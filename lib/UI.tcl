@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.22 2003-11-01 13:57:27 matben Exp $
+# $Id: UI.tcl,v 1.23 2003-11-03 11:54:58 matben Exp $
 
 # LabeledFrame --
 #
@@ -351,7 +351,7 @@ proc ::UI::InitMenuDefs { } {
 	{command   mNew                {::UI::NewWhiteboard -sendcheckstate disabled}   normal   N}
 	{command   mCloseWindow        {::UserActions::DoCloseWindow}             normal   W}
 	{separator}
-	{command   mOpenImage/Movie    {::Import::ImportImageOrMovieDlg $wtop} normal  I}
+	{command   mOpenImage/Movie    {::Import::ImportImageOrMovieDlg $wtop}    normal   I}
 	{command   mOpenURLStream      {::OpenMulticast::OpenMulticast $wtop $wDlgs(openMulti)} normal {}}
 	{command   mStopPut/Get/Open   {::UserActions::CancelAllPutGetAndPendingOpen $wtop} normal {}}
 	{separator}
@@ -412,7 +412,7 @@ proc ::UI::InitMenuDefs { } {
 	{command     mAll              {::UserActions::SelectAll $wtop}        normal   A}
 	{command     mEraseAll         {::UserActions::DoEraseAll $wtop}       normal   {}}
 	{separator}
-	{command     mInspectItem      {::ItemInspector::ItemInspector $wtop selected} disabled I}
+	{command     mInspectItem      {::ItemInspector::ItemInspector $wtop selected} disabled {}}
 	{separator}
 	{command     mRaise            {::UserActions::RaiseOrLowerItems $wtop raise} disabled R}
 	{command     mLower            {::UserActions::RaiseOrLowerItems $wtop lower} disabled L}
@@ -600,7 +600,7 @@ proc ::UI::InitMenuDefs { } {
 	  {-variable ::Jabber::jstate(inboxVis)}}
 	{separator}
 	{command     mSearch        {::Jabber::Search::Build .jsearch}      disabled {}}
-	{command     mAddNewUser    {::Jabber::Roster::NewOrEditItem $wDlgs(jrostnewedit) new} disabled {}}
+	{command     mAddNewUser    {::Jabber::Roster::NewOrEditItem new}   disabled {}}
 	{separator}
 	{command     mSendMessage   {::Jabber::NewMsg::Build $wDlgs(jsendmsg)} disabled {}}
 	{command     mChat          {::Jabber::Chat::StartThreadDlg .jchat} disabled {}}

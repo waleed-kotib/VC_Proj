@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.19 2003-11-01 13:57:27 matben Exp $
+# $Id: jabberlib.tcl,v 1.20 2003-11-03 11:54:58 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -2893,13 +2893,12 @@ proc jlib::service::getjidsfor {jlibname what} {
 #       
 # Arguments:
 #       jlibname:   the instance of this jlib.
-#       what:       "jabber", "icq", "msn", "yahoo", "aim",...
+#       what:       "*", "jabber", "icq", "msn", "yahoo", "aim",...
 #       
 # Results:
 #       list of jids supporting this service, possibly empty.
 
 proc jlib::service::gettransportjids {jlibname what} {
-    variable services
     upvar [namespace parent]::${jlibname}::agent agent
     upvar [namespace parent]::${jlibname}::lib lib
     upvar [namespace parent]::${jlibname}::opts opts
@@ -2914,7 +2913,7 @@ proc jlib::service::gettransportjids {jlibname what} {
 
     # Agent service if any.
     foreach key [array names agent "*,service"] {
-	if {[string equal $agent($key) $what]} {
+	if {[string equal $agent($key) $what] || ($what == "*")} {
 	    lappend jids [string map {,service ""} $key]
 	}
     }
@@ -2933,7 +2932,6 @@ proc jlib::service::gettransportjids {jlibname what} {
 #       type/subtype, possibly empty.
 
 proc jlib::service::gettype {jlibname jid} {
-    variable services
     upvar [namespace parent]::${jlibname}::agent agent
     upvar [namespace parent]::${jlibname}::lib lib
     upvar [namespace parent]::${jlibname}::opts opts

@@ -1,13 +1,13 @@
 # SetupAss.tcl
 #
-#       Uses the setupassistant package to build a setup assistant for the
+#       Uses the wizard package to build a setup assistant for the
 #       Coccinella. 
 #
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: SetupAss.tcl,v 1.8 2003-10-18 14:45:05 matben Exp $
+# $Id: SetupAss.tcl,v 1.9 2003-11-03 11:54:58 matben Exp $
 
-package require setupassistant
+package require wizard
 package require chasearrows
 package require http 2.3
 package require tinydom
@@ -44,7 +44,7 @@ proc ::Jabber::SetupAss::SetupAss {w} {
     
     set ns [namespace current]
     set su $w.su
-    setupassistant::setupassistant $su -background $prefs(bgColGeneral)  \
+    wizard::wizard $su -background $prefs(bgColGeneral)  \
       -closecommand [list [namespace current]::DoClose $w]   \
       -finishcommand [list [namespace current]::DoFinish $w]  \
       -nextpagecommand [list [namespace current]::NextPage $w]
