@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.20 2004-06-22 14:21:18 matben Exp $
+# $Id: Disco.tcl,v 1.21 2004-06-23 07:53:38 matben Exp $
 
 package provide Disco 1.0
 
@@ -82,6 +82,16 @@ namespace eval ::Jabber::Disco:: {
     # We keep an reference count that gets increased by one for each request
     # sent, and decremented by one for each response.
     variable arrowRefCount 0
+    
+    # We could add more icons for other categories here!
+    variable typeIcon
+    array set typeIcon [list                                 \
+	gateway/aim           [::UI::GetIcon aim_online]     \
+	gateway/icq           [::UI::GetIcon icq_online]     \
+	gateway/msn           [::UI::GetIcon msn_online]     \
+	gateway/yahoo         [::UI::GetIcon yahoo_online]   \
+	gateway/x-gadugadu    [::UI::GetIcon gadugadu_online]\
+	]
 }
 
 proc ::Jabber::Disco::NewJlibHook {jlibName} {
@@ -204,6 +214,7 @@ proc ::Jabber::Disco::ItemsCB {disconame type from subiq args} {
 		}
 	    }
 	    ::Jabber::AddErrorLog $from "Failed disco $from"
+	    #::Jabber::Disco::ControlArrows -1
 	}
 	ok - result {
 
@@ -238,6 +249,7 @@ proc ::Jabber::Disco::ItemsCB {disconame type from subiq args} {
 
 proc ::Jabber::Disco::InfoCB {disconame type from subiq args} {
     variable wtree
+    variable typeIcon
     upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::Jabber::Disco::InfoCB type=$type, from=$from"
@@ -259,11 +271,9 @@ proc ::Jabber::Disco::InfoCB {disconame type from subiq args} {
     # Icon.
     set cattype [lindex [$jstate(disco) types $from] 0]
     set icon  ""
-    if {[string match gateway/* $cattype]} {
-	set subtype [lindex [split $cattype /] 1]
-	set icon [::Jabber::Roster::GetPresenceIconFromKey available,$subtype]
+    if {[info exists typeIcon($cattype)]} {
+	set icon $typeIcon($cattype)
     }
-    # We could add more icons for other categories here!
     
     foreach v [$wtree find withtag $from] {
 	if {$name != ""} {
