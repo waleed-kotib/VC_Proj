@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.44 2004-07-30 12:55:54 matben Exp $
+# $Id: MUC.tcl,v 1.45 2004-08-06 15:19:20 matben Exp $
 
 package require entrycomp
 package require muc
@@ -460,6 +460,9 @@ proc ::Jabber::MUC::EnterRoom {roomjid nick args} {
     
     eval {$jstate(muc) enter $roomjid $nick -command \
       [list [namespace current]::EnterCallback]} $args
+   
+    # Cache groupchat protocol type (muc|conference|gc-1.0).
+    ::hooks::run groupchatEnterRoomHook $roomjid "muc"
 }
 
 # Jabber::MUC::EnterCallback --

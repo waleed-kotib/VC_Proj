@@ -5,7 +5,7 @@
 #       
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: service.tcl,v 1.10 2004-06-24 13:48:36 matben Exp $
+# $Id: service.tcl,v 1.11 2004-08-06 15:19:20 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -665,6 +665,7 @@ proc jlib::service::allroomsin {jlibname} {
 
     upvar ${jlibname}::lib lib
     upvar ${jlibname}::gchat gchat
+    upvar ${jlibname}::serv serv
 
     set roomList [concat $gchat(allroomsin) \
       [[namespace parent]::muc::allroomsin $jlibname] \

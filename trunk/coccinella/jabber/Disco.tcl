@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.25 2004-08-06 07:46:53 matben Exp $
+# $Id: Disco.tcl,v 1.26 2004-08-06 15:19:20 matben Exp $
 
 package provide Disco 1.0
 
@@ -49,6 +49,7 @@ namespace eval ::Jabber::Disco:: {
     set popMenuDefs(disco,def) {
 	mMessage       user      {::Jabber::NewMsg::Build -to $jid}
 	mChat          user      {::Jabber::Chat::StartThread $jid}
+	mWhiteboard    wb        {::Jabber::WB::NewWhiteboardTo $jid}
 	mEnterRoom     room      {
 	    ::Jabber::GroupChat::EnterOrCreate enter -roomjid $jid -autoget 1
 	}

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.64 2004-07-09 06:26:05 matben Exp $
+# $Id: GroupChat.tcl,v 1.65 2004-08-06 15:19:20 matben Exp $
 
 package require History
 
@@ -292,23 +292,21 @@ proc ::Jabber::GroupChat::EnterOrCreate {what args} {
     ::Debug 2 "::Jabber::GroupChat::EnterOrCreate prefgchatproto=$jprefs(prefgchatproto) \
       gchatprotocol=$gchatprotocol, what=$what, args='$args'"
     
-    switch -- $gchatprotocol {
-	gc-1.0 {
+    switch -- $what,$gchatprotocol {
+	*,gc-1.0 {
 	    set ans [eval {::Jabber::GroupChat::BuildEnter} $args]
 	}
-	conference {
-	    if {$what == "enter"} {
-		set ans [eval {::Jabber::Conference::BuildEnter} $args]
-	    } elseif {$what == "create"} {
-		set ans [eval {::Jabber::Conference::BuildCreate} $args]
-	    }
+	enter,conference {
+	    set ans [eval {::Jabber::Conference::BuildEnter} $args]
 	}
-	muc {
-	    if {$what == "enter"} {
-		set ans [eval {::Jabber::MUC::BuildEnter} $args]
-	    } elseif {$what == "create"} {
-		set ans [eval {::Jabber::Conference::BuildCreate} $args]
-	    }
+	create,conference {
+	    set ans [eval {::Jabber::Conference::BuildCreate} $args]
+	}
+	enter,muc {
+	    set ans [eval {::Jabber::MUC::BuildEnter} $args]
+	}
+	create,muc {
+	    set ans [eval {::Jabber::Conference::BuildCreate} $args]
 	}
     }    
     
