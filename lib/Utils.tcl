@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.21 2004-06-07 13:43:56 matben Exp $
+# $Id: Utils.tcl,v 1.22 2004-06-30 12:45:57 matben Exp $
 
 namespace eval ::Utils:: {
 
@@ -200,6 +200,20 @@ proc ::Utils::GetMaxMsgcatWidth {args} {
 	}
     }
     return $width
+}
+
+proc ::Utils::GetMaxMsgcatString {args} {
+    
+    set width 0
+    foreach str $args {
+	set mcstr [::msgcat::mc $str]
+	set len [string length $mcstr]
+	if {$len > $width} {
+	    set width $len
+	    set maxstr $mcstr
+	}
+    }
+    return $maxstr
 }
 
 # ::Utils::IsIPNumber --
