@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.13 2003-11-01 13:57:27 matben Exp $
+# $Id: Roster.tcl,v 1.14 2003-11-03 11:54:58 matben Exp $
 
 package provide Roster 1.0
 
@@ -14,10 +14,14 @@ namespace eval ::Jabber::Roster:: {
     variable wtree    
     variable servtxt
     
+    # A unique running identifier.
+    variable uid 0
+    
+    
     # Mapping from presence/show to icon. 
     # Specials for whiteboard clients and foreign IM systems.
     variable presenceIcon
-    array set presenceIcon [list                          \
+    array set presenceIcon [list                         \
       {available}         [::UI::GetIcon machead]        \
       {unavailable}       [::UI::GetIcon macheadgray]    \
       {chat}              [::UI::GetIcon macheadtalk]    \
@@ -131,7 +135,7 @@ proc ::Jabber::Roster::BuildToplevel {w} {
     set frtop $w.frall.frtop
     pack [frame $frtop] -fill x -side top -anchor w -padx 10 -pady 4
     label $frtop.la -text {Connected to:} -font $sysFont(sb)
-    label $frtop.laserv -textvariable "[namespace current]::servtxt"
+    label $frtop.laserv -textvariable [namespace current]::servtxt
     pack $frtop.la $frtop.laserv -side left -pady 4
     set servtxt {not connected}
 
@@ -845,45 +849,80 @@ namespace eval ::Jabber::Roster:: {
 
 # Jabber::Roster::NewOrEditItem --
 #
-#       Build and shows the roster new or edit item window.
+#       
 #
 # Arguments:
-#       w           toplevel window
 #       which       "new" or "edit"
 #       args      -jid theJid
 #       
 # Results:
 #       "cancel" or "add".
 
-proc ::Jabber::Roster::NewOrEditItem {w which args} {
+proc ::Jabber::Roster::NewOrEditItem {which args} {
+    upvar ::Jabber::jstate jstate
+
+    array set argsArr $args
+    
+    # Some transports (icq) have a jid = icq.jabber.se/registered
+    # in the roster, but where we get the 2-tier part. Get 3-tier jid.
+    set isTransport 0
+    if {[info exists argsArr(-jid)]} {
+	set jid $argsArr(-jid)
+	if {[regexp {([^@]+)$} $jid match host]} {
+	    set jabbers [$jstate(jlib) service gettransportjids jabber]
+	    if {[lsearch $jabbers $host] == -1} {
+		
+		# This is not a jabber host. Get true roster item.
+		puts "jid=$jid, host=$host"
+		set isTransport 1
+		set users [$jstate(roster) getusers]
+		set jid [lsearch -inline -glob $users ${host}*]
+		set subscription [$jstate(roster) getsubscription $jid]
+		puts "jid=$jid, users=$users"
+	    }
+	}
+    }
+    if {$isTransport} {
+	tk_messageBox -icon info -title "Transport Info" -message \
+	  "This is a server service that transports messages to other IM\
+	  systems. It is necessary for it to be in your roster.\
+	  You have a subscription for \"$jid\": $subscription"
+	set ans cancel
+    } else {
+	set ans [eval {::Jabber::Roster::NewOrEditDlg $which} $args]
+    }
+    return $ans
+}
+
+# Jabber::Roster::NewOrEditDlg --
+#
+#       Build and shows the roster new or edit item window.
+#
+# Arguments:
+#       which       "new" or "edit"
+#       args      -jid theJid
+#       
+# Results:
+#       "cancel" or "add".
+
+proc ::Jabber::Roster::NewOrEditDlg {which args} {
     global  sysFont this prefs wDlgs
 
+    variable uid
     variable selItem
-    variable menuVar
-    variable finishedNew -1
-    variable jid
-    variable name
-    variable oldName
-    variable usersGroup
-    variable oldUsersGroup
-    variable subscribe
-    variable unsubscribe
-    variable subscription
-    variable oldSubscription
-    variable menuDefTrpt
-    variable wjid
-    variable popuptrpt
-    variable wtrptmenu
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
     
-    if {[winfo exists $w]} {
-	return
-    }    
+    # Initialize the state variable, an array.    
+    set token [namespace current]::dlg[incr uid]
+    variable $token
+    upvar 0 $token dlgstate
+
     array set argsArr $args
-        
-    # Find all our groups for any jid.
-    set allGroups [$jstate(roster) getgroups]    
+    set w $wDlgs(jrostnewedit)${uid}
+    set dlgstate(w) $w
+    set dlgstate(finishedNew) -1
+
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
@@ -891,14 +930,19 @@ proc ::Jabber::Roster::NewOrEditItem {w which args} {
     } else {
 
     }
-
-    # Clear any old variable values.
+	
+    # Find all our groups for any jid.
+    set allGroups [$jstate(roster) getgroups]    
+    set usersGroup "None"
     set name ""
-    set usersGroup ""
+    
+    # Initialize dialog variables.
     if {[string equal $which "new"]} {
 	wm title $w [::msgcat::mc {Add New User}]
 	set jid "userName@$jserver(this)"
 	set subscribe 1
+	set unsubscribe 0
+	set subscription "none"
     } else {
 	wm title $w [::msgcat::mc {Edit User}]
 	if {[info exists argsArr(-jid)]} {
@@ -919,15 +963,15 @@ proc ::Jabber::Roster::NewOrEditItem {w which args} {
 	    set $keym $value
 	}
 	if {[llength $groups] > 0} {
-		set usersGroup [lindex $groups 0]
+	    set usersGroup [lindex $groups 0]
 	}
-	
-	# Collect the old subscription so we know if to send a new presence.
-	set oldSubscription $subscription
+	if {$usersGroup == ""} {
+	    set usersGroup "None"
+	}
     }
-    if {$usersGroup == ""} {
-    	set usersGroup "None"
-    }
+    
+    # Collect the old subscription so we know if to send a new presence.
+    set oldSubscription $subscription
     set oldName $name
     set oldUsersGroup $usersGroup
     
@@ -955,37 +999,37 @@ proc ::Jabber::Roster::NewOrEditItem {w which args} {
     label $wtrptpop -bd 2 -relief raised -image [::UI::GetIcon popupbt]
     pack $frjid.ljid $wtrptpop -side left
     
-    entry $wjid -width 24 -textvariable [namespace current]::jid
+    entry $wjid -width 24 -textvariable $token\(jid)
     label $frmid.lnick -text "[::msgcat::mc {Nick name}]:" -font $sysFont(sb) \
       -anchor e
-    entry $frmid.enick -width 24   \
-      -textvariable "[namespace current]::name"
+    entry $frmid.enick -width 24 -textvariable $token\(name)
     label $frmid.lgroups -text "[::msgcat::mc Group]:" -font $sysFont(sb) -anchor e
     
     ::combobox::combobox $frmid.egroups -font $sysFont(s) -width 18  \
-      -textvariable [namespace current]::usersGroup
+      -textvariable $token\(usersGroup)
     eval {$frmid.egroups list insert end} "None $allGroups"
         
     # Bind for popup.
     if {[string equal $which "new"]} {
-	bind $wtrptpop <Button-1> [list [namespace current]::TrptPopup %W %X %Y]
+	bind $wtrptpop <Button-1>  \
+	  [list [namespace current]::TrptPopup $token %W %X %Y]
 	bind $wtrptpop <ButtonRelease-1> \
 	  [list [namespace current]::TrptPopupRelease %W]
     }    
     if {[string equal $which "new"]} {
 	checkbutton $frmid.csubs -text "  [::msgcat::mc jarostsub]"  \
-	  -variable [namespace current]::subscribe
+	  -variable $token\(subscribe)
     } else {
 	
 	# Give user an opportunity to subscribe/unsubscribe other jid.
 	switch -- $subscription {
 	    from - none {
 		checkbutton $frmid.csubs -text "  [::msgcat::mc jarostsub]"  \
-		  -variable "[namespace current]::subscribe"
+		  -variable $token\(subscribe)
 	    }
 	    both - to {
 		checkbutton $frmid.csubs -text "  [::msgcat::mc jarostunsub]" \
-		  -variable "[namespace current]::unsubscribe"
+		  -variable $token\(unsubscribe)
 	    }
 	}
 	
@@ -997,7 +1041,7 @@ proc ::Jabber::Roster::NewOrEditItem {w which args} {
 	foreach val {none to from both} txt {None To From Both} {
 	    radiobutton ${frsub}.${val} -text [::msgcat::mc $txt]  \
 	      -state disabled  \
-	      -variable "[namespace current]::subscription" -value $val	      
+	      -variable $token\(subscription) -value $val	      
 	    pack $frsub.$val -side left -padx 4
 	}
 	
@@ -1034,8 +1078,22 @@ proc ::Jabber::Roster::NewOrEditItem {w which args} {
 	$frmid.ejid icursor 0
     }
     
+    # Cache state variables for the dialog.
+    set dlgstate(jid) $jid
+    set dlgstate(name) $name
+    set dlgstate(oldName) $oldName
+    set dlgstate(usersGroup) $usersGroup
+    set dlgstate(oldUsersGroup) $oldUsersGroup
+    set dlgstate(subscribe) $subscribe
+    set dlgstate(unsubscribe) $unsubscribe
+    set dlgstate(subscription) $subscription
+    set dlgstate(oldSubscription) $oldSubscription
+    set dlgstate(wjid) $wjid
+    set dlgstate(wtrptmenu) $wtrptmenu
+    set dlgstate(which) $which
+    
     # Build transport popup menu.
-    ::Jabber::Roster::BuildTrptMenu $wtrptmenu
+    ::Jabber::Roster::BuildTrptMenu $token
     
     # Button part.
     if {[string equal $which "edit"]} {
@@ -1045,37 +1103,39 @@ proc ::Jabber::Roster::NewOrEditItem {w which args} {
     }
     set frbot [frame $w.frall.frbot -borderwidth 0]
     pack [button $frbot.btconn -text $bttxt -default active -width 8 \
-      -command [list [namespace current]::EditSet $w $which]]  \
+      -command [list [namespace current]::EditSet $token]]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8   \
-      -command [list [namespace current]::Cancel $w]]  \
+      -command [list [namespace current]::Cancel $token]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
     
     wm resizable $w 0 0
-    bind $w <Return> [list ::Jabber::Roster::EditSet $w $which]
+    bind $w <Return> [list ::Jabber::Roster::EditSet $token]
     
     # Grab and focus.
     set oldFocus [focus]
     focus $w
-    catch {grab $w}
     
     # Wait here for a button press and window to be destroyed.
     tkwait window $w
 
-    catch {grab release $w}
     catch {focus $oldFocus}
-    return [expr {($finishedNew <= 0) ? "cancel" : "add"}]
+    set ans [expr {($dlgstate(finishedNew) <= 0) ? "cancel" : "add"}]
+    unset dlgstate
+    return $ans
 }
 
 # Jabber::Roster::BuildTrptMenu,  --
 # 
 #       Procs for handling the transport popup button in NewOrEditItem.
 
-proc ::Jabber::Roster::BuildTrptMenu {wmenu} {
+proc ::Jabber::Roster::BuildTrptMenu {token} {
+    variable $token
+    upvar 0 $token dlgstate    
+
     variable menuDefTrpt
     variable allTransports
-    variable locals
     upvar ::Jabber::jstate jstate
     
     # We must be indenpendent of method; agent, browse, disco
@@ -1084,70 +1144,72 @@ proc ::Jabber::Roster::BuildTrptMenu {wmenu} {
 	set jids [$jstate(jlib) service gettransportjids $subtype]
 	if {[llength $jids]} {
 	    lappend trpts $subtype
-	    set locals(servicejid,$subtype) [lindex $jids 0]
+	    set dlgstate(servicejid,$subtype) [lindex $jids 0]
 	}
     }    
     
     # Build popup menu.
-    set m [menu $wmenu -tearoff 0]
+    set m [menu $dlgstate(wtrptmenu) -tearoff 0]
     array set menuDefTrptDesc $menuDefTrpt
     foreach name $trpts {
 	$m add radiobutton -label $menuDefTrptDesc($name) -value $name  \
-	  -variable [namespace current]::popuptrpt  \
-	  -command [list [namespace current]::TrptPopupCmd]
+	  -variable $token\(popuptrpt)  \
+	  -command [list [namespace current]::TrptPopupCmd $token]
     }    
-    set [namespace current]::popuptrpt jabber
-    return $wmenu
+    set dlgstate(popuptrpt) jabber
+    $dlgstate(wjid) selection range 0 8
+    return $dlgstate(wtrptmenu)
 }
 
-proc ::Jabber::Roster::TrptPopup {w x y} {
+proc ::Jabber::Roster::TrptPopup {token w x y} {
     global  this
-    variable wtrptmenu
-    puts "::Jabber::Roster::TrptPopup"
-    
+    variable $token
+    upvar 0 $token dlgstate    
+
     # For some reason does we never get a ButtonRelease event here.
     if {![string equal $this(platform) "unix"]} {
-	$w configure -image [::UI::GetIcon popupbtpush]
+	#$w configure -image [::UI::GetIcon popupbtpush]
     }
-    tk_popup $wtrptmenu [expr int($x)] [expr int($y)]
+    tk_popup $dlgstate(wtrptmenu) [expr int($x)] [expr int($y)]
 }
 
 proc ::Jabber::Roster::TrptPopupRelease {w} {
         
-    puts "::Jabber::Roster::TrptPopupRelease"
-    $w configure -image [::UI::GetIcon popupbt]
+    #puts "::Jabber::Roster::TrptPopupRelease"
+    #$w configure -image [::UI::GetIcon popupbt]
 }
 
-proc ::Jabber::Roster::TrptPopupCmd { } {
-    variable wjid
-    variable jid
-    variable popuptrpt
-    variable locals
+proc ::Jabber::Roster::TrptPopupCmd {token} {
+    variable $token
+    upvar 0 $token dlgstate    
+
+    set wjid $dlgstate(wjid)
+    set popuptrpt $dlgstate(popuptrpt)
     
-    puts "popuptrpt=$popuptrpt"
+    #puts "token=$token, popuptrpt=$popuptrpt"
     
     # Seems to be necessary to achive any selection.
     focus $wjid
 
     switch -- $popuptrpt {
 	jabber {
-	    set jid "userName@$locals(servicejid,jabber)"
+	    set dlgstate(jid) "userName@$dlgstate(servicejid,jabber)"
 	    $wjid selection range 0 8
 	}
 	aim {
-	    set jid "usersName@$locals(servicejid,aim)"
+	    set dlgstate(jid) "usersName@$dlgstate(servicejid,aim)"
 	    
 	}
 	yahoo {
-	    set jid "usersName@$locals(servicejid,yahoo)"
+	    set dlgstate(jid) "usersName@$dlgstate(servicejid,yahoo)"
 	    
 	}
 	icq {
-	    set jid "screeNumber@$locals(servicejid,icq)"
+	    set dlgstate(jid) "screeNumber@$dlgstate(servicejid,icq)"
 	    $wjid selection range 0 11
 	}
 	msn {
-	    set jid "userName%hotmail.com@$locals(servicejid,msn)"
+	    set dlgstate(jid) "userName%hotmail.com@$dlgstate(servicejid,msn)"
 	    $wjid selection range 0 8
 	}
     }
@@ -1156,11 +1218,12 @@ proc ::Jabber::Roster::TrptPopupCmd { } {
 # Jabber::Roster::Cancel --
 #
 
-proc ::Jabber::Roster::Cancel {w} {
-    variable finishedNew
+proc ::Jabber::Roster::Cancel {token} {
+    variable $token
+    upvar 0 $token dlgstate    
 
-    set finishedNew 0
-    destroy $w
+    set dlgstate(finishedNew) 0
+    destroy $dlgstate(w)
 }
 
 # Jabber::Roster::EditSet --
@@ -1173,20 +1236,24 @@ proc ::Jabber::Roster::Cancel {w} {
 # Results:
 #       sends roster set.
 
-proc ::Jabber::Roster::EditSet {w which} {    
+proc ::Jabber::Roster::EditSet {token} {    
+    variable $token
+    upvar 0 $token dlgstate    
+
     variable selItem
-    variable finishedNew
-    variable jid
-    variable name
-    variable oldName
-    variable usersGroup
-    variable oldUsersGroup
-    variable subscribe
-    variable unsubscribe
-    variable subscription
-    variable oldSubscription
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
+
+    set jid $dlgstate(jid)
+    set name $dlgstate(name)
+    set oldName $dlgstate(oldName)
+    set usersGroup $dlgstate(usersGroup)
+    set oldUsersGroup $dlgstate(oldUsersGroup)
+    set subscribe $dlgstate(subscribe)
+    set unsubscribe $dlgstate(unsubscribe)
+    set subscription $dlgstate(subscription)
+    set oldSubscription $dlgstate(oldSubscription)
+    set which $dlgstate(which)
     
     # General checks.
     foreach key {jid name usersGroup} {
@@ -1222,8 +1289,33 @@ proc ::Jabber::Roster::EditSet {w which} {
 		return
 	    }
 	}
+	
+	# Check the jid we are trying to add.
+	if {[regexp {([^@]+)$} $jid match host]} {
+
+	    # Exclude jabber services.
+	    set jabbers [$jstate(jlib) service gettransportjids jabber]
+	    if {[lsearch $jabbers $host] < 0} {	    
+	    
+		# If this requires a transport component we must be registered.
+		set transport [lsearch -inline -regexp $allUsers "^${host}.*"]
+		if {$transport == "" } {
+		    
+		    # Seems we are not registered.
+		    set ans [tk_messageBox -type yesno -icon error -message \
+		      "Adding a user from a non Jabber IM system requires that\
+		      you are registered with the server transport component\
+		      $host. Do you wish to do that now?"]
+		    if {$ans == "yes"} {
+			set didRegister [::Jabber::GenRegister::BuildRegister  \
+			  .jtrptreg -server $host -autoget 1]
+			return
+		    }
+		}
+	    }
+	}
     }
-    set finishedNew 1
+    set dlgstate(finishedNew) 1
     
     # This is the only (?) situation when a client "sets" a roster item.
     # The actual roster item is pushed back to us, and not set from here.
@@ -1233,7 +1325,7 @@ proc ::Jabber::Roster::EditSet {w which} {
     }
     if {$usersGroup != $oldUsersGroup} {
     	if {$usersGroup == "None"} {
-    		set usersGroup ""
+	    set usersGroup ""
     	}
 	lappend opts -groups [list $usersGroup]
     }
@@ -1260,7 +1352,7 @@ proc ::Jabber::Roster::EditSet {w which} {
 	}
     }
     
-    destroy $w
+    destroy $dlgstate(w)
 }
 
 # Jabber::Roster::EditSetCommand --

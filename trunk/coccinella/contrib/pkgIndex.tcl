@@ -17,7 +17,7 @@ package ifneeded ProgressWindow 1.0 [list source [file join $dir ProgressWindow.
 package ifneeded TkInteractor 1.0 [list source [file join $dir TkInteractorPackage.tcl]]
 package ifneeded sha1pure 1.0 [list source [file join $dir sha1pure.tcl]]
 package ifneeded chasearrows 1.0 [list source [file join $dir chasearrows.tcl]]
-package ifneeded setupassistant 1.0 [list source [file join $dir setupassistant.tcl]]
+package ifneeded wizard 1.0 [list source [file join $dir wizard.tcl]]
 package ifneeded entrypopup 1.0 [list source [file join $dir entrypopup.tcl]]
 package ifneeded combobox 2.2 [list source [file join $dir combobox.tcl]]
 package ifneeded fontselection 1.0 [list source [file join $dir fontselection.tcl]]

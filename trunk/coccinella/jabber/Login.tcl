@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.2 2003-11-01 14:31:14 matben Exp $
+# $Id: Login.tcl,v 1.3 2003-11-03 11:54:58 matben Exp $
 
 package provide Login 1.0
 
@@ -63,7 +63,7 @@ proc ::Jabber::Login::Login {w} {
     set ssl $jprefs(usessl)
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised]   \
+    pack [frame $w.frall -borderwidth 1 -relief raised -bg gray70]   \
       -fill both -expand 1 -ipadx 12 -ipady 4
     
     label $w.frall.head -text [::msgcat::mc Login] -font $sysFont(l)  \
@@ -73,7 +73,7 @@ proc ::Jabber::Login::Login {w} {
     pack $w.frall.msg -side top -fill both -expand 1
     
     # Entries etc.
-    set frmid [frame $w.frall.frmid -borderwidth 0]
+    set frmid [frame $w.frall.frmid -borderwidth 0 -bg yellow]
     pack $frmid -side top -fill both -expand 1
 	
     # Option menu for selecting user profile.
@@ -133,7 +133,7 @@ proc ::Jabber::Login::Login {w} {
     grid $frmid.eres -column 1 -row 4 -sticky w
     
     # Triangle switch for more options.
-    set frtri [frame $w.frall.tri -borderwidth 0]
+    set frtri [frame $w.frall.tri -borderwidth 0 -bg red]
     pack $frtri -side top -fill both -expand 1 -padx 6
     set wtri $frtri.tri
     set wtrilab $frtri.l
@@ -165,7 +165,7 @@ proc ::Jabber::Login::Login {w} {
     }
 	
     # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
+    set frbot [frame $w.frall.frbot -borderwidth 0 -bg green]
     pack [button $frbot.btconn -text [::msgcat::mc Login] -width 8 \
       -default active -command [namespace current]::Doit]  \
       -side right -padx 5 -pady 5
@@ -182,7 +182,7 @@ proc ::Jabber::Login::Login {w} {
 	regexp {^[^+-]+((\+|-).+$)} $prefs(winGeom,$w) match pos
 	wm geometry $w $pos
     }
-    wm resizable $w 0 0
+    #wm resizable $w 0 0
     bind $w <Return> ::Jabber::Login::Doit
     bind $w <Escape> [list ::Jabber::Login::DoCancel $w]
     
@@ -207,12 +207,12 @@ proc ::Jabber::Login::MoreOpts {w} {
     variable wtrilab
     variable wfrmore
       
-    wm resizable $w
+    #wm resizable $w
     pack $wfrmore -side left -fill x -padx 20
     $wtri configure -image [::UI::GetIcon mactriangleopen]
     $wtrilab configure -text "Less..."
     bind $wtri <Button-1> [list [namespace current]::LessOpts $w]
-    wm resizable $w 0 0
+    #wm resizable $w 0 0
 }
 
 proc ::Jabber::Login::LessOpts {w} {
@@ -220,12 +220,12 @@ proc ::Jabber::Login::LessOpts {w} {
     variable wtrilab
     variable wfrmore
     
-    wm resizable $w
+   # wm resizable $w
     pack forget $wfrmore
     $wtri configure -image [::UI::GetIcon mactriangleclosed]
     $wtrilab configure -text "More..."
     bind $wtri <Button-1> [list [namespace current]::MoreOpts $w]
-    wm resizable $w 0 0
+    #wm resizable $w 0 0
 }
 
 proc ::Jabber::Login::DoCancel {w} {
@@ -559,3 +559,4 @@ proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
     ::Sounds::PlayWhenIdle "connected"
 }
 
+#-------------------------------------------------------------------------------

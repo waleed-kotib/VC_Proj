@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.12 2003-11-01 13:57:27 matben Exp $
+# $Id: roster.tcl,v 1.13 2003-11-03 11:54:58 matben Exp $
 # 
 # Note that every jid in the rosterArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -708,7 +708,7 @@ proc roster::getsubscription {rostName jid} {
     if {[info exists rosterArr($jid,subscription)]} {
 	return $rosterArr($jid,subscription)
     } else {
-	return {none}
+	return none
     }
 }
 
