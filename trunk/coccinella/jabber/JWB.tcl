@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.31 2004-08-30 07:46:08 matben Exp $
+# $Id: JWB.tcl,v 1.32 2004-09-01 08:48:02 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -871,7 +871,9 @@ proc ::Jabber::WB::CanvasCmdListToMessageXElement {wtop cmdList} {
     
     # amp element for message processing directives.
     # Perhaps we should conserve bandwidth by skipping it?
-    lappend xlist $ampElem
+    # 
+    # Needs more testing...
+    # lappend xlist $ampElem
     return $xlist
 }
 
