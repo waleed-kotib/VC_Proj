@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.83 2004-09-18 14:43:28 matben Exp $
+# $Id: Coccinella.tcl,v 1.84 2004-09-22 13:14:38 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -616,6 +616,9 @@ if {0} {
 	rename $name ""
 	rename t${name} $name
     }
+    set theme clam
+    package require tile::theme::$theme
+    style theme use $theme
 }
 
 # At this point we should be finished with the launch and delete the splash 

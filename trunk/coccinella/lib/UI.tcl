@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.70 2004-09-13 09:05:19 matben Exp $
+# $Id: UI.tcl,v 1.71 2004-09-22 13:14:39 matben Exp $
 
 package require entrycomp
 package require alertbox
@@ -105,6 +105,12 @@ proc ::UI::GetScreenSize { } {
     return [list [winfo vrootwidth .] [winfo vrootheight .]]
 }
 
+namespace eval ::UI:: {
+
+    variable topcache
+    set topcache(state) show
+}
+
 # UI::Toplevel --
 # 
 #       Wrapper for making a toplevel window.
@@ -113,6 +119,7 @@ proc ::UI::GetScreenSize { } {
 #       w
 #       args:
 #       -class  
+#       -closecommand
 #       -macstyle:
 #           macintosh (classic) and macosx
 #           documentProc, dBoxProc, plainDBox, altDBoxProc, movableDBoxProc, 
@@ -128,6 +135,7 @@ proc ::UI::GetScreenSize { } {
 
 proc ::UI::Toplevel {w args} {
     global  this osprefs
+    variable topcache
     
     array set argsArr {
 	-usemacmainmenu   0
@@ -136,6 +144,9 @@ proc ::UI::Toplevel {w args} {
     set topopts {}
     if {[info exists argsArr(-class)]} {
 	lappend topopts -class $argsArr(-class)
+    }
+    if {[info exists argsArr(-closecommand)]} {
+	set topcache($w,-closecommand) $argsArr(-closecommand)
     }
     eval {toplevel $w} $topopts
         
@@ -170,6 +181,7 @@ proc ::UI::Toplevel {w args} {
     } else {
 	bind $w <$osprefs(mod)-Key-w> [list ::UI::DoCloseWindow $w]
     }
+    lappend topcache(all) $w
     return $w
 }
 
@@ -188,19 +200,60 @@ proc ::UI::Toplevel {w args} {
 #       Default behaviour when no hook registered is to destroy window.
 
 proc ::UI::DoCloseWindow {{wevent {}}} {
+    variable topcache
     
     set wfocus [focus]
     if {$wfocus != ""} {
 	set w [winfo toplevel [focus]]
     
 	Debug 2 "::UI::DoCloseWindow winfo class $w=[winfo class $w]"
+	if {[info exists topcache($w,-closecommand)]} {
+	    uplevel #0 $topcache($w,-closecommand) $w
+	}
     
 	# Run hooks. Only the one corresponding to the $w needs to act!
 	set result [::hooks::run closeWindowHook $w]    
 	if {![string equal $result "stop"]} {
 	    destroy $w
+	    set topcache(all) [lsearch -all -inline -not $topcache(all) $w]
+	    array unset topcache $w,*
 	}
     }
+}
+
+# UI::GetAllToplevels --
+# 
+#       Returns a list of all existing toplevel windows created using Toplevel.
+
+proc ::UI::GetAllToplevels { } {
+    variable topcache
+
+    set tmp {.}
+    foreach w $topcache(all) {
+	if {[winfo exists $w]} {
+	    lappend tmp $w
+	}
+    }
+    set topcache(all) $tmp
+    return $topcache(all)
+}
+
+proc ::UI::WithdrawAllToplevels { } {
+    variable topcache
+    
+    foreach w [::UI::GetAllToplevels] {
+	wm withdraw $w
+    }
+    set topcache(state) hide
+}
+
+proc ::UI::ShowAllToplevels { } {
+    variable topcache
+    
+    foreach w [::UI::GetAllToplevels] {
+	wm deiconify $w
+    }
+    set topcache(state) show
 }
 
 # UI::GetToplevelNS --
@@ -450,8 +503,12 @@ proc ::UI::BuildMenu {wtop wmenu label menuDef state args} {
     foreach line $menuDef {
 	foreach {type name cmd mstate accel mopts subdef} $line {
 	    
-	    # Localized menu label.
-	    set locname [mc $name]
+	    # Localized menu label. Special for mAboutCoccinella!
+	    if {$name == "mAboutCoccinella"} {
+		set locname [mc {About %s} $prefs(appName)]
+	    } else {
+		set locname [mc $name]
+	    }
 	    set menuKeyToIndex($wmenu,$name) $i
 	    set menuNameToWmenu($wtop,$label,$name) $wmenu
 	    set ampersand [string first & $locname]

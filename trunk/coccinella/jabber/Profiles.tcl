@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.29 2004-09-18 14:43:28 matben Exp $
+# $Id: Profiles.tcl,v 1.30 2004-09-22 13:14:38 matben Exp $
 
 package provide Profiles 1.0
 
@@ -677,10 +677,7 @@ proc ::Profiles::SaveCurrentToTmp {profName} {
 	set tmpProfArr($profName,server)   $server
 	set tmpProfArr($profName,username) $username
 	set tmpProfArr($profName,password) $password
-	
-	if {$resource != ""} {
-	    set tmpProfArr($profName,-resource) $resource
-	}
+	set tmpProfArr($profName,-resource) $resource
 	
 	# Set more options if different from defaults.
 	foreach key [array names moreOpts] {
@@ -825,10 +822,6 @@ proc  ::Profiles::DestroyHandler { } {
     
     trace vdelete [namespace current]::profile w  \
       [namespace current]::TraceProfile   
-}
-
-proc ::Profiles::UserDefaultsHook { } {
-        
 }
 
 # Profiles::SaveHook --

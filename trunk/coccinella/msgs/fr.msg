@@ -873,7 +873,6 @@ pour votre usage personnel seulement.}
 	::msgcat::mcset fr jasuballow   {Autoriser "%s" à voir ma présence}
 	::msgcat::mcset fr jasubadd     {Ajouter "%s" à mes contacts}
 	::msgcat::mcset fr jarostadd	{Ajouter un utilisateur Jabber à mes contacts.\
-Les utilisateurs sont normalement ajoutés avec un enregistrement, mais peuvent être ajoutés sans.\
 Le pseudo et le groupe peuvent être changés à tout moment.\
 Pour ajouter un utilisateur d'un système de messagerie étranger, vous devez avoir un compte actif\
 sur ce système qui doit être enregistré sur les serveurs de transport Jabber.}

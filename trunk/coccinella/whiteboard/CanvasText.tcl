@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasText.tcl,v 1.2 2004-07-22 15:11:28 matben Exp $
+# $Id: CanvasText.tcl,v 1.3 2004-09-22 13:14:41 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 
@@ -172,7 +172,7 @@ proc ::CanvasText::CanvasFocus {w x y {forceNew 0}} {
 	
 	# No text item under cursor, make a new empty text item.
 	set utag [::CanvasUtils::NewUtag]
-	set y [expr $y - [font metrics $state(font) -linespace]/2]
+	set y [expr $y - [font metrics [list $state(font)] -linespace]/2]
 	set cmd [list create text $x $y -text ""   \
 	  -tags [list std text $utag] -anchor nw -fill $state(fgCol)]
 	set fontsLocal [list $state(font) $fontSize2Points($state(fontSize)) \

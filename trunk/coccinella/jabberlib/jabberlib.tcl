@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.63 2004-09-18 14:43:29 matben Exp $
+# $Id: jabberlib.tcl,v 1.64 2004-09-22 13:14:38 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -883,6 +883,7 @@ proc jlib::iq_handler {jlibname xmldata} {
 		
 		parse_roster_get $jlibname 1 {} ok $subiq
 		#parse_roster_get $jlibname 1 {} set $subiq
+		set ishandled 1
 	    }
 	}
     }
@@ -3295,11 +3296,17 @@ proc jlib::splitjid {jid jid2Var resourceVar} {
 
 proc jlib::splitjidex {jid nodeVar domainVar resourceVar} {
     
-    if {[regexp {^(([^@]+)@)?([^ /@]+)(/(.*))?$} $jid match x node domain y \
-      resource]} {
+    set node   ""
+    set domain ""
+    set res    ""
+    if {[regexp {^(([^@]+)@)?([^ /@]+)(/(.*))?$} $jid m x node domain y res]} {
 	uplevel 1 [list set $nodeVar $node]
 	uplevel 1 [list set $domainVar $domain]
-	uplevel 1 [list set $resourceVar $resource]	
+	uplevel 1 [list set $resourceVar $res]
+    } elseif {$jid == ""} {
+	uplevel 1 [list set $nodeVar $node]
+	uplevel 1 [list set $domainVar $domain]
+	uplevel 1 [list set $resourceVar $res]
     } else {
 	return -code error "not valid jid form"
     }

@@ -8,7 +8,7 @@
 #  Copyright (c) 2004  Mats Bengtsson
 #  BSD license
 #  
-# $Id: saslmd5.tcl,v 1.2 2004-09-19 07:24:23 matben Exp $
+# $Id: saslmd5.tcl,v 1.3 2004-09-22 13:14:38 matben Exp $
 
 package require base64
 package require md5 2.0
@@ -164,7 +164,7 @@ proc saslmd5::method_start {token args} {
 
 # saslmd5::method_step --
 #
-#       Takes one step when negtiating.
+#       Takes one step when negotiating.
 #
 # Arguments:
 #       token       
@@ -328,29 +328,7 @@ proc saslmd5::process_challenge {token challenge} {
     set nc      "00000001"
     set diguri  $service/$host
     set qop     "auth"
-    
-    # test
-    if {0} {
-	# sasl_mac-ok
-	set username "marilu"
-	set realm    "l4l.be"
-	set authzid  "marilu@l4l.be"
-	set pass     "1amason"
-	set nonce    "3218253468"
-	set nc       "00000001"
-	set qop      "auth"
-	set diguri   "xmpp/l4l.be"
-	set cnonce   "xAtFWjeKrKpSEIrpAcT2HjPDvxqWFqzavMBaUk54ccc="
-	# response=1d3628c9fdd344eaeffbe2750cd581c0
-	
-	# sasl_mac_ok2
-	if {0} {
-	    set nonce   "1457986605"
-	    set cnonce  "vo1DEiI5HVaIcYM37VaJJdnVmhuwtVABIcHnT6EbuRI="
-	    # response=36132ad6825e05aad5650ccf660f0258
-	}
-    }
-    
+        
     # build 'response' (2.1.2.1   Response-value in RFC 2831)
     # try to be a bit general here (from Cyrus SASL)
     # 

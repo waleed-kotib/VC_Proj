@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.43 2004-08-06 07:46:53 matben Exp $
+# $Id: Dialogs.tcl,v 1.44 2004-09-22 13:14:38 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -43,6 +43,8 @@ array set wDlgs {
     jlogin          .jlogin
     jrost           .jrost
     jrostnewedit    .jrostnewedit
+    jrostadduser    .jrostadduser
+    jrostedituser   .jrostedituser
     jsubsc          .jsubsc
     jsendmsg        .jsendmsg
     jgotmsg         .jgotmsg
