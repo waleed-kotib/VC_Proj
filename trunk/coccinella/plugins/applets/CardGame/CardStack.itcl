@@ -3,7 +3,7 @@
 #       Supposed to handle cardstacks. It doesn't handle any display things,
 #       and not any user interaction or interface stuff.
 # 
-# $Id: CardStack.itcl,v 1.1 2004-07-23 10:15:37 matben Exp $
+# $Id: CardStack.itcl,v 1.2 2004-07-23 12:35:05 matben Exp $
 
 class CardStack {
         
@@ -100,8 +100,7 @@ body CardStack::destructor {} {
 body CardStack::CreateAllCards {} {
     
     set cardsSorted {}
-    #foreach value {k q j 0 9 8 7 6 5 4 3 2 a}
-    foreach value {k} {
+    foreach value {k q j 0 9 8 7 6 5 4 3 2 a} {
 	foreach suit {d h s c} {
 	    lappend cardsSorted ${value}${suit}
 	}
