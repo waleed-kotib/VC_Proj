@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.53 2004-01-14 14:27:30 matben Exp $
+# $Id: Jabber.tcl,v 1.54 2004-01-15 14:13:00 matben Exp $
 
 package provide Jabber 1.0
 
@@ -163,9 +163,9 @@ namespace eval ::Jabber:: {
       http://jabber.org/protocol/disco {Feature discovery}
     }    
     
-    # Xml namespaces defined here.
-    variable xmlns
-    array set xmlns {
+    # <iq> XML namespaces defined here.
+    variable iqxmlns
+    array set iqxmlns {
 	servers         http://coccinella.sourceforge.net/protocols/servers
     }
   
@@ -276,8 +276,6 @@ proc ::Jabber::FactoryDefaults { } {
     set jprefs(subsc,group)         {}
     set jprefs(block,notinrost)     0
     set jprefs(block,list)          {}
-    set jprefs(speakMsg)            0
-    set jprefs(speakChat)           0
     
     # Shall we query ip number directly when verified Coccinella?
     set jprefs(preGetIP) 1
@@ -495,8 +493,6 @@ proc ::Jabber::SetUserPreferences { } {
       [list ::Jabber::jprefs(subsc,group)      jprefs_subsc_group       $jprefs(subsc,group)]  \
       [list ::Jabber::jprefs(block,notinrost)  jprefs_block_notinrost   $jprefs(block,notinrost)]  \
       [list ::Jabber::jprefs(block,list)       jprefs_block_list        $jprefs(block,list)    userDefault] \
-      [list ::Jabber::jprefs(speakMsg)         jprefs_speakMsg          $jprefs(speakMsg)]  \
-      [list ::Jabber::jprefs(speakChat)        jprefs_speakChat         $jprefs(speakChat)]  \
       [list ::Jabber::jprefs(snd,online)       jprefs_snd_online        $jprefs(snd,online)]  \
       [list ::Jabber::jprefs(snd,offline)      jprefs_snd_offline       $jprefs(snd,offline)]  \
       [list ::Jabber::jprefs(snd,statchange)   jprefs_snd_statchange    $jprefs(snd,statchange)]  \
@@ -650,7 +646,7 @@ proc ::Jabber::Init { } {
     
     variable jstate
     variable jprefs
-    variable xmlns
+    variable iqxmlns
     
     # Make the roster object.
     set jstate(roster) [::roster::roster ::Jabber::Roster::PushProc]
@@ -680,7 +676,7 @@ proc ::Jabber::Init { } {
     # Register handlers for various iq elements.
     $jstate(jlib) iq_register get jabber:iq:version ::Jabber::ParseGetVersion
     $jstate(jlib) iq_register get jabber:iq:browse  ::Jabber::ParseGetBrowse
-    $jstate(jlib) iq_register get $xmlns(servers)   ::Jabber::ParseGetServers
+    $jstate(jlib) iq_register get $iqxmlns(servers) ::Jabber::ParseGetServers
     $jstate(jlib) iq_register set jabber:iq:oob     ::Jabber::OOB::ParseSet
     
     # Set the priority order of groupchat protocols.

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.12 2004-01-14 14:27:30 matben Exp $
+# $Id: Whiteboard.tcl,v 1.13 2004-01-15 14:13:00 matben Exp $
 
 package require entrycomp
 package require CanvasDraw
@@ -776,6 +776,7 @@ proc ::WB::BuildWhiteboard {wtop args} {
     if {$isConnected} {
 	::WB::FixMenusWhen $wtop "connect"
     }
+    ::CanvasText::Init $wapp(can)
 
     # Set up paste menu if something on the clipboard.
     ::WB::GetFocus $wtop $w

@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.24 2004-01-13 14:50:21 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.25 2004-01-15 14:13:00 matben Exp $
 
 # SetWhiteboardFactoryState --
 # 
@@ -213,14 +213,6 @@ set prefs(millisToProgWin) 0
 # How frequently shall the progress window be updated, in milliseconds.
 set prefs(progUpdateMillis) 500
 set prefs(progUpdateMillis) 1000
-
-# If we have got TclSpeech the default is to have it enabled.
-set prefs(SpeechOn) 1
-
-# Default in/out voices. They will be set to actual values in 
-# ::Plugins::VerifySpeech  
-set prefs(voiceUs) ""
-set prefs(voiceOther) ""
     
 # Installation directories.
 set prefs(itemDir) [file join $this(path) items]

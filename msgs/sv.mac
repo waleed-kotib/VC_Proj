@@ -103,6 +103,7 @@
 ::msgcat::mcset sv Shortcut             {Genväg}
 ::msgcat::mcset sv Shortcuts            {Genvägar}
 ::msgcat::mcset sv Specifications	{Specifikation}
+::msgcat::mcset sv Speech               {Tal}
 ::msgcat::mcset sv State                {Län}
 ::msgcat::mcset sv State/Region		{Län/Region}
 ::msgcat::mcset sv Stop 		{Stopp}

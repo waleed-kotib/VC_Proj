@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.35 2004-01-09 14:08:21 matben Exp $
+# $Id: Coccinella.tcl,v 1.36 2004-01-15 14:12:59 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -515,7 +515,6 @@ if {$argc > 0} {
 # Goes through all the logic of verifying that the actual packages are 
 # available on our system. Speech special.
 ::Plugins::VerifyPackagesForMimeTypes
-::Plugins::VerifySpeech
 
 # Various initializations for canvas stuff and UI.
 ::UI::Init

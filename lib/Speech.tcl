@@ -120,7 +120,7 @@ proc ::Speech::SpeakMessage {type body args} {
 proc ::Speech::SpeakWBText {who str} {
     variable sprefs
     
-    puts "::Speech::SpeakWBText: who=$who, str=$str"
+    #puts "::Speech::SpeakWBText: who=$who, str=$str"
     
     set punct {[.,;?!]}
     set voice ""    

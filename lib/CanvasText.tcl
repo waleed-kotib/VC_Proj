@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasText.tcl,v 1.11 2004-01-13 14:50:21 matben Exp $
+# $Id: CanvasText.tcl,v 1.12 2004-01-15 14:13:00 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 
@@ -15,13 +15,23 @@ package provide CanvasText 1.0
 
 namespace eval ::CanvasText:: {
 
-    # For batched text.
-    variable textBuffer ""
-    variable textAfterID
-    # The index of the insertion point.
-    variable indBuffer
-    variable itnoBuffer
+}
+
+
+proc ::CanvasText::Init {wcan} {
     
+    namespace eval [namespace current]::${wcan} {
+	set buffer(str) ""
+    }
+    bind $wcan <Destroy> [list [namespace current]::Free %W]
+}
+
+proc ::CanvasText::Free {wcan} {
+    
+    EvalBufferedText $wcan
+    
+    # Remove the namespace with the widget.
+    namespace delete [namespace current]::${wcan}
 }
 
 # This could be done with 'bindtags' instead!!!!!!
@@ -156,7 +166,7 @@ proc ::CanvasText::CanvasFocus {w x y {forceNew 0}} {
     
     # If we have an unsent buffer, be sure to send it first.
     if {$prefs(batchText)} {
-	DoSendBufferedText $wtop
+	EvalBufferedText $w
     }
     if {($id == "") || ([$w type $id] != "text") || $forceNew} {
 	
@@ -205,10 +215,8 @@ proc ::CanvasText::CanvasFocus {w x y {forceNew 0}} {
 proc ::CanvasText::TextInsert {w char} {
     global  this prefs
         
-    variable textBuffer
-    variable indBuffer
-    variable itnoBuffer
-    
+    upvar ::CanvasText::${w}::buffer buffer
+        
     set punct {[.,;?!]}
     set nl_ "\\n"
     
@@ -253,36 +261,21 @@ proc ::CanvasText::TextInsert {w char} {
     
     # Need to treat the case with actual newlines in char string.
     # Write to all other clients; need to make a one liner first.
-    if {[llength [::Network::GetIP to]]} {
-	regsub -all "\n" $char $nl_ oneliner
-	if {$prefs(batchText)} {
-	    
-	    # If this is the beginning of the buffer, record the index.
-	    if {[string length $textBuffer] == 0} {
-		set indBuffer $ind
-		set itnoBuffer $utag
-	    }
-	    append textBuffer $oneliner
-	    if {[string match *${punct}* $char]} {
-		DoSendBufferedText $wtop
-	    } else {
-		ScheduleTextInsert $wtop
-	    }
-	} else {
-	    SendClientCommand $wtop \
-	      [list "CANVAS:" insert $utag $ind $oneliner]
+    regsub -all "\n" $char $nl_ oneliner
+    if {$prefs(batchText)} {	
+	if {[string length $buffer(str)] == 0} {
+	    set buffer(ind)  $ind
+	    set buffer(utag) $utag
 	}
-    }
-    
-    # If speech, speech last sentence if finished.
-    # Use the default voice on this system.
-    if {$prefs(SpeechOn)} {
+	append buffer(str) $oneliner
+	
 	if {[string match *${punct}* $char]} {
-	    set theText [$w itemcget $utag -text]
-	    if {[string length $theText]} {
-		::Speech::Speak $theText $prefs(voiceUs)
-	    }
+	    EvalBufferedText $w
+	} else {
+	    ScheduleTextBuffer $w
 	}
+    } else {
+	SendClientCommand $wtop [list "CANVAS:" insert $utag $ind $oneliner]
     }
 }
 
@@ -576,9 +569,6 @@ proc ::CanvasText::SelectWord {w x y} {
 proc ::CanvasText::NewLine {w} {
     global  prefs
     
-    variable textBuffer
-    variable indBuffer
-
     set nl_ "\\n"
     set wtop [::UI::GetToplevelNS $w]
     
@@ -590,7 +580,7 @@ proc ::CanvasText::NewLine {w} {
     
     # If we are buffering text, be sure to send buffer now if any.
     if {$prefs(batchText)} {
-	DoSendBufferedText $wtop
+	EvalBufferedText $w
     }
     set ind [$w index [$w focus] insert]
     set cmdlocal [list insert $utag $ind \n]
@@ -631,7 +621,7 @@ proc ::CanvasText::Delete {w {offset 0}} {
 	
     # If we have an unsent buffer, be sure to send it first.
     if {$prefs(batchText)} {
-	DoSendBufferedText $wtop
+	EvalBufferedText $w
     }
     
     if {[string length [$w select item]] > 0}	 {
@@ -657,7 +647,7 @@ proc ::CanvasText::Delete {w {offset 0}} {
     }
 }
 
-# CanvasText::ScheduleTextInsert --
+# CanvasText::ScheduleTextBuffer --
 #
 #       Schedules a send operation for our text inserts.
 #       
@@ -666,19 +656,19 @@ proc ::CanvasText::Delete {w {offset 0}} {
 # Results:
 #       none.
 
-proc ::CanvasText::ScheduleTextInsert {wtop} {
+proc ::CanvasText::ScheduleTextBuffer {w} {
     global  prefs
     
-    variable textAfterID
+    upvar ::CanvasText::${w}::buffer buffer
     
-    if {[info exists textAfterID]} {
-	after cancel $textAfterID
+    if {[info exists buffer(afterid)]} {
+	after cancel $buffer(afterid)
     }
-    set textAfterID [after [expr $prefs(batchTextms)]   \
-      [list [namespace current]::DoSendBufferedText $wtop]]
+    set buffer(afterid) [after [expr $prefs(batchTextms)]   \
+      [list [namespace current]::EvalBufferedText $w]]
 }
 
-# CanvasText::DoSendBufferedText --
+# CanvasText::EvalBufferedText --
 #
 #       This is the proc where buffered text are sent to clients.
 #       Buffer emptied.
@@ -688,21 +678,28 @@ proc ::CanvasText::ScheduleTextInsert {wtop} {
 # Results:
 #       socket(s) written via 'SendClientCommand'.
 
-proc ::CanvasText::DoSendBufferedText {wtop} {
-    variable textAfterID
-    variable textBuffer
-    variable indBuffer
-    variable itnoBuffer
+proc ::CanvasText::EvalBufferedText {w} {
 
-    if {[info exists textAfterID]} {
-	after cancel $textAfterID
-	unset textAfterID
+    upvar ::CanvasText::${w}::buffer buffer
+    
+    if {[info exists buffer(afterid)]} {
+	after cancel $buffer(afterid)
+	unset buffer(afterid)
     }
-    if {[llength [::Network::GetIP to]] && [string length $textBuffer]} {
+    
+    # Run all registered hooks like speech.
+    if {[info exists buffer(utag)] && [string length $buffer(str)]} {
+	set str [$w itemcget $buffer(utag) -text]
+	::hooks::run whiteboardTextInsertHook me $str
+    }
+    
+    # Send if connected.
+    if {[llength [::Network::GetIP to]] && [string length $buffer(str)]} {
+	set wtop [::UI::GetToplevelNS $w]
 	SendClientCommand $wtop   \
-	  [list "CANVAS:" insert $itnoBuffer $indBuffer $textBuffer]
+	  [list "CANVAS:" insert $buffer(utag) $buffer(ind) $buffer(str)]
     }    
-    set textBuffer ""
+    set buffer(str) ""
 }
 
 #-------------------------------------------------------------------------------
