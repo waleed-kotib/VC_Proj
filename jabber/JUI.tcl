@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.51 2004-09-18 14:43:28 matben Exp $
+# $Id: JUI.tcl,v 1.52 2004-09-22 13:14:38 matben Exp $
 
 package provide JUI 1.0
 
@@ -72,10 +72,15 @@ namespace eval ::Jabber::UI:: {
 
     # Collection of useful and common widget paths.
     variable jwapp
-    
+    variable inited 0
+}
+
+
+proc ::Jabber::UI::Init { } {
     
     # Menu definitions for the Roster/services window.
     variable menuDefs
+    variable inited
     
     set menuDefs(rost,file) {
 	{command   mNewWhiteboard      {::Jabber::WB::NewWhiteboard}  normal   N}
@@ -94,7 +99,7 @@ namespace eval ::Jabber::UI:: {
 	  {-variable ::Jabber::jstate(inboxVis)}}
 	{separator}
 	{command     mSearch        {::Jabber::Search::Build}         disabled {}}
-	{command     mAddNewUser    {::Jabber::Roster::NewOrEditItem new} disabled {}}
+	{command     mAddNewUser    {::Jabber::User::NewDlg}       disabled {}}
 	{separator}
 	{command     mSendMessage   {::Jabber::NewMsg::Build}         disabled M}
 	{command     mChat          {::Jabber::Chat::StartThreadDlg}  disabled T}
@@ -122,9 +127,7 @@ namespace eval ::Jabber::UI:: {
     }
 
     # The status menu is built dynamically due to the -image options on 8.4.
-    if {!$prefs(stripJabber)} {
-	lset menuDefs(rost,jabber) 12 6 [::Jabber::Roster::BuildStatusMenuDef]
-    }
+    lset menuDefs(rost,jabber) 12 6 [::Jabber::Roster::BuildStatusMenuDef]
 
     set menuDefs(rost,edit) {    
 	{command   mCut              {::UI::CutCopyPasteCmd cut}      disabled X}
@@ -138,6 +141,8 @@ namespace eval ::Jabber::UI:: {
     set menuDefsInsertInd(rost,edit)   [expr [llength $menuDefs(rost,edit)]]
     set menuDefsInsertInd(rost,jabber) [expr [llength $menuDefs(rost,jabber)]-2]
     set menuDefsInsertInd(rost,info)   [expr [llength $menuDefs(rost,info)]-3]
+    
+    set inited 1
 }
 
 proc ::Jabber::UI::Show {w args} {
@@ -176,9 +181,13 @@ proc ::Jabber::UI::Build {w} {
     upvar ::Jabber::jprefs jprefs
     variable menuDefs
     variable jwapp
+    variable inited
 
     ::Debug 2 "::Jabber::UI::Build w=$w"
     
+    if {!$inited} {
+	::Jabber::UI::Init
+    }
     if {$w != "."} {
 	::UI::Toplevel $w -macstyle documentProc
 	set wtop ${w}.
@@ -254,8 +263,7 @@ proc ::Jabber::UI::Build {w} {
 	  [list ::Jabber::MailBox::ShowHide -visible 1]
     }
     $wtray newbutton newuser "New User" $iconNewUser $iconNewUserDis  \
-      [list ::Jabber::Roster::NewOrEditItem new] \
-      -state disabled
+      ::Jabber::User::NewDlg -state disabled
     $wtray newbutton stop Stop $iconStop $iconStopDis  \
       [list ::Jabber::UI::StopConnect] -state disabled
 
@@ -588,10 +596,15 @@ proc ::Jabber::UI::RegisterPopupEntry {which menuSpec} {
 proc ::Jabber::UI::RegisterMenuEntry {mtail menuSpec} {
     variable menuDefs
     variable menuDefsInsertInd
+    variable inited
     
     # Keeps track of all registered menu entries.
     variable rostMenuSpec
     
+    if {!$inited} {
+	::Jabber::UI::Init
+    }
+
     # Add these entries in a section above the bottom section.
     # Add separator to section component entries.
     

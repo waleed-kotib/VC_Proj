@@ -723,7 +723,7 @@ med felkod %s beroende av att användarnamnet används. Om det är ditt eget
 namn prova att logga på istället.}
 	::msgcat::mcset sv jamessloginerr	{Påloggningen misslyckades\
 med felkod %s  och felmeddelande: %s}
-        ::msgcat::mcset sv jamessaddforeign     {Att lägga til en användare\
+        ::msgcat::mcset sv jamessaddforeign     {Att lägga till en användare\
 från ett icke Jabber system kräver att du redan har ett konto på detta\
 system och att du har använt detta konto för att registrera dig hos\
 serverns transport komponent %s. Vill du göra detta nu?}
@@ -917,9 +917,7 @@ personen:}
 	::msgcat::mcset sv jasuballow   {Tillåt "%s" att se min närvaro}
 	::msgcat::mcset sv jasubadd     {Lägg till "%s" till min roster}
 	::msgcat::mcset sv jarostadd	{Lägg till en jabber användare\
-till min roster. Användare läggs normalt till inklusive prenumeration\
-men kan också läggas till utan prenumeration. Kortnamn och grupp kan ändras\
-när som helst senare.\
+till min roster. Kortnamn och grupp kan ändras när som helst senare.\
 För att lägga till en användare från ett annat IM system så måste du ha\
 ett konto för det systemet sedan tidigare och att du använder detta konto\
 när du registrerar dig hos Jabber serverns transport komponent.}

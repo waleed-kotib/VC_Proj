@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.25 2004-08-30 07:46:08 matben Exp $
+# $Id: Register.tcl,v 1.26 2004-09-22 13:14:38 matben Exp $
 
 package provide Register 1.0
 
@@ -354,13 +354,15 @@ proc ::Jabber::Register::Remove {{jid {}}} {
     if {$ans == "yes"} {
 	
 	# Do we need to obtain a key for this???
-	::Jabber::JlibCmd register_remove $jid  \
+	$jstate(jlib) register_remove $jid  \
 	  [list ::Jabber::Register::RemoveCallback $jid]
 	
-	# Remove also from our profile.
-	set profile [::Profiles::FindProfileNameFromJID $jstate(mejid)]
-	if {$profile != ""} {
-	    ::Profiles::Remove $profile
+	# Remove also from our profile if our login account.
+	if {$jid == $jserver(this)} {
+	    set profile [::Profiles::FindProfileNameFromJID $jstate(mejid)]
+	    if {$profile != ""} {
+		::Profiles::Remove $profile
+	    }
 	}
     }
 }

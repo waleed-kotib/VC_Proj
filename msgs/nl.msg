@@ -887,8 +887,7 @@ optioneel.}
 	::msgcat::mcset nl jasuballow   {"%s" toelaten om mijn status te zien}
 	::msgcat::mcset nl jasubadd     {"%s" toevoegen aan mijn roster}
 	::msgcat::mcset nl jarostadd	{Gebruiker toetoegen aan mijn roster.\
-Gebruikers worden normaal toegevoegd m.b.v. authorizatie maar ze kunnen ook toegevoegd worden zonder enige vorm\
-van authorizatie. Bijnaam en kamer mogen op elk moment gewijzigd worden.\
+Bijnaam en kamer mogen op elk moment gewijzigd worden.\
 Om een gebruiker van een ander IM netwerk te kunnen toevoegen, moet u eerst een account hebben\
 op dat netwerk en moet u die accountgegevens gebruiken wanneer u registreert op\
 het Jabbertransport in kwestie.}

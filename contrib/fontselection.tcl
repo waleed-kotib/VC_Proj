@@ -1,7 +1,7 @@
 #  Copyright (c) 2002  Mats Bengtsson
 #  This source file is distributed under the BSD licens.
 #
-# $Id: fontselection.tcl,v 1.10 2004-09-13 09:05:18 matben Exp $
+# $Id: fontselection.tcl,v 1.11 2004-09-22 13:14:38 matben Exp $
 
 package require combobox
 
@@ -36,6 +36,7 @@ proc ::fontselection::fontselection {w args} {
 	return
     }
     toplevel $w
+    
     switch -- $tcl_platform(platform) {
 	unix {
 	    if {[string equal [tk windowingsystem] "aqua"]} {

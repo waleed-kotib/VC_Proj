@@ -7,48 +7,49 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.103 2004-09-18 14:43:28 matben Exp $
+# $Id: Jabber.tcl,v 1.104 2004-09-22 13:14:38 matben Exp $
 
-package provide Jabber 1.0
-
-package require tree
-package require jlib
-package require roster
+package require balloonhelp
 package require browse
+package require combobox
 package require disco
 package require http 2.3
-package require balloonhelp
-package require combobox
+package require jlib
+package require roster
+package require sha1pure
 package require tinyfileutils
+package require tree
 package require uriencode
 
-package require sha1pure
-
 # We should have some component mechanism that lets packages load themselves.
-package require MailBox
-package require NewMsg
-package require GotMsg
-package require OOB
-package require Chat
 package require Agents
 package require Browse
-package require Disco
-package require Roster
-package require GroupChat
-package require MUC
-package require Login
-package require JUI
-package require JWB
-package require Register
-package require Subscribe
+package require Chat
 package require Conference
-package require Search
-package require JForms
-package require Profiles
-package require JPrefs
-package require Privacy
+package require Disco
 package require Emoticons
+package require GotMsg
+package require GroupChat
+package require JForms
+package require JPrefs
+package require JUI
+package require JUser
+package require JWB
+package require Login
+package require MailBox
+package require MUC
+package require NewMsg
+package require OOB
+package require Privacy
+package require Profiles
+package require Register
+package require Roster
+package require Search
+package require Subscribe
 package require VCard
+
+
+package provide Jabber 1.0
 
 
 namespace eval ::Jabber:: {

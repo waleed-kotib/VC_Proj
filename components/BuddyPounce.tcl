@@ -4,7 +4,7 @@
 #       This is just a first sketch.
 #       TODO: all message translations.
 #       
-# $Id: BuddyPounce.tcl,v 1.1 2004-07-23 12:43:02 matben Exp $
+# $Id: BuddyPounce.tcl,v 1.2 2004-09-22 13:14:38 matben Exp $
 
 namespace eval ::BuddyPounce:: {
     
@@ -228,7 +228,6 @@ proc ::BuddyPounce::Build {jid} {
       -command [list [namespace current]::AllOff $token]]  \
       -side left -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
-
 
     set nwin [llength [::UI::GetPrefixedToplevels $wdlg]]
     if {$nwin == 1} {

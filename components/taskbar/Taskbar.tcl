@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Taskbar.tcl,v 1.3 2004-09-13 09:05:18 matben Exp $
+# $Id: Taskbar.tcl,v 1.4 2004-09-22 13:14:38 matben Exp $
 
 namespace eval ::Taskbar:: {
     
@@ -118,11 +118,13 @@ proc ::Taskbar::Cmd {event x y} {
 	    switch -- [wm state .] {
 		zoomed - normal  {
 		    #set saved_state [wm state .]
-		    wm state . withdrawn
+		    #wm state . withdrawn
+		    ::UI::WithdrawAllToplevels
 		}
 		default {
 		    #wm state . $saved_state
-		    wm deiconify .
+		    #wm deiconify .
+		    ::UI::ShowAllToplevels
 		}
 	    }
 	}
@@ -171,13 +173,15 @@ proc ::Taskbar::TearOff {wm wt} {
 
 proc ::Taskbar::HideMain { } {
     
-    wm state . withdraw
+    #wm state . withdraw
+    ::UI::WithdrawAllToplevels
     ::Taskbar::Update .
 }
 
 proc ::Taskbar::ShowMain { } {
     
-    wm deiconify .
+    #wm deiconify .
+    ::UI::ShowAllToplevels
 }
 
 proc ::Taskbar::LoginHook { } {

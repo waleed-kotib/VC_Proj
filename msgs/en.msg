@@ -886,8 +886,7 @@ optional, and for your personal use only.}
 	::msgcat::mcset en jasuballow   {Allow "%s" to see my presence}
 	::msgcat::mcset en jasubadd     {Add "%s" to my roster}
 	::msgcat::mcset en jarostadd	{Add a jabber user to my roster.\
-Users are normally added with subscriptions, but may be added without any\
-subscription. Nick name and group may be set or changed at any time.\
+Nick name and group may be set or changed at any time.\
 To add a user from a foreign IM system you must have an account already\
 on that system, and that you use it when registering with\
 the Jabber servers transport or gateway.}

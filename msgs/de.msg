@@ -890,8 +890,7 @@ optional und nur für Ihren persönlichen Gebrauch.}
 	::msgcat::mcset de jasuballow   {Erlaube "%s", meine Anwesenheit zu sehen}
 	::msgcat::mcset de jasubadd     {Füge "%s" zu meiner Kontaktliste hinzu}
 	::msgcat::mcset de jarostadd	{Füge einen Jabber-Benutzer zu meiner Liste hinzu.\
-Benutzer werden normalerweise über Anmeldung hinzugefügt, es ist aber auch\
-ohne Anmeldung möglich. Spitzname/Gruppe können zu jeder Zeit geändert werden.\
+Spitzname/Gruppe können zu jeder Zeit geändert werden.\
 Um einen Benutzer eines anderen IM-Systems hinzuzufügen, müssen Sie bereits\
 über ein Konto auf dem System verfügen und es bei der Registrierung für\
 den Jabber-Transportdienst nutzen.}
