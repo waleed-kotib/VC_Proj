@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.83 2004-10-22 15:05:33 matben Exp $
+# $Id: Chat.tcl,v 1.84 2004-10-24 14:12:52 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -655,7 +655,7 @@ proc ::Jabber::Chat::Build {threadID args} {
 #       chattoken
 
 proc ::Jabber::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
-    global  wDlgs prefs
+    global  wDlgs prefs osprefs
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
 
@@ -863,7 +863,9 @@ proc ::Jabber::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     eval {::pane::pane $wtxt $wtxtsnd} $paneopts
 
     bind $wtextsnd <Return>  \
-      [list [namespace current]::ReturnKeyPress $chattoken]
+      [list [namespace current]::ReturnKeyPress $chattoken]    
+    bind $wtextsnd <$osprefs(mod)-Return> \
+      [list [namespace current]::CommandReturnKeyPress $chattoken]
    
     # jabber:x:event
     if {$cprefs(usexevents)} {
@@ -1298,6 +1300,16 @@ proc ::Jabber::Chat::ReturnKeyPress {chattoken} {
 	# Stop further handling in Text.
 	return -code break
     } 
+}
+
+proc ::Jabber::Chat::CommandReturnKeyPress {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+
+    Send $chatstate(dlgtoken)
+
+    # Stop further handling in Text.
+    return -code break
 }
 
 proc ::Jabber::Chat::Send {dlgtoken} {

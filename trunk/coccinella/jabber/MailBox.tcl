@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.55 2004-10-01 12:44:12 matben Exp $
+# $Id: MailBox.tcl,v 1.56 2004-10-24 14:12:52 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -53,28 +53,45 @@ namespace eval ::Jabber::MailBox:: {
 
     variable locals
     
-    set locals(inited)      0
-    set locals(mailboxRead) 0
-    set locals(haveEdits)   0
-    set locals(hooksInited) 0
-    set jstate(inboxVis)    0
+    set locals(inited)        0
+    set locals(mailboxRead)   0
+    set locals(haveEdits)     0
+    set locals(hooksInited)   0
+    set locals(updateDateid)  ""
+    set locals(updateDatems)  [expr 1000*60]
+    set jstate(inboxVis)      0
     
     # Running id for incoming messages; never reused.
     variable uidmsg 1000
+    
+    variable tableUid2Key
 
     # The actual mailbox content.
-    # Content: {subject from date isread uidmsg message ?canvasid?}
+    # Content: {subject from date isread uidmsg message ?-key value ...?}
     variable mailbox
+    variable mailboxindex
+    array set mailboxindex {
+	subject     0
+	from        1
+	date        2
+	isread      3
+	uidmsg      4
+	message     5
+	opts        6
+    }
     
     # Keep a level of abstraction between column index and name.
+    # Columns: {iswb subject from secs(H) date isread(H) uidmsg(H)}
+    #    H=hidden
     variable colindex
     array set colindex {
 	iswb      0
 	subject   1
 	from      2
-	date      3
-	isread    4
-	uidmsg    5
+	secs      3
+	date      4
+	isread    5
+	uidmsg    6
     }
 }
 
@@ -86,7 +103,7 @@ proc ::Jabber::MailBox::Init { } {
     variable locals
     variable icons
    
-    ::Jabber::MailBox::TranslateAnyVer1ToCurrentVer
+    TranslateAnyVer1ToCurrentVer
     
     # Icons for the mailbox.
     set icons(readMsg) [image create photo -data {
@@ -137,6 +154,7 @@ proc ::Jabber::MailBox::InitHandler {jlibName} {
 proc ::Jabber::MailBox::ShowHide {args} {
     global wDlgs
     upvar ::Jabber::jstate jstate
+    variable locals  
 
     array set argsArr $args
     set w $wDlgs(jinbox)
@@ -147,7 +165,7 @@ proc ::Jabber::MailBox::ShowHide {args} {
     if {![winfo exists $w]} {
 	
 	# First time we are being called.
-	::Jabber::MailBox::Build
+	Build
 	if {[info exists argsArr(-visible)] && \
 	  ($argsArr(-visible) == 0)} {
 	    set jstate(inboxVis) 0
@@ -163,12 +181,20 @@ proc ::Jabber::MailBox::ShowHide {args} {
 	if {$targetstate} {
 	    catch {wm deiconify $w}
 	    raise $w
+	    UpdateDateAndTime $locals(wtbl)
 	} else {
 	    catch {wm withdraw $w}
+	    if {$locals(updateDateid) != ""} {
+		after cancel $locals(updateDateid)
+	    }
 	}
 	set jstate(inboxVis) $targetstate
     }
 }
+
+# Jabber::MailBox::Build --
+# 
+#       Creates the inbox window.
 
 proc ::Jabber::MailBox::Build {args} {
     global  this prefs wDlgs
@@ -183,7 +209,7 @@ proc ::Jabber::MailBox::Build {args} {
 
     # The inbox should only be read once to be economical.
     if {!$locals(mailboxRead)} {
-	::Jabber::MailBox::ReadMailbox
+	ReadMailbox
     }
     set w $wDlgs(jinbox)
     if {[winfo exists $w]} {
@@ -258,12 +284,13 @@ proc ::Jabber::MailBox::Build {args} {
     
     # The actual mailbox list as a tablelist.
     set wfrmbox $frmid.frmbox
-    set locals(wfrmbox) $wfrmbox
     frame $wfrmbox
-    set wtbl $wfrmbox.tbl
+    set wtbl    $wfrmbox.tbl
     set wysctbl $wfrmbox.ysc
-    set columns [list 0 {} 16 [mc Subject] 16 [mc From] \
-      0 [mc Date] 0 {} 0 {}]
+
+    # Columns: {iswb subject from secs(H) date isread(H) uidmsg(H)}
+    set columns [list \
+      0 {} 16 [mc Subject] 16 [mc From] 0 {} 0 [mc Date] 0 {} 0 {}]
     scrollbar $wysctbl -orient vertical -command [list $wtbl yview]
     tablelist::tablelist $wtbl -columns $columns  \
       -yscrollcommand [list ::UI::ScrollSet $wysctbl \
@@ -271,12 +298,22 @@ proc ::Jabber::MailBox::Build {args} {
       -labelcommand [namespace current]::LabelCommand  \
       -stretch all -width 60 -selectmode extended
     # Pressed -labelbackground #8c8c8c
-    $wtbl columnconfigure $colindex(iswb) -labelimage $locals(iconWb13)  \
+    $wtbl columnconfigure $colindex(iswb) \
+      -labelimage $locals(iconWb13)  \
       -resizable 0 -align center -showarrow 0
-    $wtbl columnconfigure $colindex(date) -sortmode command  \
+    $wtbl columnconfigure $colindex(date) \
+      -sortmode command  \
       -sortcommand [namespace current]::SortTimeColumn
+    
+    # The -formatcommand gives an infinite loop :-(
+    # -formatcommand [namespace current]::FormatDateCmd
+    $wtbl columnconfigure $colindex(secs)   -hide 1
     $wtbl columnconfigure $colindex(isread) -hide 1
     $wtbl columnconfigure $colindex(uidmsg) -hide 1
+    foreach {key value} [array get colindex] {
+	$wtbl columnconfigure $value -name $key
+    }
+    
     grid $wtbl    -column 0 -row 0 -sticky news
     grid $wysctbl -column 1 -row 0 -sticky ns
     grid columnconfigure $wfrmbox 0 -weight 1
@@ -284,7 +321,7 @@ proc ::Jabber::MailBox::Build {args} {
     
     set i 0
     foreach id [lsort -integer [array names mailbox]] {
-	::Jabber::MailBox::InsertRow $wtbl $mailbox($id) $i
+	InsertRow $wtbl $mailbox($id) $i
 	incr i
     }
     
@@ -292,7 +329,7 @@ proc ::Jabber::MailBox::Build {args} {
     set wfrmsg $frmid.frmsg    
     frame $wfrmsg
     set wtextmsg $wfrmsg.text
-    set wyscmsg $wfrmsg.ysc
+    set wyscmsg  $wfrmsg.ysc
     text $wtextmsg -height 4 -width 1 -wrap word \
       -borderwidth 1 -relief sunken  \
       -yscrollcommand [list ::UI::ScrollSet $wyscmsg \
@@ -323,7 +360,8 @@ proc ::Jabber::MailBox::Build {args} {
     }    
     eval {::pane::pane $wfrmbox $wfrmsg} $paneopts
     
-    set locals(wtbl) $wtbl
+    set locals(wfrmbox)  $wfrmbox
+    set locals(wtbl)     $wtbl
     set locals(wtextmsg) $wtextmsg
         
     ::UI::SetWindowGeometry $w
@@ -350,7 +388,10 @@ proc ::Jabber::MailBox::Build {args} {
     bind $body <Double-1> [list [namespace current]::DoubleClickMsg]
     bind $wtbl <<ListboxSelect>> [list [namespace current]::SelectMsg]
     
-    ::Jabber::MailBox::LabelCommand $wtbl $colindex(date)
+    LabelCommand $wtbl $colindex(secs)
+    
+    set locals(updateDateid) [after $locals(updateDatems) \
+      [list [namespace current]::UpdateDateAndTime $wtbl]]
 }
 
 
@@ -359,7 +400,7 @@ proc ::Jabber::MailBox::CloseHook {wclose} {
     
     set result ""
     if {[string equal $wclose $wDlgs(jinbox)]} {
-	::Jabber::MailBox::ShowHide -visible 0
+	ShowHide -visible 0
 	set result stop
     }
     return $result
@@ -371,47 +412,81 @@ proc ::Jabber::MailBox::CloseHook {wclose} {
 
 proc ::Jabber::MailBox::InsertRow {wtbl row i} {
     
+    variable mailboxindex
     variable colindex
     variable locals
-
-    set jid [lindex $row 1]
-    jlib::splitjid $jid jid2 res
-
-    # We keep any /res part.
-    #set row [lreplace $row 1 1 $jid2]
+    variable tableUid2Key
+    
+    # row:   {subject from date isread uidmsg message ?-key value ...?}
+    # item:  {iswb subject from secs(H) date isread(H) uidmsg(H)}
     
     # Does this message contain a whiteboard message?
     set haswb 0
     set len [llength $row]
-    if {($len > 6)} {
-	array set rowOpts [lrange $row 6 end]
+    if {($len > $mailboxindex(opts))} {
+	array set rowOpts [lrange $row $mailboxindex(opts) end]
 	if {[info exists rowOpts(-canvasuid)]} {
 	    set haswb 1
-	} elseif {[llength [::Jabber::MailBox::GetAnySVGElements $row]]} {
+	} elseif {[llength [GetAnySVGElements $row]]} {
 	    set haswb 1
 	}
     }
-
-    # The date is ISO 8601 and clock scan shall work here.
-    set smartDate [::Utils::SmartClockFormat [clock scan [lindex $row 2]]]
-    lset row 2 $smartDate
-    set row "{} $row"
-
+    set subject [lindex $row $mailboxindex(subject)]
+    set from    [lindex $row $mailboxindex(from)]
+    set date    [lindex $row $mailboxindex(date)]
+    set isread  [lindex $row $mailboxindex(isread)]
+    set uidmsg  [lindex $row $mailboxindex(uidmsg)]
+    set secs      [clock scan $date]
+    set smartdate [::Utils::SmartClockFormat $secs]
+    
+    set item [list {} $subject $from $secs $smartdate $isread $uidmsg]
+    
     set fontS  [option get . fontSmall {}]
     set fontSB [option get . fontSmallBold {}]
 
-    $wtbl insert end [lrange $row 0 5]
+    $wtbl insert end $item
+    set tableUid2Key($uidmsg) [$wtbl getkeys end]
     if {$haswb} {
 	$wtbl cellconfigure "${i},$colindex(iswb)" -image $locals(iconWb11)
     }
     set colsub $colindex(subject)
-    if {[lindex $row $colindex(isread)] == 0} {
+    if {[lindex $item $colindex(isread)] == 0} {
 	$wtbl rowconfigure $i -font $fontSB
 	$wtbl cellconfigure "${i},${colsub}" -image $locals(iconUnreadMsg)
     } else {
 	$wtbl rowconfigure $i -font $fontS
 	$wtbl cellconfigure "${i},${colsub}" -image $locals(iconReadMsg)
     }
+}
+
+proc ::Jabber::MailBox::FormatDateCmd {secs} {
+    
+    puts "::Jabber::MailBox::FormatDateCmd secs=$secs"
+    set displaytime [::Jabber::MailBox::FormatDateCmd $secs]
+    puts "displaytime=$displaytime"
+    return [::Jabber::MailBox::FormatDateCmd $secs]
+}
+
+proc ::Jabber::MailBox::UpdateDateAndTime {wtbl} {
+    
+    variable mailbox
+    variable colindex
+    variable mailboxindex
+    variable locals
+    
+    # Loop through the dates of all messages and update.
+    set size [$wtbl size]
+    for {set ind 0} {$ind < $size} {incr ind} {
+	set uidmsg [lindex [$wtbl get $ind] $colindex(uidmsg)]
+	set secs [clock scan [lindex $mailbox($uidmsg) $mailboxindex(date)]]
+	set smartdate [::Utils::SmartClockFormat $secs]
+	set cell $ind,$colindex(date)
+	$wtbl cellconfigure $cell -text $smartdate
+    }
+    
+    # Reschedule ourselves.
+    set locals(updateDateid) [after $locals(updateDatems) \
+      [list [namespace current]::UpdateDateAndTime $wtbl]]
 }
 
 proc ::Jabber::MailBox::GetToplevel { } {    
@@ -424,6 +499,22 @@ proc ::Jabber::MailBox::GetToplevel { } {
     }
 }
 
+# Various accessor functions.
+
+proc ::Jabber::MailBox::Get {id key} {
+    variable mailbox
+    variable mailboxindex
+    
+    return [lindex $mailbox($id) $mailboxindex($key)]
+}
+
+proc ::Jabber::MailBox::Set {id key value} {
+    variable mailbox
+    variable mailboxindex
+    
+    lset mailbox($id) $mailboxindex($key) $value
+}
+
 proc ::Jabber::MailBox::IsLastMessage {id} {
     variable mailbox
 
@@ -433,11 +524,12 @@ proc ::Jabber::MailBox::IsLastMessage {id} {
 
 proc ::Jabber::MailBox::AllRead { } {
     variable mailbox
+    variable mailboxindex
     
     # Find first that is not read.
     set allRead 1
     foreach uid [array names mailbox] {
-	if {![lindex $mailbox($uid) 3]} {
+	if {![lindex $mailbox($uid) $mailboxindex(isread)]} {
 	    set allRead 0
 	    break
 	}
@@ -473,10 +565,11 @@ proc ::Jabber::MailBox::GetMsgFromUid {id} {
 
 proc ::Jabber::MailBox::GetCanvasHexUID {id} {
     variable mailbox
+    variable mailboxindex
 
     set ans ""
-    if {[llength $mailbox($id)] > 6} {
-	array set optsArr [lrange $mailbox($id) 6 end]
+    if {[llength $mailbox($id)] > $mailboxindex(opts)} {
+	array set optsArr [lrange $mailbox($id) $mailboxindex(opts) end]
 	if {[info exists optsArr(-canvasuid)]} {
 	    set ans $optsArr(-canvasuid)
 	}
@@ -484,15 +577,24 @@ proc ::Jabber::MailBox::GetCanvasHexUID {id} {
     return $ans
 }
 
-proc ::Jabber::MailBox::MarkMsgAsRead {id} {    
+proc ::Jabber::MailBox::MarkMsgAsRead {uid} {    
     variable mailbox
+    variable mailboxindex
+    variable colindex
     variable locals
-
-    # Incomplete.
-    #$wtbl rowconfigure $item
-    #$wtbl cellconfigure "$item,0" -image $icons(readMsg)
-    if {[lindex $mailbox($id) 3] == 0} {
-	lset mailbox($id) 3 1
+    variable tableUid2Key
+    
+    if {[lindex $mailbox($uid) $mailboxindex(isread)] == 0} {
+	lset mailbox($uid) $mailboxindex(isread) 1
+	set fontS [option get . fontSmall {}]
+	set colsub $colindex(subject)
+	set wtbl $locals(wtbl)
+	
+	# Map uid to row (item) index.
+	set key $tableUid2Key($uid)
+	set item [$wtbl index k${key}]
+	$wtbl rowconfigure $item -font $fontS
+	$wtbl cellconfigure "${item},${colsub}" -image $locals(iconReadMsg)
 	set locals(haveEdits) 1
     }
 }
@@ -527,28 +629,29 @@ proc ::Jabber::MailBox::GotMsg {bodytxt args} {
     
     # The inbox should only be read once to be economical.
     if {!$locals(mailboxRead)} {
-	::Jabber::MailBox::ReadMailbox
+	ReadMailbox
     }
-    set messageList [eval {::Jabber::MailBox::MakeMessageList $bodytxt} $args]    
+    set bodytxt [string trimright $bodytxt "\n"]
+    set messageList [eval {MakeMessageList $bodytxt} $args]    
     
     # All messages cached in 'mailbox' array.
     set mailbox($uidmsg) $messageList
     
     # Always cache it in inbox.
-    ::Jabber::MailBox::PutMessageInInbox $messageList
+    PutMessageInInbox $messageList
         
-    if {$jprefs(showMsgNewWin)} {
-	::Jabber::GotMsg::GotMsg $uidmsg
-	::Jabber::MailBox::MarkMsgAsRead $uidmsg
-    }
-
     # Show in mailbox. Sorting?
-    set w [::Jabber::MailBox::GetToplevel]
+    set w [GetToplevel]
     if {$w != ""} {
-	::Jabber::MailBox::InsertRow $locals(wtbl) $mailbox($uidmsg) end
+	InsertRow $locals(wtbl) $mailbox($uidmsg) end
 	$locals(wtbl) see end
     }
     ::Jabber::UI::MailBoxState nonempty
+    
+    # Any separate window.
+    if {$jprefs(showMsgNewWin)} {
+	::Jabber::GotMsg::GotMsg $uidmsg
+    }
 }
 
 # Jabber::MailBox::HandleRawWBMessage --
@@ -567,21 +670,21 @@ proc ::Jabber::MailBox::HandleRawWBMessage {jlibname xmlns args} {
 	
     # The inbox should only be read once to be economical.
     if {!$locals(mailboxRead)} {
-	::Jabber::MailBox::ReadMailbox
+	ReadMailbox
     }
-    set messageList [eval {::Jabber::MailBox::MakeMessageList ""} $args]
+    set messageList [eval {MakeMessageList ""} $args]
     set rawList     [::Jabber::WB::GetRawCanvasMessageList $argsArr(-x) $xmlns]
     set canvasuid   [::Utils::GenerateHexUID]
     set filePath    [file join $prefs(inboxCanvasPath) ${canvasuid}.can]
     ::CanvasFile::DataToFile $filePath $rawList
     lappend messageList -canvasuid $canvasuid
     set mailbox($uidmsg) $messageList
-    ::Jabber::MailBox::PutMessageInInbox $messageList
+    PutMessageInInbox $messageList
 
     # Show in mailbox.
-    set w [::Jabber::MailBox::GetToplevel]
+    set w [GetToplevel]
     if {$w != ""} {
-	::Jabber::MailBox::InsertRow $locals(wtbl) $mailbox($uidmsg) end
+	InsertRow $locals(wtbl) $mailbox($uidmsg) end
 	$locals(wtbl) see end
     }
     ::Jabber::UI::MailBoxState nonempty
@@ -608,20 +711,20 @@ proc ::Jabber::MailBox::HandleSVGWBMessage {jlibname xmlns args} {
 	
     # The inbox should only be read once to be economical.
     if {!$locals(mailboxRead)} {
-	::Jabber::MailBox::ReadMailbox
+	ReadMailbox
     }
-    set messageList [eval {::Jabber::MailBox::MakeMessageList ""} $args]
+    set messageList [eval {MakeMessageList ""} $args]
 
     # Store svg in x element.
     lappend messageList -x $argsArr(-x)
 
     set mailbox($uidmsg) $messageList
-    ::Jabber::MailBox::PutMessageInInbox $messageList
+    PutMessageInInbox $messageList
 
     # Show in mailbox.
-    set w [::Jabber::MailBox::GetToplevel]
+    set w [GetToplevel]
     if {$w != ""} {
-	::Jabber::MailBox::InsertRow $locals(wtbl) $mailbox($uidmsg) end
+	InsertRow $locals(wtbl) $mailbox($uidmsg) end
 	$locals(wtbl) see end
     }
     ::Jabber::UI::MailBoxState nonempty
@@ -645,20 +748,21 @@ proc ::Jabber::MailBox::MakeMessageList {body args} {
 
     # Here we should probably check som 'jabber:x:delay' element...
     # This is ISO 8601.
-    set tm ""
+    set secs ""
     if {[info exists argsArr(-x)]} {
 	set tm [::Jabber::GetAnyDelayElem $argsArr(-x)]
 	if {$tm != ""} {
-	    set tm [clock scan $tm -gmt 1]
+	    # Always use local time!
+	    set secs [clock scan $tm -gmt 1]
 	}
     }
-    if {$tm == ""} {
-	set tm [clock seconds]
+    if {$secs == ""} {
+	set secs [clock seconds]
     }
-    set tm [clock format $tm -format "%Y%m%dT%H:%M:%S"]
+    set date [clock format $secs -format "%Y%m%dT%H:%M:%S"]
 
     # List format for messages.
-    return [list $argsArr(-subject) $argsArr(-from) $tm 0 [incr uidmsg] $body]
+    return [list $argsArr(-subject) $argsArr(-from) $date 0 [incr uidmsg] $body]
 }
 
 proc ::Jabber::MailBox::PutMessageInInbox {row} {
@@ -671,7 +775,7 @@ proc ::Jabber::MailBox::PutMessageInInbox {row} {
     }
     if {![catch {open $jprefs(inboxPath) a} fd]} {
 	if {!$exists} {
-	    ::Jabber::MailBox::WriteInboxHeader $fd
+	    WriteInboxHeader $fd
 	    if {[string equal $this(platform) "macintosh"]} {
 		file attributes $jprefs(inboxPath) -type pref
 	    }
@@ -703,9 +807,9 @@ proc ::Jabber::MailBox::SaveMsg { } {
 	    return
 	}
 	set row [$wtbl get $item]
-	set from [lindex $row $colindex(from)]
+	set from    [lindex $row $colindex(from)]
 	set subject [lindex $row $colindex(subject)]
-	set time [lindex $row $colindex(date)]
+	set time [lindex $row $colindex(secs)]
 	set time [clock format [clock scan $time]]
 	set maxw 14
 	puts $fd [format "%-*s %s" $maxw "From:" $from]
@@ -743,7 +847,7 @@ proc ::Jabber::MailBox::TrashMsg { } {
     # Careful, delete in reversed order!
     foreach item [lsort -integer -decreasing $items] {
 	set id [lindex [$wtbl get $item] $colindex(uidmsg)]
-	set uid [::Jabber::MailBox::GetCanvasHexUID $id]
+	set uid [GetCanvasHexUID $id]
 	if {[string length $uid] > 0} {
 	    set fileName ${uid}.can
 	    set filePath [file join $prefs(inboxCanvasPath) $fileName]
@@ -761,14 +865,14 @@ proc ::Jabber::MailBox::TrashMsg { } {
 	    set sel [expr $lastitem + 1 - [llength $items]]
 	}
 	$wtbl selection set $sel
-	::Jabber::MailBox::SelectMsg 
+	SelectMsg 
     } else {
 	$wtray buttonconfigure reply -state disabled
 	$wtray buttonconfigure forward -state disabled
 	$wtray buttonconfigure save -state disabled
 	$wtray buttonconfigure print -state disabled
 	$wtray buttonconfigure trash -state disabled
-	::Jabber::MailBox::MsgDisplayClear
+	MsgDisplayClear
 	::Jabber::UI::MailBoxState empty
     }
 }
@@ -785,6 +889,7 @@ proc ::Jabber::MailBox::SelectMsg { } {
 
     variable locals
     variable mailbox
+    variable mailboxindex
     variable colindex
     upvar ::Jabber::jstate jstate
     
@@ -802,27 +907,22 @@ proc ::Jabber::MailBox::SelectMsg { } {
 	$wtray buttonconfigure forward -state disabled
 	$wtray buttonconfigure save -state disabled
 	$wtray buttonconfigure print -state disabled
-	::Jabber::MailBox::MsgDisplayClear
+	MsgDisplayClear
 	return
     }
     set row [$wtbl get $item]
-    set id [lindex $row $colindex(uidmsg)]
+    set uid [lindex $row $colindex(uidmsg)]
     
     # 2-tier jid.
     #set jid2 [lindex $row $colindex(from)]
         
     # 3-tier jid.
-    set jid3 [lindex $mailbox($id) 1]
+    set jid3 [lindex $mailbox($uid) $mailboxindex(from)]
     jlib::splitjid $jid3 jid2 res
 
     # Mark as read.
-    set fontS [option get . fontSmall {}]
-    set colsub $colindex(subject)
-    
-    $wtbl rowconfigure $item -font $fontS
-    $wtbl cellconfigure "${item},${colsub}" -image $locals(iconReadMsg)
-    ::Jabber::MailBox::MarkMsgAsRead $id
-    ::Jabber::MailBox::DisplayMsg $id
+    MarkMsgAsRead $uid
+    DisplayMsg $uid
     
     # Configure buttons.
     $wtray buttonconfigure reply   -state normal
@@ -832,9 +932,9 @@ proc ::Jabber::MailBox::SelectMsg { } {
     $wtray buttonconfigure trash   -state normal
     
     # If any whiteboard stuff in message...
-    set uid [::Jabber::MailBox::GetCanvasHexUID $id]
-    set svgElem [::Jabber::MailBox::GetAnySVGElements $mailbox($id)]
-    ::Debug 2 "::Jabber::MailBox::SelectMsg  uid=$uid, svgElem='$svgElem'"
+    set uidcan [GetCanvasHexUID $uid]
+    set svgElem [GetAnySVGElements $mailbox($uid)]
+    ::Debug 2 "::Jabber::MailBox::SelectMsg  uidcan=$uidcan, svgElem='$svgElem'"
      
     # The "raw" protocol stores the canvas in a separate file indicated by
     # the -canvasuid key in the message list.
@@ -842,10 +942,10 @@ proc ::Jabber::MailBox::SelectMsg { } {
     # -x listOfElements
     
     # The "raw" protocol.
-    if {[string length $uid] > 0} {	
-	::Jabber::MailBox::DisplayRawMessage $jid3 $uid
+    if {[string length $uidcan] > 0} {	
+	DisplayRawMessage $jid3 $uidcan
     } elseif {[llength $svgElem]} {
-	::Jabber::MailBox::DisplayXElementSVG $jid3 $svgElem
+	DisplayXElementSVG $jid3 $svgElem
     }
 }
 
@@ -872,7 +972,7 @@ proc ::Jabber::MailBox::DisplayRawMessage {jid3 uid} {
     upvar ::Jabber::jstate jstate
     
     jlib::splitjid $jid3 jid2 res
-    set wtop [::Jabber::MailBox::MakeWhiteboard $jid2]
+    set wtop [MakeWhiteboard $jid2]
     
     # Only if user available shall we try to import.
     set tryimport 0
@@ -906,7 +1006,7 @@ proc ::Jabber::MailBox::DisplayXElementSVG {jid3 xlist} {
     
     jlib::splitjid $jid3 jid2 res
     
-    set wtop [::Jabber::MailBox::MakeWhiteboard $jid2]
+    set wtop [MakeWhiteboard $jid2]
     
     # Only if user available shall we try to import.
     set tryimport 0
@@ -949,6 +1049,7 @@ proc ::Jabber::MailBox::MakeWhiteboard {jid2} {
 proc ::Jabber::MailBox::DoubleClickMsg { } {
     variable locals
     variable mailbox
+    variable mailboxindex
     variable colindex
     upvar ::Jabber::jprefs jprefs
     
@@ -961,9 +1062,11 @@ proc ::Jabber::MailBox::DoubleClickMsg { } {
     set id [lindex $row $colindex(uidmsg)]
 
     # We shall have the original, unparsed, text here.
-    set allText [lindex $mailbox($id) 5]
-    foreach {subject to time} [lrange $mailbox($id) 0 2] break
-
+    set body    [lindex $mailbox($id) $mailboxindex(message)]
+    set subject [lindex $mailbox($id) $mailboxindex(subject)]
+    set to      [lindex $mailbox($id) $mailboxindex(from)]
+    set date    [lindex $mailbox($id) $mailboxindex(date)]
+    
     if {[string equal $jprefs(inbox2click) "newwin"]} {
 	::Jabber::GotMsg::GotMsg $id
     } elseif {[string equal $jprefs(inbox2click) "reply"]} {
@@ -971,7 +1074,7 @@ proc ::Jabber::MailBox::DoubleClickMsg { } {
 	    set subject "Re: $subject"
 	}	
 	::Jabber::NewMsg::Build -to $to -subject $subject  \
-	  -quotemessage $allText -time $time
+	  -quotemessage $body -time $date
     }
 }
 
@@ -981,13 +1084,23 @@ proc ::Jabber::MailBox::LabelCommand {w column} {
     tablelist::sortByColumn $w $column
 }
 
-proc ::Jabber::MailBox::SortTimeColumn {elem1 elem2} {
+proc ::Jabber::MailBox::SortTimeColumn {tm1 tm2} {
     variable locals
     
-    #puts "elem1=$elem1, elem2=$elem2"
+    if {0} {
+	# when -formatcommand is used.
+	if {$tm1 > $tm2} {
+	    return 1
+	} elseif {$tm1 == $tm2} {
+	    return 0
+	} else {
+	    return -1
+	}    
+    }
+
     # 'clock scan' shall take care of formats like 'today' etc.
-    set long1 [clock scan $elem1]
-    set long2 [clock scan $elem2]
+    set long1 [clock scan $tm1]
+    set long2 [clock scan $tm2]
     if {$long1 > $long2} {
 	return 1
     } elseif {$long1 == $long2} {
@@ -1009,21 +1122,28 @@ proc ::Jabber::MailBox::DisplayMsg {id} {
 
     variable locals
     variable mailbox
+    variable mailboxindex
     
     set wtextmsg $locals(wtextmsg)    
-    foreach {subject from time junk muid body} $mailbox($id) break
+
+    set subject [lindex $mailbox($id) $mailboxindex(subject)]
+    set from    [lindex $mailbox($id) $mailboxindex(from)]
+    set date    [lindex $mailbox($id) $mailboxindex(date)]
+    set body    [lindex $mailbox($id) $mailboxindex(message)]
+    
     $wtextmsg configure -state normal
     $wtextmsg delete 1.0 end
     ::Jabber::ParseAndInsertText $wtextmsg $body normal urltag
     $wtextmsg configure -state disabled
     
-    set opts [list -subject $subject -from $from -time $time]
+    set opts [list -subject $subject -from $from -time $date]
     eval {::hooks::run displayMessageHook $body} $opts
 }
 
 proc ::Jabber::MailBox::ReplyTo { } {
     variable locals
     variable mailbox
+    variable mailboxindex
     variable colindex
     upvar ::Jabber::jstate jstate
     
@@ -1036,19 +1156,23 @@ proc ::Jabber::MailBox::ReplyTo { } {
     set id [lindex $row $colindex(uidmsg)]
 
     # We shall have the original, unparsed, text here.
-    set allText [lindex $mailbox($id) 5]
-    foreach {subject to time} [lrange $mailbox($id) 0 2] break
-    set to [::Jabber::JlibCmd getrecipientjid $to]
+    set subject [lindex $mailbox($id) $mailboxindex(subject)]
+    set from    [lindex $mailbox($id) $mailboxindex(from)]
+    set date    [lindex $mailbox($id) $mailboxindex(date)]
+    set body    [lindex $mailbox($id) $mailboxindex(message)]
+    
+    set to [::Jabber::JlibCmd getrecipientjid $from]
     if {![regexp -nocase {^ *re:} $subject]} {
 	set subject "Re: $subject"
     }
     ::Jabber::NewMsg::Build -to $to -subject $subject  \
-      -quotemessage $allText -time $time
+      -quotemessage $body -time $date
 }
 
 proc ::Jabber::MailBox::ForwardTo { } {
     variable locals
     variable mailbox
+    variable mailboxindex
     variable colindex
     
     set wtbl $locals(wtbl)
@@ -1060,11 +1184,13 @@ proc ::Jabber::MailBox::ForwardTo { } {
     set id [lindex $row $colindex(uidmsg)]
 
     # We shall have the original, unparsed, text here.
-    set allText [lindex $mailbox($id) 5]
-    foreach {subject to time} [lrange $mailbox($id) 0 2] break
+    set subject [lindex $mailbox($id) $mailboxindex(subject)]
+    set from    [lindex $mailbox($id) $mailboxindex(from)]
+    set date    [lindex $mailbox($id) $mailboxindex(date)]
+    set body    [lindex $mailbox($id) $mailboxindex(message)]
+
     set subject "Forwarded: $subject"
-    ::Jabber::NewMsg::Build -subject $subject  \
-      -forwardmessage $allText -time $time
+    ::Jabber::NewMsg::Build -subject $subject -forwardmessage $body -time $date
 }
 
 proc ::Jabber::MailBox::DoPrint { } {
@@ -1080,7 +1206,7 @@ proc ::Jabber::MailBox::DoPrint { } {
 
 proc ::Jabber::MailBox::SaveMailbox {args} {
 
-    eval {::Jabber::MailBox::SaveMailboxVer2} $args
+    eval {SaveMailboxVer2} $args
 }
     
 proc ::Jabber::MailBox::SaveMailboxVer1 { } {
@@ -1170,7 +1296,7 @@ proc ::Jabber::MailBox::SaveMailboxVer2 {args} {
 	    set doSave 1
 	}
     }
-    ::Debug 2 "\tdoSave=$doSave"
+    ::Debug 2 "\t doSave=$doSave"
     if {!$doSave} {
 	return
     }
@@ -1184,7 +1310,7 @@ proc ::Jabber::MailBox::SaveMailboxVer2 {args} {
     }
     
     # Start by writing the header info.
-    ::Jabber::MailBox::WriteInboxHeader $fid
+    WriteInboxHeader $fid
     foreach id [lsort -integer [array names mailbox]] {
 	puts $fid "set mailbox(\[incr uidmsg]) {$mailbox($id)}"
     }
@@ -1215,7 +1341,7 @@ proc ::Jabber::MailBox::ReadMailbox { } {
     # Set this even if not there.
     set locals(mailboxRead) 1
     if {[file exists $jprefs(inboxPath)]} {
-	::Jabber::MailBox::ReadMailboxVer2
+	ReadMailboxVer2
     }
 }
 
@@ -1223,12 +1349,12 @@ proc ::Jabber::MailBox::TranslateAnyVer1ToCurrentVer { } {
     variable locals
     variable mailbox
     
-    set ver [::Jabber::MailBox::GetMailboxVersion]
+    set ver [GetMailboxVersion]
     if {[string equal $ver "1"]} {
-	::Jabber::MailBox::ReadMailboxVer1
+	ReadMailboxVer1
 	
 	# This should save the inbox in its current version.
-	::Jabber::MailBox::SaveMailbox -force 1
+	SaveMailbox -force 1
 	
 	# Cleanup state variables.
 	unset -nocomplain locals(mailbox) mailbox
@@ -1295,6 +1421,7 @@ proc ::Jabber::MailBox::ReadMailboxVer2 { } {
     variable locals
     variable uidmsg
     variable mailbox
+    variable mailboxindex
     upvar ::Jabber::jprefs jprefs
 
     ::Debug 2 "::Jabber::MailBox::ReadMailboxVer2"
@@ -1308,7 +1435,14 @@ proc ::Jabber::MailBox::ReadMailboxVer2 { } {
 	
 	# Keep the uidmsg in sync for each list in mailbox.
 	foreach id [lsort -integer [array names mailbox]] {
-	    lset mailbox($id) 4 $id
+	    lset mailbox($id) $mailboxindex(uidmsg) $id
+	    
+	    # If stored as secs translate to formatted.
+	    set date [lindex $mailbox($id) $mailboxindex(date)]
+	    if {[string is integer $date]} {
+		lset mailbox($id) $mailboxindex(date) \
+		  [clock format $date -format "%Y%m%dT%H:%M:%S"]
+	    }
 	    
 	    # Consistency check.
 	    if {[expr [llength $mailbox($id)] % 2] == 1} {
@@ -1347,10 +1481,10 @@ proc ::Jabber::MailBox::Exit { } {
     
     if {$jprefs(inboxSave)} {
 	if {$locals(haveEdits)} {
-	    ::Jabber::MailBox::SaveMailbox
+	    SaveMailbox
 	}
     } else {
-	::Jabber::MailBox::DeleteMailbox
+	DeleteMailbox
     }
 }
 

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.31 2004-10-22 06:44:14 matben Exp $
+# $Id: Utils.tcl,v 1.32 2004-10-24 14:12:52 matben Exp $
 
 namespace eval ::Utils:: {
 
@@ -239,7 +239,8 @@ proc ::Utils::GetDomainNameFromUrl {url} {
 #       Pretty formatted time & date.
 #
 # Arguments:
-#       secs        number of seconds since system defined time.
+#       secs        Number of seconds since system defined time.
+#                   This must be local time.
 #       
 # Results:
 #       nice time string that still can be used by 'clock scan'
@@ -248,11 +249,13 @@ proc ::Utils::SmartClockFormat {secs args} {
     
     array set opts {
 	-weekdays 0
+	-detail   0
     }
     array set opts $args
     
     # 'days': 0=today, -1=yesterday etc.
-    set days [expr ($secs - [clock scan "today 00:00"])/(60*60*24)]
+    set secs00 [clock scan "today 00:00"]
+    set days [expr ($secs - $secs00)/(60*60*24)]
     
     switch -regexp -- $days {
 	^1$ {
@@ -266,9 +269,8 @@ proc ::Utils::SmartClockFormat {secs args} {
 	}
 	^-[2-5]$ {
 	    if {$opts(-weekdays)} {
-		# clock scan doesn't work on these
 		set date [string tolower  \
-		  [clock format [clock scan "today $days days"] -format "%A"]]
+		  [clock format [clock scan "$days days ago"] -format "%A"]]
 	    } else {
 		set date [clock format $secs -format "%y-%m-%d"]
 	    }
@@ -277,8 +279,25 @@ proc ::Utils::SmartClockFormat {secs args} {
 	    set date [clock format $secs -format "%y-%m-%d"]
 	}
     }
-    
-    set time [clock format $secs -format "%H:%M:%S"]
+    if {$opts(-detail) && ($days == 0)} {
+	set now [clock seconds]
+	set minutes [expr ($now - $secs)/60]
+	if {$minutes == 0} {
+	    set time [clock format $secs -format "%H:%M:%S"]
+	} elseif {$minutes == 1} {
+	    set time "one minute ago"
+	} elseif {$minutes == 2} {
+	    set time "two minutes ago"
+	} elseif {$minutes == 3} {
+	    set time "three minutes ago"
+	} elseif {$minutes < 60} {
+	    set time "$minutes minutes ago"
+	} else {
+	    set time [clock format $secs -format "%H:%M:%S"]
+	}
+    } else {	
+	set time [clock format $secs -format "%H:%M:%S"]
+    }
     return "$date $time"
 }
 

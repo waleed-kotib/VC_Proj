@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.73 2004-10-22 15:05:33 matben Exp $
+# $Id: GroupChat.tcl,v 1.74 2004-10-24 14:12:52 matben Exp $
 
 package require History
 
@@ -150,7 +150,7 @@ proc ::Jabber::GroupChat::HaveOrigConference {{roomjid ""}} {
     set ans 0
     if {$roomjid == ""} {
 	if {[::Jabber::Browse::HaveBrowseTree $jserver(this)] &&  \
-	  [::Jabber::GroupChat::AllConference]} {
+	  [AllConference]} {
 	    set ans 1
 	}
     } else {
@@ -263,9 +263,9 @@ proc ::Jabber::GroupChat::EnterOrCreate {what args} {
 	    set gchatprotocol "gc-1.0"
 	}
 	muc {
-	    if {[::Jabber::GroupChat::HaveMUC $roomjid]} {
+	    if {[HaveMUC $roomjid]} {
 		set gchatprotocol "muc"
-	    } elseif {[::Jabber::GroupChat::HaveOrigConference $roomjid]} {
+	    } elseif {[HaveOrigConference $roomjid]} {
 		set gchatprotocol "conference"
 	    }
 	}
@@ -275,7 +275,7 @@ proc ::Jabber::GroupChat::EnterOrCreate {what args} {
     
     switch -glob -- $what,$gchatprotocol {
 	*,gc-1.0 {
-	    set ans [eval {::Jabber::GroupChat::BuildEnter} $args]
+	    set ans [eval {BuildEnter} $args]
 	}
 	enter,conference {
 	    set ans [eval {::Jabber::Conference::BuildEnter} $args]
@@ -301,7 +301,7 @@ proc ::Jabber::GroupChat::EnterHook {roomjid protocol} {
     
     ::Debug 2 "::Jabber::GroupChat::EnterHook roomjid=$roomjid $protocol"
     
-    ::Jabber::GroupChat::SetProtocol $roomjid $protocol
+    SetProtocol $roomjid $protocol
     
     # If we are using the 'conference' protocol we must browse
     # the room to get the participants.
@@ -324,7 +324,7 @@ proc ::Jabber::GroupChat::SetProtocol {roomjid inprotocol} {
     # We need a separate cache for this since the room may not yet exist.
     set protocol($roomjid) $inprotocol
     
-    set token [::Jabber::GroupChat::GetTokenFrom roomjid $roomjid]
+    set token [GetTokenFrom roomjid $roomjid]
     if {$token == ""} {
 	return
     }
@@ -531,9 +531,9 @@ proc ::Jabber::GroupChat::GotMsg {body args} {
     jlib::splitjid $from roomjid res
         
     # If we haven't a window for this roomjid, make one!
-    set token [::Jabber::GroupChat::GetTokenFrom roomjid $roomjid]
+    set token [GetTokenFrom roomjid $roomjid]
     if {$token == ""} {
-	set token [eval {::Jabber::GroupChat::Build $roomjid} $args]
+	set token [eval {Build $roomjid} $args]
     }
     variable $token
     upvar 0 $token state
@@ -544,7 +544,7 @@ proc ::Jabber::GroupChat::GotMsg {body args} {
     if {[string length $body] > 0} {
 
 	# And put message in window.
-	eval {::Jabber::GroupChat::InsertMessage $token $from $body} $args
+	eval {InsertMessage $token $from $body} $args
 	set state(got1stmsg) 1
 	
 	# Run display hooks (speech).
@@ -565,7 +565,7 @@ proc ::Jabber::GroupChat::GotMsg {body args} {
 #       shows window, returns token.
 
 proc ::Jabber::GroupChat::Build {roomjid args} {
-    global  this prefs wDlgs
+    global  this prefs wDlgs osprefs
     
     variable protocol
     variable groupChatOptions
@@ -684,9 +684,9 @@ proc ::Jabber::GroupChat::Build {roomjid args} {
     set wbtstatus $frbot.stat
     
     set state(wbstatus) $wbtstatus
-    ::Jabber::GroupChat::BuildStatusMenuButton $token $wbtstatus
+    BuildStatusMenuButton $token $wbtstatus
     pack $wbtstatus -side right -padx 6
-    ::Jabber::GroupChat::ConfigStatusMenuButton $token $wbtstatus available
+    ConfigStatusMenuButton $token $wbtstatus available
 
     pack [checkbutton $frbot.active -text " [mc {Active <Return>}]" \
       -command [list [namespace current]::ActiveCmd $token] \
@@ -765,7 +765,7 @@ proc ::Jabber::GroupChat::Build {roomjid args} {
     eval {::pane::pane $wtxt.0 $wfrusers} $paneopts
     
     # The tags.
-    ::Jabber::GroupChat::ConfigureTextTags $w $wtext
+    ConfigureTextTags $w $wtext
     
     # Text send.
     frame $wtxtsnd -height 100 -width 300
@@ -803,7 +803,7 @@ proc ::Jabber::GroupChat::Build {roomjid args} {
     set state(wtxt)       $wtxt
     
     if {$state(active)} {
-	::Jabber::GroupChat::ActiveCmd $token
+	ActiveCmd $token
     }
         
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jgc)]]
@@ -812,6 +812,9 @@ proc ::Jabber::GroupChat::Build {roomjid args} {
     }
     wm minsize $w [expr {$shortBtWidth < 240} ? 240 : $shortBtWidth] 320
     wm maxsize $w 800 2000
+
+    bind $wtextsnd <$osprefs(mod)-Return> \
+      [list [namespace current]::CommandReturnKeyPress $token]
     
     focus $w
     return $token
@@ -866,7 +869,7 @@ proc ::Jabber::GroupChat::StatusCmd {token} {
     ::Debug 2 "::Jabber::GroupChat::StatusCmd status=$state(status)"
 
     if {$status == "unavailable"} {
-	set ans [::Jabber::GroupChat::Exit $token]
+	set ans [Exit $token]
 	if {$ans == "no"} {
 	    set state(status) $state(oldStatus)
 	}
@@ -950,10 +953,10 @@ proc ::Jabber::GroupChat::CloseHook {wclose} {
     
     set result ""
     if {[string match $wDlgs(jgc)* $wclose]} {
-	set token [::Jabber::GroupChat::GetTokenFrom w $wclose]
+	set token [GetTokenFrom w $wclose]
 	if {$token != ""} {
 	    set w $wclose
-	    set ans [::Jabber::GroupChat::Exit $token]
+	    set ans [Exit $token]
 	    if {$ans == "no"} {
 		set result stop
 	    }
@@ -1062,7 +1065,7 @@ proc ::Jabber::GroupChat::Send {token} {
 
 proc ::Jabber::GroupChat::ReturnCmd {token} {
 
-    ::Jabber::GroupChat::Send $token
+    Send $token
     
     # Stop the actual return to be inserted.
     return -code break
@@ -1086,6 +1089,14 @@ proc ::Jabber::GroupChat::ActiveCmd {token} {
     set cprefs(lastActiveRet) $state(active)
 }
 
+proc ::Jabber::GroupChat::CommandReturnKeyPress {token} {
+    
+    Send $token
+    
+    # Stop further handling in Text.
+    return -code break
+}
+
 # Jabber::GroupChat::GetTokenFrom --
 # 
 #       Try to get the token state array from any stored key.
@@ -1100,7 +1111,7 @@ proc ::Jabber::GroupChat::ActiveCmd {token} {
 proc ::Jabber::GroupChat::GetTokenFrom {key pattern} {
     
     # Search all tokens for this key into state array.
-    foreach token [::Jabber::GroupChat::GetTokenList] {
+    foreach token [GetTokenList] {
 	variable $token
 	upvar 0 $token state
 	
@@ -1148,9 +1159,9 @@ proc ::Jabber::GroupChat::PresenceHook {jid presence args} {
 	set roomjid $jid
 	set jid3 ${jid}/$attrArr(-resource)
 	if {[string equal $presence "available"]} {
-	    eval {::Jabber::GroupChat::SetUser $roomjid $jid3 $presence} $args
+	    eval {SetUser $roomjid $jid3 $presence} $args
 	} elseif {[string equal $presence "unavailable"]} {
-	    ::Jabber::GroupChat::RemoveUser $roomjid $jid3
+	    RemoveUser $roomjid $jid3
 	}
 	
 	# When kicked etc. from a MUC room...
@@ -1201,9 +1212,9 @@ proc ::Jabber::GroupChat::BrowseUser {userXmlList} {
     if {[$jstate(jlib) service isroom $parent] &&  \
       ([lsearch [$jstate(jlib) conference allroomsin] $parent] >= 0)} {
 	if {[info exists attrArr(type)] && [string equal $attrArr(type) "remove"]} {
-	    ::Jabber::GroupChat::RemoveUser $parent $jid
+	    RemoveUser $parent $jid
 	} else {
-	    ::Jabber::GroupChat::SetUser $parent $jid {}
+	    SetUser $parent $jid {}
 	}
     }
 }
@@ -1235,9 +1246,9 @@ proc ::Jabber::GroupChat::SetUser {roomjid jid3 presence args} {
     set jid3    [jlib::jidmap $jid3]
 
     # If we haven't a window for this thread, make one!
-    set token [::Jabber::GroupChat::GetTokenFrom roomjid $roomjid]
+    set token [GetTokenFrom roomjid $roomjid]
     if {$token == ""} {
-	set token [eval {::Jabber::GroupChat::Build $roomjid} $args]
+	set token [eval {Build $roomjid} $args]
     }       
     variable $token
     upvar 0 $token state
@@ -1450,7 +1461,7 @@ proc ::Jabber::GroupChat::Popup {w v x y} {
 proc ::Jabber::GroupChat::RemoveUser {roomjid jid3} {
 
     set roomjid [jlib::jidmap $roomjid]
-    set token [::Jabber::GroupChat::GetTokenFrom roomjid $roomjid]
+    set token [GetTokenFrom roomjid $roomjid]
     if {$token == ""} {
 	return
     }
@@ -1519,9 +1530,9 @@ proc ::Jabber::GroupChat::Print {token} {
 proc ::Jabber::GroupChat::ExitRoom {roomjid} {
 
     set roomjid [jlib::jidmap $roomjid]
-    set token [::Jabber::GroupChat::GetTokenFrom roomjid $roomjid]
+    set token [GetTokenFrom roomjid $roomjid]
     if {$token != ""} {
-	::Jabber::GroupChat::Exit $token
+	Exit $token
     }
 }
 
@@ -1552,13 +1563,13 @@ proc ::Jabber::GroupChat::Exit {token} {
 	set ans [eval {tk_messageBox -icon warning -type yesno  \
 	  -message [mc jamesswarnexitroom $roomjid]} $opts]
 	if {$ans == "yes"} {
-	    ::Jabber::GroupChat::Close $token
+	    Close $token
 	    $jstate(jlib) service exitroom $roomjid
 	    ::hooks::run groupchatExitRoomHook $roomjid
 	}
     } else {
 	set ans "yes"
-	::Jabber::GroupChat::Close $token
+	Close $token
     }
     return $ans
 }
@@ -1599,12 +1610,12 @@ proc ::Jabber::GroupChat::Close {token} {
 proc ::Jabber::GroupChat::LogoutHook { } {    
     upvar ::Jabber::jstate jstate
 
-    set tokenList [::Jabber::GroupChat::GetTokenList]
+    set tokenList [GetTokenList]
     foreach token $tokenList {
 	variable $token
 	upvar 0 $token state
 
-	::Jabber::GroupChat::SetState $token disabled
+	SetState $token disabled
 	::hooks::run groupchatExitRoomHook $state(roomjid)
     }
 }
@@ -1612,12 +1623,12 @@ proc ::Jabber::GroupChat::LogoutHook { } {
 proc ::Jabber::GroupChat::LoginHook { } {    
     upvar ::Jabber::jstate jstate
 
-    set tokenList [::Jabber::GroupChat::GetTokenList]
+    set tokenList [GetTokenList]
     foreach token $tokenList {
 	variable $token
 	upvar 0 $token state
 
-	::Jabber::GroupChat::SetState $token normal
+	SetState $token normal
     }
 }
 
@@ -1625,7 +1636,7 @@ proc ::Jabber::GroupChat::GetFirstPanePos { } {
     global  wDlgs
     
     set win [::UI::GetFirstPrefixedToplevel $wDlgs(jgc)]
-    set token [::Jabber::GroupChat::GetTokenFrom w $win]
+    set token [GetTokenFrom w $win]
     if {$token != ""} {
 	variable $token
 	upvar 0 $token state
@@ -1656,7 +1667,7 @@ proc ::Jabber::GroupChat::BuildPrefsHook {wtree nbframe} {
     
     # Conference page ------------------------------------------------------
     set wpage [$nbframe page {Conference}]
-    ::Jabber::GroupChat::BuildPageConf $wpage
+    BuildPageConf $wpage
 }
 
 proc ::Jabber::GroupChat::BuildPageConf {page} {

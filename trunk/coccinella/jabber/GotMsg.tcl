@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.33 2004-10-16 13:32:50 matben Exp $
+# $Id: GotMsg.tcl,v 1.34 2004-10-24 14:12:52 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -23,6 +23,10 @@ namespace eval ::Jabber::GotMsg:: {
         
     # msgId for the one in the dialog.
     variable msgIdDisplay 0
+    
+    variable locals
+    set locals(updateDateid)  ""
+    set locals(updateDatems)  [expr 1000*60]
 }
 
 # Jabber::GotMsg::GotMsg --
@@ -49,7 +53,7 @@ proc ::Jabber::GotMsg::GotMsg {id} {
     if {[winfo exists $w]} {
 	$wbtnext configure -state normal
     } else {
-	::Jabber::GotMsg::Show $id
+	Show $id
     }
 }
 
@@ -66,12 +70,13 @@ proc ::Jabber::GotMsg::Show {thisMsgId} {
     variable jidtxt
     variable username
     variable subject
-    variable theTime
+    variable smartdate
     variable prestext
     variable wtext
     variable wbtnext
     variable wpresence
-    variable theMsg
+    variable body
+    variable date
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::mapShowTextToElem mapShowTextToElem
@@ -79,18 +84,19 @@ proc ::Jabber::GotMsg::Show {thisMsgId} {
     ::Debug 2 "::Jabber::GotMsg::Show thisMsgId=$thisMsgId"
     
     # Build if not mapped.
-    ::Jabber::GotMsg::Build
+    Build
     
     set msgIdDisplay $thisMsgId
-    set spec [::Jabber::MailBox::GetMsgFromUid $thisMsgId]
     ::Jabber::MailBox::MarkMsgAsRead $thisMsgId
-    if {$spec == ""} {
-	return
-    }
-    foreach {subject jid timeAndDate isRead junk theMsg} $spec break
+    
+    set subject [::Jabber::MailBox::Get $thisMsgId subject]
+    set jid     [::Jabber::MailBox::Get $thisMsgId from]
+    set date    [::Jabber::MailBox::Get $thisMsgId date]
+    set body    [::Jabber::MailBox::Get $thisMsgId message]
+    
     set jid [::Jabber::JlibCmd getrecipientjid $jid]
     set jidtxt $jid
-    set theTime [::Utils::SmartClockFormat [clock scan $timeAndDate]]
+    set smartdate [::Utils::SmartClockFormat [clock scan $date]]
     
     # Split jid into jid2 and resource.
     jlib::splitjid $jid jid2 res
@@ -118,7 +124,7 @@ proc ::Jabber::GotMsg::Show {thisMsgId} {
     # Insert the actual body of the message.
     $wtext configure -state normal
     $wtext delete 1.0 end
-    ::Jabber::ParseAndInsertText $wtext $theMsg normal urltag
+    ::Jabber::ParseAndInsertText $wtext $body normal urltag
     $wtext configure -state disabled
     
     # If no more messages after this one...
@@ -127,8 +133,8 @@ proc ::Jabber::GotMsg::Show {thisMsgId} {
     }
     
     # Run display message hook (speech).
-    set opts [list -subject $subject -from $jid -time $timeAndDate]
-    eval {::hooks::run displayMessageHook $theMsg} $opts
+    set opts [list -subject $subject -from $jid -time $date]
+    eval {::hooks::run displayMessageHook $body} $opts
 }
 
 # Jabber::GotMsg::Build --
@@ -151,11 +157,12 @@ proc ::Jabber::GotMsg::Build { } {
     variable username
     variable jidtxt
     variable subject
-    variable theTime
+    variable smartdate
     variable prestext
     variable wtext
     variable wbtnext
     variable wpresence
+    variable locals
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
@@ -201,7 +208,7 @@ proc ::Jabber::GotMsg::Build { } {
       -textvariable [namespace current]::username -state disabled \
       -borderwidth 1 -relief sunken -background $bg
     pack  $wfrom.username -side left -fill x -expand 1
-    label $wfrom.time -textvariable [namespace current]::theTime
+    label $wfrom.time -textvariable [namespace current]::smartdate
     pack  $wfrom.time -side left -padx 8 -pady 0
     label $wpresence -compound left -image "" \
       -textvariable [namespace current]::prestext
@@ -235,17 +242,39 @@ proc ::Jabber::GotMsg::Build { } {
 
     wm minsize $w 240 220
     wm maxsize $w 600 600    
+
+    set locals(updateDateid) [after $locals(updateDatems) \
+      [namespace current]::UpdateDate]
     
     # Grab and focus.
     focus $w
 }
 
+proc ::Jabber::GotMsg::UpdateDate { } {
+    variable w
+    variable locals
+    variable date
+    variable smartdate
+    
+    if {![winfo exists $w]} {
+	return
+    }
+    set smartdate [::Utils::SmartClockFormat [clock scan $date]]
+    
+    # Reschedule ourselves.
+    set locals(updateDateid) [after $locals(updateDatems) \
+      [namespace current]::UpdateDate]
+}
 
 proc ::Jabber::GotMsg::CloseHook {wclose} {
     global  wDlgs
+    variable locals
     
     if {[string equal $wDlgs(jgotmsg) $wclose]} {
 	::UI::SaveWinGeom $wclose
+	if {$locals(updateDateid) != ""} {
+	    after cancel $locals(updateDateid)
+	}
     }   
 }
 
@@ -265,7 +294,6 @@ proc ::Jabber::GotMsg::PresenceHook {pjid2 type args} {
 	    set from $argsArr(-from)
 	}
 	jlib::splitjid $jid jid2 res
-	puts "pjid2=$pjid2"
 	if {[jlib::jidequal $pjid2 $jid2]} {
 	    set show $type
 	    if {[info exists argsArr(-show)]} {
@@ -284,14 +312,14 @@ proc ::Jabber::GotMsg::NextMsg { } {
     
     # Query the mailbox for next message id.
     set nextid [::Jabber::MailBox::GetNextMsgID $msgIdDisplay]
-    ::Jabber::GotMsg::Show $nextid  
+    Show $nextid  
 }
 
 proc ::Jabber::GotMsg::Reply { } {
     variable jid
     variable subject
-    variable theTime
-    variable theMsg
+    variable date
+    variable body
     
     if {![regexp -nocase {^ *re:} $subject]} {
 	set resubject "Re: $subject"
@@ -299,7 +327,7 @@ proc ::Jabber::GotMsg::Reply { } {
 	set resubject $subject
     }
     ::Jabber::NewMsg::Build -to $jid -subject $resubject  \
-      -quotemessage $theMsg -time $theTime
+      -quotemessage $body -time $date
 }
 
 proc ::Jabber::GotMsg::Close {w} {
