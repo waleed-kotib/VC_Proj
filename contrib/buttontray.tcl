@@ -6,7 +6,7 @@
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: buttontray.tcl,v 1.19 2005-01-31 14:06:53 matben Exp $
+# $Id: buttontray.tcl,v 1.20 2005-03-04 10:55:31 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -555,6 +555,10 @@ proc ::buttontray::FancyButtonConfigure {w name args} {
 		}
 		set locals($name,-state) $value
 	    }
+	    -text {
+		set locals($name,-text) $value
+		$can itemconfigure $idtxt -text $value
+	    }
 	    -image {
 		set locals($name,-image) $value
 		if {[string equal $locals($name,-state) "normal"]} {
@@ -676,6 +680,10 @@ proc ::buttontray::PlainButtonConfigure {w name args} {
 		    bind $wlab <ButtonRelease> {}
 		}
 		set locals($name,-state) $value
+	    }
+	    -text {
+		set locals($name,-text) $value
+		# ???
 	    }
 	    -image {
 		set locals($name,-image) $value

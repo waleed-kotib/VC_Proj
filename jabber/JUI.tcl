@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.80 2005-03-02 13:49:40 matben Exp $
+# $Id: JUI.tcl,v 1.81 2005-03-04 10:55:32 matben Exp $
 
 package provide JUI 1.0
 
@@ -16,6 +16,7 @@ namespace eval ::Jabber::UI:: {
     # Shortcut buttons.
     option add *JMain.connectImage                connect         widgetDefault
     option add *JMain.connectDisImage             connectDis      widgetDefault
+    option add *JMain.connectedImage              connected       widgetDefault
     option add *JMain.inboxImage                  inbox           widgetDefault
     option add *JMain.inboxDisImage               inboxDis        widgetDefault
     option add *JMain.inboxLetterImage            inboxLetter     widgetDefault
@@ -338,11 +339,12 @@ proc ::Jabber::UI::Build {w} {
     $wtray newbutton newuser -text [mc Contact] \
       -image $iconNewUser -disabledimage $iconNewUserDis  \
       -command ::Jabber::User::NewDlg -state disabled
-    $wtray newbutton stop -text [mc Stop] \
-      -image $iconStop -disabledimage $iconStopDis \
-      -command ::Jabber::UI::StopConnect \
-      -state disabled
-
+    if {0} {
+	$wtray newbutton stop -text [mc Stop] \
+	  -image $iconStop -disabledimage $iconStopDis \
+	  -command ::Jabber::UI::StopConnect \
+	  -state disabled
+    }
     ::hooks::run buildJMainButtonTrayHook $wtray
 
     set shortBtWidth [$wtray minwidth]
@@ -715,11 +717,16 @@ proc ::Jabber::UI::FixUIWhen {what} {
 
     set contactOffImage [::Theme::GetImage [option get $wall contactOffImage {}]]
     set contactOnImage  [::Theme::GetImage [option get $wall contactOnImage {}]]
+    set connectedImage  [::Theme::GetImage [option get $wall connectedImage {}]]
+    set stopImage       [::Theme::GetImage [option get $wall stopImage {}]]
+    set iconConnect     [::Theme::GetImage [option get $wall connectImage {}]]
 
     switch -exact -- $what {
 	connectinit {
-	    $wtray buttonconfigure connect -state disabled
-	    $wtray buttonconfigure stop -state normal
+	    #$wtray buttonconfigure connect -state disabled
+	    $wtray buttonconfigure connect -text [mc Stop] -image $stopImage \
+	      -command ::Jabber::UI::StopConnect
+	    #$wtray buttonconfigure stop -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mLogin -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mNewAccount -state disabled
 	    ::UI::MenuMethod $wmi entryconfigure mSetupAssistant -state disabled
@@ -729,9 +736,11 @@ proc ::Jabber::UI::FixUIWhen {what} {
 	      -label [mc mLogout] -state normal
 	}
 	connectfin - connect {
-	    $wtray buttonconfigure connect -state disabled
+	    #$wtray buttonconfigure connect -state disabled
+	    $wtray buttonconfigure connect -text [mc Logout] \
+	      -image $connectedImage -command ::Jabber::LoginLogout
 	    $wtray buttonconfigure newuser -state normal
-	    $wtray buttonconfigure stop -state disabled
+	    #$wtray buttonconfigure stop -state disabled
 	    $jwapp(elplug) configure -image $contactOnImage
 	    ::UI::MenuMethod $wmj entryconfigure mNewAccount -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mLogin  \
@@ -752,9 +761,11 @@ proc ::Jabber::UI::FixUIWhen {what} {
 	    ::UI::MenuMethod $wmi entryconfigure mSetupAssistant -state disabled
 	}
 	disconnect {
-	    $wtray buttonconfigure connect -state normal
+	    #$wtray buttonconfigure connect -state normal
+	    $wtray buttonconfigure connect -text [mc Login] \
+	      -image $iconConnect -command ::Jabber::LoginLogout
 	    $wtray buttonconfigure newuser -state disabled
-	    $wtray buttonconfigure stop -state disabled
+	    #$wtray buttonconfigure stop -state disabled
 	    $jwapp(elplug) configure -image $contactOffImage
 	    ::UI::MenuMethod $wmj entryconfigure mNewAccount -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mLogin  \
