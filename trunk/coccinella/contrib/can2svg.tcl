@@ -6,7 +6,7 @@
 #  
 #  This particular package is BSD licensed. 
 #
-# $Id: can2svg.tcl,v 1.14 2004-08-10 13:03:51 matben Exp $
+# $Id: can2svg.tcl,v 1.15 2004-09-24 07:30:25 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -365,7 +365,7 @@ proc can2svg::svgasxmllist {cmd args} {
 	    set nlines 1
 	    if {[info exists optArr(-text)]} {
 		set chdata $optArr(-text)
-		if {$argsArr(-allownewlines)} {
+		if {!$argsArr(-allownewlines)} {
 		    set nlines [expr [regexp -all "\n" $chdata] + 1]
 		}
 	    } else {
@@ -705,28 +705,7 @@ proc can2svg::MakeStyleList {type opts args} {
 		}
 	    }
 	    -font {
-		set styleArr(font-family) [lindex $value 0]
-		if {[llength $value] > 1} {
-		    set styleArr(font-size) [expr abs([lindex $value 1])]
-		}
-		if {[llength $value] > 2} {
-		    set tkstyle [lindex $value 2]
-		    
-		    switch -- $tkstyle {
-			bold {
-			    set styleArr(font-weight) $tkstyle
-			}
-			italic {
-			    set styleArr(font-style) $tkstyle
-			}
-			underline {
-			    set styleArr(text-decoration) underline
-			}
-			overstrike {
-			    set styleArr(text-decoration) overline
-			}
-		    }
-		}		
+		array set styleArr [MakeFontStyleList $value]
 		
 	    }
 	    -joinstyle {
@@ -845,6 +824,80 @@ proc can2svg::FormatColorName {value} {
 	}
     }
     return $col
+}
+
+# can2svg::MakeFontStyleList --
+# 
+#       Takes a tk font description and returns a flat style array.
+#       
+# Arguments:
+#       fontDesc    a tk font description 
+#       
+# Results:
+#       flat style array
+
+proc can2svg::MakeFontStyleList {fontDesc} {    
+
+    # MICK Modify - break a named font into its component fields
+    set font [lindex $fontDesc 0]
+    if {[lsearch -exact [font names] $font] > -1} {
+	
+	# This is a font name
+	set styleArr(font-family) [font config $font -family]
+	set fsize [font config $font -size]
+	if {$fsize > 0} {
+	    # points
+	    set funit pt
+	} else {
+	    # pixels (actually user units)
+	    set funit px
+	}	
+	set styleArr(font-size) "[expr abs($fsize)]$funit"
+	if {[font config $font -slant] == "italic"} {
+	    set styleArr(font-style) italic
+	}
+	if {[font config $font -weight] == "bold"} {
+	    set styleArr(font-weight) bold
+	}
+	if {[font config $font -underline]} {
+	    set styleArr(text-decoration) underline
+	}
+	if {[font config $font -overstrike]} {
+	    set styleArr(text-decoration) overline
+	}
+    } else {
+	set styleArr(font-family) [lindex $fontDesc 0]
+	if {[llength $fontDesc] > 1} {
+	    # Mick: added pt at end
+	    set fsize [lindex $fontDesc 1]
+	    if {$fsize > 0} {
+		# points
+		set funit pt
+	    } else {
+		# pixels (actually user units)
+		set funit px
+	    }
+	    set styleArr(font-size) "[expr abs($fsize)]$funit"
+	}
+	if {[llength $fontDesc] > 2} {
+	    set tkstyle [lindex $fontDesc 2]
+	    switch -- $tkstyle {
+		bold {
+		    set styleArr(font-weight) $tkstyle
+		}
+		italic {
+		    set styleArr(font-style) $tkstyle
+		}
+		underline {
+		    set styleArr(text-decoration) underline
+		}
+		overstrike {
+		    set styleArr(text-decoration) overline
+		}
+	    }
+	}		
+    }
+    return [array get styleArr]
 }
 
 # can2svg::MakeImageAttr --
