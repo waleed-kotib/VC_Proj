@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.37 2004-09-11 14:21:51 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.38 2004-09-18 14:43:29 matben Exp $
 
 
 set noErr 0
@@ -115,7 +115,7 @@ set prefs(millisToProgWin) 0
 set prefs(progUpdateMillis) 500
 set prefs(progUpdateMillis) 1000
 
-set prefs(userPath) $this(path)
+set prefs(userPath) $this(appPath)
 
 # If it is the first time the application is launched, then welcome.
 set prefs(firstLaunch) 1

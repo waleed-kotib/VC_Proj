@@ -296,6 +296,7 @@
 ::msgcat::mcset fr {About Coccinella}		{À propos de Coccinella}
 ::msgcat::mcset fr {About Whiteboard}		{À propos du tableau}
 ::msgcat::mcset fr {About QuickTimeTcl}		{À propos de QuickTimeTcl}
+::msgcat::mcset fr {About %s}                   {À propos de %s}
 ::msgcat::mcset fr {Active <Return>}		{Appuyer sur <entrée>}
 ::msgcat::mcset fr {Add New User}		{Ajouter un nouvel utilisateur}
 ::msgcat::mcset fr {Add Server}			{Ajouter un serveur}
@@ -841,8 +842,10 @@ est limitée par l'utilisateur grâce aux paramètres ci-dessous : }
 ::msgcat::mcset fr prefplugctrl  {Vous pouvez dé-sélectionner ces paquetages\
 pour ne pas avoir à les charger. Coccinella doit être redémarré pour que les changements soient pris en compte.}
 ::msgcat::mcset fr prefchactret  {Toujours activer <Entrée> dans la boîte de discussion}
+::msgcat::mcset en prefchnormal  {Treat normal messages as chat messages}
 ::msgcat::mcset fr prefprofname  {Entrez le nom du profil d'utilisateur}
 ::msgcat::mcset fr prefstabui    {Utiliser l'interface du bloc-notes avec les onglets}
+::msgcat::mcset en prefsusesasl  {Use SASL authentization method}
 
 
 

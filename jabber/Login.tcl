@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.43 2004-09-13 09:05:19 matben Exp $
+# $Id: Login.tcl,v 1.44 2004-09-18 14:43:28 matben Exp $
 
 package provide Login 1.0
 
@@ -356,7 +356,7 @@ proc ::Jabber::Login::DoLoginCB {status msg} {
     switch $status {
 	error {
 	    tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
-	      [mc jamessnosocket $moreOpts(ip) $msg]]
+	      [mc jamessnosocket $server $msg]]
 	}
 	timeout {
 	    tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
