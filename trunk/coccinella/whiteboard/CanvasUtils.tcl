@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.12 2004-08-10 13:03:51 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.13 2004-08-11 13:47:18 matben Exp $
 
 package require sha1pure
 
@@ -1033,7 +1033,8 @@ proc ::CanvasUtils::SVGForeignObjectHandler {wtop xmllist paropts transformList 
 		}
 	    }
 	    if {$haveXlink} {
-		::Import::HandleImportCmd $w $cmd  \
+		# not sure about -where ???
+		::Import::HandleImportCmd $w $cmd -where local  \
 		  -progess [list ::Import::ImportProgress $cmd]  \
 		  -command [list ::Import::ImportCommand $cmd]
 	    }
@@ -1866,6 +1867,7 @@ proc ::CanvasUtils::HandleCanvasDraw {wtop instr args} {
     # Intercept the canvas command if delete to remove any markers
     # *before* it is deleted! See below for other commands.
     
+    set postCmds {}
     set cmd [lindex $instr 0]
     
     switch -- $cmd {
@@ -1875,8 +1877,8 @@ proc ::CanvasUtils::HandleCanvasDraw {wtop instr args} {
 	    $wServCan delete id$id
 	    set type [$wServCan type $id]
 	    if {[string equal $type "window"]} {
-		set win [$wServCan itemcget -window]
-		catch {destroy $win}
+		set win [$wServCan itemcget $id -window]
+		lappend postCmds [list destroy $win]
 	    }
 	}
     }
@@ -1943,6 +1945,11 @@ proc ::CanvasUtils::HandleCanvasDraw {wtop instr args} {
 		::hooks::run whiteboardTextInsertHook other $theText
 	    }
 	}
+    }
+    
+    # Execute post commands, typically after deleting an item.
+    foreach pcmd $postCmds {
+	eval $pcmd
     }
 }
 

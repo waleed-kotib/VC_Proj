@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.26 2004-08-10 13:03:51 matben Exp $
+# $Id: JWB.tcl,v 1.27 2004-08-11 13:47:17 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -1114,10 +1114,9 @@ proc ::Jabber::WB::SVGHttpHandler {wtop cmd} {
       [jlib::jidequal $jid3 $jstate(mejidres)]} {
 	set tryimport 1
     }
-    #puts "::Jabber::WB::SVGHttpHandler line=$line"
     
     set errMsg [eval {
-	 ::Import::HandleImportCmd $wcan $line -where local   \
+	 ::Import::HandleImportCmd $wcan $line -where local \
 	   -progress [list ::Import::ImportProgress $line] \
 	   -command [list ::Import::ImportCommand $line] \
 	   -tryimport $tryimport

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Import.tcl,v 1.7 2004-08-10 13:03:51 matben Exp $
+# $Id: Import.tcl,v 1.8 2004-08-11 13:47:19 matben Exp $
 
 package require http
 package require httpex
@@ -1178,6 +1178,7 @@ proc ::Import::QuickTimeTclCallback {gettoken w msg {err {}}} {
     
     switch -- $msg {
 	error {
+	    catch {destroy $getstate(wfr)}
 	    set msg "We got an error when trying to load the\
 	      movie \"$url\" with QuickTime."
 	    if {[string length $err]} {
@@ -1186,7 +1187,6 @@ proc ::Import::QuickTimeTclCallback {gettoken w msg {err {}}} {
 	    ::WB::SetStatusMessage $wtop ""
 	    tk_messageBox -icon error -type ok \
 	      -message [FormatTextForMessageBox $msg]
-	    catch {destroy $getstate(wfr)}
 	    return
 	}
 	loading {	    
@@ -1808,6 +1808,10 @@ proc ::Import::ExportMovie {wtop winfr} {
     $wmov export
 }
 
+# Import::SyncPlay --
+# 
+#       Synchronized playback for linear QuickTime movies.
+
 proc ::Import::SyncPlay {wtop winfr} {
     
     set wmov ${winfr}.m
@@ -1825,20 +1829,49 @@ proc ::Import::SyncPlay {wtop winfr} {
     }
 }
 
+# Import::QuickTimeMCCallback --
+# 
+#       Procedure for the -mccommand for QuickTime widgets.
+
 proc ::Import::QuickTimeMCCallback {utag w msg {par {}}} {
+    variable moviestate
 
     set wtop [::UI::GetToplevelNS $w]
         
+    # It is possible to add more commands.
+
     switch -- $msg {
 	play {
 	    set time [$w time]
-	    set str "QUICKTIME: play $utag $time $par"
-	    ::CanvasUtils::GenCommand $wtop $str remote
+	    set rate $par
+	    puts "msg=$msg, par (rate)=$par, time=$time"
+	    
+	    # If any of them are different from cached state then send.
+	    set timetrig 1
+	    if {[info exists moviestate($utag,time)] && \
+	      ($moviestate($utag,time) == $time)} {
+		set timetrig 0		
+	    }
+	    set ratetrig 1
+	    if {[info exists moviestate($utag,rate)] && \
+	      ($moviestate($utag,rate) == $rate)} {
+		set ratetrig 0		
+	    }
+	    puts "\t timetrig=$timetrig, ratetrig=$ratetrig"
+	    if {$timetrig || $ratetrig} {
+		set str "QUICKTIME: play $utag $time $par"
+		::CanvasUtils::GenCommand $wtop $str remote
+	    }
 	}
     }
 }
 
+# Import::QuickTimeHandler --
+# 
+#       Callback for "QUICKTIME" commands.
+
 proc ::Import::QuickTimeHandler {wcan type cmd args} {
+    variable moviestate
     
     ::Debug 4 "::Import::QuickTimeHandler cmd=$cmd"
     
@@ -1857,19 +1890,28 @@ proc ::Import::QuickTimeHandler {wcan type cmd args} {
     set wmov [lindex [winfo children $w] 0]
     
     # It is very easy to end up in an infinite loop here!
+    # It is possible to add more commands.
     
     switch -- $instr {
 	play {
 	    set time [lindex $cmd 3]
 	    set rate [lindex $cmd 4]
-	    if {[$wmov time] != $time} {
-		$wmov time $time
-	    }
+	    
+	    # Cache target state which must not be resent via callback!
+	    set moviestate($utag,time) $time
+	    set moviestate($utag,rate) $rate
+	    puts "\t movie rate=[$wmov rate], time=[$wmov time]"
 	    if {$rate == 0.0} {
 		if {[$wmov rate] != $rate} {
 		    $wmov stop
 		}
+		if {[$wmov time] != $time} {
+		    $wmov time $time
+		}
 	    } else {
+		if {[$wmov time] != $time} {
+		    $wmov time $time
+		}
 		if {[$wmov rate] != $rate} {
 		    $wmov play
 		}
