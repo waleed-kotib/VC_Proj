@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.104 2004-09-22 13:14:38 matben Exp $
+# $Id: Jabber.tcl,v 1.105 2004-09-24 12:14:13 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -56,7 +56,6 @@ namespace eval ::Jabber:: {
     global  this prefs
     
     # Add all event hooks.
-    #::hooks::add loginHook          ::Jabber::SetPrivateData
     ::hooks::add quitAppHook        ::Jabber::EndSession
 
     # Jabber internal storage.
@@ -73,6 +72,7 @@ namespace eval ::Jabber:: {
     # Our own jid, and jid/resource respectively.
     set jstate(mejid) ""
     set jstate(mejidres) ""
+    set jstate(meres) ""
     
     #set jstate(alljid) {}   not implemented yet...
     set jstate(sock) {}
@@ -167,6 +167,7 @@ namespace eval ::Jabber:: {
     # XML namespaces defined here.
     variable privatexmlns
     array set privatexmlns {
+	coccinella      http://coccinella.sourceforge.net/protocol/coccinella
 	servers         http://coccinella.sourceforge.net/protocol/servers
 	whiteboard      http://coccinella.sourceforge.net/protocol/whiteboard
 	public          http://coccinella.sourceforge.net/protocol/private
@@ -282,7 +283,7 @@ proc ::Jabber::FactoryDefaults { } {
     
     # Get ip addresses through <iq> element.
     # Switch off the raw stuff in later version.
-    set jprefs(getIPraw) 1
+    set jprefs(getIPraw) 0
     
     # Automatically browse users with resource?
     set jprefs(autoBrowseUsers) 1
@@ -1153,6 +1154,8 @@ proc ::Jabber::IsMyGroupchatJid {jid} {
 #                -notype  0|1 see XMPP 5.1
 #                -priority
 #                -status  text message
+#                -xlist
+#                -extras
 #       
 # Results:
 #       None.
@@ -1166,15 +1169,23 @@ proc ::Jabber::SetStatus {type args} {
     }
     array set argsArr $args
     
+    # This way clients get the info necessary for file transports.
+    # Necessary for each status change since internal cache cleared.
+    if {$type != "unavailable"} {
+	set cocciElem [CreateCoccinellaPresElement]
+	lappend argsArr(-extras) $cocciElem
+    }
     set presArgs {}
-    foreach {key value} $args {
+    foreach {key value} [array get argsArr] {
+	
 	switch -- $key {
-	    -to - -priority - -status {
+	    -to - -priority - -status - -xlist - -extras {
 		lappend presArgs $key $value
 	    }
 	}
     }
-    if {!$argsArr(-notype)} {	
+    if {!$argsArr(-notype)} {
+	
 	switch -- $type {
 	    available {
 		# empty
@@ -1185,7 +1196,7 @@ proc ::Jabber::SetStatus {type args} {
 	    away - dnd - xa - chat {
 		# Seems Psi gets confused by this.
 		#lappend presArgs -type "available" -show $type
-		lappend presArgs  -show $type
+		lappend presArgs -show $type
 	    }
 	}	
     }
@@ -1198,7 +1209,7 @@ proc ::Jabber::SetStatus {type args} {
     } err]} {
 	
 	# Close down?	
-	::Jabber::DoCloseClientConnection
+	DoCloseClientConnection
 	tk_messageBox -title [mc Error] -icon error -type ok \
 	  -message [FormatTextForMessageBox $err]
     } else {
@@ -1215,7 +1226,7 @@ proc ::Jabber::SetStatus {type args} {
 	    set toServer 1
 	}
 	if {$toServer && ($type == "unavailable")} {
-	    ::Jabber::DoCloseClientConnection
+	    DoCloseClientConnection
 	}
     }
 }
@@ -1375,103 +1386,6 @@ proc ::Jabber::ParseAndInsertText {w str tag linktag} {
 	eval {$w} $cmd
     }
     $w insert end "\n"
-}
-
-# Jabber::SetPrivateData --
-#
-#       Set ip & port of our two servers at out public space at the server
-#       for others to fetch.
-#       
-# Arguments:
-#       
-# Results:
-#       none.
-
-proc ::Jabber::SetPrivateData { } {
-    global  prefs
-    
-    variable jstate
-    variable jserver
-    variable privatexmlns
-    
-    # Build tag and attributes lists to 'private_set'.
-    set ip [::Network::GetThisPublicIPAddress]
-    $jstate(jlib) private_set $privatexmlns(public)  \
-      [list ::Jabber::SetPrivateDataCallback $jserver(this)]   \
-      -server [list $ip [list resource $jstate(meres)  \
-      port $prefs(thisServPort)]]       \
-      -httpd [list $ip [list resource $jstate(meres)   \
-      port $prefs(httpdPort)]]
-}
-
-# Jabber::SetPrivateDataCallback --
-#
-#       Records if this was succesful or not. Be silent.
-
-proc ::Jabber::SetPrivateDataCallback {jid jlibName what theQuery} {    
-    variable jidPublic
-
-    if {[string equal $what "error"]} {
-	set jidPublic(haveit) 0
-	::Jabber::AddErrorLog $jid "Failed setting private data: $theQuery"	    
-    } else {
-	set jidPublic(haveit) 1
-    }
-}
-
-# Jabber::GetPrivateData --
-#
-#       Gets ip & port of the two servers for the specified jid.
-#       
-# Arguments:
-#       jid         get data from this jid.
-#       
-# Results:
-#       shows window.
-
-proc ::Jabber::GetPrivateData {jid} {
-    variable jstate
-    variable privatexmlns
-    
-    # Build tag and attributes lists to 'private_set'.
-    $jstate(jlib) private_get $privatexmlns(public) {server httpd}  \
-      [list ::Jabber::GetPrivateDataCallback $jid]
-}
-
-# Jabber::GetPrivateDataCallback --
-#
-#       Parses the callback when receiving the iq result (or error).
-
-proc ::Jabber::GetPrivateDataCallback {jid jlibName what theQuery} {    
-    variable jidPublic
-    
-    if {[string equal $what "error"]} {
-	foreach {errcode errmsg} $theQuery {}
-	tk_messageBox -title [mc Error] -icon error -type ok \
-	  -message [FormatTextForMessageBox \
-	  [mc jamesserrgetpublic $jid $errcode $errmsg]]
-	return
-    }
-    
-    # Parse the query element:
-    # theQuery='{query {xmlns $privatexmlns(public)} 0 {} {
-    #     {server {resource home port 8235} 0 192.168.0.4 {}} 
-    #     {httpd {resource home port 8077} 0 192.168.0.4 {}}}}'
-    set childList [lindex $theQuery 4]
-    foreach {tag attrlist empty chdata c} $childList {
-	foreach {name val} $attrlist {
-	    set $name $val
-	}
-	set jidPublic($jid,$resource,$tag) $chdata
-	foreach {name val} $attrlist {
-	    if {[string equal $name "resource"]} {
-		continue
-	    }
-	    
-	    # Typically: jidPublic(matben@athlon.se,home,serverport).
-	    set jidPublic($jid,$resource,$tag$name) $val
-	}
-    }
 }
     
 # Jabber::GetAnyDelayElem --
@@ -1757,6 +1671,36 @@ proc ::Jabber::ParseGetVersion {jlibname from subiq args} {
     return 1
 }
 
+# Jabber::CreateCoccinellaPresElement --
+# 
+#       Used when sending inital presence. This way clients get the info
+#       necessary for file transports.
+#       
+#  <coccinella 
+#      xmlns='http://coccinella.sourceforge.net/protocol/servers'>
+#                <ip protocol='putget' port='8235'>212.214.113.57</ip>
+#                <ip protocol='http' port='8077'>212.214.113.57</ip>
+#  </coccinella>
+
+proc ::Jabber::CreateCoccinellaPresElement { } {
+    global  prefs
+    
+    variable jstate
+    variable privatexmlns
+	
+    set ip [::Network::GetThisPublicIPAddress]
+
+    set attrputget [list protocol putget port $prefs(thisServPort)]
+    set attrhttpd  [list protocol http   port $prefs(httpdPort)]
+    set subelem [list  \
+      [wrapper::createtag ip -chdata $ip -attrlist $attrputget]  \
+      [wrapper::createtag ip -chdata $ip -attrlist $attrhttpd]]
+    set xmllist [wrapper::createtag coccinella -subtags $subelem \
+      -attrlist [list xmlns $privatexmlns(servers) version $prefs(fullVers)]]
+
+    return $xmllist
+}
+
 # Jabber::ParseGetServers --
 # 
 #       Sends something like:
@@ -1774,7 +1718,7 @@ proc ::Jabber::ParseGetServers  {jlibname from subiq args} {
     variable jstate
     variable privatexmlns
     
-    # Build tag and attributes lists to 'private_set'.
+    # Build tag and attributes lists.
     set ip [::Network::GetThisPublicIPAddress]
     
     array set argsArr $args

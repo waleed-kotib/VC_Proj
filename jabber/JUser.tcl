@@ -5,51 +5,13 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JUser.tcl,v 1.1 2004-09-22 13:12:23 matben Exp $
+# $Id: JUser.tcl,v 1.2 2004-09-24 12:14:13 matben Exp $
 
 package provide JUser 1.0
 
 namespace eval ::Jabber::User:: {
     global  wDlgs
 	
-    # name description ...
-    variable menuDefTrpt {
-	jabber      {Jabber address}
-	icq         {ICQ (number)}
-	aim         {AIM}
-	msn         {MSN Messenger}
-	yahoo       {Yahoo Messenger}
-	irc         {IRC}
-	smtp        {Email address}
-	x-gadugadu  {Gadu-Gadu}
-    }
-    variable menuDefNames {
-	jabber      {Jabber}
-	icq         {ICQ}
-	aim         {AIM}
-	msn         {MSN Messenger}
-	yahoo       {Yahoo Messenger}
-	irc         {IRC}
-	smtp        {Email}
-	x-gadugadu  {Gadu-Gadu}
-    }
-    variable menuDefNamesInv {
-	{Jabber}           jabber
-	{ICQ}              icq
-	{AIM}              aim
-	{MSN Messenger}    msn
-	{Yahoo Messenger}  yahoo
-	{IRC}              irc
-	{Email}            smtp
-	{Gadu-Gadu}        x-gadugadu
-    }
-    variable menuDefNamesInvArr
-    array set menuDefNamesInvArr $menuDefNamesInv
-    variable allTransports {}
-    foreach {name spec} $menuDefTrpt {
-	lappend allTransports $name
-    }
-
     # A unique running identifier.
     variable uid 0
 
@@ -83,7 +45,7 @@ proc ::Jabber::User::NewDlg { } {
     
     # Find all our groups for any jid.
     set allGroups [$jstate(roster) getgroups]
-    set allTypes  [::Jabber::User::GetTransports $token]
+    set allTypes  [::Jabber::Roster::GetTransportNames $token]
     
     # Global frame.
     set wall $w.fr
@@ -205,15 +167,15 @@ proc ::Jabber::User::DoAdd {token} {
     if {![catch {jlib::splitjidex $jid node host res}]} {
 
 	# Exclude jabber services.
-	if {[lsearch [GetAllTransportJids] $host] >= 0} {	    
+	if {[lsearch [::Jabber::Roster::GetAllTransportJids] $host] >= 0} {	    
 	
 	    # If this requires a transport component we must be registered.
 	    set transport [lsearch -inline -regexp $allUsers "^${host}.*"]
 	    if {$transport == "" } {
 		
 		# Seems we are not registered.
-		set ans [tk_messageBox -type yesno -icon error  \
-		  -message [mc jamessaddforeign $host]]
+		set ans [tk_messageBox -type yesno -icon error \
+		  -parent $state(w) -message [mc jamessaddforeign $host]]
 		if {$ans == "yes"} {
 		    set didRegister [::Jabber::GenRegister::BuildRegister  \
 		      -server $host -autoget 1]
@@ -296,13 +258,10 @@ proc ::Jabber::User::PresError {jlibName type args} {
 proc ::Jabber::User::TypeCmd {token name1 name2 op} {
     variable $token
     upvar 0 $token state
-    variable menuDefNamesInvArr
-    
-    puts "$name1 $name2 $op"
-    
+        
     set wjid $state(wjid)
     set type $state(type)
-    set trpt $menuDefNamesInvArr($type)
+    set trpt [::Jabber::Roster::GetTrptFromName $type]
 
     # Seems to be necessary to achive any selection.
     focus $wjid
@@ -325,69 +284,6 @@ proc ::Jabber::User::TypeCmd {token name1 name2 op} {
     if {$ind > 0} {
 	$wjid selection range 0 $ind
     }
-}
-
-# Jabber::User::GetAllTransportJids --
-# 
-#       Method to get the jids of all services that are not jabber.
-
-proc ::Jabber::User::GetAllTransportJids { } {
-    upvar ::Jabber::jserver jserver
-    upvar ::Jabber::jstate jstate
-    
-    set alltrpts [$jstate(jlib) service gettransportjids *]
-    set jabbjids [$jstate(jlib) service gettransportjids jabber]
-    
-    # Exclude jabber services and login server.
-    foreach jid $jabbjids {
-	set alltrpts [lsearch -all -inline -not $alltrpts $jid]
-    }
-    return [lsearch -all -inline -not $alltrpts $jserver(this)]
-}
-
-proc ::Jabber::User::GetTransports {token} {
-    variable $token
-    upvar 0 $token state
-    variable menuDefNames
-    variable allTransports
-    upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jserver jserver
-    
-    # We must be indenpendent of method; agent, browse, disco
-    set trpts {}
-    foreach subtype $allTransports {
-	set jids [$jstate(jlib) service gettransportjids $subtype]
-	if {[llength $jids]} {
-	    lappend trpts $subtype
-	    set state(servicejid,$subtype) [lindex $jids 0]
-	}
-    }    
-
-    # Disco doesn't return jabber. Make sure it's first.
-    set trpts [lsearch -all -not -inline $trpts jabber]
-    set trpts [concat jabber $trpts]
-    set state(servicejid,jabber) $jserver(this)
-
-    array set menuDefTrptDesc $menuDefNames
-    set names {}
-    foreach name $trpts {
-	lappend names $menuDefTrptDesc($name)
-    }
-    return $names
-}
-
-proc ::Jabber::User::IsTransport {jid} {
-    upvar ::Jabber::jstate jstate
-    
-    # Some transports (icq) have a jid = icq.jabber.se/registered
-    # in the roster, but where we get the 2-tier part. Get 3-tier jid.
-    set transport 0
-    if {![catch {jlib::splitjidex $jid node host res}]} {
-	if {([lsearch [GetAllTransportJids] $host] >= 0) && ($node == "")} {    
-	    set transport 1
-	}
-    }    
-    return $transport
 }
 
 proc ::Jabber::User::CloseCmd {wclose} {
@@ -418,7 +314,7 @@ proc ::Jabber::User::EditDlg {jid} {
     set state(w) $w
     set state(finished) -1
     
-    set istransport [IsTransport $jid]
+    set istransport [::Jabber::Roster::IsTransport $jid]
     if {$istransport} {
 	set title [mc {Transport Info}]
     } else {

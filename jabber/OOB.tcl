@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.35 2004-09-08 13:13:14 matben Exp $
+# $Id: OOB.tcl,v 1.36 2004-09-24 12:14:14 matben Exp $
 
 package provide OOB 1.0
 
@@ -56,6 +56,11 @@ proc ::Jabber::OOB::BuildSet {jid} {
     variable desc ""
     variable locals
     
+    set localpath [FileOpen]
+    if {$localpath == ""} {
+	return
+    }
+    
     set w $wDlgs(joobs)
     if {[winfo exists $w]} {
 	return
@@ -63,7 +68,7 @@ proc ::Jabber::OOB::BuildSet {jid} {
     set finished -1
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox}
-    wm title $w {Send File}
+    wm title $w [mc {Send File}]
     set locals(jid) $jid
     set fontS [option get . fontSmall {}]
     set fontSB [option get . fontSmallBold {}]
@@ -81,7 +86,7 @@ proc ::Jabber::OOB::BuildSet {jid} {
     entry $frmid.efile    \
       -textvariable [namespace current]::localpath
     button $frmid.btfile -text "[mc {File}]..." -width 6 -font $fontS  \
-      -command [namespace current]::FileOpen
+      -command [namespace current]::FileOpenCmd
     label $frmid.ldesc -text "[mc {Description}]:" -font $fontSB -anchor e
     entry $frmid.edesc -width 36    \
       -textvariable [namespace current]::desc
@@ -159,9 +164,18 @@ proc ::Jabber::OOB::DnDLeave {w data type} {
     focus [winfo toplevel $w] 
 }
 
-proc ::Jabber::OOB::FileOpen { } {
+proc ::Jabber::OOB::FileOpenCmd { } {
     
     variable localpath
+    
+    set ans [FileOpen]
+    if {$ans != ""} {
+	set localpath $ans
+    }
+}
+
+proc ::Jabber::OOB::FileOpen { } {
+    
     variable locals
 
     set opts {}
@@ -170,9 +184,9 @@ proc ::Jabber::OOB::FileOpen { } {
     }
     set ans [eval {tk_getOpenFile -title [mc {Pick File}]} $opts]
     if {[string length $ans]} {
-	set localpath $ans
 	set locals(initialLocalDir) [file dirname $ans]
     }
+    return $ans
 }
 
 proc ::Jabber::OOB::DoSend { } {

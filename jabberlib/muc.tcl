@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: muc.tcl,v 1.16 2004-08-23 12:44:36 matben Exp $
+# $Id: muc.tcl,v 1.17 2004-09-24 12:14:15 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -23,7 +23,7 @@
 #      mucName allroomsin
 #      mucName create roomjid nick callback
 #      mucName destroy roomjid ?-command, -reason, alternativejid?
-#      mucName enter roomjid nick ?-command, -password?
+#      mucName enter roomjid nick ?-command, -extras, -password?
 #      mucName exit roomjid
 #      mucName getaffiliation roomjid affiliation callback
 #      mucName getrole roomjid role callback
@@ -140,6 +140,7 @@ proc jlib::muc::invoke_callback {mucname cmd type subiq} {
 #       roomjiid
 #       nick        nick name
 #       args        ?-command callbackProc?
+#                   ?-extras list of xmllist?
 #                   ?-password str?
 #       
 # Results:
@@ -152,11 +153,15 @@ proc jlib::muc::enter {mucname roomjid nick args} {
     
     set jlibname $muc2jlib($mucname)
     set xsub {}
+    set extras {}
     foreach {name value} $args {
 	
 	switch -- $name {
 	    -command {
 		set cache($roomjid,entercb) $value
+	    }
+	    -extras {
+		set extras $value
 	    }
 	    -password {
 		set xsub [list [wrapper::createtag "password" \
@@ -170,7 +175,7 @@ proc jlib::muc::enter {mucname roomjid nick args} {
     set jid ${roomjid}/${nick}
     set xelem [wrapper::createtag "x" -subtags $xsub \
       -attrlist {xmlns "http://jabber.org/protocol/muc"}]
-    $jlibname send_presence -to $jid -xlist [list $xelem] \
+    $jlibname send_presence -to $jid -xlist [list $xelem] -extras $extras \
       -command [list [namespace current]::parse_enter $mucname $roomjid]
     set cache($roomjid,mynick) $nick
     $jlibname service setroomprotocol $roomjid "muc"

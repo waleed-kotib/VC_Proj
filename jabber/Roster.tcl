@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.74 2004-09-22 13:14:38 matben Exp $
+# $Id: Roster.tcl,v 1.75 2004-09-24 12:14:14 matben Exp $
 
 package provide Roster 1.0
 
@@ -508,7 +508,6 @@ proc ::Jabber::Roster::Popup {w v x y} {
     global  wDlgs this
     variable popMenuDefs
     
-    upvar ::Jabber::privatexmlns privatexmlns
     upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::Jabber::Roster::Popup w=$w, v='$v', x=$x, y=$y"
@@ -557,8 +556,7 @@ proc ::Jabber::Roster::Popup {w v x y} {
 	    # Must let 'jid' refer to 2-tier jid for commands to work!
 	    set jid3 $jid
 	    set jid $jid2
-	    if {[$jstate(browse) hasnamespace $jid3 "coccinella:wb"] || \
-	      [$jstate(browse) hasnamespace $jid3 $privatexmlns(whiteboard)]} {
+	    if {[IsCoccinella $jid3]} {
 		set typeClicked wb
 	    } else {
 		set typeClicked user
@@ -1011,6 +1009,26 @@ proc ::Jabber::Roster::SetCoccinella {jid} {
     }
 }
 
+# Jabber::Roster::IsCoccinella --
+# 
+#       Utility function to figure out if we have evidence that jid3 is a 
+#       Coccinella.
+
+proc ::Jabber::Roster::IsCoccinella {jid3} {
+    upvar ::Jabber::jstate jstate
+    upvar ::Jabber::privatexmlns privatexmlns
+    
+    set ans 0
+    set coccielem [$jstate(roster) getextras $jid3 $privatexmlns(servers)]
+    if {$coccielem != {}} {
+	set ans 1
+    } elseif {[$jstate(browse) hasnamespace $jid3 "coccinella:wb"] || \
+      [$jstate(browse) hasnamespace $jid3 $privatexmlns(whiteboard)]} {
+	set ans 1
+    }
+    return $ans
+}
+
 # Jabber::Roster::PutItemInTree --
 #
 #       Sets the jid in the correct place in our roster tree.
@@ -1070,7 +1088,7 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
     
     set treectag item[incr treeuid]    
     set itemOpts [list -text $itemTxt -canvastags $treectag]    
-    set icon [eval {::Jabber::Roster::GetPresenceIcon $jidx $presence} $args]
+    set icon [eval {GetPresenceIcon $jidx $presence} $args]
     set groupImage [::Theme::GetImage [option get $wtree groupImage {}]]
 
     # If we have an ask attribute, put in Pending tree dir.
@@ -1219,11 +1237,16 @@ proc ::Jabber::Roster::GetPresenceIcon {jid presence args} {
     }   
     
     # If whiteboard:
-    if {!$haveForeignIM && [$jstate(browse) isbrowsed $jid]} {
-	if {[$jstate(browse) hasnamespace $jid "coccinella:wb"]} {
+    if {!$haveForeignIM && ($presence == "available")} {
+	set coccielem [$jstate(roster) getextras $jid $privatexmlns(servers)]
+	if {$coccielem != {}} {
 	    append key ",wb"
-	} elseif {[$jstate(browse) hasnamespace $jid $privatexmlns(whiteboard)]} {
-	    append key ",wb"
+	} elseif {[$jstate(browse) isbrowsed $jid]} {
+	    if {[$jstate(browse) hasnamespace $jid "coccinella:wb"]} {
+		append key ",wb"
+	    } elseif {[$jstate(browse) hasnamespace $jid $privatexmlns(whiteboard)]} {
+		append key ",wb"
+	    }
 	}
     }
     
@@ -1618,6 +1641,137 @@ proc ::Jabber::Roster::ConfigureIcon {v} {
 
     
     
+}
+
+#--- Transport utilities -------------------------------------------------------
+
+namespace eval ::Jabber::Roster:: {
+    
+    # name description ...
+    variable trptToAddressName {
+	jabber      {Jabber address}
+	icq         {ICQ (number)}
+	aim         {AIM}
+	msn         {MSN Messenger}
+	yahoo       {Yahoo Messenger}
+	irc         {IRC}
+	smtp        {Email address}
+	x-gadugadu  {Gadu-Gadu}
+    }
+    variable trptToName {
+	jabber      {Jabber}
+	icq         {ICQ}
+	aim         {AIM}
+	msn         {MSN Messenger}
+	yahoo       {Yahoo Messenger}
+	irc         {IRC}
+	smtp        {Email}
+	x-gadugadu  {Gadu-Gadu}
+    }
+    variable nameToTrpt {
+	{Jabber}           jabber
+	{ICQ}              icq
+	{AIM}              aim
+	{MSN Messenger}    msn
+	{Yahoo Messenger}  yahoo
+	{IRC}              irc
+	{Email}            smtp
+	{Gadu-Gadu}        x-gadugadu
+    }
+    
+    variable  trptToNameArr
+    array set trptToNameArr $trptToName
+    
+    variable  nameToTrptArr
+    array set nameToTrptArr $nameToTrpt
+    
+    variable allTransports {}
+    foreach {name spec} $trptToName {
+	lappend allTransports $name
+    }
+}
+
+proc ::Jabber::Roster::GetNameFromTrpt {trpt} {
+    variable  trptToNameArr
+   
+    if {[info exists trptToNameArr($trpt)]} {
+	return $trptToNameArr($trpt)
+    } else {
+	return ""
+    }
+}
+
+proc ::Jabber::Roster::GetTrptFromName {type} {
+    variable nameToTrptArr
+   
+    if {[info exists nameToTrptArr($type)]} {
+	return $nameToTrptArr($type)
+    } else {
+	return ""
+    }
+}
+
+# Jabber::Roster::GetAllTransportJids --
+# 
+#       Method to get the jids of all services that are not jabber.
+
+proc ::Jabber::Roster::GetAllTransportJids { } {
+    upvar ::Jabber::jserver jserver
+    upvar ::Jabber::jstate jstate
+    
+    set alltrpts [$jstate(jlib) service gettransportjids *]
+    set jabbjids [$jstate(jlib) service gettransportjids jabber]
+    
+    # Exclude jabber services and login server.
+    foreach jid $jabbjids {
+	set alltrpts [lsearch -all -inline -not $alltrpts $jid]
+    }
+    return [lsearch -all -inline -not $alltrpts $jserver(this)]
+}
+
+proc ::Jabber::Roster::GetTransportNames {token} {
+    variable $token
+    upvar 0 $token state
+    variable trptToName
+    variable allTransports
+    upvar ::Jabber::jstate jstate
+    upvar ::Jabber::jserver jserver
+    
+    # We must be indenpendent of method; agent, browse, disco
+    set trpts {}
+    foreach subtype $allTransports {
+	set jids [$jstate(jlib) service gettransportjids $subtype]
+	if {[llength $jids]} {
+	    lappend trpts $subtype
+	    set state(servicejid,$subtype) [lindex $jids 0]
+	}
+    }    
+
+    # Disco doesn't return jabber. Make sure it's first.
+    set trpts [lsearch -all -not -inline $trpts jabber]
+    set trpts [concat jabber $trpts]
+    set state(servicejid,jabber) $jserver(this)
+
+    array set arr $trptToName
+    set names {}
+    foreach name $trpts {
+	lappend names $arr($name)
+    }
+    return $names
+}
+
+proc ::Jabber::Roster::IsTransport {jid} {
+    upvar ::Jabber::jstate jstate
+    
+    # Some transports (icq) have a jid = icq.jabber.se/registered
+    # in the roster, but where we get the 2-tier part. Get 3-tier jid.
+    set transport 0
+    if {![catch {jlib::splitjidex $jid node host res}]} {
+	if {([lsearch [GetAllTransportJids] $host] >= 0) && ($node == "")} {    
+	    set transport 1
+	}
+    }    
+    return $transport
 }
 
 # Prefs page ...................................................................

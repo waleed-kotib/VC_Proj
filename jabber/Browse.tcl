@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.54 2004-07-30 12:55:53 matben Exp $
+# $Id: Browse.tcl,v 1.55 2004-09-24 12:14:13 matben Exp $
 
 package require chasearrows
 
@@ -905,6 +905,7 @@ proc ::Jabber::Browse::PresenceHook {jid type args} {
     variable wtree
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
+    upvar ::Jabber::privatexmlns privatexmlns
 
     ::Debug 2 "::Jabber::Browse::PresenceHook jid=$jid, type=$type, args='$args'"
 
@@ -939,8 +940,11 @@ proc ::Jabber::Browse::PresenceHook {jid type args} {
     } else {
     
 	# If users shall be automatically browsed to.
-	if {$jprefs(autoBrowseUsers) && [string equal $type "available"] && \
-	  ![$jstate(browse) isbrowsed $jid3]} {
+	# Seems only necessary to find out if Coccinella or not.
+	set coccielem [$jstate(roster) getextras $jid3 $privatexmlns(servers)]
+	
+	if {($coccielem == {}) && $jprefs(autoBrowseUsers) && \
+	  [string equal $type "available"] && ![$jstate(browse) isbrowsed $jid3]} {
 	    eval {::Jabber::Browse::AutoBrowse $jid3 $type} $args
 	}	
     }
