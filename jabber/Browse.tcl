@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.5 2003-06-01 10:26:57 matben Exp $
+# $Id: Browse.tcl,v 1.6 2003-09-13 06:39:25 matben Exp $
 
 package provide Browse 1.0
 
@@ -173,7 +173,7 @@ proc ::Jabber::Browse::Callback {browseName type jid subiq} {
 		if {[string equal $tag "conference"]} {
 		    set isConference 1
 		} elseif {[string equal $tag "item"]} {
-		    set category [wrapper::getattr [lindex $child 1] category]
+		    set category [wrapper::getattribute $child category]
 		    if {[string equal $category "conference"]} {
 			set isConference 1
 		    }
@@ -439,8 +439,8 @@ proc ::Jabber::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
     
     ::Jabber::Debug 2 "::Jabber::Browse::AddToTree parentsJidList='$parentsJidList', jid=$jid"
 
-    set category [lindex $xmllist 0]
-    array set attrArr [lindex $xmllist 1]
+    set category [wrapper::gettag $xmllist]
+    array set attrArr [wrapper::getattrlist $xmllist]
     if {[string equal $category "item"] && [info exists attrArr(category)]} {
 	set category $attrArr(category)
     }
@@ -452,15 +452,15 @@ proc ::Jabber::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
 	    
 	    # outdated !!!!!!!!!
 	    if {0} {
-		set ns [lindex $xmllist 3]
+		set ns [wrapper::getcdata $xmllist]
 		set txt $ns
 		if {[info exists nsToText($ns)]} {
 		    set txt $nsToText($ns)
 		}
 		
 		# Namespaces indicate supported feature.
-		$wtree newitem [concat $parentsJidList [lindex $xmllist 3]]  \
-		  -text $txt -dir 0
+		$wtree newitem [concat $parentsJidList \
+		  [wrapper::getcdata $xmllist]] -text $txt -dir 0
 	    }
 	}
 	default {

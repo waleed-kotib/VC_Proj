@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.9 2003-08-23 07:19:16 matben Exp $
+# $Id: GroupChat.tcl,v 1.10 2003-09-13 06:39:25 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -821,7 +821,7 @@ proc ::Jabber::GroupChat::Presence {jid presence args} {
 
     if {[info exists attrArr(-x)]} {
 	foreach c $attrArr(-x) {
-	    set xmlns [wrapper::getattr [lindex $c 1] xmlns]
+	    set xmlns [wrapper::getattribute $c xmlns]
 	    
 	    switch -- $xmlns {
 		"http://jabber.org/protocol/muc#user" {

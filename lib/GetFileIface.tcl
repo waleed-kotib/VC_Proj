@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: GetFileIface.tcl,v 1.3 2003-08-23 07:19:16 matben Exp $
+# $Id: GetFileIface.tcl,v 1.4 2003-09-13 06:39:25 matben Exp $
 
 package require getfile
 package require uriencode
@@ -34,7 +34,6 @@ namespace eval ::GetFileIface:: {
 proc ::GetFileIface::GetFile {wtop sock fileName optList} {
     global prefs noErr wDlgs
     variable uid
-    upvar ::${wtop}::wapp wapp
         
     ::Debug 2 "::GetFileIface::GetFile wtop=$wtop, fileName=$fileName"
     
@@ -63,7 +62,7 @@ proc ::GetFileIface::GetFile {wtop sock fileName optList} {
     upvar 0 $gettoken getstate
     
     set getstate(wtop) $wtop
-    set getstate(can) $wapp(can)
+    set getstate(can) [::UI::GetCanvasFromWtop $wtop]
     set getstate(sock) $sock
     set getstate(filetail) $fileTail
     set getstate(dstpath) $dstpath
@@ -139,7 +138,6 @@ proc ::GetFileIface::GetFile {wtop sock fileName optList} {
 proc ::GetFileIface::GetFileFromServer {wtop ip port path optList} {
     global prefs wDlgs noErr
     variable uid
-    upvar ::${wtop}::wapp wapp
     
     ::Debug 2 "::GetFileIface::GetFileFromServer wtop=$wtop, path=$path"
     
@@ -168,7 +166,7 @@ proc ::GetFileIface::GetFileFromServer {wtop ip port path optList} {
     upvar 0 $gettoken getstate
     
     set getstate(wtop) $wtop
-    set getstate(can) $wapp(can)
+    set getstate(can) [::UI::GetCanvasFromWtop $wtop]
     set getstate(filetail) $fileTail
     set getstate(dstpath) $dstpath
     set getstate(optlist) $optList
@@ -449,11 +447,10 @@ proc ::GetFileIface::DoImport {mime optList args} {
     if {[string equal $prefs(protocol) "jabber"]} {
 	eval {::Jabber::WB::DispatchToImporter $mime $optList} $args
     } else {
-	upvar ::.::wapp wapp
-
 	if {[::Plugins::HaveImporterForMime $mime]} {
+	    set servCan [::UI::GetServerCanvasFromWtop .]
 	    set errMsg [eval {
-		::ImageAndMovie::DoImport $wapp(servCan) $optList
+		::ImageAndMovie::DoImport $servCan $optList
 	    } $args]
 	} else {
 	    set errMsg "No importer for mime \"$mime\""

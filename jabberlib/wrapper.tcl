@@ -11,7 +11,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: wrapper.tcl,v 1.2 2003-07-26 13:54:23 matben Exp $
+# $Id: wrapper.tcl,v 1.3 2003-09-13 06:39:25 matben Exp $
 # 
 # ########################### INTERNALS ########################################
 # 
@@ -42,7 +42,14 @@
 #      wrapper::setattr attrlist attrname value
 #      wrapper::parse id xml
 #      wrapper::xmlcrypt chdata
-#      wrapper::getchildren xml
+#      wrapper::gettag xmllist
+#      wrapper::getattrlist xmllist
+#      wrapper::getisempty xmllist
+#      wrapper::getcdata xmllist
+#      wrapper::getchildren xmllist
+#      wrapper::getattribute xmllist attrname
+#      wrapper::setattrlist xmllist attrlist
+#      wrapper::setcdata xmllist cdata
 #
 # ########################### LIMITATIONS ######################################
 # 
@@ -58,6 +65,7 @@
 #       1.0b1    added wrapper::parse command, configured for expat, 
 #                return break at stream end
 #       1.0b2    fix to make parser reentrant
+#       030910   added accessor functions to get/set xmllist elements
 
 package provide wrapper 1.0
     
@@ -506,22 +514,21 @@ proc wrapper::createxml {xmllist} {
     }
     if {$isempty} {
 	append rawxml "/>"
-	return $rawxml
     } else {
 	append rawxml ">"
+	
+	# Call ourselves recursively for each child element. 
+	# There is an arbitrary choice here where childs are put before PCDATA.
+	foreach child $childlist {
+	    append rawxml [createxml $child]
+	}
+	
+	# Make standard entity replacements.
+	if {[string length $chdata]} {
+	    append rawxml [wrapper::xmlcrypt $chdata]
+	}
+	append rawxml "</$tag>"
     }
-    
-    # Call ourselves recursively for each child element. 
-    # There is an arbitrary choice here where childs are put before PCDATA.
-    foreach child $childlist {
-	append rawxml [createxml $child]
-    }
-    
-    # Make standard entity replacements.
-    if {[string length $chdata]} {
-	append rawxml [wrapper::xmlcrypt $chdata]
-    }
-    append rawxml "</$tag>"
     return $rawxml
 }
 
@@ -589,6 +596,16 @@ proc wrapper::getattr {attrlist attrname} {
     return {}
 }
 
+proc wrapper::getattribute {xmllist attrname} {
+
+    foreach {attr val} [lindex $xmllist 1] {
+	if {[string equal $attr $attrname]} {
+	    return $val
+	}
+    }
+    return {}
+}
+
 proc wrapper::setattr {attrlist attrname value} {
 
     array set attrArr $attrlist
@@ -596,9 +613,10 @@ proc wrapper::setattr {attrlist attrname value} {
     return [array get attrArr]
 }
 
-# wrapper::getchildren --
+# wrapper::gettag, getattrlist, getisempty, ,getcdata, getchildren  --
 #
-#       This proc returns the children from 'xmllist'.
+#       Accessor functions for 'xmllist'.
+#       {tag attrlist isempty cdata {grandchild1 grandchild2 ...}}
 #
 # Arguments:
 #       xmllist:    an xml hierarchical list.
@@ -606,8 +624,23 @@ proc wrapper::setattr {attrlist attrname value} {
 # Results:
 #       list of childrens if any.
 
-proc wrapper::getchildren {xmllist} {
+proc wrapper::gettag {xmllist} {
+    return [lindex $xmllist 0]
+}
 
+proc wrapper::getattrlist {xmllist} {
+    return [lindex $xmllist 1]
+}
+
+proc wrapper::getisempty {xmllist} {
+    return [lindex $xmllist 2]
+}
+
+proc wrapper::getcdata {xmllist} {
+    return [lindex $xmllist 3]
+}
+
+proc wrapper::getchildren {xmllist} {
     return [lindex $xmllist 4]
 }
 
@@ -637,6 +670,21 @@ proc wrapper::getchildwithtaginnamespace {xmllist tag ns} {
 	}
     }
     return $clist
+}
+
+proc wrapper::setattrlist {xmllist attrlist} {
+ 
+    return [lreplace $xmllist 1 1 $attrlist]
+}
+
+proc wrapper::setcdata {xmllist cdata} {
+ 
+    return [lreplace $xmllist 3 3 $cdata]
+}
+
+proc wrapper::setchildlist {xmllist childlist} {
+
+    return [lreplace $xmllist 4 4 $childlist]
 }
 
 # wrapper::xmlcrypt --

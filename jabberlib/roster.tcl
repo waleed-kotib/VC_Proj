@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.9 2003-07-05 13:37:54 matben Exp $
+# $Id: roster.tcl,v 1.10 2003-09-13 06:39:25 matben Exp $
 # 
 # Note that every jid in the rosterArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -443,7 +443,7 @@ proc roster::setpresence {rostName jid type args} {
 		    
 		    # This is a list of <x> lists.
 		    foreach xelem $value {
-			set ns [wrapper::getattr [lindex $xelem 1] xmlns]
+			set ns [wrapper::getattribute $xelem xmlns]
 			regexp {http://jabber.org/protocol/(.*)$} $ns \
 			  match ns
 			set presArr($jid,x,$ns) $xelem

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.9 2003-08-23 07:19:16 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.10 2003-09-13 06:39:25 matben Exp $
 
 package provide CanvasUtils 1.0
 package require sha1pure
@@ -83,9 +83,7 @@ proc ::CanvasUtils::Init { } {
 proc ::CanvasUtils::Command {wtop cmd {where all}} {
     global  allIPnumsToSend
     
-    upvar ::${wtop}::wapp wapp
-        
-    set w $wapp(can)
+    set w [::UI::GetCanvasFromWtop $wtop]
     if {[string equal $where "all"] || [string equal $where "local"]} {
         eval {$w} $cmd
     }
@@ -129,9 +127,7 @@ proc ::CanvasUtils::CommandExList {wtop cmdExList} {
 proc ::CanvasUtils::GenCommand {wtop cmd {where all}} {
     global  allIPnumsToSend
     
-    upvar ::${wtop}::wapp wapp
-    
-    set w $wapp(can)
+    set w [::UI::GetCanvasFromWtop $wtop]
     if {[string equal $where "all"] || [string equal $where "local"]} {
         eval {$w} $cmd
     }
@@ -288,10 +284,9 @@ proc ::CanvasUtils::ReplaceUtag {str newUtag} {
 
 proc ::CanvasUtils::GetUndoCommand {wtop cmd} {
 
-    upvar ::${wtop}::wapp wapp
-    
-    set w $wapp(can)
+    set w [::UI::GetCanvasFromWtop $wtop]
     set undo {}
+
     switch -- [lindex $cmd 0] {
 	coords {
 	    set utag [lindex $cmd 1]
@@ -1041,14 +1036,16 @@ proc ::CanvasUtils::FindBelowUtag {w id} {
 
 proc ::CanvasUtils::GetStackingOption {w id} {
     
+    # We could return both...
+    # below before above since stacking order when saving to file.
     set opt {}
-    set aboveutag [FindAboveUtag $w $id]
-    if {[string length $aboveutag]} {
-	set opt [list -below $aboveutag]
+    set belowutag [FindBelowUtag $w $id]
+    if {[string length $belowutag]} {
+	set opt [list -above $belowutag]
     } else {
-	set belowutag [FindBelowUtag $w $id]
-	if {[string length $belowutag]} {
-	    set opt [list -above $belowutag]
+	set aboveutag [FindAboveUtag $w $id]
+	if {[string length $aboveutag]} {
+	    set opt [list -below $aboveutag]
 	}
     }
     return $opt

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.19 2003-08-23 07:19:16 matben Exp $
+# $Id: Jabber.tcl,v 1.20 2003-09-13 06:39:25 matben Exp $
 #
 #  The $address is an ip name or number.
 #
@@ -525,7 +525,7 @@ proc ::Jabber::IqCallback {jlibName type args} {
     ::Jabber::Debug 2 "::Jabber::IqCallback type=$type, args='$args'"
     
     array set attrArr $args
-    set xmlns [wrapper::getattr [lindex $attrArr(-query) 1] xmlns]
+    set xmlns [wrapper::getattribute $attrArr(-query) xmlns]
     set stat 1
     
     switch -- $type {
@@ -1264,15 +1264,16 @@ proc ::Jabber::SendMessageList {jid msgList args} {
 proc ::Jabber::DoSendCanvas {wtop} {
     global  prefs
     variable jstate
-    upvar ::${wtop}::wapp wapp
 
+    set wtoplevel [::UI::GetToplevel $wtop]
     set jid $jstate($wtop,tojid)
+
     if {[::Jabber::IsWellFormedJID $jid]} {
 	
 	# The Classic mac can't run the http server!
 	if {!$prefs(haveHttpd)} {
 	    set ans [tk_messageBox -icon warning -type yesno  \
-	      -parent $wapp(toplevel)  \
+	      -parent $wtoplevel  \
 	      -message [FormatTextForMessageBox "The Classic Mac can't run\
 	      the internal http server which is needed for transporting any\
 	      images etc. in this message.\
@@ -1285,7 +1286,7 @@ proc ::Jabber::DoSendCanvas {wtop} {
 	# If user not online no files may be sent off.
 	if {![$jstate(roster) isavailable $jid]} {
 	    set ans [tk_messageBox -icon warning -type yesno  \
-	      -parent $wapp(toplevel)  \
+	      -parent $wtoplevel  \
 	      -message [FormatTextForMessageBox "The user you are sending to,\
 	      \"$jid\", is not online, and if this message contains any images\
 	      or other similar entities, this user will not get them unless\
@@ -1298,7 +1299,7 @@ proc ::Jabber::DoSendCanvas {wtop} {
 	::UserActions::DoSendCanvas $wtop
 	::UI::CloseMain $wtop
     } else {
-	tk_messageBox -icon warning -type ok -parent $wapp(toplevel) -message \
+	tk_messageBox -icon warning -type ok -parent $wtoplevel -message \
 	  [FormatTextForMessageBox [::msgcat::mc jamessinvalidjid]]
     }
 }
@@ -2808,9 +2809,8 @@ proc ::Jabber::WB::DispatchToImporter {mime optList args} {
     }
     
     if {$display && [::Plugins::HaveImporterForMime $mime]} {
-	upvar ::${wtop}::wapp wapp
-
-	eval {::ImageAndMovie::DoImport $wapp(can) $optList} $args
+	set wCan [::UI::GetCanvasFromWtop $wtop]
+	eval {::ImageAndMovie::DoImport $wCan $optList} $args
     }
 }
 

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UserActions.tcl,v 1.12 2003-08-30 09:41:00 matben Exp $
+# $Id: UserActions.tcl,v 1.13 2003-09-13 06:39:25 matben Exp $
 
 namespace eval ::UserActions:: {
     
@@ -25,8 +25,6 @@ namespace eval ::UserActions:: {
 proc ::UserActions::CancelAllPutGetAndPendingOpen {wtop} {
     global  prefs
     
-    upvar ::${wtop}::wapp wapp
-
     # This must be instance specific!!!
     ::PutFileIface::CancelAllWtop $wtop
     ::GetFileIface::CancelAllWtop $wtop
@@ -34,7 +32,7 @@ proc ::UserActions::CancelAllPutGetAndPendingOpen {wtop} {
     if {[string equal $prefs(protocol) "jabber"]} {
 	::Network::KillAll
 	::UI::SetStatusMessage $wtop {}
-	::UI::StartStopAnimatedWave $wapp(statmess) 0
+	::UI::StartStopAnimatedWaveInWB $wtop 0
     } else {
 	::OpenConnection::OpenCancelAllPending
     }
@@ -52,8 +50,7 @@ proc ::UserActions::CancelAllPutGetAndPendingOpen {wtop} {
 
 proc ::UserActions::SelectAll {wtop} {
     
-    upvar ::${wtop}::wapp wapp
-    set wCan $wapp(can)
+    set wCan [::UI::GetCanvasFromWtop $wtop]
     $wCan delete tbbox
     set ids [$wCan find all]
     foreach id $ids {
@@ -73,10 +70,8 @@ proc ::UserActions::SelectAll {wtop} {
 #       none
 
 proc ::UserActions::DeselectAll {wtop} {
-    
-    upvar ::${wtop}::wapp wapp
-    
-    set wCan $wapp(can)
+        
+    set wCan [::UI::GetCanvasFromWtop $wtop]
     $wCan delete withtag tbbox
     $wCan dtag all selected
     
@@ -97,10 +92,9 @@ proc ::UserActions::DeselectAll {wtop} {
 
 proc ::UserActions::RaiseOrLowerItems {wtop {what raise}} {
     
-    upvar ::${wtop}::wapp wapp
     upvar ::${wtop}::state state
     
-    set w $wapp(can)    
+    set w [::UI::GetCanvasFromWtop $wtop]    
 
     set cmdList {}
     set undoList {}
@@ -130,10 +124,8 @@ proc ::UserActions::RaiseOrLowerItems {wtop {what raise}} {
 
 proc ::UserActions::SetCanvasBgColor {wtop} {
     global  prefs state
-    
-    upvar ::${wtop}::wapp wapp
-    
-    set w $wapp(can)
+        
+    set w [::UI::GetCanvasFromWtop $wtop]
     set prevCol $state(bgColCan)
     set col [tk_chooseColor -initialcolor $state(bgColCan)]
     if {[string length $col] > 0} {
@@ -162,9 +154,8 @@ proc ::UserActions::DoCanvasGrid {wtop} {
     global  prefs this
     
     upvar ::${wtop}::state state
-    upvar ::${wtop}::wapp wapp
 
-    set wCan $wapp(can)
+    set wCan [::UI::GetCanvasFromWtop $wtop]
     set length 2000
     set gridDist $prefs(gridDist)
     if {$state(canGridOn) == 0} {
@@ -207,11 +198,8 @@ proc ::UserActions::DoCanvasGrid {wtop} {
 proc ::UserActions::SavePostscript {wtop} {
     global  prefs this
     
-    upvar ::${wtop}::wapp wapp
-    
-    if {[winfo exists $wapp(can)]} {
-	set w $wapp(can)
-    } else {
+    set w [::UI::GetCanvasFromWtop $wtop]
+    if {![winfo exists $w]} {
 	return
     }
     set typelist {
@@ -245,10 +233,8 @@ proc ::UserActions::SavePostscript {wtop} {
 
 proc ::UserActions::DoPrintCanvas {wtop} {
     global  this prefs wDlgs
-    
-    upvar ::${wtop}::wapp wapp
-    
-    set wCan $wapp(can)
+        
+    set wCan [::UI::GetCanvasFromWtop $wtop]
     
     switch -- $this(platform) {
 	macintosh {
@@ -379,10 +365,8 @@ proc ::UserActions::DoConnect { } {
 
 proc ::UserActions::ResizeItem {wtop factor} {
     global  prefs
-    
-    upvar ::${wtop}::wapp wapp
-    
-    set w $wapp(can)
+        
+    set w [::UI::GetCanvasFromWtop $wtop]
     set ids [$w find withtag selected]
     if {[string length $ids] == 0} {
 	return
@@ -434,10 +418,8 @@ proc ::UserActions::ResizeItem {wtop factor} {
 #
 
 proc ::UserActions::FlipItem {wtop direction} {
-    
-    upvar ::${wtop}::wapp wapp
-    
-    set w $wapp(can)
+        
+    set w [::UI::GetCanvasFromWtop $wtop]
     set id [$w find withtag selected]
     if {[llength $id] != 1} {
 	return
@@ -512,10 +494,8 @@ proc ::UserActions::Redo {wtop} {
 #       all items deleted, propagated to all clients.
 
 proc ::UserActions::DoEraseAll {wtop {where all}} {
-    
-    upvar ::${wtop}::wapp wapp
-    
-    set wCan $wapp(can)
+        
+    set wCan [::UI::GetCanvasFromWtop $wtop]
     ::UserActions::DeselectAll $wtop
     foreach id [$wCan find all] {
 	
@@ -529,10 +509,8 @@ proc ::UserActions::DoEraseAll {wtop {where all}} {
 }
 
 proc ::UserActions::EraseAll {wtop} {
-    
-    upvar ::${wtop}::wapp wapp
-    
-    set wCan $wapp(can)
+        
+    set wCan [::UI::GetCanvasFromWtop $wtop]
     foreach id [$wCan find all] {
 	$wCan delete $id
     }
@@ -549,10 +527,8 @@ proc ::UserActions::EraseAll {wtop} {
 #       all items deleted, propagated to all clients.
 
 proc ::UserActions::DoPutCanvasDlg {wtop} {
-    
-    upvar ::${wtop}::wapp wapp
-    
-    set wCan $wapp(can)
+        
+    set wCan [::UI::GetCanvasFromWtop $wtop]
     set ans [tk_messageBox -message [FormatTextForMessageBox \
       "Warning! Syncing this canvas first erases all client canvases."] \
       -icon warning -type okcancel -default ok]
@@ -653,8 +629,7 @@ proc ::UserActions::DoGetCanvas {wtop} {
 
 proc ::UserActions::DoSendCanvas {wtop} {
     
-    upvar ::${wtop}::wapp wapp   
-    set w $wapp(can)
+    set w [::UI::GetCanvasFromWtop $wtop]
     set cmdList {}
     
     foreach id [$w find all] {

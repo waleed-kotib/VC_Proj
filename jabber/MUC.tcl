@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.5 2003-07-26 13:54:23 matben Exp $
+# $Id: MUC.tcl,v 1.6 2003-09-13 06:39:25 matben Exp $
 
 package provide MUC 1.0
 
@@ -429,7 +429,7 @@ proc ::Jabber::MUC::MUCMessage {from xlist} {
 	switch -- [lindex $c 0] {
 	    invite {
 		set invite 1
-		set inviter [wrapper::getattr [lindex $c 1] "from"]
+		set inviter [wrapper::getattribute $c "from"]
 		foreach cc [wrapper::getchildren $c] {
 		    if {[string equal [lindex $cc 0] "reason"]} {
 			set reason [lindex $cc 3]

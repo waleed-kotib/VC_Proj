@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasDraw.tcl,v 1.8 2003-08-23 07:19:16 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.9 2003-09-13 06:39:25 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 
@@ -2276,21 +2276,15 @@ proc ::CanvasDraw::MarkBbox {w shift {which current}} {
 
 proc ::CanvasDraw::LostSelection {wtop} {
     
-    if {$wtop == "."} {
-	set wtopReal $wtop
-    } else {
-	set wtopReal [string trimright $wtop "."]
-    }
+    set wtopReal [::UI::GetToplevel $wtop]
     if {$wtopReal == [selection own]} {
 	::UserActions::DeselectAll $wtop
     }
 }
 
 proc ::CanvasDraw::DeselectItem {wtop utag} {
-    
-    upvar ::${wtop}::wapp wapp
-    
-    set wCan $wapp(can)
+        
+    set wCan [::UI::GetCanvasFromWtop $wtop]
     set id [$wCan find withtag $utag]
     $wCan dtag $utag "selected"
     $wCan delete id$id
@@ -2302,12 +2296,10 @@ proc ::CanvasDraw::DeselectItem {wtop utag} {
 
 proc ::CanvasDraw::SyncMarks {wtop} {
 
-    upvar ::${wtop}::wapp wapp
-    
-    set w $wapp(can)
-    $w delete withtag tbbox
-    foreach id [$w find withtag "selected"] {
-	::CanvasDraw::MarkBbox $w 1 $id	
+    set wCan [::UI::GetCanvasFromWtop $wtop]
+    $wCan delete withtag tbbox
+    foreach id [$wCan find withtag "selected"] {
+	::CanvasDraw::MarkBbox $wCan 1 $id	
     }
 }
     

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ImageAndMovie.tcl,v 1.11 2003-08-23 07:19:16 matben Exp $
+# $Id: ImageAndMovie.tcl,v 1.12 2003-09-13 06:39:25 matben Exp $
 
 package require http
 package require httpex
@@ -38,10 +38,9 @@ namespace eval ::ImageAndMovie:: {
 #       Defines option arrays and icons for movie controllers.
 
 proc ::ImageAndMovie::ImportImageOrMovieDlg {wtop} {    
-    variable initialDir
-    upvar ::${wtop}::wapp wapp
+    variable initialDir    
     
-    set wCan $wapp(can)
+    set wCan [::UI::GetCanvasFromWtop $wtop]
     if {[info exists initialDir]} {
 	set opts {-initialdir $initialDir}
     } else {
@@ -106,9 +105,6 @@ proc ::ImageAndMovie::ImportImageOrMovieDlg {wtop} {
 
 proc ::ImageAndMovie::DoImport {w optList args} {
     global  prefs this allIPnumsToSend
-    
-    variable xanimPipe2Frame 
-    variable xanimPipe2Item
     
     ::Debug 2 "_  DoImport:: optList=$optList"
     ::Debug 2 " \targs='$args'"
@@ -350,7 +346,7 @@ proc ::ImageAndMovie::DoImport {w optList args} {
 proc ::ImageAndMovie::DrawImage {w fileName optListVar args} {
     upvar $optListVar optList
 
-    ::Debug 2 "::ImageAndMovie::DrawImage args='$args'"
+    ::Debug 2 "::ImageAndMovie::DrawImage args='$args',\n\toptList=$optList"
     
     array set optArr $optList
     array set argsArr $args
@@ -553,6 +549,9 @@ proc ::ImageAndMovie::DrawSnack {w fileName optListVar args} {
 proc ::ImageAndMovie::DrawXanim {w fileName optListVar args} {
     upvar $optListVar optList
     
+    variable xanimPipe2Frame 
+    variable xanimPipe2Item
+    
     ::Debug 2 "::ImageAndMovie::DrawXanim args='$args'"
     
     array set optArr $optList
@@ -629,7 +628,6 @@ proc ::ImageAndMovie::DrawXanim {w fileName optListVar args} {
 proc ::ImageAndMovie::HttpGet {wtop url importPackage optList args} {
     global  this prefs
     variable locals
-    upvar ::${wtop}::wapp wapp
     
     ::Debug 2 "::ImageAndMovie::HttpGet wtop=$wtop, url=$url, \
       importPackage=$importPackage, args='$args'"
@@ -654,7 +652,7 @@ proc ::ImageAndMovie::HttpGet {wtop url importPackage optList args} {
     
     # Store stuff in gettoken array.
     set getstate(wtop) $wtop
-    set getstate(wcan) $wapp(can)
+    set getstate(wcan) [::UI::GetCanvasFromWtop $wtop]
     set getstate(url) $url
     set getstate(importPackage) $importPackage
     set getstate(optList) $optList
@@ -1030,7 +1028,6 @@ proc ::ImageAndMovie::HttpResetAll {wtop} {
 #       is no mechanism for checking this.
 
 proc ::ImageAndMovie::HttpGetQuickTimeTcl {wtop url optList args} {
-    upvar ::${wtop}::wapp wapp
     variable locals
     
     ::Debug 2 "::ImageAndMovie::HttpGetQuickTimeTcl"
@@ -1042,7 +1039,7 @@ proc ::ImageAndMovie::HttpGetQuickTimeTcl {wtop url optList args} {
     upvar 0 $gettoken getstate
     
     array set optArr $optList
-    set w $wapp(can)    
+    set w [::UI::GetCanvasFromWtop $wtop]    
     
     # Make a frame for the movie; need special class to catch 
     # mouse events. Postpone display until playable from callback.
@@ -1135,10 +1132,8 @@ proc ::ImageAndMovie::DrawQuickTimeTclFromHttp {gettoken} {
     
     set wtop $getstate(wtop)
     set url $getstate(url)
-    
-    upvar ::${wtop}::wapp wapp
-    
-    set w $wapp(can)
+        
+    set w [::UI::GetCanvasFromWtop $wtop]
     set wfr $getstate(wfr)
     set wmovie $getstate(wmovie)
     array set optArr $getstate(optList)
@@ -1175,12 +1170,11 @@ proc ::ImageAndMovie::DrawQuickTimeTclFromHttp {gettoken} {
 #   3) put as an ordinary binary file, perhaps flattened.
 
 proc ::ImageAndMovie::PutFile {wtop fileName where optList tag} {
-    upvar ::${wtop}::wapp wapp
 
     ::Debug 2 "::ImageAndMovie::PutFile fileName=$fileName, where=$where"
         
-    set w $wapp(can)
     array set optArr $optList
+    set w [::UI::GetCanvasFromWtop $wtop]
 
     if {![info exists optArr(above:)] && ![info exists optArr(below:)]} {
 	set idBelow [$w find below $tag]
@@ -1299,7 +1293,7 @@ proc ::ImageAndMovie::HandleImportCmd {w line args} {
 	set path $optArr(-file)
 	if {[file pathtype $path] == "relative"} {
 	    if {![info exists argsArr(-basepath) ]} {
-		return -code error {Must have "-basebath" option if relative path}
+		return -code error "Must have \"-basebath\" option if relative path"
 	    }
 	    set path [addabsolutepathwithrelative $argsArr(-basepath) $path]
 	    set path [file nativename $path]
@@ -1332,11 +1326,11 @@ proc ::ImageAndMovie::HandleImportCmd {w line args} {
     if {[info exists optArr(-zoom-factor)]} {
 	lappend optList "Zoom-Factor:" $optArr(-zoom-factor)
     }
-    if {[info exists argsArr(-above)]} {
-	lappend optList "above:" $argsArr(-above)
+    if {[info exists optArr(-above)]} {
+	lappend optList "above:" $optArr(-above)
     }
-    if {[info exists argsArr(-below)]} {
-	lappend optList "below:" $argsArr(-below)
+    if {[info exists optArr(-below)]} {
+	lappend optList "below:" $optArr(-below)
     }
     
     set errMsg [eval {::ImageAndMovie::DoImport $w $optList} $impArgs]
@@ -1412,10 +1406,9 @@ proc ::ImageAndMovie::SnackImportCmd {w utag} {
 #       image item resized, propagated to clients.
 
 proc ::ImageAndMovie::ResizeImage {wtop zoomFactor which newTag {where all}} {
-    
-    upvar ::${wtop}::wapp wapp
-    
-    set w $wapp(can)
+        
+    set w [::UI::GetCanvasFromWtop $wtop]
+
     Debug 2 "ResizeImage: wtop=$wtop, w=$w, which=$which"
     Debug 2 "    zoomFactor=$zoomFactor"
 
@@ -1621,14 +1614,13 @@ proc ::ImageAndMovie::ExportMovie {wtop winfr} {
 #       Reloads a binary entity, image and such.
 
 proc ::ImageAndMovie::ReloadImage {wtop id} {
-    upvar ::${wtop}::wapp wapp
         
     ::Debug 3 "::ImageAndMovie::ReloadImage"
     
     # Need to have an url stored here.
     set opts [::UI::ItemCGet $wtop $id]
     array set optsArr $opts  
-    set wcan $wapp(can)
+    set wcan [::UI::GetCanvasFromWtop $wtop]
     set coords [$wcan coords $id]
         
     if {![info exists optsArr(-url)]} {

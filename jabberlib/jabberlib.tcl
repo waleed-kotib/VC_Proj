@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.14 2003-07-26 13:54:23 matben Exp $
+# $Id: jabberlib.tcl,v 1.15 2003-09-13 06:39:25 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -734,7 +734,7 @@ proc jlib::dispatcher {jlibname xmldata} {
     Debug 3 "jlib::dispatcher jlibname=$jlibname, xmldata=$xmldata"
     
     # Which method?
-    switch -- [lindex $xmldata 0] {
+    switch -- [wrapper::gettag $xmldata] {
 	iq {
 	    iq_handler $jlibname $xmldata
 	}
@@ -757,9 +757,10 @@ proc jlib::iq_handler {jlibname xmldata} {
     upvar [namespace current]::${jlibname}::iq iq
     upvar [namespace current]::${jlibname}::opts opts    
     
-    # Extract the command level XML data items.
-    foreach {tag attrlist isempty chdata childlist} $xmldata break
-    array set attrArr $attrlist
+    # Extract the command level XML data items.    
+    set tag [wrapper::gettag $xmldata]
+    array set attrArr [wrapper::getattrlist $xmldata]
+    set childlist [wrapper::getchildren $xmldata]
     
     # Make an argument list ('-key value' pairs) suitable for callbacks.
     # Make variables of the attributes.
@@ -778,7 +779,7 @@ proc jlib::iq_handler {jlibname xmldata} {
     
     # The child must be a single <query> element (or any namespaced element).
     set subiq [lindex $childlist 0]
-    set xmlns [wrapper::getattr [lindex $subiq 1] xmlns]
+    set xmlns [wrapper::getattribute $subiq xmlns]
     if {![regexp {.*:([^ :]+)$} $xmlns match xmlnsLast]} {
 	set xmlnsLast "iqreply"
     }
@@ -787,10 +788,10 @@ proc jlib::iq_handler {jlibname xmldata} {
 	result {
 	    
 	    # Should we extract the <key> element for later identification.
-	    set querychildlist [lindex $subiq 4]
+	    set querychildlist [wrapper::getchildren $subiq]
 	    foreach qchild $querychildlist {
-		if {[string equal [lindex $qchild 0] "key"]} {
-		    set iq(key,$xmlns) [lindex $qchild 3]
+		if {[string equal [wrapper::gettag $qchild] "key"]} {
+		    set iq(key,$xmlns) [wrapper::getcdata $qchild]
 		    break
 		}
 	    }
@@ -881,12 +882,11 @@ proc jlib::iq_handler {jlibname xmldata} {
 	    set errcode {}
 	    set errmsg {}
 	    foreach errorchild $childlist {
-		if {[string equal [lindex $errorchild 0] "error"]} {
+		if {[string equal [wrapper::gettag $errorchild] "error"]} {
 		    
 		    # Found it!
-		    foreach {ctag cattrlist cisempty cchdata cchildlist} \
-		      $errorchild break
-		    set errcode [wrapper::getattr $cattrlist "code"]
+		    set cchdata [wrapper::getcdata $errorchild]
+		    set errcode [wrapper::getattribute $errorchild "code"]
 		    set errmsg $cchdata
 		    break
 		}
@@ -920,11 +920,13 @@ proc jlib::iq_handler {jlibname xmldata} {
 	    set attrArr(to) $attrArr(from)
 	    unset attrArr(from)
 	    set attrArr(type) "result"
-	    set xmldata [lreplace $xmldata 1 1 [array get attrArr]]
+	    #set xmldata [lreplace $xmldata 1 1 [array get attrArr]]
+	    set xmldata [wrapper::setattrlist $xmldata [array get attrArr]]
 	    set errtag [wrapper::createtag "error" -chdata "Not Implemented"  \
 	      -attrlist {code 501}]
 	    lappend childlist $errtag
-	    set xmldata [lreplace $xmldata 4 4 $childlist]
+	    #set xmldata [lreplace $xmldata 4 4 $childlist]
+	    set xmldata [wrapper::setchildlist $xmldata $childlist]
 	    
 	    # Be careful to trap network errors and report.
 	    set xml [wrapper::createxml $xmldata]
@@ -946,7 +948,8 @@ proc jlib::message_handler {jlibname xmldata} {
     upvar [namespace current]::${jlibname}::lib lib
     
     # Extract the command level XML data items.
-    foreach {tag attrlist isempty chdata childlist} $xmldata break
+    set attrlist [wrapper::getattrlist $xmldata]
+    set childlist [wrapper::getchildren $xmldata]
     set attrArr(type) "normal"
     array set attrArr $attrlist
     set type $attrArr(type)
@@ -963,15 +966,16 @@ proc jlib::message_handler {jlibname xmldata} {
     foreach child $childlist {
 	
 	# Extract the message sub-elements XML data items.
-	foreach {ctag cattrlist cisempty cchdata cchildlist} $child break		
+	set ctag [wrapper::gettag $child]
+	set cchdata [wrapper::getcdata $child]
+	
 	switch -- $ctag {
 	    body - subject - thread {
 		lappend arglist -$ctag $cchdata
 	    }
 	    error {
-		set errmsg $cchdata
-		set errcode [wrapper::getattr $cattrlist "code"]
-		lappend arglist -error [list $errcode $errmsg]
+		set errcode [wrapper::getattribute $child "code"]
+		lappend arglist -error [list $errcode $cchdata]
 	    }
 	    x {
 		lappend x $child
@@ -1000,7 +1004,8 @@ proc jlib::presence_handler {jlibname xmldata} {
     upvar [namespace current]::${jlibname}::opts opts
     
     # Extract the command level XML data items.
-    foreach {tag attrlist isempty chdata childlist} $xmldata break
+    set attrlist [wrapper::getattrlist $xmldata]
+    set childlist [wrapper::getchildren $xmldata]
     array set attrArr $attrlist
     
     # Make an argument list ('-key value' pairs) suitable for callbacks.
@@ -1019,10 +1024,9 @@ proc jlib::presence_handler {jlibname xmldata} {
 	set errcode {}
 	set errmsg {}
 	foreach errorchild $childlist {
-	    if {[string equal [lindex $errorchild 0] "error"]} {
-		foreach {ctag cattrlist cisempty cchdata cchildlist} \
-		  $errorchild break
-		set errcode [wrapper::getattr $cattrlist "code"]
+	    if {[string equal [wrapper::gettag $errorchild] "error"]} {
+		set cchdata [wrapper::getcdata $errorchild]
+		set errcode [wrapper::getattribute $errorchild "code"]
 		set errmsg $cchdata
 		break
 	    }
@@ -1035,7 +1039,9 @@ proc jlib::presence_handler {jlibname xmldata} {
 	foreach child $childlist {
 	    
 	    # Extract the presence sub-elements XML data items.
-	    foreach {ctag cattrlist cisempty cchdata cchildlist} $child break
+	    set ctag [wrapper::gettag $child]
+	    set cchdata [wrapper::getcdata $child]
+	    
 	    switch -- $ctag {
 		status - priority - show {
 		    lappend params $ctag $cchdata
@@ -1254,8 +1260,7 @@ proc jlib::parse_roster_get {jlibname ispush cmd type thequery} {
     }
     
     # Extract the XML data items.
-    foreach {tag attrlist isempty chdata childlist} $thequery break		
-    if {![string equal [wrapper::getattr $attrlist xmlns] "jabber:iq:roster"]} {
+    if {![string equal [wrapper::getattribute $thequery xmlns] "jabber:iq:roster"]} {
     
 	# Here we should issue a warning:
 	# attribute of query tag doesn't match 'jabber:iq:roster'
@@ -1266,10 +1271,13 @@ proc jlib::parse_roster_get {jlibname ispush cmd type thequery} {
     } else {
 	set what "roster_item"
     }
-    foreach child $childlist {
+    foreach child [wrapper::getchildren $thequery] {
 	
 	# Extract the message sub-elements XML data items.
-	foreach {ctag cattrlist cisempty cchdata cchildlist} $child {}		
+	set ctag [wrapper::gettag $child]
+	set cattrlist [wrapper::getattrlist $child]
+	set cchdata [wrapper::getcdata $child]
+	
 	if {[string equal $ctag "item"]} {
 	    
 	    # Add each item to our roster object.
@@ -1277,7 +1285,7 @@ proc jlib::parse_roster_get {jlibname ispush cmd type thequery} {
 	    set arglist {}
 	    set subscription {}
 	    foreach {key value} $cattrlist {
-		if {[string equal $key {jid}]} {
+		if {[string equal $key "jid"]} {
 		    set jid $value
 		} else {
 		    lappend arglist -$key $value
@@ -1294,10 +1302,10 @@ proc jlib::parse_roster_get {jlibname ispush cmd type thequery} {
 	    
 		# Collect the group elements.
 		set groups {}
-		foreach subchild $cchildlist {
-		    set subtag [lindex $subchild 0]
-		    if {[string equal $subtag {group}]} {
-			lappend groups [lindex $subchild 3]
+		foreach subchild [wrapper::getchildren $child] {
+		    set subtag [wrapper::gettag $subchild]
+		    if {[string equal $subtag "group"]} {
+			lappend groups [wrapper::getcdata $subchild]
 		    }
 		}
 		if {[string length $groups]} {
@@ -1483,9 +1491,10 @@ proc jlib::send_iq {jlibname type xmldata args} {
 	lappend attrlist "to" $argsArr(-to)
     }
     if {[llength $xmldata]} {
-	set xmllist [list "iq" $attrlist 0 {} [list $xmldata]]
+	set xmllist [wrapper::createtag "iq" -attrlist $attrlist \
+	  -subtags [list $xmldata]]
     } else {
-	set xmllist [list "iq" $attrlist 1 {} {}]
+	set xmllist [wrapper::createtag "iq" -attrlist $attrlist]
     }
 	
     # Build raw xml data from list.
@@ -1525,6 +1534,7 @@ proc jlib::send_auth {jlibname username resource cmd args} {
       [wrapper::createtag "resource" -chdata $resource]]
     array set argsArr $args
     set toopt ""
+
     foreach argsswitch [array names argsArr] {
 	set par [string trimleft $argsswitch "-"]
 	switch -- $par {
@@ -2038,8 +2048,8 @@ proc jlib::parse_agent_get {jlibname jid cmd type subiq} {
      
     # Loop through the subelement to see what we've got.
     foreach elem [wrapper::getchildren $subiq] {
-	set tag [lindex $elem 0]
-	set agent($jid,$tag) [lindex $elem 3]
+	set tag [wrapper::gettag $elem]
+	set agent($jid,$tag) [wrapper::getcdata $elem]
 	if {[lsearch $services $tag] >= 0} {
 	    lappend agent($tag) $jid
 	}
@@ -2071,16 +2081,16 @@ proc jlib::parse_agents_get {jlibname jid cmd type subiq} {
     
     # Cache the agents info we've got.
     foreach agentElem [wrapper::getchildren $subiq] {
-	if {![string equal [lindex $agentElem 0] "agent"]} {
+	if {![string equal [wrapper::gettag $agentElem] "agent"]} {
 	    continue
 	}
-	set jidAgent [wrapper::getattr [lindex $agentElem 1] jid]
+	set jidAgent [wrapper::getattribute $agentElem jid]
 	set subAgent [wrapper::getchildren $agentElem]
 	
 	# Loop through the subelement to see what we've got.
 	foreach elem $subAgent {
-	    set tag [lindex $elem 0]
-	    set agent($jidAgent,$tag) [lindex $elem 3]
+	    set tag [wrapper::gettag $elem]
+	    set agent($jidAgent,$tag) [wrapper::getcdata $elem]
 	    if {[lsearch $services $tag] >= 0} {
 		lappend agent($tag) $jidAgent
 	    }
@@ -2132,7 +2142,7 @@ proc jlib::have_agent {jlibname jid} {
 
 proc jlib::vcard_get {jlibname to cmd} {
 
-    set attrlist [list {xmlns} {vcard-temp}]    
+    set attrlist [list xmlns vcard-temp]    
     set xmllist [wrapper::createtag {vCard} -attrlist $attrlist]
     send_iq $jlibname "get" $xmllist -to $to -command   \
       [list [namespace current]::parse_iq_response $jlibname $cmd]
@@ -2154,7 +2164,7 @@ proc jlib::vcard_get {jlibname to cmd} {
 
 proc jlib::vcard_set {jlibname cmd args} {
 
-    set attrlist [list {xmlns} {vcard-temp}]    
+    set attrlist [list xmlns vcard-temp]    
     
     # Form all the sub elements by inspecting the -key.
     array set arr $args
@@ -2162,7 +2172,7 @@ proc jlib::vcard_set {jlibname cmd args} {
     set subsubelem {}
     
     # All "sub" elements with no children.
-    foreach tag {fn nickname bday url title role} {
+    foreach tag {fn nickname bday url title role desc} {
 	if {[info exists arr(-$tag)]} {
 	    lappend subelem [wrapper::createtag $tag -chdata $arr(-$tag)]
 	}
@@ -2245,7 +2255,7 @@ proc jlib::vcard_set {jlibname cmd args} {
 
 proc jlib::private_get {jlibname to ns subtags cmd} {
 
-    set attrlist [list {xmlns} $ns]    
+    set attrlist [list xmlns $ns]    
     foreach tag $subtags {
 	lappend subelements [wrapper::createtag $tag]
     }
@@ -2453,7 +2463,7 @@ proc jlib::roster_set {jlibname jid cmd args} {
     set subdata {}
     foreach group $groups {
     	if {$group != ""} {
-	lappend subdata [wrapper::createtag "group" -chdata $group]
+	    lappend subdata [wrapper::createtag "group" -chdata $group]
 	}
     }
     
@@ -3093,8 +3103,8 @@ proc jlib::conference::parse_set_enter {jlibname room cmd type subiq} {
 	# <query><id>myroom@server/7y3jy7f03</id><nick/>snuffie<nick><query/>
 	# Use it to cache own room jid.
 	foreach child [wrapper::getchildren $subiq] {
-	    set tagName [lindex $child 0]
-	    set value [lindex $child 3]
+	    set tagName [wrapper::gettag $child]
+	    set value [wrapper::getcdata $child]
 	    set $tagName $value
 	}
 	if {[info exists id] && [info exists nick]} {
