@@ -720,6 +720,9 @@ You have a subscription for %s: %s.}
 be lost when closing this chat whiteboard. Do you actually want to end this chat?}
 ::msgcat::mcset en jamesschatoffline            {This user is not online anymore\
 and the message is therfore not sent.}
+::msgcat::mcset en jamessregloginok             {You are now registered and\
+automatically logged on as "%s"}
+
 
 }
 

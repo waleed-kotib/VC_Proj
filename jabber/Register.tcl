@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.19 2004-05-26 07:36:36 matben Exp $
+# $Id: Register.tcl,v 1.20 2004-06-12 15:35:18 matben Exp $
 
 package provide Register 1.0
 
@@ -29,11 +29,13 @@ namespace eval ::Jabber::Register:: {
 proc ::Jabber::Register::Register {args} {
     global  this wDlgs
     
+    upvar ::Jabber::jprefs jprefs
     variable finished  -1
     variable server    ""
     variable username  ""
     variable password  ""
     variable password2 ""
+    variable ssl       0
     
     set w $wDlgs(jreg)
     if {[winfo exists $w]} {
@@ -49,6 +51,7 @@ proc ::Jabber::Register::Register {args} {
     if {![info exists password2] && [info exists password]} {
 	set password2 $password
     }
+    set ssl $jprefs(usessl)
 
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox}
@@ -88,6 +91,8 @@ proc ::Jabber::Register::Register {args} {
     entry $frmid.epass2 -width 22   \
       -textvariable [namespace current]::password2 -validate key  \
       -validatecommand {::Jabber::ValidatePasswdChars %S} -show {*}
+    checkbutton $frmid.cssl -text "  [::msgcat::mc {Use SSL for security}]"  \
+      -variable [namespace current]::ssl
     
     grid $frmid.lserv  -column 0 -row 0 -sticky e
     grid $frmid.eserv  -column 1 -row 0 -sticky w
@@ -97,6 +102,7 @@ proc ::Jabber::Register::Register {args} {
     grid $frmid.epass  -column 1 -row 2 -sticky w
     grid $frmid.lpass2 -column 0 -row 3 -sticky e
     grid $frmid.epass2 -column 1 -row 3 -sticky w
+    grid $frmid.cssl   -column 1 -row 4 -sticky w
 
     pack $frmid -side top -fill both -expand 1
 
@@ -115,7 +121,7 @@ proc ::Jabber::Register::Register {args} {
     
     # Grab and focus.
     set oldFocus [focus]
-    focus $w
+    focus $frmid.eserv
     catch {grab $w}
     
     # Wait here for a button press and window to be destroyed.
@@ -143,30 +149,31 @@ proc ::Jabber::Register::OK {w} {
 	set password  ""
 	set password2 ""
     } else {
-	[namespace current]::Doit $w
+	[namespace current]::DoRegister $w
     }
 }
 
-# Jabber::Register::Doit --
+# Jabber::Register::DoRegister --
 #
 #       Initiates a register operation.
 # Arguments:
 #       w
 #       
 # Results:
-#       .
+#       None, dialog closed.
 
-proc ::Jabber::Register::Doit {w} {
+proc ::Jabber::Register::DoRegister {w} {
     global  errorCode prefs
 
     variable finished
     variable server
     variable username
     variable password
+    variable ssl
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::Jabber::Register::Doit"
+    ::Debug 2 "::Jabber::Register::DoRegister"
     
     # Kill any pending open states.
     ::Network::KillAll
@@ -177,10 +184,13 @@ proc ::Jabber::Register::Doit {w} {
     foreach name {server username} {
 	upvar 0 $name what
 	if {[string length $what] <= 1} {
-	    tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
+	    tk_messageBox -icon error -type ok -parent [winfo toplevel $w] \
+	      -message [FormatTextForMessageBox \
 	      [::msgcat::mc jamessnamemissing $name]]
 	    return
 	}
+	
+	# This is just to check the validity!
 	if {[catch {
 	    switch -- $name {
 		server {
@@ -196,95 +206,72 @@ proc ::Jabber::Register::Doit {w} {
 	    return
 	}
     }    
-    
-    ::Jabber::UI::SetStatusMessage [::msgcat::mc jawaitresp $server]
-    ::Jabber::UI::StartStopAnimatedWave 1
-    update idletasks
-
-    # Set callback procedure for the async socket open.
-    set jstate(servPort) $jprefs(port)
-    set cmd [namespace current]::SocketIsOpen
-    ::Network::OpenConnection $server $jprefs(port) $cmd  \
-      -timeout $prefs(timeoutSecs)
-    
-    # Not sure about this...
-    if {0} {
-	if {$ssl} {
-	    set port $jprefs(sslport)
-	} else {
-	    set port $jprefs(port)
-	}
-	::Network::OpenConnection $server $port $cmd -timeout $prefs(timeoutSecs) \
-	  -tls $ssl
-    }
     destroy $w
+    
+    # Asks for a socket to the server.
+    ::Jabber::Login::Connect $server [namespace current]::ConnectCB -ssl $ssl
 }
 
-# Jabber::Register::SocketIsOpen --
-#
-#       Callback when socket has been opened. Registers.
-#       
-# Arguments:
-#       
-#       status      "error", "timeout", or "ok".
-# Results:
-#       .
-
-proc ::Jabber::Register::SocketIsOpen {sock ip port status {msg {}}} {    
+proc ::Jabber::Register::ConnectCB {status msg} {
     variable server
+
+    ::Debug 2 "::Jabber::Register::ConnectCB status=$status"
+    
+    switch $status {
+	error {
+	    tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
+	      [::msgcat::mc jamessnosocket $ip $msg]]
+	}
+	timeout {
+	    tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
+	      [::msgcat::mc jamesstimeoutserver $server]]
+	}
+	default {
+	    # Go ahead...
+	    if {[catch {
+		::Jabber::Login::InitStream $server \
+		  [namespace current]::SendRegister
+	    } err]} {
+		tk_messageBox -icon error -title [::msgcat::mc {Open Failed}] \
+		  -type ok -message [FormatTextForMessageBox $err]
+	    }
+	}
+    }
+}
+
+proc ::Jabber::Register::SendRegister {args} {
     variable username
     variable password
-    upvar ::Jabber::jprefs jprefs
+    variable streamid
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::Jabber::Register::SocketIsOpen"
+    ::Debug 2 "::Jabber::Register::SendRegister args=$args"
+    
+    array set argsArr $args
+    if {![info exists argsArr(id)]} {
+	tk_messageBox -icon error -type ok -message \
+	  "no id for digest in receiving <stream>"
+    } else {
+	set streamid $argsArr(id)
 
-    ::Jabber::UI::SetStatusMessage ""
-    ::Jabber::UI::StartStopAnimatedWave 0
-    update idletasks
-    
-    if {[string equal $status "error"]} {
-	tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
-	  [::msgcat::mc jamessnosocket $ip $msg]]
-	return {}
-    } elseif {[string equal $status "timeout"]} {
-	tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
-	  [::msgcat::mc jamesstimeoutserver $server]]
-	return {}
-    }    
-    
-    # Initiate a new stream. Perhaps we should wait for the server <stream>?
-    if {[catch {::Jabber::JlibCmd connect $server -socket $sock} err]} {
-	tk_messageBox -icon error -title [::msgcat::mc {Open Failed}] -type ok \
-	  -message [FormatTextForMessageBox $err]
-	return
+	# Make a new account. Perhaps necessary to get additional variables
+	# from some user preferences.
+	$jstate(jlib) register_set $username $password   \
+	  [namespace current]::SendRegisterCB
     }
-
-    # Make a new account. Perhaps necessary to get additional variables
-    # from some user preferences.
-    ::Jabber::JlibCmd register_set $username $password   \
-      [namespace current]::ResponseProc
-
-    # Just wait for a callback to the procedure.
 }
 
-# Jabber::Register::ResponseProc --
-#
-#       Callback for register iq element.
-#       
-# Arguments:
-#       
-# Results:
-#       .
-
-proc ::Jabber::Register::ResponseProc {jlibName type theQuery} {    
+proc ::Jabber::Register::SendRegisterCB {jlibName type theQuery} {    
     variable finished
     variable server
     variable username
+    variable resource
     variable password
+    variable streamid
     upvar ::Jabber::jstate jstate
+    upvar ::Jabber::jprefs jprefs
     
-    ::Debug 2 "::Jabber::Register::ResponseProc jlibName=$jlibName,\
+    ::Debug 2 "::Jabber::Register::SendRegisterCB jlibName=$jlibName,\
       type=$type, theQuery=$theQuery"
     
     if {[string equal $type "error"]} {
@@ -302,18 +289,46 @@ proc ::Jabber::Register::ResponseProc {jlibName type theQuery} {
 	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
 	  -message [FormatTextForMessageBox $msg]
     } else {
+
+	# Save to our jserver variable. Create a new profile.
+	::Profiles::Set "" $server $username $password
+    }
+    if {$jprefs(logonWhenRegister)} {
+	
+	# Go on and authenticate.
+	set resource "coccinella"
+	::Jabber::Login::Authorize $server $username $resource $password \
+	  [namespace current]::AuthorizeCB -streamid $streamid -digest 1
+    } else {
 	tk_messageBox -icon info -type ok -message [FormatTextForMessageBox \
 	  [::msgcat::mc jamessregisterok $server]]
     
-	# Save to our jserver variable. Create a new profile.
-	::Profiles::Set {} $server $username $password
+	# Disconnect. This should reset both wrapper and XML parser!
+	# Beware: we are in the middle of a callback from the xml parser,
+	# and need to be sure to exit from it before resetting!
+	after idle $jstate(jlib) disconnect
     }
-    
-    # Disconnect. This should reset both wrapper and XML parser!
-    # Beware: we are in the middle of a callback from the xml parser,
-    # and need to be sure to exit from it before resetting!
-    after idle ::Jabber::JlibCmd disconnect
     set finished 1
+}
+
+proc ::Jabber::Register::AuthorizeCB {type msg} {
+    variable server
+    variable username
+    variable resource
+    
+    ::Debug 2 "::Jabber::Register::AuthorizeCB type=$type"
+    
+    if {[string equal $type "error"]} {
+	tk_messageBox -icon error -type ok -title [::msgcat::mc Error]  \
+	  -message [FormatTextForMessageBox $msg]
+    } else {
+	
+	# Login was succesful, set presence.
+	::Jabber::Login::SetStatus
+	set jid [jlib::joinjid $username $server $resource]
+	tk_messageBox -icon info -type ok -message [FormatTextForMessageBox \
+	  [::msgcat::mc jamessregloginok $jid]]
+    }
 }
 
 # Jabber::Register::Remove --
@@ -698,7 +713,7 @@ proc ::Jabber::GenRegister::DoRegister { } {
     }
     
     # We need to do it the crude way.
-    ::Jabber::JlibCmd send_iq "set"  \
+    $jstate(jlib) send_iq "set"  \
       [wrapper::createtag "query" -attrlist {xmlns jabber:iq:register}   \
       -subtags $subelements] -to $server   \
       -command [list [namespace current]::ResultCallback $server]
@@ -714,7 +729,7 @@ proc ::Jabber::GenRegister::DoSimple { } {
     variable finished
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::JlibCmd register_set $username $password  \
+    $jstate(jlib) register_set $username $password  \
       [list [namespace current]::SimpleCallback $server] -to $server
     set finished 1
     destroy $wtop

@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements the Roster GUI part.
 #      
-#  Copyright (c) 2001-2003  Mats Bengtsson
+#  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.34 2004-06-11 07:44:44 matben Exp $
+# $Id: Login.tcl,v 1.35 2004-06-12 15:35:18 matben Exp $
 
 package provide Login 1.0
 
@@ -15,7 +15,10 @@ namespace eval ::Jabber::Login:: {
     variable server
     variable username
     variable password
+    variable uid
 
+    set uid 0
+    
     # Add all event hooks.
     ::hooks::add quitAppHook     [list ::UI::SaveWinGeom $wDlgs(jlogin)]
     ::hooks::add closeWindowHook ::Jabber::Login::CloseHook
@@ -160,7 +163,7 @@ proc ::Jabber::Login::Login { } {
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
     pack [button $frbot.btok -text [::msgcat::mc Login] \
-      -default active -command [namespace current]::Doit]  \
+      -default active -command [namespace current]::DoLogin]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
       -command [list [namespace current]::DoCancel $w]]  \
@@ -177,7 +180,7 @@ proc ::Jabber::Login::Login { } {
 	
     ::UI::SetWindowPosition $w
     wm resizable $w 0 0
-    bind $w <Return>  ::Jabber::Login::Doit
+    bind $w <Return>  [list $frbot.btok invoke]
     bind $w <Escape>  [list ::Jabber::Login::DoCancel $w]
     bind $w <Destroy> [list ::Jabber::Login::DoCancel $w]
 }
@@ -224,7 +227,6 @@ proc ::Jabber::Login::LoadProfiles { } {
 proc ::Jabber::Login::TraceMenuVar {name key op} {
     global  prefs
     
-    #puts "::Jabber::Login::TraceMenuVar name=$name"
     variable profile
     variable server
     variable username
@@ -244,9 +246,6 @@ proc ::Jabber::Login::TraceMenuVar {name key op} {
 	set ssl  $tmpProfArr($profile,-ssl)
     }
     set sasl     $tmpProfArr($profile,-sasl)
-    
-    #::Debug 3 "TraceMenuVar: locName=$locName, menuVar=$menuVar"
-    #::Debug 3 "\t[parray tmpProfArr $locName,*]"
 }
 
 proc ::Jabber::Login::CloseHook {wclose} {
@@ -305,17 +304,12 @@ proc ::Jabber::Login::Close {w} {
     catch {destroy $w}    
 }
 
-# Jabber::Login::Doit --
-#
-#       Initiates a login to a server with an existing user account.
-#
-# Arguments:
-#       
-# Results:
-#       .
+# Jabber::Login::DoLogin --
+# 
+#       Starts the login process.
 
-proc ::Jabber::Login::Doit { } {
-    global  errorCode prefs
+proc ::Jabber::Login::DoLogin {} {
+    global  prefs
 
     variable wtoplevel
     variable finished
@@ -328,7 +322,7 @@ proc ::Jabber::Login::Doit { } {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::Jabber::Login::Doit"
+    ::Debug 2 "::Jabber::Login::DoLogin"
     
     # Kill any pending open states.
     ::Network::KillAll
@@ -346,6 +340,8 @@ proc ::Jabber::Login::Doit { } {
 	if {$name == "password"} {
 	    continue
 	}
+	
+	# This is just to check the validity!
 	if {[catch {
 	    switch -- $name {
 		server {
@@ -364,157 +360,292 @@ proc ::Jabber::Login::Doit { } {
     set finished 1
     ::Jabber::Login::Close $wtoplevel
     
+    ::Jabber::Login::Connect $server [namespace current]::DoLoginCB \
+      -ssl $ssl -ip $ip
+}
+
+proc ::Jabber::Login::DoLoginCB {status msg} {
+    variable server
+    variable ip
+
+    ::Debug 2 "::Jabber::Login::DoLoginCB status=$status"
+    
+    switch $status {
+	error {
+	    tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
+	      [::msgcat::mc jamessnosocket $ip $msg]]
+	}
+	timeout {
+	    tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
+	      [::msgcat::mc jamesstimeoutserver $server]]
+	}
+	default {
+	    # Go ahead...
+	    if {[catch {
+		::Jabber::Login::InitStream $server \
+		  [namespace current]::DoAuthorize
+	    } err]} {
+		tk_messageBox -icon error -title [::msgcat::mc {Open Failed}] \
+		  -type ok -message [FormatTextForMessageBox $err]
+	    }
+	}
+    }
+}
+
+proc ::Jabber::Login::DoAuthorize {args} {
+    variable server
+    variable username
+    variable password
+    variable resource
+    variable digest
+    
+    ::Debug 2 "::Jabber::Login::DoAuthorize args=$args"
+    array set argsArr $args
+    if {![info exists argsArr(id)]} {
+	tk_messageBox -icon error -type ok -message \
+	  "no id for digest in receiving <stream>"
+    } else {
+	if {$resource == ""} {
+	    set resource "coccinella"
+	}
+	::Jabber::Login::Authorize $server $username $resource $password \
+	  [namespace current]::Finish -streamid $argsArr(id) -digest $digest
+    }
+}
+
+proc ::Jabber::Login::Finish {type msg} {
+    variable profile
+    variable priority
+    variable invisible
+    
+    ::Debug 2 "::Jabber::Login::Finish type=$type, msg=$msg"
+
+    if {[string equal $type "error"]} {
+	tk_messageBox -icon error -type ok -title [::msgcat::mc Error]  \
+	  -message [FormatTextForMessageBox $msg]
+    } else {
+	::Profiles::SetSelectedName $profile
+	
+	# Login was succesful, set presence.
+	::Jabber::Login::SetStatus -priority $priority -invisible $invisible
+    }
+}
+
+proc ::Jabber::Login::SetStatus {args} {
+    upvar ::Jabber::jstate jstate
+    
+    array set argsArr {
+	-invisible    0
+	-priority     0
+    }
+    array set argsArr $args
+    set presArgs {}
+    if {$argsArr(-priority) != 0} {
+	lappend presArgs -priority $priority
+    }
+    if {$argsArr(-invisible)} {
+	set jstate(status) "invisible"
+	eval {::Jabber::SetStatus invisible} $presArgs
+    } else {
+	set jstate(status) "available"
+	eval {::Jabber::SetStatus available -notype 1} $presArgs
+    }    
+}
+
+#-------------------------------------------------------------------------------
+
+# A few functions to handle each stage in the login process as a separate
+# component:
+#       o connect socket
+#       o initialize the stream
+#       o authorize
+#       
+# They get and set jstate and other state variables. User interface elements
+# are set, but no message boxes are shown. That is up to the caller.
+
+
+# Jabber::Login::Connect --
+#
+#       Initiates a login to a server with an existing user account.
+#
+# Arguments:
+#       server
+#       cmd         callback command when socket connected
+#       args  -ip
+#             -ssl 0|1
+#       
+# Results:
+#       Callback scheduled.
+
+proc ::Jabber::Login::Connect {server cmd args} {
+    global  prefs
+
+    upvar ::Jabber::jprefs jprefs
+    
+    ::Debug 2 "::Jabber::Login::Connect"
+    array set argsArr {
+	-ip     ""
+	-ssl    0
+    }
+    array set argsArr $args
+    
+    # Kill any pending open states.
+    ::Network::KillAll
+        
     ::Jabber::UI::SetStatusMessage [::msgcat::mc jawaitresp $server]
     ::Jabber::UI::StartStopAnimatedWave 1
     ::Jabber::UI::FixUIWhen "connectinit"
     update idletasks
 
     # Async socket open with callback.
-    if {$ssl} {
+    if {$argsArr(-ssl)} {
 	set port $jprefs(sslport)
     } else {
 	set port $jprefs(port)
     }
-    if {$ip == ""} {
+    if {$argsArr(-ip) == ""} {
 	set host $server
     } else {
-	set host $ip
+	set host $argsArr(-ip)
     }
-    ::Network::OpenConnection $host $port [namespace current]::SocketIsOpen  \
-      -timeout $prefs(timeoutSecs) -tls $ssl
+    ::Network::Open $host $port [list [namespace current]::ConnectCB $cmd] \
+      -timeout $prefs(timeoutSecs) -tls $argsArr(-ssl)
 }
 
-# Jabber::Login::SocketIsOpen --
+# Jabber::Login::ConnectCB --
 #
 #       Callback when socket has been opened. Logins.
 #       
 # Arguments:
-#       
+#       cmd         callback command
 #       status      "error", "timeout", or "ok".
+#       
 # Results:
 #       Callback initiated.
 
-proc ::Jabber::Login::SocketIsOpen {sock ip port status {msg {}}} {    
-    variable server
-    variable username
-    variable password
-    variable resource
-    variable digest
-    upvar ::Jabber::jprefs jprefs
+proc ::Jabber::Login::ConnectCB {cmd sock ip port status {msg {}}} {    
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::Jabber::Login::SocketIsOpen"
+    ::Debug 2 "::Jabber::Login::ConnectCB"
     
     switch $status {
 	error - timeout {
 	    ::Jabber::UI::SetStatusMessage ""
 	    ::Jabber::UI::StartStopAnimatedWave 0
 	    ::Jabber::UI::FixUIWhen "disconnect"
-	    if {$status == "error"} {
-		tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
-		  [::msgcat::mc jamessnosocket $ip $msg]]
-	    } elseif {$status == "timeout"} {
-		tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
-		  [::msgcat::mc jamesstimeoutserver $server]]
-	    }
-	    return ""
 	}
 	default {
-	    # Just go ahead
+	    set jstate(sock) $sock
 	}
     }    
-    set jstate(sock) $sock
-    ::Jabber::UI::SetStatusMessage [::msgcat::mc jawaitxml $server]
-    
-    # Initiate a new stream. Perhaps we should wait for the server <stream>?
-    if {[catch {
-	::Jabber::JlibCmd connect $server -socket $sock  \
-	  -cmd [namespace current]::ConnectProc
-    } err]} {
-	::Jabber::UI::SetStatusMessage ""
-	::Jabber::UI::StartStopAnimatedWave 0
-	::Jabber::UI::FixUIWhen "disconnect"
-	tk_messageBox -icon error -title [::msgcat::mc {Open Failed}] -type ok \
-	  -message [FormatTextForMessageBox $err]
-	return
-    }
-
-    # Just wait for a callback to the procedure.
+    uplevel #0 $cmd [list $status $msg]
 }
 
-# Jabber::Login::ConnectProc --
-#
-#       Callback procedure for the 'connect' command of jabberlib.
+# Jabber::Login::InitStream --
+# 
+#       Sends the init stream xml command. When received servers stream,
+#       invokes the cmd callback.
 #       
 # Arguments:
-#       jlibName    name of jabber lib instance
-#       args        attribute list
+#       server      host
+#       cmd         callback command
 #       
 # Results:
 #       Callback initiated.
 
-proc ::Jabber::Login::ConnectProc {jlibName args} {    
-    variable server
-    variable username
-    variable password
-    variable resource
-    variable digest
-    upvar ::Jabber::jprefs jprefs
+proc ::Jabber::Login::InitStream {server cmd} {
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::Jabber::Login::ConnectProc jlibName=$jlibName, args='$args'"
-
-    array set argsArray $args
-    ::Jabber::UI::SetStatusMessage [::msgcat::mc jasendauth $server]
+    ::Jabber::UI::SetStatusMessage [::msgcat::mc jawaitxml $server]
     
-    # Send authorization info for an existing account.
-    # Perhaps necessary to get additional variables
-    # from some user preferences.
-    if {$resource == ""} {
-	set resource coccinella
+    # Initiate a new stream. We should wait for the server <stream>.
+    if {[catch {
+	$jstate(jlib) connect $server -socket $jstate(sock)  \
+	  -cmd [list [namespace current]::InitStreamCB $cmd]
+    } err]} {
+	::Jabber::UI::SetStatusMessage ""
+	::Jabber::UI::StartStopAnimatedWave 0
+	::Jabber::UI::FixUIWhen "disconnect"
+	return -code error $err
     }
-    if {$digest} {
-	if {![info exists argsArray(id)]} {
-	    error "no id for digest in receiving <stream>"
-	}
-	
-	::Debug 3 "argsArray(id)=$argsArray(id), password=$password"
-	
-	set digestedPw [::sha1pure::sha1 $argsArray(id)$password]
-	::Jabber::JlibCmd send_auth $username $resource   \
-	  ::Jabber::Login::ResponseProc -digest $digestedPw
-    } else {
-	::Jabber::JlibCmd send_auth $username $resource   \
-	  ::Jabber::Login::ResponseProc -password $password
-    }
-    
-    # Just wait for a callback to the procedure.
 }
 
-# Jabber::Login::ResponseProc --
-#
-#       Callback for Login iq element.
+proc ::Jabber::Login::InitStreamCB {cmd jlibName args} {
+
+    # One of args shall be -id hexnumber
+    uplevel #0 $cmd $args
+}
+
+# Jabber::Login::Authorize --
+# 
+#       A fairly general method for authentication. Handles UI stuff, but
+#       does not show any message boxes.
 #       
 # Arguments:
+#       server
+#       username
+#       resource
+#       password
+#       cmd         callback command
+#       args:
+#           -digest  0|1
+#           -streamid 
 #       
 # Results:
-#       .
+#       Callback initiated.
 
-proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
-    global  prefs wDlgs this
+proc ::Jabber::Login::Authorize {server username resource password cmd args} {
+    variable uid
+    upvar ::Jabber::jstate jstate
     
-    variable profile
-    variable server
-    variable username
-    variable password
-    variable resource
-    variable invisible
-    variable priority
-    upvar ::Jabber::jprefs jprefs
+    ::Debug 2 "::Jabber::Login::Authorize"
+    array set argsArr {
+	-digest     1
+	-streamid   ""
+    }
+    array set argsArr $args
+
+    # Initialize the state variable, an array, that keeps is the storage.
+    
+    set token [namespace current]::auth[incr uid]
+    variable $token
+    upvar 0 $token state
+
+    set state(server)     $server
+    set state(username)   $username
+    set state(resource)   $resource
+    set state(password)   $password
+    set state(streamid)   $argsArr(-streamid)
+    set state(cmd)        $cmd
+    
+    if {$argsArr(-digest)} {
+	if {$argsArr(-streamid) == ""} {
+	    return -code error "missing -streamid for -digest"
+	}
+	set digestedPw [::sha1pure::sha1 $state(streamid)${password}]
+	$jstate(jlib) send_auth $username $resource   \
+	  [list [namespace current]::AuthorizeCB $token] -digest $digestedPw
+    } else {
+	$jstate(jlib) send_auth $username $resource   \
+	  [list [namespace current]::AuthorizeCB $token] -password $password
+    }
+}
+
+proc ::Jabber::Login::AuthorizeCB {token jlibName type theQuery} {
+
+    variable $token
+    upvar 0 $token state
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
+
+    ::Debug 2 "::Jabber::Login::AuthorizeCB type=$type, theQuery='$theQuery'"
     
-    ::Debug 2 "::Jabber::Login::ResponseProc  theQuery=$theQuery"
+    set server   $state(server)
+    set username $state(username)
+    set resource $state(resource)
+    set password $state(password)
+    set cmd      $state(cmd)
+    set msg      ""
 
     ::Jabber::UI::StartStopAnimatedWave 0
     
@@ -528,47 +659,33 @@ proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
 	} else {
 	    set msg [::msgcat::mc jamessloginerr $errcode $errmsg]
 	}
-	tk_messageBox -icon error -type ok -title [::msgcat::mc Error]  \
-	  -message [FormatTextForMessageBox $msg]
 
-	#       There is a potential problem if called from within a xml parser 
-	#       callback which makes the subsequent parsing to fail. (after idle?)
-	after idle ::Jabber::JlibCmd disconnect
-	return
-    } 
-    
-    foreach {ip addr port} [fconfigure $jstate(sock) -sockname] break
-    set jstate(ipNum) $ip
-    if {$ip != "0.0.0.0"} {
-	set this(ipnum) $ip
-    }
-    
-    # Ourself. Do jidprep? So far only on the domain name.
-    set server               [jlib::jidmap $server]
-    set jstate(mejid)        ${username}@${server}
-    set jstate(meres)        $resource
-    set jstate(mejidres)     "$jstate(mejid)/${resource}"
-    set jstate(mejidmap)     [jlib::jidmap $jstate(mejid)]
-    set jstate(mejidresmap)  [jlib::jidmap $jstate(mejidres)]
-    set jserver(this)        $server
-
-    ::Profiles::SetSelectedName $profile
+	# There is a potential problem if called from within a xml parser 
+	# callback which makes the subsequent parsing to fail. (after idle?)
+	after idle $jstate(jlib) disconnect
+    } else {    
+	foreach {ip addr port} [fconfigure $jstate(sock) -sockname] break
+	set jstate(ipNum) $ip
+	if {$ip != "0.0.0.0"} {
+	    set this(ipnum) $ip
+	}
 	
-    # Run all login hooks. We do this to get our roster before we get presence.
-    ::hooks::run loginHook
+	# Ourself. Do JIDPREP? So far only on the domain name.
+	set server               [jlib::jidmap $server]
+	set jstate(mejid)        ${username}@${server}
+	set jstate(meres)        $resource
+	set jstate(mejidres)     "$jstate(mejid)/${resource}"
+	set jstate(mejidmap)     [jlib::jidmap $jstate(mejid)]
+	set jstate(mejidresmap)  [jlib::jidmap $jstate(mejidres)]
+	set jserver(this)        $server
+	
+	# Run all login hooks. We do this to get our roster before we get presence.
+	::hooks::run loginHook
+    }
+    uplevel #0 $cmd [list $type $msg]
     
-    # Login was succesful, set presence.
-    set presArgs {}
-    if {$priority != 0} {
-	lappend presArgs -priority $priority
-    }
-    if {$invisible} {
-	set jstate(status) "invisible"
-	eval {::Jabber::SetStatus invisible} $presArgs
-    } else {
-	set jstate(status) "available"
-	eval {::Jabber::SetStatus available -notype 1} $presArgs
-    }
+    # Cleanup
+    unset state
 }
 
 #-------------------------------------------------------------------------------

@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.47 2004-06-11 07:44:44 matben Exp $
+# $Id: jabberlib.tcl,v 1.48 2004-06-12 15:35:18 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -1008,19 +1008,8 @@ proc jlib::presence_handler {jlibname xmldata} {
     
     # Check first if this is an error element (from conferencing?).
     if {[string equal $type "error"]} {
-	
-	# We should have a single error element here.
-	set errcode {}
-	set errmsg {}
-	foreach errorchild $childlist {
-	    if {[string equal [wrapper::gettag $errorchild] "error"]} {
-		set cchdata [wrapper::getcdata $errorchild]
-		set errcode [wrapper::getattribute $errorchild "code"]
-		set errmsg $cchdata
-		break
-	    }
-	}
-	lappend arglist -error [list $errcode $errmsg]
+	set errspec [jlib::geterrorspec $xmldata]
+	lappend arglist -error $errspec
     } else {
 	
 	# Extract the presence sub-elements. Separate the x element.
@@ -1249,6 +1238,8 @@ proc jlib::geterrorspec {iqelem} {
 	
     # Found it! XMPP contains an error stanza and not pure text.
     if {[info exists errelem]} {
+	
+	# The 'code' attribute is optional in XMPP!
 	set errcode [wrapper::getattribute $errelem "code"]
 	set cchdata [wrapper::getcdata $errelem]
 	if {[string length $cchdata] > 0} {		

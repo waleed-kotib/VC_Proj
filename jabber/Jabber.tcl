@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.90 2004-06-11 07:44:44 matben Exp $
+# $Id: Jabber.tcl,v 1.91 2004-06-12 15:35:18 matben Exp $
 
 package provide Jabber 1.0
 
@@ -272,6 +272,7 @@ proc ::Jabber::FactoryDefaults { } {
     
     # Other
     set jprefs(defSubscribe)        1
+    set jprefs(logonWhenRegister)   1
     
     # Shall we query ip number directly when verified Coccinella?
     set jprefs(preGetIP) 1
