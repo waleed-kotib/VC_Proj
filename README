@@ -2,7 +2,7 @@
 	  The Coccinella : Jabber application with Whiteboard
 	  ---------------------------------------------------
 
-		version 0.94.5, 30th August, 2003
+		version 0.94.6, 30th November, 2003
 
 		       by: Mats Bengtsson
 
@@ -70,7 +70,8 @@ Testing:
     It is to be considered as a developer release, so beware.  *It is far 
     from being bug free*.  It has been tested on MacOS 9.2, Mac OS X 10.2, 
     Red Hat Linux 8.0, and Windows 2000. It requires a Tcl version 8.4 or 
-    later.
+    later. The Mac OS 8/9 version is no longer supported but will likely 
+    run anyway. Just increase the memory partition of Wish a lot (30MB).
 
     I would judge this as an alpha quality application, not beta, which is 
     reflected in the version number ( < 1.0). No instabilities are known, 
