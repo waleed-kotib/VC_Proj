@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.19 2004-01-01 12:08:21 matben Exp $
+# $Id: Browse.tcl,v 1.20 2004-01-01 16:27:48 matben Exp $
 
 package require chasearrows
 
@@ -16,6 +16,7 @@ namespace eval ::Jabber::Browse:: {
     hooks::add loginHook          ::Jabber::Browse::LoginCmd
     hooks::add closeWindowHook    ::Jabber::Browse::CloseHook
     hooks::add logoutHook         ::Jabber::Browse::LogoutHook
+    hooks::add presenceHook       ::Jabber::Browse::PresenceCallback
 
     # Use option database for customization. 
     # Use priority 30 just to override the widgetDefault values!
@@ -576,42 +577,62 @@ proc ::Jabber::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
     }
 }
 
-# Jabber::Browse::Presence --
+# Jabber::Browse::PresenceCallback --
 #
 #       Sets the presence of the (<user>) jid in our browse tree.
 #
 # Arguments:
 #       jid  
-#       presence    "available", "unavailable", or "unsubscribed"
+#       type        "available", "unavailable", or "unsubscribed"
 #       args        list of '-key value' pairs of presence attributes.
 #       
 # Results:
 #       browse tree icon updated.
 
-proc ::Jabber::Browse::Presence {jid presence args} {    
+proc ::Jabber::Browse::PresenceCallback {jid type args} {    
     variable wtree
     upvar ::Jabber::jstate jstate
+    upvar ::Jabber::jprefs jprefs
 
-    ::Jabber::Debug 2 "::Jabber::Browse::Presence jid=$jid, presence=$presence, args='$args'"
+    ::Jabber::Debug 2 "::Jabber::Browse::PresenceCallback jid=$jid, type=$type, args='$args'"
 
-    array set argsArr $args
-            
-    if {![winfo exists $wtree]} {
-	return
+    set jid3 $jid
+    if {[info exists attrArr(-resource)] &&  \
+      [string length $attrArr(-resource)]} {
+	set jid3 ${jid}/$attrArr(-resource)
     }
-    set jidhash ${jid}/$argsArr(-resource)
-    set parentList [$jstate(browse) getparents $jidhash]
-    set jidList [concat $parentList $jidhash]
-    if {![$wtree isitem $jidList]} {
-	return
-    }
-    if {$presence == "available"} {
+
+    if {[$jstate(jlib) service isroom $jid]} {
+	if {[::Jabber::Browse::HaveBrowseTree $jid]} {
+	    array set argsArr $args
+	    
+	    if {![winfo exists $wtree]} {
+		return
+	    }
+	    set jidhash ${jid}/$argsArr(-resource)
+	    set parentList [$jstate(browse) getparents $jidhash]
+	    set jidList [concat $parentList $jidhash]
+	    if {![$wtree isitem $jidList]} {
+		return
+	    }
+	    if {$type == "available"} {
+		
+		# Add first if not there?    
+		set icon [eval {::Jabber::Roster::GetPresenceIcon $jidhash $type} $args]
+		$wtree itemconfigure $jidList -image $icon
+	    } elseif {$type == "unavailable"} {
+		
+	    }
+	}
+    } else {
     
-	# Add first if not there?    
-	set icon [eval {::Jabber::Roster::GetPresenceIcon $jidhash $presence} $args]
-	$wtree itemconfigure $jidList -image $icon
-    } elseif {$presence == "unavailable"} {
-
+	# If users shall be automatically browsed to.
+	if {$jprefs(autoBrowseUsers) &&  \
+	  [string equal $type "available"] &&  \
+	  ![$jstate(browse) isbrowsed $jid3]} {
+	    eval {::Jabber::Roster::AutoBrowse $jid3 $type} \
+	      $args
+	}	
     }
 }
 

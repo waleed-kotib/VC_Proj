@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: Theme.tcl,v 1.5 2003-12-23 14:41:01 matben Exp $
+# $Id: Theme.tcl,v 1.6 2004-01-01 16:27:48 matben Exp $
 
 package provide Theme 1.0
 
@@ -12,14 +12,18 @@ namespace eval ::Theme:: {
 
 }
 
-
 proc ::Theme::ReadPrefsFile { } {
     global  this prefs
     
     if {[file exists $this(themePrefsPath)]} {
 	option readfile $this(themePrefsPath)
     }
-    set prefs(themeName) [option get . themeName {}]   
+    set themeName [option get . themeName {}] 
+    if {[::Theme::CanLoadTheme $themeName]} {
+	set prefs(themeName) $themeName
+    } else {
+	set prefs(themeName) ""
+    }
 }
 
 proc ::Theme::SavePrefsFile { } {
@@ -47,6 +51,30 @@ proc ::Theme::SavePrefsFile { } {
     }
 }
 
+proc ::Theme::CanLoadTheme {themeName} {
+    global  this
+    
+    set ans 1
+    set f [file join $this(prefsPath) ${themeName}CanLoad.tcl]
+    if {[file exists $f]} {
+	set ans [source $f]
+    }
+    return $ans
+}
+
+proc ::Theme::GetAllAvailable { } {
+    global  this
+    
+    set allrsrc {}
+    foreach f [glob -nocomplain -tails -directory $this(resourcedbPath) *.rdb] {
+	set themeName [file rootname $f]
+	if {[::Theme::CanLoadTheme $themeName]} {
+	    lappend allrsrc $themeName
+	}
+    }  
+    return $allrsrc
+}
+
 proc ::Theme::PreLoadImages { } {
     
     foreach name [option get . themePreloadImages {}] {
@@ -59,6 +87,8 @@ proc ::Theme::PreLoadImages { } {
 #       Searches for a gif image in a set of directories.
 #       
 #       Returns empty if not found, else the internal tk image name.
+#       
+#       Must have method to get .png images etc.
 
 proc ::Theme::GetImage {name args} {
     global  this

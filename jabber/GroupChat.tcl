@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.31 2004-01-01 12:08:21 matben Exp $
+# $Id: GroupChat.tcl,v 1.32 2004-01-01 16:27:48 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -60,6 +60,7 @@ namespace eval ::Jabber::GroupChat:: {
     hooks::add newGroupChatMessageHook ::Jabber::GroupChat::GotMsg
     hooks::add closeWindowHook         ::Jabber::GroupChat::CloseHook
     hooks::add logoutHook              ::Jabber::GroupChat::Logout
+    hooks::add presenceHook            ::Jabber::GroupChat::PresenceCallback
     
     # Local stuff
     variable locals
@@ -894,41 +895,44 @@ proc ::Jabber::GroupChat::TraceStatus {roomJid name key op} {
 # Results:
 #       groupchat member list updated.
 
-proc ::Jabber::GroupChat::Presence {jid presence args} {
-
+proc ::Jabber::GroupChat::PresenceCallback {jid presence args} {
+    
     variable locals
+    upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 2 "::Jabber::GroupChat::Presence jid=$jid, presence=$presence, args='$args'"
-
-    array set attrArr $args
-    
-    # Since there should not be any /resource.
-    set roomJid $jid
-    set jid3 ${jid}/$attrArr(-resource)
-    if {[string equal $presence "available"]} {
-	eval {::Jabber::GroupChat::SetUser $roomJid $jid3 $presence} $args
-    } elseif {[string equal $presence "unavailable"]} {
-	::Jabber::GroupChat::RemoveUser $roomJid $jid3
-    }
-    
-    # When kicked etc. from a MUC room...
-    # 
-    # 
-#  <x xmlns='http://jabber.org/protocol/muc#user'>
-#    <item affiliation='none' role='none'>
-#      <actor jid='fluellen@shakespeare.lit'/>
-#      <reason>Avaunt, you cullion!</reason>
-#    </item>
-#    <status code='307'/>
-#  </x>
-
-    if {[info exists attrArr(-x)]} {
-	foreach c $attrArr(-x) {
-	    set xmlns [wrapper::getattribute $c xmlns]
-	    
-	    switch -- $xmlns {
-		"http://jabber.org/protocol/muc#user" {
+    if {[$jstate(jlib) service isroom $jid]} {
+	::Jabber::Debug 2 "::Jabber::GroupChat::PresenceCallback jid=$jid, presence=$presence, args='$args'"
+	
+	array set attrArr $args
+	
+	# Since there should not be any /resource.
+	set roomJid $jid
+	set jid3 ${jid}/$attrArr(-resource)
+	if {[string equal $presence "available"]} {
+	    eval {::Jabber::GroupChat::SetUser $roomJid $jid3 $presence} $args
+	} elseif {[string equal $presence "unavailable"]} {
+	    ::Jabber::GroupChat::RemoveUser $roomJid $jid3
+	}
+	
+	# When kicked etc. from a MUC room...
+	# 
+	# 
+	#  <x xmlns='http://jabber.org/protocol/muc#user'>
+	#    <item affiliation='none' role='none'>
+	#      <actor jid='fluellen@shakespeare.lit'/>
+	#      <reason>Avaunt, you cullion!</reason>
+	#    </item>
+	#    <status code='307'/>
+	#  </x>
+	
+	if {[info exists attrArr(-x)]} {
+	    foreach c $attrArr(-x) {
+		set xmlns [wrapper::getattribute $c xmlns]
+		
+		switch -- $xmlns {
+		    "http://jabber.org/protocol/muc#user" {
 			# Seems hard to figure out anything here...		    
+		    }
 		}
 	    }
 	}

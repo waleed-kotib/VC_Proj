@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.29 2004-01-01 12:08:22 matben Exp $
+# $Id: Preferences.tcl,v 1.30 2004-01-01 16:27:48 matben Exp $
  
 package require notebook
 package require tree
@@ -1124,10 +1124,9 @@ proc ::Preferences::Customization::BuildPage {page} {
     set frtheme $pbl.ftheme
     frame $frtheme
     set wpoptheme $frtheme.pop
-    set allrsrc {}
-    foreach f [glob -nocomplain -tails -directory $this(resourcedbPath) *.rdb] {
-	lappend allrsrc [file rootname $f]
-    }
+
+    set allrsrc [::Theme::GetAllAvailable]
+
     set wpopupmenuin [eval {tk_optionMenu $wpoptheme   \
       [namespace parent]::tmpPrefs(themeName)} $allrsrc]
     pack [label $frtheme.l -text {Pick theme, need relaunch:}] -side left
@@ -2585,7 +2584,7 @@ proc ::Preferences::CloseHook {wclose} {
 #       User presses the cancel button. Warn if anything changed.
 
 proc ::Preferences::CancelPushBt { } {
-    global  prefs
+    global  prefs wDlgs
     
     variable wtoplevel
     variable finished
@@ -2636,7 +2635,7 @@ proc ::Preferences::CancelPushBt { } {
     }
     if {$hasChanged} {
 	set ans [tk_messageBox -title [::msgcat::mc Warning]  \
-	  -type yesno -default no \
+	  -type yesno -default no -parent $wDlgs(prefs)  \
 	  -message [FormatTextForMessageBox [::msgcat::mc messprefschanged]]]
 	if {$ans == "yes"} {
 	    set finished 2
