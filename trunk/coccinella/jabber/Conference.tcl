@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Conference.tcl,v 1.23 2004-04-25 15:35:24 matben Exp $
+# $Id: Conference.tcl,v 1.24 2004-05-23 13:18:08 matben Exp $
 
 package provide Conference 1.0
 
@@ -480,10 +480,10 @@ proc ::Jabber::Conference::BuildCreate {args} {
     
     label $frtop.lroom -text "[::msgcat::mc {Room name}]:"    
     entry $frtop.eroom -textvariable $token\(roomname)  \
-      -validate key -validatecommand {::Jabber::ValidateJIDChars %S}
+      -validate key -validatecommand {::Jabber::ValidateUsernameStr %S}
     label $frtop.lnick -text "[::msgcat::mc {Nick name}]:"    
     entry $frtop.enick -textvariable $token\(nickname)  \
-      -validate key -validatecommand {::Jabber::ValidateJIDChars %S}
+      -validate key -validatecommand {::Jabber::ValidateResourceStr %S}
     label $frtop.ldesc -text "[::msgcat::mc Specifications]:"
     label $frtop.lstat -textvariable $token\(stattxt)
     

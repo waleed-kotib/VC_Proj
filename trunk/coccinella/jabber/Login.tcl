@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.30 2004-05-02 12:35:24 matben Exp $
+# $Id: Login.tcl,v 1.31 2004-05-23 13:18:08 matben Exp $
 
 package provide Login 1.0
 
@@ -95,11 +95,11 @@ proc ::Jabber::Login::Login { } {
     label $frmid.lserv -text "[::msgcat::mc {Jabber server}]:" -font $fontSB -anchor e
     entry $frmid.eserv -width 22    \
       -textvariable [namespace current]::server -validate key  \
-      -validatecommand {::Jabber::ValidateJIDChars %S}
+      -validatecommand {::Jabber::ValidateDomainStr %S}
     label $frmid.luser -text "[::msgcat::mc Username]:" -font $fontSB -anchor e
     entry $frmid.euser -width 22   \
       -textvariable [namespace current]::username -validate key  \
-      -validatecommand {::Jabber::ValidateJIDChars %S}
+      -validatecommand {::Jabber::ValidateUsernameStr %S}
     label $frmid.lpass -text "[::msgcat::mc Password]:" -font $fontSB -anchor e
     entry $frmid.epass -width 22   \
       -textvariable [namespace current]::password -show {*} -validate key \
@@ -107,7 +107,7 @@ proc ::Jabber::Login::Login { } {
     label $frmid.lres -text "[::msgcat::mc Resource]:" -font $fontSB -anchor e
     entry $frmid.eres -width 22   \
       -textvariable [namespace current]::resource -validate key  \
-      -validatecommand {::Jabber::ValidateJIDChars %S}
+      -validatecommand {::Jabber::ValidateResourceStr %S}
     
     grid $frmid.lserv -column 0 -row 1 -sticky e
     grid $frmid.eserv -column 1 -row 1 -sticky w
@@ -338,7 +338,16 @@ proc ::Jabber::Login::Doit { } {
 	if {$name == "password"} {
 	    continue
 	}
-	if {[regexp $jprefs(invalsExp) $var match junk]} {
+	if {[catch {
+	    switch -- $name {
+		server {
+		    jlib::nameprep $var
+		}
+		username {
+		    jlib::nodeprep $var
+		}
+	    }
+	} err]} {
 	    tk_messageBox -icon error -type ok -message  \
 	      [FormatTextForMessageBox [::msgcat::mc jamessillegalchar $name $var]]
 	    return
@@ -523,10 +532,10 @@ proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
     foreach {ip addr port} [fconfigure $jstate(sock) -sockname] break
     set jstate(ipNum) $ip
     
-    # Ourself.
-    set jstate(mejid)    "${username}@${server}"
+    # Ourself. Do jidprep???
+    set jstate(mejid)     [jlib::jidprep ${username}@${server}]
     set jstate(meres)     $resource
-    set jstate(mejidres) "${username}@${server}/${resource}"
+    set jstate(mejidres) "$jstate(mejid)/${resource}"
     set jserver(this) $server
     
     ::Profiles::SetSelectedName $profile

@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.33 2004-04-25 15:35:25 matben Exp $
+# $Id: MUC.tcl,v 1.34 2004-05-23 13:18:08 matben Exp $
 
 package require entrycomp
 
@@ -1392,7 +1392,7 @@ proc ::Jabber::MUC::VerifyEditEntry {roomjid wtbl row col text} {
 	return
     }
     
-    if {![::Jabber::IsWellFormedJID $text]} {
+    if {![jlib::jidvalidate $text]} {
 	bell
 	tk_messageBox -icon error -message "Illegal jid \"$text\"" \
 	  -parent [winfo toplevel $wtbl] -type ok

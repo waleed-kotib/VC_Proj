@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.41 2004-04-30 12:58:46 matben Exp $
+# $Id: jabberlib.tcl,v 1.42 2004-05-23 13:18:09 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -2799,13 +2799,128 @@ proc jlib::getrecipientjid {jlibname jid} {
     }
 }
 
+# Various utility procedures to handle jid's....................................
+
+proc jlib::UnicodeListToRE {ulist} {
+    
+    set str [string map {- -\\u} $ulist]
+    set str "\\u[join $str \\u]"
+    return [subst $str]
+}
+
+namespace eval jlib {
+    
+    # Characters that need to be escaped since non valid.
+    #       JEP-0106 EXPERIMENTAL!  Think OUTDATED???
+    variable jidesc { "#\&'/:<>@}
+    
+    # Prohibited ASCII characters.
+    set asciiC12C22 {\x00-\x1f\x80-\x9f\x7f\xa0}
+    set asciiC11 {\x20}
+    
+    # C.1.1 is actually allowed (RFC3491), weird!
+    set    asciiProhibit(domain) $asciiC11
+    append asciiProhibit(domain) $asciiC12C22
+    append asciiProhibit(domain) /@   
+
+    # The nodeprep prohibits these characters in addition.
+    #x22 (") 
+    #x26 (&) 
+    #x27 (') 
+    #x2F (/) 
+    #x3A (:) 
+    #x3C (<) 
+    #x3E (>) 
+    #x40 (@) 
+    set    asciiProhibit(node) {"&'/:<>@} 
+    append asciiProhibit(node) $asciiC11 
+    append asciiProhibit(node) $asciiC12C22
+    
+    set asciiProhibit(resource) $asciiC12C22
+    
+    # RFC 3454 (STRINGPREP); all unicode characters:
+    # 
+    # Maps to nothing (empty).
+    set mapB1 {
+	00ad	034f	1806	180b	180c	180d	200b	200c
+	200d	2060	fe00	fe01	fe02	fe03	fe04	fe05
+	fe06	fe07	fe08	fe09	fe0a	fe0b	fe0c	fe0d
+	fe0e	fe0f	feff    
+    }
+    
+    # ASCII space characters. Just a space.
+    set prohibitC11 {0020}
+    
+    # Non-ASCII space characters
+    set prohibitC12 {
+	00a0	1680	2000	2001	2002	2003	2004	2005
+	2006	2007	2008	2009	200a	200b	202f	205f
+	3000
+    }
+    
+    # C.2.1 ASCII control characters
+    set prohibitC21 {
+	0000-001F   007F
+    }
+    
+    # C.2.2 Non-ASCII control characters
+    set prohibitC22 {
+	0080-009f	06dd	070f	180e	200c	200d	2028
+	2029	2060	2061	2062	2063	206a-206f	feff
+	fff9-fffc       1d173-1d17a
+    }
+    
+    # C.3 Private use
+    set prohibitC3 {
+	e000-f8ff	f0000-ffffd	100000-10fffd
+    }
+    
+    # C.4 Non-character code points
+    set prohibitC4 {
+	fdd0-fdef	fffe-ffff	1fffe-1ffff	2fffe-2ffff
+	3fffe-3ffff	4fffe-4ffff	5fffe-5ffff	6fffe-6ffff
+	7fffe-7ffff	8fffe-8ffff	9fffe-9ffff	afffe-affff
+	bfffe-bffff	cfffe-cffff	dfffe-dffff	efffe-effff
+	ffffe-fffff	10fffe-10ffff
+    }
+    
+    # C.5 Surrogate codes
+    set prohibitC5 {d800-dfff}
+    
+    # C.6 Inappropriate for plain text
+    set prohibitC6 {
+	fff9	fffa	fffb	fffc	fffd
+    }
+    
+    # C.7 Inappropriate for canonical representation
+    set prohibitC7 {2ff0-2ffb}
+    
+    # C.8 Change display properties or are deprecated
+    set prohibitC8 {
+	0340	0341	200e	200f	202a	202b	202c	202d
+	202e	206a	206b	206c	206d	206e	206f
+    }
+    
+    # Test: 0, 1, 2, A-Z
+    set test {
+	0030    0031   0032    0041-005a
+    }
+    
+    # And many more...
+
+    variable mapB1RE       [UnicodeListToRE $mapB1]
+    variable prohibitC11RE [UnicodeListToRE $prohibitC11]
+    variable prohibitC12RE [UnicodeListToRE $prohibitC12]
+
+}
+
 # jlib::splitjid --
 # 
 #       Splits a general jid into a jid-2-tier and resource
 
 proc jlib::splitjid {jid jid2Var resourceVar} {
     
-    set ind [string last / $jid]
+    set ind [string first / $jid]
     if {$ind == -1} {
 	uplevel 1 [list set $jid2Var $jid]
 	uplevel 1 [list set $resourceVar {}]
@@ -2817,11 +2932,141 @@ proc jlib::splitjid {jid jid2Var resourceVar} {
     }
 }
 
-namespace eval jlib {
+# jlib::splitjidex --
+# 
+#       Split a jid into the parts: jid = [ node "@" ] domain [ "/" resource ]
+#       Possibly empty. Doesn't check for valid content, only the form.
+
+proc jlib::splitjidex {jid nodeVar domainVar resourceVar} {
     
-    # Characters that need to be escaped since non valid.
-    #       JEP-0106 EXPERIMENTAL!
-    variable jidesc { "#\&'/:<>@}
+    if {[regexp {^(([^@]+)@)?([^ /@]+)(/(.*))?$} $jid match x node domain y \
+      resource]} {
+	uplevel 1 [list set $nodeVar $node]
+	uplevel 1 [list set $domainVar $domain]
+	uplevel 1 [list set $resourceVar $resource]	
+    } else {
+	return -code error "not valid jid form"
+    }
+}
+
+# jlib::joinjid --
+# 
+#       Joins the, optionally empty, parts into a jid.
+#       domain must be nonempty though.
+
+proc jlib::joinjid {node domain resource} {
+    
+    set jid $domain
+    if {$node != ""} {
+	set jid ${node}@${jid}
+    }
+    if {$resource != ""} {
+	set jid ${jid}/${resource}
+    }
+    return $jid
+}
+
+proc jlib::jidequal {jid1 jid2} {
+    
+    return [string equal [jidprep $jid1] [jidprep $jid2]]
+}
+
+# jlib::jidvalidate --
+# 
+#       Checks if this is a valid jid interms of form and characters.
+
+proc jlib::jidvalidate {jid} {
+    
+    if {[catch {splitjidex $jid node name resource} ans]} {
+	return $ans
+    }
+    foreach what {node name resource} {
+	if {$what != ""} {
+	    if {[catch {${what}prep [set $what]} ans]} {
+		return $ans
+	    }
+	}
+    }
+    return 1
+}
+
+# String preparation (STRINGPREP) RFC3454:
+# 
+#    The steps for preparing strings are:
+#
+#  1) Map -- For each character in the input, check if it has a mapping
+#     and, if so, replace it with its mapping.  This is described in
+#     section 3.
+#
+#  2) Normalize -- Possibly normalize the result of step 1 using Unicode
+#     normalization.  This is described in section 4.
+#
+#  3) Prohibit -- Check for any characters that are not allowed in the
+#     output.  If any are found, return an error.  This is described in
+#     section 5.
+#
+#  4) Check bidi -- Possibly check for right-to-left characters, and if
+#     any are found, make sure that the whole string satisfies the
+#     requirements for bidirectional strings.  If the string does not
+#     satisfy the requirements for bidirectional strings, return an
+#     error.  This is described in section 6.
+
+proc jlib::nodeprep {node} {
+    variable asciiProhibit
+    
+    set node [string tolower $node]
+    if {[regexp ".*\[${asciiProhibit(node)}\].*" $node]} {
+	return -code error "username contains illegal character(s)"
+    }
+    return $node
+}
+
+proc jlib::nameprep {domain} {   
+    variable asciiProhibit
+    
+    set domain [string tolower $domain]
+    if {[regexp ".*\[${asciiProhibit(domain)}\].*" $domain]} {
+	return -code error "domain contains illegal character(s)"
+    }
+    return $domain
+}
+
+proc jlib::resourceprep {resource} {
+    variable asciiProhibit
+    
+    # Note that resources are case sensitive!
+    # Orinary spaces are allowed!
+    if {[regexp ".*\[${asciiProhibit(resource)}\].*" $resource]} {
+	return -code error "resource contains illegal character(s)"
+    }
+    return $resource
+}
+
+# jlib::jidprep --
+# 
+#       Applies STRINGPREP to the individiual and specific parts of the jid.
+#       
+# Results:
+#       throws an error if prohibited, else the prepared jid.
+
+proc jlib::jidprep {jid} {
+    
+    if {[catch {splitjidex $jid node domain resource} res]} {
+	return -code error $res
+    }
+    if {[catch {
+	set node     [nodeprep $node]
+	set domain   [nameprep $domain]
+	set resource [resourceprep $resource]
+    } err]} {
+	return -code error $err
+    }
+    return [joinjid $node $domain $resource]
+}
+
+proc jlib::MapStr {str } {
+    
+
 }
 
 # jlib::encodeusername, decodeusername, decodejid --

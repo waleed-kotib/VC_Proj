@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.58 2004-05-09 12:14:38 matben Exp $
+# $Id: Roster.tcl,v 1.59 2004-05-23 13:18:08 matben Exp $
 
 package provide Roster 1.0
 
@@ -779,7 +779,7 @@ proc ::Jabber::Roster::SetItem {jid args} {
 	# Add all resources for this jid?
 	jlib::splitjid $jid jid2 res
 	set presenceList [$jstate(roster) getpresence $jid2]
-	::Debug 2 "      presenceList=$presenceList"
+	::Debug 2 "\t presenceList=$presenceList"
 	
 	foreach pres $presenceList {
 	    catch {unset presArr}
@@ -871,8 +871,6 @@ proc ::Jabber::Roster::Presence {jid presence args} {
 
 proc ::Jabber::Roster::Remove {jid} {    
     variable wtree    
-    upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::Jabber::Roster::Remove, jid=$jid"
     
@@ -882,8 +880,9 @@ proc ::Jabber::Roster::Remove {jid} {
     # Else if 2-tier jid:  => remove jid2
     
     jlib::splitjid $jid jid2 res
+    set prepjid2 [jlib::jidprep $jid2]
 
-    foreach v [$wtree find withtag $jid2] {
+    foreach v [$wtree find withtag $prepjid2] {
 	$wtree delitem $v
 	
 	# Remove dirs if empty?
@@ -898,7 +897,8 @@ proc ::Jabber::Roster::Remove {jid} {
 	
 	# We've got a 3-tier jid.
 	set jid3 $jid
-	foreach v [$wtree find withtag $jid3] {
+	set prepjid3 [jlib::jidprep $jid]
+	foreach v [$wtree find withtag $prepjid3] {
 	    $wtree delitem $v
 	    set vparent [lrange $v 0 end-1]
 	    if {[llength $v] == 3} {
@@ -921,29 +921,29 @@ proc ::Jabber::Roster::SetCoccinella {jid} {
     
     ::Debug 4 "::Jabber::Roster::SetCoccinella jid=$jid"
     
-    if {[regexp {^(.+@[^/]+)/(.+)$} $jid match jid2 res]} {
-	set presArr(-show) "normal"
-	array set presArr [$jstate(roster) getpresence $jid2  \
-	  -resource $res -type available]
-	
-	#        ::Jabber::Roster::GetPresenceIcon ???
-	
-	# If available and show = ( normal | empty | chat ) display icon.
-	switch -- $presArr(-show) {
-	    normal {
-		set icon $presenceIcon(available,wb)
-	    }
-	    chat {
-		set icon $presenceIcon(chat,wb)
-	    }
-	    default {
-		# ???
-		set icon $presenceIcon(available,wb)
-	    }
+    jlib::splitjid $jid jid2 res
+    set presArr(-show) "normal"
+    array set presArr [$jstate(roster) getpresence $jid2  \
+      -resource $res -type available]
+    
+    #        ::Jabber::Roster::GetPresenceIcon ???
+    
+    # If available and show = ( normal | empty | chat ) display icon.
+    switch -- $presArr(-show) {
+	normal {
+	    set icon $presenceIcon(available,wb)
 	}
-	foreach v [$wtree find withtag $jid] {
-	    $wtree itemconfigure $v -image $icon
+	chat {
+	    set icon $presenceIcon(chat,wb)
 	}
+	default {
+	    # ???
+	    set icon $presenceIcon(available,wb)
+	}
+    }
+    set prepjid [jlib::jidprep $jid]
+    foreach v [$wtree find withtag $prepjid] {
+	$wtree itemconfigure $v -image $icon
     }
 }
 
@@ -1000,7 +1000,8 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
 	    set jidx ${jid2}/$argsArr(-resource)
 	}
     }
-    ::Debug 5 "\tjidx=$jidx"
+    set prepjid [jlib::jidprep $jidx]
+    ::Debug 5 "\t jidx=$jidx"
     
     set treectag item[incr treeuid]    
     set itemOpts [list -text $itemTxt -canvastags $treectag]    
@@ -1011,7 +1012,7 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
     if {[info exists argsArr(-ask)] &&  \
       [string equal $argsArr(-ask) "subscribe"]} {
 	eval {$wtree newitem [list {Subscription Pending} $jid]  \
-	  -image $icon -tags $jidx} $itemOpts
+	  -image $icon -tags $prepjid} $itemOpts
     } elseif {[info exists argsArr(-groups)] && ($argsArr(-groups) != "")} {
 	set groups $argsArr(-groups)
 	
@@ -1025,13 +1026,13 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
 		  -tags group -image $groupImage
 	    }
 	    eval {$wtree newitem [list $gpresarr($presence) $grp $jidx] \
-	      -image $icon -tags $jidx} $itemOpts
+	      -image $icon -tags $prepjid} $itemOpts
 	}
     } else {
 	
 	# No groups associated with this item.
 	eval {$wtree newitem [list $gpresarr($presence) $jidx] \
-	  -image $icon -tags $jidx} $itemOpts
+	  -image $icon -tags $prepjid} $itemOpts
     }
     
     # Design the balloon help window message.
@@ -1529,19 +1530,11 @@ proc ::Jabber::Roster::EditSet {token} {
     set oldSubscription $dlgstate(oldSubscription)
     set which           $dlgstate(which)
     
-    # General checks.
-    foreach key {jid name usersGroup} {
-	set what $key
-	if {[regexp $jprefs(invalsExp) $what match junk]} {
-	    tk_messageBox -message [FormatTextForMessageBox  \
-	      [::msgcat::mc jamessillegalchar $key $what]] \
-	      -icon error -type ok
-	    return
-	}
-    }
+    # General checks. 'name' and 'usersGroup'?
+
     
     # In any case the jid should be well formed.
-    if {![::Jabber::IsWellFormedJID $jid]} {
+    if {![jlib::jidvalidate $jid]} {
 	set ans [tk_messageBox -message [FormatTextForMessageBox  \
 	  [::msgcat::mc jamessbadjid $jid]] \
 	  -icon error -type yesno]
@@ -1939,7 +1932,7 @@ proc ::Jabber::Roster::PostProcessIcons { } {
     if {!$jprefs(rost,haveIMsysIcons)} {
 	return
     }
-    
+
     foreach v [$wtree find withtag all] {
 	set tags [$wtree itemconfigure $v -tags]
 	
@@ -1949,9 +1942,10 @@ proc ::Jabber::Roster::PostProcessIcons { } {
 	    } 
 	    default {
 		set jid [lindex $v end]
+		set prepjid [jlib::jidprep $jid]
 		
 		# Exclude jid's that belong to our login jabber server.
- 		if {![string match "*@$jserver(this)*" $jid]} {
+ 		if {![string match "*@$jserver(this)*" $prepjid]} {
 		    jlib::splitjid $jid jid2 res
 		    set pres [$jstate(roster) getpresence $jid2 -resource $res]
 		    array set presArr $pres

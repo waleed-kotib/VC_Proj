@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.10 2004-04-30 12:58:46 matben Exp $
+# $Id: disco.tcl,v 1.11 2004-05-23 13:18:09 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -207,7 +207,7 @@ proc disco::parse_get {disconame discotype from cmd jlibname type subiq args} {
 	    # testing...
 	    # This is perhaps not a robust way.
 	    if {![info exists items($from,$pnode,parent)]} {
-		set items($from,$pnode,parent) {}
+		set items($from,$pnode,parent)  {}
 		set items($from,$pnode,parents) {}
 	    }
 	    
@@ -308,7 +308,6 @@ proc disco::parse_get {disconame discotype from cmd jlibname type subiq args} {
     
     # Invoke callback for this get.
     uplevel #0 $cmd [list $disconame $type $from $subiq] $args
-    #uplevel #0 $cmd [list $type $from $subiq] $args
 }
 
 proc disco::isdiscoed {disconame discotype jid {node ""}} {

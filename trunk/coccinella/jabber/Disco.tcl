@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.12 2004-04-30 12:58:45 matben Exp $
+# $Id: Disco.tcl,v 1.13 2004-05-23 13:18:08 matben Exp $
 
 package provide Disco 1.0
 
@@ -161,6 +161,7 @@ proc ::Jabber::Disco::Command {disconame discotype from subiq args} {
 }
 
 proc ::Jabber::Disco::ItemsCB {disconame type from subiq args} {
+    variable tstate
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
@@ -191,8 +192,9 @@ proc ::Jabber::Disco::ItemsCB {disconame type from subiq args} {
 	    if {[string equal $from $jserver(this)]} {
 		::Jabber::UI::NewPage "Disco"
 	    }
+	    catch {unset tstate(run,$from)}
 	    ::Jabber::Disco::ControlArrows -1
-	    
+
 	    # Add to tree.
 	    set parents [$jstate(disco) parents $from]
 	    set v [concat $parents $from]
@@ -324,7 +326,8 @@ proc ::Jabber::Disco::Build {w} {
     ::tree::tree $wtree -width 180 -height 100 -silent 1 -scrollwidth 400 \
       -xscrollcommand [list $wxsc set]       \
       -yscrollcommand [list $wysc set]       \
-      -selectcommand [namespace current]::SelectCmd   \
+      -selectcommand [namespace current]::SelectCmd    \
+      -closecommand [namespace current]::CloseTreeCmd  \
       -opencommand [namespace current]::OpenTreeCmd
     
     if {[string match "mac*" $this(platform)]} {
@@ -504,7 +507,8 @@ proc ::Jabber::Disco::SelectCmd {w v} {
 #       none.
 
 proc ::Jabber::Disco::OpenTreeCmd {w v} {   
-    variable wtree    
+    variable wtree
+    variable tstate
     upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::Jabber::Disco::OpenTreeCmd v=$v"
@@ -515,6 +519,7 @@ proc ::Jabber::Disco::OpenTreeCmd {w v} {
 	# If we have not yet discoed this jid, do it now!
 	# We should have a method to tell if children have been added to tree!!!
 	if {![$jstate(disco) isdiscoed items $jid]} {
+	    set tstate(run,$jid) 1
 	    ::Jabber::Disco::ControlArrows 1
 	    
 	    # Discover services available.
@@ -531,6 +536,17 @@ proc ::Jabber::Disco::OpenTreeCmd {w v} {
 	
 	# Else it's already in the tree; do nothin.
     }    
+}
+
+proc ::Jabber::Disco::CloseTreeCmd {w v} {   
+    variable tstate
+    
+    ::Debug 2 "::Jabber::Disco::CloseTreeCmd v=$v"
+    set jid [lindex $v end]
+    if {[info exists tstate(run,$jid)]} {
+	unset tstate(run,$jid)
+	::Jabber::Disco::ControlArrows -1
+    }
 }
 
 # Jabber::Disco::AddToTree --
@@ -602,7 +618,8 @@ proc ::Jabber::Disco::AddToTree {v} {
 }
 
 proc ::Jabber::Disco::Refresh {jid} {    
-    variable wtree    
+    variable wtree
+    variable tstate
     upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::Jabber::Disco::Refresh jid=$jid"
@@ -616,6 +633,7 @@ proc ::Jabber::Disco::Refresh {jid} {
     }
     
     # Disco once more, let callback manage rest.
+    set tstate(run,$jid) 1
     ::Jabber::Disco::ControlArrows 1
     ::Jabber::Disco::GetInfo  $jid
     ::Jabber::Disco::GetItems $jid
@@ -691,9 +709,11 @@ proc ::Jabber::Disco::PresenceHook {jid presence args} {
 proc ::Jabber::Disco::InfoCmd {jid} {
     upvar ::Jabber::jstate jstate
 
+    ::Debug 4 "::Jabber::Disco::InfoCmd jid=$jid"
+    
     if {![$jstate(disco) isdiscoed info $jid]} {
 	set xmllist [$jstate(disco) get info $jid xml]
-	::Jabber::Disco::InfoResultCB $jstate(disco) result $jid $xmllist
+	::Jabber::Disco::InfoResultCB result $jid $xmllist
     } else {
 	$jstate(disco) send_get info $jid [namespace current]::InfoCmdCB
     }

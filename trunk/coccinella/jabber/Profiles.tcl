@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.17 2004-05-02 12:35:24 matben Exp $
+# $Id: Profiles.tcl,v 1.18 2004-05-23 13:18:08 matben Exp $
 
 package provide Profiles 1.0
 
@@ -322,19 +322,19 @@ proc ::Profiles::BuildPage {page} {
     label $pui.lserv -text "[::msgcat::mc {Jabber Server}]:" -anchor e
     entry $pui.eserv -width 22   \
       -textvariable [namespace current]::server -validate key  \
-      -validatecommand {::Jabber::ValidateJIDChars %S}
+      -validatecommand {::Jabber::ValidateDomainStr %S}
     label $pui.luser -text "[::msgcat::mc Username]:" -anchor e
     entry $pui.euser -width 22  \
       -textvariable [namespace current]::username -validate key  \
-      -validatecommand {::Jabber::ValidateJIDChars %S}
+      -validatecommand {::Jabber::ValidateUsernameStr %S}
     label $pui.lpass -text "[::msgcat::mc Password]:" -anchor e
     entry $pui.epass -width 22 -show {*}  \
       -textvariable [namespace current]::password -validate key  \
-      -validatecommand {::Jabber::ValidateJIDChars %S}
+      -validatecommand {::Jabber::ValidatePasswdChars %S}
     label $pui.lres -text "[::msgcat::mc Resource]:" -anchor e
     entry $pui.eres -width 22   \
       -textvariable [namespace current]::resource -validate key  \
-      -validatecommand {::Jabber::ValidateJIDChars %S}
+      -validatecommand {::Jabber::ValidateResourceStr %S}
     set wuserinfofocus $wcombo
 
     grid $pui.lserv -column 0 -row 1 -sticky e
