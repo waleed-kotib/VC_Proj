@@ -7,7 +7,7 @@
 #  (C) 2000 Kerem 'Waster_' HADIMLI (minor parts)
 #  (c) 2003  Mats Bengtsson
 #  
-# $Id: socks5.tcl,v 1.4 2003-12-06 08:08:05 matben Exp $
+# $Id: socks5.tcl,v 1.5 2003-12-06 13:48:00 matben Exp $
 # 
 # TODO:  GSSAPI authetication which is a MUST is missing.
 #        Only CMD CONNECT implemented.
@@ -138,7 +138,7 @@ proc socks5::init {sock addr port args} {
 	return -code error $err
     }
 
-    # Setup timeout timer.
+    # Setup timeout timer. !async remains!
     set state(timeoutid)  \
       [after $state(-timeout) [namespace current]::timeout $token]
     
@@ -484,8 +484,10 @@ proc socks5::cleanup {token} {
 #       port:       it's port number
 #       command:    tclProc for callabcks {token type args}
 #       args:   
-#               -blocksize  bytes
-#               -timeout    millisecs
+#               -blocksize     bytes
+#               -bytestream    boolean
+#               -opendstsocket boolean
+#               -timeout       millisecs
 #       
 # Results:
 #       token.
@@ -506,6 +508,8 @@ proc socks5::serverinit {sock ip port command args} {
 	
     array set state {
 	-blocksize        8192
+	-bytestream       1
+	-opendstsocket    1
 	-timeout          60000
 	auth              0
 	state             ""
@@ -689,18 +693,24 @@ proc socks5::serv_request {token} {
     set state(dst_addr) $addr
     set state(dst_port) $port
 
-    # Init the SOCKS connection to dst.
-    if {[catch {socket -async $addr $port} sock_dst]} {
-	serv_finish $token eof
-	return
+    # Init the SOCKS connection to dst if wanted. Else???
+    if {$state(-opendstsocket)} {
+	if {[catch {socket -async $addr $port} sock_dst]} {
+	    serv_finish $token eof
+	    return
+	}
+	set state(sock_dst) $sock_dst
+	
+	# Setup timeout timer.
+	set state(timeoutid)  \
+	  [after $state(-timeout) [namespace current]::serv_timeout $token]
+	fileevent $sock_dst writable  \
+	  [list [namespace current]::serv_dst_connect $token]
+    } else {
+	
+	# ???
+	uplevel #0 $state(command) [list $token reply]
     }
-    set state(sock_dst) $sock_dst
-    
-    # Setup timeout timer.
-    set state(timeoutid)  \
-      [after $state(-timeout) [namespace current]::serv_timeout $token]
-    fileevent $sock_dst writable  \
-      [list [namespace current]::serv_dst_connect $token]
 }
 
 proc socks5::serv_dst_connect {token} {
@@ -761,8 +771,13 @@ proc socks5::serv_reply {token} {
 	return
     }
     
-    # New we are ready to stream data.
-    establish_bytestreams $token
+    # New we are ready to stream data if wanted.
+    if {$state(-bytestream)} {
+	establish_bytestreams $token
+    } else {
+	# ???
+	serv_finish $token
+    }
 }
 
 proc socks5::establish_bytestreams {token} {
@@ -799,19 +814,37 @@ proc socks5::read_stream {token in out} {
 	serv_finish $token
     } elseif {[catch {read $in} data]} {
 	serv_finish $token eof
-    } elseif {[catch {puts -nonewline $out $data; flush $out}]} {
-	serv_finish $token eof
+    } else {
+	
+	# We could wait here (in the event loop) for channel to be writable
+	# to avoid any blocking...
+	if {0} {
+	    fileevent $out writable  \
+	      [list [namespace current]::stream_writeable $token $primary]
+	    vwait $token\(writetrigger${primary})
+	}
+	if {[catch {puts -nonewline $out $data; flush $out}]} {
+	    serv_finish $token eof
+	}
     }
-}    
+}
+
+proc socks5::stream_writeable {token primary} {
+    variable $token
+    upvar 0 $token state
+    
+    incr state(writetrigger${primary})
+}
 
 proc socks5::serv_finish {token {errormsg ""}} {
     variable $token
     upvar 0 $token state
     
     debug 2 "socks5::serv_finish"
-    catch {close $state(sock)}
-    catch {close $state(sock_dst)}
-        
+    if {$state(-bytestream)} {
+	catch {close $state(sock)}
+	catch {close $state(sock_dst)}
+    }        
     if {[string length $errormsg]} {
 	uplevel #0 $state(command) [list $token error -error $errormsg]
     } else {
