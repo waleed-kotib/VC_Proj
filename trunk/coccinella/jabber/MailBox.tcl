@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.4 2003-02-06 17:23:31 matben Exp $
+# $Id: MailBox.tcl,v 1.5 2003-02-24 17:52:05 matben Exp $
 
 package provide MailBox 1.0
 
@@ -51,6 +51,14 @@ proc ::Jabber::MailBox::Init { } {
 	  [list "Re: Shit" kk@athlon.se/hh "today 08:33:02" 0 $locals(msgId) "Hej,\n\nKass?\nlink www.apple.com\nshit www.mats.se/home"]
 	set mailbox([incr locals(msgId)])  \
 	  [list "Re: Shit" kk@athlon.se/zzz "today 08:43:02" 0 $locals(msgId) "Hej,\n\nAny :cool: stuff? I'm :bored: and :cheeky:."]
+	set mailbox([incr locals(msgId)])  \
+	  [list "Re: special braces" brace@athlon.se/co "today 08:43:02" 0 $locals(msgId) "Testing unmatched braces:  if \{1\} \{"]
+	set mailbox([incr locals(msgId)])  \
+	  [list "Re: special amp" brace@athlon.se/co "today 08:43:02" 0 $locals(msgId) "Testing ampersand:  amp &"]
+	set mailbox([incr locals(msgId)])  \
+	  [list "Re: special brackets" bracket@athlon.se/co "today 08:43:02" 0 $locals(msgId) "Testing brackets  \[\["]
+	set mailbox([incr locals(msgId)])  \
+	  [list "Re: special quotes" quote@athlon.se/co "today 08:43:02" 0 $locals(msgId) "Testing \"quotes\" "]
     }
 }
 
@@ -648,9 +656,11 @@ proc ::Jabber::MailBox::MsgDisplayClear { } {
 }
 
 proc ::Jabber::MailBox::DisplayMsg {id} {
+    global  prefs
 
     variable locals
     variable mailbox
+    upvar ::Jabber::jprefs jprefs
     
     set wtextmsg $locals(wtextmsg)    
     #$wtextmsg configure -state normal
@@ -661,6 +671,10 @@ proc ::Jabber::MailBox::DisplayMsg {id} {
 	eval $wtextmsg $cmd
     }
     #$wtextmsg configure -state disabled
+    
+    if {$jprefs(speakMsg)} {
+	::UserActions::Speak $body $prefs(voiceOther)
+    }
 }
 
 proc ::Jabber::MailBox::ReplyTo { } {

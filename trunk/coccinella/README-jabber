@@ -38,6 +38,5 @@ This brief text describes the jabber features supported:
 
 Note, however, that the jabber protocols outside the very core, are a moving 
 target, and that changes and adoptions takes place at a rapid pace.
-This is true for multi user conferencing in particular, where the MUC
-protocol just has obtained Draft status. No native support for the MUC
-protocol is provided in this release.
+This is true for multi user conferencing in particular. Release 0.94.3
+contains support for this in JabberLib, but not yet at application level.

@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.4 2003-02-06 17:23:32 matben Exp $
+# $Id: roster.tcl,v 1.5 2003-02-24 17:52:09 matben Exp $
 # 
 # Note that every jid in the rosterArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -237,7 +237,7 @@ proc roster::setrosteritem {rostName jid args} {
     foreach {name value} $args {
 	set par [string trimleft $name "-"]
 	set rosterArr($jid,$par) $value
-	if {[string compare $par {groups}] == 0} {
+	if {[string equal $par "groups"]} {
 	    foreach gr $value {
 		if {[lsearch $rosterArr(groups) $gr] < 0} {
 		    lappend rosterArr(groups) $gr
@@ -602,7 +602,7 @@ proc roster::getgroups {rostName {jid {}}} {
 	    return {}
 	}
     } else {
-	set rosterArr(groups) [lsort $rosterArr(groups)]
+	set rosterArr(groups) [lsort -unique $rosterArr(groups)]
 	return $rosterArr(groups)
     }
 }

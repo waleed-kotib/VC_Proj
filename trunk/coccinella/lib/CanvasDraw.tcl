@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasDraw.tcl,v 1.3 2003-02-06 17:23:33 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.4 2003-02-24 17:52:09 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 
@@ -352,11 +352,9 @@ proc ::CanvasDraw::DoMove {w x y what {shift 0}} {
 	
 	# Find associated id for the actual item. Saved in the tags of the marker.
 	if {![regexp " +id($id_)" [$w gettags hitBbox] match theItemId]} {
-	    #puts "no match: w gettags hitBbox=[$w gettags hitBbox]"
 	    return
 	}
 	if {[lsearch [$w gettags current] hitBbox] == -1} {
-	    #puts "DoMove:: Warning, no match"
 	    return
 	}
 	
@@ -507,7 +505,6 @@ proc ::CanvasDraw::FinalizeMove {w x y {what item}} {
 	# Find associated id for the actual item. Saved in the tags of the marker.
 	
 	if {![regexp " +id($id_)" [$w gettags current] match theItemId]} {
-	    #puts "no match: w gettags current=[$w gettags current]"
 	    return
 	}
 	set theItno [::CanvasUtils::GetUtag $w $theItemId]
@@ -597,10 +594,14 @@ proc ::CanvasDraw::FinalizeMove {w x y {what item}} {
 	} else {
 	    set redo [list ::CanvasUtils::Command $wtop $cmd]
 	}
-	set undo [list ::CanvasUtils::Command $wtop $xDrag(undocmd)]
+	if {[info exists xDrag(undocmd)]} {
+	    set undo [list ::CanvasUtils::Command $wtop $xDrag(undocmd)]
+	}
     } elseif {[string equal $what "movie"]} {
 	set redo [list ::CanvasUtils::Command $wtop $cmd]
-	set undo [list ::CanvasUtils::Command $wtop $xDrag(undocmd)]
+	if {[info exists xDrag(undocmd)]} {
+	    set undo [list ::CanvasUtils::Command $wtop $xDrag(undocmd)]
+	}
     } else {
 	
 	# Have moved a bunch of ordinary items. Images coords?
@@ -618,8 +619,10 @@ proc ::CanvasDraw::FinalizeMove {w x y {what item}} {
 	set undo [list ::CanvasUtils::CommandList $wtop $cmdUndoList]
     }
     eval $redo "remote"
-    undo::add [::UI::GetUndoToken $wtop] $undo $redo
-	
+    if {[info exists undo]} {
+	undo::add [::UI::GetUndoToken $wtop] $undo $redo
+    }
+    
     catch {unset xDrag}
 }
 
@@ -1924,9 +1927,10 @@ proc ::CanvasDraw::DeleteItem {w x y {id current} {where all}} {
 #        Makes four tiny squares at the corners of the specified items.
 #       
 # Arguments:
-#       w      the canvas widget.
-#       shift  If 'shift', then just select item, else deselect all other first.
-#       which  can either be "current", another tag, or an id.
+#       w           the canvas widget.
+#       shift       If 'shift', then just select item, else deselect all 
+#                   other first.
+#       which       can either be "current", another tag, or an id.
 #       
 # Results:
 #       none
@@ -1934,7 +1938,7 @@ proc ::CanvasDraw::DeleteItem {w x y {id current} {where all}} {
 proc ::CanvasDraw::MarkBbox {w shift {which current}} {
     global  prefs kGrad2Rad
     
-    Debug 3 "MarkBbox (entry):: w=$w, shift=$shift, which=$which"
+    Debug 3 "MarkBbox:: w=$w, shift=$shift, which=$which"
 
     set wtop [::UI::GetToplevelNS $w]
     set a $prefs(aBBox)
@@ -2067,6 +2071,20 @@ proc ::CanvasDraw::LostSelection {wtop} {
 	::UserActions::DeselectAll $wtop
     }
 }
+
+proc ::CanvasDraw::DeselectItem {wtop utag} {
+    
+    upvar ::${wtop}::wapp wapp
+    
+    set wCan $wapp(can)
+    set id [$wCan find withtag $utag]
+    $wCan dtag $utag "selected"
+    $wCan delete id$id
+    
+    # menus
+    ::UI::FixMenusWhenSelection $wCan
+}
+
 
 proc ::CanvasDraw::SyncMarks {wtop} {
 

@@ -4,7 +4,7 @@
 #
 #  Copyright (c) 2002  Mats Bengtsson
 #
-# $Id: putfile.tcl,v 1.2 2003-01-11 16:16:08 matben Exp $
+# $Id: putfile.tcl,v 1.3 2003-02-24 17:52:04 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -355,14 +355,10 @@ proc putfile::Connect {token} {
     if {[catch {
 	puts  $s "PUT: $dstFile $optList"
 	flush $s    
-    }]} {	
-	if {[info exists state(-command)]} {
-	    set msg {Got network error when transfer file}
-	    if {[catch {eval $state(-command) {$token error $msg}} err]} {
-		set state(error) [list $err $errorInfo $errorCode]
-		set state(status) error
-	    }
-	}
+    } err]} {	
+	Finish $token "Connection to $state(ip) failed."
+	cleanup $token
+	return
     }
     if {[info exists state(-command)]} {
 	set msg "Client contacted: $state(ip); negotiating..."

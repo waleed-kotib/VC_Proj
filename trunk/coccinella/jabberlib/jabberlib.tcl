@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.4 2003-02-06 17:23:32 matben Exp $
+# $Id: jabberlib.tcl,v 1.5 2003-02-24 17:52:07 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -17,6 +17,7 @@
 #
 # Variables used in JabberLib:
 # 
+# lib:
 #	lib(wrap)                  : Wrap ID
 #
 #       lib(clientcmd)             : Callback proc up to the client
@@ -31,12 +32,22 @@
 #
 #	lib(streamcmd)             : Callback command to run when the <stream>
 #	                             tag is received from the server.
-#	                             
+#
+# iq:	                             
 #	iq(uid)                    : Next iq id-number. Sent in 
 #                                    "id" attributes of <iq> packets.
 #
 #	iq($id)                    : Callback command to run when result 
 #	                             packet of $id is received.
+#
+# locals:	                             
+#	locals(groupchatPriority)  : The groupchat protocol priority list.                             
+#	                             
+#       locals(gcprot,$jid)        : Map a groupchat service jid to protocol:
+#       	                     (gc-1.0|conference|muc)
+#
+#       locals(prefgcprot,$jid)    : Stores preferred groupchat protocol that
+#                                    overrides the priority list.
 #	                               
 ############################# SCHEMA ###########################################
 #
@@ -46,6 +57,8 @@
 #                                      | /            \  |
 #                                      |/              \ |
 #   TclXML <---> wrapper <---> jabberlib <-----------> client
+#                                       \             /
+#                                        <--- muc <---
 #   
 #   Note the one-way communication with the 'roster' object since it may only
 #   be set by the server, that is, from 'jabberlib'. 
@@ -104,8 +117,10 @@
 #      jlibName send_autoupdate to cmd
 #      jlibName vcard_get to cmd
 #      jlibName vcard_set cmd ?args?
+#      jlibName setgroupchatpriority priorityList
+#      jlibName setgroupchatprotocol jid protocol
 #      
-#  o protocol independent methods for groupchats:
+#  o protocol independent methods for groupchats/conference:
 #      jlibName service parent jid
 #      jlibName service childs jid
 #      jlibName service isroom jid
@@ -135,6 +150,9 @@
 #      jlibName groupchat status room
 #      jlibName groupchat participants room
 #      jlibName groupchat allroomsin
+#      
+#  o utility functions:   
+#      jlib::invokefrombrowser browsename cmd
 #      
 #  o the 'muc' command: see muc.tcl
 #      
@@ -184,7 +202,9 @@
 #       1.0b10   fixed a number of problems with groupchat-conference compatibility,
 #                added presence callback
 #       1.0b11   changed 'browse_get' command 
-#                added 'mystatus' command
+#                added 'mystatus' command, added 'setgroupchatpriority',
+#                'setgroupchatprotocol' and reworked all groupchat protocol
+#                dispatching.
 
 # Notes:  1) there can be problems if using any uppercase character in names
 #            while they are returned all lower case, such as room names etc.
@@ -209,6 +229,10 @@ namespace eval jlib {
     variable statics
     set statics(presenceTypeExp)  \
       {(available|unavailable|subscribe|unsubscribe|subscribed|unsubscribed|invisible)}
+
+    # Maintain a priority list of groupchat protocols in decreasing priority.
+    # Entries must match: ( gc-1.0 | conference | muc )
+    set statics(groupchatTypeExp) {(gc-1.0|conference|muc)}
 }
 
 namespace eval jlib::service {
@@ -267,6 +291,8 @@ proc jlib::Debug {num str} {
   
 proc jlib::new {jlibname rostername browsename clientcmd args} {
     
+    variable objectmap
+    
     # Check that we may have a command [jlibname].
     if {[llength [info commands $jlibname]] > 0} {
 	return -code error "\"$jlibname\" command is already in use"
@@ -296,6 +322,7 @@ proc jlib::new {jlibname rostername browsename clientcmd args} {
     upvar [namespace current]::${jlibname}::opts opts
     upvar [namespace current]::${jlibname}::conf conf
     upvar [namespace current]::${jlibname}::gchat gchat
+    upvar [namespace current]::${jlibname}::locals locals
     
     array set opts {
 	-iqcommand            {}
@@ -333,6 +360,14 @@ proc jlib::new {jlibname rostername browsename clientcmd args} {
     
     set lib(isinstream) 0
     set lib(server) ""
+    
+    # Mapper between objects.
+    set objectmap(browsename,$jlibname) $browsename
+    set objectmap(jlibname,$browsename) $jlibname
+    
+    # Maintain a priority list of groupchat protocols in decreasing priority.
+    # Entries must match: ( gc-1.0 | conference | muc )
+    set locals(groupchatPriority) {conference gc-1.0}
     
     # Any of {available away dnd invisible unavailable}
     set locals(status) "unavailable"
@@ -456,6 +491,24 @@ proc jlib::verify_options {jlibname args} {
 	    return -code error "Unknown option $flag, can be: $usage"
 	}
     }
+}
+
+# jlib::invokefrombrowser --
+# 
+#       This is a helper utility to allow the browse object call a method in
+#       the jabberlib. 
+#       This is the sole deviation of the rule that the browse object is
+#       never makes any calls to jlib.
+
+proc jlib::invokefrombrowser {browsename cmd} {
+
+    variable objectmap
+
+    if {![info exists objectmap(jlibname,$browsename)]} {
+	return -code error "Unrecognized browse object \"$browsename\""
+    }
+    set jlibname $objectmap(jlibname,$browsename)
+    eval {[lindex $cmd 0] $jlibname} [lrange $cmd 1 end]
 }
 
 # The procedures for the standard socket transport layer -----------------------
@@ -1247,7 +1300,7 @@ proc jlib::parse_roster_get {jlibname ispush cmd type thequery} {
 		    }
 		}
 		if {[string length $groups]} {
-		    lappend arglist "-groups" $groups
+		    lappend arglist -groups $groups
 		}
 		
 		# Fill in our roster with this.
@@ -1816,8 +1869,8 @@ proc jlib::send_presence {jlibname args} {
     
     # Any of {available away dnd invisible unavailable}
     # Must be destined to login server (by default).
-    if {![info exists argsArr(to)] || \
-      [string equal $argsArr(to) $lib(server)]} {
+    if {![info exists argsArr(-to)] || \
+      [string equal $argsArr(-to) $lib(server)]} {
 	set locals(status) $type
 	if {[info exists argsArr(-show)]} {
 	    set locals(status) $argsArr(-show)
@@ -2011,6 +2064,9 @@ proc jlib::parse_agent_get {jlibname jid cmd type subiq} {
 	if {[lsearch $services $tag] >= 0} {
 	    lappend agent($tag) $jid
 	}
+	if {[string equal $tag "groupchat"]} {
+	    [namespace current]::registergcprotocol $jlibname $jid "gc-1.0"
+	}
     }    
     uplevel #0 "$cmd [list $jlibname ok $subiq]"
 }
@@ -2048,6 +2104,9 @@ proc jlib::parse_agents_get {jlibname jid cmd type subiq} {
 	    set agent($jidAgent,$tag) [lindex $elem 3]
 	    if {[lsearch $services $tag] >= 0} {
 		lappend agent($tag) $jidAgent
+	    }
+	    if {[string equal $tag "groupchat"]} {
+		[namespace current]::registergcprotocol $jlibname $jid "gc-1.0"
 	    }
 	}
 	set agent($jidAgent,parent) $jid
@@ -2394,7 +2453,9 @@ proc jlib::roster_set {jlibname jid cmd args} {
     }
     set subdata {}
     foreach group $groups {
-	lappend subdata [wrapper::createtag {group} -chdata $group]
+    	if {$group != ""} {
+	lappend subdata [wrapper::createtag "group" -chdata $group]
+	}
     }
     
     set xmllist [wrapper::createtag "query"   \
@@ -2505,6 +2566,101 @@ proc jlib::auto_away_cmd {jlibname what} {
 	}
     }        
     uplevel #0 "$lib(clientcmd) [list $jlibname $what]"
+}
+
+#-------------------------------------------------------------------------------
+#
+# A couple of routines that handle the selection of groupchat protocol for
+# each groupchat service.
+# A groupchat service may support more than a single protocol. For instance,
+# the MUC component supports both gc-1.0 and MUC.
+
+# Needs some more verification before using it for a dispatcher.
+
+# jlib::setgroupchatpriority --
+# 
+#       Sets the list if groupchat protocols in decreasing priority.
+#       The list contains elements 'gc-1.0', 'conference', 'muc',
+#       describing which to pick if multiple options.
+
+proc jlib::setgroupchatpriority {jlibname priorityList} {
+
+    variable statics
+    upvar [namespace current]::${jlibname}::locals locals
+
+    foreach prot $priorityList {
+	if {![regexp $statics(groupchatTypeExp) $prot]} {
+	    return -code error "Unrecognized groupchat type \"$prot\""
+	}
+    }
+    set locals(groupchatPriority) $priorityList
+}
+
+# jlib::setgroupchatprotocol --
+# 
+#       Explicitly picks a groupchat protocol to use for a groupchat service.
+
+proc jlib::setgroupchatprotocol {jlibname jid prot} {
+
+    variable statics
+    upvar [namespace current]::${jlibname}::locals locals
+    upvar [namespace current]::${jlibname}::agent agent
+    upvar [namespace parent]::${jlibname}::lib lib
+
+    if {![regexp $statics(groupchatTypeExp) $prot]} {
+	return -code error "Unrecognized groupchat type \"$prot\""
+    }
+    switch -- $prot {
+	gc-1.0 {
+	    if {![info exists agent($jid,groupchat)]} {
+		return -code error  \
+		  "No groupchat agent registered for \"$jid\""
+	    }
+	}
+	conference {
+	    set confServicesJids [$lib(browsename) getconferenceservers]
+	    if {[lsearch -exact $confServicesJids $jid] < 0} {
+		return -code error \
+		  "The jid $jid does not know of any \"conference\" service"
+	    }
+	}
+	muc {
+	    set browseNS [$lib(browsename) getnamespaces $jid]
+	    if {[lsearch -exact $browseNS "http://jabber.org/protocol/muc"] < 0} {
+		return -code error \
+		  "The jid \"$jid\" does not know of any \"conference\" service"
+	    }
+	}
+    }
+    set locals(prefgcprot,$jid) $prot
+}
+
+# jlib::registergcprotocol --
+# 
+#       Register (sets) a groupchat service jid according to the priorities
+#       presently set. Only called internally!
+
+proc jlib::registergcprotocol {jlibname jid gcprot} {
+
+    upvar [namespace current]::${jlibname}::locals locals
+    
+    # If we already told jlib to use a groupchat protocol then...
+    if {[info exist locals(prefgcprot,$jid)]} {
+	return
+    }
+    
+    # Set 'locals(gcprot,$jid)' according to the priority list.
+    foreach prot $locals(groupchatPriority) {
+	
+	# Do we have registered a groupchat protocol with higher priority?
+	if {[info exists locals(gcprot,$jid)]} {
+	    return
+	}
+	if {[string equal $prot $gcprot]} {
+	    set locals(gcprot,$jid) $prot
+	    return
+	}	
+    }
 }
 
 #--- namespace jlib::service ---------------------------------------------------
@@ -2705,8 +2861,13 @@ proc jlib::service::hashandnick {jlibname room} {
     if {[lsearch $gchat(allroomsin) $room] >= 0} {
 	
 	# Old-style groupchat just has /nick.
-	set res [[namespace parent]::groupchat::mynick $jlibname $room]
-	set hashandnick [list $room/$res $res]   
+	set nick [[namespace parent]::groupchat::mynick $jlibname $room]
+	set hashandnick [list ${room}/${nick} $nick]   
+    } elseif {[lsearch [[namespace parent]::muc::allroomsin $jlibname] $room] >= 0} {
+	
+	# The MUC conference method.
+	set nick [[namespace parent]::muc::mynick $jlibname $room]
+	set hashandnick [list ${room}/${nick} $nick]   
     } elseif {[$lib(browsename) isbrowsed $lib(server)]} {
 	set hashandnick  \
 	  [[namespace parent]::conference::hashandnick $jlibname $room]

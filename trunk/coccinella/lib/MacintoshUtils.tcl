@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: MacintoshUtils.tcl,v 1.1.1.1 2002-12-08 11:03:26 matben Exp $
+# $Id: MacintoshUtils.tcl,v 1.2 2003-02-24 17:52:11 matben Exp $
 
 namespace eval ::Mac:: {
 
@@ -23,6 +23,7 @@ proc ::Mac::Printer::PageSetup { } {
 }
 
 # Synthetic Speech .............................................................
+# Important: version 2.0 only
 
 namespace eval ::Mac::Speech:: {
 
@@ -34,16 +35,16 @@ proc ::Mac::Speech::Init { } {
 
 proc ::Mac::Speech::Speak {msg {theVoice {}}} {
         
-    if {[string length $theVoice] == 0} {
-	speak $msg
+    if {$theVoice == ""} {
+	speech::speak $msg
     } else {
-	speak -voice $theVoice $msg
+	speech::speak $msg -voice $theVoice
     }
 }
 
 proc ::Mac::Speech::GetVoices { } {
 
-    return [speak -list]
+    return [speech::speakers]
 }
 
 

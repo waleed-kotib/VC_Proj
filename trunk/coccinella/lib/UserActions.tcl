@@ -3,11 +3,11 @@
 #      This file is part of the whiteboard application. It implements typical
 #      user actions, such as callbacks from buttons and menus.
 #      
-#  Copyright (c) 2000-2002  Mats Bengtsson
+#  Copyright (c) 2000-2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UserActions.tcl,v 1.3 2003-01-30 17:34:08 matben Exp $
+# $Id: UserActions.tcl,v 1.4 2003-02-24 17:52:12 matben Exp $
 
 namespace eval ::UserActions:: {
     
@@ -31,9 +31,9 @@ proc ::UserActions::CancelAllPutGetAndPendingOpen {wtop} {
     
     upvar ::${wtop}::wapp wapp
 
-    # This shall be made instance specific!!!
-    ::PutFileIface::CancelAll
-    ::GetFile::CancelAll
+    # This must be instance specific!!!
+    ::PutFileIface::CancelAllWtop $wtop
+    ::GetFile::CancelAllWtop $wtop
     if {[string equal $prefs(protocol) "jabber"]} {
 	::Network::OpenConnectionKillAll
 	::UI::SetStatusMessage $wtop {}
@@ -254,10 +254,10 @@ proc ::UserActions::DoPrintCanvas {wtop} {
     set wCan $wapp(can)
     
     switch -- $this(platform) {
-	"macintosh" {
+	macintosh {
 	    SavePostscript $wtop
 	}
-	"windows" {
+	windows {
 	    if {!$prefs(printer)} {
 		tk_messageBox -icon error -title [::msgcat::mc {No Printing}] \
 		  -message [::msgcat::mc messprintnoextension]
@@ -265,7 +265,7 @@ proc ::UserActions::DoPrintCanvas {wtop} {
 		::Windows::Printer::Print $wCan
 	    }
 	}
-	"unix" - "macosx" {
+	unix - macosx {
 	    ::PrintPSonUnix::PrintPSonUnix $wDlgs(print) $wCan
 	}
     }
@@ -282,11 +282,11 @@ proc ::UserActions::DoPrintText {wtext args} {
 	error "::UserActions::DoPrintText: $wtext not a text widget!"
     }
     switch -- $this(platform) {
-	"macintosh" {
+	macintosh {
 	    tk_messageBox -icon error -title [::msgcat::mc {No Printing}] \
 	      -message [::msgcat::mc messprintnoextension]
 	}
-	"windows" {
+	windows {
 	    if {!$prefs(printer)} {
 		tk_messageBox -icon error -title [::msgcat::mc {No Printing}] \
 		  -message [::msgcat::mc messprintnoextension]
@@ -294,7 +294,7 @@ proc ::UserActions::DoPrintText {wtext args} {
 		eval {::Windows::Printer::Print $wtext} $args
 	    }
 	}
-	"unix" - "macosx" {
+	unix - macosx {
 	    ::PrintPSonUnix::PrintPSonUnix $wDlgs(print) $wtext
 	}
     }
@@ -326,13 +326,14 @@ proc ::UserActions::Speak {msg {voice {}}} {
     global  this prefs
     
     switch -- $this(platform) {
-	macintosh {
+	macintosh - macosx {
 	    ::Mac::Speech::Speak $msg $voice
 	}
 	windows {
 	    ::MSSpeech::Speak $msg $voice
 	}
 	unix - macosx {
+	    # empty.
 	}
     }
 }
@@ -341,7 +342,7 @@ proc ::UserActions::SpeakGetVoices { } {
     global  this prefs
     
     switch -- $this(platform) {
-	macintosh {
+	macintosh - macosx {
 	    return [::Mac::Speech::GetVoices]
 	}
 	windows {
@@ -566,7 +567,7 @@ proc ::UserActions::DoPutCanvasDlg {wtop} {
     DoEraseAll $wtop "remote"
 
     # Put this canvas to all others.
-    DoPutCanvas $wCan all
+    ::UserActions::DoPutCanvas $wCan all
 }
     
 # UserActions::DoPutCanvas --
@@ -651,6 +652,7 @@ proc ::UserActions::DoGetCanvas {wtop} {
 #       Puts the complete canvas to remote client(s).
 #       Does not use a temporary file. Does not add anything to undo stack.
 #       Needed because jabber should get everything in single batch.
+#       Lets remote client get binary entities (images ...) via http.
 
 proc ::UserActions::DoSendCanvas {wtop} {
     
@@ -679,10 +681,12 @@ proc ::UserActions::DoSendCanvas {wtop} {
 		
 		switch -- $windowClass {
 		    QTFrame {
-			set line [::CanvasUtils::GetOnelinerForQTMovie $w $id]
+			set line [::CanvasUtils::GetOnelinerForQTMovie $w $id \
+			  -uritype http]
 		    }
 		    SnackFrame {			
-			set line [::CanvasUtils::GetOnelinerForSnack $w $id]
+			set line [::CanvasUtils::GetOnelinerForSnack $w $id \
+			  -uritype http]
 		    }
 		    XanimFrame {
 			# ?
@@ -719,6 +723,11 @@ proc ::UserActions::DoCloseWindow { } {
     global  wDlgs
     
     set w [winfo toplevel [focus]]
+    if {$w == "."} {
+	set wtop $w
+    } else {
+	set wtop ${w}.
+    }
     
     # Do different things depending on type of toplevel.
     switch -glob -- [winfo class $w] {
@@ -726,13 +735,15 @@ proc ::UserActions::DoCloseWindow { } {
 	    # Main window.
 	    if {$w == "."} {
 		::UserActions::DoQuit -warning 1
+	    } else {
+		::UI::CloseMain $wtop
 	    }
 	}
 	Whiteboard {
 	    if {$w == "."} {
 		::UserActions::DoQuit -warning 1
 	    } else {
-		destroy $w
+		::UI::CloseMain $wtop
 	    }
 	}
 	Preferences {
@@ -829,7 +840,8 @@ proc ::UserActions::DoQuit {args} {
     
     # A workaround for the 'info script' bug on MacTk 8.3
     # Work on a temporary file and switch later.
-    if {[string equal $::this(platform) "macintosh"] && [info exists specialMacPrefPath]} {
+    if {[string equal $::this(platform) "macintosh"] && \
+      [info exists specialMacPrefPath]} {
 	set tmpFile ${specialMacPrefPath}.tmp
 	if {![catch {open $tmpFile w} fid]} {
 	    puts $fid "!\n!   Install path for the Whiteboard application."

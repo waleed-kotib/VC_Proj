@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.1.1.1 2002-12-08 10:59:24 matben Exp $
+# $Id: GotMsg.tcl,v 1.2 2003-02-24 17:52:05 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -120,7 +120,7 @@ proc ::Jabber::GotMsg::Show {thisMsgId} {
 	$wbtnext configure -state disabled
     }
     if {$jprefs(speakMsg)} {
-	catch {speak -voice $prefs(voiceOther) $theMsg}
+	::UserActions::Speak $theMsg $prefs(voiceOther)
     }
 }
 

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.4 2003-02-06 17:23:31 matben Exp $
+# $Id: Chat.tcl,v 1.5 2003-02-24 17:52:04 matben Exp $
 
 package provide Chat 1.0
 
@@ -146,11 +146,28 @@ proc ::Jabber::Chat::GotMsg {body args} {
 
     array set argsArr $args
     
+    # -from is a 3-tier jid /resource included.
+    set jid2 $argsArr(-from)
+    set username $argsArr(-from)
+    regexp {((.+)@([^/]+))(/.+)?$} $argsArr(-from) m jid2 username host res
+    
     # We must follow the thread...
     if {[info exists argsArr(-thread)]} {
 	set threadID $argsArr(-thread)
     } else {
-	return -code error "Missing thread ID!!!"
+	
+	# Try to find a reasonable fallback for clients that fail here (Psi).
+	# Find if we have registerd any chat for this jid.
+	foreach {key val} [array get locals "*,jid"] {
+	    if {$val == $jid2} {
+		if {[regexp {^([^,]+),jid$} $key match threadID]} {
+		    break
+		}
+	    }
+	}
+	if {![info exists threadID]} {
+	    set threadID [::sha1pure::sha1 "$jstate(mejid)[clock seconds]"]
+	}
     }
 
     if {[info exists locals($threadID,wtop)] &&  \
@@ -166,13 +183,6 @@ proc ::Jabber::Chat::GotMsg {body args} {
     }
     set wtext $locals($threadID,wtext)
     $wtext configure -state normal
-    
-    # -from is a 3-tier jid /resource included.
-    set jid2 $argsArr(-from)
-    regexp {^(.+@[^/]+)(/.+)?$} $argsArr(-from) match jid2 
-    if {![regexp {(.+)@([^/]+)(/(.+))?} $argsArr(-from) match username host junk res]} {
-	set username $jid2
-    }
     $wtext insert end <$username> youtag
     $wtext insert end "   " youtxttag
 
@@ -190,7 +200,7 @@ proc ::Jabber::Chat::GotMsg {body args} {
     }
     
     if {$jprefs(speakChat)} {
-	catch {speak -voice $prefs(voiceOther) $body}
+	::UserActions::Speak $body $prefs(voiceOther)
     }
 }
 
@@ -250,9 +260,9 @@ proc ::Jabber::Chat::Build {threadID args} {
 	set jid2 $argsArr(-from)
 	regexp {^(.+@[^/]+)(/.+)?$} $argsArr(-from) match jid2 
 	if {[$jstate(jlib) service isroom $jid2]} {
-	set locals($threadID,jid) $argsArr(-from)
+	    set locals($threadID,jid) $argsArr(-from)
 	} else {
-	set locals($threadID,jid) $jid2
+	    set locals($threadID,jid) $jid2
 	}
     } else {
 	set locals($threadID,jid) ""
@@ -433,6 +443,7 @@ proc ::Jabber::Chat::Send {threadID} {
     
     variable locals
     upvar ::Jabber::jstate jstate
+    upvar ::Jabber::jprefs jprefs
     
     ::Jabber::Debug 2 "::Jabber::Chat::Send "
     
@@ -457,14 +468,21 @@ proc ::Jabber::Chat::Send {threadID} {
     # Get text to send. Strip off any ending newlines from Return.
     set allText [$wtextsnd get 1.0 "end - 1 char"]
     set allText [string trimright $allText "\n"]
-    if {[string length $allText]} {	
-	if {[catch {
-	    $jstate(jlib) send_message $jid  \
-	      -subject $locals($threadID,subject) \
-	      -thread $threadID -type chat -body $allText
-	}]} {
-	    return
-	}
+    if {$allText == ""} {
+	return
+    }
+    
+    set opts {}
+    if {$locals($threadID,subject) != ""} {
+	lappend opts -subject $locals($threadID,subject)
+    }
+    if {[catch {
+	eval {$jstate(jlib) send_message $jid  \
+	  -thread $threadID -type chat -body $allText} $opts
+    } err]} {
+	tk_messageBox -type ok -icon error -title "Network Error" \
+	  -message "Network error ocurred: $err"
+	return
     }
     
     # Add to chat window and clear send.
@@ -485,6 +503,10 @@ proc ::Jabber::Chat::Send {threadID} {
 	$locals($threadID,wtojid) configure -state disabled  \
 	  -bg $prefs(bgColGeneral)
 	set locals($threadID,got1stMsg) 1
+    }
+    
+    if {$jprefs(speakChat)} {
+	::UserActions::Speak $allText $prefs(voiceUs)
     }
 }
 
@@ -545,6 +567,7 @@ proc ::Jabber::Chat::Close {args} {
 	  [namespace current]::TraceJid
 	
 	# Array cleanup?
+	array unset locals "${threadID},*"
     }
 }
 

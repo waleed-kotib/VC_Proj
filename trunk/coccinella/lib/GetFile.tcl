@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: GetFile.tcl,v 1.3 2003-01-30 17:33:57 matben Exp $
+# $Id: GetFile.tcl,v 1.4 2003-02-24 17:52:10 matben Exp $
 # 
 #### LEGEND ####################################################################
 #
@@ -38,6 +38,8 @@
 #
 # Note: be sure to call ShutDown before doing callback since callback may call
 #       update that triggers a large number of fileevents.
+#       
+#       SCHEDULED FOR COMPLETE REWRITE !!!!!!!!!!!!!!!!!!!
 
 namespace eval ::GetFile:: {
     
@@ -57,6 +59,7 @@ namespace eval ::GetFile:: {
 #       Open new temporary socket only for this get operation.
 #       
 # Arguments:
+#       wtop
 #       ip        the ip number of the remote server.
 #       port
 #       filePathRemote  the file name to get. It must be a pathname relative the
@@ -70,7 +73,7 @@ namespace eval ::GetFile:: {
 # Results:
 #       socket opened async.
 
-proc ::GetFile::GetFileFromServer {ip port filePathRemote cmd {optList {}}} {
+proc ::GetFile::GetFileFromServer {wtop ip port filePathRemote cmd {optList {}}} {
     global  ipNumTo
     
     variable locals
@@ -99,6 +102,8 @@ proc ::GetFile::GetFileFromServer {ip port filePathRemote cmd {optList {}}} {
     
     # Save to our locals so far.
     lappend locals(all) $s
+    set locals($wtop,s) $s
+    set locals($s,wtop) $wtop
     set locals($s,ip) $ip
     set locals($s,filePathRem) $filePathRemote
     set locals($s,fileTail) [file tail $filePathRemote]
@@ -361,6 +366,7 @@ proc ::GetFile::ReadOptLine {s} {
 #       operation is solely the remote client's.
 #       
 # Arguments:
+#       wtop
 #       ip        the ip number of the remote client.
 #       s         the channel socket.
 #       fileTail  the file name to get. 
@@ -371,7 +377,7 @@ proc ::GetFile::ReadOptLine {s} {
 # Results:
 #       none.
 
-proc ::GetFile::GetFileFromClient {ip s fileTail cmd optList} {
+proc ::GetFile::GetFileFromClient {wtop ip s fileTail cmd optList} {
     global  chunkSize tclwbProtMsg noErr
     
     variable locals
@@ -385,6 +391,8 @@ proc ::GetFile::GetFileFromClient {ip s fileTail cmd optList} {
     
     # Save to our locals so far.
     lappend locals(all) $s
+    set locals($wtop,s) $s
+    set locals($s,wtop) $wtop
     set locals($s,ip) $ip
     set locals($s,fileTail) $fileTail
     set locals($s,optList) $optList
@@ -792,7 +800,7 @@ proc ::GetFile::Finalize {s bytes {error {}}} {
 #       
 
 proc ::GetFile::DoImport {mime optList args} {
-    global  prefs
+    global  prefs plugin
     
     if {[string equal $prefs(protocol) "jabber"]} {
 	eval {::Jabber::WB::DispatchToImporter $mime $optList} $args
@@ -800,7 +808,12 @@ proc ::GetFile::DoImport {mime optList args} {
 	upvar ::.::wapp wapp
 
 	set impPackage [GetPreferredPackage $mime]
-	eval {$plugin($impPackage,importProc) $wapp(servCan) $optList} $args
+	set errMsg [eval {$plugin($impPackage,importProc) $wapp(servCan) \
+	  $optList} $args]
+	if {$errMsg != ""} {
+	    tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
+	      -message "Failed importing: $errMsg"
+	}
     }
 }
 
@@ -880,11 +893,13 @@ proc ::GetFile::ShutDown {s} {
 
 proc ::GetFile::Cleanup {s} {
     variable locals
-
-    # Cleanup the 'locals' array.
-    foreach key [array names locals "$s,*"] {
-	unset locals($key)
+    
+    if {[info exists locals($s,wprog)] && [winfo exists $locals($s,wprog)]} {
+	destroy $locals($s,wprog)
     }
+    
+    # Cleanup the 'locals' array.
+    array unset locals "$s,*"
     set ind [lsearch $locals(all) $s]
     if {$ind >= 0} {
 	set locals(all) [lreplace $locals(all) $ind $ind]
@@ -927,6 +942,20 @@ proc ::GetFile::CancelAll { } {
     set locals(all) {}
 }
 
+proc ::GetFile::CancelAllWtop {wtop} {
+    variable locals
+
+    Debug 2 "+::GetFile::CancelAllWtop wtop=$wtop"
+    
+    foreach s [array names locals "${wtop},s"] {
+	
+	# Perhaps the files themselves should also be deleted?
+	catch {file delete $locals($s,dstPath)}
+	ShutDown $s
+	Cleanup $s
+    }
+}
+
 # GetFile::DefaultCallbackProc
 #
 #       This is our standard callback proc to handle UI things during
@@ -944,22 +973,24 @@ proc ::GetFile::CancelAll { } {
 #       none.
 
 proc ::GetFile::DefaultCallbackProc {s ip fileTail totBytes sumBytes msg {error {}}} {
-    global  wDlgs prefs ipNumTo timingClicksToMilliSecs
+    global  prefs ipNumTo timingClicksToMilliSecs
     
     variable locals
 
+    set wtop $locals($s,wtop)
+
     if {[string length $error]} {
-	catch {destroy $wDlgs(prog)$s}
-	::UI::SetStatusMessage . $msg
+	catch {destroy $locals($s,wprog)}
+	::UI::SetStatusMessage $wtop $msg
 	tk_messageBox -message [FormatTextForMessageBox $error] -icon error -type ok
 	return
     }
     if {$totBytes == $sumBytes} {
 	
 	# Finished.
-	::UI::SetStatusMessage .  \
+	::UI::SetStatusMessage $wtop  \
 	  "Getting file: $fileTail from $ipNumTo(name,$ip), Finished!"
-	catch {destroy $wDlgs(prog)$s}
+	catch {destroy $locals($s,wprog)}
     } elseif {$sumBytes > 0} {
 	
 	# Ongoing transfer.
@@ -969,7 +1000,7 @@ proc ::GetFile::DefaultCallbackProc {s ip fileTail totBytes sumBytes msg {error 
 	    
 	    # Only update at the specified rate; helps to read numbers,
 	    # and saves cpu cycles.
-	    ::UI::SetStatusMessage .  \
+	    ::UI::SetStatusMessage $wtop  \
 	      "Getting file: $fileTail from $ipNumTo(name,$ip) (at $msg)"
 	    ::GetFile::UpdateAnyProgress $s $ip $fileTail $totBytes $sumBytes $msg
 	    set locals($s,lastProg) [lindex [lindex $locals($s,timing) end] 0]
@@ -980,7 +1011,7 @@ proc ::GetFile::DefaultCallbackProc {s ip fileTail totBytes sumBytes msg {error 
     } else {
 	
 	# Negotiating...
-	::UI::SetStatusMessage . $msg
+	::UI::SetStatusMessage $wtop $msg
 	update idletasks
     }
 }
@@ -1025,6 +1056,7 @@ proc ::GetFile::UpdateAnyProgress {s ip fileTail totBytes sumBytes msg} {
 	# Create the progress window.
 	Debug 2 "::GetFile::UpdateAnyProgress  create ProgWin"
 
+	set locals($s,wprog) $wProg
 	::ProgressWindow::ProgressWindow $wProg -name {Get File} \
 	  -filename $fileTail -text2 "From: $ipNumTo(name,$ip)\nRate: $msg" \
 	  -cancelcmd [list [namespace current]::CancelCmd $s]

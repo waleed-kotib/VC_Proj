@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: browse.tcl,v 1.4 2003-02-06 17:23:32 matben Exp $
+# $Id: browse.tcl,v 1.5 2003-02-24 17:52:06 matben Exp $
 # 
 #  locals($jid,parent):       the parent of $jid.
 #  locals($jid,parents):      list of all parent jid's,
@@ -99,7 +99,7 @@ proc browse::Debug {num str} {
 #       This creates a new instance of a browse object.
 #       
 # Arguments:
-#       browseName:   the name of this jlib instance
+#       browseName:   the name of this browse instance
 #       clientCmd:  callback procedure when internals of browse changes.
 #       args:            
 #       
@@ -627,6 +627,9 @@ proc browse::setsinglejid {browseName parentJid jid xmllist {browsedjid 0}} {
 	    set locals($jid,type) $jidtype
 	    lappend locals($jidtype,typelist) $jid
 	    lappend locals(alltypes) $jidtype
+	    set locals($jidtype,typelist) \
+	    	[lsort -unique $locals($jidtype,typelist)]
+	    set locals(alltypes) [lsort -unique $locals(alltypes)]
 	}
 	
 	# Cache additional info depending on the tag.
@@ -689,6 +692,25 @@ proc browse::setsinglejid {browseName parentJid jid xmllist {browsedjid 0}} {
 	    }
 	    lappend locals(ns,$ns) $jid
 	    set locals(ns,$ns) [lsort -unique $locals(ns,$ns)]
+	    
+	    # Register any groupchat protocol.
+	    # There seems to be a problem here since not all conference
+	    # components list <ns>jabber:iq:conference</ns> in their browse
+	    # section.
+	    switch -- $ns {
+		"http://jabber.org/protocol/muc" {
+		    jlib::invokefrombrowser $browseName \
+		      [list registergcprotocol $jid "muc"]
+		}
+		"jabber:iq:conference" {
+		    jlib::invokefrombrowser $browseName \
+		      [list registergcprotocol $jid "conference"]
+		}
+		"gc-1.0" {
+		    jlib::invokefrombrowser $browseName \
+		      [list registergcprotocol $jid "gc-1.0"]
+		}
+	    }
 	} else {
 	    
 	    # Now jid is the parent, and the jid to set is an attribute.
@@ -735,6 +757,7 @@ proc browse::errorcallback {browseName jid errlist args} {
 #
 #       Empties everything cached internally for the specified jid and all
 #       its children.
+#       It must be failsafe in case of missing browse elements.
 
 proc browse::clear {browseName {jid {}}} {
     
@@ -757,15 +780,23 @@ proc browse::ClearJid {browseName jid} {
 	}
     }
     
+    # Guard against the case where no parent registered.    
     # Keep parents!
-    set parent $locals($jid,parent)
-    set parents $locals($jid,parents)
+    if {[info exists locals($jid,parent)]} {
+    	set parent $locals($jid,parent)
+    }
+    if {[info exists locals($jid,parents)]} {
+    	set parents $locals($jid,parents)
+    }
 
     # Remove this specific jid from our internal state.
     array unset locals "$jid,*"
-    set locals($jid,parent) $parent
-    set locals($jid,parents) $parents
-    catch {unset locals($jid,isbrowsed)}
+    if {[info exists parent]} {
+    	set locals($jid,parent) $parent
+    }
+    if {[info exists parents]} {
+    	set locals($jid,parents) $parents
+    }
 }
     
 # browse::ClearAll --

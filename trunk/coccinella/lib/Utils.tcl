@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.2 2003-01-30 17:34:08 matben Exp $
+# $Id: Utils.tcl,v 1.3 2003-02-24 17:52:12 matben Exp $
 
 # InvertArray ---
 #
@@ -20,7 +20,7 @@ proc InvertArray {arrName invArrName} {
     upvar $arrName locArr
     upvar $invArrName locInvArr
     foreach name [array names locArr] {
-	set locInvArr($locArr($name)) $name
+        set locInvArr($locArr($name)) $name
     }
 }
 
@@ -38,18 +38,18 @@ proc minBU {a b} {
 
 proc max {a args} {
     foreach i $args {
-	if {$i > $a} {
-	    set a $i
-	}
+        if {$i > $a} {
+            set a $i
+        }
     }
     return $a
 }
 
 proc min {a args} {
     foreach i $args {
-	if {$i < $a} {
-	    set a $i
-	}
+        if {$i < $a} {
+            set a $i
+        }
     }
     return $a
 }
@@ -62,9 +62,9 @@ proc luniq {theList} {
     
     set t {}
     foreach i $theList {
-	if {[lsearch -exact $t $i] == -1} {
-	    lappend t $i
-	}
+        if {[lsearch -exact $t $i] == -1} {
+            lappend t $i
+        }
     }
     return $t
 }
@@ -76,29 +76,41 @@ proc luniq {theList} {
 if {[info tclversion] < 8.4} {
     proc lset {listName args} {
 	
-	set usage {Usage: "lset listName ind1 ind2 value"}
-	if {[llength $args] != 3} {
+	set usage {Usage: "lset listName index ?index? value"}
+	set len [llength $args]
+	if {($len < 2) || ($len > 3)} {
 	    return -code error $usage
-	}	
-	foreach {ind1 ind2 value} $args { break }
-
+	}
+	if {$len == 2} {
+	    foreach {ind1 value} $args { break }
+	} else {
+	    foreach {ind1 ind2 value} $args { break }
+	}
+	
 	upvar $listName listValue
 	if {[string equal $ind1 "end"]} {
 	    set ind1 [expr [llength $listValue] - 1]
 	}
-	if {[string equal $ind2 "end"]} {
+	if {($len == 3) && [string equal $ind2 "end"]} {
 	    set ind2 [expr [llength [lindex $listValue $ind1]] - 1]
 	}	
 	if {![string is integer $ind1]} {
 	    return -code error $usage
 	}
-	if {![string is integer $ind2]} {
+	if {($len == 3) && ![string is integer $ind2]} {
 	    return -code error $usage
 	}
 	
-	# Do the job.
-	set subList [lreplace [lindex $listValue $ind1] $ind2 $ind2 $value]
-	set $listName [lreplace $listValue $ind2 $ind2 $subList]
+	# Do the job. Be sure to execute it in the callers stack (namespace),
+	# else the variable is set in the wrong namespace. List structure!!!
+	if {$len == 2} {
+	    uplevel set $listName \
+	      [list [lreplace $listValue $ind1 $ind1 $value]]
+	} else {
+	    set subList [lreplace [lindex $listValue $ind1] $ind2 $ind2 $value]
+	    uplevel set $listName \
+	      [list [lreplace $listValue $ind1 $ind1 $subList]]
+	}
     }
 }
 
@@ -486,7 +498,7 @@ proc ::Text::URLLabel {w url args} {
 #       to a clickable thing.
 #
 # Arguments:
-#       str         the text string
+#       str         the text string, tcl special chars already protected
 #       tag         the normal text tag
 #       linktag     the tag for links
 #       
@@ -496,8 +508,8 @@ proc ::Text::URLLabel {w url args} {
 
 proc ::Text::ParseHttpLinksForTextWidget {str tag linktag} {
     
-    # Protect all special characters.
-    regsub -all {\\|&} $str {\\\0} str
+    # Protect all  *regexp*  special characters.
+    #regsub -all {\\|&} $str {\\\0} str
 
     # regexp hell, welcome!
     set wsp_ "\[ \t\r\n]"
@@ -506,10 +518,13 @@ proc ::Text::ParseHttpLinksForTextWidget {str tag linktag} {
     set start_ "(^|\"|$wsp_)"
     set end_ "(\$|\"|$wsp_)"
 
+    # This is extremely tricky business!
+    # Character data must not be embraced, but must be qoted in order for
+    # the protected tcl special chars to be deprotected.
     set re "${start_}((http://|www\\.)${path_}+${epath_})"
-    set sub "\\1\} $tag\} \{insert end \{\\2\} \{$tag $linktag\}\} \{insert end \{"
+    set sub "\\1\" $tag\} \{insert end \{\\2\} \{$tag $linktag\}\} \{insert end \""
     regsub -all -nocase -- $re $str $sub txtlist
-    return "\{insert end \{$txtlist\} $tag\}"
+    return "\{insert end \"$txtlist\" $tag\}"
 }
 
 proc ::Text::ConfigureLinkTagForTextWidget {w tag linkactive} {
@@ -525,7 +540,6 @@ proc ::Text::ConfigureLinkTagForTextWidget {w tag linkactive} {
 proc ::Text::EnterLink {w x y linktag linkactive} {
     
     set range [$w tag prevrange $linktag "@$x,$y +1 char"]
-    #puts "EnterLink: range=$range"
     if {[llength $range]} {
 	eval {$w tag add $linkactive} $range
 	eval {$w tag remove $linktag} $range
@@ -538,7 +552,6 @@ proc ::Text::EnterLink {w x y linktag linkactive} {
 proc ::Text::LeaveLink {w linktag linkactive} {
     
     set range [$w tag ranges $linkactive]
-    #puts "LeaveLink range=$range"
     if {[llength $range]} {
 	eval {$w tag add $linktag} $range
 	eval {$w tag remove $linkactive} $range
@@ -556,7 +569,6 @@ proc ::Text::ButtonPressOnLink {w x y linkactive} {
 	if {![regexp {^http://.+} $url]} {
 	    set url "http://$url"
 	}
-	#puts "ButtonPressOnLink $range $url"
 	if {[IsWellformedUrl $url]} {
 	    OpenHtmlInBrowser $url
 	}
@@ -598,7 +610,6 @@ proc ::Text::ButtonPressOnURL {w idurl} {
     if {![regexp {^http://.+} $url]} {
 	set url "http://$url"
     }
-    #puts "ButtonPressOnURL $url"
     if {[IsWellformedUrl $url]} {
 	OpenHtmlInBrowser $url
     }
@@ -608,7 +619,7 @@ proc ::Text::ButtonPressOnURL {w idurl} {
 # 
 #
 # Arguments:
-#       str         the text string
+#       str         the text string, tcl special chars already protected
 #       
 # Results:
 #       A list {str textimage ?str textimage ...?}
@@ -623,8 +634,9 @@ proc ::Text::ParseSmileysForTextWidget {str} {
     # Since there are about 60 smileys we need to be economical here.    
     # Check first if there is any short smiley.
 	
-    # Protect all special characters. Regexp hell!!!
-    regsub -all {\\|&} $str {\\\0} str
+    # Protect all  *regexp*  special characters. Regexp hell!!!
+    #regsub -all {\\|&} $str {\\\0} str
+    
     foreach smile [array names smiley] {
 	set sub "\} \{image create end -image $smiley($smile)\} \{"
 	regsub  {[)(|]} $smile {\\\0} smileExp
@@ -671,7 +683,10 @@ proc ::Text::ParseSmileysForTextWidget {str} {
 #       "insert end {Some text} $tag"
 
 proc ::Text::ParseAllForTextWidget {str tag linktag} {
-    
+        
+    # Protect Tcl special characters, quotes included.
+    regsub -all {([][$\\{}"])} $str {\\\1} str
+
     set strSmile [ParseSmileysForTextWidget $str]
     #puts "strSmile=\t'$strSmile'"
     foreach {txt icmd} $strSmile {
@@ -687,7 +702,6 @@ proc ::Text::ParseAllForTextWidget {str tag linktag} {
     }
     return $res
 }
-
 
 proc ::Text::TransformToPureText {w args} {
     
