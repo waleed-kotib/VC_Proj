@@ -31,9 +31,9 @@
 ::msgcat::mcset fr Close		{Fermer}
 ::msgcat::mcset fr Conference		{Conférence}
 ::msgcat::mcset fr Connect		{Se connecter}
-#::msgcat::mcset fr Connection
+::msgcat::mcset fr Connection		{Connexion}
 ::msgcat::mcset fr Contact		{Contact}
-#::msgcat::mcset fr Contacts
+::msgcat::mcset fr Contacts		{Contacts}
 ::msgcat::mcset fr Country		{Pays}
 ::msgcat::mcset fr Create		{Créer}
 ::msgcat::mcset fr Customization	{Affichage}
@@ -53,7 +53,7 @@
 ::msgcat::mcset fr File			{Fichier}
 ::msgcat::mcset fr Finish		{Terminer}
 ::msgcat::mcset fr Finished		{Terminé}
-#::msgcat::mcset fr First
+::msgcat::mcset fr First		{Premier}
 ::msgcat::mcset fr Friends              {Amis}
 ::msgcat::mcset fr Forward		{Faire suivre}
 ::msgcat::mcset fr From			{De}
@@ -68,11 +68,11 @@
 ::msgcat::mcset fr Inbox		{Messages}
 ::msgcat::mcset fr Info			{Infos}
 ::msgcat::mcset fr Invite		{Inviter}
-#::msgcat::mcset fr Last
+::msgcat::mcset fr Last			{Dernier}
 ::msgcat::mcset fr Less			{Moins}
 ::msgcat::mcset fr Login		{Se connecter}
 ::msgcat::mcset fr Logout		{Se déconnecter}
-#::msgcat::mcset fr Message
+::msgcat::mcset fr Message		{Message}
 ::msgcat::mcset fr Middle		{Milieu}
 ::msgcat::mcset fr More			{Plus}
 ::msgcat::mcset fr Never		{Jamais}
@@ -92,7 +92,7 @@
 ::msgcat::mcset fr Phone		{Téléphone}
 ::msgcat::mcset fr Play			{Jouer}
 ::msgcat::mcset fr Plugins		{Plugins}
-#::msgcat::mcset fr Port
+::msgcat::mcset fr Port			{Port}
 ::msgcat::mcset fr Preferences		{Préférences}
 ::msgcat::mcset fr Previous		{Précédent}
 ::msgcat::mcset fr Print		{Imprimer}
@@ -299,7 +299,7 @@
 ::msgcat::mcset fr mChatHistory     	{Historique de la discussion}
 ::msgcat::mcset fr mLoginTrpt     	{Se connecter à un serveur de transport}
 ::msgcat::mcset fr mLogoutTrpt     	{Se déconnecter d'un serveur de transport}
-#::msgcat::mcset fr mRemoveContact  	{Remove Contact...}
+::msgcat::mcset fr mRemoveContact  	{Enlever le contact...}
 
 
 
@@ -333,9 +333,9 @@
 ::msgcat::mcset fr {Chat With}			{Discuter avec}
 ::msgcat::mcset fr {Clear Disk Cache Now}	{Vider le cache}
 ::msgcat::mcset fr {Company Name}		{Nom de l'entreprise}
-#::msgcat::mcset fr {Component Info}
+::msgcat::mcset fr {Component Info}		{Infos sur la fonctionnalité}
 ::msgcat::mcset fr {Conference server}		{Serveur de la conférence}
-#::msgcat::mcset fr {Contact Type}
+::msgcat::mcset fr {Contact Type}		{Type de contact}
 ::msgcat::mcset fr {Create Room}		{Créer un salon}
 ::msgcat::mcset fr {Default group}		{Groupe par défaut}
 ::msgcat::mcset fr {Default Logout Status}	{Déconnexion par défaut}
@@ -365,7 +365,7 @@
 ::msgcat::mcset fr {First name}			{Prénom}
 ::msgcat::mcset fr {Font size}			{Taille de la police}
 ::msgcat::mcset fr {Font weight}		{Épaisseur de la police}
-#::msgcat::mcset fr {Format mm/dd/yyyy}
+::msgcat::mcset fr {Format mm/dd/yyyy}		{Format mm/jj/aaaa}
 ::msgcat::mcset fr {Get File}			{Voir le fichier}
 ::msgcat::mcset fr {Get File Error}		{Erreur lors de la réception du fichier}
 ::msgcat::mcset fr {Get vCard}			{Voir la carte de visite}
@@ -412,7 +412,7 @@
 ::msgcat::mcset fr {New Topic}			{Nouveau sujet}
 ::msgcat::mcset fr {New shortcut}		{Nouveau raccourci}
 ::msgcat::mcset fr {New User}			{Nouvel utilisateur}
-#::msgcat::mcset fr {New Version}
+::msgcat::mcset fr {New Version}		{Nouvelle version}
 ::msgcat::mcset fr {My vCard}			{Ma carte de visite}
 ::msgcat::mcset fr {NAT Address}		{Adresse NAT}
 ::msgcat::mcset fr {Nick name}			{Pseudo}
@@ -477,8 +477,8 @@
 ::msgcat::mcset fr {Set Status}			{Choisir statut}
 ::msgcat::mcset fr {Settings Panels}		{Panneau de configuration}
 ::msgcat::mcset fr {Setup Assistant}		{Assistant de configuration}
-#::msgcat::mcset fr {Slide Show}
-#::msgcat::mcset fr {Slide Show Folder}
+::msgcat::mcset fr {Slide Show}			{Diaporama}
+::msgcat::mcset fr {Slide Show Folder}		{Dossier des Diaporamas}
 ::msgcat::mcset fr {Software Update}		{Mise-à-jour du logiciel}
 ::msgcat::mcset fr {Sounds & Speech}		{Sons & langage}
 ::msgcat::mcset fr {Start Chat}			{Lancer la discussion}
@@ -574,7 +574,7 @@ de configuration ? Vous pouvez le relancer ultérieurement depuis le menu}
 vous devez relancer l'application pour que les changements prennent effet. Voulez-vous continuer ?}
 ::msgcat::mcset fr messpasswddifferent  {Les deux mots de passe sont différents,\
 Veuillez recommencer s'il vous plaît}
-#::msgcat::mcset fr messaupdatelatest    {You already have the latest version available (%s)}
+::msgcat::mcset fr messaupdatelatest    {Vous avez déjà la dernière version(%s)}
 
 
 
@@ -651,7 +651,7 @@ Code de l'erreur : %s (%s).}
 	::msgcat::mcset fr jamessregnoserver	{Le serveur doit être configuré.}
 	::msgcat::mcset fr jamesserrregget	{La récupération des informations d'inscription a échoué.\
 Code de l'erreur : %s (%s)}
-	::msgcat::mcset fr jamesserrregset	{L'inscription au sercice "%s" a échoué.\
+	::msgcat::mcset fr jamesserrregset	{L'inscription au service "%s" a échoué.\
 Code de l'erreur : %s (%s)}
 	::msgcat::mcset fr jamessokreg		{L'inscription au service "%s" a été réalisée.}
 	::msgcat::mcset fr jamessinvalidjid	{Le JID est mal configuré.\
@@ -756,7 +756,7 @@ sera ajouté à vos contacts pour fonctionner comme un serveur de transport avec
 avec l'extension .mov pour un streaming QuickTime. Cela peut être du son (radio) ou de la vidéo (TV).\
 Vous pouvez également utiliser votre navigateur pour trouver le fichier SDP, l'enregistrer sur le disque\
 et l'ouvrir comme une vidéo classique.}
-#::msgcat::mcset fr printunixcmd                 {Shell print command, edit if desired}
+::msgcat::mcset fr printunixcmd                 {Commande d'impression, peut être changée}
 
 
 
@@ -963,7 +963,7 @@ sur lequel vous voulez être enregistré. Si vous avez déjà un compte,\
 indiquez le serveur sur lequel vous êtes inscrit (de la forme jabber.org).}
 	::msgcat::mcset fr suusermsg	{Indiquez votre nom d'utilisateur et votre mot de passe.\
 Le nom d'utilisateur ne doit pas être utilisé par quelqu'un d'autre sur le serveur spécifié.\
-Si c'est le cas, vous recevrez un message vous l'idiquant\
+Si c'est le cas, vous recevrez un message vous l'indiquant\
 lorsque vous tenterez de vous enregistrer.}
 	::msgcat::mcset fr suregmsg	{Voulez-vous enregistrer votre compte maintenant\
 (si c'est un nouveau compte) ? Vous devez être connecté au réseau (sans firewall).}

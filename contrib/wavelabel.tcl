@@ -6,7 +6,7 @@
 #  Copyright (c) 2004  Mats Bengtsson
 #  This source file is distributed under the BSD licens.
 #
-# $Id: wavelabel.tcl,v 1.2 2004-10-09 13:21:55 matben Exp $
+# $Id: wavelabel.tcl,v 1.3 2004-10-11 06:14:20 matben Exp $
 #
 # ########################### USAGE ############################################
 #
@@ -46,8 +46,9 @@ namespace eval ::wavelabel:: {
     # Define speed and update frequency. Pix per sec and times per sec.
     set speed 150
     set freq  16
-    set stat(pix)  [expr int($speed/$freq)]
-    set stat(wait) [expr int(1000.0/$freq)]
+    set stat(pix)   [expr int($speed/$freq)]
+    set stat(wait)  [expr int(1000.0/$freq)]
+    set stat(swait) 1000
 }
 
 # ::wavelabel::Init --
@@ -96,6 +97,7 @@ proc ::wavelabel::Init { } {
 	-image         {image         Image      }      \
 	-takefocus     {takeFocus     TakeFocus  }      \
 	-type          {type          Type       }      \
+	-width         {width         Width      }      \
     }
   
     # The legal widget commands.
@@ -378,6 +380,9 @@ proc ::wavelabel::Configure {w args} {
 	    -height {
 		$widgets(canvas) configure -height $newValue
 	    }
+	    -width {
+		$widgets(canvas) configure -width $newValue
+	    }
 	}
     }
     if {[string equal $options(-type) "image"] && ($options(-image) == "")} {
@@ -455,7 +460,6 @@ proc ::wavelabel::StartStep {w} {
     foreach {br bg bb} [winfo rgb . white] break
     set priv(x)    0
     set priv(dx)   $dx
-    set priv(xtot) [expr $n * $dx]
     set priv(dir)  1
     
     # Right moving part.
@@ -468,6 +472,8 @@ proc ::wavelabel::StartStep {w} {
 	$c create rect $x $yu [expr $x-$xw] $yl -outline "" -fill $col \
 	  -tags tstepright
     }
+    set priv(xtot) [expr abs([lindex [$c bbox tstepright] 0])]
+    puts "priv(xtot)=$priv(xtot)"
     
     # Left moving part.
     for {set i 0} {$i < $n} {incr i} {
@@ -479,11 +485,14 @@ proc ::wavelabel::StartStep {w} {
 	$c create rect $x $yu [expr $x-$xw] $yl -outline "" -fill $col \
 	  -tags tstepleft
     }
+    set priv(left)  0
+    set priv(right) 1
     
     # Keep both of them beyond the left edge of the widget.
     $c scale tstepleft 0 0 -1 1
     $c move tstepleft -$priv(xtot) 0
-    set priv(killid) [after $stat(wait) [list ::wavelabel::AnimateStep $w]]
+    puts "bbox tstepright=[$c bbox tstepright], bbox tstepleft=[$c bbox tstepleft]"
+    set priv(killid) [after $stat(swait) [list ::wavelabel::AnimateStep $w]]
 }
 
 proc ::wavelabel::AnimateImage {w} {
@@ -509,28 +518,52 @@ proc ::wavelabel::AnimateStep {w} {
     upvar ::wavelabel::${w}::widgets widgets
     upvar ::wavelabel::${w}::priv    priv
 
-    set deltax [expr $priv(dir) * $stat(pix)]
-    incr priv(x) $deltax
-    set c $widgets(canvas)
-    
-    puts "priv(x)=$priv(x)"
+    set c  $widgets(canvas)
+    set dx $priv(dx)
+    set ww [winfo width $w]
+    set wd [expr (int($ww/$dx) - 1) * $dx]
+    puts "r=$priv(right), l=$priv(left), wd=$wd"
+
     # Treat the left and right moving independently but let them trigger
     # each other.
-    if {$priv(x) > [winfo width $w]} {
-	
+    set bbox [$c bbox tstepright]
+    set xright(l) [lindex $bbox 0]
+    set xright(r) [lindex $bbox 2]
+
+    set bbox [$c bbox tstepleft]
+    set xleft(l) [lindex $bbox 0]
+    set xleft(r) [lindex $bbox 2]
+
+    if {$priv(right)} {
+	if {$xright(l) > $wd} {
+	    set priv(right) 0
+	    $c move tstepright [expr -1*($xright(l) + $priv(xtot))] 0
+	} else {
+	    $c move tstepright $dx 0
+	}
     }
-    if {$priv(x) > [expr [winfo width $w] + $priv(xtot)]} {
-	set priv(dir) -1
-	$c move tstepleft [expr [winfo width $w] + $priv(xtot)] 0
-    } elseif {$priv(x) <= 0} {
-	set priv(dir) 1
+    if {$priv(left)} {
+	if {$xleft(r) < 0} {
+	    set priv(left) 0
+	    $c move tstepleft [expr -1*$xleft(r)] 0
+	} else {
+	    $c move tstepleft -$dx 0
+	}
     }
-    if {$priv(dir) == 1} {
-	$c move tstepright $deltax 0
-    } else {
-	$c move tstepleft $deltax 0
-    }
-    set priv(killid) [after $stat(wait) [list ::wavelabel::AnimateStep $w]]
+    
+    # See if start any of them.
+    if {!$priv(left) && ($xright(r) > $wd)} {
+	puts "trigger left: xright(l)=$xright(l), xright(r)=$xright(r)"
+	$c move tstepleft [expr $wd + $priv(xtot) + $dx/2] 0
+	$c raise tstepleft
+	set priv(left) 1
+    }    
+    if {!$priv(right) && ($xleft(l) < 0)} {
+	puts "trigger right: xleft(l)=$xleft(l), xleft(r)=$xleft(r)"
+	$c raise tstepright
+	set priv(right) 1
+    }    
+    set priv(killid) [after $stat(swait) [list ::wavelabel::AnimateStep $w]]
 }
 
 # ::wavelabel::Stop --
