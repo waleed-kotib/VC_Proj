@@ -1,0 +1,2 @@
+# Version: 2
+import 48.0 16.0 -file ../../plugins/applets/CardGame/CardGame.itcl -mime application/x-itcl -width 82 -height 102
