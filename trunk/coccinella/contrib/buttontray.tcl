@@ -6,7 +6,7 @@
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: buttontray.tcl,v 1.20 2005-03-04 10:55:31 matben Exp $
+# $Id: buttontray.tcl,v 1.21 2005-03-11 06:55:55 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -77,6 +77,11 @@ proc ::buttontray::Init { } {
 	windows - macintosh {
 	    set this(platform) $tcl_platform(platform)
 	}
+    }
+    
+    # Guard against tile redefining widgets.
+    foreach widget {canvas frame label} {
+	interp alias {} [namespace current]::${widget} {} ::${widget}
     }
     
     # List all allowed options with their database names and class names.
