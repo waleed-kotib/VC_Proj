@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.14 2003-12-22 15:04:57 matben Exp $
+# $Id: JUI.tcl,v 1.15 2003-12-29 09:02:29 matben Exp $
 
 package provide JUI 1.0
 
@@ -61,6 +61,61 @@ namespace eval ::Jabber::UI:: {
     
     # Collection of useful and common widget paths.
     variable jwapp
+    
+    
+    # Menu definitions for the Roster/services window.
+    variable menuDefs
+    set menuDefs(rost,file) {
+	{command   mNewWhiteboard      {::WB::NewWhiteboard}                  normal   N}
+	{command   mCloseWindow        {::UserActions::DoCloseWindow}         normal   W}
+	{command   mPreferences...     {::Preferences::Build}                 normal   {}}
+	{command   mUpdateCheck        {
+	    ::AutoUpdate::Get $prefs(urlAutoUpdate) -silent 0}       normal   {}}
+	{separator}
+	{command   mQuit               {::UserActions::DoQuit}                    normal   Q}
+    }
+    set menuDefs(rost,jabber) {    
+	{command     mNewAccount    {::Jabber::Register::Register}          normal   {}}
+	{command     mLogin         {::Jabber::Login::Login}                normal   {}}
+	{command     mLogoutWith    {::Jabber::Logout::WithStatus}          disabled {}}
+	{command     mPassword      {::Jabber::Passwd::Build}               disabled {}}
+	{separator}
+	{checkbutton mMessageInbox  {::Jabber::MailBox::Show}               normal   {} \
+	  {-variable ::Jabber::jstate(inboxVis)}}
+	{separator}
+	{command     mSearch        {::Jabber::Search::Build}               disabled {}}
+	{command     mAddNewUser    {::Jabber::Roster::NewOrEditItem new}   disabled {}}
+	{separator}
+	{command     mSendMessage   {::Jabber::NewMsg::Build}               disabled {}}
+	{command     mChat          {::Jabber::Chat::StartThreadDlg}        disabled {}}
+	{cascade     mStatus        {}                                      disabled {} {} {}}
+	{separator}
+	{command     mEnterRoom     {::Jabber::GroupChat::EnterOrCreate enter} disabled {}}
+	{cascade     mExitRoom      {}                                      disabled {} {} {}}
+	{command     mCreateRoom    {::Jabber::GroupChat::EnterOrCreate create} disabled {}}
+	{separator}
+	{command     mvCard         {::VCard::Fetch own}                    disabled {}}
+	{separator}
+	{command     mSetupAssistant {
+	    package require SetupAss
+	    ::Jabber::SetupAss::SetupAss .setupass}                       normal {}}
+	{command     mRemoveAccount {::Jabber::Register::Remove}          disabled {}}	
+	{separator}
+	{command     mErrorLog      {::Jabber::ErrorLogDlg .jerrdlg}      normal   {}}
+	{checkbutton mDebug         {::Jabber::DebugCmd}                  normal   {} \
+	  {-variable ::Jabber::jstate(debugCmd)}}
+    }    
+
+    # The status menu is built dynamically due to the -image options on 8.4.
+    if {!$prefs(stripJabber)} {
+	lset menuDefs(rost,jabber) 12 6 [::Jabber::Roster::BuildStatusMenuDef]
+    }
+
+    set menuDefs(min,edit) {    
+	{command   mCut              {::UI::CutCopyPasteCmd cut}           disabled X}
+	{command   mCopy             {::UI::CutCopyPasteCmd copy}          disabled C}
+	{command   mPaste            {::UI::CutCopyPasteCmd paste}         disabled V}
+    }
 }
 
 proc ::Jabber::UI::Show {w args} {
@@ -97,7 +152,7 @@ proc ::Jabber::UI::Build {w} {
     
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::menuDefs menuDefs
+    variable menuDefs
     variable jwapp
 
     ::Jabber::Debug 2 "::Jabber::UI::Build w=$w"
@@ -445,7 +500,7 @@ proc ::Jabber::UI::RegisterPopupEntry {which menuSpec} {
 #       Lets plugins/addons register their own menu entry.
 
 proc ::Jabber::UI::RegisterMenuEntry {wpath name menuSpec} {
-    upvar ::Jabber::menuDefs menuDefs 
+    variable menuDefs
     variable rostMenuSpec
     
     # Add these entries in a section above the bottom section.
@@ -853,6 +908,13 @@ proc ::Jabber::UI::SmileyMenuButton {w wtext} {
     global  prefs this
     upvar ::UI::smiley smiley
     
+    # If we have -compound left -image ... -label ... working.
+    set prefs(haveMenuImage) 0
+    if {([package vcompare [info tclversion] 8.4] >= 0) &&  \
+      ![string equal $this(platform) "macosx"]} {
+	set prefs(haveMenuImage) 1
+    }
+
     # Workaround for missing -image option on my macmenubutton.
     if {[string equal $this(platform) "macintosh"] && \
       [string length [info command menubuttonOrig]]} {

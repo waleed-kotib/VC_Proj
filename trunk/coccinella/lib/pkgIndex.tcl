@@ -28,6 +28,7 @@ package ifneeded Theme 1.0 [list source [file join $dir Theme.tcl]]
 package ifneeded Whiteboard 1.0 [list source [file join $dir Whiteboard.tcl]]
 package ifneeded WBIcons 1.0 [list source [file join $dir WBIcons.tcl]]
 package ifneeded Splash 1.0 [list source [file join $dir Splash.tcl]]
+package ifneeded Speech 1.0 [list source [file join $dir Speech.tcl]]
 
 if {[string equal $::tcl_platform(platform) "windows"]} {
     package ifneeded WindowsUtils 1.0 [list source [file join $dir WindowsUtils.tcl]]

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.45 2003-12-27 12:07:33 matben Exp $
+# $Id: Jabber.tcl,v 1.46 2003-12-29 09:02:29 matben Exp $
 #
 #  The $address is an ip name or number.
 #
@@ -22,15 +22,11 @@ package require tree
 package require jlib
 package require roster
 package require browse
-package require chasearrows
 package require http 2.3
 package require balloonhelp
-package require tablelist
-package require mactabnotebook
 package require combobox
 package require tinyfileutils
 package require uriencode
-package require JForms
 package require MailBox
 package require NewMsg
 package require GotMsg
@@ -47,6 +43,7 @@ package require Register
 package require Subscribe
 package require Conference
 package require Search
+package require JForms
 
 
 namespace eval ::Jabber:: {
@@ -385,52 +382,6 @@ proc ::Jabber::FactoryDefaults { } {
     # Menu definitions for the Roster/services window. Collects minimal Jabber
     # stuff.
     variable menuDefs
-
-    set menuDefs(rost,file) {
-	{command   mNewWhiteboard      {::WB::NewWhiteboard}                  normal   N}
-	{command   mCloseWindow        {::UserActions::DoCloseWindow}         normal   W}
-	{command   mPreferences...     {::Preferences::Build}                 normal   {}}
-	{command   mUpdateCheck        {
-	    ::AutoUpdate::Get $prefs(urlAutoUpdate) -silent 0}       normal   {}}
-	{separator}
-	{command   mQuit               {::UserActions::DoQuit}                    normal   Q}
-    }
-    set menuDefs(rost,jabber) {    
-	{command     mNewAccount    {::Jabber::Register::Register}          normal   {}}
-	{command     mLogin         {::Jabber::Login::Login}                normal   {}}
-	{command     mLogoutWith    {::Jabber::Logout::WithStatus}          disabled {}}
-	{command     mPassword      {::Jabber::Passwd::Build}               disabled {}}
-	{separator}
-	{checkbutton mMessageInbox  {::Jabber::MailBox::Show}               normal   {} \
-	  {-variable ::Jabber::jstate(inboxVis)}}
-	{separator}
-	{command     mSearch        {::Jabber::Search::Build}               disabled {}}
-	{command     mAddNewUser    {::Jabber::Roster::NewOrEditItem new}   disabled {}}
-	{separator}
-	{command     mSendMessage   {::Jabber::NewMsg::Build}               disabled {}}
-	{command     mChat          {::Jabber::Chat::StartThreadDlg}        disabled {}}
-	{cascade     mStatus        {}                                      disabled {} {} {}}
-	{separator}
-	{command     mEnterRoom     {::Jabber::GroupChat::EnterOrCreate enter} disabled {}}
-	{cascade     mExitRoom      {}                                      disabled {} {} {}}
-	{command     mCreateRoom    {::Jabber::GroupChat::EnterOrCreate create} disabled {}}
-	{separator}
-	{command     mvCard         {::VCard::Fetch own}                    disabled {}}
-	{separator}
-	{command     mSetupAssistant {
-	    package require SetupAss
-	    ::Jabber::SetupAss::SetupAss .setupass}                       normal {}}
-	{command     mRemoveAccount {::Jabber::Register::Remove}          disabled {}}	
-	{separator}
-	{command     mErrorLog      {::Jabber::ErrorLogDlg .jerrdlg}      normal   {}}
-	{checkbutton mDebug         {::Jabber::DebugCmd}                  normal   {} \
-	  {-variable ::Jabber::jstate(debugCmd)}}
-    }    
-
-    # The status menu is built dynamically due to the -image options on 8.4.
-    if {!$prefs(stripJabber)} {
-	lset menuDefs(rost,jabber) 12 6 [::Jabber::Roster::BuildStatusMenuDef]
-    }
     
     set menuDefs(min,edit) {    
 	{command   mCut              {::UI::CutCopyPasteCmd cut}           disabled X}
@@ -625,6 +576,60 @@ proc ::Jabber::GetIQRegisterElements { } {
     variable jprefs
 
     return $jprefs(iqRegisterElem)
+}
+
+proc ::Jabber::GetServerJid { } {
+    variable jserver
+
+    return $jserver(this)
+}
+
+proc ::Jabber::GetMyJid {{roomjid {}}} {
+    variable jstate
+
+    set jid ""
+    if {$roomjid == ""} {
+	set jid $jstate(mejidres)
+    } else {
+	if {[$jstate(jlib) service isroom $roomjid]} {
+	    set hashandnick [$jstate(jlib) service hashandnick $roomjid]
+	    set jid [lindex $hashandnick 0]   
+	}
+    }
+    return $jid
+}
+
+proc ::Jabber::InvokeJlibCmd {args} {
+    variable jserver
+    variable jstate
+    
+    if {[string length $jserver(this)]} {
+	eval {$jstate(jlib)} $args
+    } else {
+	return -code error "Not connected"
+    }
+}
+
+proc ::Jabber::IsConnected { } {
+    variable jserver
+
+    return [expr [string length $jserver(this)] == 0 ? 0 : 1]
+}
+
+# Jabber::InvokeRosterCmd, InvokeBrowseCmd --
+# 
+#       Access functions for invoking these commands from the outside.
+
+proc ::Jabber::InvokeRosterCmd {args}  {
+    variable jstate
+    
+    eval {$jstate(roster)} $args
+}
+
+proc ::Jabber::InvokeBrowseCmd {args}  {
+    variable jstate
+    
+    eval {$jstate(browse)} $args
 }
 
 # Generic ::Jabber:: stuff -----------------------------------------------------
@@ -890,16 +895,16 @@ proc ::Jabber::MessageDispatcher {type body args} {
 	chat {
 	    if {$iswb} {
 		eval {::Jabber::WB::ChatMsg} $args
+		eval {hooks::run newWBChatMessageHook} $args
 	    } else {
-		eval {::Jabber::Chat::GotMsg $body} $args
 		eval {hooks::run newChatMessageHook $body} $args
 	    }	    
 	}
 	groupchat {
 	    if {$iswb} {
 		eval {::Jabber::WB::GroupChatMsg} $args
+		eval {hooks::run newWBGroupChatMessageHook} $args
 	    } else {
-		eval {::Jabber::GroupChat::GotMsg $body} $args
 		eval {hooks::run newGroupChatMessageHook $body} $args
 	    }	    
 	}
@@ -951,9 +956,9 @@ proc ::Jabber::DispatchNormalMessage {body iswb args} {
 	if {[llength $restCmds] > 0} {
 	    set argsArr(-whiteboard) $restCmds
 	    eval {::Jabber::MailBox::GotMsg $body} [array get argsArr]
+	    eval {hooks::run newWBMessageHook $body} [array get argsArr]
 	}
     } else {
-	eval {::Jabber::MailBox::GotMsg $body} $args
 	eval {hooks::run newMessageHook $body} $args
     }
 }
@@ -1208,27 +1213,6 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	      -icon error -type ok	    
 	}
     }
-}
-
-proc ::Jabber::IsConnected { } {
-    variable jserver
-    return [expr [string length $jserver(this)] == 0 ? 0 : 1]
-}
-
-# Jabber::InvokeRosterCmd, InvokeBrowseCmd --
-# 
-#       Access functions for invoking these commands from the outside.
-
-proc ::Jabber::InvokeRosterCmd {args}  {
-    variable jstate
-    
-    eval {$jstate(roster)} $args
-}
-
-proc ::Jabber::InvokeBrowseCmd {args}  {
-    variable jstate
-    
-    eval {$jstate(browse)} $args
 }
 
 # Jabber::DebugCmd --

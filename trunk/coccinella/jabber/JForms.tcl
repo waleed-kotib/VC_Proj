@@ -7,13 +7,14 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #
-# $Id: JForms.tcl,v 1.9 2003-12-13 17:54:41 matben Exp $
+# $Id: JForms.tcl,v 1.10 2003-12-29 09:02:29 matben Exp $
 # 
 #      Updated to version 2.1 of JEP-0004
 #  
 #-------------------------------------------------------------------------------
 
 package require wrapper
+
 package provide JForms 1.0
 
 # Just make sure that we have the parent namespace here.

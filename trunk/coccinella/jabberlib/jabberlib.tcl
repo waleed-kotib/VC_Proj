@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.25 2003-12-10 15:21:43 matben Exp $
+# $Id: jabberlib.tcl,v 1.26 2003-12-29 09:02:29 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -755,7 +755,7 @@ proc jlib::disconnect {jlibname} {
 
 proc jlib::dispatcher {jlibname xmldata} {
     
-    Debug 3 "jlib::dispatcher jlibname=$jlibname, xmldata=$xmldata"
+    Debug 5 "jlib::dispatcher jlibname=$jlibname, xmldata=$xmldata"
     
     # Which method?
     switch -- [wrapper::gettag $xmldata] {

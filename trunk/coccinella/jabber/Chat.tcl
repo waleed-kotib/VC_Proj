@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.25 2003-12-27 12:07:33 matben Exp $
+# $Id: Chat.tcl,v 1.26 2003-12-29 09:02:29 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -22,42 +22,49 @@ namespace eval ::Jabber::Chat:: {
     set fontS  [option get . fontSmall {}]
     set fontSB [option get . fontSmallBold {}]
 
-    option add *Chat*meForeground         red                   widgetDefault
-    option add *Chat*meBackground         #cecece               widgetDefault
-    option add *Chat*meFont               $fontSB               widgetDefault                                     
-    option add *Chat*meTextForeground     black                 widgetDefault
-    option add *Chat*meTextBackground     #cecece               widgetDefault
-    option add *Chat*meTextFont           $fontS                widgetDefault                                     
-    option add *Chat*youForeground        blue                  widgetDefault
-    option add *Chat*youBackground        white                 widgetDefault
-    option add *Chat*youFont              $fontSB               widgetDefault
-    option add *Chat*youTextForeground    black                 widgetDefault
-    option add *Chat*youTextBackground    white                 widgetDefault
-    option add *Chat*youTextFont          $fontS                widgetDefault
+    option add *Chat*mePreForeground      red                   widgetDefault
+    option add *Chat*mePreBackground      ""                    widgetDefault
+    option add *Chat*mePreFont            ""                    widgetDefault                                     
+    option add *Chat*meTextForeground     ""                    widgetDefault
+    option add *Chat*meTextBackground     ""                    widgetDefault
+    option add *Chat*meTextFont           ""                    widgetDefault                                     
+    option add *Chat*youPreForeground     blue                  widgetDefault
+    option add *Chat*youPreBackground     ""                    widgetDefault
+    option add *Chat*youPreFont           ""                    widgetDefault
+    option add *Chat*youTextForeground    ""                    widgetDefault
+    option add *Chat*youTextBackground    ""                    widgetDefault
+    option add *Chat*youTextFont          ""                    widgetDefault
+    option add *Chat*sysPreForeground     green                 widgetDefault
+    option add *Chat*sysForeground        green                 widgetDefault
     option add *Chat*clockFormat          "%H:%M"               widgetDefault
 
     # List of: {tagName optionName resourceName resourceClass}
     variable chatOptions {
-	{me          -foreground          meForeground          Foreground}
-	{me          -background          meBackground          Background}
-	{me          -font                meFont                Font}
+	{mepre       -foreground          mePreForeground       Foreground}
+	{mepre       -background          mePreBackground       Background}
+	{mepre       -font                mePreFont             Font}
 	{metext      -foreground          meTextForeground      Foreground}
 	{metext      -background          meTextBackground      Background}
 	{metext      -font                meTextFont            Font}
-	{you         -foreground          youForeground         Foreground}
-	{you         -background          youBackground         Background}
-	{you         -font                youFont               Font}
+	{youpre      -foreground          youPreForeground      Foreground}
+	{youpre      -background          youPreBackground      Background}
+	{youpre      -font                youPreFont            Font}
 	{youtext     -foreground          youTextForeground     Foreground}
 	{youtext     -background          youTextBackground     Background}
 	{youtext     -font                youTextFont           Font}
+	{syspre      -foreground          sysPreForeground      Foreground}
+	{sys         -foreground          sysForeground         Foreground}
     }
 
     # Add all event hooks.
-    hooks::add quitAppHook [list ::UI::SaveWinGeom $wDlgs(jstartchat)]
-    hooks::add quitAppHook [list ::UI::SaveWinPrefixGeom $wDlgs(jchat)]
-    hooks::add quitAppHook ::Jabber::Chat::GetFirstPanePos
-    
-    variable locals
+    hooks::add quitAppHook        [list ::UI::SaveWinGeom $wDlgs(jstartchat)]
+    hooks::add quitAppHook        [list ::UI::SaveWinPrefixGeom $wDlgs(jchat)]
+    hooks::add quitAppHook        ::Jabber::Chat::GetFirstPanePos    
+    hooks::add newChatMessageHook ::Jabber::Chat::GotMsg
+    hooks::add presenceHook       ::Jabber::Chat::PresenceCallback
+        
+    # Running number for chat thread token.
+    variable uid 0
 }
 
 # Jabber::Chat::StartThreadDlg --
@@ -190,7 +197,6 @@ proc ::Jabber::Chat::DoStart {w} {
 proc ::Jabber::Chat::GotMsg {body args} {
     global  prefs
 
-    variable locals
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
 
@@ -207,67 +213,123 @@ proc ::Jabber::Chat::GotMsg {body args} {
     # We must follow the thread...
     if {[info exists argsArr(-thread)]} {
 	set threadID $argsArr(-thread)
+	set token [::Jabber::Chat::GetTokenFrom threadid $threadID]
     } else {
 	
 	# Try to find a reasonable fallback for clients that fail here (Psi).
-	# Find if we have registered any chat for this jid.
-	foreach {key val} [array get locals "*,jid"] {
-	    if {($val == $jid2) || ($val == $jid3)} {
-		if {[regexp {^([^,]+),jid$} $key match threadID]} {
-		    break
-		}
-	    }
-	}
-	if {![info exists threadID]} {
+	# Find if we have registered any chat for this jid 2/3.
+	set token [::Jabber::Chat::GetTokenFrom jid ${jid2}*]
+	if {$token == ""} {
+	    
+	    # Need to create a new thread ID.
 	    set threadID [::sha1pure::sha1 "$jstate(mejid)[clock seconds]"]
+	} else {
+	    variable $token
+	    upvar 0 $token state
+
+	    set threadID $state(threadid)
 	}
     }
     
-    # We may have reset its jid to a 2-tier jid if it has been offline.
-    set locals($threadID,jid) $jid
-
-    if {[info exists locals($threadID,wtop)] &&  \
-      [winfo exists $locals($threadID,wtop)]} {
-	# empty
-    } else {
-
-	# If we haven't a window for this thread, make one!
-	eval {::Jabber::Chat::Build $threadID} $args
+    # We may not yet have a dialog for this thread. Make one.
+    if {$token == ""} {
+	set token [eval {::Jabber::Chat::Build $threadID} $args]	
 	eval {hooks::run newChatThreadHook $body} $args
-    }   
-    set w $locals($threadID,wtop)
+    }
+    variable $token
+    upvar 0 $token state
+
+    # We may have reset its jid to a 2-tier jid if it has been offline.
+    set state(jid) $jid
+
+    set w $state(w)
     if {[info exists argsArr(-subject)]} {
-	set locals($threadID,subject) $argsArr(-subject)
+	set state(subject) $argsArr(-subject)
     }
-    set wtext $locals($threadID,wtext)
-    
-    set clockFormat [option get $w clockFormat {}]
-    if {$clockFormat != ""} {
-	set theTime [clock format [clock seconds] -format $clockFormat]
-	set txt "$theTime <$username>"
-    } else {
-	set txt <$username>
-    }
-    
-    $wtext configure -state normal
-    $wtext insert end $txt you
-    $wtext insert end "   " youtext
 
-    ::Text::ParseAndInsert $wtext $body youtext linktag
-
-    $wtext configure -state disabled
-    $wtext see end
-    if {$locals($threadID,got1stMsg) == 0} {
-	$locals($threadID,wtojid) configure -state disabled
-	set locals($threadID,got1stMsg) 1
+    ::Jabber::Chat::InsertMessage $token you $body
+    
+    if {$state(got1stMsg) == 0} {
+	$state(wtojid) configure -state disabled
+	set state(got1stMsg) 1
     }
     set dateISO [clock format [clock seconds] -format "%Y%m%dT%H:%M:%S"]
     ::Jabber::Chat::PutMessageInHistoryFile $jid2 \
       [list $jid2 $threadID $dateISO $body]
     
-    if {$jprefs(speakChat)} {
-	::UserActions::Speak $body $prefs(voiceOther)
+    # Run this hook (speech).
+    eval {hooks::run displayChatMessageHook $body} $args
+}
+
+# Jabber::Chat::InsertMessage --
+# 
+#       Puts message in text chat window.
+
+proc ::Jabber::Chat::InsertMessage {token whom body} {
+    variable $token
+    upvar 0 $token state
+    
+    set w     $state(w)
+    set wtext $state(wtext)
+    set jid   $state(jid)
+    set secs  [clock seconds]
+    set clockFormat [option get $w clockFormat {}]
+    
+    switch -- $whom {
+	me {
+	    set mejid [::Jabber::GetMyJid]
+	    jlib::splitjid $mejid jid2 res
+	}
+	you {
+	    jlib::splitjid $jid jid2 res
+	}
     }
+
+    switch -- $whom {
+	me - you {
+	    set username $jid2
+	    regexp {^([^@]+)@} $jid2 match username
+	    if {$clockFormat != ""} {
+		set theTime [clock format $secs -format $clockFormat]
+		set prefix "\[$theTime\] <$username>"
+	    } else {
+		set prefix <$username>
+	    }    
+	}
+	presence {
+	    if {$clockFormat != ""} {
+		set theTime [clock format $secs -format $clockFormat]
+		set prefix "\[$theTime\] "
+	    } else {
+		set prefix ""
+	    }
+	}
+    }
+    
+    $wtext configure -state normal
+    
+    switch -- $whom {
+	me {
+	    $wtext insert end $prefix mepre
+	    $wtext insert end "   " metext
+	    ::Text::ParseAndInsert $wtext $body metext linktag
+	}
+	you {
+	    $wtext insert end $prefix youpre
+	    $wtext insert end "   " youtext
+	    ::Text::ParseAndInsert $wtext $body youtext linktag
+	}
+	subject {
+	    $wtext insert end "Subject: $state(subject)" sys
+	}
+	presence {
+	    $wtext insert end $prefix syspre
+	    $wtext insert end $body sys
+	}
+    }
+
+    $wtext configure -state disabled
+    $wtext see end
 }
 
 # Jabber::Chat::StartThread --
@@ -293,25 +355,31 @@ proc ::Jabber::Chat::StartThread {jid} {
 #       args        ?-to jid -subject subject -from fromJid?
 #       
 # Results:
-#       shows window.
+#       token; shows window.
 
 proc ::Jabber::Chat::Build {threadID args} {
-    global  this prefs wDlgs
+    global  this prefs wDlgs osprefs
     
-    variable locals
+    variable uid
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
     ::Jabber::Debug 2 "::Jabber::Chat::Build threadID=$threadID, args='$args'"
 
-    set w $wDlgs(jchat)[string range $threadID 0 8]
-    set locals($threadID,wtop) $w
-    set locals($w,threadid) $threadID
-    set locals($threadID,active) 0
-    if {[winfo exists $w]} {
-	return
-    }
+    # Initialize the state variable, an array, that keeps is the storage.
+    
+    set token [namespace current]::[incr uid]
+    variable $token
+    upvar 0 $token state
+    
+    set w $wDlgs(jchat)${uid}
     array set argsArr $args
+
+    set state(w)          $w
+    set state(threadid)   $threadID
+    set state(active)     0
+    set state(got1stMsg)  0
+    set state(subject)    ""
     
     # Toplevel with class Chat.
     toplevel $w -class Chat
@@ -326,18 +394,25 @@ proc ::Jabber::Chat::Build {threadID args} {
     # Try to keep any /resource part unless not possible.
     
     if {[info exists argsArr(-from)]} {
-	set locals($threadID,jid) [$jstate(jlib) getrecipientjid $argsArr(-from)]
+	set state(jid) [$jstate(jlib) getrecipientjid $argsArr(-from)]
     } else {
-	set locals($threadID,jid) ""
+	set state(jid) ""
     }
+    jlib::splitjid $state(jid) jid2 res
     
     if {[info exists argsArr(-subject)]} {
-	set locals($threadID,subject) $argsArr(-subject)
+	set state(subject) $argsArr(-subject)
     }
-    set locals($threadID,got1stMsg) 0
-    wm title $w "Chat ($locals($threadID,jid))"
+
+    wm title $w "Chat ($state(jid))"
     wm protocol $w WM_DELETE_WINDOW  \
-      [list [namespace current]::Close -threadid $threadID]
+      [list [namespace current]::Close $token]
+
+    # On non macs we need to explicitly bind certain commands.
+    if {![string match "mac*" $this(platform)]} {
+	bind $w <$osprefs(mod)-Key-w>  \
+	  [list ::Jabber::Chat::Close $token]
+    }
     
     # Toplevel menu for mac only. Crashes in menudefs; BowelsOfTheMemoryMgr
     if {[string match "mac*" $this(platform)]} {
@@ -361,20 +436,20 @@ proc ::Jabber::Chat::Build {threadID args} {
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
     pack [button $frbot.btconn -text [::msgcat::mc Send] -width 8 -default active \
-      -command [list [namespace current]::Send $threadID]]  \
+      -command [list [namespace current]::Send $token]]  \
       -side right -padx 5 -pady 2
     pack [button $frbot.btcancel -text [::msgcat::mc Close] -width 8   \
-      -command [list [namespace current]::Close -threadid $threadID]]  \
+      -command [list [namespace current]::Close $token]]  \
       -side right -padx 5 -pady 2
     pack [::Jabber::UI::SmileyMenuButton $frbot.smile $wtextsnd]  \
       -side right -padx 5 -pady 2
     pack [checkbutton $frbot.active -text "  Active <Return>"   \
-      -command [list [namespace current]::ActiveCmd $threadID] \
-      -variable [namespace current]::locals($threadID,active)]  \
+      -command [list [namespace current]::ActiveCmd $token] \
+      -variable $token\(active)]  \
       -side left -padx 5 -pady 2
     pack $frbot -side bottom -fill x -padx 10 -pady 6
     
-    # CCP
+    # CCP etc.
     pack [frame $w.frall.fccp] -side top -fill x
     set wccp $w.frall.fccp.ccp
     pack [::UI::NewCutCopyPaste $wccp] -padx 10 -pady 2 -side left
@@ -382,36 +457,35 @@ proc ::Jabber::Chat::Build {threadID args} {
     ::UI::CutCopyPasteConfigure $wccp copy -state disabled
     ::UI::CutCopyPasteConfigure $wccp paste -state disabled
     pack [frame $w.frall.fccp.div -bd 2 -relief raised -width 2] -fill y -side left
-    pack [::UI::NewPrint $w.frall.fccp.pr [list [namespace current]::Print $threadID]] \
+    pack [::UI::NewPrint $w.frall.fccp.pr [list [namespace current]::Print $token]] \
       -side left -padx 10
+    button $w.frall.fccp.hist -text [msgcat::mc History]  \
+      -command [list [namespace current]::BuildHistory $jid2] 
     pack [frame $w.frall.div2 -bd 2 -relief sunken -height 2] -fill x -side top
-        
+    pack $w.frall.fccp.hist -side right -padx 6
+    
     # To and subject fields.
     set frtop [frame $w.frall.frtop -borderwidth 0]
     pack $frtop -side top -fill x   
     label $frtop.lto -text "[::msgcat::mc {To/from JID}]:" -font $fontSB \
       -anchor e
-    entry $frtop.eto   \
-      -textvariable [namespace current]::locals($threadID,jid)
+    entry $frtop.eto -textvariable $token\(jid)
     label $frtop.lsub -text "[::msgcat::mc Subject]:" -font $fontSB \
       -anchor e
-    entry $frtop.esub   \
-      -textvariable [namespace current]::locals($threadID,subject)
+    entry $frtop.esub -textvariable $token\(subject)
     grid $frtop.lto -column 0 -row 0 -sticky e -padx 6
     grid $frtop.eto -column 1 -row 0 -sticky ew -padx 6
     grid $frtop.lsub -column 0 -row 1 -sticky e -padx 6
     grid $frtop.esub -column 1 -row 1 -sticky ew -padx 6
     grid columnconfigure $frtop 1 -weight 1
-    set locals($threadID,wtojid) $frtop.eto
+
+    set state(wtojid) $frtop.eto
 
     # Text chat.
     pack [frame $frmid -height 250 -width 300 -relief sunken -bd 1 -class Pane] \
       -side top -fill both -expand 1 -padx 4 -pady 4
-    set locals($threadID,wtxt) $wtxt
     frame $wtxt
-    
-    set locals($threadID,wtext) $wtext
-    
+        
     text $wtext -height 12 -width 1 -state disabled -cursor {} \
       -borderwidth 1 -relief sunken -yscrollcommand [list $wysc set] -wrap word
     scrollbar $wysc -orient vertical -command [list $wtext yview]
@@ -449,13 +523,14 @@ proc ::Jabber::Chat::Build {threadID args} {
 	lappend paneopts -image $imageHorizontal
     }    
     eval {::pane::pane $wtxt $wtxtsnd} $paneopts
-    
-    set locals($threadID,wtext)    $wtext
-    set locals($threadID,wtextsnd) $wtextsnd
+        
+    set state(wtext)    $wtext
+    set state(wtxt)     $wtxt
+    set state(wtextsnd) $wtextsnd
 
     # We need the window title to reflect the receiving jid.
-    trace variable [namespace current]::locals($threadID,jid) w  \
-      [list [namespace current]::TraceJid $threadID]
+    trace variable $token\(jid) w  \
+      [list [namespace current]::TraceJid $token]
 
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jchat)]]
     if {$nwin == 1} {
@@ -465,6 +540,7 @@ proc ::Jabber::Chat::Build {threadID args} {
     wm maxsize $w 800 2000
     
     focus $w
+    return $token
 }
 
 proc ::Jabber::Chat::ConfigureTextTags {w wtext} {
@@ -474,7 +550,7 @@ proc ::Jabber::Chat::ConfigureTextTags {w wtext} {
     ::Jabber::Debug 2 "::Jabber::Chat::ConfigureTextTags"
     
     set space 2
-    set alltags {me metext you youtext}
+    set alltags {mepre metext youpre youtext syspre sys}
         
     if {[string length $jprefs(chatFont)]} {
 	set chatFont $jprefs(chatFont)
@@ -489,7 +565,7 @@ proc ::Jabber::Chat::ConfigureTextTags {w wtext} {
 	if {[string length $jprefs(chatFont)] && [string equal $optName "-font"]} {
 	    
 	    switch $resName {
-		meFont - youFont {
+		mePreFont - youPreFont {
 		    set value $boldChatFont
 		}
 		meTextFont - youTextFont {
@@ -503,6 +579,7 @@ proc ::Jabber::Chat::ConfigureTextTags {w wtext} {
     }
     lappend opts(metext)  -spacing3 $space -lmargin1 20 -lmargin2 20
     lappend opts(youtext) -spacing3 $space -lmargin1 20 -lmargin2 20
+    lappend opts(sys) -spacing3 $space -lmargin1 20 -lmargin2 20
     foreach tag $alltags {
 	eval {$wtext tag configure $tag} $opts($tag)
     }
@@ -511,37 +588,44 @@ proc ::Jabber::Chat::ConfigureTextTags {w wtext} {
 }
 
 proc ::Jabber::Chat::SetFont {theFont} {    
-    variable locals
     upvar ::Jabber::jprefs jprefs
 
     ::Jabber::Debug 2 "::Jabber::Chat::SetFont theFont=$theFont"
+
     set jprefs(chatFont) $theFont
         
-    foreach key [array names locals "*,threadid"] {
-	set threadID $locals($key)
-	set w  $locals($threadID,wtop)
+    foreach token [GetTokenList] {
+	variable $token
+	upvar 0 $token state
+
+	set w $state(w)
 	if {[winfo exists $w]} {
-	    set wtext $locals($threadID,wtext)
-	    ::Jabber::Chat::ConfigureTextTags $w $wtext
+	    ::Jabber::Chat::ConfigureTextTags $w $state(wtext)
+	} else {
+	    catch {unset state}
 	}
     }
 }
 
-proc ::Jabber::Chat::ActiveCmd {threadID} {
-    variable locals
+proc ::Jabber::Chat::ActiveCmd {token} {
+    variable $token
+    upvar 0 $token state
 
-    set w $locals($threadID,wtop)
-    if {$locals($threadID,active)} {
-	bind $w <Return> [list [namespace current]::Send $threadID]
+    ::Jabber::Debug 2 "::Jabber::Chat::ActiveCmd: token=$token"
+    
+    set w $state(w)
+    if {$state(active)} {
+	bind $w <Return> [list [namespace current]::Send $token]
     } else {
 	bind $w <Return> {}
     }
 }
 
-proc ::Jabber::Chat::Send {threadID} {
+proc ::Jabber::Chat::Send {token} {
     global  prefs
     
-    variable locals
+    variable $token
+    upvar 0 $token state
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
@@ -556,8 +640,8 @@ proc ::Jabber::Chat::Send {threadID} {
     
     # According to XMPP we should send to 3-tier jid if still online,
     # else to 2-tier.
-    set jid [$jstate(jlib) getrecipientjid $locals($threadID,jid)]
-    set locals($threadID,jid) $jid
+    set jid [$jstate(jlib) getrecipientjid $state(jid)]
+    set state(jid) $jid
     jlib::splitjid $jid jid2 res
 
     if {![::Jabber::IsWellFormedJID $jid]} {
@@ -568,9 +652,9 @@ proc ::Jabber::Chat::Send {threadID} {
 	    return
 	}
     }
-    set w        $locals($threadID,wtop)
-    set wtext    $locals($threadID,wtext)
-    set wtextsnd $locals($threadID,wtextsnd)
+    set w        $state(w)
+    set wtextsnd $state(wtextsnd)
+    set threadID $state(threadid)
 
     # Get text to send. Strip off any ending newlines from Return.
     # There might by smiley icons in the text widget. Parse them to text.
@@ -581,13 +665,14 @@ proc ::Jabber::Chat::Send {threadID} {
     }
     
     # Put in history file.
-    set dateISO [clock format [clock seconds] -format "%Y%m%dT%H:%M:%S"]
+    set secs [clock seconds]
+    set dateISO [clock format $secs -format "%Y%m%dT%H:%M:%S"]
     ::Jabber::Chat::PutMessageInHistoryFile $jid2 \
       [list $jstate(mejid) $threadID $dateISO $allText]
     
     set opts {}
-    if {$locals($threadID,subject) != ""} {
-	lappend opts -subject $locals($threadID,subject)
+    if {$state(subject) != ""} {
+	lappend opts -subject $state(subject)
     }
     if {[catch {
 	eval {$jstate(jlib) send_message $jid  \
@@ -597,103 +682,147 @@ proc ::Jabber::Chat::Send {threadID} {
 	  -message "Network error ocurred: $err"
 	return
     }
+    set state(lastsentsecs) $secs
     
-    # Add to chat window and clear send.
-    $wtext configure -state normal
-    if {![regexp {(.+)@([^/]+)(/(.+))?} $jstate(mejid) match username host junk res]} {
-	set username $jstate(mejid)
-    }
-
-    set clockFormat [option get $w clockFormat {}]
-    if {$clockFormat != ""} {
-	set theTime [clock format [clock seconds] -format $clockFormat]
-	set txt "$theTime <$username>"
-    } else {
-	set txt <$username>
-    }
-    
-    $wtext configure -state normal
-    $wtext insert end $txt me
-    
-    ::Text::ParseAndInsert $wtext "   $allText" metext linktag
-
-    $wtext configure -state disabled
+    # Add to chat window and clear send.        
+    ::Jabber::Chat::InsertMessage $token me $allText
     $wtextsnd delete 1.0 end
-    $wtext see end
-    if {$locals($threadID,got1stMsg) == 0} {
-	$locals($threadID,wtojid) configure -state disabled
-	set locals($threadID,got1stMsg) 1
+
+    if {$state(got1stMsg) == 0} {
+	$state(wtojid) configure -state disabled
+	set state(got1stMsg) 1
     }
     
-    if {$jprefs(speakChat)} {
-	::UserActions::Speak $allText $prefs(voiceUs)
-    }
+    # Run this hook (speech).
+    set opts [list -from $jid2]
+    eval {hooks::run displayChatMessageHook $allText} $opts
 }
 
-proc ::Jabber::Chat::TraceJid {threadID name junk1 junk2} {
+proc ::Jabber::Chat::TraceJid {token name junk1 junk2} {
+    variable $token
+    upvar 0 $token state
     
     # Call by name.
-    upvar $name locName
-    variable locals
-    
-    set w $locals($threadID,wtop)
-    wm title $w "Chat ($locals($threadID,jid))"
+    upvar $name locName    
+    wm title $state(w) "Chat ($state(jid))"
 }
 
-proc ::Jabber::Chat::Print {threadID} {
-    variable locals
-
-    set wtext $locals($threadID,wtext)
+proc ::Jabber::Chat::Print {token} {
+    variable $token
+    upvar 0 $token state
     
-    ::UserActions::DoPrintText $wtext
+    ::UserActions::DoPrintText $state(wtext)
+}
+
+proc ::Jabber::Chat::PresenceCallback {jid type args} {
+    
+    upvar ::Jabber::mapShowTextToElem mapShowTextToElem
+
+    # ::Jabber::Chat::PresenceCallback: args=marilu@jabber.dk unavailable 
+    #-resource Psi -type unavailable -type unavailable -from marilu@jabber.dk/Psi
+    #-to matben@jabber.dk -status Disconnected
+    array set argsArr $args
+    set from $jid
+    if {[info exists argsArr(-from)]} {
+	set from $argsArr(-from)
+    }
+    
+    set token [::Jabber::Chat::GetTokenFrom jid ${jid}*]
+    if {$token == ""} {
+	
+	# Likely no chat with this jid.
+	return
+    }
+    variable $token
+    upvar 0 $token state
+    
+    set show $type
+    if {[info exists argsArr(-show)]} {
+	set show $argsArr(-show)
+    }
+    set status ""
+    if {[info exists argsArr(-status)]} {
+	set status "$argsArr(-status)\n"
+    }
+    ::Jabber::Chat::InsertMessage $token presence  \
+      "$jid is: $mapShowTextToElem($show)\n$status"
+    
+}
+
+# Jabber::Chat::GetTokenFrom --
+# 
+#       Try to get the token state array from any stored key.
+#       
+# Arguments:
+#       key         w, jid, threadid etc...
+#       pattern     glob matching
+#       
+# Results:
+#       token or empty if not found.
+
+proc ::Jabber::Chat::GetTokenFrom {key pattern} {
+    
+    # Search all tokens for this key into state array.
+    foreach token [::Jabber::Chat::GetTokenList] {
+	variable $token
+	upvar 0 $token state
+	
+	if {[string match $pattern $state($key)]} {
+	    return $token
+	}
+    }
+    return ""
+}
+
+proc ::Jabber::Chat::GetTokenList { } {
+    
+    set ns [namespace current]
+    return [concat  \
+      [info vars ${ns}::\[0-9\]] \
+      [info vars ${ns}::\[0-9\]\[0-9\]] \
+      [info vars ${ns}::\[0-9\]\[0-9\]\[0-9\]] \
+      [info vars ${ns}::\[0-9\]\[0-9\]\[0-9\]\[0-9\]] \
+      [info vars ${ns}::\[0-9\]\[0-9\]\[0-9\]\[0-9\]\[0-9\]]]
 }
     
 # Jabber::Chat::Close --
 #
-#       args: must be any of -threadid or -toplevel
+#
 
-proc ::Jabber::Chat::Close {args} {
+proc ::Jabber::Chat::Close {token} {
     global  wDlgs prefs
     
-    variable locals
+    variable $token
+    upvar 0 $token state    
     
-    array set argsArr $args
-    if {[info exists argsArr(-threadid)]} {
-	set threadID $argsArr(-threadid)
-	set w $locals($threadID,wtop)
-    } elseif {[info exists argsArr(-toplevel)]} {
-	set w $argsArr(-toplevel)
-	set threadID $locals($w,threadid)
-    } else {
-	return -code error  \
-	  {::Jabber::Chat::Close must have any of -threadid or -toplevel}
-    }
-
     #set ans [tk_messageBox -icon info -parent $w -type yesno \
     #  -message [FormatTextForMessageBox [::msgcat::mc jamesschatclose]]]
     set ans "yes"
     if {$ans == "yes"} {
-	::UI::SaveWinGeom $wDlgs(jchat) $locals($threadID,wtop)
-	::UI::SavePanePos $wDlgs(jchat) $locals($threadID,wtxt)
-	destroy $locals($threadID,wtop)
+	::UI::SaveWinGeom $wDlgs(jchat) $state(w)
+	::UI::SavePanePos $wDlgs(jchat) $state(wtxt)
+	destroy $state(w)
 	
 	# Remove trace on windows title.
-	trace vdelete [namespace current]::locals($threadID,jid) w  \
+	trace vdelete $token\(jid) w  \
 	  [namespace current]::TraceJid
 	
 	# Array cleanup?
-	array unset locals "${threadID},*"
+	unset state
     }
 }
 
 proc ::Jabber::Chat::GetFirstPanePos { } {
     global  wDlgs
-    variable locals
     
     set win [::UI::GetFirstPrefixedToplevel $wDlgs(jchat)]
     if {$win != ""} {
-	set threadID $locals($win,threadid)
-	::UI::SavePanePos $wDlgs(jchat) $locals($threadID,wtxt)
+	set token [::Jabber::Chat::GetTokenFrom w $win]
+	if {$token != ""} {
+	    variable $token
+	    upvar 0 $token state    
+	    ::UI::SavePanePos $wDlgs(jchat) $state(wtxt)
+	}
     }
 }
 
@@ -816,10 +945,10 @@ proc ::Jabber::Chat::BuildHistory {jid} {
 		set syssecs [clock scan $time]
 		set cwhen [clock format $syssecs -format "%H:%M:%S"]
 		if {[string equal $cjid $jid]} {
-		    set ptag you
+		    set ptag youpre
 		    set ptxttag youtext
 		} else {
-		    set ptag me
+		    set ptag mepre
 		    set ptxttag metext
 		}
 		$wtext insert end "$cwhen <$cjid>" $ptag

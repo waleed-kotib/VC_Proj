@@ -27,7 +27,7 @@ Use them as:
 
 4) Some of these also have specific resource names, see the
 respective sources for this. One example:
-*Chat*youBackground:        green
+*Chat*youPreBackground:        green
 
 5) Most icons may also be customized. Place your gif images
 in their own directory inside the images/ directory of the

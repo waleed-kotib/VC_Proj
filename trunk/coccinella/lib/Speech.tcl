@@ -10,10 +10,10 @@ package provide Speech 1.0
 
 namespace eval ::Speech:: {
     
-    
-    hooks::add displayMessageHook        [list ::Speech::SpeakMessage normal]
-    hooks::add displayChatMessageHook    [list ::Speech::SpeakMessage chat]
-    
+    # Hooks to run when message displayed to user.
+    hooks::add displayMessageHook          [list ::Speech::SpeakMessage normal]
+    hooks::add displayChatMessageHook      [list ::Speech::SpeakMessage chat]
+    hooks::add displayGroupChatMessageHook [list ::Speech::SpeakMessage groupchat]
 }
 
 proc ::Speech::SpeakMessage {type body args} {
@@ -30,7 +30,13 @@ proc ::Speech::SpeakMessage {type body args} {
     switch -- $type {
 	normal {
 	    if {$jprefs(speakMsg)} {
-		::Speech::Speak $body $prefs(voiceOther)
+		set txt " "
+		if {[info exists argsArr(-subject)] && \
+		  ($argsArr(-subject) != "")} {
+		    append txt "Subject is $argsArr(-subject). "
+		}
+		append txt $body
+		::Speech::Speak $txt $prefs(voiceOther)
 	    }
 	}
 	chat {
@@ -39,14 +45,25 @@ proc ::Speech::SpeakMessage {type body args} {
 		jlib::splitjid $myjid jid2 res
 		if {[string match ${jid2}* $from]} {
 		    set voice $prefs(voiceUs)
+		    set txt "I say, "
 		} else {
 		    set voice $prefs(voiceOther)
+		    set txt " , "
 		}
-		::Speech::Speak $body $voice
+		append txt $body
+		::Speech::Speak $txt $voice
 	    }
 	}
 	groupchat {
-	    
+	    if {$jprefs(speakChat)} {
+		jlib::splitjid $from roomjid res
+		set myjid [::Jabber::GetMyJid $roomjid]
+		if {[string equal $myjid $from]} {
+		    ::Speech::Speak $body $prefs(voiceUs)
+		} else {
+		    ::Speech::Speak $body $prefs(voiceOther)
+		}
+	    }
 	}
     }
 }

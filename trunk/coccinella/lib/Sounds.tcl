@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Sounds.tcl,v 1.8 2003-12-23 14:41:01 matben Exp $
+# $Id: Sounds.tcl,v 1.9 2003-12-29 09:02:30 matben Exp $
 
 package provide Sounds 1.0
 
@@ -15,9 +15,9 @@ namespace eval ::Sounds:: {
     
     # Add all event hooks.
     hooks::add quitAppHook ::Sounds::Free 80
-    hooks::add newMessageHook          [list ::Sounds::Event newmsg]
-    hooks::add newChatMessageHook      [list ::Sounds::Event newmsg]
-    hooks::add newGroupChatMessageHook [list ::Sounds::Event newmsg]
+    hooks::add newMessageHook          [list ::Sounds::Msg normal newmsg]
+    hooks::add newChatMessageHook      [list ::Sounds::Msg chat newmsg]
+    hooks::add newGroupChatMessageHook [list ::Sounds::Msg groupchat newmsg]
     hooks::add loginHook               [list ::Sounds::Event connected]
     hooks::add presenceHook            ::Sounds::Presence
     
@@ -113,6 +113,38 @@ proc ::Sounds::PlayWhenIdle {snd} {
 	set afterid($snd) 1
 	after idle [list ::Sounds::Play $snd]
     }    
+}
+
+proc ::Sounds::Msg {type snd body args} {
+    
+    array set argsArr $args
+    set from ""
+    if {[info exists argsArr(-from)]} {
+	set from $argsArr(-from)
+    }
+    
+    # We shouldn't make noise for our own messages.
+    switch -- $type {
+	normal {
+
+	}
+	chat {
+	    set myjid [::Jabber::GetMyJid]
+	    jlib::splitjid $myjid jid2 res
+	    if {[string match ${jid2}* $from]} {
+		return
+	    }
+	}
+	groupchat {
+	    jlib::splitjid $from roomjid res
+	    set myjid [::Jabber::GetMyJid $roomjid]
+	    if {[string equal $myjid $from]} {
+		return
+	    }
+	}
+    }
+
+    ::Sounds::PlayWhenIdle $snd
 }
 
 proc ::Sounds::Event {snd args} {
