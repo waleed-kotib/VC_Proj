@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.88 2004-11-02 15:34:51 matben Exp $
+# $Id: Chat.tcl,v 1.89 2004-11-03 14:34:08 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -285,6 +285,7 @@ proc ::Jabber::Chat::GotMsg {body args} {
     
     # At this stage we have a threadID.
     # We may not yet have a dialog and/or page for this thread. Make them.
+    set newdlg 0
     if {$chattoken == ""} {
 	if {$body == ""} {
 	    # Junk
@@ -304,6 +305,7 @@ proc ::Jabber::Chat::GotMsg {body args} {
 		set dlgtoken [eval {Build $threadID} $args]		
 		set chattoken [GetActiveChatToken $dlgtoken]
 	    }
+	    set newdlg 1
 	    eval {::hooks::run newChatThreadHook $body} $args
 	    variable $chattoken
 	    upvar 0 $chattoken chatstate
@@ -330,40 +332,45 @@ proc ::Jabber::Chat::GotMsg {body args} {
     set chatstate(fromjid)  $jid
     set chatstate(username) $username
     
-    set w $dlgstate(w)
-    if {[info exists argsArr(-subject)]} {
-	set chatstate(subject) $argsArr(-subject)
-	set chatstate(lastsubject) $chatstate(subject)
-	eval {
-	    InsertMessage $chattoken systext "Subject: $chatstate(subject)\n"
-	} $args
+    # If new chat dialog check to see if we have got a thread history to insert.
+    if {$newdlg} {
+	InsertAnyThreadHistory $chattoken
     }
-    
-    # See if we've got a jabber:x:event (JEP-0022).
-    # 
-    #  Should we handle this with hooks????
+    set w $dlgstate(w)
+
+    set opts {}
     if {[info exists argsArr(-x)]} {
+	set tm [::Jabber::GetAnyDelayElem $argsArr(-x)]
+	if {$tm != ""} {
+	    set secs [clock scan $tm -gmt 1]
+	    lappend opts -secs $secs
+	}
+
+	# See if we've got a jabber:x:event (JEP-0022).
+	# 
+	#  Should we handle this with hooks????
 	set xevent [lindex [wrapper::getnamespacefromchilds  \
 	  $argsArr(-x) x "jabber:x:event"] 0]
 	if {[llength $xevent]} {
 	    eval {XEventRecv $chattoken $xevent} $args
 	}
     }
+
+    if {[info exists argsArr(-subject)]} {
+	set chatstate(subject) $argsArr(-subject)
+	set chatstate(lastsubject) $chatstate(subject)
+	eval {
+	    InsertMessage $chattoken systext "Subject: $chatstate(subject)\n"
+	} $opts
+    }
     
     if {$body != ""} {
 	
 	# Put in chat window.
-	eval {InsertMessage $chattoken you $body} $args
+	eval {InsertMessage $chattoken you $body} $opts
 
 	# Put in history file.
-	set secs ""
-	if {[info exists argsArr(-x)]} {
-	    set tm [::Jabber::GetAnyDelayElem $argsArr(-x)]
-	    if {$tm != ""} {
-		set secs [clock scan $tm -gmt 1]
-	    }
-	}
-	if {$secs == ""} {
+	if {![info exists secs]} {
 	    set secs [clock seconds]
 	}
 	set dateISO [clock format $secs -format "%Y%m%dT%H:%M:%S"]
@@ -397,6 +404,8 @@ proc ::Jabber::Chat::GotNormalMsg {body args} {
 # Jabber::Chat::InsertMessage --
 # 
 #       Puts message in text chat window.
+#       
+#       args:   -secs seconds
 
 proc ::Jabber::Chat::InsertMessage {chattoken whom body args} {
     variable $chattoken
@@ -426,14 +435,9 @@ proc ::Jabber::Chat::InsertMessage {chattoken whom body args} {
 	    }
 	}
     }
-    set secs ""
-    if {[info exists argsArr(-x)]} {
-	set tm [::Jabber::GetAnyDelayElem $argsArr(-x)]
-	if {$tm != ""} {
-	    set secs [clock scan $tm -gmt 1]
-	}
-    }
-    if {$secs == ""} {
+    if {[info exists argsArr(-secs)]} {
+	set secs $argsArr(-secs)
+    } else {
 	set secs [clock seconds]
     }
     if {[::Utils::IsToday $secs]} {
@@ -478,6 +482,45 @@ proc ::Jabber::Chat::InsertMessage {chattoken whom body args} {
 
     $wtext configure -state disabled
     $wtext see end
+}
+
+proc ::Jabber::Chat::InsertAnyThreadHistory {chattoken} {
+    global  prefs
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    ::Debug 2 "::Jabber::Chat::InsertAnyThreadHistory"
+    
+    # First find any matching history file.
+    jlib::splitjid $chatstate(jid) jid2 res
+    set path [file join $prefs(historyPath) [uriencode::quote $jid2]] 
+    if {[file exists $path]} {
+	
+	# Collect all matching threads.
+	set threadID $chatstate(threadid)
+	set uidstart 1000
+	set uid $uidstart
+	incr uidstart
+	catch {source $path}
+	set uidstop $uid
+	
+	set msgList {}
+	for {set i $uidstart} {$i <= $uidstop} {incr i} {
+	    set cthread [lindex $message($i) 1]
+	    if {[string equal $cthread $threadID]} {
+		set cjid [lindex $message($i) 0]
+		set date [lindex $message($i) 2]
+		set body [lindex $message($i) 3]
+		set secs [clock scan $date]
+		if {[string equal $cjid $jid2]} {
+		    set whom you
+		} else {
+		    set whom me
+		}
+		InsertMessage $chattoken $whom $body -secs $secs
+	    }
+	}
+    }
 }
 
 # Jabber::Chat::StartThread --
@@ -1370,8 +1413,7 @@ proc ::Jabber::Chat::Send {dlgtoken} {
     set opts {}
     if {![string equal $chatstate(subject) $chatstate(lastsubject)]} {
 	lappend opts -subject $chatstate(subject)
-	InsertMessage $chattoken sys  \
-	  "Subject: $chatstate(subject)\n"
+	InsertMessage $chattoken sys "Subject: $chatstate(subject)\n"
     }
     set chatstate(lastsubject) $chatstate(subject)
     
