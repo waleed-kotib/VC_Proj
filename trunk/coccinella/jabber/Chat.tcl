@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.40 2004-01-27 08:48:03 matben Exp $
+# $Id: Chat.tcl,v 1.41 2004-01-30 15:33:50 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -257,8 +257,13 @@ proc ::Jabber::Chat::GotMsg {body args} {
     
     # We may not yet have a dialog for this thread. Make one.
     if {$token == ""} {
-	set token [eval {::Jabber::Chat::Build $threadID} $args]	
-	eval {::hooks::run newChatThreadHook $body} $args
+	if {$body == ""} {
+	    # Junk
+	    return
+	} else {
+	    set token [eval {::Jabber::Chat::Build $threadID} $args]	
+	    eval {::hooks::run newChatThreadHook $body} $args
+	}
     }
     variable $token
     upvar 0 $token state
@@ -956,6 +961,7 @@ proc ::Jabber::Chat::Close {token} {
 	# Remove trace on windows title.
 	trace vdelete $token\(jid) w  \
 	  [namespace current]::TraceJid
+	::Jabber::Chat::XEventCancelCompose $token
 	
 	# Array cleanup?
 	unset state
@@ -1037,7 +1043,6 @@ proc ::Jabber::Chat::KeyPressEvent {token char} {
     }
     if {[info exists state(xevent,afterid)]} {
 	after cancel $state(xevent,afterid)
-	# puts "cancels state(xevent,afterid)= $state(xevent,afterid)"
 	unset state(xevent,afterid)
     }    
     if {[info exists state(xevent,msgid)] && ($state(xevent,status) == "")} {
@@ -1046,7 +1051,6 @@ proc ::Jabber::Chat::KeyPressEvent {token char} {
     if {$state(xevent,status) == "composing"} {
 	set state(xevent,afterid) [after $cprefs(xeventsmillis) \
 	  [list [namespace current]::XEventCancelCompose $token]]
-	# puts "schedules state(xevent,afterid)= $state(xevent,afterid)"
     }
 }
 
@@ -1086,9 +1090,12 @@ proc ::Jabber::Chat::XEventCancelCompose {token} {
 
     ::Jabber::Debug 2 "::Jabber::Chat::XEventCancelCompose token=$token"
 
+    # We may have been destroyed.
+    if {![info exists state]} {
+	return
+    }
     if {[info exists state(xevent,afterid)]} {
 	after cancel $state(xevent,afterid)
-	# puts "cancels state(xevent,afterid)= $state(xevent,afterid)"
 	unset state(xevent,afterid)
     }
     if {$state(xevent,status) == ""} {

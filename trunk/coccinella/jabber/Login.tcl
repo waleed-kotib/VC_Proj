@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.26 2004-01-27 08:48:05 matben Exp $
+# $Id: Login.tcl,v 1.27 2004-01-30 15:33:50 matben Exp $
 
 package provide Login 1.0
 
@@ -172,6 +172,7 @@ proc ::Jabber::Login::Login { } {
     # Necessary to trace the popup menu variable.
     trace variable [namespace current]::menuVar w  \
       [namespace current]::TraceMenuVar
+    set menuVar $profile
 	
     ::UI::SetWindowPosition $w
     wm resizable $w 0 0
@@ -201,7 +202,6 @@ proc ::Jabber::Login::LoadProfiles { } {
 	  -command [list set [namespace current]::menuVar $name]
     }
     set profile     [::Profiles::GetSelectedName]
-    set menuVar     $profile
     
     # Make temp array for servers. Handy for filling in the entries.
     foreach {name spec} [::Profiles::Get] {
@@ -213,10 +213,7 @@ proc ::Jabber::Login::LoadProfiles { } {
 	    set tmpProfArr($name,$key) $value
 	}
     }
-    set server   $tmpProfArr($menuVar,server)
-    set username $tmpProfArr($menuVar,username)
-    set password $tmpProfArr($menuVar,password)
-    set resource $tmpProfArr($menuVar,-resource)
+    set menuVar $profile
 }
 
 proc ::Jabber::Login::TraceMenuVar {name key op} {

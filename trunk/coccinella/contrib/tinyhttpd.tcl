@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: tinyhttpd.tcl,v 1.8 2004-01-13 14:50:20 matben Exp $
+# $Id: tinyhttpd.tcl,v 1.9 2004-01-30 15:33:50 matben Exp $
 
 # ########################### USAGE ############################################
 #
@@ -183,7 +183,7 @@ Content-Length: %s\n"
 #       args:
 #           -chunk                8192
 #           -defaultindexfile     index.html
-#	    -directorylisting     1
+#	    -directorylisting     0
 #	    -log                  0
 #	    -logfile              httpdlog.txt
 #	    -myaddr               ""
@@ -202,7 +202,7 @@ proc ::tinyhttpd::start {args} {
     array set opts {
 	-chunk                8192
 	-defaultindexfile     index.html
-	-directorylisting     1
+	-directorylisting     0
 	-log                  0
 	-logfile              httpdlog.txt
 	-myaddr               ""

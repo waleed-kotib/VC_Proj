@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.47 2004-01-29 08:09:40 matben Exp $
+# $Id: UI.tcl,v 1.48 2004-01-30 15:33:51 matben Exp $
 
 package require entrycomp
 
@@ -1404,7 +1404,7 @@ proc ::UI::FixMenusWhenSelection {w} {
 		set haveClipState normal
 	    }
 	}	
-	if {[winfo exists ${wtop}menu]} {
+	if {[winfo exists $medit]} {
 	    
 	    # We have an explicit menu for this window.
 	    ::UI::MenuMethod $medit entryconfigure mCut -state $setState

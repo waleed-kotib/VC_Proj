@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.32 2004-01-23 08:57:16 matben Exp $
+# $Id: jabberlib.tcl,v 1.33 2004-01-30 15:33:50 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -127,7 +127,8 @@
 #      jlibName setgroupchatprotocol jid protocol
 #      jlibName setroomprotocol jid protocol
 #      
-#  o protocol independent methods for groupchats/conference:
+#  o protocol independent methods for groupchats/conference/muc,
+#    agents/browse/disco(?):
 #      jlibName service parent jid
 #      jlibName service childs jid
 #      jlibName service isroom jid

@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.37 2004-01-17 11:42:53 matben Exp $
+# $Id: Coccinella.tcl,v 1.38 2004-01-30 15:33:50 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -628,6 +628,9 @@ if {($prefs(protocol) != "client") && $prefs(autoStartServer)} {
 if {($prefs(protocol) != "client") && $prefs(haveHttpd)} {
     set httpdScript [list ::tinyhttpd::start -port $prefs(httpdPort)  \
       -rootdirectory $prefs(httpdRootDir)]
+    if {$debugLevel > 0} {
+	lappend httpdScript -directorylisting 1
+    }
     
     if {[catch {
 	if {$prefs(Thread)} {
