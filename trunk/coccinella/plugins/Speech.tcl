@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Speech.tcl,v 1.1 2004-06-06 15:41:26 matben Exp $
+# $Id: Speech.tcl,v 1.2 2004-06-07 06:23:35 matben Exp $
 
 namespace eval ::Speech:: { }
 
@@ -44,7 +44,7 @@ proc ::Speech::Load { } {
     
     # We should register ourselves.
     component::register Speech "Provides synthetic speech on Macs using\
-      TclSpeech and on WIndows using MSSpeech"
+      TclSpeech and on Windows using MSSpeech"
 }
 
 proc ::Speech::Init { } {
