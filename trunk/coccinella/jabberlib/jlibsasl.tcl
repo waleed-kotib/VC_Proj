@@ -1,11 +1,12 @@
 #  jlibsasl.tcl --
 #  
 #      This file is part of the jabberlib. It provides support for the
-#      sasl authentication layer vis the tclsasl package.
+#      sasl authentication layer via the tclsasl package or the saslmd5
+#      pure tcl package.
 #      
-#  Copyright (c) 2004  Mats Bengtsson
+#  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: jlibsasl.tcl,v 1.12 2005-02-16 14:26:46 matben Exp $
+# $Id: jlibsasl.tcl,v 1.13 2005-04-03 10:41:10 matben Exp $
 
 # We need to be flexible here since can have cyrus based sasl or our 
 # own special pure tcl saslmd5.
@@ -24,8 +25,8 @@ package provide jlibsasl 1.0
 
 
 namespace eval jlib {
-
     variable cyrussasl 
+    
     if {$::_saslpack == "cyrussasl"} {
 	set cyrussasl 1
     } else {
@@ -108,6 +109,15 @@ proc jlib::auth_sasl_mechanisms_write {jlibname name1 name2 op} {
       [list [namespace current]::auth_sasl_mechanisms_write $jlibname]
     auth_sasl_continue $jlibname
 }
+
+# jlib::auth_sasl_continue --
+# 
+#       We respond to the 
+#       <stream:features>
+#           <mechanisms ...>
+#               <mechanism>DIGEST-MD5</mechanism>
+#               <mechanism>PLAIN</mechanism>
+#            ...
 
 proc jlib::auth_sasl_continue {jlibname} {
     
@@ -326,7 +336,7 @@ proc jlib::sasl_failure {jlibname tag xmllist} {
     
     if {[wrapper::getattribute $xmllist xmlns] == $xmppxmlns(sasl)} {
 	set errelem [lindex [wrapper::getchildren $xmllist] 0]
-	puts "\t errelem=$errelem"
+	#puts "\t errelem=$errelem"
 	if {$errelem == ""} {
 	    set errmsg "not-authorized"
 	} else {

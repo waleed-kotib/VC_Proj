@@ -5,10 +5,12 @@
 #       SASL [RFC 2222]
 #       DIGEST-MD5 [RFC 2831]
 #       
+#       It also includes the PLAIN mechanism, so saslmd5 is a misnomer.
+#       
 #  Copyright (c) 2004  Mats Bengtsson
 #  BSD license
 #  
-# $Id: saslmd5.tcl,v 1.3 2004-09-22 13:14:38 matben Exp $
+# $Id: saslmd5.tcl,v 1.4 2005-04-03 10:41:10 matben Exp $
 
 package require base64
 package require md5 2.0
@@ -18,7 +20,9 @@ package provide saslmd5 1.0
 
 namespace eval saslmd5 {
     
-    variable mechanisms "DIGEST-MD5"
+    # These are in order of preference.
+    variable mechanisms [list "DIGEST-MD5" "PLAIN"]
+    variable mechanisms [list "PLAIN" "DIGEST-MD5"]
     variable needed {username authzid pass realm}
     variable uid 0
     
@@ -158,8 +162,46 @@ proc saslmd5::method_start {token args} {
     }
     set state(step) 1
     
+    switch -- $mechanism {
+	PLAIN {
+	    set output [get_plain_output $token]
+	}
+	DIGEST-MD5 {
+	    set output ""
+	}
+    }
+	    
     # continue
-    return [list 4 [list mechanism $mechanism output ""]]
+    return [list 4 [list mechanism $mechanism output $output]]
+}
+
+proc saslmd5::get_plain_output {token} {
+    variable $token
+    upvar 0 $token state
+    
+    # SENT: <auth 
+    #           xmlns="urn:ietf:params:xml:ns:xmpp-sasl"
+    #           mechanism="PLAIN">
+    #               somelongstring
+    #       </auth>
+    # where somelongstring is (from Pandion's .js src):
+    #   /* Plaintext algorithm:
+    #    * Base64( UTF8( Addr ) + 0x00 + UTF8( User ) + 0x00 + UTF8( Pass ) )
+    #	 */
+    # User is the username, Addr is the full JID, and Pass is the password.
+
+    request_userpars $token
+    
+    set username $state(upar,username)
+    set pass     $state(upar,pass)
+    set realm    $state(upar,realm)
+
+    set user_lat1  [encoding convertto iso8859-1 $username]
+    set pass_lat1  [encoding convertto iso8859-1 $pass]
+    set realm_lat1 [encoding convertto iso8859-1 $realm]
+    
+    set jid [jlib::joinjid $user_lat1 $realm_lat1 ""]
+    return [binary format a*xa*xa* $jid $user_lat1 $pass_lat1]
 }
 
 # saslmd5::method_step --
@@ -271,7 +313,7 @@ proc saslmd5::iscapable {token} {
 
 # saslmd5::request_userpars --
 # 
-#       Invokes the needed callbacks to get yser's parameters.
+#       Invokes the needed callbacks to get user's parameters.
 
 proc saslmd5::request_userpars {token} {
     variable $token
