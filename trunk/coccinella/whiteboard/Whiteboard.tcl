@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.32 2005-02-04 07:05:34 matben Exp $
+# $Id: Whiteboard.tcl,v 1.33 2005-03-04 14:21:36 matben Exp $
 
 package require entrycomp
 package require moviecontroller
@@ -987,6 +987,7 @@ proc ::WB::CloseWhiteboard {wtop} {
     #::PutFileIface::CancelAllWtop $wtop
     ::GetFileIface::CancelAllWtop $wtop
     ::Import::HttpResetAll $wtop
+    ::Import::Free $wtop
     ::WB::DestroyMain $wtop
 }
 

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Import.tcl,v 1.19 2005-03-04 08:45:07 matben Exp $
+# $Id: Import.tcl,v 1.20 2005-03-04 14:21:36 matben Exp $
 
 package require http
 package require httpex
@@ -577,6 +577,7 @@ proc ::Import::QuickTimeBalloonMsg {wmovie fileName} {
 
 proc ::Import::DrawSnack {w optsVar args} {
     upvar $optsVar opts
+    variable snackSounds
     
     ::Debug 2 "::Import::DrawSnack args='$args'"
     
@@ -603,6 +604,7 @@ proc ::Import::DrawSnack {w optsVar args} {
     if {[catch {::snack::sound $uniqueName -file $fileName} err]} {
 	return $err
     }
+    lappend snackSounds($w) $uniqueName
     set wfr ${w}.fr_${uniqueName}
     frame $wfr -height 1 -width 1 -bg gray40 -class SnackFrame
     set wmovie ${wfr}.m
@@ -715,6 +717,18 @@ proc ::Import::DrawXanim {w optsVar args} {
     lappend opts -width $width -height $height
     
     return $errMsg
+}
+
+proc ::Import::Free {wtop} {
+    variable snackSounds
+    
+    set w [::WB::GetCanvasFromWtop $wtop]
+    if {[info exists snackSounds($w)]} {
+	foreach s $snackSounds($w) {
+	    $s stop
+	    $s destroy
+	}
+    }
 }
 
 

@@ -5,12 +5,12 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.124 2005-03-04 08:45:07 matben Exp $
+# $Id: Roster.tcl,v 1.125 2005-03-04 14:21:36 matben Exp $
 
 package provide Roster 1.0
 
 namespace eval ::Roster:: {
-    global  this
+    global  this prefs
     
     # Add all event hooks we need.
     ::hooks::register loginHook              ::Roster::LoginCmd
@@ -410,8 +410,11 @@ proc ::Roster::LogoutHook { } {
 }
 
 proc ::Roster::QuitHook { } {
+    variable wtree    
     
-    TreeGetClosedItems
+    if {[info exists wtree] && [winfo exists $wtree]} {
+	TreeGetClosedItems
+    }
 }
 
 proc ::Roster::SetBackgroundImage {useBgImage bgImagePath} {
