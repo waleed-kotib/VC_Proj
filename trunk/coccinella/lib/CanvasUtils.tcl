@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.25 2004-02-14 14:01:50 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.26 2004-03-04 07:53:16 matben Exp $
 
 package require sha1pure
 
@@ -359,18 +359,8 @@ proc ::CanvasUtils::GetUtag {c fromWhat {force 0}} {
 	# Need to be compatible with both 'utagpref' and 'utagpref2'!
 	# Introduced with 0.94.4
 	return [lsearch -inline -regexp $tags "${utagpre_}/${digits_}"]
-        #if {[regexp "((${utagpre_})/${digits_})" $tags utag]} {
-	#    return $utag
-        #} else {
-	#    return ""
-	#}
     } else {
 	return [lsearch -inline -regexp $tags "${pre_}/${digits_}"]
-        #if {[regexp "(^| )(${pre_}/${digits_})" $tags m junk utag]} {
-	#    return $utag
-        #} else {
-	#    return ""
-	#}
     }
 }
 
@@ -811,7 +801,7 @@ proc ::CanvasUtils::GetOnelinerForSnack {w id args} {
 proc ::CanvasUtils::GetHttpFromFile {filePath} {
     global  prefs this
     
-    set relPath [filerelative $prefs(httpdRootDir) $filePath]
+    set relPath [filerelative $this(httpdRootPath) $filePath]
     set relPath [uriencode::quotepath $relPath]
     set ip [::Network::GetThisOutsideIPAddress]
     return "http://${ip}:$prefs(httpdPort)/$relPath"

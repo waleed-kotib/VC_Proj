@@ -100,6 +100,14 @@ Non-latin character sets:
     remote clients also have this font on their system; I don't think it 
     needs to be imported. Probably any "Language Kit" should work.
 
+Translations:
+
+    Many thanks to contributors. See coccinella/msgs/README_encodings if you
+    feel like contributing.
+
+    Swedish:    myself
+    German:     Hermann J. Beckers
+
 Known Bugs:
 
     * Althogh the server is using a safe interpreter for the critical parts

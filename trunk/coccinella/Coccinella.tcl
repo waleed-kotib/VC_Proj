@@ -8,11 +8,11 @@
 #       It controls the startup sequence and therefore needs a number
 #       of code files/images to be succesful.
 #      
-#  Copyright (c) 1999-2003  Mats Bengtsson
+#  Copyright (c) 1999-2004  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.42 2004-02-12 08:48:20 matben Exp $
+# $Id: Coccinella.tcl,v 1.43 2004-03-04 07:53:16 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -101,10 +101,11 @@ proc resolve_cmd_realpath {infile} {
 # default file, never read.
 set prefs(majorVers) 0
 set prefs(minorVers) 94
-set prefs(releaseVers) 7
+set prefs(releaseVers) 8
 set prefs(fullVers) $prefs(majorVers).$prefs(minorVers).$prefs(releaseVers)
 
 # We may be embedded in another application, say an ActiveX component.
+# Need a way to detect if we are run in the Tcl plugin.
 if {[llength [namespace children :: "::browser*"]] > 0} {
     set prefs(embedded) 1
 } else {
@@ -206,6 +207,10 @@ set this(themePrefsPath)    [file join $this(prefsPath) theme]
 set this(msgcatPath)        [file join $this(path) msgs]
 set this(internalIPnum)     127.0.0.1
 set this(internalIPname)    "localhost"
+set this(httpdRootPath)     $this(path)
+if {0 && [info exists starkit::topdir]} {
+    set this(httpdRootPath)     $starkit::topdir
+}
 
 # Set our IP number temporarily.
 set this(ipnum) $this(internalIPnum) 
@@ -635,7 +640,7 @@ if {($prefs(protocol) != "client") && $prefs(autoStartServer)} {
 
 if {($prefs(protocol) != "client") && $prefs(haveHttpd)} {
     set httpdScript [list ::tinyhttpd::start -port $prefs(httpdPort)  \
-      -rootdirectory $prefs(httpdRootDir)]
+      -rootdirectory $this(httpdRootPath)]
     if {$debugLevel > 0} {
 	lappend httpdScript -directorylisting 1
     }

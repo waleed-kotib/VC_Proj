@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasDraw.tcl,v 1.21 2004-02-05 14:00:22 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.22 2004-03-04 07:53:16 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 #  
@@ -1711,7 +1711,7 @@ proc ::CanvasDraw::FinalizeLine {w x y shift {opt 0}} {
 	set extras {}
     }
     if {$prefs(haveDash)} {
-	append extras " [list -dash $state(dash)]"
+	lappend extras -dash $state(dash)
     }
     
     # Vertical or horizontal.
@@ -1723,7 +1723,7 @@ proc ::CanvasDraw::FinalizeLine {w x y shift {opt 0}} {
     set utag [::CanvasUtils::NewUtag]
     set cmd "create line $theLine($w,anchor) $x $y	\
       -tags {std line $utag} -joinstyle round	\
-      -smooth true -fill $state(fgCol) -width $state(penThick) $extras"
+      -fill $state(fgCol) -width $state(penThick) $extras"
     set undocmd "delete $utag"
     set redo [list ::CanvasUtils::Command $wtop $cmd]
     set undo [list ::CanvasUtils::Command $wtop $undocmd]

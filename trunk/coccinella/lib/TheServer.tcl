@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: TheServer.tcl,v 1.17 2004-01-13 14:50:21 matben Exp $
+# $Id: TheServer.tcl,v 1.18 2004-03-04 07:53:17 matben Exp $
     
 # DoStartServer ---
 #
@@ -272,7 +272,7 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 		set ipNumTo(connectTime,$ip) [clock seconds]
 		
 		# Add entry in the communication frame.
-		::UI::SetCommEntry . $ip -1 1
+		::WB::SetCommEntry . $ip -1 1
 		::UI::MenuMethod .menu.info entryconfigure mOnClients  \
 		  -state normal
 		

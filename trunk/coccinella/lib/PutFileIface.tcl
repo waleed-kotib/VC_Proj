@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: PutFileIface.tcl,v 1.15 2004-01-17 11:42:54 matben Exp $
+# $Id: PutFileIface.tcl,v 1.16 2004-03-04 07:53:17 matben Exp $
 
 package require putfile
 package require uriencode
@@ -64,7 +64,7 @@ proc ::PutFileIface::PutFileToAll {wtop fileName where {opts {}}} {
     }
     
     # Add an alternative way of getting this file via an URL.
-    set relPath [filerelative $prefs(httpdRootDir) $fileName]
+    set relPath [filerelative $this(httpdRootPath) $fileName]
     set relPath [uriencode::quotepath $relPath]
     set ip [::Network::GetThisOutsideIPAddress]
     array set optArr $opts
