@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.16 2004-03-31 07:55:19 matben Exp $
+# $Id: Utils.tcl,v 1.17 2004-05-03 14:11:54 matben Exp $
 
 namespace eval ::Utils:: {
 
@@ -126,6 +126,46 @@ proc getdirname {filePath} {
     } else {
 	return $filePath
     }
+}
+
+# FormatTextForMessageBox --
+#
+#       The tk_messageBox needs explicit newlines to format the message text.
+
+proc FormatTextForMessageBox {txt {width ""}} {
+    global  prefs
+
+    if {[string equal $::tcl_platform(platform) "windows"]} {
+
+	# Insert newlines to force line breaks.
+	if {[string length $width] == 0} {
+	    set width $prefs(msgWrapLength)
+	}
+	set len [string length $txt]
+	set start $width
+	set first 0
+	set newtxt {}
+	while {([set ind [tcl_wordBreakBefore $txt $start]] > 0) &&  \
+	  ($start < $len)} {	    
+	    append newtxt [string trim [string range $txt $first [expr $ind-1]]]
+	    append newtxt "\n"
+	    set start [expr $ind + $width]
+	    set first $ind
+	}
+	append newtxt [string trim [string range $txt $first end]]
+	return $newtxt
+    } else {
+	return $txt
+    }
+}
+
+#--- Utilities for general usage -----------------------------------------------
+
+namespace eval ::Utils:: {
+    
+    # Running counter for GenerateHexUID.
+    variable uid 0
+    variable maxuidpersec 10000
 }
 
 # ::Utils::GetMaxMsgcatWidth --
@@ -296,46 +336,6 @@ proc ::Utils::ValidMinutes {str} {
     }
 }
 
-# FormatTextForMessageBox --
-#
-#       The tk_messageBox needs explicit newlines to format the message text.
-
-proc FormatTextForMessageBox {txt {width ""}} {
-    global  prefs
-
-    if {[string equal $::tcl_platform(platform) "windows"]} {
-
-	# Insert newlines to force line breaks.
-	if {[string length $width] == 0} {
-	    set width $prefs(msgWrapLength)
-	}
-	set len [string length $txt]
-	set start $width
-	set first 0
-	set newtxt {}
-	while {([set ind [tcl_wordBreakBefore $txt $start]] > 0) &&  \
-	  ($start < $len)} {	    
-	    append newtxt [string trim [string range $txt $first [expr $ind-1]]]
-	    append newtxt "\n"
-	    set start [expr $ind + $width]
-	    set first $ind
-	}
-	append newtxt [string trim [string range $txt $first end]]
-	return $newtxt
-    } else {
-	return $txt
-    }
-}
-
-#--- Utilities for general usage -----------------------------------------------
-
-namespace eval ::Utils:: {
-    
-    # Running counter for GenerateHexUID.
-    variable uid 0
-    variable maxuidpersec 10000
-}
-
 # Utils::GenerateHexUID --
 #
 #       Makes a unique hex string stamped by time.
@@ -394,6 +394,206 @@ proc ::Utils::GetHttpFromFile {filePath} {
     set relPath [uriencode::quotepath $relPath]
     set ip [::Network::GetThisOutsideIPAddress]
     return "http://${ip}:$prefs(httpdPort)/$relPath"
+}
+
+# Utils::ProgressWindow, ProgressFree --
+# 
+#       Useful when using progress window. It combines the ProgressWindow
+#       with Timing.
+
+namespace eval ::Utils:: {
+    
+    variable puid 0
+}
+
+proc ::Utils::ProgressWindow {token total current args} {
+    global  prefs wDlgs tcl_platform
+    variable progress
+    variable puid
+   
+    # Cache timing info.
+    ::Timing::Set $token $current
+
+    # Update only when minimum time has passed, and only at certain interval.
+    set ms [clock clicks -milliseconds]
+    set needupdate 0
+
+    # Create progress dialog if not exists.
+    if {![info exists progress($token,w)]} {
+	set progress($token,token) $token
+	set w $wDlgs(prog)2${puid}
+	set progress($token,w) $w
+	eval {::ProgressWindow::ProgressWindow $w} $args
+	set progress($token,startmillis) $ms
+	set progress($token,lastmillis)  $ms
+	set needupdate 1
+    } elseif {[expr $ms - $progress($token,lastmillis)] > $prefs(progUpdateMillis)} {
+
+	# Update the progress window.
+	append msg3 "[::msgcat::mc Rate]: [::Timing::FormMessage $token $total]"	
+	set percent [expr 100.0 * $current/($total + 0.001)]
+	$progress($token,w) configure -percent $percent -text3 $msg3
+	set progress($token,lastmillis) $ms
+	set needupdate 1
+    }
+
+    # Be silent... except for a necessary update command to not block.
+    if {$needupdate} {
+	if {[string equal $tcl_platform(platform) "windows"]} {
+	    update
+	} else {
+	    update idletasks
+	}
+    }
+}
+
+proc ::Utils::ProgressFree {token} {
+    variable progress
+    
+    catch {destroy $progress($token,w)}
+    ::Timing::Reset $token
+    array unset progress $token,*
+}
+
+#--- Timing --------------------------------------------------------------------
+
+namespace eval ::Timing:: {
+    variable timing
+}
+
+# Timing::Set, Reset, GetRate, FormMessage --
+# 
+#       A number of utils that handle timing objects. Mainly to get bytes
+#       per second during file transfer.
+#       
+# Arguments:
+#       key         a unique key to identify a particular timing object,
+#                   typically use the socket token or a running namespaced 
+#                   number.
+#       bytes       number of bytes transported so far
+#       totalbytes  total file size in bytes
+
+proc ::Timing::Set {key bytes} {
+    variable timing
+    
+    lappend timing($key) \
+      [list [expr double([clock clicks -milliseconds])] $bytes]
+    return ""
+}
+
+proc ::Timing::Reset {key} {
+    variable timing
+    
+    catch {unset timing($key)}
+}
+
+proc ::Timing::GetRate {key} {
+    variable timing
+	
+    set len [llength $timing($key)]
+    set nAve 12
+    set istart [expr $len - $nAve]
+    if {$istart < 0} {
+	set istart 0
+    }
+    
+    # Keep only the part we are interested in.
+    set timing($key) [lrange $timing($key) $istart end]
+    set timeList $timing($key)
+    set sumMillis [expr [lindex $timeList end 0] - [lindex $timeList 0 0]]
+    set sumBytes [expr [lindex $timeList end 1] - [lindex $timeList 0 1]]
+    
+    # Treat the case with wrap around. (Guess)
+    if {$sumMillis <= 0} {
+	set sumMillis 1000000
+    }
+    
+    # Returns average bytes per second.
+    return [expr 1000.0 * $sumBytes / ($sumMillis + 1.0)]
+}
+
+proc ::Timing::GetRateLinearInterp {key} {
+    variable timing
+    
+    set len [llength $timing($key)]
+    set n 12
+    set istart [expr $len - $n]
+    if {$n > $len} {
+	set n $len
+	set istart 0
+    }
+    
+    # Keep only the part we are interested in.
+    set timing($key) [lrange $timing($key) $istart end]
+    set sumx  0.0
+    set sumy  0.0
+    set sumxy 0.0
+    set sumx2 0.0
+    
+    # Need to move origin to get numerical stability!
+    set x0 [lindex $timing($key) 0 0]
+    set y0 [lindex $timing($key) 0 1]
+    foreach co $timing($key) {
+	set x [expr [lindex $co 0] - $x0]
+	set y [expr [lindex $co 1] - $y0]
+	set sumx  [expr $sumx + $x]
+	set sumy  [expr $sumy + $y]
+	set sumxy [expr $sumxy + $x * $y]
+	set sumx2 [expr $sumx2 + $x * $x]
+    }
+    
+    # This is bytes per millisecond.
+    set k [expr ($n * $sumxy - $sumx * $sumy) /  \
+      ($n * $sumx2 - $sumx * $sumx)]
+    return [expr 1000.0 * $k]
+}
+
+proc ::Timing::GetPercent {key totalbytes} {
+    variable timing
+
+    if {[llength $timing($key)] > 1} {
+	set bytes [lindex [lindex $timing($key) end] 1]
+    } else {
+	set bytes 0
+    }
+    set percent [format "%3.0f" [expr 100.0 * $bytes/($totalbytes + 1.0)]]
+    set percent [expr $percent < 0 ? 0 : $percent]
+    set percent [expr $percent > 100 ? 100 : $percent]
+    return $percent
+}
+
+proc ::Timing::FormMessage {key totalbytes} {
+    variable timing
+    
+    #set bytesPerSec [::Timing::GetRateLinearInterp $key]
+    set bytesPerSec [::Timing::GetRate $key]
+
+    # Find format: bytes or k.
+    if {$bytesPerSec < 1000} {
+	set txtRate "[expr int($bytesPerSec)] bytes/sec"
+    } elseif {$bytesPerSec < 1000000} {
+	set txtRate [list [format "%.1f" [expr $bytesPerSec/1000.0] ]Kb/sec]
+    } else {
+	set txtRate [list [format "%.1f" [expr $bytesPerSec/1000000.0] ]Mb/sec]
+    }
+
+    # Remaining time.
+    if {[llength $timing($key)] > 1} {
+	set bytes [lindex [lindex $timing($key) end] 1]
+    } else {
+	set bytes 0
+    }
+    set percent [format "%3.0f" [expr 100.0 * $bytes/($totalbytes + 1.0)]]
+    set secsLeft  \
+      [expr int(ceil(($totalbytes - $bytes)/($bytesPerSec + 1.0)))]
+    if {$secsLeft < 60} {
+	set txtTimeLeft ", $secsLeft secs remaining"
+    } elseif {$secsLeft < 120} {
+	set txtTimeLeft ", one minute and [expr $secsLeft - 60] secs remaining"
+    } else {
+	set txtTimeLeft ", [expr $secsLeft/60] minutes remaining"
+    }
+    return "${txtRate}${txtTimeLeft}"
 }
 
 #--- Utilities for the Text widget ---------------------------------------------
@@ -597,109 +797,6 @@ proc ::Text::TransformToPureTextCallback {w key value index} {
 	    }
 	}
     }
-}
-
-#--- Timing --------------------------------------------------------------------
-
-namespace eval ::Timing:: {
-    variable timing
-}
-
-# Timing::Set, Reset, GetRate, FormMessage --
-# 
-#       A number of utils that handle timing objects. Mainly to get bytes
-#       per second during file transfer.
-#       
-# Arguments:
-#       key         a unique key to identify a particular timing object,
-#                   typically use the socket token or a running namespaced 
-#                   number.
-#       bytes       number of bytes transported so far
-#       totalbytes  total file size in bytes
-
-proc ::Timing::Set {key bytes} {
-    variable timing
-    
-    lappend timing($key) [list [clock clicks -milliseconds] $bytes]
-    return {}
-}
-
-proc ::Timing::Reset {key} {
-    variable timing
-    
-    unset timing($key)
-}
-
-proc ::Timing::GetRate {key} {
-    variable timing
-	
-    set timeList $timing($key)
-    set n [llength $timeList]
-    set nAve 6
-    set istart [expr $n - $nAve]
-    if {$istart < 0} {
-	set istart 0
-    }
-    set iend [expr $n - 1]
-    set sumBytes [expr [lindex [lindex $timeList $iend] 1] -  \
-      [lindex [lindex $timeList $istart] 1]]
-    set sumMillis [expr [lindex [lindex $timeList $iend] 0] -  \
-      [lindex [lindex $timeList $istart] 0]]
-    
-    # Treat the case with wrap around. (Guess)
-    if {$sumMillis <= 0} {
-	set sumMillis 1000000
-    }
-    
-    # Returns average bytes per second.
-    return [expr 1000.0 * $sumBytes / ($sumMillis + 1.0)]
-}
-
-proc ::Timing::GetPercent {key totalbytes} {
-    variable timing
-
-    if {[llength $timing($key)] > 1} {
-	set bytes [lindex [lindex $timing($key) end] 1]
-    } else {
-	set bytes 0
-    }
-    set percent [format "%3.0f" [expr 100.0 * $bytes/($totalbytes + 1.0)]]
-    set percent [expr $percent < 0 ? 0 : $percent]
-    set percent [expr $percent > 100 ? 100 : $percent]
-    return $percent
-}
-
-proc ::Timing::FormMessage {key totalbytes} {
-    variable timing
-    
-    set bytesPerSec [::Timing::GetRate $key]
-
-    # Find format: bytes or k.
-    if {$bytesPerSec < 1000} {
-	set txtRate "[expr int($bytesPerSec)] bytes/sec"
-    } elseif {$bytesPerSec < 1000000} {
-	set txtRate [list [format "%.1f" [expr $bytesPerSec/1000.0] ]Kb/sec]
-    } else {
-	set txtRate [list [format "%.1f" [expr $bytesPerSec/1000000.0] ]Mb/sec]
-    }
-
-    # Remaining time.
-    if {[llength $timing($key)] > 1} {
-	set bytes [lindex [lindex $timing($key) end] 1]
-    } else {
-	set bytes 0
-    }
-    set percent [format "%3.0f" [expr 100.0 * $bytes/($totalbytes + 1.0)]]
-    set secsLeft  \
-      [expr int(ceil(($totalbytes - $bytes)/($bytesPerSec + 1.0)))]
-    if {$secsLeft < 60} {
-	set txtTimeLeft ", $secsLeft secs remaining"
-    } elseif {$secsLeft < 120} {
-	set txtTimeLeft ", one minute and [expr $secsLeft - 60] secs remaining"
-    } else {
-	set txtTimeLeft ", [expr $secsLeft/60] minutes remaining"
-    }
-    return "${txtRate}${txtTimeLeft}"
 }
 
 #-------------------------------------------------------------------------------

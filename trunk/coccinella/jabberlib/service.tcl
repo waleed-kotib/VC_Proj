@@ -5,7 +5,7 @@
 #       
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: service.tcl,v 1.5 2004-05-02 08:19:42 matben Exp $
+# $Id: service.tcl,v 1.6 2004-05-03 14:11:54 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -394,8 +394,10 @@ proc jlib::service::hasfeature {jlibname jid xmlns} {
 
     # Try to gather only positive results!
     set ans 0
+    #puts "jid=$jid"
     if {$serv(browse)} {
 	set ans [$serv(browse,name) hasnamespace $jid $xmlns]
+	#puts "browse ans=$ans"
     } 
     if {!$ans && $serv(disco) && [$serv(disco,name) isdiscoed info $jid]} {
 	set ans [$serv(disco,name) hasfeature $xmlns $jid]
