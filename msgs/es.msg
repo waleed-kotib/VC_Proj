@@ -784,6 +784,10 @@
 ::msgcat::mcset es prefroclr     {Limpiar la lista de contactos en la desconexión}
 ::msgcat::mcset es prefrochat    {Doble-click: charlar, click: mensaje normal}
 ::msgcat::mcset es prefrosysicons {Usar los iconos del sistema del protocolo de mensajería ajeno}
+
+# translate
+::msgcat::mcset es prefroshowoff {Show also offline users}
+
 ::msgcat::mcset es prefblonly    {Sólo aceptar mensajes de mis contactos}
 ::msgcat::mcset es prefblbl      {Bloquear los JIDs siguientes (* asterísco para "todos") : }
 ::msgcat::mcset es prefblmsg     {Escribir la JID completo para les usuarios que quiera bloquear (les JID sont con la forma "usuario@jabber.org)}
@@ -798,6 +802,10 @@
 ::msgcat::mcset es prefcubrowse  {Explorar los servicios si el método está disponible}
 ::msgcat::mcset es prefcuagent   {Siempre utilizar el método de los agentes}
 ::msgcat::mcset es prefcuupdate  {Buscar automáticamente actualizaciones de Coccinella}
+
+# translate
+::msgcat::mcset es prefcuremdlgs {Remember open dialogs between sessions}
+
 ::msgcat::mcset es preffmhelp    {Plugins de ayuda para los tipos de archivos}
 ::msgcat::mcset es preffmsave    {Juste "guardar en disco" en el directorio entrante}
 ::msgcat::mcset es preffontmsg   {Atención: cuando añada otras fuentes\

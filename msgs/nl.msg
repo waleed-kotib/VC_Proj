@@ -777,6 +777,10 @@
 ::msgcat::mcset nl prefroclr     {Roster ledigen bij afmelden}
 ::msgcat::mcset nl prefrochat    {Chat starten i.p.v. een normaal bericht bij dubbelklik op een gebruiker}
 ::msgcat::mcset nl prefrosysicons {Andere iconen gebruiken voor andere IM netwerken}
+
+# translate
+::msgcat::mcset nl prefroshowoff {Show also offline users}
+
 ::msgcat::mcset nl prefblonly    {Alleen berichten van mensen in mijn roster accepteren}
 ::msgcat::mcset nl prefblbl      {Volgende JID's blokkeren (* jokertekens mogelijk):}
 ::msgcat::mcset nl prefblmsg     {Geef de volledige JID van de gebruiker die u wilt blokkeren. (bv: "gargamel@jabber.org")}
@@ -791,6 +795,10 @@
 ::msgcat::mcset nl prefcubrowse  {Diensten via de "browse"-methode verkennen wanneer beschikbaar}
 ::msgcat::mcset nl prefcuagent   {Altijd de "agents"-methode gebruiken}
 ::msgcat::mcset nl prefcuupdate  {Automatisch op nieuwe Coccinella versie controleren}
+
+# translate
+::msgcat::mcset nl prefcuremdlgs {Remember open dialogs between sessions}
+
 ::msgcat::mcset nl preffmhelp    {Helpplugins voor bestandstype}
 ::msgcat::mcset nl preffmsave    {Eenvoudigweg opslaan in inkomende map}
 ::msgcat::mcset nl preffontmsg   {Waarschuwing: wanneer u een ander lettertype importeert dan de standaardexemplaren (Times, Helvetica of Courier), dan moet u zich verzekeren dat alle clients dit ook\

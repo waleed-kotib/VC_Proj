@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.59 2005-02-09 14:30:30 matben Exp $
+# $Id: Login.tcl,v 1.60 2005-02-24 13:58:08 matben Exp $
 
 package provide Login 1.0
 
@@ -1014,9 +1014,9 @@ proc ::Login::AuthorizeCB {token jlibName type theQuery} {
 	
 	# Ourself. Do JIDPREP? So far only on the domain name.
 	set server               [jlib::jidmap $server]
-	set jstate(mejid)        ${username}@${server}
+	set jstate(mejid)        [jlib::joinjid $username $server ""]
 	set jstate(meres)        $resource
-	set jstate(mejidres)     "$jstate(mejid)/${resource}"
+	set jstate(mejidres)     [jlib::joinjid $username $server $resource]
 	set jstate(mejidmap)     [jlib::jidmap $jstate(mejid)]
 	set jstate(mejidresmap)  [jlib::jidmap $jstate(mejidres)]
 	set jserver(this)        $server

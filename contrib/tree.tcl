@@ -6,7 +6,7 @@
 # Copyright (C) 2002-2005 Mats Bengtsson
 # This source file is distributed under the BSD license.
 # 
-# $Id: tree.tcl,v 1.44 2005-02-14 13:48:36 matben Exp $
+# $Id: tree.tcl,v 1.45 2005-02-24 13:58:07 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -45,6 +45,7 @@
 #	-selectforeground, selectForeground, SelectForeground
 #	-selectmode, selectMode, SelectMode                   (0|1)
 #	-selectoutline, selectOutline, SelectOutline
+#	-showrootbutton, showRootButton, ShowRootButton       (0|1)
 #	-silent, silent, Silent                               (0|1)
 #	-sortcommand, sortCommand, SortCommand                tclProc
 #       -sortlevels, sortLevels, SortLevels
@@ -113,6 +114,7 @@
 #                   items: -foreground, -backgroundbd,
 #                   reworked internals
 #       041029      major rework of drawing and a lot of other things
+#       050223      added -showrootbutton; added -indention and -xmargin lists
 
 package require Tcl 8.4
 package require colorutils
@@ -314,6 +316,7 @@ proc ::tree::Init { } {
 	-selectforeground    {selectForeground     SelectForeground    }
 	-selectmode          {selectMode           SelectMode          }
 	-selectoutline       {selectOutline        SelectOutline       }
+	-showrootbutton      {showRootButton       ShowRootButton      }
 	-silent              {silent               Silent              }
 	-sortlevels          {sortLevels           SortLevels          }
 	-sortcommand         {sortCommand          SortCommand         }
@@ -363,6 +366,7 @@ proc ::tree::Init { } {
     option add *Tree.selectDash            {}              widgetDefault
     option add *Tree.selectMode            1               widgetDefault
     option add *Tree.selectOutline         {}              widgetDefault
+    option add *Tree.showRootButton        1               widgetDefault
     option add *Tree.silent                0               widgetDefault
     option add *Tree.sortLevels            {}              widgetDefault
     option add *Tree.sortOrder             {}              widgetDefault
@@ -1642,11 +1646,6 @@ proc ::tree::Build {w} {
 
     set can $widgets(canvas)
     
-    # Standard indention from center line to icon or text start.
-    set priv(xindent) $options(-xmargin)
-    if {$priv(imopen) != ""} {
-	incr priv(xindent) [expr {[image width $priv(imopen)]/2}]
-    }
     foreach col $options(-stripecolors) {
 	set priv($col:stripelight) [::colorutils::getlighter $col]
 	set priv($col:stripedark)  [::colorutils::getdarker $col]
@@ -1659,16 +1658,16 @@ proc ::tree::Build {w} {
     } else {
 	
 	# Just a dummy tag for the display list.
-	$can create line 0 0 1 0 -fill $options(-background) -tags tbgim
+	$can create line 0 0 1 0 -fill $options(-background) -tags {tbgim ticon}
     }
     unset -nocomplain state(pending)
-    catch {array unset state v:*}
+    array unset state v:*
     
     # Keeps track of top y coords to draw.
     set state(y) 0
     set state(i) 0
     set xin 4
-    if {$priv(imopen) != ""} {
+    if {$options(-showrootbutton) && $priv(imopen) != ""} {
 	incr xin [expr {[image width $priv(imopen)]/2}]
     }
     BuildLayer $w {} $xin
@@ -1677,6 +1676,7 @@ proc ::tree::Build {w} {
     $can lower ttreev ttreeh
     $can lower tpyj ttreev
     $can lower tbg ttreev
+    $can raise ticon
 
     set hbbox [expr [lindex [$can bbox (ttreev||tpyj||x)] 3] + 4]
     set wbbox [expr [lindex [$can bbox (ttreeh||x)] 2] + 10]
@@ -1720,7 +1720,7 @@ proc ::tree::DrawBackgroundImage {w} {
 
 # ::tree::BuildLayer --
 #
-#       Build a single layer of the tree on the canvas.  Indent by $in pixels.
+#       Build a single layer of the tree on the canvas. Indent by $in pixels.
 #       
 # Arguments:
 #       w       the widget path.
@@ -1748,17 +1748,34 @@ proc ::tree::BuildLayer {w v xin} {
     set yTreeOff $widgetGlobals(yTreeOff)
 
     set treeCol $options(-treecolor)
-    set indention $options(-indention)
     if {[string length $treeCol]} {
 	set hasTree 1
     }
-    if {[llength $v] == 0} {
+    set level [llength $v]
+    if {$level == 0} {
 	set vx {}
     } else {
 	set vx $v
     }
+    set showbutton 1
+    if {!$options(-showrootbutton) && ($level == 0)} {
+	set showbutton 0
+    }	
+    
+    # Standard indention from center line to icon or text start.
+    set len [llength $options(-xmargin)]
+    if {$len == 1} {
+	set xmargin [lindex $options(-xmargin) 0]
+    } elseif {$level >= $len} {
+	set xmargin [lindex $options(-xmargin) end]
+    } else {
+	set xmargin [lindex $options(-xmargin) $level]
+    }
+    if {$showbutton && ($priv(imopen) != "")} {
+	incr xmargin [expr {[image width $imopen]/2}]
+    }
+
     set uid     $v2uid($v)
-    set xoff    $priv(xindent)
     set y       $state(y)
     set ystart  $y
     set yline   $priv(yline)
@@ -1772,7 +1789,7 @@ proc ::tree::BuildLayer {w v xin} {
     set treedash    $options(-treedash)
     set pyjamascol  $options(-pyjamascolor)
     
-    Debug 3 "\t uid=$uid"
+    Debug 3 "\t level=$level, uid=$uid"
     
     # Loop through all childrens.
     foreach c $state($uid:children) {
@@ -1836,8 +1853,8 @@ proc ::tree::BuildLayer {w v xin} {
 	}
 	
 	# Tree lines?
-	if {$hasTree} {
-	    $can create line $xin $ycent [expr {$xin + $xoff - 4}] $ycent \
+	if {$showbutton && $hasTree} {
+	    $can create line $xin $ycent [expr {$xin + $xmargin - 4}] $ycent \
 	      -fill $treeCol -tags ttreeh -dash $treedash
 	}
 	
@@ -1848,13 +1865,13 @@ proc ::tree::BuildLayer {w v xin} {
 	    lappend taglist $state($uidc:ctags)
 	}
 	
-	set x [expr {$xin + $xoff}]
+	set x [expr {$xin + $xmargin}]
 	set icon $state($uidc:icon)
 	set text $state($uidc:text)
 	
 	if {$icon != ""} {
 	    set id [$can create image $x $ycent -image $icon -anchor w \
-	      -tags $taglist]
+	      -tags [concat $taglist ticon]]
 	    set state(v:$id) $vxc
 	    lappend ids $id
 	    incr x [expr {[image width $icon] + 6}]
@@ -1889,24 +1906,30 @@ proc ::tree::BuildLayer {w v xin} {
 	# Do we have a directory here?
 	if {$isDir} {
 	    if {$state($uidc:open)} {
-		if {$imopen != ""} {
-		    set id [$can create image $xin $ycent -image $imopen -tags topen]
+		if {$showbutton && ($imopen != "")} {
+		    $can create image $xin $ycent -image $imopen -tags topen
 		}
 		if {$hasChildren} {
 		
 		    # Call this recursively. 
-		    # The number here is the directory offset in x.
+		    set len [llength $options(-indention)]
+		    if {$len == 1} {
+			set indention $options(-indention)
+		    } elseif {[expr $level + 1] > $len} {
+			set indention [lindex $options(-indention) end]
+		    } else {
+			set indention [lindex $options(-indention) $level]
+		    }
 		    BuildLayer $w $vxc [expr {$xin + $indention}]
 		}
 	    } else {
-		if {$imclose != ""} {
-		    set id [$can create image $xin $ycent -image $imclose \
-		      -tags tclose]
+		if {$showbutton && ($imclose != "")} {
+		    $can create image $xin $ycent -image $imclose -tags tclose
 		}
 	    }
 	}
     }
-    if {$hasTree} {
+    if {$showbutton && $hasTree} {
 	$can create line $xin [expr {$ystart - $yoff}] \
 	  $xin [expr {$ycent + $yTreeOff}]  \
 	  -fill $treeCol -tags ttreev -dash $options(-treedash)
