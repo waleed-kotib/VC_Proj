@@ -5,17 +5,18 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Subscribe.tcl,v 1.13 2004-03-28 14:50:51 matben Exp $
+# $Id: Subscribe.tcl,v 1.14 2004-04-09 10:32:25 matben Exp $
 
 package provide Subscribe 1.0
 
 namespace eval ::Jabber::Subscribe:: {
 
     # Define all hooks for preference settings.
-    ::hooks::add prefsInitHook      ::Jabber::Subscribe::InitPrefsHook
-    ::hooks::add prefsBuildHook     ::Jabber::Subscribe::BuildPrefsHook
-    ::hooks::add prefsSaveHook      ::Jabber::Subscribe::SavePrefsHook
-    ::hooks::add prefsCancelHook    ::Jabber::Subscribe::CancelPrefsHook
+    ::hooks::add prefsInitHook          ::Jabber::Subscribe::InitPrefsHook
+    ::hooks::add prefsBuildHook         ::Jabber::Subscribe::BuildPrefsHook
+    ::hooks::add prefsSaveHook          ::Jabber::Subscribe::SavePrefsHook
+    ::hooks::add prefsCancelHook        ::Jabber::Subscribe::CancelPrefsHook
+    ::hooks::add prefsUserDefaultsHook  ::Jabber::Subscribe::UserDefaultsHook
 
     # Store everything in 'locals($uid, ... )'.
     variable locals   
@@ -327,6 +328,15 @@ proc ::Jabber::Subscribe::CancelPrefsHook { } {
 	    ::Preferences::HasChanged
 	    break
 	}
+    }
+}
+
+proc ::Jabber::Subscribe::UserDefaultsHook { } {
+    upvar ::Jabber::jprefs jprefs
+    variable tmpJPrefs
+	
+    foreach key [array names tmpJPrefs] {
+	set tmpJPrefs($key) $jprefs($key)
     }
 }
 

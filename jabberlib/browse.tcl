@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: browse.tcl,v 1.20 2004-04-04 13:37:26 matben Exp $
+# $Id: browse.tcl,v 1.21 2004-04-09 10:32:25 matben Exp $
 # 
 #  locals($jid,parent):       the parent of $jid.
 #  locals($jid,parents):      list of all parent jid's,
@@ -33,10 +33,14 @@
 #
 #   NAME
 #      browse - an object for the ...
+#      
 #   SYNOPSIS
 #      browse::browse clientCommand
+#      browse::new jlibname ?-command procName?
+#      
 #   OPTIONS
 #      none
+#      
 #   INSTANCE COMMANDS
 #      browseName clear ?jid?
 #      browseName delete
@@ -57,6 +61,7 @@
 #      browseName isbrowsed jid
 #      browseName isroom jid
 #      browseName remove jid
+#      browseName send_get jid cmd
 #      browseName setjid jid xmllist       (only from jabberlib)
 #
 #   The 'clientCommand' procedure must have the following form:
@@ -68,16 +73,20 @@
 ############################# CHANGES ##########################################
 #
 #       030703   removed browseName from browse::browse
+#       040408   version 2.0
+#       040408   browsename now fully qualified, added browse::new, send_get
 
 package require wrapper
 
-package provide browse 1.0
+package provide browse 2.0
 
 namespace eval browse {
     
     # The internal storage.
     variable browseGlobals
-    set browseGlobals(uid) 0
+    
+    # Running number.
+    variable uid 0
    
     # Globals same for all instances of all rooms.
     set browseGlobals(debug) 0
@@ -99,31 +108,82 @@ namespace eval browse {
 #       args:            
 #       
 # Results:
-#       browseName which is the command for this instance of the browser
+#       browsename which is the command for this instance of the browser
   
 proc browse::browse {clientCmd args} {
-    variable browseGlobals
-    
-    # Generate unique command token for this roster instance.
-    set browseName browse[incr browseGlobals(uid)]
+
+    variable uid
+
+    # Generate unique command token for this browse instance.
+    # Fully qualified!
+    set browsename [namespace current]::[incr uid]
       
     # Instance specific namespace.
-    namespace eval [namespace current]::${browseName} {
+    namespace eval $browsename {
 	variable locals
     }
     
     # Set simpler variable names.
-    upvar [namespace current]::${browseName}::locals locals
+    upvar ${browsename}::locals locals
     set locals(cmd) $clientCmd
     set locals(confservers) {}
-    set locals(fullBrowseName) [namespace current]::${browseName}
     
-    # Create the actual browser instance procedure. 'browseName' is interpreted 
-    # in the global namespace.
-    proc [namespace current]::${browseName} {cmd args}   \
-      "eval browse::CommandProc {$browseName} \$cmd \$args"
+    # Create the actual browser instance procedure.
+    proc $browsename {cmd args}   \
+      "eval browse::CommandProc {$browsename} \$cmd \$args"
     
-    return [namespace current]::${browseName}
+    return $browsename
+}
+
+# browse::new --
+# 
+#       Creates a new instance of a browse object.
+#       
+# Arguments:
+#       jlibname:     name of existing jabberlib instance
+#       args:         -command procName
+# 
+# Results:
+#       namespaced instance command
+
+proc browse::new {jlibname args} {
+    
+    variable uid
+    variable browse2jlib
+
+    # Generate unique command token for this browse instance.
+    # Fully qualified!
+    set browsename [namespace current]::[incr uid]
+    puts "browse::new jlibname=$jlibname, browsename=$browsename"
+      
+    # Instance specific namespace.
+    namespace eval $browsename {
+	variable locals
+    }
+    upvar ${browsename}::locals locals
+
+    foreach {key value} $args {
+	switch -- $key {
+	    -command {
+		set locals(cmd) $value
+	    }
+	    default {
+		return -code error "unrecognized option \"$key\" for disco::new"
+	    }
+	}
+    }
+    set locals(confservers) {}
+    set browse2jlib($browsename) $jlibname
+    
+    # Register some standard iq handlers that is handled internally.
+    $jlibname iq_register get jabber:iq:browse  \
+      [list [namespace current]::handle_get $browsename]
+    
+    # Create the actual browser instance procedure.
+    proc $browsename {cmd args}   \
+      "eval browse::CommandProc {$browsename} \$cmd \$args"
+    
+    return $browsename
 }
 
 # browse::CommandProc --
@@ -131,17 +191,66 @@ proc browse::browse {clientCmd args} {
 #       Just dispatches the command to the right procedure.
 #
 # Arguments:
-#       browseName:   the instance of this conference browse.
+#       browsename:   the instance of this conference browse.
 #       cmd:        the method.
 #       args:       all args to the cmd method.
 #       
 # Results:
 #       none.
 
-proc browse::CommandProc {browseName cmd args} {
+proc browse::CommandProc {browsename cmd args} {
         
     # Which command? Just dispatch the command to the right procedure.
-    return [eval {$cmd $browseName} $args]
+    return [eval {$cmd $browsename} $args]
+}
+
+# browse::send_get --
+#
+#       Sends a get request within the browse namespace.
+#
+# Arguments:
+#       browsename: the instance of this browse.
+#       jid:        to jid
+#       cmd:        callback tcl proc        
+#       
+# Results:
+#       none.
+
+proc browse::send_get {browsename jid cmd args} {
+    
+    variable browse2jlib
+    
+    $browse2jlib($browsename) iq_get "jabber:iq:browse" $jid  \
+      -command [list [namespace current]::parse_get $browsename $jid $cmd]
+}
+
+proc browse::parse_get {browsename jid cmd jlibname type subiq} {
+
+    upvar ${browsename}::locals locals
+
+    switch -- $type {
+	error {
+	    uplevel #0 $cmd "error" $subiq
+	}
+	default {
+	    setjid $browsename $jid $subiq -command $cmd
+	}
+    }
+}
+
+# browse::handle_get --
+# 
+#       Hook for iq_register.
+
+proc browse::handle_get {browsename jlibname from subiq args} {
+    
+    upvar ${browsename}::locals locals
+
+    set ishandled 0
+    if {[info exists locals(cmd)]} {
+	set ishandled [uplevel #0 $locals(cmd) [list $from $subiq] $args]
+    }
+    return $ishandled
 }
 
 # browse::getparentjid --
@@ -155,15 +264,16 @@ proc browse::CommandProc {browseName cmd args} {
 # Results:
 #       another jid or empty if failed
 
-proc browse::getparentjid {browseName jid} {   
-    upvar [namespace current]::${browseName}::locals locals
+proc browse::getparentjid {browsename jid} {
+    
+    upvar ${browsename}::locals locals
 
     if {[info exists locals($jid,parent)]} {
 	set parJid $locals($jid,parent)
     } else {
 	
 	# Only to make it failsafe. DANGER!!!
-	set parJid [GetParentJidFromJid $browseName $jid]
+	set parJid [GetParentJidFromJid $browsename $jid]
     }
     return $parJid
 }
@@ -187,13 +297,14 @@ proc browse::GetParentJidFromJid {browseName jid} {
 # browse::get --
 #
 # Arguments:
-#       browseName:   the instance of this conference browse.
+#       browsename:   the instance of this conference browse.
 #
 # Results:
 #       Hierarchical xmllist if already browsed or empty if not browsed.
 
-proc browse::get {browseName jid} {
-    upvar [namespace current]::${browseName}::locals locals
+proc browse::get {browsename jid} {
+    
+    upvar ${browsename}::locals locals
     
     Debug 3 "browse::get  jid=$jid"
     
@@ -204,8 +315,9 @@ proc browse::get {browseName jid} {
     }
 }
 
-proc browse::isbrowsed {browseName jid} {
-    upvar [namespace current]::${browseName}::locals locals
+proc browse::isbrowsed {browsename jid} {
+    
+    upvar ${browsename}::locals locals
     
     Debug 3 "browse::isbrowsed  jid=$jid"
     
@@ -220,14 +332,15 @@ proc browse::isbrowsed {browseName jid} {
 #
 #
 # Arguments:
-#       browseName:   the instance of this browse.
+#       browsename:   the instance of this browse.
 #       jid:          jid to remove.
 #
 # Results:
 #       none.
 
-proc browse::remove {browseName jid} {
-    upvar [namespace current]::${browseName}::locals locals
+proc browse::remove {browsename jid} {
+    
+    upvar ${browsename}::locals locals
     
     Debug 3 "browse::remove  jid=$jid"
     
@@ -236,20 +349,23 @@ proc browse::remove {browseName jid} {
     catch {unset locals($jid,isbrowsed)}
 
     # Evaluate the client callback.
-    uplevel #0 $locals(cmd) [list $browseName remove $jid]
+    if {[info exists locals(cmd)]} {
+	uplevel #0 $locals(cmd) [list $browsename remove $jid]
+    }
 }
     
 # browse::getparents --
 #
 #
 # Arguments:
-#       browseName:   the instance of this browse.
+#       browsename:   the instance of this browse.
 #
 # Results:
 #       List of all parent jid's.
 
-proc browse::getparents {browseName jid} {
-    upvar [namespace current]::${browseName}::locals locals
+proc browse::getparents {browsename jid} {
+    
+    upvar ${browsename}::locals locals
     
     Debug 3 "browse::getparents  jid=$jid"
     
@@ -264,13 +380,14 @@ proc browse::getparents {browseName jid} {
 #
 #
 # Arguments:
-#       browseName:   the instance of this browse.
+#       browsename:   the instance of this browse.
 #
 # Results:
 #       List of all parent jid's.
 
-proc browse::getchilds {browseName jid} {
-    upvar [namespace current]::${browseName}::locals locals
+proc browse::getchilds {browsename jid} {
+    
+    upvar ${browsename}::locals locals
     
     Debug 3 "browse::getchilds  jid=$jid"
     
@@ -287,13 +404,14 @@ proc browse::getchilds {browseName jid} {
 #       if jid is a room.
 #
 # Arguments:
-#       browseName:   the instance of this conference browse.
+#       browsename:   the instance of this conference browse.
 #       
 # Results:
 #       The nick, room name or empty if undefined.
 
-proc browse::getname {browseName jid} {
-    upvar [namespace current]::${browseName}::locals locals
+proc browse::getname {browsename jid} {
+    
+    upvar ${browsename}::locals locals
     
     Debug 3 "browse::getname  jid=$jid"
     
@@ -309,14 +427,15 @@ proc browse::getname {browseName jid} {
 #       Returns all users of a room jid in conferencing.
 #
 # Arguments:
-#       browseName:   the instance of this conference browse.
+#       browsename:   the instance of this conference browse.
 #       jid:          must be a room jid: 'roomname@server'.
 #       
 # Results:
 #       The nick name or empty if undefined.
 
-proc browse::getusers {browseName jid} {
-    upvar [namespace current]::${browseName}::locals locals
+proc browse::getusers {browsename jid} {
+    
+    upvar ${browsename}::locals locals
     
     Debug 3 "browse::getusers  jid=$jid"
     
@@ -331,8 +450,9 @@ proc browse::getusers {browseName jid} {
 #
 #
 
-proc browse::getconferenceservers {browseName} {    
-    upvar [namespace current]::${browseName}::locals locals
+proc browse::getconferenceservers {browsename} {    
+    
+    upvar ${browsename}::locals locals
     
     return $locals(confservers)
 }    
@@ -342,8 +462,9 @@ proc browse::getconferenceservers {browseName} {
 #       Gets all jid's that support a certain namespace.
 #       Only for the browsed services.
 
-proc browse::getservicesforns {browseName ns} {    
-    upvar [namespace current]::${browseName}::locals locals
+proc browse::getservicesforns {browsename ns} {    
+    
+    upvar ${browsename}::locals locals
     
     if {[info exists locals(ns,$ns)]} {
 	return $locals(ns,$ns)
@@ -356,10 +477,11 @@ proc browse::getservicesforns {browseName ns} {
 #
 #       If 'jid' is a child of a conference server, that is, a room.
 
-proc browse::isroom {browseName jid} {
-    upvar [namespace current]::${browseName}::locals locals
+proc browse::isroom {browsename jid} {
     
-    set parentJid [getparentjid $browseName $jid]
+    upvar ${browsename}::locals locals
+    
+    set parentJid [getparentjid $browsename $jid]
 
     # Check if this is in our list of conference servers.
     set ind [lsearch -exact $locals(confservers) $parentJid]
@@ -370,8 +492,9 @@ proc browse::isroom {browseName jid} {
 #
 #       Returns the jidType/subType if found.
 
-proc browse::gettype {browseName jid} {    
-    upvar [namespace current]::${browseName}::locals locals
+proc browse::gettype {browsename jid} {    
+    
+    upvar ${browsename}::locals locals
     
     if {[info exists locals($jid,type)]} {
 	return $locals($jid,type)
@@ -385,14 +508,15 @@ proc browse::gettype {browseName jid} {
 #       Returns all jids that match the glob pattern typepattern.
 #       
 # Arguments:
-#       browseName:   the instance of this conference browse.
+#       browsename:   the instance of this conference browse.
 #       typepattern:  a global pattern of jid type/subtype (service/*).
 #
 # Results:
 #       List of jid's matching the type pattern.
 
-proc browse::getalljidfortypes {browseName typepattern} {
-    upvar [namespace current]::${browseName}::locals locals
+proc browse::getalljidfortypes {browsename typepattern} {
+    
+    upvar ${browsename}::locals locals
     
     set allkeys [array names locals "${typepattern},typelist"]
     set jidlist {}
@@ -409,14 +533,15 @@ proc browse::getalljidfortypes {browseName typepattern} {
 #       Returns all types that match the glob pattern typepattern.
 #       
 # Arguments:
-#       browseName:   the instance of this conference browse.
+#       browsename:   the instance of this conference browse.
 #       typepattern:  a glob pattern of jid type/subtype (service/*).
 #
 # Results:
 #       List of types matching the type pattern.
 
-proc browse::getalltypes {browseName typepattern} {    
-    upvar [namespace current]::${browseName}::locals locals
+proc browse::getalltypes {browsename typepattern} {    
+    
+    upvar ${browsename}::locals locals
     
     set ans {}
     if {[info exists locals(alltypes)]} {
@@ -435,14 +560,15 @@ proc browse::getalltypes {browseName typepattern} {
 #       Returns all namespaces for this jid describing the services available.
 #
 # Arguments:
-#       browseName:   the instance of this conference browse.
+#       browsename:   the instance of this conference browse.
 #       jid:          .
 #       
 # Results:
 #       List of namespaces or empty if none.
 
-proc browse::getnamespaces {browseName jid} {
-    upvar [namespace current]::${browseName}::locals locals
+proc browse::getnamespaces {browsename jid} {
+    
+    upvar ${browsename}::locals locals
     
     Debug 3 "browse::getnamespaces  jid=$jid"
 
@@ -458,15 +584,16 @@ proc browse::getnamespaces {browseName jid} {
 #       Returns 0/1 if jid supports this namespace.
 #
 # Arguments:
-#       browseName:   the instance of this conference browse.
+#       browsename:   the instance of this conference browse.
 #       jid:          .
 #       ns            namespace.
 #       
 # Results:
 #       0/1
 
-proc browse::havenamespace {browseName jid ns} {
-    upvar [namespace current]::${browseName}::locals locals
+proc browse::havenamespace {browsename jid ns} {
+    
+    upvar ${browsename}::locals locals
     
     Debug 3 "browse::havenamespace  jid=$jid, ns=$ns"
 
@@ -488,7 +615,7 @@ proc browse::havenamespace {browseName jid ns} {
 #       It also keeps a list of all 'user'«s in a room.
 #       
 # Arguments:
-#       browseName:   the instance of this conference browse.
+#       browsename:   the instance of this conference browse.
 #       fromJid:      the 'from' attribute which is also the parent of any
 #                     childs.
 #       subiq:      hierarchical xml list starting with element containing
@@ -500,10 +627,11 @@ proc browse::havenamespace {browseName jid ns} {
 # Results:
 #       none.
 
-proc browse::setjid {browseName fromJid subiq args} {
-    upvar [namespace current]::${browseName}::locals locals
+proc browse::setjid {browsename fromJid subiq args} {
     
-    Debug 3 "browse::setjid browseName=$browseName, fromJid=$fromJid\n\t\
+    upvar ${browsename}::locals locals
+    
+    Debug 3 "browse::setjid browsename=$browsename, fromJid=$fromJid\n\t\
       subiq='[string range $subiq 0 80]...', args='$args'"
 
     set theTag [wrapper::gettag $subiq]
@@ -522,7 +650,7 @@ proc browse::setjid {browseName fromJid subiq args} {
 	if {[string match *@* $fromJid]} {
 
 	    # Ugly!!!
-	    set parentJid [getparentjid $browseName $fromJid]
+	    set parentJid [getparentjid $browsename $fromJid]
 	    set locals($fromJid,parent) $parentJid
 	    if {[info exists locals($parentJid,parents)]} {
 		set locals($fromJid,parents)  \
@@ -558,13 +686,15 @@ proc browse::setjid {browseName fromJid subiq args} {
     set locals($jid,isbrowsed) 1
     
     # Handle the top jid, and follow recursively for any childs.
-    setsinglejid $browseName $parentJid $jid $subiq 1
+    setsinglejid $browsename $parentJid $jid $subiq 1
     
     # Evaluate the client callback.
     if {[info exists argsArr(-command)] && [string length $argsArr(-command)]} {
-	uplevel #0 $argsArr(-command) $browseName set [list $jid $subiq]
+	uplevel #0 $argsArr(-command) $browsename set [list $jid $subiq]
     } else {
-	uplevel #0 $locals(cmd) $browseName set [list $jid $subiq]
+	if {[info exists locals(cmd)]} {
+	    uplevel #0 $locals(cmd) $browsename set [list $jid $subiq]
+	}
     }
 }
 
@@ -574,7 +704,7 @@ proc browse::setjid {browseName fromJid subiq args} {
 #       The recursive helper proc for 'setjid'.
 #       
 # Arguments:
-#       browseName:   the instance of this conference browse.
+#       browsename:   the instance of this conference browse.
 #       parentJid:    the logical parent of 'jid'
 #       jid:          the 'jid' we are setting; if empty it is in attribute list.
 #       xmllist:      hierarchical xml list.
@@ -583,11 +713,12 @@ proc browse::setjid {browseName fromJid subiq args} {
 # Results:
 #       none.
 
-proc browse::setsinglejid {browseName parentJid jid xmllist {browsedjid 0}} {
+proc browse::setsinglejid {browsename parentJid jid xmllist {browsedjid 0}} {
     variable options
-    upvar [namespace current]::${browseName}::locals locals
     
-    Debug 3 "browse::setsinglejid browseName=$browseName, parentJid=$parentJid\
+    upvar ${browsename}::locals locals
+    
+    Debug 3 "browse::setsinglejid browsename=$browsename, parentJid=$parentJid\
       jid=$jid, xmllist='$xmllist'"
     
     set category [wrapper::gettag $xmllist]
@@ -704,15 +835,15 @@ proc browse::setsinglejid {browseName parentJid jid xmllist {browsedjid 0}} {
 	    
 		switch -- $ns {
 		    "http://jabber.org/protocol/muc" {
-			jlib::invokefrombrowser $locals(fullBrowseName) \
+			jlib::invokefrombrowser $browsename \
 			  [list registergcprotocol $jid "muc"]
 		    }
 		    "jabber:iq:conference" {
-			jlib::invokefrombrowser $locals(fullBrowseName) \
+			jlib::invokefrombrowser $browsename \
 			  [list registergcprotocol $jid "conference"]
 		    }
 		    "gc-1.0" {
-			jlib::invokefrombrowser $locals(fullBrowseName) \
+			jlib::invokefrombrowser $browsename \
 			  [list registergcprotocol $jid "gc-1.0"]
 		    }
 		}
@@ -720,7 +851,7 @@ proc browse::setsinglejid {browseName parentJid jid xmllist {browsedjid 0}} {
 	} else {
 	    
 	    # Now jid is the parent, and the jid to set is an attribute.
-	    setsinglejid $browseName $jid {} $child
+	    setsinglejid $browsename $jid {} $child
 	}
     }
 }
@@ -731,7 +862,7 @@ proc browse::setsinglejid {browseName parentJid jid xmllist {browsedjid 0}} {
 #       Shall only be called from jabberlib!
 #       
 # Arguments:
-#       browseName:   the instance of this conference browse.
+#       browsename:   the instance of this conference browse.
 #       jid:          the 'from' attribute which is also the parent of any
 #                     childs.
 #       errlist:      {errorCode errorMsg}
@@ -741,10 +872,11 @@ proc browse::setsinglejid {browseName parentJid jid xmllist {browsedjid 0}} {
 # Results:
 #       none.
 
-proc browse::errorcallback {browseName jid errlist args} {
-    upvar [namespace current]::${browseName}::locals locals
+proc browse::errorcallback {browsename jid errlist args} {
     
-    Debug 3 "browse::errorcallback browseName=$browseName, jid=$jid\
+    upvar ${browsename}::locals locals
+    
+    Debug 3 "browse::errorcallback browsename=$browsename, jid=$jid\
       errlist=$errlist, args='$args'"
 
     array set argsArr $args
@@ -752,11 +884,15 @@ proc browse::errorcallback {browseName jid errlist args} {
       [string length $argsArr(-errorcommand)]} {
 	set cmd $argsArr(-errorcommand)
     } else {
-	set cmd $locals(cmd)
+	if {[info exists locals(cmd)]} {
+	    set cmd $locals(cmd)
+	}
     }
 	
     # Evaluate the client callback.
-    uplevel #0 $cmd $browseName error [list $jid $errlist]
+    if {[info exists cmd]} {
+	uplevel #0 $cmd $browsename error [list $jid $errlist]
+    }
 }
 
 # browse::clear --
@@ -766,26 +902,26 @@ proc browse::errorcallback {browseName jid errlist args} {
 #       Problem since icq.jabber.se child of icq.jabber.se/registered (?!)
 #       It must be failsafe in case of missing browse elements.
 
-proc browse::clear {browseName {jid {}}} {
+proc browse::clear {browsename {jid {}}} {
     
-    upvar [namespace current]::${browseName}::locals locals
+    upvar ${browsename}::locals locals
     
     Debug 3 "browse::clear browse::clear $jid"
     if {[string length $jid]} {
-	ClearJid $browseName $jid
+	ClearJid $browsename $jid
     } else {
-	ClearAll $browseName
+	ClearAll $browsename
     }
 }
 
-proc browse::ClearJid {browseName jid} {
-
-    upvar [namespace current]::${browseName}::locals locals
+proc browse::ClearJid {browsename jid} {
+    
+    upvar ${browsename}::locals locals
 
     # Can be problems with this (ICQ)
     if {0 && [info exists locals($jid,childs)]} {
 	foreach child $locals($jid,childs) {
-	    ClearJid $browseName $child
+	    ClearJid $browsename $child
 	}
     }
     
@@ -812,16 +948,18 @@ proc browse::ClearJid {browseName jid} {
 #
 #       Empties everything cached internally.
 
-proc browse::ClearAll {browseName} {
+proc browse::ClearAll {browsename} {
     
-    upvar [namespace current]::${browseName}::locals locals
+    upvar ${browsename}::locals locals
 
     # Be sure to keep some entries! Separate array for these?
-    set clientCmd $locals(cmd)
-    set fullBrowseName $locals(fullBrowseName)
+    if {[info exists locals(cmd)]} {
+	set clientCmd $locals(cmd)
+    }
     unset locals
-    set locals(cmd) $clientCmd
-    set locals(fullBrowseName) $fullBrowseName
+    if {[info exists clientCmd]} {
+	set locals(cmd) $clientCmd
+    }
     set locals(confservers) {}
 }
 
@@ -829,9 +967,9 @@ proc browse::ClearAll {browseName} {
 #
 #       Deletes the complete object.
 
-proc browse::delete {browseName} {
+proc browse::delete {browsename} {
     
-    namespace delete [namespace current]::$browseName
+    namespace delete $browsename
 }
 
 proc browse::Debug {num str} {

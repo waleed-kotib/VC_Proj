@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.50 2004-04-08 09:57:43 matben Exp $
+# $Id: GroupChat.tcl,v 1.51 2004-04-09 10:32:25 matben Exp $
 
 package require History
 
@@ -33,6 +33,7 @@ namespace eval ::Jabber::GroupChat:: {
     ::hooks::add prefsBuildHook          ::Jabber::GroupChat::BuildPrefsHook
     ::hooks::add prefsSaveHook           ::Jabber::GroupChat::SavePrefsHook
     ::hooks::add prefsCancelHook         ::Jabber::GroupChat::CancelPrefsHook
+    ::hooks::add prefsUserDefaultsHook   ::Jabber::GroupChat::UserDefaultsHook
 
     # Icons
     option add *GroupChat*sendImage            send             widgetDefault
@@ -1628,6 +1629,15 @@ proc ::Jabber::GroupChat::CancelPrefsHook { } {
 	    ::Preferences::HasChanged
 	    break
 	}
+    }
+}
+
+proc ::Jabber::GroupChat::UserDefaultsHook { } {
+    upvar ::Jabber::jprefs jprefs
+    variable tmpJPrefs
+	
+    foreach key [array names tmpJPrefs] {
+	set tmpJPrefs($key) $jprefs($key)
     }
 }
 

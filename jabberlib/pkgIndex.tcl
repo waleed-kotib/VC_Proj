@@ -8,10 +8,10 @@
 # script is sourced, the variable $dir must contain the
 # full path name of this file's directory.
 
-package ifneeded wrapper 1.0 [list source [file join $dir wrapper.tcl]]
-package ifneeded roster 1.0 [list source [file join $dir roster.tcl]]
-package ifneeded browse 1.0 [list source [file join $dir browse.tcl]]
+package ifneeded browse 2.0 [list source [file join $dir browse.tcl]]
+package ifneeded disco 0.1 [list source [file join $dir disco.tcl]]
 package ifneeded jlib 1.0 [list source [file join $dir jabberlib.tcl]]
 package ifneeded muc 0.1 [list source [file join $dir muc.tcl]]
+package ifneeded roster 1.0 [list source [file join $dir roster.tcl]]
 package ifneeded tinydom 0.1 [list source [file join $dir tinydom.tcl]]
-package ifneeded disco 0.1 [list source [file join $dir disco.tcl]]
+package ifneeded wrapper 1.0 [list source [file join $dir wrapper.tcl]]

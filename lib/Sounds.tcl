@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Sounds.tcl,v 1.20 2004-04-08 09:57:44 matben Exp $
+# $Id: Sounds.tcl,v 1.21 2004-04-09 10:32:26 matben Exp $
 
 package provide Sounds 1.0
 
@@ -27,6 +27,7 @@ namespace eval ::Sounds:: {
     ::hooks::add prefsBuildHook         ::Sounds::BuildPrefsHook
     ::hooks::add prefsSaveHook          ::Sounds::SavePrefsHook
     ::hooks::add prefsCancelHook        ::Sounds::CancelPrefsHook
+    ::hooks::add prefsUserDefaultsHook  ::Sounds::UserDefaultsHook
 
     ::hooks::add initHook               ::Sounds::InitHook
     
@@ -440,6 +441,21 @@ proc ::Sounds::CancelPrefsHook { } {
     }
     if {![string equal $sprefs(soundSet) $tmpPrefs(soundSet)]} {
 	::Preferences::HasChanged
+    }
+}
+
+proc ::Sounds::UserDefaultsHook { } {
+    variable sprefs
+    variable tmpPrefs
+    variable allSounds
+
+    foreach name $allSounds {
+	set tmpPrefs($name) $sprefs($name)
+    }
+    if {[string equal $sprefs(soundSet) ""]} {
+	set tmpPrefs(soundSet) [::msgcat::mc Default]
+    } else {
+	set tmpPrefs(soundSet) $sprefs(soundSet)
     }
 }
 

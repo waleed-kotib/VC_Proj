@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.49 2004-04-04 13:37:08 matben Exp $
+# $Id: Coccinella.tcl,v 1.50 2004-04-09 10:32:25 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -512,6 +512,9 @@ if {!$prefs(stripJabber)} {
     ::Jabber::SetUserPreferences
 }
 
+# Define MIME types etc.
+::Types::Init
+
 # Components that need to add their own preferences need to be registered here.
 ::hooks::run prefsInitHook
 
@@ -519,10 +522,6 @@ if {!$prefs(stripJabber)} {
 if {$argc > 0} {
     ::PreferencesUtils::ParseCommandLineOptions $argc $argv
 }
-
-#--- Initializations -----------------------------------------------------------
-#
-# Order important!
 
 switch -- $prefs(protocol) {
     jabber {
@@ -535,11 +534,11 @@ switch -- $prefs(protocol) {
 }
 
 # Define MIME types etc.
-::Types::Init
+#::Types::Init
 
 # Load all plugins available.
-::Plugins::SetBanList $prefs(pluginBanList)
-::Plugins::Init
+#::Plugins::SetBanList $prefs(pluginBanList)
+#::Plugins::Init
 
 # Addons.
 ::Plugins::InitAddons

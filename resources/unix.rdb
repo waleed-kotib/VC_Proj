@@ -2,7 +2,7 @@
 !
 ! General appearence
 !
-*fontTiny:                           Helvetica -9
+*fontTiny:                           Helvetica -10
 *fontSmall:                          Helvetica -10
 *fontSmallBold:                      Helvetica -10 bold
 *fontMedium:                         Helvetica -10

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: FilePrefs.tcl,v 1.2 2004-03-29 13:56:27 matben Exp $
+# $Id: FilePrefs.tcl,v 1.3 2004-04-09 10:32:26 matben Exp $
 
 package provide FilePrefs 1.0
 
@@ -13,10 +13,11 @@ package provide FilePrefs 1.0
 namespace eval ::FilePrefs:: {
 
     # Define all hooks for preference settings.
-    ::hooks::add prefsInitHook      ::FilePrefs::InitPrefsHook
-    ::hooks::add prefsBuildHook     ::FilePrefs::BuildPrefsHook
-    ::hooks::add prefsSaveHook      ::FilePrefs::SavePrefsHook
-    ::hooks::add prefsCancelHook    ::FilePrefs::CancelPrefsHook
+    ::hooks::add prefsInitHook          ::FilePrefs::InitPrefsHook
+    ::hooks::add prefsBuildHook         ::FilePrefs::BuildPrefsHook
+    ::hooks::add prefsSaveHook          ::FilePrefs::SavePrefsHook
+    ::hooks::add prefsCancelHook        ::FilePrefs::CancelPrefsHook
+    ::hooks::add prefsUserDefaultsHook  ::FilePrefs::UserDefaultsHook
     
     # Wait for this variable to be set in the "Inspect Associations" dialog.
     variable finishedInspect
@@ -73,10 +74,10 @@ proc ::FilePrefs::BuildPage {page} {
     # Cancel button. The MIME type works as a key in our database
     # (arrays) of various features.
 
-    array set tmpMime2Description [::Types::GetDescriptionArr]
-    array set tmpMimeTypeIsText [::Types::GetIsMimeTextArr]
-    array set tmpMime2SuffixList [::Types::GetSuffixListArr]
-    array set tmpMimeTypeDoWhat [::Plugins::GetDoWhatForMimeArr]
+    array set tmpMime2Description     [::Types::GetDescriptionArr]
+    array set tmpMimeTypeIsText       [::Types::GetIsMimeTextArr]
+    array set tmpMime2SuffixList      [::Types::GetSuffixListArr]
+    array set tmpMimeTypeDoWhat       [::Plugins::GetDoWhatForMimeArr]
     array set tmpPrefMimeType2Package [::Plugins::GetPreferredPackageArr]
     
     # Frame for everything inside the labeled container.
@@ -539,4 +540,18 @@ proc ::FilePrefs::CancelPrefsHook { } {
     }
 }
 
+proc ::FilePrefs::UserDefaultsHook { } {
+    variable tmpMime2Description
+    variable tmpMimeTypeIsText
+    variable tmpMime2SuffixList
+    variable tmpMimeTypeDoWhat
+    variable tmpPrefMimeType2Package
+    
+    array set tmpMime2Description     [::Types::GetDescriptionArr]
+    array set tmpMimeTypeIsText       [::Types::GetIsMimeTextArr]
+    array set tmpMime2SuffixList      [::Types::GetSuffixListArr]
+    array set tmpMimeTypeDoWhat       [::Plugins::GetDoWhatForMimeArr]
+    array set tmpPrefMimeType2Package [::Plugins::GetPreferredPackageArr]
+}
+    
 #-------------------------------------------------------------------------------

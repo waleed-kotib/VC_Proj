@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.52 2004-04-04 13:37:09 matben Exp $
+# $Id: Chat.tcl,v 1.53 2004-04-09 10:32:25 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -28,10 +28,11 @@ namespace eval ::Jabber::Chat:: {
     ::hooks::add logoutHook         ::Jabber::Chat::LogoutHook
 
     # Define all hooks for preference settings.
-    ::hooks::add prefsInitHook      ::Jabber::Chat::InitPrefsHook
-    ::hooks::add prefsBuildHook     ::Jabber::Chat::BuildPrefsHook
-    ::hooks::add prefsSaveHook      ::Jabber::Chat::SavePrefsHook
-    ::hooks::add prefsCancelHook    ::Jabber::Chat::CancelPrefsHook
+    ::hooks::add prefsInitHook          ::Jabber::Chat::InitPrefsHook
+    ::hooks::add prefsBuildHook         ::Jabber::Chat::BuildPrefsHook
+    ::hooks::add prefsSaveHook          ::Jabber::Chat::SavePrefsHook
+    ::hooks::add prefsCancelHook        ::Jabber::Chat::CancelPrefsHook
+    ::hooks::add prefsUserDefaultsHook  ::Jabber::Chat::UserDefaultsHook
 
     # Use option database for customization. 
     # These are nonstandard option valaues and we may therefore keep priority
@@ -1348,7 +1349,7 @@ proc ::Jabber::Chat::BuildPrefsPage {wpage} {
     set fontSB [option get . fontSmallBold {}]
     
     set tmpJPrefs(chatActiveRet) $jprefs(chatActiveRet)
-    set tmpJPrefs(chatFont) $jprefs(chatFont)
+    set tmpJPrefs(chatFont)      $jprefs(chatFont)
     
     set labfr ${wpage}.alrt
     labelframe $labfr -text [::msgcat::mc {Chat}]
@@ -1415,6 +1416,15 @@ proc ::Jabber::Chat::CancelPrefsHook { } {
 	    ::Preferences::HasChanged
 	    break
 	}
+    }
+}
+
+proc ::Jabber::Chat::UserDefaultsHook { } {
+    upvar ::Jabber::jprefs jprefs
+    variable tmpJPrefs
+    
+    foreach key [array names tmpJPrefs] {
+	set tmpJPrefs($key) $jprefs($key)
     }
 }
 

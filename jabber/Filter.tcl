@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Filter.tcl,v 1.1 2004-03-28 14:48:26 matben Exp $
+# $Id: Filter.tcl,v 1.2 2004-04-09 10:32:25 matben Exp $
 
 
 package provide Filter 1.0
@@ -15,10 +15,11 @@ package provide Filter 1.0
 namespace eval ::Jabber::Filter:: {
     
     # Define all hooks for preference settings.
-    ::hooks::add prefsInitHook      ::Jabber::Filter::InitPrefsHook
-    ::hooks::add prefsBuildHook     ::Jabber::Filter::BuildPrefsHook
-    ::hooks::add prefsSaveHook      ::Jabber::Filter::SavePrefsHook
-    ::hooks::add prefsCancelHook    ::Jabber::Filter::CancelPrefsHook
+    ::hooks::add prefsInitHook          ::Jabber::Filter::InitPrefsHook
+    ::hooks::add prefsBuildHook         ::Jabber::Filter::BuildPrefsHook
+    ::hooks::add prefsSaveHook          ::Jabber::Filter::SavePrefsHook
+    ::hooks::add prefsCancelHook        ::Jabber::Filter::CancelPrefsHook
+    ::hooks::add prefsUserDefaultsHook  ::Jabber::Filter::UserDefaultsHook
 }
 
 
@@ -225,6 +226,15 @@ proc ::Jabber::Filter::CancelPrefsHook { } {
 	    ::Preferences::HasChanged
 	    break
 	}
+    }
+}
+
+proc ::Jabber::Filter::UserDefaultsHook { } {
+    upvar ::Jabber::jprefs jprefs
+    variable tmpJPrefs
+    
+    foreach key [array names tmpJPrefs] {
+	set tmpJPrefs($key) $jprefs($key)
     }
 }
 

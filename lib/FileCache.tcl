@@ -6,7 +6,7 @@
 #
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #
-# $Id: FileCache.tcl,v 1.9 2004-03-16 15:09:08 matben Exp $
+# $Id: FileCache.tcl,v 1.10 2004-04-09 10:32:26 matben Exp $
 # 
 #       The input key can be: 
 #               1) a full url, must be uri encoded 
@@ -56,6 +56,7 @@ namespace eval ::FileCache:: {
     ::hooks::add prefsUserDefaultsHook  ::FileCache::UserDefaultsHook
     ::hooks::add prefsSaveHook          ::FileCache::SaveHook
     ::hooks::add prefsCancelHook        ::FileCache::CancelHook
+    ::hooks::add prefsUserDefaultsHook  ::FileCache::UserDefaultsHook
 
     # Main storage in array
     variable cache
@@ -489,6 +490,14 @@ proc ::FileCache::CancelHook { } {
 	::Preferences::HasChanged
 	return
     }
+}
+
+proc ::FileCache::UserDefaultsHook { } {
+    global  prefs
+    variable tmpPrefs
+    
+    set tmpPrefs(checkCache) $prefs(checkCache)
+    set tmpPrefs(mbsize)     [expr wide($prefs(cacheSize)/1e6)]
 }
 
 #-------------------------------------------------------------------------------

@@ -6,7 +6,7 @@
 !
 ! Fonts may be set to other if our system encoding is nonlatin.
 !
-*fontTiny:                           Helvetica 9
+*fontTiny:                           Helvetica 10
 *fontSmall:                          Helvetica 10
 *fontSmallBold:                      Helvetica 10 bold
 *fontMedium:                         Helvetica 10

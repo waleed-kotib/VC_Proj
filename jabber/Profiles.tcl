@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.14 2004-03-28 14:50:51 matben Exp $
+# $Id: Profiles.tcl,v 1.15 2004-04-09 10:32:25 matben Exp $
 
 package provide Profiles 1.0
 
@@ -16,6 +16,8 @@ namespace eval ::Profiles:: {
     ::hooks::add prefsUserDefaultsHook  ::Profiles::UserDefaultsHook
     ::hooks::add prefsSaveHook          ::Profiles::SaveHook
     ::hooks::add prefsCancelHook        ::Profiles::CancelHook
+    ::hooks::add prefsUserDefaultsHook  ::Profiles::UserDefaultsHook
+    
     ::hooks::add initHook               ::Profiles::ImportIfNecessary
     ::hooks::add closeWindowHook        ::Profiles::CloseDlgHook
     
@@ -596,6 +598,18 @@ proc ::Profiles::CancelHook { } {
 	::Preferences::HasChanged
 	return
     }
+}
+
+proc ::Profiles::UserDefaultsHook { } {
+    variable selected
+    variable tmpSelected
+    variable profile
+    variable wcombo    
+    
+    ::Profiles::MakeTmpProfArr
+    set tmpSelected $selected
+    set profile $selected
+    ::Profiles::SetCmd $wcombo $selected
 }
 
 # Standalone dialog --

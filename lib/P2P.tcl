@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: P2P.tcl,v 1.5 2004-03-24 14:43:11 matben Exp $
+# $Id: P2P.tcl,v 1.6 2004-04-09 10:32:26 matben Exp $
 
 package provide P2P 1.0
 
@@ -50,6 +50,7 @@ proc ::P2P::Init {} {
     ::hooks::add prefsBuildHook               ::P2P::Prefs::BuildPrefsHook
     ::hooks::add prefsSaveHook                ::P2P::Prefs::SavePrefsHook
     ::hooks::add prefsCancelHook              ::P2P::Prefs::CancelPrefsHook
+    ::hooks::add prefsUserDefaultsHook        ::P2P::Prefs::UserDefaultsHook
 
     set buttonTrayDefs(symmetric) {
 	connect    {::OpenConnection::OpenConnection $wDlgs(openConn)}
@@ -1208,6 +1209,15 @@ proc ::P2P::Prefs::CancelPrefsHook { } {
 	    ::Preferences::HasChanged
 	    break
 	}
+    }
+}
+
+proc ::P2P::Prefs::UserDefaultsHook { } {
+    global  prefs
+    variable tmpPrefs
+	
+    foreach key [array names tmpPrefs] {
+	set tmpPrefs($key) $prefs($key)
     }
 }
 
