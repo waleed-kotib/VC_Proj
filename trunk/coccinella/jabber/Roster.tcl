@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.98 2004-11-15 08:51:13 matben Exp $
+# $Id: Roster.tcl,v 1.99 2004-11-16 15:10:28 matben Exp $
 
 package provide Roster 1.0
 
@@ -31,14 +31,14 @@ namespace eval ::Jabber::Roster:: {
     set fontSB [option get . fontSmallBold {}]
     
     # Standard widgets and standard options.
-    option add *Roster.borderWidth          0               startupFile
-    option add *Roster.relief               flat            startupFile
-    option add *Roster.pad.padX             4               startupFile
-    option add *Roster.pad.padY             4               startupFile
-    option add *Roster*box.borderWidth      1               startupFile
-    option add *Roster*box.relief           sunken          startupFile
-    option add *Roster.stat.f.padX          8               startupFile
-    option add *Roster.stat.f.padY          2               startupFile
+    option add *Roster.borderWidth          0               50
+    option add *Roster.relief               flat            50
+    option add *Roster.pad.padX             4               50
+    option add *Roster.pad.padY             4               50
+    option add *Roster*box.borderWidth      1               50
+    option add *Roster*box.relief           sunken          50
+    option add *Roster.stat.f.padX          8               50
+    option add *Roster.stat.f.padY          2               50
     
     # Specials.
     option add *Roster.backgroundImage      sky             widgetDefault

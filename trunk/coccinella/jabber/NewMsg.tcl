@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements the new message dialog fo the jabber part.
 #      
-#  Copyright (c) 2001-2003  Mats Bengtsson
+#  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.48 2004-11-15 08:51:13 matben Exp $
+# $Id: NewMsg.tcl,v 1.49 2004-11-16 15:10:27 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -14,7 +14,9 @@ package provide NewMsg 1.0
 namespace eval ::Jabber::NewMsg:: {
     global  wDlgs
 
+    # Add all event hooks.
     ::hooks::register closeWindowHook    ::Jabber::NewMsg::CloseHook
+    ::hooks::register quitAppHook [list ::UI::SaveWinPrefixGeom $wDlgs(jsendmsg)]
 
     # Use option database for customization.
     option add *NewMsg.sendImage            send            widgetDefault
@@ -26,9 +28,19 @@ namespace eval ::Jabber::NewMsg:: {
     option add *NewMsg.printImage           print           widgetDefault
     option add *NewMsg.printDisImage        printDis        widgetDefault
 
-    # Add all event hooks.
-    ::hooks::register quitAppHook [list ::UI::SaveWinPrefixGeom $wDlgs(jsendmsg)]
+    # Standard widgets.
+    option add *NewMsg*fradd.borderWidth    1               50
+    option add *NewMsg*fradd.relief         raised          50
 
+    option add *JMultiAddress.background    #999999         50
+
+    # Specials.
+    option add *JMultiAddress.entry1Background  white       50
+    option add *JMultiAddress.entry1Foreground  #333333     50
+    option add *JMultiAddress.entry2Background  white       50
+    option add *JMultiAddress.entry2Foreground  black       50
+    
+    
     variable locals
     
     # Running number for unique toplevels.
@@ -209,7 +221,10 @@ proc ::Jabber::NewMsg::Build {args} {
       -yscrollcommand [list $fradd.ysc set]]
     pack $waddcan -side left -fill both -expand 1
     
-    set frport [frame $fradd.can.fr -bg gray60]
+    # Make new class since easier to set resources. 
+    # D = -bg gray60
+    set frport $fradd.can.fr
+    frame $frport -class JMultiAddress
     set wspacer [frame $frport.sp -height 1]
     grid $wspacer -sticky ew -columnspan 2 
     foreach n {1 2 3 4} {
@@ -217,7 +232,7 @@ proc ::Jabber::NewMsg::Build {args} {
     }
     FillAddrLine $w $frport 1
     set id [$waddcan create window 0 0 -anchor nw -window $frport]
-    
+        
     # If -to option. This can have jid's with and without any resource.
     # Be careful to treat this according to the XMPP spec!
 
@@ -227,14 +242,15 @@ proc ::Jabber::NewMsg::Build {args} {
 	    if {$n > 1} {
 		FillAddrLine $w $frport $n
 	    }	    
-	    set locals($w,addr$n) [::Jabber::JlibCmd getrecipientjid $jid]
+	    set locals($w,addr$n) [$jstate(jlib) getrecipientjid $jid]
 	    incr n
 	}
     }
+    
     # Text.
     set wtxt  $w.frall.frtxt
-    set wtext ${wtxt}.text
-    set wysc  ${wtxt}.ysc
+    set wtext $wtxt.text
+    set wysc  $wtxt.ysc
     
     # Subject.
     set   frsub $w.frall.frsub
@@ -258,7 +274,7 @@ proc ::Jabber::NewMsg::Build {args} {
       [list grid $wysc -column 1 -row 0 -sticky ns]]
     scrollbar $wysc -orient vertical -command [list $wtext yview]
     grid $wtext -column 0 -row 0 -sticky news
-    grid $wysc -column 1 -row 0 -sticky ns
+    grid $wysc  -column 1 -row 0 -sticky ns
     grid columnconfigure $wtxt 0 -weight 1
     grid rowconfigure $wtxt 0 -weight 1
 
@@ -272,12 +288,12 @@ proc ::Jabber::NewMsg::Build {args} {
     set locals($w,finished) 0
     set locals($w,wtray)    $wtray
     
-    if {[string length $opts(-forwardmessage)] > 0} {
+    if {$opts(-forwardmessage) != ""} {
 	$wtext insert end "\nForwarded message from $opts(-to) written at $opts(-time)\n\
 --------------------------------------------------------------------\n\
 $opts(-forwardmessage)"
     }
-    if {[string length $opts(-message)] > 0} {
+    if {$opts(-message) != ""} {
 	$wtext insert end $opts(-message)
     }
     
@@ -320,18 +336,25 @@ proc ::Jabber::NewMsg::NewAddrLine {w wfr n} {
     
     set fontSB [option get . fontSmallBold {}]
     
+    set bg1 [option get $wfr entry1Background {}]
+    set fg1 [option get $wfr entry1Foreground {}]
+    set bg2 [option get $wfr entry2Background {}]
+    set fg2 [option get $wfr entry2Foreground {}]
+    
     set jidlist [$jstate(roster) getusers]
     set num $locals($w,num)
     frame $wfr.f${n} -bd 0
     entry $wfr.f${n}.trpt -width 18 -font $fontSB -bd 0 -highlightthickness 0 \
-      -state disabled -textvariable [namespace current]::locals($w,poptrpt$n)
+      -state disabled -textvariable [namespace current]::locals($w,poptrpt$n) \
+      -bg $bg1 -disabledforeground $fg1
     label $wfr.f${n}.la -bd 0
     pack $wfr.f${n}.trpt -side left -fill y -anchor w
     pack $wfr.f${n}.la -side right -fill y
     
     set wentry $wfr.addr${n}
     ::entrycomp::entrycomp $wentry $jidlist -bd 0 -highlightthickness 0 \
-      -textvariable [namespace current]::locals($w,addr$n) -state disabled
+      -textvariable [namespace current]::locals($w,addr$n) -state disabled \
+      -bg $bg2 -fg $fg2
     
     set m [menu $locals(wpopupbase)${num}_${n} -tearoff 0]
     foreach {name desc} $locals(menuDefs) {
@@ -348,7 +371,7 @@ proc ::Jabber::NewMsg::NewAddrLine {w wfr n} {
     bind $wentry <Key-Down> [list ::Jabber::NewMsg::KeyUpDown 1 $w $wfr $n]
     
     grid $wfr.f${n} -padx 1 -pady 1 -column 0 -row $n -sticky news
-    grid $wentry -padx 1 -pady 1 -column 1 -row $n -sticky news
+    grid $wentry    -padx 1 -pady 1 -column 1 -row $n -sticky news
     grid columnconfigure $wfr 1 -weight 1
     grid rowconfigure $wfr $n -minsize 16
     set locals($w,addrline) $n
@@ -359,6 +382,7 @@ proc ::Jabber::NewMsg::FillAddrLine {w wfr n} {
     variable locals
     variable transportDefs
     
+    # D = -bg #adadad
     $wfr.f${n}.la configure -image $locals(popupbt) -bg #adadad
     $wfr.addr${n} configure -state normal
     
