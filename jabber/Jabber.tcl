@@ -1,13 +1,12 @@
 #  Jabber.tcl ---
 #  
 #      This file is part of The Coccinella application. 
-#      It implements the "glue" between the whiteboard and jabberlib.
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.111 2004-10-12 13:48:56 matben Exp $
+# $Id: Jabber.tcl,v 1.112 2004-10-16 13:32:50 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -73,6 +72,8 @@ namespace eval ::Jabber:: {
     set jstate(sock) {}
     set jstate(ipNum) {}
     set jstate(inroster) 0
+    
+    # This is our own status (presence/show).
     set jstate(status) "unavailable"
     
     # Server port actually used.
@@ -290,8 +291,8 @@ proc ::Jabber::FactoryDefaults { } {
     set jprefs(autoBrowseConference) 0
     
     # Dialog pane positions.
-    set prefs(paneGeom,$wDlgs(jchat)) {0.75 0.25}
-    set prefs(paneGeom,$wDlgs(jinbox)) {0.5 0.5}
+    set prefs(paneGeom,$wDlgs(jchat))    {0.75 0.25}
+    set prefs(paneGeom,$wDlgs(jinbox))   {0.5 0.5}
     set prefs(paneGeom,groupchatDlgVert) {0.8 0.2}
     set prefs(paneGeom,groupchatDlgHori) {0.8 0.2}
     
@@ -517,7 +518,7 @@ proc ::Jabber::Init { } {
     } $opts]
 
     # Register handlers for various iq elements.
-    $jstate(jlib) iq_register get jabber:iq:version      ::Jabber::ParseGetVersion
+    $jstate(jlib) iq_register get jabber:iq:version    ::Jabber::ParseGetVersion
     $jstate(jlib) iq_register get $coccixmlns(servers) ::Jabber::ParseGetServers
     
     # Set the priority order of groupchat protocols.
@@ -1211,6 +1212,11 @@ proc ::Jabber::SetStatus {type args} {
 	}	
     }
     
+    # General presence should not have a 'to' attribute.
+    if {![info exists argsArr(-to)]} {
+	set jstate(status) $type
+    }
+    
     # Trap network errors.
     # It is somewhat unclear here if we should have a type attribute
     # when sending initial presence, see XMPP 5.1.
@@ -1393,7 +1399,6 @@ proc ::Jabber::BtSetStatus {w} {
     set allText [string trim [$wtext get 1.0 end] " \n"]
     
     # Set present status.
-    set jstate(status) $show
     SetStatus $show -status $allText    
     set finishedStat 1
     destroy $w

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.32 2004-09-28 13:50:17 matben Exp $
+# $Id: GotMsg.tcl,v 1.33 2004-10-16 13:32:50 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -103,7 +103,7 @@ proc ::Jabber::GotMsg::Show {thisMsgId} {
 	set username $jid
     }
     if {[jlib::jidequal $jid $jstate(mejidres)]} {
-	set show $jstate(status)
+	set show [::Jabber::GetMyStatus]
     } else {
 	array set presArr [$jstate(roster) getpresence $jid2 -resource $res]
 	set show $presArr(-type)

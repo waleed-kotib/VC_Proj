@@ -115,6 +115,7 @@
 ::msgcat::mcset en Server
 ::msgcat::mcset en Servers
 ::msgcat::mcset en Set
+::msgcat::mcset en Settings
 ::msgcat::mcset en Shortcut
 ::msgcat::mcset en Shortcuts
 ::msgcat::mcset en Sounds
@@ -669,6 +670,8 @@ You have a subscription for %s: %s.}
 ::msgcat::mcset en openquicktimeurlmsg		{Open a URL which contains a SDP file with extension .mov for a QuickTime realtime live streaming sending. Can be audio (radio) or video (TV).\
 Alternatively, use your web browser to find the SDP file for a live transmission, download it on disk and open it is an ordinary movie.}
 ::msgcat::mcset en printunixcmd                 {Shell print command, edit if desired}
+::msgcat::mcset en enterpassword                {Enter the password for your account "%s"}
+
 
 
 ::msgcat::mcset en uastatpointmac 	{Point tool, click to mark, double click to inspect, press to popup}

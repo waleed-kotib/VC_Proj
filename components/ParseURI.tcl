@@ -4,7 +4,7 @@
 #       typically from an anchor element <a href='xmpp:jid[?query]'/>
 #       in a html page.
 # 
-# $Id: ParseURI.tcl,v 1.10 2004-09-28 13:50:17 matben Exp $
+# $Id: ParseURI.tcl,v 1.11 2004-10-16 13:32:50 matben Exp $
 
 package require uriencode
 
@@ -72,72 +72,14 @@ proc ::ParseURI::Parse {args} {
     set state(domain)   $domain
     
     if {[::Jabber::IsConnected]} {
-	::ParseURI::ProcessURI $token
+	ProcessURI $token
     } else {
-	::Jabber::Login::Connect $domain [list [namespace current]::ConnectCB $token]
-    }
-}
-
-proc ::ParseURI::RelaunchHook {args} {
-    
-    eval {::ParseURI::Parse} $args
-}
-
-# All these procedures are better collected somewhere so they can be used
-# by more components!
-
-proc ::ParseURI::ConnectCB {token status {msg {}}} {
-    variable $token
-    upvar 0 $token state
-    
-    # The messages are ::Jabber:: namespaced!    
-    switch $status {
-	error {
-	    set jamessnosocket [namespace eval ::Jabber:: \
-	      [list mc jamessnosocket $state(domain) $msg]]
-	    tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
-	      $jamessnosocket]
-	}
-	timeout {
-	    set jamesstimeoutserver [namespace eval ::Jabber:: \
-	      [list mc jamesstimeoutserver $state(domain)]]
-	    tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
-	      $jamesstimeoutserver]
-	}
-	default {
-	    # Go ahead...
-	    if {[catch {
-		::Jabber::Login::InitStream $state(domain) \
-		  [list [namespace current]::InitStreamCB $token]
-	    } err]} {
-		tk_messageBox -icon error -title [mc {Open Failed}] \
-		  -type ok -message [FormatTextForMessageBox $err]
-	    }
-	}
-    }
-}
-
-proc ::ParseURI::InitStreamCB {token args} {
-    variable $token
-    upvar 0 $token state
-    
-    array set argsArr $args
-
-    if {![info exists argsArr(id)]} {
-	tk_messageBox -icon error -type ok -message \
-	  "no id for digest in receiving <stream>"
-	::ParseURI::Free $token
-    } else {
-	
-	# We may need to ask for a password before preceding.
 	set profname $state(profname)
 	set password [::Profiles::Get $profname password]
 	set ans "ok"
 	if {$password == ""} {
 	    set ans [::UI::MegaDlgMsgAndEntry  \
-	      [mc {Password}]  \
-	      "Enter a password for your account \"$state(jid)\""  \
-	      "[mc Password]:"  \
+	      [mc {Password}] [mc enterpassword $state(jid)] "[mc Password]:" \
 	      password [mc Cancel] [mc OK] -show {*}]
 	}
 	if {$ans == "ok"} {
@@ -148,26 +90,31 @@ proc ::ParseURI::InitStreamCB {token args} {
 	    } else {
 		set res "coccinella"
 	    }
-	    ::Jabber::Login::Authorize $state(domain) $node $res $password \
-	      [list [namespace current]::AuthorizeCB $token] \
-	      -streamid $argsArr(id)
+	    set opts [::Profiles::Get $profname options]
+	    
+	    # Use a "high-level" login application api for this.
+	    eval {::Jabber::Login::HighLogin $state(domain) $node $res $password \
+	      [list [namespace current]::LoginCB $token]} $opts
 	} else {
-	    ::ParseURI::Free $token
+	    Free $token
 	}
     }
 }
 
-proc ::ParseURI::AuthorizeCB {token type msg} {
-    variable $token
-    upvar 0 $token state
-        
-    if {[string equal $type "error"]} {
-	tk_messageBox -icon error -type ok -title [mc Error]  \
-	  -message [FormatTextForMessageBox $msg]
-    } else {
-	::Jabber::Login::SetStatus
+#       Note that we have got two tokens here, the first one our own,
+#       the second from the login.
+
+proc ::ParseURI::LoginCB {token logtoken status {errmsg ""}} {
+    
+    ::Jabber::Login::ShowAnyMessageBox $logtoken $status $errmsg
+    if {$status == "ok"} {
+	ProcessURI $token
     }
-    ::ParseURI::ProcessURI $token
+}
+
+proc ::ParseURI::RelaunchHook {args} {
+    
+    eval {Parse} $args
 }
 
 proc ::ParseURI::ProcessURI {token} {
@@ -176,13 +123,13 @@ proc ::ParseURI::ProcessURI {token} {
   
     switch -- $state(op) {
 	message {
-	    ::ParseURI::DoMessage $token
+	    DoMessage $token
 	}
 	presence {
-	    ::ParseURI::DoPresence $token	    
+	    DoPresence $token	    
 	}
 	groupchat {
-	    ::ParseURI::DoGroupchat $token	    
+	    DoGroupchat $token	    
 	}
     }
 }
@@ -213,7 +160,7 @@ proc ::ParseURI::DoMessage {token} {
     } else {
 	eval {::Jabber::NewMsg::Build -to $state(jid)} $opts
     }
-    ::ParseURI::Free $token
+    Free $token
 }
 
 proc ::ParseURI::DoPresence {token} {
@@ -223,7 +170,7 @@ proc ::ParseURI::DoPresence {token} {
     # I don't understand why we should send directed presence when
     # we just sent global presence, or is this wrong?
 
-    ::ParseURI::Free $token
+    Free $token
 }
 
 proc ::ParseURI::DoGroupchat {token} {
@@ -240,9 +187,9 @@ proc ::ParseURI::DoGroupchat {token} {
 
     # We should check if we've got info before setting up the hooks.
     if {[$jstate(disco) isdiscoed info $service]} {
-	::ParseURI::DiscoInfoHook $token result $service {}
+	DiscoInfoHook $token result $service {}
     } elseif {[$jstate(browse) isbrowsed $service]} {
-	::ParseURI::BrowseSetHook $token $service {}
+	BrowseSetHook $token $service {}
     } else {    
 	
 	# These must be one shot hooks.
@@ -259,7 +206,7 @@ proc ::ParseURI::BrowseSetHook {token from subiq} {
     if {![jlib::jidequal $from $server]} {
 	return
     }
-    ::ParseURI::HandleGroupchat $token
+    HandleGroupchat $token
 }
 
 proc ::ParseURI::DiscoInfoHook {token type from subiq args} {
@@ -269,7 +216,7 @@ proc ::ParseURI::DiscoInfoHook {token type from subiq args} {
     if {![jlib::jidequal $from $state(service)]} {
 	return
     }
-    ::ParseURI::HandleGroupchat $token
+    HandleGroupchat $token
 }
 
 proc ::ParseURI::HandleGroupchat {token} {
@@ -296,7 +243,7 @@ proc ::ParseURI::EnterRoomCB {token type args} {
 	    ::Jabber::WB::NewWhiteboardTo $state(jid)
 	}
     }
-    ::ParseURI::Free $token
+    Free $token
 }
 
 proc ::ParseURI::Free {token} {

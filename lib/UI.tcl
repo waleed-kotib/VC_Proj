@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.72 2004-09-28 13:50:19 matben Exp $
+# $Id: UI.tcl,v 1.73 2004-10-16 13:32:51 matben Exp $
 
 package require entrycomp
 package require alertbox
@@ -753,6 +753,45 @@ proc ::UI::MenuDisableAllBut {mw normalList} {
     }
     foreach name $normalList {
 	::UI::MenuMethod $mw entryconfigure $name -state normal
+    }
+}
+
+# UI::PruneMenusUsingOptsDB --
+#
+#       A method to remove specific menu entries from 'menuDefs' and
+#       'menuDefsInsertInd' using an entry in the options database:
+#       *pruneMenyEntries:   mInfo {mDebug mCoccinellaHome}
+#
+# Arguments:
+#       name            the menus key label, mJabber, mEdit etc.
+#       menuDefVar      *name* if the menuDef variable.
+#       menuInsertIndVar  *name* if the index variable.
+#       
+# Results:
+#       None
+
+proc ::UI::PruneMenusUsingOptsDB {name menuDefVar menuInsertIndVar} {
+    upvar $menuDefVar menuDef
+    upvar $menuInsertIndVar menuInsertInd
+    
+    array set pruneArr [option get . pruneMenuEntries {}]
+    
+    ::Debug 4 "::UI::PruneMenusUsingOptsDB name=$name, prune=[array get pruneArr]"
+    
+    if {[info exists pruneArr($name)]} {
+    
+	# Take each in turn and find any matching index.
+	foreach mlabel $pruneArr($name) {
+	    set ind [lsearch -glob $menuDef *${mlabel}*]
+	    if {$ind >= 0} {
+		set menuDef [lreplace $menuDef $ind $ind]
+		
+		# If 'ind' before 'menuInsertIndVar' then adjust.
+		if {$ind < $menuInsertInd} {
+		    incr menuInsertInd -1
+		}
+	    }
+	}
     }
 }
 
