@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.92 2004-12-21 15:14:42 matben Exp $
+# $Id: GroupChat.tcl,v 1.93 2005-01-09 14:33:52 matben Exp $
 
 package require History
 
@@ -199,50 +199,34 @@ proc ::GroupChat::HaveOrigConference {{roomjid ""}} {
 # GroupChat::HaveMUC --
 # 
 #       Should perhaps be in jlib service part.
+#       
+# Arguments:
+#       jid         is either a service or a room jid
 
-proc ::GroupChat::HaveMUC {{roomjid ""}} {
+proc ::GroupChat::HaveMUC {{jid ""}} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::xmppxmlns xmppxmlns
 
     set ans 0
-    if {$roomjid == ""} {
-	if {1} {
-	    set allConfServ [$jstate(jlib) service getconferences]
-	    foreach serv $allConfServ {
-		if {[$jstate(jlib) service hasfeature $serv $xmppxmlns(muc)]} {
-		    set ans 1
-		}
-	    }
-	}
-	
-	if {0} { 
-	    # Require at least one service that supports muc.
-	    # 
-	    # PROBLEM: some clients browsed return muc xmlns!!!
-	    if {[info exists jstate(browse)]} {
-		set jids [$jstate(browse) getservicesforns $xmppxmlns(muc)]
-		if {[llength $jids] > 0} {
-		    set ans 1
-		}
-	    }
-	    if {[info exists jstate(disco)]} {
-		set jids [$jstate(disco) getjidsforfeature $xmppxmlns(muc)]
-		if {[llength $jids] > 0} {
-		    set ans 1
-		}
+    if {$jid == ""} {
+	set allConfServ [$jstate(jlib) service getconferences]
+	foreach serv $allConfServ {
+	    if {[$jstate(jlib) service hasfeature $serv $xmppxmlns(muc)]} {
+		set ans 1
 	    }
 	}
     } else {
 	
 	# We must query the service, not the room, for browse to work.
-	if {[regexp {^[^@]+@(.+)$} $roomjid match service]} {
+	if {[regexp {^[^@]+@(.+)$} $jid match service]} {
 	    if {[$jstate(jlib) service hasfeature $service $xmppxmlns(muc)]} {
 		set ans 1
 	    }
 	}
     }
-    ::Debug 4 "::GroupChat::HaveMUC roomjid=$roomjid, $ans"
+    ::Debug 4 "::GroupChat::HaveMUC = $ans, jid=$jid"
+    
     return $ans
 }
 
@@ -266,37 +250,42 @@ proc ::GroupChat::EnterOrCreate {what args} {
     upvar ::Jabber::jprefs jprefs
     
     array set argsArr $args
+    set roomjid ""
+    set service ""
     if {[info exists argsArr(-roomjid)]} {
 	set roomjid $argsArr(-roomjid)
-    } else {
-	set roomjid ""
+	jlib::splitjidex $roomjid node service res
+    } elseif {[info exists argsArr(-server)]} {
+	set service $argsArr(-server)
     }
 
     # Preferred groupchat protocol (gc-1.0|muc).
     # Use 'gc-1.0' as fallback.
-    set gchatprotocol "gc-1.0"
+    set protocol "gc-1.0"
     
     # Consistency checking.
     if {![regexp {(gc-1.0|muc)} $jprefs(prefgchatproto)]} {
     	set jprefs(prefgchatproto) muc
     }
     
+    ::Debug 2 "::GroupChat::EnterOrCreate prefgchatproto=$jprefs(prefgchatproto) \
+      what=$what, roomjid=$roomjid, service=$service, args='$args'"
+    
     switch -- $jprefs(prefgchatproto) {
 	gc-1.0 {
-	    set gchatprotocol "gc-1.0"
+	    set protocol "gc-1.0"
 	}
 	muc {
-	    if {[HaveMUC $roomjid]} {
-		set gchatprotocol "muc"
-	    } elseif {[HaveOrigConference $roomjid]} {
-		set gchatprotocol "conference"
+	    if {[HaveMUC $service]} {
+		set protocol "muc"
+	    } elseif {[HaveOrigConference $service]} {
+		set protocol "conference"
 	    }
 	}
     }
-    ::Debug 2 "::GroupChat::EnterOrCreate prefgchatproto=$jprefs(prefgchatproto) \
-      gchatprotocol=$gchatprotocol, what=$what, roomjid=$roomjid, args='$args'"
+    ::Debug 2 "\t protocol=$protocol"
     
-    switch -glob -- $what,$gchatprotocol {
+    switch -glob -- $what,$protocol {
 	*,gc-1.0 {
 	    set ans [eval {BuildEnter} $args]
 	}
@@ -448,6 +437,7 @@ proc ::GroupChat::BuildEnter {args} {
     }
     if {[info exists argsArr(-server)]} {
 	set server $argsArr(-server)
+	set enter(server) $argsArr(-server)
 	$wcomboserver configure -state disabled
     }
     
@@ -577,8 +567,8 @@ proc ::GroupChat::GotMsg {body args} {
 
 # GroupChat::Build --
 #
-#       Builds the group chat dialog. Independently on protocol 'groupchat'
-#       and 'conference'.
+#       Builds the group chat dialog. Independently on protocol 'gc-1.0',
+#       'conference', or 'muc'.
 #
 # Arguments:
 #       roomjid     The roomname@server

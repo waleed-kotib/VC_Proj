@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.39 2004-12-21 15:15:08 matben Exp $
+# $Id: Utils.tcl,v 1.40 2005-01-09 14:33:52 matben Exp $
 
 namespace eval ::Utils:: {
 
@@ -65,6 +65,33 @@ proc lrevert {args} {
 	lappend tmp [lindex $args $i]
     }
     return $tmp
+}
+
+# listintersect --
+# 
+#       Intersections of two lists.
+
+proc listintersect {alist blist} {
+    set tmp {}
+    foreach a $alist {
+	if {[lsearch $blist $a] >= 0} {
+	    lappend tmp $a
+	}
+    }
+    return $tmp
+}
+
+# listintersectnonempty --
+# 
+#       Is intersection of two lists non empty.
+
+proc listintersectnonempty {alist blist} {
+    foreach a $alist {
+	if {[lsearch $blist $a] >= 0} {
+	    return 1
+	}
+    }
+    return 0
 }
     
 # getdirname ---

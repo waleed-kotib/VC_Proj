@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.49 2004-12-22 15:12:15 matben Exp $
+# $Id: Disco.tcl,v 1.50 2005-01-09 14:33:52 matben Exp $
 
 package provide Disco 1.0
 
@@ -60,32 +60,42 @@ namespace eval ::Disco:: {
     # Template for the browse popup menu.
     variable popMenuDefs
 
+    # List the features of that each menu entry can handle:
+    #   conference: groupchat service, not room
+    #   room:       groupchat room
+    #   register:   registration support
+    #   search:     search support
+    #   user:       user that can be communicated with
+    #   wb:         whiteboarding
+    #   jid:        generic type
+    #   "":         not specific
+    
     set popMenuDefs(disco,def) {
-	mMessage       user      {::NewMsg::Build -to $jid}
-	mChat          user      {::Chat::StartThread $jid}
-	mWhiteboard    wb        {::Jabber::WB::NewWhiteboardTo $jid}
-	mEnterRoom     room      {
+	mMessage       user         {::NewMsg::Build -to $jid}
+	mChat          user         {::Chat::StartThread $jid}
+	mWhiteboard    {wb room}    {::Jabber::WB::NewWhiteboardTo $jid}
+	mEnterRoom     room         {
 	    ::GroupChat::EnterOrCreate enter -roomjid $jid -autoget 1
 	}
-	mCreateRoom       conference {::GroupChat::EnterOrCreate create \
+	mCreateRoom    conference   {::GroupChat::EnterOrCreate create \
 	  -server $jid}
-	separator         {}        {}
-	mInfo             jid       {::Disco::InfoCmd $jid}
-	mLastLogin/Activity jid  {::Jabber::GetLast $jid}
-	mLocalTime        jid       {::Jabber::GetTime $jid}
-	mvCard            jid       {::VCard::Fetch other $jid}
-	mVersion          jid       {::Jabber::GetVersion $jid}
-	separator         {}        {}
-	mSearch           search    {
+	separator      {}           {}
+	mInfo          jid          {::Disco::InfoCmd $jid}
+	mLastLogin/Activity jid     {::Jabber::GetLast $jid}
+	mLocalTime     jid          {::Jabber::GetTime $jid}
+	mvCard         jid          {::VCard::Fetch other $jid}
+	mVersion       jid          {::Jabber::GetVersion $jid}
+	separator      {}           {}
+	mSearch        search       {
 	    ::Search::Build -server $jid -autoget 1
 	}
-	mRegister         register  {
+	mRegister      register     {
 	    ::GenRegister::NewDlg -server $jid -autoget 1
 	}
-	mUnregister       register  {::Register::Remove $jid}
-	separator         {}        {}
-	mRefresh          jid       {::Disco::Refresh $jid}
-	mAddServer        {}        {::Disco::AddServerDlg}
+	mUnregister    register     {::Register::Remove $jid}
+	separator      {}           {}
+	mRefresh       jid          {::Disco::Refresh $jid}
+	mAddServer     {}           {::Disco::AddServerDlg}
     }
 
     variable dlguid 0
@@ -574,39 +584,62 @@ proc ::Disco::Popup {w v x y} {
     upvar ::Jabber::jstate jstate
 
     ::Debug 2 "::Disco::Popup w=$w, v='$v', x=$x, y=$y"
-
-    set typeClicked ""
     
     set item [lindex $v end]
     set jid  [lindex $item 0]
     set node [lindex $item 1]
-    set categoryList [$jstate(disco) types $item]
+    
+    # An item can have more than one type, for instance,
+    # msn.domain can have: {gateway/msn conference/text}
+    set categoryList [string tolower [$jstate(disco) types $item]]
     set categoryType [lindex $categoryList 0]
     
-    ::Debug 4 "\t categoryType=$categoryType"
+    ::Debug 4 "\t jid=$jid, categoryList=$categoryList"
 
     jlib::splitjidex $jid username host res
-    
-    if {$username != ""} {
-	set typeClicked user
-	if {[$jstate(disco) isroom $jid]} {
-	    set typeClicked room
-	}
-    } elseif {[string match -nocase "conference/*" $categoryType]} {
-	set typeClicked conference
-    } elseif {[string match -nocase "user/*" $categoryType]} {
-	set typeClicked user
-    } elseif {$jid != ""} {
-	set typeClicked jid
-    }
-    if {$jid == ""} {
-	set typeClicked ""	
-    }
-    set X [expr [winfo rootx $w] + $x]
-    set Y [expr [winfo rooty $w] + $y]
+       
+    # List the features of that each menu entry can handle:
+    #   conference: groupchat service, not room
+    #   room:       groupchat room
+    #   register:   registration support
+    #   search:     search support
+    #   user:       user that can be communicated with
+    #   wb:         whiteboarding
+    #   jid:        generic type
+    #   "":         not specific
 
-    ::Debug 2 "\t jid=$jid, typeClicked=$typeClicked"
+    # Make a list of all the features of the clicked item.
+    # This is then matched against each menu entries type to set its state.
+
+    set clicked {}
+    if {[lsearch -glob $categoryList "conference/*"] >= 0} {
+	lappend clicked conference
+    }
+    if {[lsearch -glob $categoryList "user/*"] >= 0} {
+	lappend clicked user
+    }
+    if {$username != ""} {
+	if {[$jstate(disco) isroom $jid]} {
+	    lappend clicked room
+	} else {
+	    lappend clicked user
+	}
+    }
+    foreach name {search register} {
+	if {[$jstate(disco) hasfeature "jabber:iq:${name}" $jid]} {
+	    lappend clicked $name
+	}
+    }
+    if {[::Roster::IsCoccinella $jid]} {
+	lappend clicked wb
+    }
+    # 'jid' is the generic type.
+    if {$jid != ""} {
+	lappend clicked jid
+    }
     
+    ::Debug 2 "\t clicked=$clicked"
+        
     # Make the appropriate menu.
     set m $jstate(wpopup,disco)
     set i 0
@@ -642,50 +675,14 @@ proc ::Disco::Popup {w v x y} {
 	    continue
 	}
 	
-	# State of menu entry. We use the 'type' and 'typeClicked' to sort
-	# out which capabilities to offer for the clicked item.
-	set state disabled
-	
-	switch -- $type {
-	    user {
-		if {[string equal $typeClicked "user"]} {
-		    set state normal
-		}
-	    }
-	    room {
-		if {[string equal $typeClicked "room"]} {
-		    set state normal
-		}
-	    }
-	    jid {
-		switch -- $typeClicked {
-		    jid - user - conference {
-			set state normal
-		    }
-		}
-	    } 
-	    search - register {
-		if {[$jstate(disco) hasfeature "jabber:iq:${type}" $jid]} {
-		    set state normal
-		}
-	    }
-	    conference {
-		switch -- $typeClicked {
-		    conference {
-			set state normal
-		    }
-		}
-	    }
-	    wb {
-		switch -- $typeClicked {
-		    room {
-			set state normal
-		    }
-		}
-	    }
-	    "" {
-		set state normal
-	    }
+	# State of menu entry. 
+	# We use the 'type' and 'clicked' lists to set the state.
+	if {[listintersectnonempty $type $clicked]} {
+	    set state normal
+	} elseif {$type == ""} {
+	    set state normal
+	} else {
+	    set state disabled
 	}
 	if {[string equal $state "normal"]} {
 	    $m entryconfigure $locname -state normal
@@ -695,7 +692,9 @@ proc ::Disco::Popup {w v x y} {
     # This one is needed on the mac so the menu is built before it is posted.
     update idletasks
     
-    # Post popup menu.
+    # Post popup menu.	
+    set X [expr [winfo rootx $w] + $x]
+    set Y [expr [winfo rooty $w] + $y]
     tk_popup $m [expr int($X) - 10] [expr int($Y) - 10]   
     
     # Mac bug... (else can't post menu while already posted if toplevel...)

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.75 2004-12-28 07:43:47 matben Exp $
+# $Id: JUI.tcl,v 1.76 2005-01-09 14:33:52 matben Exp $
 
 package provide JUI 1.0
 
@@ -688,36 +688,6 @@ proc ::Jabber::UI::RegisterMenuEntry {mtail menuSpec} {
 	set extraMenuDefs(rost,$mtail) {separator}
     }
     lappend extraMenuDefs(rost,$mtail) $menuSpec
-}
-
-proc ::Jabber::UI::RegisterMenuEntryBU {mtail menuSpec} {
-    variable menuDefs
-    variable menuDefsInsertInd
-    variable inited
-    
-    # Keeps track of all registered menu entries.
-    variable extraMenuDefs
-    
-    if {!$inited} {
-	::Jabber::UI::Init
-    }
-
-    # Add these entries in a section above the bottom section.
-    # Add separator to section component entries.
-    
-    if {![info exists extraMenuDefs(rost,$mtail)]} {
-
-	# Add separator if this is the first addon entry.
-	set extraMenuDefs(rost,$mtail) {separator}
-	
-	
-	set menuDefs(rost,$mtail) [linsert $menuDefs(rost,$mtail)  \
-	  $menuDefsInsertInd(rost,$mtail) {separator}]
-	incr menuDefsInsertInd(rost,$mtail)
-    }
-    set menuDefs(rost,$mtail) [linsert $menuDefs(rost,$mtail)  \
-      $menuDefsInsertInd(rost,$mtail) $menuSpec]
-    lappend extraMenuDefs(rost,$mtail) [list $menuSpec]
 }
 
 proc ::Jabber::UI::MergeMenuDefs { } {
