@@ -1,0 +1,129 @@
+
+               README --- Coccinella Web Integration
+               -------------------------------------
+
+You can put an url in a web page to launch The Coccinella. Use a link:
+<a href="xmpp:matben@athlon.se">The Coccinella</a>
+This works presently only on Windows, and you need to launch Coccinella
+at least once with administrator privilegies to make it work.
+Note that the jid you supplu in the uri is *not* your own login jid
+but the target address for any action specified.
+The login uses the active profile in the application, not the jid in the uri!
+
+Most recent reference at the time of writing:
+http://www.ietf.org/internet-drafts/draft-saintandre-xmpp-uri-06.txt
+If you use non US-ascii characters make sure the jid is encoded according
+to the reference above.
+
+You can also launch The Coccinella using the switch -uri:
+set argv "-uri xmpp:marilu@l4l.be?..."
+
+The specification does only specify the syntax used, and is considered
+to be generic.
+
+The syntax is: 
+xmppuri   = "xmpp:" [ nodeid "@" ] host [ path-absolute ]
+	    [ "?" xmppquery ] [ "#" fragment ]
+xmppquery = querytype [ *pair ]
+pair      = "&" key "=" value
+
+The supported querytype are: "message" and "groupchat".
+For any querytype you may specify the following key-value pairs:
+
+"ssl"           0|1
+"priority"      integer
+"invisible"     0|1
+"ip"            network domain name or number
+"sasl"          0|1
+
+For the "message" type the following key-value pairs are handled:
+
+"subject"       string
+"body"          string
+"thread"        unique string   this starts a chat with the jid in the uri
+
+For the "groupchat" type the following key-value pairs are handled
+(note that the jid you specify here must be room/nickname):
+
+"password"      string        this is the password for entering the room if necessary
+"xmlns"         "whiteboard"
+
+Some examples of supported uri's (The official specification for this
+is currently floating; changes are likely to appear in the future):
+
+xmpp:matben@athlon.se
+xmpp:marilu@l4l.be?message&subject=hi&body=Hello%20World
+    presents a send message dialog
+
+xmpp:marilu@l4l.be?message&subject=hi&body=Hello%20World&thread=abc123
+    starts a chat
+
+xmpp:mats@conference.l4l.be/matsnick?groupchat
+    enters the specified room using nick matsnick.
+
+xmpp:mats@conference.l4l.be/matsnick?groupchat&xmlns=whiteboard
+    enters the specified room using the whiteboard
+
+
+An example of a web page with links below. Do not use these specifc addresses
+since they point to an arbitrary server and user which is mainly used when I
+debug code.
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1">
+<title>Example for XMPP URI</title>
+</head>
+<body>
+</center>Hello</center>
+
+<p>
+<a href="xmpp:marilu@l4l.be">xmpp:marilu@l4l.be</a>
+
+<p>
+<a href="xmpp:marilu@l4l.be?message&subject=hi&body=Hello%20World">
+xmpp:marilu@l4l.be?message&subject=hi&body=Hello%20World
+</a>
+
+<p>
+<a href="xmpp:marilu@l4l.be?message&subject=hi&body=Hello%20World&thread=abc123">
+xmpp:marilu@l4l.be?message&subject=hi&body=Hello%20World&thread=abc123
+</a>
+
+<p>
+<a href="xmpp:mats@conference.l4l.be/matsnick?groupchat">
+xmpp:mats@conference.l4l.be/matsnick?groupchat
+</a>
+
+<p>
+<a href="xmpp:mats@conference.l4l.be/matsnick?groupchat&xmlns=whiteboard">
+xmpp:mats@conference.l4l.be/matsnick?groupchat&xmlns=whiteboard
+</a>
+
+<p>
+<a href="xmpp:secret@conference.l4l.be/matsnick?groupchat">
+xmpp:secret@conference.l4l.be/matsnick?groupchat
+</a>
+
+<p>
+<a href="xmpp:secret@conference.l4l.be/matsnick?groupchat&xmlns=whiteboard">
+xmpp:secret@conference.l4l.be/matsnick?groupchat&xmlns=whiteboard
+</a>
+
+<p>
+<a href="xmpp:sgi@sgi.se?message&subject=hi&body=Hello%20World&ip=192.169.0.10&invisible=1">
+xmpp:sgi@sgi.se?message&subject=hi&body=Hello%20World&ip=192.169.0.10&invisible=1
+</a>
+
+<p>
+<a href="xmpp:secret@muc.sgi.se/matsnick?groupchat&password=xxxxxx">
+xmpp:secret@muc.sgi.se/matsnick?groupchat&&password=xxxxxx
+</a>
+
+<p>
+<a href="xmpp:mats@muc.sgi.se/matsnick?groupchat">
+xmpp:mats@muc.sgi.se/matsnick?groupchat
+</a>
+
+</body>
+</html>

@@ -1,0 +1,47 @@
+
+Description of various protocols used in the Whiteboard.
+
+--------------------------------------------------------------------------------
+The PUT protocol: Put file from client to server.
+
+    client                         server          comments
+    ------                         ------          --------
+
+      o----------------------------->.             open a socket to the server
+
+   "PUT: file optList" ->
+
+                                <- "TCLWB/1.0 200 Ok"
+                                                   it is not necessary to 
+                                                   return the 'optList'
+
+    fcopy ------------------------> fcopy
+
+--------------------------------------------------------------------------------
+
+The GET protocol: Get file from server to client.
+
+    client                         server          comments
+    ------                         ------          --------
+
+      o----------------------------->.             open a socket to the server
+
+   "GET: file" ->
+
+                                <- "TCLWB/1.0 200 Ok"
+                                <- "key: value key:value ..."
+                                                   it is necessary to return 
+                                                   an 'optList' that 
+                                                   specifies byte size and 
+                                                   MIME type
+
+    fcopy <------------------------ fcopy
+
+--------------------------------------------------------------------------------
+
+
+
+Legend:
+         file      name of the file, only the tail
+         optList   "key: value key:value ..." which resembles the HTTP 
+                   protocol
