@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.33 2004-10-27 14:42:37 matben Exp $
+# $Id: Utils.tcl,v 1.34 2004-10-30 14:44:52 matben Exp $
 
 namespace eval ::Utils:: {
 
@@ -301,49 +301,76 @@ proc ::Utils::SmartClockFormat {secs args} {
     return "$date $time"
 }
 
+proc ::Utils::IsToday {secs} {
+    return [expr ($secs - [clock scan "today 00:00"])/(60*60*24) >= 0 ? 1 : 0]
+}
+
 proc ::Utils::UnixGetWebBrowser { } {
-    global  this prefs
+    global  this prefs env
     
     set browser ""
     if {$this(platform) == "unix"} {
-
-	# Try in order.
-	set found 0
-	set browsers [list $prefs(webBrowser) netscape mozilla konqueror opera]
-	foreach app $browsers {
-	    if {![catch {exec which $app}]} {
-		set prefs(webBrowser) $app
-		set browser $app
-		break
+	if {[info exists env(BROWSER)]} {
+	    if {[llength [auto_execok $env(BROWSER)]] > 0} {
+		set browser $env(BROWSER)
 	    }
 	}
+	set cmd [auto_execok $prefs(webBrowser)]
+	if {$cmd == {}} {
+	    foreach name {firefox galeon konqueror mozilla-firefox \
+	      mozilla-firebird mozilla netscape iexplorer opera} {
+		if {[llength [set e [auto_execok $name]]] > 0} {
+		    set browser [lindex $e 0]
+		    break
+		}
+	    }
+	}
+	set prefs(webBrowser) $browser
     }
     return $browser
 }
 
+proc ::Utils::UnixOpenUrl {url} {
+    global  prefs
+
+    if {$prefs(webBrowser) == ""} {
+	set browser [UnixGetWebBrowser]
+    } else {
+	set browser $prefs(webBrowser)
+    }
+    if {$browser != ""} {
+	if {[catch {eval exec $browser -remote \"openURL($url, new-tab)\"}]} {
+	    if {[catch {exec $browser -remote $url}]} {
+		if {[catch {exec $browser $url &}]} {
+		    set browser ""
+		}
+	    }
+	}
+    } 
+    if {$browser == ""} {
+	tk_messageBox -icon error -type ok -message \
+	  "Couldn't localize a web browser on this system.\
+	  Define a shell variable env(BROWSER) to point to a web browser."
+    }
+}
+
 proc ::Utils::OpenURLInBrowser {url} {
-    global  this prefs
+    global  tcl_platform prefs
     
     ::Debug 2 "::Utils::OpenURLInBrowser url=$url"
     
-    switch $this(platform) {
-	unix {
-	    set browser [::Utils::UnixGetWebBrowser]
-	    if {$browser == ""} {
-		tk_messageBox -icon error -type ok -message \
-		  "Couldn't localize a web browser on this system"
-	    } else {
-		exec $browser $url &
-	    }
+    switch -glob -- $tcl_platform(platform),$tcl_platform(os) {
+	unix,Darwin {
+	    exec open $url
 	}
-	windows {	    
+	unix,* {
+	    UnixOpenUrl $url
+	}
+	windows,* {	    
 	    ::Windows::OpenUrl $url
 	}
-	macintosh {    
+	macintosh,* {    
 	    ::Mac::OpenUrl $url
-	}
-	macosx {
-	    exec open $url
 	}
     }
 }

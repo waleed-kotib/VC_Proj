@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.76 2004-10-29 13:17:15 matben Exp $
+# $Id: GroupChat.tcl,v 1.77 2004-10-30 14:44:52 matben Exp $
 
 package require History
 
@@ -67,6 +67,7 @@ namespace eval ::Jabber::GroupChat:: {
     option add *GroupChat*histHeadBackground   gray60           widgetDefault
     option add *GroupChat*histHeadFont         ""               widgetDefault
     option add *GroupChat*clockFormat          "%H:%M"          widgetDefault
+    option add *GroupChat*clockFormatNotToday  "%b %d %H:%M"    widgetDefault
 
     option add *GroupChat*userForeground       ""               widgetDefault
     option add *GroupChat*userBackground       ""               widgetDefault
@@ -906,7 +907,6 @@ proc ::Jabber::GroupChat::InsertMessage {token from body args} {
     set w       $state(w)
     set wtext   $state(wtext)
     set roomjid $state(roomjid)
-    set clockFormat [option get $w clockFormat {}]
     array set argsArr $args
     
     # Old-style groupchat and browser compatibility layer.
@@ -922,22 +922,27 @@ proc ::Jabber::GroupChat::InsertMessage {token from body args} {
     } else {
 	set whom they
     }    
-    set tm ""
+    set secs ""
     if {[info exists argsArr(-x)]} {
 	set tm [::Jabber::GetAnyDelayElem $argsArr(-x)]
 	if {$tm != ""} {
-	    set tm [clock scan $tm -gmt 1]
+	    set secs [clock scan $tm -gmt 1]
 	}
     }
-    if {$tm == ""} {
-	set tm [clock seconds]
+    if {$secs == ""} {
+	set secs [clock seconds]
     }
-
-    set prefix ""
+    if {[::Utils::IsToday $secs]} {
+	set clockFormat [option get $w clockFormat {}]
+    } else {
+	set clockFormat [option get $w clockFormatNotToday {}]
+    }
     if {$clockFormat != ""} {
-	set theTime [clock format $tm -format $clockFormat]
+	set theTime [clock format $secs -format $clockFormat]
 	set prefix "\[$theTime\] "
-    }        
+    } else {
+	set prefix ""
+    }
     append prefix "<$nick>"
     
     $wtext configure -state normal

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Sounds.tcl,v 1.3 2004-09-28 13:50:17 matben Exp $
+# $Id: Sounds.tcl,v 1.4 2004-10-30 14:44:52 matben Exp $
 
 namespace eval ::Sounds:: {
         
@@ -410,6 +410,16 @@ proc ::Sounds::BuildPrefsPage {wpage} {
 	grid $fr.b${name} -column 1 -row $row -sticky ew -padx 8
 	incr row
     }
+    scale $fr.vol -showvalue 1 -command [namespace current]::VolumeCmd \
+      -from 0 -to 100 -label [mc Volume] -orient horizontal -bd 1
+    grid $fr.vol
+    
+}
+
+proc ::Sounds::VolumeCmd {volume} {
+    
+ 
+    
 }
 
 proc ::Sounds::PlayTmpPrefSound {name} {
@@ -536,6 +546,13 @@ proc ::Sounds::GetAllSets { } {
 	}
     }  
     return $allsets
+}
+
+proc ::Sounds::SetVolume {volume} {
+    
+    
+    
+    
 }
 
 #-------------------------------------------------------------------------------

@@ -39,6 +39,7 @@
 *Listbox.highlightThickness:         2
 *Message.Font:                       Helvetica 10
 *Radiobutton.Font:                   Helvetica 10
+*Scale.Font:                         Helvetica 10
 *Text.background:                    white
 *Text.Font:                          Helvetica 10
 *Text.highlightThickness:            2
