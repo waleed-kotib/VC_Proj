@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: browse.tcl,v 1.15 2003-11-01 13:57:27 matben Exp $
+# $Id: browse.tcl,v 1.16 2003-11-12 08:18:51 matben Exp $
 # 
 #  locals($jid,parent):       the parent of $jid.
 #  locals($jid,parents):      list of all parent jid's,
@@ -236,7 +236,7 @@ proc browse::remove {browseName jid} {
     catch {unset locals($jid,isbrowsed)}
 
     # Evaluate the client callback.
-    uplevel #0 "$locals(cmd) $browseName remove $jid"
+    uplevel #0 $locals(cmd) [list $browseName remove $jid]
 }
     
 # browse::getparents --
@@ -503,11 +503,11 @@ proc browse::havenamespace {browseName jid ns} {
 proc browse::setjid {browseName fromJid subiq args} {
     upvar [namespace current]::${browseName}::locals locals
     
-    Debug 3 "browse::setjid browseName=$browseName, fromJid=$fromJid\
-      subiq='[string range $subiq 0 40]...', args='$args'"
+    Debug 3 "browse::setjid browseName=$browseName, fromJid=$fromJid\n\t\
+      subiq='[string range $subiq 0 80]...', args='$args'"
 
-    set theTag [lindex $subiq 0]
-    array set attr [lindex $subiq 1]
+    set theTag [wrapper::gettag $subiq]
+    array set attrArr [wrapper::getattrlist $subiq]
     array set argsArr $args
     
     # Root parent empty. A bit unclear what to do with it.
@@ -520,9 +520,8 @@ proc browse::setjid {browseName fromJid subiq args} {
         #     <conference xmlns='jabber:iq:browse' name='Junk' type='public'/>
         # </iq>
 	if {[string match *@* $fromJid]} {
-	#if {0} 
+
 	    # Ugly!!!
-	    set parentJid [GetParentJidFromJid $browseName $fromJid]
 	    set parentJid [getparentjid $browseName $fromJid]
 	    set locals($fromJid,parent) $parentJid
 	    if {[info exists locals($parentJid,parents)]} {
@@ -544,17 +543,18 @@ proc browse::setjid {browseName fromJid subiq args} {
     # Docs say that jid is required attribute but... 
     # <conference> and <service> seem to lack jid.
     # If no jid attribute it is probably(?) assumed to be 'fromJid.
-    if {![info exists attr(jid)]} {
+    if {![info exists attrArr(jid)]} {
 	set jid $fromJid
 	set parentJid $locals($jid,parent)
     } else {
-	set jid $attr(jid)
+	set jid $attrArr(jid)
 	if {$fromJid != $jid} {
 	    set parentJid $fromJid
 	} else {
 	    set parentJid $locals($jid,parent)
 	}
     }
+    set locals($fromJid,isbrowsed) 1
     set locals($jid,isbrowsed) 1
     
     # Handle the top jid, and follow recursively for any childs.
@@ -591,20 +591,20 @@ proc browse::setsinglejid {browseName parentJid jid xmllist {browsedjid 0}} {
       jid=$jid, xmllist='$xmllist'"
     
     set category [wrapper::gettag $xmllist]
-    array set attr [wrapper::getattrlist $xmllist]
+    array set attrArr [wrapper::getattrlist $xmllist]
 
     # Check for any 'category' attribute introduced in the 1.2 rev. of JEP-0011.
-    if {[info exists attr(category)]} {
-    	set category $attr(category)
+    if {[info exists attrArr(category)]} {
+    	set category $attrArr(category)
     }
     
     # If the 'jid' is empty we get it from our attributes!
     if {[string length $jid] == 0} {
-	set jid $attr(jid)
+	set jid $attrArr(jid)
     }
     
     # First, is this a "set" or a "remove" type?
-    if {[info exists attr(type)] && [string equal $attr(type) "remove"]} {
+    if {[info exists attrArr(type)] && [string equal $attrArr(type) "remove"]} {
 	if {[string equal $category "user"]} {
 	    
 	    # Be sure to update the room's list of participants.
@@ -635,8 +635,8 @@ proc browse::setsinglejid {browseName parentJid jid xmllist {browsedjid 0}} {
 	    lappend locals($parentJid,childs) $jid
 	}
 	
-	if {[info exists attr(type)]} {
-	    set jidtype $category/$attr(type)
+	if {[info exists attrArr(type)]} {
+	    set jidtype $category/$attrArr(type)
 	    set locals($jid,type) $jidtype
 	    lappend locals($jidtype,typelist) $jid
 	    lappend locals(alltypes) $jidtype
@@ -653,8 +653,8 @@ proc browse::setsinglejid {browseName parentJid jid xmllist {browsedjid 0}} {
 		if {[string match *@* $jid]} {
 		    
 		    # This must be a room. Cache its name.
-		    if {[info exists attr(name)]} {
-			set locals($jid,name) $attr(name)
+		    if {[info exists attrArr(name)]} {
+			set locals($jid,name) $attrArr(name)
 		    }
 		} else {
 		
@@ -668,8 +668,8 @@ proc browse::setsinglejid {browseName parentJid jid xmllist {browsedjid 0}} {
 	    
 		# If with 'user' tag in conferencing, keep internal table that
 		# maps the 'room@server/hexname' to nickname.
-		if {[info exists attr(name)]} {
-		    set locals($jid,name) $attr(name)
+		if {[info exists attrArr(name)]} {
+		    set locals($jid,name) $attrArr(name)
 		}
 		
 		# Keep list of all 'user'«s in a room. The 'parentJid' must
@@ -688,13 +688,13 @@ proc browse::setsinglejid {browseName parentJid jid xmllist {browsedjid 0}} {
     # Loop through the children if any. Defines a parentship.
     # Only exception is a namespace definition <ns/>.
     foreach child [wrapper::getchildren $xmllist] {
-	if {[string equal [lindex $child 0] "ns"]} {
+	if {[string equal [wrapper::gettag $child] "ns"]} {
 	    
 	    # Cache any namespace declarations.
 	    if {![info exists locals($jid,ns)]} {
 		set locals($jid,ns) {}
 	    }
-	    set ns [lindex $child 3]
+	    set ns [wrapper::getcdata $child]
 	    lappend locals($jid,ns) $ns
 	    set locals($jid,ns) [lsort -unique $locals($jid,ns)]
 	    if {![info exists locals(ns,$ns)]} {
@@ -765,14 +765,16 @@ proc browse::errorcallback {browseName jid errlist args} {
 
 # browse::clear --
 #
-#       Empties everything cached internally for the specified jid and all
-#       its children.
+#       Empties everything cached internally for the specified jid (and all
+#       its children ?).
+#       Problem since icq.jabber.se child of icq.jabber.se/registered (?!)
 #       It must be failsafe in case of missing browse elements.
 
 proc browse::clear {browseName {jid {}}} {
     
     upvar [namespace current]::${browseName}::locals locals
     
+    Debug 3 "browse::clear browse::clear $jid"
     if {[string length $jid]} {
 	ClearJid $browseName $jid
     } else {
@@ -784,7 +786,8 @@ proc browse::ClearJid {browseName jid} {
 
     upvar [namespace current]::${browseName}::locals locals
 
-    if {[info exists locals($jid,childs)]} {
+    # Can be problems with this (ICQ)
+    if {0 && [info exists locals($jid,childs)]} {
 	foreach child $locals($jid,childs) {
 	    ClearJid $browseName $child
 	}
