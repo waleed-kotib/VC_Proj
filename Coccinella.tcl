@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.70 2004-07-26 12:50:37 matben Exp $
+# $Id: Coccinella.tcl,v 1.71 2004-07-27 14:25:19 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -28,14 +28,17 @@ tk appname coccinella
 
 set state(launchSecs) [clock seconds]
 
+# MacOSX adds a -psn_* switch.
+set argv [lsearch -all -not -inline -regexp $argv {-psn_\d*}]
+
 ### Command-line option "-privaria" indicates whether we're
 ### part of Ed Suominen's PRIVARIA distribution
 set privariaFlag 0
-if { [set k [lsearch $argv -privaria]] >= 0 } {
+if {[lsearch $argv -privaria] >= 0 } {
     set privariaFlag 1
-    set argv [concat [lrange $argv 0 [expr {$k-1}]] [lrange $argv [expr {$k+1}] end]]
-    incr argc -1
+    set argv [lsearch -all -not -inline $argv -privaria]
 }
+set argc [llength $argv]
 
 # We use a variable 'this(platform)' that is more convenient for MacOS X.
 switch -- $tcl_platform(platform) {
@@ -539,6 +542,7 @@ component::load
 
 # Parse any command line options.
 if {$argc > 0} {
+    ::Debug 2 "argv=$argv"
     ::PreferencesUtils::ParseCommandLineOptions $argc $argv
 }
 

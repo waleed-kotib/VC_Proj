@@ -5,6 +5,7 @@ component::attempt AutoUpdate   [file join $dir AutoUpdate.tcl]  ::AutoUpdate::I
 component::attempt BuddyPounce  [file join $dir BuddyPounce.tcl] ::BuddyPounce::Init
 component::attempt ICQ          [file join $dir ICQ.tcl]         ::ICQ::Init
 component::attempt ImageMagic   [file join $dir ImageMagic.tcl]  ::ImageMagic::Init
+component::attempt ParseURI     [file join $dir ParseURI.tcl]    ::ParseURI::Init
 component::attempt SlideShow    [file join $dir SlideShow.tcl]   ::SlideShow::Load  
 component::attempt Sounds       [file join $dir Sounds.tcl]      ::Sounds::Load    
 component::attempt Speech       [file join $dir Speech.tcl]      ::Speech::Load    

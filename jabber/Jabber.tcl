@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.97 2004-07-26 12:50:37 matben Exp $
+# $Id: Jabber.tcl,v 1.98 2004-07-27 14:25:19 matben Exp $
 
 package provide Jabber 1.0
 
@@ -1958,7 +1958,7 @@ proc ::Jabber::LoginLogout { } {
     if {[::Jabber::IsConnected]} {
 	::Jabber::DoCloseClientConnection
     } else {
-	::Jabber::Login::Login
+	::Jabber::Login::Dlg
     }    
 }
 
