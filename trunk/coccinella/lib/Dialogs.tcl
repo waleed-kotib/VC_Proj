@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.26 2004-01-01 12:08:22 matben Exp $
+# $Id: Dialogs.tcl,v 1.27 2004-01-02 14:41:58 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -913,9 +913,8 @@ proc ::Dialogs::AboutQuickTimeTcl { } {
     if {[winfo exists $w]} {
 	return
     }
-    toplevel $w
+    ::UI::Toplevel $w -macstyle documentProc
     if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
 	wm transient $w
     } else {
 

@@ -1,6 +1,6 @@
 #  Copyright (c) 2002  Mats Bengtsson
 #
-# $Id: fontselection.tcl,v 1.3 2003-12-27 12:07:33 matben Exp $
+# $Id: fontselection.tcl,v 1.4 2004-01-02 14:41:58 matben Exp $
 
 package require combobox
 
@@ -39,7 +39,7 @@ proc ::fontselection::fontselection {w args} {
     }
     toplevel $w
     if {[string equal $tcl_platform(platform) "macintosh"]} {
-	eval $::macWindowStyle $w documentProc
+	::tk::unsupported::MacWindowStyle style $w documentProc
     }
     
     wm title $w {Select Font}

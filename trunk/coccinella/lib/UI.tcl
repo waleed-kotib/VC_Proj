@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.40 2004-01-01 12:08:22 matben Exp $
+# $Id: UI.tcl,v 1.41 2004-01-02 14:41:58 matben Exp $
 
 package require entrycomp
 
@@ -211,6 +211,12 @@ proc ::UI::GetScreenSize { } {
 # UI::Toplevel --
 # 
 #       Wrapper for making a toplevel window.
+#       
+#       
+#       -macstyle:
+# documentProc, dBoxProc, plainDBox, altDBoxProc, movableDBoxProc, 
+# zoomDocProc, rDocProc, floatProc, floatZoomProc, floatSideProc, 
+# or floatSideZoomProc
 
 proc ::UI::Toplevel {w args} {
     global  this osprefs
@@ -224,12 +230,7 @@ proc ::UI::Toplevel {w args} {
 	lappend topopts -class $argsArr(-class)
     }
     eval {toplevel $w} $topopts
-    
-    if {[string match "mac*" $this(platform)] && \
-      [info exists argsArr(-macstyle)]} {
-	eval $::macWindowStyle $w $argsArr(-macstyle)
-    }
-    
+        
     # We direct all close events through DoCloseWindow so things can
     # be handled from there.
     wm protocol $w WM_DELETE_WINDOW [list ::UI::DoCloseWindow $w]
@@ -244,7 +245,8 @@ proc ::UI::Toplevel {w args} {
 		    }
 		}
 		-macstyle {
-		    eval $::macWindowStyle $w $argsArr(-macstyle)
+		    ::tk::unsupported::MacWindowStyle style $w  \
+		      $argsArr(-macstyle)
 		}
 	    }
 	}
