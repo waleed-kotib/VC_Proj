@@ -4,6 +4,11 @@ Whiteboard CHANGES
 
 Not to mention all bugfixes and rewrites.
 
+Coccinella-0.95.1 (040930): 	Short summary --
+
+	- SASL authentication
+
+
 Coccinella-0.95.0 (040904): 	Short summary --
 
         - tabbed chat dialog
