@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.22 2005-01-31 14:06:55 matben Exp $
+# $Id: JPrefs.tcl,v 1.23 2005-02-15 09:07:30 matben Exp $
 
 package provide JPrefs 1.0
 
@@ -237,23 +237,10 @@ proc ::JPrefs::UpdateAutoAwaySettings { } {
 	return
     }
     
-    array set oldopts [$jstate(jlib) config]
-    set reconfig 0
-    foreach name {autoaway xautoaway awaymin xawaymin} {
-	if {$oldopts(-$name) != $jprefs($name)} {
-	    set reconfig 1
-	    break
-	}
-    }
-    if {$reconfig} {
-	set opts {}
-	if {$jprefs(autoaway) || $jprefs(xautoaway)} {
-	    foreach name {autoaway xautoaway awaymin xawaymin awaymsg xawaymsg} {
-		lappend opts -$name $jprefs($name)
-	    }
-	}
-	eval {$jstate(jlib) config} $opts
-    }
+    set opts {}
+    lappend opts -autoawaymins $jprefs(awaymin) -awaymsg $jprefs(awaymsg)
+    lappend opts -xautoawaymins $jprefs(xawaymin) -xawaymsg $jprefs(xawaymsg)
+    eval {$jstate(jlib) config} $opts
 }
 
 proc ::JPrefs::BuildAppearancePage {page} {
