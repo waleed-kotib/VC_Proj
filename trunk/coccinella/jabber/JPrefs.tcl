@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.19 2004-12-10 10:01:42 matben Exp $
+# $Id: JPrefs.tcl,v 1.20 2004-12-20 11:15:02 matben Exp $
 
 package provide JPrefs 1.0
 
@@ -41,6 +41,9 @@ proc ::JPrefs::InitPrefsHook { } {
     #set jprefs(serviceMethod) "browse"
     set jprefs(serviceMethod) "disco"
     set jprefs(autoLogin) 0
+    
+    # List of additional servers to automatically disco.
+    set jprefs(disco,autoServers) {}
     
     # The rosters background image is partly controlled by option database.
     set jprefs(rost,useBgImage)     1
@@ -91,6 +94,7 @@ proc ::JPrefs::InitPrefsHook { } {
       [list ::Jabber::jprefs(rost,bgImagePath) jprefs_rost_bgImagePath  $jprefs(rost,bgImagePath)]  \
       [list ::Jabber::jprefs(serviceMethod)    jprefs_serviceMethod2    $jprefs(serviceMethod)]  \
       [list ::Jabber::jprefs(autoLogin)        jprefs_autoLogin         $jprefs(autoLogin)]  \
+      [list ::Jabber::jprefs(disco,autoServers)  jprefs_disco_autoServers  $jprefs(disco,autoServers)]  \
       ]
     
     if {$jprefs(chatFont) != ""} {

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.82 2004-12-13 14:40:46 matben Exp $
+# $Id: UI.tcl,v 1.83 2004-12-20 11:15:03 matben Exp $
 
 package require entrycomp
 package require alertbox
@@ -158,6 +158,7 @@ proc ::UI::InitDlgs { } {
 	jwbinbox        .jwbinbox
 	jprivacy        .jprivacy
 	jdirpres        .jdirpres
+	jdisaddserv     .jdisaddserv
     }
 }
 

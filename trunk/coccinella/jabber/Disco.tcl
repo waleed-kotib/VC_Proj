@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.44 2004-12-13 13:39:17 matben Exp $
+# $Id: Disco.tcl,v 1.45 2004-12-20 11:15:02 matben Exp $
 
 package provide Disco 1.0
 
@@ -67,24 +67,25 @@ namespace eval ::Disco:: {
 	mEnterRoom     room      {
 	    ::GroupChat::EnterOrCreate enter -roomjid $jid -autoget 1
 	}
-	mCreateRoom    conference {::GroupChat::EnterOrCreate create \
+	mCreateRoom       conference {::GroupChat::EnterOrCreate create \
 	  -server $jid}
-	separator      {}        {}
-	mInfo          jid       {::Disco::InfoCmd $jid}
+	separator         {}        {}
+	mInfo             jid       {::Disco::InfoCmd $jid}
 	mLastLogin/Activity jid  {::Jabber::GetLast $jid}
-	mLocalTime     jid       {::Jabber::GetTime $jid}
-	mvCard         jid       {::VCard::Fetch other $jid}
-	mVersion       jid       {::Jabber::GetVersion $jid}
-	separator      {}        {}
-	mSearch        search    {
+	mLocalTime        jid       {::Jabber::GetTime $jid}
+	mvCard            jid       {::VCard::Fetch other $jid}
+	mVersion          jid       {::Jabber::GetVersion $jid}
+	separator         {}        {}
+	mSearch           search    {
 	    ::Search::Build -server $jid -autoget 1
 	}
-	mRegister      register  {
+	mRegister         register  {
 	    ::GenRegister::NewDlg -server $jid -autoget 1
 	}
-	mUnregister    register  {::Register::Remove $jid}
-	separator      {}        {}
-	mRefresh       jid       {::Disco::Refresh $jid}
+	mUnregister       register  {::Register::Remove $jid}
+	separator         {}        {}
+	mRefresh          jid       {::Disco::Refresh $jid}
+	mAddServer        {}        {::Disco::AddServerDlg}
     }
 
     variable dlguid 0
@@ -128,8 +129,7 @@ proc ::Disco::LoginHook { } {
     #
     # We disco servers jid 'items+info', and disco its childrens 'info'.
     if {[string equal $jprefs(serviceMethod) "disco"]} {
-	GetItems $jserver(this)
-	GetInfo  $jserver(this)
+	DiscoServer $jserver(this)
     }
 }
 
@@ -151,6 +151,12 @@ proc ::Disco::HaveTree { } {
 	}
     }    
     return 0
+}
+
+proc ::Disco::DiscoServer {server} {
+    
+    GetItems $server
+    GetInfo  $server
 }
 
 # Disco::GetInfo, GetItems --
@@ -212,6 +218,7 @@ proc ::Disco::ItemsCB {disconame type from subiq args} {
     upvar ::Jabber::jprefs jprefs
     
     ::Debug 2 "::Disco::ItemsCB type=$type, from=$from"
+    
     set from [jlib::jidmap $from]
     
     switch -- $type {
@@ -253,10 +260,14 @@ proc ::Disco::ItemsCB {disconame type from subiq args} {
 		# We disco servers jid 'items+info', and disco its childrens 'info'.
 		# 
 		# Perhaps we should discover depending on items category?
-		if {[jlib::jidequal $from $jserver(this)]} {
+		#if {[jlib::jidequal $from $jserver(this)]}
+		if {[llength $v] == 1} {
 		    GetInfo $cjid
 		}		
 	    }	    
+	    if {[jlib::jidequal $from $jserver(this)]} {
+		AutoDiscoServers
+	    }
 	}
     }
     
@@ -307,6 +318,7 @@ proc ::Disco::InfoCB {disconame type from subiq args} {
     # and general (discoInfoHook) hooks.
     set ct [split $cattype /]
     set hookName [string totitle [lindex $ct 0]][string totitle [lindex $ct 1]]
+    
     eval {::hooks::run discoInfo${hookName}Hook $type $from $subiq} $args
     eval {::hooks::run discoInfoHook $type $from $subiq} $args
 }
@@ -663,6 +675,9 @@ proc ::Disco::Popup {w v x y} {
 			set state normal
 		    }
 		}
+	    }
+	    "" {
+		set state normal
 	    }
 	}
 	if {[string equal $state "normal"]} {
@@ -1067,6 +1082,101 @@ proc ::Disco::InfoResultCB {type jid subiq args} {
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 2
 	
     wm resizable $w 0 0	
+}
+
+
+proc ::Disco::AutoDiscoServers { } {
+    upvar ::Jabber::jprefs jprefs
+    
+    foreach server $jprefs(disco,autoServers) {
+	DiscoServer $server
+    }
+}
+
+proc ::Disco::AddServerDlg { } {
+    global  wDlgs
+    variable addservervar ""
+    variable permdiscovar 0
+    
+    set w $wDlgs(jdisaddserv)
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
+      -macclass {document closeBox}
+    wm title $w [mc {Add Disco Server}]
+    set fontS [option get . fontSmall {}]
+    
+    # Global frame.
+    set wall $w.frall
+    frame $wall -borderwidth 1 -relief raised
+    pack  $wall -fill both -expand 1
+    
+    message $wall.msg -text \
+      "Discover another server for groupchat rooms and other services." \
+      -anchor w -justify left -width 260
+    pack $wall.msg -side top
+    
+    set wfr $wall.fr
+    frame $wfr
+    pack  $wfr -side top -fill x -padx 10 -pady 2
+    label $wfr.l -text "[mc Server]:"
+    entry $wfr.e -textvariable [namespace current]::addservervar
+    checkbutton $wfr.ch -text " Add server permanently" \
+      -variable [namespace current]::permdiscovar
+
+    grid $wfr.l $wfr.e  -pady 2
+    grid x      $wfr.ch -pady 2 -sticky w
+    grid $wfr.l -sticky e
+    grid $wfr.e -sticky ew
+    
+    set wfr2 $wall.fr2
+    frame $wfr2
+    pack  $wfr2 -side top -fill x -padx 10 -pady 2
+    label  $wfr2.l -text "Remove all servers"
+    button $wfr2.b -text [mc Remove] -font $fontS \
+      -command [namespace current]::AddServerNone
+    pack $wfr2.b $wfr2.l -side right -padx 4
+    
+    set frbot [frame $wall.frbot -borderwidth 0]
+    pack [button $frbot.btabtokdd -text [mc Add] \
+      -command [list [namespace current]::AddServerDo $w]]  \
+      -side right -padx 5 -pady 4
+    pack [button $frbot.btcancel -text [mc Close] \
+      -command [list destroy $w]]  \
+      -side right -padx 5 -pady 4
+    pack $frbot -side top -fill both -expand 1 -padx 8 -pady 2
+	
+    wm resizable $w 0 0
+    
+    # Grab and focus.
+    set oldFocus [focus]
+    focus $wall.fr.e
+    catch {grab $w}
+    
+    # Wait here for a button press and window to be destroyed.
+    tkwait window $w
+    
+    catch {grab release $w}
+    catch {focus $oldFocus}
+}
+
+proc ::Disco::AddServerNone { } {
+    upvar ::Jabber::jprefs jprefs
+    
+    set jprefs(disco,autoServers) {}
+}
+
+proc ::Disco::AddServerDo {w} {
+    upvar ::Jabber::jprefs jprefs
+    variable addservervar
+    variable permdiscovar
+    
+    destroy $w
+    if {$addservervar != ""} {
+	DiscoServer $addservervar
+	if {$permdiscovar} {
+	    set jprefs(disco,autoServers) [lsort -unique \
+	      [concat $addservervar [list $jprefs(disco,autoServers)]]]
+	}
+    }
 }
 
 if {0} {
