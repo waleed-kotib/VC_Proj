@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.54 2004-12-02 08:22:34 matben Exp $
+# $Id: NewMsg.tcl,v 1.55 2004-12-08 08:21:19 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -59,7 +59,8 @@ namespace eval ::NewMsg:: {
     option add *JMultiAddress.entry2Foreground  black       50
     option add *JMultiAddress.entry3Background  white       50
     option add *JMultiAddress.entry4Background  white       50
-    option add *JMultiAddress.popupBackground   #adadad     50
+    option add *JMultiAddress.popup1Background  #adadad     50
+    option add *JMultiAddress.popup2Background  #dedede     50
 
     switch -- $this(platform) {
 	windows {
@@ -440,7 +441,7 @@ proc ::NewMsg::NewAddrLine {w wfr n} {
     set fg2   [option get $wfr entry2Foreground {}]
     set bg3   [option get $wfr entry3Background {}]
     set bg4   [option get $wfr entry4Background {}]
-    set bgpop [option get $wfr popupBackground {}]
+    set bgpop [option get $wfr popup2Background {}]
     
     set locals(wpopupbase) ._[string range $wDlgs(jsendmsg) 1 end]_trpt
     
@@ -486,10 +487,11 @@ proc ::NewMsg::FillAddrLine {w wfr n} {
     variable transportDefs
     
     set bg1   [option get $wfr entry1Background {}]
+    set bgpop [option get $wfr popup1Background {}]
 
     $wfr.f${n}.trpt configure -disabledbackground $bg1
     # D = -bg #adadad
-    $wfr.f${n}.la configure -image $locals(popupbt)
+    $wfr.f${n}.la configure -image $locals(popupbt) -bg $bgpop
     $wfr.addr${n} configure -state normal
     
     bind $wfr.f${n}.la <Button-1> [list ::NewMsg::TrptPopup $w $n %X %Y]
@@ -730,7 +732,7 @@ proc ::NewMsg::TrptPopup {w n x y} {
 	set ind 0
     }
     
-    # For some reason does we never get a ButtonRelease event here.
+    # For some reason we do never get a ButtonRelease event here.
     if {![string equal $this(platform) "unix"]} {
 	$wfr.f${n}.la configure -image $locals(popupbtpush)
     }

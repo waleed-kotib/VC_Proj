@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: HttpTrpt.tcl,v 1.2 2004-12-06 15:26:56 matben Exp $
+# $Id: HttpTrpt.tcl,v 1.3 2004-12-08 08:21:20 matben Exp $
 
 package require httpex
 package require timing
@@ -84,9 +84,9 @@ proc ::HttpTrpt::Get {url fileName args} {
 	  -progress [list [namespace current]::Progress $token] \
 	  -command  [list [namespace current]::Cmd $token]
     } httptoken]} {
-	set errmsg [mc httptrpterror $state(fileTail) $errmsg]
+	set errmsg [mc httptrpterror $state(fileTail) $httptoken]
 	if {$state(-command) != {}} {
- 	    uplevel #0 $state(-command) [list $token error $errstr]
+ 	    uplevel #0 $state(-command) [list $token error $errmsg]
 	}
 	if {!$state(-silent)} {
 	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
@@ -145,7 +145,7 @@ proc ::HttpTrpt::ProgressWindow {token total current} {
 	if {$state(-dialog) && ![winfo exists $w]} {
 	    set str "[mc {Writing file}]: $state(fileTail)"
 	    ::ProgressWindow::ProgressWindow $w -text $str \
-	      -cancelcmd [list [namespace current]::Cancel $token]
+	      -cancelcmd [list [namespace current]::CancelBt $token]
 	    set needupdate 1
 	}
 	if {$state(-progressmessage) != {}} {
@@ -184,13 +184,12 @@ proc ::HttpTrpt::ProgressWindow {token total current} {
 
 # HttpTrpt::Cmd --
 # 
-#       Callback for the httpex package.
+#       Callback for the httpex package. Only when we are final.
 
 proc ::HttpTrpt::Cmd {token httptoken} {
     variable $token
     upvar 0 $token state
 
-    #puts "::HttpTrpt::Cmd"
     set state(httptoken) $httptoken
 
     # Don't bother with intermediate callbacks.
@@ -205,7 +204,6 @@ proc ::HttpTrpt::Cmd {token httptoken} {
     set retstatus $status
     set msg ""
     set show 1
-    #puts "\t status=$status, ncode=$ncode, httperr=$httperr"
 
     switch -- $status {
 	timeout {
@@ -252,21 +250,26 @@ proc ::HttpTrpt::Cmd {token httptoken} {
     Free $token
 }
 
-proc ::HttpTrpt::Cancel {token} {
+proc ::HttpTrpt::Reset {token} {
     variable $token
     upvar 0 $token state
     
-    if {$state(-command) != {}} {
-	uplevel #0 $state(-command) [list $token reset]
-    }
+    #if {$state(-command) != {}} {
+#	uplevel #0 $state(-command) [list $token reset]
+    #}
+    
+    
+    # Beware, this triggers the callback command!
+    # The only thing we need to do here is to delete the file.
+    set fileName $state(fileName)
     ::httpex::reset $state(httptoken)
-    catch {file delete $state(fileName)}
-    Free $token
+    catch {file delete $fileName}
+    #Free $token
 }
 
-proc ::HttpTrpt::Reset {token} {
-    
-    Cancel $token
+proc ::HttpTrpt::CancelBt {token} {
+
+    Reset $token
 }
 
 proc ::HttpTrpt::Free {token} {
@@ -274,7 +277,9 @@ proc ::HttpTrpt::Free {token} {
     upvar 0 $token state
     
     #puts "::HttpTrpt::Free"
-    catch {destroy $state(w)}
+    if {$state(-dialog)} {
+	catch {destroy $state(w)}
+    }
     ::timing::free $state(timetok)
     ::httpex::cleanup $state(httptoken)
     catch {close $state(fd)}
