@@ -4,13 +4,12 @@
 #       window. The 'updatePerc' is a number between 0 and 100.
 #       The 'cancelCmd' should contain the fully qualified command for the 
 #       cancel operation.
-#       If we have the add on "Progressbar", 'prefs(Progressbar)' is true (1).
 #      
 #  Copyright (c) 2000-2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ProgressWindow.tcl,v 1.5 2003-12-15 08:20:53 matben Exp $
+# $Id: ProgressWindow.tcl,v 1.6 2003-12-23 14:41:01 matben Exp $
 # 
 #-------------------------------------------------------------------------------
 #
@@ -40,9 +39,6 @@
 
 package provide ProgressWindow 1.0
 
-if {![info exists prefs(Progressbar)]} {
-    set prefs(Progressbar) 0
-}
 
 namespace eval ::ProgressWindow:: {
     global  tcl_platform
@@ -53,6 +49,12 @@ namespace eval ::ProgressWindow:: {
     variable widgetCommands
     variable this
     variable macWindowStyle
+    
+    if {[catch {package require progressbar}]} {
+	set this(haveprogressbar) 0
+    } else {
+	set this(haveprogressbar) 1
+    }
     
     # We use a variable 'this(platform)' that is more convenient for MacOS X.
     switch -- $tcl_platform(platform) {
@@ -138,7 +140,7 @@ namespace eval ::ProgressWindow:: {
 #       The widget path or an error.
 
 proc ::ProgressWindow::ProgressWindow {w args} {
-    global  tcl_platform prefs
+    global  tcl_platform
     
     variable widgetOptions
     variable widgetCommands
@@ -270,8 +272,9 @@ proc ::ProgressWindow::WidgetProc {w command args} {
 #       w       the widget path (toplevel).
 
 proc ::ProgressWindow::Build {w} {
-    global  tcl_platform prefs
+    global  tcl_platform
     
+    variable this
     variable dims
     variable debugLevel
     upvar ::ProgressWindow::${w}::options options
@@ -319,7 +322,7 @@ proc ::ProgressWindow::Build {w} {
     }
     
     # Either use the "Progressbar" package or make our own.
-    if {$prefs(Progressbar)} {
+    if {$this(haveprogressbar)} {
 	set wpgb [::progressbar::progressbar $widgets(canvas).pr   \
 	  -variable ::ProgressWindow::${w}::percent \
 	  -width $prwidth -percent $options(-percent)]
@@ -341,7 +344,7 @@ proc ::ProgressWindow::Build {w} {
     }
     
     # Change to flat when no focus, to 3d when focus. Standard MacOS.
-    if {$prefs(Progressbar)} {
+    if {$this(haveprogressbar)} {
 	bind $w <FocusOut> [list ::ProgressWindow::PBFocusOut $w $wpgb]
 	bind $w <FocusIn> [list ::ProgressWindow::PBFocusIn $w $wpgb]
     } else {
@@ -365,8 +368,8 @@ proc ::ProgressWindow::Build {w} {
 #       Here we just configures an existing progress window.
 
 proc ::ProgressWindow::Configure {w args} {
-    global  prefs
 
+    variable this
     variable dims
     variable widgetOptions
     variable debugLevel
@@ -431,7 +434,7 @@ proc ::ProgressWindow::Configure {w args} {
 		set perc $opts(-percent)
 		
 		# Only update progress bar
-		if {$prefs(Progressbar)} {
+		if {$this(haveprogressbar)} {
 		    set ::ProgressWindow::${w}::percent [expr int($perc)]
 		} else {
 		    $widgets(canvas) coords progbar $dims(xnw) $dims(ynw)   \
@@ -508,11 +511,11 @@ proc ::ProgressWindow::Cleanup {w} {
 }
 
 proc ::ProgressWindow::PBFocusIn {w wpgb} {
-    global  prefs
+    variable this
     
     upvar ::ProgressWindow::${w}::widgets widgets
 
-    if {$prefs(Progressbar)} {
+    if {$this(haveprogressbar)} {
 	$wpgb configure -shape 3d -color @blue0
     } else {
 	$widgets(canvas) itemconfigure progbar -fill #424242
@@ -523,11 +526,11 @@ proc ::ProgressWindow::PBFocusIn {w wpgb} {
 }
 
 proc ::ProgressWindow::PBFocusOut {w wpgb} {
-    global  prefs
+    variable this
     
     upvar ::ProgressWindow::${w}::widgets widgets
 
-    if {$prefs(Progressbar)} {
+    if {$this(haveprogressbar)} {
 	$wpgb configure -shape flat -color #9C9CFF
     } else {
 	$widgets(canvas) itemconfigure progbar -fill #9C9CFF

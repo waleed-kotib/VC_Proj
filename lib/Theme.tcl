@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: Theme.tcl,v 1.4 2003-12-22 15:04:58 matben Exp $
+# $Id: Theme.tcl,v 1.5 2003-12-23 14:41:01 matben Exp $
 
 package provide Theme 1.0
 
@@ -49,7 +49,6 @@ proc ::Theme::SavePrefsFile { } {
 
 proc ::Theme::PreLoadImages { } {
     
-    puts "::Theme::PreLoadImages: '[option get . themePreloadImages {}]'"
     foreach name [option get . themePreloadImages {}] {
 	::Theme::GetImage $name -keepname 1
     }

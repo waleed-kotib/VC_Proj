@@ -7,11 +7,19 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Sounds.tcl,v 1.7 2003-12-15 08:20:53 matben Exp $
+# $Id: Sounds.tcl,v 1.8 2003-12-23 14:41:01 matben Exp $
 
 package provide Sounds 1.0
 
 namespace eval ::Sounds:: {
+    
+    # Add all event hooks.
+    hooks::add quitAppHook ::Sounds::Free 80
+    hooks::add newMessageHook          [list ::Sounds::Event newmsg]
+    hooks::add newChatMessageHook      [list ::Sounds::Event newmsg]
+    hooks::add newGroupChatMessageHook [list ::Sounds::Event newmsg]
+    hooks::add loginHook               [list ::Sounds::Event connected]
+    hooks::add presenceHook            ::Sounds::Presence
     
     variable allSounds
     variable allSoundFiles
@@ -106,6 +114,38 @@ proc ::Sounds::PlayWhenIdle {snd} {
 	after idle [list ::Sounds::Play $snd]
     }    
 }
+
+proc ::Sounds::Event {snd args} {
+    
+    ::Sounds::PlayWhenIdle $snd
+}
+
+# Sounds::Presence --
+#
+#       Makes an alert sound corresponding to the jid's presence status.
+#
+# Arguments:
+#       jid  
+#       presence    "available", "unavailable", or "unsubscribed"
+#       args        list of '-key value' pairs of presence attributes.
+#       
+# Results:
+#       roster tree updated.
+
+proc ::Sounds::Presence {jid presence args} {
+    
+    array set argsArr $args
+    
+    # Alert sounds.
+    if {[info exists argsArr(-show)] && [string equal $argsArr(-show) "chat"]} {
+	::Sounds::PlayWhenIdle statchange
+    } elseif {[string equal $presence "available"]} {
+	::Sounds::PlayWhenIdle online
+    } elseif {[string equal $presence "unavailable"]} {
+	::Sounds::PlayWhenIdle offline
+    }    
+}
+
 
 proc ::Sounds::Free { } {
     

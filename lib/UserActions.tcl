@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UserActions.tcl,v 1.27 2003-12-22 15:04:58 matben Exp $
+# $Id: UserActions.tcl,v 1.28 2003-12-23 14:41:01 matben Exp $
 
 namespace eval ::UserActions:: {
     
@@ -233,10 +233,6 @@ proc ::UserActions::DoQuit {args} {
     
     # If we used 'Edit/Revert To/Application Defaults' be sure to reset...
     set prefs(firstLaunch) 0
-            
-    # Delete widgets with sounds.
-    ::Sounds::Free
-    ::Dialogs::Free
     
     # Get dialog window geometries.
     set prefs(winGeom) {}

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.28 2003-12-23 08:54:53 matben Exp $
+# $Id: MailBox.tcl,v 1.29 2003-12-23 14:41:01 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -257,7 +257,8 @@ proc ::Jabber::MailBox::Build {args} {
     grid columnconfigure $wfrmsg 0 -weight 1
     grid rowconfigure $wfrmsg 0 -weight 1
     
-    set imageHorizontal [option get $frmid imageHorizontal {}]
+    set imageHorizontal  \
+      [::Theme::GetImage [option get $frmid imageHorizontal {}]]
     set sashHBackground [option get $frmid sashHBackground {}]
 
     set paneopts [list -orient vertical -limit 0.0]
@@ -504,9 +505,6 @@ proc ::Jabber::MailBox::GotMsg {bodytxt args} {
     # Always cache it in inbox.
     ::Jabber::MailBox::PutMessageInInbox $messageList
         
-    # Alert sound?
-    ::Sounds::PlayWhenIdle newmsg
-
     if {$jprefs(showMsgNewWin) && !$isWhiteboard} {
 	::Jabber::GotMsg::GotMsg $uidmsg
 	::Jabber::MailBox::MarkMsgAsRead $uidmsg

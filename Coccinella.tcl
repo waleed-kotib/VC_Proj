@@ -15,38 +15,12 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.25 2003-12-22 15:04:57 matben Exp $
-
-#--Descriptions of some central variables and their usage-----------------------
-#            
-#  The ip number is central to all administration of connections.
-#  Each connection has a unique ip number from which all other necessary
-#  variables are looked up using arrays:
-#  
-#  ipNumTo(name,$ip):    maps ip number to the specific domain name.
-#  
-#  ipName2Num:       inverse of above.
-#  
-#  ipNumTo(socket,$ip):  maps ip number to the specific socket that is used for 
-#                    sending canvas commands and other commands. It is the 
-#                    socket opened by the client, except in the case this is 
-#                    the central server in a centralized network.
-#                    
-#  ipNumTo(servSocket,$ip): maps ip number to the server side socket opened from
-#                    a remote client.
-#                                      
-#  ipNumTo(servPort,$ip): maps ip number to the specific remote server port number.
-#  
-#  ipNumTo(user,$ip):    maps ip number to the user name.
-#  
-#  ipNumTo(connectTime,$ip):    maps ip number to time when connected.
-#  
-#-------------------------------------------------------------------------------
+# $Id: Coccinella.tcl,v 1.26 2003-12-23 14:41:01 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
 
-# TclKit requires this, can't harm.
+# We want 8.4 at least.
 if {[catch {package require Tk 8.4}]} {
     return -code error "We need Tk 8.4 or later here. Run Wish!"
 }
@@ -377,16 +351,8 @@ if {[string match "mac*" $this(platform)]} {
     set macWindowStyle "::tk::unsupported::MacWindowStyle style"
 }
 
-# The splash screen is needed from the start. 
-# This also defines the wDlgs array.
-package require Dialogs
-
-# Needed in splash screen.
-proc GetScreenSize { } {
-    return [list [winfo vrootwidth .] [winfo vrootheight .]]
-}
-
 # Show it! Need a full update here, at least on Windows.
+package require Splash
 ::SplashScreen::SplashScreen
 ::SplashScreen::SetMsg [::msgcat::mc splashsource]
 update
@@ -408,14 +374,7 @@ set allLibSourceFiles {
 }
 
 foreach sourceName $allLibSourceFiles {
-    if {$debugLevel == 0} {
-	if {[catch {source [file join $this(path) lib $sourceName]} msg]} {
-	    after idle {tk_messageBox -message "Error sourcing $sourceName:  $msg"  \
-	      -icon error -type ok; exit}
-	}    
-    } else {
-	source [file join $this(path) lib $sourceName]
-    }
+    source [file join $this(path) lib $sourceName]
 }
 
 # On the mac we have some extras.
@@ -496,8 +455,10 @@ set listOfPackages {
     hooks
     moviecontroller
     mylabelframe
+    sha1pure
     tablelist
     undo
+    Dialogs
     AutoUpdate
     Connections
     FilesAndCanvas
@@ -507,6 +468,7 @@ set listOfPackages {
     Types
     Plugins
     Pane
+    ProgressWindow
     Whiteboard
 }
 foreach packName $listOfPackages {
@@ -519,16 +481,6 @@ if {$prefs(Thread)} {
 } else {
     package require tinyhttpd
 }
-if {[catch {package require progressbar} msg]} {
-    set prefs(Progressbar) 0
-} else {
-    set prefs(Progressbar) 1
-}
-
-# Note: progressbar before ProgressWindow
-package require ProgressWindow
-::SplashScreen::SetMsg [::msgcat::mc splashloadsha1]
-package require sha1pure
 
 # Provides support for the jabber system.
 # With the ActiveState distro of Tcl/Tk not "our" tclxml is loaded which crash.

@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Base64Icons.tcl,v 1.3 2003-11-01 13:57:27 matben Exp $
+# $Id: Base64Icons.tcl,v 1.4 2003-12-23 14:41:01 matben Exp $
  
 ### First all the tool buttons, both on and off states. ########################
 
@@ -530,10 +530,6 @@ set ::UI::icons(popupbtpush) [image create photo -data {
     O4s7EGW8HEVxHKYDjnCI8Vy4HnBoWhBsN+WigIsVBoGHdvtQCAm0qwDBfRAS
     TvDUVjYs0g6VjbEluL/WIWELnOKKPD0FdAQKbzc4b4EHBg9vUyRDP5N9kFGC
     UjtULT0hADs=
-}]
-set ::UI::icons(whiterect) [image create photo -data {
-    R0lGODdhEAAOAIAAAP///wAAACwAAAAAEAAOAAACDYSPqcvtD6OctNqLZQEA
-    Ow==
 }]
     
 # The mac look-alike triangles.
