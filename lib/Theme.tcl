@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: Theme.tcl,v 1.11 2004-06-16 14:17:32 matben Exp $
+# $Id: Theme.tcl,v 1.12 2004-07-03 12:54:37 matben Exp $
 
 package provide Theme 1.0
 
@@ -142,6 +142,7 @@ proc ::Theme::CanLoadTheme {themeName} {
 proc ::Theme::GetAllAvailable { } {
     global  this
     
+    # Perhaps we should exclude 'default' and all platform specific ones?
     set allrsrc {}
     foreach f [glob -nocomplain -tails -directory $this(resourcedbPath) *.rdb] {
 	set themeName [file rootname $f]

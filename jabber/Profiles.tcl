@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.21 2004-07-02 14:08:02 matben Exp $
+# $Id: Profiles.tcl,v 1.22 2004-07-03 12:54:37 matben Exp $
 
 package provide Profiles 1.0
 
@@ -310,24 +310,6 @@ proc ::Profiles::BuildPage {page} {
     set username $tmpProfArr($profile,username)
     set password $tmpProfArr($profile,password)
     
-    # We use an array for "more" options.
-    set token [namespace current]::moreOpts
-    variable $token
-
-    ::Profiles::DefaultOptionsTabNotebook $token
-
-    foreach {key value} [array get tmpProfArr $profile,-*] {
-	set optname [string map [list $profile,- ""] $key]
-	
-	switch -- $optname {
-	    resource {
-		set resource $tmpProfArr($profile,-resource)
-	    }
-	    default {
-		set moreOpts($optname) $value
-	    }
-	}
-    }
     set allNames [::Profiles::GetAllNames]
 
     # Option menu for the servers.
@@ -376,6 +358,25 @@ proc ::Profiles::BuildPage {page} {
       -command [namespace current]::DeleteCmd]   \
       -side top -fill x -pady 4
 
+    # We use an array for "more" options.
+    set token [namespace current]::moreOpts
+    variable $token
+
+    ::Profiles::DefaultOptionsTabNotebook $token
+
+    foreach {key value} [array get tmpProfArr $profile,-*] {
+	set optname [string map [list $profile,- ""] $key]
+	
+	switch -- $optname {
+	    resource {
+		set resource $tmpProfArr($profile,-resource)
+	    }
+	    default {
+		set moreOpts($optname) $value
+	    }
+	}
+    }
+
     # Tabbed notebook for more options.
     set wtabnb $popt.nb
     ::Profiles::OptionsTabNotebook $wtabnb $token
@@ -400,6 +401,8 @@ proc ::Profiles::BuildPage {page} {
 proc ::Profiles::OptionsTabNotebook {w token} {
     global  prefs
     variable $token
+    upvar 0 $token state
+    variable defaultOptionsArr
     
     set fontS  [option get . fontSmall {}]
 
@@ -457,8 +460,16 @@ proc ::Profiles::OptionsTabNotebook {w token} {
     grid $pageproxy.lpoll $pageproxy.spoll -sticky e
     grid $pageproxy.set   -   -sticky w
 
+    # Set defaults.
+    ::Profiles::DefaultOptionsTabNotebook $token
+
     # Let components ad their own stuff here.
     ::hooks::run profileBuildTabNotebook $w $token
+    
+    # The components should set their defaults in the hook, which we
+    # need to read out here.
+    array set defaultOptionsArr [array get state]
+    
     return $w
 }
 

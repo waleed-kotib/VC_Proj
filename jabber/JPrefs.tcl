@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.9 2004-06-20 10:47:02 matben Exp $
+# $Id: JPrefs.tcl,v 1.10 2004-07-03 12:54:37 matben Exp $
 
 package provide JPrefs 1.0
 
@@ -260,7 +260,12 @@ proc ::Jabber::JPrefs::BuildAppearencePage {page} {
     foreach key {rost,useBgImage rost,bgImagePath chat,tabbedui chatFont} {
 	set tmpJPrefs($key) $jprefs($key)
     }
+    
+    # An empty themeName is the default value.
     set tmpPrefs(themeName) $prefs(themeName)
+    if {$tmpPrefs(themeName) == ""} {
+	set tmpPrefs(themeName) [::msgcat::mc None]
+    }
 
     set labfrpbl $page.fr
     labelframe $labfrpbl -text [::msgcat::mc Appearence]
@@ -289,7 +294,7 @@ proc ::Jabber::JPrefs::BuildAppearencePage {page} {
     set frtheme $pbl.ftheme
     frame $frtheme
     set wpoptheme $frtheme.pop
-    set allrsrc [::Theme::GetAllAvailable]
+    set allrsrc [concat [::msgcat::mc None] [::Theme::GetAllAvailable]]
     set wpopupmenuin [eval {tk_optionMenu $wpoptheme   \
       [namespace current]::tmpPrefs(themeName)} $allrsrc]
     pack [label $frtheme.l -text "[::msgcat::mc preftheme]:"] -side left
@@ -310,7 +315,7 @@ proc ::Jabber::JPrefs::BuildCustomPage {page} {
     variable tmpJPrefs
     variable tmpPrefs
     upvar ::Jabber::jprefs jprefs
-    
+        
     set fontS  [option get . fontSmall {}]    
     set fontSB [option get . fontSmallBold {}]
     set xpadbt [option get [winfo toplevel $page] xPadBt {}]
@@ -319,7 +324,6 @@ proc ::Jabber::JPrefs::BuildCustomPage {page} {
     foreach key {inboxSave rost,useBgImage rost,bgImagePath serviceMethod} {
 	set tmpJPrefs($key) $jprefs($key)
     }
-    set tmpPrefs(themeName) $prefs(themeName)
 
     set labfrpbl $page.fr
     labelframe $labfrpbl -text [::msgcat::mc Customization]
@@ -346,27 +350,6 @@ proc ::Jabber::JPrefs::BuildCustomPage {page} {
     grid $pbl.disco  -padx 2 -pady $ypad -sticky w
     grid $pbl.browse -padx 2 -pady $ypad -sticky w
     grid $pbl.agents -padx 2 -pady $ypad -sticky w
-    
-    if {0} {
-	# Disco, Agents or Browse.
-	set frdisc $page.ag 
-	labelframe $frdisc -text [::msgcat::mc prefcudisc]
-	pack $frdisc -side top -anchor w -padx 8 -pady 4
-	set pdisc [frame $frdisc.frin]
-	pack $pdisc -padx 10 -pady 6 -side left
-	radiobutton $pdisc.disco   \
-	  -text " [::msgcat::mc {Disco method}]"  \
-	  -variable [namespace current]::tmpJPrefs(serviceMethod) -value "disco"
-	radiobutton $pdisc.browse   \
-	  -text " [::msgcat::mc prefcubrowse]"  \
-	  -variable [namespace current]::tmpJPrefs(serviceMethod) -value "browse"
-	radiobutton $pdisc.agents  \
-	  -text " [::msgcat::mc prefcuagent]" -value "agents" \
-	  -variable [namespace current]::tmpJPrefs(serviceMethod)
-	grid $pdisc.disco  -padx 2 -pady $ypad -sticky w
-	grid $pdisc.browse -padx 2 -pady $ypad -sticky w
-	grid $pdisc.agents -padx 2 -pady $ypad -sticky w
-    }
 }
 
 proc ::Jabber::JPrefs::PickFont { } {
@@ -423,7 +406,11 @@ proc ::Jabber::JPrefs::SavePrefsHook { } {
 	return
     }
     array set jprefs [array get tmpJPrefs]
-    set prefs(themeName) $tmpPrefs(themeName)
+    if {$tmpPrefs(themeName) == [::msgcat::mc None]} {
+	set prefs(themeName) ""
+    } else {
+	set prefs(themeName) $tmpPrefs(themeName)
+    }
 
     # If changed present auto away settings, may need to reconfigure.
     ::Jabber::JPrefs::UpdateAutoAwaySettings    
