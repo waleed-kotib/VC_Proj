@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.29 2004-02-05 14:00:21 matben Exp $
+# $Id: Browse.tcl,v 1.30 2004-02-11 07:12:27 matben Exp $
 
 package require chasearrows
 
@@ -528,6 +528,7 @@ proc ::Jabber::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
 		} elseif {[regexp {^([^@]+)@.*} $jid match user]} {
 		    set txt $user
 		}
+		set openParent 0
 		
 		# If three-tier jid, then dead-end.
 		# Note: it is very unclear how to determine if dead-end without
@@ -562,10 +563,13 @@ proc ::Jabber::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
 		} else {
 		    
 		    # This is a service, transport, room, etc.
-		    set isOpen [expr [llength $allChildren] ? 1 : 0]
-		    $wtree newitem $jidList -dir 1 -open $isOpen -text $txt \
-		      -tags $jid -canvastags $treectag
+		    # Do not create if exists which preserves -open.
+		    if {![$wtree isitem $jidList]} {
+			$wtree newitem $jidList -dir 1 -open 0 -text $txt \
+			  -tags $jid -canvastags $treectag
+		    }
 		}
+
 		set typesubtype [$jstate(browse) gettype $jid]
 		set jidtxt $jid
 		if {[string length $jid] > 30} {
