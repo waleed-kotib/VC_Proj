@@ -6,7 +6,7 @@
 # Copyright (C) 2002-2004 Mats Bengtsson
 # This source file is distributed under the BSD license.
 # 
-# $Id: tree.tcl,v 1.36 2004-10-22 15:05:33 matben Exp $
+# $Id: tree.tcl,v 1.37 2004-10-28 07:38:08 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -1653,7 +1653,7 @@ proc ::tree::BuildLayer {w v in} {
     set stripelen   [llength $stripecols]
     set itembd      $options(-itembackgroundbd)
 
-    Debug 3 "\tuid=$uid"
+    Debug 3 "\t uid=$uid"
     
     # Loop through all childrens.
     foreach c $state($uid:children) {
@@ -1678,11 +1678,11 @@ proc ::tree::BuildLayer {w v in} {
 	# Any background color?
 	set bgi ""
 	if {[string length $state($uidc:bg)]} {
-	    set bgi $state($uidc:bg)
+	    set bgi     $state($uidc:bg)
 	    set bglight $state($uidc:bglight)
 	    set bgdark  $state($uidc:bgdark)
 	} elseif {[string length $stripecols]} {
-	    set bgi [lindex $stripecols [expr $state(i) % $stripelen]]
+	    set bgi     [lindex $stripecols [expr $state(i) % $stripelen]]
 	    set bglight $priv($bgi:stripelight)
 	    set bgdark  $priv($bgi:stripedark)
 	}
@@ -1710,16 +1710,18 @@ proc ::tree::BuildLayer {w v in} {
 	
 	# This is the "row height".
 	incr state(y) $yline
+	set x [expr $in + $indention]
 	
 	# Any pyjamas lines?
 	if {[llength $options(-pyjamascolor)] > 0} {
-	    $can create line 0 $ylow 4000 $ylow  \
-	      -fill $options(-pyjamascolor) -tags tpyj	    
+	    $can create line 0 $ylow 4000 $ylow -fill $options(-pyjamascolor) \
+	      -tags tpyj	    
 	}
 	
 	# Tree lines?
 	if {$hasTree} {
-	    $can create line $in $ycent [expr $in + $indention - 4] $ycent \
+	    incr x 6
+	    $can create line $in $ycent [expr $x - 4] $ycent \
 	      -fill $treeCol -tags ttreeh -dash $options(-treedash)
 	}
 	set icon $state($uidc:icon)
@@ -1729,7 +1731,6 @@ proc ::tree::BuildLayer {w v in} {
 	#set taglist [list x $state($uidc:tags)]
 	set taglist x
 	set ids {}
-	set x [expr $in + $indention]
 	if {[info exists state($uidc:ctags)]} {
 	    lappend taglist $state($uidc:ctags)
 	}
@@ -1757,7 +1758,7 @@ proc ::tree::BuildLayer {w v in} {
 	}
 	set id [$can create text $x $ycent -text $text -font $itemFont \
 	  -anchor w -tags $taglist -fill $fgi]
-	    lappend ids $id
+	lappend ids $id
 	if {[info exists state($uidc:text2)]} {
 	    set id2 [$can create text 140 $ycent -text $state($uidc:text2)  \
 	      -font $options(-font) -anchor w -fill $fgi]
@@ -1784,7 +1785,7 @@ proc ::tree::BuildLayer {w v in} {
 	}
     }
     if {$hasTree} {
-	$can create line $in $ystart $in [expr $ycent + $yTreeOff]  \
+	$can create line $in [expr $ystart - $yoff] $in [expr $ycent + $yTreeOff]  \
 	  -fill $treeCol -tags ttreev -dash $options(-treedash)
     }
 }
