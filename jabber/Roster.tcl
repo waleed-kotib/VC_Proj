@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.109 2004-12-29 08:17:46 matben Exp $
+# $Id: Roster.tcl,v 1.110 2005-01-02 15:18:52 matben Exp $
 
 package provide Roster 1.0
 
@@ -1471,8 +1471,8 @@ proc ::Roster::DirectedPresenceDlg {jid} {
     pack [label $fr.l -text "[mc Status]:"] -side left -padx 8
     set wmb $fr.mb
 
-    BuildStatusMenuButton $wmb $token\(status)
-
+    ::Jabber::Status::MenuButton $wmb $token\(status)
+    
     pack $wmb -side left -padx 2 -pady 2
     
     # Any status message.   
