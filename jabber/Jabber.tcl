@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.12 2003-05-20 16:22:27 matben Exp $
+# $Id: Jabber.tcl,v 1.13 2003-05-25 15:03:27 matben Exp $
 #
 #  The $address is an ip name or number.
 #
@@ -685,14 +685,14 @@ proc ::Jabber::MessageDispatcher {type body args} {
 	chat {
 	    if {$iswb} {
 		eval {::Jabber::WB::ChatMsg} $args
-	    } elseif {[string length $body]} {
+	    } else {
 		eval {::Jabber::Chat::GotMsg $body} $args
 	    }	    
 	}
 	groupchat {
 	    if {$iswb} {
 		eval {::Jabber::WB::GroupChatMsg} $args
-	    } elseif {[string length $body]} {
+	    } else {
 		eval {::Jabber::GroupChat::GotMsg $body} $args
 	    }	    
 	}
@@ -5643,10 +5643,11 @@ proc ::Jabber::Conference::BuildCreate {w args} {
     
     set stattxt "-- [::msgcat::mc jasearchwait] --"
     
-    #bind $w <Return> [list $wbtget invoke]
+    bind $w <Return> [list $wbtget invoke]
     
     # Grab and focus.
     set oldFocus [focus]
+    focus $frtop.eroom
     catch {grab $w}
     
     # Wait here for a button press and window to be destroyed. BAD?
@@ -5667,7 +5668,7 @@ proc ::Jabber::Conference::CancelCreate {w} {
     
     set roomJid [string tolower ${roomname}@${server}]
     if {$usemuc && ($roomJid != "")} {
-	$jstate(jlib) muc setroom $roomJid cancel
+	catch {$jstate(jlib) muc setroom $roomJid cancel}
     }
     set finishedCreate 0
     destroy $w
@@ -5828,6 +5829,7 @@ proc ::Jabber::Conference::CreateGetGetCB {jlibName type subiq} {
     
     $wbtenter configure -state normal -default active
     $wbtget configure -state normal -default disabled
+    bind $wtop <Return> {}
     #bind $wtop <Return> [list $wbtenter invoke]    
 }
 

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.3 2003-05-20 16:22:23 matben Exp $
+# $Id: Browse.tcl,v 1.4 2003-05-25 15:03:27 matben Exp $
 
 package provide Browse 1.0
 
@@ -439,12 +439,15 @@ proc ::Jabber::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
     
     ::Jabber::Debug 2 "::Jabber::Browse::AddToTree parentsJidList='$parentsJidList', jid=$jid"
 
-    set tag [lindex $xmllist 0]
+    set category [lindex $xmllist 0]
     array set attrArr [lindex $xmllist 1]
+    if {[string equal $category "item"] && [info exists attrArr(category)]} {
+	set category $attrArr(category)
+    }
 
     if {$options(-setbrowsedjid)} {}
     
-    switch -exact -- $tag {
+    switch -exact -- $category {
 	ns {
 	    
 	    # outdated !!!!!!!!!
@@ -489,14 +492,14 @@ proc ::Jabber::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
 		# Note: it is very unclear how to determine if dead-end without
 		# an additional browse of that jid.
 		# This is very ad hoc!!!
-		if {[regexp {.+@[^/]+/.+} $jid match]} {
-		    if {[string equal $tag "user"]} {
+		if {[regexp {.+@[^/]+/.*} $jid match]} {
+		    if {[string equal $category "user"]} {
 			$wtree newitem $jidList -dir 0  \
 			  -text $txt -image $icons(machead) -tags $jid
 		    } else {
 			$wtree newitem $jidList -text $txt -tags $jid
 		    }
-		} elseif {[string equal $tag "service"]} {
+		} elseif {[string equal $category "service"]} {
 		    $wtree newitem $jidList -text $txt -tags $jid -style bold
 		} else {
 		    

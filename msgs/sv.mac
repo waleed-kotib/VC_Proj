@@ -49,6 +49,7 @@
 ::msgcat::mcset sv Import               {Importera}
 ::msgcat::mcset sv Inbox                {Inkorg}
 ::msgcat::mcset sv Info 		{Info}
+::msgcat::mcset sv Invite               {Bjud in}
 ::msgcat::mcset sv Login 		{Logga in}
 ::msgcat::mcset sv Logout               {Logga ut}
 ::msgcat::mcset sv Middle		{Mittinitial}

@@ -15,7 +15,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Whiteboard.tcl,v 1.9 2003-05-18 13:20:19 matben Exp $
+# $Id: Whiteboard.tcl,v 1.10 2003-05-25 15:03:26 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -304,10 +304,10 @@ wm withdraw .
 if {1} {
     switch -- $this(platform) {
 	unix {
-	    set sysFont(s) {Helvetica 10 normal}
-	    set sysFont(sb) {Helvetica 10 bold}
+	    set sysFont(s) {Helvetica -10 normal}
+	    set sysFont(sb) {Helvetica -10 bold}
 	    set sysFont(m) $sysFont(s)
-	    set sysFont(l) {Helvetica 18 normal}
+	    set sysFont(l) {Helvetica -18 normal}
 	}
 	macintosh {
 	    set sysFont(s) {Geneva 9 normal}
