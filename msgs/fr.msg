@@ -7,20 +7,20 @@
 # Défini dans l'espace des chaînes de base, peut donc être repris dans n'importe quelle chaîne.
 
 ::msgcat::mcset fr Accept		{Accepter}
-#::msgcat::mcset fr Action {}
-#::msgcat::mcset fr Active {}
+::msgcat::mcset fr Action		{Action}
+::msgcat::mcset fr Active		{Actif}
 ::msgcat::mcset fr Add			{Ajouter}
 ::msgcat::mcset fr Address		{Adresse}
 ::msgcat::mcset fr Advanced		{Avancé}
 ::msgcat::mcset fr Agents		{Agents}
-#::msgcat::mcset fr Allow {}
+::msgcat::mcset fr Allow		{Autoriser}
 ::msgcat::mcset fr Appearance           {Apparence}
 ::msgcat::mcset fr Apply		{Appliquer}
 ::msgcat::mcset fr Available		{Disponible}
 ::msgcat::mcset fr Away			{Parti}
 ::msgcat::mcset fr Binary		{Binaire}
 ::msgcat::mcset fr Birthday		{Anniversaire}
-#::msgcat::mcset fr Block {}
+::msgcat::mcset fr Block		{Bloquer}
 ::msgcat::mcset fr Blockers		{Bloqueur}
 ::msgcat::mcset fr Blocking		{Bloquant}
 ::msgcat::mcset fr Browser		{Navigateur}
@@ -67,10 +67,10 @@
 ::msgcat::mcset fr Group		{Groupe}
 ::msgcat::mcset fr Groupchat            {Groupe de discussion}
 ::msgcat::mcset fr Handling		{Ergonomie}
-#::msgcat::mcset fr Height {}
+::msgcat::mcset fr Height		{Hauteur}
 ::msgcat::mcset fr History		{Historique}
 ::msgcat::mcset fr Home			{Démarrer}
-#::msgcat::mcset fr Image {}
+::msgcat::mcset fr Image		{Image}
 ::msgcat::mcset fr Import		{Importer}
 ::msgcat::mcset fr Inbox		{Messages}
 ::msgcat::mcset fr Info			{Infos}
@@ -83,7 +83,7 @@
 ::msgcat::mcset fr Middle		{Milieu}
 ::msgcat::mcset fr Moderators		{Modérateurs}
 ::msgcat::mcset fr More			{Plus}
-#::msgcat::mcset fr Name {}
+::msgcat::mcset fr Name			{Nom}
 ::msgcat::mcset fr Never		{Jamais}
 ::msgcat::mcset fr New			{Nouveau}
 ::msgcat::mcset fr Next			{Suivant}
@@ -148,17 +148,17 @@
 ::msgcat::mcset fr To			{À}
 ::msgcat::mcset fr Topic		{Thème}
 ::msgcat::mcset fr Trash		{Corbeille}
-#::msgcat::mcset fr Type {}
+::msgcat::mcset fr Type			{Type}
 ::msgcat::mcset fr Unregister		{Se désinscrire}
 ::msgcat::mcset fr Unsubscribe		{Se désinscrire}
 ::msgcat::mcset fr Unsubscribed		{Désinscrit}
 ::msgcat::mcset fr Username		{Nom}
-#::msgcat::mcset fr Value {}
+::msgcat::mcset fr Value		{Valeur}
 ::msgcat::mcset fr Visitors		{Visitors}
 ::msgcat::mcset fr Warning		{Attention}
 ::msgcat::mcset fr Welcome              {Bienvenue}
 ::msgcat::mcset fr Whiteboard		{Tableau}
-#::msgcat::mcset fr Width {}
+::msgcat::mcset fr Width		{Largeur}
 ::msgcat::mcset fr Work			{Travail}
 ::msgcat::mcset fr Yes			{Oui}
 ::msgcat::mcset fr yes			{oui}
@@ -326,7 +326,7 @@
 ::msgcat::mcset fr {About %s}                   {À propos de %s}
 ::msgcat::mcset fr {Active <Return>}		{Appuyer sur <entrée>}
 ::msgcat::mcset fr {Add New User}		{Ajouter un nouvel utilisateur}
-#::msgcat::mcset fr {Add permanently} {}
+::msgcat::mcset fr {Add permanently}		{Ajouter définitivement}
 ::msgcat::mcset fr {Add Server}			{Ajouter un serveur}
 ::msgcat::mcset fr {Add Shortcut}		{Ajouter un raccourci}
 ::msgcat::mcset fr {Address 1}			{Adresse 1}
@@ -345,7 +345,7 @@
 ::msgcat::mcset fr {Block JID}			{Bloquage JID}
 ::msgcat::mcset fr {Built in server port}	{Port du serveur interne}
 ::msgcat::mcset fr {Cache folder}		{Répertoire du cache}
-#::msgcat::mcset fr {Canvas Size} {}
+::msgcat::mcset fr {Canvas Size}		{Taille du dessin}
 ::msgcat::mcset fr {Chat History}		{Historique de la discussion}
 ::msgcat::mcset fr {Chat With}			{Discuter avec}
 ::msgcat::mcset fr {Clear Disk Cache Now}	{Vider le cache}
@@ -356,7 +356,7 @@
 ::msgcat::mcset fr {Create Room}		{Créer un salon}
 ::msgcat::mcset fr {Default group}		{Groupe par défaut}
 ::msgcat::mcset fr {Default Logout Status}	{Déconnexion par défaut}
-#::msgcat::mcset fr {Delete Rule} {}
+::msgcat::mcset fr {Delete Rule}		{Règle de suppression}
 ::msgcat::mcset fr {Disk Cache}			{Cache}
 ::msgcat::mcset fr {Different Passwords}        {Différents mots de passe}
 ::msgcat::mcset fr {Do Not Disturb}		{Ne pas déranger}
@@ -395,8 +395,8 @@
 ::msgcat::mcset fr {Import using}		{Importer en utilisant...}
 ::msgcat::mcset fr {Import/Remove fonts}	{Importer/Supprimer polices}
 ::msgcat::mcset fr {Incoming Message}		{Message entrant}
-#::msgcat::mcset fr {Incoming Messages} {}
-#::msgcat::mcset fr {Incoming Presence} {}
+::msgcat::mcset fr {Incoming Messages}		{Messages entrants}
+::msgcat::mcset fr {Incoming Presence}		{Connexion en cours}
 ::msgcat::mcset fr {Inspect Associations}	{Inspecter les associations}
 ::msgcat::mcset fr {IP address}			{Adresse IP}
 ::msgcat::mcset fr {Is connected}		{Connecté}
@@ -420,7 +420,7 @@
 ::msgcat::mcset fr {MIME type}			{Type MIME}
 ::msgcat::mcset fr {Multi Connect}		{Connexions multiples}
 ::msgcat::mcset fr {My Status}			{Mon statut}
-#::msgcat::mcset fr {Name of list} {}
+::msgcat::mcset fr {Name of list}		{Nom de liste}
 ::msgcat::mcset fr {Network Error}		{Erreur de Réseau}
 ::msgcat::mcset fr {Network Setup}		{Configuration du réseau}
 ::msgcat::mcset fr {New Account}		{&Nouvel utilisateur}
@@ -429,9 +429,9 @@
 ::msgcat::mcset fr {New Color}			{Nouvelle couleur}
 ::msgcat::mcset fr {New incoming message}	{Nouveau message entrant}
 ::msgcat::mcset fr {New Message}		{Nouveau message}
-#::msgcat::mcset fr {New Nickname} {}
+::msgcat::mcset fr {New Nickname}		{Nouveau pseudo}
 ::msgcat::mcset fr {New password}		{Nouveau mot de passe}
-#::msgcat::mcset fr {New Rule} {}
+::msgcat::mcset fr {New Rule}			{Nouvelle règle}
 ::msgcat::mcset fr {New Topic}			{Nouveau sujet}
 ::msgcat::mcset fr {New shortcut}		{Nouveau raccourci}
 ::msgcat::mcset fr {New User}			{Nouvel utilisateur}
@@ -454,7 +454,7 @@
 ::msgcat::mcset fr {Open Helpfile}		{Ouvrir le fichier d'aide}
 ::msgcat::mcset fr {Open Image/Movie}		{Ouvrir image/vidéo}
 ::msgcat::mcset fr {Open Stream}		{Ouvrir streaming}
-#::msgcat::mcset fr {Outgoing Presence} {}
+::msgcat::mcset fr {Outgoing Presence}		{En cours de déconnexion}
 ::msgcat::mcset fr {Peer-to-Peer}		{Peer-to-peer}
 ::msgcat::mcset fr {Personal Info}		{Infos personnelles}
 ::msgcat::mcset fr {Personal Information}	{Informations personnelles}
@@ -467,7 +467,7 @@
 ::msgcat::mcset fr {Postal Code}		{Code postal}
 ::msgcat::mcset fr {Preferred Protocol}		{Protocole préféré}
 ::msgcat::mcset fr {Presence Error}		{Erreur de statut}
-#::msgcat::mcset fr {Privacy List} {}
+::msgcat::mcset fr {Privacy List}		{Liste personnelle}
 ::msgcat::mcset fr {Profile Name}               {Nom du profil}
 ::msgcat::mcset fr {Proxy Setup}		{Configuration du proxy}
 ::msgcat::mcset fr {Put File Error}		{Erreur lors de l'insertion du fichier}
@@ -492,16 +492,16 @@
 ::msgcat::mcset fr {Search results}		{Chercher les résultats}
 ::msgcat::mcset fr {Search Service}		{Chercher le service}
 ::msgcat::mcset fr {Search Specifications}	{Chercher les spécifications}
-#::msgcat::mcset fr {Select a new nickname} {}
+::msgcat::mcset fr {Select a new nickname}	{Choisir un nouveau pseudo}
 ::msgcat::mcset fr {Select Font}		{Choisir police}
 ::msgcat::mcset fr {Send File}			{Envoyer fichier}
 ::msgcat::mcset fr {Send Live}			{Envoyer live}
 ::msgcat::mcset fr {Server Info}		{Infos sur le serveur}
 ::msgcat::mcset fr {Service server}		{Service du serveur}
 ::msgcat::mcset fr {Set Directed Presence}      {Appliquer le statut désiré}
-#::msgcat::mcset fr {Set New Nickname} {}
-::msgcat::mcset fr {Set New Topic}		{Choisir nouveau sujet}
-::msgcat::mcset fr {Set Status}			{Choisir statut}
+::msgcat::mcset fr {Set New Nickname}		{Appliquer le nouveau pseudo}
+::msgcat::mcset fr {Set New Topic}		{Appliquer le nouveau sujet}
+::msgcat::mcset fr {Set Status}			{Changer le statut}
 ::msgcat::mcset fr {Settings Panels}		{Panneau de configuration}
 ::msgcat::mcset fr {Setup Assistant}		{Assistant de configuration}
 ::msgcat::mcset fr {Slide Show}			{Diaporama}
@@ -804,24 +804,24 @@ que les polices standard (Times, Helvetica ou Courier), vous devez vous assurer 
 ::msgcat::mcset fr prefprofname  {Entrez le nom du profil d'utilisateur}
 ::msgcat::mcset fr prefstabui    {Utiliser l'interface du bloc-notes avec les onglets}
 ::msgcat::mcset fr prefsusesasl  {Utiliser la méthode d'authentification SASL}
-#::msgcat::mcset fr prefprivmsg {Each user may administrate zero or many lists. Only the active or default list affect message processing. Any active list affects only the session. The default list is processed if there is no active list.}
-#::msgcat::mcset fr prefprivunav {Filter options unavailable while not connected}
-#::msgcat::mcset fr prefprivnotex {Filter options unavailable at this server}
-#::msgcat::mcset fr prefprivobtained {Filter lists obtained from server}
-#::msgcat::mcset fr prefprivgetlist {Getting filter list "%s"}
-#::msgcat::mcset fr prefprivrules {Each list contains one or many rules, each rule specify the type of events it acts on, and the action it shall take. If you specify a group to block it must exist in your roster.}
-#::msgcat::mcset fr prefuserinactive {User has been inactive for a while}
-#::msgcat::mcset fr preficonsel {The selected iconset will take action when you save}
-#::msgcat::mcset fr prefwbscroll {You may set a larger size than the default %sx%s}
-#::msgcat::mcset fr prefssbts {Show next and previous buttons}
-#::msgcat::mcset fr prefssresize {Resize canvas automatically to fit image}
+::msgcat::mcset fr prefprivmsg {Chaque utilisateur peut administrer aucune ou plusieurs listes. Seule la liste active ou par défaut est affectée. Toute liste active affecte seulement la session. La liste par défaut est concernée seulement si aucune n'est active.}
+::msgcat::mcset fr prefprivunav {Options de filtres indisponibles hors-connexion}
+::msgcat::mcset fr prefprivnotex {Options de filtres indisponibles sur ce serveur}
+::msgcat::mcset fr prefprivobtained {Listes de filtres téléchargées du serveur}
+::msgcat::mcset fr prefprivgetlist {Téléchargement de la liste de filtes "%s"}
+::msgcat::mcset fr prefprivrules {Chaque liste contient une ou plusieurs lettres, chaque règle spécifie le type d'évènements sur lequel il agit et l'action qu'elle doit effectuer. Si vous spécifiez de bloquer un groupe, il doit exister dans vos contacts.}
+::msgcat::mcset fr prefuserinactive {L'utilisateur a été inactif un moment}
+::msgcat::mcset fr preficonsel {Le thème d'icônes sera actif après une sauvegarde}
+::msgcat::mcset fr prefwbscroll {Vous devez mettre une taille supérieure à celle par défaut %sx%s}
+::msgcat::mcset fr prefssbts {Montrer les boutons précédent et suivant}
+::msgcat::mcset fr prefssresize {Redimensionner automatiquement le dessin pour l'ajuster à l'image}
 
 
 
 # Espace EditShortcuts :
 namespace eval ::EditShortcuts:: {
 	::msgcat::mcset fr shortip       {Compléter l'adresse IP ou le nom}
-	::msgcat::mcset fr shortwarn     {Attention : vous avez édité les raccourcis.. Voulez-vous les enregistrer ?}
+	::msgcat::mcset fr shortwarn     {Attention : vous avez édité les raccourcis. Voulez-vous les enregistrer ?}
 
 
 }
@@ -871,10 +871,10 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset fr jasettopic   {Mettre un nouveau thème pour ce groupe de discussion}
 ::msgcat::mcset fr jadirpresmsg {Envoyer le statut désiré à l'utilisateur "%s".}
 ::msgcat::mcset fr jatlsnegot   {Sécurisation TLS...}
-#::msgcat::mcset fr jamucentermsg {Enter your nick name and press Enter to go into the room. You may Browse to get the available rooms for the specific service.	Members only room may require a password.}
-#::msgcat::mcset fr jainmsgshow {Show incoming messages in this window}
-#::msgcat::mcset fr jadisaddserv {Discover another server for groupchat rooms and other services. You may add a server permanently which is then automatically discovered. The login server is always discovered.}
-#::msgcat::mcset fr jadisrmall {Remove all servers that are automatically and permanently discovered.}
+::msgcat::mcset fr jamucentermsg {Tapez votre pseudo et appuyez sur Entrée pour entrer dans le salon. Vous pouvez Parcourir pour trouver la liste des salons chaque service. Les salons privés peuvent vous demander un mot de passe.}
+::msgcat::mcset fr jainmsgshow {Montrer les messages entrants dans cette fenêtre}
+::msgcat::mcset fr jadisaddserv {Découvrez un autre serveur pour les salons de discussions et autres services. Vous pouvez ajouter un serveur définitivement quand il est découvert automatiquement. Le serveur de connexion est automatiquement découvert.}
+::msgcat::mcset fr jadisrmall {Enlever les serveurs qui étaient automatiquement et définitivement découverts.}
 
 
 
