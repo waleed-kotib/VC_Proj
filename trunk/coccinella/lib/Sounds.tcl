@@ -7,24 +7,55 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Sounds.tcl,v 1.10 2004-01-13 14:50:21 matben Exp $
+# $Id: Sounds.tcl,v 1.11 2004-01-16 15:01:10 matben Exp $
 
 package provide Sounds 1.0
 
 namespace eval ::Sounds:: {
     
     # Add all event hooks.
-    hooks::add quitAppHook ::Sounds::Free 80
-    hooks::add newMessageHook          [list ::Sounds::Msg normal newmsg]
-    hooks::add newChatMessageHook      [list ::Sounds::Msg chat newmsg]
-    hooks::add newGroupChatMessageHook [list ::Sounds::Msg groupchat newmsg]
-    hooks::add loginHook               [list ::Sounds::Event connected]
-    hooks::add presenceHook            ::Sounds::Presence
+    ::hooks::add quitAppHook             ::Sounds::Free 80
+    ::hooks::add newMessageHook          [list ::Sounds::Msg normal newmsg]
+    ::hooks::add newChatMessageHook      [list ::Sounds::Msg chat newmsg]
+    ::hooks::add newGroupChatMessageHook [list ::Sounds::Msg groupchat newmsg]
+    ::hooks::add loginHook               [list ::Sounds::Event connected]
+    ::hooks::add presenceHook            ::Sounds::Presence
+
+    # Define all hooks for preference settings.
+    ::hooks::add prefsInitHook          ::Sounds::InitPrefsHook
+    ::hooks::add prefsBuildHook         ::Sounds::BuildPrefsHook
+    ::hooks::add prefsSaveHook          ::Sounds::SavePrefsHook
+    ::hooks::add prefsCancelHook        ::Sounds::CancelPrefsHook
+
+    ::hooks::add initHook               ::Sounds::InitHook
     
+    variable nameToText 
+    array set nameToText {
+	online          {User is online}
+	offline         {User is offline}
+	newmsg          {New incoming message}
+	statchange      {User's status changed}
+	connected       {Is connected}
+    }
+
+    # Map between sound name and file name for default sound set.
+    variable soundIndex
+    array set soundIndex {
+	online      online.wav
+	offline     offline.wav
+	newmsg      newmsg.wav
+	statchange  statchange.wav
+	connected   connected.wav
+    }
+
     variable allSounds
     variable allSoundFiles
+    set allSounds [array names soundIndex]
+}
 
-    set allSounds {online offline newmsg statchange connected}
+proc ::Sounds::InitHook { } {
+    
+    after 600 ::Sounds::Init
 }
 
 # Sounds::Init --
@@ -37,18 +68,27 @@ namespace eval ::Sounds:: {
 #       none.
 
 proc ::Sounds::Init { } {
-    global  prefs this    
+    global  this    
     variable allSounds
     variable allSoundFiles
+    variable priv
+    variable sprefs
     
     set suff wav
     set allSoundFiles {}
+    
+    set priv(canPlay)      0
+    set priv(QuickTimeTcl) [::Plugins::HavePackage QuickTimeTcl]
+    set priv(snack)        [::Plugins::HavePackage snack]
+    if {$priv(QuickTimeTcl) || $priv(snack)} {
+	set priv(canPlay) 1
+    }
     
     foreach s $allSounds {
 	if {$::privariaFlag} {
 	    set soundFileArr($s) [file join c:/ PRIVARIA media ${s}.${suff}]
 	} else {
-	    set soundFileArr($s) [file join $this(path) sounds ${s}.${suff}]
+	    set soundFileArr($s) [file join $this(soundsPath) ${s}.${suff}]
 	}
 	lappend allSoundFiles $soundFileArr($s)
     }
@@ -63,22 +103,28 @@ proc ::Sounds::Init { } {
 	}	
     }
 
-    if {[::Plugins::HavePackage QuickTimeTcl]} {
-	
-	# Should never be mapped.
-	frame .fake
+    # Never map this frame!
+    frame .fake
+    foreach f $allSoundFiles s $allSounds {
+	::Sounds::Create $s $f
+    }
+}
+
+
+proc ::Sounds::Create {name path} {
+    variable priv
+    variable allSounds
+    variable allSoundFiles
+    
+    if {$priv(QuickTimeTcl)} {
 	if {[catch {
-	    foreach f $allSoundFiles s $allSounds {
-		movie .fake.$s -file $f -controller 0
-	    }
+	    movie .fake.$s -file $path -controller 0
 	}]} {
 	    # ?
 	}
-    } elseif {[::Plugins::HavePackage snack]} {
+    } elseif {$priv(snack)} {
 	if {[catch {
-	    foreach f $allSoundFiles s $allSounds {
-		snack::sound $s -load $f
-	    }
+	    snack::sound $s -load $path
 	}]} {
 	    # ?
 	}
@@ -86,20 +132,20 @@ proc ::Sounds::Init { } {
 }
 
 proc ::Sounds::Play {snd} {
-    global  prefs
-    upvar ::Jabber::jprefs jprefs
+    variable sprefs
+    variable priv
     variable afterid
 
     # Check the jabber prefs if sound should be played.
-    if {!$jprefs(snd,$snd)} {
+    if {!$sprefs($snd)} {
 	return
     }
     catch {unset afterid($snd)}
-    if {[::Plugins::HavePackage QuickTimeTcl]} {
+    if {$priv(QuickTimeTcl)} {
 	if {[catch {.fake.${snd} play}]} {
 	    # ?
 	}
-    } elseif {[::Plugins::HavePackage snack]} {
+    } elseif {$priv(snack)} {
 	if {[catch {$snd play}]} {
 	    # ?
 	}
@@ -184,6 +230,160 @@ proc ::Sounds::Free { } {
     if {[::Plugins::HavePackage QuickTimeTcl]} {
 	catch {destroy .fake}
     }
+}
+
+# Preference page --------------------------------------------------------------
+
+proc  ::Sounds::InitPrefsHook { } {
+    variable sprefs
+    variable allSounds
+    
+    set sprefs(soundSet) ""
+    ::PreferencesUtils::Add  \
+      [list ::Sounds::sprefs(soundSet) sound_set $sprefs(soundSet)]
+    
+    set optList {}
+    foreach name $allSounds {
+	set sprefs($name) 1
+	lappend optList [list ::Sounds::sprefs($name) sound_${name} $sprefs($name)]
+    }
+    ::PreferencesUtils::Add $optList    
+}
+
+proc ::Sounds::BuildPrefsHook {wtree nbframe} {
+    variable priv
+    
+    if {$priv(canPlay)} {
+	$wtree newitem {General Sounds}  \
+	  -text [::msgcat::mc {Sounds}]
+
+	set wpage [$nbframe page {Sounds}]    
+	::Sounds::BuildPrefsPage $wpage
+    }
+}
+
+proc ::Sounds::BuildPrefsPage {wpage} {
+    variable nameToText 
+    variable sprefs
+    variable tmpPrefs
+    variable allSounds
+    
+    set fontS  [option get . fontSmall {}]    
+    set fontSB [option get . fontSmallBold {}]    
+
+    foreach name $allSounds {
+	set tmpPrefs($name) $sprefs($name)
+    }
+    if {[string equal $sprefs(soundSet) ""]} {
+	set tmpPrefs(soundSet) [::msgcat::mc Default]
+    }
+    
+    set labpalrt [::mylabelframe::mylabelframe $wpage.alrt [::msgcat::mc {Alert sounds}]]
+    pack $wpage.alrt -side top -anchor w -ipadx 10 -fill x
+    
+    set frs $labpalrt.frs
+    pack [frame $frs] -side top -anchor w -padx 8 -pady 2
+    
+    set soundSets [concat [list [::msgcat::mc Default]] [::Sounds::GetAllSets]]
+    label $frs.lsets -text "[::msgcat::mc {Sound Set}]:"
+    set wpopsets $frs.popsets
+    set wpopupmenu [eval {tk_optionMenu $wpopsets   \
+      [namespace current]::tmpPrefs(soundSet)} $soundSets]
+    $wpopsets configure -highlightthickness 0 -font $fontSB
+    grid $frs.lsets $wpopsets -sticky w
+
+    
+    set fr $labpalrt.fr
+    pack [frame $fr] -side left
+    label $fr.lbl -text [::msgcat::mc prefsounpick]
+    grid $fr.lbl -columnspan 2 -sticky w -padx 10
+
+    set row 1
+    foreach name {online offline newmsg statchange connected} {
+	set txt $nameToText($name)
+	checkbutton $fr.$name -text "  [::msgcat::mc $txt]"  \
+	  -variable [namespace current]::tmpPrefs($name)
+	button $fr.b${name}   -text [::msgcat::mc Play] -font $fontS \
+	  -command [list [namespace current]::PlayPrefSound $name]
+	grid $fr.$name    -column 0 -padx 8 -row $row -sticky w
+	grid $fr.b${name} -column 1 -padx 8 -row $row -sticky ew 
+	incr row
+    }
+}
+
+proc ::Sounds::PlayPrefSound {name} {
+    global  this
+    variable priv
+    variable soundIndex
+    variable tmpPrefs
+    
+    array set sound [array get soundIndex]
+    
+    if {[string equal $tmpPrefs(soundSet) [::msgcat::mc Default]]} {
+	set path $this(soundsPath)
+    } else {
+	set path [file join $this(soundsPath) $tmpPrefs(soundSet)]
+	source [file join $path soundIndex.tcl]
+    }
+    set f [file join $path $sound($name)]
+    
+    if {$priv(QuickTimeTcl)} {
+	catch {destroy .fake._tmp}
+	catch {
+	    movie .fake._tmp -file $f -controller 0
+	    .fake._tmp play
+	}
+    } elseif {$priv(snack)} {
+	catch {_tmp destroy}
+	catch {snack::sound _tmp -load $f}
+    }
+}
+
+proc ::Sounds::SavePrefsHook { } {
+    variable sprefs
+    variable tmpPrefs
+    variable allSounds
+    
+    foreach name $allSounds {
+	set sprefs($name) $tmpPrefs($name)
+    }
+    if {[string equal $tmpPrefs(soundSet) [::msgcat::mc Default]]} {
+	set sprefs(soundSet) ""
+    }
+}
+
+proc ::Sounds::CancelPrefsHook { } {
+    variable sprefs
+    variable tmpPrefs
+    variable allSounds
+    
+    foreach name $allSounds {
+	if {$sprefs($name) != $tmpPrefs($name)} {
+	    ::Preferences::HasChanged
+	}
+    }
+    if {![string equal $sprefs(soundSet) $tmpPrefs(soundSet)]} {
+	::Preferences::HasChanged
+    }
+}
+
+proc ::Sounds::GetAllSets { } {
+    global  this
+    
+    set allsets {}
+    foreach f [glob -nocomplain -directory $this(soundsPath) *] {
+	if {[file isdirectory $f]  \
+	  && [file exists [file join $f soundIndex.tcl]]} {
+	    lappend allsets [file tail $f]
+	}
+    }  
+    return $allsets
+}
+
+proc ::Sounds::LoadSoundSet {setName} {
+
+    
+    
 }
 
 #-------------------------------------------------------------------------------
