@@ -72,6 +72,7 @@
 ::msgcat::mcset en Logout
 ::msgcat::mcset en Message
 ::msgcat::mcset en Middle
+::msgcat::mcset en Moderators
 ::msgcat::mcset en More
 ::msgcat::mcset en Never
 ::msgcat::mcset en New
@@ -85,6 +86,7 @@
 ::msgcat::mcset en Online
 ::msgcat::mcset en Open
 ::msgcat::mcset en Options
+::msgcat::mcset en Participants
 ::msgcat::mcset en Password
 ::msgcat::mcset en Pick
 ::msgcat::mcset en Phone
@@ -140,6 +142,7 @@
 ::msgcat::mcset en Unsubscribe
 ::msgcat::mcset en Unsubscribed
 ::msgcat::mcset en Username
+::msgcat::mcset en Vistors
 ::msgcat::mcset en Warning
 ::msgcat::mcset en Welcome
 ::msgcat::mcset en Whiteboard

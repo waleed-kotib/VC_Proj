@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.75 2004-10-27 14:42:34 matben Exp $
+# $Id: GroupChat.tcl,v 1.76 2004-10-29 13:17:15 matben Exp $
 
 package require History
 
@@ -112,6 +112,11 @@ namespace eval ::Jabber::GroupChat:: {
 	mWhiteboard    wb        {::Jabber::WB::NewWhiteboardTo $jid}
     }    
     
+    variable userRoleToStr
+    set userRoleToStr(moderator)   [mc Moderators]
+    set userRoleToStr(none)        [mc None]
+    set userRoleToStr(participant) [mc Participants]
+    set userRoleToStr(visitor)     [mc Vistors]
 }
 
 # Jabber::GroupChat::AllConference --
@@ -717,7 +722,7 @@ proc ::Jabber::GroupChat::Build {roomjid args} {
 	$wtray buttonconfigure info   -state disabled
     }
     
-    # Text chat and user list.
+    # Text chat display.
     pack [frame $frmid -height 250 -width 300 -relief sunken -bd 1 -class Pane] \
       -side top -fill both -expand 1 -padx 4 -pady 4
     frame $wtxt -height 200
@@ -732,22 +737,29 @@ proc ::Jabber::GroupChat::Build {roomjid args} {
     grid columnconfigure $wtxt.0 0 -weight 1
     grid rowconfigure    $wtxt.0 0 -weight 1
     
+    # Users list.
     frame $wfrusers
-    text $wusers -height 12 -width 12 -state disabled  \
-      -borderwidth 1 -relief sunken  \
-      -spacing1 1 -spacing3 1 -wrap none -cursor {} \
-      -yscrollcommand [list ::UI::ScrollSet $wyscusers \
-      [list grid $wyscusers -column 1 -row 0 -sticky ns -padx 2]]
     scrollbar $wyscusers -orient vertical -command [list $wusers yview]
+    ::tree::tree $wusers -width 120 -height 100 -silent 1 -scrollwidth 400 \
+      -treecolor "" -styleicons "" -indention 0 -pyjamascolor "" -xmargin 2 \
+      -yscrollcommand [list ::UI::ScrollSet $wyscusers \
+      [list grid $wyscusers -row 0 -column 1 -sticky ns]]
+
     grid $wusers    -column 0 -row 0 -sticky news
     grid $wyscusers -column 1 -row 0 -sticky ns -padx 2
     grid columnconfigure $wfrusers 0 -weight 1
     grid rowconfigure    $wfrusers 0 -weight 1
     
-    set imageVertical   \
-      [::Theme::GetImage [option get $frmid imageVertical {}]]
-    set imageHorizontal \
-      [::Theme::GetImage [option get $frmid imageHorizontal {}]]
+    if {[string match "mac*" $this(platform)]} {
+	$wusers configure -buttonpresscommand [namespace current]::Popup \
+	  -eventlist [list [list <Control-Button-1> [namespace current]::Popup] \
+	  [list <Button-2> [namespace current]::Popup]]
+    } else {
+	$wusers configure -rightclickcommand [namespace current]::Popup
+    }
+    
+    set imageVertical   [::Theme::GetImage [option get $frmid imageVertical {}]]
+    set imageHorizontal [::Theme::GetImage [option get $frmid imageHorizontal {}]]
     set sashVBackground [option get $frmid sashVBackground {}]
     set sashHBackground [option get $frmid sashHBackground {}]
 
@@ -1153,11 +1165,11 @@ proc ::Jabber::GroupChat::PresenceHook {jid presence args} {
     if {[$jstate(jlib) service isroom $jid]} {
 	::Debug 2 "::Jabber::GroupChat::PresenceHook jid=$jid, presence=$presence, args='$args'"
 	
-	array set attrArr $args
+	array set argsArr $args
 	
 	# Since there should not be any /resource.
 	set roomjid $jid
-	set jid3 ${jid}/$attrArr(-resource)
+	set jid3 ${jid}/$argsArr(-resource)
 	if {[string equal $presence "available"]} {
 	    eval {SetUser $roomjid $jid3 $presence} $args
 	} elseif {[string equal $presence "unavailable"]} {
@@ -1175,8 +1187,8 @@ proc ::Jabber::GroupChat::PresenceHook {jid presence args} {
 	#    <status code='307'/>
 	#  </x>
 	
-	if {[info exists attrArr(-x)]} {
-	    foreach c $attrArr(-x) {
+	if {[info exists argsArr(-x)]} {
+	    foreach c $argsArr(-x) {
 		set xmlns [wrapper::getattribute $c xmlns]
 		
 		switch -- $xmlns {
@@ -1201,17 +1213,17 @@ proc ::Jabber::GroupChat::BrowseUser {userXmlList} {
     
     ::Debug 2 "::Jabber::GroupChat::BrowseUser userXmlList='$userXmlList'"
 
-    array set attrArr [lindex $userXmlList 1]
+    array set argsArr [lindex $userXmlList 1]
     
     # Direct it to the correct room. 
-    set jid $attrArr(jid)
+    set jid $argsArr(jid)
     set parentList [$jstate(browse) getparents $jid]
     set parent [lindex $parentList end]
     
     # Do something only if joined that room.
     if {[$jstate(jlib) service isroom $parent] &&  \
       ([lsearch [$jstate(jlib) conference allroomsin] $parent] >= 0)} {
-	if {[info exists attrArr(type)] && [string equal $attrArr(type) "remove"]} {
+	if {[info exists argsArr(type)] && [string equal $argsArr(type) "remove"]} {
 	    RemoveUser $parent $jid
 	} else {
 	    SetUser $parent $jid {}
@@ -1225,7 +1237,7 @@ proc ::Jabber::GroupChat::BrowseUser {userXmlList} {
 #       
 # Arguments:
 #       roomjid     the room's jid
-#       jid3     $roomjid/hashornick
+#       jid3        roomjid/hashornick
 #       presence    "available", "unavailable", or "unsubscribed"
 #       args        list of '-key value' pairs where '-key' can be
 #                   -resource, -from, -type, -show...
@@ -1236,12 +1248,13 @@ proc ::Jabber::GroupChat::BrowseUser {userXmlList} {
 proc ::Jabber::GroupChat::SetUser {roomjid jid3 presence args} {
     global  this
 
+    variable userRoleToStr
     upvar ::Jabber::jstate jstate
 
     ::Debug 2 "::Jabber::GroupChat::SetUser roomjid=$roomjid,\
-      jid3=$jid3 presence=$presence"
+      jid3=$jid3 presence=$presence args=$args"
 
-    array set attrArr $args
+    array set argsArr $args
     set roomjid [jlib::jidmap $roomjid]
     set jid3    [jlib::jidmap $jid3]
 
@@ -1259,16 +1272,16 @@ proc ::Jabber::GroupChat::SetUser {roomjid jid3 presence args} {
     jlib::splitjid $jid3 jid2 resource
     
     # If we got a browse push with a <user>, asume is available.
-    if {[string length $presence] == 0} {
+    if {$presence == ""} {
 	set presence available
     }
     
     # Any show attribute?
     set showStatus $presence
-    if {[info exists attrArr(-show)] && [string length $attrArr(-show)]} {
-	set showStatus $attrArr(-show)
-    } elseif {[info exists attrArr(-subscription)] &&   \
-      [string equal $attrArr(-subscription) "none"]} {
+    if {[info exists argsArr(-show)] && ($argsArr(-show) != "")} {
+	set showStatus $argsArr(-show)
+    } elseif {[info exists argsArr(-subscription)] &&   \
+      [string equal $argsArr(-subscription) "none"]} {
 	set showStatus "subnone"
     }
     
@@ -1276,45 +1289,46 @@ proc ::Jabber::GroupChat::SetUser {roomjid jid3 presence args} {
     set wusers $state(wusers)
     
     # Old-style groupchat and browser compatibility layer.
-    set nick [::Jabber::JlibCmd service nick $jid3]
+    set nick [$jstate(jlib) service nick $jid3]
     set icon [eval {::Jabber::Roster::GetPresenceIcon $jid3 $presence} $args]
-    $wusers configure -state normal
-    set insertInd end
-    set begin end
-    set range [$wusers tag ranges $resource]
-    if {[llength $range]} {
-	
-	# Remove complete line including image.
-	set insertInd [lindex $range 0]
-	set begin "$insertInd linestart"
-	$wusers delete "$insertInd linestart" "$insertInd lineend +1 char"
-    }    
-    
-    # Icon that is popup sensitive.
-    $wusers image create $begin -image $icon -align bottom
-    $wusers tag add $resource "$begin linestart" "$begin lineend"
-
-    # Use hex string, nickname (resource) as tag.
-    $wusers insert "$begin +1 char" " $nick\n" $resource
-    $wusers configure -state disabled
-    
-    # For popping up menu.
-    if {[string match "mac*" $this(platform)]} {
-	$wusers tag bind $resource <Button-1>  \
-	  [list [namespace current]::PopupTimer $token $jid3 %x %y]
-	$wusers tag bind $resource <ButtonRelease-1>   \
-	  [list [namespace current]::PopupTimerCancel $token]
-	$wusers tag bind $resource <Control-Button-1>  \
-	  [list [namespace current]::Popup $wusers $jid3 %x %y]
-	$wusers tag bind $resource <Button-2>  \
-	  [list [namespace current]::Popup $wusers $jid3 %x %y]
+        
+    # Cover both a "flat" users list and muc's with the roles 
+    # moderator, participant, and visitor.
+    set role ""
+    if {[info exists argsArr(-x)]} {
+	set role [GetAnyRoleFromXElem $argsArr(-x)]
+    }
+    if {$role == ""} {
+	$wusers newitem $jid3 -text $nick -image $icon -tags $jid3
     } else {
-	$wusers tag bind $resource <Button-3>  \
-	  [list [namespace current]::Popup $wusers $jid3 %x %y]
+	if {![$wusers isitem $role]} {
+	    $wusers newitem $role -text $userRoleToStr($role) -dir 1 \
+	      -sortcommand {lsort -dictionary}
+	    if {[string equal $role "moderator"]} {
+		$wusers raiseitem $role
+	    }
+	}
+	$wusers newitem [list $role $jid3] -text $nick -image $icon -tags $jid3
     }
     
     # Noise.
     ::Sounds::PlayWhenIdle online
+}
+
+proc ::Jabber::GroupChat::GetAnyRoleFromXElem {xelem} {
+    
+    set role ""
+    set clist [wrapper::getnamespacefromchilds $xelem x \
+      "http://jabber.org/protocol/muc#user"]
+    set userElem [lindex $clist 0]
+    if {[llength $userElem]} {
+	set ilist [wrapper::getchildswithtag $userElem "item"]
+	set item [lindex $ilist 0]
+	if {[llength $item]} {
+	    set role [wrapper::getattribute $item "role"]
+	}
+    }
+    return $role
 }
     
 proc ::Jabber::GroupChat::RegisterPopupEntry {menuSpec} {
@@ -1352,8 +1366,7 @@ proc ::Jabber::GroupChat::PopupTimerCancel {token} {
 #       
 # Arguments:
 #       w           widget that issued the command: tree or text
-#       v           for the tree widget it is the item path, 
-#                   for text the jidhash.
+#       v           for the tree widget it is the item path
 #       
 # Results:
 #       popup menu displayed
@@ -1373,18 +1386,18 @@ proc ::Jabber::GroupChat::Popup {w v x y} {
     
     set typeClicked ""
     
-    set jid $v
+    set jid [lindex $v end]
     set jid3 $jid
     if {[regexp {^[^@]+@[^@]+(/.*)?$} $jid match res]} {
 	set typeClicked user
     }
-    if {[string length $jid] == 0} {
+    if {$jid == ""} {
 	set typeClicked ""	
     }
     set X [expr [winfo rootx $w] + $x]
     set Y [expr [winfo rooty $w] + $y]
     
-    ::Debug 2 "    jid=$jid, typeClicked=$typeClicked"
+    ::Debug 2 "\t jid=$jid, typeClicked=$typeClicked"
     
     # Mads Linden's workaround for menu post problem on mac:
     # all in menubutton commands i add "after 40 the_command"
@@ -1471,13 +1484,20 @@ proc ::Jabber::GroupChat::RemoveUser {roomjid jid3} {
     # Get the hex string to use as tag.
     jlib::splitjid $jid3 jid2 resource
     set wusers $state(wusers)
-    $wusers configure -state normal
-    set range [$wusers tag ranges $resource]
-    if {[llength $range]} {
-	set insertInd [lindex $range 0]
-	$wusers delete "$insertInd linestart" "$insertInd lineend +1 char"
+    if {0} {
+	$wusers configure -state normal
+	set range [$wusers tag ranges $resource]
+	if {[llength $range]} {
+	    set insertInd [lindex $range 0]
+	    $wusers delete "$insertInd linestart" "$insertInd lineend +1 char"
+	}
+	$wusers configure -state disabled
     }
-    $wusers configure -state disabled
+    
+    set item [$wusers find withtag $jid3]
+    if {$item != ""} {
+	$wusers delitem $item
+    }
     
     # Noise.
     ::Sounds::PlayWhenIdle offline

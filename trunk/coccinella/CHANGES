@@ -11,6 +11,8 @@ Coccinella-0.95.2 (04????): 	Short summary --
 	- extended buddy pouncing
 	- added automatic login option
 	- improved smiley/url text parsing which is 20 times faster
+	- reworked layoyt of tree widget
+	- muc chatrooms now show users role
 
 
 Coccinella-0.95.1 (040930): 	Short summary --

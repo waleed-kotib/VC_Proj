@@ -71,6 +71,7 @@
 ::msgcat::mcset sv Logout               {Logga ut}
 ::msgcat::mcset sv Message              {Meddelande}
 ::msgcat::mcset sv Middle		{Mittinitial}
+::msgcat::mcset sv Moderators           {Moderatorer}
 ::msgcat::mcset sv More                 {Mer}
 ::msgcat::mcset sv Never		{Aldrig}
 ::msgcat::mcset sv New 			{Nytt}
@@ -84,6 +85,7 @@
 ::msgcat::mcset sv Online               {Tillgänglig}
 ::msgcat::mcset sv Open                 {Öppna}
 ::msgcat::mcset sv Options              {Valmöjligheter}
+::msgcat::mcset sv Participants         {Deltagare}
 ::msgcat::mcset sv Password 		{Lösenord}
 ::msgcat::mcset sv Pick 		{Välj}
 ::msgcat::mcset sv Phone                {Telefon}
@@ -139,6 +141,7 @@
 ::msgcat::mcset sv Unsubscribe		{Avsluta prenumeration}
 ::msgcat::mcset sv Unsubscribed		{Prenumeration avslutad}
 ::msgcat::mcset sv Username 		{Användarnamn}
+::msgcat::mcset sv Vistors              {Besökare}
 ::msgcat::mcset sv Warning              {Varning}
 ::msgcat::mcset sv Welcome              {Välkommen}
 ::msgcat::mcset sv Whiteboard           {Skrivtavla}

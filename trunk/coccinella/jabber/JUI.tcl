@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.61 2004-10-20 13:35:59 matben Exp $
+# $Id: JUI.tcl,v 1.62 2004-10-29 13:17:15 matben Exp $
 
 package provide JUI 1.0
 
@@ -37,7 +37,6 @@ namespace eval ::Jabber::UI:: {
     option add *JMain*Tree.backgroundImage        {}              widgetDefault
     option add *JMain*Tree.highlightBackground    white           widgetDefault
     option add *JMain*Tree.highlightColor         black           widgetDefault
-    option add *JMain*Tree.indention              14              widgetDefault
     option add *JMain*Tree.styleIcons             plusminus       widgetDefault
     option add *JMain*Tree.pyjamasColor           white           widgetDefault
     option add *JMain*Tree.selectBackground       black           widgetDefault

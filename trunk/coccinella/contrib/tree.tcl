@@ -6,7 +6,7 @@
 # Copyright (C) 2002-2004 Mats Bengtsson
 # This source file is distributed under the BSD license.
 # 
-# $Id: tree.tcl,v 1.37 2004-10-28 07:38:08 matben Exp $
+# $Id: tree.tcl,v 1.38 2004-10-29 13:17:15 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -46,13 +46,15 @@
 #	-selectmode, selectMode, SelectMode                   (0|1)
 #	-selectoutline, selectOutline, SelectOutline
 #	-silent, silent, Silent                               (0|1)
+#	-sortcommand, sortCommand, SortCommand                tclProc
 #       -sortlevels, sortLevels, SortLevels
-#	-sortorder, sortOrder, SortOrder                      (decreasing|increasing)?
 #       -stripecolors, stripeColors, StripeColors
-#	-styleicons, styleIcons, StyleIcons                  (plusminus|triangle|crystal)
+#	-styleicons, styleIcons, StyleIcons                  
+#	                            (plusminus|plusminusbw|triangle|crystal)
 #	-treecolor, treeColor, TreeColor                      color?
 #	-treedash, treeDash, TreeDash                         dash
 #	-width, width, Width
+#	-xmargin, xMargin, Margin
 #	-xscrollcommand, xScrollCommand, ScrollCommand
 #	-yscrollcommand, yScrollCommand, ScrollCommand
 #	
@@ -82,6 +84,7 @@
 #      -foreground    color
 #      -image         imageName
 #      -open          0|1
+#      -sortcommand   ""|tclProc
 #      -style         normal|bold|italic
 #      -tags
 #      -text
@@ -92,7 +95,7 @@
 #         v   itemPath
 #
 # *) a question mark (?) means that an empty list {} is also an option.
-#    -sortorder doesn't work when configure'ing.
+#    -sortcommand (on widget) doesn't work when configure'ing.
 # 
 # ########################### CHANGES ##########################################
 #
@@ -109,6 +112,7 @@
 #                   -stripecolors; 
 #                   items: -foreground, -backgroundbd,
 #                   reworked internals
+#       041029      major rework of drawing and a lot of other things
 
 package require Tcl 8.4
 package require colorutils
@@ -140,7 +144,7 @@ namespace eval tree {
 	    0x01, 0x01, 0x01, 0x01, 0xff, 0x01
 	};
     }
-    set widgetGlobals(openPM)   \
+    set widgetGlobals(openPMbw)   \
       [image create bitmap -data $data -maskdata $maskdata \
       -foreground black -background white]
     set data "#define closed_width 9\n#define closed_height 9"
@@ -150,7 +154,7 @@ namespace eval tree {
 	    0x11, 0x01, 0x01, 0x01, 0xff, 0x01
 	};
     }
-    set widgetGlobals(closePM)   \
+    set widgetGlobals(closePMbw)   \
       [image create bitmap -data $data -maskdata $maskdata \
       -foreground black -background white]
     
@@ -298,12 +302,13 @@ proc ::tree::Init { } {
 	-selectoutline       {selectOutline        SelectOutline       }
 	-silent              {silent               Silent              }
 	-sortlevels          {sortLevels           SortLevels          }
-	-sortorder           {sortOrder            SortOrder           }
+	-sortcommand         {sortCommand          SortCommand         }
 	-stripecolors        {stripeColors         StripeColors        }
 	-styleicons          {styleIcons           StyleIcons          }
 	-treecolor           {treeColor            TreeColor           }
 	-treedash            {treeDash             TreeDash            }
 	-width               {width                Width               }
+	-xmargin             {xMargin              Margin              }
 	-xscrollcommand      {xScrollCommand       ScrollCommand       }
 	-yscrollcommand      {yScrollCommand       ScrollCommand       }
     }
@@ -317,8 +322,9 @@ proc ::tree::Init { } {
   
     # The legal widget commands.
     set widgetCommands {cget children closetree configure delitem   \
-      getselection getcanvas isitem itemconfigure labelat newitem opentree   \
-      setselection xview yview}
+      getselection getcanvas isitem itemconfigure labelat loweritem \
+      newitem opentree   \
+      raiseitem setselection xview yview}
 
     # Options for this widget
     option add *Tree.background            white           widgetDefault
@@ -333,7 +339,7 @@ proc ::tree::Init { } {
     option add *Tree.highlightColor        black           widgetDefault
     option add *Tree.highlightThickness    3               widgetDefault
     option add *Tree.height                100             widgetDefault
-    option add *Tree.indention             0               widgetDefault
+    option add *Tree.indention             8               widgetDefault
     option add *Tree.itemBackgoundBd       0               widgetDefault
     option add *Tree.openImage             ""              widgetDefault
     option add *Tree.openCommand           {}              widgetDefault
@@ -351,6 +357,7 @@ proc ::tree::Init { } {
     option add *Tree.treeColor             gray50          widgetDefault
     option add *Tree.treeDash              {}              widgetDefault
     option add *Tree.width                 100             widgetDefault
+    option add *Tree.xMargin               10              widgetDefault
     option add *Tree.xScrollCommand        {}              widgetDefault
     option add *Tree.yScrollCommand        {}              widgetDefault
     
@@ -802,11 +809,17 @@ proc ::tree::WidgetProc {w command args} {
 	labelat {
 	    set result [eval LabelAt $w $args]
 	}
+	loweritem {
+	    set result [eval RaiseLowerItem $w lower $args]
+	}
 	newitem {
 	    set result [eval NewItem $w $args]
 	}
 	opentree {
 	    set result [eval OpenTree $w $args]
+	}
+	raiseitem {
+	    set result [eval RaiseLowerItem $w raise $args]
 	}
 	setselection {
 	    set result [eval SetSelection $w $args]
@@ -923,7 +936,7 @@ proc ::tree::Configure {w args} {
 		    RemoveSelection $w
 		}
 	    }
-	    -sortorder {
+	    -sortcommand {
 		
 		if {![string equal $newValue $oldValue]} {
 		    
@@ -997,6 +1010,10 @@ proc ::tree::ConfigureIcons {w} {
 	    set priv(imclose) $widgetGlobals(closePM)	
 	    set priv(imopen)  $widgetGlobals(openPM)
 	}
+	plusminusbw {
+	    set priv(imclose) $widgetGlobals(closePMbw)	
+	    set priv(imopen)  $widgetGlobals(openPMbw)
+	}
 	triangle {
 	    set priv(imclose) $widgetGlobals(closeMac)	
 	    set priv(imopen)  $widgetGlobals(openMac)
@@ -1005,16 +1022,20 @@ proc ::tree::ConfigureIcons {w} {
 	    set priv(imclose) $widgetGlobals(closeCrystal)	
 	    set priv(imopen)  $widgetGlobals(openCrystal)
 	}
+	"" {
+	    set priv(imclose) ""
+	    set priv(imopen)  ""
+	}
 	default {
 	    return -code error "unrecognized value \"$options(-styleicons)\" for -styleicons"
 	}
     }
 
     # Let any -closeimage or -openimage override.
-    if {[string length $options(-closeimage)]} {
+    if {$options(-closeimage) != ""} {
 	set priv(imclose) $options(-closeimage)	
     }
-    if {[string length $options(-openimage)]} {
+    if {$options(-openimage) != ""} {
 	set priv(imopen) $options(-openimage)	
     }
 }
@@ -1130,6 +1151,13 @@ proc ::tree::ConfigureItem {w v args} {
 	    -open {
 		set result $state($uid:open)
 	    }
+	    -sortcommand {
+		if {[info exists state($uid:scmd)]} {
+		    set result $state($uid:scmd)
+		} else {
+		    set result ""
+		}
+	    }
 	    -style {
 		set result $state($uid:style)
 	    }
@@ -1197,6 +1225,11 @@ proc ::tree::SetItemOptions {w v args} {
 	    }
 	    -open {
 		set state($uid:open) $val
+	    }
+	    -sortcommand {
+		set state($uid:scmd) $val
+		set state($uid:children)  \
+		  [eval $state($uid:scmd) [list $state($uid:children)]]
 	    }
 	    -style {
 		if {[regexp {(normal|bold|italic)} $val]} {
@@ -1280,7 +1313,7 @@ proc ::tree::NewItem {w v args} {
     } else {
 	lappend state($uidDir:children) $tail
     }
-    if {[llength $options(-sortorder)]} {
+    if {[llength $options(-sortcommand)]} {
 	set doSort 1
 	if {[llength $options(-sortlevels)]} {
 	    set sort [lindex $options(-sortlevels) [expr [llength $v] - 1]]
@@ -1289,11 +1322,15 @@ proc ::tree::NewItem {w v args} {
 	    }
 	}
 	if {$doSort} {
-	    set state($uidDir:children)   \
-	      [lsort -$options(-sortorder) $state($uidDir:children)]
+	    set state($uidDir:children)  \
+	      [eval $options(-sortcommand) [list $state($uidDir:children)]]
 	}
     }
-
+    if {[info exists state($uidDir:scmd)] && ($state($uidDir:scmd) != "")} {
+	set state($uidDir:children)  \
+	  [eval $state($uidDir:scmd) [list $state($uidDir:children)]]
+    }
+    
     # Make fresh uid now that we know it's ok to create it.
     set uid [incr vuid]
     set v2uid($v)   $uid
@@ -1369,6 +1406,7 @@ proc ::tree::DelItem {w v args} {
 	    unset state($uid:text)
 	    unset state($uid:bg)
 	    unset state($uid:tags)
+	    unset -nocomplain state($uid:scmd)
 	    unset -nocomplain state($uid:tag)
 	    unset -nocomplain state($uid:ctags)
 	    set dir [lrange $v 0 end-1]
@@ -1387,6 +1425,58 @@ proc ::tree::DelItem {w v args} {
 	}
     }
     BuildWhenIdle $w
+}
+
+# ::tree::RaiseLowerItem --
+#
+#       Move an item up or down in the list of childrens.
+#       
+# Arguments:
+#       w       the widget path.
+#       what    "raise" or "lower".
+#       v       the item as a list.
+#       which   above or below tailname.
+#       
+# Results:
+#       none.
+
+proc ::tree::RaiseLowerItem {w what v {which ""}} {
+    
+    variable widgetGlobals
+    upvar ::tree::${w}::state state
+    upvar ::tree::${w}::v2uid v2uid
+    upvar ::tree::${w}::uid2v uid2v
+
+    set v [NormList $v]   
+    set dir  [lrange $v 0 end-1]
+    set tail [lindex $v end]
+    if {![info exists v2uid($dir)]} {
+	return -code error "parent item \"$dir\" is missing"
+    }
+    set uidDir $v2uid($dir)
+    if {$which == ""} {
+	if {$what == "raise"} {
+	    set idxin 0
+	} else {
+	    set idxin end
+	}
+    } else {
+	if {$what == "raise"} {
+	    set idxin [lsearch $state($uidDir:children) $which]
+	} else {
+	    set idxin [lsearch $state($uidDir:children) $which]
+	    incr idxin
+	}
+    }
+    set tmp $state($uidDir:children)
+    set idx [lsearch $tmp $tail]
+    if {$idx >= 0} {
+	set tmp [lreplace $tmp $idx $idx]
+    }
+    set state($uidDir:children) [linsert $tmp $idxin $tail]	
+    
+    BuildWhenIdle $w
+    return ""
 }
 
 # These procedures are only used for handling the Button bind commands.
@@ -1533,8 +1623,11 @@ proc ::tree::Build {w} {
 
     set can $widgets(canvas)
     
-    # Standard indention from center line to text start.
-    set priv(xindent) [expr [image width $priv(imopen)]/2 + 6]
+    # Standard indention from center line to icon or text start.
+    set priv(xindent) $options(-xmargin)
+    if {$priv(imopen) != ""} {
+	incr priv(xindent) [expr [image width $priv(imopen)]/2]
+    }
     foreach col $options(-stripecolors) {
 	set priv($col:stripelight) [::colorutils::getlighter $col]
 	set priv($col:stripedark)  [::colorutils::getdarker $col]
@@ -1555,7 +1648,11 @@ proc ::tree::Build {w} {
     # Keeps track of top y coords to draw.
     set state(y) 0
     set state(i) 0
-    BuildLayer $w {} [expr [image width $priv(imopen)]/2 + 4]
+    set xin 4
+    if {$priv(imopen) != ""} {
+	incr xin [expr [image width $priv(imopen)]/2]
+    }
+    BuildLayer $w {} $xin
     
     # At this stage the display list is almost completely mixed up. Reorder!
     $can lower ttreev ttreeh
@@ -1609,12 +1706,12 @@ proc ::tree::DrawBackgroundImage {w} {
 # Arguments:
 #       w       the widget path.
 #       v       the item as a list.
-#       in      indention in pixels.
+#       xin     x coordinate for the vertical tree line.
 #       
 # Results:
 #       new tree layer is drawn.
 
-proc ::tree::BuildLayer {w v in} {
+proc ::tree::BuildLayer {w v xin} {
 
     variable widgetGlobals
     upvar ::tree::${w}::widgets widgets
@@ -1623,7 +1720,7 @@ proc ::tree::BuildLayer {w v in} {
     upvar ::tree::${w}::priv priv
     upvar ::tree::${w}::v2uid v2uid
     
-    Debug 2 "::tree::BuildLayer v=$v, in=$in"
+    Debug 2 "::tree::BuildLayer v=$v, xin=$xin"
 
     set can $widgets(canvas)
     set hasTree 0
@@ -1632,7 +1729,7 @@ proc ::tree::BuildLayer {w v in} {
     set yTreeOff $widgetGlobals(yTreeOff)
 
     set treeCol $options(-treecolor)
-    set indention [expr $priv(xindent) + $options(-indention)]
+    set indention $options(-indention)
     if {[string length $treeCol]} {
 	set hasTree 1
     }
@@ -1641,18 +1738,19 @@ proc ::tree::BuildLayer {w v in} {
     } else {
 	set vx $v
     }
-    set uid $v2uid($v)
-    set y      $state(y)
-    set ystart $y
-    set yline  $priv(yline)
-    set yoff   [expr $yline/2]
-    set ycent  [expr $y + $yoff]
+    set uid     $v2uid($v)
+    set xoff    $priv(xindent)
+    set y       $state(y)
+    set ystart  $y
+    set yline   $priv(yline)
+    set yoff    [expr $yline/2]
+    set ycent   [expr $y + $yoff]
     set scrollwidth $options(-scrollwidth)
     set fg          $options(-foreground)
     set stripecols  $options(-stripecolors)
     set stripelen   [llength $stripecols]
     set itembd      $options(-itembackgroundbd)
-
+    
     Debug 3 "\t uid=$uid"
     
     # Loop through all childrens.
@@ -1677,16 +1775,16 @@ proc ::tree::BuildLayer {w v in} {
 	
 	# Any background color?
 	set bgi ""
-	if {[string length $state($uidc:bg)]} {
+	if {$state($uidc:bg) != ""} {
 	    set bgi     $state($uidc:bg)
 	    set bglight $state($uidc:bglight)
 	    set bgdark  $state($uidc:bgdark)
-	} elseif {[string length $stripecols]} {
+	} elseif {$stripecols != ""} {
 	    set bgi     [lindex $stripecols [expr $state(i) % $stripelen]]
 	    set bglight $priv($bgi:stripelight)
 	    set bgdark  $priv($bgi:stripedark)
 	}
-	if {[string length $bgi]} {
+	if {$bgi != ""} {
 	    
 	    # Draw plain background.
 	    $can create rectangle 0 $y $scrollwidth $ylow \
@@ -1694,10 +1792,10 @@ proc ::tree::BuildLayer {w v in} {
 	    
 	    # Any borders.
 	    set bdi 0
-	    if {[string length $state($uidc:bd)]} {
+	    if {$state($uidc:bd) != ""} {
 		set bdi $state($uidc:bd)
 	    } 
-	    if {($bdi == 0) && [string length $itembd]} {
+	    if {($bdi == 0) && ($itembd != "")} {
 		set bdi $itembd
 	    }
 	    if {$bdi > 0} {
@@ -1710,7 +1808,6 @@ proc ::tree::BuildLayer {w v in} {
 	
 	# This is the "row height".
 	incr state(y) $yline
-	set x [expr $in + $indention]
 	
 	# Any pyjamas lines?
 	if {[llength $options(-pyjamascolor)] > 0} {
@@ -1720,22 +1817,22 @@ proc ::tree::BuildLayer {w v in} {
 	
 	# Tree lines?
 	if {$hasTree} {
-	    incr x 6
-	    $can create line $in $ycent [expr $x - 4] $ycent \
+	    $can create line $xin $ycent [expr $xin + $xoff - 4] $ycent \
 	      -fill $treeCol -tags ttreeh -dash $options(-treedash)
 	}
-	set icon $state($uidc:icon)
-	set text $state($uidc:text)
 	
-	# The 'x' means selectable!
-	#set taglist [list x $state($uidc:tags)]
+	# The 'x' tag means selectable!
 	set taglist x
 	set ids {}
 	if {[info exists state($uidc:ctags)]} {
 	    lappend taglist $state($uidc:ctags)
 	}
 	
-	if {[string length $icon] > 0} {
+	set x [expr $xin + $xoff]
+	set icon $state($uidc:icon)
+	set text $state($uidc:text)
+	
+	if {$icon != ""} {
 	    set id [$can create image $x $ycent -image $icon -anchor w \
 	      -tags $taglist]
 	    set state(v:$id) $vxc
@@ -1772,20 +1869,25 @@ proc ::tree::BuildLayer {w v in} {
 	# Do we have a directory here?
 	if {$isDir} {
 	    if {$state($uidc:open)} {
-		set id [$can create image $in $ycent -image $imopen -tags topen]
+		if {$imopen != ""} {
+		    set id [$can create image $xin $ycent -image $imopen -tags topen]
+		}
 		if {$hasChildren} {
 		
 		    # Call this recursively. 
 		    # The number here is the directory offset in x.
-		    BuildLayer $w $vxc [expr $in + $indention]
+		    BuildLayer $w $vxc [expr $xin + $indention]
 		}
 	    } else {
-		set id [$can create image $in $ycent -image $imclose -tags tclose]
+		if {$imclose != ""} {
+		    set id [$can create image $xin $ycent -image $imclose \
+		      -tags tclose]
+		}
 	    }
 	}
     }
     if {$hasTree} {
-	$can create line $in [expr $ystart - $yoff] $in [expr $ycent + $yTreeOff]  \
+	$can create line $xin [expr $ystart - $yoff] $xin [expr $ycent + $yTreeOff]  \
 	  -fill $treeCol -tags ttreev -dash $options(-treedash)
     }
 }

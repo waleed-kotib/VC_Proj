@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.91 2004-10-20 13:35:59 matben Exp $
+# $Id: Roster.tcl,v 1.92 2004-10-29 13:17:15 matben Exp $
 
 package provide Roster 1.0
 
@@ -308,7 +308,7 @@ proc ::Jabber::Roster::Build {w} {
       -foreground   [option get $w rootForeground {}]]
     
     eval {::tree::tree $wtree -width 100 -height 100 -silent 1  \
-      -sortorder dictionary -sortlevels {0} \
+      -sortcommand {lsort -dictionary} -sortlevels {0} \
       -scrollwidth 400  \
       -xscrollcommand [list ::UI::ScrollSet $wxsc \
       [list grid $wxsc -row 1 -column 0 -sticky ew]]  \

@@ -7,16 +7,6 @@ README
 
       - start wish
 
-      - execute:
-
-        source wrapper.tcl
-        source roster.tcl 
-        source browse.tcl 
-	source jabberlib.tcl 
-        source TestJlib.tcl
-
-      -	copy and paste the appropriate lines in TestJlib.tcl
-	to your console. Possibly need to edit some of the
-	lines.
+      - TODO
 
       - If you run tclsh instead of wish be sure to start the event loop.
