@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.54 2004-07-02 14:08:02 matben Exp $
+# $Id: Preferences.tcl,v 1.55 2004-07-07 13:07:14 matben Exp $
  
 package require notebook
 package require tree
@@ -575,12 +575,90 @@ proc ::Preferences::Proxies::InitPrefsHook { } {
       httpproxypassword} {
 	set prefs($key) ""
     }
+    set prefs(httpproxyauth) 0
+
+    variable winregkey
+    set winregkey [join {
+	HKEY_CURRENT_USER
+	Software Microsoft Windows
+	CurrentVersion "Internet Settings"
+    } \\] 
+    ::Preferences::Proxies::Init
     
     ::PreferencesUtils::Add [list  \
       [list prefs(httpproxyserver)    prefs_httpproxyserver    $prefs(httpproxyserver)]  \
       [list prefs(httpproxyport)      prefs_httpproxyport      $prefs(httpproxyport)]  \
+      [list prefs(httpproxyauth)      prefs_httpproxyauth      $prefs(httpproxyauth)]  \
       [list prefs(httpproxyusername)  prefs_httpproxyusername  $prefs(httpproxyusername)]  \
       [list prefs(httpproxypassword)  prefs_httpproxypassword  $prefs(httpproxypassword)]]
+}
+
+# Preferences::Proxies::Init --
+# 
+#       Rewritten from the autoproxy package.
+
+proc ::Preferences::Proxies::Init { } {
+    global  env tcl_platform prefs
+    variable winregkey
+    
+    set httpproxy ""
+    
+    # Look for environment variables.
+    if {[info exists env(http_proxy)]} {
+	set httpproxy $env(http_proxy)
+	if {[info exists env(no_proxy)]} {
+	    set no_proxy $env(no_proxy)
+	}
+    } else {
+	if {$tcl_platform(platform) == "windows"} {
+	    package require registry 1.0
+	    array set reg {ProxyEnable 0 ProxyServer "" ProxyOverride {}}
+	    catch {
+		set reg(ProxyEnable)   [registry get $winregkey "ProxyEnable"]
+		set reg(ProxyServer)   [registry get $winregkey "ProxyServer"]
+		set reg(ProxyOverride) [registry get $winregkey "ProxyOverride"]
+	    }
+	    if {![string is bool $reg(ProxyEnable)]} {
+		set reg(ProxyEnable) 0
+	    }
+	    
+	    if {[string first ";" $reg(ProxyServer)] == -1} {
+		set httpproxy $reg(ProxyServer)
+	    } else {
+		foreach tmp [split $reg(ProxyServer) ";"] {
+		    if { [string match "http=*" $tmp] } {
+			set httpproxy [string range $tmp 5 end]
+			break
+		    }
+		}
+	    } 
+				
+	    if {$reg(ProxyEnable)} {
+		set httpproxy $reg(ProxyServer)
+		set no_proxy  $reg(ProxyOverride)
+	    }
+	}
+    }
+    
+    # If we found something ...
+    if {$httpproxy != {}} {
+	# The http_proxy is supposed to be a URL - lets make sure.
+	if {![regexp {\w://.*} $httpproxy]} {
+	    set httpproxy " http://$httpproxy "
+	}
+	
+	# decompose the string.
+	if {[regexp {[^:]+://([^:/]+)(:[0-9]+)?/.*} $httpproxy match domain port]} {
+	    set prefs(httpproxyserver) $domain
+	    set prefs(httpproxyport)   $port
+	}
+	    
+	# turn the no_proxy value into a tcl list
+	set no_proxy [string map {; " " , " "} $no_proxy]
+	
+    }
+
+    # ???
 }
 
 proc ::Preferences::Proxies::BuildPage {page} {
@@ -609,6 +687,8 @@ proc ::Preferences::Proxies::BuildPage {page} {
     entry $pca.eserv -textvariable [namespace current]::tmpPrefs(httpproxyserver)
     label $pca.lport -text [::msgcat::mc {Proxy Port}]:
     entry $pca.eport -textvariable [namespace current]::tmpPrefs(httpproxyport)
+    checkbutton $pca.auth -text " [::msgcat::mc {Use proxy authorization}]" \
+      -textvariable [namespace current]::tmpPrefs(httpproxyauth)
     label $pca.luser -text [::msgcat::mc Username]:
     entry $pca.euser -textvariable [namespace current]::tmpPrefs(httpproxyusername)
     label $pca.lpass -text [::msgcat::mc Password]:
@@ -617,6 +697,7 @@ proc ::Preferences::Proxies::BuildPage {page} {
     grid $pca.msg   -          -sticky w
     grid $pca.lserv $pca.eserv
     grid $pca.lport $pca.eport
+    grid x          $pca.auth  -sticky w
     grid $pca.luser $pca.euser
     grid $pca.lpass $pca.epass
     grid $pca.lserv $pca.lport $pca.luser $pca.lpass -sticky e

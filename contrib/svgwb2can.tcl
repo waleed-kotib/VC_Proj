@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #
-# $Id: svgwb2can.tcl,v 1.4 2004-03-27 15:20:37 matben Exp $
+# $Id: svgwb2can.tcl,v 1.5 2004-07-07 13:07:13 matben Exp $
 
 package require svg2can
 
@@ -12,7 +12,7 @@ package provide svgwb2can 1.0
 
 namespace eval svgwb2can {
 
-
+    variable debug 0
 }
 
 # Due to the very unfortunate mix up of -fill & -outline in Tk which are used
@@ -65,6 +65,8 @@ proc svgwb2can::parseelement {xmllist args} {
 
 proc svgwb2can::parseconfigure {xmllist args} {
     
+    variable debug
+    
     array set argsArr $args
     set attr [svg2can::getattr $xmllist]
     array set attrArr $attr
@@ -104,8 +106,10 @@ proc svgwb2can::parseconfigure {xmllist args} {
 	    }
 	}
     }
-    puts "presAttr=$presAttr"
-    puts "cooAttr=$cooAttr"
+    if {$debug} {
+	puts "presAttr=$presAttr"
+	puts "cooAttr=$cooAttr"
+    }
     set cmdList {}
     if {[llength $presAttr]} {
 	set opts [eval {svg2can::StyleToOpts $type $presAttr} $styleArgs]
@@ -122,39 +126,70 @@ proc svgwb2can::parseconfigure {xmllist args} {
 	# new items.
 	# This would have been much simpler if there was a path canvas item...
 
-	# Assume for the moment line or polygon...
-	set pxmlList [can2svg::MakeXMLList path -attrlist [list id $id d $d]]
-	set pcmdList [svg2can::parsepath $pxmllist {}]
-	set cmd [lindex $pcmdList 0]
-	set idx [lsearch -glob $cmd {-[a-z]*}]
-	if {$idx < 1} {
-	    set idx end
+	switch -- $type {
+	    arc {
+		
+		# Extract the -extent and -start switches.
+		set arcxmllist [wrapper::createtag path -attrlist [list d $d]]
+		set arccmd [lindex [svg2can::ParsePath $arcxmllist {} {}] 0]
+		if {$debug} {
+		    puts "arcxmllist=$arcxmllist"
+		    puts "arccmd=$arccmd"
+		}
+		set cmd [list itemconfigure $id]
+		set ind [lsearch $arccmd -extent]
+		if {$ind >= 0} {
+		    lappend cmd -extent [lindex $arccmd [incr ind]]
+		}
+		set ind [lsearch $arccmd -start]
+		if {$ind >= 0} {
+		    lappend cmd -start [lindex $arccmd [incr ind]]
+		}
+		lappend cmdList $cmd
+	    }
+	    default {
+		
+		# Assume for the moment line or polygon...
+		set pxmllist [can2svg::MakeXMLList path -attrlist [list id $id d $d]]
+		set pcmdList [svg2can::ParsePath $pxmllist {} {}]
+		set cmd [lindex $pcmdList 0]
+		set idx [lsearch -glob $cmd {-[a-z]*}]
+		if {$idx < 1} {
+		    set idx end
+		}
+		set coo [lrange $cmd 2 [expr $idx - 1]]
+		lappend cmdList [list coords $id $coo]
+	    }
 	}
-	set coo [lrange $cmd 2 [expr $idx - 1]]
-	lappend cmdList [list coords $id $coo]
     } elseif {[info exists points]} {
 	set coo [svg2can::PointsToList $points]
 	lappend cmdList [concat coords $id $coo]
     } elseif {$type == "image"} {
 	lappend cmdList [concat coords $id $x $y]
+    } elseif {$type == "window"} {
+	lappend cmdList [concat coords $id $x $y]
     } elseif {[llength $cooAttr]} {
 	
 	# Original coords.
 	set coo [$argsArr(-canvas) coords $id]
-	#puts "coo=$coo"
 	set opts [GetOptsList $argsArr(-canvas) $id]
 	array set attrArr [can2svg::CoordsToAttr $type $coo $opts svgElement]
-	#puts "[array get attrArr]"
 	
 	# Overwrite using new attributes.
 	array set attrArr $cooAttr
-	#puts "[array get attrArr]"
+	if {$debug} {
+	    puts "coo=$coo"
+	    puts "[array get attrArr]"
+	    puts "[array get attrArr]"
+	}
 
 	# And then back to Tk again...
 	set coo [svg2can::AttrToCoords $svgElement [array get attrArr]]
 	lappend cmdList [concat coords $id $coo]
     }
-    puts "cmdList=$cmdList"
+    if {$debug} {
+	puts "cmdList=$cmdList"
+    }
     return $cmdList
 }
 

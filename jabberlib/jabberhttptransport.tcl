@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #
-# $Id: jabberhttptransport.tcl,v 1.4 2004-07-02 14:08:02 matben Exp $
+# $Id: jabberhttptransport.tcl,v 1.5 2004-07-07 13:07:13 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -256,8 +256,9 @@ proc jlib::http::Post {xml} {
     
     # -query forces a POST request.
     # Make sure we send it as text dispite the application/* type.???
+    # Add extra path /jabber/http ?
     if {[catch {
-	set token [::http::geturl $opts(url)  \
+	set token [::http::geturl $opts(url)/cgi-bin/httppoll.cgi  \
 	  -timeout $opts(-timeout) -query $qry -headers $opts(header) \
 	  -command [namespace current]::HttpResponse]
     } msg]} {
@@ -306,14 +307,16 @@ proc jlib::http::HttpResponse {token} {
     
     # Trap any errors first.
     set status [::http::status $token]
-    Debug 2 "jlib::http::HttpResponse status=$status"
-    
+    Debug 2 "jlib::http::HttpResponse status=$status, [::http::ncode $token]"
+
+    Debug 2 "bady='[::http::data $token]'"
+
     switch -- $status {
-	ok {
-	    
+	ok {	    
 	    if {[::http::ncode $token] != 200} {
-		
-		
+		if {[info exists opts(-command)]} {
+		    uplevel #0 $opts(-command) [list error [::http::ncode $token]]
+		}
 		return
 	    }
 	    array set metaArr $state(meta)

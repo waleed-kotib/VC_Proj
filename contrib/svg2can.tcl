@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #
-# $Id: svg2can.tcl,v 1.17 2004-06-24 13:48:35 matben Exp $
+# $Id: svg2can.tcl,v 1.18 2004-07-07 13:07:13 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -40,6 +40,7 @@ namespace eval svg2can {
 
     variable confopts
     array set confopts {
+	-foreignobjecthandler ""
 	-httphandler          ""
 	-imagehandler         ""
     }
@@ -211,6 +212,16 @@ proc svg2can::ParseElemRecursive {xmllist paropts transformList args} {
 		    ParseElemRecursive $c $paropts $transformList
 		} [array get attrArr]]]
 	    }	    
+	}
+	foreignObject {
+	    array set parseArr $paropts
+	    if {[string length $parseArr(-foreignobjecthandler)]} {
+		set elem [uplevel #0 $parseArr(-foreignobjecthandler) \
+		  [list $xmllist $paropts $transformList] $args]
+		if {$elem != ""} {
+		    set cmdList [concat $cmdList $elem]
+		}
+	    }
 	}
 	use - defs - marker - symbol {
 	    # todo
@@ -1263,7 +1274,7 @@ proc svg2can::StyleToOpts {type styleList args} {
 	switch -- $key {
 	    fill {
 		switch -- $type {
-		    oval - polygon - rectangle - text {
+		    arc - oval - polygon - rectangle - text {
 			set optsArr(-fill) [parseColor $value]
 		    }
 		}
@@ -1307,7 +1318,7 @@ proc svg2can::StyleToOpts {type styleList args} {
 	    }
 	    stroke {
 		switch -- $type {
-		    oval - polygon - rectangle {
+		    arc - oval - polygon - rectangle {
 			set optsArr(-outline) [parseColor $value]
 		    }
 		    line {

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: WinImport.tcl,v 1.7 2004-03-13 15:21:58 matben Exp $
+# $Id: WinImport.tcl,v 1.8 2004-07-07 13:07:14 matben Exp $
 
 #package require WindowsUtils
 
@@ -266,7 +266,8 @@ proc ::WinImport::Save {wCan id args} {
 	    lappend impArgs -file $fileName
 	}
 	lappend impArgs -tags [::CanvasUtils::GetUtag $wCan $id 1]
-	return "import [$wCan coords $id] $impArgs"
+	lappend impArgs -mime [::Types::GetMimeTypeForFileName $fileName]
+	return [concat import [$wCan coords $id] $impArgs]
     } else {
 	return ""
     }

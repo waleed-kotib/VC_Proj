@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasFile.tcl,v 1.1 2004-06-06 06:41:31 matben Exp $
+# $Id: CanvasFile.tcl,v 1.2 2004-07-07 13:07:14 matben Exp $
  
 package require can2svg
 package require svg2can
@@ -450,35 +450,10 @@ proc ::CanvasFile::CanvasToFile {w fd absPath} {
 		puts $fd $line
 	    } 
 	    window {
-		
-		# A movie: for QT we have a complete widget; 
-		set windowName [$w itemcget $id -window]
-		set windowClass [winfo class $windowName]
-		
-		switch -- $windowClass {
-		    QTFrame {
-			set line [::CanvasUtils::GetOnelinerForQTMovie $w $id \
-			  -basepath $absPath]
-			puts $fd $line		    
-		    }
-		    SnackFrame {			
-			set line [::CanvasUtils::GetOnelinerForSnack $w $id \
-			  -basepath $absPath]
-			puts $fd $line		    
-		    }
-		    XanimFrame {
-			# ?
-		    }
-		    default {
-			if {[::Plugins::HaveSaveProcForWinClass $windowClass]} {
-			    set procName \
-			      [::Plugins::GetSaveProcForWinClass $windowClass]
-			    set line [$procName $w $id]
-			    if {$line != ""} {
-				puts $fd $line		    
-			    }
-			}
-		    }
+		set line [::CanvasUtils::GetOneLinerForWindow $w $id \
+		  -basepath $absPath]
+		if {$line != {}} {
+		    puts $fd $line		    
 		}
 	    }
 	    default {
@@ -625,7 +600,8 @@ proc ::CanvasFile::DoSaveCanvasFile {wtop} {
     
     switch -- $ext {
 	".svg" {
-	    ::can2svg::canvas2file $wCan $fileName -uritype file -usetags 0
+	    ::can2svg::canvas2file $wCan $fileName -uritype file -usetags 0 \
+	      -windowitemhandler ::CanvasUtils::GetSVGForeignFromWindowItem
 	}
 	default {
 	    
@@ -702,6 +678,9 @@ proc ::CanvasFile::ImagePathTranslation {optList absFilePath} {
     return $newOptList
 }
 
+# CanvasFile::SVGFileToCanvas --
+# 
+#       Imports an svg file to canvas.
 
 proc ::CanvasFile::SVGFileToCanvas {wtop filePath} {
     
@@ -719,7 +698,8 @@ proc ::CanvasFile::SVGFileToCanvas {wtop filePath} {
     
     # Update the utags...
     set cmdList [svg2can::parsesvgdocument $xmllist  \
-      -imagehandler [list ::CanvasFile::SVGImageHandler $wtop]]
+      -imagehandler [list ::CanvasFile::SVGImageHandler $wtop] \
+      -foreignobjecthandler [list ::CanvasUtils::SVGForeignObjectHandler $wtop]]
     foreach cmd $cmdList {
 	set utag [::CanvasUtils::NewUtag]
 	set cmd [::CanvasUtils::ReplaceUtag $cmd $utag]

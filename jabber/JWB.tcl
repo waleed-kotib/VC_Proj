@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.14 2004-07-02 14:08:01 matben Exp $
+# $Id: JWB.tcl,v 1.15 2004-07-07 13:07:13 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -80,14 +80,14 @@ proc ::Jabber::WB::Init {jlibName} {
     ::Jabber::AddClientXmlns [list "coccinella:wb"]
     
     # Add Advanced Message Processing elements. <amp/>
-    # Deliver only to specified resource, and do not store offline.
+    # Deliver only to specified resource, and do not store offline?
     variable ampElem
     set rule1 [wrapper::createtag "rule"  \
       -attrlist {condition deliver-at value stored action error}]
     set rule2 [wrapper::createtag "rule"  \
       -attrlist {condition match-resource value exact action error}]
     set ampElem [wrapper::createtag "amp" -attrlist \
-      {xmlns http://jabber.org/protocol/amp} -subtags [list $rule1 $rule2]]
+      {xmlns http://jabber.org/protocol/amp} -subtags [list $rule2]]
 }
 
 proc ::Jabber::WB::InitUI { } {
@@ -796,7 +796,8 @@ proc ::Jabber::WB::CanvasCmdListToMessageXElement {wtop cmdList} {
 	foreach cmd $cmdList {
 	    set cmd [::CanvasUtils::FontHtmlToPixelSize $cmd]
 	    set subx [concat $subx \
-	      [can2svgwb::svgasxmllist $cmd -usestyleattribute 0 -canvas $wcan]]
+	      [can2svgwb::svgasxmllist $cmd -usestyleattribute 0 -canvas $wcan \
+	      -unknownimporthandler ::CanvasUtils::GetSVGForeignFromImportCmd]]
 	}
 	set xlist [list [wrapper::createtag x -attrlist  \
 	  [list xmlns $xmlnsSVGWB] -subtags $subx]]
@@ -805,8 +806,7 @@ proc ::Jabber::WB::CanvasCmdListToMessageXElement {wtop cmdList} {
 	# Form an <x xmlns='coccinella:wb'><raw> element in message.
 	set subx {}
 	foreach cmd $cmdList {
-	    lappend subx [wrapper::createtag "raw" \
-	      -chdata "CANVAS: $cmd"]
+	    lappend subx [wrapper::createtag "raw" -chdata "CANVAS: $cmd"]
 	}
 	set xlist [list [wrapper::createtag x -attrlist  \
 	  {xmlns coccinella:wb} -subtags $subx]]
@@ -1061,6 +1061,8 @@ proc ::Jabber::WB::GetSVGWBMessageList {wtop xlist} {
 	array set attrArr [wrapper::getattrlist $xelem]
 	if {[string equal $attrArr(xmlns) $xmlnsSVGWB]} {
 	    set cmdList [svgwb2can::parsesvgdocument $xelem -canvas $wcan \
+	      -foreignobjecthandler \
+	      [list ::CanvasUtils::SVGForeignObjectHandler $wtop] \
 	      -httphandler [list [namespace current]::SVGHttpHandler $wtop]]
 	    #puts "---cmdList=$cmdList"
 	}
