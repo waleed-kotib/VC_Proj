@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ImageAndMovie.tcl,v 1.8 2003-06-07 12:46:36 matben Exp $
+# $Id: ImageAndMovie.tcl,v 1.9 2003-07-05 13:30:35 matben Exp $
 
 package require http
 
@@ -47,7 +47,7 @@ proc ::ImageAndMovie::ImportImageOrMovieDlg {wtop} {
 	set opts {}
     }
     set fileName [eval {tk_getOpenFile -title [::msgcat::mc {Open Image/Movie}] \
-      -filetypes [::Plugins::GetTypeListDialogOption binary]} $opts]
+      -filetypes [::Plugins::GetTypeListDialogOption all]} $opts]
     if {$fileName == ""} {
 	return
     }
@@ -457,21 +457,33 @@ proc ::ImageAndMovie::DrawQuickTimeTcl {wtop fileName optListVar args} {
     if {[info exists optArr(above:)]} {
 	catch {$w raise $useTag $optArr(above:)}
     }
-    set width [winfo reqwidth $wmovie]
-    set height [winfo reqheight $wmovie]
-    set fileTail [file tail $fileName]
-
-    array set qtTime [$wmovie gettime]
-    set lenSecs [expr $qtTime(-movieduration)/$qtTime(-movietimescale)]
-    set lenMin [expr $lenSecs/60]
-    set secs [format "%02i" [expr $lenSecs % 60]]
-    set qtBalloonMsg "$fileTail\nLength: ${lenMin}:$secs"
-    
+    set qtBalloonMsg [::ImageAndMovie::QuickTimeBalloonMsg $wmovie $fileName]
     ::balloonhelp::balloonforwindow $wmovie $qtBalloonMsg
     lappend optList "width:" [winfo reqwidth $wmovie]  \
       "height:" [winfo reqheight $wmovie]
 
     return $errMsg
+}
+
+
+proc ::ImageAndMovie::QuickTimeBalloonMsg {wmovie fileName} {
+    
+    set msg [file tail $fileName]
+    if {[string equal [file extension $fileName] ".mp3"]} {
+	array set userArr [$wmovie userdata]
+	if {[info exists userArr(-artist)]} {
+	    append msg "\nArtist: $userArr(-artist)"
+	}
+	if {[info exists userArr(-fullname)]} {
+	    append msg "\nName: $userArr(-fullname)"
+	}
+    }
+    array set qtTime [$wmovie gettime]
+    set lenSecs [expr $qtTime(-movieduration)/$qtTime(-movietimescale)]
+    set lenMin [expr $lenSecs/60]
+    set secs [format "%02i" [expr $lenSecs % 60]]
+    append msg "\nLength: ${lenMin}:$secs"
+    return $msg
 }
 
 # ImageAndMovie::DrawSnack --
@@ -959,10 +971,7 @@ proc ::ImageAndMovie::DrawQuickTimeTclFromHttp {gettoken} {
 	catch {$w raise $useTag $optArr(above:)}
     }
     set fileName [GetFilePathFromUrl $url]
-    set fileTail [file tail $fileName]
-    set width [winfo reqwidth $wmovie]
-    set height [winfo reqheight $wmovie]
-    set qtBalloonMsg "$fileTail"
+    set qtBalloonMsg [::ImageAndMovie::QuickTimeBalloonMsg $wmovie $fileName]
     ::balloonhelp::balloonforwindow $wmovie $qtBalloonMsg
     
     # Nothing to cache, not possible to transport further.
