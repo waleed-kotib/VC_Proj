@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.88 2005-02-17 10:30:07 matben Exp $
+# $Id: jabberlib.tcl,v 1.89 2005-02-18 08:32:11 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -943,9 +943,10 @@ proc jlib::iq_handler {jlibname xmldata} {
     
     # (2) Handle all preregistered callbacks via id attributes.
     #     Must be type 'result' or 'error'.
+    #     Some components use type='set' instead of 'result'.
 
     switch -- $type {
-	result {
+	result - set {
 
 	    # A request for the entire roster is coming this way, 
 	    # and calls 'parse_roster_set'.
@@ -1611,11 +1612,11 @@ proc jlib::geterrspecfromerror {errelem kind} {
 	    switch -- $tag {
 		text {
 		    
-		    # Use only as a complement iff our language.
+		    # Use only as a complement iff our language. ???
 		    set xmlns [wrapper::getattribute $c xmlns]
 		    set lang  [wrapper::getattribute $c xml:lang]
-		    if {[string equal $xmlns $xmppxmlns($kind)] && \
-		      [string equal $lang [getlang]]} {
+		    # [string equal $lang [getlang]]
+		    if {[string equal $xmlns $xmppxmlns($kind)]} {
 			set errstr [wrapper::getcdata $c]
 		    }
 		} 
@@ -1629,7 +1630,7 @@ proc jlib::geterrspecfromerror {errelem kind} {
 	    }
 	}
 	if {[info exists errstr]} {
-	    append $errmsg " $errstr"
+	    append errmsg $errstr
 	}
     }
     return [list $errcode $errmsg]
@@ -2992,7 +2993,7 @@ proc jlib::get_version {jlibname to cmd} {
       [list [namespace current]::invoke_iq_callback $jlibname $cmd]
 }
 
-# jlib::handle_get_time --
+# jlib::handle_get_version --
 #
 #       Send our version. Response to 'jabber:iq:version' get.
 
@@ -3009,7 +3010,7 @@ proc jlib::handle_get_version {jlibname from subiq args} {
     }
     set os $tcl_platform(os)
     if {[info exists tcl_platform(osVersion)]} {
-	append os " $tcl_platform(osVersion)"
+	append os " " $tcl_platform(osVersion)
     }
     lappend opts -to $from
     set subtags [list  \
