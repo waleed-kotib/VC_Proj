@@ -1,0 +1,13 @@
+# Version: 2
+create rectangle 15.0 36.0 346.0 63.0 -disabledwidth 0 -fill #fffb87 -tags {rectangle */116546857 std}
+import 226.0 104.0 -tags */116546858 -width 128 -file ../images/penguin.gif -height 150
+create polygon 130.0 136.0 20.0 132.0 9.0 158.0 12.0 186.0 105.0 182.0 211.0 176.0 255.0 145.0 230.0 153.0 220.0 136.0 -fill #fffda8 -outline black -smooth 1 -splinesteps 5 -tags {poly polygon */116546859 std}
+create polygon 58.0 79.0 25.0 82.0 19.0 98.0 29.0 121.0 77.0 125.0 149.0 125.0 215.0 123.0 249.0 120.0 272.0 113.0 278.0 98.0 307.0 112.0 265.0 84.0 229.0 82.0 -fill #9fff8a -outline black -smooth 1 -splinesteps 4 -tags {poly polygon */116546862 std}
+create polygon 164.0 280.0 58.0 276.0 17.0 279.0 20.0 334.0 42.0 345.0 106.0 337.0 276.0 338.0 322.0 321.0 295.0 230.0 296.0 274.0 192.0 278.0 -fill #ffa1aa -outline black -smooth 1 -splinesteps 4 -tags {poly polygon */116546863 std}
+create polygon 119.0 203.0 16.0 203.0 -4.0 222.0 11.0 261.0 97.0 259.0 245.0 258.0 264.0 185.0 246.0 213.0 179.0 203.0 -fill #d7ffb5 -outline black -smooth 1 -splinesteps 5 -tags {polygon */116546864 std}
+create text 26.0 9.0 -anchor nw -font {Helvetica 5 normal} -tags {*/116546865 std text} -text {Welkom bij Coccinella}
+create text 28.0 45.0 -anchor nw -font {Helvetica 2 normal} -tags {*/116546866 std text} -text {De Jabber chatclient met een innovatief whiteboard}
+create text 34.0 91.0 -anchor nw -font {Helvetica 2 normal} -tags {*/116546867 std text} -text {Start door een nieuwe Jabber account te\nregistreren als u er nog geen hebt.}
+create text 21.0 142.0 -anchor nw -font {Helvetica 2 normal} -tags {*/116546868 std text} -text {Verstuur berichten, chat met iemand,\nen doe mee aan groepsgesprekken\nin kamers.}
+create text 14.0 214.0 -anchor nw -font {Helvetica 2 normal} -tags {*/116546869 std text} -text {Whiteboard communicatie zoals berichten\nversturen, met iemand chatten en\ndeelnemen aan groepsgesprekken.}
+create text 29.0 285.0 -anchor nw -font {Helvetica 2 normal} -tags {*/116546870 std text} -text {Onder Mac en Windows is er volledige QuickTime\nondersteuning in het in het whiteboard. U kan\nQuickTime gratis downloaden als u het nog niet\nhebt.}
