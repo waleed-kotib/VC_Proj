@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: browse.tcl,v 1.10 2003-07-05 13:37:54 matben Exp $
+# $Id: browse.tcl,v 1.11 2003-07-26 13:54:23 matben Exp $
 # 
 #  locals($jid,parent):       the parent of $jid.
 #  locals($jid,parents):      list of all parent jid's,
@@ -57,7 +57,7 @@
 #      browseName isbrowsed jid
 #      browseName isroom jid
 #      browseName remove jid
-#      browseName setjid jid xmllist
+#      browseName setjid jid xmllist       (only from jabberlib)
 #
 #   The 'clientCommand' procedure must have the following form:
 #   

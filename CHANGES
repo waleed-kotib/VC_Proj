@@ -8,9 +8,14 @@ Whiteboard-0.94.5 (03????): 	Short summary --
 
 	- jid completion entry
 	- setup assistant with free servers info dialog
-	- fixed really nasty bug where the ip number was net set correctly
+	- fixed really nasty bug where the ip number was not set correctly
  	  on systems with multiple network interfaces, particularly if 
 	  using ppp
+        - removed smoothness option, added smooth operation of polygons
+	- added auto update mechanism
+	- added chat history dialog
+	- reworked internals of the inbox, new file format
+	- plugin control preference panel
 
 
 Whiteboard-0.94.4 (030616): 	Short summary --

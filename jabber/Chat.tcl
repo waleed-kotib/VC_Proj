@@ -5,9 +5,11 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.8 2003-07-05 13:37:54 matben Exp $
+# $Id: Chat.tcl,v 1.9 2003-07-26 13:54:23 matben Exp $
 
 package require entrycomp
+package require uriencode
+
 package provide Chat 1.0
 
 namespace eval ::Jabber::Chat:: {
@@ -202,6 +204,9 @@ proc ::Jabber::Chat::GotMsg {body args} {
 	  -bg $prefs(bgColGeneral)
 	set locals($threadID,got1stMsg) 1
     }
+    set dateISO [clock format [clock seconds] -format "%Y%m%dT%H:%M:%S"]
+    ::Jabber::Chat::PutMessageInHistoryFile $jid2 \
+      [list $jid2 $threadID $dateISO $body]
     
     if {$jprefs(speakChat)} {
 	::UserActions::Speak $body $prefs(voiceOther)
@@ -288,7 +293,16 @@ proc ::Jabber::Chat::Build {threadID args} {
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised]   \
       -fill both -expand 1 -ipadx 4
-        
+    
+    # Widget paths.
+    set frmid $w.frall.frmid
+    set wtxt $frmid.frtxt
+    set wtext $wtxt.text
+    set wysc $wtxt.ysc
+    set wtxtsnd $frmid.frtxtsnd        
+    set wtextsnd $wtxtsnd.text
+    set wyscsnd $wtxtsnd.ysc
+    
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
     pack [button $frbot.btconn -text [::msgcat::mc Send] -width 8 -default active \
@@ -296,6 +310,8 @@ proc ::Jabber::Chat::Build {threadID args} {
       -side right -padx 5 -pady 2
     pack [button $frbot.btcancel -text [::msgcat::mc Close] -width 8   \
       -command [list [namespace current]::Close -threadid $threadID]]  \
+      -side right -padx 5 -pady 2
+    pack [::Jabber::UI::SmileyMenuButton $frbot.smile $wtextsnd]  \
       -side right -padx 5 -pady 2
     pack [checkbutton $frbot.active -text "  Active <Return>"   \
       -command [list [namespace current]::ActiveCmd $threadID] \
@@ -334,16 +350,12 @@ proc ::Jabber::Chat::Build {threadID args} {
     set locals($threadID,wtojid) $frtop.eto
 
     # Text chat.
-    set frmid $w.frall.frmid
     pack [frame $frmid -height 250 -width 300 -relief sunken -bd 1]  \
       -side top -fill both -expand 1 -padx 4 -pady 4
-    set wtxt $frmid.frtxt
     set locals($threadID,wtxt) $wtxt
     frame $wtxt
     set boldChatFont [lreplace $jprefs(chatFont) 2 2 bold]
     
-    set wtext $wtxt.text
-    set wysc $wtxt.ysc
     set locals($threadID,wtext) $wtext
     text $wtext -height 12 -width 1 -font $jprefs(chatFont) -state disabled -cursor {} \
       -borderwidth 1 -relief sunken -yscrollcommand [list $wysc set] -wrap word
@@ -366,11 +378,7 @@ proc ::Jabber::Chat::Build {threadID args} {
     ::Text::ConfigureLinkTagForTextWidget $wtext linktag tact
 
     # Text send.
-    set wtxtsnd $frmid.frtxtsnd    
     frame $wtxtsnd
-    
-    set wtextsnd $wtxtsnd.text
-    set wyscsnd $wtxtsnd.ysc
     text $wtextsnd -height 4 -width 1 -font $jprefs(chatFont) -wrap word \
       -borderwidth 1 -relief sunken -yscrollcommand [list $wyscsnd set]
     scrollbar $wyscsnd -orient vertical -command [list $wtextsnd yview]
@@ -462,11 +470,16 @@ proc ::Jabber::Chat::Send {threadID} {
     set wtextsnd $locals($threadID,wtextsnd)
 
     # Get text to send. Strip off any ending newlines from Return.
-    set allText [$wtextsnd get 1.0 "end - 1 char"]
+    # There might by smiley icons in the text widget. Parse them to text.
+    set allText [::Text::TransformToPureText $wtextsnd]
     set allText [string trimright $allText "\n"]
     if {$allText == ""} {
 	return
     }
+    
+    set dateISO [clock format [clock seconds] -format "%Y%m%dT%H:%M:%S"]
+    ::Jabber::Chat::PutMessageInHistoryFile $jid \
+      [list $jstate(mejid) $threadID $dateISO $allText]
     
     set opts {}
     if {$locals($threadID,subject) != ""} {
@@ -517,7 +530,6 @@ proc ::Jabber::Chat::TraceJid {threadID name junk1 junk2} {
 }
 
 proc ::Jabber::Chat::Print {threadID} {
-
     variable locals
 
     set wtext $locals($threadID,wtext)
@@ -594,6 +606,156 @@ proc ::Jabber::Chat::GetPanePos { } {
 	set ans {}
     }
     return $ans
+}
+
+# Various methods to handle chat history .......................................
+
+namespace eval ::Jabber::Chat:: {
+    
+    variable uidhist 1000
+}
+
+#       jid       2-tier jid
+
+proc ::Jabber::Chat::PutMessageInHistoryFile {jid msg} {
+    global  prefs
+    
+    set path [file join $prefs(historyPath) [uriencode::quote $jid]]    
+    if {![catch {open $path a} fd]} {
+	puts $fd "set message(\[incr uid]) {$msg}"
+	close $fd
+    }
+}
+
+#       jid       2-tier jid
+
+proc ::Jabber::Chat::BuildHistory {jid} {
+    global  sysFont prefs this
+    variable uidhist
+    upvar ::Jabber::jprefs jprefs
+    
+    set w .jchist[incr uidhist]
+    toplevel $w
+    if {[string match "mac*" $this(platform)]} {
+	eval $::macWindowStyle $w documentProc
+    } else {
+	
+    }
+    wm title $w "Chat History: $jid"
+    set wtxt $w.frall.fr
+    set wtext $wtxt.t
+    set wysc $wtxt.ysc
+    set boldChatFont [lreplace $jprefs(chatFont) 2 2 bold]
+    
+    # Global frame.
+    pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
+
+    # Button part.
+    set frbot [frame $w.frall.frbot -borderwidth 0]
+    pack [button $frbot.btclose -text [::msgcat::mc Close] -width 8 \
+      -command "destroy $w"] -side right -padx 5 -pady 5
+    pack [button $frbot.btclear -text [::msgcat::mc Clear] -width 8  \
+      -command [list [namespace current]::ClearHistory $jid $wtext]]  \
+      -side right -padx 5 -pady 5
+    pack [button $frbot.btprint -text [::msgcat::mc Print] -width 8  \
+      -command [list [namespace current]::PrintHistory $wtext]]  \
+      -side right -padx 5 -pady 5
+    pack $frbot -side bottom -fill x -padx 8 -pady 6
+    
+    # Text.
+    pack [frame $w.frall.fr] -fill both -expand 1
+    text $wtext -height 20 -width 72 -font $jprefs(chatFont) -cursor {} \
+      -borderwidth 1 -relief sunken -yscrollcommand [list $wysc set] -wrap word
+    scrollbar $wysc -orient vertical -command [list $wtext yview]
+    grid $wtext -column 0 -row 0 -sticky news
+    grid $wysc -column 1 -row 0 -sticky ns
+    grid columnconfigure $wtxt 0 -weight 1
+    grid rowconfigure $wtxt 0 -weight 1    
+    
+    # The tags.
+    set space 2
+    $wtext tag configure headtag -foreground black -background #cecece  \
+      -spacing1 4 -spacing3 4 -font $boldChatFont -lmargin1 20
+    $wtext tag configure metag -foreground red  \
+      -spacing1 $space -font $boldChatFont
+    $wtext tag configure metxttag -foreground black \
+      -spacing1 $space -spacing3 $space -lmargin1 20 -lmargin2 20
+    $wtext tag configure youtag -foreground blue -spacing1 $space  \
+       -font $boldChatFont
+    $wtext tag configure youtxttag -foreground black -spacing1 $space  \
+      -spacing3 $space -lmargin1 20 -lmargin2 20
+    ::Text::ConfigureLinkTagForTextWidget $wtext linktag tact
+    
+    
+    set path [file join $prefs(historyPath) [uriencode::quote $jid]] 
+    if {[file exists $path]} {
+	set uidstart 1000
+	set uid $uidstart
+	incr uidstart
+	catch {source $path}
+	set uidstop $uid
+	
+	# Organize chat sessions into the threads.
+	# First, identify the threads and order them.
+	set allThreads {}
+	for {set i $uidstart} {$i <= $uidstop} {incr i} {
+	    set thread [lindex $message($i) 1]
+	    if {![info exists threadDate($thread)]} {
+		set threadDate($thread) [lindex $message($i) 2]
+		lappend allThreads $thread
+	    }
+	}	
+
+	foreach thread $allThreads {
+	    set when [clock format [clock scan $threadDate($thread)]  \
+	      -format "%A %e %B %Y"]
+	    $wtext insert end "Thread started $when\n" headtag
+	    
+	    for {set i $uidstart} {$i <= $uidstop} {incr i} {
+		foreach {cjid cthread time body} $message($i) break
+		if {![string equal $cthread $thread]} {
+		    continue
+		}
+		set syssecs [clock scan $time]
+		set cwhen [clock format $syssecs -format "%H:%M:%S"]
+		if {[string equal $cjid $jid]} {
+		    set ptag youtag
+		    set ptxttag youtxttag
+		} else {
+		    set ptag metag
+		    set ptxttag metxttag
+		}
+		$wtext insert end "$cwhen <$cjid>" $ptag
+		$wtext insert end "   " $ptxttag
+		set textCmds [::Text::ParseAllForTextWidget $body $ptxttag linktag]
+		foreach cmd $textCmds {
+		    eval $wtext $cmd
+		}
+		$wtext insert end "\n"
+	    }
+	}
+    } else {
+	$wtext insert end "No registered chat history for $jid\n" headtag
+    }
+    $wtext configure -state disabled
+    wm minsize $w 200 320
+}
+
+proc ::Jabber::Chat::ClearHistory {jid wtext} {
+    global  prefs
+    
+    $wtext configure -state normal
+    $wtext delete 1.0 end
+    $wtext configure -state disabled
+    set path [file join $prefs(historyPath) [uriencode::quote $jid]] 
+    if {[file exists $path]} {
+	file delete $path
+    }
+}
+
+proc ::Jabber::Chat::PrintHistory {wtext} {
+        
+    ::UserActions::DoPrintText $wtext
 }
 
 #-------------------------------------------------------------------------------

@@ -4,7 +4,7 @@
 #
 #  Code idee from Harrison & McLennan
 #  
-# $Id: balloonhelp.tcl,v 1.2 2003-01-11 16:16:08 matben Exp $
+# $Id: balloonhelp.tcl,v 1.3 2003-07-26 13:54:23 matben Exp $
 
 package provide balloonhelp 1.0
 
@@ -187,13 +187,13 @@ proc ::balloonhelp::Show {win type} {
 		
 		# Be sure to take any scrolling into account.
 		foreach {sx sy swidth sheight} [$win cget -scrollregion] \
-		  { break }
+		  break
 		set xoff [expr int($swidth * [lindex [$win xview] 0])]
 		set yoff [expr int($sheight * [lindex [$win yview] 0])]
 		
 		set itemid $locals($win,itemid)
 		set msg $locals($win,$itemid) 
-		foreach {x0 y0 x1 y1} [$win bbox $itemid] { break }
+		foreach {x0 y0 x1 y1} [$win bbox $itemid] break
 		set x $locals($win,x)
 		set y [expr [winfo rooty $win] - $yoff + $y1 + 2]
 	    }
@@ -201,7 +201,7 @@ proc ::balloonhelp::Show {win type} {
 		set tag $locals($win,tag)
 		set msg $locals($win,$tag) 
 		set range [$win tag nextrange $tag 1.0]
-		foreach {x0 y0 w0 h0} [$win bbox [lindex $range 1]] { break }
+		foreach {x0 y0 w0 h0} [$win bbox [lindex $range 1]] break
 		set ymax [expr $y0+$h0]
 		set x $locals($win,x)
 		set y [expr [winfo rooty $win] + $ymax + 2]

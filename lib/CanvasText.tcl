@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasText.tcl,v 1.4 2003-02-06 17:23:33 matben Exp $
+# $Id: CanvasText.tcl,v 1.5 2003-07-26 13:54:23 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 
@@ -147,7 +147,7 @@ proc ::CanvasText::EditBind {w} {
     }
     
     # Stop certain keyboard accelerators from firing:
-    bind $w <Control-a> { break }
+    bind $w <Control-a> break
 }
 
 # CanvasText::CanvasFocus --

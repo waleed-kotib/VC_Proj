@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.6 2003-06-07 12:46:36 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.7 2003-07-26 13:54:23 matben Exp $
 
 # SetWhiteboardFactoryState --
 # 
@@ -48,9 +48,8 @@ proc SetWhiteboardFactoryState { } {
     # Fill color for circles, polygons etc.
     set state(fill) 0
     
-    # If and how polygons should be smoothed.
+    # If polygons should be smoothed.
     set state(smooth) 0
-    set state(splinesteps) 0
     
     # Arc styles.
     set state(arcstyle) "arc"
@@ -107,7 +106,7 @@ set prefs(reflectPort) 8144
 
 # The TinyHttpd server port number and base directory.
 set prefs(httpdPort) 8077
-set prefs(httpdBaseDir) $this(path)
+set prefs(httpdRootDir) $this(path)
 
 # NAT stuff.
 set prefs(setNATip) 0
@@ -179,6 +178,9 @@ set prefs(scaleCommonCG) 0
 # Constrain movements to 45 degrees, else 90 degree intervals.
 set prefs(45) 1
 
+# Fraction of points to strip when straighten.
+set prefs(straightenFrac) 0.3
+
 # Network options: symmetric network, or a central server?
 # Jabber server or our own (standard) protocol?
 # Options: 
@@ -225,44 +227,31 @@ set prefs(checkCache) "launch"
 # 0 means that it is built first when connected.
 set prefs(jabberCommFrame) 1
 
-# Animated 'Coccinella'?
-if {[::Plugins::HavePackage QuickTimeTcl]} {
-    set prefs(coccinellaMovie) 0
-} else {
-    set prefs(coccinellaMovie) 0
-}
-
 # If we have got TclSpeech the default is to have it enabled.
-if {[::Plugins::HavePackage TclSpeech] || [::Plugins::HavePackage MSSpeech]} {
-    set prefs(SpeechOn) 1
-    set prefs(SpeechOn) 0
-} else {
-    set prefs(SpeechOn) 0
-}
+set prefs(SpeechOn) 1
 
-# Default in/out voices. We should find some better way to verify that they 
-# exist. 'speak -list' returns the known voices. Use default voice for 'voiceUs'
-if {[::Plugins::HavePackage TclSpeech]} {
-    set prefs(voiceUs) Victoria
-    set prefs(voiceOther) Zarvox
-} elseif {[::Plugins::HavePackage MSSpeech]} {
-    set allVoices [::MSSpeech::GetVoices]
-    set prefs(voiceUs) [lindex $allVoices 0]
-    set prefs(voiceOther) [lindex $allVoices 1]
-} else {
-    set prefs(voiceUs) Victoria
-    set prefs(voiceOther) Zarvox
-}
+# Default in/out voices. They will be set to actual values in 
+# ::Plugins::VerifySpeech  
+set prefs(voiceUs) ""
+set prefs(voiceOther) ""
     
 # Installation directories.
 set prefs(itemDir) [file join $this(path) items]
 set prefs(addonsDir) [file join $this(path) addons]
+
+# Plugin ban list. Do not load these packages.
+set prefs(pluginBanList) {}
 
 # File open/save initialdirs.
 set prefs(userDir) $this(path)
 
 # If it is the first time the application is launched, then welcome.
 set prefs(firstLaunch) 1
+
+# Auto update mechanism: if lastUpdateVersion < run version => autoupdate
+set prefs(lastUpdateVersion) 0.0
+set prefs(doneAutoUpdate) 0
+set prefs(urlAutoUpdate) "http://coccinella.sourceforge.net/updates/update_en.xml"
 
 # The file name of the welcoming canvas.
 set prefs(welcomeFile) [file join $this(path) welcome.can]
@@ -325,9 +314,6 @@ set prefs(haveSaveFiletypes) 1
 if {$this(platform) == "macintosh"} {
     set prefs(haveSaveFiletypes) 0
 }
-
-# Number of bytes in copy buffert.
-set chunkSize 8192
 
 #---- Shortcuts ----------------------------------------------------------------
 #----   domain names for open connection ---------------------------------------
@@ -406,7 +392,6 @@ array set tclwbProtMsg {
 switch -- $this(platform) {
     unix {
 	set osprefs(mod) Control
-	set clockClicksPerSec 1000000
 	
 	# On a central installation need to have local dirs for write access.
 	set prefs(prefsDir) ~/.coccinella
@@ -417,11 +402,12 @@ switch -- $this(platform) {
 	  [file nativename [file join $prefs(prefsDir) incoming]]
 	set prefs(inboxCanvasPath)  \
 	  [file nativename [file join $prefs(prefsDir) canvases]]
+	set prefs(historyPath)  \
+	  [file nativename [file join $prefs(prefsDir) history]]
 	set prefs(webBrowser) netscape
     }
     macintosh {
 	set osprefs(mod) Command
-	set clockClicksPerSec 1000000
 	if {[info exists env(PREF_FOLDER)]} {
 	    set macPrefsDir $env(PREF_FOLDER)
 	} else {
@@ -431,25 +417,25 @@ switch -- $this(platform) {
 	set prefs(userPrefsFilePath)  \
 	  [file join $prefs(prefsDir) "Whiteboard Prefs"]
 	set prefs(oldPrefsFilePath) [file join $macPrefsDir "Whiteboard Prefs"]
-	set prefs(incomingPath) [file join $this(path) incoming]
+	set prefs(incomingPath) [file join $prefs(prefsDir) Incoming]
 	set prefs(inboxCanvasPath) [file join $prefs(prefsDir) Canvases]
+	set prefs(historyPath) [file join $prefs(prefsDir) History]
 	set prefs(webBrowser) {Internet Explorer}
     }
     macosx {
 	set osprefs(mod) Command
-	set clockClicksPerSec 1000000
 	set macosxPrefsDir "~/Library/Preferences"
 	set prefs(prefsDir) [file join $macosxPrefsDir Coccinella]
 	set prefs(userPrefsFilePath)  \
 	  [file join $prefs(prefsDir) "Whiteboard Prefs"]
 	set prefs(oldPrefsFilePath) $prefs(userPrefsFilePath)
-	set prefs(incomingPath) [file join $this(path) incoming]
+	set prefs(incomingPath) [file join $prefs(prefsDir) Incoming]
 	set prefs(inboxCanvasPath) [file join $prefs(prefsDir) Canvases]
+	set prefs(historyPath) [file join $prefs(prefsDir) History]
 	set prefs(webBrowser) {Internet Explorer}
     }
     windows {
 	set osprefs(mod) Control
-	set clockClicksPerSec 1000
 	if {[info exists env(USERPROFILE)]} {
 	    set winPrefsDir $env(USERPROFILE)
 	} else {
@@ -458,8 +444,9 @@ switch -- $this(platform) {
 	set prefs(prefsDir) [file join $winPrefsDir Coccinella]
 	set prefs(userPrefsFilePath) [file join $prefs(prefsDir) "WBPREFS.TXT"]
 	set prefs(oldPrefsFilePath) [file join $winPrefsDir "WBPREFS.TXT"]
-	set prefs(incomingPath) [file join $this(path) incoming]
+	set prefs(incomingPath) [file join $prefs(prefsDir) Incoming]
 	set prefs(inboxCanvasPath) [file join $prefs(prefsDir) Canvases]
+	set prefs(historyPath) [file join $prefs(prefsDir) History]
 	
 	# Not used anymore. Uses the registry instead.
 	set prefs(webBrowser) {C:/Program/Internet Explorer/IEXPLORE.EXE}
@@ -476,7 +463,9 @@ if {![file isdirectory $prefs(incomingPath)]} {
 if {![file isdirectory $prefs(inboxCanvasPath)]} {
     file mkdir $prefs(inboxCanvasPath)
 }
-
+if {![file isdirectory $prefs(historyPath)]} {
+    file mkdir $prefs(historyPath)
+}
     
 # Find out how many clicks or milliseconds there are on each second.
 set timingClicksToSecs 1000

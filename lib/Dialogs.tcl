@@ -7,9 +7,14 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.6 2003-05-18 13:20:21 matben Exp $
+# $Id: Dialogs.tcl,v 1.7 2003-07-26 13:54:23 matben Exp $
    
 package provide Dialogs 1.0
+
+namespace eval ::Dialogs:: {
+    
+    
+}
 
 # Define the toplevel windows here so they don't collide.
 # Toplevel dialogs.
@@ -142,12 +147,12 @@ proc ::GetCanvas::GetCanvas {w} {
 
 #-- end ::GetCanvas:: ----------------------------------------------------------
 
-#  InfoOnPlugins ---
+#  Dialogs::InfoOnPlugins ---
 #  
 #      It implements the dialog for presenting the loaded packages or helper 
 #      applications.
 
-proc InfoOnPlugins {w} {
+proc ::Dialogs::InfoOnPlugins {w} {
     global  sysFont prefs this
     
     # Check first of there are *any* plugins.
@@ -189,7 +194,7 @@ proc InfoOnPlugins {w} {
     pack $wysc -side right -fill y
     pack $wtxt -side left -fill both -expand 1
     
-    $wtxt tag configure ttitle -foreground black -background gray80  \
+    $wtxt tag configure ttitle -foreground black -background #dedede  \
       -spacing1 2 -spacing3 2 -lmargin1 20 -font $sysFont(sb)
     $wtxt tag configure tkey -font $sysFont(sb) -spacing1 2  \
       -tabs [list $xtab1 right $xtab2 left]
@@ -243,7 +248,12 @@ proc InfoOnPlugins {w} {
 	}
 	
 	$wtxt insert end "\n" tline
-	$wtxt insert end "$plug\n" ttitle
+	$wtxt insert end " " ttitle
+	set icon [::Plugins::GetIconForPackage $plug 16]
+	if {$icon != ""} {
+	    $wtxt image create end -image $icon
+	}
+	$wtxt insert end " $plug\n" ttitle
 	$wtxt insert end "\n" tline
 	$wtxt insert end "\tType:\t" tkey
 	$wtxt insert end "[::Plugins::GetTypeDesc $plug]\n" ttxt
@@ -261,8 +271,6 @@ proc InfoOnPlugins {w} {
     tkwait window $w
     grab release $w
 }
-
-#-- end InfoOnPlugins ----------------------------------------------------------
 
 # It implements the dialog for choosing type of network topology and some 
 # options.
@@ -380,15 +388,13 @@ proc ::NetworkSetup::StopServer { {wbt {}} } {
 
 # Printing the canvas on Unix/Linux.
 
-namespace eval ::PrintPSonUnix:: {
+namespace eval ::Dialogs:: {
     
-    namespace export PrintPSonUnix
-
     variable psCmd
-    variable finished
+    variable finishedPrint
 }
 
-# PrintPSonUnix::PrintPSonUnix --
+# ::Dialogs::UnixPrintPS --
 #
 #       It implements the dialog for printing the canvas on Unix/Linux.
 #       
@@ -399,15 +405,15 @@ namespace eval ::PrintPSonUnix:: {
 # Results:
 #       shows dialog.
 
-proc ::PrintPSonUnix::PrintPSonUnix {w wtoprint} {
+proc ::Dialogs::UnixPrintPS {w wtoprint} {
     global  sysFont prefs this
     
     variable psCmd
-    variable finished
+    variable finishedPrint
     
     Debug 2 "PrintPSonUnix (entry)::"
 
-    set finished -1
+    set finishedPrint -1
     set psCmd $prefs(unixPrintCmd)
     
     catch {toplevel $w}
@@ -438,10 +444,10 @@ proc ::PrintPSonUnix::PrintPSonUnix {w wtoprint} {
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
     pack [button $frbot.btpr -text [::msgcat::mc Print] -width 8 -default active  \
-      -command "set [namespace current]::finished 1"]  \
+      -command "set [namespace current]::finishedPrint 1"]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
-      -command "set [namespace current]::finished 0"]  \
+      -command "set [namespace current]::finishedPrint 0"]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -in $w.frall  \
       -padx 8 -pady 6
@@ -451,10 +457,10 @@ proc ::PrintPSonUnix::PrintPSonUnix {w wtoprint} {
     focus $w
     focus $frtot.entcmd
     bind $w <Return> "$frbot.btpr invoke"
-    tkwait variable [namespace current]::finished
+    tkwait variable [namespace current]::finishedPrint
     
     # Print...
-    if {$finished == 1} {
+    if {$finishedPrint == 1} {
 	switch -- [winfo class $wtoprint] {
 	    Canvas {
 	
@@ -478,10 +484,8 @@ proc ::PrintPSonUnix::PrintPSonUnix {w wtoprint} {
     }
     catch {grab release $w}
     destroy $w
-    return $finished
+    return $finishedPrint
 }
-
-#-- end ::PrintPSonUnix:: ------------------------------------------------------
 
 # Choosing postscript options for the canvas.
 
@@ -720,7 +724,7 @@ proc ::PSPageSetup::PushBtSave {  } {
 
 #-- end ::PSPageSetup:: --------------------------------------------------------
 
-# InfoClients::ShowInfoClients --
+# Dialogs::ShowInfoClients --
 #
 #       It implements a dialog that shows client information.
 #       
@@ -731,13 +735,7 @@ proc ::PSPageSetup::PushBtSave {  } {
 # Results:
 #       shows dialog.
 
-namespace eval ::InfoClients:: {
-    
-    namespace export ShowInfoClients ShowInfoReflectorClients
-    variable junk
-}
-
-proc ::InfoClients::ShowInfoClients {w allIPnumsFrom} {
+proc ::Dialogs::ShowInfoClients {w allIPnumsFrom} {
     global  sysFont ipNumTo this
     
     if {[llength $allIPnumsFrom] <= 0} {
@@ -819,7 +817,7 @@ proc ::InfoClients::ShowInfoClients {w allIPnumsFrom} {
 
 #-- end ShowInfoClients --------------------------------------------------------
 
-# ShowInfoServer --
+# Dialogs::ShowInfoServer --
 #
 #       It shows server information. Uses one of the 'allIPnumsTo' to get a 
 #       channel which is used to obtain information. If not connected, then 
@@ -832,7 +830,7 @@ proc ::InfoClients::ShowInfoClients {w allIPnumsFrom} {
 # Results:
 #       none
 
-proc ShowInfoServer {w thisIPnum} {
+proc ::Dialogs::ShowInfoServer {w thisIPnum} {
     global  sysFont this ipNumTo allIPnumsFrom  \
       state listenServSocket this prefs
     
@@ -942,7 +940,6 @@ proc ShowInfoServer {w thisIPnum} {
     grab release $w
 }
 
-#-- end ShowInfoServer ---------------------------------------------------------
 
 # Handles the splash screen.
 
@@ -981,7 +978,7 @@ proc ::SplashScreen::SplashScreen {w} {
     }
     wm title $w [::msgcat::mc {About Coccinella}]
     wm resizable $w 0 0
-    foreach {screenW screenH} [GetScreenSize] { break }
+    foreach {screenW screenH} [GetScreenSize] break
     wm geometry $w +[expr ($screenW - 450)/2]+[expr ($screenH - 300)/2]
     
     # If image not already there, get it.
@@ -992,7 +989,7 @@ proc ::SplashScreen::SplashScreen {w} {
     }
     set imHeight [image height mysplash]
     set imWidth [image width mysplash]
-    foreach {r g b} [mysplash get 50 [expr $imHeight - 20]] { break }
+    foreach {r g b} [mysplash get 50 [expr $imHeight - 20]] break
     if {[expr $r + $g + $b] > [expr 2*255]} {
 	set textcol black
     } else {
@@ -1029,16 +1026,24 @@ proc ::SplashScreen::SetMsg {msg} {
     }
 }
 
-# SplashScreen::Canvas --
+namespace eval ::Dialogs:: {
+    
+    # Running number to create unique toplevel paths.
+    variable uidcan 0
+}
+
+# Dialogs::Canvas --
 # 
 #       Display a *.can file into simple canvas window.
 
-proc ::SplashScreen::Canvas {w filePath} {
+proc ::Dialogs::Canvas {filePath args} {
     global this prefs
+    variable uidcan
     
     if {[catch {open $filePath r} fd]} {
 	return
     }
+    set w .spcan[incr uidcan]
     if [catch {toplevel $w}] {
 	return
     }
@@ -1047,9 +1052,11 @@ proc ::SplashScreen::Canvas {w filePath} {
     } else {
 
     }
-    wm title $w [::msgcat::mc {Welcome}]
+    array set argsArr [list -title [file rootname [file tail $filePath]]]
+    array set argsArr $args
+    wm title $w $argsArr(-title)
     wm resizable $w 0 0
-    foreach {screenW screenH} [GetScreenSize] { break }
+    foreach {screenW screenH} [GetScreenSize] break
     set xmax 200
     set ymax 200
     set wcan $w.can
@@ -1078,26 +1085,20 @@ proc ::SplashScreen::Canvas {w filePath} {
 	    import {
 		set ind [lsearch -exact $line -file]
 		if {$ind >= 0} {
-		    set co [lrange $line 1 2]
-		    set impath [lindex $line [incr ind]]
-		    set suff [file extension $impath]
-		    if {$suff == ".gif"} {
-			set imname [image create photo -file $impath]
-			set id [eval {$wcan create image} $co \
-			  {-anchor nw -image $imname}]
-		    }
+		    ::ImageAndMovie::HandleImportCmd $wcan $line -where local \
+		      -basepath [file dirname $filePath]
 		}
 	    }
 	}
     }
-    foreach {x0 y0 x1 y1} [eval {$wcan bbox} [$wcan find all]] { break }
+    foreach {x0 y0 x1 y1} [eval {$wcan bbox} [$wcan find all]] break
     incr x1 20
     incr y1 20
     $wcan configure -width $x1 -height $y1
     catch {close $fd}
 }
 
-proc AboutQuickTimeTcl { } {
+proc ::Dialogs::AboutQuickTimeTcl { } {
     global  this
     
     set w .abqt
@@ -1117,7 +1118,7 @@ proc AboutQuickTimeTcl { } {
     set theSize [$w.m size]
     set mw [lindex $theSize 0]
     set mh [lindex $theSize 1]
-    foreach {screenW screenH} [GetScreenSize] { break }
+    foreach {screenW screenH} [GetScreenSize] break
     wm geometry $w +[expr ($screenW - $mw)/2]+[expr ($screenH - $mh)/2]
     update
     wm resizable $w 0 0

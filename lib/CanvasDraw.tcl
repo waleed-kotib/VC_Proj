@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasDraw.tcl,v 1.6 2003-05-18 13:20:21 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.7 2003-07-26 13:54:23 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 
@@ -151,7 +151,7 @@ proc ::CanvasDraw::InitMove {w x y {what item}} {
 	    set xDrag(arcX) $x
 	    set xDrag(arcY) $y
 	    set theCoords $xDrag(coords)
-	    foreach {x1 y1 x2 y2} $fullListCoords { break }
+	    foreach {x1 y1 x2 y2} $fullListCoords break
 	    set r [expr abs(($x1 - $x2)/2.0)]
 	    set cx [expr ($x1 + $x2)/2.0]
 	    set cy [expr ($y1 + $y2)/2.0]
@@ -351,7 +351,7 @@ proc ::CanvasDraw::DoMove {w x y what {shift 0}} {
 		set newco [ConstrainedDrag $x $y $xDrag(anchorX) $xDrag(anchorY)]
 	    }
 	}
-	foreach {x y} $newco { break }
+	foreach {x y} $newco break
     }
     
     # First, get canvas objects with tag 'selected'.
@@ -406,7 +406,7 @@ proc ::CanvasDraw::DoMove {w x y what {shift 0}} {
 	    
 	    # Some geometry. We have got the coordinates defining the box.
 	    set theCoords $xDrag(coords)
-	    foreach {x1 y1 x2 y2} $theCoords { break }
+	    foreach {x1 y1 x2 y2} $theCoords break
 	    set r [expr abs(($x1 - $x2)/2.0)]
 	    set cx [expr ($x1 + $x2)/2.0]
 	    set cy [expr ($y1 + $y2)/2.0]
@@ -519,8 +519,7 @@ proc ::CanvasDraw::DoMoveFrame {wcan wframe x y} {
 # Results:
 #       none
 
-proc ::CanvasDraw::FinalizeMove {w x y {what item}} {
-    
+proc ::CanvasDraw::FinalizeMove {w x y {what item}} {    
     variable  xDrag
     
     Debug 2 "FinalizeMove:: what=$what, info exists xDrag=[info exists xDrag]"
@@ -680,8 +679,19 @@ proc ::CanvasDraw::FinalizeMove {w x y {what item}} {
 	set cmdList {}
 	set cmdUndoList {}
 	foreach it $theItno {
-	    lappend cmdList [list move $it $dx $dy]
-	    lappend cmdUndoList [list move $it $mdx $mdy]
+	    
+	    # Let images use coords instead since more robust if transported.
+	    switch -- [$w type $it] {
+		image {
+		    lappend cmdList [list coords $it $x $y]
+		    lappend cmdUndoList \
+		      [list coords $it $xDrag(anchorX) $xDrag(anchorY)]
+		}
+		default {
+		    lappend cmdList [list move $it $dx $dy]
+		    lappend cmdUndoList [list move $it $mdx $mdy]
+		}
+	    }
 	}
 	set redo [list ::CanvasUtils::CommandList $wtop $cmdList]
 	set undo [list ::CanvasUtils::CommandList $wtop $cmdUndoList]
@@ -689,8 +699,7 @@ proc ::CanvasDraw::FinalizeMove {w x y {what item}} {
     eval $redo "remote"
     if {[info exists undo]} {
 	undo::add [::UI::GetUndoToken $wtop] $undo $redo
-    }
-    
+    }    
     catch {unset xDrag}
 }
 
@@ -856,7 +865,7 @@ proc ::CanvasDraw::FinalizeBox {w x y shift type {mark 0}} {
 	return
     }
     catch {$w delete $theBox($w,last)}
-    foreach {xanch yanch} $theBox($w,anchor) { break }
+    foreach {xanch yanch} $theBox($w,anchor) break
     if {($xanch == $x) && ($yanch == $y)} {
 	set nomove 1
 	return
@@ -1324,9 +1333,9 @@ proc ::CanvasDraw::FinalizePoly {w x y} {
     }
     $w delete polylines
     if {$state(fill) == 0} {
-	set theFill "-fill {}"
+	set theFill [list -fill {}]
     } else {
-	set theFill "-fill $state(fgCol)"
+	set theFill [list -fill $state(fgCol)]
     }
     if {$prefs(haveDash)} {
 	set extras [list -dash $state(dash)]
@@ -1339,15 +1348,15 @@ proc ::CanvasDraw::FinalizePoly {w x y} {
 	# This is a (closed) polygon.
 	set cmd "create polygon $coords -tags {poly $utag}  \
 	  -outline $state(fgCol) $theFill -width $state(penThick)  \
-	  -smooth $state(smooth) -splinesteps $state(splinesteps) $extras"
+	  -smooth $state(smooth) $extras"
     } else {
 	
 	# This is an open line segment.
 	set cmd "create line $coords -tags {poly $utag}  \
 	  -fill $state(fgCol) -width $state(penThick)  \
-	  -smooth $state(smooth) -splinesteps $state(splinesteps) $extras"
+	  -smooth $state(smooth) $extras"
     }
-    set undocmd "delete $utag"
+    set undocmd [list delete $utag]
     set redo [list ::CanvasUtils::Command $wtop $cmd]
     set undo [list ::CanvasUtils::Command $wtop $undocmd]
     eval $redo
@@ -1472,7 +1481,7 @@ proc ::CanvasDraw::FinalizeLine {w x y shift {opt 0}} {
     if {$shift} {
 	set newco [ConstrainedDrag $x $y [lindex $theLine($w,anchor) 0]  \
 	  [lindex $theLine($w,anchor) 1]]
-	foreach {x y} $newco { break }
+	foreach {x y} $newco break
     }
     set utag [::CanvasUtils::NewUtag]
     set cmd "create line $theLine($w,anchor) $x $y	\
@@ -1584,10 +1593,7 @@ proc ::CanvasDraw::FinalizeStroke {w x y {brush 0}} {
     if {![info exists stroke(N)]} {
 	return
     }
-    ::CanvasDraw::StrokePostProcess $w
-    for {set i 0} {$i <= $stroke(N)} {incr i} {
-	append coords $stroke($i) " "
-    }
+    set coords [::CanvasDraw::StrokePostProcess $w]
     $w delete segments
     if {[llength $coords] <= 2} {
 	return
@@ -1605,8 +1611,7 @@ proc ::CanvasDraw::FinalizeStroke {w x y {brush 0}} {
     set utag [::CanvasUtils::NewUtag]
     set cmd [list create line $coords  \
       -tags [list line $utag] -joinstyle round  \
-      -smooth $state(smooth) -splinesteps $state(splinesteps) \
-      -fill $state(fgCol) -width $thisThick]
+      -smooth $state(smooth) -fill $state(fgCol) -width $thisThick]
     set cmd [concat $cmd $extras]
     set undocmd [list delete $utag]
     set redo [list ::CanvasUtils::Command $wtop $cmd]
@@ -1621,15 +1626,24 @@ proc ::CanvasDraw::FinalizeStroke {w x y {brush 0}} {
 #       Reduce the number of coords in the stroke in a smart way that also
 #       smooths it. Always keep first and last.
 
-proc ::CanvasDraw::StrokePostProcess {w} {
-    
+proc ::CanvasDraw::StrokePostProcess {w} {    
     variable stroke
     
-    set coords {}
-    for {set i 0} {$i <= [expr $stroke(N) - 2]} {incr i} {
-
-
+    set coords $stroke(0)
+    
+    # First pass: remove duplicates if any. Seems not to be the case!
+    for {set i 0} {$i <= [expr $stroke(N) - 1]} {incr i} {
+	if {$stroke($i) != $stroke([expr $i+1])} {
+	    set coords [concat $coords $stroke([expr $i+1])]
+	}
     }
+    
+    # Next pass: remove points that are close to each other.
+    set coords [::CanvasDraw::StripClosePoints $coords 6]
+    
+    # Next pass: remove points that gives a too small radius or points
+    # lying on a straight line.
+    set coords [::CanvasDraw::StripExtremeRadius $coords 6 10000]
     return $coords
 }
 
@@ -2052,16 +2066,16 @@ proc ::CanvasDraw::DeleteItem {w x y {id current} {where all}} {
     if {[llength $cmdList] > 0} {
 	set redo [list ::CanvasUtils::CommandList $wtop $cmdList $where]
 	if {[info exists extraCmd]} {
-	    set redo [list EvalCommandList [list $redo $extraCmd]]
+	    set redo [list ::CanvasDraw::EvalCommandList [list $redo $extraCmd]]
 	}
     }
     if {[llength $undoList] > 0} {
 	set undo [list ::CanvasUtils::CommandList $wtop $undoList $where]
 	if {[info exists extraUndo]} {
-	    set undo [list EvalCommandList [list $undo $extraUndo]]
+	    set undo [list ::CanvasDraw::EvalCommandList [list $undo $extraUndo]]
 	}
     } else {
-	set undo [list EvalCommandList [list $extraUndo]]
+	set undo [list ::CanvasDraw::EvalCommandList [list $extraUndo]]
     }
     eval $redo
     undo::add [::UI::GetUndoToken $wtop] $undo $redo
@@ -2099,7 +2113,7 @@ proc ::CanvasDraw::DeleteFrame {wcan wframe x y {where all}} {
     # Undo missing here...
 
     set redo [list ::CanvasUtils::CommandList $wtop $cmdList $where]
-    set redo [list EvalCommandList [list $redo $extraCmd]]
+    set redo [list ::CanvasDraw::EvalCommandList [list $redo $extraCmd]]
     eval $redo    
 }
 
@@ -2178,7 +2192,7 @@ proc ::CanvasDraw::MarkBbox {w shift {which current}} {
     if {$prefs(bboxOrCoords) || ($type == "oval") || ($type == "text")  \
       || ($type == "rectangle") || ($type == "image")} {
 
-	foreach {x1 y1 x2 y2} $thebbox { break }
+	foreach {x1 y1 x2 y2} $thebbox break
 	$w create rect [expr $x1-$a] [expr $y1-$a] [expr $x1+$a] [expr $y1+$a] \
 	  -tags $tmark -fill white
 	$w create rect [expr $x1-$a] [expr $y2-$a] [expr $x1+$a] [expr $y2+$a] \
@@ -2201,7 +2215,7 @@ proc ::CanvasDraw::MarkBbox {w shift {which current}} {
 	    if {$n != 4} {
 		return
 	    }
-	    foreach {x1 y1 x2 y2} $theCoords { break }
+	    foreach {x1 y1 x2 y2} $theCoords break
 	    set r [expr abs(($x1 - $x2)/2.0)]
 	    set cx [expr ($x1 + $x2)/2.0]
 	    set cy [expr ($y1 + $y2)/2.0]
@@ -2348,7 +2362,7 @@ proc ::CanvasDraw::MakeSpeechBubble {w id} {
     set wtop [::UI::GetToplevelNS $w]
     set bbox [$w bbox $id]
     set utagtext [::CanvasUtils::GetUtag $w $id]
-    foreach {utag redocmd} [::CanvasDraw::SpeechBubbleCmd $w $bbox] { break }
+    foreach {utag redocmd} [::CanvasDraw::SpeechBubbleCmd $w $bbox] break
     set undocmd "delete $utag"
     set cmdLower [list lower $utag $utagtext]
     
@@ -2364,7 +2378,7 @@ proc ::CanvasDraw::SpeechBubbleCmd {w bbox args} {
     set b 12
     set c 40
     set d 20
-    foreach {left top right bottom} $bbox { break }
+    foreach {left top right bottom} $bbox break
     set midw [expr ($right+$left)/2.0]
     set midh [expr ($bottom+$top)/2.0]
     set coords [list  \
@@ -2388,13 +2402,165 @@ proc ::CanvasDraw::SpeechBubbleCmd {w bbox args} {
     return [list $utag $cmd]
 }
 
+# CanvasDraw::StripClosePoints --
+#
+#       Removes points that are closer than 'd'.
+#
+# Arguments:
+#       coords      list of coordinates {x0 y0 x1 y1 ...}
+#       dmax        maximum allowed distance
+#       
+# Results:
+#       list of new coordinates
 
-# EvalCommandList --
+proc ::CanvasDraw::StripClosePoints {coords dmax} {
+  
+    set len [llength $coords]
+    #puts "len=$len"
+    if {$len < 6} {
+	return $coords
+    }
+    set tmp [lrange $coords 0 1]
+    for {set i1 0; set i2 2} {$i2 < $len} { } {
+	foreach {x1 y1} [lrange $coords $i1 [expr $i1+1]] break
+	foreach {x2 y2} [lrange $coords $i2 [expr $i2+1]] break
+	set d [expr hypot($x2-$x1, $y2-$y1)]
+	#puts "$i1 $i2, d=$d"
+	
+	if {$i2 < [expr $len - 2]} {
+	    
+	    # To accept or not to accept.
+	    if {$d < $dmax} {
+		incr i2 2
+	    } else {
+		lappend tmp $x2 $y2
+		set i1 $i2
+		incr i2 2
+	    }
+	} else {
+	    
+	    # Last point.
+	    if {$d < $dmax} {
+		set tmp [lreplace $tmp end-1 end $x2 $y2]
+	    } else {
+		lappend tmp $x2 $y2
+	    }
+	    incr i2 2
+	}
+    }
+    return $tmp
+}
+
+proc ::CanvasDraw::GetDistList {coords} {
+    
+    set dlist {}
+    set len [llength $coords]
+    for {set i1 0; set i2 2} {$i2 < $len} {incr i1 2; incr i2 2} {
+	foreach {x1 y1} [lrange $coords $i1 [expr $i1+1]] break
+	foreach {x2 y2} [lrange $coords $i2 [expr $i2+1]] break
+	lappend dlist [expr hypot($x2-$x1, $y2-$y1)]
+    }
+    return $dlist
+}
+
+# CanvasDraw::StripExtremeRadius --
+#
+#       Strip points that form triplets with radius outside 'rmin' and 'rmax'.
+#
+# Arguments:
+#       coords      list of coordinates {x0 y0 x1 y1 ...}
+#       rmin
+#       rmax
+#       
+# Results:
+#       list of new coordinates
+
+proc ::CanvasDraw::StripExtremeRadius {coords rmin rmax} {
+    
+    set len [llength $coords]
+    if {$len < 8} {
+	return $coords
+    }
+    set tmp [lrange $coords 0 1]
+    for {set i1 0; set i2 2; set i3 4} {$i3 < $len} { } {
+	foreach {x1 y1} [lrange $coords $i1 [expr $i1+1]] break
+	foreach {x2 y2} [lrange $coords $i2 [expr $i2+1]] break
+	foreach {x3 y3} [lrange $coords $i3 [expr $i3+1]] break
+	set r [::CanvasDraw::ThreePointRadius [list $x1 $y1 $x2 $y2 $x3 $y3]]
+	#puts "$i1 $i2 $i3, r=$r"
+	
+	if {$i2 < [expr $len - 4]} {
+	    
+	    # To accept or not to accept.
+	    if {($r > $rmax) || ($r < $rmin)} {
+		incr i2 2
+		incr i3 2
+	    } else {
+		lappend tmp $x2 $y2
+		set i1 $i2
+		set i2 $i3
+		incr i3 2
+	    }
+	} else {
+
+	    # Last point.
+	    set tmp [concat $tmp [lrange $coords end-1 end]]
+	    incr i3 2
+	}
+    }
+    return $tmp
+}
+
+proc ::CanvasDraw::GetRadiusList {coords} {
+    
+    set rlist {}
+    set imax [expr [llength $coords] - 4]
+    for {set i 0} {$i < $imax} {incr i 2} {
+	lappend rlist [::CanvasDraw::ThreePointRadius  \
+	  [lrange $coords $i [expr $i + 5]]]
+    }
+    return $rlist
+}
+
+# CanvasDraw::ThreePointRadius --
+#
+#       Computes the radius of a circle that goes through three nonidentical
+#       points.
+#
+# Arguments:
+#       p           list {x1 y1 x2 y2 x3 y3}  of three points
+#       
+# Results:
+#       radius
+
+proc ::CanvasDraw::ThreePointRadius {p} {
+    
+    foreach {x1 y1 x2 y2 x3 y3} $p break
+    set a [expr $x1 - $x2]
+    set b [expr $y1 - $y2]
+    set c [expr $x1 - $x3]
+    set d [expr $y1 - $y3]
+    set e [expr 0.5 * ($x1*$x1 + $y1*$y1 - ($x2*$x2 + $y2*$y2))]
+    set f [expr 0.5 * ($x1*$x1 + $y1*$y1 - ($x3*$x3 + $y3*$y3))]
+    set det [expr $a*$d - $b*$c]
+    if {[expr abs($det)] < 1e-16} {
+	
+	# Straight line.
+	return 1e+16
+    }
+    set rx [expr ($d*$e - $b*$f)/$det]
+    set ry [expr ($a*$f - $c*$e)/$det]
+    set dx [expr $rx - $x1]
+    set dy [expr $ry - $y1]
+    return [expr sqrt($dx*$dx + $dy*$dy)]
+}
+
+# CanvasDraw::EvalCommandList --
 #
 #       A utility function to evaluate more than a single command.
 #       Useful for the undo/redo implementation.
 
-proc EvalCommandList {cmdList} {
+proc ::CanvasDraw::EvalCommandList {cmdList} {
     
     foreach cmd $cmdList {
 	eval $cmd

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.7 2003-06-15 12:40:13 matben Exp $
+# $Id: GroupChat.tcl,v 1.8 2003-07-26 13:54:23 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -346,7 +346,7 @@ proc ::Jabber::GroupChat::EnterCallback {jlibName type args} {
 	array set argsArr $args
 	set msg "We got an error when entering room \"$argsArr(-from)\"."
 	if {[info exists argsArr(-error)]} {
-	    foreach {errcode errmsg} $argsArr(-error) { break }
+	    foreach {errcode errmsg} $argsArr(-error) break
 	    append msg " The error code is $errcode: $errmsg"
 	}
 	tk_messageBox -title "Error Enter Room" -message $msg
@@ -411,7 +411,7 @@ proc ::Jabber::GroupChat::GotMsg {body args} {
 	
 	# This can be room name or nick name.
 	foreach {meRoomJid mynick}  \
-	  [$jstate(jlib) service hashandnick $roomJid] { break }
+	  [$jstate(jlib) service hashandnick $roomJid] break
 	
 	# Old-style groupchat and browser compatibility layer.
 	set nick [$jstate(jlib) service nick $fromJid]
@@ -518,6 +518,16 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     pack [frame $w.frall -borderwidth 1 -relief raised]   \
       -fill both -expand 1 -ipadx 4
     
+    # Widget paths.
+    set frmid $w.frall.frmid
+    set wtxt $frmid.frtxt
+    set wtext $wtxt.0.text
+    set wysc $wtxt.0.ysc
+    set wusers $wtxt.users
+    set wtxtsnd $frmid.frtxtsnd
+    set wtextsnd $wtxtsnd.text
+    set wyscsnd $wtxtsnd.ysc
+    
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
     pack [button $frbot.btsnd -text [::msgcat::mc Send] -width 8  \
@@ -525,6 +535,8 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
       -side right -padx 5 -pady 5
     pack [button $frbot.btexit -text [::msgcat::mc Exit] -width 8   \
       -command [list [namespace current]::Exit $roomJid]]  \
+      -side right -padx 5 -pady 5  
+    pack [::Jabber::UI::SmileyMenuButton $frbot.smile $wtextsnd]  \
       -side right -padx 5 -pady 5  
     
     # CCP
@@ -599,15 +611,10 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     $frtop.etp configure -state disabled
     
     # Text chat and user list.
-    set frmid $w.frall.frmid
     pack [frame $frmid -height 250 -width 300 -relief sunken -bd 1]  \
       -side top -fill both -expand 1 -padx 4 -pady 4
-    set wtxt $frmid.frtxt
     frame $wtxt -height 200
     frame $wtxt.0 -bg $prefs(bgColGeneral)
-    set wtext $wtxt.0.text
-    set wysc $wtxt.0.ysc
-    set wusers $wtxt.users
     text $wtext -height 12 -width 1 -font $sysFont(s) -state disabled  \
       -borderwidth 1 -relief sunken -yscrollcommand [list $wysc set] -wrap word \
       -cursor {}
@@ -637,10 +644,7 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
       -spacing3 $space -lmargin1 20 -lmargin2 20
     
     # Text send.
-    set wtxtsnd $frmid.frtxtsnd
     frame $wtxtsnd -height 100 -width 300
-    set wtextsnd $wtxtsnd.text
-    set wyscsnd $wtxtsnd.ysc
     text $wtextsnd -height 4 -width 1 -font $sysFont(s) -wrap word \
       -borderwidth 1 -relief sunken -yscrollcommand [list $wyscsnd set]
     scrollbar $wyscsnd -orient vertical -command [list $wtextsnd yview]
@@ -719,8 +723,10 @@ proc ::Jabber::GroupChat::Send {roomJid} {
     }
     set wtextsnd $locals($roomJid,wtextsnd)
 
-    # Get text to send.
-    set allText [$wtextsnd get 1.0 "end - 1 char"]
+    # Get text to send. Strip off any ending newlines from Return.
+    # There might by smiley icons in the text widget. Parse them to text.
+    set allText [::Text::TransformToPureText $wtextsnd]
+    set allText [string trimright $allText "\n"]
     if {$allText != ""} {	
 	if {[catch {
 	    $jstate(jlib) send_message $roomJid -type groupchat \

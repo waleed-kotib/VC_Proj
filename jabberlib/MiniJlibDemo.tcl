@@ -38,7 +38,8 @@ proc MyConnectProc {jlibName args} {
 }
 
 # Make an instance of jabberlib and fill in our roster object.
-set theJlib [jlib::new $myRoster $myBrowser MyClientProc  \
+set theJlib [jlib::new $myRoster MyClientProc  \
+  -browsename         $myBrowser \
   -iqcommand          MyIqCB  \
   -messagecommand     MyMsgCB \
   -presencecommand    MyPresCB]

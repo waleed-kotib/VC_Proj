@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Sounds.tcl,v 1.3 2003-06-15 12:40:13 matben Exp $
+# $Id: Sounds.tcl,v 1.4 2003-07-26 13:54:23 matben Exp $
 
 package provide Sounds 1.0
 
@@ -48,14 +48,21 @@ proc ::Sounds::Init { } {
 	
 	# Should never be mapped.
 	frame .fake
-	foreach f $allSoundFiles m $allSounds {
-	    movie .fake.$m -file $f -controller 0
+	if {[catch {
+	    foreach f $allSoundFiles m $allSounds {
+		movie .fake.$m -file $f -controller 0
+	    }
+	}]} {
+	    # ?
 	}
     } elseif {[::Plugins::HavePackage snack]} {
-	foreach f $allSoundFiles m $allSounds {
-	    snack::sound $m -load $f
+	if {[catch {
+	    foreach f $allSoundFiles m $allSounds {
+		snack::sound $m -load $f
+	    }
+	}]} {
+	    # ?
 	}
-	
     }
 }
 
@@ -69,9 +76,13 @@ proc ::Sounds::Play {snd} {
 	return
     }
     if {[::Plugins::HavePackage QuickTimeTcl]} {
-	.fake.${snd} play
+	if {[catch {.fake.${snd} play}]} {
+	    # ?
+	}
     } elseif {[::Plugins::HavePackage snack]} {
-	catch {$snd play}
+	if {[catch {$snd play}]} {
+	    # ?
+	}
     }
 }
 

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.7 2003-07-05 13:37:54 matben Exp $
+# $Id: NewMsg.tcl,v 1.8 2003-07-26 13:54:23 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -653,7 +653,6 @@ proc ::Jabber::NewMsg::SaveMsg {w} {
     set ans [tk_getSaveFile -title [::msgcat::mc {Save Message}] \
       -initialfile Untitled.txt]
     if {[string length $ans]} {
-	#set allText [$wtext get 1.0 "end - 1 char"]
 	set allText [::Text::TransformToPureText $wtext]
 	set fd [open $ans w]
 	for {set i 1} {$i <= $locals($w,addrline)} {incr i} {
@@ -666,7 +665,7 @@ proc ::Jabber::NewMsg::SaveMsg {w} {
 	puts $fd "\n"
 	puts $fd $allText	
 	close $fd
-	if {[string match "mac*" $this(platform)]} {
+	if {[string equal $this(platform) "macintosh"]} {
 	    file attributes $ans -type TEXT -creator ttxt
 	}
     }

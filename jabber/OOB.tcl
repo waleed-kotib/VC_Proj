@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.4 2003-04-28 13:32:29 matben Exp $
+# $Id: OOB.tcl,v 1.5 2003-07-26 13:54:23 matben Exp $
 
 package provide OOB 1.0
 
@@ -116,8 +116,8 @@ proc ::Jabber::OOB::DoSend { } {
     set finished 1
     
     # For now we build a relative path for the url. uri encode it!
-    #set relpath [GetRelativePath $prefs(httpdBaseDir) $localpath]
-    set relpath [filerelative $prefs(httpdBaseDir) $localpath]
+    #set relpath [GetRelativePath $prefs(httpdRootDir) $localpath]
+    set relpath [filerelative $prefs(httpdRootDir) $localpath]
     set ip [::Network::GetThisOutsideIPAddress]
     set url "http://${ip}:$prefs(httpdPort)/$relpath"
     set url [uriencode::quoteurl $url]

@@ -14,7 +14,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Plugins.tcl,v 1.3 2003-07-05 13:37:54 matben Exp $
+# $Id: Plugins.tcl,v 1.4 2003-07-26 13:54:23 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -117,8 +117,8 @@ namespace eval ::Plugins:: {
 	QuickTimeTcl       {macintosh   macosx    windows} 
 	TclSpeech          {macintosh   macosx}
 	MSSpeech           {windows}
-	snack              {macintosh   macosx    windows   unix}
-	Img                {windows                         unix}
+	snack              {windows     unix}
+	Img                {windows     unix}
     }
     array set helpers2Platform {xanim unix} 
     
@@ -127,6 +127,9 @@ namespace eval ::Plugins:: {
 	external    "External Plugin"
 	application "Helper Application"
     }
+    
+    # Plugin ban list. Do not load these packages.
+    variable pluginBanList {}
 }
 
 # Plugins::Init --
@@ -234,6 +237,7 @@ proc ::Plugins::InitQuickTimeTcl { } {
     # For QuickTime:
     set supportedMimeTypes(QuickTimeTcl) {\
       video/quicktime     video/x-dv          video/mpeg\
+      video/mpeg4\
       video/x-mpeg        audio/mpeg          audio/x-mpeg\
       video/x-msvideo     application/sdp     audio/aiff\
       audio/x-aiff        audio/basic         audio/x-sd2\
@@ -356,6 +360,13 @@ proc ::Plugins::InitXanim { } {
     set plugin(xanim,mimes) $supportedMimeTypes(xanim)
 }
 
+
+proc ::Plugins::SetBanList {banList} {
+    variable pluginBanList
+    
+    set pluginBanList $banList
+}
+
 # Plugins::CompileAndLoadPackages --
 #
 #       Compile information of all packages and helper apps to search for.
@@ -364,6 +375,7 @@ proc ::Plugins::InitXanim { } {
 proc ::Plugins::CompileAndLoadPackages { } {
     global this
     variable plugin
+    variable pluginBanList
     
     set plugin(all) {}
     set plugin(allPacks) {}
@@ -403,17 +415,25 @@ proc ::Plugins::CompileAndLoadPackages { } {
 	# Check first if this package can live on this platform.
 	if {[lsearch $plugin($name,platform) $this(platform)] >= 0} {
 	    
-	    # Search for it! Be silent.
-	    if {[string equal $plugin($name,type) "internal"]} {
-		::SplashScreen::SetMsg "[::msgcat::mc splashlook] $name..."
-		if {![catch {eval {package require} $plugin($name,pack)} msg]} {
-		    set plugin($name,loaded) 1
-		    set plugin($name,ver) $msg
-		} else {
-		    set plugin($name,loaded) 0
-		}	    
+	    # Make sure that not on the ban list.
+	    if {[lsearch $pluginBanList $name] >= 0} {
+		set plugin($name,loaded) 0
 	    } else {
-		set plugin($name,loaded) 1
+	    
+		# Search for it! Be silent.
+		if {[string equal $plugin($name,type) "internal"]} {
+		    ::SplashScreen::SetMsg "[::msgcat::mc splashlook] $name..."
+		    if {![catch {
+			eval {package require} $plugin($name,pack)
+		    } msg]} {
+			set plugin($name,loaded) 1
+			set plugin($name,ver) $msg
+		    } else {
+			set plugin($name,loaded) 0
+		    }	    
+		} else {
+		    set plugin($name,loaded) 1
+		}
 	    }
 	    set plugin($name,ishost) 1
 	} else {
@@ -721,13 +741,46 @@ proc ::Plugins::VerifyPackagesForMimeTypes { } {
 	    }
 	}
     }
-    
-    # Not all packages are associated with a mime type.
+}
+
+# Plugins::VerifySpeech --
+# 
+#       Verifies that we actually have a speech package.
+#       Also checks voices available.
+
+proc ::Plugins::VerifySpeech { } {
+    global  prefs
+    variable plugin
+
     # Make sure these are consistent as well.
     # Speech:
     if {!$plugin(TclSpeech,loaded) && !$plugin(MSSpeech,loaded)} {
 	set prefs(SpeechOn) 0
     }   
+    
+    # Voices consistency check.
+    if {$plugin(TclSpeech,loaded)} {
+	set voices [speech::speakers]
+	if {([lsearch $voices $prefs(voiceUs)] < 0) || \
+	  ($prefs(voiceUs) == "")} {
+	    set prefs(voiceUs) Victoria
+	}
+	if {([lsearch $voices $prefs(voiceOther)] < 0) || \
+	  ($prefs(voiceOther) == "")} {
+	    set prefs(voiceOther) Zarvox
+	}
+    }
+    if {$plugin(MSSpeech,loaded)} {
+	set voices [::MSSpeech::GetVoices]
+	if {([lsearch $voices $prefs(voiceUs)] < 0) || \
+	  ($prefs(voiceUs) == "")} {
+	    set prefs(voiceUs) [lindex $allVoices 0]
+	}
+	if {([lsearch $voices $prefs(voiceOther)] < 0) || \
+	  ($prefs(voiceOther) == "")} {
+	    set prefs(voiceOther) [lindex $allVoices 1]
+	}
+    }
 }
 
 # Plugins::GetPreferredPackageForMime, ... --
@@ -865,6 +918,16 @@ proc ::Plugins::IsHost {name} {
 
     if {[info exists plugin($name,ishost)]} {
 	return $plugin($name,ishost)
+    } else {
+	return 0
+    }
+}
+
+proc ::Plugins::IsLoaded {name} {    
+    variable plugin
+
+    if {[info exists plugin($name,loaded)]} {
+	return $plugin($name,loaded)
     } else {
 	return 0
     }

@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: TheServer.tcl,v 1.7 2003-07-05 13:37:54 matben Exp $
+# $Id: TheServer.tcl,v 1.8 2003-07-26 13:54:23 matben Exp $
     
 # DoStartServer ---
 #
@@ -222,7 +222,7 @@ proc HandleClientRequest {channel ip port} {
 #       none.
 
 proc ExecuteClientRequest {wtop channel ip port line args} {
-    global  tempChannel ipNumTo chunkSize debugServerLevel   \
+    global  tempChannel ipNumTo debugServerLevel   \
       clientRecord prefs allIPnumsTo this  \
       canvasSafeInterp
     
