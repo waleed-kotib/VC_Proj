@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Base64Icons.tcl,v 1.2 2003-05-18 13:20:21 matben Exp $
+# $Id: Base64Icons.tcl,v 1.3 2003-11-01 13:57:27 matben Exp $
  
 ### First all the tool buttons, both on and off states. ########################
 
@@ -513,6 +513,41 @@ AAAAAAAAAAAAAAAAAAAAACH5BAEAAAMALAAAAAAQABAAAARDcMhJq71U6C3w
 3B8HSuOgIaaWqULhFme1FUEdwKhM23Vx7YBa8LaiAQ4EwiHomyAQO17PQove
 iNSbwVD1WJvel2ccAQA7
 }]
+
+# More
+
+# General icon for minimal popup menu button.
+set ::UI::icons(popupbt) [image create photo -data {
+    R0lGODdhEAAOALMAAP///+/v797e3s7Ozr29va2trZycnJSUlIyMjHl5eXR0
+    dHNzc2NjY1JSUkJCQgAAACwAAAAAEAAOAAAEYLDIIqoYg5A5iQhVthkGR4HY
+    JhkI0gWgphUkspRn5ey8Yy+S0CDRcxRsjOAlUzwuGkERQcGjGZ6S1IxHWjCS
+    hZkEcTC2vEAOieRDNlyrNevMaKQnrIXe+71zkF8MC3ASEQA7
+}]
+set ::UI::icons(popupbtpush) [image create photo -data {
+    R0lGODdhEAAOAMQAAP///9DQ0M7Ozr29va2trZycnI2NjYyMjHZ2dnV1dXR0
+    dHNzc29vb2NjY1JSUkJCQgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    AAAAAAAAAAAAAAAAAAAAAAAAACwAAAAAEAAOAAAFbqAgCsTSOGhTjMLgmk0s
+    O4s7EGW8HEVxHKYDjnCI8Vy4HnBoWhBsN+WigIsVBoGHdvtQCAm0qwDBfRAS
+    TvDUVjYs0g6VjbEluL/WIWELnOKKPD0FdAQKbzc4b4EHBg9vUyRDP5N9kFGC
+    UjtULT0hADs=
+}]
+set ::UI::icons(whiterect) [image create photo -data {
+    R0lGODdhEAAOAIAAAP///wAAACwAAAAAEAAOAAACDYSPqcvtD6OctNqLZQEA
+    Ow==
+}]
+    
+# The mac look-alike triangles.
+set ::UI::icons(mactriangleopen) [image create photo -data {
+    R0lGODlhCwALAPMAAP///97e3s7O/729vZyc/4yMjGNjzgAAAAAAAAAAAAAA
+    AAAAAAAAAAAAAAAAAAAAACH5BAEAAAEALAAAAAALAAsAAAQgMMhJq7316M1P
+    OEIoEkchHURKGOUwoWubsYVryZiNVREAOw==
+}]
+set ::UI::icons(mactriangleclosed) [image create photo -data {
+    R0lGODlhCwALAPMAAP///97e3s7O/729vZyc/4yMjGNjzgAAAAAAAAAAAAAA
+    AAAAAAAAAAAAAAAAAAAAACH5BAEAAAEALAAAAAALAAsAAAQiMMgjqw2H3nqE
+    3h3xWaEICgRhjBi6FgMpvDEpwuCBg3sVAQA7
+}]
+
 
 ### Miscellaneous images that has no transparency in them. #####################
 

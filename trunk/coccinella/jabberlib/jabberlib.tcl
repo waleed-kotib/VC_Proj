@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.18 2003-10-25 07:22:26 matben Exp $
+# $Id: jabberlib.tcl,v 1.19 2003-11-01 13:57:27 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -132,6 +132,8 @@
 #      jlibName service nick jid
 #      jlibName service hashandnick jid
 #      jlibName service getjidsfor aservice
+#      jlibName service gettransportjids aservice
+#      jlibName service gettype jid
 #      jlibName service allroomsin
 #      jlibName service roomparticipants room
 #      jlibName service exitroom room
@@ -215,6 +217,7 @@
 #       030705   jlib::new generates self token
 #       030726   made browse object optional, jlib::new api changed!
 #       031022   added iq_get and iq_set methods
+#       031101   added 'service gettransportjids' and 'gettype'
 
 package require wrapper
 package require roster
@@ -1700,7 +1703,7 @@ proc jlib::register_remove {jlibname to cmd args} {
     set subelements [list [wrapper::createtag "remove"]]
     array set argsArr $args
     if {[info exists argsArr(-key)]} {
-	lappend subelements [wrapper::createtag "-key" -chdata $argsArr(-key)]
+	lappend subelements [wrapper::createtag "key" -chdata $argsArr(-key)]
     }
     set xmllist [wrapper::createtag "query"  \
       -attrlist {xmlns jabber:iq:register} -subtags $subelements]
@@ -2874,16 +2877,77 @@ proc jlib::service::getjidsfor {jlibname what} {
 	    }
 	}
     }
-    
-    
+       
     # Agent service if any.
-    if {[info exists agent($what)]} {
+    if {[info exists agent($what)] && [llength $agent($what)]} {
 	set agent($what) [lsort -unique $agent($what)]
-	if {[llength $agent($what)]} {
-	    set jids [concat $agent($what) $jids]
+	set jids [concat $agent($what) $jids]
+    }
+    return [lsort -unique $jids]
+}
+
+# jlib::service::gettransportjids --
+#
+#       Return a list of jid's that support a specific transport.
+#       Queries sent to both browser and agent.
+#       
+# Arguments:
+#       jlibname:   the instance of this jlib.
+#       what:       "jabber", "icq", "msn", "yahoo", "aim",...
+#       
+# Results:
+#       list of jids supporting this service, possibly empty.
+
+proc jlib::service::gettransportjids {jlibname what} {
+    variable services
+    upvar [namespace parent]::${jlibname}::agent agent
+    upvar [namespace parent]::${jlibname}::lib lib
+    upvar [namespace parent]::${jlibname}::opts opts
+
+    set jids {}
+    
+    # Browse service if any.
+    if {$opts(havebrowse)} {
+	set subtype $what
+	set jids [$lib(browsename) getalljidfortypes "service/$subtype"]
+    }
+
+    # Agent service if any.
+    foreach key [array names agent "*,service"] {
+	if {[string equal $agent($key) $what]} {
+	    lappend jids [string map {,service ""} $key]
 	}
     }
     return [lsort -unique $jids]
+}
+
+# jlib::service::gettype --
+# 
+#       Returns the 'type/subtype' for this jid if any.
+#       
+# Arguments:
+#       jlibname:   the instance of this jlib.
+#       jid:
+#       
+# Results:
+#       type/subtype, possibly empty.
+
+proc jlib::service::gettype {jlibname jid} {
+    variable services
+    upvar [namespace parent]::${jlibname}::agent agent
+    upvar [namespace parent]::${jlibname}::lib lib
+    upvar [namespace parent]::${jlibname}::opts opts
+
+    set type ""
+    
+    # Browse service if any. Returns 'service/icq' etc.
+    if {$opts(havebrowse)} {
+	set type [$lib(browsename) gettype $jid]
+    }
+    if {[info exists agent($jid,service)]} {
+	set type "service/$agent($jid,service)"
+    }
+    return $type
 }
 
 # jlib::service::isroom --

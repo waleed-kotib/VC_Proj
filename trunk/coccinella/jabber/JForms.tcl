@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #
-# $Id: JForms.tcl,v 1.7 2003-09-13 06:39:25 matben Exp $
+# $Id: JForms.tcl,v 1.8 2003-11-01 13:57:27 matben Exp $
 # 
 #      Updated to version 2.1 of JEP-0004
 #  
@@ -515,19 +515,20 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
     set i 0
     
     foreach elem [wrapper::getchildren $xml] {
-	set tag [lindex $elem 0]
+	set tag [wrapper::gettag $elem]
 	
 	switch -exact -- $tag {
+	    
 	    instructions {
 		message $w.m$i -font $sysFont(s)  \
-		  -text [lindex $elem 3] -anchor w -justify left \
+		  -text [wrapper::getcdata $elem] -anchor w -justify left \
 		  -width $argsArr(-width)
 		grid $w.m$i -row $i -column 0 -columnspan 1 -sticky ew
 		incr i
 	    }
 	    field {
 		catch {unset attrArr}
-		array set attrArr [lindex $elem 1]
+		array set attrArr [wrapper::getattrlist $elem]
 		if {[info exists attrArr(label)]} {
 		    set lab $attrArr(label)
 		} else {
@@ -551,18 +552,18 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
 		# Required? <desc> element? <value> as default?
 		set isrequired 0
 		foreach c [wrapper::getchildren $elem] {
-		    set ctag [lindex $c 0]
+		    set ctag [wrapper::gettag $c]
 		    if {[string equal $ctag "required"]} {
 			set isrequired 1
 		    } elseif {[string equal $ctag "desc"]} {
 			message $w.m$i -aspect $argsArr(-aspect) -font $sysFont(s) \
-			  -text [lindex $c 3] -width $argsArr(-width)
+			  -text [wrapper::getcdata $c] -width $argsArr(-width)
 			grid $w.m$i -row $i -column 0 -columnspan 1 -sticky ew
 			incr i
 		    } elseif {[string equal $ctag "value"]} {
 			
 			# Set default.
-			set defvalue [lindex $c 3]
+			set defvalue [wrapper::getcdata $c]
 		    }
 		}
 		if {$isrequired} {
@@ -709,7 +710,7 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
 		    hidden {
 			set var $attrArr(var)
 			set type($id,$var) $attrArr(type)
-			set cache($id,$var) [lindex $elem 3]
+			set cache($id,$var) $defvalue
 		    }
 		    default {
 			
@@ -733,7 +734,7 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
 		set reported($id) {}
 		foreach c [wrapper::getchildren $elem] {
 		    catch {unset cattrArr}
-		    array set cattrArr [lindex $c 1]
+		    array set cattrArr [wrapper::getattrlist $c]
 		    lappend reported($id) $cattrArr(var) $cattrArr(label)
 		}
 	    }
@@ -842,6 +843,19 @@ proc ::Jabber::Forms::GetXMLXData {w} {
 	    text-multi {
 		set value [$w.f${var}.txt get 1.0 end]		
 		set subtags [list [wrapper::createtag value -chdata $value]]
+	    }
+	    hidden {
+		
+		# We may have a: 
+		# <field type='hidden' var='key'><value>1c9c...</value>
+		# which must be returned.
+		if {$var == "key"} {
+		    set value $cache($id,$var)
+		    set subtags [list [wrapper::createtag value  \
+		      -chdata $cache($id,$var)]]
+		} else {
+		    set value ""
+		}
 	    }
 	    default {
 		set value ""

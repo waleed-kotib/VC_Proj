@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasDraw.tcl,v 1.15 2003-10-25 07:22:26 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.16 2003-11-01 13:57:27 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 #  
@@ -2073,7 +2073,7 @@ proc ::CanvasDraw::InitRotateItem {w x y} {
 	set rotDrag(undocmd) [list itemconfigure $it -start $rotDrag(arcStart)]
     } else {
 	set colist [$w bbox $id]
-	set rotDrag(undocmd) "coords $it [$w coords $it]"
+	set rotDrag(undocmd) [concat coords $it [$w coords $it]]
     }
     set rotDrag(cgX) [expr ([lindex $colist 0] + [lindex $colist 2])/2.0]
     set rotDrag(cgY) [expr ([lindex $colist 1] + [lindex $colist 3])/2.0]
@@ -2095,7 +2095,6 @@ proc ::CanvasDraw::InitRotateItem {w x y} {
     
     # Observe coordinate system.
     set rotDrag(startAng) [expr atan2($y - $rotDrag(cgY),$x - $rotDrag(cgX)) ]
-    #puts "InitRotateItem:: rotDrag=[parray rotDrag]"
 }
 
 # CanvasDraw::DoRotateItem --

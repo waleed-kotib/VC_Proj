@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.12 2003-10-23 06:28:00 matben Exp $
+# $Id: Roster.tcl,v 1.13 2003-11-01 13:57:27 matben Exp $
 
 package provide Roster 1.0
 
@@ -18,42 +18,42 @@ namespace eval ::Jabber::Roster:: {
     # Specials for whiteboard clients and foreign IM systems.
     variable presenceIcon
     array set presenceIcon [list                          \
-      {available}         $::UI::icons(machead)        \
-      {unavailable}       $::UI::icons(macheadgray)    \
-      {chat}              $::UI::icons(macheadtalk)    \
-      {away}              $::UI::icons(macheadaway)    \
-      {xa}                $::UI::icons(macheadunav)    \
-      {dnd}               $::UI::icons(macheadsleep)   \
-      {invisible}         $::UI::icons(macheadinv)     \
-      {subnone}           $::UI::icons(questmark)      \
-      {available,wb}      $::UI::icons(macheadwb)      \
-      {unavailable,wb}    $::UI::icons(macheadgraywb)  \
-      {chat,wb}           $::UI::icons(macheadtalkwb)  \
-      {away,wb}           $::UI::icons(macheadawaywb)  \
-      {xa,wb}             $::UI::icons(macheadunavwb)  \
-      {dnd,wb}            $::UI::icons(macheadsleepwb) \
-      {invisible,wb}      $::UI::icons(macheadinvwb)   \
-      {subnone,wb}        $::UI::icons(questmarkwb)    \
-      {available,aim}     $::UI::icons(aim_online)     \
-      {unavailable,aim}   $::UI::icons(aim_offline)    \
-      {dnd,aim}           $::UI::icons(aim_dnd)        \
-      {away,aim}          $::UI::icons(aim_away)       \
-      {xa,aim}            $::UI::icons(aim_xa)         \
-      {available,icq}     $::UI::icons(icq_online)     \
-      {unavailable,icq}   $::UI::icons(icq_offline)    \
-      {dnd,icq}           $::UI::icons(icq_dnd)        \
-      {away,icq}          $::UI::icons(icq_away)       \
-      {xa,icq}            $::UI::icons(icq_xa)         \
-      {available,msn}     $::UI::icons(msn_online)     \
-      {unavailable,msn}   $::UI::icons(msn_offline)    \
-      {dnd,msn}           $::UI::icons(msn_dnd)        \
-      {away,msn}          $::UI::icons(msn_away)       \
-      {xa,msn}            $::UI::icons(msn_xa)         \
-      {available,yahoo}   $::UI::icons(yahoo_online)   \
-      {unavailable,yahoo} $::UI::icons(yahoo_offline)  \
-      {dnd,yahoo}         $::UI::icons(yahoo_dnd)      \
-      {away,yahoo}        $::UI::icons(yahoo_away)     \
-      {xa,yahoo}          $::UI::icons(yahoo_xa)       \
+      {available}         [::UI::GetIcon machead]        \
+      {unavailable}       [::UI::GetIcon macheadgray]    \
+      {chat}              [::UI::GetIcon macheadtalk]    \
+      {away}              [::UI::GetIcon macheadaway]    \
+      {xa}                [::UI::GetIcon macheadunav]    \
+      {dnd}               [::UI::GetIcon macheadsleep]   \
+      {invisible}         [::UI::GetIcon macheadinv]     \
+      {subnone}           [::UI::GetIcon questmark]      \
+      {available,wb}      [::UI::GetIcon macheadwb]      \
+      {unavailable,wb}    [::UI::GetIcon macheadgraywb]  \
+      {chat,wb}           [::UI::GetIcon macheadtalkwb]  \
+      {away,wb}           [::UI::GetIcon macheadawaywb]  \
+      {xa,wb}             [::UI::GetIcon macheadunavwb]  \
+      {dnd,wb}            [::UI::GetIcon macheadsleepwb] \
+      {invisible,wb}      [::UI::GetIcon macheadinvwb]   \
+      {subnone,wb}        [::UI::GetIcon questmarkwb]    \
+      {available,aim}     [::UI::GetIcon aim_online]     \
+      {unavailable,aim}   [::UI::GetIcon aim_offline]    \
+      {dnd,aim}           [::UI::GetIcon aim_dnd]        \
+      {away,aim}          [::UI::GetIcon aim_away]       \
+      {xa,aim}            [::UI::GetIcon aim_xa]         \
+      {available,icq}     [::UI::GetIcon icq_online]     \
+      {unavailable,icq}   [::UI::GetIcon icq_offline]    \
+      {dnd,icq}           [::UI::GetIcon icq_dnd]        \
+      {away,icq}          [::UI::GetIcon icq_away]       \
+      {xa,icq}            [::UI::GetIcon icq_xa]         \
+      {available,msn}     [::UI::GetIcon msn_online]     \
+      {unavailable,msn}   [::UI::GetIcon msn_offline]    \
+      {dnd,msn}           [::UI::GetIcon msn_dnd]        \
+      {away,msn}          [::UI::GetIcon msn_away]       \
+      {xa,msn}            [::UI::GetIcon msn_xa]         \
+      {available,yahoo}   [::UI::GetIcon yahoo_online]   \
+      {unavailable,yahoo} [::UI::GetIcon yahoo_offline]  \
+      {dnd,yahoo}         [::UI::GetIcon yahoo_dnd]      \
+      {away,yahoo}        [::UI::GetIcon yahoo_away]     \
+      {xa,yahoo}          [::UI::GetIcon yahoo_xa]       \
     ]
 }
 
@@ -340,7 +340,8 @@ proc ::Jabber::Roster::DoubleClickCmd {w v} {
 #       rostName
 #       what        any of "presence", "remove", "set", "enterroster",
 #                   "exitroster"
-#       jid         'user@server' without any /resource.
+#       jid         'user@server' without any /resource usually.
+#                   Some transports keep a resource part in jid.
 #       args        list of '-key value' pairs where '-key' can be
 #                   -resource, -from, -type...
 #       
@@ -454,7 +455,7 @@ proc ::Jabber::Roster::ExitRoster { } {
 #       Adds a jid item to the tree.
 #
 # Arguments:
-#       jid         2-tier jid with no /resource part.
+#       jid         2-tier jid with no /resource part, usually, not always!
 #       args        list of '-key value' pairs where '-key' can be
 #                   -name
 #                   -groups   Note, PLURAL!
@@ -537,11 +538,16 @@ proc ::Jabber::Roster::Presence {jid presence args} {
     # presence = 'unavailable' => remove jid2 + jid3,  add jid2
     # Wrong! We may have 2-tier jids from transports:
     # <presence from='user%hotmail.com@msn.myserver' ...
+    # Or 3-tier (icq) with presence = 'unavailable' !
     
     foreach {jid2 res} [jlib::splitjid $jid] break
     
     # This gets a list '-name ... -groups ...' etc. from our roster.
     set itemAttr [$jstate(roster) getrosteritem $jid2]
+    if {$itemAttr == ""} {
+	# Needed for icq transports etc.
+	set itemAttr [$jstate(roster) getrosteritem $jid3]
+    }
     
     # First remove if there, then add in the right tree dir.
     ::Jabber::Roster::Remove $jid
@@ -738,6 +744,7 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
     # 
     # For Online users, the tree item must be a 3-tier jid with resource 
     # since a user may be logged in from more than one resource.
+    # Note that some (icq) transports have 3-tier items that are unavailable!
     
     set jidx $jid
     if {[info exists argsArr(-name)] && ($argsArr(-name) != "")} {
@@ -747,7 +754,7 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
     } else {
 	set itemTxt $jid
     }
-    if {[string equal $presence "available"]} {
+    if {1 || [string equal $presence "available"]} {
 	if {[info exists argsArr(-resource)] && ($argsArr(-resource) != "")} {
 	    append itemTxt " ($argsArr(-resource))"
 	    set jidx ${jid}/$argsArr(-resource)
@@ -815,6 +822,27 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
     ::balloonhelp::balloonforcanvas $wtreecanvas $jidx $msg
 }
 
+namespace eval ::Jabber::Roster:: {
+    
+    variable menuDefTrpt
+    variable allTransports
+    
+    # name description ...
+    set menuDefTrpt {
+	jabber    {Jabber address}
+	icq       {ICQ (number)}
+	aim       {AIM}
+	msn       {MSN Messenger}
+	yahoo     {Yahoo Messenger}
+	irc       {IRC}
+	smtp      {Email address}
+    }
+    set allTransports {}
+    foreach {name spec} $menuDefTrpt {
+	lappend allTransports $name
+    }
+}
+
 # Jabber::Roster::NewOrEditItem --
 #
 #       Build and shows the roster new or edit item window.
@@ -842,6 +870,10 @@ proc ::Jabber::Roster::NewOrEditItem {w which args} {
     variable unsubscribe
     variable subscription
     variable oldSubscription
+    variable menuDefTrpt
+    variable wjid
+    variable popuptrpt
+    variable wtrptmenu
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
     
@@ -865,7 +897,7 @@ proc ::Jabber::Roster::NewOrEditItem {w which args} {
     set usersGroup ""
     if {[string equal $which "new"]} {
 	wm title $w [::msgcat::mc {Add New User}]
-	set jid "@$jserver(this)"
+	set jid "userName@$jserver(this)"
 	set subscribe 1
     } else {
 	wm title $w [::msgcat::mc {Edit User}]
@@ -913,10 +945,17 @@ proc ::Jabber::Roster::NewOrEditItem {w which args} {
 
     # Entries etc.
     set frmid [frame $w.frall.frmid -borderwidth 0]
-    label $frmid.ljid -text "[::msgcat::mc {Jabber user id}]:"  \
+    set frjid [frame $frmid.fjid]
+    set wtrptpop $frjid.pop
+    set wtrptmenu $wtrptpop.menu
+    set wjid $frmid.ejid
+    
+    label $frjid.ljid -text "[::msgcat::mc {Jabber user id}]:"  \
       -font $sysFont(sb) -anchor e
-    entry $frmid.ejid -width 24    \
-      -textvariable [namespace current]::jid
+    label $wtrptpop -bd 2 -relief raised -image [::UI::GetIcon popupbt]
+    pack $frjid.ljid $wtrptpop -side left
+    
+    entry $wjid -width 24 -textvariable [namespace current]::jid
     label $frmid.lnick -text "[::msgcat::mc {Nick name}]:" -font $sysFont(sb) \
       -anchor e
     entry $frmid.enick -width 24   \
@@ -927,6 +966,12 @@ proc ::Jabber::Roster::NewOrEditItem {w which args} {
       -textvariable [namespace current]::usersGroup
     eval {$frmid.egroups list insert end} "None $allGroups"
         
+    # Bind for popup.
+    if {[string equal $which "new"]} {
+	bind $wtrptpop <Button-1> [list [namespace current]::TrptPopup %W %X %Y]
+	bind $wtrptpop <ButtonRelease-1> \
+	  [list [namespace current]::TrptPopupRelease %W]
+    }    
     if {[string equal $which "new"]} {
 	checkbutton $frmid.csubs -text "  [::msgcat::mc jarostsub]"  \
 	  -variable [namespace current]::subscribe
@@ -965,8 +1010,8 @@ proc ::Jabber::Roster::NewOrEditItem {w which args} {
 	  -font $sysFont(s) -command [list ::VCard::Fetch .kass {other} $jid]] \
 	  -side right -padx 2
     }
-    grid $frmid.ljid -column 0 -row 0 -sticky e
-    grid $frmid.ejid -column 1 -row 0 -sticky ew 
+    grid $frjid -column 0 -row 0 -sticky e
+    grid $wjid -column 1 -row 0 -sticky ew 
     grid $frmid.lnick -column 0 -row 1 -sticky e
     grid $frmid.enick -column 1 -row 1 -sticky ew
     grid $frmid.lgroups -column 0 -row 2 -sticky e
@@ -975,10 +1020,10 @@ proc ::Jabber::Roster::NewOrEditItem {w which args} {
     if {[string equal $which "new"]} {
 	grid $frmid.csubs -column 1 -row 3 -sticky w -columnspan 2
     } else {
-	grid $frmid.csubs -column 1 -row 3 -sticky w -columnspan 2 -pady 2
+	grid $frmid.csubs -column 1 -row 3 -sticky w -pady 2 -columnspan 2
 	grid $frmid.lsub -column 0 -row 4 -sticky e -pady 2
 	grid $frsub -column 1 -row 4 -sticky w -columnspan 2 -pady 2
-	grid $frvcard -column 0 -row 5 -sticky w -columnspan 2 -pady 2
+	grid $frvcard -column 0 -row 5 -sticky e -columnspan 2 -pady 2
     }
     pack $frmid -side top -fill both -expand 1
     if {[string equal $which "edit"]} {
@@ -988,6 +1033,9 @@ proc ::Jabber::Roster::NewOrEditItem {w which args} {
 	focus $frmid.ejid
 	$frmid.ejid icursor 0
     }
+    
+    # Build transport popup menu.
+    ::Jabber::Roster::BuildTrptMenu $wtrptmenu
     
     # Button part.
     if {[string equal $which "edit"]} {
@@ -1018,6 +1066,91 @@ proc ::Jabber::Roster::NewOrEditItem {w which args} {
     catch {grab release $w}
     catch {focus $oldFocus}
     return [expr {($finishedNew <= 0) ? "cancel" : "add"}]
+}
+
+# Jabber::Roster::BuildTrptMenu,  --
+# 
+#       Procs for handling the transport popup button in NewOrEditItem.
+
+proc ::Jabber::Roster::BuildTrptMenu {wmenu} {
+    variable menuDefTrpt
+    variable allTransports
+    variable locals
+    upvar ::Jabber::jstate jstate
+    
+    # We must be indenpendent of method; agent, browse, disco
+    set trpts {}
+    foreach subtype $allTransports {
+	set jids [$jstate(jlib) service gettransportjids $subtype]
+	if {[llength $jids]} {
+	    lappend trpts $subtype
+	    set locals(servicejid,$subtype) [lindex $jids 0]
+	}
+    }    
+    
+    # Build popup menu.
+    set m [menu $wmenu -tearoff 0]
+    array set menuDefTrptDesc $menuDefTrpt
+    foreach name $trpts {
+	$m add radiobutton -label $menuDefTrptDesc($name) -value $name  \
+	  -variable [namespace current]::popuptrpt  \
+	  -command [list [namespace current]::TrptPopupCmd]
+    }    
+    set [namespace current]::popuptrpt jabber
+    return $wmenu
+}
+
+proc ::Jabber::Roster::TrptPopup {w x y} {
+    global  this
+    variable wtrptmenu
+    puts "::Jabber::Roster::TrptPopup"
+    
+    # For some reason does we never get a ButtonRelease event here.
+    if {![string equal $this(platform) "unix"]} {
+	$w configure -image [::UI::GetIcon popupbtpush]
+    }
+    tk_popup $wtrptmenu [expr int($x)] [expr int($y)]
+}
+
+proc ::Jabber::Roster::TrptPopupRelease {w} {
+        
+    puts "::Jabber::Roster::TrptPopupRelease"
+    $w configure -image [::UI::GetIcon popupbt]
+}
+
+proc ::Jabber::Roster::TrptPopupCmd { } {
+    variable wjid
+    variable jid
+    variable popuptrpt
+    variable locals
+    
+    puts "popuptrpt=$popuptrpt"
+    
+    # Seems to be necessary to achive any selection.
+    focus $wjid
+
+    switch -- $popuptrpt {
+	jabber {
+	    set jid "userName@$locals(servicejid,jabber)"
+	    $wjid selection range 0 8
+	}
+	aim {
+	    set jid "usersName@$locals(servicejid,aim)"
+	    
+	}
+	yahoo {
+	    set jid "usersName@$locals(servicejid,yahoo)"
+	    
+	}
+	icq {
+	    set jid "screeNumber@$locals(servicejid,icq)"
+	    $wjid selection range 0 11
+	}
+	msn {
+	    set jid "userName%hotmail.com@$locals(servicejid,msn)"
+	    $wjid selection range 0 8
+	}
+    }
 }
 
 # Jabber::Roster::Cancel --

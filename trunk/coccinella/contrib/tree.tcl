@@ -25,7 +25,7 @@
 # 
 # Copyright (C) 2002-2003 Mats Bengtsson
 # 
-# $Id: tree.tcl,v 1.10 2003-10-29 07:44:11 matben Exp $
+# $Id: tree.tcl,v 1.11 2003-11-01 13:57:26 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -1605,10 +1605,11 @@ proc ::tree::DrawSelection {w} {
 	$can delete $treestate(selidx)
 	if {$treestate(oldselection) != ""} {
 	    set vold $treestate(oldselection)
-	    if {[info exists v2uid($vold)] &&  \
-	      [info exists treestate($uidOld:tag)]} {
+	    if {[info exists v2uid($vold)]} {
 		set uidOld $v2uid($vold)
-		$can itemconfigure $treestate($uidOld:tag) -fill black
+		if {[info exists treestate($uidOld:tag)]} {
+		    $can itemconfigure $treestate($uidOld:tag) -fill black
+		}
 	    }
 	}
     }

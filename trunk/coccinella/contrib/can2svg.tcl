@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #
-# $Id: can2svg.tcl,v 1.1.1.1 2002-12-08 10:54:10 matben Exp $
+# $Id: can2svg.tcl,v 1.2 2003-11-01 13:57:26 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -125,6 +125,7 @@ proc ::can2svg::can2svg {cmd args} {
 		set fillValue black
 	    }
 	    if {($argsArr(-usetags) != "0") && [info exists optArr(-tags)]} {
+		
 		switch -- $argsArr(-usetags) {
 		    all {			
 			set idAttr [list "id" $optArr(-tags)]
@@ -204,6 +205,7 @@ proc ::can2svg::can2svg {cmd args} {
 			  [expr $cx + $rx*cos($phi)] [expr $cy - $ry*sin($phi)]]
 		    }
 		    if {[info exists optArr(-style)]} {
+			
 			switch -- $optArr(-style) {
 			    chord {
 				append data " Z"
@@ -451,6 +453,7 @@ proc ::can2svg::MakeStyle {type opts} {
 		}
 		if {[llength $value] > 2} {
 		    set tkstyle [lindex $value 2]
+		    
 		    switch -- $tkstyle {
 			bold {
 			    set styleArr(font-weight) $tkstyle
@@ -495,6 +498,7 @@ proc ::can2svg::MakeStyle {type opts} {
 	} else {
 	    set arrowIdKey "arrowMarkerDef_${fillCol}"
 	}
+	
 	switch -- $arrowValue {
 	    first {
 		set styleArr(marker-start) "url(#$arrowIdKey)"
@@ -596,6 +600,7 @@ proc ::can2svg::MakeImageAttr {coo opts} {
     set theFile [$theImage cget -file]
     set uri [UriFromLocalFile $theFile]
     foreach {x0 y0} $coo {}
+    
     switch -- $optArr(-anchor) {
 	nw {
 	    set x $x0

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.11 2003-10-25 07:22:26 matben Exp $
+# $Id: NewMsg.tcl,v 1.12 2003-11-01 13:57:27 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -15,7 +15,7 @@ namespace eval ::Jabber::NewMsg:: {
     variable locals
     
     # Running number for unique toplevels.
-    set locals(num) 0
+    set locals(dlguid) 0
     set locals(inited) 0
     set locals(wpopupbase) .jsndtrpt
     set locals(transports) {jabber icq aim msn yahoo irc smtp}
@@ -31,53 +31,47 @@ namespace eval ::Jabber::NewMsg:: {
 	irc       {IRC       {IRC:}}
 	smtp      {Email     {Mail address:}}
     }
-    
-    # Icons.
-    set popupbt {
-R0lGODdhEAAOALMAAP///+/v797e3s7Ozr29va2trZycnJSUlIyMjHl5eXR0
-dHNzc2NjY1JSUkJCQgAAACwAAAAAEAAOAAAEYLDIIqoYg5A5iQhVthkGR4HY
-JhkI0gWgphUkspRn5ey8Yy+S0CDRcxRsjOAlUzwuGkERQcGjGZ6S1IxHWjCS
-hZkEcTC2vEAOieRDNlyrNevMaKQnrIXe+71zkF8MC3ASEQA7}
-
-    set popupbtpush {
-R0lGODdhEAAOAMQAAP///9DQ0M7Ozr29va2trZycnI2NjYyMjHZ2dnV1dXR0
-dHNzc29vb2NjY1JSUkJCQgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-AAAAAAAAAAAAAAAAAAAAAAAAACwAAAAAEAAOAAAFbqAgCsTSOGhTjMLgmk0s
-O4s7EGW8HEVxHKYDjnCI8Vy4HnBoWhBsN+WigIsVBoGHdvtQCAm0qwDBfRAS
-TvDUVjYs0g6VjbEluL/WIWELnOKKPD0FdAQKbzc4b4EHBg9vUyRDP5N9kFGC
-UjtULT0hADs=}
-
-    set whiterect {
-R0lGODdhEAAOAIAAAP///wAAACwAAAAAEAAOAAACDYSPqcvtD6OctNqLZQEA
-Ow==}
-
-    set locals(popupbt) [image create photo -data $popupbt]
-    set locals(popupbtpush) [image create photo -data $popupbtpush]
-    set locals(whiterect) [image create photo -data $whiterect]
 }
 
-proc Jabber::NewMsg::Init { } {
+# Jabber::NewMsg::Init --
+# 
+#       Initialization that is needed once.
+
+proc ::Jabber::NewMsg::Init { } {
+    
+    variable locals
+    
+    set locals(inited) 1
+    
+    # Icons.
+    set locals(popupbt) [::UI::GetIcon popupbt]
+    set locals(popupbtpush) [::UI::GetIcon popupbtpush]
+    set locals(whiterect) [::UI::GetIcon whiterect]
+}
+
+# Jabber::NewMsg::InitEach --
+# 
+#       Initializations that are needed each time a send dialog is created.
+#       This is because the services from transports must be determined
+#       dynamically.
+
+proc ::Jabber::NewMsg::InitEach { } {
     
     variable locals
     variable popupDefs
     upvar ::Jabber::jstate jstate
     
-    set locals(inited) 1
+    ::Jabber::Debug 2 "Jabber::NewMsg::InitEach"
     
-    # Get all transports from our browse object.
-    set alltypes [$jstate(browse) getalltypes service/*]
-    
-    # Sort out the transports from the services.
+    # We must be indenpendent of method; agent, browse, disco
     set trpts {}
-    foreach subtype $locals(transports) {	
-	set ind [lsearch -exact $alltypes "service/$subtype"]
-	set locals(servicejid,$subtype) {}
-	if {$ind >= 0} {
+    foreach subtype $locals(transports) {
+	set jids [$jstate(jlib) service gettransportjids $subtype]
+	if {[llength $jids]} {
 	    lappend trpts $subtype
-	    set locals(servicejid,$subtype) [lindex \
-	      [$jstate(browse) getalljidfortypes "service/$subtype"] 0]
+	    set locals(servicejid,$subtype) [lindex $jids 0]
 	}
-    }
+    }    
     set locals(ourtransports) $trpts
     
     # Build popup defs. Keep order of popupDefs. Flatten!
@@ -109,11 +103,14 @@ proc ::Jabber::NewMsg::Build {wbase args} {
     
     ::Jabber::Debug 2 "::Jabber::NewMsg::Build args='$args'"
 
+    # One shot initialization (static) and dynamic initialization.
     if {!$locals(inited)} {
 	Jabber::NewMsg::Init
     }
-    set w "$wbase[incr locals(num)]"
-    set locals($w,num) $locals(num)
+    Jabber::NewMsg::InitEach
+   
+    set w "$wbase[incr locals(dlguid)]"
+    set locals($w,num) $locals(dlguid)
     if {[winfo exists $w]} {
 	return
     }

@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.11 2003-10-23 06:28:00 matben Exp $
+# $Id: roster.tcl,v 1.12 2003-11-01 13:57:27 matben Exp $
 # 
 # Note that every jid in the rosterArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -195,7 +195,8 @@ proc roster::CommandProc {rostName cmd args} {
 #
 # Arguments:
 #       rostName:   the instance of this roster.
-#       jid:        2-tier jid, with no /resource!
+#       jid:        2-tier jid, with no /resource, usually.
+#                   Some transports keep a resource part in jid.
 #       args:       a list of '-key value' pairs, where '-key' is any of:
 #                       -name value
 #                       -subscription value
@@ -238,7 +239,7 @@ proc roster::setrosteritem {rostName jid args} {
     
     # Be sure to evaluate the registered command procedure.
     if {[string length $options(cmd)]} {
-	uplevel #0 "$options(cmd) [list $rostName set $jid] $args"
+	uplevel #0 $options(cmd) [list $rostName set $jid] $args
     }
     return {}
 }
@@ -414,9 +415,6 @@ proc roster::setpresence {rostName jid type args} {
     Debug 2 "roster::setpresence rostName=$rostName, jid='$jid', \
       type='$type', args='$args'"
     
-    #set jid2 $jid
-    #set resource ""
-    #regexp {^([^/]+)/([^/]+)$} $jid match jid2 resource
     foreach {jid2 resource} [jlib::splitjid $jid] break
     
     if {[string equal $type "unsubscribed"]} {

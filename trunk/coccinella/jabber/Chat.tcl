@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.12 2003-10-12 13:12:54 matben Exp $
+# $Id: Chat.tcl,v 1.13 2003-11-01 13:57:27 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -189,8 +189,14 @@ proc ::Jabber::Chat::GotMsg {body args} {
 	set locals($threadID,subject) $argsArr(-subject)
     }
     set wtext $locals($threadID,wtext)
+    if {$jprefs(chat,showtime)} {
+	set theTime [clock format [clock seconds] -format "%H:%M"]
+	set txt "$theTime <$username>"
+    } else {
+	set txt <$username>
+    }
     $wtext configure -state normal
-    $wtext insert end <$username> youtag
+    $wtext insert end $txt youtag
     $wtext insert end "   " youtxttag
 
     ::Text::ParseAndInsert $wtext $body youtxttag linktag
@@ -506,7 +512,14 @@ proc ::Jabber::Chat::Send {threadID} {
     if {![regexp {(.+)@([^/]+)(/(.+))?} $jstate(mejid) match username host junk res]} {
 	set username $jstate(mejid)
     }
-    $wtext insert end <$username> metag
+    if {$jprefs(chat,showtime)} {
+	set theTime [clock format [clock seconds] -format "%H:%M"]
+	set txt "$theTime <$username>"
+    } else {
+	set txt <$username>
+    }
+    $wtext configure -state normal
+    $wtext insert end $txt metag
     
     ::Text::ParseAndInsert $wtext "   $allText" metxttag linktag
 

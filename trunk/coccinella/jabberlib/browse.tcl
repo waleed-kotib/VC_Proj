@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: browse.tcl,v 1.14 2003-10-25 07:22:26 matben Exp $
+# $Id: browse.tcl,v 1.15 2003-11-01 13:57:27 matben Exp $
 # 
 #  locals($jid,parent):       the parent of $jid.
 #  locals($jid,parents):      list of all parent jid's,
@@ -410,7 +410,7 @@ proc browse::getalljidfortypes {browseName typepattern} {
 #       
 # Arguments:
 #       browseName:   the instance of this conference browse.
-#       typepattern:  a globa pattern of jid type/subtype (service/*).
+#       typepattern:  a glob pattern of jid type/subtype (service/*).
 #
 # Results:
 #       List of types matching the type pattern.
