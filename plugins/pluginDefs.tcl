@@ -4,3 +4,5 @@
 
 #::Plugins::Load [file join $dir Example.tcl] ::Example::Init
 ::Plugins::Load [file join $dir PluginTextPlain.tcl] ::TextImporter::Init
+#::Plugins::Load [file join $dir PDFImporter.tcl] ::PDFImporter::Init
+

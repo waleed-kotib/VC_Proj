@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasText.tcl,v 1.5 2003-07-26 13:54:23 matben Exp $
+# $Id: CanvasText.tcl,v 1.6 2003-09-28 06:29:08 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 
@@ -42,22 +42,6 @@ namespace eval ::CanvasText:: {
 proc ::CanvasText::EditBind {w} {
     global  this
     
-    # Should add virtual events...
-    #	bind $w <<Cut>> {
-    #	::CanvasCCP::CanvasTextCopy %W; Delete %W
-    #	}
-    #	bind $w <<Copy>> {
-    #	::CanvasCCP::CanvasTextCopy %W
-    #	}
-    #	bind $w <<Paste>> {
-    #	::CanvasCCP::CanvasTextPaste %W
-    #	}
-    bind $w <Button-1> {
-	::CanvasText::CanvasFocus %W [%W canvasx %x] [%W canvasy %y]
-    }
-    bind $w <Button-2> {
-	::CanvasCCP::CanvasTextPaste %W [%W canvasx %x] [%W canvasy %y]
-    }
     $w bind text <Button-1> {
 	::CanvasText::Hit %W [%W canvasx %x] [%W canvasy %y]
     }
@@ -137,17 +121,12 @@ proc ::CanvasText::EditBind {w} {
     }
         
     # Need some new string functions here.
-    if {[info tclversion] >= 8.2} {
-	$w bind text <Key-Up> {
-	    ::CanvasText::MoveUpOrDown %W up
-	}
-	$w bind text <Key-Down> {
-	    ::CanvasText::MoveUpOrDown %W down
-	}
+    $w bind text <Key-Up> {
+	::CanvasText::MoveUpOrDown %W up
     }
-    
-    # Stop certain keyboard accelerators from firing:
-    bind $w <Control-a> break
+    $w bind text <Key-Down> {
+	::CanvasText::MoveUpOrDown %W down
+    }
 }
 
 # CanvasText::CanvasFocus --
@@ -184,7 +163,7 @@ proc ::CanvasText::CanvasFocus {w x y {forceNew 0}} {
 	# No text item under cursor, make a new empty text item.
 	set utag [::CanvasUtils::NewUtag]
 	set cmd [list create text $x $y -text ""   \
-	  -tags [list text $utag] -anchor nw -fill $state(fgCol)]
+	  -tags [list std text $utag] -anchor nw -fill $state(fgCol)]
 	set fontsLocal [list $state(font) $fontSize2Points($state(fontSize)) \
 	  $state(fontWeight)]
 	

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Sounds.tcl,v 1.5 2003-08-30 09:41:00 matben Exp $
+# $Id: Sounds.tcl,v 1.6 2003-09-28 06:29:08 matben Exp $
 
 package provide Sounds 1.0
 
@@ -79,13 +79,14 @@ proc ::Sounds::Init { } {
 
 proc ::Sounds::Play {snd} {
     global  prefs
-
     upvar ::Jabber::jprefs jprefs
+    variable afterid
 
     # Check the jabber prefs if sound should be played.
     if {!$jprefs(snd,$snd)} {
 	return
     }
+    catch {unset afterid($snd)}
     if {[::Plugins::HavePackage QuickTimeTcl]} {
 	if {[catch {.fake.${snd} play}]} {
 	    # ?
@@ -95,6 +96,15 @@ proc ::Sounds::Play {snd} {
 	    # ?
 	}
     }
+}
+
+proc ::Sounds::PlayWhenIdle {snd} {
+    variable afterid
+        
+    if {![info exists afterid($snd)]} {
+	set afterid($snd) 1
+	after idle [list ::Sounds::Play $snd]
+    }    
 }
 
 proc ::Sounds::Free { } {

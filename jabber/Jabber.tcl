@@ -7,11 +7,10 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.21 2003-09-21 13:02:12 matben Exp $
+# $Id: Jabber.tcl,v 1.22 2003-09-28 06:29:08 matben Exp $
 #
 #  The $address is an ip name or number.
 #
-#  jserver(all)               list of all profiles in array
 #  jserver(profile,selected)  profile picked in user info
 #  jserver(this)              present connected $address
 #  jserver(profile):          {$profile1 {$server1 $username $password $resource} \
@@ -333,6 +332,9 @@ proc ::Jabber::FactoryDefaults { } {
     set jprefs(rost,allowSubNone) 1
     set jprefs(rost,clrLogout) 1
     set jprefs(rost,dblClk) normal
+    set jprefs(rost,useBgImage) 1
+    set jprefs(rost,defBgImagePath) [file join $this(path) images sky.gif]
+    set jprefs(rost,bgImagePath) $jprefs(rost,defBgImagePath)
     set jprefs(subsc,inrost) ask
     set jprefs(subsc,notinrost) ask
     set jprefs(subsc,auto) 0
@@ -343,6 +345,15 @@ proc ::Jabber::FactoryDefaults { } {
     set jprefs(speakMsg) 0
     set jprefs(speakChat) 0
     
+    # Create background images.
+    if {[catch {
+	set jprefs(rost,bgImage) [image create photo  \
+	  -file $jprefs(rost,bgImagePath)]
+    }]} {
+	set jprefs(rost,bgImage) [image create photo  \
+	  -file $jprefs(rost,defBgImagePath)]	
+    }
+	
     # Preferred groupchat protocol (gc-1.0|muc).
     # 'muc' uses 'conference' as fallback.
     set jprefs(prefgchatproto) "muc"
@@ -418,10 +429,6 @@ proc ::Jabber::FactoryDefaults { } {
       {jabber.org {jabber.org myUsername myPassword home}}
     set jserver(profile,selected)  \
       [lindex $jserver(profile) 0]
-    set jserver(all) {}
-    foreach {name spec} $jserver(profile) {
-	lappend jserver(all) $name
-    }
     
     switch $this(platform) {
 	macintosh - macosx {
@@ -434,6 +441,109 @@ proc ::Jabber::FactoryDefaults { } {
 	    set jprefs(inboxPath) [file join $prefs(prefsDir) inbox.tcl]
 	}
     }
+}
+
+# Jabber::SetUserPreferences --
+# 
+#       Set defaults in the option database for widget classes.
+#       First, on all platforms...
+#       Set the user preferences from the preferences file if they are there,
+#       else take the hardcoded defaults.
+#       'thePrefs': a list of lists where each sublist defines an item in the
+#       following way:  {theVarName itsResourceName itsHardCodedDefaultValue
+#                 {thePriority 20}}.
+
+proc ::Jabber::SetUserPreferences { } {
+    
+    variable jstate
+    variable jprefs
+    variable jserver
+    
+    ::PreferencesUtils::Add [list  \
+      [list ::Jabber::jprefs(port)             jprefs_port              $jprefs(port)]  \
+      [list ::Jabber::jprefs(sslport)          jprefs_sslport           $jprefs(sslport)]  \
+      [list ::Jabber::jprefs(rost,clrLogout)   jprefs_rost_clrRostWhenOut $jprefs(rost,clrLogout)]  \
+      [list ::Jabber::jprefs(rost,dblClk)      jprefs_rost_dblClk       $jprefs(rost,dblClk)]  \
+      [list ::Jabber::jprefs(rost,rmIfUnsub)   jprefs_rost_rmIfUnsub    $jprefs(rost,rmIfUnsub)]  \
+      [list ::Jabber::jprefs(rost,allowSubNone) jprefs_rost_allowSubNone $jprefs(rost,allowSubNone)]  \
+      [list ::Jabber::jprefs(rost,useBgImage)  jprefs_rost_useBgImage   $jprefs(rost,useBgImage)]  \
+      [list ::Jabber::jprefs(rost,bgImagePath) jprefs_rost_bgImagePath  $jprefs(rost,bgImagePath)]  \
+      [list ::Jabber::jprefs(subsc,inrost)     jprefs_subsc_inrost      $jprefs(subsc,inrost)]  \
+      [list ::Jabber::jprefs(subsc,notinrost)  jprefs_subsc_notinrost   $jprefs(subsc,notinrost)]  \
+      [list ::Jabber::jprefs(subsc,auto)       jprefs_subsc_auto        $jprefs(subsc,auto)]  \
+      [list ::Jabber::jprefs(subsc,group)      jprefs_subsc_group       $jprefs(subsc,group)]  \
+      [list ::Jabber::jprefs(block,notinrost)  jprefs_block_notinrost   $jprefs(block,notinrost)]  \
+      [list ::Jabber::jprefs(block,list)       jprefs_block_list        $jprefs(block,list)    userDefault] \
+      [list ::Jabber::jprefs(speakMsg)         jprefs_speakMsg          $jprefs(speakMsg)]  \
+      [list ::Jabber::jprefs(speakChat)        jprefs_speakChat         $jprefs(speakChat)]  \
+      [list ::Jabber::jprefs(snd,online)       jprefs_snd_online        $jprefs(snd,online)]  \
+      [list ::Jabber::jprefs(snd,offline)      jprefs_snd_offline       $jprefs(snd,offline)]  \
+      [list ::Jabber::jprefs(snd,statchange)   jprefs_snd_statchange    $jprefs(snd,statchange)]  \
+      [list ::Jabber::jprefs(snd,newmsg)       jprefs_snd_newmsg        $jprefs(snd,newmsg)]  \
+      [list ::Jabber::jprefs(snd,connected)    jprefs_snd_connected     $jprefs(snd,connected)]  \
+      [list ::Jabber::jprefs(agentsOrBrowse)   jprefs_agentsOrBrowse    $jprefs(agentsOrBrowse)]  \
+      [list ::Jabber::jprefs(agentsServers)    jprefs_agentsServers     $jprefs(agentsServers)]  \
+      [list ::Jabber::jprefs(browseServers)    jprefs_browseServers     $jprefs(browseServers)]  \
+      [list ::Jabber::jprefs(showMsgNewWin)    jprefs_showMsgNewWin     $jprefs(showMsgNewWin)]  \
+      [list ::Jabber::jprefs(inbox2click)      jprefs_inbox2click       $jprefs(inbox2click)]  \
+      [list ::Jabber::jprefs(inboxSave)        jprefs_inboxSave         $jprefs(inboxSave)]  \
+      [list ::Jabber::jprefs(prefgchatproto)   jprefs_prefgchatproto    $jprefs(prefgchatproto)]  \
+      [list ::Jabber::jprefs(autoaway)         jprefs_autoaway          $jprefs(autoaway)]  \
+      [list ::Jabber::jprefs(xautoaway)        jprefs_xautoaway         $jprefs(xautoaway)]  \
+      [list ::Jabber::jprefs(awaymin)          jprefs_awaymin           $jprefs(awaymin)]  \
+      [list ::Jabber::jprefs(xawaymin)         jprefs_xawaymin          $jprefs(xawaymin)]  \
+      [list ::Jabber::jprefs(awaymsg)          jprefs_awaymsg           $jprefs(awaymsg)]  \
+      [list ::Jabber::jprefs(xawaymsg)         jprefs_xawaymsg          $jprefs(xawaymsg)]  \
+      [list ::Jabber::jprefs(logoutStatus)     jprefs_logoutStatus      $jprefs(logoutStatus)]  \
+      [list ::Jabber::jprefs(chatFont)         jprefs_chatFont          $jprefs(chatFont)]  \
+      [list ::Jabber::jprefs(haveIMsysIcons)   jprefs_haveIMsysIcons    $jprefs(haveIMsysIcons)]  \
+      [list ::Jabber::jserver(profile)         jserver_profile          $jserver(profile)      userDefault] \
+      [list ::Jabber::jserver(profile,selected) jserver_profile_selected $jserver(profile,selected) userDefault] \
+      ]
+    
+	# Personal info corresponding to the iq:register namespace.
+	
+	set jprefsRegList {}
+	foreach key $jprefs(iqRegisterElem) {
+	    lappend jprefsRegList [list  \
+	      ::Jabber::jprefs(iq:register,$key) jprefs_iq_register_$key   \
+	      $jprefs(iq:register,$key) userDefault]
+	}
+	::PreferencesUtils::Add $jprefsRegList
+}
+
+# Jabber::GetjprefsArray, GetjserverArray, ... --
+# 
+#       Accesor functions for various preference arrays.
+
+proc ::Jabber::GetjprefsArray { } {
+    variable jprefs
+    
+    return [array get jprefs]
+}
+
+proc ::Jabber::GetjserverArray { } {
+    variable jserver
+    
+    return [array get jserver]
+}
+
+proc ::Jabber::SetjprefsArray {jprefsArrList} {
+    variable jprefs
+    
+    array set jprefs $jprefsArrList
+}
+
+proc ::Jabber::SetjserverArray {jserverArrList} {
+    variable jserver
+    
+    array set jserver $jserverArrList
+}
+
+proc ::Jabber::GetIQRegisterElements { } {
+    variable jprefs
+
+    return $jprefs(iqRegisterElem)
 }
 
 # Generic ::Jabber:: stuff -----------------------------------------------------
@@ -1976,7 +2086,7 @@ proc ::Jabber::PutFile {wtop fileName mime opts jid} {
     set dstFile [::Types::GetFileTailAddSuffix $fileName]
 
     # Translate tcl type '-key value' list to 'Key: value' option list.
-    set optList [::ImageAndMovie::GetTransportSyntaxOptsFromTcl $opts]
+    set optList [::Import::GetTransportSyntaxOptsFromTcl $opts]
 
     if {[catch {
 	::putfile::put $fileName $jidToIP($jid) $prefs(remotePort)   \
@@ -2123,23 +2233,20 @@ proc ::Jabber::SetUserProfile {profile server username password {res {coccinella
     
     ::Jabber::Debug 2 "profile=$profile, s=$server, u=$username, p=$password, r=$res"
 
-    # Be sure to sync jserver(all) first.
-    set jserver(all) {}
+    # 
     array set jserverArr $jserver(profile)
-    foreach prof [array names jserverArr] {
-	lappend jserver(all) $prof
-    }
+    set jserverList [::Jabber::GetAllProfileNames]
     
     # Create a new unique profile name.
     if {[string length $profile] == 0} {
 	set profile $server
 
 	# Make sure that 'profile' is unique.
-	if {[lsearch -exact $jserver(all) $profile] >= 0} {
+	if {[lsearch -exact $jserverList $profile] >= 0} {
 	    set i 2
 	    set tmpprof $profile
 	    set profile ${tmpprof}-${i}
-	    while {[lsearch -exact $jserver(all) $profile] >= 0} {
+	    while {[lsearch -exact $jserverList $profile] >= 0} {
 		incr i
 		set profile ${tmpprof}-${i}
 	    }
@@ -2148,11 +2255,23 @@ proc ::Jabber::SetUserProfile {profile server username password {res {coccinella
     set jserverArr($profile) [list $server $username $password $res]
     set jserver(profile) [array get jserverArr]
     set jserver(profile,selected) $profile
-    lappend jserver(all) $profile
-    set jserver(all) [lsort -unique $jserver(all)]
     return ""
 }
 
+# Jabber::GetAllProfileNames --
+# 
+#       Utlity function to get a list of the names of all profiles.
+
+proc ::Jabber::GetAllProfileNames { } {
+    variable jserver
+
+    set jserverList {}
+    foreach {name spec} $jserver(profile) {
+	lappend jserverList $name
+    }    
+    return [lsort -dictionary $jserverList]
+}
+    
 proc ::Jabber::GetAllWinGeom { } {
     
     set geomList {}
@@ -2813,7 +2932,7 @@ proc ::Jabber::WB::DispatchToImporter {mime opts args} {
     
     if {$display && [::Plugins::HaveImporterForMime $mime]} {
 	set wCan [::UI::GetCanvasFromWtop $wtop]
-	eval {::ImageAndMovie::DoImport $wCan $opts} $args
+	eval {::Import::DoImport $wCan $opts} $args
     }
 }
 
@@ -4460,17 +4579,12 @@ proc ::Jabber::Login::Login {w} {
     # Entries etc.
     set frmid [frame $w.frall.frmid -borderwidth 0]
     pack $frmid -side top -fill both -expand 1
-    
-    # Sync $jserver(all)
-    set jserver(all) {}
-    foreach {name spec} $jserver(profile) {
-	lappend jserver(all) $name
-    }
-    
+        
     # Option menu for selecting user profile.
     label $frmid.lpop -text "[::msgcat::mc Profile]:" -font $sysFont(sb) -anchor e
     set wpopup $frmid.popup
-    eval {tk_optionMenu $wpopup [namespace current]::menuVar} $jserver(all)
+    set jserverList [::Jabber::GetAllProfileNames]
+    eval {tk_optionMenu $wpopup [namespace current]::menuVar} $jserverList
     $wpopup configure -highlightthickness 0  \
       -background $prefs(bgColGeneral) -foreground black
     grid $frmid.lpop -column 0 -row 0 -sticky e
@@ -4902,7 +5016,7 @@ proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
     
 
     # Any noise.
-    ::Sounds::Play "connected"
+    ::Sounds::PlayWhenIdle "connected"
 }
 
 # Jabber::VerifyJIDWhiteboard --

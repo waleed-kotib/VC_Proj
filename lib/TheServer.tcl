@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: TheServer.tcl,v 1.11 2003-09-21 13:02:12 matben Exp $
+# $Id: TheServer.tcl,v 1.12 2003-09-28 06:29:08 matben Exp $
     
 # DoStartServer ---
 #
@@ -385,7 +385,7 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 	    
 	    set fileName [lindex $instr 0]
 	    set optList [lrange $instr 1 end]
-	    set opts [::ImageAndMovie::GetTclSyntaxOptsFromTransport $optList]
+	    set opts [::Import::GetTclSyntaxOptsFromTransport $optList]
 	    set tempChannel($channel) 1
 	    
 	    if {$prefixCmd == "PUT"} {
@@ -443,7 +443,7 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 		    puts "--->RESIZE IMAGE: itOrig=$itOrig, itNew=$itNew, \
 		      zoomFactor=$zoomFactor"
 		}
-		::ImageAndMovie::ResizeImage $wtop $zoomFactor $itOrig $itNew "local"
+		::Import::ResizeImage $wtop $zoomFactor $itOrig $itNew "local"
 	    }		
 	}
 	"GET IP" {

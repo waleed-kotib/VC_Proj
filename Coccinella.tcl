@@ -15,7 +15,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.5 2003-09-21 13:02:12 matben Exp $
+# $Id: Coccinella.tcl,v 1.6 2003-09-28 06:29:08 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -376,7 +376,8 @@ package require msgcat
 #::msgcat::mclocale sv
 ::msgcat::mcload [file join $this(path) msgs]
 
-# The splash screen is needed from the start. This also defines $wDlgs.
+# The splash screen is needed from the start. 
+# This also defines the wDlgs array.
 package require Dialogs
 
 # Needed in splash screen.
@@ -396,7 +397,7 @@ set allLibSourceFiles {
   EditDialogs.tcl        \
   FileUtils.tcl          \
   ItemInspector.tcl      \
-  ImageAndMovie.tcl      \
+  Import.tcl             \
   GetFileIface.tcl       \
   Network.tcl            \
   PutFileIface.tcl       \
@@ -427,7 +428,7 @@ switch -- $this(platform) {
     }
     windows {
 	if {[catch {source [file join $this(path) lib WindowsUtils.tcl]} msg]} {
-	    after idle {tk_messageBox -message "Error sourcing WindowsUtils.tcl  $msg"  \
+	    after idle {tk_messageBox -message "Error getting WindowsUtils  $msg"  \
 	      -icon error -type ok; exit}
 	}    
     }
@@ -615,6 +616,9 @@ if {[catch {source [file join $this(path) lib SetFactoryDefaults.tcl]} msg]} {
 # Set the user preferences from the preferences file if they are there,
 # else take the hardcoded defaults.
 ::PreferencesUtils::SetUserPreferences
+if {!$prefs(stripJabber)} {
+    ::Jabber::SetUserPreferences
+}
 
 # Parse any command line options.
 if {$argc > 0} {
@@ -661,7 +665,7 @@ if {[string equal $prefs(protocol) "jabber"]} {
     set wDlgs(mainwb) .
 }
 # Need to do this here after reading preferences.
-lappend prefs(winGeomList) $wDlgs(jrostbro)
+::Dialogs::AddToplevelToGeomList $wDlgs(jrostbro)
 
 # Make the actual whiteboard with canvas, tool buttons etc...
 # Jabber has the roster window as "main" window.

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UserActions.tcl,v 1.14 2003-09-21 13:02:12 matben Exp $
+# $Id: UserActions.tcl,v 1.15 2003-09-28 06:29:08 matben Exp $
 
 namespace eval ::UserActions:: {
     
@@ -28,7 +28,7 @@ proc ::UserActions::CancelAllPutGetAndPendingOpen {wtop} {
     # This must be instance specific!!!
     ::PutFileIface::CancelAllWtop $wtop
     ::GetFileIface::CancelAllWtop $wtop
-    ::ImageAndMovie::HttpResetAll $wtop
+    ::Import::HttpResetAll $wtop
     if {[string equal $prefs(protocol) "jabber"]} {
 	::Network::KillAll
 	::UI::SetStatusMessage $wtop {}
@@ -792,7 +792,7 @@ proc ::UserActions::DoQuit {args} {
      
     # Get dialog window geometries. Some jabber dialogs special.
     set prefs(winGeom) {}
-    foreach win $prefs(winGeomList) {
+    foreach win [::Dialogs::GetToplevelGeomList] {
 	if {[winfo exists $win] && [winfo ismapped $win]} {
 	    lappend prefs(winGeom) $win [wm geometry $win]
 	} elseif {[info exists prefs(winGeom,$win)]} {

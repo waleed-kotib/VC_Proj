@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.11 2003-09-21 13:02:12 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.12 2003-09-28 06:29:08 matben Exp $
 
 package provide CanvasUtils 1.0
 package require sha1pure
@@ -324,15 +324,15 @@ proc ::CanvasUtils::GetUndoCommand {wtop cmd} {
 
 			switch -- $winClass {
 			    QTFrame {
-				set undo [::ImageAndMovie::QTImportCmd $w $utag]
+				set undo [::Import::QTImportCmd $w $utag]
 			    }
 			    SnackFrame {
-				set undo [::ImageAndMovie::SnackImportCmd $w $utag]
+				set undo [::Import::SnackImportCmd $w $utag]
 			    }
 			    default {
 
 				# Typically a plugin.
-				set undo [::ImageAndMovie::FrameImportCmd $w $utag]
+				set undo [::Import::FrameImportCmd $w $utag]
 			    }
 			}
 		    }
@@ -430,7 +430,7 @@ proc ::CanvasUtils::GetOnelinerForItem {w id} {
 # CanvasUtils::GetOnelinerForImage, ... --
 #
 #       Makes a line that is suitable for file storage. Shall be understood
-#       by '::ImageAndMovie::HandleImportCmd'.
+#       by '::Import::HandleImportCmd'.
 #
 # Arguments:
 #       w           the canvas widget
@@ -1290,7 +1290,7 @@ proc ::CanvasUtils::HandleCanvasDraw {wtop instr} {
     
     # The 'import' command is an exception case (for the future). 
     if {[string equal $cmd "import"]} {
-	::ImageAndMovie::HandleImportCmd $wServCan $bsinstr
+	::Import::HandleImportCmd $wServCan $bsinstr
     } else {
 	
 	# Make the actual canvas command, either straight or in the 
@@ -1377,6 +1377,198 @@ proc ::CanvasUtils::ItemFree {wtop} {
     upvar ::${wtop}::itemopts itemopts
     
     catch {unset itemopts}
+}
+
+# CanvasUtils::DefineWhiteboardBindtags --
+# 
+#       Defines a number of binding tags for the whiteboard canvas.
+#       This is helpful when switching bindings depending on which tool is 
+#       selected. It defines only widget bindtags, not item binding.
+
+proc ::CanvasUtils::DefineWhiteboardBindtags { } {
+    global  this
+    
+    # WhiteboardPoint
+    bind WhiteboardPoint <Button-1> {
+	::CanvasDraw::MarkBbox %W 0
+	::CanvasDraw::InitBox %W [%W canvasx %x] [%W canvasy %y] rect
+    }
+    bind WhiteboardPoint <Shift-Button-1> {
+	::CanvasDraw::MarkBbox %W 1
+	::CanvasDraw::InitBox %W [%W canvasx %x] [%W canvasy %y] rect
+    }
+    bind WhiteboardPoint <B1-Motion> {
+	::CanvasDraw::BoxDrag %W [%W canvasx %x] [%W canvasy %y] 0 rect 1
+	::CanvasUtils::StopTimerToItemPopup
+    }
+    bind WhiteboardPoint <ButtonRelease-1> {
+	::CanvasDraw::FinalizeBox %W [%W canvasx %x] [%W canvasy %y] 0 rect 1
+    }
+    
+    # WhiteboardMove
+    # Bindings for moving items; movies need special class.
+    # The frame with the movie the mouse events, not the canvas.
+    # With shift constrained move.
+    bind WhiteboardMove <Button-1> {
+	::CanvasDraw::InitMove %W [%W canvasx %x] [%W canvasy %y]
+    }
+    bind WhiteboardMove <B1-Motion> {
+	::CanvasDraw::DoMove %W [%W canvasx %x] [%W canvasy %y] item
+    }
+    bind WhiteboardMove <ButtonRelease-1> {
+	::CanvasDraw::FinalizeMove %W [%W canvasx %x] [%W canvasy %y]
+    }
+    bind WhiteboardMove <Shift-B1-Motion> {
+	::CanvasDraw::DoMove %W [%W canvasx %x] [%W canvasy %y] item 1
+    }    
+    
+    # WhiteboardLine
+    bind WhiteboardLine <Button-1> {
+	::CanvasDraw::InitLine %W [%W canvasx %x] [%W canvasy %y]
+    }
+    bind WhiteboardLine <B1-Motion> {
+	::CanvasDraw::LineDrag %W [%W canvasx %x] [%W canvasy %y] 0
+    }
+    bind WhiteboardLine <Shift-B1-Motion> {
+	::CanvasDraw::LineDrag %W [%W canvasx %x] [%W canvasy %y] 1
+    }
+    bind WhiteboardLine <ButtonRelease-1> {
+	::CanvasDraw::FinalizeLine %W [%W canvasx %x] [%W canvasy %y] 0
+    }
+    bind WhiteboardLine <Shift-ButtonRelease-1> {
+	::CanvasDraw::FinalizeLine %W [%W canvasx %x] [%W canvasy %y] 1
+    }
+
+    # WhiteboardArrow
+    bind WhiteboardArrow <Button-1> {
+	::CanvasDraw::InitLine %W [%W canvasx %x] [%W canvasy %y] arrow
+    }
+    bind WhiteboardArrow <B1-Motion> {
+	::CanvasDraw::LineDrag %W [%W canvasx %x] [%W canvasy %y] 0 arrow
+    }
+    bind WhiteboardArrow <Shift-B1-Motion> {
+	::CanvasDraw::LineDrag %W [%W canvasx %x] [%W canvasy %y] 1 arrow
+    }
+    bind WhiteboardArrow <ButtonRelease-1> {
+	::CanvasDraw::FinalizeLine %W [%W canvasx %x] [%W canvasy %y] 0 arrow
+    }
+    bind WhiteboardArrow <Shift-ButtonRelease-1> {
+	::CanvasDraw::FinalizeLine %W [%W canvasx %x] [%W canvasy %y] 1 arrow
+    }
+    
+    # WhiteboardRect
+    bind WhiteboardRect <Button-1> {
+	::CanvasDraw::InitBox %W [%W canvasx %x] [%W canvasy %y] rect
+    }
+    bind WhiteboardRect <B1-Motion> {
+	::CanvasDraw::BoxDrag %W [%W canvasx %x] [%W canvasy %y] 0 rect
+    }
+    bind WhiteboardRect <Shift-B1-Motion> {
+	::CanvasDraw::BoxDrag %W [%W canvasx %x] [%W canvasy %y] 1 rect
+    }
+    bind WhiteboardRect <ButtonRelease-1> {
+	::CanvasDraw::FinalizeBox %W [%W canvasx %x] [%W canvasy %y] 0 rect
+    }
+    bind WhiteboardRect <Shift-ButtonRelease-1> {
+	::CanvasDraw::FinalizeBox %W [%W canvasx %x] [%W canvasy %y] 1 rect
+    }
+    
+    # WhiteboardOval
+    bind WhiteboardOval <Button-1> {
+	::CanvasDraw::InitBox %W [%W canvasx %x] [%W canvasy %y] oval
+    }
+    bind WhiteboardOval <B1-Motion> {
+	::CanvasDraw::BoxDrag %W [%W canvasx %x] [%W canvasy %y] 0 oval
+    }
+    bind WhiteboardOval <Shift-B1-Motion> {
+	::CanvasDraw::BoxDrag %W [%W canvasx %x] [%W canvasy %y] 1 oval
+    }
+    bind WhiteboardOval <ButtonRelease-1> {
+	::CanvasDraw::FinalizeBox %W [%W canvasx %x] [%W canvasy %y] 0 oval
+    }
+    bind WhiteboardOval <Shift-ButtonRelease-1> {
+	::CanvasDraw::FinalizeBox %W [%W canvasx %x] [%W canvasy %y] 1 oval
+    }
+
+    # WhiteboardText
+    bind WhiteboardText <Button-1> {
+	::CanvasText::CanvasFocus %W [%W canvasx %x] [%W canvasy %y]
+    }
+    bind WhiteboardText <Button-2> {
+	::CanvasCCP::CanvasTextPaste %W [%W canvasx %x] [%W canvasy %y]
+    }
+    # Stop certain keyboard accelerators from firing:
+    bind WhiteboardText <Control-a> break
+
+    # WhiteboardDel
+    bind WhiteboardDel <Button-1> {
+	::CanvasDraw::DeleteItem %W [%W canvasx %x] [%W canvasy %y]
+    }
+    
+    # WhiteboardPen
+    bind WhiteboardPen <Button-1> {
+	::CanvasDraw::InitStroke %W [%W canvasx %x] [%W canvasy %y]
+    }
+    bind WhiteboardPen <B1-Motion> {
+	::CanvasDraw::StrokeDrag %W [%W canvasx %x] [%W canvasy %y]
+    }
+    bind WhiteboardPen <ButtonRelease-1> {
+	::CanvasDraw::FinalizeStroke %W [%W canvasx %x] [%W canvasy %y]
+    }
+
+    # WhiteboardBrush
+    bind WhiteboardBrush <Button-1> {
+	::CanvasDraw::InitStroke %W [%W canvasx %x] [%W canvasy %y]
+    }
+    bind WhiteboardBrush <B1-Motion> {
+	::CanvasDraw::StrokeDrag %W [%W canvasx %x] [%W canvasy %y] 1
+    }
+    bind WhiteboardBrush <ButtonRelease-1> {
+	::CanvasDraw::FinalizeStroke %W [%W canvasx %x] [%W canvasy %y] 1
+    }
+
+    # WhiteboardPaint
+    bind WhiteboardPaint  <Button-1> {
+	::CanvasDraw::DoPaint %W [%W canvasx %x] [%W canvasy %y]
+    }
+    bind WhiteboardPaint  <Shift-Button-1> {
+	::CanvasDraw::DoPaint %W [%W canvasx %x] [%W canvasy %y] 1
+    }
+
+    # WhiteboardPoly
+    bind WhiteboardPoly  <Button-1> {
+	::CanvasDraw::PolySetPoint %W [%W canvasx %x] [%W canvasy %y]
+    }
+
+    # WhiteboardArc
+    bind WhiteboardArc <Button-1> {
+	::CanvasDraw::InitArc %W [%W canvasx %x] [%W canvasy %y]
+    }
+    bind WhiteboardArc <Shift-Button-1> {
+	::CanvasDraw::InitArc %W [%W canvasx %x] [%W canvasy %y] 1
+    }
+
+    # WhiteboardRot
+    bind WhiteboardRot <Button-1> {
+	::CanvasDraw::InitRotateItem %W [%W canvasx %x] [%W canvasy %y]
+    }
+    bind WhiteboardRot <B1-Motion> {
+	::CanvasDraw::DoRotateItem %W [%W canvasx %x] [%W canvasy %y] 0
+    }
+    bind WhiteboardRot <Shift-B1-Motion> {
+	::CanvasDraw::DoRotateItem %W [%W canvasx %x] [%W canvasy %y] 1
+    }
+    bind WhiteboardRot <ButtonRelease-1> {
+	::CanvasDraw::FinalizeRotate %W [%W canvasx %x] [%W canvasy %y]
+    }
+    
+    # Generic nontext bindings.
+    bind WhiteboardNonText <BackSpace> {
+	::CanvasDraw::DeleteItem %W %x %y selected
+    }
+    bind WhiteboardNonText <Control-d> {
+	::CanvasDraw::DeleteItem %W %x %y selected
+    }
 }
 
 #-------------------------------------------------------------------------------

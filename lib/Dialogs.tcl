@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.10 2003-09-21 13:02:12 matben Exp $
+# $Id: Dialogs.tcl,v 1.11 2003-09-28 06:29:08 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -258,120 +258,6 @@ proc ::Dialogs::InfoOnPlugins {w} {
     tkwait window $w
     grab release $w
 }
-
-# It implements the dialog for choosing type of network topology and some 
-# options.
-
-namespace eval ::NetworkSetup:: {
-    
-}
-
-# NetworkSetup::StartServer --
-#
-#       Starts the reflector server as a separate process. Platform specific!
-#       
-# Arguments:
-#       wbt   ???.
-#       
-# Results:
-#       starts a new tcl process.
-
-proc ::NetworkSetup::StartServer { wbt } {
-    global  this state prefs
-        
-    set path [file join $this(path) lib ReflectorServer.tcl]
-    
-    # Start the reflector server as a background process. Mac not working!
-    
-    switch -- $this(platform) {
-	macintosh {
-	    tk_messageBox -message  \
-	      "The Reflector Server can't be started on the Mac, Sorry."  \
-	      -icon error -type ok
-	    return
-	    
-	    # Don't know Applescript yet!
-	    AppleScript execute {open application TclShell}
-	    AppleScript execute {tell application TclShell to do script "puts hello"}
-	}
-	windows {
-	    
-	    # Need to start the right version, try same is present.
-	    regsub -all {\.} [info tclversion] {} ver
-	    set prgm tclsh${ver}.exe
-	    if {[catch {exec $prgm $path $prefs(reflectPort) &} res]} {
-		tk_messageBox -message  \
-		  "Failed starting the Reflector Server: $res"  \
-		  -icon error -type ok
-		return
-	    } else {
-		set state(reflectPid) $res
-	    }
-	}
-	unix - macosx {
-	    
-	    # Remeber, the exec does not go through an Unix shell!
-	    if {[catch {exec tclsh $path $prefs(reflectPort) &} res]} {
-		tk_messageBox -message  \
-		  "Failed starting the Reflector Server: $res"  \
-		  -icon error -type ok
-		return
-	    } else {
-		set state(reflectPid) $res
-	    }
-	}
-    }
-    $wbt configure -text " Stop Server " -command  \
-      [list ::NetworkSetup::StopServer $wbt]
-    set state(reflectorStarted) 1
-}
-
-# NetworkSetup::StopServer --
-#
-#       Stops the reflector server. Kills process.
-#       
-# Arguments:
-#       wbt   ???.
-#       
-# Results:
-#       kills tcl process.
-
-proc ::NetworkSetup::StopServer { {wbt {}} } {
-    global  this state prefs
-    
-    if {[string equal $this(platform) "macintosh"]} {
-	return
-    }
-    
-    # Stop the reflector servers background process. Mac not working!
-    switch -- $this(platform) {
-	windows {
-	    
-	    # Need to find the right DOS command here.
-	    set s [socket $this(ipnum) $prefs(reflectPort)]
-	    puts $s "KILL:"
-	    catch {close $s}
-	}
-	unix - macosx {
-	    if {[catch {exec kill $state(reflectPid)} res]} {
-		tk_messageBox -message  \
-		  "Failed stopping the Reflector Server: $res"  \
-		  -icon error -type ok
-		return
-
-	    }
-	}
-    }
-    Debug 2 "::NetworkSetup::StopServer  "
-
-    if {[winfo exists $wbt]} {
-	$wbt configure -text " Start Server " -command  \
-	  [list ::NetworkSetup::StartServer $wbt]
-    }
-    set state(reflectorStarted) 0
-}
-
-#-- end ::NetworkSetup:: -------------------------------------------------------
 
 # Printing the canvas on Unix/Linux.
 
@@ -1022,6 +908,7 @@ namespace eval ::Dialogs:: {
 # Dialogs::Canvas --
 # 
 #       Display a *.can file into simple canvas window.
+#       A kind of minimal, readonly, whiteboard.
 
 proc ::Dialogs::Canvas {filePath args} {
     global this prefs
@@ -1072,8 +959,8 @@ proc ::Dialogs::Canvas {filePath args} {
 	    import {
 		set ind [lsearch -exact $line -file]
 		if {$ind >= 0} {
-		    ::ImageAndMovie::HandleImportCmd $wcan $line -where local \
-		      -basepath [file dirname $filePath]
+		    ::Import::HandleImportCmd $wcan $line -where local \
+		      -basepath [file dirname $filePath] -addundo 0
 		}
 	    }
 	}
@@ -1142,17 +1029,17 @@ proc ::Dialogs::AboutQuickTimeTcl { } {
     $w.m play
 }
 
-# Procs to handle list of toplevels windows that we cache its gemotries.
+# Procs to handle list of toplevels windows that we cache its geometries.
 
 namespace eval ::Dialogs:: {
  
     variable winGeomList {}
 }
 
-proc ::Dialogs::AddToplevelToGeomList {wList} {
+proc ::Dialogs::AddToplevelToGeomList {args} {
     variable winGeomList
     
-    lappend winGeomList $wList
+    set winGeomList [concat $winGeomList $args]
 }
 
 proc ::Dialogs::GetToplevelGeomList { } {
@@ -1172,6 +1059,117 @@ proc ::Dialogs::Free { } {
     if {[winfo exists $wAboutQuickTimeTcl]} {
 	destroy $wAboutQuickTimeTcl
     }
+}
+
+#-- ::NetworkSetup:: -----------------------------------------------------------
+
+namespace eval ::NetworkSetup:: {
+    
+}
+
+# NetworkSetup::StartServer --
+#
+#       Starts the reflector server as a separate process. Platform specific!
+#       
+# Arguments:
+#       wbt   ???.
+#       
+# Results:
+#       starts a new tcl process.
+
+proc ::NetworkSetup::StartServer { wbt } {
+    global  this state prefs
+        
+    set path [file join $this(path) lib ReflectorServer.tcl]
+    
+    # Start the reflector server as a background process. Mac not working!
+    
+    switch -- $this(platform) {
+	macintosh {
+	    tk_messageBox -message  \
+	      "The Reflector Server can't be started on the Mac, Sorry."  \
+	      -icon error -type ok
+	    return
+	    
+	    # Don't know Applescript yet!
+	    AppleScript execute {open application TclShell}
+	    AppleScript execute {tell application TclShell to do script "puts hello"}
+	}
+	windows {
+	    
+	    # Need to start the right version, try same is present.
+	    regsub -all {\.} [info tclversion] {} ver
+	    set prgm tclsh${ver}.exe
+	    if {[catch {exec $prgm $path $prefs(reflectPort) &} res]} {
+		tk_messageBox -message  \
+		  "Failed starting the Reflector Server: $res"  \
+		  -icon error -type ok
+		return
+	    } else {
+		set state(reflectPid) $res
+	    }
+	}
+	unix - macosx {
+	    
+	    # Remeber, the exec does not go through an Unix shell!
+	    if {[catch {exec tclsh $path $prefs(reflectPort) &} res]} {
+		tk_messageBox -message  \
+		  "Failed starting the Reflector Server: $res"  \
+		  -icon error -type ok
+		return
+	    } else {
+		set state(reflectPid) $res
+	    }
+	}
+    }
+    $wbt configure -text " Stop Server " -command  \
+      [list ::NetworkSetup::StopServer $wbt]
+    set state(reflectorStarted) 1
+}
+
+# NetworkSetup::StopServer --
+#
+#       Stops the reflector server. Kills process.
+#       
+# Arguments:
+#       wbt   ???.
+#       
+# Results:
+#       kills tcl process.
+
+proc ::NetworkSetup::StopServer { {wbt {}} } {
+    global  this state prefs
+    
+    if {[string equal $this(platform) "macintosh"]} {
+	return
+    }
+    
+    # Stop the reflector servers background process. Mac not working!
+    switch -- $this(platform) {
+	windows {
+	    
+	    # Need to find the right DOS command here.
+	    set s [socket $this(ipnum) $prefs(reflectPort)]
+	    puts $s "KILL:"
+	    catch {close $s}
+	}
+	unix - macosx {
+	    if {[catch {exec kill $state(reflectPid)} res]} {
+		tk_messageBox -message  \
+		  "Failed stopping the Reflector Server: $res"  \
+		  -icon error -type ok
+		return
+
+	    }
+	}
+    }
+    Debug 2 "::NetworkSetup::StopServer  "
+
+    if {[winfo exists $wbt]} {
+	$wbt configure -text " Start Server " -command  \
+	  [list ::NetworkSetup::StartServer $wbt]
+    }
+    set state(reflectorStarted) 0
 }
 
 #-------------------------------------------------------------------------------

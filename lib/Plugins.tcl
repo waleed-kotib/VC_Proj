@@ -14,7 +14,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Plugins.tcl,v 1.6 2003-09-21 13:02:12 matben Exp $
+# $Id: Plugins.tcl,v 1.7 2003-09-28 06:29:08 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -200,7 +200,7 @@ proc ::Plugins::InitTk { } {
 
     set plugin(tk,type) "internal"
     set plugin(tk,desc) "Supported by the core"
-    set plugin(tk,importProc) ::ImageAndMovie::DrawImage
+    set plugin(tk,importProc) ::Import::DrawImage
     set plugin(tk,icon,12) [image create photo -format gif -file \
       [file join $this(path) images tklogo12.gif]]
     #set supSuff(tk) {.gif}
@@ -221,7 +221,7 @@ proc ::Plugins::InitQuickTimeTcl { } {
       {Displays multimedia content such as video, sound, mp3 etc.\
       It also supports a large number of still image formats.}
     set plugin(QuickTimeTcl,platform) $packages2Platform(QuickTimeTcl)
-    set plugin(QuickTimeTcl,importProc) ::ImageAndMovie::DrawQuickTimeTcl
+    set plugin(QuickTimeTcl,importProc) ::Import::DrawQuickTimeTcl
     
     # We should get files via its -url option, i.e. http if possible.
     set plugin(QuickTimeTcl,trpt,audio) http
@@ -307,7 +307,7 @@ proc ::Plugins::InitSnack { } {
     set plugin(snack,desc) "The Snack Sound extension adds audio capabilities\
       to the application. Presently supported formats include wav, au, aiff and mp3."
     set plugin(snack,platform) $packages2Platform(snack)
-    set plugin(snack,importProc) ::ImageAndMovie::DrawSnack
+    set plugin(snack,importProc) ::Import::DrawSnack
     set supportedMimeTypes(snack) {\
       audio/wav           audio/x-wav         audio/basic\
       audio/aiff          audio/x-aiff        audio/mpeg\
@@ -328,7 +328,7 @@ proc ::Plugins::InitImg { } {
     set plugin(Img,type) "internal"
     set plugin(Img,desc) "Adds more image formats than the standard one (gif)."
     set plugin(Img,platform) $packages2Platform(Img)
-    set plugin(Img,importProc) ::ImageAndMovie::DrawImage
+    set plugin(Img,importProc) ::Import::DrawImage
     set supportedMimeTypes(Img) {\
       image/x-bmp         image/gif           image/jpeg\
       image/png           image/x-png         image/tiff\
@@ -349,7 +349,7 @@ proc ::Plugins::InitXanim { } {
     set plugin(xanim,desc) "A unix/Linux only application that is used\
       for displaying multimedia content in the canvas."
     set plugin(xanim,platform) unix
-    set plugin(xanim,importProc) ::ImageAndMovie::DrawXanim
+    set plugin(xanim,importProc) ::Import::DrawXanim
     
     # There are many more...
     set supportedMimeTypes(xanim) {\
@@ -1196,6 +1196,8 @@ proc ::Plugins::SetCanvasBinds {wcan oldTool newTool} {
     variable plugin
     variable canvasbinds
     
+    ::Debug 3 "::Plugins::SetCanvasBinds oldTool=$oldTool, newTool=$newTool"
+    
     foreach plugName $plugin(allExternalPacks) {
 	
 	# Remove any previous binds.
@@ -1211,6 +1213,8 @@ proc ::Plugins::SetCanvasBinds {wcan oldTool newTool} {
 	if {($newTool != "") && [info exists canvasbinds($plugName,$newTool)]} {
 	    foreach bindStuff $canvasbinds($plugName,$newTool) {
 		foreach {bindDef cmd} $bindStuff {
+		    
+		    # $wcan substitution.
 		    set cmd [subst -nocommands -nobackslashes $cmd]
 		    eval $bindDef [list $cmd]
 		}

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.12 2003-09-21 13:02:12 matben Exp $
+# $Id: MailBox.tcl,v 1.13 2003-09-28 06:29:08 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -472,7 +472,7 @@ proc ::Jabber::MailBox::GotMsg {bodytxt args} {
     ::Jabber::MailBox::PutMessageInInbox $messageList
         
     # Alert sound?
-    ::Sounds::Play newmsg
+    ::Sounds::PlayWhenIdle newmsg
 
     if {$jprefs(showMsgNewWin) && !$isWhiteboard} {
 	::Jabber::GotMsg::GotMsg $uidmsg
@@ -655,7 +655,7 @@ proc ::Jabber::MailBox::SelectMsg { } {
 	set wbtoplevel .maininbox
 	set title "Inbox: $jid2"
 	if {[winfo exists $wbtoplevel]} {
-	    ::ImageAndMovie::HttpResetAll ${wbtoplevel}.
+	    ::Import::HttpResetAll ${wbtoplevel}.
 	    ::UserActions::EraseAll ${wbtoplevel}.
 	    ::UI::ConfigureMain ${wbtoplevel}. -title $title -jid $jid2
 	    ::UI::SetStatusMessage ${wbtoplevel}. ""

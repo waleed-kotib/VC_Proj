@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: FilesAndCanvas.tcl,v 1.9 2003-09-21 13:02:12 matben Exp $
+# $Id: FilesAndCanvas.tcl,v 1.10 2003-09-28 06:29:08 matben Exp $
  
 package require can2svg
 package require undo
@@ -226,7 +226,7 @@ proc ::CanvasFile::FileToCanvasVer1 {w fd absPath args} {
 	    }
 	    
 	    # Let the import procedure do the job; manufacture an option list.
-	    ::ImageAndMovie::DoImport $w $opts -file $filePath \
+	    ::Import::DoImport $w $opts -file $filePath \
 	      -where $where
 	    
 	} else {
@@ -382,16 +382,16 @@ proc ::CanvasFile::FileToCanvasVer2 {w fd absPath args} {
 		if {$argsArr(-tryimport)} {
 		    
 		    # This is typically an image or movie (QT or Snack).
-		    set errMsg [::ImageAndMovie::HandleImportCmd $w $line \
+		    set errMsg [::Import::HandleImportCmd $w $line \
 		      -where $where -basepath $dirPath \
-		      -progess [list ::ImageAndMovie::ImportProgress $line] \
-		      -command [list ::ImageAndMovie::ImportCommand $line]]
+		      -progess [list ::Import::ImportProgress $line] \
+		      -command [list ::Import::ImportCommand $line]]
 		}
 		if {$argsArr(-showbroken) &&  \
 		  (($errMsg != "") || !$argsArr(-tryimport))} {
 
 		    # Display a broken image to indicate for the user.
-		    eval {::ImageAndMovie::NewBrokenImage $w [lrange $line 1 2]} \
+		    eval {::Import::NewBrokenImage $w [lrange $line 1 2]} \
 		      [lrange $line 3 end]
 		}
 		incr numImports

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Example.tcl,v 1.6 2003-09-21 13:02:12 matben Exp $
+# $Id: Example.tcl,v 1.7 2003-09-28 06:29:08 matben Exp $
 
 
 namespace eval ::Example:: {
@@ -84,6 +84,7 @@ proc ::Example::Import {wcan fileName optListVar args} {
     array set argsArr $args
     array set optArr $optList
     set locals(file) $fileName    
+    set errMsg ""
     if {![catch {open $locals(file) r} fd]} {
 	set locals(body) [read $fd]
 	close $fd
@@ -106,14 +107,14 @@ proc ::Example::Import {wcan fileName optListVar args} {
     pack ${wfr}.bt -padx 3 -pady 3
     
     set id [$wcan create window $x $y -anchor nw -window $wfr -tags  \
-      [list tframe $useTag]]
+      [list frame $useTag]]
     set locals(id2file,$id) $fileName
 
     # We may let remote clients know our size.
     lappend optList -width [winfo reqwidth $wbt] -height [winfo reqheight $wbt]
     
     # Success.
-    return ""
+    return $errMsg
 }
 
 # ::Example::Save --

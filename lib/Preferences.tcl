@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.11 2003-08-23 07:19:16 matben Exp $
+# $Id: Preferences.tcl,v 1.12 2003-09-28 06:29:08 matben Exp $
  
 package require notebook
 package require tree
@@ -52,10 +52,7 @@ proc ::Preferences::Build {w} {
     variable ypadtiny
     variable ypadbig
     variable lastPage
-    
-    upvar ::Jabber::jserver jserver
-    upvar ::Jabber::jprefs jprefs
-    
+        
     toplevel $w -class Preferences
     wm title $w [::msgcat::mc Preferences]
     wm protocol $w WM_DELETE_WINDOW ::Preferences::CancelPushBt
@@ -85,22 +82,14 @@ proc ::Preferences::Build {w} {
 	    set xpadbt   2
 	}
     }    
-    if {!$prefs(stripJabber)} {
-
-	# Sync $jserver(all)
-	set jserver(all) {}
-	foreach {name spec} $jserver(profile) {
-	    lappend jserver(all) $name
-	}
-    }
     
     # Work only on a temporary copy in case we cancel.
     catch {unset tmpPrefs}
     catch {unset tmpJPrefs}
     catch {unset tmpJServer}
     array set tmpPrefs [array get prefs]
-    array set tmpJPrefs [array get jprefs]
-    array set tmpJServer [array get jserver]
+    array set tmpJPrefs [::Jabber::GetjprefsArray]
+    array set tmpJServer [::Jabber::GetjserverArray]
     
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
@@ -358,14 +347,12 @@ proc ::Preferences::ResetToUserDefaults { } {
     variable tmpPrefs
     variable tmpJPrefs
     variable tmpJServer
-    upvar ::Jabber::jserver jserver
-    upvar ::Jabber::jprefs jprefs
 
     Debug 2 "::Preferences::ResetToUserDefaults"
 
     array set tmpPrefs [array get prefs]
-    array set tmpJPrefs [array get jprefs]
-    array set tmpJServer [array get jserver]
+    array set tmpJPrefs [::Jabber::GetjprefsArray]
+    array set tmpJServer [::Jabber::GetjserverArray]
     
     # Make temp array for servers.
     ::Preferences::Profiles::MakeTmpServArr
@@ -566,6 +553,7 @@ proc ::Preferences::Profiles::MakeTmpServArr { } {
 	  tmpJServArr($name,password) \
 	  tmpJServArr($name,resource)] $spec break
     }
+    set tmpJServArr(all) [lsort -dictionary $tmpJServArr(all)]
 }
 
 # Preferences::Profiles::Set --
@@ -596,7 +584,6 @@ proc ::Preferences::Profiles::Set {wcombo profile} {
 
 proc ::Preferences::Profiles::New { } {
     
-    upvar ::Preferences::tmpJServer tmpJServer
     variable profile
     variable server
     variable username
@@ -762,9 +749,6 @@ proc ::Preferences::BuildPageConf {page} {
 proc ::Preferences::BuildPagePersInfo {page} {
     global  sysFont
 
-    upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::jserver jserver
-
     set ppers [LabeledFrame2 $page.fr [::msgcat::mc {Personal Information}]]
     pack $page.fr -side left -anchor n -ipadx 10 -ipady 6
 
@@ -783,7 +767,7 @@ proc ::Preferences::BuildPagePersInfo {page} {
     label $ppers.url -text "[::msgcat::mc {Url of homepage}]:"
     
     set row 1
-    foreach what $jprefs(iqRegisterElem) {
+    foreach what [::Jabber::GetIQRegisterElements] {
 	entry $ppers.ent$what -width 30    \
 	  -textvariable "[namespace current]::tmpJPrefs(iq:register,$what)"
 	grid $ppers.$what -column 0 -row $row -sticky e
@@ -1120,14 +1104,26 @@ proc ::Preferences::Customization::BuildPage {page} {
     radiobutton $pbl.rb2re   \
       -text " [::msgcat::mc prefcureply]" -value "reply" \
       -variable ::Preferences::tmpJPrefs(inbox2click)
+    
+    set frrost $pbl.robg
+    frame $frrost
+    pack [checkbutton $frrost.cb -text " Use background image (gif) in roster" \
+      -variable ::Preferences::tmpJPrefs(rost,useBgImage)] -side left
+    pack [button $frrost.btpick -text "Pick..." -font $sysFont(sb)  \
+      -command [list [namespace current]::PickBgImage rost]] -side left -padx 4
+    pack [button $frrost.btdefk -text "Default" -font $sysFont(sb)  \
+      -command [list [namespace current]::DefaultBgImage rost]]  \
+      -side left -padx 4
+    
     grid $pbl.lfont $pbl.btfont -padx 2 -pady $ypad -sticky w
     grid $pbl.newwin $pbl.btfont -padx 2 -pady $ypad -sticky w -columnspan 2
     grid $pbl.savein -padx 2 -pady $ypad -sticky w -columnspan 2
     grid $pbl.lmb2 -padx 2 -pady $ypad -sticky w -columnspan 2
     grid $pbl.rb2new -padx 2 -pady $ypad -sticky w -columnspan 2
     grid $pbl.rb2re -padx 2 -pady $ypad -sticky w -columnspan 2
+    grid $frrost -padx 2 -pady $ypad -sticky w -columnspan 2
     
-    
+    # Agents or Browse.
     set frdisc [LabeledFrame2 $page.ag {Agents or Browse}]
     pack $page.ag -side top -anchor w
     set pdisc [frame $frdisc.frin]
@@ -1143,13 +1139,7 @@ proc ::Preferences::Customization::BuildPage {page} {
     grid $pdisc.browse -padx 2 -pady $ypad -sticky w
     grid $pdisc.agents -padx 2 -pady $ypad -sticky w
     
-    # Seems to have been abondened.
-    if {0} {
-	checkbutton $page.update  \
-	  -text " [::msgcat::mc prefcuupdate]" \
-	  -variable ::Preferences::tmpJPrefs(autoupdateCheck)
-	pack $page.update -side top -anchor w -padx 10
-    }
+
 }
 
 proc ::Preferences::Customization::PickFont { } {
@@ -1169,6 +1159,26 @@ proc ::Preferences::Customization::PickFont { } {
     if {[llength $theFont]} {
 	set tmpJPrefs(chatFont) $theFont
     }
+}
+
+proc ::Preferences::Customization::PickBgImage {where} {
+    upvar ::Preferences::tmpJPrefs tmpJPrefs
+
+    set types {
+	{{GIF Files}        {.gif}        }
+	{{GIF Files}        {}        GIFF}
+    }
+    set ans [tk_getOpenFile -title {Open GIF Image} \
+      -filetypes $types -defaultextension ".gif"]
+    if {$ans != ""} {
+	set tmpJPrefs($where,bgImagePath) $ans
+    }
+}
+
+proc ::Preferences::Customization::DefaultBgImage {where} {
+    upvar ::Preferences::tmpJPrefs tmpJPrefs
+
+    set tmpJPrefs($where,bgImagePath) $tmpJPrefs($where,defBgImagePath)
 }
 
 # namespace  ::Preferences::Plugins:: ------------------------------------------
@@ -2483,8 +2493,6 @@ proc ::Preferences::SavePushBt { } {
     variable tmpPrefs
     variable tmpJPrefs
     variable tmpJServer
-    upvar ::Jabber::jserver jserver
-    upvar ::Jabber::jprefs jprefs
     
     # Was protocol changed?
     if {![string equal $prefs(protocol) $tmpPrefs(protocol)]} {
@@ -2499,12 +2507,14 @@ proc ::Preferences::SavePushBt { } {
     # Make all temporary prefs reflect the current settings of the panels.
     if {!$prefs(stripJabber)} {
 	::Preferences::UpdateTmpArrays
+	::Jabber::Roster::SetBackgroundImage $tmpJPrefs(rost,useBgImage) \
+	  $tmpJPrefs(rost,bgImagePath)
     }
     
     # Copy the temporary copy to the real variables.
     array set prefs [array get tmpPrefs]
-    array set jprefs [array get tmpJPrefs]
-    array set jserver [array get tmpJServer]
+    ::Jabber::SetjprefsArray [array get tmpJPrefs]
+    ::Jabber::SetjserverArray [array get tmpJServer]
     
     # and the same for all MIME stuff etc.
     ::Preferences::FileMap::SaveAssociations    
@@ -2602,7 +2612,7 @@ proc ::Preferences::UpdateTmpArrays { } {
     
     # This is a bit of double counting with two temp storages...
     # New... Profiles
-    set tmpJServer(all) $tmpJServArr(all)
+    #set tmpJServer(all) $tmpJServArr(all)
     set tmpJServer(profile) {}
     foreach profile $tmpJServArr(all) {
 	lappend tmpJServer(profile) $profile   \
