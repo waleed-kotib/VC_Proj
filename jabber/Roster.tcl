@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.92 2004-10-29 13:17:15 matben Exp $
+# $Id: Roster.tcl,v 1.93 2004-11-07 14:22:58 matben Exp $
 
 package provide Roster 1.0
 
@@ -276,10 +276,11 @@ proc ::Jabber::Roster::Build {w} {
     pack [frame $wbox -border 1 -relief sunken]   \
       -side top -fill both -expand 1 -padx 4 -pady 4
     
-    set wwave $w.fs
+    frame $w.fstat
+    pack  $w.fstat -side bottom -fill x
+    set wwave $w.fstat.wa
     set waveImage [::Theme::GetImage [option get $w waveImage {}]]  
-    ::wavelabel::wavelabel $wwave -relief groove -bd 2 \
-      -type image -image $waveImage
+    ::wavelabel::wavelabel $wwave -bd 2 -type image -image $waveImage
     pack $wwave -side bottom -fill x -padx 8 -pady 2
     
     set opts {}
@@ -1555,8 +1556,7 @@ proc ::Jabber::Roster::PresenceMenu2Cmd {w str name varName} {
 proc ::Jabber::Roster::BuildStatusMenuButton {w} {
     
     set wmenu $w.menu
-    button $w -bd 1 -image [GetMyPresenceIcon] \
-      -width 16 -height 16
+    button $w -bd 1 -image [GetMyPresenceIcon] -width 16 -height 16
     $w configure -state disabled
     menu $wmenu -tearoff 0
     BuildPresenceMenu $wmenu
