@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Conference.tcl,v 1.12 2004-02-03 10:16:31 matben Exp $
+# $Id: Conference.tcl,v 1.13 2004-02-13 10:28:24 matben Exp $
 
 package provide Conference 1.0
 
@@ -29,7 +29,7 @@ namespace eval ::Jabber::Conference:: {
 #       'jabber:iq:conference' method.
 #       
 # Arguments:
-#       args        -server, -roomjid, -roomname, -autoget 0/1
+#       args        -server, -roomjid, -autoget 0/1
 #       
 # Results:
 #       "cancel" or "enter".
@@ -42,7 +42,8 @@ proc ::Jabber::Conference::BuildEnter {args} {
     variable canHeight 120
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 2 "::Jabber::Conference::BuildEnter"
+    ::Jabber::Debug 2 "::Jabber::Conference::BuildEnter args='$args'"
+    
     array set argsArr $args
     
     # State variable to collect instance specific variables.
@@ -71,21 +72,18 @@ proc ::Jabber::Conference::BuildEnter {args} {
     	-text [::msgcat::mc jamessconfmsg]
     pack $w.frall.msg -side top -anchor w -padx 2 -pady 4
     set frtop $w.frall.top
-    pack [frame $frtop] -side top -fill x
+    pack [frame $frtop] -side top -anchor w -padx 12
     label $frtop.lserv -text "[::msgcat::mc {Conference server}]:" 
     
     set confServers [$jstate(browse) getconferenceservers]
     
-    ::Jabber::Debug 2 "BuildEnterRoom: confServers='$confServers'"
+    ::Jabber::Debug 2 "\t confServers='$confServers'"
 
-    set wcomboserver $frtop.eserv
-    set wcomboroom   $frtop.eroom
+    set wpopupserver $frtop.eserv
+    set wpopuproom   $frtop.eroom
 
-    # First combobox: servers.
-    ::combobox::combobox $wcomboserver -width 20  \
-      -textvariable $token\(server) -editable 0  \
-      -command [list [namespace current]::ConfigRoomList $token]
-    eval {$frtop.eserv list insert end} $confServers
+    # First menubutton: servers. (trace below)
+    eval {tk_optionMenu $wpopupserver $token\(server)} $confServers
     label $frtop.lroom -text "[::msgcat::mc {Room name}]:"
     
     # Find the default conferencing server.
@@ -94,30 +92,30 @@ proc ::Jabber::Conference::BuildEnter {args} {
     } elseif {[llength $confServers]} {
 	set state(server) [lindex $confServers 0]
     }
+    set state(server-state) normal
+    set state(room-state)   normal
 
-    # Second combobox: rooms for above server. Fill in below.
-    ::combobox::combobox $wcomboroom -width 20  \
-      -textvariable $token\(roomname) -editable 0
+    # Second menubutton: rooms for above server. Fill in below.
+    set state(wroommenu) [tk_optionMenu $wpopuproom $token\(roomname) ""]
 
     if {[info exists argsArr(-roomjid)]} {
-	regexp {^([^@]+)@([^/]+)} $argsArr(-roomjid) match state(roomname)  \
-	  state(server)	
-	$wcomboserver configure -state disabled
-	$wcomboroom configure -state disabled
+	regexp {^([^@]+)@([^/]+)} $argsArr(-roomjid) match state(roomname) \
+	  state(server)
+	set state(server-state) disabled
+	set state(room-state)   disabled
+	$wpopupserver configure -state disabled
+	$wpopuproom   configure -state disabled
     }
     if {[info exists argsArr(-server)]} {
 	set state(server) $argsArr(-server)
-	$wcomboserver configure -state disabled
-    }
-    if {[info exists argsArr(-roomname)]} {
-	set state(roomname) $argsArr(-roomname)
-	$wcomboroom configure -state disabled
+	set state(server-state) disabled
+	$wpopupserver configure -state disabled
     }
 
-    grid $frtop.lserv -column 0 -row 0 -sticky e
-    grid $frtop.eserv -column 1 -row 0 -sticky w
-    grid $frtop.lroom -column 0 -row 1 -sticky e
-    grid $frtop.eroom -column 1 -row 1 -sticky w
+    grid $frtop.lserv  -column 0 -row 0 -sticky e
+    grid $wpopupserver -column 1 -row 0 -sticky w
+    grid $frtop.lroom  -column 0 -row 1 -sticky e
+    grid $wpopuproom   -column 1 -row 1 -sticky w
 
     # This part must be built dynamically from the 'get' xml data.
     # May be different for each conference server.
@@ -169,8 +167,8 @@ proc ::Jabber::Conference::BuildEnter {args} {
       -side left -padx 5 -pady 0
 
     set state(wsearrows)    $wsearrows
-    set state(wcomboserver) $wcomboserver
-    set state(wcomboroom)   $wcomboroom
+    set state(wpopupserver) $wpopupserver
+    set state(wpopuproom)   $wpopuproom
     set state(wbtget)       $wbtget
     set state(wbtenter)     $wbtenter
     set state(wbox)         $wbox
@@ -179,16 +177,21 @@ proc ::Jabber::Conference::BuildEnter {args} {
     if {[info exists argsArr(-autoget)] && $argsArr(-autoget)} {
 	::Jabber::Conference::EnterGet $token
     }
+    
+    if {$state(room-state) == "normal"} {
 
-    # Fill in room list if exist else browse.
-    if {[$jstate(browse) isbrowsed $state(server)]} {
-	::Jabber::Conference::FillRoomList $token
-    } else {
-	::Jabber::Conference::BusyEnterDlgIncr $token
-	::Jabber::InvokeJlibCmd browse_get $state(server)  \
-	  -command [list [namespace current]::BrowseServiceCB $token]
+	# Fill in room list if exist else browse.
+	if {[$jstate(browse) isbrowsed $state(server)]} {
+	    ::Jabber::Conference::FillRoomList $token
+	} else {
+	    ::Jabber::Conference::BusyEnterDlgIncr $token
+	    ::Jabber::InvokeJlibCmd browse_get $state(server)  \
+	      -command [list [namespace current]::BrowseServiceCB $token]
+	}
+	trace variable $token\(server) w  \
+	  [list [namespace current]::ConfigRoomList $token]
     }
-	
+    
     wm resizable $w 0 0
     set oldFocus [focus]
     
@@ -196,21 +199,25 @@ proc ::Jabber::Conference::BuildEnter {args} {
     tkwait window $w
 
     catch {focus $oldFocus}
+    trace vdelete $token\(server) w  \
+      [list [namespace current]::ConfigRoomList $token]
     set finished $state(finished)
     unset state
     return [expr {($finished <= 0) ? "cancel" : "enter"}]
 }
 
-proc ::Jabber::Conference::ConfigRoomList {token wcombo confserver} {    
+proc ::Jabber::Conference::ConfigRoomList {token name junk1 junk2} {    
     variable $token
     upvar 0 $token state
     upvar ::Jabber::jstate jstate
+    
+    # puts "::Jabber::Conference::ConfigRoomList"
 
     # Fill in room list if exist else browse.
     if {[$jstate(browse) isbrowsed $state(server)]} {
-	::Jabber::MUC::FillRoomList $token
+	::Jabber::Conference::FillRoomList $token
     } else {
-	::Jabber::MUC::BusyEnterDlgIncr $token
+	::Jabber::Conference::BusyEnterDlgIncr $token
 	::Jabber::InvokeJlibCmd browse_get $state(server)  \
 	  -command [list [namespace current]::BrowseServiceCB $token]
     }
@@ -221,6 +228,8 @@ proc ::Jabber::Conference::FillRoomList {token} {
     upvar 0 $token state
     upvar ::Jabber::jstate jstate
     
+    # puts "::Jabber::Conference::FillRoomList"
+    
     set roomList {}
     if {[string length $state(server)] > 0} {
 	set allRooms [$jstate(browse) getchilds $state(server)]
@@ -229,8 +238,12 @@ proc ::Jabber::Conference::FillRoomList {token} {
 	    lappend roomList $room
 	}
     }
-    $state(wcomboroom) list delete 0 end
-    eval {$state(wcomboroom) list insert end} $roomList
+    set roomList [lsort $roomList]
+    $state(wroommenu) delete 0 end
+    foreach room $roomList {
+	$state(wroommenu) add radiobutton -label $room  \
+	  -variable $token\(roomname)
+    }
     set state(roomname) [lindex $roomList 0]
 }
 
@@ -239,26 +252,33 @@ proc ::Jabber::Conference::BusyEnterDlgIncr {token {num 1}} {
     upvar 0 $token state
     
     incr state(statuscount) $num
+    # puts "::Jabber::Conference::BusyEnterDlgIncr num=$num, statuscount=$state(statuscount)"
     
     if {$state(statuscount) > 0} {
 	set state(status) "Getting available rooms..." 
 	$state(wsearrows) start
-	$state(wcomboserver) configure -state disabled
-	$state(wcomboroom)   configure -state disabled
+	$state(wpopupserver) configure -state disabled
+	$state(wpopuproom)   configure -state disabled
 	$state(wbtenter)     configure -state disabled
 	$state(wbtget)       configure -state disabled
     } else {
 	set state(statuscount) 0
 	set state(status) ""
 	$state(wsearrows) stop
-	$state(wcomboserver) configure -state normal
-	$state(wcomboroom)   configure -state normal
+	if {[string equal $state(server-state) "normal"]} {
+	    $state(wpopupserver) configure -state normal
+	}
+	if {[string equal $state(room-state) "normal"]} {
+	    $state(wpopuproom)   configure -state normal
+	}
 	$state(wbtenter)     configure -state normal
 	$state(wbtget)       configure -state normal
     }
 }
 
 proc ::Jabber::Conference::BrowseServiceCB {token browsename type jid subiq} {
+    
+    # puts "::Jabber::Conference::BrowseServiceCB"
     
     ::Jabber::Conference::FillRoomList $token
     ::Jabber::Conference::BusyEnterDlgIncr $token -1
@@ -420,15 +440,12 @@ proc ::Jabber::Conference::BuildCreate {args} {
       -text [::msgcat::mc jacreateroom] -width 300
     pack $w.frall.msg -side top -fill x -anchor w -padx 10 -pady 4
     set frtop $w.frall.top
-    pack [frame $frtop] -side top -expand 0 -anchor w -padx 10
-    label $frtop.lserv -text "[::msgcat::mc {Conference server}]:"  \
-      -font $fontSB
+    pack [frame $frtop] -side top -anchor w -padx 12
+    label $frtop.lserv -text "[::msgcat::mc {Conference server}]:"
     
     set confServers [$jstate(browse) getconferenceservers]
-    set wcomboserver $frtop.eserv
-    ::combobox::combobox $wcomboserver  \
-      -textvariable $token\(server) -editable 0
-    eval {$frtop.eserv list insert end} $confServers
+    set wpopupserver $frtop.eserv
+    eval {tk_optionMenu $wpopupserver $token\(server)} $confServers
     
     # Find the default conferencing server.
     if {[llength $confServers]} {
@@ -439,15 +456,13 @@ proc ::Jabber::Conference::BuildCreate {args} {
 	$frtop.eserv configure -state disabled
     }
     
-    label $frtop.lroom -text "[::msgcat::mc {Room name}]:" \
-      -font $fontSB    
+    label $frtop.lroom -text "[::msgcat::mc {Room name}]:"    
     entry $frtop.eroom -textvariable $token\(roomname)  \
       -validate key -validatecommand {::Jabber::ValidateJIDChars %S}
-    label $frtop.lnick -text "[::msgcat::mc {Nick name}]:"  \
-      -font $fontSB    
+    label $frtop.lnick -text "[::msgcat::mc {Nick name}]:"    
     entry $frtop.enick -textvariable $token\(nickname)  \
       -validate key -validatecommand {::Jabber::ValidateJIDChars %S}
-    label $frtop.ldesc -text "[::msgcat::mc Specifications]:" -font $fontSB
+    label $frtop.ldesc -text "[::msgcat::mc Specifications]:"
     label $frtop.lstat -textvariable $token\(stattxt)
     
     grid $frtop.lserv -column 0 -row 0 -sticky e
@@ -502,7 +517,7 @@ proc ::Jabber::Conference::BuildCreate {args} {
     }
     
     set state(wsearrows) $wsearrows
-    set state(wcomboserver) $wcomboserver
+    set state(wpopupserver) $wpopupserver
     set state(wbtget) $wbtget
     set state(wbtenter) $wbtenter
     set state(wbox) $wbox
@@ -556,7 +571,7 @@ proc ::Jabber::Conference::CreateGet {token} {
 	  -message "Must provide a nickname to use in the room"
 	return
     }	
-    $state(wcomboserver) configure -state disabled
+    $state(wpopupserver) configure -state disabled
     $state(wbtget) configure -state disabled
     set state(stattxt) "-- [::msgcat::mc jawaitserver] --"
     
@@ -613,7 +628,7 @@ proc ::Jabber::Conference::CreateMUCCB {token jlibName type args} {
 	  -message [FormatTextForMessageBox \
 	  [::msgcat::mc jamesserrconfgetcre $errcode $errmsg]]
         set state(stattxt) "-- [::msgcat::mc jasearchwait] --"
-        $state(wcomboserver) configure -state normal
+        $state(wpopupserver) configure -state normal
         $state(wbtget) configure -state normal
 	return
     }
