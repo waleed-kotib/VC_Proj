@@ -9,14 +9,14 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: browse.tcl,v 1.22 2004-04-15 05:55:19 matben Exp $
+# $Id: browse.tcl,v 1.23 2004-04-17 14:02:02 matben Exp $
 # 
 #  locals($jid,parent):       the parent of $jid.
 #  locals($jid,parents):      list of all parent jid's,
 #                             {server conference.server myroom@conference.server}
 #  locals($jid,childs):       list of all childs of this jid if any.                             
 #  locals($jid,xmllist):      the hierarchical xml list of this $jid.
-#  locals($jid,type):         the type/subtype of this $jid.
+#  locals($jid,type):         the type/subtype (category/type) of this $jid.
 #  locals($type,typelist):    a list of jid's for this type/subtype.
 #  locals(alltypes):          a list of all jid types.
 #  locals($jid,allusers):     list of all users in room $jid.

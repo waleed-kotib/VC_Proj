@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.4 2004-04-16 13:59:29 matben Exp $
+# $Id: Disco.tcl,v 1.5 2004-04-17 14:02:02 matben Exp $
 
 package provide Disco 1.0
 
@@ -33,7 +33,7 @@ namespace eval ::Jabber::Disco:: {
 	mCreateRoom    conference {::Jabber::GroupChat::EnterOrCreate create \
 	  -server $jid}
 	separator      {}        {}
-	mInfo          jid       {::Jabber::Disco::GetInfo $jid}
+	mInfo          jid       {::Jabber::Disco::InfoCmd $jid}
 	mLastLogin/Activity jid  {::Jabber::GetLast $jid}
 	mLocalTime     jid       {::Jabber::GetTime $jid}
 	mvCard         jid       {::VCard::Fetch other $jid}
@@ -48,6 +48,10 @@ namespace eval ::Jabber::Disco:: {
     # This is needed for the balloons that need a real canvas tag, and that
     # we can't use jid's for this since they may contain special chars (!)!
     variable treeuid 0
+
+    # We keep an reference count that gets increased by one for each request
+    # sent, and decremented by one for each response.
+    variable arrowRefCount 0
 }
 
 proc ::Jabber::Disco::NewJlibHook {jlibName} {
@@ -66,8 +70,11 @@ proc ::Jabber::Disco::LoginHook { } {
     
     # Get the services for all our servers on the list. Depends on our settings:
     # If disco fails must use "browse" or "agents" as a fallback.
+    #
+    # We disco servers jid 'items+info', and disco its childrens 'info'.
     if {[string equal $jprefs(serviceMethod) "disco"]} {
-	::Jabber::Disco::Get $jserver(this)
+	::Jabber::Disco::GetInfo  $jserver(this)
+	::Jabber::Disco::GetItems $jserver(this)
     }
 }
 
@@ -76,7 +83,7 @@ proc ::Jabber::Disco::LogoutHook { } {
     
 }
 
-# Jabber::Disco::Get --
+# Jabber::Disco::GetInfo, GetItems --
 #
 #       Discover the services available for the $jid.
 #
@@ -87,7 +94,7 @@ proc ::Jabber::Disco::LogoutHook { } {
 # Results:
 #       callback scheduled.
 
-proc ::Jabber::Disco::Get {jid args} {    
+proc ::Jabber::Disco::GetInfo {jid args} {    
     upvar ::Jabber::jstate jstate
     
     array set opts {
@@ -97,6 +104,17 @@ proc ::Jabber::Disco::Get {jid args} {
     
     # Discover services available.
     $jstate(disco) send_get info  $jid [namespace current]::InfoCB
+}
+
+proc ::Jabber::Disco::GetItems {jid args} {    
+    upvar ::Jabber::jstate jstate
+    
+    array set opts {
+	-silent 0
+    }
+    array set opts $args
+    
+    # Discover services available.
     $jstate(disco) send_get items $jid [namespace current]::ItemsCB
 }
 
@@ -122,15 +140,46 @@ proc ::Jabber::Disco::ItemsCB {type from subiq args} {
     
     puts "::Jabber::Disco::ItemsCB type=$type, from=$from"
     
-    # It is at this stage we are confident that a Disco page is needed.
-    if {[string equal $from $jserver(this)]} {
-	::Jabber::UI::NewPage "Disco"
-    }
-    set parents [$jstate(disco) parents $from]
-    set v [concat $parents $from]
-    ::Jabber::Disco::AddToTree $v $subiq
-	
+    #::Jabber::Disco::ControlArrows -1
 
+    switch -- $type {
+	error {
+	    
+	    # As a fallback we use the browse method instead.
+	    if {[string equal $from $jserver(this)]} {
+		
+		# This is a bit ugly! 
+		# Should have another way of invoking alternatives.
+		::Jabber::Browse::GetAll
+	    }
+	}
+	ok - result {
+
+	    # It is at this stage we are confident that a Disco page is needed.
+	    if {[string equal $from $jserver(this)]} {
+		::Jabber::UI::NewPage "Disco"
+	    }
+	    
+	    # First add the discoed item.
+	    set parents [$jstate(disco) parents $from]
+	    set v [concat $parents $from]
+	    ::Jabber::Disco::AddToTree $v
+
+	    # Then all its children.
+	    set childs [$jstate(disco) children $from]
+	    foreach cjid $childs {
+		set cv [concat $v $cjid]
+		::Jabber::Disco::AddToTree $cv
+		
+		# We disco servers jid 'items+info', and disco its childrens 'info'.
+		# 
+		# Perhaps we should discover depending on items category?
+		if {[string equal $from $jserver(this)]} {
+		    ::Jabber::Disco::GetInfo $cjid
+		}		
+	    }	    
+	}
+    }
 }
 
 proc ::Jabber::Disco::InfoCB {args} {
@@ -283,10 +332,26 @@ proc ::Jabber::Disco::Popup {w v x y} {
     set typeClicked ""
     
     set jid [lindex $v end]
+    set categoryList [$jstate(disco) types $jid]
+    set categoryType [lindex $categoryList 0]
+    puts "\t categoryType=$categoryType"
 
+    switch -glob -- $categoryType {
+	user/* {
+	    set typeClicked user
+	}
+	conference/* {
+	    set typeClicked conference
+	}
+	default {
+	    set typeClicked jid
+	}
+    }
+    
     set X [expr [winfo rootx $w] + $x]
     set Y [expr [winfo rooty $w] + $y]
 
+    ::Jabber::Debug 2 "\t jid=$jid, typeClicked=$typeClicked"
     
     # Make the appropriate menu.
     set m $jstate(wpopup,disco)
@@ -409,20 +474,19 @@ proc ::Jabber::Disco::OpenTreeCmd {w v} {
     if {[llength $v]} {
 	set jid [lindex $v end]
 	
-	# If we have not yet browsed this jid, do it now!
+	# If we have not yet discoed this jid, do it now!
 	# We should have a method to tell if children have been added to tree!!!
 	if {![$jstate(disco) isdiscoed items $jid]} {
 	    ::Jabber::Disco::ControlArrows 1
 	    
 	    # Discover services available.
-	    ::Jabber::Disco::Get $jid
+	    ::Jabber::Disco::GetItems $jid
 	} elseif {[llength [$wtree children $v]] == 0} {
-	    set xmllist [$jstate(disco) get $jid xml]
-	    puts "\t xmllist=$xmllist"
-	    foreach child [wrapper::getchildren $xmllist] {
-		::Jabber::Disco::AddToTree $v $child
-	    }
+	    
+	    # ???
 	}
+	
+	# Else it's already in the tree; do nothin.
     }    
 }
 
@@ -432,17 +496,17 @@ proc ::Jabber::Disco::OpenTreeCmd {w v} {
 #
 # Arguments:
 #       v:
-#       xmllist:    xml list starting after the <iq> tag.
 
-proc ::Jabber::Disco::AddToTree {v xmllist} {    
+proc ::Jabber::Disco::AddToTree {v} {    
     variable wtree    
     variable treeuid
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
  
+    # We disco servers jid 'items+info', and disco its childrens 'info'.
     set treectag item[incr treeuid]
     
-    puts "::Jabber::Disco::AddToTree v='$v', xmllist='$xmllist'"
+    puts "::Jabber::Disco::AddToTree v='$v'"
 
     set jid [lindex $v end]
     set name [$jstate(disco) name $jid]
@@ -450,19 +514,23 @@ proc ::Jabber::Disco::AddToTree {v xmllist} {
 	set name $jid
     }
     
-    if {[string equal $jid $jserver(this)]} {
-	$wtree newitem $v -text $name -tags $jid -style bold -dir 1 -open 1 \
-	  -canvastags $treectag
-    } else {
-	$wtree newitem $v -text $name -tags $jid -style bold -open 0 \
-	  -canvastags $treectag
+    # Make the first two levels, server and its children bold, rest normal style.
+    set style normal
+    if {[llength $v] <= 2} {
+	set style bold
     }
+    set isopen 0
+    if {[llength $v] == 1} {
+	set isopen 1
+    }
+    $wtree newitem $v -text $name -tags $jid -style $style -dir 1 -open $isopen \
+      -canvastags $treectag
     
     # Add all child elements as well.
     set childs [$jstate(disco) children $jid]
     foreach cjid $childs {
 	set cv [concat $v $cjid]
-	::Jabber::Disco::AddToTree $cv {}
+	::Jabber::Disco::AddToTree $cv
      }	    
 }
 
@@ -475,14 +543,14 @@ proc ::Jabber::Disco::Refresh {jid} {
     # Clear internal state of the disco object for this jid.
     $jstate(disco) reset $jid
     
-    # Remove all children of this jid from browse tree.
+    # Remove all children of this jid from disco tree.
     foreach v [$wtree find withtag $jid] {
 	$wtree delitem $v -childsonly 1
     }
     
-    # Browse once more, let callback manage rest.
+    # Disco once more, let callback manage rest.
     ::Jabber::Disco::ControlArrows 1
-    ::Jabber::Disco::Get $jid
+    ::Jabber::Disco::GetItems $jid
 }
 
 proc ::Jabber::Disco::ControlArrows {step} {    
@@ -509,29 +577,37 @@ proc ::Jabber::Disco::ControlArrows {step} {
     }
 }
 
-proc ::Jabber::Disco::GetInfo {jid} {
+proc ::Jabber::Disco::InfoCmd {jid} {
     upvar ::Jabber::jstate jstate
 
-    $jstate(disco) send_get info  $jid [namespace current]::GetInfoCB
+    if {![$jstate(disco) isdiscoed info $jid]} {
+	set xmllist [$jstate(disco) get info $jid xml]
+	::Jabber::Disco::InfoResultCB $jstate(disco) result $jid $xmllist
+    } else {
+	$jstate(disco) send_get info  $jid [namespace current]::InfoCmdCB
+    }
 }
 
-proc ::Jabber::Disco::GetInfoCB {discoName type jid subiq args} {
+proc ::Jabber::Disco::InfoCmdCB {type jid subiq args} {
+    
+    puts "::Jabber::Disco::InfoCmdCB type=$type, jid=$jid"
     
     switch -- $type {
 	error {
 
 	}
 	result - ok {
-	    eval {[namespace current]::InfoResultCB $discoName $type $jid $subiq} $args
+	    eval {[namespace current]::InfoResultCB $type $jid $subiq} $args
 	}
     }
 }
 
-proc ::Jabber::Disco::InfoResultCB {discoName type jid subiq args} {
+proc ::Jabber::Disco::InfoResultCB {type jid subiq args} {
     global  this
     
     variable dlguid
     upvar ::Jabber::nsToText nsToText
+    upvar ::Jabber::jstate jstate
 
     set w .jdinfo[incr dlguid]
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
@@ -554,16 +630,16 @@ proc ::Jabber::Disco::InfoResultCB {discoName type jid subiq args} {
     $wtext tag configure head -background gray70
     $wtext insert end "XML namespace\tDescription\n" head
     set n 1
-    foreach c [wrapper::getchildren $subiq] {
-	if {[wrapper::gettag $c] == "ns"} {
-	    incr n
-	    set ns [wrapper::getcdata $c]
-	    $wtext insert end $ns
-	    if {[info exists nsToText($ns)]} {
-		$wtext insert end "\t$nsToText($ns)"
-	    }
-	    $wtext insert end \n
+    
+    set features [$jstate(disco) get info $jid features]
+    
+    foreach ns $features {
+	incr n
+	$wtext insert end $ns
+	if {[info exists nsToText($ns)]} {
+	    $wtext insert end "\t$nsToText($ns)"
 	}
+	$wtext insert end \n
     }
     if {$n == 1} {
 	$wtext insert end "The component did not return any services"
@@ -575,8 +651,8 @@ proc ::Jabber::Disco::InfoResultCB {discoName type jid subiq args} {
     set frbot [frame $w.frall.frbot -borderwidth 0]
     pack [button $frbot.btadd -text [::msgcat::mc Close] \
       -command [list destroy $w]]  \
-      -side right -padx 5 -pady 5
-    pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
+      -side right -padx 5 -pady 4
+    pack $frbot -side top -fill both -expand 1 -padx 8 -pady 2
 	
     wm resizable $w 0 0	
 }
