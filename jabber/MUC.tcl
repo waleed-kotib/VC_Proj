@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.55 2004-12-20 15:16:45 matben Exp $
+# $Id: MUC.tcl,v 1.56 2004-12-22 07:08:21 matben Exp $
 
 package require entrycomp
 package require muc
@@ -450,7 +450,8 @@ proc ::MUC::DoEnter {token} {
     
     # We announce that we are a Coccinella here and let others know ip etc.
     set cocciElem [::Jabber::CreateCoccinellaPresElement]
-    lappend opts -extras [list $cocciElem]
+    set capsElem  [::Jabber::CreateCapsPresElement]
+    lappend opts -extras [list $cocciElem $capsElem]
     
     eval {$jstate(muc) enter $roomJid $enter(nickname) -command \
       [list [namespace current]::EnterCallback $token]} $opts
