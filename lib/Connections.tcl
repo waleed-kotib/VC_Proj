@@ -1,6 +1,6 @@
 #  Connections.tcl ---
 #  
-#      This file is part of the whiteboard application. It creates a dialog 
+#      This file is part of The Coccinella application. It creates a dialog 
 #      for connecting to the server via TCP/IP, and provide some procedures 
 #      to make the connection.
 #      Contains also open streaming media dialogs.
@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Connections.tcl,v 1.17 2004-01-01 12:08:22 matben Exp $
+# $Id: Connections.tcl,v 1.18 2004-01-13 14:50:21 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            

@@ -1,13 +1,13 @@
 # PluginTextPlain.tcl --
 #  
-#       This file is part of the whiteboard application. 
+#       This file is part of The Coccinella application. 
 #       It is an importer for plain text documents.
 #       
 #  Copyright (c) 2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: PluginTextPlain.tcl,v 1.8 2004-01-09 14:08:22 matben Exp $
+# $Id: PluginTextPlain.tcl,v 1.9 2004-01-13 14:50:21 matben Exp $
 
 
 namespace eval ::TextImporter:: {

@@ -1,11 +1,11 @@
 #  Browse.tcl ---
 #  
-#      This file is part of the whiteboard application. 
+#      This file is part of The Coccinella application. 
 #      It implements the Browse GUI part.
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.21 2004-01-09 14:08:21 matben Exp $
+# $Id: Browse.tcl,v 1.22 2004-01-13 14:50:20 matben Exp $
 
 package require chasearrows
 
@@ -471,6 +471,11 @@ proc ::Jabber::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
     
     ::Jabber::Debug 2 "::Jabber::Browse::AddToTree parentsJidList='$parentsJidList', jid=$jid"
 
+    # Verify that parent tree item really exists!
+    if {![$wtree isitem $parentsJidList]} {
+	return
+    }
+    
     set category [wrapper::gettag $xmllist]
     array set attrArr [wrapper::getattrlist $xmllist]
     if {[string equal $category "item"] && [info exists attrArr(category)]} {

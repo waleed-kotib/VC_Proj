@@ -1,6 +1,6 @@
 #  TheServer.tcl ---
 #  
-#       This file is part of the whiteboard application. It implements the
+#       This file is part of The Coccinella application. It implements the
 #       server part and contains procedures for creating new server side sockets,
 #       handling canvas operations and file transfer.
 #      
@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: TheServer.tcl,v 1.16 2004-01-01 12:08:22 matben Exp $
+# $Id: TheServer.tcl,v 1.17 2004-01-13 14:50:21 matben Exp $
     
 # DoStartServer ---
 #

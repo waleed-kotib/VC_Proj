@@ -1,13 +1,13 @@
 #  Utils.tcl ---
 #  
-#      This file is part of the whiteboard application. We collect some handy 
+#      This file is part of The Coccinella application. We collect some handy 
 #      small utility procedures here.
 #      
 #  Copyright (c) 1999-2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.12 2003-12-12 13:46:44 matben Exp $
+# $Id: Utils.tcl,v 1.13 2004-01-13 14:50:21 matben Exp $
 
 namespace eval ::Utils:: {
 

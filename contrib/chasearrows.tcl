@@ -1,13 +1,13 @@
 #  chasearrows.tcl ---
 #  
-#      This file is part of the whiteboard application. It implements two
+#      This file is part of The Coccinella application. It implements two
 #      running arrows to show a wait state.
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: chasearrows.tcl,v 1.2 2003-01-11 16:16:08 matben Exp $
+# $Id: chasearrows.tcl,v 1.3 2004-01-13 14:50:20 matben Exp $
 #
 # ########################### USAGE ############################################
 #

@@ -1,11 +1,11 @@
 #  NewMsg.tcl ---
 #  
-#      This file is part of the whiteboard application. 
+#      This file is part of The Coccinella application. 
 #      It implements the new message dialog fo the jabber part.
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.28 2004-01-01 12:08:21 matben Exp $
+# $Id: NewMsg.tcl,v 1.29 2004-01-13 14:50:21 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -181,15 +181,19 @@ proc ::Jabber::NewMsg::Build {args} {
     $wtray newbutton print Print $iconPrint $iconPrintDis  \
       [list ::Jabber::NewMsg::DoPrint $w]
     
-    pack [frame $w.frall.divt -bd 2 -relief sunken -height 2] -fill x -side top
-    set wccp $w.frall.ccp
-    pack [::UI::NewCutCopyPaste $wccp] -padx 10 -pady 2 -side top \
-      -anchor w
-    ::UI::CutCopyPasteConfigure $wccp cut -state disabled
-    ::UI::CutCopyPasteConfigure $wccp copy -state disabled
-    ::UI::CutCopyPasteConfigure $wccp paste -state disabled
-    pack [frame $w.frall.div2 -bd 2 -relief sunken -height 2] -fill x -side top
+    hooks::run buildNewMsgButtonTrayHook $wtray
 
+    pack [frame $w.frall.divt -bd 2 -relief sunken -height 2] -fill x -side top
+    if {0} {
+	set wccp $w.frall.ccp
+	pack [::UI::NewCutCopyPaste $wccp] -padx 10 -pady 2 -side top \
+	  -anchor w
+	::UI::CutCopyPasteConfigure $wccp cut -state disabled
+	::UI::CutCopyPasteConfigure $wccp copy -state disabled
+	::UI::CutCopyPasteConfigure $wccp paste -state disabled
+	pack [frame $w.frall.div2 -bd 2 -relief sunken -height 2] -fill x -side top
+    }
+    
     # Address list.    
     set fradd [frame $w.frall.fradd -borderwidth 1 -relief sunken]
     pack $fradd -side top -fill x -padx 6 -pady 4
@@ -254,7 +258,7 @@ proc ::Jabber::NewMsg::Build {args} {
     set locals($w,wfrport)  $frport
     set locals($w,wspacer)  $wspacer
     set locals($w,wsubject) $wsubject
-    set locals($w,wccp)     $wccp
+    #set locals($w,wccp)     $wccp
     set locals($w,finished) 0
     set locals($w,wtray)    $wtray
     

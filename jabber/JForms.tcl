@@ -1,13 +1,13 @@
 #  JForms.tcl ---
 #  
-#      This file is part of the whiteboard application. 
+#      This file is part of The Coccinella application. 
 #      It implements dynamic forms GUI. 
 #      If an 'jabber:x:data' namespaced element is given, the methods
 #      involved with this method are used. Else straight (simple) model.
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #
-# $Id: JForms.tcl,v 1.10 2003-12-29 09:02:29 matben Exp $
+# $Id: JForms.tcl,v 1.11 2004-01-13 14:50:20 matben Exp $
 # 
 #      Updated to version 2.1 of JEP-0004
 #  

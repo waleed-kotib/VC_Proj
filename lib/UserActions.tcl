@@ -1,13 +1,13 @@
 #  UserActions.tcl ---
 #  
-#      This file is part of the whiteboard application. It implements typical
+#      This file is part of The Coccinella application. It implements typical
 #      user actions, such as callbacks from buttons and menus.
 #      
 #  Copyright (c) 2000-2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UserActions.tcl,v 1.32 2004-01-09 14:08:22 matben Exp $
+# $Id: UserActions.tcl,v 1.33 2004-01-13 14:50:21 matben Exp $
 
 namespace eval ::UserActions:: {
     

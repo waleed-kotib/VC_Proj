@@ -1,11 +1,11 @@
 #  MailBox.tcl ---
 #  
-#      This file is part of the whiteboard application. 
+#      This file is part of The Coccinella application. 
 #      It implements a mailbox for jabber messages.
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.33 2004-01-02 11:41:16 matben Exp $
+# $Id: MailBox.tcl,v 1.34 2004-01-13 14:50:21 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -40,6 +40,7 @@ namespace eval ::Jabber::MailBox:: {
     option add *MailBox*trashDisImage         trashDis         widgetDefault
     
     # Add some hooks...
+    hooks::add initHook        ::Jabber::MailBox::Init
     hooks::add newMessageHook  ::Jabber::MailBox::GotMsg
     hooks::add closeWindowHook ::Jabber::MailBox::CloseHook
 
@@ -70,6 +71,10 @@ namespace eval ::Jabber::MailBox:: {
 	uidmsg    5
     }
 }
+
+# Jabber::MailBox::Init --
+# 
+#       Take care of things like translating any old version mailbox etc.
 
 proc ::Jabber::MailBox::Init { } {    
     variable locals
@@ -197,6 +202,8 @@ proc ::Jabber::MailBox::Build {args} {
     $wtray newbutton trash Trash $iconTrash $iconTrashDis  \
       ::Jabber::MailBox::TrashMsg -state disabled
     
+    hooks::run buildMailBoxButtonTrayHook $wtray
+
     pack [frame $w.frall.divt -bd 2 -relief sunken -height 2] -fill x -side top
     
     # Frame to serve as container for the pane geometry manager.

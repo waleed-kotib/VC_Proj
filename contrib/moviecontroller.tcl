@@ -1,13 +1,13 @@
 #  moviecontroller.tcl ---
 #  
-#      This file is part of the whiteboard application. It implements a
+#      This file is part of The Coccinella application. It implements a
 #      QuickTime look alike movie controller widget.
 #      
 #  Copyright (c) 2000  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: moviecontroller.tcl,v 1.2 2003-05-18 13:20:19 matben Exp $
+# $Id: moviecontroller.tcl,v 1.3 2004-01-13 14:50:20 matben Exp $
 
 #  Code idee from Alexander Schoepe's "Progressbar", thank you!
 #

@@ -1,11 +1,11 @@
 #  Register.tcl ---
 #  
-#      This file is part of the whiteboard application. 
+#      This file is part of The Coccinella application. 
 #      It implements the registration UI parts for jabber.
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.8 2004-01-05 15:00:32 matben Exp $
+# $Id: Register.tcl,v 1.9 2004-01-13 14:50:21 matben Exp $
 
 package provide Register 1.0
 

@@ -1,11 +1,11 @@
 #  WBIcons.tcl ---
 #  
-#      This file is part of the whiteboard application. It contains
+#      This file is part of The Coccinella application. It contains
 #      Mime (base 64) coded icons for the tool buttons and other icons.
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: WBIcons.tcl,v 1.1 2003-12-18 08:52:25 matben Exp $
+# $Id: WBIcons.tcl,v 1.2 2004-01-13 14:50:21 matben Exp $
 
 package provide WBIcons 1.0
 

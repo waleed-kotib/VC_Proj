@@ -1,11 +1,11 @@
 #  undo.tcl ---
 #  
-#      This file is part of the whiteboard application. 
+#      This file is part of The Coccinella application. 
 #      It implements a generic undo/redo stack.
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: undo.tcl,v 1.2 2003-09-21 13:02:12 matben Exp $
+# $Id: undo.tcl,v 1.3 2004-01-13 14:50:20 matben Exp $
 
 package provide undo 0.1
 

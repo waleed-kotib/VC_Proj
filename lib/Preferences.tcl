@@ -1,13 +1,13 @@
 #  Preferences.tcl ---
 #  
-#       This file is part of the whiteboard application. It implements the
+#       This file is part of The Coccinella application. It implements the
 #       preferences dialog window.
 #      
 #  Copyright (c) 1999-2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.35 2004-01-09 14:08:22 matben Exp $
+# $Id: Preferences.tcl,v 1.36 2004-01-13 14:50:21 matben Exp $
  
 package require notebook
 package require tree

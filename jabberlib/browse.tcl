@@ -1,6 +1,6 @@
 #  browse.tcl ---
 #  
-#      This file is part of the whiteboard application. 
+#      This file is part of The Coccinella application. 
 #      It maintains the current state of all 'jid-types' for each server.
 #      In other words, it manages the client's internal state corresponding
 #      to 'iq' elements with namespace 'jabber:iq:browse'.
@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: browse.tcl,v 1.17 2003-11-30 11:46:47 matben Exp $
+# $Id: browse.tcl,v 1.18 2004-01-13 14:50:21 matben Exp $
 # 
 #  locals($jid,parent):       the parent of $jid.
 #  locals($jid,parents):      list of all parent jid's,

@@ -1,11 +1,11 @@
 #  wizard.tcl ---
 #  
-#      This file is part of the whiteboard application.
+#      This file is part of The Coccinella application.
 #      It implements a setup assistant toplevel interface.
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: wizard.tcl,v 1.3 2003-12-15 08:20:53 matben Exp $
+# $Id: wizard.tcl,v 1.4 2004-01-13 14:50:20 matben Exp $
 # 
 # ########################### USAGE ############################################
 #

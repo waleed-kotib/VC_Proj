@@ -1,6 +1,6 @@
 # Plugins.tcl --
 #  
-#       This file is part of the whiteboard application.
+#       This file is part of The Coccinella application.
 #       It registers the standard "built in" packages:
 #           QuickTimeTcl
 #           TclSpeech
@@ -14,7 +14,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Plugins.tcl,v 1.10 2004-01-09 14:08:22 matben Exp $
+# $Id: Plugins.tcl,v 1.11 2004-01-13 14:50:21 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.

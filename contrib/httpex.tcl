@@ -1,13 +1,13 @@
 #  httpex.tcl ---
 #  
-#      This file is part of the whiteboard application. It contains a number
+#      It contains a number
 #      of procedures for using the HTTP protocol, get and put, both client
 #      side and server side.
 #      Modelled after the http package with modifications.
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson only for the new and rewritten parts.
 #
-# $Id: httpex.tcl,v 1.10 2004-01-10 14:53:39 matben Exp $
+# $Id: httpex.tcl,v 1.11 2004-01-13 14:50:20 matben Exp $
 # 
 # USAGE ########################################################################
 #

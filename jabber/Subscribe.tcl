@@ -1,11 +1,11 @@
 #  Subscribe.tcl ---
 #  
-#      This file is part of the whiteboard application. 
+#      This file is part of The Coccinella application. 
 #      It implements subscription parts.
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Subscribe.tcl,v 1.6 2004-01-02 14:41:58 matben Exp $
+# $Id: Subscribe.tcl,v 1.7 2004-01-13 14:50:21 matben Exp $
 
 package provide Subscribe 1.0
 

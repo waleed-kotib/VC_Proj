@@ -1,6 +1,6 @@
 #  SetFactoryDefaults.tcl ---
 #  
-#      This file is part of the whiteboard application. 
+#      This file is part of The Coccinella application. 
 #      Standard (factory) preferences are set here.
 #      These are the hardcoded, application default, values, and can be
 #      overridden by the ones in user default file.
@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.23 2004-01-10 14:53:39 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.24 2004-01-13 14:50:21 matben Exp $
 
 # SetWhiteboardFactoryState --
 # 

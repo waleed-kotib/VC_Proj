@@ -1,13 +1,13 @@
 #  entrypopup.tcl ---
 #  
-#      This file is part of the whiteboard application. It implements an
+#      This file is part of The Coccinella application. It implements an
 #      entry with a popup menu button widget.
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: entrypopup.tcl,v 1.1.1.1 2002-12-08 10:55:11 matben Exp $
+# $Id: entrypopup.tcl,v 1.2 2004-01-13 14:50:20 matben Exp $
 #
 # ########################### USAGE ############################################
 #

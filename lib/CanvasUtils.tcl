@@ -1,13 +1,13 @@
 #  CanvasUtils.tcl ---
 #  
-#      This file is part of the whiteboard application. It implements some
+#      This file is part of The Coccinella application. It implements some
 #      miscellaneous utilities for canvas operations.
 #      
 #  Copyright (c) 2000-2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.19 2004-01-09 14:08:22 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.20 2004-01-13 14:50:21 matben Exp $
 
 package require sha1pure
 

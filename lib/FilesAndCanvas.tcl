@@ -1,13 +1,13 @@
 #  FilesAndCanvas.tcl ---
 #  
-#      This file is part of the whiteboard application. It implements procedures
+#      This file is part of The Coccinella application. It implements procedures
 #      for transfering the items of a canvas to and from files.
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: FilesAndCanvas.tcl,v 1.16 2003-12-29 09:02:30 matben Exp $
+# $Id: FilesAndCanvas.tcl,v 1.17 2004-01-13 14:50:21 matben Exp $
  
 package require can2svg
 package require undo

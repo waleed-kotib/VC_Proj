@@ -1,11 +1,11 @@
 #  OOB.tcl ---
 #  
-#      This file is part of the whiteboard application. 
+#      This file is part of The Coccinella application. 
 #      It implements the UI of the jabber:iq:oob part of the jabber.
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.15 2004-01-11 15:17:51 matben Exp $
+# $Id: OOB.tcl,v 1.16 2004-01-13 14:50:21 matben Exp $
 
 package provide OOB 1.0
 

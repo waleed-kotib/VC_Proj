@@ -1,13 +1,13 @@
 #  Dialogs.tcl ---
 #  
-#      This file is part of the whiteboard application. It implements some
+#      This file is part of The Coccinella application. It implements some
 #      of the dialogs. 
 #      
 #  Copyright (c) 1999-2002  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.28 2004-01-05 15:00:32 matben Exp $
+# $Id: Dialogs.tcl,v 1.29 2004-01-13 14:50:21 matben Exp $
    
 package provide Dialogs 1.0
 

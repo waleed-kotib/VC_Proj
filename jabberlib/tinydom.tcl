@@ -1,13 +1,13 @@
 #  tinydom.tcl ---
 #  
-#      This file is part of the whiteboard application. It implements 
+#      This file is part of The Coccinella application. It implements 
 #      a tiny DOM model which wraps xml int tcl lists.
 #
 #  Copyright (c) 2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: tinydom.tcl,v 1.2 2003-11-30 11:46:47 matben Exp $
+# $Id: tinydom.tcl,v 1.3 2004-01-13 14:50:21 matben Exp $
 
 package require xml
 

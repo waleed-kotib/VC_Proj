@@ -1,13 +1,13 @@
 #  Whiteboard.tcl ---
 #  
-#      This file is part of the whiteboard application. 
+#      This file is part of The Coccinella application. 
 #      It implements the actual whiteboard.
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.10 2004-01-09 14:08:22 matben Exp $
+# $Id: Whiteboard.tcl,v 1.11 2004-01-13 14:50:21 matben Exp $
 
 package require entrycomp
 package require CanvasDraw
@@ -1698,6 +1698,9 @@ proc ::WB::BuildShortcutButtonPad {wtop} {
 	set txt [string toupper [string index $name 0]][string range $name 1 end]
 	$wtray newbutton $name $txt $icon $iconDis $cmd
     }
+
+    hooks::run buildWhiteboardButtonTrayHook $wtray
+
     if {[string equal $prefs(protocol) "server"]} {
 	$wtray buttonconfigure connect -state disabled
     }

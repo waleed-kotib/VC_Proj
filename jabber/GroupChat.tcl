@@ -1,11 +1,11 @@
 #  GroupChat.tcl ---
 #  
-#      This file is part of the whiteboard application. 
+#      This file is part of The Coccinella application. 
 #      It implements the group chat GUI part.
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.34 2004-01-09 14:08:22 matben Exp $
+# $Id: GroupChat.tcl,v 1.35 2004-01-13 14:50:20 matben Exp $
 
 package provide GroupChat 1.0
 

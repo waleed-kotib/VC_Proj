@@ -1,13 +1,13 @@
 #  Sounds.tcl ---
 #  
-#      This file is part of the whiteboard application. 
+#      This file is part of The Coccinella application. 
 #      It implements alert sounds.
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Sounds.tcl,v 1.9 2003-12-29 09:02:30 matben Exp $
+# $Id: Sounds.tcl,v 1.10 2004-01-13 14:50:21 matben Exp $
 
 package provide Sounds 1.0
 

@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.29 2004-01-13 08:14:33 matben Exp $
+# $Id: jabberlib.tcl,v 1.30 2004-01-13 14:50:21 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -235,7 +235,7 @@ namespace eval jlib {
     # Globals same for all instances of this jlib.
     #    > 1 prints raw xml I/O
     #    > 2 prints a lot more
-    variable debug 8
+    variable debug 0
     if {[info exists ::debugLevel] && ($::debugLevel > 1) && ($debug == 0)} {
 	set debug 2
     }
@@ -248,7 +248,7 @@ namespace eval jlib {
     # Entries must match: ( gc-1.0 | conference | muc )
     set statics(groupchatTypeExp) {(gc-1.0|conference|muc)}
     
-    variable lib
+    variable version 1.0
     
     # Running number.
     variable uid 0
@@ -379,9 +379,12 @@ proc jlib::new {rostername clientcmd args} {
     set lib(server) ""
     
     # Register some standard iq handlers that is handled internally.
-    iq_register $jlibname get jabber:iq:last [namespace current]::parse_get_last
-    iq_register $jlibname get jabber:iq:time [namespace current]::parse_get_time
-
+    iq_register $jlibname get jabber:iq:last    \
+      [namespace current]::handle_get_last
+    iq_register $jlibname get jabber:iq:time    \
+      [namespace current]::handle_get_time
+    iq_register $jlibname get jabber:iq:version \
+      [namespace current]::handle_get_version
     
     
     # Mapper between objects.
@@ -626,7 +629,7 @@ proc jlib::recvsocket {jlibname} {
 
     upvar [namespace current]::${jlibname}::lib lib
 
-    if {[eof $lib(sock)]} {
+    if {[catch {eof $lib(sock)} iseof] || $iseof} {
 	end_of_parse $jlibname
 	return
     }
@@ -2455,11 +2458,11 @@ proc jlib::get_last {jlibname to cmd} {
       [list [namespace current]::parse_iq_response $jlibname $cmd]
 }
 
-# jlib::parse_get_last --
+# jlib::handle_get_last --
 #
 #       Seconds since last activity. Response to 'jabber:iq:last' get.
 
-proc jlib::parse_get_last {jlibname from subiq args} {    
+proc jlib::handle_get_last {jlibname from subiq args} {    
 
     upvar [namespace current]::${jlibname}::locals locals
     
@@ -2494,11 +2497,11 @@ proc jlib::get_time {jlibname to cmd} {
       [list [namespace current]::parse_iq_response $jlibname $cmd]
 }
 
-# jlib::parse_get_time --
+# jlib::handle_get_time --
 #
 #       Send our time. Response to 'jabber:iq:time' get.
 
-proc jlib::parse_get_time {jlibname from subiq args} {
+proc jlib::handle_get_time {jlibname from subiq args} {
     
     array set argsarr $args
     
@@ -2536,6 +2539,38 @@ proc jlib::get_version {jlibname to cmd} {
       -attrlist {xmlns jabber:iq:version}]
     send_iq $jlibname "get" $xmllist -to $to -command        \
       [list [namespace current]::parse_iq_response $jlibname $cmd]
+}
+
+# jlib::handle_get_time --
+#
+#       Send our version. Response to 'jabber:iq:version' get.
+
+proc jlib::handle_get_version {jlibname from subiq args} {
+    global  prefs tcl_platform
+    variable version
+    
+    array set argsArr $args
+    
+    # Return any id!
+    set opts {}
+    if {[info exists argsArr(-id)]} {
+	set opts [list -id $argsArr(-id)]
+    }
+    set os $tcl_platform(os)
+    if {[info exists tcl_platform(osVersion)]} {
+	append os " $tcl_platform(osVersion)"
+    }
+    lappend opts -to $from
+    set subtags [list  \
+      [wrapper::createtag name    -chdata "JabberLib"]  \
+      [wrapper::createtag version -chdata $version]  \
+      [wrapper::createtag os      -chdata $os] ]
+    set xmllist [wrapper::createtag query -subtags $subtags  \
+      -attrlist {xmlns jabber:iq:version}]
+    eval {send_iq $jlibname "result" $xmllist} $opts
+
+    # Tell jlib's iq-handler that we handled the event.
+    return 1
 }
 
 # jlib::roster_get --
