@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.111 2005-01-31 14:06:58 matben Exp $
+# $Id: Roster.tcl,v 1.112 2005-02-02 09:02:21 matben Exp $
 
 package provide Roster 1.0
 
@@ -103,34 +103,34 @@ namespace eval ::Roster:: {
     
     # General.
     set popMenuDefs(roster,def) {
-	mMessage       users     {::NewMsg::Build -to $jid}
-	mChat          user      {::Chat::StartThread $jid3}
-	mWhiteboard    wb        {::Jabber::WB::NewWhiteboardTo $jid3}
-	mSendFile      user      {::OOB::BuildSet $jid3}
-	separator      {}        {}
-	mLastLogin/Activity user {::Jabber::GetLast $jid}
-	mvCard         user      {::VCard::Fetch other $jid}
-	mAddNewUser    any       {::Jabber::User::NewDlg}
-	mEditUser      user      {::Jabber::User::EditDlg $jid}
-	mVersion       user      {::Jabber::GetVersion $jid3}
-	mChatHistory   user      {::Chat::BuildHistoryForJid $jid}
-	mRemoveContact user      {::Roster::SendRemove $jid}
-	separator      {}        {}
-	mDirStatus     user      {::Roster::DirectedPresenceDlg $jid}
-	mRefreshRoster any       {::Roster::Refresh}
+	mMessage       {head group user}  {::NewMsg::Build -to $jid}
+	mChat          {user online}      {::Chat::StartThread $jid3}
+	mWhiteboard    {wb online}        {::Jabber::WB::NewWhiteboardTo $jid3}
+	mSendFile      user               {::OOB::BuildSet $jid3}
+	separator      {}                 {}
+	mLastLogin/Activity user          {::Jabber::GetLast $jid}
+	mvCard         user               {::VCard::Fetch other $jid}
+	mAddNewUser    {}                 {::Jabber::User::NewDlg}
+	mEditUser      user               {::Jabber::User::EditDlg $jid}
+	mVersion       {user online}      {::Jabber::GetVersion $jid3}
+	mChatHistory   {user always}      {::Chat::BuildHistoryForJid $jid}
+	mRemoveContact user               {::Roster::SendRemove $jid}
+	separator      {}                 {}
+	mDirStatus     user               {::Roster::DirectedPresenceDlg $jid}
+	mRefreshRoster {}                 {::Roster::Refresh}
     }  
 
     # Transports.
     set popMenuDefs(roster,trpt,def) {
-	mLastLogin/Activity user {::Jabber::GetLast $jid}
-	mvCard         user      {::VCard::Fetch other $jid}
-	mAddNewUser    any       {::Jabber::User::NewDlg}
-	mEditUser      user      {::Jabber::User::EditDlg $jid}
-	mVersion       user      {::Jabber::GetVersion $jid3}
-	mLoginTrpt     trpt      {::Roster::LoginTrpt $jid3}
-	mLogoutTrpt    trpt      {::Roster::LogoutTrpt $jid3}
-	separator      {}        {}
-	mRefreshRoster any       {::Roster::Refresh}
+	mLastLogin/Activity user          {::Jabber::GetLast $jid}
+	mvCard         user               {::VCard::Fetch other $jid}
+	mAddNewUser    {}                 {::Jabber::User::NewDlg}
+	mEditUser      user               {::Jabber::User::EditDlg $jid}
+	mVersion       user               {::Jabber::GetVersion $jid3}
+	mLoginTrpt     {trpt offline}     {::Roster::LoginTrpt $jid3}
+	mLogoutTrpt    {trpt online}      {::Roster::LogoutTrpt $jid3}
+	separator      {}                 {}
+	mRefreshRoster {}                 {::Roster::Refresh}
     }  
 
     # Can't run our http server on macs :-(
@@ -605,92 +605,77 @@ proc ::Roster::Popup {w v x y} {
     
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::Roster::Popup w=$w, v='$v', x=$x, y=$y"
+    ::Debug 2 "::Roster::Popup w=$w, v='$v'"
     
-    # The last element of $v is either a jid, (a namespace,) 
-    # a header in roster, a group,
-    # The variables name 'jid' is a misnomer.
-    # Find also type of thing clicked, 'typesel'.
-    
-    set typesel ""
-    set group   ""
-    
-    # The last element of atree item if user is usually a 3-tier jid for
-    # online users and a 2-tier jid else, but some transports may
-    # lack the resource part for online users, and have resource
-    # even if unavailable. Beware!
-    set jid [lindex $v end]
-    set jid3 $jid
+    # This is either online or offline.
     set status [string tolower [lindex $v 0]]
+
+    # The last element of 'v' can be a head, group, or a user (jid).
+    set item [lindex $v end]
+
+    set clicked {}
     if {[llength $v]} {
 	set tags [$w itemconfigure $v -tags]
     } else {
 	set tags ""
     }
     
-    switch -- $tags {
-	head {
-	    set typesel head
+    # The commands require a number of variables to be defined:
+    #       jid, jid3, group, clicked...
+    # 
+    # These may be lists of jid's if not an individual user was clicked.
+    # We use jid3 for the actual content even if only jid2, 
+    # and strip off any resource parts for jid (jid2).
+    set jid3 {}
+    set group {}
+    if {[lsearch $tags user] >= 0} {
+	set jid3 $item
+	lappend clicked user
+	if {[IsCoccinella $jid3]} {
+	    lappend clicked wb
 	}
-	group {
-	    
-	    # Get a list of all jid's in this group. type=user.
-	    # Must strip off all resources.
-	    set typesel group
-	    set group $jid
-	    set jid {}
-	    foreach jid3 [$w children $v] {
-		jlib::splitjid $jid3 jid2 res
-		lappend jid $jid2
-	    }
-	    set jid [list $jid]
+    } elseif {[lsearch $tags head] >= 0} {
+	if {[lsearch $tags trpt] >= 0} {
+	    # empty
+	} else {
+	    lappend clicked head
+	    set jid3 [GetAllUsersInItem $w $v]
 	}
-	default {
-	    
-	    # Typically a user.
-	    jlib::splitjid $jid jid2 res
-	    
-	    # Must let 'jid' refer to 2-tier jid for commands to work!
-	    set jid3 $jid
-	    set jid $jid2
-	    if {[IsTransportHeuristics $jid3]} {
-		set typesel trpt
-	    } elseif {[IsCoccinella $jid3]} {
-		set typesel wb
-	    } else {
-		set typesel user
-	    }			
-	}		    
+    } elseif {[lsearch $tags group] >= 0} {
+	lappend clicked group
+	set jid3 [GetAllUsersInItem $w $v]
+	set group $item
+    } elseif {[lsearch $tags trpt] >= 0} {
+	lappend clicked trpt
+	set jid3 $item
+	# Transports in own directory.
+	if {[$jstate(roster) isavailable $jid3]} {
+	    set status online
+	} else {
+	    set status offline
+	}
     }
-    if {[string length $jid] == 0} {
-	set typesel ""	
+        
+    # Make jid (jid2) of all jid3.
+    set jid {}
+    foreach u $jid3 {
+	jlib::splitjid $u jid2 res
+	lappend jid $jid2
     }
-    set X [expr [winfo rootx $w] + $x]
-    set Y [expr [winfo rooty $w] + $y]
     
-    ::Debug 2 "\t jid=$jid, typesel=$typesel"
-    
-    # Mads Linden's workaround for menu post problem on mac:
-    # all in menubutton commands i add "after 40 the_command"
-    # this way i can never have to posting error.
-    # it is important after the tk_popup f.ex to
-    #
-    # destroy .mb
-    # update
-    #
-    # this way the .mb is destroyd before the next window comes up, thats how I
-    # got around this.
-    
+    ::Debug 2 "\t jid=$jid, jid3=$jid3, clicked=$clicked, status=$status"
+        
     # Make the appropriate menu.
     set m $jstate(wpopup,roster)
     set i 0
     catch {destroy $m}
     menu $m -tearoff 0
     
-    if {[string equal $typesel "trpt"]} {
-	set menuDef $popMenuDefs(roster,trpt,def)
-    } else {
-	set menuDef $popMenuDefs(roster,def)	
+    set menuDef $popMenuDefs(roster,def)	
+    foreach click $clicked {
+	if {[info exists popMenuDefs(roster,$click,def)]} {
+	    set menuDef $popMenuDefs(roster,$click,def)
+	}
     }
     
     foreach {item type cmd} $menuDef {
@@ -711,65 +696,41 @@ proc ::Roster::Popup {w v x y} {
 	    $m add command -label $locname -command [list after 40 $cmd]  \
 	      -state disabled
 	}
-	
-	# If a menu should be enabled even if not connected do it here.
-	if {$typesel == "user" &&  \
-	  [string match -nocase "*chat history*" $item]} {
-	    $m entryconfigure $locname -state normal
-	}
-	if {![::Jabber::IsConnected]} {
-	    continue
-	}
-	if {[string equal $type "any"]} {
-	    $m entryconfigure $locname -state normal
+	if {![::Jabber::IsConnected] && ([lsearch $type always] < 0)} {
 	    continue
 	}
 	
-	# State of menu entry. We use the 'type' and 'typesel' to sort
-	# out which capabilities to offer for the clicked item.
-	set state disabled
+	# State of menu entry. 
+	# We use the 'type' and 'clicked' lists to set the state.
+	if {[listintersectnonempty $type $clicked]} {
+	    set state normal
+	} elseif {$type == ""} {
+	    set state normal
+	} else {
+	    set state disabled
+	}
 	
-	switch -- $type {
-	    user {
-		switch -- $typesel user - wb - trpt {
-		    set state normal
-		}		
-		if {[string equal $status "offline"]} {
-		    if {[string match -nocase "mchat" $item] || \
-		      [string match -nocase "*version*" $item]} {
-			set state disabled
-		    }
-		}
+	# If any online/offline these must also be fulfilled.
+	if {[lsearch $type online] >= 0} {
+	    if {$status != "online"} {
+		set state disabled
 	    }
-	    users {
-		switch -- $typesel user - wb - group {
-		    set state normal
-		}		
+	} elseif {[lsearch $type offline] >= 0} {
+	    if {$status != "offline"} {
+		set state disabled
 	    }
-	    wb {
-		if {[string equal $typesel "wb"]} {
-		    set state normal
-		}
-	    }
-	    trpt {
-		set isavailable [$jstate(roster) isavailable $jid3]
-		if {!$isavailable && [string match -nocase "mlogintrpt" $item]} {
-		    set state normal
-		}
-		if {$isavailable && [string match -nocase "mlogouttrpt" $item]} {
-		    set state normal
-		}
-	    }
-	} 
+	}
 	if {[string equal $state "normal"]} {
 	    $m entryconfigure $locname -state normal
-	}   
+	}
     }
     
     # This one is needed on the mac so the menu is built before it is posted.
     update idletasks
     
     # Post popup menu.
+    set X [expr [winfo rootx $w] + $x]
+    set Y [expr [winfo rooty $w] + $y]
     tk_popup $m [expr int($X) - 10] [expr int($Y) - 10]   
     
     # Mac bug... (else can't post menu while already posted if toplevel...)
@@ -777,6 +738,26 @@ proc ::Roster::Popup {w v x y} {
 	catch {destroy $m}
 	update
     }
+}
+
+proc ::Roster::GetAllUsersInItem {w v} {
+    
+    set jid3 {}
+    foreach u [$w children $v] {
+	set ipath [concat $v [list $u]]
+	set c [$w children $ipath]
+	if {[llength $c] > 0} {
+	    set iipath [concat $ipath [list $c]]
+	    if {[lsearch [$w itemconfigure $iipath -tags] user] >= 0} {
+		lappend jid3 $c
+	    }
+	} else {
+	    if {[lsearch [$w itemconfigure $ipath -tags] user] >= 0} {
+		lappend jid3 $u
+	    }
+	}
+    }
+    return $jid3
 }
 
 # Roster::PushProc --
@@ -1247,10 +1228,11 @@ proc ::Roster::PutItemInTree {jid presence args} {
 	# Transports are treated specially.
 	set transports $dirNameArr(transports)
 	if {![$wtree isitem [list $transports]]} {
-	    $wtree newitem [list $transports] -tags head -dir 1 \
+	    $wtree newitem [list $transports] -tags {head trpt} -dir 1 \
 	      -text [mc $transports]
 	}
-	eval {$wtree newitem [list $transports $jid3] -image $icon -tags $jid3} \
+	set tags [list trpt $jid3]
+	eval {$wtree newitem [list $transports $jid3] -image $icon -tags $tags} \
 	  $itemOpts
     } elseif {[info exists argsArr(-ask)] &&  \
       [string equal $argsArr(-ask) "subscribe"]} {
@@ -1262,7 +1244,8 @@ proc ::Roster::PutItemInTree {jid presence args} {
 	    $wtree newitem [list $pending] -tags head -dir 1 \
 	      -text [mc $pending]
 	}
-	eval {$wtree newitem [list $pending $jid] -image $icon -tags $mjid} \
+	set tags [list user $mjid]
+	eval {$wtree newitem [list $pending $jid] -image $icon -tags $tags} \
 	  $itemOpts
     } elseif {[info exists argsArr(-groups)] && ($argsArr(-groups) != "")} {
 	set groups $argsArr(-groups)
@@ -1276,14 +1259,16 @@ proc ::Roster::PutItemInTree {jid presence args} {
 		$wtree newitem [list $presName $grp] -dir 1 \
 		  -tags group -image $groupImage
 	    }
-	    eval {$wtree newitem [list $presName $grp $jidx] \
-	      -image $icon -tags $mjid} $itemOpts
+	    set tags [list user $mjid]
+	    eval {$wtree newitem [list $presName $grp $jidx] -image $icon \
+	      -tags $tags} $itemOpts
 	}
     } else {
 	
 	# No groups associated with this item.
-	eval {$wtree newitem [list $presName $jidx] \
-	  -image $icon -tags $mjid} $itemOpts
+	set tags [list user $mjid]
+	eval {$wtree newitem [list $presName $jidx] -image $icon -tags $tags} \
+	  $itemOpts
     }
     
     # Design the balloon help window message.
@@ -1600,27 +1585,25 @@ proc ::Roster::PostProcessIcons {method from} {
 
     foreach v [$wtree find withtag all] {
 	set tags [$wtree itemconfigure $v -tags]
+	if {$tags == ""} {
+	    continue
+	}
+	if {([lsearch $tags head] >= 0) || ([lsearch $tags group] >= 0)} {
+	    continue
+	}
+	set jid [lindex $v end]
+	set mjid [jlib::jidmap $jid]
+	jlib::splitjidex $mjid username host res
 	
-	switch -- $tags {
-	    "" - head - group {
-		# skip
-	    } 
-	    default {
-		set jid [lindex $v end]
-		set mjid [jlib::jidmap $jid]
-		jlib::splitjidex $mjid username host res
-		
-		# Only relevant jid's. Must have full jid here!
-		# Exclude jid's that belong to our login jabber server.
- 		if {![string equal $server $host]} {
-		    
-		    # Browse always, disco only if from=host.
-		    if {!$matchHost || [string equal $from $host]} {
-			set icon [GetPresenceIconFromJid $jid]
-			if {[string length $icon]} {
-			    $wtree itemconfigure $v -image $icon
-			}
-		    }
+	# Only relevant jid's. Must have full jid here!
+	# Exclude jid's that belong to our login jabber server.
+	if {![string equal $server $host]} {
+	    
+	    # Browse always, disco only if from=host.
+	    if {!$matchHost || [string equal $from $host]} {
+		set icon [GetPresenceIconFromJid $jid]
+		if {[string length $icon]} {
+		    $wtree itemconfigure $v -image $icon
 		}
 	    }
 	}	

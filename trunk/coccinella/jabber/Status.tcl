@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Status.tcl,v 1.2 2004-11-23 08:55:23 matben Exp $
+# $Id: Status.tcl,v 1.3 2005-02-02 09:02:22 matben Exp $
 
 package provide Status 1.0
 
@@ -270,6 +270,9 @@ proc ::Jabber::Status::BuildGenPresenceMenu {mt args} {
 	    } $args $opts
 	}
     }
+    $mt add separator
+    $mt add command -label [mc mAttachMessage] \
+      -command ::Jabber::SetStatusWithMessage
 }
 
 # Jabber::Status::BuildStatusMenuDef --

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.69 2005-01-31 14:06:53 matben Exp $
+# $Id: Browse.tcl,v 1.70 2005-02-02 09:02:17 matben Exp $
 
 package provide Browse 1.0
 
@@ -38,34 +38,6 @@ namespace eval ::Browse:: {
 
     # Template for the browse popup menu.
     variable popMenuDefs
-
-    set popMenuDefs(browse,def) {
-	mMessage       user      {::NewMsg::Build -to $jid}
-	mChat          user      {::Chat::StartThread $jid}
-	mWhiteboard    wb        {::Jabber::WB::NewWhiteboardTo $jid}
-	mEnterRoom     room      {
-	    ::GroupChat::EnterOrCreate enter -roomjid $jid -autoget 1
-	}
-	mCreateRoom    conference {::GroupChat::EnterOrCreate create \
-	  -server $jid}
-	separator      {}        {}
-	mInfo          jid       {::Browse::GetInfo $jid}
-	mLastLogin/Activity jid  {::Jabber::GetLast $jid}
-	mLocalTime     jid       {::Jabber::GetTime $jid}
-	mvCard         jid       {::VCard::Fetch other $jid}
-	mVersion       jid       {::Jabber::GetVersion $jid}
-	separator      {}        {}
-	mSearch        search    {
-	    ::Search::Build -server $jid -autoget 1
-	}
-	mRegister      register  {
-	    ::GenRegister::NewDlg -server $jid -autoget 1
-	}
-	mUnregister    register  {::Register::Remove $jid}
-	separator      {}        {}
-	mRefresh       jid       {::Browse::Refresh $jid}
-	mAddServer     any       {::Browse::AddServer}
-    }
 
     # List the features of that each menu entry can handle:
     #   conference: groupchat service, not room

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.45 2004-12-13 13:39:17 matben Exp $
+# $Id: JWB.tcl,v 1.46 2005-02-02 09:02:18 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -812,13 +812,8 @@ proc ::Jabber::WB::SendMessage {wtop jid msg args} {
     upvar ::Jabber::jstate jstate
     
     set xlist [CanvasCmdListToMessageXElement $wtop [list $msg]]
-    if {[catch {
-	eval {$jstate(jlib) send_message $jid -xlist $xlist} $args
-    } err]} {
-	::Jabber::DoCloseClientConnection
-	::UI::MessageBox -title [mc Error] -icon error -type ok \
-	  -message $err
-    }
+
+    eval {$jstate(jlib) send_message $jid -xlist $xlist} $args
 }
 
 # Jabber::WB::SendMessageList --
@@ -829,13 +824,8 @@ proc ::Jabber::WB::SendMessageList {wtop jid msgList args} {
     upvar ::Jabber::jstate jstate
     
     set xlist [CanvasCmdListToMessageXElement $wtop $msgList]
-    if {[catch {
-	eval {$jstate(jlib) send_message $jid -xlist $xlist} $args
-    } err]} {
-	::Jabber::DoCloseClientConnection
-	::UI::MessageBox -title [mc Error] -icon error -type ok \
-	  -message $err
-    }
+
+    eval {$jstate(jlib) send_message $jid -xlist $xlist} $args
 }
 
 # Jabber::WB::SendRawMessageList --
@@ -853,13 +843,7 @@ proc ::Jabber::WB::SendRawMessageList {jid msgList args} {
     set xlist [list [wrapper::createtag x -attrlist  \
       {xmlns coccinella:wb} -subtags $subx]]
 
-    if {[catch {
-	eval {$jstate(jlib) send_message $jid -xlist $xlist} $args
-    } err]} {
-	::Jabber::DoCloseClientConnection
-	::UI::MessageBox -title [mc Error] -icon error -type ok \
-	  -message $err
-    }    
+    eval {$jstate(jlib) send_message $jid -xlist $xlist} $args
 }
 
 # Jabber::WB::CanvasCmdListToMessageXElement --

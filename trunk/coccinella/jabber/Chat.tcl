@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.108 2005-01-31 14:06:54 matben Exp $
+# $Id: Chat.tcl,v 1.109 2005-02-02 09:02:17 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -1514,14 +1514,9 @@ proc ::Chat::Send {dlgtoken} {
 	  -subtags [list [wrapper::createtag "composing"]]]]
     }
     
-    if {[catch {
-	eval {::Jabber::JlibCmd send_message $jid  \
-	  -thread $threadID -type chat -body $allText} $opts
-    } err]} {
-	::UI::MessageBox -type ok -icon error -title "Network Error" \
-	  -message "Network error ocurred: $err"
-	return
-    }
+    eval {::Jabber::JlibCmd send_message $jid  \
+      -thread $threadID -type chat -body $allText} $opts
+
     set dlgstate(lastsentsecs) $secs
     
     # Add to chat window and clear send.        
@@ -1971,13 +1966,7 @@ proc ::Chat::XEventSendCompose {chattoken} {
       [wrapper::createtag "composing"] \
       [wrapper::createtag "id" -chdata $id]]]]
     
-    if {[catch {
-	eval {::Jabber::JlibCmd send_message $chatstate(jid) -xlist $xelems} $opts
-    } err]} {
-	::UI::MessageBox -type ok -icon error -title "Network Error" \
-	  -message "Network error ocurred: $err"
-	return
-    }    
+    eval {::Jabber::JlibCmd send_message $chatstate(jid) -xlist $xelems} $opts
 }
 
 proc ::Chat::XEventSendCancelCompose {chattoken} {
@@ -2015,13 +2004,7 @@ proc ::Chat::XEventSendCancelCompose {chattoken} {
       [wrapper::createtag "x" -attrlist {xmlns jabber:x:event}  \
       -subtags [list [wrapper::createtag "id" -chdata $id]]]]
     
-    if {[catch {
-	eval {::Jabber::JlibCmd send_message $chatstate(jid) -xlist $xelems} $opts
-    } err]} {
-	::UI::MessageBox -type ok -icon error -title "Network Error" \
-	  -message "Network error ocurred: $err"
-	return
-    }
+    eval {::Jabber::JlibCmd send_message $chatstate(jid) -xlist $xelems} $opts
 }
 
 # Various methods to handle chat history .......................................

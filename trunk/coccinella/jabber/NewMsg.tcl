@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.57 2005-01-31 14:06:57 matben Exp $
+# $Id: NewMsg.tcl,v 1.58 2005-02-02 09:02:21 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -323,26 +323,13 @@ proc ::NewMsg::Build {args} {
     if {!$locals(initedaddr)} { 
 	InitMultiAddress $waddr
     }
-    foreach n {1 2 3 4} {
+    set nmaxlines 4
+    for {set n 1} {$n <= $nmaxlines} {incr n} {
 	NewAddrLine $w $waddr $n
     }
     FillAddrLine $w $waddr 1
     set id [$waddcan create window 0 0 -anchor nw -window $waddr]
-        
-    # If -to option. This can have jid's with and without any resource.
-    # Be careful to treat this according to the XMPP spec!
-
-    if {$opts(-to) != ""} {
-	set n 1
-	foreach jid $opts(-to) {
-	    if {$n > 1} {
-		FillAddrLine $w $waddr $n
-	    }	    
-	    set locals($w,addr$n) [$jstate(jlib) getrecipientjid $jid]
-	    incr n
-	}
-    }
-    
+            
     # Text.
     set wtxt  $w.frall.frtxt
     set wtext $wtxt.text
@@ -400,8 +387,6 @@ $opts(-forwardmessage)"
 	set waddr %s
 	set waddcan %s
 	set wspacer %s
-	#set width  [expr [winfo reqwidth $waddr] - [$waddr cget -padx]]
-	#set height [expr [winfo reqheight $waddr] - [$waddr cget -pady]]
 	set width  [winfo reqwidth $waddr]
 	set height [winfo reqheight $waddr]
 	set canwidth [winfo reqwidth $waddcan]
@@ -422,10 +407,35 @@ $opts(-forwardmessage)"
     
     bind $w <$this(modkey)-Return> \
       [list [namespace current]::CommandReturnKeyPress $w]
-    #bind $w <Destroy> [list [namespace current]::CloseDlg $w]
     wm protocol $w WM_DELETE_WINDOW [list [namespace current]::CloseDlg $w]
     
     focus $waddr.addr1
+    
+    # We need to fill in addresses after the geometry handling!
+    if {[llength $opts(-to)]} {
+	after 200 [list ::NewMsg::FillInAddresses $w $opts(-to)]
+    }
+}
+
+proc ::NewMsg::FillInAddresses {w to} {
+    variable locals
+    upvar ::Jabber::jstate jstate
+    
+    # If -to option. This can have jid's with and without any resource.
+    # Be careful to treat this according to the XMPP spec!
+
+    set waddr $locals($w,wfrport)
+    set n 1
+    foreach jid $to {
+	if {$n > 4} {
+	    NewAddrLine $w $waddr $n
+	}
+	if {$n > 1} {
+	    FillAddrLine $w $waddr $n
+	}	    
+	set locals($w,addr$n) [$jstate(jlib) getrecipientjid $jid]
+	incr n
+    }
 }
 
 proc ::NewMsg::NewAddrLine {w wfr n} {

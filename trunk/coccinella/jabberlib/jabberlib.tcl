@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.79 2004-12-22 15:12:15 matben Exp $
+# $Id: jabberlib.tcl,v 1.80 2005-02-02 09:02:22 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -200,6 +200,9 @@
 #                removed all browse stuff, added presence_register, muc as a
 #                standalone component, jlibname now always fully qualified,
 #                connect -> openstream, disconnect -> closestream
+#                
+#       050201  all network errors handled via client command (clientcmd)
+#               individual commands shall never throw network errors!
 
 package require wrapper
 package require roster
@@ -619,7 +622,8 @@ proc jlib::putssocket {jlibname xml} {
 
     Debug 2 "SEND: $xml"
     if {[catch {puts $lib(sock) $xml} err]} {
-	return -code error "Network connection dropped: $err"
+	# Error propagated to the caller that calls clientcmd.
+	return -code error
     }
 }
 
@@ -643,7 +647,7 @@ proc jlib::resetsocket {jlibname} {
 
 # jlib::recvsocket --
 #
-#	  Default transport mechanism; fileevent on socket socket.
+#	Default transport mechanism; fileevent on socket socket.
 #       Callback on incoming socket xml data. Feeds our wrapper and XML parser.
 #
 # Arguments:
@@ -657,16 +661,17 @@ proc jlib::recvsocket {jlibname} {
     upvar ${jlibname}::lib lib
 
     if {[catch {eof $lib(sock)} iseof] || $iseof} {
-	end_of_parse $jlibname
+	kill $jlibname
+	uplevel #0 $lib(clientcmd) [list $jlibname networkerror]	  
 	return
     }
     
     # Read what we've got.
     if {[catch {read $lib(sock)} temp]} {
-	closestream $jlibname
-	set errmsg "Network error when reading from network"
-	uplevel #0 $lib(clientcmd) [list $jlibname networkerror -body $errmsg]
-	  
+	kill $jlibname
+
+	# We need to call clientcmd here since async event.
+	uplevel #0 $lib(clientcmd) [list $jlibname networkerror]	  
 	return
     }
     Debug 2 "RECV: $temp"
@@ -775,21 +780,22 @@ proc jlib::closestream {jlibname} {
     upvar ${jlibname}::lib lib
 
     Debug 3 "jlib::closestream"
+
     set xml "</stream:stream>"
     catch {eval $lib(transportsend) {$xml}}
-    catch {eval $lib(transportreset)}
-    reset $jlibname
-    
-    # Be sure to reset the wrapper, which implicitly resets the XML parser.
-    wrapper::reset $lib(wrap)
+    kill $jlibname
 }
 
+# jlib::kill --
+# 
+#       Like closestream but without any network transactions.
 
 proc jlib::kill {jlibname} {
     
     upvar ${jlibname}::lib lib
 
     Debug 3 "jlib::kill"
+    
     catch {eval $lib(transportreset)}
     reset $jlibname
     
@@ -2560,16 +2566,14 @@ proc jlib::send {jlibname xmllist} {
     upvar ${jlibname}::lib lib
     
     set xml [wrapper::createxml $xmllist]
-    
-    #puts "lib(isinstream)=$lib(isinstream)"
-    
+        
     # We fail only if already in stream.
     # The first failure reports the network error, closes the stream,
     # which stops multiple errors to be reported to client.
     if {$lib(isinstream) && [catch {eval $lib(transportsend) {$xml}} err]} {
-	closestream $jlibname
-	set errmsg "Network error when sending"
-	uplevel #0 $lib(clientcmd) [list $jlibname networkerror -body $errmsg]
+	#closestream $jlibname
+	kill $jlibname
+	uplevel #0 $lib(clientcmd) [list $jlibname networkerror]
     }
 }
 

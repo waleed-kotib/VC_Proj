@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.94 2005-01-31 14:06:55 matben Exp $
+# $Id: GroupChat.tcl,v 1.95 2005-02-02 09:02:18 matben Exp $
 
 package require History
 
@@ -504,7 +504,7 @@ proc ::GroupChat::EnterCallback {jlibName type args} {
 	    foreach {errcode errmsg} $argsArr(-error) break
 	    append msg " The error code is $errcode: $errmsg"
 	}
-	::UI::MessageBox -title "Error Enter Room" -message $msg
+	::UI::MessageBox -title "Error Enter Room" -message $msg -icon error
 	return
     }
     
@@ -1010,14 +1010,8 @@ proc ::GroupChat::SetTopic {token} {
       topic [mc Cancel] [mc OK]]
 
     if {($ans == "ok") && ($topic != "")} {
-	if {[catch {
-	    ::Jabber::JlibCmd send_message $roomjid -type groupchat \
-	      -subject $topic
-	} err]} {
-	    ::UI::MessageBox -type ok -icon error -title "Network Error" \
-	      -message "Network error ocurred: $err"
-	    return
-	}
+	::Jabber::JlibCmd send_message $roomjid -type groupchat \
+	  -subject $topic
     }
     return $ans
 }
@@ -1042,14 +1036,7 @@ proc ::GroupChat::Send {token} {
     set allText [::Text::TransformToPureText $wtextsnd]
     set allText [string trimright $allText "\n"]
     if {$allText != ""} {	
-	if {[catch {
-	    ::Jabber::JlibCmd send_message $roomjid -type groupchat \
-	      -body $allText
-	} err]} {
-	    ::UI::MessageBox -type ok -icon error -title "Network Error" \
-	      -message "Network error ocurred: $err"
-	    return
-	}
+	::Jabber::JlibCmd send_message $roomjid -type groupchat -body $allText
     }
     
     # Clear send.

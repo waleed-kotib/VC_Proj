@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.124 2005-01-31 14:06:56 matben Exp $
+# $Id: Jabber.tcl,v 1.125 2005-02-02 09:02:18 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -811,10 +811,9 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	    # we never end up here.
 	    
 	    # Disconnect. This should reset both wrapper and XML parser!
-	    ::Jabber::DoCloseClientConnection
-	    
-	    ::UI::MessageBox -icon error -type ok  \
-	      -message [mc jamessconnbroken]
+	    #::Jabber::DoCloseClientConnection
+	    SetClosedState
+	    ::UI::MessageBox -icon error -type ok -message [mc jamessconnbroken]
 	}
 	away - xaway {
 	    
@@ -826,7 +825,7 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	    }
 	}
 	streamerror {
-	    ::Jabber::DoCloseClientConnection
+	    DoCloseClientConnection
 	    if {[info exists argsArr(-errormsg)]} {
 		set msg "Receieved a fatal error:\
 		  $argsArr(-errormsg). The connection is closed."
@@ -840,7 +839,7 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	    
 	    # XML parsing error.
 	    # Disconnect. This should reset both wrapper and XML parser!
-	    ::Jabber::DoCloseClientConnection
+	    DoCloseClientConnection
 	    if {[info exists argsArr(-errormsg)]} {
 		set msg "Receieved a fatal XML parsing error:\
 		  $argsArr(-errormsg). The connection is closed down."
@@ -854,9 +853,9 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	networkerror {
 	    
 	    # Disconnect. This should reset both wrapper and XML parser!
-	    ::Jabber::DoCloseClientConnection
-	    ::UI::MessageBox -title [mc {Network Error}] \
-	      -message $argsArr(-body) -icon error -type ok	    
+	    #::Jabber::DoCloseClientConnection
+	    SetClosedState
+	    ::UI::MessageBox -icon error -type ok -message [mc jamessconnbroken]
 	}
     }
     return $ishandled
@@ -998,30 +997,44 @@ proc ::Jabber::DoCloseClientConnection {args} {
     variable jprefs
     
     ::Debug 2 "::Jabber::DoCloseClientConnection"
+    
     array set argsArr [list -status $jprefs(logoutStatus)]    
     array set argsArr $args
     
-    # Ourself.
-    set jstate(mejid) ""
-    set jstate(meres) ""
-    set jstate(mejidres) ""
-    set jstate(status) "unavailable"
-    set jserver(this) ""
-
     # Send unavailable information. Silently in case we got network error.
     set opts {}
     if {[string length $argsArr(-status)] > 0} {
 	lappend opts -status $argsArr(-status)
     }
-    catch {
-	eval {$jstate(jlib) send_presence -type unavailable} $opts
-    }
+    eval {$jstate(jlib) send_presence -type unavailable} $opts
         
     # Do the actual closing.
     #       There is a potential problem if called from within a xml parser 
     #       callback which makes the subsequent parsing to fail. (after idle?)
     after idle $jstate(jlib) closestream
     
+    SetClosedState
+}
+
+# Jabber::SetClosedState --
+# 
+#       Sets the application closed connection state.
+#       Called either when doing a controlled close connection,
+#       or as a result of any exception.
+#       Doesn't do any network transactions.
+
+proc ::Jabber::SetClosedState { } {
+    variable jstate
+    variable jserver
+    
+    ::Debug 2 "::Jabber::SetClosedState"
+
+    # Ourself.
+    set jstate(mejid) ""
+    set jstate(meres) ""
+    set jstate(mejidres) ""
+    set jstate(status) "unavailable"
+    set jserver(this) ""
     set jstate(ipNum) ""
     
     # Run all logout hooks.
@@ -1664,7 +1677,7 @@ proc ::Jabber::ParseGetVersion {jlibname from subiq args} {
       [wrapper::createtag os      -chdata $os]]
     set xmllist [wrapper::createtag query -subtags $subtags  \
       -attrlist {xmlns jabber:iq:version}]
-     eval {$jstate(jlib) send_iq "result" [list $xmllist]} $opts
+    eval {$jstate(jlib) send_iq "result" [list $xmllist]} $opts
 
     # Tell jlib's iq-handler that we handled the event.
     return 1
@@ -1706,7 +1719,7 @@ proc ::Jabber::ParseGetServers  {jlibname from subiq args} {
       [wrapper::createtag ip -chdata $ip -attrlist $attrhttpd]]
     set xmllist [wrapper::createtag query -subtags $subtags  \
       -attrlist [list xmlns $coccixmlns(servers)]]
-     eval {$jstate(jlib) send_iq "result" [list $xmllist]} $opts
+    eval {$jstate(jlib) send_iq "result" [list $xmllist]} $opts
     
      # Tell jlib's iq-handler that we handled the event.
     return 1
