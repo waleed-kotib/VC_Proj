@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.23 2003-12-20 14:27:16 matben Exp $
+# $Id: GroupChat.tcl,v 1.24 2003-12-20 16:25:20 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -48,6 +48,7 @@ namespace eval ::Jabber::GroupChat:: {
 
     # Add all event hooks.
     hooks::add quitAppHook [list ::UI::SaveWinPrefixGeom $wDlgs(jgc)]
+    hooks::add quitAppHook ::Jabber::GroupChat::GetFirstPanePos
 
     
     # Local stuff
@@ -727,7 +728,7 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     trace variable [namespace current]::locals($roomJid,status) w  \
       [list [namespace current]::TraceStatus $roomJid]
     
-    set nwin [::UI::GetPrefixedToplevels $wDlgs(jgc)]
+    set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jgc)]]
     if {($nwin == 1) && [info exists prefs(winGeom,$wDlgs(jgc))]} {
 	wm geometry $w $prefs(winGeom,$wDlgs(jgc))
     }
@@ -1138,13 +1139,12 @@ proc ::Jabber::GroupChat::CloseToplevel {w} {
 proc ::Jabber::GroupChat::Close {roomJid} {
     global  wDlgs
     variable locals
-    upvar ::Jabber::jstate jstate
     
     if {[info exists locals($roomJid,wtop)] &&  \
       [winfo exists $locals($roomJid,wtop)]} {
 	::UI::SaveWinGeom $wDlgs(jgc) $locals($roomJid,wtop)
-    	::UI::SavePanePos groupchatDlgVert $locals($roomJid,wtxt) vertical
-    	::UI::SavePanePos groupchatDlgHori $locals($roomJid,wtxt.0)
+    	::UI::SavePanePos groupchatDlgVert $locals($roomJid,wtxt)
+    	::UI::SavePanePos groupchatDlgHori $locals($roomJid,wtxt.0) vertical
 
 	
     	# after idle seems to be needed to avoid crashing the mac :-(
@@ -1181,45 +1181,16 @@ proc ::Jabber::GroupChat::Logout { } {
     }
 }
 
-# Jabber::GroupChat::GetPanePos --
-#
-#       Return typical pane position list. If $roomJid is given, pick this
-#       particular dialog, else first found.
-
-proc ::Jabber::GroupChat::GetPanePos {{roomJid {}}} {
-
+proc ::Jabber::GroupChat::GetFirstPanePos { } {
+    global  wDlgs
     variable locals
-
-    set ans {}
-    if {$roomJid == ""} {
-	set found 0
-	foreach key [array names locals "*,wtxt"] {
-	    set wtxt $locals($key)
-	    set wtxt0 ${wtxt}.0
-	    if {[winfo exists $wtxt]} {
-		set found 1
-		break
-	    }
-	}
-    } else {
-	set found 1
-	set wtxt $locals($roomJid,wtxt)    
-	set wtxt0 $locals($roomJid,wtxt.0)    
+    
+    set win [::UI::GetFirstPrefixedToplevel $wDlgs(jgc)]
+    if {$win != ""} {
+	set roomJid $locals($win,room) 
+	::UI::SavePanePos groupchatDlgVert $locals($roomJid,wtxt)
+	::UI::SavePanePos groupchatDlgHori $locals($roomJid,wtxt.0) vertical
     }
-    if {$found} {
-	array set infoArr [::pane::pane info $wtxt]
-	lappend ans groupchatDlgVert   \
-	  [list $infoArr(-relheight) [expr 1.0 - $infoArr(-relheight)]]
-	array set infoArr0 [::pane::pane info $wtxt0]
-	lappend ans groupchatDlgHori   \
-	  [list $infoArr0(-relwidth) [expr 1.0 - $infoArr0(-relwidth)]]
-	set locals(panePosList) $ans
-    } elseif {[info exists locals(panePosList)]} {
-	set ans $locals(panePosList)
-    } else {
-	set ans {}
-    }
-    return $ans
 }
 
 #-------------------------------------------------------------------------------
