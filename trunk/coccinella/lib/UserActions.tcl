@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UserActions.tcl,v 1.37 2004-07-09 06:26:06 matben Exp $
+# $Id: UserActions.tcl,v 1.38 2004-07-27 14:25:19 matben Exp $
 
 namespace eval ::UserActions:: {
     
@@ -104,7 +104,7 @@ proc ::UserActions::DoConnect { } {
     global  prefs wDlgs
     
     if {[string equal $prefs(protocol) jabber]} {
-	::Jabber::Login::Login
+	::Jabber::Login::Dlg
     } elseif {![string equal $prefs(protocol) server]} {
 	::P2PNet::OpenConnection $wDlgs(openConn)
     }

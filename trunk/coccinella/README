@@ -159,6 +159,13 @@ Known Bugs:
 
     set debugLevel 3
 
+Web interaction:
+
+    You can put an url in a web page to launch The Coccinella. Use a link:
+    <a href="xmpp:matben@athlon.se">The Coccinella</a>
+    This works presently only on Windows, and you need to launch Coccinella
+    at least once with administrator privilegies to make it work.
+
 XML/SVG:
 
     You may try using SVG for drawing. Start Coccinella with arguments:

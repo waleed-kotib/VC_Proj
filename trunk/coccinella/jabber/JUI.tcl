@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.47 2004-07-26 12:50:37 matben Exp $
+# $Id: JUI.tcl,v 1.48 2004-07-27 14:25:19 matben Exp $
 
 package provide JUI 1.0
 
@@ -245,7 +245,7 @@ proc ::Jabber::UI::Build {w} {
     set jwapp(wtray) $wtray
     
     $wtray newbutton connect Connect $iconConnect $iconConnectDis  \
-      [list ::Jabber::Login::Login]
+      [list ::Jabber::Login::Dlg]
     if {[::Jabber::MailBox::HaveMailBox]} {
 	$wtray newbutton inbox Inbox $iconInboxLett $iconInboxLettDis  \
 	  [list ::Jabber::MailBox::ShowHide -visible 1]

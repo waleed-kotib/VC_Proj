@@ -17,10 +17,11 @@ Coccinella-0.95.0 (04????): 	Short summary --
 	- buddy pouncing as a component
 	- reworked incoming message dialog
 	- extra options for profiles now in tabbed notebook
-	- Itcl interface for applets accessing whiteboard functions.
-	- Itcl runtime environment for applets.
-	- card game applet as a first example.
-	- slide show component.
+	- Itcl interface for applets accessing whiteboard functions
+	- Itcl runtime environment for applets
+	- card game applet as a first example
+	- slide show component
+	- xmpp uri parser
 
 
 Coccinella-0.94.11 (040601): 	Short summary --

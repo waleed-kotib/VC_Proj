@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: WindowsUtils.tcl,v 1.6 2004-02-07 11:39:29 matben Exp $
+# $Id: WindowsUtils.tcl,v 1.7 2004-07-27 14:25:20 matben Exp $
 
 #package require gdi
 #package require printer
@@ -27,16 +27,18 @@ proc ::Windows::OpenUrl {url} {
     
     # Get the application key for HTML files
     set appKey [registry get $root\\.html ""]
-    
+
+    set ext .html
+    set appKey [registry get [format {HKEY_CLASSES_ROOT\%s} $ext] {}]
+    set key [format {HKEY_CLASSES_ROOT\%s\shell\open\command} $appKey] 
+	 
     # Get the command for opening HTML files
-    if {[catch {registry get \
-      $root\\$appKey\\shell\\open\\command ""} appCmd]} {
+    if {[catch {registry get $key {}} appCmd]} {
 	
+	# Try a different key.
+	set key [format {HKEY_CLASSES_ROOT\%s\shell\opennew\command} $appKey] 
 	if {[catch {
-	    
-	    # Try a different key.
-	    set appCmd [registry get \
-	      $root\\$appKey\\shell\\opennew\\command ""]
+	    set appCmd [registry get $key {}]
 	} msg]} {
 	    return -code error $msg
 	}
@@ -62,15 +64,15 @@ proc ::Windows::OpenFileFromSuffix {path} {
 
     # Look for the application under HKEY_CLASSES_ROOT
     set root HKEY_CLASSES_ROOT
-    set suff [file extension $path]
+    set ext [file extension $path]
     
-    # Get the application key for .suff files
-    set appKey [registry get $root\\$suff ""]
-    
+    # Get the application key for .ext files
+    set appKey [registry get $root\\$ext {}]
+    set key [format {HKEY_CLASSES_ROOT\%s\shell\open\command} $appKey] 
+   
     # Get the command for opening $suff files
     if {[catch {
-	set appCmd [registry get \
-	  $root\\$appKey\\shell\\open\\command ""]
+	set appCmd [registry get $key {}]
     } msg]} {
 	return -code error $msg
     }

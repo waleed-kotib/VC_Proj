@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.39 2004-07-09 06:26:05 matben Exp $
+# $Id: Login.tcl,v 1.40 2004-07-27 14:25:19 matben Exp $
 
 package provide Login 1.0
 
@@ -24,7 +24,7 @@ namespace eval ::Jabber::Login:: {
     ::hooks::add closeWindowHook ::Jabber::Login::CloseHook
 }
 
-# Jabber::Login::Login --
+# Jabber::Login::Dlg --
 #
 #       Log in to a server with an existing user account.
 #
@@ -33,7 +33,7 @@ namespace eval ::Jabber::Login:: {
 # Results:
 #       none
 
-proc ::Jabber::Login::Login { } {
+proc ::Jabber::Login::Dlg { } {
     global  this prefs wDlgs
     
     variable wtoplevel
