@@ -32,9 +32,9 @@
 ::msgcat::mcset nl Close		{Sluiten}
 ::msgcat::mcset nl Conference		{Groepsgesprek}
 ::msgcat::mcset nl Connect		{Aanmelden}
-#::msgcat::mcset nl Connection
-#::msgcat::mcset nl Contact
-#::msgcat::mcset nl Contacts
+::msgcat::mcset nl Connection		{Verbinding}
+::msgcat::mcset nl Contact		{Contactpersoon}
+::msgcat::mcset nl Contacts		{Contactpersonen}
 ::msgcat::mcset nl Country		{Land}
 ::msgcat::mcset nl Create		{Aanmaken}
 ::msgcat::mcset nl Customization	{Aanpassing}
@@ -54,8 +54,8 @@
 ::msgcat::mcset nl File			{Bestand}
 ::msgcat::mcset nl Finish		{Beëindigen}
 ::msgcat::mcset nl Finished		{Beëindigd}
-#::msgcat::mcset nl First
-#::msgcat::mcset nl Friends
+::msgcat::mcset nl First		{Eerst}
+::msgcat::mcset nl Friends		{Vrienden}
 ::msgcat::mcset nl Forward		{Doorsturen}
 ::msgcat::mcset nl From			{Van}
 ::msgcat::mcset nl General		{Algemeen}
@@ -69,11 +69,11 @@
 ::msgcat::mcset nl Inbox		{Postvak in}
 ::msgcat::mcset nl Info			{Info}
 ::msgcat::mcset nl Invite		{Uitnodigen}
-#::msgcat::mcset nl Last
+::msgcat::mcset nl Last			{Laatste}
 ::msgcat::mcset nl Less			{Minder}
 ::msgcat::mcset nl Login		{Aanmelden}
 ::msgcat::mcset nl Logout		{Afmelden}
-#::msgcat::mcset nl Message
+::msgcat::mcset nl Message		{Bericht}
 ::msgcat::mcset nl Middle		{Tussennaam}
 ::msgcat::mcset nl More			{Meer}
 ::msgcat::mcset nl Never		{Nooit}
@@ -87,13 +87,13 @@
 ::msgcat::mcset nl OK			{OK}
 ::msgcat::mcset nl Online		{Online}
 ::msgcat::mcset nl Open			{Openen}
-#::msgcat::mcset nl Options
+::msgcat::mcset nl Options		{Opties}
 ::msgcat::mcset nl Password		{Wachtwoord}
 ::msgcat::mcset nl Pick			{Kies}
 ::msgcat::mcset nl Phone		{Telefoon}
 ::msgcat::mcset nl Play			{Afspelen}
 ::msgcat::mcset nl Plugins		{Plugins}
-#::msgcat::mcset nl Port
+::msgcat::mcset nl Port			{Poort}
 ::msgcat::mcset nl Preferences		{Voorkeuren}
 ::msgcat::mcset nl Previous		{Vorige}
 ::msgcat::mcset nl Print		{Afdrukken}
@@ -298,9 +298,9 @@
 ::msgcat::mcset nl mLocalTime     	{Lokale tijd...}
 ::msgcat::mcset nl mSendFile     	{Bestand verzenden...}
 ::msgcat::mcset nl mChatHistory     	{Berichtengeschiedenis}
-#::msgcat::mcset nl mLoginTrpt     	{Login To Transport}
-#::msgcat::mcset nl mLogoutTrpt     	{Logout From Transport}
-#::msgcat::mcset en mRemoveContact  	{Remove Contact...}
+::msgcat::mcset nl mLoginTrpt     	{Transport aanmelden}
+::msgcat::mcset nl mLogoutTrpt     	{Transport afmelden}
+::msgcat::mcset nl mRemoveContact  	{Contactpersoon verwijderen...}
 
 
 
@@ -334,9 +334,9 @@
 ::msgcat::mcset nl {Chat With}			{Chat met}
 ::msgcat::mcset nl {Clear Disk Cache Now}	{Wis schijfcache nu}
 ::msgcat::mcset nl {Company Name}		{Bedrijfsnaam}
-#::msgcat::mcset nl {Component Info}
+::msgcat::mcset nl {Component Info}		{Bedrijfsgegevens}
 ::msgcat::mcset nl {Conference server}		{Conferentieserver}
-#::msgcat::mcset nl {Contact Type}
+::msgcat::mcset nl {Contact Type}		{IM netwerk}
 ::msgcat::mcset nl {Create Room}		{Kamer aanmaken}
 ::msgcat::mcset nl {Default group}		{Standaard groep}
 ::msgcat::mcset nl {Default Logout Status}	{Standaard afmeldstatus}
@@ -366,7 +366,7 @@
 ::msgcat::mcset nl {First name}			{Voornaam}
 ::msgcat::mcset nl {Font size}			{Lettergrootte}
 ::msgcat::mcset nl {Font weight}		{Schrijfwijze lettertype}
-#::msgcat::mcset nl {Format mm/dd/yyyy}
+::msgcat::mcset nl {Format mm/dd/yyyy}		{Formaat mm/dd/jjjj}
 ::msgcat::mcset nl {Get File}			{Bestand ophalen}
 ::msgcat::mcset nl {Get File Error}		{Bestandsfout ophalen}
 ::msgcat::mcset nl {Get vCard}			{vCard ophalen}
@@ -413,7 +413,7 @@
 ::msgcat::mcset nl {New Topic}			{Nieuw onderwerp}
 ::msgcat::mcset nl {New shortcut}		{Nieuwe snelkoppeling}
 ::msgcat::mcset nl {New User}			{Nieuwe gebruiker}
-#::msgcat::mcset nl {New Version}
+::msgcat::mcset nl {New Version}		{Nieuwe versie}
 ::msgcat::mcset nl {My vCard}			{Mijn vCard}
 ::msgcat::mcset nl {NAT Address}		{NAT adres}
 ::msgcat::mcset nl {Nick name}			{Bijnaam}
@@ -478,15 +478,15 @@
 ::msgcat::mcset nl {Set Status}			{Status instellen}
 ::msgcat::mcset nl {Settings Panels}		{Instellingen}
 ::msgcat::mcset nl {Setup Assistant}		{Setup assistent}
-#::msgcat::mcset nl {Slide Show}
-#::msgcat::mcset nl {Slide Show Folder}
+::msgcat::mcset nl {Slide Show}			{Diavoorstelling}
+::msgcat::mcset nl {Slide Show Folder}		{Map voor diavoorstelling}
 ::msgcat::mcset nl {Software Update}		{Software update}
 ::msgcat::mcset nl {Sounds & Speech}		{Geluiden & spraak}
 ::msgcat::mcset nl {Start Chat}			{Chat starten}
 ::msgcat::mcset nl {Status message}		{Statusbericht}
 ::msgcat::mcset nl {Status when logging out}	{Status bij afmelden}
-#::msgcat::mcset nl {Subscription Failed}
-::msgcat::mcset nl {Subscription Pending}	{Wachtend op authorizatie}
+::msgcat::mcset nl {Subscription Failed}	{Inschrijving mislukte}
+::msgcat::mcset nl {Subscription Pending}	{Wachtend op inschrijving}
 ::msgcat::mcset nl {Synthetic speech}		{Synthetische spraak}
 ::msgcat::mcset nl {System fonts}		{Systeemlettertypes}
 ::msgcat::mcset nl {Take Snapshot}		{Schermafdruk maken}
@@ -578,7 +578,7 @@ Dit vereist dat u Coccinella herstart voordat de wijzigingen worden doorgevoerd.
 Wilt u werkelijk verder gaan?}
 ::msgcat::mcset nl messpasswddifferent  {De wachtwoorden komen niet overeen.\
 Probeer alstublieft opnieuw.}
-#::msgcat::mcset nl messaupdatelatest    {You already have the latest version available (%s)}
+::msgcat::mcset nl messaupdatelatest    {U hebt reeds de laatste versie (%s)}
 
 
 
@@ -753,9 +753,9 @@ omdat deze gebruikersnaam reeds in gebruik is door een andere gebruiker. Als u d
 probeer dan opnieuw aan te melden. Foutmelding: %s}
 ::msgcat::mcset nl jamessregerr                 {De registratie mislukte\
 met foutmelding: %s}
-#::msgcat::mcset nl jamesstrptsubsc              {Your registered account with the %s\
-#service will be put in your roster to work as a transport with this service.}
-#::msgcat::mcset nl jamessfailedsubsc            {Failed to make a subscription to %s. The user denied the subscription.}
+::msgcat::mcset nl jamesstrptsubsc              {Uw geregistreerde account op de dienst %s\
+zal in uw roster geplaatst worden om te dienen als transport voor die dienst.}
+::msgcat::mcset nl jamessfailedsubsc            {Inschrijving op %s mislukte omdat de gebruiker weigerde.}
 
     
 
@@ -769,7 +769,7 @@ met extensie .mov voor een QuickTime realtime live streaming verzending.\
 Dit kan zowel geluid (radio) als video (TV) zijn. Als alternatief kan u uw webbrowser gebruiken om het\
 SDP bestand te vinden voor een live transmissie, download het op de harde schijf en\
 open het als een normaal filmbestand.}
-#::msgcat::mcset nl printunixcmd                 {Shell print command, edit if desired}
+::msgcat::mcset nl printunixcmd                 {Afdrukcommando, bewerk indien gewenst}
 
 
 
@@ -881,10 +881,10 @@ wordt gelimiteerd door de instellingen hieronder.}
 ::msgcat::mcset nl prefplugctrl  {U kan elk pakket deselecteren waarvan u\
 het laden wilt verhinderen. U moet Coccinella herstarten voordat de wijzigingen worden doorgevoerd.}
 ::msgcat::mcset nl prefchactret  {Altijd actieve <enter> in chatvenster gebruiken}
-#::msgcat::mcset nl prefchnormal  {Treat normal messages as chat messages}
+::msgcat::mcset nl prefchnormal  {Normale berichten als chatberichten behandelen}
 ::msgcat::mcset nl prefprofname  {Voer de gewenste naam voor het gebruikersprofiel in}
 ::msgcat::mcset nl prefstabui    {Laptopinterface met tabbladen aanzetten}
-#::msgcat::mcset nl prefsusesasl  {Use SASL authentization method}
+::msgcat::mcset nl prefsusesasl  {SASL authenticatie gebruiken}
 
 
 
