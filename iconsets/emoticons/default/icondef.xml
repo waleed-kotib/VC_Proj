@@ -1,0 +1,267 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<icondef>
+	<meta>
+		<name>Dark Project Studios Smileys</name>
+		<version>1.0</version>
+		<description>Copyright ©2001 Greg Fleming of Dark Project Studios.</description>
+		<creation>2001-07-26</creation>
+		<home>http://www.darkproject.com</home>
+		<author email='helldragon@darkproject.com' www='http://www.darkproject.com'>Greg Fleming</author>
+	</meta>
+	<!-- These icons are copyrighted, see specific README file. -->
+
+	<icon>
+		<text>:)</text>
+		<text>:-)</text>
+		<object mime='image/gif'>smiley-classic.gif</object>
+	</icon>
+	<icon>
+		<text>;-)</text>
+		<text>;)</text>
+		<object mime='image/gif'>smiley-wink.gif</object>
+	</icon>
+	<icon>
+		<text>:-(</text>
+		<object mime='image/gif'>smiley-sad.gif</object>
+	</icon>
+	<icon>
+		<text>x)</text>
+		<object mime='image/gif'>smiley-knocked.gif</object>
+	</icon>
+	<icon>
+		<text>:x</text>
+		<object mime='image/gif'>smiley-speechless.gif</object>
+	</icon>
+	<icon>
+		<text>:|</text>
+		<object mime='image/gif'>smiley-normal.gif</object>
+	</icon>
+	<icon>
+		<text>:o</text>
+		<object mime='image/gif'>smiley-embarrassed.gif</object>
+	</icon>
+	<icon>
+		<text>:O</text>
+		<object mime='image/gif'>smiley-shocked.gif</object>
+	</icon>
+	<icon>
+		<text>:p</text>
+		<object mime='image/gif'>smiley-silly.gif</object>
+	</icon>
+	<icon>
+		<text>;(</text>
+		<object mime='image/gif'>smiley-cry.gif</object>
+	</icon>
+	<icon>
+		<text>:S</text>
+		<object mime='image/gif'>smiley-puzzled.gif</object>
+	</icon>
+	<icon>
+		<text>:D</text>
+		<object mime='image/gif'>smiley-grin.gif</object>
+	</icon>
+	<icon>
+		<text>:-0</text>
+		<object mime='image/gif'>smiley-shocked.gif</object>
+	</icon>
+	<icon>
+		<text>:alien:</text>
+		<object mime='image/gif'>smiley-alien.gif</object>
+	</icon>
+	<icon>
+		<text>:angry:</text>
+		<object mime='image/gif'>smiley-angry.gif</object>
+	</icon>
+	<icon>
+		<text>:bandit:</text>
+		<object mime='image/gif'>smiley-bandit.gif</object>
+	</icon>
+	<icon>
+		<text>:beard:</text>
+		<object mime='image/gif'>smiley-beard.gif</object>
+	</icon>
+	<icon>
+		<text>:bored:</text>
+		<object mime='image/gif'>smiley-bored.gif</object>
+	</icon>
+	<icon>
+		<text>:calm:</text>
+		<object mime='image/gif'>smiley-calm.gif</object>
+	</icon>
+	<icon>
+		<text>:cat:</text>
+		<object mime='image/gif'>smiley-cat.gif</object>
+	</icon>
+	<icon>
+		<text>:cheeky:</text>
+		<object mime='image/gif'>smiley-cheeky.gif</object>
+	</icon>
+	<icon>
+		<text>:cheerful:</text>
+		<object mime='image/gif'>smiley-cheerful.gif</object>
+	</icon>
+	<icon>
+		<text>:chinese:</text>
+		<object mime='image/gif'>smiley-chinese.gif</object>
+	</icon>
+	<icon>
+		<text>:confused:</text>
+		<object mime='image/gif'>smiley-confused.gif</object>
+	</icon>
+	<icon>
+		<text>:cool:</text>
+		<object mime='image/gif'>smiley-cool.gif</object>
+	</icon>
+	<icon>
+		<text>:cross-eye:</text>
+		<object mime='image/gif'>smiley-cross-eye.gif</object>
+	</icon>
+	<icon>
+		<text>:cyclops:</text>
+		<object mime='image/gif'>smiley-cyclops.gif</object>
+	</icon>
+	<icon>
+		<text>:dead:</text>
+		<object mime='image/gif'>smiley-dead.gif</object>
+	</icon>
+	<icon>
+		<text>:depressed:</text>
+		<object mime='image/gif'>smiley-depressed.gif</object>
+	</icon>
+	<icon>
+		<text>:devious:</text>
+		<object mime='image/gif'>smiley-devious.gif</object>
+	</icon>
+	<icon>
+		<text>:disappoin:</text>
+		<object mime='image/gif'>smiley-disappoin.gif</object>
+	</icon>
+	<icon>
+		<text>:ditsy:</text>
+		<object mime='image/gif'>smiley-ditsy.gif</object>
+	</icon>
+	<icon>
+		<text>:dog:</text>
+		<object mime='image/gif'>smiley-dog.gif</object>
+	</icon>
+	<icon>
+		<text>:ermm:</text>
+		<object mime='image/gif'>smiley-ermm.gif</object>
+	</icon>
+	<icon>
+		<text>:evil:</text>
+		<object mime='image/gif'>smiley-evil.gif</object>
+	</icon>
+	<icon>
+		<text>:evolved:</text>
+		<object mime='image/gif'>smiley-evolved.gif</object>
+	</icon>
+	<icon>
+		<text>:gasmask:</text>
+		<object mime='image/gif'>smiley-gasmask.gif</object>
+	</icon>
+	<icon>
+		<text>:glasses:</text>
+		<object mime='image/gif'>smiley-glasses.gif</object>
+	</icon>
+	<icon>
+		<text>:happy:</text>
+		<object mime='image/gif'>smiley-happy.gif</object>
+	</icon>
+	<icon>
+		<text>:hurt:</text>
+		<object mime='image/gif'>smiley-hurt.gif</object>
+	</icon>
+	<icon>
+		<text>:jaguar:</text>
+		<object mime='image/gif'>smiley-jaguar.gif</object>
+	</icon>
+	<icon>
+		<text>:kommie:</text>
+		<object mime='image/gif'>smiley-kommie.gif</object>
+	</icon>
+	<icon>
+		<text>:laugh:</text>
+		<object mime='image/gif'>smiley-laugh.gif</object>
+	</icon>
+	<icon>
+		<text>:lick:</text>
+		<object mime='image/gif'>smiley-lick.gif</object>
+	</icon>
+	<icon>
+		<text>:mad:</text>
+		<object mime='image/gif'>smiley-mad.gif</object>
+	</icon>
+	<icon>
+		<text>:nervous:</text>
+		<object mime='image/gif'>smiley-nervous.gif</object>
+	</icon>
+	<icon>
+		<text>:ninja:</text>
+		<object mime='image/gif'>smiley-ninja.gif</object>
+	</icon>
+	<icon>
+		<text>:ogre:</text>
+		<object mime='image/gif'>smiley-ogre.gif</object>
+	</icon>
+	<icon>
+		<text>:old:</text>
+		<object mime='image/gif'>smiley-old.gif</object>
+	</icon>
+	<icon>
+		<text>:paranoid:</text>
+		<object mime='image/gif'>smiley-paranoid.gif</object>
+	</icon>
+	<icon>
+		<text>:pirate:</text>
+		<object mime='image/gif'>smiley-pirate.gif</object>
+	</icon>
+	<icon>
+		<text>:ponder:</text>
+		<object mime='image/gif'>smiley-ponder.gif</object>
+	</icon>
+	<icon>
+		<text>:puzzled:</text>
+		<object mime='image/gif'>smiley-puzzled.gif</object>
+	</icon>
+	<icon>
+		<text>:rambo:</text>
+		<object mime='image/gif'>smiley-rambo.gif</object>
+	</icon>
+	<icon>
+		<text>:robot:</text>
+		<object mime='image/gif'>smiley-robot.gif</object>
+	</icon>
+	<icon>
+		<text>:eek:</text>
+		<object mime='image/gif'>smiley-eek.gif</object>
+	</icon>
+	<icon>
+		<text>:shocked:</text>
+		<object mime='image/gif'>smiley-shocked.gif</object>
+	</icon>
+	<icon>
+		<text>:smiley:</text>
+		<object mime='image/gif'>smiley-smiley.gif</object>
+	</icon>
+	<icon>
+		<text>:sleeping:</text>
+		<object mime='image/gif'>smiley-sleeping.gif</object>
+	</icon>
+	<icon>
+		<text>:smoker:</text>
+		<object mime='image/gif'>smiley-smoker.gif</object>
+	</icon>
+	<icon>
+		<text>:surprised:</text>
+		<object mime='image/gif'>smiley-surprised.gif</object>
+	</icon>
+	<icon>
+		<text>:tired:</text>
+		<object mime='image/gif'>smiley-tired.gif</object>
+	</icon>
+	<icon>
+		<text>:vampire:</text>
+		<object mime='image/gif'>smiley-vampire.gif</object>
+	</icon>
+</icondef>
