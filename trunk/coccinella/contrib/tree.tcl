@@ -6,7 +6,7 @@
 # Copyright (C) 2002-2005 Mats Bengtsson
 # This source file is distributed under the BSD license.
 # 
-# $Id: tree.tcl,v 1.45 2005-02-24 13:58:07 matben Exp $
+# $Id: tree.tcl,v 1.46 2005-03-03 07:29:47 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -1076,7 +1076,7 @@ proc ::tree::ItemInit {w v} {
 
     upvar ::tree::${w}::state state
     upvar ::tree::${w}::v2uid v2uid
-    
+
     set uid $v2uid($v)
     set state($uid:children) {}
     set state($uid:open) 1
@@ -1387,6 +1387,7 @@ proc ::tree::DelItem {w v args} {
     upvar ::tree::${w}::state state
     upvar ::tree::${w}::v2uid v2uid
     upvar ::tree::${w}::uid2v uid2v
+    upvar ::tree::${w}::vuid  vuid
     
     Debug 1 "::tree::DelItem w=$w, v='$v'"
     
@@ -1400,10 +1401,16 @@ proc ::tree::DelItem {w v args} {
     }
     array set opts {-childsonly 0}
     array set opts $args
-    if {$v == ""} {
+    if {$v == {}} {
 	
 	# Remove all content.
 	unset -nocomplain state
+	unset -nocomplain v2uid
+	unset -nocomplain uid2v
+	
+	set uid [incr vuid]
+	set v2uid() $vuid
+	set uid2v($vuid) {}
 	set state(selection) {}
 	set state(oldselection) {}
 	set state(selidx) {}
