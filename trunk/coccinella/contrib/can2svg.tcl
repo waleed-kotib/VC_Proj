@@ -6,7 +6,7 @@
 #  
 #  This particular package is BSD licensed. 
 #
-# $Id: can2svg.tcl,v 1.10 2004-04-19 13:58:47 matben Exp $
+# $Id: can2svg.tcl,v 1.11 2004-05-18 05:56:00 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -1221,8 +1221,8 @@ proc can2svg::canvas2file {wcan path args} {
     variable defsStipplePatternArr
     
     array set argsArr [array get confopts]
-    array set argsArr  \
-      [list -width [winfo width $wcan] -height [winfo height $wcan]]
+    foreach {x y width height} [$wcan cget -scrollregion] break
+    array set argsArr [list -width $width -height $height]
     array set argsArr $args
     set args [array get argsArr]
     
