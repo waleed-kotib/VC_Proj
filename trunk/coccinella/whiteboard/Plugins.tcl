@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Plugins.tcl,v 1.3 2004-06-07 13:44:01 matben Exp $
+# $Id: Plugins.tcl,v 1.4 2004-06-17 13:24:19 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -74,6 +74,7 @@
 #-------------------------------------------------------------------------------
 
 package provide Plugins 1.0
+
 package require Types
 
 namespace eval ::Plugins:: {

@@ -25,7 +25,7 @@
 # 
 # Copyright (C) 2002-2004 Mats Bengtsson
 # 
-# $Id: tree.tcl,v 1.27 2004-06-12 15:35:18 matben Exp $
+# $Id: tree.tcl,v 1.28 2004-06-17 13:24:17 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -90,9 +90,11 @@
 #      pathName yview args
 #      
 #   ITEM OPTIONS
-#      -background
+#      -background    color
+#      -backgroundbd  pixel
 #      -canvastags
 #      -dir           0|1
+#      -foreground    color
 #      -image         imageName
 #      -open          0|1
 #      -style         normal|bold|italic
@@ -999,6 +1001,8 @@ proc ::tree::DfltConfig {w v} {
     set treestate($uid:tags) {}
     set treestate($uid:text) [lindex $v end]
     set treestate($uid:bg) {}
+    set treestate($uid:bd) 0
+    set treestate($uid:fg) black
 }
 
 # ::tree::ConfigureItem --
@@ -1051,6 +1055,13 @@ proc ::tree::ConfigureItem {w v args} {
 		    set result {}
 		}
 	    }
+	    -backgroundbd {
+		if {[info exists treestate($uid:bd)]} {
+		    set result $treestate($uid:bd)
+		} else {
+		    set result {}
+		}
+	    }
 	    -canvastags {
 		if {[info exists treestate($uid:ctags)]} {
 		    set result $treestate($uid:ctags)
@@ -1065,6 +1076,13 @@ proc ::tree::ConfigureItem {w v args} {
 		    set result 1
 		} else {
 		    set result 0
+		}
+	    }
+	    -foreground {
+		if {[info exists treestate($uid:fg)]} {
+		    set result $treestate($uid:fg)
+		} else {
+		    set result {}
 		}
 	    }
 	    -image {
@@ -1093,12 +1111,22 @@ proc ::tree::ConfigureItem {w v args} {
 	    switch -exact -- $op {
 		-background {
 		    set treestate($uid:bg) $arg
+		    if {[string length $arg]} {
+			set treestate($uid:bglight) #87b3d0
+			set treestate($uid:bgdark)  #0c5280
+		    }
+		}
+		-backgroundbd {
+		    set treestate($uid:bd) $arg
 		}
 		-canvastags {
 		    set treestate($uid:ctags) $arg
 		}
 		-dir {
 		    set treestate($uid:dir) $arg
+		}
+		-foreground {
+		    set treestate($uid:fg) $arg
 		}
 		-image {
 		    set treestate($uid:icon) $arg
@@ -1201,6 +1229,8 @@ proc ::tree::NewItem {w v args} {
     
     # Initialize a element of the tree.
     DfltConfig $w $v
+    
+    # We should use ConfigureItem here instead!!!!!!!!!!!!!
     
     foreach {op arg} $args {
 	
@@ -1574,6 +1604,7 @@ proc ::tree::BuildLayer {w v in} {
     set y $treestate(y)
     set yline $priv(yline)
     set yoff [expr $yline/2]
+    set scrollwidth $options(-scrollwidth)
 
     Debug 3 "\tuid=$uid"
     
@@ -1596,8 +1627,17 @@ proc ::tree::BuildLayer {w v in} {
 	
 	# Any background color?
 	if {[string length $treestate($uidc:bg)]} {
-	    $can create rectangle 0 [expr $y - $yoff + 1] $options(-scrollwidth)  \
+	    $can create rectangle 0 [expr $y - $yoff + 1] $scrollwidth  \
 	      [expr $y + $yoff] -outline {} -fill $treestate($uidc:bg) -tags tbg
+	    set bd $treestate($uidc:bd)
+	    if {$bd > 0} {
+		$can create line 0 [expr $y + $yoff] \
+		  0 [expr $y - $yoff + 1] $scrollwidth [expr $y - $yoff + 1] \
+		  -fill $treestate($uidc:bglight) -tags tbg -width $bd
+		$can create line 0 [expr $y + $yoff] \
+		  $scrollwidth [expr $y + $yoff] $scrollwidth [expr $y - $yoff + 1] \
+		  -fill $treestate($uidc:bgdark) -tags tbg -width $bd
+	    }
 	}
 	
 	# This is the "row height".
@@ -1642,12 +1682,13 @@ proc ::tree::BuildLayer {w v in} {
 		set itemFont $options(-font)
 	    }
 	}
+	set fg $treestate($uidc:fg)
 	set id [$can create text $x $y -text $text -font $itemFont \
-	  -anchor w -tags $taglist]
+	  -anchor w -tags $taglist -fill $fg]
 	    lappend ids $id
 	if {[info exists treestate($uidc:text2)]} {
 	    set id2 [$can create text 140 $y -text $treestate($uidc:text2)  \
-	      -font $options(-font) -anchor w]
+	      -font $options(-font) -anchor w -fill $fg]
 	    lappend ids $id2
 	}
 	set treestate(v:$id) $vxc

@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2004
 #  
-#  $Id: alertbox.tcl,v 1.2 2004-06-16 14:17:30 matben Exp $
+#  $Id: alertbox.tcl,v 1.3 2004-06-17 13:24:17 matben Exp $
 
 package provide alertbox 1.0
 
@@ -41,7 +41,7 @@ namespace eval ::alertbox:: {
     option add *AlertBox.image           ""     widgetDefault
     option add *AlertBox.parent          ""     widgetDefault
     option add *AlertBox.title           ""     widgetDefault
-    option add *AlertBox.msg.wrapLength 300     widgetDefault
+    option add *AlertBox.msg.wrapLength 320     widgetDefault
     option add *AlertBox.offX            20     widgetDefault
     option add *AlertBox.offY            20     widgetDefault
 
@@ -51,10 +51,10 @@ namespace eval ::alertbox:: {
 	    option add *AlertBox.msg.font system
 	}
 	windows {
-	    option add *AlertBox.msg.font {Arial 8}	    
+	    option add *AlertBox.msg.font {Arial 9}	    
 	}
 	default {
-	    option add *AlertBox.msg.font {Times 10} 
+	    option add *AlertBox.msg.font {Helvetica 14 bold} 
 	}
     }
     bind AlertBox <Return> {destroy %W}
@@ -128,12 +128,12 @@ proc ::alertbox::alertbox {msg args} {
     wm withdraw $w
     update idletasks
     
-    if {[string length $options(-parent)]} {
-	set geom [wm geometry [winfo toplevel $options(-parent)]]
-	regexp {([0-9]+)x([0-9]+)\+(\-?[0-9]+)\+(\-?[0-9]+)}  \
-	  $geom m pwidth pheight px py
-	
-	
+    if {[string length $options(-parent)] && \
+      [winfo ismapped $options(-parent)]} {
+	set x [expr {[winfo rootx $options(-parent)] + \
+		([winfo width $options(-parent)]-[winfo reqwidth $w])/2}]
+	set y [expr {[winfo rooty $options(-parent)] + \
+		([winfo height $options(-parent)]-[winfo reqheight $w])/2}]
     } else {
 	if {[llength $allAlerts] == 0} {
 	    set x [expr {[winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 \
@@ -141,20 +141,28 @@ proc ::alertbox::alertbox {msg args} {
 	    set y [expr {[winfo screenheight $w]/2 - [winfo reqheight $w]/2 \
 	      - [winfo vrooty [winfo parent $w]]}]
 	} else {
-	    set geom [wm geometry [lindex $allAlerts end]]
-	    regexp {[0-9]+x[0-9]+\+(\-?[0-9]+)\+(\-?[0-9]+)}  \
-	      $geom m x y
 	    set x [winfo x [lindex $allAlerts end]]
 	    set y [winfo y [lindex $allAlerts end]]
 	    incr x [option get $w offX {}]
 	    incr y [option get $w offY {}]
 	}
     }
+    
+    # Check bounds.
     if {$x < 0} {
 	set x 0
+    } elseif {$x > ([winfo screenwidth $w]-[winfo reqwidth $w])} {
+	set x [expr {[winfo screenwidth $w]-[winfo reqwidth $w]}]
     }
     if {$y < 0} {
 	set y 0
+    } elseif {$y > ([winfo screenheight $w]-[winfo reqheight $w])} {
+	set y [expr {[winfo screenheight $w]-[winfo reqheight $w]}]
+    }
+    if {[tk windowingsystem] eq "macintosh" \
+      || [tk windowingsystem] eq "aqua"} {
+	# Avoid the native menu bar which sits on top of everything.
+	if {$y < 20} { set y 20 }
     }
     wm maxsize $w [winfo screenwidth $w] [winfo screenheight $w]
     wm resizable $w 0 0

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.60 2004-06-16 14:17:32 matben Exp $
+# $Id: UI.tcl,v 1.61 2004-06-17 13:24:18 matben Exp $
 
 package require entrycomp
 package require alertbox
@@ -299,6 +299,8 @@ proc ::UI::SavePanePos {key wpaned {orient horizontal}} {
 proc ::UI::SetWindowPosition {w {key ""}} {
     global  prefs
     
+    #wm withdraw $w
+    #update idletasks
     if {$key == ""} {
 	set key $w
     }
@@ -306,17 +308,21 @@ proc ::UI::SetWindowPosition {w {key ""}} {
 	regexp {^[^+-]+((\+|-).+$)} $prefs(winGeom,$key) match pos
 	wm geometry $w $pos
     }
+    #wm deiconify $w
 }
 
 proc ::UI::SetWindowGeometry {w {key ""}} {
     global  prefs
     
+    #wm withdraw $w
+    #update idletasks
     if {$key == ""} {
 	set key $w
     }
     if {[info exists prefs(winGeom,$key)]} {
 	wm geometry $w $prefs(winGeom,$key)
     }
+    #wm deiconify $w
 }
 
 proc ::UI::GetFirstPrefixedToplevel {wprefix} {
