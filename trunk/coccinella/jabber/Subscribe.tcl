@@ -5,11 +5,17 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Subscribe.tcl,v 1.12 2004-03-16 15:09:08 matben Exp $
+# $Id: Subscribe.tcl,v 1.13 2004-03-28 14:50:51 matben Exp $
 
 package provide Subscribe 1.0
 
 namespace eval ::Jabber::Subscribe:: {
+
+    # Define all hooks for preference settings.
+    ::hooks::add prefsInitHook      ::Jabber::Subscribe::InitPrefsHook
+    ::hooks::add prefsBuildHook     ::Jabber::Subscribe::BuildPrefsHook
+    ::hooks::add prefsSaveHook      ::Jabber::Subscribe::SavePrefsHook
+    ::hooks::add prefsCancelHook    ::Jabber::Subscribe::CancelPrefsHook
 
     # Store everything in 'locals($uid, ... )'.
     variable locals   
@@ -229,8 +235,99 @@ proc ::Jabber::Subscribe::ResProc {jlibName what} {
     if {[string equal $what "error"]} {
 	tk_messageBox -type ok -message "We got an error from the\
 	  Jabber::Subscribe::ResProc callback"
+    }   
+}
+
+# Prefs page ...................................................................
+
+proc ::Jabber::Subscribe::InitPrefsHook { } {
+    upvar ::Jabber::jprefs jprefs
+    
+    # Defaults...
+    set jprefs(subsc,inrost)        ask
+    set jprefs(subsc,notinrost)     ask
+    set jprefs(subsc,auto)          0
+    set jprefs(subsc,group)         {}
+	
+    ::PreferencesUtils::Add [list  \
+      [list ::Jabber::jprefs(subsc,inrost)     jprefs_subsc_inrost      $jprefs(subsc,inrost)]  \
+      [list ::Jabber::jprefs(subsc,notinrost)  jprefs_subsc_notinrost   $jprefs(subsc,notinrost)]  \
+      [list ::Jabber::jprefs(subsc,auto)       jprefs_subsc_auto        $jprefs(subsc,auto)]  \
+      [list ::Jabber::jprefs(subsc,group)      jprefs_subsc_group       $jprefs(subsc,group)]  \
+      ]
+    
+}
+
+proc ::Jabber::Subscribe::BuildPrefsHook {wtree nbframe} {
+    
+    $wtree newitem {Jabber Subscriptions} -text [::msgcat::mc Subscriptions]
+    
+    # Subscriptions page ---------------------------------------------------
+    set wpage [$nbframe page {Subscriptions}]
+    ::Jabber::Subscribe::BuildPageSubscriptions $wpage    
+}
+
+proc ::Jabber::Subscribe::BuildPageSubscriptions {page} {
+    upvar ::Jabber::jprefs jprefs
+    variable tmpJPrefs
+
+    set ypad [option get [winfo toplevel $page] yPad {}]
+    
+    foreach key {inrost notinrost auto group} {
+	set tmpJPrefs(subsc,$key) $jprefs(subsc,$key)
     }
     
+    set labfrpsubs $page.fr
+    labelframe $labfrpsubs -text [::msgcat::mc Subscribe]
+    pack $labfrpsubs -side top -anchor w -padx 8 -pady 4
+    set psubs [frame $labfrpsubs.frin]
+    pack $psubs -padx 10 -pady 6 -side left
+
+    label $psubs.la1 -text [::msgcat::mc prefsuif]
+    label $psubs.lin -text [::msgcat::mc prefsuis]
+    label $psubs.lnot -text [::msgcat::mc prefsuisnot]
+    grid $psubs.la1 -columnspan 2 -sticky w -pady $ypad
+    grid $psubs.lin $psubs.lnot -sticky w -pady $ypad
+    foreach  \
+      val {accept      reject      ask}   \
+      txt {Auto-accept Auto-reject {Ask each time}} {
+	foreach val2 {inrost notinrost} {
+	    radiobutton ${psubs}.${val2}${val}  \
+	      -text [::msgcat::mc $txt] -value $val  \
+	      -variable [namespace current]::tmpJPrefs(subsc,$val2)	      
+	}
+	grid $psubs.inrost${val} $psubs.notinrost${val} -sticky w -pady $ypad
+    }
+
+    set frauto [frame $page.auto]
+    pack $frauto -side top -anchor w -padx 10 -pady $ypad
+    checkbutton $frauto.autosub -text "  [::msgcat::mc prefsuauto]"  \
+      -variable [namespace current]::tmpJPrefs(subsc,auto)
+    label $frauto.autola -text [::msgcat::mc {Default group}]:
+    entry $frauto.autoent -width 22   \
+      -textvariable [namespace current]::tmpJPrefs(subsc,group)
+    pack $frauto.autosub -side top -pady $ypad
+    pack $frauto.autola $frauto.autoent -side left -pady $ypad -padx 4
+}
+
+proc ::Jabber::Subscribe::SavePrefsHook { } {
+    upvar ::Jabber::jprefs jprefs
+    variable tmpJPrefs
+    
+    array set jprefs [array get tmpJPrefs]
+    unset tmpJPrefs
+}
+
+proc ::Jabber::Subscribe::CancelPrefsHook { } {
+    upvar ::Jabber::jprefs jprefs
+    variable tmpJPrefs
+	
+    foreach key [array names tmpJPrefs] {
+	if {![string equal $jprefs($key) $tmpJPrefs($key)]} {
+	    ::Preferences::HasChanged
+	    break
+	}
+    }
 }
 
 #-------------------------------------------------------------------------------

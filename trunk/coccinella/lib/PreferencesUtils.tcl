@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.29 2004-03-16 15:09:08 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.30 2004-03-28 14:50:51 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -285,8 +285,6 @@ proc ::PreferencesUtils::SetUserPreferences { } {
     ::PreferencesUtils::Add [list  \
       [list prefs(majorVers)       prefs_majorVers       $prefs(majorVers)       absolute] \
       [list prefs(minorVers)       prefs_minorVers       $prefs(minorVers)       absolute] \
-      [list prefs(canvasFonts)     prefs_canvasFonts     $prefs(canvasFonts)]    \
-      [list prefs(privacy)         prefs_privacy         $prefs(privacy)]        \
       [list prefs(45)              prefs_45              $prefs(45)]             \
       [list prefs(protocol)        prefs_protocol        $prefs(protocol)]       \
       [list prefs(autoConnect)     prefs_autoConnect     $prefs(autoConnect)]    \
@@ -319,17 +317,6 @@ proc ::PreferencesUtils::SetUserPreferences { } {
       [list state(canGridOn)       state_canGridOn       $state(canGridOn)]      \
       [list state(visToolbar)      state_visToolbar      $state(visToolbar)]  ]
     
-
-    # All MIME type stuff... The problem is that they are all arrays... 
-    # Invented the ..._array resource specifier!    
-    # We should have used accesor functions and not direct access to internal
-    # arrays. Sorry for this.
-    # 
-    ::PreferencesUtils::Add [list  \
-      [list ::Types::mime2Desc     mime2Desc_array         [::Types::GetDescriptionArr]] \
-      [list ::Types::mimeIsText    mimeTypeIsText_array    [::Types::GetIsMimeTextArr]]  \
-      [list ::Types::mime2SuffList mime2SuffixList_array   [::Types::GetSuffixListArr]]  \
-      [list ::Plugins::mimeTypeDoWhat mimeTypeDoWhat_array [::Plugins::GetDoWhatForMimeArr]] ]
             
     # Map list of win geoms into an array.
     foreach {win geom} $prefs(winGeom) {

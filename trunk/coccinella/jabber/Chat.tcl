@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.48 2004-03-27 15:20:37 matben Exp $
+# $Id: Chat.tcl,v 1.49 2004-03-28 14:50:50 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -1401,6 +1401,8 @@ proc ::Jabber::Chat::SavePrefsHook { } {
     
     array set jprefs [array get tmpJPrefs]
     unset tmpJPrefs
+    
+    ::Jabber::Chat::SetFont $jprefs(chatFont)
 }
 
 proc ::Jabber::Chat::CancelPrefsHook { } {
