@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.16 2004-02-04 14:33:34 matben Exp $
+# $Id: Whiteboard.tcl,v 1.17 2004-02-05 14:00:23 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -1802,7 +1802,7 @@ proc ::WB::CreateAllButtons {wtop} {
     set wColSel [canvas $wtool.cacol -width 56 -height $imheight  \
       -highlightthickness 0]
     $wtool.cacol create image 0 0 -anchor nw -image $wbicons(imcolor)
-    set idColSel [$wtool.cacol create rect 7 7 33 30	\
+    set idColSel [$wtool.cacol create rectangle 7 7 33 30	\
       -fill $state(fgCol) -outline {} -tags tcolSel]
     set wapp(colSel) $wColSel
     
@@ -3153,8 +3153,8 @@ proc ::WB::StartStopAnimatedWaveOnMain {start} {
 proc ::WB::InitDnD {wcan} {
     
     dnd bindtarget $wcan text/uri-list <Drop>      [list ::WB::DnDDrop %W %D %T %x %y]   
-    #dnd bindtarget $wcan text/uri-list <DragEnter> [list ::WB::DnDEnter %W %D %T]   
-    #dnd bindtarget $wcan text/uri-list <DragLeave> [list ::WB::DnDLeave %W %D %T]       
+    dnd bindtarget $wcan text/uri-list <DragEnter> [list ::WB::DnDEnter %W %A %D %T]   
+    dnd bindtarget $wcan text/uri-list <DragLeave> [list ::WB::DnDLeave %W %D %T]       
 }
 
 proc ::WB::DnDDrop {w data type x y} {
@@ -3173,32 +3173,40 @@ proc ::WB::DnDDrop {w data type x y} {
 	    set errMsg [::Import::DoImport $w [list -coords [list $x $y]] -file $f]
 	    if {$errMsg != ""} {
 		tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
-		  -message "Failed importing: $errMsg" -parent [winfo parent $w]
+		  -message "Failed importing: $errMsg" -parent [winfo toplevel $w]
 	    }
 	    incr x $prefs(offsetCopy)
 	    incr y $prefs(offsetCopy)
 	} else {
 	    tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
 	      -message [::msgcat::mc messfailmimeimp $mime] \
-	      -parent [winfo parent $w]
+	      -parent [winfo toplevel $w]
 	}
     }
 }
 
-proc ::WB::DnDEnter {w data type} {
+proc ::WB::DnDEnter {w action data type} {
     
-    ::Debug 2 "::WB::DnDEnter data=$data, type=$type"
-    return
-    set haveImporter [::Plugins::HaveImporterForMime  \
-      [::Types::GetMimeTypeForFileName $data]]
-    if {$haveImporter} {
-	focus $w
+    ::Debug 2 "::WB::DnDEnter action=$action, data=$data, type=$type"
+
+    set act "none"
+    foreach f $data {
+	
+	# Require at least one file importable.
+	set haveImporter [::Plugins::HaveImporterForMime  \
+	  [::Types::GetMimeTypeForFileName $f]]
+	if {$haveImporter} {
+	    focus $w
+	    set act $action
+	    break
+	}
     }
+    return $act
 }
 
 proc ::WB::DnDLeave {w data type} {
     
-    
+    focus [winfo toplevel $w] 
 }
 
 # ::WB::GetThemeImage --

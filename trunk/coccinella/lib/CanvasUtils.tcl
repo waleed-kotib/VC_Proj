@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.21 2004-01-15 14:13:00 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.22 2004-02-05 14:00:23 matben Exp $
 
 package require sha1pure
 
@@ -1544,18 +1544,18 @@ proc ::CanvasUtils::DefineWhiteboardBindtags { } {
     # WhiteboardPoint
     bind WhiteboardPoint <Button-1> {
 	::CanvasDraw::MarkBbox %W 0
-	::CanvasDraw::InitBox %W [%W canvasx %x] [%W canvasy %y] rect
+	::CanvasDraw::InitBox %W [%W canvasx %x] [%W canvasy %y] rectangle
     }
     bind WhiteboardPoint <Shift-Button-1> {
 	::CanvasDraw::MarkBbox %W 1
-	::CanvasDraw::InitBox %W [%W canvasx %x] [%W canvasy %y] rect
+	::CanvasDraw::InitBox %W [%W canvasx %x] [%W canvasy %y] rectangle
     }
     bind WhiteboardPoint <B1-Motion> {
-	::CanvasDraw::BoxDrag %W [%W canvasx %x] [%W canvasy %y] 0 rect 1
+	::CanvasDraw::BoxDrag %W [%W canvasx %x] [%W canvasy %y] 0 rectangle 1
 	::CanvasUtils::StopTimerToItemPopup
     }
     bind WhiteboardPoint <ButtonRelease-1> {
-	::CanvasDraw::FinalizeBox %W [%W canvasx %x] [%W canvasy %y] 0 rect 1
+	::CanvasDraw::FinalizeBox %W [%W canvasx %x] [%W canvasy %y] 0 rectangle 1
     }
     
     # WhiteboardMove
@@ -1617,19 +1617,19 @@ proc ::CanvasUtils::DefineWhiteboardBindtags { } {
     
     # WhiteboardRect
     bind WhiteboardRect <Button-1> {
-	::CanvasDraw::InitBox %W [%W canvasx %x] [%W canvasy %y] rect
+	::CanvasDraw::InitBox %W [%W canvasx %x] [%W canvasy %y] rectangle
     }
     bind WhiteboardRect <B1-Motion> {
-	::CanvasDraw::BoxDrag %W [%W canvasx %x] [%W canvasy %y] 0 rect
+	::CanvasDraw::BoxDrag %W [%W canvasx %x] [%W canvasy %y] 0 rectangle
     }
     bind WhiteboardRect <Shift-B1-Motion> {
-	::CanvasDraw::BoxDrag %W [%W canvasx %x] [%W canvasy %y] 1 rect
+	::CanvasDraw::BoxDrag %W [%W canvasx %x] [%W canvasy %y] 1 rectangle
     }
     bind WhiteboardRect <ButtonRelease-1> {
-	::CanvasDraw::FinalizeBox %W [%W canvasx %x] [%W canvasy %y] 0 rect
+	::CanvasDraw::FinalizeBox %W [%W canvasx %x] [%W canvasy %y] 0 rectangle
     }
     bind WhiteboardRect <Shift-ButtonRelease-1> {
-	::CanvasDraw::FinalizeBox %W [%W canvasx %x] [%W canvasy %y] 1 rect
+	::CanvasDraw::FinalizeBox %W [%W canvasx %x] [%W canvasy %y] 1 rectangle
     }
     
     # WhiteboardOval

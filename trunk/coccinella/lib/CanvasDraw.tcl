@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasDraw.tcl,v 1.20 2004-01-13 14:50:21 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.21 2004-02-05 14:00:22 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 #  
@@ -18,7 +18,7 @@
 #  The standard items which are drawn and imported images, have two additional
 #  tags:
 #       std         verbatim; this is used when binding to "all" items
-#       $type       line, oval, rect, arc, image, polygon corresponding to the
+#       $type       line, oval, rectangle, arc, image, polygon corresponding to the
 #                   items 'type'
 
 package provide CanvasDraw 1.0
@@ -999,7 +999,7 @@ proc ::CanvasDraw::FinGridMove {wcan x y grid args} {
 # Arguments:
 #       w      the canvas widget.
 #       x,y    the mouse coordinates.
-#       type   item type (rect, oval, ...).
+#       type   item type (rectangle, oval, ...).
 #       
 # Results:
 #       none
@@ -1020,9 +1020,9 @@ proc ::CanvasDraw::InitBox {w x y type} {
 #       w      the canvas widget.
 #       x,y    the mouse coordinates.
 #       shift  constrain to square or circle.
-#       type   item type (rect, oval, ...).
-#       mark   If not 'mark', then draw ordinary rectangle if 'type' is rect,
-#              or oval if 'type' is oval.
+#       type   item type (rectangle, oval, ...).
+#       mark   If not 'mark', then draw ordinary rectangle if 'type' is 
+#              rectangle or oval if 'type' is oval.
 #       
 # Results:
 #       none
@@ -1083,8 +1083,8 @@ proc ::CanvasDraw::BoxDrag {w x y shift type {mark 0}} {
 #       w      the canvas widget.
 #       x,y    the mouse coordinates.
 #       shift  constrain to square or circle.
-#       type   item type (rect, oval, ...).
-#       mark   If not 'mark', then draw ordinary rectangle if 'type' is rect,
+#       type   item type (rectangle, oval, ...).
+#       mark   If not 'mark', then draw ordinary rectangle if 'type' is rectangle,
 #              or oval if 'type' is oval.
 #       
 # Results:
@@ -1166,13 +1166,13 @@ proc ::CanvasDraw::CancelBox {w} {
 
 # ConstrainedBoxDrag --
 #
-#       With the 'shift' key pressed, the rect and oval items are contrained
+#       With the 'shift' key pressed, the rectangle and oval items are contrained
 #       to squares and circles respectively.
 #       
 # Arguments:
 #       xanch,yanch      the anchor coordinates.
 #       x,y    the mouse coordinates.
-#       type   item type (rect, oval, ...).
+#       type   item type (rectangle, oval, ...).
 #       
 # Results:
 #       List of the (two) new coordinates for the item.
@@ -1182,7 +1182,7 @@ proc ::CanvasDraw::ConstrainedBoxDrag {xanch yanch x y type} {
     set deltax [expr $x - $xanch]
     set deltay [expr $y - $yanch]
     set prod [expr $deltax * $deltay]
-    if {$type == "rect"} {
+    if {$type == "rectangle"} {
 	set boxOrig [list $xanch $yanch]
 	if {$prod != 0} {
 	    set sign [expr $prod / abs($prod)]
@@ -1195,7 +1195,7 @@ proc ::CanvasDraw::ConstrainedBoxDrag {xanch yanch x y type} {
 	    set y [expr $sign * ($x - $xanch) + $yanch]
 	}
 	
-	# A pure circle is not made with the bounding rect model.
+	# A pure circle is not made with the bounding rectangle model.
 	# The anchor and the present x, y define the diagonal instead.
     } elseif {$type == "oval"} {
 	set r [expr hypot($deltax, $deltay)/2.0]
@@ -1219,7 +1219,7 @@ proc ::CanvasDraw::ConstrainedBoxDrag {xanch yanch x y type} {
 # Arguments:
 #       w      the canvas widget.
 #       x,y    the mouse coordinates.
-#       type   item type (rect, oval, ...).
+#       type   item type (rectangle, oval, ...).
 #       shift  constrain to 45 or 90 degree arcs.
 #       
 # Results:
@@ -2486,13 +2486,13 @@ proc ::CanvasDraw::MarkBbox {w shift {which current}} {
       || ($type == "rectangle") || ($type == "image")} {
 
 	foreach {x1 y1 x2 y2} $thebbox break
-	$w create rect [expr $x1-$a] [expr $y1-$a] [expr $x1+$a] [expr $y1+$a] \
+	$w create rectangle [expr $x1-$a] [expr $y1-$a] [expr $x1+$a] [expr $y1+$a] \
 	  -tags $tmark -fill white
-	$w create rect [expr $x1-$a] [expr $y2-$a] [expr $x1+$a] [expr $y2+$a] \
+	$w create rectangle [expr $x1-$a] [expr $y2-$a] [expr $x1+$a] [expr $y2+$a] \
 	  -tags $tmark -fill white
-	$w create rect [expr $x2-$a] [expr $y1-$a] [expr $x2+$a] [expr $y1+$a] \
+	$w create rectangle [expr $x2-$a] [expr $y1-$a] [expr $x2+$a] [expr $y1+$a] \
 	  -tags $tmark -fill white
-	$w create rect [expr $x2-$a] [expr $y2-$a] [expr $x2+$a] [expr $y2+$a] \
+	$w create rectangle [expr $x2-$a] [expr $y2-$a] [expr $x2+$a] [expr $y2+$a] \
 	  -tags $tmark -fill white
     } else {
 	
@@ -2518,9 +2518,9 @@ proc ::CanvasDraw::MarkBbox {w shift {which current}} {
 	    set ystart [expr $cy - $r * sin($kGrad2Rad * $startAng)]
 	    set xfin [expr $cx + $r * cos($kGrad2Rad * ($startAng + $extentAng))]
 	    set yfin [expr $cy - $r * sin($kGrad2Rad * ($startAng + $extentAng))]
-	    $w create rect [expr $xstart-$a] [expr $ystart-$a]   \
+	    $w create rectangle [expr $xstart-$a] [expr $ystart-$a]   \
 	      [expr $xstart+$a] [expr $ystart+$a] -tags $tmark -fill white
-	    $w create rect [expr $xfin-$a] [expr $yfin-$a]   \
+	    $w create rectangle [expr $xfin-$a] [expr $yfin-$a]   \
 	      [expr $xfin+$a] [expr $yfin+$a] -tags $tmark -fill white
 	    
 	} else {
@@ -2529,7 +2529,7 @@ proc ::CanvasDraw::MarkBbox {w shift {which current}} {
 	    for {set i 0} {$i < $n} {incr i 2} {
 		set x [lindex $theCoords $i]
 		set y [lindex $theCoords [expr $i + 1]]
-		$w create rect [expr $x-$a] [expr $y-$a] [expr $x+$a] [expr $y+$a] \
+		$w create rectangle [expr $x-$a] [expr $y-$a] [expr $x+$a] [expr $y+$a] \
 		  -tags $tmark -fill white
 	    }
 	}

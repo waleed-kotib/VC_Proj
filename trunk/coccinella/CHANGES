@@ -15,7 +15,8 @@ Coccinella-0.94.7 (04????): 	Short summary --
 	- alert sounds part rewritten; added a few more sound events;
           added possiblity to use sound sets
 	- reworked tabbed notebook interface
-	- 
+	- added support for tkdnd (drag and drop) in the whiteboard for
+          linux/unix and windows
 
 
 Coccinella-0.94.6 (03????): 	Short summary --

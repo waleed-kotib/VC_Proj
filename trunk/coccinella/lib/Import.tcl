@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Import.tcl,v 1.10 2004-01-13 14:50:21 matben Exp $
+# $Id: Import.tcl,v 1.11 2004-02-05 14:00:23 matben Exp $
 
 package require http
 package require httpex
@@ -154,7 +154,7 @@ proc ::Import::DoImport {w opts args} {
 	array set optArr [list   \
 	  -mime     [::Types::GetMimeTypeForFileName $fileName] \
 	  -size     [file size $fileName]                       \
-	  -coords   {0 0}                                       \
+	  -coords   [::CanvasUtils::NewImportAnchor $w]         \
 	  -tags     [::CanvasUtils::NewUtag]]
     } else {
 	

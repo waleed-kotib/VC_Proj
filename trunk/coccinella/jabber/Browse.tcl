@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.28 2004-02-03 10:16:30 matben Exp $
+# $Id: Browse.tcl,v 1.29 2004-02-05 14:00:21 matben Exp $
 
 package require chasearrows
 
@@ -429,7 +429,7 @@ proc ::Jabber::Browse::Build {w} {
     set wysc $wbox.ysc
     scrollbar $wxsc -orient horizontal -command [list $wtree xview]
     scrollbar $wysc -orient vertical -command [list $wtree yview]
-    ::tree::tree $wtree -width 180 -height 200 -silent 1 -scrollwidth 400 \
+    ::tree::tree $wtree -width 180 -height 100 -silent 1 -scrollwidth 400 \
       -xscrollcommand [list $wxsc set]       \
       -yscrollcommand [list $wysc set]       \
       -selectcommand ::Jabber::Browse::SelectCmd   \
@@ -970,6 +970,7 @@ proc ::Jabber::Browse::ParseGet {jlibname from subiq args} {
       [wrapper::createtag "ns" -chdata "jabber:iq:version"]     \
       [wrapper::createtag "ns" -chdata "jabber:x:data"]         \
       [wrapper::createtag "ns" -chdata "jabber:x:event"]        \
+      [wrapper::createtag "ns" -chdata "http://jabber.org/protocol/muc "] \
       [wrapper::createtag "ns" -chdata "coccinella:wb"]]
     
     # Adding private namespaces.
