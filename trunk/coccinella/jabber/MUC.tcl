@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.37 2004-06-16 14:17:31 matben Exp $
+# $Id: MUC.tcl,v 1.38 2004-06-17 13:54:29 matben Exp $
 
 package require entrycomp
 
@@ -194,7 +194,8 @@ proc ::Jabber::MUC::BuildEnter {args} {
     label $frtop.lnick -text "[::msgcat::mc {Nick name}]:"
     entry $frtop.enick -textvariable $token\(nickname)
     label $frtop.lpass -text "[::msgcat::mc Password]:"
-    entry $frtop.epass -textvariable $token\(password)
+    entry $frtop.epass -textvariable $token\(password) -show {*} -validate key \
+      -validatecommand {::Jabber::ValidatePasswdChars %S}
     
     grid $frtop.lserv -column 0 -row 0 -sticky e
     grid $wpopupserver -column 1 -row 0 -sticky w
@@ -376,10 +377,13 @@ proc ::Jabber::MUC::DoEnter {token} {
 	  -message "We require that all fields are nonempty"
 	return
     }
-    set roomJid [string tolower $enter(roomname)@$enter(server)]
-    
-    $jstate(jlib) muc enter $roomJid $enter(nickname) -command \
-      [list [namespace current]::EnterCallback]
+    set roomJid [jlib::jidmap $enter(roomname)@$enter(server)]
+    set opts {}
+    if {$enter(password) != ""} {
+	lappend opts -password $enter(password)
+    }
+    eval {$jstate(jlib) muc enter $roomJid $enter(nickname) -command \
+      [list [namespace current]::EnterCallback]} $opts
     set enter(finished) 1
     catch {destroy $enter(w)}
    

@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #
-# $Id: JForms.tcl,v 1.12 2004-06-13 13:43:25 matben Exp $
+# $Id: JForms.tcl,v 1.13 2004-06-17 13:54:29 matben Exp $
 # 
 #      Updated to version 2.1 of JEP-0004
 #  
@@ -691,7 +691,7 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
 			set var $attrArr(var)
 			set cache($id,$var) $defvalue
 			set type($id,$var) $attrArr(type)
-			eval {checkbutton $w.c$i -text $lab \
+			eval {checkbutton $w.c$i -text " $lab" \
 			  -variable [namespace current]::cache($id,$var)} $opts
 			grid $w.c$i -row $i -column 0 -columnspan 1 -sticky w \
 			  -pady $pady
