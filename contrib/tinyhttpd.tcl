@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: tinyhttpd.tcl,v 1.13 2004-05-13 13:50:21 matben Exp $
+# $Id: tinyhttpd.tcl,v 1.14 2004-05-28 12:39:58 matben Exp $
 
 # ########################### USAGE ############################################
 #
@@ -326,6 +326,7 @@ proc ::tinyhttpd::HandleRequest {token} {
 	set nbytes [gets $s line]
     }]} {
 	Finish $token eof
+	return
     }
     
     # Ignore any leading empty lines (RFC 2616, 4.1).
