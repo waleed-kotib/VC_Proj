@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: GetFileIface.tcl,v 1.8 2003-10-12 13:12:55 matben Exp $
+# $Id: GetFileIface.tcl,v 1.9 2003-11-01 13:57:27 matben Exp $
 
 package require getfile
 package require uriencode
@@ -339,7 +339,7 @@ proc ::GetFileIface::Progress {gettoken token total current} {
     
     upvar #0 $gettoken getstate          
 
-    ::Debug 8 "::GetFileIface::Progress total=$total, current=$current"
+    ::Debug 4 "::GetFileIface::Progress total=$total, current=$current"
 
     # Be silent... except for a necessary update command to not block.
     if {[string equal $tcl_platform(platform) "windows"]} {

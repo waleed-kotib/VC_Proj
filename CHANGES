@@ -17,6 +17,7 @@ Coccinella-0.94.6 (03????): 	Short summary --
 	- incoming files will now have there file names encoded to
 	  avoid name conflicts
 	- added games item with chess as a first example
+	- added (primitive) printing support for Mac OS X
 
 
 Coccinella-0.94.5 (0309??): 	Short summary --

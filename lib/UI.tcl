@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.21 2003-10-12 13:12:55 matben Exp $
+# $Id: UI.tcl,v 1.22 2003-11-01 13:57:27 matben Exp $
 
 # LabeledFrame --
 #
@@ -230,6 +230,7 @@ QJ2GO/YCGGi0MDqtKnccohG5stgtiLx+z+8jIgA7
 }]
     set icons(wboard) [image create photo -format gif \
       -file [file join $this(path) images wb.gif]]
+    
     
     # Smiley icons. The "short" types.
     foreach {key name} {
@@ -778,6 +779,16 @@ proc ::UI::InitMenuDefs { } {
 	    lappend menuDefs(pop,$name) $menuDefs(pop,$key)
 	}
     }    
+}
+
+proc ::UI::GetIcon {name} {
+    variable icons
+    
+    if {[info exists icons($name)]} {
+	return $icons($name)
+    } else {
+	return -code error "icon named \"$name\" does not exist"
+    }
 }
 
 # UI::NewWhiteboard --

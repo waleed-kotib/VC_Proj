@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.27 2003-10-25 07:22:26 matben Exp $
+# $Id: Jabber.tcl,v 1.28 2003-11-01 13:57:27 matben Exp $
 #
 #  The $address is an ip name or number.
 #
@@ -41,6 +41,7 @@ package require Browse
 package require Roster
 package require GroupChat
 package require MUC
+package require Login
 
 namespace eval ::Jabber:: {
     global  this prefs
@@ -965,57 +966,72 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
     switch -- $type {
 	subscribe {
 	    
-	    # Another user request to subscribe to our presence.
-	    # Figure out what the user's prefs are.
-	    set allUsers [$jstate(roster) getusers]
-	    if {[lsearch -exact $allUsers $from] >= 0} {
-		set key inrost
+	    foreach {jid2 resource} [jlib::splitjid $from] break
+	    
+	    # Treat the case where the sender is a transport component.
+	    # We must be indenpendent of method; agent, browse, disco
+	    # The icq transports gives us subscribe from icq.host/registered
+	    
+	    set jidtype [$jstate(jlib) service gettype $jid2]
+	    if {[string match "service/*" $jidtype]} {
+		$jstate(jlib) send_presence -to $from -type "subscribed"
+		
+		
+		
 	    } else {
-		set key notinrost
-	    }		
-	    
-	    # No resource here!
-	    set subState [$jstate(roster) getsubscription $from]
-	    set isSubscriberToMe 0
-	    if {[string equal $subState "from"] ||  \
-	      [string equal $subState "both"]} {
-		set isSubscriberToMe 1
-	    }
 		
-	    # Accept, deny, or ask depending on preferences we've set.
-	    set msg ""
-	    set autoaccepted 0
-	    switch -- $jprefs(subsc,$key) {
-		accept {
-		    $jstate(jlib) send_presence -to $from -type "subscribed"
-		    set autoaccepted 1
-		    set msg [::msgcat::mc jamessautoaccepted $from]
-		}
-		reject {
-		    $jstate(jlib) send_presence -to $from -type "unsubscribed"
-		    set msg [::msgcat::mc jamessautoreject $from]
-		}
-		ask {
-		    eval {::Jabber::Subscribe::Subscribe $wDlgs(jsubsc) $from} $args
-		}
-	    }
-	    if {$msg != ""} {
-		tk_messageBox -title [::msgcat::mc Info] -icon info -type ok \
-		  -message [FormatTextForMessageBox $msg]			      
-	    }
-	    
-	    # Auto subscribe to subscribers to me.
-	    if {$autoaccepted && $jprefs(subsc,auto)} {
+		# Another user request to subscribe to our presence.
+		# Figure out what the user's prefs are.
+		set allUsers [$jstate(roster) getusers]
+		if {[lsearch -exact $allUsers $from] >= 0} {
+		    set key inrost
+		} else {
+		    set key notinrost
+		}		
 		
-		# Explicitly set the users group.
-		if {[string length $jprefs(subsc,group)]} {
-		    $jstate(jlib) roster_set $from ::Jabber::Subscribe::ResProc \
-		      -groups [list $jprefs(subsc,group)]
+		# No resource here!
+		set subState [$jstate(roster) getsubscription $from]
+		set isSubscriberToMe 0
+		if {[string equal $subState "from"] ||  \
+		  [string equal $subState "both"]} {
+		    set isSubscriberToMe 1
 		}
-		$jstate(jlib) send_presence -to $from -type "subscribe"
-		set msg [::msgcat::mc jamessautosubs $from]
-		tk_messageBox -title [::msgcat::mc Info] -icon info -type ok \
-		  -message [FormatTextForMessageBox $msg]			  
+		
+		# Accept, deny, or ask depending on preferences we've set.
+		set msg ""
+		set autoaccepted 0
+		switch -- $jprefs(subsc,$key) {
+		    accept {
+			$jstate(jlib) send_presence -to $from -type "subscribed"
+			set autoaccepted 1
+			set msg [::msgcat::mc jamessautoaccepted $from]
+		    }
+		    reject {
+			$jstate(jlib) send_presence -to $from -type "unsubscribed"
+			set msg [::msgcat::mc jamessautoreject $from]
+		    }
+		    ask {
+			eval {::Jabber::Subscribe::Subscribe $wDlgs(jsubsc) $from} $args
+		    }
+		}
+		if {$msg != ""} {
+		    tk_messageBox -title [::msgcat::mc Info] -icon info -type ok \
+		      -message [FormatTextForMessageBox $msg]			      
+		}
+		
+		# Auto subscribe to subscribers to me.
+		if {$autoaccepted && $jprefs(subsc,auto)} {
+		    
+		    # Explicitly set the users group.
+		    if {[string length $jprefs(subsc,group)]} {
+			$jstate(jlib) roster_set $from ::Jabber::Subscribe::ResProc \
+			  -groups [list $jprefs(subsc,group)]
+		    }
+		    $jstate(jlib) send_presence -to $from -type "subscribe"
+		    set msg [::msgcat::mc jamessautosubs $from]
+		    tk_messageBox -title [::msgcat::mc Info] -icon info -type ok \
+		      -message [FormatTextForMessageBox $msg]			  
+		}
 	    }
 	}
 	subscribed {
@@ -1066,7 +1082,7 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 		  -icon info -type ok  \
 		  -message [FormatTextForMessageBox $msg]
 		if {$jprefs(rost,rmIfUnsub)} {
-		
+		    
 		    # Remove completely from our roster.
 		    $jstate(jlib) roster_remove $from ::Jabber::Roster::PushProc
 		}
@@ -2943,8 +2959,6 @@ proc ::Jabber::WB::ChatMsg {args} {
     array set argsArr $args
     ::Jabber::Debug 2 "::Jabber::WB::ChatMsg args='$args'"
     
-    #set jid2 $argsArr(-from)
-    #regexp {^(.+@[^/]+)(/.*)?$} $argsArr(-from) match jid2 res
     foreach {jid2 res} [jlib::splitjid $argsArr(-from)] break
 
     # This one returns empty if not exists.
@@ -3464,7 +3478,8 @@ proc ::Jabber::UI::Popup {what w v x y} {
 	    
 	    # The last element of atree item if user is usually a 3-tier jid for
 	    # online users and a 2-tier jid else, but some transports may
-	    # lack the resource part for online users. Beware!
+	    # lack the resource part for online users, and have resource
+	    # even if unavailable. Beware!
 	    set jid [lindex $v end]
 	    set jid3 $jid
 	    set status [string tolower [lindex $v 0]]
@@ -3489,7 +3504,6 @@ proc ::Jabber::UI::Popup {what w v x y} {
 		    
 		    # Typically a user.
 		    foreach {jid2 res} [jlib::splitjid $jid] break
-		    #if {[regexp {^[^@]+@[^@]+$} $jid2]}
 		    if {[string length $jid2] > 0} {
 			
 			# Must let 'jid' refer to 2-tier jid for commands to work!
@@ -4709,511 +4723,6 @@ proc ::Jabber::GenRegister::SimpleCallback {server jlibName type subiq} {
 	tk_messageBox -type ok -icon info -message [FormatTextForMessageBox \
 	  [::msgcat::mc jamessokreg $server]]
     }
-}
-
-# The ::Jabber::Login:: namespace ----------------------------------------------
-
-namespace eval ::Jabber::Login:: {
-    
-    variable server
-    variable username
-    variable password
-}
-
-# Jabber::Login::Login --
-#
-#       Log in to a server with an existing user account.
-#
-# Arguments:
-#       w      the toplevel window.
-#       
-# Results:
-#       name of button pressed; "cancel" or "login".
-
-proc ::Jabber::Login::Login {w} {
-    global  this sysFont prefs
-    
-    variable wtoplevel $w
-    variable finished -1
-    variable menuVar
-    variable profile
-    variable server
-    variable username
-    variable password
-    variable resource
-    variable digest
-    variable ssl 0
-    variable invisible 0
-    variable tmpJServArr
-    upvar ::Jabber::jserver jserver
-    upvar ::Jabber::jprefs jprefs
-    
-    if {[winfo exists $w]} {
-	return
-    }
-    
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-
-    }
-    wm title $w [::msgcat::mc Login]
-    set digest 1
-    set ssl $jprefs(usessl)
-    
-    # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised]   \
-      -fill both -expand 1 -ipadx 12 -ipady 4
-    
-    label $w.frall.head -text [::msgcat::mc Login] -font $sysFont(l)  \
-      -anchor w -padx 10 -pady 4
-    pack $w.frall.head -side top -fill both -expand 1
-    message $w.frall.msg -width 260 -font $sysFont(s) -text [::msgcat::mc jalogin]
-    pack $w.frall.msg -side top -fill both -expand 1
-    
-    # Entries etc.
-    set frmid [frame $w.frall.frmid -borderwidth 0]
-    pack $frmid -side top -fill both -expand 1
-        
-    # Option menu for selecting user profile.
-    label $frmid.lpop -text "[::msgcat::mc Profile]:" -font $sysFont(sb) -anchor e
-    set wpopup $frmid.popup
-    set profileList [::Jabber::GetAllProfileNames]
-    eval {tk_optionMenu $wpopup [namespace current]::menuVar} $profileList
-    $wpopup configure -highlightthickness 0  \
-      -background $prefs(bgColGeneral) -foreground black
-    grid $frmid.lpop -column 0 -row 0 -sticky e
-    grid $wpopup -column 1 -row 0 -sticky e
-
-    # Verify that the selected also in array.
-    if {[lsearch -exact $jserver(profile) $jserver(profile,selected)] < 0} {
-	set jserver(profile,selected) [lindex $jserver(profile) 0]
-    }
-    set profile $jserver(profile,selected)
-    set menuVar $jserver(profile,selected)
-    
-    # Make temp array for servers. Handy fo filling in the entries.
-    foreach {name spec} $jserver(profile) {
-	foreach [list  \
-	  tmpJServArr($name,server)     \
-	  tmpJServArr($name,username)   \
-	  tmpJServArr($name,password)   \
-	  tmpJServArr($name,resource)] $spec break
-    }
-    set server $tmpJServArr($menuVar,server)
-    set username $tmpJServArr($menuVar,username)
-    set password $tmpJServArr($menuVar,password)
-    set resource $tmpJServArr($menuVar,resource)
-    
-    label $frmid.lserv -text "[::msgcat::mc {Jabber server}]:" -font $sysFont(sb) -anchor e
-    entry $frmid.eserv -width 26    \
-      -textvariable [namespace current]::server -validate key  \
-      -validatecommand {::Jabber::ValidateJIDChars %S}
-    label $frmid.luser -text "[::msgcat::mc Username]:" -font $sysFont(sb) -anchor e
-    entry $frmid.euser -width 26   \
-      -textvariable [namespace current]::username -validate key  \
-      -validatecommand {::Jabber::ValidateJIDChars %S}
-    label $frmid.lpass -text "[::msgcat::mc Password]:" -font $sysFont(sb) -anchor e
-    entry $frmid.epass -width 26   \
-      -textvariable [namespace current]::password -show {*} -validate key \
-      -validatecommand {::Jabber::ValidatePasswdChars %S}
-    label $frmid.lres -text "[::msgcat::mc Resource]:" -font $sysFont(sb) -anchor e
-    entry $frmid.eres -width 26   \
-      -textvariable [namespace current]::resource -validate key  \
-      -validatecommand {::Jabber::ValidateJIDChars %S}
-    checkbutton $frmid.cdig -text "  [::msgcat::mc {Scramble password}]"  \
-      -variable [namespace current]::digest
-    checkbutton $frmid.cssl -text "  [::msgcat::mc {Use SSL for security}]"  \
-      -variable [namespace current]::ssl
-    checkbutton $frmid.cinv  \
-      -text "  [::msgcat::mc {Login as invisible}]"  \
-      -variable [namespace current]::invisible
-
-    grid $frmid.lserv -column 0 -row 1 -sticky e
-    grid $frmid.eserv -column 1 -row 1 -sticky w
-    grid $frmid.luser -column 0 -row 2 -sticky e
-    grid $frmid.euser -column 1 -row 2 -sticky w
-    grid $frmid.lpass -column 0 -row 3 -sticky e
-    grid $frmid.epass -column 1 -row 3 -sticky w
-    grid $frmid.lres -column 0 -row 4 -sticky e
-    grid $frmid.eres -column 1 -row 4 -sticky w
-    grid $frmid.cdig -column 1 -row 5 -sticky w -pady 2
-    grid $frmid.cssl -column 1 -row 6 -sticky w -pady 2
-    grid $frmid.cinv -column 1 -row 7 -sticky w -pady 2
-
-    if {!$prefs(tls)} {
-	set ssl 0
-	$frmid.cssl configure -state disabled
-    }
-	
-    # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btconn -text [::msgcat::mc Login] -width 8 \
-      -default active -command [namespace current]::Doit]  \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
-      -command [list [namespace current]::DoCancel $w]]  \
-      -side right -padx 5 -pady 5
-    pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
-    
-    # Necessary to trace the popup menu variable.
-    trace variable [namespace current]::menuVar w  \
-      [namespace current]::TraceMenuVar
-        
-    if {[info exists prefs(winGeom,$w)]} {
-	regexp {^[^+-]+((\+|-).+$)} $prefs(winGeom,$w) match pos
-	wm geometry $w $pos
-    }
-    wm resizable $w 0 0
-    bind $w <Return> ::Jabber::Login::Doit
-    bind $w <Escape> [list ::Jabber::Login::DoCancel $w]
-    
-    # Grab and focus.
-    set oldFocus [focus]
-    focus $w
-    catch {grab $w}
-    
-    # Wait here for a button press and window to be destroyed.
-    tkwait window $w
-    
-    # Clean up.
-    catch {grab release $w}
-    ::Jabber::Login::Close $w
-    catch {focus $oldFocus}
-    return [expr {($finished <= 0) ? "cancel" : "login"}]
-}
-
-proc ::Jabber::Login::DoCancel {w} {
-    variable finished
-    
-    ::UI::SaveWinGeom $w
-    set finished 0
-    catch {destroy $w}
-}
-
-proc ::Jabber::Login::Close {w} {
-    variable menuVar
-    upvar ::Jabber::jserver jserver
-    
-    # Clean up.
-    set jserver(profile,selected) $menuVar
-    trace vdelete [namespace current]::menuVar w  \
-      [namespace current]::TraceMenuVar
-    catch {grab release $w}
-    catch {destroy $w}    
-}
-
-proc ::Jabber::Login::TraceMenuVar {name key op} {
-    
-    # Call by name.
-    upvar #0 $name locName
-
-    variable profile
-    variable server
-    variable username
-    variable password
-    variable resource
-    variable menuVar
-    variable tmpJServArr
-    
-    set profile $locName
-    set server $tmpJServArr($locName,server)
-    set username $tmpJServArr($locName,username)
-    set password $tmpJServArr($locName,password)
-    set resource $tmpJServArr($locName,resource)
-}
-
-# Jabber::Login::Doit --
-#
-#       Initiates a login to a server with an existing user account.
-#
-# Arguments:
-#       
-# Results:
-#       .
-
-proc ::Jabber::Login::Doit { } {
-    global  errorCode prefs
-
-    variable wtoplevel
-    variable finished
-    variable server
-    variable username
-    variable password
-    variable resource
-    variable ssl
-    upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::jstate jstate
-    
-    ::Jabber::Debug 2 "::Jabber::Login::Doit"
-    
-    # Kill any pending open states.
-    ::Network::KillAll
-    ::Jabber::UI::SetStatusMessage ""
-    ::Jabber::UI::StartStopAnimatedWave 0
-    
-    # Check 'server', 'username' and 'password' if acceptable.
-    foreach name {server username password} {
-	upvar 0 $name var
-	if {[string length $var] <= 1} {
-	    tk_messageBox -icon error -type ok -message  \
-	      [FormatTextForMessageBox [::msgcat::mc jamessnamemissing $name]]	      
-	    return
-	}
-	if {$name == "password"} {
-	    continue
-	}
-	if {[regexp $jprefs(invalsExp) $var match junk]} {
-	    tk_messageBox -icon error -type ok -message  \
-	      [FormatTextForMessageBox [::msgcat::mc jamessillegalchar $name $var]]
-	    return
-	}
-    }    
-    set finished 1
-    ::UI::SaveWinGeom $wtoplevel
-    catch {destroy $wtoplevel}
-    
-    ::Jabber::UI::SetStatusMessage [::msgcat::mc jawaitresp $server]
-    ::Jabber::UI::StartStopAnimatedWave 1
-    ::Jabber::UI::FixUIWhen "connectinit"
-    update idletasks
-
-    # Async socket open with callback.
-    if {$ssl} {
-	set port $jprefs(sslport)
-    } else {
-	set port $jprefs(port)
-    }
-    ::Network::OpenConnection $server $port [namespace current]::SocketIsOpen  \
-      -timeout $prefs(timeoutSecs) -tls $ssl
-}
-
-# Jabber::Login::SocketIsOpen --
-#
-#       Callback when socket has been opened. Logins.
-#       
-# Arguments:
-#       
-#       status      "error", "timeout", or "ok".
-# Results:
-#       Callback initiated.
-
-proc ::Jabber::Login::SocketIsOpen {sock ip port status {msg {}}} {    
-    variable server
-    variable username
-    variable password
-    variable resource
-    variable digest
-    upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::jstate jstate
-    
-    ::Jabber::Debug 2 "::Jabber::Login::SocketIsOpen"
-    
-    switch $status {
-	error - timeout {
-	    ::Jabber::UI::SetStatusMessage ""
-	    ::Jabber::UI::StartStopAnimatedWave 0
-	    ::Jabber::UI::FixUIWhen "disconnect"
-	    if {$status == "error"} {
-		tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
-		  [::msgcat::mc jamessnosocket $ip $msg]]
-	    } elseif {$status == "timeout"} {
-		tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
-		  [::msgcat::mc jamesstimeoutserver $server]]
-	    }
-	    return ""
-	}
-	default {
-	    # Just go ahead
-	}
-    }    
-    set jstate(sock) $sock
-    ::Jabber::UI::SetStatusMessage [::msgcat::mc jawaitxml $server]
-    
-    # Initiate a new stream. Perhaps we should wait for the server <stream>?
-    if {[catch {
-	$jstate(jlib) connect $server -socket $sock  \
-	  -cmd [namespace current]::ConnectProc
-    } err]} {
-	::Jabber::UI::SetStatusMessage ""
-	::Jabber::UI::StartStopAnimatedWave 0
-	::Jabber::UI::FixUIWhen "disconnect"
-	tk_messageBox -icon error -title [::msgcat::mc {Open Failed}] -type ok \
-	  -message [FormatTextForMessageBox $err]
-	return
-    }
-
-    # Just wait for a callback to the procedure.
-}
-
-# Jabber::Login::ConnectProc --
-#
-#       Callback procedure for the 'connect' command of jabberlib.
-#       
-# Arguments:
-#       jlibName    name of jabber lib instance
-#       args        attribute list
-#       
-# Results:
-#       Callback initiated.
-
-proc ::Jabber::Login::ConnectProc {jlibName args} {    
-    variable server
-    variable username
-    variable password
-    variable resource
-    variable digest
-    upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::jstate jstate
-    
-    ::Jabber::Debug 2 "::Jabber::Login::ConnectProc jlibName=$jlibName, args='$args'"
-
-    array set argsArray $args
-    ::Jabber::UI::SetStatusMessage [::msgcat::mc jasendauth $server]
-    
-    # Send authorization info for an existing account.
-    # Perhaps necessary to get additional variables
-    # from some user preferences.
-    if {$resource == ""} {
-    	set resource coccinella
-    }
-    if {$digest} {
-	if {![info exists argsArray(id)]} {
-	    error "no id for digest in receiving <stream>"
-	}
-	
-	::Jabber::Debug 3 "argsArray(id)=$argsArray(id), password=$password"
-	
-	set digestedPw [::sha1pure::sha1 $argsArray(id)$password]
-	$jstate(jlib) send_auth $username $resource   \
-	  ::Jabber::Login::ResponseProc -digest $digestedPw
-    } else {
-	$jstate(jlib) send_auth $username $resource   \
-	  ::Jabber::Login::ResponseProc -password $password
-    }
-    
-    # Just wait for a callback to the procedure.
-}
-
-# Jabber::Login::ResponseProc --
-#
-#       Callback for Login iq element.
-#       
-# Arguments:
-#       
-# Results:
-#       .
-
-proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
-    global  ipName2Num prefs wDlgs
-    
-    variable profile
-    variable server
-    variable username
-    variable password
-    variable resource
-    variable invisible
-    upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jserver jserver
-    
-    ::Jabber::Debug 2 "::Jabber::Login::ResponseProc  theQuery=$theQuery"
-
-    ::Jabber::UI::StartStopAnimatedWave 0
-    
-    if {[string equal $type "error"]} {	
-	set errcode [lindex $theQuery 0]
-	set errmsg [lindex $theQuery 1]
-	::Jabber::UI::SetStatusMessage [::msgcat::mc jaerrlogin $server $errmsg]
-	::Jabber::UI::FixUIWhen "disconnect"
-	if {$errcode == 409} {
-	    set msg [::msgcat::mc jamesslogin409 $errcode]
-	} else {
-	    set msg [::msgcat::mc jamessloginerr $errcode $errmsg]
-	}
-	tk_messageBox -icon error -type ok -title [::msgcat::mc Error]  \
-	  -message [FormatTextForMessageBox $msg]
-
-	#       There is a potential problem if called from within a xml parser 
-	#       callback which makes the subsequent parsing to fail. (after idle?)
-	after idle $jstate(jlib) disconnect
-	return
-    } 
-    
-    # Collect ip num name etc. in arrays.
-    if {![::OpenConnection::SetIpArrays $server $jstate(sock)  \
-      $jstate(servPort)]} {
-	::Jabber::UI::SetStatusMessage ""
-	return
-    }
-    if {[::Utils::IsIPNumber $server]} {
-	set ipNum $server
-    } else {
-	set ipNum $ipName2Num($server)
-    }
-    set jstate(ipNum) $ipNum
-    
-    # Ourself.
-    set jstate(mejid) "${username}@${server}"
-    set jstate(meres) $resource
-    set jstate(mejidres) "${username}@${server}/${resource}"
-    set jserver(profile,selected) $profile
-    set jserver(this) $server
-    
-    # Set communication entry in UI.
-    if {$prefs(jabberCommFrame)} {
-	::UI::ConfigureAllJabberEntries $ipNum -netstate "connect"	
-    } else {
-	::UI::SetCommEntry $wDlgs(mainwb) $ipNum 1 -1 -jidvariable ::Jabber::jstate(.,tojid)  \
-	  -dosendvariable ::Jabber::jstate(.,doSend)
-	# We skip this.
-	#  -validatecommand ::Jabber::VerifyJID
-    }
-    set ::Jabber::Roster::servtxt $server
-    ::Jabber::Roster::SetUIWhen "connect"
-    ::Jabber::Browse::SetUIWhen "connect"
-
-    # Multiinstance whiteboard UI stuff.
-    foreach w [::UI::GetAllWhiteboards] {
-	set wtop [::UI::GetToplevelNS $w]
-	set ::Jabber::jstate($wtop,tojid) "@${server}"
-	#::UI::SetStatusMessage $wtop [::msgcat::mc jaauthok $server]
-
-	# Make menus consistent.
-	::UI::FixMenusWhen $wtop "connect"
-    }
-    ::Network::RegisterIP $ipNum "to"
-    
-    # Update UI in Roster window.
-    ::Jabber::UI::SetStatusMessage [::msgcat::mc jaauthok $server]
-    ::Jabber::UI::FixUIWhen "connectfin"
-    
-    # Login was succesful. Get my roster, and set presence.
-    $jstate(jlib) roster_get ::Jabber::Roster::PushProc
-    if {$invisible} {
-	set jstate(status) "invisible"
-	::Jabber::SetStatus invisible
-    } else {
-	set jstate(status) "available"
-	::Jabber::SetStatus available
-    }
-    
-    # Store our own ip number in a public storage at the server.
-    ::Jabber::SetPrivateData
-    
-    # Get the services for all our servers on the list. Depends on our settings:
-    # If browsing fails must use "agents" as a fallback.
-    if {[string equal $jprefs(agentsOrBrowse) "browse"]} {
-	::Jabber::Browse::GetAll
-    } elseif {[string equal $jprefs(agentsOrBrowse) "agents"]} {
-	::Jabber::Agents::GetAll
-    }
-    
-
-    # Any noise.
-    ::Sounds::PlayWhenIdle "connected"
 }
 
 # Jabber::VerifyJIDWhiteboard --
