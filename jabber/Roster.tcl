@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.95 2004-11-10 10:08:43 matben Exp $
+# $Id: Roster.tcl,v 1.96 2004-11-14 13:53:27 matben Exp $
 
 package provide Roster 1.0
 
@@ -785,7 +785,6 @@ proc ::Jabber::Roster::Popup {w v x y} {
 
 proc ::Jabber::Roster::PushProc {rostName what {jid {}} args} {    
     upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::jserver jserver
     upvar ::Jabber::jstate jstate
 
     ::Debug 2 "--roster-> rostName=$rostName, what=$what, jid=$jid, \
@@ -1343,6 +1342,11 @@ proc ::Jabber::Roster::SetUIWhen {what} {
 }
 
 proc ::Jabber::Roster::GetPresenceIconFromKey {key} {
+
+    return [::Rosticons::Get status/$key]
+}
+
+proc ::Jabber::Roster::GetPresenceIconFromKeyBU {key} {
     variable presenceIcon
     
     if {[info exists presenceIcon($key)]} {
@@ -1372,6 +1376,54 @@ proc ::Jabber::Roster::GetPresenceIconFromJid {jid} {
 #       If presence is to make sense, the jid shall be a 3-tier jid.
 
 proc ::Jabber::Roster::GetPresenceIcon {jid presence args} {    
+    upvar ::Jabber::jprefs jprefs
+    upvar ::Jabber::jstate jstate
+    upvar ::Jabber::jserver jserver
+    
+    array set argsArr $args
+    
+    ::Debug 5 "GetPresenceIcon jid=$jid, presence=$presence, args=$args"
+    
+    # Construct the 'type/sub' specifying the icon.
+    set itype status
+    set isub  $presence
+    
+    # Then see if any <show/> element
+    if {[info exists argsArr(-subscription)] &&   \
+      [string equal $argsArr(-subscription) "none"]} {
+	set isub "ask"
+    } elseif {[info exists argsArr(-ask)] &&   \
+      [string equal $argsArr(-ask) "subscribe"]} {
+	set isub "ask"
+    } elseif {[info exists argsArr(-show)]} {
+	set isub $argsArr(-show)
+    }
+    
+    # Foreign IM systems.
+    set foreign 0
+    if {$jprefs(rost,haveIMsysIcons)} {
+	jlib::splitjidex $jid user host res
+	if {![string equal $host $jserver(this)]} {
+	
+	    # If empty we have likely not yet browsed etc.
+	    set cattype [$jstate(jlib) service gettype $host]
+	    set subtype [lindex [split $cattype /] 1]
+	    if {[lsearch -exact [::Rosticons::GetTypes] $subtype] >= 0} {
+		set itype $subtype
+		set foreign 1
+	    }
+	}
+    }   
+    
+    # If whiteboard:
+    if {!$foreign && ($presence == "available") && [IsCoccinella $jid]} {
+	set itype "whiteboard"
+    }
+    
+    return [::Rosticons::Get $itype/$isub]
+}
+
+proc ::Jabber::Roster::GetPresenceIconBU {jid presence args} {    
     variable presenceIcon
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
@@ -1416,12 +1468,22 @@ proc ::Jabber::Roster::GetPresenceIcon {jid presence args} {
     
     return $presenceIcon($key)
 }
-  
+
 proc ::Jabber::Roster::GetMyPresenceIcon { } {
-    variable presenceIcon
 
     set status [::Jabber::GetMyStatus]
-    return $presenceIcon($status)
+    return [::Rosticons::Get status/$status]
+}
+
+proc ::Jabber::Roster::GetMyPresenceIconBU { } {
+    variable presenceIcon
+    upvar ::Jabber::jstate jstate
+    
+    puts "--------------------- jstate(status)=$jstate(status)"
+    set status [::Jabber::GetMyStatus]
+    puts "+++++++++++++++++++++ status=$status"
+    puts "::Rosticons::Get=[::Rosticons::Get status/$status]"
+    return $presenceIcon($jstate(status))
 }
 
 proc ::Jabber::Roster::DirectedPresenceDlg {jid} {
@@ -1457,7 +1519,11 @@ proc ::Jabber::Roster::DirectedPresenceDlg {jid} {
     pack [frame $fr -bd 0] -side top -fill x
     pack [label $fr.l -text "[mc Status]:"] -side left -padx 8
     set wmb $fr.mb
-    BuildPresenceMenuButton2 $wmb $token\(status)
+
+    #BuildPresenceMenuButton2 $wmb $token\(status)
+
+    BuildStatusMenuButton3 $wmb $token\(status)
+
     pack $wmb -side left -padx 2 -pady 2
     
     # Any status message.   
@@ -1608,6 +1674,92 @@ proc ::Jabber::Roster::PostMenu {wmenu x y} {
     tk_popup $wmenu [expr int($x)] [expr int($y)]
 }
 
+#--------------- NEW NEW NEW !!!!!!!!!!!!!!!!
+
+# ::Jabber::Roster::BuildStatusButton3 --
+# 
+#       A few functions to build a megawidget status menu button.
+#       
+# Arguments:
+#       w
+#       varName
+#       args:     -command procName
+#       
+# Results:
+#       widget path.
+
+proc ::Jabber::Roster::BuildStatusButton3 {w varName args} {
+    upvar $varName status
+    
+    array set argsArr $args
+
+    set wmenu $w.menu
+    button $w -bd 1 -image [::Rosticons::Get status/$status] \
+      -width 16 -height 16
+    $w configure -state disabled
+    menu $wmenu -tearoff 0
+    set opts {}
+    if {[info exists argsArr(-command)]} {
+	set opts [list -command \
+	  [list [namespace current]::StatusMenuCmd3 $w $varName \
+	  $argsArr(-command)]]
+    }
+    eval {BuildGenPresenceMenu $wmenu -variable $varName} $opts
+    return $w
+}
+
+proc ::Jabber::Roster::StatusMenuCmd3 {w varName cmd} {
+    upvar $varName status
+        
+    ConfigStatusButton3 $w $status
+    uplevel #0 $cmd $status
+}
+
+proc ::Jabber::Roster::ConfigStatusButton3 {w type} {
+    
+    $w configure -image [::Rosticons::Get status/$type]
+    if {[string equal $type "unavailable"]} {
+	$w configure -state disabled
+	bind $w <Button-1> {}
+    } else {
+	$w configure -state normal
+	bind $w <Button-1> \
+	  [list [namespace current]::PostStatusMenu3 $w.menu %X %Y]
+    }
+}
+
+proc ::Jabber::Roster::PostStatusMenu3 {wmenu x y} {
+    
+    tk_popup $wmenu [expr int($x)] [expr int($y)]
+}
+
+# Jabber::Roster::BuildStatusMenuButton3 --
+# 
+#       Makes a menubutton for status that does no action. It only sets
+#       the varName.
+
+proc ::Jabber::Roster::BuildStatusMenuButton3 {w varName} {
+    upvar $varName status
+    upvar ::Jabber::mapShowTextToElem mapShowTextToElem
+
+    menubutton $w -indicatoron 1 -menu $w.menu  \
+      -relief raised -bd 2 -highlightthickness 2 -anchor c -direction flush
+    menu $w.menu -tearoff 0
+    BuildGenPresenceMenu $w.menu -variable $varName  \
+      -command [list [namespace current]::StatusMenuButtonCmd3 $w $varName]
+    $w configure -text $mapShowTextToElem($status)
+    return $w
+}
+
+proc ::Jabber::Roster::StatusMenuButtonCmd3 {w varName} {
+    upvar $varName status
+    upvar ::Jabber::mapShowTextToElem mapShowTextToElem
+    
+    $w configure -text $mapShowTextToElem($status)
+}
+
+#---------------
+
 # Jabber::Roster::BuildPresenceMenu --
 # 
 #       Adds all presence manu entries to menu.
@@ -1619,7 +1771,7 @@ proc ::Jabber::Roster::PostMenu {wmenu x y} {
 #       none.
 
 proc ::Jabber::Roster::BuildPresenceMenu {mt} {
-    global  prefs
+    global  this prefs
     variable presenceIcon
     upvar ::Jabber::mapShowTextToElem mapShowTextToElem
 
@@ -1644,6 +1796,28 @@ proc ::Jabber::Roster::BuildPresenceMenu {mt} {
 #       As above but a more general form.
 
 proc ::Jabber::Roster::BuildGenPresenceMenu {mt args} {
+    global  this
+    upvar ::Jabber::mapShowTextToElem mapShowTextToElem
+    
+    set entries {available {} away chat dnd xa invisible {} unavailable}
+
+    foreach name $entries {
+	if {$name == {}} {
+	    $mt add separator
+	} else {
+	    set opts {}
+	    if {![string match "mac*" $this(platform)]} {
+		set opts [list -compound left \
+		  -image [::Rosticons::Get status/$name]]
+	    }
+	    eval {
+		$mt add radio -label $mapShowTextToElem($name) -value $name
+	    } $args $opts
+	}
+    }
+}
+
+proc ::Jabber::Roster::BuildGenPresenceMenuBU {mt args} {
     global  prefs
     variable presenceIcon
     upvar ::Jabber::mapShowTextToElem mapShowTextToElem
@@ -1661,6 +1835,7 @@ proc ::Jabber::Roster::BuildGenPresenceMenu {mt args} {
     }
 }
 
+
 # Jabber::Roster::BuildStatusMenuDef --
 # 
 #       Builds a menuDef list for the status menu.
@@ -1671,6 +1846,37 @@ proc ::Jabber::Roster::BuildGenPresenceMenu {mt args} {
 #       menuDef list.
 
 proc ::Jabber::Roster::BuildStatusMenuDef { } {
+    global  this
+    upvar ::Jabber::mapShowTextToElem   mapShowTextToElem
+    upvar ::Jabber::mapShowTextToMLabel mapShowTextToMLabel
+    
+    set entries {available {} away chat dnd xa invisible {} unavailable}
+    set statMenuDef {}
+
+    foreach name $entries {
+	if {$name == {}} {
+	    lappend statMenuDef {separator}
+	} else {
+	    set mName $mapShowTextToMLabel($name)
+	    if {[string match "mac*" $this(platform)]} {
+		lappend statMenuDef [list radio $mName  \
+		  [list ::Jabber::SetStatus $name] normal {}  \
+		  [list -variable ::Jabber::jstate(status) -value $name]]
+	    } else {
+		lappend statMenuDef [list radio $mName  \
+		  [list ::Jabber::SetStatus $name] normal {}  \
+		  [list -variable ::Jabber::jstate(status) -value $name  \
+		  -compound left -image [::Rosticons::Get status/$name]]]
+	    }
+	}
+    }
+    lappend statMenuDef {separator}  \
+      {command mAttachMessage {::Jabber::SetStatusWithMessage}  normal {}}
+    
+    return $statMenuDef
+}
+
+proc ::Jabber::Roster::BuildStatusMenuDefBU { } {
     global  prefs this
     variable presenceIcon
     

@@ -7,7 +7,7 @@
 #       Most recent reference at the time of writing:
 #       http://www.ietf.org/internet-drafts/draft-saintandre-xmpp-uri-06.txt
 # 
-# $Id: ParseURI.tcl,v 1.15 2004-11-11 15:38:28 matben Exp $
+# $Id: ParseURI.tcl,v 1.16 2004-11-14 13:53:26 matben Exp $
 
 package require uriencode
 
@@ -50,7 +50,7 @@ proc ::ParseURI::Parse {args} {
 
     # Actually parse the uri.
     # {^xmpp:([^\?]+)(\?([^&]+)&(.+))?$}
-    set reexp {^xmpp:([^\?#]+)(\?([^&]+)&([^#]+))?(#(.+))?$}
+    # {^xmpp:([^\?#]+)(\?([^&]+)&([^#]+))?(#(.+))?$}
     set reexp {^xmpp:([^\?#]+)(\?([^&]+))?(&([^#]+))?(#(.+))?$}
     if {![regexp $reexp $uri match jid x querytype y query z fragment]} {
 	return

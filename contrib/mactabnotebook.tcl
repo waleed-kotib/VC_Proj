@@ -8,7 +8,7 @@
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: mactabnotebook.tcl,v 1.23 2004-11-02 15:34:51 matben Exp $
+# $Id: mactabnotebook.tcl,v 1.24 2004-11-14 13:53:26 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -433,6 +433,7 @@ proc ::mactabnotebook::mactabnotebook {w args} {
 	set optName        [lindex $widgetOptions($name) 0]
 	set optClass       [lindex $widgetOptions($name) 1]
 	set options($name) [option get $w $optName $optClass]
+	#puts "name=$name, optName=$optName, options($name)=$options($name)"
     }
     
     # Apply the options supplied in the widget command.

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.66 2004-11-11 15:38:29 matben Exp $
+# $Id: JUI.tcl,v 1.67 2004-11-14 13:53:26 matben Exp $
 
 package provide JUI 1.0
 
@@ -68,7 +68,7 @@ namespace eval ::Jabber::UI:: {
     option add *JMain*MacTabnotebook.activeTabBackground #cdcdcd      startupFile
     option add *JMain*MacTabnotebook.activeTabOutline    black        startupFile
     option add *JMain*MacTabnotebook.background          white        startupFile
-    option add *JMain*MacTabnotebook.style               mac          startupFile
+    #option add *JMain*MacTabnotebook.style               mac          startupFile
     option add *JMain*MacTabnotebook.tabBackground       #dedede      startupFile
     option add *JMain*MacTabnotebook.tabColor            #cecece      startupFile
     option add *JMain*MacTabnotebook.tabOutline          gray20       startupFile
@@ -359,7 +359,12 @@ proc ::Jabber::UI::Build {w} {
 
     frame $wbot
     pack  $wbot -side bottom -fill x
-    ::Jabber::Roster::BuildStatusMenuButton $jwapp(mystatus)
+    
+    #::Jabber::Roster::BuildStatusMenuButton $jwapp(mystatus)
+    
+    ::Jabber::Roster::BuildStatusButton3 $jwapp(mystatus) \
+      ::Jabber::jstate(status) -command ::Jabber::SetStatus 
+    
     pack  $jwapp(mystatus) -side left -pady 2 -padx 6
     label $wbot.size -image $iconResize
     pack  $wbot.size -side right -anchor s
@@ -595,7 +600,7 @@ proc ::Jabber::UI::MailBoxState {mailboxstate} {
 proc ::Jabber::UI::WhenSetStatus {type} {
     variable jwapp
 	
-    ::Jabber::Roster::ConfigStatusMenuButton $jwapp(mystatus) $type
+    ::Jabber::Roster::ConfigStatusButton3 $jwapp(mystatus) $type
 }
 
 proc ::Jabber::UI::EnterRoomHook {roomJid protocol} {

@@ -5,11 +5,9 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.19 2004-10-27 14:42:34 matben Exp $
-
+# $Id: Emoticons.tcl,v 1.20 2004-11-14 13:53:26 matben Exp $
 
 package provide Emoticons 1.0
-
 
 namespace eval ::Emoticons:: {
 
