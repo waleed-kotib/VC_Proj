@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.12 2004-01-27 08:48:05 matben Exp $
+# $Id: Register.tcl,v 1.13 2004-02-14 14:00:34 matben Exp $
 
 package provide Register 1.0
 
@@ -458,7 +458,7 @@ proc ::Jabber::GenRegister::BuildRegister {args} {
     catch {grab $w}
     
     if {[info exists argsArr(-autoget)] && $argsArr(-autoget)} {
-	::Jabber::GenRegister::Get
+	after idle ::Jabber::GenRegister::Get
     }
     
     # Wait here for a button press and window to be destroyed.
