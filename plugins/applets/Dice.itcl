@@ -1,0 +1,106 @@
+# Dice.itcl 
+# 
+#       Creates a dice in a whiteboard canvas. 
+# 
+# 
+# $Id: Dice.itcl,v 1.1 2004-07-26 12:49:40 matben Exp $
+
+namespace eval Dice {
+    
+    variable infoScript [info script]
+}
+
+# This file may be sourced more than once; protect for this!
+# Is there a better way? Ugly!
+
+if {[itcl::find classes Dice] == ""} {
+    
+    class Dice {
+	
+	inherit BaseWBCanvas
+	    
+	# -----------------------
+	# Private static methods.
+	# -----------------------
+
+	private {
+	    proc Init {}
+	    proc InitRand {}
+	    proc UnifRand {x}
+	}
+
+	# ------------------
+	# Class constructor.
+	# ------------------
+	
+	protected {
+	    constructor {w x y args} {$this BaseWBCanvas::constructor $w} {}
+	    destructor {}
+	}
+	
+	# --------------
+	# Class methods.
+	# --------------
+
+	public {
+	    method Save {id}
+	}
+	
+	# ----------------------
+	# Private class methods.
+	# ----------------------
+	
+	protected {
+	    method Draw {x y args}
+	}
+    
+	# ----------------------------
+	# Private static data members.
+	# ----------------------------
+
+	private common cardstackMenu
+	
+	# ---------------------------
+	# Private class data members.
+	# ---------------------------
+	
+	protected {
+	    variable idstack
+	}    
+    }
+
+    body Dice::constructor {w x y args} {
+	
+	
+
+	if {!$inited} {
+	    Init
+	}
+    }
+    
+    body Dice::Init {} {
+	
+	set inited 1
+    }
+    
+    body Dice::Draw {x y args} {
+	
+
+    }
+    
+    body Dice::InitRand {} {    
+	set seed [expr {abs([pid]+[clock clicks]%100000)}]
+	expr {srand(int($seed))}
+    }
+
+    body Dice::UnifRand {x} {    
+	return [expr {int($x*rand())}]
+    }
+}
+
+# We must instantiate ourself...
+
+eval {Dice #auto $w $x $y} $args
+
+
+
