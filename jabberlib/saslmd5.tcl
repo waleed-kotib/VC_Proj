@@ -8,7 +8,7 @@
 #  Copyright (c) 2004  Mats Bengtsson
 #  BSD license
 #  
-# $Id: saslmd5.tcl,v 1.1 2004-09-18 14:41:34 matben Exp $
+# $Id: saslmd5.tcl,v 1.2 2004-09-19 07:24:23 matben Exp $
 
 package require base64
 package require md5 2.0
@@ -72,7 +72,7 @@ proc saslmd5::encode64 {str} {
 proc saslmd5::client_new {args} {    
     variable uid
     
-    puts "saslmd5::client_new"
+    #puts "saslmd5::client_new"
     set token [namespace current]::[incr uid]
     variable $token
     upvar 0 $token state
@@ -126,7 +126,7 @@ proc saslmd5::method_start {token args} {
     upvar 0 $token state
     variable mechanisms
     
-    puts "saslmd5::method_start $args"
+    #puts "saslmd5::method_start $args"
     set state(step) 0
     
     foreach {key value} $args {
@@ -177,7 +177,7 @@ proc saslmd5::method_step {token args} {
     variable $token
     upvar 0 $token state
     
-    puts "saslmd5::method_step $token, $args"
+    #puts "saslmd5::method_step $token, $args"
     foreach {key value} $args {
 	switch -- $key {
 	    -input {
@@ -242,22 +242,12 @@ proc saslmd5::method_info {args} {
 proc saslmd5::set_callbacks {token cblist} {
     variable $token
     upvar 0 $token state
-    
-    puts "saslmd5::set_callbacks cblist=$cblist"
-    
+        
     # some of tclsasl's id's are different from the spec's!
     # note that everyone must be utf-8 encoded!
     foreach cbpair $cblist {
 	foreach {id cbproc} $cbpair {
-	    set key $id
-	    if {$id == "authname"} {
-		set key "authzid"
-	    } elseif {$id == "getrealm"} {
-		set key "realm"
-	    } elseif {$id == "user"} {
-		set key "username"
-	    }
-	    set state(cb,$key) $cbproc
+	    set state(cb,$id) $cbproc
 	}
     }
 }
@@ -267,7 +257,6 @@ proc saslmd5::iscapable {token} {
     upvar 0 $token state
     variable needed
 
-    puts "saslmd5::iscapable"
     set capable 1
     foreach id $needed {
 	if {[::info exists state(cb,$id)] && ($state(cb,$id) != {})} {
@@ -277,7 +266,6 @@ proc saslmd5::iscapable {token} {
 	    break
 	}
     }
-    puts "\t capable=$capable"
     return $capable
 }
 
@@ -325,10 +313,7 @@ proc saslmd5::process_challenge {token challenge} {
     
     set host     $state(serverFQDN)
     set service  $state(service)
-    
-    set authzid $state(upar,username)
-    set username  $state(upar,authzid)
-    
+        
     # make a 'cnonce'
     set bytes ""
     for {set n 0} {$n < 32} {incr n} {
@@ -413,8 +398,9 @@ proc saslmd5::process_challenge {token challenge} {
     append output ",qop=\"$qop\""
     append output ",response=\"$response\""
     append output ",charset=\"utf-8\""
-    append output ",authzid=\"$authzid\""
-
+    if {$authzid != ""} {
+	append output ",authzid=\"$authzid\""
+    }
     return $output
 }
 

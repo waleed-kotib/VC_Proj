@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: jlibsasl.tcl,v 1.4 2004-09-18 14:43:29 matben Exp $
+# $Id: jlibsasl.tcl,v 1.5 2004-09-19 07:24:23 matben Exp $
 
 # We need to be flexible here since can have cyrus based sasl or our 
 # own special pure tcl saslmd5.
@@ -77,7 +77,7 @@ proc jlib::auth_sasl {jlibname username resource password cmd} {
     
     upvar ${jlibname}::locals locals
     
-    puts "jlib::auth_sasl"
+    Debug 2 "jlib::auth_sasl"
         
     # Cache our login jid.
     set locals(username) $username
@@ -99,7 +99,7 @@ proc jlib::auth_sasl {jlibname username resource password cmd} {
 
 proc jlib::auth_sasl_mechanisms_write {jlibname name1 name2 op} {
     
-    puts "jlib::auth_sasl_mechanisms_write"
+    Debug 2 "jlib::auth_sasl_mechanisms_write"
     trace remove variable ${jlibname}::locals(features,mechanisms) write \
       [list [namespace current]::auth_sasl_mechanisms_write $jlibname]
     auth_sasl_continue $jlibname
@@ -112,34 +112,36 @@ proc jlib::auth_sasl_continue {jlibname} {
     variable xmppns
     variable cyrussasl 
 
-    puts "jlib::auth_sasl_continue"
-    
-    foreach id {authname user pass getrealm} {
-	lappend callbacks [list $id [list [namespace current]::sasl_callback \
-	  $jlibname]]
-    }
+    Debug 2 "jlib::auth_sasl_continue"
     
     if {$cyrussasl} {
+
+	# TclSASL's callback id's seem to be a bit mixed up.
+	foreach id {authname user pass getrealm} {
+	    lappend callbacks [list $id [list [namespace current]::sasl_callback \
+	      $jlibname]]
+	}
 	set sasltoken [sasl::client_new \
 	  -service xmpp -serverFQDN $locals(server) -callbacks $callbacks \
 	  -flags success_data]
     } else {
+	
+	# The saslmd5 package follow the naming convention in RFC 2831
+	foreach id {username authzid pass realm} {
+	    lappend callbacks [list $id [list [namespace current]::saslmd5_callback \
+	      $jlibname]]
+	}
 	set sasltoken [saslmd5::client_new \
 	  -service xmpp -serverFQDN $locals(server) -callbacks $callbacks \
 	  -flags success_data]
     }
     set lib(sasl,token) $sasltoken
-    puts "\t sasl::client_new"
     
     if {$cyrussasl} {
 	$sasltoken -operation setprop -property sec_props \
 	  -value {min_ssf 0 max_ssf 0 flags {noplaintext}}
-	puts "\t -operation setprop"
-	puts "\t sasl::info sec_flags=[sasl::info sec_flags]"
-	puts "\t sasl::mechanisms=[sasl::mechanisms]"
     } else {
 	$sasltoken setprop sec_props {min_ssf 0 max_ssf 0 flags {noplaintext}}
-	puts "\t saslmd5::mechanisms=[saslmd5::mechanisms]"
     }
     
     # Returns a serialized array if succesful.
@@ -153,8 +155,7 @@ proc jlib::auth_sasl_continue {jlibname} {
 	set code [lindex $ans 0]
 	set out  [lindex $ans 1]
     }
-    puts "\t -operation start: code=$code, out=$out"
-    puts $::errorInfo
+    Debug 4 "\t -operation start: code=$code, out=$out"
     
     switch -- $code {
 	0 {	    
@@ -175,8 +176,6 @@ proc jlib::auth_sasl_continue {jlibname} {
 	}
 	default {
 	    # This is an error
-	    #puts "\t errdetail: [$sasltoken -operation errdetail]"
-	    
 	    # We should perhaps send an abort element here.
 
 	    uplevel #0 $locals(sasl,cmd) $jlibname [list error [list unknown $::errorCode]]
@@ -186,42 +185,84 @@ proc jlib::auth_sasl_continue {jlibname} {
 
 proc jlib::sasl_interact {jlibname data} {
     
-    puts "jlib::sasl_interact"
     # empty
 }
+
+# jlib::sasl_callback --
+# 
+#       TclSASL's callback id's seem to be a bit mixed up.
 
 proc jlib::sasl_callback {jlibname data} {
     
     upvar ${jlibname}::locals locals
 
-    puts "jlib::sasl_callback data=$data"
     array set arr $data
     
     switch -- $arr(id) {
-	authname - authzid {
+	authname {
+	    # username
 	    set value [encoding convertto utf-8 $locals(username)]
 	}
-	user - username {
+	user {
+	    # authzid
 	    set value [encoding convertto utf-8 $locals(myjid2)]
 	}
 	pass {
 	    set value [encoding convertto utf-8 $locals(password)]
 	}
-	getrealm - realm {
+	getrealm {
 	    set value [encoding convertto utf-8 $locals(server)]
 	}
 	default {
 	    set value ""
 	}
     }
-    puts "\t value=$value"
+    return $value
+}
+
+# jlib::saslmd5_callback --
+# 
+#       The saslmd5 package follow the naming convention in RFC 2831.
+
+proc jlib::saslmd5_callback {jlibname data} {
+    
+    upvar ${jlibname}::locals locals
+
+    array set arr $data
+    
+    switch -- $arr(id) {
+	username {
+	    set value [encoding convertto utf-8 $locals(username)]
+	}
+	pass {
+	    set value [encoding convertto utf-8 $locals(password)]
+	}
+	authzid {
+	    
+	    # xmpp-core sect. 6.1:
+	    # As specified in [SASL], the initiating entity MUST NOT provide an
+	    # authorization identity unless the authorization identity is
+	    # different from the default authorization identity derived from
+	    # the authentication identity as described in [SASL].
+	    
+	    #set value [encoding convertto utf-8 $locals(myjid2)]
+	    set value ""
+	}
+	realm {
+	    set value [encoding convertto utf-8 $locals(server)]
+	}
+	default {
+	    set value ""
+	}
+    }
+    Debug 4 "jlib::saslmd5_callback id=$arr(id), value=$value"
     return $value
 }
 
 proc jlib::sasl_challenge {jlibname tag xmllist} {
     variable xmppns
     
-    puts "jlib::sasl_challenge"
+    Debug 4 "jlib::sasl_challenge"
     if {[wrapper::getattribute $xmllist xmlns] == $xmppns(sasl)} {
 	sasl_step $jlibname [wrapper::getcdata $xmllist]
     }
@@ -235,9 +276,8 @@ proc jlib::sasl_step {jlibname serverin64} {
     variable xmppns
     variable cyrussasl
 
-    puts "jlib::sasl_step"
     set serverin [decode64 $serverin64]
-    puts "\t serverin=$serverin"
+    Debug 4 "jlib::sasl_step, serverin=$serverin"
     
     # Note that 'step' returns the output if succesful, not a serialized array!
     if {$cyrussasl} {
@@ -248,8 +288,7 @@ proc jlib::sasl_step {jlibname serverin64} {
     } else {
 	foreach {code output} [$lib(sasl,token) step -input $serverin] {break}
     }
-    puts "\t code=$code"
-    puts "\t output=$output"
+    Debug 4 "\t code=$code \n\t output=$output"
     
     switch -- $code {
 	0 {	    
@@ -278,7 +317,7 @@ proc jlib::sasl_failure {jlibname tag xmllist} {
     upvar ${jlibname}::locals locals
     variable xmppns
 
-    puts "jlib::sasl_failure"
+    Debug 4 "jlib::sasl_failure"
     if {[wrapper::getattribute $xmllist xmlns] == $xmppns(sasl)} {
 	set errtag [lindex [wrapper::getchildren $xmllist] 0]
 	if {$errtag == ""} {
@@ -298,7 +337,7 @@ proc jlib::sasl_success {jlibname tag xmllist} {
     upvar ${jlibname}::opts opts
     variable xmppns
 
-    puts "jlib::sasl_success"
+    Debug 4 "jlib::sasl_success"
     if {[wrapper::getattribute $xmllist xmlns] != $xmppns(sasl)} {
 	return
     }
@@ -333,7 +372,6 @@ proc jlib::auth_sasl_features_write {jlibname name1 name2 op} {
     
     upvar ${jlibname}::locals locals
 
-    puts "jlib::auth_sasl_features_write"
     trace remove variable ${jlibname}::locals(features) write \
       [list [namespace current]::auth_sasl_features_write $jlibname]
 
@@ -345,8 +383,6 @@ proc jlib::resource_bind_cb {jlibname type subiq} {
     
     upvar ${jlibname}::locals locals
     variable xmppns
-
-    puts "jlib::resource_bind_cb type=$type"
     
     switch -- $type {
 	error {
@@ -366,8 +402,6 @@ proc jlib::resource_bind_cb {jlibname type subiq} {
 proc jlib::send_session_cb {jlibname type subiq args} {
 
     upvar ${jlibname}::locals locals
-
-    puts "jlib::send_session_cb type=$type"
     
     switch -- $type {
 	error {
@@ -385,7 +419,7 @@ proc jlib::send_session_cb {jlibname type subiq args} {
 
 proc jlib::sasl_log {args} {
     
-    puts "SASL: $args"
+    Debug 4 "SASL: $args"
 }
 
 proc jlib::sasl_reset {jlibname} {
