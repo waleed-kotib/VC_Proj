@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.53 2004-12-02 08:22:34 matben Exp $
+# $Id: MUC.tcl,v 1.54 2004-12-13 13:39:18 matben Exp $
 
 package require entrycomp
 package require muc
@@ -82,13 +82,13 @@ namespace eval ::MUC:: {
 
 proc ::MUC::Init {jlibName} {
     upvar ::Jabber::jstate jstate
+    upvar ::Jabber::xmppxmlns xmppxmlns
    
     set jstate(muc) [jlib::muc::new $jlibName]
 
-    $jstate(jlib) message_register * "http://jabber.org/protocol/muc#user" \
-      ::MUC::MUCMessage
+    $jstate(jlib) message_register * $xmppxmlns(muc,user) ::MUC::MUCMessage
     
-    ::Jabber::AddClientXmlns [list "http://jabber.org/protocol/muc"]
+    ::Jabber::AddClientXmlns [list $xmppxmlns(muc)]
 }
 
 # MUC::BuildEnter --
@@ -108,6 +108,7 @@ proc ::MUC::BuildEnter {args} {
     variable enteruid
     variable dlguid
     upvar ::Jabber::jstate jstate
+    upvar ::Jabber::xmppxmlns xmppxmlns
     
     array set argsArr {
 	-autobrowse     0
@@ -120,8 +121,7 @@ proc ::MUC::BuildEnter {args} {
     set confServers {}
     set allConfServ [$jstate(jlib) service getconferences]
     foreach serv $allConfServ {
-	if {[$jstate(jlib) service hasfeature $serv  \
-	  "http://jabber.org/protocol/muc"]} {
+	if {[$jstate(jlib) service hasfeature $serv $xmppxmlns(muc)]} {
 	    lappend confServers $serv
 	}
     }

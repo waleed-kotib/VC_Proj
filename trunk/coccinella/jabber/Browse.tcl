@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.67 2004-12-02 08:22:33 matben Exp $
+# $Id: Browse.tcl,v 1.68 2004-12-13 13:39:17 matben Exp $
 
 package provide Browse 1.0
 
@@ -1365,7 +1365,7 @@ proc ::Browse::ParseGet {jlibname from subiq args} {
     set attr [list xmlns jabber:iq:browse jid $jstate(mejidresmap)  \
       type client category user]
     set xmllist [wrapper::createtag "item" -subtags $subtags -attrlist $attr]
-    eval {$jstate(jlib) send_iq "result" $xmllist -to $from} $opts
+    eval {$jstate(jlib) send_iq "result" [list $xmllist] -to $from} $opts
     
     # Tell jlib's iq-handler that we handled the event.
     return 1

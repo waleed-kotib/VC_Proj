@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.44 2004-12-02 08:22:34 matben Exp $
+# $Id: JWB.tcl,v 1.45 2004-12-13 13:39:17 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -34,6 +34,7 @@ proc ::Jabber::WB::Init {jlibName} {
     variable xmlnsSVGWB
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::coccixmlns coccixmlns
+    upvar ::Jabber::xmppxmlns xmppxmlns
     
     ::Debug 4 "::Jabber::WB::Init"
     
@@ -103,7 +104,7 @@ proc ::Jabber::WB::Init {jlibName} {
     set rule2 [wrapper::createtag "rule"  \
       -attrlist {condition match-resource value exact action error}]
     set ampElem [wrapper::createtag "amp" -attrlist \
-      {xmlns http://jabber.org/protocol/amp} -subtags [list $rule2]]
+      [list xmlns $xmppxmlns(amp)] -subtags [list $rule2]]
 }
 
 proc ::Jabber::WB::InitUI { } {
