@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.33 2004-05-28 12:42:24 matben Exp $
+# $Id: Login.tcl,v 1.34 2004-06-11 07:44:44 matben Exp $
 
 package provide Login 1.0
 
@@ -137,19 +137,20 @@ proc ::Jabber::Login::Login { } {
     checkbutton $wfrmore.cinv  \
       -text "  [::msgcat::mc {Login as invisible}]"  \
       -variable [namespace current]::invisible
-    frame $wfrmore.fpri
-    pack [label $wfrmore.fpri.l -text "[::msgcat::mc {Priority}]:"] -side left
-    pack [spinbox $wfrmore.fpri.sp -textvariable [namespace current]::priority \
-      -width 5 -state readonly -increment 1 -from -128 -to 127] -side left -padx 4
-    frame $wfrmore.fr
-    pack [label $wfrmore.fr.l -text "[::msgcat::mc {IP address}]:"] -side left
-    pack [entry $wfrmore.fr.e -textvariable [namespace current]::ip] -side left
+    
+    set fsub [frame $wfrmore.fsub]
+    label $fsub.lp -text "[::msgcat::mc {Priority}]:"
+    spinbox $fsub.sp -textvariable [namespace current]::priority \
+      -width 5 -state readonly -increment 1 -from -128 -to 127
+    label $fsub.lip -text "[::msgcat::mc {IP address}]:"
+    entry $fsub.eip -textvariable [namespace current]::ip
+    grid $fsub.lp  $fsub.sp  -sticky w
+    grid $fsub.lip $fsub.eip -sticky w
 
     grid $wfrmore.cdig -sticky w -pady 2
     grid $wfrmore.cssl -sticky w -pady 2
     grid $wfrmore.cinv -sticky w -pady 2
-    grid $wfrmore.fpri -sticky w -pady 2
-    grid $wfrmore.fr   -sticky w -pady 2
+    grid $wfrmore.fsub -sticky w -pady 2
 
     if {!$prefs(tls)} {
 	set ssl 0
@@ -190,6 +191,8 @@ proc ::Jabber::Login::LoadProfiles { } {
     variable username
     variable password
     variable resource
+    variable ssl
+    variable sasl
     variable wpopupMenu
     
     if {![winfo exists $wDlgs(jlogin)]} {
@@ -201,14 +204,16 @@ proc ::Jabber::Login::LoadProfiles { } {
 	$wpopupMenu add command -label $name \
 	  -command [list set [namespace current]::menuVar $name]
     }
-    set profile     [::Profiles::GetSelectedName]
+    set profile [::Profiles::GetSelectedName]
     
     # Make temp array for servers. Handy for filling in the entries.
     foreach {name spec} [::Profiles::Get] {
-	set tmpProfArr($name,server)   [lindex $spec 0]
-	set tmpProfArr($name,username) [lindex $spec 1]
-	set tmpProfArr($name,password) [lindex $spec 2]
+	set tmpProfArr($name,server)    [lindex $spec 0]
+	set tmpProfArr($name,username)  [lindex $spec 1]
+	set tmpProfArr($name,password)  [lindex $spec 2]
 	set tmpProfArr($name,-resource) ""
+	set tmpProfArr($name,-ssl)      0
+	set tmpProfArr($name,-sasl)     0
 	foreach {key value} [lrange $spec 3 end] {
 	    set tmpProfArr($name,$key) $value
 	}
@@ -217,25 +222,28 @@ proc ::Jabber::Login::LoadProfiles { } {
 }
 
 proc ::Jabber::Login::TraceMenuVar {name key op} {
+    global  prefs
     
-    # Call by name.
-    upvar #0 $name locName
-
     #puts "::Jabber::Login::TraceMenuVar name=$name"
     variable profile
     variable server
     variable username
     variable password
     variable resource
+    variable ssl
+    variable sasl
     variable menuVar
     variable tmpProfArr
     
-    #set profile  $locName
     set profile  [set $name]
     set server   $tmpProfArr($profile,server)
     set username $tmpProfArr($profile,username)
     set password $tmpProfArr($profile,password)
     set resource $tmpProfArr($profile,-resource)
+    if {$prefs(tls)} {
+	set ssl  $tmpProfArr($profile,-ssl)
+    }
+    set sasl     $tmpProfArr($profile,-sasl)
     
     #::Debug 3 "TraceMenuVar: locName=$locName, menuVar=$menuVar"
     #::Debug 3 "\t[parray tmpProfArr $locName,*]"

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.58 2004-06-06 07:02:22 matben Exp $
+# $Id: UI.tcl,v 1.59 2004-06-11 07:44:44 matben Exp $
 
 package require entrycomp
 
@@ -74,10 +74,10 @@ proc ::UI::InitMenuDefs { } {
     }
 }
 
-proc ::UI::GetIcon {name} {
-    
-    return [::Theme::GetImageFromExisting $name ::UI::icons]
-}
+#proc ::UI::GetIcon {name} {
+#    
+#    return [::Theme::GetImageFromExisting $name ::UI::icons]
+#}
 
 proc ::UI::GetIcon {name} {
     variable icons

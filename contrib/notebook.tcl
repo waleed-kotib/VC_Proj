@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: notebook.tcl,v 1.5 2004-06-09 14:26:17 matben Exp $
+# $Id: notebook.tcl,v 1.6 2004-06-11 07:44:43 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -26,7 +26,7 @@
 #      pathName cget option
 #      pathName configure ?option? ?value option value ...?
 #      pathName deletepage pageName
-#      pathName displaypage pageName
+#      pathName displaypage ?pageName?
 #      pathName page pageName
 #      pathName pages
 #
@@ -222,10 +222,13 @@ proc ::notebook::WidgetProc {w command args} {
 	    set result [eval {DeletePage $w} $args]
 	}
 	displaypage {
-	    if {[llength $args] != 1} {
-		return -code error "wrong # args: should be $w displaypage pageName"
+	    if {[llength $args] == 0} {
+		return $nbInfo(display)
+	    } elseif {[llength $args] == 1} {
+		set result [eval {Display $w} $args]
+	    } else {
+		return -code error "wrong # args: should be $w displaypage ?pageName?"
 	    }
-	    set result [eval {Display $w} $args]
 	}
 	page {
 	    set result [eval {Page $w} $args]

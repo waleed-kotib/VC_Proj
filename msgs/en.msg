@@ -420,6 +420,7 @@
 ::msgcat::mcset en {Postal Code}
 ::msgcat::mcset en {Preferred Protocol}
 ::msgcat::mcset en {Presence Error}
+::msgcat::mcset en {Profile Name}
 ::msgcat::mcset en {Proxy Setup}
 ::msgcat::mcset en {Put File Error}
 ::msgcat::mcset en {Put Image/Movie}
@@ -842,6 +843,7 @@ is limited by user's settings below.}
 ::msgcat::mcset en prefplugctrl  {You may unselect any of these packages if\
 you don't want them loaded. You must relaunch for this to take effect.}
 ::msgcat::mcset en prefchactret  {Always use active <Return> in chat dialog}
+::msgcat::mcset en prefprofname  {Enter desired name of user profile}
 
 
 

@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.46 2004-06-08 14:03:33 matben Exp $
+# $Id: jabberlib.tcl,v 1.47 2004-06-11 07:44:44 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -830,24 +830,6 @@ proc jlib::iq_handler {jlibname xmldata} {
 	    }
 	}
 	error {
-	    if {0} {
-		# We should have a single error element here.
-		# There is an open question here if <error/> elements can sit
-		# in other branches of the xml tree.
-		set errcode {}
-		set errmsg {}
-		foreach errorchild $childlist {
-		    if {[string equal [wrapper::gettag $errorchild] "error"]} {
-			
-			# Found it!
-			set cchdata [wrapper::getcdata $errorchild]
-			set errcode [wrapper::getattribute $errorchild "code"]
-			set errmsg $cchdata
-			break
-		    }
-		}
-	    }
-
 	    set errspec [jlib::geterrorspec $xmldata]
 	    if {[info exists id] && [info exists iqcmd($id)]} {
 		uplevel #0 $iqcmd($id) [list error $errspec]
@@ -942,6 +924,13 @@ proc jlib::message_handler {jlibname xmldata} {
 	lappend arglist -$key $value
     }
     set ishandled 0
+    
+    switch -- $type {
+	error {
+	    set errspec [jlib::geterrorspec $xmldata]
+	    lappend arglist -error $errspec
+	}
+    }
    
     # Extract the message sub-elements.
     set x {}
@@ -955,10 +944,6 @@ proc jlib::message_handler {jlibname xmldata} {
 	switch -- $ctag {
 	    body - subject - thread {
 		lappend arglist -$ctag $cchdata
-	    }
-	    error {
-		set errcode [wrapper::getattribute $child "code"]
-		lappend arglist -error [list $errcode $cchdata]
 	    }
 	    x {
 		lappend x $child
