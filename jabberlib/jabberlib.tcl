@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.45 2004-06-06 15:42:49 matben Exp $
+# $Id: jabberlib.tcl,v 1.46 2004-06-08 14:03:33 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -207,6 +207,7 @@ package require wrapper
 package require roster
 package require service
 package require muc
+package require stanzaerror
 
 package provide jlib 2.0
 
@@ -773,6 +774,7 @@ proc jlib::iq_handler {jlibname xmldata} {
     }
     
     # The child must be a single <query> element (or any namespaced element).
+    # WRONG WRONG !!!!!!!!!!!!!!!
     set childlist [wrapper::getchildren $xmldata]
     set subiq [lindex $childlist 0]
     set xmlns [wrapper::getattribute $subiq xmlns]
@@ -828,24 +830,27 @@ proc jlib::iq_handler {jlibname xmldata} {
 	    }
 	}
 	error {
-	    
-	    # We should have a single error element here.
-	    # There is an open question here if <error/> elements can sit
-	    # in other branches of the xml tree.
-	    set errcode {}
-	    set errmsg {}
-	    foreach errorchild $childlist {
-		if {[string equal [wrapper::gettag $errorchild] "error"]} {
-		    
-		    # Found it!
-		    set cchdata [wrapper::getcdata $errorchild]
-		    set errcode [wrapper::getattribute $errorchild "code"]
-		    set errmsg $cchdata
-		    break
+	    if {0} {
+		# We should have a single error element here.
+		# There is an open question here if <error/> elements can sit
+		# in other branches of the xml tree.
+		set errcode {}
+		set errmsg {}
+		foreach errorchild $childlist {
+		    if {[string equal [wrapper::gettag $errorchild] "error"]} {
+			
+			# Found it!
+			set cchdata [wrapper::getcdata $errorchild]
+			set errcode [wrapper::getattribute $errorchild "code"]
+			set errmsg $cchdata
+			break
+		    }
 		}
 	    }
+
+	    set errspec [jlib::geterrorspec $xmldata]
 	    if {[info exists id] && [info exists iqcmd($id)]} {
-		uplevel #0 $iqcmd($id) [list error [list $errcode $errmsg]]
+		uplevel #0 $iqcmd($id) [list error $errspec]
 		catch {unset iqcmd($id)}
 		set ishandled 1
 	    }	    
@@ -1203,6 +1208,86 @@ proc jlib::reset {jlibname} {
     set lib(isinstream) 0
     set locals(status) "unavailable"
     set locals(myjid) ""
+}
+
+# jlib::geterrorspec --
+# 
+#       Extracts the error code and an error message from an type='error'
+#       element. We must handle both the original Jabber protocol and the
+#       XMPP protocol:
+#
+#   The syntax for stanza-related errors is as follows (XMPP):
+#
+#   <stanza-kind to='sender' type='error'>
+#     [RECOMMENDED to include sender XML here]
+#     <error type='error-type'>
+#       <defined-condition xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'/>
+#       <text xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'>
+#         OPTIONAL descriptive text
+#       </text>
+#       [OPTIONAL application-specific condition element]
+#     </error>
+#   </stanza-kind>
+#   
+#   Jabber:
+#   
+#   <iq type='error'>
+#     <query ...>
+#       <error code='..'> ... </error>
+#     </query>
+#   </iq>
+
+proc jlib::geterrorspec {iqelem} {
+    
+    set errcode {}
+    set errmsg  {}
+    set xmppstanza "urn:ietf:params:xml:ns:xmpp-stanzas"
+    
+    # First search children of <iq> element (XMPP).
+    foreach subiq [wrapper::getchildren $iqelem] {
+	set tag [wrapper::gettag $subiq]
+	if {[string equal $tag "error"]} {
+	    set errelem $subiq
+	}
+	if {[string equal $tag "query"]} {
+	    set queryelem $subiq
+	}
+    }
+    if {![info exists errelem] && [info exists queryelem]} {
+	
+	# Search children if <query> element (Jabber).
+	set errlist [wrapper::getchildswithtag $queryelem "error"]
+	if {[llength $errlist]} {
+	    set errelem [lindex $errlist 0]
+	}
+    }
+	
+    # Found it! XMPP contains an error stanza and not pure text.
+    if {[info exists errelem]} {
+	set errcode [wrapper::getattribute $errelem "code"]
+	set cchdata [wrapper::getcdata $errelem]
+	if {[string length $cchdata] > 0} {		
+	    set errmsg $cchdata
+	} else {
+	    foreach c [wrapper::getchildren $errelem] {
+		set tag [wrapper::gettag $c]
+		if {[string equal $tag "text"]} {
+		    set xmlns [wrapper::getattribute $c xmlns]
+		    if {[string equal $xmlns $xmppstanza]} {
+			set errmsg [wrapper::getcdata $c]
+			break
+		    }
+		} else {
+		    set xmlns [wrapper::getattribute $c xmlns]
+		    if {[string equal $xmlns $xmppstanza]} {
+			set errmsg [stanzaerror::getmsg $tag]
+			break
+		    }		    
+		}
+	    }
+	}
+    }
+    return [list $errcode $errmsg]
 }
    
 # jlib::parse_iq_response --

@@ -1,6 +1,6 @@
 #  Copyright (c) 2002  Mats Bengtsson
 #
-# $Id: fontselection.tcl,v 1.8 2004-06-07 13:43:55 matben Exp $
+# $Id: fontselection.tcl,v 1.9 2004-06-08 14:03:32 matben Exp $
 
 package require combobox
 
@@ -9,6 +9,7 @@ package provide fontselection 1.0
 namespace eval ::fontselection:: {
     
     variable options
+    variable prefs
     
     set options {
 	-defaultfont    {Helvetica 12 normal}
@@ -19,6 +20,7 @@ namespace eval ::fontselection:: {
 proc ::fontselection::fontselection {w args} {
     global  tcl_platform
 
+    variable prefs
     variable finished
     variable options
     variable opts
@@ -27,18 +29,27 @@ proc ::fontselection::fontselection {w args} {
     variable font
     variable size
     variable weight
-    variable allFonts
+    variable fontFamilies
     
     if {[winfo exists $w]} {
 	return
     }
     toplevel $w
-    if {[string equal $tcl_platform(platform) "macintosh"]} {
-	::tk::unsupported::MacWindowStyle style $w documentProc
+    switch -- $tcl_platform(platform) {
+	unix {
+	    if {[string equal [tk windowingsystem] "aqua"]} {
+		::tk::unsupported::MacWindowStyle style $w document closeBox
+	    }
+	}
+	macintosh {
+	    ::tk::unsupported::MacWindowStyle style $w documentProc
+	}
     }
     
     wm title $w [::msgcat::mc {Select Font}]
-    set finished 0
+    wm protocol $w WM_DELETE_WINDOW [list [namespace current]::Close $w]
+    
+    set finished -1
     array set opts $options
     array set opts $args
     array set defaultFontArr [font actual $opts(-defaultfont)]
@@ -55,7 +66,11 @@ proc ::fontselection::fontselection {w args} {
     
     # System fonts.
     set font $initialFontArr(-family)
-    set allFonts [lsort [font families]]
+    
+    # Cache font families since can be slow.
+    if {![info exists fontFamilies]} {
+	set fontFamilies [font families]
+    }
     set frfont $w.frall.frtop.font
     frame $frfont
     pack $frfont -side left -fill y -padx 4 -pady 4
@@ -63,9 +78,9 @@ proc ::fontselection::fontselection {w args} {
     set ysc $frfont.ysc
     listbox $wlb -width 28 -height 10 -yscrollcommand [list $ysc set]
     scrollbar $ysc -orient vertical -command [list $wlb yview]
-    set ind [lsearch $allFonts $initialFontArr(-family)]
+    set ind [lsearch $fontFamilies $initialFontArr(-family)]
     pack $wlb $ysc -side left -fill y
-    eval $wlb insert 0 $allFonts
+    eval $wlb insert 0 $fontFamilies
 
     # Font size, weight etc.
     set frprop $w.frall.frtop.prop
@@ -102,10 +117,10 @@ proc ::fontselection::fontselection {w args} {
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
     pack [button $frbot.btset -text [::msgcat::mc Select] -default active  \
-      -command "set [namespace current]::finished 1"]  \
+      -command [list [namespace current]::OK $w]]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
-      -command "set [namespace current]::finished 2"]  \
+      -command [list [namespace current]::Cancel $w]]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btdef -text [::msgcat::mc Default]  \
       -command [namespace current]::SetDefault]  \
@@ -113,6 +128,10 @@ proc ::fontselection::fontselection {w args} {
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
     
     wm resizable $w 0 0
+    if {[info exists prefs(winGeom)]} {
+	regexp {^[^+-]+((\+|-).+$)} $prefs(winGeom) match pos
+	wm geometry $w $pos
+    }
     bind $w   <Return> {}
     bind $wlb <<ListboxSelect>> "[namespace current]::Select $wlb font"
     bind $wlb <Button-1> {+ focus %W}
@@ -130,7 +149,7 @@ proc ::fontselection::fontselection {w args} {
     catch {grab $w}
     
     # Wait here for a button press.
-    tkwait variable [namespace current]::finished
+    tkwait window $w
     
     catch {grab release $w}
     catch {destroy $w}
@@ -172,7 +191,7 @@ proc ::fontselection::SetDefault { } {
     variable font
     variable size
     variable weight
-    variable allFonts
+    variable fontFamilies
 
     if {$opts(-defaultfont) != ""} {
 	array set defaultFontArr [font actual $opts(-defaultfont)]
@@ -180,7 +199,7 @@ proc ::fontselection::SetDefault { } {
 	set size   $defaultFontArr(-size)
 	set weight $defaultFontArr(-weight)
     }
-    set ind [lsearch $allFonts $font]
+    set ind [lsearch $fontFamilies $font]
     $wlb selection clear 0 end
     if {$ind >= 0} {
 	$wlb selection set $ind
@@ -189,6 +208,27 @@ proc ::fontselection::SetDefault { } {
 	$wlb selection set 0
 	$wlb see 0
     }
+}
+
+proc ::fontselection::OK {w} {
+    variable finished
+    
+    set finished 1
+    ::fontselection::Close $w
+}
+
+proc ::fontselection::Cancel {w} {
+    variable finished
+    
+    set finished 0
+    ::fontselection::Close $w
+}
+
+proc ::fontselection::Close {w} {
+    variable prefs
+
+    set prefs(winGeom) [wm geometry $w]
+    destroy $w
 }
 
 #-------------------------------------------------------------------------------

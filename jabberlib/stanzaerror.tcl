@@ -5,16 +5,18 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: stanzaerror.tcl,v 1.1 2004-06-07 14:26:04 matben Exp $
+# $Id: stanzaerror.tcl,v 1.2 2004-06-08 14:03:34 matben Exp $
 # 
+
+package provide stanzaerror 1.0
 
 namespace eval stanzaerror {
     
     # This maps Defined Conditions to clear text messages.
     # draft-iietf-xmpp-core23; 9.3.3 Defined Conditions
     
-    variable priv
-    array set priv {
+    variable conditionMsg
+    array set conditionMsg {
 	bad-request	      {the sender has sent XML that is malformed or\
 	  that cannot be processed}
 	conflict	      {access cannot be granted because an existing\
@@ -72,10 +74,10 @@ namespace eval stanzaerror {
 #       Return the english clear text message from a defined-condition.
 
 proc stanzaerror::getmsg {condition} {
-    variable priv
+    variable conditionMsg
 
-    if {[info exists priv($condition)]} {
-	return $priv($condition)
+    if {[info exists conditionMsg($condition)]} {
+	return $conditionMsg($condition)
     } else {
 	return ""
     }

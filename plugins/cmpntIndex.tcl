@@ -2,6 +2,7 @@
 #
 
 component::attempt Speech     [file join $dir Speech.tcl]     ::Speech::Load    
+component::attempt Sounds     [file join $dir Sounds.tcl]     ::Sounds::Load    
 component::attempt ImageMagic [file join $dir ImageMagic.tcl] ::ImageMagic::Init
 
 # Problem to determine if app hidden or not!

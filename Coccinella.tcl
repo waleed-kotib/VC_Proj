@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.59 2004-06-06 15:42:49 matben Exp $
+# $Id: Coccinella.tcl,v 1.60 2004-06-08 14:03:32 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -483,8 +483,7 @@ if {$prefs(Thread)} {
 if {!$prefs(stripJabber)} {
     ::SplashScreen::SetMsg [::msgcat::mc splashsourcejabb]
     package require Jabber
-    package require VCard
-    package require Sounds
+    #package require Sounds
 }
 
 # Beware! [info hostname] can be very slow on Macs first time it is called.
