@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.31 2004-06-16 14:17:31 matben Exp $
+# $Id: OOB.tcl,v 1.32 2004-06-30 14:25:56 matben Exp $
 
 package provide OOB 1.0
 
@@ -252,6 +252,7 @@ proc ::Jabber::OOB::ParseSet {jlibname from subiq args} {
     variable locals
     
     array set argsArr $args
+    set ishandled 0
     
     # Be sure to trace any 'id' attribute for confirmation.
     if {[info exists argsArr(-id)]} {
@@ -269,14 +270,14 @@ proc ::Jabber::OOB::ParseSet {jlibname from subiq args} {
 	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
 	  -message [FormatTextForMessageBox \
 	  [::msgcat::mc jamessoobnourl $from]]
-	return
+	return $ishandled
     }
     set tail [file tail [::Utils::GetFilePathFromUrl $url]]
     set ans [tk_messageBox -title [::msgcat::mc {Get File}] -icon info  \
       -type yesno -default yes -message [FormatTextForMessageBox \
       [::msgcat::mc jamessoobask $from $tail $desc]]]
     if {$ans == "no"} {
-	return
+	return $ishandled
     }
     
     # Validate URL, determine the server host and port.
@@ -285,7 +286,7 @@ proc ::Jabber::OOB::ParseSet {jlibname from subiq args} {
 	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
 	  -message [FormatTextForMessageBox \
 	  [::msgcat::mc jamessoobbad $from $url]]
-	return
+	return $ishandled
     }
     if {[string length $proto] == 0} {
 	set proto http
@@ -294,16 +295,18 @@ proc ::Jabber::OOB::ParseSet {jlibname from subiq args} {
 	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
 	  -message [FormatTextForMessageBox \
 	  [::msgcat::mc jamessoonnohttp $from $proto]]
-	return
+	return $ishandled
     }
     set localPath [tk_getSaveFile -title [::msgcat::mc {Save File}] \
       -initialfile $tail]
     if {[string length $localPath] == 0} {
-	return
+	return $ishandled
     }
     
     # And get it.
     ::Jabber::OOB::Get $from $url $localPath $id
+    set ishandled 1
+    return $ishandled
 }
 
 proc ::Jabber::OOB::Get {jid url file id} {
