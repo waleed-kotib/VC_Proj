@@ -722,7 +722,11 @@ be lost when closing this chat whiteboard. Do you actually want to end this chat
 and the message is therfore not sent.}
 ::msgcat::mcset en jamessregloginok             {You are now registered and\
 automatically logged on as "%s"}
-
+::msgcat::mcset en jamessregerrinuse            {The registration failed\
+because this username is already in use by another user. If this user is you,\
+try to login instead. Error message: %s}
+::msgcat::mcset en jamessregerr                 {The registration failed\
+with error message: %s}
 
 }
 

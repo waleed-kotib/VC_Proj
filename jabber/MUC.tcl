@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.35 2004-05-26 07:36:36 matben Exp $
+# $Id: MUC.tcl,v 1.36 2004-06-13 13:43:25 matben Exp $
 
 package require entrycomp
 
@@ -1654,7 +1654,7 @@ proc ::Jabber::MUC::DoRoomConfig {roomjid w} {
     set subelements [::Jabber::Forms::GetScrollForm $wbox]
     
     if {[catch {
-	::Jabber::JlibCmd muc setroom $roomjid form -form $subelements \
+	::Jabber::JlibCmd muc setroom $roomjid submit -form $subelements \
 	  -command [list [namespace current]::RoomConfigResult $roomjid]
     }]} {
 	tk_messageBox -type ok -icon error -title "Network Error" \

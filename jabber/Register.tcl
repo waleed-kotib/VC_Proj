@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.20 2004-06-12 15:35:18 matben Exp $
+# $Id: Register.tcl,v 1.21 2004-06-13 13:43:25 matben Exp $
 
 package provide Register 1.0
 
@@ -278,13 +278,9 @@ proc ::Jabber::Register::SendRegisterCB {jlibName type theQuery} {
 	set errcode [lindex $theQuery 0]
 	set errmsg [lindex $theQuery 1]
 	if {$errcode == 409} {
-	    set msg "The registration failed with the error code $errcode\
-	      message: \"$errmsg\",\
-	      because this username is already in use by another user.\
-	      If this user is you, try to login instead."
+	    set msg [::msgcat::mc jamessregerrinuse $errmsg]
 	} else {
-	    set msg "The registration failed with the error code $errcode and\
-	      message: \"$errmsg\""
+	    set msg [::msgcat::mc jamessregerr $errmsg]
 	}
 	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
 	  -message [FormatTextForMessageBox $msg]

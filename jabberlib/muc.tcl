@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: muc.tcl,v 1.9 2004-04-15 05:55:19 matben Exp $
+# $Id: muc.tcl,v 1.10 2004-06-13 13:43:25 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -357,12 +357,16 @@ proc jlib::muc::parse_create {roomjid jlibname type args} {
 
 # jlib::muc::setroom --
 # 
-# 
+#       Sends an iq set element to room. If -form the 'type' argument is
+#       omitted.
+#       
 # Arguments:
 #       jlibname    name of jabberlib instance.
 #       roomjid     the rooms jid.
-#       type        typically 'form'.
-#       args        -command, -form.
+#       type        typically 'submit' or 'cancel'.
+#       args:        
+#           -command 
+#           -form   xmllist starting with the x-element
 #       
 # Results:
 #       None.
@@ -378,16 +382,17 @@ proc jlib::muc::setroom {jlibname roomjid type args} {
 		  [list [namespace parent]::parse_iq_response $jlibname $value]
 	    }
 	    -form {
-		set subelements $value
+		set xelem $value
 	    }
 	    default {
 		return -code error "Unrecognized option \"$name\""
 	    }
 	}
     }
-    set xelem [list [wrapper::createtag "x"  \
-      -attrlist [list xmlns "jabber:x:data" type $type]  \
-      -subtags $subelements]]
+    if {[llength $xelem] == 0} {
+	set xelem [list [wrapper::createtag "x"  \
+	  -attrlist [list xmlns "jabber:x:data" type $type]]]
+    }
     set xmllist [wrapper::createtag "query" -subtags $xelem \
       -attrlist {xmlns "http://jabber.org/protocol/muc#owner"}]
     eval {[namespace parent]::send_iq $jlibname "set" $xmllist -to $roomjid} \

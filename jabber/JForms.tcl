@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #
-# $Id: JForms.tcl,v 1.11 2004-01-13 14:50:20 matben Exp $
+# $Id: JForms.tcl,v 1.12 2004-06-13 13:43:25 matben Exp $
 # 
 #      Updated to version 2.1 of JEP-0004
 #  
@@ -189,6 +189,9 @@ proc ::Jabber::Forms::GetReported {w} {
 #
 # Arguments:
 #       w           the form frame widget.
+#       
+# Results:
+#       a list of elements if simple, else starting with the x-element.
 
 proc ::Jabber::Forms::GetXML {w} {
     
@@ -208,7 +211,7 @@ proc ::Jabber::Forms::GetXML {w} {
 	default {
 	    return -code error "Type \"$locals($w,type)\" is not a valid form type"
 	}
-    }    
+    }
     return $xmlForm
 }
 
@@ -609,7 +612,8 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
 			text $wtxt -height 3 -wrap word \
 			  -yscrollcommand [list $wsc set] -width 40
 			scrollbar $wsc -orient vertical  \
-			  -command [list $wtxt yview]			
+			  -command [list $wtxt yview]
+			$wtxt insert end $defvalue
 
 			grid $wtxt -column 0 -row 0 -sticky news
 			grid $wsc -column 1 -row 0 -sticky ns
@@ -812,6 +816,7 @@ proc ::Jabber::Forms::GetXMLXData {w} {
     }
     set id $locals($w,id)
     set xmllist {}
+    set wsp_ {\n\t }
     
     # Submit all nonempty entries.
     foreach key [array names type "$id,*"] {
@@ -845,7 +850,8 @@ proc ::Jabber::Forms::GetXMLXData {w} {
 		}
 	    }
 	    text-multi {
-		set value [$w.f${var}.txt get 1.0 end]		
+		set value [$w.f${var}.txt get 1.0 end]
+		set value [string trimright $value $wsp_]
 		set subtags [list [wrapper::createtag value -chdata $value]]
 	    }
 	    hidden {
