@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.27 2004-08-28 07:00:07 matben Exp $
+# $Id: Disco.tcl,v 1.28 2004-09-26 13:52:01 matben Exp $
 
 package provide Disco 1.0
 
@@ -333,8 +333,10 @@ proc ::Jabber::Disco::IsDirCategory {jid} {
 #       none
 
 proc ::Jabber::Disco::ParseGetInfo {from subiq args} {
+    global  prefs
     variable xmlns
     upvar ::Jabber::jstate jstate
+    upvar ::Jabber::privatexmlns privatexmlns
 
     ::Debug 2 "::Jabber::Disco::ParseGetInfo: args='$args'"
     
@@ -345,18 +347,33 @@ proc ::Jabber::Disco::ParseGetInfo {from subiq args} {
     if {[info exists argsArr(-id)]} {
 	set opts [list -id $argsArr(-id)]
     }
+    set node [wrapper::getattribute $subiq node]
 
-    # Adding private namespaces.
-    set vars {}
-    foreach ns [::Jabber::GetClientXmlnsList] {
-	lappend vars $ns
+    if {$node == ""} {
+	    
+	# No node. Adding private namespaces.
+	set vars {}
+	foreach ns [::Jabber::GetClientXmlnsList] {
+	    lappend vars $ns
+	}
+	set subtags [list [wrapper::createtag "identity" -attrlist  \
+	  [list category user type client name Coccinella]]]
+	foreach var $vars {
+	    lappend subtags [wrapper::createtag "feature" -attrlist [list var $var]]
+	}	
+    } elseif {[string equal $node "$privatexmlns(caps)#$prefs(fullVers)"]} {
+	
+	# Return entity capabilities [JEP 0115]. Version number.
+	# ???
+	set subtags {}
+    } elseif {[string equal $node "$privatexmlns(caps)#ftrans"]} {
+
+	# Return entity capabilities [JEP 0115]. File transfer.
+	# ???
+	set subtags {}
+    } else {
+	set subtags {}
     }
-    set subtags [list [wrapper::createtag "identity" -attrlist  \
-      [list category user type client name Coccinella]]]
-    foreach var $vars {
-	lappend subtags [wrapper::createtag "feature" -attrlist [list var $var]]
-    }
-    
     set attr [list xmlns $xmlns(info)]
     set xmllist [wrapper::createtag "query" -subtags $subtags -attrlist $attr]
     eval {$jstate(jlib) send_iq "result" $xmllist -to $from} $opts

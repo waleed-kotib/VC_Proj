@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: jlibsasl.tcl,v 1.5 2004-09-19 07:24:23 matben Exp $
+# $Id: jlibsasl.tcl,v 1.6 2004-09-26 13:52:02 matben Exp $
 
 # We need to be flexible here since can have cyrus based sasl or our 
 # own special pure tcl saslmd5.
@@ -100,6 +100,7 @@ proc jlib::auth_sasl {jlibname username resource password cmd} {
 proc jlib::auth_sasl_mechanisms_write {jlibname name1 name2 op} {
     
     Debug 2 "jlib::auth_sasl_mechanisms_write"
+    
     trace remove variable ${jlibname}::locals(features,mechanisms) write \
       [list [namespace current]::auth_sasl_mechanisms_write $jlibname]
     auth_sasl_continue $jlibname
@@ -155,7 +156,7 @@ proc jlib::auth_sasl_continue {jlibname} {
 	set code [lindex $ans 0]
 	set out  [lindex $ans 1]
     }
-    Debug 4 "\t -operation start: code=$code, out=$out"
+    Debug 2 "\t -operation start: code=$code, out=$out"
     
     switch -- $code {
 	0 {	    
@@ -177,8 +178,7 @@ proc jlib::auth_sasl_continue {jlibname} {
 	default {
 	    # This is an error
 	    # We should perhaps send an abort element here.
-
-	    uplevel #0 $locals(sasl,cmd) $jlibname [list error [list unknown $::errorCode]]
+	    sasl_final $jlibname error [list {} $out]
 	}
     }
 }
@@ -255,14 +255,16 @@ proc jlib::saslmd5_callback {jlibname data} {
 	    set value ""
 	}
     }
-    Debug 4 "jlib::saslmd5_callback id=$arr(id), value=$value"
+    Debug 2 "jlib::saslmd5_callback id=$arr(id), value=$value"
+    
     return $value
 }
 
 proc jlib::sasl_challenge {jlibname tag xmllist} {
     variable xmppns
     
-    Debug 4 "jlib::sasl_challenge"
+    Debug 2 "jlib::sasl_challenge"
+    
     if {[wrapper::getattribute $xmllist xmlns] == $xmppns(sasl)} {
 	sasl_step $jlibname [wrapper::getcdata $xmllist]
     }
@@ -277,7 +279,7 @@ proc jlib::sasl_step {jlibname serverin64} {
     variable cyrussasl
 
     set serverin [decode64 $serverin64]
-    Debug 4 "jlib::sasl_step, serverin=$serverin"
+    Debug 2 "jlib::sasl_step, serverin=$serverin"
     
     # Note that 'step' returns the output if succesful, not a serialized array!
     if {$cyrussasl} {
@@ -288,7 +290,7 @@ proc jlib::sasl_step {jlibname serverin64} {
     } else {
 	foreach {code output} [$lib(sasl,token) step -input $serverin] {break}
     }
-    Debug 4 "\t code=$code \n\t output=$output"
+    Debug 2 "\t code=$code \n\t output=$output"
     
     switch -- $code {
 	0 {	    
@@ -307,7 +309,7 @@ proc jlib::sasl_step {jlibname serverin64} {
 	}
 	default {
 	    #puts "\t errdetail: [$lib(sasl,token) -operation errdetail]"
-	    uplevel #0 $locals(sasl,cmd) $jlibname [list error [list unknown $::errorCode]]
+	    sasl_final $jlibname error [list {} $output]
 	}
     }
 }
@@ -317,15 +319,18 @@ proc jlib::sasl_failure {jlibname tag xmllist} {
     upvar ${jlibname}::locals locals
     variable xmppns
 
-    Debug 4 "jlib::sasl_failure"
+    Debug 2 "jlib::sasl_failure"
+    
     if {[wrapper::getattribute $xmllist xmlns] == $xmppns(sasl)} {
-	set errtag [lindex [wrapper::getchildren $xmllist] 0]
-	if {$errtag == ""} {
+	set errelem [lindex [wrapper::getchildren $xmllist] 0]
+	puts "\t errelem=$errelem"
+	if {$errelem == ""} {
 	    set errmsg "not-authorized"
 	} else {
+	    set errtag [wrapper::gettag $errelem]
 	    set errmsg [sasl_getmsg $errtag]
 	}
-	uplevel #0 $locals(sasl,cmd) $jlibname [list error $errmsg]
+	sasl_final $jlibname error [list {} $errmsg]
     }
     return {}
 }
@@ -337,7 +342,7 @@ proc jlib::sasl_success {jlibname tag xmllist} {
     upvar ${jlibname}::opts opts
     variable xmppns
 
-    Debug 4 "jlib::sasl_success"
+    Debug 2 "jlib::sasl_success"
     if {[wrapper::getattribute $xmllist xmlns] != $xmppns(sasl)} {
 	return
     }
@@ -386,7 +391,7 @@ proc jlib::resource_bind_cb {jlibname type subiq} {
     
     switch -- $type {
 	error {
-	    uplevel #0 $locals(sasl,cmd) [list $jlibname error $subiq]
+	    sasl_final $jlibname error $subiq
 	}
 	default {
 	    
@@ -403,23 +408,26 @@ proc jlib::send_session_cb {jlibname type subiq args} {
 
     upvar ${jlibname}::locals locals
     
-    switch -- $type {
-	error {
-	    uplevel #0 $locals(sasl,cmd) [list $jlibname error $subiq]
-	}
-	default {
+    sasl_final $jlibname $type $subiq
+}
 
-	    # We should be finished with authorization, resource binding and
-	    # session establishment here. 
-	    # Now we are free to send any stanzas.
-	    uplevel #0 $locals(sasl,cmd) [list $jlibname $type $subiq]
-	}
-    }
+proc jlib::sasl_final {jlibname type subiq} {
+    
+    upvar ${jlibname}::locals locals
+    
+    Debug 2 "jlib::sasl_final"
+
+    # In future...
+    #element_deregister $jlibname challenge [namespace current]::sasl_challenge
+    #element_deregister $jlibname failure   [namespace current]::sasl_failure
+    #element_deregister $jlibname success   [namespace current]::sasl_success
+
+    uplevel #0 $locals(sasl,cmd) [list $jlibname $type $subiq]
 }
 
 proc jlib::sasl_log {args} {
     
-    Debug 4 "SASL: $args"
+    Debug 2 "SASL: $args"
 }
 
 proc jlib::sasl_reset {jlibname} {

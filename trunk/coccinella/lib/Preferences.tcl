@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.61 2004-09-21 14:56:21 matben Exp $
+# $Id: Preferences.tcl,v 1.62 2004-09-26 13:52:02 matben Exp $
  
 package require notebook
 package require tree
@@ -671,7 +671,8 @@ proc ::Preferences::Proxies::BuildPage {page} {
     upvar ::Preferences::ypad ypad
     
     foreach key {setNATip NATip \
-      httpproxyserver httpproxyport httpproxyusername httpproxypassword} {
+      httpproxyserver httpproxyport httpproxyauth \
+      httpproxyusername httpproxypassword} {
 	set tmpPrefs($key) $prefs($key)
     }
     

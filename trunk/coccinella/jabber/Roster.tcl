@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.75 2004-09-24 12:14:14 matben Exp $
+# $Id: Roster.tcl,v 1.76 2004-09-26 13:52:02 matben Exp $
 
 package provide Roster 1.0
 
@@ -32,6 +32,8 @@ namespace eval ::Jabber::Roster:: {
 
     option add *Roster.backgroundImage      sky            widgetDefault
     option add *Roster*Tree*dirImage        ""             widgetDefault
+    option add *Roster*Tree*onlineImage     lightbulbon    widgetDefault
+    option add *Roster*Tree*offlineImage    lightbulboff   widgetDefault
     option add *Roster*Tree*groupImage      ""             widgetDefault
     option add *Roster*rootBackground       ""             widgetDefault
     option add *Roster*rootBackgroundBd     0              widgetDefault
@@ -47,6 +49,12 @@ namespace eval ::Jabber::Roster:: {
     # This is needed for the balloons that need a real canvas tag, and that
     # we can't use jid's for this since they may contain special chars (!)!
     variable treeuid 0
+    
+    variable presToNameArr
+    array set presToNameArr {available Online unavailable Offline}
+	
+    # The trees 'directories' which should always be there.
+    variable closedTreeDirs {}
     
     # Mapping from presence/show to icon. 
     # Specials for whiteboard clients and foreign IM systems.
@@ -200,7 +208,7 @@ proc ::Jabber::Roster::BuildToplevel {w} {
     set servtxt {not connected}
 
     # And the real stuff.
-    pack [::Jabber::Roster::Build $w.frall.br] -side top -fill both -expand 1
+    pack [Build $w.frall.br] -side top -fill both -expand 1
     
     wm maxsize $w 320 800
     wm minsize $w 180 240
@@ -226,6 +234,7 @@ proc ::Jabber::Roster::Build {w} {
     variable btrefresh
     variable selItem
     variable wroster
+    variable closedTreeDirs
     upvar ::Jabber::jprefs jprefs
         
     # The frame of class Roster.
@@ -291,14 +300,16 @@ proc ::Jabber::Roster::Build {w} {
     grid columnconfigure $wbox 0 -weight 1
     grid rowconfigure $wbox 0 -weight 1    
     
-    set dirImage [::Theme::GetImage [option get $wtree dirImage {}]]
+    set dirImage     [::Theme::GetImage [option get $wtree dirImage {}]]
+    set onlineImage  [::Theme::GetImage [option get $wtree onlineImage {}]]
+    set offlineImage [::Theme::GetImage [option get $wtree offlineImage {}]]
     
     # Add root tree dirs.
-    foreach gpres $jprefs(treedirs) {
-	eval {$wtree newitem [list $gpres] -dir 1 -text [mc $gpres] \
-	  -tags head -image $dirImage} $rootOpts
-    }
-    foreach gpres $jprefs(closedtreedirs) {
+    eval {$wtree newitem [list Online] -dir 1 -text [mc Online] \
+      -tags head -image $onlineImage} $rootOpts
+    eval {$wtree newitem [list Offline] -dir 1 -text [mc Offline] \
+      -tags head -image $offlineImage} $rootOpts
+    foreach gpres $closedTreeDirs {
 	$wtree itemconfigure [list $gpres] -open 0
     }
     return $w
@@ -320,19 +331,19 @@ proc ::Jabber::Roster::LoginCmd { } {
 
     set server [::Jabber::GetServerJid]
     set ::Jabber::Roster::servtxt $server
-    ::Jabber::Roster::SetUIWhen "connect"
+    SetUIWhen "connect"
 }
 
 proc ::Jabber::Roster::LogoutHook { } {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Roster::SetUIWhen "disconnect"
+    SetUIWhen "disconnect"
 
     # Clear roster and browse windows.
     $jstate(roster) reset
     if {$jprefs(rost,clrLogout)} {
-	::Jabber::Roster::Clear
+	Clear
     }
 }
 
@@ -699,19 +710,20 @@ proc ::Jabber::Roster::PushProc {rostName what {jid {}} args} {
     switch -- $what {
 	presence {
 	    
-	    # We may get presence 'available' with empty resource (ICQ)!
-	    if {![info exists attrArr(-type)]} {
-		puts "\t Error: no type attribute"
-		return
+	    # If no 'type' attribute given "available" is default.
+	    set type "available"
+	    if {[info exists attrArr(-type)]} {
+		set type $attrArr(-type)
 	    }
-	    set type $attrArr(-type)
+	    
+	    # We may get presence 'available' with empty resource (ICQ)!
 	    set jid3 $jid
 	    if {[info exists attrArr(-resource)] &&  \
 	      [string length $attrArr(-resource)]} {
 		set jid3 ${jid}/$attrArr(-resource)
 	    }	    
 	    if {![$jstate(jlib) service isroom $jid]} {
-		eval {::Jabber::Roster::Presence $jid3 $type} $args
+		eval {Presence $jid3 $type} $args
 	    }
 	    
 	    # General type presence hooks.
@@ -735,22 +747,22 @@ proc ::Jabber::Roster::PushProc {rostName what {jid {}} args} {
 	    # Must remove all resources, and jid2 if no resources.
     	    set resList [$jstate(roster) getresources $jid]
 	    foreach res $resList {
-	        ::Jabber::Roster::Remove ${jid}/${res}
+	        Remove ${jid}/${res}
 	    }
 	    if {$resList == ""} {
-	        ::Jabber::Roster::Remove $jid
+	        Remove $jid
 	    }
 	}
 	set {
-	    eval {::Jabber::Roster::SetItem $jid} $args
+	    eval {SetItem $jid} $args
 	}
 	enterroster {
 	    set jstate(inroster) 1
-	    ::Jabber::Roster::Clear
+	    Clear
 	}
 	exitroster {
 	    set jstate(inroster) 0
-	    ::Jabber::Roster::ExitRoster
+	    ExitRoster
 	}
     }
 }
@@ -773,6 +785,7 @@ proc ::Jabber::Roster::Clear { } {
 	$wtree delitem $v -childsonly 1
     }
     catch {$wtree delitem {{Subscription Pending}}}
+    catch {$wtree delitem {{Transports}}}
 }
 
 proc ::Jabber::Roster::ExitRoster { } {
@@ -811,10 +824,10 @@ proc ::Jabber::Roster::SetItem {jid args} {
     if {!$jstate(inroster)} {
     	set resList [$jstate(roster) getresources $jid]
 	foreach res $resList {
-	    ::Jabber::Roster::Remove ${jid}/${res}
+	    Remove ${jid}/${res}
 	}
 	if {$resList == ""} {
-	    ::Jabber::Roster::Remove $jid
+	    Remove $jid
 	}
     }
     
@@ -841,7 +854,7 @@ proc ::Jabber::Roster::SetItem {jid args} {
 	    array set presArr $pres
 	    
 	    # Put in our roster tree.
-	    eval {::Jabber::Roster::PutItemInTree $jid $presArr(-type)} \
+	    eval {PutItemInTree $jid $presArr(-type)} \
 	      $args $pres
 	}
     }
@@ -885,7 +898,7 @@ proc ::Jabber::Roster::Presence {jid presence args} {
     }
     
     # First remove if there, then add in the right tree dir.
-    ::Jabber::Roster::Remove $jid
+    Remove $jid
     
     # Put in our roster tree.
     if {[string equal $presence "unsubscribed"]} {
@@ -896,7 +909,7 @@ proc ::Jabber::Roster::Presence {jid presence args} {
 	    # Think this is already been made from our presence callback proc.
 	    #$jstate(jlib) roster_remove $jid ::Jabber::Roster::PushProc
 	} else {
-	    eval {::Jabber::Roster::PutItemInTree $jid2 $treePres} \
+	    eval {PutItemInTree $jid2 $treePres} \
 	      $itemAttr $args
 	}
     } elseif {[string equal $presence "unavailable"]} {
@@ -912,12 +925,12 @@ proc ::Jabber::Roster::Presence {jid presence args} {
 	# Add only if no other jid2/* available.
 	set jid2Available [$jstate(roster) getpresence $jid2 -type available]
 	if {[llength $jid2Available] == 0} {
-	    eval {::Jabber::Roster::PutItemInTree $jid2 $treePres} $itemAttr \
+	    eval {PutItemInTree $jid2 $treePres} $itemAttr \
 	      $args
 	}
     } else {
 	set treePres $presence
-	eval {::Jabber::Roster::PutItemInTree $jid2 $treePres} $itemAttr $args
+	eval {PutItemInTree $jid2 $treePres} $itemAttr $args
     }
 }
 
@@ -1047,6 +1060,7 @@ proc ::Jabber::Roster::IsCoccinella {jid3} {
 proc ::Jabber::Roster::PutItemInTree {jid presence args} {    
     variable wtree    
     variable treeuid
+    variable presToNameArr
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::mapShowElemToText mapShowElemToText
@@ -1054,7 +1068,6 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
     ::Debug 3 "::Jabber::Roster::PutItemInTree jid=$jid, presence=$presence, args='$args'"
 
     array set argsArr $args
-    array set gpresarr {available Online unavailable Offline}
     
     jlib::splitjid $jid jid2 res
 
@@ -1069,39 +1082,72 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
     # Note that some (icq) transports have 3-tier items that are unavailable!
     
     set server [jlib::jidmap $jserver(this)]
-    if {[info exists argsArr(-name)] && ($argsArr(-name) != "")} {
-	set itemTxt $argsArr(-name)
-    } elseif {[regexp "^(\[^@\]+)@${server}" $jid match user]} {
-	set itemTxt $user
-    } else {
-	set itemTxt $jid2
-    }
+
     set jidx $jid
     if {[string equal $presence "available"]} {
 	if {[info exists argsArr(-resource)] && ($argsArr(-resource) != "")} {
-	    append itemTxt " ($argsArr(-resource))"
+	    set appstr " ($argsArr(-resource))"
 	    set jidx ${jid2}/$argsArr(-resource)
 	}
     }
     set mjid [jlib::jidmap $jidx]
     ::Debug 5 "\t jidx=$jidx"
-    
-    set treectag item[incr treeuid]    
-    set itemOpts [list -text $itemTxt -canvastags $treectag]    
-    set icon [eval {GetPresenceIcon $jidx $presence} $args]
-    set groupImage [::Theme::GetImage [option get $wtree groupImage {}]]
 
-    # If we have an ask attribute, put in Pending tree dir.
-    # Make it if not already exists.
-    if {[info exists argsArr(-ask)] &&  \
+    set istrpt [IsTransportHeuristics $jidx]
+
+    # Make display text (itemstr).
+    if {$istrpt} {
+	set itemstr $jidx
+	if {[info exists argsArr(-show)]} {
+	    set show $argsArr(-show)
+	    if {[info exists mapShowElemToText($show)]} {
+		append itemstr " ($mapShowElemToText($show))"
+	    } else {
+		append itemstr " ($show)"
+	    }
+	} elseif {[info exists argsArr(-status)]} {
+	    append itemstr " ($argsArr(-status))"
+	}
+    } else {
+	if {[info exists argsArr(-name)] && ($argsArr(-name) != "")} {
+	    set itemstr $argsArr(-name)
+	} elseif {[regexp "^(\[^@\]+)@${server}" $jid match user]} {
+	    set itemstr $user
+	} else {
+	    set itemstr $jid2
+	}
+	if {[info exists appstr]} {
+	    append itemstr $appstr
+	}
+    }
+    set treectag item[incr treeuid]    
+    set itemOpts   [list -text $itemstr -canvastags $treectag]    
+    set icon       [eval {GetPresenceIcon $jidx $presence} $args]
+    set groupImage [::Theme::GetImage [option get $wtree groupImage {}]]
+    set presName   $presToNameArr($presence)
+    
+    if {$istrpt} {
+	
+	# Transports are treated specially.
+	set transports "Transports"
+	if {![$wtree isitem [list $transports]]} {
+	    $wtree newitem [list $transports] -tags head -dir 1 \
+	      -text [mc $transports]
+	}
+	eval {$wtree newitem [list $transports $jid] -image $icon -tags $mjid} \
+	  $itemOpts
+    } elseif {[info exists argsArr(-ask)] &&  \
       [string equal $argsArr(-ask) "subscribe"]} {
+	
+	# If we have an ask attribute, put in Pending tree dir.
+	# Make it if not already exists.
 	set pending "Subscription Pending"
 	if {![$wtree isitem [list $pending]]} {
 	    $wtree newitem [list $pending] -tags head -dir 1 \
 	      -text [mc $pending]
 	}
-	eval {$wtree newitem [list $pending $jid]  \
-	  -image $icon -tags $mjid} $itemOpts
+	eval {$wtree newitem [list $pending $jid] -image $icon -tags $mjid} \
+	  $itemOpts
     } elseif {[info exists argsArr(-groups)] && ($argsArr(-groups) != "")} {
 	set groups $argsArr(-groups)
 	
@@ -1109,27 +1155,35 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
 	foreach grp $groups {
 	    
 	    # Make group if not exists already.
-	    set childs [$wtree children [list $gpresarr($presence)]]
+	    set childs [$wtree children [list $presName]]
 	    if {[lsearch -exact $childs $grp] < 0} {
-		$wtree newitem [list $gpresarr($presence) $grp] -dir 1 \
+		$wtree newitem [list $presName $grp] -dir 1 \
 		  -tags group -image $groupImage
 	    }
-	    eval {$wtree newitem [list $gpresarr($presence) $grp $jidx] \
+	    eval {$wtree newitem [list $presName $grp $jidx] \
 	      -image $icon -tags $mjid} $itemOpts
 	}
     } else {
 	
 	# No groups associated with this item.
-	eval {$wtree newitem [list $gpresarr($presence) $jidx] \
+	eval {$wtree newitem [list $presName $jidx] \
 	  -image $icon -tags $mjid} $itemOpts
     }
     
     # Design the balloon help window message.
-    if {0 && [info exists argsArr(-name)] && [string length $argsArr(-name)]} {
-	set msg "$argsArr(-name): $gpresarr($presence)"
-    } else {
-	set msg "${jidx}: $gpresarr($presence)"
-    }
+    eval {BalloonMsg $jidx $presence $treectag} $args
+}
+
+proc ::Jabber::Roster::BalloonMsg {jidx presence treectag args} {
+    variable wtree    
+    upvar ::Jabber::jstate jstate
+    upvar ::Jabber::mapShowElemToText mapShowElemToText
+    variable presToNameArr
+
+    array set argsArr $args
+    
+    # Design the balloon help window message.
+    set msg "${jidx}: $presToNameArr($presence)"
     if {[string equal $presence "available"]} {
 	set delay [$jstate(roster) getx $jidx "jabber:x:delay"]
 	if {$delay != ""} {
@@ -1195,6 +1249,17 @@ proc ::Jabber::Roster::GetPresenceIconFromKey {key} {
     }
 }
 
+proc ::Jabber::Roster::GetPresenceIconFromJid {jid} {
+    upvar ::Jabber::jstate jstate
+    
+    jlib::splitjid $jid jid2 res
+    set pres [$jstate(roster) getpresence $jid2 -resource $res]
+    array set presArr $pres
+    puts ".......jid=$jid, jid2=$jid2, res=$res, pres=$pres"
+    
+    return [eval {GetPresenceIcon $jid $presArr(-type)} $pres]
+}
+
 # Jabber::Roster::GetPresenceIcon --
 #
 #       Returns the image appropriate for 'presence', and any 'show' attribute.
@@ -1234,6 +1299,7 @@ proc ::Jabber::Roster::GetPresenceIcon {jid presence args} {
 	    append key ",$subtype"
 	    set haveForeignIM 1
 	}
+	puts "\t cattype=$cattype, key=$key"
     }   
     
     # If whiteboard:
@@ -1251,16 +1317,6 @@ proc ::Jabber::Roster::GetPresenceIcon {jid presence args} {
     }
     
     return $presenceIcon($key)
-}
-
-proc ::Jabber::Roster::GetPresenceIconEx {jid} {
-    upvar ::Jabber::jstate jstate
-    
-    jlib::splitjid $jid jid2 res
-    set pres [$jstate(roster) getpresence $jid2 -resource $res]
-    array set presArr $pres
-    set icon [eval {GetPresenceIcon $jid $presArr(-type)} $pres]
-    return $icon
 }
   
 proc ::Jabber::Roster::GetMyPresenceIcon { } {
@@ -1303,7 +1359,7 @@ proc ::Jabber::Roster::DirectedPresenceDlg {jid} {
     pack [frame $fr -bd 0] -side top -fill x
     pack [label $fr.l -text "[mc Status]:"] -side left -padx 8
     set wmb $fr.mb
-    ::Jabber::Roster::BuildPresenceMenuButton2 $wmb $token\(status)
+    BuildPresenceMenuButton2 $wmb $token\(status)
     pack $wmb -side left -padx 2 -pady 2
     
     # Any status message.   
@@ -1367,7 +1423,7 @@ proc ::Jabber::Roster::BuildPresenceMenuButton2 {w varName} {
     menubutton $w -indicatoron 1 -menu $w.menu \
       -relief raised -bd 2 -highlightthickness 2 -anchor c -direction flush
     menu $w.menu -tearoff 0
-    ::Jabber::Roster::BuildPresenceMenu2 $w $varName
+    BuildPresenceMenu2 $w $varName
     return $w
 }
 
@@ -1418,17 +1474,17 @@ proc ::Jabber::Roster::PresenceMenu2Cmd {w str name varName} {
 proc ::Jabber::Roster::BuildStatusMenuButton {w} {
     
     set wmenu $w.menu
-    button $w -bd 1 -image [::Jabber::Roster::GetMyPresenceIcon] \
+    button $w -bd 1 -image [GetMyPresenceIcon] \
       -width 16 -height 16
     $w configure -state disabled
     menu $wmenu -tearoff 0
-    ::Jabber::Roster::BuildPresenceMenu $wmenu
+    BuildPresenceMenu $wmenu
     return $w
 }
 
 proc ::Jabber::Roster::ConfigStatusMenuButton {w type} {
     
-    $w configure -image [::Jabber::Roster::GetMyPresenceIcon]
+    $w configure -image [GetMyPresenceIcon]
     if {[string equal $type "unavailable"]} {
 	$w configure -state disabled
 	#bind $w <Enter>    {}
@@ -1552,13 +1608,9 @@ proc ::Jabber::Roster::BrowseSetHook {from subiq} {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jserver jserver
     
-    if {!$jprefs(rost,haveIMsysIcons)} {
-	return
-    }
-
     # Fix icons of foreign IM systems.
-    if {[jlib::jidequal $from $jserver(this)]} {
-	::Jabber::Roster::PostProcessIcons
+    if {$jprefs(rost,haveIMsysIcons) && [jlib::jidequal $from $jserver(this)]} {
+	PostProcessIcons $from
     }
 }
 
@@ -1570,32 +1622,8 @@ proc ::Jabber::Roster::DiscoInfoHook {type from subiq args} {
     if {$type == "error"} {
 	return
     }
-    if {!$jprefs(rost,haveIMsysIcons)} {
-	return
-    }
-    set cattype [lindex [$jstate(disco) types $from] 0]
-
-    foreach v [$wtree find withtag all] {
-	set tags [$wtree itemconfigure $v -tags]
-	
-	switch -- $tags {
-	    "" - head - group {
-		# skip
-	    } 
-	    default {
-		set jid [lindex $v end]
-		set mjid [jlib::jidmap $jid]
-		jlib::splitjidex $mjid username host res
-		
-		# Check only those with same host.
-		if {[string equal $from $host]} {
-		    set icon [::Jabber::Roster::GetPresenceIconEx $jid]
-		    if {[string length $icon]} {
-			$wtree itemconfigure $v -image $icon
-		    }
-		}
-	    }
-	}
+    if {$jprefs(rost,haveIMsysIcons)} {
+	PostProcessIcons $from
     }
 }
 
@@ -1606,12 +1634,9 @@ proc ::Jabber::Roster::DiscoInfoHook {type from subiq args} {
 #       info, so we cannot know if an item is an ICQ etc. when putting it
 #       into the roster.
 
-proc ::Jabber::Roster::PostProcessIcons { } {
+proc ::Jabber::Roster::PostProcessIcons {from} {
     variable wtree    
     upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jserver jserver
-
-    set server [jlib::jidmap $jserver(this)]
 
     foreach v [$wtree find withtag all] {
 	set tags [$wtree itemconfigure $v -tags]
@@ -1625,9 +1650,9 @@ proc ::Jabber::Roster::PostProcessIcons { } {
 		set mjid [jlib::jidmap $jid]
 		jlib::splitjidex $mjid username host res
 		
-		# Exclude jid's that belong to our login jabber server.
- 		if {![string equal $server $host]} {
-		    set icon [::Jabber::Roster::GetPresenceIconEx $jid]
+		# Only relevant jid's.
+ 		if {[string equal $from $host]} {
+		    set icon [GetPresenceIconFromJid $jid]
 		    if {[string length $icon]} {
 			$wtree itemconfigure $v -image $icon
 		    }
@@ -1774,6 +1799,19 @@ proc ::Jabber::Roster::IsTransport {jid} {
     return $transport
 }
 
+proc ::Jabber::Roster::IsTransportHeuristics {jid} {
+    upvar ::Jabber::jstate jstate
+    
+    # Some transports (icq) have a jid = icq.jabber.se/registered.
+    set transport 0
+    if {![catch {jlib::splitjidex $jid node host res}]} {
+	if {($node == "") && ($res == "registered")} {
+	    set transport 1
+	}
+    }    
+    return $transport
+}
+
 # Prefs page ...................................................................
 
 proc ::Jabber::Roster::InitPrefsHook { } {
@@ -1804,7 +1842,7 @@ proc ::Jabber::Roster::BuildPrefsHook {wtree nbframe} {
         
     # Roster page ----------------------------------------------------------
     set wpage [$nbframe page {Roster}]
-    ::Jabber::Roster::BuildPageRoster $wpage
+    BuildPageRoster $wpage
 }
 
 proc ::Jabber::Roster::BuildPageRoster {page} {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.30 2004-09-02 13:59:38 matben Exp $
+# $Id: GotMsg.tcl,v 1.31 2004-09-26 13:52:01 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -112,7 +112,7 @@ proc ::Jabber::GotMsg::Show {thisMsgId} {
 	}
 	set prestext $mapShowTextToElem($show)
     }
-    set icon [::Jabber::Roster::GetPresenceIconEx $jid]
+    set icon [::Jabber::Roster::GetPresenceIconFromJid $jid]
     $wpresence configure -image $icon
     
     # Insert the actual body of the message.
@@ -272,7 +272,7 @@ proc ::Jabber::GotMsg::PresenceHook {pjid2 type args} {
 		set show $argsArr(-show)
 	    }
 	    set prestext $mapShowTextToElem($show)
-	    set icon [::Jabber::Roster::GetPresenceIconEx $from]
+	    set icon [::Jabber::Roster::GetPresenceIconFromJid $from]
 	    $wpresence configure -image $icon
 	}
     }

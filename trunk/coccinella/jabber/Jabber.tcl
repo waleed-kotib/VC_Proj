@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.105 2004-09-24 12:14:13 matben Exp $
+# $Id: Jabber.tcl,v 1.106 2004-09-26 13:52:01 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -63,11 +63,6 @@ namespace eval ::Jabber:: {
     variable jprefs
     variable jserver
     variable jerror
-        
-    # The trees 'directories' which should always be there.
-    #set jprefs(treedirs) {Online Offline {Subscription Pending}}
-    set jprefs(treedirs) {Online Offline}
-    set jprefs(closedtreedirs) {}
     
     # Our own jid, and jid/resource respectively.
     set jstate(mejid) ""
@@ -133,6 +128,7 @@ namespace eval ::Jabber:: {
 	message                      {Message handling}
 	presence                     {Presence notification}
 	presence-invisible           {Allows invisible users}
+	jabber:client                {Client entity}
 	jabber:iq:agent              {Server component properties}
 	jabber:iq:agents             {Server component properties}
 	jabber:iq:auth               {Client authentization}      
@@ -162,6 +158,7 @@ namespace eval ::Jabber:: {
 	vcard-temp                   {Business card exchange}
 	http://jabber.org/protocol/muc   {Multi user chat}
 	http://jabber.org/protocol/disco {Feature discovery}
+	http://jabber.org/protocol/caps  {Entity capabilities}
     }    
     
     # XML namespaces defined here.
@@ -171,6 +168,7 @@ namespace eval ::Jabber:: {
 	servers         http://coccinella.sourceforge.net/protocol/servers
 	whiteboard      http://coccinella.sourceforge.net/protocol/whiteboard
 	public          http://coccinella.sourceforge.net/protocol/private
+	caps            http://coccinella.sourceforge.net/protocol/caps
     }
     
     # Standard xmlns supported. Components add their own.
@@ -1173,7 +1171,8 @@ proc ::Jabber::SetStatus {type args} {
     # Necessary for each status change since internal cache cleared.
     if {$type != "unavailable"} {
 	set cocciElem [CreateCoccinellaPresElement]
-	lappend argsArr(-extras) $cocciElem
+	set capsElem  [CreateCapsPresElement]
+	lappend argsArr(-extras) $cocciElem $capsElem
     }
     set presArgs {}
     foreach {key value} [array get argsArr] {
@@ -1229,6 +1228,56 @@ proc ::Jabber::SetStatus {type args} {
 	    DoCloseClientConnection
 	}
     }
+}
+
+# Jabber::CreateCoccinellaPresElement --
+# 
+#       Used when sending inital presence. This way clients get the info
+#       necessary for file transports.
+#       
+#  <coccinella 
+#      xmlns='http://coccinella.sourceforge.net/protocol/servers'>
+#                <ip protocol='putget' port='8235'>212.214.113.57</ip>
+#                <ip protocol='http' port='8077'>212.214.113.57</ip>
+#  </coccinella>
+
+proc ::Jabber::CreateCoccinellaPresElement { } {
+    global  prefs
+    
+    variable jstate
+    variable privatexmlns
+	
+    set ip [::Network::GetThisPublicIPAddress]
+
+    set attrputget [list protocol putget port $prefs(thisServPort)]
+    set attrhttpd  [list protocol http   port $prefs(httpdPort)]
+    set subelem [list  \
+      [wrapper::createtag ip -chdata $ip -attrlist $attrputget]  \
+      [wrapper::createtag ip -chdata $ip -attrlist $attrhttpd]]
+    set xmllist [wrapper::createtag coccinella -subtags $subelem \
+      -attrlist [list xmlns $privatexmlns(servers) ver $prefs(fullVers)]]
+
+    return $xmllist
+}
+
+# Jabber::CreateCapsPresElement --
+# 
+#       Used when sending inital presence. This way clients get various info.
+#       See [JEP 0115]
+#       Note that this doesn't replace the 'coccinella' element since caps
+#       are not instance specific (can't send ip addresses).
+
+proc ::Jabber::CreateCapsPresElement { } {
+    global  prefs
+    variable privatexmlns
+
+    set capsxmlns "http://jabber.org/protocol/caps"
+    set node $privatexmlns(caps)
+    set ext "ftrans"
+    set xmllist [wrapper::createtag c \
+      -attrlist [list xmlns $capsxmlns node $node ver $prefs(fullVers) ext $ext]]
+
+    return $xmllist
 }
 
 # Jabber::SetStatusWithMessage --
@@ -1331,25 +1380,10 @@ proc ::Jabber::BtSetStatus {w} {
     
     set statusOpt {}
     set allText [string trim [$wtext get 1.0 end] " \n"]
-    if {[string length $allText]} {
-	set statusOpt [list -status $allText]
-    }  
     
     # Set present status.
     set jstate(status) $show
-    
-    switch -- $show {
-	invisible {
-	    eval {$jstate(jlib) send_presence -type "invisible" -show $show} \
-	      $statusOpt
-	}
-	default {
-	    eval {$jstate(jlib) send_presence -type "available" -show $show} \
-	      $statusOpt
-	}
-    }
-    eval {::hooks::run setPresenceHook $show} $args
-    
+    SetStatus $show -status $allText    
     set finishedStat 1
     destroy $w
 }
@@ -1669,36 +1703,6 @@ proc ::Jabber::ParseGetVersion {jlibname from subiq args} {
 
     # Tell jlib's iq-handler that we handled the event.
     return 1
-}
-
-# Jabber::CreateCoccinellaPresElement --
-# 
-#       Used when sending inital presence. This way clients get the info
-#       necessary for file transports.
-#       
-#  <coccinella 
-#      xmlns='http://coccinella.sourceforge.net/protocol/servers'>
-#                <ip protocol='putget' port='8235'>212.214.113.57</ip>
-#                <ip protocol='http' port='8077'>212.214.113.57</ip>
-#  </coccinella>
-
-proc ::Jabber::CreateCoccinellaPresElement { } {
-    global  prefs
-    
-    variable jstate
-    variable privatexmlns
-	
-    set ip [::Network::GetThisPublicIPAddress]
-
-    set attrputget [list protocol putget port $prefs(thisServPort)]
-    set attrhttpd  [list protocol http   port $prefs(httpdPort)]
-    set subelem [list  \
-      [wrapper::createtag ip -chdata $ip -attrlist $attrputget]  \
-      [wrapper::createtag ip -chdata $ip -attrlist $attrhttpd]]
-    set xmllist [wrapper::createtag coccinella -subtags $subelem \
-      -attrlist [list xmlns $privatexmlns(servers) version $prefs(fullVers)]]
-
-    return $xmllist
 }
 
 # Jabber::ParseGetServers --
