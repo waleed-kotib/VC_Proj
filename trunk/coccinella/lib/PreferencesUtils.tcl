@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.34 2004-07-09 06:26:06 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.35 2004-07-26 12:50:38 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -301,7 +301,6 @@ proc ::PreferencesUtils::SetUserPreferences { } {
       [list prefs(userPath)        prefs_userPath        $prefs(userPath)]        \
       [list prefs(winGeom)         prefs_winGeom         $prefs(winGeom)]        \
       [list prefs(paneGeom)        prefs_paneGeom        $prefs(paneGeom)]       \
-      [list prefs(lastAutoUpdateVersion) prefs_lastAutoUpdateVersion $prefs(lastAutoUpdateVersion)] \
       ]    
             
     # Map list of win geoms into an array.

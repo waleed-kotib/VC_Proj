@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-#       $Id: SlideShow.tcl,v 1.2 2004-07-26 08:37:15 matben Exp $
+#       $Id: SlideShow.tcl,v 1.3 2004-07-26 12:50:37 matben Exp $
 
 namespace eval ::SlideShow:: {
     
@@ -207,7 +207,7 @@ proc ::SlideShow::OpenFile {wtop fileName} {
 	default {
 	    ::CanvasCmd::DoEraseAll $wtop     
 	    ::undo::reset [::WB::GetUndoToken $wtop]
-	    ::Import::DoImport $wcan {} -file $fileName
+	    ::Import::DoImport $wcan {-coords {0 0}} -file $fileName
 	}
     }
 }

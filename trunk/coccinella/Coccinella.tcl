@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.69 2004-07-24 10:55:47 matben Exp $
+# $Id: Coccinella.tcl,v 1.70 2004-07-26 12:50:37 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -473,7 +473,6 @@ set listOfPackages {
     tablelist
     undo
     Dialogs
-    AutoUpdate
     FileCache
     Preferences
     PreferencesUtils
@@ -721,12 +720,6 @@ if {$argc > 0} {
 	after $prefs(afterConnect) [list ::P2PNet::DoConnect  \
 	  $argvArr(-connect) $prefs(remotePort)]
     }
-}
-
-# Auto update mechanism.
-if {!$prefs(doneAutoUpdate) &&  \
-  ([package vcompare $prefs(fullVers) $prefs(lastAutoUpdateVersion)] > 0)} {
-    after 10000 ::AutoUpdate::Get $prefs(urlAutoUpdate)  
 }
 
 update idletasks
