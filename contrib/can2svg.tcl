@@ -2,9 +2,9 @@
 #  
 #      This file provides translation from canvas commands to XML/SVG format.
 #      
-#  Copyright (c) 2002  Mats Bengtsson
+#  Copyright (c) 2002-2004  Mats Bengtsson
 #
-# $Id: can2svg.tcl,v 1.2 2003-11-01 13:57:26 matben Exp $
+# $Id: can2svg.tcl,v 1.3 2004-03-01 15:06:01 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -23,7 +23,8 @@
 # ########################### CHANGES ##########################################
 #
 #   0.1      first release
-#   0.2      URI encoded image file path, 
+#   0.2      URI encoded image file path
+#   0.3      uses xmllists more, added svgasxmllist
 #
 # ########################### TODO #############################################
 # 
@@ -39,7 +40,8 @@ package require uriencode
 
 package provide can2svg 0.1
 
-namespace eval ::can2svg:: {
+
+namespace eval can2svg {
 
     namespace export can2svg canvas2file
     
@@ -73,7 +75,7 @@ namespace eval ::can2svg:: {
     
 }
 
-# ::can2svg::can2svg --
+# can2svg::can2svg --
 #
 #       Make xml out of a canvas command, widgetPath removed.
 #       
@@ -84,7 +86,27 @@ namespace eval ::can2svg:: {
 # Results:
 #   xml data
 
-proc ::can2svg::can2svg {cmd args} {
+proc can2svg::can2svg {cmd args} {
+    
+    set xml ""
+    foreach xmllist [eval {svgasxmllist $cmd} $args] {
+	append xml [MakeXML $xmllist]
+    }
+    return $xml
+}
+
+# can2svg::svgasxmllist --
+#
+#       Make a list of xmllists out of a canvas command, widgetPath removed.
+#       
+# Arguments:
+#       cmd         canvas command without prepending widget path.
+#       args    -usetags    0|all|first|last
+#       
+# Results:
+#       a list of xmllist = {tag attrlist isempty cdata {child1 child2 ...}}
+
+proc can2svg::svgasxmllist {cmd args} {
 
     variable defsArrowMarkerArr
     variable defsStipplePatternArr
@@ -94,20 +116,27 @@ proc ::can2svg::can2svg {cmd args} {
     
     set nonum_ {[^0-9]}
     set wsp_ {[ ]+}
-    set xml ""
+    set xmlListList {}
     
     array set argsArr {-usetags all}
     array set argsArr $args
-    
+        
     switch -- [lindex $cmd 0] {
 	
 	create {
 	    set type [lindex $cmd 1]
 	    set rest [lrange $cmd 2 end]
-	    regexp -indices -- "-${nonum_}" $rest ind
-	    set ind1 [lindex $ind 0]
-	    set coo [string trim [string range $rest 0 [expr $ind1 - 1]]]
-	    set opts [string range $rest $ind1 end]
+	    
+	    # Separate coords from options.
+	    set indopt [lsearch -regexp $rest "-${nonum_}"]
+	    if {$indopt < 0} {
+		set ind end
+		set opts {}
+	    } else {
+		set ind [expr $indopt - 1]
+		set opts [lrange $rest $indopt end]
+	    }
+	    set coo [lrange $rest 0 $ind]
 	    array set optArr $opts
 	    
 	    # Figure out if we've got a spline.
@@ -156,8 +185,8 @@ proc ::can2svg::can2svg {cmd args} {
 		if {![info exists defsArrowMarkerArr($arrowKey)]} {
 		    set defsArrowMarkerArr($arrowKey)  \
 		      [eval {MakeArrowMarker} $arrowShape {$fillValue}]
-		    append xml $defsArrowMarkerArr($arrowKey)
-		    append xml "\n\t"
+		    set xmlListList \
+		      [concat $xmlListList $defsArrowMarkerArr($arrowKey)]
 		}
 	    }
 	    
@@ -171,8 +200,7 @@ proc ::can2svg::can2svg {cmd args} {
 			set defsStipplePatternArr($stipple)  \
 			  [MakeGrayStippleDef $stipple]
 		    }
-		    append xml $defsStipplePatternArr($stipple)
-		    append xml "\n\t"
+		    lappend xmlListList $defsStipplePatternArr($stipple)
 		}
 	    }
 	    	    
@@ -223,7 +251,7 @@ proc ::can2svg::can2svg {cmd args} {
 		    if {[string length $idAttr] > 0} {
 			set attr [concat $attr $idAttr]
 		    }
-		    set xmlList [MakeXMLList $elem -attrlist $attr]
+		    lappend xmlListList [MakeXMLList $elem -attrlist $attr]
 		}
 		image - bitmap {
 		    set elem "image"
@@ -231,22 +259,13 @@ proc ::can2svg::can2svg {cmd args} {
 		    if {[string length $idAttr] > 0} {
 			set attr [concat $attr $idAttr]
 		    }
-		    set xmlList [MakeXMLList $elem -attrlist $attr]
+		    lappend xmlListList [MakeXMLList $elem -attrlist $attr]
 		}
 		line {
 		    if {$haveSpline} {
 			set elem "path"
-			set style [MakeStyle $type $opts]
-			set data "M [lrange $coo 0 1] Q"
-			set i 4
-			foreach {x y} [lrange $coo 2 end-4] {
-			    set x0 [expr ($x + [lindex $coo $i])/2.0]
-			    incr i
-			    set y0 [expr ($y + [lindex $coo $i])/2.0]
-			    incr i
-			    append data " $x $y $x0 $y0"			    
-			}
-			append data " [lrange $coo end-3 end]"
+			set style [MakeStyle $type $opts]						
+			set data [ParseSplineToPath $type $coo]
 			set attr [list "d" $data "style" $style]
 		    } else {
 			set elem "polyline"
@@ -256,7 +275,7 @@ proc ::can2svg::can2svg {cmd args} {
 		    if {[string length $idAttr] > 0} {
 			set attr [concat $attr $idAttr]
 		    }
-		    set xmlList [MakeXMLList $elem -attrlist $attr]
+		    lappend xmlListList [MakeXMLList $elem -attrlist $attr]
 		}
 		oval {
 		    foreach {x y w h} [NormalizeRectCoords $coo] {}
@@ -279,27 +298,14 @@ proc ::can2svg::can2svg {cmd args} {
 		    if {[string length $idAttr] > 0} {
 			set attr [concat $attr $idAttr]
 		    }
-		    set xmlList [MakeXMLList $elem -attrlist $attr]
+		    lappend xmlListList [MakeXMLList $elem -attrlist $attr]
 		}
 		polygon {
 		    if {$haveSpline} {
 			set elem "path"
 			set style [MakeStyle $type $opts]
+			set data [ParseSplineToPath $type $coo]
 
-			# Translating a closed polygon into a qubic bezier
-			# path is a little bit tricky.
-			set x0 [expr ([lindex $coo end-1] + [lindex $coo 0])/2.0]
-			set y0 [expr ([lindex $coo end] + [lindex $coo 1])/2.0]
-			set data "M $x0 $y0 Q"
-			set i 2
-			foreach {x y} [lrange $coo 0 end-2] {
-			    set x1 [expr ($x + [lindex $coo $i])/2.0]
-			    incr i
-			    set y1 [expr ($y + [lindex $coo $i])/2.0]
-			    incr i
-			    append data " $x $y $x1 $y1"			    
-			}
-			append data " [lrange $coo end-1 end] $x0 $y0"
 			set attr [list "d" $data "style" $style]
 		    } else {
 			set elem "polygon"
@@ -309,7 +315,7 @@ proc ::can2svg::can2svg {cmd args} {
 		    if {[string length $idAttr] > 0} {
 			set attr [concat $attr $idAttr]
 		    }
-		    set xmlList [MakeXMLList $elem -attrlist $attr]
+		    lappend xmlListList [MakeXMLList $elem -attrlist $attr]
 		}
 		rectangle {
 		    set elem "rect"
@@ -322,7 +328,7 @@ proc ::can2svg::can2svg {cmd args} {
 		    if {[string length $idAttr] > 0} {
 			set attr [concat $attr $idAttr]
 		    }
-		    set xmlList [MakeXMLList $elem -attrlist $attr]		    
+		    lappend xmlListList [MakeXMLList $elem -attrlist $attr]
 		}
 		text {
 		    set elem "text"
@@ -366,30 +372,26 @@ proc ::can2svg::can2svg {cmd args} {
 			      -attrlist [list "x" $xbase "dy" $dy] -chdata $line]
 			    set dy $lineSpace
 			}
-			set xmlList [MakeXMLList $elem -attrlist $attr \
+			lappend xmlListList [MakeXMLList $elem -attrlist $attr \
 			  -subtags $subList]
 		    } else {
-			set xmlList [MakeXMLList $elem -attrlist $attr \
+			lappend xmlListList [MakeXMLList $elem -attrlist $attr \
 			  -chdata $chdata]
 		    }
 		}
 	    }
 	}
 	move {
-	    foreach {tag dx dy} [lrange $cmd 1 3] {}
-	    set attr [list "transform" "translate($dx,$dy)"  \
-	      "xlink:href" "#$tag"]
-	    set xmlList [MakeXMLList "use" -attrlist $gattr]
+	    # Empty
 	}
 	scale {
-	    
+	    # Empty
 	}
     }
-    append xml [MakeXML $xmlList]
-    return $xml
+    return $xmlListList
 }
 
-# ::can2svg::MakeStyle --
+# can2svg::MakeStyle --
 #
 #       Produce the SVG style attribute from the canvas item options.
 #
@@ -400,7 +402,7 @@ proc ::can2svg::can2svg {cmd args} {
 # Results:
 #       The SVG style attribute as a a string.
 
-proc ::can2svg::MakeStyle {type opts} {
+proc can2svg::MakeStyle {type opts} {
 
     # Defaults for everything except text.
     if {![string equal $type "text"]} {
@@ -567,18 +569,29 @@ proc ::can2svg::MakeStyle {type opts} {
     return [string trim $style]
 }
 
-proc ::can2svg::FormatColorName {value} {
+proc can2svg::FormatColorName {value} {
 
     if {[string length $value] == 0} {
 	return $value
     }
-    foreach rgb [winfo rgb . $value] {
-	lappend rgbx [expr $rgb >> 8]
+
+    switch -- $value {
+	black - white - red - green - blue {
+	    set col $value
+	}
+	default {
+	
+	    # winfo rgb . white -> 65535 65535 65535
+	    foreach rgb [winfo rgb . $value] {
+		lappend rgbx [expr $rgb >> 8]
+	    }
+	    set col [eval {format "#%02x%02x%02x"} $rgbx]
+	}
     }
-    return [eval {format "#%02x%02x%02x"} $rgbx]
+    return $col
 }
 
-# ::can2svg::MakeImageAttr --
+# can2svg::MakeImageAttr --
 #
 #       Special code is needed to make the attributes for an image item.
 #       
@@ -588,7 +601,7 @@ proc ::can2svg::FormatColorName {value} {
 # Results:
 #   
 
-proc ::can2svg::MakeImageAttr {coo opts} {
+proc can2svg::MakeImageAttr {coo opts} {
     
     array set optArr {-anchor nw}
     array set optArr $opts
@@ -644,7 +657,7 @@ proc ::can2svg::MakeImageAttr {coo opts} {
     return $attrList
 }
 
-# ::can2svg::GetTextSVGCoords --
+# can2svg::GetTextSVGCoords --
 # 
 #       Figure out the baseline coords of the svg text element from
 #       the canvas text item.
@@ -657,7 +670,7 @@ proc ::can2svg::MakeImageAttr {coo opts} {
 # Results:
 #       raw xml data of the marker def element.
 
-proc ::can2svg::GetTextSVGCoords {coo anchor chdata theFont nlines} {
+proc can2svg::GetTextSVGCoords {coo anchor chdata theFont nlines} {
     
     foreach {x y} $coo {}
     set ascent [font metrics $theFont -ascent]
@@ -722,7 +735,88 @@ proc ::can2svg::GetTextSVGCoords {coo anchor chdata theFont nlines} {
     return [list $xbase $ybase]
 }
 
-# ::can2svg::MakeArrowMarker --
+# can2svg::ParseSplineToPath --
+# 
+#       Make the path data string for a bezier.
+#
+# Arguments:
+#       type        canvas type: line or polygon
+#       coo         its coordinate list
+#       
+# Results:
+#       path data string
+
+proc can2svg::ParseSplineToPath {type coo} {
+    
+    set npts [expr [llength $coo]/2]
+    
+    # line is open ended while the polygon must be closed.
+    # Need to construct a closed smooth polygon with path instructions.
+
+    switch -- $npts {
+	1 {
+	    set data "M [lrange $coo 0 1]"
+	}
+	2 {
+	    set data "M [lrange $coo 0 1] L [lrange $coo 2 3]"				
+	}
+	3 {
+	    set data "M [lrange $coo 0 1] Q [lrange $coo 2 5]"
+	}
+	default {
+	    if {[string equal $type "polygon"]} {
+		set x0s [expr ([lindex $coo 0] + [lindex $coo end-1])/2.]
+		set y0s [expr ([lindex $coo 1] + [lindex $coo end])/2.]
+		set data "M $x0s $y0s"
+		    
+		# Add Q1 and Q2 points.
+		append data " Q [lrange $coo 0 1]"
+		set x0 [expr ([lindex $coo 0] + [lindex $coo 2])/2.]
+		set y0 [expr ([lindex $coo 1] + [lindex $coo 3])/2.]
+		append data " $x0 $y0"
+		set xctrlp [lindex $coo 2]
+		set yctrlp [lindex $coo 3]
+		set tind 4
+	    } else {
+		set data "M [lrange $coo 0 1]"
+		    
+		# Add Q1 and Q2 points.
+		append data " Q [lrange $coo 2 3]"
+		set x0 [expr ([lindex $coo 2] + [lindex $coo 4])/2.]
+		set y0 [expr ([lindex $coo 3] + [lindex $coo 5])/2.]
+		append data " $x0 $y0"
+		set xctrlp [lindex $coo 4]
+		set yctrlp [lindex $coo 5]
+		set tind 6
+	    }
+	    append data " T"				
+	    foreach {x y} [lrange $coo $tind end-2] {
+		#puts "x=$x, y=$y, xctrlp=$xctrlp, yctrlp=$yctrlp"
+		
+		# The T point is the midpoint between the
+		# two control points.
+		set x0 [expr ($x + $xctrlp)/2.0]
+		set y0 [expr ($y + $yctrlp)/2.0]
+		set xctrlp $x
+		set yctrlp $y
+		append data " $x0 $y0"
+		#puts "data=$data"
+	    }
+	    if {[string equal $type "polygon"]} {
+		set x0 [expr ([lindex $coo end-1] + $xctrlp)/2.0]
+		set y0 [expr ([lindex $coo end] + $yctrlp)/2.0]
+		append data " $x0 $y0"
+		append data " $x0s $y0s"
+	    } else {
+		append data " [lrange $coo end-1 end]"
+	    }
+	    #puts "data=$data"
+	}
+    }
+    return $data
+}
+
+# can2svg::MakeArrowMarker --
 # 
 #       Make the xml for an arrow marker def element.
 #
@@ -733,9 +827,9 @@ proc ::can2svg::GetTextSVGCoords {coo anchor chdata theFont nlines} {
 #       col         its color
 #       
 # Results:
-#       raw xml data of the marker def elements, both start and last.
+#       a list of xmllists of the marker def elements, both start and last.
 
-proc ::can2svg::MakeArrowMarker {a b c col} {
+proc can2svg::MakeArrowMarker {a b c col} {
     
     variable formatArrowMarker
     variable formatArrowMarkerLast
@@ -755,7 +849,7 @@ proc ::can2svg::MakeArrowMarker {a b c col} {
 	set defElemList [MakeXMLList "defs" -subtags  \
 	  [list [MakeXMLList "marker" -attrlist $markerAttr \
 	  -subtags [list $arrowList] ] ] ]
-	set formatArrowMarker [MakeXML $defElemList]
+	set formatArrowMarker $defElemList
 	
 	# ...and the last arrow marker.
 	set dataLast "M 0 0, %s %s, 0 %s, %s %s Z"
@@ -764,7 +858,7 @@ proc ::can2svg::MakeArrowMarker {a b c col} {
 	set defElemLastList [MakeXMLList "defs" -subtags  \
 	  [list [MakeXMLList "marker" -attrlist $markerAttr \
 	  -subtags [list $arrowLastList] ] ] ]
-	set formatArrowMarkerLast [MakeXML $defElemLastList]
+	set formatArrowMarkerLast $defElemLastList
     }
     set idKey "arrowMarkerDef_${col}_${a}_${b}_${c}"
     set idKeyLast "arrowMarkerLastDef_${col}_${a}_${b}_${c}"
@@ -777,14 +871,14 @@ proc ::can2svg::MakeArrowMarker {a b c col} {
       $b [expr 2*$c] $b $c \
       $b $c [expr 2*$c] [expr $b-$a] $c $col $col]
     
-    return "$markerXML\n\t$markerLastXML"
+    return [list $markerXML $markerLastXML]
 }
 
-# ::can2svg::MakeGrayStippleDef --
+# can2svg::MakeGrayStippleDef --
 #
 #
 
-proc ::can2svg::MakeGrayStippleDef {stipple} {
+proc can2svg::MakeGrayStippleDef {stipple} {
     
     variable stippleDataArr
     
@@ -796,10 +890,10 @@ proc ::can2svg::MakeGrayStippleDef {stipple} {
       [list [MakeXMLList "pattern" -attrlist $patterAttr \
       -subtags [list $pathList] ] ] ]
     
-    return [MakeXML $defElemList]
+    return $defElemList
 }
 
-# ::can2svg::MapEmptyToNone --
+# can2svg::MapEmptyToNone --
 #
 #
 # Arguments:
@@ -808,7 +902,7 @@ proc ::can2svg::MakeGrayStippleDef {stipple} {
 # Results:
 #   
 
-proc ::can2svg::MapEmptyToNone {val} {
+proc can2svg::MapEmptyToNone {val} {
 
     if {[string length $val] == 0} {
 	return "none"
@@ -817,7 +911,7 @@ proc ::can2svg::MapEmptyToNone {val} {
     }
 }
 
-# ::can2svg::NormalizeRectCoords --
+# can2svg::NormalizeRectCoords --
 #
 #
 # Arguments:
@@ -826,7 +920,7 @@ proc ::can2svg::MapEmptyToNone {val} {
 # Results:
 #   
 
-proc ::can2svg::NormalizeRectCoords {coo} {
+proc can2svg::NormalizeRectCoords {coo} {
     
     foreach {x1 y1 x2 y2} $coo {}
     return [list [expr $x2 > $x1 ? $x1 : $x2]  \
@@ -835,7 +929,7 @@ proc ::can2svg::NormalizeRectCoords {coo} {
       [expr abs($y1-$y2)]]
 }
 
-# ::can2svg::makedocument --
+# can2svg::makedocument --
 #
 #       Adds the prefix and suffix elements to make a complete XML/SVG
 #       document.
@@ -846,7 +940,7 @@ proc ::can2svg::NormalizeRectCoords {coo} {
 # Results:
 #   
 
-proc ::can2svg::makedocument {width height xml} {
+proc can2svg::makedocument {width height xml} {
     
     set pre "<?xml version='1.0'?>\n\
       <!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.0//EN\"\
@@ -857,7 +951,7 @@ proc ::can2svg::makedocument {width height xml} {
     return "${pre}\n${svgStart}\n${xml}${svgEnd}"
 }
 
-# ::can2svg::canvas2file --
+# can2svg::canvas2file --
 #
 #       Takes everything on a canvas widget, translates it to XML/SVG,
 #       and puts it on a file.
@@ -871,7 +965,7 @@ proc ::can2svg::makedocument {width height xml} {
 # Results:
 #   
 
-proc ::can2svg::canvas2file {wcan path args} {
+proc can2svg::canvas2file {wcan path args} {
     
     variable defsArrowMarkerArr
     variable defsStipplePatternArr
@@ -909,7 +1003,7 @@ proc ::can2svg::canvas2file {wcan path args} {
     close $fd
 }
 
-# ::can2svg::MakeXML --
+# can2svg::MakeXML --
 #
 #       Creates raw xml data from a hierarchical list of xml code.
 #       This proc gets called recursively for each child.
@@ -922,7 +1016,7 @@ proc ::can2svg::canvas2file {wcan path args} {
 # Results:
 #       raw xml data.
 
-proc ::can2svg::MakeXML {xmlList} {
+proc can2svg::MakeXML {xmlList} {
         
     # Extract the XML data items.
     foreach {tag attrlist isempty chdata childlist} $xmlList {}
@@ -951,7 +1045,7 @@ proc ::can2svg::MakeXML {xmlList} {
     return $rawxml
 }
 
-# ::can2svg::MakeXMLList --
+# can2svg::MakeXMLList --
 #
 #       Build an element list given the tag and the args.
 #
@@ -969,9 +1063,9 @@ proc ::can2svg::MakeXML {xmlList} {
 #                             of $tagname's subtags. (default: no sub-tags)
 #       
 # Results:
-#       a list suitable for ::can2svg::MakeXML.
+#       a list suitable for can2svg::MakeXML.
 
-proc ::can2svg::MakeXMLList {tagname args} {
+proc can2svg::MakeXMLList {tagname args} {
         
     # Fill in the defaults.
     array set xmlarr {-isempty 1 -attrlist {} -chdata {} -subtags {}}
@@ -994,7 +1088,7 @@ proc ::can2svg::MakeXMLList {tagname args} {
     return $xmlList
 }
 
-# ::can2svg::XMLCrypt --
+# can2svg::XMLCrypt --
 #
 #       Makes standard XML entity replacements.
 #
@@ -1004,7 +1098,7 @@ proc ::can2svg::MakeXMLList {tagname args} {
 # Results:
 #       chdata with XML standard entities replaced.
 
-proc ::can2svg::XMLCrypt {chdata} {
+proc can2svg::XMLCrypt {chdata} {
 
     foreach from {\& < > {"} {'}}   \
       to {{\&amp;} {\&lt;} {\&gt;} {\&quot;} {\&apos;}} {
@@ -1013,11 +1107,11 @@ proc ::can2svg::XMLCrypt {chdata} {
     return $chdata
 }
 
-# ::can2svg::UriFromLocalFile --
+# can2svg::UriFromLocalFile --
 #
 #       Not foolproof!
 
-proc ::can2svg::UriFromLocalFile {path} {
+proc can2svg::UriFromLocalFile {path} {
         
     # Quote the disallowed characters according to the RFC for URN scheme.
     # ref: RFC2141 sec2.2
