@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.20 2004-01-27 08:48:05 matben Exp $
+# $Id: OOB.tcl,v 1.21 2004-01-28 08:36:46 matben Exp $
 
 package provide OOB 1.0
 
@@ -105,14 +105,25 @@ proc ::Jabber::OOB::FileOpen { } {
 }
 
 proc ::Jabber::OOB::DoSend { } {
-    global  prefs
+    global  prefs wDlgs
     
     variable finished
     variable localpath
     variable desc
     variable locals
     upvar ::Jabber::jstate jstate
-
+    
+    if {$localpath == ""} {
+	tk_messageBox -type ok -title [::msgcat::mc {Pick File}] -message \
+	  "You must provide a file to send" -parent $wDlgs(joobs)
+	return
+    }
+    if {![file exists $localpath]} {
+	tk_messageBox -type ok -title [::msgcat::mc {Pick File}]  \
+	  -message "The picked file does not exist. Pick a new one." \
+	  -parent $wDlgs(joobs)
+	return
+    }
     set finished 1
     
     # For now we build a relative path for the url. uri encode it!
