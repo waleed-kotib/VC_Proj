@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.36 2004-08-18 13:46:41 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.37 2004-11-23 08:55:23 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -58,7 +58,7 @@ namespace eval ::PreferencesUtils:: {
 #       updates the internal option database.
 
 proc ::PreferencesUtils::Init { } {
-    global  prefs
+    global  prefs this
     
     set prefsFilePath $prefs(userPrefsFilePath)
     set old $prefs(oldPrefsFilePath)
@@ -75,6 +75,11 @@ proc ::PreferencesUtils::Init { } {
 	      [FormatTextForMessageBox \
 	      "Error reading preference file: $old."]
 	}
+    }
+    
+    # Post prefs file if any.
+    if {[file exists $this(postPrefsFile)]} {
+	catch {option readfile $this(postPrefsFile)} err
     }
 }
 

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.40 2004-11-08 15:52:51 matben Exp $
+# $Id: JWB.tcl,v 1.41 2004-11-23 08:55:23 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -457,6 +457,15 @@ proc ::Jabber::WB::BuildEntryHook {wtop wclass wcomm} {
     }
     SetStateFromType $wtop
     SetNetworkState  $wtop $netstate
+}
+
+proc ::Jabber::WB::Configure {wtop args} {
+    variable jwbstate
+    
+    foreach {key value} $args {
+	set akey [string trimleft $key -]
+	set jwbstate($wtop,$akey) $value
+    }
 }
 
 # Jabber::WB::SetStateFromType --

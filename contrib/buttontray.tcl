@@ -6,7 +6,7 @@
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: buttontray.tcl,v 1.17 2004-11-20 08:13:51 matben Exp $
+# $Id: buttontray.tcl,v 1.18 2004-11-23 08:55:22 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -104,6 +104,7 @@ proc ::buttontray::Init { } {
     set frameOptions {-background -borderwidth -padx -pady -relief}
     set labelOptions {-compound -disabledforeground -font -foreground \
       -labelbackground -labelpadx -labelpady}
+    # Add -image later...
     set trayOptions [array names widgetOptions]
   
     # The legal widget commands.
@@ -266,7 +267,7 @@ proc ::buttontray::WidgetProc {w command args} {
 	}
 	exists {
 	    set name [lindex $args 0]
-	    set result [info exists locals($name,idlab)]
+	    set result [info exists locals($name,wlab)]
 	}
 	minwidth {
 	    set result [MinWidth $w]
@@ -653,6 +654,7 @@ proc ::buttontray::PlainButtonConfigure {w name args} {
 	} elseif {$value != ""} {
 	    set opts($realName) $value
 	}
+	#puts "name=$name, optName=$optName, realName=$realName, options()=$options($optName)"
     }
     eval {$wlab configure} [array get opts]
     
@@ -736,8 +738,18 @@ proc ::buttontray::MinWidth {w} {
 	    incr width 2
 	}
 	plain {
-	    set width [winfo reqwidth $w]
-	    set width 100
+	    set width [expr 2 * $options(-padx)]
+	    foreach {key wlab} [array get locals *,wlab] {
+		array set packInfo [pack info $wlab]
+		incr width [expr 2 * $packInfo(-padx)]
+		incr width [winfo reqwidth $wlab]
+		if {[winfo exists ${wlab}frame1]} {
+		    incr width [expr 2 * [${wlab}frame1 cget -padx]]
+		}
+		if {[winfo exists ${wlab}frame2]} {
+		    incr width [expr 2 * [${wlab}frame2 cget -padx]]
+		}
+	    }
 	}
     }
     return $width

@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.92 2004-11-14 13:53:26 matben Exp $
+# $Id: Coccinella.tcl,v 1.93 2004-11-23 08:55:22 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -231,12 +231,16 @@ set this(path)              $thisPath
 set this(script)            $thisScript
 set this(imagePath)         [file join $this(path) images]
 set this(altImagePath)      [file join $this(prefsPath) images]
-set this(resourcedbPath)    [file join $this(path) resources]
-set this(altResourcedbPath) [file join $this(prefsPath) resources]
+set this(resourcePath)      [file join $this(path) resources]
+set this(altResourcePath)   [file join $this(prefsPath) resources]
+set this(postPrefsPath)     [file join $this(resourcePath) post]
+set this(postPrefsFile)     [file join $this(postPrefsPath) prefs]
 set this(soundsPath)        [file join $this(path) sounds]
 set this(altSoundsPath)     [file join $this(prefsPath) sounds]
-set this(basThemePrefsPath) [file join $this(resourcedbPath) theme.rdb]
-set this(themePrefsPath)    [file join $this(prefsPath) theme]
+
+set this(basThemePrefsFile) [file join $this(resourcePath) post theme.rdb]
+set this(themePrefsFile)    [file join $this(prefsPath) theme]
+
 set this(msgcatPath)        [file join $this(path) msgs]
 set this(msgcatPostPath)    [file join $this(path) msgs post]
 set this(docsPath)          [file join $this(path) docs]

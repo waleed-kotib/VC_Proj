@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.92 2004-11-14 16:40:53 matben Exp $
+# $Id: Chat.tcl,v 1.93 2004-11-23 08:55:22 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -101,6 +101,33 @@ namespace eval ::Jabber::Chat:: {
 	{histhead    -background          histHeadBackground    Background}
 	{histhead    -font                histHeadFont          Font}
     }
+
+    # Standard widgets.
+    option add *Chat.frall.borderWidth          1               50
+    option add *Chat.frall.relief               raised          50
+    option add *Chat*top.padX                   4               50
+    option add *Chat*top.padY                   2               50
+    option add *Chat*divt.borderWidth           2               50
+    option add *Chat*divt.relief                sunken          50
+
+    option add *ChatThread*fsub.padX            6               50
+    option add *ChatThread*fsub.padY            2               50
+    option add *ChatThread*fsub.l.padX          2               50
+    option add *ChatThread*fsub.p1.width        6               50
+    option add *ChatThread*fsub.p2.width        6               50
+    option add *ChatThread*mid.padX             6               50
+    option add *ChatThread*mid.padY             2               50
+    option add *ChatThread*pane.borderWidth     1               50
+    option add *ChatThread*pane.relief          sunken          50
+    option add *ChatThread*frtxt.text.borderWidth     1                50
+    option add *ChatThread*frtxt.text.relief          sunken           50
+    option add *ChatThread*frtxtsnd.text.borderWidth  1                50
+    option add *ChatThread*frtxtsnd.text.relief       sunken           50
+    option add *ChatThread*bot.padX             16              50
+    option add *ChatThread*bot.smile.padX       6               50
+    option add *ChatThread*bot.smile.padY       2               50
+    
+
     
     # Local preferences.
     variable cprefs
@@ -620,12 +647,13 @@ proc ::Jabber::Chat::Build {threadID args} {
 
     set fontSB [option get . fontSmallBold {}]
 
-    # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1 -ipadx 4
+    # Global frame. D = -borderwidth 1 -relief raised
+    frame $w.frall
+    pack  $w.frall -fill both -expand 1
     
     # Widget paths.
-    set wtray       $w.frall.tray
+    set wtop        $w.frall.top
+    set wtray       $wtop.tray
     set wcont       $w.frall.cc        ;# container frame for wthread or wnb
     set wthread     $w.frall.fthr
     set wnb         $w.frall.nb        ;# tabbed notebook
@@ -650,8 +678,12 @@ proc ::Jabber::Chat::Build {threadID args} {
     set iconNotifier    [::Theme::GetImage [option get $w notifierImage {}]]
     set dlgstate(iconNotifier) $iconNotifier
 
+    # D = -padx 4 -pady 2
+    frame $wtop
+    pack  $wtop -side top -fill x
+
     ::buttontray::buttontray $wtray
-    pack $wtray -side top -fill x -padx 4 -pady 2
+    pack $wtray -side top -fill x
 
     $wtray newbutton send  \
       -text [mc Send] -image $iconSend  \
@@ -682,7 +714,8 @@ proc ::Jabber::Chat::Build {threadID args} {
     
     set shortBtWidth [$wtray minwidth]
     
-    pack [frame $w.frall.div2 -bd 2 -relief sunken -height 2] -fill x -side top
+    # D = -bd 2 -relief sunken
+    pack [frame $w.frall.divt] -fill x -side top
 
     # Having the frame with thread frame as a sibling makes it possible
     # to pack it in a different place.
@@ -800,58 +833,72 @@ proc ::Jabber::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
 
     SetTitle $w $rosterName $chatstate(fromjid)
 
-    set wfrmid      $wthread.frmid
-    set wtxt        $wfrmid.frtxt
-    set wtext       $wtxt.text
-    set wysc        $wtxt.ysc
-    set wtxtsnd     $wfrmid.frtxtsnd        
-    set wtextsnd    $wtxtsnd.text
-    set wyscsnd     $wtxtsnd.ysc
-    set wfrbot      $wthread.f
-    set wnotifier   $wfrbot.lnot
-    set wsmile      $wfrbot.smile
+    set wbot        $wthread.bot
+    set wnotifier   $wbot.lnot
+    set wsmile      $wbot.smile.pad
     set wsubject    $wthread.frtop.fsub.e
     set wpresimage  $wthread.frtop.fsub.i
     
     # To and subject fields.
-    set frtop [frame $wthread.frtop -borderwidth 0]
+    set frtop [frame $wthread.frtop]
     pack $frtop -side top -anchor w -fill x
     
     set icon [::Jabber::Roster::GetPresenceIconFromJid $jid]
 
-    frame $frtop.fsub
-    label $frtop.fsub.l -text "[mc Subject]:"
-    entry $frtop.fsub.e -textvariable $chattoken\(subject)
-    label $frtop.fsub.i -image $icon
-    pack  $frtop.fsub   -side top -anchor w -padx 6 -pady 2 -fill x
-    pack  $frtop.fsub.l -side left -padx 2
-    pack  $frtop.fsub.i -side right -padx 6
-    pack  $frtop.fsub.e -side top -padx 2 -fill x
+    # D = -padx 6 -pady 2
+    set   wsub $frtop.fsub
+    frame $wsub
+    label $wsub.l -text "[mc Subject]:"
+    entry $wsub.e -textvariable $chattoken\(subject)
+    frame $wsub.p1
+    label $wsub.i  -image $icon
+    frame $wsub.p2
+    pack  $wsub    -side top -anchor w -fill x
+    pack  $wsub.l  -side left
+    pack  $wsub.p2 -side right
+    pack  $wsub.i  -side right
+    pack  $wsub.p1 -side right
+    pack  $wsub.e  -side top -fill x
 
     # Notifier label.
     set chatstate(wnotifier) $wnotifier
         
     # The bottom frame.
-    frame $wfrbot
-    pack  $wfrbot -side bottom -anchor w -fill x -padx 16 -pady 0
-    checkbutton $wfrbot.active -text " [mc {Active <Return>}]" \
+    frame $wbot
+    pack  $wbot -side bottom -anchor w -fill x
+    checkbutton $wbot.active -text " [mc {Active <Return>}]" \
       -command [list [namespace current]::ActiveCmd $chattoken] \
       -variable $chattoken\(active)
-    pack $wfrbot.active -side left
+    pack $wbot.active -side left
+    frame $wbot.p1
+    pack  $wbot.p1 -side left
+    frame $wbot.smile
+    pack  $wbot.smile -side left
     set cmd [list [namespace current]::SmileyCmd $chattoken]
-    ::Emoticons::MenuButton $wfrbot.smile -command $cmd
-    pack $wfrbot.smile -side left -padx 8 -pady 2	
+    ::Emoticons::MenuButton $wsmile -command $cmd
+    pack $wsmile -side left	
     label $wnotifier -textvariable $chattoken\(notifier) -pady 0 -bd 0 \
       -compound left
-    pack $wnotifier -side left -pady 0    
-    
+    pack $wnotifier -side left
+
+    set wmid        $wthread.mid
+    set wpane       $wmid.pane
+    set wtxt        $wpane.frtxt
+    set wtext       $wtxt.text
+    set wysc        $wtxt.ysc
+    set wtxtsnd     $wpane.frtxtsnd        
+    set wtextsnd    $wtxtsnd.text
+    set wyscsnd     $wtxtsnd.ysc
+
+    frame $wmid
+    pack  $wmid -side top -fill both -expand 1
+
     # Text chat.
-    pack [frame $wfrmid -height 250 -width 300 -relief sunken -bd 1 -class Pane] \
-      -side top -fill both -expand 1 -padx 4 -pady 2
+    frame $wpane -height 250 -width 300 -class Pane
+    pack  $wpane -side top -fill both -expand 1
     frame $wtxt
 	
-    text $wtext -height 12 -width 1 -state disabled -cursor {} \
-      -borderwidth 1 -relief sunken -wrap word  \
+    text $wtext -height 12 -width 1 -state disabled -cursor {} -wrap word  \
       -yscrollcommand [list ::UI::ScrollSet $wysc \
       [list grid $wysc -column 1 -row 0 -sticky ns]]
     scrollbar $wysc -orient vertical -command [list $wtext yview]
@@ -866,7 +913,6 @@ proc ::Jabber::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     # Text send.
     frame $wtxtsnd
     text  $wtextsnd -height 4 -width 1 -wrap word \
-      -borderwidth 1 -relief sunken  \
       -yscrollcommand [list ::UI::ScrollSet $wyscsnd \
       [list grid $wyscsnd -column 1 -row 0 -sticky ns]]
     scrollbar $wyscsnd -orient vertical -command [list $wtextsnd yview]
@@ -886,8 +932,8 @@ proc ::Jabber::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     }
     
     set imageHorizontal \
-      [::Theme::GetImage [option get $wfrmid imageHorizontal {}]]
-    set sashHBackground [option get $wfrmid sashHBackground {}]
+      [::Theme::GetImage [option get $wpane imageHorizontal {}]]
+    set sashHBackground [option get $wpane sashHBackground {}]
 
     set paneopts [list -orient vertical -limit 0.0]
     if {[info exists prefs(paneGeom,$wDlgs(jchat))]} {

@@ -2,9 +2,9 @@
 #
 #       Some utitilty procedures useful when theming widgets and UI.
 #       
-#  Copyright (c) 2003  Mats Bengtsson
+#  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Theme.tcl,v 1.16 2004-11-16 15:10:28 matben Exp $
+# $Id: Theme.tcl,v 1.17 2004-11-23 08:55:23 matben Exp $
 
 package provide Theme 1.0
 
@@ -27,28 +27,29 @@ proc ::Theme::Init { } {
     global  this prefs
     variable allImageSuffixes
     
-    ::Theme::ReadPrefsFile
+    ReadPrefsFile
     
     # Priorities.
     # widgetDefault: 20
     # startupFile:   40
     # userDefault:   60
+    # interactive:   80 (D)
 
     # Read resource database files in a hierarchical order.
     # 1) always read the default rdb file.
     # 2) read rdb file for this specific platform, if exists.
     # 3) read rdb file for any theme we have chosen. Search first
     #    inside the sources and then in the alternative user directory.
-    option readfile [file join $this(resourcedbPath) default.rdb] startupFile
-    set f [file join $this(resourcedbPath) $this(platform).rdb]
+    option readfile [file join $this(resourcePath) default.rdb] startupFile
+    set f [file join $this(resourcePath) $this(platform).rdb]
     if {[file exists $f]} {
 	option readfile $f startupFile
     }
-    set f [file join $this(resourcedbPath) $prefs(themeName).rdb]
+    set f [file join $this(resourcePath) $prefs(themeName).rdb]
     if {[file exists $f]} {
 	option readfile $f userDefault
     }
-    set f [file join $this(altResourcedbPath) $prefs(themeName).rdb]
+    set f [file join $this(altResourcePath) $prefs(themeName).rdb]
     if {[file exists $f]} {
 	option readfile $f userDefault
     }
@@ -88,7 +89,7 @@ proc ::Theme::Init { } {
     set allImageSuffixes [concat .gif $themeImageSuffixes]
 
     # Make all images used for widgets that doesn't use the Theme package.
-    ::Theme::PreLoadImages
+    PreLoadImages
 
 }
 
@@ -96,16 +97,22 @@ proc ::Theme::ReadPrefsFile { } {
     global  this prefs
     
     # Order of these two?
-    if {[file exists $this(basThemePrefsPath)]} {
-	option readfile $this(basThemePrefsPath)
-	set prefs(appName)    [option get . appName {}]
-	set prefs(theAppName) [option get . theAppName {}]
+    if {[file exists $this(themePrefsFile)]} {
+	option readfile $this(themePrefsFile)
     }
-    if {[file exists $this(themePrefsPath)]} {
-	option readfile $this(themePrefsPath)
+    if {[file exists $this(basThemePrefsFile)]} {
+	option readfile $this(basThemePrefsFile)
+    }
+    set appName    [option get . appName {}]
+    set theAppName [option get . theAppName {}]
+    if {$appName != ""} {
+	set prefs(appName) $appName
+    }
+    if {$theAppName != ""} {
+	set prefs(theAppName) $theAppName
     }
     set themeName [option get . themeName {}] 
-    if {[::Theme::CanLoadTheme $themeName]} {
+    if {[CanLoadTheme $themeName]} {
 	set prefs(themeName) $themeName
     } else {
 	set prefs(themeName) ""
@@ -117,7 +124,7 @@ proc ::Theme::SavePrefsFile { } {
     global  this prefs
     
     # Work on a temporary file and switch later.
-    set tmpFile $this(themePrefsPath).tmp
+    set tmpFile $this(themePrefsFile).tmp
     if {[catch {open $tmpFile w} fid]} {
 	tk_messageBox -icon error -type ok -message \
 	  [FormatTextForMessageBox [mc messerrpreffile $tmpFile]]
@@ -132,7 +139,7 @@ proc ::Theme::SavePrefsFile { } {
     puts $fid [format "%-24s\t%s" *messageLocale: $prefs(messageLocale)]
     
     close $fid
-    if {[catch {file rename -force $tmpFile $this(themePrefsPath)} msg]} {
+    if {[catch {file rename -force $tmpFile $this(themePrefsFile)} msg]} {
 	tk_messageBox -type ok -message {Error renaming preferences file.}  \
 	  -icon error
 	return
@@ -143,7 +150,7 @@ proc ::Theme::CanLoadTheme {themeName} {
     global  this
     
     set ans 1
-    set f [file join $this(resourcedbPath) ${themeName}CanLoad.tcl]
+    set f [file join $this(resourcePath) ${themeName}CanLoad.tcl]
     if {[file exists $f]} {
 	set ans [source $f]
     }
@@ -155,15 +162,15 @@ proc ::Theme::GetAllAvailable { } {
     
     # Perhaps we should exclude 'default' and all platform specific ones?
     set allrsrc {}
-    foreach f [glob -nocomplain -tails -directory $this(resourcedbPath) *.rdb] {
+    foreach f [glob -nocomplain -tails -directory $this(resourcePath) *.rdb] {
 	set themeName [file rootname $f]
-	if {[::Theme::CanLoadTheme $themeName]} {
+	if {[CanLoadTheme $themeName]} {
 	    lappend allrsrc $themeName
 	}
     }  
-    foreach f [glob -nocomplain -tails -directory $this(altResourcedbPath) *.rdb] {
+    foreach f [glob -nocomplain -tails -directory $this(altResourcePath) *.rdb] {
 	set themeName [file rootname $f]
-	if {[::Theme::CanLoadTheme $themeName]} {
+	if {[CanLoadTheme $themeName]} {
 	    lappend allrsrc $themeName
 	}
     }  
@@ -173,7 +180,7 @@ proc ::Theme::GetAllAvailable { } {
 proc ::Theme::PreLoadImages { } {
     
     foreach name [option get . themePreloadImages {}] {
-	::Theme::GetImage $name -keepname 1
+	GetImage $name -keepname 1
     }
 }
 
@@ -230,7 +237,7 @@ proc ::Theme::GetImage {name args} {
 		    break
 		}
 	    }
-	    if {[string length $ans]} {
+	    if {$ans != ""} {
 		break
 	    }
 	}
@@ -248,7 +255,7 @@ proc ::Theme::GetImage {name args} {
 
 proc ::Theme::GetImageFromExisting {name arrName} {
     
-    set imname [::Theme::GetImage $name]
+    set imname [GetImage $name]
     if {$imname == ""} {
 
 	# Call by name.

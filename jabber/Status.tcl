@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Status.tcl,v 1.1 2004-11-20 08:13:00 matben Exp $
+# $Id: Status.tcl,v 1.2 2004-11-23 08:55:23 matben Exp $
 
 package provide Status 1.0
 
@@ -58,6 +58,37 @@ namespace eval ::Jabber::Status:: {
 
 }
 
+proc ::Jabber::Status::Widget {w style varName args} {
+    
+    switch -- $style {
+	button {
+	    eval {Button $w $varName} $args
+	}
+	label {
+	    eval {Label $w $varName} $args
+	}
+	menubutton {
+	    eval {MenuButton $w $varName} $args
+	}
+    }
+    return $w
+}
+
+proc ::Jabber::Status::Configure {w status} {
+    
+    switch -- [winfo class $w] {
+	Button {
+	    ConfigButton $w $status
+	}
+	Label {
+	    ConfigLabel $w $status
+	}
+	MenuButton {
+	    # empty
+	}
+    }
+}
+
 # ::Jabber::Status::Button --
 # 
 #       A few functions to build a megawidget status menu button.
@@ -95,10 +126,10 @@ proc ::Jabber::Status::ButtonCmd {w varName cmd} {
     }
 }
 
-proc ::Jabber::Status::ConfigButton {w type} {
+proc ::Jabber::Status::ConfigButton {w status} {
     
-    $w configure -image [::Rosticons::Get status/$type]
-    if {[string equal $type "unavailable"]} {
+    $w configure -image [::Rosticons::Get status/$status]
+    if {[string equal $status "unavailable"]} {
 	$w configure -state disabled
 	bind $w <Button-1> {}
     } else {
@@ -118,7 +149,7 @@ proc ::Jabber::Status::PostMenu {wmenu x y} {
 #       Makes a menubutton for status that does no action. It only sets
 #       the varName.
 
-proc ::Jabber::Status::MenuButton {w varName} {
+proc ::Jabber::Status::MenuButton {w varName args} {
     upvar $varName status
     variable mapShowTextToElem
 
@@ -179,11 +210,11 @@ proc ::Jabber::Status::LabelCmd {w varName cmd} {
 proc ::Jabber::Status::ConfigLabel {w status} {
     variable mapShowTextToElem
     
-    $w configure -text $mapShowTextToElem($status)
+    $w configure -text "$mapShowTextToElem($status) "
     
     #$w configure -image [::Rosticons::Get status/$type]
     if {[string equal $status "unavailable"]} {
-	$w configure -state disabled
+	#$w configure -state disabled
 	bind $w <Button-1> {}
     } else {
 	$w configure -state normal

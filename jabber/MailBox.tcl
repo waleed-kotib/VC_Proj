@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.59 2004-11-19 13:10:14 matben Exp $
+# $Id: MailBox.tcl,v 1.60 2004-11-23 08:55:23 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -54,8 +54,8 @@ namespace eval ::Jabber::MailBox:: {
     option add *MailBox*mid.padX                   4                50
     option add *MailBox*mid.padY                   4                50
 
-    option add *MailBox*frpane.borderWidth          1                50
-    option add *MailBox*frpane.relief               sunken           50
+    option add *MailBox*frpane.borderWidth         1                50
+    option add *MailBox*frpane.relief              sunken           50
     option add *MailBox*frmsg.text.borderWidth     1                50
     option add *MailBox*frmsg.text.relief          sunken           50
 

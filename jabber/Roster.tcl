@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.102 2004-11-20 08:13:52 matben Exp $
+# $Id: Roster.tcl,v 1.103 2004-11-23 08:55:23 matben Exp $
 
 package provide Roster 1.0
 
@@ -268,7 +268,7 @@ proc ::Jabber::Roster::Build {w} {
     # D = -padx 0 -pady 0
     frame $w.stat
     frame $w.stat.f
-    pack  $w.stat -side bottom -fill x
+    pack  $w.stat   -side bottom -fill x
     pack  $w.stat.f -side bottom -fill x
     set wwave $w.stat.f.wa
     set waveImage [::Theme::GetImage [option get $w waveImage {}]]  
@@ -324,7 +324,7 @@ proc ::Jabber::Roster::Build {w} {
     grid $wysc -row 0 -column 1 -sticky ns
     grid $wxsc -row 1 -column 0 -sticky ew
     grid columnconfigure $wbox 0 -weight 1
-    grid rowconfigure $wbox 0 -weight 1
+    grid rowconfigure    $wbox 0 -weight 1
     
     set dirImage     [::Theme::GetImage [option get $wtree dirImage {}]]
     set onlineImage  [::Theme::GetImage [option get $wtree onlineImage {}]]
