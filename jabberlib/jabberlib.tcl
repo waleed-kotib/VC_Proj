@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.73 2004-11-10 10:08:44 matben Exp $
+# $Id: jabberlib.tcl,v 1.74 2004-11-15 08:51:14 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -2166,7 +2166,7 @@ proc jlib::send_auth {jlibname username resource cmd args} {
     set subelements [list  \
       [wrapper::createtag "username" -chdata $username]  \
       [wrapper::createtag "resource" -chdata $resource]]
-    set toopt ""
+    set toopt {}
 
     foreach {key value} $args {
 	switch -- $key {

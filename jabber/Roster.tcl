@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.97 2004-11-14 16:41:10 matben Exp $
+# $Id: Roster.tcl,v 1.98 2004-11-15 08:51:13 matben Exp $
 
 package provide Roster 1.0
 
@@ -119,67 +119,7 @@ namespace eval ::Jabber::Roster:: {
 	
     # The trees 'directories' which should always be there.
     variable closedTreeDirs {}
-    
-    # Mapping from presence/show to icon. 
-    # Specials for whiteboard clients and foreign IM systems.
-    # It is unclear if <show>online</show> is allowed.
-    variable presenceIcon
-    array set presenceIcon [list                         \
-      {available}         [::UI::GetIcon machead]        \
-      {unavailable}       [::UI::GetIcon macheadgray]    \
-      {chat}              [::UI::GetIcon macheadtalk]    \
-      {away}              [::UI::GetIcon macheadaway]    \
-      {xa}                [::UI::GetIcon macheadunav]    \
-      {dnd}               [::UI::GetIcon macheadsleep]   \
-      {online}            [::UI::GetIcon machead]        \
-      {invisible}         [::UI::GetIcon macheadinv]     \
-      {subnone}           [::UI::GetIcon questmark]      \
-      {available,wb}      [::UI::GetIcon macheadwb]      \
-      {unavailable,wb}    [::UI::GetIcon macheadgraywb]  \
-      {chat,wb}           [::UI::GetIcon macheadtalkwb]  \
-      {away,wb}           [::UI::GetIcon macheadawaywb]  \
-      {xa,wb}             [::UI::GetIcon macheadunavwb]  \
-      {dnd,wb}            [::UI::GetIcon macheadsleepwb] \
-      {online,wb}         [::UI::GetIcon macheadwb]      \
-      {invisible,wb}      [::UI::GetIcon macheadinvwb]   \
-      {subnone,wb}        [::UI::GetIcon questmarkwb]    \
-      {available,aim}     [::UI::GetIcon aim_online]     \
-      {unavailable,aim}   [::UI::GetIcon aim_offline]    \
-      {chat,aim}          [::UI::GetIcon aim_online]     \
-      {dnd,aim}           [::UI::GetIcon aim_dnd]        \
-      {away,aim}          [::UI::GetIcon aim_away]       \
-      {xa,aim}            [::UI::GetIcon aim_xa]         \
-      {online,aim}        [::UI::GetIcon aim_online]     \
-      {available,icq}     [::UI::GetIcon icq_online]     \
-      {unavailable,icq}   [::UI::GetIcon icq_offline]    \
-      {chat,icq}          [::UI::GetIcon icq_chat]       \
-      {dnd,icq}           [::UI::GetIcon icq_dnd]        \
-      {away,icq}          [::UI::GetIcon icq_away]       \
-      {xa,icq}            [::UI::GetIcon icq_xa]         \
-      {online,icq}        [::UI::GetIcon icq_online]     \
-      {available,msn}     [::UI::GetIcon msn_online]     \
-      {unavailable,msn}   [::UI::GetIcon msn_offline]    \
-      {chat,msn}          [::UI::GetIcon msn_online]     \
-      {dnd,msn}           [::UI::GetIcon msn_dnd]        \
-      {away,msn}          [::UI::GetIcon msn_away]       \
-      {xa,msn}            [::UI::GetIcon msn_away]       \
-      {online,msn}        [::UI::GetIcon msn_online]     \
-      {available,yahoo}   [::UI::GetIcon yahoo_online]   \
-      {unavailable,yahoo} [::UI::GetIcon yahoo_offline]  \
-      {chat,yahoo}        [::UI::GetIcon yahoo_online]   \
-      {dnd,yahoo}         [::UI::GetIcon yahoo_dnd]      \
-      {away,yahoo}        [::UI::GetIcon yahoo_away]     \
-      {xa,yahoo}          [::UI::GetIcon yahoo_xa]       \
-      {online,yahoo}      [::UI::GetIcon yahoo_online]   \
-      {available,gadugadu}   [::UI::GetIcon gadugadu_online]   \
-      {unavailable,gadugadu} [::UI::GetIcon gadugadu_offline]  \
-      {chat,gadugadu}        [::UI::GetIcon gadugadu_online]   \
-      {dnd,gadugadu}         [::UI::GetIcon gadugadu_away]     \
-      {away,gadugadu}        [::UI::GetIcon gadugadu_away]     \
-      {xa,gadugadu}          [::UI::GetIcon gadugadu_away]     \
-      {online,gadugadu}      [::UI::GetIcon gadugadu_away]     \
-      ]
-    
+        
     # Template for the roster popup menu.
     variable popMenuDefs
     
@@ -1395,16 +1335,6 @@ proc ::Jabber::Roster::GetPresenceIconFromKey {key} {
     return [::Rosticons::Get status/$key]
 }
 
-proc ::Jabber::Roster::GetPresenceIconFromKeyBU {key} {
-    variable presenceIcon
-    
-    if {[info exists presenceIcon($key)]} {
-	return $presenceIcon($key)
-    } else {
-	return ""
-    }
-}
-
 # Jabber::Roster::GetPresenceIconFromJid --
 # 
 #       Returns presence icon from jid, typically a full jid.
@@ -1472,67 +1402,10 @@ proc ::Jabber::Roster::GetPresenceIcon {jid presence args} {
     return [::Rosticons::Get $itype/$isub]
 }
 
-proc ::Jabber::Roster::GetPresenceIconBU {jid presence args} {    
-    variable presenceIcon
-    upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::jstate jstate
-    
-    array set argsArr $args
-    
-    ::Debug 5 "GetPresenceIcon jid=$jid, presence=$presence, args=$args"
-    
-    # This gives the basic icons.
-    set key $presence
-    
-    # Then see if any <show/> element
-    if {[info exists argsArr(-subscription)] &&   \
-      [string equal $argsArr(-subscription) "none"]} {
-	set key "subnone"
-    } elseif {[info exists argsArr(-ask)] &&   \
-      [string equal $argsArr(-ask) "subscribe"]} {
-	set key "subnone"
-    } elseif {[info exists argsArr(-show)] &&  \
-      [info exists presenceIcon($argsArr(-show))]} {
-	set key $argsArr(-show)
-    }
-    
-    # Foreign IM systems.
-    set haveForeignIM 0
-    if {$jprefs(rost,haveIMsysIcons)} {
-	jlib::splitjidex $jid user host res
-	
-	# If empty we have likely not yet browsed etc.
-	set cattype [$jstate(jlib) service gettype $host]
-	set subtype [lindex [split $cattype /] 1]
-	if {[info exists presenceIcon($key,$subtype)]} {
-	    append key ",$subtype"
-	    set haveForeignIM 1
-	}
-    }   
-    
-    # If whiteboard:
-    if {!$haveForeignIM && ($presence == "available") && [IsCoccinella $jid]} {
-	append key ",wb"
-    }
-    
-    return $presenceIcon($key)
-}
-
 proc ::Jabber::Roster::GetMyPresenceIcon { } {
 
     set status [::Jabber::GetMyStatus]
     return [::Rosticons::Get status/$status]
-}
-
-proc ::Jabber::Roster::GetMyPresenceIconBU { } {
-    variable presenceIcon
-    upvar ::Jabber::jstate jstate
-    
-    puts "--------------------- jstate(status)=$jstate(status)"
-    set status [::Jabber::GetMyStatus]
-    puts "+++++++++++++++++++++ status=$status"
-    puts "::Rosticons::Get=[::Rosticons::Get status/$status]"
-    return $presenceIcon($jstate(status))
 }
 
 proc ::Jabber::Roster::DirectedPresenceDlg {jid} {
