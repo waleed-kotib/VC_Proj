@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.50 2004-04-09 10:32:25 matben Exp $
+# $Id: Coccinella.tcl,v 1.51 2004-04-25 10:14:14 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -140,6 +140,12 @@ proc CallTrace {num} {
     }
 }
 
+proc TraceVar {name1 name2 op} {
+
+}
+#namespace eval ::Types:: {}
+#trace add variable ::Types::mime2SuffList write TraceVar
+
 #  Make sure that we are in the directory of the application itself.     
 if {[string equal $this(platform) "unix"]} {
     set thisPath [file dirname [resolve_cmd_realpath [info script]]]
@@ -210,7 +216,7 @@ set this(themePrefsPath)    [file join $this(prefsPath) theme]
 set this(msgcatPath)        [file join $this(path) msgs]
 set this(docsPath)          [file join $this(path) docs]
 set this(itemPath)          [file join $this(path) items]
-set this(addonsPath)        [file join $this(path) addons]
+set this(pluginsPath)       [file join $this(path) plugins]
 set this(emoticonsPath)     [file join $this(path) iconsets emoticons]
 set this(altEmoticonsPath)  [file join $this(prefsPath) iconsets emoticons]
 set this(httpdRootPath)     $this(path)
@@ -448,6 +454,7 @@ set listOfPackages {
     buttontray
     can2svg       
     combobox
+    component
     fontselection
     headlabel
     hooks
@@ -533,22 +540,16 @@ switch -- $prefs(protocol) {
     }
 }
 
-# Define MIME types etc.
-#::Types::Init
-
-# Load all plugins available.
-#::Plugins::SetBanList $prefs(pluginBanList)
-#::Plugins::Init
-
-# Addons.
-::Plugins::InitAddons
-
 # Check that the mime type preference settings are consistent.
 ::Types::VerifyInternal
 
 # Goes through all the logic of verifying that the actual packages are 
 # available on our system. Speech special.
 ::Plugins::VerifyPackagesForMimeTypes
+
+# Components.
+component::lappend_auto_path $this(pluginsPath)
+component::load
 
 # Various initializations for canvas stuff and UI.
 ::UI::Init
@@ -599,6 +600,9 @@ bind Text <<Copy>>          "+ ::UI::FixMenusWhenSelection %W"
 # Linux has a strange binding by default. Handled by <<Paste>>.
 if {[string equal $this(platform) "unix"]} {
     bind Text <Control-Key-v> {}
+}
+if {[string equal $this(platform) "windows"]} {
+    wm iconbitmap . -default [file join $this(imagePath) coccinella.ico]
 }
 
 # At this point we should be finished with the launch and delete the splash 

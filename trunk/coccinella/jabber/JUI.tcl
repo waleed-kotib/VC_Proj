@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.35 2004-04-16 13:59:29 matben Exp $
+# $Id: JUI.tcl,v 1.36 2004-04-25 10:14:15 matben Exp $
 
 package provide JUI 1.0
 
@@ -536,7 +536,7 @@ proc ::Jabber::UI::GroupChat {what roomJid} {
 
 # Jabber::UI::RegisterPopupEntry --
 # 
-#       Lets plugins/addons register their own menu entry.
+#       Lets plugins/components register their own menu entry.
 
 proc ::Jabber::UI::RegisterPopupEntry {which menuSpec} {
     
@@ -558,14 +558,14 @@ proc ::Jabber::UI::RegisterPopupEntry {which menuSpec} {
 
 # Jabber::UI::RegisterMenuEntry --
 # 
-#       Lets plugins/addons register their own menu entry.
+#       Lets plugins/components register their own menu entry.
 
 proc ::Jabber::UI::RegisterMenuEntry {wpath name menuSpec} {
     variable menuDefs
     variable rostMenuSpec
     
     # Add these entries in a section above the bottom section.
-    # Add separator to section addon entries.
+    # Add separator to section component entries.
     
     switch -- $wpath {
 	jabber {
@@ -627,7 +627,7 @@ proc ::Jabber::UI::FixUIWhen {what} {
 	    $jwapp(elplug) configure -image $contactOnImage
 	    ::UI::MenuMethod $wmj entryconfigure mNewAccount -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mLogin  \
-	      -label [::msgcat::mc Logout] -state normal
+	      -label [::msgcat::mc mLogout] -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mLogoutWith -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mPassword -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mSearch -state normal
@@ -650,7 +650,7 @@ proc ::Jabber::UI::FixUIWhen {what} {
 	    $jwapp(elplug) configure -image $contactOffImage
 	    ::UI::MenuMethod $wmj entryconfigure mNewAccount -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mLogin  \
-	      -label "[::msgcat::mc Login]..." -state normal
+	      -label [::msgcat::mc mLogin] -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mLogoutWith -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mPassword -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mSearch -state disabled

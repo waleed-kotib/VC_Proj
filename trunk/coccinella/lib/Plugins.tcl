@@ -14,7 +14,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Plugins.tcl,v 1.19 2004-04-09 10:32:26 matben Exp $
+# $Id: Plugins.tcl,v 1.20 2004-04-25 10:14:16 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -167,7 +167,7 @@ proc ::Plugins::Init { } {
     
     foreach mime [::Types::GetAllMime] {
 	set mimeTypeDoWhat($mime) "unavailable"
-	set prefMimeType2Package($mime) {}
+	set prefMimeType2Package($mime) ""
     }
     
     # Init the "standard" (internal and application) plugins.
@@ -707,9 +707,14 @@ proc ::Plugins::VerifyPackagesForMimeTypes { } {
     variable mimeTypeDoWhat
     variable mimeType2Packages
     
+    ::Debug 2 "::Plugins::VerifyPackagesForMimeTypes"
+    
     foreach mime [::Types::GetAllMime] {
 	if {![info exists mimeTypeDoWhat($mime)]} {
 	    set mimeTypeDoWhat($mime) unavailable
+	}
+	if {![info exists prefMimeType2Package($mime)]} {
+	    set prefMimeType2Package($mime) ""
 	}
 	
 	switch -- $mimeTypeDoWhat($mime) {
@@ -1192,35 +1197,6 @@ proc ::Plugins::SetCanvasBinds {wcan oldTool newTool} {
 	    }
 	}
     }    
-}
-
-# Plugins::InitAddons --
-# 
-#       Support for stuff in the addons directory. These are more general
-#       than 'plugins' since they can create their own interfaces, menus
-#       and such.
-
-proc ::Plugins::InitAddons { } {
-    global prefs this
-    
-    ::Debug 2 "::Plugins::InitAddons"
-
-    # Load all "external" addons.
-    # It needs the 'dir' to be there.
-    set dir $this(addonsPath)
-
-    # Load all "external" addons.
-    # The 'pluginDefs' file is sourced in own namespace. 
-    set indexFile [file join $this(addonsPath) addonDefs.tcl]
-    if {[file exists $indexFile]} {
-	source $indexFile
-    }
-}
-
-proc ::Plugins::LoadAddon {fileName initProc} {
-    
-    uplevel #0 [list source $fileName]
-    uplevel #0 $initProc
 }
 
 # Preference pages -------------------------------------------------------------

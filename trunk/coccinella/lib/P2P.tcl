@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: P2P.tcl,v 1.6 2004-04-09 10:32:26 matben Exp $
+# $Id: P2P.tcl,v 1.7 2004-04-25 10:14:16 matben Exp $
 
 package provide P2P 1.0
 
@@ -616,7 +616,7 @@ proc ::P2P::FixMenusWhenHook {} {
 	}
     }    
     
-    # Invoke any callbacks from 'addons'. 
+    # Invoke any callbacks from 'components'. 
     # Let them use their own registerd hook!!!!!!!!!!!!
 }
 
