@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.13 2004-01-15 14:13:00 matben Exp $
+# $Id: Whiteboard.tcl,v 1.14 2004-01-26 07:34:49 matben Exp $
 
 package require entrycomp
 package require CanvasDraw
@@ -24,7 +24,7 @@ namespace eval ::WB:: {
     # Add all event hooks.
     hooks::add quitAppHook     [list ::UI::SaveWinPrefixGeom $wDlgs(wb) whiteboard]
     hooks::add quitAppHook     ::WB::SaveAnyState
-    hooks::add loginHook       ::WB::LoginCmd
+    hooks::add loginHook       ::WB::LoginHook
     hooks::add closeWindowHook ::WB::CloseHook
     hooks::add logoutHook      ::WB::LogoutHook
     hooks::add initHook        ::WB::InitHook
@@ -502,11 +502,11 @@ proc ::WB::InitMenuDefs { } {
     }
 }
 
-# WB::LoginCmd --
+# WB::LoginHook --
 # 
 #       The login hook command.
 
-proc ::WB::LoginCmd { } {
+proc ::WB::LoginHook { } {
     global  prefs
         
     # Set communication entry in UI.

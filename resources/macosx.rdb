@@ -23,10 +23,15 @@
 *Text.Font:                          {Lucida Grande} 11
 *Text.highlightThickness:            3
 
+! button widths for ok and cancel buttons
+!
+*btok.width:                         8
+*btcancel.width:                     8
+
 ! contributed widgets
 !
 *Combobox.Font:                      {Lucida Grande} 11
-*MacTabnotebook.style:               aqua
+*MacTabnotebook.style:               winxp
 *MyLabelFrame.Font:                  {Lucida Grande} 11 bold
 *Tablelist.Font:                     {Lucida Grande} 11
 *Tablelist.highlightThickness:       3

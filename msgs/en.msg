@@ -45,6 +45,7 @@
 ::msgcat::mcset en Error
 ::msgcat::mcset en Exit
 ::msgcat::mcset en File
+::msgcat::mcset en Finish
 ::msgcat::mcset en Finished
 ::msgcat::mcset en Forward
 ::msgcat::mcset en From
@@ -937,6 +938,7 @@ Waiting for server response...}
 ::msgcat::mcset en autoupdatenot        {Do not automatically check for updates}
 ::msgcat::mcset en oobmsg               {Let user %s download a file from your built\
 in server. The description is optional.}
+::msgcat::mcset en chatcompreply        {%s is composing a reply}
 
 
 

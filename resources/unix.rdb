@@ -24,6 +24,8 @@
 *Scrollbar.width:                    12
 *Scrollbar.troughColor:              #bdbdbd
 
+! button icons for ok and cancel buttons
+!
 *btok.image:                         buttonok
 *btok.compound:                      left
 *btcancel.image:                     buttoncancel

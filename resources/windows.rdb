@@ -24,8 +24,16 @@
 *Radiobutton.Font:                   Arial 8
 *Text.Font:                          Arial 8
 
+! button icons for ok and cancel buttons
+!
+*btok.image:                         buttonok
+*btok.compound:                      left
+*btcancel.image:                     buttoncancel
+*btcancel.compound:                  left
+
 ! contributed widgets
 !
 *Combobox.Font:                      Arial 8
+*MacTabnotebook.Font:                Arial 8
 *MyLabelFrame.Font:                  Arial 8 bold
 *Tablelist.Font:                     Arial 8

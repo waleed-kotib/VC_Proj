@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.31 2004-01-23 08:57:58 matben Exp $
+# $Id: Dialogs.tcl,v 1.32 2004-01-26 07:34:49 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -68,6 +68,7 @@ array set wDlgs {
     jchist          .jchist
     jprofiles       .jprofiles
     joobs           .joobs
+    jerrdlg         .jerrdlg
 }
 
 # Dialogs::GetCanvas --
@@ -302,7 +303,7 @@ proc ::Dialogs::UnixPrintPS {w wtoprint} {
     set psCmd $prefs(unixPrintCmd)
     
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
-    wm title $w {Print Canvas}
+    wm title $w [::msgcat::mc Print]
     
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
@@ -323,7 +324,7 @@ proc ::Dialogs::UnixPrintPS {w wtoprint} {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btpr -text [::msgcat::mc Print] -width 8 -default active  \
+    pack [button $frbot.btok -text [::msgcat::mc Print] -width 8 -default active  \
       -command "set [namespace current]::finishedPrint 1"]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
@@ -336,7 +337,7 @@ proc ::Dialogs::UnixPrintPS {w wtoprint} {
     # Grab and focus.
     focus $w
     focus $frtot.entcmd
-    bind $w <Return> "$frbot.btpr invoke"
+    bind $w <Return> "$frbot.btok invoke"
     tkwait variable [namespace current]::finishedPrint
     
     # Print...

@@ -17,6 +17,7 @@
 *background:                         #dedede
 *highlightBackground:                #dedede
 *highlightColor:                     #6363ce
+*disabledForeground:                 #7a7a7a
 
 ! tk standard widgets
 !

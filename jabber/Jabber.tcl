@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.59 2004-01-23 14:28:17 matben Exp $
+# $Id: Jabber.tcl,v 1.60 2004-01-26 07:34:49 matben Exp $
 
 package provide Jabber 1.0
 
@@ -44,7 +44,8 @@ namespace eval ::Jabber:: {
     global  this prefs
     
     # Add all event hooks.
-    hooks::add quitAppHook ::Jabber::EndSession
+    hooks::add loginHook      ::Jabber::SetPrivateData
+    hooks::add quitAppHook    ::Jabber::EndSession
 
     # Jabber internal storage.
     variable jstate
@@ -168,6 +169,7 @@ namespace eval ::Jabber:: {
     array set privatexmlns {
 	servers         http://coccinella.sourceforge.net/protocols/servers
 	whiteboard      http://coccinella.sourceforge.net/protocols/whiteboard
+	public          http://coccinella.sourceforge.net/protocols/private
     }
   
     # Short error names.
@@ -1195,11 +1197,12 @@ proc ::Jabber::DebugCmd { } {
 
 # Jabber::ErrorLogDlg
 
-proc ::Jabber::ErrorLogDlg {w} {
-    global  this
+proc ::Jabber::ErrorLogDlg { } {
+    global  this wDlgs
     
     variable jerror
 
+    set w $wDlgs(jerrdlg)
     if {[winfo exists $w]} {
 	raise $w
 	return
@@ -2203,10 +2206,11 @@ proc ::Jabber::SetPrivateData { } {
     global  prefs
     
     variable jstate
+    variable privatexmlns
     
     # Build tag and attributes lists to 'private_set'.
     set ip [::Network::GetThisOutsideIPAddress]
-    $jstate(jlib) private_set "coccinella:public"     \
+    $jstate(jlib) private_set $privatexmlns(public)  \
       [list ::Jabber::SetPrivateDataCallback private_set]   \
       -server [list $ip [list resource $jstate(meres)  \
       port $prefs(thisServPort)]]       \
@@ -2240,9 +2244,10 @@ proc ::Jabber::SetPrivateDataCallback {jid jlibName what theQuery} {
 
 proc ::Jabber::GetPrivateData {jid} {
     variable jstate
+    variable privatexmlns
     
     # Build tag and attributes lists to 'private_set'.
-    $jstate(jlib) private_get {coccinella:public} {server httpd}  \
+    $jstate(jlib) private_get $privatexmlns(public) {server httpd}  \
       [list ::Jabber::GetPrivateDataCallback $jid]
 }
 
@@ -2262,7 +2267,7 @@ proc ::Jabber::GetPrivateDataCallback {jid jlibName what theQuery} {
     }
     
     # Parse the query element:
-    # theQuery='{query {xmlns coccinella:public} 0 {} {
+    # theQuery='{query {xmlns $privatexmlns(public)} 0 {} {
     #     {server {resource home port 8235} 0 192.168.0.4 {}} 
     #     {httpd {resource home port 8077} 0 192.168.0.4 {}}}}'
     set childList [lindex $theQuery 4]
@@ -2614,7 +2619,6 @@ proc ::Jabber::ParseGetBrowse {jlibname from subiq args} {
       [wrapper::createtag "ns" -chdata "jabber:iq:version"]     \
       [wrapper::createtag "ns" -chdata "jabber:x:data"]         \
       [wrapper::createtag "ns" -chdata "jabber:x:event"]        \
-      [wrapper::createtag "ns" -chdata "coccinella:public"]     \
       [wrapper::createtag "ns" -chdata "coccinella:wb"]]
     
     # Adding private namespaces.
@@ -3098,9 +3102,23 @@ proc ::Jabber::VerifyJIDWhiteboard {wtop} {
     return 1
 }
 
+# Jabber::LoginLogout --
+# 
+#       Toggle login/logout. Useful for binding in menu.
+
+proc ::Jabber::LoginLogout { } {
+    
+    ::Jabber::Debug 2 "::Jabber::LoginLogout"
+    if {[::Jabber::IsConnected]} {
+	::Jabber::DoCloseClientConnection
+    } else {
+	::Jabber::Login::Login
+    }    
+}
+
 # The ::Jabber::Logout:: namespace ---------------------------------------------
 
-namespace eval ::Jabber::Logout:: {}
+namespace eval ::Jabber::Logout:: { }
 
 proc ::Jabber::Logout::WithStatus { } {
     global  prefs this wDlgs

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.24 2004-01-25 15:42:15 matben Exp $
+# $Id: Login.tcl,v 1.25 2004-01-26 07:34:49 matben Exp $
 
 package provide Login 1.0
 
@@ -557,9 +557,6 @@ proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
 	set jstate(status) "available"
 	eval {::Jabber::SetStatus available -notype 1} $presArgs
     }
-    
-    # Store our own ip number in a public storage at the server.
-    ::Jabber::SetPrivateData
         
     # Run all login hooks.
     hooks::run loginHook

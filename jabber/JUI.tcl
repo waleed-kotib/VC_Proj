@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.24 2004-01-23 14:25:03 matben Exp $
+# $Id: JUI.tcl,v 1.25 2004-01-26 07:34:49 matben Exp $
 
 package provide JUI 1.0
 
@@ -74,43 +74,43 @@ namespace eval ::Jabber::UI:: {
     # Menu definitions for the Roster/services window.
     variable menuDefs
     set menuDefs(rost,file) {
-	{command   mNewWhiteboard      {::WB::NewWhiteboard}                normal   N}
-	{command   mCloseWindow        {::UI::DoCloseWindow}                normal   W}
-	{command   mPreferences...     {::Preferences::Build}               normal   {}}
+	{command   mNewWhiteboard      {::WB::NewWhiteboard}          normal   N}
+	{command   mCloseWindow        {::UI::DoCloseWindow}          normal   W}
+	{command   mPreferences...     {::Preferences::Build}         normal   {}}
 	{command   mUpdateCheck        {
-	    ::AutoUpdate::Get $prefs(urlAutoUpdate) -silent 0}       normal   {}}
+	    ::AutoUpdate::Get $prefs(urlAutoUpdate) -silent 0}        normal   {}}
 	{separator}
-	{command   mQuit               {::UserActions::DoQuit}              normal   Q}
+	{command   mQuit               {::UserActions::DoQuit}        normal   Q}
     }
     set menuDefs(rost,jabber) {    
-	{command     mNewAccount    {::Jabber::Register::Register}          normal   {}}
-	{command     mLogin         {::Jabber::Login::Login}                normal   L}
-	{command     mLogoutWith    {::Jabber::Logout::WithStatus}          disabled {}}
-	{command     mPassword      {::Jabber::Passwd::Build}               disabled {}}
+	{command     mNewAccount    {::Jabber::Register::Register}    normal   {}}
+	{command     mLogin         {::Jabber::LoginLogout}           normal   L}
+	{command     mLogoutWith    {::Jabber::Logout::WithStatus}    disabled {}}
+	{command     mPassword      {::Jabber::Passwd::Build}         disabled {}}
 	{separator}
-	{checkbutton mMessageInbox  {::Jabber::MailBox::Show}               normal   I \
+	{checkbutton mMessageInbox  {::Jabber::MailBox::ShowHide}     normal   I \
 	  {-variable ::Jabber::jstate(inboxVis)}}
 	{separator}
-	{command     mSearch        {::Jabber::Search::Build}               disabled {}}
-	{command     mAddNewUser    {::Jabber::Roster::NewOrEditItem new}   disabled {}}
+	{command     mSearch        {::Jabber::Search::Build}         disabled {}}
+	{command     mAddNewUser    {::Jabber::Roster::NewOrEditItem new} disabled {}}
 	{separator}
-	{command     mSendMessage   {::Jabber::NewMsg::Build}               disabled M}
-	{command     mChat          {::Jabber::Chat::StartThreadDlg}        disabled T}
-	{cascade     mStatus        {}                                      disabled {} {} {}}
+	{command     mSendMessage   {::Jabber::NewMsg::Build}         disabled M}
+	{command     mChat          {::Jabber::Chat::StartThreadDlg}  disabled T}
+	{cascade     mStatus        {}                                disabled {} {} {}}
 	{separator}
 	{command     mEnterRoom     {::Jabber::GroupChat::EnterOrCreate enter} disabled R}
-	{cascade     mExitRoom      {}                                      disabled {} {} {}}
+	{cascade     mExitRoom      {}                                disabled {} {} {}}
 	{command     mCreateRoom    {::Jabber::GroupChat::EnterOrCreate create} disabled {}}
 	{separator}
-	{command     mvCard         {::VCard::Fetch own}                    disabled {}}
+	{command     mvCard         {::VCard::Fetch own}              disabled {}}
 	{separator}
 	{command     mSetupAssistant {
 	    package require SetupAss
-	    ::Jabber::SetupAss::SetupAss}                                 normal {}}
-	{command     mRemoveAccount {::Jabber::Register::Remove}          disabled {}}	
+	    ::Jabber::SetupAss::SetupAss}                             normal {}}
+	{command     mRemoveAccount {::Jabber::Register::Remove}      disabled {}}	
 	{separator}
-	{command     mErrorLog      {::Jabber::ErrorLogDlg .jerrdlg}      normal   {}}
-	{checkbutton mDebug         {::Jabber::DebugCmd}                  normal   {} \
+	{command     mErrorLog      {::Jabber::ErrorLogDlg}           normal   {}}
+	{checkbutton mDebug         {::Jabber::DebugCmd}              normal   {} \
 	  {-variable ::Jabber::jstate(debugCmd)}}
     }    
 
@@ -120,9 +120,9 @@ namespace eval ::Jabber::UI:: {
     }
 
     set menuDefs(min,edit) {    
-	{command   mCut              {::UI::CutCopyPasteCmd cut}           disabled X}
-	{command   mCopy             {::UI::CutCopyPasteCmd copy}          disabled C}
-	{command   mPaste            {::UI::CutCopyPasteCmd paste}         disabled V}
+	{command   mCut              {::UI::CutCopyPasteCmd cut}      disabled X}
+	{command   mCopy             {::UI::CutCopyPasteCmd copy}     disabled C}
+	{command   mPaste            {::UI::CutCopyPasteCmd paste}    disabled V}
     }
 }
 
@@ -233,10 +233,10 @@ proc ::Jabber::UI::Build {w} {
       [list ::Jabber::Login::Login]
     if {[::Jabber::MailBox::HaveMailBox]} {
 	$wtray newbutton inbox Inbox $iconInboxLett $iconInboxLettDis  \
-	  [list ::Jabber::MailBox::Show -visible 1]
+	  [list ::Jabber::MailBox::ShowHide -visible 1]
     } else {
 	$wtray newbutton inbox Inbox $iconInbox $iconInboxDis  \
-	  [list ::Jabber::MailBox::Show -visible 1]
+	  [list ::Jabber::MailBox::ShowHide -visible 1]
     }
     $wtray newbutton newuser "New User" $iconNewUser $iconNewUserDis  \
       [list ::Jabber::Roster::NewOrEditItem new] \
@@ -895,8 +895,7 @@ proc ::Jabber::UI::FixUIWhen {what} {
 	    $jwapp(elplug) configure -image $contactOnImage
 	    ::UI::MenuMethod $wmj entryconfigure mNewAccount -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mLogin  \
-	      -label [::msgcat::mc Logout] -state normal -command \
-	      ::Jabber::DoCloseClientConnection
+	      -label [::msgcat::mc Logout] -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mLogoutWith -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mPassword -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mSearch -state normal
@@ -919,8 +918,7 @@ proc ::Jabber::UI::FixUIWhen {what} {
 	    $jwapp(elplug) configure -image $contactOffImage
 	    ::UI::MenuMethod $wmj entryconfigure mNewAccount -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mLogin  \
-	      -label "[::msgcat::mc Login]..." -state normal \
-	      -command [list ::Jabber::Login::Login]
+	      -label "[::msgcat::mc Login]..." -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mLogoutWith -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mPassword -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mSearch -state disabled

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.38 2004-01-23 08:56:26 matben Exp $
+# $Id: Roster.tcl,v 1.39 2004-01-26 07:34:49 matben Exp $
 
 package provide Roster 1.0
 
@@ -730,11 +730,13 @@ proc ::Jabber::Roster::AutoBrowseCallback {browseName type jid subiq} {
     variable presenceIcon
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
+    upvar ::Jabber::privatexmlns privatexmlns    
     
     ::Jabber::Debug 2 "::Jabber::Roster::AutoBrowseCallback, jid=$jid,\
       [string range "subiq='$subiq'" 0 40]..."
     
-    if {[$jstate(browse) havenamespace $jid "coccinella:wb"]} {
+    if {[$jstate(browse) havenamespace $jid "coccinella:wb"] || \
+      [$jstate(browse) havenamespace $jid $privatexmlns(whiteboard)]} {
 	
 	# Shall we query for its ip address right away?
 	if {$jprefs(preGetIP)} {
@@ -1539,6 +1541,7 @@ proc ::Jabber::Roster::GetPresenceIcon {jid presence args} {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
+    upvar ::Jabber::privatexmlns privatexmlns
     
     array set argsArr $args
     
@@ -1577,6 +1580,8 @@ proc ::Jabber::Roster::GetPresenceIcon {jid presence args} {
     # If whiteboard:
     if {!$haveForeignIM && [$jstate(browse) isbrowsed $jid]} {
 	if {[$jstate(browse) havenamespace $jid "coccinella:wb"]} {
+	    append key ",wb"
+	} elseif {[$jstate(browse) havenamespace $jid $privatexmlns(whiteboard)]} {
 	    append key ",wb"
 	}
     }

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.36 2004-01-23 08:56:20 matben Exp $
+# $Id: MailBox.tcl,v 1.37 2004-01-26 07:34:49 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -78,45 +78,22 @@ namespace eval ::Jabber::MailBox:: {
 
 proc ::Jabber::MailBox::Init { } {    
     variable locals
-    variable mailbox
-    variable uidmsg
-    upvar ::Jabber::jstate jstate
     
     set locals(inited) 1
    
     ::Jabber::MailBox::TranslateAnyVer1ToCurrentVer
-    
-    if {0 && $jstate(debug) > 1} {
-	set mailbox([incr uidmsg])  \
-	  [list "Nasty" olle@athlon.se/ff "yesterday 19:10:01" 0 $uidmsg "Tja,\n\nwww.mats.se, Nytt?"]
-	set mailbox([incr uidmsg])  \
-	  [list "Re: Shit" kk@athlon.se/hh "today 08:33:02" 0 $uidmsg "Hej,\n\nKass?\nlink www.apple.com\nshit www.mats.se/home"]
-	set mailbox([incr uidmsg])  \
-	  [list "Re: Shit" kk@athlon.se/zzzzzzzzzzzzzzzzzzzzzzzzzzz "today 08:43:02" 0 $uidmsg "Hej,\n\nAny :cool: stuff? I'm :bored: and :cheeky:."]
-	set mailbox([incr uidmsg])  \
-	  [list "Re: special braces" brace@athlon.se/co "today 08:43:02" 0 $uidmsg "Testing unmatched braces:  if \{1\} \{"]
-	set mailbox([incr uidmsg])  \
-	  [list "Re: special amp" brace@athlon.se/co "today 08:43:02" 0 $uidmsg "Testing ampersand:  amp &"]
-	set mailbox([incr uidmsg])  \
-	  [list "Re: special brackets" bracket@athlon.se/co "today 08:43:02" 0 $uidmsg "Testing brackets  \[\["]
-	set mailbox([incr uidmsg])  \
-	  [list "Re: special quotes" quote@athlon.se/co "today 08:43:02" 0 $uidmsg "Testing \"quotes\" "]
-	if {1} {
-	set mailbox([incr uidmsg])  \
-	  [list "Re: whiteboard" quote@athlon.se/co "today 08:43:02" 0 $uidmsg "" -canvasuid ahextest]
-	}
-    }
 }
 
-# Jabber::MailBox::Show --
+# Jabber::MailBox::ShowHide --
 # 
 #       Toggles the display of the inbox. With -visible 1 it forces it
 #       to be displayed.
 
-proc ::Jabber::MailBox::Show {args} {
+proc ::Jabber::MailBox::ShowHideBU {args} {
     global wDlgs
     upvar ::Jabber::jstate jstate
 
+    puts "jstate(inboxVis)=$jstate(inboxVis) $args"
     array set argsArr $args
     set w $wDlgs(jinbox)
     
@@ -128,10 +105,48 @@ proc ::Jabber::MailBox::Show {args} {
 	    catch {wm deiconify $w}
 	    raise $w
 	} else {
-	    ::Jabber::MailBox::Build
+	    ::Jabber::MailBox::Build $w
 	}
     } else {
 	catch {wm withdraw $w}
+    }
+}
+
+proc ::Jabber::MailBox::ShowHide {args} {
+    global wDlgs
+    upvar ::Jabber::jstate jstate
+
+    #puts "1: jstate(inboxVis)=$jstate(inboxVis) $args"
+    array set argsArr $args
+    set w $wDlgs(jinbox)
+    
+    if {[info exists argsArr(-visible)]} {
+	set visible $argsArr(-visible)
+    }
+    if {![winfo exists $w]} {
+	
+	# First time we are being called.
+	::Jabber::MailBox::Build
+	if {[info exists argsArr(-visible)] && \
+	  ($argsArr(-visible) == 0)} {
+	    set jstate(inboxVis) 0
+	} else {
+	    set jstate(inboxVis) 1
+	}
+    } else {
+	set ismapped [winfo ismapped $w]
+	set targetstate [expr $ismapped ? 0 : 1]
+	if {[info exists argsArr(-visible)]} {
+	    set targetstate $argsArr(-visible)
+	}
+	if {$targetstate} {
+	    catch {wm deiconify $w}
+	    raise $w
+	} else {
+	    catch {wm withdraw $w}
+	}
+	set jstate(inboxVis) $targetstate
+	#puts "2: jstate(inboxVis)=$jstate(inboxVis), ismapped=$ismapped, targetstate=$targetstate"
     }
 }
 
@@ -158,11 +173,7 @@ proc ::Jabber::MailBox::Build {args} {
     # Toplevel of class MailBox.
     ::UI::Toplevel $w -macstyle documentProc -class MailBox -usemacmainmenu 1
     wm title $w [::msgcat::mc Inbox]
-    
-    # Toplevel menu for mac only.
-    if {[string match "mac*" $this(platform)]} {
-	#$w configure -menu [::Jabber::UI::GetRosterWmenu]
-    }
+
     set locals(wtop) $w
     set jstate(inboxVis) 1
     
@@ -316,7 +327,7 @@ proc ::Jabber::MailBox::CloseHook {wclose} {
     
     set result ""
     if {[string equal $wclose $wDlgs(jinbox)]} {
-	::Jabber::MailBox::Show -visible 0
+	::Jabber::MailBox::ShowHide -visible 0
 	set result stop
     }
     return $result

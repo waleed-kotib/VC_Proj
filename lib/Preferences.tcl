@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.40 2004-01-23 08:58:40 matben Exp $
+# $Id: Preferences.tcl,v 1.41 2004-01-26 07:34:49 matben Exp $
  
 package require notebook
 package require tree
@@ -126,8 +126,6 @@ proc ::Preferences::Build { } {
 	$wtree newitem {Jabber Customization} -text [::msgcat::mc Customization]
     }
     $wtree newitem {Whiteboard} -text [::msgcat::mc Whiteboard]
-    $wtree newitem {Whiteboard Drawing} -text [::msgcat::mc Drawing]
-    $wtree newitem {Whiteboard Text} -text [::msgcat::mc Text]
     $wtree newitem {Whiteboard {File Mappings}} -text [::msgcat::mc {File Mappings}]
     $wtree newitem {Whiteboard {Edit Fonts}} -text [::msgcat::mc {Edit Fonts}]
     $wtree newitem {Whiteboard Privacy} -text [::msgcat::mc Privacy]
@@ -180,16 +178,6 @@ proc ::Preferences::Build { } {
 	set frcus [$nbframe page {Customization}]    
 	::Preferences::Customization::BuildPage $frcus
     }
-    
-    # Drawing page -------------------------------------------------------------
-    set frpdraw [$nbframe page {Drawing}]
-    label $frpdraw.msg -text "Something on Drawing page."
-    pack $frpdraw.msg -side left -expand yes -pady 8
-    
-    # Text page ----------------------------------------------------------------
-    set frptxt [$nbframe page {Text}]
-    label $frptxt.msg -text "Something on Text page."
-    pack $frptxt.msg -side left -expand yes -pady 8
     
     # Edit Fonts page ----------------------------------------------------------
     set frpfont [$nbframe page {Edit Fonts}]

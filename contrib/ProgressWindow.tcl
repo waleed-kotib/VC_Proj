@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ProgressWindow.tcl,v 1.10 2004-01-23 08:54:23 matben Exp $
+# $Id: ProgressWindow.tcl,v 1.11 2004-01-26 07:34:49 matben Exp $
 # 
 #-------------------------------------------------------------------------------
 #
@@ -314,7 +314,7 @@ proc ::ProgressWindow::Build {w} {
     }
     button $widgets(cancel) -text [::msgcat::mc Cancel]  \
       -command [list [namespace current]::CancelBt $w $options(-cancelcmd)]
-    pack $widgets(cancel) -side right -padx 4
+    pack $widgets(cancel) -side right -padx 8
 
     # Small text below progress bar.
     pack [label $widgets(label2) -font $options(-font2)] \
