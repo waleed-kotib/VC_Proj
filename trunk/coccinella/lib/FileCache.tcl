@@ -6,7 +6,7 @@
 #
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #
-# $Id: FileCache.tcl,v 1.17 2004-12-09 15:20:29 matben Exp $
+# $Id: FileCache.tcl,v 1.18 2004-12-09 16:32:48 matben Exp $
 # 
 #       The input key can be: 
 #               1) a full url, must be uri encoded 
@@ -404,18 +404,24 @@ proc ::FileCache::HasCacheName {fileName} {
 proc ::FileCache::WriteTable { } {
     variable indexFile
     variable cache
+    variable readcache
     
-    # Write only files in the cache directory.
-    set tmp ${indexFile}_tmp
-    if {![catch {open $tmp {WRONLY CREAT}} fd]} {
-	foreach {key value} [array get cache] {
-	    if {[string equal [file dirname $value] "."]} {
-		puts $fd [list $key $value]
+    # Only if the cacheFile read we should save it, else we just
+    # overwrite the existing file with an empty one.
+    if {$readcache} {
+    
+	# Write only files in the cache directory.
+	set tmp ${indexFile}_tmp
+	if {![catch {open $tmp {WRONLY CREAT}} fd]} {
+	    foreach {key value} [array get cache] {
+		if {[string equal [file dirname $value] "."]} {
+		    puts $fd [list $key $value]
+		}
 	    }
+	    close $fd
 	}
-	close $fd
+	catch {file rename -force $tmp $indexFile}
     }
-    catch {file rename -force $tmp $indexFile}
 }
 
 # FileCache::ReadTable --
