@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasDraw.tcl,v 1.4 2003-02-24 17:52:09 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.5 2003-04-28 13:32:31 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 
@@ -1440,7 +1440,7 @@ proc ::CanvasDraw::StrokeDrag {w x y {brush 0}} {
 #       none
 
 proc ::CanvasDraw::FinalizeStroke {w x y {brush 0}} {
-    global  prefs allIPnumsToSend
+    global  prefs
     
     variable stroke
     set wtop [::UI::GetToplevelNS $w]
@@ -1453,6 +1453,7 @@ proc ::CanvasDraw::FinalizeStroke {w x y {brush 0}} {
     if {![info exists stroke(N)]} {
 	return
     }
+    ::CanvasDraw::StrokePostProcess $w
     for {set i 0} {$i <= $stroke(N)} {incr i} {
 	append coords $stroke($i) " "
     }
@@ -1471,16 +1472,34 @@ proc ::CanvasDraw::FinalizeStroke {w x y {brush 0}} {
 	set extras ""
     }
     set utag [::CanvasUtils::NewUtag]
-    set cmd "create line $coords  \
-      -tags {line $utag} -joinstyle round  \
+    set cmd [list create line $coords  \
+      -tags [list line $utag] -joinstyle round  \
       -smooth $state(smooth) -splinesteps $state(splinesteps) \
-      -fill $state(fgCol) -width $thisThick $extras"
-    set undocmd "delete $utag"
+      -fill $state(fgCol) -width $thisThick]
+    set cmd [concat $cmd $extras]
+    set undocmd [list delete $utag]
     set redo [list ::CanvasUtils::Command $wtop $cmd]
     set undo [list ::CanvasUtils::Command $wtop $undocmd]
     eval $redo
     undo::add [::UI::GetUndoToken $wtop] $undo $redo
     catch {unset stroke}
+}
+
+# CanvasDraw::StrokePostProcess --
+# 
+#       Reduce the number of coords in the stroke in a smart way that also
+#       smooths it. Always keep first and last.
+
+proc ::CanvasDraw::StrokePostProcess {w} {
+    
+    variable stroke
+    
+    set coords {}
+    for {set i 0} {$i <= [expr $stroke(N) - 2]} {incr i} {
+
+
+    }
+    return $coords
 }
 
 #--- End of stroke tool --------------------------------------------------------

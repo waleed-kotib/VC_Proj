@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.2 2003-02-24 17:52:05 matben Exp $
+# $Id: GotMsg.tcl,v 1.3 2003-04-28 13:32:27 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -164,10 +164,15 @@ proc ::Jabber::GotMsg::Build { } {
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
     } else {
-	wm transient $w .
+
     }
     wm title $w [::msgcat::mc {Incoming Message}]
     wm protocol $w WM_DELETE_WINDOW [list ::Jabber::GotMsg::Close $w]
+    
+    # Toplevel menu for mac only.
+    if {[string match "mac*" $this(platform)]} {
+	$w configure -menu [::Jabber::UI::GetRosterWmenu]
+    }
     
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised]   \

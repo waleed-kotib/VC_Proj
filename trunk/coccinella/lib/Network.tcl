@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Network.tcl,v 1.2 2003-02-24 17:52:11 matben Exp $
+# $Id: Network.tcl,v 1.3 2003-04-28 13:32:32 matben Exp $
 
 namespace eval ::Network:: {
     
@@ -207,7 +207,45 @@ proc ::Network::GetThisOutsideIPAddress { } {
     }
 }
 
-# These one need another home???
+# Network::RegisterIP --
+# 
+#       Sets ip number for internal use.
+#   
+# Arguments:
+#       ipNum       ip number to be de/registered
+#       type        any of 'none', 'to', 'from', 'both'
+
+proc ::Network::RegisterIP {ipNum {type "both"}} {
+    global  prefs allIPnumsToSend allIPnums allIPnumsTo
+    
+    switch -- $prefs(protocol) {
+	jabber {
+	    switch -- $type {
+		both - to {
+		    set allIPnumsTo $ipNum
+		    set allIPnumsToSend $ipNum
+		    set allIPnums $ipNum
+		}
+		none {
+		    set allIPnumsTo {}
+		    set allIPnumsToSend {}
+		    set allIPnums {}
+		}
+	    }
+	}
+	symmetric {
+	    # To Do.
+	}
+	client {
+	    # To Do.
+	}
+	server {
+	    # To Do.
+	}
+    }
+}
+
+# These one need another home??? ...............................................
 
 # SendClientCommand --
 #

@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: TheServer.tcl,v 1.4 2003-03-01 09:51:28 matben Exp $
+# $Id: TheServer.tcl,v 1.5 2003-04-28 13:32:34 matben Exp $
     
 # DoStartServer ---
 #
@@ -43,8 +43,6 @@ proc DoStartServer {thisServPort} {
 		set thisIPnum [lindex $sockname 0]
 		set this(ipnum) [lindex $sockname 0]
 	    }
-	    ::UI::MenuMethod .menu.file entryconfigure mStartServer  \
-	      -state disabled
 	}
     }
 }
@@ -64,7 +62,6 @@ proc DoStopServer { } {
     
     catch {close $listenServSocket}
     set state(isServerUp) 0
-    ::UI::MenuMethod .menu.file entryconfigure mStartServer -state normal
 }
 
 # SetupChannel --
@@ -492,12 +489,13 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 		# Change total size of application so that w and h is the canvas size.
 		# Be sure to not propagate this size change to other clients.
 		# A full blown update seems to be necessary on Windows!
-		
-		bind $wServCan <Configure> [list ::UI::CanvasConfigureCallback 0]
-		::UI::SetCanvasSize $w $h
-		update
-		bind $wServCan <Configure> [list ::UI::CanvasConfigureCallback "all"]
-	    }		
+		if {0} {
+		    bind $wServCan <Configure> [list ::UI::CanvasConfigureCallback 0]
+		    ::UI::SetCanvasSize $w $h
+		    update
+		    bind $wServCan <Configure> [list ::UI::CanvasConfigureCallback "all"]
+		}		
+	    }
 	}
 	PUT - GET {
 	    if {[regexp "^(PUT|GET): +($llist_|$wrd_) *($optlist_)$" \

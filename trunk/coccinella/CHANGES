@@ -3,6 +3,12 @@ Whiteboard CHANGES
 ------------------
 
 
+Whiteboard-0.94.4 (03????): 	Short summary --
+
+	- all jabber UI elements moved from whiteboard window to roster window
+
+
+
 Whiteboard-0.94.3 (03????): 	Short summary --
 
 	- whiteboards now multiinstance for jabber; send single whiteboard

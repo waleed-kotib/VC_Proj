@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.3 2003-02-24 17:52:05 matben Exp $
+# $Id: OOB.tcl,v 1.4 2003-04-28 13:32:29 matben Exp $
 
 package provide OOB 1.0
 
@@ -36,7 +36,7 @@ proc ::Jabber::OOB::BuildSet {w jid} {
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
     } else {
-	wm transient $w .
+
     }
     wm title $w {Send File}
     set locals(jid) $jid

@@ -57,7 +57,7 @@ if {$::tcl_platform(platform) == "macintosh"} {
 
 
 # If you for some reason want to translate any of the message catalogs
-# that are utf-8 encoded to your system enncoding do:
+# that are utf-8 encoded to your system encoding do:
 
 set src [tk_getOpenFile -title {Pick your utf-8 language catalog} \
 	-filetypes {{{Message Catalogs}       {.msg}}}]

@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: PutFileIface.tcl,v 1.3 2003-02-24 17:52:12 matben Exp $
+# $Id: PutFileIface.tcl,v 1.4 2003-04-28 13:32:34 matben Exp $
 
 package require putfile
 package require uriencode
@@ -154,14 +154,14 @@ proc ::PutFileIface::PutCommand {wtop token what msg} {
 
     if {[string equal $what "error"]} {
 	set ncode [::putfile::ncode $token]
-	set codetxt [putfile::ncodetotext $ncode]
+	set codetxt [::putfile::ncodetotext $ncode]
 
 	# Depending on the flavour of the return code do different things.
 	if {$prefs(talkative) >= 1} {
 	    tk_messageBox -title [::msgcat::mc {Put File Error}]  \
-	      -type ok -message "$msg. $codetxt"
+	      -type ok -message $msg
 	} else {
-	    ::UI::SetStatusMessage $wtop "$msg $codetxt"
+	    ::UI::SetStatusMessage $wtop $msg
 	    switch -- $ncode {
 		320 - 323 {
 		    # empty
@@ -169,7 +169,7 @@ proc ::PutFileIface::PutCommand {wtop token what msg} {
 		default {
 		    if {$prefs(talkative) >= 1} {
 			tk_messageBox -title [::msgcat::mc {Put File Error}] \
-			  -type ok -message "$msg. $codetxt"
+			  -type ok -message $msg
 		    }
 		}		
 	    }

@@ -3,9 +3,9 @@
 #      This file is part of the whiteboard application. 
 #      It implements the new message dialog fo the jabber part.
 #      
-#  Copyright (c) 2001-2002  Mats Bengtsson
+#  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.3 2003-02-06 17:23:32 matben Exp $
+# $Id: NewMsg.tcl,v 1.4 2003-04-28 13:32:29 matben Exp $
 
 package provide NewMsg 1.0
 
@@ -130,20 +130,14 @@ proc ::Jabber::NewMsg::Build {wbase args} {
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
     } else {
-	#wm transient $w .
+
     }
     wm title $w [::msgcat::mc {New Message}]
     wm protocol $w WM_DELETE_WINDOW [list [namespace current]::CloseDlg $w]
     
-    # Toplevel menu for mac only. Only when multiinstance.
-    if {0 && [string match "mac*" $this(platform)]} {
-	set wmenu ${w}.menu
-	menu $wmenu -tearoff 0
-	::UI::MakeMenu $w ${wmenu}.apple   {}      $::UI::menuDefs(main,apple)
-	::UI::MakeMenu $w ${wmenu}.file    mFile   $::UI::menuDefs(min,file)
-	::UI::MakeMenu $w ${wmenu}.edit    mEdit   $::UI::menuDefs(min,edit)	
-	::UI::MakeMenu $w ${wmenu}.jabber  mJabber $::UI::menuDefs(main,jabber)
-	$w configure -menu ${wmenu}
+    # Toplevel menu for mac only.
+    if {[string match "mac*" $this(platform)]} {
+	$w configure -menu [::Jabber::UI::GetRosterWmenu]
     }
     
     # Global frame.
@@ -154,14 +148,14 @@ proc ::Jabber::NewMsg::Build {wbase args} {
     set frtop [frame $w.frall.frtop -borderwidth 0]
     pack $frtop -side top -fill x -padx 4 -pady 2
     ::UI::InitShortcutButtonPad $w $frtop 50
-    ::UI::NewButton $w send $icons(btsend) $icons(btsenddis)  \
+    ::UI::NewButton $w send Send $icons(btsend) $icons(btsenddis)  \
       [list ::Jabber::NewMsg::DoSend $w]
-    ::UI::NewButton $w quote $icons(btquote) $icons(btquotedis)  \
+    ::UI::NewButton $w quote Quote $icons(btquote) $icons(btquotedis)  \
       [list ::Jabber::NewMsg::DoQuote $w $opts(-quotemessage) $opts(-to) $opts(-time)] \
        -state $quotestate
-    ::UI::NewButton $w save $icons(btsave) $icons(btsavedis)  \
+    ::UI::NewButton $w save Save $icons(btsave) $icons(btsavedis)  \
       [list ::Jabber::NewMsg::SaveMsg $w]
-    ::UI::NewButton $w print $icons(btprint) $icons(btprintdis)  \
+    ::UI::NewButton $w print Print $icons(btprint) $icons(btprintdis)  \
       [list ::Jabber::NewMsg::DoPrint $w]
     
     pack [frame $w.frall.divt -bd 2 -relief sunken -height 2] -fill x -side top

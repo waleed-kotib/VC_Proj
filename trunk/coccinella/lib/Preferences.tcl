@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.4 2003-02-24 17:52:11 matben Exp $
+# $Id: Preferences.tcl,v 1.5 2003-04-28 13:32:32 matben Exp $
  
 package require notebook
 package require tree
@@ -58,7 +58,6 @@ proc ::Preferences::Build {w} {
     
     toplevel $w -class Preferences
     wm title $w [::msgcat::mc Preferences]
-    wm group $w .
     wm protocol $w WM_DELETE_WINDOW ::Preferences::CancelPushBt
     set finished 0
     set wtoplevel $w
@@ -1389,7 +1388,7 @@ proc ::Preferences::FileMap::Inspect {w doWhat wlist {indSel {}}} {
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
     } else {
-	wm transient $w .
+
     }
     wm title $w [::msgcat::mc {Inspect Associations}]
     set finishedInspect -1
@@ -1702,7 +1701,7 @@ proc ::Preferences::NetSetup::BuildPage {page} {
     radiobutton $fropt.symm -text [::msgcat::mc {Peer-to-Peer}]  \
       -font $sysFont(sb) -variable ::Preferences::tmpPrefs(protocol)  \
       -value symmetric
-    if {$state(reflectorStarted) || $state(isServerUp)} {
+    if {$state(isServerUp)} {
 	#$fropt.symm configure -state disabled
     }
     checkbutton $fropt.auto -text "  [::msgcat::mc {Auto Connect}]"  \
@@ -1802,55 +1801,44 @@ proc ::Preferences::NetSetup::UpdateUI { } {
     # Update menus.
     switch -- $prefs(protocol) {
 	jabber {
-	    if {$state(isServerUp)} {
-		::UI::MenuMethod .menu.file entryconfigure mStartServer -state disabled
-	    } else {
-		::UI::MenuMethod .menu.file entryconfigure mStartServer -state normal
-	    }
-	    ::UI::MenuMethod .menu.file entryconfigure mOpenConnection  \
-	      -command [list ::Jabber::Login::Login $wDlgs(jlogin)]
-	    .menu entryconfigure *Jabber* -state normal
 	    
 	    # Show our combination window.
-	    ::Jabber::RostServ::Show $wDlgs(jrostbro)
+	    ::Jabber::UI::Show $wDlgs(jrostbro)
 	}
 	central {
 	    
 	    # We are only a client.
-	    ::UI::MenuMethod .menu.file entryconfigure mStartServer -state disabled
 	    ::UI::MenuMethod .menu.file entryconfigure mOpenConnection  \
 	      -command [list OpenConnection $wDlgs(openConn)]
 	    .menu entryconfigure *Jabber* -state disabled
 	    
 	    # Hide our combination window.
-	    ::Jabber::RostServ::Close $wDlgs(jrostbro)
+	    ::Jabber::UI::Close $wDlgs(jrostbro)
 	}
 	default {
-	    if {$state(isServerUp)} {
-		::UI::MenuMethod .menu.file entryconfigure mStartServer -state disabled
-	    } else {
-		::UI::MenuMethod .menu.file entryconfigure mStartServer -state normal
-	    }
 	    ::UI::MenuMethod .menu.file entryconfigure mOpenConnection   \
 	      -command [list OpenConnection $wDlgs(openConn)]
 	    if {!$prefs(stripJabber)} {
 		.menu entryconfigure *Jabber* -state disabled
 		
 		# Hide our combination window.
-		::Jabber::RostServ::Close $wDlgs(jrostbro)
+		::Jabber::UI::Close $wDlgs(jrostbro)
 	    }
 	}
     }
     
-    # Other consistency updates needed.
-    ::UI::SetCommHead . $prefs(protocol)
-
-    switch -- $prefs(protocol) {
-	jabber {
-	    ::Jabber::BuildJabberEntry .
-	}
-	default {
-	    ::UI::DeleteJabberEntry .
+    # Other UI updates needed.
+    foreach w [::UI::GetAllWhiteboards] {
+	set wtop [::UI::GetToplevelNS $w]
+	::UI::SetCommHead $wtop $prefs(protocol)
+	
+	switch -- $prefs(protocol) {
+	    jabber {
+		::Jabber::BuildJabberEntry $wtop
+	    }
+	    default {
+		::UI::DeleteJabberEntry $wtop
+	    }
 	}
     }
 }
@@ -2451,16 +2439,20 @@ proc ::Preferences::SavePushBt { } {
     variable tmpJServer
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jprefs jprefs
+    
+    # Was protocol changed?
+    if {![string equal $prefs(protocol) $tmpPrefs(protocol)]} {
+	set ans [tk_messageBox -title Relaunch -icon info -type yesno \
+	  -message [FormatTextForMessageBox [::msgcat::mc messprotocolch]]]
+	if {$ans == "no"} {
+	    set finished 1
+	    return
+	}
+    }
         
     # Make all temporary prefs reflect the current settings of the panels.
     if {!$prefs(stripJabber)} {
 	::Preferences::UpdateTmpArrays
-    }
-    
-    # Was protocol changed?
-    set protocolChanged 0
-    if {![string equal $prefs(protocol) $tmpPrefs(protocol)]} {
-	set protocolChanged 1
     }
     
     # Copy the temporary copy to the real variables.
@@ -2471,7 +2463,7 @@ proc ::Preferences::SavePushBt { } {
     # and the same for all MIME stuff etc.
     ::Preferences::FileMap::SaveAssociations    
     ::Preferences::EditFonts::PushBtSave
-    ::Preferences::NetSetup::UpdateUI
+    #::Preferences::NetSetup::UpdateUI
     
     if {!$prefs(stripJabber)} {
 	
@@ -2485,13 +2477,6 @@ proc ::Preferences::SavePushBt { } {
     
     # Save the preference file.
     PreferencesSaveToFile
-    
-    # Info to relaunch if protocol changed.
-    if {$protocolChanged} {
-	tk_messageBox -title Relaunch -icon info -type ok -parent . -message \
-	  "Be sure to close the application and relaunch it for the network\
-	  change to take effect"
-    }
     
     set finished 1
 }
