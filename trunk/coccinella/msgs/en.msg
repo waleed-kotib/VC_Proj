@@ -167,6 +167,17 @@
 ::msgcat::mcset en dash-dotted
 ::msgcat::mcset en dashed
 
+# Status messages.
+::msgcat::mcset en available
+::msgcat::mcset en away
+::msgcat::mcset en {do not disturb}
+::msgcat::mcset en {not available}
+::msgcat::mcset en {extended away}
+::msgcat::mcset en invisible
+::msgcat::mcset en chat
+::msgcat::mcset en subscribed
+::msgcat::mcset en unsubscribed
+
 
 # All menu labels; concateneted and prepended with 'm' for the database key.
 ::msgcat::mcset en mFile		{File}

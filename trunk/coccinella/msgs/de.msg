@@ -170,6 +170,17 @@
 ::msgcat::mcset de dash-dotted	Strich-Punkt
 ::msgcat::mcset de dashed	Strich
 
+# Status messages.
+::msgcat::mcset de available        {verfügbar}
+::msgcat::mcset de away             {weg}
+::msgcat::mcset de {do not disturb} {bitte nicht stören}
+::msgcat::mcset de {not available}  {nicht verfügbar}
+::msgcat::mcset de {extended away}  {erweiterte Abwesenheit}
+::msgcat::mcset de invisible        {nicht sichtbar}
+::msgcat::mcset de chat             {chat}
+::msgcat::mcset de subscribed       {zugelassen}
+::msgcat::mcset de unsubscribed     {abgemeldet}
+
 
 # All menu labels; concateneted and prepended with 'm' for the database key.
 ::msgcat::mcset de mFile		{Datei}

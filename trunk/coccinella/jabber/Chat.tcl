@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.110 2005-02-02 15:21:18 matben Exp $
+# $Id: Chat.tcl,v 1.111 2005-02-08 08:57:13 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -890,7 +890,7 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     ::Emoticons::MenuButton $wsmile -command $cmd
     pack $wsmile -side left	
     label $wnotifier -textvariable $chattoken\(notifier) -pady 0 -bd 0 \
-      -compound left
+      -compound left -anchor w
     pack $wnotifier -side left
 
     set wmid        $wthread.mid

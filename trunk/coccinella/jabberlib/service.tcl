@@ -2,10 +2,11 @@
 #
 #       This is an abstraction layer for two things; the agent/browse/disco
 #       protocols, and for the groupchat protocols gc-1.0/conference/muc.
+#       All except disco/muc are EOL!
 #       
-#  Copyright (c) 2004  Mats Bengtsson
+#  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: service.tcl,v 1.13 2005-01-25 07:02:58 matben Exp $
+# $Id: service.tcl,v 1.14 2005-02-08 08:57:16 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -530,12 +531,18 @@ proc jlib::service::isroom {jlibname jid} {
     upvar ${jlibname}::locals locals
     
     # Check if domain name supports the 'groupchat' service.
+    # disco uses explicit children of conference, and muc cache
     set isroom 0
     if {$serv(browse) && [$serv(browse,name) isbrowsed $locals(server)]} {
 	set isroom [$serv(browse,name) isroom $jid]
-    } elseif {$serv(disco) && [$serv(disco,name) isdiscoed info $locals(server)]} {
-	set isroom [$serv(disco,name) isroom $jid]	
-    } elseif {[regexp {^[^@]+@([^@ ]+)$} $jid match domain]} {
+    }
+    if {!$isroom && $serv(disco) && [$serv(disco,name) isdiscoed info $locals(server)]} {
+	set isroom [$serv(disco,name) isroom $jid]
+    }
+    if {!$isroom && $serv(muc)} {
+	set isroom [$serv(muc,name) isroom $jid]
+    }
+    if {!$isroom && [regexp {^[^@]+@([^@ ]+)$} $jid match domain]} {
 	if {[info exists agent($domain,groupchat)]} {
 	    set isroom 1
 	}

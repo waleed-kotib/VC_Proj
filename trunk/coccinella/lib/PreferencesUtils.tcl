@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.41 2005-02-04 07:05:32 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.42 2005-02-08 08:57:16 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -132,7 +132,6 @@ proc ::PreferencesUtils::Add {thePrefs} {
 	} else {
 	    set var $value
 	}
-	#puts "varName=$varName, resName=$resName, defaultValue=$defaultValue, value=$value"
     }   
 }
 
@@ -166,6 +165,11 @@ proc ::PreferencesUtils::GetValue {varName resName defValue} {
 # 
 #       Saves the preferences to a file. Preferences must be stored in
 #       the master copy 'prefs(master)' in the corresponding list format.
+#       We do not save options if equal to default values.
+#       This has the benefit that we may change hardcoded defaults without
+#       changing resource names or other tricks. It is also useful if a
+#       default value depends on an dynamic OS thing, like if QuickTime
+#       is installed or not.
 #
 # Arguments:
 #       
@@ -194,13 +198,17 @@ proc ::PreferencesUtils::SaveToFile { } {
 	
 	# All names must be fully qualified. Therefore #0.
 	upvar #0 $varName var
-		
+	
 	# Treat arrays specially.
 	if {[string match "*_array" $resName]} {
+	    array set tmpArr $defVal
+	    if {[arraysequal $varName tmpArr]} {
+		continue
+	    }
 	    puts $fid [format "%-24s\t%s" *${resName}: [array get var]]	    
 	} else {
 	    if {[string equal $var $defVal]} {
-		#continue
+		continue
 	    }
 	    puts $fid [format "%-24s\t%s" *${resName}: $var]
 	}

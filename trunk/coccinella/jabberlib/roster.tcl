@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.28 2004-12-12 14:55:20 matben Exp $
+# $Id: roster.tcl,v 1.29 2005-02-08 08:57:16 matben Exp $
 # 
 # Note that every jid in the rostArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -498,14 +498,24 @@ proc roster::setpresence {rostName jid type args} {
 		}
 	    }
 	}
-	set argList [concat [list -resource $resource -type $type] $args]
-    }
-    
-    # Be sure to evaluate the registered command procedure.
-    if {[string length $options(cmd)]} {
-	uplevel #0 $options(cmd) [list $rostName presence $jid2] $argList
     }
     return {}
+}
+
+# roster::invokecommand --
+# 
+#       Evaluates the registered command procedure if any.
+
+proc roster::invokecommand {rostName jid type args} { 
+
+    upvar ${rostName}::options options
+        
+    if {[string length $options(cmd)]} {
+	jlib::splitjid $jid jid2 resource
+	set argList $args
+	lappend argList -type $type -resource $resource
+	uplevel #0 $options(cmd) [list $rostName presence $jid2] $argList
+    }
 }
 
 
@@ -569,11 +579,6 @@ proc roster::setpresence2 {rostName jid type args} {
 		}
 	    }
 	}
-    }
-    
-    # Be sure to evaluate the registered command procedure.
-    if {$options(cmd) != ""} {
-	uplevel #0 $options(cmd) [list $rostName presence $jid] $argList
     }
     return {}
 }

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.78 2005-02-04 07:05:32 matben Exp $
+# $Id: JUI.tcl,v 1.79 2005-02-08 08:57:14 matben Exp $
 
 package provide JUI 1.0
 
@@ -373,8 +373,10 @@ proc ::Jabber::UI::Build {w} {
       ::Jabber::jstate(status) -command ::Jabber::SetStatus -image $statusImage
     
     pack  $jwapp(mystatus) -side left
-    label $wbot.size -image $iconResize
-    pack  $wbot.size -side right
+    if {![string match "mac*" $this(platform)]} {
+	label $wbot.size -image $iconResize
+	pack  $wbot.size -side right
+    }
     label $jwapp(elplug) -image $iconContactOff
     pack  $jwapp(elplug) -side right -pady 0 -padx 0
     entry $jwapp(myjid) -state disabled -width 0 \

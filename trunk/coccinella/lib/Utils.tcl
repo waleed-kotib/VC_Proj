@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.41 2005-02-02 15:21:22 matben Exp $
+# $Id: Utils.tcl,v 1.42 2005-02-08 08:57:16 matben Exp $
 
 
 package provide Utils 1.0
@@ -97,6 +97,23 @@ proc listintersectnonempty {alist blist} {
     return 0
 }
     
+proc arraysequal {arrName1 arrName2} {
+    
+    set names1 [lsort [uplevel 1 [format {array names %s} $arrName1]]]
+    set names2 [lsort [uplevel 1 [format {array names %s} $arrName2]]]
+    if {![string equal $names1 $names2]} {
+	return 0
+    }
+    upvar 1 $arrName1 arr1
+    upvar 1 $arrName2 arr2
+    foreach name $names1 {
+	if {![string equal $arr1($name) $arr2($name)]} {
+	    return 0
+	}
+    }
+    return 1
+}
+
 # getdirname ---
 #
 #       Returns the path from 'filePath' thus stripping of any file name.
@@ -442,7 +459,7 @@ proc ::Utils::GetHttpFromFile {filePath} {
     
     set relPath [::tfileutils::relative $this(httpdRootPath) $filePath]
     set relPath [uriencode::quotepath $relPath]
-    set ip [::Network::GetThisPublicIPAddress]
+    set ip [::Network::GetThisPublicIP]
     return "http://${ip}:$prefs(httpdPort)/$relPath"
 }
 

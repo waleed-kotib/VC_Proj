@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.125 2005-02-02 09:02:18 matben Exp $
+# $Id: Jabber.tcl,v 1.126 2005-02-08 08:57:14 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -357,6 +357,8 @@ proc ::Jabber::SetUserPreferences { } {
     variable jprefs
     variable jserver
     
+    # The profile stuff here is OUTDATED and replaced.
+
     ::PreferencesUtils::Add [list  \
       [list ::Jabber::jprefs(port)             jprefs_port              $jprefs(port)]  \
       [list ::Jabber::jprefs(sslport)          jprefs_sslport           $jprefs(sslport)]  \
@@ -1256,7 +1258,7 @@ proc ::Jabber::CreateCoccinellaPresElement { } {
     variable jstate
     variable coccixmlns
 	
-    set ip [::Network::GetThisPublicIPAddress]
+    set ip [::Network::GetThisPublicIP]
 
     set attrputget [list protocol putget port $prefs(thisServPort)]
     set attrhttpd  [list protocol http   port $prefs(httpdPort)]
@@ -1294,6 +1296,12 @@ proc ::Jabber::RegisterCapsExtKey {key} {
     
     lappend capsExtList $key
     set capsExtList [lsort -unique $capsExtList]
+}
+
+proc ::Jabber::GetCapsExtKeyList { } {
+    variable capsExtList
+    
+    return $capsExtList
 }
 
 # Jabber::SetStatusWithMessage --
@@ -1701,7 +1709,7 @@ proc ::Jabber::ParseGetServers  {jlibname from subiq args} {
     variable coccixmlns
     
     # Build tag and attributes lists.
-    set ip [::Network::GetThisPublicIPAddress]
+    set ip [::Network::GetThisPublicIP]
     
     array set argsArr $args
     

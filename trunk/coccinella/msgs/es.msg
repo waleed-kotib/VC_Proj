@@ -170,6 +170,17 @@
 ::msgcat::mcset es dash-dotted		{Guiones-puntos}
 ::msgcat::mcset es dashed		{Guiones}
 
+# Status messages.
+::msgcat::mcset es available            {disponible}
+::msgcat::mcset es away                 {alejado}
+::msgcat::mcset es {do not disturb}     {no molestar}
+::msgcat::mcset es {not available}      {no disponible}
+::msgcat::mcset es {extended away}      {alejado por mucho tiempo}
+::msgcat::mcset es invisible            {invisible}
+::msgcat::mcset es chat                 {chat}
+::msgcat::mcset es subscribed           {subscrito}
+::msgcat::mcset es unsubscribed         {desubscrito}
+
 
 # Titulos de todos los menués ; concatenados con 'm' para la clave de la base de datos.
 ::msgcat::mcset es mFile		{Archivo}

@@ -2,9 +2,9 @@
 #  
 #      This file is part of the jabberlib.
 #      
-#  Copyright (c) 2004  Mats Bengtsson
+#  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.16 2004-10-28 07:36:37 matben Exp $
+# $Id: disco.tcl,v 1.17 2005-02-08 08:57:15 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -18,29 +18,43 @@
 #	-command tclProc
 #	
 #   INSTANCE COMMANDS
-#      discoName children {jid ?node?}
+#      discoName children jid
 #      discoName send_get discotype jid callbackProc ?-opt value ...?
-#      discoName isdiscoed discotype {jid ?node?}
-#      discoName get discotype {jid ?node?} key
+#      discoName isdiscoed discotype jid ?node?
+#      discoName get discotype key jid ?node?
 #      discoName getallcategories pattern
 #      discoName getconferences
 #      discoName getjidsforcategory pattern
 #      discoName getjidsforfeature feature
-#      discoName features {jid ?node?}
-#      discoName hasfeature feature {jid ?node?}
+#      discoName features jid ?node?
+#      discoName hasfeature feature jid ?node?
 #      discoName isroom jid
-#      discoName iscategorytype {jid ?node?} category/type
-#      discoName name {jid ?node?}
-#      discoName parent {jid ?node?}
-#      discoName parents {jid ?node?}
-#      discoName types {jid ?node?}
-#      discoName reset ?{jid ?node?}?
+#      discoName iscategorytype category/type jid ?node?
+#      discoName name jid ?node?
+#      discoName parent jid
+#      discoName parents jid
+#      discoName types jid ?node?
+#      discoName reset ?jid ?node??
 #      
 #      where discotype = (items|info)
 #      
 ############################# CHANGES ##########################################
 #
 #       0.1         first version
+#       050208      major rewrite with api changes
+
+# Structures:
+#       items(jid,parent)           the parent jid
+#       items(jid,parents)          list of parents jid
+#       items(jid,children)         list of any children jids
+#       
+#       items(jid,node,pnode)       the parent node; empty if top node
+#       items(jid,node,pnodes)      list of parent nodes
+#       items(jid,node,nodes)       list of any sub nodes
+#       
+#       jid must always be nonempty while node may be empty.
+#       
+#       rooms(jid,node)             exists if children of 'conference'
 
 package require jlib
 
@@ -93,10 +107,12 @@ proc disco::new {jlibname args} {
     namespace eval $disconame {
 	variable items
 	variable info
+	variable rooms
 	variable priv
     }
     upvar ${disconame}::items items
     upvar ${disconame}::info  info
+    upvar ${disconame}::rooms rooms
     upvar ${disconame}::priv  priv
 
     foreach {key value} $args {
@@ -210,16 +226,10 @@ proc disco::parse_get {disconame discotype from cmd jlibname type subiq args} {
     uplevel #0 $cmd [list $disconame $type $from $subiq] $args
 }
 
-# Each item must be characterized by both a jid and the node attribute
-# in order to be uniqely identifyable.
-# 
-# To start with we use item = jid
-# or                   item = {jid node}
-# 
-# This won't work for multi-level nodes!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 proc disco::parse_get_items {disconame from subiq} {
     upvar ${disconame}::items items
+    upvar ${disconame}::info  info
+    upvar ${disconame}::rooms rooms
 
     # Parents node if any.
     array set pattr [wrapper::getattrlist $subiq]
@@ -229,14 +239,19 @@ proc disco::parse_get_items {disconame from subiq} {
     }
 
     set items($from,$pnode,xml) $subiq
-    unset -nocomplain items($from,$pnode,children) \
-      items($from,$pnode,nodes)
+    unset -nocomplain items($from,children) items($from,$pnode,nodes)
     
-    # testing...
     # This is perhaps not a robust way.
-    if {![info exists items($from,$pnode,parent)]} {
-	set items($from,$pnode,parent)  {}
-	set items($from,$pnode,parents) {}
+    if {![info exists items($from,parent)]} {
+	set items($from,parent)  {}
+	set items($from,parents) {}
+    }
+    
+    # Cache children of category='conference' as rooms.
+    if {[lsearch $info(conferences) $from] >= 0} {
+	set isrooms 1
+    } else {
+	set isrooms 0
     }
     
     foreach c [wrapper::getchildren $subiq] {
@@ -249,17 +264,29 @@ proc disco::parse_get_items {disconame from subiq} {
 	# jid is a required attribute!
 	set jid [jlib::jidmap $attr(jid)]
 	set node ""
+	
+	# Keep separate structures for node and jid.
+	# Children:
 	if {[info exists attr(node)]} {
 	    set node $attr(node)
 	    lappend items($from,$pnode,nodes) $node
-	    lappend items($from,$pnode,children) [list $jid $node]
-	    #lappend items($from,$pnode,children)  $node
 	} else {
-	    lappend items($from,$pnode,children) $jid
+	    lappend items($from,children) $jid
 	}
-	set items($jid,$node,parent) $from
-	set items($jid,$node,parents)  \
-	  [concat $items($from,$pnode,parents) $from]
+	
+	# Parents:
+	if {$pnode == ""} {
+	    if {[info exists attr(node)]} {
+		set items($jid,$node,pnode)  {}
+		set items($jid,$node,pnodes) {}
+	    } else {
+		set items($jid,parent) $from
+		set items($jid,parents) [concat $items($from,parents) $from]
+	    }
+	} else {
+	    set items($jid,$node,pnode) $pnode
+	    set items($jid,$node,pnodes) [concat items($jid,$pnode,pnodes) $pnode]
+	}	
 	
 	foreach {key value} [array get attr] { 
 	    if {![string equal $key jid]} {
@@ -267,22 +294,27 @@ proc disco::parse_get_items {disconame from subiq} {
 		set items($jid,$node,$key) $value
 	    }
 	}
+	if {$isrooms} {
+	    set rooms($jid,$node) 1
+	}
     }	
 }
 
 proc disco::parse_get_info {disconame from subiq} {
     variable disco2jlib
+    upvar ${disconame}::items items
     upvar ${disconame}::info  info
+    upvar ${disconame}::rooms rooms
 
-    # Parents node if any.
     array set pattr [wrapper::getattrlist $subiq]
-    set pnode ""
+    set node ""
     if {[info exists pattr(node)]} {
-	set pnode $pattr(node)
+	set node $pattr(node)
     }
 
-    array unset info "$from,$pnode,*"
-    set info($from,$pnode,xml) $subiq
+    array unset info "$from,$node,*"
+    set info($from,$node,xml) $subiq
+    set isconference 0
     
     foreach c [wrapper::getchildren $subiq] {
 	unset -nocomplain attr
@@ -309,9 +341,9 @@ proc disco::parse_get_info {disconame from subiq} {
 		if {[info exists attr(name)]} {
 		    set name $attr(name)
 		}			
-		set info($from,$pnode,name) $name
+		set info($from,$node,name) $name
 		set cattype $category/$ctype
-		lappend info($from,$pnode,cattypes) $cattype
+		lappend info($from,$node,cattypes) $cattype
 		lappend info($cattype,typelist) $from
 		set info($cattype,typelist) \
 		  [lsort -unique $info($cattype,typelist)]
@@ -321,13 +353,14 @@ proc disco::parse_get_info {disconame from subiq} {
 		    switch -- $category {
 			conference {
 			    lappend info(conferences) $from
+			    set isconference 1
 			}
 		    }
 		}
 	    }
 	    feature {
 		set feature $attr(var)
-		lappend info($from,$pnode,features) $feature
+		lappend info($from,$node,features) $feature
 		lappend info($feature,featurelist) $from
 		
 		# Register any groupchat protocol with jlib.
@@ -352,15 +385,20 @@ proc disco::parse_get_info {disconame from subiq} {
 	    }
 	}
     }
+    
+    # If this is a conference be sure to cache any children as rooms.
+    if {$isconference && [info exists items($from,children)]} {
+	foreach c [$items($from,children)] {
+	    set rooms($c,) 1
+	}
+    }
 }
 
-proc disco::isdiscoed {disconame discotype item} {
+proc disco::isdiscoed {disconame discotype jid {node ""}} {
     
     upvar ${disconame}::items items
     upvar ${disconame}::info  info
     
-    set jid  [lindex $item 0]
-    set node [lindex $item 1]
     set jid [jlib::jidmap $jid]
 
     switch -- $discotype {
@@ -373,13 +411,11 @@ proc disco::isdiscoed {disconame discotype item} {
     }
 }
 
-proc disco::get {disconame discotype item key} {
+proc disco::get {disconame discotype key jid {node ""}} {
     
     upvar ${disconame}::items items
     upvar ${disconame}::info  info
     
-    set jid  [lindex $item 0]
-    set node [lindex $item 1]
     set jid [jlib::jidmap $jid]
  
     switch -- $discotype {
@@ -403,13 +439,11 @@ proc disco::get {disconame discotype item key} {
 #       element; only via info/identity element. 
 #       
 
-proc disco::name {disconame item} {
+proc disco::name {disconame jid {node ""}} {
     
     upvar ${disconame}::items items
     upvar ${disconame}::info  info
     
-    set jid  [lindex $item 0]
-    set node [lindex $item 1]
     set jid [jlib::jidmap $jid]
     if {[info exists items($jid,$node,name)]} {
 	return $items($jid,$node,name)
@@ -420,12 +454,10 @@ proc disco::name {disconame item} {
     }
 }
 
-proc disco::features {disconame item} {
+proc disco::features {disconame jid {node ""}} {
     
     upvar ${disconame}::info info
     
-    set jid  [lindex $item 0]
-    set node [lindex $item 1]
     set jid [jlib::jidmap $jid]
     if {[info exists info($jid,$node,features)]} {
 	return $info($jid,$node,features)
@@ -434,12 +466,10 @@ proc disco::features {disconame item} {
     }
 }
 
-proc disco::hasfeature {disconame feature item} {
+proc disco::hasfeature {disconame feature jid {node ""}} {
     
     upvar ${disconame}::info info
 
-    set jid  [lindex $item 0]
-    set node [lindex $item 1]
     set jid [jlib::jidmap $jid]
     if {[info exists info($jid,$node,features)]} {
 	return [expr [lsearch $info($jid,$node,features) $feature] < 0 ? 0 : 1]
@@ -448,12 +478,10 @@ proc disco::hasfeature {disconame feature item} {
     }
 }
 
-proc disco::types {disconame item} {
+proc disco::types {disconame jid {node ""}} {
     
     upvar ${disconame}::info info
     
-    set jid  [lindex $item 0]
-    set node [lindex $item 1]
     set jid [jlib::jidmap $jid]
     if {[info exists info($jid,$node,cattypes)]} {
 	return $info($jid,$node,cattypes)
@@ -466,12 +494,10 @@ proc disco::types {disconame item} {
 # 
 #       Search for any matching glob pattern.
 
-proc disco::iscategorytype {disconame item cattype} {
+proc disco::iscategorytype {disconame cattype jid {node ""}} {
     
     upvar ${disconame}::info info
     
-    set jid  [lindex $item 0]
-    set node [lindex $item 1]
     set jid [jlib::jidmap $jid]
     if {[info exists info($jid,$node,cattypes)]} {
 	if {[lsearch -glob $info($jid,$node,cattypes) $cattype] >= 0} {
@@ -548,7 +574,23 @@ proc disco::getconferences {disconame} {
     return $info(conferences)
 }
 
+# disco::isroom --
+# 
+#       Room or not? The problem is that some components, notably some
+#       msn gateways, have multiple categories, gateway and conference. BAD!
+
 proc disco::isroom {disconame jid} {
+
+    upvar ${disconame}::rooms rooms
+    
+    if {[info exists rooms($jid,)]} {
+	return 1
+    } else {
+	return 0
+    }
+}
+
+proc disco::isroomOLD {disconame jid} {
     
     upvar ${disconame}::info  info
     
@@ -556,23 +598,57 @@ proc disco::isroom {disconame jid} {
 
     # Use the form of the jid to get the service.
     jlib::splitjidex $jid node service res
-    if {[string length $node] && [string length $service] && \
-      ([string length $res] == 0)} {
-	return [expr ([lsearch -exact $info(conferences) $service] < 0) ? 0 : 1]
+    if {($node != "") && ($service != "") && ($res == "")} {
+	if {[lsearch -exact $info(conferences) $service] >= 0} {
+	    return 1
+	} else {
+	    return 0
+	}
     } else {
 	return 0
     }
 }
 
-proc disco::children {disconame item} {
+proc disco::children {disconame jid} {
     
     upvar ${disconame}::items items
 
-    set jid  [lindex $item 0]
-    set node [lindex $item 1]
     set jid [jlib::jidmap $jid]
-    if {[info exists items($jid,$node,children)]} {
-	return $items($jid,$node,children)
+    if {[info exists items($jid,children)]} {
+	return $items($jid,children)
+    } else {
+	return {}
+    }
+}
+
+proc disco::childrenlist {disconame jid {node ""}} {
+    
+    upvar ${disconame}::items items
+
+    set jid [jlib::jidmap $jid]
+    if {$node == ""} {
+	if {[info exists items($jid,children)]} {
+	    return $items($jid,children)
+	} elseif {[info exists items($jid,$node,nodes)]} {
+	    return $items($jid,$node,nodes)
+	} else {
+	    return {}
+	}
+    } else {
+	if {[info exists items($jid,$node,nodes)]} {
+	    return $items($jid,$node,nodes)
+	} else {
+	    return {}
+	}
+    }
+}
+
+proc disco::nodes {disconame jid node} {
+    
+    upvar ${disconame}::items items
+
+    if {[info exists items($jid,$node,nodes)]} {
+	return $items($jid,$node,nodes)
     } else {
 	return {}
     }
@@ -580,29 +656,67 @@ proc disco::children {disconame item} {
 
 # How to return nodes???
 
-proc disco::parent {disconame item} {
+proc disco::parent {disconame jid} {
     
     upvar ${disconame}::items items
 
-    set jid  [lindex $item 0]
-    set node [lindex $item 1]
     set jid [jlib::jidmap $jid]
-    if {[info exists items($jid,$node,parent)]} {
-	return $items($jid,$node,parent)
+    if {[info exists items($jid,parent)]} {
+	return $items($jid,parent)
     } else {
 	return {}
     }
 }
 
-proc disco::parents {disconame item} {
+proc disco::parents {disconame jid} {
     
     upvar ${disconame}::items items
 
-    set jid  [lindex $item 0]
-    set node [lindex $item 1]
     set jid [jlib::jidmap $jid]
-    if {[info exists items($jid,$node,parents)]} {
-	return $items($jid,$node,parents)
+    if {[info exists items($jid,parents)]} {
+	return $items($jid,parents)
+    } else {
+	return {}
+    }
+}
+
+# This wont distinguish between top node and nonexisting!!!
+
+proc disco::parentnode {disconame jid node} {
+    
+    upvar ${disconame}::items items
+    
+    if {[info exists items($jid,$node,pnode)]} {
+	return $items($jid,$node,pnode)
+    } else {
+	return {}
+    }
+}
+
+proc disco::parentnodes {disconame jid node} {
+    
+    upvar ${disconame}::items items
+    
+    if {[info exists items($jid,$node,pnodes)]} {
+	return $items($jid,$node,pnodes)
+    } else {
+	return {}
+    }
+}
+
+#       Return a "flat list" of jids and nodes.
+
+proc disco::parentlist {disconame jid {node ""}} {
+    
+    upvar ${disconame}::items items
+    
+    if {[info exists items($jid,parents)]} {
+	set plist $items($jid,parents)
+	if {$node != ""} {
+	    lappend plist $jid
+	    set plist [concat $plist $items($jid,$node,pnodes)]
+	}
+	return $plist
     } else {
 	return {}
     }
@@ -624,17 +738,15 @@ proc disco::handle_get {disconame discotype jlibname from subiq args} {
 # 
 #       Clear this particular jid and all its children.
 
-proc disco::reset {disconame {item {}}} {
+proc disco::reset {disconame {jid ""} {node ""}} {
 
-    set jid  [lindex $item 0]
-    set node [lindex $item 1]
     set jid [jlib::jidmap $jid]
     
     upvar ${disconame}::items items
 
     # Can be problems with this (ICQ) ???
-    if {[info exists items($jid,$node,children)]} {
-	foreach child $items($jid,$node,children) {
+    if {[info exists items($jid,children)]} {
+	foreach child $items($jid,children) {
 	    ResetJid $disconame $child
 	}
     }
@@ -645,35 +757,35 @@ proc disco::reset {disconame {item {}}} {
 # 
 #       Clear only this particular jid.
 
-proc disco::ResetJid {disconame {item {}}} {
+proc disco::ResetJid {disconame jid} {
     
     upvar ${disconame}::items items
     upvar ${disconame}::info  info
+    upvar ${disconame}::rooms rooms
 
-    if {$item == {}} {
-	unset -nocomplain items info
+    if {$jid == {}} {
+	unset -nocomplain items info rooms
 	set info(conferences) {}
     } else {
-	set jid  [lindex $item 0]
-	set node [lindex $item 1]
 	
 	# Keep parents!
-	if {[info exists items($jid,$node,parent)]} {
-	    set parent $items($jid,$node,parent)
+	if {[info exists items($jid,parent)]} {
+	    set parent $items($jid,parent)
 	}
-	if {[info exists items($jid,$node,parents)]} {
-	    set parents $items($jid,$node,parents)
+	if {[info exists items($jid,parents)]} {
+	    set parents $items($jid,parents)
 	}
 	
-	array unset items $jid,$node,*
-	array unset info $jid,$node,*
+	array unset items $jid,*
+	array unset info $jid,*
+	array unset rooms $jid,*
 	
 	# Add back parent(s).
 	if {[info exists parent]} {
-	    set items($jid,$node,parent) $parent
+	    set items($jid,parent) $parent
 	}
 	if {[info exists parents]} {
-	    set items($jid,$node,parents) $parents
+	    set items($jid,parents) $parents
 	}
 	
 	# Rest.

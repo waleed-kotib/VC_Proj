@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Network.tcl,v 1.15 2004-08-03 14:04:44 matben Exp $
+# $Id: Network.tcl,v 1.16 2005-02-08 08:57:16 matben Exp $
 
 namespace eval ::Network:: {
     
@@ -195,11 +195,11 @@ proc ::Network::KillAll { } {
     unset -nocomplain killerId
 }
 
-# Network::GetThisPublicIPAddress --
+# Network::GetThisPublicIP --
 #
 #       Returns our own ip number unless set own NAT address.
 
-proc ::Network::GetThisPublicIPAddress { } {
+proc ::Network::GetThisPublicIP { } {
     global  this prefs
     
     if {$prefs(setNATip) && ($prefs(NATip) != "")} {
