@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.4 2004-01-07 14:57:34 matben Exp $
+# $Id: Profiles.tcl,v 1.5 2004-01-14 10:24:55 matben Exp $
 
 package provide Profiles 1.0
 
@@ -17,6 +17,7 @@ namespace eval ::Profiles:: {
     ::hooks::add prefsSaveHook          ::Profiles::SaveHook
     ::hooks::add prefsCancelHook        ::Profiles::CancelHook
     ::hooks::add initHook               ::Profiles::ImportIfNecessary
+    ::hooks::add closeWindowHook        ::Profiles::CloseDlgHook
     
     # Internal storage:
     #   {name1 {server1 username1 password1 ?-key value ...?} \
@@ -593,6 +594,62 @@ proc ::Profiles::CancelHook { } {
 	::Preferences::HasChanged
 	return
     }
+}
+
+# Standalone dialog --
+
+proc ::Profiles::BuildDialog { } {
+    global  wDlgs
+    
+    set w $wDlgs(jprofiles)
+    if {[winfo exists $w]} {
+	return
+    }
+    
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
+    wm title $w [::msgcat::mc Profiles]
+    
+    # Global frame.
+    pack [frame $w.frall -borderwidth 1 -relief raised]   \
+      -fill both -expand 1 -ipadx 12 -ipady 4
+
+    set wpage $w.frall.page
+    pack [frame $wpage] -padx 4 -pady 4
+    ::Profiles::BuildPage $wpage
+    
+    # Button part.
+    set frbot [frame $w.frall.frbot -borderwidth 0]
+    pack [button $frbot.btconn -text [::msgcat::mc Save] -width 8 \
+      -default active -command [list [namespace current]::SaveDlg $w]]  \
+      -side right -padx 5 -pady 5
+    pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
+      -command [list [namespace current]::CancelDlg $w]]  \
+      -side right -padx 5 -pady 5
+    pack $frbot -side bottom -fill both -expand 1 -padx 8 -pady 6
+    
+    ::UI::SetWindowPosition $w
+    wm resizable $w 0 0
+}
+
+proc ::Profiles::CloseDlgHook {wclose} {
+    global  wDlgs
+
+    if {[string equal $wclose $wDlgs(jprofiles)]} {
+	::Profiles::CancelDlg $wclose
+    }
+}
+
+proc ::Profiles::SaveDlg {w} {
+    
+    ::UI::SaveWinGeom $w
+    ::Profiles::SaveHook
+    destroy $w
+}
+
+proc ::Profiles::CancelDlg {w} {
+    
+    ::UI::SaveWinGeom $w
+    destroy $w
 }
 
 #-------------------------------------------------------------------------------
