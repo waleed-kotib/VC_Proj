@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.53 2004-09-28 13:50:18 matben Exp $
+# $Id: MailBox.tcl,v 1.54 2004-09-30 12:43:06 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -247,6 +247,10 @@ proc ::Jabber::MailBox::Build {args} {
 
     pack [frame $w.frall.divt -bd 2 -relief sunken -height 2] -fill x -side top
     
+    if {[string match "mac*" $this(platform)]} {
+	pack [frame $w.frall.pad -height 12] -side bottom
+    }
+
     # Frame to serve as container for the pane geometry manager.
     set frmid $w.frall.frmid
     pack [frame $frmid -height 250 -width 380 -relief sunken -bd 1 -class Pane] \
@@ -319,9 +323,6 @@ proc ::Jabber::MailBox::Build {args} {
     }    
     eval {::pane::pane $wfrmbox $wfrmsg} $paneopts
     
-    if {[string match "mac*" $this(platform)]} {
-	pack [frame $w.frall.pad -height 14] -side bottom
-    }
     set locals(wtbl) $wtbl
     set locals(wtextmsg) $wtextmsg
         

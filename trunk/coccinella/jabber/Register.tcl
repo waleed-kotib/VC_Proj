@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.26 2004-09-22 13:14:38 matben Exp $
+# $Id: Register.tcl,v 1.27 2004-09-30 12:43:06 matben Exp $
 
 package provide Register 1.0
 
@@ -16,7 +16,7 @@ namespace eval ::Jabber::Register:: {
     variable password
 }
 
-# Jabber::Register::Register --
+# Jabber::Register::NewDlg --
 #
 #       Registers new user with a server.
 #
@@ -26,7 +26,7 @@ namespace eval ::Jabber::Register:: {
 # Results:
 #       "cancel" or "new".
 
-proc ::Jabber::Register::Register {args} {
+proc ::Jabber::Register::NewDlg {args} {
     global  this wDlgs
     
     upvar ::Jabber::jprefs jprefs
@@ -385,9 +385,11 @@ proc ::Jabber::Register::RemoveCallback {jid jlibName type theQuery} {
 
 namespace eval ::Jabber::GenRegister:: {
 
+    variable uid 0
+    variable UItype 2
 }
 
-# Jabber::GenRegister::BuildRegister --
+# Jabber::GenRegister::NewDlg --
 #
 #       Initiates the process of registering with a service. 
 #       Uses iq get-set method.
@@ -398,126 +400,263 @@ namespace eval ::Jabber::GenRegister:: {
 # Results:
 #       "cancel" or "register".
      
-proc ::Jabber::GenRegister::BuildRegister {args} {
+proc ::Jabber::GenRegister::NewDlg {args} {
     global  this wDlgs
 
-    variable wtop
-    variable wbox
-    variable wbtregister
-    variable wbtget
-    variable wcomboserver
-    variable server
-    variable wsearrows
-    variable stattxt
-    variable UItype 2
-    variable finished -1
+    variable uid
+    variable UItype
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::Jabber::GenRegister::BuildRegister"
-    set w $wDlgs(jreg)
-    if {[winfo exists $w]} {
-	return
-    }
-    array set argsArr $args
+    ::Debug 2 "::Jabber::GenRegister::NewDlg args=$args"
     
-    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
+    # Initialize the state variable, an array.    
+    set token [namespace current]::dlg[incr uid]
+    variable $token
+    upvar 0 $token state
+
+    array set argsArr $args
+
+    set w $wDlgs(jreg)${uid}
+    set state(w) $w
+    set state(finished) -1
+    set state(args) $args
+    
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
+      -closecommand [list [namespace current]::CloseCmd $token]
     wm title $w [mc {Register Service}]
     set wtop $w
-    
-    set fontSB [option get . fontSmallBold {}]
-    
+        
     # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1 -ipadx 12 -ipady 4
-    message $w.frall.msg -width 280 -text  \
-      [mc jaregmsg] -anchor w -justify left
-    pack $w.frall.msg -side top -fill x -anchor w -padx 4 -pady 4
-    set frtop $w.frall.top
-    pack [frame $frtop] -side top -expand 0 -anchor w -padx 10
-    label $frtop.lserv -text "[mc {Service server}]:" -font $fontSB
+    set wall $w.fr
+    frame $wall -borderwidth 1 -relief raised
+    pack  $wall -fill both -expand 1 -ipadx 12 -ipady 4
+    
+    ::headlabel::headlabel $wall.head -text [mc {Register Service}]
+    pack $wall.head -side top -fill both
+
+    label $wall.msg -wraplength 280 -justify left -text [mc jaregmsg]
+    pack  $wall.msg -side top -anchor w -padx 4 -pady 4
+    
+    set frtop $wall.top
+    pack [frame $frtop] -side top -anchor w -padx 4
+    label $frtop.lserv -text "[mc {Service server}]:"
     
     # Get all (browsed) services that support registration.
-    set regServers [::Jabber::JlibCmd service getjidsfor "register"]
+    set regServers [$jstate(jlib) service getjidsfor "register"]
     set wcomboserver $frtop.eserv
     ::combobox::combobox $wcomboserver -width 18   \
-      -textvariable "[namespace current]::server" -editable 0
+      -textvariable $token\(server) -editable 0
     eval {$frtop.eserv list insert end} $regServers
     
     # Find the default registration server.
     if {[llength $regServers]} {
-	set server [lindex $regServers 0]
+	set state(server) [lindex $regServers 0]
     }
     if {[info exists argsArr(-server)]} {
-	set server $argsArr(-server)
+	set state(server) $argsArr(-server)
 	$wcomboserver configure -state disabled
     }
-    label $frtop.ldesc -text "[mc Specifications]:" -font $fontSB
-    label $frtop.lstat -textvariable [namespace current]::stattxt
 
-    grid $frtop.lserv -column 0 -row 0 -sticky e
-    grid $wcomboserver -column 1 -row 0 -sticky ew
-    grid $frtop.ldesc -column 0 -row 1 -sticky e -padx 4 -pady 2
-    grid $frtop.lstat -column 1 -row 1 -sticky w
+    grid $frtop.lserv $wcomboserver -sticky e
+    grid $wcomboserver -sticky ew
     
     # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
-    set wsearrows $frbot.arr
+    pack [frame $wall.pady -height 8] -side bottom
+    set frbot [frame $wall.frbot -borderwidth 0]
     set wbtregister $frbot.btenter
-    set wbtget $frbot.btget
+    set wbtget      $frbot.btget
     pack [button $wbtget -text [mc Get] -default active \
-      -command [namespace current]::Get]  \
-      -side right -padx 5 -pady 5
+      -command [list [namespace current]::Get $token]] \
+      -side right -padx 5
     pack [button $wbtregister -text [mc Register] -state disabled \
-      -command [namespace current]::DoRegister]  \
-      -side right -padx 5 -pady 5
+      -command [list [namespace current]::DoRegister $token]]  \
+      -side right -padx 5
     pack [button $frbot.btcancel -text [mc Cancel]  \
-      -command [list [namespace current]::Cancel $w]]  \
-      -side right -padx 5 -pady 5
-    pack [::chasearrows::chasearrows $wsearrows -size 16] \
-      -side left -padx 5 -pady 5
-    pack $frbot -side bottom -fill both -expand 1 -padx 8 -pady 6
+      -command [list [namespace current]::Cancel $token]]  \
+      -side right -padx 5
+    pack $frbot -side bottom -fill both -padx 8
+    
+    # Running arrows and status message.
+    set wstat $wall.fs
+    pack [frame $wstat] -side bottom -anchor w -fill x -padx 16 -pady 0
+    set wsearrows $wstat.arr
+    pack [::chasearrows::chasearrows $wsearrows -size 16] -side left
+    pack [label $wstat.lstat -textvariable $token\(stattxt)] -side left -padx 8
 
     # This part must be built dynamically from the 'get' xml data.
     # May be different for each conference server.
 
     if {$UItype == 0} {
-	set wfr $w.frall.frlab
+	set wfr $wall.frlab
 	labelframe $wfr -text [mc Specifications]
 	pack $wfr -side top -fill both -padx 2 -pady 2
 	
 	set wbox $wfr.box
 	frame $wbox
 	pack $wbox -side top -fill x -padx 4 -pady 10
-	pack [label $wbox.la -textvariable "[namespace current]::stattxt"]  \
-	  -padx 0 -pady 10
+	pack [label $wbox.la -textvariable $token\(stattxt)] -padx 0 -pady 10
     }
     if {$UItype == 2} {
 	
 	# Not same wbox as above!!!
-	set wbox $w.frall.frmid
-	::Jabber::Forms::BuildScrollForm $wbox -height 160 \
-	  -width 220
+	set wbox $wall.frmid
+	::Jabber::Forms::BuildScrollForm $wbox -height 100 -width 180
 	pack $wbox -side top -fill both -expand 1 -padx 8 -pady 4
     }
     
-    set stattxt "-- [mc jasearchwait] --"
-    wm minsize $w 300 300
-	
-    # Grab and focus.
-    set oldFocus [focus]
-    catch {grab $w}
-    
-    if {[info exists argsArr(-autoget)] && $argsArr(-autoget)} {
-	after idle ::Jabber::GenRegister::Get
+    set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jreg)]]
+    if {$nwin == 1} {
+	::UI::SetWindowPosition $w $wDlgs(jreg)
     }
     
-    # Wait here for a button press and window to be destroyed.
-    tkwait window $w
+    set state(stattxt)      [mc jasearchwait]
+    set state(wcomboserver) $wcomboserver
+    set state(wbox)         $wbox
+    set state(wsearrows)    $wsearrows
+    set state(wbtregister)  $wbtregister
+    set state(wbtget)       $wbtget
+
+    # Trick to resize the labels wraplength.
+    set script [format {
+	update idletasks
+	%s configure -wraplength [expr [winfo reqwidth %s] - 10]
+	wm minsize %s [winfo reqwidth %s] 300
+    } $wall.msg $w $w $w]    
+    after idle $script
+
+    if {[info exists argsArr(-autoget)] && $argsArr(-autoget)} {
+	after idle [list [namespace current]::Get $token]
+    }
     
-    catch {grab release $w}
-    catch {focus $oldFocus}
-    return [expr {($finished <= 0) ? "cancel" : "register"}]
+    return ""
 }
+
+proc ::Jabber::GenRegister::Get {token} {    
+    variable $token
+    upvar 0 $token state
+    upvar ::Jabber::jstate jstate
+    
+    # Verify.
+    if {[string length $state(server)] == 0} {
+	tk_messageBox -type ok -icon error  \
+	  -message [mc jamessregnoserver]
+	return
+    }	
+    $state(wcomboserver) configure -state disabled
+    $state(wbtget)       configure -state disabled
+    set state(stattxt) [mc jawaitserver]
+    
+    # Send get register.
+    $jstate(jlib) register_get [list ::Jabber::GenRegister::GetCB $token] \
+      -to $state(server)
+    $state(wsearrows) start
+}
+
+proc ::Jabber::GenRegister::GetCB {token jlibName type subiq} {    
+    variable $token
+    upvar 0 $token state
+    variable UItype
+    upvar ::Jabber::jstate jstate
+    
+    ::Debug 2 "::Jabber::GenRegister::GetCB type=$type"
+
+    if {!([info exists state(w)] && [winfo exists $state(w)])} {
+	return
+    }
+    $state(wsearrows) stop
+    
+    if {[string equal $type "error"]} {
+	tk_messageBox -type ok -icon error  \
+	  -message [FormatTextForMessageBox \
+	  [mc jamesserrregget [lindex $subiq 0] [lindex $subiq 1]]]
+	return
+    }
+    set wbox $state(wbox)
+    set childs [wrapper::getchildren $subiq]
+    if {$UItype == 0} {
+	catch {destroy $wbox}
+	::Jabber::Forms::Build $wbox $childs -template "register"
+	pack $wbox -side top -fill x -anchor w -padx 2 -pady 10
+    }
+    if {$UItype == 2} {
+	set state(stattxt) ""
+	::Jabber::Forms::FillScrollForm $wbox $childs -template "register"
+    }
+    
+    $state(wbtregister) configure -state normal -default active
+    $state(wbtget)      configure -state normal -default disabled    
+}
+
+proc ::Jabber::GenRegister::DoRegister {token} {   
+    variable $token
+    upvar 0 $token state
+    variable UItype
+    upvar ::Jabber::jstate jstate
+    
+    if {[info exists state(w)] && [winfo exists $state(w)]} {
+	$state(wsearrows) start
+    }
+    if {$UItype != 2} {
+	set subelements [::Jabber::Forms::GetXML $wbox]
+    } else {
+	set subelements [::Jabber::Forms::GetScrollForm $wbox]
+    }
+    
+    # We need to do it the crude way.
+    $jstate(jlib) send_iq "set"  \
+      [wrapper::createtag "query" -attrlist {xmlns jabber:iq:register}   \
+      -subtags $subelements] -to $server   \
+      -command [list [namespace current]::ResultCallback $token]
+
+    # Keep state array until callback.
+    set state(finished) 1
+    destroy $state(w)
+}
+
+# Jabber::GenRegister::ResultCallback --
+#
+#       This is our callback procedure from 'jabber:iq:register' stuffs.
+
+proc ::Jabber::GenRegister::ResultCallback {token type subiq args} {
+    variable $token
+    upvar 0 $token state
+
+    ::Debug 2 "::Jabber::GenRegister::ResultCallback server=$server, type=$type, subiq='$subiq'"
+
+    if {[string equal $type "error"]} {
+	tk_messageBox -type ok -icon error  \
+	  -message [FormatTextForMessageBox \
+	  [mc jamesserrregset $state(server) [lindex $subiq 0] [lindex $subiq 1]]]
+    } else {
+	tk_messageBox -type ok -icon info -message [FormatTextForMessageBox \
+	  [mc jamessokreg $state(server)]]
+    }
+    
+    # Time to clean up.
+    unset state
+}
+
+proc ::Jabber::GenRegister::Cancel {token} {
+    global  wDlgs
+    variable $token
+    upvar 0 $token state
+    
+    set state(finished) 0
+    ::UI::SaveWinPrefixGeom $wDlgs(jreg)
+    destroy $state(w)
+    unset state
+}
+
+proc ::Jabber::GenRegister::CloseCmd {token wclose} {
+    global  wDlgs
+    variable $token
+    upvar 0 $token state
+
+    ::UI::SaveWinPrefixGeom $wDlgs(jreg)
+    unset state
+}
+
+#--- Simple --------------------------------------------------------------------
 
 # Jabber::GenRegister::Simple --
 #
@@ -604,7 +743,7 @@ proc ::Jabber::GenRegister::Simple {w args} {
       -default active -command [namespace current]::DoSimple]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [mc Cancel]  \
-      -command [list [namespace current]::Cancel $w]]  \
+      -command [list [namespace current]::CancelSimple $w]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
 	
@@ -622,101 +761,11 @@ proc ::Jabber::GenRegister::Simple {w args} {
     return [expr {($finished <= 0) ? "cancel" : "register"}]
 }
 
-proc ::Jabber::GenRegister::Cancel {w} {
+proc ::Jabber::GenRegister::CancelSimple {w} {
     variable finished
     
     set finished 0
     destroy $w
-}
-
-proc ::Jabber::GenRegister::Get { } {    
-    variable server
-    variable wsearrows
-    variable wcomboserver
-    variable wbtget
-    variable stattxt
-    upvar ::Jabber::jstate jstate
-    
-    # Verify.
-    if {[string length $server] == 0} {
-	tk_messageBox -type ok -icon error  \
-	  -message [mc jamessregnoserver]
-	return
-    }	
-    $wcomboserver configure -state disabled
-    $wbtget configure -state disabled
-    set stattxt "-- [mc jawaitserver] --"
-    
-    # Send get register.
-    ::Jabber::JlibCmd register_get ::Jabber::GenRegister::GetCB -to $server    
-    $wsearrows start
-}
-
-proc ::Jabber::GenRegister::GetCB {jlibName type subiq} {    
-    variable wtop
-    variable wbox
-    variable wsearrows
-    variable wbtregister
-    variable wbtget
-    variable UItype
-    variable stattxt
-    upvar ::Jabber::jstate jstate
-    
-    ::Debug 2 "::Jabber::GenRegister::GetCB type=$type, subiq='$subiq'"
-
-    if {![winfo exists $wtop]} {
-	return
-    }
-    $wsearrows stop
-    
-    if {[string equal $type "error"]} {
-	tk_messageBox -type ok -icon error  \
-	  -message [FormatTextForMessageBox \
-	  [mc jamesserrregget [lindex $subiq 0] [lindex $subiq 1]]]
-	return
-    }
-
-    set subiqChildList [wrapper::getchildren $subiq]
-    if {$UItype == 0} {
-	catch {destroy $wbox}
-	::Jabber::Forms::Build $wbox $subiqChildList -template "register"
-	pack $wbox -side top -fill x -anchor w -padx 2 -pady 10
-    }
-    if {$UItype == 2} {
-	set stattxt ""
-	::Jabber::Forms::FillScrollForm $wbox $subiqChildList \
-	   -template "register"
-    }
-    
-    $wbtregister configure -state normal -default active
-    $wbtget configure -state normal -default disabled    
-}
-
-proc ::Jabber::GenRegister::DoRegister { } {   
-    variable server
-    variable wsearrows
-    variable wtop
-    variable wbox
-    variable finished
-    variable UItype
-    upvar ::Jabber::jstate jstate
-    
-    if {[winfo exists $wsearrows]} {
-	$wsearrows start
-    }
-    if {$UItype != 2} {
-	set subelements [::Jabber::Forms::GetXML $wbox]
-    } else {
-	set subelements [::Jabber::Forms::GetScrollForm $wbox]
-    }
-    
-    # We need to do it the crude way.
-    $jstate(jlib) send_iq "set"  \
-      [wrapper::createtag "query" -attrlist {xmlns jabber:iq:register}   \
-      -subtags $subelements] -to $server   \
-      -command [list [namespace current]::ResultCallback $server]
-    set finished 1
-    destroy $wtop
 }
 
 proc ::Jabber::GenRegister::DoSimple { } {    
@@ -731,24 +780,6 @@ proc ::Jabber::GenRegister::DoSimple { } {
       [list [namespace current]::SimpleCallback $server] -to $server
     set finished 1
     destroy $wtop
-}
-
-# Jabber::GenRegister::ResultCallback --
-#
-#       This is our callback procedure from 'jabber:iq:register' stuffs.
-
-proc ::Jabber::GenRegister::ResultCallback {server type subiq} {
-
-    ::Debug 2 "::Jabber::GenRegister::ResultCallback server=$server, type=$type, subiq='$subiq'"
-
-    if {[string equal $type "error"]} {
-	tk_messageBox -type ok -icon error  \
-	  -message [FormatTextForMessageBox \
-	  [mc jamesserrregset $server [lindex $subiq 0] [lindex $subiq 1]]]
-    } else {
-	tk_messageBox -type ok -icon info -message [FormatTextForMessageBox \
-	  [mc jamessokreg $server]]
-    }
 }
 
 proc ::Jabber::GenRegister::SimpleCallback {server jlibName type subiq} {

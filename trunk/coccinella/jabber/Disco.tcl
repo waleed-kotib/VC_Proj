@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.30 2004-09-28 13:50:17 matben Exp $
+# $Id: Disco.tcl,v 1.31 2004-09-30 12:43:06 matben Exp $
 
 package provide Disco 1.0
 
@@ -66,7 +66,7 @@ namespace eval ::Jabber::Disco:: {
 	    ::Jabber::Search::Build -server $jid -autoget 1
 	}
 	mRegister      register  {
-	    ::Jabber::GenRegister::BuildRegister -server $jid -autoget 1
+	    ::Jabber::GenRegister::NewDlg -server $jid -autoget 1
 	}
 	mUnregister    register  {::Jabber::Register::Remove $jid}
 	separator      {}        {}
@@ -288,6 +288,11 @@ proc ::Jabber::Disco::InfoCB {disconame type from subiq args} {
     }
     ::Jabber::Disco::SetDirItemUsingCategory $from
     
+    # Use specific (discoInfoGatewayIcqHook, discoInfoServerImHook,...) 
+    # and general (discoInfoHook) hooks.
+    set ct [split $cattype /]
+    set hookName [string totitle [lindex $ct 0]][string totitle [lindex $ct 1]]
+    eval {::hooks::run discoInfo${hookName}Hook $type $from $subiq} $args
     eval {::hooks::run discoInfoHook $type $from $subiq} $args
 }
 

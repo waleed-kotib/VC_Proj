@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.81 2004-09-30 06:16:27 matben Exp $
+# $Id: Roster.tcl,v 1.82 2004-09-30 12:43:06 matben Exp $
 
 package provide Roster 1.0
 
@@ -106,7 +106,7 @@ namespace eval ::Jabber::Roster:: {
       {chat,msn}          [::UI::GetIcon msn_online]     \
       {dnd,msn}           [::UI::GetIcon msn_dnd]        \
       {away,msn}          [::UI::GetIcon msn_away]       \
-      {xa,msn}            [::UI::GetIcon msn_xa]         \
+      {xa,msn}            [::UI::GetIcon msn_away]       \
       {online,msn}        [::UI::GetIcon msn_online]     \
       {available,yahoo}   [::UI::GetIcon yahoo_online]   \
       {unavailable,yahoo} [::UI::GetIcon yahoo_offline]  \

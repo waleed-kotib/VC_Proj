@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.76 2004-09-28 13:50:17 matben Exp $
+# $Id: Chat.tcl,v 1.77 2004-09-30 12:43:06 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -202,6 +202,15 @@ proc ::Jabber::Chat::DoStart {w} {
     upvar ::Jabber::jstate jstate
     
     set ans yes
+    
+    if {![jlib::jidvalidate $user]} {
+	set ans [tk_messageBox -message [FormatTextForMessageBox  \
+	  [mc jamessbadjid $user]] \
+	  -icon error -type yesno]
+	if {[string equal $ans "no"]} {
+	    return
+	}
+    }    
     
     # User must be online.
     if {![$jstate(roster) isavailable $user]} {
