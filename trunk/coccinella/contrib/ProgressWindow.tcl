@@ -6,11 +6,11 @@
 #       cancel operation.
 #       If we have the add on "Progressbar", 'prefs(Progressbar)' is true (1).
 #      
-#  Copyright (c) 2000-2002  Mats Bengtsson
+#  Copyright (c) 2000-2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ProgressWindow.tcl,v 1.1.1.1 2002-12-08 10:56:10 matben Exp $
+# $Id: ProgressWindow.tcl,v 1.2 2003-05-01 13:49:16 matben Exp $
 # 
 #-------------------------------------------------------------------------------
 #
@@ -175,7 +175,7 @@ proc ::ProgressWindow::ProgressWindow {w args} {
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
     } else {
-	wm transient $w .
+	
     }
     wm resizable $w 0 0
     
