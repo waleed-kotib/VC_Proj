@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.12 2004-05-26 07:36:38 matben Exp $
+# $Id: disco.tcl,v 1.13 2004-06-13 15:34:36 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -493,7 +493,8 @@ proc disco::isroom {disconame jid} {
 
     # Use the form of the jid to get the service.
     jlib::splitjidex $jid node service res
-    if {[string length $node] && [string length $service]} {
+    if {[string length $node] && [string length $service] && \
+      ([string length $res] == 0)} {
 	return [expr ([lsearch -exact $info(conferences) $service] < 0) ? 0 : 1]
     } else {
 	return 0
