@@ -10,7 +10,7 @@
 #  Copyright (c) 2004  Mats Bengtsson
 #  BSD license
 #  
-# $Id: saslmd5.tcl,v 1.4 2005-04-03 10:41:10 matben Exp $
+# $Id: saslmd5.tcl,v 1.5 2005-04-03 10:42:04 matben Exp $
 
 package require base64
 package require md5 2.0
@@ -22,7 +22,6 @@ namespace eval saslmd5 {
     
     # These are in order of preference.
     variable mechanisms [list "DIGEST-MD5" "PLAIN"]
-    variable mechanisms [list "PLAIN" "DIGEST-MD5"]
     variable needed {username authzid pass realm}
     variable uid 0
     
