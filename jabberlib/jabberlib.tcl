@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.43 2004-05-26 07:36:38 matben Exp $
+# $Id: jabberlib.tcl,v 1.44 2004-05-27 13:59:10 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -1296,7 +1296,7 @@ proc jlib::parse_roster_get {jlibname ispush cmd type thequery} {
 		    set jid $value
 		} else {
 		    lappend arglist -$key $value
-		    if {[string equal $key {subscription}]} {
+		    if {[string equal $key "subscription"]} {
 			set subscription $value
 		    }
 		}

@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.17 2004-05-26 07:36:38 matben Exp $
+# $Id: roster.tcl,v 1.18 2004-05-27 13:59:10 matben Exp $
 # 
 # Note that every jid in the rosterArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -263,30 +263,27 @@ proc roster::setrosteritem {rostName jid args} {
 proc roster::removeitem {rostName jid} {    
     variable rostGlobals
     upvar [namespace current]::${rostName}::rosterArr rosterArr
+    upvar [namespace current]::${rostName}::presArr presArr
     upvar [namespace current]::${rostName}::options options
     
     Debug 2 "roster::removeitem rostName=$rostName, jid='$jid'"
     
     set mjid [jlib::jidmap $jid]
-    set ind [lsearch -exact $rosterArr(users) $mjid]
+    set rosterArr(users) [lsearch -all -not -inline $rosterArr(users) $mjid]
     
-    # Return if not there.
-    if {$ind < 0} {
-	return
-    } else {
-	set rosterArr(users) [lreplace $rosterArr(users) $ind $ind]
+    # Be sure to evaluate the registered command procedure.
+    # Do this before unsetting the internal state!
+    if {[string length $options(cmd)]} {
+	uplevel #0 $options(cmd) [list $rostName remove $jid]
     }
     
     # First the roster, then presence...
     foreach name $rostGlobals(tags) {
 	catch {unset rosterArr($mjid,$name)}
     }
-    array unset presArr "$mjid,*"
     
-    # Be sure to evaluate the registered command procedure.
-    if {[string length $options(cmd)]} {
-	uplevel #0 $options(cmd) [list $rostName remove $jid]
-    }
+    # Be sure to unset all, also jid3 entries!
+    array unset presArr "${mjid}*"
     return {}
 }
 
@@ -425,10 +422,10 @@ proc roster::setpresence {rostName jid type args} {
     jlib::splitjid $mjid mjid2 resource
     jlib::splitjid $jid jid2 x
     
+    # XMPP specifies that an 'unavailable' element is sent *after* we've got
+    # an subscription='remove' element. Store?
+    
     if {[string equal $type "unsubscribed"]} {
-	
-	# We need to remove item from all resources.
-	array unset presArr "${mjid2}*"
 	set argList [list -type $type]
     } else {
 	
@@ -445,6 +442,7 @@ proc roster::setpresence {rostName jid type args} {
 	set presArr($mjid,type) $type
 	foreach {name value} $args {
 	    set par [string trimleft $name "-"]
+	    
 	    switch -- $par {
 		x {
 		    
