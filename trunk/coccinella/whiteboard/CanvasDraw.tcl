@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasDraw.tcl,v 1.3 2004-07-22 15:11:28 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.4 2004-07-22 15:56:45 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 #  
@@ -852,12 +852,7 @@ proc ::CanvasDraw::FinalMoveCurrentGrid {w x y grid args} {
 	return
     }
     set dx [expr $x - $moveArr(x0)]
-    set dy [expr $y - $moveArr(y0)]
-    set mdx [expr -$dx]
-    set mdy [expr -$dy]
-    set cmdList {}
-    set cmdUndoList {}
-    
+    set dy [expr $y - $moveArr(y0)]    
     set id $moveArr(id)
     set utag [::CanvasUtils::GetUtag $w $id]
     if {$utag == ""} {
@@ -892,9 +887,7 @@ proc ::CanvasDraw::FinalMoveCurrentGrid {w x y grid args} {
 	set newx [expr int($x)]
 	set newy [expr int($y)]
     }
-    puts "doGrid=$doGrid; grid=$grid"
-    parray moveArr
-    
+       
     if {[string equal $moveArr(type) "image"]} {
 	if {$doGrid} {
 	    set anchor [$w itemcget $id -anchor]
@@ -919,6 +912,7 @@ proc ::CanvasDraw::FinalMoveCurrentGrid {w x y grid args} {
 	} else {
 	    set redo [list ::CanvasUtils::Command $wtop $cmd remote]
 	}
+	set undoCmd [concat coords $utag $moveArr(coords0,$id)]
     } else {
 	
 	# Non image items. 
@@ -933,19 +927,19 @@ proc ::CanvasDraw::FinalMoveCurrentGrid {w x y grid args} {
 	    set cmdremote [list move $utag $deltax $deltay]
 	    set redo [list ::CanvasUtils::CommandExList $wtop  \
 	      [list [list $cmdlocal local] [list $cmdremote remote]]]
+	    set undoCmd [list move $utag [expr -$deltax] [expr -$deltay]]
 	} else {
-	    set deltax [expr $x - $moveArr(x0)]
-	    set deltay [expr $y - $moveArr(y0)]
-	    set cmd [list move $utag $deltax $deltay]
+	    set cmd [list move $utag $dx $dy]
 	    set redo [list ::CanvasUtils::Command $wtop $cmd remote]
+	    set undoCmd [list move $utag [expr -($x - $moveArr(x0))] \
+	      [expr -($y - $moveArr(y0))]]
 	}
     }
 	
     # Do send to all connected.
-    if {[info exists moveArr(undocmd)]} {
-	set undo [list ::CanvasUtils::Command $wtop $moveArr(undocmd)]
-    }
+    set undo [list ::CanvasUtils::Command $wtop $undoCmd]
     eval $redo
+    undo::add [::WB::GetUndoToken $wtop] $undo $redo    
 
     catch {unset moveArr}
 }

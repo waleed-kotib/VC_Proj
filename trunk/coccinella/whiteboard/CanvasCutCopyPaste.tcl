@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasCutCopyPaste.tcl,v 1.2 2004-07-22 15:11:28 matben Exp $
+# $Id: CanvasCutCopyPaste.tcl,v 1.3 2004-07-22 15:56:45 matben Exp $
 
 package provide CanvasCutCopyPaste 1.0
 
@@ -127,14 +127,14 @@ proc ::CanvasCCP::CopySingleItemToClipboard {w doWhat id} {
     
     Debug 2 "CopySingleItemToClipboard:: id=$id"
 
-    if {[llength $id] == 0} {
+    if {$id == ""} {
 	return
     }
     set wtop [::UI::GetToplevelNS $w]
-    set theTags [$w gettags $id]
+    set tags [$w gettags $id]
     
     # Do not allow copies of broken images (mess).
-    if {[lsearch $theTags broken] >= 0} {
+    if {[lsearch $tags broken] >= 0} {
 	return
     }
     
@@ -288,8 +288,8 @@ proc ::CanvasCCP::PasteSingleFromClipboardToCanvas {w cmd} {
     # add new tags
     set itemType [lindex $cmd 1]
     set utag [::CanvasUtils::NewUtag]
-    set theTags [list $itemType $utag]
-    lappend cmd -tags $theTags
+    set tags [list std $itemType $utag]
+    lappend cmd -tags $tags
     
     # make coordinate offset, first get coords
     set ind1 [lsearch $cmd \[0-9.\]*]
