@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.57 2005-01-31 14:06:57 matben Exp $
+# $Id: MUC.tcl,v 1.58 2005-02-22 13:58:46 matben Exp $
 
 package require entrycomp
 package require muc
@@ -639,7 +639,6 @@ proc ::MUC::Invite {roomjid} {
     catch {focus $oldFocus}
     
     set finished $invite(finished)
-    unset invite
     return [expr {($finished <= 0) ? "cancel" : "ok"}]
 }
 
@@ -650,6 +649,7 @@ proc ::MUC::CancelInvite {token} {
     InviteCloseHook $invite(w)
     set invite(finished) 0
     catch {destroy $invite(w)}
+    unset invite
 }
 
 proc ::MUC::DoInvite {token} {
@@ -662,18 +662,31 @@ proc ::MUC::DoInvite {token} {
     set roomjid $invite(roomjid)
     InviteCloseHook $invite(w)
     
-    set opts {}
+    set opts [list -command [list [namespace current]::InviteCB $token]]
     if {$reason != ""} {
 	set opts [list -reason $reason]
     }
-    if {[catch {
-	eval {$jstate(muc) invite $roomjid $jid} $opts
-    } err]} {
-	::UI::MessageBox -type ok -icon error -title "Network Error" \
-	  -message "Network error ocurred: $err"
-    }
+    eval {$jstate(muc) invite $roomjid $jid} $opts
     set invite(finished) 1
     catch {destroy $invite(w)}
+}
+
+proc ::MUC::InviteCB {token jlibname type args} {
+    variable $token
+    upvar 0 $token invite
+    
+    array set argsArr $args
+    
+    if {$type == "error"} {
+	set msg "Invitation to $invite(jid) to join room $invite(roomjid) failed."
+	if {[info exists argsArr(-error)]} {
+	    set errcode [lindex $argsArr(-error) 0]
+	    set errmsg [lindex $argsArr(-error) 1]
+	    append msg " " "Error message: $errmsg"
+	}
+	::UI::MessageBox -icon error -title [mc Error] -type ok -message $msg
+    }
+    unset invite
 }
 
 proc ::MUC::InviteCloseHook {wclose} {

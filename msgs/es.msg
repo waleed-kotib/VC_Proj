@@ -713,6 +713,9 @@
 ::msgcat::mcset es jamessstarttls-nofeature     {El servidor "%s" ne supporte pas el TLS.}
 ::msgcat::mcset es jamessstarttls-failure       {Error durante la sécurisation TLS con el servidor "%s".}
 
+# translate!!!!
+::msgcat::mcset es jamessgcinvite               {You have been invited to the groupchat room %s by %s. Do you want to join?}
+
 
 
 ::msgcat::mcset es openquicktime		{Abrir el streaming QuickTime}

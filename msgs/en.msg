@@ -697,7 +697,8 @@ You have a subscription for %s: %s.}
 ::msgcat::mcset en jamesstrptsubsc              {Your registered account with the %s service will be put in your roster to work as a transport with this service.}
 ::msgcat::mcset en jamessfailedsubsc            {Failed to make a subscription to %s. The user denied the subscription.}
 ::msgcat::mcset en jamessstarttls-nofeature     {The server "%s" has no support for TLS.}
-::msgcat::mcset en jamessstarttls-failure        {TLS negotiating with server "%s" failed.}
+::msgcat::mcset en jamessstarttls-failure       {TLS negotiating with server "%s" failed.}
+::msgcat::mcset en jamessgcinvite               {You have been invited to the groupchat room %s by %s. Do you want to join?}
 
 
 

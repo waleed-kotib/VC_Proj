@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.90 2005-02-19 08:17:41 matben Exp $
+# $Id: jabberlib.tcl,v 1.91 2005-02-22 13:58:46 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -308,6 +308,7 @@ proc jlib::new {rostername clientcmd args} {
     upvar ${jlibname}::lib      lib
     upvar ${jlibname}::iqcmd    iqcmd
     upvar ${jlibname}::prescmd  prescmd
+    upvar ${jlibname}::msgcmd   msgcmd
     upvar ${jlibname}::opts     opts
     upvar ${jlibname}::conf     conf
     upvar ${jlibname}::locals   locals
@@ -341,6 +342,7 @@ proc jlib::new {rostername clientcmd args} {
     
     set iqcmd(uid)   1001
     set prescmd(uid) 1001
+    set msgcmd(uid)  1001
     set lib(rostername)   $rostername
     set lib(clientcmd)    $clientcmd
     set lib(wrap)         $wrapper
@@ -1046,6 +1048,7 @@ proc jlib::message_handler {jlibname xmldata} {
 
     upvar ${jlibname}::opts opts    
     upvar ${jlibname}::lib lib
+    upvar ${jlibname}::msgcmd msgcmd
     
     # Extract the command level XML data items.
     set attrlist  [wrapper::getattrlist $xmldata]
@@ -1088,6 +1091,17 @@ proc jlib::message_handler {jlibname xmldata} {
 	    }
 	}
     }
+    
+    # Invoke any registered handler for this message.
+    set iscallback 0
+    if {[info exists attrArr(id)]} {
+	set id $attrArr(id)
+	if {[info exists msgcmd($id)]} {
+	    uplevel #0 $msgcmd($id) [list $jlibname $type] $arglist
+	    unset -nocomplain msgcmd($id)
+	    set iscallback 1
+	}
+    }	
     if {[llength $x]} {
 	lappend arglist -x $x
 	set xxmlnsList [lsort -unique $xxmlnsList]
@@ -1101,7 +1115,7 @@ proc jlib::message_handler {jlibname xmldata} {
 	    }
 	}
     }
-    if {[string equal $ishandled "0"]} {	
+    if {!$iscallback && [string equal $ishandled "0"]} {	
     
 	# Invoke callback to client.
 	if {[string length $opts(-messagecommand)]} {
@@ -1522,13 +1536,13 @@ proc jlib::getstanzaerrorspec {stanza} {
     set errmsg  ""
         
     # First search children of stanza (<iq> element) for error element.
-    foreach subiq [wrapper::getchildren $stanza] {
-	set tag [wrapper::gettag $subiq]
+    foreach child [wrapper::getchildren $stanza] {
+	set tag [wrapper::gettag $child]
 	if {[string equal $tag "error"]} {
-	    set errelem $subiq
+	    set errelem $child
 	}
 	if {[string equal $tag "query"]} {
-	    set queryelem $subiq
+	    set queryelem $child
 	}
     }
     if {![info exists errelem] && [info exists queryelem]} {
@@ -1593,49 +1607,51 @@ proc jlib::geterrspecfromerror {errelem kind} {
     }
     set cchdata [wrapper::getcdata $errelem]
     set errcode [wrapper::getattribute $errelem code]
+    set errmsg  "Unknown"
+
     if {[string is integer -strict $errcode]} {
 	if {$cchdata != ""} {
 	    set errmsg $cchdata
 	} elseif {[info exists errCodeToText($errcode)]} {
 	    set errmsg $errCodeToText($errcode)
-	} else {
-	    set errmsg "Unknown"
 	}
     } elseif {$cchdata != ""} {
 	
 	# Old jabber way.
 	set errmsg $cchdata
-    } else {
-	set errcode ""
-	set errmsg  "Unknown"
+    }
 	
-	# xmpp way.
-	foreach c [wrapper::getchildren $errelem] {
-	    set tag [wrapper::gettag $c]
-	    
-	    switch -- $tag {
-		text {
-		    
-		    # Use only as a complement iff our language. ???
-		    set xmlns [wrapper::getattribute $c xmlns]
-		    set lang  [wrapper::getattribute $c xml:lang]
-		    # [string equal $lang [getlang]]
-		    if {[string equal $xmlns $xmppxmlns($kind)]} {
-			set errstr [wrapper::getcdata $c]
-		    }
-		} 
-		default {
-		    set xmlns [wrapper::getattribute $c xmlns]
-		    if {[string equal $xmlns $xmppxmlns($kind)]} {
-			set errcode $tag
-			set errmsg [$msgproc($kind) $tag]
-		    }
+    # xmpp way.
+    foreach c [wrapper::getchildren $errelem] {
+	set tag [wrapper::gettag $c]
+	
+	switch -- $tag {
+	    text {
+		# Use only as a complement iff our language. ???
+		set xmlns [wrapper::getattribute $c xmlns]
+		set lang  [wrapper::getattribute $c xml:lang]
+		# [string equal $lang [getlang]]
+		if {[string equal $xmlns $xmppxmlns($kind)]} {
+		    set errstr [wrapper::getcdata $c]
+		}
+	    } 
+	    default {
+		set xmlns [wrapper::getattribute $c xmlns]
+		if {[string equal $xmlns $xmppxmlns($kind)]} {
+		    set errcode $tag
+		    set errstr [$msgproc($kind) $tag]
 		}
 	    }
 	}
-	if {[info exists errstr]} {
-	    append errmsg $errstr
+    }
+    if {[info exists errstr]} {
+	if {$errmsg != ""} {
+	    append errmsg ". "
 	}
+	append errmsg $errstr
+    }
+    if {$errmsg == ""} {
+	set errmsg "Unknown"
     }
     return [list $errcode $errmsg]
 }
@@ -2093,11 +2109,9 @@ proc jlib::send_iq {jlibname type xmldata args} {
 
     upvar ${jlibname}::lib lib
     upvar ${jlibname}::iqcmd iqcmd
-    upvar ${jlibname}::locals locals
         
     Debug 3 "jlib::send_iq type='$type', xmldata='$xmldata', args='$args'"
     
-    set locals(last) [clock seconds]
     array set argsArr $args
     set attrlist [list "type" $type]
     
@@ -2439,18 +2453,19 @@ proc jlib::search_set {jlibname to cmd args} {
 #                   Anything can be put inside an *X*. Please make sure you 
 #                   created it with "wrapper::createtag" procedure, 
 #                   and also, it has a "xmlns" attribute in its root tag. 
+#
+#                   -command
 #                   
 # Results:
 #       none.
 
 proc jlib::send_message {jlibname to args} {
 
-    upvar ${jlibname}::locals locals
+    upvar ${jlibname}::msgcmd msgcmd
 
     Debug 3 "jlib::send_message to=$to, args=$args"
     
     array set argsArr $args
-    set locals(last) [clock seconds]
     set attrlist [list to $to]
     set children {}
     
@@ -2458,6 +2473,11 @@ proc jlib::send_message {jlibname to args} {
 	set par [string trimleft $name "-"]
 	
 	switch -- $name {
+	    -command {
+		lappend attrlist "id" $msgcmd(uid)
+		set msgcmd($msgcmd(uid)) $value
+		incr msgcmd(uid)
+	    }
 	    -xlist {
 		foreach xchild $value {
 		    lappend children $xchild
@@ -2514,7 +2534,6 @@ proc jlib::send_presence {jlibname args} {
     
     Debug 3 "jlib::send_presence args='$args'"
     
-    set locals(last) [clock seconds]
     set attrlist {}
     set children {}
     set type "available"
@@ -2573,10 +2592,12 @@ proc jlib::send_presence {jlibname args} {
 proc jlib::send {jlibname xmllist} {
     
     upvar ${jlibname}::lib lib
+    upvar ${jlibname}::locals locals
 	
     # For the auto away function.
     schedule_auto_away $jlibname
 
+    set locals(last) [clock seconds]
     set xml [wrapper::createxml $xmllist]
 
     # We fail only if already in stream.
