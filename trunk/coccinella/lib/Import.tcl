@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Import.tcl,v 1.4 2003-10-18 07:43:56 matben Exp $
+# $Id: Import.tcl,v 1.5 2003-11-17 15:08:27 matben Exp $
 
 package require http
 package require httpex
@@ -1776,7 +1776,7 @@ proc ::Import::SaveImageAsFile {w id} {
     set fileName [tk_getSaveFile -defaultextension gif   \
       -title [::msgcat::mc {Save As GIF}] -initialfile $initFile]
     if {$fileName != ""} {
-	$imageName write $fileName
+	$imageName write $fileName -format gif
     }
 }
 
