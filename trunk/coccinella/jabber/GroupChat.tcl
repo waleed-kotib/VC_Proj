@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.13 2003-10-12 13:12:55 matben Exp $
+# $Id: GroupChat.tcl,v 1.14 2003-10-23 06:27:59 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -465,16 +465,15 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     global  this sysFont prefs
     
     variable locals
+    variable dlguid
     upvar ::Jabber::mapShowElemToText mapShowElemToText
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
     ::Jabber::Debug 2 "::Jabber::GroupChat::Build roomJid=$roomJid, args='$args'"
     
-    # Make unique toplevel name from rooms jid.
-    regsub -all {\.} $roomJid {_} wunique
-    regsub -all {@} $wunique {_} wunique
-    set w ".[string tolower $wunique]"
+    # Make unique toplevel name.
+    set w .dlggc[incr dlguid]
     
     set locals($roomJid,wtop) $w
     set locals($w,room) $roomJid

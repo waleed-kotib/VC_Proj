@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: tinyhttpd.tcl,v 1.3 2003-10-19 11:15:00 matben Exp $
+# $Id: tinyhttpd.tcl,v 1.4 2003-10-23 06:27:59 matben Exp $
 
 # ########################### USAGE ############################################
 #
@@ -311,7 +311,7 @@ proc ::tinyhttpd::HandleRequest {s ip port} {
 	    
 	    # Set fileevent to read the sequence of 'key: value' lines.
 	    fileevent $s readable   \
-	      [list [namespace current]::ReadKeyValueLine $s $ip $cmd $path]
+	      [list [namespace current]::Event $s $ip $cmd $path]
 	} else {
 	    ::tinyhttpd::LogMsg "$ip, unknown request: $line"
 	}
@@ -320,7 +320,7 @@ proc ::tinyhttpd::HandleRequest {s ip port} {
     }
 }
 	    
-# tinyhttpd::ReadKeyValueLine --
+# tinyhttpd::Event --
 #
 #       Reads and processes a 'key: value' line, reschedules itself if not blank
 #       line, else calls 'RespondToClient' to initiate a file transfer.
@@ -333,27 +333,29 @@ proc ::tinyhttpd::HandleRequest {s ip port} {
 #       
 # Results:
 
-proc ::tinyhttpd::ReadKeyValueLine {s ip cmd inPath} {    
+proc ::tinyhttpd::Event {s ip cmd inPath} {    
     variable state
     
     if {[eof $s]} {
 	Finish $s "eof"
-	::tinyhttpd::Debug 2 "ReadKeyValueLine:: eof s"
+	::tinyhttpd::Debug 2 "Event:: eof s"
 	return
     }
     if {[fblocked $s]} {
-	::tinyhttpd::Debug 2 "ReadKeyValueLine:: blocked s"
+	::tinyhttpd::Debug 2 "Event:: blocked s"
 	return
     }
     set nbytes [gets $s line]
-    ::tinyhttpd::Debug 3 "ReadKeyValueLine:: inPath=$inPath, nbytes=$nbytes, line=$line"
+    ::tinyhttpd::Debug 3 "Event:: inPath=$inPath, nbytes=$nbytes, line=$line"
     
     if {$nbytes < 0} {
 	#close $s
 	return
     }
+    if {$nbytes > 0} {
+	# Perhaps we should keep track of the clients key-value pairs?	
+    }
     
-    # Perhaps we should keep track of the clients key-value pairs?    
     if {($nbytes == 0) || [regexp {^[ \n]+$} $line]}  {
 	
 	# First empty line, set up file transfer.

@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson only for the new and rewritten parts.
 #
-# $Id: httpex.tcl,v 1.7 2003-10-19 11:14:12 matben Exp $
+# $Id: httpex.tcl,v 1.8 2003-10-23 06:27:59 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -385,6 +385,7 @@ proc httpex::Request {method url args} {
 	coding		{}
 	currentsize	0
 	havecontentlength 0
+	haveranges      0
 	headclose       0
 	http		""
 	httpvers	1.0
@@ -741,6 +742,7 @@ proc httpex::readrequest {s callback args} {
 	coding		{}
 	currentsize	0
 	havecontentlength 0
+	haveranges      0
 	headclose       0
 	http		""
 	httpvers	1.0
@@ -932,19 +934,29 @@ proc httpex::Event {token} {
 	    
 	    # grab the optional charset information
 	    regexp -nocase {charset\s*=\s*(\S+)} $type x state(charset)
-	}
-	if {[regexp -nocase {^content-length:(.+)$} $line x length]} {
+	} elseif {[regexp -nocase {^content-length:(.+)$} $line x length]} {
 	    set state(totalsize) [string trim $length]
 	    set state(havecontentlength) 1
-	}
-	if {[regexp -nocase {^content-encoding:(.+)$} $line x coding]} {
+	} elseif {[regexp -nocase {^content-encoding:(.+)$} $line x coding]} {
 	    set state(coding) [string trim $coding]
-	}
-	if {[regexp -nocase {^connection: *close$} $line x]} {
+	} elseif {[regexp -nocase {^connection: *close$} $line x]} {
 	    set state(headclose) 1
-	}
-	if {[regexp -nocase {^transfer-encoding: *chunked} $line x]} {
+	} elseif {[regexp -nocase {^transfer-encoding: *chunked} $line x]} {
 	    set state(chunked) 1
+	} elseif {[regexp -nocase {^range: *bytes=(.+)$} $line x byteSet]} {
+	    set state(haveranges) 1
+	    set ranges {}
+	    foreach byteSpec [split $byteSet ,] {
+		if {[regexp -- {^([0-9]+)-([0-9]+)$} $byteSpec x lower upper]} {
+		    lappend ranges [list $lower $upper]
+		} elseif {[regexp -- {-([0-9]+)$} $byteSpec x endoff]} {
+		    lappend ranges [list [expr $state(totalsize) - $endoff] \
+		      $state(totalsize)]
+		} elseif {[regexp -- {^([0-9]+)-} $byteSpec x lower]} {
+		    lappend ranges [list $lower $state(totalsize)]
+		}
+	    }
+	    set state(ranges) $ranges
 	}
 	if {[regexp -nocase {^([^:]+):(.+)$} $line x key value]} {
 	    lappend state(meta) $key [string trim $value]

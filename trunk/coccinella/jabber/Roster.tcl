@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.11 2003-10-18 07:43:55 matben Exp $
+# $Id: Roster.tcl,v 1.12 2003-10-23 06:28:00 matben Exp $
 
 package provide Roster 1.0
 
@@ -203,7 +203,8 @@ proc ::Jabber::Roster::Build {w} {
     
     # Add main tree dirs.
     foreach gpres $jprefs(treedirs) {
-	$wtree newitem [list $gpres] -dir 1 -text [::msgcat::mc $gpres]
+	$wtree newitem [list $gpres] -dir 1 -text [::msgcat::mc $gpres] \
+	  -tags head
     }
     foreach gpres $jprefs(closedtreedirs) {
 	$wtree itemconfigure [list $gpres] -open 0
@@ -436,7 +437,7 @@ proc ::Jabber::Roster::Clear { } {
     ::Jabber::Debug 2 "::Jabber::Roster::Clear"
 
     foreach gpres $jprefs(treedirs) {
-	$wtree delitem $gpres -childsonly 1
+	$wtree delitem [list $gpres] -childsonly 1
     }
 }
 
@@ -516,7 +517,7 @@ proc ::Jabber::Roster::SetItem {jid args} {
 #       Sets the presence of the jid in our UI.
 #
 # Arguments:
-#       jid         3-tier jid
+#       jid         3-tier jid usually but can be a 2-tier jid
 #       presence    "available", "unavailable", or "unsubscribed"
 #       args        list of '-key value' pairs of presence attributes.
 #       
@@ -529,15 +530,16 @@ proc ::Jabber::Roster::Presence {jid presence args} {
     upvar ::Jabber::jstate jstate
 
     ::Jabber::Debug 2 "::Jabber::Roster::Presence jid=$jid, presence=$presence, args='$args'"
+    array set argsArr $args
 
     # All presence have a 3-tier jid as 'from' attribute:
     # presence = 'available'   => remove jid2 + jid3,  add jid3
     # presence = 'unavailable' => remove jid2 + jid3,  add jid2
+    # Wrong! We may have 2-tier jids from transports:
+    # <presence from='user%hotmail.com@msn.myserver' ...
     
-    array set argsArr $args
-    set jid2 $jid
-    regexp {^(.+@[^/]+)(/.+)?$} $jid match jid2 res
-        
+    foreach {jid2 res} [jlib::splitjid $jid] break
+    
     # This gets a list '-name ... -groups ...' etc. from our roster.
     set itemAttr [$jstate(roster) getrosteritem $jid2]
     
@@ -584,21 +586,13 @@ proc ::Jabber::Roster::Remove {jid} {
     
     ::Jabber::Debug 2 "::Jabber::Roster::Remove, jid=$jid"
     
-    # All presence have a 3-tier jid as 'from' attribute.
     # If have 3-tier jid:
     #    presence = 'available'   => remove jid2 + jid3
     #    presence = 'unavailable' => remove jid2 + jid3
     # Else if 2-tier jid:  => remove jid2
     
-    if {[regexp {^([^@]+@[^/]+)/.+$} $jid match jid2]} {
-	
-	# Must be 3-tier jid.
-	set jid3 $jid
-    } else {
-	set jid2 $jid
-    }
+    foreach {jid2 res} [jlib::splitjid $jid] break
 
-    # New tree widget command 'find withtag'. 
     foreach v [$wtree find withtag $jid2] {
 	$wtree delitem $v
 	
@@ -609,7 +603,10 @@ proc ::Jabber::Roster::Remove {jid} {
 	    }
 	}
     }
-    if {[info exists jid3]} {
+    if {[string length $res] > 0} {
+	
+	# We've got a 3-tier jid.
+	set jid3 $jid
 	foreach v [$wtree find withtag $jid3] {
 	    $wtree delitem $v
 	    if {[llength $v] == 3} {
@@ -774,7 +771,8 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
 	    # Make group if not exists already.
 	    set childs [$wtree children [list $gpresarr($presence)]]
 	    if {[lsearch -exact $childs $grp] < 0} {
-		$wtree newitem [list $gpresarr($presence) $grp] -dir 1
+		$wtree newitem [list $gpresarr($presence) $grp] -dir 1 \
+		  -tags group
 	    }
 	    eval {$wtree newitem [list $gpresarr($presence) $grp $jidx] \
 	      -image $icon -tags $jidx} $itemOpts

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.10 2003-10-12 13:12:55 matben Exp $
+# $Id: Utils.tcl,v 1.11 2003-10-23 06:28:00 matben Exp $
 
 namespace eval ::Utils:: {
 
@@ -334,6 +334,18 @@ proc ::Utils::GetDirIfExist {dir} {
 	return $dir
     } else {
 	return $this(path)
+    }
+}
+
+proc ::Utils::GetFontListFromName {fontSpec} {
+    
+    if {[llength $fontSpec] == 1} {
+	array set fontArr [font actual $fontSpec]
+	return [list $fontArr(-family) $fontArr(-size) $fontArr(-weight)] 
+    } elseif {[llength $fontSpec] == 3} {
+	return $fontSpec
+    } else {
+	return -code error "unknown font specification $fontSpec"
     }
 }
     
