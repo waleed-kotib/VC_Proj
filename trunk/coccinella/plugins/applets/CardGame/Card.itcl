@@ -1,0 +1,102 @@
+# Card.itcl --
+# 
+#       Each card is encoded using two characters, the first one its range,
+#       and the second one its suit code, see below.
+# 
+#       range: 
+#           2-9, ordinary numbers, 0 means 10, j (jack) q (queen), k (king), 
+#           a (ace)
+#       suits: 
+#           diamond (d), heart (h), spade (s), and club (c).
+#           
+# $Id: Card.itcl,v 1.1 2004-07-23 10:15:37 matben Exp $
+
+class Card {
+
+    # ---------------------------------
+    # Class constructor and destructor.
+    # ---------------------------------
+
+    public {
+	constructor {args} {}
+	destructor {}
+    }
+
+    # ---------------
+    # Static methods.
+    # ---------------
+
+    public proc Suit {rang}
+    public proc SuitRang {suit}
+    public proc Value {card}
+}
+
+body Card::constructor {} {
+    puts $this
+}
+
+# Card::Suit --
+#
+#	Returns the suit character code.
+#
+# Arguments:
+#	rang        integer 0-3 enumerating the suits
+#
+# Results:
+#       the suit character code
+
+body Card::Suit {rang} {
+    switch -- $rang {
+	0 {set suitChar d}
+	1 {set suitChar h}
+	2 {set suitChar s}
+	3 {set suitChar c}
+    }
+}
+
+# Card::SuitRang --
+#
+#	Returns the suit rang as an integer 0-3.
+#
+# Arguments:
+#	suit        the suit character code
+#
+# Results:
+#       enumeration from 0-3 corresponding to suit character code
+
+body Card::SuitRang {suit} {
+    switch -glob -- $suit {
+	*d* {set suitNum 0}
+	*h* {set suitNum 1}
+	*s* {set suitNum 2}
+	*c* {set suitNum 3}
+    }
+}
+
+# Card::Value --
+#
+#	Returns the cards value as an integer 1-13.
+#
+# Arguments:
+#	card        the card code as a two character code
+#
+# Results:
+#       the numerical value of the card
+
+body Card::Value {card} {
+    switch [string index $card 0] {
+	a {return 1}
+	2 {return 2}
+	3 {return 3}
+	4 {return 4}
+	5 {return 5}
+	6 {return 6}
+	7 {return 7}
+	8 {return 8}
+	9 {return 9}
+	0 {return 10}
+	j {return 11}
+	q {return 12}
+	k {return 13}
+    }
+}
