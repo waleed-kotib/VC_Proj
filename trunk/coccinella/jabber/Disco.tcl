@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.16 2004-06-06 07:02:20 matben Exp $
+# $Id: Disco.tcl,v 1.17 2004-06-13 15:33:39 matben Exp $
 
 package provide Disco 1.0
 
@@ -239,7 +239,7 @@ proc ::Jabber::Disco::InfoCB {disconame type from subiq args} {
     upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::Jabber::Disco::InfoCB type=$type, from=$from"
-    if {$type != "ok"} {
+    if {$type == "error"} {
 	::Jabber::AddErrorLog $from $subiq
 	return
     }
@@ -282,12 +282,17 @@ proc ::Jabber::Disco::IsDirCategory {jid} {
     # Ad-hoc way to figure out if dir or not. Use the category attribute.
     set types [$jstate(disco) types $jid]
     foreach type $types {
-	set category [lindex [split $type /] 0] 
+	set category [lindex [split $type /] 0]
 	if {[info exists categoryShowDir($category)] && \
 	  $categoryShowDir($category)} {
 	    set isdir 1
 	    break
 	}
+    }
+    
+    # Don't forget the rooms.
+    if {!$isdir} {
+	set isdir [$jstate(disco) isroom $jid]
     }
     return $isdir
 }
@@ -441,7 +446,10 @@ proc ::Jabber::Disco::Popup {w v x y} {
     set categoryType [lindex $categoryList 0]
     ::Debug 4 "\t categoryType=$categoryType"
 
-    if {[regexp {^.+@[^/]+(/.*)?$} $jid match res]} {
+    jlib::splitjidex $jid username host res
+    
+    #if {[regexp {^.+@[^/]+(/.*)?$} $jid match res]}
+    if {$username != ""} {
 	set typeClicked user
 	if {[$jstate(disco) isroom $jid]} {
 	    set typeClicked room
