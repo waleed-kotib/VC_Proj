@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasDraw.tcl,v 1.13 2003-10-12 13:12:55 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.14 2003-10-24 07:09:07 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 #  
@@ -263,8 +263,11 @@ proc ::CanvasDraw::InitMove {w x y {what item}} {
 	# Add specific tag to the item being moved for later use.
 	# We might need to check if item has a 'std' tag to not interfere
 	# with stuff from plugins.
-	set id [$w find withtag current]	
-	$w addtag ismoved withtag $id
+	set id {}
+	if {[lsearch -regexp [$w gettags current] {notactive|nomove}] < 0} {
+	    set id [$w find withtag current]
+	    $w addtag ismoved withtag $id
+	}
 	set ids [$w find withtag selected]
 	if {$id != ""} {
 	    set ids [lsort -unique [concat $ids $id]]
@@ -431,7 +434,7 @@ proc ::CanvasDraw::DoMove {w x y what {shift 0}} {
 	    if {[string length $it] == 0} {
 		return
 	    }
-	    if {[lsearch $tagsCurrent grid] >= 0 } {
+	    if {[lsearch $tagsCurrent notactive] >= 0 } {
 		return
 	    }
 	    $w move current [expr $x - $xDrag(baseX)] [expr $y - $xDrag(baseY)]
@@ -876,6 +879,86 @@ proc ::CanvasDraw::FinMoveWindow {wcan win x y} {
 	undo::add [::UI::GetUndoToken $wtop] $undo $redo
     }    
     catch {unset xDragWin}
+}
+
+# CanvasDraw::FinGridMove --
+# 
+#       A way to constrain movements to a grid.
+
+proc ::CanvasDraw::FinGridMove {wcan x y grid args} {
+    variable  xDrag
+    
+    Debug 2 "::CanvasDraw::FinGridMove"
+
+    if {![info exists xDrag]} {
+	return
+    }
+    set id [$wcan find withtag ismoved]
+    if {$id == ""} {
+	return
+    }
+    set utag [::CanvasUtils::GetUtag $wcan $id]
+    if {$utag == ""} {
+	return
+    }
+    array set argsArr {
+	-anchor     nw
+    }
+    array set argsArr $args
+    set wtop [::UI::GetToplevelNS $wcan]
+
+    foreach {xmin dx nx} [lindex $grid 0] break
+    foreach {ymin dy ny} [lindex $grid 1] break
+    foreach {x0 y0 x1 y1} [$wcan bbox $id] break
+    set xc [expr int(($x0 + $x1)/2)]
+    set yc [expr int(($y0 + $y1)/2)]
+    set width2 [expr int(($x1 - $x0)/2)]
+    set height2 [expr int(($y1 - $y0)/2)]
+    set ix [expr int(($xc - $xmin)/$dx + 0.5)]
+    set iy [expr int(($yc - $ymin)/$dy + 0.5)]
+    if {($ix >= 0) && ($ix < $nx) && ($iy >= 0) && ($iy < $ny)} {
+	set doGrid 1
+	set newx [expr $xmin + $ix * $dx]
+	set newy [expr $ymin + $iy * $dy]
+    } else {
+	set doGrid 0
+	set newx [expr int($x)]
+	set newy [expr int($y)]
+    }
+    puts "ix=$ix, iy=$iy, xc=$xc, yc=$yc, newx=$newx, newy=$newy"
+
+    $wcan dtag ismoved
+    if {[string equal $xDrag(type) "image"]} {
+	if {$doGrid} {
+	    set anchor [$wcan itemcget $id -anchor]
+	    
+	    switch -- $anchor {
+		nw {
+		    set offx -$width2
+		    set offy -$height2
+		}
+		default {
+		    # missing...
+		    set offx 0
+		    set offy 0
+		}
+	    }
+	    incr newx $offx
+	    incr newy $offy
+	}
+	set cmd [list coords $utag $newx $newy]
+    } else {
+	set anchor c
+	
+    }
+	
+    # Do send to all connected.
+    set redo [list ::CanvasUtils::Command $wtop $cmd]
+    if {[info exists xDragWin(undocmd)]} {
+	set undo [list ::CanvasUtils::Command $wtop $xDragWin(undocmd)]
+    }
+    eval $redo
+    catch {unset xDrag}
 }
 
 #--- End of the 'move' tool procedures -----------------------------------------
@@ -2339,6 +2422,9 @@ proc ::CanvasDraw::MarkBbox {w shift {which current}} {
 
 	# If 'which' a tag, find true id; ok also if 'which' true id.
 	set id [$w find withtag $which]
+    }
+    if {[lsearch [$w gettags $id] {notactive}] >= 0} {
+	return
     }
     if {($utag == "") || [llength $id] == 0} {
 	return
