@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.17 2004-01-14 14:27:30 matben Exp $
+# $Id: OOB.tcl,v 1.18 2004-01-23 08:50:20 matben Exp $
 
 package provide OOB 1.0
 
@@ -20,14 +20,15 @@ namespace eval ::Jabber::OOB:: {
 #
 #       Dialog for sending a 'jabber:iq:oob' 'set' element.
 
-proc ::Jabber::OOB::BuildSet {w jid} {
-    global  this
+proc ::Jabber::OOB::BuildSet {jid} {
+    global  this wDlgs
     
     variable finished
     variable localpath ""
     variable desc ""
     variable locals
     
+    set w $wDlgs(joobs)
     if {[winfo exists $w]} {
 	return
     }
@@ -67,7 +68,7 @@ proc ::Jabber::OOB::BuildSet {w jid} {
     pack [button $frbot.btsnd -text [::msgcat::mc Send] -width 8 -default active \
       -command [namespace current]::DoSend]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8   \
+    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
       -command "set [namespace current]::finished 2"]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
