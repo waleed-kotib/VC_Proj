@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.20 2004-01-13 14:50:21 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.21 2004-01-15 14:13:00 matben Exp $
 
 package require sha1pure
 
@@ -1515,25 +1515,19 @@ proc ::CanvasUtils::HandleCanvasDraw {wtop instr} {
 	}
     } 
     
-    # If text then speak up to last punct.
-    
-    if {$prefs(SpeechOn)} {
-	if {[string equal $cmd "create"] ||  \
-	  [string equal $cmd "insert"]} {
-	    if {[string equal $cmd "create"]} {
-		set utag $idnew
-	    } else {
-		set utag [lindex $instr 1]
-	    }
-	    set type [$wServCan type $utag]
-	    if {[string equal $type "text"]} {
-		
-		# Extract the actual text. TclSpeech not foolproof!
-		set theText [$wServCan itemcget $utag -text]
-		if {[string match *${punct_}* $theText]} {
-		    catch {::Speech::Speak $theText $prefs(voiceOther)}
-		}
-	    }
+    # If text then invoke hook.
+    if {[string equal $cmd "create"] || [string equal $cmd "insert"]} {
+	if {[string equal $cmd "create"]} {
+	    set utag $idnew
+	} else {
+	    set utag [lindex $instr 1]
+	}
+	set type [$wServCan type $utag]
+	if {[string equal $type "text"]} {
+	    
+	    # Extract the actual text. TclSpeech not foolproof!
+	    set theText [$wServCan itemcget $utag -text]
+	    ::hooks::run whiteboardTextInsertHook other
 	}
     }
 }

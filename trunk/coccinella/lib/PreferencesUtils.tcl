@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.25 2004-01-13 14:50:21 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.26 2004-01-15 14:13:00 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -299,7 +299,6 @@ proc ::PreferencesUtils::SetUserPreferences { } {
       [list prefs(shortsMulticastQT) prefs_shortsMulticastQT $prefs(shortsMulticastQT) userDefault] \
       [list prefs(postscriptOpts)  prefs_postscriptOpts  $prefs(postscriptOpts)] \
       [list prefs(firstLaunch)     prefs_firstLaunch     $prefs(firstLaunch)     userDefault] \
-      [list prefs(SpeechOn)        prefs_SpeechOn        $prefs(SpeechOn)]       \
       [list prefs(unixPrintCmd)    prefs_unixPrintCmd    $prefs(unixPrintCmd)]   \
       [list prefs(webBrowser)      prefs_webBrowser      $prefs(webBrowser)]     \
       [list prefs(userDir)         prefs_userDir         $prefs(userDir)]        \

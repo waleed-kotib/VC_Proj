@@ -104,6 +104,7 @@
 ::msgcat::mcset en Shortcut
 ::msgcat::mcset en Shortcuts
 ::msgcat::mcset en Specifications
+::msgcat::mcset en Speech
 ::msgcat::mcset en State
 ::msgcat::mcset en State/Region
 ::msgcat::mcset en Stop

@@ -14,7 +14,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Plugins.tcl,v 1.11 2004-01-13 14:50:21 matben Exp $
+# $Id: Plugins.tcl,v 1.12 2004-01-15 14:13:00 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -733,46 +733,6 @@ proc ::Plugins::VerifyPackagesForMimeTypes { } {
 		    set prefMimeType2Package($mime) $mimeTypeDoWhat($mime)
 		}
 	    }
-	}
-    }
-}
-
-# Plugins::VerifySpeech --
-# 
-#       Verifies that we actually have a speech package.
-#       Also checks voices available.
-
-proc ::Plugins::VerifySpeech { } {
-    global  prefs
-    variable plugin
-
-    # Make sure these are consistent as well.
-    # Speech:
-    if {!$plugin(TclSpeech,loaded) && !$plugin(MSSpeech,loaded)} {
-	set prefs(SpeechOn) 0
-    }   
-    
-    # Voices consistency check.
-    if {$plugin(TclSpeech,loaded)} {
-	set voices [speech::speakers]
-	if {([lsearch $voices $prefs(voiceUs)] < 0) || \
-	  ($prefs(voiceUs) == "")} {
-	    set prefs(voiceUs) Victoria
-	}
-	if {([lsearch $voices $prefs(voiceOther)] < 0) || \
-	  ($prefs(voiceOther) == "")} {
-	    set prefs(voiceOther) Zarvox
-	}
-    }
-    if {$plugin(MSSpeech,loaded)} {
-	set voices [::MSSpeech::GetVoices]
-	if {([lsearch $voices $prefs(voiceUs)] < 0) || \
-	  ($prefs(voiceUs) == "")} {
-	    set prefs(voiceUs) [lindex $voices 0]
-	}
-	if {([lsearch $voices $prefs(voiceOther)] < 0) || \
-	  ($prefs(voiceOther) == "")} {
-	    set prefs(voiceOther) [lindex $voices 1]
 	}
     }
 }

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.36 2004-01-13 14:50:21 matben Exp $
+# $Id: Preferences.tcl,v 1.37 2004-01-15 14:13:00 matben Exp $
  
 package require notebook
 package require tree
@@ -322,48 +322,6 @@ proc ::Preferences::BuildPageSounds {page} {
     
     set fontSB [option get . fontSmallBold {}]
     
-    set labpsp [::mylabelframe::mylabelframe $page.sp [::msgcat::mc {Synthetic speech}]]
-    pack $page.sp -side top -anchor w -ipadx 10 -fill x
-    
-    checkbutton $labpsp.speak -text "  [::msgcat::mc prefsounsynwb]"  \
-      -variable "[namespace current]::tmpPrefs(SpeechOn)"
-    checkbutton $labpsp.speakmsg -text "  [::msgcat::mc prefsounsynno]"  \
-      -variable "[namespace current]::tmpJPrefs(speakMsg)"
-    checkbutton $labpsp.speakchat -text "  [::msgcat::mc prefsounsynch]"  \
-      -variable "[namespace current]::tmpJPrefs(speakChat)"
-    pack $labpsp.speak -side top -anchor w -padx 10 -pady $ypad
-    pack $labpsp.speakmsg -side top -anchor w -padx 10 -pady $ypad
-    pack $labpsp.speakchat -side top -anchor w -padx 10 -pady $ypad
-    
-    if {[::Plugins::HavePackage TclSpeech] || [::Plugins::HavePackage MSSpeech]} {
-	
-	# Get a list of voices
-	set voicelist "None [::Speech::SpeakGetVoices]"
-    } else {
-	set voicelist {None}
-	$labpsp.speak configure -state disabled
-	$labpsp.speakmsg configure -state disabled
-	$labpsp.speakchat configure -state disabled
-	set tmpPrefs(SpeechOn) 0
-    }
-    pack [frame $labpsp.fr] -side top -anchor w -padx 26 -pady 2
-    label $labpsp.fr.in -text [::msgcat::mc prefsounvoin]
-    label $labpsp.fr.out -text [::msgcat::mc prefsounvoou]
-    set wpopin $labpsp.fr.popin
-    set wpopupmenuin [eval {tk_optionMenu $wpopin   \
-      [namespace current]::tmpPrefs(voiceOther)} $voicelist]
-    $wpopin configure -highlightthickness 0 -font $fontSB
-    set wpopout $labpsp.fr.popout
-    set wpopupmenuout [eval {tk_optionMenu $wpopout   \
-      [namespace current]::tmpPrefs(voiceUs)} $voicelist]
-    $wpopout configure -highlightthickness 0 -font $fontSB
-    
-    grid $labpsp.fr.in $wpopin -sticky w -pady 1
-    grid $labpsp.fr.out $wpopout -sticky w -pady 1
-    if {![::Plugins::HavePackage TclSpeech] && ![::Plugins::HavePackage MSSpeech]} {
-	$wpopin configure -state disabled
-	$wpopout configure -state disabled
-    }    
     
     set labpalrt [::mylabelframe::mylabelframe $page.alrt [::msgcat::mc {Alert sounds}]]
     pack $page.alrt -side top -anchor w -ipadx 10 -fill x

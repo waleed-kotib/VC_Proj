@@ -6,7 +6,7 @@
 #
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #
-# $Id: FileCache.tcl,v 1.7 2004-01-09 14:08:22 matben Exp $
+# $Id: FileCache.tcl,v 1.8 2004-01-15 14:13:00 matben Exp $
 # 
 #       The input key can be: 
 #               1) a full url, must be uri encoded 
@@ -48,7 +48,7 @@ package provide FileCache 1.0
 
 namespace eval ::FileCache:: {
 
-    # Define all hooks that is needed.
+    # Define all hooks that are needed.
     ::hooks::add initHook               ::FileCache::InitHook
     ::hooks::add quitAppHook            ::FileCache::QuitHook
     ::hooks::add prefsInitHook          ::FileCache::InitPrefsHook

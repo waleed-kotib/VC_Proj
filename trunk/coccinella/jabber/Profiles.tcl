@@ -4,13 +4,13 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.5 2004-01-14 10:24:55 matben Exp $
+# $Id: Profiles.tcl,v 1.6 2004-01-15 14:13:00 matben Exp $
 
 package provide Profiles 1.0
 
 namespace eval ::Profiles:: {
     
-    # Define all hooks that is needed.
+    # Define all hooks that are needed.
     ::hooks::add prefsInitHook          ::Profiles::InitHook
     ::hooks::add prefsBuildHook         ::Profiles::BuildHook
     ::hooks::add prefsUserDefaultsHook  ::Profiles::UserDefaultsHook
@@ -550,8 +550,7 @@ proc ::Profiles::DeleteCmd { } {
 }
 
 proc ::Profiles::UserDefaultsHook { } {
-    
-    
+        
 }
 
 proc ::Profiles::SaveHook { } {
