@@ -205,7 +205,7 @@
 ::msgcat::mcset sv mSearch		{Leta...}
 ::msgcat::mcset sv mAddNewUser		{Ny kontakt...}
 ::msgcat::mcset sv mSendMessage		{Skicka meddelande...}
-::msgcat::mcset sv mChat		{Chatta...}
+::msgcat::mcset sv mChat		{Chatta}
 ::msgcat::mcset sv mStatus		{Status}
 ::msgcat::mcset sv mAvailable		{Tillgänlig}
 ::msgcat::mcset sv mAway		{Borta}

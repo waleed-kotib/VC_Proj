@@ -15,7 +15,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.14 2003-11-30 11:46:46 matben Exp $
+# $Id: Coccinella.tcl,v 1.15 2003-12-10 15:21:43 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -136,7 +136,7 @@ proc resolve_cmd_realpath {infile} {
 # default file, never read.
 set prefs(majorVers) 0
 set prefs(minorVers) 94
-set prefs(releaseVers) 6
+set prefs(releaseVers) 7
 set prefs(fullVers) $prefs(majorVers).$prefs(minorVers).$prefs(releaseVers)
 
 # We may be embedded in another application, say an ActiveX component.

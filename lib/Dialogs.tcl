@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.15 2003-11-30 11:46:47 matben Exp $
+# $Id: Dialogs.tcl,v 1.16 2003-12-10 15:21:43 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -30,6 +30,7 @@ array set wDlgs {
     print           .prt
     prog            .prog
     splash          .splash
+    plugs           .plugs
 }
 
 # Toplevel dialogs for the jabber part.
@@ -48,6 +49,10 @@ array set wDlgs {
     jcreateroom     .jcreateroom
     jinbox          .jinbox
     jpresmsg        .jpresmsg
+    joutst          .joutst
+    jpasswd         .jpasswd
+    jsearch         .jsearch
+    jvcard          .jvcard
 }
 
 # Dialogs::GetCanvas --
@@ -139,8 +144,8 @@ proc ::Dialogs::GetCanvas {w} {
 #      It implements the dialog for presenting the loaded packages or helper 
 #      applications.
 
-proc ::Dialogs::InfoOnPlugins {w} {
-    global  sysFont prefs this
+proc ::Dialogs::InfoOnPlugins { } {
+    global  sysFont prefs this wDlgs
     
     # Check first of there are *any* plugins.
     if {[llength [::Plugins::GetAllPackages loaded]] == 0} {
@@ -148,6 +153,7 @@ proc ::Dialogs::InfoOnPlugins {w} {
 	  [FormatTextForMessageBox [::msgcat::mc messnoplugs]]
 	return  
     }
+    set w $wDlgs(plugs)
     if {[winfo exists $w]} {
 	return
     }
@@ -605,18 +611,18 @@ proc ::PSPageSetup::PushBtSave {  } {
 #       It implements a dialog that shows client information.
 #       
 # Arguments:
-#       w      the toplevel window.
 #       allIPnumsFrom   list of ip numbers of all connected clients.
 #       
 # Results:
 #       shows dialog.
 
-proc ::Dialogs::ShowInfoClients {w allIPnumsFrom} {
-    global  sysFont ipNumTo this
+proc ::Dialogs::ShowInfoClients {allIPnumsFrom} {
+    global  sysFont ipNumTo this wDlgs
     
     if {[llength $allIPnumsFrom] <= 0} {
 	return
     }
+    set w $wDlgs(infoClient)
     if {[winfo exists $w]} {
 	return
     }
@@ -701,16 +707,16 @@ proc ::Dialogs::ShowInfoClients {w allIPnumsFrom} {
 #       give only the hostname if available.
 #       
 # Arguments:
-#       w      the toplevel window.
 #       thisIPnum   the servers local ip number.
 #       
 # Results:
 #       none
 
-proc ::Dialogs::ShowInfoServer {w thisIPnum} {
-    global  sysFont this ipNumTo allIPnumsFrom  \
+proc ::Dialogs::ShowInfoServer {thisIPnum} {
+    global  sysFont this ipNumTo allIPnumsFrom wDlgs  \
       state listenServSocket this prefs
     
+    set w $wDlgs(infoServ)
     if {[winfo exists $w]} {
 	return
     }

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Subscribe.tcl,v 1.1 2003-11-14 09:56:02 matben Exp $
+# $Id: Subscribe.tcl,v 1.2 2003-12-10 15:21:43 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -21,14 +21,13 @@ namespace eval ::Jabber::Subscribe:: {
 #       Ask for user response on a subscribe presence element.
 #
 # Arguments:
-#       wbase  the toplevel window's base path.
 #       jid    the jid we receive a 'subscribe' presence element from.
 #       args   ?-key value ...? look for any '-status' only.
 #       
 # Results:
 #       "deny" or "accept".
 
-proc ::Jabber::Subscribe::Subscribe {wbase jid args} {
+proc ::Jabber::Subscribe::Subscribe {jid args} {
     global  this sysFont prefs wDlgs
     
     variable locals   
@@ -38,8 +37,7 @@ proc ::Jabber::Subscribe::Subscribe {wbase jid args} {
     
     ::Jabber::Debug 2 "::Jabber::Subscribe::Subscribe jid=$jid"
 
-    incr uid
-    set w ${wbase}${uid}
+    set w $wDlgs(jsubsc)[incr uid]
     set locals($uid,finished) -1
     set locals($uid,wtop) $w
     set locals($uid,jid) $jid
@@ -97,7 +95,7 @@ proc ::Jabber::Subscribe::Subscribe {wbase jid args} {
     label $frmid.lvcard -text "[::msgcat::mc jasubgetvcard]:" -font $sysFont(sb) \
       -anchor e
     button $frmid.bvcard -text "[::msgcat::mc {Get vCard}]..."   \
-      -command [list ::VCard::Fetch .kass other $jid]
+      -command [list ::VCard::Fetch other $jid]
     label $frmid.lmsg -text [::msgcat::mc jasubsndmsg]   \
       -font $sysFont(sb) -anchor e
     button $frmid.bmsg -text "[::msgcat::mc Send]..."    \
@@ -171,10 +169,9 @@ proc ::Jabber::Subscribe::Subscribe {wbase jid args} {
 }
 
 proc ::Jabber::Subscribe::SendMsg {uid} {
-    global  wDlgs
     variable locals   
 	
-    ::Jabber::NewMsg::Build $wDlgs(jsendmsg) -to $locals($uid,jid)
+    ::Jabber::NewMsg::Build -to $locals($uid,jid)
 }
 
 # Jabber::Subscribe::Doit --

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.2 2003-11-09 15:07:32 matben Exp $
+# $Id: Register.tcl,v 1.3 2003-12-10 15:21:43 matben Exp $
 
 package provide Register 1.0
 
@@ -21,20 +21,20 @@ namespace eval ::Jabber::Register:: {
 #       Registers new user with a server.
 #
 # Arguments:
-#       w      the toplevel window.
 #       args   -server, -username, -password
 #       
 # Results:
 #       "cancel" or "new".
 
-proc ::Jabber::Register::Register {w args} {
-    global  this sysFont
+proc ::Jabber::Register::Register {args} {
+    global  this sysFont wDlgs
     
     variable finished -1
     variable server
     variable username
     variable password
     
+    set w $wDlgs(jreg)
     if {[winfo exists $w]} {
 	return
     }
@@ -347,14 +347,13 @@ namespace eval ::Jabber::GenRegister:: {
 #       Uses iq get-set method.
 #       
 # Arguments:
-#       w           toplevel widget
 #       args   -server, -autoget 0/1
 #       
 # Results:
 #       "cancel" or "register".
      
-proc ::Jabber::GenRegister::BuildRegister {w args} {
-    global  this sysFont
+proc ::Jabber::GenRegister::BuildRegister {args} {
+    global  this sysFont wDlgs
 
     variable wtop
     variable wbox
@@ -369,6 +368,7 @@ proc ::Jabber::GenRegister::BuildRegister {w args} {
     upvar ::Jabber::jstate jstate
     
     ::Jabber::Debug 2 "::Jabber::GenRegister::BuildRegister"
+    set w $wDlgs(jreg)
     if {[winfo exists $w]} {
 	return
     }

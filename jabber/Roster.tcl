@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.24 2003-11-30 11:46:46 matben Exp $
+# $Id: Roster.tcl,v 1.25 2003-12-10 15:21:43 matben Exp $
 
 package provide Roster 1.0
 
@@ -336,8 +336,6 @@ proc ::Jabber::Roster::SelectCmd {w v} {
 #       button states set set.
 
 proc ::Jabber::Roster::DoubleClickCmd {w v} {
-    global  wDlgs
-    
     upvar ::Jabber::jprefs jprefs
 
     if {[llength $v] && ([$w itemconfigure $v -dir] == 0)} {
@@ -347,7 +345,7 @@ proc ::Jabber::Roster::DoubleClickCmd {w v} {
 	set jid [lindex $v end]
 	jlib::splitjid $jid jid2 res
 	if {[string equal $jprefs(rost,dblClk) "normal"]} {
-	    ::Jabber::NewMsg::Build $wDlgs(jsendmsg) -to $jid2
+	    ::Jabber::NewMsg::Build -to $jid2
 	} else {
 	    ::Jabber::Chat::StartThread $jid2
 	}
@@ -1089,7 +1087,7 @@ proc ::Jabber::Roster::NewOrEditDlg {which args} {
 	pack [label $frvcard.lbl -text "[::msgcat::mc jasubgetvcard]:"  \
 	  -font $sysFont(sb)] -side left -padx 2
 	pack [button $frvcard.bt -text " [::msgcat::mc {Get vCard}]..."  \
-	  -font $sysFont(s) -command [list ::VCard::Fetch .kass {other} $jid]] \
+	  -font $sysFont(s) -command [list ::VCard::Fetch other $jid]] \
 	  -side right -padx 2
     }
     grid $frjid -column 0 -row 0 -sticky e
@@ -1342,7 +1340,7 @@ proc ::Jabber::Roster::EditSet {token} {
 		      -message [::msgcat::mc jamessaddforeign $host]]
 		    if {$ans == "yes"} {
 			set didRegister [::Jabber::GenRegister::BuildRegister  \
-			  .jtrptreg -server $host -autoget 1]
+			  -server $host -autoget 1]
 			return
 		    } else {
 			return
@@ -1570,7 +1568,7 @@ proc ::Jabber::Roster::PresenceSounds {jid presence args} {
 
 # Jabber::Roster::BuildPresenceMenu --
 # 
-#       Sets presence status. Used in popup only so far.
+#       Adds all presence manu entries to menu.
 #       
 # Arguments:
 #       mt          menu widget
@@ -1584,14 +1582,14 @@ proc ::Jabber::Roster::BuildPresenceMenu {mt} {
     upvar ::Jabber::mapShowTextToElem mapShowTextToElem
 
     if {$prefs(haveMenuImage)} {
-	foreach name {available away dnd invisible unavailable} {
+	foreach name {available away chat dnd invisible unavailable} {
 	    $mt add radio -label $mapShowTextToElem($name)  \
 	      -variable ::Jabber::jstate(status) -value $name   \
 	      -command [list ::Jabber::SetStatus $name]  \
 	      -compound left -image $presenceIcon($name)
 	}
     } else {
-	foreach name {available away dnd invisible unavailable} {
+	foreach name {available away chat dnd invisible unavailable} {
 	    $mt add radio -label $mapShowTextToElem($name)  \
 	      -variable ::Jabber::jstate(status) -value $name   \
 	      -command [list ::Jabber::SetStatus $name]
@@ -1614,9 +1612,9 @@ proc ::Jabber::Roster::BuildStatusMenuDef { } {
 
     set statMenuDef {}
     if {$prefs(haveMenuImage)} {
-	foreach mName {mAvailable mAway mDoNotDisturb  \
+	foreach mName {mAvailable mAway mChat mDoNotDisturb  \
 	  mExtendedAway mInvisible mNotAvailable}      \
-	  name {available away dnd xa invisible unavailable} {
+	  name {available away chat dnd xa invisible unavailable} {
 	    lappend statMenuDef [list radio $mName  \
 	      [list ::Jabber::SetStatus $name] normal {}  \
 	      [list -variable ::Jabber::jstate(status) -value $name  \
@@ -1624,18 +1622,18 @@ proc ::Jabber::Roster::BuildStatusMenuDef { } {
 	}
 	lappend statMenuDef {separator}   \
 	  {command mAttachMessage         \
-	  {::Jabber::SetStatusWithMessage $wDlgs(jpresmsg)}  normal {}}
+	  {::Jabber::SetStatusWithMessage}  normal {}}
     } else {
-	foreach mName {mAvailable mAway mDoNotDisturb  \
+	foreach mName {mAvailable mAway mChat mDoNotDisturb  \
 	  mExtendedAway mInvisible mNotAvailable}      \
-	  name {available away dnd xa invisible unavailable} {
+	  name {available away chat dnd xa invisible unavailable} {
 	    lappend statMenuDef [list radio $mName  \
 	      [list ::Jabber::SetStatus $name] normal {} \
 	      [list -variable ::Jabber::jstate(status) -value $name]]
 	}
 	lappend statMenuDef {separator}   \
 	  {command mAttachMessage         \
-	  {::Jabber::SetStatusWithMessage $wDlgs(jpresmsg)}  normal {}}
+	  {::Jabber::SetStatusWithMessage}  normal {}}
     }
     return $statMenuDef
 }

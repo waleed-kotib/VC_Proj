@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.24 2003-11-30 11:46:47 matben Exp $
+# $Id: jabberlib.tcl,v 1.25 2003-12-10 15:21:43 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -234,6 +234,9 @@ namespace eval jlib {
     #    > 1 prints raw xml I/O
     #    > 2 prints a lot more
     variable debug 0
+    if {($::debugLevel > 1) && ($debug == 0)} {
+	set debug $::debugLevel
+    }
     
     variable statics
     set statics(presenceTypeExp)  \

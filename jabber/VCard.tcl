@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: VCard.tcl,v 1.6 2003-11-30 11:46:47 matben Exp $
+# $Id: VCard.tcl,v 1.7 2003-12-10 15:21:43 matben Exp $
 
 package provide VCard 1.0
 
@@ -26,7 +26,8 @@ namespace eval ::VCard::  {
 #
 #       Gets the vCard from 'jid'.
 
-proc ::VCard::Fetch {w type {jid {}}} {
+proc ::VCard::Fetch {type {jid {}}} {
+    global  wDlgs
 
     variable uid
     upvar ::Jabber::jstate jstate
@@ -34,8 +35,7 @@ proc ::VCard::Fetch {w type {jid {}}} {
     if {$type == "own"} {
         set jid $jstate(mejid)
     }
-    set wtoplevel ${w}${uid}
-    incr uid
+    set wtoplevel $wDlgs(jvcard)[incr uid]
         
     # We should query the server for this and then fill in.
     ::Jabber::UI::SetStatusMessage [::msgcat::mc vcardget $jid]

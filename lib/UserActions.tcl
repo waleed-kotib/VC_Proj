@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UserActions.tcl,v 1.20 2003-11-30 11:46:47 matben Exp $
+# $Id: UserActions.tcl,v 1.21 2003-12-10 15:21:43 matben Exp $
 
 namespace eval ::UserActions:: {
     
@@ -348,10 +348,10 @@ proc ::UserActions::SpeakGetVoices { } {
 #       Protocol independent open connection to server.
 
 proc ::UserActions::DoConnect { } {
-    global  prefs wDlgs
+    global  prefs
     
     if {[string equal $prefs(protocol) {jabber}]} {
-	::Jabber::Login::Login $wDlgs(jlogin)
+	::Jabber::Login::Login
     } elseif {![string equal $prefs(protocol) {server}]} {
 	::OpenConnection::OpenConnection $wDlgs(openConn)
     }

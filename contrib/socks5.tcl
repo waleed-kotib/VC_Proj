@@ -7,7 +7,7 @@
 #  (C) 2000 Kerem 'Waster_' HADIMLI (minor parts)
 #  (c) 2003  Mats Bengtsson
 #  
-# $Id: socks5.tcl,v 1.5 2003-12-06 13:48:00 matben Exp $
+# $Id: socks5.tcl,v 1.6 2003-12-10 15:21:43 matben Exp $
 # 
 # TODO:  GSSAPI authetication which is a MUST is missing.
 #        Only CMD CONNECT implemented.
@@ -818,6 +818,7 @@ proc socks5::read_stream {token in out} {
 	
 	# We could wait here (in the event loop) for channel to be writable
 	# to avoid any blocking...
+	# BUT, this would keep $data in memory for a while which is a bad idee.
 	if {0} {
 	    fileevent $out writable  \
 	      [list [namespace current]::stream_writeable $token $primary]

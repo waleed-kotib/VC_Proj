@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Search.tcl,v 1.1 2003-11-14 09:55:23 matben Exp $
+# $Id: Search.tcl,v 1.2 2003-12-10 15:21:43 matben Exp $
 
 package provide Search 1.0
 
@@ -21,14 +21,13 @@ namespace eval ::Jabber::Search:: {
 #       Initiates the process of searching a service.
 #       
 # Arguments:
-#       w           toplevel widget
 #       args   -server, -autoget 0/1
 #       
 # Results:
 #       .
      
-proc ::Jabber::Search::Build {w args} {
-    global  this sysFont prefs
+proc ::Jabber::Search::Build {args} {
+    global  this sysFont prefs wDlgs
 
     variable wtop
     variable wbox
@@ -44,6 +43,7 @@ proc ::Jabber::Search::Build {w args} {
     variable stattxt
     upvar ::Jabber::jstate jstate
     
+    set w $wDlgs(jsearch)
     if {[winfo exists $w]} {
 	return
     }

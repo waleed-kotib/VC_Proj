@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: SetupAss.tcl,v 1.11 2003-11-06 15:17:51 matben Exp $
+# $Id: SetupAss.tcl,v 1.12 2003-12-10 15:21:43 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -147,7 +147,7 @@ proc ::Jabber::SetupAss::DoRegister { } {
     variable password
     variable haveRegistered
 
-    ::Jabber::Register::Register .jreg -server $server  \
+    ::Jabber::Register::Register -server $server  \
       -username $username -password $password
     set haveRegistered 1
 }
