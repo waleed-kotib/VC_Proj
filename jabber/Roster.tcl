@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.41 2004-01-28 08:37:52 matben Exp $
+# $Id: Roster.tcl,v 1.42 2004-02-10 13:12:34 matben Exp $
 
 package provide Roster 1.0
 
@@ -21,8 +21,8 @@ namespace eval ::Jabber::Roster:: {
     set fontSB [option get . fontSmallBold {}]
 
     option add *Roster.backgroundImage      sky            widgetDefault
-    #option add *Roster*Tree.font          $fontS           30
-    #option add *Roster*Tree.fontDir       $fontSB          30
+    option add *Roster*Tree*dirImage        ""             widgetDefault
+    option add *Roster*Tree*groupImage      ""             widgetDefault
 
     variable wtree    
     variable servtxt
@@ -237,10 +237,12 @@ proc ::Jabber::Roster::Build {w} {
     grid columnconfigure $wbox 0 -weight 1
     grid rowconfigure $wbox 0 -weight 1    
     
+    set dirIcon [option get $wtree dirImage {}]
+    
     # Add main tree dirs.
     foreach gpres $jprefs(treedirs) {
 	$wtree newitem [list $gpres] -dir 1 -text [::msgcat::mc $gpres] \
-	  -tags head
+	  -tags head -image $dirIcon
     }
     foreach gpres $jprefs(closedtreedirs) {
 	$wtree itemconfigure [list $gpres] -open 0
@@ -853,6 +855,7 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
     set treectag item[incr treeuid]    
     set itemOpts [list -text $itemTxt -canvastags $treectag]    
     set icon [eval {::Jabber::Roster::GetPresenceIcon $jidx $presence} $args]
+    set groupIcon [option get $wtree groupImage {}]
 	
     # If we have an ask attribute, put in Pending tree dir.
     if {[info exists argsArr(-ask)] &&  \
@@ -869,7 +872,7 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
 	    set childs [$wtree children [list $gpresarr($presence)]]
 	    if {[lsearch -exact $childs $grp] < 0} {
 		$wtree newitem [list $gpresarr($presence) $grp] -dir 1 \
-		  -tags group
+		  -tags group -image $groupIcon
 	    }
 	    eval {$wtree newitem [list $gpresarr($presence) $grp $jidx] \
 	      -image $icon -tags $jidx} $itemOpts
