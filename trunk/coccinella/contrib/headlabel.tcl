@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: headlabel.tcl,v 1.3 2004-02-12 08:48:22 matben Exp $
+# $Id: headlabel.tcl,v 1.4 2004-02-13 14:11:48 matben Exp $
 #
 
 package provide headlabel 0.1
@@ -15,11 +15,11 @@ namespace eval ::headlabel:: {
     # The public interface.
     namespace export headlabel
     
-    option add *HeadLabel.font          {Helvetica -18}
-    option add *HeadLabel.anchor        w
-    option add *HeadLabel.background    #cecece
-    option add *HeadLabel.padX          10
-    option add *HeadLabel.padY          4
+    option add *HeadLabel.font          {Helvetica -18}     widgetDefault
+    option add *HeadLabel.anchor        w                   widgetDefault
+    option add *HeadLabel.background    #cecece             widgetDefault
+    option add *HeadLabel.padX          10                  widgetDefault
+    option add *HeadLabel.padY          4                   widgetDefault
                                         
     variable widgetOptions
     array set widgetOptions {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.43 2004-02-06 14:01:21 matben Exp $
+# $Id: Chat.tcl,v 1.44 2004-02-13 14:11:48 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -318,35 +318,27 @@ proc ::Jabber::Chat::InsertMessage {token whom body} {
     
     switch -- $whom {
 	me {
-	    set mejid [::Jabber::GetMyJid]
-	    jlib::splitjid $mejid jid2 res
+	    jlib::splitjid [::Jabber::GetMyJid] jid2 res
+	    set username $jid2
+	    regexp {^([^@]+)@} $jid2 match username
 	}
 	you {
 	    jlib::splitjid $jid jid2 res
-	}
-    }
-
-    switch -- $whom {
-	me - you {
-	    set username $jid2
-	    regexp {^([^@]+)@} $jid2 match username
-	    if {$clockFormat != ""} {
-		set theTime [clock format $secs -format $clockFormat]
-		set prefix "\[$theTime\] <$username>"
+	    if {[::Jabber::InvokeJlibCmd service isroom $jid2]} {
+		set username [::Jabber::InvokeJlibCmd service nick $jid]
 	    } else {
-		set prefix <$username>
-	    }    
-	}
-	sys {
-	    if {$clockFormat != ""} {
-		set theTime [clock format $secs -format $clockFormat]
-		set prefix "\[$theTime\] "
-	    } else {
-		set prefix ""
+		set username $jid2
+		regexp {^([^@]+)@} $jid2 match username
 	    }
 	}
     }
     
+    if {$clockFormat != ""} {
+	set theTime [clock format $secs -format $clockFormat]
+	set prefix "\[$theTime\] <$username>"
+    } else {
+	set prefix <$username>
+    }        
     $wtext configure -state normal
     
     switch -- $whom {
@@ -1033,7 +1025,10 @@ proc ::Jabber::Chat::XEventRecv {token xevent args} {
 	jlib::splitjid $state(jid) jid2 res
 	set name [::Jabber::InvokeRosterCmd getname $jid2]
 	if {$name == ""} {
-	    if {![regexp {^([^@]+)@.+} $jid2 m name]} {
+	    if {[::Jabber::InvokeJlibCmd service isroom $jid2]} {
+		set name [::Jabber::InvokeJlibCmd service nick $state(jid)]
+
+	    } elseif {![regexp {^([^@]+)@.+} $jid2 m name]} {
 		set name $jid2
 	    }
 	}

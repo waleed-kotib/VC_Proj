@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.26 2004-02-12 08:48:26 matben Exp $
+# $Id: JUI.tcl,v 1.27 2004-02-13 14:11:48 matben Exp $
 
 package provide JUI 1.0
 
@@ -302,7 +302,7 @@ proc ::Jabber::UI::Build {w} {
     set minWidth [expr $shortBtWidth > 200 ? $shortBtWidth : 200]
     wm geometry $w ${minWidth}x360
     ::UI::SetWindowGeometry $w
-    wm minsize $w $minWidth 360
+    wm minsize $w $minWidth 320
     wm maxsize $w 420 2000
     return $w
 }
