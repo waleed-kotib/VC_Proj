@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Privacy.tcl,v 1.5 2004-06-06 07:02:21 matben Exp $
+# $Id: Privacy.tcl,v 1.6 2004-06-30 12:45:57 matben Exp $
 
 package provide Privacy 1.0
 
@@ -516,11 +516,28 @@ namespace eval ::Privacy::List:: {
     # Uid for token,
     variable uid 0
     
-    variable blockStrToTag
-    array set blockStrToTag {
-	{Incoming Messages}   message
-	{Incoming Presence}   presence-in
-	{Outgoing Presence}   presence-out
+    # Need to map from menu entry to actual tag or attribute.
+    variable strToTag
+    set strToTag(type,[::msgcat::mc jid])          jid
+    set strToTag(type,[::msgcat::mc Group])        group
+    set strToTag(type,[::msgcat::mc Subscription]) subscription
+    set strToTag(block,[::msgcat::mc {Incoming Messages}]) message
+    set strToTag(block,[::msgcat::mc {Incoming Presence}]) presence-in
+    set strToTag(block,[::msgcat::mc {Outgoing Presence}]) presence-out
+    set strToTag(action,[::msgcat::mc Allow]) allow
+    set strToTag(action,[::msgcat::mc Deny])  deny
+    
+    # Labels for the menubuttons.
+    variable labels
+    set typeList   {jid Group Subscription}
+    set blockList  {{Incoming Messages} {Incoming Presence} {Outgoing Presence}}
+    set actionList {Allow Deny}
+    foreach key {type block action} {
+	set labels($key) {}
+	foreach str [set ${key}List] {
+	    lappend labels($key) [::msgcat::mc $str]
+	}
+	set labels(max,$key) [eval {::Utils::GetMaxMsgcatString} [set ${key}List]]
     }
 }
 
@@ -593,6 +610,7 @@ proc ::Privacy::List::GetListCB {name jlibname type subiq args} {
 proc ::Privacy::List::Build { } {
     global  wDlgs
     variable uid
+    variable labels
       
     # Initialize the state variable, an array, that keeps is the storage.
     
@@ -644,7 +662,19 @@ proc ::Privacy::List::Build { } {
     label $wblk  -text [::msgcat::mc {Block}]    
     label $wact  -text [::msgcat::mc {Action}]    
     label $wdel  -text [::msgcat::mc {Delete Rule}]    
-    grid $wtype $wval $wblk $wact $wdel -sticky w
+    grid $wtype $wval $wblk $wact $wdel
+    
+    # Build a row of empty frames to hold the max size of menubuttons.
+    # Fake menubutton to compute max width.
+    incr i
+    foreach what {type block action} {
+	set wtmp $w.frall._tmp
+	menubutton $wtmp -text $labels(max,$what)
+	set maxwidth [winfo reqwidth $wtmp]
+	destroy $wtmp
+	frame ${wit}.${what}${i} -width [expr $maxwidth + 20]
+    }
+    grid $wit.type${i} x $wit.block${i} $wit.action${i}
     
     set state(i) $i
     
@@ -748,7 +778,7 @@ proc ::Privacy::List::New {token} {
 proc ::Privacy::List::BuildItem {token} {
     variable $token
     upvar 0 $token state
-    variable blockStrToTag
+    variable labels
     
     set wit $state(wit)
 
@@ -756,17 +786,16 @@ proc ::Privacy::List::BuildItem {token} {
     set i $state(i)
     foreach {wtype wval wblk wact wdel}  \
       [list $wit.t${i} $wit.v${i} $wit.bl${i} $wit.a${i} $wit.bt${i}] break
-    tk_optionMenu $wtype $token\(type${i}) jid group subscription
+    eval {tk_optionMenu $wtype $token\(type${i})} $labels(type)
     entry         $wval -width 12 -textvariable $token\(value${i})
-    tk_optionMenu $wblk $token\(block${i}) {Incoming Messages} \
-      {Incoming Presence} {Outgoing Presence}
-    tk_optionMenu $wact $token\(action${i}) Allow Deny
+    eval {tk_optionMenu $wblk $token\(block${i})} $labels(block)
+    eval {tk_optionMenu $wact $token\(action${i})} $labels(action)
     button        $wdel -text Delete  \
       -command [list [namespace current]::Delete $token $i]
     
-    grid $wtype $wval $wblk $wact $wdel -sticky w
+    grid $wtype $wval $wblk $wact $wdel -sticky e
     
-    set state(action${i}) Deny
+    set state(action${i}) [::msgcat::mc Deny]
     set state(value${i})  ""
     set state(block${i})  {Incoming Messages}
     return $state(i)
@@ -806,10 +835,14 @@ proc ::Privacy::List::Delete {token i} {
     destroy $wtype $wval $wblk $wact $wdel
 }
 
+# Privacy::List::ExtractListElement --
+# 
+# 
+
 proc ::Privacy::List::ExtractListElement {token} {
     variable $token
     upvar 0 $token state
-    variable blockStrToTag
+    variable strToTag
     
     set wit  $state(wit)
     set i    $state(i)
@@ -825,10 +858,10 @@ proc ::Privacy::List::ExtractListElement {token} {
     set itemlist {}
     for {set j 1} {$j <= $i} {incr j} {
 	if {[winfo exists $wit.t${j}]} {
-	    set type   $state(type${j})
+	    set type   $strToTag(type,$state(type${j}))
 	    set value  $state(value${j})
-	    set block  $blockStrToTag($state(block${j}))
-	    set action [string tolower $state(action${j})]
+	    set block  $strToTag(block,$state(block${j}))
+	    set action $strToTag(action,$state(action${j}))
 	    
 	    # Do some error checking here.
 	    if {$value == ""} {
