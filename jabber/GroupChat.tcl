@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.101 2005-02-21 07:59:08 matben Exp $
+# $Id: GroupChat.tcl,v 1.102 2005-02-21 13:17:45 matben Exp $
 
 package require History
 
@@ -1289,7 +1289,7 @@ proc ::GroupChat::AddUsers {token} {
 #       jid3        roomjid/hashornick
 #       presence    "available", "unavailable", or "unsubscribed"
 #       args        list of '-key value' pairs where '-key' can be
-#                   -resource, -from, -type, -show...
+#                   -resource, -from, -type, -show,...
 #       
 # Results:
 #       updated UI.
@@ -1343,10 +1343,7 @@ proc ::GroupChat::SetUser {roomjid jid3 presence args} {
         
     # Cover both a "flat" users list and muc's with the roles 
     # moderator, participant, and visitor.
-    set role ""
-    if {[info exists argsArr(-x)]} {
-	set role [GetAnyRoleFromXElem $argsArr(-x)]
-    }
+    set role [GetRoleFromJid $jid3]
     if {$role == ""} {
 	$wusers newitem $jid3 -text $nick -image $icon -tags [list $jid3]
     } else {
@@ -1363,6 +1360,21 @@ proc ::GroupChat::SetUser {roomjid jid3 presence args} {
     
     # Noise.
     ::Sounds::PlayWhenIdle online
+}
+
+proc ::GroupChat::GetRoleFromJid {jid3} {
+    upvar ::Jabber::jstate jstate
+   
+    set role ""
+    set userElem [$jstate(roster) getx $jid3 "muc#user"]
+    if {$userElem != {}} {
+	set ilist [wrapper::getchildswithtag $userElem "item"]
+	if {$ilist != {}} {
+	    set item [lindex $ilist 0]
+	    set role [wrapper::getattribute $item "role"]
+	}
+    }
+    return $role
 }
 
 proc ::GroupChat::GetAnyRoleFromXElem {xelem} {
