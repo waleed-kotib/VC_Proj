@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Import.tcl,v 1.11 2004-09-28 13:50:21 matben Exp $
+# $Id: Import.tcl,v 1.12 2004-10-02 13:14:55 matben Exp $
 
 package require http
 package require httpex
@@ -22,10 +22,7 @@ namespace eval ::Import:: {
     # Specials for 'xanim'
     variable xanimPipe2Frame 
     variable xanimPipe2Item
-    
-    # Cache latest opened dir.
-    variable initialDir
-    
+        
     variable locals
     set locals(httpuid) 0
 }
@@ -43,20 +40,17 @@ namespace eval ::Import:: {
 #       Defines option arrays and icons for movie controllers.
 
 proc ::Import::ImportImageOrMovieDlg {wtop} {    
-    variable initialDir    
+    global  prefs    
     
     set wCan [::WB::GetCanvasFromWtop $wtop]
-    if {[info exists initialDir] && [file isdirectory $initialDir]} {
-	set opts {-initialdir $initialDir}
-    } else {
-	set opts {}
-    }
+    set userDir [::Utils::GetDirIfExist $prefs(userPath)]
+    set opts [list -initialdir $userDir]
     set fileName [eval {tk_getOpenFile -title [mc {Open Image/Movie}] \
       -filetypes [::Plugins::GetTypeListDialogOption all]} $opts]
     if {$fileName == ""} {
 	return
     }
-    set initialDir [file dirname $fileName]
+    set prefs(userPath) [file dirname $fileName]
     
     # Once the file name is chosen continue...
     # Perhaps we should dispatch to the registered import procedure for

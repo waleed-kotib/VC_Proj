@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.45 2004-09-28 13:50:19 matben Exp $
+# $Id: Dialogs.tcl,v 1.46 2004-10-02 13:14:55 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -331,9 +331,9 @@ proc ::Dialogs::InfoComponents { } {
     $wtxt tag configure tline -font {Helvetica -1} -background black
     
     foreach {name str} $compList {
-	$wtxt insert end "\n" tline
+	#$wtxt insert end "\n" tline
 	$wtxt insert end "$name\n" ttitle
-	$wtxt insert end "\n" tline   
+	#$wtxt insert end "\n" tline   
 	$wtxt insert end "$str\n" ttxt
     }
     $wtxt configure -state disabled

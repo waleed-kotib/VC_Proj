@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.71 2004-10-01 12:44:11 matben Exp $
+# $Id: GroupChat.tcl,v 1.72 2004-10-02 13:14:55 matben Exp $
 
 package require History
 
@@ -1388,10 +1388,10 @@ proc ::Jabber::GroupChat::Popup {w v x y} {
 	    continue
 	} else {
 	    
-	    # Substitute the jid arguments.
-	    set cmd [subst -nocommands $cmd]
+	    # Substitute the jid arguments. Preserve list structure!
+	    set cmd [eval list $cmd]
 	    set locname [mc $item]
-	    $m add command -label $locname -command "after 40 $cmd"  \
+	    $m add command -label $locname -command [list after 40 $cmd]  \
 	      -state disabled
 	}
 	
