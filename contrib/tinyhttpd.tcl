@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: tinyhttpd.tcl,v 1.5 2003-12-08 15:52:29 matben Exp $
+# $Id: tinyhttpd.tcl,v 1.6 2003-12-09 14:19:22 matben Exp $
 
 # ########################### USAGE ############################################
 #
@@ -58,6 +58,7 @@ namespace eval ::tinyhttpd:: {
 	}
     }
     set this(path) [file dirname [info script]]
+    set this(httpvers) 1.0
 
     set gstate(debug) 0
     
@@ -81,22 +82,22 @@ namespace eval ::tinyhttpd:: {
     
     # Some standard responses. Use with 'format'. Careful with spaces!
     set http(headdirlist) \
-"HTTP/1.0 200 OK
+"HTTP/$this(httpvers) 200 OK
 Server: tinyhttpd/1.0
 Last-Modified: %s
 Content-Type: text/html"
 
     set http(404) \
-"HTTP/1.0 404 $httpMsg(404)
+"HTTP/$this(httpvers) 404 $httpMsg(404)
 Content-Type: text/html\n"
 
     set http(404GET) \
-"HTTP/1.0 404 $httpMsg(404)
+"HTTP/$this(httpvers) 404 $httpMsg(404)
 Content-Type: text/html
 Content-Length: [string length $html(404)]\n\n$html(404)"
 
     set http(200) \
-"HTTP/1.0 200 OK
+"HTTP/$this(httpvers) 200 OK
 Server: tinyhttpd/1.0
 Last-Modified: %s
 Content-Type: %s
@@ -180,12 +181,14 @@ Content-Length: %s\n"
 #
 # Arguments:
 #       args:
+#           -chunk                8192
 #           -defaultindexfile     index.html
 #	    -directorylisting     1
 #	    -log                  0
 #	    -logfile              httpdlog.txt
 #	    -myaddr               ""
 #	    -port                 80
+#	    -rootdirectory        thisPath
 #       
 # Results:
 #       server socket opened.
@@ -204,6 +207,7 @@ proc ::tinyhttpd::start {args} {
 	-logfile              httpdlog.txt
 	-myaddr               ""
 	-port                 80
+	httpddirectory        httpd
     }
     set opts(-rootdirectory) $this(path)
     array set opts $args
@@ -230,13 +234,13 @@ proc ::tinyhttpd::start {args} {
 	set gstate(logfd) $fd
 	fconfigure $gstate(logfd) -buffering none
     }
+    
+    # Icon unix style paths when returning directory listings.
+    set httpdRelPathList [split $opts(httpddirectory) $this(sep)]
+    set httpdRelPath [join $httpdRelPathList /]
+    set gstate(folderIconRelPath) /$httpdRelPath/macfoldericon.gif
+    set gstate(fileIconRelPath) /$httpdRelPath/textfileicon.gif
         
-    # Keep the absolute path as a list which is helpful when adding paths.
-    # We typically get {{} root Tcl coccinella} on unix since first '/' is kept.
-    set gstate(basePathL) {}
-    foreach elem [file split $opts(-rootdirectory)] {
-	lappend gstate(basePathL) [string trim $elem "/:\\"]
-    }
     LogMsg "Tiny Httpd started"
 
     return ""
@@ -326,6 +330,9 @@ proc ::tinyhttpd::HandleRequest {token} {
 	  $line match cmd path reqvers]} {    
 	    LogMsg "$cmd: $path"
 	    set state(cmd) $cmd
+
+	    # The unix style, uri encoded path relative -rootdirectory,
+	    # starting with a "/".
 	    set state(path) $path
 	    set state(reqvers) $reqvers
 	    
@@ -347,7 +354,7 @@ proc ::tinyhttpd::HandleRequest {token} {
 # tinyhttpd::Event --
 #
 #       Reads and processes a 'key: value' line, reschedules itself if not blank
-#       line, else calls 'RespondToClient' to initiate a file transfer.
+#       line, else calls 'Respond' to initiate a file transfer.
 #
 # Arguments:
 #	token	The token for the internal state array.
@@ -392,11 +399,11 @@ proc ::tinyhttpd::Event {token} {
 	
 	# First empty line, set up file transfer.
 	fileevent $s readable {}
-	RespondToClient $token
+	Respond $token
     }
 }
 
-# tinyhttpd::RespondToClient --
+# tinyhttpd::Respond --
 #
 #       Responds the client with the HTTP protocol, and then a number of 
 #       'key: value' lines. File transfer initiated.
@@ -407,7 +414,7 @@ proc ::tinyhttpd::Event {token} {
 # Results:
 #       fcopy called.
 
-proc ::tinyhttpd::RespondToClient {token} {
+proc ::tinyhttpd::Respond {token} {
     global  this tcl_platform
     
     variable $token
@@ -419,20 +426,19 @@ proc ::tinyhttpd::RespondToClient {token} {
     variable http
     variable timing
     
-    Debug 2 "RespondToClient:: $token"
+    Debug 2 "Respond:: $token"
             
     set s $state(s)
     set cmd $state(cmd)
-    set inPath [string trimleft $state(path) /]
-    Debug 2 "\tinPath=$inPath"
+    set inRelPath [string trimleft $state(path) /]
         
-    # Decode file path.
-    set inPath [uriencode::decodefile $inPath]
-    Debug 2 "\tinPath=$inPath"
+    # Decode requested file path.
+    set inRelPath [uriencode::decodefile $inRelPath]
+    Debug 2 "\tinRelPath=$inRelPath"
     
     # Join incoming decoded file path with our base directory,
     # and normalize, i.e. remove all ../
-    set localPath [file normalize [file join $opts(-rootdirectory) $inPath]]
+    set localPath [file normalize [file join $opts(-rootdirectory) $inRelPath]]
     Debug 2 "\tlocalPath=$localPath"
     
     # If no actual file given then search for the '-defaultindexfile',
@@ -451,8 +457,7 @@ proc ::tinyhttpd::RespondToClient {token} {
 		puts $s [format $http(headdirlist) $modTime]
 		
 		if {[string equal $cmd "GET"]} {
-		    set html [BuildHtmlDirectoryListing $opts(-rootdirectory) \
-		      $inPath httpd]
+		    set html [BuildHtmlDirectoryListing $state(path)]
 		    puts $s "Content-Length: [string length $html]"
 		    puts $s "\n"
 		    puts $s $html
@@ -534,7 +539,7 @@ proc ::tinyhttpd::RespondToClient {token} {
     flush $s
     
     # Seems necessary (?) to avoid blocking the UI. BAD!!!
-    update
+    #update
     
     # Background copy. Be sure to switch off all fileevents on channel.
     fileevent $s readable {}
@@ -725,191 +730,79 @@ proc ::tinyhttpd::cleanup { } {
 
 # tinyhttpd::BuildHtmlDirectoryListing --
 #
-#
-#       relPath        Unix style path relative 'rootDir'.
-#       rootDir        The base or root directory of this http server.
-#                      May be in a native style.
-#       httpdRelPath
+#       Returns the html code that describes the directory inPath.
+#       
+# Arguments:
+#       inPath      the unix style, uri encoded path relative -rootdirectory,
+#                   starting with a "/".
 #       
 # Results:
 #       A complete html page describing the directory.
 
-proc ::tinyhttpd::BuildHtmlDirectoryListing {rootDir relPath httpdRelPath} {    
+proc ::tinyhttpd::BuildHtmlDirectoryListing {inPath} {    
     variable this
     variable html
+    variable gstate
+    variable opts
     
-    Debug 2 "----BuildHtmlDirectoryListing: rootDir=$rootDir,\
-      relPath=$relPath, httpdRelPath=$httpdRelPath"
+    Debug 2 "BuildHtmlDirectoryListing: inPath=$inPath"
+            
+    # Add the absolute '-rootdirectory' path with the relative 'inPath' to 
+    # form the absolute path of the directory.
+    set inRelPath [string trimleft $inPath /]
+
+    # Decode requested file path.
+    set inRelPath [uriencode::decodefile $inRelPath]
+
+    # Join incoming decoded file path with our base directory,
+    # and normalize, i.e. remove all ../
+    set localAbsPath  \
+      [file normalize [file join $opts(-rootdirectory) $inRelPath]]
+    set nativePath [file nativename $localAbsPath]
     
-    # Check paths?
-    if {$httpdRelPath == "/"} {
-	set httpdRelPath .
-    }
-    
-    # Make unix style paths for the icon files.
-    set httpdRelPathList [split $httpdRelPath $this(sep)]
-    set httpdRelPath [join $httpdRelPathList /]
-    set folderIconPath "/$httpdRelPath/macfoldericon.gif"
-    set fileIconPath "/$httpdRelPath/textfileicon.gif"
-    
-    # Add the absolute 'rootDir' path with the relative 'relPath' to form the
-    # absolute path of the directory.
-    set relPath [string trimleft $relPath /]
-    set fullPath [AddAbsolutePathWithRelative $rootDir $relPath]
-    set nativePath [file nativename $fullPath]
-    
-    Debug 3 "fullPath=$fullPath\n\tnativePath=$nativePath"
-    
-    # Set the current directory to our path (good?).
-    set oldPath [pwd]
-    cd $fullPath
+    Debug 3 "localAbsPath=$localAbsPath\n\tnativePath=$nativePath"
+    set fileIcon $gstate(fileIconRelPath)
+    set folderIcon $gstate(folderIconRelPath)
     
     # Start by finding the directory content. 
-    # glob needs the ending directory separator.
-    
-    set thisDir [string trim [lindex [file split $fullPath] end] "/:\\"]
-    set allFiles [glob -nocomplain *]
+    set allFiles [glob -directory $nativePath -nocomplain *]
     set totN [llength $allFiles]
     
     # Build the complete html page dynamically.    
+    set thisDir [string trim [lindex [file split $localAbsPath] end] "\\/"]
     set htmlStuff [format $html(dirhead) $thisDir $totN]
     
     # Loop over all files and directories in our directory.
-    foreach fileOrDir $allFiles {
+    foreach f $allFiles {
 	
-	if {[catch {clock format [file mtime $fileOrDir]   \
-	  -format "%a %d %b %Y, %H.%M"} res]} {
+	if {[catch {clock format [file mtime $f]  \
+	  -format "%a %d %b %Y, %H.%M"} dateAndTime]} {
 	    set dateAndTime --
-	} else {
-	    set dateAndTime $res
 	}
-	if {$relPath == ""} {
-	    set link "/${fileOrDir}"
-	} else {
-	    set link "/${relPath}${fileOrDir}"
-	}
-	set link [uriencode::quotepath $link]
+	set tail [file tail $f]
+	
+	# The link in html must be the encoded relative unix path.
+	set link "[string trimright $inPath /]/[uriencode::quotepath $tail]"
 	
 	# Is file or directory?
-	if {[file isdirectory $fileOrDir]} {
+	if {[file isdirectory $f]} {
 	    append link /
-	    append htmlStuff [format $html(dirline) $link $folderIconPath \
-	      $link $fileOrDir $dateAndTime]
+	    append htmlStuff [format $html(dirline) $link  \
+	      $folderIcon $link $tail $dateAndTime]
 	} else {
-	    if {[catch {file size $fileOrDir} res]} {
+	    if {[catch {file size $f} bytes]} {
 		set bytes 0
-	    } else {
-		set bytes $res
 	    }
 	    set formBytes [FormatBytesText $bytes]
-	    append htmlStuff [format $html(fileline) $link $fileIconPath \
-	      $link $fileOrDir $formBytes $fileOrDir $dateAndTime]
+	    append htmlStuff [format $html(fileline) $link  \
+	      $fileIcon $link $tail $formBytes $tail $dateAndTime]
 	}
     }
     
     # And the end.
     append htmlStuff $html(dirbottom)
-    
-    # Reset original working dir.
-    cd $oldPath
     return $htmlStuff
 }    
-
-# tinyhttpd::AddAbsolutePathWithRelativeUnix --
-#
-#       Adds a relative path to an absolute path. Must be unix style paths.
-#       Any "../" prepending the relative path means up one dir level.
-#       This is supposed to be a lightweight 'AddAbsolutePathWithRelative' 
-#       for unix style paths only.
-#
-# Arguments:
-#       absPath       the path to start with.. Unix style!
-#       relPath       the relative path that should be added. Unix style!
-#       
-# Results:
-#       The resulting absolute path in unix style.
-
-proc ::tinyhttpd::AddAbsolutePathWithRelativeUnix {absPath relPath} {
-    
-    # Construct the absolute path to the file. We need to take care of any
-    # up directories "../".
-    
-    set absPathL [split [string trim $absPath /] /]
-    
-    # If any up dir (../), find how many.
-    set numUp [regsub -all {\.\./} $relPath {} stripPath]
-    set stripPathL [split [string trim $stripPath /] /]
-    
-    # Delete the same number of elements from the end of the base path
-    # as there are up dirs in the relative path.
-    if {$numUp > 0} {
-	set iend [expr [llength $absPathL] - 1]
-	set newAbsPathL [lreplace $absPathL [expr $iend - $numUp + 1] $iend]
-    } else {
-	set newAbsPathL $absPathL
-    }
-    return "/[join [concat $newAbsPathL $stripPathL] "/"]"
-}
-
-# AddAbsolutePathWithRelative ---
-#
-#       Adds the second, relative path, to the first, absolute path.
-#       IMPORTANT: this should be just a copy of the procedure
-#       with the same name in the 'SomeUtils.tcl' file.
-#    
-# Arguments:
-#       absPath        an absolute path which is the "original" path.
-#       toPath         a relative path which should be added.
-#       
-# Results:
-#       The absolute path by adding 'absPath' with 'relPath'.
-
-proc ::tinyhttpd::AddAbsolutePathWithRelative {absPath relPath}  {
-    global  this tcl_platform
-    
-    # Be sure to strip off any filename.
-    set absPath [getdirname $absPath]
-    if {[file pathtype $absPath] != "absolute"} {
-	error "first path must be an absolute path"
-    } elseif {[file pathtype $relPath] != "relative"} {
-	error "second path must be a relative path"
-    }
-
-    # This is the method to reach platform independence.
-    # We must be sure that there are no path separators left.
-    
-    set absP {}
-    foreach elem [file split $absPath] {
-	lappend absP [string trim $elem "/:\\"]
-    }
-    
-    # If any up dir (../ ::  ), find how many. Only unix style.
-    set numUp [regsub -all {\.\./} $relPath {} newRelPath]
-   
-    # Delete the same number of elements from the end of the absolute path
-    # as there are up dirs in the relative path.
-    
-    if {$numUp > 0} {
-	set iend [expr [llength $absP] - 1]
-	set upAbsP [lreplace $absP [expr $iend - $numUp + 1] $iend]
-    } else {
-	set upAbsP $absP
-    }
-    set relP {}
-    foreach elem [file split $newRelPath] {
-	lappend relP [string trim $elem "/:\\"]
-    }
-    set completePath "$upAbsP $relP"
-
-    # On Windows we need special treatment of the "C:/" type drivers.
-    if {$tcl_platform(platform) == "windows"} {
-    	set finalAbsPath   \
-	    "[lindex $completePath 0]:/[join [lrange $completePath 1 end] "/"]"
-    } else {
-        set finalAbsPath "/[join $completePath "/"]"
-    }
-    return $finalAbsPath
-}
 
 # tinyhttpd::setmimemappings --
 #
