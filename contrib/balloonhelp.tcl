@@ -4,7 +4,7 @@
 #
 #  Code idee from Harrison & McLennan
 #  
-# $Id: balloonhelp.tcl,v 1.9 2004-05-29 13:20:58 matben Exp $
+# $Id: balloonhelp.tcl,v 1.10 2004-05-31 06:25:13 matben Exp $
 
 package provide balloonhelp 1.0
 
@@ -14,12 +14,15 @@ namespace eval ::balloonhelp:: {
     variable debug 0
     
     set locals(active) 1
-    set locals(millisecs) 1200
+    set locals(initted) 0
+
+    # Java style popup: light blue schemata: bg=#D8E1F4, bd=#4A6EBC
+    # Standard: light yellow: bg=#FFFF9F
     
-    option add *Balloonhelp*background            white     widgetDefault
-    option add *Balloonhelp*foreground            black     widgetDefault
-    option add *Balloonhelp.info.wrapLength       180       widgetDefault
-    option add *Balloonhelp.info.justify          left      widgetDefault
+    option add *Balloonhelp.background            #FFFF9F   widgetDefault
+    option add *Balloonhelp.foreground            black     widgetDefault
+    option add *Balloonhelp.wrapLength            180       widgetDefault
+    option add *Balloonhelp.justify               left      widgetDefault
     option add *Balloonhelp.millisecs             1200      widgetDefault
     
     # We use a variable 'locals(platform)' that is more convenient for Mac OS X.
@@ -38,37 +41,48 @@ namespace eval ::balloonhelp:: {
     }
     switch -- $locals(platform) {
 	unix {
-	    option add *Balloonhelp.info.font {Helvetica 10} widgetDefault
+	    option add *Balloonhelp.font {Helvetica 10} widgetDefault
 	}
 	windows {
-	    option add *Balloonhelp.info.font {Arial 8} widgetDefault
+	    option add *Balloonhelp.font {Arial 8} widgetDefault
 	}
-	macintosh {
-	    option add *Balloonhelp.info.font {Geneva 9} widgetDefault
+	macintosh - macosx {
+	    option add *Balloonhelp.font {Geneva 9} widgetDefault
 	}
-	macosx {
-	    option add *Balloonhelp.info.font {Geneva 9} widgetDefault
-	}
+    }
+}
+
+proc ::balloonhelp::Init { } {
+    
+    variable locals
+
+    if {!$locals(initted)} {
+	Build
+	set locals(millisecs) [option get .balloonhelp millisecs {}]
+	set locals(initted) 1
     }
 }
 
 proc ::balloonhelp::Build { } {
     
     variable locals
-
-    # Java style popup: light blue schemata: bg=#D8E1F4, bd=#4A6EBC
-    # Standard: light yellow: bg=#FFFF9F
     
-    toplevel .balloonhelp -class Balloonhelp -background #FFFF9F \
-      -bd 0 -relief flat
-    pack [label .balloonhelp.info -bg #FFFF9F] -side left -fill y
+    set w .balloonhelp
+    toplevel $w -class Balloonhelp -bd 0 -relief flat
+    set bg   [option get $w background {}]
+    set fg   [option get $w foreground {}]
+    set wrap [option get $w wrapLength {}]
+    set just [option get $w justify {}]
+
+    pack [label $w.info -bg $bg -fg $fg -wraplength $wrap -justify $just]  \
+      -side left -fill y
     if {[string equal $locals(platform) "macintosh"]} {
-	pack [frame .balloonhelp.pad -bg #FFFF9F -width 12] -side right
+	pack [frame $w.pad -bg $bg -width 12] -side right
     }
-    wm overrideredirect .balloonhelp 1
-    wm transient .balloonhelp
-    wm withdraw .balloonhelp
-    wm resizable .balloonhelp 0 0 
+    wm overrideredirect $w 1
+    wm transient $w
+    wm withdraw  $w
+    wm resizable $w 0 0 
     
     switch -- $locals(platform) {
 	macintosh {
@@ -76,13 +90,13 @@ proc ::balloonhelp::Build { } {
 	    #zoomDocProc, rDocProc, floatProc, floatZoomProc, ->floatSideProc, 
 	    #or floatSideZoomProc
 	    if {[package vcompare [info tclversion] 8.3] == 1} {
-		::tk::unsupported::MacWindowStyle style .balloonhelp floatSideProc
+		::tk::unsupported::MacWindowStyle style $w floatSideProc
 	    } else {
-		unsupported1 style .balloonhelp floatSideProc
+		unsupported1 style $w floatSideProc
 	    }
 	}
 	macosx {
-	    tk::unsupported::MacWindowStyle style .balloonhelp help none
+	    tk::unsupported::MacWindowStyle style $w help none
 	}
     }
 }
@@ -113,6 +127,7 @@ proc ::balloonhelp::balloonforwindow {win msg args} {
 
     variable locals
     
+    Init
     set locals($win) $msg
     set locals($win,args) $args
     # Perhaps we shall have "+" for all bindings to not interfere...
@@ -126,6 +141,8 @@ proc ::balloonhelp::balloonforcanvas {win itemid msg args} {
     variable locals  
     
     Debug 2 "::balloonhelp::balloonforcanvas win=$win, itemid=$itemid"
+
+    Init
     set locals($win,$itemid) $msg
     set locals($win,args) $args
     regsub -all {%} $itemid {%%} subItemId
@@ -140,6 +157,7 @@ proc ::balloonhelp::balloonfortree {win itemid msg args} {
 
     variable locals    
 
+    Init
     set wcanvas [$win getcanvas]
     eval {balloonforcanvas $wcanvas $itemid $msg} $args
 }
@@ -148,6 +166,8 @@ proc ::balloonhelp::balloonfortext {win tag msg args} {
 
     variable locals    
     Debug 2 "::balloonhelp::balloonfortext win=$win, tag=$tag"
+
+    Init
     set locals($win,$tag) $msg
     set locals($win,args) $args
     regsub -all {%} $tag {%%} subTag
@@ -185,12 +205,10 @@ proc ::balloonhelp::Cancel {win} {
 	unset locals(pending)
     }
     if {[winfo exists .balloonhelp]} {
-	catch {
-	    #puts "[focus -lastfor .balloonhelp]"
-	    #focus [focus -lastfor .balloonhelp]
-	    wm withdraw .balloonhelp
-	}
-	#focus .
+	wm withdraw .balloonhelp
+    }
+    if {[info exists locals(focus)] && ($locals(focus) != ".balloonhelp")} {
+	catch {focus $locals(focus)}
     }
 }
 
@@ -198,13 +216,14 @@ proc ::balloonhelp::Show {win type} {
     
     variable locals    
 
-    if {![winfo exists .balloonhelp]} {
-	::balloonhelp::Build
-	update idletasks
+    set w .balloonhelp
+    if {[focus] != $w} {
+	set locals(focus) [focus]
     }
     set exists 0
     
     if {$locals(active)} {
+	
 	switch -- $type {
 	    canvas {
 		
@@ -254,14 +273,34 @@ proc ::balloonhelp::Show {win type} {
 	    }
 	}
 	if {$exists} {
-	    eval {.balloonhelp.info configure -text $msg} $locals($win,args)
-	    wm geometry .balloonhelp +$x+$y
+	    eval {$w.info configure -text $msg} $locals($win,args)
 	    update idletasks
-	    wm deiconify .balloonhelp
-	    raise .balloonhelp
+	    SetPosition $x $y
+	    wm deiconify $w
+	    raise $w
 	}
     }
     unset locals(pending)
+}
+
+proc ::balloonhelp::SetPosition {x y} {
+    
+    set w .balloonhelp
+    if {[winfo exists $w]} {
+	set width  [winfo reqwidth $w]
+	set height [winfo reqheight $w]
+	
+	if {$x + $width > [winfo screenwidth $w]} {
+	    set x [expr {$x - 10 - $width}]
+	}
+	if {$x < 0} { set x 0 }
+	if {$y + $height > [winfo screenheight $w]} {
+	    set y [expr {$y - 10 - $height}]
+	}
+	if {$y < 0} { set y 0 }
+	wm geometry $w "+${x}+${y}"
+	update idletasks
+    }
 }
 
 proc ::balloonhelp::Debug {num str} {
