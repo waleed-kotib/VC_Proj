@@ -25,7 +25,7 @@
 # 
 # Copyright (C) 2002-2003 Mats Bengtsson
 # 
-# $Id: tree.tcl,v 1.11 2003-11-01 13:57:26 matben Exp $
+# $Id: tree.tcl,v 1.12 2003-11-06 08:37:43 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -47,6 +47,7 @@
 #	-highlightcolor, highlightColor, HighlightColor
 #	-highlightthickness, highlightThickness, HighlightThickness
 #	-height, height, Height
+#	-indention, indention, Indention
 #	-opencommand, openCommand, OpenCommand
 #	-openicons, openIcons, OpenIcons                      (plusminus|triangles)
 #	-pyjamascolor, pyjamasColor, PyjamasColor
@@ -83,6 +84,7 @@
 #      
 #   ITEM OPTIONS
 #      -background
+#      -canvastags
 #      -dir           0|1
 #      -image         imageName
 #      -open          0|1
@@ -104,6 +106,7 @@
 #       030921      -backgroundimage option
 #       031020      uses uid's instead of v's as key in treestate array
 #                   use NormList to handle things like {dir [junk]}
+#       031106      added -canvastags and -indention options
 
 package require Tcl 8.4
 
@@ -260,6 +263,7 @@ proc ::tree::Init { } {
 	-highlightcolor      {highlightColor       HighlightColor      }
 	-highlightthickness  {highlightThickness   HighlightThickness  }
 	-height              {height               Height              }
+	-indention           {indention            Indention           }
 	-opencommand         {openCommand          OpenCommand         }
 	-openicons           {openIcons            OpenIcons           }
 	-pyjamascolor        {pyjamasColor         PyjamasColor        }
@@ -298,6 +302,7 @@ proc ::tree::Init { } {
     option add *Tree.highlightColor        black           widgetDefault
     option add *Tree.highlightThickness    3               widgetDefault
     option add *Tree.height                100             widgetDefault
+    option add *Tree.indention             14              widgetDefault
     option add *Tree.openIcons             plusminus       widgetDefault
     option add *Tree.openCommand           {}              widgetDefault
     option add *Tree.pyjamasColor          white           widgetDefault
@@ -928,10 +933,18 @@ proc ::tree::ConfigureItem {w v args} {
 	
 	# If only one -key and no value, return present value.
 	set op [lindex $args 0]
+	
 	switch -exact -- $op {
 	    -background {
 		if {[info exists treestate($uid:bg)]} {
 		    set result $treestate($uid:bg)
+		} else {
+		    set result {}
+		}
+	    }
+	    -canvastags {
+		if {[info exists treestate($uid:ctags)]} {
+		    set result $treestate($uid:ctags)
 		} else {
 		    set result {}
 		}
@@ -967,9 +980,13 @@ proc ::tree::ConfigureItem {w v args} {
 	} 
     } else {
 	foreach {op arg} $args {
+	    
 	    switch -exact -- $op {
 		-background {
 		    set treestate($uid:bg) $arg
+		}
+		-canvastags {
+		    set treestate($uid:ctags) $arg
 		}
 		-dir {
 		    set treestate($uid:dir) $arg
@@ -1080,7 +1097,11 @@ proc ::tree::NewItem {w v args} {
     DfltConfig $w $v
     
     foreach {op arg} $args {
+	
 	switch -exact -- $op {
+	    -canvastags {
+		set treestate($uid:ctags) $arg
+	    }
 	    -dir {
 		set treestate($uid:dir) $arg
 	    }
@@ -1166,6 +1187,7 @@ proc ::tree::DelItem {w v args} {
 	    unset treestate($uid:bg)
 	    unset treestate($uid:tags)
 	    catch {unset treestate($uid:tag)}
+	    catch {unset treestate($uid:ctags)}
 	    set dir [lrange $v 0 end-1]
 	    set tail [lindex $v end]
 	    set uidDir $v2uid($dir)
@@ -1342,6 +1364,7 @@ proc ::tree::Build {w} {
 	$can create line 0 0 1 0 -fill $options(-background) -tags tbgim
     }
     catch {unset treestate(pending)}
+    catch {array unset treestate v:*}
     
     # Keeps track of y coords to draw.
     set treestate(y) 10
@@ -1417,6 +1440,7 @@ proc ::tree::BuildLayer {w v in} {
     set yTreeOff $widgetGlobals(yTreeOff)
 
     set treeCol $options(-treecolor)
+    set indention $options(-indention)
     if {[string length $treeCol]} {
 	set hasTree 1
     }
@@ -1464,17 +1488,24 @@ proc ::tree::BuildLayer {w v in} {
 	
 	# Tree lines?
 	if {$hasTree} {
-	    $can create line $in $y [expr $in + 10] $y -fill $treeCol -tags ttreeh
+	    $can create line $in $y [expr $in + $indention - 4] $y -fill $treeCol -tags ttreeh
 	}
 	set icon $treestate($uidc:icon)
 	set text $treestate($uidc:text)
 	
 	# The 'x' means selectable!
-	set taglist [list x $treestate($uidc:tags)]
-	set x [expr $in + 14]
+	#set taglist [list x $treestate($uidc:tags)]
+	set taglist x
+	set ids {}
+	set x [expr $in + $indention]
+	if {[info exists treestate($uidc:ctags)]} {
+	    lappend taglist $treestate($uidc:ctags)
+	}
+	
 	if {[string length $icon] > 0} {
 	    set id [$can create image $x $y -image $icon -anchor w -tags $taglist]
 	    set treestate(v:$id) $vxc
+	    lappend ids $id
 	    incr x [expr [image width $icon] + 6]
 	}
 	if {[info exists treestate($uidc:style)]} {
@@ -1489,12 +1520,15 @@ proc ::tree::BuildLayer {w v in} {
 	}
 	set id [$can create text $x $y -text $text -font $itemFont \
 	  -anchor w -tags $taglist]
+	    lappend ids $id
 	if {[info exists treestate($uidc:text2)]} {
-	    $can create text 140 $y -text $treestate($uidc:text2)  \
-	      -font $options(-font) -anchor w
+	    set id [$can create text 140 $y -text $treestate($uidc:text2)  \
+	      -font $options(-font) -anchor w]
+	    lappend ids $id
 	}
 	set treestate(v:$id) $vxc
 	set treestate($uidc:tag) $id
+	set treestate($uidc:ids) $ids
 	
 	# Do we have a directure here?
 	if {$isDir} {
@@ -1504,7 +1538,7 @@ proc ::tree::BuildLayer {w v in} {
 		
 		    # Call this recursively. 
 		    # The number here is the directory offset in x.
-		    BuildLayer $w $vxc [expr $in + 14]
+		    BuildLayer $w $vxc [expr $in + $indention]
 		}
 	    } else {
 		set id [$can create image $in $y -image $closedbm -tags tclose]
