@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: browse.tcl,v 1.28 2004-05-26 07:36:38 matben Exp $
+# $Id: browse.tcl,v 1.29 2004-06-21 14:40:08 matben Exp $
 # 
 #  locals($jid,parent):       the parent of $jid.
 #  locals($jid,parents):      list of all parent jid's,
@@ -133,7 +133,7 @@ proc browse::new {jlibname args} {
 		set locals(cmd) $value
 	    }
 	    default {
-		return -code error "unrecognized option \"$key\" for disco::new"
+		return -code error "unrecognized option \"$key\" for browse::new"
 	    }
 	}
     }

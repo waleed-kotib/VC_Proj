@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.66 2004-06-19 12:56:50 matben Exp $
+# $Id: Roster.tcl,v 1.67 2004-06-21 14:40:08 matben Exp $
 
 package provide Roster 1.0
 
@@ -78,7 +78,7 @@ namespace eval ::Jabber::Roster:: {
       {online,aim}        [::UI::GetIcon aim_online]     \
       {available,icq}     [::UI::GetIcon icq_online]     \
       {unavailable,icq}   [::UI::GetIcon icq_offline]    \
-      {chat,icq}          [::UI::GetIcon icq_online]     \
+      {chat,icq}          [::UI::GetIcon icq_chat]       \
       {dnd,icq}           [::UI::GetIcon icq_dnd]        \
       {away,icq}          [::UI::GetIcon icq_away]       \
       {xa,icq}            [::UI::GetIcon icq_xa]         \
