@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.17 2004-08-18 13:46:41 matben Exp $
+# $Id: Whiteboard.tcl,v 1.18 2004-08-24 07:08:55 matben Exp $
 
 package require entrycomp
 package require moviecontroller
@@ -2062,13 +2062,15 @@ proc ::WB::CreateAllButtons {wtop} {
     ::WB::BuildToolPopupFontMenu $wtop $prefs(canvasFonts)
     
     # Color selector.
+    set wcolsel $wtool.cacol
     set imheight [image height $wbicons(imcolor)]
-    set wColSel [canvas $wtool.cacol -width 56 -height $imheight  \
-      -highlightthickness 0]
-    $wtool.cacol create image 0 0 -anchor nw -image $wbicons(imcolor)
-    set idColSel [$wtool.cacol create rectangle 7 7 33 30	\
+    canvas $wcolsel -width 56 -height $imheight -highlightthickness 0
+    $wcolsel create image 0 0 -anchor nw -image $wbicons(imcolor)
+    set idColSel [$wcolsel create rectangle 7 7 33 30 \
       -fill $state(fgCol) -outline {} -tags tcolSel]
-    set wapp(colSel) $wColSel
+    set idBg [$wcolsel create polygon 21 32  35 32  35 22  48 22  48 44  21 44 \
+      -fill $state(bgCol) -smooth 0 -outline {} -tags tbgcol] 
+    set wapp(colSel) $wcolsel
     
     # Black and white reset rectangle.
     set idBWReset [$wtool.cacol create image 4 34 -anchor nw  \
@@ -2080,12 +2082,11 @@ proc ::WB::CreateAllButtons {wtop} {
     grid $wtool.cacol -  -padx 0 -pady 0
 
     if {![string equal $opts(-state) "disabled"]} {
-	$wtool.cacol bind $idColSel <Button-1>  \
+	$wcolsel bind $idColSel <Button-1>  \
 	  [list [namespace current]::ColorSelector $wtop $state(fgCol)]
-	$wtool.cacol bind $idBWReset <Button-1>  \
-	  "$wColSel itemconfigure $idColSel -fill black;  \
-	  set ::WB::${wtop}::state(fgCol) black; set ::WB::${wtop}::state(bgCol) white"
-	$wtool.cacol bind $idBWSwitch <Button-1> \
+	$wcolsel bind $idBWReset <Button-1>  \
+	  [list [namespace current]::ResetColorSelector $wtop]
+	$wcolsel bind $idBWSwitch <Button-1> \
 	  [list [namespace current]::SwitchBgAndFgCol $wtop]
     }
 }
@@ -2173,6 +2174,7 @@ proc ::WB::SwitchBgAndFgCol {wtop} {
     upvar ::WB::${wtop}::wapp wapp
 
     $wapp(colSel) itemconfigure tcolSel -fill $state(bgCol)
+    $wapp(colSel) itemconfigure tbgcol  -fill $state(fgCol)
     set tmp $state(fgCol)
     set state(fgCol) $state(bgCol)
     set state(bgCol) $tmp
@@ -2201,6 +2203,17 @@ proc ::WB::ColorSelector {wtop col} {
     }
 }
 
+proc ::WB::ResetColorSelector {wtop} {
+
+    upvar ::WB::${wtop}::state state
+    upvar ::WB::${wtop}::wapp wapp
+
+    $wapp(colSel) itemconfigure tcolSel -fill black
+    $wapp(colSel) itemconfigure tbgcol  -fill white
+    set state(fgCol) black
+    set state(bgCol) white
+}
+	
 # Access functions to make it possible to isolate these variables.
 
 proc ::WB::ToolBtNameToNum {name} {
