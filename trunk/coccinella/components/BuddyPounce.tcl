@@ -4,7 +4,7 @@
 #       This is just a first sketch.
 #       TODO: all message translations.
 #       
-# $Id: BuddyPounce.tcl,v 1.5 2004-10-20 13:35:58 matben Exp $
+# $Id: BuddyPounce.tcl,v 1.6 2004-10-21 07:38:30 matben Exp $
 
 # Key phrases are: 
 #     event:    something happens, presence change, incoming message etc.
@@ -498,7 +498,7 @@ proc ::BuddyPounce::Cancel {token} {
 # Results:
 #       none.
 
-proc ::BuddyPounce::Event {from eventkey} {
+proc ::BuddyPounce::Event {from eventkey args} {
     
     variable budprefs
     variable budprefsgroup
@@ -507,6 +507,7 @@ proc ::BuddyPounce::Event {from eventkey} {
     variable alertTitle
     
     ::Debug 4 "::BuddyPounce::Event from = $from, eventkey=$eventkey"
+    array set argsArr $args
     
     # We must check 'jid', 'group' and 'any' in that order.
     # A list of actions to perform if any.
@@ -579,8 +580,12 @@ proc ::BuddyPounce::Event {from eventkey} {
 		    set body [string map {body: ""} $bodyopt]
 		    set body [subst -nocommands -novariables $body]
 		}
-		::Jabber::NewMsg::Build -to $from  \
-		  -subject $subject -message $body
+		set opts {}
+		if {[info exists argsArr(-body)]} {
+		    lappend opts -quotemessage $argsArr(-body)
+		}
+		eval {::Jabber::NewMsg::Build -to $from  \
+		  -subject $subject -message $body} $opts
 	    }
 	}
     }
@@ -633,7 +638,7 @@ proc ::BuddyPounce::NewChatMsgHook {body args} {
     array set argsArr $args
     if {[info exists argsArr(-from)]} {
 	jlib::splitjid $argsArr(-from) jid2 res
-	Event $jid2 chat
+	eval {Event $jid2 chat} $args
     }
 }
 
@@ -642,7 +647,7 @@ proc ::BuddyPounce::NewMsgHook {body args} {
     array set argsArr $args
     if {[info exists argsArr(-from)]} {
 	jlib::splitjid $argsArr(-from) jid2 res
-	Event $jid2 msg
+	eval {Event $jid2 msg} $args
     }
 }
 
