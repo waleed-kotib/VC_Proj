@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.104 2005-01-05 09:40:27 matben Exp $
+# $Id: Chat.tcl,v 1.105 2005-01-23 08:13:11 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -467,6 +467,13 @@ proc ::Chat::GotMsg {body args} {
     }
     if {$dlgstate(got1stMsg) == 0} {
 	set dlgstate(got1stMsg) 1
+    }
+    
+    # Handle the situation if other end is just invisible and still online.
+    if {$chatstate(state) == "disabled"} {
+	SetState $chattoken normal
+	set icon [::Roster::GetPresenceIcon $jid invisible]
+	$chatstate(wpresimage) configure -image $icon
     }
     
     # Run this hook (speech).
@@ -1156,7 +1163,7 @@ proc ::Chat::SetThreadState {dlgtoken chattoken} {
     upvar 0 $chattoken chatstate
     upvar ::Jabber::jstate jstate
 
-    Debug 3 "::Chat::SetThreadState chattoken=$chattoken"
+    Debug 4 "::Chat::SetThreadState chattoken=$chattoken"
     
     jlib::splitjid $chatstate(jid) user res
     if {[$jstate(roster) isavailable $user]} {
