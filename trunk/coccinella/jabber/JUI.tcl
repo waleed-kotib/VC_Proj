@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.3 2003-11-06 15:17:51 matben Exp $
+# $Id: JUI.tcl,v 1.4 2003-11-08 08:54:44 matben Exp $
 
 package provide JUI 1.0
 
@@ -105,7 +105,7 @@ proc ::Jabber::UI::Build {w} {
     set iconStopDis       [::UI::GetIcon btstopdis]
     
     set wtray ${wtop}top
-    buttontray::buttontray $wtray 50 -borderwidth 1 -relief raised
+    ::buttontray::buttontray $wtray 52 -borderwidth 1 -relief raised
     pack $wtray -side top -fill x
     set jwapp(wtray) $wtray
     
@@ -396,7 +396,7 @@ proc ::Jabber::UI::RegisterMenuEntry {wpath name menuSpec} {
 #       
 # Arguments:
 #       what        any of "roster", "browse", or "groupchat", or "agents"
-#       w           widget that issued the command
+#       w           widget that issued the command: tree or text
 #       v           for the tree widget it is the item path, 
 #                   for text the jidhash.
 #       
@@ -417,12 +417,6 @@ proc ::Jabber::UI::Popup {what w v x y} {
     # Find also type of thing clicked, 'typeClicked'.
     
     set typeClicked ""
-    if {[llength $v]} {
-	set tags [$w itemconfigure $v -tags]
-    } else {
-	set tags ""
-    }
-    ::Jabber::Debug 3 "\ttags=$tags"
     
     switch -- $what {
 	roster {
@@ -434,6 +428,11 @@ proc ::Jabber::UI::Popup {what w v x y} {
 	    set jid [lindex $v end]
 	    set jid3 $jid
 	    set status [string tolower [lindex $v 0]]
+	    if {[llength $v]} {
+		set tags [$w itemconfigure $v -tags]
+	    } else {
+		set tags ""
+	    }
 	    
 	    switch -- $tags {
 		head {
@@ -446,7 +445,7 @@ proc ::Jabber::UI::Popup {what w v x y} {
 		    set typeClicked group
 		    set jid {}
 		    foreach jid3 [$w children $v] {
-			foreach {jid2 res} [jlib::splitjid $jid3] break
+			jlib::splitjid $jid3 jid2 res
 			lappend jid $jid2
 		    }
 		    set jid [list $jid]
@@ -454,7 +453,7 @@ proc ::Jabber::UI::Popup {what w v x y} {
 		default {
 		    
 		    # Typically a user.
-		    foreach {jid2 res} [jlib::splitjid $jid] break
+		    jlib::splitjid $jid jid2 res
 			
 		    # Must let 'jid' refer to 2-tier jid for commands to work!
 		    set jid3 $jid

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.18 2003-11-06 15:17:51 matben Exp $
+# $Id: MailBox.tcl,v 1.19 2003-11-08 08:54:44 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -164,7 +164,7 @@ proc ::Jabber::MailBox::Build {w args} {
     set iconTrashDis    [::UI::GetIcon bttrashdis]
     
     set wtray $w.frall.frtop
-    buttontray::buttontray $wtray 50
+    ::buttontray::buttontray $wtray 50
     pack $wtray -side top -fill x -padx 4 -pady 2
     set locals(wtray) $wtray
 
@@ -294,7 +294,7 @@ proc ::Jabber::MailBox::InsertRow {wtbl row i} {
     variable colindex
 
     set jid [lindex $row 1]
-    foreach {jid2 res} [jlib::splitjid $jid] break
+    jlib::splitjid $jid jid2 res
 
     # We keep any /res part.
     #set row [lreplace $row 1 1 $jid2]
@@ -455,8 +455,7 @@ proc ::Jabber::MailBox::GotMsg {bodytxt args} {
     if {!$locals(mailboxRead)} {
 	::Jabber::MailBox::ReadMailbox
     }
-    #regexp {^([^@]+@[^/]+)(/(.*))?} $argsArr(-from) match jid2 x res
-    foreach {jid2 res} [jlib::splitjid $argsArr(-from)] break
+    jlib::splitjid $argsArr(-from) jid2 res
        
     # Here we should probably check som 'jabber:x:delay' element...
     # This is ISO 8601.
@@ -796,6 +795,7 @@ proc ::Jabber::MailBox::ReplyTo { } {
     variable locals
     variable mailbox
     variable colindex
+    upvar ::Jabber::jstate jstate
     
     set wtbl $locals(wtbl)
     set item [$wtbl curselection]
@@ -808,6 +808,7 @@ proc ::Jabber::MailBox::ReplyTo { } {
     # We shall have the original, unparsed, text here.
     set allText [lindex $mailbox($id) 5]
     foreach {subject to time} [lrange $mailbox($id) 0 2] break
+    set to [$jstate(jlib) getrecipientjid $to]
     if {![regexp -nocase {^ *re:} $subject]} {
 	set subject "Re: $subject"
     }

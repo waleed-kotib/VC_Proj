@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.24 2003-11-06 15:17:51 matben Exp $
+# $Id: UI.tcl,v 1.25 2003-11-08 08:54:44 matben Exp $
 
 # LabeledFrame --
 #
@@ -2326,7 +2326,7 @@ proc ::UI::BuildShortcutButtonPad {wtop} {
     set h [image height $icons(barvert)]
     set wtray $wapp(tray)
 
-    buttontray::buttontray $wtray $h -relief raised -borderwidth 1
+    ::buttontray::buttontray $wtray $h -relief raised -borderwidth 1
 
     # We need to substitute $wCan, $wtop etc specific for this wb instance.
     foreach {name cmd} $btShortDefs(this) {
@@ -2359,195 +2359,6 @@ proc ::UI::DisableShortcutButtonPad {wtop} {
 	    }
 	}
     }
-}
-
-# UI::NewButtonTray --
-#
-#       Init a shortcut button pad.
-
-proc ::UI::NewButtonTray {wtop inframe height args} {
-    global  prefs sysFont
-    
-    namespace eval ::UI::$wtop {
-	variable locals
-    }
-
-    # Set simpler variable names.
-    upvar ::UI::${wtop}::locals locals
-    array set argsArr {
-	-bd     0 
-	-relief flat
-    }
-    array set argsArr $args
-    set locals(frame) [eval {frame $inframe -class ButtonTray} \
-      [array get argsArr]]
-    
-    # Standard minimum button width.
-    set locals(minbtwidth) 46
-    
-    # Left edge of previous button.
-    set locals(xleft) 6
-    set locals(can) ${inframe}.can
-    
-    # Consider the actual font metrics to make the necessary height.
-    set linespace [font metrics $sysFont(s) -linespace]
-    set locals(yoffset) 3
-    set locals(ytxt) [expr $locals(yoffset) + 34]
-    
-    pack [canvas $locals(can) -highlightthickness 0 -height $height  \
-      -bg $prefs(bgColGeneral)] \
-      -fill both -expand 1
-
-    return $inframe
-}
-
-# UI::NewButton --
-#
-#       Makes a new button in a shortcut button pad. The shortcut button pad
-#       must have been initialized first.
-#       
-# Arguments:
-#       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
-#       name        generic name of this button
-#       txt         text to display below button. Must be in message catalog.
-#       image       display image for normal state.
-#       imageDis    display image for disabled state.
-#       cmd         command to be executed when button pressed.
-#       args
-#       
-# Results:
-#       None.
-
-proc ::UI::NewButton {wtop name txt image imageDis cmd args} {
-    global  sysFont
-    
-    upvar ::UI::${wtop}::locals locals
-    
-    if {$wtop == "."} {
-	set w .
-    } else {
-	set w [string trimright $wtop .]
-    }
-    set inframe $locals(frame)
-    
-    set font $sysFont(s)
-    set foreground blue
-        
-    set can $locals(can)
-    set loctxt [::msgcat::mc $txt]
-    set txtwidth [expr [font measure $font $loctxt] + 6]
-    set btwidth [expr $txtwidth > $locals(minbtwidth) ? $txtwidth : $locals(minbtwidth)]
-
-    # Round to nearest higher even value.    
-    set btwidth [expr $btwidth + $btwidth % 2]
-
-    # Mid position of this button.
-    set xpos [expr $locals(xleft) + $btwidth/2]
-    set wlab [label ${can}.[string tolower $name] -bd 1 -relief flat \
-      -image $image]
-    set idlab [$can create window $xpos $locals(yoffset) \
-      -anchor n -window $wlab]
-    set idtxt [$can create text $xpos $locals(ytxt) -text $loctxt  \
-      -font $font -anchor n -fill $foreground]
-    
-    set locals($name,idlab) $idlab
-    set locals($name,idtxt) $idtxt
-    set locals($name,wlab) $wlab
-    set locals($name,image) $image
-    set locals($name,imageDis) $imageDis
-    set locals($name,cmd) $cmd
-    set locals($name,state) normal
-
-    ::UI::SetShortButtonBinds $wtop $name
-    if {[llength $args]} {
-	eval {::UI::ButtonConfigure $wtop $name} $args
-    }
-    incr locals(xleft) $btwidth
-}
-
-proc ::UI::SetShortButtonBinds {wtop name} {
-    
-    upvar ::UI::${wtop}::locals locals
-    
-    set can $locals(can)
-    set wlab $locals($name,wlab)
-    set idtxt $locals($name,idtxt)
-    set cmd $locals($name,cmd)
-
-    bind $wlab <Enter> "$wlab configure -relief raised;  \
-      $can itemconfigure $idtxt -fill red"
-    bind $wlab <Leave> "$wlab configure -relief flat;  \
-      $can itemconfigure $idtxt -fill blue"
-    bind $wlab <Button-1> [list $wlab configure -relief sunken]
-    bind $wlab <ButtonRelease> "[list $wlab configure -relief raised]; $cmd"
-
-    $can bind $idtxt <Enter> "$can itemconfigure $idtxt -fill red;  \
-      $can configure -cursor hand2"
-    $can bind $idtxt <Leave> "$can itemconfigure $idtxt -fill blue;  \
-      $can configure -cursor arrow"
-    $can bind $idtxt <Button-1> $cmd
-}
-
-# UI::ButtonConfigure --
-#
-#
-
-proc ::UI::ButtonConfigure {wtop name args} {
-    
-    upvar ::UI::${wtop}::locals locals
-
-    set wlab $locals($name,wlab)
-    set idtxt $locals($name,idtxt)
-    set can $locals(can)
-    foreach {key value} $args {
-	switch -- $key {
-	    -command {
-		set locals($name,cmd) $value
-		::UI::SetShortButtonBinds $wtop $name
-	    }
-	    -state {
-		if {[string equal $value "normal"]} {
-		    $wlab configure -image $locals($name,image)
-		    $can itemconfigure $idtxt -fill blue
-		    ::UI::SetShortButtonBinds $wtop $name
-		} else {
-		    $wlab configure -image $locals($name,imageDis) -relief flat
-		    $can itemconfigure $idtxt -fill gray50
-		    bind $wlab <Enter> {}
-		    bind $wlab <Leave> {}
-		    bind $wlab <Button-1> {}
-		    bind $wlab <ButtonRelease> {}
-		    $can bind $idtxt <Enter> {}
-		    $can bind $idtxt <Leave> {}
-		    $can bind $idtxt <Button-1> {}
-		}
-		set locals($name,state) $value
-	    }
-	    -image {
-		set locals($name,image) $value
-		if {[string equal $locals($name,state) "normal"]} {
-		    $wlab configure -image $value
-		}
-	    }
-	    -imagedis {
-		set locals($name,imageDis) $value
-		if {[string equal $locals($name,state) "disabled"]} {
-		    $wlab configure -image $value
-		}
-	    }
-	}
-    }
-}
-
-# UI::ShortButtonPadMinWidth --
-#
-#       Returns the width of all buttons created in the shortcut button pad.
-
-proc ::UI::ShortButtonPadMinWidth {wtop} {
-    
-    upvar ::UI::${wtop}::locals locals
-    
-    return $locals(xleft)
 }
 
 namespace eval ::UI:: {

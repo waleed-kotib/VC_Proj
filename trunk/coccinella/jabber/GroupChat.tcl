@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.14 2003-10-23 06:27:59 matben Exp $
+# $Id: GroupChat.tcl,v 1.15 2003-11-08 08:54:44 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -945,6 +945,8 @@ proc ::Jabber::GroupChat::SetUser {roomJid jid3 presence args} {
 	  [list ::Jabber::GroupChat::PopupTimer $wusers $jid3 %x %y]
 	$wusers tag bind $hexstr <ButtonRelease-1>   \
 	  ::Jabber::GroupChat::PopupTimerCancel
+	$wusers tag bind $hexstr <Control-Button-1>  \
+	  [list ::Jabber::UI::Popup groupchat $wusers $jid3 %x %y]
     } else {
 	$wusers tag bind $hexstr <Button-3>  \
 	  [list ::Jabber::UI::Popup groupchat $wusers $jid3 %x %y]

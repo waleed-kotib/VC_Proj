@@ -15,7 +15,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.11 2003-11-06 15:17:51 matben Exp $
+# $Id: Coccinella.tcl,v 1.12 2003-11-08 08:54:44 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -204,7 +204,6 @@ if {[string equal $this(platform) "macintosh"] && [string equal $thisPath ":"]} 
 }
 set this(path) $thisPath
 set this(script) $thisScript
-
 
 # Need a tmp directory, typically in a StarKit when QuickTime movies are opened.
 if {[info exists env(TMP)] && [file exists $env(TMP)]} {
@@ -616,6 +615,9 @@ if {[catch {source [file join $this(path) lib SetFactoryDefaults.tcl]} msg]} {
 
 # Set defaults in the option database for widget classes.
 ::PreferencesUtils::SetWidgetDefaultOptions
+
+# Overrule widget option if we have got a resource database file.
+::PreferencesUtils::ReadOptionDatabase
 
 # Manage the user preferences. Start by reading the preferences file.
 ::PreferencesUtils::Init

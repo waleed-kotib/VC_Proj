@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.13 2003-11-03 11:54:58 matben Exp $
+# $Id: roster.tcl,v 1.14 2003-11-08 08:54:44 matben Exp $
 # 
 # Note that every jid in the rosterArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -415,7 +415,7 @@ proc roster::setpresence {rostName jid type args} {
     Debug 2 "roster::setpresence rostName=$rostName, jid='$jid', \
       type='$type', args='$args'"
     
-    foreach {jid2 resource} [jlib::splitjid $jid] break
+    jlib::splitjid $jid jid2 resource
     
     if {[string equal $type "unsubscribed"]} {
 	
@@ -828,13 +828,7 @@ proc roster::isavailable {rostName jid} {
     Debug 2 "roster::isavailable rostName=$rostName, jid='$jid'"
         
     # If any resource in jid, we get it here.
-    #if {[regexp "(.+)@(.+)/(.+)" $jid match name host resource]} {
-#	set jid2 ${name}@${host}
-    #} else {
-#	set jid2 $jid
-#	set resource ""
-    #}
-    foreach {jid2 resource} [jlib::splitjid $jid] break
+    jlib::splitjid $jid jid2 resource
 
     if {[string length $resource] > 0} {
 	if {[info exists presArr($jid2/$resource,type)]} {

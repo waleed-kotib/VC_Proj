@@ -5,7 +5,9 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.7 2003-10-05 13:36:19 matben Exp $
+# $Id: MUC.tcl,v 1.8 2003-11-08 08:54:44 matben Exp $
+
+package require entrycomp
 
 package provide MUC 1.0
 
@@ -359,10 +361,11 @@ proc ::Jabber::MUC::Invite {roomjid} {
     pack [message $w.frall.msg -width 220 -font $sysFont(s) -text $msg] \
       -side top -fill both -padx 4 -pady 2
     
+    set jidlist [$jstate(roster) getusers -type available]
     set wmid $w.frall.fr
     pack [frame $wmid] -side top -fill x -expand 1 -padx 6
     label $wmid.la -font $sysFont(sb) -text "Invite Jid:"
-    entry $wmid.ejid
+    ::entrycomp::entrycomp $wmid.ejid $jidlist
     label $wmid.lre -font $sysFont(sb) -text "Reason:"
     entry $wmid.ere
     

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.15 2003-11-06 15:17:51 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.16 2003-11-08 08:54:44 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -360,6 +360,14 @@ proc ::PreferencesUtils::SetWidgetDefaultOptions { } {
     }
 }
 
+
+proc ::PreferencesUtils::ReadOptionDatabase { } {
+    global  prefs
+    
+    if {[info exists $prefs(optionsRdb)]} {
+	catch {option readfile $prefs(optionsRdb)}
+    }
+}
 
 # PreferencesUtils::SetUserPreferences --
 #
