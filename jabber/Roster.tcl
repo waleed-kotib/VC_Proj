@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.105 2004-11-30 15:11:12 matben Exp $
+# $Id: Roster.tcl,v 1.106 2004-12-02 08:22:34 matben Exp $
 
 package provide Roster 1.0
 
@@ -448,9 +448,8 @@ proc ::Roster::SendRemove {jidrm} {
     } else {
 	set jid [lindex $selItem end]
     }
-    set ans [tk_messageBox -title [mc {Remove Item}] -message  \
-      [FormatTextForMessageBox [mc jamesswarnremove]]  \
-      -icon warning -type yesno -default no]
+    set ans [::UI::MessageBox -title [mc {Remove Item}] \
+      -message [mc jamesswarnremove] -icon warning -type yesno -default no]
     if {[string equal $ans "yes"]} {
 	$jstate(jlib) roster_remove $jid [namespace current]::PushProc
     }

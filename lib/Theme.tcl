@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Theme.tcl,v 1.18 2004-11-27 08:41:21 matben Exp $
+# $Id: Theme.tcl,v 1.19 2004-12-02 08:22:34 matben Exp $
 
 package provide Theme 1.0
 
@@ -126,8 +126,8 @@ proc ::Theme::SavePrefsFile { } {
     # Work on a temporary file and switch later.
     set tmpFile $this(themePrefsFile).tmp
     if {[catch {open $tmpFile w} fid]} {
-	tk_messageBox -icon error -type ok -message \
-	  [FormatTextForMessageBox [mc messerrpreffile $tmpFile]]
+	::UI::MessageBox -icon error -type ok \
+	  -message [mc messerrpreffile $tmpFile]
 	return
     }
     
@@ -146,7 +146,7 @@ proc ::Theme::SavePrefsFile { } {
     
     close $fid
     if {[catch {file rename -force $tmpFile $this(themePrefsFile)} msg]} {
-	tk_messageBox -type ok -message {Error renaming preferences file.}  \
+	::UI::MessageBox -type ok -message {Error renaming preferences file.}  \
 	  -icon error
 	return
     }

@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: EditDialogs.tcl,v 1.13 2004-07-09 06:26:06 matben Exp $
+# $Id: EditDialogs.tcl,v 1.14 2004-12-02 08:22:34 matben Exp $
 
 
 #       ::EditShortcuts:: implements dialogs for editing shortcuts. 
@@ -174,8 +174,8 @@ proc ::EditShortcuts::DoCancel {nameOfShortcutList} {
 
     # Cancel, keep old shortcuts. If changed something then warn.
     if {$anyChange} {
-	set ans [tk_messageBox -icon error -type yesnocancel -message \
-	  [FormatTextForMessageBox [mc shortwarn]]]
+	set ans [::UI::MessageBox -icon error -type yesnocancel \
+	  -message [mc shortwarn]]
 	if {[string equal $ans "yes"]} {
 	    DoSaveEditedShortcuts $nameOfShortcutList
 	    return

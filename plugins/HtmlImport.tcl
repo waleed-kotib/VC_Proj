@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: HtmlImport.tcl,v 1.10 2004-07-07 13:07:14 matben Exp $
+# $Id: HtmlImport.tcl,v 1.11 2004-12-02 08:22:35 matben Exp $
 
 
 namespace eval ::HtmlImport:: {
@@ -282,7 +282,7 @@ proc ::HtmlImport::SaveAs {id} {
 	return
     }
     if {[catch {file copy $locals(id2file,$id) $ans} err]} {
-	tk_messageBox -type ok -icon error -message \
+	::UI::MessageBox -type ok -icon error -message \
 	  "Failed copying file: $err"
 	return
     }

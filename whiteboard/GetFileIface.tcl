@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: GetFileIface.tcl,v 1.3 2004-07-09 06:26:06 matben Exp $
+# $Id: GetFileIface.tcl,v 1.4 2004-12-02 08:22:35 matben Exp $
 
 package require getfile
 package require uriencode
@@ -114,7 +114,7 @@ proc ::GetFileIface::GetFile {wtop sock fileName opts} {
     } token]} {
 	::Debug 2 "\t ::getfile::get failed: $token"
 	set str [::GetFileIface::FormatMessage $gettoken $token]
-	tk_messageBox -title [mc {File Transfer Error}]  \
+	::UI::MessageBox -title [mc {File Transfer Error}]  \
 	  -type ok -message $str
 	unset getstate
 	return
@@ -216,7 +216,7 @@ proc ::GetFileIface::GetFileFromServer {wtop ip port path opts} {
 	  -command [list [namespace current]::Command $gettoken]
     } token]} {
 	set msg [mc {File Transfer Error}]
-	tk_messageBox -title [mc {File Transfer Error}]  \
+	::UI::MessageBox -title [mc {File Transfer Error}]  \
 	  -type ok -message $token
 	unset getstate
 	return
@@ -269,9 +269,8 @@ proc ::GetFileIface::Prepare {gettoken fileTail mime opts} {
 	ask {
 	    
 	    # 2: Ask user what to do with it.
-	    set ans [tk_messageBox -title [mc {Request To User}] \
-	      -type yesno -default yes -message \
-	      [FormatTextForMessageBox [mc messaskreceive $fileTail]]]
+	    set ans [::UI::MessageBox -title [mc {Request To User}] \
+	      -type yesno -default yes -message [mc messaskreceive $fileTail]]
 	    if {[string equal $ans "no"]} {
 		return 321
 	    } else {
@@ -386,7 +385,7 @@ proc ::GetFileIface::Command {gettoken token what msg} {
     if {[string equal $what "error"]} {
 	::WB::SetStatusMessage $wtop $str
 	if {$prefs(talkative) >= 1} {
-	    tk_messageBox -title [mc {Get File Error}] \
+	    ::UI::MessageBox -title [mc {Get File Error}] \
 	      -type ok -message $msg
 	}
 	
@@ -519,7 +518,7 @@ proc ::GetFileIface::DoImport {mime opts args} {
 	    set errMsg [mc messfailmimeimp $mime]
 	}
 	if {$errMsg != ""} {
-	    tk_messageBox -title [mc Error] -icon error -type ok \
+	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
 	      -message "Failed importing: $errMsg"
 	}
     }

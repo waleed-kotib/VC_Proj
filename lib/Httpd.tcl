@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Httpd.tcl,v 1.1 2004-11-24 08:22:53 matben Exp $
+# $Id: Httpd.tcl,v 1.2 2004-12-02 08:22:34 matben Exp $
     
 package provide Httpd 1.0
 
@@ -62,8 +62,8 @@ proc ::Httpd::Httpd { } {
 		::tinyhttpd::addmimemappings [::Types::GetSuffMimeArr]
 	    }
 	} msg]} {
-	    tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
-	      [mc messfailedhttp $msg]]	  
+	    ::UI::MessageBox -icon error -type ok \
+	      -message [mc messfailedhttp $msg]
 	} else {
 	    
 	    # Stop before quitting.

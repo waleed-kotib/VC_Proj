@@ -2,7 +2,7 @@
 #      
 #  Copyright (c) 1999-2003  Mats Bengtsson
 #  
-# $Id: Multicast.tcl,v 1.3 2004-07-30 12:55:56 matben Exp $
+# $Id: Multicast.tcl,v 1.4 2004-12-02 08:22:35 matben Exp $
 
 package provide Multicast 1.0
 
@@ -183,7 +183,7 @@ proc ::Multicast::OpenMulticastQTStream {wtop wentry} {
     unset -nocomplain port
     if {![regexp -nocase "($proto_)://($domain_)(:($port_))?($path_)$"  \
       $url match protocol domain junk port path]} {
-	tk_messageBox -message   \
+	::UI::MessageBox -message   \
 	  "Inconsistent url=$url." -icon error -type ok
 	set finished 0
 	return ""
@@ -222,12 +222,12 @@ proc ::Multicast::CleanupMulticastQTStream {wtop fid fullName token} {
     # Check errors. 
     if {[info exists state(status)] &&  \
       [string equal $state(status) "timeout"]} {
-	tk_messageBox -icon error -type ok -message   \
+	::UI::MessageBox -icon error -type ok -message   \
 	  "Timout event for url=$state(url)" 
 	return
     } elseif {[info exists state(status)] &&  \
       ![string equal $state(status) "ok"]} {
-	tk_messageBox -icon error -type ok -message   \
+	::UI::MessageBox -icon error -type ok -message   \
 	  "Not ok return code from url=$state(url); status=$state(status)"	  
 	return
     }
@@ -235,16 +235,16 @@ proc ::Multicast::CleanupMulticastQTStream {wtop fid fullName token} {
     # The http return status. Must be 2**.
     set httpCode [lindex $state(http) 1]
     if {![regexp "$no_" $httpCode]} {
-	tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
-	  "Failed open url=$url. Returned with code: $httpCode."]
+	::UI::MessageBox -icon error -type ok \
+	  -message "Failed open url=$url. Returned with code: $httpCode."
     }
     
     # Check that type of data is the wanted. Check further.
     if {[info exists state(type)] &&  \
       [string equal $state(type) "video/quicktime"]} {
-	tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
+	::UI::MessageBox -icon error -type ok -message \
 	  "Not correct file type returned from url=$state(url); \
-	  filetype=$state(type); expected video/quicktime."]	  
+	  filetype=$state(type); expected video/quicktime."
 	return
     }
     

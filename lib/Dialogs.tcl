@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.52 2004-12-01 15:15:42 matben Exp $
+# $Id: Dialogs.tcl,v 1.53 2004-12-02 08:22:34 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -106,8 +106,7 @@ proc ::Dialogs::InfoOnPlugins { } {
     
     # Check first of there are *any* plugins.
     if {[llength [::Plugins::GetAllPackages loaded]] == 0} {
-	tk_messageBox -icon info -type ok -message   \
-	  [FormatTextForMessageBox [mc messnoplugs]]
+	::UI::MessageBox -icon info -type ok -message [mc messnoplugs]
 	return  
     }
     set w $wDlgs(plugs)
@@ -224,8 +223,7 @@ proc ::Dialogs::InfoComponents { } {
     # Check first of there are *any* components.
     set compList [component::getall]
     if {[llength $compList] == 0} {
-	tk_messageBox -icon info -type ok -message   \
-	  [FormatTextForMessageBox [mc messnoplugs]]
+	::UI::MessageBox -icon info -type ok -message [mc messnoplugs]
 	return  
     }
     set w $wDlgs(comp)
@@ -360,14 +358,14 @@ proc ::Dialogs::UnixPrintPS {w wtoprint} {
 		# Note extra braces to protect eval'ing postscript!		
 		if {[catch {eval exec $psCmd <<    \
 		  {[eval $wtoprint postscript $prefs(postscriptOpts)]}} msg]} {
-		    tk_messageBox -message  \
+		    ::UI::MessageBox -message  \
 		      "Error when printing: $msg" -icon error -type ok
 		}
 	    }
 	    Text {
 		if {[catch {eval exec $psCmd <<    \
 		  {[$wtoprint get 1.0 end]}} msg]} {
-		    tk_messageBox -message  \
+		    ::UI::MessageBox -message  \
 		      "Error when printing: $msg" -icon error -type ok
 		}
 	    }
@@ -597,7 +595,7 @@ proc ::PSPageSetup::PushBtSave {  } {
 		if {![regexp "^${num_}$" $txtvarEnt($optName)]} {
 		    
 		    # Not a valid number.
-		    tk_messageBox -icon error -type ok -message   \
+		    ::UI::MessageBox -icon error -type ok -message   \
 		      "Error: not a valid number for $optName" 		      
 		    return
 		}
@@ -969,7 +967,7 @@ proc ::NetworkSetup::StartServer { wbt } {
     
     switch -- $this(platform) {
 	macintosh {
-	    tk_messageBox -message  \
+	    ::UI::MessageBox -message  \
 	      "The Reflector Server can't be started on the Mac, Sorry."  \
 	      -icon error -type ok
 	    return
@@ -984,7 +982,7 @@ proc ::NetworkSetup::StartServer { wbt } {
 	    regsub -all {\.} [info tclversion] {} ver
 	    set prgm tclsh${ver}.exe
 	    if {[catch {exec $prgm $path $prefs(reflectPort) &} res]} {
-		tk_messageBox -message  \
+		::UI::MessageBox -message  \
 		  "Failed starting the Reflector Server: $res"  \
 		  -icon error -type ok
 		return
@@ -996,7 +994,7 @@ proc ::NetworkSetup::StartServer { wbt } {
 	    
 	    # Remeber, the exec does not go through an Unix shell!
 	    if {[catch {exec tclsh $path $prefs(reflectPort) &} res]} {
-		tk_messageBox -message  \
+		::UI::MessageBox -message  \
 		  "Failed starting the Reflector Server: $res"  \
 		  -icon error -type ok
 		return
@@ -1038,7 +1036,7 @@ proc ::NetworkSetup::StopServer { {wbt {}} } {
 	}
 	unix - macosx {
 	    if {[catch {exec kill $state(reflectPid)} res]} {
-		tk_messageBox -message  \
+		::UI::MessageBox -message  \
 		  "Failed stopping the Reflector Server: $res"  \
 		  -icon error -type ok
 		return

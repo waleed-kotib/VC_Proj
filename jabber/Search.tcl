@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Search.tcl,v 1.18 2004-11-30 15:11:12 matben Exp $
+# $Id: Search.tcl,v 1.19 2004-12-02 08:22:34 matben Exp $
 
 package provide Search 1.0
 
@@ -171,7 +171,7 @@ proc ::Search::Get { } {
     
     # Verify.
     if {[string length $server] == 0} {
-	tk_messageBox -type ok -icon error  \
+	::UI::MessageBox -type ok -icon error  \
 	  -message [mc jamessregnoserver]
 	return
     }	
@@ -215,9 +215,8 @@ proc ::Search::GetCB {jlibName type subiq} {
     $wsearrows stop
     
     if {$type == "error"} {
-	tk_messageBox -type ok -icon error  \
-	  -message [FormatTextForMessageBox \
-	  [mc jamesserrsearch [lindex $subiq 0] [lindex $subiq 1]]]
+	::UI::MessageBox -type ok -icon error  \
+	  -message [mc jamesserrsearch [lindex $subiq 0] [lindex $subiq 1]]
 	return
     }
     catch {destroy $wbox}
@@ -299,7 +298,7 @@ proc ::Search::ResultCallback {server type subiq} {
 	} else {
 	    set msg "Failed searching service. Error code $ecode with message: $emsg"
 	}
-	tk_messageBox -type ok -icon error -message [FormatTextForMessageBox $msg]
+	::UI::MessageBox -type ok -icon error -message $msg
 	return
     } else {
 	

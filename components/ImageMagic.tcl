@@ -6,7 +6,7 @@
 # 
 # Unix/Linux only.
 #
-# $Id: ImageMagic.tcl,v 1.2 2004-11-06 08:15:24 matben Exp $
+# $Id: ImageMagic.tcl,v 1.3 2004-12-02 08:22:33 matben Exp $
 
 namespace eval ::ImageMagic:: {
     
@@ -53,7 +53,7 @@ proc ::ImageMagic::ImportWindowSnapShot {wtop} {
     set wCan [::WB::GetCanvasFromWtop $wtop]
     
     if {$haveImageMagic == 0} {
-	tk_messageBox -icon error -type ok -message  \
+	::UI::MessageBox -icon error -type ok -message  \
 	  "Failed to locate ImageMagic package! Can't do screen snap shot :-("
 	return
     }
@@ -73,7 +73,7 @@ proc ::ImageMagic::ImportWindowSnapShot {wtop} {
 	if {$errMsg == ""} {
 	    lappend tmpfiles $tmpfile
 	} else {
-	    tk_messageBox -title [mc Error] -icon error -type ok \
+	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
 	      -message "Failed importing: $errMsg"
 	}
     }
@@ -150,7 +150,7 @@ proc ::ImageMagic::ClearImportFiles { wCan } {
 
     if {$prefs(incomingFilePath) == "" || [string match {*[*?]*} $prefs(incomingFilePath)]} {
 	set msg "Dangerous in-box path name '$prefs(incomingFilePath)'"
-	tk_messageBox -message $msg -icon warning
+	::UI::MessageBox -message $msg -icon warning
 	return
     }
     if {![file exists $prefs(incomingFilePath)]} {
@@ -162,7 +162,7 @@ proc ::ImageMagic::ClearImportFiles { wCan } {
 	return
     }
     set msg "Click OK to remove files :\n[join $all_files \n]"
-    set ans [tk_messageBox -message $msg -type okcancel -icon warning]
+    set ans [::UI::MessageBox -message $msg -type okcancel -icon warning]
     if {"$ans" == "ok"} {
 	foreach file $all_files {
 	    file delete $file

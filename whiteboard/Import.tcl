@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Import.tcl,v 1.12 2004-10-02 13:14:55 matben Exp $
+# $Id: Import.tcl,v 1.13 2004-12-02 08:22:35 matben Exp $
 
 package require http
 package require httpex
@@ -60,11 +60,11 @@ proc ::Import::ImportImageOrMovieDlg {wtop} {
 	set opts [list -coords [::CanvasUtils::NewImportAnchor $wCan]]	
 	set errMsg [::Import::DoImport $wCan $opts -file $fileName]
 	if {$errMsg != ""} {
-	    tk_messageBox -title [mc Error] -icon error -type ok \
+	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
 	      -message "Failed importing: $errMsg"
 	}
     } else {
-	tk_messageBox -title [mc Error] -icon error -type ok \
+	::UI::MessageBox -title [mc Error] -icon error -type ok \
 	  -message [mc messfailmimeimp $mime]
     }
 }
@@ -842,8 +842,8 @@ proc ::Import::HttpProgress {gettoken token total current} {
 	      [list $status $gettoken $token $total $current]
 	} else {	
 	    set errmsg "File transfer error for \"$getstate(url)\""
-	    tk_messageBox -title [mc Error] -icon error -type ok -message \
-	      [FormatTextForMessageBox "Failed getting url: $errmsg"]
+	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
+	      -message "Failed getting url: $errmsg"
 	}
 	catch {file delete $getstate($dstPath)}
 	set getstate(status) "error"
@@ -930,7 +930,7 @@ proc ::Import::HttpCommand {gettoken token} {
 	    timeout {
 		set msg "Timeout waiting for file \"$tail\""
 		::WB::SetStatusMessage $wtop $msg
-		tk_messageBox -title [mc Timeout] -icon info \
+		::UI::MessageBox -title [mc Timeout] -icon info \
 		  -type ok -message $msg
 	    }
 	    ok {
@@ -1221,8 +1221,7 @@ proc ::Import::HttpGetQuickTimeTcl {wtop url opts args} {
 
     # This one shall return almost immediately.
     if {[catch {movie $wmovie -url $url -loadcommand $callback} msg]} {
-	tk_messageBox -icon error -type ok -message \
-	  [FormatTextForMessageBox "[mc Error]: $msg"]
+	::UI::MessageBox -icon error -type ok -message "[mc Error]: $msg"
 	catch {destroy $wfr}
 	return
     }
@@ -1251,8 +1250,7 @@ proc ::Import::QuickTimeTclCallback {gettoken w msg {err {}}} {
 		append msg " $err"
 	    }
 	    ::WB::SetStatusMessage $wtop ""
-	    tk_messageBox -icon error -type ok \
-	      -message [FormatTextForMessageBox $msg]
+	    ::UI::MessageBox -icon error -type ok -message $msg
 	    return
 	}
 	loading {	    
@@ -1413,7 +1411,7 @@ proc ::Import::XanimReadOutput {w wfr xpipe} {
        # Read each line and try to figure out if anything went wrong.
        gets $xpipe line
        if {[regexp -nocase "(unknown|error)" $line match junk]} {
-	   tk_messageBox -message "Something happened when trying to\
+	   ::UI::MessageBox -message "Something happened when trying to\
 	     run 'xanim': $line" -icon info -type ok
        }
    }
@@ -2031,7 +2029,7 @@ proc ::Import::ReloadImage {wtop id} {
     set coords [$wcan coords $id]
         
     if {![info exists optsArr(-url)]} {
-	tk_messageBox -icon error -type ok -message \
+	::UI::MessageBox -icon error -type ok -message \
 	  "No url found for the file \"$fileTail\" with MIME type $mime"
 	return
     }
@@ -2051,7 +2049,7 @@ proc ::Import::ReloadImage {wtop id} {
 
 	# Display a broken image to indicate for the user.
 	eval {::Import::NewBrokenImage $wcan $coords} $opts
-	tk_messageBox -icon error -type ok -message \
+	::UI::MessageBox -icon error -type ok -message \
 	  "Failed loading \"$optsArr(-url)\": $errMsg"
     }
 }

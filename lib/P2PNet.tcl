@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: P2PNet.tcl,v 1.6 2004-11-23 12:57:05 matben Exp $
+# $Id: P2PNet.tcl,v 1.7 2004-12-02 08:22:34 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -264,9 +264,8 @@ proc ::P2PNet::PushBtConnect { } {
     if {$prefs(protocol) == "symmetric"} {
 	if {($txtvarEntIPnameOrNum == $this(ipnum)) ||  \
 	  ($txtvarEntIPnameOrNum == $this(hostname))} {
-	    tk_messageBox -icon error -type ok -message  \
-	      [FormatTextForMessageBox \
-	      "You are not allowed to connect to yourself!"]	      
+	    ::UI::MessageBox -icon error -type ok -message  \
+	      "You are not allowed to connect to yourself!"
 	    return
 	}    
     }
@@ -274,8 +273,8 @@ proc ::P2PNet::PushBtConnect { } {
     # Check if not already connected to the ip in question.
     
     if {[IsConnectedToQ $txtvarEntIPnameOrNum]} {
-	tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
-	   "You are already connected to this client!"]
+	::UI::MessageBox -icon error -type ok -message \
+	   "You are already connected to this client!"
 	set finished 0
 	destroy $wtoplevel
 	return
@@ -341,8 +340,8 @@ proc ::P2PNet::DoConnect {toNameOrNum toPort {propagateSizeToClients 1}} {
     Debug 2 "DoConnect:: res=$res"
 
     if {$res} {
-	tk_messageBox -icon error -type ok -parent $wDlgs(mainwb) -message  \
-	  [FormatTextForMessageBox [mc messfailedsock $errorCode]]
+	::UI::MessageBox -icon error -type ok -parent $wDlgs(mainwb) \
+	  -message [mc messfailedsock $errorCode]
 	::WB::SetStatusMessage $wDlgs(mainwb) {}
 	::WB::StartStopAnimatedWaveOnMain 0
 	update idletasks
@@ -408,15 +407,15 @@ proc ::P2PNet::WhenSocketOpensInits {nameOrIP server remoteServPort \
     ::WB::StartStopAnimatedWaveOnMain 0
     if {[eof $server]} {
 	::WB::SetStatusMessage $wDlgs(mainwb) [mc messeofconnect]
-	tk_messageBox -icon error -type ok -parent $wDlgs(mainwb) -message  \
-	  [FormatTextForMessageBox [mc messeofconnect]]	  
+	::UI::MessageBox -icon error -type ok -parent $wDlgs(mainwb) \
+	  -message [mc messeofconnect]
 	return
     }
     
     # Check if something went wrong first.
     if {[catch {fconfigure $server -sockname} sockname]} {
-	tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
-	  "Something went wrong (-sockname). $sockname"]	  
+	::UI::MessageBox -icon error -type ok -message  \
+	  "Something went wrong (-sockname). $sockname"	  
 	::WB::SetStatusMessage $wDlgs(mainwb) {}
 	return {}
     }
@@ -459,8 +458,8 @@ proc ::P2PNet::WhenSocketOpensInits {nameOrIP server remoteServPort \
 	puts $server [list "IDENTITY:" $prefs(thisServPort) $utagPref $this(username)]
 	puts $server "IPS CONNECTED: $listIPandPort"
     }]} {
-	tk_messageBox -type ok -title [mc {Network Error}] -icon error -message \
-	  [FormatTextForMessageBox [mc messfailconnect $nameOrIP]]
+	::UI::MessageBox -type ok -title [mc {Network Error}] -icon error \
+	  -message [mc messfailconnect $nameOrIP]
 	return
     }
     
@@ -507,9 +506,8 @@ proc ::P2PNet::SetIpArrays {nameOrIP sock remoteServPort} {
 
 	# If not, we need to register it here and now.
 	if {[catch {fconfigure $sock -peername} peername]} {
-	    tk_messageBox -icon error -type ok -message \
-	      [FormatTextForMessageBox \
-	      "Something went wrong (-peername): $peername"]	      
+	    ::UI::MessageBox -icon error -type ok \
+	      -message "Something went wrong (-peername): $peername"
 	    return 0
 	}
 	Debug 2 "::P2PNet::SetIpArrays peername=$peername"
@@ -541,8 +539,8 @@ proc ::P2PNet::SetIpArrays {nameOrIP sock remoteServPort} {
     # Sometimes the DoStartServer just gives this(ipnum)=0.0.0.0 ; fix this here.
     if {!$state(connectedOnce)} {
 	if {[catch {fconfigure $sock -sockname} sockname]} {
-	    tk_messageBox -icon error -type ok -message \
-	      [FormatTextForMessageBox "Something went wrong: $sockname"]
+	    ::UI::MessageBox -icon error -type ok \
+	      -message "Something went wrong: $sockname"
 	    return 0
 	}
 	if {[lindex $sockname 0] != "0.0.0.0"} {
@@ -583,8 +581,8 @@ proc ::P2PNet::Kill {sock} {
 	after cancel $killerId($sock)
 	unset -nocomplain killerId($sock)
     }
-    tk_messageBox -icon error -type ok -parent $wDlgs(mainwb) -message \
-      [FormatTextForMessageBox $statMess]
+    ::UI::MessageBox -icon error -type ok -parent $wDlgs(mainwb) \
+      -message $statMess
 }
 
 # P2PNet::IsConnectedToQ --

@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: tinyhttpd.tcl,v 1.23 2004-12-01 15:15:41 matben Exp $
+# $Id: tinyhttpd.tcl,v 1.24 2004-12-02 08:22:33 matben Exp $
 
 # ########################### USAGE ############################################
 #
@@ -30,6 +30,7 @@
 #      ::tinyhttpd::registercgicommand path command
 #      ::tinyhttpd::unregistercgicommand path
 #      ::tinyhttpd::allcgibins
+#      ::tinyhttpd::putheader token httpcode ?-headers list?
 #      
 # ##############################################################################
 
@@ -852,6 +853,44 @@ proc ::tinyhttpd::PutResponse {token httpcode abspath} {
     }
 }
 
+# tinyhttpd::putheader --
+# 
+#       Utility for cgi scripts for putting the header.
+
+proc ::tinyhttpd::putheader {token httpcode args} {
+    variable $token
+    upvar 0 $token state    
+    variable httpMsg
+    variable http
+    
+    array set argsArr {
+	-headers    {}
+    }
+    array set argsArr $args
+    set s   $state(s)
+
+    # Prepare the header.
+    set msg $httpMsg($httpcode)
+    set header [format $http(headerNoContent) $httpcode $msg]
+    set extraheader ""
+    foreach {key value} $argsArr(-headers) {
+	regsub -all \[\n\r\] $value {} value
+	set key [string trim $key]
+	if {[string length $key]} {
+	    append extraheader "\n$key: $value"
+	}
+    }
+    
+    if {[catch {
+	puts $s ${header}${extraheader}
+	puts $s ""
+	flush $s
+    } err]} {
+	Finish $token $err
+	return
+    }
+}
+
 # tinyhttpd::CopyStart --
 # 
 #       The callback procedure for fcopy when copying from a disk file
@@ -1109,8 +1148,6 @@ proc ::tinyhttpd::PutIfError {token httpcode} {
     variable httpMsg
     
     # Prepare the header.
-    set modTime [clock format [file mtime $abspath]  \
-      -format "%a, %d %b %Y %H:%M:%S GMT" -gmt 1]
     set msg $httpMsg($httpcode)
     set header [format $http(headerNoContent) $httpcode $msg]
 

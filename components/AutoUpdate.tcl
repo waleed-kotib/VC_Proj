@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: AutoUpdate.tcl,v 1.8 2004-11-16 15:10:24 matben Exp $
+# $Id: AutoUpdate.tcl,v 1.9 2004-12-02 08:22:33 matben Exp $
 
 package require tinydom
 package require http 2.3
@@ -79,7 +79,7 @@ proc ::AutoUpdate::Get {args} {
 	::http::geturl $url -command [namespace current]::Command
     } $tmopts} token]} {
 	if {!$opts(-silent)} {
-	    tk_messageBox -icon error -type ok -message \
+	    ::UI::MessageBox -icon error -type ok -message \
 	      "Failed connecting server \"$url\" to get update info: $token"
 	}
     }
@@ -126,7 +126,7 @@ proc ::AutoUpdate::Command {token} {
 	if {[package vcompare $prefs(fullVers) $releaseArr(version)] == -1} {
 	    ::AutoUpdate::Dialog $releaseAttr $message $changesList
 	} elseif {!$opts(-silent)} {
-	    tk_messageBox -icon info -type ok -message \
+	    ::UI::MessageBox -icon info -type ok -message \
 	      [mc messaupdatelatest $prefs(fullVers)]
 	}
 	tinydom::cleanup $token

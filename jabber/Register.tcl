@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.30 2004-11-30 15:11:12 matben Exp $
+# $Id: Register.tcl,v 1.31 2004-12-02 08:22:34 matben Exp $
 
 package provide Register 1.0
 
@@ -175,7 +175,7 @@ proc ::Register::OK {w} {
     variable password2
     
     if {$password != $password2} {
-	tk_messageBox -icon error -title [mc {Different Passwords}] \
+	::UI::MessageBox -icon error -title [mc {Different Passwords}] \
 	  -message [mc messpasswddifferent] -parent $w
 	set password  ""
 	set password2 ""
@@ -215,9 +215,8 @@ proc ::Register::DoRegister {w} {
     foreach name {server username} {
 	upvar 0 $name what
 	if {[string length $what] <= 1} {
-	    tk_messageBox -icon error -type ok -parent [winfo toplevel $w] \
-	      -message [FormatTextForMessageBox \
-	      [mc jamessnamemissing $name]]
+	    ::UI::MessageBox -icon error -type ok -parent [winfo toplevel $w] \
+	      -message [mc jamessnamemissing $name]
 	    return
 	}
 	
@@ -232,8 +231,8 @@ proc ::Register::DoRegister {w} {
 		}
 	    }
 	} err]} {
-	    tk_messageBox -icon error -type ok -message [FormatTextForMessageBox  \
-	      [mc jamessillegalchar $name $what]]
+	    ::UI::MessageBox -icon error -type ok \
+	      -message [mc jamessillegalchar $name $what]
 	    return
 	}
     }    
@@ -250,12 +249,12 @@ proc ::Register::ConnectCB {status msg} {
     
     switch $status {
 	error {
-	    tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
-	      [mc jamessnosocket $server $msg]]
+	    ::UI::MessageBox -icon error -type ok \
+	      -message [mc jamessnosocket $server $msg]
 	}
 	timeout {
-	    tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
-	      [mc jamesstimeoutserver $server]]
+	    ::UI::MessageBox -icon error -type ok \
+	      -message [mc jamesstimeoutserver $server]
 	}
 	default {
 	    # Go ahead...
@@ -263,8 +262,8 @@ proc ::Register::ConnectCB {status msg} {
 		::Login::InitStream $server \
 		  [namespace current]::SendRegister
 	    } err]} {
-		tk_messageBox -icon error -title [mc {Open Failed}] \
-		  -type ok -message [FormatTextForMessageBox $err]
+		::UI::MessageBox -icon error -title [mc {Open Failed}] \
+		  -type ok -message $err
 	    }
 	}
     }
@@ -280,7 +279,7 @@ proc ::Register::SendRegister {args} {
     
     array set argsArr $args
     if {![info exists argsArr(id)]} {
-	tk_messageBox -icon error -type ok -message \
+	::UI::MessageBox -icon error -type ok -message \
 	  "no id for digest in receiving <stream>"
     } else {
 	set streamid $argsArr(id)
@@ -313,8 +312,8 @@ proc ::Register::SendRegisterCB {jlibName type theQuery} {
 	} else {
 	    set msg [mc jamessregerr $errmsg]
 	}
-	tk_messageBox -title [mc Error] -icon error -type ok \
-	  -message [FormatTextForMessageBox $msg]
+	::UI::MessageBox -title [mc Error] -icon error -type ok \
+	  -message $msg
     } else {
 
 	# Save to our jserver variable. Create a new profile.
@@ -327,8 +326,8 @@ proc ::Register::SendRegisterCB {jlibName type theQuery} {
 	::Login::Authorize $server $username $resource $password \
 	  [namespace current]::AuthorizeCB -streamid $streamid -digest 1
     } else {
-	tk_messageBox -icon info -type ok -message [FormatTextForMessageBox \
-	  [mc jamessregisterok $server]]
+	::UI::MessageBox -icon info -type ok \
+	  -message [mc jamessregisterok $server]
     
 	# Disconnect. This should reset both wrapper and XML parser!
 	# Beware: we are in the middle of a callback from the xml parser,
@@ -346,15 +345,15 @@ proc ::Register::AuthorizeCB {type msg} {
     ::Debug 2 "::Register::AuthorizeCB type=$type"
     
     if {[string equal $type "error"]} {
-	tk_messageBox -icon error -type ok -title [mc Error]  \
-	  -message [FormatTextForMessageBox $msg]
+	::UI::MessageBox -icon error -type ok -title [mc Error]  \
+	  -message $msg
     } else {
 	
 	# Login was succesful, set presence.
 	::Login::SetStatus
 	set jid [jlib::joinjid $username $server $resource]
-	tk_messageBox -icon info -type ok -message [FormatTextForMessageBox \
-	  [mc jamessregloginok $jid]]
+	::UI::MessageBox -icon info -type ok \
+	  -message [mc jamessregloginok $jid]
     }
 }
 
@@ -378,9 +377,8 @@ proc ::Register::Remove {{jid {}}} {
     set ans "yes"
     if {$jid == ""} {
 	set jid $jserver(this)
-	set ans [tk_messageBox -icon warning -title [mc Unregister] \
-	  -type yesno -default no -message [FormatTextForMessageBox \
-	  [mc jamessremoveaccount]]]
+	set ans [::UI::MessageBox -icon warning -title [mc Unregister] \
+	  -type yesno -default no -message [mc jamessremoveaccount]]
     }
     if {$ans == "yes"} {
 	
@@ -402,13 +400,11 @@ proc ::Register::RemoveCallback {jid jlibName type theQuery} {
     
     if {[string equal $type "error"]} {
 	foreach {errcode errmsg} $theQuery break
-	tk_messageBox -icon error -title [mc Unregister] -type ok  \
-	  -message [FormatTextForMessageBox \
-	  [mc jamesserrunreg $jid $errcode $errmsg]]
+	::UI::MessageBox -icon error -title [mc Unregister] -type ok  \
+	  -message [mc jamesserrunreg $jid $errcode $errmsg]
     } else {
-	tk_messageBox -icon info -title [mc Unregister] -type ok  \
-	  -message [FormatTextForMessageBox \
-	  [mc jamessokunreg $jid]]
+	::UI::MessageBox -icon info -title [mc Unregister] -type ok  \
+	  -message [mc jamessokunreg $jid]
     }
 }
 
@@ -569,7 +565,7 @@ proc ::GenRegister::Get {token} {
     
     # Verify.
     if {[string length $state(server)] == 0} {
-	tk_messageBox -type ok -icon error  \
+	::UI::MessageBox -type ok -icon error  \
 	  -message [mc jamessregnoserver]
 	return
     }	
@@ -597,9 +593,8 @@ proc ::GenRegister::GetCB {token jlibName type subiq} {
     $state(wsearrows) stop
     
     if {[string equal $type "error"]} {
-	tk_messageBox -type ok -icon error  \
-	  -message [FormatTextForMessageBox \
-	  [mc jamesserrregget [lindex $subiq 0] [lindex $subiq 1]]]
+	::UI::MessageBox -type ok -icon error  \
+	  -message [mc jamesserrregget [lindex $subiq 0] [lindex $subiq 1]]
 	return
     }
     set wbox $state(wbox)
@@ -657,12 +652,11 @@ proc ::GenRegister::ResultCallback {token type subiq args} {
     ::Debug 2 "::GenRegister::ResultCallback type=$type, subiq='$subiq'"
 
     if {[string equal $type "error"]} {
-	tk_messageBox -type ok -icon error  \
-	  -message [FormatTextForMessageBox \
-	  [mc jamesserrregset $state(server) [lindex $subiq 0] [lindex $subiq 1]]]
+	::UI::MessageBox -type ok -icon error -message \
+	  [mc jamesserrregset $state(server) [lindex $subiq 0] [lindex $subiq 1]]
     } else {
-	tk_messageBox -type ok -icon info -message [FormatTextForMessageBox \
-	  [mc jamessokreg $state(server)]]
+	::UI::MessageBox -type ok -icon info \
+	  -message [mc jamessokreg $state(server)]
     }
     
     # Time to clean up.
@@ -820,12 +814,10 @@ proc ::GenRegister::SimpleCallback {server jlibName type subiq} {
     ::Debug 2 "::GenRegister::ResultCallback server=$server, type=$type, subiq='$subiq'"
 
     if {[string equal $type "error"]} {
-	tk_messageBox -type ok -icon error  \
-	  -message [FormatTextForMessageBox \
-	  [mc jamesserrregset $server [lindex $subiq 0] [lindex $subiq 1]]]
+	::UI::MessageBox -type ok -icon error -message \
+	  [mc jamesserrregset $server [lindex $subiq 0] [lindex $subiq 1]]
     } else {
-	tk_messageBox -type ok -icon info -message [FormatTextForMessageBox \
-	  [mc jamessokreg $server]]
+	::UI::MessageBox -type ok -icon info -message [mc jamessokreg $server]
     }
 }
 

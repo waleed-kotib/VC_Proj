@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Subscribe.tcl,v 1.24 2004-11-30 15:11:12 matben Exp $
+# $Id: Subscribe.tcl,v 1.25 2004-12-02 08:22:34 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -221,7 +221,7 @@ proc ::Subscribe::ResProc {jlibName what} {
     ::Debug 2 "::Subscribe::ResProc: jlibName=$jlibName, what=$what"
 
     if {[string equal $what "error"]} {
-	tk_messageBox -type ok -message "We got an error from the\
+	::UI::MessageBox -type ok -message "We got an error from the\
 	  Subscribe::ResProc callback"
     }   
 }

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.37 2004-11-23 08:55:23 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.38 2004-12-02 08:22:34 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -65,15 +65,13 @@ proc ::PreferencesUtils::Init { } {
     
     if {[file exists $prefsFilePath]} {
 	if {[catch {option readfile $prefsFilePath} err]} {
-	    tk_messageBox -type ok -icon error -message  \
-	      [FormatTextForMessageBox \
-	      "Error reading preference file: $prefsFilePath."]
+	    ::UI::MessageBox -type ok -icon error \
+	      -message "Error reading preference file: $prefsFilePath."
 	}
     } elseif {[file exists $old]} {
 	if {[catch {option readfile $old} err]} {
-	    tk_messageBox -type ok -icon error -message  \
-	      [FormatTextForMessageBox \
-	      "Error reading preference file: $old."]
+	    ::UI::MessageBox -type ok -icon error \
+	      -message "Error reading preference file: $old."
 	}
     }
     
@@ -180,8 +178,8 @@ proc ::PreferencesUtils::SaveToFile { } {
     # Work on a temporary file and switch later.
     set tmpFile $prefs(userPrefsFilePath).tmp
     if {[catch {open $tmpFile w} fid]} {
-	tk_messageBox -icon error -type ok -message \
-	  [FormatTextForMessageBox [mc messerrpreffile $tmpFile]]
+	::UI::MessageBox -icon error -type ok \
+	  -message [mc messerrpreffile $tmpFile]
 	return
     }
     
@@ -207,7 +205,7 @@ proc ::PreferencesUtils::SaveToFile { } {
     }
     close $fid
     if {[catch {file rename -force $tmpFile $prefs(userPrefsFilePath)} msg]} {
-	tk_messageBox -type ok -message {Error renaming preferences file.}  \
+	::UI::MessageBox -type ok -message {Error renaming preferences file.}  \
 	  -icon error
 	return
     }

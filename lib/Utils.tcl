@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.34 2004-10-30 14:44:52 matben Exp $
+# $Id: Utils.tcl,v 1.35 2004-12-02 08:22:35 matben Exp $
 
 namespace eval ::Utils:: {
 
@@ -83,37 +83,6 @@ proc getdirname {filePath} {
 	return [file dirname $filePath]
     } else {
 	return $filePath
-    }
-}
-
-# FormatTextForMessageBox --
-#
-#       The tk_messageBox needs explicit newlines to format the message text.
-
-proc FormatTextForMessageBox {txt {width ""}} {
-    global  prefs
-
-    if {[string equal $::tcl_platform(platform) "windows"]} {
-
-	# Insert newlines to force line breaks.
-	if {[string length $width] == 0} {
-	    set width $prefs(msgWrapLength)
-	}
-	set len [string length $txt]
-	set start $width
-	set first 0
-	set newtxt {}
-	while {([set ind [tcl_wordBreakBefore $txt $start]] > 0) &&  \
-	  ($start < $len)} {	    
-	    append newtxt [string trim [string range $txt $first [expr $ind-1]]]
-	    append newtxt "\n"
-	    set start [expr $ind + $width]
-	    set first $ind
-	}
-	append newtxt [string trim [string range $txt $first end]]
-	return $newtxt
-    } else {
-	return $txt
     }
 }
 
@@ -348,7 +317,7 @@ proc ::Utils::UnixOpenUrl {url} {
 	}
     } 
     if {$browser == ""} {
-	tk_messageBox -icon error -type ok -message \
+	::UI::MessageBox -icon error -type ok -message \
 	  "Couldn't localize a web browser on this system.\
 	  Define a shell variable env(BROWSER) to point to a web browser."
     }

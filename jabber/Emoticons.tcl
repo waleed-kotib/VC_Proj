@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.22 2004-12-01 15:15:41 matben Exp $
+# $Id: Emoticons.tcl,v 1.23 2004-12-02 08:22:34 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -615,7 +615,7 @@ proc ::Emoticons::PopCmd {name1 name2 op} {
 	if {[catch {
 	    ::Emoticons::LoadTmpIconSet $state($var,path)
 	} err]} {
-	    tk_messageBox -icon error -title [mc Error] \
+	    ::UI::MessageBox -icon error -title [mc Error] \
 	      -message "Failed loading iconset $var. $err" \
 	      -parent [winfo toplevel $wpreftext]
 	    set priv(havezip) 0

@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.35 2004-11-27 14:52:54 matben Exp $
+# $Id: Profiles.tcl,v 1.36 2004-12-02 08:22:34 matben Exp $
 
 package provide Profiles 1.0
 
@@ -704,9 +704,8 @@ proc ::Profiles::VerifyNonEmpty { } {
     
     # Check that necessary entries are non-empty, at least.
     if {($server == "") || ($username == "")} {
-	tk_messageBox -type ok -icon error -parent [winfo toplevel $wpage] \
-	  -title [mc Error] -message [FormatTextForMessageBox \
-	  [mc messfillserveruser]]
+	::UI::MessageBox -type ok -icon error -parent [winfo toplevel $wpage] \
+	  -title [mc Error] -message [mc messfillserveruser]
 	set ans 0
     }
     return $ans
@@ -798,10 +797,10 @@ proc ::Profiles::DeleteCmd { } {
     
     # The present state may be something that has not been stored yet.
     if {[info exists tmpProfArr($profile,server)]} {
-	set ans [tk_messageBox -title [mc Warning]  \
+	set ans [::UI::MessageBox -title [mc Warning]  \
 	  -type yesno -icon warning -default yes  \
 	  -parent [winfo toplevel $wpage] \
-	  -message [FormatTextForMessageBox [mc messremoveprofile]]]
+	  -message [mc messremoveprofile]]
     }
     if {$ans == "yes"} {
 	set ind [$wmenu index $profile]

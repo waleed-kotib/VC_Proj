@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasCmd.tcl,v 1.6 2004-11-08 15:52:52 matben Exp $
+# $Id: CanvasCmd.tcl,v 1.7 2004-12-02 08:22:35 matben Exp $
 
 package provide CanvasCmd 1.0
 
@@ -339,8 +339,8 @@ proc ::CanvasCmd::EraseAll {wtop} {
 proc ::CanvasCmd::DoPutCanvasDlg {wtop} {
 	
     set wCan [::WB::GetCanvasFromWtop $wtop]
-    set ans [tk_messageBox -message [FormatTextForMessageBox \
-      "Warning! Syncing this canvas first erases all client canvases."] \
+    set ans [::UI::MessageBox -message  \
+      "Warning! Syncing this canvas first erases all client canvases." \
       -icon warning -type okcancel -default ok]
     if {$ans != "ok"} {
 	return
@@ -377,16 +377,14 @@ proc ::CanvasCmd::DoPutCanvas {w {toIPnum all}} {
 
     # Save canvas to temporary file.
     if {[catch [list open $absFilePath w] fileId]} {
-	tk_messageBox -message [FormatTextForMessageBox  \
-	  [mc messfailopwrite $tmpFile $fileId]] \
+	::UI::MessageBox -message [mc messfailopwrite $tmpFile $fileId] \
 	  -icon error -type ok
     }
     ::CanvasFile::CanvasToFile $w $fileId $absFilePath
     catch {close $fileId}
 
     if {[catch [list open $absFilePath r] fileId]} {
-	tk_messageBox -message [FormatTextForMessageBox  \
-	  [mcset en messfailopread $tmpFile $fileId]] \
+	::UI::MessageBox -message [mcset en messfailopread $tmpFile $fileId] \
 	  -icon error -type ok
     }
     

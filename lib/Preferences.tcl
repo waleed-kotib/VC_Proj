@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.68 2004-11-27 08:41:20 matben Exp $
+# $Id: Preferences.tcl,v 1.69 2004-12-02 08:22:34 matben Exp $
  
 package require notebook
 package require tree
@@ -210,9 +210,8 @@ proc ::Preferences::ResetToFactoryDefaults {maxPriorityNum} {
     Debug 2 "::Preferences::ResetToFactoryDefaults maxPriorityNum=$maxPriorityNum"
     
     # Warn first.
-    set ans [tk_messageBox -title [mc Warning] -type yesno -icon warning \
-      -message [FormatTextForMessageBox [mc messfactorydefaults]] \
-      -default no]
+    set ans [::UI::MessageBox -title [mc Warning] -type yesno -icon warning \
+      -message [mc messfactorydefaults] -default no]
     if {$ans == "no"} {
 	return
     }
@@ -769,8 +768,8 @@ proc ::Preferences::SavePushBt { } {
     
     # Was protocol changed?
     if {![string equal $prefs(protocol) $tmpPrefs(protocol)]} {
-	set ans [tk_messageBox -title Relaunch -icon info -type yesno \
-	  -message [FormatTextForMessageBox [mc messprotocolch]]]
+	set ans [::UI::MessageBox -title Relaunch -icon info -type yesno \
+	  -message [mc messprotocolch]]
 	if {$ans == "no"} {
 	    set finished 1
 	    return
@@ -855,9 +854,9 @@ proc ::Preferences::CancelPushBt { } {
     ::hooks::run prefsCancelHook
     
     if {$hasChanged} {
-	set ans [tk_messageBox -title [mc Warning]  \
+	set ans [::UI::MessageBox -title [mc Warning]  \
 	  -type yesno -default no -parent $wDlgs(prefs) -icon warning \
-	  -message [FormatTextForMessageBox [mc messprefschanged]]]
+	  -message [mc messprefschanged]]
 	if {$ans == "yes"} {
 	    set finished 2
 	}
