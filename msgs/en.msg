@@ -127,8 +127,10 @@
 ::msgcat::mcset en mAddons		{Addons}
 
 ::msgcat::mcset en mAboutWhiteboard   	{About Whiteboard...}
+::msgcat::mcset en mAboutCoccinella   	{About Coccinella...}
 ::msgcat::mcset en mAboutQuickTimeTcl	{About QuickTimeTcl...}
 ::msgcat::mcset en mNew			{New}
+::msgcat::mcset en mNewWhiteboard	{New Whiteboard}
 ::msgcat::mcset en mOpenConnection	{&Open Connection...}
 ::msgcat::mcset en mCloseWindow		{&Close Window}
 ::msgcat::mcset en mStartServer		{Start Server}
@@ -330,6 +332,7 @@
 ::msgcat::mcset en {New Message}
 ::msgcat::mcset en {New password}
 ::msgcat::mcset en {New shortcut}
+::msgcat::mcset en {New User}
 ::msgcat::mcset en {My vCard}
 ::msgcat::mcset en {Nick name}
 ::msgcat::mcset en {No Address}
@@ -473,7 +476,10 @@ the canvas thereby erasing the present stuff. Do you want this to happen?}
 ::msgcat::mcset en messdoquit?		{Do you actually want to quit?}
 ::msgcat::mcset en messsuassfillin	{Be sure to fill in all entries before you continue}
 ::msgcat::mcset en messsuassclose	{Are you sure you want to close the\
-setup assistant? You may start it any time later from the Info menu.}
+setup assistant? You may start it any time later from the menu.}
+::msgcat::mcset en messprotocolch	{You have changed the network setup.\
+This requires that you relaunch the application to take effect.\
+Do you actually want to continue?}
 
 
 

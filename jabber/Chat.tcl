@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.5 2003-02-24 17:52:04 matben Exp $
+# $Id: Chat.tcl,v 1.6 2003-04-28 13:32:27 matben Exp $
 
 package provide Chat 1.0
 
@@ -42,7 +42,7 @@ proc ::Jabber::Chat::StartThreadDlg {w args} {
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
     } else {
-	wm transient $w .
+
     }
     wm title $w {Start Chat}
     
@@ -250,7 +250,7 @@ proc ::Jabber::Chat::Build {threadID args} {
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
     } else {
-	#wm transient $w .
+
     }
 
     # -from is sometimes a 3-tier jid /resource included.
@@ -275,18 +275,10 @@ proc ::Jabber::Chat::Build {threadID args} {
     wm title $w "Chat ($locals($threadID,jid))"
     wm protocol $w WM_DELETE_WINDOW  \
       [list [namespace current]::Close -threadid $threadID]
-    wm group $w .
     
     # Toplevel menu for mac only. Crashes in menudefs; BowelsOfTheMemoryMgr
-    # Only when multiinstance.
-    if {0 && [string match "mac*" $this(platform)]} {
-	set wmenu ${w}.menu
-	menu $wmenu -tearoff 0
-	::UI::MakeMenu $w ${wmenu}.apple   {}       $::UI::menuDefs(main,apple)
-	::UI::MakeMenu $w ${wmenu}.file    mFile    $::UI::menuDefs(min,file)
-	::UI::MakeMenu $w ${wmenu}.edit    mEdit    $::UI::menuDefs(min,edit)	
-	::UI::MakeMenu $w ${wmenu}.jabber  mJabber  $::UI::menuDefs(main,jabber)
-	$w configure -menu ${wmenu}
+    if {[string match "mac*" $this(platform)]} {
+	$w configure -menu [::Jabber::UI::GetRosterWmenu]
     }
 
     # Global frame.

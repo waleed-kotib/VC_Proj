@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UserActions.tcl,v 1.4 2003-02-24 17:52:12 matben Exp $
+# $Id: UserActions.tcl,v 1.5 2003-04-28 13:32:36 matben Exp $
 
 namespace eval ::UserActions:: {
     
@@ -733,14 +733,14 @@ proc ::UserActions::DoCloseWindow { } {
     switch -glob -- [winfo class $w] {
 	Wish* {
 	    # Main window.
-	    if {$w == "."} {
+	    if {0 && $w == "."} {
 		::UserActions::DoQuit -warning 1
 	    } else {
 		::UI::CloseMain $wtop
 	    }
 	}
 	Whiteboard {
-	    if {$w == "."} {
+	    if {0 && $w == "."} {
 		::UserActions::DoQuit -warning 1
 	    } else {
 		::UI::CloseMain $wtop
@@ -759,7 +759,7 @@ proc ::UserActions::DoCloseWindow { } {
 	    ::Jabber::MailBox::Show $wDlgs(jinbox) -visible 0
 	}
 	RostServ {
-	    ::Jabber::RostServ::Show $wDlgs(jrostbro) -visible 0
+	    ::UserActions::DoQuit -warning 1
 	}
 	default {
 	    destroy $w
@@ -769,8 +769,8 @@ proc ::UserActions::DoCloseWindow { } {
 
 # UserActions::DoQuit ---
 #
-#       Is called just before quitting to collect some state variables which
-#       we want to save for next time.
+#       Is called just before quitting to be able to save various
+#       preferences etc.
 #       
 # Arguments:
 #       args        ?-warning boolean?
@@ -779,17 +779,12 @@ proc ::UserActions::DoCloseWindow { } {
 #       boolean, qid quit or not
 
 proc ::UserActions::DoQuit {args} {
-    global  prefs state allIPnumsTo localStateVars specialMacPrefPath this
+    global  prefs specialMacPrefPath this
     
-    upvar ::UI::dims dims
-    upvar ::.::state statelocal
-    upvar ::.::wapp wapp
-        
     array set argsArr {
 	-warning      0
     }
     array set argsArr $args
-    set wCan $wapp(can)
     if {$argsArr(-warning)} {
 	set ans [tk_messageBox -title [::msgcat::mc Quit?] -type yesno  \
 	  -default yes -message [::msgcat::mc messdoquit?]]
@@ -798,39 +793,16 @@ proc ::UserActions::DoQuit {args} {
 	}
     }
 
-    # Before quitting, save user preferences. 
-    # Need to collect some of them first.
-    # Position of root window.
-    # We want to save wRoot and hRoot as they would be without any clients 
-    # in the communication frame.
-    
-    bind $wCan <Configure> {}
-    
-    foreach {dims(wRoot) hRoot dims(x) dims(y)} [::UI::ParseWMGeometry .] {}
-    set dims(hRoot) [expr $dims(hCanvas) + $dims(hStatus) +  \
-      $dims(hCommClean) + $dims(hTop) + $dims(hFakeMenu)]
-    if {$prefs(haveScrollbars)} {
-	incr dims(hRoot) [expr [winfo height $wapp(xsc)] + 4]
+    # Before quitting, save whiteboard preferences and geom state. 
+    if {[wm state .] == "normal"} {
+	::UI::SaveWhiteboardState .
+	::UI::SaveWhiteboardDims .
+	::UI::SaveCleanWhiteboardDims .
     }
-    
-    # Take the instance specific state vars and copy to global state vars.
-    foreach key $localStateVars {
-	set state($key) $statelocal($key)
-    }
-    set state(visToolbar) [::UI::IsShortcutButtonVisable .]
     
     # If we used 'Edit/Revert To/Application Defaults' be sure to reset...
     set prefs(firstLaunch) 0
-    
-    # Stop any running reflector server. Ask first?
-    if {$state(reflectorStarted)} {
-	set ans [tk_messageBox -icon error -type yesno -message \
-	  "Should the Reflector Server be stopped?"]
-	if {$ans == "yes"} {
-	    ::NetworkSetup::StopServer
-	}
-    }
-    
+        
     # If we are a jabber client, put us unavailable etc.
     if {[string equal $prefs(protocol) "jabber"]} {
 	::Jabber::EndSession
@@ -840,7 +812,7 @@ proc ::UserActions::DoQuit {args} {
     
     # A workaround for the 'info script' bug on MacTk 8.3
     # Work on a temporary file and switch later.
-    if {[string equal $::this(platform) "macintosh"] && \
+    if {[string equal $this(platform) "macintosh"] && \
       [info exists specialMacPrefPath]} {
 	set tmpFile ${specialMacPrefPath}.tmp
 	if {![catch {open $tmpFile w} fid]} {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.5 2003-02-24 17:52:05 matben Exp $
+# $Id: MailBox.tcl,v 1.6 2003-04-28 13:32:29 matben Exp $
 
 package provide MailBox 1.0
 
@@ -106,20 +106,14 @@ proc ::Jabber::MailBox::Build {w args} {
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
     } else {
-	wm transient $w .
+
     }
     wm title $w [::msgcat::mc Inbox]
     wm protocol $w WM_DELETE_WINDOW [list [namespace current]::CloseDlg $w]
     
-    # Toplevel menu for mac only. Only when multiinstance.
-    if {0 && [string match "mac*" $this(platform)]} {
-	set wmenu ${w}.menu
-	menu $wmenu -tearoff 0
-	::UI::MakeMenu $w ${wmenu}.apple   {}       $::UI::menuDefs(main,apple)
-	::UI::MakeMenu $w ${wmenu}.file    mFile    $::UI::menuDefs(min,file)
-	::UI::MakeMenu $w ${wmenu}.edit    mEdit    $::UI::menuDefs(min,edit)	
-	::UI::MakeMenu $w ${wmenu}.jabber  mJabber  $::UI::menuDefs(main,jabber)
-	$w configure -menu ${wmenu}
+    # Toplevel menu for mac only.
+    if {[string match "mac*" $this(platform)]} {
+	$w configure -menu [::Jabber::UI::GetRosterWmenu]
     }
     set locals(wtop) $w
     set jstate(inboxVis) 1
@@ -132,17 +126,17 @@ proc ::Jabber::MailBox::Build {w args} {
     set frtop [frame $w.frall.frtop -borderwidth 0]
     pack $frtop -side top -fill x -padx 4 -pady 2
     ::UI::InitShortcutButtonPad $w $frtop 50
-    ::UI::NewButton $w new $icons(btnew) $icons(btnewdis)  \
+    ::UI::NewButton $w new New $icons(btnew) $icons(btnewdis)  \
       [list ::Jabber::NewMsg::Build $wDlgs(jsendmsg)]
-    ::UI::NewButton $w reply $icons(btreply) $icons(btreplydis)  \
+    ::UI::NewButton $w reply Reply $icons(btreply) $icons(btreplydis)  \
       [list ::Jabber::MailBox::ReplyTo] -state disabled
-    ::UI::NewButton $w forward $icons(btforward) $icons(btforwarddis)  \
+    ::UI::NewButton $w forward Forward $icons(btforward) $icons(btforwarddis)  \
       [list ::Jabber::MailBox::ForwardTo] -state disabled
-    ::UI::NewButton $w save $icons(btsave) $icons(btsavedis)  \
+    ::UI::NewButton $w save Save $icons(btsave) $icons(btsavedis)  \
       [list ::Jabber::MailBox::SaveMsg] -state disabled
-    ::UI::NewButton $w print $icons(btprint) $icons(btprintdis)  \
+    ::UI::NewButton $w print Print $icons(btprint) $icons(btprintdis)  \
       [list ::Jabber::MailBox::DoPrint] -state disabled
-    ::UI::NewButton $w trash $icons(bttrash) $icons(bttrashdis)  \
+    ::UI::NewButton $w trash Trash $icons(bttrash) $icons(bttrashdis)  \
       ::Jabber::MailBox::TrashMsg -state disabled
     
     pack [frame $w.frall.divt -bd 2 -relief sunken -height 2] -fill x -side top

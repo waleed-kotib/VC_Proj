@@ -8,13 +8,18 @@
 #      prefs:       preferences, application global
 #      state:       state variables, specific to toplevel whiteboard
 #      
-#  Copyright (c) 2002  Mats Bengtsson
+#  Copyright (c) 2002-2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.3 2003-02-24 17:52:12 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.4 2003-04-28 13:32:34 matben Exp $
 
-proc SetFactoryState { } {
+# SetWhiteboardFactoryState --
+# 
+#       There is a global 'state' array which contains a generic state
+#       that is inherited by instance specific 'state' array '::${wtop}::state'
+
+proc SetWhiteboardFactoryState { } {
     global  state
     
     # The tool buttons.
@@ -59,13 +64,8 @@ proc SetFactoryState { } {
     set state(fontWeight) normal
 }
 
-# State variables, specific to toplevel whiteboard.
-SetFactoryState
-
-# Instance specific state vars.
-set localStateVars {btState bgColCan fgCol bgCol penThick brushThick fill  \
-  arcstyle fontSize font fontWeight smooth splinesteps dash canGridOn  \
-  visToolbar}
+# Generic state variables for the whiteboard.
+SetWhiteboardFactoryState
 
 set noErr 0
 

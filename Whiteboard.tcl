@@ -15,7 +15,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Whiteboard.tcl,v 1.6 2003-02-24 17:52:04 matben Exp $
+# $Id: Whiteboard.tcl,v 1.7 2003-04-28 13:32:25 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -61,23 +61,23 @@ if {[package vcompare [info tclversion] 8.3] == -1} {
     tk_messageBox -message  \
       {This application requires Tcl/Tk version 8.3 or later.}  \
 	  -icon error -type ok
+    exit
 }
 
 # We use a variable 'this(platform)' that is more convenient for MacOS X.
 switch -- $tcl_platform(platform) {
     unix {
-	set thisPlatform $tcl_platform(platform)
+	set this(platform) $tcl_platform(platform)
 	if {[package vcompare [info tclversion] 8.3] == 1} {	
 	    if {[string equal [tk windowingsystem] "aqua"]} {
-		set thisPlatform "macosx"
+		set this(platform) "macosx"
 	    }
 	}
     }
     windows - macintosh {
-	set thisPlatform $tcl_platform(platform)
+	set this(platform) $tcl_platform(platform)
     }
 }
-set this(platform) $thisPlatform
 
 # Find program real pathname, resolve all links in between. Unix only.
 #
@@ -124,7 +124,7 @@ proc resolve_cmd_realpath {infile} {
 # default file, never read.
 set prefs(majorVers) 0
 set prefs(minorVers) 94
-set prefs(releaseVers) 3
+set prefs(releaseVers) 4
 set prefs(fullVers) $prefs(majorVers).$prefs(minorVers).$prefs(releaseVers)
 
 # We may be embedded in another application, say an ActiveX component.
@@ -135,9 +135,9 @@ if {[llength [namespace children :: "::browser*"]] > 0} {
 }
 
 # Level of detail for printouts. >= 2 for my outputs.
-set debugLevel 0
+set debugLevel 4
 # Level of detail for printouts for server. >= 2 for my outputs.
-set debugServerLevel 0
+set debugServerLevel 3
 # Macintosh only: if no debug printouts, no console. Also for windows?
 if {[string match "mac*" $this(platform)] &&   \
   $debugLevel == 0 && $debugServerLevel == 0} {
@@ -360,10 +360,12 @@ update
 proc TraceStartMessage {varName junk op} {
     global  wDlgs
     
-    # Need catch here if splash not shown. Update needed to force display (bad?).
-    catch {${wDlgs(splash)}.can itemconfigure tsplash  \
-      -text $::SplashScreen::startMsg}
-    update idletasks
+    # Update needed to force display (bad?).
+    if {[winfo exists $wDlgs(splash)]} {
+	${wDlgs(splash)}.can itemconfigure tsplash  \
+	  -text $::SplashScreen::startMsg
+	update idletasks
+    }
 }
 
 trace variable ::SplashScreen::startMsg w TraceStartMessage
@@ -520,8 +522,7 @@ set thisIPnum $internalIPnum
 
 # Beware! [info hostname] can be very slow on Macs first time it is called.
 set ::SplashScreen::startMsg [::msgcat::mc splashhost]
-set thisHostname [info hostname]
-set this(hostname) $thisHostname
+set this(hostname) [info hostname]
 
 # Try to get own ip number from a temporary server socket.
 # This can be a bit complicated as different OS sometimes give 0.0.0.0 or
@@ -578,6 +579,7 @@ set allIPnumsFrom {}
 # any connections, but all connections are connected 'from'.
 set allIPnumsToSend {}
     
+
 # Standard (factory) preferences are set here.
 # These are the hardcoded, application default, values, and can be
 # overridden by the ones in user default file.
@@ -623,12 +625,10 @@ VerifyPackagesForMimeTypes
 ::CanvasUtils::CreateFontSizeMapping
 
 # Make the actual whiteboard with canvas, tool buttons etc...
-if {$prefs(protocol) == "jabber"} {
-    ::UI::BuildMain . -serverentrystate disabled -sendcheckstate disabled
-} else {    
+# Jabber has the roster window as "main" window.
+if {![string equal $prefs(protocol) "jabber"]} {
     ::UI::BuildMain . -serverentrystate disabled
 }
-
 if {$prefs(firstLaunch) && !$prefs(stripJabber)} {
     wm withdraw .
     set displaySetup 1
@@ -656,7 +656,6 @@ after 500 {catch {destroy $wDlgs(splash)}}
 
 # Do we need all the jabber stuff? Is this the right place? Need it for setup!
 if {!$prefs(stripJabber)} {
-    #after idle {::Jabber::Init}
     ::Jabber::Init
     after 1200 {::Sounds::Init}
 } else {
@@ -669,22 +668,25 @@ if {!$prefs(stripJabber)} {
 if {$displaySetup} {
     package require SetupAss
 
-    ::Jabber::::RostServ::Show $wDlgs(jrostbro) -visible 0
     catch {destroy $wDlgs(splash)}
     update
     ::SetupAss::SetupAss .setupass
     ::UI::CenterWindow .setupass
     raise .setupass
     tkwait window .setupass
-    
-    ::Jabber::::RostServ::Show $wDlgs(jrostbro) -visible 1
-    wm deiconify .
-    raise .
 }
 
 # Is it the first time it is launched, then show the welcome canvas.
 if {$prefs(firstLaunch)} {
+    if {[wm state .] != "normal"} {
+	if {[string equal $prefs(protocol) "jabber"]} {
+	    ::UI::BuildMain . -serverentrystate disabled -sendcheckstate disabled
+	} else {    
+	    ::UI::BuildMain . -serverentrystate disabled
+	}
+    }
     ::CanvasFile::DoOpenCanvasFile . $prefs(welcomeFile)
+    raise .
 }
 set prefs(firstLaunch) 0
 
@@ -711,8 +713,7 @@ if {($prefs(protocol) != "client") && $prefs(autoStartServer)} {
     after $prefs(afterStartServer) [list DoStartServer $prefs(thisServPort)]
 }
 
-# Start the TinyHttpd server. Perhaps this should go in its own process,
-# or perhaps in its own thread...?
+# Start the TinyHttpd server. Perhaps this should go in its own thread...?
 
 if {($prefs(protocol) != "client") && $prefs(haveHttpd)} {
     if {[catch {  \

@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: browse.tcl,v 1.5 2003-02-24 17:52:06 matben Exp $
+# $Id: browse.tcl,v 1.6 2003-04-28 13:32:31 matben Exp $
 # 
 #  locals($jid,parent):       the parent of $jid.
 #  locals($jid,parents):      list of all parent jid's,
@@ -183,9 +183,7 @@ proc browse::getparentjid {browseName jid} {
 # This is not good...   DANGER!!!
 
 proc browse::GetParentJidFromJid {browseName jid} {
-    
-    upvar [namespace current]::${browseName}::locals locals
-    
+        
     Debug 3 "GetParentJidFromJid BAD!!!  jid=$jid"
 
     set c {[^@/.<>:]+}

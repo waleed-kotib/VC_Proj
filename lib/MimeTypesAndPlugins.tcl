@@ -11,7 +11,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: MimeTypesAndPlugins.tcl,v 1.4 2003-02-24 17:52:11 matben Exp $
+# $Id: MimeTypesAndPlugins.tcl,v 1.5 2003-04-28 13:32:32 matben Exp $
 
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -271,7 +271,7 @@ InvertArray macType2Suff suff2MacType
 
 if {1} {
     array set packages2Platform {
-	QuickTimeTcl       {macintosh             windows} 
+	QuickTimeTcl       {macintosh   macosx    windows} 
 	TclSpeech          {macintosh   macosx}
 	MSSpeech           {windows}
 	snack              {macintosh   macosx    windows   unix}
@@ -888,12 +888,12 @@ proc GetPreferredPackage {mime} {
 
 proc ::Importers::DispatchToImporter {filePath mime optList} {
     global  prefs wapp
-    
-    upvar ::.::wapp wapp
 
     if {[string equal $prefs(protocol) "jabber"]} {
 	::Jabber::WB::DispatchToImporter $filePath $mime $optList
-    } else {
+    } else {    
+	upvar ::.::wapp wapp
+	
 	set importPackage [GetPreferredPackage $mime]
 	if {[llength $importPackage]} {
 	    eval [list $plugin($importPackage,importProc) $wapp(servCan)  \

@@ -126,8 +126,10 @@
 ::msgcat::mcset sv mAddons		{Addons}
 
 ::msgcat::mcset sv mAboutWhiteboard   	{Om Whiteboard...}
+::msgcat::mcset sv mAboutCoccinella   	{Om Coccinella...}
 ::msgcat::mcset sv mAboutQuickTimeTcl	{Om QuickTimeTcl...}
 ::msgcat::mcset sv mNew			{Nytt}
+::msgcat::mcset sv mNewWhiteboard	{Ny skrivtavla}
 ::msgcat::mcset sv mOpenConnection	{Öppna förbindelse...}
 ::msgcat::mcset sv mCloseWindow		{Stäng fönster}
 ::msgcat::mcset sv mStartServer		{Starta servern}
@@ -329,6 +331,7 @@
 ::msgcat::mcset sv {New Message}           {Nytt meddelande}
 ::msgcat::mcset sv {New password}          {Nytt lösenord}
 ::msgcat::mcset sv {New shortcut}          {Ny genväg}
+::msgcat::mcset sv {New User}              {Ny kompis}
 ::msgcat::mcset sv {My vCard}		   {Mitt vCard}
 ::msgcat::mcset sv {Nick name}             {Kortnamn}
 ::msgcat::mcset sv {No Address}		   {Adress saknas}
@@ -475,7 +478,9 @@ hjälper oss med det här :-(}
 ::msgcat::mcset sv messsuassfillin	{Försäkra dig om att samtliga fält\
 är ifyllda innan du fortsätter}
 ::msgcat::mcset sv messsuassclose	{Är du säker på att du vill stänga\
-inställningsassistenten? Du kan starta den när som helst från Info menyn.}
+inställningsassistenten? Du kan starta den när som helst från menyn.}
+::msgcat::mcset sv messprotocolch	{Du har ändrat nätverks uppställiningen.\
+Detta kräver att programmet startas om. Vill du verkligen fortsätta?}
 
 
 

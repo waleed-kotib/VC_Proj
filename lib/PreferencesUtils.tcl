@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.4 2003-02-24 17:52:12 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.5 2003-04-28 13:32:33 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -470,7 +470,6 @@ proc ::PreferencesUtils::SetUserPreferences { } {
 	  [list ::Jabber::jprefs(logoutStatus)     jprefs_logoutStatus      $::Jabber::jprefs(logoutStatus)]  \
 	  [list ::Jabber::jprefs(chatFont)         jprefs_chatFont          $::Jabber::jprefs(chatFont)]  \
 	  [list ::Jabber::jprefs(autoupdateShow,$ver) jprefs_autoupdateShow_ver $::Jabber::jprefs(autoupdateShow,$ver)]  \
-	  [list ::Jabber::jstate(rostBrowseVis)    jstate_rostBrowseVis     $::Jabber::jstate(rostBrowseVis) userDefault] \
 	  [list ::Jabber::jserver(profile)         jserver_profile          $::Jabber::jserver(profile)      userDefault] \
 	  [list ::Jabber::jserver(profile,selected) jserver_profile_selected $::Jabber::jserver(profile,selected) userDefault] \
 	  ]

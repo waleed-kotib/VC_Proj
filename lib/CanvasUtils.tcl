@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.4 2003-02-24 17:52:10 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.5 2003-04-28 13:32:32 matben Exp $
 
 package provide CanvasUtils 1.0
 package require sha1pure
@@ -74,7 +74,7 @@ proc ::CanvasUtils::Command {wtop cmd {where all}} {
     global  allIPnumsToSend
     
     upvar ::${wtop}::wapp wapp
-    
+        
     set w $wapp(can)
     if {[string equal $where "all"] || [string equal $where "local"]} {
         eval {$w} $cmd
@@ -100,6 +100,7 @@ proc ::CanvasUtils::CommandList {wtop cmdList {where all}} {
 }
 
 # CanvasUtils::CommandExList --
+#
 #
 #       Makes it possible to have different commands local and remote.
 
@@ -676,7 +677,8 @@ proc ::CanvasUtils::DoItemPopup {w x y} {
     set m .popup${type}
     catch {destroy $m}
     if {![winfo exists $m]} {	
-	::UI::MakeMenu $wtop $m {} $::UI::menuDefs(pop,$type) -id $id -w $w
+	#::UI::MakeMenu $wtop $m {} $::UI::menuDefs(pop,$type) normal -id $id -w $w
+	::UI::NewMenu $wtop $m {} "pop,$type" normal -id $id -w $w
 	if {[string equal $type "text"]} {
 	    ::UI::BuildCanvasPopupFontMenu $w ${m}.mfont $id $prefs(canvasFonts)
 	}
@@ -752,7 +754,7 @@ proc ::CanvasUtils::PostGeneralMenu {w x y m mDef} {
     # Build popup menu.
     catch {destroy $m}
     if {![winfo exists $m]} {
-	::UI::MakeMenu $wtop $m {} $mDef -winfr $w
+	::UI::MakeMenu $wtop $m {} $mDef normal -winfr $w
 	
 	# This one is needed on the mac so the menu is built before
 	# it is posted.

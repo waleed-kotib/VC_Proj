@@ -4,9 +4,9 @@
 #      It implements a notebook interface.
 #      Code idee from Harrison & McLennan
 #      
-#  Copyright (c) 2002  Mats Bengtsson
+#  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: notebook.tcl,v 1.1.1.1 2002-12-08 10:55:53 matben Exp $
+# $Id: notebook.tcl,v 1.2 2003-04-28 13:32:25 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -201,31 +201,31 @@ proc ::notebook::WidgetProc {w command args} {
     
     # Which command?
     switch -- $command {
-	{cget} {
+	cget {
 	    if {[llength $args] != 1} {
 		error "wrong # args: should be $w cget option"
 	    }
 	    set result $options($args)
 	}
-	{configure} {
+	configure {
 	    set result [eval {Configure $w} $args]
 	}
-	{deletepage} {
+	deletepage {
 	    set result [eval {DeletePage $w} $args]
 	}
-	{displaypage} {
+	displaypage {
 	    if {[llength $args] != 1} {
 		error "wrong # args: should be $w displaypage pageName"
 	    }
 	    set result [eval {Display $w} $args 1]
 	}
-	{page} {
+	page {
 	    set result [eval {Page $w} $args]
 	}
-	{pages} {
+	pages {
 	    set result [Pages $w]
 	}
-	{default} {
+	default {
 	    error "unknown command \"$command\" of the notebook widget.\
 	      Must be one of $widgetCommands"
 	}

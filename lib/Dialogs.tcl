@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.4 2003-02-24 17:52:10 matben Exp $
+# $Id: Dialogs.tcl,v 1.5 2003-04-28 13:32:32 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -84,7 +84,7 @@ proc ::GetCanvas::GetCanvas {w} {
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
     } else {
-	wm transient $w .
+
     }
     wm title $w {Get Canvas}
     
@@ -170,7 +170,7 @@ proc InfoOnPlugins {w} {
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
     } else {
-	wm transient $w .
+
     }
     wm title $w [::msgcat::mc {Plugin Info}]
     pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
@@ -293,15 +293,13 @@ namespace eval ::NetworkSetup:: {
 
 proc ::NetworkSetup::StartServer { wbt } {
     global  this state prefs
-    
-    puts "::NetworkSetup::StartServer this(path)=$this(path)"
-    
+        
     set path [file join $this(path) lib ReflectorServer.tcl]
     
     # Start the reflector server as a background process. Mac not working!
     
     switch -- $this(platform) {
-	"macintosh" {
+	macintosh {
 	    tk_messageBox -message  \
 	      "The Reflector Server can't be started on the Mac, Sorry."  \
 	      -icon error -type ok
@@ -311,7 +309,7 @@ proc ::NetworkSetup::StartServer { wbt } {
 	    AppleScript execute {open application TclShell}
 	    AppleScript execute {tell application TclShell to do script "puts hello"}
 	}
-	"windows" {
+	windows {
 	    
 	    # Need to start the right version, try same is present.
 	    regsub -all {\.} [info tclversion] {} ver
@@ -325,7 +323,7 @@ proc ::NetworkSetup::StartServer { wbt } {
 		set state(reflectPid) $res
 	    }
 	}
-	"unix" - "macosx" {
+	unix - macosx {
 	    
 	    # Remeber, the exec does not go through an Unix shell!
 	    if {[catch {exec tclsh $path $prefs(reflectPort) &} res]} {
@@ -338,7 +336,6 @@ proc ::NetworkSetup::StartServer { wbt } {
 	    }
 	}
     }
-    puts "::NetworkSetup::StartServer:: reflectPid=$state(reflectPid)"
     $wbt configure -text " Stop Server " -command  \
       [list ::NetworkSetup::StopServer $wbt]
     set state(reflectorStarted) 1
@@ -427,7 +424,7 @@ proc ::PrintPSonUnix::PrintPSonUnix {w wtoprint} {
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
     } else {
-	wm transient $w .
+
     }
     wm title $w {Print Canvas}
     
@@ -568,7 +565,7 @@ proc ::PSPageSetup::PSPageSetup { w } {
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
     } else {
-	wm transient $w .
+
     }
     wm title $w "Page Setup"
     
@@ -759,12 +756,11 @@ proc ::InfoClients::ShowInfoClients {w allIPnumsFrom} {
     if {[winfo exists $w]} {
 	return
     }
+    toplevel $w
     if {[string match "mac*" $this(platform)]} {
-	toplevel $w
 	eval $::macWindowStyle $w documentProc
     } else {
-	toplevel $w
-	wm transient $w .
+
     }
     wm title $w "Client Info"
     pack [frame $w.frall -borderwidth 1 -relief raised]
@@ -858,7 +854,7 @@ proc ShowInfoServer {w thisIPnum} {
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
     } else {
-	wm transient $w .
+
     }
     wm title $w [::msgcat::mc {Server Info}]
     pack [frame $w.frall -borderwidth 1 -relief raised]
@@ -1038,7 +1034,7 @@ proc AboutQuickTimeTcl { } {
 	eval $::macWindowStyle $w documentProc
 	wm transient $w
     } else {
-	wm transient $w .
+
     }
     wm title $w [::msgcat::mc {About QuickTimeTcl}]
     
@@ -1050,7 +1046,6 @@ proc AboutQuickTimeTcl { } {
     wm geometry $w +[expr ($screenW - $mw)/2]+[expr ($screenH - $mh)/2]
     update
     wm resizable $w 0 0
-    wm transient $w
     $w.m play
 }
 

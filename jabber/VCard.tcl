@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: VCard.tcl,v 1.2 2003-02-24 17:52:05 matben Exp $
+# $Id: VCard.tcl,v 1.3 2003-04-28 13:32:29 matben Exp $
 
 package provide VCard 1.0
 
@@ -38,7 +38,7 @@ proc ::VCard::Fetch {w type {jid {}}} {
     incr uid
         
     # We should query the server for this and then fill in.
-    ::UI::SetStatusMessage . [::msgcat::mc vcardget $jid]
+    ::Jabber::UI::SetStatusMessage [::msgcat::mc vcardget $jid]
     $jstate(jlib) vcard_get $jid  \
       [list ::VCard::FetchCallback $wtoplevel $type $jid]
 }
@@ -55,10 +55,10 @@ proc ::VCard::FetchCallback {w type jid jlibName result theQuery} {
         tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
           -message [FormatTextForMessageBox  \
           [::msgcat::mc vcarderrget $theQuery]]
-        ::UI::SetStatusMessage . {}
+        ::Jabber::UI::SetStatusMessage ""
         return
     }
-    ::UI::SetStatusMessage . [::msgcat::mc vcardrec]
+    ::Jabber::UI::SetStatusMessage [::msgcat::mc vcardrec]
     
     # The 'theQuery' now contains all the vCard data in a xml list.
     catch {unset elem}
@@ -162,9 +162,14 @@ proc ::VCard::Build {w type jid} {
     if {[string match "mac*" $this(platform)]} {
         eval $::macWindowStyle $w documentProc
     } else {
-        wm transient $w .
+
     }    
     wm title $w [::msgcat::mc {vCard Info}]
+    
+    # Toplevel menu for mac only.
+    if {[string match "mac*" $this(platform)]} {
+	$w configure -menu [::Jabber::UI::GetRosterWmenu]
+    }
     set vcardjid $jid
     
     # Global frame.

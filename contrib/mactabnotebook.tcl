@@ -1,4 +1,3 @@
-
 #  mactabnotebook.tcl ---
 #  
 #      This file is part of the whiteboard application.
@@ -6,9 +5,9 @@
 #      This widget is "derived" from the notebook widget.
 #      Code idee from Harrison & McLennan
 #      
-#  Copyright (c) 2002  Mats Bengtsson
+#  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: mactabnotebook.tcl,v 1.1.1.1 2002-12-08 10:55:34 matben Exp $
+# $Id: mactabnotebook.tcl,v 1.2 2003-04-28 13:32:25 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -86,9 +85,25 @@ proc ::mactabnotebook::Init { } {
     variable notebookOptions
     variable tabOptions
     variable tabDefs
+    variable this
 
     if {$widgetGlobals(debug) > 1}  {
 	puts "::mactabnotebook::Init"
+    }
+    
+    # We use a variable 'this(platform)' that is more convenient for MacOS X.
+    switch -- $tcl_platform(platform) {
+	unix {
+	    set this(platform) $tcl_platform(platform)
+	    if {[package vcompare [info tclversion] 8.3] == 1} {	
+		if {[string equal [tk windowingsystem] "aqua"]} {
+		    set this(platform) "macosx"
+		}
+	    }
+	}
+	windows - macintosh {
+	    set this(platform) $tcl_platform(platform)
+	}
     }
     
     # List all allowed options with their database names and class names.
@@ -117,14 +132,14 @@ proc ::mactabnotebook::Init { } {
     option add *Notebook.takeFocus                 0            widgetDefault
     
     # Platform specifics...
-    switch $tcl_platform(platform) {
-	{unix} {
+    switch -- $tcl_platform(platform) {
+	unix {
 	    option add *MacTabnotebook.tabFont    {Helvetica -12 bold}   widgetDefault
 	}
-	{windows} {
+	windows {
 	    option add *MacTabnotebook.tabFont    {system}   widgetDefault
 	}
-	{macintosh} {
+	macintosh - macosx {
 	    option add *MacTabnotebook.tabFont    {system}    widgetDefault
 	}
     }
@@ -435,11 +450,11 @@ proc ::mactabnotebook::Configure {w args} {
 	set newValue $argsarr($opt)
 	set oldValue $options($opt)
 	switch -- $opt {
-	    {-activetabcolor} - {-margin} - {-tabbackground} -   \
-	      {-tabcolor} - {-tabfont} {		
+	    -activetabcolor - -margin - -tabbackground -   \
+	      -tabcolor - -tabfont {		
 		set redraw 1
 	    }
-	    {-borderwidth} - {-relief} {
+	    -borderwidth - -relief {
 		lappend notebookArgs $opt $newValue
 	    }
 	}
