@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.51 2004-10-20 13:35:59 matben Exp $
+# $Id: Login.tcl,v 1.52 2004-10-22 06:44:14 matben Exp $
 
 package provide Login 1.0
 
@@ -22,6 +22,7 @@ namespace eval ::Jabber::Login:: {
     # Add all event hooks.
     ::hooks::register quitAppHook     [list ::UI::SaveWinGeom $wDlgs(jlogin)]
     ::hooks::register closeWindowHook ::Jabber::Login::CloseHook
+    ::hooks::register launchFinalHook ::Jabber::Login::LaunchHook
 }
 
 # Jabber::Login::Dlg --
@@ -416,6 +417,46 @@ proc ::Jabber::Login::SetStatus {args} {
     } else {
 	eval {::Jabber::SetStatus available -notype 1} $presArgs
     }    
+}
+
+# Jabber::Login::LaunchHook --
+# 
+#       Method to automatically login after launch.
+
+proc ::Jabber::Login::LaunchHook { } {
+    upvar ::Jabber::jprefs jprefs
+    
+    if {!$jprefs(autoLogin)} {
+	return ""
+    }
+    
+    # Use our selected profile.
+    set profname [::Profiles::GetSelectedName]
+    set password [::Profiles::Get $profname password]
+    set ans "ok"
+    if {$password == ""} {
+	set ans [::UI::MegaDlgMsgAndEntry  \
+	  [mc {Password}] [mc enterpassword $state(jid)] "[mc Password]:" \
+	  password [mc Cancel] [mc OK] -show {*}]
+    }
+    if {$ans == "ok"} {
+	set domain [::Profiles::Get $profname domain]
+	set node   [::Profiles::Get $profname node]
+	set opts   [::Profiles::Get $profname options]
+	array set optsArr $opts
+	if {[info exists optsArr(-resource)] && ($optsArr(-resource) != "")} {
+	    set res $optsArr(-resource)
+	} else {
+	    set res "coccinella"
+	}
+	eval {::Jabber::Login::HighLogin $domain $node $res $password \
+	  [namespace current]::AutoLoginCB} $opts
+    }
+}
+
+proc ::Jabber::Login::AutoLoginCB {logtoken status {errmsg ""}} {
+
+    ::Jabber::Login::ShowAnyMessageBox $logtoken $status $errmsg
 }
 
 #-------------------------------------------------------------------------------

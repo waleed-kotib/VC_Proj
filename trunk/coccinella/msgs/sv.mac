@@ -725,6 +725,7 @@ Uppgifter som är serverlagrade är sökbara för samtliga användare.}
 ::msgcat::mcset sv prefcufont    {Välj typsnitt för chatt fönster:}
 ::msgcat::mcset sv prefcushow    {Visa inkommande meddelande i nytt fönster}
 ::msgcat::mcset sv prefcusave    {Spara inkorgen mellan sessionerna}
+::msgcat::mcset sv prefcuautologin  {Logga in automatiskt vid start}
 ::msgcat::mcset sv prefcu2clk    {Dubbelklicka meddelande i inkorgen:}
 ::msgcat::mcset sv prefcuopen    {Öppna meddelande i nytt fönster}
 ::msgcat::mcset sv prefcureply   {Returnera till avsändaren}

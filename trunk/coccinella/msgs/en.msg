@@ -728,6 +728,7 @@ If you haven't explicitly picked the "peer-to-peer" option in the "Network Setup
 ::msgcat::mcset en prefcufont    {Select font for chat window:}
 ::msgcat::mcset en prefcushow    {Show incoming messages in new window}
 ::msgcat::mcset en prefcusave    {Save message inbox between sessions}
+::msgcat::mcset en prefcuautologin  {Automatically login when launched}
 ::msgcat::mcset en prefcu2clk    {Double click message in inbox:}
 ::msgcat::mcset en prefcuopen    {Open message in new window}
 ::msgcat::mcset en prefcureply   {Reply to sender}

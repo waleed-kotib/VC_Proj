@@ -8,6 +8,8 @@ Coccinella-0.95.2 (04????): 	Short summary --
 
         - each page, roster, disco, browser, agents, now have their own status
 	  widget
+	- extended buddy pouncing
+	- added automatic login option
 
 Coccinella-0.95.1 (040930): 	Short summary --
 

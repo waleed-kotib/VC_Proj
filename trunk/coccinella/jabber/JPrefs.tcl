@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.15 2004-10-04 09:22:19 matben Exp $
+# $Id: JPrefs.tcl,v 1.16 2004-10-22 06:44:14 matben Exp $
 
 package provide JPrefs 1.0
 
@@ -39,6 +39,7 @@ proc ::Jabber::JPrefs::InitPrefsHook { } {
     # Service discovery method: "disco", "agents" or "browse"
     #set jprefs(serviceMethod) "browse"
     set jprefs(serviceMethod) "disco"
+    set jprefs(autoLogin) 0
     
     # The rosters background image is partly controlled by option database.
     set jprefs(rost,useBgImage)     1
@@ -88,6 +89,7 @@ proc ::Jabber::JPrefs::InitPrefsHook { } {
       [list ::Jabber::jprefs(rost,useBgImage)  jprefs_rost_useBgImage   $jprefs(rost,useBgImage)]  \
       [list ::Jabber::jprefs(rost,bgImagePath) jprefs_rost_bgImagePath  $jprefs(rost,bgImagePath)]  \
       [list ::Jabber::jprefs(serviceMethod)    jprefs_serviceMethod2    $jprefs(serviceMethod)]  \
+      [list ::Jabber::jprefs(autoLogin)        jprefs_autoLogin         $jprefs(autoLogin)]  \
       ]
     
     if {$jprefs(chatFont) != ""} {
@@ -326,7 +328,8 @@ proc ::Jabber::JPrefs::BuildCustomPage {page} {
     set xpadbt [option get [winfo toplevel $page] xPadBt {}]
     set ypad   [option get [winfo toplevel $page] yPad {}]
 
-    foreach key {inboxSave rost,useBgImage rost,bgImagePath serviceMethod} {
+    foreach key {inboxSave rost,useBgImage rost,bgImagePath serviceMethod \
+      autoLogin} {
 	set tmpJPrefs($key) $jprefs($key)
     }
 
@@ -338,6 +341,8 @@ proc ::Jabber::JPrefs::BuildCustomPage {page} {
      
     checkbutton $pbl.savein -text " [mc prefcusave]" \
       -variable [namespace current]::tmpJPrefs(inboxSave)
+    checkbutton $pbl.log -text " [mc prefcuautologin]" \
+      -variable [namespace current]::tmpJPrefs(autoLogin)
         
     label $pbl.lserv -text [mc prefcudisc]
     radiobutton $pbl.disco   \
@@ -351,6 +356,7 @@ proc ::Jabber::JPrefs::BuildCustomPage {page} {
       -variable [namespace current]::tmpJPrefs(serviceMethod)
     
     grid $pbl.savein -padx 2 -pady $ypad -sticky w -columnspan 2
+    grid $pbl.log    -padx 2 -pady $ypad -sticky w -columnspan 2
     grid $pbl.lserv  -padx 2 -pady $ypad -sticky w
     grid $pbl.disco  -padx 2 -pady $ypad -sticky w
     grid $pbl.browse -padx 2 -pady $ypad -sticky w
