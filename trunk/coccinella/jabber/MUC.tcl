@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.32 2004-04-22 13:48:43 matben Exp $
+# $Id: MUC.tcl,v 1.33 2004-04-25 15:35:25 matben Exp $
 
 package require entrycomp
 
@@ -118,7 +118,7 @@ proc ::Jabber::MUC::BuildEnter {args} {
 	}
     }
 
-    ::Jabber::Debug 2 "::Jabber::MUC::BuildEnter confServers='$confServers'; allConfServ=$allConfServ"
+    ::Debug 2 "::Jabber::MUC::BuildEnter confServers='$confServers'; allConfServ=$allConfServ"
 
     if {[llength $confServers] == 0} {
 	tk_messageBox -type ok -icon error -title "No Conference"  \
@@ -353,7 +353,7 @@ proc ::Jabber::MUC::BusyEnterDlgIncr {token {num 1}} {
 
 proc ::Jabber::MUC::GetRoomsCB {token browsename type jid subiq args} {
     
-    ::Jabber::Debug 4 "::Jabber::MUC::GetRoomsCB type=$type, jid=$jid"
+    ::Debug 4 "::Jabber::MUC::GetRoomsCB type=$type, jid=$jid"
     
     switch -- $type {
 	error {

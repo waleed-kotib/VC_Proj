@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.28 2004-03-13 15:21:41 matben Exp $
+# $Id: Login.tcl,v 1.29 2004-04-25 15:35:25 matben Exp $
 
 package provide Login 1.0
 
@@ -237,8 +237,8 @@ proc ::Jabber::Login::TraceMenuVar {name key op} {
     set password $tmpProfArr($profile,password)
     set resource $tmpProfArr($profile,-resource)
     
-    #::Jabber::Debug 3 "TraceMenuVar: locName=$locName, menuVar=$menuVar"
-    #::Jabber::Debug 3 "\t[parray tmpProfArr $locName,*]"
+    #::Debug 3 "TraceMenuVar: locName=$locName, menuVar=$menuVar"
+    #::Debug 3 "\t[parray tmpProfArr $locName,*]"
 }
 
 proc ::Jabber::Login::CloseHook {wclose} {
@@ -320,7 +320,7 @@ proc ::Jabber::Login::Doit { } {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 2 "::Jabber::Login::Doit"
+    ::Debug 2 "::Jabber::Login::Doit"
     
     # Kill any pending open states.
     ::Network::KillAll
@@ -386,7 +386,7 @@ proc ::Jabber::Login::SocketIsOpen {sock ip port status {msg {}}} {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 2 "::Jabber::Login::SocketIsOpen"
+    ::Debug 2 "::Jabber::Login::SocketIsOpen"
     
     switch $status {
 	error - timeout {
@@ -445,7 +445,7 @@ proc ::Jabber::Login::ConnectProc {jlibName args} {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 2 "::Jabber::Login::ConnectProc jlibName=$jlibName, args='$args'"
+    ::Debug 2 "::Jabber::Login::ConnectProc jlibName=$jlibName, args='$args'"
 
     array set argsArray $args
     ::Jabber::UI::SetStatusMessage [::msgcat::mc jasendauth $server]
@@ -461,7 +461,7 @@ proc ::Jabber::Login::ConnectProc {jlibName args} {
 	    error "no id for digest in receiving <stream>"
 	}
 	
-	::Jabber::Debug 3 "argsArray(id)=$argsArray(id), password=$password"
+	::Debug 3 "argsArray(id)=$argsArray(id), password=$password"
 	
 	set digestedPw [::sha1pure::sha1 $argsArray(id)$password]
 	::Jabber::InvokeJlibCmd send_auth $username $resource   \
@@ -497,7 +497,7 @@ proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
     
-    ::Jabber::Debug 2 "::Jabber::Login::ResponseProc  theQuery=$theQuery"
+    ::Debug 2 "::Jabber::Login::ResponseProc  theQuery=$theQuery"
 
     ::Jabber::UI::StartStopAnimatedWave 0
     

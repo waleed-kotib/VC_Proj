@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.54 2004-04-16 13:59:29 matben Exp $
+# $Id: Chat.tcl,v 1.55 2004-04-25 15:35:24 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -122,7 +122,7 @@ proc ::Jabber::Chat::StartThreadDlg {args} {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
 
-    ::Jabber::Debug 2 "::Jabber::Chat::StartThreadDlg args='$args'"
+    ::Debug 2 "::Jabber::Chat::StartThreadDlg args='$args'"
 
     set w $wDlgs(jstartchat)
     if {[winfo exists $w]} {
@@ -232,7 +232,7 @@ proc ::Jabber::Chat::GotMsg {body args} {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
 
-    ::Jabber::Debug 2 "::Jabber::Chat::GotMsg args='$args'"
+    ::Debug 2 "::Jabber::Chat::GotMsg args='$args'"
 
     array set argsArr $args
     
@@ -412,7 +412,7 @@ proc ::Jabber::Chat::Build {threadID args} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
-    ::Jabber::Debug 2 "::Jabber::Chat::Build threadID=$threadID, args='$args'"
+    ::Debug 2 "::Jabber::Chat::Build threadID=$threadID, args='$args'"
 
     # Initialize the state variable, an array, that keeps is the storage.
     
@@ -659,7 +659,7 @@ proc ::Jabber::Chat::ConfigureTextTags {w wtext} {
     variable chatOptions
     upvar ::Jabber::jprefs jprefs
     
-    ::Jabber::Debug 2 "::Jabber::Chat::ConfigureTextTags"
+    ::Debug 2 "::Jabber::Chat::ConfigureTextTags"
     
     set space 2
     set alltags {mepre metext youpre youtext syspre systext histhead}
@@ -703,7 +703,7 @@ proc ::Jabber::Chat::ConfigureTextTags {w wtext} {
 proc ::Jabber::Chat::SetFont {theFont} {    
     upvar ::Jabber::jprefs jprefs
 
-    ::Jabber::Debug 2 "::Jabber::Chat::SetFont theFont=$theFont"
+    ::Debug 2 "::Jabber::Chat::SetFont theFont=$theFont"
 
     set jprefs(chatFont) $theFont
         
@@ -725,7 +725,7 @@ proc ::Jabber::Chat::ActiveCmd {token} {
     variable $token
     upvar 0 $token state
 
-    ::Jabber::Debug 2 "::Jabber::Chat::ActiveCmd: token=$token"
+    ::Debug 2 "::Jabber::Chat::ActiveCmd: token=$token"
     
     set w $state(w)
     if {$state(active)} {
@@ -746,7 +746,7 @@ proc ::Jabber::Chat::Send {token} {
     variable cprefs
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 2 "::Jabber::Chat::Send "
+    ::Debug 2 "::Jabber::Chat::Send "
     
     # Check that still connected to server.
     if {![::Jabber::IsConnected]} {
@@ -983,7 +983,7 @@ proc ::Jabber::Chat::Close {token} {
     variable $token
     upvar 0 $token state    
     
-    ::Jabber::Debug 2 "::Jabber::Chat::Close: token=$token"
+    ::Debug 2 "::Jabber::Chat::Close: token=$token"
     
     #set ans [tk_messageBox -icon info -parent $w -type yesno \
     #  -message [FormatTextForMessageBox [::msgcat::mc jamesschatclose]]]
@@ -1039,7 +1039,7 @@ proc ::Jabber::Chat::XEventRecv {token xevent args} {
     }
     set composeElem [wrapper::getchildswithtag $xevent "composing"]
     set idElem [wrapper::getchildswithtag $xevent "id"]
-    ::Jabber::Debug 6 "::Jabber::Chat::XEventRecv \
+    ::Debug 6 "::Jabber::Chat::XEventRecv \
       msgid=$msgid, composeElem=$composeElem, idElem=$idElem"
     if {($msgid != "") && ($composeElem != "") && ($idElem == "")} {
 	
@@ -1074,7 +1074,7 @@ proc ::Jabber::Chat::KeyPressEvent {token char} {
     upvar 0 $token state
     variable cprefs
 
-    ::Jabber::Debug 6 "::Jabber::Chat::KeyPressEvent token=$token, char=$char"
+    ::Debug 6 "::Jabber::Chat::KeyPressEvent token=$token, char=$char"
     
     if {$char == ""} {
 	return
@@ -1097,7 +1097,7 @@ proc ::Jabber::Chat::XEventSendCompose {token} {
     upvar 0 $token state
     variable cprefs
 
-    ::Jabber::Debug 2 "::Jabber::Chat::XEventSendCompose token=$token"
+    ::Debug 2 "::Jabber::Chat::XEventSendCompose token=$token"
 
     if {$state(dlgstate) != "normal"} {
 	return
@@ -1129,7 +1129,7 @@ proc ::Jabber::Chat::XEventCancelCompose {token} {
     variable $token
     upvar 0 $token state
 
-    ::Jabber::Debug 2 "::Jabber::Chat::XEventCancelCompose token=$token"
+    ::Debug 2 "::Jabber::Chat::XEventCancelCompose token=$token"
 
     # We may have been destroyed.
     if {![info exists state]} {

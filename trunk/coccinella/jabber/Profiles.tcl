@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.15 2004-04-09 10:32:25 matben Exp $
+# $Id: Profiles.tcl,v 1.16 2004-04-25 15:35:26 matben Exp $
 
 package provide Profiles 1.0
 
@@ -61,7 +61,7 @@ proc ::Profiles::Set {name server username password args} {
     variable profiles
     variable selected
     
-    ::Jabber::Debug 2 "name=$name, s=$server, u=$username, p=$password, '$args'"
+    ::Debug 2 "name=$name, s=$server, u=$username, p=$password, '$args'"
 
     array set profArr $profiles
     set allNames [::Profiles::GetAllNames]
@@ -95,7 +95,7 @@ proc ::Profiles::Remove {name} {
     variable profiles
     variable selected
     
-    ::Jabber::Debug 2 "::Profiles::Remove name=$name"
+    ::Debug 2 "::Profiles::Remove name=$name"
     
     # Don't remove the last one.
     if {[llength $profiles] <= 2} {

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.80 2004-04-25 10:14:15 matben Exp $
+# $Id: Jabber.tcl,v 1.81 2004-04-25 15:35:25 matben Exp $
 
 package provide Jabber 1.0
 
@@ -61,11 +61,6 @@ namespace eval ::Jabber:: {
     variable jserver
     variable jerror
         
-    set jstate(debug) 0
-    if {($::debugLevel > 1) && ($jstate(debug) == 0)} {
-	set jstate(debug) $::debugLevel
-    }
-    
     # The trees 'directories' which should always be there.
     set jprefs(treedirs) {Online Offline {Subscription Pending}}
     set jprefs(closedtreedirs) {}
@@ -253,13 +248,6 @@ namespace eval ::Jabber:: {
     }
   
     variable killerId 
-}
-
-proc ::Jabber::Debug {num str} {
-    variable jstate
-    if {$num <= $jstate(debug)} {
-	puts $str
-    }
 }
 
 # Jabber::FactoryDefaults --
@@ -550,7 +538,7 @@ proc ::Jabber::IqCallback {jlibName type args} {
     variable jstate
     variable jprefs
     
-    ::Jabber::Debug 2 "::Jabber::IqCallback type=$type, args='$args'"
+    ::Debug 2 "::Jabber::IqCallback type=$type, args='$args'"
     
     array set attrArr $args
     set xmlns [wrapper::getattribute $attrArr(-query) xmlns]
@@ -577,7 +565,7 @@ proc ::Jabber::MessageCallback {jlibName type args} {
     variable jprefs
     variable privatexmlns
     
-    ::Jabber::Debug 2 "::Jabber::MessageCallback type=$type, args='$args'"
+    ::Debug 2 "::Jabber::MessageCallback type=$type, args='$args'"
     
     array set attrArr {-body ""}
     array set attrArr $args
@@ -656,7 +644,7 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
     variable jprefs
     variable jerror
     
-    ::Jabber::Debug 2 "::Jabber::PresenceCallback type=$type, args='$args'"
+    ::Debug 2 "::Jabber::PresenceCallback type=$type, args='$args'"
     
     array set attrArr $args
     set from $attrArr(-from)
@@ -829,7 +817,7 @@ proc ::Jabber::ClientProc {jlibName what args} {
     variable jstate
     variable jprefs
     
-    ::Jabber::Debug 2 "::Jabber::ClientProc: jlibName=$jlibName, what=$what, args='$args'"
+    ::Debug 2 "::Jabber::ClientProc: jlibName=$jlibName, what=$what, args='$args'"
     
     # For each 'what', split the argument list into the proper arguments,
     # and make the necessary calls.
@@ -905,9 +893,7 @@ proc ::Jabber::DebugCmd { } {
 	jlib::setdebug 2
     } else {
 	if {$this(platform) == "windows" || [string match "mac*" $this(platform)]} {
-	    if {$jstate(debug) == 0} {
-		console hide
-	    }
+	    console hide
 	}
 	jlib::setdebug 0
     }
@@ -985,7 +971,7 @@ proc ::Jabber::ErrorLogDlg { } {
 proc ::Jabber::IqSetGetCallback {method jlibName type theQuery} {    
     variable jstate
     
-    ::Jabber::Debug 2 "::Jabber::IqSetGetCallback, method=$method, type=$type,\
+    ::Debug 2 "::Jabber::IqSetGetCallback, method=$method, type=$type,\
 	  theQuery='$theQuery'"
 	
     if {[string equal $type "error"]} {
@@ -1020,7 +1006,7 @@ proc ::Jabber::DoCloseClientConnection {args} {
     variable jserver
     variable jprefs
     
-    ::Jabber::Debug 2 "::Jabber::DoCloseClientConnection"
+    ::Debug 2 "::Jabber::DoCloseClientConnection"
     array set argsArr [list -status $jprefs(logoutStatus)]    
     array set argsArr $args
     
@@ -1769,7 +1755,7 @@ proc ::Jabber::ParseGetVersion {jlibname from subiq args} {
     global  prefs tcl_platform
     variable jstate
     
-    ::Jabber::Debug 2 "Jabber::ParseGetVersion args='$args'"
+    ::Debug 2 "Jabber::ParseGetVersion args='$args'"
     
     array set argsArr $args
     
@@ -1962,7 +1948,7 @@ proc ::Jabber::Passwd::Doit {w} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
     
-    ::Jabber::Debug 2 "::Jabber::Passwd::Doit"
+    ::Debug 2 "::Jabber::Passwd::Doit"
 
     if {![string equal $validate $password]} {
 	tk_messageBox -type ok -icon error  \
@@ -2011,7 +1997,7 @@ proc ::Jabber::Passwd::ResponseProc {jlibName type theQuery} {
 
 proc ::Jabber::LoginLogout { } {
     
-    ::Jabber::Debug 2 "::Jabber::LoginLogout"
+    ::Debug 2 "::Jabber::LoginLogout"
     if {[::Jabber::IsConnected]} {
 	::Jabber::DoCloseClientConnection
     } else {
@@ -2031,7 +2017,7 @@ proc ::Jabber::Logout::WithStatus { } {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
 
-    ::Jabber::Debug 2 "::Jabber::Logout::WithStatus"
+    ::Debug 2 "::Jabber::Logout::WithStatus"
 
     set w $wDlgs(joutst)
     if {[winfo exists $w]} {

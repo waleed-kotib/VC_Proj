@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.36 2004-04-25 10:14:15 matben Exp $
+# $Id: JUI.tcl,v 1.37 2004-04-25 15:35:25 matben Exp $
 
 package provide JUI 1.0
 
@@ -136,7 +136,7 @@ proc ::Jabber::UI::Show {w args} {
     if {[info exists argsArr(-visible)]} {
 	set jstate(rostBrowseVis) $argsArr(-visible)
     }
-    ::Jabber::Debug 2 "::Jabber::UI::Show w=$w, jstate(rostBrowseVis)=$jstate(rostBrowseVis)"
+    ::Debug 2 "::Jabber::UI::Show w=$w, jstate(rostBrowseVis)=$jstate(rostBrowseVis)"
 
     if {$jstate(rostBrowseVis)} {
 	::Jabber::UI::Build $w
@@ -166,7 +166,7 @@ proc ::Jabber::UI::Build {w} {
     variable menuDefs
     variable jwapp
 
-    ::Jabber::Debug 2 "::Jabber::UI::Build w=$w"
+    ::Debug 2 "::Jabber::UI::Build w=$w"
     
     if {$w != "."} {
 	::UI::Toplevel $w -macstyle documentProc
@@ -377,7 +377,7 @@ proc ::Jabber::UI::NewPage {name} {
 
     set nbframe $jwapp(nbframe)
     set pages [$nbframe pages]
-    ::Jabber::Debug 2 "------::Jabber::UI::NewPage name=$name, pages=$pages"
+    ::Debug 2 "------::Jabber::UI::NewPage name=$name, pages=$pages"
     
     switch -exact $name {
 	Agents {
@@ -521,7 +521,7 @@ proc ::Jabber::UI::GroupChat {what roomJid} {
     set wmenu $jwapp(wmenu)
     set wmjexit ${wmenu}.jabber.mexitroom
 
-    ::Jabber::Debug 4 "::Jabber::UI::GroupChat what=$what, roomJid=$roomJid"
+    ::Debug 4 "::Jabber::UI::GroupChat what=$what, roomJid=$roomJid"
 
     switch $what {
 	enter {

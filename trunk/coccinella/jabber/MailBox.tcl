@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.44 2004-04-22 13:48:43 matben Exp $
+# $Id: MailBox.tcl,v 1.45 2004-04-25 15:35:25 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -179,7 +179,7 @@ proc ::Jabber::MailBox::Build {args} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
-    ::Jabber::Debug 2 "::Jabber::MailBox::Build args='$args'"
+    ::Debug 2 "::Jabber::MailBox::Build args='$args'"
 
     # The inbox should only be read once to be economical.
     if {!$locals(mailboxRead)} {
@@ -514,7 +514,7 @@ proc ::Jabber::MailBox::GotMsg {bodytxt args} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
-    ::Jabber::Debug 2 "::Jabber::MailBox::GotMsg args='$args'"
+    ::Debug 2 "::Jabber::MailBox::GotMsg args='$args'"
     
     # The inbox should only be read once to be economical.
     if {!$locals(mailboxRead)} {
@@ -553,7 +553,7 @@ proc ::Jabber::MailBox::HandleRawWBMessage {jlibname xmlns args} {
     variable uidmsg
     variable locals
     
-    ::Jabber::Debug 2 "::Jabber::MailBox::HandleRawWBMessage args=$args"
+    ::Debug 2 "::Jabber::MailBox::HandleRawWBMessage args=$args"
     array set argsArr $args
 	
     # The inbox should only be read once to be economical.
@@ -594,7 +594,7 @@ proc ::Jabber::MailBox::HandleSVGWBMessage {jlibname xmlns args} {
     variable uidmsg
     variable locals
     
-    ::Jabber::Debug 2 "::Jabber::MailBox::HandleSVGWBMessage args='$args'"
+    ::Debug 2 "::Jabber::MailBox::HandleSVGWBMessage args='$args'"
     array set argsArr $args
 	
     # The inbox should only be read once to be economical.
@@ -825,7 +825,7 @@ proc ::Jabber::MailBox::SelectMsg { } {
     # If any whiteboard stuff in message...
     set uid [::Jabber::MailBox::GetCanvasHexUID $id]
     set svgElem [::Jabber::MailBox::GetAnySVGElements $mailbox($id)]
-    ::Jabber::Debug 2 "::Jabber::MailBox::SelectMsg  uid=$uid, svgElem='$svgElem'"
+    ::Debug 2 "::Jabber::MailBox::SelectMsg  uid=$uid, svgElem='$svgElem'"
      
     # The "raw" protocol stores the canvas in a separate file indicated by
     # the -canvasuid key in the message list.
@@ -893,7 +893,7 @@ proc ::Jabber::MailBox::DisplayXElementSVG {jid3 xlist} {
 
     variable mailbox
     upvar ::Jabber::jstate jstate
-    ::Jabber::Debug 2 "::Jabber::MailBox::DisplayXElementSVG jid3=$jid3"
+    ::Debug 2 "::Jabber::MailBox::DisplayXElementSVG jid3=$jid3"
     
     jlib::splitjid $jid3 jid2 res
     
@@ -1148,13 +1148,13 @@ proc ::Jabber::MailBox::SaveMailboxVer2 {args} {
     } else {
 	set doSave 0
     }
-    ::Jabber::Debug 2 "::Jabber::MailBox::SaveMailboxVer2 args=$args"
+    ::Debug 2 "::Jabber::MailBox::SaveMailboxVer2 args=$args"
     if {$locals(mailboxRead)} {
 
 	# Be sure to not have any inbox that is empty.
 	if {[llength [array names mailbox]] == 0} {
 	    catch {file delete $jprefs(inboxPath)}
-	    ::Jabber::Debug 2 "\tdelete inbox"
+	    ::Debug 2 "\tdelete inbox"
 	    return
 	} else {
 	    
@@ -1162,7 +1162,7 @@ proc ::Jabber::MailBox::SaveMailboxVer2 {args} {
 	    set doSave 1
 	}
     }
-    ::Jabber::Debug 2 "\tdoSave=$doSave"
+    ::Debug 2 "\tdoSave=$doSave"
     if {!$doSave} {
 	return
     }
@@ -1255,7 +1255,7 @@ proc ::Jabber::MailBox::ReadMailboxVer1 { } {
     variable mailbox
     upvar ::Jabber::jprefs jprefs
     
-    ::Jabber::Debug 2 "::Jabber::MailBox::ReadMailboxVer1"
+    ::Debug 2 "::Jabber::MailBox::ReadMailboxVer1"
 
     if {[catch {source $jprefs(inboxPath)} msg]} {
 	set tail [file tail $jprefs(inboxPath)]
@@ -1289,7 +1289,7 @@ proc ::Jabber::MailBox::ReadMailboxVer2 { } {
     variable mailbox
     upvar ::Jabber::jprefs jprefs
 
-    ::Jabber::Debug 2 "::Jabber::MailBox::ReadMailboxVer2"
+    ::Debug 2 "::Jabber::MailBox::ReadMailboxVer2"
 
     if {[catch {source $jprefs(inboxPath)} msg]} {
 	set tail [file tail $jprefs(inboxPath)]

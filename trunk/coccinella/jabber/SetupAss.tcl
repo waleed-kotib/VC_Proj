@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: SetupAss.tcl,v 1.21 2004-03-13 15:21:41 matben Exp $
+# $Id: SetupAss.tcl,v 1.22 2004-04-25 15:35:26 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -234,7 +234,7 @@ proc ::Jabber::SetupAss::ServersDlg {w} {
     variable wtbl
     variable rowcurrent ""
 
-    ::Jabber::Debug 2 "::Jabber::SetupAss::ServersDlg w=$w"
+    ::Debug 2 "::Jabber::SetupAss::ServersDlg w=$w"
     
     if {[winfo exists $w]} {
 	raise $w
@@ -367,7 +367,7 @@ proc ::Jabber::SetupAss::ServCommand {w token} {
     variable publicServerList
     variable wtbl
 
-    ::Jabber::Debug 2 "::Jabber::SetupAss::ServCommand [::httpex::state $token]"
+    ::Debug 2 "::Jabber::SetupAss::ServCommand [::httpex::state $token]"
     
     if {![winfo exists $w]} {
 	return
@@ -381,7 +381,7 @@ proc ::Jabber::SetupAss::ServCommand {w token} {
     # Investigate 'state' for any exceptions.
     set status [::httpex::status $token]
     
-    ::Jabber::Debug 2 "\ttoken=$token status=$status"
+    ::Debug 2 "\ttoken=$token status=$status"
     
     switch -- $status {
 	timeout {

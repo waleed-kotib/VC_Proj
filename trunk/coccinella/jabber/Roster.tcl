@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.56 2004-04-25 10:14:16 matben Exp $
+# $Id: Roster.tcl,v 1.57 2004-04-25 15:35:26 matben Exp $
 
 package provide Roster 1.0
 
@@ -369,7 +369,7 @@ proc ::Jabber::Roster::SendRemove {jidrm} {
     variable selItem
     upvar ::Jabber::jstate jstate
 
-    ::Jabber::Debug 2 "::Jabber::Roster::SendRemove jidrm=$jidrm"
+    ::Debug 2 "::Jabber::Roster::SendRemove jidrm=$jidrm"
 
     if {[string length $jidrm]} {
 	set jid $jidrm
@@ -466,7 +466,7 @@ proc ::Jabber::Roster::Popup {w v x y} {
     upvar ::Jabber::privatexmlns privatexmlns
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 2 "::Jabber::Roster::Popup w=$w, v='$v', x=$x, y=$y"
+    ::Debug 2 "::Jabber::Roster::Popup w=$w, v='$v', x=$x, y=$y"
     
     # The last element of $v is either a jid, (a namespace,) 
     # a header in roster, a group,
@@ -526,7 +526,7 @@ proc ::Jabber::Roster::Popup {w v x y} {
     set X [expr [winfo rootx $w] + $x]
     set Y [expr [winfo rooty $w] + $y]
     
-    ::Jabber::Debug 2 "\t jid=$jid, typeClicked=$typeClicked"
+    ::Debug 2 "\t jid=$jid, typeClicked=$typeClicked"
     
     # Mads Linden's workaround for menu post problem on mac:
     # all in menubutton commands i add "after 40 the_command"
@@ -647,7 +647,7 @@ proc ::Jabber::Roster::PushProc {rostName what {jid {}} args} {
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jstate jstate
 
-    ::Jabber::Debug 2 "--roster-> rostName=$rostName, what=$what, jid=$jid, \
+    ::Debug 2 "--roster-> rostName=$rostName, what=$what, jid=$jid, \
       args='$args'"
 
     # Extract the args list as an array.
@@ -713,7 +713,7 @@ proc ::Jabber::Roster::Clear { } {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
 
-    ::Jabber::Debug 2 "::Jabber::Roster::Clear"
+    ::Debug 2 "::Jabber::Roster::Clear"
 
     foreach gpres $jprefs(treedirs) {
 	$wtree delitem [list $gpres] -childsonly 1
@@ -746,7 +746,7 @@ proc ::Jabber::Roster::SetItem {jid args} {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
 
-    ::Jabber::Debug 2 "::Jabber::Roster::SetItem jid=$jid, args='$args'"
+    ::Debug 2 "::Jabber::Roster::SetItem jid=$jid, args='$args'"
     
     # Remove any old items first:
     # 1) If we 'get' the roster, the roster is cleared, so we can be
@@ -779,7 +779,7 @@ proc ::Jabber::Roster::SetItem {jid args} {
 	# Add all resources for this jid?
 	jlib::splitjid $jid jid2 res
 	set presenceList [$jstate(roster) getpresence $jid2]
-	::Jabber::Debug 2 "      presenceList=$presenceList"
+	::Debug 2 "      presenceList=$presenceList"
 	
 	foreach pres $presenceList {
 	    catch {unset presArr}
@@ -808,7 +808,7 @@ proc ::Jabber::Roster::Presence {jid presence args} {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
 
-    ::Jabber::Debug 2 "::Jabber::Roster::Presence jid=$jid, presence=$presence, args='$args'"
+    ::Debug 2 "::Jabber::Roster::Presence jid=$jid, presence=$presence, args='$args'"
     array set argsArr $args
 
     # All presence have a 3-tier jid as 'from' attribute:
@@ -874,7 +874,7 @@ proc ::Jabber::Roster::Remove {jid} {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 2 "::Jabber::Roster::Remove, jid=$jid"
+    ::Debug 2 "::Jabber::Roster::Remove, jid=$jid"
     
     # If have 3-tier jid:
     #    presence = 'available'   => remove jid2 + jid3
@@ -919,7 +919,7 @@ proc ::Jabber::Roster::SetCoccinella {jid} {
     variable presenceIcon
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 4 "::Jabber::Roster::SetCoccinella jid=$jid"
+    ::Debug 4 "::Jabber::Roster::SetCoccinella jid=$jid"
     
     if {[regexp {^(.+@[^/]+)/(.+)$} $jid match jid2 res]} {
 	set presArr(-show) "normal"
@@ -969,7 +969,7 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::mapShowElemToText mapShowElemToText
     
-    ::Jabber::Debug 3 "::Jabber::Roster::PutItemInTree jid=$jid, presence=$presence, args='$args'"
+    ::Debug 3 "::Jabber::Roster::PutItemInTree jid=$jid, presence=$presence, args='$args'"
 
     array set argsArr $args
     array set gpresarr {available Online unavailable Offline}
@@ -1000,7 +1000,7 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
 	    set jidx ${jid2}/$argsArr(-resource)
 	}
     }
-    ::Jabber::Debug 5 "\tjidx=$jidx"
+    ::Debug 5 "\tjidx=$jidx"
     
     set treectag item[incr treeuid]    
     set itemOpts [list -text $itemTxt -canvastags $treectag]    
@@ -1656,7 +1656,7 @@ proc ::Jabber::Roster::PresError {jlibName type args} {
     }
     array set argsArr $args
     
-    ::Jabber::Debug 2 "::Jabber::Roster::PresError type=$type, args=$args"
+    ::Debug 2 "::Jabber::Roster::PresError type=$type, args=$args"
 
     if {[string equal $type "error"]} {
 	foreach {errcode errmsg} $argsArr(-error) break
@@ -1724,7 +1724,7 @@ proc ::Jabber::Roster::GetPresenceIcon {jid presence args} {
     
     array set argsArr $args
     
-    ::Jabber::Debug 5 "GetPresenceIcon jid=$jid, presence=$presence, args=$args"
+    ::Debug 5 "GetPresenceIcon jid=$jid, presence=$presence, args=$args"
     
     # This gives the basic icons.
     set key $presence

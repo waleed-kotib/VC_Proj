@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.51 2004-04-25 10:14:14 matben Exp $
+# $Id: Coccinella.tcl,v 1.52 2004-04-25 15:35:24 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -157,7 +157,7 @@ if {[string equal $this(platform) "unix"]} {
     set thisPath [file dirname $thisScript]
 }
 
-Debug 2 "Installation rootdir thisPath = $thisPath"
+::Debug 2 "Installation rootdir thisPath = $thisPath"
 
 if {$thisPath != ""} {
     cd $thisPath

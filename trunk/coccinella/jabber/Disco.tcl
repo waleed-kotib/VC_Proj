@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.10 2004-04-23 07:13:19 matben Exp $
+# $Id: Disco.tcl,v 1.11 2004-04-25 15:35:25 matben Exp $
 
 package provide Disco 1.0
 
@@ -148,7 +148,7 @@ proc ::Jabber::Disco::GetItems {jid args} {
 proc ::Jabber::Disco::Command {disconame discotype from subiq args} {
     upvar ::Jabber::jstate jstate
 
-    ::Jabber::Debug 2 "::Jabber::Disco::Command discotype=$discotype, from=$from"
+    ::Debug 2 "::Jabber::Disco::Command discotype=$discotype, from=$from"
 
     if {[string equal $discotype "info"]} {
 	eval {::Jabber::Disco::ParseGetInfo $from $subiq} $args
@@ -164,7 +164,7 @@ proc ::Jabber::Disco::ItemsCB {disconame type from subiq args} {
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 2 "::Jabber::Disco::ItemsCB type=$type, from=$from"
+    ::Debug 2 "::Jabber::Disco::ItemsCB type=$type, from=$from"
  
     switch -- $type {
 	error {
@@ -207,7 +207,7 @@ proc ::Jabber::Disco::ItemsCB {disconame type from subiq args} {
 
 proc ::Jabber::Disco::InfoCB {disconame type from subiq args} {
     
-    ::Jabber::Debug 2 "::Jabber::Disco::InfoCB type=$type, from=$from"
+    ::Debug 2 "::Jabber::Disco::InfoCB type=$type, from=$from"
     
     # The info contains the name attribute (optional) which may
     # need to be set since we get items before name.
@@ -228,7 +228,7 @@ proc ::Jabber::Disco::ParseGetInfo {from subiq args} {
     variable xmlns
     upvar ::Jabber::jstate jstate
 
-    ::Jabber::Debug 2 "::Jabber::Disco::ParseGetInfo: args='$args'"
+    ::Debug 2 "::Jabber::Disco::ParseGetInfo: args='$args'"
     
     array set argsArr $args
     
@@ -293,7 +293,7 @@ proc ::Jabber::Disco::Build {w} {
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jprefs jprefs
     
-    ::Jabber::Debug 2 "::Jabber::Disco::Build"
+    ::Debug 2 "::Jabber::Disco::Build"
     
     # The frame of class Disco.
     frame $w -borderwidth 0 -relief flat -class Disco
@@ -354,14 +354,14 @@ proc ::Jabber::Disco::Popup {w v x y} {
     variable popMenuDefs
     upvar ::Jabber::jstate jstate
 
-    ::Jabber::Debug 2 "::Jabber::Disco::Popup w=$w, v='$v', x=$x, y=$y"
+    ::Debug 2 "::Jabber::Disco::Popup w=$w, v='$v', x=$x, y=$y"
 
     set typeClicked ""
     
     set jid [lindex $v end]
     set categoryList [$jstate(disco) types $jid]
     set categoryType [lindex $categoryList 0]
-    ::Jabber::Debug 4 "\t categoryType=$categoryType"
+    ::Debug 4 "\t categoryType=$categoryType"
 
     if {[regexp {^.+@[^/]+(/.*)?$} $jid match res]} {
 	set typeClicked user
@@ -381,7 +381,7 @@ proc ::Jabber::Disco::Popup {w v x y} {
     set X [expr [winfo rootx $w] + $x]
     set Y [expr [winfo rooty $w] + $y]
 
-    ::Jabber::Debug 2 "\t jid=$jid, typeClicked=$typeClicked"
+    ::Debug 2 "\t jid=$jid, typeClicked=$typeClicked"
     
     # Make the appropriate menu.
     set m $jstate(wpopup,disco)
@@ -499,7 +499,7 @@ proc ::Jabber::Disco::OpenTreeCmd {w v} {
     variable wtree    
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 2 "::Jabber::Disco::OpenTreeCmd v=$v"
+    ::Debug 2 "::Jabber::Disco::OpenTreeCmd v=$v"
 
     if {[llength $v]} {
 	set jid [lindex $v end]
@@ -541,7 +541,7 @@ proc ::Jabber::Disco::AddToTree {v} {
     # We disco servers jid 'items+info', and disco its childrens 'info'.
     set treectag item[incr treeuid]
     
-    ::Jabber::Debug 4 "::Jabber::Disco::AddToTree v='$v'"
+    ::Debug 4 "::Jabber::Disco::AddToTree v='$v'"
 
     set jid   [lindex $v end]
     set isdir 1
@@ -597,7 +597,7 @@ proc ::Jabber::Disco::Refresh {jid} {
     variable wtree    
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 2 "::Jabber::Disco::Refresh jid=$jid"
+    ::Debug 2 "::Jabber::Disco::Refresh jid=$jid"
 	
     # Clear internal state of the disco object for this jid.
     $jstate(disco) reset $jid
@@ -650,7 +650,7 @@ proc ::Jabber::Disco::PresenceHook {jid presence args} {
     }
     jlib::splitjid $jid jid2 res
     
-    ::Jabber::Debug 4 "::Jabber::Disco::PresenceHook $jid, $presence, $args"
+    ::Debug 4 "::Jabber::Disco::PresenceHook $jid, $presence, $args"
     
     if {[$jstate(jlib) service isroom $jid2]} {
 	array set argsArr $args
@@ -692,7 +692,7 @@ proc ::Jabber::Disco::InfoCmd {jid} {
 
 proc ::Jabber::Disco::InfoCmdCB {disconame type jid subiq args} {
     
-    ::Jabber::Debug 4 "::Jabber::Disco::InfoCmdCB type=$type, jid=$jid"
+    ::Debug 4 "::Jabber::Disco::InfoCmdCB type=$type, jid=$jid"
     
     switch -- $type {
 	error {
