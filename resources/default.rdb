@@ -61,5 +61,6 @@
 *Agent*Tree.highlightThickness:      0
 *Browse*Scrollbar.width:             12
 *Browse*Tree.highlightThickness:     0
+*GroupChat*Scrollbar.width:          12
 *Roster*Scrollbar.width:             12
 *Roster*Tree.highlightThickness:     0

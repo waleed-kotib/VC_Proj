@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.1 2004-03-31 07:53:59 matben Exp $
+# $Id: Emoticons.tcl,v 1.2 2004-04-02 12:26:37 matben Exp $
 
 
 package provide Emoticons 1.0
@@ -179,15 +179,96 @@ proc ::Emoticons::Parse {str} {
 
 
 proc ::Emoticons::Load {dir} {
+
+    set icondefPath [file join $dir icondef.xml]
+    if {![file isfile $icondefPath]} {
+	return
+    }
+    set f [open $icondefPath]
+    set xmldata [read $f]
+    close $f
     
-    
-    
+    # Parse data.
+    ParseIconDef $dir $xmldata
 }
 
 proc ::Emoticons::ParseIconDef {dir xmldata} {
 
+    set token [tinydom::parse $xmldata]
+    set xmllist [tinydom::documentElement $token]
     
+    foreach elem [tinydom::children $xmllist] {
+	
+	switch -- [tinydom::tagname $elem] {
     
+	}
+    }
+}
+
+proc ::Emoticons::ParseIcon {dir items} {
+
+    
+}
+
+# Emoticons::MenuButton --
+# 
+#       A kind of general menubutton for inserting smileys into a text widget.
+
+proc ::Emoticons::MenuButton {w wtext} {
+    global  prefs this
+    
+    variable smiley
+
+    # If we have -compound left -image ... -label ... working.
+    set prefs(haveMenuImage) 0
+    if {([package vcompare [info tclversion] 8.4] >= 0) &&  \
+      ![string equal $this(platform) "macosx"]} {
+	set prefs(haveMenuImage) 1
+    }
+
+    # Workaround for missing -image option on my macmenubutton.
+    if {[string equal $this(platform) "macintosh"] && \
+      [string length [info command menubuttonOrig]]} {
+	set menubuttonImage menubuttonOrig
+    } else {
+	#set menubuttonImage menubutton
+	set menubuttonImage button
+    }
+    set wmenu ${w}.m
+    #$menubuttonImage $w -menu $wmenu -image $smiley(:\))
+    $menubuttonImage $w -image $smiley(:\)) -bd 2 -width 16 -height 16
+    set m [menu $wmenu -tearoff 0]
+ 
+    if {$prefs(haveMenuImage)} {
+	set i 0
+	foreach name [array names smiley] {
+	    set cmd [list Emoticons::InsertSmiley $wtext $smiley($name) $name]
+	    set opts {-hidemargin 1}
+	    if {$i && ([expr $i % 4] == 0)} {
+		lappend opts -columnbreak 1
+	    }
+	    eval {$m add command -image $smiley($name) -command $cmd} $opts
+	    incr i
+	}
+    } else {
+	foreach name [array names smiley] {
+	    set cmd [list Emoticons::InsertSmiley $wtext $smiley($name) $name]
+	    $m add command -label $name -command $cmd
+	}
+    }
+    bind $w <Button-1> [list [namespace current]::PostMenu $m %X %Y]
+    return $w
+}
+
+proc ::Emoticons::PostMenu {w x y} {
+    tk_popup $w [expr int($x)] [expr int($y)]
+}
+
+proc ::Emoticons::InsertSmiley {wtext imname name} {
+ 
+    $wtext insert insert " "
+    $wtext image create insert -image $imname -name $name
+    $wtext insert insert " "
 }
 
 #-------------------------------------------------------------------------------

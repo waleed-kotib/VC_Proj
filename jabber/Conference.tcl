@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Conference.tcl,v 1.17 2004-03-16 15:09:08 matben Exp $
+# $Id: Conference.tcl,v 1.18 2004-04-02 12:26:37 matben Exp $
 
 package provide Conference 1.0
 
@@ -717,9 +717,9 @@ proc ::Jabber::Conference::DoCreate {token} {
 	
     # Cache groupchat protocol type (muc|conference|gc-1.0).
     if {$state(usemuc)} {
-	::Jabber::GroupChat::SetProtocol $roomJid "muc"
+	::hooks::run groupchatEnterRoomHook $roomJid "muc"
     } else {
-	::Jabber::GroupChat::SetProtocol $roomJid "conference"
+	::hooks::run groupchatEnterRoomHook $roomJid "conference"
     }
     
     # This triggers the tkwait, and destroys the create dialog.

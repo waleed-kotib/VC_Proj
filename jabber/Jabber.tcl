@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.74 2004-03-31 07:55:18 matben Exp $
+# $Id: Jabber.tcl,v 1.75 2004-04-02 12:26:37 matben Exp $
 
 package provide Jabber 1.0
 
@@ -1186,7 +1186,7 @@ proc ::Jabber::IsMyGroupchatJid {jid} {
 #       
 # Arguments:
 #       type        any of 'available', 'unavailable', 'invisible',
-#                   'away', 'dnd', 'xa'.
+#                   'away', 'dnd', 'xa', 'chat'.
 #       args
 #                -to      sets any to='jid' attribute.
 #                -notype  0|1 see XMPP 5.1
@@ -1216,7 +1216,7 @@ proc ::Jabber::SetStatus {type args} {
 	    available - invisible - unavailable {
 		lappend presArgs -type $type
 	    }
-	    away - dnd - xa {
+	    away - dnd - xa - chat {
 		lappend presArgs -type "available" -show $type
 	    }
 	}	
@@ -1235,6 +1235,8 @@ proc ::Jabber::SetStatus {type args} {
 	  -message [FormatTextForMessageBox $err]
     } else {
 	
+	eval {::hooks::run setPresenceHook $type} $args
+	
 	# Do we target a room or the server itself?
 	set toServer 0
 	if {[info exists argsArr(-to)]} {
@@ -1244,11 +1246,8 @@ proc ::Jabber::SetStatus {type args} {
 	} else {
 	    set toServer 1
 	}
-	if {$toServer} {
-	    ::Jabber::UI::WhenSetStatus $type
-	    if {$type == "unavailable"} {
-		::Jabber::DoCloseClientConnection
-	    }
+	if {$toServer && ($type == "unavailable")} {
+	    ::Jabber::DoCloseClientConnection
 	}
     }
 }
@@ -1370,7 +1369,7 @@ proc ::Jabber::BtSetStatus {w} {
 	      $statusOpt
 	}
     }
-    ::Jabber::UI::WhenSetStatus $show
+    eval {::hooks::run setPresenceHook $show} $args
     
     set finishedStat 1
     destroy $w

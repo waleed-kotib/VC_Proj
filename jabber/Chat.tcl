@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.50 2004-03-31 07:55:18 matben Exp $
+# $Id: Chat.tcl,v 1.51 2004-04-02 12:26:28 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -66,7 +66,7 @@ namespace eval ::Jabber::Chat:: {
     option add *Chat*youTextBackground    ""                    widgetDefault
     option add *Chat*youTextFont          ""                    widgetDefault
     option add *Chat*sysPreForeground     #26b412               widgetDefault
-    option add *Chat*sysForeground        #26b412               widgetDefault
+    option add *Chat*sysTextForeground    #26b412               widgetDefault
     option add *Chat*histHeadForeground   ""                    widgetDefault
     option add *Chat*histHeadBackground   gray60                widgetDefault
     option add *Chat*histHeadFont         ""                    widgetDefault
@@ -87,7 +87,7 @@ namespace eval ::Jabber::Chat:: {
 	{youtext     -background          youTextBackground     Background}
 	{youtext     -font                youTextFont           Font}
 	{syspre      -foreground          sysPreForeground      Foreground}
-	{sys         -foreground          sysForeground         Foreground}
+	{systext     -foreground          sysTextForeground     Foreground}
 	{histhead    -foreground          histHeadForeground    Foreground}
 	{histhead    -background          histHeadBackground    Background}
 	{histhead    -font                histHeadFont          Font}
@@ -282,7 +282,7 @@ proc ::Jabber::Chat::GotMsg {body args} {
     if {[info exists argsArr(-subject)]} {
 	set state(subject) $argsArr(-subject)
 	set state(lastsubject) $state(subject)
-	::Jabber::Chat::InsertMessage $token sys "Subject: $state(subject)\n"
+	::Jabber::Chat::InsertMessage $token systext "Subject: $state(subject)\n"
     }
     
     # See if we've got a jabber:x:event (JEP-0022).
@@ -370,7 +370,7 @@ proc ::Jabber::Chat::InsertMessage {token whom body} {
 	}
 	sys {
 	    $wtext insert end $prefix syspre
-	    $wtext insert end $body sys
+	    $wtext insert end $body systext
 	}
     }
 
@@ -516,7 +516,7 @@ proc ::Jabber::Chat::Build {threadID args} {
     pack [button $frbot.btcancel -text [::msgcat::mc Close]  \
       -command [list [namespace current]::Close $token]]  \
       -side right -padx 5
-    pack [::Jabber::UI::SmileyMenuButton $frbot.smile $wtextsnd]  \
+    pack [::Emoticons::MenuButton $frbot.smile $wtextsnd]  \
       -side right -padx 5
     pack [checkbutton $frbot.active -text " [::msgcat::mc {Active <Return>}]" \
       -command [list [namespace current]::ActiveCmd $token] \
@@ -661,7 +661,7 @@ proc ::Jabber::Chat::ConfigureTextTags {w wtext} {
     ::Jabber::Debug 2 "::Jabber::Chat::ConfigureTextTags"
     
     set space 2
-    set alltags {mepre metext youpre youtext syspre sys histhead}
+    set alltags {mepre metext youpre youtext syspre systext histhead}
         
     if {[string length $jprefs(chatFont)]} {
 	set chatFont $jprefs(chatFont)
@@ -691,7 +691,7 @@ proc ::Jabber::Chat::ConfigureTextTags {w wtext} {
     }
     lappend opts(metext)   -spacing3 $space -lmargin1 20 -lmargin2 20
     lappend opts(youtext)  -spacing3 $space -lmargin1 20 -lmargin2 20
-    lappend opts(sys)      -spacing3 $space -lmargin1 20 -lmargin2 20
+    lappend opts(systext)  -spacing3 $space -lmargin1 20 -lmargin2 20
     lappend opts(histhead) -spacing1 4 -spacing3 4 -lmargin1 20 -lmargin2 20
     foreach tag $alltags {
 	eval {$wtext tag configure $tag} $opts($tag)
@@ -791,7 +791,7 @@ proc ::Jabber::Chat::Send {token} {
     set opts {}
     if {![string equal $state(subject) $state(lastsubject)]} {
 	lappend opts -subject $state(subject)
-	::Jabber::Chat::InsertMessage $token sys  \
+	::Jabber::Chat::InsertMessage $token systext  \
 	  "Subject: $state(subject)\n"
     }
     set state(lastsubject) $state(subject)
@@ -864,7 +864,7 @@ proc ::Jabber::Chat::Save {token} {
     
     set wtext $state(wtext)
     
-    set ans [tk_getSaveFile -title [::msgcat::mc {Save Message}] \
+    set ans [tk_getSaveFile -title [::msgcat::mc Save] \
       -initialfile "Chat $state(jid).txt"]
     
     if {[string length $ans]} {
@@ -911,7 +911,7 @@ proc ::Jabber::Chat::PresenceHook {jid type args} {
     if {[info exists argsArr(-status)]} {
 	set status "$argsArr(-status)\n"
     }
-    ::Jabber::Chat::InsertMessage $token sys  \
+    ::Jabber::Chat::InsertMessage $token systext  \
       "$jid is: $mapShowTextToElem($show)\n$status"
     
     if {[string equal $type "available"]} {

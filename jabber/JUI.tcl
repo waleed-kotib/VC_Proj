@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.32 2004-03-31 07:55:18 matben Exp $
+# $Id: JUI.tcl,v 1.33 2004-04-02 12:26:37 matben Exp $
 
 package provide JUI 1.0
 
@@ -62,10 +62,13 @@ namespace eval ::Jabber::UI:: {
       activeTabOutline background style tabBackground tabColor tabOutline}
     
     # Add all event hooks.
-    ::hooks::add quitAppHook        ::Jabber::UI::QuitHook
-    ::hooks::add loginHook          ::Jabber::UI::LoginCmd
-    ::hooks::add closeWindowHook    ::Jabber::UI::CloseHook
-    ::hooks::add logoutHook         ::Jabber::UI::LogoutHook
+    ::hooks::add quitAppHook            ::Jabber::UI::QuitHook
+    ::hooks::add loginHook              ::Jabber::UI::LoginCmd
+    ::hooks::add closeWindowHook        ::Jabber::UI::CloseHook
+    ::hooks::add logoutHook             ::Jabber::UI::LogoutHook
+    ::hooks::add setPresenceHook        ::Jabber::UI::SetPresenceHook
+    ::hooks::add groupchatEnterRoomHook ::Jabber::UI::EnterRoomHook
+    ::hooks::add groupchatExitRoomHook  ::Jabber::UI::ExitRoomHook
 
     # Collection of useful and common widget paths.
     variable jwapp
@@ -250,16 +253,14 @@ proc ::Jabber::UI::Build {w} {
 
     # Build bottom and up to handle clipping when resizing.
     # Jid entry with electric plug indicator.
-    set wbot ${fall}.jid
-    set jwapp(elplug) ${wbot}.icon
-    set jwapp(mystatus) ${wbot}.stat
-    set jwapp(myjid) ${wbot}.e
-    set jwapp(mypresmenu) ${wbot}.stat.mt
+    set wbot              ${fall}.jid
+    set jwapp(elplug)     ${wbot}.icon
+    set jwapp(mystatus)   ${wbot}.stat
+    set jwapp(myjid)      ${wbot}.e
     
     pack [frame $wbot -relief raised -borderwidth 1]  \
       -side bottom -fill x -pady 0
-    pack [label $jwapp(mystatus) -bd 1 \
-      -image [::Jabber::Roster::GetMyPresenceIcon]] \
+    pack [::Jabber::Roster::BuildStatusMenuButton $jwapp(mystatus)] \
       -side left -pady 2 -padx 6
     pack [label ${wbot}.size -image $iconResize]  \
       -padx 0 -pady 0 -side right -anchor s
@@ -281,10 +282,7 @@ proc ::Jabber::UI::Build {w} {
       -side left -pady 1 -padx 6 -fill x -expand true
     $jwapp(statmess) create text 0 0 -anchor nw -text {} -font $fontS \
       -tags stattxt
-    
-    menu $jwapp(mypresmenu) -tearoff 0
-    ::Jabber::Roster::BuildPresenceMenu $jwapp(mypresmenu)
-    
+        
     # Notebook frame.
     set frtbook ${fall}.fnb
     pack [frame $frtbook -bd 1 -relief raised] -fill both -expand 1    
@@ -326,6 +324,16 @@ proc ::Jabber::UI::QuitHook { } {
 
     if {[info exists jwapp(wtopRost)]} {
 	::UI::SaveWinGeom $jwapp(wtopRost)
+    }
+}
+
+proc ::Jabber::UI::SetPresenceHook {type args} {
+    upvar ::Jabber::jserver jserver
+    
+    array set argsArr [list -to $jserver(this)]
+    array set argsArr $args
+    if {[string equal $jserver(this) $argsArr(-to)]} {
+	::Jabber::UI::WhenSetStatus $type
     }
 }
 
@@ -474,24 +482,17 @@ proc ::Jabber::UI::MailBoxState {mailboxstate} {
 proc ::Jabber::UI::WhenSetStatus {type} {
     variable jwapp
 	
-    $jwapp(mystatus) configure -image [::Jabber::Roster::GetMyPresenceIcon]
-    if {[string equal $type "unavailable"]} {
-	bind $jwapp(mystatus) <Enter> {}
-	bind $jwapp(mystatus) <Leave> {}
-	bind $jwapp(mystatus) <Button-1> {}
-    } else {
-	bind $jwapp(mystatus) <Enter> [list %W configure -relief raised]
-	bind $jwapp(mystatus) <Leave> [list %W configure -relief flat]
-	bind $jwapp(mystatus) <Button-1>  \
-	  [list [namespace current]::PostPresenceMenu %X %Y]
-    }
+    ::Jabber::Roster::ConfigStatusMenuButton $jwapp(mystatus) $type
 }
 
-
-proc ::Jabber::UI::PostPresenceMenu {x y} {
-    variable jwapp
+proc ::Jabber::UI::EnterRoomHook {roomJid protocol} {
     
-    tk_popup $jwapp(mypresmenu) [expr int($x)] [expr int($y)]
+    ::Jabber::UI::GroupChat enter $roomJid
+}
+
+proc ::Jabber::UI::ExitRoomHook {roomJid} {
+    
+    ::Jabber::UI::GroupChat exit $roomJid
 }
 
 # Jabber::UI::GroupChat --
@@ -657,63 +658,6 @@ proc ::Jabber::UI::FixUIWhen {what} {
 	    ::UI::MenuMethod $wmj entryconfigure mSetupAssistant -state normal
 	}
     }
-}
-
-# Jabber::UI::SmileyMenuButton --
-# 
-#       A kind of general menubutton for inserting smileys into a text widget.
-
-proc ::Jabber::UI::SmileyMenuButton {w wtext} {
-    global  prefs this
-    upvar ::UI::smiley smiley
-    
-    # If we have -compound left -image ... -label ... working.
-    set prefs(haveMenuImage) 0
-    if {([package vcompare [info tclversion] 8.4] >= 0) &&  \
-      ![string equal $this(platform) "macosx"]} {
-	set prefs(haveMenuImage) 1
-    }
-
-    # Workaround for missing -image option on my macmenubutton.
-    if {[string equal $this(platform) "macintosh"] && \
-      [string length [info command menubuttonOrig]]} {
-	set menubuttonImage menubuttonOrig
-    } else {
-	set menubuttonImage menubutton
-    }
-    set wmenu ${w}.m
-    $menubuttonImage $w -menu $wmenu -image $smiley(:\))
-    set m [menu $wmenu -tearoff 0]
- 
-    if {$prefs(haveMenuImage)} {
-	set i 0
-	foreach name [array names smiley] {
-	    set cmd [list ::Jabber::UI::SmileyInsert $wtext $smiley($name) $name]
-	    if {0} {
-		$m add command -image $smiley($name) -command $cmd
-	    } else {
-		set opts {-hidemargin 1}
-		if {$i && ([expr $i % 4] == 0)} {
-		    lappend opts -columnbreak 1
-		}
-		eval {$m add command -image $smiley($name) -command $cmd} $opts
-		incr i
-	    }
-	}
-    } else {
-	foreach name [array names smiley] {
-	    set cmd [list ::Jabber::UI::SmileyInsert $wtext $smiley($name) $name]
-	    $m add command -label $name -command $cmd
-	}
-    }
-    return $w
-}
-
-proc ::Jabber::UI::SmileyInsert {wtext imname name} {
- 
-    $wtext insert insert " "
-    $wtext image create insert -image $imname -name $name
-    $wtext insert insert " "
 }
 
 #-------------------------------------------------------------------------------
