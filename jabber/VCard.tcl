@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: VCard.tcl,v 1.23 2004-09-28 13:50:19 matben Exp $
+# $Id: VCard.tcl,v 1.24 2004-10-06 17:40:41 matben Exp $
 
 package provide VCard 1.0
 
@@ -22,14 +22,17 @@ namespace eval ::VCard::  {
 
 # VCard::Fetch --
 #
-#       Gets the vCard from 'jid'.
+#       Gets the vCard from 'jid'. The jid should be a 2-tier for ordinary users.
 
 proc ::VCard::Fetch {type {jid {}}} {
     global  wDlgs
     variable uid
 
     if {$type == "own"} {
-        set jid [::Jabber::GetMyJid]
+	
+	# We must use the 2-tier jid here!
+        set jid3 [::Jabber::GetMyJid]
+	jlib::splitjid $jid3 jid res
     }
     
     # Keep a separate instance specific namespace for each VCard.
