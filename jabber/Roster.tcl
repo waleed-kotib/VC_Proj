@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.5 2003-06-01 10:26:57 matben Exp $
+# $Id: Roster.tcl,v 1.6 2003-08-30 09:40:59 matben Exp $
 
 package provide Roster 1.0
 
@@ -172,7 +172,7 @@ proc ::Jabber::Roster::Build {w} {
     set wtree $wbox.tree
     set wxsc $wbox.xsc
     set wysc $wbox.ysc
-    set wtree [::tree::tree $wtree -width 220 -height 300 -silent 1  \
+    set wtree [::tree::tree $wtree -width 180 -height 300 -silent 1  \
       -openicons triangle -treecolor {} -scrollwidth 400  \
       -xscrollcommand [list $wxsc set]       \
       -yscrollcommand [list $wysc set]       \

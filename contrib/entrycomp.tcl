@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: entrycomp.tcl,v 1.1 2003-07-05 13:26:37 matben Exp $
+# $Id: entrycomp.tcl,v 1.2 2003-08-30 09:40:59 matben Exp $
 #
 # ########################### USAGE ############################################
 #
@@ -26,8 +26,9 @@
 # ########################### CHANGES ##########################################
 #
 #       0.1      first release
+#       0.2      using bindtags instead
 
-package provide entrycomp 0.1
+package provide entrycomp 0.2
 
 namespace eval ::entrycomp:: {
 
@@ -39,12 +40,36 @@ namespace eval ::entrycomp:: {
     
     set priv(debug) 0
     set priv(initted) 0
+    
+    # New bindtag for this widget. Be sure not to override any commands.
+    bind EntryComp <KeyPress> [list ::entrycomp::Insert %W %A]
+    bind EntryComp <Control-KeyPress> {# nothing}
+    bind EntryComp <BackSpace> {# nothing}
+    bind EntryComp <Select> {# nothing}
+    bind EntryComp <Home> {# nothing}
+    bind EntryComp <End> {# nothing}
+    bind EntryComp <Delete> {# nothing}
+    bind EntryComp <<Cut>> {# nothing}
+    bind EntryComp <<Copy>> {# nothing}
+    bind EntryComp <<Paste>> {# nothing}
+    bind EntryComp <<Clear>> {# nothing}
+    bind EntryComp <<PasteSelection>> {# nothing}
+    bind EntryComp <Alt-KeyPress> {# nothing}
+    bind EntryComp <Meta-KeyPress> {# nothing}
+    bind EntryComp <Control-KeyPress> {# nothing}
+    bind EntryComp <Escape> {# nothing}
+    bind EntryComp <Return> {# nothing}
+    bind EntryComp <KP_Enter> {# nothing}
+    bind EntryComp <Tab> {# nothing}
+    if {[string equal [tk windowingsystem] "classic"]
+            || [string equal [tk windowingsystem] "aqua"]} {
+	bind EntryComp <Command-KeyPress> {# nothing}
+    }
 }
 
 proc ::entrycomp::Init { } {
     variable priv
     
-
     set priv(initted) 1
 }
 
@@ -66,9 +91,26 @@ proc ::entrycomp::entrycomp {w liblist args} {
     if {!$priv(initted)} {
 	::entrycomp::Init
     }
+    # Instance specific namespace
+    namespace eval ::entrycomp::${w} {
+	variable options
+    }
+    
+    # Set simpler variable names.
+    upvar ::entrycomp::${w}::options options
+    
+    set options(liblist) $liblist
 
     eval {entry $w} $args
-    bind $w <KeyPress> [list ::entrycomp::Insert %W %A $liblist]
+    set bindList [bindtags $w]
+    set ind [lsearch $bindList Entry]
+    if {$ind >= 0} {
+	set bindList [linsert $bindList $ind EntryComp]
+	bindtags $w $bindList
+    }
+    
+    # This allows us to clean up some things when we go away.
+    bind $w <Destroy> [list [namespace current]::DestroyHandler $w]
     return $w
 }
 
@@ -76,8 +118,9 @@ proc ::entrycomp::entrycomp {w liblist args} {
 # 
 #       Callback for <KeyPress> that replaces the Entry's binding.
 
-proc ::entrycomp::Insert {w s liblist} {
+proc ::entrycomp::Insert {w s} {
     variable priv
+    upvar ::entrycomp::${w}::options options
     
     if {[string equal $s ""]} {
 	return
@@ -90,7 +133,7 @@ proc ::entrycomp::Insert {w s liblist} {
     $w insert insert $s
     
     # Find matches in liblist.
-    set mlist [lsearch -glob -inline -all $liblist ${white}*]
+    set mlist [lsearch -glob -inline -all $options(liblist) ${white}*]
     if {[llength $mlist]} {
 	set mstr [lindex $mlist 0]
 	$w delete 0 end
@@ -102,8 +145,24 @@ proc ::entrycomp::Insert {w s liblist} {
     }    
     ::tk::EntrySeeInsert $w
     
-    # Stop Entry class handler from executing.
+    # Stop Entry class handler from executing, else we get double characters.
     return -code break
+}
+
+# entrycomp::DestroyHandler --
+#
+#       The exit handler of a entrycomp.
+#       
+# Arguments:
+#       w       the widget path.
+#       
+# Results:
+#       the internal state is cleaned up, namespace deleted.
+
+proc ::entrycomp::DestroyHandler {w} {
+    
+    # Remove the namespace with the widget.
+    namespace delete ::entrycomp::${w}
 }
 
 # test
