@@ -6,7 +6,7 @@
 #       
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: service.tcl,v 1.16 2005-02-18 13:58:54 matben Exp $
+# $Id: service.tcl,v 1.17 2005-02-21 07:59:08 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -551,6 +551,9 @@ proc jlib::service::isroom {jlibname jid} {
     }
     if {!$isroom && $serv(muc)} {
 	set isroom [$serv(muc,name) isroom $jid]
+    }
+    if {!$isroom} {
+	set isroom [jlib::groupchat::isroom $jlibname $jid]
     }
     if {!$isroom && [regexp {^[^@]+@([^@ ]+)$} $jid match domain]} {
 	if {[info exists agent($domain,groupchat)]} {

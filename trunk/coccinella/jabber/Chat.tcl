@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.113 2005-02-14 13:48:37 matben Exp $
+# $Id: Chat.tcl,v 1.114 2005-02-21 07:59:08 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -1920,12 +1920,12 @@ proc ::Chat::XEventRecv {chattoken xevent args} {
     ::Debug 6 "::Chat::XEventRecv \
       msgid=$msgid, composeElem=$composeElem, idElem=$idElem"
     
-    if {($msgid != "") && ($composeElem != "") && ($idElem == "")} {
+    if {($msgid != "") && ($composeElem != {}) && ($idElem == {})} {
 	
 	# 1) Request for event notification
-	set chatstate(xevent,msgid) $argsArr(-id)
+	set chatstate(xevent,msgid) $msgid
 	
-    } elseif {($composeElem != "") && ($idElem != "")} {
+    } elseif {($composeElem != {}) && ($idElem != {})} {
 	
 	# 2) Notification of message composing
 	jlib::splitjid $chatstate(jid) jid2 res
@@ -1944,7 +1944,7 @@ proc ::Chat::XEventRecv {chattoken xevent args} {
 
 	$chatstate(wnotifier) configure -image $dlgstate(iconNotifier)
 	set chatstate(notifier) " [mc chatcompreply $name]"
-    } elseif {($composeElem == "") && ($idElem != "")} {
+    } elseif {($composeElem == {}) && ($idElem != {})} {
 	
 	# 3) Cancellations of message composing
 	$chatstate(wnotifier) configure -image ""

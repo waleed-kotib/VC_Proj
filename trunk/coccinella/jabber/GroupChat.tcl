@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.100 2005-02-17 10:30:06 matben Exp $
+# $Id: GroupChat.tcl,v 1.101 2005-02-21 07:59:08 matben Exp $
 
 package require History
 
@@ -239,7 +239,7 @@ proc ::GroupChat::HaveMUC {{jid ""}} {
 #       
 # Arguments:
 #       what        'enter' or 'create'
-#       args        -server, -roomjid, -autoget
+#       args        -server, -roomjid, -autoget, -nickname, -protocol
 #       
 # Results:
 #       "cancel" or "enter".
@@ -258,27 +258,32 @@ proc ::GroupChat::EnterOrCreate {what args} {
 	set service $argsArr(-server)
     }
 
-    # Preferred groupchat protocol (gc-1.0|muc).
-    # Use 'gc-1.0' as fallback.
-    set protocol "gc-1.0"
-    
-    # Consistency checking.
-    if {![regexp {(gc-1.0|muc)} $jprefs(prefgchatproto)]} {
-    	set jprefs(prefgchatproto) muc
-    }
-    
-    ::Debug 2 "::GroupChat::EnterOrCreate prefgchatproto=$jprefs(prefgchatproto) \
-      what=$what, roomjid=$roomjid, service=$service, args='$args'"
-    
-    switch -- $jprefs(prefgchatproto) {
-	gc-1.0 {
-	    set protocol "gc-1.0"
+    if {[info exists argsArr(-protocol)]} {
+	set protocol $argsArr(-protocol)
+    } else {
+	
+	# Preferred groupchat protocol (gc-1.0|muc).
+	# Use 'gc-1.0' as fallback.
+	set protocol "gc-1.0"
+	
+	# Consistency checking.
+	if {![regexp {(gc-1.0|muc)} $jprefs(prefgchatproto)]} {
+	    set jprefs(prefgchatproto) muc
 	}
-	muc {
-	    if {[HaveMUC $service]} {
-		set protocol "muc"
-	    } elseif {[HaveOrigConference $service]} {
-		set protocol "conference"
+	
+	::Debug 2 "::GroupChat::EnterOrCreate prefgchatproto=$jprefs(prefgchatproto) \
+	  what=$what, roomjid=$roomjid, service=$service, args='$args'"
+	
+	switch -- $jprefs(prefgchatproto) {
+	    gc-1.0 {
+		set protocol "gc-1.0"
+	    }
+	    muc {
+		if {[HaveMUC $service]} {
+		    set protocol "muc"
+		} elseif {[HaveOrigConference $service]} {
+		    set protocol "conference"
+		}
 	    }
 	}
     }
@@ -356,7 +361,7 @@ proc ::GroupChat::SetProtocol {roomjid inprotocol} {
 #       which shall be used when not server is being browsed.
 #       
 # Arguments:
-#       args        -server, -roomjid, -autoget
+#       args        -server, -roomjid, -autoget, -nickname
 #       
 # Results:
 #       "cancel" or "enter".
@@ -370,9 +375,9 @@ proc ::GroupChat::BuildEnter {args} {
 
     set chatservers [$jstate(jlib) service getjidsfor "groupchat"]
     ::Debug 2 "::GroupChat::BuildEnter args='$args'"
-    ::Debug 2 "    service getjidsfor groupchat: '$chatservers'"
+    ::Debug 2 "\t service getjidsfor groupchat: '$chatservers'"
     
-    if {[llength $chatservers] == 0} {
+    if {$chatservers == {}} {
 	::UI::MessageBox -icon error -message [mc jamessnogchat]
 	return
     }
@@ -429,8 +434,9 @@ proc ::GroupChat::BuildEnter {args} {
     grid $frmid.eserv $frmid.eroom $frmid.enick -sticky ew
     
     if {[info exists argsArr(-roomjid)]} {
-	regexp {^([^@]+)@([^/]+)} $argsArr(-roomjid) match enter(roomname) \
-	  server
+	jlib::splitjidex $argsArr(-roomjid) node service res
+	set enter(roomname) $node
+	set enter(server)   $service
 	$wcomboserver configure -state disabled
 	$frmid.eroom configure -state disabled
     }
@@ -438,6 +444,9 @@ proc ::GroupChat::BuildEnter {args} {
 	set server $argsArr(-server)
 	set enter(server) $argsArr(-server)
 	$wcomboserver configure -state disabled
+    }
+    if {[info exists argsArr(-nickname)]} {
+	set enter(nickname) $argsArr(-nickname)
     }
     
     # Button part.
@@ -487,7 +496,7 @@ proc ::GroupChat::DoEnter {token} {
     }
 
     set roomjid [jlib::jidmap [jlib::joinjid $enter(roomname) $enter(server) ""]]
-    ::Jabber::JlibCmd groupchat enter $roomjid $enter(nickname) \
+    $jstate(jlib) groupchat enter $roomjid $enter(nickname) \
       -command [namespace current]::EnterCallback
 
     set enter(finished) 1
@@ -837,6 +846,7 @@ proc ::GroupChat::Build {roomjid args} {
     if {$state(active)} {
 	ActiveCmd $token
     }
+    AddUsers $token
         
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jgc)]]
     if {$nwin == 1} {
@@ -1143,22 +1153,54 @@ proc ::GroupChat::PresenceHook {jid presence args} {
     
     upvar ::Jabber::jstate jstate
     
-    # Only if we actually entered the room.
-    if {0} {
-	set allrooms [$jstate(jlib) service allroomsin]
-	puts "---------------allrooms=$allrooms"
-	if {[lsearch $allrooms $jid] < 0} {
-	    return
-	}
+    ::Debug 2 "::GroupChat::PresenceHook jid=$jid, presence=$presence, args='$args'"
+    
+    array set argsArr $args
+    set jid2 $jid
+    set jid3 $jid
+    if {[info exists argsArr(-resource)]} {
+	set jid3 ${jid2}/$argsArr(-resource)
     }
-    if {[$jstate(jlib) service isroom $jid]} {
-	::Debug 2 "::GroupChat::PresenceHook jid=$jid, presence=$presence, args='$args'"
+    jlib::splitjidex $jid3 node service res
+    
+    # We must check that non of jid2 or jid3 are roster items.
+    if {[$jstate(roster) isitem $jid2] || [$jstate(roster) isitem $jid3]} {
+	return
+    }
+
+    # Some msn components may send presence directly from a room when
+    # a chat invites you to a multichat:
+    # <presence 
+    #     from='r1@msn.jabber.ccc.de/marilund60@hotmail.com' 
+    #     to='matben@jabber.ccc.de'/>
+    #     
+    # Note that a conference service may also be a gateway!
+    set conferences [$jstate(jlib) service getconferences]
+    set allroomsin  [$jstate(jlib) service allroomsin]
+    set inroom [expr [lsearch $allroomsin $jid2] < 0 ? 0 : 1]
+    set isconf [expr [lsearch $conferences $service] < 0 ? 0 : 1]
+    set isroom [$jstate(jlib) service isroom $jid]
+    ::Debug 4 "..........................."
+    ::Debug 4 "conferences=$conferences"
+    ::Debug 4 "allroomsin=$allroomsin"
+    ::Debug 4 "inroom=$inroom, isconf=$isconf, isroom=$isroom"
+    
+    if {!$inroom && $isconf && ($presence == "available")} {
 	
-	array set argsArr $args
-	
+	# This seems to be a kind of invitation for a groupchat.
+	set ans [::UI::MessageBox -icon info -type yesno \
+	  -message "You have been invited to the groupchat room\
+	  ${node}@${service}. Do you want to join?"]
+	if {$ans == "yes"} {
+	    jlib::splitjidex $jstate(mejid) nd hst rs
+	    EnterOrCreate enter -roomjid $jid2 -nickname $nd -protocol gc-1.0
+	}
+    } 
+    
+    # Only if we actually entered the room.
+    if {$isroom} {
 	# Since there should not be any /resource.
 	set roomjid $jid
-	set jid3 ${jid}/$argsArr(-resource)
 	if {[string equal $presence "available"]} {
 	    eval {SetUser $roomjid $jid3 $presence} $args
 	} elseif {[string equal $presence "unavailable"]} {
@@ -1220,6 +1262,24 @@ proc ::GroupChat::BrowseUser {userXmlList} {
     }
 }
 
+proc ::GroupChat::AddUsers {token} {
+    variable $token
+    upvar 0 $token state
+    
+    upvar ::Jabber::jstate jstate
+    
+    set roomjid $state(roomjid)
+    
+    set presenceList [$jstate(roster) getpresence $roomjid]
+    foreach pres $presenceList {
+	unset -nocomplain presArr
+	array set presArr $pres
+	
+	set jid3 $roomjid/$presArr(-resource)
+	eval {SetUser $roomjid $jid3 $presArr(-type)} $pres
+    }
+}
+
 # GroupChat::SetUser --
 #
 #       Adds or updates a user item in the group chat dialog.
@@ -1240,8 +1300,8 @@ proc ::GroupChat::SetUser {roomjid jid3 presence args} {
     variable userRoleToStr
     upvar ::Jabber::jstate jstate
 
-    ::Debug 2 "::GroupChat::SetUser roomjid=$roomjid,\
-      jid3=$jid3 presence=$presence args=$args"
+    ::Debug 2 "::GroupChat::SetUser roomjid=$roomjid, jid3=$jid3 \
+      presence=$presence args=$args"
 
     array set argsArr $args
     set roomjid [jlib::jidmap $roomjid]
@@ -1260,7 +1320,7 @@ proc ::GroupChat::SetUser {roomjid jid3 presence args} {
     # within this room aswell.
     jlib::splitjid $jid3 jid2 resource
     
-    # If we got a browse push with a <user>, asume is available.
+    # If we got a browse push with a <user>, assume is available.
     if {$presence == ""} {
 	set presence available
     }
