@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UserActions.tcl,v 1.35 2004-05-06 13:41:11 matben Exp $
+# $Id: UserActions.tcl,v 1.36 2004-05-13 13:50:22 matben Exp $
 
 namespace eval ::UserActions:: {
     
@@ -161,7 +161,7 @@ proc ::UserActions::DoQuit {args} {
     ::Theme::SavePrefsFile
         
     # Cleanup. Beware, no windows with open movies must exist here!
-    file delete -force $this(tmpPath)
+    catch {file delete -force $this(tmpPath)}
     exit
 }
 

@@ -103,6 +103,7 @@
 ::msgcat::mcset de Roster	Liste
 ::msgcat::mcset de Save		Speichern
 ::msgcat::mcset de Search	Suchen
+::msgcat::mcset de Select       Select
 ::msgcat::mcset de Send		Senden
 ::msgcat::mcset de Server	Server
 ::msgcat::mcset de Servers	Server
@@ -222,6 +223,8 @@
 ::msgcat::mcset de mLogin		{Anmelden...}
 ::msgcat::mcset de mLogout		{Abmelden}
 ::msgcat::mcset de mLogoutWith          {Abmelden mit Nachricht...}
+::msgcat::mcset de mHideMain            {Hide Main}
+::msgcat::mcset de mShowMain            {Show Main}
 ::msgcat::mcset de mPassword		{Passwort...}
 ::msgcat::mcset de mRoster/Services	{Kontakte/Dienste}
 ::msgcat::mcset de mMessageInbox	{Nachrichten-Eingang}
@@ -663,6 +666,7 @@ Agenten: %s}
 	::msgcat::mcset de jamesserrsearch	{Konnte Suchspezifikation nicht\
 abrufen. Fehlercode %s Nachricht: %s}
 	::msgcat::mcset de jamessoobok		{Dateiübertragung erfolgreich}
+	::msgcat::mcset de jamessoobok2         {File transfer of %s to "%s" went ok}
 	::msgcat::mcset de jamessoobnourl	{Als von Benutzer "%s" eine Datei abgerufen\
 werden sollte, konnten wir dafür keine Url bekommen.}
 	::msgcat::mcset de jamessoobask		{Benutzer "%s" stellt Ihnen die Datei\
@@ -707,6 +711,10 @@ Wollen Sie das jetzt tun?}
 der als Server fungiert und die Nachrichten zu dem IM-System überträgt.\
 Es muss in Ihrer Liste enthalten sein.\
 Sie haben eine Anmeldung für %s: %s.}
+::msgcat::mcset de jamesswbchatlost	        {The complete conversation will\
+be lost when closing this chat whiteboard. Do you actually want to end this chat?}
+::msgcat::mcset de jamesschatoffline            {This user is not online anymore\
+and the message is therfore not sent.}
 
 
 
@@ -832,6 +840,7 @@ wird über die Benutzereinstellungen begrenzt.}
 ::msgcat::mcset de preftheme     {Thema wählen, Neustart erforderlich}
 ::msgcat::mcset de prefplugctrl  {Sie können jedes dieser Pakete deselektieren,\
 wenn es nicht geladen werden soll. Es ist ein Neustart erforderlich.}
+::msgcat::mcset de prefchactret  {Always use active <Return> in chat dialog}
 
 
 

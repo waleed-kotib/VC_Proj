@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.58 2004-05-09 12:14:37 matben Exp $
+# $Id: GroupChat.tcl,v 1.59 2004-05-13 13:50:21 matben Exp $
 
 package require History
 
@@ -185,7 +185,7 @@ proc ::Jabber::GroupChat::HaveMUC {{roomjid ""}} {
 	    foreach serv $allConfServ {
 		if {[$jstate(jlib) service hasfeature $serv  \
 		  "http://jabber.org/protocol/muc"]} {
-		    return 1
+		    set ans 1
 		}
 	    }
 	}
@@ -211,9 +211,13 @@ proc ::Jabber::GroupChat::HaveMUC {{roomjid ""}} {
 	}
     } else {
 	if {1} {
-	    if {[$jstate(jlib) service hasfeature $roomjid  \
-	      "http://jabber.org/protocol/muc"]} {
-		return 1
+	    
+	    # We must query the service, not the room, for browse to work.
+	    if {[regexp {^[^@]+@(.+)$} $roomjid match service]} {
+		if {[$jstate(jlib) service hasfeature $service  \
+		  "http://jabber.org/protocol/muc"]} {
+		    set ans 1
+		}
 	    }
 	}
 	
@@ -223,7 +227,6 @@ proc ::Jabber::GroupChat::HaveMUC {{roomjid ""}} {
 		if {[$jstate(browse) isbrowsed $confserver]} {
 		    set ans [$jstate(browse) hasnamespace $confserver  \
 		      "http://jabber.org/protocol/muc"]
-		    ::Debug 4 "::Jabber::GroupChat::HaveMUC	confserver=$confserver, ans=$ans"
 		}
 	    }
 	    if {[info exists jstate(disco)]} {
@@ -231,11 +234,11 @@ proc ::Jabber::GroupChat::HaveMUC {{roomjid ""}} {
 		if {[$jstate(disco) isdiscoed info $confserver]} {
 		    set ans [$jstate(disco) hasfeature   \
 		      "http://jabber.org/protocol/muc" $confserver]
-		    ::Debug 4 "::Jabber::GroupChat::HaveMUC	confserver=$confserver, ans=$ans"
 		}
 	    }
 	}
     }
+    ::Debug 4 "::Jabber::GroupChat::HaveMUC $ans"
     return $ans
 }
 
@@ -286,7 +289,7 @@ proc ::Jabber::GroupChat::EnterOrCreate {what args} {
 	    }
 	}
     }
-    ::Debug 2 "::Jabber::GroupChat::EnterOrCreate\
+    ::Debug 2 "::Jabber::GroupChat::EnterOrCreate prefgchatproto=$jprefs(prefgchatproto) \
       gchatprotocol=$gchatprotocol, what=$what, args='$args'"
     
     switch -- $gchatprotocol {
@@ -314,7 +317,7 @@ proc ::Jabber::GroupChat::EnterOrCreate {what args} {
 
 proc ::Jabber::GroupChat::EnterHook {roomJid protocol} {
     
-    ::Debug 2 "::Jabber::GroupChat::EnterHook roomJid=$roomJid"
+    ::Debug 2 "::Jabber::GroupChat::EnterHook roomJid=$roomJid $protocol"
     
     ::Jabber::GroupChat::SetProtocol $roomJid $protocol
     
@@ -333,6 +336,8 @@ proc ::Jabber::GroupChat::SetProtocol {roomJid inprotocol} {
     
     variable protocol
 
+    ::Debug 2 "::Jabber::GroupChat::SetProtocol $roomJid $inprotocol"
+    
     # We need a separate cache for this since the room may not yet exist.
     set protocol($roomJid) $inprotocol
     

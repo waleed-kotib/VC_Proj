@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.32 2004-05-06 13:41:11 matben Exp $
+# $Id: Whiteboard.tcl,v 1.33 2004-05-13 13:50:22 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -1192,7 +1192,6 @@ proc ::WB::SetButtonTrayDefs {buttonDefs} {
 proc ::WB::SetMenuDefs {key menuDef} {
     variable menuDefs
     
-    puts "::WB::SetMenuDefs key=$key"
     set menuDefs(main,$key) $menuDef
 }
 
