@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.81 2004-12-12 14:55:20 matben Exp $
+# $Id: UI.tcl,v 1.82 2004-12-13 14:40:46 matben Exp $
 
 package require entrycomp
 package require alertbox
@@ -384,13 +384,19 @@ proc ::UI::Toplevel {w args} {
 #       that returns stop.
 #       Default behaviour when no hook registered is to destroy window.
 
-proc ::UI::DoCloseWindow {{wevent {}}} {
+proc ::UI::DoCloseWindow {{wevent ""}} {
     variable topcache
     
-    set wfocus [focus]
-    if {$wfocus != ""} {
-	set w [winfo toplevel [focus]]
-    
+    set w ""
+    if {$wevent == ""} {
+	set wfocus [focus]
+	if {$wfocus != ""} {
+	    set w [winfo toplevel [focus]]
+	}
+    } else {
+	set w $wevent
+    }
+    if {$w != ""} {
 	Debug 2 "::UI::DoCloseWindow winfo class $w=[winfo class $w]"
 	if {[info exists topcache($w,-closecommand)]} {
 	    uplevel #0 $topcache($w,-closecommand) $w
