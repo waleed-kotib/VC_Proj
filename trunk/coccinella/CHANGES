@@ -6,8 +6,8 @@ Not to mention all bugfixes and rewrites.
 
 Coccinella-0.94.11 (040601): 	Short summary --
 
-        - internal ip not always set correctly which made some file transfers
-	  to fail
+        - internal ip not always set correctly which made transfers fail
+
 
 Coccinella-0.94.10 (040528): 	Short summary --
 

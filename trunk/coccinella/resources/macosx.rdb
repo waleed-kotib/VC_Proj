@@ -3,7 +3,7 @@
 
 ! General appearence
 !
-*fontTiny:                           {Lucida Grande} 10
+*fontTiny:                           {Lucida Grande} 11
 *fontSmall:                          {Lucida Grande} 11
 *fontSmallBold:                      {Lucida Grande} 11 bold
 *fontMedium:                         {Lucida Grande} 11
