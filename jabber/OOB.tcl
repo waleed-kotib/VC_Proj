@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.21 2004-01-28 08:36:46 matben Exp $
+# $Id: OOB.tcl,v 1.22 2004-02-17 07:44:37 matben Exp $
 
 package provide OOB 1.0
 
@@ -96,8 +96,11 @@ proc ::Jabber::OOB::FileOpen { } {
     variable localpath
     variable locals
 
-    set ans [tk_getOpenFile -title [::msgcat::mc {Pick File}]  \
-      -initialdir $locals(initialLocalDir)]
+    set opts {}
+    if {[file isdirectory $locals(initialLocalDir)]} {
+	set opts [list -initialdir $locals(initialLocalDir)]
+    }
+    set ans [eval {tk_getOpenFile -title [::msgcat::mc {Pick File}]} $opts]
     if {[string length $ans]} {
 	set localpath $ans
 	set locals(initialLocalDir) [file dirname $ans]
@@ -272,7 +275,7 @@ proc ::Jabber::OOB::Get {jid url file id} {
 }
 
 proc ::Jabber::OOB::Progress {out token total current} {
-    
+    global  tcl_platform
     variable locals
     upvar #0 $token state
     
@@ -290,6 +293,9 @@ proc ::Jabber::OOB::Progress {out token total current} {
 	# Update progress.
 	set wprog .joob$out
 	$wprog configure -percent [expr 100.0 * $current/($total + 1.0)]
+	if {[string equal $tcl_platform(platform) "windows"]} {
+	    update
+	}
     }
 }
 

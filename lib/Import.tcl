@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Import.tcl,v 1.12 2004-02-06 14:01:22 matben Exp $
+# $Id: Import.tcl,v 1.13 2004-02-17 07:44:37 matben Exp $
 
 package require http
 package require httpex
@@ -41,7 +41,7 @@ proc ::Import::ImportImageOrMovieDlg {wtop} {
     variable initialDir    
     
     set wCan [::UI::GetCanvasFromWtop $wtop]
-    if {[info exists initialDir]} {
+    if {[info exists initialDir] && [file isdirectory $initialDir]} {
 	set opts {-initialdir $initialDir}
     } else {
 	set opts {}

@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: GetFileIface.tcl,v 1.14 2004-02-05 14:00:23 matben Exp $
+# $Id: GetFileIface.tcl,v 1.15 2004-02-17 07:44:37 matben Exp $
 
 package require getfile
 package require uriencode
@@ -82,7 +82,7 @@ proc ::GetFileIface::GetFile {wtop sock fileName opts} {
     # or if you user wants something different. May modify 'getstate(dstpath)'!
     set code [::GetFileIface::Prepare $gettoken $fileTail $mime $opts]
     
-    ::Debug 2 "     code=$code"
+    ::Debug 2 "\t code=$code"
         
     if {$code != $noErr} {
 	
@@ -110,6 +110,7 @@ proc ::GetFileIface::GetFile {wtop sock fileName opts} {
 	  -progress [list [namespace current]::Progress $gettoken] \
 	  -command [list [namespace current]::Command $gettoken]
     } token]} {
+	::Debug 2 "\t ::getfile::get failed: $token"
 	tk_messageBox -title [::msgcat::mc {File Transfer Error}]  \
 	  -type ok -message $token
 	unset getstate

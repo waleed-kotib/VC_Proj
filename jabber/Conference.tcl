@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Conference.tcl,v 1.14 2004-02-14 14:00:33 matben Exp $
+# $Id: Conference.tcl,v 1.15 2004-02-17 07:44:37 matben Exp $
 
 package provide Conference 1.0
 
@@ -193,7 +193,7 @@ proc ::Jabber::Conference::BuildEnter {args} {
 	    
     if {[info exists argsArr(-autoget)] && $argsArr(-autoget)} {
 	
-	# We seem to get 1x1 on Gnome if not have after idle here???
+	# We seem to get 1x1 windows on Gnome if not have after idle here???
 	after idle ::Jabber::Conference::EnterGet $token
     }
         

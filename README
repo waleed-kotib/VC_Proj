@@ -110,6 +110,10 @@ Known Bugs:
       movies, operations on these items before they have been completely 
       received by remote clients are lost.
 
+    * There are synchronization issues if two users happen to edit an item
+      exactly simultanously. This applies only to some operations, and is 
+      not very likely to happen, but must anyway be considered.
+
     * It may sometimes happen that the internal settings become confused 
       which results in a corrupt preference file. If you suspect this then
       delete this file:
