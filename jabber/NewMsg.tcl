@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.13 2003-11-04 09:44:27 matben Exp $
+# $Id: NewMsg.tcl,v 1.14 2003-11-06 15:17:51 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -156,17 +156,18 @@ proc ::Jabber::NewMsg::Build {wbase args} {
     set iconPrint     [::UI::GetIcon btprint]
     set iconPrintDis  [::UI::GetIcon btprintdis]
     
-    set frtop [frame $w.frall.frtop -borderwidth 0]
-    pack $frtop -side top -fill x -padx 4 -pady 2
-    ::UI::InitShortcutButtonPad $w $frtop 50
-    ::UI::NewButton $w send Send $iconSend $iconSendDis  \
+    set wtray $w.frall.frtop
+    buttontray::buttontray $wtray 50
+    pack $wtray -side top -fill x -padx 4 -pady 2
+
+    $wtray newbutton send Send $iconSend $iconSendDis  \
       [list ::Jabber::NewMsg::DoSend $w]
-    ::UI::NewButton $w quote Quote $iconQuote $iconQuoteDis  \
+    $wtray newbutton quote Quote $iconQuote $iconQuoteDis  \
       [list ::Jabber::NewMsg::DoQuote $w $opts(-quotemessage) $opts(-to) $opts(-time)] \
        -state $quotestate
-    ::UI::NewButton $w save Save $iconSave $iconSaveDis  \
+     $wtray newbutton save Save $iconSave $iconSaveDis  \
       [list ::Jabber::NewMsg::SaveMsg $w]
-    ::UI::NewButton $w print Print $iconPrint $iconPrintDis  \
+    $wtray newbutton print Print $iconPrint $iconPrintDis  \
       [list ::Jabber::NewMsg::DoPrint $w]
     
     pack [frame $w.frall.divt -bd 2 -relief sunken -height 2] -fill x -side top
@@ -251,6 +252,7 @@ proc ::Jabber::NewMsg::Build {wbase args} {
     set locals($w,wsubject) $wsubject
     set locals($w,wccp) $wccp
     set locals($w,finished) 0
+    set locals($w,wtray) $wtray
     
     if {[string length $opts(-forwardmessage)] > 0} {
 	$wtext insert end "\nForwarded message from $opts(-to) written at $opts(-time)\n\
@@ -662,7 +664,7 @@ proc ::Jabber::NewMsg::DoQuote {w message to time} {
     $wtext insert end $quoteMsg
     
     # Quote only once.
-    ::UI::ButtonConfigure $w quote -state disabled
+    $locals($w,wtray) buttonconfigure quote -state disabled
 }
 
 proc ::Jabber::NewMsg::SaveMsg {w} {

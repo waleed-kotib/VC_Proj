@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.14 2003-10-18 07:43:56 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.15 2003-11-06 15:17:51 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -297,64 +297,65 @@ proc ::PreferencesUtils::ResetToUserDefaults { } {
 proc ::PreferencesUtils::SetWidgetDefaultOptions { } {
     global  prefs sysFont this
     
-    option add *Canvas.Background                   $prefs(bgColGeneral)
-    option add *Checkbutton.Font                    $sysFont(s)
-    option add *Frame.Background                    $prefs(bgColGeneral)
-    option add *Label.Background                    $prefs(bgColGeneral)
-    option add *Label.Font                          $sysFont(s)
-    option add *Message.Background                  $prefs(bgColGeneral)
-    option add *Progressbar.Background              $prefs(bgColGeneral)
-    option add *Entry.Background                    white
-    option add *Entry.BorderWidth                   1
-    option add *Entry.Font                          $sysFont(s)
-    option add *Entry.HighlightColor                #6363CE
-    option add *Entry.HighlightBackground           $prefs(bgColGeneral)
-    option add *Entry.DisableBackground             $prefs(bgColGeneral)
-    option add *Entry.DisableForeground             gray20
-    option add *Listbox.HighlightColor              #6363CE
-    option add *Listbox.HighlightBackground         $prefs(bgColGeneral)
-    option add *Radiobutton.Font                    $sysFont(s)
-    option add *Text.Background                     white
-    option add *Text.HighlightColor                 #6363CE
-    option add *Text.HighlightBackground            $prefs(bgColGeneral)
-    option add *Tablelist.HighlightThickness        3
-    option add *Tablelist.HighlightColor            #6363CE
-    option add *Tablelist.HighlightBackground       $prefs(bgColGeneral)
-    option add *Tablelist*Entry.background	    LightYellow
+    option add *Canvas.Background                   $prefs(bgColGeneral) startupFile
+    option add *Checkbutton.Font                    $sysFont(s) startupFile
+    option add *Frame.Background                    $prefs(bgColGeneral) startupFile
+    option add *Label.Background                    $prefs(bgColGeneral) startupFile
+    option add *Label.Font                          $sysFont(s) startupFile
+    option add *Message.Background                  $prefs(bgColGeneral) startupFile
+    option add *Progressbar.Background              $prefs(bgColGeneral) startupFile
+    option add *Entry.Background                    white startupFile
+    option add *Entry.BorderWidth                   1 startupFile
+    option add *Entry.Font                          $sysFont(s) startupFile
+    option add *Entry.HighlightColor                #6363CE startupFile
+    option add *Entry.HighlightBackground           $prefs(bgColGeneral) startupFile
+    option add *Entry.DisableBackground             $prefs(bgColGeneral) startupFile
+    option add *Entry.DisableForeground             gray20 startupFile
+    option add *Listbox.HighlightColor              #6363CE startupFile
+    option add *Listbox.HighlightBackground         $prefs(bgColGeneral) startupFile
+    option add *Radiobutton.Font                    $sysFont(s) startupFile
+    option add *Text.Background                     white startupFile
+    option add *Text.HighlightColor                 #6363CE startupFile
+    option add *Text.HighlightBackground            $prefs(bgColGeneral) startupFile
+    option add *Tablelist.HighlightThickness        3 startupFile
+    option add *Tablelist.HighlightColor            #6363CE startupFile
+    option add *Tablelist.HighlightBackground       $prefs(bgColGeneral) startupFile
+    option add *Tablelist.HighlightBackground       $prefs(bgColGeneral) startupFile
+    option add *ButtonTray.background               $prefs(bgColGeneral) startupFile
     
     # ...and then on specific platforms.
     
     switch -- $this(platform) {
 	macintosh - macosx {
-	    option add *Radiobutton.Background $prefs(bgColGeneral)
-	    option add *Button.HighlightBackground $prefs(bgColGeneral)
-	    option add *Checkbutton.Background $prefs(bgColGeneral)
-	    option add *Entry.HighlightThickness 3
-	    option add *Listbox.Font $sysFont(m)
-	    option add *Listbox.HighlightThickness 3
-	    option add *Text.HighlightThickness 3
-	    option add *Tablelist.BorderWidth 1
+	    option add *Radiobutton.Background     $prefs(bgColGeneral) startupFile
+	    option add *Button.HighlightBackground $prefs(bgColGeneral) startupFile
+	    option add *Checkbutton.Background     $prefs(bgColGeneral) startupFile
+	    option add *Entry.HighlightThickness   3 startupFile
+	    option add *Listbox.Font               $sysFont(m) startupFile
+	    option add *Listbox.HighlightThickness 3 startupFile
+	    option add *Text.HighlightThickness    3 startupFile
+	    option add *Tablelist.BorderWidth      1 startupFile
 	}
 	windows {
-	    option add *Radiobutton.Background $prefs(bgColGeneral)
-	    option add *Button.Background $prefs(bgColGeneral)
-	    option add *Checkbutton.Background $prefs(bgColGeneral)
-	    option add *Entry.HighlightThickness 2
-	    option add *Listbox.Background white
-	    option add *Listbox.Font $sysFont(m)
-	    option add *Listbox.HighlightThickness 2
-	    option add *Text.HighlightThickness 2
+	    option add *Radiobutton.Background $prefs(bgColGeneral) startupFile
+	    option add *Button.Background $prefs(bgColGeneral) startupFile
+	    option add *Checkbutton.Background $prefs(bgColGeneral) startupFile
+	    option add *Entry.HighlightThickness 2 startupFile
+	    option add *Listbox.Background white startupFile
+	    option add *Listbox.Font $sysFont(m) startupFile
+	    option add *Listbox.HighlightThickness 2 startupFile
+	    option add *Text.HighlightThickness 2 startupFile
 	}
 	unix {
-	    option add *Entry.Foreground Black
-	    option add *Entry.HighlightThickness 2
-	    option add *Listbox.HighlightThickness 2
-	    option add *Listbox.BorderWidth 1
-	    option add *Text.HighlightThickness 2
-	    option add *Scrollbar.BorderWidth 1
-	    option add *Scrollbar.Width 12
-	    option add *Scrollbar*troughColor #bdbdbd
-	    option add *Tablelist.BorderWidth 1
+	    option add *Entry.Foreground Black startupFile
+	    option add *Entry.HighlightThickness 2 startupFile
+	    option add *Listbox.HighlightThickness 2 startupFile
+	    option add *Listbox.BorderWidth 1 startupFile
+	    option add *Text.HighlightThickness 2 startupFile
+	    option add *Scrollbar.BorderWidth 1 startupFile
+	    option add *Scrollbar.Width 12 startupFile
+	    option add *Scrollbar*troughColor #bdbdbd startupFile
+	    option add *Tablelist.BorderWidth 1 startupFile
 	}
     }
 }

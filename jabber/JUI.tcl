@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.2 2003-11-04 09:44:27 matben Exp $
+# $Id: JUI.tcl,v 1.3 2003-11-06 15:17:51 matben Exp $
 
 package provide JUI 1.0
 
@@ -104,24 +104,26 @@ proc ::Jabber::UI::Build {w} {
     set iconStop          [::UI::GetIcon btstop]
     set iconStopDis       [::UI::GetIcon btstopdis]
     
-    set frtop [frame ${wtop}top -bd 1 -relief raised]
-    pack $frtop -side top -fill x
-    ::UI::InitShortcutButtonPad $w $frtop 50
-    ::UI::NewButton $w connect Connect $iconConnect $iconConnectDis  \
+    set wtray ${wtop}top
+    buttontray::buttontray $wtray 50 -borderwidth 1 -relief raised
+    pack $wtray -side top -fill x
+    set jwapp(wtray) $wtray
+    
+    $wtray newbutton connect Connect $iconConnect $iconConnectDis  \
       [list ::Jabber::Login::Login $wDlgs(jlogin)]
     if {[::Jabber::MailBox::HaveMailBox]} {
-	::UI::NewButton $w inbox Inbox $iconInboxLett $iconInboxLettDis  \
+	$wtray newbutton inbox Inbox $iconInboxLett $iconInboxLettDis  \
 	  [list ::Jabber::MailBox::Show -visible 1]
     } else {
-	::UI::NewButton $w inbox Inbox $iconInbox $iconInboxDis  \
+	$wtray newbutton inbox Inbox $iconInbox $iconInboxDis  \
 	  [list ::Jabber::MailBox::Show -visible 1]
     }
-    ::UI::NewButton $w newuser "New User" $iconNewUser $iconNewUserDis  \
+    $wtray newbutton newuser "New User" $iconNewUser $iconNewUserDis  \
       [list ::Jabber::Roster::NewOrEditItem new] \
       -state disabled
-    ::UI::NewButton $w stop Stop $iconStop $iconStopDis  \
+    $wtray newbutton stop Stop $iconStop $iconStopDis  \
       [list ::Jabber::UI::StopConnect] -state disabled
-    set shortBtWidth [::UI::ShortButtonPadMinWidth $w]
+    set shortBtWidth [$wtray minwidth]
 
     # Build bottom and up to handle clipping when resizing.
     # Jid entry with electric plug indicator.
@@ -288,10 +290,10 @@ proc ::Jabber::UI::MailBoxState {mailboxstate} {
     
     switch -- $mailboxstate {
 	empty {
-	    ::UI::ButtonConfigure $w inbox -image [::UI::GetIcon btinbox]
+	    $jwapp(wtray) buttonconfigure inbox -image [::UI::GetIcon btinbox]
 	}
 	nonempty {
-	    ::UI::ButtonConfigure $w inbox -image [::UI::GetIcon btinboxLett]
+	    $jwapp(wtray) buttonconfigure inbox -image [::UI::GetIcon btinboxLett]
 	}
     }
 }
@@ -695,19 +697,20 @@ proc ::Jabber::UI::FixUIWhen {what} {
     set wtop ${w}.
     set wmenu $jwapp(wmenu)
     set wmj ${wmenu}.jabber
+    set wtray $jwapp(wtray)
     
     switch -exact -- $what {
 	connectinit {
-	    ::UI::ButtonConfigure $w connect -state disabled
-	    ::UI::ButtonConfigure $w stop -state normal
+	    $wtray buttonconfigure connect -state disabled
+	    $wtray buttonconfigure stop -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mLogin -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mNewAccount -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mSetupAssistant -state disabled
 	}
 	connectfin - connect {
-	    ::UI::ButtonConfigure $w connect -state disabled
-	    ::UI::ButtonConfigure $w newuser -state normal
-	    ::UI::ButtonConfigure $w stop -state disabled
+	    $wtray buttonconfigure connect -state disabled
+	    $wtray buttonconfigure newuser -state normal
+	    $wtray buttonconfigure stop -state disabled
 	    $jwapp(elplug) configure -image [::UI::GetIcon contact_on]
 	    ::UI::MenuMethod $wmj entryconfigure mNewAccount -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mLogin  \
@@ -729,9 +732,9 @@ proc ::Jabber::UI::FixUIWhen {what} {
 	    ::UI::MenuMethod $wmj entryconfigure mSetupAssistant -state disabled
 	}
 	disconnect {
-	    ::UI::ButtonConfigure $w connect -state normal
-	    ::UI::ButtonConfigure $w newuser -state disabled
-	    ::UI::ButtonConfigure $w stop -state disabled
+	    $wtray buttonconfigure connect -state normal
+	    $wtray buttonconfigure newuser -state disabled
+	    $wtray buttonconfigure stop -state disabled
 	    $jwapp(elplug) configure -image [::UI::GetIcon contact_off]
 	    ::UI::MenuMethod $wmj entryconfigure mNewAccount -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mLogin  \

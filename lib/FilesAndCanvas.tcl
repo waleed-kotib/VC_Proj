@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: FilesAndCanvas.tcl,v 1.12 2003-10-25 07:22:27 matben Exp $
+# $Id: FilesAndCanvas.tcl,v 1.13 2003-11-06 15:17:51 matben Exp $
  
 package require can2svg
 package require undo
@@ -275,7 +275,6 @@ proc ::CanvasFile::FileToCanvasVer1 {w fd absPath args} {
 
 proc ::CanvasFile::FileToCanvasVer2 {w fd absPath args} {
     global  prefs
-    upvar ::UI::icons icons
     
     Debug 2 "FileToCanvasVer2 absPath=$absPath args='$args'"
     

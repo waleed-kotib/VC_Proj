@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.29 2003-11-03 11:54:58 matben Exp $
+# $Id: Jabber.tcl,v 1.30 2003-11-06 15:17:51 matben Exp $
 #
 #  The $address is an ip name or number.
 #
@@ -979,7 +979,7 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 		
 		# In the future we can collect the transports in another place.
 		$jstate(jlib) roster_set $from ::Jabber::Subscribe::ResProc \
-		  -groups {Transports}]
+		  -groups {Transports}
 		
 	    } else {
 		
@@ -3124,7 +3124,7 @@ proc ::Jabber::Register::Register {w args} {
       -fill both -expand 1 -ipadx 12 -ipady 4
     
     label $w.frall.head -text [::msgcat::mc {New Account}] -font $sysFont(l)  \
-      -anchor w -padx 10 -pady 4
+      -anchor w -padx 10 -pady 4 -bg #cecece
     pack $w.frall.head -side top -fill both -expand 1
     message $w.frall.msg -width 260 -font $sysFont(s)  \
       -text [::msgcat::mc janewaccount]
@@ -4013,7 +4013,7 @@ proc ::Jabber::Logout::WithStatus {w} {
       -fill both -expand 1 -ipadx 12 -ipady 4
     
     label $w.frall.head -text {Logout} -font $sysFont(l)  \
-      -anchor w -padx 10 -pady 4
+      -anchor w -padx 10 -pady 4 -bg #cecece
     pack $w.frall.head -side top -fill both -expand 1
     
     # Entries etc.
@@ -4146,7 +4146,7 @@ proc ::Jabber::Subscribe::Subscribe {wbase jid args} {
       -fill both -expand 1 -ipadx 4
     
     label $w.frall.head -text [::msgcat::mc Subscribe] -font $sysFont(l)  \
-      -anchor w -padx 10 -pady 4
+      -anchor w -padx 10 -pady 4 -bg #cecece
     pack $w.frall.head -side top -fill both -expand 1
     message $w.frall.msg -width 260 -font $sysFont(s)  \
       -text [::msgcat::mc jasubwant $jid]

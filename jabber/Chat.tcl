@@ -5,14 +5,30 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.13 2003-11-01 13:57:27 matben Exp $
+# $Id: Chat.tcl,v 1.14 2003-11-06 15:17:51 matben Exp $
 
 package require entrycomp
 package require uriencode
 
 package provide Chat 1.0
 
+# Use option database for customization. Only a first test...
+option add *Chat.textBackground       white                 widgetDefault
+option add *Chat.textFont             $sysFont(s)           widgetDefault
+option add *Chat.meForeground         red                   widgetDefault
+option add *Chat.meBackground         #cecece               widgetDefault
+option add *Chat.meTextForeground     black                 widgetDefault
+option add *Chat.meTextBackground     #cecece               widgetDefault
+option add *Chat.meFont               $sysFont(sb)          widgetDefault                                     
+option add *Chat.youForeground        blue                  widgetDefault
+option add *Chat.youBackground        white                 widgetDefault
+option add *Chat.youTextForeground    black                 widgetDefault
+option add *Chat.youTextBackground    white                 widgetDefault
+option add *Chat.youFont              $sysFont(sb)          widgetDefault
+option add *Chat.clockFormat          "%H:%M"               widgetDefault
+
 namespace eval ::Jabber::Chat:: {
+    upvar ::Jabber::jprefs jprefs
 
     variable locals
 }
@@ -48,14 +64,14 @@ proc ::Jabber::Chat::StartThreadDlg {w args} {
     } else {
 
     }
-    wm title $w {Start Chat}
+    wm title $w [::msgcat::mc {Start Chat}]
     
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised]  \
       -fill both -expand 1 -ipadx 12 -ipady 4
     
-    label $w.frall.head -text {Chat with} -font $sysFont(l)  \
-      -anchor w -padx 10 -pady 4
+    label $w.frall.head -text [::msgcat::mc {Chat with}] -font $sysFont(l)  \
+      -anchor w -padx 10 -pady 4 -bg #cecece
     pack $w.frall.head -side top -fill both -expand 1
     
     # Entries etc.
@@ -63,7 +79,8 @@ proc ::Jabber::Chat::StartThreadDlg {w args} {
     pack $frmid -side top -fill both -expand 1
     
     set jidlist [$jstate(roster) getusers -type available]
-    label $frmid.luser -text "Jabber user:" -font $sysFont(sb) -anchor e
+    label $frmid.luser -text "[::msgcat::mc {Jabber user id}]:"  \
+      -font $sysFont(sb) -anchor e
     ::entrycomp::entrycomp $frmid.euser $jidlist -width 26    \
       -textvariable [namespace current]::user
     grid $frmid.luser -column 0 -row 1 -sticky e
@@ -189,6 +206,18 @@ proc ::Jabber::Chat::GotMsg {body args} {
 	set locals($threadID,subject) $argsArr(-subject)
     }
     set wtext $locals($threadID,wtext)
+    
+    # Alternative...
+    if {0} {
+	set clockFormat [option get $w clockFormat Chat]
+	if {$clockFormat == ""} {
+	    set theTime [clock format [clock seconds] -format "%H:%M"]
+	    set txt "$theTime <$username>"
+	} else {
+	    set txt <$username>
+	}
+    }
+    
     if {$jprefs(chat,showtime)} {
 	set theTime [clock format [clock seconds] -format "%H:%M"]
 	set txt "$theTime <$username>"
@@ -361,7 +390,11 @@ proc ::Jabber::Chat::Build {threadID args} {
     frame $wtxt
     
     set locals($threadID,wtext) $wtext
-    text $wtext -height 12 -width 1 -font $jprefs(chatFont) -state disabled -cursor {} \
+    set textBackground  [option get $w textBackground Chat]
+    set textFont        [option get $w textFont Chat]
+    
+    text $wtext -height 12 -width 1 -font $textFont -background $textBackground \
+      -state disabled -cursor {} \
       -borderwidth 1 -relief sunken -yscrollcommand [list $wysc set] -wrap word
     scrollbar $wysc -orient vertical -command [list $wtext yview]
     grid $wtext -column 0 -row 0 -sticky news
@@ -370,11 +403,12 @@ proc ::Jabber::Chat::Build {threadID args} {
     grid rowconfigure $wtxt 0 -weight 1
     
     # The tags.
-    ::Jabber::Chat::ConfigureTextTags $wtext
+    ::Jabber::Chat::ConfigureTextTags $w $wtext
 
     # Text send.
     frame $wtxtsnd
-    text $wtextsnd -height 4 -width 1 -font $jprefs(chatFont) -wrap word \
+    text $wtextsnd -height 4 -width 1 -font $textFont  \
+      -background $textBackground -wrap word \
       -borderwidth 1 -relief sunken -yscrollcommand [list $wyscsnd set]
     scrollbar $wyscsnd -orient vertical -command [list $wtextsnd yview]
     grid $wtextsnd -column 0 -row 0 -sticky news
@@ -405,20 +439,36 @@ proc ::Jabber::Chat::Build {threadID args} {
     focus $w
 }
 
-proc ::Jabber::Chat::ConfigureTextTags {wtext} {
+proc ::Jabber::Chat::ConfigureTextTags {w wtext} {
     upvar ::Jabber::jprefs jprefs
         
     set space 2
+    
+    set meForeground      [option get $w meForeground Chat]
+    set meBackground      [option get $w meBackground Chat]
+    set meTextForeground  [option get $w meTextForeground Chat]
+    set meTextBackground  [option get $w meTextBackground Chat]
+    set meFont            [option get $w meFont Chat]
+    set youForeground     [option get $w youForeground Chat]
+    set youBackground     [option get $w youBackground Chat]
+    set youTextForeground [option get $w youTextForeground Chat]
+    set youTextBackground [option get $w youTextBackground Chat]
+    set youFont           [option get $w youFont Chat]
+    
     set boldChatFont [lreplace $jprefs(chatFont) 2 2 bold]
     
-    $wtext tag configure metag -foreground red -background #cecece  \
-      -spacing1 $space -font $boldChatFont
-    $wtext tag configure metxttag -foreground black -background #cecece  \
+    $wtext tag configure metag  \
+      -foreground $meForeground -background $meBackground  \
+      -spacing1 $space -font $meFont
+    $wtext tag configure metxttag  \
+      -foreground $meTextForeground -background $meTextBackground  \
       -spacing1 $space -spacing3 $space -lmargin1 20 -lmargin2 20
-    $wtext tag configure youtag -foreground blue -spacing1 $space  \
-       -font $boldChatFont
-    $wtext tag configure youtxttag -foreground black -spacing1 $space  \
-      -spacing3 $space -lmargin1 20 -lmargin2 20
+    $wtext tag configure youtag  \
+      -foreground $youForeground -background $youBackground \
+      -spacing1 $space -font $youFont
+    $wtext tag configure youtxttag  \
+      -foreground $youTextForeground -background $youTextBackground \
+      -spacing1 $space -spacing3 $space -lmargin1 20 -lmargin2 20
     
     ::Text::ConfigureLinkTagForTextWidget $wtext linktag tact
 }
@@ -470,6 +520,11 @@ proc ::Jabber::Chat::Send {threadID} {
 	  -message [::msgcat::mc jamessnotconnected]
 	return
     }
+    
+    # According to XMPP we should send to 3-tier jid if still online,
+    # else to 2-tier.
+    
+    
     set jid $locals($threadID,jid)
     if {![::Jabber::IsWellFormedJID $jid]} {
 	set ans [tk_messageBox -message [FormatTextForMessageBox  \

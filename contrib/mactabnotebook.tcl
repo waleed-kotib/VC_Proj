@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: mactabnotebook.tcl,v 1.4 2003-10-05 13:36:17 matben Exp $
+# $Id: mactabnotebook.tcl,v 1.5 2003-11-06 15:17:51 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -26,6 +26,7 @@
 #	MacTabnotebook class:
 #	-activetabcolor, activeTabColor, ActiveTabColor
 #	-margin, margin, Margin
+#	-style, style, Style
 #	-tabbackground, tabBackground, TabBackground
 #	-tabcolor, tabColor, TabColor
 #	-tabfont, tabFont, TabFont
@@ -113,34 +114,39 @@ proc ::mactabnotebook::Init { } {
 	-borderwidth         {borderWidth          BorderWidth         }  \
 	-margin              {margin               Margin              }  \
 	-relief              {relief               Relief              }  \
+	-style               {style                Style               }  \
 	-tabbackground       {tabBackground        TabBackground       }  \
 	-tabcolor            {tabColor             TabColor            }  \
 	-tabfont             {tabFont              TabFont             }  \
 	-takefocus           {takeFocus            TakeFocus           }  \
     }
     set notebookOptions {-borderwidth -relief}
-    set tabOptions {-activetabcolor -margin -tabbackground -tabcolor    \
-      -tabfont -takefocus}
+    set tabOptions {-activetabcolor -margin -style \
+      -tabbackground -tabcolor -tabfont -takefocus}
   
     # The legal widget commands. These are actually the Notebook commands.
     set widgetCommands {cget configure deletepage displaypage newpage pages}
 
     option add *MacTabnotebook.activeTabColor      #efefef      widgetDefault
     option add *MacTabnotebook.margin              6            widgetDefault
+    option add *MacTabnotebook.style               classic      widgetDefault
     option add *MacTabnotebook.tabBackground       #dedede      widgetDefault
     option add *MacTabnotebook.tabColor            #cecece      widgetDefault
     option add *Notebook.takeFocus                 0            widgetDefault
     
     # Platform specifics...
-    switch -- $tcl_platform(platform) {
+    switch -- $this(platform) {
 	unix {
 	    option add *MacTabnotebook.tabFont    {Helvetica -12 bold}   widgetDefault
 	}
 	windows {
 	    option add *MacTabnotebook.tabFont    {system}   widgetDefault
 	}
-	macintosh - macosx {
+	macintosh {
 	    option add *MacTabnotebook.tabFont    {system}    widgetDefault
+	}
+	macosx {
+	    option add *MacTabnotebook.tabFont    {{Lucida Grande} 12 bold} widgetDefault
 	}
     }
     
@@ -150,17 +156,17 @@ proc ::mactabnotebook::Init { } {
     # line:     {coords col tags}
     
     set toDrawPoly {
-	  {0 0 $x 0 \
-	    [expr $xplm - 2] [expr $ymim + 5] \
-	    [expr $xplm] [expr $ymim + 1] \
-	    [expr $xplm + 2] $ymim \
-	    [expr $xplm + $wd - 2] $ymim \
-	    [expr $xplm + $wd] [expr $ymim + 1] \
-	    [expr $xplm + $wd + 2] [expr $ymim + 5] \
-	    [expr $x + $wd + 2 * $margin] 0  \
-	    2000 0 2000 9 0 9}  \
-	    black $color {[list $name tab tab-$name]}}
-	  
+	{0 0 $x 0 \
+	  [expr $xplm - 2] [expr $ymim + 5] \
+	  [expr $xplm] [expr $ymim + 1] \
+	  [expr $xplm + 2] $ymim \
+	  [expr $xplm + $wd - 2] $ymim \
+	  [expr $xplm + $wd] [expr $ymim + 1] \
+	  [expr $xplm + $wd + 2] [expr $ymim + 5] \
+	  [expr $x + $wd + 2 * $margin] 0  \
+	  2000 0 2000 9 0 9}  \
+	  black $color {[list $name tab tab-$name]}}
+	
     set toDrawLine {
 	{1 8 1 1 [expr $x + 1] 1 [expr $x + 1] 0  \
 	  [expr $xplm - 1] [expr $ymim + 5] \
@@ -216,6 +222,14 @@ proc ::mactabnotebook::Init { } {
     set tabDefs(normal,out) {
 	ln1up #dedede ln2up #dedede ln1dn #dedede ln2dn #dedede
     }
+    
+    # Aqua style tabs:
+    #
+    # polyogon: {coords col fill tags}
+    set toDrawPolyAqua {
+	{0 $yl }
+    }
+    
     
     # This allows us to clean up some things when we go away.
     bind MacTabnotebook <Destroy> [list ::mactabnotebook::DestroyHandler %W]
@@ -584,6 +598,22 @@ proc ::mactabnotebook::DeletePage {w name} {
 #       The page widget path.
 
 proc ::mactabnotebook::Build {w} {
+    upvar ::mactabnotebook::${w}::options options
+    
+    switch -- $options(-style) {
+	classic {
+	    ::mactabnotebook::BuildClassic $w
+	}
+	aqua {
+	    ::mactabnotebook::BuildAqua $w
+	}
+	default {
+	    return -code error "unkonwn style "
+	}
+    }
+}
+
+proc ::mactabnotebook::BuildClassic {w} {
     
     variable toDrawPoly
     variable toDrawLine
@@ -592,7 +622,7 @@ proc ::mactabnotebook::Build {w} {
     upvar ::mactabnotebook::${w}::tnInfo tnInfo
 
     if {$widgetGlobals(debug) > 1} {
-	puts "::mactabnotebook::Build w=$w"
+	puts "::mactabnotebook::BuildClassic w=$w"
     }
     $w.tabs delete all
     set margin $options(-margin)
@@ -633,7 +663,7 @@ proc ::mactabnotebook::Build {w} {
 	$w.tabs raise $id	
 	$w.tabs bind $name <ButtonPress-1>  \
 	  [list ::mactabnotebook::ButtonPressTab $w $name]
-	set x [expr $x + $wd + 2 * $margin + 3]
+	incr x [expr $wd + 2 * $margin + 3]
     }
     set height [expr $maxh + 2 * $margin]
     $w.tabs move all 0 $height
@@ -644,6 +674,48 @@ proc ::mactabnotebook::Build {w} {
 	Display $w [lindex $tnInfo(tabs) 0]
     }	
     set tnInfo(pending) {}
+}
+
+proc ::mactabnotebook::BuildAqua {w} {
+    
+    variable toDrawPolyAqua
+    variable widgetGlobals
+    upvar ::mactabnotebook::${w}::options options
+    upvar ::mactabnotebook::${w}::tnInfo tnInfo
+
+    if {$widgetGlobals(debug) > 1} {
+	puts "::mactabnotebook::BuildAqua w=$w"
+    }
+    $w.tabs delete all
+
+    set font $options(-tabfont)
+    set margin $options(-margin)
+    set maxh 0
+    set x 2
+
+    foreach name $tnInfo(tabs) {
+	if {[info exists tnInfo($name,-text)]} {
+	    set str $tnInfo($name,-text)
+	} else {
+	    set str $name
+	}
+	set id [$w.tabs create text \
+	  [expr $x + $margin + 2] [expr -0.5 * $margin]  \
+	  -anchor sw -text $str -font $font -tags [list ttxt $name]]
+	
+	set bbox [$w.tabs bbox $id]
+	set wd [expr [lindex $bbox 2] - [lindex $bbox 0]]
+	set ht [expr [lindex $bbox 3] - [lindex $bbox 1]]
+	if {$ht > $maxh} {
+	    set maxh $ht
+	}
+    
+	incr x [expr $wd + 2 * $margin + 3]    
+    }
+    set height [expr $maxh + 2 * $margin]
+    $w.tabs move all 0 $height
+    $w.tabs configure -width $x -height [expr $height + 10]
+    
 }
 
 proc ::mactabnotebook::ButtonPressTab {w name} {
