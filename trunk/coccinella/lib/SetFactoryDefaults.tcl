@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.42 2004-11-23 12:57:05 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.43 2004-12-21 15:14:43 matben Exp $
 
 
 set noErr 0
@@ -269,7 +269,7 @@ if {[regexp {[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+} $this(ipnum)]} {
 # System fonts used. Other system dependent stuff.
 switch -- $this(platform) {
     unix {
-	set osprefs(mod) Control
+	set this(modkey) Control
 	
 	# On a central installation need to have local dirs for write access.
 	set prefs(userPrefsFilePath)  \
@@ -290,7 +290,7 @@ switch -- $this(platform) {
 	}
     }
     macintosh {
-	set osprefs(mod) Command
+	set this(modkey) Command
 	set prefs(userPrefsFilePath)  \
 	  [file join $this(prefsPath) "Whiteboard Prefs"]
 	set prefs(oldPrefsFilePath) [file join $::env(PREF_FOLDER) "Whiteboard Prefs"]
@@ -299,7 +299,7 @@ switch -- $this(platform) {
 	set prefs(webBrowser) {Internet Explorer}
     }
     macosx {
-	set osprefs(mod) Command
+	set this(modkey) Command
 	set prefs(userPrefsFilePath)  \
 	  [file join $this(prefsPath) "Whiteboard Prefs"]
 	set prefs(oldPrefsFilePath) $prefs(userPrefsFilePath)
@@ -308,7 +308,7 @@ switch -- $this(platform) {
 	set prefs(webBrowser) {Safari}
     }
     windows {
-	set osprefs(mod) Control
+	set this(modkey) Control
 	set prefs(userPrefsFilePath) [file join $this(prefsPath) "WBPREFS.TXT"]
 	set prefs(oldPrefsFilePath) [file join C: "WBPREFS.TXT"]
 	set prefs(inboxCanvasPath) [file join $this(prefsPath) Canvases]

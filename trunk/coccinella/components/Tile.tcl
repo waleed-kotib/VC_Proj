@@ -2,7 +2,7 @@
 # 
 #       Experimental!
 # 
-# $Id: Tile.tcl,v 1.3 2004-12-20 15:16:44 matben Exp $
+# $Id: Tile.tcl,v 1.4 2004-12-21 15:14:42 matben Exp $
 
 namespace eval ::TileComp:: { }
 
@@ -19,7 +19,7 @@ proc ::TileComp::Init { } {
     # Just experimenting with the 'tile' extension...
     set widgets {button radiobutton checkbutton menubutton scale scrollbar \
       frame label labelframe entry}
-    set widgets {button checkbutton label radiobutton scrollbar}
+    #set widgets {button checkbutton label radiobutton scrollbar}
     foreach name $widgets {
 	uplevel #0 [list rename $name ""]
 	uplevel #0 [list rename t${name} $name]

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.91 2004-12-20 15:16:45 matben Exp $
+# $Id: GroupChat.tcl,v 1.92 2004-12-21 15:14:42 matben Exp $
 
 package require History
 
@@ -588,7 +588,7 @@ proc ::GroupChat::GotMsg {body args} {
 #       shows window, returns token.
 
 proc ::GroupChat::Build {roomjid args} {
-    global  this prefs wDlgs osprefs
+    global  this prefs wDlgs
     
     variable protocol
     variable groupChatOptions
@@ -857,7 +857,7 @@ proc ::GroupChat::Build {roomjid args} {
     wm minsize $w [expr {$shortBtWidth < 240} ? 240 : $shortBtWidth] 320
     wm maxsize $w 800 2000
 
-    bind $wtextsnd <$osprefs(mod)-Return> \
+    bind $wtextsnd <$this(modkey)-Return> \
       [list [namespace current]::CommandReturnKeyPress $token]
     
     focus $w

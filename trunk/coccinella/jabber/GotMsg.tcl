@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.38 2004-11-27 14:52:53 matben Exp $
+# $Id: GotMsg.tcl,v 1.39 2004-12-21 15:14:42 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -189,18 +189,23 @@ proc ::GotMsg::Build { } {
     # Global frame.
     frame $w.frall -borderwidth 1 -relief raised
     pack  $w.frall -fill both -expand 1 -ipadx 0   
-    
+
+    pack [frame $w.frall.pad -height 8] -side bottom
+
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
     set wbtnext $frbot.btnext
     set bwidth [expr [::Utils::GetMaxMsgcatWidth Next Reply] + 2]
     pack [button $wbtnext -text [mc Next] -default active \
       -width $bwidth -state normal -command [list ::GotMsg::NextMsg]] \
-      -side right -padx 5 -pady 5
+      -side right -padx 5
     pack [button $frbot.btreply -text [mc Reply]   \
       -width $bwidth -command [list ::GotMsg::Reply]]  \
-      -side right -padx 5 -pady 5
-    pack $frbot -side bottom -fill x -padx 10 -pady 8
+      -side right -padx 5
+    pack $frbot -side bottom -fill x -padx 10 -pady 0
+    pack [checkbutton $w.frall.ch -text " [mc jainmsgshow]" \
+      -variable ::Jabber::jprefs(showMsgNewWin)] \
+      -side bottom -anchor w -padx 8
 
     # From, subject, and time fields.
     set frmid [frame $w.frall.frmid -borderwidth 0]
