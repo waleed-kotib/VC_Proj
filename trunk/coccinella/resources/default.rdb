@@ -1,0 +1,47 @@
+! Default resource database to give a reasonable appearence on all platforms.
+! It gives a light gray mac look on all widgets.  
+!
+
+! tk standard widgets
+!
+*Button.HighlightBackground:         #dedede
+*Button.Background:                  #dedede
+*Canvas.Background:                  #dedede
+*Checkbutton.Font:                   {Helvetica 10}
+*Checkbutton.Background:             #dedede
+*Entry.Background:                   white
+*Entry.BorderWidth:                  1
+*Entry.DisableBackground:            #dedede
+*Entry.DisableForeground:            gray20
+*Entry.Font:                         {Helvetica 10}
+*Entry.Foreground:                   black
+*Entry.HighlightColor:               #6363ce
+*Entry.HighlightBackground:          #dedede
+*Entry.HighlightThickness:           2
+*Frame.Background:                   #dedede
+*Label.Background:                   #dedede
+*Label.Font:                         {Helvetica 10}
+*Listbox.Background:                 white
+*Listbox.BorderWidth:                1
+*Listbox.HighlightColor:             #6363ce
+*Listbox.HighlightBackground:        #dedede
+*Listbox.HighlightThickness:         2
+*Message.Background:                 #dedede
+*Progressbar.Background:             #dedede
+*Radiobutton.Font:                   {Helvetica 10}
+*Radiobutton.Background:             #dedede
+*Text.Background:                    white
+*Text.HighlightBackground:           #dedede
+*Text.HighlightColor:                #6363ce
+*Text.HighlightThickness:            2
+
+! contributed widgets
+!
+*Tablelist.BorderWidth:              1
+*Tablelist.HighlightColor:           #6363ce
+*Tablelist.HighlightBackground:      #dedede
+*Tablelist.HighlightThickness:       2
+
+! specific megawidgets
+!
+*ButtonTray.background:              #dedede

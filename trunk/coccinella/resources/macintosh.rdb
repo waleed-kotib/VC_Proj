@@ -1,0 +1,12 @@
+! Resource database entries for Mac OS Classic
+!
+
+*Checkbutton.Font:                   {Geneva 9}
+*Entry.HighlightThickness:           3
+*Entry.Font:                         {Geneva 9}
+*Label.Font:                         {Geneva 9}
+*Listbox.HighlightThickness:         3
+*Radiobutton.Font:                   {Geneva 9}
+*Text.HighlightThickness:            3
+
+*Tablelist.HighlightThickness:       3
