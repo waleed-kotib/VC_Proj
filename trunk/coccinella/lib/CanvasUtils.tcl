@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.8 2003-07-26 13:54:23 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.9 2003-08-23 07:19:16 matben Exp $
 
 package provide CanvasUtils 1.0
 package require sha1pure
@@ -444,38 +444,51 @@ proc ::CanvasUtils::GetOnelinerForImage {w id args} {
 	-uritype file
     }
     array set argsArr $args
-    set imageName [$w itemcget $id -image]
     set impArgs {}
+    set wtop [::UI::GetToplevelNS $w]
     
-    # Find out if zoomed.		
-    if {[regexp {(.+)_zoom(|-)([0-9]+)} $imageName match origImName  \
-      sign factor]} {
+    # The 'broken image' options are cached.
+    set cachedOpts [::UI::ItemCGet $wtop $id]
+    
+    if {$cachedOpts == ""} {
+	set imageName [$w itemcget $id -image]
+   
+	# Find out if zoomed.		
+	if {[regexp {(.+)_zoom(|-)([0-9]+)} $imageName match origImName  \
+	  sign factor]} {
+	    
+	    # Find out the '-file' option from the original image.
+	    set imageFile [$origImName cget -file]
+	    lappend impArgs -zoom-factor ${sign}${factor}
+	} else {
+	    set imageFile [$imageName cget -file]		    
+	}
+	lappend impArgs -width [image width $imageName]  \
+	  -height [image height $imageName]
 	
-	# Find out the '-file' option from the original image.
-	set imageFile [$origImName cget -file]
-	lappend impArgs -zoom-factor ${sign}${factor}
-    } else {
-	set imageFile [$imageName cget -file]		    
-    }
-    switch -- $argsArr(-uritype) {
-	file {
-	    if {[info exists argsArr(-basepath)]} {
-		set imageFile [filerelative $argsArr(-basepath) $imageFile]
+	switch -- $argsArr(-uritype) {
+	    file {
+		if {[info exists argsArr(-basepath)]} {
+		    set imageFile [filerelative $argsArr(-basepath) $imageFile]
+		}
+		lappend impArgs -file $imageFile
 	    }
-	    lappend impArgs -file $imageFile
+	    http {
+		lappend impArgs -url [::CanvasUtils::GetHttpFromFile $imageFile]
+	    }
+	    default {
+		return -code error "Unknown -uritype \"$argsArr(-uritype)\""
+	    }
 	}
-	http {
-	    lappend impArgs -url [::CanvasUtils::GetHttpFromFile $imageFile]
-	}
-	default {
-	    return -code error "Unknown -uritype \"$argsArr(-uritype)\""
-	}
+    } else {
+	set impArgs $cachedOpts
     }
+    array set impArr $impArgs
     
-    # -above & -below???
-    set impArgs [concat $impArgs [::CanvasUtils::GetStackingOption $w $id]]
-    lappend impArgs -tags [::CanvasUtils::GetUtag $w $id 1]
-    return "import [$w coords $id] $impArgs"
+    # -above & -below??? Be sure to overwrite any cached options.
+    array set impArr [::CanvasUtils::GetStackingOption $w $id]
+    array set impArr [list -tags [::CanvasUtils::GetUtag $w $id 1]]
+    return "import [$w coords $id] [array get impArr]"
 }
 
 proc ::CanvasUtils::GetOnelinerForQTMovie {w id args} {
@@ -490,6 +503,8 @@ proc ::CanvasUtils::GetOnelinerForQTMovie {w id args} {
     set movFile [$movieName cget -file]
     set movUrl [$movieName cget -url]
     set impArgs {}
+    lappend impArgs -width [winfo width $windowName] \
+      -height [winfo height $windowName]
     
     switch -- $argsArr(-uritype) {
 	file {
@@ -531,6 +546,8 @@ proc ::CanvasUtils::GetOnelinerForSnack {w id args} {
     set soundObject [$movieName cget -snacksound]
     set soundFile [$soundObject cget -file]
     set impArgs {}
+    lappend impArgs -width [winfo width $windowName] \
+      -height [winfo height $windowName]
     
     switch -- $argsArr(-uritype) {
 	file {
@@ -728,8 +745,13 @@ proc ::CanvasUtils::DoItemPopup {w x y} {
     if {$id == ""} {
 	return
     }
+    
+    # Get 'type', broken is a special form of image.
     set type [$w type $id]
-    set ns [namespace current]
+    set tags [$w gettags $id]
+    if {[lsearch $tags broken] >= 0} {
+	set type broken
+    }
     Debug 2 "   type=$type"
         
     # In order to get the present value of id it turned out to be 
@@ -824,38 +846,10 @@ proc ::CanvasUtils::PostGeneralMenu {w x y m mDef} {
     tk_popup $m [expr int($x) - 10] [expr int($y) - 10]
 }
     
-# SaveImageAsFile, ExportImageAsFile, SetItemColorDialog, SetTextItemFontFamily,
-# SetTextItemFontSize, SetTextItemFontWeight
+# SetItemColorDialog, SetTextItemFontFamily, SetTextItemFontSize, 
+#    SetTextItemFontWeight --
 #
 #       Some handy utilities for the popup menu callbacks.
-
-proc ::CanvasUtils::SaveImageAsFile {w id} {
-
-    set imageName [$w itemcget $id -image]
-    set origFile [$imageName cget -file]
-    if {[string length $origFile]} {
-	set initFile [file tail $origFile]
-    } else {
-	set initFile {Untitled.gif}
-    }
-    set fileName [tk_getSaveFile -defaultextension gif   \
-      -title [::msgcat::mc {Save As GIF}] -initialfile $initFile]
-    if {$fileName != ""} {
-	$imageName write $fileName -format gif
-    }
-}
-
-proc ::CanvasUtils::ExportImageAsFile {w id} {
-    
-    set imageName [$w itemcget $id -image]
-    catch {$imageName write {Untitled.gif} -format {quicktime -dialog}}
-}
-
-proc ::CanvasUtils::ExportMovie {wtop winfr} {
-    
-    set wmov ${winfr}.m
-    $wmov export
-}
 
 proc ::CanvasUtils::ItemSmooth {w id} {
     

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.7 2003-07-26 13:54:23 matben Exp $
+# $Id: Dialogs.tcl,v 1.8 2003-08-23 07:19:16 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -1044,7 +1044,7 @@ proc ::Dialogs::Canvas {filePath args} {
 	return
     }
     set w .spcan[incr uidcan]
-    if [catch {toplevel $w}] {
+    if {[catch {toplevel $w}]} {
 	return
     }
     if {[string match "mac*" $this(platform)]} {
@@ -1095,6 +1095,7 @@ proc ::Dialogs::Canvas {filePath args} {
     incr x1 20
     incr y1 20
     $wcan configure -width $x1 -height $y1
+    raise $w
     catch {close $fd}
 }
 

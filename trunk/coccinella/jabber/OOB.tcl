@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.5 2003-07-26 13:54:23 matben Exp $
+# $Id: OOB.tcl,v 1.6 2003-08-23 07:19:16 matben Exp $
 
 package provide OOB 1.0
 
@@ -227,7 +227,7 @@ proc ::Jabber::OOB::ParseSet {from subiq args} {
 }
 
 proc ::Jabber::OOB::Copy {jid url file id} {
-    global  this
+    global  this prefs
     
     variable locals
 
@@ -237,10 +237,10 @@ proc ::Jabber::OOB::Copy {jid url file id} {
 	return
     }
     set locals($out,local) $file
-    if {[string equal $this(platform) "macintosh"]} {
+    if {0 && [string equal $this(platform) "macintosh"]} {
 	set tmopts ""
     } else {
-	set tmopts [list -timeout 40000]
+	set tmopts [list -timeout $prefs(timeoutMillis)]
     }
     
     # Be sure to set translation correctly for this MIME type.

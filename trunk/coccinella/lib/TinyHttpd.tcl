@@ -7,9 +7,9 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: TinyHttpd.tcl,v 1.3 2003-07-26 13:54:23 matben Exp $
+# $Id: TinyHttpd.tcl,v 1.4 2003-08-23 07:19:16 matben Exp $
 
-package require Tcl 8.3
+package require Tcl 8.4
 package require uriencode
 
 package provide TinyHttpd 1.0
@@ -222,20 +222,19 @@ proc ::TinyHttpd::Start {args} {
 	set state(logfd) $fd
 	fconfigure $state(logfd) -buffering none
     }
-    LogMsg "Tiny Httpd started"
+    ::TinyHttpd::LogMsg "Tiny Httpd started"
     
     # Collect the status and state of the server.
     set state(sock) $msg
     
     # Keep the absolute path as a list which is helpful when adding paths.
+    # We typically get {{} root Tcl coccinella} on unix since first '/' is kept.
     set state(basePathL) {}
     foreach elem [file split $opts(-rootdirectory)] {
 	lappend state(basePathL) [string trim $elem "/:\\"]
     }
-    
-    # Make unix style rootDir.
-    set state(rootDirUnix) "/[join $state(basePathL) /]"
-    return {}
+
+    return ""
 }
 
 # TinyHttpd::SetMimeMappings --
@@ -291,8 +290,8 @@ proc ::TinyHttpd::AddMimeMappings {arrNameSuffToMime} {
 
 proc ::TinyHttpd::NewChannel {s ip port} {
 
-    Debug 2 "NewChannel:: s=$s, ip=$ip, port=$port"
-    Debug 3 "  NewChannel:: fconfigure=[fconfigure $s]"
+    ::TinyHttpd::Debug 2 "NewChannel:: s=$s, ip=$ip, port=$port"
+    ::TinyHttpd::Debug 3 "  NewChannel:: fconfigure=[fconfigure $s]"
     
     # Everything should be done with 'fileevent'.
     fconfigure $s -blocking 0
@@ -316,19 +315,19 @@ proc ::TinyHttpd::HandleRequest {s ip port} {
     variable state
     variable path_
 
-    Debug 2 "HandleRequest:: [clock clicks], $s $ip $port"
+    ::TinyHttpd::Debug 2 "HandleRequest:: [clock clicks], $s $ip $port"
 
     # If client closes socket.
     if {[eof $s]} {
-	Debug 2 "  HandleRequest:: eof s=$s"
+	::TinyHttpd::Debug 2 "  HandleRequest:: eof s=$s"
 	close $s
 
     } elseif {[gets $s line] != -1} {
-	Debug 2 "  HandleRequest:: line=$line"
+	::TinyHttpd::Debug 2 "  HandleRequest:: line=$line"
 
 	# We only implement the GET and HEAD operations.
 	if {[regexp -nocase "^(GET|HEAD) +($path_) +HTTP" $line junk cmd path]} {    
-	    LogMsg "$cmd: $ip $path"
+	    ::TinyHttpd::LogMsg "$cmd: $ip $path"
 
 	    # If path="/onefile.txt" then file tail gives ""  !!!!! on Mac.
 	    set state($s,file) [file tail $path]
@@ -338,10 +337,10 @@ proc ::TinyHttpd::HandleRequest {s ip port} {
 	    fileevent $s readable   \
 	      [list [namespace current]::ReadKeyValueLine $s $ip $cmd $path]
 	} else {
-	    LogMsg "$ip, unknown request: $line"
+	    ::TinyHttpd::LogMsg "$ip, unknown request: $line"
 	}
     } else {
-	LogMsg "$ip, failed (eof? or blocked?)"
+	::TinyHttpd::LogMsg "$ip, failed (eof? or blocked?)"
     }
 }
 	    
@@ -362,16 +361,16 @@ proc ::TinyHttpd::ReadKeyValueLine {s ip cmd inPath} {
     variable state
     
     if {[eof $s]} {
-	Debug 2 "ReadKeyValueLine:: eof s"
+	::TinyHttpd::Debug 2 "ReadKeyValueLine:: eof s"
 	close $s
 	return
     }
     if {[fblocked $s]} {
-	Debug 2 "ReadKeyValueLine:: blocked s"
+	::TinyHttpd::Debug 2 "ReadKeyValueLine:: blocked s"
 	return
     }
     set nbytes [gets $s line]
-    Debug 3 "ReadKeyValueLine:: file=$state($s,file), nbytes=$nbytes, line=$line"
+    ::TinyHttpd::Debug 3 "ReadKeyValueLine:: file=$state($s,file), nbytes=$nbytes, line=$line"
     
     if {$nbytes < 0} {
 	#close $s
@@ -411,13 +410,14 @@ proc ::TinyHttpd::RespondToClient {s ip cmd inPath} {
     variable http
     variable chunk
     
-    Debug 2 "RespondToClient::  $state($s,file) $s $ip $cmd $inPath"
+    ::TinyHttpd::Debug 2 "RespondToClient::  $state($s,file) $s $ip $cmd $inPath"
             
     set basePathL $state(basePathL)
     set state($s,file) [file tail $inPath]
     set state($s,start) [clock clicks -milliseconds]
     
     # Here we should rely on our 'tinyfileutils' package instead!!!!
+    # Or 'file normalize' from 8.4!
 
     # If any up dir (../), find how many. Skip leading / .
     set path [string trimleft $inPath /]
@@ -432,37 +432,38 @@ proc ::TinyHttpd::RespondToClient {s ip cmd inPath} {
     } else {
 	set newBasePathL $basePathL
     }
+    ::TinyHttpd::Debug 4 "\tpath=$path\n\tnumUp=$numUp\n\tstripPathL=$stripPathL\n\tnewBasePathL=$newBasePathL"
     
     # Add the new base path with the stripped incoming path.
     # On Windows we need special treatment of the "C:/" type drivers.
     if {[string equal $this(platform) "windows"]} {
 	set vol "[lindex $newBasePathL 0]:/"
-    	set localFilePath   \
-	    "${vol}[join [lrange [concat $newBasePathL $stripPathL] 1 end] "/"]"
+    	set localPath   \
+	  "${vol}[join [lrange [concat $newBasePathL $stripPathL] 1 end] "/"]"
     } elseif {[string equal $this(platform) "macintosh"]} {
-        set localFilePath "[join [concat $newBasePathL $stripPathL] ":"]"
+        set localPath "[join [concat $newBasePathL $stripPathL] ":"]"
     } else {
-        set localFilePath "/[join [concat $newBasePathL $stripPathL] "/"]"
+        set localPath [join [concat $newBasePathL $stripPathL] "/"]
     }
     
     # Decode file path.
-    set localFilePath [uriencode::decodefile $localFilePath]
+    set localPath [uriencode::decodefile $localPath]
     
-    Debug 2 "  RespondToClient:: localFilePath=$localFilePath"
+    ::TinyHttpd::Debug 2 "  RespondToClient:: localPath=$localPath"
     
     # If no actual file given then search for the '-defaultindexfile',
     # or if no one, possibly return directory listing.
     
-    if {[file isdirectory $localFilePath]} {
-	set defFile [file join $localFilePath $opts(-defaultindexfile)]
+    if {[file isdirectory $localPath]} {
+	set defFile [file join $localPath $opts(-defaultindexfile)]
 	if {[file exists $defFile]} {
-	    set localFilePath $defFile
+	    set localPath $defFile
 	} elseif {$opts(-directorylisting)} {
 	    
 	    # No default html file exists, return directory listing.
-	    Debug 2 "  RespondToClient:: No default html file exists, return directory listing."
+	    ::TinyHttpd::Debug 2 "  RespondToClient:: No default html file exists, return directory listing."
 
-	    set modTime [clock format [file mtime $localFilePath]  \
+	    set modTime [clock format [file mtime $localPath]  \
 	      -format "%a, %d %b %Y %H:%M:%S GMT" -gmt 1]
 	    puts $s [format $http(headdirlist) $modTime]
 	    flush $s
@@ -482,7 +483,7 @@ proc ::TinyHttpd::RespondToClient {s ip cmd inPath} {
 	    return
 	}
     }
-    set fext [string tolower [file extension $localFilePath]]
+    set fext [string tolower [file extension $localPath]]
     if {[info exists suffToMimeType($fext)]} {
 	set mime $suffToMimeType($fext)
     } else {
@@ -490,8 +491,8 @@ proc ::TinyHttpd::RespondToClient {s ip cmd inPath} {
     }
     
     # Check that the file is there and opens correctly.
-    if {$localFilePath == "" || [catch {open $localFilePath r} fid]}  {
-	Debug 2 "  RespondToClient:: open $localFilePath failed"
+    if {$localPath == "" || [catch {open $localPath r} fid]}  {
+	::TinyHttpd::Debug 2 "  RespondToClient:: open $localPath failed"
 	if {[string equal $cmd "GET"]} {
 	    puts $s $http(404GET)
 	} else {
@@ -502,11 +503,11 @@ proc ::TinyHttpd::RespondToClient {s ip cmd inPath} {
     } else  {
 	
 	# Put stuff.
-	set size [file size $localFilePath]
-	set modTime [clock format [file mtime $localFilePath]  \
+	set size [file size $localPath]
+	set modTime [clock format [file mtime $localPath]  \
 	  -format "%a, %d %b %Y %H:%M:%S GMT" -gmt 1]
 	set data [format $http(200) $modTime $mime $size]
-	Debug 3 "  RespondToClient::\n'$data'"
+	::TinyHttpd::Debug 3 "  RespondToClient::\n'$data'"
 	puts $s $data
 	flush $s
     }
@@ -518,7 +519,7 @@ proc ::TinyHttpd::RespondToClient {s ip cmd inPath} {
     
     # If binary data.
     if {![string match "text/*" $mime]} {
-	Debug 2 "  RespondToClient:: binary"
+	::TinyHttpd::Debug 2 "  RespondToClient:: binary"
 	fconfigure $fid -translation binary
 	fconfigure $s -translation binary
     }
@@ -553,10 +554,11 @@ proc ::TinyHttpd::CopyMore {in out total bytes {error {}}} {
     variable state
     variable chunk
 
-    Debug 3 "CopyMore:: [clock clicks], file=$state($out,file),\
+    ::TinyHttpd::Debug 4 "CopyMore:: file=$state($out,file),\
       out=$out, total=$total, bytes=$bytes"
+    
     if {[eof $out]} {
-	Debug 2 "  CopyMore:: [clock clicks], ended prematurely because of eof on out"
+	::TinyHttpd::Debug 2 "  CopyMore:: ended prematurely because of eof on out"
 	close $in
 	return
     }
@@ -569,10 +571,10 @@ proc ::TinyHttpd::CopyMore {in out total bytes {error {}}} {
 	}
 	set bytePerSec [expr 1000 * int( $total/$trptTime )]
 
-	Debug 2 "  $state($out,file): [clock clicks], $total bytes to $state($out,ip)"
-	Debug 2 "    [FormatBytesText $bytePerSec]/second"
-	LogMsg "$state($out,file): $total bytes to $state($out,ip)"
-	LogMsg "    [FormatBytesText $bytePerSec]/second"
+	::TinyHttpd::Debug 2 "  $state($out,file): [clock clicks], $total bytes to $state($out,ip)"
+	::TinyHttpd::Debug 2 "    [FormatBytesText $bytePerSec]/second"
+	::TinyHttpd::LogMsg "$state($out,file): $total bytes to $state($out,ip)"
+	::TinyHttpd::LogMsg "    [FormatBytesText $bytePerSec]/second"
 	close $in
 	close $out
     } else {
@@ -596,7 +598,7 @@ proc ::TinyHttpd::Stop { } {
     
     catch {close $state(sock)}
     if {$opts(-log)} {
-	LogMsg "Tiny Httpd stopped"
+	::TinyHttpd::LogMsg "Tiny Httpd stopped"
 	catch {close $state(logfd)}
     }
 }
@@ -617,7 +619,7 @@ proc ::TinyHttpd::BuildHtmlDirectoryListing {rootDir relPath httpdRelPath} {
     variable this
     variable html
     
-    Debug 2 "----BuildHtmlDirectoryListing: rootDir=$rootDir, relPath=$relPath"
+    ::TinyHttpd::Debug 2 "----BuildHtmlDirectoryListing: rootDir=$rootDir, relPath=$relPath"
     
     # Check paths?
     if {$httpdRelPath == "/"} {
@@ -636,7 +638,7 @@ proc ::TinyHttpd::BuildHtmlDirectoryListing {rootDir relPath httpdRelPath} {
     set fullPath [AddAbsolutePathWithRelative $rootDir $relPath]
     set nativePath [file nativename $fullPath]
     
-    Debug 3 "fullPath=$fullPath\n\tnativePath=$nativePath"
+    ::TinyHttpd::Debug 3 "fullPath=$fullPath\n\tnativePath=$nativePath"
     
     # Set the current directory to our path (good?).
     set oldPath [pwd]

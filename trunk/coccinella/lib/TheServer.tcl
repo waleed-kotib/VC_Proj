@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: TheServer.tcl,v 1.8 2003-07-26 13:54:23 matben Exp $
+# $Id: TheServer.tcl,v 1.9 2003-08-23 07:19:16 matben Exp $
     
 # DoStartServer ---
 #
@@ -226,10 +226,6 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
       clientRecord prefs allIPnumsTo this  \
       canvasSafeInterp
     
-    upvar ::${wtop}::wapp wapp
-    
-    set wServCan $wapp(servCan)
-
     # regexp patterns. Defined globally to speedup???
     set wrd_ {[^ ]+}
     set optwrd_ {[^ ]*}
@@ -267,6 +263,7 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 	    if {[regexp "^CANVAS: +(.*)$" $line junk instr]} {
 		
 		# Regular drawing commands in the canvas.
+		set wServCan [::UI::GetServerCanvasFromWtop $wtop]
 		
 		# If html sizes in text items, be sure to translate them into
 		# platform specific point sizes.
@@ -478,21 +475,12 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 	RESIZE {
 	    if {[regexp "^RESIZE: +($int_) +($int_)$" $line match w h]} {
 		
+		# OBSOLETE!!!
 		# Received resize request.
 		
 		if {$debugServerLevel >= 2 } {
 		    puts "HandleClientRequest:: RESIZE: w=$w, h=$h"
 		}
-		
-		# Change total size of application so that w and h is the canvas size.
-		# Be sure to not propagate this size change to other clients.
-		# A full blown update seems to be necessary on Windows!
-		if {0} {
-		    bind $wServCan <Configure> [list ::UI::CanvasConfigureCallback 0]
-		    ::UI::SetCanvasSize $w $h
-		    update
-		    bind $wServCan <Configure> [list ::UI::CanvasConfigureCallback "all"]
-		}		
 	    }
 	}
 	PUT - GET {
@@ -511,9 +499,16 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 		
 		if {$cmd == "PUT"} {
 		    
-		    # Be sure to strip off any path. (this(path))??? Mac bug for /file?
-		    set fileName [file tail $fileName]
-		    ::GetFileIface::GetFile $wtop $channel $fileName $optList
+		    # The problem is that we get a direct connection with
+		    # PUT/GET request outside the Jabber framework.
+		    if {[string equal $prefs(protocol) "jabber"]} {
+			::Jabber::HandlePutRequest $channel $fileName $optList
+		    } else {
+		    
+			# Be sure to strip off any path. (this(path))??? Mac bug for /file?
+			set fileName [file tail $fileName]
+			::GetFileIface::GetFile $wtop $channel $fileName $optList
+		    }
 		} elseif {$cmd == "GET"} {
 		    
 		    # A file is requested from this server. 'fileName' may be
@@ -545,6 +540,7 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 		if {$debugServerLevel >= 2} {
 		    puts "--->GET CANVAS:"
 		}
+		set wServCan [::UI::GetServerCanvasFromWtop $wtop]
 		::UserActions::DoPutCanvas $wServCan $ip
 	    }		
 	}
@@ -561,6 +557,7 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 	    }		
 	}
 	"GET IP" {
+	    # OBSOLETE!!!
 	    if {[regexp "^GET IP: +($wrd_)$" $line match getid]} {
 		
 		# Extract the unique request id number, and forward it.
@@ -570,6 +567,7 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 	    }		
 	}
 	"PUT IP" {
+	    # OBSOLETE!!!
 	    if {[regexp "^PUT IP: +($wrd_) +($wrd_)$"   \
 	      $line match getid clientIP]} {
 		

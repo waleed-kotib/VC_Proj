@@ -4,18 +4,21 @@ Whiteboard CHANGES
 
 Not to mention all bugfixes and rewrites.
 
-Whiteboard-0.94.5 (03????): 	Short summary --
+Whiteboard-0.94.5 (0309??): 	Short summary --
 
 	- jid completion entry
 	- setup assistant with free servers info dialog
 	- fixed really nasty bug where the ip number was not set correctly
- 	  on systems with multiple network interfaces, particularly if 
+ 	  on systems with multiple network interfaces, typically when 
 	  using ppp
         - removed smoothness option, added smooth operation of polygons
 	- added auto update mechanism
 	- added chat history dialog
 	- reworked internals of the inbox, new file format
 	- plugin control preference panel
+	- much improved feedback with "broken image"
+	- better handling of passive http transports
+	- changed name of main file to Coccinella.tcl
 
 
 Whiteboard-0.94.4 (030616): 	Short summary --
@@ -26,7 +29,7 @@ Whiteboard-0.94.4 (030616): 	Short summary --
 	- a plugin structure for the whiteboard
 
 
-Whiteboard-0.94.3 (03????): 	Short summary --
+Whiteboard-0.94.3 (0301??): 	Short summary --
 
 	- whiteboards now multiinstance for jabber; send single whiteboard
 	  messages, each chat and groupchat in separate whiteboards

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.14 2003-07-26 13:54:23 matben Exp $
+# $Id: UI.tcl,v 1.15 2003-08-23 07:19:16 matben Exp $
 
 # LabeledFrame --
 #
@@ -564,7 +564,7 @@ proc ::UI::InitMenuDefs { } {
 	{command     mLogoutWith    {::Jabber::Logout::WithStatus .joutst}  disabled {}}
 	{command     mPassword      {::Jabber::Passwd::Build .jpasswd}      disabled {}}
 	{separator}
-	{checkbutton mMessageInbox  {::Jabber::MailBox::Show $wDlgs(jinbox)} normal   {} \
+	{checkbutton mMessageInbox  {::Jabber::MailBox::Show}               normal   {} \
 	  {-variable ::Jabber::jstate(inboxVis)}}
 	{separator}
 	{command     mSearch        {::Jabber::Search::Build .jsearch}      disabled {}}
@@ -651,15 +651,19 @@ proc ::UI::InitMenuDefs { } {
     set menuDefs(pop,inspectqt)  \
       {command   mInspectItem  {::ItemInspector::Movie $wtop $winfr}        normal {}}
     set menuDefs(pop,saveimageas)  \
-      {command   mSaveImageAs  {::CanvasUtils::SaveImageAsFile $w $id}      normal {}}
+      {command   mSaveImageAs  {::ImageAndMovie::SaveImageAsFile $w $id}    normal {}}
     set menuDefs(pop,imagelarger)  \
       {command   mImageLarger  {::ImageAndMovie::ResizeImage $wtop 2 $id auto}   normal {}}
     set menuDefs(pop,imagesmaller)  \
       {command   mImageSmaller {::ImageAndMovie::ResizeImage $wtop -2 $id auto}   normal {}}
     set menuDefs(pop,exportimage)  \
-      {command   mExportImage  {::CanvasUtils::ExportImageAsFile $w $id}    normal {}}
+      {command   mExportImage  {::ImageAndMovie::ExportImageAsFile $w $id}  normal {}}
     set menuDefs(pop,exportmovie)  \
-      {command   mExportMovie  {::CanvasUtils::ExportMovie $wtop $winfr}    normal {}}
+      {command   mExportMovie  {::ImageAndMovie::ExportMovie $wtop $winfr}  normal {}}
+    set menuDefs(pop,inspectbroken)  \
+      {command   mInspectItem  {::ItemInspector::Broken $wtop $id}          normal {}}
+    set menuDefs(pop,reloadimage)  \
+      {command   mReloadImage  {::ImageAndMovie::ReloadImage $wtop $id}     normal {}}
     set menuDefs(pop,smoothness)  \
       {cascade     mLineSmoothness   {}                                    normal   {} {} {
 	{radio None {::CanvasUtils::ItemConfigure $w $id -smooth 0 -splinesteps  0} normal {} \
@@ -699,7 +703,7 @@ proc ::UI::InitMenuDefs { } {
       {cascade     mWeight           {}                                    normal   {} {} {
 	{radio   mNormal {::CanvasUtils::SetTextItemFontWeight $w $id normal} normal   {} \
 	  {-value normal -variable ::UI::popupVars(-fontweight)}}
-	{radio   mBold {::CanvasUtils::SetTextItemFontWeight $w $id bold}     normal   {} \
+	{radio   mBold {::CanvasUtils::SetTextItemFontWeight $w $id bold}  normal   {} \
 	  {-value bold   -variable ::UI::popupVars(-fontweight)}}
 	{radio   mItalic {::CanvasUtils::SetTextItemFontWeight $w $id italic} normal   {} \
 	  {-value italic -variable ::UI::popupVars(-fontweight)}}}
@@ -735,6 +739,7 @@ proc ::UI::InitMenuDefs { } {
 	window     {}
 	qt         {inspectqt exportmovie}
 	snack      {}
+	broken     {inspectbroken reloadimage}
     }
     foreach name [array names menuArr] {
 	set menuDefs(pop,$name) {}
@@ -803,14 +808,15 @@ proc ::UI::BuildMain {wtop args} {
     upvar ::${wtop}::wapp wapp
     upvar ::${wtop}::state state
     upvar ::${wtop}::opts opts
+    upvar ::${wtop}::itemopts itemopts
     upvar ::${wtop}::tmpImages tmpImages
     
     Debug 3 "::UI::BuildMain args='$args'"
     
     if {[string equal $wtop "."]} {
-	set wbTitle {Coccinella (Main)}
+	set wbTitle "Coccinella (Main)"
     } else {
-	set wbTitle {Coccinella}
+	set wbTitle "Coccinella"
     }
     set titleString [expr {
 	$privariaFlag ?
@@ -1043,6 +1049,7 @@ proc ::UI::CloseMain {wtop} {
     # Reset and cancel all put/get file operations related to this window!
     ::PutFileIface::CancelAllWtop $wtop
     ::GetFileIface::CancelAllWtop $wtop
+    ::ImageAndMovie::HttpResetAll $wtop
 }
 
 # UI::DestroyMain --
@@ -1056,6 +1063,7 @@ proc ::UI::DestroyMain {wtop} {
     variable menuKeyToIndex
     upvar ::${wtop}::wapp wapp
     upvar ::${wtop}::opts opts
+    upvar ::${wtop}::itemopts itemopts
     upvar ::${wtop}::tmpImages tmpImages
     
     if {$wtop == "."} {
@@ -1083,9 +1091,8 @@ proc ::UI::DestroyMain {wtop} {
     }
     
     # We could do some cleanup here.
-    foreach imName $tmpImages {
-	$imName delete
-    }    
+    catch {unset itemopts}
+    eval {image delete} $tmpImages
 }
 
 # UI::SaveWhiteboardState
@@ -1282,6 +1289,7 @@ proc ::UI::GetWtopFromJabberType {type jid {thread {}}} {
     ::Jabber::Debug 2 "::UI::GetWtopFromJabberType type=$type, jid=$jid, thread=$thread"
     
     set wtop ""
+    
     switch -- $type {
 	chat {
 	    if {[info exists threadToWtop($thread)]} {
@@ -1297,6 +1305,7 @@ proc ::UI::GetWtopFromJabberType {type jid {thread {}}} {
 	    }	    
 	}
 	normal {
+	    # OBSOLETE!!!! Mailbox!!!
 	    if {[info exists jidToWtop($jid)]} {
 		set wtop $jidToWtop($jid)
 	    }	    
@@ -1341,6 +1350,19 @@ proc ::UI::GetToplevelNS {w} {
     } else {
 	return "${wtop}."
     }
+}
+
+
+proc ::UI::GetServerCanvasFromWtop {wtop} {    
+    upvar ::${wtop}::wapp wapp
+    
+    return $wapp(servCan)
+}
+
+proc ::UI::GetCanvasFromWtop {wtop} {    
+    upvar ::${wtop}::wapp wapp
+    
+    return $wapp(can)
 }
 
 # UI::GetButtonState --
@@ -1447,7 +1469,9 @@ proc ::UI::ClickToolButton {wtop btName} {
 	    bind $wCan <ButtonRelease-1> {
 		::CanvasDraw::FinalizeBox %W [%W canvasx %x] [%W canvasy %y] 0 rect 1
 	    }
-	    bind $wCan <Double-Button-1>  \
+	    #bind $wCan <Double-Button-1>  \
+	     # [list ::ItemInspector::ItemInspector $wtop current]
+	    $wCan bind all <Double-Button-1>  \
 	      [list ::ItemInspector::ItemInspector $wtop current]
 
 	    switch -- $this(platform) {
@@ -3206,7 +3230,7 @@ proc ::UI::FindWBGeometry {wtop} {
     set hMinTot [expr $hMinRoot + $hMenu]
         
     # Cache dims only for "." ?
-    if {$w == "."} {
+    if {1 || $w == "."} {
 	foreach key {
 	    wRoot hRoot hTop hTopOn hTopOff hStatus hComm hCommClean wStatMess \
 	      hFakeMenu hMenu wCanvas hCanvas wTot hTot wMinRoot hMinRoot \
@@ -4576,20 +4600,54 @@ proc ::UI::AnimateWave {w} {
       [after $animateWave(wait) [list ::UI::AnimateWave $w]]
 }
 
+# UI::CreateBrokenImage --
+# 
+#       Creates an actual image with the broken symbol that matches
+#       up the width and height. The image is garbage collected.
 
 proc ::UI::CreateBrokenImage {wtop width height} {
     variable icons    
     upvar ::${wtop}::tmpImages tmpImages
-
-    set name [image create photo -width $width -height $height]
-    lappend tmpImages $name
-    $name blank
-    set zoomx [expr [winfo width $icons(brokenImage)]/$width]
-    set zoomy [expr [winfo height $icons(brokenImage)]/$height]
-    set zoom [expr  ]
-    $name copy $icons(brokenImage) -to 0 0 $width $height -zoom $zoom \
-      -compositingrule overlay
+    
+    if {($width == 0) || ($height == 0)} {
+	set name $icons(brokenImage)
+    } else {
+	set zoomx [expr $width/[image width $icons(brokenImage)]]
+	set zoomy [expr $height/[image height $icons(brokenImage)]]
+	if {($zoomx < 1) && ($zoomy < 1)} {
+	    set name $icons(brokenImage)
+	} else {
+	    set zoomx [expr $zoomx < 1 ? 1 : $zoomx]
+	    set zoomy [expr $zoomy < 1 ? 1 : $zoomy]
+	    set name [image create photo -width $width -height $height]
+	    $name blank
+	    $name copy $icons(brokenImage) -to 0 0 $width $height  \
+	      -zoom $zoomx $zoomy -compositingrule overlay
+	    lappend tmpImages $name
+	}
+    }
     return $name
+}
+
+# UI::ItemSet, ItemCGet --
+#
+#       Handling cached info for items not set elsewhere.
+#       Automatically garbage collected.
+
+proc ::UI::ItemSet {wtop id args} {
+    upvar ::${wtop}::itemopts itemopts
+
+    set itemopts($id) $args
+}
+
+proc ::UI::ItemCGet {wtop id} {
+    upvar ::${wtop}::itemopts itemopts
+    
+    if {[info exists itemopts($id)]} {
+	return $itemopts($id)
+    } else {
+	return ""
+    }
 }
 
 #-------------------------------------------------------------------------------

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Example.tcl,v 1.4 2003-07-26 13:54:23 matben Exp $
+# $Id: Example.tcl,v 1.5 2003-08-23 07:19:17 matben Exp $
 
 
 namespace eval ::Example:: {
@@ -137,6 +137,7 @@ proc ::Example::Save {wCan id args} {
 	} else {
 	    lappend impArgs -file $fileName
 	}
+	#lappend impArgs -width [winfo width ] -height [winfo height ]
 	lappend impArgs -tags [::CanvasUtils::GetUtag $wCan $id 1]
 	return "import [$wCan coords $id] $impArgs"
     } else {

@@ -235,6 +235,7 @@
 ::msgcat::mcset sv mColor		{FŠrg...}
 ::msgcat::mcset sv mAddSpeechBubble	{LŠgg till pratbubbla}
 ::msgcat::mcset sv mUpdateCheck  	{Uppdaterings koll}
+::msgcat::mcset sv mReloadImage  	{HŠmta bild igen}
 
 # Popups
 ::msgcat::mcset sv mMessage     	{Meddelande...}

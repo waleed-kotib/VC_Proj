@@ -18,6 +18,8 @@ This brief text describes the jabber features supported:
 
   * Handles forms using jabber:x:data
 
+  * Supports the new MUC groupchat protocol
+
   * The Coccinella client can be browsed to, and returns the following
     namespace declarations describing its services:
 
@@ -38,5 +40,3 @@ This brief text describes the jabber features supported:
 
 Note, however, that the jabber protocols outside the very core, are a moving 
 target, and that changes and adoptions takes place at a rapid pace.
-This is true for multi user conferencing in particular. Release 0.94.3
-contains support for this in JabberLib, but not yet at application level.

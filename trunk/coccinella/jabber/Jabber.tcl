@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.18 2003-07-26 13:54:23 matben Exp $
+# $Id: Jabber.tcl,v 1.19 2003-08-23 07:19:16 matben Exp $
 #
 #  The $address is an ip name or number.
 #
@@ -214,7 +214,7 @@ namespace eval ::Jabber:: {
       or the room does not exist}  \
       conf_message_dir,405    {The conferencing service does not support\
       directed messages}   \
-      conf_message_dir,406    {A reuired extension is stopping this message}  \
+      conf_message_dir,406    {A required extension is stopping this message}  \
       conf_message_dir,407    {The client is required to be in the room in\
       order to send a message to its participants}   \
       conf_message_dir,408    {The message timed out while being sent,\
@@ -728,16 +728,23 @@ proc ::Jabber::DispatchNormalMessage {body iswb args} {
     
     # We need to split up whiteboard commands (messages) that must be
     # handled immediately and those destined for drawing etc. 
-    # BAD DESIGN HERE!!!!!!!!!
     if {$iswb} {
 	array set argsArr $args
 	set restCmds {}
 	foreach raw $argsArr(-whiteboard) {
 	    switch -glob -- $raw {
-		"GET IP:*" - "PUT IP:*" {
-		    eval {ExecuteClientRequest . $jstate(sock) ip port $raw} \
-		      $args
+		"GET IP:*" {
+		    if {[regexp {^GET IP: +([^ ]+)$} $raw m id]} {
+			::Jabber::PutIPnumber $argsArr(-from) $id
+		    }
 		}
+		"PUT IP:*" {
+			
+		    # We have got the requested ip number from the client.
+		    if {[regexp {^PUT IP: +([^ ]+) +([^ ]+)$} $raw m id ip]} {
+			::Jabber::GetIPCallback $argsArr(-from) $id $ip
+		    }		
+		}	
 		"IDENTITY:*" - "IPS CONNECTED:*" - "CLIENT:*" -  \
 		  "DISCONNECTED:*" - "RESIZE:*" {
 		    
@@ -1250,6 +1257,10 @@ proc ::Jabber::SendMessageList {jid msgList args} {
     }
 }
 
+# Jabber::DoSendCanvas --
+# 
+#       Wrapper for ::UserActions::DoSendCanvas.
+
 proc ::Jabber::DoSendCanvas {wtop} {
     global  prefs
     variable jstate
@@ -1478,18 +1489,38 @@ proc ::Jabber::ConfigureJabberEntry {wtop args} {
 # Results:
 #       boolean
 
-proc ::Jabber::IsWellFormedJID {jid} {    
+proc ::Jabber::IsWellFormedJID {jid args} {    
     variable jprefs
     
-    if {[regexp {(.+)@([^/]+)(/(.*))?} $jid match name host junk res]} {
-	if {[regexp $jprefs(invalsExp) $name match junk]} {
-	    return 0
-	} elseif {[regexp $jprefs(invalsExp) $host match junk]} {
-	    return 0
+    array set argsArr {
+	-type   user
+    }
+    array set argsArr $args
+    
+    switch -- $argsArr(-type) {
+	user {
+	    if {[regexp {(.+)@([^/]+)(/(.*))?} $jid match name host junk res]} {
+		if {[regexp $jprefs(invalsExp) $name match junk]} {
+		    return 0
+		} elseif {[regexp $jprefs(invalsExp) $host match junk]} {
+		    return 0
+		}
+		return 1
+	    } else {
+		return 0
+	    }
 	}
-	return 1
-    } else {
-	return 0
+	any {
+	    
+	    # Be sure to remove any separators @ and /.
+	    regsub -all / $jid "" jidStrip
+	    regsub -all @ $jidStrip "" jidStrip
+	    if {[regexp $jprefs(invalsExp) $jidStrip match]} {
+		return 0
+	    } else {
+		return 1
+	    }
+	}
     }
 }
 
@@ -1715,22 +1746,12 @@ proc ::Jabber::GetIPnumber {jid {cmd {}}} {
 	
 	# What shall we do when we already have the IP number?
 	if {[info exists jidToIP($jid)]} {
-	    GetIPCallback $jid $getid $jidToIP($jid)
+	    ::Jabber::GetIPCallback $jid $getid $jidToIP($jid)
 	} else {
-	    #$jstate(jlib) send_message $jid -body "GET IP: $getid"
 	    ::Jabber::SendMessage $jid "GET IP: $getid"
 	}
     }
     incr getid
-}
-
-proc ::Jabber::PutIPnumber {jid id} {
-    variable jstate
-    
-    ::Jabber::Debug 2 "::Jabber::PutIPnumber:: jid=$jid, id=$id"
-    
-    set ip [::Network::GetThisOutsideIPAddress]
-    ::Jabber::SendMessage $jid "PUT IP: $id $ip"
 }
 
 # Jabber::GetIPCallback --
@@ -1741,23 +1762,33 @@ proc ::Jabber::PutIPnumber {jid id} {
 # Arguments:
 #       fromjid     fully qualified  "username@host/resource"
 #       id
-#       clientIP
+#       ip
 #       
 # Results:
 #       Any registered callback proc is eval'ed.
 
-proc ::Jabber::GetIPCallback {fromjid id clientIP} {    
+proc ::Jabber::GetIPCallback {fromjid id ip} {    
     variable jstate
     variable getcmd
     variable jidToIP
 
-    ::Jabber::Debug 2 "::Jabber::GetIPCallback: fromjid=$fromjid, id=$id, clientIP=$clientIP"
+    ::Jabber::Debug 2 "::Jabber::GetIPCallback: fromjid=$fromjid, id=$id, ip=$ip"
+
+    set jidToIP($fromjid) $ip
     if {[info exists getcmd($id)]} {
 	::Jabber::Debug 2 "   getcmd($id)='$getcmd($id)'"
-	set jidToIP($fromjid) $clientIP
 	eval $getcmd($id) $fromjid
 	unset getcmd($id)
     }
+}
+
+proc ::Jabber::PutIPnumber {jid id} {
+    variable jstate
+    
+    ::Jabber::Debug 2 "::Jabber::PutIPnumber:: jid=$jid, id=$id"
+    
+    set ip [::Network::GetThisOutsideIPAddress]
+    ::Jabber::SendMessage $jid "PUT IP: $id $ip"
 }
 
 # Jabber::PutFileAndSchedule --
@@ -1945,7 +1976,7 @@ proc ::Jabber::PutFile {wtop fileName mime optList jid} {
 
     if {[catch {
 	::putfile::put $fileName $jidToIP($jid) $prefs(remotePort)   \
-	  -mimetype $mime -timeout [expr 1000 * $prefs(timeout)]     \
+	  -mimetype $mime -timeout $prefs(timeoutMillis)                   \
 	  -optlist $optList -filetail $dstFile                       \
 	  -progress ::PutFileIface::PutProgress                      \
 	  -command [list ::PutFileIface::PutCommand $wtop]
@@ -1955,6 +1986,22 @@ proc ::Jabber::PutFile {wtop fileName mime optList jid} {
     } else {
 	::PutFileIface::RegisterPutSession $tok $wtop
     }
+}
+
+# Jabber::HandlePutRequest --
+# 
+#       Takes care of a PUT command from the server.
+#       The problem is that we get a direct connection with
+#       PUT/GET request outside the Jabber framework.
+
+proc ::Jabber::HandlePutRequest {channel fileName optList} {
+        
+    # The whiteboard must exist!
+    set wtop [::Jabber::WB::MakeWhiteboardExist $optList]
+    
+    # Be sure to strip off any path. (this(path))??? Mac bug for /file?
+    set tail [file tail $fileName]
+    ::GetFileIface::GetFile $wtop $channel $tail $optList
 }
 
 # Jabber::SetPrivateData --
@@ -2689,20 +2736,22 @@ proc ::Jabber::WB::GroupChatMsg {args} {
     } 
 }
 
-# ::Jabber::WB::DispatchToImporter --
+# Jabber::WB::MakeWhiteboardExist --
 # 
-#       Is called as a response to a GET file event. 
-#       We've received a file that should be imported somewhere.
+#       Verifies that there exists a whiteboard for this message.
 #       
 # Arguments:
-#       mime
 #       optList
-#       args        -file, -where; for importer proc.
+#       
+# Results:
+#       $wtop; may create new toplevel whiteboard
 
-proc ::Jabber::WB::DispatchToImporter {mime optList args} {
-        
-    set display 1
+proc ::Jabber::WB::MakeWhiteboardExist {optList} {
+
+    ::Jabber::Debug 2 "::Jabber::WB::MakeWhiteboardExist"
+
     array set optArr $optList
+    
     switch -- $optArr(type:) {
 	chat {
 	    set wtop [::UI::GetWtopFromJabberType chat $optArr(from:) \
@@ -2723,15 +2772,37 @@ proc ::Jabber::WB::DispatchToImporter {mime optList args} {
 	    }
 	}
 	default {
-	    
 	    # Normal message. Shall go in inbox ???????????
-	    # We have no solution for this at the moment:
-	    # 1) Offline users can never be sent to since no offline storage.
-	    # 2) Online users may get these entities, but it is the importers
-	    #    responsibility to import it which is not designed for
-	    #    delayed display.
-	    
 	    set wtop [::UI::GetWtopFromJabberType normal $optArr(from:)]
+	}
+    }
+    return $wtop
+}
+
+# ::Jabber::WB::DispatchToImporter --
+# 
+#       Is called as a response to a GET file event. 
+#       We've received a file that should be imported somewhere.
+#       
+# Arguments:
+#       mime
+#       optList
+#       args        -file, -where; for importer proc.
+
+proc ::Jabber::WB::DispatchToImporter {mime optList args} {
+        
+    ::Jabber::Debug 2 "::Jabber::WB::DispatchToImporter"
+
+    array set optArr $optList
+
+    # Creates WB if not exists.
+    set wtop [::Jabber::WB::MakeWhiteboardExist $optList]
+
+    switch -- $optArr(type:) {
+	chat - groupchat {
+	    set display 1
+	}
+	default {
 	    set display 0
 	}
     }
@@ -2752,13 +2823,14 @@ namespace eval ::Jabber::UI:: {
 }
 
 proc ::Jabber::UI::Show {w args} {
-    
     upvar ::Jabber::jstate jstate
 
     array set argsArr $args
     if {[info exists argsArr(-visible)]} {
 	set jstate(rostBrowseVis) $argsArr(-visible)
     }
+    ::Jabber::Debug 2 "::Jabber::UI::Show w=$w, jstate(rostBrowseVis)=$jstate(rostBrowseVis)"
+
     if {$jstate(rostBrowseVis)} {
 	if {[winfo exists $w]} {
 	    wm deiconify $w
@@ -2786,11 +2858,15 @@ proc ::Jabber::UI::Build {w} {
     if {[winfo exists $w]} {
 	return
     }
-    toplevel $w -class RostServ
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-    } else {
-
+    ::Jabber::Debug 2 "::Jabber::UI::Build w=$w"
+    
+    if {$w != "."} {
+	toplevel $w -class RostServ
+	if {[string match "mac*" $this(platform)]} {
+	    eval $::macWindowStyle $w documentProc
+	} else {
+	    
+	}
     }
     set jwapp(wtopRost) $w
     wm title $w "The Coccinella"
@@ -2823,10 +2899,10 @@ proc ::Jabber::UI::Build {w} {
       [list ::Jabber::Login::Login $wDlgs(jlogin)]
     if {[::Jabber::MailBox::HaveMailBox]} {
 	::UI::NewButton $w inbox Inbox $icons(btinboxLett) $icons(btinboxLettdis)  \
-	  [list ::Jabber::MailBox::Show $wDlgs(jinbox) -visible 1]
+	  [list ::Jabber::MailBox::Show -visible 1]
     } else {
 	::UI::NewButton $w inbox Inbox $icons(btinbox) $icons(btinboxdis)  \
-	  [list ::Jabber::MailBox::Show $wDlgs(jinbox) -visible 1]
+	  [list ::Jabber::MailBox::Show -visible 1]
     }
     ::UI::NewButton $w newuser "New User" $icons(btnewuser) $icons(btnewuserdis)  \
       [list ::Jabber::Roster::NewOrEditItem $wDlgs(jrostnewedit) new] \
@@ -3071,6 +3147,7 @@ proc ::Jabber::UI::Popup {what w v x y} {
     # Find also type of thing clicked, 'typeClicked'.
     
     set typeClicked ""
+    
     switch -- $what {
 	roster {
 	    
@@ -3114,6 +3191,7 @@ proc ::Jabber::UI::Popup {what w v x y} {
 	}
 	browse {
 	    set jid [lindex $v end]
+	    set jid3 $jid
 	    set typesubtype [$jstate(browse) gettype $jid]
 	    if {[regexp {^.+@[^/]+(/.*)?$} $jid match res]} {
 		set typeClicked user
@@ -3128,12 +3206,14 @@ proc ::Jabber::UI::Popup {what w v x y} {
 	}
 	groupchat {	    
 	    set jid $v
+	    set jid3 $jid
 	    if {[regexp {^.+@[^/]+(/.*)?$} $jid match res]} {
 		set typeClicked user
 	    }
 	}
 	agents {
 	    set jid [lindex $v end]
+	    set jid3 $jid
 	    set childs [$w children $v]
 	    if {[regexp {(register|search|groupchat)} $jid match service]} {
 		set typeClicked $service
@@ -3223,7 +3303,7 @@ proc ::Jabber::UI::Popup {what w v x y} {
 			    set state normal
 			}
 			if {[string equal $status "offline"]} {
-			    if {[string match -nocase "*chat*" $item] || \
+			    if {[string match -nocase "mchat" $item] || \
 			      [string match -nocase "*version*" $item]} {
 				set state disabled
 			    }
@@ -3415,21 +3495,21 @@ proc ::Jabber::UI::SmileyMenuButton {w wtext} {
     if {$prefs(haveMenuImage)} {
 	foreach name [array names smiley] {
 	    $m add command -image $smiley($name) \
-	      -command [list ::Jabber::UI::SmileyInsert $wtext $smiley($name)]
+	      -command [list ::Jabber::UI::SmileyInsert $wtext $smiley($name) $name]
 	}
     } else {
 	foreach name [array names smiley] {
 	    $m add command -label $name \
-	      -command [list ::Jabber::UI::SmileyInsert $wtext $smiley($name)]
+	      -command [list ::Jabber::UI::SmileyInsert $wtext $smiley($name) $name]
 	}
     }
     return $w
 }
 
-proc ::Jabber::UI::SmileyInsert {wtext imname} {
+proc ::Jabber::UI::SmileyInsert {wtext imname name} {
  
     $wtext insert insert " "
-    $wtext image create insert -image $imname
+    $wtext image create insert -image $imname -name $name
     $wtext insert insert " "
 }
 
@@ -3596,7 +3676,7 @@ proc ::Jabber::Register::Doit { } {
     # Set callback procedure for the async socket open.
     set jstate(servPort) $jprefs(port)
     set cmd [namespace current]::SocketIsOpen
-    ::Network::OpenConnection $server $jprefs(port) $cmd -timeout $prefs(timeout)
+    ::Network::OpenConnection $server $jprefs(port) $cmd -timeout $prefs(timeoutSecs)
     
     # Not sure about this...
     if {0} {
@@ -3605,7 +3685,7 @@ proc ::Jabber::Register::Doit { } {
 	} else {
 	    set port $jprefs(port)
 	}
-	::Network::OpenConnection $server $port $cmd -timeout $prefs(timeout) \
+	::Network::OpenConnection $server $port $cmd -timeout $prefs(timeoutSecs) \
 	  -tls $ssl
     }
 }
@@ -4582,7 +4662,7 @@ proc ::Jabber::Login::Doit { } {
 	set port $jprefs(port)
     }
     ::Network::OpenConnection $server $port [namespace current]::SocketIsOpen  \
-      -timeout $prefs(timeout) -tls $ssl
+      -timeout $prefs(timeoutSecs) -tls $ssl
 }
 
 # Jabber::Login::SocketIsOpen --
@@ -4702,7 +4782,7 @@ proc ::Jabber::Login::ConnectProc {jlibName args} {
 #       .
 
 proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
-    global  ipName2Num prefs
+    global  ipName2Num prefs wDlgs
     
     variable profile
     variable server
@@ -4761,7 +4841,7 @@ proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
     if {$prefs(jabberCommFrame)} {
 	::UI::ConfigureAllJabberEntries $ipNum -netstate "connect"	
     } else {
-	::UI::SetCommEntry . $ipNum 1 -1 -jidvariable ::Jabber::jstate(.,tojid)  \
+	::UI::SetCommEntry $wDlgs(mainwb) $ipNum 1 -1 -jidvariable ::Jabber::jstate(.,tojid)  \
 	  -dosendvariable ::Jabber::jstate(.,doSend)
 	# We skip this.
 	#  -validatecommand ::Jabber::VerifyJID

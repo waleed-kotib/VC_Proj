@@ -7,7 +7,10 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: MacintoshUtils.tcl,v 1.3 2003-07-26 13:54:23 matben Exp $
+# $Id: MacintoshUtils.tcl,v 1.4 2003-08-23 07:19:16 matben Exp $
+
+#package require TclSpeech 2.0
+#package require Tclapplescript
 
 namespace eval ::Mac:: {
 
@@ -31,6 +34,14 @@ proc ::Mac::OpenUrl {url} {
 	    open(file "%s")
 	    Activate -1
 	    end tell
+	}
+	if {0} {
+	set script {
+	    tell application "Netscape Communicatorª"
+	    activate
+	    GetURL %s inside window 1
+	    end tell
+	}
 	}
 	AppleScript execute [format $script $url]
     }

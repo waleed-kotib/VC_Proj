@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.8 2003-07-26 13:54:23 matben Exp $
+# $Id: GroupChat.tcl,v 1.9 2003-08-23 07:19:16 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -342,8 +342,8 @@ proc ::Jabber::GroupChat::DoEnter {token} {
 
 proc ::Jabber::GroupChat::EnterCallback {jlibName type args} {
     
+    array set argsArr $args
     if {[string equal $type "error"]} {
-	array set argsArr $args
 	set msg "We got an error when entering room \"$argsArr(-from)\"."
 	if {[info exists argsArr(-error)]} {
 	    foreach {errcode errmsg} $argsArr(-error) break

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: AutoUpdate.tcl,v 1.1 2003-07-26 13:40:24 matben Exp $
+# $Id: AutoUpdate.tcl,v 1.2 2003-08-23 07:19:16 matben Exp $
 
 package require tinydom
 package require http 2.3
@@ -15,21 +15,24 @@ package require http 2.3
 package provide AutoUpdate 1.0
 
 namespace eval ::AutoUpdate:: {
-
+    
+    variable newVersion 1.0
 }
 
 proc ::AutoUpdate::Get {url args} {
-    global  this
+    global  this prefs
     variable opts
+    
+    ::Debug 2 "::AutoUpdate::Get url=$url"
     
     array set opts {
 	-silent 1
     }
     array set opts $args
-    if {[string equal $this(platform) "macintosh"]} {
+    if {0 && [string equal $this(platform) "macintosh"]} {
 	set tmopts ""
     } else {
-	set tmopts [list -timeout 40000]
+	set tmopts [list -timeout $prefs(timeoutMillis)]
     }
     if {[catch {eval {
 	::http::geturl $url -command [namespace current]::Command
@@ -45,6 +48,7 @@ proc ::AutoUpdate::Command {token} {
     global  prefs
     upvar #0 $token state
     variable opts
+    variable newVersion
     
     # Investigate 'state' for any exceptions.
     set status [::http::status $token]
@@ -72,13 +76,14 @@ proc ::AutoUpdate::Command {token} {
 		}
 	    }
 	}
+	set newVersion $releaseArr(version)
 	
 	# Show dialog if newer version available.
 	if {[package vcompare $prefs(fullVers) $releaseArr(version)] == -1} {
 	    ::AutoUpdate::Dialog $releaseAttr $message $changesList
 	} elseif {!$opts(-silent)} {
 	    tk_messageBox -icon info -type ok -message \
-	      "You already have the latest version available"
+	      "You already have the latest version available ($prefs(fullVers))"
 	}
 	tinydom::cleanup $token
     }
@@ -89,6 +94,7 @@ proc ::AutoUpdate::Command {token} {
 proc ::AutoUpdate::Dialog {releaseAttr message changesList} {
     global  this sysFont prefs
     variable noautocheck
+    variable newVersion
     
     set w .aupdate
     if {[winfo exists $w]} {
@@ -154,6 +160,9 @@ proc ::AutoUpdate::Dialog {releaseAttr message changesList} {
     $wtext configure -height [expr int(($y + $height)/$linespace + 1)]
     
     set noautocheck 0
+    if {[package vcompare $prefs(fullVers) $prefs(lastAutoUpdateVersion)] <= 0} {
+    	set noautocheck 1
+    }
     checkbutton $w.frall.ch -text " Do not automatically check for updates" \
       -variable [namespace current]::noautocheck
     pack $w.frall.ch -side top -anchor w -padx 10 -pady 4
@@ -170,9 +179,12 @@ proc ::AutoUpdate::Dialog {releaseAttr message changesList} {
 proc ::AutoUpdate::Destroy { } {
     global  prefs
     variable noautocheck
+    variable newVersion
     
     if {$noautocheck} {
-	set prefs(lastAutoUpdateVersion) $prefs(fullVers)
+	set prefs(lastAutoUpdateVersion) $newVersion
+    } else {
+	set prefs(lastAutoUpdateVersion) 0.0
     }
 }
     

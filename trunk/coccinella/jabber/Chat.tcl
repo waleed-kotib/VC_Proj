@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.9 2003-07-26 13:54:23 matben Exp $
+# $Id: Chat.tcl,v 1.10 2003-08-23 07:19:16 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -558,8 +558,9 @@ proc ::Jabber::Chat::Close {args} {
 	  {::Jabber::Chat::Close must have any of -threadid or -toplevel}
     }
 
-    set ans [tk_messageBox -icon info -parent $w -type yesno \
-      -message [FormatTextForMessageBox [::msgcat::mc jamesschatclose]]]
+    #set ans [tk_messageBox -icon info -parent $w -type yesno \
+    #  -message [FormatTextForMessageBox [::msgcat::mc jamesschatclose]]]
+    set ans "yes"
     if {$ans == "yes"} {
 	::UI::SaveWinGeom $wDlgs(jchat) $locals($threadID,wtop)
 	::UI::SavePanePos $wDlgs(jchat) $locals($threadID,wtxt)

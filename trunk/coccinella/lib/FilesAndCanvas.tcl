@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: FilesAndCanvas.tcl,v 1.6 2003-07-26 13:54:23 matben Exp $
+# $Id: FilesAndCanvas.tcl,v 1.7 2003-08-23 07:19:16 matben Exp $
  
 package require can2svg
 package require undo
@@ -271,7 +271,8 @@ proc ::CanvasFile::FileToCanvasVer1 {w fd absPath args} {
 
 # CanvasFile::FileToCanvasVer2 --
 #
-#
+#       Reads a canvas file version 2 into canvas. 
+#       Handles any 'import' commands.
 
 proc ::CanvasFile::FileToCanvasVer2 {w fd absPath args} {
     global  prefs
@@ -364,21 +365,23 @@ proc ::CanvasFile::FileToCanvasVer2 {w fd absPath args} {
 		}
 	    }
 	    import {
-		set errMsg 0
+		set errMsg ""
 		if {$argsArr(-tryimport)} {
 		    
 		    # This is typically an image or movie (QT or Snack).
 		    set errMsg [eval {
 			::ImageAndMovie::HandleImportCmd $w $line \
 			  -where $where -basepath $dirPath \
-			  -command [namespace current]::ImportCallback \
+			  -progess [list ::ImageAndMovie::ImportProgress $line] \
+			  -command [list ::ImageAndMovie::ImportCommand $line]  \
 			} $stackCmd]
 		}
-		if {($errMsg != "") && $argsArr(-showbroken)} {
-		    
+		if {$argsArr(-showbroken) &&  \
+		  (($errMsg != "") || !$argsArr(-tryimport))} {
+
 		    # Display a broken image to indicate for the user.
-		    eval {$w create image} [lrange $line 1 2] \
-		      {-image $icons(brokenImage) -anchor nw}
+		    eval {::ImageAndMovie::NewBrokenImage $w [lrange $line 1 2]} \
+		      [lrange $line 3 end]
 		}
 		incr numImports
 	    }
@@ -391,29 +394,6 @@ proc ::CanvasFile::FileToCanvasVer2 {w fd absPath args} {
 	}
     }
     return $numImports
-}
-
-# CanvasFile::ImportCallback --
-# 
-#       Callback procedure for the '::ImageAndMovie::HandleImportCmd'
-#       command. Take care of errors not reported by direct return. 
-
-proc ::CanvasFile::ImportCallback {status gettoken httptoken} {
-    upvar ::UI::icons icons
-    upvar #0 $gettoken getstate          
-
-    Debug 2 "::CanvasFile::ImportCallback "
-    
-    set wtop $getstate(wtop)
-    upvar ::${wtop}::wapp wapp
-
-    if {$status == "error"} {
-	array set optArr $getstate(optList)
-	if {[info exists optArr(coords:)]} {
-	    eval {$wapp(can) create image} $optArr(coords:) \
-	      {-image $icons(brokenImage) -anchor nw}
-	}
-    }
 }
 
 # CanvasFile::CanvasToFile --
@@ -435,7 +415,7 @@ proc ::CanvasFile::ImportCallback {status gettoken httptoken} {
 proc ::CanvasFile::CanvasToFile {w fd absPath} {
     global  this prefs
     
-    Debug 2 "CanvasToFile absPath=$absPath"
+    Debug 2 "::CanvasFile::CanvasToFile absPath=$absPath"
     
     # When saving images or movies, save relative or absolute path names?
     # It is perhaps best to choose a path relative the actual file path of the 
@@ -646,7 +626,7 @@ proc ::CanvasFile::DoSaveCanvasFile {wtop} {
 		  -message [::msgcat::mc messfailopwrite $tail $fd]
 		return
 	    }	    
-	    CanvasToFile $wCan $fd $fileName
+	    ::CanvasFile::CanvasToFile $wCan $fd $fileName
 	    close $fd
 	}
     }

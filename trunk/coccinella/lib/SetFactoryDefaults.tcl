@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.7 2003-07-26 13:54:23 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.8 2003-08-23 07:19:16 matben Exp $
 
 # SetWhiteboardFactoryState --
 # 
@@ -209,15 +209,17 @@ set prefs(asyncOpen) 1
 # Safe server interpretator? (not working)
 set prefs(makeSafeServ) 1
 
-# Maximum time to wait for any network action to respond. (secs)
-set prefs(timeout) 120
-set prefs(timeout) 60
+# Maximum time to wait for any network action to respond. (secs and millisecs)
+set prefs(timeoutSecs) 30
+#set prefs(timeoutSecs) 10
+set prefs(timeoutMillis) [expr 1000 * $prefs(timeoutSecs)]
 
 # How many milliseconds shall we wait before showing the progress window?
 set prefs(millisToProgWin) 0
 
 # How frequently shall the progress window be updated, in milliseconds.
-set prefs(millisProgUpdate) 500
+set prefs(progUpdateMillis) 500
+set prefs(progUpdateMillis) 1000
 
 # When and how old is a cached file allowed to be before downloading a new?
 # Options. "never", "always", "launch", "hour", "day", "week", "month"
@@ -248,10 +250,11 @@ set prefs(userDir) $this(path)
 # If it is the first time the application is launched, then welcome.
 set prefs(firstLaunch) 1
 
-# Auto update mechanism: if lastUpdateVersion < run version => autoupdate
-set prefs(lastUpdateVersion) 0.0
+# Auto update mechanism: if lastAutoUpdateVersion < run version => autoupdate
+set prefs(lastAutoUpdateVersion) 0.0
 set prefs(doneAutoUpdate) 0
 set prefs(urlAutoUpdate) "http://coccinella.sourceforge.net/updates/update_en.xml"
+#set prefs(urlAutoUpdate) "http://192.168.0.12/update_en.xml"
 
 # The file name of the welcoming canvas.
 set prefs(welcomeFile) [file join $this(path) welcome.can]

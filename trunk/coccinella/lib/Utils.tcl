@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.6 2003-07-26 13:54:23 matben Exp $
+# $Id: Utils.tcl,v 1.7 2003-08-23 07:19:17 matben Exp $
 
 # InvertArray ---
 #
@@ -321,7 +321,7 @@ proc IsWellformedUrl {url} {
 
 # GetFilePathFromUrl --
 #
-#       Returns the file path part from a well formed url, or 0 if
+#       Returns the file path part from a well formed url, or empty if
 #       didn't recognize it as a valid url.
 
 proc GetFilePathFromUrl {url} {
@@ -329,7 +329,16 @@ proc GetFilePathFromUrl {url} {
     if {[regexp {[^:]+://[^:/]+(:[0-9]+)?/(.*)} $url match port path]} {
 	return $path
     } else {
-	return 0
+	return ""
+    }
+}
+
+proc GetDomainNameFromUrl {url} {
+    
+    if {[regexp {[^:]+://([^:/]+)(:[0-9]+)?/.*} $url match domain port]} {
+	return $domain
+    } else {
+	return ""
     }
 }
 
@@ -343,7 +352,12 @@ proc GetFilePathFromUrl {url} {
 # Results:
 #       nice time string that still can be used by 'clock scan'
 
-proc SmartClockFormat {secs} {
+proc SmartClockFormat {secs args} {
+    
+    array set opts {
+	-weekdays 0
+    }
+    array set opts $args
     
     # 'days': 0=today, -1=yesterday etc.
     set days [expr ($secs - [clock scan "today 00:00"])/(60*60*24)]
@@ -359,11 +373,16 @@ proc SmartClockFormat {secs} {
 	    set date "yesterday"
 	}
 	^-[2-5]$ {
-	    set date [string tolower  \
-	      [clock format [clock scan "today + $days days"] -format "%A"]]
+	    if {$opts(-weekdays)} {
+		# clock scan doesn't work on these
+		set date [string tolower  \
+		  [clock format [clock scan "today $days days"] -format "%A"]]
+	    } else {
+		set date [clock format $secs -format "%y-%m-%d"]
+	    }
 	}
 	default {
-	    set date [clock format [clock seconds] -format "%y-%m-%d"]
+	    set date [clock format $secs -format "%y-%m-%d"]
 	}
     }
     
@@ -373,6 +392,8 @@ proc SmartClockFormat {secs} {
 
 proc OpenHtmlInBrowser {url} {
     global  this
+    
+    ::Debug 2 "OpenHtmlInBrowser url=$url"
     
     switch $this(platform) {
 	unix {
@@ -561,9 +582,11 @@ proc ::Text::LeaveLink {w linktag linkactive} {
 
 proc ::Text::ButtonPressOnLink {w x y linkactive} {
     
+    ::Debug 2 "::Text::ButtonPressOnLink"
+
     set range [$w tag prevrange $linkactive "@$x,$y"]
     if {[llength $range]} {
-	set url [eval $w get $range]
+	set url [string trim [eval $w get $range]]
 	
 	# Add "http://" if not there.
 	if {![regexp {^http://.+} $url]} {
@@ -728,7 +751,7 @@ proc ::Text::TransformToPureTextCallback {w key value index} {
 	image {
 	    
 	    # Treat smileys specially.
-	    set name [$w image cget $index -name]
+	    set name [$w image cget $index -name]	    
 	    if {[string length $name] > 0} {
 		append puretext($w) $name
 	    } else {

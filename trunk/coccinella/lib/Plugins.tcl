@@ -14,7 +14,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Plugins.tcl,v 1.4 2003-07-26 13:54:23 matben Exp $
+# $Id: Plugins.tcl,v 1.5 2003-08-23 07:19:16 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -774,11 +774,11 @@ proc ::Plugins::VerifySpeech { } {
 	set voices [::MSSpeech::GetVoices]
 	if {([lsearch $voices $prefs(voiceUs)] < 0) || \
 	  ($prefs(voiceUs) == "")} {
-	    set prefs(voiceUs) [lindex $allVoices 0]
+	    set prefs(voiceUs) [lindex $voices 0]
 	}
 	if {([lsearch $voices $prefs(voiceOther)] < 0) || \
 	  ($prefs(voiceOther) == "")} {
-	    set prefs(voiceOther) [lindex $allVoices 1]
+	    set prefs(voiceOther) [lindex $voices 1]
 	}
     }
 }

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.10 2003-07-26 13:54:23 matben Exp $
+# $Id: Preferences.tcl,v 1.11 2003-08-23 07:19:16 matben Exp $
  
 package require notebook
 package require tree
@@ -1051,7 +1051,7 @@ proc ::Preferences::Block::DoAdd { } {
     variable finished
     variable wlbblock
 
-    if {[::Jabber::IsWellFormedJID $addJid]} {
+    if {[::Jabber::IsWellFormedJID $addJid -type any]} {
 	$wlbblock insert end $addJid
 	set finished 1
     } else {
