@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.32 2004-10-16 13:32:50 matben Exp $
+# $Id: Profiles.tcl,v 1.33 2004-10-20 13:35:59 matben Exp $
 
 package provide Profiles 1.0
 
@@ -499,7 +499,7 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     }
     
     # Set defaults.
-    ::Profiles::NotebookSetDefaults $token
+    NotebookSetDefaults $token
 
     # Let components ad their own stuff here.
     ::hooks::run profileBuildTabNotebook $w $token
@@ -525,7 +525,7 @@ proc ::Profiles::NotebookSetDefaults {token} {
     Debug 2 "::Profiles::NotebookSetDefaults"
 
     if {!$initedDefaultOptions} {
-	::Profiles::InitDefaultOptions
+	InitDefaultOptions
     }
     array set state [array get defaultOptionsArr]
 }
@@ -587,7 +587,7 @@ proc ::Profiles::TraceProfile {name key op} {
     variable profile
 
     Debug 4 "TraceProfile name=$name; set name=[set $name]"
-    ::Profiles::SetCmd [set $name]
+    SetCmd [set $name]
 }
 
 # Profiles::SetCmd --
@@ -609,19 +609,19 @@ proc ::Profiles::SetCmd {profName} {
     if {$previousExists} {
 	
 	# Check if there are any empty fields.
-	if {![::Profiles::VerifyNonEmpty]} {
+	if {![VerifyNonEmpty]} {
 	    set profile $tmpSelected
 	    Debug 2 "***::Profiles::VerifyNonEmpty: set profile $tmpSelected"
 	    return
 	}
 	
 	# Save previous state in tmp before setting the new one.
-	::Profiles::SaveCurrentToTmp $tmpSelected
+	SaveCurrentToTmp $tmpSelected
     }
     
     # In case this is a new profile.
     if {[info exists tmpProfArr($profName,server)]} {
-	::Profiles::SetCurrentFromTmp $profName
+	SetCurrentFromTmp $profName
     }
 }
 
@@ -640,19 +640,19 @@ proc ::Profiles::SetCurrentFromTmp {profName} {
     set server   $tmpProfArr($profName,server)
     set username $tmpProfArr($profName,username)
     set password $tmpProfArr($profName,password)
-    ::Profiles::NotebookSetDefaults [namespace current]::moreOpts
+    NotebookSetDefaults [namespace current]::moreOpts
     
     foreach {key value} [array get tmpProfArr $profName,-*] {
 	set optname [string map [list $profName,- ""] $key]
+	Debug 4 "\t key=$key, value=$value, optname=$optname"
 	
 	# The 'resource' is a bit special...
 	if {$optname == "resource"} {
-	    continue
+	    set resource $value
+	} else {
+	    set moreOpts($optname) $value
 	}
-	Debug 4 "\t key=$key, value=$value, optname=$optname"
-	set moreOpts($optname) $value
     }
-    set resource $tmpProfArr($profName,-resource)
     set tmpSelected $profName  
 }
 
@@ -715,7 +715,7 @@ proc ::Profiles::MakeUniqueProfileName {name} {
     variable server
     
     # Create a unique profile name if not given.
-    set allNames [::Profiles::GetAllTmpNames]
+    set allNames [GetAllTmpNames]
     if {$name == ""} {
 	set name $server
     }
@@ -759,16 +759,14 @@ proc ::Profiles::NewCmd { } {
     set newProfile ""
     
     # First get a unique profile name.
-    set ans [::UI::MegaDlgMsgAndEntry \
-      [mc Profile] [mc prefprofname] \
-      "[mc {Profile Name}]:" newProfile \
-      [mc Cancel] [mc OK]]
+    set ans [::UI::MegaDlgMsgAndEntry [mc Profile] [mc prefprofname] \
+      "[mc {Profile Name}]:" newProfile [mc Cancel] [mc OK]]
     if {$ans == "cancel"} {
 	return
     }
     Debug 2 "::Profiles::NewCmd tmpSelected=$tmpSelected, newProfile=$newProfile"
 
-    set uniqueName [::Profiles::MakeUniqueProfileName $newProfile]
+    set uniqueName [MakeUniqueProfileName $newProfile]
     $wmenu add radiobutton -label $uniqueName  \
       -variable [namespace current]::profile
 
@@ -778,7 +776,7 @@ proc ::Profiles::NewCmd { } {
     set username  ""
     set password  ""
     set resource  ""
-    ::Profiles::NotebookSetDefaults [namespace current]::moreOpts
+    NotebookSetDefaults [namespace current]::moreOpts
     
     # Must do this for it to be automatically saved.
     set tmpProfArr($profile,name) $profile
@@ -810,11 +808,11 @@ proc ::Profiles::DeleteCmd { } {
 	    $wmenu delete $ind
 	}
 	array unset tmpProfArr "$profile,*"
-	set allNames [::Profiles::GetAllTmpNames]
+	set allNames [GetAllTmpNames]
 	
 	# Set selection to first.
 	set profile [lindex $allNames 0]
-	::Profiles::SetCmd $profile
+	SetCmd $profile
     }
 }
 
@@ -833,7 +831,7 @@ proc ::Profiles::SaveHook { } {
     variable selected
     variable tmpSelected
 
-    set profiles [::Profiles::GetTmpProfiles]
+    set profiles [GetTmpProfiles]
     set selected $tmpSelected
     
     # Update the Login dialog if any.
@@ -847,10 +845,10 @@ proc ::Profiles::GetTmpProfiles { } {
     Debug 2 "::Profiles::GetTmpProfiles"
     
     # Get present dialog state into tmp array first.
-    ::Profiles::SaveCurrentToTmp $profile
+    SaveCurrentToTmp $profile
     
     set tmpProfiles {}
-    foreach name [::Profiles::GetAllTmpNames] {
+    foreach name [GetAllTmpNames] {
 	set plist [list $tmpProfArr($name,server) $tmpProfArr($name,username) \
 	  $tmpProfArr($name,password)]
 	
@@ -884,7 +882,7 @@ proc ::Profiles::CancelHook { } {
 	::Preferences::HasChanged
 	return
     }
-    set tmpProfiles [::Profiles::GetTmpProfiles]
+    set tmpProfiles [GetTmpProfiles]
     if {![string equal $profiles $tmpProfiles]} {
 	::Preferences::HasChanged
 	return
@@ -896,10 +894,10 @@ proc ::Profiles::UserDefaultsHook { } {
     variable tmpSelected
     variable profile
     
-    ::Profiles::MakeTmpProfArr
+    MakeTmpProfArr
     set tmpSelected $selected
     set profile $selected
-    ::Profiles::SetCmd $selected
+    SetCmd $selected
 }
 
 # Standalone dialog --
@@ -922,7 +920,7 @@ proc ::Profiles::BuildDialog { } {
 
     set wpage $w.frall.page
     pack [frame $wpage] -padx 4 -pady 4
-    ::Profiles::BuildPage $wpage
+    BuildPage $wpage
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
@@ -942,14 +940,14 @@ proc ::Profiles::CloseDlgHook {wclose} {
     global  wDlgs
 
     if {[string equal $wclose $wDlgs(jprofiles)]} {
-	::Profiles::CancelDlg $wclose
+	CancelDlg $wclose
     }
 }
 
 proc ::Profiles::SaveDlg {w} {
     
     ::UI::SaveWinGeom $w
-    ::Profiles::SaveHook
+    SaveHook
     destroy $w
 }
 

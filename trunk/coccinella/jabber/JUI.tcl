@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.60 2004-10-16 13:32:50 matben Exp $
+# $Id: JUI.tcl,v 1.61 2004-10-20 13:35:59 matben Exp $
 
 package provide JUI 1.0
 
@@ -312,17 +312,17 @@ proc ::Jabber::UI::Build {w} {
     set jwapp(mystatus)   ${wbot}.stat
     set jwapp(myjid)      ${wbot}.e
     
-    pack [frame $wbot -relief raised -borderwidth 1]  \
-      -side bottom -fill x -pady 0
-    pack [::Jabber::Roster::BuildStatusMenuButton $jwapp(mystatus)] \
-      -side left -pady 2 -padx 6
-    pack [label ${wbot}.size -image $iconResize]  \
-      -padx 0 -pady 0 -side right -anchor s
-    pack [label $jwapp(elplug) -image $iconContactOff]  \
-      -side right -pady 0 -padx 0
-    pack [entry $jwapp(myjid) -state disabled -width 0  \
-      -textvariable ::Jabber::jstate(mejid)] \
-      -side left -fill x -expand 1 -pady 0 -padx 0
+    frame $wbot -relief raised -borderwidth 1
+    pack  $wbot -side bottom -fill x -pady 0
+    ::Jabber::Roster::BuildStatusMenuButton $jwapp(mystatus)
+    pack  $jwapp(mystatus) -side left -pady 2 -padx 6
+    label ${wbot}.size -image $iconResize
+    pack  ${wbot}.size -padx 0 -pady 0 -side right -anchor s
+    label $jwapp(elplug) -image $iconContactOff
+    pack  $jwapp(elplug) -side right -pady 0 -padx 0
+    entry $jwapp(myjid) -state disabled -width 0 \
+      -textvariable ::Jabber::jstate(mejid)
+    pack  $jwapp(myjid) -side left -fill x -expand 1 -pady 0 -padx 0
         
     # Build status feedback elements.
     if {0} {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.90 2004-10-16 13:32:51 matben Exp $
+# $Id: Roster.tcl,v 1.91 2004-10-20 13:35:59 matben Exp $
 
 package provide Roster 1.0
 
@@ -572,9 +572,10 @@ proc ::Jabber::Roster::Popup {w v x y} {
     # The last element of $v is either a jid, (a namespace,) 
     # a header in roster, a group,
     # The variables name 'jid' is a misnomer.
-    # Find also type of thing clicked, 'typeClicked'.
+    # Find also type of thing clicked, 'typesel'.
     
-    set typeClicked ""
+    set typesel ""
+    set group   ""
     
     # The last element of atree item if user is usually a 3-tier jid for
     # online users and a 2-tier jid else, but some transports may
@@ -591,13 +592,14 @@ proc ::Jabber::Roster::Popup {w v x y} {
     
     switch -- $tags {
 	head {
-	    set typeClicked head
+	    set typesel head
 	}
 	group {
 	    
 	    # Get a list of all jid's in this group. type=user.
 	    # Must strip off all resources.
-	    set typeClicked group
+	    set typesel group
+	    set group $jid
 	    set jid {}
 	    foreach jid3 [$w children $v] {
 		jlib::splitjid $jid3 jid2 res
@@ -614,21 +616,21 @@ proc ::Jabber::Roster::Popup {w v x y} {
 	    set jid3 $jid
 	    set jid $jid2
 	    if {[IsTransportHeuristics $jid3]} {
-		set typeClicked trpt
+		set typesel trpt
 	    } elseif {[IsCoccinella $jid3]} {
-		set typeClicked wb
+		set typesel wb
 	    } else {
-		set typeClicked user
+		set typesel user
 	    }			
 	}		    
     }
     if {[string length $jid] == 0} {
-	set typeClicked ""	
+	set typesel ""	
     }
     set X [expr [winfo rootx $w] + $x]
     set Y [expr [winfo rooty $w] + $y]
     
-    ::Debug 2 "\t jid=$jid, typeClicked=$typeClicked"
+    ::Debug 2 "\t jid=$jid, typesel=$typesel"
     
     # Mads Linden's workaround for menu post problem on mac:
     # all in menubutton commands i add "after 40 the_command"
@@ -647,7 +649,7 @@ proc ::Jabber::Roster::Popup {w v x y} {
     catch {destroy $m}
     menu $m -tearoff 0
     
-    if {[string equal $typeClicked "trpt"]} {
+    if {[string equal $typesel "trpt"]} {
 	set menuDef $popMenuDefs(roster,trpt,def)
     } else {
 	set menuDef $popMenuDefs(roster,def)	
@@ -673,7 +675,7 @@ proc ::Jabber::Roster::Popup {w v x y} {
 	}
 	
 	# If a menu should be enabled even if not connected do it here.
-	if {$typeClicked == "user" &&  \
+	if {$typesel == "user" &&  \
 	  [string match -nocase "*chat history*" $item]} {
 	    $m entryconfigure $locname -state normal
 	}
@@ -685,13 +687,13 @@ proc ::Jabber::Roster::Popup {w v x y} {
 	    continue
 	}
 	
-	# State of menu entry. We use the 'type' and 'typeClicked' to sort
+	# State of menu entry. We use the 'type' and 'typesel' to sort
 	# out which capabilities to offer for the clicked item.
 	set state disabled
 	
 	switch -- $type {
 	    user {
-		switch -- $typeClicked user - wb - trpt {
+		switch -- $typesel user - wb - trpt {
 		    set state normal
 		}		
 		if {[string equal $status "offline"]} {
@@ -702,12 +704,12 @@ proc ::Jabber::Roster::Popup {w v x y} {
 		}
 	    }
 	    users {
-		switch -- $typeClicked user - wb - group {
+		switch -- $typesel user - wb - group {
 		    set state normal
 		}		
 	    }
 	    wb {
-		if {[string equal $typeClicked "wb"]} {
+		if {[string equal $typesel "wb"]} {
 		    set state normal
 		}
 	    }

@@ -5,14 +5,14 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: jlibsasl.tcl,v 1.9 2004-10-13 14:08:38 matben Exp $
+# $Id: jlibsasl.tcl,v 1.10 2004-10-20 13:35:59 matben Exp $
 
 # We need to be flexible here since can have cyrus based sasl or our 
 # own special pure tcl saslmd5.
 
-if {![catch {package require sasl 1.0}]} {
+if {0 && ![catch {package require sasl 1.0}]} {
     set ::_saslpack cyrussasl
-} elseif {![catch {package require saslclient 1.1}]} {
+} elseif {0 && ![catch {package require saslclient 1.1}]} {
     set ::_saslpack cyrussasl
 } elseif {![catch {package require saslmd5}]} {
     set ::_saslpack saslmd5

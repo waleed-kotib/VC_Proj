@@ -4,7 +4,12 @@
 #       This is just a first sketch.
 #       TODO: all message translations.
 #       
-# $Id: BuddyPounce.tcl,v 1.4 2004-10-03 13:38:21 matben Exp $
+# $Id: BuddyPounce.tcl,v 1.5 2004-10-20 13:35:58 matben Exp $
+
+# Key phrases are: 
+#     event:    something happens, presence change, incoming message etc.
+#     target:   is either a jid, a roster group, or 'any'  
+#     action:   how to respond, popup, sound, reply etc.
 
 namespace eval ::BuddyPounce:: {
     
@@ -14,9 +19,6 @@ proc ::BuddyPounce::Init { } {
     global  this
     
     ::Debug 2 "::BuddyPounce::Init"
-
-    set popMenuSpec \
-      [list {Buddy Pouncing} user {::BuddyPounce::Build $jid}]
     
     # Add all hooks we need.
     ::hooks::register quitAppHook              ::BuddyPounce::QuitHook
@@ -27,6 +29,8 @@ proc ::BuddyPounce::Init { } {
     ::hooks::register closeWindowHook          ::BuddyPounce::CloseHook
     
     # Register popmenu entry.
+    set popMenuSpec \
+      [list {Buddy Pouncing} any {::BuddyPounce::Build $typesel $jid $group}]
     ::Jabber::UI::RegisterPopupEntry roster $popMenuSpec
     
     component::register BuddyPounce  \
@@ -65,6 +69,7 @@ proc ::BuddyPounce::Init { } {
 	}
     }
     
+    # Unique id needed to create instance tokens.
     variable uid 0
     variable wdlg .budpounce
     
@@ -73,13 +78,19 @@ proc ::BuddyPounce::Init { } {
     set events(keys) {available unavailable msg                chat}
     set events(str)  {Online    Offline     {Incoming Message} {New Chat}}
     
-    variable actions
-    set actions(keys) {msgbox sound chat msg}
+    variable actionlist
+    set actionlist(keys) {msgbox sound chat msg}
     
     # Keep prefs. jid must be mapped and with no resource!
     # The action keys correspond to option being on.
     #   budprefs(jid2) {event {list-of-action-keys} event {...} ...}
     variable budprefs
+    
+    # And the same for roster groups.
+    variable budprefsgroup
+    
+    # And for 'any' which is not an array.
+    variable budprefsany {}
     
     variable alertStr
     array set alertStr {
@@ -100,19 +111,32 @@ proc ::BuddyPounce::Init { } {
 
 proc ::BuddyPounce::InitPrefsHook { } {
     
-    variable budprefs
+    variable budprefsany
         
     ::PreferencesUtils::Add [list  \
-      [list ::BuddyPounce::budprefs budprefs_array [::BuddyPounce::GetPrefsArr]]]    
+      [list ::BuddyPounce::budprefs      budprefs_array      [GetJidPrefsArr]] \
+      [list ::BuddyPounce::budprefsgroup budprefsgroup_array [GetGroupPrefsArr]]\
+      [list ::BuddyPounce::budprefsany   budprefsany         $budprefsany]   \
+      ]    
 }
 
-proc ::BuddyPounce::GetPrefsArr { } {
+proc ::BuddyPounce::GetJidPrefsArr { } {    
     variable budprefs
-
     return [array get budprefs]
 }
 
-proc ::BuddyPounce::Build {jid} {    
+proc ::BuddyPounce::GetGroupPrefsArr { } {
+    variable budprefsgroup
+    return [array get budprefsgroup]
+}
+
+# BuddyPounce::Build --
+# 
+#       Builds the preference dialog.
+#       
+#       typeselected:   user, wb, group, ""
+
+proc ::BuddyPounce::Build {typeselected item group} {    
     global  this prefs
     
     variable uid
@@ -120,7 +144,7 @@ proc ::BuddyPounce::Build {jid} {
     variable events
     variable audioSuffixes
     
-    ::Debug 2 "::BuddyPounce::Build jid=$jid"
+    ::Debug 2 "::BuddyPounce::Build typeselected=$typeselected, item=$item"
 
     # Initialize the state variable, an array, that keeps is the storage.
     
@@ -129,15 +153,45 @@ proc ::BuddyPounce::Build {jid} {
     upvar 0 $token state
     
     set w ${wdlg}${uid}
+    set state(w) $w
     
-    set jid [jlib::jidmap $jid]
-    jlib::splitjid $jid jid2 res
-    set state(w)    $w
-    set state(jid)  $jid
-    set state(jid2) $jid2
+    switch -- $typeselected {
+	user - wb {    
+	    set jid [jlib::jidmap $item]
+	    jlib::splitjid $jid jid2 res
+	    set state(jid)  $jid
+	    set state(jid2) $jid2
+	    set state(type) jid
+	    set msg "Set a specific action when something happens with \"$jid\",\
+	      which can be a changed status, or if you receive a message etc.\
+	      Pick events using the tabs below."
+	    set title "[mc {Buddy Pouncing}]: $jid"
+	}
+	group {
+	    set state(group) $group
+	    set state(type)  group
+	    set msg "Set a specific action when something happens with\
+	      any contact belonging to the group \"$group\",\
+	      which can be a changed status, or if you receive a message etc.\
+	      Pick events using the tabs below."
+	    set title "[mc {Buddy Pouncing}]: $group"
+	}
+	"" {
+	    set state(type) any
+	    set msg "Set a specific action when something happens with\
+	      any contact in your contact list,\
+	      which can be a changed status, or if you receive a message etc.\
+	      Pick events using the tabs below."
+	    set title "[mc {Buddy Pouncing}]: Any"
+	}
+	default {
+	    unset state
+	    return
+	}
+    }
     
     # Get all sounds.
-    set allSounds [::BuddyPounce::GetAllSounds]
+    set allSounds [GetAllSounds]
     set fontS      [option get . fontSmall {}]
     set contrastBg [option get . backgroundLightContrast {}]
     set maxlen 0
@@ -152,6 +206,7 @@ proc ::BuddyPounce::Build {jid} {
     
     # Toplevel with class BuddyPounce.
     ::UI::Toplevel $w -class BuddyPounce -usemacmainmenu 1 -macstyle documentProc
+    wm title $w $title
 
     # Global frame.
     frame $w.frall -borderwidth 1 -relief raised
@@ -160,9 +215,7 @@ proc ::BuddyPounce::Build {jid} {
     ::headlabel::headlabel $w.frall.head -text [mc {Buddy Pouncing}]
     pack $w.frall.head -side top -fill both -expand 1
     label $w.frall.msg -wraplength 300 -justify left -padx 10 -pady 2 \
-      -text "Set a specific action when something happens with \"$jid\",\
-      which can be a changed status, or if you receive a message etc.\
-      Pick events using the tabs."
+      -text $msg
     pack $w.frall.msg -side top -anchor w
     
     frame $w.frall.fr -bg $contrastBg -bd 0
@@ -179,21 +232,21 @@ proc ::BuddyPounce::Build {jid} {
     destroy $wtmp
     
     set i 0
-    foreach eventStr $events(str) key $events(keys) {
+    foreach eventStr $events(str) ekey $events(keys) {
 
 	set wpage [$wnb newpage $eventStr -text [mc $eventStr]]	
 		
 	# Action
-	set wact $wpage.f${key}
+	set wact $wpage.f$ekey
 	frame $wact
 	pack  $wact -padx 6 -pady 2
 	checkbutton $wact.alrt -text " [mc {Show Popup}]" \
-	  -variable $token\($key,msgbox)
+	  -variable $token\($ekey,msgbox)
 	
 	checkbutton $wact.lsound -text " [mc {Play Sound}]:" \
-	  -variable $token\($key,sound)
+	  -variable $token\($ekey,sound)
 	set wmenu [eval {
-	    tk_optionMenu $wact.msound $token\($key,soundfile)
+	    tk_optionMenu $wact.msound $token\($ekey,soundfile)
 	} $allSounds]
 	$wmenu configure -font $fontS
 
@@ -201,13 +254,29 @@ proc ::BuddyPounce::Build {jid} {
 	frame $wpad -width [expr $soundMaxWidth + 40] -height 1
 
 	checkbutton $wact.chat -text " [mc {Start Chat}]" \
-	  -variable $token\($key,chat)
-	checkbutton $wact.msg -text " [mc {Send Message}]" \
-	  -variable $token\($key,msg)
+	  -variable $token\($ekey,chat)
+	set wmsg $wact.fmsg
+	frame $wmsg
+	
+	frame $wmsg.f1
+	pack  $wmsg.f1 -side top -anchor w
+	checkbutton $wmsg.f1.c -text " [mc {Send Message with subject}]:" \
+	  -variable $token\($ekey,msg)
+	entry $wmsg.f1.e -width 12 -textvariable $token\($ekey,msg,subject)
+	pack  $wmsg.f1.c $wmsg.f1.e -side left
+	
+	frame $wmsg.f2
+	pack  $wmsg.f2 -side top -anchor w -fill x
+	label $wmsg.f2.l -text "[mc Message]:"
+	text  $wmsg.f2.t -height 2 -width 24 -wrap word
+	pack  $wmsg.f2.l -side left -anchor n
+	pack  $wmsg.f2.t -side top -fill x
+	
+	set state($ekey,msg,wtext) $wmsg.f2.t
 	
 	grid x          x            $wpad
-	grid $wact.alrt $wact.lsound $wact.msound -sticky w -padx 4 -pady 1
-	grid $wact.chat $wact.msg    -            -sticky w -padx 4 -pady 1
+	grid $wact.alrt $wact.lsound $wact.msound -sticky w  -padx 4 -pady 1
+	grid $wact.chat $wact.fmsg   -            -sticky nw -padx 4 -pady 1
 		
 	if {([llength audioSuffixes] == 0) || ![component::exists Sounds]} {
 	    $wact.lsound configure -state disabled
@@ -232,16 +301,15 @@ proc ::BuddyPounce::Build {jid} {
     if {$nwin == 1} {
 	::UI::SetWindowPosition $w $wdlg
     }
-    wm title $w "[mc {Buddy Pouncing}]: $jid"
     wm resizable $w 0 0
     
-    ::BuddyPounce::AllOff $token
-    ::BuddyPounce::PrefsToState $token
+    AllOff $token
+    PrefsToState $token
 
     # Trick to resize the labels wraplength.
     set script [format {
 	update idletasks
-	%s configure -wraplength [expr [winfo reqwidth %s] - 20]
+	%s configure -wraplength [expr [winfo reqwidth %s] - 12]
     } $w.frall.msg $w]    
     after idle $script
 
@@ -257,51 +325,126 @@ proc ::BuddyPounce::PrefsToState {token} {
     variable $token
     upvar 0 $token state
     variable budprefs
+    variable budprefsgroup
+    variable budprefsany
     
-    set jid $state(jid2)
-    if {[info exists budprefs($jid)]} {
-	foreach {ekey actlist} $budprefs($jid) {
-	    foreach akey $actlist {
-		set state($ekey,$akey) 1
-		
-		# The sound file is treated specially.
-		if {[string match "soundfile:*" $akey]} {
+    set eventActions {}
+    
+    switch -- $state(type) {
+	jid {
+	    set jid $state(jid2)
+	    if {[info exists budprefs($jid)]} {
+		set eventActions $budprefs($jid)
+	    }
+	}
+	group {
+	    set group $state(group)
+	    if {[info exists budprefsgroup($group)]} {
+		set eventActions $budprefsgroup($group)
+	    }
+	}
+	any {
+	    set eventActions $budprefsany
+	}
+    }
+    foreach {ekey actlist} $eventActions {
+	foreach akey $actlist {
+	    
+	    switch -glob -- $akey {
+		soundfile:* {
+		    # The sound file is treated specially.
 		    set state($ekey,soundfile)  \
 		      [string map {soundfile: ""} $akey]
+		}
+		subject:* {
+		    set state($ekey,msg,subject) \
+		      [string map {subject: ""} $akey]
+		}
+		body:* {
+		    set body [string map {body: ""} $akey]
+		    set body [subst -nocommands -novariables $body]
+		    $state($ekey,msg,wtext) insert end $body
+		}
+		default {
+		    set state($ekey,$akey) 1
 		}
 	    }
 	}
     }
 }
 
+# BuddyPounce::StateToPrefs --
+# 
+#       Build the internal prefs array from the dialogs state variable.
+
 proc ::BuddyPounce::StateToPrefs {token} {
     variable $token
     upvar 0 $token state
     variable budprefs
+    variable budprefsgroup
+    variable budprefsany
     variable events
-    variable actions
+    variable actionlist
+
+    set eventActions {}
     
-    set jid $state(jid2)
-    set jidprefs {}
-    set budprefs($jid) {}
+    # Build event-action list from state.
     foreach ekey $events(keys) {
 	set actlist {}
-	foreach akey $actions(keys) {
+	foreach akey $actionlist(keys) {
 	    if {$state($ekey,$akey) == 1} {
 		lappend actlist $akey
 		
-		# If sound we also need the soundfile.
-		if {[string equal $akey "sound"]} {
-		    lappend actlist soundfile:$state($ekey,soundfile)
+		switch -- $akey {
+		    sound {
+			# If sound we also need the soundfile.
+			lappend actlist soundfile:$state($ekey,soundfile)
+		    }
+		    msg {
+			if {$state($ekey,msg,subject) != ""} {
+			    lappend actlist subject:$state($ekey,msg,subject)
+			}
+			set body [$state($ekey,msg,wtext) get 1.0 "end -1 char"]
+			regsub -all "\n" $body {\\n} body
+			if {$body != ""} {
+			    lappend actlist body:$body
+			}
+		    }
 		}
 	    }
 	}
 	if {[llength $actlist]} {
-	    lappend jidprefs $ekey $actlist
+	    lappend eventActions $ekey $actlist
 	}
     }
-    if {[llength $jidprefs]} {
-	set budprefs($jid) $jidprefs
+    if {[llength $eventActions]} {    
+	switch -- $state(type) {
+	    jid {
+		set jid $state(jid2)
+		set budprefs($jid) $eventActions
+	    }
+	    group {
+		set group $state(group)
+		set budprefsgroup($group) $eventActions
+	    }
+	    any {
+		set budprefsany $eventActions
+	    }
+	}
+    } else {
+	switch -- $state(type) {
+	    jid {
+		set jid $state(jid2)
+		unset -nocomplain budprefs($jid)
+	    }
+	    group {
+		set group $state(group)
+		unset -nocomplain budprefsgroup($group)
+	    }
+	    any {
+		set budprefsany {}
+	    }
+	}
     }
 }
 
@@ -309,13 +452,15 @@ proc ::BuddyPounce::AllOff {token} {
     variable $token
     upvar 0 $token state
     variable events
+    variable actionlist
+    set actionlist(keys) {msgbox sound chat msg}
 
     foreach ekey $events(keys) {
-	foreach name [array names state $ekey,*] {
-	    if {![string equal $ekey,soundfile $name]} {
-		set state($name) 0
-	    }
+	foreach mkey $actionlist(keys) {
+	    set state($ekey,$mkey) 0
 	}
+	set state($ekey,msg,subject) ""
+	$state($ekey,msg,wtext) delete 1.0 end
     }
 }
 
@@ -325,7 +470,7 @@ proc ::BuddyPounce::OK {token} {
     variable budprefs
     variable wdlg
     
-    ::BuddyPounce::StateToPrefs $token
+    StateToPrefs $token
     ::UI::SaveWinGeom $wdlg $state(w)
     destroy $state(w)
     unset state
@@ -344,6 +489,7 @@ proc ::BuddyPounce::Cancel {token} {
 
 # BuddyPounce::Event --
 # 
+#       Handler for any event.
 # 
 # Arguments:
 #       from        2-tier jid.
@@ -353,44 +499,88 @@ proc ::BuddyPounce::Cancel {token} {
 #       none.
 
 proc ::BuddyPounce::Event {from eventkey} {
-    variable budprefs
-    variable alertStr
-    variable alertTitle 
     
+    variable budprefs
+    variable budprefsgroup
+    variable budprefsany
+    variable alertStr
+    variable alertTitle
+    
+    ::Debug 4 "::BuddyPounce::Event from = $from, eventkey=$eventkey"
+    
+    # We must check 'jid', 'group' and 'any' in that order.
+    # A list of actions to perform if any.
+    set actions {}
+    
+    # First this specific JID.
     set jid [jlib::jidmap $from]
     if {[info exists budprefs($jid)]} {
-	array set prefsArr $budprefs($jid)
-	if {[info exists prefsArr($eventkey)]} {
-	    
-	    foreach action $prefsArr($eventkey) {
-		
-		switch -- $action {
-		    msgbox {
-			::UI::AlertBox [format $alertStr($eventkey) $from] \
-			  -title $alertTitle($eventkey)
-		    }
-		    sound {
-			set soundfile [lsearch -inline -glob \
-			  $prefsArr($eventkey) soundfile:*]
-			set tail [string map {soundfile: ""} $soundfile]
-			if {$tail != ""} {
-			    ::BuddyPounce::PlaySound $tail
-			}
-		    }
-		    chat {			
-			# If already have chat.
-			set w [::Jabber::Chat::HaveChat $jid]
-			if {$w != ""} {
-			    raise $w
-			} else {
-			    ::Jabber::Chat::StartThread $from
-			}
-		    }
-		    msg {
-			::Jabber::NewMsg::Build -to $from  \
-			  -subject [mc {Auto Reply}] -message "Insert your message!"
-		    }
+	array set eventArr $budprefs($jid)
+	if {[info exists eventArr($eventkey)]} {
+	    set actions $eventArr($eventkey)
+	}
+    }
+
+    # Groups.
+    if {[llength $actions] == 0} {
+	set groups [::Jabber::RosterCmd getgroups $jid]
+	foreach group $groups {
+	    if {[info exists budprefsgroup($group)]} {
+		array unset eventArr
+		array set eventArr $budprefsgroup($group)
+		if {[info exists eventArr($eventkey)]} {
+		    set actions $eventArr($eventkey)
 		}
+	    }
+	}
+    }
+
+    # Any.
+    if {[llength $actions] == 0} {
+	array unset eventArr
+	array set eventArr $budprefsany
+	if {[info exists eventArr($eventkey)]} {
+	    set actions $eventArr($eventkey)
+	}
+    }
+    
+    foreach action $actions {
+	
+	switch -- $action {
+	    msgbox {
+		::UI::AlertBox [format $alertStr($eventkey) $from] \
+		  -title $alertTitle($eventkey)
+	    }
+	    sound {
+		set soundfile [lsearch -inline -glob $actions soundfile:*]
+		set tail [string map {soundfile: ""} $soundfile]
+		if {$tail != ""} {
+		    PlaySound $tail
+		}
+	    }
+	    chat {			
+		# If already have chat.
+		set w [::Jabber::Chat::HaveChat $jid]
+		if {$w != ""} {
+		    raise $w
+		} else {
+		    ::Jabber::Chat::StartThread $from
+		}
+	    }
+	    msg {
+		set subject [mc {Auto Reply}]
+		set body "Insert your message!"
+		set subjectopt [lsearch -inline -glob $actions subject:*]
+		if {$subjectopt != ""} {
+		    set subject [string map {subject: ""} $subjectopt]
+		}
+		set bodyopt [lsearch -inline -glob $actions body:*]
+		if {$bodyopt != ""} {
+		    set body [string map {body: ""} $bodyopt]
+		    set body [subst -nocommands -novariables $body]
+		}
+		::Jabber::NewMsg::Build -to $from  \
+		  -subject $subject -message $body
 	    }
 	}
     }
@@ -442,17 +632,25 @@ proc ::BuddyPounce::NewChatMsgHook {body args} {
 
     array set argsArr $args
     if {[info exists argsArr(-from)]} {
-	Event $argsArr(-from) chat
+	jlib::splitjid $argsArr(-from) jid2 res
+	Event $jid2 chat
     }
 }
 
 proc ::BuddyPounce::NewMsgHook {body args} {
     
+    array set argsArr $args
+    if {[info exists argsArr(-from)]} {
+	jlib::splitjid $argsArr(-from) jid2 res
+	Event $jid2 msg
+    }
 }
 
 proc ::BuddyPounce::PresenceHook {jid type args} {
     
     ::Debug 4 "::BuddyPounce::PresenceHook jid=$jid, type=$type"
+    
+    # The 'wasavailable' roster command returns any previous available status.
     
     switch -- $type {
 	available {
