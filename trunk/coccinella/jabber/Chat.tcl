@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.90 2004-11-06 08:15:25 matben Exp $
+# $Id: Chat.tcl,v 1.91 2004-11-11 15:38:29 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -650,21 +650,33 @@ proc ::Jabber::Chat::Build {threadID args} {
     set iconNotifier    [::Theme::GetImage [option get $w notifierImage {}]]
     set dlgstate(iconNotifier) $iconNotifier
 
-    ::buttontray::buttontray $wtray 50
+    ::buttontray::buttontray $wtray
     pack $wtray -side top -fill x -padx 4 -pady 2
 
-    $wtray newbutton send    Send    $iconSend    $iconSendDis    \
-      [list [namespace current]::Send $dlgtoken]
-    $wtray newbutton sendfile {Send File} $iconSendFile $iconSendFileDis    \
-      [list [namespace current]::SendFile $dlgtoken]
-    $wtray newbutton save    Save    $iconSave    $iconSaveDis    \
-       [list [namespace current]::Save $dlgtoken]
-    $wtray newbutton history History $iconHistory $iconHistoryDis \
-      [list [namespace current]::BuildHistory $dlgtoken]
-    $wtray newbutton settings Settings $iconSettings $iconSettingsDis \
-      [list [namespace current]::Settings $dlgtoken]
-    $wtray newbutton print   Print   $iconPrint   $iconPrintDis   \
-      [list [namespace current]::Print $dlgtoken]
+    $wtray newbutton send  \
+      -text [mc Send] -image $iconSend  \
+      -disabledimage $iconSendDis    \
+      -command [list [namespace current]::Send $dlgtoken]
+    $wtray newbutton sendfile \
+      -text [mc {Send File}] -image $iconSendFile \
+      -disabledimage $iconSendFileDis    \
+      -command [list [namespace current]::SendFile $dlgtoken]
+    $wtray newbutton save  \
+      -text [mc Save] -image $iconSave  \
+      -disabledimage $iconSaveDis    \
+      -command [list [namespace current]::Save $dlgtoken]
+    $wtray newbutton history  \
+      -text [mc History] -image $iconHistory \
+      -disabledimage $iconHistoryDis \
+      -command [list [namespace current]::BuildHistory $dlgtoken]
+    $wtray newbutton settings  \
+      -text [mc Settings] -image $iconSettings \
+      -disabledimage $iconSettingsDis \
+      -command [list [namespace current]::Settings $dlgtoken]
+    $wtray newbutton print  \
+      -text [mc Print] -image $iconPrint  \
+      -disabledimage $iconPrintDis   \
+      -command [list [namespace current]::Print $dlgtoken]
     
     ::hooks::run buildChatButtonTrayHook $wtray $dlgtoken
     

@@ -6,7 +6,7 @@
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: buttontray.tcl,v 1.13 2004-11-10 10:08:43 matben Exp $
+# $Id: buttontray.tcl,v 1.14 2004-11-11 15:38:29 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -18,6 +18,8 @@
 #      
 #   OPTIONS
 #	-borderwidth, borderWidth, BorderWidth
+#	-padx, padX, PadX
+#	-pady, padY, PadY
 #	-relief, relief, Relief
 #	-takefocus, takeFocus, TakeFocus
 #	
@@ -41,6 +43,7 @@ namespace eval ::buttontray::  {
     
     namespace export buttontray
     
+    variable uid 0
 }
 
 # ::buttontray::Init --
@@ -84,13 +87,20 @@ proc ::buttontray::Init { } {
 	-activeforeground    {activeForeground     ActiveForeground    }  \
 	-background          {background           Background          }  \
 	-borderwidth         {borderWidth          BorderWidth         }  \
+	-compound            {compound             Compound            }  \
 	-disabledforeground  {disabledForeground   DisabledForeground  }  \
 	-font                {font                 Font                }  \
 	-foreground          {foreground           Foreground          }  \
+	-height              {height               Height              }  \
+	-image               {image                Image               }  \
+	-labelpadx           {labelPadX            LabelPadX           }  \
+	-labelpady           {labelPadY            LabelPadY           }  \
+	-padx                {padX                 PadX                }  \
+	-pady                {padY                 PadY                }  \
 	-relief              {relief               Relief              }  \
 	-style               {style                Style               }  \
     }
-    set frameOptions {-background -borderwidth -relief}
+    set frameOptions {-background -borderwidth -padx -pady -relief}
     foreach name [array names widgetOptions] {
 	lappend trayOptions $name
     }
@@ -102,8 +112,15 @@ proc ::buttontray::Init { } {
     option add *ButtonTray.activeForeground   white             widgetDefault
     option add *ButtonTray.background         white             widgetDefault
     option add *ButtonTray.borderWidth        0                 widgetDefault
+    option add *ButtonTray.compound           none              widgetDefault
     option add *ButtonTray.disabledForeground gray50            widgetDefault
     option add *ButtonTray.foreground         black             widgetDefault
+    option add *ButtonTray.height             0                 widgetDefault
+    option add *ButtonTray.image              ""                widgetDefault
+    option add *ButtonTray.labelPadX          1                 widgetDefault
+    option add *ButtonTray.labelPadY          1                 widgetDefault
+    option add *ButtonTray.padX               6                 widgetDefault
+    option add *ButtonTray.padY               4                 widgetDefault
     option add *ButtonTray.relief             flat              widgetDefault
     option add *ButtonTray.style              fancy             widgetDefault
     
@@ -133,13 +150,12 @@ proc ::buttontray::Init { } {
 #   
 # Arguments:
 #       w      the widget.
-#       height
 #       args   list of '-name value' options.
 #       
 # Results:
 #       The widget.
 
-proc ::buttontray::buttontray {w height args} {
+proc ::buttontray::buttontray {w args} {
     
     variable widgetOptions
     variable frameOptions
@@ -169,7 +185,7 @@ proc ::buttontray::buttontray {w height args} {
 
     # We use a frame for this specific widget class.
     set widgets(this)   [frame $w -class ButtonTray]
-    set widgets(canvas) [canvas $w.c -highlightthickness 0 -height $height]
+    set widgets(canvas) [canvas $w.c -highlightthickness 0]
     set widgets(frame) ::buttontray::${w}::${w}
     pack $widgets(canvas) -fill both -expand 1
 
@@ -178,7 +194,6 @@ proc ::buttontray::buttontray {w height args} {
 	set optName  [lindex $widgetOptions($name) 0]
 	set optClass [lindex $widgetOptions($name) 1]
 	set options($name) [option get $w $optName $optClass]
-	#puts "name=$name, optName=$optName, value=$options($name)"
     }
     
     # Apply the options supplied in the widget command.
@@ -195,17 +210,10 @@ proc ::buttontray::buttontray {w height args} {
     }
     $widgets(canvas) configure -bg $options(-background)
     
-    # Standard minimum button width.
-    set locals(minbtwidth) 46
+#    $widgets(this) configure -bg red
     
-    # Left edge of previous button.
-    set locals(xleft) 6
-    
-    # Consider the actual font metrics to make the necessary height.
-    set linespace [font metrics $options(-font) -linespace]
-    set locals(yoffset) 3
-    set locals(ytxt) [expr $locals(yoffset) + 34]
-    
+    SetGeometries $w
+        
     # Necessary to remove the original frame procedure from the global
     # namespace into our own.
     rename ::$w $widgets(frame)
@@ -322,13 +330,77 @@ proc ::buttontray::Configure {w args} {
     
 }
 
+proc ::buttontray::SetGeometries {w} {
+    
+    upvar ::buttontray::${w}::options options
+    upvar ::buttontray::${w}::widgets widgets
+    upvar ::buttontray::${w}::locals locals
+
+    switch -- $options(-style) {
+	fancy {
+	    if {$options(-height) > 0} {
+		set height [expr $options(-height) - 2 * $options(-pady) \
+		  - 2 * $options(-borderwidth)]
+		puts "height=$height"
+		parray options
+	    } else {
+		# Assume icons 32x32.
+		set height [expr {32 + 2}]
+		
+		# Consider the actual font metrics to make the necessary height.
+		set linespace [font metrics $options(-font) -linespace]
+		incr height $linespace
+		incr height 2
+		puts "linespace=$linespace, height=$height"
+	    }
+	    $widgets(canvas) configure -height $height
+	    set locals(ytxt) 35
+	    
+	    # Standard minimum button width.
+	    set locals(minbtwidth) 46
+	    
+	    # Left edge of previous button.
+	    set locals(xleft) 2
+	}
+	plain {
+	    if {$options(-height) > 0} {
+		set height [expr $options(-height) - 2 * $options(-pady) \
+		  - 2 * $options(-borderwidth)]
+	    } else {
+		set linespace [font metrics $options(-font) -linespace]
+		set height [expr {$linespace + 2}]
+		
+		if {$options(-image) != ""} {
+		    set imheight [image height $options(-image)]
+		    
+		    switch -- $options(-compound) {
+			left - right {
+			    if {$imheight > $height} {
+				set height $imheight
+			    }
+			}
+			bottom - top {
+			    incr height $imheight
+			}
+		    }
+		}
+		incr height [expr {2 * $options(-labelpady)}]
+		incr height 2
+	    }
+	    $widgets(canvas) configure -height $height
+	    set locals(minbtwidth) 46
+	    set locals(xleft) 2
+	}
+    }
+}
+
 proc ::buttontray::NewButton {w args} {
     
     upvar ::buttontray::${w}::options options
 
     switch -- $options(-style) {
 	fancy {
-	    eval {NewButtonFancy $w} $args
+	    eval {NewFancyButton $w} $args
 	}
 	plain {
 	    eval {NewButtonPlain $w} $args
@@ -336,18 +408,28 @@ proc ::buttontray::NewButton {w args} {
     }
 }
 
-proc ::buttontray::NewButtonFancy {w name txt image imageDis cmd args} {
+proc ::buttontray::NewFancyButton {w name args} {
 
+    variable uid
     upvar ::buttontray::${w}::options options
     upvar ::buttontray::${w}::widgets widgets
     upvar ::buttontray::${w}::locals locals
     
-    set font $options(-font)
-    set foreground $options(-foreground)
-	
-    set can $widgets(canvas)
-    set loctxt [::msgcat::mc $txt]
-    set txtwidth [expr [font measure $font $loctxt] + 6]
+    set locals($name,-text)    $name
+    set locals($name,-command) ""
+    set locals($name,-state)   normal
+    set locals($name,-image)   ""
+    set locals($name,-disabledimage) ""
+    foreach {key value} $args {
+	set locals($name,$key) $value
+    }
+
+    set font  $options(-font)
+    set fg    $options(-foreground)
+    set can   $widgets(canvas)
+    set str   $locals($name,-text)
+    set image $locals($name,-image)
+    set txtwidth [expr [font measure $font $str] + 6]
     set btwidth [expr $txtwidth > $locals(minbtwidth) ? $txtwidth : $locals(minbtwidth)]
 
     # Round to nearest higher even value.    
@@ -355,23 +437,18 @@ proc ::buttontray::NewButtonFancy {w name txt image imageDis cmd args} {
 
     # Mid position of this button.
     set xpos [expr $locals(xleft) + $btwidth/2]
-    set wlab [label $can.[string tolower $name] -bd 1 -relief flat \
-      -image $image]
-    set idlab [$can create window $xpos $locals(yoffset) -anchor n -window $wlab]
-    set idtxt [$can create text $xpos $locals(ytxt) -text $loctxt  \
-      -font $font -anchor n -fill $foreground]
-    
+    set wlab [label $can.[incr uid] -bd 1 -relief flat -image $image]
+    set idlab [$can create window $xpos 0 -anchor n -window $wlab]
+    set idtxt [$can create text $xpos $locals(ytxt) -text $str  \
+      -font $font -anchor n -fill $fg]
+
     set locals($name,idlab)    $idlab
     set locals($name,idtxt)    $idtxt
     set locals($name,wlab)     $wlab
-    set locals($name,image)    $image
-    set locals($name,imageDis) $imageDis
-    set locals($name,cmd)      $cmd
-    set locals($name,state)    normal
-
+    
     SetFancyButtonBinds $w $name
     if {[llength $args]} {
-	eval {ButtonConfigure $w $name} $args
+	eval {FancyButtonConfigure $w $name} $args
     }
     incr locals(xleft) $btwidth
 }
@@ -385,7 +462,7 @@ proc ::buttontray::SetFancyButtonBinds {w name} {
     set can   $widgets(canvas)
     set wlab  $locals($name,wlab)
     set idtxt $locals($name,idtxt)
-    set cmd   $locals($name,cmd)
+    set cmd   $locals($name,-command)
 
     bind $wlab <Enter>    [list ::buttontray::EnterFancy $w $name label]
     bind $wlab <Leave>    [list ::buttontray::LeaveFancy $w $name label]
@@ -404,11 +481,11 @@ proc ::buttontray::EnterFancy {w name which} {
     upvar ::buttontray::${w}::widgets widgets
     upvar ::buttontray::${w}::locals locals
 
-    set can $widgets(canvas)
-    set wlab $locals($name,wlab)
+    set can   $widgets(canvas)
+    set wlab  $locals($name,wlab)
     set idtxt $locals($name,idtxt)
-    set activebackground $options(-activebackground)
-    set activeforeground $options(-activeforeground)
+    set abg   $options(-activebackground)
+    set afg   $options(-activeforeground)
     
     if {[string equal $which "label"]} {
 	$wlab configure -relief raised
@@ -425,9 +502,9 @@ proc ::buttontray::EnterFancy {w name which} {
       [expr $x1-$h2] $y0 [expr $x1+$h2] $y0 \
       [expr $x1+$h2] $y1 [expr $x1-$h2] $y1 \
       [expr $x0+$h2] $y1 [expr $x0-$h2] $y1]
-    $can itemconfigure $idtxt -fill $activeforeground
-    $can create polygon $coords -fill $activebackground  \
-      -tags activebg -outline "" -smooth 1 -splinesteps 10
+    $can itemconfigure $idtxt -fill $afg
+    $can create polygon $coords -fill $abg -tags activebg -outline "" \
+      -smooth 1 -splinesteps 10
     $can lower activebg $idtxt
 }
 
@@ -440,20 +517,31 @@ proc ::buttontray::LeaveFancy {w name which} {
     set can $widgets(canvas)
     set wlab $locals($name,wlab)
     set idtxt $locals($name,idtxt)
-    set foreground       $options(-foreground)
-    set activebackground $options(-activebackground)
-    set activeforeground $options(-activeforeground)
-    set background       $options(-background)
+    set fg $options(-foreground)
 
     if {[string equal $which "label"]} {
 	$wlab configure -relief flat
     }
-    $can itemconfigure $idtxt -fill $foreground
+    $can itemconfigure $idtxt -fill $fg
     catch {$can delete activebg}
     $can configure -cursor arrow
 }
 
 proc ::buttontray::ButtonConfigure {w name args} {
+    
+    upvar ::buttontray::${w}::options options
+
+    switch -- $options(-style) {
+	fancy {
+	    eval {FancyButtonConfigure $w $name} $args
+	}
+	plain {
+	    eval {PlainButtonConfigure $w $name} $args
+	}
+    }
+}
+
+proc ::buttontray::FancyButtonConfigure {w name args} {
     
     upvar ::buttontray::${w}::options options
     upvar ::buttontray::${w}::widgets widgets
@@ -470,16 +558,16 @@ proc ::buttontray::ButtonConfigure {w name args} {
 	
 	switch -- $key {
 	    -command {
-		set locals($name,cmd) $value
+		set locals($name,-command) $value
 		SetFancyButtonBinds $w $name
 	    }
 	    -state {
 		if {[string equal $value "normal"]} {
-		    $wlab configure -image $locals($name,image)
+		    $wlab configure -image $locals($name,-image)
 		    $can itemconfigure $idtxt -fill $options(-foreground)
 		    SetFancyButtonBinds $w $name
 		} else {
-		    $wlab configure -image $locals($name,imageDis) -relief flat
+		    $wlab configure -image $locals($name,-disabledimage) -relief flat
 		    $can itemconfigure $idtxt -fill $options(-disabledforeground)
 		    $can delete activebg
 		    bind $wlab <Enter> {}
@@ -490,17 +578,17 @@ proc ::buttontray::ButtonConfigure {w name args} {
 		    $can bind $idtxt <Leave> {}
 		    $can bind $idtxt <Button-1> {}
 		}
-		set locals($name,state) $value
+		set locals($name,-state) $value
 	    }
 	    -image {
-		set locals($name,image) $value
-		if {[string equal $locals($name,state) "normal"]} {
+		set locals($name,-image) $value
+		if {[string equal $locals($name,-state) "normal"]} {
 		    $wlab configure -image $value
 		}
 	    }
-	    -imagedis {
-		set locals($name,imageDis) $value
-		if {[string equal $locals($name,state) "disabled"]} {
+	    -disabledimage {
+		set locals($name,-disabledimage) $value
+		if {[string equal $locals($name,-state) "disabled"]} {
 		    $wlab configure -image $value
 		}
 	    }
@@ -510,30 +598,125 @@ proc ::buttontray::ButtonConfigure {w name args} {
 
 proc ::buttontray::NewButtonPlain {w name args} {
     
+    variable uid
     upvar ::buttontray::${w}::options options
     upvar ::buttontray::${w}::widgets widgets
     upvar ::buttontray::${w}::locals locals
     
-    set font $options(-font)
-    set foreground $options(-foreground)
-    set background $options(-background)
+    set font     $options(-font)
+    set fg       $options(-foreground)
+    set bg       $options(-background)
+    set padx     $options(-labelpadx)
+    set pady     $options(-labelpady)    
+    set compound $options(-compound)
+    set image    $options(-image)
     
     set can $widgets(canvas)
+    set locals($name,-text)    $name
+    set locals($name,-image)   ""
+    set locals($name,-command) ""
+    set locals($name,-state)   normal
+    foreach {key value} $args {
+	set locals($name,$key) $value
+    }
 
-    set txtwidth [expr [font measure $font $name] + 6]
-    set btwidth [expr $txtwidth > $locals(minbtwidth) ? $txtwidth : $locals(minbtwidth)]
+    set wlab [label $can.[incr uid] -text $locals($name,-text) -bd 1 \
+      -relief flat -fg $fg -bg $bg -padx $padx -pady $pady \
+      -compound $compound -image $image]
+    set locals($name,wlab) $wlab
 
+    set btwidth [winfo reqwidth $wlab]
+    set btwidth [expr $btwidth > $locals(minbtwidth) ? $btwidth : $locals(minbtwidth)]
+    
     # Round to nearest higher even value.    
     set btwidth [expr $btwidth + $btwidth % 2]
 
     # Mid position of this button.
     set xpos [expr $locals(xleft) + $btwidth/2]
-    set wlab [label $can.[string tolower $name] -text $name -bd 1 -relief flat \
-      -fg $foreground -bg $background]
-    set idlab [$can create window $xpos $locals(yoffset) -anchor n -window $wlab]
+    set idlab [$can create window $xpos 0 -anchor n -window $wlab]
+
     
-    
+    SetPlainButtonBinds $w $name    
+    if {[llength $args]} {
+	eval {PlainButtonConfigure $w $name} $args
+    }
     incr locals(xleft) $btwidth
+}
+
+proc ::buttontray::SetPlainButtonBinds {w name} {
+    
+    upvar ::buttontray::${w}::options options
+    upvar ::buttontray::${w}::widgets widgets
+    upvar ::buttontray::${w}::locals locals
+    
+    set can   $widgets(canvas)
+    set wlab  $locals($name,wlab)
+    set cmd   $locals($name,-command)
+    
+    $wlab configure -state normal
+
+    bind $wlab <Enter> [list ::buttontray::EnterPlain $w $name]
+    bind $wlab <Leave> [list ::buttontray::LeavePlain $w $name]
+    bind $wlab <Button-1> [list $wlab configure -relief sunken]
+    bind $wlab <ButtonRelease> "[list $wlab configure -relief flat];\
+      $can configure -cursor arrow; $cmd"
+}
+
+proc ::buttontray::PlainButtonConfigure {w name args} {
+    
+    upvar ::buttontray::${w}::options options
+    upvar ::buttontray::${w}::widgets widgets
+    upvar ::buttontray::${w}::locals locals
+    
+    if {![info exists locals($name,wlab)]} {
+	return -code error "button \"$name\" does not exist in $w"
+    }
+    set wlab  $locals($name,wlab)
+    set can   $widgets(canvas)
+    
+    foreach {key value} $args {
+	
+	switch -- $key {
+	    -command {
+		set locals($name,-command) $value
+		SetPlainButtonBinds $w $name
+	    }
+	    -state {
+		if {[string equal $value "normal"]} {
+		    SetPlainButtonBinds $w $name
+		} else {
+		    $wlab configure -relief flat -state $value
+		    bind $wlab <Enter> {}
+		    bind $wlab <Leave> {}
+		    bind $wlab <Button-1> {}
+		    bind $wlab <ButtonRelease> {}
+		}
+		set locals($name,-state) $value
+	    }
+	    -image {
+		set locals($name,-image) $value
+	    }
+	    -disabledimage {
+		set locals($name,-disabledimage) $value
+	    }	    
+	}
+    }
+}
+
+proc ::buttontray::EnterPlain {w name} {
+    
+    upvar ::buttontray::${w}::locals locals
+    
+    set wlab  $locals($name,wlab)
+    $wlab configure -relief raised
+}
+
+proc ::buttontray::LeavePlain {w name} {
+    
+    upvar ::buttontray::${w}::locals locals
+    
+    set wlab  $locals($name,wlab)
+    $wlab configure -relief flat
 }
 
 # buttontray::MinWidth --

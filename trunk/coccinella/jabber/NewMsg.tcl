@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.46 2004-10-24 14:12:52 matben Exp $
+# $Id: NewMsg.tcl,v 1.47 2004-11-11 15:38:29 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -175,18 +175,22 @@ proc ::Jabber::NewMsg::Build {args} {
     set iconPrintDis  [::Theme::GetImage [option get $w printDisImage {}]]
     
     set wtray $w.frall.frtop
-    ::buttontray::buttontray $wtray 50
+    ::buttontray::buttontray $wtray
     pack $wtray -side top -fill x -padx 4 -pady 2
 
-    $wtray newbutton send Send $iconSend $iconSendDis  \
-      [list ::Jabber::NewMsg::DoSend $w]
-    $wtray newbutton quote Quote $iconQuote $iconQuoteDis  \
-      [list ::Jabber::NewMsg::DoQuote $w $opts(-quotemessage) $opts(-to) $opts(-time)] \
+    $wtray newbutton send  -text [mc Send]  \
+      -image $iconSend -disabledimage $iconSendDis  \
+      -command [list ::Jabber::NewMsg::DoSend $w]
+    $wtray newbutton quote -text [mc Quote]  \
+      -image $iconQuote -disabledimage $iconQuoteDis  \
+      -command [list ::Jabber::NewMsg::DoQuote $w $opts(-quotemessage) $opts(-to) $opts(-time)] \
       -state $quotestate
-    $wtray newbutton save Save $iconSave $iconSaveDis  \
-      [list ::Jabber::NewMsg::SaveMsg $w]
-    $wtray newbutton print Print $iconPrint $iconPrintDis  \
-      [list ::Jabber::NewMsg::DoPrint $w]
+    $wtray newbutton save  -text [mc Save]  \
+      -image $iconSave -disabledimage $iconSaveDis  \
+      -command [list ::Jabber::NewMsg::SaveMsg $w]
+    $wtray newbutton print -text [mc Print]  \
+      -image $iconPrint -disabledimage $iconPrintDis  \
+      -command [list ::Jabber::NewMsg::DoPrint $w]
     
     ::hooks::run buildNewMsgButtonTrayHook $wtray
 

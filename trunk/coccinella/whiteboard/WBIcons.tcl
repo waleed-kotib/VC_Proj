@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: WBIcons.tcl,v 1.1 2004-06-06 06:41:31 matben Exp $
+# $Id: WBIcons.tcl,v 1.2 2004-11-11 15:38:29 matben Exp $
 
 package provide WBIcons 1.0
 
@@ -221,32 +221,22 @@ Gc3JvtbDVrsl/FmfdPjQs5TmmXJtU344eiZgbm4qdWWFgI1/PpB/k1SSlW8JmpucnZ6eEQA7
 
 # Other...
 
-set ::WB::iconsPreloaded(barvert) [image create photo -data {
-    R0lGODlhCwAyAPcAAP//////////////////////////////////////////////////////
-    //////////////////////////////////////e1vfe1vfe1vfe1vfe1vfe1vfe1vfe1vfe1
-    vfe1vfe1vfe1vfe1vfe1vfe1vfe1vfe1vfe1vfe1vfe1vfe1ve+cre+cre+cre+cre+cre+c
-    re+cre+cre+cre+cre+cre+cre+cre+cre+cre+cre+cre+cre+cre+cre+cre9zhO9zhO9z
-    hO9zhO9zhO9zhO9zhO9zhO9zhO9zhO9zhO9zhO9zhO9zhO9zhO9zhO9zhO9zhO9zhO9zhO9z
-    hOdae+dae+dae+dae+dae+dae+dae+dae+dae+dae+dae+dae+dae+dae+dae+dae+dae+da
-    e+dae+dae+dae+dKY+dKY+dKY+dKY+dKY+dKY+dKY+dKY+dKY+dKY+dKY+dKY+dKY+dKY+dK
-    Y+dKY+dKY+dKY+dKY+dKY+dKY94xUt4xUt4xUt4xUt4xUt4xUt4xUt4xUt4xUt4xUt4xUt4x
-    Ut4xUt4xUt4xUt4xUt4xUt4xUt4xUt4xUt4xUtYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYA
-    IdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIc7Ozs7Ozs7Ozs7Ozs7Ozs7O
-    zs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OzpycnJycnJyc
-    nJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJyc
-    nISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISE
-    hISEhISEhISEhFJSUlJSUlJSUlJSUlJSUlJSUlJSUlJSUlJSUlJSUlJSUlJSUlJSUlJSUlJS
-    UlJSUlJSUlJSUlJSUlJSUlJSUlJSUgAAACwAAAAACwAyAAAIfABVCRxIsKBBgRdYBLHC0Moa
-    QNQEVppIsRK1XwMrWsRIkOLFgxsPilQFgGDJgukIphxZ8KRAlwNXCpTJ8qVJgzRp1oQJc6bK
-    mjcH9lSVE6jQoD9jGrV5FGVSozxxPgUa1anSpVWn6mSZ9apPrEi9El1KMuzXs1TNjhU7MiAA
-    Ow==
-}]
-
+# height = 54
 set ::WB::iconsPreloaded(barvert) [image create photo -data {
     R0lGODdhCwA2ALMAAP////e1ve+cre9zhOdae+dKY94xUtYAIdDQ0M7Ozpyc
     nISEhFJSUgAAAAAAAAAAACwAAAAACwA2AAAEYjDJSauVQQzCSTGLdIzksShT
     aaIUeV7rJScAVVcMlc/VLfmTnUTI+9ksRGIRCBzqisdJM5GESqPPoNV4xWWt
     TOQXGvZqt+Wxkpc+O9FYN3VLi7/vZPtcvtRXEwiBgoOEhQgRADs=
+}]
+
+# height = 58
+set ::WB::iconsPreloaded(barvert) [image create photo -data {
+R0lGODdhCwA6AMQAAM7Ozve1ve+cre9zhOdae+dKY94xUoSEhNYAIZycnP//
+/1JSUtDQ0P///////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAACwAAAAACwA6AAAFbiAgjmRpioEwECxRGIeI
+zDRyJGNt4yR9n7uTEKAgFUsLUnJYOoqco6VIynwaTVRqFQqdKqvXUReQBYvD
+36jZekamzVzsGxx3q9f1uZaZv3vxaH5ka0SBf4d0hoOCW4plAAyRkpOSCpOW
+kYJ7hGshADs=
 }]
 
 set ::WB::iconsPreloaded(barhoriz) [image create photo -data {

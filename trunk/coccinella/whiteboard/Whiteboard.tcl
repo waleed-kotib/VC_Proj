@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.27 2004-11-08 15:52:52 matben Exp $
+# $Id: Whiteboard.tcl,v 1.28 2004-11-11 15:38:29 matben Exp $
 
 package require entrycomp
 package require moviecontroller
@@ -1929,7 +1929,7 @@ proc ::WB::BuildShortcutButtonPad {wtop} {
     set wfrall $wapp(frall)
     set h [image height $wbicons(barvert)]
 
-    ::buttontray::buttontray $wtray $h -relief raised -borderwidth 1
+    ::buttontray::buttontray $wtray -height $h -relief raised -borderwidth 1
 
     # We need to substitute $wCan, $wtop etc specific for this wb instance.
     foreach {name cmd} $btShortDefs {
@@ -1937,7 +1937,8 @@ proc ::WB::BuildShortcutButtonPad {wtop} {
 	set iconDis [::Theme::GetImage [option get $wfrall ${name}DisImage {}]]
 	set cmd [subst -nocommands -nobackslashes $cmd]
 	set txt [string totitle $name]
-	$wtray newbutton $name $txt $icon $iconDis $cmd
+	$wtray newbutton $name -text [mc $txt] \
+	  -image $icon -disabledimage $iconDis -command $cmd
     }
     
     # Extra buttons from components if any.
@@ -1945,7 +1946,8 @@ proc ::WB::BuildShortcutButtonPad {wtop} {
 	foreach {name icon iconDis cmd} $btdef {
 	    set cmd [subst -nocommands -nobackslashes $cmd]
 	    set txt [string totitle $name]
-	    $wtray newbutton $name $txt $icon $iconDis $cmd
+	    $wtray newbutton $name -text [mc $txt] \
+	      -image $icon -disabledimage $iconDis -command $cmd
 	}
     }
 

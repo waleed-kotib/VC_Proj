@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.79 2004-11-06 08:15:25 matben Exp $
+# $Id: GroupChat.tcl,v 1.80 2004-11-11 15:38:29 matben Exp $
 
 package require History
 
@@ -658,21 +658,27 @@ proc ::Jabber::GroupChat::Build {roomjid args} {
     set iconPrint       [::Theme::GetImage [option get $w printImage {}]]
     set iconPrintDis    [::Theme::GetImage [option get $w printDisImage {}]]
 
-    ::buttontray::buttontray $wtray 50
+    ::buttontray::buttontray $wtray
     pack $wtray -side top -fill x -padx 4 -pady 2
 
-    $wtray newbutton send    Send    $iconSend    $iconSendDis    \
-      [list [namespace current]::Send $token]
-     $wtray newbutton save   Save    $iconSave    $iconSaveDis    \
-       [list [namespace current]::Save $token]
-    $wtray newbutton history History $iconHistory $iconHistoryDis \
-      [list [namespace current]::BuildHistory $token]
-    $wtray newbutton invite  Invite  $iconInvite  $iconInviteDis  \
-      [list ::Jabber::MUC::Invite $roomjid]
-    $wtray newbutton info    Info    $iconInfo    $iconInfoDis    \
-      [list ::Jabber::MUC::BuildInfo $roomjid]
-    $wtray newbutton print   Print   $iconPrint   $iconPrintDis   \
-      [list [namespace current]::Print $token]
+    $wtray newbutton send -text [mc Send] \
+      -image $iconSend -disabledimage $iconSendDis    \
+      -command [list [namespace current]::Send $token]
+    $wtray newbutton save -text [mc Save] \
+      -image $iconSave -disabledimage $iconSaveDis    \
+       -command [list [namespace current]::Save $token]
+    $wtray newbutton history -text [mc History] \
+      -image $iconHistory -disabledimage $iconHistoryDis \
+      -command [list [namespace current]::BuildHistory $token]
+    $wtray newbutton invite -text [mc Invite] \
+      -image $iconInvite -disabledimage $iconInviteDis  \
+      -command [list ::Jabber::MUC::Invite $roomjid]
+    $wtray newbutton info -text [mc Info] \
+      -image $iconInfo -disabledimage $iconInfoDis    \
+      -command [list ::Jabber::MUC::BuildInfo $roomjid]
+    $wtray newbutton print -text [mc Print] \
+      -image $iconPrint -disabledimage $iconPrintDis   \
+      -command [list [namespace current]::Print $token]
     
     ::hooks::run buildGroupChatButtonTrayHook $wtray $roomjid
     

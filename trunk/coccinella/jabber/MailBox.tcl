@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.57 2004-10-27 14:42:36 matben Exp $
+# $Id: MailBox.tcl,v 1.58 2004-11-11 15:38:29 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -252,22 +252,28 @@ proc ::Jabber::MailBox::Build {args} {
       [option get $w unreadMsgImage {}] ::Jabber::MailBox::icons]
 
     set wtray $w.frall.frtop
-    ::buttontray::buttontray $wtray 50
+    ::buttontray::buttontray $wtray
     pack $wtray -side top -fill x -padx 4 -pady 2
     set locals(wtray) $wtray
 
-    $wtray newbutton new New $iconNew $iconNewDis  \
-      [list ::Jabber::NewMsg::Build]
-    $wtray newbutton reply Reply $iconReply $iconReplyDis  \
-      [list ::Jabber::MailBox::ReplyTo] -state disabled
-    $wtray newbutton forward Forward $iconForward $iconForwardDis  \
-      [list ::Jabber::MailBox::ForwardTo] -state disabled
-    $wtray newbutton save Save $iconSave $iconSaveDis  \
-      [list ::Jabber::MailBox::SaveMsg] -state disabled
-    $wtray newbutton print Print $iconPrint $iconPrintDis  \
-      [list ::Jabber::MailBox::DoPrint] -state disabled
-    $wtray newbutton trash Trash $iconTrash $iconTrashDis  \
-      ::Jabber::MailBox::TrashMsg -state disabled
+    $wtray newbutton new  \
+      -text [mc New] -image $iconNew -disabledimage $iconNewDis  \
+      -command ::Jabber::NewMsg::Build
+    $wtray newbutton reply  \
+      -text [mc Reply] -image $iconReply -disabledimage $iconReplyDis  \
+      -command ::Jabber::MailBox::ReplyTo -state disabled
+    $wtray newbutton forward  \
+      -text [mc Forward] -image $iconForward -disabledimage $iconForwardDis  \
+      -command ::Jabber::MailBox::ForwardTo -state disabled
+    $wtray newbutton save  \
+      -text [mc Save] -image $iconSave -disabledimage $iconSaveDis  \
+      -command ::Jabber::MailBox::SaveMsg -state disabled
+    $wtray newbutton print  \
+      -text [mc Print] -image $iconPrint -disabledimage $iconPrintDis  \
+      -command ::Jabber::MailBox::DoPrint -state disabled
+    $wtray newbutton trash  \
+      -text [mc Trash] -image $iconTrash -disabledimage $iconTrashDis  \
+      -command ::Jabber::MailBox::TrashMsg -state disabled
     
     ::hooks::run buildMailBoxButtonTrayHook $wtray
 
