@@ -1,0 +1,57 @@
+
+README-resources
+
+Most of the apperance of widgets, such as colors and fonts, is set
+via the built in option database for resources.
+
+The default.rdb file always sets some reasonable values.
+After that the platform specific rdb file is read.
+If the theme is set in the prefs file, the themeName.rdb
+file is read.
+
+There are several levels of options that can be set.
+
+1) Tk's standard widget resources are set the usual way.
+Examples:
+*background:	      #aea485
+*Button.background:   red
+
+2) Specific megawidget resources are set using, for instance:
+*Tablelist.background:             #aa2222
+
+3) There are several application specific classes that can be
+used when specifying resources. They are:
+Whiteboard, JMain, MailBox, Chat, GroupChat, NewMsg, Splash.
+Use them as:
+*MailBox*Tablelist.labelBackground:        #dd1111
+
+4) Some of these also have specific resource names, see the
+respective sources for this. One example:
+*Chat*youBackground:        green
+
+5) Most icons may also be customized. Place your gif images
+in their own directory inside the images/ directory of the
+sources. Give this directory a name that associates to the 
+theme name. Specify this directory in your themes rdb file as:
+*themeImageDir:                     galileolinux
+
+6) Each image has a resource name associated with it. If you keep
+the file name the same as in the original distro, the image
+will be automatically used. You may also pick a different
+name, but then you must specify a new value for the resource
+that is also the file name. Examplevise:
+*JMain.connectImage       myConnect
+
+where the 'myConnect.gif' file is inside the themes image directory.
+
+7) Images are searched for in this order:
+   o the images/themeImageDir, in this case images/galileolinux
+   o then images/platformName where the platformName is any of
+     unix, windows, macintosh, or macosx
+   o lastly, in images/
+
+Some images have also been hardcoded into the sources, and they
+will be obtained from there if not found in the above directory
+hierarchy.
+
+That's it!
