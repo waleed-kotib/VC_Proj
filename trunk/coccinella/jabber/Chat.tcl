@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.105 2005-01-23 08:13:11 matben Exp $
+# $Id: Chat.tcl,v 1.106 2005-01-23 08:36:34 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -437,11 +437,7 @@ proc ::Chat::GotMsg {body args} {
 	# See if we've got a jabber:x:event (JEP-0022).
 	# 
 	#  Should we handle this with hooks????
-	set xevent [lindex [wrapper::getnamespacefromchilds  \
-	  $argsArr(-x) x "jabber:x:event"] 0]
-	if {[llength $xevent]} {
-	    eval {XEventRecv $chattoken $xevent} $args
-	}
+	eval {XEventHandleAnyXElem $chattoken $argsArr(-x)} $args
     }
 
     if {[info exists argsArr(-subject)]} {
@@ -493,6 +489,15 @@ proc ::Chat::GotNormalMsg {body args} {
 	
 	::Debug 2 "::Chat::GotNormalMsg args='$args'"
 	eval {GotMsg $body} $args
+    }
+    
+    # Try identify if composing event sent as normal message.
+    array set argsArr $args
+    jlib::splitjid $argsArr(-from) jid2 res
+    set mjid2 [jlib::jidmap $jid2]
+    set chattoken [GetTokenFrom chat jid ${mjid2}*]
+    if {($chattoken != "") && [info exists argsArr(-x)]} {
+	eval {XEventHandleAnyXElem $chattoken $argsArr(-x)} $args
     }
 }
 
@@ -1825,6 +1830,18 @@ proc ::Chat::GetFirstPanePos { } {
 # Support for jabber:x:event ...................................................
 
 # Handle incoming jabber:x:event (JEP-0022).
+
+proc ::Chat::XEventHandleAnyXElem {chattoken xElem args} {
+
+    # See if we've got a jabber:x:event (JEP-0022).
+    # 
+    #  Should we handle this with hooks????
+    set xevent [lindex [wrapper::getnamespacefromchilds $xElem x \
+      "jabber:x:event"] 0]
+    if {$xevent != {}} {
+	eval {XEventRecv $chattoken $xevent} $args
+    }
+}
 
 proc ::Chat::XEventRecv {chattoken xevent args} {
     variable $chattoken
