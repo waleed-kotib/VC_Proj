@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.48 2004-12-21 15:18:46 matben Exp $
+# $Id: Disco.tcl,v 1.49 2004-12-22 15:12:15 matben Exp $
 
 package provide Disco 1.0
 
@@ -582,6 +582,7 @@ proc ::Disco::Popup {w v x y} {
     set node [lindex $item 1]
     set categoryList [$jstate(disco) types $item]
     set categoryType [lindex $categoryList 0]
+    
     ::Debug 4 "\t categoryType=$categoryType"
 
     jlib::splitjidex $jid username host res
@@ -1106,44 +1107,51 @@ proc ::Disco::AddServerDlg { } {
     global  wDlgs
     variable addservervar ""
     variable permdiscovar 0
+    upvar ::Jabber::jprefs jprefs
     
     set w $wDlgs(jdisaddserv)
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document closeBox}
-    wm title $w [mc {Add Disco Server}]
+    wm title $w [mc {Add Server}]
     set fontS [option get . fontSmall {}]
+    
+    set width 260
     
     # Global frame.
     set wall $w.frall
     frame $wall -borderwidth 1 -relief raised
     pack  $wall -fill both -expand 1
     
-    message $wall.msg -text \
-      "Discover another server for groupchat rooms and other services." \
-      -anchor w -justify left -width 260
-    pack $wall.msg -side top
+    message $wall.msg -text [mc jadisaddserv] \
+      -anchor w -justify left -width $width
+    pack $wall.msg -side top -padx 8 -pady 6
     
     set wfr $wall.fr
-    frame $wfr
+    labelframe $wfr -text [mc Add]
     pack  $wfr -side top -fill x -padx 10 -pady 2
     label $wfr.l -text "[mc Server]:"
     entry $wfr.e -textvariable [namespace current]::addservervar
-    checkbutton $wfr.ch -text " Add server permanently" \
+    checkbutton $wfr.ch -anchor w -text " [mc {Add permanently}]" \
       -variable [namespace current]::permdiscovar
 
     grid $wfr.l $wfr.e  -pady 2
-    grid x      $wfr.ch -pady 2 -sticky w
+    grid x      $wfr.ch -pady 2 -sticky ew
     grid $wfr.l -sticky e
     grid $wfr.e -sticky ew
     
     set wfr2 $wall.fr2
-    frame $wfr2
+    labelframe $wfr2 -text [mc Remove] -padx 4
     pack  $wfr2 -side top -fill x -padx 10 -pady 2
-    label  $wfr2.l -text "Remove all servers"
+    label  $wfr2.l -wraplength [expr $width-10] -anchor w -justify left\
+      -text [mc jadisrmall]
     button $wfr2.b -text [mc Remove] -font $fontS \
       -command [namespace current]::AddServerNone
-    pack $wfr2.b $wfr2.l -side right -padx 4
+    pack $wfr2.l -side top
+    pack $wfr2.b -side right -padx 6 -pady 2
     
+    if {$jprefs(disco,autoServers) == {}} {
+	$wfr2.b configure -state disabled
+    }
     set frbot [frame $wall.frbot -borderwidth 0]
     pack [button $frbot.btabtokdd -text [mc Add] \
       -command [list [namespace current]::AddServerDo $w]]  \
