@@ -2,11 +2,15 @@
 #  
 #      Package for using the SOCKS5 method for connecting TCP sockets.
 #      Some code plus idee from Kerem 'Waster_' HADIMLI.
+#      Made from RFC 1928.
 #
 #  (C) 2000 Kerem 'Waster_' HADIMLI (minor parts)
 #  (c) 2003  Mats Bengtsson
 #  
-# $Id: socks5.tcl,v 1.2 2003-12-04 14:19:13 matben Exp $
+# $Id: socks5.tcl,v 1.3 2003-12-05 14:48:38 matben Exp $
+# 
+# TODO:  GSSAPI authetication which is a MUST is missing.
+#        Only CMD CONNECT implemented.
 
 package provide socks5 0.1
 
@@ -58,7 +62,7 @@ namespace eval socks5 {
 	8 "Address type not supported"
     }
     
-    variable debug 2
+    variable debug 3
     variable uid 0
 }
 
@@ -260,7 +264,7 @@ proc socks5::request {token} {
     set sock $state(sock)
     
     # Network byte-ordered port (2 binary-bytes, short)    
-    set port [binary format S $state(port)]
+    set bport [binary format S $state(port)]
     
     # Figure out type of address given to us.
     if {[regexp $ipv4_num_re $state(addr)]} {
@@ -271,7 +275,7 @@ proc socks5::request {token} {
     	foreach i [split $state(addr) .] {
 	    append atyp_addr_port [binary format c $i]
 	}
-	append atyp_addr_port $port
+	append atyp_addr_port $bport
     } elseif {[regexp $ipv6_num_re $state(addr)]} {
 	# todo
     } else {
@@ -281,7 +285,7 @@ proc socks5::request {token} {
 	# Domain length (binary 1 byte)
 	set dlen [binary format c [string length $state(addr)]]
 	set atyp_addr_port \
-	  "$const(atyp_domainname)$dlen$state(addr)$port"
+	  "$const(atyp_domainname)$dlen$state(addr)$bport"
     }
     
     # We send request for connect
@@ -318,6 +322,7 @@ proc socks5::response {token} {
     debug 2 "socks5::response"
     
     set sock $state(sock)
+    fileevent $sock readable {}
     
     # Start by reading ver+cmd+rsv.
     if {[catch {read $sock 3} data] || [eof $sock]} {
@@ -335,7 +340,7 @@ proc socks5::response {token} {
 
     switch -- $rep {
 	0 {
-	    fconfigure $sock -translation {auto auto}
+	    #fconfigure $sock -translation {auto auto}
 	}
 	1 - 2 - 3 - 4 - 5 - 6 - 7 - 8 {
 	    finish $token $msg($rep)
@@ -357,14 +362,8 @@ proc socks5::response {token} {
     set state(bnd_addr) $addr
     set state(bnd_port) $port
 
-    # And finally return result (bnd_add and bnd_port)
-    if {$state(async)} {
-	finish $token
-    } else {
-	
-	# This should propagate to the socks5::init proc.
-	return [list $state(bnd_addr) $state(bnd_port)]
-    }
+    # And finally let the client know that the bytestream is set up.
+    return [finish $token]
 }
 
 
@@ -402,6 +401,8 @@ proc socks5::parse_atyp_addr {token addrVar portVar} {
 		    append addr .
 		}
 	    }
+	    # Translate to unsigned!
+	    set port [expr ( $port + 0x10000 ) % 0x10000]
 	}
 	3 {
 	    if {[catch {read $sock 1} data] || [eof $sock]} {
@@ -413,13 +414,14 @@ proc socks5::parse_atyp_addr {token addrVar portVar} {
 	    if {[catch {read $sock $len} data] || [eof $sock]} {
 		return -code error eof
 	    }        
-	    #binary scan $data c* addr
 	    set addr $data
 	    debug 2 "\taddr=$addr"
 	    if {[catch {read $sock 2} data] || [eof $sock]} {
 		return -code error eof
 	    }        
 	    binary scan $data S port
+	    # Translate to unsigned!
+	    set port [expr ( $port + 0x10000 ) % 0x10000]
 	    debug 2 "\tport=$port"
 	}
 	4 {
@@ -437,26 +439,33 @@ proc socks5::finish {token {errormsg ""}} {
     variable $token
     upvar 0 $token state
     
-    debug 2 "socks5::finish"
-    
-    catch {close $state(sock)}
-    
+    debug 2 "socks5::finish errormsg=$errormsg"
+        
     if {$state(async)} {
 	if {[string length $errormsg]} {
+	    catch {close $state(sock)}
 	    uplevel #0 $state(-command) [list $token error $errormsg]
+	    cleanup $token
 	} else {
-	    uplevel #0 $state(-command) [list $token ok \
-	      [list $state(bnd_addr) $state(bnd_port)]]
+	    uplevel #0 $state(-command) [list $token ok]
 	}
-	unset state
     } else {
-	unset state
 	if {[string length $errormsg]} {
+	    catch {close $state(sock)}
+	    cleanup $token
 	    return -code error $errormsg
 	} else {
 	    return ""
 	}
     }
+}
+
+
+proc socks5::cleanup {token} {
+    variable $token
+    upvar 0 $token state
+    
+    catch {unset state}
 }
 
 # The server side.
@@ -478,9 +487,11 @@ proc socks5::serverinit {sock ip port command args} {
     upvar 0 $token state
 	
     array set state {
+	-blocksize        8192
 	auth              0
 	state             ""
 	status            ""
+	timeout           10000
     }
     array set state [list        \
       command       $command     \
@@ -492,7 +503,7 @@ proc socks5::serverinit {sock ip port command args} {
 
     # Start by reading the method stuff.
     if {[catch {read $sock 2} data] || [eof $sock]} {
-	servfinish $token eof
+	serv_finish $token eof
 	return
     }    
     set ver ""
@@ -503,12 +514,12 @@ proc socks5::serverinit {sock ip port command args} {
     
     # Error checking. Must have either noauth or userpasswdauth.
     if {![string equal $ver 5]} {
-	servfinish $token "Socks server isn't version 5!"
+	serv_finish $token "Socks server isn't version 5!"
 	return
     }
     for {set i 0} {$i < $nmethods} {incr i} {
 	if {[catch {read $sock 1} data] || [eof $sock]} {
-	    servfinish $token eof
+	    serv_finish $token eof
 	    return
 	}    
 	binary scan $data c method
@@ -536,11 +547,11 @@ proc socks5::serverinit {sock ip port command args} {
 	puts -nonewline $sock $ans
 	flush $sock
     } err]} {
-	servfinish $token $err
+	serv_finish $token $err
 	return
     }
     if {!$isok} {
-	servfinish $token "Unrecognized method requested by client"
+	serv_finish $token "Unrecognized method requested by client"
 	return
     }
 
@@ -551,6 +562,7 @@ proc socks5::serverinit {sock ip port command args} {
 	fileevent $sock readable  \
 	  [list [namespace current]::serv_request $token]
     }
+    return $token
 }
 
 
@@ -565,7 +577,7 @@ proc socks5::serv_auth {token} {
     fileevent $sock readable {}
     
     if {[catch {read $sock 2} data] || [eof $sock]} {
-	servfinish $token eof
+	serv_finish $token eof
 	return
     }    
     set auth_ver ""
@@ -574,27 +586,25 @@ proc socks5::serv_auth {token} {
     set ulen [expr ( $ulen + 0x100 ) % 0x100]
     debug 2 "\tauth_ver=$auth_ver, ulen=$ulen"
     if {![string equal $auth_ver 2]} {
-	servfinish $token "Wrong authorization method"
+	serv_finish $token "Wrong authorization method"
 	return
     }    
     if {[catch {read $sock $ulen} data] || [eof $sock]} {
 	return -code error eof
     }        
-    #binary scan $data c* username
     set username $data
     debug 2 "\tusername=$username"
     if {[catch {read $sock 1} data] || [eof $sock]} {
-	servfinish $token eof
+	serv_finish $token eof
 	return
     }        
     binary scan $data c plen
     set plen [expr ( $plen + 0x100 ) % 0x100]
     debug 2 "\tplen=$plen"
     if {[catch {read $sock $plen} data] || [eof $sock]} {
-	servfinish $token eof
+	serv_finish $token eof
 	return
     }        
-    #binary scan $data c* password
     set password $data
     debug 2 "\tpassword=$password"
     set state(username) $username
@@ -606,7 +616,7 @@ proc socks5::serv_auth {token} {
 	catch {
 	    puts -nonewline $state(sock) "\x00\x01"
 	}
-	servfinish $token notauthorized
+	serv_finish $token notauthorized
 	return
     }    
     
@@ -615,7 +625,7 @@ proc socks5::serv_auth {token} {
 	puts -nonewline $sock "\x01\x00"
 	flush $sock
     } err]} {
-	servfinish $token $err
+	serv_finish $token $err
 	return
     }
     fileevent $sock readable  \
@@ -637,7 +647,7 @@ proc socks5::serv_request {token} {
 
     # Start by reading ver+cmd+rsv.
     if {[catch {read $sock 3} data] || [eof $sock]} {
-	servfinish $token eof
+	serv_finish $token eof
 	return
     }        
     set ver ""
@@ -647,79 +657,185 @@ proc socks5::serv_request {token} {
     debug 2 "\tver=$ver, cmd=$cmd, rsv=$rsv"
     
     if {![string equal $ver 5]} {
-	servfinish $token "Socks server isn't version 5!"
+	serv_finish $token "Socks server isn't version 5!"
 	return
     }
     if {![string equal $cmd 1]} {
-	servfinish $token "Unsuported CMD, must be CONNECT"
+	serv_finish $token "Unsuported CMD, must be CONNECT"
 	return
     }
 
     # Now parse the variable length atyp+addr+host.
     if {[catch {parse_atyp_addr $token addr port} err]} {
-	servfinish $token $err
+	serv_finish $token $err
 	return
     }
    
     # Store in our state array.
     set state(dst_addr) $addr
     set state(dst_port) $port
+
+    # Init the SOCKS connection to dst.
+    if {[catch {socket -async $addr $port} sock_dst]} {
+	serv_finish $token eof
+	return
+    }
+    set state(sock_dst) $sock_dst
     
-    # Network byte-ordered port (2 binary-bytes, short)    
-    set bport [binary format S $port]
+    # Setup timeout timer.
+    set state(timeoutid)  \
+      [after $state(timeout) [namespace current]::serv_timeout $token]
+    fileevent $sock_dst writable  \
+      [list [namespace current]::serv_dst_connect $token]
+}
+
+proc socks5::serv_dst_connect {token} {
+    variable $token
+    upvar 0 $token state
     
-    # Form and send the reply.
-    set ans [uplevel #0 $state(command) [list $token reply $addr $port]]
-    foreach {rep bnd_addr bnd_port} $ans break
-    set bin_rep [binary format c $rep]
-    set aconst "$const(ver)$bin_rep$const(rsv)"
+    debug 2 "socks5::serv_dst_connect"
+    fileevent $state(sock_dst) writable {}
+    after cancel $state(timeoutid)
     
-    # Figure out type of address given to us.
-    if {[regexp $ipv4_num_re $bnd_addr]} {
-	debug 2 "\tipv4"
-	
-	# IPv4 numerical address.
-	set atyp_addr_port $const(atyp_ipv4)
-	foreach i [split $bnd_addr .] {
-	    append atyp_addr_port [binary format c $i]
-	}
-	append atyp_addr_port $bport
-    } elseif {[regexp $ipv6_num_re $bnd_addr]} {
-	# todo
-    } else {
-	debug 2 "\tdomainname"
-	
-	# Domain name.
-	# Domain length (binary 1 byte)
-	set dlen [binary format c [string length $bnd_addr]]
-	set atyp_addr_port \
-	  "$const(atyp_domainname)$dlen$bnd_addr$bport"
+    set sock_dst $state(sock_dst)
+    if {[eof $sock_dst]} {
+	serv_finish $token eof
+	return
     }
     
+    # Change to -buffering full later...
+    if {[catch {
+	fconfigure $sock_dst -translation {binary binary} -blocking 0 \
+	  -buffering none
+	foreach {bnd_ip bnd_addr bnd_port} [fconfigure $sock_dst -sockname] \
+	  break
+    } err]} {
+	debug 2 "\tfconfigure failed: $err"
+	serv_finish $token eof
+	return
+    }
+    array set state [list bnd_ip $bnd_ip bnd_addr $bnd_addr bnd_port $bnd_port]
+    serv_reply $token
+}
+
+
+proc socks5::serv_reply {token} {
+    variable $token
+    variable const
+    upvar 0 $token state
+    
+    debug 2 "socks5:serv_reply"
+    set sock $state(sock)
+    set bnd_addr $state(bnd_addr)
+    set bnd_port $state(bnd_port)
+    debug 2 "\tbnd_addr=$bnd_addr, bnd_port=$bnd_port"
+    
+    set aconst "$const(ver)$const(rsp_succeeded)$const(rsv)"
+    
+    # Domain length (binary 1 byte)
+    set dlen [binary format c [string length $bnd_addr]]
+
+    # Network byte-ordered port (2 binary-bytes, short)    
+    set bport [binary format S $bnd_port]    
+    set atyp_addr_port \
+      "$const(atyp_domainname)$dlen$bnd_addr$bport"
+    
     # We send request for connect
-    debug 2 "\tsend: ver rep rsv atyp_domainname dlen addr port"
+    debug 2 "\tsend: ver rep rsv atyp_domainname dlen bnd_addr bnd_port"
     if {[catch {
 	puts -nonewline $sock "$aconst$atyp_addr_port"
 	flush $sock
     } err]} {
-	servfinish $token $err
+	serv_finish $token $err
 	return
     }
-    servfinish $token
     
+    # New we are ready to stream data.
+    establish_bytestreams $token
 }
 
-
-proc socks5::servfinish {token {errormsg ""}} {
+proc socks5::establish_bytestreams {token} {
     variable $token
     upvar 0 $token state
     
-    debug 2 "socks5::servfinish"
+    debug 2 "socks5::establish_bytestreams"
+    set sock $state(sock)
+    set sock_dst $state(sock_dst)
+
+    # Forward client stream.
+    fileevent $sock readable  \
+      [list [namespace current]::read_stream $token $sock $sock_dst "sock -> sock_dst"]
+    if {0} {
+	# Be sure to switch off any fileevent before fcopy.
+	fileevent $sock readable {}
+	fileevent $sock writable {}
+	copystart $token $sock $sock_dst
+    }
+    # Forward dst stream.
+    fileevent $sock_dst readable  \
+      [list [namespace current]::read_stream $token $sock_dst $sock "sock_dst -> sock"]
+    if {0} {
+	fileevent $sock_dst readable {}
+	fileevent $sock_dst writable {}
+	copystart $token $sock_dst $sock
+    }
+}
+
+proc socks5::copystart {token in out} {
+    variable $token
+    upvar 0 $token state
+    debug 2 "socks5::copystart $in -> $out"
     
+    if {[catch {
+	fcopy $in $out -size $state(-blocksize) -command \
+	  [list [namespace current]::copydone $token $in $out]
+    } err]} {
+	serv_finish $token $err
+    }
+}
+
+proc socks5::copydone {token in out count {error {}}} {
+    variable $token
+    upvar 0 $token state
+    debug 2 "socks5::copydone $in -> $out, error=$error"
+    
+    # At this point the token may have been reset
+    if {[string length $error]} {
+	serv_finish $token $error
+    } elseif {[catch {eof $s} iseof] || $iseof} {
+	serv_finish $token eof
+    } else {
+	copystart $in $out
+    }    
+}
+
+proc socks5::read_stream {token in out dbg} {
+    variable $token
+    upvar 0 $token state
+    
+    debug 3 "::socks5::read_stream in=$in, out=$out: $dbg"
+    if {[catch {eof $in} iseof] || $iseof} {
+	serv_finish $token eof
+    } elseif {[catch {eof $out} iseof] || $iseof} {
+	serv_finish $token eof
+    } elseif {[catch {read $in} data]} {
+	serv_finish $token eof
+    } elseif {[catch {puts -nonewline $out $data; flush $out}]} {
+	serv_finish $token eof
+    }
+}    
+
+proc socks5::serv_finish {token {errormsg ""}} {
+    variable $token
+    upvar 0 $token state
+    
+    debug 2 "socks5::serv_finish"
     catch {close $state(sock)}
-    
+    catch {close $state(sock_dst)}
+        
     if {[string length $errormsg]} {
 	uplevel #0 $state(command) [list $token error -error $errormsg]
+	cleanup $token
     } else {
 	uplevel #0 $state(command) [list $token ok]
     }
@@ -735,6 +851,13 @@ proc socks5::readable {token} {
     incr state(trigger)
 }
 
+proc socks5::serv_timeout {token} {
+    variable $token
+    upvar 0 $token state
+    
+    serv_finish $token timeout
+}
+
 proc socks5::debug {num str} {
     variable debug
     if {$num <= $debug} {
@@ -748,8 +871,7 @@ if {0} {
     
     # Server
     proc serv_cmd {token type args} {
-	puts "server: token=$token, type=$type, args=$args"
-	
+	puts "server: token=$token, type=$type, args=$args"	
 	switch -- $type {
 	    error {
 		
@@ -759,9 +881,6 @@ if {0} {
 	    }
 	    authorize {
 		return 1
-	    }
-	    reply {
-		return [list 0 rainbow.se 3344]
 	    }
 	}	    
     }
@@ -773,11 +892,18 @@ if {0} {
     
     # Client
     proc cb {token type args} {
+	global s
 	puts "client: token=$token, type=$type, args=$args"
+	if {$type == "ok"} {
+	    fconfigure $s -buffering none
+	}
+    }
+    proc dump {} {
+	puts "dump:"
     }
     set s [socket 127.0.0.1 1080]
-    socks5::init $s myaddr.se 8899 -command cb
-    socks5::init $s myaddr.se 8899 -command cb -username xxx -password yyy
+    socks5::init $s localhost 3344 -command cb
+    #socks5::init $s localhost 3344 -command cb -username xxx -password yyy
 }
 
 #-------------------------------------------------------------------------------
