@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.1.1.1 2002-12-08 11:02:34 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.2 2003-01-11 16:16:09 matben Exp $
 
 package provide CanvasUtils 1.0
 package require sha1pure
@@ -405,14 +405,21 @@ proc ::CanvasUtils::GetOnelinerForItem {w id} {
 #       Makes a line that is suitable for file storage. Shall be understood
 #       by '::ImageAndMovie::HandleImportCmd'.
 #
+# Arguments:
+#       w
+#       id
 #       args:
 #           -basepath absolutePath    translate image -file to a relative path.
+#           -uritype ( file | http )
 
 proc ::CanvasUtils::GetOnelinerForImage {w id args} {
     
     set type [$w type $id]
     if {![string equal $type "image"]} {
 	return -code error {must have an "image" item type}
+    }
+    array set argsArr {
+	-uritype file
     }
     array set argsArr $args
     set imageName [$w itemcget $id -image]
@@ -428,19 +435,32 @@ proc ::CanvasUtils::GetOnelinerForImage {w id args} {
     } else {
 	set imageFile [$imageName cget -file]		    
     }
-    if {[info exists argsArr(-basepath)]} {
-	set imageFile [filerelative $argsArr(-basepath) $imageFile]
+    switch -- $argsArr(-uritype) {
+	file {
+	    if {[info exists argsArr(-basepath)]} {
+		set imageFile [filerelative $argsArr(-basepath) $imageFile]
+	    }
+	    lappend impArgs -file $imageFile
+	}
+	http {
+	    lappend impArgs -url [::CanvasUtils::GetHttpFromFile $imageFile]
+	}
+	default {
+	    return -code error "Unknown -uritype \"$argsArr(-uritype)\""
+	}
     }
     
     # -above & -below???
     set impArgs [concat $impArgs [::CanvasUtils::GetStackingOption $w $id]]
-    lappend impArgs -file $imageFile  \
-      -tags [::CanvasUtils::GetUtag $w $id 1]
+    lappend impArgs -tags [::CanvasUtils::GetUtag $w $id 1]
     return "import [$w coords $id] $impArgs"
 }
 
 proc ::CanvasUtils::GetOnelinerForQTMovie {w id args} {
     
+    array set argsArr {
+	-uritype file
+    }
     array set argsArr $args
     set windowName [$w itemcget $id -window]
     set windowClass [winfo class $windowName]
@@ -462,6 +482,9 @@ proc ::CanvasUtils::GetOnelinerForQTMovie {w id args} {
 
 proc ::CanvasUtils::GetOnelinerForSnack {w id args} {
     
+    array set argsArr {
+	-uritype file
+    }
     array set argsArr $args
     set windowName [$w itemcget $id -window]
     set windowClass [winfo class $windowName]
@@ -474,6 +497,19 @@ proc ::CanvasUtils::GetOnelinerForSnack {w id args} {
     set impArgs [list -file $soundFile]
     lappend impArgs -tags [::CanvasUtils::GetUtag $w $id 1]
     return "import [$w coords $id] $impArgs"		    
+}
+
+# CanvasUtils::GetHttpFromFile --
+# 
+#       Translates an absolute file path to an uri encoded http address
+#       for our built in http server.
+
+proc ::CanvasUtils::GetHttpFromFile {filePath} {
+    global  prefs this
+    
+    set relPath [filerelative $prefs(httpdBaseDir) $filePath]
+    set relPath [uriencode::quotepath $relPath]
+    return "http://$this(ipnum):$prefs(httpdPort)/$relPath"
 }
 
 # CanvasUtils::ItemConfigure --
@@ -895,21 +931,6 @@ proc ::CanvasUtils::GetStackingOption {w id} {
 	set belowutag [FindBelowUtag $w $id]
 	if {[string length $belowutag]} {
 	    set opt [list -above $belowutag]
-	}
-    }
-    return $opt
-}
-
-proc ::CanvasUtils::GetStackingOptionBU {w id} {
-    
-    set opt {}
-    set aboveid [$w find above $id]
-    if {[string length $aboveid]} {
-	set opt [list -below [GetUtag $w $aboveid 1]]
-    } else {
-	set belowid [$w find below $id]
-	if {[string length $belowid]} {
-	    set opt [list -above [GetUtag $w $belowid 1]]
 	}
     }
     return $opt

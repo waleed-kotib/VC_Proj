@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: browse.tcl,v 1.1.1.1 2002-12-08 11:01:09 matben Exp $
+# $Id: browse.tcl,v 1.2 2003-01-11 16:16:09 matben Exp $
 # 
 #  locals($jid,parent):         the parent of $jid.
 #  locals($jid,parents):        list of all parent jid's,
@@ -245,7 +245,7 @@ proc browse::remove {browseName jid} {
     catch {unset locals($jid,xmllist)}
 
     # Evaluate the client callback.
-    uplevel #0 "$locals(cmd) $browseName {remove} $jid"
+    uplevel #0 "$locals(cmd) $browseName remove $jid"
 }
     
 # browse::getparents --
@@ -641,7 +641,9 @@ proc browse::setsinglejid {browseName parentJid jid xmllist {browsedjid 0}} {
 	    
 		# If with 'user' tag in conferencing, keep internal table that
 		# maps the 'room@server/hexname' to nickname.
-		set locals($jid,name) $attr(name)
+		if {[info exists attr(name)]} {
+			set locals($jid,name) $attr(name)
+		}
 		
 		# Keep list of all 'user'«s in a room. The 'parentJid' must
 		# be the room's jid here.

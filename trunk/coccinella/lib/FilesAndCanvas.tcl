@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: FilesAndCanvas.tcl,v 1.1.1.1 2002-12-08 11:03:00 matben Exp $
+# $Id: FilesAndCanvas.tcl,v 1.2 2003-01-11 16:16:09 matben Exp $
  
 package require can2svg
 package require undo
@@ -352,7 +352,7 @@ proc ::CanvasFile::FileToCanvasVer2 {w fd absPath {where all}} {
 	    default {
 
 		# Here we should provide some hooks for plugins to handle
-		# their own stuff.
+		# their own stuff. ???
 	    
 	    }
 	}

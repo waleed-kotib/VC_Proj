@@ -3,11 +3,11 @@
 #      This file is part of the whiteboard application. It implements user
 #      interface elements.
 #      
-#  Copyright (c) 2002  Mats Bengtsson
+#  Copyright (c) 2002-2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.2 2002-12-15 09:10:56 matben Exp $
+# $Id: UI.tcl,v 1.3 2003-01-11 16:16:09 matben Exp $
 
 # LabeledFrame --
 #
@@ -63,14 +63,9 @@ proc LabeledFrame3 {w txt args} {
 }
 
 namespace eval ::UI:: {
-    
-    namespace export what
-    
+
+    # Keeps various geometry info.
     variable dims
-    
-    # Unique id for main toplevels
-    variable idmain 2
-    
     # Canvas size; these are also min sizes. Add new line of tools.
     set dims(wCanOri) 350
     set dims(hCanOri) [expr 328 + 28]
@@ -89,6 +84,12 @@ namespace eval ::UI:: {
     # Total screen dimension.
     set dims(screenH) [winfo vrootheight .]
     set dims(screenW) [winfo vrootwidth .]
+    # Unique id for main toplevels
+    variable idmain 2
+}
+
+proc ::UI::Init {} {
+    global  this prefs
     
     # For the communication entries.
     # variables:              $wtop is used as a key in these vars.
@@ -148,12 +149,22 @@ namespace eval ::UI:: {
 	save       {::CanvasFile::DoSaveCanvasFile $wtop}
 	open       {::CanvasFile::DoOpenCanvasFile $wtop}
 	import     {::ImageAndMovie::ImportImageOrMovieDlg $wtop}
+	send       {::Jabber::DoSendCanvas $wtop}
 	print      {::UserActions::DoPrintCanvas $wtop}
 	stop       {::UserActions::CancelAllPutGetAndPendingOpen $wtop}
     }
-
-    # Be sure to insert this one above when ready for multiinstance.
-    #send       {::UserActions::DoSendCanvas $wtop}
+    
+    # Set commands valid for this platform and prefs. Must sync indices!
+    if {($prefs(protocol) == "symmetric") || ($prefs(protocol) == "client")} {
+	set btShortDefs [lreplace $btShortDefs 1 1  \
+	  {::OpenConnection::OpenConnection $wDlgs(openConn)}]
+	set btShortDefs [lreplace $btShortDefs 8 8  \
+	  {::UserActions::DoSendCanvas $wtop}]
+    }
+    if {[string equal $this(platform) "unix"]} {
+	set btShortDefs [lreplace $btShortDefs 11 11  \
+	  {::PrintPSonUnix::PrintPSonUnix $wDlgs(print) $wCan}]
+    }
     
     # Get icons.
     set icons(igelpiga) [image create photo igelpiga -format gif  \
@@ -182,8 +193,8 @@ namespace eval ::UI:: {
 	set icons($name) [image create photo $name -format gif  \
 	  -file [file join $this(path) images $iconFile.gif]]
     }
-    set icons(bwrect) [image create photo bwrect -format gif -file  \
-      [file join $this(path) images transparent_rect.gif]]
+    set icons(bwrect) [image create photo bwrect -format gif  \
+      -file [file join $this(path) images transparent_rect.gif]]
     
     # Icons for the mailbox.
     set readmsgdata {
@@ -204,6 +215,8 @@ QJ2GO/YCGGi0MDqtKnccohG5stgtiLx+z+8jIgA7}
     set icons(readMsg) [image create photo -data $readmsgdata]
     set icons(unreadMsg) [image create photo -data $unreadmsgdata]
     set icons(wbicon) [image create photo -data $wbicon]
+    set icons(wboard) [image create photo -format gif \
+      -file [file join $this(path) images wb.gif]]
     
     # Smiley icons. The "short" types.
     foreach {key name} {
@@ -301,11 +314,11 @@ namespace eval ::UI:: {
     variable menuDefs
     
     # All menu definitions for the main (whiteboard) windows as:
-    #      {type name cmd state accelerator opts {{...} {...} ...}}
+    #      {{type name cmd state accelerator opts} {{...} {...} ...}}
     # Mac only.
     set menuDefs(main,apple) {
-	{command   mAboutWhiteboard      {::SplashScreen::SplashScreen $wDlgs(splash)} normal   {}}
-	{command   mAboutQuickTimeTcl    {AboutQuickTimeTcl}                           normal   {}}
+	{command   mAboutWhiteboard    {::SplashScreen::SplashScreen $wDlgs(splash)} normal   {}}
+	{command   mAboutQuickTimeTcl  {AboutQuickTimeTcl}                           normal   {}}
     }	
     set menuDefs(main,file) {
 	{command   mNew                {::UI::NewMain}                               disabled N}
@@ -336,7 +349,7 @@ namespace eval ::UI:: {
 	{command     mCut              {::UI::CutCopyPasteCmd cut}             disabled X}
 	{command     mCopy             {::UI::CutCopyPasteCmd copy}            disabled C}
 	{command     mPaste            {::UI::CutCopyPasteCmd paste}           disabled V}
-	{command     mAll              {SelectAll $wtop}                       normal   A}
+	{command     mAll              {::UserActions::SelectAll $wtop}        normal   A}
 	{command     mEraseAll         {::UserActions::DoEraseAll $wtop}       normal   {}}
 	{separator}
 	{command     mInspectItem      {::ItemInspector::ItemInspector $wtop selected} disabled I}
@@ -344,8 +357,8 @@ namespace eval ::UI:: {
 	{command     mRaise            {::UserActions::RaiseOrLowerItems $wtop raise} disabled R}
 	{command     mLower            {::UserActions::RaiseOrLowerItems $wtop lower} disabled L}
 	{separator}
-	{command     mLarger           {ResizeItem $wtop $prefs(scaleFactor)} disabled >}
-	{command     mSmaller          {ResizeItem $wtop $prefs(invScaleFac)} disabled <}
+	{command     mLarger           {::UserActions::ResizeItem $wtop $prefs(scaleFactor)} disabled >}
+	{command     mSmaller          {::UserActions::ResizeItem $wtop $prefs(invScaleFac)} disabled <}
 	{cascade     mFlip             {}                                      disabled {} {} {
 	    {command   mHorizontal     {::UserActions::FlipItem $wtop horizontal}  normal   {} {}}
 	    {command   mVertical       {::UserActions::FlipItem $wtop vertical}    normal   {} {}}}
@@ -357,7 +370,7 @@ namespace eval ::UI:: {
     # These are used not only in the drop-down menus.
     set menuDefs(main,prefs,separator) 	{separator}
     set menuDefs(main,prefs,background)  \
-      {command     mBackgroundColor      {SetCanvasBgColor $wtop}          normal   {}}
+      {command     mBackgroundColor      {::UserActions::SetCanvasBgColor $wtop} normal   {}}
     set menuDefs(main,prefs,grid)  \
       {checkbutton mGrid             {::UserActions::DoCanvasGrid $wtop}   normal   {} \
       {-variable ::${wtop}::state(canGridOn)}}
@@ -469,7 +482,7 @@ namespace eval ::UI:: {
     set menuDefs(main,jabber) {    
 	{command     mNewAccount       {::Jabber::Register::Register $wDlgs(jreg)} normal   {}}
 	{command     mLogin            {::Jabber::Login::Login $wDlgs(jlogin)} normal   {}}
-	{command     mPassword         {::Jabber::Passwd::Build .jpasswd}      normal   {}}
+	{command     mPassword         {::Jabber::Passwd::Build .jpasswd}      disabled {}}
 	{separator}
 	{checkbutton mRoster/Services  {::Jabber::::RostServ::Show $wDlgs(jrostbro)}  normal   {} \
 	  {-variable ::Jabber::jstate(rostBrowseVis)}}
@@ -491,7 +504,7 @@ namespace eval ::UI:: {
 	    {radio   mNotAvailable     {::Jabber::SetStatus unavailable}       normal   {} \
 	      {-variable ::Jabber::jstate(status) -value unavailable}}                     \
 	    {separator}                                                                    \
-	    {command mAttachMessage    {::Jabber::SetStatusWithMessage .jklu} normal {}}}
+	    {command mAttachMessage    {::Jabber::SetStatusWithMessage $wDlgs(jpresmsg)} normal {}}}
 	}
 	{separator}
 	{command     mEnterRoom          {::Jabber::GroupChat::EnterRoom $wDlgs(jenterroom)} disabled {}}
@@ -706,15 +719,23 @@ namespace eval ::UI:: {
 #       Makes a unique whiteboard.
 #
 # Arguments:
+#       args    -jid
+#               -sendbuttonstate normal|disabled
+#               -sendcheckstate normal|disabled
+#               -serverentrystate normal|disabled
+#               -state normal|disabled 
+#               -title name
+#               -thread threadId
+#               -toentrystate normal|disabled
+#               -type normal|chat|groupchat
 #       
 # Results:
 #       toplevel window. (.) If not "." then ".top."; extra dot!
 
-proc ::UI::NewMain {args} {
-    
+proc ::UI::NewMain {args} {    
     variable idmain
     
-    set wtop ".main[incr idmain]."
+    set wtop .main[incr idmain].
     eval {::UI::BuildMain $wtop} $args
     
     return $wtop
@@ -726,7 +747,7 @@ proc ::UI::NewMain {args} {
 #
 # Arguments:
 #       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
-#       args    ?-state normal|disabled -title name?
+#       args        see above
 #       
 # Results:
 #       new instance toplevel created.
@@ -736,6 +757,8 @@ proc ::UI::BuildMain {wtop args} {
     
     variable allWhiteboards
     variable dims
+    variable threadToWtop
+    variable jidToWtop
     
     if {![string equal [string index $wtop end] "."]} {
 	set wtop ${wtop}.
@@ -746,14 +769,38 @@ proc ::UI::BuildMain {wtop args} {
     upvar ::${wtop}::state statelocal
     upvar ::${wtop}::opts opts
     
-    #SetFactoryState
+    Debug 3 "::UI::BuildMain args='$args'"
+    
+    if {[string equal $wtop "."]} {
+	set wbTitle {Coccinella (Main)}
+    } else {
+	set wbTitle {Coccinella}
+    }
     set titleString [expr {
 	$privariaFlag ?
-	{PRIVARIA Whiteboard -- The Coccinella} :
-	{Coccinella}
+	{PRIVARIA Whiteboard -- The Coccinella} : $wbTitle
     }]
-    array set opts [list -state normal -title $titleString]
+    array set opts [list \
+      -state normal -title $titleString -sendcheckstate disabled  \
+      -sendbuttonstate normal -toentrystate normal]
     array set opts $args
+    if {[info exists opts(-thread)]} {
+	set threadToWtop($opts(-thread)) $wtop
+    }
+    if {[info exists opts(-jid)]} {
+	set jidToWtop($opts(-jid)) $wtop
+    }
+    if {[string equal $prefs(protocol) "jabber"]} {
+    	set isConnected [::Jabber::IsConnected]
+    } else {
+    	set isConnected 0
+    }
+    
+    if {[string equal $wtop "."]} {
+	set wtopReal .
+    } else {
+	set wtopReal [string trimright $wtop .]
+    }
     
     # Common widget paths.
     if {$prefs(haveScrollbars)} {
@@ -763,6 +810,7 @@ proc ::UI::BuildMain {wtop args} {
     } else {
 	set wapp(can)       ${wtop}fmain.can
     }
+    set wapp(toplevel)  $wtopReal
     set wapp(tool)      ${wtop}fmain.frleft.frbt
     set wapp(comm)      ${wtop}fcomm.ent
     set wapp(statmess)  ${wtop}fcomm.stat.lbl
@@ -777,15 +825,9 @@ proc ::UI::BuildMain {wtop args} {
 	set statelocal($key) $state($key)
     }
     set statelocal(btStateOld) $statelocal(btState)
-    
-    if {[string equal $wtop "."]} {
-	set wtopReal .
-    } else {
-	set wtopReal [string trimright $wtop .]
-    }
-    if {![winfo exists $wtop] && ($wtop != ".")} {
+    if {![winfo exists $wtopReal] && ($wtop != ".")} {
 	toplevel $wtopReal -class Whiteboard
-	wm withdraw [string trimright $wtop .]
+	wm withdraw $wtopReal
     }
     lappend allWhiteboards $wtopReal
     wm title $wtopReal $opts(-title)    
@@ -795,16 +837,16 @@ proc ::UI::BuildMain {wtop args} {
 	set ::SplashScreen::startMsg [::msgcat::mc splashbuildmenu]
     }
     ::UI::BuildWhiteboardMenus $wtop
-    ::UI::SetMenuAccelerators $wtop
+    ::UI::ConfigureMenuAccelerators $wtop -state $opts(-state)
         
     # Shortcut buttons at top? Do we want the toolbar to be visible.
     if {$wtop == "."} {
 	set ::SplashScreen::startMsg [::msgcat::mc splashbuild]
     }
     if {$state(visToolbar)} {
-	::UI::CreateShortcutButtonPad $wtop init
+	::UI::ConfigShortcutButtonPad $wtop init
     } else {
-	::UI::CreateShortcutButtonPad $wtop init off
+	::UI::ConfigShortcutButtonPad $wtop init off
     }
     
     # Make the tool button pad.
@@ -869,22 +911,22 @@ proc ::UI::BuildMain {wtop args} {
       -tags stattxt
     
     # Build the header for the actual network setup.
-    ::UI::SetCommHead $wtop $prefs(protocol)
+    ::UI::SetCommHead $wtop $prefs(protocol) -connected $isConnected
     pack [frame ${wtop}fcomm.pad -relief raised -borderwidth 1]  \
       -side right -fill both -expand true
     pack [label ${wtop}fcomm.pad.hand -relief flat -borderwidth 0 -image im_handle] \
       -side right -anchor sw
     
     # Do we want a persistant jabber entry?
-    if {($prefs(protocol) == "jabber") && $prefs(jabberCommFrame)} {
-	::Jabber::BuildJabberEntry $wtop -state $opts(-state)
-    }
     if {[string equal $prefs(protocol) "jabber"]} {
 	::Jabber::InitWhiteboard $wtop
+    	if {$prefs(jabberCommFrame)} {
+	    eval {::Jabber::BuildJabberEntry $wtop} $args
+    	}
     }
     
     # Invoke tool button.
-    ::UserActions::ClickToolButton $wtop   \
+    ::UI::ClickToolButton $wtop  \
       [::UI::ToolBtNumToName $statelocal(btState)]
     
     if {$wtop == "."} {
@@ -921,23 +963,79 @@ proc ::UI::BuildMain {wtop args} {
 	    
 	# The minsize when no connected clients. Is updated when connect/disconnect.
 	wm minsize $wtopReal $dims(wMinTot) $dims(hMinTot)
+	wm protocol $wtopReal WM_DELETE_WINDOW [list ::UI::CloseMain $wtop]
     }
-    catch {wm deiconify $wtopReal}
 
     # Add things that are defined in the prefs file and not updated else.
-    DoCanvasGrid $wtop
+    ::UserActions::DoCanvasGrid $wtop
 
     # Set up paste menu if something on the clipboard.
     ::UI::AppGetFocus $wtop $wtopReal
-    bind $wtopReal <FocusIn> "::UI::AppGetFocus $wtop %W"
+    bind $wtopReal <FocusIn> [list ::UI::AppGetFocus $wtop %W]
+
+    catch {wm deiconify $wtopReal}
 
     # Update size info when application is resized.
     if {1 || !$prefs(haveScrollbars)} {
 	bind $wapp(can) <Configure> [list ::UI::CanvasConfigureCallback "all"]
     }
+    if {$isConnected} {
+    	::UI::FixMenusWhen $wtop "connect"
+    } elseif {0} {
+    	::UI::FixMenusWhen $wtop "disconnect"
+    }
     
     # Manage the undo/redo object.
     set statelocal(undotoken) [undo::new -command [list ::UI::UndoConfig $wtop]]
+}
+
+# UI::CloseMain --
+#
+#       Called when closing whiteboard window; cleanup etc.
+
+proc ::UI::CloseMain {wtop} {
+
+    upvar ::${wtop}::wapp wapp
+    upvar ::${wtop}::opts opts
+    
+    set topw $wapp(toplevel)
+    set jtype [::UI::GetJabberType $wtop]
+    switch -- $jtype {
+	chat {
+	    set ans [tk_messageBox -icon info -parent $topw -type yesno \
+	      -message [FormatTextForMessageBox "The complete conversation will\
+	      be lost when closing this chat whiteboard.\
+	      Do you actually want to end this chat?"]]
+	    if {$ans != "yes"} {
+		return
+	    }
+	    ::UI::DestroyMain $wtop
+	}
+	groupchat {
+	    
+	    # Everything handled from Jabber::GroupChat
+	    ::Jabber::GroupChat::Exit $opts(-jid)
+	}
+	default {
+	    ::UI::DestroyMain $wtop
+	}
+    }
+}
+
+# UI::DestroyMain --
+# 
+#       Destroys toplevel whiteboard and cleans up.
+
+proc ::UI::DestroyMain {wtop} {
+    
+    upvar ::${wtop}::wapp wapp
+    upvar ::${wtop}::opts opts
+
+    set topw $wapp(toplevel)
+
+    catch {destroy $topw}    
+    unset opts
+    unset wapp
 }
 
 # UI::AEQuitHandler --
@@ -950,27 +1048,137 @@ proc ::UI::AEQuitHandler {theAEDesc theReplyAE} {
 }
 
 # UI::ConfigureMain --
+#
+#       Configure the options 'opts' state of a whiteboard.
+#       Returns 'opts' if no arguments.
 
 proc ::UI::ConfigureMain {wtop args} {
     
     upvar ::${wtop}::wapp wapp
+    upvar ::${wtop}::opts opts
     
     if {[string equal $wtop "."]} {
 	set wtopReal .
     } else {
 	set wtopReal [string trimright $wtop .]
     }
-    
-    foreach {name value} $args {
-	switch -- $name {
-	    -title {
-		wm title $wtopReal $value    
+    if {[llength $args] == 0} {
+	return [array get opts]
+    } else {
+    	set jentryOpts {}
+	foreach {name value} $args {
+	    switch -- $name {
+		-title {
+		    wm title $wtopReal $value    
+		}
+		-state {
+		    #
+		}
+		-jid {
+		    lappend jentryOpts $name $value
+		}
 	    }
-	    -state {
-		#
-	    }		
+	}
+	array set opts $args
+	if {[llength $jentryOpts] > 0} {
+	    eval {::UI::ConfigureJabberEntry $wtop {}} $jentryOpts
 	}
     }
+}
+
+# UI::GetJabberType --
+# 
+#       Returns a typical 'type' attribute suitable for a message element.
+#       If type unknown, or if "normal", return empty string.
+#       Assumes that wtop exists.
+
+proc ::UI::GetJabberType {wtop} {
+    
+    upvar ::${wtop}::opts opts
+
+    set type ""
+    if {[info exists opts(-type)]} {
+	if {![string equal $opts(-type) "normal"]} {
+	    set type $opts(-type)
+	}
+    }
+    return $type
+}
+
+# UI::GetJabberChatThread --
+# 
+#       Returns the thread id for a whiteboard chat.
+
+proc ::UI::GetJabberChatThread {wtop} {
+    
+    upvar ::${wtop}::opts opts
+
+    set threadid ""
+    if {[info exists opts(-type)] && [string equal $opts(-type) "chat"]} {
+	if {[info exists opts(-thread)]} {
+	    set threadid $opts(-thread)
+	}
+    }
+    if {[string length $threadid] == 0} {
+    	return -code error {Whiteboard type is not of type "chat"}
+    }
+    return $threadid
+}
+
+# UI::GetWtopFromJabberType --
+# 
+#       Return the wtop attribute for the given 'type', 'jid', and optionally,
+#       'thread'. If no whiteboard exists return empty.
+#       
+# Arguments:
+#       type        chat, groupchat, normal
+#       jid
+#       thread      (optional)
+#       
+# Results:
+#       wtop specifier or empty if no whiteboard exists.
+
+proc ::UI::GetWtopFromJabberType {type jid {thread {}}} {
+    
+    variable threadToWtop
+    variable jidToWtop
+
+    ::Jabber::Debug 2 "::UI::GetWtopFromJabberType type=$type, jid=$jid, thread=$thread"
+    
+    set wtop ""
+    switch -- $type {
+	chat {
+	    if {[info exists threadToWtop($thread)]} {
+		set wtop $threadToWtop($thread)
+	    }	    
+	}
+	groupchat {
+	
+	    # The jid is typically the 'roomjid/nickorhash' but can be the room itself.
+	    regexp {(^[^@]+@[^/]+)(/.+)?} $jid match jid x
+	    if {[info exists jidToWtop($jid)]} {
+		set wtop $jidToWtop($jid)
+	    }	    
+	}
+	normal {
+	    if {[info exists jidToWtop($jid)]} {
+		set wtop $jidToWtop($jid)
+	    }	    
+	}
+    }
+    
+    # Verify that toplevel actually exists.
+    if {[string length $wtop]} {
+	if {[string equal $wtop "."]} {
+	    set wtoplevel .
+	} else {
+	    set wtoplevel [string trimright $wtop "."]
+	}
+	if {![winfo exists $wtoplevel]} {
+	    set wtop ""
+	}
+    }
+    return $wtop
 }
 
 # UI::SetStatusMessage --
@@ -1015,23 +1223,438 @@ proc ::UI::GetUndoToken {wtop} {
 }
 
 # UI::GetAllWhiteboards --
+# 
+#       Return all whiteboard's wtop as a list.
 
 proc ::UI::GetAllWhiteboards { } {
     
     variable allWhiteboards    
     
-    set copyAllWBs $allWhiteboards
-    foreach wtop $copyAllWBs {
+    foreach wtop $allWhiteboards {
 	if {[winfo exists $wtop]} {
 	    lappend allTops $wtop
-	} else {
-	    set ind [lsearch -exact $allWhiteboards $wtop]
-	    if {$ind >= 0} {
-		set allWhiteboards [lreplace $allWhiteboards $ind $ind]
-	    }
 	}
     }
-    return $allTops
+    set allWhiteboards $allTops
+    return $allWhiteboards
+}
+
+
+# UI::ClickToolButton --
+#
+#       Uhhh...  When a tool button is clicked. Mainly sets all button specific
+#       bindings.
+#       
+# Arguments:
+#       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
+#       btName 
+#       
+# Results:
+#       tool buttons created and mapped
+
+proc ::UI::ClickToolButton {wtop btName} {
+    global  prefs wapp plugin this
+    
+    upvar ::${wtop}::wapp wapp
+    upvar ::${wtop}::state state
+    upvar ::${wtop}::opts opts
+
+    Debug 3 "ClickToolButton:: wtop=$wtop, btName=$btName"
+    
+    set wCan $wapp(can)
+    set state(btState) [::UI::ToolBtNameToNum $btName]
+    set irow [string index $state(btState) 0]
+    set icol [string index $state(btState) 1]
+    $wapp(tool).bt$irow$icol configure -image im_on$irow$icol
+    if {$state(btState) != $state(btStateOld)} {
+	set irow [string index $state(btStateOld) 0]
+	set icol [string index $state(btStateOld) 1]
+	$wapp(tool).bt$irow$icol configure -image im_off$irow$icol
+    }
+    set state(btStateOld) $state(btState)
+    RemoveAllBindings $wCan
+    
+    # Deselect text items.
+    if {$btName != "text"} {
+	$wCan select clear
+    }
+    if {$btName == "del" || $btName == "text"} {
+	::UserActions::DeselectAll $wtop
+    }
+    
+    # Cancel any outstanding polygon drawings.
+    ::CanvasDraw::FinalizePoly $wCan -10 -10
+    
+    $wCan config -cursor {}
+    
+    switch -- $btName {
+	point {
+	    bind $wCan <Button-1> {
+		::CanvasDraw::MarkBbox %W 0
+		::CanvasDraw::InitBox %W [%W canvasx %x] [%W canvasy %y] rect
+	    }
+	    bind $wCan <Shift-Button-1>	{
+		::CanvasDraw::MarkBbox %W 1
+		::CanvasDraw::InitBox %W [%W canvasx %x] [%W canvasy %y] rect
+	    }
+	    bind $wCan <B1-Motion> {
+		::CanvasDraw::BoxDrag %W [%W canvasx %x] [%W canvasy %y] 0 rect 1
+		::CanvasUtils::StopTimerToItemPopup
+	    }
+	    bind $wCan <ButtonRelease-1> {
+		::CanvasDraw::FinalizeBox %W [%W canvasx %x] [%W canvasy %y] 0 rect 1
+	    }
+	    bind $wCan <Double-Button-1>  \
+	      [list ::ItemInspector::ItemInspector $wtop current]
+
+	    switch -- $this(platform) {
+		macintosh - macosx {
+		    $wCan bind all <Button-1> {
+			
+			# Global coords for popup.
+			::CanvasUtils::StartTimerToItemPopup %W %X %Y 
+		    }
+		    $wCan bind all <ButtonRelease-1> {
+			::CanvasUtils::StopTimerToItemPopup
+		    }
+		    bind QTFrame <Button-1> {
+			::CanvasUtils::StartTimerToWindowPopup %W %X %Y 
+		    }
+		    bind QTFrame <ButtonRelease-1> {
+			::CanvasUtils::StopTimerToWindowPopup
+		    }
+		    bind SnackFrame <Button-1> {
+			::CanvasUtils::StartTimerToWindowPopup %W %X %Y 
+		    }
+		    bind SnackFrame <ButtonRelease-1> {
+			::CanvasUtils::StopTimerToWindowPopup
+		    }
+		    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatpointmac]
+		}
+		default {
+		    $wCan bind all <Button-3> {
+			
+			# Global coords for popup.
+			::CanvasUtils::DoItemPopup %W %X %Y 
+		    }
+		    bind QTFrame <Button-3> {
+			::CanvasUtils::DoWindowPopup %W %X %Y 
+		    }
+		    bind SnackFrame <Button-3> {
+			::CanvasUtils::DoWindowPopup %W %X %Y 
+		    }
+		    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatpoint]		      
+		}
+	    }
+	}
+	move {
+	    
+	    # Bindings for moving items; movies need special class.
+	    # The frame with the movie the mouse events, not the canvas.
+	    # With shift constrained move.
+	    bind $wCan <Button-1> {
+		InitMove %W [%W canvasx %x] [%W canvasy %y]
+	    }
+	    bind $wCan <B1-Motion> {
+		DoMove %W [%W canvasx %x] [%W canvasy %y] item
+	    }
+	    bind $wCan <ButtonRelease-1> {
+		FinalizeMove %W [%W canvasx %x] [%W canvasy %y]
+	    }
+	    bind $wCan <Shift-B1-Motion> {
+		DoMove %W [%W canvasx %x] [%W canvasy %y] item 1
+	    }
+	    
+	    # Moving single coordinates.
+	    $wCan bind tbbox <Button-1> {
+		InitMove %W [%W canvasx %x] [%W canvasy %y] point
+	    }
+	    $wCan bind tbbox <B1-Motion> {
+		DoMove %W [%W canvasx %x] [%W canvasy %y] point
+	    }
+	    $wCan bind tbbox <ButtonRelease-1> {
+		FinalizeMove %W [%W canvasx %x] [%W canvasy %y] point
+	    }
+	    $wCan bind tbbox <Shift-B1-Motion> {
+		DoMove %W [%W canvasx %x] [%W canvasy %y] point 1
+	    }
+		
+	    # Needed this to get wCan substituted in callbacks. Note %%.
+	    set scriptInitMove [format {
+		InitMove %s  \
+		  [%s canvasx [expr [winfo x %%W] + %%x]]  \
+		  [%s canvasy [expr [winfo y %%W] + %%y]] movie
+	    } $wCan $wCan $wCan]	
+	    set scriptDoMove [format {
+		DoMove %s  \
+		  [%s canvasx [expr [winfo x %%W] + %%x]]  \
+		  [%s canvasy [expr [winfo y %%W] + %%y]] movie
+	    } $wCan $wCan $wCan]	
+	    set scriptFinalizeMove [format {
+		FinalizeMove %s  \
+		  [%s canvasx [expr [winfo x %%W] + %%x]]  \
+		  [%s canvasy [expr [winfo y %%W] + %%y]] movie
+	    } $wCan $wCan $wCan]	
+	    set scriptDoMoveCon [format {
+		DoMove %s  \
+		  [%s canvasx [expr [winfo x %%W] + %%x]]  \
+		  [%s canvasy [expr [winfo y %%W] + %%y]] movie 1
+	    } $wCan $wCan $wCan]	
+	    
+	    # Moving movies.
+	    bind QTFrame <Button-1> $scriptInitMove
+	    bind QTFrame <B1-Motion> $scriptDoMove
+	    bind QTFrame <ButtonRelease-1> $scriptFinalizeMove
+	    bind QTFrame <Shift-B1-Motion> $scriptDoMoveCon
+
+	    bind SnackFrame <Button-1> $scriptInitMove
+	    bind SnackFrame <B1-Motion> $scriptDoMove
+	    bind SnackFrame <ButtonRelease-1> $scriptFinalizeMove
+	    bind SnackFrame <Shift-B1-Motion> $scriptDoMoveCon
+	    
+	    # Moving sequence grabber.
+	    bind SGFrame <Button-1> $scriptInitMove
+	    bind SGFrame <B1-Motion> $scriptDoMove
+	    bind SGFrame <ButtonRelease-1> $scriptFinalizeMove
+	    bind SGFrame <Shift-B1-Motion> $scriptDoMoveCon
+	    
+	    $wCan config -cursor hand2
+	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatmove]
+	}
+	line {
+	    bind $wCan <Button-1> {
+		InitLine %W [%W canvasx %x] [%W canvasy %y]
+	    }
+	    bind $wCan <B1-Motion> {
+		LineDrag %W [%W canvasx %x] [%W canvasy %y] 0
+	    }
+	    bind $wCan <Shift-B1-Motion> {
+		LineDrag %W [%W canvasx %x] [%W canvasy %y] 1
+	    }
+	    bind $wCan <ButtonRelease-1> {
+		FinalizeLine %W [%W canvasx %x] [%W canvasy %y] 0
+	    }
+	    bind $wCan <Shift-ButtonRelease-1> {
+		FinalizeLine %W [%W canvasx %x] [%W canvasy %y] 1
+	    }
+	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatline]
+	}
+	arrow {
+	    bind $wCan <Button-1> {
+		InitLine %W [%W canvasx %x] [%W canvasy %y] arrow
+	    }
+	    bind $wCan <B1-Motion> {
+		LineDrag %W [%W canvasx %x] [%W canvasy %y] 0 arrow
+	    }
+	    bind $wCan <Shift-B1-Motion> {
+		LineDrag %W [%W canvasx %x] [%W canvasy %y] 1 arrow
+	    }
+	    bind $wCan <ButtonRelease-1> {
+		FinalizeLine %W [%W canvasx %x] [%W canvasy %y] 0 arrow
+	    }
+	    bind $wCan <Shift-ButtonRelease-1> {
+		FinalizeLine %W [%W canvasx %x] [%W canvasy %y] 1 arrow
+	    }
+	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatarrow]
+	}
+	rect {
+	    
+	    # Bindings for rectangle drawing.
+	    bind $wCan <Button-1> {
+		::CanvasDraw::InitBox %W [%W canvasx %x] [%W canvasy %y] rect
+	    }
+	    bind $wCan <B1-Motion> {
+		::CanvasDraw::BoxDrag %W [%W canvasx %x] [%W canvasy %y] 0 rect
+	    }
+	    bind $wCan <Shift-B1-Motion> {
+		::CanvasDraw::BoxDrag %W [%W canvasx %x] [%W canvasy %y] 1 rect
+	    }
+	    bind $wCan <ButtonRelease-1> {
+		::CanvasDraw::FinalizeBox %W [%W canvasx %x] [%W canvasy %y] 0 rect
+	    }
+	    bind $wCan <Shift-ButtonRelease-1> {
+		::CanvasDraw::FinalizeBox %W [%W canvasx %x] [%W canvasy %y] 1 rect
+	    }
+	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatrect]
+	}
+	oval {
+	    bind $wCan <Button-1> {
+		::CanvasDraw::InitBox %W [%W canvasx %x] [%W canvasy %y] oval
+	    }
+	    bind $wCan <B1-Motion> {
+		::CanvasDraw::BoxDrag %W [%W canvasx %x] [%W canvasy %y] 0 oval
+	    }
+	    bind $wCan <Shift-B1-Motion> {
+		::CanvasDraw::BoxDrag %W [%W canvasx %x] [%W canvasy %y] 1 oval
+	    }
+	    bind $wCan <ButtonRelease-1> {
+		::CanvasDraw::FinalizeBox %W [%W canvasx %x] [%W canvasy %y] 0 oval
+	    }
+	    bind $wCan <Shift-ButtonRelease-1> {
+		::CanvasDraw::FinalizeBox %W [%W canvasx %x] [%W canvasy %y] 1 oval
+	    }
+	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatoval]
+	}
+	text {
+	    ::CanvasText::EditBind $wCan
+	    $wCan config -cursor xterm
+	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastattext]
+	}
+	del {
+	    bind $wCan <Button-1> {
+		::CanvasDraw::DeleteItem %W [%W canvasx %x] [%W canvasy %y]
+	    }
+	    set scriptDeleteItem [format {
+		::CanvasDraw::DeleteItem %s  \
+		  [%s canvasx [expr [winfo x %%W] + %%x]]  \
+		  [%s canvasy [expr [winfo y %%W] + %%y]] movie
+	    } $wCan $wCan $wCan]	
+	    bind QTFrame <Button-1> $scriptDeleteItem
+	    bind SnackFrame <Button-1> $scriptDeleteItem
+	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatdel]
+	}
+	pen {
+	    bind $wCan <Button-1> {
+		InitStroke %W [%W canvasx %x] [%W canvasy %y]
+	    }
+	    bind $wCan <B1-Motion> {
+		StrokeDrag %W [%W canvasx %x] [%W canvasy %y]
+	    }
+	    bind $wCan <ButtonRelease-1> {
+		FinalizeStroke %W [%W canvasx %x] [%W canvasy %y]
+	    }
+	    $wCan config -cursor pencil
+	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatpen]
+	}
+	brush {
+	    bind $wCan <Button-1> {
+		InitStroke %W [%W canvasx %x] [%W canvasy %y]
+	    }
+	    bind $wCan <B1-Motion> {
+		StrokeDrag %W [%W canvasx %x] [%W canvasy %y] 1
+	    }
+	    bind $wCan <ButtonRelease-1> {
+		FinalizeStroke %W [%W canvasx %x] [%W canvasy %y] 1
+	    }
+	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatbrush]
+	}
+	paint {
+	    bind $wCan  <Button-1> {
+		DoPaint %W [%W canvasx %x] [%W canvasy %y]
+	    }
+	    bind $wCan  <Shift-Button-1> {
+		DoPaint %W [%W canvasx %x] [%W canvasy %y] 1
+	    }
+	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatpaint]	      
+	}
+	poly {
+            bind $wCan  <Button-1> {
+		PolySetPoint %W [%W canvasx %x] [%W canvasy %y]
+	    }
+	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatpoly]	      
+        }       
+	arc {
+	    bind $wCan <Button-1> {
+		InitArc %W [%W canvasx %x] [%W canvasy %y]
+	    }
+	    bind $wCan <Shift-Button-1> {
+		InitArc %W [%W canvasx %x] [%W canvasy %y] 1
+	    }
+	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatarc]	      
+	}
+	rot {
+	    bind $wCan <Button-1> {
+		InitRotateItem %W [%W canvasx %x] [%W canvasy %y]
+	    }
+	    bind $wCan <B1-Motion> {
+		DoRotateItem %W [%W canvasx %x] [%W canvasy %y] 0
+	    }
+	    bind $wCan <Shift-B1-Motion> {
+		DoRotateItem %W [%W canvasx %x] [%W canvasy %y] 1
+	    }
+	    bind $wCan <ButtonRelease-1> {
+		FinalizeRotate %W [%W canvasx %x] [%W canvasy %y]
+	    }
+	    $wCan config -cursor exchange
+	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatrot]	      
+	}
+    }
+    
+    # Collect all common non textual bindings in one procedure.
+    if {$btName != "text"} {
+	GenericNonTextBindings $wtop
+    }
+
+    # This is a hook for plugins to register their own bindings.
+    # Call any registered bindings for the plugin.
+    foreach key [array names plugin "*,bindProc"] {
+	$plugin($key) $btName
+    }
+}
+
+proc ::UI::GenericNonTextBindings {wtop} {
+    
+    upvar ::${wtop}::wapp wapp
+    set wCan $wapp(can)
+    
+    # Various bindings.
+    bind $wCan <BackSpace> [list ::CanvasDraw::DeleteItem $wCan %x %y selected]
+    bind $wCan <Control-d> [list ::CanvasDraw::DeleteItem $wCan %x %y selected]
+}
+
+# UI::RemoveAllBindings --
+#
+#       Clears all application defined bindings in the canvas.
+#       
+# Arguments:
+#       w      the canvas widget.
+#       
+# Results:
+#       none
+
+proc ::UI::RemoveAllBindings {w} {
+    
+    Debug 3 "RemoveAllBindings::"
+
+    $w bind all <Button-1> {}
+    $w bind all <B1-Motion> {}
+    $w bind all <Any-Key> {}
+    $w bind all <Double-Button-1> {}
+    $w bind all <Button-3> {}
+    
+    # These shouldn't be necessary but they are...
+    $w bind text <Button-1> {}
+    $w bind text <B1-Motion> {}
+    $w bind text <Double-Button-1> {}	
+
+    # Remove bindings on markers on selected items.
+    $w bind tbbox <Button-1> {}
+    $w bind tbbox <B1-Motion> {}
+    $w bind tbbox <ButtonRelease-1> {}
+    
+    bind $w <Button> {}
+    bind $w <Button-1> {}
+    bind $w <Button-Motion> {}
+    bind $w <ButtonRelease> {}
+    bind $w <Shift-Button-1> {}
+    bind $w <Double-Button-1> {}
+    bind $w <Any-Key> {}
+    bind $w <ButtonRelease-1> {}
+    bind $w <B1-Motion> {}
+    bind $w <Shift-B1-Motion> {}
+    bind $w <Shift-ButtonRelease-1> {}
+    bind $w <BackSpace> {}
+    bind $w <Control-d> {}
+    bind QTFrame <Button-1> {}
+    bind QTFrame <B1-Motion> {}
+    bind QTFrame <ButtonRelease-1> {}
+    bind SnackFrame <Button-1> {}
+    bind SnackFrame <B1-Motion> {}
+    bind SnackFrame <ButtonRelease-1> {}
+    focus .
+    
+    # Remove any text insertion...
+    $w focus {}
 }
 
 # UI::SaveWinGeom --
@@ -1181,11 +1804,7 @@ proc ::UI::BuildWhiteboardMenus {wtop} {
     upvar ::${wtop}::state state
     upvar ::${wtop}::opts opts
         
-    if {$wtop != "."} {
-	set topwindow [string trimright $wtop .]
-    } else {
-	set topwindow $wtop
-    }
+    set topwindow $wapp(toplevel)
     set wCan $wapp(can)
     set wmenu ${wtop}menu
     if {$prefs(haveMenus)} {
@@ -1207,9 +1826,15 @@ proc ::UI::BuildWhiteboardMenus {wtop} {
     if {!$prefs(stripJabber)} {
 	::UI::MakeMenu $wtop ${wmenu}.jabber   mJabber $menuDefs(main,jabber)
 	
-	# The jabber stuff needs to know the "Exit Room" menu.
+	# The jabber stuff needs to know the "Exit Room" menu. WRONG!!!!! multinstance
 	if {$wtop == "."} {
 	    ::Jabber::GroupChat::SetAllRoomsMenu ${wmenu}.jabber.mexitroom
+	}
+	
+	# Grouchat whiteboards have their own presence status sent to room.
+	set jtype [::UI::GetJabberType $wtop]
+	if {[string equal $jtype "groupchat"]} {
+	    ::Jabber::GroupChat::ConfigWBStatusMenu $wtop
 	}
     }
     
@@ -1292,83 +1917,81 @@ proc ::UI::BuildWhiteboardMenus {wtop} {
 
 # UI::DisableWhiteboardMenus --
 #
-#       Handle '-state disabled' option. Keep Edit/Copy.
+#       Handle '-state disabled' option. Sets in a readonly state.
 
 proc ::UI::DisableWhiteboardMenus {wmenu} {
     
-    $wmenu entryconfigure [::msgcat::mc mFile] -state disabled
+    ::UI::MenuDisableAllBut ${wmenu}.file {
+	mNew mCloseWindow mSaveCanvas mPageSetup mPrintCanvas mQuit
+    }
+    ::UI::MenuDisableAllBut ${wmenu}.edit {}
     $wmenu entryconfigure [::msgcat::mc mPreferences] -state disabled
     $wmenu entryconfigure [::msgcat::mc mJabber] -state disabled
     $wmenu entryconfigure [::msgcat::mc mItems] -state disabled
     $wmenu entryconfigure [::msgcat::mc mInfo] -state disabled
-    set editend [${wmenu}.edit index end]
-    for {set i 0} {$i <= $editend} {incr i} {
-	if {[${wmenu}.edit type $i] != "separator"} {
-	    ${wmenu}.edit entryconfigure $i -state disabled
-	}
-    }
-    ::UI::MenuMethod ${wmenu}.edit entryconfigure mCopy -state normal
+        
     catch {$wmenu entryconfigure [::msgcat::mc mAddons] -state disabled}
 }
 
-# UI::SetMenuAccelerators --
+proc ::UI::MenuDisableAllBut {mw normalList} {
+
+    set iend [$mw index end]
+    for {set i 0} {$i <= $iend} {incr i} {
+	if {[$mw type $i] != "separator"} {
+	    $mw entryconfigure $i -state disabled
+	}
+    }
+    foreach name $normalList {
+	::UI::MenuMethod $mw entryconfigure $name -state normal
+    }
+}
+
+# UI::ConfigureMenuAccelerators --
 #
-#       Makes keyboard accelerators bindings.
+#       Makes keyboard accelerators bindings by binding to toplevel.
+#       Needed on all platforms except Mac Classic.
 #       
 # Arguments:
 #       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
+#       args        -state normal|disabled
 #       
 # Results:
 #       keyboard bindings set
 
-proc ::UI::SetMenuAccelerators {wtop} {
+proc ::UI::ConfigureMenuAccelerators {wtop args} {
     global  this prefs wDlgs osprefs
     
-    if {$wtop != "."} {
-	set topw [string trimright $wtop .]
-    } else {
-	set topw $wtop
+    variable menuDefs
+    upvar ::${wtop}::wapp wapp
+    
+    set topw $wapp(toplevel)
+    array set opts {
+	-state    normal
     }
+    array set opts $args
+    
     # Add accelerators keys "by hand". On the Mac Classic this works 
-    # automatically via the menu accelerators (not MacOSX).
+    # automatically via the menu accelerators, but not on MacOSX.
     if {![string equal "macintosh" $this(platform)]} {
-	
-	# The File menu.
-	bind $topw <$osprefs(mod)-Key-o> {
-	    if {[string equal $prefs(protocol) "jabber"]} {
-		::Jabber::Login::Login $wDlgs(jlogin)
-	    } elseif {![string equal $prefs(protocol) "server"]} {
-		OpenConnection $wDlgs(openConn)
+	    
+	#      {{type name cmd state accelerator opts} {{...} {...} ...}}
+	foreach mName {file edit} {
+	    foreach mDef $menuDefs(main,$mName) {
+		foreach {type name cmd state acc mopts} $mDef {
+		    if {[llength $acc] > 0} {
+			set key [string map {< less > greater} [string tolower $acc]]
+			if {[string equal $opts(-state) "normal"]} {
+			    if {[string equal $state "normal"]} {
+				bind $topw <$osprefs(mod)-Key-${key}>  \
+				  [subst -nocommands $cmd]
+			    }
+			} else {
+			    bind $topw <$osprefs(mod)-Key-${key}> {}
+			}
+		    }
+		}
 	    }
 	}
-	bind $topw <$osprefs(mod)-Key-w> ::UserActions::DoCloseWindow
-	bind $topw <$osprefs(mod)-Key-i>  \
-	  [list ::ImageAndMovie::ImportImageOrMovieDlg $wtop]
-	bind $topw <$osprefs(mod)-Key-s>   \
-	  [list ::CanvasFile::DoSaveCanvasFile $wtop]
-	bind $topw <$osprefs(mod)-Key-q> {
-	    ::UserActions::DoQuit
-	}
-	
-	# The Edit menu.
-	bind $topw <$osprefs(mod)-Key-a> [list ::UserActions::SelectAll $wtop]
-	bind $topw <$osprefs(mod)-Key-x> {
-	    CopySelectedToClipboard [focus] cut
-	}
-	bind $topw <$osprefs(mod)-Key-c> {
-	    CopySelectedToClipboard [focus] copy
-	}
-	bind $topw <$osprefs(mod)-Key-v> {
-	    PasteFromClipboardTo [focus]
-	}
-	bind $topw <$osprefs(mod)-Key-r>  \
-	  [list ::UserActions::RaiseOrLowerItems $wtop raise]
-	bind $topw <$osprefs(mod)-Key-l>  \
-	  [list ::UserActions::RaiseOrLowerItems $wtop lower]
-	bind $topw <$osprefs(mod)-Key-greater>  \
-	  [list ::UserActions::ResizeItem $wtop $prefs(scaleFactor)]
-	bind $topw <$osprefs(mod)-Key-less>  \
-	  [list ::UserActions::ResizeItem $wtop $prefs(invScaleFac)]]
     } else {
 	
 	# Some specials for the Mac. Seems not to be effective.
@@ -1448,7 +2071,7 @@ proc ::UI::OpenCanvasInfoFile {wtop theFile} {
     }
 }
 
-# UI::CreateShortcutButtonPad --
+# UI::ConfigShortcutButtonPad --
 #
 #       Makes the top shortcut button pad. Switches between 'on' and 'off' state.
 #       The 'subSpec' is only valid for 'init' where it can be 'off'.
@@ -1461,45 +2084,51 @@ proc ::UI::OpenCanvasInfoFile {wtop theFile} {
 # Results:
 #       toolbar created, or state toggled.
 
-proc ::UI::CreateShortcutButtonPad {wtop what {subSpec {}}} {
+proc ::UI::ConfigShortcutButtonPad {wtop what {subSpec {}}} {
     global  this wDlgs prefs
     
     variable dims
     upvar ::${wtop}::wapp wapp
     upvar ::${wtop}::opts opts
     
-    Debug 2 "::UI::CreateShortcutButtonPad what=$what, subSpec=$subSpec"
+    Debug 3 "::UI::ConfigShortcutButtonPad what=$what, subSpec=$subSpec"
 
     if {$wtop != "."} {
 	set topw [string trimright $wtop .]
     } else {
 	set topw $wtop
     }
+    set wonbar ${wtop}frtop.on.barvert
+    set woffbar ${wtop}frtop.barhoriz
     
-    if {[string equal $what "init"]} {
+    if {![winfo exists ${wtop}frtop]} {
 	pack [frame ${wtop}frtop -relief raised -borderwidth 0] -side top -fill x
 	pack [frame ${wtop}frtop.on -borderwidth 0] -fill x -side left -expand 1
-	pack [label ${wtop}frtop.on.barvert -image barvert -bd 1 -relief raised] \
+	pack [label $wonbar -image barvert -bd 1 -relief raised] \
 	  -padx 0 -pady 0 -side left
 	pack [frame $wapp(topfr) -relief raised -borderwidth 1]  \
 	  -side left -fill both -expand 1
-	label ${wtop}frtop.barhoriz -image barhoriz -relief raised -borderwidth 1
-	bind ${wtop}frtop.on.barvert <Button-1>  \
-	  [list ::UI::CreateShortcutButtonPad $wtop "off"]
+	label $woffbar -image barhoriz -relief raised -borderwidth 1
+	bind $wonbar <Button-1> [list $wonbar configure -relief sunken]
+	bind $wonbar <ButtonRelease-1>  \
+	  [list ::UI::ConfigShortcutButtonPad $wtop "off"]
 	
 	# Build the actual shortcut button pad.
 	::UI::BuildShortcutButtonPad $wtop
 	if {$opts(-state) == "disabled"} {
 	    ::UI::DisableShortcutButtonPad $wtop
 	}
-	
+    }
+ 
+    if {[string equal $what "init"]} {
+    
 	# Do we want the toolbar to be collapsed at initialization?
 	if {[string equal $subSpec "off"]} {
 	    pack forget ${wtop}frtop.on
 	    ${wtop}frtop configure -bg gray75
-	    pack ${wtop}frtop.barhoriz -side left -padx 0 -pady 0
-	    bind ${wtop}frtop.barhoriz <Button-1>   \
-	      [list ::UI::CreateShortcutButtonPad $wtop {on}]
+	    pack $woffbar -side left -padx 0 -pady 0
+	    bind $woffbar <ButtonRelease-1>   \
+	      [list ::UI::ConfigShortcutButtonPad $wtop "on"]
 	}
 	
     } elseif {[string equal $what "off"]} {
@@ -1513,10 +2142,12 @@ proc ::UI::CreateShortcutButtonPad {wtop what {subSpec {}}} {
 	wm geometry ${topw} [lindex $size 0]x$newHeight
 	pack forget ${wtop}frtop.on
 	${wtop}frtop configure -bg gray75
-	pack ${wtop}frtop.barhoriz -side left -padx 0 -pady 0
-	bind ${wtop}frtop.barhoriz <Button-1>   \
-	  [list ::UI::CreateShortcutButtonPad $wtop {on}]
+	pack $woffbar -side left -padx 0 -pady 0
+	bind $woffbar <Button-1> [list $woffbar configure -relief sunken]
+	bind $woffbar <ButtonRelease-1>   \
+	  [list ::UI::ConfigShortcutButtonPad $wtop "on"]
 	after idle [list ::UI::SetNewWMMinsize $wtop]
+	$wonbar configure -relief raised
 	
     } elseif {[string equal $what "on"]} {
 	
@@ -1524,10 +2155,12 @@ proc ::UI::CreateShortcutButtonPad {wtop what {subSpec {}}} {
 	set size [::UI::ParseWMGeometry $topw]
 	set newHeight [expr [lindex $size 1] - $dims(hTopOff) + $dims(hTopOn)]
 	wm geometry ${topw} [lindex $size 0]x$newHeight
-	pack forget ${wtop}frtop.barhoriz
+	pack forget $woffbar
 	pack ${wtop}frtop.on -fill x -side left -expand 1
-	bind ${wtop}frtop.barhoriz <Button-1>   \
-	  [list ::UI::CreateShortcutButtonPad $wtop {off}]
+	$woffbar configure -relief raised
+	bind $woffbar <Button-1> [list $woffbar configure -relief sunken]
+	bind $woffbar <ButtonRelease-1>   \
+	  [list ::UI::ConfigShortcutButtonPad $wtop "off"]
 	after idle [list ::UI::SetNewWMMinsize $wtop]
     }
 }
@@ -1567,6 +2200,7 @@ proc ::UI::BuildShortcutButtonPad {wtop} {
     if {[string equal $prefs(protocol) "server"]} {
 	::UI::ButtonConfigure $wtop connect -state disabled
     }
+    ::UI::ButtonConfigure $wtop send -state disabled
 }
 
 # UI::DisableShortcutButtonPad --
@@ -2041,8 +2675,8 @@ proc ::UI::CreateAllButtons {wtop} {
 	    set name $btNo2Name($irow$icol)
 	    
 	    if {![string equal $opts(-state) "disabled"]} {
-		bind $lwi <Button-1>   \
-		  [list ::UserActions::ClickToolButton $wtop $name]
+		bind $lwi <Button-1>  \
+		  [list ::UI::ClickToolButton $wtop $name]
 		
 		# Handle bindings to popup options.
 		if {[string match "mac*" $this(platform)]} {
@@ -2583,6 +3217,8 @@ proc ::UI::BuildCommHead {wtop type args} {
     
     Debug 2 "::UI::BuildCommHead"
     
+    array set argsArr {-connected 0}
+    array set argsArr $args
     pack [frame $wcomm -relief raised -borderwidth 1] -side left
     switch -- $type {
 	jabber {
@@ -2590,7 +3226,11 @@ proc ::UI::BuildCommHead {wtop type args} {
 	      -width 18 -anchor w -font $sysFont(sb)
 	    label $wcomm.user -text "  [::msgcat::mc {To Jabber id}]:"  \
 	      -width 18 -anchor w -font $sysFont(sb)
-	    label $wcomm.icon -image contact_off
+	    if {$argsArr(-connected)} {
+	    	label $wcomm.icon -image contact_on
+	    } else {
+	    	label $wcomm.icon -image contact_off
+	    }
 	    grid $wcomm.comm $wcomm.user -sticky nws -pady 0
 	    grid $wcomm.icon -row 0 -column 3 -sticky w -pady 0
 	}
@@ -2650,12 +3290,15 @@ proc ::UI::BuildCommHead {wtop type args} {
 # Arguments:
 #       wtop
 #       args:       ?-key value ...?
+#                   -toentrystate (normal|disabled)
+#                   -serverentrystate (normal|disabled)
 #                   -servervariable
 #                   -state (normal|disabled)
 #                   -jidvariable
 #                   -dosendvariable
 #                   -dosendcommand
 #                   -validatecommand
+#                   -sendcheckstate (normal|disabled)
 #       
 # Results:
 #       UI updated.
@@ -2667,7 +3310,12 @@ proc ::UI::BuildJabberEntry {wtop args} {
     
     Debug 2 "::UI::BuildJabberEntry args='$args'"
 
-    array set argsArr {-state normal}
+    array set argsArr {
+    	-state normal 
+    	-sendcheckstate disabled 
+    	-toentrystate normal 
+    	-serverentrystate normal
+    }
     array set argsArr $args
     set ns [namespace current]
     set wcomm $wapp(comm)
@@ -2678,7 +3326,7 @@ proc ::UI::BuildJabberEntry {wtop args} {
     }
     
     set n 1
-    entry $wcomm.ad$n -width 18 -relief sunken -bg $prefs(bgColGeneral)
+    entry $wcomm.ad$n -width 16 -relief sunken -bg $prefs(bgColGeneral)
     entry $wcomm.us$n -width 22 -relief sunken -bg white
     if {[info exists argsArr(-servervariable)]} {
 	$wcomm.ad$n configure -textvariable $argsArr(-servervariable)
@@ -2699,8 +3347,9 @@ proc ::UI::BuildJabberEntry {wtop args} {
     if {[info exists argsArr(-dosendcommand)]} {
 	set checkOpts [concat $checkOpts [list -command $argsArr(-dosendcommand)]]
     }
-    eval {checkbutton $wcomm.to$n -highlightthickness 0 -state disabled \
-      -text "  [::msgcat::mc Send]" -font $sysFont(sb)} $checkOpts
+    eval {checkbutton $wcomm.to$n -highlightthickness 0  \
+      -state $argsArr(-sendcheckstate) \
+      -text " [::msgcat::mc {Send Live}]" -font $sysFont(sb)} $checkOpts
     grid $wcomm.ad$n $wcomm.us$n -padx 4 -pady 0
     grid $wcomm.to$n -row 1 -column 2 -columnspan 2 -padx 4 -pady 0
 
@@ -2708,15 +3357,21 @@ proc ::UI::BuildJabberEntry {wtop args} {
 	$wcomm.ad$n configure -state disabled
 	$wcomm.us$n configure -state disabled
     }
+    if {$argsArr(-serverentrystate) == "disabled"} {
+    	$wcomm.ad$n configure -state disabled
+    }    
+    if {$argsArr(-toentrystate) == "disabled"} {
+    	$wcomm.us$n configure -state disabled
+    }    
 }
 
 # UI::ConfigureAllJabberEntries --
 
-proc ::UI::ConfigureAllJabberEntries {ipNum state} {
+proc ::UI::ConfigureAllJabberEntries {ipNum args} {
 
     foreach w [::UI::GetAllWhiteboards] {
 	set wtop [::UI::GetToplevelNS $w]
-	::UI::ConfigureJabberEntry $wtop $ipNum $state
+	eval {::UI::ConfigureJabberEntry $wtop $ipNum} $args
     }
 }
 
@@ -2725,34 +3380,41 @@ proc ::UI::ConfigureAllJabberEntries {ipNum state} {
 #       Configures the jabber entry in the communications frame that is suitable
 #       for persistent display.
 
-proc ::UI::ConfigureJabberEntry {wtop ipNum state} {
+proc ::UI::ConfigureJabberEntry {wtop ipNum args} {
     global  allIPnumsToSend allIPnums allIPnumsTo
     
     upvar ::${wtop}::wapp wapp
     
-    Debug 2 "::UI::ConfigureJabberEntry state=$state"
+    Debug 2 "::UI::ConfigureJabberEntry args='$args'"
 
     set wcomm $wapp(comm)
     set n 1
     
-    switch -- $state {
-	connect {
-	    set allIPnumsTo $ipNum
-	    set allIPnumsToSend $ipNum
-	    set allIPnums $ipNum
-	    ${wcomm}.to${n} configure -state normal
-	    
-	    # Update "electric plug" icon.
-	    after 400 [list ${wcomm}.icon configure -image contact_on]
-	}
-	disconnect {
-	    set allIPnumsTo {}
-	    set allIPnumsToSend {}
-	    set allIPnums {}
-	    ${wcomm}.to${n} configure -state disabled
-	    after 400 [list ${wcomm}.icon configure -image contact_off]	    
+    foreach {key value} $args {
+    	switch -- $key {
+		-netstate {
+		    switch -- $value {
+			connect {
+			    set allIPnumsTo $ipNum
+			    set allIPnumsToSend $ipNum
+			    set allIPnums $ipNum
+			    ${wcomm}.to${n} configure -state normal
+			    
+			    # Update "electric plug" icon.
+			    after 400 [list ${wcomm}.icon configure -image contact_on]
+			}
+			disconnect {
+			    set allIPnumsTo {}
+			    set allIPnumsToSend {}
+			    set allIPnums {}
+			    ${wcomm}.to${n} configure -state disabled
+			    after 400 [list ${wcomm}.icon configure -image contact_off]	    
+			}
+		    }
+		}
 	}
     }
+    eval {::Jabber::ConfigureJabberEntry $wtop} $args
 }
 
 proc ::UI::DeleteJabberEntry {wtop} {
@@ -3146,6 +3808,7 @@ proc ::UI::FixMenusWhen {wtop what} {
     global  prefs wDlgs allIPnumsToSend
     
     upvar ::${wtop}::wapp wapp
+    upvar ::${wtop}::opts opts
 
     switch -exact -- $what {
 	connect {
@@ -3153,11 +3816,16 @@ proc ::UI::FixMenusWhen {wtop what} {
 	    # If client only, allow only one connection, limited.
 	    if {[string equal $prefs(protocol) "jabber"]} {
 		::UI::ButtonConfigure $wtop connect -state disabled
+		if {[string equal $opts(-state) "normal"] &&  \
+		  [string equal $opts(-sendbuttonstate) "normal"]} {
+		    ::UI::ButtonConfigure $wtop send -state normal
+		}
 		::UI::MenuMethod ${wtop}menu.file entryconfigure mOpenConnection -state disabled
 		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mNewAccount -state disabled
 		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mLogin  \
 		  -label [::msgcat::mc Logout] -command \
 		  [list ::Jabber::DoCloseClientConnection $allIPnumsToSend]
+		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mPassword -state normal
 		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mSearch -state normal
 		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mAddNewUser -state normal
 		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mSendMessage -state normal
@@ -3193,11 +3861,13 @@ proc ::UI::FixMenusWhen {wtop what} {
 
 	    if {[string equal $prefs(protocol) "jabber"]} {
 		::UI::ButtonConfigure $wtop connect -state normal
+		::UI::ButtonConfigure $wtop send -state disabled
 		::UI::MenuMethod ${wtop}menu.file entryconfigure mOpenConnection -state normal
 		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mNewAccount -state normal
 		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mLogin  \
 		  -label "[::msgcat::mc Login]..." \
 		  -command [list ::Jabber::Login::Login $wDlgs(jlogin)]
+		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mPassword -state disabled
 		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mSearch -state disabled
 		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mAddNewUser -state disabled
 		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mSendMessage -state disabled
@@ -3244,6 +3914,7 @@ proc ::UI::FixMenusWhen {wtop what} {
 # UI::FixMenusWhenSelection --
 # 
 #       Sets the correct state for menus and buttons when selection.
+#       Take the whiteboard's state into accounts.
 #       
 # Arguments:
 #       w       the widget that contains something that is selected.
@@ -3252,12 +3923,12 @@ proc ::UI::FixMenusWhen {wtop what} {
 
 proc ::UI::FixMenusWhenSelection {w} {
     global  this
-
+    
     set wtop [::UI::GetToplevelNS $w]
     set wClass [winfo class $w]
     set wToplevel [winfo toplevel $w]
     set wToplevelClass [winfo class $wToplevel]
-
+    
     Debug 4 "::UI::FixMenusWhenSelection w=$w,\n\twtop=$wtop, wClass=$wClass,\
       wToplevelClass=$wToplevelClass"
     
@@ -3266,10 +3937,11 @@ proc ::UI::FixMenusWhenSelection {w} {
 	
 	# Respect any disabled whiteboard state.
 	upvar ::${wtop}::opts opts
-	if {$opts(-state) == "disabled"} {
-	    return
+	set isDisabled 0
+	if {[string equal $opts(-state) "disabled"]} {
+	    set isDisabled 1
 	}
-
+	
 	# Any images selected?
 	set allSelected [$w find withtag selected]
 	set anyImageSel 0
@@ -3300,46 +3972,59 @@ proc ::UI::FixMenusWhenSelection {w} {
 	  ([llength [$w select item]] == 0)} {
 	    
 	    # There is no selection in the canvas.
-	    ::UI::MenuMethod ${wtop}menu.edit entryconfigure mCut -state disabled
-	    ::UI::MenuMethod ${wtop}menu.edit entryconfigure mCopy -state disabled
-	    ::UI::MenuMethod ${wtop}menu.edit entryconfigure mInspectItem -state disabled
-	    ::UI::MenuMethod ${wtop}menu.edit entryconfigure mRaise -state disabled
-	    ::UI::MenuMethod ${wtop}menu.edit entryconfigure mLower -state disabled
-	    ::UI::MenuMethod ${wtop}menu.edit entryconfigure mLarger -state disabled
-	    ::UI::MenuMethod ${wtop}menu.edit entryconfigure mSmaller -state disabled
-	    ::UI::MenuMethod ${wtop}menu.edit entryconfigure mFlip -state disabled
-	    ::UI::MenuMethod ${wtop}menu.edit entryconfigure mImageLarger -state disabled
-	    ::UI::MenuMethod ${wtop}menu.edit entryconfigure mImageSmaller -state disabled
+	    if {$isDisabled} {
+		::UI::MenuMethod ${wtop}menu.edit entryconfigure mCopy -state disabled
+		::UI::MenuMethod ${wtop}menu.edit entryconfigure mInspectItem -state disabled
+	    } else {		
+		::UI::MenuMethod ${wtop}menu.edit entryconfigure mCut -state disabled
+		::UI::MenuMethod ${wtop}menu.edit entryconfigure mCopy -state disabled
+		::UI::MenuMethod ${wtop}menu.edit entryconfigure mInspectItem -state disabled
+		::UI::MenuMethod ${wtop}menu.edit entryconfigure mRaise -state disabled
+		::UI::MenuMethod ${wtop}menu.edit entryconfigure mLower -state disabled
+		::UI::MenuMethod ${wtop}menu.edit entryconfigure mLarger -state disabled
+		::UI::MenuMethod ${wtop}menu.edit entryconfigure mSmaller -state disabled
+		::UI::MenuMethod ${wtop}menu.edit entryconfigure mFlip -state disabled
+		::UI::MenuMethod ${wtop}menu.edit entryconfigure mImageLarger -state disabled
+		::UI::MenuMethod ${wtop}menu.edit entryconfigure mImageSmaller -state disabled
+	    }
 	} else {
-	    ::UI::MenuMethod ${wtop}menu.edit entryconfigure mCut -state normal
-	    ::UI::MenuMethod ${wtop}menu.edit entryconfigure mCopy -state normal
-	    ::UI::MenuMethod ${wtop}menu.edit entryconfigure mInspectItem -state normal
-	    ::UI::MenuMethod ${wtop}menu.edit entryconfigure mRaise -state normal
-	    ::UI::MenuMethod ${wtop}menu.edit entryconfigure mLower -state normal
-	    if {$anyNotImageSel} {
-		::UI::MenuMethod ${wtop}menu.edit entryconfigure mLarger -state normal
-		::UI::MenuMethod ${wtop}menu.edit entryconfigure mSmaller -state normal
-	    }
-	    if {$anyImageSel} {
-		::UI::MenuMethod ${wtop}menu.edit entryconfigure mImageLarger -state normal
-		::UI::MenuMethod ${wtop}menu.edit entryconfigure mImageSmaller -state normal
-	    }
-	    if {$allowFlip} {
-		# Seems to be buggy on mac...
-		::UI::MenuMethod ${wtop}menu.edit entryconfigure mFlip -state normal
+	    if {$isDisabled} {
+		::UI::MenuMethod ${wtop}menu.edit entryconfigure mCopy -state normal
+		::UI::MenuMethod ${wtop}menu.edit entryconfigure mInspectItem -state normal
+	    } else {		
+		::UI::MenuMethod ${wtop}menu.edit entryconfigure mCut -state normal
+		::UI::MenuMethod ${wtop}menu.edit entryconfigure mCopy -state normal
+		::UI::MenuMethod ${wtop}menu.edit entryconfigure mInspectItem -state normal
+		::UI::MenuMethod ${wtop}menu.edit entryconfigure mRaise -state normal
+		::UI::MenuMethod ${wtop}menu.edit entryconfigure mLower -state normal
+		if {$anyNotImageSel} {
+		    ::UI::MenuMethod ${wtop}menu.edit entryconfigure mLarger -state normal
+		    ::UI::MenuMethod ${wtop}menu.edit entryconfigure mSmaller -state normal
+		}
+		if {$anyImageSel} {
+		    ::UI::MenuMethod ${wtop}menu.edit entryconfigure mImageLarger -state normal
+		    ::UI::MenuMethod ${wtop}menu.edit entryconfigure mImageSmaller -state normal
+		}
+		if {$allowFlip} {
+		    # Seems to be buggy on mac...
+		    ::UI::MenuMethod ${wtop}menu.edit entryconfigure mFlip -state normal
+		}
 	    }
 	}
 	
     } elseif {[string equal $wClass "Entry"] ||  \
       [string equal $wClass "Text"]} {
 	set setState disabled
-	if {[string equal $wClass "Entry"]} {
-	    if {[$w selection present] == "1"} {
-		set setState normal
+	switch -- $wClass {
+	    Entry {
+		if {[$w selection present] == "1"} {
+		    set setState normal
+		}
 	    }
-	} elseif {[string equal $wClass "Text"]} {
-	    if {[string length [$w tag ranges sel]] > 0} {
-		set setState normal
+	    Text {
+		if {[string length [$w tag ranges sel]] > 0} {
+		    set setState normal
+		}
 	    }
 	}
 	
@@ -3448,7 +4133,8 @@ proc ::UI::BuildItemMenu {wtop wmenu itemDir} {
 	    
 	    # Sort out directories we shouldn't search.
 	    if {([string index $itemFile 0] == ".") ||  \
-	      [string equal [string tolower $itemFile] "resource.frk"]} {
+	      [string equal [string tolower $itemFile] "resource.frk"] || \
+	      [string equal [string tolower $itemFile] "cvs"]} {
 		continue
 	    }
 	    

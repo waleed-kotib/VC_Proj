@@ -3,11 +3,11 @@
 #      This file is part of the whiteboard application. It contains a number
 #      of procedures for performing a get operation from the network to disk.
 #      
-#  Copyright (c) 1999-2002  Mats Bengtsson
+#  Copyright (c) 1999-2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: GetFile.tcl,v 1.1.1.1 2002-12-08 11:03:13 matben Exp $
+# $Id: GetFile.tcl,v 1.2 2003-01-11 16:16:09 matben Exp $
 # 
 #### LEGEND ####################################################################
 #
@@ -459,7 +459,6 @@ proc ::GetFile::Prepare {s} {
     global  prefs noErr plugin mimeTypeDoWhat this mimeTypeIsText
     
     variable locals
-    upvar ::.::wapp wapp
 
     Debug 2 ">   Prepare::"
     
@@ -495,9 +494,9 @@ proc ::GetFile::Prepare {s} {
 	ask {
 	    
 	    # 2: Ask user what to do with it.
-	    set ans [tk_messageBox -title [::msgcat::mc {Request To User}] -message  \
-	      [FormatTextForMessageBox [::msgcat::mc messaskreceive $fileTail]]  \
-	      -type yesno -default yes]
+	    set ans [tk_messageBox -title [::msgcat::mc {Request To User}] \
+	      -type yesno -default yes -message  \
+	      [FormatTextForMessageBox [::msgcat::mc messaskreceive $fileTail]]]
 	    if {[string equal $ans "no"]} {
 		return 321
 	    } else {
@@ -526,12 +525,9 @@ proc ::GetFile::Prepare {s} {
 	set cachedFile [::FileCache::Get $optArr(Get-Url:)]
 	if {[::FileUtils::AcceptCached $cachedFile]} {
 
-	    # Get the correct import procedure for this MIME type. Empty if nothing.
-	    set importPackage [GetPreferredPackage $mime]
-	    if {[llength $importPackage]} {
-		eval [list $plugin($importPackage,importProc) $wapp(servCan)  \
-		  $optList -file $cachedFile -where "local"]
-	    }
+	    # Get the correct import procedure for this MIME type.
+	    ::GetFile::DoImport $mime $optList -file $cachedFile \
+	      -where "local"
 	    return 320
 	}
     }
@@ -566,8 +562,8 @@ proc ::GetFile::Prepare {s} {
 	    
 	    # Should we have an 'after idle' here to let us reject before
 	    # connecting via URL?
-	    eval [list $plugin($importPackage,importProc) $wapp(servCan)  \
-	      $optList -url $optArr(Get-Url:) -where "local"]
+	    ::GetFile::DoImport $mime $optList -url $optArr(Get-Url:)  \
+	      -where "local"
 	    return 323	    
 	} else {
 	    return 499
@@ -751,7 +747,6 @@ proc ::GetFile::Finalize {s bytes {error {}}} {
     global  plugin mimeTypeDoWhat this
     
     variable locals
-    upvar ::.::wapp wapp
 
     Debug 2 ">       Finalize:: (entry) bytes=$bytes"
     
@@ -790,10 +785,26 @@ proc ::GetFile::Finalize {s bytes {error {}}} {
     if {[info exists optArr(Get-Url:)]} {
 	::FileCache::Set $optArr(Get-Url:) $dstPath
     }
-    set impPackage [GetPreferredPackage $mime]
-    if {[llength $impPackage]} {
-	eval [list $plugin($impPackage,importProc) $wapp(servCan) $optList \
-	  -file $dstPath -where "local"]
+    ::GetFile::DoImport $mime $optList -file $dstPath -where "local"
+}
+
+# GetFile::DoImport --
+# 
+#       Abstraction for importing an image etc. Non jabber just imports
+#       into the main whiteboard, else let a dispatcher send entity to
+#       the correct whiteboard.
+#       
+
+proc ::GetFile::DoImport {mime optList args} {
+    global  prefs
+    
+    if {[string equal $prefs(protocol) "jabber"]} {
+	eval {::Jabber::WB::DispatchToImporter $mime $optList} $args
+    } else {
+	upvar ::.::wapp wapp
+
+	set impPackage [GetPreferredPackage $mime]
+	eval {$plugin($impPackage,importProc) $wapp(servCan) $optList} $args
     }
 }
 

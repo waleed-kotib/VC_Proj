@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.1.1.1 2002-12-08 11:00:47 matben Exp $
+# $Id: MailBox.tcl,v 1.2 2003-01-11 16:16:09 matben Exp $
 
 package provide MailBox 1.0
 
@@ -115,10 +115,10 @@ proc ::Jabber::MailBox::Build {w args} {
     if {0 && [string match "mac*" $this(platform)]} {
 	set wmenu ${w}.menu
 	menu $wmenu -tearoff 0
-	::UI::MakeMenu $w ${wmenu}.apple   {}             $::UI::menuDefs(main,apple)
-	::UI::MakeMenu $w ${wmenu}.file    {File }        $::UI::menuDefs(min,file)
-	::UI::MakeMenu $w ${wmenu}.edit    {Edit }        $::UI::menuDefs(min,edit)	
-	::UI::MakeMenu $w ${wmenu}.jabber  {Jabber }      $::UI::menuDefs(main,jabber)
+	::UI::MakeMenu $w ${wmenu}.apple   {}         $::UI::menuDefs(main,apple)
+	::UI::MakeMenu $w ${wmenu}.file    {File }    $::UI::menuDefs(min,file)
+	::UI::MakeMenu $w ${wmenu}.edit    {Edit }    $::UI::menuDefs(min,edit)	
+	::UI::MakeMenu $w ${wmenu}.jabber  {Jabber }  $::UI::menuDefs(main,jabber)
 	$w configure -menu ${wmenu}
     }
     set locals(wtop) $w
@@ -262,12 +262,11 @@ proc ::Jabber::MailBox::InsertRow {wtbl row i} {
     if {([llength $row] > 6) && ([string length [lindex $row 6]] > 0)} {
 	set haswb 1
     }
-    if {$haswb} {
-	set row [concat * $row]
-    } else {
-	set row [concat - $row]
-    }
+    set row "{} $row"
     $wtbl insert end [lrange $row 0 5]
+    if {$haswb} {
+	$wtbl cellconfigure "${i},$colindex(iswb)" -image $icons(wboard)
+    }
     set colsub $colindex(subject)
     if {[lindex $row $colindex(isread)] == 0} {
 	$wtbl rowconfigure $i -font $sysFont(sb)
@@ -570,10 +569,12 @@ proc ::Jabber::MailBox::SelectMsg { } {
 	set wbtoplevel .maininbox
 	set title "Inbox: $from"
 	if {[winfo exists $wbtoplevel]} {
+	    ::ImageAndMovie::ResetAllHttp ${wbtoplevel}.
 	    ::UserActions::EraseAll ${wbtoplevel}.
-	    ::UI::ConfigureMain ${wbtoplevel}. -title $title
+	    ::UI::ConfigureMain ${wbtoplevel}. -title $title -jid $from
 	} else {
-	    ::UI::BuildMain ${wbtoplevel}. -state disabled -title $title	    
+	    ::UI::BuildMain ${wbtoplevel}. -state disabled -title $title \
+	    -jid $from
 	}
 	set fileName ${uid}.can
 	set filePath [file join $prefs(inboxCanvasPath) $fileName]

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.1.1.1 2002-12-08 11:00:57 matben Exp $
+# $Id: OOB.tcl,v 1.2 2003-01-11 16:16:09 matben Exp $
 
 package provide OOB 1.0
 
@@ -247,8 +247,9 @@ proc ::Jabber::OOB::Copy {jid url file id} {
     set progCB [list ::Jabber::OOB::Progress $out]
     set commandCB [list ::Jabber::OOB::Finished $jid $out $id]
     
-    if {[catch {eval {::http::geturl $url -channel $out -progress $progCB  \
-      -command $commandCB} $tmopts} token]} {
+    if {[catch {eval {
+	::http::geturl $url -channel $out -progress $progCB -command $commandCB
+    } $tmopts} token]} {
 	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok -message \
 	  [FormatTextForMessageBox [::msgcat::mc jamessoobgetfail $url $token]]
 	return
@@ -283,7 +284,6 @@ proc ::Jabber::OOB::Progress {out token total current} {
 	}
     }
     $wprog configure -percent [expr 100.0 * $current/($total + 1.0)]
-    #puts "token=$token, total=$total, current=$current, status=[::http::status $token]"
 
     # Investigate 'state' for any exceptions.
     if {[::http::status $token] == "error"} {
@@ -300,20 +300,40 @@ proc ::Jabber::OOB::Progress {out token total current} {
     }
 }
 
+# Jabber::OOB::Finished --
+# 
+#       Callback for the http package. Gets called when finished,
+#       timeout, or reset. 
+
 proc ::Jabber::OOB::Finished {jid out id token} {
     
     upvar #0 $token state
     upvar ::Jabber::jstate jstate
 
     # Investigate 'state' for any exceptions.
-    if {[::http::status $token] == "timeout"} {
-	tk_messageBox -title [::msgcat::mc Timeout] -icon info -type ok  \
-	  -message [::msgcat::mc jamessoobtimeout]
+    set status [::http::status $token]
+    switch -- $status {
+	timeout {
+	    tk_messageBox -title [::msgcat::mc Timeout] -icon info -type ok \
+	      -message [::msgcat::mc jamessoobtimeout]
+	}
+	error {
+	    tk_messageBox -title "File transport error" -icon error -type ok \
+	      -message "File transport error when getting file from $jid:\
+	      [::http::error $token]"
+	}
+	eof {
+	    tk_messageBox -title "File transport error" -icon error -type ok \
+	      -message "The server with $jid closed the socket without replying."	   
+	}
+	reset {
+	    # Did this ourself?
+	}
     }
     set wprog .joob$out
     catch {destroy $wprog}
     catch {close $out}
-    ::http::reset $token
+    ::http::cleanup $token
     
     # We shall send an <iq result> element here using the same 'id' to notify
     # the sender we are done.

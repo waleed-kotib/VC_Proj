@@ -3,11 +3,11 @@
 #      This file is part of the whiteboard application. It implements two
 #      running arrows to show a wait state.
 #      
-#  Copyright (c) 2002  Mats Bengtsson
+#  Copyright (c) 2002-2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: chasearrows.tcl,v 1.1.1.1 2002-12-08 10:54:14 matben Exp $
+# $Id: chasearrows.tcl,v 1.2 2003-01-11 16:16:08 matben Exp $
 #
 # ########################### USAGE ############################################
 #
@@ -59,13 +59,13 @@ namespace eval ::chasearrows:: {
 # Results:
 #       Defines option arrays.
 
-proc ::chasearrows::Init {  }  {
+proc ::chasearrows::Init { } {
     
     variable widgetGlobals
     variable widgetOptions
     variable widgetCommands
     
-    if {$widgetGlobals(debug) > 1}  {
+    if {$widgetGlobals(debug) > 1} {
 	puts "::chasearrows::Init"
     }
     
@@ -109,7 +109,7 @@ proc ::chasearrows::InitDrawingStuff { } {
     
     variable widgetGlobals
     
-    if {$widgetGlobals(debug) > 1}  {
+    if {$widgetGlobals(debug) > 1} {
 	puts "::chasearrows::InitDrawingStuff"
     }
 
@@ -146,13 +146,13 @@ proc ::chasearrows::InitDrawingStuff { } {
     }
     
     # Arrow heads.
-    if {[string compare $tcl_platform(platform) {unix}] == 0} {
+    if {[string equal $tcl_platform(platform) "unix"]} {
 	set widgetGlobals(arrshape16) {4 4 2}
 	set widgetGlobals(arrshape32) {5 5 3}
-    } elseif {[string compare $tcl_platform(platform) {macintosh}] == 0} {
+    } elseif {[string equal $tcl_platform(platform) "macintosh"]} {
 	set widgetGlobals(arrshape16) {3 3 2}
 	set widgetGlobals(arrshape32) {4 4 2}
-    } elseif {[string compare $tcl_platform(platform) {windows}] == 0} {
+    } elseif {[string equal $tcl_platform(platform) "windows"]} {
 	set widgetGlobals(arrshape16) {4 4 2}
 	set widgetGlobals(arrshape32) {5 5 3}
     }
@@ -170,23 +170,23 @@ proc ::chasearrows::InitDrawingStuff { } {
 #       The widget path or an error. Calls the necessary procedures to make a 
 #       complete movie controller widget.
 
-proc ::chasearrows::chasearrows {w args}  {
+proc ::chasearrows::chasearrows {w args} {
 
     variable widgetGlobals
     variable widgetOptions
 
-    if {$widgetGlobals(debug) > 1}  {
+    if {$widgetGlobals(debug) > 1} {
 	puts "::chasearrows::chasearrows w=$w, args=$args"
     }
     
     # We need to make Init at least once.
-    if {![info exists widgetOptions]}  {
+    if {![info exists widgetOptions]} {
 	Init
     }
     
     # Error checking.
     foreach {name value} $args  {
-	if {![info exists widgetOptions($name)]}  {
+	if {![info exists widgetOptions($name)]} {
 	    error "unknown option for the chasearrows: $name"
 	}
     }
@@ -206,12 +206,12 @@ proc ::chasearrows::chasearrows {w args}  {
 # Results:
 #       The widget path or an error.
 
-proc ::chasearrows::Build { w args }  {
+proc ::chasearrows::Build {w args} {
 
     variable widgetGlobals
     variable widgetOptions
 
-    if {$widgetGlobals(debug) > 1}  {
+    if {$widgetGlobals(debug) > 1} {
 	puts "::chasearrows::Build w=$w, args=$args"
     }
 
@@ -246,7 +246,7 @@ proc ::chasearrows::Build { w args }  {
     
     # Apply the options supplied in the widget command.
     # Overwrites defaults when option set in command.
-    if {[llength $args] > 0}  {
+    if {[llength $args] > 0} {
 	array set options $args
     }
     
@@ -276,7 +276,7 @@ proc ::chasearrows::Build { w args }  {
 # Results:
 #
 
-proc ::chasearrows::WidgetProc { w command args }  {
+proc ::chasearrows::WidgetProc {w command args} {
     
     variable widgetGlobals
     variable widgetOptions
@@ -284,12 +284,12 @@ proc ::chasearrows::WidgetProc { w command args }  {
     upvar ::chasearrows::${w}::widgets widgets
     upvar ::chasearrows::${w}::options options
     
-    if {$widgetGlobals(debug) > 1}  {
+    if {$widgetGlobals(debug) > 1} {
 	puts "::chasearrows::WidgetProc w=$w, command=$command, args=$args"
     }
     
     # Error checking.
-    if {[lsearch -exact $widgetCommands $command] == -1}  {
+    if {[lsearch -exact $widgetCommands $command] == -1} {
 	error "unknown chasearrows command: $command"
     }
     set result {}
@@ -297,7 +297,7 @@ proc ::chasearrows::WidgetProc { w command args }  {
     # Which command?
     switch -- $command {
 	cget {
-	    if {[llength $args] != 1}  {
+	    if {[llength $args] != 1} {
 		error "wrong # args: should be $w cget option"
 	    }
 	    set result $options($args)
@@ -325,7 +325,7 @@ proc ::chasearrows::WidgetProc { w command args }  {
 # Results:
 #
 
-proc ::chasearrows::Configure { w args }  {
+proc ::chasearrows::Configure {w args} {
     
     variable widgetGlobals
     variable widgetOptions
@@ -333,17 +333,17 @@ proc ::chasearrows::Configure { w args }  {
     upvar ::chasearrows::${w}::widgets widgets
     upvar ::chasearrows::${w}::wlocals wlocals
     
-    if {$widgetGlobals(debug) > 1}  {
+    if {$widgetGlobals(debug) > 1} {
 	puts "::chasearrows::Configure w=$w, args=$args"
     }
     
     # Error checking.
     foreach {name value} $args  {
-	if {![info exists widgetOptions($name)]}  {
+	if {![info exists widgetOptions($name)]} {
 	    error "unknown option for the chasearrows: $name"
 	}
     }
-    if {[llength $args] == 0}  {
+    if {[llength $args] == 0} {
 	
 	# Return all options.
 	foreach opt [lsort [array names widgetOptions]] {
@@ -353,7 +353,7 @@ proc ::chasearrows::Configure { w args }  {
 	    lappend results [list $opt $optName $optClass $def $options($opt)]
 	}
 	return $results
-    } elseif {[llength $args] == 1}  {
+    } elseif {[llength $args] == 1} {
 	
 	# Return configuration value for this option.
 	set opt $args
@@ -364,7 +364,7 @@ proc ::chasearrows::Configure { w args }  {
     }
     
     # Error checking.
-    if {[expr {[llength $args]%2}] == 1}  {
+    if {[expr {[llength $args]%2}] == 1} {
 	error "value for \"[lindex $args end]\" missing"
     }    
         
@@ -374,13 +374,13 @@ proc ::chasearrows::Configure { w args }  {
         
     foreach opt [array names opts] {
 	set newValue $opts($opt)
-	if {[info exists options($opt)]}  {
+	if {[info exists options($opt)]} {
 	    set oldValue $options($opt)
 	} else  {
 	    set oldValue {}
 	}
 	set options($opt) $newValue
-	if {$widgetGlobals(debug) > 1}  {
+	if {$widgetGlobals(debug) > 1} {
 	    puts "::chasearrows::Configure opt=$opt, n=$newValue, o=$oldValue"
 	}
 	
@@ -420,7 +420,7 @@ proc ::chasearrows::Start {w} {
     upvar ::chasearrows::${w}::widgets widgets
     upvar ::chasearrows::${w}::wlocals wlocals
 
-    if {$widgetGlobals(debug) > 1}  {
+    if {$widgetGlobals(debug) > 1} {
 	puts "::chasearrows::Start w=$w"
     }
     set wlocals(thetaInd) 0
@@ -495,7 +495,7 @@ proc ::chasearrows::Stop {w} {
     upvar ::chasearrows::${w}::widgets widgets
     upvar ::chasearrows::${w}::wlocals wlocals
 
-    if {$widgetGlobals(debug) > 1}  {
+    if {$widgetGlobals(debug) > 1} {
 	puts "::chasearrows::Stop w=$w"
     }
     if {[info exists wlocals(killerId)]} {

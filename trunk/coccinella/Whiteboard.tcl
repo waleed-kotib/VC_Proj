@@ -11,11 +11,11 @@
 #      contains a library of canvas items that are accesable directly from
 #      a menu.
 #      
-#  Copyright (c) 1999-2002  Mats Bengtsson
+#  Copyright (c) 1999-2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Whiteboard.tcl,v 1.2 2002-12-15 09:10:55 matben Exp $
+# $Id: Whiteboard.tcl,v 1.3 2003-01-11 16:16:08 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -129,13 +129,13 @@ if {[llength [namespace children :: "::browser*"]] > 0} {
 }
 
 # Level of detail for printouts. >= 2 for my outputs.
-set debugLevel 3
+set debugLevel 0
 # Level of detail for printouts for server. >= 2 for my outputs.
-set debugServerLevel 3
+set debugServerLevel 0
 # Macintosh only: if no debug printouts, no console. Also for windows?
-if {[string equal $this(platform) "macintosh"] &&   \
+if {[string match "mac*" $this(platform)] &&   \
   $debugLevel == 0 && $debugServerLevel == 0} {
-    console hide
+    catch {console hide}
 }
 proc Debug {num str} {
     global  debugLevel
@@ -367,9 +367,6 @@ set allLibSourceFiles {
 }
 
 foreach sourceName $allLibSourceFiles {
-    #puts "Sourcing $sourceName"
-    #after 10
-    #update
     if {0 && [catch {source [file join $this(path) lib $sourceName]} msg]} {
 	after idle {tk_messageBox -message "Error sourcing $sourceName:  $msg"  \
 	  -icon error -type ok; exit}
@@ -391,7 +388,7 @@ set prefs(tls) 0
 set prefs(optcl) 0
 set prefs(tcom) 0
 switch -- $this(platform) {
-    "macintosh" {
+    macintosh {
 	if {[catch {source [file join $this(path) lib MacintoshUtils.tcl]} msg]} {
 	    after idle {tk_messageBox -message "Error sourcing MacintoshUtils.tcl  $msg"  \
 	      -icon error -type ok; exit}
@@ -400,7 +397,7 @@ switch -- $this(platform) {
 	    set prefs(applescript) 1
 	}
     }
-    "windows" {
+    windows {
 	if {[catch {source [file join $this(path) lib WindowsUtils.tcl]} msg]} {
 	    after idle {tk_messageBox -message "Error sourcing WindowsUtils.tcl  $msg"  \
 	      -icon error -type ok; exit}
@@ -419,7 +416,7 @@ switch -- $this(platform) {
 	    set prefs(tcom) 1
 	}
     }
-    "unix" {
+    unix {
 	if {![catch {package require tls} msg]} {
 	    set prefs(tls) 1
 	}
@@ -430,26 +427,26 @@ switch -- $this(platform) {
 
 set ::SplashScreen::startMsg [::msgcat::mc splashload]
 
-set listOfPackages { \
-  CanvasDraw         \
-  CanvasText         \
-  CanvasUtils        \
-  Connections        \
-  FilesAndCanvas     \
-  FileCache          \
-  Preferences        \
-  PreferencesUtils   \
-  TinyHttpd          \
-  combobox           \
-  Pane               \
-  moviecontroller    \
-  fontselection      \
-  tablelist          \
-  balloonhelp        \
-  undo               \
-  can2svg            }
+set listOfPackages {
+    CanvasDraw
+    CanvasText
+    CanvasUtils
+    Connections
+    FilesAndCanvas
+    FileCache
+    Preferences
+    PreferencesUtils
+    TinyHttpd
+    combobox
+    Pane
+    moviecontroller
+    fontselection
+    tablelist
+    balloonhelp
+    undo
+    can2svg            
+}
 foreach packName $listOfPackages {
-    #puts "packName=$packName"
     package require $packName
 }
 if {[catch {package require progressbar} msg]} {
@@ -490,7 +487,6 @@ namespace import ::UserActions::*
 ::FileCache::SetBasedir $this(path)
 
 # Define MIME types etc., and get packages.
-
 if {[catch {source [file join $this(path) lib MimeTypesAndPlugins.tcl]} msg]} {
     tk_messageBox -message "Error sourcing MimeTypesAndPlugins.tcl  $msg"  \
       -icon error -type ok
@@ -572,9 +568,6 @@ if {[catch {source [file join $this(path) lib SetFactoryDefaults.tcl]} msg]} {
     exit
 }
 
-# Various initializations for canvas stuff.
-::CanvasUtils::Init
-
 set ::SplashScreen::startMsg [::msgcat::mc splashprefs]
 
 # Set defaults in the option database for widget classes.
@@ -598,11 +591,21 @@ VerifyPackagesForMimeTypes
 
 #--- User Interface ------------------------------------------------------------
 
+# Various initializations for canvas stuff and UI.
+::CanvasUtils::Init
+::UI::Init
+
 # Create the mapping between Html sizes and font point sizes dynamically.
 ::CanvasUtils::CreateFontSizeMapping
 
 # Make the actual whiteboard with canvas, tool buttons etc...
 ::UI::BuildMain .
+if {$prefs(firstLaunch) && !$prefs(stripJabber)} {
+    wm withdraw .
+    set displaySetup 1
+} else {
+    set displaySetup 0
+}
 
 # A mechanism to set -state of cut/copy/paste. Not robust!!!
 # Entry copy/paste.
@@ -622,9 +625,10 @@ bind Text <<Copy>> "+ ::UI::FixMenusWhenSelection %W"
 set ::SplashScreen::startMsg {}
 after 500 {catch {destroy $wDlgs(splash)}}
 
-# Do we need all the jabber stuff? Is this the right place?
+# Do we need all the jabber stuff? Is this the right place? Need it for setup!
 if {!$prefs(stripJabber)} {
-    after idle {::Jabber::Init}
+    #after idle {::Jabber::Init}
+    ::Jabber::Init
     after 1200 {::Sounds::Init}
 } else {
     
@@ -633,14 +637,20 @@ if {!$prefs(stripJabber)} {
 }
 
 # Setup assistant. Must be called after initing the jabber stuff.
-if {$prefs(firstLaunch) && !$prefs(stripJabber)} {
+if {$displaySetup} {
+    package require SetupAss
+
+    ::Jabber::::RostServ::Show $wDlgs(jrostbro) -visible 0
     catch {destroy $wDlgs(splash)}
     update
-    package require SetupAss
     ::SetupAss::SetupAss .setupass
     ::UI::CenterWindow .setupass
     raise .setupass
     tkwait window .setupass
+    
+    ::Jabber::::RostServ::Show $wDlgs(jrostbro) -visible 1
+    wm deiconify .
+    raise .
 }
 
 # Is it the first time it is launched, then show the welcome canvas.
@@ -675,7 +685,7 @@ if {($prefs(protocol) != "client") && $prefs(autoStartServer)} {
 # Start the TinyHttpd server. Perhaps this should go in its own process,
 # or perhaps in its own thread...?
 
-if {$prefs(protocol) != "client"} {
+if {($prefs(protocol) != "client") && ($this(platform) != "macintosh")} {
     if {[catch {  \
       ::TinyHttpd::StartHttpServer $prefs(httpdPort) $prefs(httpdBaseDir)} msg]} {
 	tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \

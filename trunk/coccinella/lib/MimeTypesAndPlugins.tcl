@@ -11,7 +11,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: MimeTypesAndPlugins.tcl,v 1.1.1.1 2002-12-08 11:03:36 matben Exp $
+# $Id: MimeTypesAndPlugins.tcl,v 1.2 2003-01-11 16:16:09 matben Exp $
 
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -45,110 +45,115 @@
 #
 #-------------------------------------------------------------------------------
 
+namespace eval ::Importers:: {
+    
+    
+}
+
 # We start by defining general relations between MIME types etc.
 # Mapping from MIME type to a list of suffixes.
 
 array set mime2SuffixList {
-    application/x-world  {.3dmf .3dm  .qd3d .qd3}                   \
-    application/x-3dmf   {.3dmf .3dm  .qd3d .qd3}                   \
-    application/x-tcl    {.tcl}                                     \
-    application/sdp      {.sdp}                                     \
-    application/x-shockwave-flash  {.swf}                           \
-    application/x-macbinary {.bin}                                  \
-    application/vtk      {.vtk  .g    .cyb  .tri  .stl  .wrl}       \
-    application/octet-stream {.bin .exe .gz .Z .zip}                \
-    application/pdf      {.pdf}                                     \
-    application/postscript {.eps .ps}                               \
-    application/rtf      {.rtf}                                     \
-    application/x-javascript {.js}                                  \
-    application/x-tex    {.tex}                                     \
-    application/x-tar    {.tar}                                     \
+    application/x-world  {.3dmf .3dm  .qd3d .qd3}
+    application/x-3dmf   {.3dmf .3dm  .qd3d .qd3}
+    application/x-tcl    {.tcl}
+    application/sdp      {.sdp}
+    application/x-shockwave-flash  {.swf}
+    application/x-macbinary {.bin}
+    application/vtk      {.vtk  .g    .cyb  .tri  .stl  .wrl}
+    application/octet-stream {.bin .exe .gz .Z .zip}
+    application/pdf      {.pdf}
+    application/postscript {.eps .ps}
+    application/rtf      {.rtf}
+    application/x-javascript {.js}
+    application/x-tex    {.tex}
+    application/x-tar    {.tar}
     audio/mpeg           {.mpeg .m1s  .m15  .m1a  .m1v  .m64  .m75  \
-                          .mp2  .mpa  .mpg  .mpm  .mpv  .mp3}       \
+                          .mp2  .mpa  .mpg  .mpm  .mpv  .mp3}
     audio/x-mpeg         {.mpeg .m1s  .m15  .m1a  .m1v  .m64  .m75  \
-                          .mp2  .mpa  .mpg  .mpm  .mpv  .mp3}       \
-    audio/aiff           {.aif  .aiff .aifc}                        \
-    audio/x-aiff         {.aif  .aiff .aifc}                        \
-    audio/basic          {.au   .snd  .ulw}                         \
-    audio/x-sd2          {.sd2}                                     \
-    audio/wav            {.wav}                                     \
-    audio/x-wav          {.wav}                                     \
-    audio/vnd.qcelp      {.qcp}                                     \
-    audio/midi           {.mifi .mid  .smf  .kar}                   \
-    audio/x-midi         {.mifi .mid  .smf  .kar}                   \
-    image/x-bmp          {.bmp}                                     \
-    image/vnd.fpx        {.fpx}                                     \
-    image/gif            {.gif}                                     \
-    image/jpeg           {.jpg  .jpeg}                              \
-    image/x-macpaint     {.pntg .pnt  .mac}                         \
-    image/x-photoshop    {.psd}                                     \
-    image/png            {.png}                                     \
-    image/x-png          {.png}                                     \
-    image/pict           {.pict .pic  .pct}                         \
-    image/x-sgi          {.sgi  .rgb}                               \
-    image/x-targa        {.tga}                                     \
-    image/tiff           {.tif  .tiff}                              \
-    image/x-tiff         {.tif  .tiff}                              \
-    text/plain           {.txt}                                     \
-    text/html            {.html .htm}                               \
-    text/richtext        {.rtx}                                     \
-    text/xml             {.xml}                                     \
-    video/quicktime      {.mov  .qt}                                \
-    video/x-msvideo      {.avi}                                     \
-    video/avi            {.avi}                                     \
-    video/x-dv           {.dif  .dv}                                \
+                          .mp2  .mpa  .mpg  .mpm  .mpv  .mp3}
+    audio/aiff           {.aif  .aiff .aifc}
+    audio/x-aiff         {.aif  .aiff .aifc}
+    audio/basic          {.au   .snd  .ulw}
+    audio/x-sd2          {.sd2}
+    audio/wav            {.wav}
+    audio/x-wav          {.wav}
+    audio/vnd.qcelp      {.qcp}
+    audio/midi           {.mifi .mid  .smf  .kar}
+    audio/x-midi         {.mifi .mid  .smf  .kar}
+    image/x-bmp          {.bmp}
+    image/vnd.fpx        {.fpx}
+    image/gif            {.gif}
+    image/jpeg           {.jpg  .jpeg}
+    image/x-macpaint     {.pntg .pnt  .mac}
+    image/x-photoshop    {.psd}
+    image/png            {.png}
+    image/x-png          {.png}
+    image/pict           {.pict .pic  .pct}
+    image/x-sgi          {.sgi  .rgb}
+    image/x-targa        {.tga}
+    image/tiff           {.tif  .tiff}
+    image/x-tiff         {.tif  .tiff}
+    text/plain           {.txt}
+    text/html            {.html .htm}
+    text/richtext        {.rtx}
+    text/xml             {.xml}
+    video/quicktime      {.mov  .qt}
+    video/x-msvideo      {.avi}
+    video/avi            {.avi}
+    video/x-dv           {.dif  .dv}
     video/mpeg           {.mpeg .m1s  .m15  .m1a  .m1v  .m64  .m75  \
-                          .mpa  .mpg  .mpm  .mpv}                   \
+                          .mpa  .mpg  .mpm  .mpv}
     video/x-mpeg         {.mpeg .m1s  .m15  .m1a  .m1v  .m64  .m75  \
-                          .mpa  .mpg  .mpm  .mpv}                   \
-    video/flc            {.flc  .fli}                               \
+                          .mpa  .mpg  .mpm  .mpv}
+    video/flc            {.flc  .fli}
 }
 
 array set mime2Description {
-    application/x-tcl    {Tcl Application}                     \
-    application/sdp      {Session Description Protocol}        \
-    application/x-world  {World Application}                   \
-    application/x-3dmf   {3D Meta Format}                      \
-    application/x-shockwave-flash  {Shockwave Flash}           \
-    application/postscript  {Postscript Document }             \
-    application/x-macbinary {Mac Binary}                       \
-    application/vtk      {VTK 3D}                              \
-    application/pdf      {Portable Document Format}            \
-    application/rtf      {Rich Text Format}                    \
-    audio/mpeg           {MPEG Audio}                          \
-    audio/x-mpeg         {MPEG Audio}                          \
-    audio/aiff           {AIFF Audio}                          \
-    audio/x-aiff         {AIFF Audio}                          \
-    audio/basic          {ULAW Audio}                          \
-    audio/x-sd2          {Streaming Audio}                     \
-    audio/wav            {WAV Audio}                           \
-    audio/x-wav          {WAV Audio}                           \
-    audio/vnd.qcelp      {QCP Audio}                           \
-    audio/midi           {MIDI Audio}                          \
-    audio/x-midi         {MIDI Audio}                          \
-    image/x-bmp          {Windows BMP Image}                   \
-    image/vnd.fpx        {Image}                               \
-    image/gif            {GIF Image}                           \
-    image/jpeg           {JPEG Image}                          \
-    image/x-macpaint     {Macpaint Image}                      \
-    image/x-photoshop    {Photoshop Image}                     \
-    image/png            {PNG Image}                           \
-    image/x-png          {PNG Image}                           \
-    image/pict           {PICT Image}                          \
-    image/x-sgi          {SGI Image}                           \
-    image/x-targa        {Targa Truevision Image}              \
-    image/tiff           {TIFF Image}                          \
-    image/x-tiff         {TIFF Image}                          \
-    text/plain           {Plain Text}                          \
-    text/xml             {Extensible Markup Language}          \
-    text/html            {Hypertext Markup Language}           \
-    video/quicktime      {QuickTime Video}                     \
-    video/x-dv           {DV Video}                            \
-    video/mpeg           {MPEG Video}                          \
-    video/x-mpeg         {MPEG Video and Audio}                \
-    video/x-msvideo      {Microsoft Video}                     \
-    video/avi            {Microsoft Video}                     \
-    video/flc            {FLC Animation}                       \
+    application/x-tcl    {Tcl Application}
+    application/sdp      {Session Description Protocol}
+    application/x-world  {World Application}
+    application/x-3dmf   {3D Meta Format}
+    application/x-shockwave-flash  {Shockwave Flash}
+    application/postscript  {Postscript Document}
+    application/x-macbinary {Mac Binary}
+    application/vtk      {VTK 3D}
+    application/pdf      {Portable Document Format}
+    application/rtf      {Rich Text Format}
+    audio/mpeg           {MPEG Audio}
+    audio/x-mpeg         {MPEG Audio}
+    audio/aiff           {AIFF Audio}
+    audio/x-aiff         {AIFF Audio}
+    audio/basic          {ULAW Audio}
+    audio/x-sd2          {Streaming Audio}
+    audio/wav            {WAV Audio}
+    audio/x-wav          {WAV Audio}
+    audio/vnd.qcelp      {QCP Audio}
+    audio/midi           {MIDI Audio}
+    audio/x-midi         {MIDI Audio}
+    image/x-bmp          {Windows BMP Image}
+    image/vnd.fpx        {Image}
+    image/gif            {GIF Image}
+    image/jpeg           {JPEG Image}
+    image/x-macpaint     {Macpaint Image}
+    image/x-photoshop    {Photoshop Image}
+    image/png            {PNG Image}
+    image/x-png          {PNG Image}
+    image/pict           {PICT Image}
+    image/x-sgi          {SGI Image}
+    image/x-targa        {Targa Truevision Image}
+    image/tiff           {TIFF Image}
+    image/x-tiff         {TIFF Image}
+    text/plain           {Plain Text}
+    text/xml             {Extensible Markup Language}
+    text/html            {Hypertext Markup Language}
+    video/quicktime      {QuickTime Video}
+    video/x-dv           {DV Video}
+    video/mpeg           {MPEG Video}
+    video/x-mpeg         {MPEG Video and Audio}
+    video/x-msvideo      {Microsoft Video}
+    video/avi            {Microsoft Video}
+    video/flc            {FLC Animation}
 }
     
 # Create the inverse mapping, from a suffix to a list of MIME types.
@@ -183,49 +188,49 @@ foreach theMime [array names mime2SuffixList] {
 # Mapping from MIME type to a list of Mac types.
 
 array set mime2MacTypesList {
-    application/x-tcl    {TEXT}                                   \
-    application/x-world  {3DMF}                                   \
-    application/x-3dmf   {3DMF}                                   \
-    application/sdp      {TEXT}                                   \
-    application/x-shockwave-flash  {SWFL "SWF "}                  \
-    application/postscript  {TEXT}                                \
-    application/vtk      {????}                                   \
+    application/x-tcl    {TEXT}
+    application/x-world  {3DMF}
+    application/x-3dmf   {3DMF}
+    application/sdp      {TEXT}
+    application/x-shockwave-flash  {SWFL "SWF "}
+    application/postscript  {TEXT}
+    application/vtk      {????}
     application/pdf      {"PDF "}
     audio/mpeg           {MPEG MPGa MPGv MPGx "Mp3 " SwaT         \
-                          PLAY MPG3 "MP3 "}                       \
+                          PLAY MPG3 "MP3 "}
     audio/x-mpeg         {MPEG MPGa MPGv MPGx "Mp3 " SwaT         \
-                          PLAY MPG3 "MP3 "}                       \
-    audio/aiff           {AIFF AIFC}                              \
-    audio/x-aiff         {AIFF AIFC}                              \
-    audio/basic          {ULAW}                                   \
-    audio/x-sd2          {Sd2f "SD2 "}                            \
-    audio/wav            {WAVE "WAV "}                            \
-    audio/x-wav          {WAVE "WAV "}                            \
-    audio/vnd.qcelp      {????}                                   \
-    audio/midi           {Midi}                                   \
-    audio/x-midi         {Midi}                                   \
-    image/x-bmp          {"BMP " BMPf}                            \
-    image/vnd.fpx        {FPix}                                   \
-    image/gif            {GIFf "GIF "}                            \
-    image/jpeg           {JPEG}                                   \
-    image/x-macpaint     {PNTG}                                   \
-    image/x-photoshop    {8BPS}                                   \
-    image/png            {PNGf "PNG "}                            \
-    image/x-png          {PNGf "PNG "}                            \
-    image/pict           {PICT}                                   \
-    image/x-sgi          {"SGI "}                                 \
-    image/x-targa        {TPIC}                                   \
-    image/tiff           {TIFF}                                   \
-    image/x-tiff         {TIFF}                                   \
-    text/plain           {TEXT}                                   \
-    text/html            {TEXT}                                   \
-    video/flc            {"FLI "}                                 \
-    video/quicktime      {MooV}                                   \
-    video/x-dv           {dvc!}                                   \
-    video/mpeg           {MPEG MPGa MPGv MPGx}                    \
-    video/x-mpeg         {MPEG MPGa MPGv MPGx}                    \
-    video/x-msvideo      {"VfW "}                                 \
-    video/avi            {"VfW "}                                 \
+                          PLAY MPG3 "MP3 "}
+    audio/aiff           {AIFF AIFC}
+    audio/x-aiff         {AIFF AIFC}
+    audio/basic          {ULAW}
+    audio/x-sd2          {Sd2f "SD2 "}
+    audio/wav            {WAVE "WAV "}
+    audio/x-wav          {WAVE "WAV "}
+    audio/vnd.qcelp      {????}
+    audio/midi           {Midi}
+    audio/x-midi         {Midi}
+    image/x-bmp          {"BMP " BMPf}
+    image/vnd.fpx        {FPix}
+    image/gif            {GIFf "GIF "}
+    image/jpeg           {JPEG}
+    image/x-macpaint     {PNTG}
+    image/x-photoshop    {8BPS}
+    image/png            {PNGf "PNG "}
+    image/x-png          {PNGf "PNG "}
+    image/pict           {PICT}
+    image/x-sgi          {"SGI "}
+    image/x-targa        {TPIC}
+    image/tiff           {TIFF}
+    image/x-tiff         {TIFF}
+    text/plain           {TEXT}
+    text/html            {TEXT}
+    video/flc            {"FLI "}
+    video/quicktime      {MooV}
+    video/x-dv           {dvc!}
+    video/mpeg           {MPEG MPGa MPGv MPGx}
+    video/x-mpeg         {MPEG MPGa MPGv MPGx}
+    video/x-msvideo      {"VfW "}
+    video/avi            {"VfW "}
 }
 
 # Create the inverse mapping, from a mac type to a list of MIME types.
@@ -242,20 +247,21 @@ foreach theMime [array names mime2MacTypesList] {
 # the network file *must* have a suffix.
 # Some are missing...
 array set macType2Suff {
-    TEXT   .txt          GIFf   .gif          GIFF   .gif   \
-    JPEG   .jpg          MooV   .mov          PLAY   .mp3   \
-    ULAW   .au           PNGf   .png          "VfW " .avi   \
-    dvc!   .dv           MPEG   .mpg          MPGa   .m1a   \
-    MPGv   .m1v          MPGx   .m64          AIFF   .aif   \
-    "PNG " .png          TIFF   .tif          PICT   .pct   \
-    SWFL   .swf          AIFC   .aif          "Mp3 " .mp3   \
-    SwaT   .swa          MPG3   .mp3          "MP3 " .mp3   \
-    Sd2f   .sd2          "SD2 " .sd2          WAVE   .wav   \
-    "WAV " .wav          sfil   .snd          "BMP " .bmp   \
-    BMPf   .bmp          FPix   .fpx          PNTG   .pnt   \
-    8BPS   .psd          qtif   .qtif         "SGI " .sgi   \
-    TPIC   .tga          3DMF   .3dmf         "FLI " .fli   \
-    "SWF " .swf          Midi   .mid}
+    TEXT   .txt          GIFf   .gif          GIFF   .gif
+    JPEG   .jpg          MooV   .mov          PLAY   .mp3
+    ULAW   .au           PNGf   .png          "VfW " .avi
+    dvc!   .dv           MPEG   .mpg          MPGa   .m1a
+    MPGv   .m1v          MPGx   .m64          AIFF   .aif
+    "PNG " .png          TIFF   .tif          PICT   .pct
+    SWFL   .swf          AIFC   .aif          "Mp3 " .mp3
+    SwaT   .swa          MPG3   .mp3          "MP3 " .mp3
+    Sd2f   .sd2          "SD2 " .sd2          WAVE   .wav
+    "WAV " .wav          sfil   .snd          "BMP " .bmp
+    BMPf   .bmp          FPix   .fpx          PNTG   .pnt
+    8BPS   .psd          qtif   .qtif         "SGI " .sgi
+    TPIC   .tga          3DMF   .3dmf         "FLI " .fli
+    "SWF " .swf          Midi   .mid
+}
 
 # ...and the inverse mapping. Maybe there are problems with uniqueness? (.gif)
 InvertArray macType2Suff suff2MacType
@@ -327,18 +333,19 @@ set plugin(QuickTimeTcl,icon,12) [image create photo -format gif -file \
 # We must list supported MIME types for each package.
 # For QuickTime:
 set supportedMimeTypes(QuickTimeTcl) {\
-    video/quicktime     video/x-dv          video/mpeg         \
-    video/x-mpeg        audio/mpeg          audio/x-mpeg       \
-    video/x-msvideo     application/sdp     audio/aiff         \
-    audio/x-aiff        audio/basic         audio/x-sd2        \
-    audio/wav           audio/x-wav         image/x-bmp        \
-    image/vnd.fpx       image/gif           image/jpeg         \
-    image/x-macpaint    image/x-photoshop   image/png          \
-    image/x-png         image/pict          image/x-sgi        \
-    image/x-targa       image/tiff          image/x-tiff       \
-    application/x-world application/x-3dmf  video/flc          \
-    application/x-shockwave-flash           audio/midi         \
-    audio/x-midi        audio/vnd.qcelp     video/avi }
+    video/quicktime     video/x-dv          video/mpeg\
+    video/x-mpeg        audio/mpeg          audio/x-mpeg\
+    video/x-msvideo     application/sdp     audio/aiff\
+    audio/x-aiff        audio/basic         audio/x-sd2\
+    audio/wav           audio/x-wav         image/x-bmp\
+    image/vnd.fpx       image/gif           image/jpeg\
+    image/x-macpaint    image/x-photoshop   image/png\
+    image/x-png         image/pict          image/x-sgi\
+    image/x-targa       image/tiff          image/x-tiff\
+    application/x-world application/x-3dmf  video/flc\
+    application/x-shockwave-flash           audio/midi\
+    audio/x-midi        audio/vnd.qcelp     video/avi\
+}
 
 #--- TclSpeech via PlainTalk if available --------------------------------------
   
@@ -375,9 +382,10 @@ set plugin(snack,desc) "The Snack Sound extension adds audio capabilities\
 set plugin(snack,platform) $packages2Platform(snack)
 set plugin(snack,importProc) ::ImageAndMovie::DoImport
 set supportedMimeTypes(snack) {\
-    audio/wav           audio/x-wav         audio/basic        \
-    audio/aiff          audio/x-aiff        audio/mpeg         \
-    audio/x-mpeg }
+    audio/wav           audio/x-wav         audio/basic\
+    audio/aiff          audio/x-aiff        audio/mpeg\
+    audio/x-mpeg\
+}
 
 #--- Img -----------------------------------------------------------------------
 # On Unix/Linux and Windows we try to find the Img extension for reading more
@@ -389,9 +397,10 @@ set plugin(Img,desc) "Adds more image formats than the standard one (gif)."
 set plugin(Img,platform) $packages2Platform(Img)
 set plugin(Img,importProc) ::ImageAndMovie::DoImport
 set supportedMimeTypes(Img) {\
-    image/x-bmp         image/gif           image/jpeg         \
-    image/png           image/x-png         image/tiff         \
-    image/x-tiff        application/postscript}
+    image/x-bmp         image/gif           image/jpeg\
+    image/png           image/x-png         image/tiff\
+    image/x-tiff\
+}
 
 #--- xanim ---------------------------------------------------------------------
 # Test the 'xanim' app on Unix/Linux for multimedia.
@@ -405,9 +414,10 @@ set plugin(xanim,importProc) ::ImageAndMovie::DoImport
 
 # There are many more...
 set supportedMimeTypes(xanim) {\
-    audio/wav           audio/x-wav         video/mpeg         \
-    video/x-mpeg        audio/mpeg          audio/x-mpeg       \
-    audio/basic         video/quicktime }
+    audio/wav           audio/x-wav         video/mpeg\
+    video/x-mpeg        audio/mpeg          audio/x-mpeg\
+    audio/basic         video/quicktime\
+}
       
 # Add more supported filetypes as additional extensions and Mac types.
 # Hook for adding other packages or plugins
@@ -852,13 +862,33 @@ proc GetPreferredPackage {mime} {
     global  mimeTypeDoWhat
     
     set doWhat $mimeTypeDoWhat($mime)
-    if {[string equal $doWhat "reject"] ||     \
-      [string equal $doWhat "unavailable"] ||  \
-      [string equal $doWhat "ask"] ||          \
-      [string equal $doWhat "save"]} {
-	return {}
+    switch -- $doWhat {
+	reject - unavailable - ask - save {
+	    return ""
+	}
+	default {
+	    return $doWhat
+	}
+    }
+}
+
+# ::Importers::DispatchToImporter --
+# 
+# 
+
+proc ::Importers::DispatchToImporter {filePath mime optList} {
+    global  prefs wapp
+    
+    upvar ::.::wapp wapp
+
+    if {[string equal $prefs(protocol) "jabber"]} {
+	::Jabber::WB::DispatchToImporter $filePath $mime $optList
     } else {
-	return $doWhat
+	set importPackage [GetPreferredPackage $mime]
+	if {[llength $importPackage]} {
+	    eval [list $plugin($importPackage,importProc) $wapp(servCan)  \
+	      $optList -file $filePath -where "local"]
+	}
     }
 }
 

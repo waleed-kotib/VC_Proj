@@ -4,11 +4,11 @@
 #       of procedures for performing a put operation over the network from
 #       a disk file.
 #      
-#  Copyright (c) 2002  Mats Bengtsson
+#  Copyright (c) 2002-2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: PutFileIface.tcl,v 1.1.1.1 2002-12-08 11:04:12 matben Exp $
+# $Id: PutFileIface.tcl,v 1.2 2003-01-11 16:16:09 matben Exp $
 
 package require putfile
 package require uriencode
@@ -64,69 +64,67 @@ proc ::PutFileIface::PutFile {wtop fileName where {optList {}}} {
     global  allIPnumsToSend prefs this
     
     variable putTokenList
-
+    
     Debug 2 "+PutFile:: fileName=$fileName, optList=$optList"
-
+    
     if {[llength $allIPnumsToSend] == 0} {
 	return
     }
-    
-    # This must never fail (application/octet-stream as fallback).
-    set mime [GetMimeTypeFromFileName $fileName]
     
     # Add an alternative way of getting this file via an URL.
     set relPath [filerelative $prefs(httpdBaseDir) $fileName]
     set relPath [uriencode::quotepath $relPath]
     lappend optList  \
       "Get-Url:" "http://$this(ipnum):$prefs(httpdPort)/$relPath"
-    
-    if {[string equal $prefs(protocol) "jabber"]} {
-	set optList [concat $optList [::Jabber::GetJabberPutData $wtop]]
-    }
-    
+        
     # If we are a server in a client-server we need to ask the client
     # to get the file by sending a PUT NEW instruction to it on our
     # primary connection.
-    if {[string equal $prefs(protocol) "server"]} {
-	set relFilePath [filerelative $this(path) $fileName]
-	set putCmd "PUT NEW: [list $relFilePath] $optList"
-	if {$where == "remote" || $where == "all"} {
-	    SendClientCommand $wtop $putCmd
-	} else {
-	    SendClientCommand $wtop $putCmd -ips $where
-	}
-    } else {    
-	
-	# Make a list with all ip numbers to put file to.
-	# The jabber needs special treatment.
-	if {$where == "remote" || $where == "all"} {
-	    if {[string equal $prefs(protocol) "jabber"]} {
-		
-		# Only the jid (jid's if groupchat) if available and with
-		# known ip number are returned here. 
-		set allPutIP [::Jabber::GetAvailableIPsAndSchedulePutFile  \
-		  $fileName $optList]
+    switch -- $prefs(protocol) {
+	server {
+	    set relFilePath [filerelative $this(path) $fileName]
+	    set putCmd "PUT NEW: [list $relFilePath] $optList"
+	    if {$where == "remote" || $where == "all"} {
+		SendClientCommand $wtop $putCmd
 	    } else {
-		set allPutIP $allIPnumsToSend
+		SendClientCommand $wtop $putCmd -ips $where
 	    }
-	} else {
-	    set allPutIP $where
-	}    
+	}
+	jabber {
+	    
+	    # Jabber is special and handled internally.
+	    ::Jabber::PutFileAndSchedule $wtop $fileName $optList
+	}
+	default {
+	    
+	    # Make a list with all ip numbers to put file to.
+	    switch -- $where {
+		remote - all {
+		    set allPutIP $allIPnumsToSend
+		}
+		default {
+		    set allPutIP $where
+		}    
+	    }
     
-	# Get the remote (network) file name (no path, no uri encoding).
-	set dstFile [NativeToNetworkFileName $fileName]
+	    # This must never fail (application/octet-stream as fallback).
+	    set mime [GetMimeTypeFromFileName $fileName]
 	
-	# Loop over all connected servers or only the specified one.
-	foreach ip $allPutIP {
-	    if {[catch {::putfile::put $fileName $ip $prefs(remotePort)  \
-	      -mimetype $mime -timeout [expr 1000 * $prefs(timeout)]  \
-	      -optlist $optList -filetail $dstFile  \
-	      -progress ::PutFileIface::PutProgress  \
-	      -command ::PutFileIface::PutCommand} tok]} {
-		tk_messageBox -title [::msgcat::mc {File Transfer Error}]  \
-		  -type ok -message $tok
-	    } else {
-		lappend putTokenList $tok
+	    # Get the remote (network) file name (no path, no uri encoding).
+	    set dstFile [NativeToNetworkFileName $fileName]
+	    
+	    # Loop over all connected servers or only the specified one.
+	    foreach ip $allPutIP {
+		if {[catch {::putfile::put $fileName $ip $prefs(remotePort)  \
+		  -mimetype $mime -timeout [expr 1000 * $prefs(timeout)]  \
+		  -optlist $optList -filetail $dstFile  \
+		  -progress ::PutFileIface::PutProgress  \
+		  -command ::PutFileIface::PutCommand} tok]} {
+		    tk_messageBox -title [::msgcat::mc {File Transfer Error}]  \
+		      -type ok -message $tok
+		} else {
+		    lappend putTokenList $tok
+		}
 	    }
 	}
     }
@@ -203,9 +201,6 @@ proc ::PutFileIface::PutFileToClient {s ip relativeFilePath optList} {
     
     # Need to find the absolute path to 'relativeFilePath' with respect to
     # our base directory 'this(path)'.
-    
-    #set filePath [AddAbsolutePathWithRelative $this(path) $relativeFilePath]
-    #set filePath [filenormalize [file join $this(path) $relativeFilePath]]
     set filePath [addabsolutepathwithrelative $this(path) $relativeFilePath]
     
     # This must never fail (application/octet-stream as fallback).

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.1.1.1 2002-12-08 11:02:51 matben Exp $
+# $Id: Dialogs.tcl,v 1.2 2003-01-11 16:16:09 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -43,6 +43,7 @@ array set wDlgs {
     jenterroom      .jenterroom
     jcreateroom     .jcreateroom
     jinbox          .jinbox
+    jpresmsg        .jpresmsg
 }
 
 #  ::GetCanvas:: implements the dialog for choosing which client to get the 

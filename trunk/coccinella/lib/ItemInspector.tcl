@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ItemInspector.tcl,v 1.1.1.1 2002-12-08 11:03:26 matben Exp $
+# $Id: ItemInspector.tcl,v 1.2 2003-01-11 16:16:09 matben Exp $
 
 namespace eval ::ItemInspector::  {
     
@@ -82,37 +82,52 @@ namespace eval ::ItemInspector::  {
 #   
 # Arguments:
 #       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
+#       which       a valid specifier for a canvas item
+#       args        ?-state normal|disabled?
 #       
 # Results:
 #       dialog displayed.
 
-proc ::ItemInspector::ItemInspector {wtop {which current}} {
+proc ::ItemInspector::ItemInspector {wtop which args} {
     
     upvar ::${wtop}::wapp wapp
 
     Debug 2 "ItemInspector:: wtop=$wtop, which=$which"
     set wCan $wapp(can)
     
-    # We need to create an item specific instance. Use the item id
-    # for instance.
+    # We need to create an item specific instance. 
+    # Use the item id for instance.
     set itemIdList [$wCan find withtag $which]
     if {[llength $itemIdList] == 0}  {
 	return
     }
+    
+    # Query the whiteboard's state.
+    array set opts [::UI::ConfigureMain $wtop]
+    array set opts $args
     foreach itemId $itemIdList {
-	::ItemInspector::Build $wtop $itemId
+	eval {::ItemInspector::Build $wtop $itemId} [array get opts]
     }
 }
 
-proc ::ItemInspector::Build {wtop itemId} {
+# ItemInspector::Build --
+# 
+#       Builds one inspector window for the specified item.
+
+proc ::ItemInspector::Build {wtop itemId args} {
     global  sysFont prefs fontSize2Points fontPoints2Size  \
       dashShort2Full this
     
     upvar ::${wtop}::wapp wapp
 
     Debug 2 "::ItemInspector::Build wtop=$wtop, itemId=$itemId"
-    set w ".itinsp${itemId}"
+    set w .itinsp${itemId}
     set wCan $wapp(can)
+    
+    # If window already there, just return silently.
+    if {[winfo exists $w]}  {
+	return
+    }
 
     # The local namespace variables.
     variable boolFull2Short
@@ -125,15 +140,15 @@ proc ::ItemInspector::Build {wtop itemId} {
 	variable menuBtVar
 	variable finished
     }
+    array set argsArr {
+	-state    normal
+    }
+    array set argsArr $args
     
     # Refer to them by simpler variable names.
     upvar ::ItemInspector::${w}::menuBtVar menuBtVar
     upvar ::ItemInspector::${w}::finished finished
-    
-    # If window already there, just return.
-    if {[winfo exists $w]}  {
-	error "window name $w already exists!"
-    }
+
     set nl_ {\\n}
     set finished -1
     set itPrefNo [::CanvasUtils::GetUtag $wCan $itemId]
@@ -261,8 +276,12 @@ proc ::ItemInspector::Build {wtop itemId} {
 		pack $frtot.menu$iLine -in $frtot.ent$iLine -side left
 		pack $frtot.entent$iLine -in $frtot.ent$iLine  \
 		  -side left -fill x -expand 1
-		bind $frtot.entent$iLine <Double-Button-1>   \
-		  [list [namespace current]::ChooseItemColor $frtot.entent$iLine]
+		if {$argsArr(-state) == "normal"} {
+		    bind $frtot.entent$iLine <Double-Button-1>   \
+		      [list [namespace current]::ChooseItemColor $frtot.entent$iLine]
+		} else {
+			$frtot.menu$iLine configure -state disabled
+		}
 	    } 
 	    -tags       {
 		
@@ -282,9 +301,9 @@ proc ::ItemInspector::Build {wtop itemId} {
 	    -outlinestipple   -
 	    -style            -
 	    -anchor           -
-	    "-fontfamily"    -
-	    "-fontsize"      -
-	    "-fontweight"    -
+	    "-fontfamily"     -
+	    "-fontsize"       -
+	    "-fontweight"     -
 	    -justify          {
 		if {[string equal $op "-smooth"]}  {
 		    
@@ -307,6 +326,9 @@ proc ::ItemInspector::Build {wtop itemId} {
 		  ::ItemInspector::${w}::menuBtVar($opname)}  \
 		  $theMenuOpts($opname)]
 		$wMenu configure -font $sysFont(sb) 
+		if {$argsArr(-state) == "disabled"} {
+		    $frtot.ent$iLine configure -state disabled
+		}
 		$frtot.ent$iLine configure -font $sysFont(sb) -highlightthickness 0  \
 		  -background $prefs(bgColGeneral) -foreground black
 	    } 
@@ -315,6 +337,9 @@ proc ::ItemInspector::Build {wtop itemId} {
 		# Just an editable text entry widget.
 		entry $frtot.ent$iLine -width 30 
 		$frtot.ent$iLine insert end $val
+		if {$argsArr(-state) == "disabled"} {
+		    $frtot.ent$iLine configure -state disabled
+		}
 	    }
 	}
 	grid $frtot.lbl$iLine -column 0 -row $iLine -sticky e -padx 2 -pady 0
@@ -335,7 +360,7 @@ proc ::ItemInspector::Build {wtop itemId} {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btconn -text [::msgcat::mc Save] -width 8 -default active  \
+    pack [button $frbot.btsave -text [::msgcat::mc Save] -width 8 -default active  \
       -command [list [namespace current]::CanvasConfigureItem $w $wCan  \
       $itemId $listOfAllOptions]]  \
       -side right -padx 5 -pady 5
@@ -345,8 +370,12 @@ proc ::ItemInspector::Build {wtop itemId} {
     pack $frbot -side top -fill both -expand 1 -in $w.frall  \
       -padx 8 -pady 6
     
+    if {$argsArr(-state) == "disabled"} {
+	$frbot.btsave configure -state disabled
+    }
+    
     wm resizable $w 0 0
-    bind $w <Return> "$frbot.btconn invoke"
+    bind $w <Return> "$frbot.btsave invoke"
 }
 
 proc ::ItemInspector::Cancel {w} {
@@ -600,7 +629,7 @@ proc ::ItemInspector::Movie {wtop winfr} {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btconn -text [::msgcat::mc Save] -width 8 -default active  \
+    pack [button $frbot.btsave -text [::msgcat::mc Save] -width 8 -default active  \
       -command [list [namespace current]::MovieConfigure $w $wmov]]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
@@ -610,7 +639,7 @@ proc ::ItemInspector::Movie {wtop winfr} {
       -padx 8 -pady 6
     
     wm resizable $w 0 0
-    bind $w <Return> "$frbot.btconn invoke"
+    bind $w <Return> "$frbot.btsave invoke"
 }
 
 proc ::ItemInspector::MovieConfigure {w wmov} {

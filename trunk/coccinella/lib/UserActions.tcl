@@ -7,429 +7,14 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UserActions.tcl,v 1.1.1.1 2002-12-08 11:05:26 matben Exp $
+# $Id: UserActions.tcl,v 1.2 2003-01-11 16:16:09 matben Exp $
 
 namespace eval ::UserActions:: {
     
-    namespace export  SelectAll DeselectAll RaiseOrLowerItems  \
-      SetCanvasBgColor DoCanvasGrid SavePostscript  \
-      ResizeItem DoEraseAll DoPutCanvasDlg DoPutCanvas   \
+    namespace export   \
+       SavePostscript  \
+       DoEraseAll DoPutCanvasDlg DoPutCanvas   \
       DoGetCanvas
-}
-
-# UserActions::ClickToolButton --
-#
-#       Uhhh...  When a tool button is clicked. Mainly sets all button specific
-#       bindings.
-#       
-# Arguments:
-#       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
-#       btName 
-#       
-# Results:
-#       tool buttons created and mapped
-
-proc ::UserActions::ClickToolButton {wtop btName} {
-    global  prefs wapp plugin this
-    
-    upvar ::${wtop}::wapp wapp
-    upvar ::${wtop}::state state
-
-    Debug 3 "ClickToolButton:: wtop=$wtop, btName=$btName"
-    
-    set wCan $wapp(can)
-    set state(btState) [::UI::ToolBtNameToNum $btName]
-    set irow [string index $state(btState) 0]
-    set icol [string index $state(btState) 1]
-    $wapp(tool).bt$irow$icol configure -image im_on$irow$icol
-    if {$state(btState) != $state(btStateOld)} {
-	set irow [string index $state(btStateOld) 0]
-	set icol [string index $state(btStateOld) 1]
-	$wapp(tool).bt$irow$icol configure -image im_off$irow$icol
-    }
-    set state(btStateOld) $state(btState)
-    RemoveAllBindings $wCan
-    
-    # Deselect text items.
-    if {$btName != "text"} {
-	$wCan select clear
-    }
-    if {$btName == "del" || $btName == "text"} {
-	::UserActions::DeselectAll $wtop
-    }
-    
-    # Cancel any outstanding polygon drawings.
-    ::CanvasDraw::FinalizePoly $wCan -10 -10
-    
-    $wCan config -cursor {}
-    
-    switch -- $btName {
-	point {
-	    bind $wCan <Button-1> {
-		::CanvasDraw::MarkBbox %W 0
-		::CanvasDraw::InitBox %W [%W canvasx %x] [%W canvasy %y] rect
-	    }
-	    bind $wCan <Shift-Button-1>	{
-		::CanvasDraw::MarkBbox %W 1
-		::CanvasDraw::InitBox %W [%W canvasx %x] [%W canvasy %y] rect
-	    }
-	    bind $wCan <B1-Motion> {
-		::CanvasDraw::BoxDrag %W [%W canvasx %x] [%W canvasy %y] 0 rect 1
-		::CanvasUtils::StopTimerToItemPopup
-	    }
-	    bind $wCan <ButtonRelease-1> {
-		::CanvasDraw::FinalizeBox %W [%W canvasx %x] [%W canvasy %y] 0 rect 1
-	    }
-	    bind $wCan <Double-Button-1> [list ::ItemInspector::ItemInspector $wtop]
-
-	    switch -- $this(platform) {
-		macintosh - macosx {
-		    $wCan bind all <Button-1> {
-			
-			# Global coords for popup.
-			::CanvasUtils::StartTimerToItemPopup %W %X %Y 
-		    }
-		    $wCan bind all <ButtonRelease-1> {
-			::CanvasUtils::StopTimerToItemPopup
-		    }
-		    bind QTFrame <Button-1> {
-			::CanvasUtils::StartTimerToWindowPopup %W %X %Y 
-		    }
-		    bind QTFrame <ButtonRelease-1> {
-			::CanvasUtils::StopTimerToWindowPopup
-		    }
-		    bind SnackFrame <Button-1> {
-			::CanvasUtils::StartTimerToWindowPopup %W %X %Y 
-		    }
-		    bind SnackFrame <ButtonRelease-1> {
-			::CanvasUtils::StopTimerToWindowPopup
-		    }
-		    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatpointmac]
-		}
-		default {
-		    $wCan bind all <Button-3> {
-			
-			# Global coords for popup.
-			::CanvasUtils::DoItemPopup %W %X %Y 
-		    }
-		    bind QTFrame <Button-3> {
-			::CanvasUtils::DoWindowPopup %W %X %Y 
-		    }
-		    bind SnackFrame <Button-3> {
-			::CanvasUtils::DoWindowPopup %W %X %Y 
-		    }
-		    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatpoint]		      
-		}
-	    }
-	}
-	move {
-	    
-	    # Bindings for moving items; movies need special class.
-	    # The frame with the movie the mouse events, not the canvas.
-	    # With shift constrained move.
-	    bind $wCan <Button-1> {
-		InitMove %W [%W canvasx %x] [%W canvasy %y]
-	    }
-	    bind $wCan <B1-Motion> {
-		DoMove %W [%W canvasx %x] [%W canvasy %y] item
-	    }
-	    bind $wCan <ButtonRelease-1> {
-		FinalizeMove %W [%W canvasx %x] [%W canvasy %y]
-	    }
-	    bind $wCan <Shift-B1-Motion> {
-		DoMove %W [%W canvasx %x] [%W canvasy %y] item 1
-	    }
-	    
-	    # Moving single coordinates.
-	    $wCan bind tbbox <Button-1> {
-		InitMove %W [%W canvasx %x] [%W canvasy %y] point
-	    }
-	    $wCan bind tbbox <B1-Motion> {
-		DoMove %W [%W canvasx %x] [%W canvasy %y] point
-	    }
-	    $wCan bind tbbox <ButtonRelease-1> {
-		FinalizeMove %W [%W canvasx %x] [%W canvasy %y] point
-	    }
-	    $wCan bind tbbox <Shift-B1-Motion> {
-		DoMove %W [%W canvasx %x] [%W canvasy %y] point 1
-	    }
-		
-	    # Needed this to get wCan substituted in callbacks. Note %%.
-	    set scriptInitMove [format {
-		InitMove %s  \
-		  [%s canvasx [expr [winfo x %%W] + %%x]]  \
-		  [%s canvasy [expr [winfo y %%W] + %%y]] movie
-	    } $wCan $wCan $wCan]	
-	    set scriptDoMove [format {
-		DoMove %s  \
-		  [%s canvasx [expr [winfo x %%W] + %%x]]  \
-		  [%s canvasy [expr [winfo y %%W] + %%y]] movie
-	    } $wCan $wCan $wCan]	
-	    set scriptFinalizeMove [format {
-		FinalizeMove %s  \
-		  [%s canvasx [expr [winfo x %%W] + %%x]]  \
-		  [%s canvasy [expr [winfo y %%W] + %%y]] movie
-	    } $wCan $wCan $wCan]	
-	    set scriptDoMoveCon [format {
-		DoMove %s  \
-		  [%s canvasx [expr [winfo x %%W] + %%x]]  \
-		  [%s canvasy [expr [winfo y %%W] + %%y]] movie 1
-	    } $wCan $wCan $wCan]	
-	    
-	    # Moving movies.
-	    bind QTFrame <Button-1> $scriptInitMove
-	    bind QTFrame <B1-Motion> $scriptDoMove
-	    bind QTFrame <ButtonRelease-1> $scriptFinalizeMove
-	    bind QTFrame <Shift-B1-Motion> $scriptDoMoveCon
-
-	    bind SnackFrame <Button-1> $scriptInitMove
-	    bind SnackFrame <B1-Motion> $scriptDoMove
-	    bind SnackFrame <ButtonRelease-1> $scriptFinalizeMove
-	    bind SnackFrame <Shift-B1-Motion> $scriptDoMoveCon
-	    
-	    # Moving sequence grabber.
-	    bind SGFrame <Button-1> $scriptInitMove
-	    bind SGFrame <B1-Motion> $scriptDoMove
-	    bind SGFrame <ButtonRelease-1> $scriptFinalizeMove
-	    bind SGFrame <Shift-B1-Motion> $scriptDoMoveCon
-	    
-	    $wCan config -cursor hand2
-	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatmove]
-	}
-	line {
-	    bind $wCan <Button-1> {
-		InitLine %W [%W canvasx %x] [%W canvasy %y]
-	    }
-	    bind $wCan <B1-Motion> {
-		LineDrag %W [%W canvasx %x] [%W canvasy %y] 0
-	    }
-	    bind $wCan <Shift-B1-Motion> {
-		LineDrag %W [%W canvasx %x] [%W canvasy %y] 1
-	    }
-	    bind $wCan <ButtonRelease-1> {
-		FinalizeLine %W [%W canvasx %x] [%W canvasy %y] 0
-	    }
-	    bind $wCan <Shift-ButtonRelease-1> {
-		FinalizeLine %W [%W canvasx %x] [%W canvasy %y] 1
-	    }
-	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatline]
-	}
-	arrow {
-	    bind $wCan <Button-1> {
-		InitLine %W [%W canvasx %x] [%W canvasy %y] arrow
-	    }
-	    bind $wCan <B1-Motion> {
-		LineDrag %W [%W canvasx %x] [%W canvasy %y] 0 arrow
-	    }
-	    bind $wCan <Shift-B1-Motion> {
-		LineDrag %W [%W canvasx %x] [%W canvasy %y] 1 arrow
-	    }
-	    bind $wCan <ButtonRelease-1> {
-		FinalizeLine %W [%W canvasx %x] [%W canvasy %y] 0 arrow
-	    }
-	    bind $wCan <Shift-ButtonRelease-1> {
-		FinalizeLine %W [%W canvasx %x] [%W canvasy %y] 1 arrow
-	    }
-	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatarrow]
-	}
-	rect {
-	    
-	    # Bindings for rectangle drawing.
-	    bind $wCan <Button-1> {
-		::CanvasDraw::InitBox %W [%W canvasx %x] [%W canvasy %y] rect
-	    }
-	    bind $wCan <B1-Motion> {
-		::CanvasDraw::BoxDrag %W [%W canvasx %x] [%W canvasy %y] 0 rect
-	    }
-	    bind $wCan <Shift-B1-Motion> {
-		::CanvasDraw::BoxDrag %W [%W canvasx %x] [%W canvasy %y] 1 rect
-	    }
-	    bind $wCan <ButtonRelease-1> {
-		::CanvasDraw::FinalizeBox %W [%W canvasx %x] [%W canvasy %y] 0 rect
-	    }
-	    bind $wCan <Shift-ButtonRelease-1> {
-		::CanvasDraw::FinalizeBox %W [%W canvasx %x] [%W canvasy %y] 1 rect
-	    }
-	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatrect]
-	}
-	oval {
-	    bind $wCan <Button-1> {
-		::CanvasDraw::InitBox %W [%W canvasx %x] [%W canvasy %y] oval
-	    }
-	    bind $wCan <B1-Motion> {
-		::CanvasDraw::BoxDrag %W [%W canvasx %x] [%W canvasy %y] 0 oval
-	    }
-	    bind $wCan <Shift-B1-Motion> {
-		::CanvasDraw::BoxDrag %W [%W canvasx %x] [%W canvasy %y] 1 oval
-	    }
-	    bind $wCan <ButtonRelease-1> {
-		::CanvasDraw::FinalizeBox %W [%W canvasx %x] [%W canvasy %y] 0 oval
-	    }
-	    bind $wCan <Shift-ButtonRelease-1> {
-		::CanvasDraw::FinalizeBox %W [%W canvasx %x] [%W canvasy %y] 1 oval
-	    }
-	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatoval]
-	}
-	text {
-	    ::CanvasText::EditBind $wCan
-	    $wCan config -cursor xterm
-	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastattext]
-	}
-	del {
-	    bind $wCan <Button-1> {
-		::CanvasDraw::DeleteItem %W [%W canvasx %x] [%W canvasy %y]
-	    }
-	    set scriptDeleteItem [format {
-		::CanvasDraw::DeleteItem %s  \
-		  [%s canvasx [expr [winfo x %%W] + %%x]]  \
-		  [%s canvasy [expr [winfo y %%W] + %%y]] movie
-	    } $wCan $wCan $wCan]	
-	    bind QTFrame <Button-1> $scriptDeleteItem
-	    bind SnackFrame <Button-1> $scriptDeleteItem
-	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatdel]
-	}
-	pen {
-	    bind $wCan <Button-1> {
-		InitStroke %W [%W canvasx %x] [%W canvasy %y]
-	    }
-	    bind $wCan <B1-Motion> {
-		StrokeDrag %W [%W canvasx %x] [%W canvasy %y]
-	    }
-	    bind $wCan <ButtonRelease-1> {
-		FinalizeStroke %W [%W canvasx %x] [%W canvasy %y]
-	    }
-	    $wCan config -cursor pencil
-	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatpen]
-	}
-	brush {
-	    bind $wCan <Button-1> {
-		InitStroke %W [%W canvasx %x] [%W canvasy %y]
-	    }
-	    bind $wCan <B1-Motion> {
-		StrokeDrag %W [%W canvasx %x] [%W canvasy %y] 1
-	    }
-	    bind $wCan <ButtonRelease-1> {
-		FinalizeStroke %W [%W canvasx %x] [%W canvasy %y] 1
-	    }
-	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatbrush]
-	}
-	paint {
-	    bind $wCan  <Button-1> {
-		DoPaint %W [%W canvasx %x] [%W canvasy %y]
-	    }
-	    bind $wCan  <Shift-Button-1> {
-		DoPaint %W [%W canvasx %x] [%W canvasy %y] 1
-	    }
-	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatpaint]	      
-	}
-	poly {
-            bind $wCan  <Button-1> {
-		PolySetPoint %W [%W canvasx %x] [%W canvasy %y]
-	    }
-	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatpoly]	      
-        }       
-	arc {
-	    bind $wCan <Button-1> {
-		InitArc %W [%W canvasx %x] [%W canvasy %y]
-	    }
-	    bind $wCan <Shift-Button-1> {
-		InitArc %W [%W canvasx %x] [%W canvasy %y] 1
-	    }
-	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatarc]	      
-	}
-	rot {
-	    bind $wCan <Button-1> {
-		InitRotateItem %W [%W canvasx %x] [%W canvasy %y]
-	    }
-	    bind $wCan <B1-Motion> {
-		DoRotateItem %W [%W canvasx %x] [%W canvasy %y] 0
-	    }
-	    bind $wCan <Shift-B1-Motion> {
-		DoRotateItem %W [%W canvasx %x] [%W canvasy %y] 1
-	    }
-	    bind $wCan <ButtonRelease-1> {
-		FinalizeRotate %W [%W canvasx %x] [%W canvasy %y]
-	    }
-	    $wCan config -cursor exchange
-	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatrot]	      
-	}
-    }
-    
-    # Collect all common non textual bindings in one procedure.
-    if {$btName != "text"} {
-	GenericNonTextBindings $wtop
-    }
-
-    # This is a hook for plugins to register their own bindings.
-    # Call any registered bindings for the plugin.
-    foreach key [array names plugin "*,bindProc"] {
-	$plugin($key) $btName
-    }
-}
-
-proc ::UserActions::GenericNonTextBindings {wtop} {
-    
-    upvar ::${wtop}::wapp wapp
-    set wCan $wapp(can)
-    
-    # Various bindings.
-    bind $wCan <BackSpace> [list ::CanvasDraw::DeleteItem $wCan %x %y selected]
-    bind $wCan <Control-d> [list ::CanvasDraw::DeleteItem $wCan %x %y selected]
-}
-
-# UserActions::RemoveAllBindings --
-#
-#       Clears all application defined bindings in the canvas.
-#       
-# Arguments:
-#       w      the canvas widget.
-#       
-# Results:
-#       none
-
-proc ::UserActions::RemoveAllBindings {w} {
-    
-    Debug 3 "RemoveAllBindings::"
-
-    $w bind all <Button-1> {}
-    $w bind all <B1-Motion> {}
-    $w bind all <Any-Key> {}
-    $w bind all <Double-Button-1> {}
-    $w bind all <Button-3> {}
-    
-    # These shouldn't be necessary but they are...
-    $w bind text <Button-1> {}
-    $w bind text <B1-Motion> {}
-    $w bind text <Double-Button-1> {}	
-
-    # Remove bindings on markers on selected items.
-    $w bind tbbox <Button-1> {}
-    $w bind tbbox <B1-Motion> {}
-    $w bind tbbox <ButtonRelease-1> {}
-    
-    bind $w <Button> {}
-    bind $w <Button-1> {}
-    bind $w <Button-Motion> {}
-    bind $w <ButtonRelease> {}
-    bind $w <Shift-Button-1> {}
-    bind $w <Double-Button-1> {}
-    bind $w <Any-Key> {}
-    bind $w <ButtonRelease-1> {}
-    bind $w <B1-Motion> {}
-    bind $w <Shift-B1-Motion> {}
-    bind $w <Shift-ButtonRelease-1> {}
-    bind $w <BackSpace> {}
-    bind $w <Control-d> {}
-    bind QTFrame <Button-1> {}
-    bind QTFrame <B1-Motion> {}
-    bind QTFrame <ButtonRelease-1> {}
-    bind SnackFrame <Button-1> {}
-    bind SnackFrame <B1-Motion> {}
-    bind SnackFrame <ButtonRelease-1> {}
-    focus .
-    
-    # Remove any text insertion...
-    $w focus {}
 }
 
 # UserActions::CancelAllPutGetAndPendingOpen ---
@@ -472,8 +57,10 @@ proc ::UserActions::SelectAll {wtop} {
     
     upvar ::${wtop}::wapp wapp
     set wCan $wapp(can)
+    $wCan delete tbbox
     set ids [$wCan find all]
     foreach id $ids {
+	$wCan dtag $id selected
 	::CanvasDraw::MarkBbox $wCan 1 $id
     }
 }
@@ -548,7 +135,6 @@ proc ::UserActions::SetCanvasBgColor {wtop} {
     global  prefs state
     
     upvar ::${wtop}::wapp wapp
-    #upvar ::${wtop}::state state
     
     set w $wapp(can)
     set prevCol $state(bgColCan)
@@ -718,11 +304,11 @@ proc ::UserActions::PageSetup { } {
     global  this prefs wDlgs
     
     switch -- $this(platform) {
-	"macintosh" {
+	macintosh {
 	    tk_messageBox -icon error -title [::msgcat::mc {No Printing}] \
 	      -message [::msgcat::mc messprintnoextension]
 	}
-	"windows" {
+	windows {
 	    if {!$prefs(printer)} {
 		tk_messageBox -icon error -title [::msgcat::mc {No Printing}] \
 		  -message [::msgcat::mc messprintnoextension]
@@ -730,7 +316,7 @@ proc ::UserActions::PageSetup { } {
 		::Windows::Printer::PageSetup
 	    }
 	}
-	"unix" - "macosx" {
+	unix - macosx {
 	    ::PSPageSetup::PSPageSetup .page
 	}
     }
@@ -740,13 +326,13 @@ proc ::UserActions::Speak {msg {voice {}}} {
     global  this prefs
     
     switch -- $this(platform) {
-	"macintosh" {
+	macintosh {
 	    ::Mac::Speech::Speak $msg $voice
 	}
-	"windows" {
+	windows {
 	    ::MSSpeech::Speak $msg $voice
 	}
-	"unix" - "macosx" {
+	unix - macosx {
 	}
     }
 }
@@ -755,14 +341,14 @@ proc ::UserActions::SpeakGetVoices { } {
     global  this prefs
     
     switch -- $this(platform) {
-	"macintosh" {
+	macintosh {
 	    return [::Mac::Speech::GetVoices]
 	}
-	"windows" {
+	windows {
 	    return [::MSSpeech::GetVoices]
 	}
-	"unix" - "macosx" {
-	    return ""
+	unix - macosx {
+	    return {}
 	}
     }
 }
@@ -840,6 +426,7 @@ proc ::UserActions::ResizeItem {wtop factor} {
     # New markers.
     foreach id $ids {
 	$w delete id$id
+	$w dtag $id selected
 	::CanvasDraw::MarkBbox $w 1 $id
     }
 }
@@ -1080,8 +667,9 @@ proc ::UserActions::DoSendCanvas {wtop} {
 
 	switch -- $type {
 	    image {
-		set line [::CanvasUtils::GetOnelinerForImage $w $id]
-		::ImageAndMovie::HandleImportCmd $w $line -where remote
+		set line [::CanvasUtils::GetOnelinerForImage $w $id \
+		  -uritype http]
+		lappend cmdList [concat "CANVAS:" $line]
 	    }
 	    window {
 		
@@ -1092,11 +680,9 @@ proc ::UserActions::DoSendCanvas {wtop} {
 		switch -- $windowClass {
 		    QTFrame {
 			set line [::CanvasUtils::GetOnelinerForQTMovie $w $id]
-			::ImageAndMovie::HandleImportCmd $w $line -where remote
 		    }
 		    SnackFrame {			
 			set line [::CanvasUtils::GetOnelinerForSnack $w $id]
-			::ImageAndMovie::HandleImportCmd $w $line -where remote
 		    }
 		    XanimFrame {
 			# ?
@@ -1110,6 +696,7 @@ proc ::UserActions::DoSendCanvas {wtop} {
 			continue
 		    }
 		}
+		lappend cmdList [concat "CANVAS:" $line]
 	    }
 	    default {
 		set cmd [::CanvasUtils::GetOnelinerForItem $w $id]
@@ -1155,7 +742,7 @@ proc ::UserActions::DoCloseWindow { } {
 	    ::Jabber::Chat::Close -toplevel $w
 	}
 	GroupChat {
-	    ::Jabber::GroupChat::Exit -toplevel $w
+	    ::Jabber::GroupChat::CloseToplevel $w
 	}
 	MailBox {
 	    ::Jabber::MailBox::Show $wDlgs(jinbox) -visible 0
