@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.6 2004-04-17 14:02:02 matben Exp $
+# $Id: disco.tcl,v 1.7 2004-04-19 13:58:48 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -21,6 +21,11 @@
 #      discoName send_get discotype jid callbackProc ?-opt value ...?
 #      discoName isdiscoed discotype jid ?node?
 #      discoName get discotype jid key ?node?
+#      discoName getallcategories pattern
+#      discoName getjidsforcategory pattern
+#      discoName getjidsforfeature feature
+#      discoName features jid ?node?
+#      discoName havefeature feature jid ?node?
 #      discoName name jid ?node?
 #      discoName types jid ?node?
 #      discoName reset ?jid?
@@ -170,6 +175,7 @@ proc disco::send_get {disconame type jid cmd args} {
 
 proc disco::parse_get {disconame discotype from cmd jlibname type subiq args} {
     
+    variable disco2jlib
     upvar ${disconame}::items items
     upvar ${disconame}::info  info
 
@@ -191,6 +197,13 @@ proc disco::parse_get {disconame discotype from cmd jlibname type subiq args} {
 	    set items($from,$pnode,xml) $subiq
 	    catch {unset items($from,$pnode,children) items($from,$pnode,nodes)}
 	    
+	    # testing...
+	    # This is perhaps not a robust way.
+	    if {![info exists items($from,$pnode,parent)]} {
+		set items($from,$pnode,parent) {}
+		set items($from,$pnode,parents) {}
+	    }
+	    
 	    foreach c [wrapper::getchildren $subiq] {
 		if {![string equal [wrapper::gettag $c] "item"]} {
 		    continue
@@ -207,13 +220,14 @@ proc disco::parse_get {disconame discotype from cmd jlibname type subiq args} {
 		}
 		lappend items($from,$node,children) $jid
 		set items($jid,$node,parent) $from
-		if {[info exists items($from,$pnode,parent)]} {
+		if {[info exists items($from,$pnode,parents)]} {
 		    set items($jid,$pnode,parents)  \
 		      [concat $items($from,$pnode,parents) $from]
 		}
 		
 		foreach {key value} [array get attr] { 
 		    if {![string equal $key jid]} {
+			# Typically only the name attribute.
 			set items($jid,$node,$key) $value
 		    }
 		}
@@ -239,11 +253,37 @@ proc disco::parse_get {disconame discotype from cmd jlibname type subiq args} {
 			if {[info exists attr(name)]} {
 			    set name $attr(name)
 			}			
-			lappend info($from,$pnode,types) $category/$ctype
 			set info($from,$pnode,name) $name
+			set cattype $category/$ctype
+			lappend info($from,$pnode,cattypes) $cattype
+			lappend info($cattype,typelist) $from
+			set info($cattype,typelist) \
+			    [lsort -unique $info($cattype,typelist)]
 		    }
 		    feature {
-			lappend info($from,$pnode,features) $attr(var)
+			set feature $attr(var)
+			lappend info($from,$pnode,features) $feature
+			lappend info($feature,featurelist) $from
+			
+			# Register any groupchat protocol with jlib.
+			# Note that each room also returns gc features; skip!
+			if {![string match *@* $from]} {
+			    
+			    switch -- $feature {
+				"http://jabber.org/protocol/muc" {
+				    $disco2jlib($disconame) service \
+				      registergcprotocol $from "muc"
+				}
+				"jabber:iq:conference" {
+				    $disco2jlib($disconame) service \
+				      registergcprotocol $from "conference"
+				}
+				"gc-1.0" {
+				    $disco2jlib($disconame) service \
+				      registergcprotocol $from "gc-1.0"
+				}
+			    }
+			}
 		    }
 		}
 	    }
@@ -289,7 +329,9 @@ proc disco::get {disconame discotype jid key {node ""}} {
     return ""
 }
 
-proc disco::name {disconame jid {node ""}} {
+# Both the items and the info elements may have name attributes! Related???
+
+proc disco::nameINFO {disconame jid {node ""}} {
     
     upvar ${disconame}::info  info
     
@@ -300,16 +342,113 @@ proc disco::name {disconame jid {node ""}} {
     }
 }
 
-proc disco::types {disconame jid {node ""}} {
+#       The login servers jid name attribute is not returned via any items
+#       element; only via info/identity element. 
+#       
+
+proc disco::name {disconame jid {node ""}} {
     
+    upvar ${disconame}::items items
     upvar ${disconame}::info  info
     
-    if {[info exists info($jid,$node,types)]} {
-	return $info($jid,$node,types)
+    if {[info exists items($jid,$node,name)]} {
+	return $items($jid,$node,name)
+    } elseif {[info exists info($jid,$node,name)]} {
+	return $info($jid,$node,name)
     } else {
 	return {}
     }
 }
+
+proc disco::features {disconame jid {node ""}} {
+    
+    upvar ${disconame}::info info
+    
+    if {[info exists info($jid,$node,features)]} {
+	return $info($jid,$node,features)
+    } else {
+	return {}
+    }
+}
+
+proc disco::havefeature {disconame feature jid  {node ""}} {
+    
+    upvar ${disconame}::info info
+
+    if {[info exists info($jid,$node,features)]} {
+	return [expr [lsearch $info($jid,$node,features) $feature] < 0 ? 0 : 1]
+    } else {
+	return 0
+    }
+}
+
+proc disco::types {disconame jid {node ""}} {
+    
+    upvar ${disconame}::info info
+    
+    if {[info exists info($jid,$node,cattypes)]} {
+	return $info($jid,$node,cattypes)
+    } else {
+	return {}
+    }
+}
+
+
+proc disco::getjidsforfeature {disconame feature} {
+    
+    upvar ${disconame}::info info
+    
+    if {[info exists info($feature,featurelist)]} {
+	set info($feature,featurelist) [lsort -unique $info($feature,featurelist)]
+	return $info($feature,featurelist)
+    } else {
+	return {}
+    }
+}
+
+# disco::getjidsforcategory --
+#
+#       Returns all jids that match the glob pattern category/type.
+#       
+# Arguments:
+#       disconame:    the instance of this disco instance.
+#       catpattern:   a global pattern of jid type/subtype (service/*).
+#
+# Results:
+#       List of jid's matching the type pattern. nodes???
+
+proc disco::getjidsforcategory {disconame catpattern} {
+    
+    upvar ${disconame}::info info
+    
+    set jidlist {}    
+    foreach {key jid} [array get info "${catpattern},typelist"] {
+	lappend jidlist $jid
+    }
+    return $jidlist
+}    
+
+# disco::getallcategories --
+#
+#       Returns all categories that match the glob pattern catpattern.
+#       
+# Arguments:
+#       disconame:    the instance of this disco instance.
+#       catpattern:   a global pattern of jid type/subtype (service/*).
+#
+# Results:
+#       List of types matching the category/type pattern.
+
+proc disco::getallcategories {disconame catpattern} {    
+    
+    upvar ${disconame}::info info
+    
+    set ans {}
+    foreach {key catlist} [array get info *,cattypes] {
+	lappend ans $catlist
+    }
+    return [lsort -unique $ans]
+}    
 
 proc disco::children {disconame jid {node ""}} {
     
@@ -357,7 +496,31 @@ proc disco::handle_get {disconame discotype jlibname from subiq args} {
     return $ishandled
 }
 
+# disco::reset --
+# 
+#       Clear this particular jid and all its children.
+
 proc disco::reset {disconame {jid ""} {node ""}} {
+    
+    upvar ${disconame}::items items
+
+    # Can be problems with this (ICQ) ???
+    if {[info exists items($jid,$node,children)]} {
+	foreach child $items($jid,$node,children) {
+	    reset $disconame $child
+	}
+    }
+    resetjid $disconame $child
+}
+
+# disco::resetjid --
+# 
+#       Clear only this particular jid.
+#       
+#       The info($cattype,typelist) and info($feature,featurelist) are not
+#       touched!
+
+proc disco::resetjid {disconame {jid ""} {node ""}} {
     
     upvar ${disconame}::items items
     upvar ${disconame}::info  info
@@ -365,8 +528,25 @@ proc disco::reset {disconame {jid ""} {node ""}} {
     if {$jid == ""} {
 	catch {unset items info}
     } else {
-	array unset items $jid,*
-	array unset info $jid,*
+	
+	# Keep parents!
+	if {[info exists items($jid,$node,parent)]} {
+	    set parent $items($jid,$node,parent)
+	}
+	if {[info exists items($jid,$node,parents)]} {
+	    set parents $items($jid,$node,parents)
+	}
+	
+	array unset items $jid,$node,*
+	array unset info $jid,$node,*
+	
+	# Add back parent(s).
+	if {[info exists parent]} {
+	    set items($jid,$node,parent) $parent
+	}
+	if {[info exists parents]} {
+	    set items($jid,$node,parents) $parents
+	}
     }
 }
 

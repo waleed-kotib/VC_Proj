@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.78 2004-04-16 13:59:29 matben Exp $
+# $Id: Jabber.tcl,v 1.79 2004-04-19 13:58:47 matben Exp $
 
 package provide Jabber 1.0
 
@@ -131,34 +131,39 @@ namespace eval ::Jabber:: {
     # Array that maps namespace (ns) to a descriptive name.
     variable nsToText
     array set nsToText {
-      jabber:iq:agent              {Server component properties}
-      jabber:iq:agents             {Server component properties}
-      jabber:iq:auth               {Client authentization}      
-      jabber:iq:autoupdate         {Release information}
-      jabber:iq:browse             {Browsing services}
-      jabber:iq:conference         {Conferencing service}
-      jabber:iq:gateway            {Gateway}
-      jabber:iq:last               {Last time}
-      jabber:iq:oob                {Out of band data}
-      jabber:iq:private            {Store private data}
-      jabber:iq:register           {Interactive registration}
-      jabber:iq:roster             {Roster management}
-      jabber:iq:search             {Searching user database}
-      jabber:iq:time               {Client time}
-      jabber:iq:version            {Client version}
-      jabber:x:autoupdate          {Client update notification}
-      jabber:x:conference          {Conference invitation}
-      jabber:x:delay               {Object delayed}
-      jabber:x:encrypted           {Encrypted message}
-      jabber:x:envelope            {Message envelope}
-      jabber:x:event               {Message events}
-      jabber:x:expire              {Message expiration}
-      jabber:x:oob                 {Out of band attachment}
-      jabber:x:roster              {Roster item in message}
-      jabber:x:signed              {Signed presence}
-      vcard-temp                   {Business card exchange}
-      http://jabber.org/protocol/muc   {Multi user chat}
-      http://jabber.org/protocol/disco {Feature discovery}
+	iq                           {Info/query}
+	message                      {Message handling}
+	presence                     {Presence notification}
+	presence-invisible           {Allows invisible users}
+	jabber:iq:agent              {Server component properties}
+	jabber:iq:agents             {Server component properties}
+	jabber:iq:auth               {Client authentization}      
+	jabber:iq:autoupdate         {Release information}
+	jabber:iq:browse             {Browsing services}
+	jabber:iq:conference         {Conferencing service}
+	jabber:iq:gateway            {Gateway}
+	jabber:iq:last               {Last time}
+	jabber:iq:oob                {Out of band data}
+	jabber:iq:privacy            {Blocking communication}
+	jabber:iq:private            {Store private data}
+	jabber:iq:register           {Interactive registration}
+	jabber:iq:roster             {Roster management}
+	jabber:iq:search             {Searching user database}
+	jabber:iq:time               {Client time}
+	jabber:iq:version            {Client version}
+	jabber:x:autoupdate          {Client update notification}
+	jabber:x:conference          {Conference invitation}
+	jabber:x:delay               {Object delayed}
+	jabber:x:encrypted           {Encrypted message}
+	jabber:x:envelope            {Message envelope}
+	jabber:x:event               {Message events}
+	jabber:x:expire              {Message expiration}
+	jabber:x:oob                 {Out of band attachment}
+	jabber:x:roster              {Roster item in message}
+	jabber:x:signed              {Signed presence}
+	vcard-temp                   {Business card exchange}
+	http://jabber.org/protocol/muc   {Multi user chat}
+	http://jabber.org/protocol/disco {Feature discovery}
     }    
     
     # XML namespaces defined here.

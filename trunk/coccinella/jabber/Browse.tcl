@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.37 2004-04-16 13:59:29 matben Exp $
+# $Id: Browse.tcl,v 1.38 2004-04-19 13:58:47 matben Exp $
 
 package require chasearrows
 
@@ -77,6 +77,19 @@ namespace eval ::Jabber::Browse:: {
     }
 }
 
+# Jabber::Browse::NewJlibHook --
+# 
+#       Create a new browse instance when created new jlib.
+
+proc ::Jabber::Browse::NewJlibHook {jlibName} {
+    upvar ::Jabber::jstate jstate
+    
+    set jstate(browse) [browse::new $jlibName  \
+      -command ::Jabber::Browse::Command]
+    
+    ::Jabber::AddClientXmlns [list "jabber:iq:browse"]
+}
+
 proc ::Jabber::Browse::LoginCmd { } {
     upvar ::Jabber::jprefs jprefs
     
@@ -118,19 +131,6 @@ proc ::Jabber::Browse::HaveBrowseTree {jid} {
 	}
     }    
     return 0
-}
-
-# Jabber::Browse::NewJlibHook --
-# 
-#       Create a new browse instance when created new jlib.
-
-proc ::Jabber::Browse::NewJlibHook {jlibName} {
-    upvar ::Jabber::jstate jstate
-    
-    set jstate(browse) [browse::new $jlibName  \
-      -command ::Jabber::Browse::Command]
-    
-    ::Jabber::AddClientXmlns [list "jabber:iq:browse"]
 }
     
 # Jabber::Browse::GetAll --
@@ -199,6 +199,8 @@ proc ::Jabber::Browse::Command {browseName type from subiq args} {
        
     ::Jabber::Debug 2 "::Jabber::Browse::Command type=$type, from=$from"
     
+    set ishandled 0
+
     switch -- $type {
 	error {
 	    ::Jabber::Browse::ErrorProc $silent $browseName $type $from $subiq
@@ -212,10 +214,10 @@ proc ::Jabber::Browse::Command {browseName type from subiq args} {
 	}
 	get {
 	    eval {::Jabber::Browse::ParseGet $browseName $from $subiq} $args
-
+	    set ishandled 1
 	}
     }
-    return 1
+    return $ishandled
 }
 
 # Jabber::Browse::Callback --
@@ -585,9 +587,10 @@ proc ::Jabber::Browse::Popup {w v x y} {
     set jid [lindex $v end]
     set jid3 $jid
     set typesubtype [$jstate(browse) gettype $jid]
+    
     if {[regexp {^.+@[^/]+(/.*)?$} $jid match res]} {
 	set typeClicked user
-	if {[::Jabber::InvokeJlibCmd service isroom $jid]} {
+	if {[$jstate(jlib) service isroom $jid]} {
 	    set typeClicked room
 	}
     } elseif {[string match -nocase "conference/*" $typesubtype]} {

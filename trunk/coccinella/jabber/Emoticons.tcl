@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.7 2004-04-15 05:55:17 matben Exp $
+# $Id: Emoticons.tcl,v 1.8 2004-04-19 13:58:47 matben Exp $
 
 
 package provide Emoticons 1.0
@@ -251,8 +251,10 @@ proc ::Emoticons::GetAllSets { } {
 		lappend setList $name
 		set state($name,path) $f
 	    } elseif {[file isdirectory $f]} {
-		lappend setList $name	    
-		set state($name,path) $f
+		if {[file exists [file join $f icondef.xml]]} {
+		    lappend setList $name
+		    set state($name,path) $f
+		}
 	    }
 	}
     }
