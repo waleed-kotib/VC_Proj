@@ -9,7 +9,7 @@
 # full path name of this file's directory.
 
 package ifneeded notebook 1.0 [list source [file join $dir notebook.tcl]]
-package ifneeded mactabnotebook 1.0 [list source [file join $dir mactabnotebook.tcl]]
+package ifneeded mactabnotebook 2.0 [list source [file join $dir mactabnotebook.tcl]]
 package ifneeded moviecontroller 1.0 [list source [file join $dir moviecontroller.tcl]]
 package ifneeded tree 1.0 [list source [file join $dir tree.tcl]]
 package ifneeded progressbar 1.3 [list source [file join $dir progressbar.tcl]]

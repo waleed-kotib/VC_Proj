@@ -30,6 +30,7 @@
 ! contributed widgets
 !
 *Combobox.Font:                      Geneva 9
+*MacTabnotebook.style:               mac
 *MyLabelFrame.Font:                  Geneva 9 bold
 *Tablelist.Font:                     Geneva 9
 *Tablelist.highlightThickness:       3

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.22 2004-01-14 14:27:30 matben Exp $
+# $Id: JUI.tcl,v 1.23 2004-01-20 14:21:35 matben Exp $
 
 package provide JUI 1.0
 
@@ -24,6 +24,7 @@ namespace eval ::Jabber::UI:: {
     option add *JMain.newuserDisImage             newuserDis      widgetDefault
     option add *JMain.stopImage                   stop            widgetDefault
     option add *JMain.stopDisImage                stopDis         widgetDefault
+    option add *JMain.roster16Image               roster16        widgetDefault
 
     # Other icons.
     option add *JMain.contactOffImage             contactOff      widgetDefault
@@ -48,11 +49,11 @@ namespace eval ::Jabber::UI:: {
     option add *JMain*MacTabnotebook.activeTabBackground #cdcdcd      widgetDefault
     option add *JMain*MacTabnotebook.activeTabOutline    black        widgetDefault
     option add *JMain*MacTabnotebook.background          white        widgetDefault
-    option add *JMain*MacTabnotebook.style               classic      widgetDefault
+    option add *JMain*MacTabnotebook.style               mac          widgetDefault
     option add *JMain*MacTabnotebook.tabBackground       #dedede      widgetDefault
     option add *JMain*MacTabnotebook.tabColor            #cecece      widgetDefault
     option add *JMain*MacTabnotebook.tabOutline          gray20       widgetDefault
-    
+
     variable treeOpts {background backgroundImage highlightBackground \
       highlightColor indention openIcons pyjamasColor selectBackground \
       selectForeground selectMode treeColor}
@@ -217,7 +218,9 @@ proc ::Jabber::UI::Build {w} {
     # Other icons.
     set iconContactOff [::Theme::GetImage [option get $fall contactOffImage {}]]
     set iconResize     [::Theme::GetImage [option get $fall resizeHandleImage {}]]
-
+    set iconRoster     [::Theme::GetImage [option get $fall roster16Image {}]]
+    
+    
     set fontS [option get . fontSmall {}]
     
     set wtray ${fall}.top
@@ -290,7 +293,8 @@ proc ::Jabber::UI::Build {w} {
     
     # Make the notebook pages.
     # Start with the Roster page -----------------------------------------------
-    set ro [$nbframe newpage {Roster} -text [::msgcat::mc Roster]]    
+    set ro [$nbframe newpage {Roster} -text [::msgcat::mc Roster]  \
+      -image $iconRoster]    
     pack [::Jabber::Roster::Build $ro.ro] -fill both -expand 1
 
     # Build only Browser and/or Agents page when needed.

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Sounds.tcl,v 1.13 2004-01-17 14:35:14 matben Exp $
+# $Id: Sounds.tcl,v 1.14 2004-01-20 14:21:35 matben Exp $
 
 package provide Sounds 1.0
 
@@ -366,7 +366,11 @@ proc ::Sounds::SavePrefsHook { } {
     variable sprefs
     variable tmpPrefs
     variable allSounds
+    variable priv
     
+    if {!$priv(canPlay)} {
+	return
+    }
     if {[string equal $tmpPrefs(soundSet) [::msgcat::mc Default]]} {
 	set tmpPrefs(soundSet) ""
     }
@@ -383,7 +387,11 @@ proc ::Sounds::CancelPrefsHook { } {
     variable sprefs
     variable tmpPrefs
     variable allSounds
+    variable priv
     
+    if {!$priv(canPlay)} {
+	return
+    }    
     foreach name $allSounds {
 	if {$sprefs($name) != $tmpPrefs($name)} {
 	    ::Preferences::HasChanged
