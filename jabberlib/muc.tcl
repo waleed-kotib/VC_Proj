@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: muc.tcl,v 1.10 2004-06-13 13:43:25 matben Exp $
+# $Id: muc.tcl,v 1.11 2004-06-17 13:54:29 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -79,6 +79,7 @@ proc jlib::muc::CommandProc {jlibname cmd args} {
 #       roomjiid
 #       nick        nick name
 #       args        ?-command callbackProc?
+#                   ?-password str?
 #       
 # Results:
 #       none.
@@ -86,10 +87,15 @@ proc jlib::muc::CommandProc {jlibname cmd args} {
 proc jlib::muc::enter {jlibname roomjid nick args} {
     upvar [namespace current]::${jlibname}::cache cache    
     
+    set xsub {}
     foreach {name value} $args {
 	switch -- $name {
 	    -command {
 		set cache($roomjid,entercb) $value
+	    }
+	    -password {
+		set xsub [list [wrapper::createtag "password" \
+		  -chdata $value]]
 	    }
 	    default {
 		return -code error "Unrecognized option \"$name\""
@@ -97,7 +103,7 @@ proc jlib::muc::enter {jlibname roomjid nick args} {
 	}
     }
     set jid ${roomjid}/${nick}
-    set xelem [wrapper::createtag "x"  \
+    set xelem [wrapper::createtag "x" -subtags $xsub \
       -attrlist {xmlns "http://jabber.org/protocol/muc"}]
     [namespace parent]::send_presence $jlibname -to $jid -xlist [list $xelem] \
       -command [list [namespace current]::parse_enter $roomjid]
