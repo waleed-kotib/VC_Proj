@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.18 2003-11-17 15:08:27 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.19 2003-12-12 16:18:40 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -116,20 +116,6 @@ proc ::PreferencesUtils::Add {thePrefs} {
 	    set value $defaultValue
 	}
 	
-	# Don't read in version 0.92 preference file.
-	if {[string equal $resourceName "prefs_minorVers"]} {
-	    set majorOnFile [option get . prefs_majorVers {}]
-	    set minorOnFile [option get . prefs_minorVers {}]
-	    if {[string equal ${majorOnFile}.${minorOnFile} "0.92"]} {
-		
-		# Empty the database just read. Clears also the widget options!
-		option clear
-		
-		# Reset the widget defaults.
-		::PreferencesUtils::SetWidgetDefaultOptions
-	    }
-	}
-
 	# Treat incompatbility issues for prefs format here. DIRTY! Usch.		
 	# Do not read in jserver(list) if written by 0.93; format change.
 	if {[string equal $resourceName "jserver_list"]} {
@@ -288,84 +274,6 @@ proc ::PreferencesUtils::ResetToUserDefaults { } {
     Init
     Add $thePrefs
 }
-
-# PreferencesUtils::SetWidgetDefaultOptions --
-#
-#       Set defaults in the option database for widget classes.
-#       First, on all platforms...
-
-proc ::PreferencesUtils::SetWidgetDefaultOptions { } {
-    global  prefs sysFont this
-    
-    set bg $prefs(bgColGeneral)
-    set highlight #6363CE
-    set sFont $sysFont(s)
-    
-    # We should really do use 'startupFile' priority but that seems buggy
-    # on my 8.4.3 on Linux RH 7.
-    
-    option add *Canvas.Background                   $bg           
-    option add *Checkbutton.Font                    $sFont        
-    option add *Frame.Background                    $bg           
-    option add *Label.Background                    $bg           
-    option add *Label.Font                          $sFont        
-    option add *Message.Background                  $bg           
-    option add *Progressbar.Background              $bg           
-    option add *Entry.Background                    white         
-    option add *Entry.BorderWidth                   1             
-    option add *Entry.Font                          $sFont        
-    option add *Entry.HighlightColor                $highlight    
-    option add *Entry.HighlightBackground           $bg           
-    option add *Entry.DisableBackground             $bg           
-    option add *Entry.DisableForeground             gray20        
-    option add *Listbox.HighlightColor              $highlight    
-    option add *Listbox.HighlightBackground         $bg           
-    option add *Radiobutton.Font                    $sFont        
-    option add *Text.Background                     white         
-    option add *Text.HighlightColor                 $highlight    
-    option add *Text.HighlightBackground            $bg           
-    option add *Tablelist.HighlightThickness        3             
-    option add *Tablelist.HighlightColor            $highlight    
-    option add *Tablelist.HighlightBackground       $bg           
-    option add *ButtonTray.background               $bg           
-    
-    # ...and then on specific platforms.
-    
-    switch -- $this(platform) {
-	macintosh - macosx {
-	    option add *Radiobutton.Background     $bg            
-	    option add *Button.HighlightBackground $bg            
-	    option add *Checkbutton.Background     $bg            
-	    option add *Entry.HighlightThickness   3              
-	    option add *Listbox.Font               $sysFont(m)    
-	    option add *Listbox.HighlightThickness 3              
-	    option add *Text.HighlightThickness    3              
-	    option add *Tablelist.BorderWidth      1              
-	}
-	windows {
-	    option add *Radiobutton.Background     $bg            
-	    option add *Button.Background          $bg            
-	    option add *Checkbutton.Background     $bg            
-	    option add *Entry.HighlightThickness   2              
-	    option add *Listbox.Background         white          
-	    option add *Listbox.Font               $sysFont(m)    
-	    option add *Listbox.HighlightThickness 2              
-	    option add *Text.HighlightThickness    2              
-	}
-	unix {
-	    option add *Entry.Foreground           Black          
-	    option add *Entry.HighlightThickness   2              
-	    option add *Listbox.HighlightThickness 2              
-	    option add *Listbox.BorderWidth        1              
-	    option add *Text.HighlightThickness    2              
-	    option add *Scrollbar.BorderWidth      1              
-	    option add *Scrollbar.Width            12             
-	    option add *Scrollbar*troughColor      #bdbdbd        
-	    option add *Tablelist.BorderWidth      1              
-	}
-    }
-}
-
 
 proc ::PreferencesUtils::ReadOptionDatabase { } {
     global  prefs
