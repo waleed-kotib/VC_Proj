@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.56 2004-01-17 11:42:53 matben Exp $
+# $Id: Jabber.tcl,v 1.57 2004-01-20 14:21:35 matben Exp $
 
 package provide Jabber 1.0
 
@@ -1946,7 +1946,7 @@ proc ::Jabber::PutIPnumber {jid id} {
 # 
 #       Get Coccinella server ports and ip via <iq>.
 
-proc ::Jabber::GetCoccinellaServers {jid3 cmd} {
+proc ::Jabber::GetCoccinellaServers {jid3 {cmd {}}} {
     variable jstate
     variable iqxmlns
     
@@ -1970,7 +1970,9 @@ proc ::Jabber::GetCoccinellaServersCallback {jid3 cmd jlibname type subiq} {
     set ipElements [wrapper::getchildswithtag $subiq ip]
     set ip [wrapper::getcdata [lindex $ipElements 0]]
     set jidToIP($jid3) $ip
-    eval $cmd
+    if {$cmd != ""} {
+	eval $cmd
+    }
 }
 
 # Jabber::PutFileOrSchedule --

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.36 2004-01-14 14:27:30 matben Exp $
+# $Id: Roster.tcl,v 1.37 2004-01-20 14:21:35 matben Exp $
 
 package provide Roster 1.0
 
@@ -191,7 +191,7 @@ proc ::Jabber::Roster::Build {w} {
     set wysc    $wbox.ysc
     set wtree   $wbox.tree
     pack [frame $wbox -border 1 -relief sunken]   \
-      -side top -fill both -expand 1 -padx 6 -pady 6
+      -side top -fill both -expand 1 -padx 4 -pady 4
     
     set opts {}
     if {$jprefs(rost,useBgImage)} {
@@ -738,7 +738,14 @@ proc ::Jabber::Roster::AutoBrowseCallback {browseName type jid subiq} {
 	
 	# Shall we query for its ip address right away?
 	if {$jprefs(preGetIP)} {
-	    ::Jabber::GetIPnumber $jid
+	    if {1} {
+		::Jabber::GetIPnumber $jid
+	    } else {
+		
+		# New through <iq> element.
+		# Switch to this with version 0.94.8 or later!
+		::Jabber::GetCoccinellaServers $jid
+	    }
 	}
 	
 	if {[regexp {^(.+@[^/]+)/(.+)$} $jid match jid2 res]} {

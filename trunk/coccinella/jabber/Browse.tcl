@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.23 2004-01-14 14:27:30 matben Exp $
+# $Id: Browse.tcl,v 1.24 2004-01-20 14:21:35 matben Exp $
 
 package require chasearrows
 
@@ -421,7 +421,7 @@ proc ::Jabber::Browse::Build {w} {
     
     set wbox $w.box
     pack [frame $wbox -border 1 -relief sunken]   \
-      -side top -fill both -expand 1 -padx 6 -pady 6
+      -side top -fill both -expand 1 -padx 4 -pady 4
     set wtree $wbox.tree
     set wxsc $wbox.xsc
     set wysc $wbox.ysc
