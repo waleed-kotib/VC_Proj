@@ -5,9 +5,9 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-#  See the README file for license, bugs etc.
+#  This source file is distributed under the BSD licens.
 #  
-# $Id: entrypopup.tcl,v 1.3 2004-07-30 12:55:53 matben Exp $
+# $Id: entrypopup.tcl,v 1.4 2004-09-13 09:05:18 matben Exp $
 #
 # ########################### USAGE ############################################
 #

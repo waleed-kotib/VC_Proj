@@ -1,31 +1,12 @@
-#!/usr/bin/wish
-#
-# Copyright (C) 1997,1998 D. Richard Hipp
-#
-# This library is free software; you can redistribute it and/or
-# modify it under the terms of the GNU Library General Public$
-# License as published by the Free Software Foundation; either
-# version 2 of the License, or (at your option) any later version.
-#
-# This library is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-# Library General Public License for more details.
+# tree.tcl --
 # 
-# You should have received a copy of the GNU Library General Public
-# License along with this library; if not, write to the
-# Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-# Boston, MA  02111-1307, USA.
-#
-# Author contact information:
-#   drh@acm.org
-#   http://www.hwaci.com/drh/
-#
-# Complete rewrite by Mats Bengtsson   (matben@users.sourceforge.net)
+#       This package was originally inspired by Richard Hipp's tree package.
+#       Complete rewrite by Mats Bengtsson   (matben@users.sourceforge.net)
 # 
 # Copyright (C) 2002-2004 Mats Bengtsson
+# This source file is distributed under the BSD licens.
 # 
-# $Id: tree.tcl,v 1.32 2004-08-13 15:27:26 matben Exp $
+# $Id: tree.tcl,v 1.33 2004-09-13 09:05:18 matben Exp $
 # 
 # ########################### USAGE ############################################
 #

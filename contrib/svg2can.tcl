@@ -3,8 +3,9 @@
 #      This file provides translation from canvas commands to XML/SVG format.
 #      
 #  Copyright (c) 2004  Mats Bengtsson
+#  This source file is distributed under the BSD licens.
 #
-# $Id: svg2can.tcl,v 1.18 2004-07-07 13:07:13 matben Exp $
+# $Id: svg2can.tcl,v 1.19 2004-09-13 09:05:18 matben Exp $
 # 
 # ########################### USAGE ############################################
 #

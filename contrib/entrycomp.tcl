@@ -4,10 +4,11 @@
 #      entry with completion.
 #      
 #  Copyright (c) 2003  Mats Bengtsson
+#  This source file is distributed under the BSD licens.
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: entrycomp.tcl,v 1.4 2004-01-13 14:50:20 matben Exp $
+# $Id: entrycomp.tcl,v 1.5 2004-09-13 09:05:18 matben Exp $
 #
 # ########################### USAGE ############################################
 #

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.42 2004-09-08 13:13:14 matben Exp $
+# $Id: Login.tcl,v 1.43 2004-09-13 09:05:19 matben Exp $
 
 package provide Login 1.0
 
@@ -131,12 +131,11 @@ proc ::Jabber::Login::Dlg { } {
     pack $wfrmfr -padx 4 -pady 6 -side bottom -fill x -expand 1
     
     # Tabbed notebook for more options.
-    # Tabbed notebook for more options.
     set token [namespace current]::moreOpts
     variable $token
     upvar 0 $token options
     set wtabnb $wfrmfr.nb
-    ::Profiles::OptionsTabNotebook $wtabnb $token
+    ::Profiles::NotebookOptionWidget $wtabnb $token
     pack $wtabnb -fill x -expand 1
             
     # Button part.
@@ -212,7 +211,7 @@ proc ::Jabber::Login::TraceMenuVar {name key op} {
     variable tmpProfArr
     variable moreOpts
     
-    ::Profiles::DefaultOptionsTabNotebook [namespace current]::moreOpts
+    ::Profiles::NotebookSetDefaults [namespace current]::moreOpts
     
     set profile  [set $name]
     set server   $tmpProfArr($profile,server)

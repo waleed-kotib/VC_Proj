@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: jlibsasl.tcl,v 1.2 2004-09-11 14:21:51 matben Exp $
+# $Id: jlibsasl.tcl,v 1.3 2004-09-13 09:05:19 matben Exp $
 
 package require sasl 1.0
 
@@ -203,9 +203,11 @@ proc jlib::sasl_failure {jlibname tag xmllist} {
     if {[wrapper::getattribute $xmllist xmlns] == $xmppns(sasl)} {
 	set errtag [lindex [wrapper::getchildren $xmllist] 0]
 	if {$errtag == ""} {
-	    set errtag "not-authorized"
+	    set errmsg "not-authorized"
+	} else {
+	    set errmsg [sasl_getmsg $errtag]
 	}
-	uplevel #0 $locals(sasl,cmd) $jlibname [list error $errtag]
+	uplevel #0 $locals(sasl,cmd) $jlibname [list error $errmsg]
     }
     return {}
 }
@@ -318,6 +320,46 @@ proc jlib::sasl_reset {jlibname} {
     foreach tspec [trace info variable ${jlibname}::locals(features)] {
 	foreach {op cmd} $tspec {break}
 	trace remove variable ${jlibname}::locals(features) $op $cmd
+    }
+}
+
+namespace eval jlib {
+    
+    # This maps Defined Conditions to clear text messages.
+    # draft-ietf-xmpp-core23; 6.4 Defined Conditions
+    
+    variable saslmsg
+    array set saslmsg {
+    aborted             {The receiving entity acknowledges an abort
+       element sent by the initiating entity.}
+    incorrect-encoding  {The data provided by the initiating
+       entity could not be processed because the [BASE64] encoding is
+       incorrect.}
+    invalid-authzid     {The authzid provided by the initiating
+       entity is invalid, either because it is incorrectly formatted or
+       because the initiating entity does not have permissions to
+       authorize that ID.}
+    invalid-mechanism   {The initiating entity did not provide a
+       mechanism or requested a mechanism that is not supported by the
+       receiving entity.}
+    mechanism-too-weak  {The mechanism requested by the initiating
+       entity is weaker than server policy permits for that initiating
+       entity.}
+    not-authorized      {The authentication failed because the
+       initiating entity did not provide valid credentials (this includes
+       but is not limited to the case of an unknown username).}
+    temporary-auth-failure {The authentication failed because of
+       a temporary error condition within the receiving entity.}
+   }
+}
+
+proc jlib::sasl_getmsg {condition} {
+    variable saslmsg
+    
+    if {[info exists saslmsg($condition)]} {
+	return $saslmsg($condition)
+    } else {
+	return ""
     }
 }
 

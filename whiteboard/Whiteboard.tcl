@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.21 2004-09-11 14:21:51 matben Exp $
+# $Id: Whiteboard.tcl,v 1.22 2004-09-13 09:05:19 matben Exp $
 
 package require entrycomp
 package require moviecontroller
@@ -684,9 +684,9 @@ proc ::WB::BuildWhiteboard {wtop args} {
     upvar ::WB::${wtop}::canvasImages canvasImages
     
     if {[string equal $wtop "."]} {
-	set wbTitle "Coccinella (Main)"
+	set wbTitle "$prefs(theAppName) (Main)"
     } else {
-	set wbTitle "Coccinella"
+	set wbTitle $prefs(theAppName)
     }
     set titleString $wbTitle
     array set opts [list -state normal -title $titleString -usewingeom 0]

@@ -6,8 +6,9 @@
 #
 #  (C) 2000 Kerem 'Waster_' HADIMLI (minor parts)
 #  (c) 2003  Mats Bengtsson
+#  This source file is distributed under the BSD licens.
 #  
-# $Id: socks5.tcl,v 1.9 2004-09-08 13:13:14 matben Exp $
+# $Id: socks5.tcl,v 1.10 2004-09-13 09:05:18 matben Exp $
 # 
 # TODO:  GSSAPI authentication which is a MUST is missing.
 #        Only CMD CONNECT implemented.

@@ -5,8 +5,9 @@
 #      Code idee from Harrison & McLennan
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
+#  This source file is distributed under the BSD licens.
 #  
-# $Id: notebook.tcl,v 1.6 2004-06-11 07:44:43 matben Exp $
+# $Id: notebook.tcl,v 1.7 2004-09-13 09:05:18 matben Exp $
 # 
 # ########################### USAGE ############################################
 #

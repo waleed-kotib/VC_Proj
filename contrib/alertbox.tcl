@@ -3,8 +3,9 @@
 #       An alerbox that returns immediately (nonmodal).
 #       
 #  Copyright (c) 2004
+#  This source file is distributed under the BSD licens.
 #  
-#  $Id: alertbox.tcl,v 1.4 2004-06-24 13:48:35 matben Exp $
+#  $Id: alertbox.tcl,v 1.5 2004-09-13 09:05:18 matben Exp $
 
 package provide alertbox 1.0
 

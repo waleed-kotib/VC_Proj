@@ -4,8 +4,9 @@
 #      Needed to make a separate widget since theming is easier.
 #      
 #  Copyright (c) 2003  Mats Bengtsson
+#  This source file is distributed under the BSD licens.
 #  
-# $Id: headlabel.tcl,v 1.4 2004-02-13 14:11:48 matben Exp $
+# $Id: headlabel.tcl,v 1.5 2004-09-13 09:05:18 matben Exp $
 #
 
 package provide headlabel 0.1

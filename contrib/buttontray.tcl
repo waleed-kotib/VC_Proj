@@ -4,8 +4,9 @@
 #      It implements a fancy button tray widget.
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
+#  This source file is distributed under the BSD licens.
 #  
-# $Id: buttontray.tcl,v 1.10 2004-08-18 12:08:58 matben Exp $
+# $Id: buttontray.tcl,v 1.11 2004-09-13 09:05:18 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
