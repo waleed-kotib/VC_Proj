@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.6 2003-05-18 13:20:21 matben Exp $
+# $Id: Preferences.tcl,v 1.7 2003-05-20 16:22:31 matben Exp $
  
 package require notebook
 package require tree
@@ -728,9 +728,11 @@ proc ::Preferences::BuildPageRoster {page} {
     checkbutton $page.dblclk -text " [::msgcat::mc prefrochat]" \
       -variable [namespace current]::tmpJPrefs(rost,dblClk)  \
       -onvalue chat -offvalue normal
+    checkbutton $page.sysicons -text " [::msgcat::mc prefrosysicons]" \
+      -variable [namespace current]::tmpJPrefs(haveIMsysIcons)
     
     pack $page.rmifunsub $page.allsubno $page.clrout $page.dblclk  \
-      -side top -anchor w -pady $ypad -padx 10
+      $page.sysicons -side top -anchor w -pady $ypad -padx 10
 }
 
 proc ::Preferences::BuildPageConf {page} {

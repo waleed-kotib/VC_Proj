@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: muc.tcl,v 1.3 2003-05-18 13:20:21 matben Exp $
+# $Id: muc.tcl,v 1.4 2003-05-20 16:22:30 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -22,6 +22,7 @@
 #   INSTANCE COMMANDS
 #      jlibName muc allroomsin
 #      jlibName muc create roomjid nick callback
+#      jlibName muc destroy roomjid ?-command, -reason, alternativejid?
 #      jlibName muc enter roomjid nick ?-command?
 #      jlibName muc exit roomjid nick
 #      jlibName muc getaffilation roomjid affilation callback
@@ -45,7 +46,7 @@ namespace eval jlib::muc {
     # Globals same for all instances of this jlib.
     #    > 1 prints raw xml I/O
     #    > 2 prints a lot more
-    variable debug 3
+    variable debug 0
     
     variable muc
     set muc(affilationExp) {(owner|admin|member|outcast|none)}
@@ -327,6 +328,46 @@ proc jlib::muc::setroom {jlibname roomjid type args} {
       -attrlist [list xmlns "jabber:x:data" type $type]  \
       -subtags $subelements]]
     set xmllist [wrapper::createtag "query" -subtags $xelem \
+      -attrlist {xmlns "http://jabber.org/protocol/muc#owner"}]
+    eval {[namespace parent]::send_iq $jlibname "set" $xmllist -to $roomjid} \
+      $opts
+}
+
+# jlib::muc::destroy --
+# 
+# 
+# Arguments:
+#       jlibname    name of jabberlib instance.
+#       roomjid     the rooms jid.
+#       args        -command, -reason, alternativejid.
+#       
+# Results:
+#       None.
+
+proc jlib::muc::destroy {jlibname roomjid args} {
+
+    set opts {}
+    set subelements {}
+    foreach {name value} $args {
+	switch -- $name {
+	    -command {
+		lappend opts -command  \
+		  [list [namespace parent]::parse_iq_response $jlibname $value]
+	    }
+	    -reason {
+		lappend subelements [list [wrapper::createtag "reason" \
+		  -chdata $value]]
+	    }
+	    -alternativejid {
+		lappend subelements [list [wrapper::createtag "alt" \
+		  -attrlist [list jid $value]]]
+	    }
+	    default {
+		return -code error "Unrecognized option \"$name\""
+	    }
+	}
+    }
+    set xmllist [wrapper::createtag "query" -subtags $subelements \
       -attrlist {xmlns "http://jabber.org/protocol/muc#owner"}]
     eval {[namespace parent]::send_iq $jlibname "set" $xmllist -to $roomjid} \
       $opts

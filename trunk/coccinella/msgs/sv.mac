@@ -734,6 +734,8 @@ upphör}
 	::msgcat::mcset sv prefroclr     {Radera rostern när loggar ut}
 	::msgcat::mcset sv prefrochat    {Chatta när dubbelklickar användare,\
 annars normalt meddelande}
+	::msgcat::mcset sv prefrosysicons {Använd anpassade ikoner för\
+främmande IM system}
 	::msgcat::mcset sv prefblonly    {Acceptera endast meddelanden från\
 användare i min roster}
 	::msgcat::mcset sv prefblbl      {Blockera följande JID:er (* jokertecken\
@@ -849,8 +851,7 @@ för nerladdning.}
 	::msgcat::mcset sv jaupdatepri	{Den här uppdateringen är %s}
 	::msgcat::mcset sv jaupdatenewver {Den ny versionen är: %s}
 	::msgcat::mcset sv jaupdateremind {Påminn mig inte om detta fler gånger}
-	::msgcat::mcset sv jasettopic   {Sätt nytt ämne för detta gruppsamtal.\
-Det sätts när du skickar nästa meddelande.}
+	::msgcat::mcset sv jasettopic   {Sätt nytt ämne för detta gruppsamtal.}
 
 
 

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.2 2003-05-18 13:20:20 matben Exp $
+# $Id: Browse.tcl,v 1.3 2003-05-20 16:22:23 matben Exp $
 
 package provide Browse 1.0
 
@@ -198,12 +198,18 @@ proc ::Jabber::Browse::Callback {browseName type jid subiq} {
 			}
 			
 			# In principle the <ns/> elements shall signal type
-			# of protocol.
+			# of protocol. Some 'jabber:iq:conference' services
+			# don't advertise themself with this namespace.
+			# As a fallback we try to look at its version info.
+			set haveNS 0
+			foreach c [wrapper::getchildren $child] {
+			    if {[string equal [lindex $c 0] "ns"]} {
+				set haveNS 1
+				break
+			    }
+			}
 			
-			
-			# Version query only for jabber conferences 
-			#        (type='private' or 'public')
-			if {[info exists cattrArr(type)] &&  \
+			if {!$haveNS && [info exists cattrArr(type)] &&  \
 			  ($cattrArr(type) == "public" ||  \
 			  $cattrArr(type) == "private")} {
 			    $jstate(jlib) get_version $confjid   \

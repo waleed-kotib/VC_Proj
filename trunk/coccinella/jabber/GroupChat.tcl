@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.2 2003-05-18 13:20:20 matben Exp $
+# $Id: GroupChat.tcl,v 1.3 2003-05-20 16:22:24 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -92,9 +92,11 @@ proc ::Jabber::GroupChat::HaveMUC {{roomjid {}}} {
     } else {
 	set confserver [$jstate(browse) getparentjid $roomjid]
 	if {[$jstate(browse) isbrowsed $confserver]} {
-	    set ans [$jstate(browse) havenamespace $roomjid  \
+	    set ans [$jstate(browse) havenamespace $confserver  \
 	      "http://jabber.org/protocol/muc"]
 	}
+	::Jabber::Debug 4 "::Jabber::GroupChat::HaveMUC \
+	confserver=$confserver, ans=$ans"
     }
     return $ans
 }
@@ -115,6 +117,7 @@ proc ::Jabber::GroupChat::HaveMUC {{roomjid {}}} {
 #       "cancel" or "enter".
 
 proc ::Jabber::GroupChat::EnterOrCreate {w what args} {
+    variable locals
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jprefs jprefs
     
@@ -143,6 +146,8 @@ proc ::Jabber::GroupChat::EnterOrCreate {w what args} {
 	    }
 	}
     }
+    ::Jabber::Debug 2 "::Jabber::GroupChat::EnterOrCreate\
+      gchatprotocol=$gchatprotocol, what=$what, args='$args'"
     
     switch -- $gchatprotocol {
 	gc-1.0 {
@@ -163,7 +168,18 @@ proc ::Jabber::GroupChat::EnterOrCreate {w what args} {
 	    }
 	}
     }    
+    
     return $ans
+}
+
+# Jabber::GroupChat::SetProtocol --
+# 
+#       Cache groupchat protocol in use for specific room.
+
+proc ::Jabber::GroupChat::SetProtocol {roomJid protocol} {
+    variable locals
+
+    set locals($roomJid,protocol) $protocol
 }
 
 # Jabber::GroupChat::BuildEnter --
@@ -311,7 +327,11 @@ proc ::Jabber::GroupChat::EnterCallback {jlibName type args} {
 	    append msg " The error code is $errcode: $errmsg"
 	}
 	tk_messageBox -title "Error Enter Room" -message $msg
+	return
     }
+    
+    # Cache groupchat protocol type (muc|conference|gc-1.0).
+    ::Jabber::GroupChat::SetProtocol $argsArr(-from) "gc-1.0"
 }
 
 # Jabber::GroupChat::GotMsg --
@@ -444,12 +464,11 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     }
     set locals($roomJid,got1stMsg) 0
     set locals($roomJid,topic) ""
-    set locals($roomJid,topicset) 0
     toplevel $w -class GroupChat
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
     } else {
-
+	
     }
     
     # Not sure how old-style groupchat works here???
@@ -468,11 +487,11 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     if {[string match "mac*" $this(platform)]} {
 	$w configure -menu [::Jabber::UI::GetRosterWmenu]
     }
-
+    
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised]   \
       -fill both -expand 1 -ipadx 4
-        
+    
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
     pack [button $frbot.btsnd -text [::msgcat::mc Send] -width 8  \
@@ -493,7 +512,19 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
       -fill y -side left
     pack [::UI::NewPrint $w.frall.fccp.pr [list [namespace current]::Print $roomJid]] \
       -side left -padx 10
+    pack [button $w.frall.fccp.info -text "[::msgcat::mc Info]..."  \
+      -font $sysFont(s) -command [list ::Jabber::MUC::BuildInfo .mm $roomJid]] \
+      -side right -padx 4
+    pack [button $w.frall.fccp.nick -text "[::msgcat::mc {Nick name}]..."  \
+      -font $sysFont(s) -command [list ::Jabber::MUC::SetNick $roomJid]] \
+      -side right -padx 4
+    
     pack [frame $w.frall.div2 -bd 2 -relief sunken -height 2] -fill x -side top
+    if {[info exists locals($roomJid,protocol)] &&  \
+      ($locals($roomJid,protocol) != "muc")} {
+	$w.frall.fccp.info configure -state disabled
+	$w.frall.fccp.nick configure -state disabled
+    }
 
     # Popup for setting status to this room.
     set allStatus [array names mapShowElemToText]
@@ -510,7 +541,7 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     
     # Keep track of all buttons that need to be disabled on logout.
     set locals($roomJid,allBts) [list $frbot.btsnd $frbot.btexit $wpopup]
-        
+    
     # Header fields.
     set frtop [frame $w.frall.frtop -borderwidth 0]
     pack $frtop -side top -fill x   
@@ -552,7 +583,7 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     scrollbar $wysc -orient vertical -command [list $wtext yview]
     pack $wtext -side left -fill both -expand 1
     pack $wysc -side right -fill y -padx 2
-
+    
     if {[info exists prefs(paneGeom,groupchatDlgHori)]} {
 	set relpos $prefs(paneGeom,groupchatDlgHori)
     } else {
@@ -567,10 +598,10 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     $wtext tag configure metxttag -foreground black -background #cecece  \
       -spacing1 $space -spacing3 $space -lmargin1 20 -lmargin2 20
     $wtext tag configure youtag -foreground blue -spacing1 $space  \
-       -font $sysFont(sb)
+      -font $sysFont(sb)
     $wtext tag configure youtxttag -foreground black -spacing1 $space  \
       -spacing3 $space -lmargin1 20 -lmargin2 20
-
+    
     # Text send.
     set wtxtsnd $frmid.frtxtsnd
     frame $wtxtsnd -height 100 -width 300
@@ -583,7 +614,7 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     grid $wyscsnd -column 1 -row 0 -sticky ns
     grid columnconfigure $wtxtsnd 0 -weight 1
     grid rowconfigure $wtxtsnd 0 -weight 1
-
+    
     if {[info exists prefs(paneGeom,groupchatDlgVert)]} {
 	set relpos $prefs(paneGeom,groupchatDlgVert)
     } else {
@@ -596,14 +627,14 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     set locals($roomJid,wusers) $wusers
     set locals($roomJid,wtxt.0) $wtxt.0
     set locals($roomJid,wtxt) $wtxt
-	
+    
     # Add to exit menu.
     ::Jabber::UI::GroupChat "enter" $roomJid
     
     # Necessary to trace the popup menu variable.
     trace variable [namespace current]::locals($roomJid,status) w  \
       [list [namespace current]::TraceStatus $roomJid]
-
+    
     if {[info exists prefs(winGeom,groupchatDlg)]} {
 	wm geometry $w $prefs(winGeom,groupchatDlg)
     }
@@ -674,7 +705,14 @@ proc ::Jabber::GroupChat::DoSetTopic {roomJid} {
     variable locals
     variable fintopic
 
-    set locals($roomJid,topicset) 1
+    if {[catch {
+	$jstate(jlib) send_message $roomJid -type groupchat \
+	  -subject $locals($roomJid,newtopic)
+    } err]} {
+	tk_messageBox -type ok -icon error -title "Network Error" \
+	  -message "Network error ocurred: $err"
+	return
+    }
     set fintopic 1
 }
 
@@ -691,19 +729,13 @@ proc ::Jabber::GroupChat::Send {roomJid} {
 	return
     }
     set wtextsnd $locals($roomJid,wtextsnd)
-    set extras {}
-    
-    # Possibly set new topic (subject).
-    if {$locals($roomJid,topicset)} {
-	set extras [list -subject $locals($roomJid,newtopic)]
-    }
 
     # Get text to send.
     set allText [$wtextsnd get 1.0 "end - 1 char"]
     if {$allText != ""} {	
 	if {[catch {
-	    eval {$jstate(jlib) send_message $roomJid -type groupchat \
-	      -body $allText} $extras
+	    $jstate(jlib) send_message $roomJid -type groupchat \
+	      -body $allText
 	} err]} {
 	    tk_messageBox -type ok -icon error -title "Network Error" \
 	      -message "Network error ocurred: $err"

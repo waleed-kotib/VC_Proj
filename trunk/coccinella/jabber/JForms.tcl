@@ -7,16 +7,16 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #
-# $Id: JForms.tcl,v 1.4 2003-05-18 13:20:20 matben Exp $
+# $Id: JForms.tcl,v 1.5 2003-05-20 16:22:27 matben Exp $
 # 
-#      Updated to the 2002-09-03 revision of JEP-0004
+#      Updated to version 2.1 of JEP-0004
 #  
 #-------------------------------------------------------------------------------
 
 package provide JForms 1.0
 
 # Just make sure that we have the parent namespace here.
-namespace eval ::Jabber:: {}
+namespace eval ::Jabber:: { }
 
 namespace eval ::Jabber::Forms:: {
 
@@ -71,12 +71,92 @@ proc ::Jabber::Forms::Build {w xmllist args} {
     }
     if {$hasXDataForm} {
 	set locals($w,type) "xdata"
-	eval {BuildXData $w $xmlXDataElem} $args
+	eval {::Jabber::Forms::BuildXData $w $xmlXDataElem} $args
     } else {
-	BuildSimple $w $xmllist $argsArr(-template)
+	::Jabber::Forms::BuildSimple $w $xmllist $argsArr(-template)
     }
     bind $w <Destroy> [list [namespace current]::Cleanup $w]
     return $w
+}
+
+# Jabber::Forms::BuildScrollForm --
+# 
+#       Builds an empty scrollable frame.
+
+proc ::Jabber::Forms::BuildScrollForm {w args} {
+
+    namespace eval ::${w}:: { }
+    upvar ::${w}::opts opts
+    
+    array set opts {
+	-height     10
+	-ipadx      4
+	-ipady      4
+	-width      10
+    }
+    array set opts $args
+    set opts(wboxwidth) [expr $opts(-width) - 2 * $opts(-ipadx)]
+    
+    frame $w -bd 1 -relief sunken
+    set wcan $w.can
+    set wsc $w.ysc
+    set wbox $w.can.f
+    canvas $wcan -yscrollcommand [list $wsc set] -width $opts(-width)  \
+      -height $opts(-height) -bd 0 -highlightthickness 0
+    scrollbar $wsc -orient vertical -command [list $wcan yview]			
+    
+    grid $wcan -column 0 -row 0 -sticky news
+    grid $wsc -column 1 -row 0 -sticky ns
+    grid columnconfigure $w 0 -weight 1
+    grid rowconfigure $w 0 -weight 1
+    return $w
+}
+
+# Jabber::Forms::FillScrollForm --
+# 
+#       Fills the form defined in 'xmllist' into the scroll frame.
+
+proc ::Jabber::Forms::FillScrollForm {w xmllist args} {
+    upvar ::${w}::opts opts
+
+    set wcan $w.can
+    set wbox $w.can.f
+    catch {destroy $wbox}
+    eval {::Jabber::Forms::Build $wbox $xmllist -width $opts(wboxwidth)} $args
+    
+    $wcan create window $opts(-ipadx) $opts(-ipady) -anchor nw -window $wbox
+    
+    #
+    tkwait visibility $wbox
+    set width [winfo reqwidth $wbox]
+    set height [winfo reqheight $wbox]
+    set canscrollwidth [expr $width + 2 * $opts(-ipadx)]
+    set canscrollheight [expr $height + 2 * $opts(-ipady)]
+    $wcan config -scrollregion [list 0 0 $canscrollwidth $canscrollheight]
+    $wcan config -width $opts(-width) -height $opts(-height)
+    ::Jabber::Forms::ScrollConfig $w
+
+    bind $wcan <Configure> [list [namespace current]::ScrollConfig $w]
+}
+
+
+proc ::Jabber::Forms::GetScrollForm {w} {
+    upvar ::${w}::opts opts
+
+    set wbox $w.can.f
+    return [::Jabber::Forms::GetXML $wbox]
+}
+
+proc ::Jabber::Forms::ScrollConfig {w} {
+    upvar ::${w}::opts opts
+
+    set wcan $w.can
+    set wbox $w.can.f
+    set width [winfo width $wcan]
+    set height [winfo height $wcan]
+    set opts(wboxwidth) [expr $width - 2 * $opts(-ipadx)]
+    #puts "winfo width/height=$width/$height, wboxwidth=$opts(wboxwidth)"
+    $wbox.spacer configure -width $opts(wboxwidth)
 }
 
 proc ::Jabber::Forms::GetReported {w} {
@@ -147,7 +227,7 @@ proc ::Jabber::Forms::Cleanup {w} {
 # Results:
 #       w, the frame that must be packed.
 
-proc ::Jabber::Forms::BuildSimple {w xmllist {template {}}} {
+proc ::Jabber::Forms::BuildSimple {w xmllist {template ""}} {
     variable cache
     variable reported
     variable locals
@@ -155,6 +235,11 @@ proc ::Jabber::Forms::BuildSimple {w xmllist {template {}}} {
     if {![info exists locals($w,id)]} {
 	return -code error "The widget \"$w\" is not a form"
     }
+    array set argsArr {
+	-aspect    800
+	-width     200
+    }
+    array set argsArr {}
     set id $locals($w,id)
     set i 0
     set reported($id) {jid {Jid (user)}}
@@ -166,6 +251,11 @@ proc ::Jabber::Forms::BuildSimple {w xmllist {template {}}} {
 	FillInBoxOneTag $w $child {} i $template
 	incr i
     }
+    
+    # Spacer for <Configure> bind'ing.
+    frame $w.spacer 
+    grid $w.spacer -columnspan 2
+    grid columnconfigure $w 1 -weight 1
     return $w
 }
 
@@ -175,7 +265,7 @@ proc ::Jabber::Forms::BuildSimple {w xmllist {template {}}} {
 #       Makes the right row or rows for this specific tag,
 #       or calls itself rcursively.
 
-proc ::Jabber::Forms::FillInBoxOneTag {w child parentTag iName {template {}}} {
+proc ::Jabber::Forms::FillInBoxOneTag {w child parentTag iName {template ""}} {
     global  sysFont
     
     variable locals
@@ -204,10 +294,10 @@ proc ::Jabber::Forms::FillInBoxOneTag {w child parentTag iName {template {}}} {
 	    if {($tag == "nick") || ($tag == "nickname")} {
 		foreach num {1 2 3} {
 		    label $w.ln$num -text "${tag} ${num}:" -font $sysFont(sb)
-		    entry $w.en$num -width 22   \
+		    entry $w.en$num    \
 		      -textvariable [namespace current]::cache($id,$key#${num})
 		    grid $w.ln$num -column 0 -row $i -sticky e
-		    grid $w.en$num -column 1 -row $i -sticky w
+		    grid $w.en$num -column 1 -row $i -sticky ew
 		    incr i
 		}
 	    } elseif {$tag == "privacy"} {
@@ -231,24 +321,24 @@ proc ::Jabber::Forms::FillInBoxOneTag {w child parentTag iName {template {}}} {
 		incr i
 	    } else {
 		label $w.l$i -text ${tag}: -font $sysFont(sb)
-		entry $w.e$i -width 22   \
+		entry $w.e$i   \
 		  -textvariable $varName
 		grid $w.l$i -column 0 -row $i -sticky e
-		grid $w.e$i -column 1 -row $i -sticky w
+		grid $w.e$i -column 1 -row $i -sticky ew
 		incr i
 	    }
 	    
 	    # Registering & searching.
 	} elseif {($template == "register") || ($template == "search")} {
 	    if {$tag == "registered"} {
-		message $w.l$i -width 200 -font $sysFont(s) \
+		message $w.l$i -width 240 -font $sysFont(s) \
 		  -text {You are already registered with this service.\
 		  These are your current settings of your login parameters.\
 		  Possible to change???}
 		grid $w.l$i -column 0 -row $i -sticky w -columnspan 2
 		incr i
 	    } elseif {$tag == "instructions"} {
-		message $w.l$i -width 200 -font $sysFont(s)  \
+		message $w.l$i -width 240 -font $sysFont(s)  \
 		  -text $cdata
 		grid $w.l$i -column 0 -row $i -sticky w -columnspan 2
 		incr i
@@ -258,18 +348,18 @@ proc ::Jabber::Forms::FillInBoxOneTag {w child parentTag iName {template {}}} {
 		set $varName $cdata
 	    } else {
 		label $w.l$i -text ${tag}: -font $sysFont(sb)
-		entry $w.e$i -width 22 -textvariable $varName
+		entry $w.e$i -textvariable $varName
 		grid $w.l$i -column 0 -row $i -sticky e
-		grid $w.e$i -column 1 -row $i -sticky w
+		grid $w.e$i -column 1 -row $i -sticky ew
 		incr i
 	    }
 	    
 	    # Default.
 	} else {
 	    label $w.l$i -text ${tag}: -font $sysFont(sb)
-	    entry $w.e$i -width 22 -textvariable $varName
+	    entry $w.e$i -textvariable $varName
 	    grid $w.l$i -column 0 -row $i -sticky e
-	    grid $w.e$i -column 1 -row $i -sticky w
+	    grid $w.e$i -column 1 -row $i -sticky ew
 	    incr i
 	}
     } else {
@@ -296,7 +386,7 @@ proc ::Jabber::Forms::FillInBoxOneTag {w child parentTag iName {template {}}} {
 # Results:
 #       xml sub elements suitable for the -subtags option of wrapper::createtag.
 
-proc ::Jabber::Forms::GetXMLSimple {w xmllist {template {}}} {
+proc ::Jabber::Forms::GetXMLSimple {w xmllist {template ""}} {
     
     set subelements {}
     foreach child $xmllist {
@@ -407,19 +497,20 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
 	-width     200
     }
     array set argsArr $args
-    frame $w
-    set id $locals($w,id)
     
+    frame $w
+    set id $locals($w,id)   
     set i 0
+    
     foreach elem [wrapper::getchildren $xml] {
 	set tag [lindex $elem 0]
 	
 	switch -exact -- $tag {
 	    instructions {
-	    #-aspect $argsArr(-aspect)
-		message $w.m$i -font $sysFont(s) \
-		  -text [lindex $elem 3] -width $argsArr(-width)
-		grid $w.m$i -row $i -column 0 -columnspan 1 -sticky w
+		message $w.m$i -font $sysFont(s)  \
+		  -text [lindex $elem 3] -anchor w -justify left \
+		  -width $argsArr(-width)
+		grid $w.m$i -row $i -column 0 -columnspan 1 -sticky ew
 		incr i
 	    }
 	    field {
@@ -498,8 +589,8 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
 			set wfr [frame $w.f$var]
 			set wtxt ${wfr}.txt
 			set wsc ${wfr}.sc
-			text $wtxt -font $sysFont(s) -height 3 -width 30 -wrap word \
-			  -yscrollcommand [list $wsc set]
+			text $wtxt -font $sysFont(s) -height 3 -wrap word \
+			  -yscrollcommand [list $wsc set] -width 40
 			scrollbar $wsc -orient vertical  \
 			  -command [list $wtxt yview]			
 
@@ -555,7 +646,7 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
 			set wfr [frame $w.f$var]
 			set wlb $w.f${var}.lb
 			set wsc $w.f${var}.sc
-			listbox $wlb -font $sysFont(s) -height 4 -width 20 \
+			listbox $wlb -font $sysFont(s) -height 4 \
 			  -selectmode multiple  \
 			  -yscrollcommand [list $wsc set]   \
 			  -listvar [namespace current]::cache($id,$var)
@@ -590,7 +681,7 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
 			grid $w.l$i -row $i -column 0 -columnspan 1 -sticky w
 			incr i
 		    }
-		    jid {
+		    jid-single {
 			set var $attrArr(var)
 			set cache($id,$var) $defvalue
 			set type($id,$var) $attrArr(type)
@@ -636,7 +727,12 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
 	}
     }
     label $w.l$i -text {Entries labelled in red are required}
-    grid $w.l$i -row $i -column 0 -columnspan 2 -sticky w
+    grid $w.l$i -row $i -column 0 -columnspan 1 -sticky w
+
+    # Spacer for <Configure> bind'ing.
+    frame $w.spacer 
+    grid $w.spacer
+    
     return $w
 }
 
@@ -704,7 +800,7 @@ proc ::Jabber::Forms::GetXMLXData {w} {
 	regexp "^${id},(.+)$" $key match var
 
 	switch -- $type($key) {
-	    text-single - text-private - boolean - jid {
+	    text-single - text-private - boolean - jid-single {
 		set value $cache($id,$var)
 		set subtags [list [wrapper::createtag value -chdata $value]]
 	    }
