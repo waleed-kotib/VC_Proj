@@ -4,7 +4,7 @@
 #       typically from an anchor element <a href='xmpp:jid[?query]'/>
 #       in a html page.
 # 
-# $Id: ParseURI.tcl,v 1.6 2004-08-06 15:19:20 matben Exp $
+# $Id: ParseURI.tcl,v 1.7 2004-08-07 13:34:22 matben Exp $
 
 package require uriencode
 
@@ -74,8 +74,6 @@ proc ::ParseURI::ConnectCB {token status {msg {}}} {
     variable $token
     upvar 0 $token state
     
-    #puts "::ParseURI::ConnectCB status=$status"
-    
     switch $status {
 	error {
 	    tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
@@ -102,8 +100,6 @@ proc ::ParseURI::InitStreamCB {token args} {
     variable $token
     upvar 0 $token state
     
-    #puts "::ParseURI::InitStreamCB args='$args'"
-
     array set argsArr $args
 
     if {![info exists argsArr(id)]} {
@@ -228,11 +224,7 @@ proc ::ParseURI::BrowseSetHook {token from subiq} {
     if {![jlib::jidequal $from $server]} {
 	return
     }
-    ::hooks::remove  browseSetHook  $state(browsecmd)
-    
-    # We brutaly assumes muc room here.
-    ::Jabber::MUC::EnterRoom $state(jid) $state(query,nick)
-    ::ParseURI::Free $token
+    ::ParseURI::HandleGroupchat $token
 }
 
 proc ::ParseURI::DiscoInfoHook {token type from subiq args} {
@@ -242,10 +234,36 @@ proc ::ParseURI::DiscoInfoHook {token type from subiq args} {
     if {![jlib::jidequal $from $state(service)]} {
 	return
     }
-    ::hooks::remove  discoInfoHook  $state(discocmd)
+    ::ParseURI::HandleGroupchat $token
+}
 
+proc ::ParseURI::HandleGroupchat {token} {
+    variable $token
+    upvar 0 $token state
+    
+    ::hooks::remove  browseSetHook  $state(browsecmd)
+    ::hooks::remove  discoInfoHook  $state(discocmd)
+    
     # We brutaly assumes muc room here.
     ::Jabber::MUC::EnterRoom $state(jid) $state(query,nick)
+
+    if {[info exists state(query,xmlns)] && \
+      [string equal $state(query,xmlns) "whiteboard"]} {
+	set state(enterroomcmd) [list ::ParseURI::EnterRoomHook $token]
+	::hooks::add groupchatEnterRoomHook $state(enterroomcmd)
+    } else {
+	::ParseURI::Free $token
+    }
+}
+
+proc ::ParseURI::EnterRoomHook {token from protocol} {
+    variable $token
+    upvar 0 $token state
+    
+    # puts "---------------------::ParseURI::EnterRoomHook"
+    ::hooks::remove  groupchatEnterRoomHook  $state(enterroomcmd)
+    
+    ::Jabber::WB::NewWhiteboardTo $state(jid)
     ::ParseURI::Free $token
 }
 

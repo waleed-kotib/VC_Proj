@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.58 2004-08-06 07:46:53 matben Exp $
+# $Id: jabberlib.tcl,v 1.59 2004-08-07 13:34:22 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -1059,11 +1059,10 @@ proc jlib::presence_handler {jlibname xmldata} {
 	    
 	    # Not sure if we should exclude roster here since this
 	    # is not pushed to us but requested.
-	    if {![info exists prescallback]} {
-		
-		# Set presence in our roster object
-		eval {$lib(rostername) setpresence $from $type} $arglist
-	    }
+	    # It must be set for presence sent to groupchat rooms!
+	    
+	    # Set presence in our roster object
+	    eval {$lib(rostername) setpresence $from $type} $arglist
 	} else {
 	    
 	    # We probably need to respond to the 'presence' element;

@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.45 2004-08-06 15:19:20 matben Exp $
+# $Id: MUC.tcl,v 1.46 2004-08-07 13:34:22 matben Exp $
 
 package require entrycomp
 package require muc
@@ -513,7 +513,10 @@ proc ::Jabber::MUC::EnterCallback {mucname type args} {
 	    }
 	}
 	return
-    }   
+    } else {
+	
+	::hooks::run groupchatEnterRoomHook $argsArr(-from) "muc"
+    }
 }
 
 namespace eval ::Jabber::MUC:: {
