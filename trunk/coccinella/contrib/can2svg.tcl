@@ -6,7 +6,7 @@
 #  
 #  This particular package is BSD licensed. 
 #
-# $Id: can2svg.tcl,v 1.16 2004-10-18 12:23:03 matben Exp $
+# $Id: can2svg.tcl,v 1.17 2004-10-20 10:15:20 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -948,8 +948,8 @@ proc can2svg::SplitWrappedLines {line font wgtWidth} {
 	}
 	set char [string index $line [incr endchar -1]]
      }
-     set first [string range $line 0 [expr $endchar -1]]
-     set rest [string range $line $endchar end]
+     set first [string range $line 0 $endchar]
+     set rest [string range $line [expr $endchar+1] end]
      return [concat [list $first] [SplitWrappedLines $rest $font $wgtWidth]]
 }
 
