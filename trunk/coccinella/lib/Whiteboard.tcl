@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.8 2004-01-01 12:08:22 matben Exp $
+# $Id: Whiteboard.tcl,v 1.9 2004-01-05 15:00:32 matben Exp $
 
 package require entrycomp
 package require CanvasDraw
@@ -20,7 +20,15 @@ package provide Whiteboard 1.0
 
 namespace eval ::WB:: {
     global  wDlgs
-    
+        
+    # Add all event hooks.
+    hooks::add quitAppHook     [list ::UI::SaveWinPrefixGeom $wDlgs(wb) whiteboard]
+    hooks::add quitAppHook     ::WB::SaveAnyState
+    hooks::add loginHook       ::WB::LoginCmd
+    hooks::add closeWindowHook ::WB::CloseHook
+    hooks::add logoutHook      ::WB::LogoutHook
+    hooks::add initHook        ::WB::InitHook
+
     # Tool button mappings.
     variable btNo2Name 
     variable btName2No
@@ -76,13 +84,6 @@ namespace eval ::WB:: {
     option add *Whiteboard.bwrectImage          bwrect          widgetDefault
     option add *Whiteboard.imcolorImage         imcolor         widgetDefault
     
-    # Add all event hooks.
-    hooks::add quitAppHook     [list ::UI::SaveWinPrefixGeom $wDlgs(wb) whiteboard]
-    hooks::add quitAppHook     ::WB::SaveAnyState
-    hooks::add loginHook       ::WB::LoginCmd
-    hooks::add closeWindowHook ::WB::CloseHook
-    hooks::add logoutHook      ::WB::LogoutHook
-    
     # Keeps various geometry info.
     variable dims
     # Canvas size; these are also min sizes. Add new line of tools.
@@ -113,6 +114,12 @@ namespace eval ::WB:: {
     set menuSpecPublic(wpaths) {}
     
     variable iconsInitted 0
+}
+
+proc ::WB::InitHook { } {
+    
+    ::WB::Init
+    ::WB::InitMenuDefs   
 }
 
 # WB::Init --

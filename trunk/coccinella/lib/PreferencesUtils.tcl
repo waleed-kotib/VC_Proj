@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.21 2003-12-18 14:19:35 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.22 2004-01-05 15:00:32 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -40,7 +40,10 @@ namespace eval ::PreferencesUtils:: {
     
     variable priNameToNum
     array set priNameToNum {0 0 20 20 40 40 60 60 80 80 100 100   \
-      factoryDefault 20 appDefault 40 userDefault 60 interactive 80 \
+      factoryDefault 20    \
+      appDefault     40    \
+      userDefault    60    \
+      interactive    80    \
       absolute 100}
 }
 
@@ -79,7 +82,7 @@ proc ::PreferencesUtils::Init { } {
 # 
 #       Set the user preferences from the preferences file if they are there,
 #       else take the hardcoded defaults.
-#       Take care if the priority for each variable.
+#       Take care of the priority for each variable.
 #
 # Arguments:
 #       thePrefs  a list of lists where each sublist defines an item in the
@@ -96,6 +99,7 @@ proc ::PreferencesUtils::Add {thePrefs} {
     variable priNameToNum
 
     set isOldPrefFile 0
+    
     foreach item $thePrefs {
 	foreach {varName resourceName defaultValue} $item break
 	
@@ -115,17 +119,6 @@ proc ::PreferencesUtils::Add {thePrefs} {
 	} else {
 	    set value $defaultValue
 	}
-	
-	# Treat incompatbility issues for prefs format here. DIRTY! Usch.		
-	# Do not read in jserver(list) if written by 0.93; format change.
-	if {[string equal $resourceName "jserver_list"]} {
-	    set majorOnFile [option get . prefs_majorVers {}]
-	    set minorOnFile [option get . prefs_minorVers {}]
-	    if {[string equal ${majorOnFile}.${minorOnFile} "0.93"]} {
-		set $varName $defaultValue
-		continue
-	    }
-	}	
 	
 	# All names must be fully qualified. Therefore #0.
 	upvar #0 $varName var

@@ -7,14 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.49 2004-01-02 11:41:16 matben Exp $
-#
-#  The $address is an ip name or number.
-#
-#  jserver(profile,selected)  profile picked in user info
-#  jserver(this)              present connected $address
-#  jserver(profile):          {$profile1 {$server1 $username $password $resource} \
-#                              $profile2 {$server2 $username2 $password2 $resource2} ... }
+# $Id: Jabber.tcl,v 1.50 2004-01-05 15:00:31 matben Exp $
 
 package provide Jabber 1.0
 
@@ -44,6 +37,7 @@ package require Subscribe
 package require Conference
 package require Search
 package require JForms
+package require Profiles
 
 
 namespace eval ::Jabber:: {
@@ -349,16 +343,16 @@ proc ::Jabber::FactoryDefaults { } {
     
     # The User Info of servers.    
     set jserver(this) ""
-    
-    #
-    set jprefs(urlServersList) "http://www.jabber.org/servers.php"
-    
-    # New... Profiles
+
+    # New... Profiles. These are just leftovers that shall be removed later.
     set jserver(profile)  \
       {jabber.org {jabber.org myUsername myPassword home}}
     set jserver(profile,selected)  \
       [lindex $jserver(profile) 0]
     
+    #
+    set jprefs(urlServersList) "http://www.jabber.org/servers.php"
+        
     switch $this(platform) {
 	macintosh - macosx {
 	    set jprefs(inboxPath) [file join $this(prefsPath) Inbox.tcl]
@@ -556,12 +550,6 @@ proc ::Jabber::SetjprefsArray {jprefsArrList} {
     variable jprefs
     
     array set jprefs $jprefsArrList
-}
-
-proc ::Jabber::SetjserverArray {jserverArrList} {
-    variable jserver
-    
-    array set jserver $jserverArrList
 }
 
 proc ::Jabber::GetIQRegisterElements { } {
@@ -2279,128 +2267,6 @@ proc ::Jabber::GetPrivateDataCallback {jid jlibName what theQuery} {
 	}
     }
 }
-
-# Jabber::SetUserProfile --
-#
-#       Sets or replaces a user profile. Format:
-#  jserver(profile,selected)  profile picked in user info
-#  jserver(profile):          {profile1 {server1 username1 password1 resource1} \
-#                              profile2 {server2 username2 password2 resource2} ... }
-#       
-# Arguments:
-#       profile     if empty, make a new unique profile, else, create this,
-#                   possibly replace if exists already.
-#       server      Jabber server name.
-#       username
-#       password
-#       
-# Results:
-#       none.
-
-proc ::Jabber::SetUserProfile {profile server username password {res {coccinella}}} {    
-    variable jserver
-    
-    ::Jabber::Debug 2 "profile=$profile, s=$server, u=$username, p=$password, r=$res"
-
-    # 
-    array set jserverArr $jserver(profile)
-    set profileList [::Jabber::GetAllProfileNames]
-    
-    # Create a new unique profile name.
-    if {[string length $profile] == 0} {
-	set profile $server
-
-	# Make sure that 'profile' is unique.
-	if {[lsearch -exact $profileList $profile] >= 0} {
-	    set i 2
-	    set tmpprof $profile
-	    set profile ${tmpprof}-${i}
-	    while {[lsearch -exact $profileList $profile] >= 0} {
-		incr i
-		set profile ${tmpprof}-${i}
-	    }
-	}
-    }
-    set jserverArr($profile) [list $server $username $password $res]
-    set jserver(profile) [array get jserverArr]
-    set jserver(profile,selected) $profile
-    return ""
-}
-
-
-proc ::Jabber::RemoveUserProfile {profile} {
-    variable jserver
-    
-    ::Jabber::Debug 2 "::Jabber::RemoveUserProfile profile=$profile"
- 
-    set ind [lsearch -exact $jserver(profile) $profile]
-    if {$ind >= 0} {
-	if {[string equal $jserver(profile,selected) $profile]} {
-	    set jserver(profile,selected) [lindex $jserver(profile) 0]
-	}
-	set jserver(profile) [lreplace $jserver(profile) $ind [incr ind]]
-    }
-    return ""
-}
-
-# Jabber::FindProfileFromJid --
-# 
-#       Returns first matching 'profile' for jid.
-#       It makes only sence for jid2's.
-
-proc ::Jabber::FindProfileFromJid {jid} {
-    variable jserver
-    
-    set profile ""
-    
-    # If jid2 the resource == "". Find any match.
-    if {[regexp {(^.+)@([^/]+)(/(.*))?} $jid match name host junk resource]} {    
-	foreach {prof spec} $jserver(profile) {
-	    foreach {serv user pass res} $spec break
-	    if {($serv == $host) && ($user == $name)} {
-		if {$resource != ""} {
-		    if {$resource == $res} {
-			set profile $prof
-			break
-		    }
-		} else {
-		    set profile $prof
-		    break
-		}
-	    }
-	}
-    }
-    return $profile
-}
-
-# Jabber::GetAllProfileNames --
-# 
-#       Utlity function to get a list of the names of all profiles. Sorted!
-
-proc ::Jabber::GetAllProfileNames { } {
-    variable jserver
-
-    set profiles {}
-    foreach {name spec} $jserver(profile) {
-	lappend profiles $name
-    }    
-    return [lsort -dictionary $profiles]
-}
-
-# Jabber::SortProfileList --
-# 
-#       Just sorts the jserver(profile) list using names only.
-
-proc ::Jabber::SortProfileList { } {
-    variable jserver
-
-    set tmp {}
-    array set jserverArr $jserver(profile)
-    foreach name [::Jabber::GetAllProfileNames] {
-	lappend tmp $name $jserverArr($name)
-    }
-    set jserver(profile) $tmp
-}
     
 # Jabber::GetAnyDelayElem --
 #
@@ -3023,8 +2889,6 @@ proc ::Jabber::WB::DispatchToImporter {mime opts args} {
 }
 
 # The ::Jabber::Passwd:: namespace -------------------------------------------
-#  jserver(profile): {$profile1 {$server1 $username $password $resource} \
-#                     $profile2 {$server2 $username2 $password2 $resource2} ... }
 
 namespace eval ::Jabber::Passwd:: {
 
@@ -3152,7 +3016,7 @@ proc ::Jabber::Passwd::Doit {w} {
 
 proc ::Jabber::Passwd::ResponseProc {jlibName type theQuery} {    
     variable password
-    upvar ::Jabber::jserver jserver
+    upvar ::Jabber::jstate jstate
 
     if {[string equal $type "error"]} {
 	set errcode [lindex $theQuery 0]
@@ -3162,17 +3026,16 @@ proc ::Jabber::Passwd::ResponseProc {jlibName type theQuery} {
 	  -message [FormatTextForMessageBox  \
 	  [::msgcat::mc jamesspasswderr $errcode $errmsg]] \
     } else {
-	
-	# Make sure the new password is stored in our internal state array.
-	set ind [lsearch $jserver(profile) $jserver(profile,selected)]
-	if {$ind >= 0} {
-	    set userSpec [lindex $jserver(profile) [expr $ind + 1]]
-	    lset userSpec 2 $password
-	   
-	    # Save to our jserver variable. Create a new profile.
-	    eval {::Jabber::SetUserProfile {}} $userSpec
+		
+	# Make sure the new password is stored in our profiles.
+	set name [::Profiles::FindProfileNameFromJID $jstate(mejid)]
+	if {$name != ""} {
+	    set spec [::Profiles::GetProfile $name]
+	    if {[llength $spec] > 0} {
+		lset spec 2 $password
+		eval {::Profiles::Set {}} $spec
+	    }
 	}
-	
 	tk_messageBox -title [::msgcat::mc {New Password}] -icon info -type ok \
 	  -message [FormatTextForMessageBox [::msgcat::mc jamesspasswdok]]
     }
@@ -3183,7 +3046,7 @@ proc ::Jabber::Passwd::ResponseProc {jlibName type theQuery} {
 #       Validate entry for jid.
 #       
 # Arguments:
-#       #jid     username@server
+#       jid     username@server
 #       
 # Results:
 #       boolean: 0 if reject, 1 if accept

@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: SetupAss.tcl,v 1.16 2004-01-01 12:08:21 matben Exp $
+# $Id: SetupAss.tcl,v 1.17 2004-01-05 15:00:32 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -22,16 +22,20 @@ namespace eval ::Jabber::SetupAss::  {
     variable finished 0
     
     # Make the selected (first) server the default one.
-    set profile $::Jabber::jserver(profile,selected)
-    array set profArr $::Jabber::jserver(profile)
-    set server [lindex $profArr($profile) 0]
+    set profile [::Profiles::GetSelectedName]
+    set spec [::Profiles::GetProfile $profile]
+    set server [lindex $spec 0]
 }
 
-proc ::Jabber::SetupAss::SetupAss {w} {
-    global  this prefs
+proc ::Jabber::SetupAss::SetupAss { } {
+    global  this prefs wDlgs
     
     variable finished
 
+    set w $wDlgs(setupass)
+    if {[winfo exists $w]} {
+	return
+    }
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
     wm title $w [::msgcat::mc {Setup Assistant}]
     
@@ -159,7 +163,7 @@ proc ::Jabber::SetupAss::DoFinish {w} {
 	
 	# Save as a shortcut and default server only if not called 
 	# ::Jabber::Register::Register which already done this
-	::Jabber::SetUserProfile {} $server $username $password home
+	::Profiles::Set {} $server $username $password home
     }
     set finished 1
     destroy $w
