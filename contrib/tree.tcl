@@ -6,7 +6,7 @@
 # Copyright (C) 2002-2004 Mats Bengtsson
 # This source file is distributed under the BSD license.
 # 
-# $Id: tree.tcl,v 1.34 2004-10-12 13:48:56 matben Exp $
+# $Id: tree.tcl,v 1.35 2004-10-20 13:35:59 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -154,6 +154,16 @@ namespace eval tree {
       [image create bitmap -data $data -maskdata $maskdata \
       -foreground black -background white]
     
+    set widgetGlobals(openPM) [image create photo -data {
+    R0lGODdhCQAJAKIAAP//////wsLCwsLCibS0tFOJwgAAAAAAACwAAAAACQAJ
+    AAADHUi1XAowgiUjrYKavXOBQSh4YzkuAkEMrKI0C5EAADs=
+    }]
+     
+    set widgetGlobals(closePM) [image create photo -data {
+    R0lGODdhCQAJAKIAAP//////wsLCwsLCibS0tFOJwgAAAAAAACwAAAAACQAJ
+    AAADIEi1XAowghVNpNACQY33XAEFRiCEp2Cki0AQQ6wozUIkADs=
+    }]
+
     set widgetGlobals(idir) [image create photo ::tree::idir -data {
 	R0lGODlhEAAQAPMAMf////oG+Pj4+Pj4ALi4uHh4eAAAAAAAAAAAAAAAAAAA
 	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAEALAAAAAAQABAAAAQ+MMhJq70418K5

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.50 2004-10-16 13:32:50 matben Exp $
+# $Id: Login.tcl,v 1.51 2004-10-20 13:35:59 matben Exp $
 
 package provide Login 1.0
 
@@ -757,7 +757,7 @@ proc ::Jabber::Login::HttpProxyCmd {status msg} {
     
     switch -- $status {
 	ok {
-	    
+	    # only errors are handled via callback
 	}
 	default {
 	    ::Jabber::DoCloseClientConnection
@@ -886,6 +886,7 @@ proc ::Jabber::Login::Authorize {server username resource password cmd args} {
     upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::Jabber::Login::Authorize"
+    
     array set argsArr {
 	-digest     1
 	-streamid   ""
