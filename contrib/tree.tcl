@@ -6,7 +6,7 @@
 # Copyright (C) 2002-2005 Mats Bengtsson
 # This source file is distributed under the BSD license.
 # 
-# $Id: tree.tcl,v 1.42 2005-01-31 14:06:53 matben Exp $
+# $Id: tree.tcl,v 1.43 2005-02-02 09:02:16 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -794,7 +794,8 @@ proc ::tree::WidgetProc {w command args} {
 		} else {
 		    set vlist {}
 		    foreach {key val} [array get state "*:tags"] {
-			if {[string equal $val $ftag]} {
+			#if {[string equal $val $ftag]} 
+			if {[lsearch $val $ftag] >= 0} {
 			    set ind [expr {[string last ":tags" $key] - 1}]
 			    set uid [string range $key 0 $ind]
 			    if {[info exists uid2v($uid)]} {
