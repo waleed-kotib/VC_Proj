@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: tinyhttpd.tcl,v 1.2 2003-10-18 07:43:55 matben Exp $
+# $Id: tinyhttpd.tcl,v 1.3 2003-10-19 11:15:00 matben Exp $
 
 # ########################### USAGE ############################################
 #
@@ -85,7 +85,7 @@ namespace eval ::tinyhttpd:: {
 "HTTP/1.0 200 OK
 Server: tinyhttpd/1.0
 Last-Modified: %s
-Content-Type: text/html\n"
+Content-Type: text/html"
 
     set http(404) \
 "HTTP/1.0 404 $httpMsg(404)
@@ -439,10 +439,15 @@ proc ::tinyhttpd::RespondToClient {s ip cmd inPath} {
 	    set modTime [clock format [file mtime $localPath]  \
 	      -format "%a, %d %b %Y %H:%M:%S GMT" -gmt 1]
 	    puts $s [format $http(headdirlist) $modTime]
-	    flush $s
+
 	    if {[string equal $cmd "GET"]} {
-		puts $s [BuildHtmlDirectoryListing $opts(-rootdirectory) \
+		set html [BuildHtmlDirectoryListing $opts(-rootdirectory) \
 		  $inPath httpd]
+		puts $s "Content-Length: [string length $html]"
+		puts $s "\n"
+		puts $s $html
+	    } else {
+		puts $s "\n"
 	    }
 	    Finish $s ok
 	    ::tinyhttpd::Debug 2 "  RespondToClient:: No default html file exists, return directory listing."
