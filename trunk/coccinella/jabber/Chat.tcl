@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.79 2004-10-02 13:14:55 matben Exp $
+# $Id: Chat.tcl,v 1.80 2004-10-10 09:47:23 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -151,7 +151,7 @@ proc ::Jabber::Chat::StartThreadDlg {args} {
     
     # Entries etc.
     set frmid [frame $w.frall.frmid -borderwidth 0]
-    pack $frmid -side top -fill both -expand 1
+    pack $frmid -side top -fill both -expand 1 -pady 6
     
     set jidlist [::Jabber::RosterCmd getusers -type available]
     label $frmid.luser -text "[mc {Jabber user id}]:"  \
@@ -335,20 +335,14 @@ proc ::Jabber::Chat::GotMsg {body args} {
     }
     
     # See if we've got a jabber:x:event (JEP-0022).
-    # One msn transport sends a 'compose' tag along with an actual nonempty 
-    # message. Assume compose is cancelled when we receive a nonempty 'body'.
     # 
     #  Should we handle this with hooks????
-    if {$body == ""} {
-	if {[info exists argsArr(-x)]} {
-	    set xevent [lindex [wrapper::getnamespacefromchilds  \
-	      $argsArr(-x) x "jabber:x:event"] 0]
-	    if {[llength $xevent]} {
-		eval {XEventRecv $chattoken $xevent} $args
-	    }
+    if {[info exists argsArr(-x)]} {
+	set xevent [lindex [wrapper::getnamespacefromchilds  \
+	  $argsArr(-x) x "jabber:x:event"] 0]
+	if {[llength $xevent]} {
+	    eval {XEventRecv $chattoken $xevent} $args
 	}
-    } else {
-	XEventCancel $chattoken
     }
     
     # And put message in window if nonempty, and history file.
@@ -1438,48 +1432,44 @@ proc ::Jabber::Chat::PresenceHook {jid type args} {
     set from $jid
     if {[info exists argsArr(-from)]} {
 	set from $argsArr(-from)
-    }
-    set mjid [jlib::jidmap $jid]
-    set chattoken [GetTokenFrom chat jid ${mjid}*]
-    if {$chattoken == ""} {
-	
-	# Likely no chat with this jid.
-	return
-    }
-    variable $chattoken
-    upvar 0 $chattoken chatstate
-    
+    }    
     set show $type
     if {[info exists argsArr(-show)]} {
 	set show $argsArr(-show)
-    }
-    
-    # Skip if duplicate presence.
-    if {[string equal $chatstate(presence) $show]} {
-	return
     }
     set status ""
     if {[info exists argsArr(-status)]} {
 	set status "$argsArr(-status)\n"
     }
-    InsertMessage $chattoken sys  \
-      "$from is: $mapShowTextToElem($show)\n$status"
-    
-    if {[string equal $type "available"]} {
-	SetState $chattoken normal
-    } else {
-	SetState $chattoken disabled
-    }
-    set icon [::Jabber::Roster::GetPresenceIconFromJid $from]
-    if {$icon != ""} {
-	$chatstate(wpresimage) configure -image $icon
-    }
-
+    set mjid [jlib::jidmap $jid]
     jlib::splitjid $from jid2 res
     array set presArr [$jstate(roster) getpresence $jid2 -resource $res]
-    set chatstate(presence) $presArr(-type)
-    if {[info exists presArr(-show)]} {
-	set chatstate(presence) $presArr(-show)
+    set icon [::Jabber::Roster::GetPresenceIconFromJid $from]
+
+    foreach chattoken [GetAllTokensFrom chat jid ${mjid}*] {
+	variable $chattoken
+	upvar 0 $chattoken chatstate
+	
+	# Skip if duplicate presence.
+	if {[string equal $chatstate(presence) $show]} {
+	    return
+	}
+	InsertMessage $chattoken sys  \
+	  "$from is: $mapShowTextToElem($show)\n$status"
+	
+	if {[string equal $type "available"]} {
+	    SetState $chattoken normal
+	} else {
+	    SetState $chattoken disabled
+	}
+	if {$icon != ""} {
+	    $chatstate(wpresimage) configure -image $icon
+	}
+	
+	set chatstate(presence) $presArr(-type)
+	if {[info exists presArr(-show)]} {
+	    set chatstate(presence) $presArr(-show)
+	}
     }
 }
 
@@ -1509,6 +1499,7 @@ proc ::Jabber::Chat::HaveChat {jid} {
 # Jabber::Chat::GetTokenFrom --
 # 
 #       Try to get the token state array from any stored key.
+#       Only one token is returned if any.
 #       
 # Arguments:
 #       type        'dlg' or 'chat'
@@ -1539,6 +1530,35 @@ proc ::Jabber::Chat::GetTokenFrom {type key pattern} {
 	}
     }
     return ""
+}
+
+# Jabber::Chat::GetAllTokensFrom --
+# 
+#       As above but all tokens.
+
+proc ::Jabber::Chat::GetAllTokensFrom {type key pattern} {
+    
+    set alltokens {}
+    
+    # Search all tokens for this key into state array.
+    foreach token [GetTokenList $type] {
+	
+	switch -- $type {
+	    dlg {
+		variable $token
+		upvar 0 $token xstate
+	    }
+	    chat {
+		variable $token
+		upvar 0 $token xstate
+	    }
+	}
+	
+	if {[info exists xstate($key)] && [string match $pattern $xstate($key)]} {
+	    lappend alltokens $token
+	}
+    }
+    return $alltokens
 }
 
 proc ::Jabber::Chat::GetFirstDlgToken { } {
@@ -1655,8 +1675,10 @@ proc ::Jabber::Chat::XEventRecv {chattoken xevent args} {
     }
     set composeElem [wrapper::getchildswithtag $xevent "composing"]
     set idElem [wrapper::getchildswithtag $xevent "id"]
+    
     ::Debug 6 "::Jabber::Chat::XEventRecv \
       msgid=$msgid, composeElem=$composeElem, idElem=$idElem"
+    
     if {($msgid != "") && ($composeElem != "") && ($idElem == "")} {
 	
 	# 1) Request for event notification
@@ -1710,7 +1732,8 @@ proc ::Jabber::Chat::KeyPressEvent {chattoken char} {
     if {[info exists chatstate(xevent,afterid)]} {
 	after cancel $chatstate(xevent,afterid)
 	unset chatstate(xevent,afterid)
-    }    
+    }
+    parray chatstate xevent,*
     if {[info exists chatstate(xevent,msgid)] && ($chatstate(xevent,status) == "")} {
 	XEventSendCompose $chattoken
     }
