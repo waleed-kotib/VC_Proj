@@ -10,7 +10,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ProgressWindow.tcl,v 1.22 2004-12-20 15:16:44 matben Exp $
+# $Id: ProgressWindow.tcl,v 1.23 2005-01-25 13:57:17 matben Exp $
 # 
 #-------------------------------------------------------------------------------
 #
@@ -304,7 +304,8 @@ proc ::ProgressWindow::Build {w} {
 	tframe $wall -padding {16 6}
 	pack $wall
     } else {
-	pack $wall -padx 16 -pady 6
+	frame $wall
+	pack  $wall -padx 16 -pady 6
     }
     set wmid            $wall.mid
     set wbot            $wall.bot

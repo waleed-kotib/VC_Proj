@@ -4,6 +4,13 @@ Whiteboard CHANGES
 
 Not to mention all bugfixes and rewrites.
 
+
+Coccinella-0.95.3 (050125):
+
+        - minor bugfixes
+	- added add server feature to disco
+
+
 Coccinella-0.95.2 (041217): 	Short summary --
 
         - each page, roster, disco, browser, agents, now have their own status
