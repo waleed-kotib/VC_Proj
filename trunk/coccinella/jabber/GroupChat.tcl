@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.70 2004-09-28 13:50:17 matben Exp $
+# $Id: GroupChat.tcl,v 1.71 2004-10-01 12:44:11 matben Exp $
 
 package require History
 
@@ -1335,7 +1335,6 @@ proc ::Jabber::GroupChat::Popup {w v x y} {
     global  wDlgs this
     
     variable popMenuDefs
-    upvar ::Jabber::privatexmlns privatexmlns
     upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::Jabber::GroupChat::Popup w=$w, v='$v', x=$x, y=$y"

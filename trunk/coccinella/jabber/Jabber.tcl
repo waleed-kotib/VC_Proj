@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.108 2004-09-28 13:50:17 matben Exp $
+# $Id: Jabber.tcl,v 1.109 2004-10-01 12:44:11 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -162,8 +162,8 @@ namespace eval ::Jabber:: {
     }    
     
     # XML namespaces defined here.
-    variable privatexmlns
-    array set privatexmlns {
+    variable coccixmlns
+    array set coccixmlns {
 	coccinella      http://coccinella.sourceforge.net/protocol/coccinella
 	servers         http://coccinella.sourceforge.net/protocol/servers
 	whiteboard      http://coccinella.sourceforge.net/protocol/whiteboard
@@ -181,7 +181,7 @@ namespace eval ::Jabber:: {
 	"jabber:iq:version"
 	"jabber:x:event"
     }    
-    foreach {key xmlns} [array get privatexmlns] {
+    foreach {key xmlns} [array get coccixmlns] {
 	lappend clientxmlns $xmlns
     }
     
@@ -490,7 +490,7 @@ proc ::Jabber::Init { } {
     
     variable jstate
     variable jprefs
-    variable privatexmlns
+    variable coccixmlns
     
     ::Debug 2 "::Jabber::Init"
     
@@ -518,7 +518,7 @@ proc ::Jabber::Init { } {
 
     # Register handlers for various iq elements.
     $jstate(jlib) iq_register get jabber:iq:version      ::Jabber::ParseGetVersion
-    $jstate(jlib) iq_register get $privatexmlns(servers) ::Jabber::ParseGetServers
+    $jstate(jlib) iq_register get $coccixmlns(servers) ::Jabber::ParseGetServers
     
     # Set the priority order of groupchat protocols.
     $jstate(jlib) service setgroupchatpriority  \
@@ -571,7 +571,6 @@ proc ::Jabber::IqCallback {jlibName type args} {
 proc ::Jabber::MessageCallback {jlibName type args} {    
     variable jstate
     variable jprefs
-    variable privatexmlns
     
     ::Debug 2 "::Jabber::MessageCallback type=$type, args='$args'"
     
@@ -1257,7 +1256,7 @@ proc ::Jabber::CreateCoccinellaPresElement { } {
     global  prefs
     
     variable jstate
-    variable privatexmlns
+    variable coccixmlns
 	
     set ip [::Network::GetThisPublicIPAddress]
 
@@ -1267,7 +1266,7 @@ proc ::Jabber::CreateCoccinellaPresElement { } {
       [wrapper::createtag ip -chdata $ip -attrlist $attrputget]  \
       [wrapper::createtag ip -chdata $ip -attrlist $attrhttpd]]
     set xmllist [wrapper::createtag coccinella -subtags $subelem \
-      -attrlist [list xmlns $privatexmlns(servers) ver $prefs(fullVers)]]
+      -attrlist [list xmlns $coccixmlns(servers) ver $prefs(fullVers)]]
 
     return $xmllist
 }
@@ -1281,10 +1280,10 @@ proc ::Jabber::CreateCoccinellaPresElement { } {
 
 proc ::Jabber::CreateCapsPresElement { } {
     global  prefs
-    variable privatexmlns
+    variable coccixmlns
 
     set capsxmlns "http://jabber.org/protocol/caps"
-    set node $privatexmlns(caps)
+    set node $coccixmlns(caps)
     set ext "ftrans"
     set xmllist [wrapper::createtag c \
       -attrlist [list xmlns $capsxmlns node $node ver $prefs(fullVers) ext $ext]]
@@ -1732,7 +1731,7 @@ proc ::Jabber::ParseGetServers  {jlibname from subiq args} {
     global  prefs
     
     variable jstate
-    variable privatexmlns
+    variable coccixmlns
     
     # Build tag and attributes lists.
     set ip [::Network::GetThisPublicIPAddress]
@@ -1752,7 +1751,7 @@ proc ::Jabber::ParseGetServers  {jlibname from subiq args} {
       [wrapper::createtag ip -chdata $ip -attrlist $attrputget]  \
       [wrapper::createtag ip -chdata $ip -attrlist $attrhttpd]]
     set xmllist [wrapper::createtag query -subtags $subtags  \
-      -attrlist [list xmlns $privatexmlns(servers)]]
+      -attrlist [list xmlns $coccixmlns(servers)]]
      eval {$jstate(jlib) send_iq "result" $xmllist} $opts
     
      # Tell jlib's iq-handler that we handled the event.

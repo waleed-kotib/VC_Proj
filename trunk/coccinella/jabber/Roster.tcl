@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.83 2004-09-30 13:52:37 matben Exp $
+# $Id: Roster.tcl,v 1.84 2004-10-01 12:44:12 matben Exp $
 
 package provide Roster 1.0
 
@@ -788,6 +788,7 @@ proc ::Jabber::Roster::PushProc {rostName what {jid {}} args} {
 	    if {$resList == ""} {
 	        Remove $jid
 	    }
+	    RemoveEmptyRootDirs
 	}
 	set {
 	    eval {SetItem $jid} $args
@@ -1070,18 +1071,18 @@ proc ::Jabber::Roster::SetCoccinella {jid} {
 
 proc ::Jabber::Roster::IsCoccinella {jid3} {
     upvar ::Jabber::jstate jstate
-    upvar ::Jabber::privatexmlns privatexmlns
+    upvar ::Jabber::coccixmlns coccixmlns
     
     set ans 0
     if {![IsTransportHeuristics $jid3]} {
-	set coccielem [$jstate(roster) getextras $jid3 $privatexmlns(servers)]
+	set coccielem [$jstate(roster) getextras $jid3 $coccixmlns(servers)]
 	if {$coccielem != {}} {
 	    set ans 1
 	} elseif {[$jstate(browse) hasnamespace $jid3 "coccinella:wb"] || \
-	  [$jstate(browse) hasnamespace $jid3 $privatexmlns(whiteboard)]} {
+	  [$jstate(browse) hasnamespace $jid3 $coccixmlns(whiteboard)]} {
 	    set ans 1
-	} elseif {[$jstate(disco) hasfeature $privatexmlns(whiteboard) $jid3] || \
-	  [$jstate(disco) hasfeature $privatexmlns(coccinella) $jid3]} {
+	} elseif {[$jstate(disco) hasfeature $coccixmlns(whiteboard) $jid3] || \
+	  [$jstate(disco) hasfeature $coccixmlns(coccinella) $jid3]} {
 	    set ans 1
 	}
     }
@@ -1321,7 +1322,6 @@ proc ::Jabber::Roster::GetPresenceIcon {jid presence args} {
     variable presenceIcon
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
-    upvar ::Jabber::privatexmlns privatexmlns
     
     array set argsArr $args
     

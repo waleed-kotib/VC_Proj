@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.58 2004-09-30 12:43:06 matben Exp $
+# $Id: Browse.tcl,v 1.59 2004-10-01 12:44:11 matben Exp $
 
 package require chasearrows
 
@@ -598,7 +598,6 @@ proc ::Jabber::Browse::Popup {w v x y} {
     global  wDlgs this
     
     variable popMenuDefs
-    upvar ::Jabber::privatexmlns privatexmlns
     upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::Jabber::Browse::Popup w=$w, v='$v', x=$x, y=$y"
@@ -895,7 +894,7 @@ proc ::Jabber::Browse::PresenceHook {jid type args} {
     variable wtree
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::privatexmlns privatexmlns
+    upvar ::Jabber::coccixmlns coccixmlns
 
     ::Debug 2 "::Jabber::Browse::PresenceHook jid=$jid, type=$type, args='$args'"
 
@@ -937,7 +936,7 @@ proc ::Jabber::Browse::PresenceHook {jid type args} {
 	# Seems only necessary to find out if Coccinella or not.
 	if {$jprefs(autoBrowseUsers) && [string equal $type "available"]} {
 	    set coccielem \
-	      [$jstate(roster) getextras $jid3 $privatexmlns(servers)]
+	      [$jstate(roster) getextras $jid3 $coccixmlns(servers)]
 	    if {$coccielem == {}} {
 		if {![::Jabber::Roster::IsTransportHeuristics $jid3]} {
 		    if {![$jstate(browse) isbrowsed $jid3]} {
@@ -1014,13 +1013,13 @@ proc ::Jabber::Browse::AutoBrowseCmd {browseName type jid subiq args} {
 
 proc ::Jabber::Browse::AutoBrowseCallback {browseName type jid subiq} {    
     upvar ::Jabber::jstate jstate
-    upvar ::Jabber::privatexmlns privatexmlns    
+    upvar ::Jabber::coccixmlns coccixmlns    
     
     ::Debug 2 "::Jabber::Browse::AutoBrowseCallback, jid=$jid,\
       [string range "subiq='$subiq'" 0 40]..."
     
     if {[$jstate(browse) hasnamespace $jid "coccinella:wb"] || \
-      [$jstate(browse) hasnamespace $jid $privatexmlns(whiteboard)]} {
+      [$jstate(browse) hasnamespace $jid $coccixmlns(whiteboard)]} {
 	
 	::hooks::run autobrowsedCoccinellaHook $jid
 	::Jabber::Roster::SetCoccinella $jid
@@ -1366,7 +1365,6 @@ proc ::Jabber::Browse::InfoResultCB {browseName type jid subiq args} {
 proc ::Jabber::Browse::ParseGet {jlibname from subiq args} {
     global  prefs    
     upvar ::Jabber::jstate jstate
-    upvar ::Jabber::privatexmlns privatexmlns
 
     ::Debug 2 "::Jabber::Browse::ParseGet: from=$from, args='$args'"
     
