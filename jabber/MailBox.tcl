@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.42 2004-03-31 07:55:19 matben Exp $
+# $Id: MailBox.tcl,v 1.43 2004-04-15 05:55:18 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -115,7 +115,7 @@ proc ::Jabber::MailBox::Init { } {
     set locals(inited) 1
 }
 
-proc ::Jabber::MailBox::InitHandler { } {
+proc ::Jabber::MailBox::InitHandler {jlibName} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::privatexmlns privatexmlns
     
@@ -639,10 +639,14 @@ proc ::Jabber::MailBox::MakeMessageList {body args} {
     set tm ""
     if {[info exists argsArr(-x)]} {
 	set tm [::Jabber::GetAnyDelayElem $argsArr(-x)]
+	if {$tm != ""} {
+	    set tm [clock scan $tm -gmt 1]
+	}
     }
     if {$tm == ""} {
-	set tm [clock format [clock seconds] -format "%Y%m%dT%H:%M:%S"]
+	set tm [clock seconds]
     }
+    set tm [clock format $tm -format "%Y%m%dT%H:%M:%S"]
 
     # List format for messages.
     return [list $argsArr(-subject) $argsArr(-from) $tm 0 [incr uidmsg] $body]

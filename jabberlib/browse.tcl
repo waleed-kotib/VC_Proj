@@ -5,11 +5,11 @@
 #      In other words, it manages the client's internal state corresponding
 #      to 'iq' elements with namespace 'jabber:iq:browse'.
 #      
-#  Copyright (c) 2001-2003  Mats Bengtsson
+#  Copyright (c) 2001-2004  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: browse.tcl,v 1.21 2004-04-09 10:32:25 matben Exp $
+# $Id: browse.tcl,v 1.22 2004-04-15 05:55:19 matben Exp $
 # 
 #  locals($jid,parent):       the parent of $jid.
 #  locals($jid,parents):      list of all parent jid's,
@@ -35,8 +35,7 @@
 #      browse - an object for the ...
 #      
 #   SYNOPSIS
-#      browse::browse clientCommand
-#      browse::new jlibname ?-command procName?
+#      browse::new jlibname ?-command clientCommand?
 #      
 #   OPTIONS
 #      none
@@ -44,7 +43,6 @@
 #   INSTANCE COMMANDS
 #      browseName clear ?jid?
 #      browseName delete
-#      browseName errorcallback jid xmllist ?-errorcommand?
 #      browseName get jid
 #      browseName getchilds jid
 #      browseName getconferenceservers
@@ -61,12 +59,14 @@
 #      browseName isbrowsed jid
 #      browseName isroom jid
 #      browseName remove jid
-#      browseName send_get jid cmd
+#      browseName send_get jid ?-command procName?
 #      browseName setjid jid xmllist       (only from jabberlib)
 #
 #   The 'clientCommand' procedure must have the following form:
 #   
-#      clientCommand {browseName type jid xmllist}
+#      clientCommand {browseName type jid xmllist args}
+#      
+#   which is supposed to handle all get/set events which happen async.
 #      
 #   where 'type' can be 'set' or 'remove'.
 #      
@@ -74,7 +74,8 @@
 #
 #       030703   removed browseName from browse::browse
 #       040408   version 2.0
-#       040408   browsename now fully qualified, added browse::new, send_get
+#       040408   browsename now fully qualified, added browse::new, send_get,
+#                removed browse::browse,
 
 package require wrapper
 
@@ -82,14 +83,11 @@ package provide browse 2.0
 
 namespace eval browse {
     
-    # The internal storage.
-    variable browseGlobals
-    
     # Running number.
     variable uid 0
    
     # Globals same for all instances of all rooms.
-    set browseGlobals(debug) 0
+    variable debug 0
     
     # Options only for internal use. EXPERIMENTAL!
     #     -setbrowsedjid:  default=1, store the browsed jid even if cached already
@@ -99,49 +97,15 @@ namespace eval browse {
     }
 }	
 
-# browse::browse --
-#
-#       This creates a new instance of a browse object.
-#       
-# Arguments:
-#       clientCmd:  callback procedure when internals of browse changes.
-#       args:            
-#       
-# Results:
-#       browsename which is the command for this instance of the browser
-  
-proc browse::browse {clientCmd args} {
-
-    variable uid
-
-    # Generate unique command token for this browse instance.
-    # Fully qualified!
-    set browsename [namespace current]::[incr uid]
-      
-    # Instance specific namespace.
-    namespace eval $browsename {
-	variable locals
-    }
-    
-    # Set simpler variable names.
-    upvar ${browsename}::locals locals
-    set locals(cmd) $clientCmd
-    set locals(confservers) {}
-    
-    # Create the actual browser instance procedure.
-    proc $browsename {cmd args}   \
-      "eval browse::CommandProc {$browsename} \$cmd \$args"
-    
-    return $browsename
-}
-
 # browse::new --
 # 
 #       Creates a new instance of a browse object.
 #       
 # Arguments:
 #       jlibname:     name of existing jabberlib instance
-#       args:         -command procName
+#       args:         -command procName {browsename type jid subiq args}
+#                     the command is supposed to handle the async get/set 
+#                     events only.
 # 
 # Results:
 #       namespaced instance command
@@ -154,7 +118,8 @@ proc browse::new {jlibname args} {
     # Generate unique command token for this browse instance.
     # Fully qualified!
     set browsename [namespace current]::[incr uid]
-    puts "browse::new jlibname=$jlibname, browsename=$browsename"
+
+    Debug 2 "browse::new jlibname=$jlibname, browsename=$browsename"
       
     # Instance specific namespace.
     namespace eval $browsename {
@@ -175,9 +140,19 @@ proc browse::new {jlibname args} {
     set locals(confservers) {}
     set browse2jlib($browsename) $jlibname
     
+    # Register service.
+    $jlibname service register browse $browsename
+    
     # Register some standard iq handlers that is handled internally.
+    # The get/set events are async events and need to be handled by a -command.
     $jlibname iq_register get jabber:iq:browse  \
       [list [namespace current]::handle_get $browsename]
+    $jlibname iq_register set jabber:iq:browse  \
+      [list [namespace current]::handle_set $browsename]
+
+    # Make sure we clean up any state if user logouts.
+    $jlibname presence_register unavailable  \
+      [list [namespace current]::handle_unavailable $browsename]
     
     # Create the actual browser instance procedure.
     proc $browsename {cmd args}   \
@@ -211,46 +186,87 @@ proc browse::CommandProc {browsename cmd args} {
 # Arguments:
 #       browsename: the instance of this browse.
 #       jid:        to jid
-#       cmd:        callback tcl proc        
+#       cmd:        procName {browsename type jid subiq args}      
 #       
 # Results:
 #       none.
 
-proc browse::send_get {browsename jid cmd args} {
+proc browse::send_get {browsename jid cmd} {
     
     variable browse2jlib
+        
+    Debug 2 "browse::send_get jid=$jid, cmd=$cmd"
     
     $browse2jlib($browsename) iq_get "jabber:iq:browse" $jid  \
       -command [list [namespace current]::parse_get $browsename $jid $cmd]
 }
 
-proc browse::parse_get {browsename jid cmd jlibname type subiq} {
+proc browse::parse_get {browsename jid cmd jlibname type subiq args} {
 
     upvar ${browsename}::locals locals
+
+    Debug 2 "browse::parse_get jid=$jid, type=$type"
 
     switch -- $type {
 	error {
 	    uplevel #0 $cmd "error" $subiq
 	}
 	default {
-	    setjid $browsename $jid $subiq -command $cmd
+	    
+	    # Set internal state first.
+	    setjid $browsename $jid $subiq
+	    
+	    # Handle callback.
+	    uplevel #0 $cmd [list $browsename $type $jid $subiq] $args
 	}
     }
 }
 
 # browse::handle_get --
 # 
-#       Hook for iq_register.
+#       Hook for iq_register get.
 
 proc browse::handle_get {browsename jlibname from subiq args} {
     
     upvar ${browsename}::locals locals
 
+    Debug 2 "browse::handle_get from=$from"
+    
     set ishandled 0
     if {[info exists locals(cmd)]} {
-	set ishandled [uplevel #0 $locals(cmd) [list $from $subiq] $args]
+	set ishandled \
+	  [uplevel #0 $locals(cmd) [list $browsename get $from $subiq] $args]
     }
     return $ishandled
+}
+
+# browse::handle_set --
+# 
+#       Hook for iq_register set.
+
+proc browse::handle_set {browsename jlibname from subiq args} {
+    
+    upvar ${browsename}::locals locals
+
+    Debug 2 "browse::handle_set from=$from, subiq='$subiq'"
+
+    # Set internal state first, then handle any callback.
+    setjid $browsename $from $subiq
+    
+    set ishandled 0
+    if {[info exists locals(cmd)]} {
+	set ishandled \
+	  [uplevel #0 $locals(cmd) [list $browsename set $from $subiq] $args]
+    }
+    return $ishandled
+}
+
+
+proc browse::handle_unavailable {browsename jlibname jid type args} {
+    
+    Debug 2 "browse::handle_unavailable jid=$jid, type=$type"
+    
+    clear $browsename $jid
 }
 
 # browse::getparentjid --
@@ -350,7 +366,7 @@ proc browse::remove {browsename jid} {
 
     # Evaluate the client callback.
     if {[info exists locals(cmd)]} {
-	uplevel #0 $locals(cmd) [list $browsename remove $jid]
+	uplevel #0 $locals(cmd) [list $browsename remove $jid {}]
     }
 }
     
@@ -621,6 +637,8 @@ proc browse::havenamespace {browsename jid ns} {
 #       subiq:      hierarchical xml list starting with element containing
 #                     the xmlns='jabber:iq:browse' attribute.
 #                     Any children defines a parent-child relation.
+#                     
+#                   ???????????
 #       args:       -command cmdProc:   replaces the client callback command
 #                        in the browse object
 #       
@@ -688,14 +706,14 @@ proc browse::setjid {browsename fromJid subiq args} {
     # Handle the top jid, and follow recursively for any childs.
     setsinglejid $browsename $parentJid $jid $subiq 1
     
-    # Evaluate the client callback.
-    if {[info exists argsArr(-command)] && [string length $argsArr(-command)]} {
-	uplevel #0 $argsArr(-command) $browsename set [list $jid $subiq]
-    } else {
-	if {[info exists locals(cmd)]} {
-	    uplevel #0 $locals(cmd) $browsename set [list $jid $subiq]
-	}
-    }
+    # Evaluate the client callback. ??????????????? OUTDATED!!!!!!!!!!
+    #if {[info exists argsArr(-command)] && [string length $argsArr(-command)]} {
+#	uplevel #0 $argsArr(-command) $browsename set [list $jid $subiq]
+    #} else {
+#	if {[info exists locals(cmd)]} {
+#	    uplevel #0 $locals(cmd) $browsename set [list $jid $subiq]
+#	}
+    #}
 }
 
 # browse::setsinglejid --
@@ -714,12 +732,13 @@ proc browse::setjid {browsename fromJid subiq args} {
 #       none.
 
 proc browse::setsinglejid {browsename parentJid jid xmllist {browsedjid 0}} {
+
     variable options
+    variable browse2jlib
     
     upvar ${browsename}::locals locals
     
-    Debug 3 "browse::setsinglejid browsename=$browsename, parentJid=$parentJid\
-      jid=$jid, xmllist='$xmllist'"
+    Debug 3 "browse::setsinglejid browsename=$browsename, parentJid=$parentJid, jid=$jid"
     
     set category [wrapper::gettag $xmllist]
     array set attrArr [wrapper::getattrlist $xmllist]
@@ -835,16 +854,13 @@ proc browse::setsinglejid {browsename parentJid jid xmllist {browsedjid 0}} {
 	    
 		switch -- $ns {
 		    "http://jabber.org/protocol/muc" {
-			jlib::invokefrombrowser $browsename \
-			  [list registergcprotocol $jid "muc"]
+			$browse2jlib($browsename) service registergcprotocol $jid "muc"
 		    }
 		    "jabber:iq:conference" {
-			jlib::invokefrombrowser $browsename \
-			  [list registergcprotocol $jid "conference"]
+			$browse2jlib($browsename) service registergcprotocol $jid "conference"
 		    }
 		    "gc-1.0" {
-			jlib::invokefrombrowser $browsename \
-			  [list registergcprotocol $jid "gc-1.0"]
+			$browse2jlib($browsename) service registergcprotocol $jid "gc-1.0"
 		    }
 		}
 	    }
@@ -853,45 +869,6 @@ proc browse::setsinglejid {browsename parentJid jid xmllist {browsedjid 0}} {
 	    # Now jid is the parent, and the jid to set is an attribute.
 	    setsinglejid $browsename $jid {} $child
 	}
-    }
-}
-
-# browse::errorcallback --
-#
-#       Called when receiving an 'error' iq element in jabber:iq:browse.
-#       Shall only be called from jabberlib!
-#       
-# Arguments:
-#       browsename:   the instance of this conference browse.
-#       jid:          the 'from' attribute which is also the parent of any
-#                     childs.
-#       errlist:      {errorCode errorMsg}
-#       args          -errorcommand errPproc:   in case of error, this is called
-#                        instead of the browse objects callback proc.
-#       
-# Results:
-#       none.
-
-proc browse::errorcallback {browsename jid errlist args} {
-    
-    upvar ${browsename}::locals locals
-    
-    Debug 3 "browse::errorcallback browsename=$browsename, jid=$jid\
-      errlist=$errlist, args='$args'"
-
-    array set argsArr $args
-    if {[info exists argsArr(-errorcommand)] &&  \
-      [string length $argsArr(-errorcommand)]} {
-	set cmd $argsArr(-errorcommand)
-    } else {
-	if {[info exists locals(cmd)]} {
-	    set cmd $locals(cmd)
-	}
-    }
-	
-    # Evaluate the client callback.
-    if {[info exists cmd]} {
-	uplevel #0 $cmd $browsename error [list $jid $errlist]
     }
 }
 
@@ -973,8 +950,9 @@ proc browse::delete {browsename} {
 }
 
 proc browse::Debug {num str} {
-    variable browseGlobals
-    if {$num <= $browseGlobals(debug)} {
+    variable debug
+
+    if {$num <= $debug} {
 	puts $str
     }
 }

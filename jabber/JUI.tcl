@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.33 2004-04-02 12:26:37 matben Exp $
+# $Id: JUI.tcl,v 1.34 2004-04-15 05:55:17 matben Exp $
 
 package provide JUI 1.0
 
@@ -517,7 +517,7 @@ proc ::Jabber::UI::GroupChat {what roomJid} {
     switch $what {
 	enter {
 	    $wmjexit add command -label $roomJid  \
-	      -command [list ::Jabber::GroupChat::Exit $roomJid]	    
+	      -command [list ::Jabber::GroupChat::ExitRoom $roomJid]	    
 	}
 	exit {
 	    catch {$wmjexit delete $roomJid}	    

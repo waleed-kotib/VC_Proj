@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Conference.tcl,v 1.18 2004-04-02 12:26:37 matben Exp $
+# $Id: Conference.tcl,v 1.19 2004-04-15 05:55:17 matben Exp $
 
 package provide Conference 1.0
 
@@ -184,8 +184,11 @@ proc ::Jabber::Conference::BuildEnter {args} {
 	    ::Jabber::Conference::FillRoomList $token
 	} else {
 	    ::Jabber::Conference::BusyEnterDlgIncr $token
-	    ::Jabber::InvokeJlibCmd browse_get $state(server)  \
-	      -command [list [namespace current]::BrowseServiceCB $token]
+	    $jstate(browse) send_get $state(server)  \
+	      [list [namespace current]::BrowseServiceCB $token]
+	    
+	    #::Jabber::InvokeJlibCmd browse_get $state(server)  \
+	    #  -command [list [namespace current]::BrowseServiceCB $token]
 	}
 	trace variable $token\(server) w  \
 	  [list [namespace current]::ConfigRoomList $token]
@@ -221,8 +224,11 @@ proc ::Jabber::Conference::ConfigRoomList {token name junk1 junk2} {
 	::Jabber::Conference::FillRoomList $token
     } else {
 	::Jabber::Conference::BusyEnterDlgIncr $token
-	::Jabber::InvokeJlibCmd browse_get $state(server)  \
-	  -command [list [namespace current]::BrowseServiceCB $token]
+	$jstate(browse) send_get $state(server)  \
+	  [list [namespace current]::BrowseServiceCB $token]
+	
+	#::Jabber::InvokeJlibCmd browse_get $state(server)  \
+	#  -command [list [namespace current]::BrowseServiceCB $token]
     }
 }
 
@@ -279,11 +285,18 @@ proc ::Jabber::Conference::BusyEnterDlgIncr {token {num 1}} {
     }
 }
 
-proc ::Jabber::Conference::BrowseServiceCB {token browsename type jid subiq} {
+proc ::Jabber::Conference::BrowseServiceCB {token browsename type jid subiq args} {
     
     ::Jabber::Debug 4 "::Jabber::Conference::BrowseServiceCB"
     
-    ::Jabber::Conference::FillRoomList $token
+    switch -- $type {
+	error {
+	    # ???
+	}
+	ok - result {
+	    ::Jabber::Conference::FillRoomList $token
+	}
+    }
     ::Jabber::Conference::BusyEnterDlgIncr $token -1
 }
 
@@ -373,7 +386,7 @@ proc ::Jabber::Conference::DoEnter {token} {
 
 # Jabber::Conference::ResultCallback --
 #
-#       This is our callback procedure from 'jabber:iq:conference' and muc stuffs.
+#       This is our callback procedure from 'jabber:iq:conference'.
 
 proc ::Jabber::Conference::ResultCallback {roomJid jlibName type subiq} {
     variable locals
@@ -385,6 +398,8 @@ proc ::Jabber::Conference::ResultCallback {roomJid jlibName type subiq} {
 	tk_messageBox -type ok -icon error  \
 	  -message [FormatTextForMessageBox \
 	  [::msgcat::mc jamessconffailed $roomJid [lindex $subiq 0] [lindex $subiq 1]]]
+    } else {
+	::hooks::run groupchatEnterRoomHook $roomJid "conference"
     }
 }
 
@@ -700,6 +715,7 @@ proc ::Jabber::Conference::DoCreate {token} {
     $state(wsearrows) stop
     
     set roomJid [string tolower $state(roomname)@$state(server)]
+    set state(roomjid) $roomJid
     if {$UItype != 2} {
     	set subelements [::Jabber::Forms::GetXML $state(wbox)]
     } else {
@@ -709,25 +725,26 @@ proc ::Jabber::Conference::DoCreate {token} {
     # Ask jabberlib to create the room for us.
     if {$state(usemuc)} {
 	::Jabber::InvokeJlibCmd muc setroom $roomJid form -form $subelements \
-	  -command [list [namespace current]::DoCreateCallback $roomJid]
+	  -command [list [namespace current]::DoCreateCallback $state(usemuc) $roomJid]
     } else {
 	::Jabber::InvokeJlibCmd conference set_create $roomJid $subelements  \
-	  [list [namespace current]::DoCreateCallback $roomJid]
+	  [list [namespace current]::DoCreateCallback $state(usemuc) $roomJid]
     }
 	
     # Cache groupchat protocol type (muc|conference|gc-1.0).
-    if {$state(usemuc)} {
-	::hooks::run groupchatEnterRoomHook $roomJid "muc"
-    } else {
-	::hooks::run groupchatEnterRoomHook $roomJid "conference"
-    }
+    #if {$state(usemuc)} {
+#	::hooks::run groupchatEnterRoomHook $roomJid "muc"
+    #} else {
+#	::hooks::run groupchatEnterRoomHook $roomJid "conference"
+    #}
     
     # This triggers the tkwait, and destroys the create dialog.
     set state(finished) 1
     catch {destroy $state(w)}
 }
 
-proc ::Jabber::Conference::DoCreateCallback {roomJid jlibName type subiq} { 
+proc ::Jabber::Conference::DoCreateCallback {usemuc roomJid jlibName type subiq} { 
+    upvar ::Jabber::jstate jstate
     
     ::Jabber::Debug 2 "::Jabber::Conference::DoCreateCallback"
     
@@ -736,9 +753,17 @@ proc ::Jabber::Conference::DoCreateCallback {roomJid jlibName type subiq} {
 	  -message [FormatTextForMessageBox \
 	  [::msgcat::mc jamessconffailed $roomJid [lindex $subiq 0] [lindex $subiq 1]]]
     } elseif {[regexp {.+@([^@]+)$} $roomJid match service]} {
-	
-	# Browse the service to get the new room list.
-	::Jabber::InvokeJlibCmd browse_get $service
+		    
+	# Cache groupchat protocol type (muc|conference|gc-1.0).
+	if {$usemuc} {
+	    ::hooks::run groupchatEnterRoomHook $roomJid "muc"
+	} else {
+	    ::hooks::run groupchatEnterRoomHook $roomJid "conference"
+	}
+
+	# Browse the service to get the new room list. CALLBACK???
+	#$jstate(browse) send_get $service ???
+	#::Jabber::InvokeJlibCmd browse_get $service
     }
 }
 

@@ -5,11 +5,13 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.2 2004-02-05 14:00:21 matben Exp $
+# $Id: Disco.tcl,v 1.3 2004-04-15 05:55:17 matben Exp $
 
 package provide Disco 1.0
 
 namespace eval ::Jabber::Disco:: {
+
+    ::hooks::add jabberInitHook     ::Jabber::Disco::NewJlibHook
 
     # Common xml namespaces.
     variable xmlns
@@ -20,6 +22,12 @@ namespace eval ::Jabber::Disco:: {
     }
 }
 
+proc ::Jabber::Disco::NewJlibHook {jlibName} {
+    upvar ::Jabber::jstate jstate
+	    
+    set jstate(disco) [disco::new $jlibName -command  \
+      ::Jabber::Disco::Command]
+}
 
 # Jabber::Disco::Get --
 #

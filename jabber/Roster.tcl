@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.50 2004-04-09 10:32:25 matben Exp $
+# $Id: Roster.tcl,v 1.51 2004-04-15 05:55:19 matben Exp $
 
 package provide Roster 1.0
 
@@ -936,12 +936,29 @@ proc ::Jabber::Roster::AutoBrowse {jid presence args} {
 	
 	# We may not yet have browsed this (empty).
 	if {($type == "") || ($type == "service/jabber")} {
-	    ::Jabber::InvokeJlibCmd browse_get $jid  \
-	      -errorcommand [list ::Jabber::Browse::ErrorProc 1]  \
-	      -command [list [namespace current]::AutoBrowseCallback]
+	    
+	    $jstate(browse) send_get $jid [namespace current]::AutoBrowseCmd
+	    
+	    # ::Jabber::InvokeJlibCmd browse_get $jid  \
+	    #   -errorcommand [list ::Jabber::Browse::ErrorProc 1]  \
+	    #   -command [list [namespace current]::AutoBrowseCallback]
 	}
     } elseif {[string equal $presence "unavailable"]} {
-	$jstate(browse) clear $jid
+	#$jstate(browse) clear $jid
+    }
+}
+
+proc ::Jabber::Roster::AutoBrowseCmd {browseName type jid subiq args} {
+    
+    ::Jabber::Debug 2 "::Jabber::Roster::AutoBrowseCmd type=$type"
+    
+    switch -- $type {
+	error {
+	    ::Jabber::Browse::ErrorProc 1 $browseName $type $jid $subiq
+	}
+	result - ok {
+	    ::Jabber::Roster::AutoBrowseCallback $browseName $type $jid $subiq
+	}
     }
 }
 
@@ -1102,7 +1119,7 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
 	    
 	    # An ISO 8601 point-in-time specification. clock works!
 	    set stamp [wrapper::getattribute $delay stamp]
-	    set tstr [::Utils::SmartClockFormat [clock scan $stamp]]
+	    set tstr [::Utils::SmartClockFormat [clock scan $stamp -gmt 1]]
 	    append msg "\nOnline since: $tstr"
 	}
 	if {[info exists argsArr(-show)]} {

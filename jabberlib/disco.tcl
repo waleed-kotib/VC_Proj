@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.3 2004-04-09 10:32:25 matben Exp $
+# $Id: disco.tcl,v 1.4 2004-04-15 05:55:19 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -95,6 +95,9 @@ proc disco::new {jlibname args} {
 	}
     }
     set disco2jlib($disconame) $jlibname
+    
+    # Register service.
+    $jlibname service register disco $disconame
     
     # Register some standard iq handlers that is handled internally.
     $jlibname iq_register get $xmlns(items)  \

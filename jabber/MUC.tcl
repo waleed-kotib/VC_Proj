@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.27 2004-04-02 12:26:37 matben Exp $
+# $Id: MUC.tcl,v 1.28 2004-04-15 05:55:18 matben Exp $
 
 package require entrycomp
 
@@ -78,7 +78,7 @@ namespace eval ::Jabber::MUC:: {
 }
 
 
-proc ::Jabber::MUC::Init { } {
+proc ::Jabber::MUC::Init {jlibName} {
     upvar ::Jabber::jstate jstate
    
     $jstate(jlib) message_register * "http://jabber.org/protocol/muc#user" \
@@ -227,13 +227,14 @@ proc ::Jabber::MUC::BuildEnter {args} {
     if {$enter(room-state) == "normal"} {
 
 	# Fill in room list if exist else browse.
-	if {[$jstate(browse) isbrowsed $enter(server)]} {
+	# Get a freash list each time.
+	if {0 && [$jstate(browse) isbrowsed $enter(server)]} {
 	    ::Jabber::MUC::FillRoomList $token
 	} else {
 	    ::Jabber::MUC::BusyEnterDlgIncr $token
 	    update idletasks
-	    ::Jabber::InvokeJlibCmd browse_get $enter(server)  \
-	      -command [list [namespace current]::BrowseServiceCB $token]
+	    $jstate(browse) send_get $enter(server)   \
+	      [list [namespace current]::BrowseServiceCB $token]
 	}
 	trace variable $token\(server) w  \
 	  [list [namespace current]::ConfigRoomList $token]
@@ -258,7 +259,7 @@ proc ::Jabber::MUC::BuildEnter {args} {
     catch {focus $oldFocus}
     trace vdelete $token\(server) w  \
       [list [namespace current]::ConfigRoomList $token]
-   ::UI::SaveWinGeom $w
+    ::UI::SaveWinGeom $w
     set finished $enter(finished)
     unset enter
     return [expr {($finished <= 0) ? "cancel" : "enter"}]
@@ -279,8 +280,11 @@ proc ::Jabber::MUC::ConfigRoomList {token name junk1 junk2} {
 	::Jabber::MUC::FillRoomList $token
     } else {
 	::Jabber::MUC::BusyEnterDlgIncr $token
-	::Jabber::InvokeJlibCmd browse_get $enter(server)  \
-	  -command [list [namespace current]::BrowseServiceCB $token]
+	$jstate(browse) send_get $enter(server)  \
+	  [list [namespace current]::BrowseServiceCB $token]
+	
+	#::Jabber::InvokeJlibCmd browse_get $enter(server)  \
+	#  -command [list [namespace current]::BrowseServiceCB $token]
     }
 }
 
@@ -334,7 +338,14 @@ proc ::Jabber::MUC::BusyEnterDlgIncr {token {num 1}} {
 
 proc ::Jabber::MUC::BrowseServiceCB {token browsename type jid subiq} {
     
-    ::Jabber::MUC::FillRoomList $token
+    switch -- $type {
+	error {
+	    # ???
+	}
+	result {
+	    ::Jabber::MUC::FillRoomList $token
+	}
+    }
     ::Jabber::MUC::BusyEnterDlgIncr $token -1
 }
 

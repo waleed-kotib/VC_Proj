@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements the Browse GUI part.
 #      
-#  Copyright (c) 2001-2003  Mats Bengtsson
+#  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.35 2004-03-29 13:56:27 matben Exp $
+# $Id: Browse.tcl,v 1.36 2004-04-15 05:55:17 matben Exp $
 
 package require chasearrows
 
@@ -13,6 +13,7 @@ package provide Browse 1.0
 
 namespace eval ::Jabber::Browse:: {
 
+    ::hooks::add jabberInitHook     ::Jabber::Browse::NewJlibHook
     ::hooks::add loginHook          ::Jabber::Browse::LoginCmd
     ::hooks::add closeWindowHook    ::Jabber::Browse::CloseHook
     ::hooks::add logoutHook         ::Jabber::Browse::LogoutHook
@@ -95,6 +96,40 @@ proc ::Jabber::Browse::LogoutHook { } {
 	::Jabber::Browse::Clear
     }
 }
+
+# Jabber::Browse::HaveBrowseTree --
+#
+#       Does the jid belong to a browse tree? This only if we actually
+#       have browsed the server the jid belongs to.
+
+proc ::Jabber::Browse::HaveBrowseTree {jid} {    
+    upvar ::Jabber::jprefs jprefs
+    upvar ::Jabber::jserver jserver
+    upvar ::Jabber::jstate jstate
+    
+    set allServers [lsort -unique [concat $jserver(this) $jprefs(browseServers)]]
+	
+    # This is not foolproof!!!
+    foreach server $allServers {
+	if {[string match "*$server" $jid]} {
+	    if {[$jstate(browse) isbrowsed $server]} {
+		return 1
+	    }
+	}
+    }    
+    return 0
+}
+
+# Jabber::Browse::NewJlibHook --
+# 
+#       Create a new browse instance when created new jlib.
+
+proc ::Jabber::Browse::NewJlibHook {jlibName} {
+    upvar ::Jabber::jstate jstate
+    
+    set jstate(browse) [browse::new $jlibName  \
+      -command ::Jabber::Browse::Command]
+}
     
 # Jabber::Browse::GetAll --
 #
@@ -128,6 +163,7 @@ proc ::Jabber::Browse::GetAll { } {
 #       callback scheduled.
 
 proc ::Jabber::Browse::Get {jid args} {    
+    upvar ::Jabber::jstate jstate
     
     array set opts {
 	-silent 0
@@ -135,58 +171,84 @@ proc ::Jabber::Browse::Get {jid args} {
     array set opts $args
     
     # Browse services available.
-    ::Jabber::InvokeJlibCmd browse_get $jid -errorcommand  \
-      [list [namespace current]::ErrorProc $opts(-silent)]
+    $jstate(browse) send_get $jid \
+      [list [namespace current]::GetCallback $opts(-silent)]
 }
 
-# Jabber::Browse::HaveBrowseTree --
-#
-#       Does the jid belong to a browse tree? This only if we actually
-#       have browsed the server the jid belongs to.
-
-proc ::Jabber::Browse::HaveBrowseTree {jid} {    
-    upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::jserver jserver
-    upvar ::Jabber::jstate jstate
+proc ::Jabber::Browse::GetCallback {silent browseName type from subiq args} {
     
-    set allServers [lsort -unique [concat $jserver(this) $jprefs(browseServers)]]
-	
-    # This is not foolproof!!!
-    foreach server $allServers {
-	if {[string match "*$server" $jid]} {
-	    if {[$jstate(browse) isbrowsed $server]} {
-		return 1
-	    }
+    ::Jabber::Debug 2 "::Jabber::Browse::GetCallback type=$type"
+    
+    switch -- $type {
+	error {
+	    ::Jabber::Browse::ErrorProc $silent $browseName $type $from $subiq
 	}
-    }    
-    return 0
+	ok - result {
+	    ::Jabber::Browse::Callback $browseName set $from $subiq
+	}
+    }
+}
+
+# Jabber::Browse::Command --
+# 
+#       Callback command for the browse 2.0 lib.
+
+proc ::Jabber::Browse::Command {browseName type from subiq args} {
+       
+    ::Jabber::Debug 2 "::Jabber::Browse::Command type=$type, from=$from"
+    
+    switch -- $type {
+	error {
+	    ::Jabber::Browse::ErrorProc $silent $browseName $type $from $subiq
+	}
+	set {
+	    ::Jabber::Browse::Callback $browseName set $from $subiq
+	}
+	ok - result {
+	    # BAD!!!
+	    ::Jabber::Browse::Callback $browseName set $from $subiq
+	}
+	get {
+	    eval {::Jabber::Browse::ParseGet $browseName $from $subiq} $args
+
+	}
+    }
 }
 
 # Jabber::Browse::Callback --
 #
-#       The callback proc from the 'browse' object.
 #       It receives reports from iq set and result elements with the
 #       jabber:iq:browse namespace.
 #
 # Arguments:
 #       type:       can be 'set', or 'error'.
-#       jid:        the jid of the first element in 'subiq'.
+#       from:       the from attribute
 #       subiq:      xml list starting after the <iq> tag;
 #                   if 'error' then {errorCode errorMsg}
 #       
 # Results:
 #       none. UI maybe updated, jids may be auto browsed.
 
-proc ::Jabber::Browse::Callback {browseName type jid subiq} {    
+proc ::Jabber::Browse::Callback {browseName type from subiq} {    
     variable wtop
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jprefs jprefs
     
     ::Jabber::Debug 2 "::Jabber::Browse::Callback browseName=$browseName, type=$type,\
-      jid=$jid, subiq='[string range $subiq 0 30] ...'"
+      from=$from, subiq='[string range $subiq 0 60] ...'"
 
     ::Jabber::Browse::ControlArrows -1
+    array set attrArr [wrapper::getattrlist $subiq]
+
+    # Docs say that jid is required attribute but... 
+    # <conference> and <service> seem to lack jid.
+    # If no jid attribute it is probably(?) assumed to be 'fromJid.
+    if {![info exists attrArr(jid)]} {
+	set jid $from
+    } else {
+	set jid $attrArr(jid)
+    }
 
     switch -- $type {
 	error {
@@ -195,13 +257,13 @@ proc ::Jabber::Browse::Callback {browseName type jid subiq} {
 	    if {[winfo exists $wtop]} {
 		tk_messageBox -type ok -icon error \
 		  -message [FormatTextForMessageBox  \
-		  [::msgcat::mc jamesserrbrowse $jid [lindex $subiq 1]]]
+		  [::msgcat::mc jamesserrbrowse $from [lindex $subiq 1]]]
 	    }
 	}
 	set {
     
 	    # It is at this stage we are confident that a Browser page is needed.
-	    if {[string equal $jid $jserver(this)]} {
+	    if {[string equal $from $jserver(this)]} {
 		::Jabber::UI::NewPage "Browser"
 	    }
 	    
@@ -292,7 +354,7 @@ proc ::Jabber::Browse::Callback {browseName type jid subiq} {
 	    }
 	    
 	    # Fix icons of foreign IM systems.
-	    if {[string equal $jid $jserver(this)]} {
+	    if {[string equal $from $jserver(this)]} {
 		::Jabber::Roster::PostProcessIcons
 	    }
 	}
@@ -704,7 +766,8 @@ proc ::Jabber::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
 	    
 	    ::Jabber::Debug 6 "   jidList='$jidList'"
 	    
-	    if {[info exists attrArr(type)] && [string equal $attrArr(type) "remove"]} {
+	    if {[info exists attrArr(type)] && \
+	      [string equal $attrArr(type) "remove"]} {
 		
 		# Remove this jid from tree widget.
 		foreach v [$wtree find withtag $jid] {
@@ -1070,6 +1133,7 @@ proc ::Jabber::Browse::SetUIWhen {what} {
 }
 
 proc ::Jabber::Browse::GetInfo {jid args} {    
+    upvar ::Jabber::jstate jstate
     
     array set opts {
 	-silent 0
@@ -1077,12 +1141,22 @@ proc ::Jabber::Browse::GetInfo {jid args} {
     array set opts $args
     
     # Browse services available.
-    ::Jabber::InvokeJlibCmd browse_get $jid  \
-      -command [list [namespace current]::InfoCB] \
-      -errorcommand [list [namespace current]::ErrorProc $opts(-silent)]
+    $jstate(browse) send_get $jid ::Jabber::Browse::InfoCB
 }
 
-proc ::Jabber::Browse::InfoCB {browseName type jid subiq} {
+proc ::Jabber::Browse::InfoCB {browseName type jid subiq args} {
+    
+    switch -- $type {
+	error {
+	    ::Jabber::Browse::ErrorProc
+	}
+	result - ok {
+	    eval {::Jabber::Browse::InfoResultCB $browseName $type $jid $subiq} $args
+	}
+    }
+}
+
+proc ::Jabber::Browse::InfoResultCB {browseName type jid subiq args} {
     global  this
     
     variable dlguid
