@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasDraw.tcl,v 1.9 2004-08-17 06:19:54 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.10 2005-04-04 09:14:49 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 #  
@@ -2385,7 +2385,7 @@ proc ::CanvasDraw::GarbageUnusedImages { } {
     
     # Image garbage collection. TEST!
     set ims {}
-    foreach name $itemImagesDeleted {
+    foreach name [lsort -unique $itemImagesDeleted] {
 	if {![image inuse $name]} {
 	    lappend ims $name
 	}

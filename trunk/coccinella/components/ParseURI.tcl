@@ -7,7 +7,7 @@
 #       Most recent reference at the time of writing:
 #       http://www.ietf.org/internet-drafts/draft-saintandre-xmpp-uri-06.txt
 # 
-# $Id: ParseURI.tcl,v 1.20 2004-12-14 14:08:45 matben Exp $
+# $Id: ParseURI.tcl,v 1.21 2005-04-04 09:14:48 matben Exp $
 
 package require uriencode
 
@@ -211,6 +211,8 @@ proc ::ParseURI::DoGroupchat {token} {
     upvar 0 $token state
     upvar ::Jabber::jstate jstate
     
+    ::Debug 2 "::ParseURI::DoGroupchat"
+    
     # Get groupcat service from room.
     jlib::splitjidex $state(jid) roomname service res
     set state(service) $service
@@ -259,6 +261,7 @@ proc ::ParseURI::HandleGroupchat {token} {
     ::hooks::deregister  browseSetHook  $state(browsecmd)
     ::hooks::deregister  discoInfoHook  $state(discocmd)
     
+    ::Debug 2 "::ParseURI::HandleGroupchat................"
     ::Debug 2 [parray state]
     
     # We require a nick name (resource part).
@@ -286,13 +289,15 @@ proc ::ParseURI::HandleGroupchat {token} {
 proc ::ParseURI::EnterRoomCB {token type args} {
     variable $token
     upvar 0 $token state
+    
+    ::Debug 2 "::ParseURI::EnterRoomCB"
         
     if {![string equal $type "error"]} {
 	
 	# Check that this is actually a whiteboard.
 	if {[info exists state(query,xmlns)] && \
 	  [string equal $state(query,xmlns) "whiteboard"]} {
-	    ::Jabber::WB::NewWhiteboardTo $state(jid)
+	    ::Jabber::WB::NewWhiteboardTo $state(jid2) -type groupchat
 	}
     }
     Free $token
