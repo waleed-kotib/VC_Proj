@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson only for the new and rewritten parts.
 #
-# $Id: httpex.tcl,v 1.4 2003-08-23 07:19:16 matben Exp $
+# $Id: httpex.tcl,v 1.5 2003-10-18 07:43:55 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -37,12 +37,17 @@
 #
 #       The '-command' argument is a tcl procedure:  mycallback {token}
 #       where 'token' is the name of the state array returned from 
-#       httpex::get. It gets called when the status changes in some way.
-#       The status sequence is normally: 
-#          connect -> putheader -> waiting -> getheader -> body -> ok
+#       httpex::get. It gets called when the state changes in some way.
+#       
+#       The 'status' is one of: ok, reset, eof, timeout, or error, and describes
+#       the final stage. Empty before that.
+#       The 'state' describes where in the process we are, and is normally: 
+#
+#          connect -> putheader -> waiting -> getheader -> body -> final
 #       
 #       The '-progress' argument is a tcl procedure: 
 #       progressProc {token totalsize currentsize}
+#       'totalsize' can be 0 if no Content-Length attribute.
 #
 # httpex::head url ?-key value ...?
 #       Makes a HEAD request to url. The -channel key is not allowed.
@@ -71,13 +76,14 @@
 #       If the method is PUT or GET, you MUST provide an open channel by
 #       invoking httpex::setchannel, or do httpex::setdata, before returning.
 #       
-#       The status sequence is normally: 
-#          connect -> getheader -> putheader -> body -> ok
+#       The state sequence is normally: 
+#       
+#          getheader -> putheader -> body -> final
 #
 # httpex::register protocol port socketcmd
 #       Registers new transport layer.
 #
-#       protocol        URL protocol prefix, e.g. httpexs
+#       protocol        URL protocol prefix, e.g. https
 #       port            Default port for protocol
 #       socketcmd       Command to use to create socket
 #
@@ -104,13 +110,13 @@
 # TODO --------------------------------------------------------------------------
 #
 
-package provide httpex 0.1
+package provide httpex 0.2
 
 namespace eval httpex {
     
     variable opts
     variable locals
-    variable debug 0
+    variable debug 4
     variable codeToText
     
     # Only for the config command.
@@ -121,8 +127,8 @@ namespace eval httpex {
 	-proxyfilter   httpex::ProxyRequired
     }
     set opts(-basedirectory)     [pwd]
-    set opts(-server)            "Tcl/Tk/[info patchlevel] httpex/0.1"
-    set opts(-useragent)         "Tcl/Tk/[info patchlevel] httpex/0.1"
+    set opts(-server)            "Tcl/Tk/[info patchlevel] httpex/0.2"
+    set opts(-useragent)         "Tcl/Tk/[info patchlevel] httpex/0.2"
     
     set locals(uid) 0
 
@@ -356,6 +362,7 @@ proc httpex::Request {method url args} {
     upvar 0 $token state
     
     # Process command options.
+    # Note that totalsize can be 0 if missing Content-Length in header.
     
     array set state {
 	-binary		false
@@ -366,7 +373,7 @@ proc httpex::Request {method url args} {
 	-queryblocksize	8192
 	-timeout 	0
 	-type		application/x-www-form-urlencoded
-	state		header
+	state		connect
 	currentsize	0
 	totalsize	0
 	coding		{}
@@ -375,7 +382,7 @@ proc httpex::Request {method url args} {
 	offset	0
 	meta		{}
 	type            text/html
-	status		{}
+	status		""
 	headclose       0
 	http		""
 	httpvers	1.0
@@ -455,9 +462,10 @@ proc httpex::Request {method url args} {
 	    if {[info exists $oldtoken]} {
 		upvar 0 $oldtoken oldstate
 		if {![string equal $state(host) $oldstate(host)]} {
-		    Finish $token {} 1
+		    set err "the hosts $state(host) $oldstate(host) nonidentical"
+		    Finish $token $err 1
 		    cleanup $token
-		    return -code error "The hosts nonidentical"
+		    return -code error $err
 		}
 	    }
 	}
@@ -499,7 +507,8 @@ proc httpex::Request {method url args} {
 	    # (if available) because we're going to throw an exception from here
 	    # instead.
 	    set state(headclose) 1
-	    Finish $token {} 1
+	    catch {close $s}
+	    catch {after cancel $state(after)}
 	    cleanup $token
 	    return -code error $s
 	}
@@ -512,7 +521,7 @@ proc httpex::Request {method url args} {
 	
 	# Wait for the connection to complete
 	fileevent $s writable [list httpex::Connect $token]
-	set state(status) connect
+	set state(state) connect
 	if {[info exists state(-command)]} {
 	    uplevel #0 $state(-command) $token
 	}
@@ -538,25 +547,26 @@ proc httpex::Connect {token} {
     variable locals
     upvar 0 $token state    
     
-    Debug 1 "httpex::Connect state(status)=$state(status)"
+    Debug 1 "httpex::Connect state(state)=$state(state)"
     
     set s $state(-socket)
     fileevent $s writable {}
     
     if {[string equal $::tcl_platform(platform) "macintosh"]} {
-	if {[eof $s]} {
-	    Finish $token "connect failed due to eof"
+	if {[catch {eof $s} iseof] || $iseof} {
+	    Eof $token $iseof
 	    return
 	}
     } else {
-	if {[eof $s] || [string length [fconfigure $s -error]]} {
-	    Finish $token "connect failed [fconfigure $state(-socket) -error]"
+	if {[catch {eof $s} iseof] || $iseof ||  \
+	  [string length [fconfigure $s -error]]} {
+	    Eof $token $iseof
 	    return
 	}
     }
     
     # On track :-)
-    set state(status) putheader
+    set state(state) putheader
     if {[info exists state(-command)]} {
 	uplevel #0 $state(-command) $token
     }
@@ -645,7 +655,7 @@ proc httpex::Connect {token} {
 	    puts $s "Content-Type: $state(-type)"
 	    puts $s "Content-Length: $state(length)"
 	    puts $s ""
-	    set state(status) body
+	    set state(state) body
 	    fconfigure $s -translation {auto binary}
 	    fileevent $s writable [list httpex::Write $token]
 	} else {
@@ -653,7 +663,7 @@ proc httpex::Connect {token} {
 	    # This ends our header for the GET method.
 	    puts $s ""
 	    flush $s
-	    set state(status) waiting
+	    set state(state) waiting
 	    FinishedRequest $token
 	}
 	
@@ -678,7 +688,7 @@ proc httpex::FinishedRequest {token} {
     variable $token
     upvar 0 $token state    
     
-    Debug 1 "httpex::FinishedRequest state(status)=$state(status)"
+    Debug 1 "httpex::FinishedRequest state(state)=$state(state)"
     set s $state(-socket)
 
     fileevent $s readable [list httpex::Event $token]
@@ -727,8 +737,8 @@ proc httpex::readrequest {s callback args} {
 	length	0
 	meta		{}
 	offset	0
-	state		header
-	status		{}
+	state		getheader
+	status		""
 	totalsize	0
 	type            text/html
     }
@@ -742,9 +752,9 @@ proc httpex::readrequest {s callback args} {
     
     # Temporary only until request processed correctly.
     set state(method) serverxxx 
-    if {[eof $s]} {
+    if {[catch {eof $s} iseof] || $iseof} {
 	set state(headclose) 1
-	Finish $token "Eof on socket"
+	Eof $token $iseof
     }
     fileevent $s writable {}
     fileevent $s readable {}
@@ -788,7 +798,7 @@ proc httpex::readrequest {s callback args} {
     
     catch {fconfigure $s -blocking off}
     
-    set state(status) connect
+    set state(state) connect
     if {[info exists state(-command)]} {
 	uplevel #0 $state(-command) $token
     }
@@ -815,15 +825,16 @@ proc httpex::Event {token} {
     variable locals
     upvar 0 $token state
     
-    Debug 1 "httpex::Event state(status)=$state(status)"
+    Debug 1 "httpex::Event state(state)=$state(state)"
+    
     set s $state(-socket)
-    if {[eof $s]} {
-	Eof $token
+    if {[catch {eof $s} iseof] || $iseof} {
+	Eof $token $iseof
 	return
     }
     
-    if {![string equal $state(status) "getheader"]} {
-	set state(status) getheader
+    if {![string equal $state(state) "getheader"]} {
+	set state(state) getheader
 	if {[info exists state(-command)]} {
 	    uplevel #0 $state(-command) $token
 	}
@@ -875,8 +886,10 @@ proc httpex::Event {token} {
 	}
 	
 	if {[string equal $state(method) "head"]} {
+	    set state(status) ok
 	    Finish $token
 	} elseif {[string equal $state(method) "post"] && !$expectBody} {
+	    set state(status) ok
 	    Finish $token
 	} elseif {[string equal $state(method) "serverhead"] || \
 	  [string equal $state(method) "serverget"]} {
@@ -885,8 +898,8 @@ proc httpex::Event {token} {
 	  [string equal $state(method) "serverput"] || \
 	  [string equal $state(method) "serverpost"] || \
 	  $expectBody} {
+
 	    set state(state) body
-	    set state(status) body
 	    if {[info exists state(-command)]} {
 		uplevel #0 $state(-command) $token
 	    }
@@ -946,10 +959,9 @@ proc httpex::WriteResponse {token} {
     variable htmlErrMsg
     upvar 0 $token state
     
-    Debug 1 "httpex::WriteResponse state(status)=$state(status)"
+    Debug 1 "httpex::WriteResponse state(state)=$state(state)"
     
-    if {![string equal $state(status) "putheader"]} {
-	set state(status) putheader
+    if {![string equal $state(state) "putheader"]} {
 	set state(state) putheader
 	if {[info exists state(-command)]} {
 	    uplevel #0 $state(-command) $token
@@ -1057,14 +1069,14 @@ proc httpex::WriteResponse {token} {
 		fconfigure $state(-channel) -translation binary
 	    }
 	}
-	set state(status) body
+	set state(state) body
 	if {[info exists state(-command)]} {
 	    uplevel #0 $state(-command) $token
 	}
 	fileevent $s readable {}
 	fileevent $s writable [list httpex::Write $token]	
     } elseif {[info exists state(senddata)]} {
-	set state(status) body
+	set state(state) body
 	if {[info exists state(-command)]} {
 	    uplevel #0 $state(-command) $token
 	}
@@ -1108,6 +1120,7 @@ proc httpex::BadResponse {s token code} {
 	Finish $token $err
 	return
     }
+    set state(status) ok
     Finish $token
 }
 
@@ -1125,6 +1138,8 @@ proc httpex::BadResponse {s token code} {
 proc httpex::CopyStart {s token} {    
     variable $token
     upvar 0 $token state
+    
+    Debug 3 "httpex::CopyStart"
     
     set blocksize $state(-blocksize)
     if {$state(-persistent) &&  \
@@ -1154,7 +1169,7 @@ proc httpex::CopyDone {token count {error {}}} {
     variable $token
     upvar 0 $token state
     
-    Debug 2 "httpex::CopyDone state(status)=$state(status), count=$count"
+    Debug 3 "httpex::CopyDone state(state)=$state(state), count=$count"
 
     set s $state(-socket)
     incr state(currentsize) $count
@@ -1162,7 +1177,7 @@ proc httpex::CopyDone {token count {error {}}} {
 	eval $state(-progress) {$token $state(totalsize) $state(currentsize)}
     }
     set done 0
-    if {$state(currentsize) >= $state(totalsize)} {
+    if {$state(havecontentlength) && ($state(currentsize) >= $state(totalsize))} {
 	set done 1
     }
     
@@ -1172,7 +1187,7 @@ proc httpex::CopyDone {token count {error {}}} {
     } elseif {$done} {
 	Eof $token
     } elseif {[catch {eof $s} iseof] || $iseof} {
-	Eof $token
+	Eof $token $iseof
     } else {
 	CopyStart $s $token
     }
@@ -1184,22 +1199,24 @@ proc httpex::CopyDone {token count {error {}}} {
 #
 # Arguments
 #	token	The token returned from httpex::get etc.
+#	iseof   Boolean, 1 if a premature socket close.
 #
 # Side Effects
-#	Clean up the socket
+#	Clean up the socket. Invokes 'Finish'.
 
-proc httpex::Eof {token} {    
+proc httpex::Eof {token {iseof 0}} {    
     variable $token
     upvar 0 $token state
     
-    Debug 1 "httpex::Eof state(status)=$state(status)"
-    if {[string equal $state(state) "header"]} {	
+    Debug 1 "httpex::Eof iseof=$iseof, state(state)=$state(state)"
+    
+    if {$iseof} {	
 	# Premature eof
 	set state(status) eof
     } else {
 	set state(status) ok
     }
-    set state(state) eof
+    set state(state) final
     Finish $token
 }
 
@@ -1220,7 +1237,9 @@ proc httpex::Read {s token} {
     upvar 0 $token state
     
     Debug 1 "httpex::Read"
-    if {[eof $s]} {
+    
+    if {[catch {eof $s} iseof] || $iseof} {
+	#Eof $token $iseof
 	Eof $token
 	return
     }
@@ -1252,14 +1271,13 @@ proc httpex::Read {s token} {
 	    eval $state(-progress) {$token $state(totalsize) $state(currentsize)}
 	}
     }
-    if {$state(currentsize) >= $state(totalsize)} {
+    if {$state(havecontentlength) && ($state(currentsize) >= $state(totalsize))} {
 	set done 1
     }
     if {$done} {
 	if {[string match "server*" $state(method)]} {
 	    WriteResponse $token
 	} else {
-	    #Finish $token
 	    Eof $token
 	}
     }
@@ -1342,7 +1360,7 @@ proc httpex::Write {token} {
 	catch {flush $s}
 	if {[string equal $state(method) "put"] || \
 	  [string equal $state(method) "post"]} {
-	    set state(status) waiting
+	    set state(state) waiting
     	    if {[info exists state(-command)]} {
 		uplevel #0 $state(-command) $token
 	    }
@@ -1351,6 +1369,7 @@ proc httpex::Write {token} {
 	    fileevent $s writable {}
 	    FinishedRequest $token
 	} elseif {[string equal $state(method) "serverget"]} {
+	    set state(status) ok
 	    Finish $token
 	}
     }
@@ -1405,7 +1424,7 @@ proc httpex::VerifyOptions {token validopts args} {
 #
 # Arguments:
 #	token	Connection token.
-#	why	Status info.
+#	why	Status info. 'reset' or 'timeout'.
 #
 # Side Effects:
 #       See Finish
@@ -1416,42 +1435,15 @@ proc httpex::reset {token {why reset}} {
         
     Debug 1 "httpex::reset why=$why"
     
-    set state(status) $why
     catch {fileevent $state(-socket) readable {}}
     catch {fileevent $state(-socket) writable {}}
-    if {[info exists state(-command)]} {
-	#uplevel #0 $state(-command) $token
-    }
+    set state(status) $why
     Finish $token
     if {[info exists state(error)]} {
 	set errorlist $state(error)
 	unset state
 	eval error $errorlist
     }
-}
-
-# httpex::isfinal --
-#
-#	Have this thing come to an end.
-#
-# Arguments:
-#	token	Connection token.
-#
-# Side Effects:
-#       none
-
-proc httpex::isfinal {token} {   
-    variable $token
-    upvar 0 $token state
-
-    switch -- $state(status) {
-	ok - timeout - error - reset - eof {
-	    return 1
-	}
-	default {
-	    return 0
-	}
-    }        
 }
 
 # httpex::cleanup
@@ -1479,6 +1471,7 @@ proc httpex::cleanup {token} {
 #
 #	Invoke callback with "ok" or "error", clean up the socket or reschedule
 #	fileevents on persistent connections.
+#	Any state(status) except error status shall be set before.
 #
 # Arguments:
 #	token	    Connection token.
@@ -1506,12 +1499,11 @@ proc httpex::Finish {token {errormsg ""} {skipCB 0}} {
 	set state(error) [list $errormsg $errorInfo $errorCode]
 	set state(status) error
     	set doClose 1
-    } else {
-	#set state(status) ok
     }
-    if {[eof $s]} {
+    if {[catch {eof $s} iseof] || $iseof} {
 	set doClose 1
     }
+    set state(state) final
 
     # If HTTP/1.0 we MUST always close the connection, else assume a
     # persistent connection, unless the request contained a
@@ -1528,7 +1520,6 @@ proc httpex::Finish {token {errormsg ""} {skipCB 0}} {
     if {$doClose} {
 
 	# What happens if we have more requests to send on a -persistent connection?
-
     	catch {close $s}
     } else {
 	if {[string match "server*" $state(method)]} {
@@ -1596,6 +1587,11 @@ proc httpex::status {token} {
     variable $token
     upvar 0 $token state
     return $state(status)
+}
+proc httpex::state {token} {
+    variable $token
+    upvar 0 $token state
+    return $state(state)
 }
 proc httpex::size {token} {
     variable $token
@@ -1794,9 +1790,10 @@ proc httpex::Debug {num str} {
 # Client side:
 if {0} {
     set ip localhost
+    set ip 192.168.0.12
     proc mycb {token} {
 	upvar #0 $token state
-	puts "--> state(status)=$state(status)"
+	puts "--> state(state)=$state(state)"
 	if {$state(status) == "ok"} {
 	    puts "Code: [httpex::code $token]"
 	    array set meta $state(meta)
@@ -1809,9 +1806,9 @@ if {0} {
 	update idletasks
     }
     # HEAD
-    set tok [httpex::head $ip/httpex.tcl -command mycb]
+    set tok [httpex::head $ip/httpex.tcl -timeout 8000 -command mycb]
     # GET
-    set tok [httpex::get $ip/httpex.tcl -command mycb -progress myprog]
+    set tok [httpex::get $ip/httpex.tcl -timeout 8000 -command mycb -progress myprog]
     # HEADs
     set first 1
     for {set i 1} {$i <= 3} {incr i} {
@@ -1831,7 +1828,7 @@ if {0} {
     set servSock [socket -server NewConnect 80]
     proc mycb {token} {
 	upvar #0 $token state
-	puts "--> state(status)=$state(status)"
+	puts "--> state(state)=$state(state)"
 	#parray state
 	if {$state(status) == "ok"} {
 	    puts "Code: [httpex::code $token]"
@@ -1851,37 +1848,42 @@ if {0} {
 	puts "servcb: state(method)=$state(method)"
 	set code 200
 	set headlist {}
-	if {$state(method) == "serverget" || $state(method) == "serverhead"} {
-	    set abspath [httpex::abspath $token]
-	    if {[string length $abspath] == 0} {
-		return [list 500 $headlist]
-	    }
-	    if {[catch {clock format [file mtime $abspath]  \
-	      -format "%a, %d %b %Y %H:%M:%S GMT" -gmt 1} modTime]} {
-		return [list 404 $headlist]
-	    } else {
-		set headlist [list Last-Modified $modTime]
-	    }
-	    if {$state(method) == "serverget"} {
-		if {[catch {open $abspath r} fd]} {
+	
+	switch -- $state(method)  {
+	    serverget - serverhead {
+		set abspath [httpex::abspath $token]
+		if {[string length $abspath] == 0} {
+		    return [list 500 $headlist]
+		}
+		if {[catch {clock format [file mtime $abspath]  \
+		  -format "%a, %d %b %Y %H:%M:%S GMT" -gmt 1} modTime]} {
 		    return [list 404 $headlist]
 		} else {
-		    httpex::setchannel $token $fd
+		    set headlist [list Last-Modified $modTime]
 		}
+		if {$state(method) == "serverget"} {
+		    if {[catch {open $abspath r} fd]} {
+			return [list 404 $headlist]
+		    } else {
+			httpex::setchannel $token $fd
+		    }
+		} 
+		if {[lsearch {.txt .html .text .c .cpp .h} \
+		  [file extension $abspath]] >= 0} {
+		    set type text/plain
+		} else {
+		    set type application/octet-stream
+		}
+		lappend headlist content-length [file size $abspath] content-type $type
 	    } 
-	    if {[lsearch {.txt .html .text .tcl .tex .c .cpp .h} \
-	      [file extension $abspath]] >= 0} {
-		set type text/plain
-	    } else {
-		set type application/octet-stream
+	    serverpost {
+		
 	    }
-	    lappend headlist content-length [file size $abspath] content-type $type
-	} elseif {$state(method) == "serverpost"} {
-	    
 	}
+	
 	return [list $code $headlist]
     }
-
+    
     proc NewConnect {sock ip port} {
 	puts "New client at: sock=$sock, ip=$ip, port=$port"
 	set tok [httpex::readrequest $sock servcb -command mycb -persistent 1]

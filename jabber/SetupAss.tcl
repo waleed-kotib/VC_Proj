@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: SetupAss.tcl,v 1.6 2003-10-05 13:36:20 matben Exp $
+# $Id: SetupAss.tcl,v 1.7 2003-10-18 07:43:56 matben Exp $
 
 package require setupassistant
 package require chasearrows
@@ -181,6 +181,8 @@ proc ::Jabber::SetupAss::ServersDlg {w} {
     variable wtbl
     variable rowcurrent ""
 
+    ::Jabber::Debug 2 "::Jabber::SetupAss::ServersDlg w=$w"
+    
     if {[winfo exists $w]} {
 	raise $w
 	return
@@ -251,12 +253,14 @@ proc ::Jabber::SetupAss::ServersDlg {w} {
 	set tmopts [list -timeout $prefs(timeoutMillis)]
     }
     if {[catch {eval {
-	::http::geturl $url -progress [namespace current]::ServProgress  \
+	::httpex::get $url -progress [namespace current]::ServProgress  \
 	  -command [list [namespace current]::ServCommand $w]
     } $tmopts} token]} {
+	destroy $w
 	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok  \
 	  -message "Failed to obtain list of open Jabber servers from\
 	  \"$url\".: $token"
+	return
     } else {
 	set servStatVar "Getting server list from $url"
 	$warrows start
@@ -303,6 +307,7 @@ proc ::Jabber::SetupAss::ServSelect { } {
 
 proc ::Jabber::SetupAss::ServProgress {token total current} {
        
+    # Empty.
 }
 
 proc ::Jabber::SetupAss::ServCommand {w token} {
@@ -313,14 +318,22 @@ proc ::Jabber::SetupAss::ServCommand {w token} {
     variable publicServerList
     variable wtbl
 
+    ::Jabber::Debug 2 "::Jabber::SetupAss::ServCommand [::httpex::state $token]"
+    
     if {![winfo exists $w]} {
+	return
+    }
+    if {[::httpex::state $token] != "final"} {
 	return
     }
     set servStatVar ""
     $warrows stop
     
     # Investigate 'state' for any exceptions.
-    set status [::http::status $token]
+    set status [::httpex::status $token]
+    
+    ::Jabber::Debug 2 "\ttoken=$token status=$status"
+    
     switch -- $status {
 	timeout {
 	    tk_messageBox -title [::msgcat::mc Timeout] -icon info -type ok \
@@ -329,7 +342,7 @@ proc ::Jabber::SetupAss::ServCommand {w token} {
 	error {
 	    tk_messageBox -title "File transport error" -icon error -type ok \
 	      -message "File transport error when getting server list:\
-	      [::http::error $token]"
+	      [::httpex::error $token]"
 	}
 	eof {
 	    tk_messageBox -title "File transport error" -icon error -type ok \
@@ -341,7 +354,7 @@ proc ::Jabber::SetupAss::ServCommand {w token} {
 	ok {
 	    
 	    # Get and parse xml.
-	    set xml [::http::data $token]    
+	    set xml [::httpex::data $token]    
 	    set token [tinydom::parse $xml]
 	    set xmllist [tinydom::documentElement $token]
 	    set publicServerList {}
@@ -360,7 +373,10 @@ proc ::Jabber::SetupAss::ServCommand {w token} {
 	    $wtbl insertlist end $publicServerList
 	}
     }
-    ::http::cleanup $token    
+    ::httpex::cleanup $token
+    if {$status != "ok"} {
+	catch {destroy $w}
+    }
 }
 
 #-------------------------------------------------------------------------------

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.24 2003-10-12 13:12:55 matben Exp $
+# $Id: Jabber.tcl,v 1.25 2003-10-18 07:43:55 matben Exp $
 #
 #  The $address is an ip name or number.
 #
@@ -1816,10 +1816,14 @@ proc ::Jabber::SetStatusWithMessage {w} {
     set frtop $w.frall.frtop
     set fr [LabeledFrame2 $frtop [::msgcat::mc {My Status}]]
     pack $frtop -side top -fill x -padx 4 -pady 4
+    set i 0
     foreach val {available chat away xa dnd invisible} {
+	label ${fr}.l${val} -image [::Jabber::Roster::GetPresenceIconFromKey $val]
 	radiobutton ${fr}.${val} -text [::msgcat::mc jastat${val}]  \
 	  -variable "[namespace current]::show" -value $val
-	grid ${fr}.${val} -sticky w -padx 12 -pady 3
+	grid ${fr}.l${val} -sticky e -column 0 -row $i -padx 4 -pady 3
+	grid ${fr}.${val} -sticky w -column 1 -row $i -padx 8 -pady 3
+	incr i
     }
     
     # Set present status.
@@ -3851,6 +3855,7 @@ proc ::Jabber::Register::Register {w args} {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 
     }
@@ -4169,6 +4174,7 @@ proc ::Jabber::Passwd::Build {w} {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 
     }
@@ -4338,6 +4344,7 @@ proc ::Jabber::GenRegister::BuildRegister {w args} {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 
     }
@@ -4467,6 +4474,7 @@ proc ::Jabber::GenRegister::Simple {w args} {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 
     }
@@ -5602,6 +5610,7 @@ proc ::Jabber::Conference::BuildEnter {args} {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 
     }
@@ -5923,6 +5932,7 @@ proc ::Jabber::Conference::BuildCreate {args} {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 	
     }
@@ -6283,6 +6293,7 @@ proc ::Jabber::Search::Build {w args} {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 
     }

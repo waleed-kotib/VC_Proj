@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.13 2003-09-28 06:29:08 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.14 2003-10-18 07:43:56 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -325,7 +325,7 @@ proc ::PreferencesUtils::SetWidgetDefaultOptions { } {
     # ...and then on specific platforms.
     
     switch -- $this(platform) {
-	"macintosh" - "macosx" {
+	macintosh - macosx {
 	    option add *Radiobutton.Background $prefs(bgColGeneral)
 	    option add *Button.HighlightBackground $prefs(bgColGeneral)
 	    option add *Checkbutton.Background $prefs(bgColGeneral)
@@ -335,7 +335,7 @@ proc ::PreferencesUtils::SetWidgetDefaultOptions { } {
 	    option add *Text.HighlightThickness 3
 	    option add *Tablelist.BorderWidth 1
 	}
-	"windows" {
+	windows {
 	    option add *Radiobutton.Background $prefs(bgColGeneral)
 	    option add *Button.Background $prefs(bgColGeneral)
 	    option add *Checkbutton.Background $prefs(bgColGeneral)
@@ -345,7 +345,7 @@ proc ::PreferencesUtils::SetWidgetDefaultOptions { } {
 	    option add *Listbox.HighlightThickness 2
 	    option add *Text.HighlightThickness 2
 	}
-	"unix" {
+	unix {
 	    option add *Entry.Foreground Black
 	    option add *Entry.HighlightThickness 2
 	    option add *Listbox.HighlightThickness 2

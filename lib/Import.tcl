@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Import.tcl,v 1.3 2003-10-12 13:12:55 matben Exp $
+# $Id: Import.tcl,v 1.4 2003-10-18 07:43:56 matben Exp $
 
 package require http
 package require httpex
@@ -829,12 +829,7 @@ proc ::Import::HttpProgress {gettoken token total current} {
 	    uplevel #0 $argsArr(-progress)  \
 	      [list $status $gettoken $token $total $current]
 	} else {	
-	    # some 2.3 versions seem to lack ::http::error !
-	    if {[info exists state(error)]} {
-		set errmsg $state(error)
-	    } else {
-		set errmsg "File transfer error for \"$getstate(url)\""
-	    }
+	    set errmsg "File transfer error for \"$getstate(url)\""
 	    tk_messageBox -title [::msgcat::mc Error] -icon error -type ok -message \
 	      [FormatTextForMessageBox "Failed getting url: $errmsg"]
 	}
@@ -868,25 +863,36 @@ proc ::Import::HttpProgress {gettoken token total current} {
 #       Callback for httpex package.
 #       If ok it dispatches drawing to the right proc.
 #       
-#       httpex: The status sequence is normally: 
-#          putheader -> waiting -> getheader -> body -> ok
+#       httpex: The 'state' sequence is normally: 
+#          connect -> putheader -> waiting -> getheader -> body -> final
+#       The 'status' is only defined for state=eof, and is then any of:
+#       ok, reset, eof, timeout, or error.
 
 proc ::Import::HttpCommand {gettoken token} {    
     upvar #0 $token state
     upvar #0 $gettoken getstate 
     
     # Investigate 'state' for any exceptions and return code (404)!!!
+    set getstate(state) [::httpex::state $token]
     set getstate(status) [::httpex::status $token]
     set getstate(ncode) [httpex::ncode $token]
 
-    ::Debug 2 "::Import::HttpCommand status = $getstate(status)"
+    ::Debug 2 "::Import::HttpCommand state = $getstate(state)"
     
     set wtop $getstate(wtop)
     set wcan $getstate(wcan)
     set dstPath $getstate(dstPath)
     set opts $getstate(optList)
     set tail $getstate(tail)
+    set thestate $getstate(state)
     set status $getstate(status)
+    
+    # Combined state+status.
+    if {[string equal $thestate "final"]} {
+	set stateStatus $status
+    } else {
+	set stateStatus $thestate
+    }
     
     array set argsArr $getstate(args)
     if {[info exists argsArr(-command)] && ($argsArr(-command) != "")} {
@@ -897,15 +903,17 @@ proc ::Import::HttpCommand {gettoken token} {
     set errMsg ""
     
     # Catch the case when we get a non 200 return code and is otherwise ok.
-    if {[httpex::isfinal $token] && ($status == "ok") && ($getstate(ncode) != "200")} {
+    if {($thestate == "final") && ($status == "ok") && ($getstate(ncode) != "200")} {
 	set status error
+ 	set stateStatus error
 	set httpMsg [httpex::ncodetotext $getstate(ncode)]
 	set errMsg "Failed getting file \"$tail\": $httpMsg"
     }
 	
     if {$haveCommand} {
-	uplevel #0 $argsArr(-command) [list $status $gettoken $token]	
-    } else {
+	uplevel #0 $argsArr(-command) [list $stateStatus $gettoken $token]	
+    } elseif {[string equal $thestate "final"]} {
+	
 	switch -- $status {
 	    timeout {
 		set msg "Timeout waiting for file \"$tail\""
@@ -927,8 +935,9 @@ proc ::Import::HttpCommand {gettoken token} {
     
     # httpex makes callbacks during the process as well. Important!
     # We should be final here!
-    if {[httpex::isfinal $token]} {
+    if {[string equal $thestate "final"]} {
 	catch {close $getstate(dst)}
+	set impErr ""
 	
 	# Import stuff.
 	if {($status == "ok") && ($getstate(ncode) == "200")} {
@@ -937,23 +946,27 @@ proc ::Import::HttpCommand {gettoken token} {
 	    ::FileCache::Set $getstate(url) $dstPath
 	    
 	    # This should delegate the actual drawing to the correct proc.
-	    ::Import::DoImport $wcan $opts -file $dstPath -where local
+	    set impErr [::Import::DoImport $wcan $opts -file $dstPath \
+	      -where local]
 	}
 	
 	# Catch errors from 'errMsg'.
 	if {$errMsg != ""} {
-	    set status error
+	    set stateStatus error
 	    set getstate(error) $errMsg
+	} elseif {$impErr != ""} {
+	    set stateStatus error
+	    set getstate(error) $impErr
 	}
 	if {$haveCommand} {
-	    uplevel #0 $argsArr(-command) [list $status $gettoken $token]	
+	    uplevel #0 $argsArr(-command) [list $stateStatus $gettoken $token]	
 	} elseif {$errMsg != ""} {
 	    ::UI::SetStatusMessage $wtop "Failed importing \"$tail\" $errMsg"
 	}
 	
 	# Cleanup:
 	::httpex::cleanup $token
-	if {$errMsg != ""} {
+	if {($errMsg != "") || ($impErr != "")} {
 	    catch {file delete -force $getstate(dstPath)}
 	}
 	unset getstate
@@ -992,21 +1005,23 @@ proc ::Import::ImportProgress {line status gettoken httptoken total current} {
 # 
 #       Callback procedure for the '::Import::HandleImportCmd'
 #       command. 
-#       Takes care of status reports not reported by direct return. 
+#       Takes care of state reports not reported by direct return. 
 
-proc ::Import::ImportCommand {line status gettoken httptoken} {
+proc ::Import::ImportCommand {line stateStatus gettoken httptoken} {
     upvar #0 $gettoken getstate          
 
-    Debug 2 "::Import::ImportCommand status=$status"
+    Debug 2 "::Import::ImportCommand stateStatus=$stateStatus"
     
-    if {[string equal $status "reset"]} {
+    if {[string equal $stateStatus "reset"]} {
 	return
     }
     set wcan $getstate(wcan)
     set wtop $getstate(wtop)
     set tail $getstate(tail)
+    set thestate $getstate(state)
+    set status $getstate(status)
 
-    switch -- $status {
+    switch -- $stateStatus {
 	timeout {
 	    ::UI::SetStatusMessage $wtop "Timeout waiting for file \"$tail\""
 	}
@@ -1032,13 +1047,10 @@ proc ::Import::ImportCommand {line status gettoken httptoken} {
 	eof {
 	    ::UI::SetStatusMessage $wtop "Error getting file \"$tail\""
 	}
-	default {
-	    # ???
-	}
     }
 
     # We should be final here!
-    if {[httpex::isfinal $httptoken]} {
+    if {[string equal $thestate "final"]} {
 	if {$status != "ok"} {
 	    eval {::Import::NewBrokenImage $wcan [lrange $line 1 2]} \
 	      [lrange $line 3 end]
