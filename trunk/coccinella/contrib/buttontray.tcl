@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: buttontray.tcl,v 1.3 2003-12-15 08:20:53 matben Exp $
+# $Id: buttontray.tcl,v 1.4 2003-12-16 15:03:53 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -172,7 +172,6 @@ proc ::buttontray::buttontray {w height args} {
 	set optName [lindex $widgetOptions($name) 0]
 	set optClass [lindex $widgetOptions($name) 1]
 	set options($name) [option get $w $optName $optClass]
-	#puts "   name=$name, optName=$optName, optClass=$optClass"
     }
     
     # Apply the options supplied in the widget command.

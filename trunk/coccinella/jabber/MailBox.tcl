@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.22 2003-12-15 08:20:53 matben Exp $
+# $Id: MailBox.tcl,v 1.23 2003-12-16 15:03:53 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -23,6 +23,20 @@
 package provide MailBox 1.0
 
 namespace eval ::Jabber::MailBox:: {
+
+    # Use option database for customization.
+    option add *MailBox*newmsgImage           newmsg           widgetDefault
+    option add *MailBox*newmsgDisImage        newmsgDis        widgetDefault
+    option add *MailBox*replyImage            reply            widgetDefault
+    option add *MailBox*replyDisImage         replyDis         widgetDefault
+    option add *MailBox*forwardImage          forward          widgetDefault
+    option add *MailBox*forwardDisImage       forwardDis       widgetDefault
+    option add *MailBox*saveImage             save             widgetDefault
+    option add *MailBox*saveDisImage          saveDis          widgetDefault
+    option add *MailBox*printImage            print            widgetDefault
+    option add *MailBox*printDisImage         printDis         widgetDefault
+    option add *MailBox*trashImage            trash            widgetDefault
+    option add *MailBox*trashDisImage         trashDis         widgetDefault
 
     variable locals
     upvar ::Jabber::jstate jstate
@@ -152,19 +166,19 @@ proc ::Jabber::MailBox::Build {w args} {
       -fill both -expand 1 -ipadx 4
     
     # Button part.
-    set iconNew         [::UI::GetIcon btnew]
-    set iconNewDis      [::UI::GetIcon btnewdis]
-    set iconReply       [::UI::GetIcon btreply]
-    set iconReplyDis    [::UI::GetIcon btreplydis]
-    set iconForward     [::UI::GetIcon btforward]
-    set iconForwardDis  [::UI::GetIcon btforwarddis]
-    set iconSave        [::UI::GetIcon btsave]
-    set iconSaveDis     [::UI::GetIcon btsavedis]
-    set iconPrint       [::UI::GetIcon btprint]
-    set iconPrintDis    [::UI::GetIcon btprintdis]
-    set iconTrash       [::UI::GetIcon bttrash]
-    set iconTrashDis    [::UI::GetIcon bttrashdis]
-    
+    set iconNew       [::Theme::GetImage [option get $w newmsgImage {}]]
+    set iconNewDis    [::Theme::GetImage [option get $w newmsgDisImage {}]]
+    set iconReply     [::Theme::GetImage [option get $w replyImage {}]]
+    set iconReplyDis  [::Theme::GetImage [option get $w replyDisImage {}]]
+    set iconForward   [::Theme::GetImage [option get $w forwardImage {}]]
+    set iconForwardDis  [::Theme::GetImage [option get $w forwardDisImage {}]]
+    set iconSave      [::Theme::GetImage [option get $w saveImage {}]]
+    set iconSaveDis   [::Theme::GetImage [option get $w saveDisImage {}]]
+    set iconPrint     [::Theme::GetImage [option get $w printImage {}]]
+    set iconPrintDis  [::Theme::GetImage [option get $w printDisImage {}]]
+    set iconTrash     [::Theme::GetImage [option get $w trashImage {}]]
+    set iconTrashDis  [::Theme::GetImage [option get $w trashDisImage {}]]
+
     set wtray $w.frall.frtop
     ::buttontray::buttontray $wtray 50
     pack $wtray -side top -fill x -padx 4 -pady 2

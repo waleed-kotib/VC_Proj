@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: mylabelframe.tcl,v 1.1 2003-12-16 08:22:03 matben Exp $
+# $Id: mylabelframe.tcl,v 1.2 2003-12-16 15:03:53 matben Exp $
 #
 
 package provide mylabelframe 0.1
@@ -13,10 +13,10 @@ namespace eval ::mylabelframe:: {
 
     # The public interface.
     namespace export mylabelframe
-    
-    option add *MyLabelFrame.Font          system
-    option add *MyLabelFrame.padX          10
-    option add *MyLabelFrame.padY          4
+        
+    option add *MyLabelFrame.Font          system     widgetDefault
+    option add *MyLabelFrame.padX          10         widgetDefault
+    option add *MyLabelFrame.padY          4          widgetDefault
 					
     variable widgetOptions
     array set widgetOptions {

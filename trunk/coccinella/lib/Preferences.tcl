@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.20 2003-12-15 15:39:09 matben Exp $
+# $Id: Preferences.tcl,v 1.21 2003-12-16 15:03:53 matben Exp $
  
 package require notebook
 package require tree
@@ -379,7 +379,7 @@ proc ::Preferences::BuildPageSounds {page} {
     
     set fontSB [option get . fontSmallBold {}]
     
-    set labpsp [LabeledFrame2 $page.sp [::msgcat::mc {Synthetic speech}]]
+    set labpsp [::mylabelframe::mylabelframe $page.sp [::msgcat::mc {Synthetic speech}]]
     pack $page.sp -side top -anchor w -ipadx 10
     
     checkbutton $labpsp.speak -text "  [::msgcat::mc prefsounsynwb]"  \
@@ -422,7 +422,7 @@ proc ::Preferences::BuildPageSounds {page} {
 	$wpopout configure -state disabled
     }    
     
-    set labpalrt [LabeledFrame2 $page.alrt [::msgcat::mc {Alert sounds}]]
+    set labpalrt [::mylabelframe::mylabelframe $page.alrt [::msgcat::mc {Alert sounds}]]
     pack $page.alrt -side top -anchor w -ipadx 10
     label $labpalrt.lbl -text [::msgcat::mc prefsounpick]
     pack $labpalrt.lbl -side top -anchor w -padx 6 -pady $ypad
@@ -465,7 +465,7 @@ proc ::Preferences::Profiles::BuildPage {page} {
     set fontS [option get . fontSmall {}]
     set fontSB [option get . fontSmallBold {}]
     
-    set labpui [LabeledFrame2 $page.fr [::msgcat::mc {User Profiles}]]
+    set labpui [::mylabelframe::mylabelframe $page.fr [::msgcat::mc {User Profiles}]]
     pack $page.fr -side left -anchor n -ipadx 10 -ipady 6
     
     message $labpui.msg -text [::msgcat::mc prefprof] -aspect 800
@@ -758,7 +758,7 @@ proc ::Preferences::BuildPageConf {page} {
     variable ypad 
 
     # Conference (groupchat) stuff.
-    set labfr [LabeledFrame2 $page.fr [::msgcat::mc {Preferred Protocol}]]
+    set labfr [::mylabelframe::mylabelframe $page.fr [::msgcat::mc {Preferred Protocol}]]
     pack $page.fr -side top -anchor w
     set pbl [frame $labfr.frin]
     pack $pbl -padx 10 -pady 6 -side left
@@ -776,7 +776,7 @@ proc ::Preferences::BuildPageConf {page} {
 
 proc ::Preferences::BuildPagePersInfo {page} {
 
-    set ppers [LabeledFrame2 $page.fr [::msgcat::mc {Personal Information}]]
+    set ppers [::mylabelframe::mylabelframe $page.fr [::msgcat::mc {Personal Information}]]
     pack $page.fr -side left -anchor n -ipadx 10 -ipady 6
 
     message $ppers.msg -text [::msgcat::mc prefpers] -aspect 800
@@ -810,7 +810,7 @@ proc ::Preferences::BuildPageAutoAway {page} {
     variable xpadbt
     
     # Auto away stuff.
-    set labfrpbl [LabeledFrame2 $page.fr [::msgcat::mc {Auto Away}]]
+    set labfrpbl [::mylabelframe::mylabelframe $page.fr [::msgcat::mc {Auto Away}]]
     pack $page.fr -side top -anchor w
     set pbl [frame $labfrpbl.frin]
     pack $pbl -padx 10 -pady 6 -side left
@@ -848,7 +848,7 @@ proc ::Preferences::BuildPageAutoAway {page} {
     grid $pbl.frmsg.examsg -column 1 -row 1 -sticky w
     
     # Default logout status.
-    set labfrstat [LabeledFrame2 $page.frstat {Default Logout Status}]
+    set labfrstat [::mylabelframe::mylabelframe $page.frstat {Default Logout Status}]
     pack $page.frstat -side top -anchor w
     set pstat [frame $labfrstat.frin]
     pack $pstat -padx 10 -pady 6 -side left
@@ -874,7 +874,7 @@ proc ::Preferences::BuildPageSubscriptions {page} {
     variable tmpJPrefs
     variable ypad
     
-    set labfrpsubs [LabeledFrame2 $page.fr [::msgcat::mc Subscribe]]
+    set labfrpsubs [::mylabelframe::mylabelframe $page.fr [::msgcat::mc Subscribe]]
     pack $page.fr -side top -anchor w
     set psubs [frame $labfrpsubs.frin]
     pack $psubs -padx 10 -pady 6 -side left
@@ -911,7 +911,7 @@ proc ::Preferences::BuildPagePrivacy {page} {
     variable tmpPrefs
     variable xpadbt
     
-    set labfrpbl [LabeledFrame2 $page.fr [::msgcat::mc Privacy]]
+    set labfrpbl [::mylabelframe::mylabelframe $page.fr [::msgcat::mc Privacy]]
     pack $page.fr -side left -anchor n
     set pbl [frame $labfrpbl.frin]
     pack $pbl -padx 10 -pady 6 -side left
@@ -941,7 +941,7 @@ proc ::Preferences::Block::BuildPage {page} {
     
     set fontS [option get . fontSmall {}]
     
-    set labfrpbl [LabeledFrame2 $page.fr [::msgcat::mc Blockers]]
+    set labfrpbl [::mylabelframe::mylabelframe $page.fr [::msgcat::mc Blockers]]
     pack $page.fr -side left -anchor n
     set pbl [frame $labfrpbl.frin]
     pack $pbl -padx 10 -pady 6 -side left
@@ -1015,7 +1015,7 @@ proc ::Preferences::Block::Add {w} {
     
     # Labelled frame.
     set wcfr $w.frall.fr
-    set wcont [LabeledFrame2 $wcfr [::msgcat::mc {JID to block}]]
+    set wcont [::mylabelframe::mylabelframe $wcfr [::msgcat::mc {JID to block}]]
     pack $wcfr -side top -fill both -ipadx 10 -ipady 6 -in $w.frall
     
     # Overall frame for whole container.
@@ -1099,6 +1099,7 @@ namespace eval ::Preferences::Customization:: {
 }
 
 proc ::Preferences::Customization::BuildPage {page} {
+    global  this
     
     variable wlbblock
     variable btrem
@@ -1108,7 +1109,7 @@ proc ::Preferences::Customization::BuildPage {page} {
     
     set fontSB [option get . fontSmallBold {}]
 
-    set labfrpbl [LabeledFrame2 $page.fr [::msgcat::mc Customization]]
+    set labfrpbl [::mylabelframe::mylabelframe $page.fr [::msgcat::mc Customization]]
     pack $page.fr -side top -anchor w
     set pbl [frame $labfrpbl.frin]
     pack $pbl -padx 10 -pady 6 -side left
@@ -1140,6 +1141,18 @@ proc ::Preferences::Customization::BuildPage {page} {
       -command [list [namespace current]::DefaultBgImage rost]]  \
       -side left -padx 4
     
+    set frtheme $pbl.ftheme
+    frame $frtheme
+    set wpoptheme $frtheme.pop
+    set allrsrc {}
+    foreach f [glob -nocomplain -tails -directory $this(resourcedbPath) *.rdb] {
+	lappend allrsrc [file rootname $f]
+    }
+    set wpopupmenuin [eval {tk_optionMenu $wpoptheme   \
+      [namespace parent]::tmpPrefs(themeName)} $allrsrc]
+    pack [label $frtheme.l -text {Pick theme, need relaunch:}] -side left
+    pack $wpoptheme -side left
+    
     grid $pbl.lfont $pbl.btfont -padx 2 -pady $ypad -sticky w
     grid $pbl.newwin $pbl.btfont -padx 2 -pady $ypad -sticky w -columnspan 2
     grid $pbl.savein -padx 2 -pady $ypad -sticky w -columnspan 2
@@ -1147,9 +1160,10 @@ proc ::Preferences::Customization::BuildPage {page} {
     grid $pbl.rb2new -padx 2 -pady $ypad -sticky w -columnspan 2
     grid $pbl.rb2re -padx 2 -pady $ypad -sticky w -columnspan 2
     grid $frrost -padx 2 -pady $ypad -sticky w -columnspan 2
+    grid $frtheme -padx 2 -pady $ypad -sticky w -columnspan 2
     
     # Agents or Browse.
-    set frdisc [LabeledFrame2 $page.ag {Agents or Browse}]
+    set frdisc [::mylabelframe::mylabelframe $page.ag {Agents or Browse}]
     pack $page.ag -side top -anchor w
     set pdisc [frame $frdisc.frin]
     pack $pdisc -padx 10 -pady 6 -side left
@@ -1220,7 +1234,7 @@ proc ::Preferences::Plugins::BuildPage {page} {
     upvar ::Preferences::ypad ypad
 
     # Conference (groupchat) stuff.
-    set labfr [LabeledFrame2 $page.fr [::msgcat::mc {Plugin Control}]]
+    set labfr [::mylabelframe::mylabelframe $page.fr [::msgcat::mc {Plugin Control}]]
     pack $page.fr -side top -anchor w
     set pbl [frame $labfr.frin]
     pack $pbl -padx 10 -pady 6 -side left
@@ -1299,7 +1313,7 @@ proc ::Preferences::FileMap::BuildPage {page} {
     set fontS [option get . fontSmall {}]
     
     # Frame for everything inside the labeled container.
-    set wcont1 [LabeledFrame2 $page.frtop [::msgcat::mc preffmhelp]]
+    set wcont1 [::mylabelframe::mylabelframe $page.frtop [::msgcat::mc preffmhelp]]
     pack $page.frtop -side top -anchor w
     set fr1 [frame $wcont1.fr]
     
@@ -1523,7 +1537,7 @@ proc ::Preferences::FileMap::Inspect {w doWhat wlist {indSel {}}} {
     pack [frame $w.frall -borderwidth 1 -relief raised]
     
     # Frame for everything inside the labeled container: "Type of File".
-    set wcont1 [LabeledFrame2 $w.frtop [::msgcat::mc {Type of File}]]
+    set wcont1 [::mylabelframe::mylabelframe $w.frtop [::msgcat::mc {Type of File}]]
     pack $w.frtop -in $w.frall -fill x
     set fr1 [frame $wcont1.fr]
     label $fr1.x1 -text "[::msgcat::mc Description]:"
@@ -1554,7 +1568,7 @@ proc ::Preferences::FileMap::Inspect {w doWhat wlist {indSel {}}} {
     }
     
     # Frame for everything inside the labeled container: "Handling".
-    set wcont2 [LabeledFrame2 $w.frmid [::msgcat::mc Handling]]
+    set wcont2 [::mylabelframe::mylabelframe $w.frmid [::msgcat::mc Handling]]
     pack $w.frmid -in $w.frall -fill x
     set fr2 [frame $wcont2.fr]
     radiobutton $fr2.x1 -text " [::msgcat::mc {Reject receive}]"  \
@@ -1764,7 +1778,7 @@ proc ::Preferences::NetSetup::BuildPage {page} {
     
     set fontSB [option get . fontSmallBold {}]
         
-    set wcont [LabeledFrame2 $page.fr [::msgcat::mc prefnetconf]]
+    set wcont [::mylabelframe::mylabelframe $page.fr [::msgcat::mc prefnetconf]]
     pack $page.fr -side top -anchor w
 
     # Frame for everything inside the labeled container.
@@ -1955,7 +1969,7 @@ proc ::Preferences::NetSetup::Advanced {  } {
     set fontSB [option get . fontSmallBold {}]
     
     pack [frame $w.frall -borderwidth 1 -relief raised]
-    set wcont [LabeledFrame2 $w.frtop [::msgcat::mc {Advanced Configuration}]]
+    set wcont [::mylabelframe::mylabelframe $w.frtop [::msgcat::mc {Advanced Configuration}]]
     pack $w.frtop -in $w.frall -side top -fill both
     
     # Frame for everything inside the labeled container.
@@ -2065,7 +2079,7 @@ proc ::Preferences::Shorts::BuildPage {page} {
     
     set fontS [option get . fontSmall {}]
     
-    set wcont [LabeledFrame2 $page.frtop [::msgcat::mc {Edit Shortcuts}]]
+    set wcont [::mylabelframe::mylabelframe $page.frtop [::msgcat::mc {Edit Shortcuts}]]
     pack $page.frtop -side top -anchor w
     
     # Overall frame for whole container.
@@ -2206,7 +2220,7 @@ proc ::Preferences::Shorts::AddOrEdit {what} {
     pack [frame $w.frall -borderwidth 1 -relief raised]
     
     # The top part.
-    set wcont [LabeledFrame2 $w.frtop $txt]
+    set wcont [::mylabelframe::mylabelframe $w.frtop $txt]
     pack $w.frtop -in $w.frall
     
     # Overall frame for whole container.
@@ -2308,7 +2322,7 @@ proc ::Preferences::EditFonts::BuildPage {page} {
     
     # Labelled frame.
     set wcfr $page.fr
-    set wcont [LabeledFrame2 $wcfr [::msgcat::mc {Import/Remove fonts}]]
+    set wcont [::mylabelframe::mylabelframe $wcfr [::msgcat::mc {Import/Remove fonts}]]
     pack $wcfr -side top -fill both -ipadx 8 -ipady 4
     
     # Overall frame for whole container.
@@ -2473,7 +2487,7 @@ proc ::Preferences::Proxies::BuildPage {page} {
     
     upvar ::Preferences::ypad ypad
     
-    set pcnat [LabeledFrame2 $page.nat {NAT Address}]
+    set pcnat [::mylabelframe::mylabelframe $page.nat {NAT Address}]
     pack $page.nat -side top -anchor w -ipadx 10 -ipady 6
     checkbutton $pcnat.cb \
       -text {  Use the following ip address as seen from the outside} \
@@ -2483,7 +2497,7 @@ proc ::Preferences::Proxies::BuildPage {page} {
     grid $pcnat.cb -sticky w -pady $ypad
     grid $pcnat.eip -sticky ew -pady $ypad
     
-    set pca [LabeledFrame2 $page.fr {Proxies}]
+    set pca [::mylabelframe::mylabelframe $page.fr {Proxies}]
     pack $page.fr -side top -anchor w -ipadx 10 -ipady 6
     label $pca.la -text {No firewall support... yet}
     grid $pca.la -sticky w
@@ -2495,7 +2509,7 @@ proc ::Preferences::BuildPageCache {page} {
     
     variable ypad
     
-    set pca [LabeledFrame2 $page.fr [::msgcat::mc {File Cache}]]
+    set pca [::mylabelframe::mylabelframe $page.fr [::msgcat::mc {File Cache}]]
     pack $page.fr -side left -anchor n -ipadx 10 -ipady 6
     label $pca.la -text [::msgcat::mc prefcahow]
     radiobutton $pca.never    \

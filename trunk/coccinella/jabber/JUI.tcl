@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.10 2003-12-15 08:20:53 matben Exp $
+# $Id: JUI.tcl,v 1.11 2003-12-16 15:03:53 matben Exp $
 
 package provide JUI 1.0
 
@@ -13,17 +13,28 @@ package provide JUI 1.0
 namespace eval ::Jabber::UI:: {
 
     # Use option database for customization.
-    option add *JMain*Tree.background            #dedede         widgetDefault
-    option add *JMain*Tree.backgroundImage       {}              widgetDefault
-    option add *JMain*Tree.highlightBackground   white           widgetDefault
-    option add *JMain*Tree.highlightColor        black           widgetDefault
-    option add *JMain*Tree.indention             14              widgetDefault
-    option add *JMain*Tree.openIcons             plusminus       widgetDefault
-    option add *JMain*Tree.pyjamasColor          white           widgetDefault
-    option add *JMain*Tree.selectBackground      black           widgetDefault
-    option add *JMain*Tree.selectForeground      white           widgetDefault
-    option add *JMain*Tree.selectMode            1               widgetDefault
-    option add *JMain*Tree.treeColor             gray50          widgetDefault
+    option add *JMain.connectImage                connect         widgetDefault
+    option add *JMain.connectDisImage             connectDis      widgetDefault
+    option add *JMain.inboxImage                  inbox           widgetDefault
+    option add *JMain.inboxDisImage               inboxDis        widgetDefault
+    option add *JMain.inboxLetterImage            inboxLetter     widgetDefault
+    option add *JMain.inboxLetterDisImage         inboxLetterDis  widgetDefault
+    option add *JMain.newuserImage                newuser         widgetDefault
+    option add *JMain.newuserDisImage             newuserDis      widgetDefault
+    option add *JMain.stopImage                   stop            widgetDefault
+    option add *JMain.stopDisImage                stopDis         widgetDefault
+
+    option add *JMain*Tree.background             #dedede         widgetDefault
+    option add *JMain*Tree.backgroundImage        {}              widgetDefault
+    option add *JMain*Tree.highlightBackground    white           widgetDefault
+    option add *JMain*Tree.highlightColor         black           widgetDefault
+    option add *JMain*Tree.indention              14              widgetDefault
+    option add *JMain*Tree.openIcons              plusminus       widgetDefault
+    option add *JMain*Tree.pyjamasColor           white           widgetDefault
+    option add *JMain*Tree.selectBackground       black           widgetDefault
+    option add *JMain*Tree.selectForeground       white           widgetDefault
+    option add *JMain*Tree.selectMode             1               widgetDefault
+    option add *JMain*Tree.treeColor              gray50          widgetDefault
 
     option add *JMain*MacTabnotebook.activeForeground    black        widgetDefault
     option add *JMain*MacTabnotebook.activeTabColor      #efefef      widgetDefault
@@ -121,25 +132,27 @@ proc ::Jabber::UI::Build {w} {
     }
     ::UI::NewMenu $wtop ${wmenu}.jabber  mJabber   $menuDefs(rost,jabber) normal
     $w configure -menu $wmenu
-	
-    # Shortcut button part.
-    set iconConnect       [::UI::GetIcon btconnect]
-    set iconConnectDis    [::UI::GetIcon btconnectdis]
-    set iconInboxLett     [::UI::GetIcon btinboxLett]
-    set iconInboxLettDis  [::UI::GetIcon btinboxLettdis]
-    set iconInbox         [::UI::GetIcon btinbox]
-    set iconInboxDis      [::UI::GetIcon btinboxdis]
-    set iconNewUser       [::UI::GetIcon btnewuser]
-    set iconNewUserDis    [::UI::GetIcon btnewuserdis]
-    set iconStop          [::UI::GetIcon btstop]
-    set iconStopDis       [::UI::GetIcon btstopdis]
-    
-    set fontS [option get . fontSmall {}]
     
     # Use a frame here just to be able to set the class (JMain) which
     # is useful for setting options.
     set fall [frame $w.f -class JMain]
     pack $fall -fill both -expand 1
+    set jwapp(fall) $fall
+    	
+    # Shortcut button part.
+    set iconConnect     [::Theme::GetImage [option get $fall connectImage {}]]
+    set iconConnectDis  [::Theme::GetImage [option get $fall connectDisImage {}]]
+    set iconInboxLett   [::Theme::GetImage [option get $fall inboxLetterImage {}]]
+    set iconInboxLettDis  [::Theme::GetImage \
+      [option get $fall inboxLetterDisImage {}]]
+    set iconInbox       [::Theme::GetImage [option get $fall inboxImage {}]]
+    set iconInboxDis    [::Theme::GetImage [option get $fall inboxDisImage {}]]
+    set iconNewUser     [::Theme::GetImage [option get $fall newuserImage {}]]
+    set iconNewUserDis  [::Theme::GetImage [option get $fall newuserDisImage {}]]
+    set iconStop        [::Theme::GetImage [option get $fall stopImage {}]]
+    set iconStopDis     [::Theme::GetImage [option get $fall stopDisImage {}]]
+
+    set fontS [option get . fontSmall {}]
     
     set wtray ${fall}.top
     ::buttontray::buttontray $wtray 52 -borderwidth 1 -relief raised
@@ -329,13 +342,18 @@ proc ::Jabber::UI::MailBoxState {mailboxstate} {
     variable jwapp    
     
     set w $jwapp(wtopRost)
+    set fall $jwapp(fall)
+    
+    set iconInboxLett   [::Theme::GetImage [option get $fall inboxLetterImage {}]]
+    set iconInboxLettDis  [::Theme::GetImage \
+      [option get $fall inboxLetterDisImage {}]]
     
     switch -- $mailboxstate {
 	empty {
-	    $jwapp(wtray) buttonconfigure inbox -image [::UI::GetIcon btinbox]
+	    $jwapp(wtray) buttonconfigure inbox -image $iconInboxLett
 	}
 	nonempty {
-	    $jwapp(wtray) buttonconfigure inbox -image [::UI::GetIcon btinboxLett]
+	    $jwapp(wtray) buttonconfigure inbox -image $iconInboxLettDis
 	}
     }
 }

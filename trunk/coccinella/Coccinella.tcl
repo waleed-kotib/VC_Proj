@@ -15,7 +15,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.20 2003-12-15 15:39:08 matben Exp $
+# $Id: Coccinella.tcl,v 1.21 2003-12-16 15:03:53 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -326,12 +326,11 @@ switch -- $this(platform) {
 	set this(prefsPath) [file join $winPrefsDir Coccinella]
     }
 }
+set this(themePrefsPath) [file join $this(prefsPath) theme]
 
-# Read our prefs file, if any, containing the theme name.
-if {[file exists [file join $this(prefsPath) theme]]} {
-    option readfile [file join $this(prefsPath) theme]
-}
-set prefs(themeName) [option get . themeName {}]
+# Read our theme prefs file, if any, containing the theme name.
+package require Theme
+::Theme::ReadPrefsFile
 
 # Read resource database files in a hierarchical order.
 # 1) always read the default rdb file.
@@ -347,11 +346,6 @@ if {[file exists $f]} {
     option readfile $f startupFile
 }
 
-if {$debugLevel > 1} {
-    option readfile [file join $this(resourcedbPath) theme.rdb] startupFile
-}
-
-
 # Search for image files in this order:
 # 1) imagePath/themeImageDir
 # 2) imagePath/platformName
@@ -363,7 +357,10 @@ if {$themeDir != ""} {
 }
 lappend this(imagePathList)  \
   [file join $this(imagePath) $this(platform)] $this(imagePath)
-    
+
+# Make all images used for widgets that doesn't use the Theme package.
+::Theme::PreLoadImages
+
 # The message catalog for language customization.
 if {![info exists env(LANG)]} {
     set env(LANG) en
@@ -513,6 +510,7 @@ set listOfPackages {
     can2svg       
     buttontray
     headlabel
+    mylabelframe
 }
 foreach packName $listOfPackages {
     package require $packName
@@ -555,52 +553,11 @@ set this(ipnum) $this(internalIPnum)
 ::SplashScreen::SetMsg [::msgcat::mc splashhost]
 set this(hostname) [info hostname]
 
-# Try to get own ip number from a temporary server socket.
-# This can be a bit complicated as different OS sometimes give 0.0.0.0 or
-# 127.0.0.1 instead of the real number.
-
-if {![catch {socket -server puts 0} s]} {
-    set this(ipnum) [lindex [fconfigure $s -sockname] 0]
-    catch {close $s}
-    Debug 2 "1st: this(ipnum)=$this(ipnum)"
-}
-
-# If localhost or zero, try once again with '-myaddr'. 
-# My Linux box is not helped by this either!!!
-# Multiple ip interfaces are not recognized!
-if {[string equal $this(ipnum) "0.0.0.0"] ||  \
-  [string equal $this(ipnum) "127.0.0.1"]} {
-    if {![catch {socket -server xxx -myaddr $this(hostname) 0} s]} {
-	set this(ipnum) [lindex [fconfigure $s -sockname] 0]
-	catch {close $s}
-	Debug 2 "2nd: this(ipnum)=$this(ipnum)"
-    }
-}
-if {[regexp {[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+} $this(ipnum)]} {
-    set this(ipver) 4
-} else {
-    set this(ipver) 6
-}
-
 ::SplashScreen::SetMsg [::msgcat::mc splashinit]
-
-# Find user name.
-if {[info exists env(USER)]} {
-    set this(username) $env(USER)
-} elseif {[info exists env(LOGIN)]} {
-    set this(username) $env(LOGIN)
-} elseif {[info exists env(USERNAME)]} {
-    set this(username) $env(USERNAME)
-} elseif {[llength $this(hostname)]} {
-    set this(username) $this(hostname)
-} else {
-    set this(username) "Unknown"
-}
     
 # Standard (factory) preferences are set here.
 # These are the hardcoded, application default, values, and can be
 # overridden by the ones in user default file.
-#source [file join $this(path) lib SetFactoryDefaults.tcl]
 if {[catch {source [file join $this(path) lib SetFactoryDefaults.tcl]} msg]} {
     tk_messageBox -message "Error sourcing SetFactoryDefaults.tcl  $msg"  \
       -icon error -type ok

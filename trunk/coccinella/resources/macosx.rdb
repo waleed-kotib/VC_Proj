@@ -26,6 +26,7 @@
 ! contributed widgets
 !
 *Combobox.Font:                      {Lucida Grande} 11
+*MyLabelFrame.Font:                  {Lucida Grande} 11 bold
 *Tablelist.Font:                     {Lucida Grande} 11
 *Tablelist.highlightThickness:       3
 *Tablelist.BorderWidth:              1              

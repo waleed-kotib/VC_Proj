@@ -22,4 +22,5 @@
 ! contributed widgets
 !
 *Combobox.Font:                      Arial 8
+*MyLabelFrame.Font:                  Arial 8 bold
 *Tablelist.Font:                     Arial 8

@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ItemInspector.tcl,v 1.12 2003-12-13 17:54:41 matben Exp $
+# $Id: ItemInspector.tcl,v 1.13 2003-12-16 15:03:53 matben Exp $
 
 namespace eval ::ItemInspector::  {
     
@@ -178,7 +178,7 @@ proc ::ItemInspector::Build {wtop itemId args} {
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
     set w1 $w.frall.fr1
-    set wcont1 [LabeledFrame2 $w1 {Item Options}]
+    set wcont1 [::mylabelframe::mylabelframe $w1 {Item Options}]
     
     # Overall frame for whole container.
     set frtot [frame $wcont1.frin]
@@ -594,7 +594,7 @@ proc ::ItemInspector::Movie {wtop winfr} {
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
     set w1 $w.frall.fr1
-    set wcont1 [LabeledFrame2 $w1 {Movie Options}]
+    set wcont1 [::mylabelframe::mylabelframe $w1 {Movie Options}]
     
     # Overall frame for whole container.
     set frtot [frame $wcont1.frin]
@@ -713,7 +713,7 @@ proc ::ItemInspector::Broken {wtop id args} {
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
     set w1 $w.frall.fr1
-    set wcont1 [LabeledFrame2 $w1 {Broken Image}]
+    set wcont1 [::mylabelframe::mylabelframe $w1 {Broken Image}]
     pack $w1 -fill x
     
     # Overall frame for whole container.

@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: EditDialogs.tcl,v 1.4 2003-12-13 17:54:41 matben Exp $
+# $Id: EditDialogs.tcl,v 1.5 2003-12-16 15:03:53 matben Exp $
 
 
 #       ::EditShortcuts:: implements dialogs for editing shortcuts. 
@@ -70,7 +70,7 @@ proc ::EditShortcuts::EditShortcuts {w nameOfShortcutList} {
     pack [frame $w.frall -borderwidth 1 -relief raised]
     
     # The top part.
-    set wcont [LabeledFrame2 $w.frtop [::msgcat::mc {Edit Shortcuts}]]
+    set wcont [::mylabelframe::mylabelframe $w.frtop [::msgcat::mc {Edit Shortcuts}]]
     pack $w.frtop -in $w.frall
     
     # Overall frame for whole container.
@@ -250,7 +250,7 @@ proc ::EditShortcuts::AddOrEditShortcuts {what nameOfShortsCopy indShortcuts  \
     pack [frame $w.frall -borderwidth 1 -relief raised]
     
     # The top part.
-    set wcont [LabeledFrame2 $w.frtop $txt]
+    set wcont [::mylabelframe::mylabelframe $w.frtop $txt]
     pack $w.frtop -in $w.frall
     
     # Overall frame for whole container.

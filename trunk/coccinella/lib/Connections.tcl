@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Connections.tcl,v 1.12 2003-12-13 17:54:41 matben Exp $
+# $Id: Connections.tcl,v 1.13 2003-12-16 15:03:53 matben Exp $
 
 package provide Connections 1.0
 
@@ -68,7 +68,7 @@ proc ::OpenConnection::OpenConnection {w} {
     pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
     
     # Ip part.
-    set wcont1 [LabeledFrame2 $w.frip {Connect to}]
+    set wcont1 [::mylabelframe::mylabelframe $w.frip {Connect to}]
     
     # Overall frame for whole container.
     set frtot [frame $wcont1.fr]
@@ -97,7 +97,7 @@ proc ::OpenConnection::OpenConnection {w} {
     
     # Port part.
     set ofr $w.frport
-    set wcont2 [LabeledFrame2 $ofr "Port number"]
+    set wcont2 [::mylabelframe::mylabelframe $ofr "Port number"]
     label $wcont2.lport -text "Remote server port:"
     entry $wcont2.entport -width 6 -textvariable [namespace current]::compPort
     set compPort $prefs(remotePort)
@@ -680,7 +680,7 @@ proc ::OpenMulticast::OpenMulticast {wtop} {
     
     # Labelled frame.
     set wcfr $w.frall.fr
-    set wcont [LabeledFrame2 $wcfr [::msgcat::mc openquicktime]]
+    set wcont [::mylabelframe::mylabelframe $wcfr [::msgcat::mc openquicktime]]
     pack $wcfr -side top -fill both -ipadx 10 -ipady 6 -in $w.frall
     
     # Overall frame for whole container.

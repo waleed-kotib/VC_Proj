@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UserActions.tcl,v 1.22 2003-12-15 08:20:53 matben Exp $
+# $Id: UserActions.tcl,v 1.23 2003-12-16 15:03:53 matben Exp $
 
 namespace eval ::UserActions:: {
     
@@ -824,6 +824,7 @@ proc ::UserActions::DoQuit {args} {
     
     # Save to the preference file and quit...
     ::PreferencesUtils::SaveToFile
+    ::Theme::SavePrefsFile
     
     # Should we clean up our 'incoming' directory?
     if {$prefs(clearCacheOnQuit)} {

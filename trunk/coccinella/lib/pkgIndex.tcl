@@ -23,6 +23,7 @@ package ifneeded TinyHttpd 1.0 [list source [file join $dir TinyHttpd.tcl]]
 package ifneeded Types 1.0 [list source [file join $dir Types.tcl]]
 package ifneeded Plugins 1.0 [list source [file join $dir Plugins.tcl]]
 package ifneeded AutoUpdate 1.0 [list source [file join $dir AutoUpdate.tcl]]
+package ifneeded Theme 1.0 [list source [file join $dir Theme.tcl]]
 
 if {[string equal $::tcl_platform(platform) "windows"]} {
     package ifneeded WindowsUtils 1.0 [list source [file join $dir WindowsUtils.tcl]]
