@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.18 2004-09-27 12:57:40 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.19 2004-11-06 08:15:26 matben Exp $
 
 package require sha1pure
 
@@ -252,7 +252,7 @@ proc ::CanvasUtils::Command {wtop cmd {where all}} {
 proc ::CanvasUtils::CommandList {wtop cmdList {where all}} {
     
     foreach cmd $cmdList {
-        ::CanvasUtils::Command $wtop $cmd $where
+        Command $wtop $cmd $where
     }
 }
 
@@ -264,7 +264,7 @@ proc ::CanvasUtils::CommandExList {wtop cmdExList} {
     
     foreach cmdList $cmdExList {
         foreach {cmd where} $cmdList {
-            ::CanvasUtils::Command $wtop $cmd $where
+            Command $wtop $cmd $where
         }
     }
 }
@@ -290,7 +290,7 @@ proc ::CanvasUtils::GenCommand {wtop cmd {where all}} {
 proc ::CanvasUtils::GenCommandList {wtop cmdList {where all}} {
     
     foreach cmd $cmdList {
-        ::CanvasUtils::GenCommand $wtop $cmd $where
+        GenCommand $wtop $cmd $where
     }
 }
 
@@ -298,7 +298,7 @@ proc ::CanvasUtils::GenCommandExList {wtop cmdExList} {
     
     foreach cmdList $cmdExList {
         foreach {cmd where} $cmdList {
-            ::CanvasUtils::GenCommand $wtop $cmd $where
+            GenCommand $wtop $cmd $where
         }
     }
 }
@@ -404,7 +404,7 @@ proc ::CanvasUtils::GetUtagFromCanvasCmd {cmd} {
     
     switch -- [lindex $cmd 0] {
 	create {
-	    set utag [::CanvasUtils::GetUtagFromCreateCmd $cmd]
+	    set utag [GetUtagFromCreateCmd $cmd]
 	}
 	coords - dchars - delete - insert - itemconfigure - lower - move - \
 	  raise - scale {
@@ -427,7 +427,7 @@ proc ::CanvasUtils::GetUtagFromWindow {win} {
 	if {[string equal [$wcan type $id] "window"]} {
 	    set w [$wcan itemcget $id -window]
 	    if {$w == $win} {
-		set utag [::CanvasUtils::GetUtag $wcan $id]
+		set utag [GetUtag $wcan $id]
 		break
 	    }
 	}   
@@ -486,7 +486,7 @@ proc ::CanvasUtils::GetUndoCommand {wtop cmd} {
 	    set undo [list ::CanvasUtils::Command $wtop $canUndo]	
 	}
 	create {
-	    set utag [::CanvasUtils::GetUtagFromCreateCmd $cmd]
+	    set utag [GetUtagFromCreateCmd $cmd]
 	    if {$utag != ""} {
 		set canUndo [list delete $utag]
 		set undo [list ::CanvasUtils::Command $wtop $canUndo]	
@@ -507,13 +507,13 @@ proc ::CanvasUtils::GetUndoCommand {wtop cmd} {
 	    
 	    switch -- $type {
 		image - window {
-		    set line [::CanvasUtils::GetOneLinerForAny $w $utag \
+		    set line [GetOneLinerForAny $w $utag \
 		      -usehtmlsize 0 -encodenewlines 0]
 		    if {[string equal [lindex $line 0] "import"]} {
 			set undo [list ::Import::HandleImportCmd $w $line \
 			  -addundo 0]
 		    } else {
-			set stackCmd [::CanvasUtils::GetStackingCmd $w $utag]
+			set stackCmd [GetStackingCmd $w $utag]
 			set canUndoList [list $line $stackCmd]
 			set undo [list ::CanvasUtils::CommandList $wtop $canUndoList]	
 		    }
@@ -522,7 +522,7 @@ proc ::CanvasUtils::GetUndoCommand {wtop cmd} {
 		    set co [$w coords $utag]
 		    set opts [GetItemOpts $w $utag]
 		    set createCmd [concat [list create $type] $co $opts]
-		    set stackCmd [::CanvasUtils::GetStackingCmd $w $utag]
+		    set stackCmd [GetStackingCmd $w $utag]
 		    set canUndoList [list $createCmd $stackCmd]
 		    set undo [list ::CanvasUtils::CommandList $wtop $canUndoList]	
 		}
@@ -580,16 +580,16 @@ proc ::CanvasUtils::GetOneLinerForAny {w id args} {
  
     switch -glob -- $type,$havestd {
 	image,1 {
-	    set line [eval {::CanvasUtils::GetOnelinerForImage $w $id} $args]
+	    set line [eval {GetOnelinerForImage $w $id} $args]
 	    if {!$keeputag} {
-		set line [::CanvasUtils::ReplaceUtagPrefix $line *]
+		set line [ReplaceUtagPrefix $line *]
 	    }
 	} 
 	window,* {
-	    set line [eval {::CanvasUtils::GetOneLinerForWindow $w $id} $args]
+	    set line [eval {GetOneLinerForWindow $w $id} $args]
 	    if {$line != {}} {
 		if {!$keeputag} {
-		    set line [::CanvasUtils::ReplaceUtagPrefix $line *]
+		    set line [ReplaceUtagPrefix $line *]
 		}
 	    }
 	}
@@ -600,9 +600,9 @@ proc ::CanvasUtils::GetOneLinerForAny {w id args} {
 	    if {($type == "text") && ([$w itemcget $id -text] == "")} {
 		# empty
 	    } else {
-		set line [eval {::CanvasUtils::GetOneLinerForItem $w $id} $args]
+		set line [eval {GetOneLinerForItem $w $id} $args]
 		if {!$keeputag} {
-		    set line [::CanvasUtils::ReplaceUtagPrefix $line *]
+		    set line [ReplaceUtagPrefix $line *]
 		}
 	    }
 	}
@@ -634,11 +634,11 @@ proc ::CanvasUtils::GetOneLinerForWindow {w id args} {
     switch -- $windowClass {
 	QTFrame {
 	    set line [eval {
-		::CanvasUtils::GetOnelinerForQTMovie $w $id} $args]
+		GetOnelinerForQTMovie $w $id} $args]
 	}
 	SnackFrame {			
 	    set line [eval {
-		::CanvasUtils::GetOnelinerForSnack $w $id} $args]
+		GetOnelinerForSnack $w $id} $args]
 	}
 	XanimFrame {
 	    # ?
@@ -758,7 +758,7 @@ proc ::CanvasUtils::GetOnelinerForImage {w id args} {
     # The 'broken image' options are cached.
     # This can be anything imported, it is just represented as an image.
     set isbroken [expr {[lsearch [$w itemcget $id -tags] broken] < 0} ? 0 : 1]
-    array set impArr [::CanvasUtils::ItemCGet $wtop $id]
+    array set impArr [ItemCGet $wtop $id]
         
     # Real images needs more processing.
     if {!$isbroken} {
@@ -779,14 +779,14 @@ proc ::CanvasUtils::GetOnelinerForImage {w id args} {
 	
 	unset -nocomplain impArr(-file) impArr(-url)
 	array set impArr [eval {
-	    ::CanvasUtils::GetImportOptsURI $argsArr(-uritype) $imageFile
+	    GetImportOptsURI $argsArr(-uritype) $imageFile
 	} $args]
 	set impArr(-mime) [::Types::GetMimeTypeForFileName $imageFile]
     }
     
     # -above & -below??? Be sure to overwrite any cached options.
-    array set impArr [::CanvasUtils::GetStackingOption $w $id]
-    set impArr(-tags) [::CanvasUtils::GetUtag $w $id 1]
+    array set impArr [GetStackingOption $w $id]
+    set impArr(-tags) [GetUtag $w $id 1]
 
     return [concat import [$w coords $id] [array get impArr]]
 }
@@ -799,10 +799,10 @@ proc ::CanvasUtils::GetOnelinerForQTMovie {w id args} {
     array set argsArr $args
 
     set wtop [::UI::GetToplevelNS $w]
-    set opts [::CanvasUtils::GetItemOpts $w $id]
-    set opts [concat $opts [::CanvasUtils::ItemCGet $wtop $id]]
+    set opts [GetItemOpts $w $id]
+    set opts [concat $opts [ItemCGet $wtop $id]]
     set cmd  [concat create window [$w coords $id] $opts]
-    return [eval {::CanvasUtils::GetImportCmdForQTMovie $cmd} $args]
+    return [eval {GetImportCmdForQTMovie $cmd} $args]
 }
 
 proc ::CanvasUtils::GetOnelinerForSnack {w id args} {
@@ -813,10 +813,10 @@ proc ::CanvasUtils::GetOnelinerForSnack {w id args} {
     array set argsArr $args
     
     set wtop [::UI::GetToplevelNS $w]
-    set opts [::CanvasUtils::GetItemOpts $w $id]
-    set opts [concat $opts [::CanvasUtils::ItemCGet $wtop $id]]
+    set opts [GetItemOpts $w $id]
+    set opts [concat $opts [ItemCGet $wtop $id]]
     set cmd  [concat create window [$w coords $id] $opts]
-    return [eval {::CanvasUtils::GetImportCmdForSnack $cmd} $args]
+    return [eval {GetImportCmdForSnack $cmd} $args]
 }
 
 proc ::CanvasUtils::GetImportCmdForQTMovie {cmd args} {
@@ -867,7 +867,7 @@ proc ::CanvasUtils::GetImportCmdForQTMovie {cmd args} {
 	    return -code error "Unknown -uritype \"$argsArr(-uritype)\""
 	}
     }
-    set optsArr(-tags) [::CanvasUtils::GetUtagFromCreateCmd $cmd]
+    set optsArr(-tags) [GetUtagFromCreateCmd $cmd]
     set optsArr(-mime) [::Types::GetMimeTypeForFileName $movFile]
     
     return [concat import $coords [array get optsArr]]
@@ -894,9 +894,9 @@ proc ::CanvasUtils::GetImportCmdForSnack {cmd args} {
     
     unset -nocomplain optsArr(-file) optsArr(-url)
     array set optsArr [eval {
-	::CanvasUtils::GetImportOptsURI $argsArr(-uritype) $soundFile
+	GetImportOptsURI $argsArr(-uritype) $soundFile
     } $args]
-    set optsArr(-tags) [::CanvasUtils::GetUtagFromCreateCmd $cmd]
+    set optsArr(-tags) [GetUtagFromCreateCmd $cmd]
     set optsArr(-mime) [::Types::GetMimeTypeForFileName $soundFile]
     
     return [concat import $coords [array get optsArr]]
@@ -939,11 +939,11 @@ proc ::CanvasUtils::GetSVGForeignFromWindowItem {cmd args} {
     switch -- $windowClass {
 	QTFrame {
 	    set line [eval {
-		::CanvasUtils::GetImportCmdForQTMovie $cmd} $args]
+		GetImportCmdForQTMovie $cmd} $args]
 	}
 	SnackFrame {			
 	    set line [eval {
-	    ::CanvasUtils::GetImportCmdForSnack $cmd} $args]
+	    GetImportCmdForSnack $cmd} $args]
 	}
 	XanimFrame {
 	    # ?
@@ -956,7 +956,7 @@ proc ::CanvasUtils::GetSVGForeignFromWindowItem {cmd args} {
 	    }
 	}
     }
-    return [eval {::CanvasUtils::GetSVGForeignFromImportCmd $line} $args]
+    return [eval {GetSVGForeignFromImportCmd $line} $args]
 }
 
 # CanvasUtils::GetSVGForeignFromImportCmd --
@@ -1070,7 +1070,7 @@ proc ::CanvasUtils::CreateItem {w args} {
     
     set wtop [::UI::GetToplevelNS $w]
 
-    set utag [::CanvasUtils::GetUtagFromCreateCmd $args]
+    set utag [GetUtagFromCreateCmd $args]
     set cmd [concat create $args]
     set undocmd [list delete $utag]
     
@@ -1102,14 +1102,13 @@ proc ::CanvasUtils::ItemConfigure {w id args} {
     
     # Be sure to get the real id (number).
     set id [$w find withtag $id]
-    set utag [::CanvasUtils::GetUtag $w $id]
+    set utag [GetUtag $w $id]
     set cmd [concat itemconfigure $utag $args]
-    set undocmd [concat itemconfigure $utag \
-      [::CanvasUtils::GetItemOpts $w $utag $args]]
+    set undocmd [concat itemconfigure $utag [GetItemOpts $w $utag $args]]
     
     # Handle font points -> size for the network command.
-    set cmdremote [::CanvasUtils::FontHtmlToPointSize $cmd -1]
-    set undocmdremote [::CanvasUtils::FontHtmlToPointSize $undocmd -1]
+    set cmdremote [FontHtmlToPointSize $cmd -1]
+    set undocmdremote [FontHtmlToPointSize $undocmd -1]
     
     set redo [list ::CanvasUtils::CommandExList $wtop  \
       [list [list $cmd local] [list $cmdremote remote]]]
@@ -1146,7 +1145,7 @@ proc ::CanvasUtils::ItemCoords {w id coords} {
     
     # Be sure to get the real id (number).
     set id [$w find withtag $id]
-    set utag [::CanvasUtils::GetUtag $w $id]
+    set utag [GetUtag $w $id]
     set cmd "coords $utag $coords"
     set undocmd "coords $utag [$w coords $id]"
     set redo [list ::CanvasUtils::Command $wtop $cmd]
@@ -1279,7 +1278,7 @@ proc ::CanvasUtils::DoItemPopup {w x y} {
     if {![winfo exists $m]} {	
 	::UI::NewMenu $wtop $m {} $menuDefs(pop,$type) normal -id $id -w $w
 	if {[string equal $type "text"]} {
-	    ::CanvasUtils::BuildCanvasPopupFontMenu $w ${m}.mfont $id $prefs(canvasFonts)
+	    BuildCanvasPopupFontMenu $w ${m}.mfont $id $prefs(canvasFonts)
 	}
 	
 	# This one is needed on the mac so the menu is built before
@@ -1340,7 +1339,7 @@ proc ::CanvasUtils::DoWindowPopup {w x y} {
     
     switch -- [winfo class $w] {
 	SnackFrame {
-	    ::CanvasUtils::PostGeneralMenu $w $x $y .popupsnack \
+	    PostGeneralMenu $w $x $y .popupsnack \
 	      $menuDefs(pop,snack)
 	}
 	default {
@@ -1408,7 +1407,7 @@ proc ::CanvasUtils::ItemSmooth {w id} {
     }
     
     # Just toggle smooth state.
-    ::CanvasUtils::ItemConfigure $w $id -smooth [expr 1 - $smooth]
+    ItemConfigure $w $id -smooth [expr 1 - $smooth]
 }
 
 proc ::CanvasUtils::ItemStraighten {w id} {
@@ -1434,7 +1433,7 @@ proc ::CanvasUtils::ItemStraighten {w id} {
     set dsorted [lsort -real [::CanvasDraw::GetDistList $coords]]
     set dlimit [lindex $dsorted [expr int($len * $frac + 1)]]
     set coords [::CanvasDraw::StripClosePoints $coords $dlimit]
-    ::CanvasUtils::ItemCoords $w $id $coords
+    ItemCoords $w $id $coords
     
     if {[::CanvasDraw::IsSelected $w $id]} {
 	::CanvasDraw::DeselectItem $w $id
@@ -1451,7 +1450,7 @@ proc ::CanvasUtils::SetItemColorDialog {w id opt} {
     set color [tk_chooseColor -initialcolor $presentColor  \
       -title [mc {New Color}]]
     if {$color != ""} {
-	::CanvasUtils::ItemConfigure $w $id $opt $color
+	ItemConfigure $w $id $opt $color
     }
 }
 
@@ -1472,7 +1471,7 @@ proc ::CanvasUtils::SetTextItemFontSize {w id fontsize} {
     
     # Then configure with new one.
     set fontOpts [lreplace $fontOpts 1 1 $fontsize]
-    set fontOpts [::CanvasUtils::FontHtmlToPointSize [list {-font} $fontOpts]]
+    set fontOpts [FontHtmlToPointSize [list {-font} $fontOpts]]
     eval {CanvasUtils::ItemConfigure $w $id} $fontOpts
 }
 
@@ -1870,7 +1869,7 @@ proc ::CanvasUtils::HandleCanvasDraw {wtop instr args} {
     # platform specific point sizes.
     
     if {$prefs(useHtmlSizes) && ([lsearch -exact $instr "-font"] >= 0)} {
-	set instr [::CanvasUtils::FontHtmlToPointSize $instr]
+	set instr [FontHtmlToPointSize $instr]
     }
     
     # Careful, make newline (backslash) substitutions only for the command
@@ -1907,7 +1906,7 @@ proc ::CanvasUtils::HandleCanvasDraw {wtop instr args} {
     # on our undo/redo stack. Security ???
     if {$prefs(privacy) == 0} {
 	set redo [list ::CanvasUtils::Command $wtop $instr]
-	set undo [::CanvasUtils::GetUndoCommand $wtop $instr]
+	set undo [GetUndoCommand $wtop $instr]
 	undo::add [::WB::GetUndoToken $wtop] $undo $redo
     }
     
@@ -2100,10 +2099,10 @@ proc ::CanvasUtils::DefineWhiteboardBindtags { } {
 
     # WhiteboardText
     bind WhiteboardText <Button-1> {
-	::CanvasText::CanvasFocus %W [%W canvasx %x] [%W canvasy %y]
+	::CanvasText::SetFocus %W [%W canvasx %x] [%W canvasy %y]
     }
     bind WhiteboardText <Button-2> {
-	::CanvasCCP::CanvasTextPaste %W [%W canvasx %x] [%W canvasy %y]
+	::CanvasText::Paste %W [%W canvasx %x] [%W canvasy %y]
     }
     # Stop certain keyboard accelerators from firing:
     bind WhiteboardText <Control-a> break
@@ -2220,7 +2219,7 @@ proc ::CanvasUtils::GetCompleteCanvas {wcan} {
 	if {([lsearch $tags grid] >= 0) || ([lsearch $tags tbbox] >= 0)} {
 	    continue
 	}
-	set line [::CanvasUtils::GetOneLinerForAny $wcan $id -uritype http]
+	set line [GetOneLinerForAny $wcan $id -uritype http]
 	if {$line != ""} {
 	    lappend cmdList $line
 	}

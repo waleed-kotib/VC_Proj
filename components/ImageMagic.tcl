@@ -6,7 +6,7 @@
 # 
 # Unix/Linux only.
 #
-# $Id: ImageMagic.tcl,v 1.1 2004-07-23 12:43:02 matben Exp $
+# $Id: ImageMagic.tcl,v 1.2 2004-11-06 08:15:24 matben Exp $
 
 namespace eval ::ImageMagic:: {
     
@@ -14,20 +14,17 @@ namespace eval ::ImageMagic:: {
 }
 
 proc ::ImageMagic::Init { } {
-    global  env tcl_platform
+    global  tcl_platform
     variable imageType
     variable haveImageMagic
-    
-    set infile import
+    variable importcmd
+        
     set haveImageMagic 0
     if {[string equal $tcl_platform(platform) "unix"]} {
-	foreach name [split $env(PATH) :] {
-	    set filename [file join $name $infile]
-	    if {[file exists $filename] && [file executable $filename]} {
-		set haveImageMagic 1
-		break
-	    }
-	}
+	set importcmd [lindex [auto_execok import] 0]
+	if {[llength $importcmd]} {
+	    set haveImageMagic 1
+	}	
     }
     
     # Register a menu entry for this component.
@@ -51,6 +48,7 @@ proc ::ImageMagic::ImportWindowSnapShot {wtop} {
     variable imageType
     variable tmpfiles
     variable haveImageMagic
+    variable importcmd
     
     set wCan [::WB::GetCanvasFromWtop $wtop]
     
@@ -63,13 +61,12 @@ proc ::ImageMagic::ImportWindowSnapShot {wtop} {
     update
     
     if {$ans == "1"} {
-	set importapps [exec which import]
 	set pidname [format "%x" [format %d [pid]]]
 	set tmpname ${pidname}[format "%x" [clock clicks]]
 	set tmpfile [file join [glob $prefs(incomingPath)]  \
 	  $tmpname.$imageType]
-	# puts "// Info - Snap shot window using $importapps ..."
-	exec $importapps $tmpfile
+	# puts "// Info - Snap shot window using $importcmd ..."
+	exec $importcmd $tmpfile
 	# import to current canvas
 	set optList [list -coords [::CanvasUtils::NewImportAnchor $wCan]]
 	set errMsg [::Import::DoImport $wCan $optList -file $tmpfile]

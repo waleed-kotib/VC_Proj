@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: FilePrefs.tcl,v 1.4 2004-09-28 13:50:21 matben Exp $
+# $Id: FilePrefs.tcl,v 1.5 2004-11-06 08:15:26 matben Exp $
 
 package provide FilePrefs 1.0
 
@@ -50,6 +50,9 @@ proc ::FilePrefs::InitPrefsHook { } {
 
 proc ::FilePrefs::BuildPrefsHook {wtree nbframe} {
     
+    if {![$wtree isitem Whiteboard]} {
+	$wtree newitem {Whiteboard} -text [mc Whiteboard]
+    }
     $wtree newitem {Whiteboard {File Mappings}} -text [mc {File Mappings}]
     
     # File Mappings ------------------------------------------------------------

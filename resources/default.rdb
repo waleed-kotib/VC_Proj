@@ -50,13 +50,13 @@
 *Combobox.background:                white
 *Combobox.Font:                      Helvetica 10
 *HeadLabel.background:               #cecece
+*Progressbar.borderWidth:            0
 *Tablelist.borderWidth:              1
 *Tablelist.Font:                     Helvetica 10
 *Tablelist.highlightThickness:       2
 *Tablelist.labelBackground:          #cecece
 *Tablelist.stripeBackground:         #dedeff
 *Tablelist.background:               white
-*Progressbar.borderWidth:            0
 
 ! specific megawidgets
 !

@@ -6,7 +6,7 @@
 #
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #
-# $Id: FileCache.tcl,v 1.13 2004-09-28 13:50:19 matben Exp $
+# $Id: FileCache.tcl,v 1.14 2004-11-06 08:15:25 matben Exp $
 # 
 #       The input key can be: 
 #               1) a full url, must be uri encoded 
@@ -397,6 +397,9 @@ proc ::FileCache::InitPrefsHook { } {
 
 proc ::FileCache::BuildPrefsHook {wtree nbframe} {
     
+    if {![$wtree isitem Whiteboard]} {
+	$wtree newitem {Whiteboard} -text [mc Whiteboard]
+    }
     $wtree newitem {Whiteboard {File Cache}} -text [mc {File Cache}]
 
     set wpage [$nbframe page {File Cache}]    

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.78 2004-11-03 10:28:55 matben Exp $
+# $Id: GroupChat.tcl,v 1.79 2004-11-06 08:15:25 matben Exp $
 
 package require History
 
@@ -72,6 +72,8 @@ namespace eval ::Jabber::GroupChat:: {
     option add *GroupChat*userForeground       ""               widgetDefault
     option add *GroupChat*userBackground       ""               widgetDefault
     option add *GroupChat*userFont             ""               widgetDefault
+    
+    option add *GroupChat*Tree.background      white            widgetDefault
 
     # List of: {tagName optionName resourceName resourceClass}
     variable groupChatOptions {

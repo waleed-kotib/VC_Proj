@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.24 2004-11-02 15:34:51 matben Exp $
+# $Id: roster.tcl,v 1.25 2004-11-06 08:15:25 matben Exp $
 # 
 # Note that every jid in the rostArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -535,6 +535,7 @@ proc roster::setpresence2 {rostName jid type args} {
 	array unset presArr2 "${mjid},*"
     
 	set presArr2($mjid,type) $type
+	set presArr2($mjid,jid)  $mjid
 		
 	foreach {name value} $args {
 	    set par [string trimleft $name "-"]
@@ -765,6 +766,11 @@ proc roster::getpresence {rostName jid args} {
     return $result
 }
 
+# UNFINISHED!!!!!!!!!!
+# Return empty list or -type unavailable ???
+# '-key value' or 'key value' ???
+# Returns a list of flat arrays
+
 proc roster::getpresence2 {rostName jid args} {    
 
     variable rostGlobals
@@ -783,25 +789,31 @@ proc roster::getpresence2 {rostName jid args} {
     jlib::splitjid $mjid jid2 resource
     set result {}
     
-    # If 2-tier jid match any resource.
-    # If 3-tier jid return only exact match.
     if {$resource == ""} {
 	
-	# 2-tier jid.
-	
-	[array names presArr2 ]
-	
-	
+	# 2-tier jid. Match any resource.
+	set arrlist [concat [array get presArr2 $mjid,jid] \
+	  [array get presArr2 $mjid/*,jid]]
+	foreach {key value} $arrlist {
+	    set thejid $value
+	    set jidresult {}
+	    foreach {akey avalue} [array get presArr2 $thejid,*] {
+		set thekey [string map [list $thejid, ""] $akey]
+		lappend jidresult -$thekey $avalue
+	    }
+	    if {[llength $jidresult]} {
+		lappend result $jidresult
+	    }
+	}
     } else {
 	
-	# 3-tier jid.
+	# 3-tier jid. Only exact match.
 	if {[info exists presArr2($mjid,type)]} {
 	    if {[string match $argsArr(-type) $presArr2($mjid,type)]} {
-	    
-	    } else {
+		set result [list [list -jid $jid -type $presArr2($mjid,type)]]
 	    }
 	} else {
-	    set result {-type unavailable}
+	    set result [list [list -jid $jid -type unavailable]]
 	}
     }
     return $result
@@ -959,6 +971,19 @@ proc roster::getresources {rostName jid args} {
     }
 }
 
+proc roster::getmatchingjids2 {rostName jid args} {
+    
+    upvar ${rostName}::presArr2 presArr2
+    
+    set jidlist {}
+    set arrlist [concat [array get presArr2 $mjid,jid] \
+      [array get presArr2 $mjid/*,jid]]
+    foreach {key value} $arrlist {
+	lappend jidlist $value
+    }
+    return $jidlist
+}
+
 # roster::gethighestresource --
 #
 #       Returns the resource with highest priority for this jid or empty.
@@ -1001,35 +1026,24 @@ proc roster::gethighestresource {rostName jid} {
     return $maxres
 }
 
-proc roster::gethighestresource2 {rostName jid} {
+proc roster::getmaxpriorityjid2 {rostName jid} {
 
-    upvar ${rostName}::presArr presArr
+    upvar ${rostName}::presArr2 presArr2
    
-    Debug 2 "roster::gethighestresource rostName=$rostName, jid='$jid'"
+    Debug 2 "roster::getmaxpriorityjid2 jid='$jid'"
     
-    set maxres ""
-    if {[info exists presArr($jid,res)]} {
-	
-	# Find the resource corresponding to the highest priority (D=0).
-	set maxpri 0
-	set maxres [lindex $presArr($jid,res) 0]
-	foreach res $presArr($jid,res) {
-
-	    # Be sure to handle empty resources as well: '1234@icq.host'
-	    if {$res== ""} {
-		set jid3 $jid
-	    } else {
-		set jid3 $jid/$res
-	    }
-	    if {[info exists presArr($jid3,priority)]} {
-		if {$presArr($jid3,priority) > $maxpri} {
-		    set maxres $res
-		    set maxpri $presArr($jid3,priority)
-		}
+    # Find the resource corresponding to the highest priority (D=0).
+    set maxjid ""
+    set maxpri 0
+    foreach jid3 [getmatchingjids2 $rostName $jid] {
+	if {[info exists presArr2($jid3,priority)]} {
+	    if {$presArr2($jid3,priority) > $maxpri} {
+		set maxjid $jid3
+		set maxpri $presArr2($jid3,priority)
 	    }
 	}
     }
-    return $maxres
+    return $jid3
 }
 
 # roster::isavailable --

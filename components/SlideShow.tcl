@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-#       $Id: SlideShow.tcl,v 1.10 2004-10-09 13:21:54 matben Exp $
+#       $Id: SlideShow.tcl,v 1.11 2004-11-06 08:15:24 matben Exp $
 
 namespace eval ::SlideShow:: {
     
@@ -32,6 +32,7 @@ proc ::SlideShow::Load { } {
     ::hooks::register prefsSaveHook                  ::SlideShow::SavePrefsHook
     ::hooks::register prefsCancelHook                ::SlideShow::CancelPrefsHook
     ::hooks::register prefsUserDefaultsHook          ::SlideShow::UserDefaultsHook
+    ::hooks::register prefsDestroyHook               ::SlideShow::DestroyPrefsHook
 
     ::hooks::register initHook                       ::SlideShow::InitHook
     ::hooks::register whiteboardBuildButtonTrayHook  ::SlideShow::BuildButtonsHook
@@ -131,6 +132,9 @@ proc ::SlideShow::BuildPrefsHook {wtree nbframe} {
     global  prefs
     variable tmpPrefs
 
+    if {![$wtree isitem Whiteboard]} {
+	$wtree newitem {Whiteboard} -text [mc Whiteboard]
+    }
     $wtree newitem {Whiteboard {SlideShow}} -text [mc {Slide Show}]
     set wpage [$nbframe page {SlideShow}]    
     
@@ -179,6 +183,12 @@ proc ::SlideShow::UserDefaultsHook { } {
     variable tmpPrefs
 
     set tmpPrefs(slideShow,buttons) $prefs(slideShow,buttons)
+}
+
+proc ::SlideShow::DestroyPrefsHook { } {
+    variable tmpPrefs
+    
+    unset -nocomplain tmpPrefs
 }
 
 proc ::SlideShow::BuildButtonsHook {wtray} {

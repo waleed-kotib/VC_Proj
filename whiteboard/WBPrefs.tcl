@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: WBPrefs.tcl,v 1.3 2004-09-28 13:50:21 matben Exp $
+# $Id: WBPrefs.tcl,v 1.4 2004-11-06 08:15:26 matben Exp $
 
 package provide WBPrefs 1.0
 
@@ -17,12 +17,20 @@ namespace eval ::WBPrefs:: {
     ::hooks::register prefsSaveHook          ::WBPrefs::SavePrefsHook
     ::hooks::register prefsCancelHook        ::WBPrefs::CancelPrefsHook
     ::hooks::register prefsUserDefaultsHook  ::WBPrefs::UserDefaultsPrefsHook
+    ::hooks::register prefsDestroyHook       ::WBPrefs::DestroyPrefsHook
 }
 
 
 proc ::WBPrefs::InitPrefsHook { } {
+    global  prefs
     upvar ::Jabber::jprefs jprefs
     
+    # Whiteboard scrollregion.
+    set prefs(canScrollWidth)     1800
+    set prefs(canScrollHeight)    1200
+    set prefs(mincanScrollWidth)  1800
+    set prefs(mincanScrollHeight) 1200
+
     # Defaults...
     set prefs(canvasFonts) [list Times Helvetica Courier]
     
@@ -35,6 +43,8 @@ proc ::WBPrefs::InitPrefsHook { } {
     # arrays. Sorry for this.
     # 
     ::PreferencesUtils::Add [list  \
+      [list prefs(canScrollWidth)  prefs_canScrollWidth  $prefs(canScrollWidth)]  \
+      [list prefs(canScrollHeight) prefs_canScrollHeight $prefs(canScrollHeight)]  \
       [list prefs(canvasFonts)     prefs_canvasFonts     $prefs(canvasFonts)]  \
       [list prefs(privacy)         prefs_privacy         $prefs(privacy)]      \
     ]
@@ -42,16 +52,53 @@ proc ::WBPrefs::InitPrefsHook { } {
 
 proc ::WBPrefs::BuildPrefsHook {wtree nbframe} {
     
+    if {![$wtree isitem Whiteboard]} {
+	$wtree newitem {Whiteboard} -text [mc Whiteboard]
+    }
+    
     $wtree newitem {Whiteboard {Edit Fonts}} -text [mc {Edit Fonts}]
     $wtree newitem {Whiteboard Privacy} -text [mc Privacy]
     
+    set wpage [$nbframe page {Whiteboard}]
+    BuildWhiteboardPage $wpage
+
     # Edit Fonts page ----------------------------------------------------------
     set wpage [$nbframe page {Edit Fonts}]
-    ::WBPrefs::BuildFontsPage $wpage
+    BuildFontsPage $wpage
     
     # Privacy page -------------------------------------------------------------
     set wpage [$nbframe page {Privacy}]
-    ::WBPrefs::BuildPagePrivacy $wpage
+    BuildPagePrivacy $wpage
+}
+
+proc ::WBPrefs::BuildWhiteboardPage {page} {
+    global  prefs
+    variable tmpPrefs
+    
+    set tmpPrefs(canScrollWidth)  $prefs(canScrollWidth)
+    set tmpPrefs(canScrollHeight) $prefs(canScrollHeight)
+    
+    set wfr $page.fr
+    labelframe $wfr -text [mc {Scrollregion}]
+    pack $wfr -side top -padx 8 -pady 4 -anchor w
+    set str "You may set a larger size than the default\
+      $prefs(mincanScrollWidth)x$prefs(mincanScrollHeight)"
+    label $wfr.lh -text $str
+    pack $wfr.lh -side top -anchor w -padx 6
+    set afr $wfr.fr
+    frame $afr
+    pack  $afr -side top -anchor w
+    label $afr.w -text "[mc width]:"
+    label $afr.h -text "[mc height]:"
+    entry $afr.width  -width 6 \
+      -textvariable [namespace current]::tmpPrefs(canScrollWidth)
+    entry $afr.height -width 6 \
+      -textvariable [namespace current]::tmpPrefs(canScrollHeight)
+    
+    grid $afr.w   $afr.width
+    grid $afr.h   $afr.height
+    grid $afr.w -padx 2 -sticky e
+    grid $afr.h -padx 2 -sticky e
 }
 
 # Fonts Page ...................................................................
@@ -272,10 +319,28 @@ proc ::WBPrefs::BuildPagePrivacy {page} {
 proc ::WBPrefs::SavePrefsHook { } {
     global  prefs
     variable tmpPrefs
-
+    
+    # Check validity of scrollregion.
+    if {![string is integer $tmpPrefs(canScrollWidth)]} {
+	set tmpPrefs(canScrollWidth) $prefs(mincanScrollWidth)
+    }
+    if {![string is integer $tmpPrefs(canScrollHeight)]} {
+	set tmpPrefs(canScrollHeight) $prefs(mincanScrollHeight)
+    }
+    if {$tmpPrefs(canScrollWidth) < $prefs(mincanScrollWidth)} {
+	set tmpPrefs(canScrollWidth) $prefs(mincanScrollWidth)
+    }
+    if {$tmpPrefs(canScrollHeight) < $prefs(mincanScrollHeight)} {
+	set tmpPrefs(canScrollHeight) $prefs(mincanScrollHeight)
+    }
+    
     ::WBPrefs::PushBtSave
-    array set prefs [array get tmpJPrefs]
-    unset tmpPrefs
+    array set prefs [array get tmpPrefs]
+    
+    # Set scrollregion of all open whiteboards.
+    foreach w [::WB::GetAllWhiteboards] {
+	::WB::SetScrollregion $w $prefs(canScrollWidth) $prefs(canScrollHeight)
+    }
 }
 
 proc ::WBPrefs::CancelPrefsHook { } {
@@ -285,8 +350,8 @@ proc ::WBPrefs::CancelPrefsHook { } {
     if {[::WBPrefs::HaveFontListEdits]} {
 	::Preferences::HasChanged
     } else {
-	foreach key [array names tmpJPrefs] {
-	    if {![string equal $prefs($key) $tmpJPrefs($key)]} {
+	foreach key [array names tmpPrefs] {
+	    if {![string equal $prefs($key) $tmpPrefs($key)]} {
 		::Preferences::HasChanged
 		break
 	    }
@@ -301,9 +366,15 @@ proc ::WBPrefs::UserDefaultsPrefsHook { } {
     
     $wlbwb delete 0 end
     eval {$wlbwb insert 0} $prefs(canvasFonts)
-    foreach key [array names tmpJPrefs] {
-	set tmpJPrefs($key) $prefs($key)
+    foreach key [array names tmpPrefs] {
+	set tmpPrefs($key) $prefs($key)
     }
+}
+
+proc ::WBPrefs::DestroyPrefsHook { } {
+    variable tmpPrefs
+    
+    unset -nocomplain tmpPrefs
 }
 
 #-------------------------------------------------------------------------------

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.38 2004-10-26 12:46:51 matben Exp $
+# $Id: JWB.tcl,v 1.39 2004-11-06 08:15:25 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -139,8 +139,7 @@ proc ::Jabber::WB::InitUI { } {
 	{command   mPrintCanvas        {::UserActions::DoPrintCanvas $wtop}       normal   P}
 	{separator}
 	{command   mQuit               {::UserActions::DoQuit}                    normal   Q}
-    }
-
+    }    
     if {![::Plugins::HavePackage QuickTimeTcl]} {
 	lset menuDefsFile 4 3 disabled
     } else {
@@ -153,11 +152,11 @@ proc ::Jabber::WB::InitUI { } {
     
     # Get any registered menu entries.
     # I don't like this solution!
-    set insertInd [expr [llength $menuDefsFile] - 1]
+    set ind [expr [lindex [lsearch -exact -all $menuDefsFile separator] end] + 1]
     set mdef [::UI::Public::GetRegisteredMenuDefs file]
-    if {$mdef != ""} {
-	set menuDefsFile [linsert $menuDefsFile $insertInd {separator}]
-	set menuDefsFile [linsert $menuDefsFile $insertInd $mdef]
+    if {$mdef != {}} {
+	set menuDefsFile [linsert $menuDefsFile $ind {separator}]
+	set menuDefsFile [linsert $menuDefsFile $ind $mdef]
     }
     ::WB::SetMenuDefs file $menuDefsFile
 

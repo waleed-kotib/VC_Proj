@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.89 2004-11-03 14:34:08 matben Exp $
+# $Id: Chat.tcl,v 1.90 2004-11-06 08:15:25 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -32,6 +32,7 @@ namespace eval ::Jabber::Chat:: {
     ::hooks::register prefsSaveHook          ::Jabber::Chat::SavePrefsHook
     ::hooks::register prefsCancelHook        ::Jabber::Chat::CancelPrefsHook
     ::hooks::register prefsUserDefaultsHook  ::Jabber::Chat::UserDefaultsHook
+    ::hooks::register prefsDestroyHook       ::Jabber::Chat::DestroyPrefsHook
 
     # Use option database for customization. 
     # These are nonstandard option valaues and we may therefore keep priority
@@ -54,7 +55,7 @@ namespace eval ::Jabber::Chat:: {
     option add *Chat*printDisImage        printDis              widgetDefault
 
     option add *Chat*notifierImage        notifier              widgetDefault    
-    option add *Chat*tabAlertImage        notifier              widgetDefault    
+    option add *Chat*tabAlertImage        lightbulbon           widgetDefault    
     
     option add *Chat*mePreForeground      red                   widgetDefault
     option add *Chat*mePreBackground      ""                    widgetDefault
@@ -2186,7 +2187,6 @@ proc ::Jabber::Chat::SavePrefsHook { } {
     variable tmpJPrefs
     
     array set jprefs [array get tmpJPrefs]
-    unset tmpJPrefs
 }
 
 proc ::Jabber::Chat::CancelPrefsHook { } {
@@ -2208,6 +2208,12 @@ proc ::Jabber::Chat::UserDefaultsHook { } {
     foreach key [array names tmpJPrefs] {
 	set tmpJPrefs($key) $jprefs($key)
     }
+}
+
+proc ::Jabber::Chat::DestroyPrefsHook { } {
+    variable tmpJPrefs
+    
+    unset -nocomplain tmpJPrefs
 }
 
 #-------------------------------------------------------------------------------
