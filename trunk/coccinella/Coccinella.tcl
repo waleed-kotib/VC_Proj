@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.68 2004-07-23 13:03:59 matben Exp $
+# $Id: Coccinella.tcl,v 1.69 2004-07-24 10:55:47 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -338,7 +338,7 @@ if {[file exists $this(binPath)]} {
 
 # See if we have Itcl avialable already here; import namespace.
 set prefs(haveItcl) 0
-if {![catch {package require Itcl 3.3}]} {
+if {![catch {package require Itcl 3.2}]} {
     namespace import ::itcl::*
     set prefs(haveItcl) 1
 }

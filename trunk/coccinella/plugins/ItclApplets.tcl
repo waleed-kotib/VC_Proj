@@ -1,7 +1,7 @@
 # ItclApplets.tcl --
 # 
 # 
-# $Id: ItclApplets.tcl,v 1.1 2004-07-23 12:58:28 matben Exp $
+# $Id: ItclApplets.tcl,v 1.2 2004-07-24 10:55:47 matben Exp $
 
 namespace eval ::ItclApplets:: {
     
@@ -10,7 +10,7 @@ namespace eval ::ItclApplets:: {
 proc ::ItclApplets::Init {} {
     global  this auto_path
     
-    if {[catch {package require Itcl 3.3}]} {
+    if {[catch {package require Itcl 3.2}]} {
 	return
     }
     
@@ -37,8 +37,7 @@ proc ::ItclApplets::Init {} {
      
     # Register the plugin with the applications plugin mechanism.
     # Any 'package require' must have been done before this.
-    ::Plugins::Register ItclApplets $defList {}
-    
+    ::Plugins::Register ItclApplets $defList {}    
 }
 
 proc ::ItclApplets::Import {w optListVar args} {
@@ -62,9 +61,10 @@ proc ::ItclApplets::Import {w optListVar args} {
     # w, x, y must exist and 'args' must here be the optList!
     set args $optList
     if {[catch {source $fileName} err]} {
+	::Debug 4 "\t $err"
 	set errMsg $err
     }
-    
+
     # Success.
     return $errMsg
 }
