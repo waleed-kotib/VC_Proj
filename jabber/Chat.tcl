@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.66 2004-07-09 06:26:05 matben Exp $
+# $Id: Chat.tcl,v 1.67 2004-07-28 15:13:57 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -425,13 +425,19 @@ proc ::Jabber::Chat::InsertMessage {chattoken whom body} {
 # Arguments:
 #       jid
 
-proc ::Jabber::Chat::StartThread {jid} {
+proc ::Jabber::Chat::StartThread {jid args} {
 
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
+    
+    array set argsArr $args
 
     # Make unique thread id.
-    set threadID [::sha1pure::sha1 "$jstate(mejid)[clock seconds]"]
+    if {[info exists argsArr(-thread)]} {
+	set threadID $argsArr(-thread)
+    } else {
+	set threadID [::sha1pure::sha1 "$jstate(mejid)[clock seconds]"]
+    }
     if {$jprefs(chat,tabbedui)} {
 	set dlgtoken [::Jabber::Chat::GetFirstDlgToken]
 	if {$dlgtoken == ""} {

@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.23 2004-07-09 06:26:06 matben Exp $
+# $Id: Profiles.tcl,v 1.24 2004-07-28 15:13:58 matben Exp $
 
 package provide Profiles 1.0
 
@@ -154,10 +154,36 @@ proc ::Profiles::FindProfileNameFromJID {jid} {
     return $profilename
 }
 
-proc ::Profiles::Get { } {
+proc ::Profiles::GetList { } {
     variable profiles
  
     return $profiles
+}
+
+proc ::Profiles::Get {name key} {
+    variable profiles
+    
+    set ind [lsearch -exact $profiles $name]
+    if {$ind >= 0} {
+	set spec [lindex $profiles [incr ind]]
+	
+	switch -- $key {
+	    domain {
+		return [lindex $spec 0]
+	    }
+	    node {
+		return [lindex $spec 1]
+	    }
+	    password {
+		return [lindex $spec 2]
+	    }
+	    options {
+		return [lrange [lindex $profiles $ind] 3 end]
+	    }
+	}
+    } else {
+	return -code error "profile \"$name\" does not exist"
+    }
 }
 
 proc ::Profiles::GetProfile {name} {

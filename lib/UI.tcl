@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.65 2004-07-26 08:37:16 matben Exp $
+# $Id: UI.tcl,v 1.66 2004-07-28 15:13:58 matben Exp $
 
 package require entrycomp
 package require alertbox
@@ -871,12 +871,21 @@ namespace eval ::UI:: {
 # 
 #       A mega widget dialog with a message and a single entry.
 
-proc ::UI::MegaDlgMsgAndEntry {title msg label varName btcancel btok} {
+proc ::UI::MegaDlgMsgAndEntry {title msg label varName btcancel btok args} {
     global this
     
     variable finmega
     variable megauid
     upvar $varName entryVar
+    
+    set entryopts {}
+    foreach {key value} $args {
+	switch -- $key {
+	    -show {
+		lappend entryopts $key $value
+	    }
+	}
+    }
     
     set w .mega[incr megauid]
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
@@ -890,14 +899,14 @@ proc ::UI::MegaDlgMsgAndEntry {title msg label varName btcancel btok} {
     # Global frame.
     frame $w.frall -borderwidth 1 -relief raised
     pack  $w.frall -fill both -expand 1 -ipadx 4
-    pack [message $w.frall.msg -width 220 -text $msg] \
-      -side top -fill both -padx 4 -pady 2
+    pack [label $w.frall.msg -wraplength 300 -justify left -text $msg] \
+      -side top -fill both -padx 8 -pady 6
     
     set wmid $w.frall.fr
     set wentry $wmid.en
     pack [frame $wmid] -side top -fill x -expand 1 -padx 6
     label $wmid.la -font $fontSB -text $label
-    entry $wentry
+    eval {entry $wentry} $entryopts
     grid $wmid.la -column 0 -row 0 -sticky e -padx 2 
     grid $wmid.en -column 1 -row 0 -sticky ew -padx 2 
     
