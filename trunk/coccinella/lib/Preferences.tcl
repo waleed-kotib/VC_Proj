@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.59 2004-08-26 12:05:17 matben Exp $
+# $Id: Preferences.tcl,v 1.60 2004-08-26 12:24:18 matben Exp $
  
 package require notebook
 package require tree
@@ -579,6 +579,8 @@ proc ::Preferences::Proxies::InitPrefsHook { } {
     ::Preferences::Proxies::Init
     
     ::PreferencesUtils::Add [list  \
+      [list prefs(setNATip)           prefs_setNATip           $prefs(setNATip)]  \
+      [list prefs(NATip)              prefs_NATip              $prefs(NATip)]  \
       [list prefs(httpproxyserver)    prefs_httpproxyserver    $prefs(httpproxyserver)]  \
       [list prefs(httpproxyport)      prefs_httpproxyport      $prefs(httpproxyport)]  \
       [list prefs(httpproxyauth)      prefs_httpproxyauth      $prefs(httpproxyauth)]  \
