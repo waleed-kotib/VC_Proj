@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Rosticons.tcl,v 1.2 2004-11-14 16:41:10 matben Exp $
+# $Id: Rosticons.tcl,v 1.3 2004-11-15 08:51:13 matben Exp $
 
 package provide Rosticons 1.0
 
@@ -14,7 +14,8 @@ namespace eval ::Rosticons:: {
     # Define all hooks for preference settings.
     ::hooks::register prefsInitHook          ::Rosticons::InitPrefsHook
 
-    ::hooks::register initHook               ::Rosticons::Init
+    # Other init hooks depend on us!
+    ::hooks::register initHook               ::Rosticons::Init    20
 
     variable priv
     set priv(defaultSet) "default"
@@ -85,8 +86,9 @@ proc ::Rosticons::Init { } {
     # Any other set.
     if {![string equal $jprefs(rosticonSet) $priv(defaultSet)]} {
 	if {[lsearch -exact $allSets $jprefs(rosticonSet)] >= 0} {
-	    LoadTmpIconSet $state($jprefs(rosticonSet),path)
-	    SetFromTmp $jprefs(rosticonSet)
+	    set name $jprefs(rosticonSet)  
+	    LoadTmpIconSet $state($name,path)
+	    SetFromTmp $name
 	}
     }
 }

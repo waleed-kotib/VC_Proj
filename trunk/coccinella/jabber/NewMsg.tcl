@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.47 2004-11-11 15:38:29 matben Exp $
+# $Id: NewMsg.tcl,v 1.48 2004-11-15 08:51:13 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -199,9 +199,10 @@ proc ::Jabber::NewMsg::Build {args} {
 	pack [frame $w.frall.pad -height 12] -side bottom
     }
     
-    # Address list.    
-    set fradd [frame $w.frall.fradd -borderwidth 1 -relief sunken]
-    pack $fradd -side top -fill x -padx 6 -pady 4
+    # Address list. D = -borderwidth 1 -relief sunken
+    set   fradd $w.frall.fradd
+    frame $fradd -borderwidth 1 -relief sunken
+    pack  $fradd -side top -fill x -padx 6 -pady 4
     scrollbar $fradd.ysc -command [list $fradd.can yview]
     pack $fradd.ysc -side right -fill y
     set waddcan [canvas $fradd.can -bd 0 -highlightthickness 1 \

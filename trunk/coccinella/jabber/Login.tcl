@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.52 2004-10-22 06:44:14 matben Exp $
+# $Id: Login.tcl,v 1.53 2004-11-15 08:51:13 matben Exp $
 
 package provide Login 1.0
 
@@ -959,8 +959,10 @@ proc ::Jabber::Login::Authorize {server username resource password cmd args} {
 	$jstate(jlib) send_auth $username $resource   \
 	  [list [namespace current]::AuthorizeCB $token] -digest $digestedPw
     } else {
-	$jstate(jlib) auth_sasl $username $resource $password  \
-	  [list [namespace current]::AuthorizeCB $token] 
+	
+	# Plain password authentization.
+	$jstate(jlib) send_auth $username $resource   \
+	  [list [namespace current]::AuthorizeCB $token] -password $password
     }
 }
 

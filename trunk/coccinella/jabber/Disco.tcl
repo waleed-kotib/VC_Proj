@@ -5,12 +5,13 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.38 2004-10-29 13:17:15 matben Exp $
+# $Id: Disco.tcl,v 1.39 2004-11-15 08:51:13 matben Exp $
 
 package provide Disco 1.0
 
 namespace eval ::Jabber::Disco:: {
 
+    ::hooks::register initHook           ::Jabber::Disco::InitHook
     ::hooks::register jabberInitHook     ::Jabber::Disco::NewJlibHook
     ::hooks::register loginHook          ::Jabber::Disco::LoginHook
     ::hooks::register logoutHook         ::Jabber::Disco::LogoutHook
@@ -81,15 +82,19 @@ namespace eval ::Jabber::Disco:: {
     # This is needed for the balloons that need a real canvas tag, and that
     # we can't use jid's for this since they may contain special chars (!)!
     variable treeuid 0
+}
+
+proc ::Jabber::Disco::InitHook { } {
+    
     
     # We could add more icons for other categories here!
     variable typeIcon
-    array set typeIcon [list                                 \
-	gateway/aim           [::UI::GetIcon aim_online]     \
-	gateway/icq           [::UI::GetIcon icq_online]     \
-	gateway/msn           [::UI::GetIcon msn_online]     \
-	gateway/yahoo         [::UI::GetIcon yahoo_online]   \
-	gateway/x-gadugadu    [::UI::GetIcon gadugadu_online]\
+    array set typeIcon [list                                    \
+	gateway/aim           [::Rosticons::Get aim/online]     \
+	gateway/icq           [::Rosticons::Get icq/online]     \
+	gateway/msn           [::Rosticons::Get msn/online]     \
+	gateway/yahoo         [::Rosticons::Get yahoo/online]   \
+	gateway/x-gadugadu    [::Rosticons::Get gadugadu/online]\
 	]
 }
 
