@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.17 2003-11-06 08:40:54 matben Exp $
+# $Id: Roster.tcl,v 1.18 2003-11-08 08:54:44 matben Exp $
 
 package provide Roster 1.0
 
@@ -194,12 +194,13 @@ proc ::Jabber::Roster::Build {w} {
       -highlightcolor #6363CE -highlightbackground $prefs(bgColGeneral)} $opts]
 
     if {[string match "mac*" $this(platform)]} {
-	$wtree configure -buttonpresscommand  \
-	  [list ::Jabber::UI::Popup roster]
+	$wtree configure -buttonpresscommand [list ::Jabber::UI::Popup roster] \
+	  -eventlist [list [list <Control-Button-1> [list ::Jabber::UI::Popup roster]]]
     } else {
 	$wtree configure -rightclickcommand  \
 	  [list ::Jabber::UI::Popup roster]
     }
+
     scrollbar $wxsc -orient horizontal -command [list $wtree xview]
     scrollbar $wysc -orient vertical -command [list $wtree yview]
     grid $wtree -row 0 -column 0 -sticky news
@@ -547,7 +548,7 @@ proc ::Jabber::Roster::Presence {jid presence args} {
     # <presence from='user%hotmail.com@msn.myserver' ...
     # Or 3-tier (icq) with presence = 'unavailable' !
     
-    foreach {jid2 res} [jlib::splitjid $jid] break
+    jlib::splitjid $jid jid2 res
     
     # This gets a list '-name ... -groups ...' etc. from our roster.
     set itemAttr [$jstate(roster) getrosteritem $jid2]
@@ -605,7 +606,7 @@ proc ::Jabber::Roster::Remove {jid} {
     #    presence = 'unavailable' => remove jid2 + jid3
     # Else if 2-tier jid:  => remove jid2
     
-    foreach {jid2 res} [jlib::splitjid $jid] break
+    jlib::splitjid $jid jid2 res
 
     foreach v [$wtree find withtag $jid2] {
 	$wtree delitem $v
@@ -764,7 +765,7 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
     } else {
 	set itemTxt $jid
     }
-    if {1 || [string equal $presence "available"]} {
+    if {[string equal $presence "available"]} {
 	if {[info exists argsArr(-resource)] && ($argsArr(-resource) != "")} {
 	    append itemTxt " ($argsArr(-resource))"
 	    set jidx ${jid}/$argsArr(-resource)
@@ -875,7 +876,7 @@ proc ::Jabber::Roster::NewOrEditItem {which args} {
     set isTransport 0
     if {[info exists argsArr(-jid)]} {
 	set jid $argsArr(-jid)
-	if {[regexp {([^@]+)$} $jid match host]} {
+	if {[regexp {^([^@]+)$} $jid match host]} {
 	    set jabbers [$jstate(jlib) service gettransportjids jabber]
 	    if {[lsearch $jabbers $host] == -1} {
 		

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.30 2003-11-06 15:17:51 matben Exp $
+# $Id: Jabber.tcl,v 1.31 2003-11-08 08:54:44 matben Exp $
 #
 #  The $address is an ip name or number.
 #
@@ -431,8 +431,8 @@ proc ::Jabber::FactoryDefaults { } {
 
     set popMenuDefs(roster,def) {
       mMessage       users     {::Jabber::NewMsg::Build $wDlgs(jsendmsg) -to &jid}
-      mChat          user      {::Jabber::Chat::StartThread &jid}
-      mWhiteboard    wb        {::Jabber::WB::NewWhiteboard &jid}
+      mChat          user      {::Jabber::Chat::StartThread &jid3}
+      mWhiteboard    wb        {::Jabber::WB::NewWhiteboard &jid3}
       separator      {}        {}
       mLastLogin/Activity user {::Jabber::GetLast &jid}
       mvCard         user      {::VCard::Fetch .jvcard other &jid}
@@ -967,7 +967,7 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
     switch -- $type {
 	subscribe {
 	    
-	    foreach {jid2 resource} [jlib::splitjid $from] break
+	    jlib::splitjid $from jid2 resource
 	    
 	    # Treat the case where the sender is a transport component.
 	    # We must be indenpendent of method; agent, browse, disco
@@ -2858,7 +2858,7 @@ namespace eval ::Jabber::WB:: {
 #       Starts a new whiteboard session.
 #       
 # Arguments:
-#       jid         2-tier jid with no /resource (room participants???)
+#       jid         jid, usually 3-tier, but should be 2-tier if groupchat.
 #       args        -thread, -from, -to, -type, -x
 #       
 # Results:
@@ -2876,12 +2876,13 @@ proc ::Jabber::WB::NewWhiteboard {jid args} {
     #    jid is room: groupchat live
     #    jid is ordinary available user: chat
     #    jid is ordinary but unavailable user: normal message
+    jlib::splitjid $jid jid2 res
     set isRoom 0
     if {[info exists argsArr(-type)]} {
 	if {[string equal $argsArr(-type) "groupchat"]} {
 	    set isRoom 1
-	}	
-    } elseif {[$jstate(jlib) service isroom $jid]} {
+	}
+    } elseif {[$jstate(jlib) service isroom $jid2]} {
 	set isRoom 1
     }
     set isAvailable [$jstate(roster) isavailable $jid]
@@ -2962,7 +2963,7 @@ proc ::Jabber::WB::ChatMsg {args} {
     array set argsArr $args
     ::Jabber::Debug 2 "::Jabber::WB::ChatMsg args='$args'"
     
-    foreach {jid2 res} [jlib::splitjid $argsArr(-from)] break
+    jlib::splitjid $argsArr(-from) jid2 res
 
     # This one returns empty if not exists.
     set wtop [::UI::GetWtopFromJabberType "chat" $argsArr(-from)  \

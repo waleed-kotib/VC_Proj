@@ -18,6 +18,8 @@ Coccinella-0.94.6 (03????): 	Short summary --
 	  avoid name conflicts
 	- added games item with chess as a first example
 	- added (primitive) printing support for Mac OS X
+	- sorted out how to handle 2/3-tier jids in chats and messages
+	- reworked button tray into a mega widget
 
 
 Coccinella-0.94.5 (0309??): 	Short summary --

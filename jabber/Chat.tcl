@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.14 2003-11-06 15:17:51 matben Exp $
+# $Id: Chat.tcl,v 1.15 2003-11-08 08:54:44 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -171,9 +171,9 @@ proc ::Jabber::Chat::GotMsg {body args} {
     array set argsArr $args
     
     # -from is a 3-tier jid /resource included.
-    set jid2 $argsArr(-from)
-    set username $argsArr(-from)
-    regexp {((.+)@([^/]+))(/.+)?$} $argsArr(-from) m jid2 username host res
+    jlib::splitjid $argsArr(-from) jid2 res
+    set username $jid2
+    regexp {^([^@]+)@} $jid2 match username
     
     # We must follow the thread...
     if {[info exists argsArr(-thread)]} {
@@ -193,6 +193,9 @@ proc ::Jabber::Chat::GotMsg {body args} {
 	    set threadID [::sha1pure::sha1 "$jstate(mejid)[clock seconds]"]
 	}
     }
+    
+    # We may have reset its jid to a 2-tier jid if it has been offline.
+    set locals($threadID,jid) $argsArr(-from)
 
     if {[info exists locals($threadID,wtop)] &&  \
       [winfo exists $locals($threadID,wtop)]} {
@@ -297,16 +300,10 @@ proc ::Jabber::Chat::Build {threadID args} {
     }
 
     # -from is sometimes a 3-tier jid /resource included.
-    # If chatting with a room member must keep /resource, else not.
+    # Try to keep any /resource part unless not possible.
     
     if {[info exists argsArr(-from)]} {
-	set jid2 $argsArr(-from)
-	regexp {^(.+@[^/]+)(/.+)?$} $argsArr(-from) match jid2 
-	if {[$jstate(jlib) service isroom $jid2]} {
-	    set locals($threadID,jid) $argsArr(-from)
-	} else {
-	    set locals($threadID,jid) $jid2
-	}
+	set locals($threadID,jid) [$jstate(jlib) getrecipientjid $argsArr(-from)]
     } else {
 	set locals($threadID,jid) ""
     }
@@ -521,11 +518,11 @@ proc ::Jabber::Chat::Send {threadID} {
 	return
     }
     
-    # According to XMPP we should send to 3-tier jid if still online,
+    # According to  we should send to 3-tier jid if still online,
     # else to 2-tier.
-    
-    
-    set jid $locals($threadID,jid)
+    set jid [$jstate(jlib) getrecipientjid $locals($threadID,jid)]
+    set locals($threadID,jid) $jid
+
     if {![::Jabber::IsWellFormedJID $jid]} {
 	set ans [tk_messageBox -message [FormatTextForMessageBox  \
 	  [::msgcat::mc jamessbadjid $jid]] \

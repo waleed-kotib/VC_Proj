@@ -25,7 +25,7 @@
 # 
 # Copyright (C) 2002-2003 Mats Bengtsson
 # 
-# $Id: tree.tcl,v 1.12 2003-11-06 08:37:43 matben Exp $
+# $Id: tree.tcl,v 1.13 2003-11-08 08:54:44 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -41,6 +41,7 @@
 #	-buttonpresscommand, buttonPressCommand, ButtonPressCommand  tclProc?
 #	-buttonpressmillisec, buttonPressMillisec, ButtonPressMillisec
 #	-doubleclickcommand, doubleClickCommand, DoubleClickCommand  tclProc?
+#	-eventlist, eventList, EventList                      {{event tclProc} ..}
 #	-font, font, Font
 #	-fontdir, fontDir, FontDir
 #	-highlightbackground, highlightBackground, HighlightBackground
@@ -257,6 +258,7 @@ proc ::tree::Init { } {
 	-buttonpresscommand  {buttonPressCommand   ButtonPressCommand  }
 	-buttonpressmillisec {buttonPressMillisec  ButtonPressMillisec }
 	-doubleclickcommand  {doubleClickCommand   DoubleClickCommand  }
+	-eventlist           {eventList            EventList           }
 	-font                {font                 Font                }
 	-fontdir             {fontDir              FontDir             }
 	-highlightbackground {highlightBackground  HighlightBackground }
@@ -298,6 +300,7 @@ proc ::tree::Init { } {
     option add *Tree.backgroundImage       {}              widgetDefault
     option add *Tree.buttonPressCommand    {}              widgetDefault
     option add *Tree.buttonPressMillisec   1000            widgetDefault
+    option add *Tree.eventList             {}              widgetDefault
     option add *Tree.highlightBackground   white           widgetDefault
     option add *Tree.highlightColor        black           widgetDefault
     option add *Tree.highlightThickness    3               widgetDefault
@@ -489,6 +492,10 @@ proc ::tree::tree {w args} {
 	bind $widgets(canvas) <Button-3>   \
 	  [list ::tree::Button3ClickCmd $w %x %y]
     }
+    foreach eventSpec $options(-eventlist) {
+	bind $widgets(canvas) [lindex $eventSpec 0]  \
+	  [list ::tree::ButtonUserEvent $w %x %y [lindex $eventSpec 1]]
+    }
     
     # And finally... build.
     BuildWhenIdle $w
@@ -582,6 +589,14 @@ proc ::tree::Button3ClickCmd {w x y} {
 
     set v [LabelAt $w $x $y]
     uplevel #0 $options(-rightclickcommand) [list $w $v $x $y]
+}
+    
+proc ::tree::ButtonUserEvent {w x y cmd} {
+    
+    upvar ::tree::${w}::options options
+
+    set v [LabelAt $w $x $y]
+    uplevel #0 $cmd [list $w $v $x $y]
 }
     
 proc ::tree::ButtonPress {w v x y} {
@@ -795,7 +810,14 @@ proc ::tree::Configure {w args} {
     foreach opt [array names argsarr] {
 	set newValue $argsarr($opt)
 	set oldValue $options($opt)
+	
 	switch -- $opt {
+	    -eventlist {
+		foreach eventSpec $newValue {
+		    bind $widgets(canvas) [lindex $eventSpec 0]  \
+		      [list ::tree::ButtonUserEvent $w %x %y [lindex $eventSpec 1]]
+		}
+	    }
 	    -rightclickcommand {
 		if {[llength $newValue]} {
 		    bind $widgets(canvas) <Button-3>   \
@@ -1522,9 +1544,9 @@ proc ::tree::BuildLayer {w v in} {
 	  -anchor w -tags $taglist]
 	    lappend ids $id
 	if {[info exists treestate($uidc:text2)]} {
-	    set id [$can create text 140 $y -text $treestate($uidc:text2)  \
+	    set id2 [$can create text 140 $y -text $treestate($uidc:text2)  \
 	      -font $options(-font) -anchor w]
-	    lappend ids $id
+	    lappend ids $id2
 	}
 	set treestate(v:$id) $vxc
 	set treestate($uidc:tag) $id

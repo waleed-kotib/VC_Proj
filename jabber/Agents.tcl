@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Agents.tcl,v 1.2 2003-09-13 06:39:25 matben Exp $
+# $Id: Agents.tcl,v 1.3 2003-11-08 08:54:44 matben Exp $
 
 package provide Agents 1.0
 
@@ -316,8 +316,8 @@ proc ::Jabber::Agents::Build {w args} {
       -highlightcolor #6363CE -highlightbackground $prefs(bgColGeneral)
     set wtreecanvas [$wtree getcanvas]
     if {[string match "mac*" $this(platform)]} {
-	$wtree configure -buttonpresscommand  \
-	  [list ::Jabber::UI::Popup agents]
+	$wtree configure -buttonpresscommand [list ::Jabber::UI::Popup agents] \
+	  -eventlist [list [list <Control-Button-1> [list ::Jabber::UI::Popup agents]]]
     } else {
 	$wtree configure -rightclickcommand  \
 	  [list ::Jabber::UI::Popup agents]

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: buttontray.tcl,v 1.1 2003-11-06 15:15:03 matben Exp $
+# $Id: buttontray.tcl,v 1.2 2003-11-08 08:54:44 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -80,11 +80,12 @@ proc ::buttontray::Init { } {
 	-activeforeground    {activeForeground     ActiveForeground    }  \
 	-background          {background           Background          }  \
 	-borderwidth         {borderWidth          BorderWidth         }  \
+	-disabledforeground  {disabledForeground   DisabledForeground  }  \
 	-font                {font                 Font                }  \
 	-foreground          {foreground           Foreground          }  \
 	-relief              {relief               Relief              }  \
     }
-    set frameOptions {-borderwidth -relief}
+    set frameOptions {-background -borderwidth -relief}
     foreach name [array names widgetOptions] {
 	lappend trayOptions $name
     }
@@ -92,12 +93,12 @@ proc ::buttontray::Init { } {
     # The legal widget commands.
     set widgetCommands {buttonconfigure cget configure minwidth newbutton}
         
-    option add *ButtonTray.activeBackground   white             widgetDefault
-    option add *ButtonTray.activeForeground   red               widgetDefault
+    option add *ButtonTray.activeBackground   gray40            widgetDefault
+    option add *ButtonTray.activeForeground   white             widgetDefault
     option add *ButtonTray.background         white             widgetDefault
     option add *ButtonTray.borderWidth        0                 widgetDefault
-    option add *ButtonTray.disabledForeground gray60            widgetDefault
-    option add *ButtonTray.foreground         blue              widgetDefault
+    option add *ButtonTray.disabledForeground gray50            widgetDefault
+    option add *ButtonTray.foreground         black             widgetDefault
     option add *ButtonTray.relief             flat              widgetDefault
     
     # Platform specifics...
@@ -367,18 +368,70 @@ proc ::buttontray::SetButtonBinds {w name} {
     set idtxt $locals($name,idtxt)
     set cmd $locals($name,cmd)
 
-    bind $wlab <Enter> "$wlab configure -relief raised;  \
-      $can itemconfigure $idtxt -fill red"
-    bind $wlab <Leave> "$wlab configure -relief flat;  \
-      $can itemconfigure $idtxt -fill blue"
+    bind $wlab <Enter> [list ::buttontray::Enter $w $name label]
+    bind $wlab <Leave> [list ::buttontray::Leave $w $name label]
     bind $wlab <Button-1> [list $wlab configure -relief sunken]
-    bind $wlab <ButtonRelease> "[list $wlab configure -relief raised]; $cmd"
+    bind $wlab <ButtonRelease> "[list $wlab configure -relief raised];\
+      $can configure -cursor arrow; $cmd"
 
-    $can bind $idtxt <Enter> "$can itemconfigure $idtxt -fill red;  \
-      $can configure -cursor hand2"
-    $can bind $idtxt <Leave> "$can itemconfigure $idtxt -fill blue;  \
-      $can configure -cursor arrow"
+    $can bind $idtxt <Enter> [list ::buttontray::Enter $w $name text]
+    $can bind $idtxt <Leave> [list ::buttontray::Leave $w $name text]
     $can bind $idtxt <Button-1> $cmd   
+}
+
+proc ::buttontray::Enter {w name which} {
+
+    upvar ::buttontray::${w}::options options
+    upvar ::buttontray::${w}::widgets widgets
+    upvar ::buttontray::${w}::locals locals
+
+    set can $widgets(canvas)
+    set wlab $locals($name,wlab)
+    set idtxt $locals($name,idtxt)
+    set activebackground $options(-activebackground)
+    set activeforeground $options(-activeforeground)
+    
+    if {[string equal $which "label"]} {
+	$wlab configure -relief raised
+    } elseif {[string equal $which "text"]} {
+	$can configure -cursor hand2
+    }
+    foreach {x0 y0 x1 y1} [$can bbox $idtxt] break
+    set indent 2
+    incr x0 $indent
+    incr x1 -$indent
+    set h2 [expr ($y1-$y0)/2]
+    set coords [list \
+      [expr $x0-$h2] $y0 [expr $x0+$h2] $y0 \
+      [expr $x1-$h2] $y0 [expr $x1+$h2] $y0 \
+    [expr $x1+$h2] $y1 [expr $x1-$h2] $y1 \
+    [expr $x0+$h2] $y1 [expr $x0-$h2] $y1]
+    $can itemconfigure $idtxt -fill $activeforeground
+    $can create polygon $coords -fill $activebackground  \
+      -tags activebg -outline "" -smooth 1 -splinesteps 10
+    $can lower activebg $idtxt
+}
+
+proc ::buttontray::Leave {w name which} {
+
+    upvar ::buttontray::${w}::options options
+    upvar ::buttontray::${w}::widgets widgets
+    upvar ::buttontray::${w}::locals locals
+
+    set can $widgets(canvas)
+    set wlab $locals($name,wlab)
+    set idtxt $locals($name,idtxt)
+    set foreground       $options(-foreground)
+    set activebackground $options(-activebackground)
+    set activeforeground $options(-activeforeground)
+    set background       $options(-background)
+
+    if {[string equal $which "label"]} {
+	$wlab configure -relief flat
+    }
+    $can itemconfigure $idtxt -fill $foreground
+    catch {$can delete activebg}
+    $can configure -cursor arrow
 }
 
 proc ::buttontray::ButtonConfigure {w name args} {
@@ -401,11 +454,11 @@ proc ::buttontray::ButtonConfigure {w name args} {
 	    -state {
 		if {[string equal $value "normal"]} {
 		    $wlab configure -image $locals($name,image)
-		    $can itemconfigure $idtxt -fill blue
+		    $can itemconfigure $idtxt -fill $options(-foreground)
 		    SetButtonBinds $w $name
 		} else {
 		    $wlab configure -image $locals($name,imageDis) -relief flat
-		    $can itemconfigure $idtxt -fill gray50
+		    $can itemconfigure $idtxt -fill $options(-disabledforeground)
 		    bind $wlab <Enter> {}
 		    bind $wlab <Leave> {}
 		    bind $wlab <Button-1> {}

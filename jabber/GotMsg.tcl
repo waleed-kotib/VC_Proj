@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.8 2003-10-23 06:27:59 matben Exp $
+# $Id: GotMsg.tcl,v 1.9 2003-11-08 08:54:44 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -83,15 +83,13 @@ proc ::Jabber::GotMsg::Show {thisMsgId} {
 	return
     }
     foreach {subject jid timeAndDate isRead junk theMsg} $spec break
+    set jid [$jstate(jlib) getrecipientjid $jid]
     set jidtxt $jid
     set _time {[0-9][0-9]:[0-9][0-9].*}
     regexp "^(.*) (${_time})$" $timeAndDate match theDate theTime
     
     # Split jid into jid2 and resource.
-    #set jid2 $jid
-    #set res {}
-    #regexp {([^/]+)/(.*)} $jid match jid2 res
-    foreach {jid2 res} [jlib::splitjid $jid] break
+    jlib::splitjid $jid jid2 res
     
     # Use nick name.
     set nick [$jstate(roster) getname $jid2]
@@ -104,9 +102,6 @@ proc ::Jabber::GotMsg::Show {thisMsgId} {
     } else {
 	set isOnline [::msgcat::mc Offline]
 	$wonline configure -fg red
-    }
-    if {![$jstate(jlib) service isroom $jid2]} {
-    	set jid $jid2
     }
     
     # Insert the actual body of the message.

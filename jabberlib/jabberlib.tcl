@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.21 2003-11-06 15:17:51 matben Exp $
+# $Id: jabberlib.tcl,v 1.22 2003-11-08 08:54:44 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -97,6 +97,7 @@
 #      jlibName get_time to cmd
 #      jlibName get_version to cmd
 #      jlibName getagent jid
+#      jlibName getrecipientjid jid
 #      jlibName haveagent jid
 #      jlibName iq_get xmlns to ?args?
 #      jlibName iq_set xmlns to ?args?
@@ -218,6 +219,7 @@
 #       030726   made browse object optional, jlib::new api changed!
 #       031022   added iq_get and iq_set methods
 #       031101   added 'service gettransportjids' and 'gettype'
+#       031107   added 'getrecipientjid' command
 
 package require wrapper
 package require roster
@@ -2617,18 +2619,40 @@ proc jlib::auto_away_cmd {jlibname what} {
     uplevel #0 $lib(clientcmd) [list $jlibname $what]
 }
 
+# jlib::getrecipientjid --
+# 
+#       Tries to obtain the correct form of jid to send message to.
+#       Follows the XMPP spec, section 4.1.
+
+proc jlib::getrecipientjid {jlibname jid} {
+    upvar [namespace current]::${jlibname}::lib lib
+    
+    jlib::splitjid $jid jid2 resource 
+    set isroom [[namespace current]::service::isroom $jlibname $jid2]
+    if {$isroom} {
+	return $jid
+    } elseif {[$lib(rostername) isavailable $jid]} {
+	return $jid
+    } else {
+	return $jid2
+    }
+}
+
 # jlib::splitjid --
 # 
-#       Splits a general jid into a list {jid-2-tier resource}
+#       Splits a general jid into a jid-2-tier and resource
 
-proc jlib::splitjid {jid} {
+proc jlib::splitjid {jid jid2Var resourceVar} {
     
     set ind [string last / $jid]
     if {$ind == -1} {
-	return [list $jid {}]
+	uplevel 1 [list set $jid2Var $jid]
+	uplevel 1 [list set $resourceVar {}]
     } else {
-	return [list [string range $jid 0 [expr $ind - 1]] \
-	  [string range $jid [expr $ind + 1] end]]
+	set jid2 [string range $jid 0 [expr $ind - 1]]
+	set res [string range $jid [expr $ind + 1] end]
+	uplevel 1 [list set $jid2Var $jid2]
+	uplevel 1 [list set $resourceVar $res]
     }
 }
 

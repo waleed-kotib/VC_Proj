@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.12 2003-10-18 07:43:56 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.13 2003-11-08 08:54:44 matben Exp $
 
 # SetWhiteboardFactoryState --
 # 
@@ -463,6 +463,7 @@ switch -- $this(platform) {
 	set prefs(webBrowser) {C:/Program/Internet Explorer/IEXPLORE.EXE}
     }
 }
+set prefs(optionsRdb) [file nativename [file join $prefs(prefsDir) default.rdb]]
 
 # Make sure we've got the necessary directories.
 if {![file isdirectory $prefs(prefsDir)]} {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.14 2003-11-06 15:17:51 matben Exp $
+# $Id: NewMsg.tcl,v 1.15 2003-11-08 08:54:44 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -157,7 +157,7 @@ proc ::Jabber::NewMsg::Build {wbase args} {
     set iconPrintDis  [::UI::GetIcon btprintdis]
     
     set wtray $w.frall.frtop
-    buttontray::buttontray $wtray 50
+    ::buttontray::buttontray $wtray 50
     pack $wtray -side top -fill x -padx 4 -pady 2
 
     $wtray newbutton send Send $iconSend $iconSendDis  \
@@ -199,21 +199,15 @@ proc ::Jabber::NewMsg::Build {wbase args} {
     set id [$waddcan create window 0 0 -anchor nw -window $frport]
     
     # If -to option. This can have jid's with and without any resource.
-    # Generally we shouldn't care having the resource, except for groupchats.
+    # Be careful to treat this according to the XMPP spec!
+
     if {$opts(-to) != ""} {
 	set n 1
 	foreach jid $opts(-to) {
 	    if {$n > 1} {
 		::Jabber::NewMsg::FillAddrLine $w $frport $n
 	    }	    
-	    regexp {^([^/]+)(/.*)?$} $jid match jid2 x
-	    set isroom [$jstate(jlib) service isroom $jid2]
-	    if {$isroom} {
-		set tojid $jid
-	    } else {
-		set tojid $jid2
-	    }
-	    set locals($w,addr$n) $tojid
+	    set locals($w,addr$n) [$jstate(jlib) getrecipientjid $jid]
 	    incr n
 	}
     }

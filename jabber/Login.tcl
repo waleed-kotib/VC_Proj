@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.6 2003-11-06 15:17:51 matben Exp $
+# $Id: Login.tcl,v 1.7 2003-11-08 08:54:44 matben Exp $
 
 package provide Login 1.0
 
@@ -163,7 +163,7 @@ proc ::Jabber::Login::Login {w} {
 
     if {!$prefs(tls)} {
 	set ssl 0
-	$frmore.cssl configure -state disabled
+	$wfrmore.cssl configure -state disabled
     }
     
     # Button part.

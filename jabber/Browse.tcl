@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.10 2003-11-06 08:40:29 matben Exp $
+# $Id: Browse.tcl,v 1.11 2003-11-08 08:54:44 matben Exp $
 
 package provide Browse 1.0
 
@@ -400,8 +400,8 @@ proc ::Jabber::Browse::Build {w} {
       -highlightcolor #6363CE -highlightbackground $prefs(bgColGeneral)
 
     if {[string match "mac*" $this(platform)]} {
-	$wtree configure -buttonpresscommand  \
-	  [list ::Jabber::UI::Popup browse]
+	$wtree configure -buttonpresscommand [list ::Jabber::UI::Popup browse] \
+	  -eventlist [list [list <Control-Button-1> [list ::Jabber::UI::Popup browse]]]
     } else {
 	$wtree configure -rightclickcommand  \
 	  [list ::Jabber::UI::Popup browse]
