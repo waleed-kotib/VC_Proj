@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.58 2004-11-11 15:38:29 matben Exp $
+# $Id: MailBox.tcl,v 1.59 2004-11-19 13:10:14 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -43,6 +43,21 @@ namespace eval ::Jabber::MailBox:: {
     option add *MailBox*unreadMsgImage        unreadMsg        widgetDefault
     option add *MailBox*wbIcon11Image         wbIcon11         widgetDefault
     option add *MailBox*wbIcon13Image         wbIcon13         widgetDefault
+
+    # Standard widgets.
+    option add *MailBox.frall.borderWidth          1                50
+    option add *MailBox.frall.relief               raised           50
+    option add *MailBox*top.padX                   4                50
+    option add *MailBox*top.padY                   2                50
+    option add *MailBox*divt.borderWidth           2                50
+    option add *MailBox*divt.relief                sunken           50
+    option add *MailBox*mid.padX                   4                50
+    option add *MailBox*mid.padY                   4                50
+
+    option add *MailBox*frpane.borderWidth          1                50
+    option add *MailBox*frpane.relief               sunken           50
+    option add *MailBox*frmsg.text.borderWidth     1                50
+    option add *MailBox*frmsg.text.relief          sunken           50
 
     # Add some hooks...
     ::hooks::register initHook        ::Jabber::MailBox::Init
@@ -223,9 +238,9 @@ proc ::Jabber::MailBox::Build {args} {
     set locals(wtop) $w
     set jstate(inboxVis) 1
     
-    # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1 -ipadx 4
+    # Global frame. D = -borderwidth 1 -relief raised
+    frame $w.frall
+    pack  $w.frall -fill both -expand 1
     
     # Button part.
     set iconNew        [::Theme::GetImage [option get $w newmsgImage {}]]
@@ -251,9 +266,14 @@ proc ::Jabber::MailBox::Build {args} {
     set locals(iconUnreadMsg)  [::Theme::GetImageFromExisting \
       [option get $w unreadMsgImage {}] ::Jabber::MailBox::icons]
 
-    set wtray $w.frall.frtop
+    # D = -padx 4 -pady 2
+    set wtop $w.frall.top
+    frame $wtop
+    pack  $wtop -side top -fill x
+    
+    set wtray $wtop.tray
     ::buttontray::buttontray $wtray
-    pack $wtray -side top -fill x -padx 4 -pady 2
+    pack $wtray -side top -fill x
     set locals(wtray) $wtray
 
     $wtray newbutton new  \
@@ -277,19 +297,26 @@ proc ::Jabber::MailBox::Build {args} {
     
     ::hooks::run buildMailBoxButtonTrayHook $wtray
 
-    pack [frame $w.frall.divt -bd 2 -relief sunken -height 2] -fill x -side top
+    # D = -bd 2 -relief sunken
+    pack [frame $w.frall.divt] -fill x -side top
     
     if {[string match "mac*" $this(platform)]} {
 	pack [frame $w.frall.pad -height 12] -side bottom
     }
 
+    # D = -padx 4 -pady 4
+    set wmid $w.frall.mid
+    frame $wmid
+    pack  $wmid -side top -fill both -expand 1
+
     # Frame to serve as container for the pane geometry manager.
-    set frmid $w.frall.frmid
-    pack [frame $frmid -height 250 -width 380 -relief sunken -bd 1 -class Pane] \
-      -side top -fill both -expand 1 -padx 4 -pady 4
+    # D = -relief sunken -bd 1
+    set frpane $wmid.frpane
+    pack [frame $frpane -height 250 -width 380 -class Pane] \
+      -side top -fill both -expand 1
     
     # The actual mailbox list as a tablelist.
-    set wfrmbox $frmid.frmbox
+    set wfrmbox $frpane.frmbox
     frame $wfrmbox
     set wtbl    $wfrmbox.tbl
     set wysctbl $wfrmbox.ysc
@@ -332,25 +359,24 @@ proc ::Jabber::MailBox::Build {args} {
     }
     
     # Display message in a text widget.
-    set wfrmsg $frmid.frmsg    
+    set wfrmsg $frpane.frmsg    
     frame $wfrmsg
     set wtextmsg $wfrmsg.text
     set wyscmsg  $wfrmsg.ysc
     text $wtextmsg -height 4 -width 1 -wrap word \
-      -borderwidth 1 -relief sunken  \
       -yscrollcommand [list ::UI::ScrollSet $wyscmsg \
       [list grid $wyscmsg -column 1 -row 0 -sticky ns]] \
       -state disabled
     $wtextmsg tag configure normal
     scrollbar $wyscmsg -orient vertical -command [list $wtextmsg yview]
     grid $wtextmsg -column 0 -row 0 -sticky news
-    grid $wyscmsg -column 1 -row 0 -sticky ns
+    grid $wyscmsg  -column 1 -row 0 -sticky ns
     grid columnconfigure $wfrmsg 0 -weight 1
     grid rowconfigure $wfrmsg 0 -weight 1
     
     set imageHorizontal  \
-      [::Theme::GetImage [option get $frmid imageHorizontal {}]]
-    set sashHBackground [option get $frmid sashHBackground {}]
+      [::Theme::GetImage [option get $frpane imageHorizontal {}]]
+    set sashHBackground [option get $frpane sashHBackground {}]
 
     set paneopts [list -orient vertical -limit 0.0]
     if {[info exists prefs(paneGeom,$w]} {

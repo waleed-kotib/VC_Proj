@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.100 2004-11-18 07:34:01 matben Exp $
+# $Id: Roster.tcl,v 1.101 2004-11-19 13:10:14 matben Exp $
 
 package provide Roster 1.0
 
@@ -1588,6 +1588,54 @@ proc ::Jabber::Roster::StatusMenuButtonCmd {w varName} {
     variable mapShowTextToElem
     
     $w configure -text $mapShowTextToElem($status)
+}
+
+# ::Jabber::Roster::BuildStatusLabel --
+# 
+#       A few functions to build a megawidget status menu button.
+#       
+# Arguments:
+#       w
+#       varName
+#       args:     -command procName
+#       
+# Results:
+#       widget path.
+
+proc ::Jabber::Roster::BuildStatusLabel {w varName args} {
+    upvar $varName status
+    
+    set opts {}
+    set lopts {}
+    foreach {key value} $args {
+	
+	switch -glob -- $key {
+	    -label* {
+		set lkey [string map {label ""} $key]
+		lappend lopts $lkey $value
+	    }
+	    default {
+		lappend opts $key $value
+	    }
+	}
+    }
+    eval {label $w -textvariable $varName} $lopts
+    
+    array set argsArr $args
+
+    set wmenu $w.menu
+    button $w -bd 1 -image [::Rosticons::Get status/$status] \
+      -width 16 -height 16
+    $w configure -state disabled
+    menu $wmenu -tearoff 0
+    set opts {}
+    if {[info exists argsArr(-command)]} {
+	set opts [list -command \
+	  [list [namespace current]::StatusMenuCmd $w $varName \
+	  $argsArr(-command)]]
+    }
+    eval {BuildGenPresenceMenu $wmenu -variable $varName} $opts
+    return $w
 }
 
 # Jabber::Roster::BuildPresenceMenu --

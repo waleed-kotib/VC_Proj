@@ -5,14 +5,14 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.50 2004-11-18 07:34:01 matben Exp $
+# $Id: NewMsg.tcl,v 1.51 2004-11-19 13:10:14 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
 
 
 namespace eval ::Jabber::NewMsg:: {
-    global  wDlgs
+    global  wDlgs this
 
     # Add all event hooks.
     ::hooks::register closeWindowHook    ::Jabber::NewMsg::CloseHook
@@ -34,8 +34,12 @@ namespace eval ::Jabber::NewMsg:: {
     option add *NewMsg.printDisImage        printDis        widgetDefault
 
     # Standard widgets.
+    option add *NewMsg.frall.borderWidth    1               50
+    option add *NewMsg.frall.relief         raised          50
     option add *NewMsg*divt.borderWidth     2               50
     option add *NewMsg*divt.relief          sunken          50
+    option add *NewMsg*addpad.padX          6               50
+    option add *NewMsg*addpad.padY          4               50
     option add *NewMsg*fradd.borderWidth    1               50
     option add *NewMsg*fradd.relief         sunken          50
     option add *NewMsg*frsub.padX           6               50
@@ -55,10 +59,17 @@ namespace eval ::Jabber::NewMsg:: {
     option add *JMultiAddress.entry3Background  white       50
     option add *JMultiAddress.entry4Background  white       50
     option add *JMultiAddress.popupBackground   #adadad     50
-    option add *JMultiAddress.popupImage        reliefpopupbt  50
-    option add *JMultiAddress.popupImageDown    reliefpopupbtpush  50
-    
-    
+
+    switch -- $this(platform) {
+	windows {
+	    option add *JMultiAddress.popupImage      xppopupbt  50
+	    option add *JMultiAddress.popupImageDown  xppopupbt  50
+	}
+	default {
+	    option add *JMultiAddress.popupImage      reliefpopupbt      50
+	    option add *JMultiAddress.popupImageDown  reliefpopupbtpush  50
+	}
+    }
     variable locals
     
     # Running number for unique toplevels.
@@ -200,8 +211,8 @@ proc ::Jabber::NewMsg::Build {args} {
     }
     set fontSB [option get . fontSmallBold {}]
     
-    # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
+    # Global frame. D = -borderwidth 1 -relief raised
+    frame $w.frall
     pack  $w.frall -fill both -expand 1
     
     # Button part.
@@ -241,7 +252,7 @@ proc ::Jabber::NewMsg::Build {args} {
 	top {
 	    set wtray $wtop.tray
 	    ::buttontray::buttontray $wtray
-	    pack $wtray -side $buttonRowSide
+	    pack $wtray -side $buttonRowSide -fill y
 	    if {[string match "mac*" $this(platform)]} {
 		$wbot configure -height 12
 	    }
@@ -252,7 +263,7 @@ proc ::Jabber::NewMsg::Build {args} {
 	bottom {
 	    set wtray $wbot.tray
 	    ::buttontray::buttontray $wtray
-	    pack $wtray -side $buttonRowSide
+	    pack $wtray -side $buttonRowSide -fill y
 	    if {$botBannerImage == ""} {
 		pack $wtray -fill both -expand 1
 	    }
@@ -286,10 +297,15 @@ proc ::Jabber::NewMsg::Build {args} {
     # D = -bd 2 -relief sunken
     pack [frame $w.frall.divt] -fill x -side top
     
+    # D = -padx 6 -pady 4
+    set waddpad $w.frall.addpad
+    frame $waddpad
+    pack  $waddpad -side top -fill x 
+    
     # Address list. D = -borderwidth 1 -relief sunken
-    set   fradd $w.frall.fradd
+    set   fradd $waddpad.fradd
     frame $fradd
-    pack  $fradd -side top -fill x -padx 6 -pady 4
+    pack  $fradd -side top -fill x 
     scrollbar $fradd.ysc -command [list $fradd.can yview]
     pack $fradd.ysc -side right -fill y
     set waddcan [canvas $fradd.can -bd 0 -highlightthickness 1 \
