@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UserActions.tcl,v 1.38 2004-07-27 14:25:19 matben Exp $
+# $Id: UserActions.tcl,v 1.39 2004-10-04 09:22:20 matben Exp $
 
 namespace eval ::UserActions:: {
     
@@ -129,7 +129,7 @@ proc ::UserActions::DoQuit {args} {
     }
     array set argsArr $args
     if {$argsArr(-warning)} {
-	set ans [tk_messageBox -title [mc Quit?] -type yesno  \
+	set ans [tk_messageBox -title [mc Quit?] -type yesno -icon warning \
 	  -default yes -message [mc messdoquit?]]
 	if {$ans == "no"} {
 	    return $ans

@@ -4,11 +4,14 @@
 #      
 #  Copyright (c) 1999-2002  Mats Bengtsson
 #  
-# $Id: Splash.tcl,v 1.8 2004-09-18 14:43:29 matben Exp $
+# $Id: Splash.tcl,v 1.9 2004-10-04 09:22:20 matben Exp $
    
 package provide Splash 1.0
 
 namespace eval ::SplashScreen:: {
+    
+    set text1 "Written by Mats Bengtsson (C) 1999-2004"
+    set text2 "Distributed under the Gnu General Public License"
 	
     # Use option database for customization.
     option add *Splash.image               splash           widgetDefault
@@ -16,6 +19,8 @@ namespace eval ::SplashScreen:: {
     option add *Splash.showCopyright       0                widgetDefault
     option add *Splash.copyrightX          ""               widgetDefault
     option add *Splash.copyrightY          ""               widgetDefault
+    option add *Splash.copyrightText1      $text1           widgetDefault
+    option add *Splash.copyrightText2      $text2           widgetDefault
 
     # Name of variable for message displat.
     variable startMsg ""
@@ -98,12 +103,12 @@ proc ::SplashScreen::SplashScreen { } {
 	  -font {Helvetica -18} -text ".$prefs(releaseVers)" -fill #ef2910
     }
     if {$showCopyright} {
-	set copyright "Written by Mats Bengtsson (C) 1999-2004"
-	set license "Distributed under the Gnu General Public License"
+	set text1 [option get $w copyrightText1 {}]
+	set text2 [option get $w copyrightText2 {}]
 	$w.can create text $copyrightX $copyrightY -anchor nw \
-	  -font $fontS -text $copyright -fill $textcol
+	  -font $fontS -text $text1 -fill $textcol
 	$w.can create text $copyrightX [expr $copyrightY - 15] -anchor nw \
-	  -font $fontS -text $license -fill $textcol
+	  -font $fontS -text $text2 -fill $textcol
     }
     
     pack $w.can

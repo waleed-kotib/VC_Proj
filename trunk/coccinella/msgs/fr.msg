@@ -79,7 +79,7 @@
 ::msgcat::mcset fr OK			{OK}
 ::msgcat::mcset fr Online		{Connecté}
 ::msgcat::mcset fr Open			{Ouvrir}
-#::msgcat::mcset en Options
+#::msgcat::mcset fr Options
 ::msgcat::mcset fr Password		{Mot de passe}
 ::msgcat::mcset fr Pick			{Choisir}
 ::msgcat::mcset fr Phone		{Téléphone}
@@ -289,8 +289,8 @@
 ::msgcat::mcset fr mLocalTime     	{Heure locale...}
 ::msgcat::mcset fr mSendFile     	{Envoyer un message...}
 ::msgcat::mcset fr mChatHistory     	{Historique de la discussion}
-#::msgcat::mcset en mLoginTrpt     	{Login To Transport}
-#::msgcat::mcset en mLogoutTrpt     	{Logout From Transport}
+#::msgcat::mcset fr mLoginTrpt     	{Login To Transport}
+#::msgcat::mcset fr mLogoutTrpt     	{Logout From Transport}
 
 
 
@@ -468,7 +468,7 @@
 ::msgcat::mcset fr {Start Chat}			{Lancer la discussion}
 ::msgcat::mcset fr {Status message}		{Message du statut}
 ::msgcat::mcset fr {Status when logging out}	{Statut lors de la déconnexion}
-#::msgcat::mcset en {Subscription Failed}
+#::msgcat::mcset fr {Subscription Failed}
 ::msgcat::mcset fr {Subscription Pending}	{Enregistrement imminent}
 ::msgcat::mcset fr {Synthetic speech}		{Langage de synthèse}
 ::msgcat::mcset fr {System fonts}		{Polices système}
@@ -724,9 +724,9 @@ parce que ce nom est déjà employé par un autre utilisateur. Si vous êtes cet
 essayez plutôt de vous connecter. Code de l'erreur : %s}
 ::msgcat::mcset fr jamessregerr                 {L'inscription a échoué\
 avec le message d'erreur "%s"}
-#::msgcat::mcset en jamesstrptsubsc              {Your registered account with the %s\
+#::msgcat::mcset fr jamesstrptsubsc              {Your registered account with the %s\
 #service will be put in your roster to work as a transport with this service.}
-#::msgcat::mcset en jamessfailedsubsc            {Failed to make a subscription to %s. The user denied the subscription.}
+#::msgcat::mcset fr jamessfailedsubsc            {Failed to make a subscription to %s. The user denied the subscription.}
 
     
 
@@ -849,10 +849,10 @@ est limitée par l'utilisateur grâce aux paramètres ci-dessous : }
 ::msgcat::mcset fr prefplugctrl  {Vous pouvez dé-sélectionner ces paquetages\
 pour ne pas avoir à les charger. Coccinella doit être redémarré pour que les changements soient pris en compte.}
 ::msgcat::mcset fr prefchactret  {Toujours activer <Entrée> dans la boîte de discussion}
-#::msgcat::mcset en prefchnormal  {Treat normal messages as chat messages}
+#::msgcat::mcset fr prefchnormal  {Treat normal messages as chat messages}
 ::msgcat::mcset fr prefprofname  {Entrez le nom du profil d'utilisateur}
 ::msgcat::mcset fr prefstabui    {Utiliser l'interface du bloc-notes avec les onglets}
-#::msgcat::mcset en prefsusesasl  {Use SASL authentization method}
+#::msgcat::mcset fr prefsusesasl  {Use SASL authentization method}
 
 
 
@@ -872,8 +872,8 @@ ou choisir à partir du menu popup. Vous devez déjà avoir un compte sur ce ser
 	::msgcat::mcset fr janewaccount {Écrire l'adresse IP ou le nom du serveur Jabber,\
 choisir un nom d'utilisateur et un mot de passe.}
 	::msgcat::mcset fr janewpass    {Choisir le mot de passe pour : }
-	::msgcat::mcset fr jasubwant    {L'utilisateur "%s" veut vous ajouter à ses contacts.\
-Choisissez une option ci-dessous. Choisir un pseudo et un groupe est optionnel,\
+	::msgcat::mcset fr jasubwant    {L'utilisateur "%s" veut vous ajouter à ses contacts.}
+        ::msgcat::mcset fr jasubopts    {Choisissez une option ci-dessous. Choisir un pseudo et un groupe est optionnel,\
 pour votre usage personnel seulement.}
 	::msgcat::mcset fr jasubgetvcard {Voir la carte de visite de cette personne}
 	::msgcat::mcset fr jasubsndmsg  {Envoyer un message à cette personne : }

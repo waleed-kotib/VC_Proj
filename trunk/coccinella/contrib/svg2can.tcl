@@ -5,7 +5,7 @@
 #  Copyright (c) 2004  Mats Bengtsson
 #  This source file is distributed under the BSD licens.
 #
-# $Id: svg2can.tcl,v 1.19 2004-09-13 09:05:18 matben Exp $
+# $Id: svg2can.tcl,v 1.20 2004-10-04 09:22:19 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -1287,8 +1287,10 @@ proc svg2can::StyleToOpts {type styleList args} {
 	    font-size {
 		
 		# Use pixels instead of points.
-		if {[regexp {([0-9]+)pt} $value match pts]} {
-		    set pix [expr int($pts * [tk scaling] + 0.1)]
+		if {[regexp {([0-9\.]+)pt} $value match pts]} {
+		    set pix [expr int($pts * [tk scaling] + 0.01)]
+		    lset fontSpec 1 "-$pix"
+		} elseif {[regexp {([0-9\.]+)px} $value match pix]} {
 		    lset fontSpec 1 "-$pix"
 		} else {
 		    lset fontSpec 1 "-$value"

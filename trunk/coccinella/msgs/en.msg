@@ -885,8 +885,8 @@ or choose from the popup menu. You should already have an account with this serv
 	::msgcat::mcset en janewaccount {Write jabber server ip number or name.\
 Pick your username and password.}
 	::msgcat::mcset en janewpass    {Set new password for:}
-	::msgcat::mcset en jasubwant    {The user "%s" wants to subscibe to your\
-presence. Choose from the options below. Picking a nick name and group is\
+	::msgcat::mcset en jasubwant    {The user "%s" wants to subscibe to your presence.}
+        ::msgcat::mcset en jasubopts    {Choose from the options below. Picking a nick name and group is\
 optional, and for your personal use only.}
 	::msgcat::mcset en jasubgetvcard {Get this persons vCard}
 	::msgcat::mcset en jasubsndmsg  {Send a message to this person:}

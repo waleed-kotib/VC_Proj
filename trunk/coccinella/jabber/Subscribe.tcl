@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Subscribe.tcl,v 1.22 2004-09-30 12:43:07 matben Exp $
+# $Id: Subscribe.tcl,v 1.23 2004-10-04 09:22:19 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -80,8 +80,12 @@ proc ::Jabber::Subscribe::NewDlg {jid args} {
     ::headlabel::headlabel $wall.head -text [mc Subscribe]
     pack $wall.head -side top -fill both -expand 1
 
+    set str [mc jasubwant $jid]
+    if {!$havesubsc} {
+	append str " [mc jasubopts]"
+    }
     label $wall.msg -wraplength 200 -justify left \
-      -text [mc jasubwant $jid]
+      -text $str
     pack $wall.msg -padx 10 -side top -fill both -expand 1
 
     # If we already have a subscription we've already got the opportunity
