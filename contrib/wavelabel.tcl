@@ -6,7 +6,7 @@
 #  Copyright (c) 2004  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #
-# $Id: wavelabel.tcl,v 1.4 2004-10-12 13:48:56 matben Exp $
+# $Id: wavelabel.tcl,v 1.5 2004-10-13 14:08:38 matben Exp $
 #
 # ########################### USAGE ############################################
 #
@@ -302,7 +302,7 @@ proc ::wavelabel::WidgetProc {w command args} {
 	    set result [eval Configure $w $args]
 	}
 	message {
-	    $widgets(canvas) itemconfigure stattxt -text [lindex $args 0]
+	    $widgets(canvas) itemconfigure tstr -text [lindex $args 0]
 	}
 	start {
 	    set result [eval Start $w $args]
