@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.62 2004-06-30 08:52:39 matben Exp $
+# $Id: Coccinella.tcl,v 1.63 2004-06-30 08:54:09 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -114,7 +114,7 @@ if {[llength [namespace children :: "::browser*"]] > 0} {
 }
 
 # Level of detail for printouts. >= 2 for my outputs.
-set debugLevel 4
+set debugLevel 0
 
 # Macintosh only: if no debug printouts, no console. Also for windows?
 if {[string match "mac*" $this(platform)] && $debugLevel == 0} {
