@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.15 2003-11-04 09:44:27 matben Exp $
+# $Id: Roster.tcl,v 1.16 2003-11-04 11:33:08 matben Exp $
 
 package provide Roster 1.0
 
@@ -261,14 +261,14 @@ proc ::Jabber::Roster::Refresh { } {
 #
 #
 
-proc ::Jabber::Roster::SendRemove { {jidArg {}} } {    
+proc ::Jabber::Roster::SendRemove {jidrm} {    
     variable selItem
     upvar ::Jabber::jstate jstate
 
-    ::Jabber::Debug 2 "::Jabber::Roster::SendRemove jidArg=$jidArg"
+    ::Jabber::Debug 2 "::Jabber::Roster::SendRemove jidrm=$jidrm"
 
-    if {[string length $jidArg]} {
-	set jid $jidArg
+    if {[string length $jidrm]} {
+	set jid $jidrm
     } else {
 	set jid [lindex $selItem end]
     }
@@ -1348,10 +1348,10 @@ proc ::Jabber::Roster::EditSet {token} {
 	# Send (un)subscribe request.
 	if {$subscribe} {
 	    $jstate(jlib) send_presence -type "subscribe" -to $jid \
-	    -command [namespace current]::PresError
+	      -command [namespace current]::PresError
 	} elseif {$unsubscribe} {
 	    $jstate(jlib) send_presence -type "unsubscribe" -to $jid \
-	    -command [namespace current]::PresError
+	      -command [namespace current]::PresError
 	}
     }
     
@@ -1370,26 +1370,38 @@ proc ::Jabber::Roster::EditSet {token} {
 proc ::Jabber::Roster::EditSetCommand {jid type args} {
     
     if {[string equal $type "error"]} {
-	set err [lindex $args 0]
-	set errcode [lindex $err 0]
-	set errmsg [lindex $err 1]
+	foreach {errcode errmsg} [lindex $args 0] break
 	tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
 	  [::msgcat::mc jamessfailsetnick $jid $errcode $errmsg]]
     }	
 }
 
+# Jabber::Roster::PresError --
+# 
+#       Callback when sending presence to user for (un)subscription requests.
 
-proc ::Jabber::Roster::PresError {type args} {
+proc ::Jabber::Roster::PresError {jlibName type args} {
+    upvar ::Jabber::jstate jstate
     
-    if {[string equal $type "error"]} {
-	set ans [tk_messageBox -icon error -type yesno -message  \
-	  "We received an error when (un)subscribing to ?.\
-	  The error is: ? Do you want to remove it from your roster?"]
-
-	
+    array set argsArr {
+	-from       unknown
+	-error      {{} Unknown}
+	-from       ""
     }
+    array set argsArr $args
     
-    puts "::Jabber::Roster::PresError type=$type, args=$args"
+    ::Jabber::Debug 2 "::Jabber::Roster::PresError type=$type, args=$args"
+
+    if {[string equal $type "error"]} {
+	foreach {errcode errmsg} $argsArr(-error) break
+	set ans [tk_messageBox -icon error -type yesno -message  \
+	  "We received an error when (un)subscribing to $argsArr(-from).\
+	  The error is: $errmsg ($errcode).\
+	  Do you want to remove it from your roster?"]
+	if {$ans == "yes"} {
+	    $jstate(jlib) roster_remove $argsArr(-from) [namespace current]::PushProc
+	}
+    }
 }
 
 # Jabber::Roster::SetUIWhen --
