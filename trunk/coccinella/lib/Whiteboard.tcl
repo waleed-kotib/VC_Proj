@@ -7,9 +7,10 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.15 2004-01-29 08:09:39 matben Exp $
+# $Id: Whiteboard.tcl,v 1.16 2004-02-04 14:33:34 matben Exp $
 
 package require entrycomp
+package require uriencode
 package require CanvasDraw
 package require CanvasText
 package require CanvasUtils
@@ -154,7 +155,13 @@ proc ::WB::Init {} {
 	    }
 	}
     }
-
+    
+    # Drag and Drop support...
+    set prefs(haveTkDnD) 0
+    if {![catch {package require tkdnd}]} {
+	set prefs(haveTkDnD) 1
+    }    
+    
     # For the communication entries.
     # variables:              $wtop is used as a key in these vars.
     #       nEnt              a running counter for the communication frame entries
@@ -796,6 +803,11 @@ proc ::WB::BuildWhiteboard {wtop args} {
     # Subsequent whiteboards are placed by the window manager.
     if {[llength [::WB::GetAllWhiteboards]] == 1} {	
 	::UI::SetWindowGeometry $w whiteboard
+    }
+    
+    if {$prefs(haveTkDnD)} {
+	update
+	::WB::InitDnD $wapp(can)
     }
     catch {wm deiconify $w}
     #raise $w     This makes the window flashing when showed (linux)
@@ -3136,6 +3148,57 @@ proc ::WB::StartStopAnimatedWaveOnMain {start} {
     
     set waveImage [::Theme::GetImage [option get $wapp(frall) waveImage {}]]  
     ::UI::StartStopAnimatedWave $wapp(statmess) $waveImage $start
+}
+
+proc ::WB::InitDnD {wcan} {
+    
+    dnd bindtarget $wcan text/uri-list <Drop>      [list ::WB::DnDDrop %W %D %T %x %y]   
+    #dnd bindtarget $wcan text/uri-list <DragEnter> [list ::WB::DnDEnter %W %D %T]   
+    #dnd bindtarget $wcan text/uri-list <DragLeave> [list ::WB::DnDLeave %W %D %T]       
+}
+
+proc ::WB::DnDDrop {w data type x y} {
+    global  prefs
+    
+    ::Debug 2 "::WB::DnDDrop data=$data, type=$type"
+
+    foreach f $data {
+	
+	# Strip off any file:// prefix.
+	set f [string map {file:// ""} $f]
+	set f [uriencode::decodefile $f]
+	set mime [::Types::GetMimeTypeForFileName $f]
+	set haveImporter [::Plugins::HaveImporterForMime $mime]
+	if {$haveImporter} {	   
+	    set errMsg [::Import::DoImport $w [list -coords [list $x $y]] -file $f]
+	    if {$errMsg != ""} {
+		tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
+		  -message "Failed importing: $errMsg" -parent [winfo parent $w]
+	    }
+	    incr x $prefs(offsetCopy)
+	    incr y $prefs(offsetCopy)
+	} else {
+	    tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
+	      -message [::msgcat::mc messfailmimeimp $mime] \
+	      -parent [winfo parent $w]
+	}
+    }
+}
+
+proc ::WB::DnDEnter {w data type} {
+    
+    ::Debug 2 "::WB::DnDEnter data=$data, type=$type"
+    return
+    set haveImporter [::Plugins::HaveImporterForMime  \
+      [::Types::GetMimeTypeForFileName $data]]
+    if {$haveImporter} {
+	focus $w
+    }
+}
+
+proc ::WB::DnDLeave {w data type} {
+    
+    
 }
 
 # ::WB::GetThemeImage --
