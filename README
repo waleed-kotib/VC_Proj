@@ -2,9 +2,9 @@
 	  The Coccinella : Jabber application with Whiteboard
 	  ---------------------------------------------------
 
-		version 0.94.6, 30th November, 2003
+		version 0.94.7, 18th Februar, 2004
 
-		       by: Mats Bengtsson
+		       by Mats Bengtsson
 
 
 
@@ -54,7 +54,7 @@ The Jabber system:
       directly to each other, and not via an external server.  This mode 
       does not deliver the kind of user administration that is supplied by 
       the Jabber system, such as contact lists, online/offline, offline 
-      delivery etc. It is therefore not recommended to use.
+      delivery etc. It is therefore NOT recommended to use.
 
 Installation:
 
@@ -69,7 +69,7 @@ Testing:
 
     It is to be considered as a developer release, so beware.  *It is far 
     from being bug free*.  It has been tested on MacOS 9.2, Mac OS X 10.2, 
-    Red Hat Linux 8.0, and Windows 2000. It requires a Tcl version 8.4 or 
+    Red Hat Linux 8.0/9.0, and Windows 2000. It requires a Tcl version 8.4 or 
     later. The Mac OS 8/9 version is no longer supported but will likely 
     run anyway. Just increase the memory partition of Wish a lot (30MB).
 
@@ -88,6 +88,9 @@ Documentation:
 
     The source code is the only documentation. At least so far ;-)
     See also the Info/Help menu.
+
+    There are a few additional README files, README-sounds, README-resources,
+    which may be helpful if you want to do customization.
 
 Non-latin character sets:
 
@@ -111,7 +114,7 @@ Known Bugs:
       which results in a corrupt preference file. If you suspect this then
       delete this file:
           Unix/Linux       ~/.coccinella/whiteboard
-	  Windows          Coccinella/WBPREFS.TXT     (search for it)
+	  Windows          .../Coccinella/WBPREFS.TXT     (search for it)
 	  Mac OS 8/9       :Program Preferences:Coccinella:Whiteboard Prefs
 	  Mac OS X         ~/Library/Preferences/Whiteboard Prefs
 
@@ -123,25 +126,23 @@ Known Bugs:
       alpha quality software!
 
     As always, the code needs cleaning and restructuring.  If you want to see
-    what is happening "inside" you may set the various debug variables equal to
-    2 or larger.  There are two in Coccinella.tcl, one in Jabber.tcl,
-    jabberlib.tcl, and wrapper.tcl respectively. They may also be specified
+    what is happening "inside" you may set the debug level to a nonzero value.
+    You set this either in the source file Coccinella.tcl, or specified
     at the command line as:
 
-    set argv "-debugLevel 3 -debugServerLevel 3 -jstate_debug 2"
-    set argc 6
+    set argv "-debugLevel 3"
+    set argc 2
 
     and launch it. You need to have the source distribution and a Tcl/Tk
-    installation to do this, or pick the Jabber/Debug menu, and do:
+    installation to do this.
+    As an alternative on mac and windows, pick the Jabber/Debug menu, and do:
 
     set debugLevel 3
-    set debugServerLevel 3
-    set ::Jabber::jstate(debug) 3
 
 Distribution:
 
     It is distributed under the standard GPL.
-    (c) Copyright by Mats Bengtsson (1999-2003).
+    (c) Copyright by Mats Bengtsson (1999-2004).
     Buttons are stolen from Gimp and slightly changed (Thank You!).
 
 Home:

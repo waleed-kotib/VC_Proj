@@ -12,13 +12,12 @@ This brief text describes the jabber features supported:
   * Browsing (jabber:iq:browse).
 
   * Groupchat is supported via the "old" 'groupchat 1.0' protocol,
-    and via the never approved, but wide spread, jabber:iq:conference method.
+    via the never approved, but wide spread, jabber:iq:conference method,
+    and MUC.
 
   * File transfer using the oob method (http actually).
 
   * Handles forms using jabber:x:data
-
-  * Supports the new MUC groupchat protocol
 
   * The Coccinella client can be browsed to, and returns the following
     namespace declarations describing its services:
@@ -33,6 +32,9 @@ This brief text describes the jabber features supported:
       o jabber:iq:version
       o jabber:x:data
       o jabber:x:event
+      o http://jabber.org/protocol/muc
+      o http://jabber.org/protocol/disco#items
+      o http://jabber.org/protocol/disco#info
       o coccinella:wb     (to be discarded)
       o http://coccinella.sourceforge.net/protocol/servers
       o http://coccinella.sourceforge.net/protocol/whiteboard

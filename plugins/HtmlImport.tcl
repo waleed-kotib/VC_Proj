@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: HtmlImport.tcl,v 1.6 2004-01-13 14:50:21 matben Exp $
+# $Id: HtmlImport.tcl,v 1.7 2004-02-09 08:26:08 matben Exp $
 
 
 namespace eval ::HtmlImport:: {
@@ -267,7 +267,7 @@ proc ::HtmlImport::Save {wCan id args} {
 	    lappend impArgs -file $fileName
 	}
 	lappend impArgs -tags [::CanvasUtils::GetUtag $wCan $id 1]
-	return "import [$wCan coords $id] $impArgs"
+	return [concat import [$wCan coords $id] $impArgs]
     } else {
 	return ""
     }

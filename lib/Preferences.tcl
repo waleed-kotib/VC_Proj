@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.42 2004-01-27 08:48:06 matben Exp $
+# $Id: Preferences.tcl,v 1.43 2004-02-09 08:26:07 matben Exp $
  
 package require notebook
 package require tree
@@ -676,7 +676,7 @@ proc ::Preferences::Customization::BuildPage {page} {
     pack $pbl -padx 10 -pady 6 -side left
     
     label $pbl.lfont -text [::msgcat::mc prefcufont]
-    button $pbl.btfont -text "[::msgcat::mc Pick]..." -width 8 -font $fontSB \
+    button $pbl.btfont -text "[::msgcat::mc Pick]..." -width 8  \
       -command ::Preferences::Customization::PickFont
     checkbutton $pbl.newwin  \
       -text " [::msgcat::mc prefcushow]" \
@@ -696,9 +696,9 @@ proc ::Preferences::Customization::BuildPage {page} {
     frame $frrost
     pack [checkbutton $frrost.cb -text "  [::msgcat::mc prefrostbgim]" \
       -variable ::Preferences::tmpJPrefs(rost,useBgImage)] -side left
-    pack [button $frrost.btpick -text "[::msgcat::mc {Pick}]..." -font $fontSB  \
+    pack [button $frrost.btpick -text "[::msgcat::mc {Pick}]..."  \
       -command [list [namespace current]::PickBgImage rost]] -side left -padx 4
-    pack [button $frrost.btdefk -text "[::msgcat::mc {Default}]" -font $fontSB  \
+    pack [button $frrost.btdefk -text "[::msgcat::mc {Default}]"  \
       -command [list [namespace current]::DefaultBgImage rost]]  \
       -side left -padx 4
     
