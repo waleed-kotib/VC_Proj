@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: PutFileIface.tcl,v 1.3 2004-07-09 06:26:07 matben Exp $
+# $Id: PutFileIface.tcl,v 1.4 2004-12-02 08:22:35 matben Exp $
 
 package require putfile
 package require uriencode
@@ -63,7 +63,7 @@ proc ::PutFileIface::PutFile {wtop fileName ip optList} {
 	  -progress [list [namespace current]::PutProgress $puttoken] \
 	  -command [list [namespace current]::PutCommand $puttoken]
     } tok]} {
-	tk_messageBox -title [mc {File Transfer Error}]  \
+	::UI::MessageBox -title [mc {File Transfer Error}]  \
 	  -type ok -message $tok
 	unset putstate
     } else {
@@ -102,7 +102,7 @@ proc ::PutFileIface::PutCommand {puttoken token what msg} {
 	
 	# Depending on the flavour of the return code do different things.
 	if {$prefs(talkative) >= 1} {
-	    tk_messageBox -title [mc {Put File Error}]  \
+	    ::UI::MessageBox -title [mc {Put File Error}]  \
 	      -type ok -message $str
 	} else {
 	    
@@ -114,7 +114,7 @@ proc ::PutFileIface::PutCommand {puttoken token what msg} {
 		default {
 		    set errmsg "Failed while putting file \"$putstate(filetail)\""
 		    if {$prefs(talkative) >= 1} {
-			tk_messageBox -title [mc {Put File Error}] \
+			::UI::MessageBox -title [mc {Put File Error}] \
 			  -type ok -message $errmsg
 		    }
 		    ::WB::SetStatusMessage $wtop $errmsg
@@ -225,7 +225,7 @@ proc ::PutFileIface::PutFileToClient {wtop s ip relativeFilePath opts} {
 	  -progress ::PutFileIface::PutProgress    \
 	  -command [list ::PutFileIface::PutCommand $wtop]
     } tok]} {
-	tk_messageBox -title [mc {File Transfer Error}] \
+	::UI::MessageBox -title [mc {File Transfer Error}] \
 	  -type ok -message $tok
 	unset putstate
     } else {

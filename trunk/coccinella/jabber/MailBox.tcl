@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.61 2004-11-27 14:52:54 matben Exp $
+# $Id: MailBox.tcl,v 1.62 2004-12-02 08:22:34 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -832,15 +832,16 @@ proc ::MailBox::SaveMsg { } {
     if {[string length $item] == 0} {
 	return
     }
-    set ans [tk_getSaveFile -title {Save message} -initialfile Untitled.txt]
+    set row [$wtbl get $item]
+    set from [lindex $row $colindex(from)]
+    jlib::splitjid $from jid2 res
+    set ans [tk_getSaveFile -title {Save message} -initialfile ${jid2}.txt]
     if {[string length $ans] > 0} {
 	if {[catch {open $ans w} fd]} {
-	    tk_messageBox -title {Open Failed} -parent $wtbl -type ok \
+	    ::UI::MessageBox -title {Open Failed} -parent $wtbl -type ok \
 	      -message "Failed opening file [file tail $ans]: $fd"
 	    return
 	}
-	set row [$wtbl get $item]
-	set from    [lindex $row $colindex(from)]
 	set subject [lindex $row $colindex(subject)]
 	set time [lindex $row $colindex(secs)]
 	set time [clock format [clock scan $time]]
@@ -1022,11 +1023,10 @@ proc ::MailBox::DisplayRawMessage {jid3 uid} {
 	
 	# Perhaps we shall inform the user that no binary entities
 	# could be obtained.
-	tk_messageBox -type ok -title {Missing Entities}  \
-	  -icon info -message \
-	  [FormatTextForMessageBox "There were $numImports images or\
+	::UI::MessageBox -type ok -title {Missing Entities}  \
+	  -icon info -message "There were $numImports images or\
 	  similar entities that could not be obtained because the user\
-	  is not online."]
+	  is not online."
     }
 }
 
@@ -1258,8 +1258,8 @@ proc ::MailBox::SaveMailboxVer1 { } {
     # Work on a temporary file and switch later.
     set tmpFile $jprefs(inboxPath).tmp
     if {[catch {open $tmpFile w} fid]} {
-	tk_messageBox -type ok -icon error -message  \
-	  [FormatTextForMessageBox [mc jamesserrinboxopen $tmpFile]]
+	::UI::MessageBox -type ok -icon error \
+	  -message [mc jamesserrinboxopen $tmpFile]
 	return
     }
     
@@ -1281,7 +1281,7 @@ proc ::MailBox::SaveMailboxVer1 { } {
     puts $fid "}"
     close $fid
     if {[catch {file rename -force $tmpFile $jprefs(inboxPath)} msg]} {
-	tk_messageBox -type ok -message {Error renaming preferences file.}  \
+	::UI::MessageBox -type ok -message {Error renaming preferences file.}  \
 	  -icon error
 	return
     }
@@ -1338,8 +1338,8 @@ proc ::MailBox::SaveMailboxVer2 {args} {
     # Work on a temporary file and switch later.
     set tmpFile $jprefs(inboxPath).tmp
     if {[catch {open $tmpFile w} fid]} {
-	tk_messageBox -type ok -icon error -message  \
-	  [FormatTextForMessageBox [mc jamesserrinboxopen $tmpFile]]
+	::UI::MessageBox -type ok -icon error \
+	  -message [mc jamesserrinboxopen $tmpFile]
 	return
     }
     
@@ -1350,7 +1350,7 @@ proc ::MailBox::SaveMailboxVer2 {args} {
     }
     close $fid
     if {[catch {file rename -force $tmpFile $jprefs(inboxPath)} msg]} {
-	tk_messageBox -type ok -message {Error renaming preferences file.}  \
+	::UI::MessageBox -type ok -message {Error renaming preferences file.}  \
 	  -icon error
 	return
     }
@@ -1427,9 +1427,8 @@ proc ::MailBox::ReadMailboxVer1 { } {
 
     if {[catch {source $jprefs(inboxPath)} msg]} {
 	set tail [file tail $jprefs(inboxPath)]
-	tk_messageBox -title [mc {Mailbox Error}] -icon error  \
-	  -type ok -message [FormatTextForMessageBox \
-	  [mc jamesserrinboxread $tail $msg]]
+	::UI::MessageBox -title [mc {Mailbox Error}] -icon error  \
+	  -type ok -message [mc jamesserrinboxread $tail $msg]
     } else {
 	
 	# The mailbox on file is just a hierarchical list that needs to be
@@ -1462,9 +1461,8 @@ proc ::MailBox::ReadMailboxVer2 { } {
 
     if {[catch {source $jprefs(inboxPath)} msg]} {
 	set tail [file tail $jprefs(inboxPath)]
-	tk_messageBox -title [mc {Mailbox Error}] -icon error  \
-	  -type ok -message [FormatTextForMessageBox \
-	  [mc jamesserrinboxread $tail $msg]]
+	::UI::MessageBox -title [mc {Mailbox Error}] -icon error  \
+	  -type ok -message [mc jamesserrinboxread $tail $msg]
     } else {
 	
 	# Keep the uidmsg in sync for each list in mailbox.

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: P2P.tcl,v 1.18 2004-11-27 08:41:20 matben Exp $
+# $Id: P2P.tcl,v 1.19 2004-12-02 08:22:34 matben Exp $
 
 package provide P2P 1.0
 
@@ -417,8 +417,8 @@ proc ::P2P::CheckCommTo {wtop ipNum} {
     if {$commTo($wtop,$ipNum) == 0} {
 	
 	# Close connection.
-	set res [tk_messageBox -message [FormatTextForMessageBox \
-	  "Are you sure that you want to disconnect $::P2PNet::ipNumTo(name,$ipNum)?"] \
+	set res [::UI::MessageBox -message \
+	  "Are you sure that you want to disconnect $::P2PNet::ipNumTo(name,$ipNum)?" \
 	  -icon warning -type yesno -default yes]
 	if {$res == "no"} {
 	    
@@ -561,9 +561,8 @@ proc ::P2P::SendMessageListHook {wtop msgList args} {
 		puts $::P2PNet::ipNumTo(socket,$ip) "CANVAS: $cmd"
 	    }
 	}]} {
-	    tk_messageBox -type ok -title [mc {Network Error}] \
-	      -icon error -message  \
-	      [FormatTextForMessageBox [mc messfailsend $ip]]
+	    ::UI::MessageBox -type ok -title [mc {Network Error}] \
+	      -icon error -message [mc messfailsend $ip]
 	}
     }
 }
@@ -584,9 +583,8 @@ proc ::P2P::SendGenMessageListHook {wtop msgList args} {
 		puts $::P2PNet::ipNumTo(socket,$ip) $cmd
 	    }
 	}]} {
-	    tk_messageBox -type ok -title [mc {Network Error}] \
-	      -icon error -message  \
-	      [FormatTextForMessageBox [mc messfailsend $ip]]
+	    ::UI::MessageBox -type ok -title [mc {Network Error}] \
+	      -icon error -message [mc messfailsend $ip]
 	}
     }
 }
@@ -889,9 +887,9 @@ proc ::P2P::HandleServerCmd {channel ip port line args} {
 		if {$ip == $this(ipnum) &&   \
 		  [string equal [string tolower $user]  \
 		  [string tolower $this(username)]]} {
-		    tk_messageBox -message [FormatTextForMessageBox  \
+		    ::UI::MessageBox -message  \
 		      "A connecting client has chosen an ip number  \
-		      and user name identical to your own."] \
+		      and user name identical to your own." \
 		      -icon warning -type ok
 		}
 		

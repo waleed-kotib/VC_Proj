@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.55 2004-11-27 14:52:54 matben Exp $
+# $Id: Login.tcl,v 1.56 2004-12-02 08:22:34 matben Exp $
 
 package provide Login 1.0
 
@@ -312,8 +312,8 @@ proc ::Login::DoLogin {} {
     foreach name {server username password} {
 	upvar 0 $name var
 	if {[string length $var] <= 1} {
-	    tk_messageBox -icon error -type ok -message  \
-	      [FormatTextForMessageBox [mc jamessnamemissing $name]]	      
+	    ::UI::MessageBox -icon error -type ok \
+	      -message [mc jamessnamemissing $name]
 	    return
 	}
 	if {$name == "password"} {
@@ -331,8 +331,8 @@ proc ::Login::DoLogin {} {
 		}
 	    }
 	} err]} {
-	    tk_messageBox -icon error -type ok -message  \
-	      [FormatTextForMessageBox [mc jamessillegalchar $name $var]]
+	    ::UI::MessageBox -icon error -type ok \
+	      -message [mc jamessillegalchar $name $var]
 	    return
 	}
     }    
@@ -394,7 +394,7 @@ proc ::Login::ShowAnyMessageBox {token status {errmsg ""}} {
 	}
     }
     if {$str != ""} {
-	tk_messageBox -icon error -type ok -message [FormatTextForMessageBox $str]
+	::UI::MessageBox -icon error -type ok -message $str
     }
 }
 
@@ -807,7 +807,7 @@ proc ::Login::HttpProxyCmd {status msg} {
 	}
 	default {
 	    ::Jabber::DoCloseClientConnection
-	    tk_messageBox -title [mc Error] -icon error \
+	    ::UI::MessageBox -title [mc Error] -icon error \
 	      -message "The HTTP jabber service replied with a status\
 	      $status and message: $msg"
 	}

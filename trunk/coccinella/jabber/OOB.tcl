@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.41 2004-12-01 15:15:42 matben Exp $
+# $Id: OOB.tcl,v 1.42 2004-12-02 08:22:34 matben Exp $
 
 package require uriencode
 
@@ -202,12 +202,12 @@ proc ::OOB::DoSend { } {
     upvar ::Jabber::jstate jstate
     
     if {$localpath == ""} {
-	tk_messageBox -type ok -title [mc {Pick File}] -message \
+	::UI::MessageBox -type ok -title [mc {Pick File}] -message \
 	  "You must provide a file to send" -parent $wDlgs(joobs)
 	return
     }
     if {![file exists $localpath]} {
-	tk_messageBox -type ok -title [mc {Pick File}]  \
+	::UI::MessageBox -type ok -title [mc {Pick File}]  \
 	  -message "The picked file does not exist. Pick a new one." \
 	  -parent $wDlgs(joobs)
 	return
@@ -259,10 +259,10 @@ proc ::OOB::SetCallback {token jlibName type theQuery} {
 	foreach {errcode errmsg} $theQuery break
 	set msg "Got an error when trying to send a file: code was $errcode,\
 	  and error message: $errmsg"
-	tk_messageBox -icon error -type ok -title [mc Error] \
-	  -message [FormatTextForMessageBox $msg]
+	::UI::MessageBox -icon error -type ok -title [mc Error] \
+	  -message $msg
     } else {
-	tk_messageBox -icon info -type ok -title [mc {File Transfer}] \
+	::UI::MessageBox -icon info -type ok -title [mc {File Transfer}] \
 	  -message [mc jamessoobok2 $state(tail) $state(jid)]
     }
     unset state
@@ -295,15 +295,13 @@ proc ::OOB::ParseSet {jlibname from subiq args} {
 	set $tag [wrapper::getcdata $child]
     }
     if {![info exists url]} {
-	tk_messageBox -title [mc Error] -icon error -type ok \
-	  -message [FormatTextForMessageBox \
-	  [mc jamessoobnourl $from]]
+	::UI::MessageBox -title [mc Error] -icon error -type ok \
+	  -message [mc jamessoobnourl $from]
 	return $ishandled
     }
     set tail [file tail [::Utils::GetFilePathFromUrl $url]]
-    set ans [tk_messageBox -title [mc {Get File}] -icon info  \
-      -type yesno -default yes -message [FormatTextForMessageBox \
-      [mc jamessoobask $from $tail $desc]]]
+    set ans [::UI::MessageBox -title [mc {Get File}] -icon info  \
+      -type yesno -default yes -message [mc jamessoobask $from $tail $desc]]
     if {$ans == "no"} {
 	return $ishandled
     }
@@ -311,18 +309,16 @@ proc ::OOB::ParseSet {jlibname from subiq args} {
     # Validate URL, determine the server host and port.
     if {![regexp -nocase {^(([^:]*)://)?([^/:]+)(:([0-9]+))?(/.*)?$} $url \
       x prefix proto host y port path]} {
-	tk_messageBox -title [mc Error] -icon error -type ok \
-	  -message [FormatTextForMessageBox \
-	  [mc jamessoobbad $from $url]]
+	::UI::MessageBox -title [mc Error] -icon error -type ok \
+	  -message [mc jamessoobbad $from $url]
 	return $ishandled
     }
     if {[string length $proto] == 0} {
 	set proto http
     }
     if {$proto != "http"} {
-	tk_messageBox -title [mc Error] -icon error -type ok \
-	  -message [FormatTextForMessageBox \
-	  [mc jamessoonnohttp $from $proto]]
+	::UI::MessageBox -title [mc Error] -icon error -type ok \
+	  -message [mc jamessoonnohttp $from $proto]
 	return $ishandled
     }
     set userDir [::Utils::GetDirIfExist $prefs(userPath)]
@@ -346,8 +342,8 @@ proc ::OOB::Get {jid url file id} {
     variable locals
 
     if {[catch {open $file w} out]} {
-	tk_messageBox -title [mc Error] -icon error -type ok -message \
-	  [FormatTextForMessageBox [mc jamessoobfailopen $file]]
+	::UI::MessageBox -title [mc Error] -icon error -type ok \
+	  -message [mc jamessoobfailopen $file]
 	return
     }
     set locals($out,local) $file
@@ -360,8 +356,8 @@ proc ::OOB::Get {jid url file id} {
 	  -progress [list [namespace current]::Progress $out] \
 	  -command  [list [namespace current]::HttpCmd $jid $out $id]
     } $tmopts} token]} {
-	tk_messageBox -title [mc Error] -icon error -type ok -message \
-	  [FormatTextForMessageBox [mc jamessoobgetfail $url $token]]
+	::UI::MessageBox -title [mc Error] -icon error -type ok \
+	  -message [mc jamessoobgetfail $url $token]
 	return
     }
     upvar #0 $token state
@@ -381,8 +377,8 @@ proc ::OOB::Progress {out token total current} {
     
     if {[string equal $status "error"]} {
 	set errmsg "[httpex::error $token]"
-	tk_messageBox -title [mc Error] -icon error -type ok -message \
-	  [FormatTextForMessageBox "Failed getting url: $errmsg"]
+	::UI::MessageBox -title [mc Error] -icon error -type ok \
+	  -message "Failed getting url: $errmsg"
 	::httpex::cleanup $token
 	catch {file delete $locals($out,local)}
 	::Utils::ProgressFree $token
@@ -454,7 +450,7 @@ proc ::OOB::HttpCmd {jid out id token} {
     
     # Any error?
     if {[info exists emsg]} {
-	tk_messageBox -title $etitle -icon $eicon -type ok -message $emsg
+	::UI::MessageBox -title $etitle -icon $eicon -type ok -message $emsg
     }
 }
 

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: WinImport.tcl,v 1.8 2004-07-07 13:07:14 matben Exp $
+# $Id: WinImport.tcl,v 1.9 2004-12-02 08:22:35 matben Exp $
 
 #package require WindowsUtils
 
@@ -281,7 +281,7 @@ proc ::WinImport::SaveAs {id} {
 	return
     }
     if {[catch {file copy $locals(id2file,$id) $ans} err]} {
-	tk_messageBox -type ok -icon error -message \
+	::UI::MessageBox -type ok -icon error -message \
 	  "Failed copying file: $err"
 	return
     }

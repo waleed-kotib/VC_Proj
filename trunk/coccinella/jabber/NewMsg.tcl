@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.53 2004-11-27 14:52:54 matben Exp $
+# $Id: NewMsg.tcl,v 1.54 2004-12-02 08:22:34 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -763,7 +763,7 @@ proc ::NewMsg::DoSend {w} {
     
     # Check that still connected to server.
     if {![::Jabber::IsConnected]} {
-	tk_messageBox -type ok -icon error -parent $w \
+	::UI::MessageBox -type ok -icon error -parent $w \
 	  -title [mc {Not Connected}] \
 	  -message [mc jamessnotconnected]
 	return
@@ -782,8 +782,7 @@ proc ::NewMsg::DoSend {w} {
 		    set msg [mc jamessillformresend $addr]
 		    set type ok
 		}
-		set ans [tk_messageBox -type $type -parent $w \
-		  -message [FormatTextForMessageBox $msg]]
+		set ans [::UI::MessageBox -type $type -parent $w -message $msg]
 		if {$ans == "yes"} {
 		    continue
 		} elseif {$ans == "no"} {
@@ -800,9 +799,8 @@ proc ::NewMsg::DoSend {w} {
     
     # Be sure there are at least one jid.
     if {[llength $addrList] == 0} {
-	tk_messageBox -title [mc {No Address}]  \
-	  -icon error -type ok -parent $w \
-	  -message [FormatTextForMessageBox [mc jamessaddrmiss]]
+	::UI::MessageBox -title [mc {No Address}]  \
+	  -icon error -type ok -parent $w -message [mc jamessaddrmiss]
 	return
     }
     set wtext $locals($w,wtext)
@@ -900,7 +898,7 @@ proc ::NewMsg::CloseDlg {w} {
     set allText [$wtext get 1.0 "end - 1 char"]
     set doDestroy 0
     if {[string length $allText] > 0} {
-	set ans [tk_messageBox -title [mc {To Send or Not}]  \
+	set ans [::UI::MessageBox -title [mc {To Send or Not}]  \
 	  -icon warning -type yesnocancel -default "no" -parent $w \
 	  -message [mc jamesssavemsg]]
 	if {$ans == "yes"} {

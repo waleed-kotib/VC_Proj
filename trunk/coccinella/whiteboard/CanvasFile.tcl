@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasFile.tcl,v 1.15 2004-11-08 15:52:52 matben Exp $
+# $Id: CanvasFile.tcl,v 1.16 2004-12-02 08:22:35 matben Exp $
  
 package require can2svg
 package require svg2can
@@ -37,8 +37,8 @@ proc ::CanvasFile::DrawCanvasItemFromFile {wtop filePath args} {
     # Opens the data file.
     if {[catch {open $filePath r} fd]} {
 	set tail [file tail $filePath]
-	tk_messageBox -icon error -type ok -parent $wCan -message  \
-	  [FormatTextForMessageBox [mc messfailopread $tail $fd]]
+	::UI::MessageBox -icon error -type ok -parent $wCan \
+	  -message [mc messfailopread $tail $fd]
 	return
     }
     eval {::CanvasFile::FileToCanvas $wCan $fd $filePath} $args
@@ -56,7 +56,7 @@ proc ::CanvasFile::OpenCanvas {w fileName args} {
     # Opens the data file.
     if {[catch {open $fileName r} fd]} {
 	set tail [file tail $fileName]
-	tk_messageBox -message [mc messfailopread $tail $fd] \
+	::UI::MessageBox -message [mc messfailopread $tail $fd] \
 	  -icon error -type ok
 	return
     }
@@ -481,7 +481,7 @@ proc ::CanvasFile::DataToFile {filePath canvasList} {
     
     if {[catch {open $filePath w} fd]} {
 	set tail [file tail $filePath]
-	tk_messageBox -message [mc messfailopread $tail $fd] \
+	::UI::MessageBox -message [mc messfailopread $tail $fd] \
 	  -icon error -type ok
 	return
     }
@@ -523,7 +523,7 @@ proc ::CanvasFile::OpenCanvasFileDlg {wtop {filePath {}}} {
 	    {"XML/SVG"    {.svg}}
 	    {"Text"       {.txt}}
 	}
-	set ans [tk_messageBox -icon warning -type okcancel -default ok \
+	set ans [::UI::MessageBox -icon warning -type okcancel -default ok \
 	  -parent $w -message [mc messcanerasewarn]]
 	if {$ans == "cancel"} {
 	    return
@@ -669,7 +669,7 @@ proc ::CanvasFile::SaveCanvas {wCan fileName args} {
 	    # Opens the data file.
 	    if {[catch {open $fileName w} fd]} {
 		set tail [file tail $fileName]
-		tk_messageBox -icon error -type ok \
+		::UI::MessageBox -icon error -type ok \
 		  -message [mc messfailopwrite $tail $fd]
 		return ""
 	    }	    
@@ -699,7 +699,7 @@ proc ::CanvasCmd::DoSaveAsItem {wtop} {
     set fileName $ans
     if {[catch {open $fileName w} fd]} {
 	set tail [file tail $fileName]
-	tk_messageBox -icon error -type ok \
+	::UI::MessageBox -icon error -type ok \
 	  -message [mc messfailopwrite $tail $fd]
 	return
     }	    
@@ -773,8 +773,8 @@ proc ::CanvasFile::SVGFileToCanvas {wtop filePath} {
     # Opens the data file.
     if {[catch {open $filePath r} fd]} {
 	set tail [file tail $filePath]
-	tk_messageBox -icon error -type ok -parent $wCan -message  \
-	  [FormatTextForMessageBox [mc messfailopread $tail $fd]]
+	::UI::MessageBox -icon error -type ok -parent $wCan \
+	  -message [mc messfailopread $tail $fd]
 	return
     }
     set xml [read $fd]

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: FilePrefs.tcl,v 1.5 2004-11-06 08:15:26 matben Exp $
+# $Id: FilePrefs.tcl,v 1.6 2004-12-02 08:22:35 matben Exp $
 
 package provide FilePrefs 1.0
 
@@ -436,7 +436,7 @@ proc ::FilePrefs::SaveThisAss {wlist indSel} {
 
     # Check that no fields are empty.
     if {($textVarDesc == "") || ($textVarMime == "") || ($textVarSuffix == "")} {
-	tk_messageBox -title [mc Error] -icon error -type ok  \
+	::UI::MessageBox -title [mc Error] -icon error -type ok  \
 	  -message [mc messfieldsmissing]
 	return
     }

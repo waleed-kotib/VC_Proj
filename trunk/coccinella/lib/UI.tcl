@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.78 2004-12-01 15:15:42 matben Exp $
+# $Id: UI.tcl,v 1.79 2004-12-02 08:22:34 matben Exp $
 
 package require entrycomp
 package require alertbox
@@ -206,6 +206,52 @@ proc ::UI::IsAppInFront { } {
 	}
     }
     return $isfront
+}
+
+# UI::MessageBox --
+# 
+#       Wrapper for the tk_messageBox.
+
+proc ::UI::MessageBox {args} {
+    
+    eval {::hooks::run newMessageBox} $args
+    array set argsArr $args
+    if {[info exists argsArr(-message)]} {
+	set argsArr(-message) [FormatTextForMessageBox $argsArr(-message)]
+    }
+    set ans [eval {tk_messageBox} [array get argsArr]]
+    return $ans
+}
+
+# UI::FormatTextForMessageBox --
+#
+#       The tk_messageBox needs explicit newlines to format the message text.
+
+proc ::UI::FormatTextForMessageBox {txt {width ""}} {
+    global  prefs
+
+    if {[string equal $::tcl_platform(platform) "windows"]} {
+
+	# Insert newlines to force line breaks.
+	if {[string length $width] == 0} {
+	    set width $prefs(msgWrapLength)
+	}
+	set len [string length $txt]
+	set start $width
+	set first 0
+	set newtxt {}
+	while {([set ind [tcl_wordBreakBefore $txt $start]] > 0) &&  \
+	  ($start < $len)} {	    
+	    append newtxt [string trim [string range $txt $first [expr $ind-1]]]
+	    append newtxt "\n"
+	    set start [expr $ind + $width]
+	    set first $ind
+	}
+	append newtxt [string trim [string range $txt $first end]]
+	return $newtxt
+    } else {
+	return $txt
+    }
 }
 
 # Administrative code to handle toplevels:
@@ -1115,9 +1161,9 @@ proc ::UI::OpenCanvasInfoFile {wtop theFile} {
     } else {
 	set w [string trimright $wtop .]
     }
-    set ans [tk_messageBox -type yesno -icon warning -parent $w \
+    set ans [::UI::MessageBox -type yesno -icon warning -parent $w \
       -title [mc {Open Helpfile}]  \
-      -message [FormatTextForMessageBox [mc messopenhelpfile]]]
+      -message [mc messopenhelpfile]]
     if {$ans == "yes"} {
 	::CanvasFile::OpenCanvasFileDlg $wtop [file join $this(path) docs $theFile]
     }

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Agents.tcl,v 1.32 2004-11-30 15:11:10 matben Exp $
+# $Id: Agents.tcl,v 1.33 2004-12-02 08:22:33 matben Exp $
 
 package provide Agents 1.0
 
@@ -134,9 +134,8 @@ proc ::Agents::AgentsCallback {jid jlibName type subiq} {
 	    
 	    # Shall we be silent? 
 	    if {[winfo exists $wagents]} {
-		tk_messageBox -type ok -icon error \
-		  -message [FormatTextForMessageBox  \
-		  [mc jamesserragentget [lindex $subiq 1]]]
+		::UI::MessageBox -type ok -icon error \
+		  -message [mc jamesserragentget [lindex $subiq 1]]
 	    }
 	}
 	ok - result {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.95 2004-11-30 15:11:10 matben Exp $
+# $Id: Chat.tcl,v 1.96 2004-12-02 08:22:33 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -236,8 +236,7 @@ proc ::Chat::DoStart {w} {
     set ans yes
     
     if {![jlib::jidvalidate $user]} {
-	set ans [tk_messageBox -message [FormatTextForMessageBox  \
-	  [mc jamessbadjid $user]] \
+	set ans [::UI::MessageBox -message [mc jamessbadjid $user] \
 	  -icon error -type yesno]
 	if {[string equal $ans "no"]} {
 	    return
@@ -246,11 +245,11 @@ proc ::Chat::DoStart {w} {
     
     # User must be online.
     if {![$jstate(roster) isavailable $user]} {
-	set ans [tk_messageBox -icon warning -type yesno -parent $w  \
+	set ans [::UI::MessageBox -icon warning -type yesno -parent $w  \
 	  -default no  \
-	  -message [FormatTextForMessageBox "The user you intend chatting with,\
+	  -message "The user you intend chatting with,\
 	  \"$user\", is not online, and this chat makes no sense.\
-	  Do you want to chat anyway?"]]
+	  Do you want to chat anyway?"]
     }
     
     ::UI::SaveWinGeom $w
@@ -1427,7 +1426,7 @@ proc ::Chat::Send {dlgtoken} {
     
     # Check that still connected to server.
     if {![::Jabber::IsConnected]} {
-	tk_messageBox -type ok -icon error -title [mc {Not Connected}] \
+	::UI::MessageBox -type ok -icon error -title [mc {Not Connected}] \
 	  -message [mc jamessnotconnected]
 	return
     }
@@ -1447,8 +1446,7 @@ proc ::Chat::Send {dlgtoken} {
     set chatstate(jid) $jid
     
     if {![jlib::jidvalidate $jid]} {
-	set ans [tk_messageBox -message [FormatTextForMessageBox  \
-	  [mc jamessbadjid $jid]] \
+	set ans [::UI::MessageBox -message [mc jamessbadjid $jid] \
 	  -icon error -type yesno]
 	if {[string equal $ans "no"]} {
 	    return
@@ -1495,7 +1493,7 @@ proc ::Chat::Send {dlgtoken} {
 	eval {::Jabber::JlibCmd send_message $jid  \
 	  -thread $threadID -type chat -body $allText} $opts
     } err]} {
-	tk_messageBox -type ok -icon error -title "Network Error" \
+	::UI::MessageBox -type ok -icon error -title "Network Error" \
 	  -message "Network error ocurred: $err"
 	return
     }
@@ -1760,8 +1758,8 @@ proc ::Chat::Close {dlgtoken} {
     ::Debug 2 "::Chat::Close: dlgtoken=$dlgtoken"
     set ans "yes"
     if {0} {
-	set ans [tk_messageBox -icon info -parent $w -type yesno \
-	  -message [FormatTextForMessageBox [mc jamesschatclose]]]
+	set ans [::UI::MessageBox -icon info -parent $w -type yesno \
+	  -message [mc jamesschatclose]]
     }
     if {$ans == "yes"} {
 	set chattoken [GetActiveChatToken $dlgtoken]
@@ -1923,7 +1921,7 @@ proc ::Chat::XEventSendCompose {chattoken} {
 	::Jabber::JlibCmd send_message $chatstate(jid)  \
 	  -thread $chatstate(threadid) -type chat -xlist $xelems
     } err]} {
-	tk_messageBox -type ok -icon error -title "Network Error" \
+	::UI::MessageBox -type ok -icon error -title "Network Error" \
 	  -message "Network error ocurred: $err"
 	return
     }    
@@ -1964,7 +1962,7 @@ proc ::Chat::XEventSendCancelCompose {chattoken} {
 	::Jabber::JlibCmd send_message $chatstate(jid)  \
 	  -thread $chatstate(threadid) -type chat -xlist $xelems
     } err]} {
-	tk_messageBox -type ok -icon error -title "Network Error" \
+	::UI::MessageBox -type ok -icon error -title "Network Error" \
 	  -message "Network error ocurred: $err"
 	return
     }

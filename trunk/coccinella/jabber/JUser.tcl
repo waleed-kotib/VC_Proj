@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JUser.tcl,v 1.9 2004-11-30 15:11:10 matben Exp $
+# $Id: JUser.tcl,v 1.10 2004-12-02 08:22:34 matben Exp $
 
 package provide JUser 1.0
 
@@ -150,8 +150,7 @@ proc ::Jabber::User::DoAdd {token} {
 
     # In any case the jid should be well formed.
     if {![jlib::jidvalidate $jid]} {
-	set ans [tk_messageBox -message [FormatTextForMessageBox  \
-	  [mc jamessbadjid $jid]] \
+	set ans [::UI::MessageBox -message [mc jamessbadjid $jid] \
 	  -icon error -type yesno]
 	if {[string equal $ans "no"]} {
 	    return
@@ -161,8 +160,7 @@ proc ::Jabber::User::DoAdd {token} {
     # Warn if already in our roster.
     set allUsers [$jstate(roster) getusers]
     if {[lsearch -exact $allUsers $jid] >= 0} {
-	set ans [tk_messageBox -message [FormatTextForMessageBox  \
-	  [mc jamessalreadyinrost $jid]] \
+	set ans [::UI::MessageBox -message [mc jamessalreadyinrost $jid] \
 	  -icon error -type yesno]
 	if {[string equal $ans "no"]} {
 	    return
@@ -180,7 +178,7 @@ proc ::Jabber::User::DoAdd {token} {
 	    if {$transport == "" } {
 		
 		# Seems we are not registered.
-		set ans [tk_messageBox -type yesno -icon error \
+		set ans [::UI::MessageBox -type yesno -icon error \
 		  -parent $state(w) -message [mc jamessaddforeign $host]]
 		if {$ans == "yes"} {
 		    ::GenRegister::NewDlg -server $host -autoget 1
@@ -227,8 +225,8 @@ proc ::Jabber::User::SetCB {jid type args} {
     
     if {[string equal $type "error"]} {
 	foreach {errcode errmsg} [lindex $args 0] break
-	tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
-	  [mc jamessfailsetnick $jid $errcode $errmsg]]
+	::UI::MessageBox -icon error -type ok -message \
+	  [mc jamessfailsetnick $jid $errcode $errmsg]
     }	
 }
 
@@ -250,7 +248,7 @@ proc ::Jabber::User::PresError {jlibName type args} {
 
     if {[string equal $type "error"]} {
 	foreach {errcode errmsg} $argsArr(-error) break
-	set ans [tk_messageBox -icon error -type yesno -message  \
+	set ans [::UI::MessageBox -icon error -type yesno -message  \
 	  "We received an error when (un)subscribing to $argsArr(-from).\
 	  The error is: $errmsg ($errcode).\
 	  Do you want to remove it from your roster?"]
@@ -325,7 +323,7 @@ proc ::Jabber::User::EditTransportDlg {jid} {
     set typename [::Roster::GetNameFromTrpt $subtype]
     set msg [mc jamessowntrpt $typename $jid3 $subscription]
 
-    tk_messageBox -title [mc {Transport Info}] -type ok -message $msg \
+    ::UI::MessageBox -title [mc {Transport Info}] -type ok -message $msg \
       -icon info
 }
 

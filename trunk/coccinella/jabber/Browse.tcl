@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.66 2004-11-30 15:11:10 matben Exp $
+# $Id: Browse.tcl,v 1.67 2004-12-02 08:22:33 matben Exp $
 
 package provide Browse 1.0
 
@@ -259,9 +259,8 @@ proc ::Browse::Callback {browseName type from subiq} {
 	    
 	    # Shall we be silent? 
 	    if {[winfo exists $wtop]} {
-		tk_messageBox -type ok -icon error \
-		  -message [FormatTextForMessageBox  \
-		  [mc jamesserrbrowse $from [lindex $subiq 1]]]
+		::UI::MessageBox -type ok -icon error \
+		  -message [mc jamesserrbrowse $from [lindex $subiq 1]]
 	    }
 	}
 	set {
@@ -275,7 +274,7 @@ proc ::Browse::Callback {browseName type from subiq} {
 	    # Check that server is not configured with identical jid's.
 	    set parents [$jstate(browse) getparents $jid]
 	    if {[string equal [lindex $parents end] $jid]} {
-		tk_messageBox -type ok -title "Server Error" -message \
+		::UI::MessageBox -type ok -title "Server Error" -message \
 		  "The Jabber server has an error in its configuration.\
 		  The jid \"$jid\" is duplicated for different services.\
 		  Contact the system administrator of $jserver(this)."
@@ -433,9 +432,8 @@ proc ::Browse::ErrorProc {silent browseName type jid errlist} {
 	      "Failed browsing: Error code [lindex $errlist 0] and message:\
 	      [lindex $errlist 1]"
 	} else {
-	    tk_messageBox -icon error -type ok -title [mc Error] \
-	      -message [FormatTextForMessageBox \
-	      [mc jamesserrbrowse $jid [lindex $errlist 1]]]
+	    ::UI::MessageBox -icon error -type ok -title [mc Error] \
+	      -message [mc jamesserrbrowse $jid [lindex $errlist 1]]
 	}
     }
 }
@@ -1221,7 +1219,7 @@ proc ::Browse::DoAddServer {w} {
     
     # Verify that we doesn't have it already.
     if {[$wtree isitem $addserver]} {
-	tk_messageBox -type ok -icon info  \
+	::UI::MessageBox -type ok -icon info  \
 	  -message {We have this server already on our list}
 	return
     }

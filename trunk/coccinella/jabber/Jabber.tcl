@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.119 2004-11-30 15:11:11 matben Exp $
+# $Id: Jabber.tcl,v 1.120 2004-12-02 08:22:34 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -558,9 +558,8 @@ proc ::Jabber::MessageCallback {jlibName type args} {
 		set errcode [lindex $attrArr(-error) 0]
 		set errmsg [lindex $attrArr(-error) 1]
 		
-		tk_messageBox -title [mc Error] \
-		  -message [FormatTextForMessageBox \
-		  [mc jamesserrsend $attrArr(-from) $errcode $errmsg]]  \
+		::UI::MessageBox -title [mc Error] \
+		  -message [mc jamesserrsend $attrArr(-from) $errcode $errmsg] \
 		  -icon error -type ok		
 	    }
 	    eval {::hooks::run newErrorMessageHook} $args
@@ -624,7 +623,7 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 		
 		set subtype [lindex [split $jidtype /] 1]
 		set typename [::Roster::GetNameFromTrpt $subtype]
-		tk_messageBox -title [mc {Transport Suscription}] \
+		::UI::MessageBox -title [mc {Transport Subscription}] \
 		  -icon info -type ok \
 		  -message [mc jamesstrptsubsc $typename]
 	    } else {
@@ -665,8 +664,8 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 		    }
 		}
 		if {$msg != ""} {
-		    tk_messageBox -title [mc Info] -icon info -type ok \
-		      -message [FormatTextForMessageBox $msg]			      
+		    ::UI::MessageBox -title [mc Info] -icon info -type ok \
+		      -message $msg
 		}
 		
 		# Auto subscribe to subscribers to me.
@@ -679,38 +678,37 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 		    }
 		    $jstate(jlib) send_presence -to $from -type "subscribe"
 		    set msg [mc jamessautosubs $from]
-		    tk_messageBox -title [mc Info] -icon info -type ok \
-		      -message [FormatTextForMessageBox $msg]			  
+		    ::UI::MessageBox -title [mc Info] -icon info -type ok \
+		      -message $msg
 		}
 	    }
 	}
 	subscribed {
-	    tk_messageBox -title [mc Subscribed] -icon info -type ok  \
-	      -message [FormatTextForMessageBox [mc jamessallowsub $from]]
+	    ::UI::MessageBox -title [mc Subscribed] -icon info -type ok  \
+	      -message [mc jamessallowsub $from]
 	}
 	unsubscribe {	    
 	    if {$jprefs(rost,rmIfUnsub)} {
 		
 		# Remove completely from our roster.
 		$jstate(jlib) roster_remove $from ::Roster::PushProc
-		tk_messageBox -title [mc Unsubscribe] \
+		::UI::MessageBox -title [mc Unsubscribe] \
 		  -icon info -type ok  \
-		  -message [FormatTextForMessageBox [mc jamessunsub $from]]
+		  -message [mc jamessunsub $from]
 	    } else {
 		
 		$jstate(jlib) send_presence -to $from -type "unsubscribed"
-		tk_messageBox -title [mc Unsubscribe] -icon info -type ok  \
-		  -message [FormatTextForMessageBox [mc jamessunsubpres $from]]
+		::UI::MessageBox -title [mc Unsubscribe] -icon info -type ok  \
+		  -message [mc jamessunsubpres $from]
 		
 		# If there is any subscription to this jid's presence.
 		set sub [$jstate(roster) getsubscription $from]
 		if {[string equal $sub "both"] ||  \
 		  [string equal $sub "to"]} {
 		    
-		    set ans [tk_messageBox -title [mc Unsubscribed]  \
+		    set ans [::UI::MessageBox -title [mc Unsubscribed]  \
 		      -icon question -type yesno -default yes \
-		      -message [FormatTextForMessageBox  \
-		      [mc jamessunsubask $from $from]]]
+		      -message [mc jamessunsubask $from $from]]
 		    if {$ans == "yes"} {
 			$jstate(jlib) roster_remove $from \
 			  ::Roster::PushProc
@@ -728,28 +726,26 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 		if {[info exists attrArr(-status)]} {
 		    append msg " Status message: $attrArr(-status)"
 		}
-		tk_messageBox -title [mc {Subscription Failed}]  \
+		::UI::MessageBox -title [mc {Subscription Failed}]  \
 		  -icon info -type ok  \
-		  -message [FormatTextForMessageBox $msg]
+		  -message $msg
 		if {$jprefs(rost,rmIfUnsub)} {
 		    
 		    # Remove completely from our roster.
 		    $jstate(jlib) roster_remove $from ::Roster::PushProc
 		}
 	    } else {		
-		tk_messageBox -title [mc Unsubscribed]  \
+		::UI::MessageBox -title [mc Unsubscribed]  \
 		  -icon info -type ok  \
-		  -message [FormatTextForMessageBox  \
-		  [mc jamessunsubscribed $from]]
+		  -message [mc jamessunsubscribed $from]
 	    }
 	}
 	error {
 	    foreach {errcode errmsg} $attrArr(-error) break		
 	    set msg [mc jamesserrpres $errcode $errmsg]
 	    if {$prefs(talkative)} {
-		tk_messageBox -icon error -type ok  \
-		  -title [mc {Presence Error}] \
-		  -message [FormatTextForMessageBox $msg]	
+		::UI::MessageBox -icon error -type ok  \
+		  -title [mc {Presence Error}] -message $msg
 	    }
 	    ::Jabber::AddErrorLog $from $msg
 	}
@@ -799,15 +795,14 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	    # Disconnect. This should reset both wrapper and XML parser!
 	    ::Jabber::DoCloseClientConnection
 	    
-	    tk_messageBox -icon error -type ok  \
+	    ::UI::MessageBox -icon error -type ok  \
 	      -message [mc jamessconnbroken]
 	}
 	away - xaway {
 	    
 	    set tm [clock format [clock seconds] -format "%H:%M:%S"]
-	    set ans [tk_messageBox -icon info -type yesno -default yes \
-	      -message [FormatTextForMessageBox \
-	      [mc jamessautoawayset $tm]]]
+	    set ans [::UI::MessageBox -icon info -type yesno -default yes \
+	      -message [mc jamessautoawayset $tm]]
 	    if {$ans == "yes"} {
 		::Jabber::SetStatus available
 	    }
@@ -820,8 +815,8 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	    } else {
 		set msg "Receieved a fatal error. The connection is closed."
 	    }
-	    tk_messageBox -title [mc {Fatal Error}] -icon error -type ok \
-	      -message [FormatTextForMessageBox $msg]
+	    ::UI::MessageBox -title [mc {Fatal Error}] -icon error -type ok \
+	      -message $msg
 	}
 	xmlerror {
 	    
@@ -835,16 +830,15 @@ proc ::Jabber::ClientProc {jlibName what args} {
 		set msg "Receieved a fatal XML parsing error.\
 		  The connection is closed down."
 	    }
-	    tk_messageBox -title [mc {Fatal Error}] -icon error -type ok \
-	      -message [FormatTextForMessageBox $msg]
+	    ::UI::MessageBox -title [mc {Fatal Error}] -icon error -type ok \
+	      -message $msg
 	}
 	networkerror {
 	    
 	    # Disconnect. This should reset both wrapper and XML parser!
 	    ::Jabber::DoCloseClientConnection
-	    tk_messageBox -title [mc {Network Error}] \
-	      -message [FormatTextForMessageBox $argsArr(-body)] \
-	      -icon error -type ok	    
+	    ::UI::MessageBox -title [mc {Network Error}] \
+	      -message $argsArr(-body) -icon error -type ok	    
 	}
     }
     return $ishandled
@@ -963,8 +957,7 @@ proc ::Jabber::IqSetGetCallback {method jlibName type theQuery} {
 		  and with message: $errmsg"
 	    }
 	}
-	tk_messageBox -icon error -type ok -title [mc Error] -message \
-	  [FormatTextForMessageBox $msg]
+	::UI::MessageBox -icon error -type ok -title [mc Error] -message $msg
     }
 }
 
@@ -1195,8 +1188,7 @@ proc ::Jabber::SetStatus {type args} {
 	
 	# Close down?	
 	DoCloseClientConnection
-	tk_messageBox -title [mc Error] -icon error -type ok \
-	  -message [FormatTextForMessageBox $err]
+	::UI::MessageBox -title [mc Error] -icon error -type ok -message $err
     } else {
 	
 	eval {::hooks::run setPresenceHook $type} $args
@@ -1429,15 +1421,14 @@ proc ::Jabber::GetLastResult {from silent jlibname type subiq} {
 	set msg [mc jamesserrlastactive $from [lindex $subiq 1]]
 	::Jabber::AddErrorLog $from $msg	    
 	if {!$silent} {
-	    tk_messageBox -title [mc Error] -icon error -type ok \
-	      -message [FormatTextForMessageBox $msg]
+	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
+	      -message $msg
 	}
     } else {
 	array set attrArr [wrapper::getattrlist $subiq]
 	if {![info exists attrArr(seconds)]} {
-	    tk_messageBox -title [mc {Last Activity}] -icon info  \
-	      -type ok -message [FormatTextForMessageBox \
-	      [mc jamesserrnotimeinfo $from]]
+	    ::UI::MessageBox -title [mc {Last Activity}] -icon info  \
+	      -type ok -message [mc jamesserrnotimeinfo $from]
 	} else {
 	    set secs [expr [clock seconds] - $attrArr(seconds)]
 	    set uptime [clock format $secs -format "%a %b %d %H:%M:%S"]
@@ -1459,8 +1450,8 @@ proc ::Jabber::GetLastResult {from silent jlibname type subiq} {
 	    } else {
 		set msg1 [mc jamessuptime]
 	    }
-	    tk_messageBox -title [mc {Last Activity}] -icon info  \
-	      -type ok -message [FormatTextForMessageBox "$msg1 $uptime. $msg"]
+	    ::UI::MessageBox -title [mc {Last Activity}] -icon info  \
+	      -type ok -message "$msg1 $uptime. $msg"
 	}
     }
 }
@@ -1491,9 +1482,8 @@ proc ::Jabber::GetTimeResult {from silent jlibname type subiq} {
 	  "We received an error when quering its time info.\
 	  The error was: [lindex $subiq 1]"	    
 	if {!$silent} {
-	    tk_messageBox -title [mc Error] -icon error -type ok \
-	      -message [FormatTextForMessageBox \
-	      [mc jamesserrtime $from [lindex $subiq 1]]]
+	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
+	      -message [mc jamesserrtime $from [lindex $subiq 1]]
 	}
     } else {
 	
@@ -1511,8 +1501,8 @@ proc ::Jabber::GetTimeResult {from silent jlibname type subiq} {
 	} else {
 	    set msg "unknown"
 	}
-	tk_messageBox -title [mc {Local Time}] -icon info -type ok -message \
-	  [FormatTextForMessageBox [mc jamesslocaltime $from $msg]]
+	::UI::MessageBox -title [mc {Local Time}] -icon info -type ok \
+	  -message [mc jamesslocaltime $from $msg]
     }
 }
 
@@ -1550,9 +1540,8 @@ proc ::Jabber::GetVersionResult {from silent jlibname type subiq} {
 	::Jabber::AddErrorLog $from  \
 	  [mc jamesserrvers $from [lindex $subiq 1]]
 	if {!$silent} {
-	    tk_messageBox -title [mc Error] -icon error -type ok \
-	      -message [FormatTextForMessageBox \
-	      [mc jamesserrvers $from [lindex $subiq 1]]]
+	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
+	      -message [mc jamesserrvers $from [lindex $subiq 1]]
 	}
     } else {
 	set w .jvers[incr uidvers]
@@ -1824,8 +1813,7 @@ proc ::Jabber::Passwd::Doit {w} {
     ::Debug 2 "::Jabber::Passwd::Doit"
 
     if {![string equal $validate $password]} {
-	tk_messageBox -type ok -icon error  \
-	  -message [FormatTextForMessageBox [mc jamesspasswddiff]]
+	::UI::MessageBox -type ok -icon error -message [mc jamesspasswddiff]
 	return
     }
     set finished 1
@@ -1845,9 +1833,8 @@ proc ::Jabber::Passwd::ResponseProc {jlibName type theQuery} {
 	set errcode [lindex $theQuery 0]
 	set errmsg [lindex $theQuery 1]
 	set msg 
-	tk_messageBox -title [mc Error] -icon error -type ok \
-	  -message [FormatTextForMessageBox  \
-	  [mc jamesspasswderr $errcode $errmsg]] \
+	::UI::MessageBox -title [mc Error] -icon error -type ok \
+	  -message [mc jamesspasswderr $errcode $errmsg]
     } else {
 		
 	# Make sure the new password is stored in our profiles.
@@ -1859,8 +1846,8 @@ proc ::Jabber::Passwd::ResponseProc {jlibName type theQuery} {
 		eval {::Profiles::Set {}} $spec
 	    }
 	}
-	tk_messageBox -title [mc {New Password}] -icon info -type ok \
-	  -message [FormatTextForMessageBox [mc jamesspasswdok]]
+	::UI::MessageBox -title [mc {New Password}] -icon info -type ok \
+	  -message [mc jamesspasswdok]
     }
 }
 

@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: TheServer.tcl,v 1.26 2004-11-24 07:07:29 matben Exp $
+# $Id: TheServer.tcl,v 1.27 2004-12-02 08:22:34 matben Exp $
     
 package provide TheServer 1.0
 
@@ -50,8 +50,7 @@ proc ::TheServer::DoStartServer {thisServPort} {
     if {[catch {
 	socket -server [namespace current]::SetupChannel $thisServPort
     } sock]} {
-	after 500 {tk_messageBox -message [FormatTextForMessageBox \
-	  [mc messfailserver]]  \
+	after 500 {::UI::MessageBox -message [mc messfailserver] \
 	  -icon error -type ok}
     } else {
 	set state(serverSocket) $sock

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.29 2004-11-27 08:41:21 matben Exp $
+# $Id: Whiteboard.tcl,v 1.30 2004-12-02 08:22:35 matben Exp $
 
 package require entrycomp
 package require moviecontroller
@@ -2651,13 +2651,13 @@ proc ::WB::DnDDrop {w data type x y} {
 	    if {$haveImporter} {	   
 		set errMsg [::Import::DoImport $w [list -coords [list $x $y]] -file $f]
 		if {$errMsg != ""} {
-		    tk_messageBox -title [mc Error] -icon error -type ok \
+		    ::UI::MessageBox -title [mc Error] -icon error -type ok \
 		      -message "Failed importing: $errMsg" -parent [winfo toplevel $w]
 		}
 		incr x $prefs(offsetCopy)
 		incr y $prefs(offsetCopy)
 	    } else {
-		tk_messageBox -title [mc Error] -icon error -type ok \
+		::UI::MessageBox -title [mc Error] -icon error -type ok \
 		  -message [mc messfailmimeimp $mime] \
 		  -parent [winfo toplevel $w]
 	    }

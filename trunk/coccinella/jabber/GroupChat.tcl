@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.87 2004-11-30 15:11:10 matben Exp $
+# $Id: GroupChat.tcl,v 1.88 2004-12-02 08:22:34 matben Exp $
 
 package require History
 
@@ -388,7 +388,7 @@ proc ::GroupChat::BuildEnter {args} {
     ::Debug 2 "    service getjidsfor groupchat: '$chatservers'"
     
     if {[llength $chatservers] == 0} {
-	tk_messageBox -icon error -message [mc jamessnogchat]
+	::UI::MessageBox -icon error -message [mc jamessnogchat]
 	return
     }
 
@@ -495,7 +495,7 @@ proc ::GroupChat::DoEnter {token} {
     # Verify the fields first.
     if {($enter(server) == "") || ($enter(roomname) == "") ||  \
       ($enter(nickname) == "")} {
-	tk_messageBox -title [mc Warning] -type ok -message \
+	::UI::MessageBox -title [mc Warning] -type ok -message \
 	  [mc jamessgchatfields] -parent $enter(w)
 	return
     }
@@ -517,7 +517,7 @@ proc ::GroupChat::EnterCallback {jlibName type args} {
 	    foreach {errcode errmsg} $argsArr(-error) break
 	    append msg " The error code is $errcode: $errmsg"
 	}
-	tk_messageBox -title "Error Enter Room" -message $msg
+	::UI::MessageBox -title "Error Enter Room" -message $msg
 	return
     }
     
@@ -1027,7 +1027,7 @@ proc ::GroupChat::SetTopic {token} {
 	    ::Jabber::JlibCmd send_message $roomjid -type groupchat \
 	      -subject $topic
 	} err]} {
-	    tk_messageBox -type ok -icon error -title "Network Error" \
+	    ::UI::MessageBox -type ok -icon error -title "Network Error" \
 	      -message "Network error ocurred: $err"
 	    return
 	}
@@ -1043,7 +1043,7 @@ proc ::GroupChat::Send {token} {
     
     # Check that still connected to server.
     if {![::Jabber::IsConnected]} {
-	tk_messageBox -type ok -icon error -title [mc {Not Connected}] \
+	::UI::MessageBox -type ok -icon error -title [mc {Not Connected}] \
 	  -message [mc jamessnotconnected]
 	return
     }
@@ -1059,7 +1059,7 @@ proc ::GroupChat::Send {token} {
 	    ::Jabber::JlibCmd send_message $roomjid -type groupchat \
 	      -body $allText
 	} err]} {
-	    tk_messageBox -type ok -icon error -title "Network Error" \
+	    ::UI::MessageBox -type ok -icon error -title "Network Error" \
 	      -message "Network error ocurred: $err"
 	    return
 	}
@@ -1565,7 +1565,7 @@ proc ::GroupChat::Exit {token} {
     }
     
     if {[::Jabber::IsConnected]} {
-	set ans [eval {tk_messageBox -icon warning -type yesno  \
+	set ans [eval {::UI::MessageBox -icon warning -type yesno  \
 	  -message [mc jamesswarnexitroom $roomjid]} $opts]
 	if {$ans == "yes"} {
 	    Close $token

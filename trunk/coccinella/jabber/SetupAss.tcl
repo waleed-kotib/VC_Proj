@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: SetupAss.tcl,v 1.27 2004-11-30 15:11:12 matben Exp $
+# $Id: SetupAss.tcl,v 1.28 2004-12-02 08:22:34 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -154,11 +154,11 @@ proc ::Jabber::SetupAss::NextPage {w page} {
     switch -- $page {
 	username {
 	    if {($username == "") || ($password == "")} {
-		tk_messageBox -icon error -title [mc {Empty Fields}] \
+		::UI::MessageBox -icon error -title [mc {Empty Fields}] \
 		  -message [mc messsuassfillin] -parent $w
 		return -code 3
 	    } elseif {$password != $password2} {
-		tk_messageBox -icon error -title [mc {Different Passwords}] \
+		::UI::MessageBox -icon error -title [mc {Different Passwords}] \
 		  -message [mc messpasswddifferent] -parent $w
 		set password ""
 		set password2 ""
@@ -181,8 +181,8 @@ proc ::Jabber::SetupAss::DefaultLang { } {
 
 proc ::Jabber::SetupAss::DoClose {w} {
     
-    set ans [tk_messageBox -type yesno -parent $w -icon info \
-      -message [FormatTextForMessageBox [mc messsuassclose]]]
+    set ans [::UI::MessageBox -type yesno -parent $w -icon info \
+      -message [mc messsuassclose]]
     if {$ans == "yes"} {
 	destroy $w
     }
@@ -306,7 +306,7 @@ proc ::Jabber::SetupAss::ServersDlg {w} {
 	  -command [list [namespace current]::ServCommand $w]
     } $tmopts} token]} {
 	destroy $w
-	tk_messageBox -title [mc Error] -icon error -type ok  \
+	::UI::MessageBox -title [mc Error] -icon error -type ok  \
 	  -message "Failed to obtain list of open Jabber servers from\
 	  \"$url\": $token"
 	return
@@ -385,16 +385,16 @@ proc ::Jabber::SetupAss::ServCommand {w token} {
     
     switch -- $status {
 	timeout {
-	    tk_messageBox -title [mc Timeout] -icon info -type ok \
+	    ::UI::MessageBox -title [mc Timeout] -icon info -type ok \
 	      -message "Timeout while waiting for response."
 	}
 	error {
-	    tk_messageBox -title "File transport error" -icon error -type ok \
+	    ::UI::MessageBox -title "File transport error" -icon error -type ok \
 	      -message "File transport error when getting server list:\
 	      [::httpex::error $token]"
 	}
 	eof {
-	    tk_messageBox -title "File transport error" -icon error -type ok \
+	    ::UI::MessageBox -title "File transport error" -icon error -type ok \
 	      -message "The server closed the socket without replying."	   
 	}
 	reset {

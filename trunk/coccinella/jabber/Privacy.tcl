@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Privacy.tcl,v 1.9 2004-09-28 13:50:18 matben Exp $
+# $Id: Privacy.tcl,v 1.10 2004-12-02 08:22:34 matben Exp $
 
 package provide Privacy 1.0
 
@@ -849,7 +849,7 @@ proc ::Privacy::List::ExtractListElement {token} {
     set name $state(name)
 
     if {$name == ""} {
-	tk_messageBox -title [mc Error] -message \
+	::UI::MessageBox -title [mc Error] -message \
 	  {You must specify a nonempty list name!} -icon error
 	return ""
     }
@@ -865,7 +865,7 @@ proc ::Privacy::List::ExtractListElement {token} {
 	    
 	    # Do some error checking here.
 	    if {$value == ""} {
-		tk_messageBox -title [mc Error] -message \
+		::UI::MessageBox -title [mc Error] -message \
 		  "You must specify a nonempty value for $type!" -icon error
 		return ""
 	    }

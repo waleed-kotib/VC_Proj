@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.52 2004-11-30 15:11:12 matben Exp $
+# $Id: MUC.tcl,v 1.53 2004-12-02 08:22:34 matben Exp $
 
 package require entrycomp
 package require muc
@@ -129,7 +129,7 @@ proc ::MUC::BuildEnter {args} {
     ::Debug 2 "::MUC::BuildEnter confServers='$confServers'; allConfServ=$allConfServ"
 
     if {[llength $confServers] == 0} {
-	tk_messageBox -type ok -icon error -title "No Conference"  \
+	::UI::MessageBox -type ok -icon error -title "No Conference"  \
 	  -message "Failed to find any multi user chat service component"
 	return
     }
@@ -378,7 +378,7 @@ proc ::MUC::FillRoomList {token} {
 	}
     }
     if {[llength $roomList] == 0} {
-	tk_messageBox -type ok -icon error -title "No Rooms"  \
+	::UI::MessageBox -type ok -icon error -title "No Rooms"  \
 	  -message "Failed to find any rooms at $enter(server)"
 	return
     }
@@ -441,7 +441,7 @@ proc ::MUC::DoEnter {token} {
     upvar ::Jabber::jstate jstate
     
     if {($enter(roomname) == "") || ($enter(nickname) == "")} {
-	tk_messageBox -type ok -icon error  \
+	::UI::MessageBox -type ok -icon error  \
 	  -message "We require that all fields are nonempty"
 	return
     }
@@ -499,7 +499,7 @@ proc ::MUC::EnterCallback {token mucname type args} {
 		    # Password required.
 		    set msg "Error when entering room \"$roomjid\":\
 		      $errmsg Do you want to retry?"
-		    set ans [tk_messageBox -type yesno -icon error  \
+		    set ans [::UI::MessageBox -type yesno -icon error  \
 		      -message $msg]
 		    if {$ans == "yes"} {
 			set retry 1
@@ -508,9 +508,8 @@ proc ::MUC::EnterCallback {token mucname type args} {
 		}
 		default {
 		    set errmsg [lindex $argsArr(-error) 1]
-		    tk_messageBox -type ok -icon error  \
-		      -message [FormatTextForMessageBox \
-		      [mc jamesserrconfgetcre $errcode $errmsg]]
+		    ::UI::MessageBox -type ok -icon error  \
+		      -message [mc jamesserrconfgetcre $errcode $errmsg]
 		}
 	    }
 	}
@@ -672,7 +671,7 @@ proc ::MUC::DoInvite {token} {
     if {[catch {
 	eval {$jstate(muc) invite $roomjid $jid} $opts
     } err]} {
-	tk_messageBox -type ok -icon error -title "Network Error" \
+	::UI::MessageBox -type ok -icon error -title "Network Error" \
 	  -message "Network error ocurred: $err"
     }
     set invite(finished) 1
@@ -732,7 +731,7 @@ proc ::MUC::MUCMessage {jlibname xmlns args} {
 	    lappend opts -password $password
 	}
 	append msg " Do you want to join right away?"
-	set ans [tk_messageBox -icon info -type yesno -title "Invitation" \
+	set ans [::UI::MessageBox -icon info -type yesno -title "Invitation" \
 	  -message $msg]
 	if {$ans == "yes"} {
 	    eval {BuildEnter -roomjid $from} $opts
@@ -1116,7 +1115,7 @@ proc ::MUC::GrantRevoke {roomjid which type} {
 	      $nick $actionDefs($which,$type,what)  \
 	      -command [list [namespace current]::IQCallback $roomjid]} $opts
 	} err]} {
-	    tk_messageBox -type ok -icon error -title "Network Error" \
+	    ::UI::MessageBox -type ok -icon error -title "Network Error" \
 	      -message "Network error ocurred: $err"
 	}
     }
@@ -1151,7 +1150,7 @@ proc ::MUC::Kick {roomjid} {
 	    eval {$jstate(muc) setrole $roomjid $nick "none" \
 	      -command [list [namespace current]::IQCallback $roomjid]} $opts
 	} err]} {
-	    tk_messageBox -type ok -icon error -title "Network Error" \
+	    ::UI::MessageBox -type ok -icon error -title "Network Error" \
 	      -message "Network error ocurred: $err"
 	}
     }
@@ -1186,7 +1185,7 @@ proc ::MUC::Ban {roomjid} {
 	    eval {$jstate(muc) setaffiliation $roomjid $nick "outcast" \
 	      -command [list [namespace current]::IQCallback $roomjid]} $opts
 	} err]} {
-	    tk_messageBox -type ok -icon error -title "Network Error" \
+	    ::UI::MessageBox -type ok -icon error -title "Network Error" \
 	      -message "Network error ocurred: $err"
 	}
     }
@@ -1409,7 +1408,7 @@ proc ::MUC::EditListBuild {roomjid type} {
 	  [list [namespace current]::EditListGetCB $roomjid $editlocals(callid)]
     } err]} {
 	$wsearrows stop
-	tk_messageBox -type ok -icon error -title "Network Error" \
+	::UI::MessageBox -type ok -icon error -title "Network Error" \
 	  -message "Network error ocurred: $err"
     }      
     
@@ -1460,7 +1459,7 @@ proc ::MUC::EditListGetCB {roomjid callid mucname type subiq} {
     
     $wsearrows stop
     if {$type == "error"} {
-	tk_messageBox -type ok -icon error -message $subiq
+	::UI::MessageBox -type ok -icon error -message $subiq
 	return
     }
     
@@ -1541,7 +1540,7 @@ proc ::MUC::VerifyEditEntry {roomjid wtbl row col text} {
     
     if {![jlib::jidvalidate $text]} {
 	bell
-	tk_messageBox -icon error -message "Illegal jid \"$text\"" \
+	::UI::MessageBox -icon error -message "Illegal jid \"$text\"" \
 	  -parent [winfo toplevel $wtbl] -type ok
 	$wtbl rejectinput
 	return ""
@@ -1686,7 +1685,7 @@ proc ::MUC::EditListSet {roomjid} {
 	$jstate(muc) $setact $roomjid xxx \
 	  -command [list [namespace current]::IQCallback $roomjid]} $opts
     } err]} {
-	tk_messageBox -type ok -icon error -title "Network Error" \
+	::UI::MessageBox -type ok -icon error -title "Network Error" \
 	  -message "Network error ocurred: $err"
     }    
 }
@@ -1746,7 +1745,7 @@ proc ::MUC::RoomConfig {roomjid} {
 	  [list [namespace current]::ConfigGetCB $roomjid]
     }]} {
 	$wsearrows stop
-	tk_messageBox
+	::UI::MessageBox
     }   
     
     # Grab and focus.
@@ -1805,7 +1804,7 @@ proc ::MUC::DoRoomConfig {roomjid w} {
 	$jstate(muc) setroom $roomjid submit -form $subelements \
 	  -command [list [namespace current]::RoomConfigResult $roomjid]
     }]} {
-	tk_messageBox -type ok -icon error -title "Network Error" \
+	::UI::MessageBox -type ok -icon error -title "Network Error" \
 	  -message "Network error ocurred: $err"
 	return
     }
@@ -1816,7 +1815,7 @@ proc ::MUC::RoomConfigResult {roomjid mucname type subiq} {
 
     if {$type == "error"} {
 	regexp {^([^@]+)@.*} $roomjid match roomName
-	tk_messageBox -type ok -icon error  \
+	::UI::MessageBox -type ok -icon error  \
 	  -message "We failed trying to configurate room \"$roomName\".\
 	  [lindex $subiq 0] [lindex $subiq 1]"
     }
@@ -1844,7 +1843,7 @@ proc ::MUC::SetNick {roomjid} {
 	    $jstate(muc) setnick $roomjid $nickname \
 	      -command [list [namespace current]::PresCallback $roomjid]
 	} err]} {
-	    tk_messageBox -type ok -icon error -title "Network Error" \
+	    ::UI::MessageBox -type ok -icon error -title "Network Error" \
 	      -message "Network error ocurred: $err"
 	}
     }
@@ -1940,7 +1939,7 @@ proc ::MUC::Destroy {roomjid} {
 	    $jstate(muc) destroy $roomjid  \
 	      -command [list [namespace current]::IQCallback $roomjid]} $opts
 	} err]} {
-	    tk_messageBox -type ok -icon error -title "Network Error" \
+	    ::UI::MessageBox -type ok -icon error -title "Network Error" \
 	      -message "Network error ocurred: $err"
 	}
     }
@@ -1966,7 +1965,7 @@ proc ::MUC::IQCallback {roomjid mucname type subiq} {
     	regexp {^([^@]+)@.*} $roomjid match roomName
     	set msg "We received an error when interaction with the room\
     	\"$roomName\": $subiq"
-	tk_messageBox -type ok -icon error -title "Error" -message $msg
+	::UI::MessageBox -type ok -icon error -title "Error" -message $msg
     }
 }
 
@@ -1982,7 +1981,7 @@ proc ::MUC::PresCallback {roomjid mucname type args} {
     	regexp {^([^@]+)@.*} $roomjid match roomName
     	set msg "We received an error when interaction with the room\
     	\"$roomName\": $errmsg"
-	tk_messageBox -type ok -icon error -title "Error" -message $msg
+	::UI::MessageBox -type ok -icon error -title "Error" -message $msg
     }
 }
 

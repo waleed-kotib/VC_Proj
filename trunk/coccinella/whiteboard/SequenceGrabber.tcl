@@ -4,7 +4,7 @@
 #
 #    Copyright (c) 2002   Mats Bengtsson
 #    
-# $Id: SequenceGrabber.tcl,v 1.1 2004-06-06 06:41:31 matben Exp $
+# $Id: SequenceGrabber.tcl,v 1.2 2004-12-02 08:22:35 matben Exp $
 
 #---------------------------------------------------------------------
 #   DisplaySequenceGrabber ---
@@ -28,7 +28,7 @@ proc DisplaySequenceGrabber  {wtop}  {
     
     # Start the sequence grabber.
     if {[catch {seqgrabber ${fr}.sg} msg]}  {
-	tk_messageBox -message "Error: couldn,t start the camera."  \
+	::UI::MessageBox -message "Error: couldn,t start the camera."  \
 	  -icon error -type ok
 	catch {destroy $fr}
 	return
@@ -60,7 +60,7 @@ proc SetVideoConfig  { wtop what {opt {}} }  {
     switch -- $what {
 	audiosettings {
 	    if {[catch {$seqGrabPath audiosettings} res]} {
-		tk_messageBox -message "Error:  $res" -icon error -type ok
+		::UI::MessageBox -message "Error:  $res" -icon error -type ok
 		return
 	    }
 	}
@@ -71,7 +71,7 @@ proc SetVideoConfig  { wtop what {opt {}} }  {
 	    
 	    # Open a file?
 	    if {[catch {$seqGrabPath picture $opt } res]} {
-		tk_messageBox -message "Error:  $res" -icon error -type ok
+		::UI::MessageBox -message "Error:  $res" -icon error -type ok
 		return
 	    }
 	}
@@ -80,7 +80,7 @@ proc SetVideoConfig  { wtop what {opt {}} }  {
 	}
 	videosettings {
 	    if {[catch {$seqGrabPath videosettings} res]} {
-		tk_messageBox -message "Error:  $res" -icon error -type ok
+		::UI::MessageBox -message "Error:  $res" -icon error -type ok
 		return
 	    }
 	}

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: WBPrefs.tcl,v 1.4 2004-11-06 08:15:26 matben Exp $
+# $Id: WBPrefs.tcl,v 1.5 2004-12-02 08:22:35 matben Exp $
 
 package provide WBPrefs 1.0
 
@@ -259,8 +259,7 @@ proc ::WBPrefs::PushBtRemove {indSel wapp} {
     
     # Check that not the standard fonts are removed.
     if {[lsearch {Times Helvetica Courier} $fntName] >= 0} {
-	tk_messageBox -message [FormatTextForMessageBox  \
-	  [mc messrmstandardfonts]] \
+	::UI::MessageBox -message [mc messrmstandardfonts] \
 	  -icon error -type ok
 	return
     }

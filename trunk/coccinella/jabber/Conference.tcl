@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Conference.tcl,v 1.32 2004-11-30 15:11:10 matben Exp $
+# $Id: Conference.tcl,v 1.33 2004-12-02 08:22:33 matben Exp $
 
 package provide Conference 1.0
 
@@ -311,9 +311,8 @@ proc ::Conference::EnterGet {token} {
     
     # Verify.
     if {($state(roomname) == "") || ($state(server) == "")} {
-	tk_messageBox -type ok -icon error -parent $state(w) \
-	  -message [FormatTextForMessageBox \
-	  [mc jamessenterroomempty]]
+	::UI::MessageBox -type ok -icon error -parent $state(w) \
+	  -message [mc jamessenterroomempty]
 	return
     }	
     ::Conference::BusyEnterDlgIncr $token
@@ -338,9 +337,8 @@ proc ::Conference::EnterGetCB {token jlibName type subiq} {
     ::Conference::BusyEnterDlgIncr $token -1
     
     if {$type == "error"} {
-	tk_messageBox -type ok -icon error -parent $state(w) \
-	  -message [FormatTextForMessageBox \
-	  [mc jamesserrconfget [lindex $subiq 0] [lindex $subiq 1]]]
+	::UI::MessageBox -type ok -icon error -parent $state(w) \
+	  -message [mc jamesserrconfget [lindex $subiq 0] [lindex $subiq 1]]
 	return
     }
 
@@ -390,9 +388,8 @@ proc ::Conference::ResultCallback {roomJid jlibName type subiq} {
     ::Debug 2 "::Conference::ResultCallback roomJid=$roomJid, type=$type, subiq='$subiq'"
     
     if {$type == "error"} {
-	tk_messageBox -type ok -icon error  \
-	  -message [FormatTextForMessageBox \
-	  [mc jamessconffailed $roomJid [lindex $subiq 0] [lindex $subiq 1]]]
+	::UI::MessageBox -type ok -icon error -message  \
+	  [mc jamessconffailed $roomJid [lindex $subiq 0] [lindex $subiq 1]]
     } else {
 	::hooks::run groupchatEnterRoomHook $roomJid "conference"
     }
@@ -583,7 +580,7 @@ proc ::Conference::CreateGet {token} {
     # Verify.
     if {($state(server) == "") || ($state(roomname) == "") || \
     ($state(usemuc) && ($state(nickname) == ""))} {
-	tk_messageBox -type ok -icon error -parent $state(w) \
+	::UI::MessageBox -type ok -icon error -parent $state(w) \
 	  -message "Must provide a nickname to use in the room"
 	return
     }	
@@ -640,9 +637,8 @@ proc ::Conference::CreateMUCCB {token jlibName type args} {
     	    set errcode [lindex $argsArr(-error) 0]
     	    set errmsg [lindex $argsArr(-error) 1]
 	}
-	tk_messageBox -type ok -icon error -parent $state(w) \
-	  -message [FormatTextForMessageBox \
-	  [mc jamesserrconfgetcre $errcode $errmsg]]
+	::UI::MessageBox -type ok -icon error -parent $state(w) \
+	  -message [mc jamesserrconfgetcre $errcode $errmsg]
         set state(stattxt) "-- [mc jasearchwait] --"
         $state(wpopupserver) configure -state normal
         $state(wbtget) configure -state normal
@@ -679,9 +675,8 @@ proc ::Conference::CreateGetGetCB {token jlibName type subiq} {
     set state(stattxt) ""
     
     if {$type == "error"} {
-	tk_messageBox -type ok -icon error -parent $state(w) \
-	  -message [FormatTextForMessageBox \
-	  [mc jamesserrconfgetcre [lindex $subiq 0] [lindex $subiq 1]]]
+	::UI::MessageBox -type ok -icon error -parent $state(w) \
+	  -message [mc jamesserrconfgetcre [lindex $subiq 0] [lindex $subiq 1]]
 	return
     }
 
@@ -740,9 +735,8 @@ proc ::Conference::DoCreateCallback {usemuc roomJid jlibName type subiq} {
     ::Debug 2 "::Conference::DoCreateCallback"
     
     if {$type == "error"} {
-	tk_messageBox -type ok -icon error  \
-	  -message [FormatTextForMessageBox \
-	  [mc jamessconffailed $roomJid [lindex $subiq 0] [lindex $subiq 1]]]
+	::UI::MessageBox -type ok -icon error -message  \
+	  [mc jamessconffailed $roomJid [lindex $subiq 0] [lindex $subiq 1]]
     } elseif {[regexp {.+@([^@]+)$} $roomJid match service]} {
 		    
 	# Cache groupchat protocol type (muc|conference|gc-1.0).

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UserActions.tcl,v 1.40 2004-11-27 14:52:55 matben Exp $
+# $Id: UserActions.tcl,v 1.41 2004-12-02 08:22:35 matben Exp $
 
 namespace eval ::UserActions:: {
     
@@ -28,7 +28,7 @@ proc ::UserActions::DoPrintCanvas {wtop} {
 	}
 	windows {
 	    if {!$prefs(printer)} {
-		tk_messageBox -icon error -title [mc {No Printing}] \
+		::UI::MessageBox -icon error -title [mc {No Printing}] \
 		  -message [mc messprintnoextension]
 	    } else {
 		::Windows::Printer::Print $wCan
@@ -52,7 +52,7 @@ proc ::UserActions::DoPrintText {wtext args} {
     }
     switch -- $this(platform) {
 	macintosh {
-	    tk_messageBox -icon error -title [mc {No Printing}] \
+	    ::UI::MessageBox -icon error -title [mc {No Printing}] \
 	      -message [mc messprintnoextension]
 	}
 	macosx {
@@ -60,7 +60,7 @@ proc ::UserActions::DoPrintText {wtext args} {
 	}
 	windows {
 	    if {!$prefs(printer)} {
-		tk_messageBox -icon error -title [mc {No Printing}] \
+		::UI::MessageBox -icon error -title [mc {No Printing}] \
 		  -message [mc messprintnoextension]
 	    } else {
 		::Windows::Printer::DoPrintText $wtext
@@ -84,7 +84,7 @@ proc ::UserActions::PageSetup {wtop} {
 	}
 	windows {
 	    if {!$prefs(printer)} {
-		tk_messageBox -icon error -title [mc {No Printing}] \
+		::UI::MessageBox -icon error -title [mc {No Printing}] \
 		  -message [mc messprintnoextension]
 	    } else {
 		::Windows::Printer::PageSetup
@@ -129,7 +129,7 @@ proc ::UserActions::DoQuit {args} {
     }
     array set argsArr $args
     if {$argsArr(-warning)} {
-	set ans [tk_messageBox -title [mc Quit?] -type yesno -icon warning \
+	set ans [::UI::MessageBox -title [mc Quit?] -type yesno -icon warning \
 	  -default yes -message [mc messdoquit?]]
 	if {$ans == "no"} {
 	    return $ans

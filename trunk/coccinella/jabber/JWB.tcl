@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.43 2004-11-30 15:11:10 matben Exp $
+# $Id: JWB.tcl,v 1.44 2004-12-02 08:22:34 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -618,8 +618,8 @@ proc ::Jabber::WB::CloseHook {wtop} {
     
     switch -- $jwbstate($wtop,type) {
 	chat {
-	    set ans [tk_messageBox -icon info -parent $w -type yesno \
-	      -message [FormatTextForMessageBox [mc jamesswbchatlost]]]
+	    set ans [::UI::MessageBox -icon info -parent $w -type yesno \
+	      -message [mc jamesswbchatlost]]
 	    if {$ans != "yes"} {
 		return stop
 	    }
@@ -787,7 +787,7 @@ proc ::Jabber::WB::CheckIfOnline {wtop} {
     if {[string equal $jwbstate($wtop,type) "chat"]} {
 	set isok [$jstate(roster) isavailable $jwbstate($wtop,jid)]
 	if {!$isok} {
-	    tk_messageBox -type ok -icon warning \
+	    ::UI::MessageBox -type ok -icon warning \
 	      -parent [string trimright $wtop .] \
 	      -message [mc jamesschatoffline]
 	}
@@ -815,8 +815,8 @@ proc ::Jabber::WB::SendMessage {wtop jid msg args} {
 	eval {$jstate(jlib) send_message $jid -xlist $xlist} $args
     } err]} {
 	::Jabber::DoCloseClientConnection
-	tk_messageBox -title [mc Error] -icon error -type ok \
-	  -message [FormatTextForMessageBox $err]
+	::UI::MessageBox -title [mc Error] -icon error -type ok \
+	  -message $err
     }
 }
 
@@ -832,8 +832,8 @@ proc ::Jabber::WB::SendMessageList {wtop jid msgList args} {
 	eval {$jstate(jlib) send_message $jid -xlist $xlist} $args
     } err]} {
 	::Jabber::DoCloseClientConnection
-	tk_messageBox -title [mc Error] -icon error -type ok \
-	  -message [FormatTextForMessageBox $err]
+	::UI::MessageBox -title [mc Error] -icon error -type ok \
+	  -message $err
     }
 }
 
@@ -856,8 +856,8 @@ proc ::Jabber::WB::SendRawMessageList {jid msgList args} {
 	eval {$jstate(jlib) send_message $jid -xlist $xlist} $args
     } err]} {
 	::Jabber::DoCloseClientConnection
-	tk_messageBox -title [mc Error] -icon error -type ok \
-	  -message [FormatTextForMessageBox $err]
+	::UI::MessageBox -title [mc Error] -icon error -type ok \
+	  -message $err
     }    
 }
 
@@ -923,13 +923,13 @@ proc ::Jabber::WB::DoSendCanvas {wtop} {
 		
 	# If user not online no files may be sent off.
 	if {![$jstate(roster) isavailable $jid]} {
-	    set ans [tk_messageBox -icon warning -type yesno  \
+	    set ans [::UI::MessageBox -icon warning -type yesno  \
 	      -parent $wtoplevel  \
-	      -message [FormatTextForMessageBox "The user you are sending to,\
+	      -message "The user you are sending to,\
 	      \"$jid\", is not online, and if this message contains any images\
 	      or other similar entities, this user will not get them unless\
 	      you happen to be online while this message is being read.\
-	      Do you want to send it anyway?"]]
+	      Do you want to send it anyway?"]
 	    if {$ans == "no"} {
 		return
 	    }
@@ -937,8 +937,8 @@ proc ::Jabber::WB::DoSendCanvas {wtop} {
 	::CanvasCmd::DoSendCanvas $wtop
 	::WB::CloseWhiteboard     $wtop
     } else {
-	tk_messageBox -icon warning -type ok -parent $wtoplevel -message \
-	  [FormatTextForMessageBox [mc jamessinvalidjid]]
+	::UI::MessageBox -icon warning -type ok -parent $wtoplevel \
+	  -message [mc jamessinvalidjid]
     }
 }
 
@@ -1859,12 +1859,12 @@ proc ::Jabber::WB::DispatchToImporter {mime opts args} {
 	    set wCan [::WB::GetCanvasFromWtop $wtop]
 	    set errMsg [eval {::Import::DoImport $wCan $opts} $args]
 	    if {$errMsg != ""} {
-		tk_messageBox -title [mc Error] -icon error -type ok \
+		::UI::MessageBox -title [mc Error] -icon error -type ok \
 		  -message "Failed importing: $errMsg" \
 		  -parent [winfo toplevel $wCan]
 	    }
 	} else {
-	    tk_messageBox -title [mc Error] -icon error -type ok \
+	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
 	      -message [mc messfailmimeimp $mime] \
 	      -parent [winfo toplevel $wCan]
 	}
@@ -1891,8 +1891,8 @@ proc ::Jabber::WB::VerifyJIDWhiteboard {wtop} {
     }
     if {$jwbstate($wtop,send)} {
 	if {![jlib::jidvalidate $jwbstate($wtop,jid)]} {
-	    tk_messageBox -icon warning -type ok -parent $w -message  \
-	      [FormatTextForMessageBox [mc jamessinvalidjid]]
+	    ::UI::MessageBox -icon warning -type ok -parent $w \
+	      -message [mc jamessinvalidjid]
 	    return 0
 	}
     }
