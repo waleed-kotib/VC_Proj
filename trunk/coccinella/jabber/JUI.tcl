@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.64 2004-11-08 15:52:51 matben Exp $
+# $Id: JUI.tcl,v 1.65 2004-11-10 10:08:43 matben Exp $
 
 package provide JUI 1.0
 
@@ -29,7 +29,9 @@ namespace eval ::Jabber::UI:: {
 
     # Top header image if any.
     option add *JMain.headImage                   ""              widgetDefault
-    
+    option add *JMain.head.borderWidth            0               startupFile 
+    option add *JMain.head.relief                 flat            startupFile
+
     # Other icons.
     option add *JMain.contactOffImage             contactOff      widgetDefault
     option add *JMain.contactOnImage              contactOn       widgetDefault
@@ -37,35 +39,39 @@ namespace eval ::Jabber::UI:: {
     option add *JMain.resizeHandleImage           resizehandle    widgetDefault
 
     # Standard widgets.
-    option add *JMain.fnb.borderWidth             1               widgetDefault
-    option add *JMain.fnb.relief                  raised          widgetDefault
-    option add *JMain.bot.borderWidth             1               widgetDefault
-    option add *JMain.bot.padX                    0               widgetDefault
-    option add *JMain.bot.padY                    0               widgetDefault
-    option add *JMain.bot.relief                  raised          widgetDefault
-    
+    option add *JMain.fnb.borderWidth             1               startupFile
+    option add *JMain.fnb.relief                  raised          startupFile
+    option add *JMain.bot.borderWidth             1               startupFile
+    option add *JMain.bot.padX                    0               startupFile
+    option add *JMain.bot.padY                    0               startupFile
+    option add *JMain.bot.relief                  raised          startupFile
+    option add *JMain.bpad.height                 0               startupFile
+ 
+    option add *JMain.ButtonTray.borderWidth      1               startupFile
+    option add *JMain.ButtonTray.relief           raised          startupFile
+
     # Generic tree options.
-    option add *JMain*Tree.background             #dedede         widgetDefault
-    option add *JMain*Tree.backgroundImage        {}              widgetDefault
-    option add *JMain*Tree.highlightBackground    white           widgetDefault
-    option add *JMain*Tree.highlightColor         black           widgetDefault
-    option add *JMain*Tree.styleIcons             plusminus       widgetDefault
-    option add *JMain*Tree.pyjamasColor           white           widgetDefault
-    option add *JMain*Tree.selectBackground       black           widgetDefault
-    option add *JMain*Tree.selectForeground       white           widgetDefault
-    option add *JMain*Tree.selectMode             1               widgetDefault
-    option add *JMain*Tree.treeColor              gray50          widgetDefault
+    option add *JMain*Tree.background             #dedede         startupFile
+    option add *JMain*Tree.backgroundImage        {}              startupFile
+    option add *JMain*Tree.highlightBackground    white           startupFile
+    option add *JMain*Tree.highlightColor         black           startupFile
+    option add *JMain*Tree.styleIcons             plusminus       startupFile
+    option add *JMain*Tree.pyjamasColor           white           startupFile
+    option add *JMain*Tree.selectBackground       black           startupFile
+    option add *JMain*Tree.selectForeground       white           startupFile
+    option add *JMain*Tree.selectMode             1               startupFile
+    option add *JMain*Tree.treeColor              gray50          startupFile
 
     # The tab notebook options.
-    option add *JMain*MacTabnotebook.activeForeground    black        widgetDefault
-    option add *JMain*MacTabnotebook.activeTabColor      #efefef      widgetDefault
-    option add *JMain*MacTabnotebook.activeTabBackground #cdcdcd      widgetDefault
-    option add *JMain*MacTabnotebook.activeTabOutline    black        widgetDefault
-    option add *JMain*MacTabnotebook.background          white        widgetDefault
-    option add *JMain*MacTabnotebook.style               mac          widgetDefault
-    option add *JMain*MacTabnotebook.tabBackground       #dedede      widgetDefault
-    option add *JMain*MacTabnotebook.tabColor            #cecece      widgetDefault
-    option add *JMain*MacTabnotebook.tabOutline          gray20       widgetDefault
+    option add *JMain*MacTabnotebook.activeForeground    black        startupFile
+    option add *JMain*MacTabnotebook.activeTabColor      #efefef      startupFile
+    option add *JMain*MacTabnotebook.activeTabBackground #cdcdcd      startupFile
+    option add *JMain*MacTabnotebook.activeTabOutline    black        startupFile
+    option add *JMain*MacTabnotebook.background          white        startupFile
+    option add *JMain*MacTabnotebook.style               mac          startupFile
+    option add *JMain*MacTabnotebook.tabBackground       #dedede      startupFile
+    option add *JMain*MacTabnotebook.tabColor            #cecece      startupFile
+    option add *JMain*MacTabnotebook.tabOutline          gray20       startupFile
 
     variable treeOpts {background backgroundImage highlightBackground \
       highlightColor indention styleIcons pyjamasColor selectBackground \
@@ -282,7 +288,7 @@ proc ::Jabber::UI::Build {w} {
     set headImage [::Theme::GetImage [option get $wmain headImage {}]]
     if {$headImage != ""} {
 	label $wmain.head -image $headImage
-	pack  $wmain.head -side top -anchor w -padx 0 -pady 0
+	pack  $wmain.head -side top -anchor w
     }
     
     # Shortcut button part.
@@ -305,8 +311,9 @@ proc ::Jabber::UI::Build {w} {
         
     set fontS [option get . fontSmall {}]
     
-    set wtray ${wmain}.top
-    ::buttontray::buttontray $wtray 52 -borderwidth 1 -relief raised
+    set wtray $wmain.top
+    # D = -borderwidth 1 -relief raised
+    ::buttontray::buttontray $wtray 52
     pack $wtray -side top -fill x
     set jwapp(wtray) $wtray
     
@@ -328,12 +335,18 @@ proc ::Jabber::UI::Build {w} {
 
     set shortBtWidth [$wtray minwidth]
 
+    # Keep empty frame for any padding.
+    frame $wmain.bpad -bg red -height 0
+    if {[$wmain.bpad cget -height] > 0} {
+	pack  $wmain.bpad -side bottom -fill x
+    }
+
     # Build bottom and up to handle clipping when resizing.
     # Jid entry with electric plug indicator.
-    set wbot              ${wmain}.bot.f
-    set jwapp(elplug)     ${wbot}.icon
-    set jwapp(mystatus)   ${wbot}.stat
-    set jwapp(myjid)      ${wbot}.jid
+    set wbot              $wmain.bot.f
+    set jwapp(elplug)     $wbot.icon
+    set jwapp(mystatus)   $wbot.stat
+    set jwapp(myjid)      $wbot.jid
 
     frame $wmain.bot
     pack  $wmain.bot -side bottom -fill x
@@ -342,8 +355,8 @@ proc ::Jabber::UI::Build {w} {
     pack  $wbot -side bottom -fill x
     ::Jabber::Roster::BuildStatusMenuButton $jwapp(mystatus)
     pack  $jwapp(mystatus) -side left -pady 2 -padx 6
-    label ${wbot}.size -image $iconResize
-    pack  ${wbot}.size -padx 0 -pady 0 -side right -anchor s
+    label $wbot.size -image $iconResize
+    pack  $wbot.size -padx 0 -pady 0 -side right -anchor s
     label $jwapp(elplug) -image $iconContactOff
     pack  $jwapp(elplug) -side right -pady 0 -padx 0
     entry $jwapp(myjid) -state disabled -width 0 \
@@ -351,7 +364,7 @@ proc ::Jabber::UI::Build {w} {
     pack  $jwapp(myjid) -side left -fill x -expand 1 -pady 0 -padx 0
         
     # Notebook frame.
-    set frtbook ${wmain}.fnb
+    set frtbook $wmain.fnb
     # D = -bd 1 -relief raised
     frame $frtbook    
     pack  $frtbook -fill both -expand 1

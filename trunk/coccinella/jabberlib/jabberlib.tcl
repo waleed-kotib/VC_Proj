@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.72 2004-10-29 13:17:16 matben Exp $
+# $Id: jabberlib.tcl,v 1.73 2004-11-10 10:08:44 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -2768,7 +2768,8 @@ proc jlib::vcard_get {jlibname to cmd} {
 
 # jlib::vcard_set --
 #
-#       Sends our vCard to the server.
+#       Sends our vCard to the server. Internally we use all lower case
+#       but the spec (JEP-0054) says that all tags be all upper case.
 #
 # Arguments:
 #       jlibname:   the instance of this jlib.
@@ -2792,21 +2793,22 @@ proc jlib::vcard_set {jlibname cmd args} {
     # All "sub" elements with no children.
     foreach tag {fn nickname bday url title role desc} {
 	if {[info exists arr(-$tag)]} {
-	    lappend subelem [wrapper::createtag $tag -chdata $arr(-$tag)]
+	    lappend subelem [wrapper::createtag [string toupper $tag] \
+	      -chdata $arr(-$tag)]
 	}
     }
     if {[info exists arr(-email_internet_pref)]} {
 	set elem {}
-	lappend elem [wrapper::createtag "internet"]
-	lappend elem [wrapper::createtag "pref"]
-	lappend subelem [wrapper::createtag "email" \
+	lappend elem [wrapper::createtag "INTERNET"]
+	lappend elem [wrapper::createtag "PREF"]
+	lappend subelem [wrapper::createtag "EMAIL" \
 	  -chdata $arr(-email_internet_pref) -subtags $elem]
     }
     if {[info exists arr(-email_internet)]} {
 	foreach email $arr(-email_internet) {
 	    set elem {}
-	    lappend elem [wrapper::createtag "internet"]
-	    lappend subelem [wrapper::createtag "email" \
+	    lappend elem [wrapper::createtag "INTERNET"]
+	    lappend subelem [wrapper::createtag "EMAIL" \
 	      -chdata $email -subtags $elem]
 	}
     }
@@ -2816,27 +2818,31 @@ proc jlib::vcard_set {jlibname cmd args} {
 	set elem {}
 	foreach key [array names arr "-${tag}_*"] {
 	    regexp -- "-${tag}_(.+)" $key match sub
-	    lappend elem [wrapper::createtag $sub -chdata $arr($key)]
+	    lappend elem [wrapper::createtag [string toupper $sub] \
+	      -chdata $arr($key)]
 	}
     
 	# Insert subsub elements where they belong.
 	if {[llength $elem]} {
-	    lappend subelem [wrapper::createtag $tag -subtags $elem]
+	    lappend subelem [wrapper::createtag [string toupper $tag] \
+	      -subtags $elem]
 	}
     }
     
     # The <adr><home/>, <adr><work/> sub elements.
     foreach tag {adr_home adr_work} {
 	regexp -- {([^_]+)_(.+)} $tag match head sub
-	set elem [list [wrapper::createtag $sub]]
+	set elem [list [wrapper::createtag [string toupper $sub]]]
 	set haveThisTag 0
 	foreach key [array names arr "-${tag}_*"] {
 	    set haveThisTag 1
 	    regexp -- "-${tag}_(.+)" $key match sub
-	    lappend elem [wrapper::createtag $sub -chdata $arr($key)]
+	    lappend elem [wrapper::createtag [string toupper $sub] \
+	      -chdata $arr($key)]
 	}		
 	if {$haveThisTag} {
-	    lappend subelem [wrapper::createtag $head -subtags $elem]
+	    lappend subelem [wrapper::createtag [string toupper $head] \
+	      -subtags $elem]
 	}
     }	
     
@@ -2844,9 +2850,9 @@ proc jlib::vcard_set {jlibname cmd args} {
     foreach tag [array names arr "-tel_*"] {
 	if {[regexp -- {-tel_([^_]+)_([^_]+)} $tag match second third]} {
 	    set elem {}
-	    lappend elem [wrapper::createtag $second]
-	    lappend elem [wrapper::createtag $third]
-	    lappend subelem [wrapper::createtag "tel" -chdata $arr($tag) \
+	    lappend elem [wrapper::createtag [string toupper $second]]
+	    lappend elem [wrapper::createtag [string toupper $third]]
+	    lappend subelem [wrapper::createtag "TEL" -chdata $arr($tag) \
 	      -subtags $elem]
 	}
     }

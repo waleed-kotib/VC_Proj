@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: Theme.tcl,v 1.14 2004-09-13 09:05:19 matben Exp $
+# $Id: Theme.tcl,v 1.15 2004-11-10 10:08:44 matben Exp $
 
 package provide Theme 1.0
 
@@ -34,18 +34,18 @@ proc ::Theme::Init { } {
     # 2) read rdb file for this specific platform, if exists.
     # 3) read rdb file for any theme we have chosen. Search first
     #    inside the sources and then in the alternative user directory.
-    option readfile [file join $this(resourcedbPath) default.rdb] startupFile
+    option readfile [file join $this(resourcedbPath) default.rdb] userDefault
     set f [file join $this(resourcedbPath) $this(platform).rdb]
     if {[file exists $f]} {
-	option readfile $f startupFile
+	option readfile $f userDefault
     }
     set f [file join $this(resourcedbPath) $prefs(themeName).rdb]
     if {[file exists $f]} {
-	option readfile $f startupFile
+	option readfile $f userDefault
     }
     set f [file join $this(altResourcedbPath) $prefs(themeName).rdb]
     if {[file exists $f]} {
-	option readfile $f startupFile
+	option readfile $f userDefault
     }
 
     # Search for image files in this order:

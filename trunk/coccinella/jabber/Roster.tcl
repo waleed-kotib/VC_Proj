@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.94 2004-11-08 15:52:52 matben Exp $
+# $Id: Roster.tcl,v 1.95 2004-11-10 10:08:43 matben Exp $
 
 package provide Roster 1.0
 
@@ -31,14 +31,14 @@ namespace eval ::Jabber::Roster:: {
     set fontSB [option get . fontSmallBold {}]
     
     # Standard widgets and standard options.
-    option add *Roster.borderWidth          1               widgetDefault
-    option add *Roster.relief               raised          widgetDefault
-    option add *Roster.box.borderWidth      1               widgetDefault
-    option add *Roster.box.padX             4               widgetDefault
-    option add *Roster.box.padY             4               widgetDefault
-    option add *Roster.box.relief           sunken          widgetDefault
-    option add *Roster.pad.fstat.padX       8               widgetDefault
-    option add *Roster.pad.fstat.padY       2               widgetDefault
+    option add *Roster.borderWidth          0               startupFile
+    option add *Roster.relief               flat            startupFile
+    option add *Roster.pad.padX             4               startupFile
+    option add *Roster.pad.padY             4               startupFile
+    option add *Roster*box.borderWidth      1               startupFile
+    option add *Roster*box.relief           sunken          startupFile
+    option add *Roster.stat.f.padX          8               startupFile
+    option add *Roster.stat.f.padY          2               startupFile
     
     # Specials.
     option add *Roster.backgroundImage      sky             widgetDefault
@@ -277,26 +277,34 @@ proc ::Jabber::Roster::Build {w} {
 
     # The frame of class Roster. D = -bd 0 -relief flat
     frame $w -class Roster
-
+    
+    # Keep empty frame for any padding.
+    frame $w.tpad
+    pack  $w.tpad -side top -fill x
+    
     # Tree frame with scrollbars.
     set wroster $w
-    set wbox    $w.box
+    set wpad    $w.pad
+    set wbox    $w.pad.box
     set wxsc    $wbox.xsc
     set wysc    $wbox.ysc
     set wtree   $wbox.tree
     
-    # D = -border 1 -relief sunken -padx 4 -pady 4
+    # D = -padx 4 -pady 4
+    frame $wpad
+    pack  $wpad -side top -fill both -expand 1
+    # D = -border 1 -relief sunken
     frame $wbox
     pack  $wbox -side top -fill both -expand 1
     
     # D = -padx 0 -pady 0
-    frame $w.pad
-    frame $w.pad.fstat
-    pack  $w.pad -side bottom -fill x
-    pack  $w.pad.fstat -side bottom -fill x
-    set wwave $w.pad.fstat.wa
+    frame $w.stat
+    frame $w.stat.f
+    pack  $w.stat -side bottom -fill x
+    pack  $w.stat.f -side bottom -fill x
+    set wwave $w.stat.f.wa
     set waveImage [::Theme::GetImage [option get $w waveImage {}]]  
-    ::wavelabel::wavelabel $wwave -bd 2 -type image -image $waveImage
+    ::wavelabel::wavelabel $wwave -type image -image $waveImage
     pack $wwave -side bottom -fill x
     
     set opts {}
