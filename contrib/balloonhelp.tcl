@@ -4,7 +4,7 @@
 #
 #  Code idee from Harrison & McLennan
 #  
-# $Id: balloonhelp.tcl,v 1.8 2004-05-16 15:04:26 matben Exp $
+# $Id: balloonhelp.tcl,v 1.9 2004-05-29 13:20:58 matben Exp $
 
 package provide balloonhelp 1.0
 
@@ -63,7 +63,7 @@ proc ::balloonhelp::Build { } {
       -bd 0 -relief flat
     pack [label .balloonhelp.info -bg #FFFF9F] -side left -fill y
     if {[string equal $locals(platform) "macintosh"]} {
-		pack [frame .balloonhelp.pad -bg #FFFF9F -width 12] -side right
+	pack [frame .balloonhelp.pad -bg #FFFF9F -width 12] -side right
     }
     wm overrideredirect .balloonhelp 1
     wm transient .balloonhelp
@@ -184,7 +184,14 @@ proc ::balloonhelp::Cancel {win} {
 	after cancel $locals(pending)
 	unset locals(pending)
     }
-    catch {wm withdraw .balloonhelp}
+    if {[winfo exists .balloonhelp]} {
+	catch {
+	    #puts "[focus -lastfor .balloonhelp]"
+	    #focus [focus -lastfor .balloonhelp]
+	    wm withdraw .balloonhelp
+	}
+	#focus .
+    }
 }
 
 proc ::balloonhelp::Show {win type} {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.14 2004-05-26 07:36:35 matben Exp $
+# $Id: Disco.tcl,v 1.15 2004-05-29 13:20:58 matben Exp $
 
 package provide Disco 1.0
 
@@ -22,6 +22,25 @@ namespace eval ::Jabber::Disco:: {
 	disco           http://jabber.org/protocol/disco 
 	items           http://jabber.org/protocol/disco#items 
 	info            http://jabber.org/protocol/disco#info
+    }
+    
+    # Disco catagories from Jabber :: Registrar determines if dir or not.
+    variable categoryShowDir
+    array set categoryShowDir {
+	auth                  0
+	automation            1
+	client                1
+	collaboration         1
+	component             1
+	conference            1
+	directory             1
+	gateway               0
+	headline              0
+	hierarchy             1
+	proxy                 0
+	pubsub                1
+	server                1
+	store                 1
     }
     
     # Template for the browse popup menu.
@@ -221,6 +240,11 @@ proc ::Jabber::Disco::InfoCB {disconame type from subiq args} {
     upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::Jabber::Disco::InfoCB type=$type, from=$from"
+    if {$type != "ok"} {
+	::Jabber::AddErrorLog [clock format [clock seconds] -format "%H:%M:%S"] \
+	  $from $subiq
+	return
+    }
     
     # The info contains the name attribute (optional) which may
     # need to be set since we get items before name.
@@ -229,13 +253,45 @@ proc ::Jabber::Disco::InfoCB {disconame type from subiq args} {
     if {![info exists wtree] || ![winfo exists $wtree]} {
 	return
     }
-    set from [jlib::jidmap $from]
-    set name [$jstate(disco) name $from]
-    if {$name != ""} {
-	foreach v [$wtree find withtag $from] {
+    set from  [jlib::jidmap $from]
+    set name  [$jstate(disco) name $from]
+    foreach v [$wtree find withtag $from] {
+	if {$name != ""} {
 	    $wtree itemconfigure $v -text $name
 	}
+	set treectag [$wtree itemconfigure $v -canvastags]
+	::Jabber::Disco::MakeBalloonHelp $from $treectag
     }
+    ::Jabber::Disco::SetDirItemUsingCategory $from
+}
+
+proc ::Jabber::Disco::SetDirItemUsingCategory {jid} {
+    variable wtree
+    
+    if {[::Jabber::Disco::IsDirCategory $jid]} {
+	foreach v [$wtree find withtag $jid] {
+	    $wtree itemconfigure $v -dir 1
+	}
+    }
+}
+
+proc ::Jabber::Disco::IsDirCategory {jid} {
+    variable categoryShowDir
+    upvar ::Jabber::jstate jstate
+    
+    set isdir 0
+    
+    # Ad-hoc way to figure out if dir or not. Use the category attribute.
+    set types [$jstate(disco) types $jid]
+    foreach type $types {
+	set category [lindex [split $type /] 0] 
+	if {[info exists categoryShowDir($category)] && \
+	  $categoryShowDir($category)} {
+	    set isdir 1
+	    break
+	}
+    }
+    return $isdir
 }
 	    
 # Jabber::Disco::ParseGetInfo --
@@ -570,18 +626,23 @@ proc ::Jabber::Disco::CloseTreeCmd {w v} {
 proc ::Jabber::Disco::AddToTree {v} {    
     variable wtree    
     variable treeuid
+    variable categoryShowDir
     upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jserver jserver
  
-    # We disco servers jid 'items+info', and disco its childrens 'info'.
-    set treectag item[incr treeuid]
-    
+    # We disco servers jid 'items+info', and disco its childrens 'info'.    
     ::Debug 4 "::Jabber::Disco::AddToTree v='$v'"
 
-    set jid   [lindex $v end]
-    set isdir 1
-    set icon  ""
-
+    set jid [lindex $v end]
+    set icon ""
+    
+    # Ad-hoc way to figure out if dir or not. Use the category attribute.
+    # <identity category='server' type='im' name='ejabberd'/>
+    if {[llength $v] == 1} {
+	set isdir 1
+    } else {
+	set isdir [::Jabber::Disco::IsDirCategory $jid]
+    }
+    
     # Display text string. Room participants with their nicknames.
     jlib::splitjid $jid jid2 res
     if {[$jstate(disco) isroom $jid2] && [string length $res]} {
@@ -607,18 +668,13 @@ proc ::Jabber::Disco::AddToTree {v} {
         
     # Do not create if exists which preserves -open.
     if {![$wtree isitem $v]} {
+	set treectag item[incr treeuid]
 	$wtree newitem $v -text $name -tags $jid -style $style -dir $isdir \
 	  -image $icon -open $isopen -canvastags $treectag
+	
+	# Balloon.
+	::Jabber::Disco::MakeBalloonHelp $jid $treectag
     }
-    
-    # Balloon.
-    set jidtxt $jid
-    if {[string length $jid] > 30} {
-	set jidtxt "[string range $jid 0 28]..."
-    }
-    set types [$jstate(disco) types $jid]
-    set msg "jid: $jidtxt\ntype: $types"
-    ::balloonhelp::balloonfortree $wtree $treectag $msg
 
     # Add all child elements as well.
     set childs [$jstate(disco) children $jid]
@@ -626,6 +682,19 @@ proc ::Jabber::Disco::AddToTree {v} {
 	set cv [concat $v $cjid]
 	::Jabber::Disco::AddToTree $cv
      }	    
+}
+
+proc ::Jabber::Disco::MakeBalloonHelp {jid treectag} {
+    variable wtree    
+    upvar ::Jabber::jstate jstate
+    
+    set jidtxt $jid
+    if {[string length $jid] > 30} {
+	set jidtxt "[string range $jid 0 28]..."
+    }
+    set types [$jstate(disco) types $jid]
+    set msg "jid: $jidtxt\ntype: $types"
+    ::balloonhelp::balloonfortree $wtree $treectag $msg
 }
 
 proc ::Jabber::Disco::Refresh {jid} {    
