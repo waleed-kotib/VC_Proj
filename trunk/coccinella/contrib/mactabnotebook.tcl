@@ -5,9 +5,9 @@
 #      This widget is "derived" from the notebook widget.
 #      Code idee from Harrison & McLennan
 #      
-#  Copyright (c) 2002-2003  Mats Bengtsson
+#  Copyright (c) 2002-2004  Mats Bengtsson
 #  
-# $Id: mactabnotebook.tcl,v 1.8 2004-01-13 14:50:20 matben Exp $
+# $Id: mactabnotebook.tcl,v 1.9 2004-01-20 14:20:43 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -26,10 +26,11 @@
 #	MacTabnotebook class:
 #	-activetabcolor, activeTabColor, ActiveTabColor
 #	-margin, margin, Margin
+#	-orient, orient, Orient
 #	-style, style, Style
 #	-tabbackground, tabBackground, TabBackground
 #	-tabcolor, tabColor, TabColor
-#	-tabfont, tabFont, TabFont
+#	-font, font, Font
 #	-takefocus, takeFocus, TakeFocus
 #	
 #   WIDGET COMMANDS
@@ -37,16 +38,16 @@
 #      pathName configure ?option? ?value option value ...?
 #      pathName deletepage pageName
 #      pathName displaypage ?pageName?
-#      pathName newpage pageName ?-text value?
+#      pathName newpage pageName ?-text value -image imageName?
 #      pathName pages
 #
 # ########################### CHANGES ##########################################
 #
 #       1.0     Original version
-#       1.1     Added -text option to 'newpage' method
+#       2.0     added large number stuff, mainly styling things
 
 package require notebook
-package provide mactabnotebook 1.0
+package provide mactabnotebook 2.0
 
 namespace eval ::mactabnotebook::  {
     
@@ -81,6 +82,7 @@ proc ::mactabnotebook::Init { } {
     variable toDrawPoly
     variable toDrawLine
     variable toDrawPolyAqua
+    variable toDrawPolyWinXP
     variable widgetCommands
     variable widgetGlobals
     variable widgetOptions
@@ -111,65 +113,119 @@ proc ::mactabnotebook::Init { } {
     # List all allowed options with their database names and class names.
     
     array set widgetOptions {
+	-accent1             {accent1              Accent1             }  \
+	-accent2             {accent2              Accent2             }  \
 	-activeforeground    {activeForeground     ActiveForeground    }  \
 	-activetabbackground {activeTabBackground  ActiveTabBackground }  \
 	-activetabcolor      {activeTabColor       ActiveTabColor      }  \
 	-activetaboutline    {activeTabOutline     ActiveTabOutline    }  \
 	-background          {background           Background          }  \
 	-borderwidth         {borderWidth          BorderWidth         }  \
+	-font                {font                 Font                }  \
 	-foreground          {foreground           Foreground          }  \
-	-margin              {margin               Margin              }  \
+	-ipadx               {ipadX                PadX                }  \
+	-ipady               {ipadY                PadY                }  \
+	-margin1             {margin1              Margin              }  \
+	-margin2             {margin2              Margin              }  \
+	-orient              {orient               Orient              }  \
 	-relief              {relief               Relief              }  \
 	-style               {style                Style               }  \
 	-tabbackground       {tabBackground        TabBackground       }  \
 	-tabcolor            {tabColor             TabColor            }  \
-	-tabfont             {tabFont              TabFont             }  \
+	-tabgradient1        {tabGradient1         TabColor            }  \
+	-tabgradient2        {tabGradient2         TabColor            }  \
 	-taboutline          {tabOutline           TabOutline          }  \
 	-takefocus           {takeFocus            TakeFocus           }  \
+	-ymargin1            {yMargin1             YMargin1            }  \
     }
     set notebookOptions {-borderwidth -relief}
-    set tabOptions {-activeforeground -activetabcolor -activetaboutline \
-      -background -foreground -margin -style \
-      -tabbackground -tabcolor -tabfont -taboutline -takefocus}
+    set tabOptions(nostyle) {
+	-background -foreground
+	-font -ipadx -ipady 
+	-orient -style -takefocus
+    }
+    set tabOptions(styled) {
+	-accent1 -accent2
+	-activeforeground -activetabcolor -activetaboutline -activetabbackground
+	-margin1 -margin2 
+	-tabgradient1 -tabgradient2 -tabbackground -tabcolor -taboutline
+	-ymargin1
+    }
   
     # The legal widget commands. These are actually the Notebook commands.
     set widgetCommands {cget configure deletepage displaypage newpage pages}
 
-    option add *MacTabnotebook.activeForeground    black        widgetDefault
-    option add *MacTabnotebook.activeTabColor      #efefef      widgetDefault
-    option add *MacTabnotebook.activeTabBackground #cdcdcd      widgetDefault
-    option add *MacTabnotebook.activeTabOutline    black        widgetDefault
-    option add *MacTabnotebook.background          white        widgetDefault
-    option add *MacTabnotebook.margin              6            widgetDefault
-    option add *MacTabnotebook.style               classic      widgetDefault
-    option add *MacTabnotebook.tabBackground       #dedede      widgetDefault
-    option add *MacTabnotebook.tabColor            #cecece      widgetDefault
-    option add *MacTabnotebook.tabOutline          gray20       widgetDefault
-    option add *Notebook.takeFocus                 0            widgetDefault
+    # Nonstyled options.
+    option add *MacTabnotebook.background              white        widgetDefault
+    option add *MacTabnotebook.foreground              black        widgetDefault
+    option add *MacTabnotebook.ipadX                   6            widgetDefault
+    option add *MacTabnotebook.ipadY                   1            widgetDefault
+    option add *MacTabnotebook.orient                  normal       widgetDefault
+    option add *MacTabnotebook.style                   winxp        widgetDefault
+    option add *Notebook.takeFocus                     0            widgetDefault
 
-    # Aqua
-    if {0} {
-	option add *MacTabnotebook.activeTabBackground #cdcdcd      widgetDefault
-	option add *MacTabnotebook.tabBackground       #acacac      widgetDefault    
-	option add *MacTabnotebook.outline             #656565      widgetDefault    
-	option add *MacTabnotebook.foreground          #3a3a3a      widgetDefault    
-    }
+    # Styled options for Mac Classic:
+    option add *MacTabnotebook.activeForegroundMac     black        widgetDefault
+    option add *MacTabnotebook.activeTabColorMac       #efefef      widgetDefault
+    option add *MacTabnotebook.activeTabBackgroundMac  #cdcdcd      widgetDefault
+    option add *MacTabnotebook.activeTabOutlineMac     black        widgetDefault
+    option add *MacTabnotebook.margin1Mac              2            widgetDefault
+    option add *MacTabnotebook.margin2Mac              6            widgetDefault
+    option add *MacTabnotebook.tabBackgroundMac        #dedede      widgetDefault
+    option add *MacTabnotebook.tabColorMac             #cecece      widgetDefault
+    option add *MacTabnotebook.tabOutlineMac           gray20       widgetDefault
+    option add *MacTabnotebook.yMargin1Mac             6            widgetDefault
+    
+    # Aqua:
+    # taboutline          #575757 - #6a6a6a
+    # activetabbackground #aaaaaa - #c6c6c6
+    # tabbackground       #848484 - #949494
+    option add *MacTabnotebook.activeForegroundAqua    #3a3a3a      widgetDefault
+    option add *MacTabnotebook.activeTabBackgroundAqua #bbbbbb      widgetDefault
+    option add *MacTabnotebook.margin1Aqua             0            widgetDefault
+    option add *MacTabnotebook.margin2Aqua             0            widgetDefault
+    option add *MacTabnotebook.tabBackgroundAqua       #8a8a8a      widgetDefault    
+    option add *MacTabnotebook.tabOutlineAqua          #575757      widgetDefault    
+    option add *MacTabnotebook.backgroundAqua          #bebebe      widgetDefault
+    option add *MacTabnotebook.foregroundAqua          #3a3a3a      widgetDefault    
+    option add *MacTabnotebook.yMargin1Aqua            1            widgetDefault
+    
+    # Winxp:
+    # taboutline          #a0b4bf
+    # activetabbackground #ffffff
+    # tabbackground       #c8c8de - #ffffff
+    # tabaccent           #ea9a3c, #ffd04d
+    option add *MacTabnotebook.accent1Winxp            #ea9a3c      widgetDefault
+    option add *MacTabnotebook.accent2Winxp            #ffd04d      widgetDefault
+    option add *MacTabnotebook.activeForegroundWinxp   black        widgetDefault
+    option add *MacTabnotebook.activeTabBackgroundWinxp white       widgetDefault
+    option add *MacTabnotebook.margin1Winxp            0            widgetDefault
+    option add *MacTabnotebook.margin2Winxp            2            widgetDefault
+    option add *MacTabnotebook.tabBackgroundWinxp      white        widgetDefault    
+    option add *MacTabnotebook.tabGradient1Winxp       white        widgetDefault    
+    option add *MacTabnotebook.tabGradient2Winxp       #cecee2      widgetDefault    
+    option add *MacTabnotebook.tabOutlineWinxp         #a0b4bf      widgetDefault    
+    option add *MacTabnotebook.yMargin1Winxp           1            widgetDefault
     
     # Platform specifics...
     switch -- $this(platform) {
 	unix {
-	    option add *MacTabnotebook.tabFont    {Helvetica -12 bold}   widgetDefault
+	    option add *MacTabnotebook.font    {Helvetica -12}   widgetDefault
 	}
 	windows {
-	    option add *MacTabnotebook.tabFont    {system}   widgetDefault
+	    option add *MacTabnotebook.font    {system}   widgetDefault
 	}
 	macintosh {
-	    option add *MacTabnotebook.tabFont    {system}    widgetDefault
+	    option add *MacTabnotebook.font    {system}    widgetDefault
 	}
 	macosx {
-	    option add *MacTabnotebook.tabFont    {{Lucida Grande} 12 bold} widgetDefault
+	    option add *MacTabnotebook.font    {{Lucida Grande} 12} widgetDefault
 	}
     }
+    
+    # Keep a level of indirection between the tabs name and its corresponding
+    # canvas tags by having an uid for each tab and an array 'name2uid'.
+    variable uid 0
     
     # Canvas drawing commands for the tabs as:
     # 
@@ -184,9 +240,9 @@ proc ::mactabnotebook::Init { } {
 	  [expr $xplm + $wd - 2] $ymim \
 	  [expr $xplm + $wd] [expr $ymim + 1] \
 	  [expr $xplm + $wd + 2] [expr $ymim + 5] \
-	  [expr $x + $wd + 2 * $margin] 0  \
+	  [expr $x + $wd + 2 * $margin2] 0  \
 	  2000 0 2000 9 0 9}  \
-	  black $color {[list $name tab tab-$name]}}
+	  black $color {[list $tname tab tab-$tname]}}
 	
     set toDrawLine {
 	{1 8 1 1 [expr $x + 1] 1 [expr $x + 1] 0  \
@@ -194,21 +250,21 @@ proc ::mactabnotebook::Init { } {
 	  [expr $xplm] [expr $ymim + 2] \
 	  [expr $xplm + 2] [expr $ymim + 1] \
 	  [expr $xplm + $wd - 2] [expr $ymim + 1]} \
-	#cecece {[list $name ln1up ln1up-$name]}  \
+	#cecece {[list $tname ln1up ln1up-$tname]}  \
 	{2 7 2 2 [expr $x + 1] 2 [expr $x + 2] 0  \
 	  [expr $xplm - 0] [expr $ymim + 5] \
 	  [expr $xplm] [expr $ymim + 3] \
 	  [expr $xplm + 2] [expr $ymim + 2] \
 	  [expr $xplm + $wd - 1] [expr $ymim + 2]} \
-	#dedede {[list $name ln2up ln2up-$name]}  \
+	#dedede {[list $tname ln2up ln2up-$tname]}  \
 	{[expr $xplm + $wd] [expr $ymim + 3] \
 	[expr $xplm + $wd + 1] [expr $ymim + 6] \
-	[expr $x + $wd + 2 * $margin - 2] -2}  \
-	#bdbdbd {[list $name ln2dn ln2dn-$name]}  \
+	[expr $x + $wd + 2 * $margin2 - 2] -2}  \
+	#bdbdbd {[list $tname ln2dn ln2dn-$tname]}  \
 	{[expr $xplm + $wd] [expr $ymim + 2] \
 	[expr $xplm + $wd + 1] [expr $ymim + 4] \
-	[expr $x + $wd + 2 * $margin - 1] -1}  \
-	#adadad {[list $name ln1dn ln1dn-$name]}  \
+	[expr $x + $wd + 2 * $margin2 - 1] -1}  \
+	#adadad {[list $tname ln1dn ln1dn-$tname]}  \
 	{0 0 $x 0 \
 	[expr $xplm - 2] [expr $ymim + 5] \
 	[expr $xplm] [expr $ymim + 1] \
@@ -216,16 +272,16 @@ proc ::mactabnotebook::Init { } {
 	[expr $xplm + $wd - 2] [expr $ymim] \
 	[expr $xplm + $wd] [expr $ymim + 1] \
 	[expr $xplm + $wd + 2] [expr $ymim + 5] \
-	[expr $x + $wd + 2 * $margin] 0}  \
-	black {[list $name ln-$name]}   \
-	{[expr $x + $wd + 2 * $margin] 1 2000 1}   \
-	#cecece {[list $name ln1tp-$name]}  \
-	{[expr $x + $wd + 2 * $margin] 2 2000 2}   \
-	#ffffff {[list $name ln2tp-$name]}  \
+	[expr $x + $wd + 2 * $margin2] 0}  \
+	black {[list $tname ln-$tname]}   \
+	{[expr $x + $wd + 2 * $margin2] 1 2000 1}   \
+	#cecece {[list $tname ln1tp-$tname]}  \
+	{[expr $x + $wd + 2 * $margin2] 2 2000 2}   \
+	#ffffff {[list $tname ln2tp-$tname]}  \
 	{2 8 2000 8}   \
-	#9c9c9c {[list $name ln1bt-$name]}  \
+	#9c9c9c {[list $tname ln1bt-$tname]}  \
 	{3 7 2000 7}   \
-	#bdbdbd {[list $name ln2bt-$name]}  \
+	#bdbdbd {[list $tname ln2bt-$tname]}  \
     }
   
     # Helpers to easily switch from one state to another.
@@ -246,11 +302,17 @@ proc ::mactabnotebook::Init { } {
     
     # Aqua style tabs:
     #
-    # polyogon: {coords col fill tags}
+    # polyogon: {coords tags}
     set toDrawPolyAqua {
 	{-2 0 -2 $yl $xleft $yl $xleft $yu $xright $yu $xright $yl \
 	  2000 $yl 2000 0}
-	$outline $fill $tags
+	{[list poly $tname poly-$tname]}
+    }
+    set toDrawPolyWinXP {
+	{-2 0 -2 $yl $xleft $yl $xleft [expr $yu+2] [expr $xleft+2] $yu \
+	  [expr $xright-2] $yu $xright [expr $yu+2] $xright $yl \
+	  2000 $yl 2000 0}
+	{[list poly $tname poly-$tname]}
     }
     
     # This allows us to clean up some things when we go away.
@@ -293,48 +355,57 @@ proc ::mactabnotebook::mactabnotebook {w args} {
 	variable options
 	variable widgets
 	variable tnInfo
+	variable name2uid
     }
     
     # Set simpler variable names.
     upvar ::mactabnotebook::${w}::options options
     upvar ::mactabnotebook::${w}::widgets widgets
     upvar ::mactabnotebook::${w}::tnInfo tnInfo
+    upvar ::mactabnotebook::${w}::name2uid name2uid
 
     # We use a frame for this specific widget class.
-    set widgets(this) [frame $w -class MacTabnotebook]
-    set widgets(canvas) [canvas $w.tabs -highlightthickness 0]
-    set widgets(frame) ::mactabnotebook::${w}::${w}
+    set widgets(this)    [frame $w -class MacTabnotebook]
+    set widgets(canvas)  $w.tabs
+    set widgets(frame)   ::mactabnotebook::${w}::${w}
     set widgets(nbframe) $w.notebook
-    pack $w.tabs -fill x
     
     # Necessary to remove the original frame procedure from the global
     # namespace into our own.
     rename ::$w $widgets(frame)
 
-    # Process the new configuration options.
-    array set argsarr $args
-
     # Parse options for the tabs. First get widget defaults.
-    foreach name $tabOptions {
+    # Non styled.
+    foreach name $tabOptions(nostyle) {
 	set optName [lindex $widgetOptions($name) 0]
 	set optClass [lindex $widgetOptions($name) 1]
 	set options($name) [option get $w $optName $optClass]
-	if {$widgetGlobals(debug) > 1} {
-	    puts "   name=$name, optName=$optName, optClass=$optClass"
-	}
     }
     
     # Apply the options supplied in the widget command.
     # Overwrites defaults when option set in command.
-    if {[llength $args] > 0}  {
-	array set options $args
+    array set options $args
+    
+    # Styled.
+    set styleName [string totitle $options(-style)]
+    foreach name $tabOptions(styled) {
+	set optName [lindex $widgetOptions($name) 0]
+	append optName $styleName
+	set optClass [lindex $widgetOptions($name) 1]
+	set options($name) [option get $w $optName $optClass]
     }
+    array set options $args    
+    
+    canvas $widgets(canvas) -highlightthickness 0 -closeenough 0.0 \
+      -background $options(-background)
+    pack $widgets(canvas) -fill x
     
     # Create the actual widget procedure.
     proc ::${w} {command args}   \
       "eval ::mactabnotebook::WidgetProc {$w} \$command \$args"
     
     # Select the notebook options from the args.
+    array set argsarr $args
     set notebookArgs {}
     foreach name $notebookOptions {
 	if {[info exists argsarr($name)]} {
@@ -347,12 +418,15 @@ proc ::mactabnotebook::mactabnotebook {w args} {
     pack $widgets(nbframe) -expand yes -fill both
 
     # Note the plus (+) signs here.
-    bind [winfo toplevel $w] <FocusOut> "+ ::mactabnotebook::ConfigTabs $w"
-    bind [winfo toplevel $w] <FocusIn> "+ ::mactabnotebook::ConfigTabs $w"
-    
-    set tnInfo(tabs) {}
-    set tnInfo(current) {}
-    set tnInfo(pending) {}
+    if {[string equal $options(-style) "mac"]} {
+	bind [winfo toplevel $w] <FocusOut> "+ ::mactabnotebook::ConfigTabs $w"
+	bind [winfo toplevel $w] <FocusIn> "+ ::mactabnotebook::ConfigTabs $w"
+    }
+    set tnInfo(tabs)     {}
+    set tnInfo(current)  {}
+    set tnInfo(previous) {}
+    set tnInfo(pending)  {}
+    set name2uid()       {}
 
     return $w
 }
@@ -450,17 +524,16 @@ proc ::mactabnotebook::Configure {w args} {
     if {[llength $args] == 0} {
 	
 	# Return all mactabnotebook options.
-	foreach opt $tabOptions {
+	foreach opt $tabOptions(nostyle) {
 	    set optName [lindex $widgetOptions($opt) 0]
 	    set optClass [lindex $widgetOptions($opt) 1]
 	    set def [option get $w $optName $optClass]
-	    #puts "opt=$opt, optName=$optName, optClass=$optClass, def=$def"
 	    lappend results [list $opt $optName $optClass $def $options($opt)]
 	}
 	
 	# Get all notebook options as well.
 	set nbConfig [$widgets(nbframe) configure]
-	return "$results $nbConfig"
+	return [concat $results $nbConfig]
     } elseif {[llength $args] == 1} {
 	
 	# Return configuration value for this option.
@@ -485,13 +558,17 @@ proc ::mactabnotebook::Configure {w args} {
     foreach opt [array names argsarr] {
 	set newValue $argsarr($opt)
 	set oldValue $options($opt)
+	
 	switch -- $opt {
-	    -activetabcolor - -margin - -tabbackground -   \
-	      -tabcolor - -tabfont {		
+	    -activetabcolor - -margin1 - -margin2 - -orient - -tabbackground -   \
+	      -tabcolor - -font {		
 		set redraw 1
 	    }
 	    -borderwidth - -relief {
 		lappend notebookArgs $opt $newValue
+	    }
+	    -style {
+		return -code error "Cannot change style after widget is created"
 	    }
 	}
     }
@@ -520,22 +597,24 @@ proc ::mactabnotebook::Configure {w args} {
 # Arguments:
 #       w      the widget.
 #       name   its name.
-#       args   ?-text value?
+#       args   ?-text value -image imageName?
 # Results:
 #       The page widget path.
 
 proc ::mactabnotebook::NewPage {w name args} {
     
     variable widgetGlobals
+    variable uid
     upvar ::mactabnotebook::${w}::tnInfo tnInfo
     upvar ::mactabnotebook::${w}::widgets widgets
+    upvar ::mactabnotebook::${w}::name2uid name2uid
 
     if {$widgetGlobals(debug) > 1} {
 	puts "::mactabnotebook::NewPage w=$w, name=$name"
     }
     foreach {key value} $args {
 	switch -- $key {
-	    -text {
+	    -text - -image {
 		set tnInfo($name,$key) $value
 	    }
 	    default {
@@ -545,6 +624,7 @@ proc ::mactabnotebook::NewPage {w name args} {
     }
     set page [$widgets(nbframe) page $name]
     lappend tnInfo(tabs) $name
+    set name2uid($name) "t[incr uid]"
     
     if {$tnInfo(pending) == ""} {
 	set id [after idle [list ::mactabnotebook::Build $w]]
@@ -575,6 +655,7 @@ proc ::mactabnotebook::DeletePage {w name} {
     variable widgetGlobals
     upvar ::mactabnotebook::${w}::tnInfo tnInfo
     upvar ::mactabnotebook::${w}::widgets widgets
+    upvar ::mactabnotebook::${w}::name2uid name2uid
 
     if {$widgetGlobals(debug) > 1} {
 	puts "::mactabnotebook::DeletePage w=$w, name=$name"
@@ -620,49 +701,62 @@ proc ::mactabnotebook::DeletePage {w name} {
 #       The page widget path.
 
 proc ::mactabnotebook::Build {w} {
+
     upvar ::mactabnotebook::${w}::options options
+    upvar ::mactabnotebook::${w}::tnInfo tnInfo
     
     switch -- $options(-style) {
-	classic {
-	    ::mactabnotebook::BuildClassic $w
+	mac {
+	    BuildMac $w
 	}
 	aqua {
-	    ::mactabnotebook::BuildAqua $w
+	    BuildAqua $w
+	}
+	winxp {
+	    BuildWinxp $w
 	}
 	default {
 	    return -code error "unkonwn style "
 	}
     }
+    if {[string length $tnInfo(current)]} {
+	Display $w $tnInfo(current)
+    } else {
+	Display $w [lindex $tnInfo(tabs) 0]
+    }	
 }
 
-proc ::mactabnotebook::BuildClassic {w} {
+proc ::mactabnotebook::BuildMac {w} {
     
     variable toDrawPoly
     variable toDrawLine
     variable widgetGlobals
     upvar ::mactabnotebook::${w}::options options
     upvar ::mactabnotebook::${w}::tnInfo tnInfo
+    upvar ::mactabnotebook::${w}::name2uid name2uid
 
     if {$widgetGlobals(debug) > 1} {
-	puts "::mactabnotebook::BuildClassic w=$w"
+	puts "::mactabnotebook::BuildMac w=$w"
     }
     $w.tabs delete all
-    set margin $options(-margin)
-    set color $options(-tabcolor)
-    set font $options(-tabfont)
-    set x 2
+    set margin1 $options(-margin1)
+    set margin2 $options(-margin2)
+    set color   $options(-tabcolor)
+    set font    $options(-font)
+    set x $margin1
     set maxh 0
-    set coords { }
+    set coords {}
     
     foreach name $tnInfo(tabs) {
+	set tname $name2uid($name)
 	if {[info exists tnInfo($name,-text)]} {
 	    set str $tnInfo($name,-text)
 	} else {
 	    set str $name
 	}
 	set id [$w.tabs create text \
-	  [expr $x + $margin + 2] [expr -0.5 * $margin]  \
-	  -anchor sw -text $str -font $font -tags [list ttxt $name]]
+	  [expr $x + $margin2 + 2] [expr -0.5 * $margin2]  \
+	  -anchor sw -text $str -font $font -tags [list ttxt $tname]]
 	
 	set bbox [$w.tabs bbox $id]
 	set wd [expr [lindex $bbox 2] - [lindex $bbox 0]]
@@ -673,8 +767,8 @@ proc ::mactabnotebook::BuildClassic {w} {
 	
 	# The actual drawing of the tab here.
 	
-	set xplm [expr $x + $margin]
-	set ymim [expr -$ht - $margin]
+	set xplm [expr $x + $margin2]
+	set ymim [expr -$ht - $margin2]
 	foreach {coords col fill tags} $toDrawPoly {
 	    eval $w.tabs create polygon $coords -outline $col -fill $fill \
 	      -tags $tags
@@ -683,18 +777,14 @@ proc ::mactabnotebook::BuildClassic {w} {
 	    eval $w.tabs create line $coords -fill $col -tags $tags
 	}
 	$w.tabs raise $id	
-	$w.tabs bind $name <ButtonPress-1>  \
+	$w.tabs bind $tname <ButtonPress-1>  \
 	  [list ::mactabnotebook::ButtonPressTab $w $name]
-	incr x [expr $wd + 2 * $margin + 3]
+	incr x [expr $wd + 2 * $margin2 + 3]
     }
-    set height [expr $maxh + 2 * $margin]
+    set height [expr $maxh + 2 * $margin2]
     $w.tabs move all 0 $height
     $w.tabs configure -width $x -height [expr $height + 10]
-    if {[string length $tnInfo(current)]} {
-	Display $w $tnInfo(current)
-    } else {
-	Display $w [lindex $tnInfo(tabs) 0]
-    }	
+
     set tnInfo(pending) {}
 }
 
@@ -704,116 +794,223 @@ proc ::mactabnotebook::BuildAqua {w} {
     variable widgetGlobals
     upvar ::mactabnotebook::${w}::options options
     upvar ::mactabnotebook::${w}::tnInfo tnInfo
+    upvar ::mactabnotebook::${w}::name2uid name2uid
 
     if {$widgetGlobals(debug) > 1} {
 	puts "::mactabnotebook::BuildAqua w=$w"
     }
     $w.tabs delete all
 
-    set font $options(-tabfont)
-    set outline $options(-taboutline)
-    set fill $options(-tabbackground)
+    set font        $options(-font)
+    set outline     $options(-taboutline)
+    set fill        $options(-tabbackground)
+    set foreground  $options(-foreground)
+    set ipadx       $options(-ipadx)
+    set ipady       $options(-ipady)
+    set margin1     $options(-margin1)
+    set margin2     $options(-margin2)
     array set metricsArr [font metrics $font]
     set fontHeight $metricsArr(-linespace)
-
-    set x 8
-    set xtext [expr int($x + $fontHeight)]
-    set yl -6
-    set yltext [expr $yl - 2]
-    set yu [expr $yltext - $fontHeight - 2]
+    
+    # Find max height of any image.
+    set maxh 0
+    foreach {key name} [array get tnInfo "*,-image"] {
+	set imh [image height $name]
+	if {$imh > $maxh} {
+	    set maxh $imh
+	}
+    }
+    set x $margin1
+    set yl -$options(-ymargin1)
+    set contenth [expr {$fontHeight > $maxh} ? $fontHeight : $maxh]
+    set yu [expr $yl - $contenth - 2 - 2*$ipady]
+    set ym [expr ($yl + $yu)/2]
     set height [expr abs($yu - 6)]
-        
-    #{0 0 0 $yl $xleft $yl $xleft $yu $xright $yu $xright $yl 2000 $yl 2000 0}
-    #$outline $fill $tags
-
+    
     foreach name $tnInfo(tabs) {
+	set tname $name2uid($name)
 	if {[info exists tnInfo($name,-text)]} {
 	    set str $tnInfo($name,-text)
 	} else {
 	    set str $name
 	}
-	set id [$w.tabs create text $xtext $yltext  \
-	  -anchor sw -text $str -font $font -tags [list ttxt $name]]
+	if {[info exists tnInfo($name,-image)]} {
+	    set im $tnInfo($name,-image)
+	    set xim [expr $x + 2 + $ipadx]
+	    $w.tabs create image $xim $ym -anchor w -image $im  \
+	      -tags [list tim $tname]
+	    set xtext [expr $xim + [image width $im] + $ipadx]
+	} else {
+	    set xtext [expr int($x + 2 + $ipadx)]
+	}
+	#set id [$w.tabs create text $xtext [expr $ym+1] \
+	#  -fill white -anchor w -text $str -font $font -tags [list ttxt tsdw $tname]]
+	set id [$w.tabs create text $xtext $ym -fill $foreground \
+	  -anchor w -text $str -font $font -tags [list ttxt $tname]]
 	
 	set bbox [$w.tabs bbox $id]
 	set wd [expr [lindex $bbox 2] - [lindex $bbox 0]]
 	set ht [expr [lindex $bbox 3] - [lindex $bbox 1]]
 	set xleft $x
-	set xright [expr $xtext + $wd + $fontHeight + 4]
+	set xright [expr $xtext + $wd + $ipadx + 2]
 	
 	# Draw tabs.
-	foreach {coords poutline pfill tags} $toDrawPolyAqua {
-	    eval $w.tabs create polygon $coords  \
-	      -fill $pfill -outline $poutline -tags $tags
+	foreach {coords ptags} $toDrawPolyAqua {
+	    eval {$w.tabs create polygon} $coords  \
+	      -fill $fill -outline $outline -tags $ptags
 	}
+	#DrawAluRect $w.tabs [expr $xleft+1] [expr $yu+1] [expr $xright-1] $yl  \
+	#  $fill talu
 	
-	
-	set x $xright    
-	set xtext [expr int($x + $fontHeight)]
+	# New x for next tab.
+	set x [expr $xright + $margin2]
+
+	$w.tabs bind $tname <ButtonPress-1>  \
+	  [list ::mactabnotebook::ButtonPressTab $w $name]
     }
     $w.tabs move all 0 $height
+    $w.tabs raise talu
     $w.tabs raise ttxt
+    $w.tabs raise tim
     $w.tabs configure -width $x -height $height
+    if {[string equal $options(-orient) "hang"]} {
+	$w.tabs scale all 0 0 1 -1
+	$w.tabs move all 0 $height
+	$w.tabs move tsdw 0 2
+    }
+    set tnInfo(pending) {}
+}
+
+proc ::mactabnotebook::BuildWinxp {w} {
     
+    variable toDrawPolyWinXP
+    variable widgetGlobals
+    upvar ::mactabnotebook::${w}::options options
+    upvar ::mactabnotebook::${w}::tnInfo tnInfo
+    upvar ::mactabnotebook::${w}::name2uid name2uid
+
+    if {$widgetGlobals(debug) > 1} {
+	puts "::mactabnotebook::BuildAqua w=$w"
+    }
+    $w.tabs delete all
+
+    set font        $options(-font)
+    set outline     $options(-taboutline)
+    set fill        $options(-tabbackground)
+    set foreground  $options(-foreground)
+    set accent1     $options(-accent1)
+    set accent2     $options(-accent2)
+    set ipadx       $options(-ipadx)
+    set ipady       $options(-ipady)
+    set margin1     $options(-margin1)
+    set margin2     $options(-margin2)
+    array set metricsArr [font metrics $font]
+    set fontHeight $metricsArr(-linespace)
+    
+    # Find max height of any image.
+    set maxh 0
+    foreach {key name} [array get tnInfo "*,-image"] {
+	set imh [image height $name]
+	if {$imh > $maxh} {
+	    set maxh $imh
+	}
+    }
+    set x $margin1
+    set yl -$options(-ymargin1)
+    set contenth [expr {$fontHeight > $maxh} ? $fontHeight : $maxh]
+    set yu [expr $yl - $contenth - 2 - 2*$ipady]
+    set ym [expr ($yl + $yu + 2)/2]
+    set height [expr abs($yu) + 6]
+
+    foreach {r1 g1 b1} [winfo rgb . $options(-tabgradient1)] break
+    foreach {r2 g2 b2} [winfo rgb . $options(-tabgradient2)] break
+    foreach col {r g b} {
+	set k($col) [expr double([set ${col}1]-[set ${col}2])/($yu-$yl)]
+	set m($col) [expr [set ${col}1]-$k($col)*$yu]
+    }
+    for {set y $yu} {$y <= $yl} {incr y} {
+	set gcol($y) [format "#%02x%02x%02x" [expr int($k(r)*$y+$m(r))/256]  \
+	  [expr int($k(g)*$y+$m(g))/256] [expr int($k(b)*$y+$m(b))/256]]
+    }
+    
+    foreach name $tnInfo(tabs) {
+	set tname $name2uid($name)
+	if {[info exists tnInfo($name,-text)]} {
+	    set str $tnInfo($name,-text)
+	} else {
+	    set str $name
+	}
+	if {[info exists tnInfo($name,-image)]} {
+	    set im $tnInfo($name,-image)
+	    set xim [expr $x + 2 + $ipadx]
+	    $w.tabs create image $xim $ym -anchor w -image $im  \
+	      -tags [list tim $tname]
+	    set xtext [expr $xim + [image width $im] + $ipadx]
+	} else {
+	    set xtext [expr int($x + 2 + $ipadx)]
+	}
+	set id [$w.tabs create text $xtext $ym -fill $foreground \
+	  -anchor w -text $str -font $font -tags [list ttxt $tname]]
+	
+	set bbox [$w.tabs bbox $id]
+	set wd [expr [lindex $bbox 2] - [lindex $bbox 0]]
+	set ht [expr [lindex $bbox 3] - [lindex $bbox 1]]
+	set xleft $x
+	set xright [expr $xtext + $wd + $ipadx + 2]
+	set xlplus [expr $xleft+1]
+	set xrminus [expr $xright-1]
+	
+	# Draw tabs.
+	foreach {coords ptags} $toDrawPolyWinXP {
+	    eval {$w.tabs create polygon} $coords -fill $fill  \
+	      -outline $outline -tags $ptags
+	}
+	
+	# Gradient.
+	for {set y [expr $yu+2]} {$y < $yl} {incr y} { 
+	    $w.tabs create line $xlplus $y $xrminus $y -fill $gcol($y) \
+	      -tags [list tgrad $tname]
+	}
+	
+	# Accent lines.
+	$w.tabs create line [expr $xleft+2] $yu [expr $xright-2] $yu  \
+	  -fill $accent1 -tags [list tacc $tname]
+	$w.tabs create line [expr $xleft+1] [expr $yu+1] \
+	  [expr $xright-1] [expr $yu+1] -fill $accent2  -tags [list tacc $tname]
+	$w.tabs create line $xleft [expr $yu+2] $xright [expr $yu+2]  \
+	  -fill $accent2 -tags [list tacc $tname]
+	
+	# New x for next tab.
+	set x [expr $xright + $margin2]
+
+	$w.tabs bind $tname <ButtonPress-1>  \
+	  [list ::mactabnotebook::ButtonPressTab $w $name]
+    }
+    $w.tabs move all 0 $height
+    $w.tabs lower tacc
+    $w.tabs raise tgrad
+    $w.tabs raise ttxt
+    $w.tabs raise tim
+    $w.tabs configure -width $x -height $height
+    if {[string equal $options(-orient) "hang"]} {
+	$w.tabs scale all 0 0 1 -1
+	$w.tabs move all 0 $height
+    }
+    set tnInfo(pending) {}
 }
 
 proc ::mactabnotebook::ButtonPressTab {w name} {
     
+    variable widgetGlobals
     upvar ::mactabnotebook::${w}::tnInfo tnInfo
 
+    if {$widgetGlobals(debug) > 1} {
+	puts "::mactabnotebook::ButtonPressTab name=$name"
+    }
     if {[string equal $name $tnInfo(current)]} {
 	return
     }
     Display $w $name
-}
-
-# mactabnotebook::ConfigTabs --
-#
-#       Configures the tabs to their correct state: 
-#       focusin/focusout/active/normal.
-#   
-# Arguments:
-#       w      the widget.
-# Results:
-#       none.
-
-proc ::mactabnotebook::ConfigTabs {w} {
-
-    variable tabDefs
-    upvar ::mactabnotebook::${w}::tnInfo tnInfo
-    upvar ::mactabnotebook::${w}::options options
-
-    set foc out
-    set lncol #737373
-    if {[string length [focus]] &&  \
-      [string equal [winfo toplevel [focus]] [winfo toplevel $w]]} {
-	set foc in
-	set lncol black
-    }
-    set current $tnInfo(current)
-
-    foreach name $tnInfo(tabs) {
-	if {[string equal $current $name]} {
-	    foreach {t col} $tabDefs(active,$foc) {
-		$w.tabs itemconfigure ${t}-${name} -fill $col
-	    }
-	    $w.tabs itemconfigure ln-$name -fill $lncol
-	} else {
-	    foreach {t col} $tabDefs(normal,$foc) {
-		$w.tabs itemconfigure ${t}-${name} -fill $col
-	    }
-	    $w.tabs itemconfigure ln-$name -fill $lncol
-	}
-    }    
-    if {[string equal $foc "in"]} {
-	$w.tabs itemconfigure tab -fill $options(-tabcolor) -outline $lncol
-	$w.tabs itemconfigure tab-$current -fill $options(-activetabcolor) \
-	  -outline black
-    } else {
-	$w.tabs itemconfigure tab -fill #dedede -outline $lncol
-	$w.tabs itemconfigure tab-$current -fill #efefef -outline $lncol
-    }
-    $w.tabs itemconfigure ttxt -fill $lncol
 }
     
 # mactabnotebook::Display --
@@ -837,12 +1034,169 @@ proc ::mactabnotebook::Display {w name {opt {}}} {
     if {$widgetGlobals(debug) > 1} {
 	puts "::mactabnotebook::Display w=$w, name=$name"
     }
-    if {$opt != "tabsonly"} {
+    if {![string equal $opt "tabsonly"]} {
 	$widgets(nbframe) displaypage $name
     }
-    $w.tabs raise $name
+    if {![string equal $name $tnInfo(current)]} {
+	set tnInfo(previous) $tnInfo(current)
+    }
     set tnInfo(current) $name
     ConfigTabs $w
+}
+
+proc ::mactabnotebook::ConfigTabs {w} {
+
+    upvar ::mactabnotebook::${w}::options options
+    
+    switch -- $options(-style) {
+	mac {
+	    ConfigClassicTabs $w
+	}
+	aqua {
+	    ConfigAquaTabs $w
+	}
+	winxp {
+	    ConfigWinxpTabs $w
+	}
+    }
+}
+
+# mactabnotebook::ConfigClassicTabs --
+#
+#       Configures the tabs to their correct state: 
+#       focusin/focusout/active/normal.
+#   
+# Arguments:
+#       w      the widget.
+# Results:
+#       none.
+
+proc ::mactabnotebook::ConfigClassicTabs {w} {
+
+    variable tabDefs
+    upvar ::mactabnotebook::${w}::tnInfo tnInfo
+    upvar ::mactabnotebook::${w}::options options
+    upvar ::mactabnotebook::${w}::name2uid name2uid
+
+    set foc out
+    set lncol #737373
+    if {[string length [focus]] &&  \
+      [string equal [winfo toplevel [focus]] [winfo toplevel $w]]} {
+	set foc in
+	set lncol black
+    }
+    set current $tnInfo(current)
+    set tcurrent $name2uid($current)
+    $w.tabs raise $tcurrent
+
+    foreach name $tnInfo(tabs) {
+	set tname $name2uid($name)
+	if {[string equal $current $name]} {
+	    foreach {t col} $tabDefs(active,$foc) {
+		$w.tabs itemconfigure ${t}-${tname} -fill $col
+	    }
+	    $w.tabs itemconfigure ln-$tname -fill $lncol
+	} else {
+	    foreach {t col} $tabDefs(normal,$foc) {
+		$w.tabs itemconfigure ${t}-${tname} -fill $col
+	    }
+	    $w.tabs itemconfigure ln-$tname -fill $lncol
+	}
+    }    
+    if {[string equal $foc "in"]} {
+	$w.tabs itemconfigure tab -fill $options(-tabcolor) -outline $lncol
+	$w.tabs itemconfigure tab-$tcurrent -fill $options(-activetabcolor) \
+	  -outline black
+    } else {
+	$w.tabs itemconfigure tab -fill #dedede -outline $lncol
+	$w.tabs itemconfigure tab-$tcurrent -fill #efefef -outline $lncol
+    }
+    $w.tabs itemconfigure ttxt -fill $lncol
+}
+
+proc ::mactabnotebook::ConfigAquaTabs {w} {
+
+    upvar ::mactabnotebook::${w}::options options
+    upvar ::mactabnotebook::${w}::tnInfo tnInfo
+    upvar ::mactabnotebook::${w}::name2uid name2uid
+    
+    set current $tnInfo(current)
+    set tcurrent $name2uid($current)
+    $w.tabs raise $tcurrent
+    
+    foreach name $tnInfo(tabs) {
+	set tname $name2uid($name)
+	if {[string equal $current $name]} {
+	    $w.tabs itemconfigure poly-$tname -fill $options(-activetabbackground)
+	} else {
+	    $w.tabs itemconfigure poly-$tname -fill $options(-tabbackground)
+	}
+    }        
+}
+
+proc ::mactabnotebook::ConfigWinxpTabs {w} {
+
+    upvar ::mactabnotebook::${w}::options options
+    upvar ::mactabnotebook::${w}::tnInfo tnInfo
+    upvar ::mactabnotebook::${w}::name2uid name2uid
+    
+    set current $tnInfo(current)
+    set previous $tnInfo(previous)
+    set tcurrent $name2uid($current)
+    $w.tabs raise $tcurrent
+    $w.tabs lower tacc
+    $w.tabs raise tacc&&${tcurrent}
+    
+    $w.tabs lower tgrad&&${tcurrent}
+    if {$previous != ""} {
+	set tprevious $name2uid($previous)
+	$w.tabs raise tgrad&&${tprevious} poly&&${tprevious}
+    }
+    
+    foreach name $tnInfo(tabs) {
+	set tname $name2uid($current)
+	if {[string equal $current $name]} {
+	    $w.tabs itemconfigure poly-$tname -fill $options(-activetabbackground)
+	} else {
+	    $w.tabs itemconfigure poly-$tname -fill $options(-tabbackground)
+	}
+    }        
+}
+
+proc ::mactabnotebook::DrawAluRect {wcan x0 y0 x1 y1 col tag} {
+        
+    foreach {r g b} [winfo rgb . $col] break
+    
+    set dcol [expr 10*256]
+    set lenmin 10
+    set lenmax 40
+    set nstrokes [expr 2.0 * ($x1-$x0)/$lenmax]
+    set xleft  [expr $x0-$lenmin]
+    set xright [expr $x1+$lenmin]
+    set xlen   [expr $xright-$xleft]
+    
+    # If x is the probability to draw a stroke with given conditions,
+    # then <n> = (1-x) sum n x^(n-1), where n is the number of strokes 
+    # until failure (included). Then nstrokes = n-1.
+    # We get: <n> = 1/(1-x)  ->  x = nstrokes/(1+nstrokes).
+    
+    set pstroke [expr $nstrokes/(1+$nstrokes)]
+    puts "nstrokes=$nstrokes, pstroke=$pstroke"
+    
+    for {set y $y0} {$y < $y1} {incr y} { 
+    
+	while {[expr rand() < $pstroke]} {
+	    set rmid [expr $xleft+rand()*$xlen]
+	    set rlen [expr $lenmin+rand()*($lenmax-$lenmin)]
+	    set xl [expr $rmid-$rlen]
+	    set xr [expr $rmid+$rlen]
+	    set xl [expr {$xl < $x0} ? $x0 : $xl]
+	    set xr [expr {$xr > $x1} ? $x1 : $xr]
+	    set gray [expr int($r+2.0*(rand()-0.5)*$dcol)]
+	    set c [eval format "#%04x%04x%04x" $gray $gray $gray]
+	    $wcan create line $xl $y $xr $y -fill $c -tags $tag
+	}
+    }
 }
 
 # mactabnotebook::DestroyHandler --
