@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: jlibtls.tcl,v 1.1 2004-10-12 13:48:56 matben Exp $
+# $Id: jlibtls.tcl,v 1.2 2004-10-13 14:08:38 matben Exp $
 
 package require tls
 
@@ -26,22 +26,22 @@ proc jlib::starttls {jlibname cmd args} {
     element_register $jlibname failure [namespace current]::tls_failure
     element_register $jlibname proceed [namespace current]::tls_proceed
 
-    if {[info exists locals(features,mechanisms)]} {
+    if {[info exists locals(features)]} {
 	tls_continue $jlibname
     } else {
 	
 	# Must be careful so this is not triggered by a reset or something...
-	trace add variable ${jlibname}::locals(features,mechanisms) write \
-	  [list [namespace current]::tls_mechanisms_write $jlibname]
+	trace add variable ${jlibname}::locals(features) write \
+	  [list [namespace current]::tls_features_write $jlibname]
     }
 }
 
-proc jlib::tls_mechanisms_write {jlibname name1 name2 op} {
+proc jlib::tls_features_write {jlibname name1 name2 op} {
     
-    Debug 2 "jlib::tls_mechanisms_write"
+    Debug 2 "jlib::tls_features_write"
     
-    trace remove variable ${jlibname}::locals(features,mechanisms) write \
-      [list [namespace current]::tls_mechanisms_write $jlibname]
+    trace remove variable ${jlibname}::locals(features) write \
+      [list [namespace current]::tls_features_write $jlibname]
     tls_continue $jlibname
 }
 
@@ -65,6 +65,7 @@ proc jlib::tls_proceed {jlibname tag xmllist} {
     variable xmppns
     
     Debug 2 "jlib::tls_proceed"
+    
     if {[wrapper::getattribute $xmllist xmlns] != $xmppns(tls)} {
 	tls_finish $jlibname "received incorrectly namespaced proceed element"
     }
@@ -98,9 +99,7 @@ proc jlib::tls_proceed {jlibname tag xmllist} {
     wrapper::reset $lib(wrap)
     
     # We must clear out any server info we've received so far.
-    # Seems the only info is from the <features/> element.
-    # UGLY.
-    array unset locals features*
+    stream_reset $jlibname
     
     set xml "<stream:stream\
       xmlns='$opts(-streamnamespace)' xmlns:stream='$xmppns(stream)'\
@@ -108,6 +107,20 @@ proc jlib::tls_proceed {jlibname tag xmllist} {
 
     eval $lib(transportsend) {$xml}
 
+    # Must be careful so this is not triggered by a reset or something...
+    trace add variable ${jlibname}::locals(features) write \
+      [list [namespace current]::tls_features_write_2nd $jlibname]
+    
+    return {}
+}
+
+proc jlib::tls_features_write_2nd {jlibname name1 name2 op} {
+    
+    Debug 2 "jlib::tls_features_write_2nd"
+    
+    trace remove variable ${jlibname}::locals(features) write \
+      [list [namespace current]::tls_features_write_2nd $jlibname]
+    
     tls_finish $jlibname
 }
 
@@ -150,7 +163,8 @@ proc jlib::tls_reset {jlibname} {
     
     upvar ${jlibname}::locals locals
 
-    trace remove variable ${jlibname}::locals(features,mechanisms) write \
-      [list [namespace current]::tls_mechanisms_write $jlibname]
+    trace remove variable ${jlibname}::locals(features) write \
+      [list [namespace current]::tls_features_write $jlibname]
 }
 
+#-------------------------------------------------------------------------------

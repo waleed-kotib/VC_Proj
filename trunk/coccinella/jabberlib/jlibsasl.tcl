@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: jlibsasl.tcl,v 1.8 2004-10-12 13:48:56 matben Exp $
+# $Id: jlibsasl.tcl,v 1.9 2004-10-13 14:08:38 matben Exp $
 
 # We need to be flexible here since can have cyrus based sasl or our 
 # own special pure tcl saslmd5.
@@ -93,6 +93,8 @@ proc jlib::auth_sasl {jlibname username resource password cmd} {
     } else {
 	
 	# Must be careful so this is not triggered by a reset or something...
+	# 
+	# Perhaps these traces should be handled by 'element_register'?
 	trace add variable ${jlibname}::locals(features,mechanisms) write \
 	  [list [namespace current]::auth_sasl_mechanisms_write $jlibname]
     }
@@ -357,9 +359,7 @@ proc jlib::sasl_success {jlibname tag xmllist} {
     wrapper::reset $lib(wrap)
     
     # We must clear out any server info we've received so far.
-    # Seems the only info is from the <features/> element.
-    # UGLY.
-    array unset locals features*
+    stream_reset $jlibname
     
     set xml "<stream:stream\
       xmlns='$opts(-streamnamespace)' xmlns:stream='$xmppns(stream)'\

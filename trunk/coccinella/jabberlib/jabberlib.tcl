@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.68 2004-10-12 13:48:56 matben Exp $
+# $Id: jabberlib.tcl,v 1.69 2004-10-13 14:08:38 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -81,6 +81,8 @@
 #      jlibName closestream
 #      jlibName element_deregister tag func
 #      jlibName element_register tag func ?seq?
+#      jlibName getstreamattr name
+#      jlibName havefeatures name
 #      jlibName get_last to cmd
 #      jlibName get_time to cmd
 #      jlibName get_version to cmd
@@ -99,6 +101,7 @@
 #      jlibName register_set username password cmd ?args?
 #      jlibName register_get cmd ?args?
 #      jlibName register_remove to cmd ?args?
+#      jlibName resetstream
 #      jlibName roster_get cmd
 #      jlibName roster_set item cmd ?args?
 #      jlibName roster_remove item cmd
@@ -1182,10 +1185,6 @@ proc jlib::presence_handler {jlibname xmldata} {
     if {[info exists id] && [info exists prescmd($id)]} {
 	uplevel #0 $prescmd($id) [list $jlibname $type] $arglist
 	unset -nocomplain prescmd($id)
-    } elseif {[string length $opts(-presencecommand)]} {
-	# uplevel #0 $opts(-presencecommand) [list $jlibname $type] $arglist
-    } else {
-	# uplevel #0 $lib(clientcmd) [list $jlibname presence] $arglist
     }	
 }
 
@@ -1235,6 +1234,27 @@ proc jlib::features_handler {jlibname xmllist} {
     set locals(features) 1
 }
 
+# jlib::havefeatures --
+# 
+#       Just to get access of the stream features.
+
+proc jlib::havefeatures {jlibname name {name2 ""}} {
+    
+    upvar ${jlibname}::locals locals
+
+    set ans 0
+    if {$name2 != ""} {
+	if {[info exists locals(features,$name,$name2)]} {
+	    set ans $locals(features,$name,$name2)
+	}
+    } else {
+	if {[info exists locals(features,$name)]} {
+	    set ans $locals(features,$name)
+	}
+    }
+    return $ans
+}
+
 # jlib::error_handler --
 # 
 #       Callback when receiving an stream:error element. According to xmpp-core
@@ -1274,9 +1294,14 @@ proc jlib::error_handler {jlibname xmllist} {
 proc jlib::got_stream {jlibname args} {
 
     upvar ${jlibname}::lib lib
+    upvar ${jlibname}::locals locals
 
     Debug 3 "jlib::got_stream jlibname=$jlibname, args='$args'"
     
+    # Cache stream attributes.
+    foreach {name value} $args {
+	set locals(streamattr,$name) $value
+    }
     uplevel #0 $lib(clientcmd) [list $jlibname connect]
     schedule_auto_away $jlibname
     set lib(isinstream) 1
@@ -1285,6 +1310,21 @@ proc jlib::got_stream {jlibname args} {
     if {[info exists lib(streamcmd)] && [llength $lib(streamcmd)]} {
 	uplevel #0 $lib(streamcmd) $jlibname $args
 	unset lib(streamcmd)
+    }
+}
+
+# jlib::getstreamattr --
+# 
+#       Returns the value of any stream attribute, typically 'id'.
+
+proc jlib::getstreamattr {jlibname name} {
+    
+    upvar ${jlibname}::locals locals
+    
+    if {[info exists locals(streamattr,$name)]} {
+	return $locals(streamattr,$name)
+    } else {
+	return ""
     }
 }
 
@@ -1372,6 +1412,25 @@ proc jlib::reset {jlibname} {
     set locals(myjid)  ""
 
     set lib(isinstream) 0
+    
+    stream_reset $jlibname
+    sasl_reset $jlibname
+    tls_reset $jlibname
+}
+
+# jlib::stream_reset --
+# 
+#       Clears out all variables that are cached for this stream.
+#       The xmpp specifies that any information obtained during tls,sasl
+#       must be discarded before opening a new stream.
+#       Call this before opening a new stream
+
+proc jlib::stream_reset {jlibname} {
+    
+    upvar ${jlibname}::locals locals
+    
+    array unset locals features*
+    array unset locals streamattr,*
 }
 
 # jlib::getstanzaerrorspec --
