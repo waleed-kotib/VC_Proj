@@ -10,10 +10,10 @@
 *Roster*rootForeground:              white
 *Roster.backgroundImage:
 
-*MacTabnotebook.style:                   aqua
-*MacTabnotebook.background:              #336699
-*MacTabnotebook.foreground:              white
-*MacTabnotebook.activeTabBackgroundAqua: #4791c5
-*MacTabnotebook.tabBackgroundAqua:       #2e73ac
-*MacTabnotebook.tabReliefAqua:           raised
-*MacTabnotebook.margin2Aqua:             1
+*JMain*MacTabnotebook.style:                   aqua
+*JMain*MacTabnotebook.background:              #336699
+*JMain*MacTabnotebook.foreground:              white
+*JMain*MacTabnotebook.activeTabBackgroundAqua: #4791c5
+*JMain*MacTabnotebook.tabBackgroundAqua:       #2e73ac
+*JMain*MacTabnotebook.tabReliefAqua:           raised
+*JMain*MacTabnotebook.margin2Aqua:             1

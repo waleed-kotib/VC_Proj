@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.8 2004-06-16 14:17:30 matben Exp $
+# $Id: JPrefs.tcl,v 1.9 2004-06-20 10:47:02 matben Exp $
 
 package provide JPrefs 1.0
 
@@ -295,11 +295,10 @@ proc ::Jabber::JPrefs::BuildAppearencePage {page} {
     pack [label $frtheme.l -text "[::msgcat::mc preftheme]:"] -side left
     pack $wpoptheme -side left
     
-    grid $pbl.tabbed                        -padx 2 -pady $ypad -sticky w
+    grid $pbl.tabbed -          -           -padx 2 -pady $ypad -sticky w
     grid $pbl.bgim  $pbl.bgpick $pbl.bgdefk -padx 2 -pady $ypad -sticky w
     grid $pbl.lfont $pbl.btfont $pbl.dfont  -padx 2 -sticky w
-    grid $frtheme                           -padx 2 -pady $ypad -sticky w \
-      -columnspan 2
+    grid $frtheme   -           -           -padx 2 -pady $ypad -sticky w
 }
 
 proc ::Jabber::JPrefs::BuildCustomPage {page} {

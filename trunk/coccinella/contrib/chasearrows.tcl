@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: chasearrows.tcl,v 1.3 2004-01-13 14:50:20 matben Exp $
+# $Id: chasearrows.tcl,v 1.4 2004-06-20 10:47:02 matben Exp $
 #
 # ########################### USAGE ############################################
 #
@@ -255,7 +255,8 @@ proc ::chasearrows::Build {w args} {
       "eval ::chasearrows::WidgetProc {$w} \$command \$args"
 
     canvas $widgets(canvas) -width $options(-size) -height $options(-size)  \
-      -bd 0 -highlightthickness 0 -bg $options(-background)
+      -bd 0 -highlightthickness 0 -bg $options(-background) \
+      -scrollregion [list 0 0 $options(-size) $options(-size)]
     pack $widgets(canvas) -fill both
     
     # The actual drawing takes place from 'Configure' which calls

@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.38 2004-06-17 13:54:29 matben Exp $
+# $Id: MUC.tcl,v 1.39 2004-06-20 10:47:02 matben Exp $
 
 package require entrycomp
 
@@ -16,6 +16,7 @@ package provide MUC 1.0
 namespace eval ::Jabber::MUC:: {
       
     ::hooks::add jabberInitHook     ::Jabber::MUC::Init
+    ::hooks::add closeWindowHook    ::Jabber::MUC::EnterCloseHook
     
     # Local stuff
     variable dlguid 0
@@ -92,7 +93,7 @@ proc ::Jabber::MUC::Init {jlibName} {
 #       Initiates the process of entering a MUC room. Multi instance.
 #       
 # Arguments:
-#       args        -server, -roomjid, -nickname, -password
+#       args        -server, -roomjid, -nickname, -password, -autobrowse
 #       
 # Results:
 #       "cancel" or "enter".
@@ -104,6 +105,9 @@ proc ::Jabber::MUC::BuildEnter {args} {
     variable dlguid
     upvar ::Jabber::jstate jstate
     
+    array set argsArr {
+	-autobrowse     0
+    }
     array set argsArr $args
 
     #set confServers [$jstate(browse) getservicesforns  \
@@ -150,10 +154,11 @@ proc ::Jabber::MUC::BuildEnter {args} {
     # Global frame.
     frame $w.frall -borderwidth 1 -relief raised
     pack  $w.frall -fill both -expand 1
-    message $w.frall.msg -width 260  \
+    label $w.frall.msg -wraplength 260 -justify left  \
     	-text "Enter your nick name and press Enter to go into the room.\
+	You may Browse to get the available rooms for the specific service.\
 	Members only room may require a password."
-    pack $w.frall.msg -side top -fill x -anchor w -padx 2 -pady 4
+    pack $w.frall.msg -side top -fill x -anchor w -padx 8 -pady 4
     set frtop $w.frall.top
     pack [frame $frtop] -side top -anchor w -padx 12
     label $frtop.lserv -text "[::msgcat::mc {Conference server}]:" 
@@ -173,13 +178,18 @@ proc ::Jabber::MUC::BuildEnter {args} {
     }
     set enter(server-state) normal
     set enter(room-state)   normal
+    set enter(-autobrowse)  $argsArr(-autobrowse)
 
     # Second menubutton: rooms for above server. Fill in below.
-    set enter(wroommenu) [tk_optionMenu $wpopuproom $token\(roomname) ""]
-
+    # Combobox since we sometimes want to enter room manually.
+    #set enter(wroommenu) [tk_optionMenu $wpopuproom $token\(roomname) ""]
+    ::combobox::combobox $wpopuproom -width 8 -textvariable $token\(roomname)
+    set enter(wbrowse) $frtop.browse
+    button $frtop.browse -text [::msgcat::mc Browse] \
+      -command [list [namespace current]::Browse $token]
+    
     if {[info exists argsArr(-roomjid)]} {
-	regexp {^([^@]+)@([^/]+)} $argsArr(-roomjid) match enter(roomname)  \
-	  enter(server)	
+	jlib::splitjidex $argsArr(-roomjid) enter(roomname) enter(server) z
 	set enter(server-state) disabled
 	set enter(room-state)   disabled
 	$wpopupserver configure -state disabled
@@ -192,19 +202,27 @@ proc ::Jabber::MUC::BuildEnter {args} {
     }
     
     label $frtop.lnick -text "[::msgcat::mc {Nick name}]:"
-    entry $frtop.enick -textvariable $token\(nickname)
+    entry $frtop.enick -textvariable $token\(nickname) -width 30
     label $frtop.lpass -text "[::msgcat::mc Password]:"
     entry $frtop.epass -textvariable $token\(password) -show {*} -validate key \
       -validatecommand {::Jabber::ValidatePasswdChars %S}
+   
+    # Busy arrows and status message.
+    set wsearrows $frtop.st.arr
+    set wstatus   $frtop.st.stat
+    frame $frtop.st
+    pack [::chasearrows::chasearrows $wsearrows -size 16] \
+      -side left -padx 5 -pady 0
+    pack [label $wstatus -textvariable $token\(status) -pady 0 -bd 0] \
+      -side left -padx 5 -pady 0
     
-    grid $frtop.lserv -column 0 -row 0 -sticky e
-    grid $wpopupserver -column 1 -row 0 -sticky w
-    grid $frtop.lroom -column 0 -row 1 -sticky e
-    grid $wpopuproom -column 1 -row 1 -sticky w
-    grid $frtop.lnick -column 0 -row 2 -sticky e
-    grid $frtop.enick -column 1 -row 2 -sticky w
-    grid $frtop.lpass -column 0 -row 3 -sticky e
-    grid $frtop.epass -column 1 -row 3 -sticky w
+    grid $frtop.lserv   $wpopupserver -             -sticky e
+    grid $frtop.lroom   $wpopuproom   $frtop.browse -sticky e
+    grid $frtop.lnick   $frtop.enick  -             -sticky e
+    grid $frtop.lpass   $frtop.epass  -             -sticky e
+    grid $frtop.st      -             -             -sticky w
+    grid $wpopupserver  $wpopuproom  $frtop.enick  $frtop.epass  -sticky ew
+    grid $frtop.browse -padx 4
     
     if {[info exists argsArr(-nickname)]} {
 	set enter(nickname) $argsArr(-nickname)
@@ -217,6 +235,7 @@ proc ::Jabber::MUC::BuildEnter {args} {
        
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
+    pack $frbot -side bottom -fill x -expand 0 -padx 8 -pady 0
     set wbtenter  $frbot.btok
     pack [button $wbtenter -text [::msgcat::mc Enter] \
       -default active -command [list [namespace current]::DoEnter $token]]  \
@@ -225,30 +244,22 @@ proc ::Jabber::MUC::BuildEnter {args} {
       -command [list [namespace current]::CancelEnter $token]]  \
       -side right -padx 5 -pady 5
     pack [frame $w.frall.pad -height 8 -width 1] -side bottom -pady 0
-    pack $frbot -side bottom -fill x -expand 0 -padx 8 -pady 0
-   
-    # Busy arrows and status message.
-    pack [frame $w.frall.st]  -side bottom -fill x -padx 8 -pady 0
-    set wsearrows $w.frall.st.arr
-    set wstatus   $w.frall.st.stat
-    pack [::chasearrows::chasearrows $wsearrows -size 16] \
-      -side left -padx 5 -pady 0
-    pack [label $wstatus -textvariable $token\(status) -pady 0 -bd 0] \
-      -side left -padx 5 -pady 0
 
+    set enter(status)       "  "
     set enter(wpopupserver) $wpopupserver
     set enter(wpopuproom)   $wpopuproom
     set enter(wsearrows)    $wsearrows
     set enter(wbtenter)     $wbtenter
     
-    if {$enter(room-state) == "normal"} {
+    if {$enter(-autobrowse) && [string equal $enter(room-state) "normal"]} {
 
-	# Fill in room list if exist else browse.
 	# Get a freash list each time.
 	::Jabber::MUC::BusyEnterDlgIncr $token
 	update idletasks
 	$jstate(jlib) service send_getchildren $enter(server)  \
 	  [list [namespace current]::GetRoomsCB $token]
+    }
+    if {[string equal $enter(room-state) "normal"]} {
 	trace variable $token\(server) w  \
 	  [list [namespace current]::ConfigRoomList $token]
     }
@@ -265,6 +276,18 @@ proc ::Jabber::MUC::BuildEnter {args} {
     } else {
     	focus $frtop.eserv
     }
+
+    # Trick to resize the labels wraplength.
+    set script [format {
+	update idletasks
+	%s configure -wraplength [expr [winfo reqwidth %s] - 20]
+    } $w.frall.msg $w]    
+    after idle $script
+
+    set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jmucenter)]]
+    if {$nwin == 1} {
+	::UI::SetWindowPosition $w $wDlgs(jmucenter)
+    }
     
     # Wait here for a button press and window to be destroyed. BAD?
     tkwait window $w
@@ -272,10 +295,19 @@ proc ::Jabber::MUC::BuildEnter {args} {
     catch {focus $oldFocus}
     trace vdelete $token\(server) w  \
       [list [namespace current]::ConfigRoomList $token]
-    ::UI::SaveWinGeom $w
     set finished $enter(finished)
     unset enter
     return [expr {($finished <= 0) ? "cancel" : "enter"}]
+}
+
+proc ::Jabber::MUC::Browse {token} {
+    variable $token
+    upvar 0 $token enter
+    upvar ::Jabber::jstate jstate
+       
+    ::Jabber::MUC::BusyEnterDlgIncr $token
+    $jstate(jlib) service send_getchildren $enter(server)  \
+      [list [namespace current]::GetRoomsCB $token]
 }
 
 # Jabber::MUC::ConfigRoomList --
@@ -287,14 +319,19 @@ proc ::Jabber::MUC::ConfigRoomList {token name junk1 junk2} {
     variable $token
     upvar 0 $token enter
     upvar ::Jabber::jstate jstate
+    
+    ::Debug 4 "::Jabber::MUC::ConfigRoomList"
 
     # Fill in room list if exist else get.    
     if {[$jstate(jlib) service isinvestigated $enter(server)]} {
 	::Jabber::MUC::FillRoomList $token
     } else {
-	::Jabber::MUC::BusyEnterDlgIncr $token
-	$jstate(jlib) service send_getchildren $enter(server)  \
-	  [list [namespace current]::GetRoomsCB $token]
+	if {$enter(-autobrowse)} {
+	    ::Jabber::MUC::Browse $token
+	} else {
+	    $enter(wpopuproom) list delete 0 end
+	    set enter(roomname) ""
+	}
     }
 }
 
@@ -302,6 +339,8 @@ proc ::Jabber::MUC::FillRoomList {token} {
     variable $token
     upvar 0 $token enter
     upvar ::Jabber::jstate jstate
+    
+    ::Debug 4 "::Jabber::MUC::FillRoomList"
     
     set roomList {}
     if {[string length $enter(server)] > 0} {
@@ -318,11 +357,8 @@ proc ::Jabber::MUC::FillRoomList {token} {
     }
     
     set roomList [lsort $roomList]
-    $enter(wroommenu) delete 0 end
-    foreach room $roomList {
-	$enter(wroommenu) add radiobutton -label $room  \
-	  -variable $token\(roomname)
-    }
+    $enter(wpopuproom) list delete 0 end
+    eval {$enter(wpopuproom) list insert end} $roomList
     set enter(roomname) [lindex $roomList 0]
 }
 
@@ -355,6 +391,11 @@ proc ::Jabber::MUC::BusyEnterDlgIncr {token {num 1}} {
 proc ::Jabber::MUC::GetRoomsCB {token browsename type jid subiq args} {
     
     ::Debug 4 "::Jabber::MUC::GetRoomsCB type=$type, jid=$jid"
+    
+    # Make sure the dialog still exists.
+    if {![info exists $token]} {
+	return
+    }
     
     switch -- $type {
 	error {
@@ -397,6 +438,14 @@ proc ::Jabber::MUC::CancelEnter {token} {
 
     set enter(finished) 0
     catch {destroy $enter(w)}
+}
+
+proc ::Jabber::MUC::EnterCloseHook {wclose} {
+    global  wDlgs
+
+    if {[string match $wDlgs(jmucenter)* $wclose]} {
+	::UI::SaveWinGeom $wDlgs(jmucenter) $wclose
+    }
 }
 
 # Jabber::MUC::EnterCallback --
