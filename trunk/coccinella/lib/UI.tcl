@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.6 2003-02-24 17:52:12 matben Exp $
+# $Id: UI.tcl,v 1.7 2003-03-01 09:51:28 matben Exp $
 
 # LabeledFrame --
 #
@@ -531,8 +531,10 @@ proc ::UI::InitMenuDefs { } {
     }    
     
     # The status menu is built dynamically due to the -image options on 8.4.
-    lset menuDefs(main,jabber) 13 6 [::Jabber::BuildStatusMenuDef]
-
+    if {!$prefs(stripJabber)} {
+	lset menuDefs(main,jabber) 13 6 [::Jabber::BuildStatusMenuDef]
+    }
+    
     set menuDefs(main,cam) {    
 	{command     {Camera Action}     {DisplaySequenceGrabber $wtop}        normal   {}}	
 	{checkbutton {Pause}             {SetVideoConfig $wtop pause}          normal   {}}	

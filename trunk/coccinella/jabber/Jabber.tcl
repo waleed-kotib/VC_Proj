@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.6 2003-02-24 17:52:05 matben Exp $
+# $Id: Jabber.tcl,v 1.7 2003-03-01 09:51:27 matben Exp $
 #
 #  The $address is an ip name or number.
 #
@@ -1707,6 +1707,7 @@ proc ::Jabber::GetIPnumber {jid {cmd {}}} {
     variable jidToIP
 
     ::Jabber::Debug 2 "::Jabber::GetIPnumber:: jid=$jid, cmd='$cmd'"
+    
     if {[string length $cmd]} {
 	set getcmd($getid) $cmd
 	
@@ -1814,21 +1815,21 @@ proc ::Jabber::PutFileAndSchedule {wtop fileName optList} {
     if {[regexp {^(.+)@([^/]+)/([^/]+)} $tojid match name host res]} {
 	
 	# The 'tojid' is already complete with resource.
-	set allJidLong $tojid
+	set allJid3 $tojid
     	lappend optList from: $jstate(mejidres)
     } else {
 	
 	# If 'tojid' is without a resource, it can be a room.
 	if {[$jstate(jlib) service isroom $tojid]} {
 	    set isRoom 1
-	    set allJidLong [$jstate(jlib) service roomparticipants $tojid]
+	    set allJid3 [$jstate(jlib) service roomparticipants $tojid]
 	    
 	    # Exclude ourselves.
 	    foreach {meRoomJid nick} [$jstate(jlib) service hashandnick $tojid] \
 	      { break }
-	    set ind [lsearch $allJidLong $meRoomJid]
+	    set ind [lsearch $allJid3 $meRoomJid]
 	    if {$ind >= 0} {
-		set allJidLong [lreplace $allJidLong $ind $ind]
+		set allJid3 [lreplace $allJid3 $ind $ind]
 	    }
 	    
 	    # Be sure to have our room jid and not the real one.
@@ -1840,43 +1841,43 @@ proc ::Jabber::PutFileAndSchedule {wtop fileName optList} {
 	    if {$res == ""} {
 		
 		# This is someone we haven't got presence from.
-		set allJidLong $tojid
+		set allJid3 $tojid
 	    } else {
-		set allJidLong $tojid/$res
+		set allJid3 $tojid/$res
 	    }
 	    lappend optList from: $jstate(mejidres)
 	}
     }
     
-    ::Jabber::Debug 2 "   allJidLong=$allJidLong"
+    ::Jabber::Debug 2 "   allJid3=$allJid3"
     
     # We shall put to all resources. Treat each in turn.
-    foreach jidLong $allJidLong {
+    foreach jid3 $allJid3 {
 	
 	# If we are in a room all must be available, else check.
 	if {$isRoom} {
 	    set avail 1
 	} else {
-	    set avail [$jstate(roster) isavailable $jidLong]
+	    set avail [$jstate(roster) isavailable $jid3]
 	}
 	
 	# Each jid must get its own to: attribute.
-	set optjidList [concat $optList to: $jidLong]
+	set optjidList [concat $optList to: $jid3]
 	
-	::Jabber::Debug 2 "   jidLong=$jidLong, avail=$avail"
+	::Jabber::Debug 2 "   jid3=$jid3, avail=$avail"
 	
 	if {$avail} {
-	    if {[info exists jidToIP($jidLong)]} {
+	    if {[info exists jidToIP($jid3)]} {
 		
 		# This one had already told us its ip number, good!
-		::Jabber::PutFile $wtop $fileName $mime $optjidList $jidLong
+		::Jabber::PutFile $wtop $fileName $mime $optjidList $jid3
 	    } else {
 		
 		# This jid is online but has not told us its ip number.
 		# We need to get this jid's ip number and register the
 		# PutFile as a callback when receiving this ip.
-		GetIPnumber $jidLong [list ::Jabber::PutFile $wtop $fileName \
-		  $mime $optjidList]
+		::Jabber::GetIPnumber $jid3 \
+		  [list ::Jabber::PutFile $wtop $fileName $mime $optjidList]
 	    }
 	} else {
 	    
@@ -1884,7 +1885,7 @@ proc ::Jabber::PutFileAndSchedule {wtop fileName optList} {
 	    # possibly as an OOB http transfer.
 	    array set optArr $optList
 	    if {[info exists optArr(Get-Url:)]} {
-		$jstate(jlib) oob_set $jidLong ::Jabber::OOB::SetCallback  \
+		$jstate(jlib) oob_set $jid3 ::Jabber::OOB::SetCallback  \
 		  $optArr(Get-Url:)  \
 		  -desc {This file is part of a whiteboard conversation.\
 		  You were not online when I opened this file}
@@ -4392,7 +4393,6 @@ proc ::Jabber::Roster::EditSet {w which} {
     	}
 	lappend opts -groups [list $usersGroup]
     }
-    puts "usersGroup=$usersGroup, opts='$opts'"
     if {[string equal $which "new"]} {
 	eval {$jstate(jlib) roster_set $jid   \
 	  [list ::Jabber::Roster::EditSetCommand $jid]} $opts

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: GetFile.tcl,v 1.4 2003-02-24 17:52:10 matben Exp $
+# $Id: GetFile.tcl,v 1.5 2003-03-01 09:51:28 matben Exp $
 # 
 #### LEGEND ####################################################################
 #
@@ -78,7 +78,7 @@ proc ::GetFile::GetFileFromServer {wtop ip port filePathRemote cmd {optList {}}}
     
     variable locals
     
-    Debug 2 "+  ::GetFile::GetFileFromServer: ip=$ip, filePathRemote=$filePathRemote"
+    Debug 2 "+  ::GetFile::GetFileFromServer: wtop=$wtop, ip=$ip, filePathRemote=$filePathRemote"
     
     # We should already here figure out if we actually need to open a fresh
     # connection: http transport, mime type not supported...
@@ -977,8 +977,13 @@ proc ::GetFile::DefaultCallbackProc {s ip fileTail totBytes sumBytes msg {error 
     
     variable locals
 
-    set wtop $locals($s,wtop)
-
+    # Temporary workaround for calls from 'GetFileFromClient'.
+    if {[info exists locals($s,wtop)]} {
+	set wtop $locals($s,wtop)
+    } else {
+	set wtop .
+    }
+    
     if {[string length $error]} {
 	catch {destroy $locals($s,wprog)}
 	::UI::SetStatusMessage $wtop $msg
