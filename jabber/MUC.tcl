@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.22 2004-01-31 13:46:07 matben Exp $
+# $Id: MUC.tcl,v 1.23 2004-02-05 14:00:22 matben Exp $
 
 package require entrycomp
 
@@ -451,7 +451,6 @@ proc ::Jabber::MUC::Invite {roomjid} {
     # Grab and focus.
     set oldFocus [focus]
     focus $wmid.ejid
-    catch {grab $w}
     
     # Wait here for a button press.
     tkwait variable [namespace current]::fininvite
@@ -460,7 +459,6 @@ proc ::Jabber::MUC::Invite {roomjid} {
     set reason [$wmid.ere get]
     ::UI::SaveWinGeom $w
 
-    catch {grab release $w}
     catch {destroy $w}
     catch {focus $oldFocus}
     
@@ -1146,7 +1144,6 @@ proc ::Jabber::MUC::EditListBuild {roomjid type} {
     
     # Grab and focus.
     set oldFocus [focus]
-    catch {grab $w}
     
     # Cache local variables.
     set editlocals(wtbl) $wtbl
@@ -1214,7 +1211,6 @@ proc ::Jabber::MUC::EditListBuild {roomjid type} {
     tkwait variable [namespace current]::fineditlist
     
     ::UI::SaveWinGeom $w
-    catch {grab release $w}
     catch {destroy $w}
     catch {focus $oldFocus}
 
@@ -1547,13 +1543,11 @@ proc ::Jabber::MUC::RoomConfig {roomjid} {
     # Grab and focus.
     set oldFocus [focus]
     focus $w
-    catch {grab $w}
     
     # Wait here for a button press and window to be destroyed. BAD?
     tkwait window $w
     
     ::UI::SaveWinGeom $w
-    catch {grab release $w}
     catch {focus $oldFocus}
     return
 }

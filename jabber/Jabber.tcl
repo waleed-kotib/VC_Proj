@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.64 2004-02-03 10:16:31 matben Exp $
+# $Id: Jabber.tcl,v 1.65 2004-02-05 14:00:21 matben Exp $
 
 package provide Jabber 1.0
 
@@ -2866,9 +2866,20 @@ proc ::Jabber::WB::DispatchToImporter {mime opts args} {
 	}
     }
     
-    if {$display && [::Plugins::HaveImporterForMime $mime]} {
-	set wCan [::UI::GetCanvasFromWtop $wtop]
-	eval {::Import::DoImport $wCan $opts} $args
+    if {$display} {
+	if {[::Plugins::HaveImporterForMime $mime]} {
+	    set wCan [::UI::GetCanvasFromWtop $wtop]
+	    set errMsg [eval {::Import::DoImport $wCan $opts} $args]
+	    if {$errMsg != ""} {
+		tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
+		  -message "Failed importing: $errMsg" \
+		  -parent [winfo toplevel $wCan]
+	    }
+	} else {
+	    tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
+	      -message [::msgcat::mc messfailmimeimp $mime] \
+	      -parent [winfo toplevel $wCan]
+	}
     }
 }
 

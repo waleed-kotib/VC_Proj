@@ -55,3 +55,5 @@
 
 ! specific megawidgets
 !
+*Roster*Scrollbar.width:             12
+*Browse*Scrollbar.width:             12

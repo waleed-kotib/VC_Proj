@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: GetFileIface.tcl,v 1.13 2004-01-13 14:50:21 matben Exp $
+# $Id: GetFileIface.tcl,v 1.14 2004-02-05 14:00:23 matben Exp $
 
 package require getfile
 package require uriencode
@@ -468,7 +468,7 @@ proc ::GetFileIface::DoImport {mime opts args} {
 		::Import::DoImport $servCan $opts
 	    } $args]
 	} else {
-	    set errMsg "No importer for mime \"$mime\""
+	    set errMsg [::msgcat::mc messfailmimeimp $mime]
 	}
 	if {$errMsg != ""} {
 	    tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \

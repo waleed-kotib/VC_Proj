@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.1 2004-02-02 13:41:56 matben Exp $
+# $Id: Disco.tcl,v 1.2 2004-02-05 14:00:21 matben Exp $
 
 package provide Disco 1.0
 
@@ -106,6 +106,7 @@ proc ::Jabber::Disco::ParseGetInfo {from subiq args} {
 	jabber:iq:version
 	jabber:x:data
 	jabber:x:event
+	http://jabber.org/protocol/muc 
 	coccinella:wb
     }
     lappend vars $xmlns(info) $xmlns(items)
