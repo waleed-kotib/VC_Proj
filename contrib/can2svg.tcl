@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #
-# $Id: can2svg.tcl,v 1.8 2004-03-27 15:20:37 matben Exp $
+# $Id: can2svg.tcl,v 1.9 2004-04-18 10:57:05 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -15,10 +15,27 @@
 #      can2svg canvasCmd ?options?
 #           canvasCmd is everything except the widget path name.
 #           
-#      canvas2file widgetPath fileName ?options?
+#      can2svg::canvas2file widgetPath fileName ?options?
 #           options:   -height
 #                      -width
 #      
+#      can2svg::can2svg canvasCmd ?options?
+#           options:    -httpbasedir  path
+#                       -ovalasellipse 0|1
+#                       -reusedefs     0|1
+#                       -uritype    file|http
+#                       -usestyleattribute 0|1
+#                       -usetags    0|all|first|last
+#                       
+#      can2svg::config ?options?
+#           options:	-allownewlines      0
+#	                -filtertags         ""
+#	                -httpaddr           localhost
+#	                -ovalasellipse      0
+#	                -reusedefs          1
+#	                -uritype            file
+#	                -usetags            all
+#	                -usestyleattribute  1
 #
 # ########################### CHANGES ##########################################
 #
@@ -39,7 +56,7 @@
 package require uriencode
 package require tinyfileutils
 
-package provide can2svg 0.1
+package provide can2svg 0.3
 
 
 namespace eval can2svg {
