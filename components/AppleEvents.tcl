@@ -3,7 +3,7 @@
 #       Experimental!
 #       Some code from Alpha.
 # 
-# $Id: AppleEvents.tcl,v 1.3 2004-08-18 12:08:58 matben Exp $
+# $Id: AppleEvents.tcl,v 1.4 2004-10-26 12:46:51 matben Exp $
 
 namespace eval ::AppleEvents:: { }
 
@@ -65,7 +65,7 @@ proc ::AppleEvents::OpenHandler {theAppleEvent theReplyAE} {
     foreach f $paths {	
 	switch -- [file extension $f] {
 	    .can {
-		::WB::New -file $f
+		::WB::NewWhiteboard -file $f
 	    }
 	}
     }
@@ -80,7 +80,7 @@ proc ::AppleEvents::PrintHandler {theAppleEvent theReplyAE} {
     foreach f $paths {	
 	switch -- [file extension $f] {
 	    .can {
-		set wtop [::WB::New -file $f]
+		set wtop [::WB::NewWhiteboard -file $f]
 		::UserActions::DoPrintCanvas $wtop
 	    }
 	}

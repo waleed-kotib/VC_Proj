@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasFile.tcl,v 1.12 2004-09-24 12:14:15 matben Exp $
+# $Id: CanvasFile.tcl,v 1.13 2004-10-26 12:46:52 matben Exp $
  
 package require can2svg
 package require svg2can
@@ -764,6 +764,118 @@ proc ::CanvasFile::SVGImageHandler {wtop cmd} {
     set idx [lsearch -regexp $cmd {-[a-z]+}]
     array set argsArr [lrange $cmd $idx end]
     return [::WB::CreateImageForWtop $wtop "" -file $argsArr(-file)]
+}
+
+#
+# These could go in a component for themselves.
+# Only a first incomplete sketch!!!
+#
+
+namespace eval ::CanvasFile:: {
+    
+    variable mkdbuid 0
+}
+
+proc ::CanvasFile::CanvasToMetakit {w fileName} {
+    variable mkdbuid
+
+    package require Mk4tcl
+    
+    set tag canvasmkfile[incr mkdbuid]
+    mk::file open $tag $fileName
+    set view [mk::view layout $tag.canvas command:S file:B data:S]
+
+    foreach id [$w find all] {
+	set line [::CanvasUtils::GetOneLinerForAny $w $id]
+
+	# Replace any -file options with a database entry.
+	set ind [lsearch -exact $line -file]
+	if {$ind >= 0} {
+	    set f [lindex $line [incr ind]]
+	    if {[file exists $f]} {
+		lset line $ind [file tail $f]
+		set cursor [mk::row append $view command $line]
+		set fd [open $f RDONLY]
+		fconfigure $fd -translation binary
+		puts ".........cursor=$cursor"
+		set dbd [mk::channel $cursor file write]
+		set n [fcopy $fd $dbd]
+		puts "n=$n"
+		close $fd
+		close $dbd
+		mk::file commit $tag
+	    }
+	} else {
+	    set cursor [mk::row append $view command $line]
+	}
+    }
+    mk::file close $tag
+}
+
+proc ::CanvasFile::MetakitToCanvas {w fileName} {
+    global  this
+    variable mkdbuid
+    
+    package require Mk4tcl
+    
+    set tag canvasmkfile[incr mkdbuid]
+    mk::file open $tag $fileName
+    set views [mk::file views $tag]
+    puts "views=$views"
+    set wtop [::UI::GetToplevelNS $w]
+    
+    # Handle only 'canvas' view.
+    if {[lsearch $views canvas] < 0} {
+	return -code error "no canvas viw in metakit file"
+    }
+    set i 0
+    set view $tag.canvas
+    
+    mk::loop c $view {
+	set line [mk::get $c command]
+	puts "line=$line"
+	set ind [lsearch -exact $line -file]
+	if {$ind >= 0} {
+	    set tail [lindex $line [incr ind]]
+	    puts "..........c=$c"
+	    set dbd [mk::channel $c file read]
+	    set tmp [file join $this(tmpPath) ${tag}${i}${tail}]
+	    set fd [open $tmp {WRONLY CREAT}]
+	    fconfigure $fd -translation binary
+	    set n [fcopy $dbd $fd]
+	    puts "n=$n"
+	    close $fd
+	    close $dbd
+	    lset line $ind $tmp
+	    incr i
+	}
+
+	set utag [::CanvasUtils::NewUtag]
+	set line [::CanvasUtils::ReplaceUtag $line $utag]
+	set cmd [lindex $line 0]
+	set type [lindex $line 1]
+
+	switch -- $cmd {
+	    create {
+		# If html font sizes, then translate these to point sizes.
+		if {[string equal $type "text"]} {
+		    set cmdlocal [subst -nocommands -novariables $line]
+		    set cmdlocal [::CanvasUtils::FontHtmlToPointSize $cmdlocal]
+		    # Wrong size
+		    set line $cmdlocal
+		}
+		::CanvasUtils::Command $wtop $line
+	    }
+	    import {
+		set errMsg [::Import::HandleImportCmd $w $line -addundo 0  \
+		  -progress [list ::Import::ImportProgress $line]  \
+		  -command  [list ::Import::ImportCommand $line]]
+
+	    }
+	}
+    }
+    
+    mk::file close $tag
 }
 
 #-------------------------------------------------------------------------------

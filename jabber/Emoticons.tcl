@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.17 2004-09-28 13:50:17 matben Exp $
+# $Id: Emoticons.tcl,v 1.18 2004-10-26 12:46:51 matben Exp $
 
 
 package provide Emoticons 1.0
@@ -224,35 +224,7 @@ proc ::Emoticons::Parse {str} {
 	    puts "--->smile=$smile, smileExp=$smileExp"
 	}
     }
-    
-    # Now check for any "long" names, such as :angry: :cool: etc.
-    # OUTDATED!
-    if {[info exists smileyLongNames]} {
-	set candidateList {}
-	set ndx 0
-	
-	while {[regexp -start $ndx -indices -- {:[a-zA-Z]+:} $str ind]} {
-	    set ndx [lindex $ind 1]
-	    set candidate [string range $str [lindex $ind 0] [lindex $ind 1]]
-	    if {[lsearch $smileyLongNames $candidate] >= 0} {
-		lappend candidateList $candidate
-		
-		# Load image if not done that.
-		if {![info exists smileyLongIm($candidate)]} {
-		    set fileName "smiley-[string trim $candidate :].gif"
-		    set smileyLongIm($candidate) [image create photo -format gif  \
-		      -file [file join $this(imagePath) smileys $fileName]]	    
-		}
-	    }
-	}
-	if {[llength $candidateList]} {
-	    regsub -all {\\|&} $str {\\\0} str
-	    foreach smile $candidateList {
-		set sub "\} \{image create end -image $smileyLongIm($smile) -name $smile\} \{"
-		regsub -all $smile $str $sub str
-	    }
-	}
-    }
+
     return "\{$str\}"
 }
 
