@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.16 2003-11-04 11:33:08 matben Exp $
+# $Id: Roster.tcl,v 1.17 2003-11-06 08:40:54 matben Exp $
 
 package provide Roster 1.0
 
@@ -17,6 +17,10 @@ namespace eval ::Jabber::Roster:: {
     # A unique running identifier.
     variable uid 0
     
+    # Use a unique canvas tag in the tree widget for each jid put there.
+    # This is needed for the balloons that need a real canvas tag, and that
+    # we can't use jid's for this since they may contain special chars (!)!
+    variable treeuid 0
     
     # Mapping from presence/show to icon. 
     # Specials for whiteboard clients and foreign IM systems.
@@ -160,7 +164,6 @@ proc ::Jabber::Roster::Build {w} {
     global  sysFont this wDlgs prefs
         
     variable wtree    
-    variable wtreecanvas
     variable servtxt
     variable btedit
     variable btremove
@@ -189,7 +192,7 @@ proc ::Jabber::Roster::Build {w} {
       -selectcommand [namespace current]::SelectCmd   \
       -doubleclickcommand [namespace current]::DoubleClickCmd   \
       -highlightcolor #6363CE -highlightbackground $prefs(bgColGeneral)} $opts]
-    set wtreecanvas [$wtree getcanvas]
+
     if {[string match "mac*" $this(platform)]} {
 	$wtree configure -buttonpresscommand  \
 	  [list ::Jabber::UI::Popup roster]
@@ -550,6 +553,7 @@ proc ::Jabber::Roster::Presence {jid presence args} {
     set itemAttr [$jstate(roster) getrosteritem $jid2]
     if {$itemAttr == ""} {
 	# Needed for icq transports etc.
+	set jid3 $jid2/$argsArr(-resource)
 	set itemAttr [$jstate(roster) getrosteritem $jid3]
     }
     
@@ -607,8 +611,9 @@ proc ::Jabber::Roster::Remove {jid} {
 	$wtree delitem $v
 	
 	# Remove dirs if empty?
+	set vparent [lrange $v 0 end-1]
 	if {[llength $v] == 3} {
-	    if {[llength [$wtree children [lrange $v 0 1]]] == 0} {
+	    if {[llength [$wtree children $vparent]] == 0} {
 		$wtree delitem [lrange $v 0 1]
 	    }
 	}
@@ -619,8 +624,9 @@ proc ::Jabber::Roster::Remove {jid} {
 	set jid3 $jid
 	foreach v [$wtree find withtag $jid3] {
 	    $wtree delitem $v
+	    set vparent [lrange $v 0 end-1]
 	    if {[llength $v] == 3} {
-		if {[llength [$wtree children [lrange $v 0 1]]] == 0} {
+		if {[llength [$wtree children $vparent]] == 0} {
 		    $wtree delitem [lrange $v 0 1]
 		}
 	    }
@@ -730,7 +736,7 @@ proc ::Jabber::Roster::AutoBrowseCallback {browseName type jid subiq} {
 
 proc ::Jabber::Roster::PutItemInTree {jid presence args} {    
     variable wtree    
-    variable wtreecanvas
+    variable treeuid
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::mapShowElemToText mapShowElemToText
@@ -764,8 +770,9 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
 	    set jidx ${jid}/$argsArr(-resource)
 	}
     }
+    set treectag item[incr treeuid]
     
-    set itemOpts [list -text $itemTxt]    
+    set itemOpts [list -text $itemTxt -canvastags $treectag]    
     set icon [eval {::Jabber::Roster::GetPresenceIcon $jidx $presence} $args]
 	
     # If we have an ask attribute, put in Pending tree dir.
@@ -823,7 +830,7 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
 	append msg "\n$argsArr(-status)"
     }
     
-    ::balloonhelp::balloonforcanvas $wtreecanvas $jidx $msg
+    ::balloonhelp::balloonfortree $wtree $treectag $msg
 }
 
 namespace eval ::Jabber::Roster:: {
