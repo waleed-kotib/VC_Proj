@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.5 2004-07-22 15:11:28 matben Exp $
+# $Id: Whiteboard.tcl,v 1.6 2004-07-23 07:21:17 matben Exp $
 
 package require entrycomp
 package require moviecontroller
@@ -403,6 +403,7 @@ proc ::WB::InitMenuDefs { } {
 	{command   mSaveCanvas      {::CanvasFile::DoSaveCanvasFile $wtop}  normal   S}
 	{separator}
 	{command   mSaveAs          {::CanvasCmd::SavePostscript $wtop}     normal   {}}
+	{command   mSaveAsItem      {::CanvasCmd::DoSaveAsItem $wtop}       normal   {}}
 	{command   mPageSetup       {::UserActions::PageSetup $wtop}        normal   {}}
 	{command   mPrintCanvas     {::UserActions::DoPrintCanvas $wtop}    normal   P}
 	{separator}
@@ -608,12 +609,18 @@ proc ::WB::InitMenuDefs { } {
     }
     
     set menuDefs(main,items) [::WB::MakeItemMenuDef $this(itemPath)]
+    set altItemsMenuDefs     [::WB::MakeItemMenuDef $this(altItemPath)]
+    if {[llength $altItemsMenuDefs]} {
+	lappend menuDefs(main,items) {separator}
+	set menuDefs(main,items) [concat $menuDefs(main,items) $altItemsMenuDefs]
+    }
     
     # When registering new menu entries they shall be added at:
     variable menuDefsInsertInd
     set menuDefsInsertInd(main,file)   [expr [llength $menuDefs(main,file)]-2]
     set menuDefsInsertInd(main,edit)   [expr [llength $menuDefs(main,edit)]]
     set menuDefsInsertInd(main,prefs)  [expr [llength $menuDefs(main,prefs)]]
+    set menuDefsInsertInd(main,items)  [expr [llength $menuDefs(main,items)]]
     set menuDefsInsertInd(main,info)   [expr [llength $menuDefs(main,info)]-2]
 }
 

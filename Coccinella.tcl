@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.66 2004-07-22 15:11:27 matben Exp $
+# $Id: Coccinella.tcl,v 1.67 2004-07-23 07:21:15 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -217,6 +217,7 @@ set this(themePrefsPath)    [file join $this(prefsPath) theme]
 set this(msgcatPath)        [file join $this(path) msgs]
 set this(docsPath)          [file join $this(path) docs]
 set this(itemPath)          [file join $this(path) items]
+set this(altItemPath)       [file join $this(prefsPath) items]
 set this(pluginsPath)       [file join $this(path) plugins]
 set this(appletsPath)       [file join $this(path) plugins applets]
 set this(emoticonsPath)     [file join $this(path) iconsets emoticons]
