@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.98 2005-02-08 08:57:14 matben Exp $
+# $Id: GroupChat.tcl,v 1.99 2005-02-14 13:48:38 matben Exp $
 
 package require History
 
@@ -169,14 +169,13 @@ proc ::GroupChat::AllConference { } {
 #       Ad hoc method for finding out if possible to use the original
 #       jabber:iq:conference method. Requires jabber:iq:browse
 
-proc ::GroupChat::HaveOrigConference {{roomjid ""}} {
+proc ::GroupChat::HaveOrigConference {{service ""}} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
 
     set ans 0
-    if {$roomjid == ""} {
-	if {[::Browse::HaveBrowseTree $jserver(this)] &&  \
-	  [AllConference]} {
+    if {$service == ""} {
+	if {[::Browse::HaveBrowseTree $jserver(this)] && [AllConference]} {
 	    set ans 1
 	}
     } else {
@@ -184,10 +183,9 @@ proc ::GroupChat::HaveOrigConference {{roomjid ""}} {
 	# Require that conference service browsed and that we have the
 	# original jabber:iq:conference
 	if {[info exists jstate(browse)]} {
-	    set conf [$jstate(browse) getparentjid $roomjid]
-	    if {[$jstate(browse) isbrowsed $conf]} {
-		if {[info exists jstate(conference,$conf)] && \
-		  $jstate(conference,$conf)} {
+	    if {[$jstate(browse) isbrowsed $service]} {
+		if {[info exists jstate(conference,$service)] && \
+		  $jstate(conference,$service)} {
 		    set ans 1
 		}
 	    }

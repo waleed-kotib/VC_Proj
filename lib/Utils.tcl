@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.42 2005-02-08 08:57:16 matben Exp $
+# $Id: Utils.tcl,v 1.43 2005-02-14 13:48:45 matben Exp $
 
 
 package provide Utils 1.0
@@ -171,6 +171,12 @@ proc ::Utils::FontEqual {font1 font2} {
 	}
     }
     return $ans
+}
+
+proc ::Utils::FontBold {fontName} {
+    
+    array set fontArr [font actual $fontName]
+    return [list $fontArr(-family) $fontArr(-size) bold]
 }
 
 # ::Utils::GetMaxMsgcatWidth --

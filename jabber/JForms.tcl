@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #
-# $Id: JForms.tcl,v 1.18 2005-02-09 14:30:30 matben Exp $
+# $Id: JForms.tcl,v 1.19 2005-02-14 13:48:38 matben Exp $
 # 
 #      Updated to version 2.1 of JEP-0004
 #  
@@ -70,15 +70,10 @@ proc ::Jabber::Forms::Build {w xmllist args} {
     set locals($w,type) "simple"
 
     if {$jprefs(useXDataSearch)} {
-	foreach c $xmllist {
-	    if {[string equal [wrapper::gettag $c] "x"]} {
-		array set cattrArr [wrapper::getattrlist $c]
-		if {[info exists cattrArr(xmlns)] &&  \
-		  [string equal $cattrArr(xmlns) "jabber:x:data"]} {
-		    set hasXDataForm 1
-		    set xmlXDataElem $c
-		}
-	    }
+	set clist [wrapper::getnamespacefromchilds $xmllist x "jabber:x:data"]
+	if {$clist != {}} {
+	    set hasXDataForm 1
+	    set xmlXDataElem [lindex $clist 0]
 	}
     }
     if {$hasXDataForm} {
@@ -87,7 +82,7 @@ proc ::Jabber::Forms::Build {w xmllist args} {
     } else {
 	::Jabber::Forms::BuildSimple $w $xmllist $argsArr(-template)
     }
-    bind $w <Destroy> [list [namespace current]::Cleanup $w]
+    bind $w <Destroy> [list [namespace current]::Free $w]
     
     return $w
 }
@@ -137,7 +132,7 @@ proc ::Jabber::Forms::FillScrollForm {w xmllist args} {
     set wcan $w.can
     set wbox $w.can.f
     catch {destroy $wbox}
-    eval {::Jabber::Forms::Build $wbox $xmllist -width $opts(wboxwidth)} $args
+    eval {Build $wbox $xmllist -width $opts(wboxwidth)} $args
     
     $wcan create window $opts(-ipadx) $opts(-ipady) -anchor nw -window $wbox
     
@@ -226,14 +221,16 @@ proc ::Jabber::Forms::GetXML {w} {
     return $xmlForm
 }
 
-proc ::Jabber::Forms::Cleanup {w} {
+proc ::Jabber::Forms::Free {w} {
     
     variable locals
     variable reported
     variable cache
+    variable wpaths
 
     set id $locals($w,id)
     array unset cache "$id,*"
+    array unset wpaths "$id,*"
     array unset locals "$w,*"
     unset -nocomplain reported($id)
 }
@@ -504,12 +501,9 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
     variable reported
     variable type
     variable locals
-    variable pady
-    variable optionLabel2Value
-    variable optionValue2Label
 
     if {[wrapper::gettag $xml] != "x"} {
-	return -code error {Not proper xml data here}
+	return -code error "Not proper xml data here"
     }
     array set attrArr [wrapper::getattrlist $xml]
     if {![info exists attrArr(xmlns)]} {
@@ -518,13 +512,11 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
     if {![string equal $attrArr(xmlns) "jabber:x:data"]} {
 	return -code error {Expected an "jabber:x:data" element here}
     }
-    array set argsArr {
-	-width     200
-    }
+    set width 240
     array set argsArr $args
-        
-    set bg [option get . backgroundGeneral {}]
-    
+    if {[info exists argsArr(-width)]} {
+	set width $argsArr(-width)
+    }
     frame $w
     set id $locals($w,id)   
     set i 0
@@ -534,238 +526,62 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
 	
 	switch -exact -- $tag {
 	    
-	    instructions - title {
+	    title {
 		label $w.m$i -text [wrapper::getcdata $elem] \
-		  -anchor w -justify left -wraplength $argsArr(-width)
+		  -anchor c -justify center -wraplength $width
+		grid $w.m$i -row $i -column 0 -columnspan 2 -sticky ew
+		$w.m$i configure -font [::Utils::FontBold [$w.m$i cget -font]]
+		incr i
+	    }
+	    instructions {
+		label $w.m$i -text [wrapper::getcdata $elem] \
+		  -anchor w -justify left -wraplength $width
 		grid $w.m$i -row $i -column 0 -columnspan 2 -sticky ew
 		incr i
 	    }
 	    field {
-		unset -nocomplain attrArr
-		array set attrArr [wrapper::getattrlist $elem]
-		if {[info exists attrArr(label)]} {
-		    set lab $attrArr(label)
-		} else {
-		    set lab Unknown
+		set attr(type) "text-single"
+		array set attr [wrapper::getattrlist $elem]
+				
+		set c [wrapper::getfirstchildwithtag $elem "desc"]
+		if {$c != {}} {
+		    label $w.m$i -text [wrapper::getcdata $c] \
+		      -wraplength $width -justify left
+		    grid $w.m$i -row $i -column 0 -columnspan 2 -sticky ew
+		    incr i
 		}
+		#puts "type=$attr(type)"
 		
-		# Set reasonable default value if not given.
-		switch -exact -- $attrArr(type) {
-		    text-single - text-private - text-multi - list-single - \
-		      list-multi - jid - jid-multi {
-			set defvalue ""
-		    }
-		    boolean {
-			set defvalue 0
-		    }
-		    default {
-			set defvalue ""
-		    }
-		}
-		
-		# Required? <desc> element? <value> as default?
-		set isrequired 0
-		foreach c [wrapper::getchildren $elem] {
-		    set ctag [wrapper::gettag $c]
-		    if {[string equal $ctag "required"]} {
-			set isrequired 1
-		    } elseif {[string equal $ctag "desc"]} {
-			label $w.m$i -text [wrapper::getcdata $c] \
-			  -wraplength $argsArr(-width) -justify left
-			grid $w.m$i -row $i -column 0 -columnspan 2 -sticky ew
-			incr i
-		    } elseif {[string equal $ctag "value"]} {
-			
-			# Set default.
-			set defvalue [wrapper::getcdata $c]
-		    }
-		}
-		if {$isrequired} {
-		    set opts {-foreground red}
-		} else {
-		    set opts {}
-		}
-		#puts "type=$attrArr(type)"
-		
-		switch -exact -- $attrArr(type) {
+		switch -exact -- $attr(type) {
 		    text-single - text-private {
-			set var $attrArr(var)
-			set cache($id,$var) $defvalue
-			set type($id,$var) $attrArr(type)
-			if {[string equal $attrArr(type) "text-single"]} {
-			    set show {}
-			} else {
-			    set show {-show *}
-			}
-			
-			# If label not too long make it into a single row.
-			if {[string length $lab] < 24} {
-			    eval {label $w.l$i -text $lab} $opts
-			    grid $w.l$i -row $i -column 0 -sticky w
-			    eval {entry $w.e$i  \
-			      -textvariable [namespace current]::cache($id,$var)} \
-			      $show
-			    grid $w.e$i -row $i -column 1 -sticky ew
-			    incr i
-			} else {
-			    eval {label $w.l$i -text $lab} $opts
-			    grid $w.l$i -row $i -column 0 -columnspan 2 -sticky w
-			    incr i
-			    eval {entry $w.e$i  \
-			      -textvariable [namespace current]::cache($id,$var)} \
-			      $show
-			    grid $w.e$i -row $i -column 0 -columnspan 2 -sticky ew
-			    incr i
-			}
+			NewLabelEntry $w $elem $width i			
 		    }
 		    text-multi {
-			set var $attrArr(var)
-			set cache($id,$var) $defvalue
-			set type($id,$var) $attrArr(type)
-			eval {label $w.l$i -text $lab} $opts
-			grid $w.l$i -row $i -column 0 -columnspan 2 -sticky w
-			incr i
-
-			set wfr [frame $w.f$var]
-			set wtxt ${wfr}.txt
-			set wsc ${wfr}.sc
-			text $wtxt -height 3 -wrap word \
-			  -yscrollcommand [list $wsc set] -width 40
-			scrollbar $wsc -orient vertical \
-			  -command [list $wtxt yview]
-			$wtxt insert end $defvalue
-
-			grid $wtxt -column 0 -row 0 -sticky news
-			grid $wsc -column 1 -row 0 -sticky ns
-			grid columnconfigure $wfr 0 -weight 1
-			grid rowconfigure $wfr 0 -weight 1
-			
-			grid $wfr -row $i -column 0 -columnspan 2 -sticky ew
-			incr i
+			NewTextMulti $w $elem $width i
 		    }
 		    list-single {
-			
-			# Represented by a popup menu button.
-			set var $attrArr(var)
-			set cache($id,$var) $defvalue
-			set type($id,$var) $attrArr(type)
-			
-			# Build menu list and mapping from label to value.
-			foreach {defValue optionList}   \
-			  [HandleMultipleOptions $id $elem $var] {break}
-
-			if {[string length $lab] < 24} {
-			    eval {label $w.l$i -text $lab} $opts
-			    grid $w.l$i -row $i -column 0 -sticky w
-			    
-			    set wmenu [eval {tk_optionMenu $w.pop$i   \
-			      [namespace current]::cache($id,$var)} $optionList]
-			    $w.pop$i configure -highlightthickness 0  \
-			      -background $bg -foreground black
-			    grid $w.pop$i -row $i -column 1 -sticky w			
-			    incr i
-			 } else {
-			     eval {label $w.l$i -text $lab} $opts
-			     grid $w.l$i -row $i -column 0 -columnspan 2 -sticky w
-			     incr i
-			     
-			     set wmenu [eval {tk_optionMenu $w.pop$i   \
-			       [namespace current]::cache($id,$var)} $optionList]
-			     $w.pop$i configure -highlightthickness 0  \
-			       -background $bg -foreground black
-			     grid $w.pop$i -row $i -column 0 -columnspan 2 -sticky w			
-			     incr i
-			 }
-			 if {$defValue == ""} {
-			     set cache($id,$var) ""
-			 } else {
-			     set cache($id,$var) $optionValue2Label($id,$var,$defValue)
-			 }
+			NewListSingle $w $elem $width i
 		    }
-		    list-multi - jid-multi {
-			
-			# Build menu list and mapping from label to value.
-			set var $attrArr(var)
-			set cache($id,$var) $defvalue
-			set type($id,$var) $attrArr(type)
-			foreach {defValue optionList}   \
-			  [HandleMultipleOptions $id $elem $var] {break}
-			set cache($id,$var) $optionList
-			
-			# Represented by a listbox.
-			eval {label $w.l$i -text $lab} \
-			  $opts
-			grid $w.l$i -row $i -column 0 -columnspan 2 -sticky w
-			incr i
-
-			set wfr [frame $w.f$var]
-			set wlb $w.f${var}.lb
-			set wsc $w.f${var}.sc
-			listbox $wlb -height 4 -selectmode multiple  \
-			  -yscrollcommand [list $wsc set]   \
-			  -listvar [namespace current]::cache($id,$var)
-			scrollbar $wsc -orient vertical  \
-			  -command [list $wlb yview]
-			grid $wlb -column 0 -row 0 -sticky news
-			grid $wsc -column 1 -row 0 -sticky ns
-			grid columnconfigure $wfr 0 -weight 1
-			grid rowconfigure $wfr 0 -weight 1
-						
-			grid $wfr -row $i -column 0 -columnspan 2 -sticky ew
-			
-			set ind [lsearch $optionList  \
-			  $optionValue2Label($id,$var,$defValue)]
-			if {$ind >= 0} {
-			    $wlb selection set $ind
-			}
-			incr i
+		    list-multi {
+			NewListMulti $w $elem $width i
+		    }
+		    jid-multi {
+			NewJidMulti $w $elem $width i
 		    }
 		    boolean {
-			set var $attrArr(var)
-			set cache($id,$var) $defvalue
-			set type($id,$var) $attrArr(type)
-			eval {checkbutton $w.c$i -text " $lab" \
-			  -variable [namespace current]::cache($id,$var)} $opts
-			grid $w.c$i -row $i -column 0 -columnspan 2 -sticky w \
-			  -pady $pady
-			incr i
+			NewBoolean $w $elem $width i			
 		    }
 		    fixed {
-			eval {label $w.l$i -text $defvalue -justify left \
-			  -wraplength $argsArr(-width)} $opts
-			grid $w.l$i -row $i -column 0 -columnspan 2 -sticky w
-			incr i
+			NewFixed $w $elem $width i
 		    }
 		    jid-single {
-			set var $attrArr(var)
-			set cache($id,$var) $defvalue
-			set type($id,$var) $attrArr(type)
-			label $w.l$i -text $lab
-			grid $w.l$i -row $i -column 0 -columnspan 2 -sticky w
-			incr i
-			entry $w.e$i  \
-			  -textvariable [namespace current]::cache($id,$var)
-			grid $w.e$i -row $i -column 0 -columnspan 2 -sticky ew
-			incr i
+			NewJidSingle $w $elem $width
 		    }
 		    hidden {
-			set var $attrArr(var)
-			set type($id,$var) $attrArr(type)
-			set cache($id,$var) $defvalue
+			NewHidden $w $elem
 		    }
 		    default {
-			
-			# Use text-single type as fallback.
-			set var $attrArr(var)
-			set cache($id,$var) $defvalue
-			set type($id,$var) $attrArr(type)
-			label $w.l$i -text $lab
-			grid $w.l$i -row $i -column 0 -columnspan 2 -sticky w
-			incr i
-			entry $w.e$i  \
-			  -textvariable [namespace current]::cache($id,$var)
-			grid $w.e$i -row $i -column 0 -columnspan 2 -sticky ew
-			incr i
+			NewLabelEntry $w $elem $width i
 		    }
 		}
 	    }
@@ -781,6 +597,8 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
 	    }
 	}
     }
+    grid columnconfigure $w 1 -weight 1
+
     label $w.l$i -text "Entries labelled in red are required"
     grid  $w.l$i -row $i -column 0 -columnspan 2 -sticky w
     incr i
@@ -798,11 +616,385 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
     return $w
 }
 
-# Jabber::Forms::HandleMultipleOptions --
-# 
-# 
+proc ::Jabber::Forms::GetDefaultValue {elem defValue} {
+    
+    set valueElem [wrapper::getfirstchildwithtag $elem "value"]
+    if {$valueElem != {}} {
+	set defValue [wrapper::getcdata $valueElem]
+    }
+    return $defValue
+}
 
-proc ::Jabber::Forms::HandleMultipleOptions {id elem var} {
+proc ::Jabber::Forms::GetDefaultValuesList {elem} {
+
+    set defValueList {}
+    foreach c [wrapper::getchildswithtag $elem "value"] {
+	lappend defValueList [wrapper::getcdata $c]
+    }
+    return $defValueList
+}
+
+proc ::Jabber::Forms::NewLabelEntry {w elem width iVar} {
+    upvar $iVar i
+    variable locals
+    variable cache
+    variable type
+    
+    set attr(type) "text-single"
+    array set attr [wrapper::getattrlist $elem]
+    if {[info exists attr(label)]} {
+	set label $attr(label)
+    } else {
+	set label ""
+    }
+    set defValue [GetDefaultValue $elem ""]
+    set id $locals($w,id)   
+    set var $attr(var)
+    
+    set cache($id,$var) $defValue
+    set type($id,$var)  $attr(type)
+    
+    set lopts {}
+    set requiredElem [wrapper::getfirstchildwithtag $elem "required"]
+    if {$requiredElem != {}} {
+	set lopts {-fg red}
+    }
+    set eopts {}
+    if {[string equal $attr(type) "text-private"]} {
+	set eopts {-show *}
+    }
+    
+    # If label not too long make it into a single row.
+    if {0 && [string length $label] < 24} {
+	eval {label $w.l$i -text $label} $lopts
+	grid $w.l$i -row $i -column 0 -sticky w
+	eval {
+	    entry $w.e$i -textvariable [namespace current]::cache($id,$var)
+	} $eopts
+	grid $w.e$i -row $i -column 1 -sticky ew
+	incr i
+    } else {
+	eval {label $w.l$i -text $label -wraplength $width -justify left} $lopts
+	grid $w.l$i -row $i -column 0 -columnspan 2 -sticky w
+	incr i
+	eval {
+	    entry $w.e$i -textvariable [namespace current]::cache($id,$var)
+	} $eopts
+	grid $w.e$i -row $i -column 0 -columnspan 2 -sticky ew
+	incr i
+    }
+}
+
+proc ::Jabber::Forms::NewBoolean {w elem width iVar} {
+    upvar $iVar i
+    variable locals
+    variable cache
+    variable type
+    variable pady
+    
+    array set attr [wrapper::getattrlist $elem]
+    if {[info exists attr(label)]} {
+	set label $attr(label)
+    } else {
+	set label ""
+    }
+    set defValue [GetDefaultValue $elem 0]
+    if {![regexp {(0|1)} $defValue]} { 
+	set defValue 0
+    }
+    set id $locals($w,id)   
+    set var $attr(var)
+    set cache($id,$var) $defValue
+    set type($id,$var)  $attr(type)
+
+    set opts {}
+    set requiredElem [wrapper::getfirstchildwithtag $elem "required"]
+    if {$requiredElem != {}} {
+	set opts {-fg red}
+    }
+    eval {
+	checkbutton $w.c$i -text " $label" \
+	  -variable [namespace current]::cache($id,$var)  \
+	  -wraplength $width -justify left
+    } $opts
+    grid $w.c$i -row $i -column 0 -columnspan 2 -sticky w -pady $pady
+    incr i
+}
+
+proc ::Jabber::Forms::NewFixed {w elem width iVar} {
+    upvar $iVar i
+    
+    set defValue [GetDefaultValue $elem ""]
+    set lopts {}
+    set requiredElem [wrapper::getfirstchildwithtag $elem "required"]
+    if {$requiredElem != {}} {
+	set lopts {-fg red}
+    }
+    eval {
+	label $w.l$i -text $defValue -justify left -wraplength $width
+    } $lopts
+    grid $w.l$i -row $i -column 0 -columnspan 2 -sticky w
+    incr i
+}
+
+proc ::Jabber::Forms::NewListSingle {w elem width iVar} {
+    upvar $iVar i
+    variable locals
+    variable cache
+    variable type
+    variable optionLabel2Value
+    variable optionValue2Label
+    
+    array set attr [wrapper::getattrlist $elem]
+    if {[info exists attr(label)]} {
+	set label $attr(label)
+    } else {
+	set label ""
+    }
+    
+    # Represented by a popup menu button.
+    set id $locals($w,id)   
+    set var $attr(var)
+    set type($id,$var) $attr(type)
+    
+    # Build menu list and mapping from label to value.
+    foreach {defValue optionList} [ParseMultiOpts $id $elem $var] {break}
+
+    set lopts {}
+    set requiredElem [wrapper::getfirstchildwithtag $elem "required"]
+    if {$requiredElem != {}} {
+	set lopts {-fg red}
+    }
+
+    if {0 && [string length $label] < 24} {
+	eval {label $w.l$i -text $label} $lopts
+	grid $w.l$i -row $i -column 0 -sticky w
+	
+	set wmenu [eval {tk_optionMenu $w.pop$i   \
+	  [namespace current]::cache($id,$var)} $optionList]
+	$w.pop$i configure -highlightthickness 0 -foreground black
+	grid $w.pop$i -row $i -column 1 -sticky w			
+	incr i
+     } else {
+	 eval {label $w.l$i -text $label -wraplength $width -justify left} $lopts
+	 grid $w.l$i -row $i -column 0 -columnspan 2 -sticky w
+	 incr i
+	 
+	 set wmenu [eval {tk_optionMenu $w.pop$i   \
+	   [namespace current]::cache($id,$var)} $optionList]
+	 $w.pop$i configure -highlightthickness 0 -foreground black
+	 grid $w.pop$i -row $i -column 0 -columnspan 2 -sticky w			
+	 incr i
+     }
+     if {$defValue == ""} {
+	 set cache($id,$var) ""
+     } else {
+	 set cache($id,$var) $optionValue2Label($id,$var,$defValue)
+     }
+}
+
+proc ::Jabber::Forms::NewListMulti {w elem width iVar} {
+    upvar $iVar i
+    variable locals
+    variable cache
+    variable type
+    variable wpaths
+    variable optionLabel2Value
+    variable optionValue2Label
+    
+    array set attr [wrapper::getattrlist $elem]
+    if {[info exists attr(label)]} {
+	set label $attr(label)
+    } else {
+	set label ""
+    }
+
+    # Build menu list and mapping from label to value.
+    set id $locals($w,id)   
+    set var $attr(var)
+    set cache($id,$var) [GetDefaultValuesList $elem]
+    set type($id,$var) $attr(type)
+    foreach {defValue optionList} [ParseMultiOpts $id $elem $var] {break}
+    set cache($id,$var) $optionList
+
+    set lopts {}
+    set requiredElem [wrapper::getfirstchildwithtag $elem "required"]
+    if {$requiredElem != {}} {
+	set lopts {-fg red}
+    }
+
+    # Represented by a listbox.
+    eval {label $w.l$i -text $label -wraplength $width -justify left} $lopts
+    grid $w.l$i -row $i -column 0 -columnspan 2 -sticky w
+    incr i
+    
+    set wfr [frame $w.f$var]
+    set wlb $w.f${var}.lb
+    set wsc $w.f${var}.sc
+    listbox $wlb -height 4 -selectmode multiple  \
+      -yscrollcommand [list $wsc set]   \
+      -listvar [namespace current]::cache($id,$var)
+    scrollbar $wsc -orient vertical -command [list $wlb yview]
+    grid $wlb -column 0 -row 0 -sticky news
+    grid $wsc -column 1 -row 0 -sticky ns
+    grid columnconfigure $wfr 0 -weight 1
+    grid rowconfigure    $wfr 0 -weight 1
+    
+    grid $wfr -row $i -column 0 -columnspan 2 -sticky ew
+
+    set wpaths($id,$var) $wlb
+
+    set ind [lsearch $optionList $optionValue2Label($id,$var,$defValue)]
+    if {$ind >= 0} {
+	$wlb selection set $ind
+    }
+    incr i
+}   
+
+proc ::Jabber::Forms::NewJidSingle {w elem width iVar} {
+    upvar $iVar i
+    variable locals
+    variable cache
+    variable type
+    
+    array set attr [wrapper::getattrlist $elem]
+    if {[info exists attr(label)]} {
+	set label $attr(label)
+    } else {
+	set label ""
+    }
+    set defValue [GetDefaultValue $elem ""]
+    set id $locals($w,id)   
+    set var $attr(var)
+    set cache($id,$var) $defValue
+    set type($id,$var) $attr(type)
+    label $w.l$i -text $label -wraplength $width -justify left
+    grid $w.l$i -row $i -column 0 -columnspan 2 -sticky w
+    incr i
+    entry $w.e$i -textvariable [namespace current]::cache($id,$var)
+    grid $w.e$i -row $i -column 0 -columnspan 2 -sticky ew
+    incr i
+}
+
+proc ::Jabber::Forms::NewJidMulti {w elem width iVar} {
+    upvar $iVar i
+    variable locals
+    variable cache
+    variable type
+    variable wpaths
+    
+    array set attr [wrapper::getattrlist $elem]
+    if {[info exists attr(label)]} {
+	set label $attr(label)
+    } else {
+	set label ""
+    }
+    set defValue ""
+    foreach c [wrapper::getchildswithtag $elem "value"] {
+	append defValue " " [wrapper::getcdata $c]
+    }
+    set id $locals($w,id)   
+    set var $attr(var)
+    set cache($id,$var) $defValue
+    set type($id,$var)  $attr(type)
+
+    set lopts {}
+    set requiredElem [wrapper::getfirstchildwithtag $elem "required"]
+    if {$requiredElem != {}} {
+	set lopts {-fg red}
+    }
+    
+    eval {label $w.l$i -text $label -wraplength $width -justify left} $lopts
+    grid $w.l$i -row $i -column 0 -columnspan 2 -sticky w
+    incr i
+
+    set wfr [frame $w.f$var]
+    set wtxt ${wfr}.txt
+    set wsc ${wfr}.sc
+    text $wtxt -height 3 -wrap word -yscrollcommand [list $wsc set] -width 20
+    scrollbar $wsc -orient vertical -command [list $wtxt yview]
+    $wtxt insert end $defValue
+    set wpaths($id,$var) $wtxt
+
+    grid $wtxt -column 0 -row 0 -sticky news
+    grid $wsc  -column 1 -row 0 -sticky ns
+    grid columnconfigure $wfr 0 -weight 1
+    grid rowconfigure    $wfr 0 -weight 1
+    
+    grid $wfr -row $i -column 0 -columnspan 2 -sticky ew
+    incr i
+}
+
+proc ::Jabber::Forms::NewTextMulti {w elem width iVar} {
+    upvar $iVar i
+    variable locals
+    variable cache
+    variable type
+    variable wpaths
+
+    array set attr [wrapper::getattrlist $elem]
+    if {[info exists attr(label)]} {
+	set label $attr(label)
+    } else {
+	set label ""
+    }
+    set defValueList {}
+    foreach c [wrapper::getchildswithtag $elem "value"] {
+	lappend defValueList [wrapper::getcdata $c]
+    }
+    set id $locals($w,id)   
+    set var $attr(var)
+    set cache($id,$var) $defValueList
+    set type($id,$var)  $attr(type)
+
+    set lopts {}
+    set requiredElem [wrapper::getfirstchildwithtag $elem "required"]
+    if {$requiredElem != {}} {
+	set lopts {-fg red}
+    }
+    
+    eval {label $w.l$i -text $label -wraplength $width -justify left} $lopts
+    grid $w.l$i -row $i -column 0 -columnspan 2 -sticky w
+    incr i
+
+    set wfr [frame $w.f$var]
+    set wtxt ${wfr}.txt
+    set wsc ${wfr}.sc
+    text $wtxt -height 3 -wrap word -yscrollcommand [list $wsc set] -width 20
+    scrollbar $wsc -orient vertical -command [list $wtxt yview]
+    foreach str $defValueList {
+	$wtxt insert end $str
+	$wtxt insert end "\n"
+    }
+    set wpaths($id,$var) $wtxt
+
+    grid $wtxt -column 0 -row 0 -sticky news
+    grid $wsc  -column 1 -row 0 -sticky ns
+    grid columnconfigure $wfr 0 -weight 1
+    grid rowconfigure    $wfr 0 -weight 1
+    
+    grid $wfr -row $i -column 0 -columnspan 2 -sticky ew
+    incr i
+}
+
+proc ::Jabber::Forms::NewHidden {w elem} {
+    variable locals
+    variable cache
+    variable type
+    
+    array set attr [wrapper::getattrlist $elem]
+    set defValue [GetDefaultValue $elem ""]
+    set id $locals($w,id)   
+    set var $attr(var)
+    set type($id,$var)  $attr(type)
+    set cache($id,$var) $defValue
+}
+
+# Jabber::Forms::ParseMultiOpts --
+# 
+#       Returns a list {default optionList}
+
+proc ::Jabber::Forms::ParseMultiOpts {id elem var} {
     
     variable optionLabel2Value
     variable optionValue2Label
@@ -829,6 +1021,7 @@ proc ::Jabber::Forms::HandleMultipleOptions {id elem var} {
 	    }
 	}
     }
+    #puts "ParseMultiOpts: [list $value $optionList]"
     return [list $value $optionList]
 }
 
@@ -847,6 +1040,7 @@ proc ::Jabber::Forms::GetXMLXData {w} {
     variable locals
     variable cache
     variable type
+    variable wpaths
     variable optionLabel2Value
     
     if {![info exists locals($w,id)]} {
@@ -854,12 +1048,14 @@ proc ::Jabber::Forms::GetXMLXData {w} {
     }
     set id $locals($w,id)
     set xmllist {}
-    set wsp_ {\n\t }
     
     # Submit all nonempty entries.
     foreach key [array names type "$id,*"] {
 	regexp "^${id},(.+)$" $key match var
-
+	set subtags {}
+	
+	#puts "type=$type($key), var=$var"
+	
 	switch -- $type($key) {
 	    text-single - text-private - boolean - jid-single {
 		set value $cache($id,$var)
@@ -872,8 +1068,8 @@ proc ::Jabber::Forms::GetXMLXData {w} {
 		set value $optionLabel2Value($id,$var,$label)
 		set subtags [list [wrapper::createtag value -chdata $value]]
 	    }
-	    list-multi - jid-multi {
-		set wlb $w.f${var}.lb
+	    list-multi {
+		set wlb $wpaths($id,$var)
 		set selIndList [$wlb curselection]
 		set valueList {}
 		foreach ind $selIndList {
@@ -882,14 +1078,27 @@ proc ::Jabber::Forms::GetXMLXData {w} {
 		if {[llength $valueList] == 0} {
 		    continue
 		}
-		set subtags {}
+		foreach value $valueList {
+		    lappend subtags [wrapper::createtag value -chdata $value]
+		}
+	    }
+	    jid-multi {
+		set wtxt $wpaths($id,$var)
+		set txt [$wtxt get 1.0 end]
+		set txt [string trimright $txt]
+		set valueList [split $txt "\n"]
 		foreach value $valueList {
 		    lappend subtags [wrapper::createtag value -chdata $value]
 		}
 	    }
 	    text-multi {
-		set value [$w.f${var}.txt get 1.0 end]
-		set value [string trimright $value $wsp_]
+		set wtxt $wpaths($id,$var)
+		set txt [$wtxt get 1.0 end]
+		set txt [string trimright $txt]
+		set valueList [split $txt "\n"]
+		foreach value $valueList {
+		    lappend subtags [wrapper::createtag value -chdata $value]
+		}
 		set subtags [list [wrapper::createtag value -chdata $value]]
 	    }
 	    hidden {
@@ -909,7 +1118,8 @@ proc ::Jabber::Forms::GetXMLXData {w} {
 		set value ""
 	    }
 	}
-	if {[string length $value]} {
+	#puts "\t subtags=$subtags"
+	if {$subtags != {}} {
 	    lappend xmllist [wrapper::createtag field -attrlist [list var $var] \
 	      -subtags $subtags]
 	}
@@ -993,7 +1203,7 @@ proc ::Jabber::Forms::ResultListXData {w subiq} {
     }
     set id $locals($w,id)
     set res {}
-    set xlist [wrapper::getchildwithtaginnamespace $subiq x jabber:x:data]
+    set xlist [wrapper::getchildwithtaginnamespace $subiq x "jabber:x:data"]
     if {[llength $xlist] == 0} {
 	return -code error {Did not identify the <x> element in search result}
     }

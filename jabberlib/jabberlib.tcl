@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.83 2005-02-13 13:17:42 matben Exp $
+# $Id: jabberlib.tcl,v 1.84 2005-02-14 13:48:44 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -587,8 +587,8 @@ proc jlib::initsocket {jlibname} {
     # Schedule keep-alives to keep socket open in case anyone want's to close it.
     # Be sure to not send any keep-alives before the stream is inited.
     if {$opts(-keepalivesecs)} {
-	after $opts(-keepalivesecs)  \
-	  [namespace current]::schedule_keepalive $jlibname
+	after [expr 1000 * $opts(-keepalivesecs)] \
+	  [list [namespace current]::schedule_keepalive $jlibname]
     }
 }
 
@@ -3125,7 +3125,11 @@ proc jlib::schedule_keepalive {jlibname} {
     upvar ${jlibname}::lib lib
 
     if {$opts(-keepalivesecs) && $lib(isinstream)} {
-	if {[catch {puts $lib(sock) "\n"} err]} {
+	Debug 2 "SEND:"
+	if {[catch {
+	    puts -nonewline $lib(sock) "\n"
+	    flush $lib(sock)
+	} err]} {
 	    closestream $jlibname
 	    set errmsg "Network was disconnected"
 	    uplevel #0 $lib(clientcmd) [list $jlibname networkerror -body $errmsg]
