@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.21 2003-12-16 15:03:53 matben Exp $
+# $Id: Preferences.tcl,v 1.22 2003-12-18 14:19:35 matben Exp $
  
 package require notebook
 package require tree
@@ -1927,16 +1927,16 @@ proc ::Preferences::NetSetup::UpdateUI { } {
     }
     
     # Other UI updates needed.
-    foreach w [::UI::GetAllWhiteboards] {
+    foreach w [::WB::GetAllWhiteboards] {
 	set wtop [::UI::GetToplevelNS $w]
-	::UI::SetCommHead $wtop $prefs(protocol)
+	::WB::SetCommHead $wtop $prefs(protocol)
 	
 	switch -- $prefs(protocol) {
 	    jabber {
 		::Jabber::BuildJabberEntry $wtop
 	    }
 	    default {
-		::UI::DeleteJabberEntry $wtop
+		::WB::DeleteJabberEntry $wtop
 	    }
 	}
     }
@@ -2464,7 +2464,7 @@ proc ::Preferences::EditFonts::PushBtSave { } {
 
     # Do save.
     set prefs(canvasFonts) [$wlbwb get 0 end]
-    ::UI::BuildAllFontMenus $prefs(canvasFonts)
+    ::WB::BuildAllFontMenus $prefs(canvasFonts)
 }
     
 proc ::Preferences::EditFonts::PushBtStandard {wapp} {

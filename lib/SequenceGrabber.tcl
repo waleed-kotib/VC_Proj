@@ -4,7 +4,7 @@
 #
 #    Copyright (c) 2002   Mats Bengtsson
 #    
-# $Id: SequenceGrabber.tcl,v 1.1.1.1 2002-12-08 11:04:23 matben Exp $
+# $Id: SequenceGrabber.tcl,v 1.2 2003-12-18 14:19:35 matben Exp $
 
 #---------------------------------------------------------------------
 #   DisplaySequenceGrabber ---
@@ -34,7 +34,7 @@ proc DisplaySequenceGrabber  {wtop}  {
 	return
     }
     set seqGrabPath $msg	
-    set anc [::CanvasUtils::NewImportAnchor]
+    set anc [::CanvasUtils::NewImportAnchor $w]
     
     # We keep the item tag 'movie', and add a new tag 'grabber'.
     $w create window [lindex $anc 0] [lindex $anc 1] -anchor nw  \

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.1 2003-12-18 07:25:11 matben Exp $
+# $Id: Whiteboard.tcl,v 1.2 2003-12-18 14:19:35 matben Exp $
 
 package require entrycomp
 package require CanvasDraw
@@ -18,6 +18,22 @@ package require CanvasCutCopyPaste
 package provide Whiteboard 1.0
 
 namespace eval ::WB:: {
+
+    # Tool button mappings.
+    variable btNo2Name 
+    variable btName2No
+    array set btNo2Name	{
+	00 point 01 move 10 line  11 arrow 
+	20 rect  21 oval 30 pen   31 brush
+	40 text  41 del  50 paint 51 poly 
+	60 arc   61 rot
+    }
+    array set btName2No {
+	point 00 move 01 line  10 arrow 11 
+	rect  20 oval 21 pen   30 brush 31
+	text  40 del  41 paint 50 poly  51 
+	arc   60 rot  61
+    }
 
     # Use option database for customization.
     # Shortcut buttons.
@@ -42,7 +58,23 @@ namespace eval ::WB:: {
     option add *Whiteboard.waveImage            wave            widgetDefault
     option add *Whiteboard.resizeHandleImage    resizehandle    widgetDefault
 
+    option add *Whiteboard.barhorizImage        barhoriz        widgetDefault
+    option add *Whiteboard.barvertImage         barvert         widgetDefault
 
+    # Drawing tool buttons.
+    for {set icol 0} {$icol <= 1} {incr icol} {
+	for {set irow 0} {$irow <= 6} {incr irow} {
+	    set idx ${irow}${icol}
+	    option add *Whiteboard.toolOff$btNo2Name($idx)Image off${idx}  widgetDefault
+	    option add *Whiteboard.toolOn$btNo2Name($idx)Image  on${idx} widgetDefault
+	}
+    }
+
+    # Color selector.
+    option add *Whiteboard.bwrectImage          bwrect          widgetDefault
+    option add *Whiteboard.imcolorImage         imcolor         widgetDefault
+    
+    
     # Keeps various geometry info.
     variable dims
     # Canvas size; these are also min sizes. Add new line of tools.
@@ -73,6 +105,8 @@ namespace eval ::WB:: {
     variable fixMenusCallback {}
     variable menuSpecPublic
     set menuSpecPublic(wpaths) {}
+    
+    variable iconsInitted 0
 }
 
 # WB::Init --
@@ -81,6 +115,7 @@ namespace eval ::WB:: {
 
 proc ::WB::Init {} {
     global  this prefs
+    variable wbicons
     
     ::Debug 2 "::WB::Init"
     
@@ -101,23 +136,6 @@ proc ::WB::Init {} {
     variable thisType
 
     variable animateWave
-    upvar ::UI::icons icons
-    
-    # Tool button mappings.
-    variable btNo2Name 
-    variable btName2No
-    array set btNo2Name	{
-	00 point 01 move 10 line  11 arrow 
-	20 rect  21 oval 30 pen   31 brush
-	40 text  41 del  50 paint 51 poly 
-	60 arc   61 rot
-    }
-    array set btName2No {
-	point 00 move 01 line  10 arrow 11 
-	rect  20 oval 21 pen   30 brush 31
-	text  40 del  41 paint 50 poly  51 
-	arc   60 rot  61
-    }
     
     # Defines canvas binding tags suitable for each tool.
     ::CanvasUtils::DefineWhiteboardBindtags
@@ -156,14 +174,40 @@ proc ::WB::Init {} {
     }
     set btShortDefs(client) $btShortDefs(symmetric)
     set btShortDefs(server) $btShortDefs(symmetric)
-    set btShortDefs(this)   $btShortDefs($prefs(protocol))
-	
-    # Get icons.
-	
-    set icons(bwrect) [image create photo bwrect -format gif  \
-      -file [file join $this(path) images transparent_rect.gif]]
+    set btShortDefs(this)   $btShortDefs($prefs(protocol))   
+}
+
+# WB::InitIcons --
+# 
+#       Get all standard icons using the option database with the
+#       preloaded icons as fallback.
+
+proc ::WB::InitIcons {w} {
     
+    variable iconsInitted 1
+    variable btNo2Name 
+    variable wbicons
     
+    # Make all standard icons.
+    package require WBIcons
+    
+    set wbicons(barhoriz) [::WB::GetThemeImage [option get $w barhorizImage {}]]
+    set wbicons(barvert)  [::WB::GetThemeImage [option get $w barvertImage {}]]
+    
+    # Drawing tool buttons.
+    for {set icol 0} {$icol <= 1} {incr icol} {
+	for {set irow 0} {$irow <= 6} {incr irow} {
+	    set idx ${irow}${icol}
+	    set wbicons(off${idx}) [::WB::GetThemeImage  \
+	      [option get $w toolOff$btNo2Name($idx)Image {}]]
+	    set wbicons(on${idx})  [::WB::GetThemeImage  \
+	      [option get $w toolOn$btNo2Name($idx)Image {}]]
+	}
+    }
+    
+    # Color selector.
+    set wbicons(imcolor)  [::WB::GetThemeImage [option get $w imcolorImage {}]]
+    set wbicons(bwrect)   [::WB::GetThemeImage [option get $w bwrectImage {}]]
 }
 
 # WB::InitMenuDefs --
@@ -182,16 +226,12 @@ proc ::WB::InitMenuDefs { } {
     
     # All menu definitions for the main (whiteboard) windows as:
     #      {{type name cmd state accelerator opts} {{...} {...} ...}}
-
+    
     set menuDefs(main,info,aboutwhiteboard)  \
-      {command   mAboutCoccinella    {::SplashScreen::SplashScreen $wDlgs(splash)} normal   {}}
+      {command   mAboutCoccinella    {::SplashScreen::SplashScreen} normal   {}}
     set menuDefs(main,info,aboutquicktimetcl)  \
       {command   mAboutQuickTimeTcl  {::Dialogs::AboutQuickTimeTcl}                normal   {}}
 
-    # Mac only.
-    set menuDefs(main,apple) [list $menuDefs(main,info,aboutwhiteboard)  \
-      $menuDefs(main,info,aboutquicktimetcl)]
-    
     set menuDefsMainFileJabber {
 	{command   mNew                {::WB::NewWhiteboard -sendcheckstate disabled}   normal   N}
 	{command   mCloseWindow        {::UserActions::DoCloseWindow}             normal   W}
@@ -320,10 +360,6 @@ proc ::WB::InitMenuDefs { } {
     set menuDefs(main,prefs,smooth)  \
       {checkbutton mLineSmoothness   {}                                    normal   {} \
       {-variable ::${wtop}::state(smooth)}}
-    if {0} {
-	set menuDefs(main,prefs,straighten)  \
-	  {command     mStraighten       {::CanvasUtils::ItemStraighten $w $id} normal   {} {}}
-    }
     set menuDefs(main,prefs,arcs)  \
       {cascade     mArcs             {}                                    normal   {} {} {
 	{radio   mPieslice         {}                                      normal   {} \
@@ -626,6 +662,7 @@ proc ::WB::BuildWhiteboard {wtop args} {
     variable wbicons
     variable threadToWtop
     variable jidToWtop
+    variable iconsInitted
     
     Debug 2 "::WB::BuildWhiteboard wtop=$wtop, args='$args'"
     
@@ -712,8 +749,12 @@ proc ::WB::BuildWhiteboard {wtop args} {
     pack $wapp(frall) -fill both -expand 1
     
     set fontS [option get . fontSmall {}]
+    set fg    black
     set iconResize [::Theme::GetImage [option get $wall resizeHandleImage {}]]
     set wbicons(resizehandle) $iconResize
+    if {!$iconsInitted} {
+	::WB::InitIcons $wall
+    }
     
     # Note that the order of calls can be critical as any 'update' may trigger
     # network events to attempt drawing etc. Beware!!!
@@ -744,8 +785,8 @@ proc ::WB::BuildWhiteboard {wtop args} {
       -side top -fill x -padx 10 -pady 2 -in $wapp(frstat)
     pack [canvas $wapp(statmess) -bd 0 -highlightthickness 0 -height 14]  \
       -side left -pady 1 -padx 6 -fill x -expand true
-    $wapp(statmess) create text 0 0 -anchor nw -text {} -font $fontS \
-      -tags stattxt
+    $wapp(statmess) create text 0 [expr 14/2] -anchor w -text {} -font $fontS \
+      -tags stattxt -fill $fg
     
     # Build the header for the actual network setup.
     ::WB::SetCommHead $wtop $prefs(protocol) -connected $isConnected
@@ -1248,7 +1289,7 @@ proc ::WB::GetAllWhiteboards { } {
 proc ::WB::SetToolButton {wtop btName} {
     global  prefs wapp this
     
-    upvar ::UI::icons icons
+    variable wbicons
     upvar ::${wtop}::wapp wapp
     upvar ::${wtop}::state state
     upvar ::${wtop}::opts opts
@@ -1260,11 +1301,11 @@ proc ::WB::SetToolButton {wtop btName} {
     set state(btState) [::WB::ToolBtNameToNum $btName]
     set irow [string index $state(btState) 0]
     set icol [string index $state(btState) 1]
-    $wapp(tool).bt$irow$icol configure -image $icons(on${irow}${icol})
+    $wapp(tool).bt$irow$icol configure -image $wbicons(on${irow}${icol})
     if {$state(btState) != $state(btStateOld)} {
 	set irow [string index $state(btStateOld) 0]
 	set icol [string index $state(btStateOld) 1]
-	$wapp(tool).bt$irow$icol configure -image $icons(off${irow}${icol})
+	$wapp(tool).bt$irow$icol configure -image $wbicons(off${irow}${icol})
     }
     set oldButton $state(btStateOld)
     set oldBtName [::WB::ToolBtNumToName $oldButton]
@@ -1618,7 +1659,7 @@ proc ::WB::ConfigShortcutButtonPad {wtop what {subSpec {}}} {
     global  this wDlgs prefs
     
     variable dims
-    upvar ::UI::icons icons
+    variable wbicons
     upvar ::${wtop}::wapp wapp
     upvar ::${wtop}::opts opts
     upvar ::${wtop}::state state    
@@ -1638,11 +1679,11 @@ proc ::WB::ConfigShortcutButtonPad {wtop what {subSpec {}}} {
     if {![winfo exists $wfrtop]} {
 	pack [frame $wfrtop -relief raised -borderwidth 0] -side top -fill x
 	pack [frame $wfron -borderwidth 0] -fill x -side left -expand 1
-	pack [label $wonbar -image $icons(barvert) -bd 1 -relief raised] \
+	pack [label $wonbar -image $wbicons(barvert) -bd 1 -relief raised] \
 	  -padx 0 -pady 0 -side left
 	#pack [frame $wapp(tray) -relief raised -borderwidth 1]  \
 	#  -side left -fill both -expand 1
-	label $woffbar -image $icons(barhoriz) -relief raised -borderwidth 1
+	label $woffbar -image $wbicons(barhoriz) -relief raised -borderwidth 1
 	bind $wonbar <Button-1> [list $wonbar configure -relief sunken]
 	bind $wonbar <ButtonRelease-1>  \
 	  [list [namespace current]::ConfigShortcutButtonPad $wtop "off"]
@@ -1709,14 +1750,14 @@ proc ::WB::ConfigShortcutButtonPad {wtop what {subSpec {}}} {
 proc ::WB::BuildShortcutButtonPad {wtop} {
     global  prefs wDlgs this
     
-    upvar ::UI::icons icons
+    variable wbicons
     variable btShortDefs
     upvar ::${wtop}::wapp wapp
     
     set wCan   $wapp(can)
     set wtray  $wapp(tray)
     set wfrall $wapp(frall)
-    set h [image height $icons(barvert)]
+    set h [image height $wbicons(barvert)]
 
     ::buttontray::buttontray $wtray $h -relief raised -borderwidth 1
 
@@ -1770,7 +1811,7 @@ proc ::WB::CreateAllButtons {wtop} {
     
     variable btNo2Name 
     variable btName2No
-    upvar ::UI::icons icons
+    variable wbicons
     upvar ::${wtop}::state state
     upvar ::${wtop}::wapp wapp
     upvar ::${wtop}::opts opts
@@ -1781,7 +1822,7 @@ proc ::WB::CreateAllButtons {wtop} {
 	for {set irow 0} {$irow <= 6} {incr irow} {
 	    
 	    # The icons are Mime coded gifs.
-	    set lwi [label $wtool.bt$irow$icol -image $icons(off${irow}${icol}) \
+	    set lwi [label $wtool.bt$irow$icol -image $wbicons(off${irow}${icol}) \
 	      -borderwidth 0]
 	    grid $lwi -row $irow -column $icol -padx 0 -pady 0
 	    set name $btNo2Name($irow$icol)
@@ -1806,19 +1847,21 @@ proc ::WB::CreateAllButtons {wtop} {
     ::WB::BuildToolPopupFontMenu $wtop $prefs(canvasFonts)
     
     # Color selector.
-    set imheight [image height $icons(imcolor)]
+    set imheight [image height $wbicons(imcolor)]
     set wColSel [canvas $wtool.cacol -width 56 -height $imheight  \
       -highlightthickness 0]
-    $wtool.cacol create image 0 0 -anchor nw -image $icons(imcolor)
+    $wtool.cacol create image 0 0 -anchor nw -image $wbicons(imcolor)
     set idColSel [$wtool.cacol create rect 7 7 33 30	\
       -fill $state(fgCol) -outline {} -tags tcolSel]
     set wapp(colSel) $wColSel
     
     # Black and white reset rectangle.
-    set idBWReset [$wtool.cacol create image 4 34 -anchor nw -image bwrect]
+    set idBWReset [$wtool.cacol create image 4 34 -anchor nw  \
+      -image $wbicons(bwrect)]
     
     # bg and fg switching.
-    set idBWSwitch [$wtool.cacol create image 38 4 -anchor nw -image bwrect]
+    set idBWSwitch [$wtool.cacol create image 38 4 -anchor nw  \
+      -image $wbicons(bwrect)]
     grid $wtool.cacol -  -padx 0 -pady 0
 
     if {![string equal $opts(-state) "disabled"]} {
@@ -3160,6 +3203,21 @@ proc ::WB::StartStopAnimatedWaveOnMain {start} {
     
     set waveImage [::Theme::GetImage [option get $wapp(frall) waveImage {}]]  
     ::UI::StartStopAnimatedWave $wapp(statmess) $waveImage $start
+}
+
+# ::WB::GetThemeImage --
+# 
+#       This is a method to first search for any image file using
+#       the standard theme engine, but use hardcoded icons as fallback.
+
+proc ::WB::GetThemeImage {name} {
+    variable iconsPreloaded
+    
+    set imname [::Theme::GetImage $name]
+    if {$imname == ""} {
+	set imname $iconsPreloaded($name)
+    }
+    return $imname
 }
 
 #-------------------------------------------------------------------------------

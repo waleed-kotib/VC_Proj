@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: GetFileIface.tcl,v 1.10 2003-11-17 15:08:27 matben Exp $
+# $Id: GetFileIface.tcl,v 1.11 2003-12-18 14:19:35 matben Exp $
 
 package require getfile
 package require uriencode
@@ -377,7 +377,7 @@ proc ::GetFileIface::Command {gettoken token what msg} {
     set wtop $getstate(wtop)
     
     if {[string equal $what "error"]} {
-	::UI::SetStatusMessage $wtop $msg
+	::WB::SetStatusMessage $wtop $msg
 	if {$prefs(talkative) >= 1} {
 	    tk_messageBox -title [::msgcat::mc {Get File Error}] \
 	      -type ok -message $msg
@@ -392,7 +392,7 @@ proc ::GetFileIface::Command {gettoken token what msg} {
 	unset getstate
 	getfile::cleanup $token
     } elseif {[string equal $what "ok"]} {
-	::UI::SetStatusMessage $wtop $msg
+	::WB::SetStatusMessage $wtop $msg
 
 	::Debug 3 "+        status=[::getfile::status $token]"
 	if {[::getfile::status $token] == "ok"} {
@@ -488,7 +488,7 @@ proc ::GetFileIface::NewBrokenImage {code gettoken} {
     
     set msg "Failed importing $getstate(filetail): "
     append msg [getfile::ncodetotext $code]
-    ::UI::SetStatusMessage $getstate(wtop) $msg
+    ::WB::SetStatusMessage $getstate(wtop) $msg
 
     set opts $getstate(optlist)
     array set optArr $getstate(optlist)

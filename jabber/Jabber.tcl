@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.41 2003-12-16 15:03:53 matben Exp $
+# $Id: Jabber.tcl,v 1.42 2003-12-18 14:19:34 matben Exp $
 #
 #  The $address is an ip name or number.
 #
@@ -385,7 +385,7 @@ proc ::Jabber::FactoryDefaults { } {
     variable menuDefs
 
     set menuDefs(rost,file) {
-	{command   mNewWhiteboard      {::UI::NewWhiteboard}                  normal   N}
+	{command   mNewWhiteboard      {::WB::NewWhiteboard}                  normal   N}
 	{command   mCloseWindow        {::UserActions::DoCloseWindow}         normal   W}
 	{command   mPreferences...     {::Preferences::Build}                 normal   {}}
 	{command   mUpdateCheck        {
@@ -1400,11 +1400,11 @@ proc ::Jabber::SendWhiteboardMessageList {wtop msgList args} {
 proc ::Jabber::SendWhiteboardArgs {wtop} {
 
     set argsList {}
-    set type [::UI::GetJabberType $wtop]
+    set type [::WB::GetJabberType $wtop]
     if {[llength $type] > 0} {
 	lappend argsList -type $type
 	if {[string equal $type "chat"]} {
-		lappend argsList -thread [::UI::GetJabberChatThread $wtop]
+		lappend argsList -thread [::WB::GetJabberChatThread $wtop]
 	}
     }
     return $argsList
@@ -1502,7 +1502,7 @@ proc ::Jabber::DoSendCanvas {wtop} {
 	    }
 	}
 	::UserActions::DoSendCanvas $wtop
-	::UI::CloseWhiteboard $wtop
+	::WB::CloseWhiteboard $wtop
     } else {
 	tk_messageBox -icon warning -type ok -parent $wtoplevel -message \
 	  [FormatTextForMessageBox [::msgcat::mc jamessinvalidjid]]
@@ -1585,14 +1585,14 @@ proc ::Jabber::DoCloseClientConnection {args} {
     
     # Update the communication frame; remove connection 'to'.
     if {$prefs(jabberCommFrame)} {
-	::UI::ConfigureAllJabberEntries $jstate(ipNum) -netstate "disconnect"
+	::WB::ConfigureAllJabberEntries $jstate(ipNum) -netstate "disconnect"
     }
     ::Jabber::UI::SetStatusMessage "Logged out"
 
     # Multiinstance whiteboard UI stuff.
-    foreach w [::UI::GetAllWhiteboards] {
+    foreach w [::WB::GetAllWhiteboards] {
 	set wtop [::UI::GetToplevelNS $w]
-	#::UI::SetStatusMessage $wtop [::msgcat::mc jaservclosed]
+	#::WB::SetStatusMessage $wtop [::msgcat::mc jaservclosed]
 
 	# If no more connections left, make menus consistent.
 	::UI::FixMenusWhen $wtop "disconnect"
@@ -1658,7 +1658,7 @@ proc ::Jabber::EndSession { } {
 
 proc ::Jabber::BuildJabberEntry {wtop args} {
     
-    eval {::UI::BuildJabberEntry $wtop  \
+    eval {::WB::BuildJabberEntry $wtop  \
       -servervariable ::Jabber::jserver(this)  \
       -jidvariable ::Jabber::jstate($wtop,tojid) \
       -dosendvariable ::Jabber::jstate($wtop,doSend)} $args
@@ -2078,7 +2078,7 @@ proc ::Jabber::PutFileAndSchedule {wtop fileName opts} {
     # -to, -from, -type, -thread etc.
     # 
     # -type and 'tojid' shall never be in conflict???
-    foreach {key value} [::UI::ConfigureMain $wtop] {
+    foreach {key value} [::WB::ConfigureMain $wtop] {
 	switch -- $key {
 	    -type - -thread {
 		lappend opts $key $value
@@ -2988,7 +2988,7 @@ proc ::Jabber::WB::NewWhiteboard {jid args} {
 	set sendLive 0
     }
     
-    set wtop [eval {::UI::NewWhiteboard} $wbOpts]
+    set wtop [eval {::WB::NewWhiteboard} $wbOpts]
     set jstate($wtop,doSend) $sendLive
     
     return $wtop
@@ -3012,7 +3012,7 @@ proc ::Jabber::WB::ChatMsg {args} {
     jlib::splitjid $argsArr(-from) jid2 res
 
     # This one returns empty if not exists.
-    set wtop [::UI::GetWtopFromJabberType "chat" $argsArr(-from)  \
+    set wtop [::WB::GetWtopFromJabberType "chat" $argsArr(-from)  \
       $argsArr(-thread)]
     if {$wtop == ""} {
 	set wtop [eval {::Jabber::WB::NewWhiteboard $argsArr(-from)} $args]
@@ -3033,7 +3033,7 @@ proc ::Jabber::WB::GroupChatMsg {args} {
     if {![regexp {(^[^@]+@[^/]+)(/.*)?} $argsArr(-from) match roomjid]} {
 	return -code error "The jid we got \"$argsArr(-from)\" was not well-formed!"
     }
-    set wtop [::UI::GetWtopFromJabberType "groupchat" $roomjid]
+    set wtop [::WB::GetWtopFromJabberType "groupchat" $roomjid]
     if {$wtop == ""} {
 	set wtop [eval {::Jabber::WB::NewWhiteboard $roomjid} $args]
     }
@@ -3060,7 +3060,7 @@ proc ::Jabber::WB::MakeWhiteboardExist {opts} {
 
     switch -- $optArr(-type) {
 	chat {
-	    set wtop [::UI::GetWtopFromJabberType chat $optArr(-from) \
+	    set wtop [::WB::GetWtopFromJabberType chat $optArr(-from) \
 	      $optArr(-thread)]
 	    if {$wtop == ""} {
 		set wtop [::Jabber::WB::NewWhiteboard $optArr(-from)  \
@@ -3072,14 +3072,14 @@ proc ::Jabber::WB::MakeWhiteboardExist {opts} {
 		return -code error  \
 		  "The jid we got \"$optArr(-from)\" was not well-formed!"
 	    }
-	    set wtop [::UI::GetWtopFromJabberType groupchat $optArr(-from)]
+	    set wtop [::WB::GetWtopFromJabberType groupchat $optArr(-from)]
 	    if {$wtop == ""} {
 		set wtop [::Jabber::WB::NewWhiteboard $roomjid]
 	    }
 	}
 	default {
 	    # Normal message. Shall go in inbox ???????????
-	    set wtop [::UI::GetWtopFromJabberType normal $optArr(-from)]
+	    set wtop [::WB::GetWtopFromJabberType normal $optArr(-from)]
 	}
     }
     return $wtop

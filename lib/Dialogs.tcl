@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.20 2003-12-16 15:03:53 matben Exp $
+# $Id: Dialogs.tcl,v 1.21 2003-12-18 14:19:35 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -836,6 +836,9 @@ proc ::Dialogs::ShowInfoServer {thisIPnum} {
 
 namespace eval ::SplashScreen:: {
         
+    # Use option database for customization.
+    option add *Splash.splashImage         splash           widgetDefault
+
     # Name of variable for message displat.
     variable startMsg ""
     variable topwin ""
@@ -852,16 +855,19 @@ namespace eval ::SplashScreen:: {
 # Results:
 #       none
 
-proc ::SplashScreen::SplashScreen {w} {
-    global  this prefs
+proc ::SplashScreen::SplashScreen { } {
+    global  this prefs wDlgs
     variable topwin
     variable canwin
     variable startMsg
     
+    
+    set w $wDlgs(splash)
     set topwin $w
-    if [catch {toplevel $w}] {
+    if {[winfo exists $w]} {
 	return
     }
+    toplevel $w -class Splash
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w movableDBoxProc
 	wm transient $w .
@@ -875,10 +881,10 @@ proc ::SplashScreen::SplashScreen {w} {
     set fontS [option get . fontSmall {}]
     
     # If image not already there, get it.
-    set imsplash [::Theme::GetImage splash]
+    set imsplash [::Theme::GetImage [option get $w splashImage {}]]
     set imHeight [image height $imsplash]
     set imWidth [image width $imsplash]
-    foreach {r g b} [splash get 50 [expr $imHeight - 20]] break
+    foreach {r g b} [$imsplash get 50 [expr $imHeight - 20]] break
     if {[expr $r + $g + $b] > [expr 2*255]} {
 	set textcol black
     } else {

@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: Theme.tcl,v 1.2 2003-12-16 15:03:53 matben Exp $
+# $Id: Theme.tcl,v 1.3 2003-12-18 14:19:35 matben Exp $
 
 package provide Theme 1.0
 
@@ -55,21 +55,33 @@ proc ::Theme::PreLoadImages { } {
     }
 }
 
+# ::Theme::GetImage --
+# 
+#       Searches for a gif image in a set of directories.
+#       
+#       Returns empty if not found, else the internal tk image name.
+
 proc ::Theme::GetImage {name} {
     global  this
+        
+    # It is recommended to create images in an own namespace since they 
+    # may silently overwrite any existing command!
+    set nsname ::_img::${name}
+    set ans ""
 	
-    if {[lsearch [image names] $name] == -1} {
+    if {[lsearch [image names] $nsname] == -1} {
 	foreach dir $this(imagePathList) {
 	    set f [file join $dir ${name}.gif]
 	    if {[file exists $f]} {
-		image create photo $name -file $f -format gif
+		image create photo $nsname -file $f -format gif
+		set ans $nsname
 		break
 	    }
 	}
+    } else {
+	set ans $nsname
     }
-    
-    # We could return a different name here. Problems when preloading...
-    return $name
+    return $ans
 }
 
 #-------------------------------------------------------------------------------

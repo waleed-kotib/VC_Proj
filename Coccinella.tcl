@@ -15,7 +15,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.21 2003-12-16 15:03:53 matben Exp $
+# $Id: Coccinella.tcl,v 1.22 2003-12-18 14:19:34 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -387,14 +387,13 @@ proc GetScreenSize { } {
 }
 
 # Show it! Need a full update here, at least on Windows.
-::SplashScreen::SplashScreen $wDlgs(splash)
+::SplashScreen::SplashScreen
 ::SplashScreen::SetMsg [::msgcat::mc splashsource]
 update
 
 # These are auxilary procedures that we need to source, rest is found in packages.
 set allLibSourceFiles {
   Base64Icons.tcl        \
-  CanvasCutCopyPaste.tcl \
   EditDialogs.tcl        \
   FileUtils.tcl          \
   ItemInspector.tcl      \
@@ -489,8 +488,6 @@ if {$prefs(Thread)} {
 ::SplashScreen::SetMsg [::msgcat::mc splashload]
 
 set listOfPackages {
-    CanvasDraw
-    CanvasText
     CanvasUtils
     Connections
     FilesAndCanvas
@@ -511,6 +508,7 @@ set listOfPackages {
     buttontray
     headlabel
     mylabelframe
+    Whiteboard
 }
 foreach packName $listOfPackages {
     package require $packName
@@ -608,9 +606,10 @@ if {$argc > 0} {
 ::FileCache::SetBestBefore $prefs(checkCache) $prefs(incomingPath)
 
 # Various initializations for canvas stuff and UI.
-::CanvasUtils::Init
 ::UI::Init
 ::UI::InitMenuDefs
+::WB::Init
+::WB::InitMenuDefs
 
 # Create the mapping between Html sizes and font point sizes dynamically.
 ::CanvasUtils::CreateFontSizeMapping
@@ -630,7 +629,7 @@ if {[string equal $prefs(protocol) "jabber"]} {
 # Jabber has the roster window as "main" window.
 if {![string equal $prefs(protocol) "jabber"]} {
     ::SplashScreen::SetMsg [::msgcat::mc splashbuild]
-    ::UI::BuildWhiteboard $wDlgs(mainwb) -serverentrystate disabled
+    ::WB::BuildWhiteboard $wDlgs(mainwb) -serverentrystate disabled
 }
 if {$prefs(firstLaunch) && !$prefs(stripJabber)} {
     if {[winfo exists $wDlgs(mainwb)]} {
@@ -678,7 +677,7 @@ if {[string equal $this(platform) "macosx"]} {
 	    
 	    switch -- [file extension $f] {
 		.can {
-		    ::UI::NewWhiteboard -file $f
+		    ::WB::NewWhiteboard -file $f
 		}
 	    }
 	}

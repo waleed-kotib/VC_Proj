@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.21 2003-12-15 08:20:53 matben Exp $
+# $Id: GroupChat.tcl,v 1.22 2003-12-18 14:19:34 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -1058,7 +1058,7 @@ proc ::Jabber::GroupChat::RemoveUser {roomJid jid3} {
 proc ::Jabber::GroupChat::ConfigWBStatusMenu {wtop} {   
     variable locals
 
-    array set wbOpts [::UI::ConfigureMain $wtop]
+    array set wbOpts [::WB::ConfigureMain $wtop]
     set roomJid $wbOpts(-jid)
 
     # Orig: {-variable ::Jabber::jstate(status) -value available}
@@ -1149,9 +1149,9 @@ proc ::Jabber::GroupChat::Close {roomJid} {
     }
     
     # Make sure any associated whiteboard is closed as well.
-    set wbwtop [::UI::GetWtopFromJabberType "groupchat" $roomJid]
+    set wbwtop [::WB::GetWtopFromJabberType "groupchat" $roomJid]
     if {[string length $wbwtop]} {
-	::UI::DestroyMain $wbwtop
+	::WB::DestroyMain $wbwtop
     }
 }
 

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.23 2003-12-16 15:03:53 matben Exp $
+# $Id: MailBox.tcl,v 1.24 2003-12-18 14:19:34 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -198,15 +198,6 @@ proc ::Jabber::MailBox::Build {w args} {
       ::Jabber::MailBox::TrashMsg -state disabled
     
     pack [frame $w.frall.divt -bd 2 -relief sunken -height 2] -fill x -side top
-    set wccp $w.frall.ccp
-    if {0} {
-	# All widgets are disabled anyway...
-	pack [::UI::NewCutCopyPaste $wccp] -padx 10 -pady 2 -side top -anchor w
-	::UI::CutCopyPasteConfigure $wccp cut -state disabled
-	::UI::CutCopyPasteConfigure $wccp copy -state disabled
-	::UI::CutCopyPasteConfigure $wccp paste -state disabled
-	pack [frame $w.frall.div2 -bd 2 -relief sunken -height 2] -fill x -side top
-    }
     
     # Frame to serve as container for the pane geometry manager.
     set frmid $w.frall.frmid
@@ -274,7 +265,6 @@ proc ::Jabber::MailBox::Build {w args} {
     }
     set locals(wtbl) $wtbl
     set locals(wtextmsg) $wtextmsg
-    set locals(wccp) $wccp
         
     if {[info exists prefs(winGeom,$w)]} {
 	wm geometry $w $prefs(winGeom,$w)
@@ -352,16 +342,6 @@ proc ::Jabber::MailBox::GetToplevel { } {
     
     if {[info exists locals(wtop)] && [winfo exists $locals(wtop)]} {
 	return $locals(wtop)
-    } else {
-	return {}
-    }
-}
-
-proc ::Jabber::MailBox::GetCCP { } {    
-    variable locals
-    
-    if {[info exists locals(wccp)]} {
-	return $locals(wccp)
     } else {
 	return {}
     }
@@ -695,11 +675,11 @@ proc ::Jabber::MailBox::SelectMsg { } {
 	if {[winfo exists $wbtoplevel]} {
 	    ::Import::HttpResetAll ${wbtoplevel}.
 	    ::UserActions::EraseAll ${wbtoplevel}.
-	    ::UI::ConfigureMain ${wbtoplevel}. -title $title -jid $jid2
-	    ::UI::SetStatusMessage ${wbtoplevel}. ""
-	    undo::reset [::UI::GetUndoToken ${wbtoplevel}.]
+	    ::WB::ConfigureMain ${wbtoplevel}. -title $title -jid $jid2
+	    ::WB::SetStatusMessage ${wbtoplevel}. ""
+	    undo::reset [::WB::GetUndoToken ${wbtoplevel}.]
 	} else {
-	    ::UI::BuildWhiteboard ${wbtoplevel}. -state disabled -title $title \
+	    ::WB::BuildWhiteboard ${wbtoplevel}. -state disabled -title $title \
 	      -jid $jid2 -type normal
 	}
 	

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.20 2003-12-15 15:39:09 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.21 2003-12-18 14:19:35 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -315,10 +315,6 @@ proc ::PreferencesUtils::SetUserPreferences { } {
       [list prefs(paneGeom)        prefs_paneGeom        $prefs(paneGeom)]       \
       [list prefs(lastAutoUpdateVersion) prefs_lastAutoUpdateVersion $prefs(lastAutoUpdateVersion)] \
       [list prefs(pluginBanList)   prefs_pluginBanList   $prefs(pluginBanList)]  \
-      [list ::UI::dims(x)          dims_x                $::UI::dims(x)]         \
-      [list ::UI::dims(y)          dims_y                $::UI::dims(y)]         \
-      [list ::UI::dims(wRoot)      dims_wRoot            $::UI::dims(wRoot)]     \
-      [list ::UI::dims(hRoot)      dims_hRoot            $::UI::dims(hRoot)]     \
       [list state(btState)         state_btState         $state(btState)]        \
       [list state(bgColCan)        state_bgColCan        $state(bgColCan)]       \
       [list state(fgCol)           state_fgCol           $state(fgCol)]          \
@@ -334,6 +330,11 @@ proc ::PreferencesUtils::SetUserPreferences { } {
       [list state(canGridOn)       state_canGridOn       $state(canGridOn)]      \
       [list state(visToolbar)      state_visToolbar      $state(visToolbar)]  ]
     
+    #[list ::UI::dims(x)          dims_x                $::UI::dims(x)]         \
+    #[list ::UI::dims(y)          dims_y                $::UI::dims(y)]         \
+    #[list ::UI::dims(wRoot)      dims_wRoot            $::UI::dims(wRoot)]     \
+    #[list ::UI::dims(hRoot)      dims_hRoot            $::UI::dims(hRoot)]     \
+
     # All MIME type stuff... The problem is that they are all arrays... 
     # Invented the ..._array resource specifier!    
     # We should have used accesor functions and not direct access to internal
