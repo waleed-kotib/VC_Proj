@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.19 2004-02-12 10:31:54 matben Exp $
+# $Id: Whiteboard.tcl,v 1.20 2004-03-01 07:24:17 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -641,8 +641,13 @@ proc ::WB::BuildWhiteboard {wtop args} {
     
     # Common widget paths.
     set wapp(toplevel)  $w
-    set wall            ${w}.f
-    set wapp(menu)      ${w}.menu
+    if {$w == "."} {
+	set wall            .f
+	set wapp(menu)      .menu
+    } else {
+	set wall            ${w}.f
+	set wapp(menu)      ${w}.menu
+    }
     set wapp(frall)     $wall
     set wapp(frtop)     ${wall}.frtop
     if {$prefs(haveScrollbars)} {
