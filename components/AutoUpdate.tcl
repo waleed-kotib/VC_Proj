@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: AutoUpdate.tcl,v 1.6 2004-10-27 14:42:33 matben Exp $
+# $Id: AutoUpdate.tcl,v 1.7 2004-11-16 07:13:00 matben Exp $
 
 package require tinydom
 package require http 2.3
@@ -26,6 +26,7 @@ namespace eval ::AutoUpdate:: {
 proc ::AutoUpdate::Init { } {
 
     ::Debug 2 "::AutoUpdate::Init"
+    return
         
     ::hooks::register prefsInitHook   ::AutoUpdate::InitPrefsHook
     ::hooks::register launchFinalHook ::AutoUpdate::LaunchHook
