@@ -99,6 +99,7 @@
 ::msgcat::mcset en Roster
 ::msgcat::mcset en Save
 ::msgcat::mcset en Search
+::msgcat::mcset en Select
 ::msgcat::mcset en Send
 ::msgcat::mcset en Server
 ::msgcat::mcset en Servers
@@ -309,6 +310,7 @@
 ::msgcat::mcset en {Default group}
 ::msgcat::mcset en {Default Logout Status}
 ::msgcat::mcset en {Disk Cache}
+::msgcat::mcset en {Different Passwords}
 ::msgcat::mcset en {Do Not Disturb}
 ::msgcat::mcset en {Edit Fonts}
 ::msgcat::mcset en {Edit Item}
@@ -535,6 +537,8 @@ setup assistant? You may start it any time later from the menu.}
 ::msgcat::mcset en messprotocolch	{You have changed the network setup.\
 This requires that you relaunch the application to take effect.\
 Do you actually want to continue?}
+::msgcat::mcset en messpasswddifferent  {The two passwords do not match.\
+Please try again.}
 
 
 
@@ -654,6 +658,7 @@ agents: %s}
 	::msgcat::mcset en jamesserrsearch	{Failed obtaining search\
 specification. Error code %s with message: %s}
 	::msgcat::mcset en jamessoobok		{File transfer succesful}
+	::msgcat::mcset en jamessoobok2         {File transfer of %s to "%s" went ok}
 	::msgcat::mcset en jamessoobnourl	{When user "%s" wanted\
 us to fetch a file, we did not receive an url to get it from.}
 	::msgcat::mcset en jamessoobask		{The user "%s" makes the file\
@@ -698,6 +703,8 @@ component %s. Do you wish to do that now?}
 that acts as a server service that transports messages to that IM\
 system. It is necessary for it to be in your roster.\
 You have a subscription for %s: %s.}
+::msgcat::mcset en jamesswbchatlost	        {The complete conversation will\
+be lost when closing this chat whiteboard. Do you actually want to end this chat?}
     
     
 
@@ -822,6 +829,7 @@ is limited by user's settings below.}
 ::msgcat::mcset en preftheme     {Pick theme, need relaunch}
 ::msgcat::mcset en prefplugctrl  {You may unselect any of these packages if\
 you don't want them loaded. You must relaunch for this to take effect.}
+::msgcat::mcset en prefchactret  {Always use active <Return> in chat dialog}
 
 
 

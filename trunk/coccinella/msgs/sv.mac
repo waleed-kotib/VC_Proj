@@ -98,6 +98,7 @@
 ::msgcat::mcset sv Roster               {Roster}
 ::msgcat::mcset sv Save 		{Spara}
 ::msgcat::mcset sv Search		{Sök}
+::msgcat::mcset sv Select               {Välj}
 ::msgcat::mcset sv Send 		{Skicka}
 ::msgcat::mcset sv Server		{Server}
 ::msgcat::mcset sv Servers		{Servrar}
@@ -308,6 +309,7 @@
 ::msgcat::mcset sv {Default group}         {Standard grupp}
 ::msgcat::mcset sv {Default Logout Status} {Standard utloggningsstatus}
 ::msgcat::mcset sv {Disk Cache}            {Diskminne}
+::msgcat::mcset sv {Different Passwords}   {Lösenorden skiljer}
 ::msgcat::mcset sv {Do Not Disturb}	   {Stör ej}
 ::msgcat::mcset sv {Edit Fonts}            {Redigera typsnitt}
 ::msgcat::mcset sv {Edit Item}             {Redigera objekt}
@@ -539,6 +541,8 @@ hjälper oss med det här :-(}
 inställningsassistenten? Du kan starta den när som helst från menyn.}
 ::msgcat::mcset sv messprotocolch	{Du har ändrat nätverks uppställiningen.\
 Detta kräver att programmet startas om. Vill du verkligen fortsätta?}
+::msgcat::mcset sv messpasswddifferent  {De två lösenorden matchar ej.\
+Försök igen.}
 
 
 
@@ -660,6 +664,8 @@ när försökte få tag i "agents": %s}
 	::msgcat::mcset sv jamesserrsearch	{Misslyckades med att få tag\
 i en sökspecifikation. Felkoden %s och felmeddelande: %s}
 	::msgcat::mcset sv jamessoobok		{Filöverföringen lyckad!}
+	::msgcat::mcset sv jamessoobok2         {Filöverföringen av %s till\
+"%s" lyckad!}
 	::msgcat::mcset sv jamessoobnourl	{När användaren "%s" gjorde en\
 fil tillgänglig så saknades url:en.}
 	::msgcat::mcset sv jamessoobask		{Användaren "%s" gör filen\
@@ -707,6 +713,8 @@ serverns transport komponent %s. Vill du göra detta nu?}
 hos %s som fungerar som en server service vilken transporterar meddelanden\
 till motsvarande IM system. Det är nödvändigt att den finns i din\
 roster. Du har prenumeration för %s: %s.}
+::msgcat::mcset sv jamesswbchatlost	        {Du förlorar hela chatt\
+konversationen när du stänger whiteboarden. Vill du verkligen avsluta denna chatt?}
 
 
 
@@ -846,6 +854,7 @@ på filminnet begränsas av användarinställningarna nedan.}
 ::msgcat::mcset sv prefplugctrl  {Du kan välja bort följande paket om\
 de inte ska användas. Programmet måste startas om för att detta ska vara\
 verksamt.}
+::msgcat::mcset sv prefchactret  {Använd alltid aktiv <Return> i chatt dialog}
 
 
 

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasDraw.tcl,v 1.22 2004-03-04 07:53:16 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.23 2004-03-13 15:21:41 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 #  
@@ -1032,7 +1032,7 @@ proc ::CanvasDraw::BoxDrag {w x y shift type {mark 0}} {
     
     variable theBox
     set wtop [::UI::GetToplevelNS $w]
-    upvar ::${wtop}::state state
+    upvar ::WB::${wtop}::state state
 
     catch {$w delete $theBox($w,last)}
     
@@ -1095,7 +1095,7 @@ proc ::CanvasDraw::FinalizeBox {w x y shift type {mark 0}} {
     
     variable theBox
     set wtop [::UI::GetToplevelNS $w]
-    upvar ::${wtop}::state state
+    upvar ::WB::${wtop}::state state
     
     # If no theBox($w,anchor) defined just return.
     if {![info exists theBox($w,anchor)]}  {
@@ -1304,7 +1304,7 @@ proc ::CanvasDraw::ArcDrag {w x y {shift 0}} {
 
     variable arcBox
     set wtop [::UI::GetToplevelNS $w]
-    upvar ::${wtop}::state state
+    upvar ::WB::${wtop}::state state
 
     # If constrained to 90/45 degrees.
     if {$shift} {
@@ -1358,7 +1358,7 @@ proc ::CanvasDraw::FinalizeArc {w x y} {
 
     variable arcBox
     set wtop [::UI::GetToplevelNS $w]
-    upvar ::${wtop}::state state
+    upvar ::WB::${wtop}::state state
 
     Debug 2 "FinalizeArc:: w=$w"
 
@@ -1490,7 +1490,7 @@ proc ::CanvasDraw::PolyDrag {w x y {shift 0}} {
 
     variable thePoly
     set wtop [::UI::GetToplevelNS $w]
-    upvar ::${wtop}::state state
+    upvar ::WB::${wtop}::state state
 
     # Move one end point of the latest line segment of the polygon.
     # If anchor not set just return.
@@ -1534,7 +1534,7 @@ proc ::CanvasDraw::FinalizePoly {w x y} {
     
     variable thePoly
     set wtop [::UI::GetToplevelNS $w]
-    upvar ::${wtop}::state state
+    upvar ::WB::${wtop}::state state
 
     bind $w <Motion> {}
     bind $w <KeyPress-space> {}
@@ -1645,7 +1645,7 @@ proc ::CanvasDraw::LineDrag {w x y shift {opt 0}} {
     
     variable theLine
     set wtop [::UI::GetToplevelNS $w]
-    upvar ::${wtop}::state state
+    upvar ::WB::${wtop}::state state
 
     # If anchor not set just return.
     if {![info exists theLine($w,anchor)]} {
@@ -1693,7 +1693,7 @@ proc ::CanvasDraw::FinalizeLine {w x y shift {opt 0}} {
     
     variable theLine
     set wtop [::UI::GetToplevelNS $w]
-    upvar ::${wtop}::state state
+    upvar ::WB::${wtop}::state state
 
     # If anchor not set just return.
     if {![info exists theLine($w,anchor)]} {
@@ -1778,7 +1778,7 @@ proc ::CanvasDraw::StrokeDrag {w x y {brush 0}} {
     
     variable stroke
     set wtop [::UI::GetToplevelNS $w]
-    upvar ::${wtop}::state state
+    upvar ::WB::${wtop}::state state
 
     # If stroke not set just return.
     if {![info exists stroke(N)]} {
@@ -1821,7 +1821,7 @@ proc ::CanvasDraw::FinalizeStroke {w x y {brush 0}} {
     
     variable stroke
     set wtop [::UI::GetToplevelNS $w]
-    upvar ::${wtop}::state state
+    upvar ::WB::${wtop}::state state
 
     Debug 2 "FinalizeStroke::"
 
@@ -1905,7 +1905,7 @@ proc ::CanvasDraw::DoPaint {w x y {shift 0}} {
     global  prefs kRad2Grad
 
     set wtop [::UI::GetToplevelNS $w]
-    upvar ::${wtop}::state state
+    upvar ::WB::${wtop}::state state
 
     Debug 2 "DoPaint:: w=$w, x=$x, y=$y, shift=$shift"
     
@@ -2558,7 +2558,7 @@ proc ::CanvasDraw::LostSelection {wtop} {
 
 proc ::CanvasDraw::DeselectItem {wtop utag} {
         
-    set wCan [::UI::GetCanvasFromWtop $wtop]
+    set wCan [::WB::GetCanvasFromWtop $wtop]
     set id [$wCan find withtag $utag]
     $wCan dtag $utag "selected"
     $wCan delete id$id
@@ -2570,7 +2570,7 @@ proc ::CanvasDraw::DeselectItem {wtop utag} {
 
 proc ::CanvasDraw::SyncMarks {wtop} {
 
-    set wCan [::UI::GetCanvasFromWtop $wtop]
+    set wCan [::WB::GetCanvasFromWtop $wtop]
     $wCan delete withtag tbbox
     foreach id [$wCan find withtag "selected"] {
 	::CanvasDraw::MarkBbox $wCan 1 $id	

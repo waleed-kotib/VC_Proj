@@ -5,15 +5,15 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.42 2004-02-10 13:12:34 matben Exp $
+# $Id: Roster.tcl,v 1.43 2004-03-13 15:21:41 matben Exp $
 
 package provide Roster 1.0
 
 namespace eval ::Jabber::Roster:: {
     
     # Add all event hooks we need.
-    hooks::add loginHook   ::Jabber::Roster::LoginCmd
-    hooks::add logoutHook  ::Jabber::Roster::LogoutHook
+    ::hooks::add loginHook   ::Jabber::Roster::LoginCmd
+    ::hooks::add logoutHook  ::Jabber::Roster::LogoutHook
 
     # Use option database for customization. 
     # Use priority 30 just to override the widgetDefault values!
@@ -142,7 +142,8 @@ proc ::Jabber::Roster::BuildToplevel {w} {
     set fontSB [option get . fontSmallBold {}]
         
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1
     
     # Top frame for info.
     set frtop $w.frall.frtop
@@ -585,7 +586,6 @@ proc ::Jabber::Roster::SetItem {jid args} {
 #       roster tree updated.
 
 proc ::Jabber::Roster::Presence {jid presence args} {    
-    upvar ::Jabber::jidToIP jidToIP
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
 
@@ -637,11 +637,6 @@ proc ::Jabber::Roster::Presence {jid presence args} {
     } else {
 	set treePres $presence
 	eval {::Jabber::Roster::PutItemInTree $jid2 $treePres} $itemAttr $args
-    }
-    if {[string equal $treePres "unavailable"]} {
-	
-	# Need to remove our cached ip number for this jid.
-	catch {unset jidToIP($jid)}
     }
 }
 
@@ -750,17 +745,7 @@ proc ::Jabber::Roster::AutoBrowseCallback {browseName type jid subiq} {
     if {[$jstate(browse) havenamespace $jid "coccinella:wb"] || \
       [$jstate(browse) havenamespace $jid $privatexmlns(whiteboard)]} {
 	
-	# Shall we query for its ip address right away?
-	if {$jprefs(preGetIP)} {
-	    if {1} {
-		::Jabber::GetIPnumber $jid
-	    } else {
-		
-		# New through <iq> element.
-		# Switch to this with version 0.94.8 or later!
-		::Jabber::GetCoccinellaServers $jid
-	    }
-	}
+	::hooks::run autobrowsedCoccinellaHook $jid
 	
 	if {[regexp {^(.+@[^/]+)/(.+)$} $jid match jid2 res]} {
 	    set presArr(-show) "normal"
@@ -937,8 +922,8 @@ namespace eval ::Jabber::Roster:: {
     }
     
     # Hooks for subscription dialog.
-    hooks::add quitAppHook        [list ::UI::SaveWinGeom $wDlgs(jrostnewedit)]
-    hooks::add closeWindowHook    ::Jabber::Roster::SubscCloseHook
+    ::hooks::add quitAppHook        [list ::UI::SaveWinGeom $wDlgs(jrostnewedit)]
+    ::hooks::add closeWindowHook    ::Jabber::Roster::SubscCloseHook
 
 }
 
@@ -1068,8 +1053,8 @@ proc ::Jabber::Roster::NewOrEditDlg {which args} {
     set fontSB [option get . fontSmallBold {}]
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised]   \
-      -fill both -expand 1 -ipadx 12 -ipady 4
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1 -ipadx 12 -ipady 4
     
     if {[string equal $which "new"]} {
 	set msg [::msgcat::mc jarostadd]

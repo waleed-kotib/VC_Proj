@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.13 2004-02-14 14:00:34 matben Exp $
+# $Id: Register.tcl,v 1.14 2004-03-13 15:21:41 matben Exp $
 
 package provide Register 1.0
 
@@ -29,10 +29,10 @@ namespace eval ::Jabber::Register:: {
 proc ::Jabber::Register::Register {args} {
     global  this wDlgs
     
-    variable finished -1
-    variable server
-    variable username
-    variable password
+    variable finished  -1
+    variable server    ""
+    variable username  ""
+    variable password  ""
     
     set w $wDlgs(jreg)
     if {[winfo exists $w]} {
@@ -45,6 +45,10 @@ proc ::Jabber::Register::Register {args} {
 	    set $name $argsArr(-$name)
 	}
     }
+    if {![info exists password2] && [info exists password]} {
+	set password2 $password
+    }
+
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox}
     wm title $w [::msgcat::mc {Register New Account}]
@@ -52,8 +56,8 @@ proc ::Jabber::Register::Register {args} {
     set fontSB [option get . fontSmallBold {}]
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised]   \
-      -fill both -expand 1 -ipadx 12 -ipady 4
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1 -ipadx 12 -ipady 4
     
     ::headlabel::headlabel $w.frall.head -text [::msgcat::mc {New Account}]
     pack $w.frall.head -side top -fill both -expand 1
@@ -75,21 +79,30 @@ proc ::Jabber::Register::Register {args} {
       -validatecommand {::Jabber::ValidateJIDChars %S}
     label $frmid.lpass -text "[::msgcat::mc Password]:" -font $fontSB  \
       -anchor e
-    entry $frmid.epass -width 22   \
+    entry $frmid.epass -width 22  -show {*}  \
       -textvariable [namespace current]::password -validate key  \
       -validatecommand {::Jabber::ValidatePasswdChars %S}
-    grid $frmid.lserv -column 0 -row 0 -sticky e
-    grid $frmid.eserv -column 1 -row 0 -sticky w
-    grid $frmid.luser -column 0 -row 1 -sticky e
-    grid $frmid.euser -column 1 -row 1 -sticky w
-    grid $frmid.lpass -column 0 -row 2 -sticky e
-    grid $frmid.epass -column 1 -row 2 -sticky w
+    label $frmid.lpass2 -text "[::msgcat::mc {Retype password}]:" -font $fontSB  \
+      -anchor e
+    entry $frmid.epass2 -width 22   \
+      -textvariable [namespace current]::password2 -validate key  \
+      -validatecommand {::Jabber::ValidatePasswdChars %S} -show {*}
+    
+    grid $frmid.lserv  -column 0 -row 0 -sticky e
+    grid $frmid.eserv  -column 1 -row 0 -sticky w
+    grid $frmid.luser  -column 0 -row 1 -sticky e
+    grid $frmid.euser  -column 1 -row 1 -sticky w
+    grid $frmid.lpass  -column 0 -row 2 -sticky e
+    grid $frmid.epass  -column 1 -row 2 -sticky w
+    grid $frmid.lpass2 -column 0 -row 3 -sticky e
+    grid $frmid.epass2 -column 1 -row 3 -sticky w
+
     pack $frmid -side top -fill both -expand 1
 
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
     pack [button $frbot.btok -text [::msgcat::mc New] -default active \
-      -command [list [namespace current]::Doit $w]]  \
+      -command [list [namespace current]::OK $w]]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
       -command [list [namespace current]::Cancel $w]]  \
@@ -117,6 +130,20 @@ proc ::Jabber::Register::Cancel {w} {
 
     set finished 0
     destroy $w
+}
+
+proc ::Jabber::Register::OK {w} {
+    variable password
+    variable password2
+    
+    if {$password != $password2} {
+	tk_messageBox -icon error -title [::msgcat::mc {Different Passwords}] \
+	  -message [::msgcat::mc messpasswddifferent] -parent $w
+	set password  ""
+	set password2 ""
+    } else {
+	[namespace current]::Doit $w
+    }
 }
 
 # Jabber::Register::Doit --
@@ -377,8 +404,8 @@ proc ::Jabber::GenRegister::BuildRegister {args} {
     set fontSB [option get . fontSmallBold {}]
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised]   \
-      -fill both -expand 1 -ipadx 12 -ipady 4
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1 -ipadx 12 -ipady 4
     message $w.frall.msg -width 280 -text  \
       [::msgcat::mc jaregmsg] -anchor w -justify left
     pack $w.frall.msg -side top -fill x -anchor w -padx 4 -pady 4
@@ -414,10 +441,10 @@ proc ::Jabber::GenRegister::BuildRegister {args} {
     set wsearrows $frbot.arr
     set wbtregister $frbot.btenter
     set wbtget $frbot.btget
-    pack [button $wbtget -text [::msgcat::mc Get] -width 8 -default active \
+    pack [button $wbtget -text [::msgcat::mc Get] -default active \
       -command [namespace current]::Get]  \
       -side right -padx 5 -pady 5
-    pack [button $wbtregister -text [::msgcat::mc Register] -width 8 -state disabled \
+    pack [button $wbtregister -text [::msgcat::mc Register] -state disabled \
       -command [namespace current]::DoRegister]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
@@ -504,8 +531,8 @@ proc ::Jabber::GenRegister::Simple {w args} {
     set fontSB [option get . fontSmallBold {}]
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised]   \
-      -fill both -expand 1 -ipadx 12 -ipady 4
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1 -ipadx 12 -ipady 4
     message $w.frall.msg -width 240 -text  \
       [::msgcat::mc jaregmsg]
     pack $w.frall.msg -side top -fill x -anchor w -padx 4 -pady 4

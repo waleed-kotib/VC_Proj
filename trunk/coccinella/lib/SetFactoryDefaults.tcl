@@ -12,12 +12,12 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.27 2004-03-04 07:53:17 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.28 2004-03-13 15:21:41 matben Exp $
 
 # SetWhiteboardFactoryState --
 # 
 #       There is a global 'state' array which contains a generic state
-#       that is inherited by instance specific 'state' array '::${wtop}::state'
+#       that is inherited by instance specific 'state' array '::WB::${wtop}::state'
 
 proc SetWhiteboardFactoryState { } {
     global  state

@@ -7,10 +7,12 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Import.tcl,v 1.13 2004-02-17 07:44:37 matben Exp $
+# $Id: Import.tcl,v 1.14 2004-03-13 15:21:41 matben Exp $
 
 package require http
 package require httpex
+
+package provide Import 1.0
 
 namespace eval ::Import:: {
     
@@ -40,7 +42,7 @@ namespace eval ::Import:: {
 proc ::Import::ImportImageOrMovieDlg {wtop} {    
     variable initialDir    
     
-    set wCan [::UI::GetCanvasFromWtop $wtop]
+    set wCan [::WB::GetCanvasFromWtop $wtop]
     if {[info exists initialDir] && [file isdirectory $initialDir]} {
 	set opts {-initialdir $initialDir}
     } else {
@@ -197,7 +199,7 @@ proc ::Import::DoImport {w opts args} {
     } else {
 	set drawLocal 0
     }
-    if {($argsArr(-where) != "local") && ([llength [::Network::GetIP to]] > 0)} {
+    if {![string equal $argsArr(-where) "local"]} {
 	set doPut 1
     } else {
 	set doPut 0
@@ -330,20 +332,28 @@ proc ::Import::DoImport {w opts args} {
     # Put to remote peers but require we did not fail ourself.   
     if {$doPut && ($errMsg == "")} {	
 	if {$isLocal} {
-	    
+	    set optArr(-url) [::Utils::GetHttpFromFile $fileName]
+	    set putOpts [array get optArr]
+	    set putOpts [::Import::GetStackOptions $w $putOpts $useTag]
+	    	    
 	    # Either we use the put/get method with a new connection,
 	    # or use standard http.
-	    if {[string equal $prefs(trptMethod) "putget"]} {
-		::Import::PutFile $wtopNS $fileName $argsArr(-where) \
-		  $putOpts $useTag
-	    } elseif {[string equal $prefs(trptMethod) "http"]} {
-		
-		# We need the real id here.
-		set id [$w find withtag $useTag]
-		set line [::CanvasUtils::GetOnelinerForAny $w $id  \
-		  -uritype http]
-		if {$line != ""} {
-		    SendClientCommand $wtopNS [concat "CANVAS:" $line]   
+	    
+	    switch -- $prefs(trptMethod) {
+		putget {
+		    set putArgs {}
+		    if {$argsArr(-where) != "all"} {
+			lappend putArgs -where $argsArr(-where)
+		    }
+		    eval {::WB::PutFile $wtopNS $fileName $putOpts} $putArgs
+		}
+		http {
+		    set id [$w find withtag $useTag]
+		    set line [::CanvasUtils::GetOnelinerForAny $w $id  \
+		      -uritype http]
+		    if {[llength $line]} {
+			::WB::SendMessageList $wtopNS [list $line]
+		    }
 		}
 	    }
 	} else {
@@ -763,7 +773,7 @@ proc ::Import::HttpGet {wtop url importPackage opts args} {
     
     # Store stuff in gettoken array.
     set getstate(wtop) $wtop
-    set getstate(wcan) [::UI::GetCanvasFromWtop $wtop]
+    set getstate(wcan) [::WB::GetCanvasFromWtop $wtop]
     set getstate(url) $url
     set getstate(importPackage) $importPackage
     set getstate(optList) $opts
@@ -1127,7 +1137,7 @@ proc ::Import::HttpGetQuickTimeTcl {wtop url opts args} {
     upvar 0 $gettoken getstate
     
     array set optArr $opts
-    set w [::UI::GetCanvasFromWtop $wtop]    
+    set w [::WB::GetCanvasFromWtop $wtop]    
     
     # Make a frame for the movie; need special class to catch 
     # mouse events. Postpone display until playable from callback.
@@ -1223,7 +1233,7 @@ proc ::Import::DrawQuickTimeTclFromHttp {gettoken} {
     set wtop $getstate(wtop)
     set url $getstate(url)
         
-    set w [::UI::GetCanvasFromWtop $wtop]
+    set w [::WB::GetCanvasFromWtop $wtop]
     set wfr $getstate(wfr)
     set wmovie $getstate(wmovie)
     array set optArr $getstate(optList)
@@ -1248,43 +1258,29 @@ proc ::Import::DrawQuickTimeTclFromHttp {gettoken} {
     #::FileCache::Set $getstate(url) $dstPath
 }
 
-# Import::PutFile --
-# 
-#       Interface to the PutFile. Must be called after item created to
-#       process the canvas stacking order correctly.
-#       
-# Transfer movie file to all other servers.
-# Several options possible:
-#   1) flatten, put in httpd directory, and transfer via http.
-#   2) make hint track and serve using RTP.
-#   3) put as an ordinary binary file, perhaps flattened.
+proc ::Import::GetStackOptions {w opts tag} {
+    
+    array set optsArr $opts
 
-proc ::Import::PutFile {wtop fileName where opts tag} {
-
-    ::Debug 2 "::Import::PutFile fileName=$fileName, where=$where"
-        
-    array set optArr $opts
-    set w [::UI::GetCanvasFromWtop $wtop]
-
-    if {![info exists optArr(-above)]} {
-	set idBelow [$w find below $tag]
-	if {[string length $idBelow] > 0} {
-	    set utagBelow [::CanvasUtils::GetUtag $w $idBelow 1]
-	    if {[string length $utagBelow] > 0} {
-		lappend opts -above $utagBelow
-	    }
-	} 
-    }
-    if {![info exists optArr(-below)]} {
-	set idAbove [$w find above $tag]
-	if {[string length $idAbove] > 0} {
-	    set utagAbove [::CanvasUtils::GetUtag $w $idAbove 1]
-	    if {[string length $utagAbove] > 0} {
-		lappend opts -below $utagAbove
-	    }
-	}
-    }
-    ::PutFileIface::PutFileToAll $wtop $fileName $where $opts
+    if {![info exists optsArr(-above)]} {
+	 set idBelow [$w find below $tag]
+	 if {[string length $idBelow] > 0} {
+	     set utagBelow [::CanvasUtils::GetUtag $w $idBelow 1]
+	     if {[string length $utagBelow] > 0} {
+		 lappend opts -above $utagBelow
+	     }
+	 } 
+     }
+     if {![info exists optsArr(-below)]} {
+	 set idAbove [$w find above $tag]
+	 if {[string length $idAbove] > 0} {
+	     set utagAbove [::CanvasUtils::GetUtag $w $idAbove 1]
+	     if {[string length $utagAbove] > 0} {
+		 lappend opts -below $utagAbove
+	     }
+	 }
+     }    
+    return [array get optsArr]
 }
 
 # Import::XanimQuerySize --
@@ -1608,7 +1604,7 @@ proc ::Import::GetTransportSyntaxOptsFromTcl {optList} {
 
 proc ::Import::ResizeImage {wtop zoomFactor which newTag {where all}} {
         
-    set w [::UI::GetCanvasFromWtop $wtop]
+    set w [::WB::GetCanvasFromWtop $wtop]
 
     Debug 2 "ResizeImage: wtop=$wtop, w=$w, which=$which"
     Debug 2 "    zoomFactor=$zoomFactor"
@@ -1724,6 +1720,8 @@ proc ::Import::ResizeImage {wtop zoomFactor which newTag {where all}} {
 	    }
 	}
 	
+	# We need to do something different here!!!!!!!!!!!!!!!!!!!!!!!!!
+	
 	# Assemble remote command.
 	if {$where != "local"} {
 	    set cmdremote "RESIZE IMAGE: $utagOrig $useTag $zoomFactor"
@@ -1827,7 +1825,7 @@ proc ::Import::ReloadImage {wtop id} {
     ::Debug 3 "::Import::ReloadImage"
     
     # Need to have an url stored here.
-    set wcan [::UI::GetCanvasFromWtop $wtop]
+    set wcan [::WB::GetCanvasFromWtop $wtop]
     set opts [::CanvasUtils::ItemCGet $wtop $id]
     array set optsArr $opts  
     set coords [$wcan coords $id]

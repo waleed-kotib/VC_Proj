@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.13 2004-01-13 14:50:21 matben Exp $
+# $Id: Utils.tcl,v 1.14 2004-03-13 15:21:42 matben Exp $
 
 namespace eval ::Utils:: {
 
@@ -31,14 +31,6 @@ proc InvertArray {arrName invArrName} {
 # max, min ---
 #
 #    Finds max and min of two numerical values. From the WikiWiki page.
-
-proc maxBU {a b} {
-    return [expr ($a >= $b) ? $a : $b]
-}
-
-proc minBU {a b} {
-    return [expr ($a <= $b) ? $a : $b]
-}
 
 proc max {a args} {
     foreach i $args {
@@ -134,6 +126,23 @@ proc getdirname {filePath} {
     } else {
 	return $filePath
     }
+}
+
+# ::Utils::GetMaxMsgcatWidth --
+# 
+#       Returns the max string length for the current catalog of the
+#       given source strings.
+
+proc ::Utils::GetMaxMsgcatWidth {args} {
+    
+    set width 0
+    foreach str $args {
+	set len [string length [::msgcat::mc $str]]
+	if {$len > $width} {
+	    set width $len
+	}
+    }
+    return $width
 }
 
 # ::Utils::IsIPNumber --
@@ -363,6 +372,20 @@ proc ::Utils::GetFontListFromName {fontSpec} {
     }
 }
     
+# Utils::GetHttpFromFile --
+# 
+#       Translates an absolute file path to an uri encoded http address
+#       for our built in http server.
+
+proc ::Utils::GetHttpFromFile {filePath} {
+    global  prefs this
+    
+    set relPath [filerelative $this(httpdRootPath) $filePath]
+    set relPath [uriencode::quotepath $relPath]
+    set ip [::Network::GetThisOutsideIPAddress]
+    return "http://${ip}:$prefs(httpdPort)/$relPath"
+}
+
 #--- Utilities for the Text widget ---------------------------------------------
 
 namespace eval ::Text:: {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Subscribe.tcl,v 1.10 2004-01-27 08:48:06 matben Exp $
+# $Id: Subscribe.tcl,v 1.11 2004-03-13 15:21:41 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -69,8 +69,8 @@ proc ::Jabber::Subscribe::Subscribe {jid args} {
     }
 
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised]  \
-      -fill both -expand 1 -ipadx 4
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1 -ipadx 4
     
     ::headlabel::headlabel $w.frall.head -text [::msgcat::mc Subscribe]
     pack $w.frall.head -side top -fill both -expand 1

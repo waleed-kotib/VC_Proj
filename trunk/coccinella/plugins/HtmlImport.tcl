@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: HtmlImport.tcl,v 1.7 2004-02-09 08:26:08 matben Exp $
+# $Id: HtmlImport.tcl,v 1.8 2004-03-13 15:21:58 matben Exp $
 
 
 namespace eval ::HtmlImport:: {
@@ -262,7 +262,7 @@ proc ::HtmlImport::Save {wCan id args} {
     if {[info exists locals(id2file,$id)]} {
 	set fileName $locals(id2file,$id)
 	if {$argsArr(-uritype) == "http"} {
-	    lappend impArgs -url [::CanvasUtils::GetHttpFromFile $fileName]
+	    lappend impArgs -url [::Utils::GetHttpFromFile $fileName]
 	} else {
 	    lappend impArgs -file $fileName
 	}

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Conference.tcl,v 1.15 2004-02-17 07:44:37 matben Exp $
+# $Id: Conference.tcl,v 1.16 2004-03-13 15:21:40 matben Exp $
 
 package provide Conference 1.0
 
@@ -66,8 +66,8 @@ proc ::Jabber::Conference::BuildEnter {args} {
     set fontSB [option get . fontSmallBold {}]
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised]   \
-      -fill both -expand 1 -ipadx 12 -ipady 4
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall  -fill both -expand 1 -ipadx 12 -ipady 4
     message $w.frall.msg -width 280  -justify left  \
     	-text [::msgcat::mc jamessconfmsg]
     pack $w.frall.msg -side top -anchor w -padx 2 -pady 4
@@ -145,10 +145,10 @@ proc ::Jabber::Conference::BuildEnter {args} {
     set frbot [frame $w.frall.frbot -borderwidth 0]
     set wbtenter  $frbot.btenter
     set wbtget    $frbot.btget
-    pack [button $wbtget -text [::msgcat::mc Get] -width 8 -default active \
+    pack [button $wbtget -text [::msgcat::mc Get] -default active \
       -command [list [namespace current]::EnterGet $token]]  \
       -side right -padx 5 -pady 0
-    pack [button $wbtenter -text [::msgcat::mc Enter] -width 8 -state disabled \
+    pack [button $wbtenter -text [::msgcat::mc Enter] -state disabled \
       -command [list [namespace current]::DoEnter $token]]  \
       -side right -padx 5 -pady 0
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
@@ -437,8 +437,8 @@ proc ::Jabber::Conference::BuildCreate {args} {
     }
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised]   \
-      -fill both -expand 1 -ipadx 12 -ipady 4
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1 -ipadx 12 -ipady 4
     message $w.frall.msg -anchor w -justify left  \
       -text [::msgcat::mc jacreateroom] -width 300
     pack $w.frall.msg -side top -fill x -anchor w -padx 10 -pady 4
@@ -482,10 +482,10 @@ proc ::Jabber::Conference::BuildCreate {args} {
     set wsearrows $frbot.arr
     set wbtenter $frbot.btenter
     set wbtget $frbot.btget
-    pack [button $wbtget -text [::msgcat::mc Get] -width 8 -default active \
+    pack [button $wbtget -text [::msgcat::mc Get] -default active \
       -command [list [namespace current]::CreateGet $token]]  \
       -side right -padx 5 -pady 5
-    pack [button $wbtenter -text [::msgcat::mc Create] -width 8 -state disabled \
+    pack [button $wbtenter -text [::msgcat::mc Create] -state disabled \
       -command [list [namespace current]::DoCreate $token]]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \

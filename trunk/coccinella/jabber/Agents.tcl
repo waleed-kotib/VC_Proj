@@ -5,14 +5,14 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Agents.tcl,v 1.11 2004-02-03 10:16:30 matben Exp $
+# $Id: Agents.tcl,v 1.12 2004-03-13 15:21:40 matben Exp $
 
 package provide Agents 1.0
 
 namespace eval ::Jabber::Agents:: {
 
-    hooks::add loginHook      ::Jabber::Agents::LoginCmd
-    hooks::add logoutHook     ::Jabber::Agents::LogoutHook
+    ::hooks::add loginHook      ::Jabber::Agents::LoginCmd
+    ::hooks::add logoutHook     ::Jabber::Agents::LogoutHook
 
     # We keep an reference count that gets increased by one for each request
     # sent, and decremented by one for each response.

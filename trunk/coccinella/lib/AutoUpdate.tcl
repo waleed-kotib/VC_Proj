@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: AutoUpdate.tcl,v 1.7 2004-01-13 14:50:21 matben Exp $
+# $Id: AutoUpdate.tcl,v 1.8 2004-03-13 15:21:41 matben Exp $
 
 package require tinydom
 package require http 2.3
@@ -105,7 +105,8 @@ proc ::AutoUpdate::Dialog {releaseAttr message changesList} {
     set fontSB [option get . fontSmallBold {}]
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1
     
     # Text.
     set wtext $w.frall.text
@@ -166,7 +167,7 @@ proc ::AutoUpdate::Dialog {releaseAttr message changesList} {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btset -text [::msgcat::mc Close] -width 8 \
+    pack [button $frbot.btset -text [::msgcat::mc Close] \
       -command "destroy $w"] -side right -padx 5 -pady 5
     pack $frbot -side top -fill x -padx 8 -pady 6
     

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Search.tcl,v 1.9 2004-01-23 08:56:31 matben Exp $
+# $Id: Search.tcl,v 1.10 2004-03-13 15:21:41 matben Exp $
 
 package provide Search 1.0
 
@@ -55,8 +55,8 @@ proc ::Jabber::Search::Build {args} {
     set wtop $w
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised]   \
-      -fill both -expand 1 -ipadx 6 -ipady 4
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1 -ipadx 6 -ipady 4
     
     # Left half.
     set wleft $w.frall.fl
@@ -77,7 +77,7 @@ proc ::Jabber::Search::Build {args} {
     set frbot [frame $wleft.frbot -borderwidth 0]
     set wsearrows $frbot.arr
     set wbtsearch $frbot.btenter
-    pack [button $wbtsearch -text [::msgcat::mc Search] -width 8 -state disabled \
+    pack [button $wbtsearch -text [::msgcat::mc Search] -state disabled \
       -command [namespace current]::DoSearch]  \
       -side right -padx 5 -pady 2
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \

@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ItemInspector.tcl,v 1.18 2004-01-27 08:48:06 matben Exp $
+# $Id: ItemInspector.tcl,v 1.19 2004-03-13 15:21:41 matben Exp $
 
 namespace eval ::ItemInspector::  {
     
@@ -94,7 +94,7 @@ namespace eval ::ItemInspector::  {
 proc ::ItemInspector::ItemInspector {wtop which args} {
     
     Debug 2 "ItemInspector:: wtop=$wtop, which=$which"
-    set wCan [::UI::GetCanvasFromWtop $wtop]
+    set wCan [::WB::GetCanvasFromWtop $wtop]
     
     # We need to create an item specific instance. 
     # Use the item id for instance.
@@ -126,7 +126,7 @@ proc ::ItemInspector::Build {wtop itemId args} {
     
     Debug 2 "::ItemInspector::Build wtop=$wtop, itemId=$itemId"
     set w .itinsp${itemId}
-    set wCan [::UI::GetCanvasFromWtop $wtop]
+    set wCan [::WB::GetCanvasFromWtop $wtop]
     
     # If window already there, just return silently.
     if {[winfo exists $w]}  {
@@ -171,7 +171,8 @@ proc ::ItemInspector::Build {wtop itemId args} {
     set fontSB [option get . fontSmallBold {}]
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1
     set w1 $w.frall.fr1
     set wcont1 [::mylabelframe::mylabelframe $w1 {Item Options}]
     
@@ -364,7 +365,7 @@ proc ::ItemInspector::Build {wtop itemId args} {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btsave -text [::msgcat::mc Save] -width 8 -default active  \
+    pack [button $frbot.btsave -text [::msgcat::mc Save] -default active  \
       -command [list [namespace current]::CanvasConfigureItem $w $wCan  \
       $itemId $listOfAllOptions]]  \
       -side right -padx 5 -pady 5
@@ -550,7 +551,7 @@ proc ::ItemInspector::Movie {wtop winfr} {
 
     incr uid
     set w ".itinsp${uid}"
-    set wCan [::UI::GetCanvasFromWtop $wtop]
+    set wCan [::WB::GetCanvasFromWtop $wtop]
     
     # Need to have instance specific namespace for regional variables.
     namespace eval ::ItemInspector::$w  {
@@ -582,7 +583,8 @@ proc ::ItemInspector::Movie {wtop winfr} {
     }
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1
     set w1 $w.frall.fr1
     set wcont1 [::mylabelframe::mylabelframe $w1 {Movie Options}]
     
@@ -629,7 +631,7 @@ proc ::ItemInspector::Movie {wtop winfr} {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btsave -text [::msgcat::mc Save] -width 8 -default active  \
+    pack [button $frbot.btsave -text [::msgcat::mc Save] -default active  \
       -command [list [namespace current]::MovieConfigure $w $wmov]]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
@@ -691,12 +693,13 @@ proc ::ItemInspector::Broken {wtop id args} {
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox}
     wm title $w {Item Inspector}
-    set wcan [::UI::GetCanvasFromWtop $wtop]
+    set wcan [::WB::GetCanvasFromWtop $wtop]
     
     set fontSB [option get . fontSmallBold {}]
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1
     set w1 $w.frall.fr1
     set wcont1 [::mylabelframe::mylabelframe $w1 {Broken Image}]
     pack $w1 -fill x

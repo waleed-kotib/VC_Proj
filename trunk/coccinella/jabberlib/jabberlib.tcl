@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.34 2004-02-03 10:14:52 matben Exp $
+# $Id: jabberlib.tcl,v 1.35 2004-03-13 15:21:41 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -102,6 +102,7 @@
 #      jlibName iq_get xmlns to ?args?
 #      jlibName iq_set xmlns to ?args?
 #      jlibName iq_register type xmlns cmd
+#      jlibName message_register xmlns cmd
 #      jlibName myjid
 #      jlibName mystatus
 #      jlibName oob_set to cmd url ?args?
@@ -318,6 +319,7 @@ proc jlib::new {rostername clientcmd args} {
 	variable locals
 	variable iqcmd
 	variable iqhook
+	variable msghook
 	variable opts
 	variable agent
 	# Cache for the 'conference' subcommand.
@@ -927,7 +929,7 @@ proc jlib::iq_handler {jlibname xmldata} {
 
     if {[string equal $ishandled "0"]} {
 	set ishandled [eval {
-	    iq_invoke_hook $jlibname $type $xmlns $afrom $subiq} $arglist]
+	    iq_run_hook $jlibname $type $xmlns $afrom $subiq} $arglist]
     }
     
     # (4) If unhandled by 3, use any -iqcommand callback.
@@ -990,7 +992,7 @@ proc jlib::message_handler {jlibname xmldata} {
     upvar [namespace current]::${jlibname}::lib lib
     
     # Extract the command level XML data items.
-    set attrlist [wrapper::getattrlist $xmldata]
+    set attrlist  [wrapper::getattrlist $xmldata]
     set childlist [wrapper::getchildren $xmldata]
     set attrArr(type) "normal"
     array set attrArr $attrlist
@@ -999,16 +1001,18 @@ proc jlib::message_handler {jlibname xmldata} {
     # Make an argument list ('-key value' pairs) suitable for callbacks.
     # Make variables of the attributes.
     set arglist {}
-    foreach attrkey [array names attrArr] {
-	lappend arglist -$attrkey $attrArr($attrkey)
+    foreach {key value} [array get attrArr] {
+	lappend arglist -$key $value
     }
-    
+    set ishandled 0
+   
     # Extract the message sub-elements.
     set x {}
+    set xxmlnsList {}
     foreach child $childlist {
 	
 	# Extract the message sub-elements XML data items.
-	set ctag [wrapper::gettag $child]
+	set ctag    [wrapper::gettag $child]
 	set cchdata [wrapper::getcdata $child]
 	
 	switch -- $ctag {
@@ -1021,21 +1025,34 @@ proc jlib::message_handler {jlibname xmldata} {
 	    }
 	    x {
 		lappend x $child
+		lappend xxmlnsList [wrapper::getattribute $child "xmlns"]
 	    }
 	}
     }
-    if {[string length $x]} {
+    if {[llength $x]} {
 	lappend arglist -x $x
+	set xxmlnsList [lsort -unique $xxmlnsList]
+	
+	# Invoke any registered message handlers.
+	foreach xxmlns $xxmlnsList {
+	    set ishandled [eval {
+		message_run_hook $jlibname $type $xxmlns} $arglist]
+	    if {$ishandled} {
+		break
+	    }
+	}
     }
+    if {[string equal $ishandled "0"]} {	
     
-    # Invoke callback to client.
-    if {[string length $opts(-messagecommand)]} {
-	uplevel #0 $opts(-messagecommand) [list $jlibname $type] $arglist
-    } else {
-	uplevel #0 $lib(clientcmd) [list $jlibname message] $arglist
+	# Invoke callback to client.
+	if {[string length $opts(-messagecommand)]} {
+	    uplevel #0 $opts(-messagecommand) [list $jlibname $type] $arglist
+	} else {
+	    uplevel #0 $lib(clientcmd) [list $jlibname message] $arglist
+	}
     }
 }
-
+    
 # jlib::presence_handler --
 #
 #       Callback for incoming <presence> elements. See 'jlib::dispatcher'.
@@ -1054,7 +1071,7 @@ proc jlib::presence_handler {jlibname xmldata} {
     upvar [namespace current]::${jlibname}::opts opts
     
     # Extract the command level XML data items.
-    set attrlist [wrapper::getattrlist $xmldata]
+    set attrlist  [wrapper::getattrlist $xmldata]
     set childlist [wrapper::getchildren $xmldata]
     array set attrArr $attrlist
     
@@ -1494,33 +1511,90 @@ proc jlib::parse_search_set {jlibname cmd type subiq} {
     uplevel #0 $cmd [list $type $subiq]
 }
 
+# jlib::iq_register --
+# 
+#       Handler for registered iq callbacks.
+#       
+#       We could think of a more general mechanism here!!!!
+#       1) Using -type, -xmlns, -from etc.
 
-proc jlib::iq_register {jlibname type xmlns func} {
+proc jlib::iq_register {jlibname type xmlns func {seq 50}} {
     
     upvar [namespace current]::${jlibname}::iqhook iqhook
     
-    set iqhook($type,$xmlns) $func
+    lappend iqhook($type,$xmlns) [list $func $seq]
+    set iqhook($type,$xmlns) \
+      [lsort -integer -index 1 [lsort -unique $iqhook($type,$xmlns)]]
 }
 
-proc jlib::iq_invoke_hook {jlibname type xmlns from subiq args} {
+proc jlib::iq_run_hook {jlibname type xmlns from subiq args} {
     
     upvar [namespace current]::${jlibname}::iqhook iqhook
+
+    set ishandled 0    
+
+    foreach key [list $type,$xmlns *,$xmlns $type,*] {
+	if {[info exists iqhook($key)]} {
+	    foreach spec $iqhook($key) {
+		set func [lindex $spec 0]
+		set code [catch {
+		    uplevel #0 $func [list $jlibname $from $subiq] $args
+		} ans]
+		if {$code} {
+		    bgerror "iqhook $func failed: $code\n$::errorInfo"
+		}
+		if {[string equal $ans "1"]} {
+		    set ishandled 1
+		    break
+		}
+	    }
+	}	
+	if {$ishandled} {
+	    break
+	}
+    }
+    return $ishandled
+}
+
+# jlib::message_register --
+# 
+#       Handler for registered message callbacks.
+#       
+#       We could think of a more general mechanism here!!!!
+
+proc jlib::message_register {jlibname type xmlns func {seq 50}} {
+    
+    upvar [namespace current]::${jlibname}::msghook msghook
+    
+    lappend msghook($type,$xmlns) [list $func $seq]
+    set msghook($type,$xmlns) \
+      [lsort -integer -index 1 [lsort -unique $msghook($type,$xmlns)]]
+}
+
+proc jlib::message_run_hook {jlibname type xmlns args} {
+    
+    upvar [namespace current]::${jlibname}::msghook msghook
 
     set ishandled 0
     
-    if {[info exists iqhook($type,$xmlns)]} {
-	set func $iqhook($type,$xmlns)
-    } elseif {[info exists iqhook(,$xmlns)]} {
-	set func $iqhook(,$xmlns)
-    }
-    if {[info exists func]} {
-	set code [catch {
-	    uplevel #0 $func [list $jlibname $from $subiq] $args} ans]
-	if {$code} {
-	    bgerror "iqhook $func failed: $code\n$::errorInfo"
-	}
-	if {[string equal $ans 1]} {
-	    set ishandled 1
+    foreach key [list $type,$xmlns *,$xmlns $type,*] {
+	if {[info exists msghook($key)]} {
+	    foreach spec $msghook($key) {
+		set func [lindex $spec 0]
+		set code [catch {
+		    uplevel #0 $func [list $jlibname $xmlns] $args
+		} ans]
+		if {$code} {
+		    bgerror "msghook $func failed: $code\n$::errorInfo"
+		}
+		if {[string equal $ans "1"]} {
+		    set ishandled 1
+		    break
+		}
+	    }
+	}	
+	if {$ishandled} {
+	    break
 	}
     }
     return $ishandled

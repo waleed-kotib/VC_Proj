@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: VCard.tcl,v 1.14 2004-01-27 08:48:06 matben Exp $
+# $Id: VCard.tcl,v 1.15 2004-03-13 15:21:41 matben Exp $
 
 package provide VCard 1.0
 
@@ -15,7 +15,7 @@ package require mactabnotebook
 namespace eval ::VCard::  {
         
     # Add all event hooks.
-    hooks::add closeWindowHook    ::VCard::CloseHook
+    ::hooks::add closeWindowHook    ::VCard::CloseHook
 
     variable uid 0
 }
@@ -166,7 +166,8 @@ proc ::VCard::Build {nstoken} {
     set priv(vcardjid) $jid
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 0 -relief raised] -fill both -expand 1
+    frame $w.frall -borderwidth 0 -relief raised
+    pack  $w.frall -fill both -expand 1
     set frall $w.frall
     
     set nbframe [::mactabnotebook::mactabnotebook $frall.tn]
@@ -321,7 +322,7 @@ proc ::VCard::Build {nstoken} {
       -side top -fill x -expand 1 -padx 8 -pady 6
     set fr $w.frall.frbot
     if {$type == "own"} {
-        pack [button $fr.btsave -text [::msgcat::mc Save] -width 8  \
+        pack [button $fr.btsave -text [::msgcat::mc Save]  \
           -default active -command [list [namespace current]::SetVCard $nstoken]] \
 	  -side right -padx 5 -pady 5
         pack [button $fr.btcancel -text [::msgcat::mc Cancel]  \

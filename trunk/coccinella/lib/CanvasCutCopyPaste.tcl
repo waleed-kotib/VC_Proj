@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasCutCopyPaste.tcl,v 1.9 2004-01-29 08:09:43 matben Exp $
+# $Id: CanvasCutCopyPaste.tcl,v 1.10 2004-03-13 15:21:41 matben Exp $
 
 package provide CanvasCutCopyPaste 1.0
 
@@ -45,7 +45,7 @@ proc ::CanvasCCP::CutCopyPasteCmd {cmd} {
 	    
     # Operate on the whiteboard's canvas.
     set wtop [::UI::GetToplevelNS $wfocus]
-    upvar ::${wtop}::wapp wapp
+    upvar ::WB::${wtop}::wapp wapp
     
     switch -- $cmd {
 	cut - copy {
@@ -107,7 +107,7 @@ proc ::CanvasCCP::CopySelectedToClipboard {w doWhat} {
 	}
 	set clipToken "item"
     }
-    ::UI::FixMenusWhenCopy $w
+    ::WB::FixMenusWhenCopy $w
 }
 
 # CanvasCCP::CopySingleItemToClipboard --
@@ -158,7 +158,7 @@ proc ::CanvasCCP::CopySingleItemToClipboard {w doWhat id} {
     } elseif {$doWhat == "copy"} {
 	
     }
-    ::UI::FixMenusWhenCopy $w
+    ::WB::FixMenusWhenCopy $w
 }
 
 # CanvasCCP::PasteFromClipboardTo
@@ -183,7 +183,7 @@ proc ::CanvasCCP::PasteFromClipboardTo {w} {
 	
 	    # We assume that it is the canvas that should receive this?
 	    set wtop [::UI::GetToplevelNS $w]
-	    set wCan [::UI::GetCanvasFromWtop $wtop]
+	    set wCan [::WB::GetCanvasFromWtop $wtop]
 	    ::CanvasCCP::PasteFromClipboardToCanvas $wCan
 	}
 	default {

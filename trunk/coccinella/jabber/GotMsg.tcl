@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.21 2004-01-23 08:54:42 matben Exp $
+# $Id: GotMsg.tcl,v 1.22 2004-03-13 15:21:40 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -13,9 +13,9 @@ namespace eval ::Jabber::GotMsg:: {
     global  wDlgs
 
     # Add all event hooks.
-    hooks::add quitAppHook        [list ::UI::SaveWinGeom $wDlgs(jgotmsg)]
-    hooks::add displayMessageHook [list ::Speech::SpeakMessage normal]
-    hooks::add closeWindowHook    ::Jabber::GotMsg::CloseHook
+    ::hooks::add quitAppHook        [list ::UI::SaveWinGeom $wDlgs(jgotmsg)]
+    ::hooks::add displayMessageHook [list ::Speech::SpeakMessage normal]
+    ::hooks::add closeWindowHook    ::Jabber::GotMsg::CloseHook
     
     
     # Wait for this variable to be set.
@@ -169,17 +169,18 @@ proc ::Jabber::GotMsg::Build { } {
     set bg [option get . backgroundGeneral {}]
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised]   \
-      -fill both -expand 1 -ipadx 0   
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1 -ipadx 0   
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
     set wbtnext $frbot.btnext
-    pack [button $wbtnext -text [::msgcat::mc Next] -width 8 -default active \
-      -state normal -command [list ::Jabber::GotMsg::NextMsg]]  \
+    set bwidth [expr [::Utils::GetMaxMsgcatWidth Next Reply] + 2]
+    pack [button $wbtnext -text [::msgcat::mc Next] -default active \
+      -width $bwidth -state normal -command [list ::Jabber::GotMsg::NextMsg]] \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btreply -text [::msgcat::mc Reply] -width 8   \
-      -command [list ::Jabber::GotMsg::Reply]]  \
+    pack [button $frbot.btreply -text [::msgcat::mc Reply]   \
+      -width $bwidth -command [list ::Jabber::GotMsg::Reply]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side bottom -fill x -padx 10 -pady 8
 

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.23 2004-03-04 07:53:16 matben Exp $
+# $Id: OOB.tcl,v 1.24 2004-03-13 15:21:41 matben Exp $
 
 package provide OOB 1.0
 
@@ -14,6 +14,9 @@ namespace eval ::Jabber::OOB:: {
     variable locals
     set locals(initialLocalDir) [pwd]
     set locals(id) 1000
+
+    # Running number for token.
+    variable uid 0
 }
 
 # Jabber::OOB::BuildSet --
@@ -44,8 +47,8 @@ proc ::Jabber::OOB::BuildSet {jid} {
     set fontSB [option get . fontSmallBold {}]
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised]  \
-      -fill both -expand 1 -ipadx 12 -ipady 4
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1 -ipadx 12 -ipady 4
     
     message $w.frall.msg -width 300 -text [::msgcat::mc oobmsg $jid]
     pack $w.frall.msg -side top -fill both -expand 1
@@ -114,6 +117,7 @@ proc ::Jabber::OOB::DoSend { } {
     variable localpath
     variable desc
     variable locals
+    variable uid
     upvar ::Jabber::jstate jstate
     
     if {$localpath == ""} {
@@ -127,13 +131,17 @@ proc ::Jabber::OOB::DoSend { } {
 	  -parent $wDlgs(joobs)
 	return
     }
+
+    # Initialize the state variable, an array, that keeps is the storage.
+    set token [namespace current]::[incr uid]
+    variable $token
+    upvar 0 $token state
+
+    set state(path) $localpath
+    set state(tail) [file tail $localpath]
+    set state(jid)  $jid
     set finished 1
-    
-    # For now we build a relative path for the url. uri encode it!
-    set relpath [filerelative $this(httpdRootPath) $localpath]
-    set ip [::Network::GetThisOutsideIPAddress]
-    set url "http://${ip}:$prefs(httpdPort)/$relpath"
-    set url [uriencode::quoteurl $url]
+    set url [::Utils::GetHttpFromFile $localpath]
     
     # If 'jid' is without a resource, we MUST add it!
     set jid $locals(jid)
@@ -145,7 +153,8 @@ proc ::Jabber::OOB::DoSend { } {
     if {[string length $desc]} {
 	set opts [list -desc $desc]
     }
-    eval {::Jabber::InvokeJlibCmd oob_set $jid ::Jabber::OOB::SetCallback $url} $opts
+    eval {$jstate(jlib) oob_set $jid \
+      [list [namespace current]::SetCallback $token] $url} $opts
 }
 
 # Jabber::OOB::SetCallback --
@@ -158,8 +167,9 @@ proc ::Jabber::OOB::DoSend { } {
 #       thequery:   if type="error", this is a list {errcode errmsg},
 #                   else it is the query element as a xml list structure.
 
-proc ::Jabber::OOB::SetCallback {jlibName type theQuery} {
-    
+proc ::Jabber::OOB::SetCallback {token jlibName type theQuery} {
+    variable $token
+    upvar 0 $token state
     upvar ::Jabber::jstate jstate
     
     ::Jabber::Debug 2 "::Jabber::OOB::SetCallback, type=$type,theQuery='$theQuery'"
@@ -172,8 +182,9 @@ proc ::Jabber::OOB::SetCallback {jlibName type theQuery} {
 	  -message [FormatTextForMessageBox $msg]
     } else {
 	tk_messageBox -icon info -type ok -title [::msgcat::mc {File Transfer}] \
-	  -message [::msgcat::mc jamessoobok]
+	  -message [::msgcat::mc jamessoobok2 $state(tail) $state(jid)]
     }
+    unset state
 }
 
 # Jabber::OOB::ParseSet --
@@ -195,9 +206,9 @@ proc ::Jabber::OOB::ParseSet {jlibname from subiq args} {
 	incr locals(id)
     }
     set desc {}
-    foreach child [lindex $subiq 4] {
-	set tag [lindex $child 0]
-	set $tag [lindex $child 3]
+    foreach child [wrapper::getchildren $subiq] {
+	set tag  [wrapper::gettag $child]
+	set $tag [wrapper::getcdata $child]
     }
     if {![info exists url]} {
 	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \

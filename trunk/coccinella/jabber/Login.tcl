@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.27 2004-01-30 15:33:50 matben Exp $
+# $Id: Login.tcl,v 1.28 2004-03-13 15:21:41 matben Exp $
 
 package provide Login 1.0
 
@@ -17,8 +17,8 @@ namespace eval ::Jabber::Login:: {
     variable password
 
     # Add all event hooks.
-    hooks::add quitAppHook     [list ::UI::SaveWinGeom $wDlgs(jlogin)]
-    hooks::add closeWindowHook ::Jabber::Login::CloseHook
+    ::hooks::add quitAppHook     [list ::UI::SaveWinGeom $wDlgs(jlogin)]
+    ::hooks::add closeWindowHook ::Jabber::Login::CloseHook
 }
 
 # Jabber::Login::Login --
@@ -69,8 +69,8 @@ proc ::Jabber::Login::Login { } {
     set fontSB [option get . fontSmallBold {}]
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised]   \
-      -fill both -expand 1 -ipadx 12 -ipady 4
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1 -ipadx 12 -ipady 4
                                  
     ::headlabel::headlabel $w.frall.head -text [::msgcat::mc Login]    
     pack $w.frall.head -side top -fill both -expand 1
@@ -484,7 +484,7 @@ proc ::Jabber::Login::ConnectProc {jlibName args} {
 #       .
 
 proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
-    global  ipName2Num prefs wDlgs
+    global  prefs wDlgs
     
     variable profile
     variable server
@@ -520,28 +520,16 @@ proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
 	return
     } 
     
-    # Collect ip num name etc. in arrays.
-    if {![::OpenConnection::SetIpArrays $server $jstate(sock)  \
-      $jstate(servPort)]} {
-	::Jabber::UI::SetStatusMessage ""
-	return
-    }
-    if {[::Utils::IsIPNumber $server]} {
-	set ipNum $server
-    } else {
-	set ipNum $ipName2Num($server)
-    }
-    set jstate(ipNum) $ipNum
+    foreach {ip addr port} [fconfigure $jstate(sock) -sockname] break
+    set jstate(ipNum) $ip
     
     # Ourself.
-    set jstate(mejid) "${username}@${server}"
-    set jstate(meres) $resource
+    set jstate(mejid)    "${username}@${server}"
+    set jstate(meres)     $resource
     set jstate(mejidres) "${username}@${server}/${resource}"
     set jserver(this) $server
     
     ::Profiles::SetSelectedName $profile
-
-    ::Network::RegisterIP $ipNum "to"
     
     # Login was succesful, set presence.
     set presArgs {}
@@ -557,7 +545,7 @@ proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
     }
         
     # Run all login hooks.
-    hooks::run loginHook
+    ::hooks::run loginHook
 }
 
 #-------------------------------------------------------------------------------

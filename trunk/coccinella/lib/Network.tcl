@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Network.tcl,v 1.10 2004-03-04 07:53:17 matben Exp $
+# $Id: Network.tcl,v 1.11 2004-03-13 15:21:41 matben Exp $
 
 namespace eval ::Network:: {
     
@@ -227,33 +227,19 @@ namespace eval ::Network:: {
 #       type        any of 'to', 'from', 'both'
 
 proc ::Network::RegisterIP {ipNum {type "both"}} {
-    global  prefs
     variable ipNums
 
     # Keep lists of ip numbers for connected clients and servers.
     #    to: all we have a cllient connection to
     #    from: all we have another clinet connected to our server socket
-
-    switch -- $prefs(protocol) {
-	jabber {
 	    
-	    switch -- $type {
-		to {
-		    set ipNums(to) $ipNum
-		}
-	    }
+    switch -- $type {
+	to - from {
+	    lappend ipNums($type) $ipNum
 	}
-	default {
-	    
-	    switch -- $type {
-		to - from {
-		    lappend ipNums($type) $ipNum
-		}
-		both {
-		    lappend ipNums(to) $ipNum
-		    lappend ipNums(from) $ipNum
-		}
-	    }
+	both {
+	    lappend ipNums(to) $ipNum
+	    lappend ipNums(from) $ipNum
 	}
     }
 
@@ -273,26 +259,17 @@ proc ::Network::RegisterIP {ipNum {type "both"}} {
 #       type        any of 'to', 'from', 'both'
 
 proc ::Network::DeRegisterIP {ipNum {type "both"}} {
-    global  prefs
     variable ipNums
-    
-    switch -- $prefs(protocol) {
-	jabber {
-	    set ipNums(to) {}
+    	    
+    switch -- $type {
+	to - from {
+	    lprune ipNums($type) $ipNum
 	}
-	default {
-	    
-	    switch -- $type {
-		to - from {
-		    lprune ipNums($type) $ipNum
-		}
-		both {
-		    lprune ipNums(to) $ipNum
-		    lprune ipNums(from) $ipNum
-		}
-	    }	    
+	both {
+	    lprune ipNums(to) $ipNum
+	    lprune ipNums(from) $ipNum
 	}
-    }
+    }	    
     set ipNums(to) [lsort -unique $ipNums(to)]
     set ipNums(from) [lsort -unique $ipNums(from)]
 }
@@ -353,72 +330,6 @@ proc ::Network::IsConnected {ipNum type} {
     
     set all [::Network::GetIP $type]
     return [expr {[lsearch $all $ipNum] >= 0} ? 1 : 0]
-}
-
-# These one need another home??? ...............................................
-
-# SendClientCommand --
-#
-#       Sends to command to whoever we are connected to. If jabber, we send
-#       XML code, else our own protocol.
-#   
-# Arguments:
-#       wtop
-#       cmd         the command (line) to send which must be protocol compliant.
-#       args   ?-key value ...?
-#       -ips         (D=all ips) send to this list of ip numbers. 
-#                    Not for jabber.
-#       -force 0|1  (D=1) overrides the doSend checkbutton in jabber.
-#       
-# Results:
-#       none
-
-proc SendClientCommand {wtop cmd args} {
-    global  ipNumTo prefs
-    
-    array set opts [list -ips [::Network::GetIP to] -force 0]
-    array set opts $args
-    
-    if {[string equal $prefs(protocol) "jabber"]} {
-	::Jabber::SendWhiteboardMessage $wtop $cmd -force $opts(-force)
-    } else {
-	foreach ip $opts(-ips) {
-	    if {[catch {
-		puts $ipNumTo(socket,$ip) $cmd
-	    }]} {
-		tk_messageBox -type ok -title [::msgcat::mc {Network Error}] \
-		  -icon error -message  \
-		  [FormatTextForMessageBox [::msgcat::mc messfailsend $ip]]
-	    }
-	}
-    }
-}
-
-# SendClientCommandList --
-#
-#       As 'SendClientCommand' but accepts a list of commands.
-
-proc SendClientCommandList {wtop cmdList args} {
-    global  ipNumTo prefs
-    
-    array set opts [list -ips [::Network::GetIP to] -force 0]
-    array set opts $args
-
-    if {[string equal $prefs(protocol) "jabber"]} {
-	::Jabber::SendWhiteboardMessageList $wtop $cmdList -force $opts(-force)
-    } else {
-	foreach ip $opts(-ips) {
-	    if {[catch {
-		foreach cmd $cmdList {
-		    puts $ipNumTo(socket,$ip) $cmd
-		}
-	    }]} {
-		tk_messageBox -type ok -title [::msgcat::mc {Network Error}] \
-		  -icon error -message  \
-		  [FormatTextForMessageBox [::msgcat::mc messfailsend $ip]]
-	    }
-	}
-    }
 }
 
 #-------------------------------------------------------------------------------

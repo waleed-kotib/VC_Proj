@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasText.tcl,v 1.13 2004-01-30 15:33:51 matben Exp $
+# $Id: CanvasText.tcl,v 1.14 2004-03-13 15:21:41 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 
@@ -157,7 +157,7 @@ proc ::CanvasText::CanvasFocus {w x y {forceNew 0}} {
     global  prefs fontSize2Points
     
     set wtop [::UI::GetToplevelNS $w]
-    upvar ::${wtop}::state state
+    upvar ::WB::${wtop}::state state
 
     focus $w
     set id [::CanvasUtils::FindTypeFromOverlapping $w $x $y "text"]
@@ -275,7 +275,7 @@ proc ::CanvasText::TextInsert {w char} {
 	    ScheduleTextBuffer $w
 	}
     } else {
-	SendClientCommand $wtop [list "CANVAS:" insert $utag $ind $oneliner]
+	::WB::SendMessageList $wtop [list [list insert $utag $ind $oneliner]]
     }
 }
 
@@ -678,7 +678,7 @@ proc ::CanvasText::ScheduleTextBuffer {w} {
 #       w      the canvas widget.
 #       
 # Results:
-#       socket(s) written via 'SendClientCommand'.
+#       any registered send message hook invoked.
 
 proc ::CanvasText::EvalBufferedText {w} {
 
@@ -695,11 +695,10 @@ proc ::CanvasText::EvalBufferedText {w} {
 	::hooks::run whiteboardTextInsertHook me $str
     }
     
-    # Send if connected.
-    if {[llength [::Network::GetIP to]] && [string length $buffer(str)]} {
+    if {[string length $buffer(str)]} {
 	set wtop [::UI::GetToplevelNS $w]
-	SendClientCommand $wtop   \
-	  [list "CANVAS:" insert $buffer(utag) $buffer(ind) $buffer(str)]
+	::WB::SendMessageList $wtop  \
+	  [list [list insert $buffer(utag) $buffer(ind) $buffer(str)]]
     }    
     set buffer(str) ""
 }

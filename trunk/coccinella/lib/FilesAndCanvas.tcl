@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: FilesAndCanvas.tcl,v 1.19 2004-03-04 07:53:17 matben Exp $
+# $Id: FilesAndCanvas.tcl,v 1.20 2004-03-13 15:21:41 matben Exp $
  
 package require can2svg
 package require svg2can
@@ -32,7 +32,7 @@ namespace eval ::CanvasFile:: {}
 
 proc ::CanvasFile::DrawCanvasItemFromFile {wtop filePath args} {
     
-    set wCan [::UI::GetCanvasFromWtop $wtop]
+    set wCan [::WB::GetCanvasFromWtop $wtop]
 
     # Opens the data file.
     if {[catch {open $filePath r} fd]} {
@@ -537,7 +537,7 @@ proc ::CanvasFile::DoOpenCanvasFile {wtop {filePath {}}} {
     global  prefs
     
     set w [::UI::GetToplevel $wtop]
-    set wCan [::UI::GetCanvasFromWtop $wtop]
+    set wCan [::WB::GetCanvasFromWtop $wtop]
     
     if {[string length $filePath] == 0} {
 	set typelist {
@@ -600,7 +600,7 @@ proc ::CanvasFile::DoOpenCanvasFile {wtop {filePath {}}} {
 proc ::CanvasFile::DoSaveCanvasFile {wtop} {
     global  prefs this
         
-    set wCan [::UI::GetCanvasFromWtop $wtop]
+    set wCan [::WB::GetCanvasFromWtop $wtop]
     set typelist {
 	{"Canvas"            {.can}}
 	{"Adobe XML/SVG"     {.svg}}
@@ -704,7 +704,7 @@ proc ::CanvasFile::ImagePathTranslation {optList absFilePath} {
 
 proc ::CanvasFile::SVGFileToCanvas {wtop filePath} {
     
-    set wCan [::UI::GetCanvasFromWtop $wtop]
+    set wCan [::WB::GetCanvasFromWtop $wtop]
 
     # Opens the data file.
     if {[catch {open $filePath r} fd]} {
