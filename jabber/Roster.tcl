@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.121 2005-02-27 14:11:06 matben Exp $
+# $Id: Roster.tcl,v 1.122 2005-02-28 15:00:42 matben Exp $
 
 package provide Roster 1.0
 
@@ -1540,7 +1540,7 @@ proc ::Roster::TreeNewItem {jid presence args} {
 	if {![$wtree isitem [list pending]]} {
 	    set vdir [list pending]
 	    $wtree newitem $vdir -tags head -dir 1 \
-	      -text [mc $pending]
+	      -text [mc {Subscription Pending}]
 	}
 	set tags [list user $mjid]
 	eval {$wtree newitem [list pending $jid] -image $icon -tags $tags} \
