@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.44 2004-03-13 15:21:41 matben Exp $
+# $Id: Preferences.tcl,v 1.45 2004-03-16 15:09:08 matben Exp $
  
 package require notebook
 package require tree
@@ -110,10 +110,11 @@ proc ::Preferences::Build { } {
     pack [frame $frtree] -fill both -expand 1 -side left
     pack [label $frtree.la -text [::msgcat::mc {Settings Panels}]  \
       -font $fontSB -relief raised -bd 1 -bg #bdbdbd] -side top -fill x
-    set wtree [::tree::tree $frtree.t -width 140 -height 300 \
+    set wtree $frtree.t
+    ::tree::tree $wtree -width 140 -height 300 \
       -yscrollcommand [list $frtree.sby set]       \
       -selectcommand ::Preferences::SelectCmd   \
-      -doubleclickcommand {}]
+      -doubleclickcommand {}
     scrollbar $frtree.sby -orient vertical -command [list $wtree yview]
     
     pack $wtree -side left -fill both -expand 1
@@ -123,7 +124,6 @@ proc ::Preferences::Build { } {
     $wtree newitem {General} -text [::msgcat::mc General]
     $wtree newitem {General {Network Setup}} -text [::msgcat::mc {Network Setup}]
     $wtree newitem {General {Proxy Setup}} -text [::msgcat::mc {Proxy Setup}]
-    $wtree newitem {General Shortcuts} -text [::msgcat::mc Shortcuts]
     if {!$prefs(stripJabber)} {
 	$wtree newitem {Jabber}
 	$wtree newitem {Jabber {Personal Info}} -text [::msgcat::mc {Personal Info}]
@@ -152,11 +152,7 @@ proc ::Preferences::Build { } {
     # Proxies Setup page -------------------------------------------------------
     set frpoxy [$nbframe page {Proxy Setup}]
     ::Preferences::Proxies::BuildPage $frpoxy
-        
-    # Shortcuts page -----------------------------------------------------------
-    set frpshort [$nbframe page Shortcuts]
-    ::Preferences::Shorts::BuildPage $frpshort    
-    
+            
     if {!$prefs(stripJabber)} {
 	
 	# Personal Info page ---------------------------------------------------
@@ -333,9 +329,9 @@ proc ::Preferences::BuildPageConf {page} {
     variable ypad 
 
     # Conference (groupchat) stuff.
-    set labfr [::mylabelframe::mylabelframe $page.fr  \
-      [::msgcat::mc {Preferred Protocol}]]
-    pack $page.fr -side top -anchor w -fill x
+    set labfr $page.fr
+    labelframe $labfr -text [::msgcat::mc {Preferred Protocol}]
+    pack $labfr -side top -anchor w -padx 8 -pady 4
     set pbl [frame $labfr.frin]
     pack $pbl -padx 10 -pady 6 -side left
     
@@ -351,8 +347,9 @@ proc ::Preferences::BuildPageConf {page} {
 
 proc ::Preferences::BuildPagePersInfo {page} {
 
-    set ppers [::mylabelframe::mylabelframe $page.fr [::msgcat::mc {Personal Information}]]
-    pack $page.fr -side top -anchor w -ipadx 10 -ipady 6 -fill x
+    set ppers $page.fr
+    labelframe $ppers -text [::msgcat::mc {Personal Information}]
+    pack $ppers -side top -anchor w -padx 8 -pady 4
 
     message $ppers.msg -text [::msgcat::mc prefpers] -aspect 800
     grid $ppers.msg -columnspan 2 -sticky w
@@ -383,8 +380,9 @@ proc ::Preferences::BuildPageAutoAway {page} {
     variable xpadbt
     
     # Auto away stuff.
-    set labfrpbl [::mylabelframe::mylabelframe $page.fr [::msgcat::mc {Auto Away}]]
-    pack $page.fr -side top -anchor w -fill x
+    set labfrpbl $page.fr
+    labelframe $labfrpbl -text [::msgcat::mc {Auto Away}]
+    pack $labfrpbl -side top -anchor w -padx 8 -pady 4
     set pbl [frame $labfrpbl.frin]
     pack $pbl -padx 10 -pady 6 -side left
     pack [label $pbl.lab -text [::msgcat::mc prefaaset]] \
@@ -421,9 +419,9 @@ proc ::Preferences::BuildPageAutoAway {page} {
     grid $pbl.frmsg.examsg -column 1 -row 1 -sticky w
     
     # Default logout status.
-    set labfrstat [::mylabelframe::mylabelframe $page.frstat  \
-      [::msgcat::mc {Default Logout Status}]]
-    pack $page.frstat -side top -anchor w -fill x
+    set labfrstat $page.frstat
+    labelframe $labfrstat -text [::msgcat::mc {Default Logout Status}]
+    pack $labfrstat -side top -anchor w -padx 8 -pady 4
     set pstat [frame $labfrstat.frin]
     pack $pstat -padx 10 -pady 6 -side left
 
@@ -448,8 +446,9 @@ proc ::Preferences::BuildPageSubscriptions {page} {
     variable tmpJPrefs
     variable ypad
     
-    set labfrpsubs [::mylabelframe::mylabelframe $page.fr [::msgcat::mc Subscribe]]
-    pack $page.fr -side top -anchor w -fill x
+    set labfrpsubs $page.fr
+    labelframe $labfrpsubs -text [::msgcat::mc Subscribe]
+    pack $labfrpsubs -side top -anchor w -padx 8 -pady 4
     set psubs [frame $labfrpsubs.frin]
     pack $psubs -padx 10 -pady 6 -side left
 
@@ -485,8 +484,9 @@ proc ::Preferences::BuildPagePrivacy {page} {
     variable tmpPrefs
     variable xpadbt
     
-    set labfrpbl [::mylabelframe::mylabelframe $page.fr [::msgcat::mc Privacy]]
-    pack $page.fr -side top -anchor w -fill x
+    set labfrpbl $page.fr
+    labelframe $labfrpbl -text [::msgcat::mc Privacy]
+    pack $labfrpbl -side top -anchor w -padx 8 -pady 4
     set pbl [frame $labfrpbl.frin]
     pack $pbl -padx 10 -pady 6 -side left
     
@@ -515,8 +515,9 @@ proc ::Preferences::Block::BuildPage {page} {
     
     set fontS [option get . fontSmall {}]
     
-    set labfrpbl [::mylabelframe::mylabelframe $page.fr [::msgcat::mc Blockers]]
-    pack $page.fr -side top -anchor w -fill x
+    set labfrpbl $page.fr
+    labelframe $labfrpbl -text [::msgcat::mc Blockers]
+    pack $labfrpbl -side top -anchor w -padx 8 -pady 4
     set pbl [frame $labfrpbl.frin]
     pack $pbl -padx 10 -pady 6 -side left
     checkbutton $pbl.only  \
@@ -585,16 +586,15 @@ proc ::Preferences::Block::Add {w} {
     
     # Labelled frame.
     set wcfr $w.frall.fr
-    set wcont [::mylabelframe::mylabelframe $wcfr [::msgcat::mc {JID to block}]]
-    pack $wcfr -side top -fill both -ipadx 10 -ipady 6 -in $w.frall -fill x
+    labelframe $wcfr -text [::msgcat::mc {JID to block}]
+    pack $wcfr -side top -fill both -padx 8 -pady 4 -in $w.frall
     
     # Overall frame for whole container.
-    set frtot [frame $wcont.frin]
+    set frtot [frame $wcfr.frin]
     pack $frtot
     message $frtot.msg -borderwidth 0 -aspect 500 \
       -text [::msgcat::mc prefblmsg]
-    entry $frtot.ent -width 24    \
-      -textvariable "[namespace current]::addJid"
+    entry $frtot.ent -width 24 -textvariable [namespace current]::addJid
     set addJid {}
     pack $frtot.msg $frtot.ent -side top -fill x -anchor w -padx 2 -pady 2
     
@@ -677,26 +677,22 @@ proc ::Preferences::Customization::BuildPage {page} {
     upvar ::Preferences::xpadbt xpadbt
     upvar ::Preferences::ypad ypad
     
+    set fontS  [option get . fontSmall {}]    
     set fontSB [option get . fontSmallBold {}]
 
-    set labfrpbl [::mylabelframe::mylabelframe $page.fr [::msgcat::mc Customization]]
-    pack $page.fr -side top -anchor w -fill x
+    set labfrpbl $page.fr
+    labelframe $labfrpbl -text [::msgcat::mc Customization]
+    pack $labfrpbl -side top -anchor w -padx 8 -pady 4
     set pbl [frame $labfrpbl.frin]
     pack $pbl -padx 10 -pady 6 -side left
     
-    label $pbl.lfont -text [::msgcat::mc prefcufont]
-    button $pbl.btfont -text "[::msgcat::mc Pick]..."  \
-      -command ::Preferences::Customization::PickFont
-    checkbutton $pbl.newwin  \
-      -text " [::msgcat::mc prefcushow]" \
+    checkbutton $pbl.newwin -text " [::msgcat::mc prefcushow]" \
       -variable ::Preferences::tmpJPrefs(showMsgNewWin)
-    checkbutton $pbl.savein   \
-      -text " [::msgcat::mc prefcusave]" \
+    checkbutton $pbl.savein -text " [::msgcat::mc prefcusave]" \
       -variable ::Preferences::tmpJPrefs(inboxSave)
     label $pbl.lmb2 -text [::msgcat::mc prefcu2clk]
-    radiobutton $pbl.rb2new   \
-      -text " [::msgcat::mc prefcuopen]" -value "newwin" \
-      -variable ::Preferences::tmpJPrefs(inbox2click)
+    radiobutton $pbl.rb2new -text " [::msgcat::mc prefcuopen]" \
+      -value "newwin" -variable ::Preferences::tmpJPrefs(inbox2click)
     radiobutton $pbl.rb2re   \
       -text " [::msgcat::mc prefcureply]" -value "reply" \
       -variable ::Preferences::tmpJPrefs(inbox2click)
@@ -706,9 +702,10 @@ proc ::Preferences::Customization::BuildPage {page} {
     pack [checkbutton $frrost.cb -text "  [::msgcat::mc prefrostbgim]" \
       -variable ::Preferences::tmpJPrefs(rost,useBgImage)] -side left
     pack [button $frrost.btpick -text "[::msgcat::mc {Pick}]..."  \
-      -command [list [namespace current]::PickBgImage rost]] -side left -padx 4
+      -command [list [namespace current]::PickBgImage rost] -font $fontS] \
+      -side left -padx 4
     pack [button $frrost.btdefk -text "[::msgcat::mc {Default}]"  \
-      -command [list [namespace current]::DefaultBgImage rost]]  \
+      -command [list [namespace current]::DefaultBgImage rost] -font $fontS]  \
       -side left -padx 4
     
     set frtheme $pbl.ftheme
@@ -722,8 +719,7 @@ proc ::Preferences::Customization::BuildPage {page} {
     pack [label $frtheme.l -text "[::msgcat::mc preftheme]:"] -side left
     pack $wpoptheme -side left
     
-    grid $pbl.lfont $pbl.btfont -padx 2 -pady $ypad -sticky w
-    grid $pbl.newwin $pbl.btfont -padx 2 -pady $ypad -sticky w -columnspan 2
+    grid $pbl.newwin -padx 2 -pady $ypad -sticky w -columnspan 2
     grid $pbl.savein -padx 2 -pady $ypad -sticky w -columnspan 2
     grid $pbl.lmb2 -padx 2 -pady $ypad -sticky w -columnspan 2
     grid $pbl.rb2new -padx 2 -pady $ypad -sticky w -columnspan 2
@@ -732,8 +728,9 @@ proc ::Preferences::Customization::BuildPage {page} {
     grid $frtheme -padx 2 -pady $ypad -sticky w -columnspan 2
     
     # Agents or Browse.
-    set frdisc [::mylabelframe::mylabelframe $page.ag {Agents or Browse}]
-    pack $page.ag -side top -anchor w -fill x
+    set frdisc $page.ag 
+    labelframe $frdisc -text {Agents or Browse}
+    pack $frdisc -side top -anchor w -padx 8 -pady 4
     set pdisc [frame $frdisc.frin]
     pack $pdisc -padx 10 -pady 6 -side left
     label $pdisc.la -text [::msgcat::mc prefcudisc]
@@ -748,36 +745,6 @@ proc ::Preferences::Customization::BuildPage {page} {
     grid $pdisc.agents -padx 2 -pady $ypad -sticky w
     
 
-}
-
-proc ::Preferences::Customization::PickFont { } {
-    
-    upvar ::Preferences::tmpJPrefs tmpJPrefs
-    
-    set fontS [option get . fontSmall {}]
-    array set fontArr [font actual $fontS]
-
-    if {[string length $tmpJPrefs(chatFont)]} {
-	set opts [list  \
-	  -defaultfont    "" \
-	  -defaultsize    "" \
-	  -defaultweight  "" \
-	  -initialfont [lindex $tmpJPrefs(chatFont) 0]  \
-	  -initialsize [lindex $tmpJPrefs(chatFont) 1]  \
-	  -initialweight [lindex $tmpJPrefs(chatFont) 2]]
-    } else {
-	set opts {-defaultfont "" -defaultsize "" -defaultweight  ""}
-    }
-    
-    # Default font is here {{} {} {}} which shall match an empty chatFont.
-    set theFont [eval {::fontselection::fontselection .mnb} $opts]
-    if {[llength $theFont]} {
-	if {[lindex $theFont 0] == ""} {
-	    set tmpJPrefs(chatFont) ""
-	} else {
-	    set tmpJPrefs(chatFont) $theFont
-	}
-    }
 }
 
 proc ::Preferences::Customization::PickBgImage {where} {
@@ -840,12 +807,12 @@ proc ::Preferences::FileMap::BuildPage {page} {
     set fontS [option get . fontSmall {}]
     
     # Frame for everything inside the labeled container.
-    set wcont1 [::mylabelframe::mylabelframe $page.frtop [::msgcat::mc preffmhelp]]
-    pack $page.frtop -side top -anchor w -fill x
+    set wcont1 $page.frtop
+    labelframe $wcont1 -text [::msgcat::mc preffmhelp]
+    pack $wcont1 -side top -anchor w -padx 8 -pady 4
     set fr1 [frame $wcont1.fr]
     
     pack $fr1 -side left -padx 16 -pady 10 -fill x
-    pack $wcont1 -fill x    
     
     # Make the multi column listbox. 
     # Keep an invisible index column with index as a tag.
@@ -884,14 +851,16 @@ proc ::Preferences::FileMap::BuildPage {page} {
     # Add, Change, and Remove buttons.
     set frbt [frame $fr1.frbot]
     grid $frbt -row 1 -column 0 -columnspan 2 -sticky nsew -padx 0 -pady 0
-    button $frbt.rem -text [::msgcat::mc Delete] -font $fontS  \
-      -state disabled -padx $xpadbt  \
+    set btwidth [expr [::Utils::GetMaxMsgcatWidth Delete Edit New] + 2]
+    button $frbt.rem -text [::msgcat::mc Delete] -width $btwidth \
+      -state disabled -padx $xpadbt -font $fontS \
       -command "::Preferences::FileMap::DeleteAssociation $wmclist  \
       \[$wmclist curselection]"
-    button $frbt.change -text "[::msgcat::mc Edit]..." -font $fontS  \
-      -state disabled -padx $xpadbt -command  \
+    button $frbt.change -text "[::msgcat::mc Edit]..." -width $btwidth  \
+      -state disabled -padx $xpadbt -font $fontS -command  \
       "${ns}::Inspect $wDlgs(fileAssoc) edit $wmclist \[$wmclist curselection]"
-    button $frbt.add -text "[::msgcat::mc New]..." -font $fontS -padx $xpadbt \
+    button $frbt.add -text "[::msgcat::mc New]..." -width $btwidth \
+      -padx $xpadbt -font $fontS \
       -command [list ${ns}::Inspect .setass new $wmclist -1]
     pack $frbt.rem $frbt.change $frbt.add -side right -padx 5 -pady 5
     
@@ -1060,8 +1029,9 @@ proc ::Preferences::FileMap::Inspect {w doWhat wlist {indSel {}}} {
     pack  $w.frall
     
     # Frame for everything inside the labeled container: "Type of File".
-    set wcont1 [::mylabelframe::mylabelframe $w.frtop [::msgcat::mc {Type of File}]]
-    pack $w.frtop -in $w.frall -fill x
+    set wcont1 $w.frtop
+    labelframe $wcont1 -text [::msgcat::mc {Type of File}]
+    pack $wcont1 -in $w.frall -padx 8 -pady 4
     set fr1 [frame $wcont1.fr]
     label $fr1.x1 -text "[::msgcat::mc Description]:"
     entry $fr1.x2 -width 30   \
@@ -1091,8 +1061,9 @@ proc ::Preferences::FileMap::Inspect {w doWhat wlist {indSel {}}} {
     }
     
     # Frame for everything inside the labeled container: "Handling".
-    set wcont2 [::mylabelframe::mylabelframe $w.frmid [::msgcat::mc Handling]]
-    pack $w.frmid -in $w.frall -fill x
+    set wcont2 $w.frmid
+    labelframe $wcont2 -text [::msgcat::mc Handling]
+    pack $wcont2 -in $w.frall -padx 8 -pady 4
     set fr2 [frame $wcont2.fr]
     radiobutton $fr2.x1 -text " [::msgcat::mc {Reject receive}]"  \
       -variable [namespace current]::receiveVar -value reject
@@ -1299,11 +1270,13 @@ proc ::Preferences::NetSetup::BuildPage {page} {
     
     set fontSB [option get . fontSmallBold {}]
         
-    set wcont [::mylabelframe::mylabelframe $page.fr [::msgcat::mc prefnetconf]]
-    pack $page.fr -side top -anchor w -fill x
+    set wcont $page.fr
+    labelframe $wcont -text [::msgcat::mc prefnetconf]
+    pack $wcont -side top -anchor w -padx 8 -pady 4
 
     # Frame for everything inside the labeled container.
     set fr [frame $wcont.fr]    
+    pack $fr -side left -padx 2    
     message $fr.msg -width 300 -text [::msgcat::mc prefnethead]
     
     # The actual options.
@@ -1312,25 +1285,21 @@ proc ::Preferences::NetSetup::BuildPage {page} {
         
     # The Jabber server.
     radiobutton $fropt.jabb -text [::msgcat::mc {Jabber Client}]  \
-      -font $fontSB -value jabber  \
-      -variable ::Preferences::tmpPrefs(protocol)
+      -value jabber -variable ::Preferences::tmpPrefs(protocol)
     message $fropt.jabbmsg -width 160  \
       -text [::msgcat::mc prefnetjabb]
     
     # For the symmetric network config.
     radiobutton $fropt.symm -text [::msgcat::mc {Peer-to-Peer}]  \
-      -font $fontSB -variable ::Preferences::tmpPrefs(protocol)  \
-      -value symmetric
+      -variable ::Preferences::tmpPrefs(protocol) -value symmetric
     if {$state(isServerUp)} {
 	#$fropt.symm configure -state disabled
     }
     checkbutton $fropt.auto -text "  [::msgcat::mc {Auto Connect}]"  \
-      -font $fontSB  \
       -variable ::Preferences::tmpPrefs(autoConnect)
     message $fropt.automsg -width 160  \
       -text [::msgcat::mc prefnetauto]
     checkbutton $fropt.multi -text "  [::msgcat::mc {Multi Connect}]"  \
-      -font $fontSB  \
       -variable ::Preferences::tmpPrefs(multiConnect)
     message $fropt.multimsg -width 160  \
       -text [::msgcat::mc prefnetmulti]
@@ -1363,8 +1332,6 @@ proc ::Preferences::NetSetup::BuildPage {page} {
 
     pack $fr.msg -side top -padx 2 -pady $ypadbig
     pack $fropt -side top -padx 5 -pady $ypadbig
-    pack $fr -side left -padx 2    
-    pack $wcont -fill x    
     
     trace variable ::Preferences::tmpPrefs(protocol) w  \
       [namespace current]::TraceNetConfig
@@ -1477,8 +1444,9 @@ proc ::Preferences::NetSetup::Advanced {  } {
     
     frame $w.frall -borderwidth 1 -relief raised
     pack  $w.frall
-    set wcont [::mylabelframe::mylabelframe $w.frtop [::msgcat::mc {Advanced Configuration}]]
-    pack $w.frtop -in $w.frall -side top -fill both
+    set wcont $w.frtop
+    labelframe $wcont -text [::msgcat::mc {Advanced Configuration}]
+    pack $wcont -in $w.frall -side top -padx 8 -pady 4
     
     # Frame for everything inside the labeled container.
     set fr [frame $wcont.fr]
@@ -1569,238 +1537,6 @@ proc ::Preferences::NetSetup::AdvSetupSave {  } {
     set finishedAdv 1
 }
 
-# namespace  ::Preferences::Shorts:: -------------------------------------------
-
-namespace eval ::Preferences::Shorts:: {
-    
-    variable finished
-}
-
-proc ::Preferences::Shorts::BuildPage {page} {
-    
-    variable btadd
-    variable btrem
-    variable btedit
-    variable wlbox
-    variable shortListVar
-    upvar ::Preferences::tmpPrefs tmpPrefs
-    
-    set fontS [option get . fontSmall {}]
-    
-    set wcont [::mylabelframe::mylabelframe $page.frtop [::msgcat::mc {Edit Shortcuts}]]
-    pack $page.frtop -side top -anchor w
-    
-    # Overall frame for whole container.
-    set frtot [frame $wcont.fr]
-    message $frtot.msg -borderwidth 0 -aspect 600 \
-      -text [::msgcat::mc prefshortcut]
-    pack $frtot.msg -side top -padx 4 -pady 6
-    
-    # Frame for listbox and scrollbar.
-    set frlist [frame $frtot.lst]
-    
-    # The listbox.
-    set wsb $frlist.sb
-    set shortListVar {}
-    foreach pair $tmpPrefs(shortcuts) {
-	lappend shortListVar [lindex $pair 0]
-    }
-    set wlbox [listbox $frlist.lb -height 10 -width 18   \
-      -listvar [namespace current]::shortListVar \
-      -yscrollcommand [list $wsb set] -selectmode extended]
-    scrollbar $wsb -command [list $wlbox yview]
-    pack $wlbox -side left -fill both
-    pack $wsb -side left -fill both
-    pack $frlist -side left
-    
-    # Buttons at the right side.
-    frame $frtot.btfr
-    set btadd $frtot.btfr.btadd
-    set btrem $frtot.btfr.btrem
-    set btedit $frtot.btfr.btedit
-    button $btadd -text "[::msgcat::mc Add]..." -font $fontS  \
-      -command [list [namespace current]::AddOrEdit add]
-    button $btrem -text [::msgcat::mc Remove] -font $fontS -state disabled  \
-      -command [namespace current]::Remove
-    button $btedit -text "[::msgcat::mc Edit]..." -state disabled -font $fontS \
-      -command [list [namespace current]::AddOrEdit edit]
-    pack $frtot.btfr -side top -anchor w
-    pack $btadd $btrem $btedit -side top -fill x -padx 4 -pady 4
-    
-    pack $frtot -side left -padx 6 -pady 6    
-    pack $wcont -fill x    
-    
-    # Listbox bindings.
-    bind $wlbox <Button-1> {+ focus %W}
-    bind $wlbox <Double-Button-1> [list $btedit invoke]
-    bind $wlbox <<ListboxSelect>> [list [namespace current]::SelectCmd]
-}
-
-proc ::Preferences::Shorts::SelectCmd { } {
-
-    variable btadd
-    variable btrem
-    variable btedit
-    variable wlbox
-
-    if {[llength [$wlbox curselection]]} {
-	$btrem configure -state normal
-    } else {
-	$btrem configure -state disabled
-	$btedit configure -state disabled
-    }
-    if {[llength [$wlbox curselection]] == 1} {
-	$btedit configure -state normal
-    }
-}
-
-proc ::Preferences::Shorts::Remove { } {
-    
-    variable wlbox
-    variable shortListVar
-    upvar ::Preferences::tmpPrefs tmpPrefs
-
-    set selInd [$wlbox curselection]
-    if {[llength $selInd]} {
-	foreach ind [lsort -integer -decreasing $selInd] {
-	    set shortListVar [lreplace $shortListVar $ind $ind]
-	    set tmpPrefs(shortcuts) [lreplace $tmpPrefs(shortcuts) $ind $ind]
-	}
-    }
-}
-
-# ::Preferences::Shorts::AddOrEdit --
-#
-#       Callback when the "add" or "edit" buttons pushed. New toplevel dialog
-#       for editing an existing shortcut, or adding a fresh one.
-#
-# Arguments:
-#       what           "add" or "edit".
-#       
-# Results:
-#       shows dialog.
-
-proc ::Preferences::Shorts::AddOrEdit {what} {
-    global  this
-    
-    variable wlbox
-    variable finAdd
-    variable shortListVar
-    variable shortTextVar
-    variable longTextVar
-    upvar ::Preferences::tmpPrefs tmpPrefs
-    
-    Debug 2 "::Preferences::Shorts::AddOrEdit"
-
-    set indShortcuts [lindex [$wlbox curselection] 0]
-    if {$what == "edit" && $indShortcuts == ""} {
-	return
-    } 
-    set w .taddshorts$what
-    if {[winfo exists $w]} {
-	return
-    }
-    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
-      -macclass {document closeBox}
-    if {$what == "add"} {
-	set txt [::msgcat::mc {Add Shortcut}]
-	set txt1 "[::msgcat::mc {New shortcut}]:"
-	set txt2 "[::msgcat::mc prefshortip]:"
-	set txtbt [::msgcat::mc Add]
-	set shortTextVar {}
-	set longTextVar {}
-    } elseif {$what == "edit"} {
-	set txt [::msgcat::mc {Edit Shortcut}]
-	set txt1 "[::msgcat::mc Shortcut]:"
-	set txt2 "[::msgcat::mc prefshortip]:"
-	set txtbt [::msgcat::mc Save]
-    }
-    set finAdd 0
-    wm title $w $txt
-    
-    set fontSB [option get . fontSmallBold {}]
-    
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall
-    
-    # The top part.
-    set wcont [::mylabelframe::mylabelframe $w.frtop $txt]
-    pack $w.frtop -in $w.frall
-    
-    # Overall frame for whole container.
-    set frtot [frame $wcont.fr]
-    label $frtot.lbl1 -text $txt1 -font $fontSB
-    entry $frtot.ent1 -width 36 -textvariable [namespace current]::shortTextVar
-    label $frtot.lbl2 -text $txt2 -font $fontSB
-    entry $frtot.ent2 -width 36 -textvariable [namespace current]::longTextVar
-    grid $frtot.lbl1 -sticky w -padx 6 -pady 1
-    grid $frtot.ent1 -sticky ew -padx 6 -pady 1
-    grid $frtot.lbl2 -sticky w -padx 6 -pady 1
-    grid $frtot.ent2 -sticky ew -padx 6 -pady 1
-    
-    pack $frtot -side left -padx 16 -pady 10
-    pack $wcont -fill x    
-    focus $frtot.ent1
-    
-    # Get the short pair to edit.
-    if {[string equal $what "edit"]} {
-	set shortTextVar [lindex [lindex $tmpPrefs(shortcuts) $indShortcuts] 0]
-	set longTextVar [lindex [lindex $tmpPrefs(shortcuts) $indShortcuts] 1]
-    } elseif {[string equal $what "add"]} {
-	
-    }
-    
-    # The bottom part.
-    pack [frame $w.frbot -borderwidth 0] -in $w.frall -fill both  \
-      -padx 8 -pady 6
-    button $w.frbot.bt1 -text "$txtbt" -default active  \
-      -command [list [namespace current]::PushBtAddOrEdit $what]
-    pack $w.frbot.bt1 -side right -padx 5 -pady 5
-    pack [button $w.frbot.btcancel -text [::msgcat::mc Cancel]  \
-      -command "set [namespace current]::finAdd 2"]  \
-      -side right -padx 5 -pady 5
-    
-    bind $w <Return> [list $w.frbot.bt1 invoke]
-    wm resizable $w 0 0
-    
-    # Grab and focus.
-    focus $w
-    catch {grab $w}
-    tkwait variable [namespace current]::finAdd
-    
-    catch {grab release $w}
-    destroy $w
-}
-
-proc ::Preferences::Shorts::PushBtAddOrEdit {what} {
-    
-    variable wlbox
-    variable finAdd
-    variable shortListVar
-    variable shortTextVar
-    variable longTextVar
-    upvar ::Preferences::tmpPrefs tmpPrefs
-
-    if {($shortTextVar == "") || ($longTextVar == "")} {
-	set finAdd 1
-	return
-    }
-    if {$what == "add"} {
- 
-	# Save shortcuts in listbox.
-	lappend shortListVar $shortTextVar
-	lappend tmpPrefs(shortcuts) [list $shortTextVar $longTextVar]
-    } else {
-	
-	# Edit. Replace old with new.
-	set ind [lindex [$wlbox curselection] 0]
-	set shortListVar [lreplace $shortListVar $ind $ind $shortTextVar]
-	set tmpPrefs(shortcuts) [lreplace $tmpPrefs(shortcuts) $ind $ind   \
-	  [list $shortTextVar $longTextVar]]
-    }
-    set finAdd 1
-}
-
 # namespace  ::Preferences::EditFonts:: ----------------------------------------
 # 
 #       These procedures implement the dialog of importing fonts to the 
@@ -1826,12 +1562,12 @@ proc ::Preferences::EditFonts::BuildPage {page} {
     
     # Labelled frame.
     set wcfr $page.fr
-    set wcont [::mylabelframe::mylabelframe $wcfr [::msgcat::mc {Import/Remove fonts}]]
-    pack $wcfr -side top -fill both -ipadx 8 -ipady 4
+    labelframe $wcfr -text [::msgcat::mc {Import/Remove fonts}]
+    pack $wcfr -side top -padx 8 -pady 4
     
     # Overall frame for whole container.
-    set frtot [frame $wcont.frin]
-    pack $frtot
+    set frtot [frame $wcfr.frin]
+    pack $frtot -padx 4 -pady 2
     
     label $frtot.sysfont -text [::msgcat::mc {System fonts}] -font $fontSB
     label $frtot.wifont -text [::msgcat::mc {Whiteboard fonts}] -font $fontSB
@@ -1991,9 +1727,9 @@ proc ::Preferences::Proxies::BuildPage {page} {
     
     upvar ::Preferences::ypad ypad
     
-    set pcnat [::mylabelframe::mylabelframe $page.nat  \
-      [::msgcat::mc {NAT Address}]]
-    pack $page.nat -side top -anchor w -ipadx 10 -ipady 6
+    set pcnat $page.nat
+    labelframe $pcnat -text [::msgcat::mc {NAT Address}]
+    pack $pcnat -side top -anchor w -padx 8 -pady 4
     checkbutton $pcnat.cb -text "  [::msgcat::mc prefnatip]" \
       -variable [namespace current]::tmpPrefs(setNATip)
     entry $pcnat.eip -textvariable [namespace current]::tmpPrefs(NATip) \
@@ -2001,8 +1737,9 @@ proc ::Preferences::Proxies::BuildPage {page} {
     grid $pcnat.cb -sticky w -pady $ypad
     grid $pcnat.eip -sticky ew -pady $ypad
     
-    set pca [::mylabelframe::mylabelframe $page.fr {Proxies}]
-    pack $page.fr -side top -anchor w -ipadx 10 -ipady 6
+    set pca $page.fr
+    labelframe $pca -text {Proxies}
+    pack $pca -side top -anchor w -padx 8 -pady 4
     label $pca.la -text {No firewall support... yet}
     grid $pca.la -sticky w
 }

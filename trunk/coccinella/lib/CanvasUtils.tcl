@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.28 2004-03-15 13:26:11 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.29 2004-03-16 15:09:08 matben Exp $
 
 package require sha1pure
 
@@ -1028,6 +1028,7 @@ proc ::CanvasUtils::BuildCanvasPopupFontMenu {w wmenu id allFonts} {
 }
 
 proc ::CanvasUtils::DoWindowPopup {w x y} {
+    variable menuDefs
     
     switch -- [winfo class $w] {
 	QTFrame {

@@ -22,6 +22,7 @@
 *Entry.background:                   white
 *Entry.Font:                         Arial 8
 *Label.Font:                         Arial 8
+*Labelframe.Font:                    Arial 8 bold
 *Listbox.background:                 white
 *Listbox.Font:                       Arial 8
 *Message.Font:                       Arial 8
@@ -41,6 +42,5 @@
 *Combobox.background:                white
 *Combobox.Font:                      Arial 8
 *MacTabnotebook.Font:                Arial 8
-*MyLabelFrame.Font:                  Arial 8 bold
 *Tablelist.background:               white
 *Tablelist.Font:                     Arial 8

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Sounds.tcl,v 1.18 2004-02-08 11:56:14 matben Exp $
+# $Id: Sounds.tcl,v 1.19 2004-03-16 15:09:08 matben Exp $
 
 package provide Sounds 1.0
 
@@ -319,8 +319,9 @@ proc ::Sounds::BuildPrefsPage {wpage} {
 	set tmpPrefs(soundSet) $sprefs(soundSet)
     }
     
-    set labpalrt [::mylabelframe::mylabelframe $wpage.alrt [::msgcat::mc {Alert sounds}]]
-    pack $wpage.alrt -side top -anchor w -ipadx 10 -fill x
+    set labpalrt $wpage.alrt
+    labelframe $labpalrt -text [::msgcat::mc {Alert sounds}]
+    pack $labpalrt -side top -anchor w -padx 8 -pady 4
     
     set frs $labpalrt.frs
     pack [frame $frs] -side top -anchor w -padx 8 -pady 2

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.14 2004-03-13 15:21:41 matben Exp $
+# $Id: Register.tcl,v 1.15 2004-03-16 15:09:08 matben Exp $
 
 package provide Register 1.0
 
@@ -459,10 +459,10 @@ proc ::Jabber::GenRegister::BuildRegister {args} {
 
     if {$UItype == 0} {
 	set wfr $w.frall.frlab
-	set wcont [::mylabelframe::mylabelframe $wfr [::msgcat::mc Specifications]]
+	labelframe $wfr -text [::msgcat::mc Specifications]
 	pack $wfr -side top -fill both -padx 2 -pady 2
 	
-	set wbox $wcont.box
+	set wbox $wfr.box
 	frame $wbox
 	pack $wbox -side top -fill x -padx 4 -pady 10
 	pack [label $wbox.la -textvariable "[namespace current]::stattxt"]  \

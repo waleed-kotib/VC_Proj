@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.11 2004-03-13 15:21:41 matben Exp $
+# $Id: Profiles.tcl,v 1.12 2004-03-16 15:09:08 matben Exp $
 
 package provide Profiles 1.0
 
@@ -282,14 +282,15 @@ proc ::Profiles::BuildPage {page} {
     
     set fontS [option get . fontSmall {}]
     set fontSB [option get . fontSmallBold {}]
-    
-    set labpui [::mylabelframe::mylabelframe $page.fr [::msgcat::mc {User Profiles}]]
-    pack $page.fr -side top -anchor w -ipadx 10 -ipady 6 -fill x
-    
-    message $labpui.msg -text [::msgcat::mc prefprof] -aspect 800
-    pack $labpui.msg -side top -anchor w -fill x
 
-    set pui $labpui.fr
+    set lfr $page.fr
+    labelframe $lfr -text [::msgcat::mc {User Profiles}]
+    pack $lfr -side top -anchor w -padx 8 -pady 4
+    
+    message $lfr.msg -text [::msgcat::mc prefprof] -aspect 800
+    pack $lfr.msg -side top -anchor w -fill x
+
+    set pui $lfr.fr
     pack [frame $pui] -side left  
     
     # Make temp array for servers.
@@ -302,15 +303,15 @@ proc ::Profiles::BuildPage {page} {
     #}
 	
     # Init textvariables.
-    set profile $tmpSelected
-    set server $tmpProfArr($profile,server)
+    set profile  $tmpSelected
+    set server   $tmpProfArr($profile,server)
     set username $tmpProfArr($profile,username)
     set password $tmpProfArr($profile,password)
     set resource $tmpProfArr($profile,-resource)
     set allNames [::Profiles::GetAllNames]
 
     # Option menu for the servers.
-    label $pui.lpop -text "[::msgcat::mc Profile]:" -font $fontSB -anchor e
+    label $pui.lpop -text "[::msgcat::mc Profile]:" -anchor e
     
     set wcombo $pui.popup
     ::combobox::combobox $wcombo   \
@@ -321,20 +322,19 @@ proc ::Profiles::BuildPage {page} {
     grid $pui.lpop -column 0 -row 0 -sticky e
     grid $wcombo -column 1 -row 0 -sticky ew
     
-    label $pui.lserv -text "[::msgcat::mc {Jabber Server}]:" -font $fontSB \
-      -anchor e
+    label $pui.lserv -text "[::msgcat::mc {Jabber Server}]:" -anchor e
     entry $pui.eserv -width 22   \
       -textvariable [namespace current]::server -validate key  \
       -validatecommand {::Jabber::ValidateJIDChars %S}
-    label $pui.luser -text "[::msgcat::mc Username]:" -font $fontSB -anchor e
+    label $pui.luser -text "[::msgcat::mc Username]:" -anchor e
     entry $pui.euser -width 22  \
       -textvariable [namespace current]::username -validate key  \
       -validatecommand {::Jabber::ValidateJIDChars %S}
-    label $pui.lpass -text "[::msgcat::mc Password]:" -font $fontSB -anchor e
+    label $pui.lpass -text "[::msgcat::mc Password]:" -anchor e
     entry $pui.epass -width 22 -show {*}  \
       -textvariable [namespace current]::password -validate key  \
       -validatecommand {::Jabber::ValidateJIDChars %S}
-    label $pui.lres -text "[::msgcat::mc Resource]:" -font $fontSB -anchor e
+    label $pui.lres -text "[::msgcat::mc Resource]:" -anchor e
     entry $pui.eres -width 22   \
       -textvariable [namespace current]::resource -validate key  \
       -validatecommand {::Jabber::ValidateJIDChars %S}
@@ -349,7 +349,7 @@ proc ::Profiles::BuildPage {page} {
     grid $pui.lres  -column 0 -row 4 -sticky e
     grid $pui.eres  -column 1 -row 4 -sticky w
 
-    set puibt [frame $labpui.frbt]
+    set puibt [frame $lfr.frbt]
     pack $puibt -padx 8 -pady 6 -side left -fill y
     pack [button $puibt.new -font $fontS -text [::msgcat::mc New]  \
       -command [namespace current]::NewCmd]   \
@@ -621,12 +621,13 @@ proc ::Profiles::BuildDialog { } {
     ::Profiles::BuildPage $wpage
     
     # Button part.
+    set btwidth [expr [::Utils::GetMaxMsgcatWidth Save Cancel] + 2]
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btconn -text [::msgcat::mc Save]  \
+    pack [button $frbot.btconn -text [::msgcat::mc Save] -width $btwidth \
       -default active -command [list [namespace current]::SaveDlg $w]]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
-      -command [list [namespace current]::CancelDlg $w]]  \
+      -command [list [namespace current]::CancelDlg $w] -width $btwidth]  \
       -side right -padx 5 -pady 5
     pack $frbot -side bottom -fill both -expand 1 -padx 8 -pady 6
     

@@ -131,6 +131,7 @@
 ::msgcat::mcset de Unsubscribed	Abgemeldet 
 ::msgcat::mcset de Username	Benutzername
 ::msgcat::mcset de Warning	Warnung
+::msgcat::mcset de Welcome      Willkommen
 ::msgcat::mcset de Whiteboard	Zeichenwand
 ::msgcat::mcset de Work		Beruflich
 ::msgcat::mcset de Yes		Ja
@@ -156,6 +157,7 @@
 ::msgcat::mcset de mAboutWhiteboard   	{Über Whiteboard...}
 ::msgcat::mcset de mAboutCoccinella   	{Über Coccinella...}
 ::msgcat::mcset de mAboutQuickTimeTcl	{Über QuickTimeTcl...}
+::msgcat::mcset de mWelcome     	{Willkommen}
 ::msgcat::mcset de mNew			{Neu}
 ::msgcat::mcset de mNewWhiteboard	{Neue Zeichenfläche}
 ::msgcat::mcset de mOpenConnection	{Verbindung öffnen...}

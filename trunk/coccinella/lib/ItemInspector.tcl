@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ItemInspector.tcl,v 1.19 2004-03-13 15:21:41 matben Exp $
+# $Id: ItemInspector.tcl,v 1.20 2004-03-16 15:09:08 matben Exp $
 
 namespace eval ::ItemInspector::  {
     
@@ -174,10 +174,11 @@ proc ::ItemInspector::Build {wtop itemId args} {
     frame $w.frall -borderwidth 1 -relief raised
     pack  $w.frall -fill both -expand 1
     set w1 $w.frall.fr1
-    set wcont1 [::mylabelframe::mylabelframe $w1 {Item Options}]
-    
+    labelframe $w1 -text {Item Options}
+    pack $w1 -padx 8 -pady 4
+
     # Overall frame for whole container.
-    set frtot [frame $wcont1.frin]
+    set frtot [frame $w1.frin]
     pack $frtot -padx 10 -pady 10
     
     # List available options of the option menus.
@@ -361,16 +362,16 @@ proc ::ItemInspector::Build {wtop itemId args} {
 	    lappend listOfAllOptions [list $op $val $frtot.ent$iLine]
 	}
     }
-    pack $w1 -fill x
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
+    set btwidth [::Utils::GetMaxMsgcatWidth Save Cancel]
     pack [button $frbot.btsave -text [::msgcat::mc Save] -default active  \
       -command [list [namespace current]::CanvasConfigureItem $w $wCan  \
-      $itemId $listOfAllOptions]]  \
+      $itemId $listOfAllOptions] -width $btwidth]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
-      -command "[namespace current]::Cancel $w"]  \
+      -command "[namespace current]::Cancel $w" -width $btwidth]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -in $w.frall  \
       -padx 8 -pady 6
@@ -586,10 +587,11 @@ proc ::ItemInspector::Movie {wtop winfr} {
     frame $w.frall -borderwidth 1 -relief raised
     pack  $w.frall -fill both -expand 1
     set w1 $w.frall.fr1
-    set wcont1 [::mylabelframe::mylabelframe $w1 {Movie Options}]
+    labelframe $w1 -text {Movie Options}
+    pack $w1 -fill x -padx 8 -pady 4
     
     # Overall frame for whole container.
-    set frtot [frame $wcont1.frin]
+    set frtot [frame $w1.frin]
     pack $frtot -padx 10 -pady 10
     
     # Loop over all options.
@@ -627,14 +629,15 @@ proc ::ItemInspector::Movie {wtop winfr} {
 	    grid $frtot.e$i -column 1 -row $i -sticky w -padx 2 -pady 1
 	}
     }
-    pack $w1 -fill x
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
+    set btwidth [::Utils::GetMaxMsgcatWidth Save Cancel]
     pack [button $frbot.btsave -text [::msgcat::mc Save] -default active  \
+      -width $btwidth  \
       -command [list [namespace current]::MovieConfigure $w $wmov]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
+    pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width $btwidth \
       -command "[namespace current]::MovieCancel $w"]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -in $w.frall  \
@@ -701,11 +704,11 @@ proc ::ItemInspector::Broken {wtop id args} {
     frame $w.frall -borderwidth 1 -relief raised
     pack  $w.frall -fill both -expand 1
     set w1 $w.frall.fr1
-    set wcont1 [::mylabelframe::mylabelframe $w1 {Broken Image}]
-    pack $w1 -fill x
+    labelframe $w1 -text {Broken Image}
+    pack $w1 -fill x -padx 8 -pady 4
     
     # Overall frame for whole container.
-    set fr [frame $wcont1.fr]
+    set fr [frame $w1.fr]
     pack $fr -padx 10 -pady 10
     
     # Get any cached info for this id.

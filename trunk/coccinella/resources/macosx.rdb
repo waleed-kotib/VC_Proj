@@ -16,6 +16,8 @@
 *Entry.highlightThickness:           3
 *Entry.Font:                         {Lucida Grande} 11
 *Label.Font:                         {Lucida Grande} 11
+*Labelframe.Font:                    {Lucida Grande} 11 bold
+*Labelframe.Foreground:              black
 *Listbox.Font:                       {Lucida Grande} 11
 *Listbox.highlightThickness:         3
 *Message.Font:                       {Lucida Grande} 11
@@ -32,7 +34,6 @@
 !
 *Combobox.Font:                      {Lucida Grande} 11
 *MacTabnotebook.style:               aqua
-*MyLabelFrame.Font:                  {Lucida Grande} 11 bold
 *Tablelist.Font:                     {Lucida Grande} 11
 *Tablelist.highlightThickness:       3
 *Tablelist.BorderWidth:              1              

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: FilesAndCanvas.tcl,v 1.20 2004-03-13 15:21:41 matben Exp $
+# $Id: FilesAndCanvas.tcl,v 1.21 2004-03-16 15:09:08 matben Exp $
  
 package require can2svg
 package require svg2can
@@ -534,7 +534,7 @@ proc ::CanvasFile::DataToFile {filePath canvasList} {
 #       none
 
 proc ::CanvasFile::DoOpenCanvasFile {wtop {filePath {}}} {
-    global  prefs
+    global  prefs this
     
     set w [::UI::GetToplevel $wtop]
     set wCan [::WB::GetCanvasFromWtop $wtop]
@@ -550,14 +550,14 @@ proc ::CanvasFile::DoOpenCanvasFile {wtop {filePath {}}} {
 	if {$ans == "cancel"} {
 	    return
 	}
-	set userDir [::Utils::GetDirIfExist $prefs(userDir)]
+	set userDir [::Utils::GetDirIfExist $prefs(userPath)]
 	set ans [tk_getOpenFile -title [::msgcat::mc {Open Canvas}]  \
 	  -filetypes $typelist -defaultextension ".can"  \
 	  -initialdir $userDir]
 	if {$ans == ""} {
 	    return
 	}
-	set prefs(userDir) [file dirname $ans]
+	set prefs(userPath) [file dirname $ans]
 	set fileName $ans
     } else {
 	set fileName $filePath
@@ -606,7 +606,7 @@ proc ::CanvasFile::DoSaveCanvasFile {wtop} {
 	{"Adobe XML/SVG"     {.svg}}
 	{"Text"              {.txt}}
     }
-    set userDir [::Utils::GetDirIfExist $prefs(userDir)]
+    set userDir [::Utils::GetDirIfExist $prefs(userPath)]
     set opts [list -initialdir $userDir]
     if {$prefs(haveSaveFiletypes)} {
 	lappend opts -filetypes $typelist
@@ -619,7 +619,7 @@ proc ::CanvasFile::DoSaveCanvasFile {wtop} {
     if {$ans == ""} {
 	return
     }
-    set prefs(userDir) [file dirname $ans]
+    set prefs(userPath) [file dirname $ans]
     set fileName $ans
     set ext [file extension $fileName]
     switch -- $ext {

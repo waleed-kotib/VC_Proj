@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.22 2004-03-13 15:21:40 matben Exp $
+# $Id: GotMsg.tcl,v 1.23 2004-03-16 15:09:08 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -190,13 +190,13 @@ proc ::Jabber::GotMsg::Build { } {
     
     # From field.
     set wfrom $frmid.from
-    set wcont [::mylabelframe::mylabelframe $wfrom [::msgcat::mc From]]
+    labelframe $wfrom -text [::msgcat::mc From]
     pack $wfrom -side top -fill both -padx 2 -pady 2
-    pack [entry $wcont.nick -width 14 \
+    pack [entry $wfrom.nick -width 14 \
       -textvariable [namespace current]::nick -state disabled \
       -borderwidth 1 -relief sunken -background $bg] \
       -side left 
-    pack [entry $wcont.jid   \
+    pack [entry $wfrom.jid   \
       -textvariable [namespace current]::jid -state disabled \
       -borderwidth 1 -relief sunken -background $bg] \
       -side left -fill x -expand 1

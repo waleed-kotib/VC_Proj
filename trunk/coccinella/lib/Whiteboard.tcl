@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.22 2004-03-15 13:26:11 matben Exp $
+# $Id: Whiteboard.tcl,v 1.23 2004-03-16 15:09:08 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -246,7 +246,7 @@ proc ::WB::InitMenuDefs { } {
 	{command   mCloseWindow     {::UI::DoCloseWindow}                   normal   W}
 	{separator}
 	{command   mOpenImage/Movie {::Import::ImportImageOrMovieDlg $wtop} normal  I}
-	{command   mOpenURLStream   {::OpenMulticast::OpenMulticast $wtop}  normal   {}}
+	{command   mOpenURLStream   {::Multicast::OpenMulticast $wtop}  normal   {}}
 	{separator}
 	{command   mOpenCanvas      {::CanvasFile::DoOpenCanvasFile $wtop}  normal   {}}
 	{command   mSaveCanvas      {::CanvasFile::DoSaveCanvasFile $wtop}  normal   S}
@@ -407,18 +407,26 @@ proc ::WB::InitMenuDefs { } {
     }
 
     set menuDefs(main,info) {    
-	{command     mOnServer       {::Dialogs::ShowInfoServer \$this(ipnum)} normal {}}	
-	{command     mOnClients      {::Dialogs::ShowInfoClients} disabled {}}	
+	{command     mOnServer       {::Dialogs::ShowInfoServer}        normal {}}	
+	{command     mOnClients      {::Dialogs::ShowInfoClients}       disabled {}}	
 	{command     mOnPlugins      {::Dialogs::InfoOnPlugins}         normal {}}	
 	{separator}
-	{cascade     mHelpOn             {}                                    normal   {} {} {}}
+	{cascade     mHelpOn             {}                             normal   {} {} {}}
     }
     
     # Build "Help On" menu dynamically.
     set infoDefs {}
-    foreach f [glob -nocomplain -directory [file join $this(path) docs] *.can] {
-	set name [file rootname [file tail $f]]
-	lappend infoDefs [list command m${name} [list ::Dialogs::Canvas $f] normal {}]
+    set systemLocale [lindex [split $this(systemLocale) _] 0]
+    foreach fen [glob -nocomplain -directory $this(docsPath) *_en.can] {
+	set name [lindex [split [file tail $fen] _] 0]
+	set floc [file join $this(docsPath) ${name}_${systemLocale}.can]
+	if {[file exists $floc]} {
+	    set f $floc
+	} else {
+	    set f $fen
+	}
+	lappend infoDefs [list \
+	  command m${name} [list ::Dialogs::Canvas $f -title $name] normal {}]
     }
     lset menuDefs(main,info) end end $infoDefs
     
@@ -713,7 +721,8 @@ proc ::WB::BuildWhiteboard {wtop args} {
 proc ::WB::CloseHook {wclose} {
     global  wDlgs
     
-    if {[string equal [winfo class $wclose] "Whiteboard"]} {
+    if {[winfo exists $wclose] && \
+      [string equal [winfo class $wclose] "Whiteboard"]} {
 	if {$wclose == "."} {
 	    set wtop .
 	} else {
@@ -1341,7 +1350,7 @@ proc ::WB::BuildWhiteboardMenus {wtop} {
     ::UI::NewMenu $wtop ${wmenu}.prefs  mPreferences $menuDefs(main,prefs) $opts(-state)
 	
     # Item menu (temporary placement).
-    ::WB::BuildItemMenu $wtop ${wmenu}.items $prefs(itemDir)
+    ::WB::BuildItemMenu $wtop ${wmenu}.items $this(itemPath)
     
     # Addon or Plugin menus if any.
     ::UI::BuildPublicMenus $wtop $wmenu

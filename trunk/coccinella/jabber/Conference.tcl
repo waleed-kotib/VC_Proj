@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Conference.tcl,v 1.16 2004-03-13 15:21:40 matben Exp $
+# $Id: Conference.tcl,v 1.17 2004-03-16 15:09:08 matben Exp $
 
 package provide Conference 1.0
 
@@ -122,12 +122,12 @@ proc ::Jabber::Conference::BuildEnter {args} {
         
     if {$UItype == 0} {
 	set wfr $w.frall.frlab
-	set wcont [::mylabelframe::mylabelframe $wfr [::msgcat::mc Specifications]]
+	labelframe $wfr -text [::msgcat::mc Specifications]
 	pack $wfr -side top -fill both -padx 2 -pady 2
 	
-	set wbox $wcont.box
+	set   wbox $wfr.box
 	frame $wbox
-	pack $wbox -side top -fill x -padx 4 -pady 10
+	pack  $wbox -side top -fill x -padx 4 -pady 10
 	pack [label $wbox.la -textvariable $token\(stattxt)]  \
 	  -padx 0 -pady 10
     }
@@ -500,12 +500,12 @@ proc ::Jabber::Conference::BuildCreate {args} {
     
     if {$UItype == 0} {
 	set wfr $w.frall.frlab
-	set wcont [::mylabelframe::mylabelframe $wfr [::msgcat::mc Specifications]]
+	labelframe $wfr -text [::msgcat::mc Specifications]
 	pack $wfr -side top -fill both -padx 2 -pady 2
 	
-	set wbox $wcont.box
+	set   wbox $wfr.box
 	frame $wbox
-	pack $wbox -side top -fill x -padx 4 -pady 10
+	pack  $wbox -side top -fill x -padx 4 -pady 10
 	pack [label $wbox.la -textvariable $token\(stattxt)]  \
 	  -padx 0 -pady 10
     }

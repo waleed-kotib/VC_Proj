@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.34 2004-03-13 15:21:41 matben Exp $
+# $Id: Dialogs.tcl,v 1.35 2004-03-16 15:09:08 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -106,11 +106,11 @@ proc ::Dialogs::GetCanvas {w} {
     
     # Labelled frame.
     set wcfr $w.frall.fr
-    set wcont [::mylabelframe::mylabelframe $wcfr {Get Canvas}]
-    pack $wcfr -side top -fill both -ipadx 10 -ipady 6 -in $w.frall
+    labelframe $wcfr -text {Get Canvas}
+    pack $wcfr -side top -fill both -padx 8 -pady 4
     
     # Overall frame for whole container.
-    set frtot [frame $wcont.frin]
+    set frtot [frame $wcfr.frin]
     pack $frtot
     message $frtot.msg -borderwidth 0 -aspect 500 \
       -text {Choose client from which you want to get the canvas.\
@@ -314,10 +314,10 @@ proc ::Dialogs::UnixPrintPS {w wtoprint} {
     frame $w.frall -borderwidth 1 -relief raised
     pack  $w.frall -fill both -expand 1
     set w1 $w.frall.fr1
-    set wcont1 [::mylabelframe::mylabelframe $w1 [::msgcat::mc Print]]
+    labelframe $w1 -text [::msgcat::mc Print]
     
     # Overall frame for whole container.
-    set frtot [frame $wcont1.frin]
+    set frtot [frame $w1.frin]
     pack $frtot -padx 10 -pady 10
     
     message $frtot.msg -borderwidth 0 -aspect 1000 \
@@ -326,7 +326,7 @@ proc ::Dialogs::UnixPrintPS {w wtoprint} {
       -textvariable [namespace current]::psCmd
     grid $frtot.msg -column 0 -row 0 -padx 4 -pady 2 -sticky news
     grid $frtot.entcmd -column 0 -row 1 -padx 4 -pady 2 -sticky news
-    pack $w1 -fill x
+    pack $w1 -fill x -padx 8 -pady 4
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
@@ -451,10 +451,10 @@ proc ::PSPageSetup::PSPageSetup { w } {
     frame $w.frall -borderwidth 1 -relief raised
     pack  $w.frall -fill both -expand 1
     set w1 $w.frall.fr1
-    set wcont [::mylabelframe::mylabelframe $w1 {Postscript Page Setup}]
+    labelframe $w1 -text {Postscript Page Setup}
     
     # Overall frame for whole container.
-    set frtot [frame $wcont.frin]
+    set frtot [frame $w1.frin]
     pack $frtot -padx 10 -pady 10
     
     message $frtot.msg -width 200 -text  \
@@ -526,7 +526,7 @@ proc ::PSPageSetup::PSPageSetup { w } {
 	grid $frtot.lbl$optName -column 0 -row $iLine -sticky e -padx 2 -pady 1
 	grid $frtot.fr$optName -column 1 -row $iLine -sticky w -padx 2 -pady 1
     }
-    pack $w1 -fill x
+    pack $w1 -fill x -padx 8 -pady 4
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
@@ -644,8 +644,9 @@ proc ::Dialogs::ShowInfoClients { } {
 	set sockname [fconfigure $channel -sockname]
 	set buff [fconfigure $channel -buffering]
 	set block [fconfigure $channel -blocking]
-	set wcont [::mylabelframe::mylabelframe $w.frtop$n [lindex $peername 1]]
-	pack $w.frtop$n -in $w.frtop
+	set wcont $w.frtop$n
+	set wcont [labelframe $wcont -text [lindex $peername 1]]
+	pack $wcont -in $w.frtop -padx 8 -pady 4
 	
 	# Frame for everything inside the labeled container.
 	set fr [frame $wcont.fr]
@@ -705,14 +706,12 @@ proc ::Dialogs::ShowInfoClients { } {
 #       give only the hostname if available.
 #       
 # Arguments:
-#       thisIPnum   the servers local ip number.
 #       
 # Results:
 #       none
 
-proc ::Dialogs::ShowInfoServer {thisIPnum} {
-    global  this ipNumTo wDlgs  \
-      state listenServSocket this prefs
+proc ::Dialogs::ShowInfoServer { } {
+    global  this ipNumTo wDlgs state prefs
     
     set w $wDlgs(infoServ)
     if {[winfo exists $w]} {
@@ -722,33 +721,27 @@ proc ::Dialogs::ShowInfoServer {thisIPnum} {
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox}
     wm title $w [::msgcat::mc {Server Info}]
-    set fontSB [option get . fontSmallBold {}]
     
     pack [frame $w.frall -borderwidth 1 -relief raised]
-    set wcont [::mylabelframe::mylabelframe $w.frtop [::msgcat::mc {Server Info}]]
-    pack $w.frtop -in $w.frall    
+    set wcont $w.frtop
+    labelframe $wcont -text [::msgcat::mc {Server Info}]
+    pack $wcont -in $w.frall    
     
     # Frame for everything inside the labeled container.
     set fr [frame $wcont.fr]
-    label $fr.x1 -text "[::msgcat::mc {Is server up}]:" -font $fontSB
+    label $fr.x1 -text "[::msgcat::mc {Is server up}]:"
     label $fr.x2 -text $boolToYesNo($state(isServerUp))
-    label $fr.a1 -text "[::msgcat::mc {This IP number}]:" -font $fontSB
-    label $fr.b1 -text "[::msgcat::mc {Host name}]:" -font $fontSB
-    label $fr.c1 -text "[::msgcat::mc Username]:" -font $fontSB
-    label $fr.d1 -text "[::msgcat::mc {Port number}]:" -font $fontSB
-    label $fr.e1 -text "[::msgcat::mc Buffering]:" -font $fontSB
-    label $fr.f1 -text "[::msgcat::mc Blocking]:" -font $fontSB
-    label $fr.g1 -text "[::msgcat::mc {Is safe}]:" -font $fontSB
+    label $fr.a1 -text "[::msgcat::mc {This IP number}]:"
+    label $fr.b1 -text "[::msgcat::mc {Host name}]:"
+    label $fr.c1 -text "[::msgcat::mc Username]:"
+    label $fr.d1 -text "[::msgcat::mc {Port number}]:"
+    label $fr.e1 -text "[::msgcat::mc Buffering]:"
+    label $fr.f1 -text "[::msgcat::mc Blocking]:"
+    label $fr.g1 -text "[::msgcat::mc {Is safe}]:"
 
     if {!$state(isServerUp)} {
-	
-	# Not yet started server.
-	set theHostname [info hostname]
-	if {[string length $theHostname] == 0} {
-	    set theHostname [::msgcat::mc {Not available}]
-	}
-	label $fr.a2 -text $thisIPnum
-	label $fr.b2 -text $theHostname
+	label $fr.a2 -text $this(ipnum)
+	label $fr.b2 -text $this(hostname)
 	label $fr.c2 -text $this(username)
 	label $fr.d2 -text [::msgcat::mc {Not available}]
 	label $fr.e2 -text [::msgcat::mc {Not available}]
@@ -756,15 +749,9 @@ proc ::Dialogs::ShowInfoServer {thisIPnum} {
 	label $fr.g2 -text [::msgcat::mc {Not available}]
 	
     } elseif {$state(isServerUp)} {
-
-	# Not yet connected but up.
-	set theHostname [info hostname]
-	if {[string length $theHostname] == 0} {
-	    set theHostname [::msgcat::mc {Not available}]
-	}
-	set sockname [fconfigure $listenServSocket -sockname]
-	label $fr.a2 -text $thisIPnum
-	label $fr.b2 -text $theHostname
+	set sockname [fconfigure $state(serverSocket) -sockname]
+	label $fr.a2 -text $this(ipnum)
+	label $fr.b2 -text $this(hostname)
 	label $fr.c2 -text $this(username)
 	label $fr.d2 -text $prefs(thisServPort)
 	label $fr.e2 -text [::msgcat::mc {Not available}]
@@ -773,14 +760,15 @@ proc ::Dialogs::ShowInfoServer {thisIPnum} {
 
     } elseif {$state(isServerUp) && [llength [::Network::GetIP from]] > 0} {
 	
+	# Not sure here...
 	# Take any ip and get server side channel.
 	set channel $ipNumTo(servSocket,[lindex [::Network::GetIP from] 0])
 	set peername [fconfigure $channel -peername]
 	set sockname [fconfigure $channel -sockname]
 	set buff [fconfigure $channel -buffering]
 	set block [fconfigure $channel -blocking]
-	label $fr.a2 -text $thisIPnum
-	label $fr.b2 -text "[info hostname]"
+	label $fr.a2 -text $this(ipnum)
+	label $fr.b2 -text $this(hostname)
 	label $fr.c2 -text $this(username)
 	label $fr.d2 -text $prefs(thisServPort)
 	label $fr.e2 -text $buff
@@ -840,10 +828,11 @@ proc ::Dialogs::Canvas {filePath args} {
     set w .spcan[incr uidcan]
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox}
+    wm withdraw $w
     
     # Make the namespace exist.
     set wtop ${w}.
-    namespace eval ::${wtop}:: "set wtop $wtop"
+    namespace eval ::WB::${wtop}:: {}
 
     array set argsArr [list -title [file rootname [file tail $filePath]]]
     array set argsArr $args
@@ -884,13 +873,15 @@ proc ::Dialogs::Canvas {filePath args} {
 	    }
 	}
     }
+    catch {close $fd}
     foreach {x0 y0 x1 y1} [eval {$wcan bbox} [$wcan find all]] break
     incr x1 20
     incr y1 20
     $wcan configure -width $x1 -height $y1
+    update idletasks
+    wm deiconify $w
     raise $w
-    catch {close $fd}
-}
+ }
 
 namespace eval ::Dialogs:: {
     

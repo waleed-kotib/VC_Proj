@@ -20,6 +20,7 @@
 *Entry.Font:                         Geneva 9
 *Entry.highlightThickness:           3
 *Label.Font:                         Geneva 9
+*Labelframe.Font:                    Geneva 9 bold
 *Listbox.Font:                       Geneva 9
 *Listbox.highlightThickness:         3
 *Message.Font:                       Geneva 9
@@ -31,7 +32,6 @@
 !
 *Combobox.Font:                      Geneva 9
 *MacTabnotebook.style:               mac
-*MyLabelFrame.Font:                  Geneva 9 bold
 *Tablelist.Font:                     Geneva 9
 *Tablelist.highlightThickness:       3
 *Tree.openIcons:                     triangle

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.2 2004-03-15 13:25:56 matben Exp $
+# $Id: JWB.tcl,v 1.3 2004-03-16 15:09:08 matben Exp $
 
 package provide JWB 1.0
 
@@ -89,7 +89,7 @@ proc ::Jabber::WB::InitUI { } {
 	{command   mCloseWindow        {::UI::DoCloseWindow}             normal   W}
 	{separator}
 	{command   mOpenImage/Movie    {::Import::ImportImageOrMovieDlg $wtop}    normal   I}
-	{command   mOpenURLStream      {::OpenMulticast::OpenMulticast $wtop}     normal   {}}
+	{command   mOpenURLStream      {::Multicast::OpenMulticast $wtop}     normal   {}}
 	{command   mStopPut/Get/Open   {::Jabber::WB::Stop $wtop}        normal {}}
 	{separator}
 	{command   mOpenCanvas         {::CanvasFile::DoOpenCanvasFile $wtop}     normal   O}

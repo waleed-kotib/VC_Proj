@@ -128,6 +128,7 @@
 ::msgcat::mcset sv Unsubscribed		{Prenumeration avslutad}
 ::msgcat::mcset sv Username 		{Användarnamn}
 ::msgcat::mcset sv Warning              {Varning}
+::msgcat::mcset sv Welcome              {Välkommen}
 ::msgcat::mcset sv Whiteboard           {Skrivtavla}
 ::msgcat::mcset sv Work			{Arbete}
 ::msgcat::mcset sv Yes 			{Ja}
@@ -153,6 +154,7 @@
 ::msgcat::mcset sv mAboutWhiteboard   	{Om Whiteboard...}
 ::msgcat::mcset sv mAboutCoccinella   	{Om Coccinella...}
 ::msgcat::mcset sv mAboutQuickTimeTcl	{Om QuickTimeTcl...}
+::msgcat::mcset sv mWelcome     	{Välkommen}
 ::msgcat::mcset sv mNew			{Nytt}
 ::msgcat::mcset sv mNewWhiteboard	{Ny skrivtavla}
 ::msgcat::mcset sv mOpenConnection	{Öppna förbindelse...}

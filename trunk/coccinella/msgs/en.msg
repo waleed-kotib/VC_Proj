@@ -129,6 +129,7 @@
 ::msgcat::mcset en Unsubscribed
 ::msgcat::mcset en Username
 ::msgcat::mcset en Warning
+::msgcat::mcset en Welcome
 ::msgcat::mcset en Whiteboard
 ::msgcat::mcset en Work
 ::msgcat::mcset en Yes
@@ -154,6 +155,7 @@
 ::msgcat::mcset en mAboutWhiteboard   	{About Whiteboard...}
 ::msgcat::mcset en mAboutCoccinella   	{About Coccinella...}
 ::msgcat::mcset en mAboutQuickTimeTcl	{About QuickTimeTcl...}
+::msgcat::mcset en mWelcome     	{Welcome}
 ::msgcat::mcset en mNew			{New}
 ::msgcat::mcset en mNewWhiteboard	{New Whiteboard}
 ::msgcat::mcset en mOpenConnection	{&Open Connection...}
