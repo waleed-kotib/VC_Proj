@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.10 2003-12-10 15:21:43 matben Exp $
+# $Id: Login.tcl,v 1.11 2003-12-13 17:54:41 matben Exp $
 
 package provide Login 1.0
 
@@ -26,7 +26,7 @@ namespace eval ::Jabber::Login:: {
 #       name of button pressed; "cancel" or "login".
 
 proc ::Jabber::Login::Login { } {
-    global  this sysFont prefs wDlgs
+    global  this prefs wDlgs
     
     variable wtoplevel
     variable finished -1
@@ -64,14 +64,17 @@ proc ::Jabber::Login::Login { } {
     set digest 1
     set ssl $jprefs(usessl)
     
+    set fontSB [option get . fontSmallBold {}]
+    set fontL [option get . fontLarge {}]
+    
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised]   \
       -fill both -expand 1 -ipadx 12 -ipady 4
     
-    label $w.frall.head -text [::msgcat::mc Login] -font $sysFont(l)  \
+    label $w.frall.head -text [::msgcat::mc Login] -font $fontL  \
       -anchor w -padx 10 -pady 4 -bg #cecece
     pack $w.frall.head -side top -fill both -expand 1
-    message $w.frall.msg -width 280 -font $sysFont(s) -text [::msgcat::mc jalogin]
+    message $w.frall.msg -width 280 -text [::msgcat::mc jalogin]
     pack $w.frall.msg -side top -fill both -expand 1 -padx 2
     
     # Entries etc.
@@ -79,12 +82,11 @@ proc ::Jabber::Login::Login { } {
     pack $frmid -side top -fill both -expand 1
 	
     # Option menu for selecting user profile.
-    label $frmid.lpop -text "[::msgcat::mc Profile]:" -font $sysFont(sb) -anchor e
+    label $frmid.lpop -text "[::msgcat::mc Profile]:" -font $fontSB -anchor e
     set wpopup $frmid.popup
     set profileList [::Jabber::GetAllProfileNames]
     eval {tk_optionMenu $wpopup [namespace current]::menuVar} $profileList
-    $wpopup configure -highlightthickness 0  \
-      -background $prefs(bgColGeneral) -foreground black
+    $wpopup configure -highlightthickness 0 -foreground black
     grid $frmid.lpop -column 0 -row 0 -sticky e
     grid $wpopup -column 1 -row 0 -sticky e
 
@@ -108,19 +110,19 @@ proc ::Jabber::Login::Login { } {
     set password $tmpJServArr($menuVar,password)
     set resource $tmpJServArr($menuVar,resource)
     
-    label $frmid.lserv -text "[::msgcat::mc {Jabber server}]:" -font $sysFont(sb) -anchor e
+    label $frmid.lserv -text "[::msgcat::mc {Jabber server}]:" -font $fontSB -anchor e
     entry $frmid.eserv -width 22    \
       -textvariable [namespace current]::server -validate key  \
       -validatecommand {::Jabber::ValidateJIDChars %S}
-    label $frmid.luser -text "[::msgcat::mc Username]:" -font $sysFont(sb) -anchor e
+    label $frmid.luser -text "[::msgcat::mc Username]:" -font $fontSB -anchor e
     entry $frmid.euser -width 22   \
       -textvariable [namespace current]::username -validate key  \
       -validatecommand {::Jabber::ValidateJIDChars %S}
-    label $frmid.lpass -text "[::msgcat::mc Password]:" -font $sysFont(sb) -anchor e
+    label $frmid.lpass -text "[::msgcat::mc Password]:" -font $fontSB -anchor e
     entry $frmid.epass -width 22   \
       -textvariable [namespace current]::password -show {*} -validate key \
       -validatecommand {::Jabber::ValidatePasswdChars %S}
-    label $frmid.lres -text "[::msgcat::mc Resource]:" -font $sysFont(sb) -anchor e
+    label $frmid.lres -text "[::msgcat::mc Resource]:" -font $fontSB -anchor e
     entry $frmid.eres -width 22   \
       -textvariable [namespace current]::resource -validate key  \
       -validatecommand {::Jabber::ValidateJIDChars %S}

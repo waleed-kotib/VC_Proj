@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.17 2003-12-12 13:46:44 matben Exp $
+# $Id: Preferences.tcl,v 1.18 2003-12-13 17:54:41 matben Exp $
  
 package require notebook
 package require tree
@@ -40,7 +40,7 @@ proc ::Preferences::Display {w} {
 }
 
 proc ::Preferences::Build { } {
-    global  sysFont this prefs wDlgs
+    global  this prefs wDlgs
     
     variable tmpPrefs
     variable tmpJPrefs
@@ -99,6 +99,8 @@ proc ::Preferences::Build { } {
     array set tmpJPrefs [::Jabber::GetjprefsArray]
     array set tmpJServer [::Jabber::GetjserverArray]
     
+    set fontSB [option get . fontSmallBold {}]
+    
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
     
@@ -111,13 +113,12 @@ proc ::Preferences::Build { } {
     set frtree $w.frall.fr.t.frtree
     pack [frame $frtree] -fill both -expand 1 -side left
     pack [label $frtree.la -text [::msgcat::mc {Settings Panels}]  \
-      -font $sysFont(sb) -relief raised -bd 1 -bg #bdbdbd] -side top -fill x
+      -font $fontSB -relief raised -bd 1 -bg #bdbdbd] -side top -fill x
     set wtree [::tree::tree $frtree.t -width 120 -height 300   \
       -openicons triangle -treecolor {}   \
       -yscrollcommand [list $frtree.sby set]       \
       -selectcommand ::Preferences::SelectCmd   \
-      -doubleclickcommand {}   \
-      -highlightcolor #6363CE -highlightbackground $prefs(bgColGeneral)]
+      -doubleclickcommand {} -highlightcolor #6363CE]
     scrollbar $frtree.sby -orient vertical -command [list $wtree yview]
     
     pack $wtree -side left -fill both -expand 1
@@ -370,12 +371,14 @@ proc ::Preferences::ResetToUserDefaults { } {
 }
 
 proc ::Preferences::BuildPageSounds {page} {
-    global  sysFont prefs
+    global  prefs
     
     variable xpadbt
     variable tmpJPrefs
     variable tmpPrefs
     variable ypad 
+    
+    set fontSB [option get . fontSmallBold {}]
     
     set labpsp [LabeledFrame2 $page.sp [::msgcat::mc {Synthetic speech}]]
     pack $page.sp -side top -anchor w -ipadx 10
@@ -407,13 +410,11 @@ proc ::Preferences::BuildPageSounds {page} {
     set wpopin $labpsp.fr.popin
     set wpopupmenuin [eval {tk_optionMenu $wpopin   \
       [namespace current]::tmpPrefs(voiceOther)} $voicelist]
-    $wpopin configure -highlightthickness 0 -font $sysFont(sb)  \
-      -background $prefs(bgColGeneral) -foreground black
+    $wpopin configure -highlightthickness 0 -font $fontSB
     set wpopout $labpsp.fr.popout
     set wpopupmenuout [eval {tk_optionMenu $wpopout   \
       [namespace current]::tmpPrefs(voiceUs)} $voicelist]
-    $wpopout configure -highlightthickness 0 -font $sysFont(sb)  \
-      -background $prefs(bgColGeneral) -foreground black
+    $wpopout configure -highlightthickness 0 -font $fontSB
     
     grid $labpsp.fr.in $wpopin -sticky w -pady 1
     grid $labpsp.fr.out $wpopout -sticky w -pady 1
@@ -447,7 +448,7 @@ namespace eval ::Preferences::Profiles:: {
 # User Profiles Page ...........................................................
 
 proc ::Preferences::Profiles::BuildPage {page} {
-    global  sysFont prefs
+    global  prefs
     
     upvar ::Preferences::tmpJServer tmpJServer
     upvar ::Preferences::tmpJServArr tmpJServArr
@@ -462,12 +463,13 @@ proc ::Preferences::Profiles::BuildPage {page} {
     variable wuserinfofocus
     
     set digest 1
+    set fontS [option get . fontSmall {}]
+    set fontSB [option get . fontSmallBold {}]
     
     set labpui [LabeledFrame2 $page.fr [::msgcat::mc {User Profiles}]]
     pack $page.fr -side left -anchor n -ipadx 10 -ipady 6
     
-    message $labpui.msg -text [::msgcat::mc prefprof]   \
-      -font $sysFont(s) -aspect 800
+    message $labpui.msg -text [::msgcat::mc prefprof] -aspect 800
     pack $labpui.msg -side top -fill x
 
     set pui $labpui.fr
@@ -477,10 +479,10 @@ proc ::Preferences::Profiles::BuildPage {page} {
     ::Preferences::Profiles::MakeTmpServArr
         
     # Option menu for the servers.
-    label $pui.lpop -text "[::msgcat::mc Profile]:" -font $sysFont(sb) -anchor e
+    label $pui.lpop -text "[::msgcat::mc Profile]:" -font $fontSB -anchor e
     
     set wcombo $pui.popup
-    ::combobox::combobox $wcombo -font $sysFont(s)   \
+    ::combobox::combobox $wcombo   \
       -textvariable [namespace current]::profile  \
       -command [namespace current]::Set
     eval {$wcombo list insert end} $tmpJServArr(all)
@@ -498,20 +500,20 @@ proc ::Preferences::Profiles::BuildPage {page} {
     set password $tmpJServArr($profile,password)
     set resource $tmpJServArr($profile,resource)
     
-    label $pui.lserv -text "[::msgcat::mc {Jabber Server}]:" -font $sysFont(sb) \
+    label $pui.lserv -text "[::msgcat::mc {Jabber Server}]:" -font $fontSB \
       -anchor e
     entry $pui.eserv -width 28   \
       -textvariable [namespace current]::server -validate key  \
       -validatecommand {::Jabber::ValidateJIDChars %S}
-    label $pui.luser -text "[::msgcat::mc Username]:" -font $sysFont(sb) -anchor e
+    label $pui.luser -text "[::msgcat::mc Username]:" -font $fontSB -anchor e
     entry $pui.euser -width 28  \
       -textvariable [namespace current]::username -validate key  \
       -validatecommand {::Jabber::ValidateJIDChars %S}
-    label $pui.lpass -text "[::msgcat::mc Password]:" -font $sysFont(sb) -anchor e
+    label $pui.lpass -text "[::msgcat::mc Password]:" -font $fontSB -anchor e
     entry $pui.epass -width 28  \
       -textvariable [namespace current]::password -validate key  \
       -validatecommand {::Jabber::ValidateJIDChars %S}
-    label $pui.lres -text "[::msgcat::mc Resource]:" -font $sysFont(sb) -anchor e
+    label $pui.lres -text "[::msgcat::mc Resource]:" -font $fontSB -anchor e
     entry $pui.eres -width 28   \
       -textvariable [namespace current]::resource -validate key  \
       -validatecommand {::Jabber::ValidateJIDChars %S}
@@ -531,13 +533,13 @@ proc ::Preferences::Profiles::BuildPage {page} {
 
     set puibt [frame $labpui.frbt]
     pack $puibt -padx 4 -pady 6 -side right -fill y -expand 1
-    pack [button $puibt.new -font $sysFont(s) -text [::msgcat::mc New]  \
+    pack [button $puibt.new -font $fontS -text [::msgcat::mc New]  \
       -padx $xpadbt -command [namespace current]::New]   \
       -side top -fill x -pady 4
-    pack [button $puibt.app -font $sysFont(s) -text [::msgcat::mc Apply] \
+    pack [button $puibt.app -font $fontS -text [::msgcat::mc Apply] \
       -padx $xpadbt -command [namespace current]::Apply]   \
       -side top -fill x -pady 4
-    pack [button $puibt.del -font $sysFont(s) -text [::msgcat::mc Delete]  \
+    pack [button $puibt.del -font $fontS -text [::msgcat::mc Delete]  \
       -padx $xpadbt -command [namespace current]::Delete]   \
       -side top -fill x -pady 4
 }
@@ -731,7 +733,6 @@ proc ::Preferences::Profiles::Delete { } {
 #-------------------------------------------------------------------------------
 
 proc ::Preferences::BuildPageRoster {page} {
-    global  sysFont
 
     variable tmpJPrefs
     variable ypad 
@@ -753,7 +754,6 @@ proc ::Preferences::BuildPageRoster {page} {
 }
 
 proc ::Preferences::BuildPageConf {page} {
-    global  sysFont
 
     variable tmpJPrefs
     variable ypad 
@@ -776,13 +776,11 @@ proc ::Preferences::BuildPageConf {page} {
 }
 
 proc ::Preferences::BuildPagePersInfo {page} {
-    global  sysFont
 
     set ppers [LabeledFrame2 $page.fr [::msgcat::mc {Personal Information}]]
     pack $page.fr -side left -anchor n -ipadx 10 -ipady 6
 
-    message $ppers.msg -text [::msgcat::mc prefpers] \
-      -font $sysFont(s) -aspect 800
+    message $ppers.msg -text [::msgcat::mc prefpers] -aspect 800
     grid $ppers.msg -columnspan 2 -sticky ew
     
     label $ppers.first -text "[::msgcat::mc {First name}]:"
@@ -808,7 +806,6 @@ proc ::Preferences::BuildPagePersInfo {page} {
 }
 
 proc ::Preferences::BuildPageAutoAway {page} {
-    global  sysFont
     
     variable tmpJPrefs
     variable xpadbt
@@ -874,7 +871,6 @@ proc ::Preferences::ValidMinutes {str} {
 }
 
 proc ::Preferences::BuildPageSubscriptions {page} {
-    global  sysFont
     
     variable tmpJPrefs
     variable ypad
@@ -912,7 +908,6 @@ proc ::Preferences::BuildPageSubscriptions {page} {
 }
 
 proc ::Preferences::BuildPagePrivacy {page} {
-    global  sysFont
     
     variable tmpPrefs
     variable xpadbt
@@ -922,8 +917,7 @@ proc ::Preferences::BuildPagePrivacy {page} {
     set pbl [frame $labfrpbl.frin]
     pack $pbl -padx 10 -pady 6 -side left
     
-    message $pbl.msg -text [::msgcat::mc prefpriv] \
-      -font $sysFont(s) -aspect 800
+    message $pbl.msg -text [::msgcat::mc prefpriv] -aspect 800
     checkbutton $pbl.only -anchor w \
       -text "  [::msgcat::mc Privacy]" -variable [namespace current]::tmpPrefs(privacy)
     pack $pbl.msg $pbl.only -side top -fill x -anchor w
@@ -939,13 +933,14 @@ namespace eval ::Preferences::Block:: {
 }
 
 proc ::Preferences::Block::BuildPage {page} {
-    global  sysFont
     
     variable wlbblock
     variable btrem
     variable wlbblock
     upvar ::Preferences::xpadbt xpadbt
     upvar ::Preferences::tmpJPrefs tmpJPrefs
+    
+    set fontS [option get . fontSmall {}]
     
     set labfrpbl [LabeledFrame2 $page.fr [::msgcat::mc Blockers]]
     pack $page.fr -side left -anchor n
@@ -969,13 +964,13 @@ proc ::Preferences::Block::BuildPage {page} {
     pack $wscyblock -side left -fill y
     set btadd $pbl.fr.add
     set btrem $pbl.fr.rm
-    pack [button $btadd -text "[::msgcat::mc Add]..." -font $sysFont(s) -padx $xpadbt  \
+    pack [button $btadd -text "[::msgcat::mc Add]..." -font $fontS -padx $xpadbt  \
       -command [list ::Preferences::Block::Add .blkadd]]    \
       -side top -fill x -padx 6 -pady 4
-    pack [button $btrem -text [::msgcat::mc Remove] -font $sysFont(s) -padx $xpadbt  \
+    pack [button $btrem -text [::msgcat::mc Remove] -font $fontS -padx $xpadbt  \
       -command [list ::Preferences::Block::Remove] -state disabled] \
       -side top -fill x -padx 6 -pady 4
-    pack [button $pbl.fr.clr -text [::msgcat::mc Clear] -font $sysFont(s) \
+    pack [button $pbl.fr.clr -text [::msgcat::mc Clear] -font $fontS \
       -padx $xpadbt -command [list ::Preferences::Block::Clear]]    \
       -side top -fill x -padx 6 -pady 4
         
@@ -997,7 +992,7 @@ proc ::Preferences::Block::SelectCmd { } {
 }
 
 proc ::Preferences::Block::Add {w} {
-    global  sysFont this
+    global  this
 
     variable finished
     variable addJid
@@ -1027,7 +1022,7 @@ proc ::Preferences::Block::Add {w} {
     # Overall frame for whole container.
     set frtot [frame $wcont.frin]
     pack $frtot
-    message $frtot.msg -borderwidth 0 -font $sysFont(s) -aspect 500 \
+    message $frtot.msg -borderwidth 0 -aspect 500 \
       -text [::msgcat::mc prefblmsg]
     entry $frtot.ent -width 24    \
       -textvariable "[namespace current]::addJid"
@@ -1105,13 +1100,14 @@ namespace eval ::Preferences::Customization:: {
 }
 
 proc ::Preferences::Customization::BuildPage {page} {
-    global  sysFont
     
     variable wlbblock
     variable btrem
     variable wlbblock
     upvar ::Preferences::xpadbt xpadbt
     upvar ::Preferences::ypad ypad
+    
+    set fontSB [option get . fontSmallBold {}]
 
     set labfrpbl [LabeledFrame2 $page.fr [::msgcat::mc Customization]]
     pack $page.fr -side top -anchor w
@@ -1119,7 +1115,7 @@ proc ::Preferences::Customization::BuildPage {page} {
     pack $pbl -padx 10 -pady 6 -side left
     
     label $pbl.lfont -text [::msgcat::mc prefcufont]
-    button $pbl.btfont -text "[::msgcat::mc Pick]..." -width 8 -font $sysFont(sb) \
+    button $pbl.btfont -text "[::msgcat::mc Pick]..." -width 8 -font $fontSB \
       -command ::Preferences::Customization::PickFont
     checkbutton $pbl.newwin  \
       -text " [::msgcat::mc prefcushow]" \
@@ -1139,9 +1135,9 @@ proc ::Preferences::Customization::BuildPage {page} {
     frame $frrost
     pack [checkbutton $frrost.cb -text " Use background image (gif) in roster" \
       -variable ::Preferences::tmpJPrefs(rost,useBgImage)] -side left
-    pack [button $frrost.btpick -text "Pick..." -font $sysFont(sb)  \
+    pack [button $frrost.btpick -text "Pick..." -font $fontSB  \
       -command [list [namespace current]::PickBgImage rost]] -side left -padx 4
-    pack [button $frrost.btdefk -text "Default" -font $sysFont(sb)  \
+    pack [button $frrost.btdefk -text "Default" -font $fontSB  \
       -command [list [namespace current]::DefaultBgImage rost]]  \
       -side left -padx 4
     
@@ -1173,11 +1169,11 @@ proc ::Preferences::Customization::BuildPage {page} {
 }
 
 proc ::Preferences::Customization::PickFont { } {
-    global  sysFont
     
     upvar ::Preferences::tmpJPrefs tmpJPrefs
     
-    array set fontArr [font actual $sysFont(s)]
+    set fontS [option get . fontSmall {}]
+    array set fontArr [font actual $fontS]
 
     set opts [list -defaultfont $fontArr(-family)  \
       -defaultsize $fontArr(-size)  \
@@ -1219,7 +1215,7 @@ namespace eval ::Preferences::Plugins:: {
 }
 
 proc ::Preferences::Plugins::BuildPage {page} {
-    global  sysFont prefs
+    global  prefs
     
     variable plugins
     upvar ::Preferences::ypad ypad
@@ -1281,7 +1277,7 @@ namespace eval ::Preferences::FileMap:: {
 }
 
 proc ::Preferences::FileMap::BuildPage {page} {
-    global  sysFont prefs  wDlgs
+    global  prefs  wDlgs
 
     variable tmpMime2Description
     variable tmpMimeTypeIsText
@@ -1301,6 +1297,8 @@ proc ::Preferences::FileMap::BuildPage {page} {
     array set tmpMimeTypeDoWhat [::Plugins::GetDoWhatForMimeArr]
     array set tmpPrefMimeType2Package [::Plugins::GetPreferredPackageArr]
     
+    set fontS [option get . fontSmall {}]
+    
     # Frame for everything inside the labeled container.
     set wcont1 [LabeledFrame2 $page.frtop [::msgcat::mc preffmhelp]]
     pack $page.frtop -side top -anchor w
@@ -1316,7 +1314,7 @@ proc ::Preferences::FileMap::BuildPage {page} {
     set ns [namespace current]
     
     tablelist::tablelist $wmclist  \
-      -columns $colDef -font $sysFont(s) -labelfont $sysFont(s)  \
+      -columns $colDef  \
       -background white -yscrollcommand [list $fr1.vsb set]  \
       -labelbackground #cecece -stripebackground #dedeff  \
       -labelcommand "tablelist::sortByColumn"  \
@@ -1348,14 +1346,14 @@ proc ::Preferences::FileMap::BuildPage {page} {
     # Add, Change, and Remove buttons.
     set frbt [frame $fr1.frbot]
     grid $frbt -row 1 -column 0 -columnspan 2 -sticky nsew -padx 0 -pady 0
-    button $frbt.rem -text [::msgcat::mc Delete] -font $sysFont(s)  \
+    button $frbt.rem -text [::msgcat::mc Delete] -font $fontS  \
       -state disabled -width 8 -padx $xpadbt  \
       -command "::Preferences::FileMap::DeleteAssociation $wmclist  \
       \[$wmclist curselection]"
-    button $frbt.change -text "[::msgcat::mc Edit]..." -font $sysFont(s)  \
+    button $frbt.change -text "[::msgcat::mc Edit]..." -font $fontS  \
       -state disabled -width 8 -padx $xpadbt -command  \
       "${ns}::Inspect $wDlgs(fileAssoc) edit $wmclist \[$wmclist curselection]"
-    button $frbt.add -text "[::msgcat::mc New]..." -font $sysFont(s) -width 8 -padx $xpadbt \
+    button $frbt.add -text "[::msgcat::mc New]..." -font $fontS -width 8 -padx $xpadbt \
       -command [list ${ns}::Inspect .setass new $wmclist -1]
     pack $frbt.rem $frbt.change $frbt.add -side right -padx 5 -pady 5
     
@@ -1443,7 +1441,7 @@ proc ::Preferences::FileMap::SaveAssociations { } {
 #       Dialog is displayed.
 
 proc ::Preferences::FileMap::Inspect {w doWhat wlist {indSel {}}} {
-    global  sysFont prefs this
+    global  prefs this
     
     variable textVarDesc
     variable textVarMime
@@ -1478,6 +1476,8 @@ proc ::Preferences::FileMap::Inspect {w doWhat wlist {indSel {}}} {
     }
     wm title $w [::msgcat::mc {Inspect Associations}]
     set finishedInspect -1
+    
+    set fontSB [option get . fontSmallBold {}]
     
     if {$doWhat == "edit"} {
 	if {$indSel < 0} {
@@ -1571,9 +1571,8 @@ proc ::Preferences::FileMap::Inspect {w doWhat wlist {indSel {}}} {
     set wMenu [eval {
 	tk_optionMenu $fr2.opt [namespace current]::packageVar
     } $packageList]
-    $wMenu configure -font $sysFont(sb) 
-    $fr2.opt configure -font $sysFont(sb) -highlightthickness 0  \
-      -background $prefs(bgColGeneral) -foreground black
+    $wMenu configure -font $fontSB 
+    $fr2.opt configure -font $fontSB -highlightthickness 0
     
     radiobutton $fr2.x8 -text " [::msgcat::mc {Unknown: Prompt user}]"  \
       -variable [namespace current]::receiveVar -value ask
@@ -1759,19 +1758,21 @@ namespace eval ::Preferences::NetSetup:: {
 }
     
 proc ::Preferences::NetSetup::BuildPage {page} {
-    global  sysFont prefs this state
+    global  prefs this state
 
     variable wopt
 
     upvar ::Preferences::ypadtiny ypadtiny
     upvar ::Preferences::ypadbig ypadbig
+    
+    set fontSB [option get . fontSmallBold {}]
         
     set wcont [LabeledFrame2 $page.fr [::msgcat::mc prefnetconf]]
     pack $page.fr -side top -anchor w
 
     # Frame for everything inside the labeled container.
     set fr [frame $wcont.fr]    
-    message $fr.msg -width 260 -font $sysFont(s) -text [::msgcat::mc prefnethead]
+    message $fr.msg -width 260 -text [::msgcat::mc prefnethead]
     
     # The actual options.
     set fropt [frame $fr.fropt]
@@ -1779,27 +1780,27 @@ proc ::Preferences::NetSetup::BuildPage {page} {
         
     # The Jabber server.
     radiobutton $fropt.jabb -text [::msgcat::mc {Jabber Client}]  \
-      -font $sysFont(sb) -value jabber  \
+      -font $fontSB -value jabber  \
       -variable ::Preferences::tmpPrefs(protocol)
-    message $fropt.jabbmsg -width 160 -font $sysFont(s)  \
+    message $fropt.jabbmsg -width 160  \
       -text [::msgcat::mc prefnetjabb]
     
     # For the symmetric network config.
     radiobutton $fropt.symm -text [::msgcat::mc {Peer-to-Peer}]  \
-      -font $sysFont(sb) -variable ::Preferences::tmpPrefs(protocol)  \
+      -font $fontSB -variable ::Preferences::tmpPrefs(protocol)  \
       -value symmetric
     if {$state(isServerUp)} {
 	#$fropt.symm configure -state disabled
     }
     checkbutton $fropt.auto -text "  [::msgcat::mc {Auto Connect}]"  \
-      -font $sysFont(sb)  \
+      -font $fontSB  \
       -variable ::Preferences::tmpPrefs(autoConnect)
-    message $fropt.automsg -width 160 -font $sysFont(s)  \
+    message $fropt.automsg -width 160  \
       -text [::msgcat::mc prefnetauto]
     checkbutton $fropt.multi -text "  [::msgcat::mc {Multi Connect}]"  \
-      -font $sysFont(sb)  \
+      -font $fontSB  \
       -variable ::Preferences::tmpPrefs(multiConnect)
-    message $fropt.multimsg -width 160 -font $sysFont(s)  \
+    message $fropt.multimsg -width 160  \
       -text [::msgcat::mc prefnetmulti]
     if {[string equal $prefs(protocol) "symmetric"]} { 
 	$fropt.auto configure -state disabled
@@ -1940,7 +1941,7 @@ proc ::Preferences::NetSetup::UpdateUI { } {
 #       shows dialog.
 
 proc ::Preferences::NetSetup::Advanced {  } {
-    global  sysFont this prefs
+    global  this prefs
 
     variable finishedAdv -1
     
@@ -1953,23 +1954,26 @@ proc ::Preferences::NetSetup::Advanced {  } {
 	toplevel $w
     }
     wm title $w [::msgcat::mc {Advanced Setup}]
+    
+    set fontSB [option get . fontSmallBold {}]
+    
     pack [frame $w.frall -borderwidth 1 -relief raised]
     set wcont [LabeledFrame2 $w.frtop [::msgcat::mc {Advanced Configuration}]]
     pack $w.frtop -in $w.frall -side top -fill both
     
     # Frame for everything inside the labeled container.
     set fr [frame $wcont.fr]
-    message $fr.msg -width 260 -font $sysFont(s) -text [::msgcat::mc prefnetadv]
+    message $fr.msg -width 260 -text [::msgcat::mc prefnetadv]
     
     # The actual options.
     set fropt [frame $fr.fropt]
 
     label $fropt.lserv -text "[::msgcat::mc {Built in server port}]:"  \
-      -font $sysFont(sb)
+      -font $fontSB
     label $fropt.lhttp -text "[::msgcat::mc {HTTP port}]:" \
-      -font $sysFont(sb)
+      -font $fontSB
     label $fropt.ljab -text "[::msgcat::mc {Jabber server port}]:"  \
-      -font $sysFont(sb)
+      -font $fontSB
     entry $fropt.eserv -width 6 -textvariable  \
       ::Preferences::tmpPrefs(thisServPort)
     entry $fropt.ehttp -width 6 -textvariable  \
@@ -2054,7 +2058,6 @@ namespace eval ::Preferences::Shorts:: {
 }
 
 proc ::Preferences::Shorts::BuildPage {page} {
-    global  sysFont
     
     variable btadd
     variable btrem
@@ -2063,12 +2066,14 @@ proc ::Preferences::Shorts::BuildPage {page} {
     variable shortListVar
     upvar ::Preferences::tmpPrefs tmpPrefs
     
+    set fontS [option get . fontSmall {}]
+    
     set wcont [LabeledFrame2 $page.frtop [::msgcat::mc {Edit Shortcuts}]]
     pack $page.frtop -side top -anchor w
     
     # Overall frame for whole container.
     set frtot [frame $wcont.fr]
-    message $frtot.msg -borderwidth 0 -font $sysFont(s) -aspect 600 \
+    message $frtot.msg -borderwidth 0 -aspect 600 \
       -text [::msgcat::mc prefshortcut]
     pack $frtot.msg -side top -padx 4 -pady 6
     
@@ -2094,11 +2099,11 @@ proc ::Preferences::Shorts::BuildPage {page} {
     set btadd $frtot.btfr.btadd
     set btrem $frtot.btfr.btrem
     set btedit $frtot.btfr.btedit
-    button $btadd -text "[::msgcat::mc Add]..." -font $sysFont(s)  \
+    button $btadd -text "[::msgcat::mc Add]..." -font $fontS  \
       -command [list [namespace current]::AddOrEdit add]
-    button $btrem -text [::msgcat::mc Remove] -font $sysFont(s) -state disabled  \
+    button $btrem -text [::msgcat::mc Remove] -font $fontS -state disabled  \
       -command [namespace current]::Remove
-    button $btedit -text "[::msgcat::mc Edit]..." -state disabled -font $sysFont(s) \
+    button $btedit -text "[::msgcat::mc Edit]..." -state disabled -font $fontS \
       -command [list [namespace current]::AddOrEdit edit]
     pack $frtot.btfr -side top
     pack $btadd $btrem $btedit -side top -fill x -padx 4 -pady 4
@@ -2157,7 +2162,7 @@ proc ::Preferences::Shorts::Remove { } {
 #       shows dialog.
 
 proc ::Preferences::Shorts::AddOrEdit {what} {
-    global  sysFont this
+    global  this
     
     variable wlbox
     variable finAdd
@@ -2199,6 +2204,8 @@ proc ::Preferences::Shorts::AddOrEdit {what} {
     set finAdd 0
     wm title $w $txt
     
+    set fontSB [option get . fontSmallBold {}]
+    
     pack [frame $w.frall -borderwidth 1 -relief raised]
     
     # The top part.
@@ -2207,9 +2214,9 @@ proc ::Preferences::Shorts::AddOrEdit {what} {
     
     # Overall frame for whole container.
     set frtot [frame $wcont.fr]
-    label $frtot.lbl1 -text $txt1 -font $sysFont(sb)
+    label $frtot.lbl1 -text $txt1 -font $fontSB
     entry $frtot.ent1 -width 36 -textvariable [namespace current]::shortTextVar
-    label $frtot.lbl2 -text $txt2 -font $sysFont(sb)
+    label $frtot.lbl2 -text $txt2 -font $fontSB
     entry $frtot.ent2 -width 36 -textvariable [namespace current]::longTextVar
     grid $frtot.lbl1 -sticky w -padx 6 -pady 1
     grid $frtot.ent1 -sticky ew -padx 6 -pady 1
@@ -2290,7 +2297,7 @@ namespace eval ::Preferences::EditFonts:: {
 }
 
 proc ::Preferences::EditFonts::BuildPage {page} {
-    global  sysFont prefs
+    global  prefs
 
     variable wlbwb
     variable wlbsys
@@ -2298,6 +2305,9 @@ proc ::Preferences::EditFonts::BuildPage {page} {
     variable btremove
     variable wsamp
     upvar ::Preferences::xpadbt xpadbt
+    
+    set fontS [option get . fontSmall {}]
+    set fontSB [option get . fontSmallBold {}]
     
     # Labelled frame.
     set wcfr $page.fr
@@ -2308,8 +2318,8 @@ proc ::Preferences::EditFonts::BuildPage {page} {
     set frtot [frame $wcont.frin]
     pack $frtot
     
-    label $frtot.sysfont -text [::msgcat::mc {System fonts}] -font $sysFont(sb)
-    label $frtot.wifont -text [::msgcat::mc {Whiteboard fonts}] -font $sysFont(sb)
+    label $frtot.sysfont -text [::msgcat::mc {System fonts}] -font $fontSB
+    label $frtot.wifont -text [::msgcat::mc {Whiteboard fonts}] -font $fontSB
     grid $frtot.sysfont x $frtot.wifont -padx 4 -pady 6
     
     grid [frame $frtot.fr1] -column 0 -row 1
@@ -2320,7 +2330,7 @@ proc ::Preferences::EditFonts::BuildPage {page} {
     
     # System fonts.
     listbox $wlbsys -width 20 -height 10  \
-      -font $sysFont(s) -yscrollcommand [list $frtot.fr1.sc set]
+      -yscrollcommand [list $frtot.fr1.sc set]
     scrollbar $frtot.fr1.sc -orient vertical   \
       -command [list $frtot.fr1.lb yview]
     pack $frtot.fr1.lb $frtot.fr1.sc -side left -fill y
@@ -2330,27 +2340,26 @@ proc ::Preferences::EditFonts::BuildPage {page} {
     set btimport $frtot.fr2.imp
     set btremove $frtot.fr2.rm
     pack [button $btimport -text {>>Import>>} -state disabled \
-      -font $sysFont(s) -padx $xpadbt   \
+      -font $fontS -padx $xpadbt   \
       -command "[namespace current]::PushBtImport  \
       \[$wlbsys curselection] $wlbsys $wlbwb"] -padx 1 -pady 6 -fill x
     pack [button $btremove -text [::msgcat::mc Remove] -state disabled  \
-      -font $sysFont(s) -padx $xpadbt   \
+      -font $fontS -padx $xpadbt   \
       -command "[namespace current]::PushBtRemove  \
       \[$wlbwb curselection] $wlbwb"] -padx 1 -pady 6 -fill x
-    pack [button $frtot.fr2.std -text {Standard} -font $sysFont(s)    \
+    pack [button $frtot.fr2.std -text {Standard} -font $fontS    \
       -padx $xpadbt -command "[namespace current]::PushBtStandard $wlbwb"] \
       -padx 1 -pady 6 -fill x
     
     # Whiteboard fonts.
     listbox $wlbwb -width 20 -height 10  \
-      -font $sysFont(s) -yscrollcommand [list $frtot.fr3.sc set]
+      -yscrollcommand [list $frtot.fr3.sc set]
     scrollbar $frtot.fr3.sc -orient vertical   \
       -command [list $frtot.fr3.lb yview]
     pack $frtot.fr3.lb $frtot.fr3.sc -side left -fill y
     eval $frtot.fr3.lb insert 0 $prefs(canvasFonts)
     
-    message $frtot.msg -text [::msgcat::mc preffontmsg]   \
-      -font $sysFont(s) -aspect 600
+    message $frtot.msg -text [::msgcat::mc preffontmsg] -aspect 600
     set wsamp $frtot.samp
     canvas $wsamp -width 200 -height 48 -highlightthickness 0 -border 1 \
       -relief sunken
@@ -2464,7 +2473,6 @@ namespace eval ::Preferences::Proxies:: {
 }
 
 proc ::Preferences::Proxies::BuildPage {page} {
-    global  sysFont
     
     upvar ::Preferences::ypad ypad
     
@@ -2487,7 +2495,6 @@ proc ::Preferences::Proxies::BuildPage {page} {
 #-------------------------------------------------------------------------------
 
 proc ::Preferences::BuildPageCache {page} {
-    global  sysFont
     
     variable ypad
     

@@ -5,24 +5,26 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.18 2003-12-10 15:21:43 matben Exp $
+# $Id: NewMsg.tcl,v 1.19 2003-12-13 17:54:41 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
 
-# Use option database for customization. Only a first test...
-option add *NewMsg*Tablelist.background             white        widgetDefault
-option add *NewMsg*Tablelist.labelBackground        white        widgetDefault
-option add *NewMsg*Tablelist.labelFont              $sysFont(s)  widgetDefault
-option add *NewMsg*Tablelist.labelRelief            raised       widgetDefault
-option add *NewMsg*Tablelist.stripeBackground       white        widgetDefault
-option add *NewMsg*Tablelist.stripeForeground       white        widgetDefault
-
-option add *NewMsg*Text.background                  white        widgetDefault
-option add *NewMsg*Text.foreground                  black        widgetDefault
-
 
 namespace eval ::Jabber::NewMsg:: {
+
+    # Use option database for customization. Only a first test...
+    set fontS [option get . fontSmall {}]
+
+    option add *NewMsg*Tablelist.background             white        widgetDefault
+    option add *NewMsg*Tablelist.labelBackground        white        widgetDefault
+    option add *NewMsg*Tablelist.labelFont              $fontS       widgetDefault
+    option add *NewMsg*Tablelist.labelRelief            raised       widgetDefault
+    option add *NewMsg*Tablelist.stripeBackground       white        widgetDefault
+    option add *NewMsg*Tablelist.stripeForeground       white        widgetDefault
+
+    option add *NewMsg*Text.background                  white        widgetDefault
+    option add *NewMsg*Text.foreground                  black        widgetDefault
 
     variable locals
     
@@ -105,7 +107,7 @@ proc ::Jabber::NewMsg::InitEach { } {
 #       shows window.
 
 proc ::Jabber::NewMsg::Build {args} {
-    global  this sysFont prefs wDlgs
+    global  this prefs wDlgs
     
     variable locals  
     upvar ::Jabber::jstate jstate
@@ -138,6 +140,8 @@ proc ::Jabber::NewMsg::Build {args} {
     } else {
 	set quotestate "disabled"
     }
+    
+    # Toplevel of class NewMsg.
     toplevel $w -class NewMsg
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
@@ -152,6 +156,7 @@ proc ::Jabber::NewMsg::Build {args} {
     if {[string match "mac*" $this(platform)]} {
 	$w configure -menu [::Jabber::UI::GetRosterWmenu]
     }
+    set fontSB [option get . fontSmallBold {}]
     
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised]   \
@@ -196,7 +201,7 @@ proc ::Jabber::NewMsg::Build {args} {
     scrollbar $fradd.ysc -command [list $fradd.can yview]
     pack $fradd.ysc -side right -fill y
     set waddcan [canvas $fradd.can -highlightcolor #6363CE -bd 0  \
-      -highlightthickness 1 -highlightbackground $prefs(bgColGeneral) \
+      -highlightthickness 1 \
       -yscrollcommand [list $fradd.ysc set]]
     pack $waddcan -side left -fill both -expand 1
     
@@ -226,7 +231,7 @@ proc ::Jabber::NewMsg::Build {args} {
     # Subject.
     set frsub [frame $w.frall.frsub -borderwidth 0]
     pack $frsub -side top -fill x -padx 6 -pady 0
-    label $frsub.lsub -text "[::msgcat::mc Subject]:" -font $sysFont(sb) -anchor e
+    label $frsub.lsub -text "[::msgcat::mc Subject]:" -font $fontSB -anchor e
     set wsubject $frsub.esub
     entry $wsubject  \
       -textvariable [namespace current]::locals($w,subject)
@@ -238,7 +243,7 @@ proc ::Jabber::NewMsg::Build {args} {
     pack [frame $wtxt] -side top -fill both -expand 1 -padx 6 -pady 4
     set wtext $wtxt.text
     set wysc $wtxt.ysc
-    text $wtext -height 8 -width 48 -font $sysFont(s) -wrap word \
+    text $wtext -height 8 -width 48 -wrap word \
       -borderwidth 1 -relief sunken -yscrollcommand [list $wysc set]
     scrollbar $wysc -orient vertical -command [list $wtext yview]
     grid $wtext -column 0 -row 0 -sticky news
@@ -297,15 +302,16 @@ $opts(-forwardmessage)"
 }
 
 proc ::Jabber::NewMsg::NewAddrLine {w wfr n} {
-    global  sysFont
     
     variable locals
     upvar ::Jabber::jstate jstate
     
+    set fontSB [option get . fontSmallBold {}]
+    
     set jidlist [$jstate(roster) getusers]
     set num $locals($w,num)
     frame $wfr.f${n} -bd 0
-    entry $wfr.f${n}.trpt -width 18 -font $sysFont(sb) -bd 0 -highlightthickness 0 \
+    entry $wfr.f${n}.trpt -width 18 -font $fontSB -bd 0 -highlightthickness 0 \
       -state disabled -textvariable [namespace current]::locals($w,poptrpt$n)
     label $wfr.f${n}.la -image $locals(whiterect) -bd 0 -bg white
     pack $wfr.f${n}.trpt $wfr.f${n}.la -side left -fill y
@@ -695,14 +701,15 @@ proc ::Jabber::NewMsg::SaveMsg {w} {
 }
 
 proc ::Jabber::NewMsg::DoPrint {w} {
-    global  sysFont
     
     variable locals
     upvar ::Jabber::jstate jstate
-
+    
+    set fontS [option get . fontSmall {}]
+    
     set allText [::Text::TransformToPureText $locals($w,wtext)]    
     ::UserActions::DoPrintText $locals($w,wtext)  \
-      -data $allText -font $sysFont(s)    
+      -data $allText -font $fontS    
 }
 
 proc ::Jabber::NewMsg::CloseDlg {w} {

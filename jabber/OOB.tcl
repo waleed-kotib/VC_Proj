@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.10 2003-10-12 13:12:55 matben Exp $
+# $Id: OOB.tcl,v 1.11 2003-12-13 17:54:41 matben Exp $
 
 package provide OOB 1.0
 
@@ -21,7 +21,7 @@ namespace eval ::Jabber::OOB:: {
 #       Dialog for sending a 'jabber:iq:oob' 'set' element.
 
 proc ::Jabber::OOB::BuildSet {w jid} {
-    global  this sysFont
+    global  this
     
     variable finished
     variable localpath ""
@@ -41,24 +41,26 @@ proc ::Jabber::OOB::BuildSet {w jid} {
     }
     wm title $w {Send File}
     set locals(jid) $jid
+    set fontS [option get . fontSmall {}]
+    set fontSB [option get . fontSmallBold {}]
     
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised]  \
       -fill both -expand 1 -ipadx 12 -ipady 4
     
-    message $w.frall.msg -width 260 -font $sysFont(s) -text  \
+    message $w.frall.msg -width 260 -text  \
       "Let user \"$jid\" download a file from your built in server.\
       The description is optional."
     pack $w.frall.msg -side top -fill both -expand 1
     
     # Entries etc.
     set frmid [frame $w.frall.frmid -borderwidth 0]
-    label $frmid.lfile -text {File:} -font $sysFont(sb) -anchor e
+    label $frmid.lfile -text {File:} -font $fontSB -anchor e
     entry $frmid.efile    \
       -textvariable "[namespace current]::localpath"
-    button $frmid.btfile -text {File...} -width 6 -font $sysFont(s)  \
+    button $frmid.btfile -text {File...} -width 6 -font $fontS  \
       -command ::Jabber::OOB::FileOpen
-    label $frmid.ldesc -text {Description:} -font $sysFont(sb) -anchor e
+    label $frmid.ldesc -text {Description:} -font $fontSB -anchor e
     entry $frmid.edesc -width 36    \
       -textvariable "[namespace current]::desc"
     grid $frmid.lfile -column 0 -row 0 -sticky e
@@ -361,7 +363,7 @@ proc ::Jabber::OOB::Cancel {out token} {
 #       w
 
 proc ::Jabber::OOB::BuildText {w xml args} {
-    global  sysFont prefs
+    global  prefs
 
     if {[wrapper::gettag $xml] != "x"} {
 	error {Not proper xml data here}
@@ -389,8 +391,11 @@ proc ::Jabber::OOB::BuildText {w xml args} {
 	    }
 	}
     }
-    text $w -font $sysFont(s) -bd 0 -wrap word -width $argsArr(-width)  \
-      -background $prefs(bgColGeneral) -height $nlines  \
+    
+    set bg [option get . backgroundGeneral {}]
+    
+    text $w -bd 0 -wrap word -width $argsArr(-width)  \
+      -background $bg -height $nlines  \
       -highlightthickness 0
     if {[info exists desc] && [info exists url]} {
 	$w tag configure normal -foreground blue -underline 1

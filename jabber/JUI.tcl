@@ -5,35 +5,35 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.8 2003-12-12 13:46:44 matben Exp $
+# $Id: JUI.tcl,v 1.9 2003-12-13 17:54:41 matben Exp $
 
 package provide JUI 1.0
 
-# Use option database for customization. Not used yet...
-option add *RostServ*Tree.background            #dedede         widgetDefault
-option add *RostServ*Tree.backgroundImage       {}              widgetDefault
-option add *RostServ*Tree.highlightBackground   white           widgetDefault
-option add *RostServ*Tree.highlightColor        black           widgetDefault
-option add *RostServ*Tree.indention             14              widgetDefault
-option add *RostServ*Tree.openIcons             plusminus       widgetDefault
-option add *RostServ*Tree.pyjamasColor          white           widgetDefault
-option add *RostServ*Tree.selectBackground      black           widgetDefault
-option add *RostServ*Tree.selectForeground      white           widgetDefault
-option add *RostServ*Tree.selectMode            1               widgetDefault
-option add *RostServ*Tree.treeColor             gray50          widgetDefault
-
-option add *RostServ*MacTabnotebook.activeForeground    black        widgetDefault
-option add *RostServ*MacTabnotebook.activeTabColor      #efefef      widgetDefault
-option add *RostServ*MacTabnotebook.activeTabBackground #cdcdcd      widgetDefault
-option add *RostServ*MacTabnotebook.activeTabOutline    black        widgetDefault
-option add *RostServ*MacTabnotebook.background          white        widgetDefault
-option add *RostServ*MacTabnotebook.style               classic      widgetDefault
-option add *RostServ*MacTabnotebook.tabBackground       #dedede      widgetDefault
-option add *RostServ*MacTabnotebook.tabColor            #cecece      widgetDefault
-option add *RostServ*MacTabnotebook.tabOutline          gray20       widgetDefault
-
 
 namespace eval ::Jabber::UI:: {
+
+    # Use option database for customization. Not used yet...
+    option add *RostServ*Tree.background            #dedede         widgetDefault
+    option add *RostServ*Tree.backgroundImage       {}              widgetDefault
+    option add *RostServ*Tree.highlightBackground   white           widgetDefault
+    option add *RostServ*Tree.highlightColor        black           widgetDefault
+    option add *RostServ*Tree.indention             14              widgetDefault
+    option add *RostServ*Tree.openIcons             plusminus       widgetDefault
+    option add *RostServ*Tree.pyjamasColor          white           widgetDefault
+    option add *RostServ*Tree.selectBackground      black           widgetDefault
+    option add *RostServ*Tree.selectForeground      white           widgetDefault
+    option add *RostServ*Tree.selectMode            1               widgetDefault
+    option add *RostServ*Tree.treeColor             gray50          widgetDefault
+
+    option add *RostServ*MacTabnotebook.activeForeground    black        widgetDefault
+    option add *RostServ*MacTabnotebook.activeTabColor      #efefef      widgetDefault
+    option add *RostServ*MacTabnotebook.activeTabBackground #cdcdcd      widgetDefault
+    option add *RostServ*MacTabnotebook.activeTabOutline    black        widgetDefault
+    option add *RostServ*MacTabnotebook.background          white        widgetDefault
+    option add *RostServ*MacTabnotebook.style               classic      widgetDefault
+    option add *RostServ*MacTabnotebook.tabBackground       #dedede      widgetDefault
+    option add *RostServ*MacTabnotebook.tabColor            #cecece      widgetDefault
+    option add *RostServ*MacTabnotebook.tabOutline          gray20       widgetDefault
     
     # Collection of useful and common widget paths.
     variable jwapp
@@ -69,7 +69,7 @@ proc ::Jabber::UI::Show {w args} {
 #       $w
 
 proc ::Jabber::UI::Build {w} {
-    global  this sysFont prefs
+    global  this prefs
     
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
@@ -79,6 +79,8 @@ proc ::Jabber::UI::Build {w} {
     ::Jabber::Debug 2 "::Jabber::UI::Build w=$w"
     
     if {$w != "."} {
+	
+	# Toplevel of class RostServ.
 	toplevel $w -class RostServ
 	if {[string match "mac*" $this(platform)]} {
 	    eval $::macWindowStyle $w documentProc
@@ -127,6 +129,8 @@ proc ::Jabber::UI::Build {w} {
     set iconNewUserDis    [::UI::GetIcon btnewuserdis]
     set iconStop          [::UI::GetIcon btstop]
     set iconStopDis       [::UI::GetIcon btstopdis]
+    
+    set fontS [option get . fontSmall {}]
     
     set wtray ${wtop}top
     ::buttontray::buttontray $wtray 52 -borderwidth 1 -relief raised
@@ -182,7 +186,7 @@ proc ::Jabber::UI::Build {w} {
       -side top -fill x -padx 8 -pady 2
     pack [canvas $jwapp(statmess) -bd 0 -highlightthickness 0 -height 14]  \
       -side left -pady 1 -padx 6 -fill x -expand true
-    $jwapp(statmess) create text 0 0 -anchor nw -text {} -font $sysFont(s) \
+    $jwapp(statmess) create text 0 0 -anchor nw -text {} -font $fontS \
       -tags stattxt
     
     menu $jwapp(mypresmenu) -tearoff 0

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.20 2003-12-10 15:21:43 matben Exp $
+# $Id: MailBox.tcl,v 1.21 2003-12-13 17:54:41 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -111,7 +111,7 @@ proc ::Jabber::MailBox::Show {args} {
 }
 
 proc ::Jabber::MailBox::Build {w args} {
-    global  this sysFont prefs
+    global  this prefs
     
     variable locals  
     variable colindex
@@ -128,6 +128,8 @@ proc ::Jabber::MailBox::Build {w args} {
     if {[winfo exists $w]} {
 	return
     }
+    
+    # Toplevel of class MailBox.
     toplevel $w -class MailBox
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
@@ -209,7 +211,6 @@ proc ::Jabber::MailBox::Build {w args} {
       0 [::msgcat::mc Date] 0 {} 0 {}]
     scrollbar $wysctbl -orient vertical -command [list $wtbl yview]
     tablelist::tablelist $wtbl -columns $columns  \
-      -font $sysFont(sb) -labelfont $sysFont(s) -background white  \
       -yscrollcommand [list $wysctbl set]  \
       -labelbackground #cecece -stripebackground #dedeff  \
       -labelcommand [namespace current]::LabelCommand  \
@@ -237,7 +238,7 @@ proc ::Jabber::MailBox::Build {w args} {
     frame $wfrmsg
     set wtextmsg $wfrmsg.text
     set wyscmsg $wfrmsg.ysc
-    text $wtextmsg -height 4 -width 1 -font $sysFont(s) -wrap word \
+    text $wtextmsg -height 4 -width 1 -wrap word \
       -borderwidth 1 -relief sunken -yscrollcommand [list $wyscmsg set] \
       -state disabled
     $wtextmsg tag configure normal -foreground black
@@ -289,7 +290,6 @@ proc ::Jabber::MailBox::Build {w args} {
 #       Does the actual job of adding a line in the mailbox widget.
 
 proc ::Jabber::MailBox::InsertRow {wtbl row i} {
-    global  sysFont
     
     variable colindex
 
@@ -317,16 +317,19 @@ proc ::Jabber::MailBox::InsertRow {wtbl row i} {
     set iconWboard  [::UI::GetIcon wboard]
     set iconUnread  [::UI::GetIcon unreadMsg]
     set iconRead    [::UI::GetIcon readMsg]
+    set fontS [option get . fontSmall {}]
+    set fontSB [option get . fontSmallBold {}]
+
     $wtbl insert end [lrange $row 0 5]
     if {$haswb} {
 	$wtbl cellconfigure "${i},$colindex(iswb)" -image $iconWboard
     }
     set colsub $colindex(subject)
     if {[lindex $row $colindex(isread)] == 0} {
-	$wtbl rowconfigure $i -font $sysFont(sb)
+	$wtbl rowconfigure $i -font $fontSB
 	$wtbl cellconfigure "${i},${colsub}" -image $iconUnread
     } else {
-	$wtbl rowconfigure $i -font $sysFont(s)
+	$wtbl rowconfigure $i -font $fontS
 	$wtbl cellconfigure "${i},${colsub}" -image $iconRead
     }
 }
@@ -416,7 +419,7 @@ proc ::Jabber::MailBox::MarkMsgAsRead {id} {
     variable locals
 
     # Incomplete.
-    #$wtbl rowconfigure $item -font $sysFont(s)
+    #$wtbl rowconfigure $item
     #$wtbl cellconfigure "$item,0" -image $icons(readMsg)
     if {[lindex $mailbox($id) 3] == 0} {
 	set mailbox($id) [lreplace $mailbox($id) 3 3 1]
@@ -436,7 +439,7 @@ proc ::Jabber::MailBox::MarkMsgAsRead {id} {
 #       updates UI.
 
 proc ::Jabber::MailBox::GotMsg {bodytxt args} {
-    global  sysFont prefs
+    global  prefs
 
     variable locals
     variable mailbox
@@ -620,7 +623,7 @@ proc ::Jabber::MailBox::TrashMsg { } {
 }
 
 proc ::Jabber::MailBox::SelectMsg { } {
-    global  sysFont prefs
+    global  prefs
 
     variable locals
     variable mailbox
@@ -655,8 +658,9 @@ proc ::Jabber::MailBox::SelectMsg { } {
 
     # Mark as read.
     set iconRead    [::UI::GetIcon readMsg]
+    set fontS [option get . fontSmall {}]
     set colsub $colindex(subject)
-    $wtbl rowconfigure $item -font $sysFont(s)
+    $wtbl rowconfigure $item -font $fontS
     $wtbl cellconfigure "${item},${colsub}" -image $iconRead
     ::Jabber::MailBox::MarkMsgAsRead $id
     ::Jabber::MailBox::DisplayMsg $id
@@ -834,14 +838,14 @@ proc ::Jabber::MailBox::ForwardTo { } {
 }
 
 proc ::Jabber::MailBox::DoPrint { } {
-    global  sysFont
 
     variable locals
 
     set allText [::Text::TransformToPureText $locals(wtextmsg)]
+    set fontS [option get . fontSmall {}]
     
     ::UserActions::DoPrintText $locals(wtextmsg)  \
-      -data $allText -font $sysFont(s)
+      -data $allText -font $fontS
 }
 
 proc ::Jabber::MailBox::SaveMailbox {args} {

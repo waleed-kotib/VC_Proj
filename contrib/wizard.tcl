@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: wizard.tcl,v 1.1 2003-11-03 11:52:04 matben Exp $
+# $Id: wizard.tcl,v 1.2 2003-12-13 17:54:40 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -100,7 +100,6 @@ proc ::wizard::Init { } {
     option add *Wizard.closeCommand        {}           widgetDefault
     option add *Wizard.finishCommand       {}           widgetDefault
     option add *Wizard.nextPageCommand     {}           widgetDefault
-    option add *Notebook.takeFocus                 0            widgetDefault
     
     # Platform specifics...
     switch $tcl_platform(platform) {

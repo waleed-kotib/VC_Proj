@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Search.tcl,v 1.2 2003-12-10 15:21:43 matben Exp $
+# $Id: Search.tcl,v 1.3 2003-12-13 17:54:41 matben Exp $
 
 package provide Search 1.0
 
@@ -27,7 +27,7 @@ namespace eval ::Jabber::Search:: {
 #       .
      
 proc ::Jabber::Search::Build {args} {
-    global  this sysFont prefs wDlgs
+    global  this prefs wDlgs
 
     variable wtop
     variable wbox
@@ -72,12 +72,12 @@ proc ::Jabber::Search::Build {args} {
     set wright $w.frall.fr
     pack [frame $wright] -side right -expand 1 -fill both
     
-    message $wleft.msg -width 200 -font $sysFont(s)  \
+    message $wleft.msg -width 200  \
       -text [::msgcat::mc jasearch] -anchor w
     pack $wleft.msg -side top -fill x -anchor w -padx 4 -pady 2
     set frtop $wleft.top
     pack [frame $frtop] -side top -fill x -anchor w -padx 4 -pady 2
-    label $frtop.lserv -text "[::msgcat::mc {Search Service}]:" -font $sysFont(sb)
+    label $frtop.lserv -text "[::msgcat::mc {Search Service}]:" -font $fontSB
     
     # Button part.
     set frbot [frame $wleft.frbot -borderwidth 0]
@@ -100,7 +100,7 @@ proc ::Jabber::Search::Build {args} {
     # Get all (browsed) services that support search.
     set searchServ [$jstate(jlib) service getjidsfor "search"]
     set wcomboserver $frtop.eserv
-    ::combobox::combobox $wcomboserver -width 20 -font $sysFont(s)   \
+    ::combobox::combobox $wcomboserver -width 20   \
       -textvariable [namespace current]::server -editable 0
     eval {$frtop.eserv list insert end} $searchServ
     
@@ -143,7 +143,7 @@ proc ::Jabber::Search::Build {args} {
     set wysc $frsearch.ysc
     tablelist::tablelist $wtb \
       -columns [list 60 [::msgcat::mc {Search results}]]  \
-      -font $sysFont(s) -labelfont $sysFont(s) -background white  \
+      -background white  \
       -xscrollcommand [list $wxsc set] -yscrollcommand [list $wysc set]  \
       -labelbackground #cecece -stripebackground #dedeff -width 60 -height 20
     #-labelcommand "[namespace current]::LabelCommand"  \
@@ -198,7 +198,6 @@ proc ::Jabber::Search::Get { } {
 #       search, but this is untested.
 
 proc ::Jabber::Search::GetCB {jlibName type subiq} {
-    global  sysFont
     
     variable wtop
     variable wbox

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: PluginTextPlain.tcl,v 1.6 2003-10-12 13:12:56 matben Exp $
+# $Id: PluginTextPlain.tcl,v 1.7 2003-12-13 17:54:41 matben Exp $
 
 
 namespace eval ::TextImporter:: {
@@ -205,16 +205,18 @@ proc ::TextImporter::Save {wCan id args} {
 }
 
 proc ::TextImporter::Clicked {id} {
-    global sysFont
+    
     variable locals
 
+    set fontSB [option get . fontSmallBold {}]
+    
     set win .ty7588[incr locals(wuid)]
     toplevel $win
     wm title $win "Plain Text Browser"
     pack [frame ${win}.f -borderwidth 1 -relief raised]   \
       -fill both -expand 1 -ipadx 12 -ipady 4
     set txt "The content of the text file: $locals(name,$id)"
-    pack [label ${win}.f.la -text $txt -font $sysFont(sb)]  \
+    pack [label ${win}.f.la -text $txt -font $fontSB]  \
       -side top -anchor w -padx 12 -pady 6
     
     # Button part.
@@ -232,8 +234,8 @@ proc ::TextImporter::Clicked {id} {
     set wysc ${win}.f.fr.ysc
     pack [scrollbar $wysc -orient vertical -command [list $wtext yview]] \
       -side right -fill y
-    pack [text $wtext -width 80 -height 30 -yscrollcommand [list $wysc set] \
-      -font $sysFont(s)] -side left -fill both -expand 1
+    pack [text $wtext -width 80 -height 30 -yscrollcommand [list $wysc set]] \
+      -side left -fill both -expand 1
     
     if {![catch {open $locals(id2file,$id) r} fd]} {
 	set data [read $fd]

@@ -1,7 +1,25 @@
 ! Resource database entries for Windows
 !
 
-*Checkbutton.Font:                   {Arial 8}
-*Entry.Font:                         {Arial 8}
-*Label.Font:                         {Arial 8}
-*Radiobutton.Font:                   {Arial 8}
+! General appearence
+!
+*fontSmall:                          Arial 8
+*fontSmallBold:                      Arial 8 bold
+*fontMedium:                         Arial 8
+*fontLarge:                          Helvetica 16
+*backgroundGeneral:                  #dedede
+
+! tk standard widgets
+!
+*Checkbutton.Font:                   Arial 8
+*Entry.Font:                         Arial 8
+*Label.Font:                         Arial 8
+*Listbox.Font:                       Arial 8
+*Message.Font:                       Arial 8
+*Radiobutton.Font:                   Arial 8
+*Text.Font:                          Arial 8
+
+! contributed widgets
+!
+*Combobox.Font:                      Arial 8
+*Tablelist.Font:                     Arial 8

@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #
-# $Id: JForms.tcl,v 1.8 2003-11-01 13:57:27 matben Exp $
+# $Id: JForms.tcl,v 1.9 2003-12-13 17:54:41 matben Exp $
 # 
 #      Updated to version 2.1 of JEP-0004
 #  
@@ -277,7 +277,6 @@ proc ::Jabber::Forms::BuildSimple {w xmllist {template ""}} {
 #       or calls itself rcursively.
 
 proc ::Jabber::Forms::FillInBoxOneTag {w child parentTag iName {template ""}} {
-    global  sysFont
     
     variable locals
     variable reported
@@ -292,6 +291,8 @@ proc ::Jabber::Forms::FillInBoxOneTag {w child parentTag iName {template ""}} {
     set subchildren [lindex $child 4]
     set key ${parentTag}${tag}
     
+    set fontSB [option get . fontSmallBold {}]
+    
     if {$subchildren == ""} {
 	set varName [namespace current]::cache($id,$key)
 
@@ -304,7 +305,7 @@ proc ::Jabber::Forms::FillInBoxOneTag {w child parentTag iName {template ""}} {
 	if {$template == "room"} {
 	    if {($tag == "nick") || ($tag == "nickname")} {
 		foreach num {1 2 3} {
-		    label $w.ln$num -text "${tag} ${num}:" -font $sysFont(sb)
+		    label $w.ln$num -text "${tag} ${num}:" -font $fontSB
 		    entry $w.en$num    \
 		      -textvariable [namespace current]::cache($id,$key#${num})
 		    grid $w.ln$num -column 0 -row $i -sticky e
@@ -312,7 +313,7 @@ proc ::Jabber::Forms::FillInBoxOneTag {w child parentTag iName {template ""}} {
 		    incr i
 		}
 	    } elseif {$tag == "privacy"} {
-		label $w.l$i -text {Privacy if nickname} -font $sysFont(sb)
+		label $w.l$i -text {Privacy if nickname} -font $fontSB
 		grid $w.l$i -column 0 -row $i -columnspan 2 -sticky w
 		incr i
 	    } elseif {$tag == "ns"} {
@@ -325,13 +326,13 @@ proc ::Jabber::Forms::FillInBoxOneTag {w child parentTag iName {template ""}} {
 		} else {
 		    set txt {Namespace:}
 		}
-		label $w.l$i -text $txt -font $sysFont(sb)
+		label $w.l$i -text $txt -font $fontSB
 		label $w.lns$i -text $cdata 
 		grid $w.l$i -column 0 -row $i -sticky e
 		grid $w.lns$i -column 1 -row $i -sticky w
 		incr i
 	    } else {
-		label $w.l$i -text ${tag}: -font $sysFont(sb)
+		label $w.l$i -text ${tag}: -font $fontSB
 		entry $w.e$i   \
 		  -textvariable $varName
 		grid $w.l$i -column 0 -row $i -sticky e
@@ -342,14 +343,14 @@ proc ::Jabber::Forms::FillInBoxOneTag {w child parentTag iName {template ""}} {
 	    # Registering & searching.
 	} elseif {($template == "register") || ($template == "search")} {
 	    if {$tag == "registered"} {
-		message $w.l$i -width 240 -font $sysFont(s) \
+		message $w.l$i -width 240 \
 		  -text {You are already registered with this service.\
 		  These are your current settings of your login parameters.\
 		  Possible to change???}
 		grid $w.l$i -column 0 -row $i -sticky w -columnspan 2
 		incr i
 	    } elseif {$tag == "instructions"} {
-		message $w.l$i -width 240 -font $sysFont(s)  \
+		message $w.l$i -width 240  \
 		  -text $cdata
 		grid $w.l$i -column 0 -row $i -sticky w -columnspan 2
 		incr i
@@ -358,7 +359,7 @@ proc ::Jabber::Forms::FillInBoxOneTag {w child parentTag iName {template ""}} {
 		# This is a trick to return the <key>. ???
 		set $varName $cdata
 	    } else {
-		label $w.l$i -text ${tag}: -font $sysFont(sb)
+		label $w.l$i -text ${tag}: -font $fontSB
 		entry $w.e$i -textvariable $varName
 		grid $w.l$i -column 0 -row $i -sticky e
 		grid $w.e$i -column 1 -row $i -sticky ew
@@ -367,7 +368,7 @@ proc ::Jabber::Forms::FillInBoxOneTag {w child parentTag iName {template ""}} {
 	    
 	    # Default.
 	} else {
-	    label $w.l$i -text ${tag}: -font $sysFont(sb)
+	    label $w.l$i -text ${tag}: -font $fontSB
 	    entry $w.e$i -textvariable $varName
 	    grid $w.l$i -column 0 -row $i -sticky e
 	    grid $w.e$i -column 1 -row $i -sticky ew
@@ -484,7 +485,7 @@ proc ::Jabber::Forms::GetXMLForChild {w child parentTags template} {
 #       $w
 
 proc ::Jabber::Forms::BuildXData {w xml args} {
-    global  sysFont prefs
+    global  prefs
 
     variable cache
     variable reported
@@ -510,6 +511,8 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
     }
     array set argsArr $args
     
+    set bg [option get . backgroundGeneral {}]
+    
     frame $w
     set id $locals($w,id)   
     set i 0
@@ -520,7 +523,7 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
 	switch -exact -- $tag {
 	    
 	    instructions {
-		message $w.m$i -font $sysFont(s)  \
+		message $w.m$i  \
 		  -text [wrapper::getcdata $elem] -anchor w -justify left \
 		  -width $argsArr(-width)
 		grid $w.m$i -row $i -column 0 -columnspan 1 -sticky ew
@@ -556,7 +559,7 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
 		    if {[string equal $ctag "required"]} {
 			set isrequired 1
 		    } elseif {[string equal $ctag "desc"]} {
-			message $w.m$i -aspect $argsArr(-aspect) -font $sysFont(s) \
+			message $w.m$i -aspect $argsArr(-aspect)  \
 			  -text [wrapper::getcdata $c] -width $argsArr(-width)
 			grid $w.m$i -row $i -column 0 -columnspan 1 -sticky ew
 			incr i
@@ -602,7 +605,7 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
 			set wfr [frame $w.f$var]
 			set wtxt ${wfr}.txt
 			set wsc ${wfr}.sc
-			text $wtxt -font $sysFont(s) -height 3 -wrap word \
+			text $wtxt -height 3 -wrap word \
 			  -yscrollcommand [list $wsc set] -width 40
 			scrollbar $wsc -orient vertical  \
 			  -command [list $wtxt yview]			
@@ -633,7 +636,7 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
 			set wmenu [eval {tk_optionMenu $w.pop$i   \
 			  [namespace current]::cache($id,$var)} $optionList]
 			$w.pop$i configure -highlightthickness 0  \
-			  -background $prefs(bgColGeneral) -foreground black
+			  -background $bg -foreground black
 			if {[info exists defValue]} {
 			    set cache($id,$var) $optionValue2Label($id,$var,$defValue)
 			}
@@ -659,7 +662,7 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
 			set wfr [frame $w.f$var]
 			set wlb $w.f${var}.lb
 			set wsc $w.f${var}.sc
-			listbox $wlb -font $sysFont(s) -height 4 \
+			listbox $wlb -height 4 \
 			  -selectmode multiple  \
 			  -yscrollcommand [list $wsc set]   \
 			  -listvar [namespace current]::cache($id,$var)

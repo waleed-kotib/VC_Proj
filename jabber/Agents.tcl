@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Agents.tcl,v 1.3 2003-11-08 08:54:44 matben Exp $
+# $Id: Agents.tcl,v 1.4 2003-12-13 17:54:40 matben Exp $
 
 package provide Agents 1.0
 
@@ -273,7 +273,7 @@ proc ::Jabber::Agents::AddAgentToTree {parentJid jid subAgent} {
 #       w
 
 proc ::Jabber::Agents::Build {w args} {
-    global  sysFont prefs this
+    global  prefs this
 
     variable wagents
     variable warrows
@@ -313,7 +313,7 @@ proc ::Jabber::Agents::Build {w args} {
       -yscrollcommand [list $wysc set]       \
       -selectcommand ::Jabber::Agents::SelectCmd   \
       -opencommand ::Jabber::Agents::OpenTreeCmd   \
-      -highlightcolor #6363CE -highlightbackground $prefs(bgColGeneral)
+      -highlightcolor #6363CE
     set wtreecanvas [$wtree getcanvas]
     if {[string match "mac*" $this(platform)]} {
 	$wtree configure -buttonpresscommand [list ::Jabber::UI::Popup agents] \

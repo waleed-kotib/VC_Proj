@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: EditDialogs.tcl,v 1.3 2003-10-05 13:36:20 matben Exp $
+# $Id: EditDialogs.tcl,v 1.4 2003-12-13 17:54:41 matben Exp $
 
 
 #       ::EditShortcuts:: implements dialogs for editing shortcuts. 
@@ -210,7 +210,7 @@ proc ::EditShortcuts::DoCancel {nameOfShortcutList} {
 
 proc ::EditShortcuts::AddOrEditShortcuts {what nameOfShortsCopy indShortcuts  \
   {wListBox {}}} {
-    global  sysFont this
+    global  this
     
     variable finAdd
 
@@ -245,6 +245,7 @@ proc ::EditShortcuts::AddOrEditShortcuts {what nameOfShortsCopy indShortcuts  \
 	set txtbt [::msgcat::mc Save]
     }
     wm title $w $txt
+    set fontSB [option get . fontSmallBold {}]
     
     pack [frame $w.frall -borderwidth 1 -relief raised]
     
@@ -254,9 +255,9 @@ proc ::EditShortcuts::AddOrEditShortcuts {what nameOfShortsCopy indShortcuts  \
     
     # Overall frame for whole container.
     set frtot [frame $wcont.fr]
-    label $frtot.lbl1 -text $txt1 -font $sysFont(sb)
+    label $frtot.lbl1 -text $txt1 -font $fontSB
     entry $frtot.ent1 -width 36 
-    label $frtot.lbl2 -text $txt2 -font $sysFont(sb)
+    label $frtot.lbl2 -text $txt2 -font $fontSB
     entry $frtot.ent2 -width 36 
     grid $frtot.lbl1 -sticky w -padx 6 -pady 1
     grid $frtot.ent1 -sticky ew -padx 6 -pady 1

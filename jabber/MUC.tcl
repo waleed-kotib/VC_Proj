@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.8 2003-11-08 08:54:44 matben Exp $
+# $Id: MUC.tcl,v 1.9 2003-12-13 17:54:41 matben Exp $
 
 package require entrycomp
 
@@ -84,7 +84,7 @@ namespace eval ::Jabber::MUC:: {
 #       "cancel" or "enter".
 
 proc ::Jabber::MUC::BuildEnter {args} {
-    global  this sysFont
+    global  this
 
     variable enteruid
     variable dlguid
@@ -115,16 +115,18 @@ proc ::Jabber::MUC::BuildEnter {args} {
 	password    ""
     }
     
+    set fontSB [option get . fontSmallBold {}]
+    
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
-    message $w.frall.msg -width 260 -font $sysFont(s)  \
+    message $w.frall.msg -width 260  \
     	-text "Enter your nick name and press Enter to go into the room.\
 	Members only room may require a password."
     pack $w.frall.msg -side top -fill x -anchor w -padx 2 -pady 4
     set frtop $w.frall.top
     pack [frame $frtop] -side top -fill x -padx 4
     label $frtop.lserv -text "[::msgcat::mc {Conference server}]:" \
-      -font $sysFont(sb) 
+      -font $fontSB 
 
     set confServers [$jstate(browse) getservicesforns  \
       "http://jabber.org/protocol/muc"]
@@ -134,11 +136,11 @@ proc ::Jabber::MUC::BuildEnter {args} {
     set wcomboserver $frtop.eserv
     set wcomboroom $frtop.eroom
 
-    ::combobox::combobox $wcomboserver -width 20 -font $sysFont(s)  \
+    ::combobox::combobox $wcomboserver -width 20  \
       -textvariable $token\(server)  \
       -command [list [namespace current]::ConfigRoomList $wcomboroom] -editable 0
     eval {$frtop.eserv list insert end} $confServers
-    label $frtop.lroom -text "[::msgcat::mc {Room name}]:" -font $sysFont(sb)
+    label $frtop.lroom -text "[::msgcat::mc {Room name}]:" -font $fontSB
     
     # Find the default conferencing server.
     if {[info exists argsArr(-server)]} {
@@ -155,7 +157,7 @@ proc ::Jabber::MUC::BuildEnter {args} {
 	    lappend roomList $room
 	}
     }
-    ::combobox::combobox $wcomboroom -width 20 -font $sysFont(s)   \
+    ::combobox::combobox $wcomboroom -width 20   \
       -textvariable $token\(roomname) -editable 0
     eval {$frtop.eroom list insert end} $roomList
 
@@ -170,9 +172,9 @@ proc ::Jabber::MUC::BuildEnter {args} {
 	$wcomboserver configure -state disabled
     }
     
-    label $frtop.lnick -text "[::msgcat::mc {Nick name}]:" -font $sysFont(sb)
+    label $frtop.lnick -text "[::msgcat::mc {Nick name}]:" -font $fontSB
     entry $frtop.enick -textvariable $token\(nickname)
-    label $frtop.lpass -text "[::msgcat::mc Password]:" -font $sysFont(sb)
+    label $frtop.lpass -text "[::msgcat::mc Password]:" -font $fontSB
     entry $frtop.epass -textvariable $token\(password)
     
     grid $frtop.lserv -column 0 -row 0 -sticky e
@@ -335,7 +337,7 @@ proc ::Jabber::MUC::EnterCallback {jlibName type args} {
 #       Make an invitation to a room.
 
 proc ::Jabber::MUC::Invite {roomjid} {
-    global this sysFont
+    global this
     
     upvar ::Jabber::jstate jstate
     variable fininvite
@@ -353,20 +355,22 @@ proc ::Jabber::MUC::Invite {roomjid} {
     set fininvite -1
     wm protocol $w WM_DELETE_WINDOW "set [namespace current]::fininvite 0"
     
+    set fontSB [option get . fontSmallBold {}]
+    
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised] \
       -fill both -expand 1 -ipadx 4
     regexp {^([^@]+)@.*} $roomjid match roomName
     set msg "Invite a user for groupchat in room $roomName"
-    pack [message $w.frall.msg -width 220 -font $sysFont(s) -text $msg] \
+    pack [message $w.frall.msg -width 220 -text $msg] \
       -side top -fill both -padx 4 -pady 2
     
     set jidlist [$jstate(roster) getusers -type available]
     set wmid $w.frall.fr
     pack [frame $wmid] -side top -fill x -expand 1 -padx 6
-    label $wmid.la -font $sysFont(sb) -text "Invite Jid:"
+    label $wmid.la -font $fontSB -text "Invite Jid:"
     ::entrycomp::entrycomp $wmid.ejid $jidlist
-    label $wmid.lre -font $sysFont(sb) -text "Reason:"
+    label $wmid.lre -font $fontSB -text "Reason:"
     entry $wmid.ere
     
     grid $wmid.la -column 0 -row 0 -sticky e -padx 2 
@@ -474,7 +478,7 @@ proc ::Jabber::MUC::MUCMessage {from xlist} {
 #       Displays an info dialog for MUC room configuration.
 
 proc ::Jabber::MUC::BuildInfo {roomjid} {
-    global this sysFont
+    global this
     
     variable dlguid
     upvar ::Jabber::jstate jstate
@@ -521,12 +525,13 @@ proc ::Jabber::MUC::BuildInfo {roomjid} {
 	    set pady 4
 	}
     }
+    set fontS [option get . fontSmall {}]
     
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
     
     # 
-    pack [message $w.frall.msg -width 400 -font $sysFont(s) -text \
+    pack [message $w.frall.msg -width 400 -text \
       "This dialog makes available a number of options and actions for a\
       room. Your role and affiliation determines your privilege to act.\
       Further restrictions may exist depending on specific room\
@@ -549,16 +554,15 @@ proc ::Jabber::MUC::BuildInfo {roomjid} {
     set wysc $frtab.ysc
     set wtbl $frtab.tb
     pack [frame $frtab] -padx 0 -pady 0 -side top
-    #label $frtab.l -text "Participants:" -font $sysFont(sb)
+    #label $frtab.l -text "Participants:" -font $fontSB
     set columns [list 0 Nickname 0 Role 0 Affiliation]
     
     tablelist::tablelist $wtbl  \
-      -columns $columns -stretch all -selectmode single \
-      -font $sysFont(s) -labelfont $sysFont(s) -background white  \
+      -columns $columns -stretch all -selectmode single -background white  \
       -yscrollcommand [list $wysc set]  \
       -labelbackground #cecece -stripebackground #dedeff -width 36 -height 8
     scrollbar $wysc -orient vertical -command [list $wtbl yview]
-    button $frtab.ref -text Refresh -font $sysFont(s) -command  \
+    button $frtab.ref -text Refresh -font $fontS -command  \
       [list [namespace current]::Refresh $roomjid]
     #grid $frtab.l -sticky w
     grid $wtbl $wysc -sticky news
@@ -933,7 +937,7 @@ proc ::Jabber::MUC::Ban {roomjid} {
 #       "cancel" or "ok".
 
 proc ::Jabber::MUC::EditListBuild {roomjid type} {
-    global this sysFont
+    global this
     
     upvar [namespace current]::${roomjid}::editlocals editlocals
     upvar ::Jabber::jstate jstate
@@ -984,11 +988,13 @@ proc ::Jabber::MUC::EditListBuild {roomjid type} {
     wm title $w "Edit List $titleType: $roomName"
     wm protocol $w WM_DELETE_WINDOW "set [namespace current]::fineditlist 0"
     
+    set fontS [option get . fontSmall {}]
+    
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised] \
       -fill both -expand 1 -ipadx 4
     regexp {^([^@]+)@.*} $roomjid match roomName
-    pack [message $w.frall.msg -width 300 -font $sysFont(s)  \
+    pack [message $w.frall.msg -width 300  \
       -text $editmsg($type)] -side top -anchor w -padx 4 -pady 2
     
     #
@@ -1001,8 +1007,7 @@ proc ::Jabber::MUC::EditListBuild {roomjid type} {
     set wtbl $frtab.tb
     pack [frame $frtab] -padx 0 -pady 0 -side left
     tablelist::tablelist $wtbl -width $tblwidth -height 8 \
-      -columns $columns($type) -stretch all -selectmode single \
-      -font $sysFont(s) -labelfont $sysFont(s) -background white  \
+      -columns $columns($type) -stretch all -selectmode single -background white  \
       -yscrollcommand [list $wysc set]  \
       -labelbackground #cecece -stripebackground #dedeff \
       -editendcommand [list [namespace current]::VerifyEditEntry $roomjid] \
@@ -1046,11 +1051,11 @@ proc ::Jabber::MUC::EditListBuild {roomjid type} {
     set wbtedit $wbts.edit
     set wbtrm $wbts.rm
     pack [frame $wbts] -side right -anchor n -padx 4 -pady 4
-    button $wbtadd -text "Add" -font $sysFont(s) -state disabled -command \
+    button $wbtadd -text "Add" -font $fontS -state disabled -command \
       [list [namespace current]::EditListDoAdd $roomjid]
-    button $wbtedit -text "Edit" -font $sysFont(s) -state disabled -command \
+    button $wbtedit -text "Edit" -font $fontS -state disabled -command \
       [list [namespace current]::EditListDoEdit $roomjid]
-    button $wbtrm -text "Remove" -font $sysFont(s) -state disabled -command \
+    button $wbtrm -text "Remove" -font $fontS -state disabled -command \
       [list [namespace current]::EditListDoRemove $roomjid]
     
     grid $wbtadd -pady 2 -sticky ew
@@ -1414,7 +1419,7 @@ proc ::Jabber::MUC::EditListSet {roomjid} {
 # End edit lists ---------------------------------------------------------------
 
 proc ::Jabber::MUC::RoomConfig {roomjid} {
-    global  this sysFont
+    global  this
     
     variable wbox
     variable wsearrows
@@ -1562,7 +1567,7 @@ proc ::Jabber::MUC::SetNick {roomjid} {
 }
 
 proc ::Jabber::MUC::Destroy {roomjid} {
-    global this sysFont
+    global this
     
     upvar ::Jabber::jstate jstate
     variable findestroy
@@ -1584,6 +1589,8 @@ proc ::Jabber::MUC::Destroy {roomjid} {
     set findestroy -1
     wm protocol $w WM_DELETE_WINDOW "set [namespace current]::findestroy 0"
     
+    set fontSB [option get . fontSmallBold {}]
+    
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised] \
       -fill both -expand 1 -ipadx 4
@@ -1591,14 +1598,14 @@ proc ::Jabber::MUC::Destroy {roomjid} {
     set msg "You are about to destroy the room \"$roomName\".\
       Optionally you may give any present room particpants an\
       alternative room jid and a reason."
-    pack [message $w.frall.msg -width 280 -font $sysFont(s) -text $msg] \
+    pack [message $w.frall.msg -width 280 -text $msg] \
       -side top -anchor w -padx 4 -pady 2
     
     set wmid $w.frall.fr
     pack [frame $wmid] -side top -fill x -expand 1 -padx 6
-    label $wmid.la -font $sysFont(sb) -text "Alternative Room Jid:"
+    label $wmid.la -font $fontSB -text "Alternative Room Jid:"
     entry $wmid.ejid
-    label $wmid.lre -font $sysFont(sb) -text "Reason:"
+    label $wmid.lre -font $fontSB -text "Reason:"
     entry $wmid.ere
     
     grid $wmid.la -column 0 -row 0 -sticky e -padx 2 

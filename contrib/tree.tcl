@@ -25,7 +25,7 @@
 # 
 # Copyright (C) 2002-2003 Mats Bengtsson
 # 
-# $Id: tree.tcl,v 1.16 2003-11-30 11:46:46 matben Exp $
+# $Id: tree.tcl,v 1.17 2003-12-13 17:54:40 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -50,7 +50,7 @@
 #	-height, height, Height
 #	-indention, indention, Indention
 #	-opencommand, openCommand, OpenCommand
-#	-openicons, openIcons, OpenIcons                      (plusminus|triangles)
+#	-openicons, openIcons, OpenIcons                      (plusminus|triangle)
 #	-pyjamascolor, pyjamasColor, PyjamasColor
 #	-rightclickcommand, rightClickCommand, RightClickCommand  tclProc?
 #	-scrollwidth, scrollWidth, ScrollWidth
@@ -297,7 +297,7 @@ proc ::tree::Init { } {
       setselection xview yview}
 
     # Options for this widget
-    option add *Tree.background            #dedede         widgetDefault
+    option add *Tree.background            white           widgetDefault
     option add *Tree.backgroundImage       {}              widgetDefault
     option add *Tree.buttonPressCommand    {}              widgetDefault
     option add *Tree.buttonPressMillisec   1000            widgetDefault
@@ -325,9 +325,15 @@ proc ::tree::Init { } {
     # Platform specifics...
     switch $tcl_platform(platform) {
 	unix {
-	    set widgetGlobals(font)             {Helvetica 10 normal}
-	    set widgetGlobals(fontbold)         {Helvetica 10 bold}
-	    set widgetGlobals(fontitalic)       {Helvetica 10 italic}
+	    if {[tk windowingsystem] == "aqua"} {
+		set widgetGlobals(font)             {{Lucida Grande} 11 normal}
+		set widgetGlobals(fontbold)         {{Lucida Grande} 11 bold}
+		set widgetGlobals(fontitalic)       {{Lucida Grande} 11 italic}
+	    } else {
+		set widgetGlobals(font)             {Helvetica 10 normal}
+		set widgetGlobals(fontbold)         {Helvetica 10 bold}
+		set widgetGlobals(fontitalic)       {Helvetica 10 italic}
+	    }
 	}
 	windows {
 	    set widgetGlobals(font)             {Arial 8 normal}
@@ -340,13 +346,17 @@ proc ::tree::Init { } {
 	    set widgetGlobals(fontitalic)       {Geneva 9 italic}
 	}
     }
-    option add *Tree.font               $widgetGlobals(font)
-    option add *Tree.fontDir            $widgetGlobals(fontbold)
+    option add *Tree.font         $widgetGlobals(font)      widgetDefault
+    option add *Tree.fontDir      $widgetGlobals(fontbold)  widgetDefault
         
     # Some platform specific drawing issues.
     switch $tcl_platform(platform) {
 	unix {
-	    set widgetGlobals(yTreeOff) 1
+	    if {[tk windowingsystem] == "aqua"} {
+		set widgetGlobals(yTreeOff) 0
+	    } else {
+		set widgetGlobals(yTreeOff) 1
+	    }
 	}
 	windows {
 	    set widgetGlobals(yTreeOff) 1
@@ -431,7 +441,7 @@ proc ::tree::tree {w args} {
 	set optClass [lindex $widgetOptions($name) 1]
 	set options($name) [option get $w $optName $optClass]
 
-	Debug 5 "   name=$name, optName=$optName, optClass=$optClass"
+	Debug 5 "\tname=$name, optName=$optName, optClass=$optClass"
     }
 
     # Need to translate '-scrollwidth' to '-scrollregion'.

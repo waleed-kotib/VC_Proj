@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: WinImport.tcl,v 1.3 2003-11-30 11:46:47 matben Exp $
+# $Id: WinImport.tcl,v 1.4 2003-12-13 17:54:41 matben Exp $
 
 #package require WindowsUtils
 
@@ -287,18 +287,20 @@ proc ::WinImport::SaveAs {id} {
 }
 
 proc ::WinImport::MakeGenericAppIcon32 {w suff} {
-    global  sysFont
+    
     variable locals
+    
+    set fontSB [option get . fontSmallBold {}]
     
     canvas $w -bg white -width 32 -height 32 -scrollregion {0 0 32 32} \
       -highlightthickness 0
     set col gray20
     $w create image 0 0 -anchor nw -image $locals(docim)
-    $w create text 18 24 -anchor c -text $suff -font $sysFont(sb) -fill gray70 \
+    $w create text 18 24 -anchor c -text $suff -font $fontSB -fill gray70 \
       -tags txt
-    $w create text 17 23 -anchor c -text $suff -font $sysFont(sb) -fill gray60 \
+    $w create text 17 23 -anchor c -text $suff -font $fontSB -fill gray60 \
       -tags txt
-    $w create text 16 22 -anchor c -text $suff -font $sysFont(sb) -fill gray10 \
+    $w create text 16 22 -anchor c -text $suff -font $fontSB -fill gray10 \
       -tags txt
     return $w
 }

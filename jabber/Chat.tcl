@@ -5,30 +5,33 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.16 2003-12-10 15:21:43 matben Exp $
+# $Id: Chat.tcl,v 1.17 2003-12-13 17:54:40 matben Exp $
 
 package require entrycomp
 package require uriencode
 
 package provide Chat 1.0
 
-# Use option database for customization. Only a first test...
-option add *Chat.textBackground       white                 widgetDefault
-option add *Chat.textFont             $sysFont(s)           widgetDefault
-option add *Chat.meForeground         red                   widgetDefault
-option add *Chat.meBackground         #cecece               widgetDefault
-option add *Chat.meTextForeground     black                 widgetDefault
-option add *Chat.meTextBackground     #cecece               widgetDefault
-option add *Chat.meFont               $sysFont(sb)          widgetDefault                                     
-option add *Chat.youForeground        blue                  widgetDefault
-option add *Chat.youBackground        white                 widgetDefault
-option add *Chat.youTextForeground    black                 widgetDefault
-option add *Chat.youTextBackground    white                 widgetDefault
-option add *Chat.youFont              $sysFont(sb)          widgetDefault
-option add *Chat.clockFormat          "%H:%M"               widgetDefault
 
 namespace eval ::Jabber::Chat:: {
-    upvar ::Jabber::jprefs jprefs
+    
+    # Use option database for customization. Only a first test...
+    set fontS [option get . fontSmall {}]
+    set fontSB [option get . fontSmallBold {}]
+
+    option add *Chat*textBackground       white                 widgetDefault
+    option add *Chat*textFont             $fontS                widgetDefault
+    option add *Chat*meForeground         red                   widgetDefault
+    option add *Chat*meBackground         #cecece               widgetDefault
+    option add *Chat*meTextForeground     black                 widgetDefault
+    option add *Chat*meTextBackground     #cecece               widgetDefault
+    option add *Chat*meFont               $fontSB               widgetDefault                                     
+    option add *Chat*youForeground        blue                  widgetDefault
+    option add *Chat*youBackground        white                 widgetDefault
+    option add *Chat*youTextForeground    black                 widgetDefault
+    option add *Chat*youTextBackground    white                 widgetDefault
+    option add *Chat*youFont              $fontSB               widgetDefault
+    option add *Chat*clockFormat          "%H:%M"               widgetDefault
 
     variable locals
 }
@@ -44,7 +47,7 @@ namespace eval ::Jabber::Chat:: {
 #       updates UI.
 
 proc ::Jabber::Chat::StartThreadDlg {args} {
-    global  prefs this sysFont wDlgs
+    global  prefs this wDlgs
 
     variable finished -1
     upvar ::Jabber::jprefs jprefs
@@ -66,11 +69,14 @@ proc ::Jabber::Chat::StartThreadDlg {args} {
     }
     wm title $w [::msgcat::mc {Start Chat}]
     
+    set fontSB [option get . fontSmallBold {}]
+    set fontL [option get . fontLarge {}]
+    
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised]  \
       -fill both -expand 1 -ipadx 12 -ipady 4
     
-    label $w.frall.head -text [::msgcat::mc {Chat with}] -font $sysFont(l)  \
+    label $w.frall.head -text [::msgcat::mc {Chat with}] -font $fontL  \
       -anchor w -padx 10 -pady 4 -bg #cecece
     pack $w.frall.head -side top -fill both -expand 1
     
@@ -80,7 +86,7 @@ proc ::Jabber::Chat::StartThreadDlg {args} {
     
     set jidlist [$jstate(roster) getusers -type available]
     label $frmid.luser -text "[::msgcat::mc {Jabber user id}]:"  \
-      -font $sysFont(sb) -anchor e
+      -font $fontSB -anchor e
     ::entrycomp::entrycomp $frmid.euser $jidlist -width 26    \
       -textvariable [namespace current]::user
     grid $frmid.luser -column 0 -row 1 -sticky e
@@ -227,6 +233,8 @@ proc ::Jabber::Chat::GotMsg {body args} {
     } else {
 	set txt <$username>
     }
+    set bg [option get . backgroundGeneral {}]
+    
     $wtext configure -state normal
     $wtext insert end $txt youtag
     $wtext insert end "   " youtxttag
@@ -237,7 +245,7 @@ proc ::Jabber::Chat::GotMsg {body args} {
     $wtext see end
     if {$locals($threadID,got1stMsg) == 0} {
 	$locals($threadID,wtojid) configure -state disabled   \
-	  -bg $prefs(bgColGeneral)
+	  -bg $bg
 	set locals($threadID,got1stMsg) 1
     }
     set dateISO [clock format [clock seconds] -format "%Y%m%dT%H:%M:%S"]
@@ -275,7 +283,7 @@ proc ::Jabber::Chat::StartThread {jid} {
 #       shows window.
 
 proc ::Jabber::Chat::Build {threadID args} {
-    global  this sysFont prefs wDlgs
+    global  this prefs wDlgs
     
     variable locals
     upvar ::Jabber::jstate jstate
@@ -291,6 +299,8 @@ proc ::Jabber::Chat::Build {threadID args} {
 	return
     }
     array set argsArr $args
+    
+    # Toplevel with class Chat.
     toplevel $w -class Chat
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
@@ -320,6 +330,7 @@ proc ::Jabber::Chat::Build {threadID args} {
     if {[string match "mac*" $this(platform)]} {
 	$w configure -menu [::Jabber::UI::GetRosterWmenu]
     }
+    set fontSB [option get . fontSmallBold {}]
 
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised]   \
@@ -365,11 +376,11 @@ proc ::Jabber::Chat::Build {threadID args} {
     # To and subject fields.
     set frtop [frame $w.frall.frtop -borderwidth 0]
     pack $frtop -side top -fill x   
-    label $frtop.lto -text "[::msgcat::mc {To/from JID}]:" -font $sysFont(sb) \
+    label $frtop.lto -text "[::msgcat::mc {To/from JID}]:" -font $fontSB \
       -anchor e
     entry $frtop.eto   \
       -textvariable [namespace current]::locals($threadID,jid)
-    label $frtop.lsub -text "[::msgcat::mc Subject]:" -font $sysFont(sb) \
+    label $frtop.lsub -text "[::msgcat::mc Subject]:" -font $fontSB \
       -anchor e
     entry $frtop.esub   \
       -textvariable [namespace current]::locals($threadID,subject)
@@ -572,6 +583,8 @@ proc ::Jabber::Chat::Send {threadID} {
     } else {
 	set txt <$username>
     }
+    set bg [option get . backgroundGeneral {}]
+    
     $wtext configure -state normal
     $wtext insert end $txt metag
     
@@ -582,7 +595,7 @@ proc ::Jabber::Chat::Send {threadID} {
     $wtext see end
     if {$locals($threadID,got1stMsg) == 0} {
 	$locals($threadID,wtojid) configure -state disabled  \
-	  -bg $prefs(bgColGeneral)
+	  -bg $bg
 	set locals($threadID,got1stMsg) 1
     }
     
@@ -720,7 +733,7 @@ proc ::Jabber::Chat::PutMessageInHistoryFile {jid msg} {
 #       dialog displayed.
 
 proc ::Jabber::Chat::BuildHistory {jid} {
-    global  sysFont prefs this
+    global  prefs this
     variable uidhist
     upvar ::Jabber::jprefs jprefs
     

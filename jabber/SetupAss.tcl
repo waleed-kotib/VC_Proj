@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: SetupAss.tcl,v 1.12 2003-12-10 15:21:43 matben Exp $
+# $Id: SetupAss.tcl,v 1.13 2003-12-13 17:54:41 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -28,7 +28,7 @@ namespace eval ::Jabber::SetupAss::  {
 }
 
 proc ::Jabber::SetupAss::SetupAss {w} {
-    global  this sysFont prefs
+    global  this prefs
     
     variable finished
 
@@ -41,36 +41,38 @@ proc ::Jabber::SetupAss::SetupAss {w} {
     }
     wm title $w [::msgcat::mc {Setup Assistant}]
     
+    set fontSB [option get . fontSmallBold {}]
+    
     set ns [namespace current]
     set su $w.su
-    wizard::wizard $su -background $prefs(bgColGeneral)  \
+    wizard::wizard $su  \
       -closecommand [list [namespace current]::DoClose $w]   \
       -finishcommand [list [namespace current]::DoFinish $w]  \
       -nextpagecommand [list [namespace current]::NextPage $w]
     pack $su -expand 1 -fill both
     
     # Front page.
-    set p1 [$su newpage "intro" -background $prefs(bgColGeneral)   \
+    set p1 [$su newpage "intro"   \
       -headtext [::msgcat::mc suheadtxt]]
     pack [frame $p1.fr] -padx 10 -pady 8 -side top -anchor w
-    message $p1.fr.msg1 -width 260 -font $sysFont(s) -anchor w -text   \
+    message $p1.fr.msg1 -width 260 -anchor w -text   \
       [::msgcat::mc suintro1]
-    message $p1.fr.msg2 -width 260 -font $sysFont(s) -anchor w -text   \
+    message $p1.fr.msg2 -width 260 -anchor w -text   \
       [::msgcat::mc suintro2]
-    message $p1.fr.msg3 -width 260 -font $sysFont(s) -anchor w -text   \
+    message $p1.fr.msg3 -width 260 -anchor w -text   \
       [::msgcat::mc suintro3]
     pack $p1.fr.msg1 $p1.fr.msg2 $p1.fr.msg3 -side top -anchor w -fill x -pady 4
     
     # Server.
     set p2 [$su newpage "server" -headtext [::msgcat::mc {Jabber Server}]]
     pack [frame $p2.fr] -padx 10 -pady 8 -side top -anchor w
-    message $p2.fr.msg1 -width 260 -font $sysFont(s) -text   \
+    message $p2.fr.msg1 -width 260 -text   \
       [::msgcat::mc suservmsg]
     button $p2.fr.bt -text [::msgcat::mc Get] \
       -command [list [namespace current]::ServersDlg .jsuserv]
-    message $p2.fr.msg2 -width 200 -font $sysFont(s) -text   \
+    message $p2.fr.msg2 -width 200 -text   \
       "Get list of public and open Jabber servers"
-    label $p2.fr.la -font $sysFont(sb) -text "[::msgcat::mc Server]:"
+    label $p2.fr.la -font $fontSB -text "[::msgcat::mc Server]:"
     entry $p2.fr.serv -width 28 -textvariable ${ns}::server \
        -validate key -validatecommand {::Jabber::ValidateJIDChars %S}
     grid $p2.fr.msg1 -sticky n -columnspan 2 -row 0
@@ -82,10 +84,10 @@ proc ::Jabber::SetupAss::SetupAss {w} {
     # Username & Password.
     set p3 [$su newpage "username" -headtext [::msgcat::mc {Username & Password}]]
     pack [frame $p3.fr] -padx 10 -pady 8 -side top -anchor w
-    message $p3.fr.msg1 -width 260 -font $sysFont(s) -text   \
+    message $p3.fr.msg1 -width 260 -text   \
       [::msgcat::mc suusermsg]
-    label $p3.fr.lan -font $sysFont(sb) -text "[::msgcat::mc Username]:"
-    label $p3.fr.lap -font $sysFont(sb) -text "[::msgcat::mc Password]:"
+    label $p3.fr.lan -font $fontSB -text "[::msgcat::mc Username]:"
+    label $p3.fr.lap -font $fontSB -text "[::msgcat::mc Password]:"
     entry $p3.fr.name -width 28 -textvariable ${ns}::username \
        -validate key -validatecommand {::Jabber::ValidateJIDChars %S}
     entry $p3.fr.pass -width 28 -textvariable ${ns}::password \
@@ -99,7 +101,7 @@ proc ::Jabber::SetupAss::SetupAss {w} {
     # Register?
     set p4 [$su newpage "register" -headtext [::msgcat::mc Register]]
     pack [frame $p4.fr] -padx 10 -pady 8 -side top -anchor w
-    message $p4.fr.msg1 -width 260 -font $sysFont(s) -text   \
+    message $p4.fr.msg1 -width 260 -text   \
       [::msgcat::mc suregmsg]
     button $p4.fr.btreg -text "  [::msgcat::mc {Register Now}]... "  \
       -command [namespace current]::DoRegister
@@ -109,7 +111,7 @@ proc ::Jabber::SetupAss::SetupAss {w} {
     # Finish.
     set p5 [$su newpage "fin" -headtext [::msgcat::mc Finished]]
     pack [frame $p5.fr] -padx 10 -pady 8 -side top -anchor w
-    message $p5.fr.msg1 -width 260 -font $sysFont(s) -text   \
+    message $p5.fr.msg1 -width 260 -text   \
       [::msgcat::mc sufinmsg]
     label $p5.fr.piga -image [::UI::GetIcon igelpiga]
     grid $p5.fr.msg1 -sticky n
@@ -170,7 +172,7 @@ proc ::Jabber::SetupAss::DoFinish {w} {
 }
 
 proc ::Jabber::SetupAss::ServersDlg {w} {
-    global  sysFont this prefs
+    global  this prefs
 
     variable server
     variable finishedServ 0
@@ -195,6 +197,8 @@ proc ::Jabber::SetupAss::ServersDlg {w} {
     }
     wm title $w {Public Jabber Servers}
     
+    set fontSB [option get . fontSmallBold {}]
+    
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
        
@@ -210,7 +214,7 @@ proc ::Jabber::SetupAss::ServersDlg {w} {
     pack $frbot -side bottom -fill both -padx 8 -pady 6
     
     # List of servers.
-    pack [label $w.frall.topl -text "List of open Jabber servers:" -font $sysFont(sb)] \
+    pack [label $w.frall.topl -text "List of open Jabber servers:" -font $fontSB] \
       -side top -anchor w -padx 4 -pady 4
     set wtbfr $w.frall.wtbfr
     pack [frame $wtbfr -borderwidth 1 -relief sunken] -side top -fill both \
@@ -218,8 +222,7 @@ proc ::Jabber::SetupAss::ServersDlg {w} {
     set wysc $wtbfr.ysc
     set wtbl $wtbfr.wtbl
     tablelist::tablelist $wtbl \
-      -columns [list 16 Address 30 Name]  \
-      -font $sysFont(s) -labelfont $sysFont(s) -background white  \
+      -columns [list 16 Address 30 Name] -background white  \
       -yscrollcommand [list $wysc set] -stretch all \
       -labelbackground #cecece -stripebackground #dedeff -width 70 -height 16
     scrollbar $wysc -orient vertical -command [list $wtbl yview]

@@ -5,12 +5,20 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.25 2003-12-10 15:21:43 matben Exp $
+# $Id: Roster.tcl,v 1.26 2003-12-13 17:54:41 matben Exp $
 
 package provide Roster 1.0
 
 namespace eval ::Jabber::Roster:: {
     
+    # Use option database for customization. 
+    # Use priority 30 just to override the widgetDefault values!
+    set fontS [option get . fontSmall {}]
+    set fontSB [option get . fontSmallBold {}]
+
+    #option add *Roster*Tree.font          $fontS           30
+    #option add *Roster*Tree.fontDir       $fontSB          30
+
     variable wtree    
     variable servtxt
     
@@ -111,7 +119,7 @@ proc ::Jabber::Roster::Show {w} {
 #       shows window.
 
 proc ::Jabber::Roster::BuildToplevel {w} {
-    global  this sysFont prefs
+    global  this prefs
 
     variable wtop
     variable servtxt
@@ -132,6 +140,8 @@ proc ::Jabber::Roster::BuildToplevel {w} {
     wm title $w {Roster (Contact list)}
     wm protocol $w WM_DELETE_WINDOW [list [namespace current]::CloseDlg $w]
     
+    set fontSB [option get . fontSmallBold {}]
+    
     # Toplevel menu for mac only. Only when multiinstance.
     if {0 && [string match "mac*" $this(platform)]} {
 	set wmenu ${w}.menu
@@ -149,7 +159,7 @@ proc ::Jabber::Roster::BuildToplevel {w} {
     # Top frame for info.
     set frtop $w.frall.frtop
     pack [frame $frtop] -fill x -side top -anchor w -padx 10 -pady 4
-    label $frtop.la -text {Connected to:} -font $sysFont(sb)
+    label $frtop.la -text {Connected to:} -font $fontSB
     label $frtop.laserv -textvariable [namespace current]::servtxt
     pack $frtop.la $frtop.laserv -side left -pady 4
     set servtxt {not connected}
@@ -172,7 +182,7 @@ proc ::Jabber::Roster::BuildToplevel {w} {
 #       w
 
 proc ::Jabber::Roster::Build {w} {
-    global  sysFont this wDlgs prefs
+    global  this wDlgs prefs
         
     variable wtree    
     variable servtxt
@@ -182,8 +192,8 @@ proc ::Jabber::Roster::Build {w} {
     variable selItem
     upvar ::Jabber::jprefs jprefs
         
-    # The frame.
-    frame $w -borderwidth 0 -relief flat
+    # The frame of class Roster.
+    frame $w -borderwidth 0 -relief flat -class Roster
 
     # Tree frame with scrollbars.
     set wbox $w.box
@@ -197,13 +207,12 @@ proc ::Jabber::Roster::Build {w} {
 	lappend opts -backgroundimage $jprefs(rost,bgImage)
     }
     set wtree [eval {::tree::tree $wtree -width 180 -height 300 -silent 1  \
-      -openicons triangle -treecolor {} -scrollwidth 400  \
+      -scrollwidth 400  \
       -xscrollcommand [list $wxsc set]       \
       -yscrollcommand [list $wysc set]       \
       -selectcommand [namespace current]::SelectCmd   \
-      -doubleclickcommand [namespace current]::DoubleClickCmd   \
-      -highlightcolor #6363CE -highlightbackground $prefs(bgColGeneral)} $opts]
-
+      -doubleclickcommand [namespace current]::DoubleClickCmd} $opts]
+    
     if {[string match "mac*" $this(platform)]} {
 	$wtree configure -buttonpresscommand [list ::Jabber::UI::Popup roster] \
 	  -eventlist [list [list <Control-Button-1> [list ::Jabber::UI::Popup roster]]]
@@ -942,7 +951,7 @@ proc ::Jabber::Roster::NewOrEditItem {which args} {
 #       "cancel" or "add".
 
 proc ::Jabber::Roster::NewOrEditDlg {which args} {
-    global  sysFont this prefs wDlgs
+    global  this prefs wDlgs
 
     variable uid
     variable selItem
@@ -1011,6 +1020,9 @@ proc ::Jabber::Roster::NewOrEditDlg {which args} {
     set oldName $name
     set oldUsersGroup $usersGroup
     
+    set fontS [option get . fontSmall {}]
+    set fontSB [option get . fontSmallBold {}]
+    
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised]   \
       -fill both -expand 1 -ipadx 12 -ipady 4
@@ -1020,7 +1032,7 @@ proc ::Jabber::Roster::NewOrEditDlg {which args} {
     } elseif {[string equal $which "edit"]} {
 	set msg [::msgcat::mc jarostset $jid]
     }
-    message $w.frall.msg -width 300 -font $sysFont(s) -text $msg
+    message $w.frall.msg -width 300 -text $msg
     pack $w.frall.msg -side top -fill both -expand 1
 
     # Entries etc.
@@ -1031,17 +1043,17 @@ proc ::Jabber::Roster::NewOrEditDlg {which args} {
     set wjid $frmid.ejid
     
     label $frjid.ljid -text "[::msgcat::mc {Jabber user id}]:"  \
-      -font $sysFont(sb) -anchor e
+      -font $fontSB -anchor e
     label $wtrptpop -bd 2 -relief raised -image [::UI::GetIcon popupbt]
     pack $frjid.ljid $wtrptpop -side left
     
     entry $wjid -width 24 -textvariable $token\(jid)
-    label $frmid.lnick -text "[::msgcat::mc {Nick name}]:" -font $sysFont(sb) \
+    label $frmid.lnick -text "[::msgcat::mc {Nick name}]:" -font $fontSB \
       -anchor e
     entry $frmid.enick -width 24 -textvariable $token\(name)
-    label $frmid.lgroups -text "[::msgcat::mc Group]:" -font $sysFont(sb) -anchor e
+    label $frmid.lgroups -text "[::msgcat::mc Group]:" -font $fontSB -anchor e
     
-    ::combobox::combobox $frmid.egroups -font $sysFont(s) -width 12  \
+    ::combobox::combobox $frmid.egroups -width 12  \
       -textvariable $token\(usersGroup)
     eval {$frmid.egroups list insert end} "None $allGroups"
         
@@ -1072,7 +1084,7 @@ proc ::Jabber::Roster::NewOrEditDlg {which args} {
 	# Present subscription.
 	set frsub $frmid.frsub
 	label $frmid.lsub -text "[::msgcat::mc Subscription]:"  \
-	  -font $sysFont(sb) -anchor e
+	  -font $fontSB -anchor e
 	frame $frsub
 	foreach val {none to from both} txt {None To From Both} {
 	    radiobutton ${frsub}.${val} -text [::msgcat::mc $txt]  \
@@ -1085,9 +1097,9 @@ proc ::Jabber::Roster::NewOrEditDlg {which args} {
 	set frvcard $frmid.vcard
 	frame $frvcard
 	pack [label $frvcard.lbl -text "[::msgcat::mc jasubgetvcard]:"  \
-	  -font $sysFont(sb)] -side left -padx 2
+	  -font $fontSB] -side left -padx 2
 	pack [button $frvcard.bt -text " [::msgcat::mc {Get vCard}]..."  \
-	  -font $sysFont(s) -command [list ::VCard::Fetch other $jid]] \
+	  -font $fontS -command [list ::VCard::Fetch other $jid]] \
 	  -side right -padx 2
     }
     grid $frjid -column 0 -row 0 -sticky e
@@ -1107,7 +1119,7 @@ proc ::Jabber::Roster::NewOrEditDlg {which args} {
     }
     pack $frmid -side top -fill both -expand 1
     if {[string equal $which "edit"]} {
-	$frmid.ejid configure -state disabled -bg $prefs(bgColGeneral)
+	$frmid.ejid configure -state disabled
     }
     if {[string equal $which "new"]} {
 	focus $frmid.ejid

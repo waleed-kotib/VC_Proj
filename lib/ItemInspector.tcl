@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ItemInspector.tcl,v 1.11 2003-12-12 13:46:44 matben Exp $
+# $Id: ItemInspector.tcl,v 1.12 2003-12-13 17:54:41 matben Exp $
 
 namespace eval ::ItemInspector::  {
     
@@ -121,7 +121,7 @@ proc ::ItemInspector::ItemInspector {wtop which args} {
 #       Builds one inspector window for the specified item.
 
 proc ::ItemInspector::Build {wtop itemId args} {
-    global  sysFont prefs fontSize2Points fontPoints2Size  \
+    global  prefs fontSize2Points fontPoints2Size  \
       dashShort2Full this
     
     Debug 2 "::ItemInspector::Build wtop=$wtop, itemId=$itemId"
@@ -173,6 +173,8 @@ proc ::ItemInspector::Build {wtop itemId args} {
     }
     wm title $w {Item Inspector}
     
+    set fontSB [option get . fontSmallBold {}]
+    
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
     set w1 $w.frall.fr1
@@ -202,21 +204,21 @@ proc ::ItemInspector::Build {wtop itemId args} {
     # Item type.
     set iLine 0
     set itemType [$wCan type $itemId]
-    label $frtot.lbl$iLine -text "item type:" -font $sysFont(sb)
+    label $frtot.lbl$iLine -text "item type:" -font $fontSB
     entry $frtot.ent$iLine -width 30
     $frtot.ent$iLine insert end $itemType
-    $frtot.ent$iLine configure -state disabled -bg $prefs(bgColGeneral)
+    $frtot.ent$iLine configure -state disabled
     grid $frtot.lbl$iLine -column 0 -row $iLine -sticky e -padx 2 -pady 1
     grid $frtot.ent$iLine -column 1 -row $iLine -sticky w -padx 2 -pady 1
     lappend listOfAllOptions [list type $itemType $frtot.ent$iLine]
     
     # Coordinates.
     incr iLine
-    label $frtot.lbl$iLine -text {coordinates:} -font $sysFont(sb)
+    label $frtot.lbl$iLine -text {coordinates:} -font $fontSB
     entry $frtot.ent$iLine -width 30
     set theCoords [$wCan coords $itemId]
     $frtot.ent$iLine insert end $theCoords
-    $frtot.ent$iLine configure -state disabled -bg $prefs(bgColGeneral)
+    $frtot.ent$iLine configure -state disabled
     grid $frtot.lbl$iLine -column 0 -row $iLine -sticky e -padx 2 -pady 1
     grid $frtot.ent$iLine -column 1 -row $iLine -sticky w -padx 2 -pady 1
     lappend listOfAllOptions [list coords $theCoords $frtot.ent$iLine]
@@ -260,7 +262,7 @@ proc ::ItemInspector::Build {wtop itemId args} {
 	    set val $oneliner
 	}
 	set opname [string trim $op -]
-	label $frtot.lbl$iLine -text "$opname:" -font $sysFont(sb)
+	label $frtot.lbl$iLine -text "$opname:" -font $fontSB
 	
 	# Intercept options for nontext output.
 	switch -exact -- $op {
@@ -275,10 +277,9 @@ proc ::ItemInspector::Build {wtop itemId args} {
 		}
 		set wMenu [tk_optionMenu $frtot.menu$iLine   \
 		  ::ItemInspector::${w}::menuBtVar($opname) transparent fill]
-		$wMenu configure -font $sysFont(sb)
-		$frtot.menu$iLine configure -font $sysFont(sb)  \
-		  -highlightthickness 0  \
-		  -background $prefs(bgColGeneral) -foreground black
+		$wMenu configure -font $fontSB
+		$frtot.menu$iLine configure -font $fontSB  \
+		  -highlightthickness 0 -foreground black
 		entry $frtot.entent$iLine -width 4 -state disabled
 		if {[string length $val] > 0} {
 		    $frtot.entent$iLine configure $disabledBackground $val
@@ -297,8 +298,7 @@ proc ::ItemInspector::Build {wtop itemId args} {
 		
 		entry $frtot.ent$iLine -width 30 
 		$frtot.ent$iLine insert end $val
-		$frtot.ent$iLine configure -state disabled   \
-		  -bg $prefs(bgColGeneral)
+		$frtot.ent$iLine configure -state disabled
 		
 		# Pure menu options.
 	    } 
@@ -335,12 +335,11 @@ proc ::ItemInspector::Build {wtop itemId args} {
 		set wMenu [eval {tk_optionMenu $frtot.ent$iLine   \
 		  ::ItemInspector::${w}::menuBtVar($opname)}  \
 		  $theMenuOpts($opname)]
-		$wMenu configure -font $sysFont(sb) 
+		$wMenu configure -font $fontSB 
 		if {$argsArr(-state) == "disabled"} {
 		    $frtot.ent$iLine configure -state disabled
 		}
-		$frtot.ent$iLine configure -font $sysFont(sb) -highlightthickness 0  \
-		  -background $prefs(bgColGeneral) -foreground black
+		$frtot.ent$iLine configure -font $fontSB -highlightthickness 0
 	    } 
 	    default  {
 		
@@ -547,7 +546,7 @@ proc ::ItemInspector::ChooseItemColor {wEntry} {
 #
 
 proc ::ItemInspector::Movie {wtop winfr} {
-    global  sysFont prefs this
+    global  prefs this
     
     variable uid
     variable skipMovieOpts
@@ -582,6 +581,8 @@ proc ::ItemInspector::Movie {wtop winfr} {
 	#
     }
     wm title $w {Movie Inspector}
+    set fontSB [option get . fontSmallBold {}]
+    
     set wmov ${winfr}.m
     set ispano [$wmov ispanoramic]
     set isvisual [$wmov isvisual]
@@ -612,7 +613,7 @@ proc ::ItemInspector::Movie {wtop winfr} {
 		continue
 	    }
 	    incr i
-	    label $frtot.l$i -text "$opname:" -font $sysFont(sb)
+	    label $frtot.l$i -text "$opname:" -font $fontSB
 	    switch -- $op {
 		-controller - -custombutton - -loadintoram - -loopstate -
 		-mcedit - -palindromeloopstate {
@@ -620,10 +621,8 @@ proc ::ItemInspector::Movie {wtop winfr} {
 		    set menuBtVar($op) $boolShort2Full($val)
 		    set wMenu [eval {tk_optionMenu $frtot.e$i  \
 		      ::ItemInspector::${w}::menuBtVar($op)} true false]
-		    $wMenu configure -font $sysFont(sb) 
-		    $frtot.e$i configure -font $sysFont(sb)  \
-		      -highlightthickness 0  \
-		      -background $prefs(bgColGeneral) -foreground black		    
+		    $wMenu configure -font $fontSB 
+		    $frtot.e$i configure -font $fontSB -highlightthickness 0
 		}
 		default {
 		    set ::ItemInspector::${w}::tvar($op) $val
@@ -693,7 +692,7 @@ proc ::ItemInspector::MovieCancel {w} {
 
 
 proc ::ItemInspector::Broken {wtop id args} {
-    global  this sysFont
+    global  this
         
     set w .itin${id}
     if {[winfo exists $w]} {
@@ -708,6 +707,8 @@ proc ::ItemInspector::Broken {wtop id args} {
     }
     wm title $w {Item Inspector}
     set wcan [::UI::GetCanvasFromWtop $wtop]
+    
+    set fontSB [option get . fontSmallBold {}]
     
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
@@ -726,7 +727,7 @@ proc ::ItemInspector::Broken {wtop id args} {
 	if {$key == "-optlist"} {
 	    foreach {optkey optvalue} $value {
 		set name [string totitle [string trimright $optkey :]]
-		label $fr.l$i -text $name -font $sysFont(sb)
+		label $fr.l$i -text $name -font $fontSB
 		label $fr.v$i -text $optvalue
 		grid $fr.l$i -row $i -column 0 -sticky e
 		grid $fr.v$i -row $i -column 1 -sticky w
@@ -734,7 +735,7 @@ proc ::ItemInspector::Broken {wtop id args} {
 	    }
 	} else {
 	    set name [string totitle [string trimleft $key -]]
-	    label $fr.l$i -text $name -font $sysFont(sb)
+	    label $fr.l$i -text $name -font $fontSB
 	    label $fr.v$i -text $value
 	    grid $fr.l$i -row $i -column 0 -sticky e
 	    grid $fr.v$i -row $i -column 1 -sticky w

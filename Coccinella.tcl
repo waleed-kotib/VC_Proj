@@ -15,7 +15,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.17 2003-12-12 16:18:40 matben Exp $
+# $Id: Coccinella.tcl,v 1.18 2003-12-13 17:54:40 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -204,6 +204,8 @@ if {[string equal $this(platform) "macintosh"] && [string equal $thisPath ":"]} 
 }
 set this(path) $thisPath
 set this(script) $thisScript
+set this(imagePath) [file join $this(path) images]
+set this(resourcedbPath) [file join $this(path) resources]
 
 # Need a tmp directory, typically in a StarKit when QuickTime movies are opened.
 if {[info exists env(TMP)] && [file exists $env(TMP)]} {
@@ -229,8 +231,6 @@ if {[info exists env(TMP)] && [file exists $env(TMP)]} {
 if {![file isdirectory $this(tmpDir)]} {
     file mkdir $this(tmpDir)
 }
-set this(imagePath) [file join $this(path) images]
-set this(resourcedbPath) [file join $this(path) resources]
 
 # Privaria-specific stuff
 if {$privariaFlag} {
@@ -338,47 +338,19 @@ if {[string match "mac*" $this(platform)]} {
 
 set state(launchSecs) [clock seconds]
 
-# Fonts needed in the splash screen and elsewhere.
-# These should work allright for latin character sets.
-if {1} {
-    switch -- $this(platform) {
-	unix {
-	    set sysFont(s) {Helvetica -10 normal}
-	    set sysFont(sb) {Helvetica -10 bold}
-	    set sysFont(m) $sysFont(s)
-	    set sysFont(l) {Helvetica -18 normal}
-	}
-	macintosh {
-	    set sysFont(s) [font create -family Geneva -size 9]
-	    set sysFont(sb) [font create -family Geneva -size 9 -weight bold]
-	    set sysFont(m) application
-	    set sysFont(l) [font create -family Helvetica -size 18]
-	}
-	macosx {
-	    set sysFont(s) [font create -family {Lucida Grande} -size 11]
-	    set sysFont(sb) [font create -family {Lucida Grande} -size 11 -weight bold]
-	    set sysFont(m) application
-	    set sysFont(l) [font create -family Helvetica -size 18]
-	}
-	windows {
-	    set sysFont(s) {Arial 8 normal}
-	    set sysFont(sb) {Arial 8 bold}
-	    set sysFont(m) $sysFont(s)
-	    set sysFont(l) {Helvetica 18 normal}
-	}
-    }
-} else {
-    
-    # Fill in nonlatin character sets here appropriate for your system.
-}
-
 # Read resource database files in a hierarchical order.
+# 1) always read the default rdb file.
+# 2) read rdb file for this specific platform, if exists.
+# 3) read rdb file for any theme we have chosen.
 option readfile [file join $this(resourcedbPath) default.rdb] startupFile
 set f [file join $this(resourcedbPath) $this(platform).rdb]
 if {[file exists $f]} {
     option readfile $f startupFile
 }
-
+if {$debugLevel > 1} {
+    option readfile [file join $this(resourcedbPath) theme.rdb] startupFile
+}
+    
 # The message catalog for language customization.
 if {![info exists env(LANG)]} {
     set env(LANG) en

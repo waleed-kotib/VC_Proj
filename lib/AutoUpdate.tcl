@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: AutoUpdate.tcl,v 1.4 2003-11-30 11:46:47 matben Exp $
+# $Id: AutoUpdate.tcl,v 1.5 2003-12-13 17:54:41 matben Exp $
 
 package require tinydom
 package require http 2.3
@@ -92,7 +92,7 @@ proc ::AutoUpdate::Command {token} {
 
 
 proc ::AutoUpdate::Dialog {releaseAttr message changesList} {
-    global  this sysFont prefs
+    global  this prefs
     variable noautocheck
     variable newVersion
     
@@ -108,21 +108,22 @@ proc ::AutoUpdate::Dialog {releaseAttr message changesList} {
 	
     }
     wm title $w "New Version"
+    set fontSB [option get . fontSmallBold {}]
     
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
     
     # Text.
     set wtext $w.frall.text
-    text $wtext -width 60 -height 16 -font $sysFont(s) -wrap word \
+    text $wtext -width 60 -height 16 -wrap word \
       -borderwidth 1 -relief sunken -background white
     pack $wtext
     
     $wtext tag configure msgtag -lmargin1 10 -spacing1 4 -spacing3 4 \
-      -font $sysFont(sb)
+      -font $fontSB
     $wtext tag configure attrtag -lmargin1 10 -spacing1 2 -spacing3 2
     $wtext tag configure changestag -lmargin1 10 -spacing1 4 -spacing3 4 \
-      -font $sysFont(sb)
+      -font $fontSB
     $wtext tag configure itemtag -lmargin1 20 -lmargin2 30 \
       -spacing1 2 -spacing3 2
     ::Text::ConfigureLinkTagForTextWidget $wtext urltag activeurltag
