@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Conference.tcl,v 1.35 2005-01-31 14:06:55 matben Exp $
+# $Id: Conference.tcl,v 1.36 2005-02-09 14:30:29 matben Exp $
 
 package provide Conference 1.0
 
@@ -538,6 +538,11 @@ proc ::Conference::BuildCreate {args} {
     
     # Grab and focus.
     focus $frtop.eroom
+    
+    set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jcreateroom)]]
+    if {$nwin == 1} {
+	::UI::SetWindowGeometry $w $wDlgs(jcreateroom)
+    }
     
     # Wait here for a button press and window to be destroyed. BAD?
     tkwait window $w

@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.81 2005-02-08 08:57:16 matben Exp $
+# $Id: jabberlib.tcl,v 1.82 2005-02-09 14:30:32 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -117,7 +117,7 @@
 #      jlibName vcard_get to cmd
 #      jlibName vcard_set cmd ?args?
 #      
-#  o using the experimental 'conference' protocol:
+#  o using the experimental 'conference' protocol:  OUTDATED!
 #      jlibName conference get_enter room cmd
 #      jlibName conference set_enter room subelements cmd
 #      jlibName conference get_create server cmd
@@ -128,14 +128,6 @@
 #      jlibName conference hashandnick room
 #      jlibName conference roomname room
 #      jlibName conference allroomsin
-#      
-#  o using the old 'groupchat-1.0' protocol:
-#      jlibName groupchat enter room nick
-#      jlibName groupchat exit room
-#      jlibName groupchat mynick room ?nick?
-#      jlibName groupchat status room
-#      jlibName groupchat participants room
-#      jlibName groupchat allroomsin
 #      
 #      
 #   The callbacks given for any of the '-iqcommand', '-messagecommand', 
@@ -209,6 +201,7 @@ package require roster
 package require service
 package require stanzaerror
 package require streamerror
+package require groupchat
 
 package provide jlib 2.0
 
@@ -247,9 +240,6 @@ namespace eval jlib {
 
 # Collects the 'conference' subcommand.
 namespace eval jlib::conference { }
-
-# Collects the 'groupchat' subcommand.
-namespace eval jlib::groupchat { }
 
 # jlib::new --
 #
@@ -296,8 +286,6 @@ proc jlib::new {rostername clientcmd args} {
 	variable agent
 	# Cache for the 'conference' subcommand.
 	variable conf
-	# Cache for the 'groupchat' subcommand.
-	variable gchat	
     }
             
     # Set simpler variable names.
@@ -306,7 +294,6 @@ proc jlib::new {rostername clientcmd args} {
     upvar ${jlibname}::prescmd  prescmd
     upvar ${jlibname}::opts     opts
     upvar ${jlibname}::conf     conf
-    upvar ${jlibname}::gchat    gchat
     upvar ${jlibname}::locals   locals
     
     array set opts {
@@ -359,8 +346,8 @@ proc jlib::new {rostername clientcmd args} {
     set locals(myjid) ""
     
     # Init conference and groupchat state.
-    set conf(allroomsin) {}    
-    set gchat(allroomsin) {}
+    set conf(allroomsin) {}
+    jlib::groupchat::init $jlibname
 
     # Create the actual jlib instance procedure.
     proc $jlibname {cmd args}   \
@@ -3928,132 +3915,6 @@ proc jlib::conference::allroomsin {jlibname} {
     
     set conf(allroomsin) [lsort -unique $conf(allroomsin)]
     return $conf(allroomsin)
-}
-
-#--- namespace jlib::groupchat -------------------------------------------------
-
-# jlib::groupchat --
-#
-#       Provides API's for the old-style groupchat protocol, 'groupchat 1.0'.
-
-proc jlib::groupchat {jlibname cmd args} {
-    
-    # Which command? Just dispatch the command to the right procedure.
-    set ans [eval {[namespace current]::groupchat::${cmd} $jlibname} $args]
-    return $ans
-}
-
-# jlib::groupchat::enter --
-#
-#       Enter room using the 'gc-1.0' protocol by sending <presence>.
-#
-#       args:  -command callback
-
-proc jlib::groupchat::enter {jlibname room nick args} {
-
-    upvar ${jlibname}::gchat gchat
-    
-    set room [string tolower $room]
-    set jid ${room}/${nick}
-    eval {[namespace parent]::send_presence $jlibname -to $jid} $args
-    set gchat($room,mynick) $nick
-    
-    # This is not foolproof since it may not always success.
-    lappend gchat(allroomsin) $room
-    [namespace parent]::service::setroomprotocol $jlibname $room "gc-1.0"
-    set gchat(allroomsin) [lsort -unique $gchat(allroomsin)]
-    return ""
-}
-
-proc jlib::groupchat::exit {jlibname room} {
-
-    upvar ${jlibname}::gchat gchat
-    upvar ${jlibname}::lib lib
-    
-    set room [string tolower $room]
-    if {[info exists gchat($room,mynick)]} {
-	set nick $gchat($room,mynick)
-    } else {
-	return -code error "Unknown nick name for room \"$room\""
-    }
-    set jid ${room}/${nick}
-    [namespace parent]::send_presence $jlibname -to $jid -type "unavailable"
-    unset gchat($room,mynick)
-    set ind [lsearch -exact $gchat(allroomsin) $room]
-    if {$ind >= 0} {
-	set gchat(allroomsin) [lreplace $gchat(allroomsin) $ind $ind]
-    }
-    $lib(rostername) clearpresence "${room}*"
-    return ""
-}
-
-proc jlib::groupchat::mynick {jlibname room args} {
-
-    upvar ${jlibname}::gchat gchat
-
-    set room [string tolower $room]
-    if {[llength $args] == 0} {
-	if {[info exists gchat($room,mynick)]} {
-	    return $gchat($room,mynick)
-	} else {
-	    return -code error "Unknown nick name for room \"$room\""
-	}
-    } elseif {[llength $args] == 1} {
-	
-	# This should work automatically.
-	enter $jlibname $room $args
-    } else {
-	return -code error "Wrong number of arguments"
-    }
-}
-
-proc jlib::groupchat::status {jlibname room args} {
-
-    upvar ${jlibname}::gchat gchat
-
-    set room [string tolower $room]
-    if {[info exists gchat($room,mynick)]} {
-	set nick $gchat($room,mynick)
-    } else {
-	return -code error "Unknown nick name for room \"$room\""
-    }
-    set jid ${room}/${nick}
-    eval {[namespace parent]::send_presence $jlibname -to $jid} $args
-}
-
-proc jlib::groupchat::participants {jlibname room} {
-
-    upvar ${jlibname}::agent agent
-    upvar ${jlibname}::gchat gchat
-    upvar ${jlibname}::lib lib
-
-    set room [string tolower $room]
-    set isroom 0
-    if {[regexp {^[^@]+@([^@ ]+)$} $room match domain]} {
-	if {[info exists agent($domain,groupchat)]} {
-	    set isroom 1
-	}
-    }    
-    if {!$isroom} {
-	return -code error "Not recognized \"$room\" as a groupchat room"
-    }
-    
-    # The rosters presence elements should give us all info we need.
-    set everyone {}
-    foreach userAttr [$lib(rostername) getpresence $room -type available] {
-	unset -nocomplain attrArr
-	array set attrArr $userAttr
-	lappend everyone ${room}/$attrArr(-resource)
-    }
-    return $everyone
-}
-
-proc jlib::groupchat::allroomsin {jlibname} {
-
-    upvar ${jlibname}::gchat gchat
-
-    set gchat(allroomsin) [lsort -unique $gchat(allroomsin)]
-    return $gchat(allroomsin)
 }
 
 #-------------------------------------------------------------------------------

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.58 2005-01-31 14:06:56 matben Exp $
+# $Id: Login.tcl,v 1.59 2005-02-09 14:30:30 matben Exp $
 
 package provide Login 1.0
 
@@ -161,6 +161,9 @@ proc ::Login::Dlg { } {
     bind $w <Return>  [list $frbot.btok invoke]
     bind $w <Escape>  [list ::Login::DoCancel $w]
     bind $w <Destroy> [list ::Login::DoCancel $w]
+    if {$password == ""} {
+	focus $frmid.epass
+    }
 }
 
 proc ::Login::LoadProfiles { } {

@@ -2,7 +2,7 @@
 # 
 #       Provides some specific ICQ handling elements.
 #       
-# $Id: ICQ.tcl,v 1.5 2004-11-27 14:52:52 matben Exp $
+# $Id: ICQ.tcl,v 1.6 2005-02-09 14:30:27 matben Exp $
 
 namespace eval ::ICQ:: {
     
@@ -32,7 +32,7 @@ proc ::ICQ::BrowseSetHook {from subiq} {
 
     set server [::Jabber::GetServerJid]
     if {[jlib::jidequal $from $server]} {
-	::ICQ::InvestigateRoster
+	InvestigateRoster
     }
 }
 
@@ -42,14 +42,14 @@ proc ::ICQ::DiscoInfoHook {type from subiq args} {
     
     set cattype [lindex [::Jabber::DiscoCmd types $from] 0]
     if {$cattype == "gateway/icq"} {
-	::ICQ::InvestigateRoster
+	InvestigateRoster
     }
 }
 
 proc ::ICQ::InvestigateRoster { } {
     variable vcardnick
     
-    set wtree [::Roster::GetWtree]
+    set wtree  [::Roster::GetWtree]
     set server [::Jabber::GetServerJid]
     set icqHosts [::Jabber::JlibCmd service gettransportjids "icq"]
     
@@ -58,39 +58,34 @@ proc ::ICQ::InvestigateRoster { } {
     # We must loop through all roster items to search for ICQ users.
     foreach v [$wtree find withtag all] {
 	set tags [$wtree itemconfigure $v -tags]
+	if {[lsearch $tags user] < 0} {
+	    continue
+	}
+	set jid [lindex $v end]
+	set mjid [jlib::jidmap $jid]
+	jlib::splitjidex $mjid node host res
 	
-	switch -- $tags {
-	    "" - head - group {
-		# skip
-	    } 
-	    default {
-		set jid [lindex $v end]
-		set mjid [jlib::jidmap $jid]
-		jlib::splitjidex $mjid node host res
+	# Not a user.
+	if {$node == ""} {
+	    continue
+	}
+	
+	# Allready got it.
+	if {[info exists vcardnick($mjid)]} {
+	    continue
+	}
+	
+	# Exclude jid's that belong to our login jabber server.
+	if {[string equal $server $host]} {
+	    continue
+	}
+	if {[lsearch -exact $icqHosts $host] >= 0} {
+	    set name [::Jabber::RosterCmd getname $mjid]
+	    if {$name == ""} {
 		
-		# Not a user.
-		if {$node == ""} {
-		    continue
-		}
-		
-		# Allready got it.
-		if {[info exists vcardnick($mjid)]} {
-		    continue
-		}
-		
-		# Exclude jid's that belong to our login jabber server.
-		if {[string equal $server $host]} {
-		    continue
-		}
-		if {[lsearch -exact $icqHosts $host] >= 0} {
-		    set name [::Jabber::RosterCmd getname $mjid]
-		    if {$name == ""} {
-			
-			# Get vCard
-			::Jabber::JlibCmd vcard_get $jid \
-			  [list [namespace current]::VCardGetCB $jid]
-		    }
-		}
+		# Get vCard
+		::Jabber::JlibCmd vcard_get $jid \
+		  [list [namespace current]::VCardGetCB $jid]
 	    }
 	}	
     }   

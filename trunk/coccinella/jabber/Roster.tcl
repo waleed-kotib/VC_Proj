@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.116 2005-02-08 13:45:51 matben Exp $
+# $Id: Roster.tcl,v 1.117 2005-02-09 14:30:31 matben Exp $
 
 package provide Roster 1.0
 
@@ -838,7 +838,17 @@ proc ::Roster::PushProc {rostName what {jid {}} args} {
 	    
 	    # This 'isroom' gives wrong answer if a gateway also supports
 	    # conference (groupchat).
-	    if {![$jstate(jlib) service isroom $jid]} {
+	    if {0} {
+		if {![$jstate(jlib) service isroom $jid]} {
+		    eval {Presence $jid3 $type} $args
+		}
+	    }
+	    
+	    # We get presence also for rooms etc which are not roster items.
+	    # Some transports have /registered resource.
+	    if {[$jstate(roster) isitem $jid]} {
+		eval {Presence $jid3 $type} $args
+	    } elseif {[$jstate(roster) isitem $jid3]} {
 		eval {Presence $jid3 $type} $args
 	    }
 		
@@ -922,6 +932,7 @@ proc ::Roster::ExitRoster { } {
 
 # Roster::SetItem --
 #
+#       Callback from roster pushes when getting <item .../>.
 #       Adds a jid item to the tree.
 #
 # Arguments:
@@ -978,8 +989,7 @@ proc ::Roster::SetItem {jid args} {
 	    array set presArr $pres
 	    
 	    # Put in our roster tree.
-	    eval {PutItemInTree $jid $presArr(-type)} \
-	      $args $pres
+	    eval {PutItemInTree $jid $presArr(-type)} $args $pres
 	}
     }
     RemoveEmptyRootDirs
@@ -1206,6 +1216,9 @@ proc ::Roster::PutItemInTree {jid presence args} {
     
     ::Debug 3 "::Roster::PutItemInTree jid=$jid, presence=$presence, args='$args'"
 
+    if {![regexp $presence {(available|unavailable)}]} {
+	return
+    }
     array set argsArr $args
     
     jlib::splitjid $jid jid2 res

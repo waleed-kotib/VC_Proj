@@ -10,6 +10,7 @@
 
 package ifneeded browse 2.0   [list source [file join $dir browse.tcl]]
 package ifneeded disco 0.1    [list source [file join $dir disco.tcl]]
+package ifneeded groupchat 1.0 [list source [file join $dir groupchat.tcl]]
 package ifneeded jlib 2.0     [list source [file join $dir jabberlib.tcl]]
 package ifneeded jlibhttp 0.1 [list source [file join $dir jlibhttp.tcl]]
 package ifneeded jlibsasl 2.0 [list source [file join $dir jlibsasl.tcl]]

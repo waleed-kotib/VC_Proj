@@ -5,9 +5,9 @@
 #      If an 'jabber:x:data' namespaced element is given, the methods
 #      involved with this method are used. Else straight (simple) model.
 #      
-#  Copyright (c) 2002-2003  Mats Bengtsson
+#  Copyright (c) 2002-2005  Mats Bengtsson
 #
-# $Id: JForms.tcl,v 1.17 2004-10-02 13:14:55 matben Exp $
+# $Id: JForms.tcl,v 1.18 2005-02-09 14:30:30 matben Exp $
 # 
 #      Updated to version 2.1 of JEP-0004
 #  

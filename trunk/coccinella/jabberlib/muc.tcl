@@ -5,11 +5,11 @@
 #      protocol as defined by the 'http://jabber.org/protocol/muc*'
 #      namespace.
 #      
-#  Copyright (c) 2003  Mats Bengtsson
+#  Copyright (c) 2003-2005  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: muc.tcl,v 1.19 2005-02-08 08:57:16 matben Exp $
+# $Id: muc.tcl,v 1.20 2005-02-09 14:30:33 matben Exp $
 # 
 ############################# USAGE ############################################
 #
