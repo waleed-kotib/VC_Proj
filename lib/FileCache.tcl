@@ -1,11 +1,12 @@
 # FileCache.tcl --
 #
 #	Simple data base for caching files that has or don't need be transported.
-#	It maps 'key' (see below) to the local absolute native (?) file path.
+#	It maps 'key' (see below) to the local absolute native file path.
+#	Directories may also be time stamped with "best before date".
 #
-#  Copyright (c) 2002  Mats Bengtsson
+#  Copyright (c) 2002-2003  Mats Bengtsson
 #
-# $Id: FileCache.tcl,v 1.2 2003-01-11 16:16:09 matben Exp $
+# $Id: FileCache.tcl,v 1.3 2003-01-30 17:33:56 matben Exp $
 # 
 #       The input key can be: 
 #               1) a full url, must be uri encoded 
@@ -35,6 +36,8 @@
 # ::FileCache::Get key
 # 
 # ::FileCache::IsCached key
+# 
+# ::FileCache::SetDirFiles dir ?pattern?
 
 package require tinyfileutils
 package require uriencode
@@ -46,6 +49,13 @@ namespace eval ::FileCache:: {
     # Main storage in array
     variable cache
     variable basedir [pwd]
+    variable launchtime [clock seconds]
+    
+    # Time stamps for directories.
+    variable bestbeforedir
+    
+    # Any of "never" or "always".
+    variable usecache "always"
 }
 
 proc ::FileCache::SetBasedir {dir} {
@@ -77,7 +87,6 @@ proc ::FileCache::Set {key {locabspath {}}} {
 proc ::FileCache::Get {key} {
 
     variable cache
-    
     set nkey [Normalize $key]
     if {[info exists cache($nkey)]} {
 	set ans $cache($nkey)
@@ -89,19 +98,37 @@ proc ::FileCache::Get {key} {
     return $ans
 }
 
-proc ::FileCache::IsCached {key} {
+# FileCache::IsCached --
+# 
+#       Checks if this key is stored in cache and acceptable.
 
+proc ::FileCache::IsCached {key} {
+    
     variable cache
-    set iscached 0
-    if {[info exists cache([Normalize $key])]} {
-	set iscached 1
-    } elseif {[IsLocal $key]} {
-	set iscached 1
+    variable usecache
+
+    if {[string equal $usecache "never"]} {
+	set iscached 0
+    } else {
+	set iscached 0
+	set nkey [Normalize $key]
+	if {[info exists cache($nkey)]} {
+	    set iscached 1
+	} elseif {[IsLocal $key]} {
+	    set iscached 1
+	}
+	if {$iscached} {
+	    set iscached [::FileCache::Accept $cache($nkey)]
+	}
     }
     return $iscached
 }
 
-proc ::FileCache::SetDirFiles {dir pattern} {
+# FileCache::SetDirFiles --
+# 
+#       Caches all files in this directory that match 'pattern'. 
+
+proc ::FileCache::SetDirFiles {dir {pattern *}} {
 
     if {![string equal [file pathtype $dir] "absolute"]} {
 	return -code error "The path \"$dir\" is not of type absolute"
@@ -110,7 +137,7 @@ proc ::FileCache::SetDirFiles {dir pattern} {
     # glob returns absolute paths but we must store them relative 'basedir'
     # and the key must be uri encoded!
     foreach f [glob -nocomplain -directory $dir $pattern] {
-	Set $f
+	::FileCache::Set $f
     }
 }
 
@@ -160,21 +187,93 @@ proc ::FileCache::IsLocal {key} {
 	    set abspath [file join $basedir $path]
 	    if {[file exists $abspath] && [file isfile $abspath]} {
 		set islocal 1
-		Set $key $abspath
+		::FileCache::Set $key $abspath
 	    }
 	}
     } else {
 	set islocal 1
 	if {[string match "../*" $key]} {
-	    #set abspath [filenormalize [file join $basedir $key]]
 	    set abspath [addabsolutepathwithrelative $basedir $key]
 	    set abspath [file nativename $abspath]
 	} else {
 	    set abspath [file nativename $key]
 	}
-	Set $key $abspath
+	::FileCache::Set $key $abspath
     }
     return $islocal
 }
 
+# --- Some functions for handling "best before" things -------------------------
+
+# FileCache::SetBestBefore --
+# 
+#       Sets a time limit on cached files in the specified directory.
+#       A cached file in this directory is not accepted if its modify time
+#       is older than as specified by 'timetoken'.
+#       
+#       timetoken:  any of "never", "always", "launch", "min", "hour", "day", "month"
+
+proc ::FileCache::SetBestBefore {timetoken {dir {}}} {
+ 
+    variable launchtime
+    variable bestbeforedir
+    variable usecache
+    
+    switch -- $timetoken {
+	never - always {
+	    set usecache $timetoken
+	    catch {unset bestbeforedir}
+	}
+	launch - min - hour - day - month {
+	    if {![string equal [file pathtype $dir] "absolute"]} {
+		return -code error "The path \"$dir\" is not of type absolute"
+	    }
+	    set usecache "always"
+	    set bestbeforedir($dir) $timetoken
+	}
+	default {
+	    return -code error "Unrecognized timetoken \"$timetoken\""
+	}
+    }
+}
+
+# FileCache::Accept --
+# 
+#
+#       locabspath:   local native not uri encoded abslute path.
+
+proc ::FileCache::Accept {locabspath} {
+ 
+    variable launchtime
+    variable bestbeforedir
+    
+    if {![string equal [file pathtype $locabspath] "absolute"]} {
+	return -code error "The path \"$locabspath\" is not of type absolute"
+    }
+    
+    # Need to loop through all directorys with "best before date" and see if
+    # any matches the file path in question.
+    set accept 1
+    foreach dir [array names bestbeforedir] {
+	if {[string match ${dir}* $locabspath]} {
+	    set timetoken $bestbeforedir($dir)
+	    set filemtime [file mtime $locabspath]	    
+	    switch -- $timetoken {
+		launch {
+		    set timelimit $launchtime
+		}
+		default {
+		    set timelimit [clock scan "-1 $timetoken"]
+		}
+	    }
+	    if {$filemtime < $timelimit} {
+		set accept 0
+	    }
+	    break
+	}
+    }
+    return $accept
+}
+
 #-------------------------------------------------------------------------------
+

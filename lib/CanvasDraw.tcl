@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasDraw.tcl,v 1.1.1.1 2002-12-08 11:02:20 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.2 2003-01-30 17:33:51 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 
@@ -684,7 +684,7 @@ proc ::CanvasDraw::BoxDrag {w x y shift type {mark 0}} {
 	set x [lindex $box 2]
 	set y [lindex $box 3]
     }
-    if {$prefs(hasDash)} {
+    if {$prefs(haveDash)} {
 	set extras [list -dash $state(dash)]
     } else {
 	set extras ""
@@ -752,7 +752,7 @@ proc ::CanvasDraw::FinalizeBox {w x y shift type {mark 0}} {
 	}
 	$w delete withtag markbox
     }
-    if {$prefs(hasDash)} {
+    if {$prefs(haveDash)} {
 	set extras [list -dash $state(dash)]
     } else {
 	set extras ""
@@ -957,7 +957,7 @@ proc ::CanvasDraw::ArcDrag {w x y {shift 0}} {
     } else {
 	set theFill "-fill $state(fgCol)"
     }
-    if {$prefs(hasDash)} {
+    if {$prefs(haveDash)} {
 	set extras [list -dash $state(dash)]
     } else {
 	set extras {}
@@ -1007,7 +1007,7 @@ proc ::CanvasDraw::FinalizeArc {w x y} {
     } else {
 	set theFill "-fill $state(fgCol)"
     }
-    if {$prefs(hasDash)} {
+    if {$prefs(haveDash)} {
 	set extras [list -dash $state(dash)]
     } else {
 	set extras {}
@@ -1125,7 +1125,7 @@ proc ::CanvasDraw::PolyDrag {w x y {shift 0}} {
 	set newco [ConstrainedDrag $x $y [lindex $anch 0] [lindex $anch 1]]
 	foreach {x y} $newco {}
     }
-    if {$prefs(hasDash)} {
+    if {$prefs(haveDash)} {
 	set extras [list -dash $state(dash)]
     } else {
 	set extras ""
@@ -1194,7 +1194,7 @@ proc ::CanvasDraw::FinalizePoly {w x y} {
     } else {
 	set theFill "-fill $state(fgCol)"
     }
-    if {$prefs(hasDash)} {
+    if {$prefs(haveDash)} {
 	set extras [list -dash $state(dash)]
     } else {
 	set extras ""
@@ -1278,7 +1278,7 @@ proc ::CanvasDraw::LineDrag {w x y shift {opt 0}} {
     } else {
 	set extras {}
     }
-    if {$prefs(hasDash)} {
+    if {$prefs(haveDash)} {
 	append extras " [list -dash $state(dash)]"
     }
     
@@ -1330,7 +1330,7 @@ proc ::CanvasDraw::FinalizeLine {w x y shift {opt 0}} {
     } else {
 	set extras {}
     }
-    if {$prefs(hasDash)} {
+    if {$prefs(haveDash)} {
 	append extras " [list -dash $state(dash)]"
     }
     
@@ -1413,7 +1413,7 @@ proc ::CanvasDraw::StrokeDrag {w x y {brush 0}} {
     } else {
 	set thisThick $state(penThick)
     }
-    if {$prefs(hasDash)} {
+    if {$prefs(haveDash)} {
 	set extras [list -dash $state(dash)]
     } else {
 	set extras ""
@@ -1462,7 +1462,7 @@ proc ::CanvasDraw::FinalizeStroke {w x y {brush 0}} {
     } else {
 	set thisThick $state(penThick)
     }
-    if {$prefs(hasDash)} {
+    if {$prefs(haveDash)} {
 	set extras [list -dash $state(dash)]
     } else {
 	set extras ""

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ImageAndMovie.tcl,v 1.2 2003-01-11 16:16:09 matben Exp $
+# $Id: ImageAndMovie.tcl,v 1.3 2003-01-30 17:33:58 matben Exp $
 
 package require http
 
@@ -95,15 +95,19 @@ proc ::ImageAndMovie::ImportImageOrMovieDlg {wtop} {
 #            -where     "all": write to this canvas and all others,
 #                       "remote": write only to remote client canvases,
 #                       "local": write only to this canvas and not to any other.
-#                       ip number: write only to this remote client canvas and not
-#                       to own.
+#                       ip number: write only to this remote client canvas and 
+#                       not to own.
 #       
-# Results:
+# Side Effects:
 #       Shows the image or movie in canvas and initiates transfer to other
 #       clients if requested.
+#       
+# Results:
+#       boolean telling if the thing managed to be imported or not or if
+#       the http things ok so far.
 
 proc ::ImageAndMovie::DoImport {w optList args} {
-    global  allIPnumsToSend prefs this prefMimeType2Package supportedMimeTypes
+    global  prefs this prefMimeType2Package plugin
     
     variable xanimPipe2Frame 
     variable xanimPipe2Item
@@ -127,6 +131,7 @@ proc ::ImageAndMovie::DoImport {w optList args} {
 	set isLocal 0
     }
     set wtopNS [::UI::GetToplevelNS $w]
+    set didImport 1
     
     # Define a standard set of put/import options that may be overwritten by
     # the options in the procedure argument 'optList'.
@@ -167,7 +172,18 @@ proc ::ImageAndMovie::DoImport {w optList args} {
     # Note: image/* always through tk's photo handler; package neutral.
     set theMIME $optArr(Content-Type:)
     regexp {([^/]+)/([^/]+)} $theMIME match mimeBase mimeSubType
-    set importPackage $prefMimeType2Package($theMIME)
+    
+    # Find import package if any for this MIME type.
+    if {[info exists prefMimeType2Package($theMIME)]} {
+	set importPackage $prefMimeType2Package($theMIME)
+	if {[llength $importPackage] == 0} {
+	    return 0
+	}
+    } else {
+	return 0
+    }
+    
+    # Images are dispatched internally by tk's photo command.
     if {[string equal $mimeBase "image"]} {
 	set importer "image"
     } else {
@@ -177,68 +193,89 @@ proc ::ImageAndMovie::DoImport {w optList args} {
     if {$argsArr(-where) == "all" || $argsArr(-where) == "local"} {
 	
 	switch -- $importer {
-	    
 	    image {
 		
 		# Either '-file localPath' or '-url http://...'
 		if {$isLocal} {
-		    eval {::ImageAndMovie::DrawImage $wtopNS $fileName $putOpts} \
-		      [array get argsArr]
+		    set didImport [eval {
+			::ImageAndMovie::DrawImage $wtopNS $fileName $putOpts
+		    } [array get argsArr]]
 		} else {
-		    eval {::ImageAndMovie::HttpGet $wtopNS $argsArr(-url) \
-		      $importer $putOpts} [array get argsArr]
+		    set didImport [eval {
+			::ImageAndMovie::HttpGet $wtopNS $argsArr(-url) \
+			  $importer $putOpts} [array get argsArr]]
 		}
 	    }
-	    
 	    QuickTimeTcl {	    
 		if {$isLocal} {
-		    eval {::ImageAndMovie::DrawQuickTimeTcl $wtopNS $fileName \
-		      $putOpts} [array get argsArr]
+		    set didImport [eval {
+			::ImageAndMovie::DrawQuickTimeTcl $wtopNS $fileName \
+			  $putOpts
+		    } [array get argsArr]]
 		} else {
-		    eval {::ImageAndMovie::HttpGetQuickTimeTcl $wtopNS  \
-		      $argsArr(-url) $putOpts} [array get argsArr]
+		    set didImport [eval {
+			::ImageAndMovie::HttpGetQuickTimeTcl $wtopNS  \
+			  $argsArr(-url) $putOpts} [array get argsArr]]
 		    
 		    # Perhaps there shall be an option to get QT stuff via
 		    # http but without streaming it?
 		    if {0} {
-		    eval {::ImageAndMovie::HttpGet $wtopNS $argsArr(-url) \
-		      $importer $putOpts} [array get argsArr]
-		      }
+			eval {::ImageAndMovie::HttpGet $wtopNS $argsArr(-url) \
+			  $importer $putOpts} [array get argsArr]
+		    }
 		}
 	    }
-	    
 	    snack {
 		if {$isLocal} {
-		    eval {::ImageAndMovie::DrawSnack $wtopNS $fileName \
-		      $putOpts} [array get argsArr]
+		    set didImport [eval {
+			::ImageAndMovie::DrawSnack $wtopNS $fileName $putOpts
+		    } [array get argsArr]]
 		} else {
-		    eval {::ImageAndMovie::HttpGet $wtopNS $argsArr(-url) \
-		      $importer $putOpts} [array get argsArr]
+		    set didImport [eval {
+			::ImageAndMovie::HttpGet $wtopNS $argsArr(-url) \
+			  $importer $putOpts} [array get argsArr]]
 		}
-	    }
-	    
+	    }	    
 	    xanim {	    
 		if {$isLocal} {
-		    eval {::ImageAndMovie::DrawXanim $wtopNS $fileName \
-		      $putOpts} [array get argsArr]
+		    set didImport [eval {
+			::ImageAndMovie::DrawXanim $wtopNS $fileName $putOpts
+		    } [array get argsArr]]
 		} else {
-		    eval {::ImageAndMovie::HttpGet $wtopNS $argsArr(-url) \
-		      $importer $putOpts} [array get argsArr]
+		    set didImport [eval {
+			::ImageAndMovie::HttpGet $wtopNS $argsArr(-url) \
+			  $importer $putOpts} [array get argsArr]]
 		}
 
 
 	    }
 	    default {
-		return -code error "Unknown importer for MIME $theMIME"
+		
+		# Dispatch to any registerd importer for this MIME type.
+		if {0} {
+		    if {$isLocal} {
+			set didImport [eval {
+			    $plugin($importer,importProc) $wtopNS $fileName \
+			      $putOpts
+			} [array get argsArr]]
+		    } else {
+			
+		    }
+		}
+		set didImport 0
 	    }
 	}
     }
+    return $didImport
 }
 
 # ImageAndMovie::DrawImage --
 # 
 #       Draws the image in 'fileName' onto canvas, taking options
 #       in 'optList' into account. May put image to remote peers.
+#       
+# Results:
+#       boolean telling if the thing managed to be imported or not.
 
 proc ::ImageAndMovie::DrawImage {wtop fileName optList args} {
     global  allIPnumsToSend    
@@ -249,6 +286,7 @@ proc ::ImageAndMovie::DrawImage {wtop fileName optList args} {
     array set optArr $optList
     array set argsArr $args
     set w $wapp(can)
+    set didImport 1
     
     # Extract coordinates and tags which must be there. error checking?
     foreach {x y} $optArr(coords:) { break }
@@ -261,13 +299,15 @@ proc ::ImageAndMovie::DrawImage {wtop fileName optList args} {
 	set imageName $optArr(Image-Name:)
     } else {
 	set imageName [::CanvasUtils::UniqueImageName]
-	lappend putOpts "Image-Name:" $imageName
+	lappend optList "Image-Name:" $imageName
     }
     
     if {[string equal $mimeSubType "gif"]} {
 	image create photo $imageName -file $fileName -format gif
     } else {
-	image create photo $imageName -file $fileName
+	if {[catch {image create photo $imageName -file $fileName}]} {
+	    return 0
+	}
     }
     
     # Treat if image should be zoomed.
@@ -294,22 +334,23 @@ proc ::ImageAndMovie::DrawImage {wtop fileName optList args} {
     } elseif {[info exists optArr(below:)]} {
 	catch {$w lower $useTag $optArr(below:)}
     }
-
-    # Add to the lists of known files.
-    ::FileCache::Set $fileName
     
     # Once the thing lives on the canvas, add a 'putOpts' "above" or
     # "below" if not already there.
     if {($argsArr(-where) != "local") && ([llength $allIPnumsToSend] > 0)} {
-	::ImageAndMovie::PutFile $wtop $fileName $argsArr(-where) $putOpts \
+	::ImageAndMovie::PutFile $wtop $fileName $argsArr(-where) $optList \
 	  $useTag
     }
+    return $didImport
 }
 
 # ImageAndMovie::DrawQuickTimeTcl --
 # 
 #       Draws a local QuickTime movie onto canvas. May initiate put request to
 #       remote peers.
+#       
+# Results:
+#       boolean telling if the thing managed to be imported or not.
 
 proc ::ImageAndMovie::DrawQuickTimeTcl {wtop fileName optList args} {
     global  allIPnumsToSend    
@@ -320,6 +361,7 @@ proc ::ImageAndMovie::DrawQuickTimeTcl {wtop fileName optList args} {
     array set optArr $optList
     array set argsArr $args
     set w $wapp(can)
+    set didImport 1
     
     # Extract coordinates and tags which must be there. error checking?
     foreach {x y} $optArr(coords:) { break }
@@ -333,10 +375,8 @@ proc ::ImageAndMovie::DrawQuickTimeTcl {wtop fileName optList args} {
     set wmovie ${wfr}.m	
 
     if {[catch {movie $wmovie -file $fileName -controller 1} msg]} {
-	tk_messageBox  -icon error -type ok -message \
-	  [FormatTextForMessageBox "[::msgcat::mc Error]:  $msg"]
 	catch {destroy $wfr}
-	return
+	return 0
     }
     
     $w create window $x $y -anchor nw -window $wfr   \
@@ -357,20 +397,21 @@ proc ::ImageAndMovie::DrawQuickTimeTcl {wtop fileName optList args} {
     set qtBalloonMsg "$fileTail\nLength: ${lenMin}:$secs"
     
     ::balloonhelp::balloonforwindow $wmovie $qtBalloonMsg
-
-    # Add to the lists of known files.
-    ::FileCache::Set $fileName
     
     if {($argsArr(-where) != "local") && ([llength $allIPnumsToSend] > 0)} {
 	::ImageAndMovie::PutFile $wtop $fileName $argsArr(-where)  \
 	  $optList $useTag
     }
+    return $didImport
 }
 
 # ImageAndMovie::DrawSnack --
 # 
 #       Draws a local snack movie onto canvas. May initiate put request to
 #       remote peers.
+#       
+# Results:
+#       boolean telling if the thing managed to be imported or not.
 
 proc ::ImageAndMovie::DrawSnack {wtop fileName optList args} {
     global  allIPnumsToSend    
@@ -381,6 +422,7 @@ proc ::ImageAndMovie::DrawSnack {wtop fileName optList args} {
     array set optArr $optList
     array set argsArr $args
     set w $wapp(can)
+    set didImport 1
     
     # Extract coordinates and tags which must be there. error checking?
     foreach {x y} $optArr(coords:) { break }
@@ -391,9 +433,7 @@ proc ::ImageAndMovie::DrawSnack {wtop fileName optList args} {
     # The snack plug-in for audio. Make a snack sound object.
     
     if {[catch {::snack::sound $uniqueName -file $fileName} msg]} {
-	tk_messageBox -icon error -type ok -message \
-	  [FormatTextForMessageBox "Snack failed: $msg"]
-	return
+	return 0
     }
     set wfr ${w}.fr_${uniqueName}
     frame $wfr -height 1 -width 1 -bg gray40 -class SnackFrame
@@ -409,19 +449,20 @@ proc ::ImageAndMovie::DrawSnack {wtop fileName optList args} {
     set qtBalloonMsg $fileTail
     ::balloonhelp::balloonforwindow $wmovie $qtBalloonMsg
     
-    # Add to the lists of known files.
-    ::FileCache::Set $fileName
-    
     if {($argsArr(-where) != "local") && ([llength $allIPnumsToSend] > 0)} {
 	::ImageAndMovie::PutFile $wtop $fileName $argsArr(-where)  \
 	  $optList $useTag
     }
+    return $didImport
 }
 
 # ImageAndMovie::DrawXanim --
 # 
 #       Draws a local xanim movie onto canvas. May initiate put request to
 #       remote peers.
+#       
+# Results:
+#       boolean telling if the thing managed to be imported or not.
 
 proc ::ImageAndMovie::DrawXanim {wtop fileName optList args} {
     global  allIPnumsToSend    
@@ -432,6 +473,7 @@ proc ::ImageAndMovie::DrawXanim {wtop fileName optList args} {
     array set optArr $optList
     array set argsArr $args
     set w $wapp(can)
+    set didImport 1
     
     # Extract coordinates and tags which must be there. error checking?
     foreach {x y} $optArr(coords:) { break }
@@ -467,26 +509,27 @@ proc ::ImageAndMovie::DrawXanim {wtop fileName optList args} {
     
     # Note trick to pipe stdout as well as stderr. Forks without &.
     if {[catch {open "|xanim +W$xatomid $fileName 2>@stdout"} xpipe]} {
-	puts "xanim err: xpipe=$xpipe"
+	return 0
     } else {
 	set xanimPipe2Frame($xpipe) $wfr
 	set xanimPipe2Item($xpipe) $useTag
 	fileevent $xpipe readable [list XanimReadOutput $w $xpipe]
     }    
     
-    # Add to the lists of known files.
-    ::FileCache::Set $fileName
-    
     if {($argsArr(-where) != "local") && ([llength $allIPnumsToSend] > 0)} {
 	::ImageAndMovie::PutFile $wtop $fileName $argsArr(-where)  \
 	  $optList $useTag
     }
+    return $didImport
 }
 
 # ImageAndMovie::HttpGet --
 # 
 #       Imports the specified file using http to file.
 #       The actual work done via callbacks to the http package.
+#       
+# Results:
+#       boolean giving the error status so far.
 
 proc ::ImageAndMovie::HttpGet {wtop url importer optList args} {
     global  this prefs
@@ -504,9 +547,7 @@ proc ::ImageAndMovie::HttpGet {wtop url importer optList args} {
     set dstPath [file join $prefs(incomingFilePath)  \
       [::uriencode::decodefile $fileTail]]
     if {[catch {open $dstPath w} dst]} {
-	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
-	  -message [FormatTextForMessageBox $dst]
-	return
+	return 0
     }
     if {[string equal $this(platform) "macintosh"]} {
 	set tmopts ""
@@ -533,9 +574,7 @@ proc ::ImageAndMovie::HttpGet {wtop url importer optList args} {
     if {[catch {eval {
 	::http::geturl $url -channel $dst -progress $progCB -command $commandCB
     } $tmopts} token]} {
-	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
-	  -message [FormatTextForMessageBox $token]
-	return
+	return 0
     }
     upvar #0 $token state
     set getstate(token) $token
@@ -548,6 +587,7 @@ proc ::ImageAndMovie::HttpGet {wtop url importer optList args} {
 	      $importer $optList} $args
         }
     }
+    return 1
 }
 
 # ImageAndMovie::HttpProgress --
@@ -588,39 +628,43 @@ proc ::ImageAndMovie::HttpProgress {gettoken token total current} {
 #       Invoked callback after the HTTP transaction completes.
 
 proc ::ImageAndMovie::HttpFinished {gettoken token} {
-
+    
     ::Debug 2 "::ImageAndMovie::HttpFinished gettoken=$gettoken, token=$token"
-
+    
     upvar #0 $token state
     upvar #0 $gettoken getstate          
-
+    
     set wtop $getstate(wtop)
     set dstPath $getstate(dstPath)
     set optList $getstate(optList)
     set tail [file tail $getstate(dstPath)]
-
+    
     # Investigate 'state' for any exceptions.
     set getstate(status) [::http::status $token]
     ::Debug 2 "    ::http::status = $getstate(status)"
     
     switch -- $getstate(status) {
-    	timeout {
-	tk_messageBox -title [::msgcat::mc Timeout] -icon info -type ok  \
-	  -message timeout
-	::UI::SetStatusMessage $wtop "Timeout waiting for file $tail"
-	catch {close $getstate(dst)}
-	return
+	timeout {
+	    tk_messageBox -title [::msgcat::mc Timeout] -icon info -type ok  \
+	      -message timeout
+	    ::UI::SetStatusMessage $wtop "Timeout waiting for file $tail"
+	    catch {close $getstate(dst)}
+	    return
 	}
 	ok {
-	::UI::SetStatusMessage $wtop "Finished getting file $tail"
-	catch {close $getstate(dst)}
+	    ::UI::SetStatusMessage $wtop "Finished getting file $tail"
+	    catch {close $getstate(dst)}
 	}
 	default {
-		# ???
+	    # ???
 	}
     }
     
     if {$getstate(status) == "ok"} {
+	
+	# Add to the lists of known files.
+	::FileCache::Set $getstate(url) $dstPath
+	
 	switch -- $getstate(importer) {
 	    image {
 		eval {::ImageAndMovie::DrawImage $wtop $dstPath $optList} \
@@ -822,6 +866,7 @@ proc ::ImageAndMovie::DrawQuickTimeTclFromHttp {gettoken} {
     
     # Nothing to cache, not possible to transport further.
     # Perhaps possible to do: $wmovie saveas filepath
+    #::FileCache::Set $getstate(url) $dstPath
 }
 
 # ImageAndMovie::PutFile --
@@ -932,8 +977,9 @@ proc ::ImageAndMovie::XanimReadOutput {w xpipe} {
 #               -above
 #               -below
 #               -basepath
+#               
 # Results:
-#       none. calls importer.
+#       boolean telling if the thing managed to be imported or not.
 
 proc ::ImageAndMovie::HandleImportCmd {w line args} {
 
@@ -994,7 +1040,8 @@ proc ::ImageAndMovie::HandleImportCmd {w line args} {
 	lappend optList "below:" $argsArr(-below)
     }
     
-    eval {::ImageAndMovie::DoImport $w $optList} $impArgs
+    set didImport [eval {::ImageAndMovie::DoImport $w $optList} $impArgs]
+    return $didImport
 }
 
 # ImageAndMovie::ImageImportCmd, QTImportCmd, SnackImportCmd --
@@ -1094,7 +1141,7 @@ proc ::ImageAndMovie::ResizeImage {wtop zoomFactor which newTag {where all}} {
 	    return
 	}
     }
-    set idsNew {}
+    set idsNewSelected {}
     foreach id $ids {
 	
 	if {$where == "all" || $where == "local"} {	    
@@ -1177,7 +1224,11 @@ proc ::ImageAndMovie::ResizeImage {wtop zoomFactor which newTag {where all}} {
 	      "create image $coords [::CanvasUtils::GetItemOpts $w $id all]"
 	    set undocmdExList [list [list $undocmd "local"]  \
 	      [list [list delete $useTag] "local"]]
-	    lappend idsNew $useTag
+	    
+	    # Collect tags of selected originals.
+	    if {[lsearch [$w itemcget $id -tags] "selected"] >= 0} {
+		lappend idsNewSelected $useTag
+	    }
 	}
 	
 	# Assemble remote command.
@@ -1202,8 +1253,8 @@ proc ::ImageAndMovie::ResizeImage {wtop zoomFactor which newTag {where all}} {
     }
     ::UserActions::DeselectAll $wtop
     
-    # Mark the new ones.
-    foreach id $idsNew {
+    # Mark the new ones if old ones selected.
+    foreach id $idsNewSelected {
 	::CanvasDraw::MarkBbox $w 1 $id
     }
 }

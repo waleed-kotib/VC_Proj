@@ -187,6 +187,8 @@
 ::msgcat::mcset en mPreferences...	{Preferences...}
 ::msgcat::mcset en mNewAccount		{New Account...}
 ::msgcat::mcset en mLogin		{Login...}
+::msgcat::mcset en mLogout		{Logout}
+::msgcat::mcset en mLogoutWith          {Logout With Message...}
 ::msgcat::mcset en mPassword		{Password...}
 ::msgcat::mcset en mRoster/Services	{Roster/Services}
 ::msgcat::mcset en mMessageInbox	{Message Inbox}
@@ -199,6 +201,8 @@
 ::msgcat::mcset en mAway		{Away}
 ::msgcat::mcset en mDoNotDisturb	{Do Not Disturb}
 ::msgcat::mcset en mNotAvailable	{Not Available}
+::msgcat::mcset en mExtendedAway        {Extended Away}
+::msgcat::mcset en mInvisible           {Invisible}
 ::msgcat::mcset en mAttachMessage	{Attach Message...}
 ::msgcat::mcset en mEnterRoom		{Enter Room...}
 ::msgcat::mcset en mExitRoom		{Exit Room}
@@ -307,11 +311,13 @@
 ::msgcat::mcset en {Jabber Server}
 ::msgcat::mcset en {Jabber server port:}
 ::msgcat::mcset en {Jabber user id}
+::msgcat::mcset en {Jabber Id}
 ::msgcat::mcset en {JID to block}
 ::msgcat::mcset en {Last Activity}
 ::msgcat::mcset en {Last name}
 ::msgcat::mcset en {Launch time}
 ::msgcat::mcset en {Local Time}
+::msgcat::mcset en {Login as invisible}
 ::msgcat::mcset en {Mailbox Error}
 ::msgcat::mcset en {MIME type}
 ::msgcat::mcset en {Multi Connect}
@@ -791,10 +797,12 @@ desired room since each server may have specific requirements.}
 	::msgcat::mcset en jawaitserver	{Waiting for server response...}
 	::msgcat::mcset en jaregmsg	{Registration for a specific service with\
 this server. If already registered you may alter your personal info with this dialog.}
+	::msgcat::mcset en jastatavailable {Available}
 	::msgcat::mcset en jastatchat	{Chat: available for immediate contact}
 	::msgcat::mcset en jastataway	{Away: online, but momentarily away}
-	::msgcat::mcset en jastatxa	{xa: online, but inactive a while}
+	::msgcat::mcset en jastatxa	{Extended away: online, but inactive a while}
 	::msgcat::mcset en jastatdnd	{DND: do not disturb}
+	::msgcat::mcset en jastatinvisible {Invisible}
 	::msgcat::mcset en javersinfo	{Version information for %s}
 	::msgcat::mcset en jabrowseaddserver	{Enter the JID of the server you\
 want to add to the list of services, for instance, "jabber.org".}

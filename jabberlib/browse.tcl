@@ -5,22 +5,22 @@
 #      In other words, it manages the client's internal state corresponding
 #      to 'iq' elements with namespace 'jabber:iq:browse'.
 #      
-#  Copyright (c) 2001-2002  Mats Bengtsson
+#  Copyright (c) 2001-2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: browse.tcl,v 1.2 2003-01-11 16:16:09 matben Exp $
+# $Id: browse.tcl,v 1.3 2003-01-30 17:33:47 matben Exp $
 # 
-#  locals($jid,parent):         the parent of $jid.
-#  locals($jid,parents):        list of all parent jid's,
-#                               {server conference.server myroom@conference.server}
-#  locals($jid,childs):         list of all childs of this jid if any.                             
-#  locals($jid,xmllist):        the hierarchical xml list of this $jid.
-#  locals($jid,type):           the type/subtype of this $jid.
-#  locals($type,typelist):      a list of jid's for this type/subtype.
-#  locals(alltypes):            a list of all jid types.
-#  locals($jid,allusers):       list of all users in room $jid.
-#  locals($jid,isbrowsed):      1 if $jid browsed, 0 if not.
+#  locals($jid,parent):       the parent of $jid.
+#  locals($jid,parents):      list of all parent jid's,
+#                             {server conference.server myroom@conference.server}
+#  locals($jid,childs):       list of all childs of this jid if any.                             
+#  locals($jid,xmllist):      the hierarchical xml list of this $jid.
+#  locals($jid,type):         the type/subtype of this $jid.
+#  locals($type,typelist):    a list of jid's for this type/subtype.
+#  locals(alltypes):          a list of all jid types.
+#  locals($jid,allusers):     list of all users in room $jid.
+#  locals($jid,isbrowsed):    1 if $jid browsed, 0 if not.
 #
 ############################# USAGE ############################################
 #
@@ -40,6 +40,7 @@
 #   INSTANCE COMMANDS
 #      browseName clear ?jid?
 #      browseName delete
+#      browseName errorcallback jid xmllist ?-errorcommand?
 #      browseName get jid
 #      browseName getchilds jid
 #      browseName getconferenceservers
@@ -59,14 +60,15 @@
 #
 #   The 'clientCommand' procedure must have the following form:
 #   
-#      clientCommand {browseName what jid xmllist}
+#      clientCommand {browseName type jid xmllist}
 #      
-#   where 'what' can be 'set' or 'remove'.
+#   where 'type' can be 'set' or 'remove'.
 #      
 ############################# CHANGES ##########################################
 #
 
 package require wrapper
+
 package provide browse 1.0
 
 namespace eval browse {
@@ -183,6 +185,8 @@ proc browse::getparentjid {browseName jid} {
 proc browse::GetParentJidFromJid {browseName jid} {
     
     upvar [namespace current]::${browseName}::locals locals
+    
+    Debug 3 "GetParentJidFromJid BAD!!!  jid=$jid"
 
     set c {[^@/.<>:]+}
     if {[regexp "(${c}@(${c}\.)+${c})/${c}" $jid match parJid junk]} {	
@@ -230,7 +234,7 @@ proc browse::isbrowsed {browseName jid} {
 #
 #
 # Arguments:
-#       browseName:   the instance of this conference browse.
+#       browseName:   the instance of this browse.
 #       jid:          jid to remove.
 #
 # Results:
@@ -243,6 +247,7 @@ proc browse::remove {browseName jid} {
     
     catch {unset locals($jid,parents)}
     catch {unset locals($jid,xmllist)}
+    catch {unset locals($jid,isbrowsed)}
 
     # Evaluate the client callback.
     uplevel #0 "$locals(cmd) $browseName remove $jid"
@@ -252,7 +257,7 @@ proc browse::remove {browseName jid} {
 #
 #
 # Arguments:
-#       browseName:   the instance of this conference browse.
+#       browseName:   the instance of this browse.
 #
 # Results:
 #       List of all parent jid's.
@@ -273,7 +278,7 @@ proc browse::getparents {browseName jid} {
 #
 #
 # Arguments:
-#       browseName:   the instance of this conference browse.
+#       browseName:   the instance of this browse.
 #
 # Results:
 #       List of all parent jid's.
@@ -473,8 +478,9 @@ proc browse::getnamespaces {browseName jid} {
 # browse::setjid --
 #
 #       Called when receiving a 'set' or 'result' iq element in jabber:iq:browse
-#       Shall only be called from jabberlib. Sets internal state, and makes
-#       callback to client proc. Could be called with type='remove' attribute.
+#       Shall only be called from jabberlib" 
+#       Sets internal state, and makes callback to client proc. 
+#       Could be called with type='remove' attribute.
 #       For 'user' elements we need to build a table that maps the
 #       'roomname@server/hexname' with the nick name.
 #       It also keeps a list of all 'user'«s in a room.
@@ -486,31 +492,35 @@ proc browse::getnamespaces {browseName jid} {
 #       subiq:      hierarchical xml list starting with element containing
 #                     the xmlns='jabber:iq:browse' attribute.
 #                     Any children defines a parent-child relation.
+#       args:       -command cmdProc:   replaces the client callback command
+#                        in the browse object
 #       
 # Results:
 #       none.
 
-proc browse::setjid {browseName fromJid subiq} {
+proc browse::setjid {browseName fromJid subiq args} {
     upvar [namespace current]::${browseName}::locals locals
     
     Debug 3 "browse::setjid browseName=$browseName, fromJid=$fromJid\
-      subiq='$subiq'"
+      subiq='[string range $subiq 0 40]...', args='$args'"
 
     set theTag [lindex $subiq 0]
     array set attr [lindex $subiq 1]
+    array set argsArr $args
     
-    # Root parent empty.
+    # Root parent empty. A bit unclear what to do with it.
     if {![info exists locals($fromJid,parent)]} {
 	
 	# This can be a completely new room not seen before.
-	if {[string match *@* $fromJid]} {
+	#if {[string match *@* $fromJid]}
+	if {0} {
 	    set parentJid [getparentjid $browseName $fromJid]
 	    set locals($fromJid,parent) $parentJid
-	    set locals($fromJid,parents)   \
+	    set locals($fromJid,parents)  \
 	      [concat $locals($parentJid,parents) $parentJid]
 	} else {
 	
-	    # Else we assume it is a root.
+	    # Else we assume it is a root. Not correct!
 	    set locals($fromJid,parent) {}
 	    set locals($fromJid,parents) {}
 	    set parentJid {}
@@ -537,7 +547,11 @@ proc browse::setjid {browseName fromJid subiq} {
     setsinglejid $browseName $parentJid $jid $subiq 1
     
     # Evaluate the client callback.
-    uplevel #0 $locals(cmd) $browseName set [list $jid $subiq]
+    if {[info exists argsArr(-command)] && [string length $argsArr(-command)]} {
+	uplevel #0 $argsArr(-command) $browseName set [list $jid $subiq]
+    } else {
+	uplevel #0 $locals(cmd) $browseName set [list $jid $subiq]
+    }
 }
 
 # browse::setsinglejid --
@@ -605,6 +619,7 @@ proc browse::setsinglejid {browseName parentJid jid xmllist {browsedjid 0}} {
 	if {[info exists attr(type)]} {
 	    
 	    # Check for any 'category' attribute introduced in the 1.2 rev.
+	    # of JEP-0011.
 	    if {[info exists attr(category)]} {
 		set jidtype "$attr(category)/$attr(type)"
 	    } else {		
@@ -683,6 +698,40 @@ proc browse::setsinglejid {browseName parentJid jid xmllist {browsedjid 0}} {
     }
 }
 
+# browse::errorcallback --
+#
+#       Called when receiving an 'error' iq element in jabber:iq:browse.
+#       Shall only be called from jabberlib!
+#       
+# Arguments:
+#       browseName:   the instance of this conference browse.
+#       jid:          the 'from' attribute which is also the parent of any
+#                     childs.
+#       errlist:      {errorCode errorMsg}
+#       args          -errorcommand errPproc:   in case of error, this is called
+#                        instead of the browse objects callback proc.
+#       
+# Results:
+#       none.
+
+proc browse::errorcallback {browseName jid errlist args} {
+    upvar [namespace current]::${browseName}::locals locals
+    
+    Debug 3 "browse::errorcallback browseName=$browseName, jid=$jid\
+      errlist=$errlist, args='$args'"
+
+    array set argsArr $args
+    if {[info exists argsArr(-errorcommand)] &&  \
+      [string length $argsArr(-errorcommand)]} {
+	set cmd $argsArr(-errorcommand)
+    } else {
+	set cmd $locals(cmd)
+    }
+	
+    # Evaluate the client callback.
+    uplevel #0 $cmd $browseName error [list $jid $errlist]
+}
+
 # browse::clear --
 #
 #       Empties everything cached internally for the specified jid and all
@@ -714,11 +763,10 @@ proc browse::ClearJid {browseName jid} {
     set parents $locals($jid,parents)
 
     # Remove this specific jid from our internal state.
-    foreach key [array names locals "$jid,*"] {
-	unset locals($key)
-    }
+    array unset locals "$jid,*"
     set locals($jid,parent) $parent
     set locals($jid,parents) $parents
+    catch {unset locals($jid,isbrowsed)}
 }
     
 # browse::ClearAll --

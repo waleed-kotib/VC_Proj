@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.1.1.1 2002-12-08 11:04:28 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.2 2003-01-30 17:34:04 matben Exp $
 
 proc SetFactoryState { } {
     global  state
@@ -74,6 +74,19 @@ if {$prefs(embedded)} {
     set prefs(haveMenus) 0
 } else {
     set prefs(haveMenus) 1
+}
+
+# If we have -compound left -image ... -label ... working.
+set prefs(haveMenuImage) 0
+if {([package vcompare [info tclversion] 8.4] >= 0) &&  \
+  ![string equal $this(platform) "macosx"]} {
+    set prefs(haveMenuImage) 1
+}
+
+# Shall we run the httpd?
+set prefs(haveHttpd) 1
+if {[string equal $this(platform) "macintosh"]} {
+    set prefs(haveHttpd) 0
 }
 
 # Dialog window custom geometries. {pathName wxh+x+y ...}
@@ -200,7 +213,7 @@ set prefs(secsToProgWin) 0
 set prefs(msecsProgUpdate) 1000
 
 # When and how old is a cached file allowed to be before downloading a new?
-# Options. "never", "always", "launch", "hour", "day", "week", "30days"
+# Options. "never", "always", "launch", "hour", "day", "week", "month"
 set prefs(checkCache) "launch"
 
 # Switch to make the jabber comm entry already at build.
@@ -259,7 +272,7 @@ if {[info exists env(PRINTER)]} {
 # Postscript options. A4 paper minus some margin (297m 210m).
 set prefs(postscriptOpts) {-pageheight 280m -pagewidth 190m -pageanchor c}
 
-# Useful time constants in seconds.
+# Useful time constants in seconds. Not used.
 set tmsec(min) 60
 set tmsec(hour) [expr 60*$tmsec(min)]
 set tmsec(day) [expr 24*$tmsec(hour)]
@@ -285,9 +298,9 @@ set state(reflectorStarted) 0
 set state(connectedOnce) 0
 
 # Are there a working canvas dash option?
-set prefs(hasDash) 0
+set prefs(haveDash) 0
 if {![string match "mac*" $this(platform)]} {
-    set prefs(hasDash) 1
+    set prefs(haveDash) 1
 }
 
 # Dashed options. Used both for the Preference menu and ItemInspector.
@@ -303,16 +316,9 @@ set dashShort2Full() none
 
 # No -filetypes option in 'tk_getSaveFile' on latest MacTk.
 # Need to check the Mac Tk patchlevel also (>= 8.3.1).
-set prefs(hasSaveFiletypes) 1
+set prefs(haveSaveFiletypes) 1
 if {$this(platform) == "macintosh"} {
-    if {[info tclversion] >= 8.4} {
-	set prefs(hasSaveFiletypes) 0
-    } else {
-	set patchlevel [string index [info patchlevel] end]
-	if {$patchlevel >= 1} {
-	    set prefs(hasSaveFiletypes) 0
-	}
-    }
+    set prefs(haveSaveFiletypes) 0
 }
 
 # Number of bytes in copy buffert.

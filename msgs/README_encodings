@@ -8,9 +8,34 @@ editor producing utf-8 text, you need to translate it using
 the utf-8 encoding. If you don't you'll se a number of '?'
 for your national characters.
 
+Instructions:
+
+1.   Copy the en.msg file to a file name describing your language code
+and platform. Say, "fr.win" for French on Windows. As an alternative
+you can take the Swedish message catalog, "sv.msg", as a template.
+
+2.   Open it in your text editor. This file should be readable.
+Now you edit it in your system encoding. Change all occurences of
+"::msgcat::mcset en" to "::msgcat::mcset fr" if on a French system,
+for instance. The syntax for each entry in a message catalog is:
+::msgcat::mcset langCode key ?translatedString?
+Add the 'translatedString' if missing, and do translate if exists.
+
+3.  Utf-8 encode the file using the script below. Now you pick a file
+name 'fr.msg' if French, for instance.
+
+4.  In order to load the correct message catalog, you must set the
+language code in the file 'Whiteboard.tcl' 
+::msgcat::mclocale languageCode
+
+Now try it...
+
+
 Use the following code to do this:
 
 ........................................................................
+
+# Translate a file from system encoding to utf-8
 
 set src [tk_getOpenFile -title {Pick your language catalog}]
 set new "[file rootname [file tail $src]].msg"
@@ -21,6 +46,30 @@ set dst [tk_getSaveFile -title {Pick new catalog}  \
 	-initialdir [file dirname $src] -initialfile $new]
 set fddst [open $dst "w"]
 fconfigure $fddst -encoding utf-8
+puts $fddst $txt
+close $fddst
+if {$::tcl_platform(platform) == "macintosh"} {
+    set creator [file attributes $src -creator]
+    file attributes $dst -creator $creator
+}
+
+........................................................................
+
+
+# If you for some reason want to translate any of the message catalogs
+# that are utf-8 encoded to your system enncoding do:
+
+set src [tk_getOpenFile -title {Pick your utf-8 language catalog} \
+	-filetypes {{{Message Catalogs}       {.msg}}}]
+set suff [string range $::tcl_platform(platform) 0 2]
+set new "[file rootname [file tail $src]].${suff}"
+set fdsrc [open $src "r"]
+fconfigure $fdsrc -encoding utf-8
+set txt [read $fdsrc];
+close $fdsrc
+set dst [tk_getSaveFile -title {Save system encoded}  \
+	-initialdir [file dirname $src] -initialfile $new]
+set fddst [open $dst "w"]
 puts $fddst $txt
 close $fddst
 if {$::tcl_platform(platform) == "macintosh"} {

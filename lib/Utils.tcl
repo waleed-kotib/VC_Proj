@@ -3,11 +3,11 @@
 #      This file is part of the whiteboard application. We collect some handy 
 #      small utility procedures here.
 #      
-#  Copyright (c) 1999-2002  Mats Bengtsson
+#  Copyright (c) 1999-2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.1.1.1 2002-12-08 11:05:33 matben Exp $
+# $Id: Utils.tcl,v 1.2 2003-01-30 17:34:08 matben Exp $
 
 # InvertArray ---
 #
@@ -67,6 +67,39 @@ proc luniq {theList} {
 	}
     }
     return $t
+}
+
+# lset --
+# 
+#       Poor mans lset for pre 8.4. Not complete!
+
+if {[info tclversion] < 8.4} {
+    proc lset {listName args} {
+	
+	set usage {Usage: "lset listName ind1 ind2 value"}
+	if {[llength $args] != 3} {
+	    return -code error $usage
+	}	
+	foreach {ind1 ind2 value} $args { break }
+
+	upvar $listName listValue
+	if {[string equal $ind1 "end"]} {
+	    set ind1 [expr [llength $listValue] - 1]
+	}
+	if {[string equal $ind2 "end"]} {
+	    set ind2 [expr [llength [lindex $listValue $ind1]] - 1]
+	}	
+	if {![string is integer $ind1]} {
+	    return -code error $usage
+	}
+	if {![string is integer $ind2]} {
+	    return -code error $usage
+	}
+	
+	# Do the job.
+	set subList [lreplace [lindex $listValue $ind1] $ind2 $ind2 $value]
+	set $listName [lreplace $listValue $ind2 $ind2 $subList]
+    }
 }
 
 # getdirname ---
@@ -290,22 +323,35 @@ proc GetFilePathFromUrl {url} {
 
 # SmartClockFormat --
 #
-#       Pretty formatted time.
+#       Pretty formatted time & date.
 #
+# Arguments:
+#       secs        number of seconds since system defined time.
+#       
 # Results:
 #       nice time string that still can be used by 'clock scan'
 
 proc SmartClockFormat {secs} {
     
-    if {[expr $secs - [clock scan "today 00:00"]] < [expr 60*60*24]} {
-	set theDate "today"
-    } elseif {[expr $secs - [clock scan "yesterday 00:00"]] < [expr 2*60*60*24]} {
-	set theDate "today"
-    } else {
-	set theDate [clock format [clock seconds] -format "%y-%m-%d"]
+    # 'days': 0=today, -1=yesterday etc.
+    set days [expr ($secs - [clock scan "today 00:00"])/(60*60*24)]
+    switch -- $days {
+	1 {
+	    set date "tomorrow"
+	}
+	0 {
+	    set date "today"
+	}
+	-1 {
+	    set date "yesterday"
+	}
+	default {
+	    set date [clock format [clock seconds] -format "%y-%m-%d"]
+	}
     }
-    set theTime [clock format [clock seconds] -format "%H:%M:%S"]
-    return "$theDate $theTime"
+    
+    set time [clock format $secs -format "%H:%M:%S"]
+    return "$date $time"
 }
 
 proc OpenHtmlInBrowser {url} {

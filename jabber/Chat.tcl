@@ -5,13 +5,122 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.2 2003-01-11 16:16:08 matben Exp $
+# $Id: Chat.tcl,v 1.3 2003-01-30 17:33:42 matben Exp $
 
 package provide Chat 1.0
 
 namespace eval ::Jabber::Chat:: {
 
     variable locals
+}
+
+# Jabber::Chat::StartThreadDlg --
+#
+#       Start a chat, ask for user in dialog.
+#       
+# Arguments:
+#       w
+#       args        ?-key value? pairs
+#       
+# Results:
+#       updates UI.
+
+proc ::Jabber::Chat::StartThreadDlg {w args} {
+    global  prefs this sysFont
+
+    variable finished -1
+    upvar ::Jabber::jprefs jprefs
+    upvar ::Jabber::jstate jstate
+
+    ::Jabber::Debug 2 "::Jabber::Chat::StartThreadDlg args='$args'"
+
+    if {[winfo exists $w]} {
+	return
+    }
+    
+    toplevel $w
+    if {[string match "mac*" $this(platform)]} {
+	eval $::macWindowStyle $w documentProc
+    } else {
+	wm transient $w .
+    }
+    wm title $w {Start Chat}
+    
+    # Global frame.
+    pack [frame $w.frall -borderwidth 1 -relief raised]  \
+      -fill both -expand 1 -ipadx 12 -ipady 4
+    
+    label $w.frall.head -text {Chat with} -font $sysFont(l)  \
+      -anchor w -padx 10 -pady 4
+    pack $w.frall.head -side top -fill both -expand 1
+    
+    # Entries etc.
+    set frmid [frame $w.frall.frmid -borderwidth 0]
+    pack $frmid -side top -fill both -expand 1
+    
+    label $frmid.luser -text "Jabber user:" -font $sysFont(sb) -anchor e
+    entry $frmid.euser -width 26    \
+      -textvariable [namespace current]::user
+    grid $frmid.luser -column 0 -row 1 -sticky e
+    grid $frmid.euser -column 1 -row 1 -sticky w
+    
+    # Button part.
+    set frbot [frame $w.frall.frbot -borderwidth 0]
+    pack [button $frbot.btok -text [::msgcat::mc OK] -width 8 \
+      -default active -command [list [namespace current]::DoStart $w]] \
+      -side right -padx 5 -pady 5
+    pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
+      -command [list [namespace current]::DoCancel $w]]  \
+      -side right -padx 5 -pady 5
+    pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
+    
+    if {[info exists prefs(winGeom,$w)]} {
+	regexp {^[^+-]+((\+|-).+$)} $prefs(winGeom,$w) match pos
+	wm geometry $w $pos
+    }
+    wm resizable $w 0 0
+    bind $w <Return> "$frbot.btok invoke"
+    
+    # Grab and focus.
+    set oldFocus [focus]
+    focus $frmid.euser
+    catch {grab $w}
+    
+    # Wait here for a button press and window to be destroyed.
+    tkwait window $w
+    
+    # Clean up.
+    catch {grab release $w}
+    focus $oldFocus
+    return [expr {($finished <= 0) ? "cancel" : "ok"}]
+}
+
+proc ::Jabber::Chat::DoCancel {w} {
+    variable finished
+    
+    set finished 0
+    destroy $w
+}
+
+proc ::Jabber::Chat::DoStart {w} {
+    variable finished
+    variable user
+    upvar ::Jabber::jstate jstate
+    
+    # User must be online.
+    if {![$jstate(roster) isavailable $user]} {
+	set ans [tk_messageBox -icon warning -type yesno -parent $w  \
+	  -default no  \
+	  -message [FormatTextForMessageBox "The user you intend chatting with,\
+	  \"$user\", is not online, and this chat makes no sense.\
+	  Do you want to chat anyway?"]]
+    }
+    
+    set finished 1
+    destroy $w
+    if {$ans == "yes"} {
+	::Jabber::Chat::StartThread $user
+    }
 }
 
 # Jabber::Chat::GotMsg --
@@ -57,8 +166,12 @@ proc ::Jabber::Chat::GotMsg {body args} {
     }
     set wtext $locals($threadID,wtext)
     $wtext configure -state normal
+    
+    # -from is a 3-tier jid /resource included.
+    set jid2 $argsArr(-from)
+    regexp {^(.+@[^/]+)(/.+)?$} $argsArr(-from) match jid2 
     if {![regexp {(.+)@([^/]+)(/(.+))?} $argsArr(-from) match username host junk res]} {
-	set username $argsArr(-from)
+	set username $jid2
     }
     $wtext insert end <$username> youtag
     $wtext insert end "   " youtxttag
@@ -88,13 +201,11 @@ proc ::Jabber::Chat::GotMsg {body args} {
 
 proc ::Jabber::Chat::StartThread {jid} {
 
-    variable locals
     upvar ::Jabber::jstate jstate
 
     # Make unique thread id.
     set threadID [::sha1pure::sha1 "$jstate(mejid)[clock seconds]"]
-    set locals($threadID,jid) $jid
-    ::Jabber::Chat::Build $threadID    
+    ::Jabber::Chat::Build $threadID -from $jid
 }
 
 # Jabber::Chat::Build --
@@ -120,6 +231,7 @@ proc ::Jabber::Chat::Build {threadID args} {
     set w "$wDlgs(jchat)[string range $threadID 0 8]"
     set locals($threadID,wtop) $w
     set locals($w,threadid) $threadID
+    set locals($threadID,active) 0
     if {[winfo exists $w]} {
 	return
     }
@@ -130,16 +242,23 @@ proc ::Jabber::Chat::Build {threadID args} {
     } else {
 	#wm transient $w .
     }
+
+    # -from is sometimes a 3-tier jid /resource included.
     if {[info exists argsArr(-from)]} {
-	set locals($threadID,jid) $argsArr(-from)
+	set jid2 $argsArr(-from)
+	regexp {^(.+@[^/]+)(/.+)?$} $argsArr(-from) match jid2 
+	set locals($threadID,jid) $jid2
+    } else {
+	set locals($threadID,jid) ""
     }
+    
     if {[info exists argsArr(-subject)]} {
 	set locals($threadID,subject) $argsArr(-subject)
     }
     set locals($threadID,got1stMsg) 0
     wm title $w "Chat ($locals($threadID,jid))"
     wm protocol $w WM_DELETE_WINDOW  \
-      [list ::Jabber::Chat::Close -threadid $threadID]
+      [list [namespace current]::Close -threadid $threadID]
     wm group $w .
     
     # Toplevel menu for mac only. Crashes in menudefs; BowelsOfTheMemoryMgr
@@ -147,12 +266,10 @@ proc ::Jabber::Chat::Build {threadID args} {
     if {0 && [string match "mac*" $this(platform)]} {
 	set wmenu ${w}.menu
 	menu $wmenu -tearoff 0
-	::UI::MakeMenu $w ${wmenu}.apple {} $::UI::menuDefs(main,apple)
-	::UI::MakeMenu $w ${wmenu}.file    {File }        $::UI::menuDefs(min,file)
-	::UI::MakeMenu $w ${wmenu}.edit    {Edit }        $::UI::menuDefs(min,edit)	
-	if {!$prefs(stripJabber)} {
-	    ::UI::MakeMenu $w ${wmenu}.jabber   {Jabber } $::UI::menuDefs(main,jabber)
-	}
+	::UI::MakeMenu $w ${wmenu}.apple   {}       $::UI::menuDefs(main,apple)
+	::UI::MakeMenu $w ${wmenu}.file    mFile    $::UI::menuDefs(min,file)
+	::UI::MakeMenu $w ${wmenu}.edit    mEdit    $::UI::menuDefs(min,edit)	
+	::UI::MakeMenu $w ${wmenu}.jabber  mJabber  $::UI::menuDefs(main,jabber)
 	$w configure -menu ${wmenu}
     }
 
@@ -163,12 +280,16 @@ proc ::Jabber::Chat::Build {threadID args} {
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
     pack [button $frbot.btconn -text [::msgcat::mc Send] -width 8 -default active \
-      -command [list ::Jabber::Chat::Send $threadID]]  \
-      -side right -padx 5 -pady 5
+      -command [list [namespace current]::Send $threadID]]  \
+      -side right -padx 5 -pady 2
     pack [button $frbot.btcancel -text [::msgcat::mc Close] -width 8   \
-      -command [list ::Jabber::Chat::Close -threadid $threadID]]  \
-      -side right -padx 5 -pady 5
-    pack $frbot -side bottom -fill x -padx 10 -pady 8
+      -command [list [namespace current]::Close -threadid $threadID]]  \
+      -side right -padx 5 -pady 2
+    pack [checkbutton $frbot.active -text "  Active <Return>"   \
+      -command [list [namespace current]::ActiveCmd $threadID] \
+      -variable [namespace current]::locals($threadID,active)]  \
+      -side left -padx 5 -pady 2
+    pack $frbot -side bottom -fill x -padx 10 -pady 6
     
     # CCP
     pack [frame $w.frall.fccp] -side top -fill x
@@ -178,7 +299,7 @@ proc ::Jabber::Chat::Build {threadID args} {
     ::UI::CutCopyPasteConfigure $wccp copy -state disabled
     ::UI::CutCopyPasteConfigure $wccp paste -state disabled
     pack [frame $w.frall.fccp.div -bd 2 -relief raised -width 2] -fill y -side left
-    pack [::UI::NewPrint $w.frall.fccp.pr [list ::Jabber::Chat::Print $threadID]] \
+    pack [::UI::NewPrint $w.frall.fccp.pr [list [namespace current]::Print $threadID]] \
       -side left -padx 10
     pack [frame $w.frall.div2 -bd 2 -relief sunken -height 2] -fill x -side top
         
@@ -290,6 +411,17 @@ proc ::Jabber::Chat::SetFont {theFont} {
     }
 }
 
+proc ::Jabber::Chat::ActiveCmd {threadID} {
+    variable locals
+
+    set w $locals($threadID,wtop)
+    if {$locals($threadID,active)} {
+	bind $w <Return> [list [namespace current]::Send $threadID]
+    } else {
+	bind $w <Return> {}
+    }
+}
+
 proc ::Jabber::Chat::Send {threadID} {
     global  prefs
     
@@ -316,11 +448,17 @@ proc ::Jabber::Chat::Send {threadID} {
     set wtext $locals($threadID,wtext)
     set wtextsnd $locals($threadID,wtextsnd)
 
-    # Get text to send.
+    # Get text to send. Strip off any ending newlines from Return.
     set allText [$wtextsnd get 1.0 "end - 1 char"]
+    set allText [string trimright $allText "\n"]
     if {[string length $allText]} {	
-	$jstate(jlib) send_message $jid -subject $locals($threadID,subject) \
-	  -thread $threadID -type chat -body $allText 
+	if {[catch {
+	    $jstate(jlib) send_message $jid  \
+	      -subject $locals($threadID,subject) \
+	      -thread $threadID -type chat -body $allText
+	}]} {
+	    return
+	}
     }
     
     # Add to chat window and clear send.

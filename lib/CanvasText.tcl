@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasText.tcl,v 1.2 2003-01-11 16:16:09 matben Exp $
+# $Id: CanvasText.tcl,v 1.3 2003-01-30 17:33:53 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 
@@ -32,66 +32,66 @@ namespace eval ::CanvasText:: {
 #       Typically when the user clicks the text tool button.
 #       
 # Arguments:
-#       c      the canvas widget.
+#       w      the canvas widget.
 #       
 # Results:
 #       none
 
 # Could this be done with 'bindtags' instead???
 
-proc ::CanvasText::EditBind {c} {
+proc ::CanvasText::EditBind {w} {
     global  this
     
     # Should add virtual events...
-    #	bind $c <<Cut>> {
+    #	bind $w <<Cut>> {
     #	::CanvasCCP::CanvasTextCopy %W; Delete %W
     #	}
-    #	bind $c <<Copy>> {
+    #	bind $w <<Copy>> {
     #	::CanvasCCP::CanvasTextCopy %W
     #	}
-    #	bind $c <<Paste>> {
+    #	bind $w <<Paste>> {
     #	::CanvasCCP::CanvasTextPaste %W
     #	}
-    bind $c <Button-1> {
+    bind $w <Button-1> {
 	::CanvasText::CanvasFocus %W [%W canvasx %x] [%W canvasy %y]
     }
-    bind $c <Button-2> {
+    bind $w <Button-2> {
 	::CanvasCCP::CanvasTextPaste %W [%W canvasx %x] [%W canvasy %y]
     }
-    $c bind text <Button-1> {
+    $w bind text <Button-1> {
 	::CanvasText::Hit %W [%W canvasx %x] [%W canvasy %y]
     }
-    $c bind text <B1-Motion> {
+    $w bind text <B1-Motion> {
 	::CanvasText::Drag %W [%W canvasx %x] [%W canvasy %y]
     }
-    $c bind text <Double-Button-1> {
+    $w bind text <Double-Button-1> {
 	::CanvasText::SelectWord %W [%W canvasx %x] [%W canvasy %y]
     }
-    $c bind text <Delete> {
+    $w bind text <Delete> {
 	::CanvasText::Delete %W
     }
     
     # Swallow any commands on mac's. 
     if {[string match "mac*" $this(platform)]} {
-	$c bind text <Command-Any-Key> {# nothing}
+	$w bind text <Command-Any-Key> {# nothing}
 	# Testing... for chinese input method...
-	$c bind text <Command-t> {
+	$w bind text <Command-t> {
 	    break
 	}
     }
-    $c bind text <BackSpace> {
+    $w bind text <BackSpace> {
 	::CanvasText::Delete %W
     }
-    $c bind text <Return> {
+    $w bind text <Return> {
 	::CanvasText::NewLine %W
     }
-    $c bind text <KeyPress> {
+    $w bind text <KeyPress> {
 	::CanvasText::TextInsert %W %A
     }
-    $c bind text <Key-Right> {
+    $w bind text <Key-Right> {
 	::CanvasText::MoveRight %W
     }
-    $c bind text <Key-Left> {
+    $w bind text <Key-Left> {
 	::CanvasText::MoveLeft %W
     }
 
@@ -100,54 +100,54 @@ proc ::CanvasText::EditBind {c} {
     # <KeyPress> class binding will also fire and insert the character,
     # which is wrong.  Ditto for Escape, and Tab.
     
-    $c bind text <Alt-KeyPress> {# nothing}
-    $c bind text <Meta-KeyPress> {# nothing}
-    $c bind text <Control-KeyPress> {# nothing}
-    $c bind text <Escape> {# nothing}
-    $c bind text <KP_Enter> {# nothing}
-    $c bind text <Tab> {# nothing}
+    $w bind text <Alt-KeyPress> {# nothing}
+    $w bind text <Meta-KeyPress> {# nothing}
+    $w bind text <Control-KeyPress> {# nothing}
+    $w bind text <Escape> {# nothing}
+    $w bind text <KP_Enter> {# nothing}
+    $w bind text <Tab> {# nothing}
 
     # Additional emacs-like bindings.
-    $c bind text <Control-d> {
+    $w bind text <Control-d> {
 	::CanvasText::Delete %W 1
     }
-    $c bind text <Control-a> {
+    $w bind text <Control-a> {
 	::CanvasText::InsertBegin %W
     }
-    $c bind text <Control-e> {
+    $w bind text <Control-e> {
 	::CanvasText::InsertEnd %W
     }
-    $c bind text <Control-Left> {
+    $w bind text <Control-Left> {
 	::CanvasText::SetCursor %W [::CanvasText::PrevWord %W]
     }
-    $c bind text <Control-Right> {
+    $w bind text <Control-Right> {
 	::CanvasText::SetCursor %W [::CanvasText::NextWord %W]
     }
-    $c bind text <Control-Up> {
+    $w bind text <Control-Up> {
 	::CanvasText::SetCursor %W 0
     }
-    $c bind text <Control-Down> {
+    $w bind text <Control-Down> {
 	::CanvasText::SetCursor %W end
     }
-    $c bind text <Home> {
+    $w bind text <Home> {
 	::CanvasText::InsertBegin %W
     }
-    $c bind text <End> {
+    $w bind text <End> {
 	::CanvasText::InsertEnd %W
     }
         
     # Need some new string functions here.
     if {[info tclversion] >= 8.2} {
-	$c bind text <Key-Up> {
+	$w bind text <Key-Up> {
 	    ::CanvasText::MoveUpOrDown %W up
 	}
-	$c bind text <Key-Down> {
+	$w bind text <Key-Down> {
 	    ::CanvasText::MoveUpOrDown %W down
 	}
     }
     
     # Stop certain keyboard accelerators from firing:
-    bind $c <Control-a> {break}
+    bind $w <Control-a> { break }
 }
 
 # CanvasText::CanvasFocus --
@@ -157,21 +157,21 @@ proc ::CanvasText::EditBind {c} {
 #       make a new item.
 #
 # Arguments:
-#       c      the canvas widget.
+#       w      the canvas widget.
 #       x,y    the mouse coordinates.
 #       forceNew   make new item regardless if text item under the mouse.
 #       
 # Results:
 #       none
 
-proc ::CanvasText::CanvasFocus {c x y {forceNew 0}} {
+proc ::CanvasText::CanvasFocus {w x y {forceNew 0}} {
     global  prefs fontSize2Points
     
-    set wtop [::UI::GetToplevelNS $c]
+    set wtop [::UI::GetToplevelNS $w]
     upvar ::${wtop}::state state
 
-    focus $c
-    set id [::CanvasUtils::FindTypeFromOverlapping $c $x $y "text"]
+    focus $w
+    set id [::CanvasUtils::FindTypeFromOverlapping $w $x $y "text"]
 
     Debug 2 "CanvasFocus:: id=$id"
     
@@ -179,7 +179,7 @@ proc ::CanvasText::CanvasFocus {c x y {forceNew 0}} {
     if {$prefs(batchText)} {
 	DoSendBufferedText $wtop
     }
-    if {($id == "") || ([$c type $id] != "text") || $forceNew} {
+    if {($id == "") || ([$w type $id] != "text") || $forceNew} {
 	
 	# No text item under cursor, make a new empty text item.
 	set utag [::CanvasUtils::NewUtag]
@@ -205,9 +205,9 @@ proc ::CanvasText::CanvasFocus {c x y {forceNew 0}} {
 	eval $redo
 	undo::add [::UI::GetUndoToken $wtop] $undo $redo
 
-	$c focus $utag
-	$c select clear
-	$c icursor $utag 0
+	$w focus $utag
+	$w select clear
+	$w icursor $utag 0
     }
 }
 
@@ -217,13 +217,13 @@ proc ::CanvasText::CanvasFocus {c x y {forceNew 0}} {
 #       with focus. Handles newlines as well.
 #
 # Arguments:
-#       c      the canvas widget.
+#       w      the canvas widget.
 #       char   the char or text string to insert.
 #       
 # Results:
 #       none
 
-proc ::CanvasText::TextInsert {c char} {
+proc ::CanvasText::TextInsert {w char} {
     global  allIPnumsToSend this prefs
         
     variable textBuffer
@@ -235,28 +235,28 @@ proc ::CanvasText::TextInsert {c char} {
     
     # First, find out if there are any text item with focus.
     # If not, then make one.
-    if {[llength [$c focus]] == 0} {
+    if {[llength [$w focus]] == 0} {
 	
     }
-    set wtop [::UI::GetToplevelNS $c]
+    set wtop [::UI::GetToplevelNS $w]
     
     # Find the 'itno'.
-    set utag [::CanvasUtils::GetUtag $c focus]
+    set utag [::CanvasUtils::GetUtag $w focus]
     if {$utag == "" || $char == ""}	 {
 	Debug 4 "TextInsert:: utag == {}"
 	return
     }
-    set itfocus [$c focus]
+    set itfocus [$w focus]
     
     # The index of the insertion point.
-    set ind [$c index $itfocus insert]
+    set ind [$w index $itfocus insert]
 
     # Mac text bindings: delete selection before inserting.
     if {[string match "mac*" $this(platform)] ||   \
       ($this(platform) == "windows")} {
 	if {![catch {selection get} s]} {
 	    if {[llength $s] > 0} {
-		Delete $c
+		Delete $w
 		selection clear
 	    }
 	}
@@ -267,7 +267,7 @@ proc ::CanvasText::TextInsert {c char} {
     set undocmd [list dchars $utag $ind [expr $ind + [string length $char]]]
     set redo [list ::CanvasUtils::Command $wtop $cmd]
     set undo [list ::CanvasUtils::Command $wtop $undocmd]    
-    eval {$c} $cmd
+    eval {$w} $cmd
     undo::add [::UI::GetUndoToken $wtop] $undo $redo
         
     Debug 9 "TextInsert:: utag = $utag, ind = $ind, char: $char"
@@ -299,7 +299,7 @@ proc ::CanvasText::TextInsert {c char} {
     # Use the default voice on this system.
     if {$prefs(SpeechOn)} {
 	if {[string match *${punct}* $char]} {
-	    set theText [$c itemcget $utag -text]
+	    set theText [$w itemcget $utag -text]
 	    if {[string length $theText]} {
 		::UserActions::Speak $theText $prefs(voiceUs)
 	    }
@@ -312,21 +312,21 @@ proc ::CanvasText::TextInsert {c char} {
 # 
 #
 # Arguments:
-# c -		The canvas window.
+# w -		The canvas window.
 # pos -		The desired new position for the cursor in the text item.
 
-proc ::CanvasText::SetCursor {c pos} {
+proc ::CanvasText::SetCursor {w pos} {
 
-    set foc [$c focus]
-    $c select clear
-    $c icursor $foc $pos
+    set foc [$w focus]
+    $w select clear
+    $w icursor $foc $pos
 }
 
-proc ::CanvasText::NextWord {c} {
+proc ::CanvasText::NextWord {w} {
     
-    set id [$c focus]
-    set str [$c itemcget $id -text]
-    set ind [$c index $id insert]
+    set id [$w focus]
+    set str [$w itemcget $id -text]
+    set ind [$w index $id insert]
     set next [tcl_startOfNextWord $str $ind]
     if {$next == -1} {
 	set next end
@@ -334,11 +334,11 @@ proc ::CanvasText::NextWord {c} {
     return $next
 }
 
-proc ::CanvasText::PrevWord {c} {
+proc ::CanvasText::PrevWord {w} {
     
-    set id [$c focus]
-    set str [$c itemcget $id -text]
-    set ind [$c index $id insert]
+    set id [$w focus]
+    set str [$w itemcget $id -text]
+    set ind [$w index $id insert]
     set prev [tcl_startOfPreviousWord $str $ind]
     if {$prev == -1} {
 	set prev 0
@@ -351,15 +351,15 @@ proc ::CanvasText::PrevWord {c} {
 #       Move insert cursor one step to the right.
 #
 # Arguments:
-#       c      the canvas widget.
+#       w      the canvas widget.
 #       
 # Results:
 #       none
 
-proc ::CanvasText::MoveRight {c} {
+proc ::CanvasText::MoveRight {w} {
     global  this
     
-    set foc [$c focus]
+    set foc [$w focus]
     
     # Mac text bindings: remove selection then move insert to end.
     if {[string match "mac*" $this(platform)] ||  \
@@ -368,14 +368,14 @@ proc ::CanvasText::MoveRight {c} {
 	# If selection.
 	if {![catch {selection get} s]} {
 	    if {[llength $s] > 0} {
-		$c icursor $foc [expr [$c index $foc sel.last] + 1]
-		$c select clear
+		$w icursor $foc [expr [$w index $foc sel.last] + 1]
+		$w select clear
 	    }
 	} else {
-	    $c icursor $foc [expr [$c index $foc insert] + 1]
+	    $w icursor $foc [expr [$w index $foc insert] + 1]
 	}
     } else {
-	$c icursor $foc [expr [$c index $foc insert] + 1]
+	$w icursor $foc [expr [$w index $foc insert] + 1]
     }
 }
 
@@ -384,15 +384,15 @@ proc ::CanvasText::MoveRight {c} {
 #       Move insert cursor one step to the left.
 #
 # Arguments:
-#       c      the canvas widget.
+#       w      the canvas widget.
 #       
 # Results:
 #       none
 
-proc ::CanvasText::MoveLeft {c} {
+proc ::CanvasText::MoveLeft {w} {
     global  this
     
-    set foc [$c focus]
+    set foc [$w focus]
     
     # Mac text bindings: remove selection then move insert to first.
     if {[string match "mac*" $this(platform)] ||  \
@@ -401,14 +401,14 @@ proc ::CanvasText::MoveLeft {c} {
 	# If selection.
 	if {![catch {selection get} s]} {
 	    if {[llength $s] > 0} {
-		$c icursor $foc [expr [$c index $foc sel.first] + 0]
-		$c select clear
+		$w icursor $foc [expr [$w index $foc sel.first] + 0]
+		$w select clear
 	    }
 	} else {
-	    $c icursor $foc [expr [$c index $foc insert] - 1]
+	    $w icursor $foc [expr [$w index $foc insert] - 1]
 	}
     } else {
-	$c icursor $foc [expr [$c index $foc insert] - 1]
+	$w icursor $foc [expr [$w index $foc insert] - 1]
     }
 }
 
@@ -418,19 +418,19 @@ proc ::CanvasText::MoveLeft {c} {
 #       Counts chars from line break, not optimal solution.
 #
 # Arguments:
-#       c      the canvas widget.
+#       w      the canvas widget.
 #       upOrDown  "up" or "down".
 #       
 # Results:
 #       none
 
-proc ::CanvasText::MoveUpOrDown {c upOrDown} {
+proc ::CanvasText::MoveUpOrDown {w upOrDown} {
     
-    set foc [$c focus]
+    set foc [$w focus]
     
     # Find index of new character. Only for left justified text.
-    set ind [$c index $foc insert]
-    set theText [$c itemcget $foc -text]
+    set ind [$w index $foc insert]
+    set theText [$w itemcget $foc -text]
 
     if {[string equal $upOrDown "up"]} {
 	
@@ -444,7 +444,7 @@ proc ::CanvasText::MoveUpOrDown {c upOrDown} {
 	}
 	set ncharLeft [expr $ind - $indPrevNL - 1]
 	set newInd [min [expr $indPrev2NL + $ncharLeft + 1] $indPrevNL]
-	$c icursor $foc $newInd
+	$w icursor $foc $newInd
 	
     } else {
 	
@@ -465,37 +465,37 @@ proc ::CanvasText::MoveUpOrDown {c upOrDown} {
 	} else {
 	    set newInd [min [expr $indNextNL + $ncharLeft + 1] $indNext2NL]
 	}
-	$c icursor $foc $newInd
+	$w icursor $foc $newInd
     }
 }
 
-proc ::CanvasText::InsertBegin {c} {
+proc ::CanvasText::InsertBegin {w} {
     
-    set foc [$c focus]
+    set foc [$w focus]
     
     # Find index of new character. Only for left justified text.
-    set ind [expr [$c index $foc insert] - 1]
-    set theText [$c itemcget $foc -text]
+    set ind [expr [$w index $foc insert] - 1]
+    set theText [$w itemcget $foc -text]
     set indPrevNL [expr [string last \n $theText $ind] + 1]
     if {$indPrevNL == -1} {
-	$c icursor $foc 0
+	$w icursor $foc 0
     } else {
-	$c icursor $foc $indPrevNL
+	$w icursor $foc $indPrevNL
     }
 }
 
-proc ::CanvasText::InsertEnd {c} {
+proc ::CanvasText::InsertEnd {w} {
     
-    set foc [$c focus]
+    set foc [$w focus]
     
     # Find index of new character. Only for left justified text.
-    set ind [$c index $foc insert]
-    set theText [$c itemcget $foc -text]
+    set ind [$w index $foc insert]
+    set theText [$w itemcget $foc -text]
     set indNextNL [string first \n $theText $ind]
     if {$indNextNL == -1} {
-	$c icursor $foc end
+	$w icursor $foc end
     } else {
-	$c icursor $foc $indNextNL
+	$w icursor $foc $indNextNL
     }
 }
 
@@ -504,21 +504,21 @@ proc ::CanvasText::InsertEnd {c} {
 #       Called when clicking a text item with the text tool selected.
 #
 # Arguments:
-#       c      the canvas widget.
+#       w      the canvas widget.
 #       x,y    the mouse coordinates.
 #       select   
 #       
 # Results:
 #       none
 
-proc ::CanvasText::Hit {c x y {select 1}} {
+proc ::CanvasText::Hit {w x y {select 1}} {
 
     Debug 2 "::CanvasText::Hit select=$select"
 
-    $c focus current
-    $c icursor current @$x,$y
-    $c select clear
-    $c select from current @$x,$y
+    $w focus current
+    $w icursor current @$x,$y
+    $w select clear
+    $w select from current @$x,$y
 }
 
 # CanvasText::Drag --
@@ -526,26 +526,26 @@ proc ::CanvasText::Hit {c x y {select 1}} {
 #       Text selection when dragging the mouse over a text item.
 #
 # Arguments:
-#       c      the canvas widget.
+#       w      the canvas widget.
 #       x,y    the mouse coordinates.
 #       
 # Results:
 #       none
 
-proc ::CanvasText::Drag {c x y} {
+proc ::CanvasText::Drag {w x y} {
     global  this
     
-    set wtop [::UI::GetToplevelNS $c]
+    set wtop [::UI::GetToplevelNS $w]
     ::UserActions::DeselectAll $wtop
-    $c select to current @$x,$y
+    $w select to current @$x,$y
     
     # Mac text bindings.????
     if {[string match "mac*" $this(platform)]} {
-	#$c focus
+	#$w focus
     }
     
     # menus
-    ::UI::FixMenusWhenSelection $c
+    ::UI::FixMenusWhenSelection $w
 }
 
 # CanvasText::SelectWord --
@@ -553,34 +553,34 @@ proc ::CanvasText::Drag {c x y} {
 #       Typically selects wholw word when double clicking it.
 #
 # Arguments:
-#       c      the canvas widget.
+#       w      the canvas widget.
 #       x,y    the mouse coordinates.
 #       
 # Results:
 #       none
 
-proc ::CanvasText::SelectWord {c x y} {
+proc ::CanvasText::SelectWord {w x y} {
     
-    set wtop [::UI::GetToplevelNS $c]
+    set wtop [::UI::GetToplevelNS $w]
     ::UserActions::DeselectAll $wtop
-    $c focus current
+    $w focus current
     
-    set id [$c find withtag current]
+    set id [$w find withtag current]
     if {$id == ""} {
 	return
     }
-    if {[$c type $id] != "text"} {
+    if {[$w type $id] != "text"} {
 	return
     }
-    set txt [$c itemcget $id -text]
-    set ind [$c index $id @$x,$y]
+    set txt [$w itemcget $id -text]
+    set ind [$w index $id @$x,$y]
     
     # Find the boundaries of the word and select word.
-    $c select from $id [string wordstart $txt $ind]
-    $c select adjust $id [expr [string wordend $txt $ind] - 1]
+    $w select from $id [string wordstart $txt $ind]
+    $w select adjust $id [expr [string wordend $txt $ind] - 1]
     
     # menus
-    ::UI::FixMenusWhenSelection $c
+    ::UI::FixMenusWhenSelection $w
 }
 
 # CanvasText::NewLine --
@@ -589,22 +589,22 @@ proc ::CanvasText::SelectWord {c x y} {
 #       clients; double escaped.
 #
 # Arguments:
-#       c      the canvas widget.
+#       w      the canvas widget.
 #       
 # Results:
 #       none
 
-proc ::CanvasText::NewLine {c} {
+proc ::CanvasText::NewLine {w} {
     global  prefs
     
     variable textBuffer
     variable indBuffer
 
     set nl_ "\\n"
-    set wtop [::UI::GetToplevelNS $c]
+    set wtop [::UI::GetToplevelNS $w]
     
     # Find the 'utag'.
-    set utag [::CanvasUtils::GetUtag $c focus]
+    set utag [::CanvasUtils::GetUtag $w focus]
     if {$utag == ""}	 {
 	return
     }
@@ -613,7 +613,7 @@ proc ::CanvasText::NewLine {c} {
     if {$prefs(batchText)} {
 	DoSendBufferedText $wtop
     }
-    set ind [$c index [$c focus] insert]
+    set ind [$w index [$w focus] insert]
     set cmdlocal [list insert $utag $ind \n]
     set cmdremote [list insert $utag $ind $nl_]
     set undocmd [list dchars $utag $ind]
@@ -631,41 +631,41 @@ proc ::CanvasText::NewLine {c} {
 #       A backspace if text item has focus deletes text left of insert cursor.
 #
 # Arguments:
-#       c      the canvas widget.
+#       w      the canvas widget.
 #       offset (D=0) is 1 if we want to delete a character right of insertion
 #              point (control-d)
 #       
 # Results:
 #       none
 
-proc ::CanvasText::Delete {c {offset 0}} {
+proc ::CanvasText::Delete {w {offset 0}} {
     global  prefs
     
-    Debug 2 "Delete"
+    Debug 2 "::CanvasText::Delete"
 
-    set idfocus [$c focus]
-    set utag [::CanvasUtils::GetUtag $c focus]
+    set idfocus [$w focus]
+    set utag [::CanvasUtils::GetUtag $w focus]
     if {$utag == ""} {
 	return
     }
-    set wtop [::UI::GetToplevelNS $c]
+    set wtop [::UI::GetToplevelNS $w]
 	
     # If we have an unsent buffer, be sure to send it first.
     if {$prefs(batchText)} {
 	DoSendBufferedText $wtop
     }
     
-    if {[string length [$c select item]] > 0}	 {
-	set sfirst [$c index $idfocus sel.first]
-	set slast [$c index $idfocus sel.last]
-	set thetext [$c itemcget $idfocus -text]
+    if {[string length [$w select item]] > 0}	 {
+	set sfirst [$w index $idfocus sel.first]
+	set slast [$w index $idfocus sel.last]
+	set thetext [$w itemcget $idfocus -text]
 	set str [string range $thetext $sfirst $slast]
 	set cmd [list dchars $utag $sfirst $slast]
 	set undocmd [list insert $utag $sfirst $str]
 
     } elseif {$idfocus != {}} {
-	set ind [expr [$c index $idfocus insert] - 1 + $offset]
-	set thetext [$c itemcget $idfocus -text]
+	set ind [expr [$w index $idfocus insert] - 1 + $offset]
+	set thetext [$w itemcget $idfocus -text]
 	set str [string index $thetext $ind]
 	set cmd [list dchars $utag $ind]
 	set undocmd [list insert $utag $ind $str]
@@ -673,7 +673,8 @@ proc ::CanvasText::Delete {c {offset 0}} {
     if {[info exists cmd]} {
 	set redo [list ::CanvasUtils::Command $wtop $cmd]
 	set undo [list ::CanvasUtils::Command $wtop $undocmd]    
-	eval {$c} $cmd
+	#eval {$w} $cmd
+	eval $redo
 	undo::add [::UI::GetUndoToken $wtop] $undo $redo
     }
 }

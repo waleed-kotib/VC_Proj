@@ -3,9 +3,9 @@
 #      This file is part of the whiteboard application. 
 #      It implements a mailbox for jabber messages.
 #      
-#  Copyright (c) 2002  Mats Bengtsson
+#  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.2 2003-01-11 16:16:09 matben Exp $
+# $Id: MailBox.tcl,v 1.3 2003-01-30 17:33:44 matben Exp $
 
 package provide MailBox 1.0
 
@@ -115,10 +115,10 @@ proc ::Jabber::MailBox::Build {w args} {
     if {0 && [string match "mac*" $this(platform)]} {
 	set wmenu ${w}.menu
 	menu $wmenu -tearoff 0
-	::UI::MakeMenu $w ${wmenu}.apple   {}         $::UI::menuDefs(main,apple)
-	::UI::MakeMenu $w ${wmenu}.file    {File }    $::UI::menuDefs(min,file)
-	::UI::MakeMenu $w ${wmenu}.edit    {Edit }    $::UI::menuDefs(min,edit)	
-	::UI::MakeMenu $w ${wmenu}.jabber  {Jabber }  $::UI::menuDefs(main,jabber)
+	::UI::MakeMenu $w ${wmenu}.apple   {}       $::UI::menuDefs(main,apple)
+	::UI::MakeMenu $w ${wmenu}.file    mFile    $::UI::menuDefs(min,file)
+	::UI::MakeMenu $w ${wmenu}.edit    mEdit    $::UI::menuDefs(min,edit)	
+	::UI::MakeMenu $w ${wmenu}.jabber  mJabber  $::UI::menuDefs(main,jabber)
 	$w configure -menu ${wmenu}
     }
     set locals(wtop) $w
@@ -377,29 +377,16 @@ proc ::Jabber::MailBox::GotMsg {bodytxt args} {
 	-from unknown -subject {}
     }
     array set opts $args
-    regexp {^(.+@[^/]+)(/(.+))?} $opts(-from) match jidNoRes x res
-    
-    set theDate [clock format [clock seconds] -format "%y-%m-%d"]
-    set theTime [clock format [clock seconds] -format "%H:%M:%S"]
-    set timeDate "$theDate $theTime"
-    set secs [clock seconds]
-    
+    regexp {^(.+@[^/]+)(/(.+))?} $opts(-from) match jid2 x res
+        
     # Here we should probably check som 'jabber:x:delay' element...
+    set timeDate ""
     if {[info exists opts(-x)]} {
-	foreach xlist $opts(-x) {
-	    foreach {tag attrlist empty chdata sub} $xlist { break }
-	    array set attrarr $attrlist
-	    if {[info exists attrarr(xmlns)] &&   \
-	      [string equal $attrarr(xmlns) "jabber:x:delay"]} {
-		
-		# This is ISO 8601 and 'clock scan' shall work here!
-		set timeDate [clock format [clock scan $attrarr(stamp)]  \
-		  -format "%y-%m-%d %H:%M:%S"]
-		set secs [clock scan $attrarr(stamp)]
-	    }
-	}
+	set timeDate [::Jabber::FormatAnyDelayElem $opts(-x)]
     }
-    set timeDate [SmartClockFormat $secs]
+    if {$timeDate == ""} {
+	set timeDate [SmartClockFormat [clock seconds]]
+    }
     
     # If any whiteboard elements in this message (binary entities?).
     # Generate unique hex id which is stored in mailbox and used in file name.
@@ -527,6 +514,7 @@ proc ::Jabber::MailBox::SelectMsg { } {
     variable locals
     variable mailbox
     variable colindex
+    upvar ::Jabber::jstate jstate
     upvar ::UI::icons icons
     
     set wtextmsg $locals(wtextmsg)
@@ -547,8 +535,13 @@ proc ::Jabber::MailBox::SelectMsg { } {
     }
     set row [$wtbl get $item]
     set id [lindex $row $colindex(msgid)]
-    set from [lindex $row $colindex(from)]
     
+    # 2-tier jid.
+    set jid2 [lindex $row $colindex(from)]
+        
+    # 3-tier jid.
+    set jid3 [lindex $mailbox($id) 1]
+
     # Mark as read.
     set colsub $colindex(subject)
     $wtbl rowconfigure $item -font $sysFont(s)
@@ -567,18 +560,38 @@ proc ::Jabber::MailBox::SelectMsg { } {
     set uid [::Jabber::MailBox::GetCanvasHexUID $id]
     if {[string length $uid] > 0} {
 	set wbtoplevel .maininbox
-	set title "Inbox: $from"
+	set title "Inbox: $jid2"
 	if {[winfo exists $wbtoplevel]} {
 	    ::ImageAndMovie::ResetAllHttp ${wbtoplevel}.
 	    ::UserActions::EraseAll ${wbtoplevel}.
-	    ::UI::ConfigureMain ${wbtoplevel}. -title $title -jid $from
+	    ::UI::ConfigureMain ${wbtoplevel}. -title $title -jid $jid2
+	    undo::reset [::UI::GetUndoToken ${wbtoplevel}.]
 	} else {
 	    ::UI::BuildMain ${wbtoplevel}. -state disabled -title $title \
-	    -jid $from
+	    -jid $jid2
 	}
+	
+	# Only if user available shall we try to import.
+	set tryimport 0
+	if {[$jstate(roster) isavailable $jid3] || \
+	  ($jid3 == $jstate(mejidres))} {
+	    set tryimport 1
+	}
+		
 	set fileName ${uid}.can
 	set filePath [file join $prefs(inboxCanvasPath) $fileName]
-	::CanvasFile::DrawCanvasItemFromFile ${wbtoplevel}. $filePath local
+	set numImports [::CanvasFile::DrawCanvasItemFromFile ${wbtoplevel}. \
+	  $filePath -where local -tryimport $tryimport]
+	if {!$tryimport && $numImports > 0} {
+	    
+	    # Perhaps we shall inform the user that no binary entities
+	    # could be obtained.
+	    tk_messageBox -type ok -title {Missing Entities}  \
+	      -icon info -message \
+	      [FormatTextForMessageBox "There were $numImports images or\
+	      similar entities that could not be obtained because the user\
+	      is not online."]
+	}
     }
 }
 

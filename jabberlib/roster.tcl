@@ -5,9 +5,13 @@
 #
 # Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.2 2003-01-11 16:16:09 matben Exp $
+# $Id: roster.tcl,v 1.3 2003-01-30 17:33:51 matben Exp $
 # 
-# Note that the $jid below is always without '/resource'!
+# Note that every jid in the rosterArr is usually (always) without any resource,
+# but the jid's in the presArr are identical to the 'from' attribute, except
+# the presArr($jid-2,res) which have any resource stripped off. The 'from' 
+# attribute sre (always) with /resource.
+# 
 # Variables used in roster:
 # 
 #	rosterArr(users)              : The JID's of users currently in roster
@@ -24,17 +28,17 @@
 #	rosterArr($jid,ask)           : "Ask" of $jid 
 #                                       (subscribe|unsubscribe|"")
 #                                       
-#	presArr($jid,res)             : List of resources for this $jid.
+#	presArr($jid-2,res)           : List of resources for this $jid.
 #
-#       presArr($jid/$res,type)       : One of 'available' or 'unavailable.
+#       presArr($from,type)           : One of 'available' or 'unavailable.
 #
-#       presArr($jid/$res,status)     : The presence status element.
+#       presArr($from,status)         : The presence status element.
 #
-#       presArr($jid/$res,priority)   : The presence priority element.
+#       presArr($from,priority)       : The presence priority element.
 #
-#       presArr($jid/$res,show)       : The presence show element.
+#       presArr($from,show)           : The presence show element.
 #
-#       presArr($jid/$res,x)          : List of the presence x elements:
+#       presArr($from,x)              : List of the presence x elements:
 #                                       jabber:x:autoupdate
 #                                       jabber:x:delay
 #                                       jabber:x:oob
@@ -69,7 +73,7 @@
 #      rostName isavailable jid
 #      rostName removeitem jid
 #      rostName reset
-#      rostName setpresence jid resource type ?-option value -option ...?
+#      rostName setpresence jid type ?-option value -option ...?
 #      rostName setrosteritem jid ?-option value -option ...?
 #      
 #   The 'clientCommand' procedure must have the following form:
@@ -99,6 +103,7 @@
 #       1.0a2    clear roster and presence array before receiving such elements
 #       1.0a3    added reset, isavailable, getresources, and getsubscription 
 #       1.0b1    added gethighestresource command
+#                changed setpresence arguments
 
 package provide roster 1.0
 
@@ -199,7 +204,7 @@ proc roster::CommandProc {rostName cmd args} {
 #
 # Arguments:
 #       rostName:   the instance of this roster.
-#       jid:        .
+#       jid:        2-tier jid, with no /resource!
 #       args:       a list of '-key value' pairs, where '-key' is any of:
 #                       -name value
 #                       -subscription value
@@ -230,7 +235,7 @@ proc roster::setrosteritem {rostName jid args} {
     # Old values will be overwritten, nonexisting options will result in
     # nonexisting array entries.
     foreach {name value} $args {
-	set par [string trimleft $name {-}]
+	set par [string trimleft $name "-"]
 	set rosterArr($jid,$par) $value
 	if {[string compare $par {groups}] == 0} {
 	    foreach gr $value {
@@ -243,7 +248,7 @@ proc roster::setrosteritem {rostName jid args} {
     
     # Be sure to evaluate the registered command procedure.
     if {[string length $options(cmd)]} {
-	uplevel #0 "$options(cmd) [list $rostName {set} $jid] $args"
+	uplevel #0 "$options(cmd) [list $rostName set $jid] $args"
     }
     return {}
 }
@@ -254,7 +259,7 @@ proc roster::setrosteritem {rostName jid args} {
 #
 # Arguments:
 #       rostName:   the instance of this roster.
-#       jid:        .
+#       jid:        2-tier jid with no /resource.
 #       
 # Results:
 #       none.
@@ -280,10 +285,7 @@ proc roster::removeitem {rostName jid} {
     foreach name $rostGlobals(entries) {
 	catch {unset rosterArr($jid,$name)}
     }
-    catch {unset presArr($jid,res)}
-    foreach key [array names $jid*] {
-	unset rosterArr($key)
-    }
+    array unset presArr "$jid,*"
     
     # Be sure to evaluate the registered command procedure.
     if {[string length $options(cmd)]} {
@@ -384,8 +386,7 @@ proc roster::reset {rostName} {
 #
 # Arguments:
 #       rostName:   the instance of this roster.
-#       jid:        from this.
-#       resource:   and its resource.
+#       jid:        the from attribute. Usually 3-tier jid with /resource part.
 #       type:       one of 'available', 'unavailable', or 'unsubscribed'.
 #       args:       a list of '-key value' pairs, where '-key' is any of:
 #                     -status value
@@ -396,57 +397,58 @@ proc roster::reset {rostName} {
 # Results:
 #       none.
 
-proc roster::setpresence {rostName jid resource type args} {
+proc roster::setpresence {rostName jid type args} {
     
     variable rostGlobals
     upvar [namespace current]::${rostName}::rosterArr rosterArr
     upvar [namespace current]::${rostName}::presArr presArr
     upvar [namespace current]::${rostName}::options options
     
-    Debug 2 "roster::setpresence rostName=$rostName, \
-      jid='$jid', resource=$resource, type='$type', args='$args'"
+    Debug 2 "roster::setpresence rostName=$rostName, jid='$jid', \
+      type='$type', args='$args'"
+    
+    set jid2 $jid
+    set resource ""
+    regexp {([^/]+)/([^/]+)} $jid match jid2 resource
     
     if {[string equal $type "unsubscribed"]} {
 	
 	# We need to remove item from all resources.
-	foreach key [array names presArr "${jid}*"] {
-	    unset presArr($key)
-	}
-	set argList [list "-type" $type]
+	array unset presArr "${jid2}*"
+	set argList [list -type $type]
     } else {
 	
 	# Add user if not there already.
-	if {[lsearch -exact $rosterArr(users) $jid] < 0} {
-	    lappend rosterArr(users) $jid
+	if {[lsearch -exact $rosterArr(users) $jid2] < 0} {
+	    lappend rosterArr(users) $jid2
 	}
 	
 	# Clear out the old presence state since elements may still be lurking.
 	foreach key $rostGlobals(presEntries) {
-	    catch {unset presArr($jid/$resource,$key)}
+	    catch {unset presArr($jid,$key)}
 	}
 	
 	# Should we add something more to our roster, such as subscription,
 	# if we haven't got our roster before this?
 	
 	# Add to list of resources.
-	if {![info exists presArr($jid,res)]} {
-	    set presArr($jid,res) $resource
-	} elseif {[lsearch -exact $presArr($jid,res) $resource] < 0} {
-	    lappend presArr($jid,res) $resource
+	if {![info exists presArr($jid2,res)]} {
+	    set presArr($jid2,res) $resource
+	} elseif {[lsearch -exact $presArr($jid2,res) $resource] < 0} {
+	    lappend presArr($jid2,res) $resource
 	}
 	
-	set fulljid  $jid/$resource
-	set presArr($fulljid,type) $type
+	set presArr($jid,type) $type
 	foreach {name value} $args {
-	    set par [string trimleft $name -]
-	    set presArr($fulljid,$par) $value
+	    set par [string trimleft $name "-"]
+	    set presArr($jid,$par) $value
 	}
-	set argList "[list -resource $resource -type $type] $args"
+	set argList [concat [list -resource $resource -type $type] $args]
     }
     
     # Be sure to evaluate the registered command procedure.
     if {[string length $options(cmd)]} {
-	uplevel #0 "$options(cmd) [list $rostName presence $jid] $argList"
+	uplevel #0 $options(cmd) [list $rostName presence $jid2] $argList
     }
     return {}
 }
@@ -530,7 +532,11 @@ proc roster::getpresence {rostName jid {resource {}}} {
     # Can anyway have presence???
     if {![info exists presArr($jid,res)] ||   \
       ([string length $presArr($jid,res)] == 0)} {
-	return [list [list -resource $resource -type unavailable]]
+    	if {[string length $resource]} {
+		return [list -resource $resource -type unavailable]
+	} else {      
+		return [list [list -resource $resource -type unavailable]]
+	}
     }
     
     set result {}

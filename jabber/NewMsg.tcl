@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.1.1.1 2002-12-08 11:00:55 matben Exp $
+# $Id: NewMsg.tcl,v 1.2 2003-01-30 17:33:46 matben Exp $
 
 package provide NewMsg 1.0
 
@@ -139,12 +139,10 @@ proc ::Jabber::NewMsg::Build {wbase args} {
     if {0 && [string match "mac*" $this(platform)]} {
 	set wmenu ${w}.menu
 	menu $wmenu -tearoff 0
-	::UI::MakeMenu $w ${wmenu}.apple {} $::UI::menuDefs(main,apple)
-	::UI::MakeMenu $w ${wmenu}.file    {File }        $::UI::menuDefs(min,file)
-	::UI::MakeMenu $w ${wmenu}.edit    {Edit }        $::UI::menuDefs(min,edit)	
-	if {!$prefs(stripJabber)} {
-	    ::UI::MakeMenu $w ${wmenu}.jabber   {Jabber } $::UI::menuDefs(main,jabber)
-	}
+	::UI::MakeMenu $w ${wmenu}.apple   {}      $::UI::menuDefs(main,apple)
+	::UI::MakeMenu $w ${wmenu}.file    mFile   $::UI::menuDefs(min,file)
+	::UI::MakeMenu $w ${wmenu}.edit    mEdit   $::UI::menuDefs(min,edit)	
+	::UI::MakeMenu $w ${wmenu}.jabber  mJabber $::UI::menuDefs(main,jabber)
 	$w configure -menu ${wmenu}
     }
     

@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.2 2003-01-11 16:16:09 matben Exp $
+# $Id: jabberlib.tcl,v 1.3 2003-01-30 17:33:50 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -17,25 +17,26 @@
 #
 # Variables used in JabberLib:
 # 
-#	lib(wrap)                    : Wrap ID
+#	lib(wrap)                  : Wrap ID
 #
-#       lib(clientcmd)               : Callback proc up to the client
+#       lib(clientcmd)             : Callback proc up to the client
 #       
-#       lib(rostername)              : the name of the roster object
+#       lib(rostername)            : the name of the roster object
 #       
-#       lib(browsename)              : the name of the browse object
+#       lib(browsename)            : the name of the browse object
 #       
-#       lib(server)                  : The server domain name or ip number
+#       lib(server)                : The server domain name or ip number
 #       
-#	lib(sock)                    : SocketName
+#	lib(sock)                  : SocketName
 #
-#	lib(streamcmd)               : Callback command to run when the <stream>
-#	                               tag is received from the server.
-#	iq(uid)                      : Next iq id-number. Sent in 
-#                                      "id" attributes of <iq> packets.
+#	lib(streamcmd)             : Callback command to run when the <stream>
+#	                             tag is received from the server.
+#	                             
+#	iq(uid)                    : Next iq id-number. Sent in 
+#                                    "id" attributes of <iq> packets.
 #
-#	iq($id)                      : Callback command to run when result 
-#	                               packet of $id is received.
+#	iq($id)                    : Callback command to run when result 
+#	                             packet of $id is received.
 #	                               
 ############################# SCHEMA ###########################################
 #
@@ -75,13 +76,15 @@
 #   INSTANCE COMMANDS
 #      jlibName agent_get to cmd
 #      jlibName agents_get to cmd
-#      jlibName browse_get to cmd
+#      jlibName browse_get to ?-command, -errorcommand?
 #      jlibName config ?args?
 #      jlibName connect server ?args?
 #      jlibName disconnect
 #      jlibName get_last to cmd
 #      jlibName get_time to cmd
 #      jlibName get_version to cmd
+#      jlibName myjid
+#      jlibName mystatus
 #      jlibName oob_set to cmd url ?args?
 #      jlibName private_get to ns subtags cmd
 #      jlibName private_set ns cmd ?args?
@@ -133,6 +136,8 @@
 #      jlibName groupchat participants room
 #      jlibName groupchat allroomsin
 #      
+#  o the 'muc' command: see muc.tcl
+#      
 #   The callbacks given for any of the '-iqcommand', '-messagecommand', 
 #   or '-presencecommand' must have the following form:
 #   
@@ -178,10 +183,16 @@
 #                'register_remove' is now an iq-set command, new 'to' argument
 #       1.0b10   fixed a number of problems with groupchat-conference compatibility,
 #                added presence callback
+#       1.0b11   changed 'browse_get' command 
+#                added 'mystatus' command
+
+# Notes:  1) there can be problems if using any uppercase character in names
+#            while they are returned all lower case, such as room names etc.
 
 package require wrapper
 package require roster
 package require browse
+package require muc
 
 package provide jlib 1.0
 
@@ -194,6 +205,10 @@ namespace eval jlib {
     #    > 1 prints raw xml I/O
     #    > 2 prints a lot more
     variable debug 2
+    
+    variable statics
+    set statics(presenceTypeExp)  \
+      {(available|unavailable|subscribe|unsubscribe|subscribed|unsubscribed|invisible)}
 }
 
 namespace eval jlib::service {
@@ -210,6 +225,13 @@ namespace eval jlib::conference {}
 
 # Collects the 'groupchat' subcommand.
 namespace eval jlib::groupchat {}
+
+
+# Bindings to the muc package.
+proc jlib::muc {jlibname args} {
+
+    eval {[namespace current]::muc::CommandProc $jlibname} $args
+}
 
 proc jlib::setdebug {args} {
     variable debug
@@ -260,7 +282,12 @@ proc jlib::new {jlibname rostername browsename clientcmd args} {
 	# Cache for the 'conference' subcommand.
 	variable conf
 	# Cache for the 'groupchat' subcommand.
-	variable gchat
+	variable gchat	
+    }
+    
+    # Cache for the MUC subcommand.
+    namespace eval [namespace current]::muc::${jlibname} {
+       	variable cache
     }
         
     # Set simpler variable names.
@@ -307,6 +334,10 @@ proc jlib::new {jlibname rostername browsename clientcmd args} {
     set lib(isinstream) 0
     set lib(server) ""
     
+    # Any of {available away dnd invisible unavailable}
+    set locals(status) "unavailable"
+    set locals(myjid) ""
+    
     # Init conference and groupchat state.
     set conf(allroomsin) {}    
     set gchat(allroomsin) {}
@@ -314,7 +345,7 @@ proc jlib::new {jlibname rostername browsename clientcmd args} {
     # Create the actual jlib instance procedure. 'jlibname' is interpreted in
     # the global namespace.
     # Perhaps need to check if 'jlibname' is already a fully qualified name?
-    proc ::${jlibname} {cmd args}   \
+    proc ::${jlibname} {cmd args}  \
       "eval jlib::cmdproc {$jlibname} \$cmd \$args"
     
     return $jlibname
@@ -478,7 +509,7 @@ proc jlib::putssocket {jlibname xml} {
 
     Debug 2 "SEND: $xml"
     if {[catch {puts $lib(sock) $xml} err]} {
-	return -code error {Network connection dropped}
+	return -code error "Network connection dropped: $err"
     }
 }
 
@@ -545,6 +576,8 @@ proc jlib::recv {jlibname xml} {
     wrapper::parse $lib(wrap) $xml
 }
 
+# standard socket transport layer end ------------------------------------------
+
 # jlib::connect --
 #
 #       Initializes a stream to a jabber server. The socket must already 
@@ -605,7 +638,7 @@ proc jlib::connect {jlibname server args} {
 	# The socket probably was never connected,
 	# or the connection dropped later.
 	disconnect $jlibname
-	return -code error {The connection failed or dropped later}
+	return -code error "The connection failed or dropped later: $err"
     }
     return {}
 }
@@ -771,7 +804,7 @@ proc jlib::iq_handler {jlibname xmldata} {
 		    
 		    # This is the same as the one we get from a 'browse_get'.
 		    # This contains no error element so skip callback.
-		    parse_browse_get $jlibname $from {} ok $subiq
+		    parse_browse_get $jlibname $from {} {} ok $subiq
 		}
 		jabber:iq:search {
 		    
@@ -971,18 +1004,17 @@ proc jlib::presence_handler {jlibname xmldata} {
 	    lappend arglist -x $x
 	}
 	
-	# Fill in the presence array .
-	# Split the 'from' to jid and resource.
-	set jid $from
-	set res {}
-	regexp {([^/]+)/([^/]+)} $from match jid res
-	
 	# Do different things depending on the 'type' attribute.
 	if {[string equal $type "available"] ||  \
 	  [string equal $type "unavailable"]} {
 	    
 	    # Set presence in our roster object
-	    eval {$lib(rostername) setpresence $jid $res $type} $arglist
+	    eval {$lib(rostername) setpresence $from $type} $arglist
+	    
+	    # If unavailable be sure to clear browse object for this jid.
+	    if {[string equal $type "unavailable"]} {
+		$lib(browsename) clear $from
+	    }
 	} else {
 	    
 	    # We probably need to respond to the 'presence' element;
@@ -990,7 +1022,7 @@ proc jlib::presence_handler {jlibname xmldata} {
 	    # If we have 'unsubscribe'd another users presence it cannot be
 	    # anything else than 'unavailable' anymore.
 	    if {[string equal $type "unsubscribed"]} {
-		$lib(rostername) setpresence $jid $res "unsubscribed"
+		$lib(rostername) setpresence $from "unsubscribed"
 	    }
 	    if {[string length $opts(-presencecommand)]} {
 		uplevel #0 $opts(-presencecommand) [list $jlibname $type] $arglist
@@ -1101,6 +1133,8 @@ proc jlib::reset {jlibname} {
     }
     cancel_auto_away $jlibname
     set lib(isinstream) 0
+    set locals(status) "unavailable"
+    set locals(myjid) ""
 }
    
 # jlib::parse_iq_response --
@@ -1121,6 +1155,7 @@ proc jlib::reset {jlibname} {
 proc jlib::parse_iq_response {jlibname cmd type subiq} {
 
     Debug 3 "jlib::parse_iq_response cmd=$cmd, type=$type, subiq=$subiq"
+    
     if {[string equal $type "error"]} {
 	uplevel #0 "$cmd [list $jlibname error $subiq]"
     } else {
@@ -1173,15 +1208,15 @@ proc jlib::parse_roster_get {jlibname ispush cmd type thequery} {
 	
     }    
     if {$ispush} {
-	set what {roster_push}
+	set what "roster_push"
     } else {
-	set what {roster_item}
+	set what "roster_item"
     }
     foreach child $childlist {
 	
 	# Extract the message sub-elements XML data items.
 	foreach {ctag cattrlist cisempty cchdata cchildlist} $child {}		
-	if {[string equal $ctag {item}]} {
+	if {[string equal $ctag "item"]} {
 	    
 	    # Add each item to our roster object.
 	    # Build the argument list of '-key value' pairs. Extract the jid.
@@ -1199,7 +1234,7 @@ proc jlib::parse_roster_get {jlibname ispush cmd type thequery} {
 	    }
 	    
 	    # Check if item should be romoved (subscription='remove').
-	    if {[string equal $subscription {remove}]} {
+	    if {[string equal $subscription "remove"]} {
 		$lib(rostername) removeitem $jid
 	    } else {
 	    
@@ -1212,7 +1247,7 @@ proc jlib::parse_roster_get {jlibname ispush cmd type thequery} {
 		    }
 		}
 		if {[string length $groups]} {
-		    lappend arglist {-groups} $groups
+		    lappend arglist "-groups" $groups
 		}
 		
 		# Fill in our roster with this.
@@ -1289,24 +1324,33 @@ proc jlib::parse_roster_remove {jlibname jid cmd type thequery} {
 # Arguments:
 #       jlibname:   the instance of this jlib.
 #       jid:        the jid we browsed.
-#       cmd:        for error propagation to client?
+#       cmd:        see 'browse_get', may be empty.
+#       errcmd:     see 'browse_get', may be empty.
 #       type:       "ok" or "error"
 #       subiq:
 
-proc jlib::parse_browse_get {jlibname jid cmd type subiq} {
+proc jlib::parse_browse_get {jlibname jid cmd errcmd type subiq} {
     
     upvar [namespace current]::${jlibname}::lib lib
 
     Debug 3 "jlib::parse_browse_get jid=$jid, cmd='$cmd', type=$type, subiq='$subiq'"
     
+    set opts {}
+    
     # A server push should not be able to send an error element.
-    if {[string equal $type "error"] && ([string length $cmd] > 0)} {
-	uplevel #0 "$cmd [list $lib(browsename) error $jid $subiq]"
+    if {[string equal $type "error"]} {
+	if {[string length $errcmd]} {
+	    lappend opts -errorcommand $errcmd
+	}
+	eval {$lib(browsename) errorcallback $jid $subiq} $opts
     } else {
     
 	# Fill in our browse object with this. Client callback is executed from
 	# within this procedure.
-	$lib(browsename) setjid $jid $subiq
+	if {[string length $cmd]} {
+	    lappend opts -command $cmd
+	}
+	eval {$lib(browsename) setjid $jid $subiq} $opts
     }
 }
 
@@ -1397,7 +1441,7 @@ proc jlib::send_iq {jlibname type xmldata args} {
     # Trap network errors here.
     if {[catch {eval $opts(-transportsend) {$iqxml}} err]} {
 	disconnect $jlibname
-	return -code error {Network connection dropped}
+	return -code error "Network connection dropped: $err"
     }
 }
 
@@ -1414,26 +1458,41 @@ proc jlib::send_iq {jlibname type xmldata args} {
 #       args:       Any of "-password" or "-digest" must be given.
 #           -password
 #           -digest
+#           -to
 #       
 # Results:
 #       none.
 
 proc jlib::send_auth {jlibname username resource cmd args} {
 
+    upvar [namespace current]::${jlibname}::lib lib
+    upvar [namespace current]::${jlibname}::locals locals
+
     set subelements [list  \
       [wrapper::createtag "username" -chdata $username]  \
       [wrapper::createtag "resource" -chdata $resource]]
     array set argsArr $args
+    set toopt ""
     foreach argsswitch [array names argsArr] {
 	set par [string trimleft $argsswitch "-"]
-	lappend subelements [wrapper::createtag $par  \
-	  -chdata $argsArr($argsswitch)]
+	switch -- $par {
+	    password - digest {
+		lappend subelements [wrapper::createtag $par  \
+		  -chdata $argsArr($argsswitch)]
+	    }
+	    to {
+		set toopt [list -to $argsArr($argsswitch)]
+	    }
+	}
     }
 
     set xmllist [wrapper::createtag "query" -attrlist {xmlns jabber:iq:auth} \
       -subtags $subelements]
-    send_iq $jlibname "set" $xmllist -command        \
-      [list [namespace current]::parse_iq_response $jlibname $cmd]
+    eval {send_iq $jlibname "set" $xmllist -command        \
+      [list [namespace current]::parse_iq_response $jlibname $cmd]} $toopt
+    
+    # Cache our login jid.
+    set locals(myjid) ${username}@$lib(server)/${resource}
 }
 
 # jlib::register_get --
@@ -1638,9 +1697,10 @@ proc jlib::send_message {jlibname to args} {
 
     Debug 3 "jlib::send_message to=$to, args=$args"
     
-    set locals(last) [clock seconds]
     array set argsArr $args
-    set attrlist [list {to} $to]
+    set locals(last) [clock seconds]
+    set attrlist [list to $to]
+    set children {}
     foreach name [array names argsArr] {
 	set par [string trimleft $name "-"]
 	if {[string equal $par "xlist"]} {
@@ -1681,10 +1741,11 @@ proc jlib::send_message {jlibname to args} {
 #           -to     the jabber id of the recepient.
 #           -from   should never be set by client!
 #           -type   one of 'available', 'unavailable', 'subscribe', 
-#                   'unsubscribe', 'subscribed', 'unsubscribed', 'probe'.
+#                   'unsubscribe', 'subscribed', 'unsubscribed', 'invisible'.
 #           -status
 #           -priority
 #           -show
+#           -xlist
 #           -command   Specify a callback to call if we may expect any reply
 #                   package, as entering a room with 'gc-1.0'.
 #     
@@ -1693,6 +1754,7 @@ proc jlib::send_message {jlibname to args} {
 
 proc jlib::send_presence {jlibname args} {
 
+    variable statics
     upvar [namespace current]::${jlibname}::lib lib
     upvar [namespace current]::${jlibname}::locals locals
     upvar [namespace current]::${jlibname}::opts opts
@@ -1703,16 +1765,25 @@ proc jlib::send_presence {jlibname args} {
     set locals(last) [clock seconds]
     set attrlist {}
     set children {}
+    set type "available"
     array set argsArr $args
     foreach argsswitch [array names argsArr] {
-	set par [string trimleft $argsswitch {-}]
+	set par [string trimleft $argsswitch -]
 	switch -- $par {
-	    type - from - to {
+	    type {
+		set type $argsArr($argsswitch)
+		if {[regexp $statics(presenceTypeExp) $type]} {
+		    lappend attrlist $par $type
+		} else {
+		    return -code error "Is not valid presence type: \"$type\""
+		}
+	    }
+	    from - to {
 		lappend attrlist $par $argsArr($argsswitch)
 	    }
 	    xlist {
 		foreach xchild $argsArr(-xlist) {
-		    lappend children $xlist
+		    lappend children $xchild
 		}
 	    }
 	    command {
@@ -1743,12 +1814,45 @@ proc jlib::send_presence {jlibname args} {
 	}
     }
     
+    # Any of {available away dnd invisible unavailable}
+    # Must be destined to login server (by default).
+    if {![info exists argsArr(to)] || \
+      [string equal $argsArr(to) $lib(server)]} {
+	set locals(status) $type
+	if {[info exists argsArr(-show)]} {
+	    set locals(status) $argsArr(-show)
+	}
+    }
+    
     # Trap network errors.
     set xml [wrapper::createxml $xmllist]
     if {[catch {eval $opts(-transportsend) {$xml}} err]} {
 	disconnect $jlibname
-	return -code error {Network connection dropped}	
+	return -code error $err	
     }
+}
+
+# jlib::mystatus --
+# 
+#       Returns any of {available away dnd invisible unavailable}
+#       for our status with the login server.
+
+proc jlib::mystatus {jlibname} {
+
+    upvar [namespace current]::${jlibname}::locals locals
+    
+    return $locals(status)
+}
+
+# jlib::myjid --
+# 
+#       Returns our 3-tier jid as authorized with the login server.
+
+proc jlib::myjid {jlibname} {
+
+    upvar [namespace current]::${jlibname}::locals locals
+    
+    return $locals(myjid)
 }
 
 # jlib::send_autoupdate --
@@ -1808,17 +1912,25 @@ proc jlib::oob_set {jlibname to cmd url args} {
 # Arguments:
 #       jlibname:   the instance of this jlib.
 #       to:         the jid to browse ('conference.jabber.org', for instance)
-#       cmd:        client command to be executed if error???
-#                   The browse object takes care of client callbacks.
+#       args:       -command cmdProc:   replaces the client callback command
+#                        in the browse object
+#                   -errorcommand errPproc:    in case of error, this is called
+#                        instead of the browse objects callback proc.
 #       
 # Results:
 #       none.
 
-proc jlib::browse_get {jlibname to cmd} {
+proc jlib::browse_get {jlibname to args} {
 
+    array set argsArr {
+	-command        ""
+	-errorcommand   ""
+    }
+    array set argsArr $args
     set xmllist [wrapper::createtag query -attrlist {xmlns jabber:iq:browse}]
     send_iq $jlibname get $xmllist -to $to -command   \
-      [list [namespace current]::parse_browse_get $jlibname $to $cmd]
+      [list [namespace current]::parse_browse_get $jlibname $to  \
+      $argsArr(-command) $argsArr(-errorcommand)]
 }
 
 # jlib::browse_set --
@@ -2132,14 +2244,16 @@ proc jlib::parse_get_last {jlibname args} {
 
     set secs [expr [clock seconds] - $locals(last)]
     set xmllist [wrapper::createtag "query"  \
-      -attrlist {xmlns jabber:iq:last} [list {seconds} $secs]]
+      -attrlist [list xmlns jabber:iq:last seconds $secs]]
     
+    set opts {}
     if {[info exists argsarr(-from)]} {
-	set toopt "-to $argsarr(-from)"
-    } else {
-	set toopt ""
+	lappend opts -to $argsarr(-from)
     }
-    eval {send_iq $jlibname "result" $xmllist} $toopt
+    if {[info exists argsarr(-id)]} {
+	lappend opts -id $argsarr(-id)
+    }
+    eval {send_iq $jlibname "result" $xmllist} $opts
 }
 
 # jlib::get_last --
@@ -2162,21 +2276,26 @@ proc jlib::parse_get_time {jlibname args} {
     
     array set argsarr $args
     
-    set utc [clock format [clock seconds] -format "%Y%m%dT%H:%M:%S" -gmt 1]
-    set tz [clock format [clock seconds] -format "%Z"]
-    set display [clock format [clock seconds]]
+    set secs [clock seconds]
+    set utc [clock format $secs -format "%Y%m%dT%H:%M:%S" -gmt 1]
+    #set tz [clock format $secs -format "%Z"]
+    set tz "GMT"
+    set display [clock format $secs]
     set subtags [list  \
       [wrapper::createtag "utc" -chdata $utc]  \
       [wrapper::createtag "tz" -chdata $tz]  \
       [wrapper::createtag "display" -chdata $display] ]
     set xmllist [wrapper::createtag "query" -subtags $subtags  \
       -attrlist {xmlns jabber:iq:time}]
+
+    set opts {}
     if {[info exists argsarr(-from)]} {
-	set toopt "-to $argsarr(-from)"
-    } else {
-	set toopt ""
+	lappend opts -to $argsarr(-from)
     }
-    eval {send_iq $jlibname "result" $xmllist} $toopt
+    if {[info exists argsarr(-id)]} {
+	lappend opts -id $argsarr(-id)
+    }
+    eval {send_iq $jlibname "result" $xmllist} $opts
 }
 
 # jlib::get_time --
@@ -2377,11 +2496,11 @@ proc jlib::auto_away_cmd {jlibname what} {
     
     switch -- $what {
 	away {
-	    send_presence $jlibname -type {available} -show {away}  \
+	    send_presence $jlibname -type "available" -show {away}  \
 	      -status $opts(-awaymsg)
 	}
 	xaway {
-	    send_presence $jlibname -type {available} -show {xa}  \
+	    send_presence $jlibname -type "available" -show {xa}  \
 	      -status $opts(-xawaymsg)
 	}
     }        
@@ -2398,11 +2517,7 @@ proc jlib::auto_away_cmd {jlibname what} {
 proc jlib::service {jlibname cmd args} {
     
     # Which command? Just dispatch the command to the right procedure.
-    if {[catch {
-	eval {[namespace current]::service::${cmd} $jlibname} $args
-    } ans]} {
-	return -code error $ans
-    }
+    set ans [eval {[namespace current]::service::${cmd} $jlibname} $args]
     return $ans
 }
     
@@ -2553,7 +2668,11 @@ proc jlib::service::nick {jlibname jid} {
 	} elseif {[regexp {^([^@]+)@[^@/]+$} $jid match nick]} {
 	} else {
 	    set nick $jid
-	}	
+	}
+    } elseif {[lsearch [[namespace parent]::muc::allroomsin $jlibname] $room] >= 0} {
+	
+	# The MUC conference method.
+	set nick [[namespace parent]::muc::mynick $jlibname $room]
     } elseif {[$lib(browsename) isbrowsed $lib(server)]} {
     
 	# Assume that if the login server is browsed we also should query
@@ -2870,11 +2989,7 @@ proc jlib::conference::allroomsin {jlibname} {
 proc jlib::groupchat {jlibname cmd args} {
     
     # Which command? Just dispatch the command to the right procedure.
-    if {[catch {
-	eval {[namespace current]::groupchat::$cmd $jlibname} $args
-    } ans]} {
-	return -code error $ans
-    }
+    set ans [eval {[namespace current]::groupchat::$cmd $jlibname} $args]
     return $ans
 }
 
@@ -2888,12 +3003,14 @@ proc jlib::groupchat::enter {jlibname room nick args} {
 
     upvar [namespace parent]::${jlibname}::gchat gchat
     
+    set room [string tolower $room]
     set jid ${room}/${nick}
     eval {[namespace parent]::send_presence $jlibname -to $jid} $args
     set gchat($room,mynick) $nick
     
     # This is not foolproof since it may not always success.
     lappend gchat(allroomsin) $room
+    set gchat(allroomsin) [lsort -unique $gchat(allroomsin)]
     return {}
 }
 
@@ -2901,6 +3018,7 @@ proc jlib::groupchat::exit {jlibname room} {
 
     upvar [namespace parent]::${jlibname}::gchat gchat
     
+    set room [string tolower $room]
     if {[info exists gchat($room,mynick)]} {
 	set nick $gchat($room,mynick)
     } else {
@@ -2920,6 +3038,7 @@ proc jlib::groupchat::mynick {jlibname room args} {
 
     upvar [namespace parent]::${jlibname}::gchat gchat
 
+    set room [string tolower $room]
     if {[llength $args] == 0} {
 	if {[info exists gchat($room,mynick)]} {
 	    return $gchat($room,mynick)
@@ -2939,6 +3058,7 @@ proc jlib::groupchat::status {jlibname room args} {
 
     upvar [namespace parent]::${jlibname}::gchat gchat
 
+    set room [string tolower $room]
     if {[info exists gchat($room,mynick)]} {
 	set nick $gchat($room,mynick)
     } else {
@@ -2954,6 +3074,7 @@ proc jlib::groupchat::participants {jlibname room} {
     upvar [namespace parent]::${jlibname}::gchat gchat
     upvar [namespace parent]::${jlibname}::lib lib
 
+    set room [string tolower $room]
     set isroom 0
     if {[regexp {^[^@]+@([^@ ]+)$} $room match domain]} {
 	if {[info exists agent($domain,groupchat)]} {

@@ -15,7 +15,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Whiteboard.tcl,v 1.3 2003-01-11 16:16:08 matben Exp $
+# $Id: Whiteboard.tcl,v 1.4 2003-01-30 17:33:36 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -484,8 +484,6 @@ namespace import ::PreferencesUtils::*
 namespace import ::TinyHttpd::*
 namespace import ::UserActions::*
 
-::FileCache::SetBasedir $this(path)
-
 # Define MIME types etc., and get packages.
 if {[catch {source [file join $this(path) lib MimeTypesAndPlugins.tcl]} msg]} {
     tk_messageBox -message "Error sourcing MimeTypesAndPlugins.tcl  $msg"  \
@@ -494,7 +492,7 @@ if {[catch {source [file join $this(path) lib MimeTypesAndPlugins.tcl]} msg]} {
 }    
 
 set internalIPnum 127.0.0.1
-set internalIPname {localhost}
+set internalIPname "localhost"
 
 # Set our IP number temporarily.
 set thisIPnum $internalIPnum 
@@ -589,17 +587,22 @@ if {$argc > 0} {
 # and the actual packages available on our system.
 VerifyPackagesForMimeTypes
 
+# Init the file cache settings.
+::FileCache::SetBasedir $this(path)
+::FileCache::SetBestBefore $prefs(checkCache) $prefs(incomingFilePath)
+
 #--- User Interface ------------------------------------------------------------
 
 # Various initializations for canvas stuff and UI.
 ::CanvasUtils::Init
 ::UI::Init
+::UI::InitMenuDefs
 
 # Create the mapping between Html sizes and font point sizes dynamically.
 ::CanvasUtils::CreateFontSizeMapping
 
 # Make the actual whiteboard with canvas, tool buttons etc...
-::UI::BuildMain .
+::UI::BuildMain . -serverentrystate disabled
 if {$prefs(firstLaunch) && !$prefs(stripJabber)} {
     wm withdraw .
     set displaySetup 1
@@ -658,6 +661,7 @@ if {$prefs(firstLaunch)} {
     ::CanvasFile::DoOpenCanvasFile . $prefs(welcomeFile)
 }
 set prefs(firstLaunch) 0
+raise .
 
 ### The server part ############################################################
 
@@ -685,7 +689,7 @@ if {($prefs(protocol) != "client") && $prefs(autoStartServer)} {
 # Start the TinyHttpd server. Perhaps this should go in its own process,
 # or perhaps in its own thread...?
 
-if {($prefs(protocol) != "client") && ($this(platform) != "macintosh")} {
+if {($prefs(protocol) != "client") && $prefs(haveHttpd)} {
     if {[catch {  \
       ::TinyHttpd::StartHttpServer $prefs(httpdPort) $prefs(httpdBaseDir)} msg]} {
 	tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \

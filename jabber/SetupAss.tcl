@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: SetupAss.tcl,v 1.1.1.1 2002-12-08 11:00:59 matben Exp $
+# $Id: SetupAss.tcl,v 1.2 2003-01-30 17:33:47 matben Exp $
 
 package require setupassistant
 package provide SetupAss 1.0
@@ -155,7 +155,7 @@ proc ::SetupAss::DoFinish {w} {
 	
 	# Save as a shortcut and default server only if not called 
 	# ::Jabber::Register::Register which already done this
-	::Jabber::SetServerShortcut {} $server $username $password home
+	::Jabber::SetUserProfile {} $server $username $password home
     }
     set finished 1
     destroy $w
