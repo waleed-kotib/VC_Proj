@@ -310,6 +310,8 @@
 ::msgcat::mcset de mCoccinellaHome  	 {Coccinella im Web...}
 ::msgcat::mcset de mComponents 	 	{Komponenten...}
 ::msgcat::mcset de mBugReport  	 {Fehler melden...}
+#::msgcat::mcset de mTakeSnapShot        {Take Snapshot}
+#::msgcat::mcset de mTimeCode            {Timecode}
 #::msgcat::mcset de mUserInfo            {User Info...}
 
 

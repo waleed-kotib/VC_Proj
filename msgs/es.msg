@@ -310,6 +310,8 @@
 ::msgcat::mcset es mCoccinellaHome  	{Inicio de Coccinella...}
 ::msgcat::mcset es mComponents          {Componentes...}
 ::msgcat::mcset es mBugReport           {Informar de un fallo...}
+#::msgcat::mcset es mTakeSnapShot        {Take Snapshot}
+#::msgcat::mcset es mTimeCode            {Timecode}
 #::msgcat::mcset es mUserInfo            {User Info...}
 
 

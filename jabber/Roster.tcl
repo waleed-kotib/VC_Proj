@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.125 2005-03-04 14:21:36 matben Exp $
+# $Id: Roster.tcl,v 1.126 2005-03-05 09:00:31 matben Exp $
 
 package provide Roster 1.0
 
@@ -577,74 +577,24 @@ proc ::Roster::RegisterPopupEntry {menuSpec} {
     set regPopMenuSpec [concat $regPopMenuSpec $menuSpec]
 }
 
-# Roster::Popup --
+# Roster::DePopup --
 #
 #       Handle popup menu in roster.
 #       
 # Arguments:
-#       w           widget that issued the command: tree or text
-#       v           for the tree widget it is the item path, 
-#                   for text the jidhash.
+#       jid3        this is a list of actual jid's, can be any form
+#       clicked
+#       status      'available', 'unavailable', 'transports', or 'pending'
 #       
 # Results:
 #       popup menu displayed
 
-proc ::Roster::Popup {w v x y} {
+proc ::Roster::DoPopup {jid3 clicked status group x y} {
     global  wDlgs this
     variable popMenuDefs
+    variable wtree
     
     upvar ::Jabber::jstate jstate
-    
-    ::Debug 2 "::Roster::Popup w=$w, v='$v'"
-    
-    # This is either 'available' or 'unavailable'.
-    set status [lindex $v 0]
-
-    # The last element of 'v' can be a head, group, or a user (jid).
-    set item [lindex $v end]
-
-    set clicked {}
-    if {[llength $v]} {
-	set tags [$w itemconfigure $v -tags]
-    } else {
-	set tags ""
-    }
-    
-    # The commands require a number of variables to be defined:
-    #       jid, jid3, group, clicked...
-    # 
-    # These may be lists of jid's if not an individual user was clicked.
-    # We use jid3 for the actual content even if only jid2, 
-    # and strip off any resource parts for jid (jid2).
-    set jid3 {}
-    set group {}
-    if {[lsearch $tags user] >= 0} {
-	set jid3 $item
-	lappend clicked user
-	if {[IsCoccinella $jid3]} {
-	    lappend clicked wb
-	}
-    } elseif {[lsearch $tags head] >= 0} {
-	if {[lsearch $tags trpt] >= 0} {
-	    # empty
-	} else {
-	    lappend clicked head
-	    set jid3 [GetAllUsersInItem $w $v]
-	}
-    } elseif {[lsearch $tags group] >= 0} {
-	lappend clicked group
-	set jid3 [GetAllUsersInItem $w $v]
-	set group $item
-    } elseif {[lsearch $tags trpt] >= 0} {
-	lappend clicked trpt
-	set jid3 $item
-	# Transports in own directory.
-	if {[$jstate(roster) isavailable $jid3]} {
-	    set status available
-	} else {
-	    set status unavailable
-	}
-    }
         
     # Make jid (jid2) of all jid3.
     set jid {}
@@ -653,7 +603,7 @@ proc ::Roster::Popup {w v x y} {
 	lappend jid $jid2
     }
     
-    ::Debug 2 "\t jid=$jid, jid3=$jid3, clicked=$clicked, status=$status"
+    ::Debug 2 "::Roster::DoPopup jid=$jid, jid3=$jid3, clicked=$clicked, status=$status"
         
     # Make the appropriate menu.
     set m $jstate(wpopup,roster)
@@ -719,8 +669,8 @@ proc ::Roster::Popup {w v x y} {
     update idletasks
     
     # Post popup menu.
-    set X [expr [winfo rootx $w] + $x]
-    set Y [expr [winfo rooty $w] + $y]
+    set X [expr [winfo rootx $wtree] + $x]
+    set Y [expr [winfo rooty $wtree] + $y]
     tk_popup $m [expr int($X) - 10] [expr int($Y) - 10]   
     
     # Mac bug... (else can't post menu while already posted if toplevel...)
@@ -1389,11 +1339,11 @@ proc ::Roster::TreeNew {w wtree wxsc wysc} {
 	  [list grid $wysc -row 0 -column 1 -sticky ns]]  \
 	  -selectcommand [namespace current]::SelectCmd   \
 	  -doubleclickcommand [namespace current]::DoubleClickCmd  \
-	  -eventlist [list [list <<ButtonPopup>> [namespace current]::Popup]]
+	  -eventlist [list [list <<ButtonPopup>> [namespace current]::TreePopup]]
     } $opts
     
     if {[string match "mac*" $this(platform)]} {
-	$wtree configure -buttonpresscommand [namespace current]::Popup
+	$wtree configure -buttonpresscommand [namespace current]::TreePopup
     }
 }
 
@@ -1702,6 +1652,75 @@ proc ::Roster::TreePostProcess {method from} {
 	    }
 	}	
     }   
+}
+
+# Roster::TreePopup --
+#
+#       Handle popup menu in roster.
+#       
+# Arguments:
+#       w           widget that issued the command: tree or text
+#       v           for the tree widget it is the item path, 
+#                   for text the jidhash.
+#       
+# Results:
+#       popup menu displayed
+
+proc ::Roster::TreePopup {w v x y} {
+    upvar ::Jabber::jstate jstate
+    
+    ::Debug 2 "::Roster::Popup w=$w, v='$v'"
+    
+    # This is either 'available', 'unavailable', 'transports', or 'pending'.
+    set status [lindex $v 0]
+
+    # The last element of 'v' can be a head, group, or a user (jid).
+    set item [lindex $v end]
+
+    set clicked {}
+    if {[llength $v]} {
+	set tags [$w itemconfigure $v -tags]
+    } else {
+	set tags ""
+    }
+    
+    # The commands require a number of variables to be defined:
+    #       jid, jid3, group, clicked...
+    # 
+    # These may be lists of jid's if not an individual user was clicked.
+    # We use jid3 for the actual content even if only jid2, 
+    # and strip off any resource parts for jid (jid2).
+    set jid3 {}
+    set group {}
+    if {[lsearch $tags user] >= 0} {
+	set jid3 $item
+	lappend clicked user
+	if {[IsCoccinella $jid3]} {
+	    lappend clicked wb
+	}
+    } elseif {[lsearch $tags head] >= 0} {
+	if {[lsearch $tags trpt] >= 0} {
+	    # empty
+	} else {
+	    lappend clicked head
+	    set jid3 [GetAllUsersInItem $w $v]
+	}
+    } elseif {[lsearch $tags group] >= 0} {
+	lappend clicked group
+	set jid3 [GetAllUsersInItem $w $v]
+	set group $item
+    } elseif {[lsearch $tags trpt] >= 0} {
+	lappend clicked trpt
+	set jid3 $item
+	# Transports in own directory.
+	if {[$jstate(roster) isavailable $jid3]} {
+	    set status available
+	} else {
+	    set status unavailable
+	}
+    }
+
+    DoPopup $jid3 $clicked $status $group $x $y
 }
 
 # Roster::TreeRemoveEmpty --
