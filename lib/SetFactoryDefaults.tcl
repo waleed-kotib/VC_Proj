@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.8 2003-08-23 07:19:16 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.9 2003-09-21 13:02:12 matben Exp $
 
 # SetWhiteboardFactoryState --
 # 
@@ -104,7 +104,7 @@ set prefs(thisServPort) 8235
 set prefs(remotePort) 8235
 set prefs(reflectPort) 8144
 
-# The TinyHttpd server port number and base directory.
+# The tinyhttpd server port number and base directory.
 set prefs(httpdPort) 8077
 set prefs(httpdRootDir) $this(path)
 

@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: GetFileIface.tcl,v 1.4 2003-09-13 06:39:25 matben Exp $
+# $Id: GetFileIface.tcl,v 1.5 2003-09-21 13:02:12 matben Exp $
 
 package require getfile
 package require uriencode
@@ -28,24 +28,24 @@ namespace eval ::GetFileIface:: {
 #       wtop       toplevel for whiteboard
 #       sock
 #       fileName   the file name (tail), uri encoded.
-#       optList    is a list of key-value pairs that contains additional 
+#       opts       is a list of '-key value' pairs that contains additional 
 #                  information.
 
-proc ::GetFileIface::GetFile {wtop sock fileName optList} {
+proc ::GetFileIface::GetFile {wtop sock fileName opts} {
     global prefs noErr wDlgs
     variable uid
         
     ::Debug 2 "::GetFileIface::GetFile wtop=$wtop, fileName=$fileName"
     
-    array set optArr $optList
+    array set optArr $opts
     
-    if {[info exists optArr(Content-Type:)]} {
-	set mime $optArr(Content-Type:)
+    if {[info exists optArr(-mime)]} {
+	set mime $optArr(-mime)
     } else {
 	set mime [::Types::GetMimeTypeForFileName $fileName]
     }
-    if {[info exists optArr(size:)]} {
-	set size $optArr(size:)
+    if {[info exists optArr(-size)]} {
+	set size $optArr(-size)
     } else {
 	set size 0
     }
@@ -66,7 +66,7 @@ proc ::GetFileIface::GetFile {wtop sock fileName optList} {
     set getstate(sock) $sock
     set getstate(filetail) $fileTail
     set getstate(dstpath) $dstpath
-    set getstate(optlist) $optList
+    set getstate(optlist) $opts
     set getstate(mime) $mime
     set getstate(file) $fileName
     set getstate(firstmillis) [clock clicks -milliseconds]
@@ -76,7 +76,7 @@ proc ::GetFileIface::GetFile {wtop sock fileName optList} {
     
     # Check if this file is cached already, http transported instead,
     # or if you user wants something different. May modify 'getstate(dstpath)'!
-    set code [::GetFileIface::Prepare $gettoken $fileTail $mime $optList]
+    set code [::GetFileIface::Prepare $gettoken $fileTail $mime $opts]
     ::Debug 2 "     code=$code"
         
     if {$code != $noErr} {
@@ -111,8 +111,8 @@ proc ::GetFileIface::GetFile {wtop sock fileName optList} {
     }
     set getstate(token) $token
     set getstate(peername) [fconfigure $sock -peername]
-    if {[info exists optArr(from:)]} {	
-	set getstate(fromname) $optArr(from:)
+    if {[info exists optArr(-from)]} {	
+	set getstate(fromname) $optArr(-from)
     } else {
 	set getstate(fromname) [lindex $getstate(peername) 1]
     }
@@ -132,24 +132,24 @@ proc ::GetFileIface::GetFile {wtop sock fileName optList} {
 #       path       It must be a pathname relative the servers base 
 #                  directory including any ../ if up dir. 
 #                  Keep it a unix path style. uri encoded!
-#       optList    is a list of key-value pairs that contains additional 
+#       opts       is a list of '-key value' pairs that contains additional 
 #                  information.
 
-proc ::GetFileIface::GetFileFromServer {wtop ip port path optList} {
+proc ::GetFileIface::GetFileFromServer {wtop ip port path opts} {
     global prefs wDlgs noErr
     variable uid
     
     ::Debug 2 "::GetFileIface::GetFileFromServer wtop=$wtop, path=$path"
     
-    array set optArr $optList
+    array set optArr $opts
     
-    if {[info exists optArr(Content-Type:)]} {
-	set mime $optArr(Content-Type:)
+    if {[info exists optArr(-mime)]} {
+	set mime $optArr(-mime)
     } else {
 	set mime [::Types::GetMimeTypeForFileName $path]
     }
-    if {[info exists optArr(size:)]} {
-	set size $optArr(size:)
+    if {[info exists optArr(-size)]} {
+	set size $optArr(-size)
     } else {
 	set size 0
     }
@@ -169,7 +169,7 @@ proc ::GetFileIface::GetFileFromServer {wtop ip port path optList} {
     set getstate(can) [::UI::GetCanvasFromWtop $wtop]
     set getstate(filetail) $fileTail
     set getstate(dstpath) $dstpath
-    set getstate(optlist) $optList
+    set getstate(optlist) $opts
     set getstate(mime) $mime
     set getstate(file) $path
     set getstate(firstmillis) [clock clicks -milliseconds]
@@ -179,7 +179,7 @@ proc ::GetFileIface::GetFileFromServer {wtop ip port path optList} {
     
     # Check if this file is cached already, http transported instead,
     # or if you user wants something different. May modify 'getstate(dstpath)'!
-    set code [::GetFileIface::Prepare $gettoken $fileTail $mime $optList]
+    set code [::GetFileIface::Prepare $gettoken $fileTail $mime $opts]
     ::Debug 2 "     code=$code"
 
     
@@ -209,8 +209,8 @@ proc ::GetFileIface::GetFileFromServer {wtop ip port path optList} {
 	return
     }
     set getstate(token) $token
-    if {[info exists optArr(from:)]} {	
-	set getstate(fromname) $optArr(from:)
+    if {[info exists optArr(-from)]} {	
+	set getstate(fromname) $optArr(-from)
     } else {
 	set getstate(fromname) $ip
     }
@@ -228,17 +228,19 @@ proc ::GetFileIface::GetFileFromServer {wtop ip port path optList} {
 # Arguments:
 #       gettoken
 #       fileTail   the uri decoded file tail
+#       mime
+#       opts
 #                 
 # Results:
 #       a three number error code indicating the type of error, or noErr (0). 
 #       May modify 'gettoken(dstpath)'!
 
-proc ::GetFileIface::Prepare {gettoken fileTail mime optList} {
+proc ::GetFileIface::Prepare {gettoken fileTail mime opts} {
     global  prefs noErr this
     
     upvar #0 $gettoken getstate          
 
-    array set optArr $optList
+    array set optArr $opts
    	
     set doWhat [::Plugins::GetDoWhatForMime $mime]
     if {$doWhat == ""} {
@@ -276,13 +278,13 @@ proc ::GetFileIface::Prepare {gettoken fileTail mime optList} {
     
     # 3: Check if the file is cached, and not too old.
     
-    if {[info exists optArr(Get-Url:)]} {
-	set url $optArr(Get-Url:)
+    if {[info exists optArr(-url)]} {
+	set url $optArr(-url)
 	if {[::FileCache::IsCached $url]} {
 	    set cachedFile [::FileCache::Get $url]
 	    
 	    # Get the correct import procedure for this MIME type.
-	    ::GetFileIface::DoImport $mime $optList -file $cachedFile -where local
+	    ::GetFileIface::DoImport $mime $opts -file $cachedFile -where local
 	    return 320
 	}
     }
@@ -294,11 +296,11 @@ proc ::GetFileIface::Prepare {gettoken fileTail mime optList} {
     
     # 4:
     # Check if the import package wants to get it via an URL instead.
-    # But only if we have an option 'preferred-transport: http'!!!
+    # But only if we have an option '-preferred-transport http'!!!
     
     set doHttpTransport 0    
-    if {[info exists optArr(preferred-transport:)] && \
-      [string equal $optArr(preferred-transport:) "http"]} {
+    if {[info exists optArr(-preferred-transport)] && \
+      [string equal $optArr(-preferred-transport) "http"]} {
 	set packName [::Plugins::GetPreferredPackageForMime $mime]
       
 	if {[::Plugins::HaveHTTPTransportForMimeAndPlugin $packName $mime]} {
@@ -308,9 +310,9 @@ proc ::GetFileIface::Prepare {gettoken fileTail mime optList} {
     
     if {$doHttpTransport} {
 	
-	# Need to get the "Get-Url:" key from the optList.
-	if {[info exists optArr(Get-Url:)]} {
-	    ::GetFileIface::DoImport $mime $optList -url $optArr(Get-Url:)  \
+	# Need to get the "-url" key from the 'opts'.
+	if {[info exists optArr(-url)]} {
+	    ::GetFileIface::DoImport $mime $opts -url $optArr(-url)  \
 	      -where "local"
 	    return 323	    
 	} else {
@@ -439,18 +441,18 @@ proc ::GetFileIface::UpdateProgress {gettoken total current} {
 #       the correct whiteboard.
 #       
 
-proc ::GetFileIface::DoImport {mime optList args} {
+proc ::GetFileIface::DoImport {mime opts args} {
     global  prefs
     
     ::Debug 3 "+        ::GetFileIface::DoImport"
 
     if {[string equal $prefs(protocol) "jabber"]} {
-	eval {::Jabber::WB::DispatchToImporter $mime $optList} $args
+	eval {::Jabber::WB::DispatchToImporter $mime $opts} $args
     } else {
 	if {[::Plugins::HaveImporterForMime $mime]} {
 	    set servCan [::UI::GetServerCanvasFromWtop .]
 	    set errMsg [eval {
-		::ImageAndMovie::DoImport $servCan $optList
+		::ImageAndMovie::DoImport $servCan $opts
 	    } $args]
 	} else {
 	    set errMsg "No importer for mime \"$mime\""
@@ -475,44 +477,14 @@ proc ::GetFileIface::NewBrokenImage {code gettoken} {
     append msg [getfile::ncodetotext $code]
     ::UI::SetStatusMessage $getstate(wtop) $msg
 
-    set optList $getstate(optlist)
-    array set optArr $optList
-    set opts {}
-    foreach {key value} $optList {
-	switch -- $key {
-	    width: {
-		lappend opts -width $value
-	    }
-	    height: {
-		lappend opts -height $value
-	    }
-	    Get-Url: {
-		lappend opts -url $value
-	    }
-	    size: {
-		lappend opts -size $value
-	    }
-	    Content-Type: {
-		lappend opts -mime $value
-	    }
-	    tags: {
-		lappend opts -tags $value
-	    }
-	    above: {
-		lappend opts -above $value
-	    }
-	    below: {
-		lappend opts -below $value
-	    }
-	}
-    }
-    if {![info exists optArr(coords:)]} {
+    set opts $getstate(optlist)
+    array set optArr $getstate(optlist)
+    if {![info exists optArr(-coords)]} {
 	# Should never happen!
 	return
     }
 
-    eval {::ImageAndMovie::NewBrokenImage $getstate(can) $optArr(coords:)  \
-      -optlist $optList} $opts
+    eval {::ImageAndMovie::NewBrokenImage $getstate(can) $optArr(-coords)} $opts
 }
 
 # GetFileIface::CancelCmd, CancelAll, CancelAllWtop --

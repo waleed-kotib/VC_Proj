@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.7 2003-08-23 07:19:17 matben Exp $
+# $Id: Utils.tcl,v 1.8 2003-09-21 13:02:12 matben Exp $
 
 # InvertArray ---
 #
@@ -233,7 +233,7 @@ proc GetRelativePath {fromPath toPath} {
 # AddAbsolutePathWithRelative ---       OUTDATED!!!!!!!!!!!!
 #
 #       Adds the second, relative path, to the first, absolute path.
-#       IMPORTANT: any changes should be copied to 'TinyHttpd.tcl'.
+#       IMPORTANT: any changes should be copied to 'tinyhttpd.tcl'.
 #           
 # Arguments:
 #       absPath        an absolute path which is the "original" path.
@@ -245,7 +245,7 @@ proc GetRelativePath {fromPath toPath} {
 proc AddAbsolutePathWithRelative {absPath relPath} {
     global  this
     
-    # For 'TinyHttpd.tcl'.
+    # For 'tinyhttpd.tcl'.
     #variable state
     set state(debug) 0
     if {$state(debug) >= 3} {

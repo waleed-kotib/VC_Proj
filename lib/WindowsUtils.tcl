@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: WindowsUtils.tcl,v 1.1.1.1 2002-12-08 11:05:33 matben Exp $
+# $Id: WindowsUtils.tcl,v 1.2 2003-09-21 13:02:12 matben Exp $
 
 #package require gdi
 #package require printer
@@ -46,7 +46,52 @@ proc ::Windows::OpenUrl {url} {
     # Invoke the command
     eval exec $appCmd $url &
 }
+
+# ::Windows::OpenFileFromSuffix --
+# 
+#       Uses the registry to try to find an application for a file using
+#       its suffix.
+
+proc ::Windows::OpenFileFromSuffix {path} {
+
+    # Look for the application under HKEY_CLASSES_ROOT
+    set root HKEY_CLASSES_ROOT
+    set suff [file extension $path]
+    
+    # Get the application key for .suff files
+    set appKey [registry get $root\\$suff ""]
+    
+    # Get the command for opening $suff files
+    if {[catch {registry get \
+      $root\\$appKey\\shell\\opennew\\command ""} appCmd]} {
+	
+	# Try a different key.
+	set appCmd [registry get \
+	  $root\\$appKey\\shell\\open\\command ""]
+    }
+        
+    # Double up the backslashes for eval (below)
+    regsub -all {\\} $appCmd  {\\\\} appCmd
+    
+    # Invoke the command
+    eval exec $appCmd $path &
+}
   
+proc ::Windows::CanOpenFileWithSuffix {path} {
+
+    # Look for the application under HKEY_CLASSES_ROOT
+    set root HKEY_CLASSES_ROOT
+    set suff [file extension $path]
+    
+    # Get the application key for .suff files
+    if {[catch {registry get $root\\$suff ""} appKey]} {
+	return 0
+    } 
+    
+    
+    return 1
+}
+
 #--- Printer Utilities ---------------------------------------------------------
 #
 # Be sure that the 'printer' and 'gdi' packages are there.

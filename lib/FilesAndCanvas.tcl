@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: FilesAndCanvas.tcl,v 1.8 2003-09-13 06:39:25 matben Exp $
+# $Id: FilesAndCanvas.tcl,v 1.9 2003-09-21 13:02:12 matben Exp $
  
 package require can2svg
 package require undo
@@ -214,19 +214,19 @@ proc ::CanvasFile::FileToCanvasVer1 {w fd absPath args} {
 	    # Need to know the coordinates.
 	    set x [lindex $line 2]
 	    set y [lindex $line 3]
-	    set optList [list "coords:" [list $x $y] "tags:" $ittag]
+	    set opts [list -coords [list $x $y] -tags $ittag]
 	    if {$zoomOpts != ""} {
-		lappend optList {Zoom-Factor:} $zoomOpts
+		lappend opts -zoomfactor $zoomOpts
 	    }
 	    
 	    # Need to preserve the stacking order for images on remote clients.
-	    # Add stacking order to the 'optList'.
+	    # Add stacking order to the 'opts'.
 	    if {[info exists previousUtag]} {
-		lappend optList {above:} $previousUtag
+		lappend opts -above $previousUtag
 	    }
 	    
 	    # Let the import procedure do the job; manufacture an option list.
-	    ::ImageAndMovie::DoImport $w $optList -file $filePath \
+	    ::ImageAndMovie::DoImport $w $opts -file $filePath \
 	      -where $where
 	    
 	} else {
@@ -291,7 +291,7 @@ proc ::CanvasFile::FileToCanvasVer2 {w fd absPath args} {
     set fileNameToNative 1
     set nl_ "\\n"
     
-    # New freash 'utags' only if writing to own canvas as well.
+    # New fresh 'utags' only if writing to own canvas as well.
     if {[string equal $where "all"] || [string equal $where "local"]} {
 	set updateUtags 1
     } else {
@@ -300,8 +300,6 @@ proc ::CanvasFile::FileToCanvasVer2 {w fd absPath args} {
     set dirPath [file dirname $absPath]
     set wtop [::UI::GetToplevelNS $w]
     
-    # This is not completely correct!!!
-    set stackCmd [list -below all]
     set numImports 0
     
     # Read line by line; each line contains an almost complete canvas command.
@@ -314,7 +312,13 @@ proc ::CanvasFile::FileToCanvasVer2 {w fd absPath args} {
 	    continue
 	}
 	set cmd [lindex $line 0]
-	if {$updateUtags} {
+	
+	# This fails if not  $updateUtags !!!
+	if {[info exists nextUtag]} {
+	    set utag $nextUtag
+	    set line [::CanvasUtils::ReplaceUtag $line $utag]
+	    unset nextUtag
+	} elseif {$updateUtags} {
 	    set utag [::CanvasUtils::NewUtag]
 	    set line [::CanvasUtils::ReplaceUtag $line $utag]
 	} else {
@@ -326,7 +330,6 @@ proc ::CanvasFile::FileToCanvasVer2 {w fd absPath args} {
 	    
 		# Draw ordinary item not image nor window (movie).
 		set type [lindex $line 1]
-		set stackCmd [list -above $utag]
 	
 		# Make newline substitutions.
 		set cmdnl [subst -nocommands -novariables $line]
@@ -365,15 +368,24 @@ proc ::CanvasFile::FileToCanvasVer2 {w fd absPath args} {
 	    }
 	    import {
 		set errMsg ""
+
+		# Assume the order in the file is also stacking order.
+		if {[info exists previousUtag]} {
+		    lappend line -above $previousUtag
+		} 
+		    
+		# To get the -below value we need a trick.
+		# Make the next utag to use.
+		set nextUtag [::CanvasUtils::NewUtag]
+		lappend line -below $nextUtag
+
 		if {$argsArr(-tryimport)} {
 		    
 		    # This is typically an image or movie (QT or Snack).
-		    set errMsg [eval {
-			::ImageAndMovie::HandleImportCmd $w $line \
-			  -where $where -basepath $dirPath \
-			  -progess [list ::ImageAndMovie::ImportProgress $line] \
-			  -command [list ::ImageAndMovie::ImportCommand $line]  \
-			} $stackCmd]
+		    set errMsg [::ImageAndMovie::HandleImportCmd $w $line \
+		      -where $where -basepath $dirPath \
+		      -progess [list ::ImageAndMovie::ImportProgress $line] \
+		      -command [list ::ImageAndMovie::ImportCommand $line]]
 		}
 		if {$argsArr(-showbroken) &&  \
 		  (($errMsg != "") || !$argsArr(-tryimport))} {
@@ -391,6 +403,7 @@ proc ::CanvasFile::FileToCanvasVer2 {w fd absPath args} {
 		# Or handled elsewhere???
 	    }
 	}
+	set previousUtag $utag
     }
     return $numImports
 }

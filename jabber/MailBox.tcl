@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.11 2003-08-23 07:08:53 matben Exp $
+# $Id: MailBox.tcl,v 1.12 2003-09-21 13:02:12 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -658,6 +658,7 @@ proc ::Jabber::MailBox::SelectMsg { } {
 	    ::ImageAndMovie::HttpResetAll ${wbtoplevel}.
 	    ::UserActions::EraseAll ${wbtoplevel}.
 	    ::UI::ConfigureMain ${wbtoplevel}. -title $title -jid $jid2
+	    ::UI::SetStatusMessage ${wbtoplevel}. ""
 	    undo::reset [::UI::GetUndoToken ${wbtoplevel}.]
 	} else {
 	    ::UI::BuildMain ${wbtoplevel}. -state disabled -title $title \

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.17 2003-09-13 06:39:25 matben Exp $
+# $Id: UI.tcl,v 1.18 2003-09-21 13:02:12 matben Exp $
 
 # LabeledFrame --
 #
@@ -87,7 +87,7 @@ namespace eval ::UI:: {
     set dims(screenH) [winfo vrootheight .]
     set dims(screenW) [winfo vrootwidth .]
     # Unique id for main toplevels
-    variable uidmain 2
+    variable uidmain 0
 }
 
 # UI::Init --
@@ -770,7 +770,7 @@ proc ::UI::InitMenuDefs { } {
 proc ::UI::NewMain {args} {    
     variable uidmain
     
-    # Need to reuse ".".
+    # Need to reuse ".". Outdated!
     if {[wm state .] == "normal"} {
 	set wtop .wb[incr uidmain].
     } else {
@@ -800,6 +800,8 @@ proc ::UI::BuildMain {wtop args} {
     variable threadToWtop
     variable jidToWtop
     
+    Debug 2 "::UI::BuildMain args='$args'"
+    
     if {![string equal [string index $wtop end] "."]} {
 	set wtop ${wtop}.
     }    
@@ -808,10 +810,7 @@ proc ::UI::BuildMain {wtop args} {
     upvar ::${wtop}::wapp wapp
     upvar ::${wtop}::state state
     upvar ::${wtop}::opts opts
-    upvar ::${wtop}::itemopts itemopts
     upvar ::${wtop}::tmpImages tmpImages
-    
-    Debug 3 "::UI::BuildMain args='$args'"
     
     if {[string equal $wtop "."]} {
 	set wbTitle "Coccinella (Main)"
@@ -873,8 +872,8 @@ proc ::UI::BuildMain {wtop args} {
 	toplevel $wtopReal -class Whiteboard
 	wm withdraw $wtopReal
     }
-    lappend allWhiteboards $wtopReal
     wm title $wtopReal $opts(-title)
+    wm protocol $wtopReal WM_DELETE_WINDOW [list ::UI::CloseMain $wtop]
     
     # Note that the order of calls can be criticl as any 'update' may trigger
     # network events to attempt drawing etc. Beware!!!
@@ -894,50 +893,9 @@ proc ::UI::BuildMain {wtop args} {
 	::UI::ButtonConfigure $wtop stop -command  \
 	  [list ::ImageAndMovie::HttpResetAll $wtop]
     }
-    
-    # Make the tool button pad.
-    pack [frame ${wtop}fmain -borderwidth 0 -bg $prefs(bgColGeneral) -relief flat] \
-      -side top -fill both -expand true
-    pack [frame ${wtop}fmain.frleft] -side left -fill y
-    pack [frame $wapp(tool)] -side top
-    pack [label ${wtop}fmain.frleft.pad -relief raised -borderwidth 1]  \
-      -fill both -expand true
-    
-    # The 'Coccinella'.
-    pack [label ${wtop}fmain.frleft.padphoto -borderwidth 0 -image igelpiga]  \
-      -in ${wtop}fmain.frleft.pad -side bottom
-    
-    # ...and the drawing canvas.
-    if {$prefs(haveScrollbars)} {
-	set f [frame ${wtop}fmain.fc -bd 1 -relief raised]
-	set wxsc ${f}.xsc
-	set wysc ${f}.ysc
-	
-	pack $f -fill both -expand true -side right
-	canvas $wapp(can) -height $dims(hCanOri) -width $dims(wCanOri)  \
-	  -relief raised -bd 0 -highlightthickness 0 -background $state(bgColCan)  \
-	  -scrollregion [list 0 0 $prefs(canScrollWidth) $prefs(canScrollHeight)]  \
-	  -xscrollcommand [list $wxsc set]  \
-	  -yscrollcommand [list $wysc set]	
-	scrollbar $wxsc -orient horizontal -command [list $wapp(can) xview]
-	scrollbar $wysc -orient vertical -command [list $wapp(can) yview]
-	
-	grid $wapp(can) -row 0 -column 0 -sticky news -padx 1 -pady 1
-	grid $wysc -row 0 -column 1 -sticky ns
-	grid $wxsc -row 1 -column 0 -sticky ew
-	grid columnconfigure $f 0 -weight 1
-	grid rowconfigure $f 0 -weight 1    	
-    } else {
-	canvas $wapp(can) -height $dims(hCanOri) -width $dims(wCanOri)  \
-	  -relief raised -bd 1 -highlightthickness 0 -background $state(bgColCan)
-	pack $wapp(can) -fill both -expand true -side right
-    }
-    
-    # Make the tool buttons and invoke the one from the prefs file.
-    ::UI::CreateAllButtons $wtop
 
     # Make the connection frame.
-    pack [frame ${wtop}fcomm] -side top -fill x
+    pack [frame ${wtop}fcomm] -side bottom -fill x
     
     # Status message part.
     pack [frame ${wtop}fcomm.st -relief raised -borderwidth 1]  \
@@ -965,10 +923,66 @@ proc ::UI::BuildMain {wtop args} {
     	}
     }
     
-    # Invoke tool button.
-    ::UI::ClickToolButton $wtop [::UI::ToolBtNumToName $state(btState)]
+    # Make the tool button pad.
+    pack [frame ${wtop}fmain -borderwidth 0 -bg $prefs(bgColGeneral) -relief flat] \
+      -side top -fill both -expand true
+    pack [frame ${wtop}fmain.frleft] -side left -fill y
+    pack [frame $wapp(tool)] -side top
+    pack [frame ${wtop}fmain.frleft.pad -relief raised -borderwidth 1]  \
+      -fill both -expand true
     
-    if {$wtop == "."} {
+    # The 'Coccinella'.
+    pack [label ${wtop}fmain.frleft.pad.bug -borderwidth 0 -image igelpiga]  \
+      -side bottom
+    
+    # Make the tool buttons and invoke the one from the prefs file.
+    ::UI::CreateAllButtons $wtop
+    
+    # ...and the drawing canvas.
+    if {$prefs(haveScrollbars)} {
+	set f [frame ${wtop}fmain.fc -bd 1 -relief raised]
+	set wxsc ${f}.xsc
+	set wysc ${f}.ysc
+	
+	pack $f -fill both -expand true -side right
+	canvas $wapp(can) -height $dims(hCanOri) -width $dims(wCanOri)  \
+	  -relief raised -bd 0 -highlightthickness 0 -background $state(bgColCan)  \
+	  -scrollregion [list 0 0 $prefs(canScrollWidth) $prefs(canScrollHeight)]  \
+	  -xscrollcommand [list $wxsc set]  \
+	  -yscrollcommand [list $wysc set]	
+	scrollbar $wxsc -orient horizontal -command [list $wapp(can) xview]
+	scrollbar $wysc -orient vertical -command [list $wapp(can) yview]
+	
+	grid $wapp(can) -row 0 -column 0 -sticky news -padx 1 -pady 1
+	grid $wysc -row 0 -column 1 -sticky ns
+	grid $wxsc -row 1 -column 0 -sticky ew
+	grid columnconfigure $f 0 -weight 1
+	grid rowconfigure $f 0 -weight 1    	
+    } else {
+	canvas $wapp(can) -height $dims(hCanOri) -width $dims(wCanOri)  \
+	  -relief raised -bd 1 -highlightthickness 0 -background $state(bgColCan)
+	pack $wapp(can) -fill both -expand true -side right
+    }
+    
+    # Invoke tool button.
+    ::UI::SetToolButton $wtop [::UI::ToolBtNumToName $state(btState)]
+
+    # Add things that are defined in the prefs file and not updated else.
+    ::UserActions::DoCanvasGrid $wtop
+    if {$isConnected} {
+    	::UI::FixMenusWhen $wtop "connect"
+    }
+
+    # Set up paste menu if something on the clipboard.
+    ::UI::AppGetFocus $wtop $wtopReal
+    bind $wtopReal <FocusIn> [list ::UI::AppGetFocus $wtop %W]
+    
+    # Create the undo/redo object.
+    set state(undotoken) [undo::new -command [list ::UI::UndoConfig $wtop]]
+    
+    # Set window position only for the first whiteboard on screen.
+    # Subsequent whiteboards are placed by the window manager.
+    if {[llength [::UI::GetAllWhiteboards]] == 0} {
 	
 	# Setting the window position never hurts. Check that it fits to screen.
 	if {$dims(x) > [expr [winfo vrootwidth .] - 30]} {
@@ -981,28 +995,13 @@ proc ::UI::BuildMain {wtop args} {
 	# Setting total (root) size should only be done if set in pref file!
 	# Some window managers are tricky with the 'wm geometry' command.
 	if {($dims(wRoot) > 1) && ($dims(hRoot) > 1)} {
-	    wm geometry . $dims(wRoot)x$dims(hRoot)+$dims(x)+$dims(y)
-	    update
+	    wm geometry $wtopReal $dims(wRoot)x$dims(hRoot)+$dims(x)+$dims(y)
+	    #update
 	}
     }
-    wm protocol $wtopReal WM_DELETE_WINDOW [list ::UI::CloseMain $wtop]
-
-    # Add things that are defined in the prefs file and not updated else.
-    ::UserActions::DoCanvasGrid $wtop
-
-    if {$isConnected} {
-    	::UI::FixMenusWhen $wtop "connect"
-    }
-    
-    # Manage the undo/redo object.
-    set state(undotoken) [undo::new -command [list ::UI::UndoConfig $wtop]]
-
-    # Set up paste menu if something on the clipboard.
-    ::UI::AppGetFocus $wtop $wtopReal
-    bind $wtopReal <FocusIn> [list ::UI::AppGetFocus $wtop %W]
-
     catch {wm deiconify $wtopReal}
-    raise $wtopReal
+    #raise $wtopReal     This makes the window flashing when showed (linux)
+    lappend allWhiteboards $wtopReal
 
     # A trick to let the window manager be finished before getting the geometry.
     # An 'update idletasks' needed anyway in 'FindWBGeometry'.
@@ -1063,14 +1062,17 @@ proc ::UI::DestroyMain {wtop} {
     variable menuKeyToIndex
     upvar ::${wtop}::wapp wapp
     upvar ::${wtop}::opts opts
-    upvar ::${wtop}::itemopts itemopts
     upvar ::${wtop}::tmpImages tmpImages
+    
+    # The last whiteboard that is destroyed sets preference state & dims.
+    if {[llength [::UI::GetAllWhiteboards]] == 1} {
+	
+	# Save instance specific 'state' array into generic 'state'.
+	::UI::SaveWhiteboardState $wtop
+    }
     
     if {$wtop == "."} {
 	if {[string equal $prefs(protocol) "jabber"]} {
-	
-	    # Save instance specific 'state' array into generic 'state'.
-	    ::UI::SaveWhiteboardState $wtop
 	    
 	    # Destroy all content and withdraw.
 	    foreach win $wapp(topchilds) {
@@ -1091,8 +1093,8 @@ proc ::UI::DestroyMain {wtop} {
     }
     
     # We could do some cleanup here.
-    catch {unset itemopts}
     eval {image delete} $tmpImages
+    ::CanvasUtils::ItemFree $wtop
 }
 
 # UI::SaveWhiteboardState
@@ -1104,11 +1106,7 @@ proc ::UI::SaveWhiteboardState {wtop} {
 
     upvar ::UI::dims dims
     upvar ::${wtop}::wapp wapp
-    
-    if {$wtop != "."} {
-	return
-    }
-  
+      
     # Read back instance specific 'state' into generic 'state'.
     array set ::state [array get ::${wtop}::state]
 
@@ -1126,17 +1124,15 @@ proc ::UI::SaveWhiteboardDims {wtop} {
     upvar ::UI::dims dims
     upvar ::${wtop}::wapp wapp
     
-    if {$wtop != "."} {
-	return
-    }
+    set w $wapp(toplevel)
     set wCan $wapp(can)
             
     # Update actual size values. 'Root' no menu, 'Tot' with menu.
     set dims(wStatMess) [winfo width $wapp(statmess)]
-    set dims(wRoot) [winfo width .]
-    set dims(hRoot) [winfo height .]
-    set dims(x) [winfo x .]
-    set dims(y) [winfo y .]
+    set dims(wRoot) [winfo width $w]
+    set dims(hRoot) [winfo height $w]
+    set dims(x) [winfo x $w]
+    set dims(y) [winfo y $w]
     set dims(wTot) $dims(wRoot)
     
     # hMenu seems unreliable!!!
@@ -1144,8 +1140,8 @@ proc ::UI::SaveWhiteboardDims {wtop} {
 	# MATS: seems to always give 1 Linux not...
         ### EAS BEGIN
         set dims(hMenu) 1
-	if {[winfo exists .#menu]} {
-	    set dims(hMenu) [winfo height .#menu]
+	if {[winfo exists ${wtop}#menu]} {
+	    set dims(hMenu) [winfo height ${wtop}#menu]
 	}
         ### EAS END
     } else {
@@ -1281,8 +1277,7 @@ proc ::UI::GetJabberChatThread {wtop} {
 # Results:
 #       wtop specifier or empty if no whiteboard exists.
 
-proc ::UI::GetWtopFromJabberType {type jid {thread {}}} {
-    
+proc ::UI::GetWtopFromJabberType {type jid {thread {}}} {    
     variable threadToWtop
     variable jidToWtop
 
@@ -1321,7 +1316,9 @@ proc ::UI::GetWtopFromJabberType {type jid {thread {}}} {
 	}
 	if {![winfo exists $w]} {
 	    set wtop ""
-	} elseif {![winfo ismapped $w]} {
+	    
+	    # This is due to the weird reusage of "." BAD!!!
+	} elseif {0 && ![winfo ismapped $w]} {
 	    set wtop ""
 	}
     }
@@ -1386,9 +1383,9 @@ proc ::UI::GetButtonState {wtop} {
     return $btNo2Name($state(btState))
 }
 
-proc ::UI::GetUndoToken {wtop} {
+proc ::UI::GetUndoToken {wtop} {    
+    upvar ::${wtop}::state state
     
-    upvar ::${wtop}::state state    
     return $state(undotoken)
 }
 
@@ -1397,22 +1394,21 @@ proc ::UI::GetUndoToken {wtop} {
 #       Return all whiteboard's wtop as a list. 
 #       Note: 'allWhiteboards' have real toplevel path.
 
-proc ::UI::GetAllWhiteboards { } {
-    
+proc ::UI::GetAllWhiteboards { } {    
     variable allWhiteboards    
     
     set allTops {}
-    foreach wtop $allWhiteboards {
-	if {[winfo exists $wtop] && ([wm state $wtop] == "normal")} {
-	    lappend allTops $wtop
+    foreach w $allWhiteboards {
+	if {[winfo exists $w] && ([wm state $w] == "normal")} {
+	    lappend allTops $w
 	}
     }
-    set allWhiteboards $allTops
+    set allWhiteboards [lsort -ascii $allTops]
     return $allWhiteboards
 }
 
 
-# UI::ClickToolButton --
+# UI::SetToolButton --
 #
 #       Uhhh...  When a tool button is clicked. Mainly sets all button specific
 #       bindings.
@@ -1424,7 +1420,7 @@ proc ::UI::GetAllWhiteboards { } {
 # Results:
 #       tool buttons created and mapped
 
-proc ::UI::ClickToolButton {wtop btName} {
+proc ::UI::SetToolButton {wtop btName} {
     global  prefs wapp this
     
     variable icons
@@ -1432,7 +1428,7 @@ proc ::UI::ClickToolButton {wtop btName} {
     upvar ::${wtop}::state state
     upvar ::${wtop}::opts opts
 
-    Debug 3 "ClickToolButton:: wtop=$wtop, btName=$btName"
+    Debug 3 "SetToolButton:: wtop=$wtop, btName=$btName"
     
     set wCan $wapp(can)
     set state(btState) [::UI::ToolBtNameToNum $btName]
@@ -2964,7 +2960,7 @@ proc ::UI::CreateAllButtons {wtop} {
 	    
 	    if {![string equal $opts(-state) "disabled"]} {
 		bind $lwi <Button-1>  \
-		  [list ::UI::ClickToolButton $wtop $name]
+		  [list ::UI::SetToolButton $wtop $name]
 		
 		# Handle bindings to popup options.
 		if {[string match "mac*" $this(platform)]} {
@@ -3164,7 +3160,7 @@ proc ::UI::FindWBGeometry {wtop} {
     variable dims
     variable icons
     upvar ::${wtop}::wapp wapp
-    
+        
     # Changed to reqwidth and reqheight instead of width and height.
     # EAS: Begin
     # update idletasks
@@ -3205,6 +3201,11 @@ proc ::UI::FindWBGeometry {wtop} {
 	if {[winfo exists ${wtop}#menu]} {
 	    set hMenu [winfo height ${wtop}#menu]
 	}
+	# In 8.4 it seems that .wb1.#wb1#menu is used.
+	set wmenu ${wtop}#[string trim $wtop .]#menu
+	if {[winfo exists $wmenu]} {
+	    set hMenu [winfo height $wmenu]
+	}
 	### EAS END
     } else {
 	set hMenu 0
@@ -3238,16 +3239,17 @@ proc ::UI::FindWBGeometry {wtop} {
     set wMinTot $wMinRoot
     set hMinTot [expr $hMinRoot + $hMenu]
         
-    # Cache dims only for "." ?
-    if {1 || $w == "."} {
-	foreach key {
-	    wRoot hRoot hTop hTopOn hTopOff hStatus hComm hCommClean wStatMess \
-	      hFakeMenu hMenu wCanvas hCanvas wTot hTot wMinRoot hMinRoot \
-	      wMinTot hMinTot
-	} {
-	    set dims($key) [set $key]
-	}
+    # Cache dims.
+    foreach key {
+	wRoot hRoot hTop hTopOn hTopOff hStatus hComm hCommClean wStatMess \
+	  hFakeMenu hMenu wCanvas hCanvas wTot hTot wMinRoot hMinRoot \
+	  wMinTot hMinTot
+    } {
+	set dims($key) [set $key]
     }
+    
+    #::Debug 2 "::UI::FindWBGeometry"
+    #::Debug 2 "[parray dims]"
     
     # The minsize when no connected clients. 
     # Is updated when connect/disconnect (Not jabber).
@@ -3382,7 +3384,7 @@ proc ::UI::SetNewWMMinsize {wtop} {
     
     upvar ::UI::dims dims
     upvar ::${wtop}::wapp wapp
-    
+        
     # test...
     update idletasks
     set dims(hTop) 0
@@ -4108,6 +4110,8 @@ proc ::UI::FixMenusWhen {wtop what} {
     upvar ::${wtop}::wapp wapp
     upvar ::${wtop}::opts opts
     
+    set mfile ${wtop}menu.file 
+    
     switch -exact -- $what {
 	connect {
 	    
@@ -4119,27 +4123,27 @@ proc ::UI::FixMenusWhen {wtop what} {
 		      [string equal $opts(-sendbuttonstate) "normal"]} {
 			::UI::ButtonConfigure $wtop send -state normal
 		    }
-		    ::UI::MenuMethod ${wtop}menu.file entryconfigure mOpenConnection -state disabled
+		    ::UI::MenuMethod $mfile entryconfigure mOpenConnection -state disabled
 		}
 		symmetric {
-		    ::UI::MenuMethod ${wtop}menu.file entryconfigure mPutFile -state normal
-		    ::UI::MenuMethod ${wtop}menu.file entryconfigure mPutCanvas -state normal
-		    ::UI::MenuMethod ${wtop}menu.file entryconfigure mGetCanvas -state normal
+		    ::UI::MenuMethod $mfile entryconfigure mPutFile -state normal
+		    ::UI::MenuMethod $mfile entryconfigure mPutCanvas -state normal
+		    ::UI::MenuMethod $mfile entryconfigure mGetCanvas -state normal
 		}
 		client {
 		    ::UI::ButtonConfigure $wtop connect -state disabled
-		    ::UI::MenuMethod ${wtop}menu.file entryconfigure mOpenConnection -state disabled
-		    ::UI::MenuMethod ${wtop}menu.file entryconfigure mPutFile -state normal
-		    ::UI::MenuMethod ${wtop}menu.file entryconfigure mPutCanvas -state normal
-		    ::UI::MenuMethod ${wtop}menu.file entryconfigure mGetCanvas -state normal
+		    ::UI::MenuMethod $mfile entryconfigure mOpenConnection -state disabled
+		    ::UI::MenuMethod $mfile entryconfigure mPutFile -state normal
+		    ::UI::MenuMethod $mfile entryconfigure mPutCanvas -state normal
+		    ::UI::MenuMethod $mfile entryconfigure mGetCanvas -state normal
 		}
 		server {
-		    ::UI::MenuMethod ${wtop}menu.file entryconfigure mPutFile -state normal
-		    ::UI::MenuMethod ${wtop}menu.file entryconfigure mPutCanvas -state normal
-		    ::UI::MenuMethod ${wtop}menu.file entryconfigure mGetCanvas -state normal
+		    ::UI::MenuMethod $mfile entryconfigure mPutFile -state normal
+		    ::UI::MenuMethod $mfile entryconfigure mPutCanvas -state normal
+		    ::UI::MenuMethod $mfile entryconfigure mGetCanvas -state normal
 		}
 		default {
-		    ::UI::MenuMethod ${wtop}menu.file entryconfigure mOpenConnection -state disabled
+		    ::UI::MenuMethod $mfile entryconfigure mOpenConnection -state disabled
 		    ::UI::ButtonConfigure $wtop connect -state disabled
 		}
 	    }	    
@@ -4150,11 +4154,11 @@ proc ::UI::FixMenusWhen {wtop what} {
 		jabber {
 		    #::UI::ButtonConfigure $wtop connect -state normal
 		    ::UI::ButtonConfigure $wtop send -state disabled
-		    ::UI::MenuMethod ${wtop}menu.file entryconfigure mOpenConnection -state normal
+		    ::UI::MenuMethod $mfile entryconfigure mOpenConnection -state normal
 		}
 		client {
 		    ::UI::ButtonConfigure $wtop connect -state normal
-		    ::UI::MenuMethod ${wtop}menu.file entryconfigure mOpenConnection -state normal
+		    ::UI::MenuMethod $mfile entryconfigure mOpenConnection -state normal
 		}
 	    }
 	    
@@ -4165,20 +4169,20 @@ proc ::UI::FixMenusWhen {wtop what} {
 		# make sure ww can make a new connection when closed the old one.
 		
 		if {[string equal $prefs(protocol) "central"]} {
-		    ::UI::MenuMethod ${wtop}menu.file entryconfigure mOpenConnection -state normal
+		    ::UI::MenuMethod $mfile entryconfigure mOpenConnection -state normal
 		}
-		::UI::MenuMethod ${wtop}menu.file entryconfigure mPutFile -state disabled
-		::UI::MenuMethod ${wtop}menu.file entryconfigure mPutCanvas -state disabled
-		::UI::MenuMethod ${wtop}menu.file entryconfigure mGetCanvas -state disabled
+		::UI::MenuMethod $mfile entryconfigure mPutFile -state disabled
+		::UI::MenuMethod $mfile entryconfigure mPutCanvas -state disabled
+		::UI::MenuMethod $mfile entryconfigure mGetCanvas -state disabled
 	    }
 	}
 	disconnectserver {
 	    
 	    # If no more connections left, make menus consistent.
 	    if {[llength $allIPnumsToSend] == 0} {
-		::UI::MenuMethod ${wtop}menu.file entryconfigure mPutFile -state disabled
-		::UI::MenuMethod ${wtop}menu.file entryconfigure mPutCanvas -state disabled
-		::UI::MenuMethod ${wtop}menu.file entryconfigure mGetCanvas -state disabled
+		::UI::MenuMethod $mfile entryconfigure mPutFile -state disabled
+		::UI::MenuMethod $mfile entryconfigure mPutCanvas -state disabled
+		::UI::MenuMethod $mfile entryconfigure mGetCanvas -state disabled
 	    }
 	}
     }
@@ -4650,27 +4654,6 @@ proc ::UI::CreateBrokenImage {wtop width height} {
 	}
     }
     return $name
-}
-
-# UI::ItemSet, ItemCGet --
-#
-#       Handling cached info for items not set elsewhere.
-#       Automatically garbage collected.
-
-proc ::UI::ItemSet {wtop id args} {
-    upvar ::${wtop}::itemopts itemopts
-
-    set itemopts($id) $args
-}
-
-proc ::UI::ItemCGet {wtop id} {
-    upvar ::${wtop}::itemopts itemopts
-    
-    if {[info exists itemopts($id)]} {
-	return $itemopts($id)
-    } else {
-	return ""
-    }
 }
 
 #-------------------------------------------------------------------------------

@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: PutFileIface.tcl,v 1.7 2003-08-23 07:19:16 matben Exp $
+# $Id: PutFileIface.tcl,v 1.8 2003-09-21 13:02:12 matben Exp $
 
 package require putfile
 package require uriencode
@@ -30,11 +30,6 @@ proc ::PutFileIface::PutFileDlg {wtop} {
     if {[llength $allIPnumsToSend] == 0} {
 	return
     }
-    
-    # In the dialog we need all entries from 'typelistImageMovie', but also
-    # the standard text files.
-    
-    set typelist [concat $typelistText $typelistImageMovie]
     set ans [tk_getOpenFile -title [::msgcat::mc {Put Image/Movie}] \
       -filetypes [::Plugins::GetTypeListDialogOption]]
     if {$ans == ""} {
@@ -56,15 +51,14 @@ proc ::PutFileIface::PutFileDlg {wtop} {
 #       fileName   the local path to the file to be put.
 #       where = "remote" or "all": put only to remote clients.
 #       where = ip number: put only to this remote client.
-#   
-#       'optList'  a list of 'key: value' pairs, resembling the html 
-#                  protocol for getting files, but where most keys correspond
-#                  to a valid "canvas create" option.
+#       opts      a list of '-key value' pairs, where most keys correspond 
+#                 to a valid "canvas create" option, and everything is on 
+#                 a single line.
 
-proc ::PutFileIface::PutFile {wtop fileName where {optList {}}} {
+proc ::PutFileIface::PutFile {wtop fileName where {opts {}}} {
     global  allIPnumsToSend prefs this
     
-    Debug 2 "+PutFile:: fileName=$fileName, optList=$optList"
+    Debug 2 "+PutFile:: fileName=$fileName, opts=$opts"
     
     if {[llength $allIPnumsToSend] == 0} {
 	return
@@ -74,14 +68,19 @@ proc ::PutFileIface::PutFile {wtop fileName where {optList {}}} {
     set relPath [filerelative $prefs(httpdRootDir) $fileName]
     set relPath [uriencode::quotepath $relPath]
     set ip [::Network::GetThisOutsideIPAddress]
-    lappend optList  \
-      "Get-Url:" "http://${ip}:$prefs(httpdPort)/$relPath"
+    array set optArr $opts
+    array set optArr [list -url "http://${ip}:$prefs(httpdPort)/$relPath"]
+    set opts [array get optArr]
         
     # If we are a server in a client-server we need to ask the client
     # to get the file by sending a PUT NEW instruction to it on our
     # primary connection.
+    
     switch -- $prefs(protocol) {
 	server {
+    
+	    # Translate tcl type '-key value' list to 'Key: value' option list.
+	    set optList [::ImageAndMovie::GetTransportSyntaxOptsFromTcl $opts]
 	    set relFilePath [filerelative $this(path) $fileName]
 	    set relFilePath [uriencode::quotepath $relFilePath]
 	    set putCmd "PUT NEW: [list $relFilePath] $optList"
@@ -94,7 +93,7 @@ proc ::PutFileIface::PutFile {wtop fileName where {optList {}}} {
 	jabber {
 	    
 	    # Jabber is special and handled internally.
-	    ::Jabber::PutFileAndSchedule $wtop $fileName $optList
+	    ::Jabber::PutFileAndSchedule $wtop $fileName $opts
 	}
 	default {
 	    
@@ -113,6 +112,9 @@ proc ::PutFileIface::PutFile {wtop fileName where {optList {}}} {
 	
 	    # Get the remote (network) file name (no path, no uri encoding).
 	    set dstFile [::Types::GetFileTailAddSuffix $fileName]
+    
+	    # Translate tcl type '-key value' list to 'Key: value' option list.
+	    set optList [::ImageAndMovie::GetTransportSyntaxOptsFromTcl $opts]
 	    
 	    # Loop over all connected servers or only the specified one.
 	    foreach ip $allPutIP {
@@ -194,11 +196,14 @@ proc ::PutFileIface::PutCommand {wtop token what msg} {
 #       s                 the socket.
 #       ip                its ip number.
 #       relativeFilePath  the optionally relative path pointing to the file.
+#       opts      a list of '-key value' pairs, where most keys correspond 
+#                 to a valid "canvas create" option, and everything is on 
+#                 a single line.
 #       
 # Results:
 #    none.
 
-proc ::PutFileIface::PutFileToClient {wtop s ip relativeFilePath optList} {
+proc ::PutFileIface::PutFileToClient {wtop s ip relativeFilePath opts} {
     global  tclwbProtMsg this
     
     Debug 2 "+      PutFileToClient:: s=$s, ip=$ip,\
@@ -210,6 +215,9 @@ proc ::PutFileIface::PutFileToClient {wtop s ip relativeFilePath optList} {
     
     # This must never fail (application/octet-stream as fallback).
     set mime [::Types::GetMimeTypeForFileName $filePath]
+    
+    # Translate tcl type '-key value' list to 'Key: value' option list.
+    set optList [::ImageAndMovie::GetTransportSyntaxOptsFromTcl $opts]
     
     # And finally...    
     if {[catch {

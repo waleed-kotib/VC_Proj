@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.9 2003-08-30 09:41:00 matben Exp $
+# $Id: Dialogs.tcl,v 1.10 2003-09-21 13:02:12 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -50,24 +50,15 @@ array set wDlgs {
     jpresmsg        .jpresmsg
 }
 
-#  ::GetCanvas:: implements the dialog for choosing which client to get the 
-#  canvas from.
+# Dialogs::GetCanvas --
+# 
+#       Implements the dialog for choosing which client to get the 
+#       canvas from.
 
-namespace eval ::GetCanvas:: {
-    
-    namespace export GetCanvas
-    
-    # Wait for this variable to be set.
-    variable finished
-    
-    # The ip name to get canvas from.
-    variable getIPName
-}
-
-proc ::GetCanvas::GetCanvas {w} {
+proc ::Dialogs::GetCanvas {w} {
     global  allIPnumsToSend ipNumTo ipName2Num sysFont prefs this
     
-    variable finished
+    variable finished -1
     variable getIPName
     
     # Build list of ip names.
@@ -80,7 +71,6 @@ proc ::GetCanvas::GetCanvas {w} {
     if {[llength $ipNames] == 0} {
 	return 
     }
-    set finished -1
     if {[winfo exists $w]} {
 	return
     }
@@ -143,8 +133,6 @@ proc ::GetCanvas::GetCanvas {w} {
 	return ""
     }
 }
-
-#-- end ::GetCanvas:: ----------------------------------------------------------
 
 #  Dialogs::InfoOnPlugins ---
 #  
@@ -1152,6 +1140,25 @@ proc ::Dialogs::AboutQuickTimeTcl { } {
     update
     wm resizable $w 0 0
     $w.m play
+}
+
+# Procs to handle list of toplevels windows that we cache its gemotries.
+
+namespace eval ::Dialogs:: {
+ 
+    variable winGeomList {}
+}
+
+proc ::Dialogs::AddToplevelToGeomList {wList} {
+    variable winGeomList
+    
+    lappend winGeomList $wList
+}
+
+proc ::Dialogs::GetToplevelGeomList { } {
+    variable winGeomList
+    
+    return $winGeomList
 }
 
 # Dialogs::Free --
