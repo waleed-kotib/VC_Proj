@@ -14,7 +14,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Plugins.tcl,v 1.12 2004-01-15 14:13:00 matben Exp $
+# $Id: Plugins.tcl,v 1.13 2004-03-01 13:30:51 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -1272,11 +1272,12 @@ proc ::Plugins::BuildPrefsPage {page} {
 
 proc ::Plugins::SaveHook { } {
     global prefs
-    variable prefplugins
+    variable tmpPrefPlugins
 
+    # To be correct we should also have loaded the pack here. TODO.
     set banList {}
-    foreach name [array names prefplugins] {
-	if {$prefplugins($name) == 0} {
+    foreach name [array names tmpPrefPlugins] {
+	if {$tmpPrefPlugins($name) == 0} {
 	    lappend banList $name
 	}
     }
