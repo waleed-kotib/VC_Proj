@@ -42,3 +42,11 @@
 *Tree.styleIcons:                    triangle
 *Tree.treeColor:                     
 
+! tile widgets
+!
+
+*TCheckbutton.Font:                   {Lucida Grande} 11
+*TEntry.Font:                         {Lucida Grande} 11
+*TLabel.Font:                         {Lucida Grande} 11
+*TLabelframe.Font:                    {Lucida Grande} 11
+*TRadiobutton.Font:                   {Lucida Grande} 11

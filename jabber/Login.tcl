@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.61 2005-03-02 13:49:41 matben Exp $
+# $Id: Login.tcl,v 1.62 2005-03-11 06:55:55 matben Exp $
 
 package provide Login 1.0
 
@@ -24,6 +24,8 @@ namespace eval ::Login:: {
     ::hooks::register quitAppHook     ::Login::QuitAppHook
     ::hooks::register closeWindowHook ::Login::CloseHook
     ::hooks::register launchFinalHook ::Login::LaunchHook
+    
+    #::UTile::Use
 }
 
 # Login::Dlg --
@@ -64,7 +66,6 @@ proc ::Login::Dlg { } {
       -macclass {document closeBox}
     wm title $w [mc Login]
     
-    set fontSB     [option get . fontSmallBold {}]
     set contrastBg [option get . backgroundLightContrast {}]
     
     # Global frame.
@@ -81,8 +82,11 @@ proc ::Login::Dlg { } {
     pack $frmid -side top -fill both -expand 1
 	
     # Option menu for selecting user profile.
-    label $frmid.lpop -text "[mc Profile]:" -font $fontSB -anchor e
+    label $frmid.lpop -text "[mc Profile]:" -anchor e
     set wpopup $frmid.popup
+    
+    set fontSB [::Utils::FontBold [$frmid.lpop cget -font]]
+    $frmid.lpop configure -font $fontSB
     
     set wpopupMenu [tk_optionMenu $wpopup [namespace current]::menuVar {}]
     $wpopup configure -highlightthickness 0 -foreground black

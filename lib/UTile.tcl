@@ -4,7 +4,7 @@
 #       
 #       Experimental!
 # 
-# $Id: UTile.tcl,v 1.1 2005-03-07 07:22:36 matben Exp $
+# $Id: UTile.tcl,v 1.2 2005-03-11 06:55:56 matben Exp $
 
 package provide UTile 0.1
 
@@ -17,6 +17,11 @@ proc ::UTile::Init { } {
 	set priv(tile) 0
     } else {
 	set priv(tile) 1
+    }
+    set priv(widgets) {
+	frame labelframe label entry
+	button radiobutton checkbutton menubutton 
+	scale scrollbar
     }
     return $priv(tile)
 }
@@ -40,17 +45,29 @@ proc ::UTile::Use {{widgets {}}} {
 	return 0
     }
     if {$widgets == {}} {
-	set wset {
-	    frame labelframe label entry
-	    button radiobutton checkbutton menubutton 
-	    scale scrollbar
-	}
+	set wset $priv(widgets)
     } else {
 	set wset $widgets
     }
     set ns [uplevel 1 {namespace current}]
     foreach widget $wset {
-	interp alias {} ${ns}::${widget} {} ::ttk::$widget
+	interp alias {} ${ns}::${widget} {} ::ttk::${widget}
     }
     return 1
 }
+
+# ::UTile::UseTk --
+# 
+#       Guard against using tile widgets when ::UTile::Use was invoked
+#       in an outer namespace. Switches back to standard tk again.
+
+proc ::UTile::UseTk { } {
+    variable priv
+    
+    set ns [uplevel 1 {namespace current}]
+    foreach widget $priv(widgets) {
+	interp alias {} ${ns}::${widget} {} ::${widget}
+    }
+}
+
+
