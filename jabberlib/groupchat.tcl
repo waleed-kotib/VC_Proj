@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: groupchat.tcl,v 1.2 2005-02-19 08:17:41 matben Exp $
+# $Id: groupchat.tcl,v 1.3 2005-02-21 07:59:08 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -37,7 +37,10 @@ proc jlib::groupchat {jlibname cmd args} {
 proc jlib::groupchat::init {jlibname} {
 
     upvar ${jlibname}::gchat gchat
-
+    
+    namespace eval ${jlibname}::groupchat {
+	variable rooms
+    }
     set gchat(allroomsin) {}
 }
 
@@ -50,6 +53,7 @@ proc jlib::groupchat::init {jlibname} {
 proc jlib::groupchat::enter {jlibname room nick args} {
 
     upvar ${jlibname}::gchat gchat
+    upvar ${jlibname}::groupchat::rooms rooms
     
     set room [string tolower $room]
     set jid ${room}/${nick}
@@ -58,6 +62,7 @@ proc jlib::groupchat::enter {jlibname room nick args} {
     
     # This is not foolproof since it may not always success.
     lappend gchat(allroomsin) $room
+    set rooms($room) 1
     [namespace parent]::service::setroomprotocol $jlibname $room "gc-1.0"
     set gchat(allroomsin) [lsort -unique $gchat(allroomsin)]
     return ""
@@ -144,6 +149,17 @@ proc jlib::groupchat::participants {jlibname room} {
 	lappend everyone ${room}/$attrArr(-resource)
     }
     return $everyone
+}
+
+proc jlib::groupchat::isroom {jlibname jid} {
+
+    upvar ${jlibname}::groupchat::rooms rooms
+    
+    if {[info exists rooms($jid)]} {
+	return 1
+    } else {
+	return 0
+    }
 }
 
 proc jlib::groupchat::allroomsin {jlibname} {

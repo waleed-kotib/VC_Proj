@@ -3,9 +3,9 @@
 #       An object for storing the roster and presence information for a 
 #       jabber client. Is used together with jabberlib.
 #
-# Copyright (c) 2001-2003  Mats Bengtsson
+# Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.31 2005-02-16 14:26:46 matben Exp $
+# $Id: roster.tcl,v 1.32 2005-02-21 07:59:08 matben Exp $
 # 
 # Note that every jid in the rostArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
