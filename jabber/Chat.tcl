@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.111 2005-02-08 08:57:13 matben Exp $
+# $Id: Chat.tcl,v 1.112 2005-02-09 14:30:27 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -657,6 +657,7 @@ proc ::Chat::Build {threadID args} {
 
     set dlgstate(w)           $w
     set dlgstate(got1stMsg)   0
+    set dlgstate(recentctokens) {}
     
     # Toplevel with class Chat.
     ::UI::Toplevel $w -class Chat -usemacmainmenu 1 -macstyle documentProc
@@ -793,6 +794,7 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     upvar 0 $chattoken chatstate
 
     lappend dlgstate(chattokens) $chattoken
+    lappend dlgstate(recentctokens) $chattoken
 
     set fontS  [option get . fontSmall {}]
 
@@ -1050,6 +1052,7 @@ proc ::Chat::MakeNewPage {dlgtoken threadID args} {
     upvar 0 $chattoken chatstate
     set chatstate(pagename) $name
     set dlgstate(name2token,$name) $chattoken
+    
     return $chattoken
 }
 
@@ -1161,6 +1164,10 @@ proc ::Chat::SelectPageCmd {dlgtoken w name} {
         
     set chattoken $dlgstate(name2token,$name)
     SetThreadState $dlgtoken $chattoken
+    SetFocus $dlgtoken $chattoken
+    
+    lappend dlgstate(recentctokens) $chattoken
+    set dlgstate(recentctokens) [lrange $dlgstate(recentctokens) end-1 end]
 }
 
 proc ::Chat::SetThreadState {dlgtoken chattoken} {
@@ -1171,7 +1178,7 @@ proc ::Chat::SetThreadState {dlgtoken chattoken} {
     upvar 0 $chattoken chatstate
     upvar ::Jabber::jstate jstate
 
-    Debug 4 "::Chat::SetThreadState chattoken=$chattoken"
+    Debug 6 "::Chat::SetThreadState chattoken=$chattoken"
     
     jlib::splitjid $chatstate(jid) user res
     if {[$jstate(roster) isavailable $user]} {
@@ -1183,6 +1190,41 @@ proc ::Chat::SetThreadState {dlgtoken chattoken} {
 	$dlgstate(wnb) pageconfigure $chatstate(pagename) -image ""
     }
     SetTitle $chattoken
+}
+
+# Chat::SetFocus --
+# 
+#       When selecting a new page we must move focus along.
+#       This does not work reliable on MacOSX.
+
+proc ::Chat::SetFocus {dlgtoken chattoken} {
+    global  this
+    variable $dlgtoken
+    upvar 0 $dlgtoken dlgstate
+
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+
+    # Try remember any previous focus on previous page.
+    #puts ".....$dlgstate(recentctokens)"
+    if {[llength dlgstate(recentctokens)]} {
+	set ctoken [lindex $dlgstate(recentctokens) end]
+	variable $ctoken
+	upvar 0 $ctoken cstate
+	set cstate(focus) [focus]
+	#puts "\t cstate(focus)=$cstate(focus)"
+    }
+    if {[info exists chatstate(focus)]} {
+	#puts "\t exists chatstate(focus)=$chatstate(focus)"
+	set wfocus $chatstate(focus)
+    } else {
+	set wfocus $chatstate(wtextsnd)
+    }
+    # This seems to be needed on macs.
+    if {[string equal $this(platform) "macosx"]} {
+	update idletasks
+    }
+    focus $wfocus
 }
 
 # Chat::SetState --

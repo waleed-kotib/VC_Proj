@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.29 2005-02-08 08:57:16 matben Exp $
+# $Id: roster.tcl,v 1.30 2005-02-09 14:30:33 matben Exp $
 # 
 # Note that every jid in the rostArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -16,11 +16,10 @@
 # 
 # Variables used in roster:
 # 
-#	rostArr(users)              : The JID's of users currently in roster
-#	                                (without the /resource).
-#
 #       rostArr(groups)             : List of all groups the exist in roster.
 #
+#	rostArr($jid,item)          : $jid.
+#	
 #	rostArr($jid,name)          : Name of $jid.
 #	
 #	rostArr($jid,groups)        : Groups $jid is in. Note: PLURAL!
@@ -76,6 +75,7 @@
 #      rostName getx jid xmlns
 #      rostName getextras jid xmlns
 #      rostName isavailable jid
+#      rostName isitem jid
 #      rostName removeitem jid
 #      rostName reset
 #      rostName setpresence jid type ?-option value -option ...?
@@ -177,7 +177,6 @@ proc roster::roster {clientCmd args} {
     upvar ${rostName}::rostArr rostArr
     upvar ${rostName}::options options
         
-    set rostArr(users) {}
     set rostArr(groups) {}
     set options(cmd) $clientCmd
     
@@ -226,7 +225,8 @@ proc roster::CommandProc {rostName cmd args} {
 # Results:
 #       none.
 
-proc roster::setrosteritem {rostName jid args} {        variable rostGlobals
+proc roster::setrosteritem {rostName jid args} {        
+    variable rostGlobals
     upvar ${rostName}::rostArr rostArr
     upvar ${rostName}::options options
     
@@ -234,15 +234,13 @@ proc roster::setrosteritem {rostName jid args} {        variable rostGlobals
         
     set mjid [jlib::jidmap $jid]
     
-    # Add user if not there already.
-    if {[lsearch -exact $rostArr(users) $mjid] < 0} {
-	lappend rostArr(users) $mjid
-    }
-    
     # Clear out the old state since an 'ask' element may still be lurking.
     foreach key $rostGlobals(tags) {
 	unset -nocomplain rostArr($mjid,$key)
     }
+    
+    # This array is better than list to keep track of users.
+    set rostArr($mjid,item) $mjid
     
     # Old values will be overwritten, nonexisting options will result in
     # nonexisting array entries.
@@ -287,7 +285,6 @@ proc roster::removeitem {rostName jid} {
     Debug 2 "roster::removeitem rostName=$rostName, jid='$jid'"
     
     set mjid [jlib::jidmap $jid]
-    set rostArr(users) [lsearch -all -not -inline $rostArr(users) $mjid]
     
     # Be sure to evaluate the registered command procedure.
     # Do this before unsetting the internal state!
@@ -299,6 +296,7 @@ proc roster::removeitem {rostName jid} {
     foreach name $rostGlobals(tags) {
 	unset -nocomplain rostArr($mjid,$name)
     }
+    unset -nocomplain rostArr($mjid,item)
     
     # Be sure to unset all, also jid3 entries!
     array unset presArr "${mjid}*"
@@ -326,12 +324,12 @@ proc roster::ClearRoster {rostName} {
     Debug 2 "roster::ClearRoster rostName=$rostName"
         
     # Remove the roster.
-    foreach jid $rostArr(users) {
+    foreach {x mjid} [array get rostArr *,item] {
 	foreach key $rostGlobals(tags) {
-	    unset -nocomplain rostArr($jid,$key)
+	    unset -nocomplain rostArr($mjid,$key)
 	}
     }
-    set rostArr(users) {}
+    array unset rostArr *,item
     
     # Be sure to evaluate the registered command procedure.
     if {[string length $options(cmd)]} {
@@ -386,7 +384,6 @@ proc roster::reset {rostName} {
     upvar ${rostName}::presArr presArr
     
     unset -nocomplain rostArr presArr
-    set rostArr(users) {}
     set rostArr(groups) {}
 }
 
@@ -603,19 +600,33 @@ proc roster::getrosteritem {rostName jid} {
     
     Debug 2 "roster::getrosteritem rostName=$rostName, jid='$jid'"
     
-    set jid [jlib::jidmap $jid]
-    if {[lsearch -exact $rostArr(users) $jid] < 0} {
-	#error "nonexisting jid \"$jid\" in roster"
-	# Or should we be silent?
+    set mjid [jlib::jidmap $jid]
+    if {![info exists rostArr($mjid,item)]} {
 	return {}
     }
     set result {}
     foreach key $rostGlobals(tags) {
-	if {[info exists rostArr($jid,$key)]} {
-	    lappend result -$key $rostArr($jid,$key)
+	if {[info exists rostArr($mjid,$key)]} {
+	    lappend result -$key $rostArr($mjid,$key)
 	}
     }
     return $result
+}
+
+# roster::isitem --
+# 
+#       Does the jid exist in the roster?
+
+proc roster::isitem {rostName jid} {
+    
+    upvar ${rostName}::rostArr rostArr
+    
+    set mjid [jlib::jidmap $jid]
+    if {[info exists rostArr($mjid,item)]} {
+	return 1
+    } else {
+	return 0
+    }
 }
 
 # roster::getusers --
@@ -634,44 +645,33 @@ proc roster::getusers {rostName args} {
     upvar ${rostName}::rostArr rostArr
     upvar ${rostName}::presArr presArr    
     
-    set jidlist $rostArr(users)
-    
-    foreach {key value} $args {
-	
-	switch -- $key {
-	    -type {
-		
-		# Loop through all jid2 in roster and see if any available
-		set jidlist {}
-		foreach jid2 $rostArr(users) {
-		    set isavailable 0
+    set all {}
+    foreach {x jid} [array get rostArr *,item] {
+	lappend all $jid
+    }
+    array set argsArr $args
+    set jidlist {}
+    if {$args == {}} {
+	set jidlist $all
+    } elseif {[info exists argsArr(-type)]} {
+	set type $argsArr(-type)
+	set jidlist {}
+	foreach jid2 $all {
+	    set isavailable 0
 
-		    # Be sure to handle empty resources as well: '1234@icq.host'
-		    foreach key [array names presArr "${jid2}*,type"] {
-			if {[string equal $presArr($key) "available"]} {
-			    set isavailable 1
-			    break
-			}
-		    }
-		    
-		    switch -- $value {
-			available {
-			    if {$isavailable} {
-				lappend jidlist $jid2
-			    }
-			}
-			unavailable {
-			    if {!$isavailable} {
-				lappend jidlist $jid2
-			    }
-			}
-		    }
+	    # Be sure to handle empty resources as well: '1234@icq.host'
+	    foreach key [array names presArr "${jid2}*,type"] {
+		if {[string equal $presArr($key) "available"]} {
+		    set isavailable 1
+		    break
 		}
 	    }
-	    default {
-		# empty
+	    if {$isavailable && [string equal $type "available"]} {
+		lappend jidlist $jid2
+	    } elseif {!$isavailable && [string equal $type "unavailable"]} {
+		lappend jidlist $jid2
 	    }
-	}
+	}	
     }
     return $jidlist
 }
