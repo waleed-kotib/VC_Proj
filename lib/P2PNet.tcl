@@ -4,11 +4,11 @@
 #      for connecting to the server via TCP/IP, and provide some procedures 
 #      to make the connection.
 #      
-#  Copyright (c) 1999-2004  Mats Bengtsson
+#  Copyright (c) 1999-2005  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: P2PNet.tcl,v 1.7 2004-12-02 08:22:34 matben Exp $
+# $Id: P2PNet.tcl,v 1.8 2005-01-31 14:06:59 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            

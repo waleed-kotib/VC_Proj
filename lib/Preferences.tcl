@@ -3,11 +3,11 @@
 #       This file is part of The Coccinella application. It implements the
 #       preferences dialog window.
 #      
-#  Copyright (c) 1999-2003  Mats Bengtsson
+#  Copyright (c) 1999-2005  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.71 2004-12-20 15:16:46 matben Exp $
+# $Id: Preferences.tcl,v 1.72 2005-01-31 14:06:59 matben Exp $
  
 package require mnotebook
 package require tree

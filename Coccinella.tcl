@@ -8,11 +8,15 @@
 #       It controls the startup sequence and therefore needs a number
 #       of code files/images to be succesful.
 #      
-#  Copyright (c) 1999-2004  Mats Bengtsson
+#  Copyright (c) 1999-2005  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.106 2005-01-30 15:12:28 matben Exp $
+# $Id: Coccinella.tcl,v 1.107 2005-01-31 14:06:52 matben Exp $
+	
+
+# Level of detail for printouts. >= 2 for my outputs.
+set debugLevel 0
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -137,9 +141,6 @@ if {[info exists ::env(HOME)]} {
 } else {
     catch {cd ~}
 }
-
-# Level of detail for printouts. >= 2 for my outputs.
-set debugLevel 0
 
 # Debug support.
 source [file join $thisPath lib Debug.tcl]

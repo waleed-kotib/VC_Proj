@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements the Roster GUI part.
 #      
-#  Copyright (c) 2001-2004  Mats Bengtsson
+#  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.110 2005-01-02 15:18:52 matben Exp $
+# $Id: Roster.tcl,v 1.111 2005-01-31 14:06:58 matben Exp $
 
 package provide Roster 1.0
 

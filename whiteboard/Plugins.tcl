@@ -8,11 +8,11 @@
 #           
 #       It also contains support functions for adding external plugins.
 #      
-#  Copyright (c) 2003-2004  Mats Bengtsson
+#  Copyright (c) 2003-2005  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Plugins.tcl,v 1.15 2004-12-08 08:21:20 matben Exp $
+# $Id: Plugins.tcl,v 1.16 2005-01-31 14:07:00 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.

@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements the Browse GUI part.
 #      
-#  Copyright (c) 2001-2004  Mats Bengtsson
+#  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.68 2004-12-13 13:39:17 matben Exp $
+# $Id: Browse.tcl,v 1.69 2005-01-31 14:06:53 matben Exp $
 
 package provide Browse 1.0
 
@@ -65,6 +65,44 @@ namespace eval ::Browse:: {
 	separator      {}        {}
 	mRefresh       jid       {::Browse::Refresh $jid}
 	mAddServer     any       {::Browse::AddServer}
+    }
+
+    # List the features of that each menu entry can handle:
+    #   conference: groupchat service, not room
+    #   room:       groupchat room
+    #   register:   registration support
+    #   search:     search support
+    #   user:       user that can be communicated with
+    #   wb:         whiteboarding
+    #   jid:        generic type
+    #   "":         not specific
+
+    set popMenuDefs(browse,def) {
+	mMessage       user      {::NewMsg::Build -to $jid}
+	mChat          user      {::Chat::StartThread $jid}
+	mWhiteboard    {wb room} {::Jabber::WB::NewWhiteboardTo $jid}
+	mEnterRoom     room      {
+	    ::GroupChat::EnterOrCreate enter -roomjid $jid -autoget 1
+	}
+	mCreateRoom    conference {::GroupChat::EnterOrCreate create \
+	  -server $jid}
+	separator      {}        {}
+	mInfo          jid       {::Browse::GetInfo $jid}
+	mLastLogin/Activity jid  {::Jabber::GetLast $jid}
+	mLocalTime     jid       {::Jabber::GetTime $jid}
+	mvCard         jid       {::VCard::Fetch other $jid}
+	mVersion       jid       {::Jabber::GetVersion $jid}
+	separator      {}        {}
+	mSearch        search    {
+	    ::Search::Build -server $jid -autoget 1
+	}
+	mRegister      register  {
+	    ::GenRegister::NewDlg -server $jid -autoget 1
+	}
+	mUnregister    register  {::Register::Remove $jid}
+	separator      {}        {}
+	mRefresh       jid       {::Browse::Refresh $jid}
+	mAddServer     {}        {::Browse::AddServer}
     }
 }
 
@@ -601,35 +639,43 @@ proc ::Browse::Popup {w v x y} {
     
     ::Debug 2 "::Browse::Popup w=$w, v='$v', x=$x, y=$y"
     
-    # The last element of $v is either a jid, (a namespace,) 
-    # a header in roster, a group, or an agents xml tag.
-    # The variables name 'jid' is a misnomer.
-    # Find also type of thing clicked, 'typeClicked'.
-    
-    set typeClicked ""
-    
     set jid [lindex $v end]
-    set jid3 $jid
     set typesubtype [$jstate(browse) gettype $jid]
+    jlib::splitjidex $jid username host res
+
+    ::Debug 4 "\t jid=$jid, typesubtype=$typesubtype"
     
-    if {[regexp {^.+@[^/]+(/.*)?$} $jid match res]} {
-	set typeClicked user
-	if {[$jstate(jlib) service isroom $jid]} {
-	    set typeClicked room
+    # Make a list of all the features of the clicked item.
+    # This is then matched against each menu entries type to set its state.
+
+    set clicked {}
+    if {[lsearch -glob $typesubtype "conference/*"] >= 0} {
+	lappend clicked conference
+    }
+    if {[lsearch -glob $typesubtype "user/*"] >= 0} {
+	lappend clicked user
+    }
+    if {$username != ""} {
+	if {[$jstate(browse) isroom $jid]} {
+	    lappend clicked room
+	} else {
+	    lappend clicked user
 	}
-    } elseif {[string match -nocase "conference/*" $typesubtype]} {
-	set typeClicked conference
-    } elseif {$jid != ""} {
-	set typeClicked jid
     }
-    if {[string length $jid] == 0} {
-	set typeClicked ""	
+    foreach name {search register} {
+	if {[$jstate(browse) hasnamespace $jid "jabber:iq:${name}"]} {
+	    lappend clicked $name
+	}
     }
-    set X [expr [winfo rootx $w] + $x]
-    set Y [expr [winfo rooty $w] + $y]
+    if {[::Roster::IsCoccinella $jid]} {
+	lappend clicked wb
+    }
+    if {$jid != ""} {
+	lappend clicked jid
+    }
     
-    ::Debug 2 "\t jid=$jid, typeClicked=$typeClicked"
-    
+    ::Debug 2 "\t clicked=$clicked"
+
     # Mads Linden's workaround for menu post problem on mac:
     # all in menubutton commands i add "after 40 the_command"
     # this way i can never have to posting error.
@@ -638,7 +684,7 @@ proc ::Browse::Popup {w v x y} {
     # destroy .mb
     # update
     #
-    # this way the .mb is destroyd before the next window comes up, thats how I
+    # this way the .mb is destroyed before the next window comes up, thats how I
     # got around this.
     
     # Make the appropriate menu.
@@ -671,52 +717,15 @@ proc ::Browse::Popup {w v x y} {
 	if {![::Jabber::IsConnected]} {
 	    continue
 	}
-	if {[string equal $type "any"]} {
-	    $m entryconfigure $locname -state normal
-	    continue
-	}
 	
-	# State of menu entry. We use the 'type' and 'typeClicked' to sort
-	# out which capabilities to offer for the clicked item.
-	set state disabled
-	
-	switch -- $type {
-	    user {
-		if {[string equal $typeClicked "user"]} {
-		    set state normal
-		}
-	    }
-	    room {
-		if {[string equal $typeClicked "room"]} {
-		    set state normal
-		}
-	    }
-	    jid {
-		switch -- $typeClicked {
-		    jid - user - conference {
-			set state normal
-		    }
-		}
-	    } 
-	    search - register {
-		if {[$jstate(browse) hasnamespace $jid "jabber:iq:${type}"]} {
-		    set state normal
-		}
-	    }
-	    conference {
-		switch -- $typeClicked {
-		    conference {
-			set state normal
-		    }
-		}
-	    }
-	    wb {
-		switch -- $typeClicked {
-		    room {
-			set state normal
-		    }
-		}
-	    }
+	# State of menu entry. 
+	# We use the 'type' and 'clicked' lists to set the state.
+	if {[listintersectnonempty $type $clicked]} {
+	    set state normal
+	} elseif {$type == ""} {
+	    set state normal
+	} else {
+	    set state disabled
 	}
 	if {[string equal $state "normal"]} {
 	    $m entryconfigure $locname -state normal
@@ -727,6 +736,8 @@ proc ::Browse::Popup {w v x y} {
     update idletasks
     
     # Post popup menu.
+    set X [expr [winfo rootx $w] + $x]
+    set Y [expr [winfo rooty $w] + $y]
     tk_popup $m [expr int($X) - 10] [expr int($Y) - 10]   
     
     # Mac bug... (else can't post menu while already posted if toplevel...)

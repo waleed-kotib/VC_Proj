@@ -4,9 +4,9 @@
 #	It maps 'key' (see below) to the local absolute native file path.
 #	Directories may also be time stamped with "best before date".
 #
-#  Copyright (c) 2002-2004  Mats Bengtsson
+#  Copyright (c) 2002-2005  Mats Bengtsson
 #
-# $Id: FileCache.tcl,v 1.19 2004-12-10 10:01:43 matben Exp $
+# $Id: FileCache.tcl,v 1.20 2005-01-31 14:06:59 matben Exp $
 # 
 #       The input key can be: 
 #               1) a full url, must be uri encoded 

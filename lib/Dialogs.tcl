@@ -3,11 +3,11 @@
 #      This file is part of The Coccinella application. It implements some
 #      of the dialogs. 
 #      
-#  Copyright (c) 1999-2004  Mats Bengtsson
+#  Copyright (c) 1999-2005  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.54 2004-12-02 15:22:07 matben Exp $
+# $Id: Dialogs.tcl,v 1.55 2005-01-31 14:06:58 matben Exp $
    
 package provide Dialogs 1.0
 

@@ -2,11 +2,11 @@
 #  
 #      This file is part of The Coccinella application. 
 #      
-#  Copyright (c) 2001-2004  Mats Bengtsson
+#  Copyright (c) 2001-2005  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.123 2004-12-21 15:14:42 matben Exp $
+# $Id: Jabber.tcl,v 1.124 2005-01-31 14:06:56 matben Exp $
 
 package require balloonhelp
 package require browse

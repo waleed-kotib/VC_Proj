@@ -4,11 +4,11 @@
 #      This file is part of The Coccinella application. It implements the
 #      cut, copy, and paste commands to and from canvas, typically canvas items.
 #      
-#  Copyright (c) 2002-2004  Mats Bengtsson
+#  Copyright (c) 2002-2005  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasCutCopyPaste.tcl,v 1.6 2004-11-06 08:15:26 matben Exp $
+# $Id: CanvasCutCopyPaste.tcl,v 1.7 2005-01-31 14:06:59 matben Exp $
 
 package provide CanvasCutCopyPaste 1.0
 

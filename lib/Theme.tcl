@@ -2,9 +2,9 @@
 #
 #       Some utitilty procedures useful when theming widgets and UI.
 #       
-#  Copyright (c) 2003-2004  Mats Bengtsson
+#  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Theme.tcl,v 1.19 2004-12-02 08:22:34 matben Exp $
+# $Id: Theme.tcl,v 1.20 2005-01-31 14:06:59 matben Exp $
 
 package provide Theme 1.0
 

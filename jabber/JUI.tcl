@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements jabber GUI parts.
 #      
-#  Copyright (c) 2001-2004  Mats Bengtsson
+#  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.76 2005-01-09 14:33:52 matben Exp $
+# $Id: JUI.tcl,v 1.77 2005-01-31 14:06:56 matben Exp $
 
 package provide JUI 1.0
 

@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements chat type of UI for jabber.
 #      
-#  Copyright (c) 2001-2004  Mats Bengtsson
+#  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.107 2005-01-25 07:02:57 matben Exp $
+# $Id: Chat.tcl,v 1.108 2005-01-31 14:06:54 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -497,6 +497,7 @@ proc ::Chat::GotNormalMsg {body args} {
     jlib::splitjid $argsArr(-from) jid2 res
     set mjid2 [jlib::jidmap $jid2]
     set chattoken [GetTokenFrom chat jid ${mjid2}*]
+    
     if {($chattoken != "") && [info exists argsArr(-x)]} {
 	eval {XEventHandleAnyXElem $chattoken $argsArr(-x)} $args
     }
@@ -820,6 +821,7 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set chatstate(active)           $cprefs(lastActiveRet)
     set chatstate(xevent,status)    ""
     set chatstate(xevent,msgidlist) ""
+    set chatstate(xevent,type)      chat
     if {[info exists argsArr(-subject)]} {
 	set chatstate(subject) $argsArr(-subject)
     }
@@ -1840,6 +1842,19 @@ proc ::Chat::XEventHandleAnyXElem {chattoken xElem args} {
     set xevent [lindex [wrapper::getnamespacefromchilds $xElem x \
       "jabber:x:event"] 0]
     if {$xevent != {}} {
+	array set argsArr $args
+
+	# If we get xevents as normal messages, send them as normal as well.
+	if {[info exists argsArr(-type)]} {
+	    variable $chattoken
+	    upvar 0 $chattoken chatstate
+
+	    if {$argsArr(-type) == "chat"} {
+		set chatstate(xevent,type) chat
+	    } else {
+		set chatstate(xevent,type) normal
+	    }
+	}
 	eval {XEventRecv $chattoken $xevent} $args
     }
 }
@@ -1945,6 +1960,10 @@ proc ::Chat::XEventSendCompose {chattoken} {
     set id [lindex $chatstate(xevent,msgidlist) end]
     set chatstate(xevent,msgidlist) [lindex $chatstate(xevent,msgidlist) end]
     set chatstate(xevent,composeid) $id
+    set opts {}
+    if {$chatstate(xevent,type) == "chat"} {
+	set opts [list -thread $chatstate(threadid) -type chat]
+    }
     
     set xelems [list \
       [wrapper::createtag "x" -attrlist {xmlns jabber:x:event}  \
@@ -1953,8 +1972,7 @@ proc ::Chat::XEventSendCompose {chattoken} {
       [wrapper::createtag "id" -chdata $id]]]]
     
     if {[catch {
-	::Jabber::JlibCmd send_message $chatstate(jid)  \
-	  -thread $chatstate(threadid) -type chat -xlist $xelems
+	eval {::Jabber::JlibCmd send_message $chatstate(jid) -xlist $xelems} $opts
     } err]} {
 	::UI::MessageBox -type ok -icon error -title "Network Error" \
 	  -message "Network error ocurred: $err"
@@ -1988,14 +2006,17 @@ proc ::Chat::XEventSendCancelCompose {chattoken} {
     set id $chatstate(xevent,composeid)
     set chatstate(xevent,status) ""
     set chatstate(xevent,composeid) ""
+    set opts {}
+    if {$chatstate(xevent,type) == "chat"} {
+	set opts [list -thread $chatstate(threadid) -type chat]
+    }
 
     set xelems [list \
       [wrapper::createtag "x" -attrlist {xmlns jabber:x:event}  \
       -subtags [list [wrapper::createtag "id" -chdata $id]]]]
-
+    
     if {[catch {
-	::Jabber::JlibCmd send_message $chatstate(jid)  \
-	  -thread $chatstate(threadid) -type chat -xlist $xelems
+	eval {::Jabber::JlibCmd send_message $chatstate(jid) -xlist $xelems} $opts
     } err]} {
 	::UI::MessageBox -type ok -icon error -title "Network Error" \
 	  -message "Network error ocurred: $err"

@@ -3,11 +3,11 @@
 #      This file is part of The Coccinella application. It implements some
 #      miscellaneous utilities for canvas operations.
 #      
-#  Copyright (c) 2000-2004  Mats Bengtsson
+#  Copyright (c) 2000-2005  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.22 2005-01-30 15:12:29 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.23 2005-01-31 14:07:00 matben Exp $
 
 package require sha1pure
 

@@ -2,9 +2,9 @@
 #  
 #      This file implements code for handling profiles.
 #      
-#  Copyright (c) 2003-2004  Mats Bengtsson
+#  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.36 2004-12-02 08:22:34 matben Exp $
+# $Id: Profiles.tcl,v 1.37 2005-01-31 14:06:58 matben Exp $
 
 package provide Profiles 1.0
 

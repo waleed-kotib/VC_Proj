@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements the group chat GUI part.
 #      
-#  Copyright (c) 2001-2004  Mats Bengtsson
+#  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.93 2005-01-09 14:33:52 matben Exp $
+# $Id: GroupChat.tcl,v 1.94 2005-01-31 14:06:55 matben Exp $
 
 package require History
 

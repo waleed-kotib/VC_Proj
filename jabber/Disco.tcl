@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.51 2005-01-25 07:02:57 matben Exp $
+# $Id: Disco.tcl,v 1.52 2005-01-31 14:06:55 matben Exp $
 
 package provide Disco 1.0
 
@@ -669,10 +669,6 @@ proc ::Disco::Popup {w v x y} {
 	# If a menu should be enabled even if not connected do it here.
 	
 	if {![::Jabber::IsConnected]} {
-	    continue
-	}
-	if {[string equal $type "any"]} {
-	    $m entryconfigure $locname -state normal
 	    continue
 	}
 	

@@ -2,11 +2,11 @@
 #  
 #      This file is part of The Coccinella application. 
 #      
-#  Copyright (c) 2001-2004  Mats Bengtsson
+#  Copyright (c) 2001-2005  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: VCard.tcl,v 1.28 2004-12-02 08:22:34 matben Exp $
+# $Id: VCard.tcl,v 1.29 2005-01-31 14:06:58 matben Exp $
 
 package provide VCard 1.0
 
