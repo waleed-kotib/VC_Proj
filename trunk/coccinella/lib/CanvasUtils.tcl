@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.23 2004-02-06 14:01:22 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.24 2004-02-12 11:22:24 matben Exp $
 
 package require sha1pure
 
@@ -1199,8 +1199,13 @@ proc ::CanvasUtils::NewImportAnchor {wcan} {
     # Update 'importAnchor'.
     incr importAnchor(x) $prefs(offsetCopy)
     incr importAnchor(y) $prefs(offsetCopy)
-    foreach {x0 y0 width height} [$wcan cget -scrollregion] break
     
+    # This returns an empty list if not yet displayed.
+    foreach {x0 y0 width height} [$wcan cget -scrollregion] break
+    if {![info exists width]} {
+	set width [winfo reqwidth $wcan]
+	set height [winfo reqheight $wcan]
+    }
     if {($importAnchor(x) > [expr $width - 60]) ||   \
       ($importAnchor(y) > [expr $height - 60])} {
 	set importAnchor(x) $prefs(offsetCopy)
