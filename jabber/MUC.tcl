@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.21 2004-01-30 15:33:50 matben Exp $
+# $Id: MUC.tcl,v 1.22 2004-01-31 13:46:07 matben Exp $
 
 package require entrycomp
 
@@ -100,7 +100,8 @@ proc ::Jabber::MUC::BuildEnter {args} {
     upvar 0 $token enter
     
     set w $wDlgs(jmucenter)[incr dlguid]
-    ::UI::Toplevel $w -macstyle documentProc -macclass {document closeBox}
+    ::UI::Toplevel $w -macstyle documentProc -macclass {document closeBox} \
+      -usemacmainmenu 1
     wm title $w [::msgcat::mc {Enter Room}]
     set enter(w) $w
     array set enter {
@@ -122,8 +123,7 @@ proc ::Jabber::MUC::BuildEnter {args} {
     pack $w.frall.msg -side top -fill x -anchor w -padx 2 -pady 4
     set frtop $w.frall.top
     pack [frame $frtop] -side top -fill x -padx 4
-    label $frtop.lserv -text "[::msgcat::mc {Conference server}]:" \
-      -font $fontSB 
+    label $frtop.lserv -text "[::msgcat::mc {Conference server}]:" 
 
     set confServers [$jstate(browse) getservicesforns  \
       "http://jabber.org/protocol/muc"]
@@ -162,9 +162,9 @@ proc ::Jabber::MUC::BuildEnter {args} {
 	$wcomboserver configure -state disabled
     }
     
-    label $frtop.lnick -text "[::msgcat::mc {Nick name}]:" -font $fontSB
+    label $frtop.lnick -text "[::msgcat::mc {Nick name}]:"
     entry $frtop.enick -textvariable $token\(nickname)
-    label $frtop.lpass -text "[::msgcat::mc Password]:" -font $fontSB
+    label $frtop.lpass -text "[::msgcat::mc Password]:"
     entry $frtop.epass -textvariable $token\(password)
     
     grid $frtop.lserv -column 0 -row 0 -sticky e
@@ -187,8 +187,6 @@ proc ::Jabber::MUC::BuildEnter {args} {
        
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    set wsearrows $frbot.arr
-    set wstatus   $frbot.stat
     set wbtenter  $frbot.btok
     pack [button $wbtenter -text [::msgcat::mc Enter] \
       -default active -command [list [namespace current]::DoEnter $token]]  \
@@ -196,11 +194,17 @@ proc ::Jabber::MUC::BuildEnter {args} {
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
       -command [list [namespace current]::CancelEnter $token]]  \
       -side right -padx 5 -pady 5
+    pack [frame $w.frall.pad -height 8 -width 1] -side bottom -pady 0
+    pack $frbot -side bottom -fill x -expand 0 -padx 8 -pady 0
+   
+    # Busy arrows and status message.
+    pack [frame $w.frall.st]  -side bottom -fill x -padx 8 -pady 0
+    set wsearrows $w.frall.st.arr
+    set wstatus   $w.frall.st.stat
     pack [::chasearrows::chasearrows $wsearrows -size 16] \
-      -side left -padx 5 -pady 5
-    pack [label $wstatus -textvariable $token\(status)] \
-      -side left -padx 5 -pady 5
-    pack $frbot -side bottom -fill x -expand 0 -padx 8 -pady 6
+      -side left -padx 5 -pady 0
+    pack [label $wstatus -textvariable $token\(status) -pady 0 -bd 0] \
+      -side left -padx 5 -pady 0
 
     set enter(wcomboserver) $wcomboserver
     set enter(wcomboroom)   $wcomboroom
@@ -212,6 +216,7 @@ proc ::Jabber::MUC::BuildEnter {args} {
 	::Jabber::MUC::FillRoomList $token
     } else {
 	::Jabber::MUC::BusyEnterDlgIncr $token
+	update idletasks
 	::Jabber::InvokeJlibCmd browse_get $enter(server)  \
 	  -command [list [namespace current]::BrowseServiceCB $token]
     }
@@ -284,7 +289,7 @@ proc ::Jabber::MUC::BusyEnterDlgIncr {token {num 1}} {
     incr enter(statuscount) $num
     
     if {$enter(statuscount) > 0} {
-	set enter(status) "Getting rooms..." 
+	set enter(status) "Getting available rooms..."
 	$enter(wsearrows) start
 	$enter(wcomboserver) configure -state disabled
 	$enter(wcomboroom)   configure -state disabled

@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: browse.tcl,v 1.18 2004-01-13 14:50:21 matben Exp $
+# $Id: browse.tcl,v 1.19 2004-01-31 13:46:07 matben Exp $
 # 
 #  locals($jid,parent):       the parent of $jid.
 #  locals($jid,parents):      list of all parent jid's,
@@ -674,9 +674,6 @@ proc browse::setsinglejid {browseName parentJid jid xmllist {browsedjid 0}} {
 		
 		# Keep list of all 'user'«s in a room. The 'parentJid' must
 		# be the room's jid here.
-		if {![info exists locals($parentJid,allusers)]} {
-		    set locals($parentJid,allusers) {}
-		}
 		lappend locals($parentJid,allusers) $jid
 		set locals($parentJid,allusers)  \
 		  [lsort -unique $locals($parentJid,allusers)]
@@ -691,15 +688,9 @@ proc browse::setsinglejid {browseName parentJid jid xmllist {browsedjid 0}} {
 	if {[string equal [wrapper::gettag $child] "ns"]} {
 	    
 	    # Cache any namespace declarations.
-	    if {![info exists locals($jid,ns)]} {
-		set locals($jid,ns) {}
-	    }
 	    set ns [wrapper::getcdata $child]
 	    lappend locals($jid,ns) $ns
 	    set locals($jid,ns) [lsort -unique $locals($jid,ns)]
-	    if {![info exists locals(ns,$ns)]} {
-		set locals(ns,$ns) {}
-	    }
 	    lappend locals(ns,$ns) $jid
 	    set locals(ns,$ns) [lsort -unique $locals(ns,$ns)]
 	    

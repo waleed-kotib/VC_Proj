@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.62 2004-01-30 15:33:50 matben Exp $
+# $Id: Jabber.tcl,v 1.63 2004-01-31 13:46:06 matben Exp $
 
 package provide Jabber 1.0
 
@@ -424,7 +424,8 @@ proc ::Jabber::FactoryDefaults { } {
       mEnterRoom     room      {
 	  ::Jabber::GroupChat::EnterOrCreate enter -roomjid &jid -autoget 1
       }
-      mCreateRoom    conference {::Jabber::GroupChat::EnterOrCreate create}
+      mCreateRoom    conference {::Jabber::GroupChat::EnterOrCreate create \
+	-server &jid}
       separator      {}        {}
       mInfo          jid       {::Jabber::Browse::GetInfo &jid}
       mLastLogin/Activity jid  {::Jabber::GetLast &jid}
