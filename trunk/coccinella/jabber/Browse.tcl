@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.14 2003-12-15 08:20:53 matben Exp $
+# $Id: Browse.tcl,v 1.15 2003-12-15 15:39:08 matben Exp $
 
 package provide Browse 1.0
 
@@ -404,8 +404,7 @@ proc ::Jabber::Browse::Build {w} {
     set wysc $wbox.ysc
     scrollbar $wxsc -orient horizontal -command [list $wtree xview]
     scrollbar $wysc -orient vertical -command [list $wtree yview]
-    ::tree::tree $wtree -width 180 -height 200 -silent 1  \
-      -scrollwidth 400 \
+    ::tree::tree $wtree -width 180 -height 200 -silent 1 -scrollwidth 400 \
       -xscrollcommand [list $wxsc set]       \
       -yscrollcommand [list $wysc set]       \
       -selectcommand ::Jabber::Browse::SelectCmd   \

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.19 2003-12-15 08:20:53 matben Exp $
+# $Id: Preferences.tcl,v 1.20 2003-12-15 15:39:09 matben Exp $
  
 package require notebook
 package require tree
@@ -115,10 +115,9 @@ proc ::Preferences::Build { } {
     pack [label $frtree.la -text [::msgcat::mc {Settings Panels}]  \
       -font $fontSB -relief raised -bd 1 -bg #bdbdbd] -side top -fill x
     set wtree [::tree::tree $frtree.t -width 120 -height 300   \
-      -openicons triangle -treecolor {}   \
       -yscrollcommand [list $frtree.sby set]       \
       -selectcommand ::Preferences::SelectCmd   \
-      -doubleclickcommand {} -highlightcolor #6363CE]
+      -doubleclickcommand {}]
     scrollbar $frtree.sby -orient vertical -command [list $wtree yview]
     
     pack $wtree -side left -fill both -expand 1

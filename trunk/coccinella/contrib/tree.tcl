@@ -25,7 +25,7 @@
 # 
 # Copyright (C) 2002-2003 Mats Bengtsson
 # 
-# $Id: tree.tcl,v 1.17 2003-12-13 17:54:40 matben Exp $
+# $Id: tree.tcl,v 1.18 2003-12-15 15:39:08 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -1009,7 +1009,7 @@ proc ::tree::ConfigureItem {w v args} {
 	    -dir {
 		if {[info exists treestate($uid:dir)]} {
 		    set result $treestate($uid:dir)
-		} elseif {[string length $treestate($uid:children)]} {
+		} elseif {[llength $treestate($uid:children)]} {
 		    set result 1
 		} else {
 		    set result 0
@@ -1529,7 +1529,7 @@ proc ::tree::BuildLayer {w v in} {
 	    set isDir 1
 	}
 	set hasChildren 0
-	if {[string length $treestate($uidc:children)]} {
+	if {[llength $treestate($uidc:children)]} {
 	    set hasChildren 1
 	    set isDir 1
 	}
@@ -1641,7 +1641,7 @@ proc ::tree::OpenTree {w v} {
     if {[info exists treestate($uid:open)] &&     \
       ($treestate($uid:open) == 0) &&             \
       [info exists treestate($uid:children)] &&   \
-      ([string length $treestate($uid:children)] > 0)} {
+      [llength $treestate($uid:children)]} {
 	set treestate($uid:open) 1
 	BuildWhenIdle $w
 	

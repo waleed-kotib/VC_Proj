@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.30 2003-12-13 17:54:41 matben Exp $
+# $Id: UI.tcl,v 1.31 2003-12-15 15:39:09 matben Exp $
 
 # LabeledFrame --
 #
@@ -3627,16 +3627,14 @@ proc ::UI::BuildCommEntry {wtop ipNum args} {
     } else {
 	set wtopReal [string trimright $wtop .]
     }
-    
-    set bg [option get . backgroundGeneral {}]
-    
+        
     set size [::UI::ParseWMGeometry $wtopReal]
     set n $nEnt($wtop)
     
     # Add new status line.
     if {[string equal $thisType "jabber"]} {
-	entry $wcomm.ad$n -width 18 -relief sunken -bg $bg
-	entry $wcomm.us$n -width 22 -relief sunken -bg white
+	entry $wcomm.ad$n -width 18 -relief sunken
+	entry $wcomm.us$n -width 22 -relief sunken
 	if {[info exists argsArr(-jidvariable)]} {
 	    $wcomm.us$n configure -textvariable $argsArr(-jidvariable)
 	}
@@ -3661,11 +3659,9 @@ proc ::UI::BuildCommEntry {wtop ipNum args} {
 	# Update "electric plug".
 	after 400 [list $wcomm.icon configure -image $icons(contact_on)]
     } elseif {[string equal $thisType "symmetric"]} {
-	entry $wcomm.ad$n -width 24  \
-	  -relief sunken -bg $bg
+	entry $wcomm.ad$n -width 24 -relief sunken
 	entry $wcomm.us$n -width 16   \
-	  -textvariable ipNumTo(user,$ipNum) -relief sunken  \
-	  -bg $bg
+	  -textvariable ipNumTo(user,$ipNum) -relief sunken
 	checkbutton $wcomm.to$n -variable ${ns}::commTo($wtop,$ipNum)   \
 	  -highlightthickness 0 -command [list ::UI::CheckCommTo $wtop $ipNum]
 	checkbutton $wcomm.from$n -variable ${ns}::commFrom($wtop,$ipNum)  \
@@ -3674,21 +3670,17 @@ proc ::UI::BuildCommEntry {wtop ipNum args} {
 	  $wcomm.from$n -padx 4 -pady 0
 	$wcomm.us$n configure -state disabled
     } elseif {[string equal $thisType "client"]} {
-	entry $wcomm.ad$n -width 24   \
-	  -relief sunken -bg $bg
+	entry $wcomm.ad$n -width 24 -relief sunken
 	entry $wcomm.us$n -width 16    \
-	  -textvariable ipNumTo(user,$ipNum) -relief sunken  \
-	  -bg $bg
+	  -textvariable ipNumTo(user,$ipNum) -relief sunken
 	checkbutton $wcomm.to$n -variable ${ns}::commTo($wtop,$ipNum)   \
 	  -highlightthickness 0 -command [list ::UI::CheckCommTo $wtop $ipNum]
 	grid $wcomm.ad$n $wcomm.us$n $wcomm.to$n -padx 4 -pady 0
 	$wcomm.us$n configure -state disabled
     } elseif {[string equal $thisType "server"]} {
-	entry $wcomm.ad$n -width 24   \
-	  -relief sunken -bg $bg
+	entry $wcomm.ad$n -width 24 -relief sunken
 	entry $wcomm.us$n -width 16    \
-	  -textvariable ipNumTo(user,$ipNum) -relief sunken  \
-	  -bg $bg
+	  -textvariable ipNumTo(user,$ipNum) -relief sunken
 	checkbutton $wcomm.from$n -variable ${ns}::commFrom($wtop,$ipNum)  \
 	  -highlightthickness 0 -state disabled
 	grid $wcomm.ad$n $wcomm.us$n $wcomm.from$n -padx 4 -pady 0
@@ -4489,6 +4481,21 @@ proc ::UI::CreateBrokenImage {wtop width height} {
 	    $name copy $icons(brokenImage) -to 0 0 $width $height  \
 	      -zoom $zoomx $zoomy -compositingrule overlay
 	    lappend tmpImages $name
+	}
+    }
+    return $name
+}
+
+
+
+proc ::UI::GetThemeImage {name} {
+    global  this
+        
+    foreach dir $this(imagePathList) {
+	set f [file join $dir ${name}.gif]
+	if {[file exists $f]} {
+	    image create photo $name -file $f
+	    break
 	}
     }
     return $name

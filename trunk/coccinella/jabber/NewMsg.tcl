@@ -5,26 +5,13 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.19 2003-12-13 17:54:41 matben Exp $
+# $Id: NewMsg.tcl,v 1.20 2003-12-15 15:39:09 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
 
 
 namespace eval ::Jabber::NewMsg:: {
-
-    # Use option database for customization. Only a first test...
-    set fontS [option get . fontSmall {}]
-
-    option add *NewMsg*Tablelist.background             white        widgetDefault
-    option add *NewMsg*Tablelist.labelBackground        white        widgetDefault
-    option add *NewMsg*Tablelist.labelFont              $fontS       widgetDefault
-    option add *NewMsg*Tablelist.labelRelief            raised       widgetDefault
-    option add *NewMsg*Tablelist.stripeBackground       white        widgetDefault
-    option add *NewMsg*Tablelist.stripeForeground       white        widgetDefault
-
-    option add *NewMsg*Text.background                  white        widgetDefault
-    option add *NewMsg*Text.foreground                  black        widgetDefault
 
     variable locals
     

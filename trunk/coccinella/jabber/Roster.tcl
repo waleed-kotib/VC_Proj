@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.26 2003-12-13 17:54:41 matben Exp $
+# $Id: Roster.tcl,v 1.27 2003-12-15 15:39:09 matben Exp $
 
 package provide Roster 1.0
 
@@ -206,7 +206,7 @@ proc ::Jabber::Roster::Build {w} {
     if {$jprefs(rost,useBgImage)} {
 	lappend opts -backgroundimage $jprefs(rost,bgImage)
     }
-    set wtree [eval {::tree::tree $wtree -width 180 -height 300 -silent 1  \
+    set wtree [eval {::tree::tree $wtree -width 180 -height 100 -silent 1  \
       -scrollwidth 400  \
       -xscrollcommand [list $wxsc set]       \
       -yscrollcommand [list $wysc set]       \
