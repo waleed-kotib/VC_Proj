@@ -25,7 +25,7 @@
 # 
 # Copyright (C) 2002-2004 Mats Bengtsson
 # 
-# $Id: tree.tcl,v 1.29 2004-06-19 12:56:35 matben Exp $
+# $Id: tree.tcl,v 1.30 2004-06-20 10:47:02 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -1898,7 +1898,7 @@ proc ::tree::DrawSelection {w} {
     set bbox [$can bbox $state($uid:tag)]
     if {[llength $bbox] == 4} {
 	set bbox [list \
-	  [expr [lindex $bbox 0] - 2] $state($uid:y)  \
+	  [expr [lindex $bbox 0] - 2] [expr $state($uid:y) + 1]  \
 	  [expr [lindex $bbox 2] + 2] [expr $state($uid:y) + $priv(yline)]]
 	
 	set id [eval {$can create rectangle} $bbox {-fill $options(-selectbackground) \
