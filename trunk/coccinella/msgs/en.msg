@@ -655,7 +655,12 @@ code %s because this username is already in use by another user.\
 If this user is you, try to login instead.}
 	::msgcat::mcset en jamessloginerr	{The login failed with the error\
 code %s and message: %s}
-
+::msgcat::mcset en jamessaddforeign	        {Adding a user from a non Jabber\
+IM system requires that you already have an account on this system, and that\
+you have used this account to register with the corresponding server transport\
+component %s. Do you wish to do that now?}
+    
+    
 
 }
 
@@ -799,7 +804,8 @@ optional, and for your personal use only.}
 	::msgcat::mcset en jarostadd	{Add a jabber user to my roster.\
 Users are normally added with subscriptions, but may be added without any\
 subscription. Nick name and group may be set or changed at any time.\
-Adding a user of a foreign IM system requires that you are registered with\
+To add a user from a foreign IM system you must have an account already\
+on that system, and that you use it when registering with\
 the Jabber servers transport or gateway.}
 	::msgcat::mcset en jarostset	{Set nick name and group of user "%s"\
 to what you want. They may be set or changed at any time later.}

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.25 2003-11-08 08:54:44 matben Exp $
+# $Id: UI.tcl,v 1.26 2003-11-09 15:07:32 matben Exp $
 
 # LabeledFrame --
 #
@@ -63,6 +63,47 @@ proc LabeledFrame3 {w txt args} {
     $w.pad configure -height [expr $h-4]
     return $w.cont
 }
+
+# MessageText --
+#
+#       Used instead of 'message' widget to handle -fill x properly.
+#       
+# Arguments:
+#       w
+#       args
+#       
+# Results:
+#       w
+
+proc MessageText {w args} {
+    global  prefs
+    
+    puts "w=$w"
+    
+    array set argsArr {-text ""}
+    array set argsArr $args
+    array set argsArr [list -borderwidth 0 -bd 0 -wrap word \
+      -bg $prefs(bgColGeneral) -width 20]
+    set theText $argsArr(-text)
+    unset argsArr(-text)
+    catch {unset argsArr(-aspect)}
+    eval {text $w} [array get argsArr]
+    $w insert 1.0 $theText
+    
+    # Figure out number of lines.
+    #set endInd [$w index end-1char]
+    foreach {x y w h} [$w bbox end-1char] break
+    #set dlineinfo [$w dlineinfo end-1char]
+    array set fontMetrics [font metrics [$w cget -font]]
+    set linespace $fontMetrics(-linespace)
+    #set base [lindex $dlineinfo 3]
+    #set height [expr ($y + $h)/$fontMetrics(-linespace)]
+    #puts "y=$y, h=$h, linespace=$fontMetrics(-linespace)"
+    set height 5
+    $w configure -height $height
+    return $w
+}
+
 
 namespace eval ::UI:: {
 
@@ -897,7 +938,7 @@ proc ::UI::BuildWhiteboard {wtop args} {
     set wapp(tool)      ${wtop}fmain.frleft.frbt
     set wapp(comm)      ${wtop}fcomm.ent
     set wapp(statmess)  ${wtop}fcomm.stat.lbl
-    set wapp(tray)     ${wtop}frtop.on.fr
+    set wapp(tray)      ${wtop}frtop.on.fr
     set wapp(servCan)   $wapp(can)
     set wapp(topchilds) [list ${wtop}menu ${wtop}frtop ${wtop}fmain ${wtop}fcomm]
     
@@ -2346,6 +2387,7 @@ proc ::UI::BuildShortcutButtonPad {wtop} {
 
 proc ::UI::DisableShortcutButtonPad {wtop} {
     variable btShortDefs
+    upvar ::${wtop}::wapp wapp
 
     set wtray $wapp(tray)
     foreach {name cmd} $btShortDefs(this) {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.19 2003-11-09 11:47:03 matben Exp $
+# $Id: Roster.tcl,v 1.20 2003-11-09 15:07:32 matben Exp $
 
 package provide Roster 1.0
 
@@ -466,7 +466,7 @@ proc ::Jabber::Roster::ExitRoster { } {
 #       Adds a jid item to the tree.
 #
 # Arguments:
-#       jid         2-tier jid with no /resource part, usually, not always!
+#       jid         2-tier jid with no /resource part usually, not icq/reg.
 #       args        list of '-key value' pairs where '-key' can be
 #                   -name
 #                   -groups   Note, PLURAL!
@@ -510,7 +510,8 @@ proc ::Jabber::Roster::SetItem {jid args} {
     
 	# We get a sublist for each resource. IMPORTANT!
 	# Add all resources for this jid?
-	set presenceList [$jstate(roster) getpresence $jid]
+	jlib::splitjid $jid jid2 res
+	set presenceList [$jstate(roster) getpresence $jid2]
 	::Jabber::Debug 2 "      presenceList=$presenceList"
 	
 	foreach pres $presenceList {
@@ -999,7 +1000,7 @@ proc ::Jabber::Roster::NewOrEditDlg {which args} {
     } elseif {[string equal $which "edit"]} {
 	set msg [::msgcat::mc jarostset $jid]
     }
-    message $w.frall.msg -width 260 -font $sysFont(s) -text $msg
+    message $w.frall.msg -width 300 -font $sysFont(s) -text $msg
     pack $w.frall.msg -side top -fill both -expand 1
 
     # Entries etc.
@@ -1014,13 +1015,13 @@ proc ::Jabber::Roster::NewOrEditDlg {which args} {
     label $wtrptpop -bd 2 -relief raised -image [::UI::GetIcon popupbt]
     pack $frjid.ljid $wtrptpop -side left
     
-    entry $wjid -width 24 -textvariable $token\(jid)
+    entry $wjid -width 20 -textvariable $token\(jid)
     label $frmid.lnick -text "[::msgcat::mc {Nick name}]:" -font $sysFont(sb) \
       -anchor e
-    entry $frmid.enick -width 24 -textvariable $token\(name)
+    entry $frmid.enick -width 20 -textvariable $token\(name)
     label $frmid.lgroups -text "[::msgcat::mc Group]:" -font $sysFont(sb) -anchor e
     
-    ::combobox::combobox $frmid.egroups -font $sysFont(s) -width 18  \
+    ::combobox::combobox $frmid.egroups -font $sysFont(s) -width 12  \
       -textvariable $token\(usersGroup)
     eval {$frmid.egroups list insert end} "None $allGroups"
         
@@ -1317,13 +1318,13 @@ proc ::Jabber::Roster::EditSet {token} {
 		if {$transport == "" } {
 		    
 		    # Seems we are not registered.
-		    set ans [tk_messageBox -type yesno -icon error -message \
-		      "Adding a user from a non Jabber IM system requires that\
-		      you are registered with the server transport component\
-		      $host. Do you wish to do that now?"]
+		    set ans [tk_messageBox -type yesno -icon error  \
+		      -message [::msgcat::mc jamessaddforeign $host]]
 		    if {$ans == "yes"} {
 			set didRegister [::Jabber::GenRegister::BuildRegister  \
 			  .jtrptreg -server $host -autoget 1]
+			return
+		    } else {
 			return
 		    }
 		}
@@ -1486,7 +1487,6 @@ proc ::Jabber::Roster::GetPresenceIcon {jid presence args} {
       [string equal $argsArr(-subscription) "none"]} {
 	set key "subnone"
     }
-    #puts "key=$key"
     
     # Foreign IM systems.
     if {$jprefs(haveIMsysIcons)} {
@@ -1497,7 +1497,9 @@ proc ::Jabber::Roster::GetPresenceIcon {jid presence args} {
 	    if {[string length $typesubtype] > 0} {
 		if {[regexp {[^/]+/([^/]+)} $typesubtype match subtype]} {
 		    if {[regexp {(aim|icq|msn|yahoo)} $subtype match]} {
-			append key ",$subtype"
+			if {[info exists presenceIcon($key,$subtype)]} {
+			    append key ",$subtype"
+			}
 		    }
 		}
 	    } else {

@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: PutFileIface.tcl,v 1.10 2003-10-12 13:12:55 matben Exp $
+# $Id: PutFileIface.tcl,v 1.11 2003-11-09 15:07:32 matben Exp $
 
 package require putfile
 package require uriencode
@@ -196,7 +196,7 @@ proc ::PutFileIface::PutCommand {puttoken token what msg} {
 	    
 	    # The 'msg' is typically a low level error msg.
 	    switch -- $ncode {
-		320 - 323 {
+		320 - 321 - 323 {
 		    ::UI::SetStatusMessage $wtop $msg
 		} 
 		default {

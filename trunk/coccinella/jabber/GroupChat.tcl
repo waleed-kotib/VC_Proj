@@ -5,12 +5,35 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.15 2003-11-08 08:54:44 matben Exp $
+# $Id: GroupChat.tcl,v 1.16 2003-11-09 15:07:32 matben Exp $
 
 package provide GroupChat 1.0
 
 # Provides dialog for old-style gc-1.0 groupchat but the rest should work for 
 # both groupchat and conference protocols.
+
+# Use option database for customization. Not used yet...
+option add *GroupChat.textBackground       white                 widgetDefault
+option add *GroupChat.textFont             $sysFont(s)           widgetDefault
+option add *GroupChat.textSendBackground   white                 widgetDefault
+option add *GroupChat.textSendFont         $sysFont(s)           widgetDefault
+option add *GroupChat.meForeground         red                   widgetDefault
+option add *GroupChat.meBackground         #cecece               widgetDefault
+option add *GroupChat.meTextForeground     black                 widgetDefault
+option add *GroupChat.meTextBackground     #cecece               widgetDefault
+option add *GroupChat.meFont               $sysFont(sb)          widgetDefault                                     
+option add *GroupChat.themForeground       blue                  widgetDefault
+option add *GroupChat.themBackground       white                 widgetDefault
+option add *GroupChat.themTextForeground   black                 widgetDefault
+option add *GroupChat.themTextBackground   white                 widgetDefault
+option add *GroupChat.themFont             $sysFont(sb)          widgetDefault
+option add *GroupChat.usersForeground      blue                  widgetDefault
+option add *GroupChat.usersBackground      white                 widgetDefault
+option add *GroupChat.usersTextForeground  black                 widgetDefault
+option add *GroupChat.usersTextBackground  white                 widgetDefault
+option add *GroupChat.usersFont            $sysFont(sb)          widgetDefault
+option add *GroupChat.clockFormat         "%H:%M"                widgetDefault
+
 
 namespace eval ::Jabber::GroupChat:: {
       

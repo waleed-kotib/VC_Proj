@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.14 2003-11-08 08:54:44 matben Exp $
+# $Id: roster.tcl,v 1.15 2003-11-09 15:07:32 matben Exp $
 # 
 # Note that every jid in the rosterArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -575,6 +575,7 @@ proc roster::getpresence {rostName jid args} {
     upvar [namespace current]::${rostName}::options options
     
     Debug 2 "roster::getpresence rostName=$rostName, jid=$jid, args='$args'"
+    
     array set argsArr $args
     set haveRes 0
     if {[info exists argsArr(-resource)]} {
