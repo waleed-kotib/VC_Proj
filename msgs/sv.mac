@@ -878,6 +878,7 @@ de inte ska användas. Programmet måste startas om för att detta ska vara\
 verksamt.}
 ::msgcat::mcset sv prefchactret  {Använd alltid aktiv <Return> i chatt dialog}
 ::msgcat::mcset sv prefprofname  {Skriv in önskat namn på användarprofilen}
+::msgcat::mcset sv prefstabui    {Använd användargränssnitt med flikar}
 
 
 

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.42 2004-06-06 15:42:49 matben Exp $
+# $Id: JUI.tcl,v 1.43 2004-06-16 14:17:30 matben Exp $
 
 package provide JUI 1.0
 
@@ -581,6 +581,8 @@ proc ::Jabber::UI::RegisterPopupEntry {which menuSpec} {
 
 proc ::Jabber::UI::RegisterMenuEntry {wpath name menuSpec} {
     variable menuDefs
+    
+    # Keeps track of all registered menu entries.
     variable rostMenuSpec
     
     # Add these entries in a section above the bottom section.
@@ -590,6 +592,8 @@ proc ::Jabber::UI::RegisterMenuEntry {wpath name menuSpec} {
 	jabber {
 	    set ind [lindex [lsearch -all $menuDefs(rost,jabber) "separator"] end]
 	    if {![info exists rostMenuSpec(jabber)]} {
+
+		# Add separator if this is the first addon entry.
 		set menuDefs(rost,jabber) [linsert $menuDefs(rost,jabber)  \
 		  $ind {separator}]
 		incr ind

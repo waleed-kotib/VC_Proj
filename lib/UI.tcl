@@ -7,10 +7,10 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.59 2004-06-11 07:44:44 matben Exp $
+# $Id: UI.tcl,v 1.60 2004-06-16 14:17:32 matben Exp $
 
 package require entrycomp
-
+package require alertbox
 
 namespace eval ::UI:: {
 
@@ -661,6 +661,40 @@ proc ::UI::MenuDisableAllBut {mw normalList} {
     foreach name $normalList {
 	::UI::MenuMethod $mw entryconfigure $name -state normal
     }
+}
+
+# Wrapper for alertbox package to enable png icons.
+# A bit hacky!
+
+namespace eval ::UI:: {
+    
+    variable alertInit 0
+    variable alertArgs ""
+    
+    #option add *alertImage  alert  widgetDefault
+    option add *alertImage  light  widgetDefault
+}
+
+proc ::UI::AlertBoxInit { } {
+    variable alertInit 
+    variable alertArgs
+    
+    set havepng [::Plugins::HaveImporterForMime image/png]
+    if {$havepng} {
+	set alertArgs [list -image  \
+	  [::Theme::GetImage [option get . alertImage {}] -suffixes .png]]
+    }
+    set alertInit 1
+}
+
+proc ::UI::AlertBox {msg args} {
+    variable alertInit 
+    variable alertArgs
+
+    if {!$alertInit} {
+	::UI::AlertBoxInit
+    }
+    eval {::alertbox::alertbox $msg} $alertArgs $args
 }
 
 #--- The public interfaces -----------------------------------------------------

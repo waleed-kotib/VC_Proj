@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.64 2004-06-11 07:44:44 matben Exp $
+# $Id: Roster.tcl,v 1.65 2004-06-16 14:17:31 matben Exp $
 
 package provide Roster 1.0
 
@@ -443,10 +443,33 @@ proc ::Jabber::Roster::DoubleClickCmd {w v} {
     }    
 }
     
+# Jabber::Roster::RegisterPopupEntry --
+# 
+#       Components or plugins can add their own menu entries here.
+
 proc ::Jabber::Roster::RegisterPopupEntry {menuSpec} {
     variable popMenuDefs
     
-    set popMenuDefs(roster,def) [concat $popMenuDefs(roster,def) $menuSpec]
+    # Keeps track of all registered menu entries.
+    variable regPopMenuSpec
+    
+    # Index of last separator.
+    set ind [lindex [lsearch -all $popMenuDefs(roster,def) "separator"] end]
+    if {![info exists regPopMenuSpec]} {
+	
+	# Add separator if this is the first addon entry.
+	incr ind 3
+	set popMenuDefs(roster,def) [linsert $popMenuDefs(roster,def)  \
+	  $ind {separator} {} {}]
+	set regPopMenuSpec {}
+	set ind [lindex [lsearch -all $popMenuDefs(roster,def) "separator"] end]
+    }
+    
+    # Add new entry just before the last separator
+    set v $popMenuDefs(roster,def)
+    set popMenuDefs(roster,def) [concat [lrange $v 0 [expr $ind-1]] $menuSpec \
+      [lrange $v $ind end]]
+    set regPopMenuSpec [concat $regPopMenuSpec $menuSpec]
 }
 
 # Jabber::Roster::Popup --
@@ -672,7 +695,22 @@ proc ::Jabber::Roster::PushProc {rostName what {jid {}} args} {
 	    if {![$jstate(jlib) service isroom $jid]} {
 		eval {::Jabber::Roster::Presence $jid3 $type} $args
 	    }
+	    
+	    # General type presence hooks.
 	    eval {::hooks::run presenceHook $jid $type} $args
+
+	    # Specific type presence hooks.
+	    eval {::hooks::run presence[string totitle $type]Hook $jid $type} $args
+	    
+	    # Make an additional call for delayed presence.
+	    # This only happend when type='available'.
+	    if {[info exists attrArr(-x)]} {
+		set delayElem [wrapper::getnamespacefromchilds  \
+		  $attrArr(-x) x "jabber:x:delay"]
+		if {[llength $delayElem]} {
+		    eval {::hooks::run presenceDelayHook $jid $type} $args
+		}
+	    }
 	}
 	remove {
 	    
@@ -1645,7 +1683,7 @@ proc ::Jabber::Roster::EditSet {token} {
 #
 # Arguments:
 #       jid
-#       type        "ok" or "error"
+#       type        "result" or "error"
 #       args
 
 proc ::Jabber::Roster::EditSetCommand {jid type args} {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.30 2004-06-06 07:02:21 matben Exp $
+# $Id: OOB.tcl,v 1.31 2004-06-16 14:17:31 matben Exp $
 
 package provide OOB 1.0
 
@@ -218,7 +218,7 @@ proc ::Jabber::OOB::DoSend { } {
 #
 # Arguments:
 #       jlibName:   the instance of this jlib.
-#       type:       "error" or "ok".
+#       type:       "error" or "result".
 #       thequery:   if type="error", this is a list {errcode errmsg},
 #                   else it is the query element as a xml list structure.
 

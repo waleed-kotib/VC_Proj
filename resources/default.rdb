@@ -12,6 +12,7 @@
 *fontMedium:                         Helvetica 10
 *fontLarge:                          Helvetica 18
 *backgroundGeneral:                  #dedede
+*backgroundLightContrast:            #bcbcbc
 
 ! general settings for all widgets
 !

@@ -14,6 +14,7 @@ Coccinella-0.95.0 (04????): 	Short summary --
 	- improved notebook interface for smoother refresh
 	- added the possibility to use ssl when registering new account
 	- now automatically login after registration
+	- buddy pouncing as a component
 
 
 Coccinella-0.94.11 (040601): 	Short summary --

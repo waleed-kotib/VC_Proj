@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.7 2004-06-09 14:26:18 matben Exp $
+# $Id: JPrefs.tcl,v 1.8 2004-06-16 14:17:30 matben Exp $
 
 package provide JPrefs 1.0
 
@@ -268,7 +268,7 @@ proc ::Jabber::JPrefs::BuildAppearencePage {page} {
     set pbl [frame $labfrpbl.frin]
     pack $pbl -padx 10 -pady 6 -side left
      
-    checkbutton $pbl.tabbed -text " Use tabbed notebook interface"  \
+    checkbutton $pbl.tabbed -text " [::msgcat::mc prefstabui]"  \
       -variable [namespace current]::tmpJPrefs(chat,tabbedui)
 
     # Roster bg image.
