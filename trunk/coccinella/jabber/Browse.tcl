@@ -5,13 +5,15 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.16 2003-12-29 09:02:29 matben Exp $
+# $Id: Browse.tcl,v 1.17 2003-12-29 15:44:19 matben Exp $
 
 package require chasearrows
 
 package provide Browse 1.0
 
 namespace eval ::Jabber::Browse:: {
+
+    hooks::add loginHook ::Jabber::Browse::LoginCmd
 
     # Use option database for customization. 
     # Use priority 30 just to override the widgetDefault values!
@@ -40,6 +42,18 @@ namespace eval ::Jabber::Browse:: {
     variable treeuid 0
 }
 
+proc ::Jabber::Browse::LoginCmd { } {
+    upvar ::Jabber::jprefs jprefs
+    
+    ::Jabber::Browse::SetUIWhen "connect"
+
+    # Get the services for all our servers on the list. Depends on our settings:
+    # If browsing fails must use "agents" as a fallback.
+    if {[string equal $jprefs(agentsOrBrowse) "browse"]} {
+	::Jabber::Browse::GetAll
+    }
+}
+
 # Jabber::Browse::GetAll --
 #
 #       Queries (browses) the services available for all the servers
@@ -54,7 +68,6 @@ proc ::Jabber::Browse::GetAll { } {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jserver jserver
     
-    #set allServers [lsort -unique [concat $jserver(this) $jprefs(browseServers)]]
     set allServers $jserver(this)
     foreach server $allServers {
 	::Jabber::Browse::Get $server

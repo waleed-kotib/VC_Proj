@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.5 2003-12-22 15:04:58 matben Exp $
+# $Id: Whiteboard.tcl,v 1.6 2003-12-29 15:44:19 matben Exp $
 
 package require entrycomp
 package require CanvasDraw
@@ -79,6 +79,7 @@ namespace eval ::WB:: {
     # Add all event hooks.
     hooks::add quitAppHook [list ::UI::SaveWinPrefixGeom $wDlgs(wb) whiteboard]
     hooks::add quitAppHook ::WB::SaveAnyState
+    hooks::add loginHook   ::WB::LoginCmd
     
     # Keeps various geometry info.
     variable dims
@@ -632,6 +633,29 @@ proc ::WB::InitMenuDefs { } {
     }    
 }
 
+# WB::LoginCmd --
+# 
+#       The login hook command.
+
+proc ::WB::LoginCmd { } {
+    global  prefs
+        
+    # Set communication entry in UI.
+    set ipNum [::Jabber::GetServerIpNum]
+    ::WB::ConfigureAllJabberEntries $ipNum -netstate "connect"	
+    
+    set server [::Jabber::GetServerJid]
+    
+    # Multiinstance whiteboard UI stuff.
+    foreach w [::WB::GetAllWhiteboards] {
+	set wtop [::UI::GetToplevelNS $w]
+	set ::Jabber::jstate($wtop,tojid) "@${server}"
+
+	# Make menus consistent.
+	::UI::FixMenusWhen $wtop "connect"
+    }
+}
+
 # WB::NewWhiteboard --
 #
 #       Makes a unique whiteboard.
@@ -820,9 +844,7 @@ proc ::WB::BuildWhiteboard {wtop args} {
     # Do we want a persistant jabber entry?
     if {[string equal $prefs(protocol) "jabber"]} {
 	::Jabber::InitWhiteboard $wtop
-	if {$prefs(jabberCommFrame)} {
-	    eval {::Jabber::BuildJabberEntry $wtop} $args
-	}
+	eval {::Jabber::BuildJabberEntry $wtop} $args
     }
     
     # Make the tool button pad.

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.30 2003-12-29 09:02:29 matben Exp $
+# $Id: MailBox.tcl,v 1.31 2003-12-29 15:44:19 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -161,7 +161,7 @@ proc ::Jabber::MailBox::Build {args} {
     # wm protocol $w WM_DELETE_WINDOW [list [namespace current]::CloseDlg $w]
 
     # On non macs we need to explicitly bind certain commands.
-    if {![string match "mac*" $this(platform)]} {
+    if {![string equal $this(platform) "macintosh"]} {
 	bind $w <$osprefs(mod)-Key-w> {::Jabber::MailBox::Show -visible 0}
     }
     

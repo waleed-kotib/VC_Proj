@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.15 2003-12-29 09:02:29 matben Exp $
+# $Id: JUI.tcl,v 1.16 2003-12-29 15:44:19 matben Exp $
 
 package provide JUI 1.0
 
@@ -178,6 +178,7 @@ proc ::Jabber::UI::Build {w} {
 
     # Add all event hooks.
     hooks::add quitAppHook [list ::UI::SaveWinGeom $w]
+    hooks::add loginHook   ::Jabber::UI::LoginCmd
 
     # Build minimal menu for Jabber stuff.
     set wmenu ${wtop}menu
@@ -302,6 +303,17 @@ proc ::Jabber::UI::Build {w} {
     return $w
 }
 
+# Jabber::UI::LoginCmd --
+# 
+#       The login hook command.
+
+proc ::Jabber::UI::LoginCmd { } {
+
+    # Update UI in Roster window.
+    set server [::Jabber::GetServerJid]
+    ::Jabber::UI::SetStatusMessage [::msgcat::mc jaauthok $server]
+    ::Jabber::UI::FixUIWhen "connectfin"
+}
 
 proc ::Jabber::UI::GetRosterWmenu { } {
     variable jwapp

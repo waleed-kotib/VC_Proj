@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.16 2003-12-23 14:41:01 matben Exp $
+# $Id: Login.tcl,v 1.17 2003-12-29 15:44:19 matben Exp $
 
 package provide Login 1.0
 
@@ -510,33 +510,8 @@ proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
     set jstate(mejidres) "${username}@${server}/${resource}"
     set jserver(profile,selected) $profile
     set jserver(this) $server
-    
-    # Set communication entry in UI.
-    if {$prefs(jabberCommFrame)} {
-	::WB::ConfigureAllJabberEntries $ipNum -netstate "connect"	
-    } else {
-	::UI::SetCommEntry $wDlgs(mainwb) $ipNum 1 -1 -jidvariable ::Jabber::jstate(.,tojid)  \
-	  -dosendvariable ::Jabber::jstate(.,doSend)
-	# We skip this.
-	#  -validatecommand ::Jabber::VerifyJID
-    }
-    set ::Jabber::Roster::servtxt $server
-    ::Jabber::Roster::SetUIWhen "connect"
-    ::Jabber::Browse::SetUIWhen "connect"
 
-    # Multiinstance whiteboard UI stuff.
-    foreach w [::WB::GetAllWhiteboards] {
-	set wtop [::UI::GetToplevelNS $w]
-	set ::Jabber::jstate($wtop,tojid) "@${server}"
-
-	# Make menus consistent.
-	::UI::FixMenusWhen $wtop "connect"
-    }
     ::Network::RegisterIP $ipNum "to"
-    
-    # Update UI in Roster window.
-    ::Jabber::UI::SetStatusMessage [::msgcat::mc jaauthok $server]
-    ::Jabber::UI::FixUIWhen "connectfin"
     
     # Login was succesful. Get my roster, and set presence.
     $jstate(jlib) roster_get ::Jabber::Roster::PushProc
@@ -550,15 +525,7 @@ proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
     
     # Store our own ip number in a public storage at the server.
     ::Jabber::SetPrivateData
-    
-    # Get the services for all our servers on the list. Depends on our settings:
-    # If browsing fails must use "agents" as a fallback.
-    if {[string equal $jprefs(agentsOrBrowse) "browse"]} {
-	::Jabber::Browse::GetAll
-    } elseif {[string equal $jprefs(agentsOrBrowse) "agents"]} {
-	::Jabber::Agents::GetAll
-    }
-    
+        
     # Run all login hooks.
     hooks::run loginHook
 }

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.27 2003-12-29 14:14:41 matben Exp $
+# $Id: Chat.tcl,v 1.28 2003-12-29 15:44:19 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -411,7 +411,7 @@ proc ::Jabber::Chat::Build {threadID args} {
       [list [namespace current]::Close $token]
 
     # On non macs we need to explicitly bind certain commands.
-    if {![string match "mac*" $this(platform)]} {
+    if {![string equal $this(platform) "macintosh"]} {
 	bind $w <$osprefs(mod)-Key-w>  \
 	  [list ::Jabber::Chat::Close $token]
     }
@@ -801,6 +801,8 @@ proc ::Jabber::Chat::Close {token} {
     
     variable $token
     upvar 0 $token state    
+    
+    ::Jabber::Debug 2 "::Jabber::Chat::Close: token=$token"
     
     #set ans [tk_messageBox -icon info -parent $w -type yesno \
     #  -message [FormatTextForMessageBox [::msgcat::mc jamesschatclose]]]

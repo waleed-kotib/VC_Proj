@@ -8,6 +8,9 @@ Coccinella-0.94.7 (04????): 	Short summary --
 
 	- separating actual whiteboard code from rest.
 	- uses resource database for everything, also images
+	- chat dialog rewritten
+	- using a hooks mechanism to handle callbacks in a more
+	  modular way
 
 Coccinella-0.94.6 (03????): 	Short summary --
 
