@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-#       $Id: SlideShow.tcl,v 1.1 2004-07-25 15:05:32 matben Exp $
+#       $Id: SlideShow.tcl,v 1.2 2004-07-26 08:37:15 matben Exp $
 
 namespace eval ::SlideShow:: {
     
@@ -31,7 +31,6 @@ proc ::SlideShow::Load { } {
     ::hooks::add initHook                       ::SlideShow::InitHook
     ::hooks::add whiteboardBuildButtonTrayHook  ::SlideShow::BuildButtonsHook
     ::hooks::add whiteboardCloseHook            ::SlideShow::CloseWhiteboard
-    ::hooks::add quitAppHook                    ::SlideShow::QuitHook
 
     ::UI::Public::RegisterMenuEntry file $menuspec
     
@@ -83,10 +82,9 @@ proc ::SlideShow::Load { } {
     L2Shw4cPG9bLn0+fUCAAOw==
     }]
     
-    set priv(btdefs) {
-	previous     {::SlideShow::Previous $wtop}
-	next         {::SlideShow::Next $wtop}
-    }
+    set priv(btdefs) [list \
+      [list previous $priv(imprevious) $priv(imprevious)  {::SlideShow::Previous $wtop}] \
+      [list next     $priv(imnext)     $priv(imnext)      {::SlideShow::Next $wtop}] ]
 }
 
 proc ::SlideShow::InitHook { } {
@@ -104,43 +102,49 @@ proc ::SlideShow::InitHook { } {
 	set priv(suffixes) [concat $priv(suffixes)  \
 	  [::Types::GetSuffixListForMime $mime]]
     }
+    
+    ::WB::RegisterShortcutButtons $priv(btdefs)
 }
 
 proc ::SlideShow::InitPrefsHook { } {
     global  prefs
     
-    set prefs(slideShowDir) ""
+    set prefs(slideShow,dir) ""
+    set prefs(slideShow,buttons) 1
     
     ::PreferencesUtils::Add [list  \
-      [list prefs(slideShowDir)    prefs_slideShowDir    $prefs(slideShowDir)]]
+      [list prefs(slideShow,buttons) prefs_slideShow_buttons $prefs(slideShow,buttons)] \
+      [list prefs(slideShow,dir)     prefs_slideShow_dir     $prefs(slideShow,dir)]]
 }
 
 proc ::SlideShow::BuildButtonsHook {wtray} {
+    global  prefs
     variable priv
     
     set wtop [::UI::GetToplevelNS $wtray]
-    foreach {name cmd} $priv(btdefs) {
-	set cmd [subst -nocommands -nobackslashes $cmd]
-	set txt [string totitle $name]
-	set icon $priv(im${name})
-	$wtray newbutton $name $txt $icon $icon $cmd
+    set priv($wtop,wtray) $wtray
+    if {$prefs(slideShow,buttons)} {
+	foreach btdef $priv(btdefs) {
+	    $wtray buttonconfigure [lindex $btdef 0] -state disabled
+	}
     }
-}
-
-proc ::SlideShow::QuitHook { } {
-    
-    
 }
 
 proc ::SlideShow::PickFolder {wtop} {
     global  prefs
     variable priv
     
-    set ans [tk_chooseDirectory -mustexist 1 -title "Slide Show Folder"]
+    set opts {}
+    if {[file isdirectory $prefs(slideShow,dir)]} {
+	lappend opts -initialdir $prefs(slideShow,dir)
+    }
+    set ans [eval {
+	tk_chooseDirectory -mustexist 1 -title "Slide Show Folder"} $opts]
     if {$ans != ""} {
 	
 	# Check first if any useful content?
 	set priv($wtop,dir) $ans
+	set prefs(slideShow,dir) $ans
 	set msshow [::UI::GetMenu $wtop "Slide Show" Next]
 	::UI::MenuMethod $msshow entryconfigure First    -state normal
 	::UI::MenuMethod $msshow entryconfigure Last     -state normal
@@ -163,7 +167,6 @@ proc ::SlideShow::LoadFolder {wtop} {
     }
     set pages [lsort -unique -dictionary $pages]
     set priv(pages) $pages
-    parray priv
     
     # Pick first one.
     OpenPage $wtop [lindex $pages 0]
@@ -246,13 +249,20 @@ proc ::SlideShow::Last {wtop} {
 proc ::SlideShow::SetMenuState {wtop} {
     variable priv
     
+    set wtray $priv($wtop,wtray)
     set msshow [::UI::GetMenu $wtop "Slide Show" Next]
-    ::UI::MenuMethod $msshow entryconfigure Previous -state normal
-    ::UI::MenuMethod $msshow entryconfigure Next     -state normal
+    if {[llength $priv(pages)]} {
+	::UI::MenuMethod $msshow entryconfigure Previous -state normal
+	::UI::MenuMethod $msshow entryconfigure Next     -state normal
+	$wtray buttonconfigure next     -state normal
+	$wtray buttonconfigure previous -state normal
+    }
     if {[string equal $priv($wtop,current) [lindex $priv(pages) 0]]} {
 	::UI::MenuMethod $msshow entryconfigure Previous -state disabled
+	$wtray buttonconfigure previous -state disabled
     } elseif {[string equal $priv($wtop,current) [lindex $priv(pages) end]]} {
-	::UI::MenuMethod $msshow entryconfigure Next     -state disabled
+	::UI::MenuMethod $msshow entryconfigure Next -state disabled
+	$wtray buttonconfigure next -state disabled
     }
 }
 

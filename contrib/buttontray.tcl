@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  
-# $Id: buttontray.tcl,v 1.8 2004-06-06 07:02:20 matben Exp $
+# $Id: buttontray.tcl,v 1.9 2004-07-26 08:37:16 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -30,6 +30,8 @@
 # ########################### CHANGES ##########################################
 #
 #       1.0     Original version
+
+package require msgcat
 
 package provide buttontray 1.0
 
