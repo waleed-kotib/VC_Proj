@@ -1,0 +1,35 @@
+
+HOWTO: Client-Server configuration
+----------------------------------
+
+The variable prefs(protocol) controls the "mode" of the whiteboard.
+The two standard options are "jabber" and "symmetric", where symmetric
+means peer-to-peer connections where all applications are both client and 
+server.
+
+There are two special modes "client" and "server" which is like
+symmetric but where only a single connection is made from client
+to server. There is no UI for this so it can only be hardcoded or
+set from the command line. If set to any of these two modes, it
+is necessary to edit the preference file to explicitly set the
+mode back to symmetric or jabber mode.
+
+The client mode only open client sockets, and the server mode only
+has a listening (server) socket and never opens any client sockets.
+
+This is how you launch setting the correct preferences and how to
+automatically connect the client.
+
+Server side:
+
+wish Whiteboard.tcl -prefs_protocol server -prefs_thisServPort 8235
+
+Client side:
+
+wish Whiteboard.tcl -prefs_protocol client -prefs_remotePort 8235 \
+	-connect 192.168.0.2
+
+If you do it from wish do 'exec ... &'.
+You may also strip out Jabber stuff by setting prefs(stripJabber) 1
+instead of 0 in Whiteboard.tcl.
+
