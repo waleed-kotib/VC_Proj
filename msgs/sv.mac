@@ -922,4 +922,8 @@ VŠntar pŒ serversvar...}
 
 }
 
+
+::msgcat::mcset sv autoupdatenot        {Leta ej automatiskt efter uppdatering}
+
+
 # END --------------------------------------------------------------------------

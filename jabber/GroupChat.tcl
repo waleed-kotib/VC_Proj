@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.17 2003-11-12 08:20:49 matben Exp $
+# $Id: GroupChat.tcl,v 1.18 2003-11-30 11:46:46 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -793,7 +793,7 @@ proc ::Jabber::GroupChat::TraceStatus {roomJid name key op} {
     } else {
     
 	# Send our status.
-	::Jabber::SetStatus $status $roomJid
+	::Jabber::SetStatus $status -to $roomJid
 	set locals($roomJid,oldStatus) $locName
     }
 }

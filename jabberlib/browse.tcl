@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: browse.tcl,v 1.16 2003-11-12 08:18:51 matben Exp $
+# $Id: browse.tcl,v 1.17 2003-11-30 11:46:47 matben Exp $
 # 
 #  locals($jid,parent):       the parent of $jid.
 #  locals($jid,parents):      list of all parent jid's,
@@ -707,18 +707,21 @@ proc browse::setsinglejid {browseName parentJid jid xmllist {browsedjid 0}} {
 	    # There seems to be a problem here since not all conference
 	    # components list <ns>jabber:iq:conference</ns> in their browse
 	    # section.
-	    switch -- $ns {
-		"http://jabber.org/protocol/muc" {
-		    jlib::invokefrombrowser $locals(fullBrowseName) \
-		      [list registergcprotocol $jid "muc"]
-		}
-		"jabber:iq:conference" {
-		    jlib::invokefrombrowser $locals(fullBrowseName) \
-		      [list registergcprotocol $jid "conference"]
-		}
-		"gc-1.0" {
-		    jlib::invokefrombrowser $locals(fullBrowseName) \
-		      [list registergcprotocol $jid "gc-1.0"]
+	    if {[string equal $category "conference"]} {
+	    
+		switch -- $ns {
+		    "http://jabber.org/protocol/muc" {
+			jlib::invokefrombrowser $locals(fullBrowseName) \
+			  [list registergcprotocol $jid "muc"]
+		    }
+		    "jabber:iq:conference" {
+			jlib::invokefrombrowser $locals(fullBrowseName) \
+			  [list registergcprotocol $jid "conference"]
+		    }
+		    "gc-1.0" {
+			jlib::invokefrombrowser $locals(fullBrowseName) \
+			  [list registergcprotocol $jid "gc-1.0"]
+		    }
 		}
 	    }
 	} else {

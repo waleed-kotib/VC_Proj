@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson only for the new and rewritten parts.
 #
-# $Id: httpex.tcl,v 1.8 2003-10-23 06:27:59 matben Exp $
+# $Id: httpex.tcl,v 1.9 2003-11-30 11:46:46 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -1170,7 +1170,7 @@ proc httpex::CopyStart {s token} {
     Debug 3 "httpex::CopyStart"
     
     set blocksize $state(-blocksize)
-    if {$state(havecontentlength) && $state(-persistent) &&  \
+    if {$state(-persistent) && $state(havecontentlength) &&  \
       ([expr $state(currentsize) + $blocksize] >= $state(totalsize))} {
 	set blocksize [expr $state(totalsize) - $state(currentsize)]
     }
@@ -1204,8 +1204,11 @@ proc httpex::CopyDone {token count {error {}}} {
     if {[info exists state(-progress)]} {
 	eval $state(-progress) {$token $state(totalsize) $state(currentsize)}
     }
+    
+    # We shall not do this since text files have end of line translations
+    # that do not preserve the total file size.
     set done 0
-    if {$state(havecontentlength) && ($state(currentsize) >= $state(totalsize))} {
+    if {0 && $state(havecontentlength) && ($state(currentsize) >= $state(totalsize))} {
 	set done 1
     }
     
@@ -1215,7 +1218,8 @@ proc httpex::CopyDone {token count {error {}}} {
     } elseif {$done} {
 	Eof $token
     } elseif {[catch {eof $s} iseof] || $iseof} {
-	Eof $token $iseof
+	#Eof $token $iseof
+	Eof $token
     } else {
 	CopyStart $s $token
     }

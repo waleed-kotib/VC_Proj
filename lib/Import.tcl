@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Import.tcl,v 1.5 2003-11-17 15:08:27 matben Exp $
+# $Id: Import.tcl,v 1.6 2003-11-30 11:46:47 matben Exp $
 
 package require http
 package require httpex
@@ -742,8 +742,6 @@ proc ::Import::HttpGet {wtop url importPackage opts args} {
     # We store file names with cached names to avoid name clashes.
     set fileTail [::uriencode::decodefile [file tail  \
       [::Utils::GetFilePathFromUrl $url]]]
-    #set dstPath [file join $prefs(incomingPath)  \
-    #  [::uriencode::decodefile $fileTail]]
     set dstPath [::Import::NewCacheFilePath $fileTail]
     if {[catch {open $dstPath w} dst]} {
 	return $dst
@@ -1768,15 +1766,23 @@ proc ::Import::SaveImageAsFile {w id} {
 
     set imageName [$w itemcget $id -image]
     set origFile [$imageName cget -file]
-    if {[string length $origFile]} {
-	set initFile [file tail $origFile]
+    
+    # Do different things depending on if in cache or not.
+    if {[file exists $origFile]} {
+	set ext [file extension $origFile]
+	set initFile Untitled${ext}
+	set fileName [tk_getSaveFile -defaultextension $ext   \
+	  -title [::msgcat::mc {Save As}] -initialfile $initFile]
+	if {$fileName != ""} {
+	    file copy $origFile $fileName
+	}
     } else {
-	set initFile {Untitled.gif}
-    }
-    set fileName [tk_getSaveFile -defaultextension gif   \
-      -title [::msgcat::mc {Save As GIF}] -initialfile $initFile]
-    if {$fileName != ""} {
-	$imageName write $fileName -format gif
+	set initFile Untitled.gif
+	set fileName [tk_getSaveFile -defaultextension gif   \
+	  -title [::msgcat::mc {Save As GIF}] -initialfile $initFile]
+	if {$fileName != ""} {
+	    $imageName write $fileName -format gif
+	}
     }
 }
 

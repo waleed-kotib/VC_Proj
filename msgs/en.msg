@@ -891,4 +891,9 @@ Waiting for server response...}
 
 }
 
+
+::msgcat::mcset en autoupdatenot        {Do not automatically check for updates}
+
+
+
 # END --------------------------------------------------------------------------

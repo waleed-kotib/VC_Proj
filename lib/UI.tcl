@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.26 2003-11-09 15:07:32 matben Exp $
+# $Id: UI.tcl,v 1.27 2003-11-30 11:46:47 matben Exp $
 
 # LabeledFrame --
 #
@@ -78,7 +78,7 @@ proc LabeledFrame3 {w txt args} {
 proc MessageText {w args} {
     global  prefs
     
-    puts "w=$w"
+    #puts "w=$w"
     
     array set argsArr {-text ""}
     array set argsArr $args
@@ -607,9 +607,6 @@ proc ::UI::InitMenuDefs { } {
     if {$haveAppleMenu && ![::Plugins::HavePackage QuickTimeTcl]} {
 	lset menuDefs(main,apple) 1 3 disabled
     }
-    if {![::Plugins::HavePackage QuickTimeTcl]} {
-	lset menuDefs(main,file) 5 3 disabled
-    }
     if {!$prefs(haveDash)} {
 	lset menuDefs(main,prefs) 7 3 disabled
     }
@@ -837,7 +834,8 @@ proc ::UI::GetIcon {name} {
 #       Makes a unique whiteboard.
 #
 # Arguments:
-#       args    -jid
+#       args    -file fileName
+#               -jid
 #               -sendbuttonstate normal|disabled
 #               -sendcheckstate normal|disabled
 #               -serverentrystate normal|disabled
@@ -973,7 +971,7 @@ proc ::UI::BuildWhiteboard {wtop args} {
     
     # Special configuration of shortcut buttons.
     if {[info exists opts(-type)] && [string equal $opts(-type) "normal"]} {
-	$wtray buttonconfigure stop -command  \
+	$wapp(tray) buttonconfigure stop -command  \
 	  [list ::Import::HttpResetAll $wtop]
     }
 
@@ -1089,6 +1087,10 @@ proc ::UI::BuildWhiteboard {wtop args} {
     # A trick to let the window manager be finished before getting the geometry.
     # An 'update idletasks' needed anyway in 'FindWBGeometry'.
     after idle ::UI::FindWBGeometry $wtop
+    
+    if {[info exists opts(-file)]} {
+	::CanvasFile::DrawCanvasItemFromFile $wtop $opts(-file)
+    }
 }
 
 # UI::CloseWhiteboard --
@@ -2089,9 +2091,16 @@ proc ::UI::BuildWhiteboardMenus {wtop} {
 }
 
 proc ::UI::BuildAppleMenu {wtop wmenuapple state} {
+    global  this wDlgs
     variable menuDefs
     
     ::UI::NewMenu $wtop $wmenuapple {} $menuDefs(main,apple) $state
+    
+    if {[string equal $this(platform) "macosx"]} {
+	proc ::tk::mac::ShowPreferences { } {
+	    ::Preferences::Build $wDlgs(prefs)
+	}
+    }
 }
 
 # UI::DisableWhiteboardMenus --

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: tinydom.tcl,v 1.1 2003-07-26 13:41:42 matben Exp $
+# $Id: tinydom.tcl,v 1.2 2003-11-30 11:46:47 matben Exp $
 
 package require xml
 
@@ -51,7 +51,6 @@ proc tinydom::XmlElementStart {tagname attrlist args} {
     variable xmlobj
     variable level
 
-    #puts "XmlElementStart: tagname=$tagname, attrlist=$attrlist, args=$args"
     set xmlobj([incr level]) [list $tagname $attrlist {} {}]
 }
 

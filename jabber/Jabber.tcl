@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.34 2003-11-17 15:05:57 matben Exp $
+# $Id: Jabber.tcl,v 1.35 2003-11-30 11:46:46 matben Exp $
 #
 #  The $address is an ip name or number.
 #
@@ -1767,46 +1767,71 @@ proc ::Jabber::ValidatePasswdChars {str} {
 
 # Jabber::SetStatus --
 #
-#       Sends presence status information.
+#       Sends presence status information. 
+#       It should take care of everything (almost) when setting status.
 #       
 # Arguments:
 #       type        any of 'available', 'unavailable', 'invisible',
 #                   'away', 'dnd', 'xa'.
-#       to          (optional) sets any to='jid' attribute.
+#       args
+#                -to      sets any to='jid' attribute.
+#                -notype  0|1 see XMPP 5.1
 #       
 # Results:
 #       None.
 
-proc ::Jabber::SetStatus {type {to {}}} {    
-    variable jprefs
+proc ::Jabber::SetStatus {type args} {    
     variable jstate
+    variable jserver
     
-    if {$to != ""} {
-	set toArgs "-to $to"
-    } else {
-	set toArgs {}
-	::Jabber::UI::WhenSetStatus $type
+    array set argsArr {
+	-notype         0
+    }
+    array set argsArr $args
+    
+    set presArgs {}
+    if {[info exists argsArr(-to)]} {
+	lappend presArgs -to $argsArr(-to)
+    }
+    if {!$argsArr(-notype)} {	
+	switch -- $type {
+	    available - invisible - unavailable {
+		lappend presArgs -type $type
+	    }
+	    away - dnd - xa {
+		lappend presArgs -type "available" -show $type
+	    }
+	}	
     }
     
     # Trap network errors.
+    # It is somewhat unclear here if we should have a type attribute
+    # when sending initial presence, see XMPP 5.1.
     if {[catch {	
-	switch -- $type {
-	    available - invisible {
-		eval {$jstate(jlib) send_presence -type $type} $toArgs
-	    }
-	    away - dnd - xa {
-		eval {$jstate(jlib) send_presence -type "available"}  \
-		  -show $type $toArgs
-	    }
-	    unavailable {
-		::Jabber::DoCloseClientConnection $jstate(ipNum)
-	    }
-	}	
+	eval {$jstate(jlib) send_presence} $presArgs
     } err]} {
 	
 	# Close down?	
+	::Jabber::DoCloseClientConnection $jstate(ipNum)
 	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
 	  -message [FormatTextForMessageBox $err]
+    } else {
+	
+	# Do we target a room or the server itself?
+	set toServer 0
+	if {[info exists argsArr(-to)]} {
+	    if {[string equal $jserver(this) $argsArr(-to)]} {
+		set toServer 1
+	    }
+	} else {
+	    set toServer 1
+	}
+	if {$toServer} {
+	    ::Jabber::UI::WhenSetStatus $type
+	    if {$type == "unavailable"} {
+		::Jabber::DoCloseClientConnection $jstate(ipNum)
+	    }
+	}
     }
 }
 
@@ -1850,7 +1875,7 @@ proc ::Jabber::SetStatusWithMessage {w} {
     foreach val {available chat away xa dnd invisible} {
 	label ${fr}.l${val} -image [::Jabber::Roster::GetPresenceIconFromKey $val]
 	radiobutton ${fr}.${val} -text [::msgcat::mc jastat${val}]  \
-	  -variable "[namespace current]::show" -value $val
+	  -variable [namespace current]::show -value $val
 	grid ${fr}.l${val} -sticky e -column 0 -row $i -padx 4 -pady 3
 	grid ${fr}.${val} -sticky w -column 1 -row $i -padx 8 -pady 3
 	incr i
@@ -1914,6 +1939,7 @@ proc ::Jabber::BtSetStatus {w} {
     
     # Set present status.
     set jstate(status) $show
+    
     switch -- $show {
 	invisible {
 	    eval {$jstate(jlib) send_presence -type "invisible" -show $show} \
@@ -2817,7 +2843,6 @@ proc ::Jabber::ParseGetBrowse {args} {
     # List everything this client supports.
     set subtags [list  \
       [wrapper::createtag "ns" -chdata "jabber:client"]         \
-      [wrapper::createtag "ns" -chdata "jabber:iq:autoupdate"]  \
       [wrapper::createtag "ns" -chdata "jabber:iq:browse"]      \
       [wrapper::createtag "ns" -chdata "jabber:iq:conference"]  \
       [wrapper::createtag "ns" -chdata "jabber:iq:last"]        \
@@ -2825,14 +2850,13 @@ proc ::Jabber::ParseGetBrowse {args} {
       [wrapper::createtag "ns" -chdata "jabber:iq:roster"]      \
       [wrapper::createtag "ns" -chdata "jabber:iq:time"]        \
       [wrapper::createtag "ns" -chdata "jabber:iq:version"]     \
-      [wrapper::createtag "ns" -chdata "jabber:x:autoupdate"]   \
       [wrapper::createtag "ns" -chdata "jabber:x:data"]         \
       [wrapper::createtag "ns" -chdata "coccinella:public"]     \
       [wrapper::createtag "ns" -chdata "coccinella:wb"]]
     
     set attr [list xmlns jabber:iq:browse jid $jstate(mejidres)  \
       type client category user]
-    set xmllist [wrapper::createtag "user" -subtags $subtags -attrlist $attr]
+    set xmllist [wrapper::createtag "item" -subtags $subtags -attrlist $attr]
     eval {$jstate(jlib) send_iq "result" $xmllist -to $argsArr(-from)} $opts
     
     # Tell jlib's iq-handler that we handled the event.

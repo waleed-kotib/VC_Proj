@@ -25,7 +25,7 @@
 # 
 # Copyright (C) 2002-2003 Mats Bengtsson
 # 
-# $Id: tree.tcl,v 1.15 2003-11-14 10:00:25 matben Exp $
+# $Id: tree.tcl,v 1.16 2003-11-30 11:46:46 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -1220,9 +1220,14 @@ proc ::tree::DelItem {w v args} {
 	set treestate(selidx) {}
 	::tree::DfltConfig $w {}
     } else {
+	
+	# Start by removing all child elements, recursively.
 	foreach c $treestate($uid:children) {
-	    catch {DelItem $w [concat $v [list $c]]}
+	    #catch {DelItem $w [concat $v [list $c]]}
+	    DelItem $w [concat $v [list $c]]
 	}
+	
+	# Then remove the actual element.
 	if {$opts(-childsonly) == 0} {
 	    unset treestate($uid:open)
 	    unset treestate($uid:children)
@@ -1234,6 +1239,9 @@ proc ::tree::DelItem {w v args} {
 	    catch {unset treestate($uid:ctags)}
 	    set dir [lrange $v 0 end-1]
 	    set tail [lindex $v end]
+	    
+	    # Remove us from the list of childrens of the directory above.
+	    # Exists...????
 	    set uidDir $v2uid($dir)
 	    set i [lsearch -exact $treestate($uidDir:children) $tail]
 	    if {$i >= 0} {

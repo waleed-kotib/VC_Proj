@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.14 2003-11-06 15:17:51 matben Exp $
+# $Id: Dialogs.tcl,v 1.15 2003-11-30 11:46:47 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -125,7 +125,6 @@ proc ::Dialogs::GetCanvas {w} {
     
     catch {grab release $w}
     catch {destroy $w}
-    #puts "   getIPName=$getIPName"
     
     if {$finished == 1 &&  \
       [info exists ipName2Num($getIPName)]} {

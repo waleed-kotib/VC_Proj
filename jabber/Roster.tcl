@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.23 2003-11-15 07:33:48 matben Exp $
+# $Id: Roster.tcl,v 1.24 2003-11-30 11:46:46 matben Exp $
 
 package provide Roster 1.0
 
@@ -912,7 +912,6 @@ proc ::Jabber::Roster::NewOrEditItem {which args} {
 	    if {[lsearch $jabbers $host] == -1} {
 		
 		# This is not a jabber host. Get true roster item.
-		#puts "jid=$jid, host=$host"
 		set isTransport 1
 		set subtype "unknown"
 		set users [$jstate(roster) getusers]
@@ -920,7 +919,6 @@ proc ::Jabber::Roster::NewOrEditItem {which args} {
 		set subscription [$jstate(roster) getsubscription $jid]
 		set typesubtype [$jstate(jlib) service gettype $host]
 		regexp {^[^/]+/(.+)$} $typesubtype match subtype
-		#puts "jid=$jid, users=$users, host=$host"
 	    }
 	}
     }
@@ -1668,7 +1666,6 @@ proc ::Jabber::Roster::PostProcessIcons { } {
 	    } 
 	    default {
 		set jid [lindex $v end]
-		#puts "jid=$jid:"
 		
 		# Exclude jid's that belong to our login jabber server.
  		if {![string match "*@$jserver(this)*" $jid]} {
@@ -1676,7 +1673,6 @@ proc ::Jabber::Roster::PostProcessIcons { } {
 		    set pres [$jstate(roster) getpresence $jid2 -resource $res]
 		    array set presArr $pres
 		    set icon [eval {GetPresenceIcon $jid $presArr(-type)} $pres]
-		    #puts "\t$pres, icon=$icon"
 		    $wtree itemconfigure $v -image $icon
 		}
 	    }

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.8 2003-11-09 15:07:32 matben Exp $
+# $Id: Login.tcl,v 1.9 2003-11-30 11:46:46 matben Exp $
 
 package provide Login 1.0
 
@@ -526,7 +526,6 @@ proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
     foreach w [::UI::GetAllWhiteboards] {
 	set wtop [::UI::GetToplevelNS $w]
 	set ::Jabber::jstate($wtop,tojid) "@${server}"
-	#::UI::SetStatusMessage $wtop [::msgcat::mc jaauthok $server]
 
 	# Make menus consistent.
 	::UI::FixMenusWhen $wtop "connect"
@@ -544,7 +543,7 @@ proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
 	::Jabber::SetStatus invisible
     } else {
 	set jstate(status) "available"
-	::Jabber::SetStatus available
+	::Jabber::SetStatus available -notype 1
     }
     
     # Store our own ip number in a public storage at the server.

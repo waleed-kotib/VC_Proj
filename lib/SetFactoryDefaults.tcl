@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.14 2003-11-17 15:03:03 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.15 2003-11-30 11:46:47 matben Exp $
 
 # SetWhiteboardFactoryState --
 # 
@@ -260,7 +260,7 @@ set prefs(firstLaunch) 1
 set prefs(lastAutoUpdateVersion) 0.0
 set prefs(doneAutoUpdate) 0
 set prefs(urlAutoUpdate) "http://coccinella.sourceforge.net/updates/update_en.xml"
-#set prefs(urlAutoUpdate) "http://192.168.0.12/update_en.xml"
+#set prefs(urlAutoUpdate) "http://coccinella.sourceforge.net/updates/update_test.xml"
 
 # The file name of the welcoming canvas.
 set prefs(welcomeFile) [file join $this(path) welcome.can]
@@ -405,7 +405,7 @@ switch -- $this(platform) {
 	set osprefs(mod) Control
 	
 	# On a central installation need to have local dirs for write access.
-	set prefs(prefsDir) ~/.coccinella
+	set prefs(prefsDir) [file nativename ~/.coccinella]
 	set prefs(userPrefsFilePath)  \
 	  [file nativename [file join $prefs(prefsDir) whiteboard]]
 	set prefs(oldPrefsFilePath) [file nativename ~/.whiteboard]
@@ -435,7 +435,7 @@ switch -- $this(platform) {
     }
     macosx {
 	set osprefs(mod) Command
-	set macosxPrefsDir "~/Library/Preferences"
+	set macosxPrefsDir [file nativename ~/Library/Preferences]
 	set prefs(prefsDir) [file join $macosxPrefsDir Coccinella]
 	set prefs(userPrefsFilePath)  \
 	  [file join $prefs(prefsDir) "Whiteboard Prefs"]

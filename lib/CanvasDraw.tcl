@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasDraw.tcl,v 1.16 2003-11-01 13:57:27 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.17 2003-11-30 11:46:47 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 #  
@@ -120,7 +120,6 @@ proc ::CanvasDraw::InitMove {w x y {what item}} {
 	
 	# Find associated id for the actual item. Saved in the tags of the marker.
 	if {![regexp " +id($id_)" [$w gettags current] match theItemId]} {
-	    #puts "no match: w gettags current=[$w gettags current]"
 	    return
 	}
 	set xDrag(type) [$w type $theItemId]
@@ -932,7 +931,6 @@ proc ::CanvasDraw::FinGridMove {wcan x y grid args} {
 	set newx [expr int($x)]
 	set newy [expr int($y)]
     }
-    #puts "ix=$ix, iy=$iy, xc=$xc, yc=$yc, newx=$newx, newy=$newy"
 
     $wcan dtag ismoved
     if {[string equal $xDrag(type) "image"]} {
@@ -984,7 +982,6 @@ proc ::CanvasDraw::FinGridMove {wcan x y grid args} {
     # Do send to all connected.
     if {[info exists xDrag(undocmd)]} {
 	set undo [list ::CanvasUtils::Command $wtop $xDrag(undocmd)]
-	#puts "undo=$undo"
     }
     eval $redo
 
