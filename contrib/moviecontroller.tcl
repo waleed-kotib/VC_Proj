@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: moviecontroller.tcl,v 1.3 2004-01-13 14:50:20 matben Exp $
+# $Id: moviecontroller.tcl,v 1.4 2004-07-24 10:55:47 matben Exp $
 
 #  Code idee from Alexander Schoepe's "Progressbar", thank you!
 #
@@ -333,6 +333,9 @@ IRULECFGAAA7}
     option add *MovieController.variable      {}        widgetDefault
     option add *MovieController.volume        50        widgetDefault
     option add *MovieController.width         160       widgetDefault
+
+    # This allows us to clean up some things when we go away.
+    bind MovieController <Destroy> [list ::moviecontroller::DestroyHandler %W]
 }
 
 # ::moviecontroller::moviecontroller --
@@ -1548,6 +1551,17 @@ proc ::moviecontroller::SnackEnd  { w snd }  {
     catch {after cancel $wlocals(afterid)}
     ConfigurePercent $w 100
     ::moviecontroller::PlayStop $w stop 0
+}
+
+proc ::moviecontroller::DestroyHandler {w} {
+
+    upvar ::moviecontroller::${w}::wlocals wlocals
+ 
+    catch {after cancel $wlocals(afterid)}
+    catch {after cancel $wlocals(ffrewAfterid)}
+     
+    # Remove the namespace with the widget.
+    namespace delete ::moviecontroller::${w}
 }
 
 #-------------------------------------------------------------------------------

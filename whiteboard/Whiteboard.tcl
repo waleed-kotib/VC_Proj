@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.6 2004-07-23 07:21:17 matben Exp $
+# $Id: Whiteboard.tcl,v 1.7 2004-07-24 10:55:47 matben Exp $
 
 package require entrycomp
 package require moviecontroller
@@ -1308,18 +1308,6 @@ proc ::WB::GetAllWhiteboards { } {
       [lsearch -all -inline -glob [winfo children .] $wDlgs(wb)*]]
 }
 
-
-namespace eval ::WB:: {
-    
-    # Bindings directly to the canvas widget are dealt with using bindtags.
-    # In the future we shall never bind to 'all' items since this also binds
-    # to imported stuff. The item tag 'std', introduced in 0.94.6 shall be used
-    # instead.
-    
-    set stdTag std
-    #set stdTag all   
-}
-
 # WB::SetToolButton --
 #
 #       Uhhh...  When a tool button is clicked. Mainly sets all button specific
@@ -1335,7 +1323,6 @@ namespace eval ::WB:: {
 proc ::WB::SetToolButton {wtop btName} {
     global  prefs wapp this
     
-    variable stdTag
     variable wbicons
     upvar ::WB::${wtop}::wapp wapp
     upvar ::WB::${wtop}::state state
@@ -1373,8 +1360,35 @@ proc ::WB::SetToolButton {wtop btName} {
     $wCan config -cursor {}
     
     # Bindings directly to the canvas widget are dealt with using bindtags.
-    
-    set stdTag std
+
+    # Typical B3 bindings independent of tool selected.
+    switch -- $this(platform) {
+	macintosh - macosx {
+	    $wCan bind std <Control-Button-1> {
+		::CanvasUtils::DoItemPopup %W %X %Y 
+	    }
+	    $wCan bind std <Button-2> {
+		::CanvasUtils::DoItemPopup %W %X %Y 
+	    }
+	    
+	    # This one is needed to cancel selection since we compete
+	    # with Button-1 binding to canvas.
+	    $wCan bind std <Control-ButtonRelease-1> {
+		::CanvasDraw::CancelBox %W
+	    }
+	}
+	default {
+	    $wCan bind std <Button-3> {
+		::CanvasUtils::DoItemPopup %W %X %Y 
+	    }
+	    bind QTFrame <Button-3> {
+		::CanvasUtils::DoWindowPopup %W %X %Y 
+	    }
+	    bind SnackFrame <Button-3> {
+		::CanvasUtils::DoWindowPopup %W %X %Y 
+	    }
+	}
+    }
     
     switch -- $btName {
 	point {
@@ -1386,25 +1400,25 @@ proc ::WB::SetToolButton {wtop btName} {
 
 	    switch -- $this(platform) {
 		macintosh - macosx {
-		    $wCan bind $stdTag <Button-1> {
+		    $wCan bind std <Button-1> {
 			
 			# Global coords for popup.
 			::CanvasUtils::StartTimerToItemPopup %W %X %Y 
 		    }
-		    $wCan bind $stdTag <ButtonRelease-1> {
+		    $wCan bind std <ButtonRelease-1> {
 			::CanvasUtils::StopTimerToItemPopup
 		    }
-		    $wCan bind $stdTag <Control-Button-1> {
+		    $wCan bind std <Control-Button-1> {
 			::CanvasUtils::DoItemPopup %W %X %Y 
 		    }
 		    
 		    # This one is needed to cancel selection since we compete
 		    # with Button-1 binding to canvas.
-		    $wCan bind $stdTag <Control-ButtonRelease-1> {
+		    $wCan bind std <Control-ButtonRelease-1> {
 			::CanvasDraw::CancelBox %W
 		    }
 
-		    $wCan bind $stdTag <Button-2> {
+		    $wCan bind std <Button-2> {
 			::CanvasUtils::DoItemPopup %W %X %Y 
 		    }
 		    bind QTFrame <Button-1> {
@@ -1422,7 +1436,7 @@ proc ::WB::SetToolButton {wtop btName} {
 		    ::WB::SetStatusMessage $wtop [mc uastatpointmac]
 		}
 		default {
-		    $wCan bind $stdTag <Button-3> {
+		    $wCan bind std <Button-3> {
 			
 			# Global coords for popup.
 			::CanvasUtils::DoItemPopup %W %X %Y 
@@ -1626,8 +1640,6 @@ proc ::WB::GenericNonTextBindings {wtop} {
 
 proc ::WB::RemoveAllBindings {w} {
     
-    variable stdTag
-
     Debug 3 "::WB::RemoveAllBindings w=$w"
     
     # List all tags that we may bind to.

@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Plugins.tcl,v 1.6 2004-07-22 15:11:28 matben Exp $
+# $Id: Plugins.tcl,v 1.7 2004-07-24 10:55:47 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -1185,9 +1185,8 @@ proc ::Plugins::SetCanvasBinds {wcan oldTool newTool} {
     
 	# Remove any previous binds.
 	if {($oldTool != "") && [info exists canvasClassBinds($name,$oldTool)]} {
-	    foreach bindStuff $canvasClassBinds($name,$oldTool) {
-		foreach {bindDef cmd} $bindStuff {
-		    #set bindDef [subst -nocommands -nobackslashes $bindDef]
+	    foreach binds $canvasClassBinds($name,$oldTool) {
+		foreach {bindDef cmd} $binds {
 		    regsub -all {\\|&} $bindDef {\\\0} bindDef
 		    regsub -all {%W} $bindDef $wcan bindDef
 		    eval $bindDef {{}}
@@ -1196,15 +1195,18 @@ proc ::Plugins::SetCanvasBinds {wcan oldTool newTool} {
 	}
 	
 	# Add registered binds.
-	if {($newTool != "") && [info exists canvasClassBinds($name,$newTool)]} {
-	    foreach bindStuff $canvasClassBinds($name,$newTool) {
-		foreach {bindDef cmd} $bindStuff {
-		    #set bindDef [subst -nocommands -nobackslashes $bindDef]
-		    #set cmd     [subst -nocommands -nobackslashes $cmd]
-		    regsub -all {\\|&} $bindDef {\\\0} bindDef
-		    regsub -all {%W} $bindDef $wcan bindDef
-		    eval $bindDef [list $cmd]
-		}
+	set bindList {}
+	if {[info exists canvasClassBinds($name,$newTool)]} {
+	    set bindList [concat $bindList $canvasClassBinds($name,$newTool)]
+	}
+	if {[info exists canvasClassBinds($name,*)]} {
+	    set bindList [concat $bindList $canvasClassBinds($name,*)]
+	} 
+	foreach binds $bindList {
+	    foreach {bindDef cmd} $binds {
+		regsub -all {\\|&} $bindDef {\\\0} bindDef
+		regsub -all {%W} $bindDef $wcan bindDef
+		eval $bindDef [list $cmd]
 	    }
 	}
     }
@@ -1215,9 +1217,8 @@ proc ::Plugins::SetCanvasBinds {wcan oldTool newTool} {
     
 	# Remove any previous binds.
 	if {($oldTool != "") && [info exists canvasInstBinds($wcan,$name,$oldTool)]} {
-	    foreach bindStuff $canvasInstBinds($wcan,$name,$oldTool) {
-		foreach {bindDef cmd} $bindStuff {
-		    #set bindDef [subst -nocommands -nobackslashes $bindDef]
+	    foreach binds $canvasInstBinds($wcan,$name,$oldTool) {
+		foreach {bindDef cmd} $binds {
 		    regsub -all {\\|&} $bindDef {\\\0} bindDef
 		    regsub -all {%W} $bindDef $wcan bindDef
 		    eval $bindDef {{}}
@@ -1226,15 +1227,19 @@ proc ::Plugins::SetCanvasBinds {wcan oldTool newTool} {
 	}
 	
 	# Add registered binds.
-	if {($newTool != "") && [info exists canvasInstBinds($wcan,$name,$newTool)]} {
-	    foreach bindStuff $canvasInstBinds($wcan,$name,$newTool) {
-		foreach {bindDef cmd} $bindStuff {
-		    #set bindDef [subst -nocommands -nobackslashes $bindDef]
-		    #set cmd     [subst -nocommands -nobackslashes $cmd]
-		    regsub -all {\\|&} $bindDef {\\\0} bindDef
-		    regsub -all {%W} $bindDef $wcan bindDef
-		    eval $bindDef [list $cmd]
-		}
+	set bindList {}
+	if {[info exists canvasInstBinds($wcan,$name,$newTool)]} {
+	    set bindList [concat $bindList  \
+	      $canvasInstBinds($wcan,$name,$newTool)]
+	}
+	if {[info exists canvasInstBinds($wcan,$name,*)]} {
+	    set bindList [concat $bindList $canvasInstBinds($wcan,$name,*)]
+	} 
+	foreach binds $bindList {
+	    foreach {bindDef cmd} $binds {
+		regsub -all {\\|&} $bindDef {\\\0} bindDef
+		regsub -all {%W} $bindDef $wcan bindDef
+		eval $bindDef [list $cmd]
 	    }
 	}
     }    

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasDraw.tcl,v 1.4 2004-07-22 15:56:45 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.5 2004-07-24 10:55:47 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 #  
@@ -174,6 +174,9 @@ proc ::CanvasDraw::FinalMoveCurrent {w x y} {
     if {[llength $selected] > 0} {
 	return
     }
+    if {![info exists moveArr]} {
+	return
+    }
     set dx [expr $x - $moveArr(x0)]
     set dy [expr $y - $moveArr(y0)]
     set mdx [expr -$dx]
@@ -306,6 +309,9 @@ proc ::CanvasDraw::DragMoveRectPoint {w x y {modifier {}}} {
 proc ::CanvasDraw::FinalMoveRectPoint {w x y} {
     variable moveArr
     
+    if {![info exists moveArr]} {
+	return
+    }
     if {![string equal $moveArr(bindType) "tbbox:rect"]} {
 	return
     }
@@ -481,6 +487,9 @@ proc ::CanvasDraw::DragMoveArcPoint {w x y {modifier {}}} {
 proc ::CanvasDraw::FinalMoveArcPoint {w x y} {
     variable moveArr
     
+    if {![info exists moveArr]} {
+	return
+    }
     set id $moveArr(itemid)
     set wtop [::UI::GetToplevelNS $w]
 
@@ -561,6 +570,9 @@ proc ::CanvasDraw::DragMovePolyLinePoint {w x y {modifier {}}} {
 proc ::CanvasDraw::FinalMovePolyLinePoint {w x y} {
     variable moveArr
 
+    if {![info exists moveArr]} {
+	return
+    }
     set itemid $moveArr(itemid)
     set coords $moveArr(coords)
     set utag [::CanvasUtils::GetUtag $w $itemid]
@@ -1195,9 +1207,8 @@ proc ::CanvasDraw::FinalizeBox {w x y shift type {mark 0}} {
 proc ::CanvasDraw::CancelBox {w} {
     
     variable theBox
-    
-    # If no theBox($w,anchor) defined, .
-    catch {unset theBox($w,anchor)}
+
+    catch {unset theBox}
     $w delete withtag markbox
 }
 

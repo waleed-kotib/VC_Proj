@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.5 2004-07-23 07:21:17 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.6 2004-07-24 10:55:47 matben Exp $
 
 package require sha1pure
 
@@ -488,9 +488,9 @@ proc ::CanvasUtils::GetUndoCommand {wtop cmd} {
 		default {
 		    set co [$w coords $utag]
 		    set opts [GetItemOpts $w $utag]
-		    set canUndo [concat [list create $type] $co $opts]
-		    #set canUndo [concat [list create $type] $co $opts  \
-		    #  [::CanvasUtils::GetStackingOption $w $utag]]
+		    set createCmd [concat [list create $type] $co $opts]
+		    set stackCmd [::CanvasUtils::GetStackingCmd $w $utag]
+		    set canUndoList [list $createCmd $stackCmd]
 		}
 	    }
 	}
@@ -511,6 +511,8 @@ proc ::CanvasUtils::GetUndoCommand {wtop cmd} {
     # If we've got a canvas command, make a complete command.
     if {[info exists canUndo]} {
 	set undo [list ::CanvasUtils::Command $wtop $canUndo]	
+    } elseif {[info exists canUndoList]} {
+	set undo [list ::CanvasUtils::CommandList $wtop $canUndoList]	
     }
     return $undo
 }
