@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.5 2004-04-08 12:54:52 matben Exp $
+# $Id: Emoticons.tcl,v 1.6 2004-04-09 10:32:25 matben Exp $
 
 
 package provide Emoticons 1.0
@@ -18,8 +18,9 @@ namespace eval ::Emoticons:: {
     ::hooks::add prefsBuildHook         ::Emoticons::BuildPrefsHook
     ::hooks::add prefsSaveHook          ::Emoticons::SavePrefsHook
     ::hooks::add prefsCancelHook        ::Emoticons::CancelPrefsHook
+    ::hooks::add prefsUserDefaultsHook  ::Emoticons::UserDefaultsHook
 
-    ::hooks::add initHook ::Emoticons::Init
+    ::hooks::add initHook               ::Emoticons::Init
 
     variable priv
     set priv(defaultSet) "default"
@@ -57,8 +58,8 @@ proc ::Emoticons::Init { } {
 	set priv(needtmp)   1
 	set priv(pngformat) {}
     }
-    ::Debug 2 "sets=[::Emoticons::GetAllSets]"
-    ::Debug 2 "\t [::Emoticons::GetPrefSetPathExists]"
+    ::Debug 5 "sets=[::Emoticons::GetAllSets]"
+    ::Debug 5 "\t [::Emoticons::GetPrefSetPathExists]"
     
     # Load set.
     ::Emoticons::LoadTmpIconSet [::Emoticons::GetPrefSetPathExists]
@@ -351,7 +352,7 @@ proc ::Emoticons::ParseIconDef {name dir xmldata} {
 proc ::Emoticons::ParseMeta {name dir xmllist} {
     variable meta
     
-    catch {unset meta}
+    array unset meta $name,*
     foreach elem [tinydom::children $xmllist] {
 	set tag [tinydom::tagname $elem]
 	lappend meta($name,$tag) [tinydom::chdata $elem]
@@ -486,6 +487,20 @@ proc ::Emoticons::FreeTmpSet {name} {
     array unset tmpicons $name,*
     array unset tmpiconsInv $name,*
     array unset state $name,*
+}
+
+proc ::Emoticons::FreeAllTmpSets { } {
+    variable meta
+    variable state
+    variable tmpicons
+    variable tmpiconsInv
+
+    set ims {}
+    foreach {key photo} [array get tmpicons ] {
+	lappend ims $photo
+    }
+    eval {image delete} [lsort -unique $ims]
+    catch {unset meta state tmpicons tmpiconsInv}
 }
 
 # Emoticons::MenuButton --
@@ -728,6 +743,19 @@ proc ::Emoticons::CancelPrefsHook { } {
 	#::Preferences::HasChanged
     }
     ::Emoticons::FreePrefsPage
+    ::Emoticons::FreeAllTmpSets
+}
+
+proc ::Emoticons::UserDefaultsHook { } {
+    variable tmpSet
+    upvar ::Jabber::jprefs jprefs
+    
+    set allSets [::Emoticons::GetAllSets]
+    if {[lsearch $allSets $jprefs(emoticonSet)] < 0} {
+	set tmpSet $priv(defaultSet)
+    } else {
+	set tmpSet $jprefs(emoticonSet)
+    }
 }
 
 #-------------------------------------------------------------------------------

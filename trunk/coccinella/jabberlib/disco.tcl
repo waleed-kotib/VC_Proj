@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.2 2004-02-03 10:16:31 matben Exp $
+# $Id: disco.tcl,v 1.3 2004-04-09 10:32:25 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -70,6 +70,8 @@ proc disco::new {jlibname args} {
     variable xmlns
     variable disco2jlib
     
+    # Generate unique command token for this disco instance.
+    # Fully qualified!
     set disconame [namespace current]::[incr uid]
     
     # Instance specific arrays.
@@ -101,7 +103,7 @@ proc disco::new {jlibname args} {
       [list [namespace current]::handle_get $disconame info]
     
     # Create the actual disco instance procedure.
-    proc ${disconame} {cmd args}  \
+    proc $disconame {cmd args}  \
       "eval disco::cmdproc {$disconame} \$cmd \$args"
     
     return $disconame

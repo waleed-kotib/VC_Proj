@@ -2,9 +2,9 @@
 #  
 #      Implements platform independent synthetic speech.
 #      
-#  Copyright (c) 2003  Mats Bengtsson
+#  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id
+# $Id: Speech.tcl,v 1.8 2004-04-09 10:32:26 matben Exp $
 
 package provide Speech 1.0
 
@@ -21,6 +21,7 @@ namespace eval ::Speech:: {
     ::hooks::add prefsBuildHook         ::Speech::BuildPrefsHook
     ::hooks::add prefsSaveHook          ::Speech::SavePrefsHook
     ::hooks::add prefsCancelHook        ::Speech::CancelPrefsHook
+    ::hooks::add prefsUserDefaultsHook  ::Speech::UserDefaultsPrefsHook
     
     ::hooks::add initHook               ::Speech::Verify
 }
@@ -173,12 +174,12 @@ proc ::Speech::InitPrefsHook { } {
     
     variable sprefs
     variable allprefskeys {speakWBText speakMsg speakChat voiceUs voiceOther}
-    
-    
+       
     set sprefs(haveSpeech) 0
     if {[::Plugins::HavePackage TclSpeech] || [::Plugins::HavePackage MSSpeech]} {
 	set sprefs(haveSpeech) 1
     }
+    ::Debug 2 "::Speech::InitPrefsHook sprefs(haveSpeech)=$sprefs(haveSpeech)"
     
     # Default in/out voices. They will be set to actual values in 
     # ::Plugins::VerifySpeech  
@@ -238,6 +239,13 @@ proc ::Speech::CancelPrefsHook { } {
 	}
 	catch {unset tmpPrefs}
     }
+}
+
+proc ::Speech::UserDefaultsPrefsHook { } {
+    variable sprefs
+    variable tmpPrefs
+    
+    array set tmpPrefs [array get sprefs]
 }
 
 proc ::Speech::BuildPrefsPage {page} {

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.75 2004-04-02 12:26:37 matben Exp $
+# $Id: Jabber.tcl,v 1.76 2004-04-09 10:32:25 matben Exp $
 
 package provide Jabber 1.0
 
@@ -52,8 +52,8 @@ namespace eval ::Jabber:: {
     global  this prefs
     
     # Add all event hooks.
-    ::hooks::add loginHook      ::Jabber::SetPrivateData
-    ::hooks::add quitAppHook    ::Jabber::EndSession
+    ::hooks::add loginHook          ::Jabber::SetPrivateData
+    ::hooks::add quitAppHook        ::Jabber::EndSession
 
     # Jabber internal storage.
     variable jstate
@@ -523,6 +523,10 @@ proc ::Jabber::Init { } {
     
     # Set the priority order of groupchat protocols.
     $jstate(jlib) setgroupchatpriority [list $jprefs(prefgchatproto) "gc-1.0"]
+      
+    # Browse 2.0.
+    set jstate(browse2) [browse::new $jstate(jlib) -command  \
+      ::Jabber::Browse::Callback]
       
     # Disco.
     set jstate(disco) [disco::new $jstate(jlib) -command  \

@@ -5,17 +5,18 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: WBPrefs.tcl,v 1.2 2004-03-29 13:56:27 matben Exp $
+# $Id: WBPrefs.tcl,v 1.3 2004-04-09 10:32:26 matben Exp $
 
 package provide WBPrefs 1.0
 
 namespace eval ::WBPrefs:: {
 
     # Define all hooks for preference settings.
-    ::hooks::add prefsInitHook      ::WBPrefs::InitPrefsHook
-    ::hooks::add prefsBuildHook     ::WBPrefs::BuildPrefsHook
-    ::hooks::add prefsSaveHook      ::WBPrefs::SavePrefsHook
-    ::hooks::add prefsCancelHook    ::WBPrefs::CancelPrefsHook
+    ::hooks::add prefsInitHook          ::WBPrefs::InitPrefsHook
+    ::hooks::add prefsBuildHook         ::WBPrefs::BuildPrefsHook
+    ::hooks::add prefsSaveHook          ::WBPrefs::SavePrefsHook
+    ::hooks::add prefsCancelHook        ::WBPrefs::CancelPrefsHook
+    ::hooks::add prefsUserDefaultsHook  ::WBPrefs::UserDefaultsPrefsHook
 }
 
 
@@ -121,8 +122,8 @@ proc ::WBPrefs::BuildFontsPage {page} {
       -yscrollcommand [list $frtot.fr3.sc set]
     scrollbar $frtot.fr3.sc -orient vertical   \
       -command [list $frtot.fr3.lb yview]
-    pack $frtot.fr3.lb $frtot.fr3.sc -side left -fill y
-    eval $frtot.fr3.lb insert 0 $prefs(canvasFonts)
+    pack $wlbwb $frtot.fr3.sc -side left -fill y
+    eval $wlbwb insert 0 $prefs(canvasFonts)
     
     message $frtot.msg -text [::msgcat::mc preffontmsg] -aspect 600
     set wsamp $frtot.samp
@@ -281,6 +282,18 @@ proc ::WBPrefs::CancelPrefsHook { } {
 		break
 	    }
 	}
+    }
+}
+
+proc ::WBPrefs::UserDefaultsPrefsHook { } {
+    global  prefs
+    variable tmpPrefs
+    variable wlbwb
+    
+    $wlbwb delete 0 end
+    eval {$wlbwb insert 0} $prefs(canvasFonts)
+    foreach key [array names tmpJPrefs] {
+	set tmpJPrefs($key) $prefs($key)
     }
 }
 

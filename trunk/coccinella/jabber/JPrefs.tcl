@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.1 2004-03-28 14:48:26 matben Exp $
+# $Id: JPrefs.tcl,v 1.2 2004-04-09 10:32:25 matben Exp $
 
 
 package provide JPrefs 1.0
@@ -14,10 +14,11 @@ package provide JPrefs 1.0
 namespace eval ::Jabber::JPrefs:: {
     
     # Define all hooks for preference settings.
-    ::hooks::add prefsInitHook      ::Jabber::JPrefs::InitPrefsHook
-    ::hooks::add prefsBuildHook     ::Jabber::JPrefs::BuildPrefsHook
-    ::hooks::add prefsSaveHook      ::Jabber::JPrefs::SavePrefsHook
-    ::hooks::add prefsCancelHook    ::Jabber::JPrefs::CancelPrefsHook
+    ::hooks::add prefsInitHook          ::Jabber::JPrefs::InitPrefsHook
+    ::hooks::add prefsBuildHook         ::Jabber::JPrefs::BuildPrefsHook
+    ::hooks::add prefsSaveHook          ::Jabber::JPrefs::SavePrefsHook
+    ::hooks::add prefsCancelHook        ::Jabber::JPrefs::CancelPrefsHook
+    ::hooks::add prefsUserDefaultsHook  ::Jabber::JPrefs::UserDefaultsHook
 }
 
 
@@ -224,6 +225,15 @@ proc ::Jabber::JPrefs::CancelPrefsHook { } {
 	    ::Preferences::HasChanged
 	    break
 	}
+    }
+}
+
+proc ::Jabber::JPrefs::UserDefaultsHook { } {
+    upvar ::Jabber::jprefs jprefs
+    variable tmpJPrefs
+	
+    foreach key [array names tmpJPrefs] {
+	set tmpJPrefs($key) $jprefs($key)
     }
 }
 

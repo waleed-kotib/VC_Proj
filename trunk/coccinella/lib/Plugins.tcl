@@ -10,11 +10,11 @@
 #           
 #       It also contains support functions for adding external plugins.
 #      
-#  Copyright (c) 2003  Mats Bengtsson
+#  Copyright (c) 2003-2004  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Plugins.tcl,v 1.18 2004-04-08 09:57:43 matben Exp $
+# $Id: Plugins.tcl,v 1.19 2004-04-09 10:32:26 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -81,6 +81,13 @@ package require Types
 namespace eval ::Plugins:: {
     global tcl_platform
     
+    # Define all hooks for preference settings. Be early!
+    ::hooks::add prefsInitHook          ::Plugins::InitPrefsHook     10
+    ::hooks::add prefsBuildHook         ::Plugins::BuildPrefsHook
+    ::hooks::add prefsUserDefaultsHook  ::Plugins::UserDefaultsHook
+    ::hooks::add prefsSaveHook          ::Plugins::SaveHook
+    ::hooks::add prefsCancelHook        ::Plugins::CancelHook
+
     variable inited 0
     variable packages2Platform
     variable helpers2Platform
@@ -1218,23 +1225,19 @@ proc ::Plugins::LoadAddon {fileName initProc} {
 
 # Preference pages -------------------------------------------------------------
 
-namespace eval ::Plugins:: {
-    
-    ::hooks::add prefsInitHook          ::Plugins::InitPrefsHook
-    ::hooks::add prefsBuildHook         ::Plugins::BuildPrefsHook
-    ::hooks::add prefsUserDefaultsHook  ::Plugins::UserDefaultsHook
-    ::hooks::add prefsSaveHook          ::Plugins::SaveHook
-    ::hooks::add prefsCancelHook        ::Plugins::CancelHook
-}
-
 proc ::Plugins::InitPrefsHook { } {
     global  prefs
     
     # Plugin ban list. Do not load these packages.
     set prefs(pluginBanList) {}
+    ::Debug 2 "::Plugins::InitPrefsHook"
     
     ::PreferencesUtils::Add [list  \
       [list prefs(pluginBanList)   prefs_pluginBanList   $prefs(pluginBanList)]]
+    
+    # Load all plugins available.
+    ::Plugins::SetBanList $prefs(pluginBanList)
+    ::Plugins::Init
 }
 
 proc ::Plugins::BuildPrefsHook {wtree nbframe} {
@@ -1305,6 +1308,16 @@ proc ::Plugins::CancelHook { } {
 	    ::Preferences::HasChanged
 	    return
 	}
+    }    
+}
+
+proc ::Plugins::UserDefaultsHook { } {
+    variable prefplugins
+    variable tmpPrefPlugins
+    
+    foreach plug [::Plugins::GetAllPackages platform] {
+	set tmpPrefPlugins($plug) [::Plugins::IsLoaded $plug]
+	set prefplugins($plug) $tmpPrefPlugins($plug)
     }    
 }
 
