@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.36 2004-10-12 13:48:56 matben Exp $
+# $Id: Disco.tcl,v 1.37 2004-10-28 07:37:33 matben Exp $
 
 package provide Disco 1.0
 
@@ -27,8 +27,8 @@ namespace eval ::Jabber::Disco:: {
     }
     
     # Disco catagories from Jabber :: Registrar determines if dir or not.
-    variable categoryShowDir
-    array set categoryShowDir {
+    variable isBranchCategory
+    array set isBranchCategory {
 	auth                  0
 	automation            1
 	client                1
@@ -298,33 +298,38 @@ proc ::Jabber::Disco::InfoCB {disconame type from subiq args} {
 proc ::Jabber::Disco::SetDirItemUsingCategory {jid} {
     variable wtree
     
-    if {[IsDirCategory $jid]} {
+    if {[IsBranchCategory $jid]} {
 	foreach v [$wtree find withtag $jid] {
 	    $wtree itemconfigure $v -dir 1
 	}
     }
 }
 
-proc ::Jabber::Disco::IsDirCategory {jid} {
-    variable categoryShowDir
+proc ::Jabber::Disco::IsBranchCategory {jid} {
+    variable isBranchCategory
     upvar ::Jabber::jstate jstate
     
-    set isdir 0
+    # Have not seen any case of this, yet.
+    if {[$jstate(disco) iscategorytype $jid hierarchy/leaf]} {
+	set isdir 0
+    } else { 
     
-    # Ad-hoc way to figure out if dir or not. Use the category attribute.
-    set types [$jstate(disco) types $jid]
-    foreach type $types {
-	set category [lindex [split $type /] 0]
-	if {[info exists categoryShowDir($category)] && \
-	  $categoryShowDir($category)} {
-	    set isdir 1
-	    break
+	# Ad-hoc way to figure out if dir or not. Use the category attribute.
+	set isdir 0
+	set types [$jstate(disco) types $jid]
+	foreach type $types {
+	    set category [lindex [split $type /] 0]
+	    if {[info exists isBranchCategory($category)] && \
+	      $isBranchCategory($category)} {
+		set isdir 1
+		break
+	    }
 	}
-    }
     
-    # Don't forget the rooms.
-    if {!$isdir} {
-	set isdir [$jstate(disco) isroom $jid]
+	# Don't forget the rooms.
+	if {!$isdir} {
+	    set isdir [$jstate(disco) isroom $jid]
+	}
     }
     return $isdir
 }
@@ -719,7 +724,6 @@ proc ::Jabber::Disco::CloseTreeCmd {w v} {
 proc ::Jabber::Disco::AddToTree {v} {    
     variable wtree    
     variable treeuid
-    variable categoryShowDir
     upvar ::Jabber::jstate jstate
  
     # We disco servers jid 'items+info', and disco its childrens 'info'.    
@@ -735,7 +739,7 @@ proc ::Jabber::Disco::AddToTree {v} {
     if {[llength $v] == 1} {
 	set isdir 1
     } else {
-	set isdir [IsDirCategory $jid]
+	set isdir [IsBranchCategory $jid]
     }
     
     # Display text string. Room participants with their nicknames.
