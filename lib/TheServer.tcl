@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: TheServer.tcl,v 1.3 2003-02-24 17:52:12 matben Exp $
+# $Id: TheServer.tcl,v 1.4 2003-03-01 09:51:28 matben Exp $
     
 # DoStartServer ---
 #
@@ -259,7 +259,7 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
     set rb_ {\}}
     
     if {$debugServerLevel >= 2} {
-	puts "ExecuteClientRequest:: line='$line', args='$args'"
+	puts "ExecuteClientRequest:: wtop=$wtop, line='$line', args='$args'"
     }
     array set attrarr $args
     if {![regexp {^([A-Z]+ *[A-Z]+):} $line x prefixCmd]} {
