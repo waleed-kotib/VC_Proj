@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.40 2004-07-27 14:25:19 matben Exp $
+# $Id: Login.tcl,v 1.41 2004-07-28 15:13:57 matben Exp $
 
 package provide Login 1.0
 
@@ -188,7 +188,7 @@ proc ::Jabber::Login::LoadProfiles { } {
     
     # Make temp array for servers. Handy for filling in the entries.
     array unset tmpProfArr
-    foreach {name spec} [::Profiles::Get] {
+    foreach {name spec} [::Profiles::GetList] {
 	set tmpProfArr($name,server)    [lindex $spec 0]
 	set tmpProfArr($name,username)  [lindex $spec 1]
 	set tmpProfArr($name,password)  [lindex $spec 2]
