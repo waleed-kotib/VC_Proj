@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.78 2004-12-20 11:15:02 matben Exp $
+# $Id: jabberlib.tcl,v 1.79 2004-12-22 15:12:15 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -3589,6 +3589,8 @@ proc jlib::jidmap {jid} {
     if {$jid == ""} {
 	return ""
     }
+    # Guard against spurious spaces.
+    set jid [string trim $jid]
     if {[catch {splitjidex $jid node domain resource} res]} {
 	return -code error $res
     }
