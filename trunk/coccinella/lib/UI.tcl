@@ -1,13 +1,13 @@
 #  UI.tcl ---
 #  
-#      This file is part of the whiteboard application. It implements user
+#      This file is part of The Coccinella application. It implements user
 #      interface elements.
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.42 2004-01-05 15:00:32 matben Exp $
+# $Id: UI.tcl,v 1.43 2004-01-13 14:50:21 matben Exp $
 
 package require entrycomp
 

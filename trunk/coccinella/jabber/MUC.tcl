@@ -1,13 +1,13 @@
 #  MUC.tcl ---
 #  
-#      This file is part of the whiteboard application. 
+#      This file is part of The Coccinella application. 
 #      It implements parts of the UI for the Multi User Chat protocol.
 #      
 #      This code is not completed!!!!!!!
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.15 2004-01-01 16:27:48 matben Exp $
+# $Id: MUC.tcl,v 1.16 2004-01-13 14:50:21 matben Exp $
 
 package require entrycomp
 

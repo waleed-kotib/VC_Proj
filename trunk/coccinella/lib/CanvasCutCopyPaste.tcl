@@ -1,14 +1,14 @@
 
 #  CanvasCutCopyPaste.tcl ---
 #  
-#      This file is part of the whiteboard application. It implements the
+#      This file is part of The Coccinella application. It implements the
 #      cut, copy, and paste commands to and from canvas, typically canvas items.
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasCutCopyPaste.tcl,v 1.7 2003-12-18 14:19:35 matben Exp $
+# $Id: CanvasCutCopyPaste.tcl,v 1.8 2004-01-13 14:50:21 matben Exp $
 
 package provide CanvasCutCopyPaste 1.0
 

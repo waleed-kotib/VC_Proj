@@ -1,13 +1,13 @@
 #  tinyhttpd.tcl --
 #  
-#       This file is part of the whiteboard application. It implements a tiny
+#       This file is part of The Coccinella application. It implements a tiny
 #       http server.
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: tinyhttpd.tcl,v 1.7 2004-01-11 15:17:50 matben Exp $
+# $Id: tinyhttpd.tcl,v 1.8 2004-01-13 14:50:20 matben Exp $
 
 # ########################### USAGE ############################################
 #

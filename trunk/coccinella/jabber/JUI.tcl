@@ -1,11 +1,11 @@
 #  JUI.tcl ---
 #  
-#      This file is part of the whiteboard application. 
+#      This file is part of The Coccinella application. 
 #      It implements jabber GUI parts.
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.20 2004-01-09 14:08:22 matben Exp $
+# $Id: JUI.tcl,v 1.21 2004-01-13 14:50:20 matben Exp $
 
 package provide JUI 1.0
 
@@ -239,6 +239,9 @@ proc ::Jabber::UI::Build {w} {
       -state disabled
     $wtray newbutton stop Stop $iconStop $iconStopDis  \
       [list ::Jabber::UI::StopConnect] -state disabled
+
+    hooks::run buildJMainButtonTrayHook $wtray
+
     set shortBtWidth [$wtray minwidth]
 
     # Build bottom and up to handle clipping when resizing.

@@ -1,13 +1,13 @@
 # HtmlImport.tcl --
 #  
-#       This file is part of the whiteboard application. 
+#       This file is part of The Coccinella application. 
 #       It is an importer for html documents.
 #       
 #  Copyright (c) 2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: HtmlImport.tcl,v 1.5 2004-01-09 14:08:22 matben Exp $
+# $Id: HtmlImport.tcl,v 1.6 2004-01-13 14:50:21 matben Exp $
 
 
 namespace eval ::HtmlImport:: {

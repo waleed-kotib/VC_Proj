@@ -1,13 +1,13 @@
 #  AutoUpdate.tcl ---
 #  
-#      This file is part of the whiteboard application. It implements 
+#      This file is part of The Coccinella application. It implements 
 #      methods to query for new versions.
 #
 #  Copyright (c) 2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: AutoUpdate.tcl,v 1.6 2004-01-01 12:08:21 matben Exp $
+# $Id: AutoUpdate.tcl,v 1.7 2004-01-13 14:50:21 matben Exp $
 
 package require tinydom
 package require http 2.3

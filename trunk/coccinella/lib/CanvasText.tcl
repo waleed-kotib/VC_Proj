@@ -1,13 +1,13 @@
 #  CanvasText.tcl ---
 #  
-#      This file is part of the whiteboard application. It implements the
+#      This file is part of The Coccinella application. It implements the
 #      text commands associated with the text tool.
 #      
 #  Copyright (c) 2000-2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasText.tcl,v 1.10 2003-12-29 09:02:30 matben Exp $
+# $Id: CanvasText.tcl,v 1.11 2004-01-13 14:50:21 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 

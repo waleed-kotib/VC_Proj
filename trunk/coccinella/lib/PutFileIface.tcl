@@ -1,6 +1,6 @@
 # PutFileIface.tcl --
 #  
-#       This file is part of the whiteboard application. It contains a number
+#       This file is part of The Coccinella application. It contains a number
 #       of procedures for performing a put operation over the network from
 #       a disk file.
 #      
@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: PutFileIface.tcl,v 1.13 2003-12-18 14:19:35 matben Exp $
+# $Id: PutFileIface.tcl,v 1.14 2004-01-13 14:50:21 matben Exp $
 
 package require putfile
 package require uriencode

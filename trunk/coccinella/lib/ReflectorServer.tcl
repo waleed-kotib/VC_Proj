@@ -4,7 +4,7 @@
       
 #  ReflectorServer.tcl --
 #  
-#      This file is part of the whiteboard application. It implements a
+#      This file is part of The Coccinella application. It implements a
 #      reflector server that accepts connections from clients.
 #      In short, incoming stuff from one client is written to all other
 #      clients, see note below.
@@ -16,7 +16,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: ReflectorServer.tcl,v 1.1.1.1 2002-12-08 11:04:23 matben Exp $
+# $Id: ReflectorServer.tcl,v 1.2 2004-01-13 14:50:21 matben Exp $
 # 
 #  Since this is a pretty complex piece of code we describe the principles in
 #  some detail here.

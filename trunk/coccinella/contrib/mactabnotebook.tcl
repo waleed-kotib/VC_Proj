@@ -1,13 +1,13 @@
 #  mactabnotebook.tcl ---
 #  
-#      This file is part of the whiteboard application.
+#      This file is part of The Coccinella application.
 #      It implements a tabbed notebook interface.
 #      This widget is "derived" from the notebook widget.
 #      Code idee from Harrison & McLennan
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: mactabnotebook.tcl,v 1.7 2003-11-09 15:07:32 matben Exp $
+# $Id: mactabnotebook.tcl,v 1.8 2004-01-13 14:50:20 matben Exp $
 # 
 # ########################### USAGE ############################################
 #

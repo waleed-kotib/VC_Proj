@@ -217,12 +217,12 @@
 ::msgcat::mcset sv mSendMessage		{Skicka meddelande...}
 ::msgcat::mcset sv mChat		{Chatta}
 ::msgcat::mcset sv mStatus		{Status}
-::msgcat::mcset sv mAvailable		{Tillgänlig}
+::msgcat::mcset sv mAvailable		{Tillgänglig}
 ::msgcat::mcset sv mAway		{Borta}
 ::msgcat::mcset sv mDoNotDisturb	{Stör ej}
 ::msgcat::mcset sv mExtendedAway        {Borta länge}
 ::msgcat::mcset sv mInvisible           {Osynlig}
-::msgcat::mcset sv mNotAvailable	{Ej tillgänlig}
+::msgcat::mcset sv mNotAvailable	{Ej tillgänglig}
 ::msgcat::mcset sv mAttachMessage	{Bifoga meddelande...}
 ::msgcat::mcset sv mEnterRoom		{Gå in i rum...}
 ::msgcat::mcset sv mExitRoom		{Lämna rum}
@@ -374,8 +374,8 @@
 ::msgcat::mcset sv {No Address}		   {Adress saknas}
 ::msgcat::mcset sv {No Inbox}		   {Ingen inkorg}
 ::msgcat::mcset sv {No Printing}           {Ingen utskrift}
-::msgcat::mcset sv {Not Available}	   {Ej tillgänligt}
-::msgcat::mcset sv {Not available}	   {Ej tillgänligt}
+::msgcat::mcset sv {Not Available}	   {Ej tillgängligt}
+::msgcat::mcset sv {Not available}	   {Ej tillgängligt}
 ::msgcat::mcset sv {Not Connected}	   {Ej ansluten}
 ::msgcat::mcset sv {Once per session}      {En gång per start}
 ::msgcat::mcset sv {One day}               {En dag}

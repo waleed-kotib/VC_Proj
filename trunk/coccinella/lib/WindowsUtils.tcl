@@ -1,13 +1,13 @@
 #  WindowsUtils.tcl ---
 #  
-#      This file is part of the whiteboard application. It implements things
+#      This file is part of The Coccinella application. It implements things
 #      that are windows only, like a glue to win only packages.
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: WindowsUtils.tcl,v 1.4 2003-10-05 13:36:21 matben Exp $
+# $Id: WindowsUtils.tcl,v 1.5 2004-01-13 14:50:21 matben Exp $
 
 #package require gdi
 #package require printer

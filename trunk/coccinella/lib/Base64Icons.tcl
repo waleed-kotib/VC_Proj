@@ -1,14 +1,14 @@
 
 #  Base64Icons.tcl ---
 #  
-#      This file is part of the whiteboard application. It contains
+#      This file is part of The Coccinella application. It contains
 #      Mime (base 64) coded icons for the tool buttons and other icons.
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Base64Icons.tcl,v 1.4 2003-12-23 14:41:01 matben Exp $
+# $Id: Base64Icons.tcl,v 1.5 2004-01-13 14:50:21 matben Exp $
  
 ### First all the tool buttons, both on and off states. ########################
 

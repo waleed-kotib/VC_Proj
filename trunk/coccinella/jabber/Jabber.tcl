@@ -1,13 +1,13 @@
 #  Jabber.tcl ---
 #  
-#      This file is part of the whiteboard application. 
+#      This file is part of The Coccinella application. 
 #      It implements the "glue" between the whiteboard and jabberlib.
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.51 2004-01-11 15:17:51 matben Exp $
+# $Id: Jabber.tcl,v 1.52 2004-01-13 14:50:20 matben Exp $
 
 package provide Jabber 1.0
 
@@ -693,9 +693,6 @@ proc ::Jabber::Init { } {
 	    wm withdraw $wDlgs(jrostbro)
 	}
     }
-    
-    # Take care of things like translating any old version mailbox etc.
-    ::Jabber::MailBox::Init
 }
 
 # ::Jabber::IqCallback --
@@ -2516,21 +2513,20 @@ proc ::Jabber::ParseGetVersion {jlibname from subiq args} {
     if {[info exists argsArr(-id)]} {
 	set opts [list -id $argsArr(-id)]
     }
+    lappend opts -to $from
+   
     set os $tcl_platform(os)
     if {[info exists tcl_platform(osVersion)]} {
 	append os " $tcl_platform(osVersion)"
     }
+    set version $prefs(majorVers).$prefs(minorVers).$prefs(releaseVers)
     set subtags [list  \
-      [wrapper::createtag name -chdata "Coccinella"]  \
-      [wrapper::createtag version  \
-      -chdata $prefs(majorVers).$prefs(minorVers).$prefs(releaseVers)]  \
-      [wrapper::createtag os -chdata $os] ]
+      [wrapper::createtag name    -chdata "Coccinella"]  \
+      [wrapper::createtag version -chdata $version]      \
+      [wrapper::createtag os      -chdata $os]]
     set xmllist [wrapper::createtag query -subtags $subtags  \
       -attrlist {xmlns jabber:iq:version}]
-    if {[info exists argsArr(-from)]} {
-	lappend opts -to $argsArr(-from)
-    }
-    eval {$jstate(jlib) send_iq "result" $xmllist} $opts
+     eval {$jstate(jlib) send_iq "result" $xmllist} $opts
 
     # Tell jlib's iq-handler that we handled the event.
     return 1

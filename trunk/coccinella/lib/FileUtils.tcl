@@ -1,13 +1,13 @@
 #  FileUtils.tcl ---
 #  
-#      This file is part of the whiteboard application. It implements procs
+#      This file is part of The Coccinella application. It implements procs
 #      for handling specific file tasks etc.
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: FileUtils.tcl,v 1.2 2003-01-30 17:33:56 matben Exp $
+# $Id: FileUtils.tcl,v 1.3 2004-01-13 14:50:21 matben Exp $
 
 namespace eval ::FileUtils:: {
     

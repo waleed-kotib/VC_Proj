@@ -1,13 +1,13 @@
 #  MacintoshUtils.tcl ---
 #  
-#      This file is part of the whiteboard application. It implements things
+#      This file is part of The Coccinella application. It implements things
 #      that are mac only, like a glue to mac only packages.
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: MacintoshUtils.tcl,v 1.6 2003-10-29 07:45:31 matben Exp $
+# $Id: MacintoshUtils.tcl,v 1.7 2004-01-13 14:50:21 matben Exp $
 
 #package require TclSpeech 2.0
 #package require Tclapplescript

@@ -1,11 +1,11 @@
 #  Agents.tcl ---
 #  
-#      This file is part of the whiteboard application. 
+#      This file is part of The Coccinella application. 
 #      It implements the Agent(s) GUI part.
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Agents.tcl,v 1.8 2004-01-02 11:41:16 matben Exp $
+# $Id: Agents.tcl,v 1.9 2004-01-13 14:50:20 matben Exp $
 
 package provide Agents 1.0
 
@@ -69,9 +69,8 @@ proc ::Jabber::Agents::GetAll { } {
 
 proc ::Jabber::Agents::Get {jid} {
     
-    upvar ::Jabber::jstate jstate
-    
-    $jstate(jlib) agents_get $jid [list ::Jabber::Agents::AgentsCallback $jid]
+    ::Jabber::InvokeJlibCmd agents_get $jid  \
+      [list ::Jabber::Agents::AgentsCallback $jid]
 }
 
 # Jabber::Agents::GetAgent --
@@ -83,13 +82,11 @@ proc ::Jabber::Agents::Get {jid} {
 
 proc ::Jabber::Agents::GetAgent {parentJid jid args} {
     
-    upvar ::Jabber::jstate jstate
-    
     array set opts {
 	-silent 0
     }
     array set opts $args        
-    $jstate(jlib) agent_get $jid  \
+    ::Jabber::InvokeJlibCmd agent_get $jid  \
       [list ::Jabber::Agents::GetAgentCallback $parentJid $jid $opts(-silent)]
 }
 

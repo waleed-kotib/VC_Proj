@@ -1,13 +1,13 @@
 #  entrycomp.tcl ---
 #  
-#      This file is part of the whiteboard application. It implements an
+#      This file is part of The Coccinella application. It implements an
 #      entry with completion.
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: entrycomp.tcl,v 1.3 2003-10-25 07:22:26 matben Exp $
+# $Id: entrycomp.tcl,v 1.4 2004-01-13 14:50:20 matben Exp $
 #
 # ########################### USAGE ############################################
 #

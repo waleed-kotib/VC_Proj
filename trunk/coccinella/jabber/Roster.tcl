@@ -1,11 +1,11 @@
 #  Roster.tcl ---
 #  
-#      This file is part of the whiteboard application. 
+#      This file is part of The Coccinella application. 
 #      It implements the Roster GUI part.
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.34 2004-01-02 11:41:16 matben Exp $
+# $Id: Roster.tcl,v 1.35 2004-01-13 14:50:21 matben Exp $
 
 package provide Roster 1.0
 

@@ -1,12 +1,12 @@
 #  notebook.tcl ---
 #  
-#      This file is part of the whiteboard application.
+#      This file is part of The Coccinella application.
 #      It implements a notebook interface.
 #      Code idee from Harrison & McLennan
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: notebook.tcl,v 1.2 2003-04-28 13:32:25 matben Exp $
+# $Id: notebook.tcl,v 1.3 2004-01-13 14:50:20 matben Exp $
 # 
 # ########################### USAGE ############################################
 #

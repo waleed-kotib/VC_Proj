@@ -1,11 +1,11 @@
 #  Conference.tcl ---
 #  
-#      This file is part of the whiteboard application. 
+#      This file is part of The Coccinella application. 
 #      It implements conference parts for jabber.
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Conference.tcl,v 1.5 2003-12-30 15:30:58 matben Exp $
+# $Id: Conference.tcl,v 1.6 2004-01-13 14:50:20 matben Exp $
 
 package provide Conference 1.0
 

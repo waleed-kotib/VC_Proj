@@ -1,13 +1,13 @@
 #  CanvasDraw.tcl ---
 #  
-#      This file is part of the whiteboard application. It implements the
+#      This file is part of The Coccinella application. It implements the
 #      drawings commands associated with the tools.
 #      
 #  Copyright (c) 2000-2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasDraw.tcl,v 1.19 2003-12-20 14:27:16 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.20 2004-01-13 14:50:21 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 #  

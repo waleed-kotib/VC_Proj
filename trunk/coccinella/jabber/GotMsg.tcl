@@ -1,11 +1,11 @@
 #  GotMsg.tcl ---
 #  
-#      This file is part of the whiteboard application. 
+#      This file is part of The Coccinella application. 
 #      It implements a dialog for jabber messages.
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.18 2003-12-30 15:30:58 matben Exp $
+# $Id: GotMsg.tcl,v 1.19 2004-01-13 14:50:20 matben Exp $
 
 package provide GotMsg 1.0
 

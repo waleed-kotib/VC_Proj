@@ -1,13 +1,13 @@
 #  Import.tcl ---
 #  
-#      This file is part of the whiteboard application. It implements image
+#      This file is part of The Coccinella application. It implements image
 #      and movie stuff.
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Import.tcl,v 1.9 2003-12-20 14:27:16 matben Exp $
+# $Id: Import.tcl,v 1.10 2004-01-13 14:50:21 matben Exp $
 
 package require http
 package require httpex

@@ -1,11 +1,11 @@
 #  Chat.tcl ---
 #  
-#      This file is part of the whiteboard application. 
+#      This file is part of The Coccinella application. 
 #      It implements chat type of UI for jabber.
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.32 2004-01-11 15:17:51 matben Exp $
+# $Id: Chat.tcl,v 1.33 2004-01-13 14:50:20 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -16,6 +16,15 @@ package provide Chat 1.0
 namespace eval ::Jabber::Chat:: {
     global  wDlgs
     
+    # Add all event hooks.
+    hooks::add quitAppHook        [list ::UI::SaveWinGeom $wDlgs(jstartchat)]
+    hooks::add quitAppHook        [list ::UI::SaveWinPrefixGeom $wDlgs(jchat)]
+    hooks::add quitAppHook        ::Jabber::Chat::GetFirstPanePos    
+    hooks::add newChatMessageHook ::Jabber::Chat::GotMsg
+    hooks::add presenceHook       ::Jabber::Chat::PresenceCallback
+    hooks::add closeWindowHook    ::Jabber::Chat::CloseHook
+    hooks::add closeWindowHook    ::Jabber::Chat::CloseHistoryHook
+
     # Use option database for customization. 
     # These are nonstandard option valaues and we may therefore keep priority
     # widgetDefault.
@@ -69,15 +78,6 @@ namespace eval ::Jabber::Chat:: {
 	{histhead    -background          histHeadBackground    Background}
 	{histhead    -font                histHeadFont          Font}
     }
-
-    # Add all event hooks.
-    hooks::add quitAppHook        [list ::UI::SaveWinGeom $wDlgs(jstartchat)]
-    hooks::add quitAppHook        [list ::UI::SaveWinPrefixGeom $wDlgs(jchat)]
-    hooks::add quitAppHook        ::Jabber::Chat::GetFirstPanePos    
-    hooks::add newChatMessageHook ::Jabber::Chat::GotMsg
-    hooks::add presenceHook       ::Jabber::Chat::PresenceCallback
-    hooks::add closeWindowHook    ::Jabber::Chat::CloseHook
-    hooks::add closeWindowHook    ::Jabber::Chat::CloseHistoryHook
         
     # Running number for chat thread token.
     variable uid 0
@@ -446,6 +446,9 @@ proc ::Jabber::Chat::Build {threadID args} {
       [list [namespace current]::Print $token]
     $wtray newbutton history History $iconPrint $iconPrintDis  \
       [list [namespace current]::BuildHistory $jid2]
+    
+    hooks::run buildChatButtonTrayHook $wtray $state(jid)
+    
     set shortBtWidth [$wtray minwidth]
 
     # Button part.

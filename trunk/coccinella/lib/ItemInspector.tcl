@@ -1,6 +1,6 @@
 #  ItemInspector.tcl ---
 #  
-#      This file is part of the whiteboard application. It lets the user 
+#      This file is part of The Coccinella application. It lets the user 
 #      inspect and configure item options in the canvas. The options are 
 #      organized into a list as:   
 #      listOfAllOptions = {{-option oldValue entryWidget} {...} ...}
@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ItemInspector.tcl,v 1.15 2004-01-01 12:08:22 matben Exp $
+# $Id: ItemInspector.tcl,v 1.16 2004-01-13 14:50:21 matben Exp $
 
 namespace eval ::ItemInspector::  {
     

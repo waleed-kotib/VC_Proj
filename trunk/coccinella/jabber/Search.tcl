@@ -1,11 +1,11 @@
 #  Search.tcl ---
 #  
-#      This file is part of the whiteboard application. 
+#      This file is part of The Coccinella application. 
 #      It implements search UI parts for jabber.
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Search.tcl,v 1.6 2004-01-01 12:08:21 matben Exp $
+# $Id: Search.tcl,v 1.7 2004-01-13 14:50:21 matben Exp $
 
 package provide Search 1.0
 

@@ -1,13 +1,13 @@
 #  PreferencesUtils.tcl ---
 #  
-#      This file is part of the whiteboard application. It defines some 
+#      This file is part of The Coccinella application. It defines some 
 #      utilities for keeping the user preferences. 
 #      
 #  Copyright (c) 1999-2002  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.24 2004-01-09 14:08:22 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.25 2004-01-13 14:50:21 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              

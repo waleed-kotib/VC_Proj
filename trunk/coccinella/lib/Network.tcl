@@ -1,13 +1,13 @@
 #  Network.tcl ---
 #  
-#      This file is part of the whiteboard application. 
+#      This file is part of The Coccinella application. 
 #      It implements some network utilities.
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Network.tcl,v 1.8 2003-12-12 16:18:40 matben Exp $
+# $Id: Network.tcl,v 1.9 2004-01-13 14:50:21 matben Exp $
 
 namespace eval ::Network:: {
     
@@ -110,7 +110,7 @@ proc ::Network::WhenSocketOpensInits {sock nameOrIP port cmd tls} {
 	catch {unset killerId($sock)}
     }
 
-    if {[eof $sock]} {
+    if {[catch {eof $sock} iseof] || $iseof} {
 	catch {close $sock}
 	set msg "Failed to open network socket to $nameOrIP."
 	uplevel #0 $cmd [list $sock $nameOrIP $port error $msg]

@@ -1,6 +1,6 @@
 # GetFileIface.tcl --
 #  
-#       This file is part of the whiteboard application. It contains a number
+#       This file is part of The Coccinella application. It contains a number
 #       of procedures for performing a get operation over the network.
 #       They are mainly interfaces to the 'getfile' package to provide GUI.
 #      
@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: GetFileIface.tcl,v 1.12 2004-01-10 14:53:39 matben Exp $
+# $Id: GetFileIface.tcl,v 1.13 2004-01-13 14:50:21 matben Exp $
 
 package require getfile
 package require uriencode

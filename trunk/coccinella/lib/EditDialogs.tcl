@@ -1,6 +1,6 @@
 #  EditDialogs.tcl ---
 #  
-#      This file is part of the whiteboard application. 
+#      This file is part of The Coccinella application. 
 #      It implements dialogs that are used for editing things, such as,
 #      for instance, shortcut lists or font families.
 #      
@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: EditDialogs.tcl,v 1.6 2004-01-01 12:08:22 matben Exp $
+# $Id: EditDialogs.tcl,v 1.7 2004-01-13 14:50:21 matben Exp $
 
 
 #       ::EditShortcuts:: implements dialogs for editing shortcuts. 

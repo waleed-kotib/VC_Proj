@@ -1,11 +1,11 @@
 #  buttontray.tcl ---
 #  
-#      This file is part of the whiteboard application.
+#      This file is part of The Coccinella application.
 #      It implements a fancy button tray widget.
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: buttontray.tcl,v 1.5 2003-12-22 15:04:57 matben Exp $
+# $Id: buttontray.tcl,v 1.6 2004-01-13 14:50:20 matben Exp $
 # 
 # ########################### USAGE ############################################
 #

@@ -1,6 +1,6 @@
 # Types.tcl --
 #  
-#       This file is part of the whiteboard application. It contains various
+#       This file is part of The Coccinella application. It contains various
 #       tools to map:
 #       mime type <-> file suffix
 #       mac type <-> file suffix
@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Types.tcl,v 1.5 2003-10-12 13:12:55 matben Exp $
+# $Id: Types.tcl,v 1.6 2004-01-13 14:50:21 matben Exp $
 
 package provide Types 1.0
 

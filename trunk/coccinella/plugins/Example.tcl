@@ -1,13 +1,13 @@
 # Example.tcl --
 #  
-#       This file is part of the whiteboard application. It is an example
+#       This file is part of The Coccinella application. It is an example
 #       template for the plugin structure. See also lib/Plugins.tcl.
 #
 #  Copyright (c) 2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Example.tcl,v 1.10 2003-12-13 17:54:41 matben Exp $
+# $Id: Example.tcl,v 1.11 2004-01-13 14:50:21 matben Exp $
 
 
 namespace eval ::Example:: {

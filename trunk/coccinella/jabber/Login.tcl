@@ -1,11 +1,11 @@
 #  Login.tcl ---
 #  
-#      This file is part of the whiteboard application. 
+#      This file is part of The Coccinella application. 
 #      It implements the Roster GUI part.
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.20 2004-01-05 15:00:32 matben Exp $
+# $Id: Login.tcl,v 1.21 2004-01-13 14:50:21 matben Exp $
 
 package provide Login 1.0
 

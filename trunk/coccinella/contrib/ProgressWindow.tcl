@@ -1,6 +1,6 @@
 #  ProgressWindow.tcl ---
 #  
-#       This file is part of the whiteboard application. It makes a progress 
+#       This file is part of The Coccinella application. It makes a progress 
 #       window. The 'updatePerc' is a number between 0 and 100.
 #       The 'cancelCmd' should contain the fully qualified command for the 
 #       cancel operation.
@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ProgressWindow.tcl,v 1.8 2004-01-10 14:52:15 matben Exp $
+# $Id: ProgressWindow.tcl,v 1.9 2004-01-13 14:50:20 matben Exp $
 # 
 #-------------------------------------------------------------------------------
 #
