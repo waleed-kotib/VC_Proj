@@ -1,4 +1,4 @@
-#  ImageAndMovie.tcl ---
+#  Import.tcl ---
 #  
 #      This file is part of the whiteboard application. It implements image
 #      and movie stuff.
@@ -7,12 +7,12 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ImageAndMovie.tcl,v 1.13 2003-09-21 13:02:12 matben Exp $
+# $Id: Import.tcl,v 1.1 2003-09-28 06:19:38 matben Exp $
 
 package require http
 package require httpex
 
-namespace eval ::ImageAndMovie:: {
+namespace eval ::Import:: {
     
     # Specials for 'xanim'
     variable xanimPipe2Frame 
@@ -25,7 +25,7 @@ namespace eval ::ImageAndMovie:: {
     set locals(httpuid) 0
 }
 
-# ImageAndMovie::ImportImageOrMovieDlg --
+# Import::ImportImageOrMovieDlg --
 #
 #       Handles the dialog of opening a file ans then lets 
 #       'DoImport' do the rest. On Mac either file extension or 
@@ -37,7 +37,7 @@ namespace eval ::ImageAndMovie:: {
 # Results:
 #       Defines option arrays and icons for movie controllers.
 
-proc ::ImageAndMovie::ImportImageOrMovieDlg {wtop} {    
+proc ::Import::ImportImageOrMovieDlg {wtop} {    
     variable initialDir    
     
     set wCan [::UI::GetCanvasFromWtop $wtop]
@@ -59,7 +59,7 @@ proc ::ImageAndMovie::ImportImageOrMovieDlg {wtop} {
     set mime [::Types::GetMimeTypeForFileName $fileName]
     if {[::Plugins::HaveImporterForMime $mime]} {
 	set opts [list -coords [::CanvasUtils::NewImportAnchor]]	
-	set errMsg [::ImageAndMovie::DoImport $wCan $opts -file $fileName]
+	set errMsg [::Import::DoImport $wCan $opts -file $fileName]
 	if {$errMsg != ""} {
 	    tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
 	      -message "Failed importing: $errMsg"
@@ -70,7 +70,7 @@ proc ::ImageAndMovie::ImportImageOrMovieDlg {wtop} {
     }
 }
 
-# ImageAndMovie::DoImport --
+# Import::DoImport --
 # 
 #       Dispatches importing images/audio/video etc., to the whiteboard.  
 #       There shall be a registered import procedure for the mime type
@@ -103,7 +103,7 @@ proc ::ImageAndMovie::ImportImageOrMovieDlg {wtop} {
 # Results:
 #       an error string which is empty if things went ok so far.
 
-proc ::ImageAndMovie::DoImport {w opts args} {
+proc ::Import::DoImport {w opts args} {
     global  prefs this allIPnumsToSend
     
     ::Debug 2 "_  DoImport:: opts=$opts"
@@ -115,10 +115,10 @@ proc ::ImageAndMovie::DoImport {w opts args} {
     }
     array set argsArr $args
     if {![info exists argsArr(-file)] && ![info exists argsArr(-url)]} {
-	return -code error "::ImageAndMovie::DoImport needs -file or -url"
+	return -code error "::Import::DoImport needs -file or -url"
     }
     if {[info exists argsArr(-file)] && [info exists argsArr(-url)]} {
-	return -code error "::ImageAndMovie::DoImport needs -file or -url, not both"
+	return -code error "::Import::DoImport needs -file or -url, not both"
     }
     if {[info exists argsArr(-file)]} {
 	set isLocal 1
@@ -199,11 +199,11 @@ proc ::ImageAndMovie::DoImport {w opts args} {
 	    if {$drawLocal} {
 		if {$isLocal} {
 		    set errMsg [eval {
-			::ImageAndMovie::DrawImage $w $fileName putOpts
+			::Import::DrawImage $w $fileName putOpts
 		    } [array get argsArr]]
 		} else {
 		    set errMsg [eval {
-			::ImageAndMovie::HttpGet $wtopNS $argsArr(-url) \
+			::Import::HttpGet $wtopNS $argsArr(-url) \
 			  $importer $putOpts
 		    } [array get argsArr]]
 		}
@@ -222,18 +222,18 @@ proc ::ImageAndMovie::DoImport {w opts args} {
 	    if {$drawLocal} {
 		if {$isLocal} {
 		    set errMsg [eval {
-			::ImageAndMovie::DrawQuickTimeTcl $w $fileName \
+			::Import::DrawQuickTimeTcl $w $fileName \
 			  putOpts
 		    } [array get argsArr]]
 		} else {
 		    set errMsg [eval {
-			::ImageAndMovie::HttpGetQuickTimeTcl $wtopNS  \
+			::Import::HttpGetQuickTimeTcl $wtopNS  \
 			  $argsArr(-url) $putOpts} [array get argsArr]]
 			
 		    # Perhaps there shall be an option to get QT stuff via
 		    # http but without streaming it?
 		    if {0} {
-			eval {::ImageAndMovie::HttpGet $wtopNS $argsArr(-url) \
+			eval {::Import::HttpGet $wtopNS $argsArr(-url) \
 			  $importer $putOpts} [array get argsArr]
 		    }
 		}
@@ -252,11 +252,11 @@ proc ::ImageAndMovie::DoImport {w opts args} {
 	    if {$drawLocal} {
 		if {$isLocal} {
 		    set errMsg [eval {
-			::ImageAndMovie::DrawSnack $w $fileName putOpts
+			::Import::DrawSnack $w $fileName putOpts
 		    } [array get argsArr]]
 		} else {
 		    set errMsg [eval {
-			::ImageAndMovie::HttpGet $wtopNS $argsArr(-url) \
+			::Import::HttpGet $wtopNS $argsArr(-url) \
 			  $importer $putOpts
 		    } [array get argsArr]]
 		}    
@@ -275,11 +275,11 @@ proc ::ImageAndMovie::DoImport {w opts args} {
 	    if {$drawLocal} {
 		if {$isLocal} {
 		    set errMsg [eval {
-			::ImageAndMovie::DrawXanim $w $fileName putOpts
+			::Import::DrawXanim $w $fileName putOpts
 		    } [array get argsArr]]
 		} else {
 		    set errMsg [eval {
-			::ImageAndMovie::HttpGet $wtopNS $argsArr(-url) \
+			::Import::HttpGet $wtopNS $argsArr(-url) \
 			  $importer $putOpts
 		    } [array get argsArr]]
 		}
@@ -306,7 +306,7 @@ proc ::ImageAndMovie::DoImport {w opts args} {
 			} [array get argsArr]]
 		    } else {			
 			set errMsg [eval {
-			    ::ImageAndMovie::HttpGet $wtopNS $argsArr(-url) \
+			    ::Import::HttpGet $wtopNS $argsArr(-url) \
 			      $importer $putOpts
 			} [array get argsArr]]
 		    }
@@ -318,7 +318,7 @@ proc ::ImageAndMovie::DoImport {w opts args} {
     # Put to remote peers but require we did not fail ourself.   
     if {$doPut && ($errMsg == "")} {	
 	if {$isLocal} {
-	    ::ImageAndMovie::PutFile $wtopNS $fileName $argsArr(-where) \
+	    ::Import::PutFile $wtopNS $fileName $argsArr(-where) \
 	      $putOpts $useTag
 	} else {
 	    
@@ -328,7 +328,7 @@ proc ::ImageAndMovie::DoImport {w opts args} {
     
     # Construct redo/undo entry.
     if {$argsArr(-addundo) && ($errMsg == "")} {
-	set redo [concat [list ::ImageAndMovie::DoImport $w $opts -addundo 0] \
+	set redo [concat [list ::Import::DoImport $w $opts -addundo 0] \
 	  $args]
 	set undo [list ::CanvasUtils::Command $wtopNS [list delete $useTag]]
 	undo::add [::UI::GetUndoToken $wtopNS] $undo $redo
@@ -336,7 +336,7 @@ proc ::ImageAndMovie::DoImport {w opts args} {
     return $errMsg
 }
 
-# ImageAndMovie::DrawImage --
+# Import::DrawImage --
 # 
 #       Draws the image in 'fileName' onto canvas, taking options
 #       in 'opts' into account.
@@ -350,10 +350,10 @@ proc ::ImageAndMovie::DoImport {w opts args} {
 # Results:
 #       an error string which is empty if things went ok.
 
-proc ::ImageAndMovie::DrawImage {w fileName optsVar args} {
+proc ::Import::DrawImage {w fileName optsVar args} {
     upvar $optsVar opts
 
-    ::Debug 2 "::ImageAndMovie::DrawImage args='$args',\n\topts=$opts"
+    ::Debug 2 "::Import::DrawImage args='$args',\n\topts=$opts"
     
     array set optArr $opts
     set errMsg ""
@@ -397,7 +397,7 @@ proc ::ImageAndMovie::DrawImage {w fileName optsVar args} {
 	set imageName $newImName
     }
     set cmd [list create image $x $y   \
-      -image $imageName -anchor nw -tags [list image $useTag]]
+      -image $imageName -anchor nw -tags [list std image $useTag]]
     eval $w $cmd
     
     # Handle stacking order. Need catch since relative items may not yet exist.
@@ -412,7 +412,7 @@ proc ::ImageAndMovie::DrawImage {w fileName optsVar args} {
     return $errMsg
 }
 
-# ImageAndMovie::DrawQuickTimeTcl --
+# Import::DrawQuickTimeTcl --
 # 
 #       Draws a local QuickTime movie onto canvas.
 #       
@@ -425,10 +425,10 @@ proc ::ImageAndMovie::DrawImage {w fileName optsVar args} {
 # Results:
 #       an error string which is empty if things went ok.
 
-proc ::ImageAndMovie::DrawQuickTimeTcl {w fileName optsVar args} {
+proc ::Import::DrawQuickTimeTcl {w fileName optsVar args} {
     upvar $optsVar opts
     
-    ::Debug 2 "::ImageAndMovie::DrawQuickTimeTcl args='$args'"
+    ::Debug 2 "::Import::DrawQuickTimeTcl args='$args'"
     
     array set optArr $opts
     array set argsArr $args
@@ -451,13 +451,13 @@ proc ::ImageAndMovie::DrawQuickTimeTcl {w fileName optsVar args} {
     }
     
     $w create window $x $y -anchor nw -window $wfr   \
-      -tags [list movie $useTag]
+      -tags [list frame $useTag]
     pack $wmovie -in $wfr -padx 3 -pady 3
     
     if {[info exists optArr(-above)]} {
 	catch {$w raise $useTag $optArr(-above)}
     }
-    set qtBalloonMsg [::ImageAndMovie::QuickTimeBalloonMsg $wmovie $fileName]
+    set qtBalloonMsg [::Import::QuickTimeBalloonMsg $wmovie $fileName]
     ::balloonhelp::balloonforwindow $wmovie $qtBalloonMsg
     lappend opts -width [winfo reqwidth $wmovie]  \
       -height [winfo reqheight $wmovie]
@@ -465,11 +465,11 @@ proc ::ImageAndMovie::DrawQuickTimeTcl {w fileName optsVar args} {
     return $errMsg
 }
 
-# ImageAndMovie::QuickTimeBalloonMsg --
+# Import::QuickTimeBalloonMsg --
 # 
 #       Makes a text for balloon message for an mp3 typically.
 
-proc ::ImageAndMovie::QuickTimeBalloonMsg {wmovie fileName} {
+proc ::Import::QuickTimeBalloonMsg {wmovie fileName} {
     
     set msg [file tail $fileName]
     if {[string equal [file extension $fileName] ".mp3"]} {
@@ -489,7 +489,7 @@ proc ::ImageAndMovie::QuickTimeBalloonMsg {wmovie fileName} {
     return $msg
 }
 
-# ImageAndMovie::DrawSnack --
+# Import::DrawSnack --
 # 
 #       Draws a local snack movie onto canvas. 
 #       
@@ -502,10 +502,10 @@ proc ::ImageAndMovie::QuickTimeBalloonMsg {wmovie fileName} {
 # Results:
 #       an error string which is empty if things went ok.
 
-proc ::ImageAndMovie::DrawSnack {w fileName optsVar args} {
+proc ::Import::DrawSnack {w fileName optsVar args} {
     upvar $optsVar opts
     
-    ::Debug 2 "::ImageAndMovie::DrawSnack args='$args'"
+    ::Debug 2 "::Import::DrawSnack args='$args'"
     
     array set optArr $opts
     set errMsg ""
@@ -526,7 +526,7 @@ proc ::ImageAndMovie::DrawSnack {w fileName optsVar args} {
     set wmovie ${wfr}.m
     ::moviecontroller::moviecontroller $wmovie -snacksound $uniqueName
     $w create window $x $y -anchor nw -window $wfr  \
-      -tags [list movie $useTag]
+      -tags [list frame $useTag]
     pack $wmovie -in $wfr -padx 3 -pady 3
     update idletasks
     if {[info exists optArr(-above)]} {
@@ -542,7 +542,7 @@ proc ::ImageAndMovie::DrawSnack {w fileName optsVar args} {
     return $errMsg
 }
 
-# ImageAndMovie::DrawXanim --
+# Import::DrawXanim --
 # 
 #       Draws a local xanim movie onto canvas.
 #       
@@ -555,13 +555,13 @@ proc ::ImageAndMovie::DrawSnack {w fileName optsVar args} {
 # Results:
 #       an error string which is empty if things went ok.
 
-proc ::ImageAndMovie::DrawXanim {w fileName optsVar args} {
+proc ::Import::DrawXanim {w fileName optsVar args} {
     upvar $optsVar opts
     
     variable xanimPipe2Frame 
     variable xanimPipe2Item
     
-    ::Debug 2 "::ImageAndMovie::DrawXanim args='$args'"
+    ::Debug 2 "::Import::DrawXanim args='$args'"
     
     array set optArr $opts
     set errMsg ""
@@ -584,7 +584,7 @@ proc ::ImageAndMovie::DrawXanim {w fileName optsVar args} {
     set width [lindex $size 0]
     set height [lindex $size 1]
     $wfr configure -width [expr $width + 6] -height [expr $height + 6]
-    $w create window $x $y -anchor nw -window $wfr -tags [list movie $useTag]
+    $w create window $x $y -anchor nw -window $wfr -tags [list frame $useTag]
     
     # Make special frame for xanim to draw in.
     set frxanim [frame $wfr.xanim -container 1 -bg black  \
@@ -604,14 +604,14 @@ proc ::ImageAndMovie::DrawXanim {w fileName optsVar args} {
     } else {
 	set xanimPipe2Frame($xpipe) $wfr
 	set xanimPipe2Item($xpipe) $useTag
-	fileevent $xpipe readable [list XanimReadOutput $w $xpipe]
+	fileevent $xpipe readable [list XanimReadOutput $w $wfr $xpipe]
     }    
     lappend opts -width $width -height $height
     
     return $errMsg
 }
 
-# ImageAndMovie::HttpGet --
+# Import::HttpGet --
 # 
 #       Imports the specified file using http to file.
 #       The actual work done via callbacks to the http package.
@@ -632,11 +632,11 @@ proc ::ImageAndMovie::DrawXanim {w fileName optsVar args} {
 # Results:
 #       an error string which is empty if things went ok so far.
 
-proc ::ImageAndMovie::HttpGet {wtop url importPackage opts args} {
+proc ::Import::HttpGet {wtop url importPackage opts args} {
     global  this prefs
     variable locals
     
-    ::Debug 2 "::ImageAndMovie::HttpGet wtop=$wtop, url=$url, \
+    ::Debug 2 "::Import::HttpGet wtop=$wtop, url=$url, \
       importPackage=$importPackage, args='$args'"
 
     # Make local state array for convenient storage. 
@@ -692,21 +692,21 @@ proc ::ImageAndMovie::HttpGet {wtop url importPackage opts args} {
     foreach {name value} $state(meta) {
         if {[regexp -nocase ^location$ $name]} {
 	    close $dst
-            eval {::ImageAndMovie::HttpGet $wtop [string trim $value] \
+            eval {::Import::HttpGet $wtop [string trim $value] \
 	      $importPackage $opts} $args
         }
     }
     return ""
 }
 
-# ImageAndMovie::HttpProgress --
+# Import::HttpProgress --
 # 
 #       Progress callback for the http package.
 #       Any -progess command gets only called at an prefs(progUpdateMillis) 
 #       interval unless there is an error.
 
 
-proc ::ImageAndMovie::HttpProgress {gettoken token total current} {
+proc ::Import::HttpProgress {gettoken token total current} {
     global prefs
     
     upvar #0 $token state
@@ -766,7 +766,7 @@ proc ::ImageAndMovie::HttpProgress {gettoken token total current} {
     }
 }
 
-# ImageAndMovie::HttpCommand --
+# Import::HttpCommand --
 # 
 #       Callback for httpex package.
 #       If ok it dispatches drawing to the right proc.
@@ -774,7 +774,7 @@ proc ::ImageAndMovie::HttpProgress {gettoken token total current} {
 #       httpex: The status sequence is normally: 
 #          putheader -> waiting -> getheader -> body -> ok
 
-proc ::ImageAndMovie::HttpCommand {gettoken token} {    
+proc ::Import::HttpCommand {gettoken token} {    
     upvar #0 $token state
     upvar #0 $gettoken getstate 
     
@@ -782,7 +782,7 @@ proc ::ImageAndMovie::HttpCommand {gettoken token} {
     set getstate(status) [::httpex::status $token]
     set getstate(ncode) [httpex::ncode $token]
 
-    ::Debug 2 "::ImageAndMovie::HttpCommand status = $getstate(status)"
+    ::Debug 2 "::Import::HttpCommand status = $getstate(status)"
     
     set wtop $getstate(wtop)
     set wcan $getstate(wcan)
@@ -840,29 +840,29 @@ proc ::ImageAndMovie::HttpCommand {gettoken token} {
 	    ::FileCache::Set $getstate(url) $dstPath
 	    
 	    # ??? instead
-	    # ::ImageAndMovie::DoImport ... -where local
+	    # ::Import::DoImport ... -where local
 	    
 	    switch -- $getstate(importPackage) {
 		image {
 		    set errMsg [eval {
-			::ImageAndMovie::DrawImage $wcan $dstPath opts} \
+			::Import::DrawImage $wcan $dstPath opts} \
 			  $getstate(args)]
 		}
 		QuickTimeTcl {
 		    
 		    # This transport method is different from the QT streaming http.
 		    set errMsg [eval {
-			::ImageAndMovie::DrawQuickTimeTcl $wcan $dstPath opts} \
+			::Import::DrawQuickTimeTcl $wcan $dstPath opts} \
 			  $getstate(args)]
 		}
 		snack {
 		    set errMsg [eval {
-			::ImageAndMovie::DrawSnack $wcan $dstPath opts} \
+			::Import::DrawSnack $wcan $dstPath opts} \
 			  $getstate(args)]
 		}
 		xanim {
 		    set errMsg [eval {
-			::ImageAndMovie::DrawXanim $wcan $dstPath opts} \
+			::Import::DrawXanim $wcan $dstPath opts} \
 			  $getstate(args)]
 		}
 		default {
@@ -899,13 +899,13 @@ proc ::ImageAndMovie::HttpCommand {gettoken token} {
     } 	
 }
 
-# ImageAndMovie::ImportProgress --
+# Import::ImportProgress --
 # 
 #       Handles http progress UI stuff. 
 #       Gets only called at an prefs(progUpdateMillis) interval unless 
 #       there is an error.
 
-proc ::ImageAndMovie::ImportProgress {line status gettoken httptoken total current} {
+proc ::Import::ImportProgress {line status gettoken httptoken total current} {
 
     upvar #0 $token state
     upvar #0 $gettoken getstate
@@ -928,16 +928,16 @@ proc ::ImageAndMovie::ImportProgress {line status gettoken httptoken total curre
     }
 }
 
-# ImageAndMovie::ImportCommand --
+# Import::ImportCommand --
 # 
-#       Callback procedure for the '::ImageAndMovie::HandleImportCmd'
+#       Callback procedure for the '::Import::HandleImportCmd'
 #       command. 
 #       Takes care of status reports not reported by direct return. 
 
-proc ::ImageAndMovie::ImportCommand {line status gettoken httptoken} {
+proc ::Import::ImportCommand {line status gettoken httptoken} {
     upvar #0 $gettoken getstate          
 
-    Debug 2 "::ImageAndMovie::ImportCommand status=$status"
+    Debug 2 "::Import::ImportCommand status=$status"
     
     if {[string equal $status "reset"]} {
 	return
@@ -980,24 +980,24 @@ proc ::ImageAndMovie::ImportCommand {line status gettoken httptoken} {
     # We should be final here!
     if {[httpex::isfinal $httptoken]} {
 	if {$status != "ok"} {
-	    eval {::ImageAndMovie::NewBrokenImage $wcan [lrange $line 1 2]} \
+	    eval {::Import::NewBrokenImage $wcan [lrange $line 1 2]} \
 	      [lrange $line 3 end]
 	}
     }
 }
 
-# ImageAndMovie::HttpResetAll --
+# Import::HttpResetAll --
 # 
 #       Cancel and reset all ongoing http transactions for this wtop.
 
-proc ::ImageAndMovie::HttpResetAll {wtop} {
+proc ::Import::HttpResetAll {wtop} {
 
     set gettokenList [concat  \
-      [info vars ::ImageAndMovie::\[0-9\]] \
-      [info vars ::ImageAndMovie::\[0-9\]\[0-9\]] \
-      [info vars ::ImageAndMovie::\[0-9\]\[0-9\]\[0-9\]]]
+      [info vars ::Import::\[0-9\]] \
+      [info vars ::Import::\[0-9\]\[0-9\]] \
+      [info vars ::Import::\[0-9\]\[0-9\]\[0-9\]]]
     
-    ::Debug 2 "::ImageAndMovie::HttpResetAll wtop=$wtop, gettokenList='$gettokenList'"
+    ::Debug 2 "::Import::HttpResetAll wtop=$wtop, gettokenList='$gettokenList'"
     
     foreach gettoken $gettokenList {
 	upvar #0 $gettoken getstate          
@@ -1025,16 +1025,16 @@ proc ::ImageAndMovie::HttpResetAll {wtop} {
     }
 }
 
-# ImageAndMovie::HttpGetQuickTimeTcl --
+# Import::HttpGetQuickTimeTcl --
 # 
 #       Obtains a QuickTime movie from an url. This is streaming and the
 #       movie being streamed must be prepared for this. Currently there
 #       is no mechanism for checking this.
 
-proc ::ImageAndMovie::HttpGetQuickTimeTcl {wtop url opts args} {
+proc ::Import::HttpGetQuickTimeTcl {wtop url opts args} {
     variable locals
     
-    ::Debug 2 "::ImageAndMovie::HttpGetQuickTimeTcl"
+    ::Debug 2 "::Import::HttpGetQuickTimeTcl"
 
     # Make local state array for convenient storage. 
     # Use 'variable' for permanent storage.
@@ -1075,11 +1075,11 @@ proc ::ImageAndMovie::HttpGetQuickTimeTcl {wtop url opts args} {
     ::UI::SetStatusMessage $wtop "Opening $url"    
 }
 
-# ImageAndMovie::QuickTimeTclCallback --
+# Import::QuickTimeTclCallback --
 # 
 #       Callback for QuickTimeTcl package when using -url.
 
-proc ::ImageAndMovie::QuickTimeTclCallback {gettoken w msg {err {}}} {
+proc ::Import::QuickTimeTclCallback {gettoken w msg {err {}}} {
 
     upvar #0 $gettoken getstate          
     
@@ -1117,7 +1117,7 @@ proc ::ImageAndMovie::QuickTimeTclCallback {gettoken w msg {err {}}} {
     # If possible to map as a canvas item but is unmapped.
     if {$canmap && !$getstate(mapped)} {
 	set getstate(mapped) 1
-	::ImageAndMovie::DrawQuickTimeTclFromHttp $gettoken
+	::Import::DrawQuickTimeTclFromHttp $gettoken
     }
     
     # Cleanup when completely finished.
@@ -1126,12 +1126,12 @@ proc ::ImageAndMovie::QuickTimeTclCallback {gettoken w msg {err {}}} {
     }
 }
 
-# ImageAndMovie::DrawQuickTimeTclFromHttp --
+# Import::DrawQuickTimeTclFromHttp --
 #
 #       Performs the final stage of drawing the movie to canvas when
 #       obtained via the internal QT -url option.
 
-proc ::ImageAndMovie::DrawQuickTimeTclFromHttp {gettoken} {
+proc ::Import::DrawQuickTimeTclFromHttp {gettoken} {
     upvar #0 $gettoken getstate          
     
     set wtop $getstate(wtop)
@@ -1147,14 +1147,14 @@ proc ::ImageAndMovie::DrawQuickTimeTclFromHttp {gettoken} {
     set useTag $optArr(-tags)    
     
     $w create window $x $y -anchor nw -window $wfr \
-      -tags [list movie $useTag]
+      -tags [list frame $useTag]
     pack $wmovie -in $wfr -padx 3 -pady 3
     
     if {[info exists optArr(-above)]} {
 	catch {$w raise $useTag $optArr(-above)}
     }
     set fileName [GetFilePathFromUrl $url]
-    set qtBalloonMsg [::ImageAndMovie::QuickTimeBalloonMsg $wmovie $fileName]
+    set qtBalloonMsg [::Import::QuickTimeBalloonMsg $wmovie $fileName]
     ::balloonhelp::balloonforwindow $wmovie $qtBalloonMsg
     
     # Nothing to cache, not possible to transport further.
@@ -1162,7 +1162,7 @@ proc ::ImageAndMovie::DrawQuickTimeTclFromHttp {gettoken} {
     #::FileCache::Set $getstate(url) $dstPath
 }
 
-# ImageAndMovie::PutFile --
+# Import::PutFile --
 # 
 #       Interface to the PutFile. Must be called after item created to
 #       process the canvas stacking order correctly.
@@ -1173,9 +1173,9 @@ proc ::ImageAndMovie::DrawQuickTimeTclFromHttp {gettoken} {
 #   2) make hint track and serve using RTP.
 #   3) put as an ordinary binary file, perhaps flattened.
 
-proc ::ImageAndMovie::PutFile {wtop fileName where opts tag} {
+proc ::Import::PutFile {wtop fileName where opts tag} {
 
-    ::Debug 2 "::ImageAndMovie::PutFile fileName=$fileName, where=$where"
+    ::Debug 2 "::Import::PutFile fileName=$fileName, where=$where"
         
     array set optArr $opts
     set w [::UI::GetCanvasFromWtop $wtop]
@@ -1201,12 +1201,12 @@ proc ::ImageAndMovie::PutFile {wtop fileName where opts tag} {
     ::PutFileIface::PutFile $wtop $fileName $where $opts
 }
 
-# ImageAndMovie::XanimQuerySize --
+# Import::XanimQuerySize --
 #
 #       Gets size of the movie. If any error, return {}.
 #       Check also version number ( >= 2.70 ).
 
-proc ::ImageAndMovie::XanimQuerySize {fileName} {
+proc ::Import::XanimQuerySize {fileName} {
     
     set num_ {[0-9]+}
     set ver_ {[0-9]+\.[0-9]+}
@@ -1233,7 +1233,7 @@ proc ::ImageAndMovie::XanimQuerySize {fileName} {
     }
 }
 
-proc ::ImageAndMovie::XanimReadOutput {w xpipe} {
+proc ::Import::XanimReadOutput {w wfr xpipe} {
     
     variable xanimPipe2Frame 
     variable xanimPipe2Item
@@ -1242,7 +1242,7 @@ proc ::ImageAndMovie::XanimReadOutput {w xpipe} {
 	
 	# Movie is stopped, cleanup.
 	set co [$w coords $xanimPipe2Item($xpipe)]
-	::CanvasDraw::DeleteItem $w [lindex $co 0] [lindex $co 1] movie
+	::CanvasDraw::DeleteFrame $w $wfr [lindex $co 0] [lindex $co 1]
 	catch {close $xpipe}
     } else {
 	
@@ -1255,7 +1255,7 @@ proc ::ImageAndMovie::XanimReadOutput {w xpipe} {
    }
 }
 
-# ImageAndMovie::HandleImportCmd --
+# Import::HandleImportCmd --
 #
 #       Shall be canvasPath neutral and also neutral to file path type.
 #       Typically used when reading canvas file version 2.
@@ -1270,23 +1270,35 @@ proc ::ImageAndMovie::XanimReadOutput {w xpipe} {
 #               -commmand  a callback command for errors that cannot be reported
 #                          right away, using -url http for instance.
 #               -progress  http progress callback
+#               -addundo   (0|1)
 #               
 # Results:
 #       an error string which is empty if things went ok.
 
-proc ::ImageAndMovie::HandleImportCmd {w line args} {
+proc ::Import::HandleImportCmd {w line args} {
 
     Debug 2 "HandleImportCmd: line=$line, args=$args"
     
     if {![string equal [lindex $line 0] "import"]} {
 	return -code error "Line is not an \"import\" line"
     }
+    
+    # Make a suitable '-key value' list from the $line argument.
     set opts [concat [list -coords [lrange $line 1 2]] [lrange $line 3 end]]
     array set optArr $opts
     array set argsArr $args
+    
+    # SOrt out the switches that shall go as impArgs.
     set impArgs {}
-    if {[info exists argsArr(-where)]} {
-	lappend impArgs -where $argsArr(-where)
+    foreach {key value} $args {
+	switch -- $key {
+	    -where - -addundo {
+		lappend impArgs $key $value
+	    }
+	    default {
+		#
+	    }
+	}
     }
     
     # We must provide the importer with an absolute path if relative path.
@@ -1318,18 +1330,18 @@ proc ::ImageAndMovie::HandleImportCmd {w line args} {
 	}
     }
         
-    set errMsg [eval {::ImageAndMovie::DoImport $w $opts} $impArgs]
+    set errMsg [eval {::Import::DoImport $w $opts} $impArgs]
     return $errMsg
 }
 
-# ImageAndMovie::ImageImportCmd, QTImportCmd, SnackImportCmd,
+# Import::ImageImportCmd, QTImportCmd, SnackImportCmd,
 #    FrameImportCmd --
 #
 #       These are handy commands for the undo method.
 #       Executing any of these commands should be package neutral.
 #       Must be called *before* item is deleted.
 
-proc ::ImageAndMovie::ImageImportCmd {w utag} {
+proc ::Import::ImageImportCmd {w utag} {
     
     set imageName [$w itemcget $utag -image]
     set imageFile [$imageName cget -file]
@@ -1337,10 +1349,10 @@ proc ::ImageAndMovie::ImageImportCmd {w utag} {
     set optList [list -coords [$w coords $utag] -tags $utag]
     
     return [concat  \
-      [list ::ImageAndMovie::DoImport $w $optList] $imArgs]
+      [list ::Import::DoImport $w $optList] $imArgs]
 }
     
-proc ::ImageAndMovie::QTImportCmd {w utag} {
+proc ::Import::QTImportCmd {w utag} {
     
     # We need to reconstruct how it was imported.
     set win [$w itemcget $utag -window]
@@ -1354,10 +1366,10 @@ proc ::ImageAndMovie::QTImportCmd {w utag} {
 	set movargs [list -url $movUrl]
     }
     return [concat  \
-      [list ::ImageAndMovie::DoImport $w $optList] $movargs]
+      [list ::Import::DoImport $w $optList] $movargs]
 }
 
-proc ::ImageAndMovie::SnackImportCmd {w utag} {
+proc ::Import::SnackImportCmd {w utag} {
     
     # We need to reconstruct how it was imported.
     # 'wmovie' is a moviecontroller widget.
@@ -1368,12 +1380,12 @@ proc ::ImageAndMovie::SnackImportCmd {w utag} {
     set optList [list -coords [$w coords $utag] -tags $utag]
     set movargs [list -file $soundFile]
     return [concat  \
-      [list ::ImageAndMovie::DoImport $w $optList] $movargs]
+      [list ::Import::DoImport $w $optList] $movargs]
 }
 
 # Generic command for plugins, typically.
 
-proc ::ImageAndMovie::FrameImportCmd {w utag} {
+proc ::Import::FrameImportCmd {w utag} {
     
     set wtop [::UI::GetToplevelNS $w]
     set opts [::CanvasUtils::ItemCGet $wtop $utag]
@@ -1385,14 +1397,14 @@ proc ::ImageAndMovie::FrameImportCmd {w utag} {
     set optList [list -coords [$w coords $utag] -tags $utag]
     
     return [concat  \
-      [list ::ImageAndMovie::DoImport $w $optList] $impArgs]
+      [list ::Import::DoImport $w $optList] $impArgs]
 }
     
-# ImageAndMovie::GetTclSyntaxOptsFromTransport --
+# Import::GetTclSyntaxOptsFromTransport --
 # 
 # 
 
-proc ::ImageAndMovie::GetTclSyntaxOptsFromTransport {optList} {
+proc ::Import::GetTclSyntaxOptsFromTransport {optList} {
 
     set opts {}
 
@@ -1421,11 +1433,11 @@ proc ::ImageAndMovie::GetTclSyntaxOptsFromTransport {optList} {
     return $opts
 }
 
-# ImageAndMovie::GetTransportSyntaxOptsFromTcl --
+# Import::GetTransportSyntaxOptsFromTcl --
 # 
 # 
 
-proc ::ImageAndMovie::GetTransportSyntaxOptsFromTcl {optList} {
+proc ::Import::GetTransportSyntaxOptsFromTcl {optList} {
 
     set opts {}
 
@@ -1454,7 +1466,7 @@ proc ::ImageAndMovie::GetTransportSyntaxOptsFromTcl {optList} {
     return $opts
 }
 
-# ImageAndMovie::ResizeImage --
+# Import::ResizeImage --
 #
 #       Uhh.. resizes the selected images. 'zoomFactor' is 0,1 for no resize,
 #       2 for an enlargement with a factor of two, and
@@ -1475,7 +1487,7 @@ proc ::ImageAndMovie::GetTransportSyntaxOptsFromTcl {optList} {
 # Results:
 #       image item resized, propagated to clients.
 
-proc ::ImageAndMovie::ResizeImage {wtop zoomFactor which newTag {where all}} {
+proc ::Import::ResizeImage {wtop zoomFactor which newTag {where all}} {
         
     set w [::UI::GetCanvasFromWtop $wtop]
 
@@ -1621,7 +1633,7 @@ proc ::ImageAndMovie::ResizeImage {wtop zoomFactor which newTag {where all}} {
     }
 }
 
-# ImageAndMovie::GetAutoFitSize --
+# Import::GetAutoFitSize --
 #
 #       Gives a new smaller size of 'theMovie' if it is too large for canvas 'w'.
 #       It is rescaled by factors of two.
@@ -1630,7 +1642,7 @@ proc ::ImageAndMovie::ResizeImage {wtop zoomFactor which newTag {where all}} {
 #
 # Results:
 
-proc ::ImageAndMovie::GetAutoFitSize {w theMovie} {
+proc ::Import::GetAutoFitSize {w theMovie} {
 
     set factor 2.0
     set canw [winfo width $w]
@@ -1651,7 +1663,7 @@ proc ::ImageAndMovie::GetAutoFitSize {w theMovie} {
 #
 #       Some handy utilities for the popup menu callbacks.
 
-proc ::ImageAndMovie::SaveImageAsFile {w id} {
+proc ::Import::SaveImageAsFile {w id} {
 
     set imageName [$w itemcget $id -image]
     set origFile [$imageName cget -file]
@@ -1667,25 +1679,25 @@ proc ::ImageAndMovie::SaveImageAsFile {w id} {
     }
 }
 
-proc ::ImageAndMovie::ExportImageAsFile {w id} {
+proc ::Import::ExportImageAsFile {w id} {
     
     set imageName [$w itemcget $id -image]
     catch {$imageName write {Untitled.gif} -format {quicktime -dialog}}
 }
 
-proc ::ImageAndMovie::ExportMovie {wtop winfr} {
+proc ::Import::ExportMovie {wtop winfr} {
     
     set wmov ${winfr}.m
     $wmov export
 }
 
-# ImageAndMovie::ReloadImage --
+# Import::ReloadImage --
 # 
 #       Reloads a binary entity, image and such.
 
-proc ::ImageAndMovie::ReloadImage {wtop id} {
+proc ::Import::ReloadImage {wtop id} {
         
-    ::Debug 3 "::ImageAndMovie::ReloadImage"
+    ::Debug 3 "::Import::ReloadImage"
     
     # Need to have an url stored here.
     set opts [::CanvasUtils::ItemCGet $wtop $id]
@@ -1706,20 +1718,20 @@ proc ::ImageAndMovie::ReloadImage {wtop id} {
     set line [concat import $coords $opts]
     
     set errMsg [eval {
-	::ImageAndMovie::HandleImportCmd $wcan $line -where local   \
+	::Import::HandleImportCmd $wcan $line -where local   \
 	  -progess [list [namespace current]::ImportProgress $line] \
 	  -command [list [namespace current]::ImportCommand $line]
     }]
     if {$errMsg != ""} {
 
 	# Display a broken image to indicate for the user.
-	eval {::ImageAndMovie::NewBrokenImage $wcan $coords} $opts
+	eval {::Import::NewBrokenImage $wcan $coords} $opts
 	tk_messageBox -icon error -type ok -message \
 	  "Failed loading \"$optsArr(-url)\": $errMsg"
     }
 }
 
-# ImageAndMovie::NewBrokenImage --
+# Import::NewBrokenImage --
 # 
 #       Draws a broken image instaed of an ordinary image to indicate some
 #       kind of failure somewhere.
@@ -1728,9 +1740,9 @@ proc ::ImageAndMovie::ReloadImage {wtop id} {
 #
 # Results:
 
-proc ::ImageAndMovie::NewBrokenImage {w coords args} {
+proc ::Import::NewBrokenImage {w coords args} {
 
-    ::Debug 2 "::ImageAndMovie::NewBrokenImage coords=$coords, args='$args'"
+    ::Debug 2 "::Import::NewBrokenImage coords=$coords, args='$args'"
     
     array set argsArr {
 	-width      0
