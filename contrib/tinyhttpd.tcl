@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: tinyhttpd.tcl,v 1.17 2004-10-12 13:48:56 matben Exp $
+# $Id: tinyhttpd.tcl,v 1.18 2004-11-24 08:23:43 matben Exp $
 
 # ########################### USAGE ############################################
 #
@@ -35,7 +35,7 @@ package provide tinyhttpd 1.0
 namespace eval ::tinyhttpd:: {
         
     # Keep track of useful things.
-    variable gstate
+    variable priv
     variable httpMsg
     variable html
     variable http
@@ -61,7 +61,7 @@ namespace eval ::tinyhttpd:: {
     set this(path) [file dirname [info script]]
     set this(httpvers) 1.0
 
-    set gstate(debug) 0
+    set priv(debug) 0
     
     array set httpMsg {
       200 OK
@@ -197,7 +197,7 @@ Content-Length: %s\n"
 
 proc ::tinyhttpd::start {args} {
     variable opts
-    variable gstate
+    variable priv
     variable this
         
     # Any configuration options. Start with defaults, overwrite with args.
@@ -225,23 +225,23 @@ proc ::tinyhttpd::start {args} {
 	  $opts(-port)} msg]} {
 	return -code error "Couldn't start server socket: $msg."
     }	
-    set gstate(sock) $msg
+    set priv(sock) $msg
 
     # Log file
     if {$opts(-log)} {
 	if {[catch {open $opts(-logfile) a} fd]} {
-	    catch {close $gstate(sock)}
+	    catch {close $priv(sock)}
 	    return -code error "Failed open the log file: $opts(-logfile): $fd"
 	}
-	set gstate(logfd) $fd
-	fconfigure $gstate(logfd) -buffering none
+	set priv(logfd) $fd
+	fconfigure $priv(logfd) -buffering none
     }
     
     # Icon unix style paths when returning directory listings.
-    set httpdRelPathList [split $opts(-httpdrelativepath) $this(sep)]
-    set httpdRelPath     [join $httpdRelPathList /]
-    set gstate(folderIconRelPath) /$httpdRelPath/macfoldericon.gif
-    set gstate(fileIconRelPath)   /$httpdRelPath/textfileicon.gif
+    set relPathList [split $opts(-httpdrelativepath) $this(sep)]
+    set relPath     [join $relPathList /]
+    set priv(rpath,images,folder) /$relPath/macfoldericon.gif
+    set priv(rpath,images,file)   /$relPath/textfileicon.gif
     set absIconPath [file join $opts(-rootdirectory) $opts(-httpdrelativepath) \
       macfoldericon.gif]
     if {![file exists $absIconPath]} {
@@ -281,10 +281,9 @@ proc ::tinyhttpd::NewChannel {s ip port} {
 	state             "connected"
 	status            ""
     }
-    array set state [list     \
-      s             $s        \
-      ip            $ip       \
-      port          $port]    
+    set state(s)    $s
+    set state(ip)   $ip
+    set state(port) $port
     
     # Everything should be done with 'fileevent'.
     fconfigure $s -blocking 0 -buffering line
@@ -306,7 +305,6 @@ proc ::tinyhttpd::NewChannel {s ip port} {
 proc ::tinyhttpd::HandleRequest {token} {    
     variable $token
     upvar 0 $token state    
-    variable gstate
 
     Debug 2 "HandleRequest:: $token"
     
@@ -349,8 +347,7 @@ proc ::tinyhttpd::HandleRequest {token} {
 	    set state(reqvers) $reqvers
 	    
 	    # Set fileevent to read the sequence of 'key: value' lines.
-	    fileevent $s readable   \
-	      [list [namespace current]::Event $token]
+	    fileevent $s readable [list [namespace current]::Event $token]
 	} else {
 	    LogMsg "unknown request: $line"
 	    Finish $token "unknown request: $line"
@@ -376,7 +373,6 @@ proc ::tinyhttpd::HandleRequest {token} {
 proc ::tinyhttpd::Event {token} {    
     variable $token
     upvar 0 $token state    
-    variable gstate
     
     set s $state(s)
     if {[catch {eof $s} iseof] || $iseof} {
@@ -436,7 +432,6 @@ proc ::tinyhttpd::Respond {token} {
     variable $token
     upvar 0 $token state    
     variable opts
-    variable gstate
     variable suffToMimeType
     variable httpMsg
     variable http
@@ -584,7 +579,6 @@ proc ::tinyhttpd::Respond {token} {
 proc ::tinyhttpd::CopyStart {s token} {    
     variable $token
     upvar 0 $token state    
-    variable gstate
     variable opts
     
     Debug 4 "CopyStart::"
@@ -662,13 +656,13 @@ proc ::tinyhttpd::Finish {token {errmsg ""}} {
 # Results:
 
 proc ::tinyhttpd::stop { } {    
-    variable gstate
+    variable priv
     variable opts
     
-    catch {close $gstate(sock)}
+    catch {close $priv(sock)}
     LogMsg "Tiny Httpd stopped"
     if {$opts(-log)} {
-	catch {close $gstate(logfd)}
+	catch {close $priv(logfd)}
     }
 }
 
@@ -728,14 +722,14 @@ proc ::tinyhttpd::avergaebytespersec { } {
 # 
 
 proc ::tinyhttpd::cleanup { } {
-    variable gstate
+    variable priv
     variable opts
     variable timing
     
     # Not sure precisely what to do here.
-    catch {close $gstate(sock)}
+    catch {close $priv(sock)}
     if {$opts(-log)} {
-	catch {close $gstate(logfd)}
+	catch {close $priv(logfd)}
     }   
     unset -nocomplain timing
 
@@ -758,7 +752,7 @@ proc ::tinyhttpd::cleanup { } {
 proc ::tinyhttpd::BuildHtmlDirectoryListing {inPath} {    
     variable this
     variable html
-    variable gstate
+    variable priv
     variable opts
     
     Debug 2 "BuildHtmlDirectoryListing: inPath=$inPath"
@@ -777,8 +771,8 @@ proc ::tinyhttpd::BuildHtmlDirectoryListing {inPath} {
     set nativePath [file nativename $localAbsPath]
     
     Debug 3 "localAbsPath=$localAbsPath\n\tnativePath=$nativePath"
-    set fileIcon   $gstate(fileIconRelPath)
-    set folderIcon $gstate(folderIconRelPath)
+    set fileIcon   $priv(rpath,images,file)
+    set folderIcon $priv(rpath,images,folder)
     
     # Start by finding the directory content. 
     set allFiles [glob -directory $nativePath -nocomplain *]
@@ -877,19 +871,20 @@ proc ::tinyhttpd::FormatBytesText {bytes} {
 }
 
 proc ::tinyhttpd::Debug {num str} {
-    variable gstate
+    variable priv
     
-    if {$num <= $gstate(debug)} {
+    if {$num <= $priv(debug)} {
 	puts $str
     }
 }
 
 proc ::tinyhttpd::LogMsg {msg} {
+    variable priv
     variable opts
     
     if {$opts(-log)} {
 	catch {
-	    puts $gstate(logfd) "[clock format [clock clicks]]: $msg"
+	    puts $priv(logfd) "[clock format [clock clicks]]: $msg"
 	}
     }
 }
