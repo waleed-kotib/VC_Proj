@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.23 2004-02-05 14:00:22 matben Exp $
+# $Id: MUC.tcl,v 1.24 2004-02-13 14:08:19 matben Exp $
 
 package require entrycomp
 
@@ -122,7 +122,7 @@ proc ::Jabber::MUC::BuildEnter {args} {
 	Members only room may require a password."
     pack $w.frall.msg -side top -fill x -anchor w -padx 2 -pady 4
     set frtop $w.frall.top
-    pack [frame $frtop] -side top -fill x -padx 4
+    pack [frame $frtop] -side top -anchor w -padx 12
     label $frtop.lserv -text "[::msgcat::mc {Conference server}]:" 
 
     set confServers [$jstate(browse) getservicesforns  \
@@ -130,14 +130,11 @@ proc ::Jabber::MUC::BuildEnter {args} {
     
     ::Jabber::Debug 2 "::Jabber::MUC::BuildEnter confServers='$confServers'"
 
-    set wcomboserver $frtop.eserv
-    set wcomboroom   $frtop.eroom
+    set wpopupserver $frtop.eserv
+    set wpopuproom   $frtop.eroom
 
-    # First combobox: servers.
-    ::combobox::combobox $wcomboserver -width 20 -editable 0 \
-      -textvariable $token\(server)  \
-      -command [list [namespace current]::ConfigRoomList $token]
-    eval {$frtop.eserv list insert end} $confServers
+    # First menubutton: servers. (trace below)
+     eval {tk_optionMenu $wpopupserver $token\(server)} $confServers
     label $frtop.lroom -text "[::msgcat::mc {Room name}]:"
     
     # Find the default conferencing server.
@@ -146,20 +143,24 @@ proc ::Jabber::MUC::BuildEnter {args} {
     } elseif {[llength $confServers]} {
 	set enter(server) [lindex $confServers 0]
     }
+    set enter(server-state) normal
+    set enter(room-state)   normal
 
-    # Second combobox: rooms for above server. Fill in below.
-    ::combobox::combobox $wcomboroom -width 20 -editable 0  \
-      -textvariable $token\(roomname)
+    # Second menubutton: rooms for above server. Fill in below.
+    set enter(wroommenu) [tk_optionMenu $wpopuproom $token\(roomname) ""]
 
     if {[info exists argsArr(-roomjid)]} {
 	regexp {^([^@]+)@([^/]+)} $argsArr(-roomjid) match enter(roomname)  \
 	  enter(server)	
-	$wcomboserver configure -state disabled
-	$wcomboroom configure -state disabled
+	set enter(server-state) disabled
+	set enter(room-state)   disabled
+	$wpopupserver configure -state disabled
+	$wpopuproom configure -state disabled
     }
     if {[info exists argsArr(-server)]} {
 	set enter(server) $argsArr(-server)
-	$wcomboserver configure -state disabled
+	set enter(server-state) disabled
+	$wpopupserver configure -state disabled
     }
     
     label $frtop.lnick -text "[::msgcat::mc {Nick name}]:"
@@ -168,9 +169,9 @@ proc ::Jabber::MUC::BuildEnter {args} {
     entry $frtop.epass -textvariable $token\(password)
     
     grid $frtop.lserv -column 0 -row 0 -sticky e
-    grid $frtop.eserv -column 1 -row 0 -sticky w
+    grid $wpopupserver -column 1 -row 0 -sticky w
     grid $frtop.lroom -column 0 -row 1 -sticky e
-    grid $frtop.eroom -column 1 -row 1 -sticky w
+    grid $wpopuproom -column 1 -row 1 -sticky w
     grid $frtop.lnick -column 0 -row 2 -sticky e
     grid $frtop.enick -column 1 -row 2 -sticky w
     grid $frtop.lpass -column 0 -row 3 -sticky e
@@ -206,19 +207,24 @@ proc ::Jabber::MUC::BuildEnter {args} {
     pack [label $wstatus -textvariable $token\(status) -pady 0 -bd 0] \
       -side left -padx 5 -pady 0
 
-    set enter(wcomboserver) $wcomboserver
-    set enter(wcomboroom)   $wcomboroom
+    set enter(wpopupserver) $wpopupserver
+    set enter(wpopuproom)   $wpopuproom
     set enter(wsearrows)    $wsearrows
     set enter(wbtenter)     $wbtenter
     
-    # Fill in room list if exist else browse.
-    if {[$jstate(browse) isbrowsed $enter(server)]} {
-	::Jabber::MUC::FillRoomList $token
-    } else {
-	::Jabber::MUC::BusyEnterDlgIncr $token
-	update idletasks
-	::Jabber::InvokeJlibCmd browse_get $enter(server)  \
-	  -command [list [namespace current]::BrowseServiceCB $token]
+    if {$enter(room-state) == "normal"} {
+
+	# Fill in room list if exist else browse.
+	if {[$jstate(browse) isbrowsed $enter(server)]} {
+	    ::Jabber::MUC::FillRoomList $token
+	} else {
+	    ::Jabber::MUC::BusyEnterDlgIncr $token
+	    update idletasks
+	    ::Jabber::InvokeJlibCmd browse_get $enter(server)  \
+	      -command [list [namespace current]::BrowseServiceCB $token]
+	}
+	trace variable $token\(server) w  \
+	  [list [namespace current]::ConfigRoomList $token]
     }
 
     wm resizable $w 0 0
@@ -238,7 +244,9 @@ proc ::Jabber::MUC::BuildEnter {args} {
     tkwait window $w
     
     catch {focus $oldFocus}
-    ::UI::SaveWinGeom $w
+    trace vdelete $token\(server) w  \
+      [list [namespace current]::ConfigRoomList $token]
+   ::UI::SaveWinGeom $w
     set finished $enter(finished)
     unset enter
     return [expr {($finished <= 0) ? "cancel" : "enter"}]
@@ -249,7 +257,7 @@ proc ::Jabber::MUC::BuildEnter {args} {
 #       When a conference server is picked in the server combobox, the 
 #       room combobox must get the available rooms for this particular server.
 
-proc ::Jabber::MUC::ConfigRoomList {token wcombo confserver} {    
+proc ::Jabber::MUC::ConfigRoomList {token name junk1 junk2} {    
     variable $token
     upvar 0 $token enter
     upvar ::Jabber::jstate jstate
@@ -277,8 +285,12 @@ proc ::Jabber::MUC::FillRoomList {token} {
 	    lappend roomList $room
 	}
     }
-    $enter(wcomboroom) list delete 0 end
-    eval {$enter(wcomboroom) list insert end} $roomList
+    set roomList [lsort $roomList]
+    $enter(wroommenu) delete 0 end
+    foreach room $roomList {
+	$enter(wroommenu) add radiobutton -label $room  \
+	  -variable $token\(roomname)
+    }
     set enter(roomname) [lindex $roomList 0]
 }
 
@@ -291,15 +303,19 @@ proc ::Jabber::MUC::BusyEnterDlgIncr {token {num 1}} {
     if {$enter(statuscount) > 0} {
 	set enter(status) "Getting available rooms..."
 	$enter(wsearrows) start
-	$enter(wcomboserver) configure -state disabled
-	$enter(wcomboroom)   configure -state disabled
+	$enter(wpopupserver) configure -state disabled
+	$enter(wpopuproom)   configure -state disabled
 	$enter(wbtenter)     configure -state disabled
     } else {
 	set enter(statuscount) 0
 	set enter(status) ""
 	$enter(wsearrows) stop
-	$enter(wcomboserver) configure -state normal
-	$enter(wcomboroom)   configure -state normal
+	if {[string equal $enter(server-state) "normal"]} {
+	    $enter(wpopupserver) configure -state normal
+	}
+	if {[string equal $enter(room-state) "normal"]} {
+	    $enter(wpopuproom)   configure -state normal
+	}
 	$enter(wbtenter)     configure -state normal
     }
 }
