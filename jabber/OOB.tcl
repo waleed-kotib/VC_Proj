@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.12 2004-01-01 12:08:21 matben Exp $
+# $Id: OOB.tcl,v 1.13 2004-01-09 14:08:22 matben Exp $
 
 package provide OOB 1.0
 
@@ -42,21 +42,19 @@ proc ::Jabber::OOB::BuildSet {w jid} {
     pack [frame $w.frall -borderwidth 1 -relief raised]  \
       -fill both -expand 1 -ipadx 12 -ipady 4
     
-    message $w.frall.msg -width 260 -text  \
-      "Let user \"$jid\" download a file from your built in server.\
-      The description is optional."
+    message $w.frall.msg -width 300 -text [::msgcat::mc oobmsg $jid]
     pack $w.frall.msg -side top -fill both -expand 1
     
     # Entries etc.
     set frmid [frame $w.frall.frmid -borderwidth 0]
-    label $frmid.lfile -text {File:} -font $fontSB -anchor e
+    label $frmid.lfile -text "[::msgcat::mc {File}]:" -font $fontSB -anchor e
     entry $frmid.efile    \
-      -textvariable "[namespace current]::localpath"
-    button $frmid.btfile -text {File...} -width 6 -font $fontS  \
-      -command ::Jabber::OOB::FileOpen
-    label $frmid.ldesc -text {Description:} -font $fontSB -anchor e
+      -textvariable [namespace current]::localpath
+    button $frmid.btfile -text "[::msgcat::mc {File}]..." -width 6 -font $fontS  \
+      -command [namespace current]::FileOpen
+    label $frmid.ldesc -text "[::msgcat::mc {Description}]:" -font $fontSB -anchor e
     entry $frmid.edesc -width 36    \
-      -textvariable "[namespace current]::desc"
+      -textvariable [namespace current]::desc
     grid $frmid.lfile -column 0 -row 0 -sticky e
     grid $frmid.efile -column 1 -row 0 -sticky ew
     grid $frmid.btfile -column 2 -row 0 
@@ -67,7 +65,7 @@ proc ::Jabber::OOB::BuildSet {w jid} {
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
     pack [button $frbot.btsnd -text [::msgcat::mc Send] -width 8 -default active \
-      -command "::Jabber::OOB::DoSend"]  \
+      -command [namespace current]::DoSend]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8   \
       -command "set [namespace current]::finished 2"]  \
@@ -148,7 +146,7 @@ proc ::Jabber::OOB::SetCallback {jlibName type theQuery} {
     ::Jabber::Debug 2 "::Jabber::OOB::SetCallback, type=$type,theQuery='$theQuery'"
     
     if {$type == "error"} {
-	foreach {errcode errmsg} $theQuery {}
+	foreach {errcode errmsg} $theQuery break
 	set msg "Got an error when trying to send a file: code was $errcode,\
 	  and error message: $errmsg"
 	tk_messageBox -icon error -type ok -title [::msgcat::mc Error] \
@@ -188,9 +186,10 @@ proc ::Jabber::OOB::ParseSet {from subiq args} {
 	  [::msgcat::mc jamessoobnourl $from]]
 	return
     }
+    set tail [file tail [::Utils::GetFilePathFromUrl $url]]
     set ans [tk_messageBox -title [::msgcat::mc {Get File}] -icon info  \
       -type yesno -default yes -message [FormatTextForMessageBox \
-      [::msgcat::mc jamessoobask $from $url $desc]]]
+      [::msgcat::mc jamessoobask $from $tail $desc]]]
     if {$ans == "no"} {
 	return
     }
@@ -212,17 +211,17 @@ proc ::Jabber::OOB::ParseSet {from subiq args} {
 	  [::msgcat::mc jamessoonnohttp $from $proto]]
 	return
     }
-    set tail [file tail [string trimleft $path /]]
-    set localPath [tk_getSaveFile -title [::msgcat::mc {Save File}] -initialfile $tail]
+    set localPath [tk_getSaveFile -title [::msgcat::mc {Save File}] \
+      -initialfile $tail]
     if {[string length $localPath] == 0} {
 	return
     }
     
     # And get it.
-    ::Jabber::OOB::Copy $from $url $localPath $id
+    ::Jabber::OOB::Get $from $url $localPath $id
 }
 
-proc ::Jabber::OOB::Copy {jid url file id} {
+proc ::Jabber::OOB::Get {jid url file id} {
     global  this prefs
     
     variable locals
@@ -256,7 +255,7 @@ proc ::Jabber::OOB::Copy {jid url file id} {
     # Handle URL redirects
     foreach {name value} $state(meta) {
         if {[regexp -nocase ^location$ $name]} {
-            return [::Jabber::OOB::Copy $jid [string trim $value] $file $id]
+            return [::Jabber::OOB::Get $jid [string trim $value] $file $id]
         }
     }
     set wprog .joob$out

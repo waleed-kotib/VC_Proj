@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: headlabel.tcl,v 1.1 2003-12-15 08:19:16 matben Exp $
+# $Id: headlabel.tcl,v 1.2 2004-01-09 14:08:21 matben Exp $
 #
 
 package provide headlabel 0.1
@@ -15,7 +15,7 @@ namespace eval ::headlabel:: {
     # The public interface.
     namespace export headlabel
     
-    option add *HeadLabel.Font          {Helvetica 16}
+    option add *HeadLabel.Font          {Helvetica -18}
     option add *HeadLabel.anchor        w
     option add *HeadLabel.Background    #cecece
     option add *HeadLabel.padX          10

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.20 2004-01-01 16:27:48 matben Exp $
+# $Id: Browse.tcl,v 1.21 2004-01-09 14:08:21 matben Exp $
 
 package require chasearrows
 
@@ -596,15 +596,15 @@ proc ::Jabber::Browse::PresenceCallback {jid type args} {
 
     ::Jabber::Debug 2 "::Jabber::Browse::PresenceCallback jid=$jid, type=$type, args='$args'"
 
+    array set argsArr $args
     set jid3 $jid
-    if {[info exists attrArr(-resource)] &&  \
-      [string length $attrArr(-resource)]} {
-	set jid3 ${jid}/$attrArr(-resource)
+    if {[info exists argsArr(-resource)] &&  \
+      [string length $argsArr(-resource)]} {
+	set jid3 ${jid}/$argsArr(-resource)
     }
 
     if {[$jstate(jlib) service isroom $jid]} {
 	if {[::Jabber::Browse::HaveBrowseTree $jid]} {
-	    array set argsArr $args
 	    
 	    if {![winfo exists $wtree]} {
 		return
@@ -630,8 +630,7 @@ proc ::Jabber::Browse::PresenceCallback {jid type args} {
 	if {$jprefs(autoBrowseUsers) &&  \
 	  [string equal $type "available"] &&  \
 	  ![$jstate(browse) isbrowsed $jid3]} {
-	    eval {::Jabber::Roster::AutoBrowse $jid3 $type} \
-	      $args
+	    eval {::Jabber::Roster::AutoBrowse $jid3 $type} $args
 	}	
     }
 }

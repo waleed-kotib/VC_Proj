@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.34 2004-01-07 14:57:34 matben Exp $
+# $Id: Preferences.tcl,v 1.35 2004-01-09 14:08:22 matben Exp $
  
 package require notebook
 package require tree
@@ -37,6 +37,7 @@ proc ::Preferences::Build { } {
     variable tmpJPrefs
     
     variable wtoplevel
+    variable wtree
     variable finished
     variable nbframe
     variable xpadbt
@@ -100,7 +101,7 @@ proc ::Preferences::Build { } {
     pack [frame $frtree] -fill both -expand 1 -side left
     pack [label $frtree.la -text [::msgcat::mc {Settings Panels}]  \
       -font $fontSB -relief raised -bd 1 -bg #bdbdbd] -side top -fill x
-    set wtree [::tree::tree $frtree.t -width 120 -height 300 -indention 4 \
+    set wtree [::tree::tree $frtree.t -width 140 -height 300 \
       -yscrollcommand [list $frtree.sby set]       \
       -selectcommand ::Preferences::SelectCmd   \
       -doubleclickcommand {}]
@@ -115,7 +116,6 @@ proc ::Preferences::Build { } {
     $wtree newitem {General {Proxy Setup}} -text [::msgcat::mc {Proxy Setup}]
     $wtree newitem {General {Sounds & Speech}} -text [::msgcat::mc {Sounds & Speech}]
     $wtree newitem {General Shortcuts} -text [::msgcat::mc Shortcuts]
-    #$wtree newitem {General Plugins}
     if {!$prefs(stripJabber)} {
 	$wtree newitem {Jabber}
 	$wtree newitem {Jabber {Personal Info}} -text [::msgcat::mc {Personal Info}]
@@ -129,7 +129,6 @@ proc ::Preferences::Build { } {
     $wtree newitem {Whiteboard} -text [::msgcat::mc Whiteboard]
     $wtree newitem {Whiteboard Drawing} -text [::msgcat::mc Drawing]
     $wtree newitem {Whiteboard Text} -text [::msgcat::mc Text]
-    $wtree newitem {Whiteboard Plugins} -text [::msgcat::mc Plugins]
     $wtree newitem {Whiteboard {File Mappings}} -text [::msgcat::mc {File Mappings}]
     $wtree newitem {Whiteboard {Edit Fonts}} -text [::msgcat::mc {Edit Fonts}]
     $wtree newitem {Whiteboard Privacy} -text [::msgcat::mc Privacy]
@@ -201,10 +200,6 @@ proc ::Preferences::Build { } {
     set frpfont [$nbframe page {Edit Fonts}]
     ::Preferences::EditFonts::BuildPage $frpfont
     
-    # Plugin page --------------------------------------------------------------
-    set frpplug [$nbframe page Plugins]
-    ::Preferences::Plugins::BuildPage $frpplug    
-    
     # File Mappings ------------------------------------------------------------
     set frfm [$nbframe page {File Mappings}]    
     ::Preferences::FileMap::BuildPage $frfm
@@ -243,18 +238,6 @@ proc ::Preferences::Build { } {
     
     # Grab and focus.
     focus $w
-    
-    # Wait here for a button press.
-    tkwait variable [namespace current]::finished
-    
-    # Which page to be in front next time?
-    set lastPage [$wtree getselection]
-    
-    # Clean up.
-    trace vdelete ::Preferences::tmpPrefs(protocol) w  \
-      ::Preferences::NetSetup::TraceNetConfig
-    catch {grab release $w}
-    catch {destroy $w}  
 }
 
 # Preferences::ResetToFactoryDefaults --
@@ -892,58 +875,6 @@ proc ::Preferences::Customization::DefaultBgImage {where} {
     set tmpJPrefs($where,bgImagePath) ""
 }
 
-# namespace  ::Preferences::Plugins:: ------------------------------------------
-
-namespace eval ::Preferences::Plugins:: {
-    
-    variable plugins
-}
-
-proc ::Preferences::Plugins::BuildPage {page} {
-    global  prefs
-    
-    variable plugins
-    upvar ::Preferences::ypad ypad
-
-    # Conference (groupchat) stuff.
-    set labfr [::mylabelframe::mylabelframe $page.fr [::msgcat::mc {Plugin Control}]]
-    pack $page.fr -side top -anchor w -fill x
-    set pbl [frame $labfr.frin]
-    pack $pbl -padx 10 -pady 6 -side left
-    
-    label ${pbl}.lhead -wraplength 300 -anchor w -justify left \
-      -text [::msgcat::mc prefplugctrl]
-    pack ${pbl}.lhead -padx 0 -pady 2 -side top -anchor w
-    
-    set pfr [frame ${pbl}.frpl]
-    pack $pfr -side top -anchor w
-    set i 0
-    foreach plug [::Plugins::GetAllPackages platform] {
-	set icon [::Plugins::GetIconForPackage $plug 12]
-	if {$icon != ""} {
-	    label ${pfr}.i${i} -image $icon
-	    grid ${pfr}.i${i} -row $i -column 0 -sticky w
-	}
-	set plugins($plug) [::Plugins::IsLoaded $plug]
-	checkbutton ${pfr}.c${i} -anchor w -text " $plug"  \
-	  -variable [namespace current]::plugins($plug)
-	grid ${pfr}.c${i} -row $i -column 1 -padx 2 -pady $ypad -sticky ew
-	incr i
-    }
-}
-
-proc ::Preferences::Plugins::Save { } {
-    global prefs
-    variable plugins
-
-    set banList {}
-    foreach name [array names plugins] {
-	if {$plugins($name) == 0} {
-	    lappend banList $name
-	}
-    }
-    set prefs(pluginBanList) [lsort -unique $banList]
-}
 
 # namespace  ::Preferences::FileMap:: ------------------------------------------
 
@@ -2164,6 +2095,7 @@ proc ::Preferences::Proxies::BuildPage {page} {
 proc ::Preferences::SavePushBt { } {
     global  prefs
     
+    variable wtoplevel
     variable finished
     variable tmpPrefs
     variable tmpJPrefs
@@ -2194,7 +2126,6 @@ proc ::Preferences::SavePushBt { } {
     # and the same for all MIME stuff etc.
     ::Preferences::FileMap::SaveAssociations    
     ::Preferences::EditFonts::PushBtSave
-    #::Preferences::NetSetup::UpdateUI
     
     if {!$prefs(stripJabber)} {
 	
@@ -2202,18 +2133,15 @@ proc ::Preferences::SavePushBt { } {
 	::Jabber::UpdateAutoAwaySettings    
 	::Jabber::Chat::SetFont $tmpJPrefs(chatFont)
     }
-    
-    # Reset file cache doesn't hurt.
-    ::FileCache::SetBestBefore $prefs(checkCache) $prefs(incomingPath)
-    
-    ::Preferences::Plugins::Save
-    
+        
     # Save the preference file.
     ::PreferencesUtils::SaveToFile
     
     ::hooks::run prefsSaveHook
 
+    ::Preferences::CleanUp
     set finished 1
+    destroy $wtoplevel
 }
 
 proc ::Preferences::CloseHook {wclose} {
@@ -2224,7 +2152,7 @@ proc ::Preferences::CloseHook {wclose} {
 	set ans [::Preferences::CancelPushBt]
 	if {$ans == "no"} {
 	    set result stop
-	}
+	  }
     }   
     return $result
 }
@@ -2290,9 +2218,26 @@ proc ::Preferences::CancelPushBt { } {
 	set finished 2
     }
     if {$finished == 2} {
-	::UI::SaveWinGeom $wtoplevel
+	::Preferences::CleanUp
+	destroy $wtoplevel
     }
     return $ans
+}
+
+proc ::Preferences::CleanUp { } {
+    variable wtoplevel
+    variable wtree
+    variable lastPage
+    variable tmpPrefs
+    
+    # Which page to be in front next time?
+    set lastPage [$wtree getselection]
+    
+    # Clean up.
+    trace vdelete ::Preferences::tmpPrefs(protocol) w  \
+      ::Preferences::NetSetup::TraceNetConfig
+
+    ::UI::SaveWinGeom $wtoplevel
 }
 
 # Preferences::HasChanged --

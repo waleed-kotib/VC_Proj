@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.34 2004-01-07 14:57:34 matben Exp $
+# $Id: Coccinella.tcl,v 1.35 2004-01-09 14:08:21 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -166,6 +166,11 @@ set this(path) $thisPath
 set this(script) $thisScript
 set this(imagePath) [file join $this(path) images]
 set this(resourcedbPath) [file join $this(path) resources]
+set this(internalIPnum) 127.0.0.1
+set this(internalIPname) "localhost"
+
+# Set our IP number temporarily.
+set this(ipnum) $this(internalIPnum) 
 
 # Need a tmp directory, typically in a StarKit when QuickTime movies are opened.
 if {[info exists env(TMP)] && [file exists $env(TMP)]} {
@@ -303,14 +308,25 @@ set this(themePrefsPath) [file join $this(prefsPath) theme]
 package require Theme
 ::Theme::Init
 
-# The message catalog for language customization.
+# The message catalog for language customization. Use 'en' as fallback.
 package require msgcat
 set this(msgcatPath) [file join $this(path) msgs]
 if {[string match -nocase "c" [::msgcat::mclocale]]} {
     ::msgcat::mclocale en
-}  
-# tmp...
-::msgcat::mclocale sv
+}
+set locale [::msgcat::mclocale]
+set langs [glob -nocomplain -tails -directory $this(msgcatPath) *.msg]
+set havecat 0
+foreach f $langs {
+    set langcode [lindex [split [file rootname $f] _] 0]
+    if {[string match -nocase ${langcode}* $locale]} {
+	set havecat 1
+	break
+    }
+}
+if {!$havecat} {
+    ::msgcat::mclocale en
+}
 ::msgcat::mcload $this(msgcatPath)
 
 # Show it! Need a full update here, at least on Windows.
@@ -359,16 +375,10 @@ if {[string equal $this(platform) "macosx"]} {
 
 switch -- $this(platform) {
     macintosh - macosx {
-	if {[catch {source [file join $this(path) lib MacintoshUtils.tcl]} msg]} {
-	    after idle {tk_messageBox -message "Error sourcing MacintoshUtils.tcl  $msg"  \
-	      -icon error -type ok; exit}
-	}    
+	source [file join $this(path) lib MacintoshUtils.tcl]
     }
     windows {
-	if {[catch {source [file join $this(path) lib WindowsUtils.tcl]} msg]} {
-	    after idle {tk_messageBox -message "Error getting WindowsUtils  $msg"  \
-	      -icon error -type ok; exit}
-	}    
+	source [file join $this(path) lib WindowsUtils.tcl]
     }
 }
 
@@ -455,12 +465,6 @@ if {!$prefs(stripJabber)} {
     package require Sounds
 }
 
-set this(internalIPnum) 127.0.0.1
-set this(internalIPname) "localhost"
-
-# Set our IP number temporarily.
-set this(ipnum) $this(internalIPnum) 
-
 # Beware! [info hostname] can be very slow on Macs first time it is called.
 ::SplashScreen::SetMsg [::msgcat::mc splashhost]
 set this(hostname) [info hostname]
@@ -470,12 +474,7 @@ set this(hostname) [info hostname]
 # Standard (factory) preferences are set here.
 # These are the hardcoded, application default, values, and can be
 # overridden by the ones in user default file.
-if {[catch {source [file join $this(path) lib SetFactoryDefaults.tcl]} msg]} {
-    tk_messageBox -message "Error sourcing SetFactoryDefaults.tcl  $msg"  \
-      -icon error -type ok
-    exit
-}
-
+source [file join $this(path) lib SetFactoryDefaults.tcl]
 ::SplashScreen::SetMsg [::msgcat::mc splashprefs]
 
 # Manage the user preferences. Start by reading the preferences file.
@@ -517,10 +516,6 @@ if {$argc > 0} {
 # available on our system. Speech special.
 ::Plugins::VerifyPackagesForMimeTypes
 ::Plugins::VerifySpeech
-
-# Init the file cache settings.
-::FileCache::SetBasedir $this(path)
-::FileCache::SetBestBefore $prefs(checkCache) $prefs(incomingPath)
 
 # Various initializations for canvas stuff and UI.
 ::UI::Init

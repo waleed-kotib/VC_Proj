@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasCmd.tcl,v 1.1 2003-12-20 14:25:26 matben Exp $
+# $Id: CanvasCmd.tcl,v 1.2 2004-01-09 14:08:22 matben Exp $
 
 package provide CanvasCmd 1.0
 
@@ -596,7 +596,6 @@ proc ::UserActions::DoQuit {args} {
     # Run all quit hooks.
     hooks::run quitAppHook
     
-
 	    
     # If we used 'Edit/Revert To/Application Defaults' be sure to reset...
     set prefs(firstLaunch) 0
@@ -622,12 +621,6 @@ proc ::UserActions::DoQuit {args} {
     # Save to the preference file and quit...
     ::PreferencesUtils::SaveToFile
     ::Theme::SavePrefsFile
-    
-    # Should we clean up our 'incoming' directory?
-    if {$prefs(clearCacheOnQuit)} {
-	file delete -force -- $prefs(incomingPath)
-	file mkdir $prefs(incomingPath)
-    }
     
     # Cleanup. Beware, no windows with open movies must exist here!
     file delete -force $this(tmpPath)

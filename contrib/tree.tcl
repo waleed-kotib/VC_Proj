@@ -25,7 +25,7 @@
 # 
 # Copyright (C) 2002-2003 Mats Bengtsson
 # 
-# $Id: tree.tcl,v 1.18 2003-12-15 15:39:08 matben Exp $
+# $Id: tree.tcl,v 1.19 2004-01-09 14:08:21 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -306,7 +306,7 @@ proc ::tree::Init { } {
     option add *Tree.highlightColor        black           widgetDefault
     option add *Tree.highlightThickness    3               widgetDefault
     option add *Tree.height                100             widgetDefault
-    option add *Tree.indention             14              widgetDefault
+    option add *Tree.indention             0               widgetDefault
     option add *Tree.openIcons             plusminus       widgetDefault
     option add *Tree.openCommand           {}              widgetDefault
     option add *Tree.pyjamasColor          white           widgetDefault
@@ -1403,19 +1403,23 @@ proc ::tree::Build {w} {
     upvar ::tree::${w}::widgets widgets
     upvar ::tree::${w}::options options
     upvar ::tree::${w}::treestate treestate
+    upvar ::tree::${w}::priv priv
 
     Debug 1 "::tree::Build w=$w"
 
     set can $widgets(canvas)
     if {[string equal $options(-openicons) "plusminus"]} {
-	set widgetGlobals(openbm) $widgetGlobals(openbmplusmin)
-	set widgetGlobals(closedbm) $widgetGlobals(closedbmplusmin)	
+	set priv(openbm) $widgetGlobals(openbmplusmin)
+	set priv(closedbm) $widgetGlobals(closedbmplusmin)	
     } elseif {[string equal $options(-openicons) "triangle"]} {
-	set widgetGlobals(openbm) $widgetGlobals(openbmmac)
-	set widgetGlobals(closedbm) $widgetGlobals(closedbmmac)	
+	set priv(openbm) $widgetGlobals(openbmmac)
+	set priv(closedbm) $widgetGlobals(closedbmmac)	
     } else {
 	return -code error "unrecognized value \"$options(-openicons)\" for -openicons"
     }
+    
+    # Standard indention from center line to text start.
+    set priv(xindent) [expr [image width $priv(openbm)]/2 + 6]
     $can delete all
     
     if {[string length $options(-backgroundimage)] > 0} {
@@ -1430,7 +1434,7 @@ proc ::tree::Build {w} {
     
     # Keeps track of y coords to draw.
     set treestate(y) 10
-    BuildLayer $w {} 12
+    BuildLayer $w {} [expr [image width $priv(openbm)]/2 + 4]
     
     # At this stage the display list is almost completely mixed up. Reorder!
     $can lower ttreev ttreeh
@@ -1498,12 +1502,12 @@ proc ::tree::BuildLayer {w v in} {
 
     set can $widgets(canvas)
     set hasTree 0
-    set openbm $widgetGlobals(openbm) 
-    set closedbm $widgetGlobals(closedbm) 
+    set openbm $priv(openbm) 
+    set closedbm $priv(closedbm) 
     set yTreeOff $widgetGlobals(yTreeOff)
 
     set treeCol $options(-treecolor)
-    set indention $options(-indention)
+    set indention [expr $priv(xindent) + $options(-indention)]
     if {[string length $treeCol]} {
 	set hasTree 1
     }

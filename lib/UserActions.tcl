@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UserActions.tcl,v 1.31 2003-12-30 15:30:58 matben Exp $
+# $Id: UserActions.tcl,v 1.32 2004-01-09 14:08:22 matben Exp $
 
 namespace eval ::UserActions:: {
     
@@ -159,13 +159,7 @@ proc ::UserActions::DoQuit {args} {
     # Save to the preference file and quit...
     ::PreferencesUtils::SaveToFile
     ::Theme::SavePrefsFile
-    
-    # Should we clean up our 'incoming' directory?
-    if {$prefs(clearCacheOnQuit)} {
-	file delete -force -- $prefs(incomingPath)
-	file mkdir $prefs(incomingPath)
-    }
-    
+        
     # Cleanup. Beware, no windows with open movies must exist here!
     file delete -force $this(tmpPath)
     exit

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: HtmlImport.tcl,v 1.4 2003-11-30 11:46:47 matben Exp $
+# $Id: HtmlImport.tcl,v 1.5 2004-01-09 14:08:22 matben Exp $
 
 
 namespace eval ::HtmlImport:: {
@@ -228,7 +228,7 @@ proc ::HtmlImport::Import {wcan optListVar args} {
 
     if {[info exists optArr(-url)]} {
 	set name [::uriencode::decodefile  \
-	  [::Utils::GetFilePathFromUrl $optArr(-url)]]
+	  [file tail [::Utils::GetFilePathFromUrl $optArr(-url)]]]
     } else {
 	set name [file tail $fileName]
     }
