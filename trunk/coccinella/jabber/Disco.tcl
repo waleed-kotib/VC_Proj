@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.19 2004-06-19 12:56:50 matben Exp $
+# $Id: Disco.tcl,v 1.20 2004-06-22 14:21:18 matben Exp $
 
 package provide Disco 1.0
 
@@ -232,6 +232,8 @@ proc ::Jabber::Disco::ItemsCB {disconame type from subiq args} {
 	    }	    
 	}
     }
+    
+    eval {::hooks::run discoItemsHook $type $from $subiq} $args
 }
 
 proc ::Jabber::Disco::InfoCB {disconame type from subiq args} {
@@ -251,16 +253,31 @@ proc ::Jabber::Disco::InfoCB {disconame type from subiq args} {
     if {![info exists wtree] || ![winfo exists $wtree]} {
 	return
     }
-    set from  [jlib::jidmap $from]
-    set name  [$jstate(disco) name $from]
+    set from    [jlib::jidmap $from]
+    set name    [$jstate(disco) name $from]
+    
+    # Icon.
+    set cattype [lindex [$jstate(disco) types $from] 0]
+    set icon  ""
+    if {[string match gateway/* $cattype]} {
+	set subtype [lindex [split $cattype /] 1]
+	set icon [::Jabber::Roster::GetPresenceIconFromKey available,$subtype]
+    }
+    # We could add more icons for other categories here!
+    
     foreach v [$wtree find withtag $from] {
 	if {$name != ""} {
 	    $wtree itemconfigure $v -text $name
+	}
+	if {$icon != ""} {
+	    $wtree itemconfigure $v -image $icon
 	}
 	set treectag [$wtree itemconfigure $v -canvastags]
 	::Jabber::Disco::MakeBalloonHelp $from $treectag
     }
     ::Jabber::Disco::SetDirItemUsingCategory $from
+    
+    eval {::hooks::run discoInfoHook $type $from $subiq} $args
 }
 
 proc ::Jabber::Disco::SetDirItemUsingCategory {jid} {

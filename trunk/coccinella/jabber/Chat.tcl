@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.63 2004-06-17 13:24:18 matben Exp $
+# $Id: Chat.tcl,v 1.64 2004-06-22 14:21:17 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -153,7 +153,7 @@ proc ::Jabber::Chat::StartThreadDlg {args} {
     set frmid [frame $w.frall.frmid -borderwidth 0]
     pack $frmid -side top -fill both -expand 1
     
-    set jidlist [::Jabber::InvokeRosterCmd getusers -type available]
+    set jidlist [::Jabber::RosterCmd getusers -type available]
     label $frmid.luser -text "[::msgcat::mc {Jabber user id}]:"  \
       -font $fontSB -anchor e
     ::entrycomp::entrycomp $frmid.euser $jidlist -width 26    \
@@ -673,16 +673,21 @@ proc ::Jabber::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set wnotifier   $wthread.f.lnot
     set wclose      $wthread.f.close
     set wsubject    $wthread.frtop.fsub.e
+    set wpresimage  $wthread.frtop.fsub.i
     
     # To and subject fields.
     set frtop [frame $wthread.frtop -borderwidth 0]
     pack $frtop -side top -anchor w -fill x
     
+    set icon [::Jabber::Roster::GetPresenceIconEx $jid]
+
     frame $frtop.fsub
     label $frtop.fsub.l -text "[::msgcat::mc Subject]:"
     entry $frtop.fsub.e -textvariable $chattoken\(subject)
+    label $frtop.fsub.i -image $icon
     pack  $frtop.fsub -side top -anchor w -padx 6 -pady 2 -fill x
     pack  $frtop.fsub.l -side left -padx 2
+    pack  $frtop.fsub.i -side right -padx 6
     pack  $frtop.fsub.e -side top -padx 2 -fill x
 
     # Notifier label.
@@ -767,6 +772,7 @@ proc ::Jabber::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set chatstate(wtextsnd) $wtextsnd
     set chatstate(wclose)   $wclose
     set chatstate(wsubject) $wsubject
+    set chatstate(wpresimage) $wpresimage
  
     return $chattoken
 }
@@ -1376,6 +1382,10 @@ proc ::Jabber::Chat::PresenceHook {jid type args} {
     } else {
 	::Jabber::Chat::SetState $chattoken disabled
     }
+    set icon [::Jabber::Roster::GetPresenceIconEx $jid]
+    if {$icon != ""} {
+	$chatstate(wpresimage) configure -image $icon
+    }
 }
 
 # Jabber::Chat::HaveChat --
@@ -1561,7 +1571,7 @@ proc ::Jabber::Chat::XEventRecv {chattoken xevent args} {
 	
 	# 2) Notification of message composing
 	jlib::splitjid $chatstate(jid) jid2 res
-	set name [::Jabber::InvokeRosterCmd getname $jid2]
+	set name [::Jabber::RosterCmd getname $jid2]
 	if {$name == ""} {
 	    if {[::Jabber::JlibCmd service isroom $jid2]} {
 		set name [::Jabber::JlibCmd service nick $chatstate(jid)]

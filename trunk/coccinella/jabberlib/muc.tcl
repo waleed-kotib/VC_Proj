@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: muc.tcl,v 1.12 2004-06-21 14:40:08 matben Exp $
+# $Id: muc.tcl,v 1.13 2004-06-22 14:21:19 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -46,7 +46,7 @@ package provide muc 0.2
 namespace eval jlib::muc {
     
     # Globals same for all instances of this jlib.
-    variable debug 4
+    variable debug 0
 
     # Running number.
     variable uid 0
@@ -122,6 +122,9 @@ proc jlib::muc::CommandProc {mucname cmd args} {
     return [eval {$cmd $mucname} $args]
 }
 
+# jlib::muc::invoke_callback --
+# 
+# 
 
 proc jlib::muc::invoke_callback {mucname cmd type subiq} {
 
@@ -194,7 +197,7 @@ proc jlib::muc::parse_enter {mucname roomjid jlibname type args} {
 	set cache($roomjid,inside) 1
     }
     if {[info exists cache($roomjid,entercb)]} {
-	uplevel #0 $cache($roomjid,entercb) $jlibname $type $args
+	uplevel #0 $cache($roomjid,entercb) $mucname $type $args
 	catch {unset cache($roomjid,entercb)}
     }
 }
@@ -295,7 +298,7 @@ proc jlib::muc::setrole {mucname roomjid nick role args} {
 	switch -- $name {
 	    -command {
 		lappend opts -command  \
-		  [list [namespace current]::invoke_callback $jlibname $value]
+		  [list [namespace current]::invoke_callback $mucname $value]
 	    }
 	    -reason {
 		set subitem [list [wrapper::createtag "reason" -chdata $value]]
@@ -334,7 +337,7 @@ proc jlib::muc::setaffiliation {mucname roomjid nick affiliation args} {
 	switch -- $name {
 	    -command {
 		lappend opts -command  \
-		  [list [namespace current]::invoke_callback $jlibname $value]
+		  [list [namespace current]::invoke_callback $mucname $value]
 	    }
 	    -reason {
 		set subitem [list [wrapper::createtag "reason" -chdata $value]]
@@ -381,7 +384,7 @@ proc jlib::muc::getrole {mucname roomjid role callback} {
     set xmllist [wrapper::createtag "query" -subtags $subelements \
       -attrlist {xmlns "http://jabber.org/protocol/muc#admin"}]
     $jlibname send_iq "get" $xmllist -to $roomjid \
-      -command [list [namespace current]::invoke_callback $jlibname $callback]
+      -command [list [namespace current]::invoke_callback $mucname $callback]
 }
 
 # jlib::muc::getaffiliation --
@@ -412,7 +415,7 @@ proc jlib::muc::getaffiliation {mucname roomjid affiliation callback} {
     set xmllist [wrapper::createtag "query" -subtags $subelements \
       -attrlist [list xmlns $xmlns]]
     $jlibname send_iq "get" $xmllist -to $roomjid \
-      -command [list [namespace current]::invoke_callback $jlibname $callback]
+      -command [list [namespace current]::invoke_callback $mucname $callback]
 }
 
 # jlib::muc::create --
@@ -429,8 +432,7 @@ proc jlib::muc::create {mucname roomjid nick callback} {
     set cache($roomjid,createcb) $callback
     set xelem [wrapper::createtag "x"  \
       -attrlist {xmlns "http://jabber.org/protocol/muc"}]
-    [namespace parent]::send_presence $jlibname -to $jid  \
-      -xlist [list $xelem]  \
+    $jlibname send_presence -to $jid -xlist [list $xelem]  \
       -command [list [namespace current]::parse_create $roomjid]
     set cache($roomjid,mynick) $nick
     $jlibname service setroomprotocol $roomjid "muc"
@@ -447,7 +449,7 @@ proc jlib::muc::parse_create {mucname jlibname type args} {
 	set cache($roomjid,inside) 1
     }
     if {[info exists cache($roomjid,createcb)]} {
-	uplevel #0 $cache($roomjid,createcb) $jlibname $type $args
+	uplevel #0 $cache($roomjid,createcb) $mucname $type $args
 	catch {unset cache($roomjid,createcb)}
     }
 }
@@ -479,7 +481,7 @@ proc jlib::muc::setroom {mucname roomjid type args} {
 	switch -- $name {
 	    -command {
 		lappend opts -command  \
-		  [list [namespace current]::invoke_callback $jlibname $value]
+		  [list [namespace current]::invoke_callback $mucname $value]
 	    }
 	    -form {
 		set xelem $value
@@ -520,7 +522,7 @@ proc jlib::muc::destroy {mucname roomjid args} {
 	switch -- $name {
 	    -command {
 		lappend opts -command  \
-		  [list [namespace current]::invoke_callback $jlibname $value]
+		  [list [namespace current]::invoke_callback $mucname $value]
 	    }
 	    -reason {
 		lappend subelements [wrapper::createtag "reason" \
@@ -556,7 +558,7 @@ proc jlib::muc::getroom {mucname roomjid callback} {
     set xmllist [wrapper::createtag "query"  \
       -attrlist {xmlns "http://jabber.org/protocol/muc#owner"}]
     $jlibname send_iq "get" $xmllist -to $roomjid  \
-      -command [list [namespace current]::invoke_callback $jlibname $callback]
+      -command [list [namespace current]::invoke_callback $mucname $callback]
 }
 
 # jlib::muc::mynick --

@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.40 2004-06-21 14:40:07 matben Exp $
+# $Id: MUC.tcl,v 1.41 2004-06-22 14:21:18 matben Exp $
 
 package require entrycomp
 package require muc
@@ -458,14 +458,14 @@ proc ::Jabber::MUC::DoEnter {token} {
 #       is needed for entering room.
 #
 # Arguments:
-#       jlibName 
+#       mucName 
 #       type    presence typ attribute, 'available' etc.
 #       args    -from, -id, -to, -x ...
 #       
 # Results:
 #       None.
 
-proc ::Jabber::MUC::EnterCallback {jlibName type args} {
+proc ::Jabber::MUC::EnterCallback {mucName type args} {
     
     Debug 3 "::Jabber::MUC::EnterCallback type=$type, args='$args'"
     array set argsArr $args
@@ -1381,7 +1381,8 @@ proc ::Jabber::MUC::EditListCloseHook {wclose} {
     }   
 }
 
-proc ::Jabber::MUC::EditListGetCB {roomjid callid jlibname type subiq} {
+proc ::Jabber::MUC::EditListGetCB {roomjid callid mucName type subiq} {
+
     upvar [namespace current]::${roomjid}::editlocals editlocals
     upvar ::Jabber::jstate jstate
 
@@ -1723,7 +1724,7 @@ proc ::Jabber::MUC::CancelConfig {roomjid w} {
     destroy $w
 }
 
-proc ::Jabber::MUC::ConfigGetCB {roomjid jlibName type subiq} {
+proc ::Jabber::MUC::ConfigGetCB {roomjid mucName type subiq} {
     variable wbox
     variable wsearrows
     variable wbtok
@@ -1754,7 +1755,7 @@ proc ::Jabber::MUC::DoRoomConfig {roomjid w} {
     destroy $w
 }
 
-proc ::Jabber::MUC::RoomConfigResult {roomjid jlibName type subiq} {
+proc ::Jabber::MUC::RoomConfigResult {roomjid mucName type subiq} {
 
     if {$type == "error"} {
 	regexp {^([^@]+)@.*} $roomjid match roomName
@@ -1902,7 +1903,7 @@ proc ::Jabber::MUC::DestroyCloseHook {wclose} {
 # 
 #       Generic callbacks when setting things via <iq/> or <presence/>
 
-proc ::Jabber::MUC::IQCallback {roomjid jlibname type subiq} {
+proc ::Jabber::MUC::IQCallback {roomjid mucName type subiq} {
     
     if {$type == "error"} {
     	regexp {^([^@]+)@.*} $roomjid match roomName
@@ -1913,7 +1914,7 @@ proc ::Jabber::MUC::IQCallback {roomjid jlibname type subiq} {
 }
 
 
-proc ::Jabber::MUC::PresCallback {roomjid jlibname type args} {
+proc ::Jabber::MUC::PresCallback {roomjid mucName type args} {
     
     if {$type == "error"} {
     	set errcode ???

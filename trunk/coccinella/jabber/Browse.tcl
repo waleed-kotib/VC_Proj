@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.50 2004-06-19 12:56:50 matben Exp $
+# $Id: Browse.tcl,v 1.51 2004-06-22 14:21:17 matben Exp $
 
 package require chasearrows
 
@@ -345,7 +345,7 @@ proc ::Jabber::Browse::Callback {browseName type from subiq} {
 			if {!$haveNS && [info exists cattrArr(type)] &&  \
 			  ($cattrArr(type) == "public" ||  \
 			  $cattrArr(type) == "private")} {
-			    ::Jabber::JlibCmd get_version $confjid   \
+			    $jstate(jlib) get_version $confjid   \
 			      [list ::Jabber::CacheGroupchatType $confjid]
 			}
 
@@ -360,10 +360,8 @@ proc ::Jabber::Browse::Callback {browseName type from subiq} {
 		# Ende: foreach child
 	    }
 	    
-	    # Fix icons of foreign IM systems.
-	    if {[jlib::jidequal $from $jserver(this)]} {
-		::Jabber::Roster::PostProcessIcons
-	    }
+	    # Let other interested parties know we've got browse info.
+	    ::hooks::run browseSetHook $from $subiq
 	}
     }
 }

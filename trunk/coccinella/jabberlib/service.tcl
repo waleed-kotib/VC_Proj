@@ -5,7 +5,7 @@
 #       
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: service.tcl,v 1.8 2004-06-21 14:40:08 matben Exp $
+# $Id: service.tcl,v 1.9 2004-06-22 14:21:19 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -35,7 +35,19 @@
 #      jlibName service setgroupchatprotocol jid protocol
 #      jlibName service setroomprotocol jid protocol
 #      jlibName service unregister type name
-#      
+# 
+# 
+#   VARIABLES
+#
+# serv:	                             
+#	serv(gcProtoPriority)      : The groupchat protocol priority list.                             
+#	                             
+#       serv(gcprot,$jid)          : Map a groupchat service jid to protocol:
+#       	                     (gc-1.0|conference|muc)
+#
+#       serv(prefgcprot,$jid)      : Stores preferred groupchat protocol that
+#                                    overrides the priority list.
+#     
 ############################# CHANGES ##########################################
 #
 #       0.1         first version
