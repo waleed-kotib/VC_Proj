@@ -44,6 +44,7 @@
 !
 *Combobox.background:                white
 *Combobox.Font:                      Helvetica 10
+*HeadLabel.background:               #cecece
 *MyLabelFrame.Font:                  Helvetica 10 bold
 *Tablelist.borderWidth:              1
 *Tablelist.Font:                     Helvetica 10
