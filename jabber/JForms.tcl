@@ -1,0 +1,885 @@
+#  JForms.tcl ---
+#  
+#      This file is part of the whiteboard application. 
+#      It implements dynamic forms GUI. 
+#      If an 'jabber:x:data' namespaced element is given, the methods
+#      involved with this method are used. Else straight (simple) model.
+#      
+#  Copyright (c) 2002  Mats Bengtsson
+#
+# $Id: JForms.tcl,v 1.1.1.1 2002-12-08 11:00:40 matben Exp $
+# 
+#      Updated to the 2002-09-03 revision of JEP-0004
+#  
+#-------------------------------------------------------------------------------
+
+package provide JForms 1.0
+
+# Just make sure that we have the parent namespace here.
+namespace eval ::Jabber:: {}
+
+namespace eval ::Jabber::Forms:: {
+
+    # Unique id used as a token.
+    variable uid 0
+
+    # Storage for content in entries etc.
+    variable cache
+    
+    # Mappings from $w to $id etc. locals($w,id), locals($w,type)
+    variable locals
+    
+    # List of pairs 'varName label' for each search entry received.
+    variable reported
+}
+
+# Jabber::Forms::Build --
+#
+#       Builds a megawidget form. Dispatches to the appropriate proc
+#       depending on if we've got an 'jabber:x:data' namespace or not.
+
+proc ::Jabber::Forms::Build {w xmllist args} {
+    
+    upvar ::Jabber::jprefs jprefs
+    variable uid
+    variable locals
+    variable reported
+    
+    incr uid
+    set argsArr(-template) ""
+    array set argsArr $args
+    set locals($w,id) $uid
+    set locals($w,template) $argsArr(-template)
+    set locals($w,xmllist) $xmllist
+    set reported($uid) {}
+    
+    # We must figure out if the service supports the jabber:x:data stuff.
+    set hasXDataForm 0
+    set locals($w,type) "simple"
+
+    if {$jprefs(useXDataSearch)} {
+	foreach c $xmllist {
+	    if {[string equal [lindex $c 0] "x"]} {
+		array set cattrArr [lindex $c 1]
+		if {[info exists cattrArr(xmlns)] &&  \
+		  [string equal $cattrArr(xmlns) "jabber:x:data"]} {
+		    set hasXDataForm 1
+		    set xmlXDataElem $c
+		}
+	    }
+	}
+    }
+    if {$hasXDataForm} {
+	set locals($w,type) "xdata"
+	eval {BuildXData $w $xmlXDataElem} $args
+    } else {
+	BuildSimple $w $xmllist $argsArr(-template)
+    }
+    bind $w <Destroy> [list [namespace current]::Cleanup $w]
+    return $w
+}
+
+proc ::Jabber::Forms::GetReported {w} {
+
+    variable locals
+    variable reported
+    
+    if {![info exists locals($w,id)]} {
+	return -code error "The widget \"$w\" is not a form"
+    }
+    set id $locals($w,id)
+    return $reported($id)
+}
+
+# Jabber::Forms::GetXML --
+#
+#       Get xml from form.
+#
+# Arguments:
+#       w           the form frame widget.
+
+proc ::Jabber::Forms::GetXML {w} {
+    
+    variable locals
+
+    if {![info exists locals($w,id)]} {
+	return -code error "The widget \"$w\" is not a form"
+    }
+
+    switch -- $locals($w,type) {
+	simple {
+	    set xmlForm [GetXMLSimple $w $locals($w,xmllist) $locals($w,template)]
+	}
+	xdata {
+	    set xmlForm [GetXMLXData $w]
+	}
+	default {
+	    return -code error "Type \"$locals($w,type)\" is not a valid form type"
+	}
+    }    
+    return $xmlForm
+}
+
+proc ::Jabber::Forms::Cleanup {w} {
+    
+    variable locals
+    variable reported
+    variable cache
+
+    set id $locals($w,id)
+    foreach key [array names cache "$id,*"] {
+	unset cache($key)
+    }
+    foreach key [array names locals "$w,*"] {
+	unset locals($key)
+    }
+    unset reported($id)
+}
+
+# Jabber::Forms::BuildSimple --
+#
+#       Utility to make a label-entry box automatically from a xml list.
+#       Stored as cache($id,$key) where key is tag1, tag1_tag2, or
+#       tag1#3.
+#       
+# Arguments:
+#       w           The frame to be created.
+#       xmllist     Hierarchical xml list.
+#       template    (optional) Tells us the context for this call.
+#                   "room", "register",...
+#       
+# Results:
+#       w, the frame that must be packed.
+
+proc ::Jabber::Forms::BuildSimple {w xmllist {template {}}} {
+    variable cache
+    variable reported
+    variable locals
+
+    if {![info exists locals($w,id)]} {
+	return -code error "The widget \"$w\" is not a form"
+    }
+    set id $locals($w,id)
+    set i 0
+    set reported($id) {jid {Jid (user)}}
+    frame $w
+    
+    # Handle tag by tag.
+    foreach child $xmllist {
+	set tag [lindex $child 0]
+	FillInBoxOneTag $w $child {} i $template
+	incr i
+    }
+    return $w
+}
+
+# Jabber::Forms::FillInBoxOneTag --
+#
+#       Just a helper proc to 'BuildSimple'.
+#       Makes the right row or rows for this specific tag,
+#       or calls itself rcursively.
+
+proc ::Jabber::Forms::FillInBoxOneTag {w child parentTag iName {template {}}} {
+    global  sysFont
+    
+    variable locals
+    variable reported
+    variable cache
+    
+    # Call by name for the row counter.
+    upvar $iName i
+    
+    set id $locals($w,id)
+    set tag [lindex $child 0]
+    set cdata [lindex $child 3]
+    set subchildren [lindex $child 4]
+    set key ${parentTag}${tag}
+    
+    if {[llength $subchildren] == 0} {
+	set varName [namespace current]::cache($id,$key)
+
+	# Collect 'reported' keys.
+	if {($tag != "instructions") && ($tag != "key") && ($tag != "x")} {
+	    lappend reported($id) $tag $tag
+	}
+	
+	# Room template.
+	if {$template == "room"} {
+	    if {($tag == "nick") || ($tag == "nickname")} {
+		foreach num {1 2 3} {
+		    label $w.ln$num -text "${tag} ${num}:" -font $sysFont(sb)
+		    entry $w.en$num -width 22   \
+		      -textvariable [namespace current]::cache($id,$key#${num})
+		    grid $w.ln$num -column 0 -row $i -sticky e
+		    grid $w.en$num -column 1 -row $i -sticky w
+		    incr i
+		}
+	    } elseif {$tag == "privacy"} {
+		label $w.l$i -text {Privacy if nickname} -font $sysFont(sb)
+		grid $w.l$i -column 0 -row $i -columnspan 2 -sticky w
+		incr i
+	    } elseif {$tag == "ns"} {
+		catch {unset attr}
+		array set attr [lindex $child 1]
+		if {[info exists attr(type)]} {
+		    set str $attr(type)
+		    set txt "[string replace $str 0 0   \
+		      [string toupper [string index $str 0]]] namespace:"
+		} else {
+		    set txt {Namespace:}
+		}
+		label $w.l$i -text $txt -font $sysFont(sb)
+		label $w.lns$i -text $cdata 
+		grid $w.l$i -column 0 -row $i -sticky e
+		grid $w.lns$i -column 1 -row $i -sticky w
+		incr i
+	    } else {
+		label $w.l$i -text ${tag}: -font $sysFont(sb)
+		entry $w.e$i -width 22   \
+		  -textvariable $varName
+		grid $w.l$i -column 0 -row $i -sticky e
+		grid $w.e$i -column 1 -row $i -sticky w
+		incr i
+	    }
+	    
+	    # Registering & searching.
+	} elseif {($template == "register") || ($template == "search")} {
+	    if {$tag == "registered"} {
+		message $w.l$i -width 200 -font $sysFont(s) \
+		  -text {You are already registered with this service.\
+		  These are your current settings of your login parameters.\
+		  Possible to change???}
+		grid $w.l$i -column 0 -row $i -sticky w -columnspan 2
+		incr i
+	    } elseif {$tag == "instructions"} {
+		message $w.l$i -width 200 -font $sysFont(s)  \
+		  -text $cdata
+		grid $w.l$i -column 0 -row $i -sticky w -columnspan 2
+		incr i
+	    } elseif {$tag == "key"} {
+
+		# This is a trick to return the <key>. ???
+		set $varName $cdata
+	    } else {
+		label $w.l$i -text ${tag}: -font $sysFont(sb)
+		entry $w.e$i -width 22 -textvariable $varName
+		grid $w.l$i -column 0 -row $i -sticky e
+		grid $w.e$i -column 1 -row $i -sticky w
+		incr i
+	    }
+	    
+	    # Default.
+	} else {
+	    label $w.l$i -text ${tag}: -font $sysFont(sb)
+	    entry $w.e$i -width 22 -textvariable $varName
+	    grid $w.l$i -column 0 -row $i -sticky e
+	    grid $w.e$i -column 1 -row $i -sticky w
+	    incr i
+	}
+    } else {
+	
+	# Handle subtags by recursive calls.
+	# We shouldn't do this if an <x> element (jabber:x:data etc.)
+	if {![string equal $tag "x"]} {
+	    foreach subchild $subchildren {
+		FillInBoxOneTag $w $subchild "${key}_" $iName $template	    
+	    }
+	}
+    }
+}
+
+# Jabber::Forms::GetXMLSimple --
+#
+#       Utility to use the UI box above and construct the xml data from that.
+#       The array key of each element is constructed as:
+#       rootTag_subTag_subSubTag.
+#       
+# Arguments:
+#       w           The existing frame.
+#       
+# Results:
+#       xml sub elements suitable for the -subtags option of wrapper::createtag.
+
+proc ::Jabber::Forms::GetXMLSimple {w xmllist {template {}}} {
+    
+    set subelements {}
+    foreach child $xmllist {
+	set subelements [concat $subelements   \
+	  [GetXMLForChild $w $child {} $template]]
+    }
+    return $subelements
+}
+
+# Jabber::Forms::GetXMLForChild --
+#
+#       Just a helper proc for the above one. If we get a leaf tag, it builds
+#       and returns a xml list, if children, it calls itself recursively.
+#       Important: it returns a list of one or more children. The extra list
+#       structure must be stripped of by 'concat'.
+
+proc ::Jabber::Forms::GetXMLForChild {w child parentTags template} {
+
+    variable cache
+    variable locals
+    
+    set tag [lindex $child 0]
+    set subchildren [lindex $child 4]
+    set subelements {}
+    set id $locals($w,id)
+    
+    # Leaf tag.
+    if {[llength $subchildren] == 0} {
+	set keyTag [join "$parentTags $tag" _]
+	if {$template == "room"} {
+	    
+	    # Treat certain tags with special rules.
+	    if {($tag == "nick") || ($tag == "nickname")} {
+		set sub {}
+		foreach num {1 2 3} {
+		    set val $cache($id,${keyTag}#${num})
+		    if {$val != ""} {
+			lappend sub [wrapper::createtag $tag -chdata $val]
+		    }
+		}	 
+		if {$sub != ""} {
+		    set subelements $sub
+		}	    
+	    } elseif {[info exists cache($id,$keyTag)]} {
+		set val $cache($id,$keyTag)
+		if {$val != ""} {
+		    set subelements [list [wrapper::createtag $tag -chdata $val]]
+		}	    
+	    }
+	} else {
+	    if {[info exists cache($id,$keyTag)]} {
+		set val $cache($id,$keyTag)
+		if {$val != ""} {
+		    set subelements [list [wrapper::createtag $tag -chdata $val]]
+		}
+	    }	    
+	}
+    } else {
+	
+	# Recursively.
+	set subsub {}
+	set ptaglist [concat $parentTags $tag]
+	foreach subchild $subchildren {
+	    set subsub [concat $subsub  \
+	      [GetXMLForChild $w $subchild $ptaglist $template]]
+	}
+	set subelements [list [wrapper::createtag $tag -subtags $subsub]]
+    }
+    return $subelements
+}
+
+# Some code for handling the jabber:x:data things ------------------------------
+
+# Jabber::Forms::BuildXData
+#
+#       Makes a frame from xml jabber:x:data namespaced xml.
+#
+# Arguments:
+#       w           the form frame widget.
+#       xml         an xml list starting with the <x> element, namespaced
+#                   jabber:x:data
+#       
+# Results:
+#       none
+
+proc ::Jabber::Forms::BuildXData {w xml args} {
+    global  sysFont prefs
+
+    variable cache
+    variable reported
+    variable type
+    variable locals
+    variable optionLabel2Value
+    variable optionValue2Label
+
+    if {[lindex $xml 0] != "x"} {
+	return -code error {Not proper xml data here}
+    }
+    array set attrArr [lindex $xml 1]
+    if {![info exists attrArr(xmlns)]} {
+	return -code error {Not proper xml data here}
+    }
+    if {![string equal $attrArr(xmlns) "jabber:x:data"]} {
+	return -code error {Not proper xml data here}
+    }
+    array set argsArr {
+	-aspect    800
+	-width     200
+    }
+    array set argsArr $args
+    frame $w
+    set id $locals($w,id)
+    
+    set i 0
+    foreach elem [wrapper::getchildren $xml] {
+	set tag [lindex $elem 0]
+	switch -- $tag {
+	    instructions {
+		message $w.m$i -aspect $argsArr(-aspect) -font $sysFont(s) \
+		  -text [lindex $elem 3] -width $argsArr(-width)
+		grid $w.m$i -row $i -column 0 -columnspan 1 -sticky ew
+		incr i
+	    }
+	    field {
+		catch {unset attrArr}
+		array set attrArr [lindex $elem 1]
+		set var $attrArr(var)
+		set type($id,$var) $attrArr(type)
+		if {[info exists attrArr(label)]} {
+		    set lab $attrArr(label)
+		} else {
+		    set lab $var
+		}
+		
+		# Required? <desc> element? <value> as default?
+		set isrequired 0
+		foreach c [wrapper::getchildren $elem] {
+		    if {[string equal [lindex $c 0] "required"]} {
+			set isrequired 1
+		    } elseif {[string equal [lindex $c 0] "desc"]} {
+			message $w.m$i -aspect $argsArr(-aspect) -font $sysFont(s)  \
+			  -text [lindex $c 3] -width $argsArr(-width)
+			grid $w.m$i -row $i -column 0 -columnspan 1 -sticky ew
+			incr i
+		    } elseif {[string equal [lindex $c 0] "value"]} {
+			
+			# Set default.
+			set cache($id,$var) [lindex $c 3]
+		    }
+		}
+		if {$isrequired} {
+		    set opts {-foreground red}
+		} else {
+		    set opts {}
+		}
+		
+		switch -exact -- $attrArr(type) {
+		    text-single - text-private {
+			if {[string equal $attrArr(type) "text-single"]} {
+			    set show {}
+			} else {
+			    set show {-show *}
+			}
+			eval {label $w.l$i -text $lab} $opts
+			grid $w.l$i -row $i -column 0 -sticky w
+			incr i
+			eval {entry $w.e$i  \
+			  -textvariable [namespace current]::cache($id,$var)} \
+			  $show
+			grid $w.e$i -row $i -column 0 -sticky ew
+			incr i
+		    }
+		    text-multi {
+			eval {label $w.l$i -text $lab} $opts
+			grid $w.l$i -row $i -column 0 -sticky w
+			incr i
+
+			set wfr [frame $w.f$var]
+			set wtxt ${wfr}.txt
+			set wsc ${wfr}.sc
+			text $wtxt -font $sysFont(s) -height 3 -wrap word \
+			  -yscrollcommand [list $wsc set]
+			scrollbar $wsc -orient vertical  \
+			  -command [list $wtxt yview]
+			grid $wtxt -column 0 -row 0 -sticky news
+			grid $wsc -column 1 -row 0 -sticky ns
+			grid columnconfigure $wfr 0 -weight 1
+			grid rowconfigure $wfr 0 -weight 1
+			
+			grid $wfr -row $i -column 0 -sticky news
+			incr i
+		    }
+		    list-single {
+			
+			# Represented by a popup menu button.
+			eval {label $w.l$i -text $lab} \
+			  $opts
+			grid $w.l$i -row $i -column 0 -sticky w
+			incr i
+			
+			# Build menu list and mapping from label to value.
+			foreach {defValue optionList}   \
+			  [HandleMultipleOptions $id $elem $var] {}
+			
+			set wmenu [eval {tk_optionMenu $w.pop$i   \
+			  [namespace current]::cache($id,$var)} $optionList]
+			$w.pop$i configure -highlightthickness 0  \
+			  -background $prefs(bgColGeneral) -foreground black
+			if {[info exists defValue]} {
+			    set cache($id,$var) $optionValue2Label($id,$var,$defValue)
+			}
+			grid $w.pop$i -row $i -column 0 -sticky ew			
+			incr i
+		    }
+		    list-multi {
+			
+			# Build menu list and mapping from label to value.
+			foreach {defValue optionList}   \
+			  [HandleMultipleOptions $id $elem $var] {}
+			set cache($id,$var) $optionList
+			
+			# Represented by a listbox.
+			eval {label $w.l$i -text $lab} \
+			  $opts
+			grid $w.l$i -row $i -column 0 -sticky w
+			incr i
+
+			set wfr [frame $w.f$var]
+			set wlb $w.f${var}.lb
+			set wsc $w.f${var}.sc
+			listbox $wlb -font $sysFont(s) -height 4  \
+			  -selectmode multiple  \
+			  -yscrollcommand [list $wsc set]   \
+			  -listvar [namespace current]::cache($id,$var)
+			scrollbar $wsc -orient vertical  \
+			  -command [list $wlb yview]
+			grid $wlb -column 0 -row 0 -sticky news
+			grid $wsc -column 1 -row 0 -sticky ns
+			grid columnconfigure $wfr 0 -weight 1
+			grid rowconfigure $wfr 0 -weight 1
+						
+			grid $wfr -row $i -column 0 -sticky news
+			
+			set ind [lsearch $optionList  \
+			  $optionValue2Label($id,$var,$defValue)]
+			if {$ind >= 0} {
+			    $wlb selection set $ind
+			}
+			incr i
+		    }
+		    boolean {
+			eval {checkbutton $w.c$i -text $lab \
+			  -variable [namespace current]::cache($id,$var)} $opts
+			grid $w.c$i -row $i -column 0 -columnspan 1 -sticky ew
+			incr i
+		    }
+		    fixed {
+			eval {label $w.l$i -text [lindex $elem 3]} \
+			  $opts
+			grid $w.l$i -row $i -column 0 -columnspan 1 -sticky ew
+			incr i
+		    }
+		    jid {
+			label $w.l$i -text $lab
+			grid $w.l$i -row $i -column 0 -sticky w
+			incr i
+			entry $w.e$i  \
+			  -textvariable [namespace current]::cache($id,$var)
+			grid $w.e$i -row $i -column 0 -sticky ew
+			incr i
+		    }
+		    hidden {
+			set cache($id,$var) [lindex $elem 3]
+		    }
+		    default {
+			
+			# Use text-single type as fallback.
+			label $w.l$i -text $lab
+			grid $w.l$i -row $i -column 0 -sticky w
+			incr i
+			entry $w.e$i  \
+			  -textvariable [namespace current]::cache($id,$var)
+			grid $w.e$i -row $i -column 0 -sticky ew
+			incr i
+		    }
+		}
+	    }
+	    reported {
+		
+		# Seems to be outdated. Reported instead in result element.
+		set reported($id) {}
+		foreach c [wrapper::getchildren $elem] {
+		    catch {unset cattrArr}
+		    array set cattrArr [lindex $c 1]
+		    lappend reported($id) $cattrArr(var) $cattrArr(label)
+		}
+	    }
+	}
+    }
+    label $w.l$i -text {Entries labelled in red are required}
+    grid $w.l$i -row $i -column 0 -columnspan 2 -sticky ew
+}
+
+# Jabber::Forms::HandleMultipleOptions --
+
+proc ::Jabber::Forms::HandleMultipleOptions {id elem var} {
+    
+    variable optionLabel2Value
+    variable optionValue2Label
+    
+    # Build menu list and mapping from label to value.
+    set value {}
+    set optionList {}
+    foreach c [wrapper::getchildren $elem] {
+	switch -- [lindex $c 0] {
+	    value {
+		set value [lindex $c 3]				    
+	    }
+	    option {
+		catch {unset cattrArr}
+		array set cattrArr [lindex $c 1]
+		set optValue $cattrArr(label)
+		foreach cc [wrapper::getchildren $c] {
+		    if {[string equal [lindex $cc 0] "value"]} {
+			set optValue [lindex $cc 3]
+			break
+		    }
+		}
+		set optionLabel2Value($id,$var,$cattrArr(label)) $optValue
+		set optionValue2Label($id,$var,$optValue) $cattrArr(label)
+		lappend optionList $cattrArr(label)
+	    }
+	}
+    }
+    return [list $value $optionList]
+}
+
+# Jabber::Forms::GetXMLXData
+#
+#       Returns the xml list corresponding to the form with this id.
+#
+# Arguments:
+#       w           the form frame widget.
+#       
+# Results:
+#       the hierarchical xml list starting with the <x> element.
+
+proc ::Jabber::Forms::GetXMLXData {w} {
+    
+    variable locals
+    variable cache
+    variable type
+    variable optionLabel2Value
+    
+    if {![info exists locals($w,id)]} {
+	return -code error "The widget \"$w\" is not a form"
+    }
+    set id $locals($w,id)
+    set xmllist {}
+    
+    # Submit all nonempty entries.
+    foreach key [array names type "$id,*"] {
+	regexp "^$id,(.+)$" $key match var
+
+	switch -- $type($key) {
+	    text-single - text-private - boolean - jid {
+		set value $cache($id,$var)
+		set subtags [list [wrapper::createtag value -chdata $value]]
+	    }
+	    list-single {
+		
+		# Need to map from label to value!
+		set label $cache($id,$var)
+		set value $optionLabel2Value($id,$var,$label)
+		set subtags [list [wrapper::createtag value -chdata $value]]
+	    }
+	    list-multi {
+		set wlb $win($id).f${var}.lb
+		set selIndList [$wlb curselection]
+		set valueList {}
+		foreach ind $selIndList {
+		    lappend valueList [$wlb get $ind]
+		}
+		if {[llength $valueList] == 0} {
+		    continue
+		}
+		set subtags {}
+		foreach value $valueList {
+		    lappend subtags [wrapper::createtag value -chdata $value]
+		}
+	    }
+	    text-multi {
+		set value [$win($id).f${var}.txt get 1.0 end]		
+		set subtags [list [wrapper::createtag value -chdata $value]]
+	    }
+	    default {
+		set value ""
+	    }
+	}
+	if {[string length $value]} {
+	    lappend xmllist [wrapper::createtag field -attrlist [list var $var] \
+	      -subtags $subtags]
+	}
+    }
+    
+    # Note the list structure.
+    return [list [wrapper::createtag x  \
+      -attrlist {xmlns jabber:x:data type submit} -subtags $xmllist]]
+}
+
+# Jabber::Forms::ResultList
+#
+#       Returns a list describing, for instance, a search result.
+#
+# Arguments:
+#       w           the megawidget form.
+#       
+# Results:
+#       a hierarchical list {{jid1 val1 val2 ...} {jid2 val1 val2 ...} ... }
+
+proc ::Jabber::Forms::ResultList {w subiq} {
+
+    variable locals
+    variable reported
+    
+    if {![info exists locals($w,id)]} {
+	return -code error "The widget \"$w\" is not a form"
+    }
+    set id $locals($w,id)
+    set res {}
+    
+    if {$locals($w,type) == "xdata"} {		
+	set res [ResultListXData $w $subiq]	
+    } elseif {$locals($w,type) == "simple"} {
+	
+	# Loop through the items. Make sure we get them in the order specified 
+	# in 'reported'.
+	# We are not guaranteed to receive every field.
+	foreach item [wrapper::getchildren $subiq] {
+	    catch {unset attrArr}
+	    catch {unset itemArr}
+	    array set attrArr [lindex $item 1]
+	    set itemArr(jid) $attrArr(jid)
+	    foreach thing [wrapper::getchildren $item] {
+		set tag [lindex $thing 0]
+		set val [lindex $thing 3]
+		set itemArr($tag) $val
+	    }
+	    set row {}
+	    foreach {var label} $reported($id) {
+		if {[info exists itemArr($var)]} {
+		    lappend row $itemArr($var)
+		} else {
+		    lappend row {}
+		}
+	    }
+	    lappend res $row
+	}
+    } else {
+	return -code error "The form \"$w\" is of invalid type \"$locals($w,type)\""
+    }
+    return $res
+}
+
+# Jabber::Forms::ResultListXData --
+# 
+#       See ::Jabber::Forms::ResultList
+#       Complete xml: <query ...><iq ...><x xmlns='jabber:x:data' ...>
+#       subiq: <iq ...><x ...
+
+proc ::Jabber::Forms::ResultListXData {w subiq} {
+    
+    variable locals
+    variable reported
+    
+    if {![info exists locals($w,id)]} {
+	return -code error "The widget \"$w\" is not a form"
+    }
+    set id $locals($w,id)
+    set res {}
+    set xElem [lindex [wrapper::getchildren $subiq] 0]    
+    if {![string equal [lindex $xElem 0] "x"]} {
+	return -code error {Did not identify the <x> element in search result}
+    }
+    
+    # Loop through the items. The first one must be a <reported> element.
+    # We are not guaranteed to receive every field.
+    
+    foreach item [wrapper::getchildren $xElem] {
+	switch -- [lindex $item 0] {
+	    title {
+		#
+	    }
+	    reported {
+		set reported($id) {}
+		foreach field [wrapper::getchildren $item] {
+		    catch {unset attrArr}
+		    array set attrArr [lindex $field 1]
+		    lappend reported($id) $attrArr(var) $attrArr(label)
+		}
+	    }
+	    item {
+		foreach field [wrapper::getchildren $item] {
+		    catch {unset fieldAttrArr}
+		    array set fieldAttrArr [lindex $field 1]
+		    set valueElem [lindex [wrapper::getchildren $field] 0]
+		    if {![string equal [lindex $valueElem 0] "value"]} {
+			continue
+		    }		
+		    set itemArr($fieldAttrArr(var)) [lindex $valueElem 3]		
+		}
+		
+		# Sort in order of <reported>.
+		set row {}
+		foreach {var label} $reported($id) {
+		    if {[info exists itemArr($var)]} {
+			lappend row $itemArr($var)
+		    } else {
+			lappend row {}
+		    }
+		}
+		lappend res $row
+	    }
+	}
+    }
+    return $res
+}
+
+# Jabber::Forms::ResultListXData_OLD --
+# 
+#       See ::Jabber::Forms::ResultList
+
+proc ::Jabber::Forms::ResultListXData_OLD {w subiq} {
+    
+    variable locals
+    variable reported
+    
+    if {![info exists locals($w,id)]} {
+	return -code error "The widget \"$w\" is not a form"
+    }
+    set id $locals($w,id)
+    set res {}
+    
+    # Loop through the items. The first one must be a <reported> element.
+    # We are not guaranteed to receive every field.
+    
+    foreach item [wrapper::getchildren $subiq] {
+
+	catch {unset attrArr}
+	catch {unset itemArr}
+	array set attrArr [lindex $item 1]
+	set itemArr(jid) $attrArr(jid)
+	set xElem [lindex [wrapper::getchildren $item] 0]
+	if {![string equal [lindex $xElem 0] "x"]} {
+	    continue
+	}
+	foreach field [wrapper::getchildren $xElem] {
+	    if {![string equal [lindex $field 0] "field"]} {
+		continue
+	    }
+	    catch {unset fieldAttrArr}
+	    array set fieldAttrArr [lindex $field 1]
+	    set valueElem [lindex [wrapper::getchildren $field] 0]
+	    if {![string equal [lindex $valueElem 0] "value"]} {
+		continue
+	    }		
+	    set itemArr($fieldAttrArr(var)) [lindex $valueElem 3]		
+	}
+	set row {}
+	foreach {var label} $keyList {
+	    if {[info exists itemArr($var)]} {
+		lappend row $itemArr($var)
+	    } else {
+		lappend row {}
+	    }
+	}
+	lappend res $row
+    }
+    return $res
+}
+
+#-------------------------------------------------------------------------------

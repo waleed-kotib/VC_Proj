@@ -1,0 +1,1 @@
+create polygon 95.0 75.0 105.0 26.0 111.0 76.0 157.0 83.0 111.0 90.0 103.0 128.0 95.0 90.0 51.0 82.0 -fill #ffffff -outline black -smooth 0 -splinesteps 1 -stipple {} -tags {poly localhost/4} -width 1

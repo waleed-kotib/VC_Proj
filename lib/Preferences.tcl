@@ -1,0 +1,2525 @@
+#  Preferences.tcl ---
+#  
+#       This file is part of the whiteboard application. It implements the
+#       preferences dialog window.
+#      
+#  Copyright (c) 1999-2002  Mats Bengtsson
+#  
+#  See the README file for license, bugs etc.
+#  
+# $Id: Preferences.tcl,v 1.1.1.1 2002-12-08 11:04:02 matben Exp $
+ 
+package require notebook
+package require tree
+package require tablelist
+package require combobox
+
+package provide Preferences 1.0
+
+namespace eval ::Preferences:: {
+    
+    # Variable to be used in tkwait.
+    variable finished
+    
+    # Name of the page that was in front last time.
+    variable lastPage {}
+}
+
+proc ::Preferences::Display {w} {
+
+    variable finished
+
+    if {[winfo exists $w]} {
+	set finished 0
+	wm deiconify $w
+    } else {
+	Build $w
+    }
+}
+
+proc ::Preferences::Build {w} {
+    global  sysFont this prefs
+    
+    variable tmpPrefs
+    variable tmpJPrefs
+    variable tmpJServer
+    
+    variable wtoplevel
+    variable finished
+    variable nbframe
+    variable xpadbt
+    variable ypad 
+    variable ypadtiny
+    variable ypadbig
+    variable lastPage
+    
+    upvar ::Jabber::jserver jserver
+    upvar ::Jabber::jprefs jprefs
+    
+    toplevel $w -class Preferences
+    wm title $w [::msgcat::mc Preferences]
+    wm group $w .
+    wm protocol $w WM_DELETE_WINDOW ::Preferences::CancelPushBt
+    set finished 0
+    set wtoplevel $w
+    
+    # Unfortunately it is necessary to do some platform specific things to
+    # get the pages to look nice.
+    switch -glob -- $this(platform) {
+	mac* {
+	    eval $::macWindowStyle $w documentProc
+	    set ypadtiny 1
+	    set ypad     3
+	    set ypadbig  4
+	    set xpadbt   7
+	}
+	windows {
+	    set ypadtiny 0
+	    set ypad     0
+	    set ypadbig  1
+	    set xpadbt   4
+	}
+	default {
+	    set ypadtiny 0
+	    set ypad     1
+	    set ypadbig  2
+	    set xpadbt   2
+	}
+    }    
+    if {!$prefs(stripJabber)} {
+
+	# Sync $jserver(all)
+	set jserver(all) {}
+	foreach {name spec} $jserver(profile) {
+	    lappend jserver(all) $name
+	}
+    }
+    
+    # Work only on a temporary copy in case we cancel.
+    catch {unset tmpPrefs}
+    catch {unset tmpJPrefs}
+    catch {unset tmpJServer}
+    array set tmpPrefs [array get prefs]
+    array set tmpJPrefs [array get jprefs]
+    array set tmpJServer [array get jserver]
+    
+    # Global frame.
+    pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
+    
+    # Frame for everything except the buttons.
+    pack [frame $w.frall.fr] -fill both -expand 1 -side top
+    
+    # Tree frame with scrollbars.
+    pack [frame $w.frall.fr.t -relief sunken -bd 1]   \
+      -fill y -side left -padx 4 -pady 4
+    set frtree $w.frall.fr.t.frtree
+    pack [frame $frtree] -fill both -expand 1 -side left
+    pack [label $frtree.la -text [::msgcat::mc {Settings Panels}]  \
+      -font $sysFont(sb) -relief raised -bd 1 -bg #bdbdbd] -side top -fill x
+    set wtree [::tree::tree $frtree.t -width 120 -height 300   \
+      -openicons triangle -treecolor {}   \
+      -yscrollcommand [list $frtree.sby set]       \
+      -selectcommand ::Preferences::SelectCmd   \
+      -doubleclickcommand {}   \
+      -highlightcolor #6363CE -highlightbackground $prefs(bgColGeneral)]
+    scrollbar $frtree.sby -orient vertical -command [list $wtree yview]
+    
+    pack $wtree -side left -fill both -expand 1
+    pack $frtree.sby -side right -fill y
+    
+    # Fill tree.
+    $wtree newitem {General} -text [::msgcat::mc General]
+    $wtree newitem {General {Network Setup}} -text [::msgcat::mc {Network Setup}]
+    $wtree newitem {General {Proxy Setup}} -text [::msgcat::mc {Proxy Setup}]
+    $wtree newitem {General {Sounds & Speech}} -text [::msgcat::mc {Sounds & Speech}]
+    $wtree newitem {General Shortcuts} -text [::msgcat::mc Shortcuts]
+    #$wtree newitem {General Plugins}
+    if {!$prefs(stripJabber)} {
+	$wtree newitem {Jabber}
+	$wtree newitem {Jabber {User Profiles}} -text [::msgcat::mc {User Profiles}]
+	$wtree newitem {Jabber {Personal Info}} -text [::msgcat::mc {Personal Info}]
+	$wtree newitem {Jabber {Auto Away}} -text [::msgcat::mc {Auto Away}]
+	$wtree newitem {Jabber Subscriptions} -text [::msgcat::mc Subscriptions]
+	$wtree newitem {Jabber Roster} -text [::msgcat::mc Roster]
+	$wtree newitem {Jabber Conference} -text [::msgcat::mc Conference]
+	$wtree newitem {Jabber Blockers} -text [::msgcat::mc Blockers]
+	$wtree newitem {Jabber Customization} -text [::msgcat::mc Customization]
+    }
+    $wtree newitem {Whiteboard} -text [::msgcat::mc Whiteboard]
+    $wtree newitem {Whiteboard Drawing} -text [::msgcat::mc Drawing]
+    $wtree newitem {Whiteboard Text} -text [::msgcat::mc Text]
+    $wtree newitem {Whiteboard {File Mappings}} -text [::msgcat::mc {File Mappings}]
+    $wtree newitem {Whiteboard {Edit Fonts}} -text [::msgcat::mc {Edit Fonts}]
+    $wtree newitem {Whiteboard {File Cache}} -text [::msgcat::mc {File Cache}]
+    $wtree newitem {Whiteboard Privacy} -text [::msgcat::mc Privacy]
+    
+    # The notebook and its pages.
+    set nbframe [notebook::notebook $w.frall.fr.nb -borderwidth 1 -relief sunken]
+    pack $nbframe -expand 1 -fill both -padx 4 -pady 4
+    
+    # Make the notebook pages.
+    
+    # Network Setup page -------------------------------------------------------
+    set frpnet [$nbframe page {Network Setup}]
+    ::Preferences::NetSetup::BuildPage $frpnet
+    
+    # Proxies Setup page -------------------------------------------------------
+    set frpoxy [$nbframe page {Proxy Setup}]
+    ::Preferences::Proxies::BuildPage $frpoxy
+    
+    # Sounds & Speech page -----------------------------------------------------
+    set frpss [$nbframe page {Sounds & Speech}]
+    ::Preferences::BuildPageSounds $frpss    
+    
+    # Shortcuts page -----------------------------------------------------------
+    set frpshort [$nbframe page Shortcuts]
+    ::Preferences::Shorts::BuildPage $frpshort    
+    
+    # Plugin page --------------------------------------------------------------
+    #set frpplug [$nbframe page Plugins]
+    #::Preferences::Plugins::BuildPage $frpplug    
+    
+    if {!$prefs(stripJabber)} {
+	
+	# User Info page -------------------------------------------------------
+	set frpui [$nbframe page {User Profiles}]    
+	::Preferences::BuildPageUserInfo $frpui
+	
+	# Personal Info page ---------------------------------------------------
+	set frppers [$nbframe page {Personal Info}]
+	::Preferences::BuildPagePersInfo $frppers
+	
+	# Auto Away page -------------------------------------------------------
+	set frpaway [$nbframe page {Auto Away}]
+	::Preferences::BuildPageAutoAway $frpaway
+	
+	# Subscriptions page ---------------------------------------------------
+	set frpsubs [$nbframe page {Subscriptions}]
+	::Preferences::BuildPageSubscriptions $frpsubs    
+	
+	# Roster page ----------------------------------------------------------
+	set frprost [$nbframe page {Roster}]
+	::Preferences::BuildPageRoster $frprost
+	
+	# Conference page ------------------------------------------------------
+	set frpgroup [$nbframe page {Conference}]
+	label $frpgroup.msg -text "Something on Conference page."
+	pack $frpgroup.msg -side left -expand yes -pady 8
+	
+	# Blockers page --------------------------------------------------------
+	set frbl [$nbframe page {Blockers}]    
+	::Preferences::Block::BuildPage $frbl
+	
+	# Customization page -------------------------------------------------------
+	set frcus [$nbframe page {Customization}]    
+	::Preferences::Customization::BuildPage $frcus
+    }
+    
+    # Drawing page -------------------------------------------------------------
+    set frpdraw [$nbframe page {Drawing}]
+    label $frpdraw.msg -text "Something on Drawing page."
+    pack $frpdraw.msg -side left -expand yes -pady 8
+    
+    # Text page ----------------------------------------------------------------
+    set frptxt [$nbframe page {Text}]
+    label $frptxt.msg -text "Something on Text page."
+    pack $frptxt.msg -side left -expand yes -pady 8
+    
+    # Edit Fonts page ----------------------------------------------------------
+    set frpfont [$nbframe page {Edit Fonts}]
+    ::Preferences::EditFonts::BuildPage $frpfont
+    
+    # File Mappings ------------------------------------------------------------
+    set frfm [$nbframe page {File Mappings}]    
+    ::Preferences::FileMap::BuildPage $frfm
+    
+    # Cache page ---------------------------------------------------------------
+    set frca [$nbframe page {File Cache}]  
+    ::Preferences::BuildPageCache $frca
+    
+    # Privacy page -------------------------------------------------------------
+    set frppriv [$nbframe page {Privacy}]
+    ::Preferences::BuildPagePrivacy $frppriv
+    
+    # Button part.
+    set frbot [frame $w.frall.frbot -borderwidth 0]
+    pack [button $frbot.btconn -text [::msgcat::mc Save] -default active -width 8 \
+      -command ::Preferences::SavePushBt]  \
+      -side right -padx 5 -pady 5
+    pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8   \
+      -command ::Preferences::CancelPushBt]  \
+      -side right -padx 5 -pady 5
+    pack [button $frbot.btfactory -text [::msgcat::mc {Factory Settings}]   \
+      -command [list ::Preferences::ResetToFactoryDefaults "40"]]  \
+      -side left -padx 5 -pady 5
+    pack [button $frbot.btrevert -text [::msgcat::mc {Revert Panel}]  \
+      -command ::Preferences::ResetToUserDefaults]  \
+      -side left -padx 5 -pady 5
+    pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
+    
+    # Don't set width and height since not resizable (font change ex).
+    # .prefs 597x385+177+69
+    if {[info exists prefs(winGeom,$w)]} {
+	regexp {^[^+-]+((\+|-).+$)} $prefs(winGeom,$w) match pos
+	wm geometry $w $pos
+    }
+    wm resizable $w 0 0
+    bind $w <Return> {}
+    
+    # Which page to be in front?
+    if {[llength $lastPage]} {
+	$wtree setselection $lastPage
+    }
+    
+    # Grab and focus.
+    focus $w
+    
+    # Wait here for a button press.
+    tkwait variable [namespace current]::finished
+    
+    # Which page to be in front next time?
+    set lastPage [$wtree getselection]
+    
+    # Clean up.
+    trace vdelete ::Preferences::tmpPrefs(protocol) w  \
+      ::Preferences::NetSetup::TraceNetConfig
+    catch {grab release $w}
+    catch {destroy $w}  
+    #wm withdraw $w
+}
+
+# Preferences::ResetToFactoryDefaults --
+#
+#       Takes all prefs that is in the master list, and sets all
+#       our tmp variables identical to their default (hardcoded) values.
+#       All MIME settings are excluded.
+#
+# Arguments:
+#       maxPriority 0 20 40 60 80 100, or equivalent description.
+#                   Pick only values with lower priority than maxPriority.
+#       
+# Results:
+#       none. 
+
+proc ::Preferences::ResetToFactoryDefaults {maxPriorityNum} {
+    global  prefs
+    
+    variable tmpPrefs
+    variable tmpJPrefs
+    variable tmpJServer
+
+    Debug 2 "::Preferences::ResetToFactoryDefaults maxPriorityNum=$maxPriorityNum"
+    
+    # Warn first.
+    set ans [tk_messageBox -title [::msgcat::mc Warning] -type yesno -icon warning \
+      -message [FormatTextForMessageBox [::msgcat::mc messfactorydefaults]] \
+      -default no]
+    if {$ans == "no"} {
+	return
+    }
+    foreach item $prefs(master) {
+	set varName [lindex $item 0]
+	set resourceName [lindex $item 1]
+	set defaultValue [lindex $item 2]
+	set varPriority [lindex $item 3]
+	if {$varPriority < $maxPriorityNum} {
+	
+	    # Set only tmp variables. Find the corresponding tmp variable.
+	    if {[regsub "^prefs" $varName tmpPrefs tmpVarName]} {
+	    } elseif {[regsub "^::Jabber::jprefs" $varName tmpJPrefs tmpVarName]} {
+	    } elseif {[regsub "^::Jabber::jserver" $varName tmpJServer tmpVarName]} {
+	    } else {
+		continue
+	    }
+	    #puts "varName=$varName, tmpVarName=$tmpVarName"
+	    
+	    # Treat arrays specially.
+	    if {[string match "*_array" $resourceName]} {
+		array set $tmpVarName $defaultValue
+	    } else {
+		set $tmpVarName $defaultValue
+	    }
+	}
+    }
+    
+    # Make temp array for servers.
+    MakeTempServerArray
+    
+    # Probably more...
+    
+}
+
+# Preferences::ResetToUserDefaults --
+#
+#       Revert panels to the state when dialog showed.
+
+proc ::Preferences::ResetToUserDefaults { } {
+    global  prefs
+    
+    variable tmpPrefs
+    variable tmpJPrefs
+    variable tmpJServer
+    upvar ::Jabber::jserver jserver
+    upvar ::Jabber::jprefs jprefs
+
+    Debug 2 "::Preferences::ResetToUserDefaults"
+
+    array set tmpPrefs [array get prefs]
+    array set tmpJPrefs [array get jprefs]
+    array set tmpJServer [array get jserver]
+    
+    # Make temp array for servers.
+    MakeTempServerArray
+
+    # Probably more...
+        
+}
+
+proc ::Preferences::BuildPageSounds {page} {
+    global  sysFont prefs
+    
+    variable xpadbt
+    variable tmpJPrefs
+    variable tmpPrefs
+    variable ypad 
+    
+    set labpsp [LabeledFrame2 $page.sp [::msgcat::mc {Synthetic speech}]]
+    pack $page.sp -side top -anchor w -ipadx 10
+    
+    checkbutton $labpsp.speak -text "  [::msgcat::mc prefsounsynwb]"  \
+      -variable "[namespace current]::tmpPrefs(SpeechOn)"
+    checkbutton $labpsp.speakmsg -text "  [::msgcat::mc prefsounsynno]"  \
+      -variable "[namespace current]::tmpJPrefs(speakMsg)"
+    checkbutton $labpsp.speakchat -text "  [::msgcat::mc prefsounsynch]"  \
+      -variable "[namespace current]::tmpJPrefs(speakChat)"
+    pack $labpsp.speak -side top -anchor w -padx 10 -pady $ypad
+    pack $labpsp.speakmsg -side top -anchor w -padx 10 -pady $ypad
+    pack $labpsp.speakchat -side top -anchor w -padx 10 -pady $ypad
+    
+    if {$prefs(TclSpeech) || $prefs(MSSpeech)} {
+	
+	# Get a list of voices
+	set voicelist "None [::UserActions::SpeakGetVoices]"
+    } else {
+	set voicelist {None}
+	$labpsp.speak configure -state disabled
+	$labpsp.speakmsg configure -state disabled
+	$labpsp.speakchat configure -state disabled
+	set tmpPrefs(SpeechOn) 0
+    }
+    pack [frame $labpsp.fr] -side top -anchor w -padx 26 -pady 2
+    label $labpsp.fr.in -text [::msgcat::mc prefsounvoin]
+    label $labpsp.fr.out -text [::msgcat::mc prefsounvoou]
+    set wpopin $labpsp.fr.popin
+    set wpopupmenuin [eval {tk_optionMenu $wpopin   \
+      [namespace current]::tmpPrefs(voiceOther)} $voicelist]
+    $wpopin configure -highlightthickness 0 -font $sysFont(sb)  \
+      -background $prefs(bgColGeneral) -foreground black
+    set wpopout $labpsp.fr.popout
+    set wpopupmenuout [eval {tk_optionMenu $wpopout   \
+      [namespace current]::tmpPrefs(voiceUs)} $voicelist]
+    $wpopout configure -highlightthickness 0 -font $sysFont(sb)  \
+      -background $prefs(bgColGeneral) -foreground black
+    
+    grid $labpsp.fr.in $wpopin -sticky w -pady 1
+    grid $labpsp.fr.out $wpopout -sticky w -pady 1
+    if {!$prefs(TclSpeech) && !$prefs(MSSpeech)} {
+	$wpopin configure -state disabled
+	$wpopout configure -state disabled
+    }    
+    
+    set labpalrt [LabeledFrame2 $page.alrt [::msgcat::mc {Alert sounds}]]
+    pack $page.alrt -side top -anchor w -ipadx 10
+    label $labpalrt.lbl -text [::msgcat::mc prefsounpick]
+    pack $labpalrt.lbl -side top -anchor w -padx 6 -pady $ypad
+    foreach name {online offline newmsg statchange connected} txt {
+	{User is online} 
+	{User is offline}
+	{New incoming message} 
+	{User's status changed}
+	{Is connected}} {
+	    checkbutton $labpalrt.$name -text "  [::msgcat::mc $txt]"  \
+	      -variable "[namespace current]::tmpJPrefs(snd,$name)"
+	    pack $labpalrt.$name -side top -anchor w -pady $ypad -padx 10
+    }
+}
+
+# User Info Page ...............................................................
+
+proc ::Preferences::BuildPageUserInfo {page} {
+    global  sysFont prefs
+    
+    variable wpopup    
+    variable profile
+    variable server
+    variable username
+    variable password
+    variable resource
+    variable digest
+    variable tmpJServer
+    variable xpadbt
+    variable wuserinfofocus
+    variable tmpJServArr
+    
+    set digest 1
+    
+    set labpui [LabeledFrame2 $page.fr [::msgcat::mc {User Profiles}]]
+    pack $page.fr -side left -anchor n -ipadx 10 -ipady 6
+    
+    message $labpui.msg -text [::msgcat::mc prefprof]   \
+      -font $sysFont(s) -aspect 800
+    pack $labpui.msg -side top -fill x
+
+    set pui $labpui.fr
+    pack [frame $pui] -side left  
+    
+    # Make temp array for servers.
+    MakeTempServerArray
+        
+    # Option menu for the servers.
+    label $pui.lpop -text "[::msgcat::mc Profile]:" -font $sysFont(sb) -anchor e
+    
+    set wpopup $pui.popup
+    ::combobox::combobox $wpopup -font $sysFont(s)   \
+      -textvariable [namespace current]::profile  \
+      -command [namespace current]::ProfileSet
+    eval {$wpopup list insert end} $tmpJServArr(all)
+        
+    grid $pui.lpop -column 0 -row 0 -sticky e
+    grid $wpopup -column 1 -row 0 -sticky ew
+        
+    # Verify that the selected also in array.
+    if {[lsearch -exact $tmpJServer(profile) $profile] < 0} {
+	set profile [lindex $tmpJServer(profile) 0]
+    }
+    set profile $tmpJServer(profile,selected)    
+    set server $tmpJServArr($profile,server)
+    set username $tmpJServArr($profile,username)
+    set password $tmpJServArr($profile,password)
+    set resource $tmpJServArr($profile,resource)
+    
+    label $pui.lserv -text "[::msgcat::mc {Jabber Server}]:" -font $sysFont(sb) \
+      -anchor e
+    entry $pui.eserv -width 28   \
+      -textvariable [namespace current]::server -validate key  \
+      -validatecommand {::Jabber::ValidateJIDChars %S}
+    label $pui.luser -text "[::msgcat::mc Username]:" -font $sysFont(sb) -anchor e
+    entry $pui.euser -width 28  \
+      -textvariable [namespace current]::username -validate key  \
+      -validatecommand {::Jabber::ValidateJIDChars %S}
+    label $pui.lpass -text "[::msgcat::mc Password]:" -font $sysFont(sb) -anchor e
+    entry $pui.epass -width 28  \
+      -textvariable [namespace current]::password -validate key  \
+      -validatecommand {::Jabber::ValidateJIDChars %S}
+    label $pui.lres -text "[::msgcat::mc Resource]:" -font $sysFont(sb) -anchor e
+    entry $pui.eres -width 28   \
+      -textvariable [namespace current]::resource -validate key  \
+      -validatecommand {::Jabber::ValidateJIDChars %S}
+    checkbutton $pui.cdig -text "  [::msgcat::mc {Scramble password}]"  \
+      -variable [namespace current]::digest
+    set wuserinfofocus $wpopup
+
+    grid $pui.lserv -column 0 -row 1 -sticky e
+    grid $pui.eserv -column 1 -row 1 -sticky w
+    grid $pui.luser -column 0 -row 2 -sticky e
+    grid $pui.euser -column 1 -row 2 -sticky w
+    grid $pui.lpass -column 0 -row 3 -sticky e
+    grid $pui.epass -column 1 -row 3 -sticky w
+    grid $pui.lres -column 0 -row 4 -sticky e
+    grid $pui.eres -column 1 -row 4 -sticky w
+    grid $pui.cdig -column 1 -row 5 -sticky w -pady 2
+
+    set puibt [frame $labpui.frbt]
+    pack $puibt -padx 4 -pady 6 -side right -fill y -expand 1
+    pack [button $puibt.new -font $sysFont(s) -text [::msgcat::mc New]  \
+      -padx $xpadbt -command ::Preferences::UserInfoNew]   \
+      -side top -fill x -pady 4
+    pack [button $puibt.app -font $sysFont(s) -text [::msgcat::mc Apply] \
+      -padx $xpadbt -command ::Preferences::UserInfoApply]   \
+      -side top -fill x -pady 4
+    pack [button $puibt.del -font $sysFont(s) -text [::msgcat::mc Delete]  \
+      -padx $xpadbt -command ::Preferences::UserInfoDelete]   \
+      -side top -fill x -pady 4
+}
+    
+# Preferences::MakeTempServerArray --
+#
+#       Make temp array for servers.
+
+proc ::Preferences::MakeTempServerArray { } {
+    
+    variable tmpJServer
+    variable tmpJServArr
+    
+    # New... Profiles
+    set tmpJServArr(all) {}
+    foreach {name spec} $tmpJServer(profile) {
+	lappend tmpJServArr(all) $name
+	foreach [list tmpJServArr($name,server) tmpJServArr($name,username) \
+	  tmpJServArr($name,password) tmpJServArr($name,resource)] $spec { break }
+    }
+}
+
+proc ::Preferences::ProfileSet {wcombo value} {
+    
+    variable tmpJServArr
+    variable tmpJServer
+    variable server
+    variable username
+    variable password
+    variable resource
+    
+    #puts "::Preferences::ProfileSet value=$value"
+    
+    # In case this is a new profile.
+    if {[info exists tmpJServArr($value,server)]} {
+	#puts "   $value is set"
+	set server $tmpJServArr($value,server)
+	set username $tmpJServArr($value,username)
+	set password $tmpJServArr($value,password)
+	set resource $tmpJServArr($value,resource)
+	set tmpJServer(profile,selected) $value  
+    }
+}
+
+proc ::Preferences::UserInfoDelete { } {
+    global  prefs
+    
+    variable profile
+    variable wpopup
+    variable tmpJServArr
+
+    set ans [tk_messageBox -title [::msgcat::mc Warning] -type yesno -icon warning \
+      -message [FormatTextForMessageBox [::msgcat::mc messremoveprofile]] \
+      -default yes]
+    if {$ans == "yes"} {
+	unset tmpJServArr($profile,server)
+	unset tmpJServArr($profile,username)
+	unset tmpJServArr($profile,password)
+	unset tmpJServArr($profile,resource)
+	set ind [lsearch $tmpJServArr(all) $profile]
+	if {$ind >= 0} {
+	    set tmpJServArr(all) [lreplace $tmpJServArr(all) $ind $ind]
+	    $wpopup list delete $ind
+	}
+	set profile [lindex $tmpJServArr(all) 0]
+	::Preferences::ProfileSet $wpopup $profile
+    }
+}
+
+proc ::Preferences::UserInfoApply { } {
+    global  prefs
+    
+    variable wpopup
+    variable profile
+    variable server
+    variable username
+    variable password
+    variable resource
+    variable tmpJServArr
+    variable tmpJServer
+
+    #puts "::Preferences::UserInfoApply profile=$profile"
+    
+    # Check that necessary entries are non-empty, at least.
+    foreach what [list $server $username] {
+	if {[string length $what] == 0} {
+	    tk_messageBox -type ok -icon error  \
+	      -title [::msgcat::mc Error] -message [FormatTextForMessageBox \
+	      [::msgcat::mc messfillserveruser]]
+	    return
+	}
+    }
+    
+    # Handle duplicate servers. Is this good???
+    if {[lsearch -exact $tmpJServArr(all) $profile] < 0} {
+	lappend tmpJServArr(all) $profile
+    } else {
+	
+	# It's there already!
+	set ans [tk_messageBox -type yesno -default yes -icon warning  \
+	  -title [::msgcat::mc Warning] -message [FormatTextForMessageBox \
+	  [::msgcat::mc messprofinuse]]]
+	if {$ans == "no"} {
+	    return
+	}
+    }
+    set tmpJServArr($profile,server) $server
+    set tmpJServArr($profile,username) $username
+    set tmpJServArr($profile,password) $password
+    set tmpJServArr($profile,resource) $resource
+    set tmpJServer(profile,selected) $profile  
+
+    $wpopup list insert end $profile
+}
+
+proc ::Preferences::UserInfoNew { } {
+    
+    variable profile
+    variable server
+    variable username
+    variable password
+    variable resource
+    variable tmpJServer
+    variable wuserinfofocus
+
+    set profile {}
+    set server {}
+    set username {}
+    set password {}
+    set resource {}
+    focus $wuserinfofocus
+}
+
+proc ::Preferences::BuildPageRoster {page} {
+    global  sysFont
+
+    variable tmpJPrefs
+    variable ypad 
+
+    checkbutton $page.rmifunsub -text " [::msgcat::mc prefrorm]"  \
+      -variable [namespace current]::tmpJPrefs(rost,rmIfUnsub)
+    checkbutton $page.allsubno -text " [::msgcat::mc prefroallow]"  \
+      -variable [namespace current]::tmpJPrefs(rost,allowSubNone)
+    checkbutton $page.clrout -text " [::msgcat::mc prefroclr]"  \
+      -variable [namespace current]::tmpJPrefs(rost,clrLogout)
+    checkbutton $page.dblclk -text " [::msgcat::mc prefrochat]" \
+      -variable [namespace current]::tmpJPrefs(rost,dblClk)  \
+      -onvalue chat -offvalue normal
+    
+    pack $page.rmifunsub $page.allsubno $page.clrout $page.dblclk  \
+      -side top -anchor w -pady $ypad -padx 10
+}
+
+proc ::Preferences::BuildPagePersInfo {page} {
+    global  sysFont
+
+    upvar ::Jabber::jprefs jprefs
+    upvar ::Jabber::jserver jserver
+
+    set ppers [LabeledFrame2 $page.fr [::msgcat::mc {Personal Information}]]
+    pack $page.fr -side left -anchor n -ipadx 10 -ipady 6
+
+    message $ppers.msg -text [::msgcat::mc prefpers] \
+      -font $sysFont(s) -aspect 800
+    grid $ppers.msg -columnspan 2 -sticky ew
+    
+    label $ppers.first -text "[::msgcat::mc {First name}]:"
+    label $ppers.last -text "[::msgcat::mc {Last name}]:"
+    label $ppers.nick -text "[::msgcat::mc {Nick name}]:"
+    label $ppers.email -text "[::msgcat::mc {Email address}]:"
+    label $ppers.address -text "[::msgcat::mc {Address}]:"
+    label $ppers.city -text "[::msgcat::mc {City}]:"
+    label $ppers.state -text "[::msgcat::mc {State}]:"
+    label $ppers.phone -text "[::msgcat::mc {Phone}]:"
+    label $ppers.url -text "[::msgcat::mc {Url of homepage}]:"
+    
+    set row 1
+    foreach what $jprefs(iqRegisterElem) {
+	entry $ppers.ent$what -width 30    \
+	  -textvariable "[namespace current]::tmpJPrefs(iq:register,$what)"
+	grid $ppers.$what -column 0 -row $row -sticky e
+	grid $ppers.ent$what -column 1 -row $row -sticky ew 
+	incr row
+    }    
+    frame $ppers.bts
+    grid $ppers.bts -columnspan 2 -sticky ew
+}
+
+proc ::Preferences::BuildPageAutoAway {page} {
+    global  sysFont
+    
+    variable tmpJPrefs
+    variable xpadbt
+    
+    set labfrpbl [LabeledFrame2 $page.fr [::msgcat::mc {Auto Away}]]
+    pack $page.fr -side left -anchor n
+    set pbl [frame $labfrpbl.frin]
+    pack $pbl -padx 10 -pady 6 -side left
+    pack [label $pbl.lab -text [::msgcat::mc prefaaset]] \
+      -side top -anchor w
+    
+    pack [frame $pbl.frma] -side top -anchor w
+    checkbutton $pbl.frma.lminaw -anchor w \
+      -text "  [::msgcat::mc prefminaw]"  \
+      -variable [namespace current]::tmpJPrefs(autoaway)
+    entry $pbl.frma.eminaw -width 3  \
+      -validate key -validatecommand {::Preferences::ValidMinutes %S} \
+      -textvariable [namespace current]::tmpJPrefs(awaymin)
+    checkbutton $pbl.frma.lminxa -anchor w \
+      -text "  [::msgcat::mc prefminea]"  \
+      -variable [namespace current]::tmpJPrefs(xautoaway)
+    entry $pbl.frma.eminxa -width 3  \
+      -validate key -validatecommand {::Preferences::ValidMinutes %S} \
+      -textvariable [namespace current]::tmpJPrefs(xawaymin)
+    grid $pbl.frma.lminaw -column 0 -row 0 -sticky w
+    grid $pbl.frma.eminaw -column 1 -row 0 -sticky w
+    grid $pbl.frma.lminxa -column 0 -row 1 -sticky w
+    grid $pbl.frma.eminxa -column 1 -row 1 -sticky w
+
+    pack [frame $pbl.frmsg] -side top -fill x -anchor w
+    label $pbl.frmsg.lawmsg -text "[::msgcat::mc {Away status}]:"
+    entry $pbl.frmsg.eawmsg -width 32  \
+      -textvariable [namespace current]::tmpJPrefs(awaymsg)
+    label $pbl.frmsg.lxa -text "[::msgcat::mc {Extended Away status}]:"
+    entry $pbl.frmsg.examsg -width 32  \
+      -textvariable [namespace current]::tmpJPrefs(xawaymsg)
+    grid $pbl.frmsg.lawmsg -column 0 -row 0 -sticky e
+    grid $pbl.frmsg.eawmsg -column 1 -row 0 -sticky w
+    grid $pbl.frmsg.lxa -column 0 -row 1 -sticky e
+    grid $pbl.frmsg.examsg -column 1 -row 1 -sticky w
+}
+
+proc ::Preferences::ValidMinutes {str} {
+    if {[regexp {[0-9]*} $str match]} {
+	return 1
+    } else {
+	bell
+	return 0
+    }
+}
+
+proc ::Preferences::BuildPageSubscriptions {page} {
+    global  sysFont
+    
+    variable tmpJPrefs
+    variable ypad
+    
+    set labfrpsubs [LabeledFrame2 $page.fr [::msgcat::mc Subscribe]]
+    pack $page.fr -side top -anchor w
+    set psubs [frame $labfrpsubs.frin]
+    pack $psubs -padx 10 -pady 6 -side left
+
+    label $psubs.la1 -text [::msgcat::mc prefsuif]
+    label $psubs.lin -text [::msgcat::mc prefsuis]
+    label $psubs.lnot -text [::msgcat::mc prefsuisnot]
+    grid $psubs.la1 -columnspan 2 -sticky w -pady $ypad
+    grid $psubs.lin $psubs.lnot -sticky w -pady $ypad
+    foreach val {accept reject ask}   \
+      txt {Auto-accept Auto-reject {Ask each time}} {
+	foreach val2 {inrost notinrost} {
+	    radiobutton $psubs.${val2}${val}  \
+	      -text [::msgcat::mc $txt] -value $val  \
+	      -variable [namespace current]::tmpJPrefs(subsc,$val2)	      
+	}
+	grid $psubs.inrost${val} $psubs.notinrost${val} -sticky w -pady $ypad
+    }
+
+    set frauto [frame $page.auto]
+    pack $frauto -side top -anchor w -padx 10 -pady $ypad
+    checkbutton $frauto.autosub  \
+      -text "  [::msgcat::mc prefsuauto]"  \
+      -variable [namespace current]::tmpJPrefs(subsc,auto)
+    label $frauto.autola -text "      [::msgcat::mc {Default group}]:"
+    entry $frauto.autoent -width 22   \
+      -textvariable [namespace current]::tmpJPrefs(subsc,group)
+    grid $frauto.autosub -sticky w -columnspan 2 -pady $ypad
+    grid $frauto.autola $frauto.autoent -sticky w -pady $ypad
+}
+
+proc ::Preferences::BuildPagePrivacy {page} {
+    global  sysFont
+    
+    variable tmpPrefs
+    variable xpadbt
+    
+    set labfrpbl [LabeledFrame2 $page.fr [::msgcat::mc Privacy]]
+    pack $page.fr -side left -anchor n
+    set pbl [frame $labfrpbl.frin]
+    pack $pbl -padx 10 -pady 6 -side left
+    
+    message $pbl.msg -text [::msgcat::mc prefpriv] \
+      -font $sysFont(s) -aspect 800
+    checkbutton $pbl.only -anchor w \
+      -text "  [::msgcat::mc Privacy]" -variable [namespace current]::tmpPrefs(privacy)
+    pack $pbl.msg $pbl.only -side top -fill x -anchor w
+}
+
+# namespace  ::Preferences::Plugins:: ------------------------------------------
+
+namespace eval ::Preferences::Plugins:: {
+    
+}
+
+proc ::Preferences::Plugins::BuildPage {page} {
+    global  plugin sysFont prefs
+
+    upvar ::Preferences::ypad ypad
+
+    set fr [LabeledFrame2 $page.fr {Plugin Control}]
+    pack $page.fr -side left -anchor n
+    set pbl [frame $fr.frin]
+    pack $pbl -padx 10 -pady 6 -side left
+
+    set i 0
+    foreach packName $plugin(allPacks) {
+	if {[info exists prefs($packName)] && ($prefs($packName) == 1)} {
+	    checkbutton $pbl.c$i -anchor w  \
+	      -text "   $plugin($packName,full)" -pady $ypad
+	    grid $pbl.c$i -sticky w
+	    incr i
+	}
+    }
+}
+
+# namespace  ::Preferences::Block:: --------------------------------------------
+
+namespace eval ::Preferences::Block:: {
+    
+    variable finished
+    variable addJid
+    variable wlbblock
+}
+
+proc ::Preferences::Block::BuildPage {page} {
+    global  sysFont
+    
+    variable wlbblock
+    variable btrem
+    variable wlbblock
+    upvar ::Preferences::xpadbt xpadbt
+    upvar ::Preferences::tmpJPrefs tmpJPrefs
+    
+    set labfrpbl [LabeledFrame2 $page.fr [::msgcat::mc Blockers]]
+    pack $page.fr -side left -anchor n
+    set pbl [frame $labfrpbl.frin]
+    pack $pbl -padx 10 -pady 6 -side left
+    checkbutton $pbl.only  \
+      -text " [::msgcat::mc prefblonly]"  \
+      -variable [namespace current]::tmpJPrefs(block,notinrost)
+    label $pbl.blk -text " [::msgcat::mc prefblbl]"
+    frame $pbl.fr
+    grid $pbl.only -sticky w -pady 1
+    grid $pbl.blk -sticky w -pady 1
+    grid $pbl.fr -sticky news -pady 1
+    set wlbblock $pbl.fr.lb
+    set wscyblock $pbl.fr.ysc
+    listbox $wlbblock -width 22 -height 12 -selectmode extended  \
+      -yscrollcommand [list $wscyblock set]   \
+      -listvar tmpJPrefs(block,list)
+    scrollbar $wscyblock -orient vertical -command [list $wlbblock yview]
+    pack $wlbblock -side left -fill both -expand 1
+    pack $wscyblock -side left -fill y
+    set btadd $pbl.fr.add
+    set btrem $pbl.fr.rm
+    pack [button $btadd -text "[::msgcat::mc Add]..." -font $sysFont(s) -padx $xpadbt  \
+      -command [list ::Preferences::Block::Add .blkadd]]    \
+      -side top -fill x -padx 6 -pady 4
+    pack [button $btrem -text [::msgcat::mc Remove] -font $sysFont(s) -padx $xpadbt  \
+      -command [list ::Preferences::Block::Remove] -state disabled] \
+      -side top -fill x -padx 6 -pady 4
+    pack [button $pbl.fr.clr -text [::msgcat::mc Clear] -font $sysFont(s) \
+      -padx $xpadbt -command [list ::Preferences::Block::Clear]]    \
+      -side top -fill x -padx 6 -pady 4
+        
+    # Special bindings for the listbox.
+    bind $wlbblock <Button-1> {+ focus %W}
+    bind $wlbblock <<ListboxSelect>> [list [namespace current]::SelectCmd]
+}
+
+proc ::Preferences::Block::SelectCmd { } {
+
+    variable btrem
+    variable wlbblock
+
+    if {[llength [$wlbblock curselection]]} {
+	$btrem configure -state normal
+    } else {
+	$btrem configure -state disabled
+    }
+}
+
+proc ::Preferences::Block::Add {w} {
+    global  sysFont this
+
+    variable finished
+    variable addJid
+    variable wlbblock
+    
+    set finished 0
+    if {[winfo exists $w]} {
+	return
+    }
+    if {[string match "mac*" $this(platform)]} {
+	toplevel $w
+	eval $::macWindowStyle $w documentProc
+    } else {
+	toplevel $w
+    }
+    wm title $w [::msgcat::mc {Block JID}]
+    
+    # Global frame.
+    pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
+    
+    # Labelled frame.
+    set wcfr $w.frall.fr
+    set wcont [LabeledFrame2 $wcfr [::msgcat::mc {JID to block}]]
+    pack $wcfr -side top -fill both -ipadx 10 -ipady 6 -in $w.frall
+    
+    # Overall frame for whole container.
+    set frtot [frame $wcont.frin]
+    pack $frtot
+    message $frtot.msg -borderwidth 0 -font $sysFont(s) -aspect 500 \
+      -text [::msgcat::mc prefblmsg]
+    entry $frtot.ent -width 24    \
+      -textvariable "[namespace current]::addJid"
+    set addJid {}
+    pack $frtot.msg $frtot.ent -side top -fill x -anchor w -padx 2 -pady 2
+    
+    # Button part.
+    set frbot [frame $w.frall.frbot -borderwidth 0]
+    pack [button $frbot.btconn -text [::msgcat::mc Add] -width 8 -default active \
+      -command [list ::Preferences::Block::DoAdd]]  \
+      -side right -padx 5 -pady 5
+    pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
+      -command "set [namespace current]::finished 2"]  \
+      -side right -padx 5 -pady 5
+    pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
+    
+    wm resizable $w 0 0
+    bind $w <Return> [list $frbot.btconn invoke]
+    
+    # Grab and focus.
+    focus $w
+    focus $frtot.ent
+    catch {grab $w}
+    
+    # Wait here for a button press.
+    tkwait variable [namespace current]::finished
+    
+    catch {grab release $w}
+    catch {destroy $w}
+}
+
+proc ::Preferences::Block::DoAdd { } {
+
+    variable addJid
+    variable finished
+    variable wlbblock
+
+    if {[::Jabber::IsWellFormedJID $addJid]} {
+	$wlbblock insert end $addJid
+	set finished 1
+    } else {
+	set ans [tk_messageBox -type yesno -default no -icon warning  \
+	  -title [::msgcat::mc Warning] -message [FormatTextForMessageBox \
+	  [::msgcat::mc messblockbadjid $addJid]
+	if {$ans == "yes"} {
+	    $wlbblock insert end $addJid
+	    set finished 1
+	}
+    }
+}
+
+proc ::Preferences::Block::Remove { } {
+
+    variable wlbblock
+
+    set selectedInd [$wlbblock curselection]
+    if {[llength $selectedInd]} {
+	foreach ind [lsort -integer -decreasing $selectedInd] {
+	    $wlbblock delete $ind
+	}
+    }
+}
+
+proc ::Preferences::Block::Clear { } {
+    
+    variable wlbblock
+
+    $wlbblock delete 0 end
+}
+
+# namespace  ::Preferences::Block:: --------------------------------------------
+
+namespace eval ::Preferences::Customization:: {
+    
+}
+
+proc ::Preferences::Customization::BuildPage {page} {
+    global  sysFont
+    
+    variable wlbblock
+    variable btrem
+    variable wlbblock
+    upvar ::Preferences::xpadbt xpadbt
+    upvar ::Preferences::ypad ypad
+
+    set labfrpbl [LabeledFrame2 $page.fr [::msgcat::mc Customization]]
+    pack $page.fr -side top -anchor w
+    set pbl [frame $labfrpbl.frin]
+    pack $pbl -padx 10 -pady 6 -side left
+    
+    label $pbl.lfont -text [::msgcat::mc prefcufont]
+    button $pbl.btfont -text "[::msgcat::mc Pick]..." -width 8 -font $sysFont(sb) \
+      -command ::Preferences::Customization::PickFont
+    checkbutton $pbl.newwin  \
+      -text " [::msgcat::mc prefcushow]" \
+      -variable ::Preferences::tmpJPrefs(showMsgNewWin)
+    checkbutton $pbl.savein   \
+      -text " [::msgcat::mc prefcusave]" \
+      -variable ::Preferences::tmpJPrefs(inboxSave)
+    label $pbl.lmb2 -text [::msgcat::mc prefcu2clk]
+    radiobutton $pbl.rb2new   \
+      -text " [::msgcat::mc prefcuopen]" -value "newwin" \
+      -variable ::Preferences::tmpJPrefs(inbox2click)
+    radiobutton $pbl.rb2re   \
+      -text " [::msgcat::mc prefcureply]" -value "reply" \
+      -variable ::Preferences::tmpJPrefs(inbox2click)
+    grid $pbl.lfont $pbl.btfont -padx 2 -pady $ypad -sticky w
+    grid $pbl.newwin $pbl.btfont -padx 2 -pady $ypad -sticky w -columnspan 2
+    grid $pbl.savein -padx 2 -pady $ypad -sticky w -columnspan 2
+    grid $pbl.lmb2 -padx 2 -pady $ypad -sticky w -columnspan 2
+    grid $pbl.rb2new -padx 2 -pady $ypad -sticky w -columnspan 2
+    grid $pbl.rb2re -padx 2 -pady $ypad -sticky w -columnspan 2
+    
+    
+    set frdisc [LabeledFrame2 $page.ag {Agents or Browse}]
+    pack $page.ag -side top -anchor w
+    set pdisc [frame $frdisc.frin]
+    pack $pdisc -padx 10 -pady 6 -side left
+    label $pdisc.la -text [::msgcat::mc prefcudisc]
+    radiobutton $pdisc.browse   \
+      -text " [::msgcat::mc prefcubrowse]"  \
+      -variable ::Preferences::tmpJPrefs(agentsOrBrowse) -value "browse"
+    radiobutton $pdisc.agents  \
+      -text " [::msgcat::mc prefcuagent]" -value "agents" \
+      -variable ::Preferences::tmpJPrefs(agentsOrBrowse)
+    grid $pdisc.la -padx 2 -pady $ypad -sticky w
+    grid $pdisc.browse -padx 2 -pady $ypad -sticky w
+    grid $pdisc.agents -padx 2 -pady $ypad -sticky w
+    
+    checkbutton $page.update  \
+      -text " [::msgcat::mc prefcuupdate]" \
+      -variable ::Preferences::tmpJPrefs(autoupdateCheck)
+    pack $page.update -side top -anchor w -padx 10
+}
+
+proc ::Preferences::Customization::PickFont { } {
+    global  sysFont
+    
+    upvar ::Preferences::tmpJPrefs tmpJPrefs
+
+    set opts [list -defaultfont [lindex $sysFont(s) 0]  \
+      -defaultsize [lindex $sysFont(s) 1]  \
+      -defaultweight [lindex $sysFont(s) 2]  \
+      -initialfont [lindex $tmpJPrefs(chatFont) 0]  \
+      -initialsize [lindex $tmpJPrefs(chatFont) 1]  \
+      -initialweight [lindex $tmpJPrefs(chatFont) 2]]
+    set theFont [eval {::fontselection::fontselection .mnb} $opts]
+    if {[llength $theFont]} {
+	set tmpJPrefs(chatFont) $theFont
+    }
+}
+
+# namespace  ::Preferences::FileMap:: ------------------------------------------
+
+namespace eval ::Preferences::FileMap:: {
+    
+    # Wait for this variable to be set in the "Inspect Associations" dialog.
+    variable finishedInspect
+        
+    # Temporary local copy of Mime types to edit.
+    variable tmpAllMimeTypes
+    variable tmpMime2Description
+    variable tmpMimeTypeIsText
+    variable tmpMime2SuffixList
+    variable tmpMimeTypeDoWhat
+    variable tmpPrefMimeType2Package
+}
+
+proc ::Preferences::FileMap::BuildPage {page} {
+    global  sysFont prefs mime2Description prefMimeType2Package  \
+      mimeTypeIsText mime2SuffixList mimeTypeDoWhat plugin wDlgs
+
+    variable tmpAllMimeTypes
+    variable tmpMime2Description
+    variable tmpMimeTypeIsText
+    variable tmpMime2SuffixList
+    variable tmpMimeTypeDoWhat
+    variable tmpPrefMimeType2Package
+    variable wmclist
+    upvar ::Preferences::xpadbt xpadbt
+        
+    # Work only on copies of list of MIME types in case user presses the 
+    # Cancel button. The MIME type works as a key in our database
+    # (arrays) of various features.
+
+    set tmpAllMimeTypes [array names mime2Description]
+    array set tmpMime2Description [array get mime2Description]
+    array set tmpMimeTypeIsText [array get mimeTypeIsText]
+    array set tmpMime2SuffixList [array get mime2SuffixList]
+    array set tmpMimeTypeDoWhat [array get mimeTypeDoWhat]
+    array set tmpPrefMimeType2Package [array get prefMimeType2Package]
+    
+    # Frame for everything inside the labeled container.
+    set wcont1 [LabeledFrame2 $page.frtop [::msgcat::mc preffmhelp]]
+    pack $page.frtop -side top -anchor w
+    set fr1 [frame $wcont1.fr]
+    
+    pack $fr1 -side left -padx 16 -pady 10 -fill x
+    pack $wcont1 -fill x    
+    
+    # Make the multi column listbox. 
+    # Keep an invisible index column with index as a tag.
+    set colDef [list 0 [::msgcat::mc Description] 0 [::msgcat::mc {Handled By}] 0 ""]
+    set wmclist $fr1.mclist
+    tablelist::tablelist $wmclist  \
+      -columns $colDef -font $sysFont(s) -labelfont $sysFont(s)  \
+      -background white -yscrollcommand [list $fr1.vsb set]  \
+      -labelbackground #cecece -stripebackground #dedeff  \
+      -labelcommand "tablelist::sortByColumn"  \
+      -stretch all -width 42 -height 12
+    $wmclist columnconfigure 2 -hide 1
+    scrollbar $fr1.vsb -orient vertical -command [list $wmclist yview]
+    
+    grid $wmclist -column 0 -row 0 -sticky news
+    grid $fr1.vsb -column 1 -row 0 -sticky ns
+    grid columnconfigure $fr1 0 -weight 1
+    grid rowconfigure $fr1 0 -weight 1
+        
+    # Insert all MIME types.
+    set i 0
+    foreach mime $tmpAllMimeTypes {
+	set doWhat $tmpMimeTypeDoWhat($mime)
+	if {![regexp {(unavailable|reject|save|ask)} $doWhat] &&  \
+	  [info exists plugin($doWhat,icon,12)]} {
+	    $wmclist insert end [list " $tmpMime2Description($mime)"  \
+	      $plugin($doWhat,full) $mime]
+	    $wmclist cellconfigure "$i,1" -image $plugin($doWhat,icon,12)
+	} else {
+	    $wmclist insert end [list " $tmpMime2Description($mime)"  \
+	      "     $plugin($doWhat,full)" $mime]
+	}
+	incr i
+    }    
+    
+    # Add, Change, and Remove buttons.
+    set frbt [frame $fr1.frbot]
+    grid $frbt -row 1 -column 0 -columnspan 2 -sticky nsew -padx 0 -pady 0
+    button $frbt.rem -text [::msgcat::mc Delete] -font $sysFont(s)  \
+      -state disabled -width 8 -padx $xpadbt  \
+      -command "::Preferences::FileMap::DeleteAssociation $wmclist  \
+      \[$wmclist curselection]"
+    button $frbt.change -text "[::msgcat::mc Edit]..." -font $sysFont(s)  \
+      -state disabled -width 8 -padx $xpadbt -command  \
+      "::Preferences::FileMap::Inspect $wDlgs(fileAssoc) edit $wmclist \[$wmclist curselection]"
+    button $frbt.add -text "[::msgcat::mc New]..." -font $sysFont(s) -width 8 -padx $xpadbt \
+      -command [list ::Preferences::FileMap::Inspect .setass new $wmclist -1]
+    pack $frbt.rem $frbt.change $frbt.add -side right -padx 5 -pady 5
+    
+    # Special bindings for the tablelist.
+    set body [$wmclist bodypath]
+    bind $body <Button-1> {+ focus %W}
+    bind $body <Double-1> [list $frbt.change invoke]
+    bind $wmclist <FocusIn> "$frbt.rem configure -state normal;  \
+      $frbt.change configure -state normal"
+    bind $wmclist <FocusOut> "$frbt.rem configure -state disabled;  \
+      $frbt.change configure -state disabled"
+    #bind $wmclist <<ListboxSelect>> [list [namespace current]::SelectMsg]
+}
+
+# ::Preferences::FileMap::DeleteAssociation --
+#
+#       Deletes an MIME association.
+#
+# Arguments:
+#       wmclist  the multi column listbox widget path.
+#       indSel   the index of the one to remove.
+# Results:
+#       None.
+
+proc ::Preferences::FileMap::DeleteAssociation {wmclist {indSel {}}} {
+    
+    variable tmpMime2Description
+    variable tmpMimeTypeIsText
+    variable tmpMime2SuffixList
+    variable tmpAllMimeTypes
+    variable tmpPrefMimeType2Package
+
+    if {[llength $indSel] == 0} {
+	return
+    }
+    foreach {name pack theMime} [lrange [$wmclist get $indSel] 0 2] { break }
+    $wmclist delete $indSel
+    catch {unset tmpMime2Description($theMime)}
+    catch {unset tmpMimeTypeIsText($theMime)}
+    catch {unset tmpMime2SuffixList($theMime)}
+    catch {unset tmpPrefMimeType2Package($theMime)}
+    
+    # Select the next one
+    $wmclist selection set $indSel
+    set tmpAllMimeTypes [lreplace $tmpAllMimeTypes $indSel $indSel]
+}    
+
+# ::Preferences::FileMap::SaveAssociations --
+# 
+#       Takes all the temporary arrays that makes up our database, 
+#       and sets them to the actual arrays, tmp...(MIME).
+#
+# Arguments:
+#       
+# Results:
+#       None.
+
+proc ::Preferences::FileMap::SaveAssociations { } {
+    global  mime2Description mime2SuffixList mimeTypeIsText mimeTypeDoWhat \
+      prefMimeType2Package
+    
+    variable tmpMime2Description
+    variable tmpMimeTypeIsText
+    variable tmpMime2SuffixList
+    variable tmpMimeTypeDoWhat
+    variable tmpPrefMimeType2Package
+    
+    unset mime2Description mime2SuffixList mimeTypeIsText mimeTypeDoWhat \
+      prefMimeType2Package
+    
+    array set mime2Description [array get tmpMime2Description]
+    array set mimeTypeIsText [array get tmpMimeTypeIsText]
+    array set mime2SuffixList [array get tmpMime2SuffixList]
+    array set mimeTypeDoWhat [array get tmpMimeTypeDoWhat]
+    array set prefMimeType2Package [array get tmpPrefMimeType2Package]
+}
+    
+# ::Preferences::FileMap::Inspect --
+#
+#       Shows a dialog to set the MIME associations for one specific MIME type.
+#
+# Arguments:
+#       w       the toplevel widget path.
+#       doWhat  is "edit" if we want to change an association, or "new" if...
+#       wlist   the listbox widget path in the "FileAssociations" dialog.
+#       indSel  the index of the selected item in 'wlist'.
+#       
+# Results:
+#       Dialog is displayed.
+
+proc ::Preferences::FileMap::Inspect {w doWhat wlist {indSel {}}} {
+    global  sysFont prefs mimeType2Packages plugin this
+    
+    variable textVarDesc
+    variable textVarMime
+    variable textVarSuffix
+    variable packageVar
+    variable receiveVar
+    variable codingVar
+    variable finishedInspect
+    
+    variable tmpAllMimeTypes
+    variable tmpMime2Description
+    variable tmpMimeTypeIsText
+    variable tmpMime2SuffixList
+    variable tmpMimeTypeDoWhat
+    variable tmpPrefMimeType2Package
+    upvar ::Preferences::ypad ypad
+
+    set receiveVar 0
+    set codingVar 0
+    
+    if {[winfo exists $w]} {
+	return
+    }
+    if {[string length $indSel] == 0} {
+	return
+    }
+    toplevel $w
+    if {[string match "mac*" $this(platform)]} {
+	eval $::macWindowStyle $w documentProc
+    } else {
+	wm transient $w .
+    }
+    wm title $w [::msgcat::mc {Inspect Associations}]
+    set finishedInspect -1
+    
+    if {$doWhat == "edit"} {
+	if {$indSel < 0} {
+	    error {::Preferences::FileMap::Inspect called with illegal index}
+	}
+	
+	# Find the corresponding MIME type.
+	foreach {name pack mime} [lrange [$wlist get $indSel] 0 2] { break }
+	set textVarMime $mime
+	set textVarDesc $tmpMime2Description($mime)
+	set textVarSuffix $tmpMime2SuffixList($mime)
+	set codingVar $tmpMimeTypeIsText($mime)
+	
+	# Map to the correct radiobutton alternative.
+	switch -- $tmpMimeTypeDoWhat($mime) {
+	    unavailable - reject {
+		set receiveVar reject
+	    }
+	    save - ask {
+		set receiveVar $tmpMimeTypeDoWhat($mime)
+	    }
+	    default {
+		
+		# Should be a package.
+		set receiveVar import
+	    }
+	}
+	
+	# This is for the package menu button.
+	set packageList None
+	set packageVar None
+	if {[info exists mimeType2Packages($mime)]} {
+	    set packageVar $plugin($tmpPrefMimeType2Package($mime),full)
+	    set packageList {}
+	    foreach packName $mimeType2Packages($mime) {
+		eval lappend packageList [list $plugin($packName,full)]
+	    }
+	}
+    } elseif {$doWhat == "new"} {
+	set textVarMime {}
+	set textVarDesc {}
+	set textVarSuffix {}
+	set codingVar 0
+	set receiveVar reject
+	set packageVar None
+	set packageList None
+    }
+    pack [frame $w.frall -borderwidth 1 -relief raised]
+    
+    # Frame for everything inside the labeled container: "Type of File".
+    set wcont1 [LabeledFrame2 $w.frtop [::msgcat::mc {Type of File}]]
+    pack $w.frtop -in $w.frall -fill x
+    set fr1 [frame $wcont1.fr]
+    label $fr1.x1 -text "[::msgcat::mc Description]:"
+    entry $fr1.x2 -width 30   \
+      -textvariable [namespace current]::textVarDesc
+    label $fr1.x3 -text "[::msgcat::mc {MIME type}]:"
+    entry $fr1.x4 -width 30   \
+      -textvariable [namespace current]::textVarMime
+    label $fr1.x5 -text "[::msgcat::mc {File suffixes}]:"
+    entry $fr1.x6 -width 30   \
+      -textvariable [namespace current]::textVarSuffix
+    
+    set px 1
+    set py 1
+    grid $fr1.x1 -column 0 -row 0 -sticky e -padx $px -pady $py
+    grid $fr1.x2 -column 1 -row 0 -sticky w -padx $px -pady $py
+    grid $fr1.x3 -column 0 -row 1 -sticky e -padx $px -pady $py
+    grid $fr1.x4 -column 1 -row 1 -sticky w -padx $px -pady $py
+    grid $fr1.x5 -column 0 -row 2 -sticky e -padx $px -pady $py
+    grid $fr1.x6 -column 1 -row 2 -sticky w -padx $px -pady $py
+    
+    pack $fr1 -side left -padx 8 -fill x
+    pack $wcont1 -fill x    
+    
+    if {$doWhat == "edit"} {
+	$fr1.x2 configure -state disabled
+	$fr1.x4 configure -state disabled
+    }
+    
+    # Frame for everything inside the labeled container: "Handling".
+    set wcont2 [LabeledFrame2 $w.frmid [::msgcat::mc Handling]]
+    pack $w.frmid -in $w.frall -fill x
+    set fr2 [frame $wcont2.fr]
+    radiobutton $fr2.x1 -text " [::msgcat::mc {Reject receive}]"  \
+      -variable [namespace current]::receiveVar -value reject
+    radiobutton $fr2.x2 -text " [::msgcat::mc preffmsave]"  \
+      -variable [namespace current]::receiveVar -value save
+    frame $fr2.fr
+    radiobutton $fr2.x3 -text " [::msgcat::mc {Import using}]:  "  \
+      -variable [namespace current]::receiveVar -value import
+    
+    set wMenu [eval tk_optionMenu $fr2.opt [namespace current]::packageVar  \
+      $packageList]
+    $wMenu configure -font $sysFont(sb) 
+    $fr2.opt configure -font $sysFont(sb) -highlightthickness 0  \
+      -background $prefs(bgColGeneral) -foreground black
+    
+    radiobutton $fr2.x8 -text " [::msgcat::mc {Unknown: Prompt user}]"  \
+      -variable [namespace current]::receiveVar -value ask
+    frame $fr2.frcode
+    label $fr2.x4 -text " [::msgcat::mc {File coding}]:"
+    radiobutton $fr2.x5 -text " [::msgcat::mc {As text}]" -anchor w  \
+      -variable [namespace current]::codingVar -value 1
+    radiobutton $fr2.x6 -text " [::msgcat::mc Binary]" -anchor w   \
+      -variable [namespace current]::codingVar -value 0
+    
+    # If we dont have any registered packages for this MIME, disable this
+    # option.
+    
+    if {($doWhat == "edit") && ![info exists mimeType2Packages($mime)]} {
+	$fr2.x3 configure -state disabled
+	$fr2.opt configure -state disabled
+    }
+    if {$doWhat == "new"} {
+	$fr2.x3 configure -state disabled
+    }
+    pack $fr2.x1 $fr2.x2 $fr2.fr -side top -padx 10 -pady $ypad -anchor w
+    pack $fr2.x3 $fr2.opt -in $fr2.fr -side left -padx 0 -pady 0
+    pack $fr2.x8 -side top -padx 10 -pady $ypad -anchor w
+    pack $fr2.frcode -side top -padx 10 -pady $ypad -anchor w
+    grid $fr2.x4 $fr2.x5 -in $fr2.frcode -sticky w -padx 3 -pady $ypad
+    grid x       $fr2.x6 -in $fr2.frcode -sticky w -padx 3 -pady $ypad
+    
+    pack $fr2 -side left -padx 8 -fill x
+    pack $wcont2 -fill x    
+    
+    # Button part
+    pack [frame $w.frbot -borderwidth 0] -in $w.frall -fill both  \
+      -padx 8 -pady 6
+    button $w.ok -text [::msgcat::mc Save] -width 8 -default active  \
+      -command [list [namespace current]::SaveThisAss $wlist $indSel]
+    button $w.cancel -text [::msgcat::mc Cancel] -width 8   \
+      -command "set [namespace current]::finishedInspect 0"
+    pack $w.ok $w.cancel -in $w.frbot -side right -padx 5 -pady 5
+    
+    if {[info exists prefs(winGeom,$w)]} {
+	wm geometry $w $prefs(winGeom,$w)
+    }
+    wm resizable $w 0 0
+    bind $w <Return> "$w.ok invoke"
+    
+    # Wait here for a button press.
+    tkwait variable [namespace current]::finishedInspect
+    grab release $w
+    destroy $w
+}
+
+# ::Preferences::FileMap::SaveThisAss --
+#
+#       Saves the association for one specific MIME type.
+#
+# Arguments:
+#       wlist   the listbox widget path in the "FileAssociations" dialog.
+#       indSel  the index of the selected item in 'wlist'. -1 if new.
+#       
+# Results:
+#       Modifies the tmp... variables for one MIME type.
+
+proc ::Preferences::FileMap::SaveThisAss {wlist indSel} {
+    global  plugin
+    
+    # Variables for entries etc.
+    variable textVarDesc
+    variable textVarMime
+    variable textVarSuffix
+    variable packageVar
+    variable receiveVar
+    variable codingVar
+    variable finishedInspect
+    
+    # The temporary copies of the MIME associations.
+    variable tmpAllMimeTypes
+    variable tmpMime2Description
+    variable tmpMimeTypeIsText
+    variable tmpMime2SuffixList
+    variable tmpMimeTypeDoWhat
+    variable tmpPrefMimeType2Package
+
+    # Check that no fields are empty.
+    if {([llength $textVarDesc] == 0) || ([llength $textVarMime] == 0) || \
+      ([llength $textVarSuffix] == 0)} {
+	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok  \
+	  -message [::msgcat::mc messfieldsmissing]
+	return
+    }
+    
+    # Put this specific MIME type associations in the tmp arrays.
+    set tmpMime2Description($textVarMime) $textVarDesc
+	
+    # Map from the correct radiobutton alternative.
+    switch -- $receiveVar {
+	reject {
+	    
+	    # This maps either to an actual "reject" or to "unavailable".
+	    if {[llength $tmpPrefMimeType2Package($textVarMime)]} {
+		set tmpMimeTypeDoWhat($textVarMime) reject		
+	    } else {
+		set tmpMimeTypeDoWhat($textVarMime) unavailable
+	    }
+	}
+	save - ask {
+	    set tmpMimeTypeDoWhat($textVarMime) $receiveVar
+	}
+	default {
+	    
+	    # Should be a package.
+	    set tmpMimeTypeDoWhat($textVarMime) $packageVar
+	    set tmpPrefMimeType2Package($textVarMime) $packageVar
+	}
+    }
+    set tmpMimeTypeIsText($textVarMime) $codingVar
+    set tmpMime2SuffixList($textVarMime) $textVarSuffix
+    
+    # Need to update the Mime type list in the "File Association" dialog.
+    
+    if {$indSel == -1} {
+
+	# New association.
+	set indInsert end
+	lappend tmpAllMimeTypes $textVarMime	
+    } else {
+	
+	# Delete old, add new below.
+	$wlist delete $indSel
+	set indInsert $indSel
+	set ind [lsearch $tmpAllMimeTypes $textVarMime]
+	if {$ind >= 0} {
+	    set tmpAllMimeTypes [lreplace $tmpAllMimeTypes $ind $ind $textVarMime]
+	}
+    }
+    
+    set doWhat $tmpMimeTypeDoWhat($textVarMime)
+    if {![regexp {(unavailable|reject|save|ask)} $doWhat] &&  \
+      [info exists plugin($doWhat,icon,12)]} {
+	$wlist insert $indInsert [list " $tmpMime2Description($textVarMime)" \
+	  $plugin($doWhat,full) $textVarMime]
+	$wlist cellconfigure "$indInsert,1" -image $plugin($doWhat,icon,12)
+    } else {
+	$wlist insert $indInsert [list " $tmpMime2Description($textVarMime)" \
+	  "     $plugin($doWhat,full)" $textVarMime]
+    }
+    if {$indSel >= 0} {
+	$wlist selection set $indSel
+    } 
+    set w [winfo toplevel $wlist]
+    ::UI::SaveWinGeom $w
+    set finishedInspect 1
+}
+
+proc ::Preferences::FileMap::IsAnythingChangedQ { } {
+    global  mime2Description mime2SuffixList mimeTypeIsText mimeTypeDoWhat
+    
+    variable tmpMime2Description
+    variable tmpMimeTypeIsText
+    variable tmpMime2SuffixList
+    variable tmpMimeTypeDoWhat
+    
+    set allMimeList [lsort [array names mime2Description]]
+    set tmpAllMimeList [lsort [array names tmpMime2Description]]
+    if {$allMimeList != $tmpAllMimeList} {
+	return 1
+    }
+    foreach key $allMimeList {	
+	if {($mime2Description($key) != $tmpMime2Description($key)) ||  \
+	  ($mime2SuffixList($key) != $tmpMime2SuffixList($key)) ||  \
+	  ($mimeTypeIsText($key) != $tmpMimeTypeIsText($key)) ||  \
+	  ($mimeTypeDoWhat($key) != $tmpMimeTypeDoWhat($key))} {
+	    return 1
+	}
+    }
+    return 0
+}
+
+# namespace  ::Preferences::NetSetup:: -----------------------------------------
+
+namespace eval ::Preferences::NetSetup:: {
+
+}
+    
+proc ::Preferences::NetSetup::BuildPage {page} {
+    global  sysFont prefs this state allIPnumsTo
+
+    variable wopt
+
+    upvar ::Preferences::ypadtiny ypadtiny
+    upvar ::Preferences::ypadbig ypadbig
+        
+    set wcont [LabeledFrame2 $page.fr [::msgcat::mc prefnetconf]]
+    pack $page.fr -side top -anchor w
+
+    # Frame for everything inside the labeled container.
+    set fr [frame $wcont.fr]    
+    message $fr.msg -width 260 -font $sysFont(s) -text [::msgcat::mc prefnethead]
+    
+    # The actual options.
+    set fropt [frame $fr.fropt]
+    set wopt $fropt
+        
+    # The Jabber server.
+    radiobutton $fropt.jabb -text [::msgcat::mc {Jabber Client}]  \
+      -font $sysFont(sb) -value jabber  \
+      -variable ::Preferences::tmpPrefs(protocol)
+    message $fropt.jabbmsg -width 160 -font $sysFont(s)  \
+      -text [::msgcat::mc prefnetjabb]
+    
+    # For the symmetric network config.
+    radiobutton $fropt.symm -text [::msgcat::mc {Peer-to-Peer}]  \
+      -font $sysFont(sb) -variable ::Preferences::tmpPrefs(protocol)  \
+      -value symmetric
+    if {$state(reflectorStarted) || $state(isServerUp)} {
+	#$fropt.symm configure -state disabled
+    }
+    checkbutton $fropt.auto -text "  [::msgcat::mc {Auto Connect}]"  \
+      -font $sysFont(sb)  \
+      -variable ::Preferences::tmpPrefs(autoConnect)
+    message $fropt.automsg -width 160 -font $sysFont(s)  \
+      -text [::msgcat::mc prefnetauto]
+    checkbutton $fropt.multi -text "  [::msgcat::mc {Multi Connect}]"  \
+      -font $sysFont(sb)  \
+      -variable ::Preferences::tmpPrefs(multiConnect)
+    message $fropt.multimsg -width 160 -font $sysFont(s)  \
+      -text [::msgcat::mc prefnetmulti]
+    if {[string equal $prefs(protocol) "symmetric"]} { 
+	$fropt.auto configure -state disabled
+	$fropt.multi configure -state disabled
+    }    
+    
+    button $fropt.adv -text "[::msgcat::mc Advanced]..." -command  \
+      [list ::Preferences::NetSetup::Advanced]
+    
+    # If already connected don't allow network topology to be changed.
+    if {[llength $allIPnumsTo] > 0} {
+	$fropt.jabb configure -state disabled
+	$fropt.symm configure -state disabled
+    }
+    if {$prefs(stripJabber) ||  \
+      ($prefs(protocol) == "server") || ($prefs(protocol) == "client")} {
+	$fropt.jabb configure -state disabled
+	$fropt.symm configure -state disabled
+    }
+    grid $fropt.jabb -column 0 -row 0 -rowspan 4 -sticky nw -padx 10 -pady $ypadtiny
+    grid $fropt.jabbmsg -column 1 -row 0 -sticky w -padx 10 -pady $ypadtiny
+    grid $fropt.symm -column 0 -row 1 -rowspan 4 -sticky nw -padx 10 -pady $ypadtiny
+    grid $fropt.auto -column 1 -row 1 -sticky w -padx 10 -pady $ypadtiny
+    grid $fropt.automsg -column 1 -row 2 -sticky w -padx 10 -pady $ypadtiny
+    grid $fropt.multi -column 1 -row 3 -sticky w -padx 10 -pady $ypadtiny
+    grid $fropt.multimsg -column 1 -row 4 -sticky w -padx 10 -pady $ypadtiny
+    grid $fropt.adv -column 0 -row 6 -sticky w -padx 10 -pady $ypadbig
+
+    pack $fr.msg -side top -padx 2 -pady $ypadbig
+    pack $fropt -side top -padx 5 -pady $ypadbig
+    pack $fr -side left -padx 2    
+    pack $wcont -fill x    
+    
+    trace variable ::Preferences::tmpPrefs(protocol) w  \
+      [namespace current]::TraceNetConfig
+}
+
+# ::Preferences::NetSetup::TraceNetConfig --
+#
+#       Trace command for the 'tmpPrefs(protocol)' variable that is
+#       used for the network type radio buttons.
+#       
+# Arguments:
+#       name   the toplevel window.
+#       index  array index.
+#       op     operation.
+#       
+# Results:
+#       shows dialog.
+
+proc ::Preferences::NetSetup::TraceNetConfig {name index op} {
+    
+    variable wopt
+    upvar ::Preferences::tmpPrefs tmpPrefs
+    
+    Debug 2 "::Preferences::NetSetup::TraceNetConfig"
+
+    set fropt $wopt
+    if {$tmpPrefs(protocol) == {symmetric}} { 
+	$fropt.auto configure -state normal
+	$fropt.multi configure -state normal
+    } elseif {$tmpPrefs(protocol) == {central}} {
+	$fropt.auto configure -state disabled
+	$fropt.multi configure -state disabled
+    } elseif {$tmpPrefs(protocol) == {jabber}} {
+	$fropt.auto configure -state disabled
+	$fropt.multi configure -state disabled
+    }
+}
+
+# ::Preferences::NetSetup::UpdateUI --
+#
+#       If network setup changed be sure to update the UI to reflect this.
+#       Must be called after saving in 'prefs' etc.
+#       
+# Arguments:
+#       
+# Results:
+#       .
+
+proc ::Preferences::NetSetup::UpdateUI { } {
+    global  prefs state wDlgs
+    
+    Debug 2 "::Preferences::NetSetup::UpdateUI"
+    
+    # Update menus.
+    switch -- $prefs(protocol) {
+	jabber {
+	    if {$state(isServerUp)} {
+		::UI::MenuMethod .menu.file entryconfigure mStartServer -state disabled
+	    } else {
+		::UI::MenuMethod .menu.file entryconfigure mStartServer -state normal
+	    }
+	    ::UI::MenuMethod .menu.file entryconfigure mOpenConnection  \
+	      -command [list ::Jabber::Login::Login $wDlgs(jlogin)]
+	    .menu entryconfigure *Jabber* -state normal
+	    
+	    # Show our combination window.
+	    ::Jabber::RostServ::Show $wDlgs(jrostbro)
+	}
+	central {
+	    
+	    # We are only a client.
+	    ::UI::MenuMethod .menu.file entryconfigure mStartServer -state disabled
+	    ::UI::MenuMethod .menu.file entryconfigure mOpenConnection  \
+	      -command [list OpenConnection $wDlgs(openConn)]
+	    .menu entryconfigure *Jabber* -state disabled
+	    
+	    # Hide our combination window.
+	    ::Jabber::RostServ::Close $wDlgs(jrostbro)
+	}
+	default {
+	    if {$state(isServerUp)} {
+		::UI::MenuMethod .menu.file entryconfigure mStartServer -state disabled
+	    } else {
+		::UI::MenuMethod .menu.file entryconfigure mStartServer -state normal
+	    }
+	    ::UI::MenuMethod .menu.file entryconfigure mOpenConnection   \
+	      -command [list OpenConnection $wDlgs(openConn)]
+	    if {!$prefs(stripJabber)} {
+		.menu entryconfigure *Jabber* -state disabled
+		
+		# Hide our combination window.
+		::Jabber::RostServ::Close $wDlgs(jrostbro)
+	    }
+	}
+    }
+    
+    # Other consistency updates needed.
+    ::UI::SetCommHead . $prefs(protocol)
+
+    switch -- $prefs(protocol) {
+	jabber {
+	    ::Jabber::BuildJabberEntry .
+	}
+	default {
+	    ::UI::DeleteJabberEntry .
+	}
+    }
+}
+
+# Preferences::NetSetup::Advanced --
+#
+#       Shows dialog for setting the "advanced" network options.
+#       
+# Arguments:
+#       
+# Results:
+#       shows dialog.
+
+proc ::Preferences::NetSetup::Advanced {  } {
+    global  sysFont this prefs
+
+    variable finishedAdv -1
+    
+    set w .dlgAdvNet
+    if {[string match "mac*" $this(platform)]} {
+	toplevel $w
+	eval $::macWindowStyle $w documentProc
+    } else {
+	toplevel $w
+    }
+    wm title $w [::msgcat::mc {Advanced Setup}]
+    pack [frame $w.frall -borderwidth 1 -relief raised]
+    set wcont [LabeledFrame2 $w.frtop [::msgcat::mc {Advanced Configuration}]]
+    pack $w.frtop -in $w.frall -side top -fill both
+    
+    # Frame for everything inside the labeled container.
+    set fr [frame $wcont.fr]
+    message $fr.msg -width 260 -font $sysFont(s) -text [::msgcat::mc prefnetadv]
+    
+    # The actual options.
+    set fropt [frame $fr.fropt]
+
+    label $fropt.lserv -text [::msgcat::mc {Built in server port:}]  \
+      -font $sysFont(sb)
+    label $fropt.lhttp -text [::msgcat::mc {HTTP port:}]  \
+      -font $sysFont(sb)
+    label $fropt.ljab -text [::msgcat::mc {Jabber server port:}]  \
+      -font $sysFont(sb)
+    entry $fropt.eserv -width 6 -textvariable  \
+      ::Preferences::tmpPrefs(thisServPort)
+    entry $fropt.ehttp -width 6 -textvariable  \
+      ::Preferences::tmpPrefs(httpdPort)
+    entry $fropt.ejab -width 6 -textvariable  \
+      ::Preferences::tmpJPrefs(port)
+
+    set py 0
+    set px 2
+    set row 0
+    foreach wid {serv http jab} {
+	grid $fropt.l$wid -column 0 -row $row -sticky e   \
+	  -padx $px -pady $py
+	grid $fropt.e$wid -column 1 -row $row -sticky w   \
+	  -padx $px -pady $py
+	incr row
+    }
+        
+    pack $fr.msg -side top -padx 2 -pady 6
+    pack $fropt -side top -padx 5 -pady 6
+    pack $fr -side left -padx 2    
+    pack $wcont -fill x    
+    
+    # Button part.
+    pack [frame $w.frbot -borderwidth 0] -in $w.frall -fill both  \
+      -padx 8 -pady 6 -side bottom
+    pack [button $w.ok -text [::msgcat::mc Save] -width 8 -default active \
+      -command [namespace current]::AdvSetupSave]  \
+      -in $w.frbot -side right -padx 5 -pady 5
+    pack [button $w.cancel -text [::msgcat::mc Cancel] -width 8   \
+      -command "set [namespace current]::finishedAdv 0"]  \
+      -in $w.frbot -side right -padx 5 -pady 5
+    wm resizable $w 0 0
+    bind $w <Return> "$w.ok invoke"
+    
+    # Grab and focus.
+    focus $w
+    catch {grab $w}    
+    tkwait variable [namespace current]::finishedAdv
+    
+    # Clean up.
+    catch {unset finishedAdv}
+    catch {grab release $w}
+    destroy $w
+}
+    
+# ::Preferences::NetSetup::AdvSetupSave --
+#
+#       Saves the values set in dialog in the preference variables.
+#       It saves these port numbers independently of the main panel!!!
+#       Is this the right thing to do???
+#       
+# Arguments:
+#       
+# Results:
+#       none.
+
+proc ::Preferences::NetSetup::AdvSetupSave {  } {
+    global  prefs
+    
+    variable finishedAdv
+    upvar ::Preferences::tmpPrefs tmpPrefs
+    upvar ::Preferences::tmpJPrefs tmpJPrefs
+    upvar ::Jabber::jprefs jprefs
+
+    set prefs(thisServPort) $tmpPrefs(thisServPort)
+    set prefs(httpdPort) $tmpPrefs(httpdPort)
+    set jprefs(port) $tmpJPrefs(port)
+
+    set finishedAdv 1
+}
+
+# namespace  ::Preferences::Shorts:: -------------------------------------------
+
+namespace eval ::Preferences::Shorts:: {
+    
+    variable finished
+}
+
+proc ::Preferences::Shorts::BuildPage {page} {
+    global  sysFont
+    
+    variable btadd
+    variable btrem
+    variable btedit
+    variable wlbox
+    variable shortListVar
+    upvar ::Preferences::tmpPrefs tmpPrefs
+    
+    set wcont [LabeledFrame2 $page.frtop [::msgcat::mc {Edit Shortcuts}]]
+    pack $page.frtop -side top -anchor w
+    
+    # Overall frame for whole container.
+    set frtot [frame $wcont.fr]
+    message $frtot.msg -borderwidth 0 -font $sysFont(s) -aspect 600 \
+      -text [::msgcat::mc prefshortcut]
+    pack $frtot.msg -side top -padx 4 -pady 6
+    
+    # Frame for listbox and scrollbar.
+    set frlist [frame $frtot.lst]
+    
+    # The listbox.
+    set wsb $frlist.sb
+    set shortListVar {}
+    foreach pair $tmpPrefs(shortcuts) {
+	lappend shortListVar [lindex $pair 0]
+    }
+    set wlbox [listbox $frlist.lb -height 10 -width 18   \
+      -listvar [namespace current]::shortListVar \
+      -yscrollcommand [list $wsb set] -selectmode extended]
+    scrollbar $wsb -command [list $wlbox yview]
+    pack $wlbox -side left -fill both
+    pack $wsb -side left -fill both
+    pack $frlist -side left
+    
+    # Buttons at the right side.
+    frame $frtot.btfr
+    set btadd $frtot.btfr.btadd
+    set btrem $frtot.btfr.btrem
+    set btedit $frtot.btfr.btedit
+    button $btadd -text "[::msgcat::mc Add]..." -font $sysFont(s)  \
+      -command [list [namespace current]::AddOrEdit add]
+    button $btrem -text [::msgcat::mc Remove] -font $sysFont(s) -state disabled  \
+      -command [namespace current]::Remove
+    button $btedit -text "[::msgcat::mc Edit]..." -state disabled -font $sysFont(s) \
+      -command [list [namespace current]::AddOrEdit edit]
+    pack $frtot.btfr -side top
+    pack $btadd $btrem $btedit -side top -fill x -padx 4 -pady 4
+    
+    pack $frtot -side left -padx 6 -pady 6    
+    pack $wcont -fill x    
+    
+    # Listbox bindings.
+    bind $wlbox <Button-1> {+ focus %W}
+    bind $wlbox <Double-Button-1> [list $btedit invoke]
+    bind $wlbox <<ListboxSelect>> [list [namespace current]::SelectCmd]
+}
+
+proc ::Preferences::Shorts::SelectCmd { } {
+
+    variable btadd
+    variable btrem
+    variable btedit
+    variable wlbox
+
+    if {[llength [$wlbox curselection]]} {
+	$btrem configure -state normal
+    } else {
+	$btrem configure -state disabled
+	$btedit configure -state disabled
+    }
+    if {[llength [$wlbox curselection]] == 1} {
+	$btedit configure -state normal
+    }
+}
+
+proc ::Preferences::Shorts::Remove { } {
+    
+    variable wlbox
+    variable shortListVar
+    upvar ::Preferences::tmpPrefs tmpPrefs
+
+    set selInd [$wlbox curselection]
+    if {[llength $selInd]} {
+	foreach ind [lsort -integer -decreasing $selInd] {
+	    set shortListVar [lreplace $shortListVar $ind $ind]
+	    set tmpPrefs(shortcuts) [lreplace $tmpPrefs(shortcuts) $ind $ind]
+	}
+    }
+}
+
+# ::Preferences::Shorts::AddOrEdit --
+#
+#       Callback when the "add" or "edit" buttons pushed. New toplevel dialog
+#       for editing an existing shortcut, or adding a fresh one.
+#
+# Arguments:
+#       what           "add" or "edit".
+#       
+# Results:
+#       shows dialog.
+
+proc ::Preferences::Shorts::AddOrEdit {what} {
+    global  sysFont this
+    
+    variable wlbox
+    variable finAdd
+    variable shortListVar
+    variable shortTextVar
+    variable longTextVar
+    upvar ::Preferences::tmpPrefs tmpPrefs
+    
+    Debug 2 "::Preferences::Shorts::AddOrEdit"
+
+    set indShortcuts [lindex [$wlbox curselection] 0]
+    if {$what == "edit" && $indShortcuts == ""} {
+	return
+    } 
+    set w .taddshorts$what
+    if {[winfo exists $w]} {
+	return
+    }
+    toplevel $w
+    if {[string match "mac*" $this(platform)]} {
+	eval $::macWindowStyle $w documentProc
+    } else {
+	#
+    }
+    if {$what == "add"} {
+	set txt [::msgcat::mc {Add Shortcut}]
+	set txt1 "[::msgcat::mc {New shortcut}]:"
+	set txt2 "[::msgcat::mc prefshortip]:"
+	set txtbt [::msgcat::mc Add]
+	set shortTextVar {}
+	set longTextVar {}
+    } elseif {$what == "edit"} {
+	set txt [::msgcat::mc {Edit Shortcut}]
+	set txt1 "[::msgcat::mc Shortcut]:"
+	set txt2 "[::msgcat::mc prefshortip]:"
+	set txtbt [::msgcat::mc Save]
+    }
+    set finAdd 0
+    wm title $w $txt
+    
+    pack [frame $w.frall -borderwidth 1 -relief raised]
+    
+    # The top part.
+    set wcont [LabeledFrame2 $w.frtop $txt]
+    pack $w.frtop -in $w.frall
+    
+    # Overall frame for whole container.
+    set frtot [frame $wcont.fr]
+    label $frtot.lbl1 -text $txt1 -font $sysFont(sb)
+    entry $frtot.ent1 -width 36 -textvariable [namespace current]::shortTextVar
+    label $frtot.lbl2 -text $txt2 -font $sysFont(sb)
+    entry $frtot.ent2 -width 36 -textvariable [namespace current]::longTextVar
+    grid $frtot.lbl1 -sticky w -padx 6 -pady 1
+    grid $frtot.ent1 -sticky ew -padx 6 -pady 1
+    grid $frtot.lbl2 -sticky w -padx 6 -pady 1
+    grid $frtot.ent2 -sticky ew -padx 6 -pady 1
+    
+    pack $frtot -side left -padx 16 -pady 10
+    pack $wcont -fill x    
+    focus $frtot.ent1
+    
+    # Get the short pair to edit.
+    if {[string compare $what "edit"] == 0} {
+	set shortTextVar [lindex [lindex $tmpPrefs(shortcuts) $indShortcuts] 0]
+	set longTextVar [lindex [lindex $tmpPrefs(shortcuts) $indShortcuts] 1]
+    } elseif {[string compare $what "add"] == 0} {
+	
+    }
+    
+    # The bottom part.
+    pack [frame $w.frbot -borderwidth 0] -in $w.frall -fill both  \
+      -padx 8 -pady 6
+    button $w.frbot.bt1 -text "$txtbt" -width 8 -default active  \
+      -command [list [namespace current]::PushBtAddOrEdit $what]
+    pack $w.frbot.bt1 -side right -padx 5 -pady 5
+    pack [button $w.frbot.bt2 -text [::msgcat::mc Cancel] -width 8  \
+      -command "set [namespace current]::finAdd 2"]  \
+      -side right -padx 5 -pady 5
+    
+    bind $w <Return> [list $w.frbot.bt1 invoke]
+    wm resizable $w 0 0
+    
+    # Grab and focus.
+    focus $w
+    catch {grab $w}
+    tkwait variable [namespace current]::finAdd
+    
+    catch {grab release $w}
+    destroy $w
+}
+
+proc ::Preferences::Shorts::PushBtAddOrEdit {what} {
+    
+    variable wlbox
+    variable finAdd
+    variable shortListVar
+    variable shortTextVar
+    variable longTextVar
+    upvar ::Preferences::tmpPrefs tmpPrefs
+
+    if {($shortTextVar == "") || ($longTextVar == "")} {
+	set finAdd 1
+	return
+    }
+    if {$what == "add"} {
+ 
+	# Save shortcuts in listbox.
+	lappend shortListVar $shortTextVar
+	lappend tmpPrefs(shortcuts) [list $shortTextVar $longTextVar]
+    } else {
+	
+	# Edit. Replace old with new.
+	set ind [lindex [$wlbox curselection] 0]
+	set shortListVar [lreplace $shortListVar $ind $ind $shortTextVar]
+	set tmpPrefs(shortcuts) [lreplace $tmpPrefs(shortcuts) $ind $ind   \
+	  [list $shortTextVar $longTextVar]]
+    }
+    set finAdd 1
+}
+
+# namespace  ::Preferences::EditFonts:: ----------------------------------------
+# 
+#       These procedures implement the dialog of importing fonts to the 
+#       whiteboard.
+
+namespace eval ::Preferences::EditFonts:: {
+    
+    namespace export EditFontFamilies
+}
+
+proc ::Preferences::EditFonts::BuildPage {page} {
+    global  sysFont prefs
+
+    variable wlbwb
+    variable wlbsys
+    variable btimport
+    variable btremove
+    variable wsamp
+    upvar ::Preferences::xpadbt xpadbt
+    
+    # Labelled frame.
+    set wcfr $page.fr
+    set wcont [LabeledFrame2 $wcfr [::msgcat::mc {Import/Remove fonts}]]
+    pack $wcfr -side top -fill both -ipadx 8 -ipady 4
+    
+    # Overall frame for whole container.
+    set frtot [frame $wcont.frin]
+    pack $frtot
+    
+    label $frtot.sysfont -text [::msgcat::mc {System fonts}] -font $sysFont(sb)
+    label $frtot.wifont -text [::msgcat::mc {Whiteboard fonts}] -font $sysFont(sb)
+    grid $frtot.sysfont x $frtot.wifont -padx 4 -pady 6
+    
+    grid [frame $frtot.fr1] -column 0 -row 1
+    grid [frame $frtot.fr2] -column 1 -row 1 -sticky n -padx 4 -pady 2
+    grid [frame $frtot.fr3] -column 2 -row 1
+    set wlbsys $frtot.fr1.lb
+    set wlbwb $frtot.fr3.lb
+    
+    # System fonts.
+    listbox $wlbsys -width 20 -height 10  \
+      -font $sysFont(s) -yscrollcommand [list $frtot.fr1.sc set]
+    scrollbar $frtot.fr1.sc -orient vertical   \
+      -command [list $frtot.fr1.lb yview]
+    pack $frtot.fr1.lb $frtot.fr1.sc -side left -fill y
+    eval $frtot.fr1.lb insert 0 [font families]
+    
+    # Mid buttons.
+    set btimport $frtot.fr2.imp
+    set btremove $frtot.fr2.rm
+    pack [button $btimport -text {>>Import>>} -state disabled \
+      -font $sysFont(s) -padx $xpadbt   \
+      -command "[namespace current]::PushBtImport  \
+      \[$wlbsys curselection] $wlbsys $wlbwb"] -padx 1 -pady 6 -fill x
+    pack [button $btremove -text [::msgcat::mc Remove] -state disabled  \
+      -font $sysFont(s) -padx $xpadbt   \
+      -command "[namespace current]::PushBtRemove  \
+      \[$wlbwb curselection] $wlbwb"] -padx 1 -pady 6 -fill x
+    pack [button $frtot.fr2.std -text {Standard} -font $sysFont(s)    \
+      -padx $xpadbt -command "[namespace current]::PushBtStandard $wlbwb"] \
+      -padx 1 -pady 6 -fill x
+    
+    # Whiteboard fonts.
+    listbox $wlbwb -width 20 -height 10  \
+      -font $sysFont(s) -yscrollcommand [list $frtot.fr3.sc set]
+    scrollbar $frtot.fr3.sc -orient vertical   \
+      -command [list $frtot.fr3.lb yview]
+    pack $frtot.fr3.lb $frtot.fr3.sc -side left -fill y
+    eval $frtot.fr3.lb insert 0 $prefs(canvasFonts)
+    
+    message $frtot.msg -text [::msgcat::mc preffontmsg]   \
+      -font $sysFont(s) -aspect 600
+    set wsamp $frtot.samp
+    canvas $wsamp -width 200 -height 48 -highlightthickness 0 -border 1 \
+      -relief sunken
+    grid $frtot.msg -columnspan 3 -sticky news
+    grid $frtot.samp -columnspan 3 -sticky news
+    
+    bind $wlbsys <Button-1> {+ focus %W}
+    bind $wlbwb <Button-1> {+ focus %W}
+    bind $wlbsys <<ListboxSelect>> [list [namespace current]::SelectCmd system]
+    bind $wlbwb <<ListboxSelect>> [list [namespace current]::SelectCmd wb]
+}
+  
+proc ::Preferences::EditFonts::SelectCmd {which} {
+
+    variable wlbwb
+    variable wlbsys
+    variable btimport
+    variable btremove
+    variable wsamp
+
+    if {$which == "system"} {
+	set selInd [$wlbsys curselection]
+	if {[llength $selInd]} {
+	    $btimport configure -state normal
+	    set fntName [$wlbsys get $selInd]
+	    if {[llength $fntName]} {
+		$wsamp delete all
+		$wsamp create text 6 24 -anchor w -text {Hello cruel World!}  \
+		  -font [list $fntName 36]
+	    }
+	} else {
+	    $btimport configure -state disabled
+	}
+    } elseif {$which == "wb"} {
+	if {[llength [$wlbwb curselection]]} {
+	    $btremove configure -state normal
+	} else {
+	    $btremove configure -state disabled
+	}
+    }
+}
+
+# EditFonts::PushBtImport, PushBtRemove, PushBtSave, PushBtStandard --
+#
+#       Callbacks for the various buttons in the FontFamilies dialog.
+#   
+# Arguments:
+#       indSel    the index of the selected line in the listbox.
+#       wsys      the system font listbox widget.
+#       wapp      the application font listbox widget.
+#       
+# Results:
+#       content in listbox updated.
+
+proc ::Preferences::EditFonts::PushBtImport {indSel wsys wapp} {
+    
+    if {$indSel == ""} {
+	return
+    }
+    set fntName [$wsys get $indSel]
+    
+    # Check that it is not there already.
+    set allFntApp [$wapp get 0 end]
+    if {[lsearch $allFntApp $fntName] >= 0} {
+	return
+    }
+    $wapp insert end $fntName	
+}
+    
+proc ::Preferences::EditFonts::PushBtRemove {indSel wapp} {
+    
+    if {$indSel == ""} {
+	return
+    }
+    set fntName [$wapp get $indSel]
+    
+    # Check that not the standard fonts are removed.
+    if {[lsearch {Times Helvetica Courier} $fntName] >= 0} {
+	tk_messageBox -message [FormatTextForMessageBox  \
+	  [::msgcat::mcset en messrmstandardfonts]] \
+	  -icon error -type ok
+	return
+    }
+    $wapp delete $indSel	
+}
+    
+proc ::Preferences::EditFonts::PushBtSave { } {
+    global  prefs
+    
+    variable wlbwb
+
+    # Do save.
+    set prefs(canvasFonts) [$wlbwb get 0 end]
+    ::UI::BuildAllFontMenus $prefs(canvasFonts)
+}
+    
+proc ::Preferences::EditFonts::PushBtStandard {wapp} {
+    
+    # Insert the three standard fonts.
+    $wapp delete 0 end
+    eval $wapp insert 0 {Times Helvetica Courier}
+}
+
+
+# namespace  ::Preferences::Proxies:: ----------------------------------------
+# 
+#       This is supposed to provide proxy support etc. 
+
+namespace eval ::Preferences::Proxies:: {
+    
+}
+
+proc ::Preferences::Proxies::BuildPage {page} {
+    global  sysFont
+    
+    variable ypad
+    
+    set pca [LabeledFrame2 $page.fr {Proxies}]
+    pack $page.fr -side left -anchor n -ipadx 10 -ipady 6
+    label $pca.la -text {No firewall support... yet}
+    grid $pca.la -sticky w
+}
+
+#-------------------------------------------------------------------------------
+
+proc ::Preferences::BuildPageCache {page} {
+    global  sysFont
+    
+    variable ypad
+    
+    set pca [LabeledFrame2 $page.fr [::msgcat::mc {File Cache}]]
+    pack $page.fr -side left -anchor n -ipadx 10 -ipady 6
+    label $pca.la -text [::msgcat::mc prefcahow]
+    radiobutton $pca.never    \
+      -variable [namespace current]::tmpPrefs(checkCache) -value never \
+      -text [::msgcat::mc prefcanev]
+    radiobutton $pca.always    \
+      -variable [namespace current]::tmpPrefs(checkCache) -value always \
+      -text [::msgcat::mc prefcaalw]
+    label $pca.la2 -text "     [::msgcat::mc prefcaor]"
+    grid $pca.la -sticky w
+    grid $pca.never -sticky w -pady $ypad
+    grid $pca.always -sticky w -pady $ypad
+    grid $pca.la2 -sticky w
+
+    foreach val {launch hour day week 30days}   \
+      txt {{Launch time} {One hour} {One day} {One week} {30 days}} {
+	radiobutton $pca.$val -text [::msgcat::mc $txt]   \
+	  -variable [namespace current]::tmpPrefs(checkCache) -value $val
+	grid $pca.$val -sticky w -pady $ypad
+    }
+}
+
+# Preferences::SavePushBt --
+#
+#       Saving all settings of panels to the applications state and
+#       its preference file.
+
+proc ::Preferences::SavePushBt { } {
+    global  prefs
+    
+    variable finished
+    variable tmpPrefs
+    variable tmpJPrefs
+    variable tmpJServer
+    upvar ::Jabber::jserver jserver
+    upvar ::Jabber::jprefs jprefs
+        
+    # Make all temporary prefs reflect the current settings of the panels.
+    if {!$prefs(stripJabber)} {
+	::Preferences::UpdateTmpArrays
+    }
+    
+    # Was protocol changed?
+    set protocolChanged 0
+    if {![string equal $prefs(protocol) $tmpPrefs(protocol)]} {
+	set protocolChanged 1
+    }
+    
+    # Copy the temporary copy to the real variables.
+    array set prefs [array get tmpPrefs]
+    array set jprefs [array get tmpJPrefs]
+    array set jserver [array get tmpJServer]
+    
+    # and the same for all MIME stuff etc.
+    ::Preferences::FileMap::SaveAssociations    
+    ::Preferences::EditFonts::PushBtSave
+    ::Preferences::NetSetup::UpdateUI
+    
+    if {!$prefs(stripJabber)} {
+	
+	# If changed present auto away settings, may need to reconfigure.
+	::Jabber::UpdateAutoAwaySettings    
+	::Jabber::Chat::SetFont $tmpJPrefs(chatFont)
+    }
+    
+    # Save the preference file.
+    PreferencesSaveToFile
+    
+    # Info to relaunch if protocol changed.
+    if {$protocolChanged} {
+	tk_messageBox -title Relaunch -icon info -type ok -parent . -message \
+	  "Be sure to close the application and relaunch it for the network\
+	  change to take effect"
+    }
+    
+    set finished 1
+}
+    
+# Preferences::CancelPushBt --
+#
+#       User presses the cancel button. Warn if anything changed.
+
+proc ::Preferences::CancelPushBt { } {
+    global  prefs
+    
+    variable wtoplevel
+    variable finished
+    variable tmpPrefs
+    variable tmpJPrefs
+    variable tmpJServer
+    upvar ::Jabber::jserver jserver
+    upvar ::Jabber::jprefs jprefs
+    
+    # Make all temporary prefs reflect the current settings of the panels.
+    if {!$prefs(stripJabber)} {
+	::Preferences::UpdateTmpArrays
+    }
+    
+    # Check if anything changed, if so then warn.
+    set hasChanged 0
+    foreach {arrName tmpName}   \
+      {prefs tmpPrefs jserver tmpJServer jprefs tmpJPrefs} {
+	if {!$hasChanged} {
+	    foreach key [array names $arrName] {		
+		set locName ${arrName}($key)
+		upvar 0 $locName arrVal 
+		set locName ${tmpName}($key)
+		upvar 0 $locName tmpVal 
+		if {![info exists $tmpName]} {
+		    set hasChanged 1
+		    break
+		}
+		if {$arrVal != $tmpVal} {
+		    set hasChanged 1
+		    break
+		}
+	    }
+	}
+    }
+    
+    # Check all MIME type stuff.
+    if {!$hasChanged} {
+	set hasChanged [::Preferences::FileMap::IsAnythingChangedQ]
+    }
+    if {$hasChanged} {
+	set ans [tk_messageBox -title [::msgcat::mc Warning]  \
+	  -type yesno -default no \
+	  -message [FormatTextForMessageBox [::msgcat::mc messprefschanged]]]
+	if {$ans == "yes"} {
+	    set finished 2
+	}
+    } else {
+	set finished 2
+    }
+    if {$finished == 2} {
+	::UI::SaveWinGeom $wtoplevel
+    }
+}
+
+# ::Preferences::UpdateTmpArrays --
+#
+#       Make all temporary prefs reflect the current settings of the panels.
+
+proc ::Preferences::UpdateTmpArrays { } {
+    
+    variable tmpJPrefs
+    variable tmpJServer
+    variable tmpJServArr
+    
+    # This is a bit of double counting with two temp storages...
+    # New... Profiles
+    set tmpJServer(all) $tmpJServArr(all)
+    set tmpJServer(profile) {}
+    foreach profile $tmpJServArr(all) {
+	lappend tmpJServer(profile) $profile   \
+	  [list $tmpJServArr($profile,server)  \
+	  $tmpJServArr($profile,username)      \
+	  $tmpJServArr($profile,password)      \
+	  $tmpJServArr($profile,resource)]
+    }
+}
+
+# Preferences::SelectCmd --
+#
+#       Callback when selecting item in tree.
+#
+# Arguments:
+#       w           tree widget
+#       v           tree item path
+#       
+# Results:
+#       new page displayed
+
+proc ::Preferences::SelectCmd {w v} {
+
+    variable nbframe
+
+    if {[llength $v] && ([$w itemconfigure $v -dir] == 0)} {
+	$nbframe displaypage [lindex $v end]
+    }    
+}
+
+#-------------------------------------------------------------------------------

@@ -1,0 +1,1 @@
+image create photo im_smiley-grin.gif -data {} -format gif -file ../../images/smileys/smiley-grin.gif -gamma 1.0 -height 0 -palette {} -width 0create image 64.0 64.0 -activeimage {} -anchor nw -disabledimage {} -image im_smiley-grin.gif -state {} -tags {image xxx/138639664}

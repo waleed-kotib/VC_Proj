@@ -1,0 +1,1 @@
+image create photo im_igelpiga.gif -data {} -format {} -file ../images/igelpiga.gif -gamma 1.0 -height 0 -palette {} -width 0create image 21.0 61.0 -anchor nw -image im_igelpiga.gif -tags {image xxx/7}

@@ -1,0 +1,1 @@
+image create photo im_smiley-normal.gif -data {} -format gif -file ../../images/smileys/smiley-normal.gif -gamma 1.0 -height 0 -palette {} -width 0create image 96.0 96.0 -activeimage {} -anchor nw -disabledimage {} -image im_smiley-normal.gif -state {} -tags {image xxx/138639666}

@@ -1,0 +1,18 @@
+
+README for this directory structure (bin/*)
+
+This is where all binaries go, that is, all packages
+written in C code.
+
+The directories at this level (macintosh, macosx, windows, unix)
+correspond to the tcl variable 'tcl_platform(platform)' with
+'macosx' as a special case.
+
+On unix platforms (not Mac OS X) the following directory structure 
+corresponds to the variable 'tcl_platform(os)'
+
+The last directory corresponds to the 'tcl_platform(machine)' 
+variable on all platforms.
+
+Finally, all spaces are removed from the file path since not all
+CVS systems like this.

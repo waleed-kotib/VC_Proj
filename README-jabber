@@ -1,0 +1,43 @@
+                            =============
+                            README-jabber
+                            =============
+
+
+This brief text describes the jabber features supported:
+
+  * Ordinary messages, one-to-one chat, and groupchat.
+
+  * Agent(s) method to discover services.
+
+  * Browsing (jabber:iq:browse).
+
+  * Groupchat is supported via the "old" 'groupchat 1.0' protocol,
+    and via the never approved, but wide spread, jabber:iq:conference method.
+
+  * File transfer using the oob method (http actually).
+
+  * Handles forms using jabber:x:data
+
+  * The Coccinella client can be browsed to, and returns the following
+    namespace declarations describing its services:
+
+      o jabber:client
+      o jabber:iq:autoupdate
+      o jabber:iq:browse
+      o jabber:iq:conference
+      o jabber:iq:last
+      o jabber:iq:oob
+      o jabber:iq:roster
+      o jabber:iq:time
+      o jabber:iq:version
+      o jabber:x:autoupdate
+      o jabber:x:data
+      o coccinella:public
+      o coccinella:wb
+   
+
+Note, however, that the jabber protocols outside the very core, are a moving 
+target, and that changes and adoptions takes place at a rapid pace.
+This is true for multi user conferencing in particular, where the MUC
+protocol just has obtained Draft status. No native support for the MUC
+protocol is provided in this release.
