@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.4 2004-04-08 09:57:43 matben Exp $
+# $Id: Emoticons.tcl,v 1.5 2004-04-08 12:54:52 matben Exp $
 
 
 package provide Emoticons 1.0
@@ -293,7 +293,7 @@ proc ::Emoticons::LoadTmpIconSet {path} {
     set dir $path
     set name [file rootname [file tail $path]]
     
-    if {[file extension $path] == ".jisp"} {
+    if {[string equal [file extension $path] ".jisp"]} {
 	if {$priv(havezip)} {
 	    set mountpath [file join [file dirname $path] $name]
 	    if {[catch {
@@ -301,7 +301,11 @@ proc ::Emoticons::LoadTmpIconSet {path} {
 	    } err]} {
 		return -code error $err
 	    }
-	    set dir [file join $mountpath $name]
+	    
+	    # We cannot be sure of that the name of the archive is identical 
+	    # with the name of the original directory.
+	    set zipdir [lindex [glob -nocomplain -directory $mountpath *] 0]
+	    set dir $zipdir
 	} else {
 	    return -code error "cannot read jisp archive without vfs::zip"
 	}
@@ -347,6 +351,7 @@ proc ::Emoticons::ParseIconDef {name dir xmldata} {
 proc ::Emoticons::ParseMeta {name dir xmllist} {
     variable meta
     
+    catch {unset meta}
     foreach elem [tinydom::children $xmllist] {
 	set tag [tinydom::tagname $elem]
 	lappend meta($name,$tag) [tinydom::chdata $elem]
