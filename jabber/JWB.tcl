@@ -5,7 +5,10 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.3 2004-03-16 15:09:08 matben Exp $
+# $Id: JWB.tcl,v 1.4 2004-03-18 14:11:18 matben Exp $
+
+package require can2svgwb
+package require svgwb2can
 
 package provide JWB 1.0
 
@@ -30,6 +33,7 @@ namespace eval ::Jabber::WB:: {
 }
 
 proc ::Jabber::WB::Init { } {
+    global  this prefs
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::privatexmlns privatexmlns
     
@@ -47,6 +51,12 @@ proc ::Jabber::WB::Init { } {
     ::hooks::add logoutHook                   ::Jabber::WB::LogoutHook
     ::hooks::add groupchatExitRoomHook        ::Jabber::WB::ExitRoomHook
 
+    # Configure the Tk->SVG translation to use http.
+    # Must be reconfigured when we know our address after connecting???
+    set ip [::Network::GetThisOutsideIPAddress]
+    can2svg::config -uritype http -httpaddr ${ip}:$prefs(httpdPort) \
+      -httpbasedir $this(httpdRootPath)
+    
     # Register for the messages we want. Duplicate protocols.
     $jstate(jlib) message_register normal coccinella:wb  \
       [namespace current]::HandleSpecialMessage 20
@@ -103,6 +113,8 @@ proc ::Jabber::WB::InitUI { } {
     }
     if {![::Plugins::HavePackage QuickTimeTcl]} {
 	lset menuDefsFile 4 3 disabled
+    } else {
+	package require Multicast
     }
     # If embedded the embedding app should close us down.
     if {$prefs(embedded)} {
@@ -562,6 +574,9 @@ proc ::Jabber::WB::SendMessageHook {wtop msg args} {
     if {![::Jabber::IsConnected]} {
 	return
     }
+    
+    # Check that still online!
+    
     array set opts {-force 0}
     array set opts $args
         
@@ -593,6 +608,9 @@ proc ::Jabber::WB::SendMessageListHook {wtop msgList args} {
     if {![::Jabber::IsConnected]} {
 	return
     }
+
+    # Check that still online!
+    
     array set opts {-force 0}
     array set opts $args
     
@@ -621,6 +639,9 @@ proc ::Jabber::WB::SendGenMessageListHook {wtop msgList args} {
     if {![::Jabber::IsConnected]} {
 	return
     }
+
+    # Check that still online!
+    
     array set opts {-force 0}
     array set opts $args
 
@@ -734,7 +755,7 @@ proc ::Jabber::WB::CanvasCmdListToMessageXElement {cmdList} {
 	set subx {}
 	foreach cmd $cmdList {
 	    set subx [concat $subx \
-	      [can2svg::svgasxmllist $cmd -usestyleattribute 0]]
+	      [can2svgwb::svgasxmllist $cmd -usestyleattribute 0]]
 	}
 	set xlist [list [wrapper::createtag x -attrlist  \
 	  {xmlns http://jabber.org/protocol/svgwb} -subtags $subx]]
@@ -841,8 +862,8 @@ proc ::Jabber::WB::HandleRawChatMessage {jlibname xmlns args} {
     ::Jabber::Debug 2 "::Jabber::WB::HandleRawChatMessage args=$args"
     array set argsArr $args
         
-    set rawList [::Jabber::WB::GetRawMessageList $argsArr(-x) $xmlns]
-    eval {::Jabber::WB::ChatMsg $rawList} $args
+    set cmdList [::Jabber::WB::GetRawMessageList $argsArr(-x) $xmlns]
+    eval {::Jabber::WB::ChatMsg $cmdList} $args
     eval {::hooks::run newWBChatMessageHook} $args
     
     # We have handled this message completely.
@@ -861,8 +882,8 @@ proc ::Jabber::WB::HandleRawGroupchatMessage {jlibname xmlns args} {
     
     # Do not duplicate ourselves!
     if {![::Jabber::IsMyGroupchatJid $argsArr(-from)]} {
-	set rawList [::Jabber::WB::GetRawMessageList $argsArr(-x) $xmlns]
-	eval {::Jabber::WB::GroupChatMsg $rawList} $args
+	set cmdList [::Jabber::WB::GetRawMessageList $argsArr(-x) $xmlns]
+	eval {::Jabber::WB::GroupChatMsg $cmdList} $args
 	eval {::hooks::run newWBGroupChatMessageHook} $args
     }
     
@@ -874,6 +895,11 @@ proc ::Jabber::WB::HandleRawGroupchatMessage {jlibname xmlns args} {
 proc ::Jabber::WB::HandleSVGWBChatMessage {jlibname xmlns args} {
     
     ::Jabber::Debug 2 "::Jabber::WB::HandleSVGWBChatMessage"
+    array set argsArr $args
+	
+    set cmdList [::Jabber::WB::GetSVGWBMessageList $argsArr(-x)]
+    eval {::Jabber::WB::ChatMsg $cmdList} $args
+    eval {::hooks::run newWBChatMessageHook} $args
     
     # We have handled this message completely.
     return 1
@@ -913,6 +939,41 @@ proc ::Jabber::WB::GetRawMessageList {xlist xmlns} {
 	}
     }
     return $rawElemList
+}
+
+# Jabber::WB::GetRawCanvasMessageList --
+# 
+#       As above but skips the CANVAS: prefix. Assumes CANVAS: prefix!
+
+proc ::Jabber::WB::GetRawCanvasMessageList {xlist xmlns} {
+    
+    set cmdList {}
+    
+    foreach xelem $xlist {
+	array set attrArr [wrapper::getattrlist $xelem]
+	if {[string equal $attrArr(xmlns) $xmlns]} {
+	    foreach xraw [wrapper::getchildren $xelem] {
+		if {[string equal [wrapper::gettag $xraw] "raw"]} {
+		    lappend cmdList [lrange [wrapper::getcdata $xraw] 1 end]
+		}	
+	    }
+	}
+    }
+    return $cmdList
+}
+
+proc ::Jabber::WB::GetSVGWBMessageList {xlist} {
+
+    set cmdList {}
+    
+    foreach xelem $xlist {
+	array set attrArr [wrapper::getattrlist $xelem]
+	if {[string equal $attrArr(xmlns) "http://jabber.org/protocol/svgwb"]} {
+	    set cmdList [svgwb2can::parsesvgdocument $xelem]
+	    #puts "---cmdList=$cmdList"
+	}
+    }
+    return $cmdList
 }
 
 proc ::Jabber::WB::Free {wtop} {
@@ -1271,32 +1332,33 @@ proc ::Jabber::WB::HandlePutRequest {channel fileName opts} {
 #       Handles incoming chat/groupchat message aimed for a whiteboard.
 #       It may not exist, for instance, if we receive a new chat thread.
 #       Then create a specific whiteboard for this chat/groupchat.
-#       The commands shall only be CANVAS: types.
+#       The commands shall only be CANVAS: types. ????!!!
 #       
 # Arguments:
 #       args        -from, -to, -type, -thread, -x,...
 
-proc ::Jabber::WB::ChatMsg {rawList args} {    
+proc ::Jabber::WB::ChatMsg {cmdList args} {    
     upvar ::Jabber::jstate jstate
 
     array set argsArr $args
     ::Jabber::Debug 2 "::Jabber::WB::ChatMsg args='$args'"
     
-    jlib::splitjid $argsArr(-from) jid2 res
-
     # This one returns empty if not exists.
     set wtop [::Jabber::WB::GetWtopFromMessage "chat" $argsArr(-from)  \
       $argsArr(-thread)]
     if {$wtop == ""} {
 	set wtop [eval {::Jabber::WB::NewWhiteboardTo $argsArr(-from)} $args]
     }
-    set rawList [::Jabber::WB::HandleAnyResizeImage $wtop $rawList]
-    foreach line $rawList {
-	::CanvasUtils::HandleCanvasDraw $wtop [lrange $line 1 end]
+    set cmdList [::Jabber::WB::HandleAnyResizeImage $wtop $cmdList]
+    foreach line $cmdList {
+	if {[string match CANVAS:* $line]} {
+	    set line [lrange $line 1 end]
+	}
+	::CanvasUtils::HandleCanvasDraw $wtop $line
     }     
 }
 
-proc ::Jabber::WB::GroupChatMsg {rawList args} {    
+proc ::Jabber::WB::GroupChatMsg {cmdList args} {    
     upvar ::Jabber::jstate jstate
 
     array set argsArr $args
@@ -1309,9 +1371,12 @@ proc ::Jabber::WB::GroupChatMsg {rawList args} {
     if {$wtop == ""} {
 	set wtop [eval {::Jabber::WB::NewWhiteboardTo $roomjid} $args]
     }
-    set rawList [::Jabber::WB::HandleAnyResizeImage $wtop $rawList]
-    foreach line $rawList {
-	::CanvasUtils::HandleCanvasDraw $wtop [lrange $line 1 end]
+    set cmdList [::Jabber::WB::HandleAnyResizeImage $wtop $cmdList]
+    foreach line $cmdList {
+	if {[string match CANVAS:* $line]} {
+	    set line [lrange $line 1 end]
+	}
+	::CanvasUtils::HandleCanvasDraw $wtop $line
     } 
 }
 

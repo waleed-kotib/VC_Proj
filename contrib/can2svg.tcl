@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #
-# $Id: can2svg.tcl,v 1.5 2004-03-13 15:21:40 matben Exp $
+# $Id: can2svg.tcl,v 1.6 2004-03-18 14:11:18 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -37,6 +37,7 @@
 # We need URN encoding for the file path in images. From my whiteboard code.
 
 package require uriencode
+package require tinyfileutils
 
 package provide can2svg 0.1
 
@@ -44,6 +45,15 @@ package provide can2svg 0.1
 namespace eval can2svg {
 
     namespace export can2svg canvas2file
+    
+    variable confopts
+    array set confopts {
+	-httpaddr             localhost
+	-uritype              file
+	-usetags              all
+	-usestyleattribute    1
+    }
+    set confopts(-httpbasedir) [info script]
     
     variable formatArrowMarker
     variable formatArrowMarkerLast
@@ -75,20 +85,54 @@ namespace eval can2svg {
     
 }
 
+proc can2svg::config {args} {
+    variable confopts
+    
+    set options [lsort [array names confopts -*]]
+    set usage [join $options ", "]
+    if {[llength $args] == 0} {
+	set result {}
+	foreach name $options {
+	    lappend result $name $confopts($name)
+	}
+	return $result
+    }
+    regsub -all -- - $options {} options
+    set pat ^-([join $options |])$
+    if {[llength $args] == 1} {
+	set flag [lindex $args 0]
+	if {[regexp -- $pat $flag]} {
+	    return $confopts($flag)
+	} else {
+	    return -code error "Unknown option $flag, must be: $usage"
+	}
+    } else {
+	foreach {flag value} $args {
+	    if {[regexp -- $pat $flag]} {
+		set confopts($flag) $value
+	    } else {
+		return -code error "Unknown option $flag, must be: $usage"
+	    }
+	}
+    }
+}
+
 # can2svg::can2svg --
 #
 #       Make xml out of a canvas command, widgetPath removed.
 #       
 # Arguments:
 #       cmd         canvas command without prepending widget path.
-#       args    -usetags    0|all|first|last
+#       args    -httpbasedir  path
+#               -uritype    file|http
 #               -usestyleattribute 0|1
+#               -usetags    0|all|first|last
 #       
 # Results:
 #   xml data
 
 proc can2svg::can2svg {cmd args} {
-    
+
     set xml ""
     foreach xmllist [eval {svgasxmllist $cmd} $args] {
 	append xml [MakeXML $xmllist]
@@ -102,14 +146,17 @@ proc can2svg::can2svg {cmd args} {
 #       
 # Arguments:
 #       cmd         canvas command without prepending widget path.
-#       args    -usetags    0|all|first|last
+#       args    -httpbasedir  path
+#               -uritype    file|http
 #               -usestyleattribute 0|1
+#               -usetags    0|all|first|last
 #       
 # Results:
 #       a list of xmllist = {tag attrlist isempty cdata {child1 child2 ...}}
 
 proc can2svg::svgasxmllist {cmd args} {
 
+    variable confopts
     variable defsArrowMarkerArr
     variable defsStipplePatternArr
     variable anglesToRadians
@@ -120,11 +167,9 @@ proc can2svg::svgasxmllist {cmd args} {
     set wsp_ {[ ]+}
     set xmlListList {}
     
-    array set argsArr {
-	-usestyleattribute    1
-	-usetags              all
-    }
+    array set argsArr [array get confopts]
     array set argsArr $args
+    set args [array get argsArr]
         
     switch -- [lindex $cmd 0] {
 	
@@ -270,7 +315,7 @@ proc can2svg::svgasxmllist {cmd args} {
 		}
 		image - bitmap {
 		    set elem "image"
-		    set attr [MakeImageAttr $coo $opts]
+		    set attr [eval {MakeImageAttr $coo $opts} $args]
 		    if {[string length $idAttr] > 0} {
 			set attr [concat $attr $idAttr]
 		    }
@@ -394,12 +439,6 @@ proc can2svg::svgasxmllist {cmd args} {
 		    }
 		}
 	    }
-	}
-	move {
-	    # Empty
-	}
-	scale {
-	    # Empty
 	}
     }
     return $xmlListList
@@ -634,17 +673,23 @@ proc can2svg::FormatColorName {value} {
 # Results:
 #   
 
-proc can2svg::MakeImageAttr {coo opts} {
+proc can2svg::MakeImageAttr {coo opts args} {
+    variable confopts
     
     array set optArr {-anchor nw}
     array set optArr $opts
+    array set argsArr $args
     set theImage $optArr(-image)
     set w [image width $theImage]
     set h [image height $theImage]
     
     # We should make this an URI.
     set theFile [$theImage cget -file]
-    set uri [UriFromLocalFile $theFile]
+    if {[string equal $argsArr(-uritype) "file"]} {
+	set uri [FileUriFromLocalFile $theFile]
+    } elseif {[string equal $argsArr(-uritype) "http"]} {
+	set uri [HttpFromLocalFile $theFile]
+    }
     foreach {x0 y0} $coo {}
     
     switch -- $optArr(-anchor) {
@@ -999,20 +1044,23 @@ proc can2svg::makedocument {width height xml} {
 #   
 
 proc can2svg::canvas2file {wcan path args} {
-    
+    variable confopts
     variable defsArrowMarkerArr
     variable defsStipplePatternArr
-
-    # Need to make a fresh start for marker def's.
-    catch {unset defsArrowMarkerArr}
-    catch {unset defsStipplePatternArr}
-
+    
+    array set argsArr [array get confopts]
     array set argsArr  \
       [list -width [winfo width $wcan] -height [winfo height $wcan]]
     array set argsArr $args
+    set args [array get argsArr]
     
+    # Need to make a fresh start for marker def's.
+    catch {unset defsArrowMarkerArr}
+    catch {unset defsStipplePatternArr}
+  
     set fd [open $path w]
 
+    # This could have been done line by line.
     set xml ""
     foreach id [$wcan find all] {
 	set type [$wcan type $id]
@@ -1030,7 +1078,7 @@ proc can2svg::canvas2file {wcan path args} {
 	}
 	set co [$wcan coords $id]
 	set cmd [concat "create" $type $co $opcmd]
-	append xml "\t[can2svg $cmd]\n"	
+	append xml "\t[eval {can2svg $cmd} $args]\n"	
     }
     puts $fd [makedocument $argsArr(-width) $argsArr(-height) $xml]
     close $fd
@@ -1140,15 +1188,27 @@ proc can2svg::XMLCrypt {chdata} {
     return $chdata
 }
 
-# can2svg::UriFromLocalFile --
+# can2svg::FileUriFromLocalFile --
 #
 #       Not foolproof!
 
-proc can2svg::UriFromLocalFile {path} {
+proc can2svg::FileUriFromLocalFile {path} {
         
     # Quote the disallowed characters according to the RFC for URN scheme.
     # ref: RFC2141 sec2.2
     return file://[uriencode::quotepath $path]
+}
+
+# can2svg::HttpFromLocalFile --
+#
+#       Translates an absolute file path to an uri encoded http address.
+
+proc can2svg::HttpFromLocalFile {path} {
+    variable confopts
+    
+    set relPath [filerelative $confopts(-httpbasedir) $path]
+    set relPath [uriencode::quotepath $relPath]
+    return "http://$confopts(-httpaddr)/$relPath"
 }
 
 #-------------------------------------------------------------------------------

@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ItemInspector.tcl,v 1.20 2004-03-16 15:09:08 matben Exp $
+# $Id: ItemInspector.tcl,v 1.21 2004-03-18 14:11:18 matben Exp $
 
 namespace eval ::ItemInspector::  {
     
@@ -365,13 +365,12 @@ proc ::ItemInspector::Build {wtop itemId args} {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    set btwidth [::Utils::GetMaxMsgcatWidth Save Cancel]
     pack [button $frbot.btsave -text [::msgcat::mc Save] -default active  \
       -command [list [namespace current]::CanvasConfigureItem $w $wCan  \
-      $itemId $listOfAllOptions] -width $btwidth]  \
+      $itemId $listOfAllOptions]]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
-      -command "[namespace current]::Cancel $w" -width $btwidth]  \
+      -command [list [namespace current]::Cancel $w]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -in $w.frall  \
       -padx 8 -pady 6
@@ -632,13 +631,11 @@ proc ::ItemInspector::Movie {wtop winfr} {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    set btwidth [::Utils::GetMaxMsgcatWidth Save Cancel]
     pack [button $frbot.btsave -text [::msgcat::mc Save] -default active  \
-      -width $btwidth  \
       -command [list [namespace current]::MovieConfigure $w $wmov]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width $btwidth \
-      -command "[namespace current]::MovieCancel $w"]  \
+    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
+      -command [list [namespace current]::MovieCancel $w]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -in $w.frall  \
       -padx 8 -pady 6

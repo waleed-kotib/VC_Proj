@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.12 2004-03-16 15:09:08 matben Exp $
+# $Id: Profiles.tcl,v 1.13 2004-03-18 14:11:18 matben Exp $
 
 package provide Profiles 1.0
 
@@ -621,13 +621,12 @@ proc ::Profiles::BuildDialog { } {
     ::Profiles::BuildPage $wpage
     
     # Button part.
-    set btwidth [expr [::Utils::GetMaxMsgcatWidth Save Cancel] + 2]
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btconn -text [::msgcat::mc Save] -width $btwidth \
+    pack [button $frbot.btconn -text [::msgcat::mc Save]  \
       -default active -command [list [namespace current]::SaveDlg $w]]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
-      -command [list [namespace current]::CancelDlg $w] -width $btwidth]  \
+      -command [list [namespace current]::CancelDlg $w]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side bottom -fill both -expand 1 -padx 8 -pady 6
     

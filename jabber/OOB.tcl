@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.25 2004-03-15 13:26:11 matben Exp $
+# $Id: OOB.tcl,v 1.26 2004-03-18 14:11:18 matben Exp $
 
 package provide OOB 1.0
 
@@ -137,9 +137,6 @@ proc ::Jabber::OOB::DoSend { } {
     variable $token
     upvar 0 $token state
 
-    set state(path) $localpath
-    set state(tail) [file tail $localpath]
-    set state(jid)  $jid
     set finished 1
     set url [::Utils::GetHttpFromFile $localpath]
     
@@ -153,6 +150,9 @@ proc ::Jabber::OOB::DoSend { } {
     if {[string length $desc]} {
 	set opts [list -desc $desc]
     }
+    set state(path) $localpath
+    set state(tail) [file tail $localpath]
+    set state(jid)  $jid
     eval {$jstate(jlib) oob_set $jid \
       [list [namespace current]::SetCallback $token] $url} $opts
 }

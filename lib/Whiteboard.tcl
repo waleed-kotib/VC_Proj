@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.23 2004-03-16 15:09:08 matben Exp $
+# $Id: Whiteboard.tcl,v 1.24 2004-03-18 14:11:18 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -264,6 +264,8 @@ proc ::WB::InitMenuDefs { } {
     # If embedded the embedding app should close us down.
     if {$prefs(embedded)} {
 	lset menuDefs(main,file) end 3 disabled
+    } else {
+	package require Multicast
     }
 
     set menuDefs(main,edit) {    

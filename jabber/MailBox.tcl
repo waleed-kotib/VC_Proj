@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.38 2004-03-13 15:21:41 matben Exp $
+# $Id: MailBox.tcl,v 1.39 2004-03-18 14:11:18 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -548,7 +548,7 @@ proc ::Jabber::MailBox::HandleRawWBMessage {jlibname xmlns args} {
 	::Jabber::MailBox::ReadMailbox
     }
     set messageList [eval {::Jabber::MailBox::MakeMessageList ""} $args]
-    set rawList [::Jabber::WB::GetRawMessageList $argsArr(-x) $xmlns]
+    set rawList [::Jabber::WB::GetRawCanvasMessageList $argsArr(-x) $xmlns]
     set canvasuid [::Utils::GenerateHexUID]
     set filePath [file join $prefs(inboxCanvasPath) ${canvasuid}.can]
     ::CanvasFile::DataToFile $filePath $rawList

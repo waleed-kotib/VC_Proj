@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #
-# $Id: svg2can.tcl,v 1.13 2004-03-04 07:53:16 matben Exp $
+# $Id: svg2can.tcl,v 1.14 2004-03-18 14:11:18 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -37,6 +37,12 @@ package require uriencode
 package provide svg2can 1.0
 
 namespace eval svg2can {
+
+    variable confopts
+    array set confopts {
+	-httphandler          ""
+	-imagehandler         ""
+    }
 
     variable textAnchorMap
     array set textAnchorMap {
@@ -78,6 +84,38 @@ namespace eval svg2can {
 	}
 	windows - macintosh {
 	    set systemFont system
+	}
+    }
+}
+
+proc svg2can::config {args} {
+    variable confopts
+    
+    set options [lsort [array names confopts -*]]
+    set usage [join $options ", "]
+    if {[llength $args] == 0} {
+	set result {}
+	foreach name $options {
+	    lappend result $name $confopts($name)
+	}
+	return $result
+    }
+    regsub -all -- - $options {} options
+    set pat ^-([join $options |])$
+    if {[llength $args] == 1} {
+	set flag [lindex $args 0]
+	if {[regexp -- $pat $flag]} {
+	    return $confopts($flag)
+	} else {
+	    return -code error "Unknown option $flag, must be: $usage"
+	}
+    } else {
+	foreach {flag value} $args {
+	    if {[regexp -- $pat $flag]} {
+		set confopts($flag) $value
+	    } else {
+		return -code error "Unknown option $flag, must be: $usage"
+	    }
 	}
     }
 }
@@ -244,6 +282,7 @@ proc svg2can::parseellipse {xmllist transformList args} {
 
 proc svg2can::parseimage {xmllist transformList args} {
     variable tmptag
+    variable confopts
     
     set x 0
     set y 0    
@@ -269,14 +308,7 @@ proc svg2can::parseimage {xmllist transformList args} {
 		set $key $value
 	    }
 	    xlink:href {
-		set path [uriencode::decodefile $value]
-		set path [string map {file:/// /} $path]
-		if {[string tolower [file extension $path]] == ".gif"} {
-		    set photo [image create photo -file $path -format gif]
-		} else {
-		    set photo [image create photo -file $path]
-		}
-		lappend opts -image $photo
+		set xlinkhref $value
 	    }
 	    default {
 		lappend presentationAttr $key $value
@@ -285,7 +317,41 @@ proc svg2can::parseimage {xmllist transformList args} {
     }
     lappend opts -tags $tags -anchor nw
     set opts [MergePresentationAttr image $opts $presentationAttr]
-    set cmdList [list [concat create image $x $y $opts]]
+    set cmd [concat create image $x $y $opts]
+    
+    # Handle the xlink:href attribute.
+    if {[info exists xlinkhref]} {
+	
+	switch -glob -- $xlinkhref {
+	    file:/* {			
+		set path [uriencode::decodefile $xlinkhref]
+		set path [string map {file:/// /} $path]
+		lappend cmd -file $path
+		if {[string length $confopts(-imagehandler)]} {
+		    uplevel #0 $confopts(-imagehandler) $cmd
+		    return ""
+		} else {			
+		    if {[string tolower [file extension $path]] == ".gif"} {
+			set photo [image create photo -file $path -format gif]
+		    } else {
+			set photo [image create photo -file $path]
+		    }
+		    lappend opts -image $photo
+		}
+	    }
+	    http:/* {
+		if {[string length $confopts(-httphandler)]} {
+		    lappend cmd -url $xlinkhref
+		    uplevel #0 $confopts(-httphandler) $cmd
+		    return ""
+		}
+	    }
+	    default {
+		return ""
+	    }
+	}	
+    }
+    set cmdList [list $cmd]
 
     return [AddAnyTransformCmds $cmdList $transformList]
 }
@@ -1298,12 +1364,17 @@ proc svg2can::ParseTransformAttr {attrlist} {
     set cmd ""
     set idx [lsearch -exact $attrlist "transform"]
     if {$idx >= 0} {
-	set cmd [lindex $attrlist [incr idx]]
-	regsub -all -- {\( *([-0-9]+) *\)} $cmd { \1} cmd
-	regsub -all -- {\( *([-0-9]+) *, *([-0-9]+) *\)} $cmd { {\1 \2}} cmd
-	regsub -all -- {\( *([-0-9]+) *, *([-0-9]+) *, *([-0-9]+) *\)} \
-	  $cmd { {\1 \2 \3}} cmd
+	set cmd [TransformAttrToList [lindex $attrlist [incr idx]]]
     }
+    return $cmd
+}
+
+proc svg2can::TransformAttrToList {cmd} {
+    
+    regsub -all -- {\( *([-0-9.]+) *\)} $cmd { \1} cmd
+    regsub -all -- {\( *([-0-9.]+)[ ,]+([-0-9.]+) *\)} $cmd { {\1 \2}} cmd
+    regsub -all -- {\( *([-0-9.]+)[ ,]+([-0-9.]+)[ ,]+([-0-9.]+) *\)} \
+      $cmd { {\1 \2 \3}} cmd
     return $cmd
 }
 
