@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.86 2004-10-05 12:16:23 matben Exp $
+# $Id: Roster.tcl,v 1.87 2004-10-08 12:22:21 matben Exp $
 
 package provide Roster 1.0
 
@@ -1767,6 +1767,7 @@ proc ::Jabber::Roster::ConfigureIcon {v} {
 namespace eval ::Jabber::Roster:: {
     
     # name description ...
+    # Excluding smtp since it works differently.
     variable trptToAddressName {
 	jabber      {Jabber address}
 	icq         {ICQ (number)}
@@ -1774,7 +1775,6 @@ namespace eval ::Jabber::Roster:: {
 	msn         {MSN Messenger}
 	yahoo       {Yahoo Messenger}
 	irc         {IRC}
-	smtp        {Email address}
 	x-gadugadu  {Gadu-Gadu}
     }
     variable trptToName {
@@ -1784,7 +1784,6 @@ namespace eval ::Jabber::Roster:: {
 	msn         {MSN Messenger}
 	yahoo       {Yahoo Messenger}
 	irc         {IRC}
-	smtp        {Email}
 	x-gadugadu  {Gadu-Gadu}
     }
     variable nameToTrpt {
@@ -1794,7 +1793,6 @@ namespace eval ::Jabber::Roster:: {
 	{MSN Messenger}    msn
 	{Yahoo Messenger}  yahoo
 	{IRC}              irc
-	{Email}            smtp
 	{Gadu-Gadu}        x-gadugadu
     }
     

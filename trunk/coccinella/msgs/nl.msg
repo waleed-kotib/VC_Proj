@@ -52,6 +52,7 @@
 ::msgcat::mcset nl File			{Bestand}
 ::msgcat::mcset nl Finish		{Beëindigen}
 ::msgcat::mcset nl Finished		{Beëindigd}
+#::msgcat::mcset nl Friends
 ::msgcat::mcset nl Forward		{Doorsturen}
 ::msgcat::mcset nl From			{Van}
 ::msgcat::mcset nl General		{Algemeen}
