@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.38 2004-12-02 08:22:34 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.39 2005-01-18 07:43:40 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -294,6 +294,7 @@ proc ::PreferencesUtils::SetUserPreferences { } {
       [list prefs(autoConnect)     prefs_autoConnect     $prefs(autoConnect)]    \
       [list prefs(multiConnect)    prefs_multiConnect    $prefs(multiConnect)]   \
       [list prefs(thisServPort)    prefs_thisServPort    $prefs(thisServPort)]   \
+      [list prefs(httpdPort)       prefs_httpdPort       $prefs(httpdPort)]   \
       [list prefs(remotePort)      prefs_remotePort      $prefs(remotePort)]     \
       [list prefs(setNATip)        prefs_setNATip        $prefs(setNATip)]       \
       [list prefs(NATip)           prefs_NATip           $prefs(NATip)]          \
