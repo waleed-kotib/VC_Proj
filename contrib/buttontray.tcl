@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application.
 #      It implements a fancy button tray widget.
 #      
-#  Copyright (c) 2002-2003  Mats Bengtsson
+#  Copyright (c) 2002-2004  Mats Bengtsson
 #  
-# $Id: buttontray.tcl,v 1.6 2004-01-13 14:50:20 matben Exp $
+# $Id: buttontray.tcl,v 1.7 2004-03-31 07:55:17 matben Exp $
 # 
 # ########################### USAGE ############################################
 #

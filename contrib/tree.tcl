@@ -23,9 +23,9 @@
 #
 # Complete rewrite by Mats Bengtsson   (matben@privat.utfors.se)
 # 
-# Copyright (C) 2002-2003 Mats Bengtsson
+# Copyright (C) 2002-2004 Mats Bengtsson
 # 
-# $Id: tree.tcl,v 1.22 2004-03-24 14:43:11 matben Exp $
+# $Id: tree.tcl,v 1.23 2004-03-31 07:55:18 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -40,6 +40,7 @@
 #	-backgroundimage, backgroundImage, BackgroundImage
 #	-buttonpresscommand, buttonPressCommand, ButtonPressCommand  tclProc?
 #	-buttonpressmillisec, buttonPressMillisec, ButtonPressMillisec
+#       -closeimage, closeImage, CloseImage
 #	-doubleclickcommand, doubleClickCommand, DoubleClickCommand  tclProc?
 #	-eventlist, eventList, EventList                      {{event tclProc} ..}
 #	-font, font, Font
@@ -50,7 +51,7 @@
 #	-height, height, Height
 #	-indention, indention, Indention
 #	-opencommand, openCommand, OpenCommand
-#	-openicons, openIcons, OpenIcons                      (plusminus|triangle)
+#       -openimage, openImage, OpenImage
 #	-pyjamascolor, pyjamasColor, PyjamasColor
 #	-rightclickcommand, rightClickCommand, RightClickCommand  tclProc?
 #	-scrollwidth, scrollWidth, ScrollWidth
@@ -62,6 +63,7 @@
 #	-selectoutline, selectOutline, SelectOutline
 #	-silent, silent, Silent                               (0|1)
 #	-sortorder, sortOrder, SortOrder                      (decreasing|increasing)?
+#	-styleicons, styleIcons, StyleIcons                  (plusminus|triangle)
 #	-treecolor, treeColor, TreeColor                      color?
 #	-treedash, treeDash, TreeDash                         dash
 #	-width, width, Width
@@ -113,6 +115,8 @@
 #       031106      added -canvastags and -indention options
 #       031110      added 'find withtag all' 
 #       040210      added -treedash, -selectoutline, -selectdash
+#       040330      changed -closeicons to -styleicons, added -closeimage and
+#                   -openimage
 
 package require Tcl 8.4
 
@@ -143,7 +147,7 @@ namespace eval tree {
 	    0x01, 0x01, 0x01, 0x01, 0xff, 0x01
 	};
     }
-    set widgetGlobals(openbmplusmin)   \
+    set widgetGlobals(openPM)   \
       [image create bitmap -data $data -maskdata $maskdata \
       -foreground black -background white]
     set data "#define closed_width 9\n#define closed_height 9"
@@ -153,7 +157,7 @@ namespace eval tree {
 	    0x11, 0x01, 0x01, 0x01, 0xff, 0x01
 	};
     }
-    set widgetGlobals(closedbmplusmin)   \
+    set widgetGlobals(closePM)   \
       [image create bitmap -data $data -maskdata $maskdata \
       -foreground black -background white]
     
@@ -171,12 +175,12 @@ namespace eval tree {
     }]
 	
     # The mac look-alike triangles, folder, and generic file icons.
-    set widgetGlobals(openbmmac) [image create photo -data {
+    set widgetGlobals(openMac) [image create photo -data {
 	R0lGODlhCwALAPMAAP///97e3s7O/729vZyc/4yMjGNjzgAAAAAAAAAAAAAA
 	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAEALAAAAAALAAsAAAQgMMhJq7316M1P
 	OEIoEkchHURKGOUwoWubsYVryZiNVREAOw==
     }]
-    set widgetGlobals(closedbmmac) [image create photo -data {
+    set widgetGlobals(closeMac) [image create photo -data {
 	R0lGODlhCwALAPMAAP///97e3s7O/729vZyc/4yMjGNjzgAAAAAAAAAAAAAA
 	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAEALAAAAAALAAsAAAQiMMgjqw2H3nqE
 	3h3xWaEICgRhjBi6FgMpvDEpwuCBg3sVAQA7
@@ -249,6 +253,7 @@ proc ::tree::Init { } {
 	-backgroundimage     {backgroundImage      BackgroundImage     }
 	-buttonpresscommand  {buttonPressCommand   ButtonPressCommand  }
 	-buttonpressmillisec {buttonPressMillisec  ButtonPressMillisec }
+	-closeimage          {closeImage           CloseImage          }
 	-doubleclickcommand  {doubleClickCommand   DoubleClickCommand  }
 	-eventlist           {eventList            EventList           }
 	-font                {font                 Font                }
@@ -259,7 +264,7 @@ proc ::tree::Init { } {
 	-height              {height               Height              }
 	-indention           {indention            Indention           }
 	-opencommand         {openCommand          OpenCommand         }
-	-openicons           {openIcons            OpenIcons           }
+	-openimage           {openImage            OpenImage           }
 	-pyjamascolor        {pyjamasColor         PyjamasColor        }
 	-rightclickcommand   {rightClickCommand    RightClickCommand   }
 	-scrollwidth         {scrollWidth          ScrollWidth         }
@@ -271,6 +276,7 @@ proc ::tree::Init { } {
 	-selectoutline       {selectOutline        SelectOutline       }
 	-silent              {silent               Silent              }
 	-sortorder           {sortOrder            SortOrder           }
+	-styleicons          {styleIcons           StyleIcons          }
 	-treecolor           {treeColor            TreeColor           }
 	-treedash            {treeDash             TreeDash            }
 	-width               {width                Width               }
@@ -295,23 +301,24 @@ proc ::tree::Init { } {
     option add *Tree.backgroundImage       {}              widgetDefault
     option add *Tree.buttonPressCommand    {}              widgetDefault
     option add *Tree.buttonPressMillisec   1000            widgetDefault
+    option add *Tree.closeImage            ""              widgetDefault
     option add *Tree.eventList             {}              widgetDefault
     option add *Tree.highlightBackground   white           widgetDefault
     option add *Tree.highlightColor        black           widgetDefault
     option add *Tree.highlightThickness    3               widgetDefault
     option add *Tree.height                100             widgetDefault
     option add *Tree.indention             0               widgetDefault
-    option add *Tree.openIcons             plusminus       widgetDefault
+    option add *Tree.openImage             ""              widgetDefault
     option add *Tree.openCommand           {}              widgetDefault
     option add *Tree.pyjamasColor          white           widgetDefault
     option add *Tree.rightClickCommand     {}              widgetDefault
     option add *Tree.scrollWidth           200             widgetDefault
-    #option add *Tree.selectBackground      #9dc9ff           widgetDefault
     option add *Tree.selectDash            {}              widgetDefault
     option add *Tree.selectMode            1               widgetDefault
     option add *Tree.selectOutline         {}              widgetDefault
     option add *Tree.silent                0               widgetDefault
     option add *Tree.sortOrder             {}              widgetDefault
+    option add *Tree.styleIcons            plusminus       widgetDefault
     option add *Tree.treeColor             gray50          widgetDefault
     option add *Tree.treeDash              {}              widgetDefault
     option add *Tree.width                 100             widgetDefault
@@ -462,6 +469,9 @@ proc ::tree::tree {w args} {
     if {$options(-scrollwidth) < $options(-width)} {
 	set options(-scrollwidth) $options(-width)
     }
+    
+    # Process icons to use.
+    ConfigureIcons $w
     
     # Create the actual widget procedure.
     proc ::${w} {command args}   \
@@ -900,6 +910,8 @@ proc ::tree::Configure {w args} {
     set options(-scrollregion)   \
       [list 0 0 $options(-scrollwidth) $options(-height)]
     
+    ConfigureIcons $w
+
     # Find the canvas options.
     set canvasArgs {}
     foreach name $canvasOptions {
@@ -928,6 +940,36 @@ proc ::tree::Configure {w args} {
     }
 
     return ""
+}
+
+# tree::ConfigureIcons --
+# 
+#       Sets the actual iamges to use internally.
+#       Lets any -closeimage and -openimage override -styleicon.
+
+proc ::tree::ConfigureIcons {w} {
+
+    variable widgetGlobals
+    upvar ::tree::${w}::options options
+    upvar ::tree::${w}::priv priv
+
+    if {[string equal $options(-styleicons) "plusminus"]} {
+	set priv(imclose) $widgetGlobals(closePM)	
+	set priv(imopen)  $widgetGlobals(openPM)
+    } elseif {[string equal $options(-styleicons) "triangle"]} {
+	set priv(imclose) $widgetGlobals(closeMac)	
+	set priv(imopen)  $widgetGlobals(openMac)
+    } else {
+	return -code error "unrecognized value \"$options(-styleicons)\" for -styleicons"
+    }
+
+    # Let any -closeimage or -openimage override.
+    if {[string length $options(-closeimage)]} {
+	set priv(imclose) $options(-closeimage)	
+    }
+    if {[string length $options(-openimage)]} {
+	set priv(imopen) $options(-openimage)	
+    }
 }
 
 # Initialize a element of the tree. Internal use only
@@ -1418,18 +1460,9 @@ proc ::tree::Build {w} {
     Debug 1 "::tree::Build w=$w"
 
     set can $widgets(canvas)
-    if {[string equal $options(-openicons) "plusminus"]} {
-	set priv(openbm) $widgetGlobals(openbmplusmin)
-	set priv(closedbm) $widgetGlobals(closedbmplusmin)	
-    } elseif {[string equal $options(-openicons) "triangle"]} {
-	set priv(openbm) $widgetGlobals(openbmmac)
-	set priv(closedbm) $widgetGlobals(closedbmmac)	
-    } else {
-	return -code error "unrecognized value \"$options(-openicons)\" for -openicons"
-    }
     
     # Standard indention from center line to text start.
-    set priv(xindent) [expr [image width $priv(openbm)]/2 + 6]
+    set priv(xindent) [expr [image width $priv(imopen)]/2 + 6]
     $can delete all
     
     if {[string length $options(-backgroundimage)] > 0} {
@@ -1444,7 +1477,7 @@ proc ::tree::Build {w} {
     
     # Keeps track of y coords to draw.
     set treestate(y) 10
-    BuildLayer $w {} [expr [image width $priv(openbm)]/2 + 4]
+    BuildLayer $w {} [expr [image width $priv(imopen)]/2 + 4]
     
     # At this stage the display list is almost completely mixed up. Reorder!
     $can lower ttreev ttreeh
@@ -1512,8 +1545,8 @@ proc ::tree::BuildLayer {w v in} {
 
     set can $widgets(canvas)
     set hasTree 0
-    set openbm $priv(openbm) 
-    set closedbm $priv(closedbm) 
+    set imopen   $priv(imopen) 
+    set imclose  $priv(imclose) 
     set yTreeOff $widgetGlobals(yTreeOff)
 
     set treeCol $options(-treecolor)
@@ -1611,10 +1644,10 @@ proc ::tree::BuildLayer {w v in} {
 	set treestate($uidc:tag) $id
 	set treestate($uidc:ids) $ids
 	
-	# Do we have a directure here?
+	# Do we have a directory here?
 	if {$isDir} {
 	    if {$treestate($uidc:open)} {
-		set id [$can create image $in $y -image $openbm -tags topen]
+		set id [$can create image $in $y -image $imopen -tags topen]
 		if {$hasChildren} {
 		
 		    # Call this recursively. 
@@ -1622,7 +1655,7 @@ proc ::tree::BuildLayer {w v in} {
 		    BuildLayer $w $vxc [expr $in + $indention]
 		}
 	    } else {
-		set id [$can create image $in $y -image $closedbm -tags tclose]
+		set id [$can create image $in $y -image $imclose -tags tclose]
 	    }
 	}
     }

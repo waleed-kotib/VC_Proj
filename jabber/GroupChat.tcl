@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.46 2004-03-29 13:56:27 matben Exp $
+# $Id: GroupChat.tcl,v 1.47 2004-03-31 07:55:18 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -509,7 +509,7 @@ proc ::Jabber::GroupChat::GotMsg {body args} {
 	    set methey they
 	}
 	$wtext insert end $txt ${methey}pre
-	::Text::ParseAndInsert $wtext "  $body" ${methey}text linktag	
+	::Jabber::ParseAndInsertText $wtext "  $body" ${methey}text urltag
 	$wtext configure -state disabled
 	$wtext see end
 
@@ -846,7 +846,7 @@ proc ::Jabber::GroupChat::ConfigureTextTags {w wtext} {
 	eval {$wtext tag configure $tag} $opts($tag)
     }
     
-    ::Text::ConfigureLinkTagForTextWidget $wtext linktag tact
+    ::Text::ConfigureLinkTagForTextWidget $wtext urltag activeurltag
 }
 
 proc ::Jabber::GroupChat::SetTopic {roomJid} {

@@ -5,9 +5,9 @@
 #      side and server side.
 #      Modelled after the http package with modifications.
 #      
-#  Copyright (c) 2002-2003  Mats Bengtsson only for the new and rewritten parts.
+#  Copyright (c) 2002-2004  Mats Bengtsson only for the new and rewritten parts.
 #
-# $Id: httpex.tcl,v 1.11 2004-01-13 14:50:20 matben Exp $
+# $Id: httpex.tcl,v 1.12 2004-03-31 07:55:18 matben Exp $
 # 
 # USAGE ########################################################################
 #

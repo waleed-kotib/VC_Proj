@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements jabber GUI parts.
 #      
-#  Copyright (c) 2001-2003  Mats Bengtsson
+#  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.31 2004-03-29 13:56:27 matben Exp $
+# $Id: JUI.tcl,v 1.32 2004-03-31 07:55:18 matben Exp $
 
 package provide JUI 1.0
 
@@ -38,7 +38,7 @@ namespace eval ::Jabber::UI:: {
     option add *JMain*Tree.highlightBackground    white           widgetDefault
     option add *JMain*Tree.highlightColor         black           widgetDefault
     option add *JMain*Tree.indention              14              widgetDefault
-    option add *JMain*Tree.openIcons              plusminus       widgetDefault
+    option add *JMain*Tree.styleIcons             plusminus       widgetDefault
     option add *JMain*Tree.pyjamasColor           white           widgetDefault
     option add *JMain*Tree.selectBackground       black           widgetDefault
     option add *JMain*Tree.selectForeground       white           widgetDefault
@@ -56,7 +56,7 @@ namespace eval ::Jabber::UI:: {
     option add *JMain*MacTabnotebook.tabOutline          gray20       widgetDefault
 
     variable treeOpts {background backgroundImage highlightBackground \
-      highlightColor indention openIcons pyjamasColor selectBackground \
+      highlightColor indention styleIcons pyjamasColor selectBackground \
       selectForeground selectMode treeColor}
     variable macTabOpts {activeForeground activeTabColor activeTabBackground \
       activeTabOutline background style tabBackground tabColor tabOutline}
@@ -199,7 +199,7 @@ proc ::Jabber::UI::Build {w} {
     
     # Use a frame here just to be able to set the class (JMain) which
     # is useful for setting options.
-    set fall [frame $w.f -class JMain]
+    set  fall [frame $w.f -class JMain]
     pack $fall -fill both -expand 1
     set jwapp(fall) $fall
     	

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.53 2004-03-29 13:56:27 matben Exp $
+# $Id: UI.tcl,v 1.54 2004-03-31 07:55:19 matben Exp $
 
 package require entrycomp
 
@@ -31,104 +31,12 @@ namespace eval ::UI:: {
 
 proc ::UI::Init {} {
     global  this prefs
-
-    variable smiley
-    variable smileyExp
-    variable smileyLongNames
     
     ::Debug 2 "::UI::Init"    
     
     # Standard button icons.
     ::Theme::GetImage [option get . buttonOKImage {}] -keepname 1
     ::Theme::GetImage [option get . buttonCancelImage {}] -keepname 1    
-    
-    # Smiley icons. The "short" types.
-    foreach {key name} {
-	":-)"          classic 
-	":-("          sad 
-	":-0"          shocked 
-	";-)"          wink
-	";("           cry
-	":o"           embarrassed
-	":D"           grin
-	"x)"           knocked
-	":|"           normal
-	":S"           puzzled
-	":p"           silly
-	":O"           shocked
-	":x"           speechless} {
-	    set imSmile($name) [image create photo -format gif  \
-	      -file [file join $this(path) images smileys "smiley-${name}.gif"]]
-	    set smiley($key) $imSmile($name)
-    }
-    
-    # Duplicates:
-    foreach {key name} {
-	":)"           classic 
-	";)"           wink} {
-	    set smiley($key) $imSmile($name)
-    }
-    set smileyExp {(}
-    foreach key [array names smiley] {
-	append smileyExp "$key|"
-    }
-    set smileyExp [string trimright $smileyExp "|"]
-    append smileyExp {)}
-    regsub  {[)(|]} $smileyExp {\\\0} smileyExp
-    
-    # The "long" smileys are treated differently; only loaded when needed.
-    set smileyLongNames {
-	:alien:
-	:angry:
-	:bandit:
-	:beard:
-	:bored:
-	:calm:
-	:cat:
-	:cheeky:
-	:cheerful:
-	:chinese:
-	:confused:
-	:cool:
-	:cross-eye:
-	:cyclops:
-	:dead:
-	:depressed:
-	:devious:
-	:disappoin:
-	:ditsy:
-	:dog:
-	:ermm:
-	:evil:
-	:evolved:
-	:gasmask:
-	:glasses:
-	:happy:
-	:hurt:
-	:jaguar:
-	:kommie:
-	:laugh:
-	:lick:
-	:mad:
-	:nervous:
-	:ninja:
-	:ogre:
-	:old:
-	:paranoid:
-	:pirate:
-	:ponder:
-	:puzzled:
-	:rambo:
-	:robot:
-	:eek:
-	:shocked:
-	:smiley:
-	:sleeping:
-	:smoker:
-	:surprised:
-	:tired:
-	:vampire:
-    }
 }
 
 # UI::InitMenuDefs --
