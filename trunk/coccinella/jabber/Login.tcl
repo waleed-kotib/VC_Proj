@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.41 2004-07-28 15:13:57 matben Exp $
+# $Id: Login.tcl,v 1.42 2004-09-08 13:13:14 matben Exp $
 
 package provide Login 1.0
 
@@ -365,9 +365,13 @@ proc ::Jabber::Login::DoLoginCB {status msg} {
 	}
 	default {
 	    # Go ahead...
+	    set opts {}
+	    if {$moreOpts(sasl)} {
+		lappend opts -sasl 1
+	    }
 	    if {[catch {
-		::Jabber::Login::InitStream $server \
-		  [namespace current]::DoAuthorize
+		eval {::Jabber::Login::InitStream $server \
+		  [namespace current]::DoAuthorize} $opts
 	    } err]} {
 		tk_messageBox -icon error -title [mc {Open Failed}] \
 		  -type ok -message [FormatTextForMessageBox $err]
@@ -392,9 +396,26 @@ proc ::Jabber::Login::DoAuthorize {args} {
 	if {$resource == ""} {
 	    set resource "coccinella"
 	}
+	
+	# If we are trying to use sasl indicated by version='1.0' we must also
+	# be sure to receive a version attribute larger or equal to 1.0.
+	set trysasl $moreOpts(sasl)
+	if {$moreOpts(sasl)} {
+	    if {[info exists argsArr(version)]} {
+		if {[package vcompare $argsArr(version) 1.0] == -1} {
+		    set moreOpts(sasl) 0
+		}
+	    } else {
+		set moreOpts(sasl) 0
+	    }
+	}
+	if {$trysasl && !$moreOpts(sasl)} {
+	    ::Jabber::AddErrorLog $server  \
+	      "SASL authentization failed since server does not support version=1.0"
+	}
 	::Jabber::Login::Authorize $server $username $resource $password \
 	  [namespace current]::Finish -streamid $argsArr(id)  \
-	  -digest $moreOpts(digest)
+	  -digest $moreOpts(digest) -sasl $moreOpts(sasl)
     }
 }
 
@@ -588,15 +609,23 @@ proc ::Jabber::Login::ConnectCB {cmd sock ip port status {msg {}}} {
 # Results:
 #       Callback initiated.
 
-proc ::Jabber::Login::InitStream {server cmd} {
+proc ::Jabber::Login::InitStream {server cmd args} {
     upvar ::Jabber::jstate jstate
     
     ::Jabber::UI::SetStatusMessage [mc jawaitxml $server]
+    set opts {}
+    foreach {key value} $args {
+	switch -- $key {
+	    -sasl {
+		lappend opts -version 1.0
+	    }
+	}
+    }
     
     # Initiate a new stream. We should wait for the server <stream>.
     if {[catch {
-	$jstate(jlib) openstream $server  \
-	  -cmd [list [namespace current]::InitStreamCB $cmd]
+	eval {$jstate(jlib) openstream $server  \
+	  -cmd [list [namespace current]::InitStreamCB $cmd]} $opts
     } err]} {
 	::Jabber::UI::SetStatusMessage ""
 	::Jabber::UI::StartStopAnimatedWave 0
@@ -606,7 +635,7 @@ proc ::Jabber::Login::InitStream {server cmd} {
 }
 
 proc ::Jabber::Login::InitStreamCB {cmd jlibName args} {
-
+    
     # One of args shall be -id hexnumber
     uplevel #0 $cmd $args
 }
@@ -625,6 +654,7 @@ proc ::Jabber::Login::InitStreamCB {cmd jlibName args} {
 #       args:
 #           -digest  0|1
 #           -streamid 
+#           -sasl
 #       
 # Results:
 #       Callback initiated.
@@ -637,6 +667,7 @@ proc ::Jabber::Login::Authorize {server username resource password cmd args} {
     array set argsArr {
 	-digest     1
 	-streamid   ""
+	-sasl       0
     }
     array set argsArr $args
 
@@ -653,7 +684,10 @@ proc ::Jabber::Login::Authorize {server username resource password cmd args} {
     set state(streamid)   $argsArr(-streamid)
     set state(cmd)        $cmd
     
-    if {$argsArr(-digest)} {
+    if {$argsArr(-sasl)} {
+	$jstate(jlib) auth_sasl $username $resource $password  \
+	  [list [namespace current]::AuthorizeCB $token]
+    } elseif {$argsArr(-digest)} {
 	if {$argsArr(-streamid) == ""} {
 	    return -code error "missing -streamid for -digest"
 	}
@@ -661,8 +695,8 @@ proc ::Jabber::Login::Authorize {server username resource password cmd args} {
 	$jstate(jlib) send_auth $username $resource   \
 	  [list [namespace current]::AuthorizeCB $token] -digest $digestedPw
     } else {
-	$jstate(jlib) send_auth $username $resource   \
-	  [list [namespace current]::AuthorizeCB $token] -password $password
+	$jstate(jlib) auth_sasl $username $resource $password  \
+	  [list [namespace current]::AuthorizeCB $token] 
     }
 }
 
@@ -702,9 +736,8 @@ proc ::Jabber::Login::AuthorizeCB {token jlibName type theQuery} {
     } else {    
 	foreach {ip addr port} [fconfigure $jstate(sock) -sockname] break
 	set jstate(ipNum) $ip
-	if {$ip != "0.0.0.0"} {
-	    set this(ipnum) $ip
-	}
+	set this(ipnum)   $ip
+	::Debug 4 "\t this(ipnum)=$ip"
 	
 	# Ourself. Do JIDPREP? So far only on the domain name.
 	set server               [jlib::jidmap $server]

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.34 2004-07-09 06:26:06 matben Exp $
+# $Id: OOB.tcl,v 1.35 2004-09-08 13:13:14 matben Exp $
 
 package provide OOB 1.0
 
@@ -377,27 +377,39 @@ proc ::Jabber::OOB::Progress {out token total current} {
 proc ::Jabber::OOB::HttpCmd {jid out id token} {
     
     upvar #0 $token state
-    set httpstate  [::httpex::state $token]
-    set status [::httpex::status $token]
+    set httpstate [::httpex::state $token]
 
     # Don't bother with intermediate callbacks.
     if {![string equal $httpstate "final"]} {
 	return
-    }
+    } 
+    set status  [::httpex::status $token]
+    set ncode   [::httpex::ncode $token]
+    set httperr [::httpex::error $token]
 
     switch -- $status {
 	timeout {
-	    tk_messageBox -title [mc Timeout] -icon info -type ok \
-	      -message [mc jamessoobtimeout]
+	    set etitle [mc Timeout]
+	    set emsg [mc jamessoobtimeout]
+	    set eicon info
 	}
 	error {
-	    tk_messageBox -title "File transport error" -icon error -type ok \
-	      -message "File transport error when getting file from $jid:\
-	      [::httpex::error $token]"
+	    set etitle [mc "File transport error"]
+	    set emsg "File transport error when getting file from $jid: $httperr"
+	    set eicon error
 	}
 	eof {
-	    tk_messageBox -title "File transport error" -icon error -type ok \
-	      -message "The server with $jid closed the socket without replying."	   
+	    set etitle [mc "File transport error"]
+	    set emsg "The server with $jid closed the socket without replying."
+	    set eicon error
+	}
+	ok {
+	    if {$ncode != 200} {
+		set etitle [mc "File transport error"]
+		set emsg "File transport error when getting file from $jid: "
+		append emsg "code $ncode; [httpex::ncodetotext $ncode]"
+		set eicon error
+	    }
 	}
 	reset {
 	    # Did this ourself?
@@ -410,13 +422,18 @@ proc ::Jabber::OOB::HttpCmd {jid out id token} {
     # We shall send an <iq result> element here using the same 'id' to notify
     # the sender we are done.
 
-    switch -- $status {
-	ok {
+    switch -- $status,$ncode {
+	ok,200 {
 	    ::Jabber::JlibCmd send_iq "result" {} -to $jid -id $id
 	} 
 	default {
 	    ::Jabber::JlibCmd send_iq "error" {} -to $jid -id $id
 	}
+    }
+    
+    # Any error?
+    if {[info exists emsg]} {
+	tk_messageBox -title $etitle -icon $eicon -type ok -message $emsg
     }
 }
 
