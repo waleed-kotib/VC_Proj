@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.17 2003-12-29 15:44:19 matben Exp $
+# $Id: Browse.tcl,v 1.18 2003-12-30 15:30:58 matben Exp $
 
 package require chasearrows
 
@@ -13,7 +13,9 @@ package provide Browse 1.0
 
 namespace eval ::Jabber::Browse:: {
 
-    hooks::add loginHook ::Jabber::Browse::LoginCmd
+    hooks::add loginHook          ::Jabber::Browse::LoginCmd
+    hooks::add closeWindowHook    ::Jabber::Browse::CloseHook
+    hooks::add logoutHook         ::Jabber::Browse::LogoutHook
 
     # Use option database for customization. 
     # Use priority 30 just to override the widgetDefault values!
@@ -54,6 +56,14 @@ proc ::Jabber::Browse::LoginCmd { } {
     }
 }
 
+proc ::Jabber::Browse::LogoutHook { } {
+    
+    if {[lsearch [::Jabber::UI::Pages] "Browser"] >= 0} {
+	::Jabber::Browse::SetUIWhen "disconnect"
+	::Jabber::Browse::Clear
+    }
+}
+    
 # Jabber::Browse::GetAll --
 #
 #       Queries (browses) the services available for all the servers
@@ -344,20 +354,9 @@ proc ::Jabber::Browse::BuildToplevel {w} {
     }
     set wtop $w
     
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-
-    }
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
     wm title $w {Jabber Browser}
-    wm protocol $w WM_DELETE_WINDOW [list ::Jabber::Browse::CloseDlg $w]
     
-    # Toplevel menu for mac only. Only when multiinstance.
-    if {0 && [string match "mac*" $this(platform)]} {
-	$w configure -menu [::Jabber::UI::GetRosterWmenu]
-    }
     set fontS [option get . fontSmall {}]
     set fontSB [option get . fontSmallBold {}]
     
@@ -376,6 +375,15 @@ proc ::Jabber::Browse::BuildToplevel {w} {
     
     wm minsize $w 180 260
     wm maxsize $w 420 2000
+}
+
+proc ::Jabber::Browse::CloseHook {wclose} {
+    global  wDlgs
+    variable wtop
+    
+    if {[string equal $wtop $wclose]} {
+	::Jabber::Browse::CloseDlg $wtop
+    }   
 }
     
 # Jabber::Browse::Build --
@@ -742,13 +750,7 @@ proc ::Jabber::Browse::AddServer { } {
     }
     set finishedAdd 0
     
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-
-    }
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
     wm title $w [::msgcat::mc {Add Server}]
     
     # Global frame.
@@ -861,13 +863,7 @@ proc ::Jabber::Browse::InfoCB {browseName type jid subiq} {
     upvar ::Jabber::nsToText nsToText
 
     set w .brres[incr dlguid]
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-
-    }
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
     wm title $w "Browse Info: $jid"
     set fontS [option get . fontSmall {}]
     

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.6 2003-12-29 15:44:19 matben Exp $
+# $Id: Whiteboard.tcl,v 1.7 2003-12-30 15:30:58 matben Exp $
 
 package require entrycomp
 package require CanvasDraw
@@ -77,9 +77,11 @@ namespace eval ::WB:: {
     option add *Whiteboard.imcolorImage         imcolor         widgetDefault
     
     # Add all event hooks.
-    hooks::add quitAppHook [list ::UI::SaveWinPrefixGeom $wDlgs(wb) whiteboard]
-    hooks::add quitAppHook ::WB::SaveAnyState
-    hooks::add loginHook   ::WB::LoginCmd
+    hooks::add quitAppHook     [list ::UI::SaveWinPrefixGeom $wDlgs(wb) whiteboard]
+    hooks::add quitAppHook     ::WB::SaveAnyState
+    hooks::add loginHook       ::WB::LoginCmd
+    hooks::add closeWindowHook ::WB::CloseHook
+    hooks::add logoutHook      ::WB::LogoutHook
     
     # Keeps various geometry info.
     variable dims
@@ -256,7 +258,7 @@ proc ::WB::InitMenuDefs { } {
 
     set menuDefsMainFileJabber {
 	{command   mNew                {::WB::NewWhiteboard -sendcheckstate disabled}   normal   N}
-	{command   mCloseWindow        {::UserActions::DoCloseWindow}             normal   W}
+	{command   mCloseWindow        {::UI::DoCloseWindow}             normal   W}
 	{separator}
 	{command   mOpenImage/Movie    {::Import::ImportImageOrMovieDlg $wtop}    normal   I}
 	{command   mOpenURLStream      {::OpenMulticast::OpenMulticast $wtop}     normal   {}}
@@ -276,7 +278,7 @@ proc ::WB::InitMenuDefs { } {
     }
     set menuDefsMainFileP2P {
 	{command   mOpenConnection     {::UserActions::DoConnect}                 normal   O}
-	{command   mCloseWindow        {::UserActions::DoCloseWindow}             normal   W}
+	{command   mCloseWindow        {::UI::DoCloseWindow}             normal   W}
 	{separator}
 	{command   mOpenImage/Movie    {::Import::ImportImageOrMovieDlg $wtop} normal  I}
 	{command   mOpenURLStream      {::OpenMulticast::OpenMulticast $wtop}     normal   {}}
@@ -482,7 +484,7 @@ proc ::WB::InitMenuDefs { } {
     # Menu definitions for a minimal setup. Used on mac only.
     set menuDefs(min,file) {
 	{command   mNewWhiteboard    {::WB::NewWhiteboard}                       normal   N}
-	{command   mCloseWindow      {::UserActions::DoCloseWindow}        normal   W}
+	{command   mCloseWindow      {::UI::DoCloseWindow}                 normal   W}
 	{separator}
 	{command   mQuit             {::UserActions::DoQuit}               normal   Q}
     }	    
@@ -656,6 +658,17 @@ proc ::WB::LoginCmd { } {
     }
 }
 
+proc ::WB::LogoutHook { } {
+    
+    # Multiinstance whiteboard UI stuff.
+    foreach w [::WB::GetAllWhiteboards] {
+	set wtop [::UI::GetToplevelNS $w]
+
+	# If no more connections left, make menus consistent.
+	::UI::FixMenusWhen $wtop "disconnect"
+    }   
+}
+
 # WB::NewWhiteboard --
 #
 #       Makes a unique whiteboard.
@@ -783,11 +796,10 @@ proc ::WB::BuildWhiteboard {wtop args} {
     }
     
     if {![winfo exists $w] && ($wtop != ".")} {
-	toplevel $w -class Whiteboard
+	::UI::Toplevel $w -class Whiteboard
 	wm withdraw $w
     }
     wm title $w $opts(-title)
-    wm protocol $w WM_DELETE_WINDOW [list ::WB::CloseWhiteboard $wtop]
     
     # Have an overall frame here of class Whiteboard. Needed for option db.
     frame $wapp(frall) -class Whiteboard
@@ -921,6 +933,20 @@ proc ::WB::BuildWhiteboard {wtop args} {
     if {[info exists opts(-file)]} {
 	::CanvasFile::DrawCanvasItemFromFile $wtop $opts(-file)
     }
+}
+
+
+proc ::WB::CloseHook {wclose} {
+    global  wDlgs
+    
+    if {[string match $wDlgs(wb)* $wclose]} {
+	if {$wclose == "."} {
+	    set wtop .
+	} else {
+	    set wtop ${wclose}.
+	}
+	::WB::CloseWhiteboard $wtop
+    }   
 }
 
 # WB::CloseWhiteboard --

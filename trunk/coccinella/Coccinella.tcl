@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.29 2003-12-29 15:44:19 matben Exp $
+# $Id: Coccinella.tcl,v 1.30 2003-12-30 15:30:58 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -601,14 +601,6 @@ bind Text <<Copy>> "+ ::UI::FixMenusWhenSelection %W"
 # Linux has a strange binding by default. Handled by <<Paste>>.
 if {[string equal $this(platform) "unix"]} {
     bind Text <Control-Key-v> {}
-}
-
-# On non macs we need to explicitly bind certain commands.
-if {![string equal $this(platform) "macintosh"]} {
-    foreach wclass {Toplevel} {
-	bind $wclass <$osprefs(mod)-Key-w>  \
-	  [list ::UserActions::DoCloseWindow %W]
-    }
 }
 
 # At this point we should be finished with the launch and delete the splash 

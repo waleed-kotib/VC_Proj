@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.38 2003-12-23 14:41:01 matben Exp $
+# $Id: UI.tcl,v 1.39 2003-12-30 15:30:58 matben Exp $
 
 package require entrycomp
 
@@ -208,6 +208,76 @@ proc ::UI::GetScreenSize { } {
     return [list [winfo vrootwidth .] [winfo vrootheight .]]
 }
 
+# UI::Toplevel --
+# 
+#       Wrapper for making a toplevel window.
+
+proc ::UI::Toplevel {w args} {
+    global  this osprefs
+    
+    array set argsArr $args
+    set topopts {}
+    if {[info exists argsArr(-class)]} {
+	lappend topopts -class $argsArr(-class)
+    }
+    eval {toplevel $w} $topopts
+    
+    if {[string match "mac*" $this(platform)] && \
+      [info exists argsArr(-macstyle)]} {
+	eval $::macWindowStyle $w $argsArr(-macstyle)
+    }
+    
+    # We direct all close events through DoCloseWindow so things can
+    # be handled from there.
+    wm protocol $w WM_DELETE_WINDOW [list ::UI::DoCloseWindow $w]
+    
+    if {[string match "mac*" $this(platform)]} {
+	foreach {key value} $args {
+	    
+	    switch -- $key {
+		-usemacmainmenu {
+		    if {$argsArr(-usemacmainmenu)} {
+			::UI::MacUseMainMenu $w
+		    }
+		}
+		-macstyle {
+		    eval $::macWindowStyle $w $argsArr(-macstyle)
+		}
+	    }
+	}
+    } else {
+	bind $w <$osprefs(mod)-Key-w> [list ::UI::DoCloseWindow $w]
+    }
+    return $w
+}
+
+# UI::DoCloseWindow --
+#
+#       Take special actions before a window is closed.
+#       
+#       Notes: There are three ways to close a window:
+#       1) from the menus Close Window command
+#       2) using the menu keyboard shortcut command/control-w
+#       3) clicking the menus close button
+#       
+#       If any cleanup etc. is necessary all three must execute the same code.
+#       In case where window must not be destroyed a hook must be registered
+#       that returns stop.
+#       Default behaviour when no hook registered is to destroy window.
+
+proc ::UI::DoCloseWindow {{wevent {}}} {
+    
+    set w [winfo toplevel [focus]]
+    
+    Debug 2 "::UI::DoCloseWindow winfo class $w=[winfo class $w]"
+    
+    # Run hooks. Only the one corresponding to the $w needs to act!
+    set result [::hooks::run closeWindowHook $w]    
+    if {![string equal $result "stop"]} {
+	destroy $w
+    }
+}
+
 # UI::GetToplevelNS --
 #
 #       Returns the toplevel widget from any descendent, but with an extra
@@ -316,7 +386,6 @@ proc ::UI::SetWindowGeometry {w {key ""}} {
     if {$key == ""} {
 	set key $w
     }
-    #puts "::UI::SetWindowGeometry w=$w, key=$key"
     if {[info exists prefs(winGeom,$key)]} {
 	wm geometry $w $prefs(winGeom,$key)
     }

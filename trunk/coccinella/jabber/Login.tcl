@@ -5,18 +5,20 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.17 2003-12-29 15:44:19 matben Exp $
+# $Id: Login.tcl,v 1.18 2003-12-30 15:30:58 matben Exp $
 
 package provide Login 1.0
 
 namespace eval ::Jabber::Login:: {
+    global  wDlgs
     
     variable server
     variable username
     variable password
 
     # Add all event hooks.
-    hooks::add quitAppHook [list ::UI::SaveWinGeom $::wDlgs(jlogin)]
+    hooks::add quitAppHook     [list ::UI::SaveWinGeom $wDlgs(jlogin)]
+    hooks::add closeWindowHook ::Jabber::Login::CloseHook
 }
 
 # Jabber::Login::Login --
@@ -56,13 +58,7 @@ proc ::Jabber::Login::Login { } {
     }
     set wtoplevel $w
     
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-
-    }
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
     wm title $w [::msgcat::mc Login]
     set digest 1
     set ssl $jprefs(usessl)
@@ -186,8 +182,8 @@ proc ::Jabber::Login::Login { } {
 	
     ::UI::SetWindowPosition $w
     wm resizable $w 0 0
-    bind $w <Return> ::Jabber::Login::Doit
-    bind $w <Escape> [list ::Jabber::Login::DoCancel $w]
+    bind $w <Return>  ::Jabber::Login::Doit
+    bind $w <Escape>  [list ::Jabber::Login::DoCancel $w]
     bind $w <Destroy> [list ::Jabber::Login::DoCancel $w]
     
     # Grab and focus.
@@ -205,6 +201,14 @@ proc ::Jabber::Login::Login { } {
     return [expr {($finished <= 0) ? "cancel" : "login"}]
 }
 
+
+proc ::Jabber::Login::CloseHook {wclose} {
+    global  wDlgs
+    
+    if {[string equal $wclose $wDlgs(jlogin)]} {
+	puts ::Jabber::Login::CloseHook
+    }
+}
 
 proc ::Jabber::Login::MoreOpts {w} {
     variable wtri

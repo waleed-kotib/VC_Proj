@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.27 2003-12-29 15:44:19 matben Exp $
+# $Id: Preferences.tcl,v 1.28 2003-12-30 15:30:58 matben Exp $
  
 package require notebook
 package require tree
@@ -17,6 +17,7 @@ package require combobox
 package provide Preferences 1.0
 
 namespace eval ::Preferences:: {
+    global  wDlgs
     
     # Variable to be used in tkwait.
     variable finished
@@ -25,11 +26,12 @@ namespace eval ::Preferences:: {
     variable lastPage {}
 
     # Add all event hooks.
-    hooks::add quitAppHook [list ::UI::SaveWinGeom $::wDlgs(prefs)]
+    hooks::add quitAppHook     [list ::UI::SaveWinGeom $wDlgs(prefs)]
+    hooks::add closeWindowHook ::Preferences::CloseHook
 }
 
 proc ::Preferences::Build { } {
-    global  this prefs wDlgs osprefs
+    global  this prefs wDlgs
     
     variable tmpPrefs
     variable tmpJPrefs
@@ -49,14 +51,8 @@ proc ::Preferences::Build { } {
 	raise $w
 	return
     }
-    toplevel $w -class Preferences
+    ::UI::Toplevel $w -class Preferences
     wm title $w [::msgcat::mc Preferences]
-    wm protocol $w WM_DELETE_WINDOW ::Preferences::CancelPushBt
-
-    # On non macs we need to explicitly bind certain commands.
-    if {![string equal $this(platform) "macintosh"]} {
-	bind $w <$osprefs(mod)-Key-w> ::Preferences::CancelPushBt
-    }
 
     set finished 0
     set wtoplevel $w
@@ -274,6 +270,16 @@ proc ::Preferences::Build { } {
       ::Preferences::NetSetup::TraceNetConfig
     catch {grab release $w}
     catch {destroy $w}  
+}
+
+
+proc ::Preferences::CloseHook {wclose} {
+    global  wDlgs
+    
+    if {[string equal $wclose $wDlgs(prefs)]} {
+	puts ::Preferences::CloseHook
+	::Preferences::CancelPushBt
+    }   
 }
 
 # Preferences::ResetToFactoryDefaults --

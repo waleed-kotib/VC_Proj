@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.16 2003-12-29 15:44:19 matben Exp $
+# $Id: JUI.tcl,v 1.17 2003-12-30 15:30:58 matben Exp $
 
 package provide JUI 1.0
 
@@ -59,6 +59,12 @@ namespace eval ::Jabber::UI:: {
     variable macTabOpts {activeForeground activeTabColor activeTabBackground \
       activeTabOutline background style tabBackground tabColor tabOutline}
     
+    # Add all event hooks.
+    hooks::add quitAppHook        ::Jabber::UI::QuitHook
+    hooks::add loginHook          ::Jabber::UI::LoginCmd
+    hooks::add closeWindowHook    ::Jabber::UI::CloseHook
+    hooks::add logoutHook         ::Jabber::UI::LogoutHook
+
     # Collection of useful and common widget paths.
     variable jwapp
     
@@ -67,7 +73,7 @@ namespace eval ::Jabber::UI:: {
     variable menuDefs
     set menuDefs(rost,file) {
 	{command   mNewWhiteboard      {::WB::NewWhiteboard}                  normal   N}
-	{command   mCloseWindow        {::UserActions::DoCloseWindow}         normal   W}
+	{command   mCloseWindow        {::UI::DoCloseWindow}                  normal   W}
 	{command   mPreferences...     {::Preferences::Build}                 normal   {}}
 	{command   mUpdateCheck        {
 	    ::AutoUpdate::Get $prefs(urlAutoUpdate) -silent 0}       normal   {}}
@@ -158,12 +164,7 @@ proc ::Jabber::UI::Build {w} {
     ::Jabber::Debug 2 "::Jabber::UI::Build w=$w"
     
     if {$w != "."} {
-	toplevel $w
-	if {[string match "mac*" $this(platform)]} {
-	    eval $::macWindowStyle $w documentProc
-	} else {
-	    
-	}
+	::UI::Toplevel $w -macstyle documentProc
 	set wtop ${w}.
     } else {
 	set wtop .
@@ -174,11 +175,6 @@ proc ::Jabber::UI::Build {w} {
     }    
     set jwapp(wtopRost) $w
     wm title $w "The Coccinella"
-    wm protocol $w WM_DELETE_WINDOW [list ::Jabber::UI::CloseRoster $w]
-
-    # Add all event hooks.
-    hooks::add quitAppHook [list ::UI::SaveWinGeom $w]
-    hooks::add loginHook   ::Jabber::UI::LoginCmd
 
     # Build minimal menu for Jabber stuff.
     set wmenu ${wtop}menu
@@ -303,6 +299,26 @@ proc ::Jabber::UI::Build {w} {
     return $w
 }
 
+
+proc ::Jabber::UI::CloseHook {wclose} {    
+    variable jwapp
+    
+    set result ""
+    if {[string equal $jwapp(wtopRost) $wclose]} {
+	set ans [::UserActions::DoQuit -warning 1]
+	if {$ans == "no"} {
+	    set result stop
+	}
+    }   
+    return $result
+}
+
+proc ::Jabber::UI::QuitHook { } {
+    variable jwapp
+    
+    ::UI::SaveWinGeom $jwapp(wtopRost)
+}
+
 # Jabber::UI::LoginCmd --
 # 
 #       The login hook command.
@@ -315,6 +331,18 @@ proc ::Jabber::UI::LoginCmd { } {
     ::Jabber::UI::FixUIWhen "connectfin"
 }
 
+proc ::Jabber::UI::LogoutHook { } {
+    
+    ::Jabber::UI::SetStatusMessage "Logged out"
+    ::Jabber::UI::FixUIWhen "disconnect"
+    ::Jabber::UI::WhenSetStatus "unavailable"
+    
+    # Be sure to kill the wave; could end up here when failing to connect.
+    ::Jabber::UI::StartStopAnimatedWave 0
+    
+    ::Jabber::UI::LogoutClear    
+}
+    
 proc ::Jabber::UI::GetRosterWmenu { } {
     variable jwapp
 
@@ -364,20 +392,6 @@ proc ::Jabber::UI::StopConnect { } {
     ::Jabber::UI::StartStopAnimatedWave 0
     ::Jabber::UI::FixUIWhen disconnect
 }    
-
-proc ::Jabber::UI::CloseRoster {w} {    
-    upvar ::Jabber::jstate jstate
-
-    ::UserActions::DoQuit -warning 1
-    
-    if {0} {
-	set jstate(rostBrowseVis) 0
-	if {[winfo exists $w]} {
-	    catch {wm withdraw $w}
-	    ::UI::SaveWinGeom $w
-	}
-    }
-}
 
 proc ::Jabber::UI::Pages { } {
     variable jwapp

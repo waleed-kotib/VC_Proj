@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UserActions.tcl,v 1.30 2003-12-29 15:44:19 matben Exp $
+# $Id: UserActions.tcl,v 1.31 2003-12-30 15:30:58 matben Exp $
 
 namespace eval ::UserActions:: {
     
@@ -107,54 +107,6 @@ proc ::UserActions::DoConnect { } {
 	::Jabber::Login::Login
     } elseif {![string equal $prefs(protocol) server]} {
 	::OpenConnection::OpenConnection $wDlgs(openConn)
-    }
-}
-
-# UserActions::DoCloseWindow --
-#
-#       Typically called from the menu.
-#       Take special actions before a window is closed.
-
-proc ::UserActions::DoCloseWindow {{wevent {}}} {
-    global  wDlgs
-    
-    set w [winfo toplevel [focus]]
-    
-    # If we bind to toplevel descriminate events coming from childrens.
-    if {($wevent != "") && ($wevent != $w)} {
-	return
-    }
-    if {$w == "."} {
-	set wtop $w
-    } else {
-	set wtop ${w}.
-    }
-    Debug 2 "::UserActions::DoCloseWindow winfo class $w=[winfo class $w]"
-    
-    switch -- $w \
-      $wDlgs(mainwb) {
-	::WB::CloseWhiteboard $wtop
-	return
-    } \
-      $wDlgs(jrostbro) {
-	::UserActions::DoQuit -warning 1
-	return
-    }
-    
-    # Do different things depending on type of toplevel.
-    switch -glob -- [winfo class $w] {
-	Wish* - Whiteboard* - Coccinella* - Tclkit* {
-	
-	    # NOT ALWAYS CORRECT!!!!!!!
-	    # Whiteboard window.
-	    ::WB::CloseWhiteboard $wtop
-	}
-	JMain {
-	    ::UserActions::DoQuit -warning 1
-	}
-	default {
-	    #destroy $w
-	}
     }
 }
 

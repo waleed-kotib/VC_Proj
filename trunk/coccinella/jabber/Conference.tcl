@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Conference.tcl,v 1.4 2003-12-16 15:03:53 matben Exp $
+# $Id: Conference.tcl,v 1.5 2003-12-30 15:30:58 matben Exp $
 
 package provide Conference 1.0
 
@@ -57,13 +57,7 @@ proc ::Jabber::Conference::BuildEnter {args} {
     upvar 0 $token enter
     
     set w $wDlgs(jenterroom)[incr dlguid]    
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-
-    }
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
     wm title $w [::msgcat::mc {Enter Room}]
     set enter(w) $w
     array set enter {
@@ -381,13 +375,7 @@ proc ::Jabber::Conference::BuildCreate {args} {
     upvar 0 $token create
     
     set w $wDlgs(jcreateroom)[incr dlguid]    
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-	
-    }
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
     wm title $w [::msgcat::mc {Create Room}]
     set fontSB [option get . fontSmallBold {}]
 

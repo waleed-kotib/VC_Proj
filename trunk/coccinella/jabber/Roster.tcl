@@ -5,13 +5,15 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.30 2003-12-29 15:44:19 matben Exp $
+# $Id: Roster.tcl,v 1.31 2003-12-30 15:30:58 matben Exp $
 
 package provide Roster 1.0
 
 namespace eval ::Jabber::Roster:: {
     
+    # Add all event hooks we need.
     hooks::add loginHook   ::Jabber::Roster::LoginCmd
+    hooks::add logoutHook  ::Jabber::Roster::LogoutHook
 
     # Use option database for customization. 
     # Use priority 30 just to override the widgetDefault values!
@@ -251,6 +253,19 @@ proc ::Jabber::Roster::LoginCmd { } {
     set server [::Jabber::GetServerJid]
     set ::Jabber::Roster::servtxt $server
     ::Jabber::Roster::SetUIWhen "connect"
+}
+
+proc ::Jabber::Roster::LogoutHook { } {
+    upvar ::Jabber::jprefs jprefs
+    upvar ::Jabber::jstate jstate
+    
+    ::Jabber::Roster::SetUIWhen "disconnect"
+
+    # Clear roster and browse windows.
+    $jstate(roster) reset
+    if {$jprefs(rost,clrLogout)} {
+	::Jabber::Roster::Clear
+    }
 }
 
 proc ::Jabber::Roster::SetBackgroundImage {useBgImage bgImagePath} {
@@ -885,6 +900,7 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
 }
 
 namespace eval ::Jabber::Roster:: {
+    global  wDlgs
     
     variable menuDefTrpt
     variable allTransports
@@ -903,6 +919,11 @@ namespace eval ::Jabber::Roster:: {
     foreach {name spec} $menuDefTrpt {
 	lappend allTransports $name
     }
+    
+    # Hooks for subscription dialog.
+    hooks::add quitAppHook        [list ::UI::SaveWinGeom $wDlgs(jrostnewedit)]
+    hooks::add closeWindowHook    ::Jabber::Roster::SubscCloseHook
+
 }
 
 # Jabber::Roster::NewOrEditItem --
@@ -980,13 +1001,7 @@ proc ::Jabber::Roster::NewOrEditDlg {which args} {
     set dlgstate(w) $w
     set dlgstate(finishedNew) -1
 
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-
-    }
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
 	
     # Find all our groups for any jid.
     set allGroups [$jstate(roster) getgroups]    
@@ -1170,6 +1185,7 @@ proc ::Jabber::Roster::NewOrEditDlg {which args} {
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
     
+    ::UI::SetWindowPosition $w $wDlgs(jrostnewedit)
     wm resizable $w 0 0
     bind $w <Return> [list ::Jabber::Roster::EditSet $token]
     
@@ -1184,6 +1200,14 @@ proc ::Jabber::Roster::NewOrEditDlg {which args} {
     set ans [expr {($dlgstate(finishedNew) <= 0) ? "cancel" : "add"}]
     unset dlgstate
     return $ans
+}
+
+proc ::Jabber::Roster::SubscCloseHook {wclose} {
+    global  wDlgs
+    
+    if {[string match $wDlgs(jrostnewedit)* $wclose]} {
+	::UI::SaveWinPrefixGeom $wDlgs(jrostnewedit)
+    }   
 }
 
 # Jabber::Roster::BuildTrptMenu,  --

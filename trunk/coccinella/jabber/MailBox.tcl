@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.31 2003-12-29 15:44:19 matben Exp $
+# $Id: MailBox.tcl,v 1.32 2003-12-30 15:30:58 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -40,8 +40,9 @@ namespace eval ::Jabber::MailBox:: {
     option add *MailBox*trashDisImage         trashDis         widgetDefault
     
     # Add some hooks...
-    hooks::add newMessageHook ::Jabber::MailBox::GotMsg
-    
+    hooks::add newMessageHook  ::Jabber::MailBox::GotMsg
+    hooks::add closeWindowHook ::Jabber::MailBox::CloseHook
+
     variable locals
     upvar ::Jabber::jstate jstate
     
@@ -130,7 +131,7 @@ proc ::Jabber::MailBox::Show {args} {
 }
 
 proc ::Jabber::MailBox::Build {args} {
-    global  this prefs wDlgs osprefs
+    global  this prefs wDlgs
     
     variable locals  
     variable colindex
@@ -150,24 +151,12 @@ proc ::Jabber::MailBox::Build {args} {
     }
     
     # Toplevel of class MailBox.
-    toplevel $w -class MailBox
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-
-    }
+    ::UI::Toplevel $w -macstyle documentProc -class MailBox -usemacmainmenu 1
     wm title $w [::msgcat::mc Inbox]
-    # wm protocol $w WM_DELETE_WINDOW [list [namespace current]::CloseDlg $w]
-
-    # On non macs we need to explicitly bind certain commands.
-    if {![string equal $this(platform) "macintosh"]} {
-	bind $w <$osprefs(mod)-Key-w> {::Jabber::MailBox::Show -visible 0}
-    }
     
     # Toplevel menu for mac only.
     if {[string match "mac*" $this(platform)]} {
-	$w configure -menu [::Jabber::UI::GetRosterWmenu]
+	#$w configure -menu [::Jabber::UI::GetRosterWmenu]
     }
     set locals(wtop) $w
     set jstate(inboxVis) 1
@@ -182,7 +171,7 @@ proc ::Jabber::MailBox::Build {args} {
     set iconReply     [::Theme::GetImage [option get $w replyImage {}]]
     set iconReplyDis  [::Theme::GetImage [option get $w replyDisImage {}]]
     set iconForward   [::Theme::GetImage [option get $w forwardImage {}]]
-    set iconForwardDis  [::Theme::GetImage [option get $w forwardDisImage {}]]
+    set iconForwardDis [::Theme::GetImage [option get $w forwardDisImage {}]]
     set iconSave      [::Theme::GetImage [option get $w saveImage {}]]
     set iconSaveDis   [::Theme::GetImage [option get $w saveDisImage {}]]
     set iconPrint     [::Theme::GetImage [option get $w printImage {}]]
@@ -312,6 +301,19 @@ proc ::Jabber::MailBox::Build {args} {
     bind $wtbl <<ListboxSelect>> [list [namespace current]::SelectMsg]
     
     ::Jabber::MailBox::LabelCommand $wtbl $colindex(date)
+}
+
+
+proc ::Jabber::MailBox::CloseHook {wclose} {
+    global  wDlgs
+    
+    set result ""
+    if {[string equal $wclose $wDlgs(jinbox)]} {
+	puts ::Jabber::MailBox::CloseHook
+	::Jabber::MailBox::Show -visible 0
+	set result stop
+    }
+    return $result
 }
 
 # Jabber::MailBox::InsertRow --
