@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.67 2004-11-14 13:53:26 matben Exp $
+# $Id: JUI.tcl,v 1.68 2004-11-14 16:40:53 matben Exp $
 
 package provide JUI 1.0
 
@@ -359,10 +359,8 @@ proc ::Jabber::UI::Build {w} {
 
     frame $wbot
     pack  $wbot -side bottom -fill x
-    
-    #::Jabber::Roster::BuildStatusMenuButton $jwapp(mystatus)
-    
-    ::Jabber::Roster::BuildStatusButton3 $jwapp(mystatus) \
+        
+    ::Jabber::Roster::BuildStatusButton $jwapp(mystatus) \
       ::Jabber::jstate(status) -command ::Jabber::SetStatus 
     
     pack  $jwapp(mystatus) -side left -pady 2 -padx 6
@@ -600,7 +598,7 @@ proc ::Jabber::UI::MailBoxState {mailboxstate} {
 proc ::Jabber::UI::WhenSetStatus {type} {
     variable jwapp
 	
-    ::Jabber::Roster::ConfigStatusButton3 $jwapp(mystatus) $type
+    ::Jabber::Roster::ConfigStatusButton $jwapp(mystatus) $type
 }
 
 proc ::Jabber::UI::EnterRoomHook {roomJid protocol} {

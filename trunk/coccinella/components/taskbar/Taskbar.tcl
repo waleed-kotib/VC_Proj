@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Taskbar.tcl,v 1.5 2004-09-28 13:50:17 matben Exp $
+# $Id: Taskbar.tcl,v 1.6 2004-11-14 16:40:53 matben Exp $
 
 namespace eval ::Taskbar:: {
     
@@ -68,7 +68,7 @@ proc ::Taskbar::Load { } {
     bind . <Map> [list [namespace current]::Update %W]
     
     set status [::Jabber::GetMyStatus]
-    set statusStr [::Jabber::GetStatusText $status]
+    set statusStr [::Jabber::Roster::MapShowToText $status]
 
     winico taskbar add $icon -callback  \
       [list [namespace current]::Cmd %m %X %Y] \
@@ -241,7 +241,7 @@ proc ::Taskbar::SetPresenceHook {type args} {
     # This can be used to update any specific icon in taskbar.
    if {$icon != ""} {
  	set status [::Jabber::GetMyStatus]
-	set statusStr [::Jabber::GetStatusText $status]
+	set statusStr [::Jabber::Roster::MapShowToText $status]
 	winico taskbar modify $icon -text "$prefs(theAppName) - $statusStr"
     }
 }
