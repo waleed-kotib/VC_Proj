@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ItemInspector.tcl,v 1.23 2004-04-23 07:13:22 matben Exp $
+# $Id: ItemInspector.tcl,v 1.24 2004-05-06 13:41:11 matben Exp $
 
 namespace eval ::ItemInspector::  {
     
@@ -228,7 +228,7 @@ proc ::ItemInspector::Build {wtop itemId args} {
     if {$ind >= 0}  {
 	
 	# Find the actual values set for the text.
-	set fontOpts [lindex [lindex $opts $ind] 4]
+	set fontOpts [lindex $opts $ind 4]
 	set opts [lreplace $opts $ind $ind   \
 	  [list {-fontfamily} {} {} {} [lindex $fontOpts 0]]  \
 	  [list {-fontsize} {} {} {} $fontPoints2Size([lindex $fontOpts 1])]  \

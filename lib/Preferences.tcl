@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.49 2004-04-16 13:59:29 matben Exp $
+# $Id: Preferences.tcl,v 1.50 2004-05-06 13:41:11 matben Exp $
  
 package require notebook
 package require tree
@@ -277,7 +277,9 @@ proc ::Preferences::NetSetup::BuildPage {page} {
     # Frame for everything inside the labeled container.
     set fr [frame $wcont.fr]    
     pack $fr -side left -padx 2    
-    message $fr.msg -width 300 -text [::msgcat::mc prefnethead]
+    label $fr.msg -wraplength 200 -justify left \
+      -text [::msgcat::mc prefnethead]
+    pack $fr.msg -side top -padx 2 -anchor w -pady $ypadbig
     
     # The actual options.
     set fropt [frame $fr.fropt]
@@ -286,24 +288,21 @@ proc ::Preferences::NetSetup::BuildPage {page} {
     # The Jabber server.
     radiobutton $fropt.jabb -text [::msgcat::mc {Jabber Client}]  \
       -value jabber -variable ::Preferences::tmpPrefs(protocol)
-    message $fropt.jabbmsg -width 160  \
+    label $fropt.jabbmsg -wraplength 200 -justify left  \
       -text [::msgcat::mc prefnetjabb]
     
     # For the symmetric network config.
     radiobutton $fropt.symm -text [::msgcat::mc {Peer-to-Peer}]  \
       -variable ::Preferences::tmpPrefs(protocol) -value symmetric
-    if {$state(isServerUp)} {
-	#$fropt.symm configure -state disabled
-    }
     checkbutton $fropt.auto -text "  [::msgcat::mc {Auto Connect}]"  \
       -variable ::Preferences::tmpPrefs(autoConnect)
-    message $fropt.automsg -width 160  \
+    label $fropt.automsg -wraplength 200 -justify left  \
       -text [::msgcat::mc prefnetauto]
     checkbutton $fropt.multi -text "  [::msgcat::mc {Multi Connect}]"  \
       -variable ::Preferences::tmpPrefs(multiConnect)
-    message $fropt.multimsg -width 160  \
+    label $fropt.multimsg -wraplength 200 -justify left  \
       -text [::msgcat::mc prefnetmulti]
-    if {[string equal $prefs(protocol) "symmetric"]} { 
+    if {![string equal $prefs(protocol) "symmetric"]} { 
 	$fropt.auto configure -state disabled
 	$fropt.multi configure -state disabled
     }    
@@ -312,7 +311,16 @@ proc ::Preferences::NetSetup::BuildPage {page} {
       [list ::Preferences::NetSetup::Advanced]
     
     # If already connected don't allow network topology to be changed.
-    if {[llength [::Network::GetIP to]] > 0} {
+    
+    switch -- $prefs(protocol) {
+	jabber {
+	    set connected [::Jabber::IsConnected]
+	}
+	default {
+	    set connected [llength [::P2PNet::GetIP to]]
+	}
+    }
+    if {$connected} {
 	$fropt.jabb configure -state disabled
 	$fropt.symm configure -state disabled
     }
@@ -330,11 +338,17 @@ proc ::Preferences::NetSetup::BuildPage {page} {
     grid $fropt.multimsg -column 1 -row 4 -sticky w -padx 10 -pady $ypadtiny
     grid $fropt.adv -column 0 -row 6 -sticky w -padx 10 -pady $ypadbig
 
-    pack $fr.msg -side top -padx 2 -pady $ypadbig
     pack $fropt -side top -padx 5 -pady $ypadbig
     
     trace variable ::Preferences::tmpPrefs(protocol) w  \
       [namespace current]::TraceNetConfig
+	
+    # Trick to resize the labels wraplength.
+    set script [format {
+	update idletasks
+	%s configure -wraplength [expr [winfo reqwidth %s] - 20]
+    } $fr.msg $fr]    
+    after idle $script
 }
 
 # ::Preferences::NetSetup::TraceNetConfig --
@@ -396,7 +410,7 @@ proc ::Preferences::NetSetup::UpdateUI { } {
 	    
 	    # We are only a client.
 	    ::UI::MenuMethod .menu.file entryconfigure mOpenConnection  \
-	      -command [list ::OpenConnection::OpenConnection $wDlgs(openConn)]
+	      -command [list ::P2PNet::OpenConnection $wDlgs(openConn)]
 	    .menu entryconfigure *Jabber* -state disabled
 	    
 	    # Hide our combination window.
@@ -404,7 +418,7 @@ proc ::Preferences::NetSetup::UpdateUI { } {
 	}
 	default {
 	    ::UI::MenuMethod .menu.file entryconfigure mOpenConnection   \
-	      -command [list ::OpenConnection::OpenConnection $wDlgs(openConn)]
+	      -command [list ::P2PNet::OpenConnection $wDlgs(openConn)]
 	    if {!$prefs(stripJabber)} {
 		.menu entryconfigure *Jabber* -state disabled
 		
@@ -593,11 +607,6 @@ proc ::Preferences::SavePushBt { } {
 	} else {
 	    set protocolSet 1
 	}
-    }
-        
-    if {!$prefs(stripJabber) && !$protocolSet} {
-	::Jabber::Roster::SetBackgroundImage $tmpJPrefs(rost,useBgImage) \
-	  $tmpJPrefs(rost,bgImagePath)
     }
     
     # Copy the temporary copy to the real variables.

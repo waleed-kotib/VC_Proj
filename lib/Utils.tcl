@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.17 2004-05-03 14:11:54 matben Exp $
+# $Id: Utils.tcl,v 1.18 2004-05-06 13:41:11 matben Exp $
 
 namespace eval ::Utils:: {
 
@@ -491,6 +491,9 @@ proc ::Timing::GetRate {key} {
     variable timing
 	
     set len [llength $timing($key)]
+    if {$len <= 1} {
+	return 0.0
+    }
     set nAve 12
     set istart [expr $len - $nAve]
     if {$istart < 0} {
@@ -516,6 +519,9 @@ proc ::Timing::GetRateLinearInterp {key} {
     variable timing
     
     set len [llength $timing($key)]
+    if {$len <= 1} {
+	return 0.0
+    }
     set n 12
     set istart [expr $len - $n]
     if {$n > $len} {
@@ -552,7 +558,7 @@ proc ::Timing::GetPercent {key totalbytes} {
     variable timing
 
     if {[llength $timing($key)] > 1} {
-	set bytes [lindex [lindex $timing($key) end] 1]
+	set bytes [lindex $timing($key) end 1]
     } else {
 	set bytes 0
     }
@@ -579,7 +585,7 @@ proc ::Timing::FormMessage {key totalbytes} {
 
     # Remaining time.
     if {[llength $timing($key)] > 1} {
-	set bytes [lindex [lindex $timing($key) end] 1]
+	set bytes [lindex $timing($key) end 1]
     } else {
 	set bytes 0
     }

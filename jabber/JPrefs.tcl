@@ -5,11 +5,9 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.3 2004-04-16 13:59:29 matben Exp $
-
+# $Id: JPrefs.tcl,v 1.4 2004-05-06 13:41:10 matben Exp $
 
 package provide JPrefs 1.0
-
 
 namespace eval ::Jabber::JPrefs:: {
     
@@ -22,18 +20,17 @@ namespace eval ::Jabber::JPrefs:: {
 }
 
 
-
 proc ::Jabber::JPrefs::InitPrefsHook { } {
     upvar ::Jabber::jprefs jprefs
     
     # Defaults...
     # Auto away page:
-    set jprefs(autoaway) 0
-    set jprefs(xautoaway) 0
-    set jprefs(awaymin) 0
-    set jprefs(xawaymin) 0
-    set jprefs(awaymsg) {}
-    set jprefs(xawaymsg) {User has been inactive for a while}
+    set jprefs(autoaway)     0
+    set jprefs(xautoaway)    0
+    set jprefs(awaymin)      0
+    set jprefs(xawaymin)     0
+    set jprefs(awaymsg)      ""
+    set jprefs(xawaymsg)     "User has been inactive for a while"
     set jprefs(logoutStatus) ""
         
     set jprefs(showMsgNewWin) 1
@@ -209,9 +206,14 @@ proc ::Jabber::JPrefs::BuildPersInfoPage {wpage} {
 #       If changed present auto away settings, may need to configure
 #       our jabber object.
 
-proc ::Jabber::JPrefs::UpdateAutoAwaySettings { } {    
+proc ::Jabber::JPrefs::UpdateAutoAwaySettings { } { 
+    global  prefs
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
+    
+    if {!$jstate(haveJabberUI)} {
+	return
+    }
     
     array set oldopts [$jstate(jlib) config]
     set reconfig 0
@@ -265,9 +267,9 @@ proc ::Jabber::JPrefs::BuildCustomPage {page} {
       -variable [namespace current]::tmpJPrefs(inboxSave)
     label $pbl.lmb2 -text [::msgcat::mc prefcu2clk]
     radiobutton $pbl.rb2new -text " [::msgcat::mc prefcuopen]" \
-      -value "newwin" -variable [namespace current]::tmpJPrefs(inbox2click)
+      -value newwin -variable [namespace current]::tmpJPrefs(inbox2click)
     radiobutton $pbl.rb2re   \
-      -text " [::msgcat::mc prefcureply]" -value "reply" \
+      -text " [::msgcat::mc prefcureply]" -value reply \
       -variable [namespace current]::tmpJPrefs(inbox2click)
     
     set frrost $pbl.robg
@@ -343,16 +345,24 @@ proc ::Jabber::JPrefs::DefaultBgImage {where} {
 proc ::Jabber::JPrefs::SavePrefsHook { } {
     global  prefs
     upvar ::Jabber::jprefs jprefs
+    upvar ::Jabber::jstate jstate
     variable tmpJPrefs
     variable tmpPrefs
     
+    if {!$jstate(haveJabberUI)} {
+	return
+    }
     array set jprefs [array get tmpJPrefs]
-    unset tmpJPrefs
-    
     set prefs(themeName) $tmpPrefs(themeName)
 
     # If changed present auto away settings, may need to reconfigure.
     ::Jabber::JPrefs::UpdateAutoAwaySettings    
+
+    # Roster background image.
+    ::Jabber::Roster::SetBackgroundImage $tmpJPrefs(rost,useBgImage) \
+      $tmpJPrefs(rost,bgImagePath)
+
+    unset tmpJPrefs
 }
 
 proc ::Jabber::JPrefs::CancelPrefsHook { } {

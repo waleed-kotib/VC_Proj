@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: FileUtils.tcl,v 1.3 2004-01-13 14:50:21 matben Exp $
+# $Id: FileUtils.tcl,v 1.4 2004-05-06 13:41:11 matben Exp $
 
 namespace eval ::FileUtils:: {
     
@@ -16,62 +16,6 @@ namespace eval ::FileUtils:: {
     # Our arrays that act as a data base.
     variable knownFiles {}
     variable knownPaths {}
-}
-
-
-# FileUtils::GetTransferRateFromTiming --
-#
-#       From 'listClicksBytes' which is a list of {clockClicks bytes}, 
-#       the transfer rate is computed as bytes per seconds.
-#       A moving average of the latest elements is used.
-#       
-# Arguments:
-#
-# Results:
-
-proc ::FileUtils::GetTransferRateFromTiming {listClicksBytes} {
-    global  timingClicksToSecs
-    
-    set n [llength $listClicksBytes]
-    set nAve 3
-    set istart [expr $n - $nAve]
-    if {$istart < 0} {
-	set istart 0
-    }
-    set iend [expr $n - 1]
-    set sumBytes [expr [lindex [lindex $listClicksBytes $iend] 1] -  \
-      [lindex [lindex $listClicksBytes $istart] 1]]
-    set sumClicks [expr [lindex [lindex $listClicksBytes $iend] 0] -  \
-      [lindex [lindex $listClicksBytes $istart] 0]]
-    
-    # Treat the case with wrap around. (Guess)
-    if {$sumClicks <= 0} {
-	set sumClicks $timingClicksToSecs
-    }
-    set aveBytesPerClick [expr $sumBytes / ($sumClicks + 1.0)]
-    set aveBytesPerSec [expr $aveBytesPerClick * $timingClicksToSecs]
-    return $aveBytesPerSec
-}
-
-# FileUtils::BytesPerSecFormatted --
-#
-#       Returns the transfer rate as a nicely formatted text string.
-#       
-# Arguments:
-#
-# Results:
-
-proc ::FileUtils::BytesPerSecFormatted {bytesPerSec} {
-
-    # Find format: bytes or k.
-    if {$bytesPerSec < 1000} {
-	set txtRate "$bytesPerSec bytes/sec"
-    } elseif {$bytesPerSec < 1000000} {
-	set txtRate [list [format "%.1f" [expr $bytesPerSec/1000.0] ]Kb/sec]
-    } else {
-	set txtRate [list [format "%.1f" [expr $bytesPerSec/1000000.0] ]Mb/sec]
-    }
-    return $txtRate
 }
 
 # FileUtils::AddToKnownFiles, GetKnownPathFromTail --

@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.53 2004-04-26 10:21:15 matben Exp $
+# $Id: Coccinella.tcl,v 1.54 2004-05-06 13:41:09 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -114,11 +114,9 @@ if {[llength [namespace children :: "::browser*"]] > 0} {
 
 # Level of detail for printouts. >= 2 for my outputs.
 set debugLevel 0
-# Level of detail for printouts for server. >= 2 for my outputs.
-set debugServerLevel $debugLevel
+
 # Macintosh only: if no debug printouts, no console. Also for windows?
-if {[string match "mac*" $this(platform)] &&   \
-  $debugLevel == 0 && $debugServerLevel == 0} {
+if {[string match "mac*" $this(platform)] && $debugLevel == 0} {
     catch {console hide}
 }
 
@@ -464,7 +462,6 @@ set listOfPackages {
     undo
     Dialogs
     AutoUpdate
-    Connections
     FilesAndCanvas
     FileCache
     Preferences
@@ -487,9 +484,7 @@ if {$prefs(Thread)} {
     package require tinyhttpd
 }
 
-# Provides support for the jabber system.
-# With the ActiveState distro of Tcl/Tk not "our" tclxml is loaded which crash.
-
+# The Jabber stuff.
 if {!$prefs(stripJabber)} {
     ::SplashScreen::SetMsg [::msgcat::mc splashsourcejabb]
     package require Jabber
@@ -532,11 +527,11 @@ if {$argc > 0} {
 
 switch -- $prefs(protocol) {
     jabber {
-	
+	# empty
     }
     default {
 	package require P2P
-	::P2P::Init
+	package require P2PNet
     }
 }
 
@@ -572,7 +567,7 @@ if {[string equal $prefs(protocol) "jabber"]} {
 # Jabber has the roster window as "main" window.
 if {![string equal $prefs(protocol) "jabber"]} {
     ::SplashScreen::SetMsg [::msgcat::mc splashbuild]
-    ::WB::BuildWhiteboard $wDlgs(mainwb)
+    ::WB::BuildWhiteboard $wDlgs(mainwb) -usewingeom 1
 }
 if {$prefs(firstLaunch) && !$prefs(stripJabber)} {
     if {[winfo exists $wDlgs(mainwb)]} {
@@ -612,7 +607,7 @@ wm protocol . WM_DELETE_WINDOW {::UI::DoCloseWindow .}
 after 500 {catch {destroy $wDlgs(splash)}}
 
 # Do we need all the jabber stuff? Is this the right place? Need it for setup!
-if {!$prefs(stripJabber)} {
+if {($prefs(protocol) == "jabber") && !$prefs(stripJabber)} {
     ::Jabber::Init
 } else {
     
@@ -697,7 +692,7 @@ if {($prefs(protocol) != "client") && $prefs(haveHttpd)} {
 if {$argc > 0} {
     if {[info exists argvArr(-connect)]} {
 	update idletasks
-	after $prefs(afterConnect) [list ::OpenConnection::DoConnect  \
+	after $prefs(afterConnect) [list ::P2PNet::DoConnect  \
 	  $argvArr(-connect) $prefs(remotePort)]
     }
 }

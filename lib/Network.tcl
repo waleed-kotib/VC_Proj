@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Network.tcl,v 1.11 2004-03-13 15:21:41 matben Exp $
+# $Id: Network.tcl,v 1.12 2004-05-06 13:41:11 matben Exp $
 
 namespace eval ::Network:: {
     
@@ -149,7 +149,6 @@ proc ::Network::WhenSocketOpensInits {sock nameOrIP port cmd tls} {
 # ScheduleKiller, Kill --
 #
 #       Cancel 'OpenConnection' process if timeout.
-#       Should probably go in ::OpenConnection:: in the future.
 #
 # Arguments:
 #       sock
@@ -185,7 +184,6 @@ proc ::Network::Kill {sock cmd} {
 # Network::KillAll --
 #
 #       Kills all pending open states.
-#       Should probably go in ::OpenConnection:: in the future.
 
 proc ::Network::KillAll { } {
     variable killerId
@@ -209,127 +207,6 @@ proc ::Network::GetThisOutsideIPAddress { } {
     } else {
 	return $this(ipnum)
     }
-}
-
-namespace eval ::Network:: {
-    variable ipNums
-
-    set ipNums(to) {}
-    set ipNums(from) {}
-}
-
-# Network::RegisterIP --
-# 
-#       Sets ip number for internal use.
-#   
-# Arguments:
-#       ipNum       ip number to be de/registered
-#       type        any of 'to', 'from', 'both'
-
-proc ::Network::RegisterIP {ipNum {type "both"}} {
-    variable ipNums
-
-    # Keep lists of ip numbers for connected clients and servers.
-    #    to: all we have a cllient connection to
-    #    from: all we have another clinet connected to our server socket
-	    
-    switch -- $type {
-	to - from {
-	    lappend ipNums($type) $ipNum
-	}
-	both {
-	    lappend ipNums(to) $ipNum
-	    lappend ipNums(from) $ipNum
-	}
-    }
-
-    switch -- $type {
-	to - from {
-	    set ipNums($type) [lsort -unique $ipNums($type)]
-	}
-    }
-}
-
-# Network::DeRegisterIP --
-# 
-#       Remove ip number from register for the specified type.
-#       
-# Arguments:
-#       ipNum       ip number to be de/registered
-#       type        any of 'to', 'from', 'both'
-
-proc ::Network::DeRegisterIP {ipNum {type "both"}} {
-    variable ipNums
-    	    
-    switch -- $type {
-	to - from {
-	    lprune ipNums($type) $ipNum
-	}
-	both {
-	    lprune ipNums(to) $ipNum
-	    lprune ipNums(from) $ipNum
-	}
-    }	    
-    set ipNums(to) [lsort -unique $ipNums(to)]
-    set ipNums(from) [lsort -unique $ipNums(from)]
-}
-
-proc ::Network::IsRegistered {ipNum {type "both"}} {
-    global  prefs
-    variable ipNums
-
-    switch -- $type {
-	to - from {
-	    set ans [expr {[lsearch $ipNums($type) $ipNum] >= 0} ? 1 : 0]
-	}
-	default {
-	    set ans [expr {[lsearch \
-	      [concat $ipNums(from) $ipNums(to)] $ipNum] >= 0} ? 1 : 0]
-	}
-    }
-    return $ans
-}
-
-# Network::GetIP --
-# 
-#       
-#   
-# Arguments:
-#       type        any of 'to', 'from', 'both'
-#       
-# Results:
-#       empty or one or more ip numbers
-
-proc ::Network::GetIP {type} {
-    global  prefs
-    variable ipNums
-    
-    set ans {}
-    
-    if {[string equal $type "both"]} {
-	set ans [lsort -unique [concat $ipNums(from) $ipNums(to)]]
-    } else {
-
-	switch -- $prefs(protocol) {
-	    server {
-		if {$type == "to"} {
-		    set ans $ipNums(from)
-		} else {
-		    set ans $ipNums($type)	    
-		}
-	    }
-	    default {
-		set ans $ipNums($type)
-	    }
-	}
-    }
-    return $ans
-}
-
-proc ::Network::IsConnected {ipNum type} {
-    
-    set all [::Network::GetIP $type]
-    return [expr {[lsearch $all $ipNum] >= 0} ? 1 : 0]
 }
 
 #-------------------------------------------------------------------------------

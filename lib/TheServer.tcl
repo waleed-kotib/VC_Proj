@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: TheServer.tcl,v 1.21 2004-03-16 15:09:08 matben Exp $
+# $Id: TheServer.tcl,v 1.22 2004-05-06 13:41:11 matben Exp $
     
 # DoStartServer ---
 #
@@ -67,7 +67,6 @@ proc DoStopServer { } {
 #       socket event handler set up.
 
 proc SetupChannel {channel ip port} {
-    global  ipNumTo ipName2Num this prefs
     
     # This is the important code that sets up the server event handler.
     fileevent $channel readable [list HandleClientRequest $channel $ip $port]
@@ -79,44 +78,11 @@ proc SetupChannel {channel ip port} {
     fconfigure $channel -buffering line
     
     # For nonlatin characters to work be sure to use Unicode/UTF-8.
-    if {[info tclversion] >= 8.1} {
-        catch {fconfigure $channel -encoding utf-8}
-    }
+    catch {fconfigure $channel -encoding utf-8}
 
     Debug 2 "---> Connection made to $ip:${port} on channel $channel."
     
-    ::hooks::run serverNewConnectionHook
-    
-    # Save ip nums and names etc in arrays.
-    # Depending on which happens first, this info is either collected here, or via
-    # '::OpenConnection::SetIpArrays' when a client socket is opened.
-    # Need to be economical here since '-peername' takes 5 secs on my intranet.
-    if {![info exists ipNumTo(name,$ip)]} {
-
-	# problem on my mac since ipName is '<unknown>'
-	set peername [fconfigure $channel -peername]
-	set ipNum [lindex $peername 0]
-	set ipName [lindex $peername 1]
-	set ipNumTo(name,$ipNum) $ipName
-	set ipName2Num($ipName) $ipNum
-	Debug 4 "   [clock clicks -milliseconds]: peername=$peername"
-    }
-	
-    # If we are a server in a client/server set up store socket if this is first time.
-    if {($prefs(protocol) == "server") && ![info exists ipNumTo(socket,$ip)]} {
-	set ipNumTo(socket,$ip) $channel
-    }
-    set sockname [fconfigure $channel -sockname] 
-
-    # Sometimes the DoStartServer just gives this(ipnum)=0.0.0.0 ; fix this here.
-    if {[string equal $this(ipnum) "0.0.0.0"]} {
-	set this(ipnum) [lindex $sockname 0]
-    }
-    
-    # Don't think this is correct!!!
-    if {![info exists ipNumTo(servPort,$this(ipnum))]} {
-	set ipNumTo(servPort,$this(ipnum)) [lindex $sockname 2]
-    }
+    ::hooks::run serverNewConnectionHook $channel $ip $port
 }
 
 # HandleClientRequest --
@@ -134,37 +100,20 @@ proc SetupChannel {channel ip port} {
 #       one line read from socket.
 
 proc HandleClientRequest {channel ip port} {
-    global  tempChannel prefs debugServerLevel
+    global  fileTransportChannel prefs
         
     # If client closes socket to this server.
-    
+        
     if {[catch {eof $channel} iseof] || $iseof} {
-	if {$debugServerLevel >= 2} {
-	    puts "HandleClientRequest:: eof channel=$channel"
-	}
+
+	::Debug 2 "HandleClientRequest:: eof channel=$channel"
 	fileevent $channel readable {}
 	
 	# Update entry only for nontemporary channels.
-	if {[info exists tempChannel($channel)]} {
-	    unset tempChannel($channel)
+	if {[info exists fileTransportChannel($channel)]} {
+	    unset fileTransportChannel($channel)
 	} else {
-	    if {[string equal $prefs(protocol) "jabber"]} {
-		
-		# Am not sure we ever end up here...
-		::Jabber::DoCloseClientConnection
-	    } elseif {[string equal $prefs(protocol) "symmetric"]} {
-	    
-		# Close the 'from' part.
-		::OpenConnection::DoCloseServerConnection $ip
-	    } elseif {[string equal $prefs(protocol) "server"]} {
-		::OpenConnection::DoCloseServerConnection $ip
-	    } elseif {[string equal $prefs(protocol) "central"] ||  \
-	      [string equal $prefs(protocol) "client"]} {
-		
-		# If connected to a reflector server that closes down,
-		# close the 'to' part.
-		::OpenConnection::DoCloseClientConnection $ip
-	    }
+	    ::hooks::run serverEofHook $channel $ip $port
 	}
 		
     } elseif {[gets $channel line] != -1} {
@@ -192,7 +141,7 @@ proc HandleClientRequest {channel ip port} {
 }
 
 proc ExecuteClientRequest {channel ip port line args} {
-    global  tempChannel
+    global  fileTransportChannel
     
     if {![regexp {^([A-Z ]+): *(.*)$} $line x cmd instr]} {
 	return
@@ -206,7 +155,7 @@ proc ExecuteClientRequest {channel ip port line args} {
 	    set fileName [lindex $instr 0]
 	    set optList [lrange $instr 1 end]
 	    set opts [::Import::GetTclSyntaxOptsFromTransport $optList]
-	    set tempChannel($channel) 1
+	    set fileTransportChannel($channel) 1
 	    ::hooks::run serverGetRequestHook $channel $ip $fileName $opts
 	}
 	PUT {
@@ -214,7 +163,7 @@ proc ExecuteClientRequest {channel ip port line args} {
 	    set fileName [file tail [lindex $instr 0]]
 	    set optList [lrange $instr 1 end]
 	    set opts [::Import::GetTclSyntaxOptsFromTransport $optList]
-	    set tempChannel($channel) 1
+	    set fileTransportChannel($channel) 1
 	    ::hooks::run serverPutRequestHook $channel $fileName $opts
 	}
 	default {

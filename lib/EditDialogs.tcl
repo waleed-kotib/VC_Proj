@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: EditDialogs.tcl,v 1.11 2004-03-16 15:09:08 matben Exp $
+# $Id: EditDialogs.tcl,v 1.12 2004-05-06 13:41:11 matben Exp $
 
 
 #       ::EditShortcuts:: implements dialogs for editing shortcuts. 
@@ -264,8 +264,8 @@ proc ::EditShortcuts::AddOrEditShortcuts {what nameOfShortsCopy indShortcuts  \
     
     # Get the short pair to edit.
     if {[string equal $what "edit"]} {
-	$frtot.ent1 insert 0 [lindex [lindex $theShortCopy 0] $indShortcuts]
-	$frtot.ent2 insert 0 [lindex [lindex $theShortCopy 1] $indShortcuts]
+	$frtot.ent1 insert 0 [lindex $theShortCopy 0 $indShortcuts]
+	$frtot.ent2 insert 0 [lindex $theShortCopy 1 $indShortcuts]
     } elseif {[string equal $what "add"]} {
 	
     }

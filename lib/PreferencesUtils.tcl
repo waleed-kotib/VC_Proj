@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.31 2004-04-23 07:13:23 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.32 2004-05-06 13:41:11 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -337,7 +337,7 @@ proc ::PreferencesUtils::ParseCommandLineOptions {cargc cargv} {
     
     foreach {key value} $optList {
 	switch -glob -- $key {
-	    -debugLevel - -debugServerLevel {
+	    -debugLevel {
 		set name [string trimleft $key -]
 		uplevel #0 set $name $value
 	    }

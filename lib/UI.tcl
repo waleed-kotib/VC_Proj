@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.56 2004-04-25 10:14:16 matben Exp $
+# $Id: UI.tcl,v 1.57 2004-05-06 13:41:11 matben Exp $
 
 package require entrycomp
 
@@ -226,7 +226,7 @@ proc ::UI::GetToplevel {w} {
     }
 }
 
-# UI::SaveWinGeom --
+# UI::SaveWinGeom, SaveWinPrefixGeom --
 #
 #       Call this when closing window to store its geometry if exists.
 #
@@ -256,6 +256,12 @@ proc ::UI::SaveWinPrefixGeom {wprefix {key ""}} {
     if {$win != ""} {
 	::UI::SaveWinGeom $key $win
     }	
+}
+
+proc ::UI::SaveWinGeomUseSize {key geom} {
+    global  prefs
+    
+    set prefs(winGeom,$key) $geom
 }
 
 # UI::SavePanePos --
@@ -532,9 +538,9 @@ proc ::UI::MenuMethod {wmenu cmd key args} {
 	    
 	switch -- $key {
 	    -state {
-		set mcmd [lindex [lindex $menuSpec $mind] 2]
+		set mcmd [lindex $menuSpec $mind 2]
 		set mcmd [subst -nocommands $mcmd]
-		set acc [lindex [lindex $menuSpec $mind] 4]
+		set acc [lindex $menuSpec $mind 4]
 
 		# Cut, Copy & Paste handled by widgets internally!
 		if {[string length $acc] && ![regexp {(X|C|V)} $acc]} {
@@ -1132,18 +1138,15 @@ proc ::UI::NewPrint {w cmd} {
 #       Parses 'wm geometry' result into a list.
 #       
 # Arguments:
-#       w           the (real) toplevel widget path
+#       win         the (real) toplevel widget path
 # Results:
 #       list {width height x y}
 
-proc ::UI::ParseWMGeometry {w} {
+proc ::UI::ParseWMGeometry {win} {
     
-    set int_ {[0-9]+}
-    set sint_ {\-?[0-9]+}
-    set plus_ {\+}
-    regexp "(${int_})x(${int_})${plus_}(${sint_})${plus_}(${sint_})"   \
-      [wm geometry $w] match wid hei x y
-    return [list $wid $hei $x $y]
+    regexp {([0-9]+)x([0-9]+)\+(\-?[0-9]+)\+(\-?[0-9]+)}  \
+      [wm geometry $win] m w h x y
+    return [list $w $h $x $y]
 }
 
 # UI::FixMenusWhenSelection --

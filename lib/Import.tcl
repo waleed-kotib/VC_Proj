@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Import.tcl,v 1.17 2004-05-03 14:11:54 matben Exp $
+# $Id: Import.tcl,v 1.18 2004-05-06 13:41:11 matben Exp $
 
 package require http
 package require httpex
@@ -865,9 +865,9 @@ proc ::Import::HttpProgress {gettoken token total current} {
 		uplevel #0 $argsArr(-progress)  \
 		  [list $status $gettoken $token $total $current]	
 	    } else {
-		set wtop $getstate(wtop)
-		::WB::SetStatusMessage $wtop \
-		  "Getting file \"$getstate(tail)\", $current out of $total"
+		set tmsg [::Timing::FormMessage $getstate(timingkey) $total]
+		set msg "Getting \"$getstate(tail)\", $tmsg"
+		::WB::SetStatusMessage $getstate(wtop) $msg
 	    }	    
 	}
     }
@@ -1009,8 +1009,8 @@ proc ::Import::ImportProgress {line status gettoken httptoken total current} {
 	}
 	::WB::SetStatusMessage $wtop "Failed getting url: $errmsg"
     } else {
-	set wcan $getstate(wcan)
-	set msg "Getting \"$getstate(tail)\", [::Timing::FormMessage $getstate(timingkey) $total]"
+	set tmsg [::Timing::FormMessage $getstate(timingkey) $total]
+	set msg "Getting \"$getstate(tail)\", $tmsg"
 	::WB::SetStatusMessage $wtop $msg
     }
 }
