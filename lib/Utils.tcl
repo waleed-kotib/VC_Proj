@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.30 2004-08-28 07:00:08 matben Exp $
+# $Id: Utils.tcl,v 1.31 2004-10-22 06:44:14 matben Exp $
 
 namespace eval ::Utils:: {
 
@@ -290,7 +290,7 @@ proc ::Utils::UnixGetWebBrowser { } {
 
 	# Try in order.
 	set found 0
-	set browsers [list $prefs(webBrowser) netscape mozilla konqueror]
+	set browsers [list $prefs(webBrowser) netscape mozilla konqueror opera]
 	foreach app $browsers {
 	    if {![catch {exec which $app}]} {
 		set prefs(webBrowser) $app

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.44 2004-10-09 13:21:57 matben Exp $
+# $Id: NewMsg.tcl,v 1.45 2004-10-22 06:44:14 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -144,10 +144,10 @@ proc ::Jabber::NewMsg::Build {args} {
     }
     array set opts $args
     set locals($w,subject) $opts(-subject)
-    if {[string length $opts(-quotemessage)] > 0} {
-	set quotestate "normal"
-    } else {
+    if {$opts(-quotemessage) == ""} {
 	set quotestate "disabled"
+    } else {
+	set quotestate "normal"
     }
     
     # Toplevel of class NewMsg.
