@@ -25,6 +25,7 @@ Coccinella-0.95.0 (04????): 	Short summary --
 	- xmpp uri parser
 	- restricted to single instance on Windows
 	- synced playback for QuickTime
+	- using disco as default in place of browse
 
 
 Coccinella-0.94.11 (040601): 	Short summary --

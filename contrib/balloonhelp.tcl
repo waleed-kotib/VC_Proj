@@ -4,7 +4,7 @@
 #
 #  Code idee from Harrison & McLennan
 #  
-# $Id: balloonhelp.tcl,v 1.11 2004-08-13 15:27:26 matben Exp $
+# $Id: balloonhelp.tcl,v 1.12 2004-08-18 12:08:58 matben Exp $
 
 package provide balloonhelp 1.0
 
@@ -280,7 +280,7 @@ proc ::balloonhelp::Show {win type} {
 	    raise $w
 	}
     }
-    unset locals(pending)
+    unset -nocomplain locals(pending)
 }
 
 proc ::balloonhelp::SetPosition {x y} {

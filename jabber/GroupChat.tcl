@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.66 2004-08-07 13:34:22 matben Exp $
+# $Id: GroupChat.tcl,v 1.67 2004-08-18 12:08:58 matben Exp $
 
 package require History
 
@@ -238,7 +238,7 @@ proc ::Jabber::GroupChat::HaveMUC {{roomjid ""}} {
 	    }
 	}
     }
-    ::Debug 4 "::Jabber::GroupChat::HaveMUC $ans"
+    ::Debug 4 "::Jabber::GroupChat::HaveMUC roomjid=$roomjid, $ans"
     return $ans
 }
 
@@ -290,9 +290,9 @@ proc ::Jabber::GroupChat::EnterOrCreate {what args} {
 	}
     }
     ::Debug 2 "::Jabber::GroupChat::EnterOrCreate prefgchatproto=$jprefs(prefgchatproto) \
-      gchatprotocol=$gchatprotocol, what=$what, args='$args'"
+      gchatprotocol=$gchatprotocol, what=$what, roomjid=$roomjid, args='$args'"
     
-    switch -- $what,$gchatprotocol {
+    switch -glob -- $what,$gchatprotocol {
 	*,gc-1.0 {
 	    set ans [eval {::Jabber::GroupChat::BuildEnter} $args]
 	}
@@ -307,6 +307,9 @@ proc ::Jabber::GroupChat::EnterOrCreate {what args} {
 	}
 	create,muc {
 	    set ans [eval {::Jabber::Conference::BuildCreate} $args]
+	}
+	default {
+	    # error
 	}
     }    
     

@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-#       $Id: SlideShow.tcl,v 1.4 2004-08-06 07:46:53 matben Exp $
+#       $Id: SlideShow.tcl,v 1.5 2004-08-18 12:08:58 matben Exp $
 
 namespace eval ::SlideShow:: {
     
@@ -119,9 +119,11 @@ proc ::SlideShow::InitPrefsHook { } {
     
     set prefs(slideShow,dir) ""
     set prefs(slideShow,buttons) 0
+    set prefs(slideShow,autosize) 0
     
     ::PreferencesUtils::Add [list  \
       [list prefs(slideShow,buttons) prefs_slideShow_buttons $prefs(slideShow,buttons)] \
+      [list prefs(slideShow,autosize) prefs_slideShow_autosize $prefs(slideShow,autosize)] \
       [list prefs(slideShow,dir)     prefs_slideShow_dir     $prefs(slideShow,dir)]]
 }
 
@@ -137,10 +139,13 @@ proc ::SlideShow::BuildPrefsHook {wtree nbframe} {
     pack $lfr -side top -anchor w -padx 8 -pady 4
 
     set tmpPrefs(slideShow,buttons) $prefs(slideShow,buttons)
+    set tmpPrefs(slideShow,autosize) $prefs(slideShow,autosize)
 
     checkbutton $lfr.ss -text " Show next and previous buttons"  \
       -variable [namespace current]::tmpPrefs(slideShow,buttons)
-    pack $lfr.ss -side top -anchor w -padx 8 -pady 2
+    checkbutton $lfr.size -text " Resize canvas utomatically to fit image"  \
+      -variable [namespace current]::tmpPrefs(slideShow,autosize)
+    pack $lfr.ss $lfr.size -side top -anchor w -padx 8 -pady 2
 }
 
 proc ::SlideShow::SavePrefsHook { } {
@@ -149,6 +154,7 @@ proc ::SlideShow::SavePrefsHook { } {
     variable priv
     
     set prefs(slideShow,buttons) $tmpPrefs(slideShow,buttons)
+    set prefs(slideShow,autosize) $tmpPrefs(slideShow,autosize)
     
     if {$prefs(slideShow,buttons)} {
 	::WB::RegisterShortcutButtons $priv(btdefs)
@@ -254,6 +260,7 @@ proc ::SlideShow::OpenPage {wtop page} {
 }
 
 proc ::SlideShow::OpenFile {wtop fileName} {
+    global  prefs
     variable priv
     
     set wcan [::WB::GetCanvasFromWtop $wtop]
@@ -266,6 +273,13 @@ proc ::SlideShow::OpenFile {wtop fileName} {
 	    ::CanvasCmd::DoEraseAll $wtop     
 	    ::undo::reset [::WB::GetUndoToken $wtop]
 	    ::Import::DoImport $wcan {-coords {0 0}} -file $fileName
+	}
+    }
+    if {$prefs(slideShow,autosize)} {
+	foreach {width height} [::WB::GetCanvasSize $wtop] {break}
+	foreach {bx by bw bh} [$wcan bbox all] {break}
+	if {($width < $bw) || ($height < $bh)} {
+	    ::WB::SetCanvasSize $wtop $bw $bh
 	}
     }
 }
@@ -312,15 +326,21 @@ proc ::SlideShow::SetMenuState {wtop} {
     if {[llength $priv(pages)]} {
 	::UI::MenuMethod $msshow entryconfigure Previous -state normal
 	::UI::MenuMethod $msshow entryconfigure Next     -state normal
-	$wtray buttonconfigure next     -state normal
-	$wtray buttonconfigure previous -state normal
+	if {[$wtray exists next]} {
+	    $wtray buttonconfigure next     -state normal
+	    $wtray buttonconfigure previous -state normal
+	}
     }
     if {[string equal $priv($wtop,current) [lindex $priv(pages) 0]]} {
 	::UI::MenuMethod $msshow entryconfigure Previous -state disabled
-	$wtray buttonconfigure previous -state disabled
+	if {[$wtray exists previous]} {
+	    $wtray buttonconfigure previous -state disabled
+	}
     } elseif {[string equal $priv($wtop,current) [lindex $priv(pages) end]]} {
 	::UI::MenuMethod $msshow entryconfigure Next -state disabled
-	$wtray buttonconfigure next -state disabled
+	if {[$wtray exists next]} {
+	    $wtray buttonconfigure next -state disabled
+	}
     }
 }
 

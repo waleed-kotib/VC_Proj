@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.28 2004-08-13 15:27:26 matben Exp $
+# $Id: JWB.tcl,v 1.29 2004-08-18 12:08:58 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -17,6 +17,7 @@ package provide JWB 1.0
 namespace eval ::Jabber::WB:: {
        
     ::hooks::add jabberInitHook               ::Jabber::WB::Init
+    #::hooks::add initHook                     ::Jabber::WB::InitUI
     
     # Internal storage for jabber specific parts of whiteboard.
     variable jwbstate
@@ -37,6 +38,7 @@ proc ::Jabber::WB::Init {jlibName} {
     
     ::Debug 4 "::Jabber::WB::Init"
     
+    ::hooks::add whiteboardNewHook            ::Jabber::WB::NewHook
     ::hooks::add whiteboardBuildEntryHook     ::Jabber::WB::BuildEntryHook
     ::hooks::add whiteboardSetMinsizeHook     ::Jabber::WB::SetMinsizeHook    
     ::hooks::add whiteboardCloseHook          ::Jabber::WB::CloseHook        20
@@ -150,6 +152,11 @@ proc ::Jabber::WB::InitUI { } {
     ::WB::SetMenuDefs file $menuDefsFile
 
     set initted 1
+}
+
+proc ::Jabber::WB::NewHook {args} {
+    
+    eval {::Jabber::WB::NewWhiteboard} $args
 }
 
 # Jabber::WB::InitWhiteboard --
