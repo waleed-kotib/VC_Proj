@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.28 2004-01-11 15:17:51 matben Exp $
+# $Id: jabberlib.tcl,v 1.29 2004-01-13 08:14:33 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -235,7 +235,7 @@ namespace eval jlib {
     # Globals same for all instances of this jlib.
     #    > 1 prints raw xml I/O
     #    > 2 prints a lot more
-    variable debug 0
+    variable debug 8
     if {[info exists ::debugLevel] && ($::debugLevel > 1) && ($debug == 0)} {
 	set debug 2
     }
@@ -783,8 +783,15 @@ proc jlib::dispatcher {jlibname xmldata} {
 
 # jlib::iq_handler --
 #
-#       Callback for incoming <iq> elements. Most client callbacks are handled
-#       with predetermined functions (via 'iqcmd($id)'). See 'jlib::dispatcher'.
+#       Callback for incoming <iq> elements.
+#       The handling sequence is the following:
+#       1) handle all roster pushes (set) internally
+#       2) handle all preregistered callbacks via id attributes
+#       3) handle callbacks specific for 'type' and 'xmlns' that have been
+#          registered with 'iq_register'
+#       4) if unhandled by 3, use any -iqcommand callback
+#       5) if still, use the client command callback
+#       6) if type='get' and still unhandled, return an error element
 #       
 # Arguments:
 #       jlibname:   the instance of this jlib.
@@ -799,17 +806,23 @@ proc jlib::iq_handler {jlibname xmldata} {
     upvar [namespace current]::${jlibname}::iqcmd iqcmd
     upvar [namespace current]::${jlibname}::opts opts    
     
+    Debug 5 "jlib::iq_handler: ------------"
+
     # Extract the command level XML data items.    
     set tag [wrapper::gettag $xmldata]
     array set attrArr [wrapper::getattrlist $xmldata]
-    set childlist [wrapper::getchildren $xmldata]
     
     # Make an argument list ('-key value' pairs) suitable for callbacks.
     # Make variables of the attributes.
     set arglist {}
-    foreach attrkey [array names attrArr] {
-	set $attrkey $attrArr($attrkey)
-	lappend arglist -$attrkey $attrArr($attrkey)
+    foreach {key value} [array get attrArr] {
+	set $key $value
+	lappend arglist -$key $value
+    }
+    
+    # The 'type' attribute must exist! Else we return silently.
+    if {![info exists type]} {	
+	return
     }
     if {![info exists from]} {
 	set afrom ""
@@ -817,36 +830,54 @@ proc jlib::iq_handler {jlibname xmldata} {
 	set afrom $from
     }
     
-    # The 'type' attribute must exist! Else we return silently.
-    if {![info exists type]} {	
-	return
-    }
-    set iqcallback ""
-    set clientcallback ""
-    
     # The child must be a single <query> element (or any namespaced element).
+    set childlist [wrapper::getchildren $xmldata]
     set subiq [lindex $childlist 0]
     set xmlns [wrapper::getattribute $subiq xmlns]
-    if {![regexp {.*:([^ :]+)$} $xmlns match xmlnsLast]} {
-	set xmlnsLast "iqreply"
-    }
     
-    switch -- $type {
-	result {
-	    
-	    # Should we extract the <key> element for later identification.
-	    set querychildlist [wrapper::getchildren $subiq]
-	    foreach qchild $querychildlist {
-		if {[string equal [wrapper::gettag $qchild] "key"]} {
-		    set iqcmd(key,$xmlns) [wrapper::getcdata $qchild]
-		    break
+    if {[string equal $type "error"]} {
+	set callbackType "error"
+    } elseif {[regexp {.*:([^ :]+)$} $xmlns match callbackType]} {
+	# empty
+    } else {
+	set callbackType "iqreply"
+    }
+    set ishandled 0
+
+    # (1) This is a server push! Handle internally.
+
+    if {[string equal $type "set"]} {
+	
+	switch -- $xmlns {
+	    jabber:iq:roster {
+		
+		# Found a roster-push, typically after a subscription event.
+		# First, we reply to the server, saying that, we 
+		# got the data, and accepted it. ???		    
+		# We call the 'parse_roster_get', because this
+		# data is the same as the one we get from a 'roster_get'.
+		
+		parse_roster_get $jlibname 1 {} ok $subiq
+	    }
+	    jabber:iq:browse {
+		
+		# Shouldn't be here much longer...
+		# This is the same as the one we get from a 'browse_get'.
+		# This contains no error element so skip callback.
+		if {$opts(havebrowse)} {
+		    parse_browse_get $jlibname $from {} {} ok $subiq
 		}
 	    }
-	    
-	    # The namespace of the child element of 'iq' determines 
-	    # what this is about.
+	}
+    }
+    
+    # (2) Handle all preregistered callbacks via id attributes.
+
+    switch -- $type {
+	result - get - set {
+
 	    # A request for the entire roster is coming this way, 
-	    # and calls 'parse_roster_set'. Same for browsing etc.
+	    # and calls 'parse_roster_set'.
 	    # $iqcmd($id) contains the 'parse_...' call as 1st element.
 	    if {[info exists id] && [info exists iqcmd($id)]} {
 		uplevel #0 $iqcmd($id) [list ok $subiq]
@@ -854,56 +885,9 @@ proc jlib::iq_handler {jlibname xmldata} {
 		# We need a catch here since the callback my in turn 
 		# call 'disconnect' which unsets all iq before returning.
 		catch {unset iqcmd($id)}
+		set ishandled 1
 	    }
 	}
-	get {
-	    
-	    set iqcallback [concat  \
-	      [list $jlibname $type -query $subiq] $arglist]
-	    set clientcallback [concat  \
-	      [list $jlibname $xmlnsLast -query $subiq] $arglist]
-	}	 
-	set {
-	    
-	    # This is a server push!
-	    # Before calling our 'clientcmd'  procedure, we should check
-	    # the 'xmlns' attribute, to understand if this is some 'iq' that
-	    # should be handled inside jlib, such as a roster-push.
-	    
-	    switch -- $xmlns {
-		jabber:iq:roster {
-		    
-		    # Found a roster-push, typically after a subscription event.
-		    # First, we reply to the server, saying that, we 
-		    # got the data, and accepted it. ???		    
-		    # We call the 'parse_roster_get', because this
-		    # data is the same as the one we get from a 'roster_get'.
-		    
-		    parse_roster_get $jlibname 1 {} ok $subiq
-		}
-		jabber:iq:browse {
-		    
-		    # This is the same as the one we get from a 'browse_get'.
-		    # This contains no error element so skip callback.
-		    if {$opts(havebrowse)} {
-			parse_browse_get $jlibname $from {} {} ok $subiq
-		    }
-		}
-		jabber:iq:search {
-		    
-		    # This is the same as the one we get from a 'search_set'.
-		    if {[info exists id] && [info exists iqcmd($id)]} {
-			uplevel #0 $iqcmd($id) [list set $subiq]
-		    }
-		}
-		default {
-		    set iqcallback [concat  \
-		      [list $jlibname $type -query $subiq] $arglist]
-		    set clientcallback [concat  \
-		      [list $jlibname $xmlnsLast -query $subiq] $arglist]
-		}
-	    }
-	}	 
 	error {
 	    
 	    # We should have a single error element here.
@@ -924,30 +908,39 @@ proc jlib::iq_handler {jlibname xmldata} {
 	    if {[info exists id] && [info exists iqcmd($id)]} {
 		uplevel #0 $iqcmd($id) [list error [list $errcode $errmsg]]
 		catch {unset iqcmd($id)}
-	    } else {		
-		set iqcallback [concat  \
-		  [list $jlibname $type -query $subiq] $arglist]
-		set clientcallback [concat  \
-		  [list $jlibname error -query $subiq] $arglist]
-	    }
-	}
-	default {	    
-	    # This is an error. We've got an illegal 'type' attribute.
+		set ishandled 1
+	    }	    
 	}
     }
+	        
+    # (3) Handle callbacks specific for 'type' and 'xmlns' that have been
+    #     registered with 'iq_register'
+
+    if {!$ishandled} {
+	set ishandled [eval {
+	    iq_invoke_hook $jlibname $type $xmlns $afrom $subiq} $arglist]
+    }
     
-    # Invoke our iq hook specific for 'type' and 'xmlns' if any.
-    set stat [eval {iq_invoke_hook $jlibname $type $xmlns $afrom $subiq} \
-      $arglist]
-    
-    # Invoke callback if any.
-    if {!$stat && [string length $iqcallback]} {
+    # (4) If unhandled by 3, use any -iqcommand callback.
+
+    if {!$ishandled} {	
 	if {[string length $opts(-iqcommand)]} {
-	    set stat [uplevel #0 $opts(-iqcommand) $iqcallback]
-	} else {
-	    set stat [uplevel #0 $lib(clientcmd) $clientcallback]
+	    set iqcallback [concat  \
+	      [list $jlibname $type -query $subiq] $arglist]
+	    set ishandled [uplevel #0 $opts(-iqcommand) $iqcallback]
+	} 
+	    
+	# (5) If unhandled by 3 and 4, use the client command callback.
+
+	if {!$ishandled} {
+	    set clientcallback [concat  \
+	      [list $jlibname $callbackType -query $subiq] $arglist]
+	    set ishandled [uplevel #0 $lib(clientcmd) $clientcallback]
 	}
-	if {[string equal $stat "0"]} {
+
+	# (6) If type='get' and still unhandled, return an error element.
+
+	if {[string equal $type "get"] && !$ishandled} {
 	    
 	    # Return a "Not Implemented" to the sender. Just switch to/from,
 	    # type='result', and add an <error> element.
@@ -1504,6 +1497,10 @@ proc jlib::iq_invoke_hook {jlibname type xmlns from subiq args} {
     
     if {[info exists iqhook($type,$xmlns)]} {
 	set func $iqhook($type,$xmlns)
+    } elseif {[info exists iqhook(,$xmlns)]} {
+	set func $iqhook(,$xmlns)
+    }
+    if {[info exists func]} {
 	set code [catch {
 	    uplevel #0 $func [list $jlibname $from $subiq] $args} ans]
 	if {$code} {
@@ -1590,6 +1587,18 @@ proc jlib::send_iq {jlibname type xmldata args} {
 	return -code error "Network connection dropped: $err"
     }
 }
+
+# jlib::iq_get, iq_set --
+#
+#       Wrapper for 'send_iq' for set/getting namespaced elements.
+#
+# Arguments:
+#       jlibname:   the instance of this jlib.
+#       xmlns:
+#       to:         recepient jid
+#       
+# Results:
+#       none.
 
 proc jlib::iq_get {jlibname xmlns to args} {
 
@@ -2687,8 +2696,14 @@ proc jlib::cancel_auto_away {jlibname} {
 
     upvar [namespace current]::${jlibname}::locals locals
 
-    catch {after cancel $locals(afterawayid)}
-    catch {after cancel $locals(afterxawayid)}
+    if {[info exists locals(afterawayid)]} {
+	after cancel $locals(afterawayid)
+	unset locals(afterawayid)
+    }
+    if {[info exists locals(afterxawayid)]} {
+	after cancel $locals(afterxawayid)
+	unset locals(afterxawayid)
+    }
 }
 
 # jlib::auto_away_cmd --
