@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #
-# $Id: svg2can.tcl,v 1.10 2004-02-25 15:02:12 matben Exp $
+# $Id: svg2can.tcl,v 1.11 2004-02-26 15:11:29 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -12,8 +12,8 @@
 #      svg2can - translate XML/SVG to canvas command.
 #      
 #   SYNOPSIS
-#      svg2can xmllist
-#           
+#      svg2can::parsesvgdocument xmllist
+#      svg2can::parseelement xmllist
 #      
 #
 # ########################### CHANGES ##########################################
@@ -92,7 +92,7 @@ proc svg2can::parsesvgdocument {xmllist args} {
         
     set ans {}
     foreach c [getchildren $xmllist] {
-	set ans [concat $ans [parseelement $c]]
+	set ans [concat $ans [parseelement $c {}]]
     }
     return $ans
 }
@@ -102,25 +102,26 @@ proc svg2can::parsesvgdocument {xmllist args} {
 # 
 # Arguments:
 #       xmllist     the elements xml list
+#       transformList
 #       args        list of attributes from any enclosing element (g).
 #       
 # Results:
 #       a list of canvas commands without the widgetPath
 
-proc svg2can::parseelement {xmllist args} {
+proc svg2can::parseelement {xmllist transformList args} {
 
     set cmdList {}
     set tag [gettag $xmllist]
     
+    # Handle any tranform attribute; may be recursive, so keep a list.
+    set transformList [concat $transformList \
+      [ParseTransformAttr [getattr $xmllist]]]
+    puts "transformList=$transformList"
+
     switch -- $tag {
-	circle - ellipse - image - line - polyline - polygon - rect {
-	    lappend cmdList [eval {parse${tag} $xmllist} $args]
-	}
-	path {
-	    set cmdList [concat $cmdList [eval {parsepath $xmllist} $args]]
-	}
-	text {
-	    set cmdList [eval {parsetext $xmllist} $args]
+	circle - ellipse - image - line - polyline - polygon - rect - path - text {
+	    set cmdList [concat $cmdList \
+	      [eval {parse${tag} $xmllist $transformList} $args]]
 	}
 	g {
 	    # Need to collect the attributes for the g element since
@@ -129,7 +130,7 @@ proc svg2can::parseelement {xmllist args} {
 	    array set attrArr [getattr $xmllist]
 	    foreach c [getchildren $xmllist] {
 		set cmdList [concat $cmdList \
-		  [eval {parseelement $c} [array get attrArr]]]
+		  [eval {parseelement $c $transformList} [array get attrArr]]]
 	    }	    
 	}
     }
@@ -147,9 +148,9 @@ proc svg2can::parseelement {xmllist args} {
 #       args        list of attributes from any enclosing element (g).
 #       
 # Results:
-#       canvas create command without the widgetPath.
+#       list of canvas create command without the widgetPath.
 
-proc svg2can::parsecircle {xmllist args} {
+proc svg2can::parsecircle {xmllist transformList args} {
     
     set opts {}
     set presentationAttr {}
@@ -180,10 +181,10 @@ proc svg2can::parsecircle {xmllist args} {
     set coords [list [expr $cx - $r] [expr $cy - $r] \
       [expr $cx + $r] [expr $cy + $r]]
     set opts [MergePresentationAttr oval $opts $presentationAttr]
-    return [concat create oval $coords $opts]
+    return [list [concat create oval $coords $opts]]
 }
 
-proc svg2can::parseellipse {xmllist args} {
+proc svg2can::parseellipse {xmllist transformList args} {
     
     set opts {}
     set presentationAttr {}
@@ -214,10 +215,10 @@ proc svg2can::parseellipse {xmllist args} {
     set coords [list [expr $cx - $rx] [expr $cy - $ry] \
       [expr $cx + $rx] [expr $cy + $ry]]
     set opts [MergePresentationAttr oval $opts $presentationAttr]
-    return [concat create oval $coords $opts]
+    return [list [concat create oval $coords $opts]]
 }
 
-proc svg2can::parseimage {xmllist args} {
+proc svg2can::parseimage {xmllist transformList args} {
     
     set x 0
     set y 0    
@@ -250,10 +251,10 @@ proc svg2can::parseimage {xmllist args} {
 	}
     }
     set opts [MergePresentationAttr image $opts $presentationAttr]
-    return [concat create image $x $y $opts]
+    return [list [concat create image $x $y $opts]]
 }
 
-proc svg2can::parseline {xmllist args} {
+proc svg2can::parseline {xmllist transformList args} {
     
     set opts {}
     set coords {0 0 0 0}
@@ -288,16 +289,18 @@ proc svg2can::parseline {xmllist args} {
 	}
     }
     set opts [MergePresentationAttr line $opts $presentationAttr]  
-    return [concat create line $coords $opts]
+    return [list [concat create line $coords $opts]]
 }
 
-proc svg2can::parsepath {xmllist args} {
+proc svg2can::parsepath {xmllist transformList args} {
     
     set cmdList {}
     set opts {}
     set presentationAttr {}
     set path {}
     set styleList {}
+    set lineopts {}
+    set polygonopts {}
     array set attrArr $args
     array set attrArr [getattr $xmllist]
     
@@ -347,63 +350,78 @@ proc svg2can::parsepath {xmllist args} {
     
     while {$i < $len} {
 	set elem [lindex $path $i]
-	set cotype absolute
+	set isabsolute 1
 	if {[string is lower $elem]} {
-	    set cotype relative
+	    set isabsolute 0
 	}
 	#puts "elem=$elem"
 	
 	switch -glob -- $elem {
 	    A - a {
-		# ?
+		# Not part of Tiny SVG.
 		incr i
 	    }
-	    C {
+	    C - c {
 		# We could have a sequence of pairs of points here...
-		# This is wrong! Must not be smooth.
 		# Approximate by quadratic bezier.
+		# There are three options here: 
+		# C (p1 p2 p3) (p4 p5 p6)...           finalize item
+		# C (p1 p2 p3) S (p4 p5)...            let S trigger below
+		# C p1 p2 p3 anything else             finalize here
 		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && \
 		  ($i < $len6)} {
-		    lappend co [lindex $path [incr i]] [lindex $path [incr i]]
-		    lappend co [lindex $path [incr i]] [lindex $path [incr i]]
-		    lappend co [lindex $path [incr i]] [lindex $path [incr i]]
+		    set co [list $cpx $cpy] 
+		    if {$isabsolute} {
+			lappend co [lindex $path [incr i]] [lindex $path [incr i]]
+			lappend co [lindex $path [incr i]] [lindex $path [incr i]]
+			lappend co [lindex $path [incr i]] [lindex $path [incr i]]
+			set cpx [lindex $co end-1]
+			set cpy [lindex $co end]
+		    } else {			
+			PathAddRelative $path co i cpx cpy
+			PathAddRelative $path co i cpx cpy
+			PathAddRelative $path co i cpx cpy
+		    }
+		    
+		    # If S instruction do not finalize item.
+		    if {![string equal -nocase [lindex $path [expr $i+1]] "S"]} {
+			#puts "\ti=$i, current=($cpx,$cpy), co=$co"
+			lappend itemopts -smooth 1
+			set opts [concat $lineopts $itemopts]
+			lappend cmdList [concat create line $co $opts]
+			set co {}
+			set itemopts {}
+		    }
 		}
-		incr i
-		lappend itemopts -smooth 1
-	    }
-	    c {
 		incr i
 	    }
 	    H {
-		#puts "H: i=$i, path=$path"
 		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && \
 		  ($i < $len1)} {
 		    lappend co [lindex $path [incr i]] $cpy
-		    #puts "\ti=$i, co=$co"
 		}
 		incr i
 	    }
 	    h {
-		#puts "h: i=$i, path=$path"
 		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && \
 		  ($i < $len1)} {
 		    lappend co [expr $cpx + [lindex $path [incr i]]] $cpy
-		    #puts "\ti=$i, co=$co"
 		}
 		incr i
 	    }
 	    L - {[0-9]+} - {-[0-9]+} {
-		#puts "L: i=$i, path=$path"
 		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && \
 		  ($i < $len2)} {
 		    lappend co [lindex $path [incr i]] [lindex $path [incr i]]
-		    #puts "\ti=$i, co=$co"
 		}
 		incr i
 	    }
 	    l {
-		lappend co [expr $cpx + [lindex $path [incr i]]] \
-		  [expr $cpy + [lindex $path [incr i]]]
+		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && \
+		  ($i < $len2)} {
+		    lappend co [expr $cpx + [lindex $path [incr i]]] \
+		      [expr $cpy + [lindex $path [incr i]]]
+		}
 		incr i
 	    }
 	    M - m {
@@ -412,7 +430,7 @@ proc svg2can::parsepath {xmllist args} {
 		    set opts [concat [set ${cantype}opts] $itemopts]
 		    lappend cmdList [concat create $cantype $co $opts]
 		}
-		if {($elem == "m") && [info exists cpx]} {
+		if {!$isabsolute && [info exists cpx]} {
 		    set co [list  \
 		      [expr $cpx + [lindex $path [incr i]]]
 		      [expr $cpy + [lindex $path [incr i]]]]
@@ -422,7 +440,7 @@ proc svg2can::parsepath {xmllist args} {
 		set itemopts {}
 		incr i
 	    }
-	    Q {
+	    Q - q {
 		# There are three options here: 
 		# Q p1 p2 p3 p4...           finalize item
 		# Q p1 p2 T p3...            let T trigger below
@@ -435,13 +453,18 @@ proc svg2can::parsepath {xmllist args} {
 		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && \
 		  ($i < $len4)} {
 		    set co [list $cpx $cpy] 
-		    lappend co [lindex $path [incr i]] [lindex $path [incr i]]
-		    lappend co [lindex $path [incr i]] [lindex $path [incr i]]
-		    set cpx [lindex $co end-1]
-		    set cpy [lindex $co end]
+		    if {$isabsolute} {
+			lappend co [lindex $path [incr i]] [lindex $path [incr i]]
+			lappend co [lindex $path [incr i]] [lindex $path [incr i]]
+			set cpx [lindex $co end-1]
+			set cpy [lindex $co end]
+		    } else {
+			PathAddRelative $path co i cpx cpy
+			PathAddRelative $path co i cpx cpy
+		    }
 		    
 		    # If T instruction do not finalize item.
-		    if {![string equal [lindex $path [expr $i+1]] "T"]} {
+		    if {![string equal -nocase [lindex $path [expr $i+1]] "T"]} {
 			#puts "\ti=$i, current=($cpx,$cpy), co=$co"
 			lappend itemopts -smooth 1
 			set opts [concat $lineopts $itemopts]
@@ -452,11 +475,31 @@ proc svg2can::parsepath {xmllist args} {
 		}
 		incr i
 	    }
-	    q {
-		# ?
+	    S - s {
+		# Must annihilate last point added and use its mirror instead.
+		#puts "S: i=$i, path=$path"
+		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && \
+		  ($i < $len4)} {
+		    # Control point from mirroring.
+		    set ctrlpx [expr 2 * $cpx - [lindex $co end-3]]
+		    set ctrlpy [expr 2 * $cpy - [lindex $co end-2]]
+		    lset co end-1 $ctrlpx
+		    lset co end $ctrlpy
+		    if {$isabsolute} {
+			lappend co [lindex $path [incr i]] [lindex $path [incr i]]
+			lappend co [lindex $path [incr i]] [lindex $path [incr i]]
+			set cpx [lindex $co end-1]
+			set cpy [lindex $co end]
+		    } else {
+			PathAddRelative $path co i cpx cpy
+			PathAddRelative $path co i cpx cpy
+		    }
+		    #puts "\ti=$i, ctrl=($ctrlpx,$ctrlpy), co=$co"
+		}		
 		incr i
+		lappend itemopts -smooth 1
 	    }
-	    T {
+	    T - t {
 		# Must annihilate last point added and use its mirror instead.
 		#puts "T: i=$i, path=$path"
 		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && \
@@ -466,29 +509,29 @@ proc svg2can::parsepath {xmllist args} {
 		    set ctrlpy [expr 2 * $cpy - [lindex $co end-2]]
 		    lset co end-1 $ctrlpx
 		    lset co end $ctrlpy
-		    lappend co [lindex $path [incr i]] [lindex $path [incr i]]
-		    set cpx [lindex $co end-1]
-		    set cpy [lindex $co end]
+		    if {$isabsolute} {
+			lappend co [lindex $path [incr i]] [lindex $path [incr i]]
+			set cpx [lindex $co end-1]
+			set cpy [lindex $co end]
+		    } else {
+			PathAddRelative $path co i cpx cpy
+		    }
 		    #puts "\ti=$i, ctrl=($ctrlpx,$ctrlpy), co=$co"
 		}		
 		incr i
 		lappend itemopts -smooth 1
 	    }
 	    V {
-		#puts "V: i=$i, path=$path"
 		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && \
 		  ($i < $len1)} {
 		    lappend co $cpx [lindex $path [incr i]]
-		    #puts "\ti=$i, co=$co"
 		}
 		incr i
 	    }
 	    v {
-		#puts "v: i=$i, path=$path"
 		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && \
 		  ($i < $len1)} {
 		    lappend co $cpx [expr $cpy + [lindex $path [incr i]]]
-		    #puts "\ti=$i, co=$co"
 		}
 		incr i
 	    }
@@ -522,7 +565,7 @@ proc svg2can::parsepath {xmllist args} {
     return $cmdList
 }
 
-proc svg2can::parsepolyline {xmllist args} {
+proc svg2can::parsepolyline {xmllist transformList args} {
     
     set coords {}
     set opts {}
@@ -548,10 +591,10 @@ proc svg2can::parsepolyline {xmllist args} {
 	}
     }
     set opts [MergePresentationAttr line $opts $presentationAttr]
-    return [concat create line $coords $opts]
+    return [list [concat create line $coords $opts]]
 }
 
-proc svg2can::parsepolygon {xmllist args} {
+proc svg2can::parsepolygon {xmllist transformList args} {
     
     set coords {}
     set opts {}
@@ -577,10 +620,10 @@ proc svg2can::parsepolygon {xmllist args} {
 	}
     }
     set opts [MergePresentationAttr polygon $opts $presentationAttr]
-    return [concat create polygon $coords $opts]
+    return [list [concat create polygon $coords $opts]]
 }
 
-proc svg2can::parserect {xmllist args} {
+proc svg2can::parserect {xmllist transformList args} {
     
     set opts {}
     set coords {0 0 0 0}
@@ -593,6 +636,7 @@ proc svg2can::parserect {xmllist args} {
 	switch -- $key {
 	    id {
 		lappend opts -tags $value
+		set id $value
 	    }
 	    rx - ry {
 		# unsupported :-(
@@ -621,7 +665,12 @@ proc svg2can::parserect {xmllist args} {
 	lset coords 3 [expr [lindex $coords 1] + $height]
     }
     set opts [MergePresentationAttr rectangle $opts $presentationAttr]
-    return [concat create rectangle $coords $opts]
+    set cmdList [list [concat create rectangle $coords $opts]]
+    if {[info exists id]} {
+	set cmdList [concat $cmdList \
+	  [CreateTransformCanvasCmdList $id $transformList]]
+    }
+    return $cmdList
 }
 
 # svg2can::parsetext --
@@ -630,7 +679,7 @@ proc svg2can::parserect {xmllist args} {
 #       Assuming that chdata is not mixed with elements, we should now have
 #       either chdata OR more elements (tspan).
 
-proc svg2can::parsetext {xmllist args} {
+proc svg2can::parsetext {xmllist transformList args} {
     
     set x 0
     set y 0
@@ -665,6 +714,10 @@ proc svg2can::ParseTspan {xmllist xVar yVar xAttrVar yAttrVar opts} {
     set tag [gettag $xmllist]
     set childList [getchildren $xmllist]
     set cmdList {}
+    if {[string equal $tag "text"]} {
+	set x $xAttr
+	set y $yAttr
+    }
     #puts "x=$x, y=$y, xAttr=$xAttr, yAttr=$yAttr"
     
     if {[llength $childList]} {
@@ -957,9 +1010,72 @@ proc svg2can::BaselineShiftToDy {baselineshift fontSpec} {
     return $dy
 }
 
+# svg2can::PathAddRelative --
+# 
+#       Utility function to add a relative point from the path to the 
+#       coordinate list. Updates iVar, and the current point.
+
+proc svg2can::PathAddRelative {path coVar iVar cpxVar cpyVar} {
+    upvar $coVar  co
+    upvar $iVar   i
+    upvar $cpxVar cpx
+    upvar $cpyVar cpy
+
+    set newx [expr $cpx + [lindex $path [incr i]]]
+    set newy [expr $cpy + [lindex $path [incr i]]]
+    lappend co $newx $newy
+    set cpx $newx
+    set cpy $newy
+}
+
 proc svg2can::PointsToList {points} {
     
     return [string map {, " "} $points]
+}
+
+# svg2can::ParseTransformAttr --
+# 
+#       Parse the svg syntax for the transform attribute to a simple tcl
+#       list.
+
+proc svg2can::ParseTransformAttr {attrlist} {
+    
+    set cmd ""
+    set idx [lsearch -exact $attrlist "transform"]
+    if {$idx >= 0} {
+	set cmd [lindex $attrlist [incr idx]]
+	regsub -all -- {\( *([-0-9]+) *\)} $cmd { \1} cmd
+	regsub -all -- {\( *([-0-9]+) *, *([-0-9]+) *\)} $cmd { {\1 \2}} cmd
+	regsub -all -- {\( *([-0-9]+) *, *([-0-9]+) *, *([-0-9]+) *\)} \
+	  $cmd { {\1 \2 \3}} cmd
+    }
+    return $cmd
+}
+
+# svg2can::CreateTransformCanvasCmdList --
+# 
+#       Takes a parsed list of transform attributes and turns them
+#       into a sequence of canvas commands.
+
+proc svg2can::CreateTransformCanvasCmdList {id transformList} {
+    
+    set cmdList {}
+    foreach {key argument} $transformList {
+	
+	switch -- $key {
+	    translate {
+		set dy 0
+		foreach {dx dy} $argument break
+		lappend cmdList [list move $id $dx $dy]
+	    }
+	    scale {
+		set yScale 0
+		foreach {xScale yScale} $argument break
+		lappend cmdList [list scale $id 0 0 $xScale $yScale]
+	    }
+	}
+    }
+    return $cmdList
 }
 
 proc svg2can::MapNoneToEmpty {val} {
@@ -1018,25 +1134,26 @@ proc svg2can::getchildren {xmllist} {
 if {0} {
     package require svg2can
     toplevel .t
-    pack [canvas .t.c -width 500 -height 400]
+    pack [canvas .t.c -width 600 -height 500]    
+    set i 0
     
-    set xml(0) {<polyline points='400 10 10 10 10 400' \
+    set xml([incr i]) {<polyline points='400 10 10 10 10 400' \
       style='stroke: #000000; stroke-width: 1.0; fill: none;'/>}
                     
     # Text
-    set xml(1) {<text x='10.0' y='20.0' \
+    set xml([incr i]) {<text x='10.0' y='20.0' \
       style='stroke-width: 0; font-family: Helvetica; font-size: 12; \
       fill: #000000;' id='std text t001'>\
       <tspan>Start</tspan><tspan>Mid</tspan><tspan>End</tspan></text>}
-    set xml(2) {<text x='10.0' y='40.0' \
+    set xml([incr i]) {<text x='10.0' y='40.0' \
       style='stroke-width: 0; font-family: Helvetica; font-size: 12; \
       fill: #000000;' id='std text t002'>One\
       straight text data</text>}
-    set xml(3) {<text x='10.0' y='60.0' \
+    set xml([incr i]) {<text x='10.0' y='60.0' \
       style='stroke-width: 0; font-family: Helvetica; font-size: 12; \
       fill: #000000;' id='std text t003'>\
       <tspan>Online</tspan><tspan dy='6'>dy=6</tspan><tspan dy='-6'>End</tspan></text>}
-    set xml(4) {<text x='10.0' y='90.0' \
+    set xml([incr i]) {<text x='10.0' y='90.0' \
       style='stroke-width: 0; font-family: Helvetica; font-size: 16; \
       fill: #000000;' id='std text t004'>\
       <tspan>First</tspan>\
@@ -1044,38 +1161,48 @@ if {0} {
       <tspan><tspan>Nested</tspan></tspan><tspan>End</tspan></text>}
     
     # Paths
-    set xml(5) {<path d='M 200 100 L 300 100 300 200 200 200 Z' \
+    set xml([incr i]) {<path d='M 200 100 L 300 100 300 200 200 200 Z' \
       style='fill-rule: evenodd; fill: none; stroke: black; stroke-width: 1.0;\
       stroke-linejoin: round;' id='std poly t005'/>}
-    set xml(6) {<path d='M 30 100 Q 80 30 100 100 130 65 200 80' \
+    set xml([incr i]) {<path d='M 30 100 Q 80 30 100 100 130 65 200 80' \
       style='fill-rule: evenodd; stroke: #af5da8; stroke-width: 4.0;\
       stroke-linejoin: round;' id='std poly t006'/>}
-    set xml(7) {<polyline points='30 100,80 30,100 100,130 65,200 80' \
+    set xml([incr i]) {<polyline points='30 100,80 30,100 100,130 65,200 80' \
       style='stroke: red;'/>}
     set xml(8) {<path d='M 10 200 Q 50 150 100 200   \
       150 250 200 200    250 150 300 200    350 250 400 200'\
       style='fill-rule: evenodd; stroke: black; stroke-width: 2.0;\
       stroke-linejoin: round; fill: #d7ffb5;' id='std t008'/>}
-    set xml(9)  {<path d='M 10 200 H 100 200 v20h 10'\
+    set xml([incr i])  {<path d='M 10 200 H 100 200 v20h 10'\
       style='fill-rule: evenodd; stroke: black; stroke-width: 2.0;\
       stroke-linejoin: round; fill: #d7ffb5;' id='std t008'/>}
-    set xml(10)  {<path d='M 20 200 V 300 310 h 10 v 10'\
+    set xml([incr i])  {<path d='M 20 200 V 300 310 h 10 v 10'\
       style='fill-rule: evenodd; stroke: blue; stroke-width: 2.0;\
       stroke-linejoin: round; fill: #d7ffb5;' id='std t008'/>}
-    set xml(11) {<path d='M 30 100 Q 80 30 100 100 T 200 80' \
-      style='stroke: green; stroke-width: 2.0;' id='std poly t006'/>}
-    set xml(12) {<path d='M 30 200 Q 80 130 100 200 T 150 180 200 180 250 180 300 180' \
-      style='stroke: gray50; stroke-width: 2.0;' id='std poly t006'/>}
+    set xml([incr i]) {<path d='M 30 100 Q 80 30 100 100 T 200 80' \
+      style='stroke: green; stroke-width: 2.0;' id='t006'/>}
+    set xml([incr i]) {<path d='M 30 200 Q 80 130 100 200 T 150 180 200 180 250 180 300 180' \
+      style='stroke: gray50; stroke-width: 2.0;' id='t006'/>}
+    set xml([incr i]) {<path d='M 30 300 Q 80 230 100 300 t 50 0 50 0 50 0 50 0' \
+      style='stroke: gray50; stroke-width: 1.0;' id='std poly t006'/>}
+    set xml([incr i]) {<path d="M100,200 C100,100 250,100 250,200 \
+      S400,300 400,200" />}
     
     # g
-    set xml(13) {<g fill="none" stroke="red" stroke-width="3" > \
+    set xml([incr i]) {<g fill="none" stroke="red" stroke-width="3" > \
       <line x1="300" y1="10" x2="350" y2="10" /> \
       <line x1="300" y1="10" x2="300" y2="50" /> \
       </g>}
     
+    # translate
+    set xml([incr i]) {<rect id="t0012" x="10" y="10" width="20" height="20" \
+      transform="translate(200,200)"/>}
+    set xml([incr i]) {<rect id="t0013" x="10" y="10" width="20" height="20" \
+      transform="scale(2)"/>}
+    
     foreach i [lsort -integer [array names xml]] {
 	set xmllist [tinydom::documentElement [tinydom::parse $xml($i)]]
-	set cmdList [svg2can::parseelement $xmllist]
+	set cmdList [svg2can::parseelement $xmllist {}]
 	foreach c $cmdList {
 	    puts $c
 	    eval .t.c $c
