@@ -2,11 +2,11 @@
 #  
 #      This file is part of The Coccinella application. 
 #      
-#  Copyright (c) 2001-2003  Mats Bengtsson
+#  Copyright (c) 2001-2004  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: VCard.tcl,v 1.26 2004-10-22 15:05:33 matben Exp $
+# $Id: VCard.tcl,v 1.27 2004-11-10 10:08:44 matben Exp $
 
 package provide VCard 1.0
 
@@ -67,14 +67,14 @@ proc ::VCard::FetchCallback {nstoken jlibName result theQuery} {
           -message [FormatTextForMessageBox  \
           [mc vcarderrget $errmsg]]
         ::Jabber::UI::SetStatusMessage ""
-	::VCard::Free $nstoken
+	Free $nstoken
         return
     }
     ::Jabber::UI::SetStatusMessage [mc vcardrec]
     
     # The 'theQuery' now contains all the vCard data in a xml list.
     if {[llength $theQuery]} {
-        ::VCard::ParseXmlList $theQuery ${nstoken}::elem
+        ParseXmlList $theQuery ${nstoken}::elem
     }
     Build $nstoken
 }
@@ -88,22 +88,22 @@ proc ::VCard::ParseXmlList {subiq arrName} {
     upvar #0 $arrName arr
     
     foreach c [wrapper::getchildren $subiq] {
-        set tag [string tolower [lindex $c 0]]
+        set tag [string tolower [wrapper::gettag $c]]
         switch -- $tag {
             fn - nickname - bday - url - title - role - desc {
-                set arr($tag) [lindex $c 3]     
+                set arr($tag) [wrapper::getcdata $c]     
             }
             n - org {
                 foreach sub [wrapper::getchildren $c] {
-                    set subt [string tolower [lindex $sub 0]]
-                    set arr(${tag}_${subt}) [lindex $sub 3]
+                    set subt [string tolower [wrapper::gettag $sub]]
+                    set arr(${tag}_${subt}) [wrapper::getcdata $sub]
                 }
             }
             tel {
                 set key "tel"
-                set telno [lindex $c 3]
+                set telno [wrapper::getcdata $c]
                 foreach sub [wrapper::getchildren $c] {
-                    set subt [string tolower [lindex $sub 0]]
+                    set subt [string tolower [wrapper::gettag $sub]]
                     append key "_$subt"
                 }
                 set arr($key) $telno
@@ -114,20 +114,20 @@ proc ::VCard::ParseXmlList {subiq arrName} {
                 set where [string tolower \
                   [lindex [wrapper::getchildren $c] 0 0]]
                 foreach sub [wrapper::getchildren $c] {
-                    if {[lindex $sub 2]} {
+                    if {[wrapper::getisempty $sub]} {
                         continue
                     }
-                    set subt [string tolower [lindex $sub 0]]
-                    set arr(adr_${where}_${subt}) [lindex $sub 3]
+                    set subt [string tolower [wrapper::gettag $sub]]
+                    set arr(adr_${where}_${subt}) [wrapper::getcdata $sub]
                 }
             }
             email {
                 set key "email"
-                set mailaddr [lindex $c 3]
+                set mailaddr [wrapper::getcdata $c]
                 
                 # Label with all (empty) subtags.
                 foreach sub [wrapper::getchildren $c] {
-                    set subt [string tolower [lindex $sub 0]]
+                    set subt [string tolower [wrapper::gettag $sub]]
                     append key "_$subt"
                 }
                 

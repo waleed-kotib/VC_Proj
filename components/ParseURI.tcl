@@ -3,8 +3,11 @@
 #       Parses and executes any -uri xmpp:jid[?query] command line option.
 #       typically from an anchor element <a href='xmpp:jid[?query]'/>
 #       in a html page.
+#       
+#       Most recent reference at the time of writing:
+#       http://www.ietf.org/internet-drafts/draft-saintandre-xmpp-uri-06.txt
 # 
-# $Id: ParseURI.tcl,v 1.13 2004-11-03 10:28:54 matben Exp $
+# $Id: ParseURI.tcl,v 1.14 2004-11-10 10:08:43 matben Exp $
 
 package require uriencode
 
@@ -42,10 +45,13 @@ proc ::ParseURI::Parse {args} {
     }
     set uri [lindex $args [incr ind]]
     set uri [uriencode::decodeurl $uri]
+    
     ::Debug 2 "::ParseURI::Parse uri=$uri"
 
     # Actually parse the uri.
-    if {![regexp {^xmpp:([^\?]+)(\?([^&]+)&(.+))?$} $uri match jid x op query]} {
+    # set reexp {^xmpp:([^\?]+)(\?([^&]+)&(.+))?$}
+    set reexp {^xmpp:([^\?#]+)(\?([^&]+)&([^#]+))?(#(.+))?$}
+    if {![regexp $reexp $uri match jid x querytype query y fragment]} {
 	return
     }
     
@@ -54,10 +60,11 @@ proc ::ParseURI::Parse {args} {
     variable $token
     upvar 0 $token state
 
-    set state(uri)    $uri
-    set state(jid)    $jid
-    set state(op)     $op
-    set state(query)  $query
+    set state(uri)       $uri
+    set state(jid)       $jid
+    set state(querytype) $querytype
+    set state(query)     $query
+    set state(fragment)  $fragment
     
     # Parse the query into an array.
     foreach sub [split $query &] {
@@ -95,11 +102,19 @@ proc ::ParseURI::Parse {args} {
 	    } else {
 		set res "coccinella"
 	    }
-	    set opts [::Profiles::Get $profname options]
+	    array set optsArr [::Profiles::Get $profname options]
+	    
+	    # We may override or set some of these options using specific 
+	    # query key-value pairs from the uri.
+	    foreach key {sasl ssl priority invisible ip} {
+		if {[info exists state(query,$key)]} {
+		    set optsArr(-$key) $state(query,$key)
+		}
+	    }
 	    
 	    # Use a "high-level" login application api for this.
 	    eval {::Jabber::Login::HighLogin $state(domain) $node $res $password \
-	      [list [namespace current]::LoginCB $token]} $opts
+	      [list [namespace current]::LoginCB $token]} [array get optsArr]
 	} else {
 	    Free $token
 	}
@@ -132,7 +147,7 @@ proc ::ParseURI::ProcessURI {token} {
     variable $token
     upvar 0 $token state
   
-    switch -- $state(op) {
+    switch -- $state(querytype) {
 	message {
 	    DoMessage $token
 	}
@@ -238,15 +253,19 @@ proc ::ParseURI::HandleGroupchat {token} {
     ::hooks::deregister  discoInfoHook  $state(discocmd)
     
     # We brutaly assumes muc room here.
-    ::Jabber::MUC::EnterRoom $state(jid) $state(query,nick) \
-      -command [list ::ParseURI::EnterRoomCB $token]
+    set opts {}
+    if {[info exists state(query,password)]} {
+	lappend opts -password $state(query,password)
+    }
+    eval {::Jabber::MUC::EnterRoom $state(jid) $state(query,nick) \
+      -command [list [namespace current]::EnterRoomCB $token]} $opts
 }
 
 proc ::ParseURI::EnterRoomCB {token type args} {
     variable $token
     upvar 0 $token state
         
-    if {$type != "error"} {
+    if {![string equal $type "error"]} {
 	
 	# Check that this is actually a whiteboard.
 	if {[info exists state(query,xmlns)] && \
