@@ -219,6 +219,8 @@
 ::msgcat::mcset sv mLogin		{Anslut...}
 ::msgcat::mcset sv mLogout		{Logga ut}
 ::msgcat::mcset sv mLogoutWith          {Logga ut meddelande...}
+::msgcat::mcset sv mHideMain            {Gšm}
+::msgcat::mcset sv mShowMain            {Visa}
 ::msgcat::mcset sv mPassword		{Lšsenord...}
 ::msgcat::mcset sv mRoster/Services	{Roster/Services}
 ::msgcat::mcset sv mMessageInbox	{Inkorg}

@@ -11,6 +11,8 @@ This brief text describes the jabber features supported:
 
   * Browsing (jabber:iq:browse).
 
+  * Disco.
+
   * Groupchat is supported via the "old" 'groupchat 1.0' protocol,
     via the never approved, but wide spread, jabber:iq:conference method,
     and MUC.
@@ -24,7 +26,6 @@ This brief text describes the jabber features supported:
 
       o jabber:client
       o jabber:iq:browse
-      o jabber:iq:conference
       o jabber:iq:last
       o jabber:iq:oob
       o jabber:iq:roster
@@ -32,7 +33,6 @@ This brief text describes the jabber features supported:
       o jabber:iq:version
       o jabber:x:data
       o jabber:x:event
-      o http://jabber.org/protocol/muc
       o http://jabber.org/protocol/disco#items
       o http://jabber.org/protocol/disco#info
       o coccinella:wb     (to be discarded)

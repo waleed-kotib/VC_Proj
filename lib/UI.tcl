@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.55 2004-04-23 07:13:24 matben Exp $
+# $Id: UI.tcl,v 1.56 2004-04-25 10:14:16 matben Exp $
 
 package require entrycomp
 
@@ -20,7 +20,7 @@ namespace eval ::UI:: {
     
     variable wThatUseMainMenu {}
 
-    # Addon stuff.
+    # components stuff.
     variable menuSpecPublic
     set menuSpecPublic(wpaths) {}
 }
@@ -651,7 +651,7 @@ proc ::UI::MenuDisableAllBut {mw normalList} {
 namespace eval ::UI::Public:: {
     
     # This is supposed to collect some "public" interfaces useful for
-    # 'plugins' and 'addons'.
+    # 'plugins' and 'components'.
 }
 
 # UI::Public::RegisterMenuEntry --

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.30 2004-04-23 07:13:25 matben Exp $
+# $Id: Whiteboard.tcl,v 1.31 2004-04-25 10:14:17 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -118,7 +118,7 @@ namespace eval ::WB:: {
     # Unique id for main toplevels
     variable uidmain 0
         
-    # Addon stuff.
+    # Plugin stuff.
     variable menuSpecPublic
     set menuSpecPublic(wpaths) {}
     
@@ -1604,7 +1604,7 @@ proc ::WB::BuildWhiteboardMenus {wtop} {
     # Item menu (temporary placement).
     ::WB::BuildItemMenu $wtop ${wmenu}.items $this(itemPath)
     
-    # Addon or Plugin menus if any.
+    # Plugin menus if any.
     ::UI::BuildPublicMenus $wtop $wmenu
     
     ::UI::NewMenu $wtop ${wmenu}.info mInfo $menuDefs(main,info) $opts(-state)
@@ -1640,7 +1640,7 @@ proc ::WB::DisableWhiteboardMenus {wmenu} {
     $wmenu entryconfigure [::msgcat::mc mItems] -state disabled
     $wmenu entryconfigure [::msgcat::mc mInfo] -state disabled
 	
-    # Handle all 'addons'.
+    # Handle all 'plugins'.
     foreach wpath $menuSpecPublic(wpaths) {
 	set name $menuSpecPublic($wpath,name)
 	$wmenu entryconfigure $name -state disabled

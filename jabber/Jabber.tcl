@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.79 2004-04-19 13:58:47 matben Exp $
+# $Id: Jabber.tcl,v 1.80 2004-04-25 10:14:15 matben Exp $
 
 package provide Jabber 1.0
 
@@ -111,16 +111,16 @@ namespace eval ::Jabber:: {
     variable mapShowElemToText
     variable mapShowTextToElem
     
-    array set mapShowElemToText  \
-      [list [::msgcat::mc mAvailable] available  \
+    array set mapShowElemToText [list \
+      [::msgcat::mc mAvailable]       available  \
       [::msgcat::mc mAway]            away       \
       [::msgcat::mc mChat]            chat       \
       [::msgcat::mc mDoNotDisturb]    dnd        \
       [::msgcat::mc mExtendedAway]    xa         \
       [::msgcat::mc mInvisible]       invisible  \
       [::msgcat::mc mNotAvailable]    unavailable]
-    array set mapShowTextToElem  \
-      [list available [::msgcat::mc mAvailable]     \
+    array set mapShowTextToElem [list \
+      available       [::msgcat::mc mAvailable]     \
       away            [::msgcat::mc mAway]          \
       chat            [::msgcat::mc mChat]          \
       dnd             [::msgcat::mc mDoNotDisturb]  \
@@ -434,6 +434,22 @@ proc ::Jabber::GetMyJid {{roomjid {}}} {
 	}
     }
     return $jid
+}
+
+proc ::Jabber::GetMyStatus { } {
+    variable jstate
+    
+    return $jstate(status)
+}
+
+proc ::Jabber::GetStatusText {status} {    
+    variable mapShowTextToElem
+    
+    if {[info exists mapShowTextToElem($status)]} {
+	return $mapShowTextToElem($status)
+    } else {
+	return ""
+    }
 }
 
 proc ::Jabber::InvokeJlibCmd {args} {

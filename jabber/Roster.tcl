@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.55 2004-04-23 07:13:20 matben Exp $
+# $Id: Roster.tcl,v 1.56 2004-04-25 10:14:16 matben Exp $
 
 package provide Roster 1.0
 
@@ -319,8 +319,6 @@ proc ::Jabber::Roster::SetBackgroundImage {useBgImage bgImagePath} {
     variable wtree    
     variable wroster
     
-    #puts "::Jabber::Roster::SetBackgroundImage: useBgImage=$useBgImage, bgImagePath=$bgImagePath"
-    #puts "\tjprefs(rost,useBgImage)=$jprefs(rost,useBgImage)"
     if {[winfo exists $wtree]} {
 	
 	# Change only if needed.

@@ -220,6 +220,8 @@
 ::msgcat::mcset en mLogin		{Login...}
 ::msgcat::mcset en mLogout		{Logout}
 ::msgcat::mcset en mLogoutWith          {Logout With Message...}
+::msgcat::mcset en mHideMain            {Hide Main}
+::msgcat::mcset en mShowMain            {Show Main}
 ::msgcat::mcset en mPassword		{Password...}
 ::msgcat::mcset en mRoster/Services	{Roster/Services}
 ::msgcat::mcset en mMessageInbox	{Message Inbox}
