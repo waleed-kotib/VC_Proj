@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.31 2004-01-09 14:08:22 matben Exp $
+# $Id: Chat.tcl,v 1.32 2004-01-11 15:17:51 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -21,6 +21,14 @@ namespace eval ::Jabber::Chat:: {
     # widgetDefault.
     set fontS  [option get . fontSmall {}]
     set fontSB [option get . fontSmallBold {}]
+
+    # Icons
+    option add *Chat*sendImage            send                  widgetDefault
+    option add *Chat*sendDisImage         sendDis               widgetDefault
+    option add *Chat*saveImage            save                  widgetDefault
+    option add *Chat*saveDisImage         saveDis               widgetDefault
+    option add *Chat*printImage           print                 widgetDefault
+    option add *Chat*printDisImage        printDis              widgetDefault
 
     option add *Chat*mePreForeground      red                   widgetDefault
     option add *Chat*mePreBackground      ""                    widgetDefault
@@ -417,7 +425,29 @@ proc ::Jabber::Chat::Build {threadID args} {
     set wtxtsnd  $frmid.frtxtsnd        
     set wtextsnd $wtxtsnd.text
     set wyscsnd  $wtxtsnd.ysc
-    
+    set wtray    $w.frall.tray
+        
+    # Shortcut button part.
+    set iconSend      [::Theme::GetImage [option get $w sendImage {}]]
+    set iconSendDis   [::Theme::GetImage [option get $w sendDisImage {}]]
+    set iconSave      [::Theme::GetImage [option get $w saveImage {}]]
+    set iconSaveDis   [::Theme::GetImage [option get $w saveDisImage {}]]
+    set iconPrint     [::Theme::GetImage [option get $w printImage {}]]
+    set iconPrintDis  [::Theme::GetImage [option get $w printDisImage {}]]
+
+    ::buttontray::buttontray $wtray 50
+    pack $wtray -side top -fill x -padx 4 -pady 2
+
+    $wtray newbutton send    Send    $iconSend  $iconSendDis  \
+      [list [namespace current]::Send $token]
+     $wtray newbutton save   Save    $iconSave  $iconSaveDis  \
+       [list [namespace current]::Save $token]
+    $wtray newbutton print   Print   $iconPrint $iconPrintDis  \
+      [list [namespace current]::Print $token]
+    $wtray newbutton history History $iconPrint $iconPrintDis  \
+      [list [namespace current]::BuildHistory $jid2]
+    set shortBtWidth [$wtray minwidth]
+
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
     pack [button $frbot.btconn -text [::msgcat::mc Send] -width 8 -default active \
@@ -435,19 +465,22 @@ proc ::Jabber::Chat::Build {threadID args} {
     pack $frbot -side bottom -fill x -padx 10 -pady 6
     
     # CCP etc.
-    pack [frame $w.frall.fccp] -side top -fill x
-    set wccp $w.frall.fccp.ccp
-    pack [::UI::NewCutCopyPaste $wccp] -padx 10 -pady 2 -side left
-    ::UI::CutCopyPasteConfigure $wccp cut -state disabled
-    ::UI::CutCopyPasteConfigure $wccp copy -state disabled
-    ::UI::CutCopyPasteConfigure $wccp paste -state disabled
-    pack [frame $w.frall.fccp.div -bd 2 -relief raised -width 2] -fill y -side left
-    pack [::UI::NewPrint $w.frall.fccp.pr [list [namespace current]::Print $token]] \
-      -side left -padx 10
-    button $w.frall.fccp.hist -text [msgcat::mc History]  \
-      -command [list [namespace current]::BuildHistory $jid2] 
+    if {0} {
+	pack [frame $w.frall.fccp] -side top -fill x
+	set wccp $w.frall.fccp.ccp
+	pack [::UI::NewCutCopyPaste $wccp] -padx 10 -pady 2 -side left
+	::UI::CutCopyPasteConfigure $wccp cut -state disabled
+	::UI::CutCopyPasteConfigure $wccp copy -state disabled
+	::UI::CutCopyPasteConfigure $wccp paste -state disabled
+	pack [frame $w.frall.fccp.div -bd 2 -relief raised -width 2] -fill y -side left
+	pack [::UI::NewPrint $w.frall.fccp.pr [list [namespace current]::Print $token]] \
+	  -side left -padx 10
+	button $w.frall.fccp.hist -text [msgcat::mc History]  \
+	  -command [list [namespace current]::BuildHistory $jid2] 
+	pack [frame $w.frall.div2 -bd 2 -relief sunken -height 2] -fill x -side top
+	pack $w.frall.fccp.hist -side right -padx 6
+    }
     pack [frame $w.frall.div2 -bd 2 -relief sunken -height 2] -fill x -side top
-    pack $w.frall.fccp.hist -side right -padx 6
     
     # To and subject fields.
     set frtop [frame $w.frall.frtop -borderwidth 0]
@@ -521,7 +554,7 @@ proc ::Jabber::Chat::Build {threadID args} {
     if {$nwin == 1} {
 	::UI::SetWindowGeometry $w $wDlgs(jchat)
     }
-    wm minsize $w 220 320
+    wm minsize $w [expr {$shortBtWidth < 220} ? 220 : $shortBtWidth] 320
     wm maxsize $w 800 2000
     
     focus $w
@@ -714,6 +747,31 @@ proc ::Jabber::Chat::Print {token} {
     upvar 0 $token state
     
     ::UserActions::DoPrintText $state(wtext)
+}
+
+proc ::Jabber::Chat::Save {token} {
+    global  this
+    variable $token
+    upvar 0 $token state
+    
+    set wtext $state(wtext)
+    
+    set ans [tk_getSaveFile -title [::msgcat::mc {Save Message}] \
+      -initialfile "Chat $state(jid).txt"]
+    
+    if {[string length $ans]} {
+	set allText [::Text::TransformToPureText $wtext]
+	set fd [open $ans w]
+	puts $fd "Chat with:\t$state(jid)"
+	puts $fd "Subject:\t$state(subject)"
+	puts $fd "\n"
+	puts $fd $allText	
+	close $fd
+	if {[string equal $this(platform) "macintosh"]} {
+	    file attributes $ans -type TEXT -creator ttxt
+	}
+    }
+
 }
 
 proc ::Jabber::Chat::PresenceCallback {jid type args} {
