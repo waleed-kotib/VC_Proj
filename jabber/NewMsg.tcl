@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.42 2004-09-30 12:43:06 matben Exp $
+# $Id: NewMsg.tcl,v 1.43 2004-10-08 12:22:20 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -39,13 +39,13 @@ namespace eval ::Jabber::NewMsg:: {
     # {subtype popupText entryText}
     variable transportDefs
     array set transportDefs {
-	jabber      {Jabber     {Jabber (address):}}
-	icq         {ICQ        {ICQ (number):}}
+	jabber      {Jabber     {Jabber address:}}
+	icq         {ICQ        {ICQ number:}}
 	aim         {AIM        {AIM:}}
 	msn         {MSN        {MSN Messenger:}}
 	yahoo       {Yahoo      {Yahoo Messenger:}}
 	irc         {IRC        {IRC:}}
-	smtp        {Email      {Mail address:}}
+	smtp        {Email      {Email address, @->%:}}
 	x-gadugadu  {Gadu-Gadu  {Address:}}
     }
 }
@@ -533,6 +533,9 @@ proc ::Jabber::NewMsg::PopupCmd {w n} {
 	}
 	*MSN* {
 	    set locals($w,addr$n) "userName%hotmail.com@$locals(servicejid,msn)"
+	}
+	*Email* {
+	    set locals($w,addr$n) "userName%emailserver@$locals(servicejid,smtp)"
 	}
 	default {
 	    set locals($w,addr$n) ""

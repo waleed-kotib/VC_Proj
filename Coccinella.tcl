@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.87 2004-10-05 12:16:22 matben Exp $
+# $Id: Coccinella.tcl,v 1.88 2004-10-08 12:22:20 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -128,11 +128,13 @@ if {[llength [namespace children :: "::browser*"]] > 0} {
 # Level of detail for printouts. >= 2 for my outputs.
 set debugLevel 0
 
-# Macintosh only: if no debug printouts, no console. Also for windows?
-if {[string match "mac*" $this(platform)] && $debugLevel == 0} {
-    catch {console hide}
+# If no debug printouts, no console.
+if {$debugLevel == 0} {
+    switch -- $this(platform) windows - macintosh - macosx {
+	catch {console hide}
+    }
 }
-
+	
 # For debug purposes.
 if {$debugLevel >= 6} {
     set fdLog [open [file join [file dirname [info script]] debug.log] w]
@@ -223,7 +225,7 @@ switch -- $this(platform) {
     }
 }
 
-# Collect paths in this array.
+# Collect paths in 'this' array.
 set this(path)              $thisPath
 set this(script)            $thisScript
 set this(imagePath)         [file join $this(path) images]
@@ -400,7 +402,7 @@ foreach sourceName $allLibSourceFiles {
     source [file join $this(path) lib $sourceName]
 }
 
-# On the mac we have some extras.
+# On the mac we have some extras. Should go away in later versions of AquaTk.
 if {[string equal $this(platform) "macosx"]} {
     if {![catch {package require MovableAlerts} msg]} {
 	rename tk_messageBox ""

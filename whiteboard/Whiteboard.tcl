@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.23 2004-09-28 13:50:21 matben Exp $
+# $Id: Whiteboard.tcl,v 1.24 2004-10-08 12:22:21 matben Exp $
 
 package require entrycomp
 package require moviecontroller
@@ -574,7 +574,7 @@ proc ::WB::InitMenuDefs { } {
     if {!$haveAppleMenu} {
 	lappend menuDefs(main,info) $menuDefs(main,info,aboutwhiteboard)
     }
-    if {!$haveAppleMenu && [::Plugins::HavePackage QuickTimeTcl]} {
+    if {!$haveAppleMenu && ![catch {package require QuickTimeTcl 3.1}]} {
 	lappend menuDefs(main,info) $menuDefs(main,info,aboutquicktimetcl)
     }
 	

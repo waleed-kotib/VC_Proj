@@ -51,6 +51,7 @@
 ::msgcat::mcset fr File			{Fichier}
 ::msgcat::mcset fr Finish		{Terminer}
 ::msgcat::mcset fr Finished		{Terminé}
+::msgcat::mcset fr Friends              {Amis}
 ::msgcat::mcset fr Forward		{Faire suivre}
 ::msgcat::mcset fr From			{De}
 ::msgcat::mcset fr General		{Général}

@@ -52,6 +52,7 @@
 ::msgcat::mcset de File		Datei
 ::msgcat::mcset de Finish	Ende
 ::msgcat::mcset de Finished	Beendet
+::msgcat::mcset de Friends      Freunden
 ::msgcat::mcset de Forward	Weiterleiten
 ::msgcat::mcset de From		Von
 ::msgcat::mcset de General	Allgemein
