@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.113 2005-02-03 08:43:58 matben Exp $
+# $Id: Roster.tcl,v 1.114 2005-02-04 07:05:32 matben Exp $
 
 package provide Roster 1.0
 
@@ -137,6 +137,12 @@ namespace eval ::Roster:: {
     if {[string equal $this(platform) "macintosh"]} {
 	set popMenuDefs(roster,def) [lreplace $popMenuDefs(roster,def) 9 11]
     }
+    
+    # Various time values.
+    variable timer
+    set timer(msg,ms) 10000
+    set timer(exitroster,secs) 0
+    set timer(pres,secs) 4
 }
 
 proc ::Roster::GetNameOrjid {jid} {
@@ -344,29 +350,28 @@ proc ::Roster::Build {w} {
       -backgroundbd [option get $w rootBackgroundBd {}] \
       -foreground   [option get $w rootForeground {}]]
     
-    eval {::tree::tree $wtree -width 100 -height 100 -silent 1  \
-      -sortcommand {lsort -dictionary} -sortlevels {0} \
-      -scrollwidth 400  \
-      -xscrollcommand [list ::UI::ScrollSet $wxsc \
-      [list grid $wxsc -row 1 -column 0 -sticky ew]]  \
-      -yscrollcommand [list ::UI::ScrollSet $wysc \
-      [list grid $wysc -row 0 -column 1 -sticky ns]]  \
-      -selectcommand [namespace current]::SelectCmd   \
-      -doubleclickcommand [namespace current]::DoubleClickCmd} $opts
+    eval {
+	::tree::tree $wtree -width 100 -height 100 -silent 1  \
+	  -sortcommand {lsort -dictionary} -sortlevels {0} \
+	  -scrollwidth 400  \
+	  -xscrollcommand [list ::UI::ScrollSet $wxsc \
+	  [list grid $wxsc -row 1 -column 0 -sticky ew]]  \
+	  -yscrollcommand [list ::UI::ScrollSet $wysc \
+	  [list grid $wysc -row 0 -column 1 -sticky ns]]  \
+	  -selectcommand [namespace current]::SelectCmd   \
+	  -doubleclickcommand [namespace current]::DoubleClickCmd  \
+	  -eventlist [list [list <<ButtonPopup>> [namespace current]::Popup]]
+    } $opts
     
     if {[string match "mac*" $this(platform)]} {
-	$wtree configure -buttonpresscommand [namespace current]::Popup \
-	  -eventlist [list [list <Control-Button-1> [namespace current]::Popup] \
-	  [list <Button-2> [namespace current]::Popup]]
-    } else {
-	$wtree configure -rightclickcommand [namespace current]::Popup
+	$wtree configure -buttonpresscommand [namespace current]::Popup
     }
 
     scrollbar $wxsc -orient horizontal -command [list $wtree xview]
     scrollbar $wysc -orient vertical -command [list $wtree yview]
     grid $wtree -row 0 -column 0 -sticky news
-    grid $wysc -row 0 -column 1 -sticky ns
-    grid $wxsc -row 1 -column 0 -sticky ew
+    grid $wysc  -row 0 -column 1 -sticky ns
+    grid $wxsc  -row 1 -column 0 -sticky ew
     grid columnconfigure $wbox 0 -weight 1
     grid rowconfigure    $wbox 0 -weight 1
     
@@ -401,6 +406,33 @@ proc ::Roster::Message {str} {
     variable wwave
     
     $wwave message $str
+}
+
+proc ::Roster::TimedMessage {str} {
+    variable timer
+    
+    if {[info exists timer(msg)]} {
+	after cancel $timer(msg)
+    }
+    Message $str
+    after $timer(msg,ms) [namespace current]::CancelTimedMessage
+}
+
+proc ::Roster::CancelTimedMessage { } {
+    Message ""
+}
+
+proc ::Roster::SetPresenceMessage {jid presence args} {
+    variable mapShowTextToElem
+    
+    array set argsArr $args
+    set show $presence
+    if {[info exists argsArr(-show)]} {
+	set show $argsArr(-show)
+    }
+    set name [GetDisplayName $jid]
+    set str [mc {%s is %s} $name $mapShowTextToElem($show)]
+    TimedMessage $str
 }
 
 # Roster::LoginCmd --
@@ -874,10 +906,12 @@ proc ::Roster::Clear { } {
 
 proc ::Roster::ExitRoster { } {
     variable wwave
+    variable timer
 
     ::Jabber::UI::SetStatusMessage [mc jarostupdate]
     $wwave animate -1
-
+    set timer(exitroster,secs) [clock seconds]
+    
     # Should perhaps fix the directories of the tree widget, such as
     # appending (#items) for each headline.
 }
@@ -959,7 +993,8 @@ proc ::Roster::SetItem {jid args} {
 # Results:
 #       roster tree updated.
 
-proc ::Roster::Presence {jid presence args} {    
+proc ::Roster::Presence {jid presence args} {
+    variable timer
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
 
@@ -1021,6 +1056,11 @@ proc ::Roster::Presence {jid presence args} {
 	eval {PutItemInTree $jid2 $treePres} $itemAttr $args
     }
     RemoveEmptyRootDirs
+    
+    # We set timed messages for presences only if significantly after login.
+    if {[expr [clock seconds] - $timer(exitroster,secs)] > $timer(pres,secs)} {
+	eval {SetPresenceMessage $jid $presence} $args
+    }
 }
 
 # Roster::Remove --

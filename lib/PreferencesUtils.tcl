@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.40 2005-02-02 15:21:20 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.41 2005-02-04 07:05:32 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -104,7 +104,7 @@ proc ::PreferencesUtils::Add {thePrefs} {
     set isOldPrefFile 0
     
     foreach item $thePrefs {
-	foreach {varName resourceName defaultValue} $item break
+	foreach {varName resName defaultValue} $item break
 	
 	# The default priority for hardcoded values are 20 (factoryDefault).
 	if {[llength $item] >= 4} {
@@ -113,12 +113,12 @@ proc ::PreferencesUtils::Add {thePrefs} {
 	    set varPriority 20
 	}
 	lappend prefs(master)   \
-	  [list $varName $resourceName $defaultValue $varPriority]
+	  [list $varName $resName $defaultValue $varPriority]
 	
 	# Override options that should be write only:
 	# for instance, version numbers.
 	if {$varPriority <= 60} {
-	    set value [GetValue $varName $resourceName $defaultValue]
+	    set value [GetValue $varName $resName $defaultValue]
 	} else {
 	    set value $defaultValue
 	}
@@ -127,12 +127,12 @@ proc ::PreferencesUtils::Add {thePrefs} {
 	upvar #0 $varName var
 	
 	# Treat arrays specially.
-	if {[string match "*_array" $resourceName]} {
+	if {[string match "*_array" $resName]} {
 	    array set var $value
 	} else {
 	    set var $value
 	}
-	#puts "varName=$varName, resourceName=$resourceName, defaultValue=$defaultValue, value=$value"
+	#puts "varName=$varName, resName=$resName, defaultValue=$defaultValue, value=$value"
     }   
 }
 
@@ -144,16 +144,16 @@ proc ::PreferencesUtils::Add {thePrefs} {
 #
 # Arguments:
 #       varName       the actual name of the preference variable.
-#       resourceName  the resource name of the preference variable.
+#       resName       the resource name of the preference variable.
 #       defValue      the default value of the preference name.
 #       
 # Results:
 #       a value for the preference with the given name. 
 
-proc ::PreferencesUtils::GetValue {varName resourceName defValue} {
+proc ::PreferencesUtils::GetValue {varName resName defValue} {
     upvar #0 varName theVar
     
-    set theVar [option get . $resourceName {}]
+    set theVar [option get . $resName {}]
     
     # If not there {} then take the itsHardCodedDefaultValue.
     if {$theVar == {}} {
@@ -190,17 +190,19 @@ proc ::PreferencesUtils::SaveToFile { } {
     
     # Only preferences indicated in the master copy are saved.
     foreach item $prefs(master) {
-	set varName [lindex $item 0]
-	set resourceName [lindex $item 1]
+	foreach {varName resName defVal} $item {break}
 	
 	# All names must be fully qualified. Therefore #0.
 	upvar #0 $varName var
-	
+		
 	# Treat arrays specially.
-	if {[string match "*_array" $resourceName]} {
-	    puts $fid [format "%-24s\t%s" *${resourceName}: [array get var]]	    
+	if {[string match "*_array" $resName]} {
+	    puts $fid [format "%-24s\t%s" *${resName}: [array get var]]	    
 	} else {
-	    puts $fid [format "%-24s\t%s" *${resourceName}: $var]
+	    if {[string equal $var $defVal]} {
+		#continue
+	    }
+	    puts $fid [format "%-24s\t%s" *${resName}: $var]
 	}
     }
     close $fid
@@ -233,14 +235,14 @@ proc ::PreferencesUtils::ResetToFactoryDefaults {maxPriority} {
     set maxPriorityNum $priNameToNum($maxPriority)
     foreach item $prefs(master) {
 	set varName [lindex $item 0]
-	set resourceName [lindex $item 1]
+	set resName [lindex $item 1]
 	set defaultValue [lindex $item 2]
 	set varPriority [lindex $item 3]
 	if {$varPriority < $maxPriorityNum} {
 	    upvar #0 $varName var
 	
 	    # Treat arrays specially.
-	    if {[string match "*_array" $resourceName]} {
+	    if {[string match "*_array" $resName]} {
 		array set var $defaultValue
 	    } else {
 		set var $defaultValue

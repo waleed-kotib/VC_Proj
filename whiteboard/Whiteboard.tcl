@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.31 2005-01-31 14:07:00 matben Exp $
+# $Id: Whiteboard.tcl,v 1.32 2005-02-04 07:05:34 matben Exp $
 
 package require entrycomp
 package require moviecontroller
@@ -1366,12 +1366,6 @@ proc ::WB::SetToolButton {wtop btName} {
     # Typical B3 bindings independent of tool selected.
     switch -- $this(platform) {
 	macintosh - macosx {
-	    $wCan bind std <Control-Button-1> {
-		::CanvasUtils::DoItemPopup %W %X %Y 
-	    }
-	    $wCan bind std <Button-2> {
-		::CanvasUtils::DoItemPopup %W %X %Y 
-	    }
 	    
 	    # This one is needed to cancel selection since we compete
 	    # with Button-1 binding to canvas.
@@ -1381,24 +1375,17 @@ proc ::WB::SetToolButton {wtop btName} {
 	    $wCan bind std <Control-B1-Motion> {
 		::CanvasDraw::CancelBox %W
 	    }
-	    bind QTFrame <Control-Button-1> {
-		::CanvasUtils::DoQuickTimePopup %W %X %Y 
-	    }
-	    bind QTFrame <Button-2> {
-		::CanvasUtils::DoQuickTimePopup %W %X %Y 
-	    }
 	}
-	default {
-	    $wCan bind std <Button-3> {
-		::CanvasUtils::DoItemPopup %W %X %Y 
-	    }
-	    bind QTFrame <Button-3> {
-		::CanvasUtils::DoQuickTimePopup %W %X %Y 
-	    }
-	    bind SnackFrame <Button-3> {
-		::CanvasUtils::DoWindowPopup %W %X %Y 
-	    }
-	}
+    }
+
+    $wCan bind std <<ButtonPopup>> {
+	::CanvasUtils::DoItemPopup %W %X %Y 
+    }
+    bind QTFrame <<ButtonPopup>> {
+	::CanvasUtils::DoQuickTimePopup %W %X %Y 
+    }
+    bind SnackFrame <<ButtonPopup>> {
+	::CanvasUtils::DoWindowPopup %W %X %Y 
     }
     
     switch -- $btName {
@@ -1419,18 +1406,11 @@ proc ::WB::SetToolButton {wtop btName} {
 		    $wCan bind std <ButtonRelease-1> {
 			::CanvasUtils::StopTimerToItemPopup
 		    }
-		    $wCan bind std <Control-Button-1> {
-			::CanvasUtils::DoItemPopup %W %X %Y 
-		    }
 		    
 		    # This one is needed to cancel selection since we compete
 		    # with Button-1 binding to canvas.
 		    $wCan bind std <Control-ButtonRelease-1> {
 			::CanvasDraw::CancelBox %W
-		    }
-
-		    $wCan bind std <Button-2> {
-			::CanvasUtils::DoItemPopup %W %X %Y 
 		    }
 		    bind QTFrame <Button-1> {
 			::CanvasUtils::StartTimerToPopupEx %W %X %Y \
@@ -1448,19 +1428,20 @@ proc ::WB::SetToolButton {wtop btName} {
 		    ::WB::SetStatusMessage $wtop [mc uastatpointmac]
 		}
 		default {
-		    $wCan bind std <Button-3> {
-			
-			# Global coords for popup.
-			::CanvasUtils::DoItemPopup %W %X %Y 
-		    }
-		    bind QTFrame <Button-3> {
-			::CanvasUtils::DoQuickTimePopup %W %X %Y 
-		    }
-		    bind SnackFrame <Button-3> {
-			::CanvasUtils::DoWindowPopup %W %X %Y 
-		    }
 		    ::WB::SetStatusMessage $wtop [mc uastatpoint]		      
 		}
+	    }
+
+	    $wCan bind std <<ButtonPopup>> {
+		
+		# Global coords for popup.
+		::CanvasUtils::DoItemPopup %W %X %Y 
+	    }
+	    bind QTFrame <<ButtonPopup>> {
+		::CanvasUtils::DoQuickTimePopup %W %X %Y 
+	    }
+	    bind SnackFrame <<ButtonPopup>> {
+		::CanvasUtils::DoWindowPopup %W %X %Y 
 	    }
 	}
 	move {
@@ -2056,9 +2037,8 @@ proc ::WB::CreateAllButtons {wtop} {
 		if {[string match "mac*" $this(platform)]} {
 		    bind $lwi <Button-1> "+ [namespace current]::StartTimerToToolPopup %W $wtop $name"
 		    bind $lwi <ButtonRelease-1> [namespace current]::StopTimerToToolPopup
-		} else {
-		    bind $lwi <Button-3> [list [namespace current]::DoToolPopup %W $wtop $name]
 		}
+		bind $lwi <<ButtonPopup>> [list [namespace current]::DoToolPopup %W $wtop $name]
 	    }
 	}
     }
