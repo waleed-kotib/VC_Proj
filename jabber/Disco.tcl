@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.13 2004-05-23 13:18:08 matben Exp $
+# $Id: Disco.tcl,v 1.14 2004-05-26 07:36:35 matben Exp $
 
 package provide Disco 1.0
 
@@ -84,8 +84,8 @@ proc ::Jabber::Disco::LoginHook { } {
     #
     # We disco servers jid 'items+info', and disco its childrens 'info'.
     if {[string equal $jprefs(serviceMethod) "disco"]} {
-	::Jabber::Disco::GetInfo  $jserver(this)
 	::Jabber::Disco::GetItems $jserver(this)
+	::Jabber::Disco::GetInfo  $jserver(this)
     }
 }
 
@@ -93,8 +93,8 @@ proc ::Jabber::Disco::LogoutHook { } {
     
     if {[lsearch [::Jabber::UI::Pages] "Disco"] >= 0} {
 	#::Jabber::Disco::SetUIWhen "disconnect"
-	#::Jabber::Disco::Clear
     }
+    ::Jabber::Disco::Clear
 }
 
 proc ::Jabber::Disco::HaveTree { } {    
@@ -167,12 +167,13 @@ proc ::Jabber::Disco::ItemsCB {disconame type from subiq args} {
     upvar ::Jabber::jprefs jprefs
     
     ::Debug 2 "::Jabber::Disco::ItemsCB type=$type, from=$from"
- 
+    set from [jlib::jidmap $from]
+    
     switch -- $type {
 	error {
 	    
 	    # As a fallback we use the agents/browse method instead.
-	    if {[string equal $from $jserver(this)]} {
+	    if {[jlib::jidequal $from $jserver(this)]} {
 		
 		switch -- $jprefs(serviceMethod) {
 		    disco {
@@ -189,7 +190,7 @@ proc ::Jabber::Disco::ItemsCB {disconame type from subiq args} {
 	ok - result {
 
 	    # It is at this stage we are confident that a Disco page is needed.
-	    if {[string equal $from $jserver(this)]} {
+	    if {[jlib::jidequal $from $jserver(this)]} {
 		::Jabber::UI::NewPage "Disco"
 	    }
 	    catch {unset tstate(run,$from)}
@@ -207,7 +208,7 @@ proc ::Jabber::Disco::ItemsCB {disconame type from subiq args} {
 		# We disco servers jid 'items+info', and disco its childrens 'info'.
 		# 
 		# Perhaps we should discover depending on items category?
-		if {[string equal $from $jserver(this)]} {
+		if {[jlib::jidequal $from $jserver(this)]} {
 		    ::Jabber::Disco::GetInfo $cjid
 		}		
 	    }	    
@@ -216,6 +217,8 @@ proc ::Jabber::Disco::ItemsCB {disconame type from subiq args} {
 }
 
 proc ::Jabber::Disco::InfoCB {disconame type from subiq args} {
+    variable wtree
+    upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::Jabber::Disco::InfoCB type=$type, from=$from"
     
@@ -223,8 +226,16 @@ proc ::Jabber::Disco::InfoCB {disconame type from subiq args} {
     # need to be set since we get items before name.
     # 
     # BUT the items element may also have a name attribute???
-    
-    
+    if {![info exists wtree] || ![winfo exists $wtree]} {
+	return
+    }
+    set from [jlib::jidmap $from]
+    set name [$jstate(disco) name $from]
+    if {$name != ""} {
+	foreach v [$wtree find withtag $from] {
+	    $wtree itemconfigure $v -text $name
+	}
+    }
 }
 	    
 # Jabber::Disco::ParseGetInfo --
@@ -637,6 +648,12 @@ proc ::Jabber::Disco::Refresh {jid} {
     ::Jabber::Disco::ControlArrows 1
     ::Jabber::Disco::GetInfo  $jid
     ::Jabber::Disco::GetItems $jid
+}
+
+proc ::Jabber::Disco::Clear { } {    
+    upvar ::Jabber::jstate jstate
+    
+    $jstate(disco) reset
 }
 
 proc ::Jabber::Disco::ControlArrows {step} {    

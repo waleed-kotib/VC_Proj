@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.28 2004-05-03 14:11:54 matben Exp $
+# $Id: OOB.tcl,v 1.29 2004-05-26 07:36:36 matben Exp $
 
 package provide OOB 1.0
 
@@ -344,10 +344,10 @@ proc ::Jabber::OOB::HttpCmd {jid out id token} {
 
     switch -- $status {
 	ok {
-	    ::Jabber::InvokeJlibCmd send_iq "result" {} -to $jid -id $id
+	    ::Jabber::JlibCmd send_iq "result" {} -to $jid -id $id
 	} 
 	default {
-	    ::Jabber::InvokeJlibCmd send_iq "error" {} -to $jid -id $id
+	    ::Jabber::JlibCmd send_iq "error" {} -to $jid -id $id
 	}
     }
 }

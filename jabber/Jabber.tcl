@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.85 2004-05-23 13:18:08 matben Exp $
+# $Id: Jabber.tcl,v 1.86 2004-05-26 07:36:35 matben Exp $
 
 package provide Jabber 1.0
 
@@ -438,7 +438,7 @@ proc ::Jabber::GetStatusText {status} {
     }
 }
 
-proc ::Jabber::InvokeJlibCmd {args} {
+proc ::Jabber::JlibCmd {args} {
     variable jstate
     
     eval {$jstate(jlib)} $args
@@ -1185,7 +1185,7 @@ proc ::Jabber::SetStatus {type args} {
 	# Do we target a room or the server itself?
 	set toServer 0
 	if {[info exists argsArr(-to)]} {
-	    if {[string equal $jserver(this) $argsArr(-to)]} {
+	    if {[jlib::jidequal $jserver(this) $argsArr(-to)]} {
 		set toServer 1
 	    }
 	} else {

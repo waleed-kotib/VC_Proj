@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: browse.tcl,v 1.27 2004-05-23 13:18:08 matben Exp $
+# $Id: browse.tcl,v 1.28 2004-05-26 07:36:38 matben Exp $
 # 
 #  locals($jid,parent):       the parent of $jid.
 #  locals($jid,parents):      list of all parent jid's,
@@ -282,6 +282,7 @@ proc browse::getparentjid {browsename jid} {
     
     upvar ${browsename}::locals locals
 
+    set jid [jlib::jidmap $jid]
     if {[info exists locals($jid,parent)]} {
 	set parJid $locals($jid,parent)
     } else {
@@ -322,6 +323,7 @@ proc browse::get {browsename jid} {
     
     Debug 3 "browse::get  jid=$jid"
     
+    set jid [jlib::jidmap $jid]
     if {[info exists locals($jid,xmllist)]} {
 	return $locals($jid,xmllist)
     } else {
@@ -335,6 +337,7 @@ proc browse::isbrowsed {browsename jid} {
     
     Debug 3 "browse::isbrowsed  jid=$jid"
     
+    set jid [jlib::jidmap $jid]
     if {[info exists locals($jid,isbrowsed)] && ($locals($jid,isbrowsed) == 1)} {
 	return 1
     } else {
@@ -358,9 +361,11 @@ proc browse::remove {browsename jid} {
     
     Debug 3 "browse::remove  jid=$jid"
     
-    catch {unset locals($jid,parents)}
-    catch {unset locals($jid,xmllist)}
-    catch {unset locals($jid,isbrowsed)}
+    set mjid [jlib::jidmap $jid]
+    
+    catch {unset locals($mjid,parents)}
+    catch {unset locals($mjid,xmllist)}
+    catch {unset locals($mjid,isbrowsed)}
 
     # Evaluate the client callback.
     if {[info exists locals(cmd)]} {
@@ -382,7 +387,8 @@ proc browse::getparents {browsename jid} {
     upvar ${browsename}::locals locals
     
     Debug 3 "browse::getparents  jid=$jid"
-    
+
+    set jid [jlib::jidmap $jid]    
     if {[info exists locals($jid,parents)]} {
 	return $locals($jid,parents)
     } else {
@@ -405,6 +411,7 @@ proc browse::getchilds {browsename jid} {
     
     Debug 3 "browse::getchilds  jid=$jid"
     
+    set jid [jlib::jidmap $jid]
     if {[info exists locals($jid,childs)]} {
 	return $locals($jid,childs)
     } else {
@@ -429,6 +436,7 @@ proc browse::getname {browsename jid} {
     
     Debug 3 "browse::getname  jid=$jid"
     
+    set jid [jlib::jidmap $jid]    
     if {[info exists locals($jid,name)]} {
 	return $locals($jid,name)
     } else {
@@ -453,6 +461,7 @@ proc browse::getusers {browsename jid} {
     
     Debug 3 "browse::getusers  jid=$jid"
     
+    set jid [jlib::jidmap $jid]    
     if {[info exists locals($jid,allusers)]} {
 	return $locals($jid,allusers)
     } else {
@@ -495,6 +504,7 @@ proc browse::isroom {browsename jid} {
     
     upvar ${browsename}::locals locals
     
+    set jid [jlib::jidmap $jid]    
     set parentJid [getparentjid $browsename $jid]
 
     # Check if this is in our list of conference servers.
@@ -510,6 +520,7 @@ proc browse::gettype {browsename jid} {
     
     upvar ${browsename}::locals locals
     
+    set jid [jlib::jidmap $jid]    
     if {[info exists locals($jid,type)]} {
 	return $locals($jid,type)
     } else {
@@ -586,6 +597,7 @@ proc browse::getnamespaces {browsename jid} {
     
     Debug 3 "browse::getnamespaces  jid=$jid"
 
+    set jid [jlib::jidmap $jid]    
     if {[info exists locals($jid,ns)]} {
 	return $locals($jid,ns)
     } else {
@@ -611,6 +623,7 @@ proc browse::hasnamespace {browsename jid ns} {
     
     Debug 3 "browse::hasnamespace  jid=$jid, ns=$ns"
 
+    set jid [jlib::jidmap $jid]    
     if {[info exists locals($jid,ns)]} {
 	return [expr [lsearch $locals($jid,ns) $ns] < 0 ? 0 : 1]
     } else {
@@ -655,7 +668,7 @@ proc browse::setjid {browsename fromJid subiq args} {
     array set argsArr $args
     
     # Seems that the browse component doesn't do STRINGPREP.
-    set fromJid [jlib::jidprep $fromJid]
+    set fromJid [jlib::jidmap $fromJid]
     
     # Root parent empty. A bit unclear what to do with it.
     if {![info exists locals($fromJid,parent)]} {
@@ -696,7 +709,7 @@ proc browse::setjid {browsename fromJid subiq args} {
     } else {
 	
 	# Must do STRINGPREP when comparing two jids!
-	set jid [jlib::jidprep $attrArr(jid)]
+	set jid [jlib::jidmap $attrArr(jid)]
 	if {$fromJid != $jid} {
 	    set parentJid $fromJid
 	} else {
@@ -881,6 +894,7 @@ proc browse::clear {browsename {jid {}}} {
     if {[string length $jid]} {
 
 	# testing...
+	set jid [jlib::jidmap $jid]    
 	ClearJidIsbrowsed $browsename $jid
 	ClearJid $browsename $jid
     } else {

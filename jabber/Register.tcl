@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.18 2004-05-23 13:18:08 matben Exp $
+# $Id: Register.tcl,v 1.19 2004-05-26 07:36:36 matben Exp $
 
 package provide Register 1.0
 
@@ -254,7 +254,7 @@ proc ::Jabber::Register::SocketIsOpen {sock ip port status {msg {}}} {
     }    
     
     # Initiate a new stream. Perhaps we should wait for the server <stream>?
-    if {[catch {::Jabber::InvokeJlibCmd connect $server -socket $sock} err]} {
+    if {[catch {::Jabber::JlibCmd connect $server -socket $sock} err]} {
 	tk_messageBox -icon error -title [::msgcat::mc {Open Failed}] -type ok \
 	  -message [FormatTextForMessageBox $err]
 	return
@@ -262,7 +262,7 @@ proc ::Jabber::Register::SocketIsOpen {sock ip port status {msg {}}} {
 
     # Make a new account. Perhaps necessary to get additional variables
     # from some user preferences.
-    ::Jabber::InvokeJlibCmd register_set $username $password   \
+    ::Jabber::JlibCmd register_set $username $password   \
       [namespace current]::ResponseProc
 
     # Just wait for a callback to the procedure.
@@ -312,7 +312,7 @@ proc ::Jabber::Register::ResponseProc {jlibName type theQuery} {
     # Disconnect. This should reset both wrapper and XML parser!
     # Beware: we are in the middle of a callback from the xml parser,
     # and need to be sure to exit from it before resetting!
-    after idle ::Jabber::InvokeJlibCmd disconnect
+    after idle ::Jabber::JlibCmd disconnect
     set finished 1
 }
 
@@ -343,7 +343,7 @@ proc ::Jabber::Register::Remove {{jid {}}} {
     if {$ans == "yes"} {
 	
 	# Do we need to obtain a key for this???
-	::Jabber::InvokeJlibCmd register_remove $jid  \
+	::Jabber::JlibCmd register_remove $jid  \
 	  [list ::Jabber::Register::RemoveCallback $jid]
 	
 	# Remove also from our profile.
@@ -424,7 +424,7 @@ proc ::Jabber::GenRegister::BuildRegister {args} {
     label $frtop.lserv -text "[::msgcat::mc {Service server}]:" -font $fontSB
     
     # Get all (browsed) services that support registration.
-    set regServers [::Jabber::InvokeJlibCmd service getjidsfor "register"]
+    set regServers [::Jabber::JlibCmd service getjidsfor "register"]
     set wcomboserver $frtop.eserv
     ::combobox::combobox $wcomboserver -width 18   \
       -textvariable "[namespace current]::server" -editable 0
@@ -551,7 +551,7 @@ proc ::Jabber::GenRegister::Simple {w args} {
     label $frtop.lserv -text "[::msgcat::mc {Service server}]:" -font $fontSB
     
     # Get all (browsed) services that support registration.
-    set regServers [::Jabber::InvokeJlibCmd service getjidsfor "register"]
+    set regServers [::Jabber::JlibCmd service getjidsfor "register"]
     set wcomboserver $frtop.eserv
     ::combobox::combobox $wcomboserver -width 20   \
       -textvariable [namespace current]::server -editable 0
@@ -635,7 +635,7 @@ proc ::Jabber::GenRegister::Get { } {
     set stattxt "-- [::msgcat::mc jawaitserver] --"
     
     # Send get register.
-    ::Jabber::InvokeJlibCmd register_get ::Jabber::GenRegister::GetCB -to $server    
+    ::Jabber::JlibCmd register_get ::Jabber::GenRegister::GetCB -to $server    
     $wsearrows start
 }
 
@@ -698,7 +698,7 @@ proc ::Jabber::GenRegister::DoRegister { } {
     }
     
     # We need to do it the crude way.
-    ::Jabber::InvokeJlibCmd send_iq "set"  \
+    ::Jabber::JlibCmd send_iq "set"  \
       [wrapper::createtag "query" -attrlist {xmlns jabber:iq:register}   \
       -subtags $subelements] -to $server   \
       -command [list [namespace current]::ResultCallback $server]
@@ -714,7 +714,7 @@ proc ::Jabber::GenRegister::DoSimple { } {
     variable finished
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::InvokeJlibCmd register_set $username $password  \
+    ::Jabber::JlibCmd register_set $username $password  \
       [list [namespace current]::SimpleCallback $server] -to $server
     set finished 1
     destroy $wtop

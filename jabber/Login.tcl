@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.31 2004-05-23 13:18:08 matben Exp $
+# $Id: Login.tcl,v 1.32 2004-05-26 07:36:36 matben Exp $
 
 package provide Login 1.0
 
@@ -420,7 +420,7 @@ proc ::Jabber::Login::SocketIsOpen {sock ip port status {msg {}}} {
     
     # Initiate a new stream. Perhaps we should wait for the server <stream>?
     if {[catch {
-	::Jabber::InvokeJlibCmd connect $server -socket $sock  \
+	::Jabber::JlibCmd connect $server -socket $sock  \
 	  -cmd [namespace current]::ConnectProc
     } err]} {
 	::Jabber::UI::SetStatusMessage ""
@@ -473,10 +473,10 @@ proc ::Jabber::Login::ConnectProc {jlibName args} {
 	::Debug 3 "argsArray(id)=$argsArray(id), password=$password"
 	
 	set digestedPw [::sha1pure::sha1 $argsArray(id)$password]
-	::Jabber::InvokeJlibCmd send_auth $username $resource   \
+	::Jabber::JlibCmd send_auth $username $resource   \
 	  ::Jabber::Login::ResponseProc -digest $digestedPw
     } else {
-	::Jabber::InvokeJlibCmd send_auth $username $resource   \
+	::Jabber::JlibCmd send_auth $username $resource   \
 	  ::Jabber::Login::ResponseProc -password $password
     }
     
@@ -525,20 +525,26 @@ proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
 
 	#       There is a potential problem if called from within a xml parser 
 	#       callback which makes the subsequent parsing to fail. (after idle?)
-	after idle ::Jabber::InvokeJlibCmd disconnect
+	after idle ::Jabber::JlibCmd disconnect
 	return
     } 
     
     foreach {ip addr port} [fconfigure $jstate(sock) -sockname] break
     set jstate(ipNum) $ip
     
-    # Ourself. Do jidprep???
-    set jstate(mejid)     [jlib::jidprep ${username}@${server}]
-    set jstate(meres)     $resource
-    set jstate(mejidres) "$jstate(mejid)/${resource}"
-    set jserver(this) $server
-    
+    # Ourself. Do jidprep? So far only on the domain name.
+    set server               [jlib::jidmap $server]
+    set jstate(mejid)        ${username}@${server}
+    set jstate(meres)        $resource
+    set jstate(mejidres)     "$jstate(mejid)/${resource}"
+    set jstate(mejidmap)     [jlib::jidmap $jstate(mejid)]
+    set jstate(mejidresmap)  [jlib::jidmap $jstate(mejidres)]
+    set jserver(this)        $server
+
     ::Profiles::SetSelectedName $profile
+	
+    # Run all login hooks. We do this to get our roster before we get presence.
+    ::hooks::run loginHook
     
     # Login was succesful, set presence.
     set presArgs {}
@@ -552,9 +558,6 @@ proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
 	set jstate(status) "available"
 	eval {::Jabber::SetStatus available -notype 1} $presArgs
     }
-        
-    # Run all login hooks.
-    ::hooks::run loginHook
 }
 
 #-------------------------------------------------------------------------------

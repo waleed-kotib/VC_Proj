@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: VCard.tcl,v 1.18 2004-05-06 13:41:11 matben Exp $
+# $Id: VCard.tcl,v 1.19 2004-05-26 07:36:38 matben Exp $
 
 package provide VCard 1.0
 
@@ -46,7 +46,7 @@ proc ::VCard::Fetch {type {jid {}}} {
     
     # We should query the server for this and then fill in.
     ::Jabber::UI::SetStatusMessage [::msgcat::mc vcardget $jid]
-    ::Jabber::InvokeJlibCmd vcard_get $jid  \
+    ::Jabber::JlibCmd vcard_get $jid  \
       [list [namespace current]::FetchCallback $nstoken]
 }
 
@@ -373,7 +373,7 @@ proc ::VCard::SetVCard {nstoken}  {
 	    lappend argList -$key $value
 	}
     }
-    eval {::Jabber::InvokeJlibCmd vcard_set ::VCard::SetVCardCallback} $argList
+    eval {::Jabber::JlibCmd vcard_set ::VCard::SetVCardCallback} $argList
     ::VCard::Close $nstoken
 }
 

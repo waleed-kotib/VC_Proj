@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Agents.tcl,v 1.18 2004-05-07 12:24:05 matben Exp $
+# $Id: Agents.tcl,v 1.19 2004-05-26 07:36:35 matben Exp $
 
 package provide Agents 1.0
 
@@ -87,7 +87,7 @@ proc ::Jabber::Agents::GetAll { } {
 
 proc ::Jabber::Agents::Get {jid} {
     
-    ::Jabber::InvokeJlibCmd agents_get $jid  \
+    ::Jabber::JlibCmd agents_get $jid  \
       [list ::Jabber::Agents::AgentsCallback $jid]
 }
 
@@ -104,7 +104,7 @@ proc ::Jabber::Agents::GetAgent {parentJid jid args} {
 	-silent 0
     }
     array set opts $args        
-    ::Jabber::InvokeJlibCmd agent_get $jid  \
+    ::Jabber::JlibCmd agent_get $jid  \
       [list ::Jabber::Agents::GetAgentCallback $parentJid $jid $opts(-silent)]
 }
 
@@ -165,7 +165,7 @@ proc ::Jabber::Agents::AgentsCallback {jid jlibName type subiq} {
 		# version number to know which protocol to use.
 		foreach elem $subAgent {
 		    if {[string equal [wrapper::gettag $elem] "groupchat"]} {
-			::Jabber::InvokeJlibCmd get_version $jidAgent   \
+			::Jabber::JlibCmd get_version $jidAgent   \
 			  [list ::Jabber::CacheGroupchatType $jidAgent]
 			
 			# The old groupchat protocol is used as a fallback.

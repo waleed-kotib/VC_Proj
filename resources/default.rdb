@@ -64,5 +64,6 @@
 *Disco*Scrollbar.width:              12
 *Disco*Tree.highlightThickness:      0
 *GroupChat*Scrollbar.width:          12
+*NewMsg*Scrollbar.width:             12
 *Roster*Scrollbar.width:             12
 *Roster*Tree.highlightThickness:     0

@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.11 2004-05-23 13:18:09 matben Exp $
+# $Id: disco.tcl,v 1.12 2004-05-26 07:36:38 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -189,6 +189,9 @@ proc disco::parse_get {disconame discotype from cmd jlibname type subiq args} {
     # We need to use both jid and any node for addressing since
     # each item may have identical jid's but different node's.
 
+    # Do STRINGPREP.
+    set from [jlib::jidmap $from]
+
     # Parents node if any.
     array set pattr [wrapper::getattrlist $subiq]
     set pnode ""
@@ -219,7 +222,7 @@ proc disco::parse_get {disconame discotype from cmd jlibname type subiq args} {
 		array set attr [wrapper::getattrlist $c]
 
 		# jid is a required attribute!
-		set jid $attr(jid)
+		set jid [jlib::jidmap $attr(jid)]
 		set node ""
 		if {[info exists attr(node)]} {
 		    set node $attr(node)
@@ -315,6 +318,8 @@ proc disco::isdiscoed {disconame discotype jid {node ""}} {
     upvar ${disconame}::items items
     upvar ${disconame}::info  info
     
+    set jid [jlib::jidmap $jid]
+
     switch -- $discotype {
 	items {
 	    return [info exists items($jid,$node,xml)]
@@ -330,6 +335,8 @@ proc disco::get {disconame discotype jid key {node ""}} {
     upvar ${disconame}::items items
     upvar ${disconame}::info  info
     
+    set jid [jlib::jidmap $jid]
+ 
     switch -- $discotype {
 	items {
 	    if {[info exists items($jid,$node,$key)]} {
@@ -351,6 +358,7 @@ proc disco::nameINFO {disconame jid {node ""}} {
     
     upvar ${disconame}::info  info
     
+    set jid [jlib::jidmap $jid]
     if {[info exists info($jid,$node,name)]} {
 	return $info($jid,$node,name)
     } else {
@@ -367,6 +375,7 @@ proc disco::name {disconame jid {node ""}} {
     upvar ${disconame}::items items
     upvar ${disconame}::info  info
     
+    set jid [jlib::jidmap $jid]
     if {[info exists items($jid,$node,name)]} {
 	return $items($jid,$node,name)
     } elseif {[info exists info($jid,$node,name)]} {
@@ -380,6 +389,7 @@ proc disco::features {disconame jid {node ""}} {
     
     upvar ${disconame}::info info
     
+    set jid [jlib::jidmap $jid]
     if {[info exists info($jid,$node,features)]} {
 	return $info($jid,$node,features)
     } else {
@@ -391,6 +401,7 @@ proc disco::hasfeature {disconame feature jid  {node ""}} {
     
     upvar ${disconame}::info info
 
+    set jid [jlib::jidmap $jid]
     if {[info exists info($jid,$node,features)]} {
 	return [expr [lsearch $info($jid,$node,features) $feature] < 0 ? 0 : 1]
     } else {
@@ -402,6 +413,7 @@ proc disco::types {disconame jid {node ""}} {
     
     upvar ${disconame}::info info
     
+    set jid [jlib::jidmap $jid]
     if {[info exists info($jid,$node,cattypes)]} {
 	return $info($jid,$node,cattypes)
     } else {
@@ -428,7 +440,7 @@ proc disco::getjidsforfeature {disconame feature} {
 #       
 # Arguments:
 #       disconame:    the instance of this disco instance.
-#       catpattern:   a global pattern of jid type/subtype (service/*).
+#       catpattern:   a global pattern of jid type/subtype (gateway/*).
 #
 # Results:
 #       List of jid's matching the type pattern. nodes???
@@ -438,8 +450,8 @@ proc disco::getjidsforcategory {disconame catpattern} {
     upvar ${disconame}::info info
     
     set jidlist {}    
-    foreach {key jid} [array get info "${catpattern},typelist"] {
-	lappend jidlist $jid
+    foreach {key jids} [array get info "${catpattern},typelist"] {
+	set jidlist [concat $jidlist $jids]
     }
     return $jidlist
 }    
@@ -450,7 +462,7 @@ proc disco::getjidsforcategory {disconame catpattern} {
 #       
 # Arguments:
 #       disconame:    the instance of this disco instance.
-#       catpattern:   a global pattern of jid type/subtype (service/*).
+#       catpattern:   a global pattern of jid type/subtype (gateway/*).
 #
 # Results:
 #       List of types matching the category/type pattern.
@@ -477,8 +489,11 @@ proc disco::isroom {disconame jid} {
     
     upvar ${disconame}::info  info
     
+    set jid [jlib::jidmap $jid]
+
     # Use the form of the jid to get the service.
-    if {[regexp {^[^@/]+@([^@/]+)$} $jid match service]} {
+    jlib::splitjidex $jid node service res
+    if {[string length $node] && [string length $service]} {
 	return [expr ([lsearch -exact $info(conferences) $service] < 0) ? 0 : 1]
     } else {
 	return 0
@@ -489,6 +504,7 @@ proc disco::children {disconame jid {node ""}} {
     
     upvar ${disconame}::items items
 
+    set jid [jlib::jidmap $jid]
     if {[info exists items($jid,$node,children)]} {
 	return $items($jid,$node,children)
     } else {
@@ -502,6 +518,7 @@ proc disco::parent {disconame jid {node ""}} {
     
     upvar ${disconame}::items items
 
+    set jid [jlib::jidmap $jid]
     if {[info exists items($jid,$node,parent)]} {
 	return $items($jid,$node,parent)
     } else {
@@ -513,6 +530,7 @@ proc disco::parents {disconame jid {node ""}} {
     
     upvar ${disconame}::items items
 
+    set jid [jlib::jidmap $jid]
     if {[info exists items($jid,$node,parents)]} {
 	return $items($jid,$node,parents)
     } else {
@@ -537,23 +555,25 @@ proc disco::handle_get {disconame discotype jlibname from subiq args} {
 #       Clear this particular jid and all its children.
 
 proc disco::reset {disconame {jid ""} {node ""}} {
+
+    set jid [jlib::jidmap $jid]
     
     upvar ${disconame}::items items
 
     # Can be problems with this (ICQ) ???
     if {[info exists items($jid,$node,children)]} {
 	foreach child $items($jid,$node,children) {
-	    reset $disconame $child
+	    ResetJid $disconame $child
 	}
     }
-    resetjid $disconame $jid
+    ResetJid $disconame $jid
 }
 
-# disco::resetjid --
+# disco::ResetJid --
 # 
 #       Clear only this particular jid.
 
-proc disco::resetjid {disconame {jid ""} {node ""}} {
+proc disco::ResetJid {disconame {jid ""} {node ""}} {
     
     upvar ${disconame}::items items
     upvar ${disconame}::info  info

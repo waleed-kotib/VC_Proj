@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.56 2004-05-23 13:18:08 matben Exp $
+# $Id: Chat.tcl,v 1.57 2004-05-26 07:36:35 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -238,9 +238,15 @@ proc ::Jabber::Chat::GotMsg {body args} {
     
     # -from is a 3-tier jid /resource included.
     set jid $argsArr(-from)
-    jlib::splitjid $jid jid2 res
-    set username $jid2
-    regexp {^([^@]+)@} $jid2 match username
+    jlib::splitjidex $jid node domain res
+    set jid2 [jlib::joinjid $node $domain ""]
+    if {$node == ""} {
+	set username $domain
+    } else {
+	set username $node
+    }
+    set mjid  [jlib::jidmap $jid]
+    set mjid2 [jlib::jidmap $jid2]
     
     # We must follow the thread...
     if {[info exists argsArr(-thread)]} {
@@ -250,7 +256,7 @@ proc ::Jabber::Chat::GotMsg {body args} {
 	
 	# Try to find a reasonable fallback for clients that fail here (Psi).
 	# Find if we have registered any chat for this jid 2/3.
-	set token [::Jabber::Chat::GetTokenFrom jid ${jid2}*]
+	set token [::Jabber::Chat::GetTokenFrom jid ${mjid2}*]
 	if {$token == ""} {
 	    
 	    # Need to create a new thread ID.
@@ -277,7 +283,9 @@ proc ::Jabber::Chat::GotMsg {body args} {
     upvar 0 $token state
 
     # We may have reset its jid to a 2-tier jid if it has been offline.
-    set state(jid) $jid
+    set state(jid)      $mjid
+    set state(fromjid)  $jid
+    set state(username) $username
     
     set w $state(w)
     if {[info exists argsArr(-subject)]} {
@@ -320,25 +328,27 @@ proc ::Jabber::Chat::InsertMessage {token whom body} {
     variable $token
     upvar 0 $token state
     
-    set w     $state(w)
-    set wtext $state(wtext)
-    set jid   $state(jid)
+    set w        $state(w)
+    set wtext    $state(wtext)
+    set jid      $state(jid)
     set secs  [clock seconds]
     set clockFormat [option get $w clockFormat {}]
     
     switch -- $whom {
 	me {
-	    jlib::splitjid [::Jabber::GetMyJid] jid2 res
-	    set username $jid2
-	    regexp {^([^@]+)@} $jid2 match username
+	    jlib::splitjidex [::Jabber::GetMyJid] node host res
+	    if {$node == ""} {
+		set name $host
+	    } else {
+		set name $node
+	    }
 	}
 	you {
 	    jlib::splitjid $jid jid2 res
-	    if {[::Jabber::InvokeJlibCmd service isroom $jid2]} {
-		set username [::Jabber::InvokeJlibCmd service nick $jid]
+	    if {[::Jabber::JlibCmd service isroom $jid2]} {
+		set name [::Jabber::JlibCmd service nick $jid]
 	    } else {
-		set username $jid2
-		regexp {^([^@]+)@} $jid2 match username
+		set name $state(username)
 	    }
 	}
     }
@@ -351,7 +361,7 @@ proc ::Jabber::Chat::InsertMessage {token whom body} {
     
     switch -- $whom {
 	me - you {
-	    append prefix "<$username>"
+	    append prefix "<$name>"
 	}
 	sys {
 	}
@@ -445,17 +455,27 @@ proc ::Jabber::Chat::Build {threadID args} {
     # Try to keep any /resource part unless not possible.
     
     if {[info exists argsArr(-from)]} {
-	set state(jid) [::Jabber::InvokeJlibCmd getrecipientjid $argsArr(-from)]
+	set jid [::Jabber::JlibCmd getrecipientjid $argsArr(-from)]
     } else {
-	set state(jid) ""
+	set jid ""
     }
-    jlib::splitjid $state(jid) jid2 res
-    
+    set mjid [jlib::jidmap $jid]
+    jlib::splitjidex $jid node domain res
+    if {$node == ""} {
+	set username $domain
+    } else {
+	set username $node
+    }
+    jlib::splitjid $mjid jid2 x
+    set state(username) $username
+    set state(fromjid)  $jid
+    set state(jid)      $mjid
+
     if {[info exists argsArr(-subject)]} {
 	set state(subject) $argsArr(-subject)
     }
 
-    wm title $w "[::msgcat::mc Chat] ($state(jid))"
+    wm title $w "[::msgcat::mc Chat] ($state(fromjid))"
     set fontSB [option get . fontSmallBold {}]
     if {$state(active)} {
 	::Jabber::Chat::ActiveCmd $token
@@ -541,7 +561,7 @@ proc ::Jabber::Chat::Build {threadID args} {
     
     frame $frtop.fjid
     label $frtop.fjid.l -text [::msgcat::mc {Chat with}]
-    label $frtop.fjid.ljid -textvariable $token\(jid)
+    label $frtop.fjid.ljid -textvariable $token\(fromjid)
     pack $frtop.fjid -side top -anchor w -padx 6
     grid $frtop.fjid.l $frtop.fjid.ljid -sticky w -padx 1
     
@@ -602,7 +622,7 @@ proc ::Jabber::Chat::Build {threadID args} {
     set state(wbtsend)  $w.frall.frbot.btok
 
     # We need the window title to reflect the receiving jid.
-    trace variable $token\(jid) w  \
+    trace variable $token\(fromjid) w  \
       [list [namespace current]::TraceJid $token]
     
     # jabber:x:event
@@ -760,10 +780,11 @@ proc ::Jabber::Chat::Send {token} {
     
     # According to XMPP we should send to 3-tier jid if still online,
     # else to 2-tier.
-    set jid [::Jabber::InvokeJlibCmd getrecipientjid $state(jid)]
-    set state(jid) $jid
+    set state(fromjid) [::Jabber::JlibCmd getrecipientjid $state(fromjid)]
+    set jid [jlib::jidmap $state(fromjid)]
     jlib::splitjid $jid jid2 res
-
+    set state(jid) $jid
+    
     if {![jlib::jidvalidate $jid]} {
 	set ans [tk_messageBox -message [FormatTextForMessageBox  \
 	  [::msgcat::mc jamessbadjid $jid]] \
@@ -811,7 +832,7 @@ proc ::Jabber::Chat::Send {token} {
     }
     
     if {[catch {
-	eval {::Jabber::InvokeJlibCmd send_message $jid  \
+	eval {::Jabber::JlibCmd send_message $jid  \
 	  -thread $threadID -type chat -body $allText} $opts
     } err]} {
 	tk_messageBox -type ok -icon error -title "Network Error" \
@@ -839,14 +860,14 @@ proc ::Jabber::Chat::TraceJid {token name junk1 junk2} {
     
     # Call by name.
     upvar $name locName    
-    wm title $state(w) "Chat ($state(jid))"
+    wm title $state(w) "[::msgcat::mc Chat] ($state(fromjid))"
 }
 
 proc ::Jabber::Chat::SendFile {token} {
     variable $token
     upvar 0 $token state
     
-    jlib::splitjid $state(jid) jid2 res
+    jlib::splitjid $state(fromjid) jid2 res
     ::Jabber::OOB::BuildSet $jid2
 }
 
@@ -865,12 +886,12 @@ proc ::Jabber::Chat::Save {token} {
     set wtext $state(wtext)
     
     set ans [tk_getSaveFile -title [::msgcat::mc Save] \
-      -initialfile "Chat $state(jid).txt"]
+      -initialfile "Chat $state(fromjid).txt"]
     
     if {[string length $ans]} {
 	set allText [::Text::TransformToPureText $wtext]
 	set fd [open $ans w]
-	puts $fd "Chat with:\t$state(jid)"
+	puts $fd "Chat with:\t$state(fromjid)"
 	puts $fd "Subject:\t$state(subject)"
 	puts $fd "\n"
 	puts $fd $allText	
@@ -893,8 +914,8 @@ proc ::Jabber::Chat::PresenceHook {jid type args} {
     if {[info exists argsArr(-from)]} {
 	set from $argsArr(-from)
     }
-    
-    set token [::Jabber::Chat::GetTokenFrom jid ${jid}*]
+    set mjid [jlib::jidmap $jid]
+    set token [::Jabber::Chat::GetTokenFrom jid ${mjid}*]
     if {$token == ""} {
 	
 	# Likely no chat with this jid.
@@ -1052,11 +1073,11 @@ proc ::Jabber::Chat::XEventRecv {token xevent args} {
 	jlib::splitjid $state(jid) jid2 res
 	set name [::Jabber::InvokeRosterCmd getname $jid2]
 	if {$name == ""} {
-	    if {[::Jabber::InvokeJlibCmd service isroom $jid2]} {
-		set name [::Jabber::InvokeJlibCmd service nick $state(jid)]
+	    if {[::Jabber::JlibCmd service isroom $jid2]} {
+		set name [::Jabber::JlibCmd service nick $state(jid)]
 
-	    } elseif {![regexp {^([^@]+)@.+} $jid2 m name]} {
-		set name $jid2
+	    } else {
+		set name $state(username)
 	    }
 	}
 	$state(wnotifier) configure -image $state(iconNotifier)
@@ -1116,7 +1137,7 @@ proc ::Jabber::Chat::XEventSendCompose {token} {
       [wrapper::createtag "id" -chdata $id]]]]
     
     if {[catch {
-	::Jabber::InvokeJlibCmd send_message $state(jid)  \
+	::Jabber::JlibCmd send_message $state(jid)  \
 	  -thread $state(threadid) -type chat -xlist $xelems
     } err]} {
 	tk_messageBox -type ok -icon error -title "Network Error" \
@@ -1154,7 +1175,7 @@ proc ::Jabber::Chat::XEventCancelCompose {token} {
       -subtags [list [wrapper::createtag "id" -chdata $id]]]]
 
     if {[catch {
-	::Jabber::InvokeJlibCmd send_message $state(jid)  \
+	::Jabber::JlibCmd send_message $state(jid)  \
 	  -thread $state(threadid) -type chat -xlist $xelems
     } err]} {
 	tk_messageBox -type ok -icon error -title "Network Error" \
@@ -1184,6 +1205,7 @@ namespace eval ::Jabber::Chat:: {
 proc ::Jabber::Chat::PutMessageInHistoryFile {jid msg} {
     global  prefs
     
+    set mjid [jlib::jidmap $jid]
     set path [file join $prefs(historyPath) [uriencode::quote $jid]]    
     if {![catch {open $path a} fd]} {
 	puts $fd "set message(\[incr uid]) {$msg}"
@@ -1206,6 +1228,7 @@ proc ::Jabber::Chat::BuildHistory {jid} {
     variable uidhist
     variable historyOptions
     
+    set jid [jlib::jidmap $jid]
     set w $wDlgs(jchist)[incr uidhist]
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
     wm title $w "[::msgcat::mc {Chat History}]: $jid"
@@ -1227,6 +1250,9 @@ proc ::Jabber::Chat::BuildHistory {jid} {
       -side right -padx 5 -pady 5
     pack [button $frbot.btprint -text [::msgcat::mc Print]  \
       -command [list [namespace current]::PrintHistory $wtext]]  \
+      -side right -padx 5 -pady 5
+    pack [button $frbot.btsave -text [::msgcat::mc Save]  \
+      -command [list [namespace current]::SaveHistory $jid $wtext]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side bottom -fill x -padx 8 -pady 6
     
@@ -1319,6 +1345,23 @@ proc ::Jabber::Chat::CloseHistoryHook {wclose} {
 proc ::Jabber::Chat::PrintHistory {wtext} {
         
     ::UserActions::DoPrintText $wtext
+}
+
+proc ::Jabber::Chat::SaveHistory {jid wtext} {
+    global  this
+	
+    set ans [tk_getSaveFile -title [::msgcat::mc Save] \
+      -initialfile "Chat ${jid}.txt"]
+
+    if {[string length $ans]} {
+	set allText [::Text::TransformToPureText $wtext]
+	set fd [open $ans w]
+	puts $fd $allText	
+	close $fd
+	if {[string equal $this(platform) "macintosh"]} {
+	    file attributes $ans -type TEXT -creator ttxt
+	}
+    }
 }
 
 # Preference page --------------------------------------------------------------

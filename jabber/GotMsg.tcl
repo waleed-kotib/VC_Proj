@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.26 2004-04-25 15:35:25 matben Exp $
+# $Id: GotMsg.tcl,v 1.27 2004-05-26 07:36:35 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -88,7 +88,7 @@ proc ::Jabber::GotMsg::Show {thisMsgId} {
 	return
     }
     foreach {subject jid timeAndDate isRead junk theMsg} $spec break
-    set jid [::Jabber::InvokeJlibCmd getrecipientjid $jid]
+    set jid [::Jabber::JlibCmd getrecipientjid $jid]
     set jidtxt $jid
     set theTime [::Utils::SmartClockFormat [clock scan $timeAndDate]]
     
@@ -100,7 +100,8 @@ proc ::Jabber::GotMsg::Show {thisMsgId} {
     if {[string length $nick]} {
 	set jidtxt "${nick} <${jid}>"
     }
-    if {[$jstate(roster) isavailable $jid2] || ($jid == $jstate(mejidres))} {
+    if {[$jstate(roster) isavailable $jid2] || \
+      [jlib::jidequal $jid $jstate(mejidres)]} {
 	set isOnline [::msgcat::mc Online]
 	$wonline configure -fg blue
     } else {

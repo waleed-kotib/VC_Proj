@@ -5,7 +5,7 @@
 #       
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: service.tcl,v 1.6 2004-05-03 14:11:54 matben Exp $
+# $Id: service.tcl,v 1.7 2004-05-26 07:36:38 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -159,6 +159,7 @@ proc jlib::service::setgroupchatprotocol {jlibname jid prot} {
     upvar [namespace parent]::${jlibname}::agent agent
     upvar [namespace parent]::${jlibname}::serv serv
 
+    set jid [jlib::jidmap $jid]
     if {![regexp $groupchatTypeExp $prot]} {
 	return -code error "Unrecognized groupchat type \"$prot\""
     }
@@ -206,6 +207,7 @@ proc jlib::service::registergcprotocol {jlibname jid gcprot} {
     upvar [namespace parent]::${jlibname}::serv serv
     
     Debug 2 "jlib::registergcprotocol jid=$jid, gcprot=$gcprot"
+    set jid [jlib::jidmap $jid]
     
     # If we already told jlib to use a groupchat protocol then...
     if {[info exist serv(prefgcprot,$jid)]} {
@@ -238,6 +240,7 @@ proc jlib::service::setroomprotocol {jlibname roomjid protocol} {
     variable groupchatTypeExp
     upvar [namespace parent]::${jlibname}::serv serv
     
+    set roomjid [jlib::jidmap $roomjid]
     if {![regexp $groupchatTypeExp $protocol]} {
 	return -code error "Unrecognized groupchat protocol \"$protocol\""
     }
@@ -269,6 +272,7 @@ proc jlib::service::parent {jlibname jid} {
     } elseif {$serv(disco) && [$serv(disco,name) isdiscoed items $jid]} {
 	return [$serv(disco,name) parent $jid]
     } else {
+	set jid [jlib::jidmap $jid]
 	if {[info exists agent($jid,parent)]} {
 	    return $agent($jid,parent)
 	} else {
@@ -288,6 +292,7 @@ proc jlib::service::childs {jlibname jid} {
     } elseif {$serv(disco) && [$serv(disco,name) isdiscoed items $jid]} {
 	return [$serv(disco,name) children $jid]
     } else {
+	set jid [jlib::jidmap $jid]
 	if {[info exists agent($jid,childs)]} {
 	    set agent($jid,childs) [lsort -unique $agent($jid,childs)]
 	    return $agent($jid,childs)
@@ -394,10 +399,8 @@ proc jlib::service::hasfeature {jlibname jid xmlns} {
 
     # Try to gather only positive results!
     set ans 0
-    #puts "jid=$jid"
     if {$serv(browse)} {
 	set ans [$serv(browse,name) hasnamespace $jid $xmlns]
-	#puts "browse ans=$ans"
     } 
     if {!$ans && $serv(disco) && [$serv(disco,name) isdiscoed info $jid]} {
 	set ans [$serv(disco,name) hasfeature $xmlns $jid]
@@ -430,8 +433,11 @@ proc jlib::service::gettransportjids {jlibname what} {
 	  [$serv(browse,name) getalljidfortypes "service/$what"]]
     }
     if {$serv(disco)} {
+	
+	# The Jabber registrar defines the type/subtype for all
+	# categories. The actual server is "server/im".
 	set jids [concat $jids \
-	  [$serv(disco,name) getjidsforcategory "service/$what"]]
+	  [$serv(disco,name) getjidsforcategory "gateway/$what"]]
     }
 
     # Agent service if any.
@@ -469,6 +475,7 @@ proc jlib::service::gettype {jlibname jid} {
     if {$serv(disco) && [$serv(disco,name) isdiscoed info $jid]} {
 	set type [lindex [$serv(disco,name) types $jid] 0]
     }
+    set jid [jlib::jidmap $jid]
     if {[info exists agent($jid,service)]} {
 	set type "service/$agent($jid,service)"
     }
@@ -603,6 +610,8 @@ proc jlib::service::hashandnick {jlibname room} {
     upvar [namespace parent]::${jlibname}::lib lib
     upvar [namespace parent]::${jlibname}::serv serv
 
+    set room [jlib::jidmap $room]
+
     # All kind of conference components seem to support the old 'gc-1.0'
     # protocol, and we therefore must query our method for entering the room.
     if {![info exists serv(roomprot,$room)]} {
@@ -652,6 +661,7 @@ proc jlib::service::roomparticipants {jlibname room} {
     upvar [namespace parent]::${jlibname}::lib lib
     upvar [namespace parent]::${jlibname}::serv serv
     
+    set room [jlib::jidmap $room]
     if {![info exists serv(roomprot,$room)]} {
 	return -code error "Does not know which protocol to use in $room"
     }
@@ -682,6 +692,7 @@ proc jlib::service::exitroom {jlibname room} {
     upvar [namespace parent]::${jlibname}::lib lib
     upvar [namespace parent]::${jlibname}::serv serv
 
+    set room [jlib::jidmap $room]
     if {![info exists serv(roomprot,$room)]} {
 	return -code error "Does not know which protocol to use in $room"
     }

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.36 2004-05-23 13:18:08 matben Exp $
+# $Id: NewMsg.tcl,v 1.37 2004-05-26 07:36:36 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -35,18 +35,18 @@ namespace eval ::Jabber::NewMsg:: {
     set locals(dlguid) 0
     set locals(inited) 0
     set locals(wpopupbase) ._[string range $wDlgs(jsendmsg) 1 end]_trpt
-    set locals(transports) {jabber icq aim msn yahoo irc smtp}
     
     # {subtype popupText entryText}
-    variable popupDefs
-    array set popupDefs {
-	jabber    {Jabber    {Jabber (address):}}
-	icq       {ICQ       {ICQ (number):}}
-	aim       {AIM       {AIM:}}
-	msn       {MSN       {MSN Messenger:}}
-	yahoo     {Yahoo     {Yahoo Messenger:}}
-	irc       {IRC       {IRC:}}
-	smtp      {Email     {Mail address:}}
+    variable transportDefs
+    array set transportDefs {
+	jabber      {Jabber     {Jabber (address):}}
+	icq         {ICQ        {ICQ (number):}}
+	aim         {AIM        {AIM:}}
+	msn         {MSN        {MSN Messenger:}}
+	yahoo       {Yahoo      {Yahoo Messenger:}}
+	irc         {IRC        {IRC:}}
+	smtp        {Email      {Mail address:}}
+	x-gadugadu  {Gadu-Gadu  {Address:}}
     }
 }
 
@@ -61,7 +61,7 @@ proc ::Jabber::NewMsg::Init { } {
     set locals(inited) 1
     
     # Icons.
-    set locals(popupbt) [::UI::GetIcon popupbt]
+    set locals(popupbt)     [::UI::GetIcon popupbt]
     set locals(popupbtpush) [::UI::GetIcon popupbtpush]
 }
 
@@ -74,26 +74,32 @@ proc ::Jabber::NewMsg::Init { } {
 proc ::Jabber::NewMsg::InitEach { } {
     
     variable locals
-    variable popupDefs
+    variable transportDefs
     upvar ::Jabber::jstate jstate
+    upvar ::Jabber::jserver jserver
     
     ::Debug 2 "Jabber::NewMsg::InitEach"
     
-    # We must be indenpendent of method; agent, browse, disco
+    # We must be indenpendent of method; agent, browse, disco.
     set trpts {}
-    foreach subtype $locals(transports) {
-	set jids [::Jabber::InvokeJlibCmd service gettransportjids $subtype]
+    foreach subtype [lsort [array names transportDefs]] {
+	set jids [$jstate(jlib) service gettransportjids $subtype]
 	if {[llength $jids]} {
 	    lappend trpts $subtype
 	    set locals(servicejid,$subtype) [lindex $jids 0]
 	}
     }    
+
+    # Disco doesn't return jabber. Make sure it's first.
+    set trpts [lsearch -all -not -inline $trpts jabber]
+    set trpts [concat jabber $trpts]
+    set locals(servicejid,jabber) $jserver(this)
     set locals(ourtransports) $trpts
     
-    # Build popup defs. Keep order of popupDefs. Flatten!
+    # Build popup defs. Keep order of transportDefs. Flatten!
     set locals(menuDefs) {}
     foreach trpt $trpts {
-	eval {lappend locals(menuDefs)} $popupDefs($trpt)
+	eval {lappend locals(menuDefs)} $transportDefs($trpt)
     }
 }
 
@@ -221,7 +227,7 @@ proc ::Jabber::NewMsg::Build {args} {
 	    if {$n > 1} {
 		::Jabber::NewMsg::FillAddrLine $w $frport $n
 	    }	    
-	    set locals($w,addr$n) [::Jabber::InvokeJlibCmd getrecipientjid $jid]
+	    set locals($w,addr$n) [::Jabber::JlibCmd getrecipientjid $jid]
 	    incr n
 	}
     }
@@ -242,10 +248,10 @@ proc ::Jabber::NewMsg::Build {args} {
     pack  $frsub.esub -side left -padx 2 -fill x -expand 1
     
     pack [::Emoticons::MenuButton $frsub.smile $wtext]  \
-      -side right -padx 16
+      -side right -padx 16 -pady 0
     
     # Text.
-    pack [frame $wtxt] -side top -fill both -expand 1 -padx 6 -pady 4
+    pack [frame $wtxt] -side top -fill both -expand 1 -padx 6 -pady 2
     text $wtext -height 8 -width 48 -wrap word \
       -borderwidth 1 -relief sunken -yscrollcommand [list $wysc set]
     scrollbar $wysc -orient vertical -command [list $wtext yview]
@@ -263,7 +269,6 @@ proc ::Jabber::NewMsg::Build {args} {
     set locals($w,wfrport)  $frport
     set locals($w,wspacer)  $wspacer
     set locals($w,wsubject) $wsubject
-    #set locals($w,wccp)     $wccp
     set locals($w,finished) 0
     set locals($w,wtray)    $wtray
     
@@ -347,7 +352,7 @@ proc ::Jabber::NewMsg::NewAddrLine {w wfr n} {
 proc ::Jabber::NewMsg::FillAddrLine {w wfr n} {
     
     variable locals
-    variable popupDefs
+    variable transportDefs
     
     $wfr.f${n}.la configure -image $locals(popupbt) -bg #adadad
     $wfr.addr${n} configure -state normal
@@ -355,7 +360,7 @@ proc ::Jabber::NewMsg::FillAddrLine {w wfr n} {
     bind $wfr.f${n}.la <Button-1> [list ::Jabber::NewMsg::TrptPopup $w $n %X %Y]
     bind $wfr.f${n}.la <ButtonRelease-1> [list ::Jabber::NewMsg::TrptPopupRelease $w $n]
     set locals($w,fillline) $n
-    set locals($w,poptrpt$n) [lindex $popupDefs(jabber) 1]
+    set locals($w,poptrpt$n) [lindex $transportDefs(jabber) 1]
 }
 
 proc ::Jabber::NewMsg::ButtonInAddr {w wfr n} {
@@ -506,9 +511,9 @@ proc ::Jabber::NewMsg::PopupCmd {w n} {
     variable locals
     upvar ::Jabber::jserver jserver
     
-    set num $locals($w,num)
+    set num     $locals($w,num)
     set wfrport $locals($w,wfrport)
-    set pick $locals($w,poptrpt$n)
+    set pick    $locals($w,poptrpt$n)
 
     # Seems to be necessary to achive any selection.
     set wentry $wfrport.addr${n}
@@ -517,7 +522,6 @@ proc ::Jabber::NewMsg::PopupCmd {w n} {
     switch -glob -- $pick {
 	*Jabber* {
 	    set locals($w,addr$n) "userName@$locals(servicejid,jabber)"
-	    $wentry selection range 0 8
 	}
 	*AIM* {
 	    set locals($w,addr$n) "usersName@$locals(servicejid,aim)"
@@ -525,16 +529,20 @@ proc ::Jabber::NewMsg::PopupCmd {w n} {
 	}
 	*Yahoo* {
 	    set locals($w,addr$n) "usersName@$locals(servicejid,yahoo)"
-	    
 	}
 	*ICQ* {
 	    set locals($w,addr$n) "screeNumber@$locals(servicejid,icq)"
-	    $wentry selection range 0 11
 	}
 	*MSN* {
 	    set locals($w,addr$n) "userName%hotmail.com@$locals(servicejid,msn)"
-	    $wentry selection range 0 8
 	}
+	default {
+	    set locals($w,addr$n) ""
+	}
+    }
+    set ind [string first @ $locals($w,addr$n)]
+    if {$ind > 0} {
+	$wentry selection range 0 $ind
     }
 }
 
@@ -659,7 +667,7 @@ proc ::Jabber::NewMsg::DoSend {w} {
     }
     if {[string length $allText]} {
 	foreach jid $addrList {
-	    eval {::Jabber::InvokeJlibCmd send_message $jid} $subopt {-body $allText}
+	    eval {::Jabber::JlibCmd send_message $jid} $subopt {-body $allText}
 	}
     }
     set locals($w,finished) 1
