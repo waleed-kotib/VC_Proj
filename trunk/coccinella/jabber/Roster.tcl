@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.76 2004-09-26 13:52:02 matben Exp $
+# $Id: Roster.tcl,v 1.77 2004-09-26 15:19:53 matben Exp $
 
 package provide Roster 1.0
 
@@ -1134,7 +1134,7 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
 	    $wtree newitem [list $transports] -tags head -dir 1 \
 	      -text [mc $transports]
 	}
-	eval {$wtree newitem [list $transports $jid] -image $icon -tags $mjid} \
+	eval {$wtree newitem [list $transports $jidx] -image $icon -tags $mjid} \
 	  $itemOpts
     } elseif {[info exists argsArr(-ask)] &&  \
       [string equal $argsArr(-ask) "subscribe"]} {
@@ -1248,6 +1248,10 @@ proc ::Jabber::Roster::GetPresenceIconFromKey {key} {
 	return ""
     }
 }
+
+# Jabber::Roster::GetPresenceIconFromJid --
+# 
+#       Returns presence icon from jid, typically a full jid.
 
 proc ::Jabber::Roster::GetPresenceIconFromJid {jid} {
     upvar ::Jabber::jstate jstate
@@ -1637,6 +1641,9 @@ proc ::Jabber::Roster::DiscoInfoHook {type from subiq args} {
 proc ::Jabber::Roster::PostProcessIcons {from} {
     variable wtree    
     upvar ::Jabber::jstate jstate
+    upvar ::Jabber::jserver jserver
+
+    set server [jlib::jidmap $jserver(this)]
 
     foreach v [$wtree find withtag all] {
 	set tags [$wtree itemconfigure $v -tags]
@@ -1650,7 +1657,7 @@ proc ::Jabber::Roster::PostProcessIcons {from} {
 		set mjid [jlib::jidmap $jid]
 		jlib::splitjidex $mjid username host res
 		
-		# Only relevant jid's.
+		# Only relevant jid's. Must have full jid here!
  		if {[string equal $from $host]} {
 		    set icon [GetPresenceIconFromJid $jid]
 		    if {[string length $icon]} {
@@ -1664,8 +1671,6 @@ proc ::Jabber::Roster::PostProcessIcons {from} {
 
 proc ::Jabber::Roster::ConfigureIcon {v} {
 
-    
-    
 }
 
 #--- Transport utilities -------------------------------------------------------
