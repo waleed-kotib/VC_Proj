@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.8 2004-04-16 13:59:29 matben Exp $
+# $Id: JWB.tcl,v 1.9 2004-04-20 13:57:27 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -246,7 +246,8 @@ proc ::Jabber::WB::NewWhiteboardTo {jid args} {
 		return
 	    }
 	}
-	set roomName [$jstate(browse) getname $jid]    
+	#set roomName [$jstate(browse) getname $jid]    
+	set roomName [$jstate(jlib) service name $jid]
 	if {[llength $roomName]} {
 	    set title "Groupchat room $roomName"
 	} else {

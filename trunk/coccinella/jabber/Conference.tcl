@@ -1,18 +1,17 @@
 #  Conference.tcl ---
 #  
 #      This file is part of The Coccinella application. 
-#      It implements conference parts for jabber.
+#      It implements enter and create dialogs for groupchat using
+#      the 'jabber:iq:conference' and 'muc' protocols.
 #      
-#  Copyright (c) 2001-2003  Mats Bengtsson
+#  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Conference.tcl,v 1.20 2004-04-19 13:58:47 matben Exp $
+# $Id: Conference.tcl,v 1.21 2004-04-20 13:57:27 matben Exp $
 
 package provide Conference 1.0
 
 # This uses the 'jabber:iq:conference' namespace and therefore requires
 # that we use the 'jabber:iq:browse' for this to work.
-# We only handle the enter/create dialogs here since the rest is handled
-# in ::GroupChat::
 # The 'jabber:iq:conference' is in a transition to be replaced by MUC.
 
 namespace eval ::Jabber::Conference:: {
@@ -75,7 +74,7 @@ proc ::Jabber::Conference::BuildEnter {args} {
     pack [frame $frtop] -side top -anchor w -padx 12
     label $frtop.lserv -text "[::msgcat::mc {Conference server}]:" 
     
-    set confServers [$jstate(browse) getconferenceservers]
+    set confServers [$jstate(jlib) service getconferences]
     
     ::Jabber::Debug 2 "\t confServers='$confServers'"
 
@@ -180,16 +179,15 @@ proc ::Jabber::Conference::BuildEnter {args} {
     if {$state(room-state) == "normal"} {
 
 	# Fill in room list if exist else browse.
-	if {[$jstate(browse) isbrowsed $state(server)]} {
-	    ::Jabber::Conference::FillRoomList $token
-	} else {
-	    ::Jabber::Conference::BusyEnterDlgIncr $token
-	    $jstate(browse) send_get $state(server)  \
-	      [list [namespace current]::BrowseServiceCB $token]
-	    
-	    #::Jabber::InvokeJlibCmd browse_get $state(server)  \
-	    #  -command [list [namespace current]::BrowseServiceCB $token]
-	}
+	#if {[$jstate(browse) isbrowsed $state(server)]} {
+	#	::Jabber::Conference::FillRoomList $token
+	#} else {
+	#	::Jabber::Conference::BusyEnterDlgIncr $token
+	#	$jstate(browse) send_get $state(server)  \
+	#	  [list [namespace current]::GetRoomsCB $token]
+	#}
+
+	::Jabber::Conference::ConfigRoomList $token x x x
 	trace variable $token\(server) w  \
 	  [list [namespace current]::ConfigRoomList $token]
     }
@@ -219,16 +217,21 @@ proc ::Jabber::Conference::ConfigRoomList {token name junk1 junk2} {
     
     ::Jabber::Debug 4 "::Jabber::Conference::ConfigRoomList"
 
-    # Fill in room list if exist else browse.
-    if {[$jstate(browse) isbrowsed $state(server)]} {
+    # Fill in room list if exist else browse or disco.
+    #if {[$jstate(browse) isbrowsed $state(server)]} {
+#	::Jabber::Conference::FillRoomList $token
+    #} else {
+#	::Jabber::Conference::BusyEnterDlgIncr $token
+#	$jstate(browse) send_get $state(server)  \
+#	  [list [namespace current]::GetRoomsCB $token]
+    #}
+    
+    if {[$jstate(jlib) service isinvestigated $state(server)]} {
 	::Jabber::Conference::FillRoomList $token
     } else {
 	::Jabber::Conference::BusyEnterDlgIncr $token
-	$jstate(browse) send_get $state(server)  \
-	  [list [namespace current]::BrowseServiceCB $token]
-	
-	#::Jabber::InvokeJlibCmd browse_get $state(server)  \
-	#  -command [list [namespace current]::BrowseServiceCB $token]
+	$jstate(jlib) service send_getchildren $state(server)  \
+	  [list [namespace current]::GetRoomsCB $token]
     }
 }
 
@@ -241,7 +244,7 @@ proc ::Jabber::Conference::FillRoomList {token} {
     
     set roomList {}
     if {[string length $state(server)] > 0} {
-	set allRooms [$jstate(browse) getchilds $state(server)]
+	set allRooms [$jstate(jlib) service childs $state(server)]
 	foreach roomJid $allRooms {
 	    regexp {([^@]+)@.+} $roomJid match room
 	    lappend roomList $room
@@ -285,9 +288,9 @@ proc ::Jabber::Conference::BusyEnterDlgIncr {token {num 1}} {
     }
 }
 
-proc ::Jabber::Conference::BrowseServiceCB {token browsename type jid subiq args} {
+proc ::Jabber::Conference::GetRoomsCB {token browsename type jid subiq args} {
     
-    ::Jabber::Debug 4 "::Jabber::Conference::BrowseServiceCB"
+    ::Jabber::Debug 4 "::Jabber::Conference::GetRoomsCB type=$type, jid=$jid"
     
     switch -- $type {
 	error {
@@ -461,7 +464,8 @@ proc ::Jabber::Conference::BuildCreate {args} {
     pack [frame $frtop] -side top -anchor w -padx 12
     label $frtop.lserv -text "[::msgcat::mc {Conference server}]:"
     
-    set confServers [$jstate(browse) getconferenceservers]
+    set confServers [$jstate(jlib) service getconferences]
+
     set wpopupserver $frtop.eserv
     eval {tk_optionMenu $wpopupserver $token\(server)} $confServers
     
@@ -562,7 +566,7 @@ proc ::Jabber::Conference::CancelCreate {token} {
     
     set roomJid [string tolower $state(roomname)@$state(server)]
     if {$state(usemuc) && ($roomJid != "")} {
-	catch {::Jabber::InvokeJlibCmd muc setroom $roomJid cancel}
+	catch {$jstate(jlib) muc setroom $roomJid cancel}
     }
     set state(finished) 0
     catch {destroy $state(w)}
@@ -576,7 +580,7 @@ proc ::Jabber::Conference::CreateGet {token} {
 
     # Figure out if 'conference' or 'muc' protocol.
     if {$jprefs(prefgchatproto) == "muc"} {
-	set state(usemuc) [$jstate(browse) havenamespace $state(server)  \
+	set state(usemuc) [$jstate(jlib) service havefeature $state(server)  \
 	  "http://jabber.org/protocol/muc"]
     } else {
 	set state(usemuc) 0
@@ -600,10 +604,10 @@ proc ::Jabber::Conference::CreateGet {token} {
     ::Jabber::Debug 2 "::Jabber::Conference::CreateGet usemuc=$state(usemuc)"
 
     if {$state(usemuc)} {
-	::Jabber::InvokeJlibCmd muc create $roomJid $state(nickname) \
+	$jstate(jlib) muc create $roomJid $state(nickname) \
 	  [list [namespace current]::CreateMUCCB $token]
     } else {
-	::Jabber::InvokeJlibCmd conference get_create $roomJid  \
+	$jstate(jlib) conference get_create $roomJid  \
 	  [list [namespace current]::CreateGetGetCB $token]
     }
 
@@ -730,13 +734,6 @@ proc ::Jabber::Conference::DoCreate {token} {
 	::Jabber::InvokeJlibCmd conference set_create $roomJid $subelements  \
 	  [list [namespace current]::DoCreateCallback $state(usemuc) $roomJid]
     }
-	
-    # Cache groupchat protocol type (muc|conference|gc-1.0).
-    #if {$state(usemuc)} {
-#	::hooks::run groupchatEnterRoomHook $roomJid "muc"
-    #} else {
-#	::hooks::run groupchatEnterRoomHook $roomJid "conference"
-    #}
     
     # This triggers the tkwait, and destroys the create dialog.
     set state(finished) 1
@@ -760,10 +757,6 @@ proc ::Jabber::Conference::DoCreateCallback {usemuc roomJid jlibName type subiq}
 	} else {
 	    ::hooks::run groupchatEnterRoomHook $roomJid "conference"
 	}
-
-	# Browse the service to get the new room list. CALLBACK???
-	#$jstate(browse) send_get $service ???
-	#::Jabber::InvokeJlibCmd browse_get $service
     }
 }
 

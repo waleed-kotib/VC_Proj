@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.51 2004-04-15 05:55:19 matben Exp $
+# $Id: Roster.tcl,v 1.52 2004-04-20 13:57:27 matben Exp $
 
 package provide Roster 1.0
 
@@ -670,7 +670,7 @@ proc ::Jabber::Roster::PushProc {rostName what {jid {}} args} {
 		set jid3 ${jid}/$attrArr(-resource)
 	    }
 	    
-	    if {![::Jabber::InvokeJlibCmd service isroom $jid]} {
+	    if {![$jstate(jlib) service isroom $jid]} {
 		eval {::Jabber::Roster::Presence $jid3 $type} $args
 	    }
 	    

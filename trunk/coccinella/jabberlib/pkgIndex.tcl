@@ -11,6 +11,7 @@
 package ifneeded browse 2.0 [list source [file join $dir browse.tcl]]
 package ifneeded disco 0.1 [list source [file join $dir disco.tcl]]
 package ifneeded jlib 2.0 [list source [file join $dir jabberlib.tcl]]
+package ifneeded service 1.0 [list source [file join $dir service.tcl]]
 package ifneeded muc 0.1 [list source [file join $dir muc.tcl]]
 package ifneeded roster 1.0 [list source [file join $dir roster.tcl]]
 package ifneeded tinydom 0.1 [list source [file join $dir tinydom.tcl]]

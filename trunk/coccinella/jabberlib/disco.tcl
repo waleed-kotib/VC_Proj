@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.7 2004-04-19 13:58:48 matben Exp $
+# $Id: disco.tcl,v 1.8 2004-04-20 13:57:27 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -18,15 +18,20 @@
 #	-command tclProc
 #	
 #   INSTANCE COMMANDS
+#      discoName children jid ?node?
 #      discoName send_get discotype jid callbackProc ?-opt value ...?
 #      discoName isdiscoed discotype jid ?node?
 #      discoName get discotype jid key ?node?
 #      discoName getallcategories pattern
+#      discoName getconferences
 #      discoName getjidsforcategory pattern
 #      discoName getjidsforfeature feature
 #      discoName features jid ?node?
 #      discoName havefeature feature jid ?node?
+#      discoName isroom jid
 #      discoName name jid ?node?
+#      discoName parent jid ?node?
+#      discoName parents jid ?node?
 #      discoName types jid ?node?
 #      discoName reset ?jid?
 #      
@@ -117,6 +122,8 @@ proc disco::new {jlibname args} {
     # Create the actual disco instance procedure.
     proc $disconame {cmd args}  \
       "eval disco::cmdproc {$disconame} \$cmd \$args"
+    
+    set info(conferences) {}
     
     return $disconame
 }
@@ -258,7 +265,16 @@ proc disco::parse_get {disconame discotype from cmd jlibname type subiq args} {
 			lappend info($from,$pnode,cattypes) $cattype
 			lappend info($cattype,typelist) $from
 			set info($cattype,typelist) \
-			    [lsort -unique $info($cattype,typelist)]
+			  [lsort -unique $info($cattype,typelist)]
+			
+			if {![string match *@* $from]} {
+
+			    switch -- $category {
+				conference {
+				    lappend info(conferences) $from
+				}
+			    }
+			}
 		    }
 		    feature {
 			set feature $attr(var)
@@ -291,7 +307,8 @@ proc disco::parse_get {disconame discotype from cmd jlibname type subiq args} {
     }
     
     # Invoke callback for this get.
-    uplevel #0 $cmd [list $type $from $subiq] $args
+    uplevel #0 $cmd [list $disconame $type $from $subiq] $args
+    #uplevel #0 $cmd [list $type $from $subiq] $args
 }
 
 proc disco::isdiscoed {disconame discotype jid {node ""}} {
@@ -450,6 +467,21 @@ proc disco::getallcategories {disconame catpattern} {
     return [lsort -unique $ans]
 }    
 
+proc disco::getconferences {disconame} {
+    
+    upvar ${disconame}::info info
+
+    return $info(conferences)
+}
+
+proc disco::isroom {disconame jid} {
+    
+    upvar ${disconame}::info info
+
+    set parent [lindex [split $jid @] end]
+    return [expr ([lsearch -exact $info(conferences) $parent] < 0) ? 0 : 1]
+}
+
 proc disco::children {disconame jid {node ""}} {
     
     upvar ${disconame}::items items
@@ -491,7 +523,8 @@ proc disco::handle_get {disconame discotype jlibname from subiq args} {
 
     set ishandled 0
     if {[info exists priv(cmd)]} {
-	set ishandled [uplevel #0 $priv(cmd) [list $discotype $from $subiq] $args]
+	set ishandled [uplevel #0 $priv(cmd)  \
+	  [list $disconame $discotype $from $subiq] $args]
     }
     return $ishandled
 }
@@ -510,15 +543,12 @@ proc disco::reset {disconame {jid ""} {node ""}} {
 	    reset $disconame $child
 	}
     }
-    resetjid $disconame $child
+    resetjid $disconame $jid
 }
 
 # disco::resetjid --
 # 
 #       Clear only this particular jid.
-#       
-#       The info($cattype,typelist) and info($feature,featurelist) are not
-#       touched!
 
 proc disco::resetjid {disconame {jid ""} {node ""}} {
     
@@ -527,6 +557,7 @@ proc disco::resetjid {disconame {jid ""} {node ""}} {
 
     if {$jid == ""} {
 	catch {unset items info}
+	set info(conferences) {}
     } else {
 	
 	# Keep parents!
@@ -546,6 +577,14 @@ proc disco::resetjid {disconame {jid ""} {node ""}} {
 	}
 	if {[info exists parents]} {
 	    set items($jid,$node,parents) $parents
+	}
+	
+	# Rest.
+	foreach {key value} [array get info "*,typelist"] {
+	    set info($key) [lsearch -all -not -inline -exact $value $jid]
+	}
+	foreach {key value} [array get info "*,featurelist"] {
+	    set info($key) [lsearch -all -not -inline -exact $value $jid]
 	}
     }
 }
