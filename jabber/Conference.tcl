@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Conference.tcl,v 1.13 2004-02-13 10:28:24 matben Exp $
+# $Id: Conference.tcl,v 1.14 2004-02-14 14:00:33 matben Exp $
 
 package provide Conference 1.0
 
@@ -173,10 +173,9 @@ proc ::Jabber::Conference::BuildEnter {args} {
     set state(wbtenter)     $wbtenter
     set state(wbox)         $wbox
     set state(stattxt) "-- [::msgcat::mc jasearchwait] --"    
-            
-    if {[info exists argsArr(-autoget)] && $argsArr(-autoget)} {
-	::Jabber::Conference::EnterGet $token
-    }
+    
+    wm resizable $w 0 0
+    set oldFocus [focus]
     
     if {$state(room-state) == "normal"} {
 
@@ -191,13 +190,17 @@ proc ::Jabber::Conference::BuildEnter {args} {
 	trace variable $token\(server) w  \
 	  [list [namespace current]::ConfigRoomList $token]
     }
-    
-    wm resizable $w 0 0
-    set oldFocus [focus]
-    
+	    
+    if {[info exists argsArr(-autoget)] && $argsArr(-autoget)} {
+	
+	# We seem to get 1x1 on Gnome if not have after idle here???
+	after idle ::Jabber::Conference::EnterGet $token
+    }
+        
     # Wait here for a button press and window to be destroyed.
     tkwait window $w
 
+    ::Jabber::Debug 3 "\t after tkwait window"
     catch {focus $oldFocus}
     trace vdelete $token\(server) w  \
       [list [namespace current]::ConfigRoomList $token]
@@ -211,7 +214,7 @@ proc ::Jabber::Conference::ConfigRoomList {token name junk1 junk2} {
     upvar 0 $token state
     upvar ::Jabber::jstate jstate
     
-    # puts "::Jabber::Conference::ConfigRoomList"
+    ::Jabber::Debug 4 "::Jabber::Conference::ConfigRoomList"
 
     # Fill in room list if exist else browse.
     if {[$jstate(browse) isbrowsed $state(server)]} {
@@ -228,7 +231,7 @@ proc ::Jabber::Conference::FillRoomList {token} {
     upvar 0 $token state
     upvar ::Jabber::jstate jstate
     
-    # puts "::Jabber::Conference::FillRoomList"
+    ::Jabber::Debug 4 "::Jabber::Conference::FillRoomList"
     
     set roomList {}
     if {[string length $state(server)] > 0} {
@@ -252,7 +255,7 @@ proc ::Jabber::Conference::BusyEnterDlgIncr {token {num 1}} {
     upvar 0 $token state
     
     incr state(statuscount) $num
-    # puts "::Jabber::Conference::BusyEnterDlgIncr num=$num, statuscount=$state(statuscount)"
+    ::Jabber::Debug 4 "::Jabber::Conference::BusyEnterDlgIncr num=$num, statuscount=$state(statuscount)"
     
     if {$state(statuscount) > 0} {
 	set state(status) "Getting available rooms..." 
@@ -278,7 +281,7 @@ proc ::Jabber::Conference::BusyEnterDlgIncr {token {num 1}} {
 
 proc ::Jabber::Conference::BrowseServiceCB {token browsename type jid subiq} {
     
-    # puts "::Jabber::Conference::BrowseServiceCB"
+    ::Jabber::Debug 4 "::Jabber::Conference::BrowseServiceCB"
     
     ::Jabber::Conference::FillRoomList $token
     ::Jabber::Conference::BusyEnterDlgIncr $token -1
