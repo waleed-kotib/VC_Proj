@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Search.tcl,v 1.5 2003-12-16 15:03:53 matben Exp $
+# $Id: Search.tcl,v 1.6 2004-01-01 12:08:21 matben Exp $
 
 package provide Search 1.0
 
@@ -50,13 +50,7 @@ proc ::Jabber::Search::Build {args} {
     array set argsArr $args
     set finished -1
     
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-
-    }
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
     wm title $w [::msgcat::mc {Search Service}]
     set wtop $w
     

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.18 2003-12-30 15:30:58 matben Exp $
+# $Id: Browse.tcl,v 1.19 2004-01-01 12:08:21 matben Exp $
 
 package require chasearrows
 
@@ -345,7 +345,7 @@ proc ::Jabber::Browse::Show {w} {
 }
 
 proc ::Jabber::Browse::BuildToplevel {w} {
-    global  this prefs
+    global  prefs
 
     variable wtop
 
@@ -740,7 +740,7 @@ proc ::Jabber::Browse::CloseDlg {w} {
 }
 
 proc ::Jabber::Browse::AddServer { } {
-    global  this prefs
+    global  prefs
     
     variable finishedAdd -1
 

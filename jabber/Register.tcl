@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.6 2003-12-16 15:03:53 matben Exp $
+# $Id: Register.tcl,v 1.7 2004-01-01 12:08:21 matben Exp $
 
 package provide Register 1.0
 
@@ -45,13 +45,7 @@ proc ::Jabber::Register::Register {args} {
 	    set $name $argsArr(-$name)
 	}
     }
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-
-    }
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
     wm title $w [::msgcat::mc {Register New Account}]
     
     set fontSB [option get . fontSmallBold {}]
@@ -375,13 +369,7 @@ proc ::Jabber::GenRegister::BuildRegister {args} {
     }
     array set argsArr $args
     
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-
-    }
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
     wm title $w [::msgcat::mc {Register Service}]
     set wtop $w
     
@@ -507,13 +495,7 @@ proc ::Jabber::GenRegister::Simple {w args} {
     }
     array set argsArr $args
     
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-
-    }
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
     wm title $w [::msgcat::mc {Register Service}]
     set wtop $w
     

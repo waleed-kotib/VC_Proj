@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.13 2003-12-30 15:30:58 matben Exp $
+# $Id: MUC.tcl,v 1.14 2004-01-01 12:08:21 matben Exp $
 
 package require entrycomp
 
@@ -327,6 +327,11 @@ proc ::Jabber::MUC::EnterCallback {jlibName type args} {
     }   
 }
 
+namespace eval ::Jabber::MUC:: {
+    
+    hooks::add closeWindowHook    ::Jabber::MUC::InviteCloseHook
+}
+
 # Jabber::MUC::Invite --
 # 
 #       Make an invitation to a room.
@@ -335,20 +340,12 @@ proc ::Jabber::MUC::Invite {roomjid} {
     global this wDlgs
     
     upvar ::Jabber::jstate jstate
-    variable fininvite
+    variable fininvite -1
     variable dlguid
     
     set w $wDlgs(jmucinvite)[incr dlguid]
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-	
-    }
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
     wm title $w {Invite User}
-    set fininvite -1
-    wm protocol $w WM_DELETE_WINDOW "set [namespace current]::fininvite 0"
     
     set fontSB [option get . fontSmallBold {}]
     
@@ -419,6 +416,15 @@ proc ::Jabber::MUC::Invite {roomjid} {
     return [expr {($fininvite <= 0) ? "cancel" : "ok"}]
 }
 
+proc ::Jabber::MUC::InviteCloseHook {wclose} {
+    global  wDlgs
+    variable fininvite
+        
+    if {[string match $wDlgs(jmucinvite)* $wclose]} {
+	set fininvite 0
+    }   
+}
+
 # Jabber::MUC::MUCMessage --
 # 
 #       Handle incoming message tagged with muc namespaced x-element.
@@ -469,6 +475,11 @@ proc ::Jabber::MUC::MUCMessage {from xlist} {
 
 #--- The Info Dialog -----------------------------------------------------------
 
+namespace eval ::Jabber::MUC:: {
+    
+    hooks::add closeWindowHook    ::Jabber::MUC::InfoCloseHook
+}
+
 # Jabber::MUC::BuildInfo --
 # 
 #       Displays an info dialog for MUC room configuration.
@@ -491,20 +502,12 @@ proc ::Jabber::MUC::BuildInfo {roomjid} {
     }    
     set w $wDlgs(jmucinfo)[incr dlguid]
 
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-
-    }
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
     set roomName [$jstate(browse) getname $roomjid]
     if {$roomName == ""} {
 	regexp {([^@]+)@.+} $roomjid match roomName
     }
     wm title $w "Info Room: $roomName"
-    wm protocol $w WM_DELETE_WINDOW  \
-      [list [namespace current]::Close $roomjid]
     set locals($roomjid,w) $w
     set locals($w,roomjid) $roomjid
     set locals($roomjid,mynick) [$jstate(jlib) muc mynick $roomjid]
@@ -969,13 +972,7 @@ proc ::Jabber::MUC::EditListBuild {roomjid type} {
     set editlocals(listvar) {}
     
     set w $wDlgs(jmucedit)[incr dlguid]
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-	
-    }
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
     set roomName [$jstate(browse) getname $roomjid]
     if {$roomName == ""} {
 	regexp {([^@]+)@.+} $roomjid match roomName
@@ -1423,13 +1420,7 @@ proc ::Jabber::MUC::RoomConfig {roomjid} {
     upvar ::Jabber::jstate jstate
     
     set w $wDlgs(jmuccfg)[incr dlguid]
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-
-    }
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
     wm title $w "Configure Room"
     wm protocol $w WM_DELETE_WINDOW  \
       [list [namespace current]::CancelConfig $roomjid $w]
@@ -1569,13 +1560,7 @@ proc ::Jabber::MUC::Destroy {roomjid} {
     variable dlguid
     
     set w $wDlgs(jmucdestroy)[incr dlguid]
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-	
-    }
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
     set roomName [$jstate(browse) getname $roomjid]
     if {$roomName == ""} {
 	regexp {([^@]+)@.+} $roomjid match roomName
@@ -1687,6 +1672,22 @@ proc ::Jabber::MUC::PresCallback {roomjid jlibname type args} {
 	tk_messageBox -type ok -icon error -title "Error" -message $msg
     }
 }
+
+proc ::Jabber::MUC::InfoCloseHook {wclose} {
+    global  wDlgs
+	
+    if {[string match $wDlgs(jmucinfo)* $wclose]} {
+
+	# Need to find roomjid from toplevel widget.
+	foreach ns [namespace children [namespace current]] {
+	    set roomjid [namespace tail $ns]
+	    if {[string equal [set ${ns}::locals($roomjid,w)] $wclose]} {
+		::Jabber::MUC::Close $roomjid
+	    }
+	}
+    }   
+}
+
 proc ::Jabber::MUC::Close {roomjid} {
     upvar [namespace current]::${roomjid}::locals locals
 

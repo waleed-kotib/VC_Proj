@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.7 2003-12-30 15:30:58 matben Exp $
+# $Id: Whiteboard.tcl,v 1.8 2004-01-01 12:08:22 matben Exp $
 
 package require entrycomp
 package require CanvasDraw
@@ -654,7 +654,7 @@ proc ::WB::LoginCmd { } {
 	set ::Jabber::jstate($wtop,tojid) "@${server}"
 
 	# Make menus consistent.
-	::UI::FixMenusWhen $wtop "connect"
+	::WB::FixMenusWhen $wtop "connect"
     }
 }
 
@@ -665,7 +665,7 @@ proc ::WB::LogoutHook { } {
 	set wtop [::UI::GetToplevelNS $w]
 
 	# If no more connections left, make menus consistent.
-	::UI::FixMenusWhen $wtop "disconnect"
+	::WB::FixMenusWhen $wtop "disconnect"
     }   
 }
 
@@ -907,7 +907,7 @@ proc ::WB::BuildWhiteboard {wtop args} {
     # Add things that are defined in the prefs file and not updated else.
     ::CanvasCmd::DoCanvasGrid $wtop
     if {$isConnected} {
-	::UI::FixMenusWhen $wtop "connect"
+	::WB::FixMenusWhen $wtop "connect"
     }
 
     # Set up paste menu if something on the clipboard.
@@ -1630,7 +1630,7 @@ proc ::WB::RemoveAllBindings {w} {
 #       menu created
 
 proc ::WB::BuildWhiteboardMenus {wtop} {
-    global  this wDlgs prefs dashFull2Short osprefs
+    global  this wDlgs prefs dashFull2Short
     
     variable menuDefs
     upvar ::${wtop}::wapp wapp
@@ -3004,20 +3004,26 @@ proc ::WB::FixMenusWhen {wtop what} {
 		}
 	    }
 	    
-	    # If no more connections left, make menus consistent.
-	    if {[llength [::Network::GetIP to]] == 0} {
-		::UI::MenuMethod $mfile entryconfigure mPutFile -state disabled
-		::UI::MenuMethod $mfile entryconfigure mPutCanvas -state disabled
-		::UI::MenuMethod $mfile entryconfigure mGetCanvas -state disabled
+	    if {![string equal $prefs(protocol) "jabber"]} {
+		
+		# If no more connections left, make menus consistent.
+		if {[llength [::Network::GetIP to]] == 0} {
+		    ::UI::MenuMethod $mfile entryconfigure mPutFile -state disabled
+		    ::UI::MenuMethod $mfile entryconfigure mPutCanvas -state disabled
+		    ::UI::MenuMethod $mfile entryconfigure mGetCanvas -state disabled
+		}
 	    }
 	}
 	disconnectserver {
 	    
-	    # If no more connections left, make menus consistent.
-	    if {[llength [::Network::GetIP to]] == 0} {
-		::UI::MenuMethod $mfile entryconfigure mPutFile -state disabled
-		::UI::MenuMethod $mfile entryconfigure mPutCanvas -state disabled
-		::UI::MenuMethod $mfile entryconfigure mGetCanvas -state disabled
+	    if {![string equal $prefs(protocol) "jabber"]} {
+
+		# If no more connections left, make menus consistent.
+		if {[llength [::Network::GetIP to]] == 0} {
+		    ::UI::MenuMethod $mfile entryconfigure mPutFile -state disabled
+		    ::UI::MenuMethod $mfile entryconfigure mPutCanvas -state disabled
+		    ::UI::MenuMethod $mfile entryconfigure mGetCanvas -state disabled
+		}
 	    }
 	}
     }

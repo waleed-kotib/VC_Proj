@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.39 2003-12-30 15:30:58 matben Exp $
+# $Id: UI.tcl,v 1.40 2004-01-01 12:08:22 matben Exp $
 
 package require entrycomp
 
@@ -215,6 +215,9 @@ proc ::UI::GetScreenSize { } {
 proc ::UI::Toplevel {w args} {
     global  this osprefs
     
+    array set argsArr {
+	-usemacmainmenu     0
+    }
     array set argsArr $args
     set topopts {}
     if {[info exists argsArr(-class)]} {
@@ -267,14 +270,17 @@ proc ::UI::Toplevel {w args} {
 
 proc ::UI::DoCloseWindow {{wevent {}}} {
     
-    set w [winfo toplevel [focus]]
+    set wfocus [focus]
+    if {$wfocus != ""} {
+	set w [winfo toplevel [focus]]
     
-    Debug 2 "::UI::DoCloseWindow winfo class $w=[winfo class $w]"
+	Debug 2 "::UI::DoCloseWindow winfo class $w=[winfo class $w]"
     
-    # Run hooks. Only the one corresponding to the $w needs to act!
-    set result [::hooks::run closeWindowHook $w]    
-    if {![string equal $result "stop"]} {
-	destroy $w
+	# Run hooks. Only the one corresponding to the $w needs to act!
+	set result [::hooks::run closeWindowHook $w]    
+	if {![string equal $result "stop"]} {
+	    destroy $w
+	}
     }
 }
 
@@ -789,13 +795,7 @@ proc ::UI::MegaDlgMsgAndEntry {title msg label varName btcancel btok} {
     upvar $varName entryVar
     
     set w .mega[incr megauid]
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-	
-    }
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
     wm title $w $title
     set finmega -1
     wm protocol $w WM_DELETE_WINDOW [list set [namespace current]::finmega 0]
@@ -1176,98 +1176,6 @@ proc ::UI::ParseWMGeometry {w} {
     regexp "(${int_})x(${int_})${plus_}(${sint_})${plus_}(${sint_})"   \
       [wm geometry $w] match wid hei x y
     return [list $wid $hei $x $y]
-}
-
-
-
-# UI::FixMenusWhen --
-#       
-#       Sets the correct state for menus and buttons when 'what'.
-#       
-# Arguments:
-#       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
-#       what        "connect", "disconnect", "disconnectserver"
-#
-# Results:
-
-proc ::UI::FixMenusWhen {wtop what} {
-    global  prefs wDlgs
-    
-    upvar ::${wtop}::wapp wapp
-    upvar ::${wtop}::opts opts
-    variable fixMenusCallback
-    
-    set mfile ${wtop}menu.file 
-    set wtray $wapp(tray)
-    
-    switch -exact -- $what {
-	connect {
-	    
-	    # If client only, allow only one connection, limited.
-	    switch -- $prefs(protocol) {
-		jabber {
-		    if {[string equal $opts(-state) "normal"] &&  \
-		      [string equal $opts(-sendbuttonstate) "normal"]} {
-			$wtray buttonconfigure send -state normal
-		    }
-		}
-		symmetric {
-		    ::UI::MenuMethod $mfile entryconfigure mPutFile -state normal
-		    ::UI::MenuMethod $mfile entryconfigure mPutCanvas -state normal
-		    ::UI::MenuMethod $mfile entryconfigure mGetCanvas -state normal
-		}
-		client {
-		    $wtray buttonconfigure connect -state disabled
-		    ::UI::MenuMethod $mfile entryconfigure mOpenConnection -state disabled
-		    ::UI::MenuMethod $mfile entryconfigure mPutFile -state normal
-		    ::UI::MenuMethod $mfile entryconfigure mPutCanvas -state normal
-		    ::UI::MenuMethod $mfile entryconfigure mGetCanvas -state normal
-		}
-		server {
-		    ::UI::MenuMethod $mfile entryconfigure mPutFile -state normal
-		    ::UI::MenuMethod $mfile entryconfigure mPutCanvas -state normal
-		    ::UI::MenuMethod $mfile entryconfigure mGetCanvas -state normal
-		}
-		default {
-		    ::UI::MenuMethod $mfile entryconfigure mOpenConnection -state disabled
-		    $wtray buttonconfigure connect -state disabled
-		}
-	    }	    
-	}
-	disconnect {
-	    
-	    switch -- $prefs(protocol) {
-		jabber {
-		    $wtray buttonconfigure send -state disabled
-		}
-		client {
-		    $wtray buttonconfigure connect -state normal
-		    ::UI::MenuMethod $mfile entryconfigure mOpenConnection -state normal
-		}
-	    }
-	    
-	    # If no more connections left, make menus consistent.
-	    if {[llength [::Network::GetIP to]] == 0} {
-		::UI::MenuMethod $mfile entryconfigure mPutFile -state disabled
-		::UI::MenuMethod $mfile entryconfigure mPutCanvas -state disabled
-		::UI::MenuMethod $mfile entryconfigure mGetCanvas -state disabled
-	    }
-	}
-	disconnectserver {
-	    
-	    # If no more connections left, make menus consistent.
-	    if {[llength [::Network::GetIP to]] == 0} {
-		::UI::MenuMethod $mfile entryconfigure mPutFile -state disabled
-		::UI::MenuMethod $mfile entryconfigure mPutCanvas -state disabled
-		::UI::MenuMethod $mfile entryconfigure mGetCanvas -state disabled
-	    }
-	}
-    }
-    
-    # Invoke any callbacks from 'addons'.
-    foreach cmd $fixMenusCallback {
-	eval {$cmd} ${wtop}menu $what
-    }
 }
 
 # UI::FixMenusWhenSelection --

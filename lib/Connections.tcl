@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Connections.tcl,v 1.16 2003-12-23 14:41:01 matben Exp $
+# $Id: Connections.tcl,v 1.17 2004-01-01 12:08:22 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -81,13 +81,7 @@ proc ::OpenConnection::OpenConnection {w} {
     if {[winfo exists $w]} {
 	return
     }
-    if {[string match "mac*" $this(platform)]} {
-	toplevel $w
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-	toplevel $w
-    }
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
     wm title $w {Open Connection}
     
     # Global frame.
@@ -391,7 +385,7 @@ proc ::OpenConnection::WhenSocketOpensInits {nameOrIP server remoteServPort \
     ::UI::SetCommEntry $wDlgs(mainwb) $ipNum 1 -1
     
     # Update menus. If client only, allow only one connection, limited.
-    ::UI::FixMenusWhen $wDlgs(mainwb) "connect"
+    ::WB::FixMenusWhen $wDlgs(mainwb) "connect"
     return $ipNum
 }
 
@@ -612,7 +606,7 @@ proc ::OpenConnection::DoCloseClientConnection {ipNum} {
 
     # If no more connections left, make menus consistent.
     if {[llength [::Network::GetIP to]] == 0} {
-	::UI::FixMenusWhen $wDlgs(mainwb) {disconnect}
+	::WB::FixMenusWhen $wDlgs(mainwb) {disconnect}
     }
 }
 
@@ -653,7 +647,7 @@ proc ::OpenConnection::DoCloseServerConnection {ipNum args} {
     }
     
     # If no more connections left, make menus consistent.
-    ::UI::FixMenusWhen $wDlgs(mainwb) "disconnectserver"
+    ::WB::FixMenusWhen $wDlgs(mainwb) "disconnectserver"
 }
 
 #--- OpenMulticast stuff -------------------------------------------------------
@@ -689,13 +683,7 @@ proc ::OpenMulticast::OpenMulticast {wtop} {
 
     set finished -1
     set w $wDlgs(openMulti)[incr uid]
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-	#
-    }
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
     wm title $w [::msgcat::mc {Open Stream}]
     set fontSB [option get . fontSmallBold {}]
     

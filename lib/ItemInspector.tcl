@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ItemInspector.tcl,v 1.14 2003-12-18 14:19:35 matben Exp $
+# $Id: ItemInspector.tcl,v 1.15 2004-01-01 12:08:22 matben Exp $
 
 namespace eval ::ItemInspector::  {
     
@@ -164,13 +164,7 @@ proc ::ItemInspector::Build {wtop itemId args} {
     if {[lsearch [$wCan gettags $itPrefNo] "frame"] >= 0}  {
 	#return
     }	
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-	#
-    }
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
     wm title $w {Item Inspector}
     
     set fontSB [option get . fontSmallBold {}]
@@ -573,13 +567,7 @@ proc ::ItemInspector::Movie {wtop winfr} {
     if {[winfo exists $w]}  {
 	error "window name $w already exists!"
     }
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-	#
-    }
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
     wm title $w {Movie Inspector}
     set fontSB [option get . fontSmallBold {}]
     
@@ -698,13 +686,7 @@ proc ::ItemInspector::Broken {wtop id args} {
     if {[winfo exists $w]} {
 	return
     }
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-	#
-    }
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
     wm title $w {Item Inspector}
     set wcan [::UI::GetCanvasFromWtop $wtop]
     

@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: SetupAss.tcl,v 1.15 2003-12-18 14:19:35 matben Exp $
+# $Id: SetupAss.tcl,v 1.16 2004-01-01 12:08:21 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -32,13 +32,7 @@ proc ::Jabber::SetupAss::SetupAss {w} {
     
     variable finished
 
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-	#
-    }
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
     wm title $w [::msgcat::mc {Setup Assistant}]
     
     set fontSB [option get . fontSmallBold {}]
@@ -188,13 +182,7 @@ proc ::Jabber::SetupAss::ServersDlg {w} {
 	raise $w
 	return
     }
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-
-    }
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
     wm title $w {Public Jabber Servers}
     
     set fontSB [option get . fontSmallBold {}]

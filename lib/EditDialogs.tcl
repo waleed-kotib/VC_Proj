@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: EditDialogs.tcl,v 1.5 2003-12-16 15:03:53 matben Exp $
+# $Id: EditDialogs.tcl,v 1.6 2004-01-01 12:08:22 matben Exp $
 
 
 #       ::EditShortcuts:: implements dialogs for editing shortcuts. 
@@ -59,13 +59,7 @@ proc ::EditShortcuts::EditShortcuts {w nameOfShortcutList} {
     if {[winfo exists $w]} {
 	return
     }
-    if {[string match "mac*" $this(platform)]} {
-	toplevel $w
-	eval $::macWindowStyle $w documentProc
- 	::UI::MacUseMainMenu $w
-   } else {
-	toplevel $w
-    }
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
     wm title $w [::msgcat::mc {Edit Shortcuts}]
     pack [frame $w.frall -borderwidth 1 -relief raised]
     
@@ -226,13 +220,7 @@ proc ::EditShortcuts::AddOrEditShortcuts {what nameOfShortsCopy indShortcuts  \
     if {[winfo exists $w]} {
 	return
     }
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-	#
-    }
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
     if {$what == "add"} {
 	set txt [::msgcat::mc {Add Shortcut}]
 	set txt1 "[::msgcat::mc {New shortcut}]:"

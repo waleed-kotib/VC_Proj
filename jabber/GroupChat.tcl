@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.30 2003-12-30 15:30:58 matben Exp $
+# $Id: GroupChat.tcl,v 1.31 2004-01-01 12:08:21 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -503,7 +503,7 @@ proc ::Jabber::GroupChat::GotMsg {body args} {
 #       shows window.
 
 proc ::Jabber::GroupChat::Build {roomJid args} {
-    global  this prefs wDlgs osprefs
+    global  this prefs wDlgs
     
     variable groupChatOptions
     variable locals

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.11 2003-12-13 17:54:41 matben Exp $
+# $Id: OOB.tcl,v 1.12 2004-01-01 12:08:21 matben Exp $
 
 package provide OOB 1.0
 
@@ -32,13 +32,7 @@ proc ::Jabber::OOB::BuildSet {w jid} {
 	return
     }
     set finished -1
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-
-    }
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
     wm title $w {Send File}
     set locals(jid) $jid
     set fontS [option get . fontSmall {}]
