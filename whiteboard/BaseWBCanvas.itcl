@@ -1,0 +1,165 @@
+# BaseWBCanvas.itcl 
+# 
+#       Interface between application code and the itcl runtime environment for
+#       tcl applets.
+#       
+#       An itcl applet inherits this class which makes a number of methods
+#       available from the actual application code.
+#       
+#       To be safe the code should run in a safe interpreter with all
+#       methods and variables in this base class aliased.
+# 
+# $Id: BaseWBCanvas.itcl,v 1.1 2004-07-22 15:08:50 matben Exp $
+
+class BaseWBCanvas {
+	
+    # ------------------
+    # Class constructor.
+    # ------------------
+
+    protected {
+	constructor {args} {}
+	destructor {}
+    }
+
+    # ------------------------
+    # Protected class methods.
+    # ------------------------
+
+    protected {
+	method NewUtag {}
+	method GetUtag {id}
+	method NewImportAnchor
+	method RegisterCanvasClassBinds {name canvasBindList}
+	method DeregisterCanvasClassBinds {name}
+	method RegisterCanvasInstBinds {name canvasBindList}
+	method DeregisterCanvasInstBinds {{name {}}}
+	method CancelBox {}
+	method CreateItem {args}
+	method ItemConfigure {id args}
+	method InitMoveCurrent {x y}
+	method DragMoveCurrent {x y {modifier {}}}
+	method FinalMoveCurrent {x y}
+	method FinalMoveCurrentGrid {x y grid}
+	method AddUndo {undo redo}
+	method DeleteCurrent {x y}
+	method DeleteCurrentWithUndo {x y {undoCmdList {}}}
+	method Command {cmd {where all}}
+	method CommandList {cmdList {where all}}
+    }
+
+    # -------------------------
+    # Protected static methods.
+    # -------------------------
+
+    protected {
+	proc GetThis {key}
+    }
+    
+    # ---------------------------
+    # Private class data members.
+    # ---------------------------
+    
+    protected {
+	variable tkCanvas
+    }
+}
+
+body BaseWBCanvas::constructor {args} {
+    
+    if {[llength $args] != 1} {
+	return
+    }
+    set w [lindex $args 0]
+    set tkCanvas $w
+}
+
+body BaseWBCanvas::destructor {} {
+
+}
+
+body BaseWBCanvas::NewUtag {} {
+    return [::CanvasUtils::NewUtag]
+}
+
+body BaseWBCanvas::NewImportAnchor {} {
+    return [::CanvasUtils::NewImportAnchor $tkCanvas]
+}
+
+body BaseWBCanvas::RegisterCanvasClassBinds {name canvasBindList} {
+    ::WB::RegisterCanvasClassBinds $name $canvasBindList
+}
+
+body BaseWBCanvas::RegisterCanvasInstBinds {name canvasBindList} {
+    ::WB::RegisterCanvasInstBinds $tkCanvas $name $canvasBindList
+}
+
+body BaseWBCanvas::DeregisterCanvasInstBinds {{name {}}} {
+    ::Plugins::DeregisterCanvasInstBinds $tkCanvas $name
+}
+
+body BaseWBCanvas::CancelBox {} {
+    ::CanvasDraw::CancelBox $tkCanvas
+}
+
+body BaseWBCanvas::CreateItem {args} {
+    eval {::CanvasUtils::CreateItem $tkCanvas} $args
+}
+
+body BaseWBCanvas::ItemConfigure {id args} {
+    eval {::CanvasUtils::ItemConfigure $tkCanvas $id} $args
+}
+
+body BaseWBCanvas::GetUtag {id} {
+    return [::CanvasUtils::GetUtag $tkCanvas $id]
+}
+
+body BaseWBCanvas::GetThis {key} {
+    global  this
+    
+    return $this($key)
+}
+
+body BaseWBCanvas::InitMoveCurrent {x y} {
+    ::CanvasDraw::InitMoveCurrent $tkCanvas $x $y
+}
+
+body BaseWBCanvas::DragMoveCurrent {x y {modifier {}}} {
+    ::CanvasDraw::DragMoveCurrent $tkCanvas $x $y $modifier
+}
+
+body BaseWBCanvas::FinalMoveCurrent {x y} {   
+    ::CanvasDraw::FinalMoveCurrent $tkCanvas $x $y
+}
+
+body BaseWBCanvas::FinalMoveCurrentGrid {x y grid} {   
+    ::CanvasDraw::FinalMoveCurrentGrid $tkCanvas $x $y $grid
+}
+
+body BaseWBCanvas::AddUndo {undo redo} {
+    set wtop [::UI::GetToplevelNS $tkCanvas]
+    undo::add [::WB::GetUndoToken $wtop] $undo $redo
+}
+
+body BaseWBCanvas::DeleteCurrent {x y} {
+    ::CanvasDraw::DeleteCurrent $tkCanvas $x $y
+}
+
+body BaseWBCanvas::DeleteCurrentWithUndo {x y {undoCmdList {}}} {
+    ::CanvasDraw::DeleteCurrentWithUndo $tkCanvas $x $y $undoCmdList
+}
+
+body BaseWBCanvas::Command {cmd {where all}} {
+    set wtop [::UI::GetToplevelNS $tkCanvas]
+    ::CanvasUtils::Command $wtop $cmd $where
+}
+
+body BaseWBCanvas::CommandList {cmdList {where all}} {
+    set wtop [::UI::GetToplevelNS $tkCanvas]
+    ::CanvasUtils::CommandList $wtop $cmdList $where
+}
+
+
+
+
+
