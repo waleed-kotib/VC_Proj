@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.67 2004-07-23 07:21:15 matben Exp $
+# $Id: Coccinella.tcl,v 1.68 2004-07-23 13:03:59 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -220,6 +220,7 @@ set this(itemPath)          [file join $this(path) items]
 set this(altItemPath)       [file join $this(prefsPath) items]
 set this(pluginsPath)       [file join $this(path) plugins]
 set this(appletsPath)       [file join $this(path) plugins applets]
+set this(componentPath)     [file join $this(path) components]
 set this(emoticonsPath)     [file join $this(path) iconsets emoticons]
 set this(altEmoticonsPath)  [file join $this(prefsPath) iconsets emoticons]
 set this(httpdRootPath)     $this(path)
@@ -530,7 +531,7 @@ if {!$prefs(stripJabber)} {
 
 # Components.
 ::Debug 2 "component::load"
-component::lappend_auto_path $this(pluginsPath)
+component::lappend_auto_path $this(componentPath)
 component::load
 
 # Components that need to add their own preferences need to be registered here.
