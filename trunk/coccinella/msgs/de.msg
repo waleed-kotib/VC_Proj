@@ -8,20 +8,20 @@
 #     (hj dot beckers at onlinehome dot de)
 
 ::msgcat::mcset de Accept	Akzeptieren
-::msgcat::mcset de Action {}	Aktion
-::msgcat::mcset de Active {} 	aktiv
+::msgcat::mcset de Action 	Aktion
+::msgcat::mcset de Active 	aktiv
 ::msgcat::mcset de Add		Hinzufügen
 ::msgcat::mcset de Address	Adresse
 ::msgcat::mcset de Advanced	Erweitert
 ::msgcat::mcset de Agents	Agenten
-::msgcat::mcset de Allow {}	Erlaube
+::msgcat::mcset de Allow  	Erlaube
 ::msgcat::mcset de Appearance   Aussehen
 ::msgcat::mcset de Apply	Anwenden
 ::msgcat::mcset de Available	Verfügbar
 ::msgcat::mcset de Away		Weg
 ::msgcat::mcset de Binary	Binär
 ::msgcat::mcset de Birthday	Geburtstag
-::msgcat::mcset de Block {}	Blockieren
+::msgcat::mcset de Block  	Blockieren
 ::msgcat::mcset de Blockers	Sperren
 ::msgcat::mcset de Blocking	gesperrt
 ::msgcat::mcset de Browser	Browser
@@ -68,10 +68,10 @@
 ::msgcat::mcset de Group	Gruppe
 ::msgcat::mcset de Groupchat    Gruppen-Chat
 ::msgcat::mcset de Handling	Behandlung
-::msgcat::mcset de Height {}	Höhe
+::msgcat::mcset de Height 	Höhe
 ::msgcat::mcset de History	Verlauf
 ::msgcat::mcset de Home		Privat
-::msgcat::mcset de Image {}	Bild
+::msgcat::mcset de Image  	Bild
 ::msgcat::mcset de Import	Import
 ::msgcat::mcset de Inbox	Posteingang
 ::msgcat::mcset de Info		Information
@@ -84,7 +84,7 @@
 ::msgcat::mcset de Middle	{2. Vorname}
 ::msgcat::mcset de Moderators	Moderatoren
 ::msgcat::mcset de More		Mehr
-::msgcat::mcset de Name {}	Name
+::msgcat::mcset de Name  	Name
 ::msgcat::mcset de Never	Niemals
 ::msgcat::mcset de New		Neu
 ::msgcat::mcset de Next		Weiter
@@ -149,17 +149,17 @@
 ::msgcat::mcset de To		An	
 ::msgcat::mcset de Topic	Thema
 ::msgcat::mcset de Trash	Müll
-::msgcat::mcset de Type {}	Typ
+::msgcat::mcset de Type  	Typ
 ::msgcat::mcset de Unregister	Abmelden
 ::msgcat::mcset de Unsubscribe	Abmelden
 ::msgcat::mcset de Unsubscribed	Abgemeldet 
 ::msgcat::mcset de Username	Benutzername
-::msgcat::mcset de Value {}	Wert
+::msgcat::mcset de Value  	Wert
 ::msgcat::mcset de Visitors	Besucher
 ::msgcat::mcset de Warning	Warnung
 ::msgcat::mcset de Welcome      Willkommen
 ::msgcat::mcset de Whiteboard	Zeichenwand
-::msgcat::mcset de Width {}	Breite
+::msgcat::mcset de Width  	Breite
 ::msgcat::mcset de Work		Beruflich
 ::msgcat::mcset de Yes		Ja
 ::msgcat::mcset de yes		ja

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Import.tcl,v 1.16 2004-12-08 08:21:20 matben Exp $
+# $Id: Import.tcl,v 1.17 2005-01-26 08:21:41 matben Exp $
 
 package require http
 package require httpex
@@ -2074,6 +2074,18 @@ proc ::Import::QuickTimeHandler {wcan type cmd args} {
 	    }
 	}
     }
+}
+
+proc ::Import::TakeShot {wtop winfr} {
+    
+    set wcan [::WB::GetCanvasFromWtop $wtop]
+    set wmov ${winfr}.m
+    set name [image create photo]
+    $wmov picture [$wmov time] name
+    
+    
+    
+    DrawImage $w opts
 }
 
 # Import::ReloadImage --
