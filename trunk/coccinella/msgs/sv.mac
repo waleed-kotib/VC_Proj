@@ -419,12 +419,13 @@
 ::msgcat::mcset sv {Postal Code}	   {Postnummer}
 ::msgcat::mcset sv {Preferred Protocol}    {Förstahands protokoll}
 ::msgcat::mcset sv {Presence Error}	   {Presence fel}
+::msgcat::mcset sv {Profile Name}          {Profil namn}
 ::msgcat::mcset sv {Proxy Setup}           {Proxyinställning}
 ::msgcat::mcset sv {Put File Error}        {Felektighet vid filöverföring}
 ::msgcat::mcset sv {Put Image/Movie}       {Skicka bild/film}
 ::msgcat::mcset sv {Reject receive}        {Neka mottagande}
 ::msgcat::mcset sv {Request To User}       {Förfrågan till användaren}
-::msgcat::mcset sv {Retype password}       {Skriv om lösenord}
+::msgcat::mcset sv {Retype password}       {Upprepa lösenord}
 ::msgcat::mcset sv {Revert Panel}          {Återställ panelen}
 ::msgcat::mcset sv {Register New Account}  {Registrera nytt konto}
 ::msgcat::mcset sv {Register Now}	   {Registrera nu}
@@ -869,7 +870,7 @@ på filminnet begränsas av användarinställningarna nedan.}
 de inte ska användas. Programmet måste startas om för att detta ska vara\
 verksamt.}
 ::msgcat::mcset sv prefchactret  {Använd alltid aktiv <Return> i chatt dialog}
-
+::msgcat::mcset sv prefprofname  {Skriv in önskat namn på användarprofilen}
 
 
 

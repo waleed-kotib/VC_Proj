@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.47 2004-06-06 07:02:20 matben Exp $
+# $Id: Browse.tcl,v 1.48 2004-06-11 07:44:43 matben Exp $
 
 package require chasearrows
 
@@ -379,11 +379,11 @@ proc ::Jabber::Browse::DispatchUsers {jid subiq} {
       subiq='[string range $subiq 0 30] ...'"
     
     # Find any <user> elements.
-    if {[string equal [lindex $subiq 0] "user"]} {
+    if {[string equal [wrapper::gettag $subiq] "user"]} {
 	::Jabber::GroupChat::BrowseUser $subiq
     }
     foreach child [wrapper::getchildren $subiq] {
-	if {[string equal [lindex $child 0] "user"]} {
+	if {[string equal [wrapper::gettag $child] "user"]} {
 	    ::Jabber::GroupChat::BrowseUser $child	    
 	}
     }

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.61 2004-06-09 14:26:17 matben Exp $
+# $Id: Chat.tcl,v 1.62 2004-06-11 07:44:44 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -274,7 +274,6 @@ proc ::Jabber::Chat::GotMsg {body args} {
 	    set threadID $chatstate(threadid)
 	}
     }
-    puts "chattoken=$chattoken"
     
     # At this stage we have a threadID.
     # We may not yet have a dialog and/or page for this thread. Make them.

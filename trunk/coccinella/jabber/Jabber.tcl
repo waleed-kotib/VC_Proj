@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.89 2004-06-08 14:03:32 matben Exp $
+# $Id: Jabber.tcl,v 1.90 2004-06-11 07:44:44 matben Exp $
 
 package provide Jabber 1.0
 
@@ -63,7 +63,8 @@ namespace eval ::Jabber:: {
     variable jerror
         
     # The trees 'directories' which should always be there.
-    set jprefs(treedirs) {Online Offline {Subscription Pending}}
+    #set jprefs(treedirs) {Online Offline {Subscription Pending}}
+    set jprefs(treedirs) {Online Offline}
     set jprefs(closedtreedirs) {}
     
     # Our own jid, and jid/resource respectively.
@@ -1516,7 +1517,7 @@ proc ::Jabber::GetLastResult {from silent jlibname type subiq} {
 	      -message [FormatTextForMessageBox $msg]
 	}
     } else {
-	array set attrArr [lindex $subiq 1]
+	array set attrArr [wrapper::getattrlist $subiq]
 	if {![info exists attrArr(seconds)]} {
 	    tk_messageBox -title [::msgcat::mc {Last Activity}] -icon info  \
 	      -type ok -message [FormatTextForMessageBox \
@@ -1524,8 +1525,8 @@ proc ::Jabber::GetLastResult {from silent jlibname type subiq} {
 	} else {
 	    set secs [expr [clock seconds] - $attrArr(seconds)]
 	    set uptime [clock format $secs -format "%a %b %d %H:%M:%S"]
-	    if {[lindex $subiq 3] != ""} {
-		set msg "The message: [lindex $subiq 3]"
+	    if {[wrapper::getcdata $subiq] != ""} {
+		set msg "The message: [wrapper::getcdata $subiq]"
 	    } else {
 		set msg {}
 	    }
@@ -1581,18 +1582,18 @@ proc ::Jabber::GetTimeResult {from silent jlibname type subiq} {
     } else {
 	
 	# Display the cdata of <display>, or <utc>.
-	foreach child [lindex $subiq 4] {
+	foreach child [wrapper::getchildren $subiq] {
 	    set tag [lindex $child 0]
 	    set $tag [lindex $child 3]
 	}
 	if {[info exists display]} {
 	    set msg $display
 	} elseif {[info exists utc]} {
-	    set msg $utc
+	    set msg [clock format [clock scan $utc]]
 	} elseif {[info exists tz]} {
-	    set msg $tz
+	    # ???
 	} else {
-	    set msg {unknown}
+	    set msg "unknown"
 	}
 	tk_messageBox -title [::msgcat::mc {Local Time}] -icon info -type ok -message \
 	  [FormatTextForMessageBox [::msgcat::mc jamesslocaltime $from $msg]]
@@ -1648,7 +1649,7 @@ proc ::Jabber::GetVersionResult {from silent jlibname type subiq} {
 	  -side top -padx 8 -pady 4
 	pack [frame $w.fr] -padx 10 -pady 4 -side top 
 	set i 0
-	foreach child [lindex $subiq 4] {
+	foreach child [wrapper::getchildren $subiq] {
 	    label $w.fr.l$i -font $fontSB -text "[lindex $child 0]:"
 	    label $w.fr.lr$i -text [lindex $child 3]
 	    grid $w.fr.l$i -column 0 -row $i -sticky e
@@ -1688,9 +1689,9 @@ proc ::Jabber::CacheGroupchatType {confjid jlibname type subiq} {
     
     set name ""
     set version ""
-    foreach child [lindex $subiq 4] {
-	set tag [lindex $child 0]
-	set $tag [lindex $child 3]
+    foreach child [wrapper::getchildren $subiq] {
+	set tag  [wrapper::gettag $child]
+	set $tag [wrapper::getcdata $child]
     }
 		
     # This is a VERY rude ad hoc method of figuring out if the

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.63 2004-06-06 15:42:49 matben Exp $
+# $Id: Roster.tcl,v 1.64 2004-06-11 07:44:44 matben Exp $
 
 package provide Roster 1.0
 
@@ -710,13 +710,11 @@ proc ::Jabber::Roster::PushProc {rostName what {jid {}} args} {
 
 proc ::Jabber::Roster::Clear { } {    
     variable wtree    
-    upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::jstate jstate
 
     ::Debug 2 "::Jabber::Roster::Clear"
 
-    foreach gpres $jprefs(treedirs) {
-	$wtree delitem [list $gpres] -childsonly 1
+    foreach v [$wtree find withtag head] {
+	$wtree delitem $v -childsonly 1
     }
 }
 
@@ -1017,9 +1015,15 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
     set groupImage [::Theme::GetImage [option get $wtree groupImage {}]]
 
     # If we have an ask attribute, put in Pending tree dir.
+    # Make it if not already exists.
     if {[info exists argsArr(-ask)] &&  \
       [string equal $argsArr(-ask) "subscribe"]} {
-	eval {$wtree newitem [list {Subscription Pending} $jid]  \
+	set pending "Subscription Pending"
+	if {![$wtree isitem [list $pending]]} {
+	    $wtree newitem [list $pending] -tags head -dir 1 \
+	      -text [::msgcat::mc $pending]
+	}
+	eval {$wtree newitem [list $pending $jid]  \
 	  -image $icon -tags $mjid} $itemOpts
     } elseif {[info exists argsArr(-groups)] && ($argsArr(-groups) != "")} {
 	set groups $argsArr(-groups)

@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.18 2004-05-23 13:18:08 matben Exp $
+# $Id: Profiles.tcl,v 1.19 2004-06-11 07:44:44 matben Exp $
 
 package provide Profiles 1.0
 
@@ -61,7 +61,7 @@ proc ::Profiles::Set {name server username password args} {
     variable profiles
     variable selected
     
-    ::Debug 2 "name=$name, s=$server, u=$username, p=$password, '$args'"
+    ::Debug 2 "::Profiles::Set: name=$name, s=$server, u=$username, p=$password, '$args'"
 
     array set profArr $profiles
     set allNames [::Profiles::GetAllNames]
@@ -220,8 +220,6 @@ proc ::Profiles::ImportIfNecessary { } {
     variable profiles
     variable selected
     upvar ::Jabber::jserver jserver
-    
-    #puts "::Profiles::ImportIfNecessary"
 
     if {[info exists jserver(profile)] && [info exists jserver(profile,selected)]} {
 
@@ -237,8 +235,6 @@ proc ::Profiles::ImportFromJserver { } {
     variable profiles
     variable selected
     upvar ::Jabber::jserver jserver
-    
-    #puts "::Profiles::ImportFromJserver"
     
     #  jserver(profile,selected)  profile picked in user info
     #  jserver(profile):   {profile1 {server1 username1 password1 resource1}}
@@ -272,17 +268,21 @@ proc ::Profiles::BuildPage {page} {
     variable profiles
     variable selected
     
-    variable wcombo    
+    variable wmenubt
+    variable wmenu
     variable profile
     variable server
     variable username
     variable password
     variable resource
+    variable ssl
+    variable sasl
     variable wuserinfofocus
     variable tmpProfArr
     variable tmpSelected
+    variable wpage $page
     
-    set fontS [option get . fontSmall {}]
+    set fontS  [option get . fontSmall {}]
     set fontSB [option get . fontSmallBold {}]
 
     set lfr $page.fr
@@ -291,6 +291,10 @@ proc ::Profiles::BuildPage {page} {
     
     label $lfr.msg -text [::msgcat::mc prefprof] -wraplength 200 -justify left
     pack  $lfr.msg -side top -anchor w -fill x
+    
+    # Need to pack options here to get the complete bottom slice.
+    set  popt [frame $lfr.fropt]
+    pack $popt -padx 8 -pady 2 -side bottom -fill y
 
     set pui $lfr.fr
     pack [frame $pui] -side left  
@@ -304,20 +308,33 @@ proc ::Profiles::BuildPage {page} {
     set server   $tmpProfArr($profile,server)
     set username $tmpProfArr($profile,username)
     set password $tmpProfArr($profile,password)
-    set resource $tmpProfArr($profile,-resource)
+    foreach key {resource ssl sasl} {
+	if {[info exists tmpProfArr($profile,-$key)]} {
+	    set $key $tmpProfArr($profile,-$key)
+	} else {
+	    switch -- $key {
+		resource {
+		    set $key ""
+		}
+		ssl - tasl {
+		    set $key 0
+		}
+	    }
+	}
+    }
     set allNames [::Profiles::GetAllNames]
 
     # Option menu for the servers.
     label $pui.lpop -text "[::msgcat::mc Profile]:" -anchor e
     
-    set wcombo $pui.popup
-    ::combobox::combobox $wcombo   \
-      -textvariable [namespace current]::profile  \
-      -command [namespace current]::SetCmd
-    eval {$wcombo list insert end} $allNames
-	
+    set wmenubt $pui.popup
+    set wmenu [eval {tk_optionMenu $wmenubt [namespace current]::profile} \
+      $allNames]
+    trace variable [namespace current]::profile w  \
+      [namespace current]::TraceMenuVar
+
     grid $pui.lpop -column 0 -row 0 -sticky e
-    grid $wcombo -column 1 -row 0 -sticky ew
+    grid $wmenubt -column 1 -row 0 -sticky ew
     
     label $pui.lserv -text "[::msgcat::mc {Jabber Server}]:" -anchor e
     entry $pui.eserv -width 22   \
@@ -335,29 +352,38 @@ proc ::Profiles::BuildPage {page} {
     entry $pui.eres -width 22   \
       -textvariable [namespace current]::resource -validate key  \
       -validatecommand {::Jabber::ValidateResourceStr %S}
-    set wuserinfofocus $wcombo
+    set wuserinfofocus $pui.eserv
 
-    grid $pui.lserv -column 0 -row 1 -sticky e
-    grid $pui.eserv -column 1 -row 1 -sticky w
-    grid $pui.luser -column 0 -row 2 -sticky e
-    grid $pui.euser -column 1 -row 2 -sticky w
-    grid $pui.lpass -column 0 -row 3 -sticky e
-    grid $pui.epass -column 1 -row 3 -sticky w
-    grid $pui.lres  -column 0 -row 4 -sticky e
-    grid $pui.eres  -column 1 -row 4 -sticky w
+    grid $pui.lserv  -column 0 -row 1 -sticky e
+    grid $pui.eserv  -column 1 -row 1 -sticky w
+    grid $pui.luser  -column 0 -row 2 -sticky e
+    grid $pui.euser  -column 1 -row 2 -sticky w
+    grid $pui.lpass  -column 0 -row 3 -sticky e
+    grid $pui.epass  -column 1 -row 3 -sticky w
+    grid $pui.lres   -column 0 -row 4 -sticky e
+    grid $pui.eres   -column 1 -row 4 -sticky w
 
-    set puibt [frame $lfr.frbt]
-    pack $puibt -padx 8 -pady 6 -side left -fill y
+    set  puibt [frame $lfr.frbt]
+    pack $puibt -padx 8 -pady 6 -side right -fill y
     pack [button $puibt.new -font $fontS -text [::msgcat::mc New]  \
       -command [namespace current]::NewCmd]   \
-      -side top -fill x -pady 4
-    pack [button $puibt.app -font $fontS -text [::msgcat::mc Apply] \
-      -command [namespace current]::ApplyCmd]   \
       -side top -fill x -pady 4
     pack [button $puibt.del -font $fontS -text [::msgcat::mc Delete]  \
       -command [namespace current]::DeleteCmd]   \
       -side top -fill x -pady 4
-    
+
+    checkbutton $popt.cssl -text "  [::msgcat::mc {Use SSL for security}]"  \
+      -variable [namespace current]::ssl   
+    grid $popt.cssl
+
+    if {!$prefs(tls)} {
+	set ssl 0
+	$popt.cssl configure -state disabled
+    }
+
+    # This allows us to clean up some things when we go away.
+    bind $lfr <Destroy> [list [namespace current]::DestroyHandler]
+
     # Trick to resize the labels wraplength.
     set script [format {
 	update idletasks
@@ -391,122 +417,151 @@ proc ::Profiles::MakeTmpProfArr { } {
     }
 }
 
+proc ::Profiles::TraceMenuVar {name key op} {
+    variable profile
+
+    # puts "TraceMenuVar name=$name"
+    #puts "\t set name=[set $name]"
+    ::Profiles::SetCmd [set $name]
+}
+
 # Profiles::SetCmd --
 #
-#       Callback for the combobox when a new item is selected.
+#       Callback when a new item is selected in the menu.
 
-proc ::Profiles::SetCmd {wcombo profile} {
+proc ::Profiles::SetCmd {profName} {
     
     variable tmpProfArr
     variable tmpSelected
+    variable profile
     variable server
     variable username
     variable password
     variable resource
+    variable ssl
+    variable sasl
     
-    #puts "::Profiles::SetCmd profile=$profile"
+    # The 'profName' is here the new profile, and 'tmpSelected' the
+    # previous one.
+    # puts "::Profiles::SetCmd profName=$profName, tmpSelected=$tmpSelected"
+
+    set previousExists [info exists tmpProfArr($tmpSelected,name)]
+    # puts "\t previousExists=$previousExists"
+    if {$previousExists} {
+	
+	# Check if there are any empty fields.
+	if {![::Profiles::VerifyNonEmpty]} {
+	    set profile $tmpSelected
+	    # puts "***::Profiles::VerifyNonEmpty: set profile $tmpSelected"
+	    return
+	}
+	
+	# Save previous state in tmp before setting the new one.
+	::Profiles::SaveStateToTmpProfArr $tmpSelected
+    }
     
     # In case this is a new profile.
-    if {[info exists tmpProfArr($profile,server)]} {
-	#puts "   $profile is set"
-	set server   $tmpProfArr($profile,server)
-	set username $tmpProfArr($profile,username)
-	set password $tmpProfArr($profile,password)
-	if {[info exists tmpProfArr($profile,-resource)]} {
-	    set resource $tmpProfArr($profile,-resource)
-	} else {
-	    set resource ""
+    if {[info exists tmpProfArr($profName,server)]} {
+	set server   $tmpProfArr($profName,server)
+	set username $tmpProfArr($profName,username)
+	set password $tmpProfArr($profName,password)
+	foreach key {resource ssl sasl} {
+	    if {[info exists tmpProfArr($profName,-$key)]} {
+		set $key $tmpProfArr($profName,-$key)
+	    } else {
+		switch -- $key {
+		    resource {
+			set $key ""
+		    }
+		    ssl - tasl {
+			set $key 0
+		    }
+		}
+	    }
 	}
-	set tmpSelected $profile  
+	set tmpSelected $profName  
     }
 }
 
-proc ::Profiles::NewCmd { } {
-    
-    variable profile
-    variable server
-    variable username
-    variable password
-    variable resource
-    variable wuserinfofocus
-
-    set profile   ""
-    set server    ""
-    set username  ""
-    set password  ""
-    set resource  ""
-    focus $wuserinfofocus
-}
-
-proc ::Profiles::ApplyCmd { } {
+proc ::Profiles::SaveStateToTmpProfArr {profName} {
     global  prefs
     
-    variable tmpProfArr
-    variable tmpSelected
-    variable wcombo
-    variable profile
+    variable tmpProfArr    
     variable server
     variable username
     variable password
     variable resource
+    variable ssl
+    variable sasl
+    
+    # puts "::Profiles::SaveStateToTmpProfArr profName=$profName"
+    
+    # Store it in the temporary array. 
+    # But only of the profile already exists since we may have just deleted it!
+    if {[info exists tmpProfArr($profName,name)]} {
+	# puts "\t  exists tmpProfArr($profName,name)"
+	set tmpProfArr($profName,name)     $profName
+	set tmpProfArr($profName,server)   $server
+	set tmpProfArr($profName,username) $username
+	set tmpProfArr($profName,password) $password
+	if {$resource != ""} {
+	    set tmpProfArr($profName,-resource) $resource
+	}
+	foreach key {resource ssl sasl} {
+	    switch -- $key {
+		resource {
+		    if {$resource != ""} {
+			set tmpProfArr($profName,-$key) [set $key]
+		    }
+		}
+		ssl - tasl {
+		    set tmpProfArr($profName,-$key) [set $key]
+		}
+	    }
+	}
+	set tmpSelected $profName  
+    }
+}
 
-    #puts "::Profiles::ApplyCmd profile=$profile"
+proc ::Profiles::VerifyNonEmpty { } {
+    variable server
+    variable username
+    variable wpage
+
+    set ans 1
     
     # Check that necessary entries are non-empty, at least.
     if {($server == "") || ($username == "")} {
-	tk_messageBox -type ok -icon error -parent [winfo toplevel $wcombo] \
+	tk_messageBox -type ok -icon error -parent [winfo toplevel $wpage] \
 	  -title [::msgcat::mc Error] -message [FormatTextForMessageBox \
 	  [::msgcat::mc messfillserveruser]]
-	return
+	set ans 0
     }
+    return $ans
+}
+
+proc ::Profiles::MakeUniqueProfileName {name} {
+    variable server
     
     # Create a unique profile name if not given.
     set allNames [::Profiles::GetAllTmpNames]
-    if {$profile == ""} {
-	set profile $server
+    if {$name == ""} {
+	set name $server
+    }
 
-	# Make sure that 'profile' is unique.
-	if {[lsearch -exact $allNames $profile] >= 0} {
-	    set i 2
-	    set tmpprof $profile
-	    set profile ${tmpprof}-${i}
-	    while {[lsearch -exact $allNames $profile] >= 0} {
-		incr i
-		set profile ${tmpprof}-${i}
-	    }
+    # Make sure that 'profile' is unique.
+    if {[lsearch -exact $allNames $name] >= 0} {
+	set i 2
+	set tmpprof $name
+	set name ${tmpprof}-${i}
+	while {[lsearch -exact $allNames $name] >= 0} {
+	    incr i
+	    set name ${tmpprof}-${i}
 	}
     }
-    if {$resource == ""} {
-	set resource "coccinella"
-    }
-    
-    # Handle duplicate servers. Is this good???
-    if {[lsearch -exact $allNames $profile] >= 0} {
-	
-	# It's there already!
-	set ans [tk_messageBox -type yesno -default yes -icon warning  \
-	  -parent [winfo toplevel $wcombo]  \
-	  -title [::msgcat::mc Warning] -message [FormatTextForMessageBox \
-	  [::msgcat::mc messprofinuse]]]
-	if {$ans == "no"} {
-	    ::Profiles::SetCmd $wcombo [lindex $allNames 0]
-	    return
-	}
-    } else {
-	$wcombo list insert end $profile
-    }
-    
-    # Store it the temporary array.
-    set tmpProfArr($profile,name)     $profile
-    set tmpProfArr($profile,server)   $server
-    set tmpProfArr($profile,username) $username
-    set tmpProfArr($profile,password) $password
-    if {$resource != ""} {
-	set tmpProfArr($profile,-resource) $resource
-    }
-    set tmpSelected $profile  
+    return $name
 }
-
+    
 proc ::Profiles::GetAllTmpNames { } {
     variable tmpProfArr
     
@@ -517,40 +572,89 @@ proc ::Profiles::GetAllTmpNames { } {
     return [lsort -dictionary $allNames]
 }
 
+proc ::Profiles::NewCmd { } {
+    
+    variable tmpProfArr
+    variable tmpSelected
+    variable profile
+    variable server
+    variable username
+    variable password
+    variable resource
+    variable ssl
+    variable sasl
+    variable wuserinfofocus
+    variable wmenu
+    
+    set newProfile ""
+    
+    # First get a unique profile name.
+    set ans [::UI::MegaDlgMsgAndEntry \
+      [::msgcat::mc Profile] [::msgcat::mc prefprofname] \
+      "[::msgcat::mc {Profile Name}]:" newProfile \
+      [::msgcat::mc Cancel] [::msgcat::mc OK]]
+    if {$ans == "cancel"} {
+	return
+    }
+    # puts "::Profiles::NewCmd tmpSelected=$tmpSelected, newProfile=$newProfile"
+
+    set uniqueName [::Profiles::MakeUniqueProfileName $newProfile]
+    # puts "\t uniqueName=$uniqueName"
+    $wmenu add radiobutton -label $uniqueName  \
+      -variable [namespace current]::profile
+
+    set tmpSelected $uniqueName
+    set profile   $uniqueName
+    set server    ""
+    set username  ""
+    set password  ""
+    set resource  ""
+    set ssl       0
+    set sasl      0
+    
+    # Must do this for it to be automatically saved.
+    set tmpProfArr($profile,name) $profile
+    focus $wuserinfofocus
+}
+
 proc ::Profiles::DeleteCmd { } {
     global  prefs
     
     variable tmpProfArr
     variable tmpSelected
     variable profile
-    variable wcombo
+    variable wmenu
+    variable wpage
     
-    #puts "::Profiles::DeleteCmd profile=$profile"
+    # puts "::Profiles::DeleteCmd profile=$profile"
+    set ans "yes"
     
-    # The present state may be something that has not been stored by pressing
-    # the Apply button.
+    # The present state may be something that has not been stored yet.
     if {[info exists tmpProfArr($profile,server)]} {
-	
+	# puts "\t exists tmpProfArr($profile,server)"
 	set ans [tk_messageBox -title [::msgcat::mc Warning]  \
 	  -type yesno -icon warning -default yes  \
-	  -parent [winfo toplevel $wcombo] \
+	  -parent [winfo toplevel $wpage] \
 	  -message [FormatTextForMessageBox [::msgcat::mc messremoveprofile]]]
-	if {$ans == "yes"} {
-	    set allNames [::Profiles::GetAllTmpNames]
-	    set ind [lsearch -exact $allNames $profile]
-	    if {$ind >= 0} {
-		$wcombo list delete $ind
-	    }
-	    array unset tmpProfArr "$profile,*"
-	    set allNames [::Profiles::GetAllTmpNames]
-	    set profile [lindex $allNames 0]
-	    ::Profiles::SetCmd $wcombo $profile
-	}
-    } else {
-	set allNames [::Profiles::GetAllTmpNames]
-	set profile [lindex $allNames 0]
-	::Profiles::SetCmd $wcombo $profile
     }
+    if {$ans == "yes"} {
+	set ind [$wmenu index $profile]
+	if {$ind >= 0} {
+	    $wmenu delete $ind
+	}
+	array unset tmpProfArr "$profile,*"
+	set allNames [::Profiles::GetAllTmpNames]
+	
+	# Set selection to first.
+	set profile [lindex $allNames 0]
+	::Profiles::SetCmd $profile
+    }
+}
+
+proc  ::Profiles::DestroyHandler { } {
+    
+    trace vdelete [namespace current]::profile w  \
+      [namespace current]::TraceMenuVar   
 }
 
 proc ::Profiles::UserDefaultsHook { } {
@@ -571,13 +675,28 @@ proc ::Profiles::SaveHook { } {
 
 proc ::Profiles::GetTmpProfiles { } {
     variable tmpProfArr
+    variable profile
+    
+    # Get present dialog state into tmp array first.
+    ::Profiles::SaveStateToTmpProfArr $profile
     
     set tmpProfiles {}
     foreach name [::Profiles::GetAllTmpNames] {
 	set plist [list $tmpProfArr($name,server) $tmpProfArr($name,username) \
 	  $tmpProfArr($name,password)]
-	if {[info exists tmpProfArr($name,-resource)]} {
-	    lappend plist -resource $tmpProfArr($name,-resource)
+
+	foreach key {resource ssl sasl} {
+	    if {[info exists tmpProfArr($name,-$key)]} {
+		
+		switch -- $key {
+		    resource {
+			lappend plist -resource $tmpProfArr($name,-resource)
+		    }
+		    ssl - tasl {		    
+			lappend plist -$key $tmpProfArr($name,-$key)
+		    }
+		}
+	    }
 	}
 	lappend tmpProfiles $name $plist
     }
@@ -606,12 +725,11 @@ proc ::Profiles::UserDefaultsHook { } {
     variable selected
     variable tmpSelected
     variable profile
-    variable wcombo    
     
     ::Profiles::MakeTmpProfArr
     set tmpSelected $selected
     set profile $selected
-    ::Profiles::SetCmd $wcombo $selected
+    ::Profiles::SetCmd $selected
 }
 
 # Standalone dialog --
