@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.15 2004-08-28 07:00:08 matben Exp $
+# $Id: disco.tcl,v 1.16 2004-10-28 07:36:37 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -29,6 +29,7 @@
 #      discoName features {jid ?node?}
 #      discoName hasfeature feature {jid ?node?}
 #      discoName isroom jid
+#      discoName iscategorytype {jid ?node?} category/type
 #      discoName name {jid ?node?}
 #      discoName parent {jid ?node?}
 #      discoName parents {jid ?node?}
@@ -294,6 +295,14 @@ proc disco::parse_get_info {disconame from subiq} {
 		# Each <identity/> element MUST possess 'category' and 
 		# 'type' attributes. (category/type)
 		# Each identity element SHOULD have the same name value.
+		# 
+		# JEP 0030:
+		# If the hierarchy category is used, every node in the 
+		# hierarchy MUST be identified as either a branch or a leaf; 
+		# however, since a node MAY have multiple identities, any given 
+		# node MAY also possess an identity other than 
+		# "hierarchy/branch" or "hierarchy/leaf". 
+
 		set category $attr(category)
 		set ctype    $attr(type)
 		set name     ""
@@ -450,6 +459,28 @@ proc disco::types {disconame item} {
 	return $info($jid,$node,cattypes)
     } else {
 	return {}
+    }
+}
+
+# disco::iscategorytype --
+# 
+#       Search for any matching glob pattern.
+
+proc disco::iscategorytype {disconame item cattype} {
+    
+    upvar ${disconame}::info info
+    
+    set jid  [lindex $item 0]
+    set node [lindex $item 1]
+    set jid [jlib::jidmap $jid]
+    if {[info exists info($jid,$node,cattypes)]} {
+	if {[lsearch -glob $info($jid,$node,cattypes) $cattype] >= 0} {
+	    return 1
+	} else {
+	    return 0
+	}
+    } else {
+	return 0
     }
 }
 
