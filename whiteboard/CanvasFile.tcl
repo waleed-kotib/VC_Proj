@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasFile.tcl,v 1.5 2004-07-23 07:21:17 matben Exp $
+# $Id: CanvasFile.tcl,v 1.6 2004-07-25 15:06:43 matben Exp $
  
 package require can2svg
 package require svg2can
@@ -42,6 +42,27 @@ proc ::CanvasFile::DrawCanvasItemFromFile {wtop filePath args} {
 	return
     }
     eval {::CanvasFile::FileToCanvas $wCan $fd $filePath} $args
+    close $fd
+}
+
+# CanvasFile::OpenCanvas --
+# 
+#       Just a wrapper for FileToCanvas.
+
+proc ::CanvasFile::OpenCanvas {w fileName} {
+    
+    set wtop [::UI::GetToplevelNS $w]
+
+    # Opens the data file.
+    if {[catch {open $fileName r} fd]} {
+	set tail [file tail $fileName]
+	tk_messageBox -message [mc messfailopread $tail $fd] \
+	  -icon error -type ok
+	return
+    }
+    ::undo::reset [::WB::GetUndoToken $wtop]
+    ::CanvasCmd::DoEraseAll $wtop     
+    FileToCanvas $w $fd $fileName
     close $fd
 }
 	  
@@ -406,6 +427,28 @@ proc ::CanvasFile::FileToCanvasVer2 {w fd absPath args} {
     return $numImports
 }
 
+# CanvasFile::SaveCanvas --
+# 
+#       Just a wrapper for CanvasToFile.
+
+proc ::CanvasFile::SaveCanvas {w fileName args} {
+    
+    # If not .txt make sure it's .can extension.
+    if {[file extension $fileName] != ".txt"} {
+	set fileName "[file rootname $fileName].can"
+    }
+
+    # Opens the data file.
+    if {[catch {open $fileName w} fd]} {
+	set tail [file tail $fileName]
+	tk_messageBox -icon error -type ok \
+	  -message [mc messfailopwrite $tail $fd]
+	return
+    }	    
+    ::CanvasFile::CanvasToFile $w $fd $fileName
+    close $fd
+}
+
 # CanvasFile::CanvasToFile --
 #
 #       Writes line by line to file. Each line contains an almost complete 
@@ -570,18 +613,7 @@ proc ::CanvasFile::DoOpenCanvasFile {wtop {filePath {}}} {
 	    ::CanvasFile::SVGFileToCanvas $wtop $fileName
 	}
 	.can {	    
-	    
-	    # Opens the data file.
-	    if {[catch {open $fileName r} fd]} {
-		set tail [file tail $fileName]
-		tk_messageBox -message [mc messfailopread $tail $fd] \
-		  -icon error -type ok
-		return
-	    }
-	    ::undo::reset [::WB::GetUndoToken $wtop]
-	    ::CanvasCmd::DoEraseAll $wtop     
-	    FileToCanvas $wCan $fd $fileName
-	    close $fd
+	    OpenCanvas $wCan $fileName
 	}
     }
 }

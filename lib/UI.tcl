@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.63 2004-07-22 15:11:27 matben Exp $
+# $Id: UI.tcl,v 1.64 2004-07-25 15:06:42 matben Exp $
 
 package require entrycomp
 package require alertbox
@@ -212,7 +212,7 @@ proc ::UI::GetToplevelNS {w} {
     if {[string equal $wtop "."]} {
 	return $wtop
     } else {
-	return "${wtop}."
+	return ${wtop}.
     }
 }
 
@@ -400,6 +400,9 @@ proc ::UI::BuildMenu {wtop wmenu label menuDef state args} {
     global  this wDlgs prefs osprefs
 
     variable menuKeyToIndex
+    variable menuNameToWmenu
+    variable mapWmenuToWtop
+    variable cachedMenuSpec
     
     if {$wtop == "."} {
 	set topw .
@@ -436,6 +439,7 @@ proc ::UI::BuildMenu {wtop wmenu label menuDef state args} {
 	    # Localized menu label.
 	    set locname [mc $name]
 	    set menuKeyToIndex($wmenu,$name) $i
+	    set menuNameToWmenu($wtop,$label,$name) $wmenu
 	    set ampersand [string first & $locname]
 	    if {$ampersand != -1} {
 		regsub -all & $locname "" locname
@@ -448,7 +452,11 @@ proc ::UI::BuildMenu {wtop wmenu label menuDef state args} {
 		# Make cascade menu recursively.
 		regsub -all -- " " [string tolower $name] "" mt
 		regsub -all -- {\.} $mt "" mt
-		eval {::UI::BuildMenu $wtop ${wmenu}.${mt} $name $subdef $state} \
+		
+		set wsubmenu ${wmenu}.${mt}
+		set cachedMenuSpec($wtop,$wsubmenu) $subdef
+		set mapWmenuToWtop($wsubmenu) $wtop
+		eval {::UI::BuildMenu $wtop $wsubmenu $name $subdef $state} \
 		  $args
 		
 		# Explicitly set any disabled state of cascade.
@@ -485,17 +493,25 @@ proc ::UI::BuildMenu {wtop wmenu label menuDef state args} {
     return $wmenu
 }
 
+proc ::UI::GetMenu {wtop label1 {label2 ""}} {
+    variable menuNameToWmenu
+
+    return $menuNameToWmenu($wtop,$label1,$label2)
+}
+
 proc ::UI::FreeMenu {wtop} {
     variable mapWmenuToWtop
     variable cachedMenuSpec
     variable menuKeyToIndex
+    variable menuNameToWmenu
     
-    foreach key [array names cachedMenuSpec "$wtop,*"] {
+    foreach key [array names cachedMenuSpec $wtop,*] {
 	set wmenu [string map [list "$wtop," ""] $key]
 	unset mapWmenuToWtop($wmenu)
-	array unset menuKeyToIndex "$wmenu,*"
+	array unset menuKeyToIndex $wmenu,*
     }
-    array unset cachedMenuSpec "$wtop,*"
+    array unset cachedMenuSpec  $wtop,*
+    array unset menuNameToWmenu $wtop,*
 }
 
 # UI::MenuMethod --
