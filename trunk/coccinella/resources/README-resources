@@ -53,4 +53,9 @@ Some images have also been hardcoded into the sources, and they
 will be obtained from there if not found in the above directory
 hierarchy.
 
+8) Finally, if your theme have any requirements these should be put
+in a file named ${themeName}CanLoad.tcl which must return 1 if the
+theme resources can be loaded on the system and 0 if not.
+
+
 That's it!

@@ -3,9 +3,11 @@
 #      This file is part of the whiteboard application. 
 #      It implements parts of the UI for the Multi User Chat protocol.
 #      
+#      This code is not completed!!!!!!!
+#      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.14 2004-01-01 12:08:21 matben Exp $
+# $Id: MUC.tcl,v 1.15 2004-01-01 16:27:48 matben Exp $
 
 package require entrycomp
 
@@ -923,6 +925,11 @@ proc ::Jabber::MUC::Ban {roomjid} {
     }
 }
 
+namespace eval ::Jabber::MUC:: {
+    
+    hooks::add closeWindowHook    ::Jabber::MUC::EditListCloseHook
+}
+
 # Jabber::MUC::EditListBuild --
 #
 #       Shows and handles a dialog for edit various lists of room content.
@@ -978,7 +985,6 @@ proc ::Jabber::MUC::EditListBuild {roomjid type} {
 	regexp {([^@]+)@.+} $roomjid match roomName
     }
     wm title $w "Edit List $titleType: $roomName"
-    wm protocol $w WM_DELETE_WINDOW "set [namespace current]::fineditlist 0"
     
     set fontS [option get . fontSmall {}]
     
@@ -1154,6 +1160,15 @@ proc ::Jabber::MUC::EditListBuild {roomjid type} {
 	::Jabber::MUC::EditListSet $roomjid
     }
     return [expr {($fineditlist <= 0) ? "cancel" : "ok"}]
+}
+
+proc ::Jabber::MUC::EditListCloseHook {wclose} {
+    global  wDlgs
+    variable fineditlist
+	
+    if {[string equal $wDlgs(jmucedit) $wclose]} {
+	set fineditlist 0
+    }   
 }
 
 proc ::Jabber::MUC::EditListGetCB {roomjid callid jlibname type subiq} {
@@ -1409,6 +1424,13 @@ proc ::Jabber::MUC::EditListSet {roomjid} {
     
 # End edit lists ---------------------------------------------------------------
 
+# Unfinished...
+
+namespace eval ::Jabber::MUC:: {
+    
+    hooks::add closeWindowHook    ::Jabber::MUC::RoomConfigCloseHook
+}
+
 proc ::Jabber::MUC::RoomConfig {roomjid} {
     global  this wDlgs
     
@@ -1422,8 +1444,6 @@ proc ::Jabber::MUC::RoomConfig {roomjid} {
     set w $wDlgs(jmuccfg)[incr dlguid]
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
     wm title $w "Configure Room"
-    wm protocol $w WM_DELETE_WINDOW  \
-      [list [namespace current]::CancelConfig $roomjid $w]
     
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised]   \
@@ -1472,6 +1492,18 @@ proc ::Jabber::MUC::RoomConfig {roomjid} {
     catch {grab release $w}
     catch {focus $oldFocus}
     return
+}
+
+proc ::Jabber::MUC::RoomConfigCloseHook {wclose} {
+    global  wDlgs
+
+    #wm protocol $w WM_DELETE_WINDOW  \
+    #  [list [namespace current]::CancelConfig $roomjid $w]
+
+    if {[string match $wDlgs(jmuccfg)* $wclose]} {
+
+	
+    }   
 }
 
 proc ::Jabber::MUC::CancelConfig {roomjid w} {
@@ -1552,6 +1584,11 @@ proc ::Jabber::MUC::SetNick {roomjid} {
     return $ans
 }
 
+namespace eval ::Jabber::MUC:: {
+    
+    hooks::add closeWindowHook    ::Jabber::MUC::DestroyCloseHook
+}
+
 proc ::Jabber::MUC::Destroy {roomjid} {
     global this wDlgs
     
@@ -1567,7 +1604,6 @@ proc ::Jabber::MUC::Destroy {roomjid} {
     }
     wm title $w "Destroy Room: $roomName"
     set findestroy -1
-    wm protocol $w WM_DELETE_WINDOW "set [namespace current]::findestroy 0"
     
     set fontSB [option get . fontSmallBold {}]
     
@@ -1641,6 +1677,15 @@ proc ::Jabber::MUC::Destroy {roomjid} {
 	}
     }
     return [expr {($findestroy <= 0) ? "cancel" : "ok"}]
+}
+
+proc ::Jabber::MUC::DestroyCloseHook {wclose} {
+    global  wDlgs
+    variable findestroy
+	
+    if {[string equal $wDlgs(jmucdestroy) $wclose]} {
+	set findestroy 0
+    }   
 }
 
 # Jabber::MUC::IQCallback, PresCallback --

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.32 2004-01-01 12:08:21 matben Exp $
+# $Id: Roster.tcl,v 1.33 2004-01-01 16:27:48 matben Exp $
 
 package provide Roster 1.0
 
@@ -415,26 +415,8 @@ proc ::Jabber::Roster::PushProc {rostName what {jid {}} args} {
 		set jid3 ${jid}/$attrArr(-resource)
 	    }
 	    
-	    # Ordinary members should go into our roster, but presence
-	    # from groupchat users shall go into the specific groupchat dialog.
-	    if {[$jstate(jlib) service isroom $jid]} {
-		eval {::Jabber::GroupChat::Presence $jid $type} $args
-		
-		# What if agent(s) instead???
-		# Dont do this unless we've got browsing for this server.		
-		if {[::Jabber::Browse::HaveBrowseTree $jid]} {
-		    eval {::Jabber::Browse::Presence $jid $type} $args
-		}
-	    } else {
+	    if {![$jstate(jlib) service isroom $jid]} {
 		eval {::Jabber::Roster::Presence $jid3 $type} $args
-	    
-	    	# If users shall be automatically browsed to.
-	    	if {$jprefs(autoBrowseUsers) &&  \
-		  [string equal $type "available"] &&  \
-		  ![$jstate(browse) isbrowsed $jid3]} {
-		    eval {::Jabber::Roster::AutoBrowse $jid3 $type} \
-		      $args
-	    	}
 	    }
 	    
 	    eval {hooks::run presenceHook $jid $type} $args
