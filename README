@@ -160,30 +160,6 @@ Known Bugs:
 
     set debugLevel 3
 
-Web interaction (uri bindings):
-
-    You can put an url in a web page to launch The Coccinella. Use a link:
-    <a href="xmpp:matben@athlon.se">The Coccinella</a>
-    This works presently only on Windows, and you need to launch Coccinella
-    at least once with administrator privilegies to make it work.
-
-    You can also launch The Coccinella using the switch -uri:
-    set argv "-uri xmpp:marilu@l4l.be?..." Note that the jid you supply here
-    is the target address for any action specified. The login uses the
-    active profile in the application, not the jid in the uri!
-
-    Some examples of supported uri's (The official specification for this
-    is currently floating; changes are likely to appear in the future.):
-
-    xmpp:matben@athlon.se
-    xmpp:marilu@l4l.be?message&subject=hi&body=Hello%20World
-    xmpp:marilu@l4l.be?message&subject=hi&body=Hello%20World&thread=abc123
-    xmpp:mats@conference.l4l.be?groupchat&nick=matsnick
-        enters the specified room using nick matsnick.
-
-    xmpp:mats@muc.sgi.se?groupchat&nick=matsnick&xmlns=whiteboard
-        enters the specified room using the whiteboard
-
 
 XML/SVG:
 

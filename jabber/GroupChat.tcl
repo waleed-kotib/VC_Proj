@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.77 2004-10-30 14:44:52 matben Exp $
+# $Id: GroupChat.tcl,v 1.78 2004-11-03 10:28:55 matben Exp $
 
 package require History
 
@@ -955,7 +955,7 @@ proc ::Jabber::GroupChat::InsertMessage {token from body args} {
     $wtext see end
 
     # History.
-    set dateISO [clock format $tm -format "%Y%m%dT%H:%M:%S"]
+    set dateISO [clock format $secs -format "%Y%m%dT%H:%M:%S"]
     ::History::PutToFile $roomjid [list $nick $dateISO $body $whom]
 }
 
