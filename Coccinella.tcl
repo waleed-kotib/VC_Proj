@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.55 2004-05-13 13:50:21 matben Exp $
+# $Id: Coccinella.tcl,v 1.56 2004-05-21 06:58:08 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -101,7 +101,7 @@ proc resolve_cmd_realpath {infile} {
 # default file, never read.
 set prefs(majorVers) 0
 set prefs(minorVers) 94
-set prefs(releaseVers) 9
+set prefs(releaseVers) 10
 set prefs(fullVers) $prefs(majorVers).$prefs(minorVers).$prefs(releaseVers)
 
 # We may be embedded in another application, say an ActiveX component.
@@ -602,6 +602,15 @@ if {[string equal $this(platform) "windows"]} {
 }
 wm protocol . WM_DELETE_WINDOW {::UI::DoCloseWindow .}
 
+if {0} {
+    package require tile
+    foreach name {button radiobutton checkbutton menubutton scrollbar \
+      labelframe} {
+	rename $name ""
+	rename t${name} $name
+    }
+}
+
 # At this point we should be finished with the launch and delete the splash 
 # screen.
 ::SplashScreen::SetMsg ""
@@ -640,6 +649,8 @@ if {$prefs(firstLaunch)} {
     ::Dialogs::Canvas $f -title [::msgcat::mc {Welcome}]
 }
 set prefs(firstLaunch) 0
+
+::Debug 5 "auto_path:\n[join $auto_path \n]"
 
 ### The server part ############################################################
 

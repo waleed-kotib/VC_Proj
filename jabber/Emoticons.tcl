@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.10 2004-04-23 07:13:19 matben Exp $
+# $Id: Emoticons.tcl,v 1.11 2004-05-21 06:58:08 matben Exp $
 
 
 package provide Emoticons 1.0
@@ -58,11 +58,19 @@ proc ::Emoticons::Init { } {
 	set priv(needtmp)   1
 	set priv(pngformat) {}
     }
-    ::Debug 5 "sets=[::Emoticons::GetAllSets]"
-    ::Debug 5 "\t [::Emoticons::GetPrefSetPathExists]"
+    ::Debug 4 "sets=[::Emoticons::GetAllSets]"
+    ::Debug 4 "\t [::Emoticons::GetPrefSetPathExists]"
     
     # Load set.
-    ::Emoticons::LoadTmpIconSet [::Emoticons::GetPrefSetPathExists]
+    # Even if we succeed to get the vfs::zip package, it doesn't check
+    # the Memchan package, and can therefore still fail.
+    if {[catch {
+	::Emoticons::LoadTmpIconSet [::Emoticons::GetPrefSetPathExists]
+    }]} {
+	set priv(havezip) 0
+	set jprefs(emoticonSet) $priv(defaultSet)
+	::Emoticons::LoadTmpIconSet [::Emoticons::GetPrefSetPathExists]
+    }
     ::Emoticons::SetPermanentSet $jprefs(emoticonSet)
 }
 
@@ -267,21 +275,23 @@ proc ::Emoticons::GetAllSets { } {
 # Emoticons::GetPrefSetPathExists --
 # 
 #       Gets the full path to our emoticons file/folder.
-#       Verfies that it exists.
+#       Verfies that it exists and that can be mounted if zip archive.
 
 proc ::Emoticons::GetPrefSetPathExists { } {
     global  this
     variable priv
     upvar ::Jabber::jprefs jprefs
 
+    # Start with the failsafe set.
     set path [file join $this(emoticonsPath) $priv(defaultSet)]
+    
     foreach dir [list $this(emoticonsPath) $this(altEmoticonsPath)] {
 	set f [file join $dir $jprefs(emoticonSet)]
 	set fjisp ${f}.jisp
 	if {[file exists $f]} {
 	    set path $f
 	    break
-	} elseif {[file exists $fjisp]} {
+	} elseif {[file exists $fjisp] && $priv(havezip)} {
 	    set path $fjisp
 	    break
 	}
