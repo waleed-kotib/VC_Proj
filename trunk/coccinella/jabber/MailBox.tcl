@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.48 2004-07-09 06:26:06 matben Exp $
+# $Id: MailBox.tcl,v 1.49 2004-07-30 12:55:54 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -1225,8 +1225,7 @@ proc ::Jabber::MailBox::TranslateAnyVer1ToCurrentVer { } {
 	::Jabber::MailBox::SaveMailbox -force 1
 	
 	# Cleanup state variables.
-	catch {unset locals(mailbox)}
-	catch {unset mailbox}
+	unset -nocomplain locals(mailbox) mailbox
     }
 }
 

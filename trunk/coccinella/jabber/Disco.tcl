@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.23 2004-07-09 06:26:05 matben Exp $
+# $Id: Disco.tcl,v 1.24 2004-07-30 12:55:54 matben Exp $
 
 package provide Disco 1.0
 
@@ -222,7 +222,7 @@ proc ::Jabber::Disco::ItemsCB {disconame type from subiq args} {
 	    if {[jlib::jidequal $from $jserver(this)]} {
 		::Jabber::UI::NewPage "Disco"
 	    }
-	    catch {unset tstate(run,$from)}
+	    unset -nocomplain tstate(run,$from)
 	    ::Jabber::Disco::ControlArrows -1
 
 	    # Add to tree.

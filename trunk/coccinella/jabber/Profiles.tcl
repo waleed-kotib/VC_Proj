@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.24 2004-07-28 15:13:58 matben Exp $
+# $Id: Profiles.tcl,v 1.25 2004-07-30 12:55:54 matben Exp $
 
 package provide Profiles 1.0
 
@@ -134,7 +134,7 @@ proc ::Profiles::FindProfileNameFromJID {jid} {
 	foreach {prof spec} $profiles {
 	    
 	    foreach {serv user pass} $spec break
-	    catch {unset opts}
+	    unset -nocomplain opts
 	    set opts(-resource) ""
 	    array set opts [lrange $spec 3 end]
 	    
@@ -549,7 +549,7 @@ proc ::Profiles::MakeTmpProfArr { } {
     variable moreOpts
     
     # New... Profiles
-    catch {unset tmpProfArr}
+    unset -nocomplain tmpProfArr
     
     foreach {name spec} $profiles {
 	set tmpProfArr($name,name) $name
@@ -655,7 +655,7 @@ proc ::Profiles::SaveStateToTmpProfArr {profName} {
 	foreach key [array names moreOpts] {
 	    
 	    # Cleanup any old entries.
-	    catch {unset tmpProfArr($profName,-$key)}
+	    unset -nocomplain tmpProfArr($profName,-$key)
 	    if {![string equal $moreOpts($key) $defaultOptionsArr($key)]} {
 		Debug 4 "\t key=$key"
 		set tmpProfArr($profName,-$key) $moreOpts($key)

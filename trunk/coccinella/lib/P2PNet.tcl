@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: P2PNet.tcl,v 1.2 2004-07-09 06:26:06 matben Exp $
+# $Id: P2PNet.tcl,v 1.3 2004-07-30 12:55:55 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -402,7 +402,7 @@ proc ::P2PNet::WhenSocketOpensInits {nameOrIP server remoteServPort \
     #  Cancel timeout killer.
     if {[info exists killerId($server)]} {
 	after cancel $killerId($server)
-	catch {unset killerId($server)}
+	unset -nocomplain killerId($server)
     }
     
     ::WB::StartStopAnimatedWaveOnMain 0
@@ -581,7 +581,7 @@ proc ::P2PNet::Kill {sock} {
     ::WB::StartStopAnimatedWaveOnMain 0
     if {[info exists killerId($sock)]} {
 	after cancel $killerId($sock)
-	catch {unset killerId($sock)}
+	unset -nocomplain killerId($sock)
     }
     tk_messageBox -icon error -type ok -parent $wDlgs(mainwb) -message \
       [FormatTextForMessageBox $statMess]
@@ -658,7 +658,7 @@ proc ::P2PNet::OpenCancelAllPending { } {
 	    
 	    # Then close socket.
 	    catch {close $s}
-	    catch {unset killerId($s)}
+	    unset -nocomplain killerId($s)
 	}
     }
 }
@@ -725,7 +725,7 @@ proc ::P2PNet::DoCloseServerConnection {ipNum args} {
     ::P2P::SetCommEntry $wDlgs(mainwb) $ipNum -1 0
     if {[string equal $prefs(protocol) "server"]} {
 	catch {close $ipNumTo(socket,$ipNum)}
-	catch {unset ipNumTo(socket,$ipNum)}
+	unset -nocomplain ipNumTo(socket,$ipNum)
     } else {
 	catch {close $ipNumTo(servSocket,$ipNum)}
     }

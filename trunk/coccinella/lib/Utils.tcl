@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.25 2004-07-30 09:33:15 matben Exp $
+# $Id: Utils.tcl,v 1.26 2004-07-30 12:55:55 matben Exp $
 
 namespace eval ::Utils:: {
 
@@ -30,69 +30,14 @@ proc InvertArray {arrName invArrName} {
 
 # max, min ---
 #
-#    Finds max and min of two numerical values. From the WikiWiki page.
+#    Finds max and min of numerical values. From the WikiWiki page.
 
-proc max {a args} {
-    foreach i $args {
-        if {$i > $a} {
-            set a $i
-        }
-    }
-    return $a
+proc max {args} {
+    lindex [lsort -real $args] end
 }
 
-proc min {a args} {
-    foreach i $args {
-        if {$i < $a} {
-            set a $i
-        }
-    }
-    return $a
-}
-
-# lset --
-# 
-#       Poor mans lset for pre 8.4. Not complete!
-
-if {[info tclversion] < 8.4} {
-    proc lset {listName args} {
-	
-	set usage {Usage: "lset listName index ?index? value"}
-	set len [llength $args]
-	if {($len < 2) || ($len > 3)} {
-	    return -code error $usage
-	}
-	if {$len == 2} {
-	    foreach {ind1 value} $args break
-	} else {
-	    foreach {ind1 ind2 value} $args break
-	}
-	
-	upvar $listName listValue
-	if {[string equal $ind1 "end"]} {
-	    set ind1 [expr [llength $listValue] - 1]
-	}
-	if {($len == 3) && [string equal $ind2 "end"]} {
-	    set ind2 [expr [llength [lindex $listValue $ind1]] - 1]
-	}	
-	if {![string is integer $ind1]} {
-	    return -code error $usage
-	}
-	if {($len == 3) && ![string is integer $ind2]} {
-	    return -code error $usage
-	}
-	
-	# Do the job. Be sure to execute it in the callers stack (namespace),
-	# else the variable is set in the wrong namespace. List structure!!!
-	if {$len == 2} {
-	    uplevel set $listName \
-	      [list [lreplace $listValue $ind1 $ind1 $value]]
-	} else {
-	    set subList [lreplace [lindex $listValue $ind1] $ind2 $ind2 $value]
-	    uplevel set $listName \
-	      [list [lreplace $listValue $ind1 $ind1 $subList]]
-	}
-    }
+proc min {args} {
+    lindex [lsort -real $args] 0
 }
 
 # lprune --
@@ -576,7 +521,7 @@ proc ::Timing::Set {key bytes} {
 proc ::Timing::Reset {key} {
     variable timing
     
-    catch {unset timing($key)}
+    unset -nocomplain timing($key)
 }
 
 proc ::Timing::GetRate {key} {
@@ -857,7 +802,7 @@ proc ::Text::TransformToPureText {w args} {
     if {[winfo class $w] != "Text"} {
 	error {TransformToPureText needs a text widget here}
     }
-    catch {unset puretext($w)}
+    unset -nocomplain puretext($w)
     set puretext($w) ""
     foreach {key value index} [$w dump 1.0 end $w] {
 	::Text::TransformToPureTextCallback $w $key $value $index

@@ -2,7 +2,7 @@
 #      
 #  Copyright (c) 1999-2003  Mats Bengtsson
 #  
-# $Id: Multicast.tcl,v 1.2 2004-07-09 06:26:06 matben Exp $
+# $Id: Multicast.tcl,v 1.3 2004-07-30 12:55:56 matben Exp $
 
 package provide Multicast 1.0
 
@@ -180,7 +180,7 @@ proc ::Multicast::OpenMulticastQTStream {wtop wentry} {
     }
     
     # Check and parse url.
-    catch {unset port}
+    unset -nocomplain port
     if {![regexp -nocase "($proto_)://($domain_)(:($port_))?($path_)$"  \
       $url match protocol domain junk port path]} {
 	tk_messageBox -message   \

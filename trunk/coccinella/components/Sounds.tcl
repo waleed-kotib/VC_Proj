@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Sounds.tcl,v 1.1 2004-07-23 12:43:02 matben Exp $
+# $Id: Sounds.tcl,v 1.2 2004-07-30 12:55:53 matben Exp $
 
 namespace eval ::Sounds:: {
         
@@ -205,7 +205,7 @@ proc ::Sounds::Play {snd} {
     if {[info exists sprefs($snd)] && !$sprefs($snd)} {
 	return
     }
-    catch {unset afterid($snd)}
+    unset -nocomplain afterid($snd)
     if {$priv(QuickTimeTcl)} {
 	if {[catch {.fake.${snd} play}]} {
 	    # ?

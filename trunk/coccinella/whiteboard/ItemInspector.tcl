@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ItemInspector.tcl,v 1.2 2004-07-09 06:26:06 matben Exp $
+# $Id: ItemInspector.tcl,v 1.3 2004-07-30 12:55:56 matben Exp $
 
 package provide ItemInspector 1.0
 
@@ -518,9 +518,9 @@ proc ::ItemInspector::CanvasConfigureItem {w wCan itemId listOfAllOptions} {
 	  [info exists newOptsArr(-fontweight)]}  {
 	    set newFontOpts   \
 	      [list $fontFamily $fontSize2Points($fontSize) $fontWeight]
-	    catch {unset newOptsArr(-fontfamily)}
-	    catch {unset newOptsArr(-fontsize)}
-	    catch {unset newOptsArr(-fontweight)}
+	    unset -nocomplain newOptsArr(-fontfamily) \
+	      newOptsArr(-fontsize) \
+	      newOptsArr(-fontweight)
 	    set newOptsArr(-font) $newFontOpts
 	    #puts "newFontOpts=$newFontOpts"
 	    set allNewOpts [array get newOptsArr]

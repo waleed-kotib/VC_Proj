@@ -6,7 +6,7 @@
 #  
 #  This particular package is BSD licensed. 
 #
-# $Id: can2svg.tcl,v 1.12 2004-07-07 13:07:13 matben Exp $
+# $Id: can2svg.tcl,v 1.13 2004-07-30 12:55:53 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -1110,7 +1110,7 @@ proc can2svg::MakeArrowMarker {a b c col} {
     variable formatArrowMarker
     variable formatArrowMarkerLast
     
-    catch {unset formatArrowMarker}
+    unset -nocomplain formatArrowMarker
     
     if {![info exists formatArrowMarker]} {
 	
@@ -1253,8 +1253,7 @@ proc can2svg::canvas2file {wcan path args} {
     set args [array get argsArr]
     
     # Need to make a fresh start for marker def's.
-    catch {unset defsArrowMarkerArr}
-    catch {unset defsStipplePatternArr}
+    unset -nocomplain defsArrowMarkerArr defsStipplePatternArr
   
     set fd [open $path w]
 

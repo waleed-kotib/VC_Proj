@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: browse.tcl,v 1.29 2004-06-21 14:40:08 matben Exp $
+# $Id: browse.tcl,v 1.30 2004-07-30 12:55:54 matben Exp $
 # 
 #  locals($jid,parent):       the parent of $jid.
 #  locals($jid,parents):      list of all parent jid's,
@@ -363,9 +363,8 @@ proc browse::remove {browsename jid} {
     
     set mjid [jlib::jidmap $jid]
     
-    catch {unset locals($mjid,parents)}
-    catch {unset locals($mjid,xmllist)}
-    catch {unset locals($mjid,isbrowsed)}
+    unset -nocomplain locals($mjid,parents) locals($mjid,xmllist) \
+      locals($mjid,isbrowsed)
 
     # Evaluate the client callback.
     if {[info exists locals(cmd)]} {
@@ -941,7 +940,7 @@ proc browse::ClearJidIsbrowsed {browsename jid} {
 	    ClearJidIsbrowsed $browsename $child
 	}
     }
-    catch {unset locals($jid,isbrowsed)}
+    unset -nocomplain locals($jid,isbrowsed)
 }
     
 # browse::ClearAll --

@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  
-# $Id: mactabnotebook.tcl,v 1.15 2004-06-19 12:56:35 matben Exp $
+# $Id: mactabnotebook.tcl,v 1.16 2004-07-30 12:55:53 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -713,7 +713,7 @@ proc ::mactabnotebook::ConfigurePage {w name args} {
 	    }
 	    -image {
 		if {$value == ""} {
-		    catch {unset tnInfo($name,$key)}
+		    unset -nocomplain tnInfo($name,$key)
 		} else {
 		    set tnInfo($name,$key) $value
 		}

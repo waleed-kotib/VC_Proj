@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.19 2004-07-26 08:37:16 matben Exp $
+# $Id: JWB.tcl,v 1.20 2004-07-30 12:55:54 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -1216,12 +1216,8 @@ proc ::Jabber::WB::GroupChatMsg {cmdList args} {
 proc ::Jabber::WB::Free {wtop} {
     variable jwbstate
     
-    if {[info exists jwbstate($wtop,thread)]} {
-	catch {unset jwbstate($jwbstate($wtop,thread),wtop)}
-    }
-    if {[info exists jwbstate($wtop,jid)]} {
-	catch {unset jwbstate($jwbstate($wtop,jid),wtop)}
-    }
+    unset -nocomplain jwbstate($jwbstate($wtop,thread),wtop) \
+      jwbstate($jwbstate($wtop,jid),wtop)
     array unset jwbstate "$wtop,*"    
 }
 
@@ -1281,7 +1277,7 @@ proc ::Jabber::WB::GetIPCallback {jid id ip} {
     if {[info exists ipCache(cmd,$id)]} {
 	::Debug 2 "\t ipCache(cmd,$id)=$ipCache(cmd,$id)"
 	eval $ipCache(cmd,$id) $jid
-	catch {unset ipCache(cmd,$id) ipCache(req,$mjid)}
+	unset -nocomplain ipCache(cmd,$id) ipCache(req,$mjid)
     }
 }
 
@@ -1328,7 +1324,7 @@ proc ::Jabber::WB::GetCoccinellaServersCallback {jid3 cmd jlibname type subiq} {
     if {$cmd != ""} {
 	eval $cmd
     }
-    catch {unset ipCache(req,$mjid3)}
+    unset -nocomplain ipCache(req,$mjid3)
 }
 
 proc ::Jabber::WB::PresenceHook {jid type args} {
@@ -1345,7 +1341,7 @@ proc ::Jabber::WB::PresenceHook {jid type args} {
 	unavailable {
 	    
 	    # Need to remove our cached ip number for this jid.
-	    catch {unset ipCache(ip,$mjid) ipCache(req,$mjid)}
+	    unset -nocomplain ipCache(ip,$mjid) ipCache(req,$mjid)
 	}
 	available {
 	    

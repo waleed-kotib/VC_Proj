@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson only for the new and rewritten parts.
 #
-# $Id: httpex.tcl,v 1.12 2004-03-31 07:55:18 matben Exp $
+# $Id: httpex.tcl,v 1.13 2004-07-30 12:55:53 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -1881,7 +1881,7 @@ proc httpex::DeChunkBody {token} {
     # Set Content-Length and remove 'chunked'.
     array set metaArr $state(meta)
     set metaArr(Content-Length) $len
-    catch {unset metaArr(Transfer-Encoding)}
+    unset -nocomplain metaArr(Transfer-Encoding)
     set state(meta) [array get metaArr]
     set state(body) $newbody
     set state(totalsize) $len

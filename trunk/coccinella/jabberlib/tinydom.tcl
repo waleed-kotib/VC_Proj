@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: tinydom.tcl,v 1.5 2004-02-18 14:14:28 matben Exp $
+# $Id: tinydom.tcl,v 1.6 2004-07-30 12:55:55 matben Exp $
 
 package require xml
 
@@ -121,7 +121,7 @@ proc tinydom::children {xmllist} {
 proc tinydom::cleanup {token} {
     variable cache
     
-    catch {unset cache($token)}
+    unset -nocomplain cache($token)
 }
 
 #-------------------------------------------------------------------------------

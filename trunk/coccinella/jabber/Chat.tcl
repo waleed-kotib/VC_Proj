@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.68 2004-07-30 09:33:15 matben Exp $
+# $Id: Chat.tcl,v 1.69 2004-07-30 12:55:53 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -1213,7 +1213,7 @@ proc ::Jabber::Chat::SetFont {theFont} {
 		$chatstate(wtextsnd) configure -font $jprefs(chatFont)
 	    }
 	} else {
-	    catch {unset chatstate}
+	    unset -nocomplain chatstate
 	}
     }
 }
@@ -1582,7 +1582,7 @@ proc ::Jabber::Chat::Free {dlgtoken} {
     foreach chattoken $dlgstate(chattokens) {
 	variable $chattoken
 	upvar 0 $chattoken chatstate
-	catch {unset chatstate}
+	unset -nocomplain chatstate
     }
     unset dlgstate
 }

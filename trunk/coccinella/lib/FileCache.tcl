@@ -6,7 +6,7 @@
 #
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #
-# $Id: FileCache.tcl,v 1.11 2004-07-09 06:26:06 matben Exp $
+# $Id: FileCache.tcl,v 1.12 2004-07-30 12:55:55 matben Exp $
 # 
 #       The input key can be: 
 #               1) a full url, must be uri encoded 
@@ -299,7 +299,7 @@ proc ::FileCache::SetBestBefore {timetoken {dir {}}} {
     switch -- $timetoken {
 	never - always {
 	    set usecache $timetoken
-	    catch {unset bestbeforedir}
+	    unset -nocomplain bestbeforedir
 	}
 	launch - min - hour - day - month {
 	    if {![string equal [file pathtype $dir] "absolute"]} {
@@ -359,7 +359,7 @@ proc ::FileCache::ClearCache { } {
     foreach nkey [array names cache] {
 	catch {file delete $chache($nkey)}
     }
-    catch {unset cache}
+    unset -nocomplain cache
 
     catch {file delete -force -- $prefs(incomingPath)}
     file mkdir $prefs(incomingPath)

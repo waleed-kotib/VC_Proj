@@ -16,7 +16,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: ReflectorServer.tcl,v 1.3 2004-07-09 06:26:06 matben Exp $
+# $Id: ReflectorServer.tcl,v 1.4 2004-07-30 12:55:55 matben Exp $
 # 
 #  Since this is a pretty complex piece of code we describe the principles in
 #  some detail here.
@@ -630,7 +630,7 @@ proc ClientDisconnected { s ip } {
     # ...and remove it from the send list.
     
     if {$isPrimarySock($s)} {
-	catch {unset ip2PrimarySock($ip)}
+	unset -nocomplain ip2PrimarySock($ip)
 	set ind [lsearch $allIps $ip]
 	if {$ind >= 0} {
 	    set allIps [lreplace $allIps $ind $ind]

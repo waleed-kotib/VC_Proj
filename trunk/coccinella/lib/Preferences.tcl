@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.56 2004-07-09 06:26:06 matben Exp $
+# $Id: Preferences.tcl,v 1.57 2004-07-30 12:55:55 matben Exp $
  
 package require notebook
 package require tree
@@ -97,8 +97,7 @@ proc ::Preferences::Build {args} {
     set wtoplevel $w
         
     # Work only on a temporary copy in case we cancel.
-    catch {unset tmpPrefs}
-    catch {unset tmpJPrefs}
+    unset -nocomplain tmpPrefs tmpJPrefs
     array set tmpPrefs [array get prefs]
     array set tmpJPrefs [::Jabber::GetjprefsArray]
     
@@ -527,7 +526,7 @@ proc ::Preferences::NetSetup::Advanced {  } {
     tkwait variable [namespace current]::finishedAdv
     
     # Clean up.
-    catch {unset finishedAdv}
+    unset -nocomplain finishedAdv
     catch {grab release $w}
     destroy $w
 }

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: WindowsUtils.tcl,v 1.7 2004-07-27 14:25:20 matben Exp $
+# $Id: WindowsUtils.tcl,v 1.8 2004-07-30 12:55:55 matben Exp $
 
 #package require gdi
 #package require printer
@@ -183,7 +183,7 @@ proc ::Windows::Printer::PrintText {w hdc pName} {
     set attrList {-background -borderwidth -font -foreground \
       -lmargin1 -lmargin2 -rmargin -spacing1 -spacing2 -spacing3 \
       -tabs}
-    catch {unset state}
+    unset -nocomplain state
     foreach key $attrList {
 	set state($key) {}
     }
@@ -226,8 +226,7 @@ proc ::Windows::Printer::PrintText {w hdc pName} {
       [list ::Windows::Printer::TextDumpCallback $hdc]
     
     # Cleanup
-    catch {unset facx}
-    catch {unset facy}
+    unset -nocomplain facx facy
 }
 
 proc ::Windows::Printer::TextDumpCallback {hdc key value index} {

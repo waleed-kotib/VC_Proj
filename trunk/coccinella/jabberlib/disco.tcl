@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.13 2004-06-13 15:34:36 matben Exp $
+# $Id: disco.tcl,v 1.14 2004-07-30 12:55:54 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -205,7 +205,8 @@ proc disco::parse_get {disconame discotype from cmd jlibname type subiq args} {
     } else {
 	if {[string equal $discotype "items"]} {
 	    set items($from,$pnode,xml) $subiq
-	    catch {unset items($from,$pnode,children) items($from,$pnode,nodes)}
+	    unset -nocomplain items($from,$pnode,children) \
+	      items($from,$pnode,nodes)
 	    
 	    # testing...
 	    # This is perhaps not a robust way.
@@ -218,7 +219,7 @@ proc disco::parse_get {disconame discotype from cmd jlibname type subiq args} {
 		if {![string equal [wrapper::gettag $c] "item"]} {
 		    continue
 		}
-		catch {unset attr}
+		unset -nocomplain attr
 		array set attr [wrapper::getattrlist $c]
 
 		# jid is a required attribute!
@@ -247,7 +248,7 @@ proc disco::parse_get {disconame discotype from cmd jlibname type subiq args} {
 	    set info($from,$pnode,xml) $subiq
 	    
 	    foreach c [wrapper::getchildren $subiq] {
-		catch {unset attr}
+		unset -nocomplain attr
 		array set attr [wrapper::getattrlist $c]
 		
 		# There can be one or many of each 'identity' and 'feature'.
@@ -580,7 +581,7 @@ proc disco::ResetJid {disconame {jid ""} {node ""}} {
     upvar ${disconame}::info  info
 
     if {$jid == ""} {
-	catch {unset items info}
+	unset -nocomplain items info
 	set info(conferences) {}
     } else {
 	

@@ -25,7 +25,7 @@
 # 
 # Copyright (C) 2002-2004 Mats Bengtsson
 # 
-# $Id: tree.tcl,v 1.30 2004-06-20 10:47:02 matben Exp $
+# $Id: tree.tcl,v 1.31 2004-07-30 12:55:53 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -1328,7 +1328,7 @@ proc ::tree::DelItem {w v args} {
     if {$v == ""} {
 	
 	# Remove all content.
-	catch {unset state}
+	unset -nocomplain state
 	set state(selection) {}
 	set state(oldselection) {}
 	set state(selidx) {}
@@ -1354,8 +1354,8 @@ proc ::tree::DelItem {w v args} {
 	    unset state($uid:text)
 	    unset state($uid:bg)
 	    unset state($uid:tags)
-	    catch {unset state($uid:tag)}
-	    catch {unset state($uid:ctags)}
+	    unset -nocomplain state($uid:tag)
+	    unset -nocomplain state($uid:ctags)
 	    set dir [lrange $v 0 end-1]
 	    set tail [lindex $v end]
 	    
@@ -1534,7 +1534,7 @@ proc ::tree::Build {w} {
 	# Just a dummy tag for the display list.
 	$can create line 0 0 1 0 -fill $options(-background) -tags tbgim
     }
-    catch {unset state(pending)}
+    unset -nocomplain state(pending)
     catch {array unset state v:*}
     
     # Keeps track of top y coords to draw.

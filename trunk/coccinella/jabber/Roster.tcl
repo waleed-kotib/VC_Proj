@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.72 2004-07-09 06:26:06 matben Exp $
+# $Id: Roster.tcl,v 1.73 2004-07-30 12:55:54 matben Exp $
 
 package provide Roster 1.0
 
@@ -843,7 +843,7 @@ proc ::Jabber::Roster::SetItem {jid args} {
 	::Debug 2 "\t presenceList=$presenceList"
 	
 	foreach pres $presenceList {
-	    catch {unset presArr}
+	    unset -nocomplain presArr
 	    array set presArr $pres
 	    
 	    # Put in our roster tree.

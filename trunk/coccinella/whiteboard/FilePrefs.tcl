@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: FilePrefs.tcl,v 1.2 2004-07-09 06:26:06 matben Exp $
+# $Id: FilePrefs.tcl,v 1.3 2004-07-30 12:55:56 matben Exp $
 
 package provide FilePrefs 1.0
 
@@ -171,10 +171,11 @@ proc ::FilePrefs::DeleteAssociation {wmclist {indSel {}}} {
     }
     foreach {name pack mime} [lrange [$wmclist get $indSel] 0 2] break
     $wmclist delete $indSel
-    catch {unset tmpMime2Description($mime)}
-    catch {unset tmpMimeTypeIsText($mime)}
-    catch {unset tmpMime2SuffixList($mime)}
-    catch {unset tmpPrefMimeType2Package($mime)}
+    unset -nocomplain \
+      tmpMime2Description($mime) \
+      tmpMimeTypeIsText($mime) \
+      tmpMime2SuffixList($mime) \
+      tmpPrefMimeType2Package($mime)
     
     # Select the next one
     $wmclist selection set $indSel
