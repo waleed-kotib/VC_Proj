@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.52 2004-04-20 13:57:27 matben Exp $
+# $Id: Roster.tcl,v 1.53 2004-04-21 13:21:12 matben Exp $
 
 package provide Roster 1.0
 
@@ -514,8 +514,8 @@ proc ::Jabber::Roster::Popup {w v x y} {
 	    # Must let 'jid' refer to 2-tier jid for commands to work!
 	    set jid3 $jid
 	    set jid $jid2
-	    if {[$jstate(browse) havenamespace $jid3 "coccinella:wb"] || \
-	      [$jstate(browse) havenamespace $jid3 $privatexmlns(whiteboard)]} {
+	    if {[$jstate(browse) hasnamespace $jid3 "coccinella:wb"] || \
+	      [$jstate(browse) hasnamespace $jid3 $privatexmlns(whiteboard)]} {
 		set typeClicked wb
 	    } else {
 		set typeClicked user
@@ -980,8 +980,8 @@ proc ::Jabber::Roster::AutoBrowseCallback {browseName type jid subiq} {
     ::Jabber::Debug 2 "::Jabber::Roster::AutoBrowseCallback, jid=$jid,\
       [string range "subiq='$subiq'" 0 40]..."
     
-    if {[$jstate(browse) havenamespace $jid "coccinella:wb"] || \
-      [$jstate(browse) havenamespace $jid $privatexmlns(whiteboard)]} {
+    if {[$jstate(browse) hasnamespace $jid "coccinella:wb"] || \
+      [$jstate(browse) hasnamespace $jid $privatexmlns(whiteboard)]} {
 	
 	::hooks::run autobrowsedCoccinellaHook $jid
 	
@@ -1831,9 +1831,9 @@ proc ::Jabber::Roster::GetPresenceIcon {jid presence args} {
     
     # If whiteboard:
     if {!$haveForeignIM && [$jstate(browse) isbrowsed $jid]} {
-	if {[$jstate(browse) havenamespace $jid "coccinella:wb"]} {
+	if {[$jstate(browse) hasnamespace $jid "coccinella:wb"]} {
 	    append key ",wb"
-	} elseif {[$jstate(browse) havenamespace $jid $privatexmlns(whiteboard)]} {
+	} elseif {[$jstate(browse) hasnamespace $jid $privatexmlns(whiteboard)]} {
 	    append key ",wb"
 	}
     }

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.38 2004-04-19 13:58:47 matben Exp $
+# $Id: Browse.tcl,v 1.39 2004-04-21 13:20:45 matben Exp $
 
 package require chasearrows
 
@@ -675,7 +675,7 @@ proc ::Jabber::Browse::Popup {w v x y} {
 		}
 	    } 
 	    search - register {
-		if {[$jstate(browse) havenamespace $jid "jabber:iq:${type}"]} {
+		if {[$jstate(browse) hasnamespace $jid "jabber:iq:${type}"]} {
 		    set state normal
 		}
 	    }

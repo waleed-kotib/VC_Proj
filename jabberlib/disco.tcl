@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.8 2004-04-20 13:57:27 matben Exp $
+# $Id: disco.tcl,v 1.9 2004-04-21 13:22:10 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -27,7 +27,7 @@
 #      discoName getjidsforcategory pattern
 #      discoName getjidsforfeature feature
 #      discoName features jid ?node?
-#      discoName havefeature feature jid ?node?
+#      discoName hasfeature feature jid ?node?
 #      discoName isroom jid
 #      discoName name jid ?node?
 #      discoName parent jid ?node?
@@ -388,7 +388,7 @@ proc disco::features {disconame jid {node ""}} {
     }
 }
 
-proc disco::havefeature {disconame feature jid  {node ""}} {
+proc disco::hasfeature {disconame feature jid  {node ""}} {
     
     upvar ${disconame}::info info
 
@@ -476,10 +476,14 @@ proc disco::getconferences {disconame} {
 
 proc disco::isroom {disconame jid} {
     
-    upvar ${disconame}::info info
-
-    set parent [lindex [split $jid @] end]
-    return [expr ([lsearch -exact $info(conferences) $parent] < 0) ? 0 : 1]
+    upvar ${disconame}::info  info
+    
+    # Use the form of the jid to get the service.
+    if {[regexp {^[^@/]+@([^@/]+)$} $jid match service]} {
+	return [expr ([lsearch -exact $info(conferences) $service] < 0) ? 0 : 1]
+    } else {
+	return 0
+    }
 }
 
 proc disco::children {disconame jid {node ""}} {

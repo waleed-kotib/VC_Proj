@@ -5,7 +5,7 @@
 #       
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: service.tcl,v 1.1 2004-04-20 13:55:59 matben Exp $
+# $Id: service.tcl,v 1.2 2004-04-21 13:22:12 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -25,7 +25,7 @@
 #      jlibName service gettransportjids aservice
 #      jlibName service gettype jid
 #      jlibName service hashandnick jid
-#      jlibName service havefeature jid feature (xmlns)
+#      jlibName service hasfeature jid feature (xmlns)
 #      jlibName service nick jid
 #      jlibName service parent jid
 #      jlibName service register type name
@@ -186,7 +186,7 @@ proc jlib::service::setgroupchatprotocol {jlibname jid prot} {
 		return -code error \
 		  "there is no browse object associated with this jlib"
 	    }    
-	    if {![$serv(browse,name) havenamespace $jid  \
+	    if {![$serv(browse,name) hasnamespace $jid  \
 	      "http://jabber.org/protocol/muc"]} {
 		return -code error \
 		  "The jid \"$jid\" does not know of any \"muc\" service"
@@ -383,14 +383,14 @@ proc jlib::service::getconferences {jlibname} {
     return [lsort -unique $jids]
 }
 
-proc jlib::service::havefeature {jlibname jid xmlns} {
+proc jlib::service::hasfeature {jlibname jid xmlns} {
 
     upvar [namespace parent]::${jlibname}::serv serv
 
     if {$serv(browse) && [$serv(browse,name) isbrowsed $jid]} {
-	return [$serv(browse,name) havenamespace $jid $xmlns]
+	return [$serv(browse,name) hasnamespace $jid $xmlns]
     } elseif {$serv(disco) && [$serv(disco,name) isdiscoed info $jid]} {
-	return [$serv(disco,name) havefeature $xmlns $jid]
+	return [$serv(disco,name) hasfeature $xmlns $jid]
     }
     return 0
 }
@@ -529,13 +529,17 @@ proc jlib::service::nick {jlibname jid} {
 
     # All kind of conference components seem to support the old 'gc-1.0'
     # protocol, and we therefore must query our method for entering the room.
-    if {![regexp {^([^/]+)/.+} $jid match room]} {
-	set room $jid
-    } 
+    jlib::splitjid $jid room res
+        
+    # Use fallback here???
     if {![info exists serv(roomprot,$room)]} {
-	return -code error "Does not know which protocol to use in $room"
+	return $res
+	#return -code error "Does not know which protocol to use in $room"
     }
-    set nick ""
+    set nick $res
+    if {$res == ""} {
+	set nick $jid
+    }
     
     switch -- $serv(roomprot,$room) {
 	gc-1.0 {

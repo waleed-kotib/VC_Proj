@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Conference.tcl,v 1.21 2004-04-20 13:57:27 matben Exp $
+# $Id: Conference.tcl,v 1.22 2004-04-21 13:20:47 matben Exp $
 
 package provide Conference 1.0
 
@@ -580,7 +580,7 @@ proc ::Jabber::Conference::CreateGet {token} {
 
     # Figure out if 'conference' or 'muc' protocol.
     if {$jprefs(prefgchatproto) == "muc"} {
-	set state(usemuc) [$jstate(jlib) service havefeature $state(server)  \
+	set state(usemuc) [$jstate(jlib) service hasfeature $state(server)  \
 	  "http://jabber.org/protocol/muc"]
     } else {
 	set state(usemuc) 0

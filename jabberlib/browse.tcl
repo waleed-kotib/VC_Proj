@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: browse.tcl,v 1.23 2004-04-17 14:02:02 matben Exp $
+# $Id: browse.tcl,v 1.24 2004-04-21 13:21:49 matben Exp $
 # 
 #  locals($jid,parent):       the parent of $jid.
 #  locals($jid,parents):      list of all parent jid's,
@@ -55,7 +55,7 @@
 #      browseName getalltypes globpattern
 #      browseName getalljidfortypes globpattern
 #      browseName getusers jid
-#      browseName havenamespace jid namespace
+#      browseName hasnamespace jid namespace
 #      browseName isbrowsed jid
 #      browseName isroom jid
 #      browseName remove jid
@@ -209,14 +209,12 @@ proc browse::parse_get {browsename jid cmd jlibname type subiq args} {
 
     switch -- $type {
 	error {
-	    uplevel #0 $cmd "error" $subiq
+	    uplevel #0 $cmd [list $browsename $type $jid $subiq] $args
 	}
 	default {
 	    
-	    # Set internal state first.
+	    # Set internal state first, then handle callback.
 	    setjid $browsename $jid $subiq
-	    
-	    # Handle callback.
 	    uplevel #0 $cmd [list $browsename $type $jid $subiq] $args
 	}
     }
@@ -595,7 +593,7 @@ proc browse::getnamespaces {browsename jid} {
     }
 }
 
-# browse::havenamespace --
+# browse::hasnamespace --
 #
 #       Returns 0/1 if jid supports this namespace.
 #
@@ -607,11 +605,11 @@ proc browse::getnamespaces {browsename jid} {
 # Results:
 #       0/1
 
-proc browse::havenamespace {browsename jid ns} {
+proc browse::hasnamespace {browsename jid ns} {
     
     upvar ${browsename}::locals locals
     
-    Debug 3 "browse::havenamespace  jid=$jid, ns=$ns"
+    Debug 3 "browse::hasnamespace  jid=$jid, ns=$ns"
 
     if {[info exists locals($jid,ns)]} {
 	return [expr [lsearch $locals($jid,ns) $ns] < 0 ? 0 : 1]
