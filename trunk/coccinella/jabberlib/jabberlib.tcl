@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.82 2005-02-09 14:30:32 matben Exp $
+# $Id: jabberlib.tcl,v 1.83 2005-02-13 13:17:42 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -608,7 +608,7 @@ proc jlib::putssocket {jlibname xml} {
     upvar ${jlibname}::lib lib
 
     Debug 2 "SEND: $xml"
-    if {[catch {puts $lib(sock) $xml} err]} {
+    if {[catch {puts -nonewline $lib(sock) $xml} err]} {
 	# Error propagated to the caller that calls clientcmd.
 	return -code error
     }
@@ -2438,7 +2438,7 @@ proc jlib::send_message {jlibname to args} {
     }
     set xmllist [wrapper::createtag "message" -attrlist $attrlist  \
       -subtags $children]
-    
+	
     # For the auto away function.
     schedule_auto_away $jlibname
     
@@ -2519,15 +2519,13 @@ proc jlib::send_presence {jlibname args} {
       -subtags $children]
     
     # Be sure to cancel auto away scheduling if necessary.
-    if {[info exists argsArr(-type)]} {
-	if {[string equal $argsArr(-type) "available"]} {
-	    if {[info exists argsArr(-show)] && \
-	      ![string equal $argsArr(-show) "chat"]} {
-		cancel_auto_away $jlibname
-	    }
-	} else {
+    if {[string equal $type "available"]} {
+	if {[info exists argsArr(-show)] && \
+	  ![string equal $argsArr(-show) "chat"]} {
 	    cancel_auto_away $jlibname
 	}
+    } else {
+	cancel_auto_away $jlibname
     }
     
     # Any of {available away dnd invisible unavailable}
@@ -2550,7 +2548,7 @@ proc jlib::send_presence {jlibname args} {
 proc jlib::send {jlibname xmllist} {
     
     upvar ${jlibname}::lib lib
-    
+
     set xml [wrapper::createxml $xmllist]
         
     # We fail only if already in stream.
@@ -3187,12 +3185,10 @@ proc jlib::auto_away_cmd {jlibname what} {
     
     switch -- $what {
 	away {
-	    send_presence $jlibname -type "available" -show "away"  \
-	      -status $opts(-awaymsg)
+	    send_presence $jlibname -show "away" -status $opts(-awaymsg)
 	}
 	xaway {
-	    send_presence $jlibname -type "available" -show "xa"  \
-	      -status $opts(-xawaymsg)
+	    send_presence $jlibname -show "xa" -status $opts(-xawaymsg)
 	}
     }        
     uplevel #0 $lib(clientcmd) [list $jlibname $what]

@@ -11,7 +11,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: wrapper.tcl,v 1.11 2004-10-18 14:01:04 matben Exp $
+# $Id: wrapper.tcl,v 1.12 2005-02-13 13:17:42 matben Exp $
 # 
 # ########################### INTERNALS ########################################
 # 
@@ -697,6 +697,18 @@ proc wrapper::getchildswithtag {xmllist tag} {
 	}
     }
     return $clist
+}
+
+proc wrapper::getfirstchildwithtag {xmllist tag} {
+    
+    set c {}
+    foreach celem [lindex $xmllist 4] {
+	if {[string equal [lindex $celem 0] $tag]} {
+	    set c $celem
+	    break
+	}
+    }
+    return $c
 }
 
 proc wrapper::getchildwithtaginnamespace {xmllist tag ns} {

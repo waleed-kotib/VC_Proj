@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.17 2005-02-08 08:57:15 matben Exp $
+# $Id: disco.tcl,v 1.18 2005-02-13 13:17:42 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -24,6 +24,7 @@
 #      discoName get discotype key jid ?node?
 #      discoName getallcategories pattern
 #      discoName getconferences
+#      discoName getflatlist jid ?node?
 #      discoName getjidsforcategory pattern
 #      discoName getjidsforfeature feature
 #      discoName features jid ?node?
@@ -31,8 +32,13 @@
 #      discoName isroom jid
 #      discoName iscategorytype category/type jid ?node?
 #      discoName name jid ?node?
+#      discoName nodes jid ?node?
 #      discoName parent jid
+#      discoName parentitemslist jid ?node?
+#      discoName parentnode jid node
+#      discoName parentnodes jid node
 #      discoName parents jid
+#      discoName splititemlist list
 #      discoName types jid ?node?
 #      discoName reset ?jid ?node??
 #      
@@ -226,6 +232,10 @@ proc disco::parse_get {disconame discotype from cmd jlibname type subiq args} {
     uplevel #0 $cmd [list $disconame $type $from $subiq] $args
 }
 
+# disco::parse_get_items --
+# 
+#       Fills the internal records with this disco items query result.
+
 proc disco::parse_get_items {disconame from subiq} {
     upvar ${disconame}::items items
     upvar ${disconame}::info  info
@@ -273,6 +283,11 @@ proc disco::parse_get_items {disconame from subiq} {
 	} else {
 	    lappend items($from,children) $jid
 	}
+	#::Debug 2 "\t from=$from, jid=$jid, pnode=$pnode, node=$node"
+
+	if {[info exists attr(name)]} {
+	    set items($jid,$node,name) $attr(name)
+	}			
 	
 	# Parents:
 	if {$pnode == ""} {
@@ -285,7 +300,7 @@ proc disco::parse_get_items {disconame from subiq} {
 	    }
 	} else {
 	    set items($jid,$node,pnode) $pnode
-	    set items($jid,$node,pnodes) [concat items($jid,$pnode,pnodes) $pnode]
+	    set items($jid,$node,pnodes) [concat $items($jid,$pnode,pnodes) $pnode]
 	}	
 	
 	foreach {key value} [array get attr] { 
@@ -299,6 +314,10 @@ proc disco::parse_get_items {disconame from subiq} {
 	}
     }	
 }
+
+# disco::parse_get_info --
+# 
+#       Fills the internal records with this disco info query result.
 
 proc disco::parse_get_info {disconame from subiq} {
     variable disco2jlib
@@ -454,6 +473,10 @@ proc disco::name {disconame jid {node ""}} {
     }
 }
 
+# disco::features --
+# 
+#       Returns the var attributes of all feature elements for this jid/node.
+
 proc disco::features {disconame jid {node ""}} {
     
     upvar ${disconame}::info info
@@ -466,6 +489,10 @@ proc disco::features {disconame jid {node ""}} {
     }
 }
 
+# disco::hasfeature --
+# 
+#       Returns 1 if the jid/node has the specified feature var.
+
 proc disco::hasfeature {disconame feature jid {node ""}} {
     
     upvar ${disconame}::info info
@@ -477,6 +504,10 @@ proc disco::hasfeature {disconame feature jid {node ""}} {
 	return 0
     }
 }
+
+# disco::types --
+# 
+#       Returns a list of all category/types of this jid/node.
 
 proc disco::types {disconame jid {node ""}} {
     
@@ -492,7 +523,7 @@ proc disco::types {disconame jid {node ""}} {
 
 # disco::iscategorytype --
 # 
-#       Search for any matching glob pattern.
+#       Search for any matching feature var glob pattern.
 
 proc disco::iscategorytype {disconame cattype jid {node ""}} {
     
@@ -510,6 +541,9 @@ proc disco::iscategorytype {disconame cattype jid {node ""}} {
     }
 }
 
+# disco::getjidsforfeature --
+# 
+#       Returns a list of all jids that support the specified feature.
 
 proc disco::getjidsforfeature {disconame feature} {
     
@@ -578,6 +612,7 @@ proc disco::getconferences {disconame} {
 # 
 #       Room or not? The problem is that some components, notably some
 #       msn gateways, have multiple categories, gateway and conference. BAD!
+#       We therefore use a specific 'rooms' array.
 
 proc disco::isroom {disconame jid} {
 
@@ -608,6 +643,10 @@ proc disco::isroomOLD {disconame jid} {
 	return 0
     }
 }
+
+# disco::children --
+# 
+#       Returns a list of all child jids of this jid.
 
 proc disco::children {disconame jid} {
     
@@ -643,7 +682,11 @@ proc disco::childrenlist {disconame jid {node ""}} {
     }
 }
 
-proc disco::nodes {disconame jid node} {
+# disco::nodes --
+# 
+#       Returns a list of child nodes of this jid|node.
+
+proc disco::nodes {disconame jid {node ""}} {
     
     upvar ${disconame}::items items
 
@@ -654,7 +697,9 @@ proc disco::nodes {disconame jid node} {
     }
 }
 
-# How to return nodes???
+# disco::parent --
+# 
+#       Returns the parent of the jid. Empty if no parent known.
 
 proc disco::parent {disconame jid} {
     
@@ -667,6 +712,10 @@ proc disco::parent {disconame jid} {
 	return {}
     }
 }
+
+# disco::parents --
+# 
+#       Returns a list of parents of the jid. Empty if no parent known.
 
 proc disco::parents {disconame jid} {
     
@@ -681,6 +730,10 @@ proc disco::parents {disconame jid} {
 }
 
 # This wont distinguish between top node and nonexisting!!!
+
+# disco::parentnode, parentnodes --
+# 
+#       Same as parent(s) but for nodes.
 
 proc disco::parentnode {disconame jid node} {
     
@@ -704,9 +757,12 @@ proc disco::parentnodes {disconame jid node} {
     }
 }
 
-#       Return a "flat list" of jids and nodes.
+# disco::parentitemslist --
+# 
+#       Return a "flat list" of jids and nodes: {jid jid... ?node node...?}
+#       of the parent of the jid/node combination.
 
-proc disco::parentlist {disconame jid {node ""}} {
+proc disco::parentitemslist {disconame jid {node ""}} {
     
     upvar ${disconame}::items items
     
@@ -714,12 +770,50 @@ proc disco::parentlist {disconame jid {node ""}} {
 	set plist $items($jid,parents)
 	if {$node != ""} {
 	    lappend plist $jid
-	    set plist [concat $plist $items($jid,$node,pnodes)]
+	    # The echo component messes up the jid's and therefore this check.
+	    if {[info exists items($jid,$node,pnodes)]} {
+		set plist [concat $plist $items($jid,$node,pnodes)]
+	    }
 	}
 	return $plist
     } else {
 	return {}
     }
+}
+
+# disco::getflatlist --
+# 
+#       Same as parentitemslist but includes the jid/node specified.
+
+proc disco::getflatlist {disconame jid {node ""}} {
+    
+    set plist [parentitemslist $disconame $jid $node]
+    if {$node == ""} {
+	set v [concat $plist [list $jid]]
+    } else {
+	set v [concat $plist [list $node]]
+    }
+    return $v
+}
+
+# disco::splititemlist --
+# 
+#       Takes a flatlist of jids/nodes and returns {{jid jid...} {node...}}
+
+proc disco::splititemlist {disconame plist} {
+    
+    upvar ${disconame}::items items
+    
+    set jidlist  {}
+    set nodelist {}
+    foreach a $plist {
+	if {[info exists items($a,parent)]} {
+	    lappend jidlist $a
+	} else {
+	    lappend nodelist $a
+	}
+    }    
+    return [list $jidlist $nodelist]
 }
 
 proc disco::handle_get {disconame discotype jlibname from subiq args} {
