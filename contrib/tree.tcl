@@ -25,7 +25,7 @@
 # 
 # Copyright (C) 2002-2003 Mats Bengtsson
 # 
-# $Id: tree.tcl,v 1.9 2003-10-25 07:22:26 matben Exp $
+# $Id: tree.tcl,v 1.10 2003-10-29 07:44:11 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -1603,20 +1603,27 @@ proc ::tree::DrawSelection {w} {
     set can $widgets(canvas)
     if {[string length $treestate(selidx)] > 0} {
 	$can delete $treestate(selidx)
-	if {[string length $treestate(oldselection)] > 0} {
+	if {$treestate(oldselection) != ""} {
 	    set vold $treestate(oldselection)
-	    set uidOld $v2uid($vold)
-	    if {[info exists treestate($uidOld:tag)]} {
+	    if {[info exists v2uid($vold)] &&  \
+	      [info exists treestate($uidOld:tag)]} {
+		set uidOld $v2uid($vold)
 		$can itemconfigure $treestate($uidOld:tag) -fill black
 	    }
 	}
     }
+    
+    # This is the current selection. It may have been deleted.
     set v $treestate(selection)
-    set uid $v2uid($v)
-    if {[string length $v] == 0} {
+    if {$v == ""} {
 	return ""
     }
-    if {![info exists treestate($uid:tag)]} {
+    if {[info exists v2uid($v)]} {
+	set uid $v2uid($v)
+	if {![info exists treestate($uid:tag)]} {
+	    return ""
+	}
+    } else {
 	return ""
     }
     
