@@ -2,7 +2,7 @@
 # 
 #       Interface for launching Gnome Meeting.
 #
-# $Id: GMeeting.tcl,v 1.3 2004-12-12 14:55:19 matben Exp $
+# $Id: GMeeting.tcl,v 1.4 2004-12-12 15:03:30 matben Exp $
 
 namespace eval ::GMeeting:: {
     
@@ -55,7 +55,8 @@ proc ::GMeeting::RosterCmd {jid} {
 	  -message "We failed to identify any ip address for \"$jid\""
 	return
     }
-    if {[catch {exec $cmd -c $ip &} err]} {
+    set uri h323:${ip}
+    if {[catch {exec $cmd -c $uri &} err]} {
 	tk_messageBox -type ok -icon error -title Error \
 	  -message "We failed to launch Gnome Meeting: $err"
     }
