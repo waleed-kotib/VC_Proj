@@ -18,12 +18,14 @@
 ::msgcat::mcset sv Both   		{Båda}
 ::msgcat::mcset sv Buffering		{Buffring}
 ::msgcat::mcset sv Cancel		{Avbryt}
+::msgcat::mcset en Change               {Ändra}
 ::msgcat::mcset sv City                 {Stad}
 ::msgcat::mcset sv Clear 		{Radera}
 ::msgcat::mcset sv Close 		{Stäng}
 ::msgcat::mcset sv Conference           {Konferans}
 ::msgcat::mcset sv Connect              {Anslut}
 ::msgcat::mcset sv Country		{Land}
+::msgcat::mcset sv Create               {Skapa}
 ::msgcat::mcset sv Customization        {Anpassningar}
 ::msgcat::mcset sv Date 		{Datum}
 ::msgcat::mcset sv Default              {Standard}
@@ -98,6 +100,7 @@
 ::msgcat::mcset sv Timeout		{Timeout}
 ::msgcat::mcset sv Title		{Jobbtitel}
 ::msgcat::mcset sv To 			{Till}
+::msgcat::mcset sv Topic                {Ämne}
 ::msgcat::mcset sv Trash 		{Kasta}
 ::msgcat::mcset sv Unregister		{Avregistrera}
 ::msgcat::mcset sv Unsubscribe		{Avsluta prenumeration}
@@ -250,7 +253,7 @@
 ::msgcat::mcset sv {About Coccinella}      {Om Coccinella}
 ::msgcat::mcset sv {About Whiteboard}      {Om skrivtavlan}
 ::msgcat::mcset sv {About QuickTimeTcl}    {Om QuickTimeTcl}
-::msgcat::mcset sv {Add New User}          {Lägg till ny användare}
+::msgcat::mcset sv {Add New User}          {Lägg till ny kontakt}
 ::msgcat::mcset sv {Add Server}		   {Lägg till server}
 ::msgcat::mcset sv {Add Shortcut}          {Lägg till genväg}
 ::msgcat::mcset sv {Address 1}		   {Adress 1}
@@ -297,6 +300,7 @@
 ::msgcat::mcset sv {Font weight}           {Typsnittsstil}
 ::msgcat::mcset sv {Get File}		   {Hämta fil}
 ::msgcat::mcset sv {Get vCard}             {Hämta vCard}
+::msgcat::mcset sv {Group chat in room}    {Gruppsamtal i rum}
 ::msgcat::mcset sv {Handled By}            {Hanteras av}
 ::msgcat::mcset sv {Host name}		   {Värdnamn}
 ::msgcat::mcset sv {HTTP port:}            {HTTP port:}
@@ -331,7 +335,8 @@
 ::msgcat::mcset sv {New Message}           {Nytt meddelande}
 ::msgcat::mcset sv {New password}          {Nytt lösenord}
 ::msgcat::mcset sv {New shortcut}          {Ny genväg}
-::msgcat::mcset sv {New User}              {Ny kompis}
+::msgcat::mcset sv {New Topic}             {Nytt ämne}
+::msgcat::mcset sv {New User}              {Ny kontakt}
 ::msgcat::mcset sv {My vCard}		   {Mitt vCard}
 ::msgcat::mcset sv {Nick name}             {Kortnamn}
 ::msgcat::mcset sv {No Address}		   {Adress saknas}
@@ -385,6 +390,7 @@
 ::msgcat::mcset sv {Send Live}             {Skicka lajv}
 ::msgcat::mcset sv {Server Info}           {Server info}
 ::msgcat::mcset sv {Service server}	   {Tjänst server}
+::msgcat::mcset sv {Set New Topic}         {Sätt nytt ämne}
 ::msgcat::mcset sv {Set Status}            {Sätt status}
 ::msgcat::mcset sv {Settings Panels}       {Inställningspaneler}
 ::msgcat::mcset sv {Setup Assistant}	   {Inställningsassistent}
@@ -843,6 +849,8 @@ för nerladdning.}
 	::msgcat::mcset sv jaupdatepri	{Den här uppdateringen är %s}
 	::msgcat::mcset sv jaupdatenewver {Den ny versionen är: %s}
 	::msgcat::mcset sv jaupdateremind {Påminn mig inte om detta fler gånger}
+	::msgcat::mcset sv jasettopic   {Sätt nytt ämne för detta gruppsamtal.\
+Det sätts när du skickar nästa meddelande.}
 
 
 

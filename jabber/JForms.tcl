@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #
-# $Id: JForms.tcl,v 1.3 2003-02-06 17:23:31 matben Exp $
+# $Id: JForms.tcl,v 1.4 2003-05-18 13:20:20 matben Exp $
 # 
 #      Updated to the 2002-09-03 revision of JEP-0004
 #  
@@ -127,13 +127,9 @@ proc ::Jabber::Forms::Cleanup {w} {
     variable cache
 
     set id $locals($w,id)
-    foreach key [array names cache "$id,*"] {
-	unset cache($key)
-    }
-    foreach key [array names locals "$w,*"] {
-	unset locals($key)
-    }
-    unset reported($id)
+    array unset cache "$id,*"
+    array unset locals "$w,*"
+    catch {unset reported($id)}
 }
 
 # Jabber::Forms::BuildSimple --
@@ -384,7 +380,7 @@ proc ::Jabber::Forms::GetXMLForChild {w child parentTags template} {
 #                   jabber:x:data
 #       
 # Results:
-#       none
+#       $w
 
 proc ::Jabber::Forms::BuildXData {w xml args} {
     global  sysFont prefs
@@ -404,7 +400,7 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
 	return -code error {Not proper xml data here}
     }
     if {![string equal $attrArr(xmlns) "jabber:x:data"]} {
-	return -code error {Not proper xml data here}
+	return -code error {Expected an "jabber:x:data" element here}
     }
     array set argsArr {
 	-aspect    800
@@ -417,38 +413,53 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
     set i 0
     foreach elem [wrapper::getchildren $xml] {
 	set tag [lindex $elem 0]
-	switch -- $tag {
+	
+	switch -exact -- $tag {
 	    instructions {
-		message $w.m$i -aspect $argsArr(-aspect) -font $sysFont(s) \
+	    #-aspect $argsArr(-aspect)
+		message $w.m$i -font $sysFont(s) \
 		  -text [lindex $elem 3] -width $argsArr(-width)
-		grid $w.m$i -row $i -column 0 -columnspan 1 -sticky ew
+		grid $w.m$i -row $i -column 0 -columnspan 1 -sticky w
 		incr i
 	    }
 	    field {
 		catch {unset attrArr}
 		array set attrArr [lindex $elem 1]
-		set var $attrArr(var)
-		set type($id,$var) $attrArr(type)
 		if {[info exists attrArr(label)]} {
 		    set lab $attrArr(label)
 		} else {
-		    set lab $var
+		    set lab Unknown
+		}
+		
+		# Set reasonable default value if not given.
+		switch -exact -- $attrArr(type) {
+		    text-single - text-private - text-multi - list-single - \
+		      list-multi - jid - jid-multi {
+			set defvalue ""
+		    }
+		    boolean {
+			set defvalue 0
+		    }
+		    default {
+			set defvalue ""
+		    }
 		}
 		
 		# Required? <desc> element? <value> as default?
 		set isrequired 0
 		foreach c [wrapper::getchildren $elem] {
-		    if {[string equal [lindex $c 0] "required"]} {
+		    set ctag [lindex $c 0]
+		    if {[string equal $ctag "required"]} {
 			set isrequired 1
-		    } elseif {[string equal [lindex $c 0] "desc"]} {
-			message $w.m$i -aspect $argsArr(-aspect) -font $sysFont(s)  \
+		    } elseif {[string equal $ctag "desc"]} {
+			message $w.m$i -aspect $argsArr(-aspect) -font $sysFont(s) \
 			  -text [lindex $c 3] -width $argsArr(-width)
 			grid $w.m$i -row $i -column 0 -columnspan 1 -sticky ew
 			incr i
-		    } elseif {[string equal [lindex $c 0] "value"]} {
+		    } elseif {[string equal $ctag "value"]} {
 			
 			# Set default.
-			set cache($id,$var) [lindex $c 3]
+			set defvalue [lindex $c 3]
 		    }
 		}
 		if {$isrequired} {
@@ -459,6 +470,9 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
 		
 		switch -exact -- $attrArr(type) {
 		    text-single - text-private {
+			set var $attrArr(var)
+			set cache($id,$var) $defvalue
+			set type($id,$var) $attrArr(type)
 			if {[string equal $attrArr(type) "text-single"]} {
 			    set show {}
 			} else {
@@ -474,6 +488,9 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
 			incr i
 		    }
 		    text-multi {
+			set var $attrArr(var)
+			set cache($id,$var) $defvalue
+			set type($id,$var) $attrArr(type)
 			eval {label $w.l$i -text $lab} $opts
 			grid $w.l$i -row $i -column 0 -sticky w
 			incr i
@@ -481,10 +498,11 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
 			set wfr [frame $w.f$var]
 			set wtxt ${wfr}.txt
 			set wsc ${wfr}.sc
-			text $wtxt -font $sysFont(s) -height 3 -wrap word \
+			text $wtxt -font $sysFont(s) -height 3 -width 30 -wrap word \
 			  -yscrollcommand [list $wsc set]
 			scrollbar $wsc -orient vertical  \
-			  -command [list $wtxt yview]
+			  -command [list $wtxt yview]			
+
 			grid $wtxt -column 0 -row 0 -sticky news
 			grid $wsc -column 1 -row 0 -sticky ns
 			grid columnconfigure $wfr 0 -weight 1
@@ -496,6 +514,9 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
 		    list-single {
 			
 			# Represented by a popup menu button.
+			set var $attrArr(var)
+			set cache($id,$var) $defvalue
+			set type($id,$var) $attrArr(type)
 			eval {label $w.l$i -text $lab} \
 			  $opts
 			grid $w.l$i -row $i -column 0 -sticky w
@@ -515,9 +536,12 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
 			grid $w.pop$i -row $i -column 0 -sticky ew			
 			incr i
 		    }
-		    list-multi {
+		    list-multi - jid-multi {
 			
 			# Build menu list and mapping from label to value.
+			set var $attrArr(var)
+			set cache($id,$var) $defvalue
+			set type($id,$var) $attrArr(type)
 			foreach {defValue optionList}   \
 			  [HandleMultipleOptions $id $elem $var] {}
 			set cache($id,$var) $optionList
@@ -531,7 +555,7 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
 			set wfr [frame $w.f$var]
 			set wlb $w.f${var}.lb
 			set wsc $w.f${var}.sc
-			listbox $wlb -font $sysFont(s) -height 4  \
+			listbox $wlb -font $sysFont(s) -height 4 -width 20 \
 			  -selectmode multiple  \
 			  -yscrollcommand [list $wsc set]   \
 			  -listvar [namespace current]::cache($id,$var)
@@ -552,18 +576,24 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
 			incr i
 		    }
 		    boolean {
+			set var $attrArr(var)
+			set cache($id,$var) $defvalue
+			set type($id,$var) $attrArr(type)
 			eval {checkbutton $w.c$i -text $lab \
 			  -variable [namespace current]::cache($id,$var)} $opts
 			grid $w.c$i -row $i -column 0 -columnspan 1 -sticky ew
 			incr i
 		    }
 		    fixed {
-			eval {label $w.l$i -text [lindex $elem 3]} \
-			  $opts
-			grid $w.l$i -row $i -column 0 -columnspan 1 -sticky ew
+			eval {label $w.l$i -text $defvalue -justify left \
+			  -wraplength $argsArr(-width)} $opts
+			grid $w.l$i -row $i -column 0 -columnspan 1 -sticky w
 			incr i
 		    }
 		    jid {
+			set var $attrArr(var)
+			set cache($id,$var) $defvalue
+			set type($id,$var) $attrArr(type)
 			label $w.l$i -text $lab
 			grid $w.l$i -row $i -column 0 -sticky w
 			incr i
@@ -573,11 +603,16 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
 			incr i
 		    }
 		    hidden {
+			set var $attrArr(var)
+			set type($id,$var) $attrArr(type)
 			set cache($id,$var) [lindex $elem 3]
 		    }
 		    default {
 			
 			# Use text-single type as fallback.
+			set var $attrArr(var)
+			set cache($id,$var) $defvalue
+			set type($id,$var) $attrArr(type)
 			label $w.l$i -text $lab
 			grid $w.l$i -row $i -column 0 -sticky w
 			incr i
@@ -601,10 +636,13 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
 	}
     }
     label $w.l$i -text {Entries labelled in red are required}
-    grid $w.l$i -row $i -column 0 -columnspan 2 -sticky ew
+    grid $w.l$i -row $i -column 0 -columnspan 2 -sticky w
+    return $w
 }
 
 # Jabber::Forms::HandleMultipleOptions --
+# 
+# 
 
 proc ::Jabber::Forms::HandleMultipleOptions {id elem var} {
     
@@ -663,7 +701,7 @@ proc ::Jabber::Forms::GetXMLXData {w} {
     
     # Submit all nonempty entries.
     foreach key [array names type "$id,*"] {
-	regexp "^$id,(.+)$" $key match var
+	regexp "^${id},(.+)$" $key match var
 
 	switch -- $type($key) {
 	    text-single - text-private - boolean - jid {
@@ -677,8 +715,8 @@ proc ::Jabber::Forms::GetXMLXData {w} {
 		set value $optionLabel2Value($id,$var,$label)
 		set subtags [list [wrapper::createtag value -chdata $value]]
 	    }
-	    list-multi {
-		set wlb $win($id).f${var}.lb
+	    list-multi - jid-multi {
+		set wlb $w.f${var}.lb
 		set selIndList [$wlb curselection]
 		set valueList {}
 		foreach ind $selIndList {
@@ -693,7 +731,7 @@ proc ::Jabber::Forms::GetXMLXData {w} {
 		}
 	    }
 	    text-multi {
-		set value [$win($id).f${var}.txt get 1.0 end]		
+		set value [$w.f${var}.txt get 1.0 end]		
 		set subtags [list [wrapper::createtag value -chdata $value]]
 	    }
 	    default {
@@ -825,59 +863,6 @@ proc ::Jabber::Forms::ResultListXData {w subiq} {
 		lappend res $row
 	    }
 	}
-    }
-    return $res
-}
-
-# Jabber::Forms::ResultListXData_OLD --
-# 
-#       See ::Jabber::Forms::ResultList
-
-proc ::Jabber::Forms::ResultListXData_OLD {w subiq} {
-    
-    variable locals
-    variable reported
-    
-    if {![info exists locals($w,id)]} {
-	return -code error "The widget \"$w\" is not a form"
-    }
-    set id $locals($w,id)
-    set res {}
-    
-    # Loop through the items. The first one must be a <reported> element.
-    # We are not guaranteed to receive every field.
-    
-    foreach item [wrapper::getchildren $subiq] {
-
-	catch {unset attrArr}
-	catch {unset itemArr}
-	array set attrArr [lindex $item 1]
-	set itemArr(jid) $attrArr(jid)
-	set xElem [lindex [wrapper::getchildren $item] 0]
-	if {![string equal [lindex $xElem 0] "x"]} {
-	    continue
-	}
-	foreach field [wrapper::getchildren $xElem] {
-	    if {![string equal [lindex $field 0] "field"]} {
-		continue
-	    }
-	    catch {unset fieldAttrArr}
-	    array set fieldAttrArr [lindex $field 1]
-	    set valueElem [lindex [wrapper::getchildren $field] 0]
-	    if {![string equal [lindex $valueElem 0] "value"]} {
-		continue
-	    }		
-	    set itemArr($fieldAttrArr(var)) [lindex $valueElem 3]		
-	}
-	set row {}
-	foreach {var label} $keyList {
-	    if {[info exists itemArr($var)]} {
-		lappend row $itemArr($var)
-	    } else {
-		lappend row {}
-	    }
-	}
-	lappend res $row
     }
     return $res
 }

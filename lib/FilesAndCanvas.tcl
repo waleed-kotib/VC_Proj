@@ -3,11 +3,11 @@
 #      This file is part of the whiteboard application. It implements procedures
 #      for transfering the items of a canvas to and from files.
 #      
-#  Copyright (c) 2002  Mats Bengtsson
+#  Copyright (c) 2002-2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: FilesAndCanvas.tcl,v 1.4 2003-02-06 17:23:33 matben Exp $
+# $Id: FilesAndCanvas.tcl,v 1.5 2003-05-18 13:20:21 matben Exp $
  
 package require can2svg
 package require undo
@@ -479,12 +479,14 @@ proc ::CanvasFile::CanvasToFile {w fd absPath} {
 			# ?
 		    }
 		    default {
-			
-			# What about other formats that are put in their own
-			# window widget? We should have some hook here for
-			# 3rd party extensions such VTK.
-			
-			continue
+			if {[::Plugins::HaveSaveProcForWinClass $windowClass]} {
+			    set procName \
+			      [::Plugins::GetSaveProcForWinClass $windowClass]
+			    set line [$procName $w $id]
+			    if {$line != ""} {
+				puts $fd $line		    
+			    }
+			}
 		    }
 		}
 	    }
@@ -582,7 +584,7 @@ proc ::CanvasFile::DoOpenCanvasFile {wtop {filePath {}}} {
 	return
     }
     ::undo::reset [::UI::GetUndoToken $wtop]
-    DoEraseAll $wtop     
+    ::UserActions::DoEraseAll $wtop     
     FileToCanvas $wCan $fd $fileName
     close $fd
 }

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.5 2003-04-28 13:32:33 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.6 2003-05-18 13:20:22 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -37,9 +37,6 @@
 package provide PreferencesUtils 1.0
 
 namespace eval ::PreferencesUtils:: {
-
-    namespace export PreferencesInit PreferencesAdd PreferencesSaveToFile  \
-      PreferencesResetToFactoryDefaults PreferencesResetToUserDefaults 
     
     variable priNameToNum
     array set priNameToNum {0 0 20 20 40 40 60 60 80 80 100 100   \
@@ -47,7 +44,7 @@ namespace eval ::PreferencesUtils:: {
       absolute 100}
 }
 
-# PreferencesUtils::PreferencesInit --
+# PreferencesUtils::Init --
 # 
 #       Reads the preference file into the internal option database.
 #       Use pre 0.94.2 prefs file as a fallback.
@@ -57,7 +54,7 @@ namespace eval ::PreferencesUtils:: {
 # Results:
 #       updates the internal option database.
 
-proc ::PreferencesUtils::PreferencesInit { } {
+proc ::PreferencesUtils::Init { } {
     global  prefs
     
     set prefsFilePath $prefs(userPrefsFilePath)
@@ -78,7 +75,7 @@ proc ::PreferencesUtils::PreferencesInit { } {
     }
 }
 
-# PreferencesUtils::PreferencesAdd --
+# PreferencesUtils::Add --
 # 
 #       Set the user preferences from the preferences file if they are there,
 #       else take the hardcoded defaults.
@@ -93,16 +90,14 @@ proc ::PreferencesUtils::PreferencesInit { } {
 # Results:
 #       none
 
-proc ::PreferencesUtils::PreferencesAdd {thePrefs} {
+proc ::PreferencesUtils::Add {thePrefs} {
     global  prefs
     
     variable priNameToNum
 
     set isOldPrefFile 0
     foreach item $thePrefs {
-	set varName [lindex $item 0]
-	set resourceName [lindex $item 1]
-	set defaultValue [lindex $item 2]
+	foreach {varName resourceName defaultValue} $item { break }
 	
 	# The default priority for hardcoded values are 20 (factoryDefault).
 	if {[llength $item] >= 4} {
@@ -116,7 +111,7 @@ proc ::PreferencesUtils::PreferencesAdd {thePrefs} {
 	# Override options that should be write only:
 	# for instance, version numbers.
 	if {$varPriority <= 60} {
-	    set value [PreferencesGetValue $varName $resourceName $defaultValue]
+	    set value [GetValue $varName $resourceName $defaultValue]
 	} else {
 	    set value $defaultValue
 	}
@@ -159,7 +154,7 @@ proc ::PreferencesUtils::PreferencesAdd {thePrefs} {
     }   
 }
 
-# PreferencesUtils::PreferencesGetValue --
+# PreferencesUtils::GetValue --
 # 
 #       Returns the preference variables value, either from the preference
 #       file, or if there is no value for it there, return the default
@@ -173,7 +168,7 @@ proc ::PreferencesUtils::PreferencesAdd {thePrefs} {
 # Results:
 #       a value for the preference with the given name. 
 
-proc ::PreferencesUtils::PreferencesGetValue {varName resourceName defValue} {
+proc ::PreferencesUtils::GetValue {varName resourceName defValue} {
     upvar #0 varName theVar
     
     set theVar [option get . $resourceName {}]
@@ -185,7 +180,7 @@ proc ::PreferencesUtils::PreferencesGetValue {varName resourceName defValue} {
     return $theVar
 }
   
-# PreferencesUtils::PreferencesSaveToFile --
+# PreferencesUtils::SaveToFile --
 # 
 #       Saves the preferences to a file. Preferences must be stored in
 #       the master copy 'prefs(master)' in the corresponding list format.
@@ -195,7 +190,7 @@ proc ::PreferencesUtils::PreferencesGetValue {varName resourceName defValue} {
 # Results:
 #       preference file written. 
 
-proc ::PreferencesUtils::PreferencesSaveToFile { } {
+proc ::PreferencesUtils::SaveToFile { } {
     global prefs this
 
     # Work on a temporary file and switch later.
@@ -237,7 +232,7 @@ proc ::PreferencesUtils::PreferencesSaveToFile { } {
     }
 }
 
-# PreferencesUtils::PreferencesResetToFactoryDefaults --
+# PreferencesUtils::ResetToFactoryDefaults --
 # 
 #       Resets the preferences in 'prefs(master)' to their hardcoded values.
 #
@@ -248,7 +243,7 @@ proc ::PreferencesUtils::PreferencesSaveToFile { } {
 # Results:
 #       prefs values may change, and user interface stuff updated. 
 
-proc ::PreferencesUtils::PreferencesResetToFactoryDefaults {maxPriority} {
+proc ::PreferencesUtils::ResetToFactoryDefaults {maxPriority} {
     global  prefs
     
     variable priNameToNum
@@ -272,7 +267,7 @@ proc ::PreferencesUtils::PreferencesResetToFactoryDefaults {maxPriority} {
     }
 }
 
-# PreferencesUtils::PreferencesResetToUserDefaults --
+# PreferencesUtils::ResetToUserDefaults --
 # 
 #       Resets the applications state to correspond to the existing
 #       preference file.
@@ -282,7 +277,7 @@ proc ::PreferencesUtils::PreferencesResetToFactoryDefaults {maxPriority} {
 # Results:
 #       prefs values may change, and user interface stuff updated. 
 
-proc ::PreferencesUtils::PreferencesResetToUserDefaults { } {
+proc ::PreferencesUtils::ResetToUserDefaults { } {
     global  prefs
 	
     # Need to make a temporary storage in order not to duplicate items.
@@ -290,8 +285,8 @@ proc ::PreferencesUtils::PreferencesResetToUserDefaults { } {
     set prefs(master) {}
     
     # Read the user option database file once again.
-    PreferencesInit
-    PreferencesAdd $thePrefs
+    Init
+    Add $thePrefs
 }
 
 # PreferencesUtils::SetWidgetDefaultOptions --
@@ -376,10 +371,9 @@ proc ::PreferencesUtils::SetWidgetDefaultOptions { } {
 # Note: it may prove useful to have the versions numbers as the first elements!
 
 proc ::PreferencesUtils::SetUserPreferences { } {
-    global  prefs dims state mime2Description mimeTypeIsText mime2SuffixList \
-      mimeTypeDoWhat
+    global  prefs dims state
     
-    ::PreferencesUtils::PreferencesAdd [list  \
+    ::PreferencesUtils::Add [list  \
       [list prefs(majorVers)       prefs_majorVers       $prefs(majorVers)       absolute] \
       [list prefs(minorVers)       prefs_minorVers       $prefs(minorVers)       absolute] \
       [list prefs(canvasFonts)     prefs_canvasFonts     $prefs(canvasFonts)]    \
@@ -424,19 +418,21 @@ proc ::PreferencesUtils::SetUserPreferences { } {
       [list state(visToolbar)      state_visToolbar      $state(visToolbar)]  ]
     
     # All MIME type stuff... The problem is that they are all arrays... 
-    # Invented the ..._array resource specifier!
-    
-    PreferencesAdd [list  \
-      [list mime2Description       mime2Description_array        [array get mime2Description]]   \
-      [list mimeTypeIsText         mimeTypeIsText_array          [array get mimeTypeIsText]]     \
-      [list mime2SuffixList        mime2SuffixList_array         [array get mime2SuffixList]]    \
-      [list mimeTypeDoWhat         mimeTypeDoWhat_array          [array get mimeTypeDoWhat]] ]
+    # Invented the ..._array resource specifier!    
+    # We should have used accesor functions and not direct access to internal 
+    # arrays. Sorry for this.
+    # 
+    ::PreferencesUtils::Add [list  \
+      [list ::Types::mime2Desc     mime2Desc_array         [::Types::GetDescriptionArr]] \
+      [list ::Types::mimeIsText    mimeTypeIsText_array    [::Types::GetIsMimeTextArr]]  \
+      [list ::Types::mime2SuffList mime2SuffixList_array   [::Types::GetSuffixListArr]]  \
+      [list ::Plugins::mimeTypeDoWhat mimeTypeDoWhat_array [::Plugins::GetDoWhatForMimeArr]] ]
     
     # And continue with the jabber preferences... 
     
     set ver $prefs(fullVers)
     if {!$prefs(stripJabber)} {
-	PreferencesAdd [list  \
+	::PreferencesUtils::Add [list  \
 	  [list ::Jabber::jprefs(port)             jprefs_port              $::Jabber::jprefs(port)]  \
 	  [list ::Jabber::jprefs(sslport)          jprefs_sslport           $::Jabber::jprefs(sslport)]  \
 	  [list ::Jabber::jprefs(rost,clrLogout)   jprefs_rost_clrRostWhenOut $::Jabber::jprefs(rost,clrLogout)]  \
@@ -461,6 +457,7 @@ proc ::PreferencesUtils::SetUserPreferences { } {
 	  [list ::Jabber::jprefs(showMsgNewWin)    jprefs_showMsgNewWin     $::Jabber::jprefs(showMsgNewWin)]  \
 	  [list ::Jabber::jprefs(inbox2click)      jprefs_inbox2click       $::Jabber::jprefs(inbox2click)]  \
 	  [list ::Jabber::jprefs(inboxSave)        jprefs_inboxSave         $::Jabber::jprefs(inboxSave)]  \
+	  [list ::Jabber::jprefs(prefgchatproto)   jprefs_prefgchatproto    $::Jabber::jprefs(prefgchatproto)]  \
 	  [list ::Jabber::jprefs(autoaway)         jprefs_autoaway          $::Jabber::jprefs(autoaway)]  \
 	  [list ::Jabber::jprefs(xautoaway)        jprefs_xautoaway         $::Jabber::jprefs(xautoaway)]  \
 	  [list ::Jabber::jprefs(awaymin)          jprefs_awaymin           $::Jabber::jprefs(awaymin)]  \
@@ -482,7 +479,7 @@ proc ::PreferencesUtils::SetUserPreferences { } {
 	      ::Jabber::jprefs(iq:register,$key) jprefs_iq_register_$key   \
 	      $::Jabber::jprefs(iq:register,$key) userDefault]
 	}
-	::PreferencesUtils::PreferencesAdd $jprefsRegList
+	::PreferencesUtils::Add $jprefsRegList
     }
     
     # Map list of win geoms into an array.

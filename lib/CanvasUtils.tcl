@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.5 2003-04-28 13:32:32 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.6 2003-05-18 13:20:21 matben Exp $
 
 package provide CanvasUtils 1.0
 package require sha1pure
@@ -21,7 +21,8 @@ namespace eval ::CanvasUtils:: {
 proc ::CanvasUtils::Init { } {
     global  this internalIPname prefs env
     variable utaguid
-    variable utagPref
+    variable utagpref
+    variable utagpref2
     variable importAnchor
     
     # Present anchor coordinates when importing images and movies.
@@ -44,16 +45,25 @@ proc ::CanvasUtils::Init { } {
     }
     
     # Unique tag prefix for items created by this client.
-    set utagPref $this(hostname)
-    if {$utagPref == ""} {
-        set utagPref $internalIPname
+    set utagpref $this(hostname)
+    if {$utagpref == ""} {
+        set utagpref $internalIPname
+    }
+    
+    # Incompatible change!!!
+    if {$this(ipver) == 4} {
+	set utagpref2 "u[eval {format %02x%02x%02x%02x} [split $this(ipnum) .]]"
+    } else {
+	
+	# Needs to be investigated!
+	set utagpref2 "u[join [split $this(ipnum) :] ""]"
     }
     
     # On multiuser platforms (unix) prepend the user name; no spaces allowed.
     if {[string equal $this(platform) "unix"] && [info exists env(USER)]} {
         set user $this(username)
         regsub -all " " $user "" user
-        set utagPref ${user}@${utagPref}
+        set utagpref ${user}@${utagpref}
     }
 }
 
@@ -156,12 +166,16 @@ proc ::CanvasUtils::GenCommandExList {wtop cmdExList} {
 
 proc ::CanvasUtils::NewUtag {{doincr 1}} {
     variable utaguid
-    variable utagPref
+    variable utagpref
+    variable utagpref2
     
     if {$doincr} {
         incr utaguid
     }
-    return ${utagPref}/${utaguid}
+    
+    # Incompatible change!
+    return ${utagpref}/${utaguid}
+    #return ${utagpref2}/${utaguid}
 }
 
 # CanvasUtils::GetUtag --
@@ -182,32 +196,41 @@ proc ::CanvasUtils::NewUtag {{doincr 1}} {
 
 proc ::CanvasUtils::GetUtag {c fromWhat {force 0}} {
     global  prefs
-    variable utagPref
+    variable utagpref
+    variable utagpref2
     
-    # Find the 'itno'.
+    # Find the 'utag'.
     set pre_ {[^/ ]+}
-    set digit_ {[0-9]}
+    set digits_ {[0-9]+}
     set wild_ {[xX]+}
+    set utagpre_ ${wild_}|${utagpref}|${utagpref2}
+    
     if {[string equal $fromWhat "current"]} {
-        set tcurr [$c gettags current]
+        set tags [$c gettags current]
     } elseif {[string equal $fromWhat "focus"]} {
-        set tcurr [$c gettags [$c focus]]
+        set tags [$c gettags [$c focus]]
     } else {
-        set tcurr [$c gettags $fromWhat]
+        set tags [$c gettags $fromWhat]
     }
-    if {$tcurr == ""} {
-        return {}
+    if {$tags == ""} {
+        return ""
     }
     if {$prefs(privacy) && !$force} {
-        if {[regexp "(($wild_|$utagPref)/$digit_+)" "$tcurr" utag] == 0} {
-            return {}
-        }
+	
+	# Need to be compatible with both 'utagpref' and 'utagpref2'!
+	# Introduced with 0.94.4
+        if {[regexp "((${utagpre_})/${digits_})" $tags utag]} {
+	    return $utag
+        } else {
+	    return ""
+	}
     } else {
-        if {[regexp "(^| )($pre_/$digit_+)" "$tcurr" junk junk2 utag] == 0} {
-            return {}
-        }
+        if {[regexp "(^| )(${pre_}/${digits_})" $tags m junk utag]} {
+	    return $utag
+        } else {
+	    return ""
+	}
     }
-    return $utag
 }
 
 # CanvasUtils::GetUtagPrefix --
@@ -215,8 +238,9 @@ proc ::CanvasUtils::GetUtag {c fromWhat {force 0}} {
 #       Returns the unique tag prefix for this client.
 
 proc ::CanvasUtils::GetUtagPrefix { } {
-    variable utagPref
-    return $utagPref
+    variable utagpref
+    
+    return $utagpref
 }
 
 # CanvasUtils::GetUtagFromCmd --

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.4 2003-04-28 13:32:29 matben Exp $
+# $Id: NewMsg.tcl,v 1.5 2003-05-18 13:20:20 matben Exp $
 
 package provide NewMsg 1.0
 
@@ -261,8 +261,8 @@ $opts(-forwardmessage)"
 	$waddcan configure -width $width -height $height -yscrollincrement $hline
     } $frport $waddcan $wspacer]
     after idle $script
-    bind $frport <Configure> [list ::Jabber::NewMsg::AddrResize $w]
-    bind $waddcan <Configure> [list ::Jabber::NewMsg::ResizeCan $w]
+    bind $frport <Configure> [list [namespace current]::AddrResize $w]
+    bind $waddcan <Configure> [list [namespace current]::ResizeCan $w]
     
     if {[info exists prefs(winGeom,$w)]} {
 	wm geometry $w $prefs(winGeom,$w)

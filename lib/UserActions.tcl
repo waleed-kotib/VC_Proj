@@ -7,14 +7,10 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UserActions.tcl,v 1.5 2003-04-28 13:32:36 matben Exp $
+# $Id: UserActions.tcl,v 1.6 2003-05-18 13:20:22 matben Exp $
 
 namespace eval ::UserActions:: {
     
-    namespace export   \
-       SavePostscript  \
-       DoEraseAll DoPutCanvasDlg DoPutCanvas   \
-      DoGetCanvas
 }
 
 # UserActions::CancelAllPutGetAndPendingOpen ---
@@ -33,13 +29,13 @@ proc ::UserActions::CancelAllPutGetAndPendingOpen {wtop} {
 
     # This must be instance specific!!!
     ::PutFileIface::CancelAllWtop $wtop
-    ::GetFile::CancelAllWtop $wtop
+    ::GetFileIface::CancelAllWtop $wtop
     if {[string equal $prefs(protocol) "jabber"]} {
-	::Network::OpenConnectionKillAll
+	::Network::KillAll
 	::UI::SetStatusMessage $wtop {}
 	::UI::StartStopAnimatedWave $wapp(statmess) 0
     } else {
-	OpenCancelAllPending
+	::OpenConnection::OpenCancelAllPending
     }
 }
 
@@ -255,7 +251,7 @@ proc ::UserActions::DoPrintCanvas {wtop} {
     
     switch -- $this(platform) {
 	macintosh {
-	    SavePostscript $wtop
+	    ::UserActions::SavePostscript $wtop
 	}
 	windows {
 	    if {!$prefs(printer)} {
@@ -842,7 +838,7 @@ proc ::UserActions::DoQuit {args} {
     }
     
     # Save to the preference file and quit...
-    PreferencesSaveToFile
+    ::PreferencesUtils::SaveToFile
     exit
 }
 

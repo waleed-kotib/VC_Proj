@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: setupassistant.tcl,v 1.1.1.1 2002-12-08 10:56:20 matben Exp $
+# $Id: setupassistant.tcl,v 1.2 2003-05-18 13:20:20 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -597,7 +597,7 @@ proc ::setupassistant::DestroyHandler {w} {
     }
 
     # Remove the namespace with the widget.
-    if {[string compare [winfo class $w] {SetupAssistant}] == 0} {
+    if {[string equal [winfo class $w] "SetupAssistant"]} {
 	namespace delete ::setupassistant::${w}
     }
 }

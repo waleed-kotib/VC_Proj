@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.5 2003-04-28 13:32:32 matben Exp $
+# $Id: Preferences.tcl,v 1.6 2003-05-18 13:20:21 matben Exp $
  
 package require notebook
 package require tree
@@ -201,9 +201,8 @@ proc ::Preferences::Build {w} {
 	::Preferences::BuildPageRoster $frprost
 	
 	# Conference page ------------------------------------------------------
-	set frpgroup [$nbframe page {Conference}]
-	label $frpgroup.msg -text "Something on Conference page."
-	pack $frpgroup.msg -side left -expand yes -pady 8
+	set frpconf [$nbframe page {Conference}]
+	::Preferences::BuildPageConf $frpconf
 	
 	# Blockers page --------------------------------------------------------
 	set frbl [$nbframe page {Blockers}]    
@@ -395,7 +394,7 @@ proc ::Preferences::BuildPageSounds {page} {
     pack $labpsp.speakmsg -side top -anchor w -padx 10 -pady $ypad
     pack $labpsp.speakchat -side top -anchor w -padx 10 -pady $ypad
     
-    if {$prefs(TclSpeech) || $prefs(MSSpeech)} {
+    if {[::Plugins::HavePackage TclSpeech] || [::Plugins::HavePackage MSSpeech]} {
 	
 	# Get a list of voices
 	set voicelist "None [::UserActions::SpeakGetVoices]"
@@ -422,7 +421,7 @@ proc ::Preferences::BuildPageSounds {page} {
     
     grid $labpsp.fr.in $wpopin -sticky w -pady 1
     grid $labpsp.fr.out $wpopout -sticky w -pady 1
-    if {!$prefs(TclSpeech) && !$prefs(MSSpeech)} {
+    if {![::Plugins::HavePackage TclSpeech] && ![::Plugins::HavePackage MSSpeech]} {
 	$wpopin configure -state disabled
 	$wpopout configure -state disabled
     }    
@@ -734,6 +733,27 @@ proc ::Preferences::BuildPageRoster {page} {
       -side top -anchor w -pady $ypad -padx 10
 }
 
+proc ::Preferences::BuildPageConf {page} {
+    global  sysFont
+
+    variable tmpJPrefs
+    variable ypad 
+
+    # Conference (groupchat) stuff.
+    set labfr [LabeledFrame2 $page.fr [::msgcat::mc {Preferred Protocol}]]
+    pack $page.fr -side top -anchor w
+    set pbl [frame $labfr.frin]
+    pack $pbl -padx 10 -pady 6 -side left
+    
+    foreach val {gc-1.0 conference muc}   \
+      txt {{Groupchat-1.0 (fallback)} Conference {Multi user chat (MUC)}} {
+	set wrad ${pbl}.[string map {. ""} $val]
+	radiobutton $wrad -text [::msgcat::mc $txt] -value $val  \
+	  -variable [namespace current]::tmpJPrefs(prefgchatproto)	      
+	grid $wrad -sticky w -pady $ypad
+    }
+}
+
 proc ::Preferences::BuildPagePersInfo {page} {
     global  sysFont
 
@@ -898,7 +918,7 @@ namespace eval ::Preferences::Plugins:: {
 }
 
 proc ::Preferences::Plugins::BuildPage {page} {
-    global  plugin sysFont prefs
+    global  sysFont prefs
 
     upvar ::Preferences::ypad ypad
 
@@ -908,13 +928,10 @@ proc ::Preferences::Plugins::BuildPage {page} {
     pack $pbl -padx 10 -pady 6 -side left
 
     set i 0
-    foreach packName $plugin(allPacks) {
-	if {[info exists prefs($packName)] && ($prefs($packName) == 1)} {
-	    checkbutton $pbl.c$i -anchor w  \
-	      -text "   $plugin($packName,full)" -pady $ypad
-	    grid $pbl.c$i -sticky w
-	    incr i
-	}
+    foreach packName [::Plugins::GetAllPackages loaded] {
+	checkbutton $pbl.c$i -anchor w -text "   $packName" -pady $ypad
+	grid $pbl.c$i -sticky w
+	incr i
     }
 }
 
@@ -1179,7 +1196,6 @@ namespace eval ::Preferences::FileMap:: {
     variable finishedInspect
         
     # Temporary local copy of Mime types to edit.
-    variable tmpAllMimeTypes
     variable tmpMime2Description
     variable tmpMimeTypeIsText
     variable tmpMime2SuffixList
@@ -1188,10 +1204,8 @@ namespace eval ::Preferences::FileMap:: {
 }
 
 proc ::Preferences::FileMap::BuildPage {page} {
-    global  sysFont prefs mime2Description prefMimeType2Package  \
-      mimeTypeIsText mime2SuffixList mimeTypeDoWhat plugin wDlgs
+    global  sysFont prefs  wDlgs
 
-    variable tmpAllMimeTypes
     variable tmpMime2Description
     variable tmpMimeTypeIsText
     variable tmpMime2SuffixList
@@ -1204,12 +1218,11 @@ proc ::Preferences::FileMap::BuildPage {page} {
     # Cancel button. The MIME type works as a key in our database
     # (arrays) of various features.
 
-    set tmpAllMimeTypes [array names mime2Description]
-    array set tmpMime2Description [array get mime2Description]
-    array set tmpMimeTypeIsText [array get mimeTypeIsText]
-    array set tmpMime2SuffixList [array get mime2SuffixList]
-    array set tmpMimeTypeDoWhat [array get mimeTypeDoWhat]
-    array set tmpPrefMimeType2Package [array get prefMimeType2Package]
+    array set tmpMime2Description [::Types::GetDescriptionArr]
+    array set tmpMimeTypeIsText [::Types::GetIsMimeTextArr]
+    array set tmpMime2SuffixList [::Types::GetSuffixListArr]
+    array set tmpMimeTypeDoWhat [::Plugins::GetDoWhatForMimeArr]
+    array set tmpPrefMimeType2Package [::Plugins::GetPreferredPackageArr]
     
     # Frame for everything inside the labeled container.
     set wcont1 [LabeledFrame2 $page.frtop [::msgcat::mc preffmhelp]]
@@ -1223,6 +1236,7 @@ proc ::Preferences::FileMap::BuildPage {page} {
     # Keep an invisible index column with index as a tag.
     set colDef [list 0 [::msgcat::mc Description] 0 [::msgcat::mc {Handled By}] 0 ""]
     set wmclist $fr1.mclist
+    set ns [namespace current]
     
     tablelist::tablelist $wmclist  \
       -columns $colDef -font $sysFont(s) -labelfont $sysFont(s)  \
@@ -1241,16 +1255,15 @@ proc ::Preferences::FileMap::BuildPage {page} {
         
     # Insert all MIME types.
     set i 0
-    foreach mime $tmpAllMimeTypes {
-	set doWhat $tmpMimeTypeDoWhat($mime)
-	if {![regexp {(unavailable|reject|save|ask)} $doWhat] &&  \
-	  [info exists plugin($doWhat,icon,12)]} {
-	    $wmclist insert end [list " $tmpMime2Description($mime)"  \
-	      $plugin($doWhat,full) $mime]
-	    $wmclist cellconfigure "$i,1" -image $plugin($doWhat,icon,12)
+    foreach mime [::Types::GetAllMime] {
+	set doWhat [::Plugins::GetDoWhatForMime $mime]
+	set icon [::Plugins::GetIconForPackage $doWhat 12]
+	set desc [::Types::GetDescriptionForMime $mime]
+	if {![regexp {(unavailable|reject|save|ask)} $doWhat] && ($icon != "")} {
+	    $wmclist insert end [list " $desc" $doWhat $mime]
+	    $wmclist cellconfigure "$i,1" -image $icon
 	} else {
-	    $wmclist insert end [list " $tmpMime2Description($mime)"  \
-	      "     $plugin($doWhat,full)" $mime]
+	    $wmclist insert end [list " $desc" "     $doWhat" $mime]
 	}
 	incr i
     }    
@@ -1264,9 +1277,9 @@ proc ::Preferences::FileMap::BuildPage {page} {
       \[$wmclist curselection]"
     button $frbt.change -text "[::msgcat::mc Edit]..." -font $sysFont(s)  \
       -state disabled -width 8 -padx $xpadbt -command  \
-      "::Preferences::FileMap::Inspect $wDlgs(fileAssoc) edit $wmclist \[$wmclist curselection]"
+      "${ns}::Inspect $wDlgs(fileAssoc) edit $wmclist \[$wmclist curselection]"
     button $frbt.add -text "[::msgcat::mc New]..." -font $sysFont(s) -width 8 -padx $xpadbt \
-      -command [list ::Preferences::FileMap::Inspect .setass new $wmclist -1]
+      -command [list ${ns}::Inspect .setass new $wmclist -1]
     pack $frbt.rem $frbt.change $frbt.add -side right -padx 5 -pady 5
     
     # Special bindings for the tablelist.
@@ -1295,22 +1308,20 @@ proc ::Preferences::FileMap::DeleteAssociation {wmclist {indSel {}}} {
     variable tmpMime2Description
     variable tmpMimeTypeIsText
     variable tmpMime2SuffixList
-    variable tmpAllMimeTypes
     variable tmpPrefMimeType2Package
 
     if {$indSel == ""} {
 	return
     }
-    foreach {name pack theMime} [lrange [$wmclist get $indSel] 0 2] { break }
+    foreach {name pack mime} [lrange [$wmclist get $indSel] 0 2] { break }
     $wmclist delete $indSel
-    catch {unset tmpMime2Description($theMime)}
-    catch {unset tmpMimeTypeIsText($theMime)}
-    catch {unset tmpMime2SuffixList($theMime)}
-    catch {unset tmpPrefMimeType2Package($theMime)}
+    catch {unset tmpMime2Description($mime)}
+    catch {unset tmpMimeTypeIsText($mime)}
+    catch {unset tmpMime2SuffixList($mime)}
+    catch {unset tmpPrefMimeType2Package($mime)}
     
     # Select the next one
     $wmclist selection set $indSel
-    set tmpAllMimeTypes [lreplace $tmpAllMimeTypes $indSel $indSel]
 }    
 
 # ::Preferences::FileMap::SaveAssociations --
@@ -1324,23 +1335,21 @@ proc ::Preferences::FileMap::DeleteAssociation {wmclist {indSel {}}} {
 #       None.
 
 proc ::Preferences::FileMap::SaveAssociations { } {
-    global  mime2Description mime2SuffixList mimeTypeIsText mimeTypeDoWhat \
-      prefMimeType2Package
-    
     variable tmpMime2Description
     variable tmpMimeTypeIsText
     variable tmpMime2SuffixList
     variable tmpMimeTypeDoWhat
     variable tmpPrefMimeType2Package
+        
+    ::Types::SetDescriptionArr tmpMime2Description
+    ::Types::SetSuffixListArr tmpMime2SuffixList
+    ::Types::SetIsMimeTextArr tmpMimeTypeIsText
+    ::Plugins::SetDoWhatForMimeArr tmpMimeTypeDoWhat
+    ::Plugins::SetPreferredPackageArr tmpPrefMimeType2Package
     
-    unset mime2Description mime2SuffixList mimeTypeIsText mimeTypeDoWhat \
-      prefMimeType2Package
-    
-    array set mime2Description [array get tmpMime2Description]
-    array set mimeTypeIsText [array get tmpMimeTypeIsText]
-    array set mime2SuffixList [array get tmpMime2SuffixList]
-    array set mimeTypeDoWhat [array get tmpMimeTypeDoWhat]
-    array set prefMimeType2Package [array get tmpPrefMimeType2Package]
+    # Do some consistency checks.
+    ::Types::VerifyInternal
+    ::Plugins::VerifyPackagesForMimeTypes
 }
     
 # ::Preferences::FileMap::Inspect --
@@ -1357,7 +1366,7 @@ proc ::Preferences::FileMap::SaveAssociations { } {
 #       Dialog is displayed.
 
 proc ::Preferences::FileMap::Inspect {w doWhat wlist {indSel {}}} {
-    global  sysFont prefs mimeType2Packages plugin this
+    global  sysFont prefs this
     
     variable textVarDesc
     variable textVarMime
@@ -1367,7 +1376,6 @@ proc ::Preferences::FileMap::Inspect {w doWhat wlist {indSel {}}} {
     variable codingVar
     variable finishedInspect
     
-    variable tmpAllMimeTypes
     variable tmpMime2Description
     variable tmpMimeTypeIsText
     variable tmpMime2SuffixList
@@ -1421,14 +1429,12 @@ proc ::Preferences::FileMap::Inspect {w doWhat wlist {indSel {}}} {
 	}
 	
 	# This is for the package menu button.
-	set packageList None
-	set packageVar None
-	if {[info exists mimeType2Packages($mime)]} {
-	    set packageVar $plugin($tmpPrefMimeType2Package($mime),full)
-	    set packageList {}
-	    foreach packName $mimeType2Packages($mime) {
-		eval lappend packageList [list $plugin($packName,full)]
-	    }
+	set packageList [::Plugins::GetPackageListForMime $mime]
+	if {[llength $packageList] > 0} {		    
+	    set packageVar $tmpPrefMimeType2Package($mime)
+	} else {
+	    set packageList None
+	    set packageVar None
 	}
     } elseif {$doWhat == "new"} {
 	set textVarMime {}
@@ -1484,8 +1490,9 @@ proc ::Preferences::FileMap::Inspect {w doWhat wlist {indSel {}}} {
     radiobutton $fr2.x3 -text " [::msgcat::mc {Import using}]:  "  \
       -variable [namespace current]::receiveVar -value import
     
-    set wMenu [eval tk_optionMenu $fr2.opt [namespace current]::packageVar  \
-      $packageList]
+    set wMenu [eval {
+	tk_optionMenu $fr2.opt [namespace current]::packageVar
+    } $packageList]
     $wMenu configure -font $sysFont(sb) 
     $fr2.opt configure -font $sysFont(sb) -highlightthickness 0  \
       -background $prefs(bgColGeneral) -foreground black
@@ -1502,7 +1509,7 @@ proc ::Preferences::FileMap::Inspect {w doWhat wlist {indSel {}}} {
     # If we dont have any registered packages for this MIME, disable this
     # option.
     
-    if {($doWhat == "edit") && ![info exists mimeType2Packages($mime)]} {
+    if {($doWhat == "edit") && ($packageList == "None")} {
 	$fr2.x3 configure -state disabled
 	$fr2.opt configure -state disabled
     }
@@ -1552,7 +1559,6 @@ proc ::Preferences::FileMap::Inspect {w doWhat wlist {indSel {}}} {
 #       Modifies the tmp... variables for one MIME type.
 
 proc ::Preferences::FileMap::SaveThisAss {wlist indSel} {
-    global  plugin
     
     # Variables for entries etc.
     variable textVarDesc
@@ -1564,7 +1570,6 @@ proc ::Preferences::FileMap::SaveThisAss {wlist indSel} {
     variable finishedInspect
     
     # The temporary copies of the MIME associations.
-    variable tmpAllMimeTypes
     variable tmpMime2Description
     variable tmpMimeTypeIsText
     variable tmpMime2SuffixList
@@ -1580,7 +1585,10 @@ proc ::Preferences::FileMap::SaveThisAss {wlist indSel} {
     
     # Put this specific MIME type associations in the tmp arrays.
     set tmpMime2Description($textVarMime) $textVarDesc
-	
+    if {$packageVar == "None"} {
+	set tmpPrefMimeType2Package($textVarMime) ""
+    }
+    
     # Map from the correct radiobutton alternative.
     switch -- $receiveVar {
 	reject {
@@ -1611,27 +1619,22 @@ proc ::Preferences::FileMap::SaveThisAss {wlist indSel} {
 
 	# New association.
 	set indInsert end
-	lappend tmpAllMimeTypes $textVarMime	
     } else {
 	
 	# Delete old, add new below.
 	$wlist delete $indSel
 	set indInsert $indSel
-	set ind [lsearch $tmpAllMimeTypes $textVarMime]
-	if {$ind >= 0} {
-	    set tmpAllMimeTypes [lreplace $tmpAllMimeTypes $ind $ind $textVarMime]
-	}
-    }
-    
+    }	
+	
     set doWhat $tmpMimeTypeDoWhat($textVarMime)
-    if {![regexp {(unavailable|reject|save|ask)} $doWhat] &&  \
-      [info exists plugin($doWhat,icon,12)]} {
+    set icon [::Plugins::GetIconForPackage $doWhat 12]
+    if {![regexp {(unavailable|reject|save|ask)} $doWhat] && ($icon != "")} {
 	$wlist insert $indInsert [list " $tmpMime2Description($textVarMime)" \
-	  $plugin($doWhat,full) $textVarMime]
-	$wlist cellconfigure "$indInsert,1" -image $plugin($doWhat,icon,12)
+	  $doWhat $textVarMime]
+	$wlist cellconfigure "$indInsert,1" -image $icon
     } else {
 	$wlist insert $indInsert [list " $tmpMime2Description($textVarMime)" \
-	  "     $plugin($doWhat,full)" $textVarMime]
+	  "     $doWhat" $textVarMime]
     }
     if {$indSel >= 0} {
 	$wlist selection set $indSel
@@ -1641,24 +1644,30 @@ proc ::Preferences::FileMap::SaveThisAss {wlist indSel} {
     set finishedInspect 1
 }
 
+# Preferences::FileMap::IsAnythingChangedQ --
+# 
+#       Returns 1 if any of the mime settings was changed, and 0 else.
+
 proc ::Preferences::FileMap::IsAnythingChangedQ { } {
-    global  mime2Description mime2SuffixList mimeTypeIsText mimeTypeDoWhat
-    
     variable tmpMime2Description
     variable tmpMimeTypeIsText
     variable tmpMime2SuffixList
     variable tmpMimeTypeDoWhat
-    
-    set allMimeList [lsort [array names mime2Description]]
+
+    set allMimeList [lsort [::Types::GetAllMime]]
     set tmpAllMimeList [lsort [array names tmpMime2Description]]
     if {$allMimeList != $tmpAllMimeList} {
 	return 1
     }
-    foreach key $allMimeList {	
-	if {($mime2Description($key) != $tmpMime2Description($key)) ||  \
-	  ($mime2SuffixList($key) != $tmpMime2SuffixList($key)) ||  \
-	  ($mimeTypeIsText($key) != $tmpMimeTypeIsText($key)) ||  \
-	  ($mimeTypeDoWhat($key) != $tmpMimeTypeDoWhat($key))} {
+    foreach m $allMimeList {	
+	set doWhat [::Plugins::GetDoWhatForMime $m]
+	set desc [::Types::GetDescriptionForMime $m]
+	set suffList [::Types::GetSuffixListForMime $m]
+	set isText [::Types::IsMimeText $m]
+	if {($desc != $tmpMime2Description($m)) ||  \
+	  ($suffList != $tmpMime2SuffixList($m)) ||  \
+	  ($isText != $tmpMimeTypeIsText($m)) ||  \
+	  ($doWhat != $tmpMimeTypeDoWhat($m))} {
 	    return 1
 	}
     }
@@ -1809,7 +1818,7 @@ proc ::Preferences::NetSetup::UpdateUI { } {
 	    
 	    # We are only a client.
 	    ::UI::MenuMethod .menu.file entryconfigure mOpenConnection  \
-	      -command [list OpenConnection $wDlgs(openConn)]
+	      -command [list ::OpenConnection::OpenConnection $wDlgs(openConn)]
 	    .menu entryconfigure *Jabber* -state disabled
 	    
 	    # Hide our combination window.
@@ -1817,7 +1826,7 @@ proc ::Preferences::NetSetup::UpdateUI { } {
 	}
 	default {
 	    ::UI::MenuMethod .menu.file entryconfigure mOpenConnection   \
-	      -command [list OpenConnection $wDlgs(openConn)]
+	      -command [list ::OpenConnection::OpenConnection $wDlgs(openConn)]
 	    if {!$prefs(stripJabber)} {
 		.menu entryconfigure *Jabber* -state disabled
 		
@@ -2132,10 +2141,10 @@ proc ::Preferences::Shorts::AddOrEdit {what} {
     focus $frtot.ent1
     
     # Get the short pair to edit.
-    if {[string compare $what "edit"] == 0} {
+    if {[string equal $what "edit"]} {
 	set shortTextVar [lindex [lindex $tmpPrefs(shortcuts) $indShortcuts] 0]
 	set longTextVar [lindex [lindex $tmpPrefs(shortcuts) $indShortcuts] 1]
-    } elseif {[string compare $what "add"] == 0} {
+    } elseif {[string equal $what "add"]} {
 	
     }
     
@@ -2473,10 +2482,10 @@ proc ::Preferences::SavePushBt { } {
     }
     
     # Reset file cache doesn't hurt.
-    ::FileCache::SetBestBefore $prefs(checkCache) $prefs(incomingFilePath)
+    ::FileCache::SetBestBefore $prefs(checkCache) $prefs(incomingPath)
     
     # Save the preference file.
-    PreferencesSaveToFile
+    ::PreferencesUtils::SaveToFile
     
     set finished 1
 }

@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: muc.tcl,v 1.2 2003-02-24 17:52:09 matben Exp $
+# $Id: muc.tcl,v 1.3 2003-05-18 13:20:21 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -27,11 +27,11 @@
 #      jlibName muc getaffilation roomjid affilation callback
 #      jlibName muc getrole roomjid role callback
 #      jlibName muc getroom roomjid callback
-#      jlibName muc setnick roomjid nick ?-command?
 #      jlibName muc invite roomjid jid ?-reason?
 #      jlibName muc mynick roomjid
-#      jlibName muc setrole roomjid nick role ?-command, -reason?
 #      jlibName muc setaffilation roomjid nick affilation ?-command, -reason?
+#      jlibName muc setnick roomjid nick ?-command?
+#      jlibName muc setrole roomjid nick role ?-command, -reason?
 #      jlibName muc setroom roomjid type ?-command, -form?
 #      
 ############################# CHANGES ##########################################
@@ -45,18 +45,11 @@ namespace eval jlib::muc {
     # Globals same for all instances of this jlib.
     #    > 1 prints raw xml I/O
     #    > 2 prints a lot more
-    variable debug 2
+    variable debug 3
     
     variable muc
     set muc(affilationExp) {(owner|admin|member|outcast|none)}
     set muc(roleExp) {(moderator|participant|visitor|none)}
-}
-
-proc jlib::muc::Debug {num str} {
-    variable debug
-    if {$num <= $debug} {
-	puts $str
-    }
 }
   
 # jlib::muc::CommandProc --
@@ -64,24 +57,24 @@ proc jlib::muc::Debug {num str} {
 #       Just dispatches the command to the right procedure.
 #
 # Arguments:
-#       jlibName    name of jabberlib instance.
+#       jlibname    name of jabberlib instance.
 #       cmd         the method.
 #       args        all args to the cmd method.
 #       
 # Results:
 #       from the individual command if any.
 
-proc jlib::muc::CommandProc {jlibName cmd args} {
+proc jlib::muc::CommandProc {jlibname cmd args} {
     
     # Which sub command? Just dispatch the command to the right procedure.
-    return [eval {$cmd $jlibName} $args]
+    return [eval {$cmd $jlibname} $args]
 }
 
 # jlib::muc::enter --
 # 
 # 
 # Arguments:
-#       jlibName    name of jabberlib instance.
+#       jlibname    name of jabberlib instance.
 #       roomjiid
 #       nick        nick name
 #       args        ?-command callbackProc?
@@ -89,8 +82,8 @@ proc jlib::muc::CommandProc {jlibName cmd args} {
 # Results:
 #       none.
 
-proc jlib::muc::enter {jlibName roomjid nick args} {
-    upvar [namespace current]::${jlibName}::cache cache    
+proc jlib::muc::enter {jlibname roomjid nick args} {
+    upvar [namespace current]::${jlibname}::cache cache    
     
     set opts {}
     foreach {name value} $args {
@@ -106,7 +99,7 @@ proc jlib::muc::enter {jlibName roomjid nick args} {
     set jid ${roomjid}/${nick}
     set xelem [wrapper::createtag "x"  \
       -attrlist {xmlns "http://jabber.org/protocol/muc"}]
-    eval {[namespace parent]::send_presence $jlibName -to $jid  \
+    eval {[namespace parent]::send_presence $jlibname -to $jid  \
       -xlist [list $xelem]} $opts
     set cache($roomjid,mynick) $nick
 }
@@ -115,11 +108,11 @@ proc jlib::muc::enter {jlibName roomjid nick args} {
 # 
 # 
 
-proc jlib::muc::exit {jlibName roomjid nick} {
-    upvar [namespace current]::${jlibName}::cache cache    
+proc jlib::muc::exit {jlibname roomjid nick} {
+    upvar [namespace current]::${jlibname}::cache cache    
     
     set jid ${roomjid}/${nick}
-    [namespace parent]::send_presence $jlibName -to $jid -type "unavailable"
+    [namespace parent]::send_presence $jlibname -to $jid -type "unavailable"
     catch {unset cache($roomjid,mynick)}
 }
 
@@ -127,8 +120,8 @@ proc jlib::muc::exit {jlibName roomjid nick} {
 # 
 # 
 
-proc jlib::muc::setnick {jlibName roomjid nick args} {
-    upvar [namespace current]::${jlibName}::cache cache    
+proc jlib::muc::setnick {jlibname roomjid nick args} {
+    upvar [namespace current]::${jlibname}::cache cache    
     
     set opts {}
     foreach {name value} $args {
@@ -142,7 +135,7 @@ proc jlib::muc::setnick {jlibName roomjid nick args} {
 	}
     }
     set jid ${roomjid}/${nick}
-    eval {[namespace parent]::send_presence $jlibName -to $jid} $opts
+    eval {[namespace parent]::send_presence $jlibname -to $jid} $opts
     set cache($roomjid,mynick) $nick
 }
 
@@ -150,7 +143,7 @@ proc jlib::muc::setnick {jlibName roomjid nick args} {
 # 
 # 
 
-proc jlib::muc::invite {jlibName roomjid jid args} {
+proc jlib::muc::invite {jlibname roomjid jid args} {
     
     set children {}
     foreach {name value} $args {
@@ -169,7 +162,7 @@ proc jlib::muc::invite {jlibName roomjid jid args} {
     
     set xelem [wrapper::createtag "x" -subtags $invite  \
       -attrlist {xmlns "http://jabber.org/protocol/muc#user"}]
-    [namespace parent]::send_message $jlibName $roomjid  \
+    [namespace parent]::send_message $jlibname $roomjid  \
       -xlist [list $xelem]
 }
 
@@ -177,7 +170,7 @@ proc jlib::muc::invite {jlibName roomjid jid args} {
 # 
 # 
 
-proc jlib::muc::setrole {jlibName roomjid nick role args} {
+proc jlib::muc::setrole {jlibname roomjid nick role args} {
     variable muc
     
     if {![regexp $muc(roleExp) $role]} {
@@ -188,7 +181,8 @@ proc jlib::muc::setrole {jlibName roomjid nick role args} {
     foreach {name value} $args {
 	switch -- $name {
 	    -command {
-		lappend opts $name $value
+		lappend opts -command  \
+		  [list [namespace parent]::parse_iq_response $jlibname $value]
 	    }
 	    -reason {
 		set subitem [list [wrapper::createtag "reason" -chdata $value]]
@@ -205,7 +199,7 @@ proc jlib::muc::setrole {jlibName roomjid nick role args} {
     set xmllist [wrapper::createtag "query" \
       -attrlist {xmlns "http://jabber.org/protocol/muc#admin"} \
       -subtags $subelements]
-    eval {[namespace parent]::send_iq $jlibName "set" $xmllist -to $roomjid} \
+    eval {[namespace parent]::send_iq $jlibname "set" $xmllist -to $roomjid} \
       $opts
 }
 
@@ -213,7 +207,7 @@ proc jlib::muc::setrole {jlibName roomjid nick role args} {
 # 
 # 
 
-proc jlib::muc::setaffilation {jlibName roomjid nick affilation args} {
+proc jlib::muc::setaffilation {jlibname roomjid nick affilation args} {
     variable muc
     
     if {![regexp $muc(affilationExp) $affilation]} {
@@ -224,7 +218,8 @@ proc jlib::muc::setaffilation {jlibName roomjid nick affilation args} {
     foreach {name value} $args {
 	switch -- $name {
 	    -command {
-		lappend opts $name $value
+		lappend opts -command  \
+		  [list [namespace parent]::parse_iq_response $jlibname $value]
 	    }
 	    -reason {
 		set subitem [list [wrapper::createtag "reason" -chdata $value]]
@@ -241,7 +236,7 @@ proc jlib::muc::setaffilation {jlibName roomjid nick affilation args} {
     set xmllist [wrapper::createtag "query" \
       -attrlist {xmlns "http://jabber.org/protocol/muc#admin"} \
       -subtags $subelements]
-    eval {[namespace parent]::send_iq $jlibName "set" $xmllist -to $roomjid} \
+    eval {[namespace parent]::send_iq $jlibname "set" $xmllist -to $roomjid} \
       $opts
 }
 
@@ -249,7 +244,7 @@ proc jlib::muc::setaffilation {jlibName roomjid nick affilation args} {
 # 
 # 
 
-proc jlib::muc::getrole {jlibName roomjid role callback} {
+proc jlib::muc::getrole {jlibname roomjid role callback} {
     variable muc
     
     if {![regexp $muc(roleExp) $role]} {
@@ -260,15 +255,15 @@ proc jlib::muc::getrole {jlibName roomjid role callback} {
     
     set xmllist [wrapper::createtag "query" -subtags $subelements \
       -attrlist {xmlns "http://jabber.org/protocol/muc#admin"}]
-    [namespace parent]::send_iq $jlibName "get" $xmllist -to $roomjid \
-      -command $callback
+    [namespace parent]::send_iq $jlibname "get" $xmllist -to $roomjid \
+      -command [list [namespace parent]::parse_iq_response $jlibname $callback]
 }
 
 # jlib::muc::getaffilation --
 # 
 # 
 
-proc jlib::muc::getaffilation {jlibName roomjid affilation callback} {
+proc jlib::muc::getaffilation {jlibname roomjid affilation callback} {
     variable muc
     
     if {![regexp $muc(affilationExp) $affilation]} {
@@ -279,21 +274,21 @@ proc jlib::muc::getaffilation {jlibName roomjid affilation callback} {
     
     set xmllist [wrapper::createtag "query" -subtags $subelements \
       -attrlist {xmlns "http://jabber.org/protocol/muc#admin"}]
-    [namespace parent]::send_iq $jlibName "get" $xmllist -to $roomjid \
-      -command $callback
+    [namespace parent]::send_iq $jlibname "get" $xmllist -to $roomjid \
+      -command [list [namespace parent]::parse_iq_response $jlibname $callback]
 }
 
 # jlib::muc::create --
 # 
-# 
+#       The first thing to do when creating a room.
 
-proc jlib::muc::create {jlibName roomjid nick callback} {
-    upvar [namespace current]::${jlibName}::cache cache    
+proc jlib::muc::create {jlibname roomjid nick callback} {
+    upvar [namespace current]::${jlibname}::cache cache    
 
     set jid ${roomjid}/${nick}
     set xelem [wrapper::createtag "x"  \
       -attrlist {xmlns "http://jabber.org/protocol/muc"}]
-    [namespace parent]::send_presence $jlibName -to $jid  \
+    [namespace parent]::send_presence $jlibname -to $jid  \
       -xlist [list $xelem] -command $callback
     set cache($roomjid,mynick) $nick
 }
@@ -301,15 +296,24 @@ proc jlib::muc::create {jlibName roomjid nick callback} {
 # jlib::muc::setroom --
 # 
 # 
+# Arguments:
+#       jlibname    name of jabberlib instance.
+#       roomjid     the rooms jid.
+#       type        typically 'form'.
+#       args        -command, -form.
+#       
+# Results:
+#       None.
 
-proc jlib::muc::setroom {jlibName roomjid type args} {
+proc jlib::muc::setroom {jlibname roomjid type args} {
 
     set opts {}
     set subelements {}
     foreach {name value} $args {
 	switch -- $name {
 	    -command {
-		lappend opts $name $value
+		lappend opts -command  \
+		  [list [namespace parent]::parse_iq_response $jlibname $value]
 	    }
 	    -form {
 		set subelements $value
@@ -324,7 +328,7 @@ proc jlib::muc::setroom {jlibName roomjid type args} {
       -subtags $subelements]]
     set xmllist [wrapper::createtag "query" -subtags $xelem \
       -attrlist {xmlns "http://jabber.org/protocol/muc#owner"}]
-    eval {[namespace parent]::send_iq $jlibName "set" $xmllist -to $roomjid} \
+    eval {[namespace parent]::send_iq $jlibname "set" $xmllist -to $roomjid} \
       $opts
 }
 
@@ -332,20 +336,20 @@ proc jlib::muc::setroom {jlibName roomjid type args} {
 # 
 # 
 
-proc jlib::muc::getroom {jlibName roomjid callback} {
+proc jlib::muc::getroom {jlibname roomjid callback} {
 
     set xmllist [wrapper::createtag "query"  \
       -attrlist {xmlns "http://jabber.org/protocol/muc#owner"}]
-    [namespace parent]::send_iq $jlibName "set" $xmllist -to $roomjid  \
-      -command $callback
+    [namespace parent]::send_iq $jlibname "get" $xmllist -to $roomjid  \
+      -command [list [namespace parent]::parse_iq_response $jlibname $callback]
 }
 
 # jlib::muc::mynick --
 # 
 #       Returns own nick name for room, or empty if not there.
 
-proc jlib::muc::mynick {jlibName roomjid} {
-    upvar [namespace current]::${jlibName}::cache cache    
+proc jlib::muc::mynick {jlibname roomjid} {
+    upvar [namespace current]::${jlibname}::cache cache    
     
     if {[info exists cache($roomjid,mynick)]} {
 	return $cache($roomjid,mynick)
@@ -358,8 +362,8 @@ proc jlib::muc::mynick {jlibName roomjid} {
 # 
 #       Returns a list of all room jid's we are inside.
 
-proc jlib::muc::allroomsin {jlibName} {
-    upvar [namespace current]::${jlibName}::cache cache    
+proc jlib::muc::allroomsin {jlibname} {
+    upvar [namespace current]::${jlibname}::cache cache    
     
     set keyList [array names cache "*,mynick"]
     set roomList {}
@@ -368,6 +372,13 @@ proc jlib::muc::allroomsin {jlibName} {
 	lappend roomList $room
     }
     return $roomList
+}
+
+proc jlib::muc::Debug {num str} {
+    variable debug
+    if {$num <= $debug} {
+	puts $str
+    }
 }
 
 #-------------------------------------------------------------------------------

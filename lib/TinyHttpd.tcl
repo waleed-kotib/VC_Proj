@@ -7,16 +7,14 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: TinyHttpd.tcl,v 1.1.1.1 2002-12-08 11:04:40 matben Exp $
+# $Id: TinyHttpd.tcl,v 1.2 2003-05-18 13:20:22 matben Exp $
 
 package require uriencode
 
 package provide TinyHttpd 1.0
 
 namespace eval ::TinyHttpd:: {
-    
-    namespace export StartHttpServer StopHttpServer SetMimeMappings
-    
+        
     # Keep track of useful things.
     variable state
     variable httpMsg

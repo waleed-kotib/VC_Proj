@@ -15,7 +15,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Whiteboard.tcl,v 1.8 2003-04-28 13:36:32 matben Exp $
+# $Id: Whiteboard.tcl,v 1.9 2003-05-18 13:20:19 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -354,22 +354,8 @@ proc GetScreenSize { } {
 
 # Show it! Need a full update here, at least on Windows.
 ::SplashScreen::SplashScreen $wDlgs(splash)
+::SplashScreen::SetMsg [::msgcat::mc splashsource]
 update
-
-# Need to set a trace on variable containing the splash start message.
-proc TraceStartMessage {varName junk op} {
-    global  wDlgs
-    
-    # Update needed to force display (bad?).
-    if {[winfo exists $wDlgs(splash)]} {
-	${wDlgs(splash)}.can itemconfigure tsplash  \
-	  -text $::SplashScreen::startMsg
-	update idletasks
-    }
-}
-
-trace variable ::SplashScreen::startMsg w TraceStartMessage
-set ::SplashScreen::startMsg [::msgcat::mc splashsource]
 
 # These are auxilary procedures that we need to source, rest is found in packages.
 set allLibSourceFiles {
@@ -379,7 +365,7 @@ set allLibSourceFiles {
   FileUtils.tcl          \
   ItemInspector.tcl      \
   ImageAndMovie.tcl      \
-  GetFile.tcl            \
+  GetFileIface.tcl       \
   Network.tcl            \
   PutFileIface.tcl       \
   Utils.tcl              \
@@ -448,7 +434,7 @@ switch -- $this(platform) {
 
 # As an alternative to sourcing tcl code directly, use the package mechanism.
 
-set ::SplashScreen::startMsg [::msgcat::mc splashload]
+::SplashScreen::SetMsg [::msgcat::mc splashload]
 
 set listOfPackages {
     CanvasDraw
@@ -460,6 +446,8 @@ set listOfPackages {
     Preferences
     PreferencesUtils
     TinyHttpd
+    Types
+    Plugins
     combobox
     Pane
     moviecontroller
@@ -480,39 +468,27 @@ if {[catch {package require progressbar} msg]} {
 
 # Note: progressbar before ProgressWindow
 package require ProgressWindow
-set ::SplashScreen::startMsg [::msgcat::mc splashloadsha1]
+::SplashScreen::SetMsg [::msgcat::mc splashloadsha1]
 package require sha1pure
 
 # Provides support for the jabber system.
 # With the ActiveState distro of Tcl/Tk not "our" tclxml is loaded which crash.
 
 if {!$prefs(stripJabber)} {
-    set ::SplashScreen::startMsg [::msgcat::mc splashsourcejabb]
+    ::SplashScreen::SetMsg [::msgcat::mc splashsourcejabb]
     package require Jabber
     package require VCard
     package require Sounds
 }
 
-# Import routines that get exported from various namespaces in the lib files.
-# This is a bit inconsistent since I sometimes use import namespace and 
-# sometimes the fully qulified name; need to sort out this later.
-# Note that the lib routines above need fully qualified names!
+# Define MIME types etc.
+::Types::Init
 
-namespace import ::CanvasDraw::*
-namespace import ::CanvasCCP::*
-namespace import ::GetFile::*
-namespace import ::OpenConnection::*
-namespace import ::OpenMulticast::*
-namespace import ::PreferencesUtils::*
-namespace import ::TinyHttpd::*
-namespace import ::UserActions::*
+# Load all plugins available.
+::Plugins::Init
 
-# Define MIME types etc., and get packages.
-if {[catch {source [file join $this(path) lib MimeTypesAndPlugins.tcl]} msg]} {
-    tk_messageBox -message "Error sourcing MimeTypesAndPlugins.tcl  $msg"  \
-      -icon error -type ok
-    exit
-}    
+# Addons.
+::Plugins::InitAddons
 
 set internalIPnum 127.0.0.1
 set internalIPname "localhost"
@@ -521,7 +497,7 @@ set internalIPname "localhost"
 set thisIPnum $internalIPnum 
 
 # Beware! [info hostname] can be very slow on Macs first time it is called.
-set ::SplashScreen::startMsg [::msgcat::mc splashhost]
+::SplashScreen::SetMsg [::msgcat::mc splashhost]
 set this(hostname) [info hostname]
 
 # Try to get own ip number from a temporary server socket.
@@ -545,8 +521,13 @@ if {[string equal $thisIPnum "0.0.0.0"] ||  \
     }
 }
 set this(ipnum) $thisIPnum
+if {[regexp {[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+} $this(ipnum)]} {
+    set this(ipver) 4
+} else {
+    set this(ipver) 6
+}
 
-set ::SplashScreen::startMsg [::msgcat::mc splashinit]
+::SplashScreen::SetMsg [::msgcat::mc splashinit]
 
 # Find user name.
 if {[info exists env(USER)]} {
@@ -589,13 +570,13 @@ if {[catch {source [file join $this(path) lib SetFactoryDefaults.tcl]} msg]} {
     exit
 }
 
-set ::SplashScreen::startMsg [::msgcat::mc splashprefs]
+::SplashScreen::SetMsg [::msgcat::mc splashprefs]
 
 # Set defaults in the option database for widget classes.
 ::PreferencesUtils::SetWidgetDefaultOptions
 
 # Manage the user preferences. Start by reading the preferences file.
-::PreferencesUtils::PreferencesInit
+::PreferencesUtils::Init
 
 # Set the user preferences from the preferences file if they are there,
 # else take the hardcoded defaults.
@@ -606,13 +587,16 @@ if {$argc > 0} {
     ::PreferencesUtils::ParseCommandLineOptions $argc $argv
 }
 
-# Goes through all the logic of verifying the 'mimeTypeDoWhat' 
-# and the actual packages available on our system.
-VerifyPackagesForMimeTypes
+# Check that the mime type preference settings are consistent.
+::Types::VerifyInternal
+
+# Goes through all the logic of verifying that the actual packages are 
+# available on our system.
+::Plugins::VerifyPackagesForMimeTypes
 
 # Init the file cache settings.
 ::FileCache::SetBasedir $this(path)
-::FileCache::SetBestBefore $prefs(checkCache) $prefs(incomingFilePath)
+::FileCache::SetBestBefore $prefs(checkCache) $prefs(incomingPath)
 
 #--- User Interface ------------------------------------------------------------
 
@@ -651,13 +635,13 @@ bind Text <<Copy>> "+ ::UI::FixMenusWhenSelection %W"
 
 # At this point we should be finished with the launch and delete the splash 
 # screen.
-set ::SplashScreen::startMsg {}
+::SplashScreen::SetMsg ""
 after 500 {catch {destroy $wDlgs(splash)}}
 
 # Do we need all the jabber stuff? Is this the right place? Need it for setup!
 if {!$prefs(stripJabber)} {
     ::Jabber::Init
-    after 1200 {::Sounds::Init}
+    after 600 {::Sounds::Init}
 } else {
     
     # The most convinient solution is to create the namespaces at least.
@@ -678,15 +662,8 @@ if {$displaySetup} {
 
 # Is it the first time it is launched, then show the welcome canvas.
 if {$prefs(firstLaunch)} {
-    if {[wm state .] != "normal"} {
-	if {[string equal $prefs(protocol) "jabber"]} {
-	    ::UI::BuildMain . -serverentrystate disabled -sendcheckstate disabled
-	} else {    
-	    ::UI::BuildMain . -serverentrystate disabled
-	}
-    }
-    ::CanvasFile::DoOpenCanvasFile . $prefs(welcomeFile)
-    raise .
+    ::SplashScreen::Canvas .twel $prefs(welcomeFile)
+    raise .twel
 }
 set prefs(firstLaunch) 0
 

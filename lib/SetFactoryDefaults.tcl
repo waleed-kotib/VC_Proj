@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.4 2003-04-28 13:32:34 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.5 2003-05-18 13:20:22 matben Exp $
 
 # SetWhiteboardFactoryState --
 # 
@@ -209,12 +209,14 @@ set prefs(makeSafeServ) 1
 
 # Maximum time to wait for any network action to respond. (secs)
 set prefs(timeout) 120
+set prefs(timeout) 60
 
-# How many seconds shall we wait before showing the progress window?
-set prefs(secsToProgWin) 0
+# How many milliseconds shall we wait before showing the progress window?
+set prefs(millisToProgWin) 0
 
 # How frequently shall the progress window be updated, in milliseconds.
-set prefs(msecsProgUpdate) 1000
+set prefs(millisProgUpdate) 2000
+set prefs(millisProgUpdate) 100
 
 # When and how old is a cached file allowed to be before downloading a new?
 # Options. "never", "always", "launch", "hour", "day", "week", "month"
@@ -225,14 +227,14 @@ set prefs(checkCache) "launch"
 set prefs(jabberCommFrame) 1
 
 # Animated 'Coccinella'?
-if {$prefs(QuickTimeTcl)} {
+if {[::Plugins::HavePackage QuickTimeTcl]} {
     set prefs(coccinellaMovie) 0
 } else {
     set prefs(coccinellaMovie) 0
 }
 
 # If we have got TclSpeech the default is to have it enabled.
-if {$prefs(TclSpeech) || $prefs(MSSpeech)} {
+if {[::Plugins::HavePackage TclSpeech] || [::Plugins::HavePackage MSSpeech]} {
     set prefs(SpeechOn) 1
     set prefs(SpeechOn) 0
 } else {
@@ -241,10 +243,10 @@ if {$prefs(TclSpeech) || $prefs(MSSpeech)} {
 
 # Default in/out voices. We should find some better way to verify that they 
 # exist. 'speak -list' returns the known voices. Use default voice for 'voiceUs'
-if {$prefs(TclSpeech)} {
+if {[::Plugins::HavePackage TclSpeech]} {
     set prefs(voiceUs) Victoria
     set prefs(voiceOther) Zarvox
-} elseif {$prefs(MSSpeech)} {
+} elseif {[::Plugins::HavePackage MSSpeech]} {
     set allVoices [::MSSpeech::GetVoices]
     set prefs(voiceUs) [lindex $allVoices 0]
     set prefs(voiceOther) [lindex $allVoices 1]
@@ -412,7 +414,7 @@ switch -- $this(platform) {
 	set prefs(userPrefsFilePath)  \
 	  [file nativename [file join $prefs(prefsDir) whiteboard]]
 	set prefs(oldPrefsFilePath) [file nativename ~/.whiteboard]
-	set prefs(incomingFilePath)  \
+	set prefs(incomingPath)  \
 	  [file nativename [file join $prefs(prefsDir) incoming]]
 	set prefs(inboxCanvasPath)  \
 	  [file nativename [file join $prefs(prefsDir) canvases]]
@@ -430,7 +432,7 @@ switch -- $this(platform) {
 	set prefs(userPrefsFilePath)  \
 	  [file join $prefs(prefsDir) "Whiteboard Prefs"]
 	set prefs(oldPrefsFilePath) [file join $macPrefsDir "Whiteboard Prefs"]
-	set prefs(incomingFilePath) [file join $this(path) incoming]
+	set prefs(incomingPath) [file join $this(path) incoming]
 	set prefs(inboxCanvasPath) [file join $prefs(prefsDir) Canvases]
 	set prefs(webBrowser) {Internet Explorer}
     }
@@ -442,7 +444,7 @@ switch -- $this(platform) {
 	set prefs(userPrefsFilePath)  \
 	  [file join $prefs(prefsDir) "Whiteboard Prefs"]
 	set prefs(oldPrefsFilePath) $prefs(userPrefsFilePath)
-	set prefs(incomingFilePath) [file join $this(path) incoming]
+	set prefs(incomingPath) [file join $this(path) incoming]
 	set prefs(inboxCanvasPath) [file join $prefs(prefsDir) Canvases]
 	set prefs(webBrowser) {Internet Explorer}
     }
@@ -457,7 +459,7 @@ switch -- $this(platform) {
 	set prefs(prefsDir) [file join $winPrefsDir Coccinella]
 	set prefs(userPrefsFilePath) [file join $prefs(prefsDir) "WBPREFS.TXT"]
 	set prefs(oldPrefsFilePath) [file join $winPrefsDir "WBPREFS.TXT"]
-	set prefs(incomingFilePath) [file join $this(path) incoming]
+	set prefs(incomingPath) [file join $this(path) incoming]
 	set prefs(inboxCanvasPath) [file join $prefs(prefsDir) Canvases]
 	
 	# Not used anymore. Uses the registry instead.
@@ -469,8 +471,8 @@ switch -- $this(platform) {
 if {![file isdirectory $prefs(prefsDir)]} {
     file mkdir $prefs(prefsDir)
 }
-if {![file isdirectory $prefs(incomingFilePath)]} {
-    file mkdir $prefs(incomingFilePath)
+if {![file isdirectory $prefs(incomingPath)]} {
+    file mkdir $prefs(incomingPath)
 }
 if {![file isdirectory $prefs(inboxCanvasPath)]} {
     file mkdir $prefs(inboxCanvasPath)

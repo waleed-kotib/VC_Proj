@@ -10,7 +10,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ProgressWindow.tcl,v 1.2 2003-05-01 13:49:16 matben Exp $
+# $Id: ProgressWindow.tcl,v 1.3 2003-05-18 13:20:19 matben Exp $
 # 
 #-------------------------------------------------------------------------------
 #
@@ -416,7 +416,7 @@ proc ::ProgressWindow::Configure {w args} {
     foreach {name value} $args {
 	set opts($name) $value
     }
-    if {[string compare [focus] $w] == 0} {
+    if {[string equal [focus] $w]} {
 	set col black
     } else {
 	set col #6B6B6B
@@ -424,7 +424,7 @@ proc ::ProgressWindow::Configure {w args} {
 
     # Process all configuration options.
     foreach optName [array names opts] {
-	if {[string compare $opts($optName) $options($optName)] == 0} {
+	if {[string equal $opts($optName) $options($optName)]} {
 	    continue
 	}
 	switch -- $optName {

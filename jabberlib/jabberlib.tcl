@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.6 2003-03-01 09:51:28 matben Exp $
+# $Id: jabberlib.tcl,v 1.7 2003-05-18 13:20:21 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -41,7 +41,7 @@
 #	                             packet of $id is received.
 #
 # locals:	                             
-#	locals(groupchatPriority)  : The groupchat protocol priority list.                             
+#	locals(gcProtoPriority)    : The groupchat protocol priority list.                             
 #	                             
 #       locals(gcprot,$jid)        : Map a groupchat service jid to protocol:
 #       	                     (gc-1.0|conference|muc)
@@ -218,9 +218,6 @@ package provide jlib 1.0
 
 namespace eval jlib {
     
-    # The public interface.
-    #namespace export what
-
     # Globals same for all instances of this jlib.
     #    > 1 prints raw xml I/O
     #    > 2 prints a lot more
@@ -237,43 +234,24 @@ namespace eval jlib {
 
 namespace eval jlib::service {
     
-    # This is to provide compatibility between the agent and browse methods,
-    # and possibly other things.
+    # This is an abstraction layer for two things; the agent/browse/(disco?)
+    # protocols, and for the groupchat protocols gc-1.0/conference/muc.
     
     # Cache the following services in particular.
     variable services {search register groupchat conference muc}    
 }
 
 # Collects the 'conference' subcommand.
-namespace eval jlib::conference {}
+namespace eval jlib::conference { }
 
 # Collects the 'groupchat' subcommand.
-namespace eval jlib::groupchat {}
+namespace eval jlib::groupchat { }
 
 
 # Bindings to the muc package.
 proc jlib::muc {jlibname args} {
 
     eval {[namespace current]::muc::CommandProc $jlibname} $args
-}
-
-proc jlib::setdebug {args} {
-    variable debug
-    
-    if {[llength $args] == 0} {
-	return $debug
-    } elseif {[llength $args] == 1} {
-	set debug $args
-    } else {
-	return -code error "Usage: jlib::setdebug ?integer?"
-    }
-}
-
-proc jlib::Debug {num str} {
-    variable debug
-    if {$num <= $debug} {
-	puts $str
-    }
 }
 
 # jlib::new --
@@ -355,7 +333,7 @@ proc jlib::new {jlibname rostername browsename clientcmd args} {
     set lib(wrap)   \
       [wrapper::new [list [namespace current]::got_stream $jlibname]  \
       [list [namespace current]::end_of_parse $jlibname]              \
-      [list [namespace current]::dispatcher $jlibname]                     \
+      [list [namespace current]::dispatcher $jlibname]                \
       [list [namespace current]::xmlerror $jlibname]]
     
     set lib(isinstream) 0
@@ -367,7 +345,7 @@ proc jlib::new {jlibname rostername browsename clientcmd args} {
     
     # Maintain a priority list of groupchat protocols in decreasing priority.
     # Entries must match: ( gc-1.0 | conference | muc )
-    set locals(groupchatPriority) {conference gc-1.0}
+    set locals(gcProtoPriority) {muc conference gc-1.0}
     
     # Any of {available away dnd invisible unavailable}
     set locals(status) "unavailable"
@@ -455,7 +433,7 @@ proc jlib::config {jlibname args} {
       [info exists argsArr(-xawaymin)]} {
 	schedule_auto_away $jlibname
     }
-    return {}
+    return ""
 }
 
 # jlib::verify_options
@@ -693,7 +671,7 @@ proc jlib::connect {jlibname server args} {
 	disconnect $jlibname
 	return -code error "The connection failed or dropped later: $err"
     }
-    return {}
+    return ""
 }
 
 # jlib::disconnect --
@@ -1006,9 +984,9 @@ proc jlib::presence_handler {jlibname xmldata} {
     # Make variables of the attributes.
     set arglist {}
     set type "available"
-    foreach attrkey [array names attrArr] {
-	set $attrkey $attrArr($attrkey)
-	lappend arglist -$attrkey $attrArr($attrkey)
+    foreach {attrkey attrval} $attrlist {
+	set $attrkey $attrval
+	lappend arglist -$attrkey $attrval
     }
     
     # Check first if this is an error element (from conferencing?).
@@ -1027,14 +1005,6 @@ proc jlib::presence_handler {jlibname xmldata} {
 	    }
 	}
 	lappend arglist -error [list $errcode $errmsg]
-	
-	if {[info exists id] && [info exists iq($id)]} {
-	    uplevel #0 $iq($id) [list $jlibname $type] $arglist
-	} elseif {[string length $opts(-presencecommand)]} {
-	    uplevel #0 $opts(-presencecommand) [list $jlibname $type] $arglist
-	} else {
-	    uplevel #0 $lib(clientcmd) [list $jlibname presence] $arglist
-	}	
     } else {
 	
 	# Extract the presence sub-elements. Separate the x element.
@@ -1053,7 +1023,7 @@ proc jlib::presence_handler {jlibname xmldata} {
 		}
 	    }
 	}	    
-	if {$x != ""} {
+	if {[llength $x] > 0} {
 	    lappend arglist -x $x
 	}
 	
@@ -1084,6 +1054,16 @@ proc jlib::presence_handler {jlibname xmldata} {
 	    }	
 	}
     }
+
+# Invoke any callback.
+if {[info exists id] && [info exists iq($id)]} {
+    uplevel #0 $iq($id) [list $jlibname $type] $arglist
+    catch {unset iq($id)}
+} elseif {[string length $opts(-presencecommand)]} {
+    uplevel #0 $opts(-presencecommand) [list $jlibname $type] $arglist
+} else {
+    uplevel #0 $lib(clientcmd) [list $jlibname presence] $arglist
+}	
 }
 
 # jlib::got_stream --
@@ -1333,8 +1313,6 @@ proc jlib::parse_roster_get {jlibname ispush cmd type thequery} {
 #       none.
 
 proc jlib::parse_roster_set {jlibname jid cmd groups name type thequery} {
-
-    variable debug
     upvar [namespace current]::${jlibname}::lib lib
 
     Debug 3 "jlib::parse_roster_set jid=$jid"
@@ -1820,11 +1798,12 @@ proc jlib::send_presence {jlibname args} {
     set children {}
     set type "available"
     array set argsArr $args
-    foreach argsswitch [array names argsArr] {
-	set par [string trimleft $argsswitch -]
+    
+    foreach {key value} $args {
+	set par [string trimleft $key -]
 	switch -- $par {
 	    type {
-		set type $argsArr($argsswitch)
+		set type $value
 		if {[regexp $statics(presenceTypeExp) $type]} {
 		    lappend attrlist $par $type
 		} else {
@@ -1832,10 +1811,10 @@ proc jlib::send_presence {jlibname args} {
 		}
 	    }
 	    from - to {
-		lappend attrlist $par $argsArr($argsswitch)
+		lappend attrlist $par $value
 	    }
 	    xlist {
-		foreach xchild $argsArr(-xlist) {
+		foreach xchild $value {
 		    lappend children $xchild
 		}
 	    }
@@ -1843,12 +1822,11 @@ proc jlib::send_presence {jlibname args} {
 		
 		# Use iq things for this; needs to be renamed.
 		lappend attrlist "id" $iq(uid)
-		set iq($iq(uid)) $argsArr(-command)
+		set iq($iq(uid)) $value
 		incr iq(uid)
 	    }
 	    default {
-		lappend children [wrapper::createtag $par  \
-		  -chdata $argsArr($argsswitch)]
+		lappend children [wrapper::createtag $par -chdata $value]
 	    }
 	}
     }
@@ -2568,6 +2546,25 @@ proc jlib::auto_away_cmd {jlibname what} {
     uplevel #0 "$lib(clientcmd) [list $jlibname $what]"
 }
 
+proc jlib::setdebug {args} {
+    variable debug
+    
+    if {[llength $args] == 0} {
+	return $debug
+    } elseif {[llength $args] == 1} {
+	set debug $args
+    } else {
+	return -code error "Usage: jlib::setdebug ?integer?"
+    }
+}
+
+proc jlib::Debug {num str} {
+    variable debug
+    if {$num <= $debug} {
+	puts $str
+    }
+}
+
 #-------------------------------------------------------------------------------
 #
 # A couple of routines that handle the selection of groupchat protocol for
@@ -2593,12 +2590,20 @@ proc jlib::setgroupchatpriority {jlibname priorityList} {
 	    return -code error "Unrecognized groupchat type \"$prot\""
 	}
     }
-    set locals(groupchatPriority) $priorityList
+    set locals(gcProtoPriority) $priorityList
 }
 
 # jlib::setgroupchatprotocol --
 # 
 #       Explicitly picks a groupchat protocol to use for a groupchat service.
+#       
+# Arguments:
+#       jlibname
+#       jid
+#       prot        any of 'gc-1.0', 'conference', 'muc'.
+#
+# Results:
+#       None.
 
 proc jlib::setgroupchatprotocol {jlibname jid prot} {
 
@@ -2625,10 +2630,10 @@ proc jlib::setgroupchatprotocol {jlibname jid prot} {
 	    }
 	}
 	muc {
-	    set browseNS [$lib(browsename) getnamespaces $jid]
-	    if {[lsearch -exact $browseNS "http://jabber.org/protocol/muc"] < 0} {
+	    if {![$lib(browsename) havenamespace $jid  \
+	      "http://jabber.org/protocol/muc"]} {
 		return -code error \
-		  "The jid \"$jid\" does not know of any \"conference\" service"
+		  "The jid \"$jid\" does not know of any \"muc\" service"
 	    }
 	}
     }
@@ -2644,16 +2649,19 @@ proc jlib::registergcprotocol {jlibname jid gcprot} {
 
     upvar [namespace current]::${jlibname}::locals locals
     
+    Debug 2 "jlib::registergcprotocol jid=$jid, gcprot=$gcprot"
+    
     # If we already told jlib to use a groupchat protocol then...
     if {[info exist locals(prefgcprot,$jid)]} {
 	return
     }
     
     # Set 'locals(gcprot,$jid)' according to the priority list.
-    foreach prot $locals(groupchatPriority) {
+    foreach prot $locals(gcProtoPriority) {
 	
 	# Do we have registered a groupchat protocol with higher priority?
-	if {[info exists locals(gcprot,$jid)]} {
+	if {[info exists locals(gcprot,$jid)] && \
+		[string equal $locals(gcprot,$jid) $prot]} {
 	    return
 	}
 	if {[string equal $prot $gcprot]} {
@@ -2667,8 +2675,8 @@ proc jlib::registergcprotocol {jlibname jid gcprot} {
 
 # jlib::service --
 #
-#       Provides a 'service' command to provide a generic layer to call
-#       things provided in 'agent' and browse'.
+#       This is an abstraction layer for two things; the agent/browse/(disco?)
+#       protocols, and for the groupchat protocols gc-1.0/conference/muc.
 
 proc jlib::service {jlibname cmd args} {
     
@@ -2957,7 +2965,7 @@ proc jlib::conference::get_enter {jlibname room cmd} {
       -attrlist {xmlns jabber:iq:conference}]
     [namespace parent]::send_iq $jlibname "get" $xmllist -to $room -command  \
       [list [namespace parent]::parse_iq_response $jlibname $cmd]
-    return {}
+    return ""
 }
 
 proc jlib::conference::set_enter {jlibname room subelements cmd} {
@@ -2967,7 +2975,7 @@ proc jlib::conference::set_enter {jlibname room subelements cmd} {
       [wrapper::createtag "enter" -attrlist {xmlns jabber:iq:conference} \
       -subtags $subelements] -to $room -command  \
       [list [namespace current]::parse_set_enter $jlibname $room $cmd]
-    return {}
+    return ""
 }
 
 # jlib::conference::parse_set_enter --
@@ -3045,7 +3053,7 @@ proc jlib::conference::set_create {jlibname room subelements cmd} {
       [wrapper::createtag "create" -attrlist {xmlns jabber:iq:conference} \
       -subtags $subelements] -to $room -command  \
       [list [namespace current]::parse_set_enter $jlibname $room $cmd]
-    return {}
+    return ""
 }
 
 # jlib::conference::delete --
@@ -3066,7 +3074,7 @@ proc jlib::conference::delete {jlibname room cmd} {
       -attrlist {xmlns jabber:iq:conference}]
     [namespace parent]::send_iq $jlibname "set" $xmllist -to $room -command  \
       [list [namespace parent]::parse_iq_response $jlibname $cmd]
-    return {}
+    return ""
 }
 
 proc jlib::conference::exit {jlibname room} {
@@ -3078,7 +3086,7 @@ proc jlib::conference::exit {jlibname room} {
     if {$ind >= 0} {
 	set conf(allroomsin) [lreplace $conf(allroomsin) $ind $ind]
     }
-    return {}
+    return ""
 }
 
 # jlib::conference::set_user --
@@ -3150,7 +3158,7 @@ proc jlib::conference::allroomsin {jlibname} {
 proc jlib::groupchat {jlibname cmd args} {
     
     # Which command? Just dispatch the command to the right procedure.
-    set ans [eval {[namespace current]::groupchat::$cmd $jlibname} $args]
+    set ans [eval {[namespace current]::groupchat::${cmd} $jlibname} $args]
     return $ans
 }
 
@@ -3172,7 +3180,7 @@ proc jlib::groupchat::enter {jlibname room nick args} {
     # This is not foolproof since it may not always success.
     lappend gchat(allroomsin) $room
     set gchat(allroomsin) [lsort -unique $gchat(allroomsin)]
-    return {}
+    return ""
 }
 
 proc jlib::groupchat::exit {jlibname room} {
@@ -3192,7 +3200,7 @@ proc jlib::groupchat::exit {jlibname room} {
     if {$ind >= 0} {
 	set gchat(allroomsin) [lreplace $gchat(allroomsin) $ind $ind]
     }
-    return {}
+    return ""
 }
 
 proc jlib::groupchat::mynick {jlibname room args} {

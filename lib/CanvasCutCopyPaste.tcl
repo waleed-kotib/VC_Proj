@@ -8,15 +8,12 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasCutCopyPaste.tcl,v 1.2 2003-02-06 17:23:32 matben Exp $
+# $Id: CanvasCutCopyPaste.tcl,v 1.3 2003-05-18 13:20:21 matben Exp $
 
 package provide CanvasCutCopyPaste 1.0
 
 namespace eval ::CanvasCCP:: {
     
-    namespace export CopySelectedToClipboard PasteFromClipboardTo CanvasTextCopy
-    namespace export CanvasTextCopy CanvasTextPaste
-
     # Default for 'clipToken' should always be "string" to be prepared
     # for imports from other apps.
     variable clipToken "string"

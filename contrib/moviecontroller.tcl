@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: moviecontroller.tcl,v 1.1.1.1 2002-12-08 10:55:49 matben Exp $
+# $Id: moviecontroller.tcl,v 1.2 2003-05-18 13:20:19 matben Exp $
 
 #  Code idee from Alexander Schoepe's "Progressbar", thank you!
 #
@@ -1063,7 +1063,7 @@ proc ::moviecontroller::PlayStop  { w what btDown }  {
     if {$widgetGlobals(debug) > 1}  {
 	puts "::moviecontroller::PlayStop w=$w, what=$what, btDown=$btDown"
     }
-    if {[string compare $what "play"] == 0}  {
+    if {[string equal $what "play"]}  {
 	
 	# Show stop button
 	if {$btDown} {
@@ -1072,7 +1072,7 @@ proc ::moviecontroller::PlayStop  { w what btDown }  {
 	    $widgets(canvas) raise tstop
 	}
 	set wlocals(plays) 1
-    } elseif {[string compare $what "stop"] == 0}  {
+    } elseif {[string equal $what "stop"]}  {
 	
 	# Show play button.
 	if {$btDown} {
@@ -1119,7 +1119,7 @@ proc ::moviecontroller::RewFF  { w what btDown }  {
     }
 
     # Toggle the push button icons.
-    if {[string compare $what "rew"] == 0} {
+    if {[string equal $what "rew"]} {
 	if {$btDown} {
 	    $widgets(canvas) raise trewpu
 	} else {

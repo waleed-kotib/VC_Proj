@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: TheServer.tcl,v 1.5 2003-04-28 13:32:34 matben Exp $
+# $Id: TheServer.tcl,v 1.6 2003-05-18 13:20:22 matben Exp $
     
 # DoStartServer ---
 #
@@ -444,7 +444,7 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 		    # Make temporary array that maps ip to port.
 		    array set arrayIP2Port $remListIPandPort
 		    foreach ipNum [array names arrayIP2Port] {
-			if {![IsConnectedToQ $ipNum]} {		
+			if {![::OpenConnection::IsConnectedToQ $ipNum]} {		
 			    
 			    # Handle the complete connection process.
 			    # Let propagateSizeToClients = false.
@@ -513,26 +513,15 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 		
 		if {$cmd == "PUT"} {
 		    
-		    # Some file is put on this server, take action.
-		    if {$debugServerLevel >= 2 } {
-			puts "=HandleClientRequest:: PUT: cmd=$cmd, channel=$channel"
-			puts "    fileName=$fileName, optList=$optList"
-		    }
-		    
 		    # Be sure to strip off any path. (this(path))??? Mac bug for /file?
 		    set fileName [file tail $fileName]
-		    ::GetFile::GetFileFromClient $wtop $ip $channel $fileName \
-		      ::GetFile::DefaultCallbackProc $optList
+		    ::GetFileIface::GetFile $wtop $channel $fileName $optList
 		} elseif {$cmd == "GET"} {
 		    
 		    # A file is requested from this server. 'fileName' may be
 		    # a relative path so beware. This should be taken care for in
 		    # 'PutFileToClient'.
 		    
-		    if {$debugServerLevel >= 2 } {
-			puts "=HandleClientRequest:: GET: cmd=$cmd, channel=$channel"
-			puts "    fileName=$fileName, optList=$optList"
-		    }
 		    ::PutFileIface::PutFileToClient $wtop $channel $ip \
 		      $fileName $optList
 		}
@@ -547,12 +536,8 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 		
 		# For some reason the outer {} must be stripped off.
 		set relFilePath [lindex $relFilePath 0]
-		
-		if {$debugServerLevel >= 2} {
-		    puts "--->PUT NEW: relFilePath='$relFilePath', optList='$optList'"
-		}
-		::GetFile::GetFileFromServer $wtop $ip $ipNumTo(servPort,$ip) $relFilePath  \
-		  ::GetFile::DefaultCallbackProc $optList
+		::GetFileIface::GetFileFromServer $wtop $ip $ipNumTo(servPort,$ip) \
+		  $relFilePath $optList
 	    }		
 	}
 	"GET CANVAS" {
@@ -562,7 +547,7 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 		if {$debugServerLevel >= 2} {
 		    puts "--->GET CANVAS:"
 		}
-		DoPutCanvas $wServCan $ip
+		::UserActions::DoPutCanvas $wServCan $ip
 	    }		
 	}
 	"RESIZE IMAGE" {
