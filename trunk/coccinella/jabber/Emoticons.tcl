@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.15 2004-07-30 12:55:54 matben Exp $
+# $Id: Emoticons.tcl,v 1.16 2004-08-25 10:07:38 matben Exp $
 
 
 package provide Emoticons 1.0
@@ -42,12 +42,19 @@ proc ::Emoticons::Init { } {
 
     ::Debug 2 "::Emoticons::Init"
     
-    # Cache stuff we need later.
+    # We need the 'vfs::zip' package and if not using starkit we also need
+    # the 'Memchan' package which is not automatically checked for.
     if {[catch {package require vfs::zip}]} {
+	set priv(havezip) 0
+    } elseif {[info exists starkit::topdir]} {
+	set priv(havezip) 1
+    } elseif {[catch {package require Memchan}]} {
 	set priv(havezip) 0
     } else {
 	set priv(havezip) 1
     }
+
+    # Cache stuff we need later.
     set priv(havepng)      [::Plugins::HaveImporterForMime image/png]
     set priv(QuickTimeTcl) [::Plugins::HavePackage QuickTimeTcl]
     set priv(Img)          [::Plugins::HavePackage Img]
