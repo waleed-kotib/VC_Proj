@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Agents.tcl,v 1.28 2004-10-02 13:14:55 matben Exp $
+# $Id: Agents.tcl,v 1.29 2004-10-05 12:16:23 matben Exp $
 
 package provide Agents 1.0
 
@@ -325,6 +325,8 @@ proc ::Jabber::Agents::Build {w args} {
     
     ::Debug 2 "::Jabber::Agents::Build w=$w"
         
+    set fontS [option get . fontSmall {}]
+
     # The frame.
     frame $w -borderwidth 0 -relief flat -class Agent
     set wagents $w
@@ -336,6 +338,14 @@ proc ::Jabber::Agents::Build {w args} {
       -side left -padx 5 -pady 5
     pack [label $w.bot.la   \
       -textvariable [namespace current]::arrMsg] -side left -padx 8 -pady 6
+    
+    if {0} {
+	frame $w.fs -relief groove -bd 2
+	canvas $w.fs.c -bd 0 -highlightthickness 0 -height 14
+	pack $w.fs.c -side left -pady 1 -padx 6 -fill x -expand true
+	$w.fs.c create text 0 0 -anchor nw -text {Some junk...} -font $fontS
+	pack $w.fs -side bottom -fill x -padx 8 -pady 2
+    }
     
     # Tree part
     set wbox $w.box

@@ -8,7 +8,7 @@
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  This source file is distributed under the BSD licens.
 #  
-# $Id: mactabnotebook.tcl,v 1.18 2004-09-13 09:05:18 matben Exp $
+# $Id: mactabnotebook.tcl,v 1.19 2004-10-05 12:16:22 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -65,9 +65,7 @@ package require colorutils
 package provide mactabnotebook 2.0
 
 namespace eval ::mactabnotebook::  {
-    
-    namespace export mactabnotebook
-    
+        
     # Arrays that collects a information needed.
     # Is unset when finished.
     

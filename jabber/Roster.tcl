@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.85 2004-10-02 13:14:55 matben Exp $
+# $Id: Roster.tcl,v 1.86 2004-10-05 12:16:23 matben Exp $
 
 package provide Roster 1.0
 
@@ -260,6 +260,8 @@ proc ::Jabber::Roster::Build {w} {
     variable dirNameArr
     upvar ::Jabber::jprefs jprefs
         
+    set fontS [option get . fontSmall {}]
+
     # The frame of class Roster.
     frame $w -borderwidth 0 -relief flat -class Roster
 
@@ -271,6 +273,14 @@ proc ::Jabber::Roster::Build {w} {
     set wtree   $wbox.tree
     pack [frame $wbox -border 1 -relief sunken]   \
       -side top -fill both -expand 1 -padx 4 -pady 4
+    
+    if {0} {
+	frame $w.fs -relief groove -bd 2
+	canvas $w.fs.c -bd 0 -highlightthickness 0 -height 14
+	pack $w.fs.c -side left -pady 1 -padx 6 -fill x -expand true
+	$w.fs.c create text 0 0 -anchor nw -text {Some junk...} -font $fontS
+	pack $w.fs -side bottom -fill x -padx 8 -pady 2
+    }
     
     set opts {}
     if {$jprefs(rost,useBgImage)} {
@@ -321,7 +331,7 @@ proc ::Jabber::Roster::Build {w} {
     grid $wysc -row 0 -column 1 -sticky ns
     grid $wxsc -row 1 -column 0 -sticky ew
     grid columnconfigure $wbox 0 -weight 1
-    grid rowconfigure $wbox 0 -weight 1    
+    grid rowconfigure $wbox 0 -weight 1
     
     set dirImage     [::Theme::GetImage [option get $wtree dirImage {}]]
     set onlineImage  [::Theme::GetImage [option get $wtree onlineImage {}]]

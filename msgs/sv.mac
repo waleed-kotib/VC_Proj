@@ -28,6 +28,7 @@
 ::msgcat::mcset sv Close 		{Stäng}
 ::msgcat::mcset sv Conference           {Konferans}
 ::msgcat::mcset sv Connect              {Anslut}
+::msgcat::mcset sv Contact              {Kontakt}
 ::msgcat::mcset sv Country		{Land}
 ::msgcat::mcset sv Create               {Skapa}
 ::msgcat::mcset sv Customization        {Anpassningar}

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.56 2004-10-04 09:22:19 matben Exp $
+# $Id: JUI.tcl,v 1.57 2004-10-05 12:16:23 matben Exp $
 
 package provide JUI 1.0
 
@@ -292,7 +292,7 @@ proc ::Jabber::UI::Build {w} {
 	$wtray newbutton inbox Inbox $iconInbox $iconInboxDis  \
 	  [list ::Jabber::MailBox::ShowHide -visible 1]
     }
-    $wtray newbutton newuser "New User" $iconNewUser $iconNewUserDis  \
+    $wtray newbutton newuser "Contact" $iconNewUser $iconNewUserDis  \
       ::Jabber::User::NewDlg -state disabled
     $wtray newbutton stop Stop $iconStop $iconStopDis  \
       [list ::Jabber::UI::StopConnect] -state disabled
@@ -324,7 +324,7 @@ proc ::Jabber::UI::Build {w} {
     set wstat ${fall}.st
     set jwapp(statmess) ${wstat}.g.c
 
-    pack [frame ${wstat} -relief raised -borderwidth 1]  \
+    pack [frame $wstat -relief raised -borderwidth 1]  \
       -side bottom -fill x -pady 0
     pack [frame ${wstat}.g -relief groove -bd 2]  \
       -side top -fill x -padx 8 -pady 2

@@ -7,7 +7,7 @@
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  This source file is distributed under the BSD licens.
 #  
-# $Id: notebook.tcl,v 1.7 2004-09-13 09:05:18 matben Exp $
+# $Id: notebook.tcl,v 1.8 2004-10-05 12:16:22 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -38,9 +38,7 @@
 package provide notebook 1.0
 
 namespace eval ::notebook::  {
-    
-    namespace export notebook
-    
+        
     # Globals same for all instances of this widget.
     variable widgetGlobals
 

@@ -29,6 +29,7 @@
 ::msgcat::mcset en Close
 ::msgcat::mcset en Conference
 ::msgcat::mcset en Connect
+::msgcat::mcset en Contact
 ::msgcat::mcset en Country
 ::msgcat::mcset en Create
 ::msgcat::mcset en Customization

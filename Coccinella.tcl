@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.86 2004-10-04 09:22:19 matben Exp $
+# $Id: Coccinella.tcl,v 1.87 2004-10-05 12:16:22 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -611,13 +611,22 @@ wm protocol . WM_DELETE_WINDOW {::UI::DoCloseWindow .}
 # Just experimenting with the 'tile' extension...
 if {0} {
     package require tile
-    foreach name {button radiobutton checkbutton menubutton scrollbar \
-      labelframe} {
+    set widgets {button radiobutton checkbutton menubutton scrollbar \
+      frame label labelframe}
+    set widgets {frame}
+    foreach name $widgets {
 	rename $name ""
 	rename t${name} $name
     }
-    set theme clam
-    package require tile::theme::$theme
+    switch -- $this(platform) {
+	macosx {
+	    set theme aqua
+	}
+	default {
+	    set theme clam
+	    package require tile::theme::$theme
+	}
+    }
     style theme use $theme
 }
 

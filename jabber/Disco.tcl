@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.34 2004-10-03 13:38:22 matben Exp $
+# $Id: Disco.tcl,v 1.35 2004-10-05 12:16:23 matben Exp $
 
 package provide Disco 1.0
 
@@ -425,6 +425,8 @@ proc ::Jabber::Disco::Build {w} {
     
     ::Debug 2 "::Jabber::Disco::Build"
     
+    set fontS [option get . fontSmall {}]
+
     # The frame of class Disco.
     frame $w -borderwidth 0 -relief flat -class Disco
     set wbrowser $w
@@ -434,6 +436,14 @@ proc ::Jabber::Disco::Build {w} {
     pack [::chasearrows::chasearrows $wsearrows -size 16] \
       -side left -padx 5 -pady 0
     pack $frbot -side bottom -fill x -padx 8 -pady 2
+    
+    if {0} {
+	frame $w.fs -relief groove -bd 2
+	canvas $w.fs.c -bd 0 -highlightthickness 0 -height 14
+	pack $w.fs.c -side left -pady 1 -padx 6 -fill x -expand true
+	$w.fs.c create text 0 0 -anchor nw -text {Some junk...} -font $fontS
+	pack $w.fs -side bottom -fill x -padx 8 -pady 2
+    }
     
     set wbox $w.box
     pack [frame $wbox -border 1 -relief sunken]   \
