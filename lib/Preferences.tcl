@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.31 2004-01-02 11:41:16 matben Exp $
+# $Id: Preferences.tcl,v 1.32 2004-01-05 15:00:32 matben Exp $
  
 package require notebook
 package require tree
@@ -35,7 +35,6 @@ proc ::Preferences::Build { } {
     
     variable tmpPrefs
     variable tmpJPrefs
-    variable tmpJServer
     
     variable wtoplevel
     variable finished
@@ -79,17 +78,12 @@ proc ::Preferences::Build { } {
 	    set xpadbt   2
 	}
     }    
-    
-    # Must sort 'jserver(profile)'.
-    ::Jabber::SortProfileList
-    
+        
     # Work only on a temporary copy in case we cancel.
     catch {unset tmpPrefs}
     catch {unset tmpJPrefs}
-    catch {unset tmpJServer}
     array set tmpPrefs [array get prefs]
     array set tmpJPrefs [::Jabber::GetjprefsArray]
-    array set tmpJServer [::Jabber::GetjserverArray]
     
     set fontSB [option get . fontSmallBold {}]
     
@@ -124,7 +118,6 @@ proc ::Preferences::Build { } {
     #$wtree newitem {General Plugins}
     if {!$prefs(stripJabber)} {
 	$wtree newitem {Jabber}
-	$wtree newitem {Jabber {User Profiles}} -text [::msgcat::mc {User Profiles}]
 	$wtree newitem {Jabber {Personal Info}} -text [::msgcat::mc {Personal Info}]
 	$wtree newitem {Jabber {Auto Away}} -text [::msgcat::mc {Auto Away}]
 	$wtree newitem {Jabber Subscriptions} -text [::msgcat::mc Subscriptions]
@@ -165,10 +158,6 @@ proc ::Preferences::Build { } {
     ::Preferences::Shorts::BuildPage $frpshort    
     
     if {!$prefs(stripJabber)} {
-	
-	# User Info page -------------------------------------------------------
-	set frpui [$nbframe page {User Profiles}]    
-	::Preferences::Profiles::BuildPage $frpui
 	
 	# Personal Info page ---------------------------------------------------
 	set frppers [$nbframe page {Personal Info}]
@@ -229,6 +218,9 @@ proc ::Preferences::Build { } {
     set frppriv [$nbframe page {Privacy}]
     ::Preferences::BuildPagePrivacy $frppriv
     
+    # TODO: each code component makes its own page.
+    ::hooks::run prefsBuildHook $wtree $nbframe
+    
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
     pack [button $frbot.btconn -text [::msgcat::mc Save] -default active -width 8 \
@@ -288,7 +280,6 @@ proc ::Preferences::ResetToFactoryDefaults {maxPriorityNum} {
     
     variable tmpPrefs
     variable tmpJPrefs
-    variable tmpJServer
 
     Debug 2 "::Preferences::ResetToFactoryDefaults maxPriorityNum=$maxPriorityNum"
     
@@ -309,7 +300,6 @@ proc ::Preferences::ResetToFactoryDefaults {maxPriorityNum} {
 	    # Set only tmp variables. Find the corresponding tmp variable.
 	    if {[regsub "^prefs" $varName tmpPrefs tmpVarName]} {
 	    } elseif {[regsub "^::Jabber::jprefs" $varName tmpJPrefs tmpVarName]} {
-	    } elseif {[regsub "^::Jabber::jserver" $varName tmpJServer tmpVarName]} {
 	    } else {
 		continue
 	    }
@@ -323,12 +313,8 @@ proc ::Preferences::ResetToFactoryDefaults {maxPriorityNum} {
 	    }
 	}
     }
-    
-    # Make temp array for servers.
-    ::Preferences::Profiles::MakeTmpServArr
-    
-    # Probably more...
-    
+
+    ::hooks::run prefsFactoryDefaultsHook
 }
 
 # Preferences::ResetToUserDefaults --
@@ -340,19 +326,14 @@ proc ::Preferences::ResetToUserDefaults { } {
     
     variable tmpPrefs
     variable tmpJPrefs
-    variable tmpJServer
 
     Debug 2 "::Preferences::ResetToUserDefaults"
 
     array set tmpPrefs [array get prefs]
     array set tmpJPrefs [::Jabber::GetjprefsArray]
-    array set tmpJServer [::Jabber::GetjserverArray]
-    
-    # Make temp array for servers.
-    ::Preferences::Profiles::MakeTmpServArr
 
-    # Probably more...
-        
+
+    ::hooks::run prefsUserDefaultsHook
 }
 
 proc ::Preferences::BuildPageSounds {page} {
@@ -421,297 +402,6 @@ proc ::Preferences::BuildPageSounds {page} {
 	    checkbutton $labpalrt.$name -text "  [::msgcat::mc $txt]"  \
 	      -variable "[namespace current]::tmpJPrefs(snd,$name)"
 	    pack $labpalrt.$name -side top -anchor w -pady $ypad -padx 10
-    }
-}
-
-# namespace  ::Preferences::Profiles:: -----------------------------------------
-
-namespace eval ::Preferences::Profiles:: {
-    
-}
-
-# User Profiles Page ...........................................................
-
-proc ::Preferences::Profiles::BuildPage {page} {
-    global  prefs
-    
-    upvar ::Preferences::tmpJServer tmpJServer
-    upvar ::Preferences::tmpJServArr tmpJServArr
-    upvar ::Preferences::xpadbt xpadbt
-    variable wcombo    
-    variable profile
-    variable server
-    variable username
-    variable password
-    variable resource
-    variable digest
-    variable wuserinfofocus
-    
-    set digest 1
-    set fontS [option get . fontSmall {}]
-    set fontSB [option get . fontSmallBold {}]
-    
-    set labpui [::mylabelframe::mylabelframe $page.fr [::msgcat::mc {User Profiles}]]
-    pack $page.fr -side left -anchor n -ipadx 10 -ipady 6
-    
-    message $labpui.msg -text [::msgcat::mc prefprof] -aspect 800
-    pack $labpui.msg -side top -fill x
-
-    set pui $labpui.fr
-    pack [frame $pui] -side left  
-    
-    # Make temp array for servers.
-    ::Preferences::Profiles::MakeTmpServArr
-        
-    # Option menu for the servers.
-    label $pui.lpop -text "[::msgcat::mc Profile]:" -font $fontSB -anchor e
-    
-    set wcombo $pui.popup
-    ::combobox::combobox $wcombo   \
-      -textvariable [namespace current]::profile  \
-      -command [namespace current]::Set
-    eval {$wcombo list insert end} $tmpJServArr(all)
-        
-    grid $pui.lpop -column 0 -row 0 -sticky e
-    grid $wcombo -column 1 -row 0 -sticky ew
-        
-    # Verify that the selected also in array.
-    if {[lsearch -exact $tmpJServer(profile) $profile] < 0} {
-	set profile [lindex $tmpJServer(profile) 0]
-    }
-    set profile $tmpJServer(profile,selected)    
-    set server $tmpJServArr($profile,server)
-    set username $tmpJServArr($profile,username)
-    set password $tmpJServArr($profile,password)
-    set resource $tmpJServArr($profile,resource)
-    
-    label $pui.lserv -text "[::msgcat::mc {Jabber Server}]:" -font $fontSB \
-      -anchor e
-    entry $pui.eserv -width 28   \
-      -textvariable [namespace current]::server -validate key  \
-      -validatecommand {::Jabber::ValidateJIDChars %S}
-    label $pui.luser -text "[::msgcat::mc Username]:" -font $fontSB -anchor e
-    entry $pui.euser -width 28  \
-      -textvariable [namespace current]::username -validate key  \
-      -validatecommand {::Jabber::ValidateJIDChars %S}
-    label $pui.lpass -text "[::msgcat::mc Password]:" -font $fontSB -anchor e
-    entry $pui.epass -width 28  \
-      -textvariable [namespace current]::password -validate key  \
-      -validatecommand {::Jabber::ValidateJIDChars %S}
-    label $pui.lres -text "[::msgcat::mc Resource]:" -font $fontSB -anchor e
-    entry $pui.eres -width 28   \
-      -textvariable [namespace current]::resource -validate key  \
-      -validatecommand {::Jabber::ValidateJIDChars %S}
-    checkbutton $pui.cdig -text "  [::msgcat::mc {Scramble password}]"  \
-      -variable [namespace current]::digest
-    set wuserinfofocus $wcombo
-
-    grid $pui.lserv -column 0 -row 1 -sticky e
-    grid $pui.eserv -column 1 -row 1 -sticky w
-    grid $pui.luser -column 0 -row 2 -sticky e
-    grid $pui.euser -column 1 -row 2 -sticky w
-    grid $pui.lpass -column 0 -row 3 -sticky e
-    grid $pui.epass -column 1 -row 3 -sticky w
-    grid $pui.lres -column 0 -row 4 -sticky e
-    grid $pui.eres -column 1 -row 4 -sticky w
-    grid $pui.cdig -column 1 -row 5 -sticky w -pady 2
-
-    set puibt [frame $labpui.frbt]
-    pack $puibt -padx 4 -pady 6 -side right -fill y -expand 1
-    pack [button $puibt.new -font $fontS -text [::msgcat::mc New]  \
-      -padx $xpadbt -command [namespace current]::New]   \
-      -side top -fill x -pady 4
-    pack [button $puibt.app -font $fontS -text [::msgcat::mc Apply] \
-      -padx $xpadbt -command [namespace current]::Apply]   \
-      -side top -fill x -pady 4
-    pack [button $puibt.del -font $fontS -text [::msgcat::mc Delete]  \
-      -padx $xpadbt -command [namespace current]::Delete]   \
-      -side top -fill x -pady 4
-}
-    
-# Preferences::Profiles::MakeTmpServArr --
-#
-#       Make temp array for servers.
-
-proc ::Preferences::Profiles::MakeTmpServArr { } {
-    
-    upvar ::Preferences::tmpJServer tmpJServer
-    upvar ::Preferences::tmpJServArr tmpJServArr
-    
-    # New... Profiles
-    set tmpJServArr(all) {}
-    foreach {name spec} $tmpJServer(profile) {
-	lappend tmpJServArr(all) $name
-	foreach [list \
-	  tmpJServArr($name,server)   \
-	  tmpJServArr($name,username) \
-	  tmpJServArr($name,password) \
-	  tmpJServArr($name,resource)] $spec break
-    }
-    set tmpJServArr(all) [lsort -dictionary $tmpJServArr(all)]
-}
-
-# ::Preferences::Profiles::UpdateTmpJServerProfile --
-#
-#       Make the 'tmpJServer(profile)' reflect 'tmpJServArr'.
-
-proc ::Preferences::Profiles::UpdateTmpJServerProfile { } {
-    
-    upvar ::Preferences::tmpJServer tmpJServer
-    upvar ::Preferences::tmpJServArr tmpJServArr
-    
-    # This is a bit of double counting with two temp storages...
-    # New... Profiles
-    set tmpJServer(profile) {}
-    foreach profile [lsort -dictionary $tmpJServArr(all)] {
-	lappend tmpJServer(profile) $profile   \
-	  [list $tmpJServArr($profile,server)  \
-	  $tmpJServArr($profile,username)      \
-	  $tmpJServArr($profile,password)      \
-	  $tmpJServArr($profile,resource)]
-    }
-}
-
-# Preferences::Profiles::Set --
-#
-#       Callback for the combobox when a new item is selected.
-
-proc ::Preferences::Profiles::Set {wcombo profile} {
-    
-    upvar ::Preferences::tmpJServArr tmpJServArr
-    upvar ::Preferences::tmpJServer tmpJServer
-    variable server
-    variable username
-    variable password
-    variable resource
-    
-    #puts "::Preferences::Profiles::Set profile=$profile"
-    
-    # In case this is a new profile.
-    if {[info exists tmpJServArr($profile,server)]} {
-	#puts "   $profile is set"
-	set server $tmpJServArr($profile,server)
-	set username $tmpJServArr($profile,username)
-	set password $tmpJServArr($profile,password)
-	set resource $tmpJServArr($profile,resource)
-	set tmpJServer(profile,selected) $profile  
-    }
-}
-
-proc ::Preferences::Profiles::New { } {
-    
-    variable profile
-    variable server
-    variable username
-    variable password
-    variable resource
-    variable wuserinfofocus
-
-    set profile {}
-    set server {}
-    set username {}
-    set password {}
-    set resource {}
-    focus $wuserinfofocus
-}
-
-proc ::Preferences::Profiles::Apply { } {
-    global  prefs
-    
-    upvar ::Preferences::tmpJServArr tmpJServArr
-    upvar ::Preferences::tmpJServer tmpJServer
-    variable wcombo
-    variable profile
-    variable server
-    variable username
-    variable password
-    variable resource
-
-    #puts "::Preferences::Profiles::Apply profile=$profile"
-    
-    # Check that necessary entries are non-empty, at least.
-    if {($server == "") || ($username == "")} {
-	tk_messageBox -type ok -icon error  \
-	  -title [::msgcat::mc Error] -message [FormatTextForMessageBox \
-	  [::msgcat::mc messfillserveruser]]
-	return
-    }
-    
-    # Create a unique profile name if not given.
-    if {[string length $profile] == 0} {
-	set profile $server
-
-	# Make sure that 'profile' is unique.
-	if {[lsearch -exact $tmpJServArr(all) $profile] >= 0} {
-	    set i 2
-	    set tmpprof $profile
-	    set profile ${tmpprof}-${i}
-	    while {[lsearch -exact $tmpJServArr(all) $profile] >= 0} {
-		incr i
-		set profile ${tmpprof}-${i}
-	    }
-	}
-    }
-    if {[string length $resource] == 0} {
-	set resource "coccinella"
-    }
-    
-    # Handle duplicate servers. Is this good???
-    if {[lsearch -exact $tmpJServArr(all) $profile] >= 0} {
-	
-	# It's there already!
-	set ans [tk_messageBox -type yesno -default yes -icon warning  \
-	  -title [::msgcat::mc Warning] -message [FormatTextForMessageBox \
-	  [::msgcat::mc messprofinuse]]]
-	if {$ans == "no"} {
-	    ::Preferences::Profiles::Set $wcombo [lindex $tmpJServArr(all) 0]
-	    return
-	}
-    } else {
-	$wcombo list insert end $profile
-    }
-    
-    # Store it the temporary array.
-    set tmpJServArr(all) [lsort -unique [concat $tmpJServArr(all) $profile]]
-    set tmpJServArr($profile,server) $server
-    set tmpJServArr($profile,username) $username
-    set tmpJServArr($profile,password) $password
-    set tmpJServArr($profile,resource) $resource
-    set tmpJServer(profile,selected) $profile  
-}
-
-proc ::Preferences::Profiles::Delete { } {
-    global  prefs
-    
-    upvar ::Preferences::tmpJServArr tmpJServArr
-    variable profile
-    variable wcombo
-    
-    #puts "::Preferences::Profiles::Delete profile=$profile"
-    
-    # The present state may be something that has not been stored by pressing
-    # the Apply button.
-    if {[info exists tmpJServArr($profile,server)]} {
-	
-	set ans [tk_messageBox -title [::msgcat::mc Warning]  \
-	  -type yesno -icon warning -default yes \
-	  -message [FormatTextForMessageBox [::msgcat::mc messremoveprofile]]]
-	if {$ans == "yes"} {
-	    unset tmpJServArr($profile,server)
-	    unset tmpJServArr($profile,username)
-	    unset tmpJServArr($profile,password)
-	    unset tmpJServArr($profile,resource)
-	    set ind [lsearch $tmpJServArr(all) $profile]
-	    if {$ind >= 0} {
-		set tmpJServArr(all) [lreplace $tmpJServArr(all) $ind $ind]
-		$wcombo list delete $ind
-	    }
-	    set profile [lindex $tmpJServArr(all) 0]
-	    ::Preferences::Profiles::Set $wcombo $profile
-	}
-    } else {
-	set profile [lindex $tmpJServArr(all) 0]
-	::Preferences::Profiles::Set $wcombo $profile
     }
 }
 
@@ -2513,7 +2203,6 @@ proc ::Preferences::SavePushBt { } {
     variable finished
     variable tmpPrefs
     variable tmpJPrefs
-    variable tmpJServer
     
     set protocolSet 0
     
@@ -2529,19 +2218,14 @@ proc ::Preferences::SavePushBt { } {
 	}
     }
         
-    # Make all temporary prefs reflect the current settings of the panels.
-    if {!$prefs(stripJabber)} {
-	::Preferences::Profiles::UpdateTmpJServerProfile
-	if {!$protocolSet} {
-	    ::Jabber::Roster::SetBackgroundImage $tmpJPrefs(rost,useBgImage) \
-	      $tmpJPrefs(rost,bgImagePath)
-	}
+    if {!$prefs(stripJabber) && !$protocolSet} {
+	::Jabber::Roster::SetBackgroundImage $tmpJPrefs(rost,useBgImage) \
+	  $tmpJPrefs(rost,bgImagePath)
     }
     
     # Copy the temporary copy to the real variables.
     array set prefs [array get tmpPrefs]
     ::Jabber::SetjprefsArray [array get tmpJPrefs]
-    ::Jabber::SetjserverArray [array get tmpJServer]
     
     # and the same for all MIME stuff etc.
     ::Preferences::FileMap::SaveAssociations    
@@ -2563,6 +2247,8 @@ proc ::Preferences::SavePushBt { } {
     # Save the preference file.
     ::PreferencesUtils::SaveToFile
     
+    ::hooks::run prefsSaveHook
+
     set finished 1
 }
 
@@ -2590,22 +2276,15 @@ proc ::Preferences::CancelPushBt { } {
     variable finished
     variable tmpPrefs
     variable tmpJPrefs
-    variable tmpJServer
-    upvar ::Jabber::jserver jserver
+    variable hasChanged
     upvar ::Jabber::jprefs jprefs
     
     set ans yes
-    
-    # Make all temporary prefs reflect the current settings of the panels.
-    if {!$prefs(stripJabber)} {
-	::Preferences::Profiles::UpdateTmpJServerProfile
-    }
-    
+        
     # Check if anything changed, if so then warn.
     set hasChanged 0
     foreach {arrName tmpName} {
 	prefs      tmpPrefs 
-	jserver    tmpJServer 
 	jprefs     tmpJPrefs
     } {
 	if {!$hasChanged} {
@@ -2633,6 +2312,9 @@ proc ::Preferences::CancelPushBt { } {
     if {!$hasChanged} {
 	set hasChanged [::Preferences::FileMap::IsAnythingChangedQ]
     }
+    
+    ::hooks::run prefsCancelHook
+    
     if {$hasChanged} {
 	set ans [tk_messageBox -title [::msgcat::mc Warning]  \
 	  -type yesno -default no -parent $wDlgs(prefs)  \
@@ -2647,6 +2329,17 @@ proc ::Preferences::CancelPushBt { } {
 	::UI::SaveWinGeom $wtoplevel
     }
     return $ans
+}
+
+# Preferences::HasChanged --
+# 
+#       Used for components to tell us that something changed with their
+#       internal preferences.
+
+proc ::Preferences::HasChanged { } {
+    variable hasChanged
+
+    set hasChanged 1
 }
 
 # Preferences::SelectCmd --

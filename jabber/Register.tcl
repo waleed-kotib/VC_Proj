@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.7 2004-01-01 12:08:21 matben Exp $
+# $Id: Register.tcl,v 1.8 2004-01-05 15:00:32 matben Exp $
 
 package provide Register 1.0
 
@@ -268,7 +268,7 @@ proc ::Jabber::Register::ResponseProc {jlibName type theQuery} {
 	  [::msgcat::mc jamessregisterok $server]]
     
 	# Save to our jserver variable. Create a new profile.
-	::Jabber::SetUserProfile {} $server $username $password
+	::Profiles::Set {} $server $username $password
     }
     
     # Disconnect. This should reset both wrapper and XML parser!
@@ -309,9 +309,9 @@ proc ::Jabber::Register::Remove {{jid {}}} {
 	  [list ::Jabber::Register::RemoveCallback $jid]
 	
 	# Remove also from our profile.
-	set profile [::Jabber::FindProfileFromJid $jstate(mejid)]
+	set profile [::Profiles::FindProfileNameFromJID $jstate(mejid)]
 	if {$profile != ""} {
-	    ::Jabber::RemoveUserProfile $profile
+	    ::Profiles::Remove $profile
 	}
     }
 }

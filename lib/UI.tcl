@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.41 2004-01-02 14:41:58 matben Exp $
+# $Id: UI.tcl,v 1.42 2004-01-05 15:00:32 matben Exp $
 
 package require entrycomp
 
@@ -1200,7 +1200,7 @@ proc ::UI::FixMenusWhenSelection {w} {
     set wToplevelClass [winfo class $wToplevel]
     set medit ${wtop}menu.edit 
     
-    Debug 3 "::UI::FixMenusWhenSelection w=$w,\n\twtop=$wtop, wClass=$wClass,\
+    Debug 5 "::UI::FixMenusWhenSelection w=$w,\n\twtop=$wtop, wClass=$wClass,\
       wToplevelClass=$wToplevelClass"
     
     # Do different things dependent on the type of widget.
@@ -1417,7 +1417,7 @@ proc ::UI::MacFocusFixEditMenu {w wtopmenu wfocus} {
     if {$w != $wfocus} {
 	return
     }    
-    ::Debug 3 "MacFocusFixEditMenu: w=$w, wfocus=$wfocus"
+    ::Debug 5 "MacFocusFixEditMenu: w=$w, wfocus=$wfocus"
     
     # The <FocusIn> events are sent in order, from toplevel and down
     # to the actual window with focus.

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.17 2003-12-30 15:30:58 matben Exp $
+# $Id: JUI.tcl,v 1.18 2004-01-05 15:00:31 matben Exp $
 
 package provide JUI 1.0
 
@@ -104,7 +104,7 @@ namespace eval ::Jabber::UI:: {
 	{separator}
 	{command     mSetupAssistant {
 	    package require SetupAss
-	    ::Jabber::SetupAss::SetupAss .setupass}                       normal {}}
+	    ::Jabber::SetupAss::SetupAss}                                 normal {}}
 	{command     mRemoveAccount {::Jabber::Register::Remove}          disabled {}}	
 	{separator}
 	{command     mErrorLog      {::Jabber::ErrorLogDlg .jerrdlg}      normal   {}}

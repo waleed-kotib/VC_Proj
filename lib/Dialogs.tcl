@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.27 2004-01-02 14:41:58 matben Exp $
+# $Id: Dialogs.tcl,v 1.28 2004-01-05 15:00:32 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -32,6 +32,7 @@ array set wDlgs {
     print           .prt
     prog            .prog
     plugs           .plugs
+    setupass        .setupass
     wb              .wb
 }
 

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.19 2004-01-02 11:41:16 matben Exp $
+# $Id: Login.tcl,v 1.20 2004-01-05 15:00:32 matben Exp $
 
 package provide Login 1.0
 
@@ -48,8 +48,7 @@ proc ::Jabber::Login::Login { } {
     variable wtri
     variable wtrilab
     variable wfrmore
-    variable tmpJServArr
-    upvar ::Jabber::jserver jserver
+    variable tmpProfArr
     upvar ::Jabber::jprefs jprefs
     
     set w $wDlgs(jlogin)
@@ -81,31 +80,30 @@ proc ::Jabber::Login::Login { } {
     # Option menu for selecting user profile.
     label $frmid.lpop -text "[::msgcat::mc Profile]:" -font $fontSB -anchor e
     set wpopup $frmid.popup
-    set profileList [::Jabber::GetAllProfileNames]
+    
+    set profileList [::Profiles::GetAllNames]
     eval {tk_optionMenu $wpopup [namespace current]::menuVar} $profileList
     $wpopup configure -highlightthickness 0 -foreground black
     grid $frmid.lpop -column 0 -row 0 -sticky e
     grid $wpopup -column 1 -row 0 -sticky e
 
-    # Verify that the selected also in array.
-    if {[lsearch -exact $jserver(profile) $jserver(profile,selected)] < 0} {
-	set jserver(profile,selected) [lindex $jserver(profile) 0]
-    }
-    set profile $jserver(profile,selected)
-    set menuVar $jserver(profile,selected)
+    set profile [::Profiles::GetSelectedName]
+    set menuVar $profile    
     
-    # Make temp array for servers. Handy fo filling in the entries.
-    foreach {name spec} $jserver(profile) {
-	foreach [list  \
-	  tmpJServArr($name,server)     \
-	  tmpJServArr($name,username)   \
-	  tmpJServArr($name,password)   \
-	  tmpJServArr($name,resource)] $spec break
+    # Make temp array for servers. Handy for filling in the entries.
+    foreach {name spec} [::Profiles::Get] {
+	set tmpProfArr($name,server)   [lindex $spec 0]
+	set tmpProfArr($name,username) [lindex $spec 1]
+	set tmpProfArr($name,password) [lindex $spec 2]
+	set tmpProfArr($name,-resource) ""
+	foreach {key value} [lrange $spec 3 end] {
+	    set tmpProfArr($name,$key) $value
+	}
     }
-    set server $tmpJServArr($menuVar,server)
-    set username $tmpJServArr($menuVar,username)
-    set password $tmpJServArr($menuVar,password)
-    set resource $tmpJServArr($menuVar,resource)
+    set server   $tmpProfArr($menuVar,server)
+    set username $tmpProfArr($menuVar,username)
+    set password $tmpProfArr($menuVar,password)
+    set resource $tmpProfArr($menuVar,-resource)
     
     label $frmid.lserv -text "[::msgcat::mc {Jabber server}]:" -font $fontSB -anchor e
     entry $frmid.eserv -width 22    \
@@ -242,10 +240,9 @@ proc ::Jabber::Login::DoCancel {w} {
 
 proc ::Jabber::Login::Close {w} {
     variable menuVar
-    upvar ::Jabber::jserver jserver
     
     # Clean up.
-    set jserver(profile,selected) $menuVar
+    ::Profiles::SetSelectedName $menuVar
     trace vdelete [namespace current]::menuVar w  \
       [namespace current]::TraceMenuVar
     catch {grab release $w}
@@ -263,13 +260,16 @@ proc ::Jabber::Login::TraceMenuVar {name key op} {
     variable password
     variable resource
     variable menuVar
-    variable tmpJServArr
+    variable tmpProfArr
     
-    set profile $locName
-    set server $tmpJServArr($locName,server)
-    set username $tmpJServArr($locName,username)
-    set password $tmpJServArr($locName,password)
-    set resource $tmpJServArr($locName,resource)
+    set profile  $locName
+    set server   $tmpProfArr($locName,server)
+    set username $tmpProfArr($locName,username)
+    set password $tmpProfArr($locName,password)
+    set resource $tmpProfArr($locName,-resource)
+    
+    #::Jabber::Debug 3 "TraceMenuVar: locName=$locName, menuVar=$menuVar"
+    #::Jabber::Debug 3 "\t[parray tmpProfArr $locName,*]"
 }
 
 # Jabber::Login::Doit --
@@ -512,8 +512,8 @@ proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
     set jstate(mejid) "${username}@${server}"
     set jstate(meres) $resource
     set jstate(mejidres) "${username}@${server}/${resource}"
-    set jserver(profile,selected) $profile
     set jserver(this) $server
+    ::Profiles::SetSelectedName $profile
 
     ::Network::RegisterIP $ipNum "to"
     

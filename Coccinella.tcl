@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.31 2004-01-02 14:41:58 matben Exp $
+# $Id: Coccinella.tcl,v 1.32 2004-01-05 15:00:31 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -268,9 +268,6 @@ if {[file exists $prefs(binPath)]} {
 
 # Path where preferences etc are stored.
 switch -- $this(platform) {
-    unix {
-	set this(prefsPath) [file nativename ~/.coccinella]
-    }
     macintosh {
 	if {[info exists env(PREF_FOLDER)]} {
 	    set this(prefsPath) [file join $env(PREF_FOLDER) Coccinella]
@@ -282,6 +279,9 @@ switch -- $this(platform) {
 	set this(prefsPath)  \
 	  [file join [file nativename ~/Library/Preferences] Coccinella]
     }    
+    unix {
+	set this(prefsPath) [file nativename ~/.coccinella]
+    }
     windows {
 	if {[info exists env(USERPROFILE)]} {
 	    set winPrefsDir $env(USERPROFILE)
@@ -308,8 +308,8 @@ if {![info exists env(LANG)]} {
     set env(LANG) en
 }
 package require msgcat
+set lang [::msgcat::mclocale]
 ::msgcat::mclocale en
-#::msgcat::mclocale sv
 ::msgcat::mcload [file join $this(path) msgs]
 
 # Show it! Need a full update here, at least on Windows.
@@ -487,6 +487,9 @@ if {!$prefs(stripJabber)} {
     ::Jabber::SetUserPreferences
 }
 
+# Components that need to add their own preferences need to be registered here.
+::hooks::run prefsInitHook
+
 # Parse any command line options.
 if {$argc > 0} {
     ::PreferencesUtils::ParseCommandLineOptions $argc $argv
@@ -521,16 +524,18 @@ if {$argc > 0} {
 # Various initializations for canvas stuff and UI.
 ::UI::Init
 ::UI::InitMenuDefs
-::WB::Init
-::WB::InitMenuDefs
+
+# All components that requires some kind of initialization should register here.
+# Beware, order may be important!
+::hooks::run initHook
 
 # Let main window "." be roster in jabber and whiteboard else.
 if {[string equal $prefs(protocol) "jabber"]} {
     set wDlgs(jrostbro) .
-    set wDlgs(mainwb) .wb0
+    set wDlgs(mainwb)   .wb0
 } else {
     set wDlgs(jrostbro) .jrostbro
-    set wDlgs(mainwb) .
+    set wDlgs(mainwb)   .
 }
 
 # Make the actual whiteboard with canvas, tool buttons etc...
@@ -588,10 +593,10 @@ if {$displaySetup} {
 
     catch {destroy $wDlgs(splash)}
     update
-    ::Jabber::SetupAss::SetupAss .setupass
-    ::UI::CenterWindow .setupass
-    raise .setupass
-    tkwait window .setupass
+    ::Jabber::SetupAss::SetupAss
+    ::UI::CenterWindow $wDlgs(setupass)
+    raise $wDlgs(setupass)
+    tkwait window $wDlgs(setupass)
 }
 
 # Is it the first time it is launched, then show the welcome canvas.

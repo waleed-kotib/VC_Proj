@@ -25,7 +25,7 @@ Add the 'translatedString' if missing, and do translate if exists.
 name 'fr.msg' if French, for instance.
 
 4.  In order to load the correct message catalog, you must set the
-language code in the file 'Whiteboard.tcl' 
+language code in the file 'Coccinella.tcl' 
 ::msgcat::mclocale languageCode
 
 Now try it...
