@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #
-# $Id: svg2can.tcl,v 1.5 2004-02-20 15:10:29 matben Exp $
+# $Id: svg2can.tcl,v 1.6 2004-02-21 16:02:18 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -21,6 +21,8 @@
 #   0.1      first release
 #
 # ########################### TODO #############################################
+#
+#       A lot...
 #
 # ########################### INTERNALS ########################################
 # 
@@ -92,8 +94,11 @@ proc svg2can::parseelement {xmllist args} {
     set tag [gettag $xmllist]
     
     switch -- $tag {
-	circle - ellipse - image - line - path - polyline - polygon - rect - text {
+	circle - ellipse - image - line - path - polyline - polygon - rect {
 	    lappend cmd [parse${tag} $xmllist]
+	}
+	text {
+	    set cmd [parsetext $xmllist]
 	}
 	g {
 	    foreach c [getchildren $xmllist] {
@@ -384,40 +389,48 @@ proc svg2can::parserect {xmllist} {
 proc svg2can::parsetext {xmllist} {
     
     set x 0
-    set y 0    
-    set cmdList [ParseTspan $xmllist x y {}]
-    return $cmdList
+    set y 0
+    set xAttr 0
+    set yAttr 0
+    set cmdList [ParseTspan $xmllist x y xAttr yAttr 1 {}]
+    return [FlattenList $cmdList]
 }
 
 # svg2can::ParseTspan --
 # 
-#       Takes a tspan element and returns a list of canvas
+#       Takes a tspan or text element and returns a list of canvas
 #       create text commands.
 
-proc svg2can::ParseTspan {xmllist xVar yVar opts} { 
+proc svg2can::ParseTspan {xmllist xVar yVar xAttrVar yAttrVar inherit opts} { 
     variable systemFont
     upvar $xVar x
     upvar $yVar y
+    upvar $xAttrVar xAttr
+    upvar $yAttrVar yAttr
 
     # Nested tspan elements do not inherit x, y, dx, or dy attributes set.
-    # tspan elements in sequence do inherit these attributes.
-    # Keep two separate sets of x and y!
+    # Sibling tspan elements do inherit x, y attributes.
+    # Keep two separate sets of x and y; (x,y) and (xAttr,yAttr).
     
     # Inherit opts.
-    array set optsArr [ParseTextAttr $xmllist x y]
     array set optsArr $opts
+    array set optsArr [ParseTextAttr $xmllist xAttr yAttr]
     set opts [array get optsArr]
+    if {1 || $inherit} {
+	set x $xAttr
+	set y $yAttr
+    }
 
     set childList [getchildren $xmllist]
     set cmdList {}
-    puts "x=$x, y=$y"
+    puts "x=$x, y=$y, xAttr=$xAttr, yAttr=$yAttr, inherit=$inherit"
     
     if {[llength $childList]} {
 	foreach c $childList {
 	    
 	    switch -- [gettag $c] {
 		tspan {
-		    lappend cmdList [ParseTspan $c x y $opts]
+		    lappend cmdList [ParseTspan $c x y xAttr yAttr 0 $opts]
 		}
 		default {
 		    # empty
@@ -435,7 +448,9 @@ proc svg2can::ParseTspan {xmllist xVar yVar opts} {
 	    set theFont $optsArr(-font)
 	}
 	# newlines???
-	set x [expr $x + [font measure $theFont $str]]
+	set deltax [font measure $theFont $str]
+	set x     [expr $x + $deltax]
+	set xAttr [expr $xAttr + $deltax]
     }
     return $cmdList
 }
@@ -477,7 +492,8 @@ proc svg2can::ParseTextAttr {xmllist xVar yVar} {
 		lappend opts -tags $value
 	    }
 	    style {
-		set opts [StyleToOpts text [StyleAttrToList $value]]
+		set opts [concat $opts \
+		  [StyleToOpts text [StyleAttrToList $value]]]
 	    }
 	    x - y {
 		set $key $value
@@ -700,7 +716,11 @@ proc svg2can::ParseStraightPath {path} {
 		set co [list [lindex $path [incr i]] [lindex $path [incr i]]]
 		incr i
 	    }
-	    Q - q {
+	    Q {
+		# ?
+		incr i
+	    }
+	    q {
 		# ?
 		incr i
 	    }
@@ -746,11 +766,15 @@ proc svg2can::FlattenList {hilist} {
 proc svg2can::FlatListRecursive {hilist flatlistVar} {
     upvar $flatlistVar flatlist
     
-    foreach c $hilist {
-	if {[string equal [lindex $c 0] "create"]} {
-	    lappend flatlist $c
-	} else {
-	    FlatListRecursive $c flatlist
+    if {[string equal [lindex $hilist 0] "create"]} {
+	set flatlist [list $hilist]
+    } else {
+	foreach c $hilist {
+	    if {[string equal [lindex $c 0] "create"]} {
+		lappend flatlist $c
+	    } else {
+		FlatListRecursive $c flatlist
+	    }
 	}
     }
 }
@@ -780,15 +804,30 @@ if {0} {
     toplevel .t
     pack [canvas .t.c -width 500 -height 400]
     package require svg2can
-    set textxml1 {<text x='34.0' y='20.0' \
-      style='stroke-width: 0; font-family: Helvetica; font-size: 12; \
-      fill: #000000;' id='std text foo113-57.visit.se/263174163'>\
-      <tspan>Start</tspan><tspan>Mid</tspan><tspan>End</tspan></text>}
     
-    set xmllist [tinydom::documentElement [tinydom::parse $textxml1]]
-    set cmdList [svg2can::parsetext $xmllist]
-    set cmdList [svg2can::FlattenList $cmdList]
-    foreach c $cmdList {eval .t.c $c}
+    set xml(0) {<polyline points='400 10 10 10 10 400' \
+      style='stroke: #000000; stroke-width: 1.0; fill: none;'/>}
+    set xml(1) {<text x='10.0' y='20.0' \
+      style='stroke-width: 0; font-family: Helvetica; font-size: 12; \
+      fill: #000000;' id='std text t001'>\
+      <tspan>Start</tspan><tspan>Mid</tspan><tspan>End</tspan></text>}
+    set xml(2) {<text x='10.0' y='40.0' \
+      style='stroke-width: 0; font-family: Helvetica; font-size: 12; \
+      fill: #000000;' id='std text t002'>One\
+      straight text data</text>}
+    set xml(3) {<text x='10.0' y='60.0' \
+      style='stroke-width: 0; font-family: Helvetica; font-size: 12; \
+      fill: #000000;' id='std text t003'>\
+      <tspan>Online</tspan><tspan dy='6'>dy=6</tspan><tspan>End</tspan></text>}
+    
+    foreach i [array names xml] {
+	set xmllist [tinydom::documentElement [tinydom::parse $xml($i)]]
+	set cmdList [svg2can::parseelement $xmllist]
+	foreach c $cmdList {
+	    puts $c
+	    eval .t.c $c
+	}
+    }
     
 }
     
