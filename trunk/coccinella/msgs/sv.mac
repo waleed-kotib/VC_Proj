@@ -114,6 +114,7 @@
 ::msgcat::mcset sv Server		{Server}
 ::msgcat::mcset sv Servers		{Servrar}
 ::msgcat::mcset sv Set                  {Sätt}
+::msgcat::mcset sv Settings             {Ställ in}
 ::msgcat::mcset sv Shortcut             {Genväg}
 ::msgcat::mcset sv Shortcuts            {Genvägar}
 ::msgcat::mcset sv Specifications	{Specifikation}
@@ -666,6 +667,7 @@ Det är nödvändigt att den finns i din roster. Du har prenumeration för %s: %s.}
 Den kan bestå av ljud (radio) eller video (TV). Som alternativ använd en webbläsare för att hitta en SDP fil, ladda ner den till din disk och öppna den som en vanlig film.}
 ::msgcat::mcset sv jabrowseaddserver		{Skriv in JID:n för servern du önskar lägga till till listan av tjänster, till exempel "jabber.org".}
 ::msgcat::mcset sv printunixcmd                 {Kommando för utskrift; redigera om nödvändigt}
+::msgcat::mcset sv enterpassword                {Skriv in lösenordet for ditt konto "%s"}
 
 
 

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.89 2004-10-12 13:48:56 matben Exp $
+# $Id: Roster.tcl,v 1.90 2004-10-16 13:32:51 matben Exp $
 
 package provide Roster 1.0
 
@@ -1392,9 +1392,9 @@ proc ::Jabber::Roster::GetPresenceIcon {jid presence args} {
   
 proc ::Jabber::Roster::GetMyPresenceIcon { } {
     variable presenceIcon
-    upvar ::Jabber::jstate jstate
 
-    return $presenceIcon($jstate(status))
+    set status [::Jabber::GetMyStatus]
+    return $presenceIcon($status)
 }
 
 proc ::Jabber::Roster::DirectedPresenceDlg {jid} {

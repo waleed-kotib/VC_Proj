@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.31 2004-09-28 13:50:18 matben Exp $
+# $Id: Profiles.tcl,v 1.32 2004-10-16 13:32:50 matben Exp $
 
 package provide Profiles 1.0
 
@@ -66,7 +66,7 @@ proc ::Profiles::Set {name server username password args} {
     ::Debug 2 "::Profiles::Set: name=$name, s=$server, u=$username, p=$password, '$args'"
 
     array set profArr $profiles
-    set allNames [::Profiles::GetAllNames]
+    set allNames [GetAllNames]
     
     # Create a new unique profile name.
     if {[string length $name] == 0} {
@@ -88,7 +88,7 @@ proc ::Profiles::Set {name server username password args} {
     set selected $name
     
     # Keep them sorted.
-    ::Profiles::SortProfileList
+    SortProfileList
     return ""
 }
 
@@ -201,7 +201,7 @@ proc ::Profiles::GetProfile {name} {
 proc ::Profiles::GetSelectedName { } {
     variable selected
  
-    set all [::Profiles::GetAllNames]
+    set all [GetAllNames]
     if {[lsearch -exact $all $selected] < 0} {
 	return [lindex $all 0]
     } else {
@@ -238,7 +238,7 @@ proc ::Profiles::SortProfileList { } {
 
     set tmp {}
     array set profArr $profiles
-    foreach name [::Profiles::GetAllNames] {
+    foreach name [GetAllNames] {
 	lappend tmp $name $profArr($name)
     }
     set profiles $tmp
@@ -254,7 +254,7 @@ proc ::Profiles::ImportIfNecessary { } {
 	# Use ad hoc method to figure out if want to import profiles.
 	if {[string equal [lindex $profiles 1 1] "myUsername"] && \
 	  ([llength $profiles] == 2)} {
-	    ::Profiles::ImportFromJserver
+	    ImportFromJserver
 	}
     }
 }
@@ -287,7 +287,7 @@ proc ::Profiles::BuildHook {wtree nbframe} {
       -text [mc {User Profiles}]
 
     set wpage [$nbframe page {User Profiles}]    
-    ::Profiles::BuildPage $wpage
+    BuildPage $wpage
 }
 
 proc ::Profiles::BuildPage {page} {
@@ -327,7 +327,7 @@ proc ::Profiles::BuildPage {page} {
     pack [frame $pui] -side left  
     
     # Make temp array for servers.
-    ::Profiles::MakeTmpProfArr
+    MakeTmpProfArr
     set tmpSelected $selected
 		
     # Init textvariables.
@@ -336,7 +336,7 @@ proc ::Profiles::BuildPage {page} {
     set username $tmpProfArr($profile,username)
     set password $tmpProfArr($profile,password)
     
-    set allNames [::Profiles::GetAllNames]
+    set allNames [GetAllNames]
 
     # Option menu for the servers.
     label $pui.lpop -text "[mc Profile]:" -anchor e
@@ -403,11 +403,11 @@ proc ::Profiles::BuildPage {page} {
 
     # Tabbed notebook for more options.
     set wtabnb $popt.nb
-    ::Profiles::NotebookOptionWidget $wtabnb $token
+    NotebookOptionWidget $wtabnb $token
     pack $wtabnb -fill x
     
     # The actual prefs state for the current profile must be set.
-    ::Profiles::SetCurrentFromTmp $tmpSelected
+    SetCurrentFromTmp $tmpSelected
 
     # This allows us to clean up some things when we go away.
     bind $lfr <Destroy> [list [namespace current]::DestroyHandler]

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.80 2004-10-10 09:47:23 matben Exp $
+# $Id: Chat.tcl,v 1.81 2004-10-16 13:32:50 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -48,6 +48,8 @@ namespace eval ::Jabber::Chat:: {
     option add *Chat*saveDisImage         saveDis               widgetDefault
     option add *Chat*historyImage         history               widgetDefault
     option add *Chat*historyDisImage      historyDis            widgetDefault
+    option add *Chat*settingsImage        settings              widgetDefault
+    option add *Chat*settingsDisImage     settingsDis           widgetDefault
     option add *Chat*printImage           print                 widgetDefault
     option add *Chat*printDisImage        printDis              widgetDefault
 
@@ -573,6 +575,8 @@ proc ::Jabber::Chat::Build {threadID args} {
     set iconSaveDis     [::Theme::GetImage [option get $w saveDisImage {}]]
     set iconHistory     [::Theme::GetImage [option get $w historyImage {}]]
     set iconHistoryDis  [::Theme::GetImage [option get $w historyDisImage {}]]
+    set iconSettings    [::Theme::GetImage [option get $w settingsImage {}]]
+    set iconSettingsDis [::Theme::GetImage [option get $w settingsDisImage {}]]
     set iconPrint       [::Theme::GetImage [option get $w printImage {}]]
     set iconPrintDis    [::Theme::GetImage [option get $w printDisImage {}]]
     set iconNotifier    [::Theme::GetImage [option get $w notifierImage {}]]
@@ -589,6 +593,8 @@ proc ::Jabber::Chat::Build {threadID args} {
        [list [namespace current]::Save $dlgtoken]
     $wtray newbutton history History $iconHistory $iconHistoryDis \
       [list [namespace current]::BuildHistory $dlgtoken]
+    $wtray newbutton settings Settings $iconSettings $iconSettingsDis \
+      [list [namespace current]::Settings $dlgtoken]
     $wtray newbutton print   Print   $iconPrint   $iconPrintDis   \
       [list [namespace current]::Print $dlgtoken]
     
@@ -1383,6 +1389,11 @@ proc ::Jabber::Chat::SendFile {dlgtoken} {
     ::Jabber::OOB::BuildSet $jid2
 }
 
+proc ::Jabber::Chat::Settings {dlgtoken} {
+    
+    ::Preferences::Build -page {Jabber Chat}
+}
+
 proc ::Jabber::Chat::Print {dlgtoken} {
     
     set chattoken [GetActiveChatToken $dlgtoken]
@@ -1733,7 +1744,6 @@ proc ::Jabber::Chat::KeyPressEvent {chattoken char} {
 	after cancel $chatstate(xevent,afterid)
 	unset chatstate(xevent,afterid)
     }
-    parray chatstate xevent,*
     if {[info exists chatstate(xevent,msgid)] && ($chatstate(xevent,status) == "")} {
 	XEventSendCompose $chattoken
     }

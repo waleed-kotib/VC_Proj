@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.49 2004-10-14 10:22:11 matben Exp $
+# $Id: Login.tcl,v 1.50 2004-10-16 13:32:50 matben Exp $
 
 package provide Login 1.0
 
@@ -348,138 +348,53 @@ proc ::Jabber::Login::DoLogin {} {
 	lappend opts -tls 1
     }
     eval {HighLogin $server $username $resource $password \
-      [namespace current]::HighFinalCB} $opts
+      [namespace current]::LoginCallback} $opts
 }
 
-proc ::Jabber::Login::DoLoginCB {status msg} {
-    variable server
-    variable moreOpts
-
-    ::Debug 2 "::Jabber::Login::DoLoginCB status=$status"
+proc ::Jabber::Login::LoginCallback {token status {errmsg ""}} {
+    variable $token
+    upvar 0 $token state
     
-    switch $status {
-	error {
-	    tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
-	      [mc jamessnosocket $server $msg]]
+    ::Debug 2 "::Jabber::Login::LoginCallback"
+    
+    ShowAnyMessageBox $token $status $errmsg
+}
+
+#       Show message box if necessary.
+
+proc ::Jabber::Login::ShowAnyMessageBox {token status {errmsg ""}} {
+    variable $token
+    upvar 0 $token state
+    
+    ::Debug 2 "::Jabber::Login::DoLoginHighCB status=$status errmsg=$errmsg"
+    
+    set str ""
+    
+    switch -- $status {
+	ok {
+	    # empty
+	}
+	connect-failed {
+	    set str [mc jamessnosocket $state(server) $errmsg]
 	}
 	timeout {
-	    tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
-	      [mc jamesstimeoutserver $server]]
+	    set str [mc jamesstimeoutserver $state(server)]
+	}
+	authfail {
+	    set str $errmsg
+	}
+	starttls-nofeature {
+	    set str [mc jamessstarttls-nofeature $state(server)]
+	}
+	startls-failure {
+	    set str [mc jamessstartls-failure $state(server)]
 	}
 	default {
-	    
-	    # Go ahead...
-	    set opts {}
-	    if {$moreOpts(sasl)} {
-		lappend opts -sasl 1
-	    }
-	    if {[catch {
-		eval {InitStream $server \
-		  [namespace current]::InitStreamResult} $opts
-	    } err]} {
-		tk_messageBox -icon error -title [mc {Open Failed}] \
-		  -type ok -message [FormatTextForMessageBox $err]
-	    }
+	    set str $errmsg
 	}
     }
-}
-
-proc ::Jabber::Login::InitStreamResult {args} {
-    variable server
-    variable username
-    variable password
-    variable resource
-    variable moreOpts
-
-    ::Debug 2 "::Jabber::Login::InitStreamResult args=$args"
-    
-    array set argsArr $args
-
-    if {![info exists argsArr(id)]} {
-	tk_messageBox -icon error -type ok -message \
-	  "no id for digest in receiving <stream>"
-    } else {
-
-	# If we are trying to use sasl indicated by version='1.0' we must also
-	# be sure to receive a version attribute larger or equal to 1.0.
-	set trysasl $moreOpts(sasl)
-	if {$moreOpts(sasl)} {
-	    if {[info exists argsArr(version)]} {
-		if {[package vcompare $argsArr(version) 1.0] == -1} {
-		    set moreOpts(sasl) 0
-		}
-	    } else {
-		set moreOpts(sasl) 0
-	    }
-	}
-	if {$trysasl && !$moreOpts(sasl)} {
-	    ::Jabber::AddErrorLog $server  \
-	      "SASL authentization failed since server does not support version=1.0"
-	}
-	set starttls 0
-	if {$moreOpts(sasl) && $moreOpts(ssl)} {
-	    set starttls 1
-	}
-	
-	# We either start tls or authorize.
-	if {$starttls} {
-	    StartTls [namespace current]::StartTlsResult
-	} else {
-	    if {$resource == ""} {
-		set resource "coccinella"
-	    }
-	    Authorize $server $username $resource $password \
-	      [namespace current]::Finish -streamid $argsArr(id)  \
-	      -digest $moreOpts(digest) -sasl $moreOpts(sasl)
-	}    
-    }    
-}
-
-proc ::Jabber::Login::StartTlsResult {jlibname type args} {
-    variable server
-    variable username
-    variable password
-    variable resource
-    variable moreOpts
-    upvar ::Jabber::jstate jstate
-    
-    ::Debug 2 "::Jabber::Login::StartTlsResult type=$type, args=$args"
-    
-    if {[string equal $type "error"]} {
-	foreach {errcode errmsg} [lindex $args 0] break
-	tk_messageBox -icon error -type ok -title [mc Error]  \
-	  -message [FormatTextForMessageBox $errmsg]
-    } else {
-	set id [$jstate(jlib) getstreamattr id]
-	if {$id == ""} {
-	    tk_messageBox -icon error -type ok -message \
-	      "no id for digest in receiving <stream>"
-	    return
-	}
-	if {$resource == ""} {
-	    set resource "coccinella"
-	}
-	Authorize $server $username $resource $password \
-	  [namespace current]::Finish -streamid $id  \
-	  -digest $moreOpts(digest) -sasl $moreOpts(sasl)
-    }
-}
-
-proc ::Jabber::Login::Finish {type msg} {
-    variable profile
-    variable moreOpts
-    
-    ::Debug 2 "::Jabber::Login::Finish type=$type, msg=$msg"
-
-    if {[string equal $type "error"]} {
-	tk_messageBox -icon error -type ok -title [mc Error]  \
-	  -message [FormatTextForMessageBox $msg]
-    } else {
-	::Profiles::SetSelectedName $profile
-	
-	# Login was succesful, set presence.
-	SetStatus -priority $moreOpts(priority)  \
-	  -invisible $moreOpts(invisible)
+    if {$str != ""} {
+	tk_messageBox -icon error -type ok -message [FormatTextForMessageBox $str]
     }
 }
 
@@ -497,10 +412,8 @@ proc ::Jabber::Login::SetStatus {args} {
     }
     
     if {$argsArr(-invisible)} {
-	set jstate(status) "invisible"
 	eval {::Jabber::SetStatus invisible} $presArgs
     } else {
-	set jstate(status) "available"
 	eval {::Jabber::SetStatus available -notype 1} $presArgs
     }    
 }
@@ -528,6 +441,7 @@ proc ::Jabber::Login::SetStatus {args} {
 #           -ip
 #           -priority
 #           -sasl
+#           -ssl        0|1 (synonym for -tls)
 #           -tls
 #       
 # Results:
@@ -548,6 +462,7 @@ proc ::Jabber::Login::HighLogin {server username resource password cmd args} {
 	-ip             ""
 	-priority       0
 	-sasl           0
+	-ssl            0
 	-tls            0
     }
     set argsArr(-port) $jprefs(port)
@@ -569,6 +484,11 @@ proc ::Jabber::Login::HighLogin {server username resource password cmd args} {
     set state(cmd)        $cmd
     foreach {key value} [array get argsArr] {
 	set state($key) $value
+    }
+    
+    # -ssl synonym for -tls.
+    if {$state(-ssl)} {
+	set state(-tls) 1
     }
     
     # The "old" jabber protocol uses a designated port number for ssl
@@ -710,10 +630,8 @@ proc ::Jabber::Login::HighAuthorizeCB {token type msg} {
 		lappend opts -priority $state(-priority)
 	    }
 	    if {$state(-invisible)} {
-		set jstate(status) "invisible"
 		eval {::Jabber::SetStatus invisible} $opts
 	    } else {
-		set jstate(status) "available"
 		eval {::Jabber::SetStatus available -notype 1} $opts
 	    }    
 	    HighFinish $token
@@ -734,45 +652,6 @@ proc ::Jabber::Login::HighFinish {token {err ""} {msg ""}} {
 	uplevel #0 $state(cmd) [list $token $err $msg]
     }
     unset state
-}
-
-
-#       Show message box if necessary.
-
-proc ::Jabber::Login::HighFinalCB {token status {errmsg ""}} {
-    variable $token
-    upvar 0 $token state
-    
-    ::Debug 2 "::Jabber::Login::DoLoginHighCB status=$status errmsg=$errmsg"
-    
-    set str ""
-    
-    switch -- $status {
-	ok {
-	    # empty
-	}
-	connect-failed {
-	    set str [mc jamessnosocket $state(server) $errmsg]
-	}
-	timeout {
-	    set str [mc jamesstimeoutserver $state(server)]
-	}
-	authfail {
-	    set str $errmsg
-	}
-	starttls-nofeature {
-	    set str [mc jamessstarttls-nofeature $state(server)]
-	}
-	startls-failure {
-	    set str [mc jamessstartls-failure $state(server)]
-	}
-	default {
-	    set str $errmsg
-	}
-    }
-    if {$str != ""} {
-	tk_messageBox -icon error -type ok -message [FormatTextForMessageBox $str]
-    }
 }
 
 #-------------------------------------------------------------------------------

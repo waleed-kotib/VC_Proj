@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.59 2004-10-12 13:48:56 matben Exp $
+# $Id: JUI.tcl,v 1.60 2004-10-16 13:32:50 matben Exp $
 
 package provide JUI 1.0
 
@@ -173,7 +173,11 @@ proc ::Jabber::UI::Init { } {
 	set menuDefsInsertInd(rost,info)   [expr [llength $menuDefs(rost,info)]-4]
     }
     set inited 1
+    
+    # We should do this for all menus eventaully.
+    ::UI::PruneMenusUsingOptsDB mInfo menuDefs(rost,info) menuDefsInsertInd(rost,info)
 }
+
 
 proc ::Jabber::UI::Show {w args} {
     upvar ::Jabber::jstate jstate
@@ -292,7 +296,7 @@ proc ::Jabber::UI::Build {w} {
 	$wtray newbutton inbox Inbox $iconInbox $iconInboxDis  \
 	  [list ::Jabber::MailBox::ShowHide -visible 1]
     }
-    $wtray newbutton newuser "Contact" $iconNewUser $iconNewUserDis  \
+    $wtray newbutton newuser Contact $iconNewUser $iconNewUserDis  \
       ::Jabber::User::NewDlg -state disabled
     $wtray newbutton stop Stop $iconStop $iconStopDis  \
       [list ::Jabber::UI::StopConnect] -state disabled

@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.89 2004-10-12 13:48:56 matben Exp $
+# $Id: Coccinella.tcl,v 1.90 2004-10-16 13:32:50 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -32,7 +32,7 @@ set state(launchSecs) [clock seconds]
 set argv [lsearch -all -not -inline -regexp $argv {-psn_\d*}]
 set argc [llength $argv]
 
-# We use a variable 'this(platform)' that is more convenient for MacOS X.
+# We use a variable 'this(platform)' that is more convenient for MacOSX.
 switch -- $tcl_platform(platform) {
     unix {
 	if {[string equal [tk windowingsystem] "aqua"]} {
@@ -112,9 +112,9 @@ proc resolve_cmd_realpath {infile} {
 
 # The application major and minor version numbers; should only be written to
 # default file, never read.
-set prefs(majorVers) 0
-set prefs(minorVers) 95
-set prefs(releaseVers) 2
+set prefs(majorVers)    0
+set prefs(minorVers)   95
+set prefs(releaseVers)  2
 set prefs(fullVers) $prefs(majorVers).$prefs(minorVers).$prefs(releaseVers)
 
 # We may be embedded in another application, say an ActiveX component.
@@ -135,7 +135,7 @@ if {$debugLevel == 0} {
     }
 }
 	
-# For debug purposes.
+# For debug purposes. Writing to log file can be helpful to trace infinite loops.
 if {$debugLevel >= 6} {
     set fdLog [open [file join [file dirname [info script]] debug.log] w]
 }
@@ -376,9 +376,12 @@ if {!$havecat} {
     ::msgcat::mclocale en
 }
 
-# Test here if you want a prticular message catalog (en, nl, de, fr, sv,...).
+# Test here if you want a particular message catalog (en, nl, de, fr, sv,...).
 #::msgcat::mclocale en
 ::msgcat::mcload $this(msgcatPath)
+
+# This is a method to override default messages with custom ones for each
+# language.
 if {[file isdirectory $this(msgcatPostPath)]} {
     ::msgcat::mcload $this(msgcatPostPath)
 }
@@ -455,7 +458,8 @@ if {$prefs(Thread)} {
 }
 
 # As an alternative to sourcing tcl code directly, use the package mechanism.
-
+# We should make this a little different!
+# Separate packages into two levels, basic support and application specific.
 ::SplashScreen::SetMsg [mc splashload]
 
 set listOfPackages {
@@ -678,6 +682,8 @@ set prefs(firstLaunch) 0
 ::Debug 7 "auto_path:\n[join $auto_path \n]"
 
 ### The server part ############################################################
+
+# We should do this using hooks instead!
 
 if {$prefs(makeSafeServ)} {
     set canvasSafeInterp [interp create -safe]
