@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.48 2004-01-30 15:33:51 matben Exp $
+# $Id: UI.tcl,v 1.49 2004-02-12 08:48:26 matben Exp $
 
 package require entrycomp
 
@@ -1420,7 +1420,9 @@ proc ::UI::FixMenusWhenSelection {w} {
 	}
 	
 	# If we have a cut/copy/paste row of buttons need to set their state.
-	::UI::CutCopyPasteCheckState $w $setState $haveClipState
+	if {[winfo exists $w]} {
+	    ::UI::CutCopyPasteCheckState $w $setState $haveClipState
+	}
     } 
     
     # Invoke any callbacks from 'addons'.

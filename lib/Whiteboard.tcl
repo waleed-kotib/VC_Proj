@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.17 2004-02-05 14:00:23 matben Exp $
+# $Id: Whiteboard.tcl,v 1.18 2004-02-12 08:48:26 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -627,6 +627,8 @@ proc ::WB::BuildWhiteboard {wtop args} {
     if {[info exists opts(-jid)]} {
 	set jidToWtop($opts(-jid)) $wtop
     }
+    Debug 3 "\tjidToWtop="
+    Debug 3 "[parray jidToWtop]"
     if {[string equal $prefs(protocol) "jabber"]} {
 	set isConnected [::Jabber::IsConnected]
     } else {
@@ -784,6 +786,9 @@ proc ::WB::BuildWhiteboard {wtop args} {
 	::WB::FixMenusWhen $wtop "connect"
     }
     ::CanvasText::Init $wapp(can)
+    
+    # Create the undo/redo object.
+    set state(undotoken) [undo::new -command [list ::UI::UndoConfig $wtop]]
 
     # Set up paste menu if something on the clipboard.
     ::WB::GetFocus $wtop $w
@@ -795,9 +800,6 @@ proc ::WB::BuildWhiteboard {wtop args} {
     bind $wapp(can) <<Cut>>   [list ::CanvasCCP::CutCopyPasteCmd cut]
     bind $wapp(can) <<Copy>>  [list ::CanvasCCP::CutCopyPasteCmd copy]
     bind $wapp(can) <<Paste>> [list ::CanvasCCP::CutCopyPasteCmd paste]
-    
-    # Create the undo/redo object.
-    set state(undotoken) [undo::new -command [list ::UI::UndoConfig $wtop]]
     
     # Set window position only for the first whiteboard on screen.
     # Subsequent whiteboards are placed by the window manager.
@@ -819,6 +821,7 @@ proc ::WB::BuildWhiteboard {wtop args} {
     if {[info exists opts(-file)]} {
 	::CanvasFile::DrawCanvasItemFromFile $wtop $opts(-file)
     }
+    Debug 3 "::WB::BuildWhiteboard wtop=$wtop EXIT EXIT EXIT....."
 }
 
 
@@ -1133,9 +1136,9 @@ proc ::WB::GetWtopFromJabberType {type jid {thread {}}} {
 	groupchat {
 	
 	    # The jid is typically the 'roomjid/nickorhash' but can be the room itself.
-	    regexp {(^[^@]+@[^/]+)(/.+)?} $jid match jid x
-	    if {[info exists jidToWtop($jid)]} {
-		set wtop $jidToWtop($jid)
+	    jlib::splitjid $jid jid2 resource
+	    if {[info exists jidToWtop($jid2)]} {
+		set wtop $jidToWtop($jid2)
 	    }	    
 	}
 	normal {
@@ -1147,7 +1150,7 @@ proc ::WB::GetWtopFromJabberType {type jid {thread {}}} {
     }
     
     # Verify that toplevel actually exists.
-    if {[string length $wtop]} {
+    if {[string length $wtop] > 0} {
 	if {[string equal $wtop "."]} {
 	    set w .
 	} else {

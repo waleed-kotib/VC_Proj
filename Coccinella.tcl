@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.41 2004-02-09 08:26:07 matben Exp $
+# $Id: Coccinella.tcl,v 1.42 2004-02-12 08:48:20 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -203,6 +203,7 @@ set this(altResourcedbPath) [file join $this(prefsPath) resources]
 set this(soundsPath)        [file join $this(path) sounds]
 set this(altSoundsPath)     [file join $this(prefsPath) sounds]
 set this(themePrefsPath)    [file join $this(prefsPath) theme]
+set this(msgcatPath)        [file join $this(path) msgs]
 set this(internalIPnum)     127.0.0.1
 set this(internalIPname)    "localhost"
 
@@ -308,17 +309,21 @@ if {[file exists $this(binPath)]} {
     set this(binPath) {}
 }
 
-# Read our theme prefs file, if any, containing the theme name.
+# Read our theme prefs file, if any, containing the theme name and locale.
 package require Theme
 ::Theme::Init
 
 # The message catalog for language customization. Use 'en' as fallback.
 package require msgcat
-set this(msgcatPath) [file join $this(path) msgs]
-if {[string match -nocase "c" [::msgcat::mclocale]]} {
-    ::msgcat::mclocale en
+if {$prefs(messageLocale) == ""} {
+    if {[string match -nocase "c" [::msgcat::mclocale]]} {
+	::msgcat::mclocale en
+    }
+    set locale [::msgcat::mclocale]
+} else {
+    set locale $prefs(messageLocale)
+    ::msgcat::mclocale $locale
 }
-set locale [::msgcat::mclocale]
 set langs [glob -nocomplain -tails -directory $this(msgcatPath) *.msg]
 set havecat 0
 foreach f $langs {

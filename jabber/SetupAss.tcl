@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: SetupAss.tcl,v 1.19 2004-01-27 08:48:06 matben Exp $
+# $Id: SetupAss.tcl,v 1.20 2004-02-12 08:48:26 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -31,6 +31,7 @@ proc ::Jabber::SetupAss::SetupAss { } {
     global  this prefs wDlgs
     
     variable finished
+    variable locale
 
     set w $wDlgs(setupass)
     if {[winfo exists $w]} {
@@ -54,13 +55,32 @@ proc ::Jabber::SetupAss::SetupAss { } {
     set p1 [$su newpage "intro"   \
       -headtext [::msgcat::mc suheadtxt]]
     pack [frame $p1.fr] -padx 10 -pady 8 -side top -anchor w
-    message $p1.fr.msg1 -width 260 -anchor w -text   \
-      [::msgcat::mc suintro1]
-    message $p1.fr.msg2 -width 260 -anchor w -text   \
-      [::msgcat::mc suintro2]
-    message $p1.fr.msg3 -width 260 -anchor w -text   \
-      [::msgcat::mc suintro3]
+    message $p1.fr.msg1 -width 260 -anchor w -text [::msgcat::mc suintro1]
+    message $p1.fr.msg2 -width 260 -anchor w -text [::msgcat::mc suintro2]
+    message $p1.fr.msg3 -width 260 -anchor w -text [::msgcat::mc suintro3]
     pack $p1.fr.msg1 $p1.fr.msg2 $p1.fr.msg3 -side top -anchor w -fill x -pady 4
+    
+    # Language catalog.
+    set plang [$su newpage "language" -headtext [::msgcat::mc Language]]
+    pack [frame $plang.fr] -padx 10 -pady 8 -side top -anchor w
+    message $plang.fr.msg1 -width 260 -text [::msgcat::mc sulang]
+
+    set langs {}
+    foreach f [glob -nocomplain -tails -directory $this(msgcatPath) *.msg] {
+	lappend langs [file rootname $f]
+    }
+    eval {tk_optionMenu $plang.fr.pop [namespace current]::locale} $langs
+    if {$prefs(messageLocale) == ""} {
+	set locale [lindex [split [::msgcat::mclocale] _] 0]
+    } else {
+	set locale $prefs(messageLocale)
+    }
+    button $plang.fr.def -text [::msgcat::mc Default] -command \
+      [namespace current]::DefaultLang
+    
+    pack $plang.fr.msg1 -side top -anchor w -fill x -pady 4
+    pack $plang.fr.pop -side top -anchor w -pady 4
+    pack $plang.fr.def -side top -anchor w -pady 4
     
     # Server.
     set p2 [$su newpage "server" -headtext [::msgcat::mc {Jabber Server}]]
@@ -124,15 +144,28 @@ proc ::Jabber::SetupAss::NextPage {w page} {
     variable password
     
     # Verify that it is ok before showing the next page.
-    if {[string equal $page "username"]} {
-	if {([string length $username] == 0) || ([string length $password] == 0)} {
-	    tk_messageBox -icon error -title [::msgcat::mc {Empty Fields}] \
-	      -message [::msgcat::mc messsuassfillin] -parent $w
-	    return -code 3
+    switch -- $page {
+	username {
+	    if {($username == "") || ($password == "")} {
+		tk_messageBox -icon error -title [::msgcat::mc {Empty Fields}] \
+		  -message [::msgcat::mc messsuassfillin] -parent $w
+		return -code 3
+	    }
+	}
+	language {
+	    	    
 	}
     }
 }
     
+proc ::Jabber::SetupAss::DefaultLang { } {
+    global  prefs
+    variable locale
+    
+    set prefs(messageLocale) ""
+    set locale [lindex [split [::msgcat::mclocale] _] 0]
+}
+
 proc ::Jabber::SetupAss::DoClose {w} {
     
     set ans [tk_messageBox -type yesno -parent $w -icon info \
@@ -154,9 +187,11 @@ proc ::Jabber::SetupAss::DoRegister { } {
 }
 
 proc ::Jabber::SetupAss::DoFinish {w} {
+    global  this prefs
     variable server
     variable username
     variable password
+    variable locale
     variable finished
     variable haveRegistered
     
@@ -166,6 +201,11 @@ proc ::Jabber::SetupAss::DoFinish {w} {
 	# ::Jabber::Register::Register which already done this
 	::Profiles::Set {} $server $username $password home
     }
+    
+    # Load any new message catalog.
+    set prefs(messageLocale) $locale
+    ::msgcat::mclocale $locale
+    ::msgcat::mcload $this(msgcatPath)
     set finished 1
     destroy $w
 }
@@ -369,76 +409,6 @@ proc ::Jabber::SetupAss::ServCommand {w token} {
 	}
     }
     ::httpex::cleanup $token
-    if {$status != "ok"} {
-	catch {destroy $w}
-    }
-}
-
-# This is for the standard http package.
-# 
-# ABONDENED !!!!!!!!!
-
-proc ::Jabber::SetupAss::ServCommandStdHttp {w token} {
-    upvar #0 $token state
-    upvar ::Jabber::jstate jstate
-    variable warrows
-    variable servStatVar
-    variable publicServerList
-    variable wtbl
-
-    ::Jabber::Debug 2 "::Jabber::SetupAss::ServCommand"
-    
-    if {![winfo exists $w]} {
-	return
-    }
-    set servStatVar ""
-    $warrows stop
-    
-    # Investigate 'state' for any exceptions.
-    set status [::http::status $token]
-    
-    ::Jabber::Debug 2 "\ttoken=$token status=$status"
-    
-    switch -- $status {
-	timeout {
-	    tk_messageBox -title [::msgcat::mc Timeout] -icon info -type ok \
-	      -message "Timeout while waiting for response."
-	}
-	error {
-	    tk_messageBox -title "File transport error" -icon error -type ok \
-	      -message "File transport error when getting server list:\
-	      [::httpex::error $token]"
-	}
-	eof {
-	    tk_messageBox -title "File transport error" -icon error -type ok \
-	      -message "The server closed the socket without replying."	   
-	}
-	reset {
-	    # Did this ourself?
-	}
-	ok {
-	    
-	    # Get and parse xml.
-	    set xml [::http::data $token]    
-	    set token [tinydom::parse $xml]
-	    set xmllist [tinydom::documentElement $token]
-	    set publicServerList {}
-	    
-	    foreach elem [tinydom::children $xmllist] {
-		switch -- [tinydom::tagname $elem] {
-		    item {
-			catch {unset attrArr}
-			array set attrArr [tinydom::attrlist $elem]
-			lappend publicServerList  \
-			  [list $attrArr(jid) $attrArr(name)]
-		    }
-		}
-	    }
-
-	    $wtbl insertlist end $publicServerList
-	}
-    }
-    ::http::cleanup $token
     if {$status != "ok"} {
 	catch {destroy $w}
     }

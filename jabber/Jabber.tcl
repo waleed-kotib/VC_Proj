@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.65 2004-02-05 14:00:21 matben Exp $
+# $Id: Jabber.tcl,v 1.66 2004-02-12 08:48:26 matben Exp $
 
 package provide Jabber 1.0
 
@@ -255,7 +255,7 @@ proc ::Jabber::Debug {num str} {
 
 proc ::Jabber::FactoryDefaults { } {
     global  this env prefs wDlgs sysFont
-
+    
     variable jstate
     variable jprefs
     variable jserver
@@ -284,7 +284,7 @@ proc ::Jabber::FactoryDefaults { } {
     
     # Shall we query ip number directly when verified Coccinella?
     set jprefs(preGetIP) 1
-	
+    
     # Preferred groupchat protocol (gc-1.0|muc).
     # 'muc' uses 'conference' as fallback.
     set jprefs(prefgchatproto) "muc"
@@ -308,14 +308,14 @@ proc ::Jabber::FactoryDefaults { } {
     # Abondened!!!!!!!
     set jprefs(autoupdateCheck) 0
     set jprefs(autoupdateShow,$prefs(fullVers)) 1
-        
+    
     # Sounds.
     set jprefs(snd,online) 1
     set jprefs(snd,offline) 1
     set jprefs(snd,newmsg) 1
     set jprefs(snd,statchange) 1
     set jprefs(snd,connected) 1
-
+    
     set jprefs(showMsgNewWin) 1
     set jprefs(inbox2click) "newwin"
     
@@ -355,7 +355,7 @@ proc ::Jabber::FactoryDefaults { } {
     
     # The User Info of servers.    
     set jserver(this) ""
-
+    
     # New... Profiles. These are just leftovers that shall be removed later.
     set jserver(profile)  \
       {jabber.org {jabber.org myUsername myPassword home}}
@@ -364,7 +364,7 @@ proc ::Jabber::FactoryDefaults { } {
     
     #
     set jprefs(urlServersList) "http://www.jabber.org/servers.php"
-        
+    
     switch $this(platform) {
 	macintosh - macosx {
 	    set jprefs(inboxPath) [file join $this(prefsPath) Inbox.tcl]
@@ -386,33 +386,33 @@ proc ::Jabber::FactoryDefaults { } {
 	{command   mCopy             {::UI::CutCopyPasteCmd copy}          disabled C}
 	{command   mPaste            {::UI::CutCopyPasteCmd paste}         disabled V}
     }
-      
+    
     # Templates for popup menus for the roster, browse, and groupchat windows.
     # The roster:
     variable popMenuDefs
-
+    
     set popMenuDefs(roster,def) {
-      mMessage       users     {::Jabber::NewMsg::Build -to &jid}
-      mChat          user      {::Jabber::Chat::StartThread &jid3}
-      mWhiteboard    wb        {::Jabber::WB::NewWhiteboard &jid3}
-      mSendFile      user      {::Jabber::OOB::BuildSet &jid3}
-      separator      {}        {}
-      mLastLogin/Activity user {::Jabber::GetLast &jid}
-      mvCard         user      {::VCard::Fetch other &jid}
-      mAddNewUser    any       {
-	  ::Jabber::Roster::NewOrEditItem new
-      }
-      mEditUser      user      {
-	  ::Jabber::Roster::NewOrEditItem edit -jid &jid
-      }
-      mVersion       user      {::Jabber::GetVersion &jid3}
-      mChatHistory   user      {::Jabber::Chat::BuildHistory &jid}
-      mRemoveUser    user      {::Jabber::Roster::SendRemove &jid}
-      separator      {}        {}
-      mStatus        any       @::Jabber::Roster::BuildPresenceMenu
-      mRefreshRoster any       {::Jabber::Roster::Refresh}
+	mMessage       users     {::Jabber::NewMsg::Build -to &jid}
+	mChat          user      {::Jabber::Chat::StartThread &jid3}
+	mWhiteboard    wb        {::Jabber::WB::NewWhiteboard &jid3}
+	mSendFile      user      {::Jabber::OOB::BuildSet &jid3}
+	separator      {}        {}
+	mLastLogin/Activity user {::Jabber::GetLast &jid}
+	mvCard         user      {::VCard::Fetch other &jid}
+	mAddNewUser    any       {
+	    ::Jabber::Roster::NewOrEditItem new
+	}
+	mEditUser      user      {
+	    ::Jabber::Roster::NewOrEditItem edit -jid &jid
+	}
+	mVersion       user      {::Jabber::GetVersion &jid3}
+	mChatHistory   user      {::Jabber::Chat::BuildHistory &jid}
+	mRemoveUser    user      {::Jabber::Roster::SendRemove &jid}
+	separator      {}        {}
+	mStatus        any       @::Jabber::Roster::BuildPresenceMenu
+	mRefreshRoster any       {::Jabber::Roster::Refresh}
     }  
-      
+    
     # Can't run our http server on macs :-(
     if {[string equal $this(platform) "macintosh"]} {
 	set popMenuDefs(roster,def) [lreplace $popMenuDefs(roster,def) 9 11]
@@ -420,55 +420,55 @@ proc ::Jabber::FactoryDefaults { } {
     
     # The browse:
     set popMenuDefs(browse,def) {
-      mMessage       user      {::Jabber::NewMsg::Build -to &jid}
-      mChat          user      {::Jabber::Chat::StartThread &jid}
-      mWhiteboard    wb        {::Jabber::WB::NewWhiteboard &jid}
-      mEnterRoom     room      {
-	  ::Jabber::GroupChat::EnterOrCreate enter -roomjid &jid -autoget 1
-      }
-      mCreateRoom    conference {::Jabber::GroupChat::EnterOrCreate create \
-	-server &jid}
-      separator      {}        {}
-      mInfo          jid       {::Jabber::Browse::GetInfo &jid}
-      mLastLogin/Activity jid  {::Jabber::GetLast &jid}
-      mLocalTime     jid       {::Jabber::GetTime &jid}
-      mvCard         jid       {::VCard::Fetch other &jid}
-      mVersion       jid       {::Jabber::GetVersion &jid}
-      separator      {}        {}
-      mSearch        search    {
-	  ::Jabber::Search::Build -server &jid -autoget 1
-      }
-      mRegister      register  {
-	  ::Jabber::GenRegister::BuildRegister -server &jid -autoget 1
-      }
-      mUnregister    register  {::Jabber::Register::Remove &jid}
-      separator      {}        {}
-      mRefresh       jid       {::Jabber::Browse::Refresh &jid}
-      mAddServer     any       {::Jabber::Browse::AddServer}
+	mMessage       user      {::Jabber::NewMsg::Build -to &jid}
+	mChat          user      {::Jabber::Chat::StartThread &jid}
+	mWhiteboard    wb        {::Jabber::WB::NewWhiteboard &jid}
+	mEnterRoom     room      {
+	    ::Jabber::GroupChat::EnterOrCreate enter -roomjid &jid -autoget 1
+	}
+	mCreateRoom    conference {::Jabber::GroupChat::EnterOrCreate create \
+	  -server &jid}
+	separator      {}        {}
+	mInfo          jid       {::Jabber::Browse::GetInfo &jid}
+	mLastLogin/Activity jid  {::Jabber::GetLast &jid}
+	mLocalTime     jid       {::Jabber::GetTime &jid}
+	mvCard         jid       {::VCard::Fetch other &jid}
+	mVersion       jid       {::Jabber::GetVersion &jid}
+	separator      {}        {}
+	mSearch        search    {
+	    ::Jabber::Search::Build -server &jid -autoget 1
+	}
+	mRegister      register  {
+	    ::Jabber::GenRegister::BuildRegister -server &jid -autoget 1
+	}
+	mUnregister    register  {::Jabber::Register::Remove &jid}
+	separator      {}        {}
+	mRefresh       jid       {::Jabber::Browse::Refresh &jid}
+	mAddServer     any       {::Jabber::Browse::AddServer}
     }
     
     # The groupchat:
     set popMenuDefs(groupchat,def) {
-      mMessage       user      {::Jabber::NewMsg::Build -to &jid}
-      mChat          user      {::Jabber::Chat::StartThread &jid}
-      mWhiteboard    wb        {::Jabber::WB::NewWhiteboard &jid}
+	mMessage       user      {::Jabber::NewMsg::Build -to &jid}
+	mChat          user      {::Jabber::Chat::StartThread &jid}
+	mWhiteboard    wb        {::Jabber::WB::NewWhiteboard &jid}
     }    
     
     # The agents stuff:
     set popMenuDefs(agents,def) {
-      mSearch        search    {
-	  ::Jabber::Search::Build -server &jid -autoget 1
-      }
-      mRegister      register  {
-	  ::Jabber::GenRegister::BuildRegister -server &jid -autoget 1
-      }
-      mUnregister    register  {::Jabber::Register::Remove &jid}
-      separator      {}        {}
-      mEnterRoom     groupchat {::Jabber::GroupChat::EnterOrCreate enter}
-      mLastLogin/Activity jid  {::Jabber::GetLast &jid}
-      mLocalTime     jid       {::Jabber::GetTime &jid}
-      mVersion       jid       {::Jabber::GetVersion &jid}
-   }    
+	mSearch        search    {
+	    ::Jabber::Search::Build -server &jid -autoget 1
+	}
+	mRegister      register  {
+	    ::Jabber::GenRegister::BuildRegister -server &jid -autoget 1
+	}
+	mUnregister    register  {::Jabber::Register::Remove &jid}
+	separator      {}        {}
+	mEnterRoom     groupchat {::Jabber::GroupChat::EnterOrCreate enter}
+	mLastLogin/Activity jid  {::Jabber::GetLast &jid}
+	mLocalTime     jid       {::Jabber::GetTime &jid}
+	mVersion       jid       {::Jabber::GetVersion &jid}
+    }    
 }
 
 # Jabber::SetUserPreferences --
@@ -2673,6 +2673,7 @@ proc ::Jabber::WB::NewWhiteboard {jid args} {
     # Make a fresh whiteboard window. Use any -type argument.
     # Note that the jid can belong to a room but we may still have a p2p chat.
     #    jid is room: groupchat live
+    #    jid is a user in a room: chat
     #    jid is ordinary available user: chat
     #    jid is ordinary but unavailable user: normal message
     jlib::splitjid $jid jid2 res
@@ -2681,12 +2682,16 @@ proc ::Jabber::WB::NewWhiteboard {jid args} {
 	if {[string equal $argsArr(-type) "groupchat"]} {
 	    set isRoom 1
 	}
-    } elseif {[$jstate(jlib) service isroom $jid2]} {
+    } elseif {[$jstate(jlib) service isroom $jid]} {
 	set isRoom 1
+    }
+    set isUserInRoom 0
+    if {[$jstate(jlib) service isroom $jid2] && [string length $res]} {
+	set isUserInRoom 1
     }
     set isAvailable [$jstate(roster) isavailable $jid]
     
-    ::Jabber::Debug 2 "\tisRoom=$isRoom, isAvailable=$isAvailable"
+    ::Jabber::Debug 2 "\tisRoom=$isRoom, isUserInRoom=$isUserInRoom, isAvailable=$isAvailable"
     
     if {$isRoom} {
 	
@@ -2711,7 +2716,7 @@ proc ::Jabber::WB::NewWhiteboard {jid args} {
 	  -toentrystate disabled -sendbuttonstate disabled \
 	  -serverentrystate disabled]
 	set sendLive 1
-    } elseif {$isAvailable} {
+    } elseif {$isAvailable || $isUserInRoom} {
 	if {[info exists argsArr(-thread)]} {
 	    set threadID $argsArr(-thread)
 	} else {
@@ -2783,9 +2788,7 @@ proc ::Jabber::WB::GroupChatMsg {args} {
     
     # The -from argument is either the room itself, or usually a user in
     # the room.
-    if {![regexp {(^[^@]+@[^/]+)(/.*)?} $argsArr(-from) match roomjid]} {
-	return -code error "The jid we got \"$argsArr(-from)\" was not well-formed!"
-    }
+    jlib::splitjid $argsArr(-from) roomjid resource
     set wtop [::WB::GetWtopFromJabberType "groupchat" $roomjid]
     if {$wtop == ""} {
 	set wtop [eval {::Jabber::WB::NewWhiteboard $roomjid} $args]

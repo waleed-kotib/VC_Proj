@@ -20,13 +20,15 @@ Now you edit it in your system encoding. Change all occurences of
 for instance. The syntax for each entry in a message catalog is:
 ::msgcat::mcset langCode key ?translatedString?
 Add the 'translatedString' if missing, and do translate if exists.
+Save your file as 'fr.sys', for instance.
 
 3.  Utf-8 encode the file using the script below. Now you pick a file
 name 'fr.msg' if French, for instance.
 
-4.  In order to load the correct message catalog, you must set the
-language code in the file 'Coccinella.tcl' 
-::msgcat::mclocale languageCode
+4.  You new language catalog should now be loaded automatically.
+
+5.  As a check that all entries in your message catalog exists you
+may use the small script at the end of this file.
 
 Now try it...
 
@@ -38,12 +40,14 @@ Use the following code to do this:
 # Translate a file from system encoding to utf-8
 
 set src [tk_getOpenFile -title {Pick your language catalog}]
+if {$src == ""} return
 set new "[file rootname [file tail $src]].msg"
 set fdsrc [open $src "r"]
 set txt [read $fdsrc];
 close $fdsrc
 set dst [tk_getSaveFile -title {Pick new catalog}  \
 	-initialdir [file dirname $src] -initialfile $new]
+if {$dst == ""} return
 set fddst [open $dst "w"]
 fconfigure $fddst -encoding utf-8
 puts $fddst $txt
@@ -76,3 +80,37 @@ if {$::tcl_platform(platform) == "macintosh"} {
     set creator [file attributes $src -creator]
     file attributes $dst -creator $creator
 }
+
+........................................................................
+
+# If you want to compare an exiisting message catalog with the original
+# en.msg to see if any parts missing use the script below.
+# Quit Wish when finished!
+
+namespace eval ::msgcat:: {}
+proc ::msgcat::mcset {lang key {str ""}} {
+    global arr
+    set arr($lang,$key) 1
+}
+set src [tk_getOpenFile -title {Pick en.msg File} \
+	-filetypes {{{Message Catalog}       {.msg}}}]
+if {$src == ""} return
+if {[file tail $src] != "en.msg"} {
+    tk_messageBox -message "Wrong file!"
+    return
+}
+set dst [tk_getOpenFile -title {Pick Your Message Catalog} \
+	-filetypes {{{Message Catalog}       {.msg}}}]
+if {$dst == ""} return
+set rootdst [file rootname [file tail $dst]]
+source $src
+source $dst
+foreach name [array names arr en,*] {
+    regexp {en,(.*)} $name match key
+    if {![info exists arr($rootdst,$key)]} {
+         puts "Missing: $key"
+    }
+}
+unset arr
+
+........................................................................

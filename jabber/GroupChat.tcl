@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.40 2004-01-31 13:46:06 matben Exp $
+# $Id: GroupChat.tcl,v 1.41 2004-02-12 08:48:23 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -115,9 +115,10 @@ proc ::Jabber::GroupChat::HaveOrigConference {{roomjid {}}} {
 	
 	# Require that conference service browsed and that we have the
 	# original jabber:iq:conference
-	set confserver [$jstate(browse) getparentjid $roomjid]
-	if {[$jstate(browse) isbrowsed $confserver]} {
-	    if {$jstate(conference,$confserver)} {
+	set conf [$jstate(browse) getparentjid $roomjid]
+	if {[$jstate(browse) isbrowsed $conf]} {
+	    if {[info exists jstate(conference,$conf)] && \
+	      $jstate(conference,$conf)} {
 		set ans 1
 	    }
 	}
