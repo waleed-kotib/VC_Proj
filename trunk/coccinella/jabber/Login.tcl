@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.21 2004-01-13 14:50:21 matben Exp $
+# $Id: Login.tcl,v 1.22 2004-01-14 10:24:55 matben Exp $
 
 package provide Login 1.0
 
@@ -28,7 +28,7 @@ namespace eval ::Jabber::Login:: {
 # Arguments:
 #       
 # Results:
-#       name of button pressed; "cancel" or "login".
+#       none
 
 proc ::Jabber::Login::Login { } {
     global  this prefs wDlgs
@@ -44,6 +44,7 @@ proc ::Jabber::Login::Login { } {
     variable digest
     variable ssl 0
     variable invisible 0
+    variable priority 0
     variable ip ""
     variable wtri
     variable wtrilab
@@ -53,6 +54,7 @@ proc ::Jabber::Login::Login { } {
     
     set w $wDlgs(jlogin)
     if {[winfo exists $w]} {
+	raise $w
 	return
     }
     set wtoplevel $w
@@ -150,6 +152,10 @@ proc ::Jabber::Login::Login { } {
     checkbutton $wfrmore.cinv  \
       -text "  [::msgcat::mc {Login as invisible}]"  \
       -variable [namespace current]::invisible
+    frame $wfrmore.fpri
+    pack [label $wfrmore.fpri.l -text "[::msgcat::mc {Priority}]:"] -side left
+    pack [spinbox $wfrmore.fpri.sp -textvariable [namespace current]::priority \
+      -width 5 -state readonly -increment 1 -from -128 -to 127] -side left -padx 4
     frame $wfrmore.fr
     pack [label $wfrmore.fr.l -text "[::msgcat::mc {IP address}]:"] -side left
     pack [entry $wfrmore.fr.e -textvariable [namespace current]::ip] -side left
@@ -157,7 +163,8 @@ proc ::Jabber::Login::Login { } {
     grid $wfrmore.cdig -sticky w -pady 2
     grid $wfrmore.cssl -sticky w -pady 2
     grid $wfrmore.cinv -sticky w -pady 2
-    grid $wfrmore.fr -sticky w -pady 2
+    grid $wfrmore.fpri -sticky w -pady 2
+    grid $wfrmore.fr   -sticky w -pady 2
 
     if {!$prefs(tls)} {
 	set ssl 0
@@ -172,6 +179,9 @@ proc ::Jabber::Login::Login { } {
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
       -command [list [namespace current]::DoCancel $w]]  \
       -side right -padx 5 -pady 5
+    pack [button $frbot.btprof -text [::msgcat::mc Profiles]  \
+      -command [namespace current]::Profiles]  \
+      -side left -padx 5 -pady 5
     pack $frbot -side bottom -fill both -expand 1 -padx 8 -pady 6
     
     # Necessary to trace the popup menu variable.
@@ -184,27 +194,31 @@ proc ::Jabber::Login::Login { } {
     bind $w <Escape>  [list ::Jabber::Login::DoCancel $w]
     bind $w <Destroy> [list ::Jabber::Login::DoCancel $w]
     
-    # Grab and focus.
-    set oldFocus [focus]
-    focus $w
-    catch {grab $w}
-    
-    # Wait here for a button press and window to be destroyed.
-    tkwait window $w
-    
-    # Clean up.
-    catch {grab release $w}
-    ::Jabber::Login::Close $w
-    catch {focus $oldFocus}
-    return [expr {($finished <= 0) ? "cancel" : "login"}]
+    if {0} {
+	# Grab and focus.
+	set oldFocus [focus]
+	focus $w
+	catch {grab $w}
+	
+	# Wait here for a button press and window to be destroyed.
+	tkwait window $w
+	
+	# Clean up.
+	catch {grab release $w}
+	::Jabber::Login::Close $w
+	catch {focus $oldFocus}
+	return [expr {($finished <= 0) ? "cancel" : "login"}]
+    }
 }
 
 
 proc ::Jabber::Login::CloseHook {wclose} {
     global  wDlgs
+    variable finished
     
     if {[string equal $wclose $wDlgs(jlogin)]} {
-	puts ::Jabber::Login::CloseHook
+	set finished 0
+	::Jabber::Login::Close $wclose
     }
 }
 
@@ -232,16 +246,21 @@ proc ::Jabber::Login::LessOpts {w} {
 
 proc ::Jabber::Login::DoCancel {w} {
     variable finished
-    
-    ::UI::SaveWinGeom $w
+
     set finished 0
-    catch {destroy $w}
+    ::Jabber::Login::Close $w
+}
+
+proc ::Jabber::Login::Profiles { } {
+    
+    ::Profiles::BuildDialog
 }
 
 proc ::Jabber::Login::Close {w} {
     variable menuVar
     
     # Clean up.
+    ::UI::SaveWinGeom $w
     ::Profiles::SetSelectedName $menuVar
     trace vdelete [namespace current]::menuVar w  \
       [namespace current]::TraceMenuVar
@@ -320,8 +339,7 @@ proc ::Jabber::Login::Doit { } {
 	}
     }    
     set finished 1
-    ::UI::SaveWinGeom $wtoplevel
-    catch {destroy $wtoplevel}
+    ::Jabber::Login::Close $wtoplevel
     
     ::Jabber::UI::SetStatusMessage [::msgcat::mc jawaitresp $server]
     ::Jabber::UI::StartStopAnimatedWave 1
@@ -387,7 +405,7 @@ proc ::Jabber::Login::SocketIsOpen {sock ip port status {msg {}}} {
     
     # Initiate a new stream. Perhaps we should wait for the server <stream>?
     if {[catch {
-	$jstate(jlib) connect $server -socket $sock  \
+	::Jabber::InvokeJlibCmd connect $server -socket $sock  \
 	  -cmd [namespace current]::ConnectProc
     } err]} {
 	::Jabber::UI::SetStatusMessage ""
@@ -440,10 +458,10 @@ proc ::Jabber::Login::ConnectProc {jlibName args} {
 	::Jabber::Debug 3 "argsArray(id)=$argsArray(id), password=$password"
 	
 	set digestedPw [::sha1pure::sha1 $argsArray(id)$password]
-	$jstate(jlib) send_auth $username $resource   \
+	::Jabber::InvokeJlibCmd send_auth $username $resource   \
 	  ::Jabber::Login::ResponseProc -digest $digestedPw
     } else {
-	$jstate(jlib) send_auth $username $resource   \
+	::Jabber::InvokeJlibCmd send_auth $username $resource   \
 	  ::Jabber::Login::ResponseProc -password $password
     }
     
@@ -468,6 +486,7 @@ proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
     variable password
     variable resource
     variable invisible
+    variable priority
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
@@ -491,7 +510,7 @@ proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
 
 	#       There is a potential problem if called from within a xml parser 
 	#       callback which makes the subsequent parsing to fail. (after idle?)
-	after idle $jstate(jlib) disconnect
+	after idle ::Jabber::InvokeJlibCmd disconnect
 	return
     } 
     
@@ -518,12 +537,16 @@ proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
     ::Network::RegisterIP $ipNum "to"
     
     # Login was succesful, set presence.
+    set presArgs {}
+    if {$priority != 0} {
+	lappend presArgs -priority $priority
+    }
     if {$invisible} {
 	set jstate(status) "invisible"
-	::Jabber::SetStatus invisible
+	eval {::Jabber::SetStatus invisible} $presArgs
     } else {
 	set jstate(status) "available"
-	::Jabber::SetStatus available -notype 1
+	eval {::Jabber::SetStatus available -notype 1} $presArgs
     }
     
     # Store our own ip number in a public storage at the server.
