@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasText.tcl,v 1.12 2004-01-15 14:13:00 matben Exp $
+# $Id: CanvasText.tcl,v 1.13 2004-01-30 15:33:51 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 
@@ -652,6 +652,7 @@ proc ::CanvasText::Delete {w {offset 0}} {
 #       Schedules a send operation for our text inserts.
 #       
 # Arguments:
+#       w      the canvas widget.
 #       
 # Results:
 #       none.
@@ -674,6 +675,7 @@ proc ::CanvasText::ScheduleTextBuffer {w} {
 #       Buffer emptied.
 #       
 # Arguments:
+#       w      the canvas widget.
 #       
 # Results:
 #       socket(s) written via 'SendClientCommand'.

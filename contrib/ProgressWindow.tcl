@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ProgressWindow.tcl,v 1.12 2004-01-27 08:48:02 matben Exp $
+# $Id: ProgressWindow.tcl,v 1.13 2004-01-30 15:33:50 matben Exp $
 # 
 #-------------------------------------------------------------------------------
 #
@@ -170,8 +170,12 @@ proc ::ProgressWindow::ProgressWindow {w args} {
     
     toplevel $w -class ProgressWindow
     wm withdraw $w
-    if {[string equal $tcl_platform(platform) "macintosh"]} {
+    if {[string equal $this(platform) "macintosh"]} {
 	::tk::unsupported::MacWindowStyle style $w documentProc
+    } elseif {[string equal $this(platform) "macosx"]} {
+	#::tk::unsupported::MacWindowStyle style $w floating collapseBox
+	::tk::unsupported::MacWindowStyle style $w document \
+	  {collapseBox verticalZoom}
     }
     wm resizable $w 0 0
     

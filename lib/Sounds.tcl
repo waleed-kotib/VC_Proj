@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Sounds.tcl,v 1.16 2004-01-26 07:34:49 matben Exp $
+# $Id: Sounds.tcl,v 1.17 2004-01-30 15:33:51 matben Exp $
 
 package provide Sounds 1.0
 
@@ -324,7 +324,7 @@ proc ::Sounds::BuildPrefsPage {wpage} {
 	set txt $nameToText($name)
 	checkbutton $fr.$name -text "  [::msgcat::mc $txt]"  \
 	  -variable [namespace current]::tmpPrefs($name)
-	button $fr.b${name} -text [::msgcat::mc Play] -padx 4 -pady 1 \
+	button $fr.b${name} -text [::msgcat::mc Play] \
 	  -font $fontS \
 	  -command [list [namespace current]::PlayTmpPrefSound $name]
 	grid $fr.$name    -column 0 -padx 8 -row $row -sticky w

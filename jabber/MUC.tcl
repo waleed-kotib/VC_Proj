@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.20 2004-01-27 08:48:05 matben Exp $
+# $Id: MUC.tcl,v 1.21 2004-01-30 15:33:50 matben Exp $
 
 package require entrycomp
 
@@ -105,6 +105,7 @@ proc ::Jabber::MUC::BuildEnter {args} {
     set enter(w) $w
     array set enter {
 	finished    -1
+	statuscount 0
 	server      ""
 	roomname    ""
 	nickname    ""
@@ -130,13 +131,14 @@ proc ::Jabber::MUC::BuildEnter {args} {
     ::Jabber::Debug 2 "::Jabber::MUC::BuildEnter confServers='$confServers'"
 
     set wcomboserver $frtop.eserv
-    set wcomboroom $frtop.eroom
+    set wcomboroom   $frtop.eroom
 
-    ::combobox::combobox $wcomboserver -width 20  \
+    # First combobox: servers.
+    ::combobox::combobox $wcomboserver -width 20 -editable 0 \
       -textvariable $token\(server)  \
-      -command [list [namespace current]::ConfigRoomList $wcomboroom] -editable 0
+      -command [list [namespace current]::ConfigRoomList $token]
     eval {$frtop.eserv list insert end} $confServers
-    label $frtop.lroom -text "[::msgcat::mc {Room name}]:" -font $fontSB
+    label $frtop.lroom -text "[::msgcat::mc {Room name}]:"
     
     # Find the default conferencing server.
     if {[info exists argsArr(-server)]} {
@@ -145,17 +147,9 @@ proc ::Jabber::MUC::BuildEnter {args} {
 	set enter(server) [lindex $confServers 0]
     }
 
-    set roomList {}
-    if {[string length $enter(server)] > 0} {
-	set allRooms [$jstate(browse) getchilds $enter(server)]
-	foreach roomJid $allRooms {
-	    regexp {([^@]+)@.+} $roomJid match room
-	    lappend roomList $room
-	}
-    }
-    ::combobox::combobox $wcomboroom -width 20   \
-      -textvariable $token\(roomname) -editable 0
-    eval {$frtop.eroom list insert end} $roomList
+    # Second combobox: rooms for above server. Fill in below.
+    ::combobox::combobox $wcomboroom -width 20 -editable 0  \
+      -textvariable $token\(roomname)
 
     if {[info exists argsArr(-roomjid)]} {
 	regexp {^([^@]+)@([^/]+)} $argsArr(-roomjid) match enter(roomname)  \
@@ -194,7 +188,8 @@ proc ::Jabber::MUC::BuildEnter {args} {
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
     set wsearrows $frbot.arr
-    set wbtenter $frbot.btok
+    set wstatus   $frbot.stat
+    set wbtenter  $frbot.btok
     pack [button $wbtenter -text [::msgcat::mc Enter] \
       -default active -command [list [namespace current]::DoEnter $token]]  \
       -side right -padx 5 -pady 5
@@ -203,13 +198,28 @@ proc ::Jabber::MUC::BuildEnter {args} {
       -side right -padx 5 -pady 5
     pack [::chasearrows::chasearrows $wsearrows -size 16] \
       -side left -padx 5 -pady 5
+    pack [label $wstatus -textvariable $token\(status)] \
+      -side left -padx 5 -pady 5
     pack $frbot -side bottom -fill x -expand 0 -padx 8 -pady 6
+
+    set enter(wcomboserver) $wcomboserver
+    set enter(wcomboroom)   $wcomboroom
+    set enter(wsearrows)    $wsearrows
+    set enter(wbtenter)     $wbtenter
+    
+    # Fill in room list if exist else browse.
+    if {[$jstate(browse) isbrowsed $enter(server)]} {
+	::Jabber::MUC::FillRoomList $token
+    } else {
+	::Jabber::MUC::BusyEnterDlgIncr $token
+	::Jabber::InvokeJlibCmd browse_get $enter(server)  \
+	  -command [list [namespace current]::BrowseServiceCB $token]
+    }
 
     wm resizable $w 0 0
 
     bind $w <Return> [list $wbtenter invoke]
     
-    # Grab and focus.
     set oldFocus [focus]
     if {[info exists argsArr(-roomjid)]} {
     	focus $frtop.enick
@@ -218,12 +228,10 @@ proc ::Jabber::MUC::BuildEnter {args} {
     } else {
     	focus $frtop.eserv
     }
-    #catch {grab $w}
     
     # Wait here for a button press and window to be destroyed. BAD?
     tkwait window $w
     
-    #catch {grab release $w}
     catch {focus $oldFocus}
     ::UI::SaveWinGeom $w
     set finished $enter(finished)
@@ -236,17 +244,65 @@ proc ::Jabber::MUC::BuildEnter {args} {
 #       When a conference server is picked in the server combobox, the 
 #       room combobox must get the available rooms for this particular server.
 
-proc ::Jabber::MUC::ConfigRoomList {wcomboroom wcombo confserver} {    
+proc ::Jabber::MUC::ConfigRoomList {token wcombo confserver} {    
+    variable $token
+    upvar 0 $token enter
     upvar ::Jabber::jstate jstate
 
-    set allRooms [$jstate(browse) getchilds $confserver]
-    set roomList {}
-    foreach roomJid $allRooms {
-	regexp {([^@]+)@.+} $roomJid match room
-	lappend roomList $room
+    # Fill in room list if exist else browse.
+    if {[$jstate(browse) isbrowsed $enter(server)]} {
+	::Jabber::MUC::FillRoomList $token
+    } else {
+	::Jabber::MUC::BusyEnterDlgIncr $token
+	::Jabber::InvokeJlibCmd browse_get $enter(server)  \
+	  -command [list [namespace current]::BrowseServiceCB $token]
     }
-    $wcomboroom list delete 0 end
-    eval {$wcomboroom list insert end} $roomList
+}
+
+proc ::Jabber::MUC::FillRoomList {token} {
+    variable $token
+    upvar 0 $token enter
+    upvar ::Jabber::jstate jstate
+    
+    set roomList {}
+    if {[string length $enter(server)] > 0} {
+	set allRooms [$jstate(browse) getchilds $enter(server)]
+	foreach roomJid $allRooms {
+	    regexp {([^@]+)@.+} $roomJid match room
+	    lappend roomList $room
+	}
+    }
+    $enter(wcomboroom) list delete 0 end
+    eval {$enter(wcomboroom) list insert end} $roomList
+    set enter(roomname) [lindex $roomList 0]
+}
+
+proc ::Jabber::MUC::BusyEnterDlgIncr {token {num 1}} {
+    variable $token
+    upvar 0 $token enter
+    
+    incr enter(statuscount) $num
+    
+    if {$enter(statuscount) > 0} {
+	set enter(status) "Getting rooms..." 
+	$enter(wsearrows) start
+	$enter(wcomboserver) configure -state disabled
+	$enter(wcomboroom)   configure -state disabled
+	$enter(wbtenter)     configure -state disabled
+    } else {
+	set enter(statuscount) 0
+	set enter(status) ""
+	$enter(wsearrows) stop
+	$enter(wcomboserver) configure -state normal
+	$enter(wcomboroom)   configure -state normal
+	$enter(wbtenter)     configure -state normal
+    }
+}
+
+proc ::Jabber::MUC::BrowseServiceCB {token browsename type jid subiq} {
+    
+    ::Jabber::MUC::FillRoomList $token
+    ::Jabber::MUC::BusyEnterDlgIncr $token -1
 }
 
 proc ::Jabber::MUC::DoEnter {token} {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.38 2004-01-23 14:26:19 matben Exp $
+# $Id: GroupChat.tcl,v 1.39 2004-01-30 15:33:50 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -239,8 +239,8 @@ proc ::Jabber::GroupChat::SetProtocol {roomJid protocol} {
     # If groupchat window already exists.
     if {[info exists locals($roomJid,wtop)] && \
     [winfo exists $locals($roomJid,wtop)]} {
-	$locals($roomJid,wbtinfo) configure -state normal
-	$locals($roomJid,wbtnick) configure -state normal
+	$locals($roomJid,wbtinfo)   configure -state normal
+	$locals($roomJid,wbtnick)   configure -state normal
 	$locals($roomJid,wbtinvite) configure -state normal
     }
 }
@@ -376,7 +376,7 @@ proc ::Jabber::GroupChat::DoEnter {token} {
     if {($enter(server) == "") || ($enter(roomname) == "") ||  \
       ($enter(nickname) == "")} {
 	tk_messageBox -title [::msgcat::mc Warning] -type ok -message \
-	  [::msgcat::mc jamessgchatfields]
+	  [::msgcat::mc jamessgchatfields] -parent $enter(w)
 	return
     }
 

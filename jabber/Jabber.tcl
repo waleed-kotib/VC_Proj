@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.61 2004-01-27 08:48:03 matben Exp $
+# $Id: Jabber.tcl,v 1.62 2004-01-30 15:33:50 matben Exp $
 
 package provide Jabber 1.0
 
@@ -289,6 +289,9 @@ proc ::Jabber::FactoryDefaults { } {
     
     # Automatically browse users with resource?
     set jprefs(autoBrowseUsers) 1
+    
+    # Automatically browse conference items?
+    set jprefs(autoBrowseConference) 0
     
     # Show special icons for foreign IM systems?
     set jprefs(haveIMsysIcons) 0

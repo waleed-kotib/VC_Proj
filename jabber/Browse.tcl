@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.26 2004-01-27 08:48:03 matben Exp $
+# $Id: Browse.tcl,v 1.27 2004-01-30 15:33:50 matben Exp $
 
 package require chasearrows
 
@@ -150,6 +150,7 @@ proc ::Jabber::Browse::Callback {browseName type jid subiq} {
     variable wtop
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
+    upvar ::Jabber::jprefs jprefs
     
     ::Jabber::Debug 2 "::Jabber::Browse::Callback browseName=$browseName, type=$type,\
       jid=$jid, subiq='[string range $subiq 0 30] ...'"
@@ -249,8 +250,9 @@ proc ::Jabber::Browse::Callback {browseName type jid subiq} {
 			}
 
 			# Auto browse only 'public' jabber conferences.
-			if {[info exists cattrArr(type)] &&   \
-			  $cattrArr(type) == "public"} {
+			if {$jprefs(autoBrowseConference) &&  \
+			  [info exists cattrArr(type)] &&   \
+			  ($cattrArr(type) == "public")} {
 			    ::Jabber::Browse::Get $confjid -silent 1
 			}
 		    }
@@ -468,7 +470,7 @@ proc ::Jabber::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::nsToText nsToText
     
-    ::Jabber::Debug 2 "::Jabber::Browse::AddToTree parentsJidList='$parentsJidList', jid=$jid"
+    ::Jabber::Debug 5 "::Jabber::Browse::AddToTree parentsJidList='$parentsJidList', jid=$jid"
 
     # Verify that parent tree item really exists!
     if {![$wtree isitem $parentsJidList]} {
@@ -509,7 +511,7 @@ proc ::Jabber::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
 	    set jidList [concat $parentsJidList $jid]
 	    set allChildren [wrapper::getchildren $xmllist]
 	    
-	    ::Jabber::Debug 3 "   jidList='$jidList'"
+	    ::Jabber::Debug 5 "   jidList='$jidList'"
 	    
 	    if {[info exists attrArr(type)] && [string equal $attrArr(type) "remove"]} {
 		
