@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.82 2004-09-30 12:43:06 matben Exp $
+# $Id: Roster.tcl,v 1.83 2004-09-30 13:52:37 matben Exp $
 
 package provide Roster 1.0
 
@@ -1050,32 +1050,12 @@ proc ::Jabber::Roster::RemoveEmptyRootDirs { } {
 
 proc ::Jabber::Roster::SetCoccinella {jid} {
     variable wtree    
-    variable presenceIcon
     upvar ::Jabber::jstate jstate
     
     ::Debug 4 "::Jabber::Roster::SetCoccinella jid=$jid"
     
-    jlib::splitjid $jid jid2 res
-    set presArr(-show) "normal"
-    array set presArr [$jstate(roster) getpresence $jid2  \
-      -resource $res -type available]
-    
-    #        ::Jabber::Roster::GetPresenceIcon ???
-    
-    # If available and show = ( normal | empty | chat ) display icon.
-    switch -- $presArr(-show) {
-	normal {
-	    set icon $presenceIcon(available,wb)
-	}
-	chat {
-	    set icon $presenceIcon(chat,wb)
-	}
-	default {
-	    # ???
-	    set icon $presenceIcon(available,wb)
-	}
-    }
     set mjid [jlib::jidmap $jid]
+    set icon [GetPresenceIconFromJid $jid]
     foreach v [$wtree find withtag $mjid] {
 	$wtree itemconfigure $v -image $icon
     }
@@ -1099,6 +1079,9 @@ proc ::Jabber::Roster::IsCoccinella {jid3} {
 	    set ans 1
 	} elseif {[$jstate(browse) hasnamespace $jid3 "coccinella:wb"] || \
 	  [$jstate(browse) hasnamespace $jid3 $privatexmlns(whiteboard)]} {
+	    set ans 1
+	} elseif {[$jstate(disco) hasfeature $privatexmlns(whiteboard) $jid3] || \
+	  [$jstate(disco) hasfeature $privatexmlns(coccinella) $jid3]} {
 	    set ans 1
 	}
     }
@@ -1325,7 +1308,6 @@ proc ::Jabber::Roster::GetPresenceIconFromJid {jid} {
     jlib::splitjid $jid jid2 res
     set pres [$jstate(roster) getpresence $jid2 -resource $res]
     array set presArr $pres
-    #puts ".......jid=$jid, jid2=$jid2, res=$res, pres=$pres"
     
     return [eval {GetPresenceIcon $jid $presArr(-type)} $pres]
 }
