@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: AutoUpdate.tcl,v 1.9 2004-12-02 08:22:33 matben Exp $
+# $Id: AutoUpdate.tcl,v 1.10 2004-12-20 11:15:02 matben Exp $
 
 package require tinydom
 package require http 2.3
@@ -176,7 +176,8 @@ proc ::AutoUpdate::Dialog {releaseAttr message changesList} {
 	
 	switch -- $name {
 	    url {
-		::Text::ParseUrl $wtext "\t$value"
+		$wtext insert end "\t"
+		::Text::ParseUrl $wtext $value
 	    }
 	    date {
 		set date [clock format [clock scan $value]  \
@@ -213,6 +214,8 @@ proc ::AutoUpdate::Dialog {releaseAttr message changesList} {
     pack [button $frbot.btset -text [mc Close] \
       -command "destroy $w"] -side right -padx 5 -pady 5
     pack $frbot -side top -fill x -padx 8 -pady 6
+    
+    wm resizable $w 0 0
     
     bind $w <Destroy> [namespace current]::Destroy
 }

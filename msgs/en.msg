@@ -305,7 +305,6 @@
 ::msgcat::mcset en mRemoveContact  	{Remove Contact...}
 
 
-
 # Short texts only. Use english text as database key.
 ::msgcat::mcset en {30 days}
 ::msgcat::mcset en {About Coccinella}

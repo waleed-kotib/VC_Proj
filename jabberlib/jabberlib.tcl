@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.77 2004-12-13 13:39:19 matben Exp $
+# $Id: jabberlib.tcl,v 1.78 2004-12-20 11:15:02 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -1441,7 +1441,9 @@ proc jlib::reset {jlibname} {
     
     stream_reset $jlibname
     sasl_reset $jlibname
-    tls_reset $jlibname
+    if {[havetls]} {
+	tls_reset $jlibname
+    }
 }
 
 # jlib::stream_reset --
