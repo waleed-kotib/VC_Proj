@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Status.tcl,v 1.3 2005-02-02 09:02:22 matben Exp $
+# $Id: Status.tcl,v 1.4 2005-02-25 14:08:59 matben Exp $
 
 package provide Status 1.0
 
@@ -14,10 +14,10 @@ namespace eval ::Jabber::Status:: {
     
     # Mappings from <show> element to displayable text and vice versa.
     # chat away xa dnd
-    variable mapShowElemToText
     variable mapShowTextToElem
+    variable mapShowElemToText
     
-    array set mapShowElemToText [list \
+    array set mapShowTextToElem [list \
       [mc mAvailable]       available  \
       [mc mAway]            away       \
       [mc mChat]            chat       \
@@ -25,7 +25,7 @@ namespace eval ::Jabber::Status:: {
       [mc mExtendedAway]    xa         \
       [mc mInvisible]       invisible  \
       [mc mNotAvailable]    unavailable]
-    array set mapShowTextToElem [list \
+    array set mapShowElemToText [list \
       available       [mc mAvailable]     \
       away            [mc mAway]          \
       chat            [mc mChat]          \
@@ -151,22 +151,22 @@ proc ::Jabber::Status::PostMenu {wmenu x y} {
 
 proc ::Jabber::Status::MenuButton {w varName args} {
     upvar $varName status
-    variable mapShowTextToElem
+    variable mapShowElemToText
 
     menubutton $w -indicatoron 1 -menu $w.menu  \
       -relief raised -bd 2 -highlightthickness 2 -anchor c -direction flush
     menu $w.menu -tearoff 0
     BuildGenPresenceMenu $w.menu -variable $varName  \
       -command [list [namespace current]::MenuButtonCmd $w $varName]
-    $w configure -text $mapShowTextToElem($status)
+    $w configure -text $mapShowElemToText($status)
     return $w
 }
 
 proc ::Jabber::Status::MenuButtonCmd {w varName} {
     upvar $varName status
-    variable mapShowTextToElem
+    variable mapShowElemToText
     
-    $w configure -text $mapShowTextToElem($status)
+    $w configure -text $mapShowElemToText($status)
 }
 
 # ::Jabber::Status::Label --
@@ -208,9 +208,9 @@ proc ::Jabber::Status::LabelCmd {w varName cmd} {
 }
 
 proc ::Jabber::Status::ConfigLabel {w status} {
-    variable mapShowTextToElem
+    variable mapShowElemToText
     
-    $w configure -text "$mapShowTextToElem($status) "
+    $w configure -text "$mapShowElemToText($status) "
     
     #$w configure -image [::Rosticons::Get status/$type]
     if {[string equal $status "unavailable"]} {
@@ -252,7 +252,7 @@ proc ::Jabber::Status::MenuCmd {varName} {
 
 proc ::Jabber::Status::BuildGenPresenceMenu {mt args} {
     global  this
-    variable mapShowTextToElem
+    variable mapShowElemToText
     
     set entries {available {} away chat dnd xa invisible {} unavailable}
 
@@ -266,7 +266,7 @@ proc ::Jabber::Status::BuildGenPresenceMenu {mt args} {
 		  -image [::Rosticons::Get status/$name]]
 	    }
 	    eval {
-		$mt add radio -label $mapShowTextToElem($name) -value $name
+		$mt add radio -label $mapShowElemToText($name) -value $name
 	    } $args $opts
 	}
     }
@@ -286,7 +286,7 @@ proc ::Jabber::Status::BuildGenPresenceMenu {mt args} {
 
 proc ::Jabber::Status::BuildStatusMenuDef { } {
     global  this
-    variable mapShowTextToElem
+    variable mapShowElemToText
     variable mapShowTextToMLabel
     
     set entries {available {} away chat dnd xa invisible {} unavailable}

@@ -148,6 +148,7 @@
 ::msgcat::mcset es Title		{Título}
 ::msgcat::mcset es To			{Para}
 ::msgcat::mcset es Topic		{Tópico}
+#::msgcat::mcset es Transports
 ::msgcat::mcset es Trash		{Basura}
 #::msgcat::mcset es Type {}
 ::msgcat::mcset es Unregister		{Desregistrarse}
@@ -786,7 +787,8 @@
 ::msgcat::mcset es prefrosysicons {Usar los iconos del sistema del protocolo de mensajería ajeno}
 
 # translate
-::msgcat::mcset es prefroshowoff {Show also offline users}
+::msgcat::mcset es prefrohideoff {Do not show offline users}
+::msgcat::mcset es prefrohidetrpt {Do not show transports}
 
 ::msgcat::mcset es prefblonly    {Sólo aceptar mensajes de mis contactos}
 ::msgcat::mcset es prefblbl      {Bloquear los JIDs siguientes (* asterísco para "todos") : }

@@ -147,6 +147,7 @@
 ::msgcat::mcset fr Title		{Titre}
 ::msgcat::mcset fr To			{À}
 ::msgcat::mcset fr Topic		{Thème}
+#::msgcat::mcset fr Transports
 ::msgcat::mcset fr Trash		{Corbeille}
 ::msgcat::mcset fr Type			{Type}
 ::msgcat::mcset fr Unregister		{Se désinscrire}
@@ -786,7 +787,8 @@
 ::msgcat::mcset fr prefrosysicons {Utiliser les icônes système du protocole de messagerie étranger}
 
 # translate
-::msgcat::mcset fr prefroshowoff {Show also offline users}
+::msgcat::mcset fr prefrohideoff {Do not show offline users}
+::msgcat::mcset fr prefrohidetrpt {Do not show transports}
 
 ::msgcat::mcset fr prefblonly    {N'accepter que les messages de mes contacts}
 ::msgcat::mcset fr prefblbl      {Bloquer les JIDs suivants (* étoile pour "tous") : }
