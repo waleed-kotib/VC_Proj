@@ -32,6 +32,7 @@
 ::msgcat::mcset nl Close		{Sluiten}
 ::msgcat::mcset nl Conference		{Groepsgesprek}
 ::msgcat::mcset nl Connect		{Aanmelden}
+#::msgcat::mcset nl Contact
 ::msgcat::mcset nl Country		{Land}
 ::msgcat::mcset nl Create		{Aanmaken}
 ::msgcat::mcset nl Customization	{Aanpassing}

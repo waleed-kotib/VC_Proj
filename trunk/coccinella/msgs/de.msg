@@ -32,6 +32,7 @@
 ::msgcat::mcset de Close	Schlieﬂen
 ::msgcat::mcset de Conference	Konferenz
 ::msgcat::mcset de Connect	Verbinden
+#::msgcat::mcset de Contact
 ::msgcat::mcset de Country	Land
 ::msgcat::mcset de Create	Erstellen
 ::msgcat::mcset de Customization	Anpassung

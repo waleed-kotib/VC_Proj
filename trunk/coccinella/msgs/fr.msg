@@ -31,6 +31,7 @@
 ::msgcat::mcset fr Close		{Fermer}
 ::msgcat::mcset fr Conference		{Conférence}
 ::msgcat::mcset fr Connect		{Se connecter}
+#::msgcat::mcset fr Contact
 ::msgcat::mcset fr Country		{Pays}
 ::msgcat::mcset fr Create		{Créer}
 ::msgcat::mcset fr Customization	{Affichage}

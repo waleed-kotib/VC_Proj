@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.60 2004-10-02 13:14:55 matben Exp $
+# $Id: Browse.tcl,v 1.61 2004-10-05 12:16:23 matben Exp $
 
 package require chasearrows
 
@@ -512,6 +512,8 @@ proc ::Jabber::Browse::Build {w} {
     
     ::Debug 2 "::Jabber::Browse::Build"
     
+    set fontS [option get . fontSmall {}]
+
     # The frame of class Browse.
     frame $w -borderwidth 0 -relief flat -class Browse
     set wbrowser $w
@@ -522,6 +524,14 @@ proc ::Jabber::Browse::Build {w} {
       -side left -padx 5 -pady 0
     pack $frbot -side bottom -fill x -padx 8 -pady 2
     
+    if {0} {
+	frame $w.fs -relief groove -bd 2
+	canvas $w.fs.c -bd 0 -highlightthickness 0 -height 14
+	pack $w.fs.c -side left -pady 1 -padx 6 -fill x -expand true
+	$w.fs.c create text 0 0 -anchor nw -text {Some junk...} -font $fontS
+	pack $w.fs -side bottom -fill x -padx 8 -pady 2
+    }
+
     set wbox $w.box
     pack [frame $wbox -border 1 -relief sunken]   \
       -side top -fill both -expand 1 -padx 4 -pady 4
