@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.9 2003-07-26 13:54:23 matben Exp $
+# $Id: MailBox.tcl,v 1.10 2003-07-29 16:18:09 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -88,11 +88,13 @@ proc ::Jabber::MailBox::Init { } {
 #       Toggles the display of the inbox. With -visible 1 it forces it
 #       to be displayed.
 
-proc ::Jabber::MailBox::Show {w args} {
-
+proc ::Jabber::MailBox::Show {args} {
+    global wDlgs
     upvar ::Jabber::jstate jstate
 
     array set argsArr $args
+    set w $wDlgs(jinbox)
+    
     if {[info exists argsArr(-visible)]} {
 	set jstate(inboxVis) $argsArr(-visible)
     }
@@ -279,8 +281,11 @@ proc ::Jabber::MailBox::InsertRow {wtbl row i} {
 
     # We keep any /res part.
     #set row [lreplace $row 1 1 $jid2]
+    
+    # Does this message contain a whiteboard message?
     set haswb 0
-    if {[llength $row] > 6} {
+    set len [llength $row]
+    if {($len > 6)} {
 	array set rowOpts [lrange $row 6 end]
 	if {[info exists rowOpts(-canvasuid)]} {
 	    set haswb 1
@@ -1026,8 +1031,12 @@ proc ::Jabber::MailBox::ReadMailboxVer1 { } {
 
 	    # Any canvas uid must be translated to '-canvasuid hex' option
 	    # to be compatible with new mailbox format.
-	    if {([llength $row] == 7)  && [string length [lindex $row 6]]} {
-		set mailbox($id) [lreplace $row 6 end -canvasuid [lindex $row 6]]
+	    if {[llength $row] == 7} {
+	     	if {[string length [lindex $row 6]]} {
+				set mailbox($id) [lreplace $row 6 end -canvasuid [lindex $row 6]]
+			} else {
+				set mailbox($id) [lrange $row 0 5]
+			}
 	    }
 	}
     }
@@ -1050,7 +1059,12 @@ proc ::Jabber::MailBox::ReadMailboxVer2 { } {
 	
 	# Keep the uidmsg in sync for each list in mailbox.
 	foreach id [lsort -integer [array names mailbox]] {
-	    set mailbox($id) [lreplace $mailbox($id) 4 4 $id]   
+	    set mailbox($id) [lreplace $mailbox($id) 4 4 $id]
+	    
+	    # Consistency check.
+	    if {[expr [llength $mailbox($id)] % 2] == 1} {
+	    	set mailbox($id) [lrange $mailbox($id) 0 5]
+	    }
 	}
     }
 }
