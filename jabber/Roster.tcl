@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.22 2003-11-14 10:00:29 matben Exp $
+# $Id: Roster.tcl,v 1.23 2003-11-15 07:33:48 matben Exp $
 
 package provide Roster 1.0
 
@@ -669,10 +669,19 @@ proc ::Jabber::Roster::AutoBrowse {jid presence args} {
     ::Jabber::Debug 2 "::Jabber::Roster::AutoBrowse jid=$jid, presence=$presence, args='$args'"
 
     array set argsArr $args
-    if {[string equal $presence "available"]} {    
-	$jstate(jlib) browse_get $jid  \
-	  -errorcommand [list ::Jabber::Browse::ErrorProc 1]  \
-	  -command [list [namespace current]::AutoBrowseCallback]
+    
+    if {[string equal $presence "available"]} {   
+	
+	# Browse only potential Coccinella (all jabber) clients.
+	regexp {^(.+@)?([^@/]+)(/.*)?} $jid match pre host
+	set type [$jstate(jlib) service gettype $host]
+	
+	# We may not yet have browsed this (empty).
+	if {($type == "") || ($type == "service/jabber")} {
+	    $jstate(jlib) browse_get $jid  \
+	      -errorcommand [list ::Jabber::Browse::ErrorProc 1]  \
+	      -command [list [namespace current]::AutoBrowseCallback]
+	}
     } elseif {[string equal $presence "unavailable"]} {
 	$jstate(browse) clear $jid
     }
