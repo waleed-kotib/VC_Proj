@@ -24,6 +24,7 @@ package ifneeded fontselection 1.0 [list source [file join $dir fontselection.tc
 package ifneeded Pane 1.0 [list source [file join $dir pane.tcl]]
 package ifneeded balloonhelp 1.0 [list source [file join $dir balloonhelp.tcl]]
 package ifneeded can2svg 1.0 [list source [file join $dir can2svg.tcl]]
+package ifneeded svg2can 1.0 [list source [file join $dir svg2can.tcl]]
 package ifneeded MSSpeech 1.0 [list source [file join $dir MSSpeech.tcl]]
 package ifneeded uriencode 1.0 [list source [file join $dir uriencode.tcl]]
 package ifneeded putfile 1.0 [list source [file join $dir putfile putfile.tcl]]

@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Connections.tcl,v 1.20 2004-01-27 08:48:06 matben Exp $
+# $Id: Connections.tcl,v 1.21 2004-02-22 08:29:13 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -860,7 +860,6 @@ proc ::OpenMulticast::CleanupMulticastQTStream {wtop fid fullName token} {
     set wCan [::UI::GetCanvasFromWtop $wtop]
     set no_ {^2[0-9]+}
     catch {close $fid}
-    #parray state
     
     # Waiting is over.
     ::WB::StartStopAnimatedWaveOnMain 0
