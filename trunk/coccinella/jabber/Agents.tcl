@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Agents.tcl,v 1.10 2004-01-14 14:27:30 matben Exp $
+# $Id: Agents.tcl,v 1.11 2004-02-03 10:16:30 matben Exp $
 
 package provide Agents 1.0
 
@@ -135,7 +135,7 @@ proc ::Jabber::Agents::AgentsCallback {jid jlibName what subiq} {
 	# 1) fill in what we've got so far.
 	# 2) send get jabber:iq:agent.
 	foreach agent [wrapper::getchildren $subiq] {
-	    if {![string equal [lindex $agent 0] "agent"]} {
+	    if {![string equal [wrapper::gettag $agent] "agent"]} {
 		continue
 	    }
 	    set subAgent [wrapper::getchildren $agent]

@@ -34,8 +34,8 @@ This brief text describes the jabber features supported:
       o jabber:x:data
       o jabber:x:event
       o coccinella:wb     (to be discarded)
-      o http://coccinella.sourceforge.net/protocols/servers
-      o http://coccinella.sourceforge.net/protocols/whiteboard
+      o http://coccinella.sourceforge.net/protocol/servers
+      o http://coccinella.sourceforge.net/protocol/whiteboard
    
 
 Note, however, that the jabber protocols outside the very core, are a moving 

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.41 2004-01-30 15:33:50 matben Exp $
+# $Id: Chat.tcl,v 1.42 2004-02-03 10:16:31 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -423,6 +423,7 @@ proc ::Jabber::Chat::Build {threadID args} {
     set state(notifier)         " "
     set state(xevent,status)    ""
     set state(xevent,msgidlist) ""
+    set state(dlgstate)         normal
     
     # Toplevel with class Chat.
     ::UI::Toplevel $w -class Chat -usemacmainmenu 1 -macstyle documentProc
@@ -633,13 +634,7 @@ proc ::Jabber::Chat::LoginHook { } {
 proc ::Jabber::Chat::LogoutHook { } {
     
     foreach token [::Jabber::Chat::GetTokenList] {
-	variable $token
-	upvar 0 $token state
-	
-	foreach name {send sendfile} {
-	    $state(wtray) buttonconfigure $name -state disabled 
-	}
-	$state(wbtsend) configure -state disabled
+	::Jabber::Chat::SetState $token disabled
     }
     return ""
 }
@@ -900,6 +895,11 @@ proc ::Jabber::Chat::PresenceCallback {jid type args} {
     ::Jabber::Chat::InsertMessage $token sys  \
       "$jid is: $mapShowTextToElem($show)\n$status"
     
+    if {[string equal $type "available"]} {
+	::Jabber::Chat::SetState $token normal
+    } else {
+	::Jabber::Chat::SetState $token disabled
+    }
 }
 
 # Jabber::Chat::GetTokenFrom --
@@ -937,7 +937,23 @@ proc ::Jabber::Chat::GetTokenList { } {
       [info vars ${ns}::\[0-9\]\[0-9\]\[0-9\]\[0-9\]] \
       [info vars ${ns}::\[0-9\]\[0-9\]\[0-9\]\[0-9\]\[0-9\]]]
 }
+
+# Jabber::Chat::SetState --
+# 
+#       Set state of complete dialog to normal or disabled.
+  
+proc ::Jabber::Chat::SetState {token dlgstate} {
+    variable $token
+    upvar 0 $token state    
     
+    foreach name {send sendfile} {
+	$state(wtray) buttonconfigure $name -state $dlgstate 
+    }
+    $state(wbtsend)  configure -state $dlgstate
+    $state(wtextsnd) configure -state $dlgstate
+    set state(dlgstate) $dlgstate
+}
+
 # Jabber::Chat::Close --
 #
 #
@@ -1061,6 +1077,9 @@ proc ::Jabber::Chat::XEventSendCompose {token} {
 
     ::Jabber::Debug 2 "::Jabber::Chat::XEventSendCompose token=$token"
 
+    if {$state(dlgstate) != "normal"} {
+	return
+    }
     set state(xevent,status) "composing"
 
     # Pick the id of the most recent event request and skip any previous.
@@ -1092,6 +1111,9 @@ proc ::Jabber::Chat::XEventCancelCompose {token} {
 
     # We may have been destroyed.
     if {![info exists state]} {
+	return
+    }
+    if {$state(dlgstate) != "normal"} {
 	return
     }
     if {[info exists state(xevent,afterid)]} {
