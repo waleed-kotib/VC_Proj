@@ -6,7 +6,7 @@
 # Copyright (C) 2002-2005 Mats Bengtsson
 # This source file is distributed under the BSD license.
 # 
-# $Id: tree.tcl,v 1.43 2005-02-02 09:02:16 matben Exp $
+# $Id: tree.tcl,v 1.44 2005-02-14 13:48:36 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -782,8 +782,6 @@ proc ::tree::WidgetProc {w command args} {
 	}
 	find {
 	    if {[string equal [lindex $args 0] "withtag"]} {
-		
-		# Is there a smarter way?
 		set ftag [lindex $args 1]
 		if {[string equal $ftag "all"]} {
 		    set vlist [array names v2uid]
@@ -793,6 +791,8 @@ proc ::tree::WidgetProc {w command args} {
 		    }
 		} else {
 		    set vlist {}
+		    
+		    # Is there a smarter way? Linear search BAD!
 		    foreach {key val} [array get state "*:tags"] {
 			#if {[string equal $val $ftag]} 
 			if {[lsearch $val $ftag] >= 0} {

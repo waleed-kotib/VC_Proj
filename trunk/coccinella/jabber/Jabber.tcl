@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.126 2005-02-08 08:57:14 matben Exp $
+# $Id: Jabber.tcl,v 1.127 2005-02-14 13:48:38 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -503,7 +503,7 @@ proc ::Jabber::Init { } {
 
     # Make an instance of jabberlib and fill in our roster object.
     set jstate(jlib) [eval {
-	::jlib::new $jstate(roster) ::Jabber::ClientProc
+	::jlib::new $jstate(roster) ::Jabber::ClientProc -keepalivesecs 60
     } $opts]
 
     # Register handlers for various iq elements.
@@ -818,13 +818,7 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	    ::UI::MessageBox -icon error -type ok -message [mc jamessconnbroken]
 	}
 	away - xaway {
-	    
-	    set tm [clock format [clock seconds] -format "%H:%M:%S"]
-	    set ans [::UI::MessageBox -icon info -type yesno -default yes \
-	      -message [mc jamessautoawayset $tm]]
-	    if {$ans == "yes"} {
-		::Jabber::SetStatus available
-	    }
+	    after idle ::Jabber::AutoAway
 	}
 	streamerror {
 	    DoCloseClientConnection
@@ -861,6 +855,16 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	}
     }
     return $ishandled
+}
+
+proc ::Jabber::AutoAway {} {
+    
+    set tm [clock format [clock seconds] -format "%H:%M:%S"]
+    set ans [::UI::MessageBox -icon info -type yesno -default yes \
+      -message [mc jamessautoawayset $tm]]
+    if {$ans == "yes"} {
+	::Jabber::SetStatus available
+    }
 }
 
 # Jabber::DebugCmd --

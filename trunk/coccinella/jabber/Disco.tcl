@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.54 2005-02-08 08:57:13 matben Exp $
+# $Id: Disco.tcl,v 1.55 2005-02-14 13:48:37 matben Exp $
 
 package provide Disco 1.0
 
@@ -30,6 +30,12 @@ namespace eval ::Disco:: {
     # Specials.
     option add *Disco.waveImage             wave            widgetDefault
 
+    # Used for discoing ourselves using a node hierarchy.
+    variable debugNodes 1
+    
+    # If number children smaller than this do disco#info.
+    variable discoInfoLimit 12
+    
     # Common xml namespaces.
     variable xmlns
     array set xmlns {
@@ -39,8 +45,8 @@ namespace eval ::Disco:: {
     }
     
     # Disco catagories from Jabber :: Registrar determines if dir or not.
-    variable isBranchCategory
-    array set isBranchCategory {
+    variable branchCategory
+    array set branchCategory {
 	auth                  0
 	automation            1
 	client                1
@@ -50,7 +56,6 @@ namespace eval ::Disco:: {
 	directory             1
 	gateway               0
 	headline              0
-	hierarchy             1
 	proxy                 0
 	pubsub                1
 	server                1
@@ -71,6 +76,8 @@ namespace eval ::Disco:: {
     #   jid:        generic type
     #   "":         not specific
     
+    # This does not work if nodes. The limitation is in the protocol.
+
     set popMenuDefs(disco,def) {
 	mMessage       user         {::NewMsg::Build -to $jid}
 	mChat          user         {::Chat::StartThread $jid}
@@ -81,7 +88,7 @@ namespace eval ::Disco:: {
 	mCreateRoom    conference   {::GroupChat::EnterOrCreate create \
 	  -server $jid}
 	separator      {}           {}
-	mInfo          jid          {::Disco::InfoCmd $jid}
+	mInfo          jid          {::Disco::InfoCmd $jid $node}
 	mLastLogin/Activity jid     {::Jabber::GetLast $jid}
 	mLocalTime     jid          {::Jabber::GetTime $jid}
 	mvCard         jid          {::VCard::Fetch other $jid}
@@ -175,33 +182,30 @@ proc ::Disco::DiscoServer {server} {
 #
 # Arguments:
 #       jid         The jid to discover.
-#       args    ?-silent 0/1? (D=0)
 #       
 # Results:
 #       callback scheduled.
 
-proc ::Disco::GetInfo {jid args} {    
+proc ::Disco::GetInfo {jid {node ""}} {    
     upvar ::Jabber::jstate jstate
-    
-    array set opts {
-	-silent 0
+        
+    # Discover info for this entity.
+    set opts {}
+    if {$node != ""} {
+	lappend opts -node $node
     }
-    array set opts $args
-    
-    # Discover services available.
-    $jstate(disco) send_get info  $jid [namespace current]::InfoCB
+    eval {$jstate(disco) send_get info $jid [namespace current]::InfoCB} $opts
 }
 
-proc ::Disco::GetItems {jid args} {    
+proc ::Disco::GetItems {jid {node ""}} {    
     upvar ::Jabber::jstate jstate
     
-    array set opts {
-	-silent 0
+    # Discover items for this entity.
+    set opts {}
+    if {$node != ""} {
+	lappend opts -node $node
     }
-    array set opts $args
-    
-    # Discover services available.
-    $jstate(disco) send_get items $jid [namespace current]::ItemsCB
+    eval {$jstate(disco) send_get items $jid [namespace current]::ItemsCB} $opts
 }
 
 # Disco::Command --
@@ -227,6 +231,7 @@ proc ::Disco::Command {disconame discotype from subiq args} {
 proc ::Disco::ItemsCB {disconame type from subiq args} {
     variable tstate
     variable wwave
+    variable discoInfoLimit
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
@@ -235,54 +240,84 @@ proc ::Disco::ItemsCB {disconame type from subiq args} {
     
     set from [jlib::jidmap $from]
     
-    switch -- $type {
-	error {
+    if {[string equal $type "error"]} {
+	
+	# As a fallback we use the agents/browse method instead.
+	if {[jlib::jidequal $from $jserver(this)]} {
 	    
-	    # As a fallback we use the agents/browse method instead.
-	    if {[jlib::jidequal $from $jserver(this)]} {
-		
-		switch -- $jprefs(serviceMethod) {
-		    disco {
-			::Browse::GetAll
-		    }
-		    browse {
-			::Agents::GetAll
-		    }
+	    switch -- $jprefs(serviceMethod) {
+		disco {
+		    ::Browse::GetAll
+		}
+		browse {
+		    ::Agents::GetAll
 		}
 	    }
-	    ::Jabber::AddErrorLog $from "Failed disco $from"
-	    AddServerErrorCheck $from
-	    catch {$wwave animate -1}
 	}
-	ok - result {
-
-	    # It is at this stage we are confident that a Disco page is needed.
-	    if {[jlib::jidequal $from $jserver(this)]} {
-		::Jabber::UI::NewPage "Disco"
-	    }
-	    unset -nocomplain tstate(run,$from)
-	    $wwave animate -1
-
-	    # Add to tree.
+	::Jabber::AddErrorLog $from "Failed disco $from"
+	AddServerErrorCheck $from
+	catch {$wwave animate -1}
+    } else {
+	
+	# It is at this stage we are confident that a Disco page is needed.
+	if {[jlib::jidequal $from $jserver(this)]} {
+	    ::Jabber::UI::NewPage "Disco"
+	}
+	unset -nocomplain tstate(run,$from)
+	$wwave animate -1
+	
+	# Add to tree:
+	#       v = {item item ...}  with item = jid|node
+	# These nodes are only identical to the nodes we have just obtained
+	# if it is the first node level of this jid.
+	set nodes [$jstate(disco) nodes $from]
+	if {$nodes == {}} {
 	    set parents [$jstate(disco) parents $from]
-	    set v [concat $parents $from]
-	    AddToTree $v
-
-	    # Get info for the login servers children.
+	    set v [concat $parents [list $from]]
+	} else {
+	    
+	    # Need to look at any children to get any parent node.
+	    set child [lindex [wrapper::getchildren $subiq] 0]
+	    set node [wrapper::getattribute $child node]
+	    set pnode [$jstate(disco) parentnode $from $node]
+	    set plist [$jstate(disco) parentitemslist $from $node]
+	    set v $plist
+	    if {0} {
+		::Debug 4 "\t child=$child"
+		::Debug 4 "\t nodes=$nodes"
+		::Debug 4 "\t node=$node"
+		::Debug 4 "\t pnode=$pnode"
+		::Debug 4 "\t plist=$plist"
+		::Debug 4 "\t v=$v"
+	    }
+	}
+	
+	# We add the jid+node corresponding to the subiq element.
+	AddToTree $v
+	
+	# Get info for the login servers children.
+	if {$nodes == {}} {
 	    set childs [$jstate(disco) children $from]
 	    foreach cjid $childs {
 		
 		# We disco servers jid 'items+info', and disco its childrens 'info'.
-		# 
 		# Perhaps we should discover depending on items category?
-		#if {[jlib::jidequal $from $jserver(this)]}
 		if {[llength $v] == 1} {
 		    GetInfo $cjid
-		}		
-	    }	    
-	    if {[jlib::jidequal $from $jserver(this)]} {
-		AutoDiscoServers
+		} elseif {[llength $childs] < $discoInfoLimit} {
+		    GetInfo $cjid
+		}
 	    }
+	} else {
+	    set cnodes [$jstate(disco) nodes $from $pnode]
+	    if {[llength $cnodes] < $discoInfoLimit} {
+		foreach nd $cnodes {
+		    GetInfo $from $nd
+		}
+	    }
+	}
+	if {[jlib::jidequal $from $jserver(this)]} {
+	    AutoDiscoServers
 	}
     }
     
@@ -295,97 +330,122 @@ proc ::Disco::InfoCB {disconame type from subiq args} {
     upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::Disco::InfoCB type=$type, from=$from"
-
+    
     set from [jlib::jidmap $from]
-    switch -- $type {
-	error {
-	    ::Jabber::AddErrorLog $from $subiq
-	    AddServerErrorCheck $from
-	}
-	ok - result {
+    set node [wrapper::getattribute $subiq node]
     
-	    # The info contains the name attribute (optional) which may
-	    # need to be set since we get items before name.
-	    # 
-	    # BUT the items element may also have a name attribute???
-	    if {![info exists wtree] || ![winfo exists $wtree]} {
-		return
-	    }
-	    set name [$jstate(disco) name $from]
-	    
-	    # Icon.
-	    set cattype [lindex [$jstate(disco) types $from] 0]
-	    set icon  ""
-	    if {[info exists typeIcon($cattype)]} {
-		set icon $typeIcon($cattype)
-	    }
-	    
-	    foreach v [$wtree find withtag $from] {
-		if {$name != ""} {
-		    $wtree itemconfigure $v -text $name
-		}
-		if {$icon != ""} {
-		    $wtree itemconfigure $v -image $icon
-		}
-		set treectag [$wtree itemconfigure $v -canvastags]
-		MakeBalloonHelp $from $treectag
-	    }
-	    SetDirItemUsingCategory $from
-	    
-	    # Use specific (discoInfoGatewayIcqHook, discoInfoServerImHook,...) 
-	    # and general (discoInfoHook) hooks.
-	    set ct [split $cattype /]
-	    set hookName [string totitle [lindex $ct 0]][string totitle [lindex $ct 1]]
-	    
-	    eval {::hooks::run discoInfo${hookName}Hook $type $from $subiq} $args
-	    eval {::hooks::run discoInfoHook $type $from $subiq} $args
+    if {[string equal $type "error"]} {
+	::Jabber::AddErrorLog $from $subiq
+	AddServerErrorCheck $from
+    } else {
+	
+	# The info contains the name attribute (optional) which may
+	# need to be set since we get items before name.
+	# 
+	# BUT the items element may also have a name attribute???
+	if {![info exists wtree] || ![winfo exists $wtree]} {
+	    return
 	}
+	set name [$jstate(disco) name $from $node]
+	
+	# Icon.
+	set cattype [lindex [$jstate(disco) types $from $node] 0]
+	set icon  ""
+	if {[info exists typeIcon($cattype)]} {
+	    set icon $typeIcon($cattype)
+	}
+	
+	# Find the 'v' using from jid and any node.
+	set v [$jstate(disco) getflatlist $from $node]
+	if {[$wtree isitem $v]} {
+	    if {$name != ""} {
+		$wtree itemconfigure $v -text $name
+	    }
+	    if {$icon != ""} {
+		$wtree itemconfigure $v -image $icon
+	    }
+	    set treectag [$wtree itemconfigure $v -canvastags]
+	    MakeBalloonHelp $from $node $treectag
+	}
+	SetDirItemUsingCategory $from $node
+	
+	# Use specific (discoInfoGatewayIcqHook, discoInfoServerImHook,...) 
+	# and general (discoInfoHook) hooks.
+	set ct [split $cattype /]
+	set hookName [string totitle [lindex $ct 0]][string totitle [lindex $ct 1]]
+	
+	eval {::hooks::run discoInfo${hookName}Hook $type $from $subiq} $args
+	eval {::hooks::run discoInfoHook $type $from $subiq} $args
     }
 }
 
-proc ::Disco::SetDirItemUsingCategory {jid} {
+proc ::Disco::SetDirItemUsingCategory {jid {node ""}} {
     variable wtree
-    
-    if {[IsBranchCategory $jid]} {
-	foreach v [$wtree find withtag $jid] {
-	    $wtree itemconfigure $v -dir 1 -sortcommand {lsort -dictionary}
-	}
-    }
-}
-
-proc ::Disco::IsBranchCategory {jid} {
-    variable isBranchCategory
     upvar ::Jabber::jstate jstate
     
-    # Have not seen any case of this, yet.
-    if {[$jstate(disco) iscategorytype hierarchy/leaf $jid]} {
-	set isdir 0
-    } else { 
+    #puts "::Disco::SetDirItemUsingCategory jid=$jid, node=$node"
     
-	# Ad-hoc way to figure out if dir or not. Use the category attribute.
-	set isdir 0
-	set types [$jstate(disco) types $jid]
-	foreach type $types {
-	    set category [lindex [split $type /] 0]
-	    if {[info exists isBranchCategory($category)] && \
-	      $isBranchCategory($category)} {
-		set isdir 1
-		break
-	    }
-	}
+    if {[IsBranchCategory $jid $node]} {
+	set v [$jstate(disco) getflatlist $jid $node]
+	#puts "\t v=$v isdir"
+	$wtree itemconfigure $v -dir 1 -sortcommand {lsort -dictionary}
+    }
+}
+
+proc ::Disco::IsBranchCategory {jid {node ""}} {
     
-	# Don't forget the rooms.
-	if {!$isdir} {
-	    set isdir [$jstate(disco) isroom $jid]
+    set isdir 0
+    if {$node == ""} {
+	if {[IsJidBranchCategory $jid]} {
+	    set isdir 1
 	}
+    } else {
+	if {[IsBranchNode $jid $node]} {
+	    set isdir 1
+	}
+    }
+    return $isdir
+}
+
+proc ::Disco::IsJidBranchCategory {jid} {
+    variable branchCategory
+    upvar ::Jabber::jstate jstate
+        
+    # Ad-hoc way to figure out if dir or not. Use the category attribute.
+    set isdir 0
+    set types [$jstate(disco) types $jid]
+    foreach type $types {
+	set category [lindex [split $type /] 0]
+	if {[info exists branchCategory($category)] && \
+	  $branchCategory($category)} {
+	    set isdir 1
+	    break
+	}
+    }
+    
+    # Don't forget the rooms.
+    if {!$isdir} {
+	set isdir [$jstate(disco) isroom $jid]
+    }
+    return $isdir
+}
+
+proc ::Disco::IsBranchNode {jid node} {
+    upvar ::Jabber::jstate jstate
+    
+    set isdir 0
+    if {[$jstate(disco) iscategorytype hierarchy/branch $jid $node]} {
+	set isdir 1
     }
     return $isdir
 }
 	    
 # Disco::ParseGetInfo --
 #
-#       Respond to an incoming discovery get query.
+#       Respond to an incoming discovery get info query.
 #       Some of this is described in [JEP 0115].
+#
+# Arguments:
 #       
 # Results:
 #       none
@@ -393,14 +453,17 @@ proc ::Disco::IsBranchCategory {jid} {
 proc ::Disco::ParseGetInfo {from subiq args} {
     global  prefs
     variable xmlns
+    variable debugNodes
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::coccixmlns coccixmlns
-
-    ::Debug 2 "::Disco::ParseGetInfo: args='$args'"
+    upvar ::Jabber::xmppxmlns xmppxmlns
+    
+    ::Debug 2 "::Disco::ParseGetInfo: from=$from args='$args'"
     
     array set argsArr $args
     set ishandled 1
     set type "result"
+    set found 0
     
     # Return any id!
     set opts {}
@@ -408,6 +471,10 @@ proc ::Disco::ParseGetInfo {from subiq args} {
 	set opts [list -id $argsArr(-id)]
     }
     set node [wrapper::getattribute $subiq node]
+    
+    # Every entity MUST have at least one identity, and every entity MUST 
+    # support at least the 'http://jabber.org/protocol/disco#info' feature; 
+    # however, an entity is not required to return a result...
 
     if {$node == ""} {
 	    
@@ -418,48 +485,80 @@ proc ::Disco::ParseGetInfo {from subiq args} {
 	}
 	set subtags [list [wrapper::createtag "identity" -attrlist  \
 	  [list category client type pc name Coccinella]]]
+	lappend subtags [wrapper::createtag "feature" \
+	  -attrlist [list var $xmppxmlns(disco,info)]]
 	foreach var $vars {
 	    lappend subtags [wrapper::createtag "feature" \
 	      -attrlist [list var $var]]
 	}	
+	set found 1
     } elseif {[string equal $node "$coccixmlns(caps)#$prefs(fullVers)"]} {
 	
 	# Return version number.
 	set subtags [list [wrapper::createtag "identity" -attrlist  \
-	  [list category user type client name Coccinella]]]
+	  [list category client type pc name Coccinella]]]
+	lappend subtags [wrapper::createtag "feature" \
+	  -attrlist [list var $xmppxmlns(disco,info)]]
 	# version number ???
 	lappend subtags [wrapper::createtag "feature" \
-	      -attrlist {var "jabber:iq:version"}]]	
+	  -attrlist [list var "jabber:iq:version"]]
+	set found 1
     } elseif {[string equal $node "$coccixmlns(caps)#ftrans"]} {
 
 	# Return entity capabilities [JEP 0115]. File transfer.
 	set subtags [list [wrapper::createtag "identity" -attrlist  \
-	  [list category user type client name Coccinella]]]
-    } else {
+	  [list category client type pc name Coccinella]]]
+	lappend subtags [wrapper::createtag "feature" \
+	  -attrlist [list var $xmppxmlns(disco,info)]]
+	lappend subtags [wrapper::createtag "feature" \
+	  -attrlist [list var $coccixmlns(servers)]]
+	lappend subtags [wrapper::createtag "feature" \
+	  -attrlist [list var jabber:iq:oob]]
+	set found 1
+   } else {
     
 	# Find any matching exts.
-	set have 0
 	set exts [::Jabber::GetCapsExtKeyList]
 	foreach ext $exts {
 	    if {[string equal $node "$coccixmlns(caps)#$ext"]} {
-		set have 1
+		set found 1
 		break
 	    }
 	}
-	if {$have} {
+	if {$found} {
 	    set subtags [list [wrapper::createtag "identity" -attrlist  \
-	      [list category user type client name Coccinella]]]
+	      [list category client type pc name Coccinella]]]
 	    lappend subtags [wrapper::createtag "feature" \
-		  -attrlist [list var "$coccixmlns(caps)#$ext"]]]
-	} else {
-	    
-	    # This entity is not found.
-	    set subtags [list [wrapper::createtag "error" \
-	      -attrlist {code 404 type cancel} \
-	      -subtags [list [wrapper::createtag "item-not-found" \
-	      -attrlist [list xmlns urn:ietf:xml:params:ns:xmpp-stanzas]]]]]
-	    set type "error"
+	      -attrlist [list var $xmppxmlns(disco,info)]]
+	    lappend subtags [wrapper::createtag "feature" \
+		  -attrlist [list var "$coccixmlns(caps)#$ext"]]
 	}
+    }
+    
+    # If still no hit see if node matches...
+    if {!$found && $debugNodes} {
+	if {$node == "A"} {
+	    set subtags [list [wrapper::createtag "identity" -attrlist  \
+	      [list category hierarchy type leaf]]]
+	    lappend subtags [wrapper::createtag "feature" \
+	      -attrlist [list var $xmppxmlns(disco,info)]]
+	    set found 1
+	} elseif {$node == "B"} {
+	    set subtags [list [wrapper::createtag "identity" -attrlist  \
+	      [list category hierarchy type branch]]]
+	    lappend subtags [wrapper::createtag "feature" \
+	      -attrlist [list var $xmppxmlns(disco,info)]]
+	    set found 1
+	}
+    }
+    if {!$found} {
+	
+	# This entity is not found.
+	set subtags [list [wrapper::createtag "error" \
+	  -attrlist {code 404 type cancel} \
+	  -subtags [list [wrapper::createtag "item-not-found" \
+	  -attrlist [list xmlns urn:ietf:xml:params:ns:xmpp-stanzas]]]]]
+	set type "error"
     }
     if {$node == ""} {
 	set attr [list xmlns $xmlns(info)]
@@ -471,28 +570,65 @@ proc ::Disco::ParseGetInfo {from subiq args} {
     
     return $ishandled
 }
+	    
+# Disco::ParseGetItems --
+#
+#       Respond to an incoming discovery get items query.
+#
+# Arguments:
+#       
+# Results:
+#       none
 
 proc ::Disco::ParseGetItems {from subiq args} {
     variable xmlns
+    variable debugNodes
     upvar ::Jabber::jstate jstate    
     
+    ::Debug 2 "::Disco::ParseGetItems from=$from args='$args'"
+
     array set argsArr $args
     set ishandled 0
+    set found 0
     
     # Return any id!
     set opts {}
     if {[info exists argsArr(-id)]} {
 	set opts [list -id $argsArr(-id)]
     }
+    set node [wrapper::getattribute $subiq node]
 
-    set subtags [list [wrapper::createtag "error" \
-      -attrlist {code 404 type cancel} \
-      -subtags [list [wrapper::createtag "item-not-found" \
-      -attrlist {xmlns urn:ietf:xml:params:ns:xmpp-stanzas}]]]]
-    set type "error"
-
-    set attr [list xmlns $xmlns(items)]
-    set xmllist [wrapper::createtag "query" -attrlist $attr -subtags $subtags]
+    if {$debugNodes && ($node == "")} {
+	set type "result"
+	set found 1
+	if {[info exists argsArr(-to)]} {
+	    set myjid $argsArr(-to)
+	} else {
+	    set myjid [::Jabber::GetMyJid]
+	}
+	set subtags {}
+	
+	# This is just some dummy nodes used for debugging.
+	lappend subtags [wrapper::createtag "item" \
+	  -attrlist [list jid $myjid node A name "Name A"]]
+	lappend subtags [wrapper::createtag "item" \
+	  -attrlist [list jid $myjid node B name "Empty branch"]]
+	set attr [list xmlns $xmlns(items)]
+	if {$node != ""} {
+	    lappend attr node $node
+	}
+	set xmllist [wrapper::createtag "query" -attrlist $attr -subtags $subtags]
+    }
+    if {!$found} {
+	set type "error"
+	set subtags [list [wrapper::createtag "error" \
+	  -attrlist {code 404 type cancel} \
+	  -subtags [list [wrapper::createtag "item-not-found" \
+	  -attrlist {xmlns urn:ietf:xml:params:ns:xmpp-stanzas}]]]]
+	
+	set attr [list xmlns $xmlns(items)]
+	set xmllist [wrapper::createtag "query" -attrlist $attr -subtags $subtags]
+    }
     eval {$jstate(jlib) send_iq $type [list $xmllist] -to $from} $opts
     
     return $ishandled
@@ -618,8 +754,7 @@ proc ::Disco::RegisterPopupEntry {menuSpec} {
 #       
 # Arguments:
 #       w           widget that issued the command: tree or text
-#       v           for the tree widget it is the item path, 
-#                   for text the jidhash.
+#       v           tree item path {item item ...}  with item = jid|node
 #       
 # Results:
 #       popup menu displayed
@@ -631,17 +766,17 @@ proc ::Disco::Popup {w v x y} {
     upvar ::Jabber::jstate jstate
 
     ::Debug 2 "::Disco::Popup w=$w, v='$v', x=$x, y=$y"
-    
-    set item [lindex $v end]
-    set jid  [lindex $item 0]
-    set node [lindex $item 1]
-    
+        
+    set items [$jstate(disco) splititemlist $v]
+    set jid  [lindex $items 0 end]
+    set node [lindex $items 1 0]
+
     # An item can have more than one type, for instance,
     # msn.domain can have: {gateway/msn conference/text}
     set categoryList [string tolower [$jstate(disco) types $jid $node]]
     set categoryType [lindex $categoryList 0]
     
-    ::Debug 4 "\t jid=$jid, categoryList=$categoryList"
+    ::Debug 4 "\t jid=$jid, node=$node, categoryList=$categoryList"
 
     jlib::splitjidex $jid username host res
        
@@ -759,7 +894,7 @@ proc ::Disco::SelectCmd {w v} {
 #
 # Arguments:
 #       w           tree widget
-#       v           tree item path (jidList: {jabber.org jud.jabber.org} etc.)
+#       v           tree item path {item item ...}  with item = jid|node
 #       
 # Results:
 #       none.
@@ -773,10 +908,10 @@ proc ::Disco::OpenTreeCmd {w v} {
     ::Debug 2 "::Disco::OpenTreeCmd v=$v"
 
     if {[llength $v]} {
-	set item [lindex $v end]
-	set jid  [lindex $item 0]
-	set node [lindex $item 1]
-	
+	set items [$jstate(disco) splititemlist $v]
+	set jid  [lindex $items 0 end]
+	set node [lindex $items 1 0]
+
 	# If we have not yet discoed this jid, do it now!
 	# We should have a method to tell if children have been added to tree!!!
 	if {![$jstate(disco) isdiscoed items $jid $node]} {
@@ -784,12 +919,16 @@ proc ::Disco::OpenTreeCmd {w v} {
 	    $wwave animate 1
 	    
 	    # Discover services available.
-	    GetItems $jid
+	    GetItems $jid $node
 	} elseif {[llength [$wtree children $v]] == 0} {
 	    
 	    # An item may have been discoed but not from here.
-	    set children [$jstate(disco) children $item]
+	    set children [$jstate(disco) children $jid]
 	    foreach c $children {
+		AddToTree [concat $v [list $c]]
+	    }
+	    set nodes [$jstate(disco) nodes $jid $node]
+	    foreach c $nodes {
 		AddToTree [concat $v [list $c]]
 	    }
 	}
@@ -803,9 +942,9 @@ proc ::Disco::CloseTreeCmd {w v} {
     variable tstate
     
     ::Debug 2 "::Disco::CloseTreeCmd v=$v"
-    set jid [lindex $v end]
-    if {[info exists tstate(run,$jid)]} {
-	unset tstate(run,$jid)
+    set item [lindex $v end]
+    if {[info exists tstate(run,$item)]} {
+	unset tstate(run,$item)
 	$wwave animate -1
     }
 }
@@ -815,7 +954,8 @@ proc ::Disco::CloseTreeCmd {w v} {
 #       Fills tree with content. Calls itself recursively.
 #
 # Arguments:
-#       v:
+#       v           tree item path {item item ...}  with item = jid|node
+#
 
 proc ::Disco::AddToTree {v} {    
     variable wtree    
@@ -825,9 +965,9 @@ proc ::Disco::AddToTree {v} {
     # We disco servers jid 'items+info', and disco its childrens 'info'.    
     ::Debug 4 "::Disco::AddToTree v='$v'"
 
-    set item [lindex $v end]
-    set jid  [lindex $item 0]
-    set node [lindex $item 1]
+    set items [$jstate(disco) splititemlist $v]
+    set jid  [lindex $items 0 end]
+    set node [lindex $items 1 0]
     set icon ""
     
     # Ad-hoc way to figure out if dir or not. Use the category attribute.
@@ -835,7 +975,8 @@ proc ::Disco::AddToTree {v} {
     if {[llength $v] == 1} {
 	set isdir 1
     } else {
-	set isdir [IsBranchCategory $jid]
+	set isdir [IsBranchCategory $jid $node]
+	#puts "\t IsBranchCategory=$isdir"
     }
     
     # Display text string. Room participants with their nicknames.
@@ -847,7 +988,11 @@ proc ::Disco::AddToTree {v} {
     } else {
 	set name [$jstate(disco) name $jid $node]
 	if {$name == ""} {
-	    set name $jid
+	    if {$node == ""} {
+		set name $jid
+	    } else {
+		set name $node
+	    }
 	}
     }
     
@@ -864,7 +1009,12 @@ proc ::Disco::AddToTree {v} {
     # Do not create if exists which preserves -open.
     if {![$wtree isitem $v]} {
 	set treectag item[incr treeuid]
-	set opts [list -text $name -tags $item -style $style -dir $isdir \
+	if {$node == ""} {
+	    set tags [list jid $jid]
+	} else {
+	    set tags [list node $jid $node]
+	}
+	set opts [list -text $name -tags $tags -style $style -dir $isdir \
 	  -image $icon -open $isopen -canvastags $treectag]
 	if {$isdir && ([llength $v] >= 2)} {
 	    lappend opts -sortcommand {lsort -dictionary}
@@ -872,23 +1022,34 @@ proc ::Disco::AddToTree {v} {
 	eval {$wtree newitem $v} $opts
 	
 	# Balloon.
-	MakeBalloonHelp $item $treectag
+	MakeBalloonHelp $jid $node $treectag
     }
 
-    # Add all child elements as well.
+    # Add all child or node elements as well.
+    # These are mutually exclusive.
     set childs [$jstate(disco) children $jid]
-    foreach citem $childs {
-	set cv [concat $v [list $citem]]
-	AddToTree $cv
-    }	    
+    if {[llength $childs]} {
+	::Debug 4 "\t childs=$childs"
+	foreach citem $childs {
+	    set cv [concat $v [list $citem]]
+	    AddToTree $cv
+	}	    
+    } else {
+	if {0} {
+	    ::Debug 4 "\t items=$items"
+	    ::Debug 4 "\t nodes=[$jstate(disco) nodes $jid $node]"
+	}
+	foreach cnode [$jstate(disco) nodes $jid $node] {
+	    set cv [concat $v [list $cnode]]
+	    AddToTree $cv
+	}
+    }
 }
 
-proc ::Disco::MakeBalloonHelp {item treectag} {
+proc ::Disco::MakeBalloonHelp {jid node treectag} {
     variable wtree    
     upvar ::Jabber::jstate jstate
     
-    set jid  [lindex $item 0]
-    set node [lindex $item 1]
     set jidtxt $jid
     if {[string length $jid] > 30} {
 	set jidtxt "[string range $jid 0 28]..."
@@ -898,7 +1059,9 @@ proc ::Disco::MakeBalloonHelp {item treectag} {
 	append msg "\nnode: $node"
     }
     set types [$jstate(disco) types $jid]
-    append msg "\ntype: $types"
+    if {$types != {}} {
+	append msg "\ntype: $types"
+    }
     ::balloonhelp::balloonfortree $wtree $treectag $msg
 }
 
@@ -1038,16 +1201,22 @@ proc ::Disco::AutoDiscoCmd {disconame type from subiq args} {
     }
 }
 
-proc ::Disco::InfoCmd {jid} {
+proc ::Disco::InfoCmd {jid {node ""}} {
     upvar ::Jabber::jstate jstate
 
     ::Debug 4 "::Disco::InfoCmd jid=$jid"
     
-    if {![$jstate(disco) isdiscoed info $jid]} {
-	set xmllist [$jstate(disco) get info xml $jid]
+    if {![$jstate(disco) isdiscoed info $jid $node]} {
+	set xmllist [$jstate(disco) get info xml $jid $node]
 	InfoResultCB result $jid $xmllist
     } else {
-	$jstate(disco) send_get info $jid [namespace current]::InfoCmdCB
+	set opts {}
+	if {$node != ""} {
+	    lappend opts -node $node
+	}
+	eval {
+	    $jstate(disco) send_get info $jid [namespace current]::InfoCmdCB
+	} $opts
     }
 }
 
@@ -1072,10 +1241,17 @@ proc ::Disco::InfoResultCB {type jid subiq args} {
     upvar ::Jabber::nsToText nsToText
     upvar ::Jabber::jstate jstate
 
+    set node [wrapper::getattribute $subiq node]
+    if {$node == ""} {
+	set txt $jid
+    } else {
+	set txt "$jid, node $node"
+    }
+
     set w .jdinfo[incr dlguid]
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document closeBox}
-    wm title $w "Disco Info: $jid"
+    wm title $w "Disco Info: $txt"
     set fontS [option get . fontSmall {}]
     
     # Global frame.
@@ -1083,7 +1259,7 @@ proc ::Disco::InfoResultCB {type jid subiq args} {
     pack  $w.frall -fill both -expand 1 -ipadx 12 -ipady 4
     set wtext $w.frall.t
     set iconInfo [::Theme::GetImage info]
-    label $w.frall.l -text "Description of services provided by $jid" \
+    label $w.frall.l -text "Description of services provided by $txt" \
       -justify left -image $iconInfo -compound left
     text $wtext -wrap word -width 60 -bg gray80 \
       -tabs {180} -spacing1 3 -spacing3 2 -bd 0
@@ -1094,7 +1270,7 @@ proc ::Disco::InfoResultCB {type jid subiq args} {
     $wtext tag configure feature -lmargin1 6
     $wtext insert end "Feature\tXML namespace\n" head
     
-    set features [$jstate(disco) features $jid]
+    set features [$jstate(disco) features $jid $node]
     
     set tfont [$wtext cget -font]
     set maxw 0

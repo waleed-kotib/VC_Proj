@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Conference.tcl,v 1.36 2005-02-09 14:30:29 matben Exp $
+# $Id: Conference.tcl,v 1.37 2005-02-14 13:48:37 matben Exp $
 
 package provide Conference 1.0
 
@@ -523,7 +523,7 @@ proc ::Conference::BuildCreate {args} {
 	# Not same wbox as above!!!
 	set wbox $w.frall.frmid
 	::Jabber::Forms::BuildScrollForm $wbox -height $canHeight \
-	  -width 320
+	  -width 280
 	pack $wbox -side top -fill both -expand 1 -padx 8 -pady 4
     }
     

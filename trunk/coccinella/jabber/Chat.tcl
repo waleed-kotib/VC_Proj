@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.112 2005-02-09 14:30:27 matben Exp $
+# $Id: Chat.tcl,v 1.113 2005-02-14 13:48:37 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -1673,7 +1673,9 @@ proc ::Chat::PresenceHook {jid type args} {
 	if {[string equal $type "available"]} {
 	    SetState $chattoken normal
 	} else {
-	    SetState $chattoken disabled
+	    
+	    # There have been complaints about this...
+	    #SetState $chattoken disabled
 	}
 	if {$icon != ""} {
 	    $chatstate(wpresimage) configure -image $icon

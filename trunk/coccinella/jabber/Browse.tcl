@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.71 2005-02-04 07:05:30 matben Exp $
+# $Id: Browse.tcl,v 1.72 2005-02-14 13:48:37 matben Exp $
 
 package provide Browse 1.0
 
@@ -427,8 +427,7 @@ proc ::Browse::ErrorProc {silent browseName type jid errlist} {
 		::Agents::GetAll
 	    }
 	    browse {
-		::Disco::GetInfo  $jserver(this)
-		::Disco::GetItems $jserver(this)
+		::Disco::DiscoServer $jserver(this)
 	    }
 	}	
 	::Jabber::AddErrorLog $jid  \

@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.18 2005-02-13 13:17:42 matben Exp $
+# $Id: disco.tcl,v 1.19 2005-02-14 13:48:40 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -279,6 +279,12 @@ proc disco::parse_get_items {disconame from subiq} {
 	# Children:
 	if {[info exists attr(node)]} {
 	    set node $attr(node)
+	    
+	    # Not two nodes of a jid may be identical. Beware for infinite loops!
+	    # We only do some rudimentary check.
+	    if {[string equal $pnode $node]} {
+		continue
+	    }
 	    lappend items($from,$pnode,nodes) $node
 	} else {
 	    lappend items($from,children) $jid
