@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.12 2004-06-06 07:02:20 matben Exp $
+# $Id: Emoticons.tcl,v 1.13 2004-07-01 06:55:03 matben Exp $
 
 
 package provide Emoticons 1.0
@@ -66,7 +66,8 @@ proc ::Emoticons::Init { } {
     # the Memchan package, and can therefore still fail.
     if {[catch {
 	::Emoticons::LoadTmpIconSet [::Emoticons::GetPrefSetPathExists]
-    }]} {
+    } err]} {
+	::Debug 4 "\t catch: $err"
 	set priv(havezip) 0
 	set jprefs(emoticonSet) $priv(defaultSet)
 	::Emoticons::LoadTmpIconSet [::Emoticons::GetPrefSetPathExists]
@@ -275,7 +276,7 @@ proc ::Emoticons::GetAllSets { } {
 # Emoticons::GetPrefSetPathExists --
 # 
 #       Gets the full path to our emoticons file/folder.
-#       Verfies that it exists and that can be mounted if zip archive.
+#       Verifies that it exists and that can be mounted if zip archive.
 
 proc ::Emoticons::GetPrefSetPathExists { } {
     global  this
@@ -724,6 +725,11 @@ proc ::Emoticons::BuildPrefsPage {wpage} {
     set wpreftext $wfr.t
     set wysc $wfr.ysc
     set allSets [::Emoticons::GetAllSets]
+    
+    # This should never happen!
+    if {[llength $allSets] == 0} {
+	set allSets None
+    }
     label $wpage.l -text "The selected iconset will take action when you save"
     pack $wpage.l -side top -anchor w -padx 8 -pady 4
     eval {tk_optionMenu $wpop [namespace current]::tmpSet} $allSets
@@ -750,10 +756,24 @@ proc ::Emoticons::BuildPrefsPage {wpage} {
 proc ::Emoticons::PopCmd {name1 name2 op} {
     variable wpreftext 
     variable state
+    variable tmpSet
+    variable priv
+    upvar ::Jabber::jprefs jprefs
     upvar $name1 var
 
     if {![info exists state($var,loaded)]} {
-	::Emoticons::LoadTmpIconSet $state($var,path)
+	if {[catch {
+	    ::Emoticons::LoadTmpIconSet $state($var,path)
+	} err]} {
+	    tk_messageBox -icon error -title [::msgcat::mc Error] \
+	      -message "Failed loading iconset $var. $err" \
+	      -parent [winfo toplevel $wpreftext]
+	    set priv(havezip) 0
+	    set jprefs(emoticonSet) $priv(defaultSet)
+	    set tmpSet $priv(defaultSet)
+	    ::Emoticons::LoadTmpIconSet [::Emoticons::GetPrefSetPathExists]
+	    return
+	}
     }
     ::Emoticons::InsertTextLegend $wpreftext $var
 }
