@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Privacy.tcl,v 1.7 2004-07-09 06:26:06 matben Exp $
+# $Id: Privacy.tcl,v 1.8 2004-07-30 12:55:54 matben Exp $
 
 package provide Privacy 1.0
 
@@ -587,7 +587,7 @@ proc ::Privacy::List::GetListCB {name jlibname type subiq args} {
 		
 		switch -- [wrapper::gettag $listElem] {
 		    list {
-			catch {unset attrArr}
+			unset -nocomplain attrArr
 			array set attrArr [wrapper::getattrlist $listElem]
 			
 			# Pick only the list we have requested.

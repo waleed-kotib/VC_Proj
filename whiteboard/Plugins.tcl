@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Plugins.tcl,v 1.8 2004-07-30 09:33:15 matben Exp $
+# $Id: Plugins.tcl,v 1.9 2004-07-30 12:55:56 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -752,7 +752,7 @@ proc ::Plugins::SetPreferredPackageArr {prefMime2PackArrName} {
     variable prefMimeType2Package
     upvar $prefMime2PackArrName locArrName
 
-    catch {unset prefMimeType2Package}
+    unset -nocomplain prefMimeType2Package
     array set prefMimeType2Package [array get locArrName]
 }
 
@@ -843,7 +843,7 @@ proc ::Plugins::SetDoWhatForMimeArr {doWhatArrName} {
     variable mimeTypeDoWhat
     upvar $doWhatArrName locArrName
 
-    catch {unset mimeTypeDoWhat}
+    unset -nocomplain mimeTypeDoWhat
     array set mimeTypeDoWhat [array get locArrName]
 }
 
@@ -1025,9 +1025,9 @@ proc ::Plugins::DeleteMimeType {mime} {
     variable prefMimeType2Package
     variable mimeTypeDoWhat
 
-    catch {unset mimeType2Packages($mime)}
-    catch {unset prefMimeType2Package($mime)}
-    catch {unset mimeTypeDoWhat($mime)}
+    unset -nocomplain mimeType2Packages($mime) \
+      prefMimeType2Package($mime) \
+      mimeTypeDoWhat($mime)
 }
 
 #--- Support Functions ---------------------------------------------------------
@@ -1318,7 +1318,7 @@ proc ::Plugins::SaveHook { } {
 	}
     }
     set prefs(pluginBanList) [lsort -unique $banList]
-    catch {unset tmpPrefPlugins}
+    unset -nocomplain tmpPrefPlugins
 }
 
 proc ::Plugins::CancelHook { } {

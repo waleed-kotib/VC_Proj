@@ -2,7 +2,7 @@
 # 
 #       Provides some specific ICQ handling elements.
 #       
-# $Id: ICQ.tcl,v 1.1 2004-07-23 12:43:02 matben Exp $
+# $Id: ICQ.tcl,v 1.2 2004-07-30 12:55:53 matben Exp $
 
 namespace eval ::ICQ:: {
     
@@ -116,7 +116,7 @@ proc ::ICQ::LogoutHook { } {
     variable vcardnick
     
     # Cleanup.
-    catch {unset vcardnick}
+    unset -nocomplain vcardnick
 }
 
 #-------------------------------------------------------------------------------

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.53 2004-07-09 06:26:05 matben Exp $
+# $Id: Browse.tcl,v 1.54 2004-07-30 12:55:53 matben Exp $
 
 package require chasearrows
 
@@ -244,7 +244,7 @@ proc ::Jabber::Browse::Callback {browseName type from subiq} {
     ::Debug 2 "::Jabber::Browse::Callback browseName=$browseName, type=$type,\
       from=$from, subiq='[string range $subiq 0 60] ...'"
 
-    catch {unset tstate(run,$from)}
+    unset -nocomplain tstate(run,$from)
     ::Jabber::Browse::ControlArrows -1
     array set attrArr [wrapper::getattrlist $subiq]
 
@@ -312,7 +312,7 @@ proc ::Jabber::Browse::Callback {browseName type from subiq} {
 		    }
 		}
 		if {$isConference} {
-		    catch {unset cattrArr}
+		    unset -nocomplain cattrArr
 		    array set cattrArr [lindex $child 1]
 		    set confjid $cattrArr(jid)
 		    

@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Types.tcl,v 1.10 2004-07-22 15:11:27 matben Exp $
+# $Id: Types.tcl,v 1.11 2004-07-30 12:55:55 matben Exp $
 
 package provide Types 1.0
 
@@ -525,7 +525,7 @@ proc ::Types::SetSuffixListArr {suffListName} {
     variable mime2SuffList
     upvar $suffListName locArrName
     
-    catch {unset mime2SuffList}
+    unset -nocomplain mime2SuffList
     array set mime2SuffList [array get locArrName]
 }
 
@@ -565,7 +565,7 @@ proc ::Types::SetDescriptionArr {descListName} {
     variable mime2Desc
     upvar $descListName locArrName
 
-    catch {unset mime2Desc}
+    unset -nocomplain mime2Desc
     array set mime2Desc [array get locArrName]
 }
 
@@ -611,7 +611,7 @@ proc ::Types::SetIsMimeTextArr {isTextArrName} {
     variable mimeIsText
     upvar $isTextArrName locArrName
 
-    catch {unset mimeIsText}
+    unset -nocomplain mimeIsText
     array set mimeIsText [array get locArrName]
 }
 
@@ -662,10 +662,8 @@ proc ::Types::DeleteMimeType {mime} {
 	      [lreplace $macType2MimeList($macType) $ind $ind]
 	}
     }
-    catch {unset mime2Desc($mime)}
-    catch {unset mime2SuffList($mime)}
-    catch {unset mimeIsText($mime)}
-    catch {unset mime2MacTypeList($mime)}
+    unset -nocomplain mime2Desc($mime) mime2SuffList($mime) \
+      mimeIsText($mime) mime2MacTypeList($mime)
 }
 
 #-------------------------------------------------------------------------------

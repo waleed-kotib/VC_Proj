@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasDraw.tcl,v 1.5 2004-07-24 10:55:47 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.6 2004-07-30 12:55:55 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 #  
@@ -125,7 +125,7 @@ proc ::CanvasDraw::FinalMoveSelected {w x y} {
     eval $redo remote
     undo::add [::WB::GetUndoToken $wtop] $undo $redo    
     
-    catch {unset moveArr}
+    unset -nocomplain moveArr
 }
 
 # CanvasDraw::InitMoveCurrent, DragMoveCurrent, FinalMoveCurrent  --
@@ -210,7 +210,7 @@ proc ::CanvasDraw::FinalMoveCurrent {w x y} {
     eval $redo remote
     undo::add [::WB::GetUndoToken $wtop] $undo $redo    
     
-    catch {unset moveArr}
+    unset -nocomplain moveArr
 }
 
 # CanvasDraw::InitMoveRectPoint, DragMoveRectPoint, FinalMoveRectPoint --
@@ -332,7 +332,7 @@ proc ::CanvasDraw::FinalMoveRectPoint {w x y} {
     eval $redo remote
     undo::add [::WB::GetUndoToken $wtop] $undo $redo
 
-    catch {unset moveArr}
+    unset -nocomplain moveArr
 }
 
 # CanvasDraw::InitMoveArcPoint, DragMoveArcPoint, FinalMoveArcPoint --
@@ -506,7 +506,7 @@ proc ::CanvasDraw::FinalMoveArcPoint {w x y} {
     eval $redo remote
     undo::add [::WB::GetUndoToken $wtop] $undo $redo
     
-    catch {unset moveArr}
+    unset -nocomplain moveArr
 }
 
 # CanvasDraw::InitMovePolyLinePoint, DragMovePolyLinePoint, 
@@ -601,7 +601,7 @@ proc ::CanvasDraw::FinalMovePolyLinePoint {w x y} {
 	set opcmd $lineopts
 	array set opcmdArr $opcmd
 	foreach op {arrow arrowshape capstyle joinstyle tags} {
-	    catch {unset opcmdArr(-$op)}
+	    unset -nocomplain opcmdArr(-$op)
 	}
 	set opcmdArr(-outline) black
 	
@@ -633,7 +633,7 @@ proc ::CanvasDraw::FinalMovePolyLinePoint {w x y} {
     eval $redo remote
     undo::add [::WB::GetUndoToken $wtop] $undo $redo
    
-    catch {unset moveArr}
+    unset -nocomplain moveArr
 }
 
 # CanvasDraw::InitMoveFrame, DoMoveFrame FinMoveFrame --
@@ -744,7 +744,7 @@ proc ::CanvasDraw::FinMoveFrame {wcan wframe  x y} {
     if {[info exists undo]} {
 	undo::add [::WB::GetUndoToken $wtop] $undo $redo
     }    
-    catch {unset xDragFrame}
+    unset -nocomplain xDragFrame
 }
 
 # CanvasDraw::InitMoveWindow --
@@ -847,7 +847,7 @@ proc ::CanvasDraw::FinMoveWindow {wcan win x y} {
     if {[info exists undo]} {
 	undo::add [::WB::GetUndoToken $wtop] $undo $redo
     }    
-    catch {unset xDragWin}
+    unset -nocomplain xDragWin
 }
 
 # CanvasDraw::FinalMoveCurrentGrid --
@@ -953,7 +953,7 @@ proc ::CanvasDraw::FinalMoveCurrentGrid {w x y grid args} {
     eval $redo
     undo::add [::WB::GetUndoToken $wtop] $undo $redo    
 
-    catch {unset moveArr}
+    unset -nocomplain moveArr
 }
 
 proc ::CanvasDraw::HitTBBox {w x y} {
@@ -1057,7 +1057,7 @@ proc ::CanvasDraw::InitBox {w x y type} {
     variable theBox
     
     set theBox($w,anchor) [list $x $y]
-    catch {unset theBox($w,last)}
+    unset -nocomplain theBox($w,last)
 }
 
 # CanvasDraw::BoxDrag --
@@ -1201,14 +1201,14 @@ proc ::CanvasDraw::FinalizeBox {w x y shift type {mark 0}} {
 	eval $redo
 	undo::add [::WB::GetUndoToken $wtop] $undo $redo
     }
-    catch {unset theBox}
+    unset -nocomplain theBox
 }
 
 proc ::CanvasDraw::CancelBox {w} {
     
     variable theBox
 
-    catch {unset theBox}
+    unset -nocomplain theBox
     $w delete withtag markbox
 }
 
@@ -1331,7 +1331,7 @@ proc ::CanvasDraw::InitArc {w x y {shift 0}} {
 	    ::CanvasDraw::FinalizeArc %W [%W canvasx %x] [%W canvasy %y]
 	}
     }
-    catch {unset arcBox($w,last)}
+    unset -nocomplain arcBox($w,last)
 }
 
 # CanvasDraw::ArcDrag --
@@ -1419,7 +1419,7 @@ proc ::CanvasDraw::FinalizeArc {w x y} {
     
     # If extent angle zero, nothing to draw, nothing to send.
     if {$arcBox($w,extent) == "0.0"} {
-	catch {unset arcBox}
+	unset -nocomplain arcBox
 	return
     }
     
@@ -1444,7 +1444,7 @@ proc ::CanvasDraw::FinalizeArc {w x y} {
     set undo [list ::CanvasUtils::Command $wtop $undocmd]
     eval $redo
     undo::add [::WB::GetUndoToken $wtop] $undo $redo
-    catch {unset arcBox}
+    unset -nocomplain arcBox
 }
 
 # CanvasDraw::ArcCancel --
@@ -1464,7 +1464,7 @@ proc ::CanvasDraw::ArcCancel {w} {
 
     ::WB::SetStatusMessage $wtop [mc uastatarc]
     catch {$w delete tcent}
-    catch {unset arcBox}
+    unset -nocomplain arcBox
 }
 
 #--- End of the arc tool procedures --------------------------------------------
@@ -1489,7 +1489,7 @@ proc ::CanvasDraw::PolySetPoint {w x y} {
     if {![info exists thePoly(0)]} {
 	
 	# First point.
-	catch {unset thePoly}
+	unset -nocomplain thePoly
 	set thePoly(N) 0
 	set thePoly(0) [list $x $y]
     } elseif {[expr   \
@@ -1595,7 +1595,7 @@ proc ::CanvasDraw::FinalizePoly {w x y} {
     # If too few segment.
     if {$thePoly(N) <= 1} {
 	$w delete polylines
-	catch {unset thePoly}
+	unset -nocomplain thePoly
 	return
     }
     
@@ -1646,7 +1646,7 @@ proc ::CanvasDraw::FinalizePoly {w x y} {
     set undo [list ::CanvasUtils::Command $wtop $undocmd]
     eval $redo
     undo::add [::WB::GetUndoToken $wtop] $undo $redo
-    catch {unset thePoly}
+    unset -nocomplain thePoly
 }
 
 #--- End of polygon drawing procedures -----------------------------------------
@@ -1671,7 +1671,7 @@ proc ::CanvasDraw::InitLine {w x y {opt 0}} {
     variable theLine
     
     set theLine($w,anchor) [list $x $y]
-    catch {unset theLine($w,last)}
+    unset -nocomplain theLine($w,last)
 }
 
 # CanvasDraw::LineDrag --
@@ -1777,7 +1777,7 @@ proc ::CanvasDraw::FinalizeLine {w x y shift {opt 0}} {
     set undo [list ::CanvasUtils::Command $wtop $undocmd]
     eval $redo
     undo::add [::WB::GetUndoToken $wtop] $undo $redo
-    catch {unset theLine}
+    unset -nocomplain theLine
 }
 
 #--- End of line and arrow drawing procedures ----------------------------------
@@ -1802,7 +1802,7 @@ proc ::CanvasDraw::InitStroke {w x y} {
 
     variable stroke
     
-    catch {unset stroke}
+    unset -nocomplain stroke
     set stroke(N) 0
     set stroke(0) [list $x $y]
 }
@@ -1903,7 +1903,7 @@ proc ::CanvasDraw::FinalizeStroke {w x y {brush 0}} {
     set undo [list ::CanvasUtils::Command $wtop $undocmd]
     eval $redo
     undo::add [::WB::GetUndoToken $wtop] $undo $redo
-    catch {unset stroke}
+    unset -nocomplain stroke
 }
 
 # CanvasDraw::StrokePostProcess --
@@ -2248,7 +2248,7 @@ proc ::CanvasDraw::FinalizeRotate {w x y} {
     set undo [list ::CanvasUtils::Command $wtop $undocmd]
     ::CanvasUtils::Command $wtop $cmd remote
     undo::add [::WB::GetUndoToken $wtop] $undo $redo	    
-    catch {unset rotDrag}
+    unset -nocomplain rotDrag
 }
 
 #--- End of rotate tool --------------------------------------------------------

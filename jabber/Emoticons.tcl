@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.14 2004-07-09 06:26:05 matben Exp $
+# $Id: Emoticons.tcl,v 1.15 2004-07-30 12:55:54 matben Exp $
 
 
 package provide Emoticons 1.0
@@ -454,7 +454,7 @@ proc ::Emoticons::SetPermanentSet {selected} {
 	    FreeTmpSet $name   
 	}
     }
-    catch {unset state}
+    unset -nocomplain state
 }
 
 proc ::Emoticons::SetSmileyArr {name} {
@@ -482,7 +482,7 @@ proc ::Emoticons::FreeSmileyArr { } {
     # This could create empty images for any open dialogs. BAD?
     # MEMLEAK!
     #eval {image delete} [array names smileyInv]
-    catch {unset smiley smileyInv}
+    unset -nocomplain smiley smileyInv
 }
 
 proc ::Emoticons::FreeTmpSet {name} {
@@ -516,7 +516,7 @@ proc ::Emoticons::FreeAllTmpSets { } {
 	lappend ims $photo
     }
     eval {image delete} [lsort -unique $ims]
-    catch {unset meta state tmpicons tmpiconsInv}
+    unset -nocomplain meta state tmpicons tmpiconsInv
 }
 
 # Emoticons::MenuButton --

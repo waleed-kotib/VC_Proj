@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: entrypopup.tcl,v 1.2 2004-01-13 14:50:20 matben Exp $
+# $Id: entrypopup.tcl,v 1.3 2004-07-30 12:55:53 matben Exp $
 #
 # ########################### USAGE ############################################
 #
@@ -313,7 +313,7 @@ proc ::entrypopup::Configure {w args} {
     # Do the entry options. Separate the popup and entry options.
     array set argsarr $args
     foreach optname [array names widgetOptions] {
-	catch {unset argsarr($optname)}
+	unset -nocomplain argsarr($optname)
     }
     eval {$widgets(entry) configure} [array get argsarr] 
     set size [winfo reqheight $widgets(entry)]

@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.19 2004-06-16 14:17:32 matben Exp $
+# $Id: roster.tcl,v 1.20 2004-07-30 12:55:54 matben Exp $
 # 
 # Note that every jid in the rostArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -228,7 +228,7 @@ proc roster::setrosteritem {rostName jid args} {        variable rostGlobals
     
     # Clear out the old state since an 'ask' element may still be lurking.
     foreach key $rostGlobals(tags) {
-	catch {unset rostArr($mjid,$key)}
+	unset -nocomplain rostArr($mjid,$key)
     }
     
     # Old values will be overwritten, nonexisting options will result in
@@ -282,7 +282,7 @@ upvar ${rostName}::rostArr rostArr
     
     # First the roster, then presence...
     foreach name $rostGlobals(tags) {
-	catch {unset rostArr($mjid,$name)}
+	unset -nocomplain rostArr($mjid,$name)
     }
     
     # Be sure to unset all, also jid3 entries!
@@ -312,7 +312,7 @@ proc roster::ClearRoster {rostName} {
     # Remove the roster.
     foreach jid $rostArr(users) {
 	foreach key $rostGlobals(tags) {
-	    catch {unset rostArr($jid,$key)}
+	    unset -nocomplain rostArr($jid,$key)
 	}
     }
     set rostArr(users) {}
@@ -369,8 +369,7 @@ proc roster::reset {rostName} {
     upvar ${rostName}::rostArr rostArr
     upvar ${rostName}::presArr presArr
     
-    catch {unset rostArr}
-    catch {unset presArr}
+    unset -nocomplain rostArr presArr
     set rostArr(users) {}
     set rostArr(groups) {}
 }
@@ -392,7 +391,7 @@ proc roster::clearpresence {rostName {jidpattern ""}} {
     upvar ${rostName}::presArr presArr
 
     if {$jidpattern == ""} {
-	catch {unset presArr}
+	unset -nocomplain presArr
     } else {
 	array unset presArr $jidpattern
     }

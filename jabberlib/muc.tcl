@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: muc.tcl,v 1.14 2004-06-24 13:48:36 matben Exp $
+# $Id: muc.tcl,v 1.15 2004-07-30 12:55:54 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -192,13 +192,13 @@ proc jlib::muc::parse_enter {mucname roomjid jlibname type args} {
     upvar ${mucname}::cache cache
 
     if {[string equal $type "error"]} {
-	catch {unset cache($roomjid,mynick)}
+	unset -nocomplain cache($roomjid,mynick)
     } else {
 	set cache($roomjid,inside) 1
     }
     if {[info exists cache($roomjid,entercb)]} {
 	uplevel #0 $cache($roomjid,entercb) $mucname $type $args
-	catch {unset cache($roomjid,entercb)}
+	unset -nocomplain cache($roomjid,entercb)
     }
 }
 
@@ -216,9 +216,9 @@ proc jlib::muc::exit {mucname roomjid} {
     if {[info exists cache($roomjid,mynick)]} {
 	set jid ${roomjid}/$cache($roomjid,mynick)
 	$jlibname send_presence -to $jid -type "unavailable"
-	catch {unset cache($roomjid,mynick)}
+	unset -nocomplain cache($roomjid,mynick)
     }
-    catch {unset cache($roomjid,inside)}
+    unset -nocomplain cache($roomjid,inside)
     $rostername clearpresence "${roomjid}*"
 }
 
@@ -444,13 +444,13 @@ proc jlib::muc::parse_create {mucname roomjid jlibname type args} {
     upvar ${mucname}::cache cache
 
     if {[string equal $type "error"]} {
-	catch {unset cache($roomjid,mynick)}
+	unset -nocomplain cache($roomjid,mynick)
     } else {
 	set cache($roomjid,inside) 1
     }
     if {[info exists cache($roomjid,createcb)]} {
 	uplevel #0 $cache($roomjid,createcb) $mucname $type $args
-	catch {unset cache($roomjid,createcb)}
+	unset -nocomplain cache($roomjid,createcb)
     }
 }
 
@@ -607,7 +607,7 @@ proc jlib::muc::participants {mucname roomjid} {
 
     # The rosters presence elements should give us all info we need.
     foreach userAttr [$rostername getpresence $roomjid -type available] {
-	catch {unset attrArr}
+	unset -nocomplain attrArr
 	array set attrArr $userAttr
 	lappend everyone ${roomjid}/$attrArr(-resource)
     }

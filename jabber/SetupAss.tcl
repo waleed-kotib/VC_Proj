@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: SetupAss.tcl,v 1.24 2004-07-09 06:26:06 matben Exp $
+# $Id: SetupAss.tcl,v 1.25 2004-07-30 12:55:54 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -411,7 +411,7 @@ proc ::Jabber::SetupAss::ServCommand {w token} {
 	    foreach elem [tinydom::children $xmllist] {
 		switch -- [tinydom::tagname $elem] {
 		    item {
-			catch {unset attrArr}
+			unset -nocomplain attrArr
 			array set attrArr [tinydom::attrlist $elem]
 			lappend publicServerList  \
 			  [list $attrArr(jid) $attrArr(name)]

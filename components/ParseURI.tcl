@@ -4,7 +4,7 @@
 #       typically from an anchor element <a href='xmpp:jid[?query]'/>
 #       in a html page.
 # 
-# $Id: ParseURI.tcl,v 1.3 2004-07-30 09:33:15 matben Exp $
+# $Id: ParseURI.tcl,v 1.4 2004-07-30 12:55:53 matben Exp $
 
 package require uriencode
 
@@ -219,7 +219,7 @@ proc ::ParseURI::Free {token} {
     variable $token
     upvar 0 $token state
     
-    catch {unset state}
+    unset -nocomplain state
 }
 
 #-------------------------------------------------------------------------------

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: tinyhttpd.tcl,v 1.14 2004-05-28 12:39:58 matben Exp $
+# $Id: tinyhttpd.tcl,v 1.15 2004-07-30 12:55:53 matben Exp $
 
 # ########################### USAGE ############################################
 #
@@ -736,7 +736,7 @@ proc ::tinyhttpd::cleanup { } {
     if {$opts(-log)} {
 	catch {close $gstate(logfd)}
     }   
-    catch {unset timing}
+    unset -nocomplain timing
 
     foreach token [getTokenList] {
 	Finish $token reset
@@ -834,7 +834,7 @@ proc ::tinyhttpd::setmimemappings {suff2MimeList} {
     variable suffToMimeType
     
     # Clear out the old, set the new.
-    catch {unset suffToMimeType}
+    unset -nocomplain suffToMimeType
     array set suffToMimeType $suff2MimeList
 }
 

@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #
-# $Id: JForms.tcl,v 1.13 2004-06-17 13:54:29 matben Exp $
+# $Id: JForms.tcl,v 1.14 2004-07-30 12:55:54 matben Exp $
 # 
 #      Updated to version 2.1 of JEP-0004
 #  
@@ -224,7 +224,7 @@ proc ::Jabber::Forms::Cleanup {w} {
     set id $locals($w,id)
     array unset cache "$id,*"
     array unset locals "$w,*"
-    catch {unset reported($id)}
+    unset -nocomplain reported($id)
 }
 
 # Jabber::Forms::BuildSimple --
@@ -321,7 +321,7 @@ proc ::Jabber::Forms::FillInBoxOneTag {w child parentTag iName {template ""}} {
 		grid $w.l$i -column 0 -row $i -columnspan 2 -sticky w
 		incr i
 	    } elseif {$tag == "ns"} {
-		catch {unset attr}
+		unset -nocomplain attr
 		array set attr [lindex $child 1]
 		if {[info exists attr(type)]} {
 		    set str $attr(type)
@@ -534,7 +534,7 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
 		incr i
 	    }
 	    field {
-		catch {unset attrArr}
+		unset -nocomplain attrArr
 		array set attrArr [wrapper::getattrlist $elem]
 		if {[info exists attrArr(label)]} {
 		    set lab $attrArr(label)
@@ -741,7 +741,7 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
 		# Seems to be outdated. Reported instead in result element.
 		set reported($id) {}
 		foreach c [wrapper::getchildren $elem] {
-		    catch {unset cattrArr}
+		    unset -nocomplain cattrArr
 		    array set cattrArr [wrapper::getattrlist $c]
 		    lappend reported($id) $cattrArr(var) $cattrArr(label)
 		}
@@ -776,7 +776,7 @@ proc ::Jabber::Forms::HandleMultipleOptions {id elem var} {
 		set value [lindex $c 3]				    
 	    }
 	    option {
-		catch {unset cattrArr}
+		unset -nocomplain cattrArr
 		array set cattrArr [lindex $c 1]
 		set optValue $cattrArr(label)
 		foreach cc [wrapper::getchildren $c] {
@@ -911,8 +911,7 @@ proc ::Jabber::Forms::ResultList {w subiq} {
 	# in 'reported'.
 	# We are not guaranteed to receive every field.
 	foreach item [wrapper::getchildren $subiq] {
-	    catch {unset attrArr}
-	    catch {unset itemArr}
+	    unset -nocomplain attrArr itemArr
 	    array set attrArr [lindex $item 1]
 	    set itemArr(jid) $attrArr(jid)
 	    foreach thing [wrapper::getchildren $item] {
@@ -968,14 +967,14 @@ proc ::Jabber::Forms::ResultListXData {w subiq} {
 	    reported {
 		set reported($id) {}
 		foreach field [wrapper::getchildren $item] {
-		    catch {unset attrArr}
+		    unset -nocomplain attrArr
 		    array set attrArr [lindex $field 1]
 		    lappend reported($id) $attrArr(var) $attrArr(label)
 		}
 	    }
 	    item {
 		foreach field [wrapper::getchildren $item] {
-		    catch {unset fieldAttrArr}
+		    unset -nocomplain fieldAttrArr
 		    array set fieldAttrArr [lindex $field 1]
 		    set valueElem [lindex [wrapper::getchildren $field] 0]
 		    if {![string equal [lindex $valueElem 0] "value"]} {

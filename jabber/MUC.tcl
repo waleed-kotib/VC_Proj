@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.43 2004-07-30 09:33:15 matben Exp $
+# $Id: MUC.tcl,v 1.44 2004-07-30 12:55:54 matben Exp $
 
 package require entrycomp
 package require muc
@@ -895,7 +895,7 @@ proc ::Jabber::MUC::FillTable {roomjid} {
 	set role none
 	foreach elem [wrapper::getchildren $xelem] {
 	    if {[string equal [lindex $elem 0] "item"]} {
-		catch {unset attrArr}
+		unset -nocomplain attrArr
 		array set attrArr [lindex $elem 1]
 		if {[info exists attrArr(affiliation)]} {
 		    set aff $attrArr(affiliation)

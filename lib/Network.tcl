@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Network.tcl,v 1.13 2004-06-12 15:35:18 matben Exp $
+# $Id: Network.tcl,v 1.14 2004-07-30 12:55:55 matben Exp $
 
 namespace eval ::Network:: {
     
@@ -107,7 +107,7 @@ proc ::Network::WhenSocketOpensInits {sock nameOrIP port cmd tls} {
     #  Cancel timeout killer.
     if {[info exists killerId($sock)]} {
 	after cancel $killerId($sock)
-	catch {unset killerId($sock)}
+	unset -nocomplain killerId($sock)
     }
 
     if {[catch {eof $sock} iseof] || $iseof} {
@@ -174,7 +174,7 @@ proc ::Network::Kill {sock cmd} {
     catch {close $sock}
     if {[info exists killerId($sock)]} {
 	after cancel $killerId($sock)
-	catch {unset killerId($sock)}
+	unset -nocomplain killerId($sock)
     }
     
     # Evaluate our callback procedure.
@@ -192,7 +192,7 @@ proc ::Network::KillAll { } {
 	catch {close $sock}
 	after cancel $killerId($sock)
     }
-    catch {unset killerId}
+    unset -nocomplain killerId
 }
 
 # Network::GetThisOutsideIPAddress --

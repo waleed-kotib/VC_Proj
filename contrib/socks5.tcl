@@ -7,7 +7,7 @@
 #  (C) 2000 Kerem 'Waster_' HADIMLI (minor parts)
 #  (c) 2003  Mats Bengtsson
 #  
-# $Id: socks5.tcl,v 1.7 2004-07-02 14:08:00 matben Exp $
+# $Id: socks5.tcl,v 1.8 2004-07-30 12:55:53 matben Exp $
 # 
 # TODO:  GSSAPI authetication which is a MUST is missing.
 #        Only CMD CONNECT implemented.
@@ -469,7 +469,7 @@ proc socks5::cleanup {token} {
     variable $token
     upvar 0 $token state
     
-    catch {unset state}
+    unset -nocomplain state
 }
 
 # socks5::serverinit --

@@ -11,7 +11,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: wrapper.tcl,v 1.6 2004-01-23 08:57:36 matben Exp $
+# $Id: wrapper.tcl,v 1.7 2004-07-30 12:55:55 matben Exp $
 # 
 # ########################### INTERNALS ########################################
 # 
@@ -671,7 +671,7 @@ proc wrapper::getchildwithtaginnamespace {xmllist tag ns} {
     set clist {}
     foreach celem [lindex $xmllist 4] {
 	if {[string equal [lindex $celem 0] $tag]} {
-	    catch {unset attrArr}
+	    unset -nocomplain attrArr
 	    array set attrArr [lindex $celem 1]
 	    if {[info exists attrArr(xmlns)] &&  \
 	      [string equal $attrArr(xmlns) $ns]} {
@@ -699,7 +699,7 @@ proc wrapper::getnamespacefromchilds {childs tag ns} {
     set clist {}
     foreach celem $childs {
 	if {[string equal [lindex $celem 0] $tag]} {
-	    catch {unset attrArr}
+	    unset -nocomplain attrArr
 	    array set attrArr [lindex $celem 1]
 	    if {[info exists attrArr(xmlns)] &&  \
 	      [string equal $attrArr(xmlns) $ns]} {

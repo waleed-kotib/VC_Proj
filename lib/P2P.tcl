@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: P2P.tcl,v 1.11 2004-07-26 08:37:16 matben Exp $
+# $Id: P2P.tcl,v 1.12 2004-07-30 12:55:55 matben Exp $
 
 package provide P2P 1.0
 
@@ -485,8 +485,7 @@ proc ::P2P::RemoveCommEntry {wtop ipNum} {
     wm geometry $w ${width}x[expr $height - $eheight]
     
     # These variables must be unset to indicate that entry does not exists.
-    catch {unset commTo($wtop,$ipNum)}
-    catch {unset commFrom($wtop,$ipNum)}
+    unset -nocomplain commTo($wtop,$ipNum) commFrom($wtop,$ipNum)
     
     # Geometry considerations. Update geometry vars and set new minsize.
     after idle [list [namespace current]::SetMinsize $wtop]

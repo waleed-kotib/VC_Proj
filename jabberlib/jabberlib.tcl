@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.56 2004-07-30 09:33:15 matben Exp $
+# $Id: jabberlib.tcl,v 1.57 2004-07-30 12:55:54 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -831,7 +831,7 @@ proc jlib::iq_handler {jlibname xmldata} {
 		
 		# We need a catch here since the callback my in turn 
 		# call 'closestream' which unsets all iq before returning.
-		catch {unset iqcmd($id)}
+		unset -nocomplain iqcmd($id)
 		set ishandled 1
 	    }
 	}
@@ -842,7 +842,7 @@ proc jlib::iq_handler {jlibname xmldata} {
 		
 		#uplevel #0 $iqcmd($id) [list error $xmldata]
 		
-		catch {unset iqcmd($id)}
+		unset -nocomplain iqcmd($id)
 		set ishandled 1
 	    }	    
 	}
@@ -1089,7 +1089,7 @@ proc jlib::presence_handler {jlibname xmldata} {
     # Invoke any callback.
     if {[info exists id] && [info exists prescmd($id)]} {
 	uplevel #0 $prescmd($id) [list $jlibname $type] $arglist
-	catch {unset prescmd($id)}
+	unset -nocomplain prescmd($id)
     } elseif {[string length $opts(-presencecommand)]} {
 	# uplevel #0 $opts(-presencecommand) [list $jlibname $type] $arglist
     } else {
@@ -3581,7 +3581,7 @@ proc jlib::groupchat::participants {jlibname room} {
     # The rosters presence elements should give us all info we need.
     set everyone {}
     foreach userAttr [$lib(rostername) getpresence $room -type available] {
-	catch {unset attrArr}
+	unset -nocomplain attrArr
 	array set attrArr $userAttr
 	lappend everyone ${room}/$attrArr(-resource)
     }

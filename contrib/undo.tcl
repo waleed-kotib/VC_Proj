@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: undo.tcl,v 1.3 2004-01-13 14:50:20 matben Exp $
+# $Id: undo.tcl,v 1.4 2004-07-30 12:55:53 matben Exp $
 
 package provide undo 0.1
 
@@ -64,9 +64,7 @@ proc undo::delete {token} {
     variable histStack
     variable stackPtr
 
-    catch {unset undoStack($token)}
-    catch {unset histStack($token)}
-    catch {unset stackPtr($token)}
+    unset -nocomplain undoStack($token) histStack($token) stackPtr($token)
 }
 
 proc undo::add {token undocmd redocmd} {

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.7 2004-07-30 09:33:15 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.8 2004-07-30 12:55:56 matben Exp $
 
 package require sha1pure
 
@@ -811,7 +811,7 @@ proc ::CanvasUtils::GetImportCmdForQTMovie {cmd args} {
 		    set movFile [filerelative $argsArr(-basepath) $movFile]	    
 		} 
 		set optsArr(-file) $movFile
-		catch {unset impArr(-url)}
+		unset -nocomplain impArr(-url)
 	    } elseif {$movUrl != ""} {
 		
 		# In this case we don't have access to QT's internal cache.
@@ -824,7 +824,7 @@ proc ::CanvasUtils::GetImportCmdForQTMovie {cmd args} {
 	    } elseif {$movUrl != ""} {
 		set optsArr(-url) $movUrl
 	    }	    
-	    catch {unset optsArr(-file)}
+	    unset -nocomplain optsArr(-file)
 	}
 	default {
 	    return -code error "Unknown -uritype \"$argsArr(-uritype)\""
@@ -2103,7 +2103,7 @@ proc ::CanvasUtils::ItemCGet {wtop id} {
 proc ::CanvasUtils::ItemFree {wtop} {
     upvar ::WB::${wtop}::itemopts itemopts
     
-    catch {unset itemopts}
+    unset -nocomplain itemopts
 }
 
 # CanvasUtils::GetCompleteCanvas --
