@@ -9,6 +9,7 @@
 ::msgcat::mcset en Address
 ::msgcat::mcset en Advanced
 ::msgcat::mcset en Agents
+::msgcat::mcset en Appearence
 ::msgcat::mcset en Apply
 ::msgcat::mcset en Available
 ::msgcat::mcset en Away

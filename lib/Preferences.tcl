@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.51 2004-06-06 07:02:21 matben Exp $
+# $Id: Preferences.tcl,v 1.52 2004-06-09 14:26:18 matben Exp $
  
 package require notebook
 package require tree
@@ -122,7 +122,7 @@ proc ::Preferences::Build { } {
     ::tree::tree $wtree -width 100 -height 300 \
       -yscrollcommand [list ::UI::ScrollSet $frtree.sby \
       [list pack $frtree.sby -side right -fill y]]  \
-    -selectcommand ::Preferences::SelectCmd   \
+      -selectcommand ::Preferences::SelectCmd   \
       -doubleclickcommand {}
     scrollbar $frtree.sby -orient vertical -command [list $wtree yview]
     
