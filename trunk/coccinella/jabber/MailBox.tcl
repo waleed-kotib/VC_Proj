@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.47 2004-06-06 07:02:21 matben Exp $
+# $Id: MailBox.tcl,v 1.48 2004-07-09 06:26:06 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -192,7 +192,7 @@ proc ::Jabber::MailBox::Build {args} {
     
     # Toplevel of class MailBox.
     ::UI::Toplevel $w -macstyle documentProc -class MailBox -usemacmainmenu 1
-    wm title $w [::msgcat::mc Inbox]
+    wm title $w [mc Inbox]
 
     set locals(wtop) $w
     set jstate(inboxVis) 1
@@ -258,8 +258,8 @@ proc ::Jabber::MailBox::Build {args} {
     frame $wfrmbox
     set wtbl $wfrmbox.tbl
     set wysctbl $wfrmbox.ysc
-    set columns [list 0 {} 16 [::msgcat::mc Subject] 16 [::msgcat::mc From] \
-      0 [::msgcat::mc Date] 0 {} 0 {}]
+    set columns [list 0 {} 16 [mc Subject] 16 [mc From] \
+      0 [mc Date] 0 {} 0 {}]
     scrollbar $wysctbl -orient vertical -command [list $wtbl yview]
     tablelist::tablelist $wtbl -columns $columns  \
       -yscrollcommand [list ::UI::ScrollSet $wysctbl \
@@ -1094,7 +1094,7 @@ proc ::Jabber::MailBox::SaveMailboxVer1 { } {
     set tmpFile $jprefs(inboxPath).tmp
     if {[catch {open $tmpFile w} fid]} {
 	tk_messageBox -type ok -icon error -message  \
-	  [FormatTextForMessageBox [::msgcat::mc jamesserrinboxopen $tmpFile]]
+	  [FormatTextForMessageBox [mc jamesserrinboxopen $tmpFile]]
 	return
     }
     
@@ -1174,7 +1174,7 @@ proc ::Jabber::MailBox::SaveMailboxVer2 {args} {
     set tmpFile $jprefs(inboxPath).tmp
     if {[catch {open $tmpFile w} fid]} {
 	tk_messageBox -type ok -icon error -message  \
-	  [FormatTextForMessageBox [::msgcat::mc jamesserrinboxopen $tmpFile]]
+	  [FormatTextForMessageBox [mc jamesserrinboxopen $tmpFile]]
 	return
     }
     
@@ -1262,9 +1262,9 @@ proc ::Jabber::MailBox::ReadMailboxVer1 { } {
 
     if {[catch {source $jprefs(inboxPath)} msg]} {
 	set tail [file tail $jprefs(inboxPath)]
-	tk_messageBox -title [::msgcat::mc {Mailbox Error}] -icon error  \
+	tk_messageBox -title [mc {Mailbox Error}] -icon error  \
 	  -type ok -message [FormatTextForMessageBox \
-	  [::msgcat::mc jamesserrinboxread $tail $msg]]
+	  [mc jamesserrinboxread $tail $msg]]
     } else {
 	
 	# The mailbox on file is just a hierarchical list that needs to be
@@ -1296,9 +1296,9 @@ proc ::Jabber::MailBox::ReadMailboxVer2 { } {
 
     if {[catch {source $jprefs(inboxPath)} msg]} {
 	set tail [file tail $jprefs(inboxPath)]
-	tk_messageBox -title [::msgcat::mc {Mailbox Error}] -icon error  \
+	tk_messageBox -title [mc {Mailbox Error}] -icon error  \
 	  -type ok -message [FormatTextForMessageBox \
-	  [::msgcat::mc jamesserrinboxread $tail $msg]]
+	  [mc jamesserrinboxread $tail $msg]]
     } else {
 	
 	# Keep the uidmsg in sync for each list in mailbox.

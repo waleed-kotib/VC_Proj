@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Agents.tcl,v 1.23 2004-06-24 13:48:35 matben Exp $
+# $Id: Agents.tcl,v 1.24 2004-07-09 06:26:05 matben Exp $
 
 package provide Agents 1.0
 
@@ -139,7 +139,7 @@ proc ::Jabber::Agents::AgentsCallback {jid jlibName type subiq} {
 	    if {[winfo exists $wagents]} {
 		tk_messageBox -type ok -icon error \
 		  -message [FormatTextForMessageBox  \
-		  [::msgcat::mc jamesserragentget [lindex $subiq 1]]]
+		  [mc jamesserragentget [lindex $subiq 1]]]
 	    }
 	}
 	ok - result {
@@ -482,7 +482,7 @@ proc ::Jabber::Agents::Popup {w v x y} {
     foreach {item type cmd} $popMenuDefs(agents,def) {
 	if {[string index $cmd 0] == "@"} {
 	    set mt [menu ${m}.sub${i} -tearoff 0]
-	    set locname [::msgcat::mc $item]
+	    set locname [mc $item]
 	    $m add cascade -label $locname -menu $mt -state disabled
 	    eval [string range $cmd 1 end] $mt
 	    incr i
@@ -493,7 +493,7 @@ proc ::Jabber::Agents::Popup {w v x y} {
 	    
 	    # Substitute the jid arguments.
 	    set cmd [subst -nocommands $cmd]
-	    set locname [::msgcat::mc $item]
+	    set locname [mc $item]
 	    $m add command -label $locname -command "after 40 $cmd"  \
 	      -state disabled
 	}

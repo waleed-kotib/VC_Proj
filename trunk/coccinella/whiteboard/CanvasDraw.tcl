@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasDraw.tcl,v 1.1 2004-06-06 06:41:31 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.2 2004-07-09 06:26:06 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 #  
@@ -1254,7 +1254,7 @@ proc ::CanvasDraw::InitArc {w x y {shift 0}} {
 	bind $w <KeyPress-space> {
 	    ::CanvasDraw::ArcCancel %W
 	}
-	::WB::SetStatusMessage $wtop [::msgcat::mc uastatarc2]
+	::WB::SetStatusMessage $wtop [mc uastatarc2]
 	
     } else {
 	
@@ -1362,7 +1362,7 @@ proc ::CanvasDraw::FinalizeArc {w x y} {
 
     Debug 2 "FinalizeArc:: w=$w"
 
-    ::WB::SetStatusMessage $wtop [::msgcat::mc uastatarc]
+    ::WB::SetStatusMessage $wtop [mc uastatarc]
     bind $w <B1-Motion> {}
     bind $w <ButtonRelease-1> {}
     bind $w <KeyPress-space> {}
@@ -1414,7 +1414,7 @@ proc ::CanvasDraw::ArcCancel {w} {
     variable arcBox
     set wtop [::UI::GetToplevelNS $w]
 
-    ::WB::SetStatusMessage $wtop [::msgcat::mc uastatarc]
+    ::WB::SetStatusMessage $wtop [mc uastatarc]
     catch {$w delete tcent}
     catch {unset arcBox}
 }

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Search.tcl,v 1.15 2004-06-16 14:17:31 matben Exp $
+# $Id: Search.tcl,v 1.16 2004-07-09 06:26:06 matben Exp $
 
 package provide Search 1.0
 
@@ -51,7 +51,7 @@ proc ::Jabber::Search::Build {args} {
     set finished -1
     
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
-    wm title $w [::msgcat::mc {Search Service}]
+    wm title $w [mc {Search Service}]
     set wtop $w
 
     set fontS [option get . fontSmall {}]
@@ -70,20 +70,20 @@ proc ::Jabber::Search::Build {args} {
     pack [frame $wright] -side right -expand 1 -fill both
     
     message $wleft.msg -width 200  \
-      -text [::msgcat::mc jasearch] -anchor w
+      -text [mc jasearch] -anchor w
     pack $wleft.msg -side top -fill x -anchor w -padx 4 -pady 2
     set frtop $wleft.top
     pack [frame $frtop] -side top -fill x -anchor w -padx 4 -pady 2
-    label $frtop.lserv -text "[::msgcat::mc {Search Service}]:" -font $fontSB
+    label $frtop.lserv -text "[mc {Search Service}]:" -font $fontSB
     
     # Button part.
     set frbot [frame $wleft.frbot -borderwidth 0]
     set wsearrows $frbot.arr
     set wbtsearch $frbot.btenter
-    pack [button $wbtsearch -text [::msgcat::mc Search] -state disabled \
+    pack [button $wbtsearch -text [mc Search] -state disabled \
       -command [namespace current]::DoSearch]  \
       -side right -padx 5 -pady 2
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
+    pack [button $frbot.btcancel -text [mc Cancel]  \
       -command "destroy $w"]  \
       -side right -padx 5 -pady 2
     pack [::chasearrows::chasearrows $wsearrows -size 16] \
@@ -112,7 +112,7 @@ proc ::Jabber::Search::Build {args} {
     
     # Get button.
     set wbtget $frtop.btget
-    button $wbtget -text [::msgcat::mc Get] -width 6 -default active \
+    button $wbtget -text [mc Get] -width 6 -default active \
       -command [list ::Jabber::Search::Get]
 
     grid $frtop.lserv -sticky w
@@ -122,14 +122,14 @@ proc ::Jabber::Search::Build {args} {
     # This part must be built dynamically from the 'get' xml data.
     # May be different for each conference server.
     set wfr $wleft.frlab
-    labelframe $wfr -text [::msgcat::mc {Search Specifications}]
+    labelframe $wfr -text [mc {Search Specifications}]
     pack $wfr -side top -fill both -padx 6 -pady 4
 
     set wbox [frame $wfr.box]
     pack $wbox -side left -fill both -padx 4 -pady 4 -expand 1
     pack [label $wbox.la -textvariable "[namespace current]::stattxt"]  \
       -padx 0 -pady 10 -side left
-    set stattxt "-- [::msgcat::mc jasearchwait] --"
+    set stattxt "-- [mc jasearchwait] --"
     
     # The Search result tablelist widget.
     set frsearch $wright.se
@@ -139,7 +139,7 @@ proc ::Jabber::Search::Build {args} {
     set wxsc $frsearch.xsc
     set wysc $frsearch.ysc
     tablelist::tablelist $wtb \
-      -columns [list 60 [::msgcat::mc {Search results}]]  \
+      -columns [list 60 [mc {Search results}]]  \
       -xscrollcommand [list $wxsc set] -yscrollcommand [list $wysc set]  \
       -width 60 -height 20
     #-labelcommand "[namespace current]::LabelCommand"  \
@@ -172,18 +172,18 @@ proc ::Jabber::Search::Get { } {
     # Verify.
     if {[string length $server] == 0} {
 	tk_messageBox -type ok -icon error  \
-	  -message [::msgcat::mc jamessregnoserver]
+	  -message [mc jamessregnoserver]
 	return
     }	
     $wcomboserver configure -state disabled
     $wbtget configure -state disabled
-    set stattxt "-- [::msgcat::mc jawaitserver] --"
+    set stattxt "-- [mc jawaitserver] --"
     
     # Send get register.
     ::Jabber::JlibCmd search_get $server ::Jabber::Search::GetCB    
     $wsearrows start
     
-    $wtb configure -columns [list 60 [::msgcat::mc {Search results}]]
+    $wtb configure -columns [list 60 [mc {Search results}]]
     $wtb delete 0 end
 }
 
@@ -217,7 +217,7 @@ proc ::Jabber::Search::GetCB {jlibName type subiq} {
     if {$type == "error"} {
 	tk_messageBox -type ok -icon error  \
 	  -message [FormatTextForMessageBox \
-	  [::msgcat::mc jamesserrsearch [lindex $subiq 0] [lindex $subiq 1]]]
+	  [mc jamesserrsearch [lindex $subiq 0] [lindex $subiq 1]]]
 	return
     }
     catch {destroy $wbox}

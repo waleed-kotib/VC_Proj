@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.3 2004-06-17 13:24:19 matben Exp $
+# $Id: Whiteboard.tcl,v 1.4 2004-07-09 06:26:07 matben Exp $
 
 package require entrycomp
 package require moviecontroller
@@ -1378,7 +1378,7 @@ proc ::WB::SetToolButton {wtop btName} {
 		    bind SnackFrame <ButtonRelease-1> {
 			::CanvasUtils::StopTimerToWindowPopup
 		    }
-		    ::WB::SetStatusMessage $wtop [::msgcat::mc uastatpointmac]
+		    ::WB::SetStatusMessage $wtop [mc uastatpointmac]
 		}
 		default {
 		    $wCan bind $stdTag <Button-3> {
@@ -1392,7 +1392,7 @@ proc ::WB::SetToolButton {wtop btName} {
 		    bind SnackFrame <Button-3> {
 			::CanvasUtils::DoWindowPopup %W %X %Y 
 		    }
-		    ::WB::SetStatusMessage $wtop [::msgcat::mc uastatpoint]		      
+		    ::WB::SetStatusMessage $wtop [mc uastatpoint]		      
 		}
 	    }
 	}
@@ -1440,34 +1440,34 @@ proc ::WB::SetToolButton {wtop btName} {
 	      [subst {::CanvasDraw::FinMoveFrame $wCan %W %x %y}]
 	    
 	    $wCan config -cursor hand2
-	    ::WB::SetStatusMessage $wtop [::msgcat::mc uastatmove]
+	    ::WB::SetStatusMessage $wtop [mc uastatmove]
 	}
 	line {
 	    bindtags $wCan  \
 	      [list $wCan WhiteboardLine WhiteboardNonText $wtoplevel all]
-	    ::WB::SetStatusMessage $wtop [::msgcat::mc uastatline]
+	    ::WB::SetStatusMessage $wtop [mc uastatline]
 	}
 	arrow {
 	    bindtags $wCan  \
 	      [list $wCan WhiteboardArrow WhiteboardNonText $wtoplevel all]
-	    ::WB::SetStatusMessage $wtop [::msgcat::mc uastatarrow]
+	    ::WB::SetStatusMessage $wtop [mc uastatarrow]
 	}
 	rect {
 	    bindtags $wCan  \
 	      [list $wCan WhiteboardRect WhiteboardNonText $wtoplevel all]
-	    ::WB::SetStatusMessage $wtop [::msgcat::mc uastatrect]
+	    ::WB::SetStatusMessage $wtop [mc uastatrect]
 	}
 	oval {
 	    bindtags $wCan  \
 	      [list $wCan WhiteboardOval WhiteboardNonText $wtoplevel all]
-	    ::WB::SetStatusMessage $wtop [::msgcat::mc uastatoval]
+	    ::WB::SetStatusMessage $wtop [mc uastatoval]
 	}
 	text {
 	    bindtags $wCan  \
 	      [list $wCan WhiteboardText $wtoplevel all]
 	    ::CanvasText::EditBind $wCan
 	    $wCan config -cursor xterm
-	    ::WB::SetStatusMessage $wtop [::msgcat::mc uastattext]
+	    ::WB::SetStatusMessage $wtop [mc uastattext]
 	}
 	del {
 	    bindtags $wCan  \
@@ -1476,39 +1476,39 @@ proc ::WB::SetToolButton {wtop btName} {
 	      [subst {::CanvasDraw::DeleteFrame $wCan %W %x %y}]
 	    bind SnackFrame <Button-1>  \
 	      [subst {::CanvasDraw::DeleteFrame $wCan %W %x %y}]
-	    ::WB::SetStatusMessage $wtop [::msgcat::mc uastatdel]
+	    ::WB::SetStatusMessage $wtop [mc uastatdel]
 	}
 	pen {
 	    bindtags $wCan  \
 	      [list $wCan WhiteboardPen WhiteboardNonText $wtoplevel all]
 	    $wCan config -cursor pencil
-	    ::WB::SetStatusMessage $wtop [::msgcat::mc uastatpen]
+	    ::WB::SetStatusMessage $wtop [mc uastatpen]
 	}
 	brush {
 	    bindtags $wCan  \
 	      [list $wCan WhiteboardBrush WhiteboardNonText $wtoplevel all]
-	    ::WB::SetStatusMessage $wtop [::msgcat::mc uastatbrush]
+	    ::WB::SetStatusMessage $wtop [mc uastatbrush]
 	}
 	paint {
 	    bindtags $wCan  \
 	      [list $wCan WhiteboardPaint WhiteboardNonText $wtoplevel all]
-	    ::WB::SetStatusMessage $wtop [::msgcat::mc uastatpaint]	      
+	    ::WB::SetStatusMessage $wtop [mc uastatpaint]	      
 	}
 	poly {
 	    bindtags $wCan  \
 	      [list $wCan WhiteboardPoly WhiteboardNonText $wtoplevel all]
-	    ::WB::SetStatusMessage $wtop [::msgcat::mc uastatpoly]	      
+	    ::WB::SetStatusMessage $wtop [mc uastatpoly]	      
 	}       
 	arc {
 	    bindtags $wCan  \
 	      [list $wCan WhiteboardArc WhiteboardNonText $wtoplevel all]
-	    ::WB::SetStatusMessage $wtop [::msgcat::mc uastatarc]	      
+	    ::WB::SetStatusMessage $wtop [mc uastatarc]	      
 	}
 	rot {
 	    bindtags $wCan  \
 	      [list $wCan WhiteboardRot WhiteboardNonText $wtoplevel all]
 	    $wCan config -cursor exchange
-	    ::WB::SetStatusMessage $wtop [::msgcat::mc uastatrot]	      
+	    ::WB::SetStatusMessage $wtop [mc uastatrot]	      
 	}
     }
     
@@ -1650,9 +1650,9 @@ proc ::WB::DisableWhiteboardMenus {wmenu} {
 	mNew mCloseWindow mSaveCanvas mPageSetup mPrintCanvas mQuit
     }
     ::UI::MenuDisableAllBut ${wmenu}.edit {mAll}
-    $wmenu entryconfigure [::msgcat::mc mPreferences] -state disabled
-    $wmenu entryconfigure [::msgcat::mc mItems] -state disabled
-    $wmenu entryconfigure [::msgcat::mc mInfo] -state disabled
+    $wmenu entryconfigure [mc mPreferences] -state disabled
+    $wmenu entryconfigure [mc mItems] -state disabled
+    $wmenu entryconfigure [mc mInfo] -state disabled
 	
     # Handle all 'plugins'.
     foreach wpath $menuSpecPublic(wpaths) {
@@ -2347,7 +2347,7 @@ proc ::WB::BuildItemMenu {wtop wmenu itemDir} {
     if {[string equal [winfo class $wgrandparent] "Menu"]} {
 	set txt [file tail $itemDir]
     } else {
-	set txt [::msgcat::mc mItems]
+	set txt [mc mItems]
     }
     
     # A trick to make this work for popup menus, which do not have a Menu parent.
@@ -2583,14 +2583,14 @@ proc ::WB::DnDDrop {w data type x y} {
 	    if {$haveImporter} {	   
 		set errMsg [::Import::DoImport $w [list -coords [list $x $y]] -file $f]
 		if {$errMsg != ""} {
-		    tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
+		    tk_messageBox -title [mc Error] -icon error -type ok \
 		      -message "Failed importing: $errMsg" -parent [winfo toplevel $w]
 		}
 		incr x $prefs(offsetCopy)
 		incr y $prefs(offsetCopy)
 	    } else {
-		tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
-		  -message [::msgcat::mc messfailmimeimp $mime] \
+		tk_messageBox -title [mc Error] -icon error -type ok \
+		  -message [mc messfailmimeimp $mime] \
 		  -parent [winfo toplevel $w]
 	    }
 	}

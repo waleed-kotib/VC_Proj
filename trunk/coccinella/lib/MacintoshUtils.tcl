@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: MacintoshUtils.tcl,v 1.9 2004-06-06 15:42:49 matben Exp $
+# $Id: MacintoshUtils.tcl,v 1.10 2004-07-09 06:26:06 matben Exp $
 
 namespace eval ::Mac:: {
 
@@ -59,8 +59,8 @@ proc ::Mac::MacPrint::PageSetup {wtop} {
 	    set cache($wtop,printObj) $printObj
 	}
     } else {
-	tk_messageBox -icon error -title [::msgcat::mc {No Printing}] \
-	  -message [::msgcat::mc messprintnoextension]
+	tk_messageBox -icon error -title [mc {No Printing}] \
+	  -message [mc messprintnoextension]
     }	    
 }
     
@@ -81,8 +81,8 @@ proc ::Mac::MacPrint::PrintCanvas {wtop} {
 	    eval {macprint::printcanvas $wCan $printObject} $opts
 	}
     } else {
-	tk_messageBox -icon error -title [::msgcat::mc {No Printing}] \
-	  -message [::msgcat::mc messprintnoextension]
+	tk_messageBox -icon error -title [mc {No Printing}] \
+	  -message [mc messprintnoextension]
     }	    
 }
 
@@ -108,8 +108,8 @@ proc ::Mac::MacCarbonPrint::PageSetup {wtop} {
 	    set cache($wtop,pageFormat) $pageFormat
 	}
     } else {
-	tk_messageBox -icon error -title [::msgcat::mc {No Printing}] \
-	  -message [::msgcat::mc messprintnoextension]
+	tk_messageBox -icon error -title [mc {No Printing}] \
+	  -message [mc messprintnoextension]
     }
 }
 
@@ -130,8 +130,8 @@ proc ::Mac::MacCarbonPrint::PrintCanvas {wtop} {
 	    eval {maccarbonprint::printcanvas $wCan $printObject}
 	}
     } else {
-	tk_messageBox -icon error -title [::msgcat::mc {No Printing}] \
-	  -message [::msgcat::mc messprintnoextension]
+	tk_messageBox -icon error -title [mc {No Printing}] \
+	  -message [mc messprintnoextension]
     }	    
 }
 
@@ -157,8 +157,8 @@ proc ::Mac::MacCarbonPrint::PrintText {wtext args} {
 	    eval {maccarbonprint::printtext $wtext $printObject} $args
 	}
     } else {
-	tk_messageBox -icon error -title [::msgcat::mc {No Printing}] \
-	  -message [::msgcat::mc messprintnoextension]
+	tk_messageBox -icon error -title [mc {No Printing}] \
+	  -message [mc messprintnoextension]
     }	    
 }
 

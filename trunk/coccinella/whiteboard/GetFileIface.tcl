@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: GetFileIface.tcl,v 1.2 2004-06-06 07:02:23 matben Exp $
+# $Id: GetFileIface.tcl,v 1.3 2004-07-09 06:26:06 matben Exp $
 
 package require getfile
 package require uriencode
@@ -114,7 +114,7 @@ proc ::GetFileIface::GetFile {wtop sock fileName opts} {
     } token]} {
 	::Debug 2 "\t ::getfile::get failed: $token"
 	set str [::GetFileIface::FormatMessage $gettoken $token]
-	tk_messageBox -title [::msgcat::mc {File Transfer Error}]  \
+	tk_messageBox -title [mc {File Transfer Error}]  \
 	  -type ok -message $str
 	unset getstate
 	return
@@ -215,8 +215,8 @@ proc ::GetFileIface::GetFileFromServer {wtop ip port path opts} {
 	  -progress [list [namespace current]::Progress $gettoken] \
 	  -command [list [namespace current]::Command $gettoken]
     } token]} {
-	set msg [::msgcat::mc {File Transfer Error}]
-	tk_messageBox -title [::msgcat::mc {File Transfer Error}]  \
+	set msg [mc {File Transfer Error}]
+	tk_messageBox -title [mc {File Transfer Error}]  \
 	  -type ok -message $token
 	unset getstate
 	return
@@ -269,14 +269,14 @@ proc ::GetFileIface::Prepare {gettoken fileTail mime opts} {
 	ask {
 	    
 	    # 2: Ask user what to do with it.
-	    set ans [tk_messageBox -title [::msgcat::mc {Request To User}] \
+	    set ans [tk_messageBox -title [mc {Request To User}] \
 	      -type yesno -default yes -message \
-	      [FormatTextForMessageBox [::msgcat::mc messaskreceive $fileTail]]]
+	      [FormatTextForMessageBox [mc messaskreceive $fileTail]]]
 	    if {[string equal $ans "no"]} {
 		return 321
 	    } else {
 		set ans [tk_chooseDirectory -initialdir $prefs(incomingPath) \
-		  -title [::msgcat::mc {Pick Directory}]]
+		  -title [mc {Pick Directory}]]
 		if {$ans == ""} {
 		    return 321
 		} else {
@@ -386,7 +386,7 @@ proc ::GetFileIface::Command {gettoken token what msg} {
     if {[string equal $what "error"]} {
 	::WB::SetStatusMessage $wtop $str
 	if {$prefs(talkative) >= 1} {
-	    tk_messageBox -title [::msgcat::mc {Get File Error}] \
+	    tk_messageBox -title [mc {Get File Error}] \
 	      -type ok -message $msg
 	}
 	
@@ -445,7 +445,7 @@ proc ::GetFileIface::FormatMessage {gettoken msg} {
 	}
 	[0-9]* {
 	    set codetext [getfile::ncodetotext $msg]
-	    set msg [::msgcat::mc getnot200 $getstate(fromname) $msg $codetext]
+	    set msg [mc getnot200 $getstate(fromname) $msg $codetext]
 	    set doformat 0
 	}
 	default {
@@ -453,7 +453,7 @@ proc ::GetFileIface::FormatMessage {gettoken msg} {
 	}
     }    
     if {$doformat} {
-	set str [eval {::msgcat::mc get${msg}} $pars]
+	set str [eval {mc get${msg}} $pars]
     } else {
 	set str $msg
     }
@@ -488,7 +488,7 @@ proc ::GetFileIface::UpdateProgress {gettoken total current} {
 	# Create the progress window.
 	::Debug 2 "::GetFileIface::UpdateProgress  create ProgWin"
 
-	set str "[::msgcat::mc {Writing file}]: $getstate(filetail)"
+	set str "[mc {Writing file}]: $getstate(filetail)"
 	::ProgressWindow::ProgressWindow $getstate(wprog)  \
 	  -text $str -text2 $msg2 -text3 $msg3 \
 	  -cancelcmd [list [namespace current]::CancelCmd $gettoken]
@@ -516,10 +516,10 @@ proc ::GetFileIface::DoImport {mime opts args} {
 		::Import::DoImport $servCan $opts
 	    } $args]
 	} else {
-	    set errMsg [::msgcat::mc messfailmimeimp $mime]
+	    set errMsg [mc messfailmimeimp $mime]
 	}
 	if {$errMsg != ""} {
-	    tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
+	    tk_messageBox -title [mc Error] -icon error -type ok \
 	      -message "Failed importing: $errMsg"
 	}
     }

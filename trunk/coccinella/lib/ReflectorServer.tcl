@@ -16,7 +16,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: ReflectorServer.tcl,v 1.2 2004-01-13 14:50:21 matben Exp $
+# $Id: ReflectorServer.tcl,v 1.3 2004-07-09 06:26:06 matben Exp $
 # 
 #  Since this is a pretty complex piece of code we describe the principles in
 #  some detail here.
@@ -121,7 +121,7 @@ if {([string compare $tcl_platform(platform) "windows"] == 0) &&   \
 
 # Mapping from error code to error message; 320+ own, rest HTTP codes.
 
-set tclwbProtMsg(200) [::msgcat::mc OK]
+set tclwbProtMsg(200) [mc OK]
 set tclwbProtMsg(201) "Created"
 set tclwbProtMsg(202) "Accepted"
 set tclwbProtMsg(204) "No Content"

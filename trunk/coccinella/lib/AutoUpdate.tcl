@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: AutoUpdate.tcl,v 1.8 2004-03-13 15:21:41 matben Exp $
+# $Id: AutoUpdate.tcl,v 1.9 2004-07-09 06:26:06 matben Exp $
 
 package require tinydom
 package require http 2.3
@@ -161,13 +161,13 @@ proc ::AutoUpdate::Dialog {releaseAttr message changesList} {
     if {[package vcompare $prefs(fullVers) $prefs(lastAutoUpdateVersion)] <= 0} {
     	set noautocheck 1
     }
-    checkbutton $w.frall.ch -text " [::msgcat::mc autoupdatenot]" \
+    checkbutton $w.frall.ch -text " [mc autoupdatenot]" \
       -variable [namespace current]::noautocheck
     pack $w.frall.ch -side top -anchor w -padx 10 -pady 4
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btset -text [::msgcat::mc Close] \
+    pack [button $frbot.btset -text [mc Close] \
       -command "destroy $w"] -side right -padx 5 -pady 5
     pack $frbot -side top -fill x -padx 8 -pady 6
     

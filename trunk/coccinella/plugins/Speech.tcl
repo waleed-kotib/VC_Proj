@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Speech.tcl,v 1.3 2004-06-07 07:05:42 matben Exp $
+# $Id: Speech.tcl,v 1.4 2004-07-09 06:26:06 matben Exp $
 
 namespace eval ::Speech:: { }
 
@@ -236,7 +236,7 @@ proc ::Speech::BuildPrefsHook {wtree nbframe} {
     variable sprefs
     
     if {$sprefs(haveSpeech)} {
-	$wtree newitem {General {Speech}} -text [::msgcat::mc {Speech}]
+	$wtree newitem {General {Speech}} -text [mc {Speech}]
 	set wpage [$nbframe page {Speech}]    
 	::Speech::BuildPrefsPage $wpage
     }
@@ -289,14 +289,14 @@ proc ::Speech::BuildPrefsPage {page} {
     array set tmpPrefs [array get sprefs]
     
     set labpsp $page.sp
-    labelframe $labpsp -text [::msgcat::mc {Synthetic speech}]
+    labelframe $labpsp -text [mc {Synthetic speech}]
     pack $labpsp -side top -anchor w -padx 8 -pady 4
     
-    checkbutton $labpsp.speak     -text "  [::msgcat::mc prefsounsynwb]"  \
+    checkbutton $labpsp.speak     -text "  [mc prefsounsynwb]"  \
       -variable [namespace current]::tmpPrefs(speakWBText)
-    checkbutton $labpsp.speakmsg  -text "  [::msgcat::mc prefsounsynno]"  \
+    checkbutton $labpsp.speakmsg  -text "  [mc prefsounsynno]"  \
       -variable [namespace current]::tmpPrefs(speakMsg)
-    checkbutton $labpsp.speakchat -text "  [::msgcat::mc prefsounsynch]"  \
+    checkbutton $labpsp.speakchat -text "  [mc prefsounsynch]"  \
       -variable [namespace current]::tmpPrefs(speakChat)
     pack $labpsp.speak     -side top -anchor w -padx 10
     pack $labpsp.speakmsg  -side top -anchor w -padx 10
@@ -314,8 +314,8 @@ proc ::Speech::BuildPrefsPage {page} {
 	set tmpPrefs(SpeechOn) 0
     }
     pack [frame $labpsp.fr] -side top -anchor w -padx 26 -pady 2
-    label $labpsp.fr.in  -text [::msgcat::mc prefsounvoin]
-    label $labpsp.fr.out -text [::msgcat::mc prefsounvoou]
+    label $labpsp.fr.in  -text [mc prefsounvoin]
+    label $labpsp.fr.out -text [mc prefsounvoou]
     
     set wpopin $labpsp.fr.popin
     set wpopupmenuin [eval {tk_optionMenu $wpopin   \

@@ -6,7 +6,7 @@
 # 
 # Unix/Linux only.
 #
-# $Id: ImageMagic.tcl,v 1.1 2004-06-07 07:07:36 matben Exp $
+# $Id: ImageMagic.tcl,v 1.2 2004-07-09 06:26:06 matben Exp $
 
 namespace eval ::ImageMagic:: {
     
@@ -39,9 +39,9 @@ proc ::ImageMagic::Init { } {
 	# 'type' 'label' 'command' 'opts' {subspec}
 	# where subspec defines a cascade menu recursively
 	set menuspec [list \
-	    command [::msgcat::mc {Take Snapshot}] {::ImageMagic::ImportWindowSnapShot $wtop} normal {} {} {} \
+	    command [mc {Take Snapshot}] {::ImageMagic::ImportWindowSnapShot $wtop} normal {} {} {} \
 	]
-	::UI::Public::RegisterMenuEntry addon [::msgcat::mc mAddons] $menuspec
+	::UI::Public::RegisterMenuEntry addon [mc mAddons] $menuspec
     }
 }
 
@@ -76,7 +76,7 @@ proc ::ImageMagic::ImportWindowSnapShot {wtop} {
 	if {$errMsg == ""} {
 	    lappend tmpfiles $tmpfile
 	} else {
-	    tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
+	    tk_messageBox -title [mc Error] -icon error -type ok \
 	      -message "Failed importing: $errMsg"
 	}
     }
@@ -118,10 +118,10 @@ proc ::ImageMagic::BuildDialog {w} {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btok -text [::msgcat::mc OK] -default active \
+    pack [button $frbot.btok -text [mc OK] -default active \
       -command [list set [namespace current]::finished 1]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel] \
+    pack [button $frbot.btcancel -text [mc Cancel] \
       -command [list set [namespace current]::finished 0]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6

@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ItemInspector.tcl,v 1.1 2004-06-06 06:41:31 matben Exp $
+# $Id: ItemInspector.tcl,v 1.2 2004-07-09 06:26:06 matben Exp $
 
 package provide ItemInspector 1.0
 
@@ -367,11 +367,11 @@ proc ::ItemInspector::Build {wtop itemId args} {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btsave -text [::msgcat::mc Save] -default active  \
+    pack [button $frbot.btsave -text [mc Save] -default active  \
       -command [list [namespace current]::CanvasConfigureItem $w $wCan  \
       $itemId $listOfAllOptions]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
+    pack [button $frbot.btcancel -text [mc Cancel]  \
       -command [list [namespace current]::Cancel $w]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -in $w.frall  \
@@ -642,10 +642,10 @@ proc ::ItemInspector::Movie {wtop winfr} {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btsave -text [::msgcat::mc Save] -default active  \
+    pack [button $frbot.btsave -text [mc Save] -default active  \
       -command [list [namespace current]::MovieConfigure $w $wmov]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
+    pack [button $frbot.btcancel -text [mc Cancel]  \
       -command [list [namespace current]::MovieCancel $w]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -in $w.frall  \
@@ -744,7 +744,7 @@ proc ::ItemInspector::Broken {wtop id args} {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btok -text [::msgcat::mc OK]  \
+    pack [button $frbot.btok -text [mc OK]  \
       -command "destroy $w"]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Import.tcl,v 1.1 2004-06-06 06:41:31 matben Exp $
+# $Id: Import.tcl,v 1.2 2004-07-09 06:26:06 matben Exp $
 
 package require http
 package require httpex
@@ -48,7 +48,7 @@ proc ::Import::ImportImageOrMovieDlg {wtop} {
     } else {
 	set opts {}
     }
-    set fileName [eval {tk_getOpenFile -title [::msgcat::mc {Open Image/Movie}] \
+    set fileName [eval {tk_getOpenFile -title [mc {Open Image/Movie}] \
       -filetypes [::Plugins::GetTypeListDialogOption all]} $opts]
     if {$fileName == ""} {
 	return
@@ -63,12 +63,12 @@ proc ::Import::ImportImageOrMovieDlg {wtop} {
 	set opts [list -coords [::CanvasUtils::NewImportAnchor $wCan]]	
 	set errMsg [::Import::DoImport $wCan $opts -file $fileName]
 	if {$errMsg != ""} {
-	    tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
+	    tk_messageBox -title [mc Error] -icon error -type ok \
 	      -message "Failed importing: $errMsg"
 	}
     } else {
-	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
-	  -message [::msgcat::mc messfailmimeimp $mime]
+	tk_messageBox -title [mc Error] -icon error -type ok \
+	  -message [mc messfailmimeimp $mime]
     }
 }
 
@@ -845,7 +845,7 @@ proc ::Import::HttpProgress {gettoken token total current} {
 	      [list $status $gettoken $token $total $current]
 	} else {	
 	    set errmsg "File transfer error for \"$getstate(url)\""
-	    tk_messageBox -title [::msgcat::mc Error] -icon error -type ok -message \
+	    tk_messageBox -title [mc Error] -icon error -type ok -message \
 	      [FormatTextForMessageBox "Failed getting url: $errmsg"]
 	}
 	catch {file delete $getstate($dstPath)}
@@ -933,7 +933,7 @@ proc ::Import::HttpCommand {gettoken token} {
 	    timeout {
 		set msg "Timeout waiting for file \"$tail\""
 		::WB::SetStatusMessage $wtop $msg
-		tk_messageBox -title [::msgcat::mc Timeout] -icon info \
+		tk_messageBox -title [mc Timeout] -icon info \
 		  -type ok -message $msg
 	    }
 	    ok {
@@ -1156,7 +1156,7 @@ proc ::Import::HttpGetQuickTimeTcl {wtop url opts args} {
     # This one shall return almost immediately.
     if {[catch {movie $wmovie -url $url -loadcommand $callback} msg]} {
 	tk_messageBox -icon error -type ok -message \
-	  [FormatTextForMessageBox "[::msgcat::mc Error]: $msg"]
+	  [FormatTextForMessageBox "[mc Error]: $msg"]
 	catch {destroy $wfr}
 	return
     }
@@ -1289,7 +1289,7 @@ proc ::Import::XanimQuerySize {fileName} {
 	# Check version number.
 	if {[regexp "Rev +($ver_)" $res match ver]} {
 	    if {$ver < 2.7} {
-		puts stderr "[::msgcat::mc Error]: xanim must have at least version 2.7"
+		puts stderr "[mc Error]: xanim must have at least version 2.7"
 		return {}
 	    }
 	}
@@ -1782,14 +1782,14 @@ proc ::Import::SaveImageAsFile {w id} {
 	set ext [file extension $origFile]
 	set initFile Untitled${ext}
 	set fileName [tk_getSaveFile -defaultextension $ext   \
-	  -title [::msgcat::mc {Save As}] -initialfile $initFile]
+	  -title [mc {Save As}] -initialfile $initFile]
 	if {$fileName != ""} {
 	    file copy $origFile $fileName
 	}
     } else {
 	set initFile Untitled.gif
 	set fileName [tk_getSaveFile -defaultextension gif   \
-	  -title [::msgcat::mc {Save As GIF}] -initialfile $initFile]
+	  -title [mc {Save As GIF}] -initialfile $initFile]
 	if {$fileName != ""} {
 	    $imageName write $fileName -format gif
 	}

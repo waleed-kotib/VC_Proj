@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.13 2004-07-01 06:55:03 matben Exp $
+# $Id: Emoticons.tcl,v 1.14 2004-07-09 06:26:05 matben Exp $
 
 
 package provide Emoticons 1.0
@@ -705,7 +705,7 @@ proc  ::Emoticons::InitPrefsHook { } {
 
 proc ::Emoticons::BuildPrefsHook {wtree nbframe} {
 
-    $wtree newitem {Jabber Emoticons} -text [::msgcat::mc {Emoticons}]
+    $wtree newitem {Jabber Emoticons} -text [mc {Emoticons}]
     
     set wpage [$nbframe page {Emoticons}]    
     ::Emoticons::BuildPrefsPage $wpage
@@ -765,7 +765,7 @@ proc ::Emoticons::PopCmd {name1 name2 op} {
 	if {[catch {
 	    ::Emoticons::LoadTmpIconSet $state($var,path)
 	} err]} {
-	    tk_messageBox -icon error -title [::msgcat::mc Error] \
+	    tk_messageBox -icon error -title [mc Error] \
 	      -message "Failed loading iconset $var. $err" \
 	      -parent [winfo toplevel $wpreftext]
 	    set priv(havezip) 0

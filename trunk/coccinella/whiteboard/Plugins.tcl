@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Plugins.tcl,v 1.4 2004-06-17 13:24:19 matben Exp $
+# $Id: Plugins.tcl,v 1.5 2004-07-09 06:26:06 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -382,7 +382,7 @@ proc ::Plugins::CompileAndLoadPackages { } {
 	    
 		# Search for it! Be silent.
 		if {[string equal $plugin($name,type) "internal"]} {
-		    ::SplashScreen::SetMsg "[::msgcat::mc splashlook] $name..."
+		    ::SplashScreen::SetMsg "[mc splashlook] $name..."
 		    if {![catch {
 			eval {package require} $plugin($name,pack)
 		    } msg]} {
@@ -1173,7 +1173,7 @@ proc ::Plugins::InitPrefsHook { } {
 
 proc ::Plugins::BuildPrefsHook {wtree nbframe} {
     
-    $wtree newitem {Whiteboard Plugins2} -text [::msgcat::mc Plugins]
+    $wtree newitem {Whiteboard Plugins2} -text [mc Plugins]
 
     set wpage [$nbframe page Plugins2]
     ::Plugins::BuildPrefsPage $wpage
@@ -1187,13 +1187,13 @@ proc ::Plugins::BuildPrefsPage {page} {
 
     # Conference (groupchat) stuff.
     set labfr $page.fr
-    labelframe $labfr -text [::msgcat::mc {Plugin Control}]
+    labelframe $labfr -text [mc {Plugin Control}]
     pack $labfr -side top -anchor w -padx 8 -pady 4
     set pbl [frame $labfr.frin]
     pack $pbl -padx 10 -pady 6 -side left
     
     label ${pbl}.lhead -wraplength 300 -anchor w -justify left \
-      -text [::msgcat::mc prefplugctrl]
+      -text [mc prefplugctrl]
     pack ${pbl}.lhead -padx 0 -pady 2 -side top -anchor w
     
     set pfr [frame ${pbl}.frpl]

@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Conference.tcl,v 1.28 2004-06-24 13:48:35 matben Exp $
+# $Id: Conference.tcl,v 1.29 2004-07-09 06:26:05 matben Exp $
 
 package provide Conference 1.0
 
@@ -53,7 +53,7 @@ proc ::Jabber::Conference::BuildEnter {args} {
     set w $wDlgs(jenterroom)$uid    
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document closeBox}
-    wm title $w [::msgcat::mc {Enter Room}]
+    wm title $w [mc {Enter Room}]
     set state(w) $w
     array set state {
 	finished    -1
@@ -68,11 +68,11 @@ proc ::Jabber::Conference::BuildEnter {args} {
     frame $w.frall -borderwidth 1 -relief raised
     pack  $w.frall  -fill both -expand 1 -ipadx 12 -ipady 4
     message $w.frall.msg -width 280  -justify left  \
-    	-text [::msgcat::mc jamessconfmsg]
+    	-text [mc jamessconfmsg]
     pack $w.frall.msg -side top -anchor w -padx 2 -pady 4
     set frtop $w.frall.top
     pack [frame $frtop] -side top -anchor w -padx 12
-    label $frtop.lserv -text "[::msgcat::mc {Conference server}]:" 
+    label $frtop.lserv -text "[mc {Conference server}]:" 
     
     set confServers [$jstate(jlib) service getconferences]
     
@@ -83,7 +83,7 @@ proc ::Jabber::Conference::BuildEnter {args} {
 
     # First menubutton: servers. (trace below)
     eval {tk_optionMenu $wpopupserver $token\(server)} $confServers
-    label $frtop.lroom -text "[::msgcat::mc {Room name}]:"
+    label $frtop.lroom -text "[mc {Room name}]:"
     
     # Find the default conferencing server.
     if {[info exists argsArr(-server)]} {
@@ -121,7 +121,7 @@ proc ::Jabber::Conference::BuildEnter {args} {
         
     if {$UItype == 0} {
 	set wfr $w.frall.frlab
-	labelframe $wfr -text [::msgcat::mc Specifications]
+	labelframe $wfr -text [mc Specifications]
 	pack $wfr -side top -fill both -padx 2 -pady 2
 	
 	set   wbox $wfr.box
@@ -144,13 +144,13 @@ proc ::Jabber::Conference::BuildEnter {args} {
     set frbot [frame $w.frall.frbot -borderwidth 0]
     set wbtenter  $frbot.btenter
     set wbtget    $frbot.btget
-    pack [button $wbtget -text [::msgcat::mc Get] -default active \
+    pack [button $wbtget -text [mc Get] -default active \
       -command [list [namespace current]::EnterGet $token]]  \
       -side right -padx 5 -pady 0
-    pack [button $wbtenter -text [::msgcat::mc Enter] -state disabled \
+    pack [button $wbtenter -text [mc Enter] -state disabled \
       -command [list [namespace current]::DoEnter $token]]  \
       -side right -padx 5 -pady 0
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
+    pack [button $frbot.btcancel -text [mc Cancel]  \
       -command [list [namespace current]::CancelEnter $token]]  \
       -side right -padx 5 -pady 0
     pack [frame $w.frall.pad -height 8 -width 1] -side bottom -pady 0
@@ -171,7 +171,7 @@ proc ::Jabber::Conference::BuildEnter {args} {
     set state(wbtget)       $wbtget
     set state(wbtenter)     $wbtenter
     set state(wbox)         $wbox
-    set state(stattxt) "-- [::msgcat::mc jasearchwait] --"    
+    set state(stattxt) "-- [mc jasearchwait] --"    
     
     wm resizable $w 0 0
     set oldFocus [focus]
@@ -321,7 +321,7 @@ proc ::Jabber::Conference::EnterGet {token} {
     if {($state(roomname) == "") || ($state(server) == "")} {
 	tk_messageBox -type ok -icon error -parent $state(w) \
 	  -message [FormatTextForMessageBox \
-	  [::msgcat::mc jamessenterroomempty]]
+	  [mc jamessenterroomempty]]
 	return
     }	
     ::Jabber::Conference::BusyEnterDlgIncr $token
@@ -348,7 +348,7 @@ proc ::Jabber::Conference::EnterGetCB {token jlibName type subiq} {
     if {$type == "error"} {
 	tk_messageBox -type ok -icon error -parent $state(w) \
 	  -message [FormatTextForMessageBox \
-	  [::msgcat::mc jamesserrconfget [lindex $subiq 0] [lindex $subiq 1]]]
+	  [mc jamesserrconfget [lindex $subiq 0] [lindex $subiq 1]]]
 	return
     }
 
@@ -400,7 +400,7 @@ proc ::Jabber::Conference::ResultCallback {roomJid jlibName type subiq} {
     if {$type == "error"} {
 	tk_messageBox -type ok -icon error  \
 	  -message [FormatTextForMessageBox \
-	  [::msgcat::mc jamessconffailed $roomJid [lindex $subiq 0] [lindex $subiq 1]]]
+	  [mc jamessconffailed $roomJid [lindex $subiq 0] [lindex $subiq 1]]]
     } else {
 	::hooks::run groupchatEnterRoomHook $roomJid "conference"
     }
@@ -437,7 +437,7 @@ proc ::Jabber::Conference::BuildCreate {args} {
     
     set w $wDlgs(jcreateroom)$uid    
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
-    wm title $w [::msgcat::mc {Create Room}]
+    wm title $w [mc {Create Room}]
     set fontSB [option get . fontSmallBold {}]
 
     set state(w) $w
@@ -458,11 +458,11 @@ proc ::Jabber::Conference::BuildCreate {args} {
     frame $w.frall -borderwidth 1 -relief raised
     pack  $w.frall -fill both -expand 1 -ipadx 12 -ipady 4
     message $w.frall.msg -anchor w -justify left  \
-      -text [::msgcat::mc jacreateroom] -width 300
+      -text [mc jacreateroom] -width 300
     pack $w.frall.msg -side top -fill x -anchor w -padx 10 -pady 4
     set frtop $w.frall.top
     pack [frame $frtop] -side top -anchor w -padx 12
-    label $frtop.lserv -text "[::msgcat::mc {Conference server}]:"
+    label $frtop.lserv -text "[mc {Conference server}]:"
     
     set confServers [$jstate(jlib) service getconferences]
 
@@ -478,13 +478,13 @@ proc ::Jabber::Conference::BuildCreate {args} {
 	$frtop.eserv configure -state disabled
     }
     
-    label $frtop.lroom -text "[::msgcat::mc {Room name}]:"    
+    label $frtop.lroom -text "[mc {Room name}]:"    
     entry $frtop.eroom -textvariable $token\(roomname)  \
       -validate key -validatecommand {::Jabber::ValidateUsernameStr %S}
-    label $frtop.lnick -text "[::msgcat::mc {Nick name}]:"    
+    label $frtop.lnick -text "[mc {Nick name}]:"    
     entry $frtop.enick -textvariable $token\(nickname)  \
       -validate key -validatecommand {::Jabber::ValidateResourceStr %S}
-    label $frtop.ldesc -text "[::msgcat::mc Specifications]:"
+    label $frtop.ldesc -text "[mc Specifications]:"
     label $frtop.lstat -textvariable $token\(stattxt)
     
     grid $frtop.lserv -column 0 -row 0 -sticky e
@@ -501,13 +501,13 @@ proc ::Jabber::Conference::BuildCreate {args} {
     set wsearrows $frbot.arr
     set wbtenter $frbot.btenter
     set wbtget $frbot.btget
-    pack [button $wbtget -text [::msgcat::mc Get] -default active \
+    pack [button $wbtget -text [mc Get] -default active \
       -command [list [namespace current]::CreateGet $token]]  \
       -side right -padx 5 -pady 5
-    pack [button $wbtenter -text [::msgcat::mc Create] -state disabled \
+    pack [button $wbtenter -text [mc Create] -state disabled \
       -command [list [namespace current]::DoCreate $token]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
+    pack [button $frbot.btcancel -text [mc Cancel]  \
       -command [list [namespace current]::CancelCreate $token]]  \
       -side right -padx 5 -pady 5
     pack [::chasearrows::chasearrows $wsearrows -size 16] \
@@ -519,7 +519,7 @@ proc ::Jabber::Conference::BuildCreate {args} {
     
     if {$UItype == 0} {
 	set wfr $w.frall.frlab
-	labelframe $wfr -text [::msgcat::mc Specifications]
+	labelframe $wfr -text [mc Specifications]
 	pack $wfr -side top -fill both -padx 2 -pady 2
 	
 	set   wbox $wfr.box
@@ -543,7 +543,7 @@ proc ::Jabber::Conference::BuildCreate {args} {
     set state(wbtget) $wbtget
     set state(wbtenter) $wbtenter
     set state(wbox) $wbox
-    set state(stattxt) "-- [::msgcat::mc jasearchwait] --"
+    set state(stattxt) "-- [mc jasearchwait] --"
     
     bind $w <Return> [list $wbtget invoke]
     
@@ -595,7 +595,7 @@ proc ::Jabber::Conference::CreateGet {token} {
     }	
     $state(wpopupserver) configure -state disabled
     $state(wbtget) configure -state disabled
-    set state(stattxt) "-- [::msgcat::mc jawaitserver] --"
+    set state(stattxt) "-- [mc jawaitserver] --"
     
     # Send get create room. NOT the server!
     set roomJid [jlib::jidmap $state(roomname)@$state(server)]
@@ -648,8 +648,8 @@ proc ::Jabber::Conference::CreateMUCCB {token jlibName type args} {
 	}
 	tk_messageBox -type ok -icon error -parent $state(w) \
 	  -message [FormatTextForMessageBox \
-	  [::msgcat::mc jamesserrconfgetcre $errcode $errmsg]]
-        set state(stattxt) "-- [::msgcat::mc jasearchwait] --"
+	  [mc jamesserrconfgetcre $errcode $errmsg]]
+        set state(stattxt) "-- [mc jasearchwait] --"
         $state(wpopupserver) configure -state normal
         $state(wbtget) configure -state normal
 	return
@@ -687,7 +687,7 @@ proc ::Jabber::Conference::CreateGetGetCB {token jlibName type subiq} {
     if {$type == "error"} {
 	tk_messageBox -type ok -icon error -parent $state(w) \
 	  -message [FormatTextForMessageBox \
-	  [::msgcat::mc jamesserrconfgetcre [lindex $subiq 0] [lindex $subiq 1]]]
+	  [mc jamesserrconfgetcre [lindex $subiq 0] [lindex $subiq 1]]]
 	return
     }
 
@@ -748,7 +748,7 @@ proc ::Jabber::Conference::DoCreateCallback {usemuc roomJid jlibName type subiq}
     if {$type == "error"} {
 	tk_messageBox -type ok -icon error  \
 	  -message [FormatTextForMessageBox \
-	  [::msgcat::mc jamessconffailed $roomJid [lindex $subiq 0] [lindex $subiq 1]]]
+	  [mc jamessconffailed $roomJid [lindex $subiq 0] [lindex $subiq 1]]]
     } elseif {[regexp {.+@([^@]+)$} $roomJid match service]} {
 		    
 	# Cache groupchat protocol type (muc|conference|gc-1.0).

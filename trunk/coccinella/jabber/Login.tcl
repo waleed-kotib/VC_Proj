@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.38 2004-07-07 13:07:13 matben Exp $
+# $Id: Login.tcl,v 1.39 2004-07-09 06:26:05 matben Exp $
 
 package provide Login 1.0
 
@@ -60,7 +60,7 @@ proc ::Jabber::Login::Login { } {
     
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document closeBox}
-    wm title $w [::msgcat::mc Login]
+    wm title $w [mc Login]
     
     set fontSB     [option get . fontSmallBold {}]
     set contrastBg [option get . backgroundLightContrast {}]
@@ -69,9 +69,9 @@ proc ::Jabber::Login::Login { } {
     frame $w.frall -borderwidth 1 -relief raised
     pack  $w.frall -fill both -expand 1
                                  
-    ::headlabel::headlabel $w.frall.head -text [::msgcat::mc Login]    
+    ::headlabel::headlabel $w.frall.head -text [mc Login]    
     pack $w.frall.head -side top -fill both -expand 1
-    label $w.frall.msg -wraplength 280 -justify left -text [::msgcat::mc jalogin]
+    label $w.frall.msg -wraplength 280 -justify left -text [mc jalogin]
     pack $w.frall.msg -side top -fill both -expand 1 -padx 10
     
     # Entries etc.
@@ -79,7 +79,7 @@ proc ::Jabber::Login::Login { } {
     pack $frmid -side top -fill both -expand 1
 	
     # Option menu for selecting user profile.
-    label $frmid.lpop -text "[::msgcat::mc Profile]:" -font $fontSB -anchor e
+    label $frmid.lpop -text "[mc Profile]:" -font $fontSB -anchor e
     set wpopup $frmid.popup
     
     set wpopupMenu [tk_optionMenu $wpopup [namespace current]::menuVar {}]
@@ -89,19 +89,19 @@ proc ::Jabber::Login::Login { } {
     
     ::Jabber::Login::LoadProfiles
 
-    label $frmid.lserv -text "[::msgcat::mc {Jabber server}]:" -font $fontSB -anchor e
+    label $frmid.lserv -text "[mc {Jabber server}]:" -font $fontSB -anchor e
     entry $frmid.eserv -width 22    \
       -textvariable [namespace current]::server -validate key  \
       -validatecommand {::Jabber::ValidateDomainStr %S}
-    label $frmid.luser -text "[::msgcat::mc Username]:" -font $fontSB -anchor e
+    label $frmid.luser -text "[mc Username]:" -font $fontSB -anchor e
     entry $frmid.euser -width 22   \
       -textvariable [namespace current]::username -validate key  \
       -validatecommand {::Jabber::ValidateUsernameStr %S}
-    label $frmid.lpass -text "[::msgcat::mc Password]:" -font $fontSB -anchor e
+    label $frmid.lpass -text "[mc Password]:" -font $fontSB -anchor e
     entry $frmid.epass -width 22   \
       -textvariable [namespace current]::password -show {*} -validate key \
       -validatecommand {::Jabber::ValidatePasswdChars %S}
-    label $frmid.lres -text "[::msgcat::mc Resource]:" -font $fontSB -anchor e
+    label $frmid.lres -text "[mc Resource]:" -font $fontSB -anchor e
     entry $frmid.eres -width 22   \
       -textvariable [namespace current]::resource -validate key  \
       -validatecommand {::Jabber::ValidateResourceStr %S}
@@ -121,7 +121,7 @@ proc ::Jabber::Login::Login { } {
     set wtri $frtri.tri
     set wtrilab $frtri.l
     label $wtri -image [::UI::GetIcon mactriangleclosed]
-    label $wtrilab -text "[::msgcat::mc More]..."
+    label $wtrilab -text "[mc More]..."
     pack $wtri $wtrilab -side left -padx 2
     bind $wtri <Button-1> [list [namespace current]::MoreOpts $w]
     
@@ -141,13 +141,13 @@ proc ::Jabber::Login::Login { } {
             
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btok -text [::msgcat::mc Login] \
+    pack [button $frbot.btok -text [mc Login] \
       -default active -command [namespace current]::DoLogin]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
+    pack [button $frbot.btcancel -text [mc Cancel]  \
       -command [list [namespace current]::DoCancel $w]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btprof -text [::msgcat::mc Profiles]  \
+    pack [button $frbot.btprof -text [mc Profiles]  \
       -command [namespace current]::Profiles]  \
       -side left -padx 5 -pady 5
     pack $frbot -side bottom -fill both -expand 1 -padx 8 -pady 6
@@ -246,7 +246,7 @@ proc ::Jabber::Login::MoreOpts {w} {
       
     pack $wfrmore -side top -fill x -padx 10
     $wtri configure -image [::UI::GetIcon mactriangleopen]
-    $wtrilab configure -text "[::msgcat::mc Less]..."
+    $wtrilab configure -text "[mc Less]..."
     bind $wtri <Button-1> [list [namespace current]::LessOpts $w]
 }
 
@@ -257,7 +257,7 @@ proc ::Jabber::Login::LessOpts {w} {
     
     pack forget $wfrmore
     $wtri configure -image [::UI::GetIcon mactriangleclosed]
-    $wtrilab configure -text "[::msgcat::mc More]..."
+    $wtrilab configure -text "[mc More]..."
     bind $wtri <Button-1> [list [namespace current]::MoreOpts $w]
 }
 
@@ -314,7 +314,7 @@ proc ::Jabber::Login::DoLogin {} {
 	upvar 0 $name var
 	if {[string length $var] <= 1} {
 	    tk_messageBox -icon error -type ok -message  \
-	      [FormatTextForMessageBox [::msgcat::mc jamessnamemissing $name]]	      
+	      [FormatTextForMessageBox [mc jamessnamemissing $name]]	      
 	    return
 	}
 	if {$name == "password"} {
@@ -333,7 +333,7 @@ proc ::Jabber::Login::DoLogin {} {
 	    }
 	} err]} {
 	    tk_messageBox -icon error -type ok -message  \
-	      [FormatTextForMessageBox [::msgcat::mc jamessillegalchar $name $var]]
+	      [FormatTextForMessageBox [mc jamessillegalchar $name $var]]
 	    return
 	}
     }    
@@ -357,11 +357,11 @@ proc ::Jabber::Login::DoLoginCB {status msg} {
     switch $status {
 	error {
 	    tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
-	      [::msgcat::mc jamessnosocket $moreOpts(ip) $msg]]
+	      [mc jamessnosocket $moreOpts(ip) $msg]]
 	}
 	timeout {
 	    tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
-	      [::msgcat::mc jamesstimeoutserver $server]]
+	      [mc jamesstimeoutserver $server]]
 	}
 	default {
 	    # Go ahead...
@@ -369,7 +369,7 @@ proc ::Jabber::Login::DoLoginCB {status msg} {
 		::Jabber::Login::InitStream $server \
 		  [namespace current]::DoAuthorize
 	    } err]} {
-		tk_messageBox -icon error -title [::msgcat::mc {Open Failed}] \
+		tk_messageBox -icon error -title [mc {Open Failed}] \
 		  -type ok -message [FormatTextForMessageBox $err]
 	    }
 	}
@@ -405,7 +405,7 @@ proc ::Jabber::Login::Finish {type msg} {
     ::Debug 2 "::Jabber::Login::Finish type=$type, msg=$msg"
 
     if {[string equal $type "error"]} {
-	tk_messageBox -icon error -type ok -title [::msgcat::mc Error]  \
+	tk_messageBox -icon error -type ok -title [mc Error]  \
 	  -message [FormatTextForMessageBox $msg]
     } else {
 	::Profiles::SetSelectedName $profile
@@ -481,7 +481,7 @@ proc ::Jabber::Login::Connect {server cmd args} {
     # Kill any pending open states.
     ::Network::KillAll
         
-    ::Jabber::UI::SetStatusMessage [::msgcat::mc jawaitresp $server]
+    ::Jabber::UI::SetStatusMessage [mc jawaitresp $server]
     ::Jabber::UI::StartStopAnimatedWave 1
     ::Jabber::UI::FixUIWhen "connectinit"
     update idletasks
@@ -538,7 +538,7 @@ proc ::Jabber::Login::HttpProxyCmd {status msg} {
 	}
 	default {
 	    ::Jabber::DoCloseClientConnection
-	    tk_messageBox -title [::msgcat::mc Error] -icon error \
+	    tk_messageBox -title [mc Error] -icon error \
 	      -message "The HTTP jabber service replied with a status\
 	      $status and message: $msg"
 	}
@@ -591,7 +591,7 @@ proc ::Jabber::Login::ConnectCB {cmd sock ip port status {msg {}}} {
 proc ::Jabber::Login::InitStream {server cmd} {
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::UI::SetStatusMessage [::msgcat::mc jawaitxml $server]
+    ::Jabber::UI::SetStatusMessage [mc jawaitxml $server]
     
     # Initiate a new stream. We should wait for the server <stream>.
     if {[catch {
@@ -688,12 +688,12 @@ proc ::Jabber::Login::AuthorizeCB {token jlibName type theQuery} {
     if {[string equal $type "error"]} {	
 	set errcode [lindex $theQuery 0]
 	set errmsg [lindex $theQuery 1]
-	::Jabber::UI::SetStatusMessage [::msgcat::mc jaerrlogin $server $errmsg]
+	::Jabber::UI::SetStatusMessage [mc jaerrlogin $server $errmsg]
 	::Jabber::UI::FixUIWhen "disconnect"
 	if {$errcode == 409} {
-	    set msg [::msgcat::mc jamesslogin409 $errcode]
+	    set msg [mc jamesslogin409 $errcode]
 	} else {
-	    set msg [::msgcat::mc jamessloginerr $errcode $errmsg]
+	    set msg [mc jamessloginerr $errcode $errmsg]
 	}
 
 	# There is a potential problem if called from within a xml parser 

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.22 2004-06-30 12:45:57 matben Exp $
+# $Id: Utils.tcl,v 1.23 2004-07-09 06:26:06 matben Exp $
 
 namespace eval ::Utils:: {
 
@@ -194,7 +194,7 @@ proc ::Utils::GetMaxMsgcatWidth {args} {
     
     set width 0
     foreach str $args {
-	set len [string length [::msgcat::mc $str]]
+	set len [string length [mc $str]]
 	if {$len > $width} {
 	    set width $len
 	}
@@ -206,7 +206,7 @@ proc ::Utils::GetMaxMsgcatString {args} {
     
     set width 0
     foreach str $args {
-	set mcstr [::msgcat::mc $str]
+	set mcstr [mc $str]
 	set len [string length $mcstr]
 	if {$len > $width} {
 	    set width $len
@@ -461,7 +461,7 @@ proc ::Utils::ProgressWindow {token total current args} {
     } elseif {[expr $ms - $progress($token,lastmillis)] > $prefs(progUpdateMillis)} {
 
 	# Update the progress window.
-	append msg3 "[::msgcat::mc Rate]: [::Timing::FormMessage $token $total]"	
+	append msg3 "[mc Rate]: [::Timing::FormMessage $token $total]"	
 	set percent [expr 100.0 * $current/($total + 0.001)]
 	$progress($token,w) configure -percent $percent -text3 $msg3
 	set progress($token,lastmillis) $ms

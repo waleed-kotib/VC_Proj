@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: WBPrefs.tcl,v 1.1 2004-06-06 06:41:31 matben Exp $
+# $Id: WBPrefs.tcl,v 1.2 2004-07-09 06:26:07 matben Exp $
 
 package provide WBPrefs 1.0
 
@@ -42,8 +42,8 @@ proc ::WBPrefs::InitPrefsHook { } {
 
 proc ::WBPrefs::BuildPrefsHook {wtree nbframe} {
     
-    $wtree newitem {Whiteboard {Edit Fonts}} -text [::msgcat::mc {Edit Fonts}]
-    $wtree newitem {Whiteboard Privacy} -text [::msgcat::mc Privacy]
+    $wtree newitem {Whiteboard {Edit Fonts}} -text [mc {Edit Fonts}]
+    $wtree newitem {Whiteboard Privacy} -text [mc Privacy]
     
     # Edit Fonts page ----------------------------------------------------------
     set wpage [$nbframe page {Edit Fonts}]
@@ -72,15 +72,15 @@ proc ::WBPrefs::BuildFontsPage {page} {
     
     # Labelled frame.
     set wcfr $page.fr
-    labelframe $wcfr -text [::msgcat::mc {Import/Remove fonts}]
+    labelframe $wcfr -text [mc {Import/Remove fonts}]
     pack $wcfr -side top -padx 8 -pady 4
     
     # Overall frame for whole container.
     set frtot [frame $wcfr.frin]
     pack $frtot -padx 4 -pady 2
     
-    label $frtot.sysfont -text [::msgcat::mc {System fonts}] -font $fontSB
-    label $frtot.wifont -text [::msgcat::mc {Whiteboard fonts}] -font $fontSB
+    label $frtot.sysfont -text [mc {System fonts}] -font $fontSB
+    label $frtot.wifont -text [mc {Whiteboard fonts}] -font $fontSB
     grid $frtot.sysfont x $frtot.wifont -padx 4 -pady 6
     
     grid [frame $frtot.fr1] -column 0 -row 1
@@ -109,7 +109,7 @@ proc ::WBPrefs::BuildFontsPage {page} {
       -font $fontS -padx $xpadbt   \
       -command "[namespace current]::PushBtImport  \
       \[$wlbsys curselection] $wlbsys $wlbwb"] -padx 1 -pady 6 -fill x
-    pack [button $btremove -text [::msgcat::mc Remove] -state disabled  \
+    pack [button $btremove -text [mc Remove] -state disabled  \
       -font $fontS -padx $xpadbt   \
       -command "[namespace current]::PushBtRemove  \
       \[$wlbwb curselection] $wlbwb"] -padx 1 -pady 6 -fill x
@@ -125,7 +125,7 @@ proc ::WBPrefs::BuildFontsPage {page} {
     pack $wlbwb $frtot.fr3.sc -side left -fill y
     eval $wlbwb insert 0 $prefs(canvasFonts)
     
-    label $frtot.msg -text [::msgcat::mc preffontmsg] -wraplength 300 \
+    label $frtot.msg -text [mc preffontmsg] -wraplength 300 \
       -justify left
     set wsamp $frtot.samp
     canvas $wsamp -width 200 -height 48 -highlightthickness 0 -border 1 \
@@ -213,7 +213,7 @@ proc ::WBPrefs::PushBtRemove {indSel wapp} {
     # Check that not the standard fonts are removed.
     if {[lsearch {Times Helvetica Courier} $fntName] >= 0} {
 	tk_messageBox -message [FormatTextForMessageBox  \
-	  [::msgcat::mcset en messrmstandardfonts]] \
+	  [mc messrmstandardfonts]] \
 	  -icon error -type ok
 	return
     }
@@ -257,14 +257,14 @@ proc ::WBPrefs::BuildPagePrivacy {page} {
     set tmpPrefs(privacy) $prefs(privacy)
 
     set labfrpbl $page.fr
-    labelframe $labfrpbl -text [::msgcat::mc Privacy]
+    labelframe $labfrpbl -text [mc Privacy]
     pack $labfrpbl -side top -anchor w -padx 8 -pady 4
     set pbl $labfrpbl.frin
     frame $pbl
     pack  $pbl -padx 10 -pady 6 -side left -fill x
     
-    label $pbl.msg -text [::msgcat::mc prefpriv] -wraplength 340 -justify left
-    checkbutton $pbl.only -anchor w -text "  [::msgcat::mc Privacy]"  \
+    label $pbl.msg -text [mc prefpriv] -wraplength 340 -justify left
+    checkbutton $pbl.only -anchor w -text "  [mc Privacy]"  \
       -variable [namespace current]::tmpPrefs(privacy)
     pack $pbl.msg $pbl.only -side top -fill x -anchor w
 }

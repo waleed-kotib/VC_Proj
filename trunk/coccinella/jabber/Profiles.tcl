@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.22 2004-07-03 12:54:37 matben Exp $
+# $Id: Profiles.tcl,v 1.23 2004-07-09 06:26:06 matben Exp $
 
 package provide Profiles 1.0
 
@@ -258,7 +258,7 @@ proc ::Profiles::ImportFromJserver { } {
 proc ::Profiles::BuildHook {wtree nbframe} {
     
     $wtree newitem {Jabber {User Profiles}}  \
-      -text [::msgcat::mc {User Profiles}]
+      -text [mc {User Profiles}]
 
     set wpage [$nbframe page {User Profiles}]    
     ::Profiles::BuildPage $wpage
@@ -287,10 +287,10 @@ proc ::Profiles::BuildPage {page} {
     set contrastBg [option get . backgroundLightContrast {}]
 
     set lfr $page.fr
-    labelframe $lfr -text [::msgcat::mc {User Profiles}]
+    labelframe $lfr -text [mc {User Profiles}]
     pack $lfr -side top -anchor w -padx 8 -pady 4
     
-    label $lfr.msg -text [::msgcat::mc prefprof] -wraplength 200 -justify left
+    label $lfr.msg -text [mc prefprof] -wraplength 200 -justify left
     pack  $lfr.msg -side top -anchor w -fill x
     
     # Need to pack options here to get the complete bottom slice.
@@ -313,7 +313,7 @@ proc ::Profiles::BuildPage {page} {
     set allNames [::Profiles::GetAllNames]
 
     # Option menu for the servers.
-    label $pui.lpop -text "[::msgcat::mc Profile]:" -anchor e
+    label $pui.lpop -text "[mc Profile]:" -anchor e
     
     set wmenubt $pui.popup
     set wmenu [eval {tk_optionMenu $wmenubt [namespace current]::profile} \
@@ -324,19 +324,19 @@ proc ::Profiles::BuildPage {page} {
     grid $pui.lpop -column 0 -row 0 -sticky e
     grid $wmenubt -column 1 -row 0 -sticky ew
     
-    label $pui.lserv -text "[::msgcat::mc {Jabber Server}]:" -anchor e
+    label $pui.lserv -text "[mc {Jabber Server}]:" -anchor e
     entry $pui.eserv -width 22   \
       -textvariable [namespace current]::server -validate key  \
       -validatecommand {::Jabber::ValidateDomainStr %S}
-    label $pui.luser -text "[::msgcat::mc Username]:" -anchor e
+    label $pui.luser -text "[mc Username]:" -anchor e
     entry $pui.euser -width 22  \
       -textvariable [namespace current]::username -validate key  \
       -validatecommand {::Jabber::ValidateUsernameStr %S}
-    label $pui.lpass -text "[::msgcat::mc Password]:" -anchor e
+    label $pui.lpass -text "[mc Password]:" -anchor e
     entry $pui.epass -width 22 -show {*}  \
       -textvariable [namespace current]::password -validate key  \
       -validatecommand {::Jabber::ValidatePasswdChars %S}
-    label $pui.lres -text "[::msgcat::mc Resource]:" -anchor e
+    label $pui.lres -text "[mc Resource]:" -anchor e
     entry $pui.eres -width 22   \
       -textvariable [namespace current]::resource -validate key  \
       -validatecommand {::Jabber::ValidateResourceStr %S}
@@ -351,10 +351,10 @@ proc ::Profiles::BuildPage {page} {
     
     set  puibt [frame $lfr.frbt]
     pack $puibt -padx 8 -pady 6 -side right -fill y
-    pack [button $puibt.new -font $fontS -text [::msgcat::mc New]  \
+    pack [button $puibt.new -font $fontS -text [mc New]  \
       -command [namespace current]::NewCmd]   \
       -side top -fill x -pady 4
-    pack [button $puibt.del -font $fontS -text [::msgcat::mc Delete]  \
+    pack [button $puibt.del -font $fontS -text [mc Delete]  \
       -command [namespace current]::DeleteCmd]   \
       -side top -fill x -pady 4
 
@@ -410,30 +410,30 @@ proc ::Profiles::OptionsTabNotebook {w token} {
     ::mactabnotebook::mactabnotebook $w
 
     # Login options.
-    set wpage [$w newpage {Login} -text [::msgcat::mc {Login}]]
+    set wpage [$w newpage {Login} -text [mc {Login}]]
     set pagelog $wpage.f
     pack [frame $pagelog] -side top -anchor w -padx 6 -pady 4
-    checkbutton $pagelog.cdig -text " [::msgcat::mc {Scramble password}]"  \
+    checkbutton $pagelog.cdig -text " [mc {Scramble password}]"  \
       -variable $token\(digest)
-    label $pagelog.lp -text "[::msgcat::mc {Priority}]:"
+    label $pagelog.lp -text "[mc {Priority}]:"
     spinbox $pagelog.sp -textvariable $token\(priority) \
       -width 5 -state readonly -increment 1 -from 0 -to 127
     checkbutton $pagelog.cinv  \
-      -text " [::msgcat::mc {Login as invisible}]"  \
+      -text " [mc {Login as invisible}]"  \
       -variable $token\(invisible)
     grid $pagelog.cdig   - -sticky w
     grid $pagelog.cinv   - -sticky w
     grid $pagelog.lp     $pagelog.sp
     
     # Connection page.
-    set wpage [$w newpage {Connection} -text [::msgcat::mc {Connection}]] 
+    set wpage [$w newpage {Connection} -text [mc {Connection}]] 
     set pageconn $wpage.f
     pack [frame $pageconn] -side top -anchor w -padx 6 -pady 4
-    label $pageconn.lip   -text "[::msgcat::mc {IP address}]:"
+    label $pageconn.lip   -text "[mc {IP address}]:"
     entry $pageconn.eip   -textvariable $token\(ip)
-    label $pageconn.lport -text "[::msgcat::mc Port]:"
+    label $pageconn.lport -text "[mc Port]:"
     entry $pageconn.eport -textvariable $token\(port) -width 6
-    checkbutton $pageconn.cssl -text " [::msgcat::mc {Use SSL for security}]" \
+    checkbutton $pageconn.cssl -text " [mc {Use SSL for security}]" \
       -variable $token\(ssl)   
     if {!$prefs(tls)} {
 	$pageconn.cssl configure -state disabled
@@ -446,15 +446,15 @@ proc ::Profiles::OptionsTabNotebook {w token} {
     grid $pageconn.cssl -sticky w
 
     # HTTP proxy.
-    set wpage [$w newpage {Proxy} -text [::msgcat::mc {HTTP Proxy}]] 
+    set wpage [$w newpage {Proxy} -text [mc {HTTP Proxy}]] 
     set pageproxy $wpage.f
     pack [frame $pageproxy] -side top -anchor w -padx 6 -pady 4
-    checkbutton $pageproxy.http -text " [::msgcat::mc {Connect using Http proxy}]" \
+    checkbutton $pageproxy.http -text " [mc {Connect using Http proxy}]" \
       -variable $token\(httpproxy)
-    label $pageproxy.lpoll -text [::msgcat::mc {Poll interval (secs)}]
+    label $pageproxy.lpoll -text [mc {Poll interval (secs)}]
     spinbox $pageproxy.spoll -textvariable $token\(pollsecs) \
       -width 4 -state readonly -increment 1 -from 1 -to 120
-    button $pageproxy.set -font $fontS -text [::msgcat::mc {Proxy Settings}] \
+    button $pageproxy.set -font $fontS -text [mc {Proxy Settings}] \
       -command [list ::Preferences::Build -page {General {Proxy Setup}}]
     grid $pageproxy.http  -   -sticky w
     grid $pageproxy.lpoll $pageproxy.spoll -sticky e
@@ -650,8 +650,8 @@ proc ::Profiles::VerifyNonEmpty { } {
     # Check that necessary entries are non-empty, at least.
     if {($server == "") || ($username == "")} {
 	tk_messageBox -type ok -icon error -parent [winfo toplevel $wpage] \
-	  -title [::msgcat::mc Error] -message [FormatTextForMessageBox \
-	  [::msgcat::mc messfillserveruser]]
+	  -title [mc Error] -message [FormatTextForMessageBox \
+	  [mc messfillserveruser]]
 	set ans 0
     }
     return $ans
@@ -706,9 +706,9 @@ proc ::Profiles::NewCmd { } {
     
     # First get a unique profile name.
     set ans [::UI::MegaDlgMsgAndEntry \
-      [::msgcat::mc Profile] [::msgcat::mc prefprofname] \
-      "[::msgcat::mc {Profile Name}]:" newProfile \
-      [::msgcat::mc Cancel] [::msgcat::mc OK]]
+      [mc Profile] [mc prefprofname] \
+      "[mc {Profile Name}]:" newProfile \
+      [mc Cancel] [mc OK]]
     if {$ans == "cancel"} {
 	return
     }
@@ -747,10 +747,10 @@ proc ::Profiles::DeleteCmd { } {
     # The present state may be something that has not been stored yet.
     if {[info exists tmpProfArr($profile,server)]} {
 	# puts "\t exists tmpProfArr($profile,server)"
-	set ans [tk_messageBox -title [::msgcat::mc Warning]  \
+	set ans [tk_messageBox -title [mc Warning]  \
 	  -type yesno -icon warning -default yes  \
 	  -parent [winfo toplevel $wpage] \
-	  -message [FormatTextForMessageBox [::msgcat::mc messremoveprofile]]]
+	  -message [FormatTextForMessageBox [mc messremoveprofile]]]
     }
     if {$ans == "yes"} {
 	set ind [$wmenu index $profile]
@@ -866,7 +866,7 @@ proc ::Profiles::BuildDialog { } {
     
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document closeBox}
-    wm title $w [::msgcat::mc Profiles]
+    wm title $w [mc Profiles]
     
     # Global frame.
     frame $w.frall -borderwidth 1 -relief raised
@@ -878,10 +878,10 @@ proc ::Profiles::BuildDialog { } {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btconn -text [::msgcat::mc Save]  \
+    pack [button $frbot.btconn -text [mc Save]  \
       -default active -command [list [namespace current]::SaveDlg $w]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
+    pack [button $frbot.btcancel -text [mc Cancel]  \
       -command [list [namespace current]::CancelDlg $w]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side bottom -fill both -expand 1 -padx 8 -pady 6

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.52 2004-06-24 13:48:35 matben Exp $
+# $Id: Browse.tcl,v 1.53 2004-07-09 06:26:05 matben Exp $
 
 package require chasearrows
 
@@ -264,7 +264,7 @@ proc ::Jabber::Browse::Callback {browseName type from subiq} {
 	    if {[winfo exists $wtop]} {
 		tk_messageBox -type ok -icon error \
 		  -message [FormatTextForMessageBox  \
-		  [::msgcat::mc jamesserrbrowse $from [lindex $subiq 1]]]
+		  [mc jamesserrbrowse $from [lindex $subiq 1]]]
 	    }
 	}
 	set {
@@ -435,9 +435,9 @@ proc ::Jabber::Browse::ErrorProc {silent browseName type jid errlist} {
 	      "Failed browsing: Error code [lindex $errlist 0] and message:\
 	      [lindex $errlist 1]"
 	} else {
-	    tk_messageBox -icon error -type ok -title [::msgcat::mc Error] \
+	    tk_messageBox -icon error -type ok -title [mc Error] \
 	      -message [FormatTextForMessageBox \
-	      [::msgcat::mc jamesserrbrowse $jid [lindex $errlist 1]]]
+	      [mc jamesserrbrowse $jid [lindex $errlist 1]]]
 	}
     }
 }
@@ -662,7 +662,7 @@ proc ::Jabber::Browse::Popup {w v x y} {
     foreach {item type cmd} $popMenuDefs(browse,def) {
 	if {[string index $cmd 0] == "@"} {
 	    set mt [menu ${m}.sub${i} -tearoff 0]
-	    set locname [::msgcat::mc $item]
+	    set locname [mc $item]
 	    $m add cascade -label $locname -menu $mt -state disabled
 	    eval [string range $cmd 1 end] $mt
 	    incr i
@@ -673,7 +673,7 @@ proc ::Jabber::Browse::Popup {w v x y} {
 	    
 	    # Substitute the jid arguments.
 	    set cmd [subst -nocommands $cmd]
-	    set locname [::msgcat::mc $item]
+	    set locname [mc $item]
 	    $m add command -label $locname -command "after 40 $cmd"  \
 	      -state disabled
 	}
@@ -1174,12 +1174,12 @@ proc ::Jabber::Browse::AddServer { } {
     
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document closeBox}
-    wm title $w [::msgcat::mc {Add Server}]
+    wm title $w [mc {Add Server}]
     
     # Global frame.
     frame $w.frall -borderwidth 1 -relief raised
     pack  $w.frall -fill both -expand 1 -ipadx 12 -ipady 4
-    message $w.frall.msg -width 220 -text [::msgcat::mc jabrowseaddserver]
+    message $w.frall.msg -width 220 -text [mc jabrowseaddserver]
     entry $w.frall.ent -width 24   \
       -textvariable "[namespace current]::addserver"
     pack $w.frall.msg $w.frall.ent -side top -fill x -anchor w -padx 10  \
@@ -1187,10 +1187,10 @@ proc ::Jabber::Browse::AddServer { } {
 
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btadd -text [::msgcat::mc Add] -default active \
+    pack [button $frbot.btadd -text [mc Add] -default active \
       -command [list [namespace current]::DoAddServer $w]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
+    pack [button $frbot.btcancel -text [mc Cancel]  \
       -command [list [namespace current]::CancelAdd $w]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
@@ -1337,7 +1337,7 @@ proc ::Jabber::Browse::InfoResultCB {browseName type jid subiq args} {
 
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btadd -text [::msgcat::mc Close] \
+    pack [button $frbot.btadd -text [mc Close] \
       -command [list destroy $w]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6

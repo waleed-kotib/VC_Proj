@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.28 2004-06-23 14:19:38 matben Exp $
+# $Id: GotMsg.tcl,v 1.29 2004-07-09 06:26:05 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -170,7 +170,7 @@ proc ::Jabber::GotMsg::Build { } {
     
     # Toplevel with class GotMsg.
     ::UI::Toplevel $w -class GotMsg -usemacmainmenu 1 -macstyle documentProc
-    wm title $w [::msgcat::mc {Incoming Message}]
+    wm title $w [mc {Incoming Message}]
     
     set bg [option get . backgroundGeneral {}]
     
@@ -182,10 +182,10 @@ proc ::Jabber::GotMsg::Build { } {
     set frbot [frame $w.frall.frbot -borderwidth 0]
     set wbtnext $frbot.btnext
     set bwidth [expr [::Utils::GetMaxMsgcatWidth Next Reply] + 2]
-    pack [button $wbtnext -text [::msgcat::mc Next] -default active \
+    pack [button $wbtnext -text [mc Next] -default active \
       -width $bwidth -state normal -command [list ::Jabber::GotMsg::NextMsg]] \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btreply -text [::msgcat::mc Reply]   \
+    pack [button $frbot.btreply -text [mc Reply]   \
       -width $bwidth -command [list ::Jabber::GotMsg::Reply]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side bottom -fill x -padx 10 -pady 8
@@ -197,7 +197,7 @@ proc ::Jabber::GotMsg::Build { } {
     # From field.
     set wfrom     $frmid.from
     set wpresence $wfrom.icon
-    labelframe $wfrom -text [::msgcat::mc From]
+    labelframe $wfrom -text [mc From]
     pack $wfrom -side top -fill both -padx 10 -pady 4
     entry $wfrom.username -width 10 \
       -textvariable [namespace current]::username -state disabled \
@@ -211,7 +211,7 @@ proc ::Jabber::GotMsg::Build { } {
         
     # Subject field.
     pack [frame $frmid.fsub -border 0] -side top -fill x -expand 1 -padx 6
-    pack [label $frmid.fsub.l -text "[::msgcat::mc Subject]:"  \
+    pack [label $frmid.fsub.l -text "[mc Subject]:"  \
       -anchor e] -side left -padx 2 -pady 1
     pack [entry $frmid.fsub.e -width 10 \
       -borderwidth 1 -relief sunken -background $bg \

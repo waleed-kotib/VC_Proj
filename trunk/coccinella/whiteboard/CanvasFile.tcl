@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasFile.tcl,v 1.2 2004-07-07 13:07:14 matben Exp $
+# $Id: CanvasFile.tcl,v 1.3 2004-07-09 06:26:06 matben Exp $
  
 package require can2svg
 package require svg2can
@@ -38,7 +38,7 @@ proc ::CanvasFile::DrawCanvasItemFromFile {wtop filePath args} {
     if {[catch {open $filePath r} fd]} {
 	set tail [file tail $filePath]
 	tk_messageBox -icon error -type ok -parent $wCan -message  \
-	  [FormatTextForMessageBox [::msgcat::mc messfailopread $tail $fd]]
+	  [FormatTextForMessageBox [mc messfailopread $tail $fd]]
 	return
     }
     eval {::CanvasFile::FileToCanvas $wCan $fd $filePath} $args
@@ -478,7 +478,7 @@ proc ::CanvasFile::DataToFile {filePath canvasList} {
     
     if {[catch {open $filePath w} fd]} {
 	set tail [file tail $filePath]
-	tk_messageBox -message [::msgcat::mc messfailopread $tail $fd] \
+	tk_messageBox -message [mc messfailopread $tail $fd] \
 	  -icon error -type ok
 	return
     }
@@ -521,12 +521,12 @@ proc ::CanvasFile::DoOpenCanvasFile {wtop {filePath {}}} {
 	    {"Text"       {.txt}}
 	}
 	set ans [tk_messageBox -icon warning -type okcancel -default ok \
-	  -parent $w -message [::msgcat::mc messcanerasewarn]]
+	  -parent $w -message [mc messcanerasewarn]]
 	if {$ans == "cancel"} {
 	    return
 	}
 	set userDir [::Utils::GetDirIfExist $prefs(userPath)]
-	set ans [tk_getOpenFile -title [::msgcat::mc {Open Canvas}]  \
+	set ans [tk_getOpenFile -title [mc {Open Canvas}]  \
 	  -filetypes $typelist -defaultextension ".can"  \
 	  -initialdir $userDir]
 	if {$ans == ""} {
@@ -549,7 +549,7 @@ proc ::CanvasFile::DoOpenCanvasFile {wtop {filePath {}}} {
 	    # Opens the data file.
 	    if {[catch {open $fileName r} fd]} {
 		set tail [file tail $fileName]
-		tk_messageBox -message [::msgcat::mc messfailopread $tail $fd] \
+		tk_messageBox -message [mc messfailopread $tail $fd] \
 		  -icon error -type ok
 		return
 	    }
@@ -589,7 +589,7 @@ proc ::CanvasFile::DoSaveCanvasFile {wtop} {
     if {[string match "mac*" $this(platform)]} {
 	lappend opts -message "Pick .svg suffix for SVG, .can as default"
     }
-    set ans [eval {tk_getSaveFile -title [::msgcat::mc {Save Canvas}] \
+    set ans [eval {tk_getSaveFile -title [mc {Save Canvas}] \
       -defaultextension ".can"} $opts]
     if {$ans == ""} {
 	return
@@ -614,7 +614,7 @@ proc ::CanvasFile::DoSaveCanvasFile {wtop} {
 	    if {[catch {open $fileName w} fd]} {
 		set tail [file tail $fileName]
 		tk_messageBox -icon error -type ok \
-		  -message [::msgcat::mc messfailopwrite $tail $fd]
+		  -message [mc messfailopwrite $tail $fd]
 		return
 	    }	    
 	    ::CanvasFile::CanvasToFile $wCan $fd $fileName
@@ -690,7 +690,7 @@ proc ::CanvasFile::SVGFileToCanvas {wtop filePath} {
     if {[catch {open $filePath r} fd]} {
 	set tail [file tail $filePath]
 	tk_messageBox -icon error -type ok -parent $wCan -message  \
-	  [FormatTextForMessageBox [::msgcat::mc messfailopread $tail $fd]]
+	  [FormatTextForMessageBox [mc messfailopread $tail $fd]]
 	return
     }
     set xml [read $fd]

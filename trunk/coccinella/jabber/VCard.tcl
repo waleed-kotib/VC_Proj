@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: VCard.tcl,v 1.21 2004-06-12 15:35:18 matben Exp $
+# $Id: VCard.tcl,v 1.22 2004-07-09 06:26:06 matben Exp $
 
 package provide VCard 1.0
 
@@ -45,7 +45,7 @@ proc ::VCard::Fetch {type {jid {}}} {
     set priv(w)    $wDlgs(jvcard)${uid}
     
     # We should query the server for this and then fill in.
-    ::Jabber::UI::SetStatusMessage [::msgcat::mc vcardget $jid]
+    ::Jabber::UI::SetStatusMessage [mc vcardget $jid]
     ::Jabber::JlibCmd vcard_get $jid  \
       [list [namespace current]::FetchCallback $nstoken]
 }
@@ -58,14 +58,14 @@ proc ::VCard::FetchCallback {nstoken jlibName result theQuery} {
     
     if {$result == "error"} {
 	set errmsg "([lindex $theQuery 0]) [lindex $theQuery 1]"
-        tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
+        tk_messageBox -title [mc Error] -icon error -type ok \
           -message [FormatTextForMessageBox  \
-          [::msgcat::mc vcarderrget $errmsg]]
+          [mc vcarderrget $errmsg]]
         ::Jabber::UI::SetStatusMessage ""
 	::VCard::Free $nstoken
         return
     }
-    ::Jabber::UI::SetStatusMessage [::msgcat::mc vcardrec]
+    ::Jabber::UI::SetStatusMessage [mc vcardrec]
     
     # The 'theQuery' now contains all the vCard data in a xml list.
     if {[llength $theQuery]} {
@@ -160,9 +160,9 @@ proc ::VCard::Build {nstoken} {
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox}
     if {$type == "own"} {
-	wm title $w [::msgcat::mc {vCard Info}]
+	wm title $w [mc {vCard Info}]
     } else {
-	wm title $w "[::msgcat::mc {vCard Info}]: $jid"
+	wm title $w "[mc {vCard Info}]: $jid"
     }
     set priv(vcardjid) $jid
     
@@ -178,11 +178,11 @@ proc ::VCard::Build {nstoken} {
     # Start with the Basic Info -------------------------------------------------
     
     if {$type == "own"} {
-        set ltxt [::msgcat::mc {My vCard}]
+        set ltxt [mc {My vCard}]
     } else {
         set ltxt $jid
     }
-    set frbi [$nbframe newpage {Basic Info} -text [::msgcat::mc {Basic Info}]] 
+    set frbi [$nbframe newpage {Basic Info} -text [mc {Basic Info}]] 
 
     set lfr $frbi.fr
     labelframe $lfr -text $ltxt
@@ -193,9 +193,9 @@ proc ::VCard::Build {nstoken} {
     pack  $pbi -padx 10 -pady 6 -side left
     
     # Name part.
-    label $pbi.first -text [::msgcat::mc {First name}]
-    label $pbi.middle -text [::msgcat::mc Middle]
-    label $pbi.fam -text [::msgcat::mc {Last name}]
+    label $pbi.first -text [mc {First name}]
+    label $pbi.middle -text [mc Middle]
+    label $pbi.fam -text [mc {Last name}]
     entry $pbi.efirst -width 16 -textvariable ${nstoken}::elem(n_given)
     entry $pbi.emiddle -width 4 -textvariable ${nstoken}::elem(n_middle)
     entry $pbi.efam -width 18   -textvariable ${nstoken}::elem(n_family)
@@ -204,9 +204,9 @@ proc ::VCard::Build {nstoken} {
     grid $pbi.efirst $pbi.emiddle $pbi.efam -sticky ew
     
     # Other part.
-    label $pbi.nick   -text "[::msgcat::mc {Nick name}]:"
-    label $pbi.email  -text "[::msgcat::mc {Email address}]:"
-    label $pbi.jid    -text "[::msgcat::mc {Jabber address}]:"
+    label $pbi.nick   -text "[mc {Nick name}]:"
+    label $pbi.email  -text "[mc {Email address}]:"
+    label $pbi.jid    -text "[mc {Jabber address}]:"
     entry $pbi.enick  -textvariable ${nstoken}::elem(nickname)
     entry $pbi.eemail -textvariable ${nstoken}::elem(email_internet_pref)
     entry $pbi.ejid   -textvariable ${nstoken}::priv(vcardjid) -state disabled
@@ -219,7 +219,7 @@ proc ::VCard::Build {nstoken} {
     grid $pbi.ejid   -column 1 -row 4 -sticky news -columnspan 2
     
     # Description part.
-    label $pbi.ldes -text "[::msgcat::mc Description]:"    
+    label $pbi.ldes -text "[mc Description]:"    
     frame $pbi.fdes
     set wdesctxt $pbi.fdes.t
     set wdysc $pbi.fdes.ysc
@@ -238,7 +238,7 @@ proc ::VCard::Build {nstoken} {
     
     # Personal Info page -------------------------------------------------------
     set frppers [$nbframe newpage {Personal Info}  \
-      -text [::msgcat::mc {Personal Info}]]
+      -text [mc {Personal Info}]]
     set pbp [frame $frppers.frin]
     pack $pbp -padx 10 -pady 6 -side left -anchor n
 
@@ -247,7 +247,7 @@ proc ::VCard::Build {nstoken} {
         Occupation        role
         Birthday          bday
     } {
-        label $pbp.l$tag -text "[::msgcat::mc $name]:"
+        label $pbp.l$tag -text "[mc $name]:"
         entry $pbp.e$tag -width 28  \
           -textvariable ${nstoken}::elem($tag)
         grid $pbp.l$tag $pbp.e$tag -sticky e
@@ -255,7 +255,7 @@ proc ::VCard::Build {nstoken} {
     label $pbp.frmt -text {Format mm/dd/yyyy}
     grid $pbp.frmt -column 1 -sticky w
 
-    label $pbp.email -text "[::msgcat::mc {Email addresses}]:"
+    label $pbp.email -text "[mc {Email addresses}]:"
     grid $pbp.email -column 0 -sticky w
     set wemails $pbp.emails
     text $wemails -wrap none -bd 1 -relief sunken \
@@ -268,7 +268,7 @@ proc ::VCard::Build {nstoken} {
     }
     
     # Home page --------------------------------------------------------------
-    set frprost [$nbframe newpage {Home} -text [::msgcat::mc Home]]
+    set frprost [$nbframe newpage {Home} -text [mc Home]]
     set pbh [frame $frprost.frin]
     pack $pbh -padx 10 -pady 6 -side left -anchor n
     
@@ -282,14 +282,14 @@ proc ::VCard::Build {nstoken} {
         {Tel (voice)}     tel_voice_home
         {Tel (fax)}       tel_fax_home
     } {
-        label $pbh.l$tag -text "[::msgcat::mc $name]:"
+        label $pbh.l$tag -text "[mc $name]:"
         entry $pbh.e$tag -width 28  \
           -textvariable ${nstoken}::elem($tag)
         grid $pbh.l$tag $pbh.e$tag -sticky e
     }
     
     # Work page ----------------------------------------------------------
-    set frpgroup [$nbframe newpage {Work} -text [::msgcat::mc Work]]
+    set frpgroup [$nbframe newpage {Work} -text [mc Work]]
     set pbw [frame $frpgroup.frin]
     pack $pbw -padx 10 -pady 6 -side left -anchor n
     
@@ -306,7 +306,7 @@ proc ::VCard::Build {nstoken} {
         {Tel (voice)}     tel_voice_work
         {Tel (fax)}       tel_fax_work
     } {
-        label $pbw.l$tag -text "[::msgcat::mc $name]:"
+        label $pbw.l$tag -text "[mc $name]:"
         entry $pbw.e$tag -width 28 -textvariable ${nstoken}::elem($tag)
         grid $pbw.l$tag $pbw.e$tag -sticky e
     }
@@ -329,14 +329,14 @@ proc ::VCard::Build {nstoken} {
       -side top -fill x -expand 1 -padx 8 -pady 6
     set fr $w.frall.frbot
     if {$type == "own"} {
-        pack [button $fr.btsave -text [::msgcat::mc Save]  \
+        pack [button $fr.btsave -text [mc Save]  \
           -default active -command [list [namespace current]::SetVCard $nstoken]] \
 	  -side right -padx 5 -pady 5
-        pack [button $fr.btcancel -text [::msgcat::mc Cancel]  \
+        pack [button $fr.btcancel -text [mc Cancel]  \
           -command [list [namespace current]::Close $nstoken]]  \
 	  -side right -padx 5 -pady 5
     } else {
-        pack [button $fr.btcancel -text [::msgcat::mc Close] \
+        pack [button $fr.btcancel -text [mc Close] \
           -command [list [namespace current]::Close $nstoken]]  \
 	  -side right -padx 5 -pady 5
     }
@@ -418,7 +418,7 @@ proc ::VCard::Close {nstoken} {
 proc ::VCard::SetVCardCallback {jlibName type theQuery} {
 
     if {$type == "error"} {
-	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
+	tk_messageBox -title [mc Error] -icon error -type ok \
 	  -message [FormatTextForMessageBox \
 	  "Failed setting the vCard. The result was: $theQuery"]	  
 	return
