@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.62 2005-03-11 06:55:55 matben Exp $
+# $Id: Login.tcl,v 1.63 2005-04-02 13:58:37 matben Exp $
 
 package provide Login 1.0
 
@@ -70,7 +70,7 @@ proc ::Login::Dlg { } {
     
     # Global frame.
     frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1
+    pack  $w.frall -fill x
                                  
     ::headlabel::headlabel $w.frall.head -text [mc Login]    
     pack  $w.frall.head -side top -fill both -expand 1

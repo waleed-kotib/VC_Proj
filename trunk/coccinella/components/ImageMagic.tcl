@@ -6,7 +6,7 @@
 # 
 # Unix/Linux only.
 #
-# $Id: ImageMagic.tcl,v 1.4 2005-02-02 15:21:17 matben Exp $
+# $Id: ImageMagic.tcl,v 1.5 2005-04-02 13:58:36 matben Exp $
 
 namespace eval ::ImageMagic:: {
     
@@ -43,8 +43,7 @@ proc ::ImageMagic::Init { } {
 }
 
 proc ::ImageMagic::ImportWindowSnapShot {wtop} {
-    global  env thisHostname prefs this
-    
+    global  this
     variable imageType
     variable tmpfiles
     variable haveImageMagic
@@ -61,13 +60,9 @@ proc ::ImageMagic::ImportWindowSnapShot {wtop} {
     update
     
     if {$ans == "1"} {
-	set pidname [format "%x" [format %d [pid]]]
-	set tmpname ${pidname}[format "%x" [clock clicks]]
-	set tmpfile [file join [glob $this(incomingPath)]  \
-	  $tmpname.$imageType]
-	# puts "// Info - Snap shot window using $importcmd ..."
+	set tmpfile [::tfileutils::tempfile $this(tmpPath) imagemagic]
+	append tmpfile .$imageType
 	exec $importcmd $tmpfile
-	# import to current canvas
 	set optList [list -coords [::CanvasUtils::NewImportAnchor $wCan]]
 	set errMsg [::Import::DoImport $wCan $optList -file $tmpfile]
 	if {$errMsg == ""} {
@@ -144,7 +139,7 @@ proc ::ImageMagic::BuildDialog {w} {
 # 
 
 proc ::ImageMagic::ClearImportFiles { wCan } {
-    global env thisHostname prefs
+    global  prefs
     
     variable tmpfiles
 
