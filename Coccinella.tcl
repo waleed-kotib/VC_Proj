@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.78 2004-08-31 12:48:17 matben Exp $
+# $Id: Coccinella.tcl,v 1.79 2004-09-02 13:59:37 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -142,13 +142,13 @@ if {[string match "mac*" $this(platform)] && $debugLevel == 0} {
 }
 
 # For debug purposes.
-if {$debugLevel} {
+if {0 && $debugLevel} {
     set fdLog [open [file join [file dirname [info script]] debug.log] w]
 }
 proc Debug {num str} {
     global  debugLevel fdLog
     if {$num <= $debugLevel} {
-	if {[info exists fdDebug]} {
+	if {[info exists fdLog]} {
 	    puts $fdLog $str
 	    flush $fdLog
 	}

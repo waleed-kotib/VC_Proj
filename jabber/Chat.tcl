@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.70 2004-08-10 13:03:51 matben Exp $
+# $Id: Chat.tcl,v 1.71 2004-09-02 13:59:38 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -1335,7 +1335,6 @@ proc ::Jabber::Chat::Send {dlgtoken} {
 	set dlgstate(got1stMsg) 1
     }
     
-    # Run this hook (speech).
     set opts [list -from $jid2]
     eval {::hooks::run displayChatMessageHook $allText} $opts
 }

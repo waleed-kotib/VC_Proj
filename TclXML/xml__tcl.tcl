@@ -17,9 +17,9 @@
 # liability for all claims, expenses, losses, damages and costs any user may
 # incur as a result of using, copying or modifying the Software.
 #
-# $Id: xml__tcl.tcl,v 1.2 2004-08-17 14:10:30 matben Exp $
+# $Id: xml__tcl.tcl,v 1.3 2004-09-02 13:59:38 matben Exp $
 
-package provide xml::tcl 2.0
+package provide xml::tcl 99.0
 
 #if {![catch {package require xml::c}]} {
 #    return -code error "this package is incompatible with xml::c"

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.29 2004-07-09 06:26:05 matben Exp $
+# $Id: GotMsg.tcl,v 1.30 2004-09-02 13:59:38 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -14,10 +14,8 @@ namespace eval ::Jabber::GotMsg:: {
 
     # Add all event hooks.
     ::hooks::add quitAppHook        [list ::UI::SaveWinGeom $wDlgs(jgotmsg)]
-    ::hooks::add displayMessageHook [list ::Speech::SpeakMessage normal]
     ::hooks::add closeWindowHook    ::Jabber::GotMsg::CloseHook
-    ::hooks::add presenceHook       ::Jabber::GotMsg::PresenceHook
-    
+    ::hooks::add presenceHook       ::Jabber::GotMsg::PresenceHook    
     
     # Wait for this variable to be set.
     variable finished  
