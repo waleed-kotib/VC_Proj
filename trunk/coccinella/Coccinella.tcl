@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.100 2004-11-30 15:11:09 matben Exp $
+# $Id: Coccinella.tcl,v 1.101 2004-12-01 15:15:40 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -127,11 +127,11 @@ if {[llength [namespace children :: "::browser*"]] > 0} {
 
 # Identify our own position in the file system.
 if {[string equal $this(platform) "unix"]} {
-    set thisScript [resolve_cmd_realpath [info script]]
+    set thisScript [file normalize [resolve_cmd_realpath [info script]]]
 } else {
-    set thisScript [info script]
+    set thisScript [file normalize [info script]]
 }
-set thisPath [file dirname $thisScript]
+set thisPath [file normalize [file dirname $thisScript]]
 if {[info exists ::env(HOME)]} {
     cd $::env(HOME)
 } else {

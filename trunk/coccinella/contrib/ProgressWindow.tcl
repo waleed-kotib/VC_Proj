@@ -10,7 +10,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ProgressWindow.tcl,v 1.18 2004-11-30 15:11:10 matben Exp $
+# $Id: ProgressWindow.tcl,v 1.19 2004-12-01 15:15:41 matben Exp $
 # 
 #-------------------------------------------------------------------------------
 #
@@ -293,8 +293,9 @@ proc ::ProgressWindow::Build {w} {
     if {$debugLevel >= 3} {
 	puts "::ProgressWindow::Build:: w=$w"
     }
-    pack [$framecmd $widgets(frame)] -padx 16 -pady 6
-    
+    $framecmd $widgets(frame)
+    pack $widgets(frame) -padx 16 -pady 6
+
     set widgets(label)  $widgets(frame).la
     set widgets(label2) $widgets(frame).la2
     set widgets(label3) $widgets(frame).la3

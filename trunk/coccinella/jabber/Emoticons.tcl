@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.21 2004-11-30 15:11:10 matben Exp $
+# $Id: Emoticons.tcl,v 1.22 2004-12-01 15:15:41 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -263,7 +263,7 @@ proc ::Emoticons::ParseIcon {name dir xmllist} {
 	    set f [file join $dir $object]
 	    if {$priv(needtmp)} {
 		#set tmp [file join $this(tmpPath) $object]
-		set tmp [tempfile $this(tmpPath) $object]
+		set tmp [tempfile $this(tmpPath) [file rootname $object]]
 		file copy -force $f $tmp
 		set f $tmp
 	    }
