@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.39 2004-01-30 15:33:50 matben Exp $
+# $Id: GroupChat.tcl,v 1.40 2004-01-31 13:46:06 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -300,17 +300,17 @@ proc ::Jabber::GroupChat::BuildEnter {args} {
     pack [frame $frmid] -side top -fill both -expand 1
     set msg [::msgcat::mc jagchatmsg]
     message $frmid.msg -width 260 -text $msg
-    label $frmid.lserv -text "[::msgcat::mc Servers]:" -font $fontSB -anchor e
+    label $frmid.lserv -text "[::msgcat::mc Servers]:" -anchor e
 
     set wcomboserver $frmid.eserv
     ::combobox::combobox $wcomboserver -width 18  \
       -textvariable $token\(server)
     eval {$frmid.eserv list insert end} $chatservers
-    label $frmid.lroom -text "[::msgcat::mc Room]:" -font $fontSB -anchor e
+    label $frmid.lroom -text "[::msgcat::mc Room]:" -anchor e
     entry $frmid.eroom -width 24    \
       -textvariable $token\(roomname) -validate key  \
       -validatecommand {::Jabber::ValidateJIDChars %S}
-    label $frmid.lnick -text "[::msgcat::mc {Nick name}]:" -font $fontSB \
+    label $frmid.lnick -text "[::msgcat::mc {Nick name}]:" \
       -anchor e
     entry $frmid.enick -width 24    \
       -textvariable $token\(nickname) -validate key  \
@@ -630,10 +630,9 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     # Header fields.
     set frtop [frame $w.frall.frtop -borderwidth 0]
     pack $frtop -side top -fill x   
-    label $frtop.la -text "[::msgcat::mc {Group chat in room}]:"  \
-      -font $fontSB -anchor e
+    label $frtop.la -text "[::msgcat::mc {Group chat in room}]:" -anchor e
     entry $frtop.en -bg $bg
-    label $frtop.ltp -text "[::msgcat::mc Topic]:" -font $fontSB -anchor e
+    label $frtop.ltp -text "[::msgcat::mc Topic]:" -anchor e
     entry $frtop.etp -bg $bg  \
       -textvariable [namespace current]::locals($roomJid,topic)
     button $frtop.btp -text "[::msgcat::mc Change]..." -font $fontS  \
