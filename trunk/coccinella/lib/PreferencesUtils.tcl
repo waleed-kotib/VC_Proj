@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.32 2004-05-06 13:41:11 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.33 2004-05-13 13:50:22 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -182,7 +182,7 @@ proc ::PreferencesUtils::SaveToFile { } {
     
     # Header information.
     puts $fid "!\n!   User preferences for the Whiteboard application."
-    puts $fid "!   It may be edited if you now what you are doing."
+    puts $fid "!   It may be edited if you know what you are doing."
     puts $fid "!   The data written at: [clock format [clock seconds]]\n!"
     
     # Only preferences indicated in the master copy are saved.

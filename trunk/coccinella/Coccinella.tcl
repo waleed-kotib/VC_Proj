@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.54 2004-05-06 13:41:09 matben Exp $
+# $Id: Coccinella.tcl,v 1.55 2004-05-13 13:50:21 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -146,13 +146,13 @@ proc TraceVar {name1 name2 op} {
 
 #  Make sure that we are in the directory of the application itself.     
 if {[string equal $this(platform) "unix"]} {
-    set thisPath [file dirname [resolve_cmd_realpath [info script]]]
-    set thisTail [file tail [info script]]
+    set thisPath   [file dirname [resolve_cmd_realpath [info script]]]
+    set thisTail   [file tail [info script]]
     set thisScript [file join $thisPath $thisTail]
 } else {
     set thisScript [info script]
-    set thisTail [file tail $thisScript]
-    set thisPath [file dirname $thisScript]
+    set thisTail   [file tail $thisScript]
+    set thisPath   [file dirname $thisScript]
 }
 
 ::Debug 2 "Installation rootdir thisPath = $thisPath"
@@ -218,7 +218,8 @@ set this(pluginsPath)       [file join $this(path) plugins]
 set this(emoticonsPath)     [file join $this(path) iconsets emoticons]
 set this(altEmoticonsPath)  [file join $this(prefsPath) iconsets emoticons]
 set this(httpdRootPath)     $this(path)
-if {[info exists starkit::topdir]} {
+# Need to rework this...
+if {0 && [info exists starkit::topdir]} {
     set this(httpdRootPath)     $starkit::topdir
     set this(httpdRelPath)      \
       [file join $::starkit::topdir lib app-Coccinella httpd]
@@ -673,10 +674,10 @@ if {($prefs(protocol) != "client") && $prefs(haveHttpd)} {
 	
 	    # Add more Mime types than the standard built in ones.
 	    thread::send $this(httpdthreadid)  \
-	      [list ::tinyhttpd::addmimemappings [array get prefSuffix2MimeType]]
+	      [list ::tinyhttpd::addmimemappings [::Types::GetSuffMimeArr]]
 	} else {
 	    eval $httpdScript
-	    ::tinyhttpd::addmimemappings [array get prefSuffix2MimeType]
+	    ::tinyhttpd::addmimemappings [::Types::GetSuffMimeArr]
 	}
     } msg]} {
 	tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \

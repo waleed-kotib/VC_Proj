@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Types.tcl,v 1.8 2004-04-25 10:14:16 matben Exp $
+# $Id: Types.tcl,v 1.9 2004-05-13 13:50:22 matben Exp $
 
 package provide Types 1.0
 
@@ -570,6 +570,12 @@ proc ::Types::GetAllMime { } {
     variable mime2SuffList
     
     return [array names mime2SuffList]
+}
+
+proc ::Types::GetSuffMimeArr { } {
+    variable prefSuff2MimeType
+    
+    return [array get prefSuff2MimeType]
 }
 
 proc ::Types::IsMimeText {mime} {

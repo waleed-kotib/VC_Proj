@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: tinyhttpd.tcl,v 1.12 2004-03-27 15:20:37 matben Exp $
+# $Id: tinyhttpd.tcl,v 1.13 2004-05-13 13:50:21 matben Exp $
 
 # ########################### USAGE ############################################
 #
@@ -238,9 +238,9 @@ proc ::tinyhttpd::start {args} {
     
     # Icon unix style paths when returning directory listings.
     set httpdRelPathList [split $opts(-httpdrelativepath) $this(sep)]
-    set httpdRelPath [join $httpdRelPathList /]
+    set httpdRelPath     [join $httpdRelPathList /]
     set gstate(folderIconRelPath) /$httpdRelPath/macfoldericon.gif
-    set gstate(fileIconRelPath) /$httpdRelPath/textfileicon.gif
+    set gstate(fileIconRelPath)   /$httpdRelPath/textfileicon.gif
     set absIconPath [file join $opts(-rootdirectory) $opts(-httpdrelativepath) \
       macfoldericon.gif]
     if {![file exists $absIconPath]} {
