@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.13 2003-11-08 08:54:44 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.14 2003-11-17 15:03:03 matben Exp $
 
 # SetWhiteboardFactoryState --
 # 
@@ -449,6 +449,12 @@ switch -- $this(platform) {
 	set osprefs(mod) Control
 	if {[info exists env(USERPROFILE)]} {
 	    set winPrefsDir $env(USERPROFILE)
+	} elseif {[info exists env(HOME)]} {
+	    set winPrefsDir $env(HOME)
+	} elseif {[lsearch -glob [file volumes] "c:*"] >= 0} {
+	    set winPrefsDir c:/
+	} elseif {[lsearch -glob [file volumes] "C:*"] >= 0} {
+	    set winPrefsDir C:/
 	} else {
 	    set winPrefsDir $this(path)
 	}
