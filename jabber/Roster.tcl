@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.44 2004-03-25 08:11:14 matben Exp $
+# $Id: Roster.tcl,v 1.45 2004-03-28 14:50:51 matben Exp $
 
 package provide Roster 1.0
 
@@ -14,6 +14,12 @@ namespace eval ::Jabber::Roster:: {
     # Add all event hooks we need.
     ::hooks::add loginHook   ::Jabber::Roster::LoginCmd
     ::hooks::add logoutHook  ::Jabber::Roster::LogoutHook
+    
+    # Define all hooks for preference settings.
+    ::hooks::add prefsInitHook      ::Jabber::Roster::InitPrefsHook
+    ::hooks::add prefsBuildHook     ::Jabber::Roster::BuildPrefsHook
+    ::hooks::add prefsSaveHook      ::Jabber::Roster::SavePrefsHook
+    ::hooks::add prefsCancelHook    ::Jabber::Roster::CancelPrefsHook
 
     # Use option database for customization. 
     # Use priority 30 just to override the widgetDefault values!
@@ -1575,7 +1581,7 @@ proc ::Jabber::Roster::GetPresenceIcon {jid presence args} {
     
     # Foreign IM systems.
     set haveForeignIM 0
-    if {$jprefs(haveIMsysIcons)} {
+    if {$jprefs(rost,haveIMsysIcons)} {
 	if {[regexp {^(.+@)?([^@/]+)(/.*)?} $jid match pre host]} {
 	    set typesubtype [::Jabber::InvokeJlibCmd service gettype $host]
 	
@@ -1702,7 +1708,7 @@ proc ::Jabber::Roster::PostProcessIcons { } {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
 
-    if {!$jprefs(haveIMsysIcons)} {
+    if {!$jprefs(rost,haveIMsysIcons)} {
 	return
     }
     
@@ -1733,6 +1739,85 @@ proc ::Jabber::Roster::ConfigureIcon {v} {
 
     
     
+}
+
+# Prefs page ...................................................................
+
+proc ::Jabber::Roster::InitPrefsHook { } {
+    upvar ::Jabber::jprefs jprefs
+    
+    # Defaults...
+    set jprefs(rost,rmIfUnsub)      1
+    set jprefs(rost,allowSubNone)   1
+    set jprefs(rost,clrLogout)      1
+    set jprefs(rost,dblClk)         normal
+    
+    # Show special icons for foreign IM systems?
+    set jprefs(rost,haveIMsysIcons) 0
+	
+    ::PreferencesUtils::Add [list  \
+      [list ::Jabber::jprefs(rost,clrLogout)   jprefs_rost_clrRostWhenOut $jprefs(rost,clrLogout)]  \
+      [list ::Jabber::jprefs(rost,dblClk)      jprefs_rost_dblClk       $jprefs(rost,dblClk)]  \
+      [list ::Jabber::jprefs(rost,rmIfUnsub)   jprefs_rost_rmIfUnsub    $jprefs(rost,rmIfUnsub)]  \
+      [list ::Jabber::jprefs(rost,allowSubNone) jprefs_rost_allowSubNone $jprefs(rost,allowSubNone)]  \
+      [list ::Jabber::jprefs(rost,haveIMsysIcons)   jprefs_rost_haveIMsysIcons    $jprefs(rost,haveIMsysIcons)]  \
+      ]
+    
+}
+
+proc ::Jabber::Roster::BuildPrefsHook {wtree nbframe} {
+    
+    $wtree newitem {Jabber Roster} -text [::msgcat::mc Roster]
+        
+    # Roster page ----------------------------------------------------------
+    set wpage [$nbframe page {Roster}]
+    ::Jabber::Roster::BuildPageRoster $wpage
+}
+
+proc ::Jabber::Roster::BuildPageRoster {page} {
+    upvar ::Jabber::jprefs jprefs
+    variable tmpJPrefs
+
+    set ypad [option get [winfo toplevel $page] yPad {}]
+    
+    foreach key {rmIfUnsub allowSubNone clrLogout dblClk haveIMsysIcons} {
+	set tmpJPrefs(rost,$key) $jprefs(rost,$key)
+    }
+
+    checkbutton $page.rmifunsub -text " [::msgcat::mc prefrorm]"  \
+      -variable [namespace current]::tmpJPrefs(rost,rmIfUnsub)
+    checkbutton $page.allsubno -text " [::msgcat::mc prefroallow]"  \
+      -variable [namespace current]::tmpJPrefs(rost,allowSubNone)
+    checkbutton $page.clrout -text " [::msgcat::mc prefroclr]"  \
+      -variable [namespace current]::tmpJPrefs(rost,clrLogout)
+    checkbutton $page.dblclk -text " [::msgcat::mc prefrochat]" \
+      -variable [namespace current]::tmpJPrefs(rost,dblClk)  \
+      -onvalue chat -offvalue normal
+    checkbutton $page.sysicons -text " [::msgcat::mc prefrosysicons]" \
+      -variable [namespace current]::tmpJPrefs(rost,haveIMsysIcons)
+    
+    pack $page.rmifunsub $page.allsubno $page.clrout $page.dblclk  \
+      $page.sysicons -side top -anchor w -pady $ypad -padx 10
+}
+
+proc ::Jabber::Roster::SavePrefsHook { } {
+    upvar ::Jabber::jprefs jprefs
+    variable tmpJPrefs
+    
+    array set jprefs [array get tmpJPrefs]
+    unset tmpJPrefs
+}
+
+proc ::Jabber::Roster::CancelPrefsHook { } {
+    upvar ::Jabber::jprefs jprefs
+    variable tmpJPrefs
+	
+    foreach key [array names tmpJPrefs] {
+	if {![string equal $jprefs($key) $tmpJPrefs($key)]} {
+	    ::Preferences::HasChanged
+	    break
+	}
+    }
 }
 
 #-------------------------------------------------------------------------------

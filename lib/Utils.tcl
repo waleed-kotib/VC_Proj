@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.14 2004-03-13 15:21:42 matben Exp $
+# $Id: Utils.tcl,v 1.15 2004-03-28 14:50:51 matben Exp $
 
 namespace eval ::Utils:: {
 
@@ -283,6 +283,16 @@ proc ::Utils::OpenHtmlInBrowser {url} {
 	macosx {
 	    exec open $url
 	}
+    }
+}
+
+
+proc ::Utils::ValidMinutes {str} {
+    if {[regexp {[0-9]*} $str match]} {
+	return 1
+    } else {
+	bell
+	return 0
     }
 }
 

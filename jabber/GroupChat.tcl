@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.44 2004-03-27 15:20:37 matben Exp $
+# $Id: GroupChat.tcl,v 1.45 2004-03-28 14:50:50 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -24,6 +24,12 @@ namespace eval ::Jabber::GroupChat:: {
     ::hooks::add loginHook               ::Jabber::GroupChat::LoginHook
     ::hooks::add logoutHook              ::Jabber::GroupChat::LogoutHook
     ::hooks::add presenceHook            ::Jabber::GroupChat::PresenceHook
+    
+    # Define all hooks for preference settings.
+    ::hooks::add prefsInitHook           ::Jabber::GroupChat::InitPrefsHook
+    ::hooks::add prefsBuildHook          ::Jabber::GroupChat::BuildPrefsHook
+    ::hooks::add prefsSaveHook           ::Jabber::GroupChat::SavePrefsHook
+    ::hooks::add prefsCancelHook         ::Jabber::GroupChat::CancelPrefsHook
 
     # Use option database for customization. Not used yet...
     set fontS [option get . fontSmall {}]
@@ -1307,6 +1313,75 @@ proc ::Jabber::GroupChat::GetFirstPanePos { } {
 	set roomJid $locals($win,room) 
 	::UI::SavePanePos groupchatDlgVert $locals($roomJid,wtxt)
 	::UI::SavePanePos groupchatDlgHori $locals($roomJid,wtxt.0) vertical
+    }
+}
+
+# Prefs page ...................................................................
+
+proc ::Jabber::GroupChat::InitPrefsHook { } {
+    upvar ::Jabber::jprefs jprefs
+    
+    # Defaults...    
+    # Preferred groupchat protocol (gc-1.0|muc).
+    # 'muc' uses 'conference' as fallback.
+    set jprefs(prefgchatproto) "muc"
+	
+    ::PreferencesUtils::Add [list  \
+      [list ::Jabber::jprefs(prefgchatproto)   jprefs_prefgchatproto    $jprefs(prefgchatproto)]  \
+      ]   
+}
+
+proc ::Jabber::GroupChat::BuildPrefsHook {wtree nbframe} {
+    
+    $wtree newitem {Jabber Conference} -text [::msgcat::mc Conference]
+    
+    # Conference page ------------------------------------------------------
+    set wpage [$nbframe page {Conference}]
+    ::Jabber::GroupChat::BuildPageConf $wpage
+}
+
+proc ::Jabber::GroupChat::BuildPageConf {page} {
+    upvar ::Jabber::jprefs jprefs
+    variable tmpJPrefs
+
+    set ypad [option get [winfo toplevel $page] yPad {}]
+    
+    set tmpJPrefs(prefgchatproto) $jprefs(prefgchatproto)
+    
+    # Conference (groupchat) stuff.
+    set labfr $page.fr
+    labelframe $labfr -text [::msgcat::mc {Preferred Protocol}]
+    pack $labfr -side top -anchor w -padx 8 -pady 4
+    set pbl [frame $labfr.frin]
+    pack $pbl -padx 10 -pady 6 -side left
+    
+    foreach  \
+      val {gc-1.0                     muc}   \
+      txt {{Groupchat-1.0 (fallback)} prefmucconf} {
+	set wrad ${pbl}.[string map {. ""} $val]
+	radiobutton $wrad -text [::msgcat::mc $txt] -value $val  \
+	  -variable [namespace current]::tmpJPrefs(prefgchatproto)	      
+	grid $wrad -sticky w -pady $ypad
+    }
+}
+
+proc ::Jabber::GroupChat::SavePrefsHook { } {
+    upvar ::Jabber::jprefs jprefs
+    variable tmpJPrefs
+    
+    array set jprefs [array get tmpJPrefs]
+    unset tmpJPrefs
+}
+
+proc ::Jabber::GroupChat::CancelPrefsHook { } {
+    upvar ::Jabber::jprefs jprefs
+    variable tmpJPrefs
+	
+    foreach key [array names tmpJPrefs] {
+	if {![string equal $jprefs($key) $tmpJPrefs($key)]} {
+	    ::Preferences::HasChanged
+	    break
+	}
     }
 }
 

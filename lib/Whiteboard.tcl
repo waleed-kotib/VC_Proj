@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.26 2004-03-27 15:20:37 matben Exp $
+# $Id: Whiteboard.tcl,v 1.27 2004-03-28 14:50:51 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -16,8 +16,10 @@ package require CanvasText
 package require CanvasUtils
 package require CanvasCutCopyPaste
 package require CanvasCmd
+package require FilePrefs
 package require FilesAndCanvas
 package require Import
+package require WBPrefs
 
 package provide Whiteboard 1.0
 

@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.30 2004-03-24 14:43:11 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.31 2004-03-28 14:50:51 matben Exp $
 
 # SetWhiteboardFactoryState --
 # 
@@ -133,7 +133,6 @@ set prefs(batchTextms) 2000
 # Want to fit all movies within canvas?
 set prefs(autoFitMovies) 1
 
-set prefs(canvasFonts) [list Times Helvetica Courier]
 set prefs(canScrollWidth) 1800
 set prefs(canScrollHeight) 1200
 
@@ -146,9 +145,6 @@ set prefs(offsetCopy) 16
 
 # Grid spacing.
 set prefs(gridDist) 40                 
-
-# Only manipulate own items?
-set prefs(privacy) 0
 
 # How expressive shall we be with message boxes?
 set prefs(talkative) 0

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.71 2004-03-27 15:20:37 matben Exp $
+# $Id: Jabber.tcl,v 1.72 2004-03-28 14:50:50 matben Exp $
 
 package provide Jabber 1.0
 
@@ -42,6 +42,8 @@ package require Conference
 package require Search
 package require JForms
 package require Profiles
+package require JPrefs
+package require Filter
 
 
 namespace eval ::Jabber:: {
@@ -85,10 +87,6 @@ namespace eval ::Jabber:: {
     # Regexp pattern for username etc. Ascii no. 0-32 (deci) not allowed.
     set jprefs(invalsExp) {.*([\x00-\x20]|[\r\n\t@:' <>&"/])+.*}
     set jprefs(valids) {[^\x00-\x20]|[^\r\n\t@:' <>&"]}
-    
-    # List all iq:register personal info elements.
-    set jprefs(iqRegisterElem)   \
-      {first last nick email address city state phone url}
     
     # Popup menus.
     set jstate(wpopup,roster) .jpopupro
@@ -264,20 +262,10 @@ proc ::Jabber::FactoryDefaults { } {
     
     # Other
     set jprefs(defSubscribe)        1
-    set jprefs(rost,rmIfUnsub)      1
-    set jprefs(rost,allowSubNone)   1
-    set jprefs(rost,clrLogout)      1
-    set jprefs(rost,dblClk)         normal
     
     # The rosters background image is partly controlled by option database.
     set jprefs(rost,useBgImage)     1
     set jprefs(rost,bgImagePath)    ""
-    set jprefs(subsc,inrost)        ask
-    set jprefs(subsc,notinrost)     ask
-    set jprefs(subsc,auto)          0
-    set jprefs(subsc,group)         {}
-    set jprefs(block,notinrost)     0
-    set jprefs(block,list)          {}
     
     # Shall we query ip number directly when verified Coccinella?
     set jprefs(preGetIP) 1
@@ -286,18 +274,11 @@ proc ::Jabber::FactoryDefaults { } {
     # Switch off the raw stuff in later version.
     set jprefs(getIPraw) 1
     
-    # Preferred groupchat protocol (gc-1.0|muc).
-    # 'muc' uses 'conference' as fallback.
-    set jprefs(prefgchatproto) "muc"
-    
     # Automatically browse users with resource?
     set jprefs(autoBrowseUsers) 1
     
     # Automatically browse conference items?
     set jprefs(autoBrowseConference) 0
-    
-    # Show special icons for foreign IM systems?
-    set jprefs(haveIMsysIcons) 0
     
     # Dialog pane positions.
     set prefs(paneGeom,$wDlgs(jchat)) {0.75 0.25}
@@ -310,27 +291,11 @@ proc ::Jabber::FactoryDefaults { } {
     set jprefs(autoupdateCheck) 0
     set jprefs(autoupdateShow,$prefs(fullVers)) 1
     
-    # Sounds.
-    set jprefs(snd,online) 1
-    set jprefs(snd,offline) 1
-    set jprefs(snd,newmsg) 1
-    set jprefs(snd,statchange) 1
-    set jprefs(snd,connected) 1
-    
     set jprefs(showMsgNewWin) 1
     set jprefs(inbox2click) "newwin"
     
     # Save inbox when quit?
     set jprefs(inboxSave) 0
-    
-    set jprefs(autoaway) 0
-    set jprefs(xautoaway) 0
-    set jprefs(awaymin) 0
-    set jprefs(xawaymin) 0
-    set jprefs(awaymsg) {}
-    set jprefs(xawaymsg) {User has been inactive for a while}
-    
-    set jprefs(logoutStatus) ""
     
     # Empty here means use option database.
     set jprefs(chatFont) ""
@@ -343,11 +308,6 @@ proc ::Jabber::FactoryDefaults { } {
     set jstate(browseVis) 0
     set jstate(rostBrowseVis) 1
     set jstate(debugCmd) 0
-    
-    # Personal info corresponding to the iq:register namespace.
-    foreach key $jprefs(iqRegisterElem) {
-	set jprefs(iq:register,$key) {}
-    }
     
     # Query these jabber servers for services. Login server is automatically
     # queried.
@@ -491,49 +451,21 @@ proc ::Jabber::SetUserPreferences { } {
     ::PreferencesUtils::Add [list  \
       [list ::Jabber::jprefs(port)             jprefs_port              $jprefs(port)]  \
       [list ::Jabber::jprefs(sslport)          jprefs_sslport           $jprefs(sslport)]  \
-      [list ::Jabber::jprefs(rost,clrLogout)   jprefs_rost_clrRostWhenOut $jprefs(rost,clrLogout)]  \
-      [list ::Jabber::jprefs(rost,dblClk)      jprefs_rost_dblClk       $jprefs(rost,dblClk)]  \
-      [list ::Jabber::jprefs(rost,rmIfUnsub)   jprefs_rost_rmIfUnsub    $jprefs(rost,rmIfUnsub)]  \
-      [list ::Jabber::jprefs(rost,allowSubNone) jprefs_rost_allowSubNone $jprefs(rost,allowSubNone)]  \
       [list ::Jabber::jprefs(rost,useBgImage)  jprefs_rost_useBgImage   $jprefs(rost,useBgImage)]  \
       [list ::Jabber::jprefs(rost,bgImagePath) jprefs_rost_bgImagePath  $jprefs(rost,bgImagePath)]  \
-      [list ::Jabber::jprefs(subsc,inrost)     jprefs_subsc_inrost      $jprefs(subsc,inrost)]  \
-      [list ::Jabber::jprefs(subsc,notinrost)  jprefs_subsc_notinrost   $jprefs(subsc,notinrost)]  \
-      [list ::Jabber::jprefs(subsc,auto)       jprefs_subsc_auto        $jprefs(subsc,auto)]  \
-      [list ::Jabber::jprefs(subsc,group)      jprefs_subsc_group       $jprefs(subsc,group)]  \
-      [list ::Jabber::jprefs(block,notinrost)  jprefs_block_notinrost   $jprefs(block,notinrost)]  \
-      [list ::Jabber::jprefs(block,list)       jprefs_block_list        $jprefs(block,list)    userDefault] \
       [list ::Jabber::jprefs(agentsOrBrowse)   jprefs_agentsOrBrowse    $jprefs(agentsOrBrowse)]  \
       [list ::Jabber::jprefs(agentsServers)    jprefs_agentsServers     $jprefs(agentsServers)]  \
       [list ::Jabber::jprefs(browseServers)    jprefs_browseServers     $jprefs(browseServers)]  \
       [list ::Jabber::jprefs(showMsgNewWin)    jprefs_showMsgNewWin     $jprefs(showMsgNewWin)]  \
       [list ::Jabber::jprefs(inbox2click)      jprefs_inbox2click       $jprefs(inbox2click)]  \
       [list ::Jabber::jprefs(inboxSave)        jprefs_inboxSave         $jprefs(inboxSave)]  \
-      [list ::Jabber::jprefs(prefgchatproto)   jprefs_prefgchatproto    $jprefs(prefgchatproto)]  \
-      [list ::Jabber::jprefs(autoaway)         jprefs_autoaway          $jprefs(autoaway)]  \
-      [list ::Jabber::jprefs(xautoaway)        jprefs_xautoaway         $jprefs(xautoaway)]  \
-      [list ::Jabber::jprefs(awaymin)          jprefs_awaymin           $jprefs(awaymin)]  \
-      [list ::Jabber::jprefs(xawaymin)         jprefs_xawaymin          $jprefs(xawaymin)]  \
-      [list ::Jabber::jprefs(awaymsg)          jprefs_awaymsg           $jprefs(awaymsg)]  \
-      [list ::Jabber::jprefs(xawaymsg)         jprefs_xawaymsg          $jprefs(xawaymsg)]  \
-      [list ::Jabber::jprefs(logoutStatus)     jprefs_logoutStatus      $jprefs(logoutStatus)]  \
-      [list ::Jabber::jprefs(haveIMsysIcons)   jprefs_haveIMsysIcons    $jprefs(haveIMsysIcons)]  \
       [list ::Jabber::jserver(profile)         jserver_profile          $jserver(profile)      userDefault] \
       [list ::Jabber::jserver(profile,selected) jserver_profile_selected $jserver(profile,selected) userDefault] \
       ]
     
-	# Personal info corresponding to the iq:register namespace.
-	
-	set jprefsRegList {}
-	foreach key $jprefs(iqRegisterElem) {
-	    lappend jprefsRegList [list  \
-	      ::Jabber::jprefs(iq:register,$key) jprefs_iq_register_$key   \
-	      $jprefs(iq:register,$key) userDefault]
-	}
-	::PreferencesUtils::Add $jprefsRegList
-	if {$jprefs(chatFont) != ""} {
-	    set jprefs(chatFont) [::Utils::GetFontListFromName $jprefs(chatFont)]
-	}
+    if {$jprefs(chatFont) != ""} {
+	set jprefs(chatFont) [::Utils::GetFontListFromName $jprefs(chatFont)]
+    }
 }
 
 # Jabber::GetjprefsArray, GetjserverArray, ... --
@@ -1145,34 +1077,6 @@ proc ::Jabber::IqSetGetCallback {method jlibName type theQuery} {
 	}
 	tk_messageBox -icon error -type ok -title [::msgcat::mc Error] -message \
 	  [FormatTextForMessageBox $msg]
-    }
-}
-
-# Jabber::UpdateAutoAwaySettings --
-#
-#       If changed present auto away settings, may need to configure
-#       our jabber object.
-
-proc ::Jabber::UpdateAutoAwaySettings { } {    
-    variable jstate
-    variable jprefs
-    
-    array set oldopts [$jstate(jlib) config]
-    set reconfig 0
-    foreach name {autoaway xautoaway awaymin xawaymin} {
-	if {$oldopts(-$name) != $jprefs($name)} {
-	    set reconfig 1
-	    break
-	}
-    }
-    if {$reconfig} {
-	set opts {}
-	if {$jprefs(autoaway) || $jprefs(xautoaway)} {
-	    foreach name {autoaway xautoaway awaymin xawaymin awaymsg xawaymsg} {
-		lappend opts -$name $jprefs($name)
-	    }
-	}
-	eval {$jstate(jlib) config} $opts
     }
 }
 
