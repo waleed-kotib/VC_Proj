@@ -8,7 +8,7 @@
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: mactabnotebook.tcl,v 1.26 2004-12-10 10:01:42 matben Exp $
+# $Id: mactabnotebook.tcl,v 1.27 2004-12-10 15:02:09 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -696,7 +696,7 @@ proc ::mactabnotebook::NewPage {w name args} {
     eval {ConfigurePage $w $name} $args
     set page [$widgets(nbframe) page $name]
     lappend tnInfo(tabs) $name
-    set name2uid($name) "t[incr uid]"
+    set name2uid($name) t[incr uid]
     
     if {$tnInfo(pending) == ""} {
 	set id [after idle [list ::mactabnotebook::Build $w]]
@@ -924,9 +924,10 @@ proc ::mactabnotebook::BuildMac {w} {
 	foreach {coords col tags} $toDrawLine {
 	    eval $w.tabs create line $coords -fill $col -tags $tags
 	}
-	$w.tabs raise $id	
+	$w.tabs raise $id
+	regsub -all {%} $name {%%} subname
 	$w.tabs bind $tname <ButtonPress-1>  \
-	  [list ::mactabnotebook::ButtonPressTab $w $name]
+	  [list ::mactabnotebook::ButtonPressTab $w $subname]
 	incr x [expr {$wd + 2 * $margin2 + 3}]
     }
     set height [expr {$maxh + 2 * $margin2}]
@@ -1056,9 +1057,9 @@ proc ::mactabnotebook::BuildAqua {w} {
 	
 	# New x for next tab.
 	set x [expr {$xright + $margin2}]
-
+	regsub -all {%} $name {%%} subname
 	$w.tabs bind $tname <ButtonPress-1>  \
-	  [list ::mactabnotebook::ButtonPressTab $w $name]
+	  [list ::mactabnotebook::ButtonPressTab $w $subname]
     }
     $w.tabs move all 0 $height
     $w.tabs raise talu
@@ -1196,9 +1197,9 @@ proc ::mactabnotebook::BuildWinxp {w} {
 	
 	# New x for next tab.
 	set x [expr {$xright + $margin2}]
-
+	regsub -all {%} $name {%%} subname
 	$w.tabs bind $tname <ButtonPress-1>  \
-	  [list ::mactabnotebook::ButtonPressTab $w $name]
+	  [list ::mactabnotebook::ButtonPressTab $w $subname]
     }
     $w.tabs move all 0 $height
     $w.tabs lower tacc
@@ -1515,12 +1516,13 @@ proc ::mactabnotebook::DrawReliefButton {w name r} {
 	$w.tabs create line -$a -$a $ap  $ap -tags $tags -fill $lighter
 	$w.tabs create line -$a  $a $ap -$ap -tags $tags -fill $lighter
     }
+    regsub -all {%} $name {%%} subname
     $w.tabs bind bt&&$tname <ButtonPress-1>  \
-      [list ::mactabnotebook::CloseButton $w $name]
+      [list ::mactabnotebook::CloseButton $w $subname]
     $w.tabs bind bt&&$tname <Enter>  \
-      [list ::mactabnotebook::EnterReliefButton $w $name]
+      [list ::mactabnotebook::EnterReliefButton $w $subname]
     $w.tabs bind bt&&$tname <Leave>  \
-      [list ::mactabnotebook::LeaveReliefButton $w $name]
+      [list ::mactabnotebook::LeaveReliefButton $w $subname]
 }
 
 proc ::mactabnotebook::DrawWinxpButton {w name r} {
@@ -1547,8 +1549,9 @@ proc ::mactabnotebook::DrawWinxpButton {w name r} {
 	set id1 [$w.tabs create line -$a -$a $ap  $ap -tags $tags -fill white]
 	set id2 [$w.tabs create line -$a  $a $ap -$ap -tags $tags -fill white]
     }
+    regsub -all {%} $name {%%} subname
     $w.tabs bind bt&&$tname <ButtonPress-1>  \
-      [list ::mactabnotebook::CloseButton $w $name]
+      [list ::mactabnotebook::CloseButton $w $subname]
 }
 
 proc ::mactabnotebook::DrawAluRect {wcan x0 y0 x1 y1 col tag} {
