@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: PutFileIface.tcl,v 1.6 2003-07-26 13:54:23 matben Exp $
+# $Id: PutFileIface.tcl,v 1.7 2003-08-23 07:19:16 matben Exp $
 
 package require putfile
 package require uriencode
@@ -118,7 +118,7 @@ proc ::PutFileIface::PutFile {wtop fileName where {optList {}}} {
 	    foreach ip $allPutIP {
 		if {[catch {
 		    ::putfile::put $fileName $ip $prefs(remotePort)  \
-		      -mimetype $mime -timeout [expr 1000 * $prefs(timeout)] \
+		      -mimetype $mime -timeout $prefs(timeoutMillis) \
 		      -optlist $optList -filetail $dstFile  \
 		      -progress [namespace current]::PutProgress  \
 		      -command [list [namespace current]::PutCommand $wtop]

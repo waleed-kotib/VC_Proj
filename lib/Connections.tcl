@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Connections.tcl,v 1.4 2003-07-26 13:54:23 matben Exp $
+# $Id: Connections.tcl,v 1.5 2003-08-23 07:19:16 matben Exp $
 
 package provide Connections 1.0
 
@@ -212,14 +212,14 @@ proc ::OpenConnection::TraceOpenConnect {name junk1 junk2} {
 #       (weird things happen).
 
 proc ::OpenConnection::DoConnect {toNameOrNum toPort {propagateSizeToClients 1}} {
-    global  this prefs errorCode
+    global  this prefs errorCode wDlgs
     
     set nameOrIP $toNameOrNum
     set remoteServPort $toPort
     
     Debug 2 "DoConnect:: nameOrIP: $nameOrIP, remoteServPort: $remoteServPort"
 
-    ::UI::SetStatusMessage . "Contacted $nameOrIP. Waiting for response..."
+    ::UI::SetStatusMessage $wDlgs(mainwb) "Contacted $nameOrIP. Waiting for response..."
     ::UI::StartStopAnimatedWaveOnMain 1
     
     # Handle the TCP/IP channel; if internal pick internalIPnum
@@ -242,9 +242,9 @@ proc ::OpenConnection::DoConnect {toNameOrNum toPort {propagateSizeToClients 1}}
     Debug 2 "DoConnect:: res=$res"
 
     if {$res} {
-	tk_messageBox -icon error -type ok -parent . -message  \
+	tk_messageBox -icon error -type ok -parent $wDlgs(mainwb) -message  \
 	  [FormatTextForMessageBox [::msgcat::mc messfailedsock $errorCode]]
-	::UI::SetStatusMessage . {}
+	::UI::SetStatusMessage $wDlgs(mainwb) {}
 	::UI::StartStopAnimatedWaveOnMain 0
 	update idletasks
 	return {}
@@ -289,7 +289,7 @@ proc ::OpenConnection::DoConnect {toNameOrNum toPort {propagateSizeToClients 1}}
 
 proc ::OpenConnection::WhenSocketOpensInits {nameOrIP server remoteServPort \
   {propagateSizeToClients 1}} {	
-    global  ipName2Num ipNumTo this allIPnumsTo prefs
+    global  ipName2Num ipNumTo this allIPnumsTo prefs wDlgs
     
     variable killerId
     
@@ -306,8 +306,8 @@ proc ::OpenConnection::WhenSocketOpensInits {nameOrIP server remoteServPort \
     
     ::UI::StartStopAnimatedWaveOnMain 0
     if {[eof $server]} {
-	::UI::SetStatusMessage . [::msgcat::mc messeofconnect]
-	tk_messageBox -icon error -type ok -parent . -message  \
+	::UI::SetStatusMessage $wDlgs(mainwb) [::msgcat::mc messeofconnect]
+	tk_messageBox -icon error -type ok -parent $wDlgs(mainwb) -message  \
 	  [FormatTextForMessageBox [::msgcat::mc messeofconnect]]	  
 	return
     }
@@ -316,13 +316,13 @@ proc ::OpenConnection::WhenSocketOpensInits {nameOrIP server remoteServPort \
     if {[catch {fconfigure $server -sockname} sockname]} {
 	tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
 	  "Something went wrong (-sockname). $sockname"]	  
-	::UI::SetStatusMessage . {}
+	::UI::SetStatusMessage $wDlgs(mainwb) {}
 	return {}
     }
     
     # Save ip number, names, socks etc. in arrays.
     if {![::OpenConnection::SetIpArrays $nameOrIP $server $remoteServPort]} {
-	::UI::SetStatusMessage . {}
+	::UI::SetStatusMessage $wDlgs(mainwb) {}
 	return
     }
     if {[IsIPNumber $nameOrIP]} {
@@ -333,7 +333,7 @@ proc ::OpenConnection::WhenSocketOpensInits {nameOrIP server remoteServPort \
 	set ipNum $ipName2Num($ipName)
     }
 
-    ::UI::SetStatusMessage . "Client $ipName responded."
+    ::UI::SetStatusMessage $wDlgs(mainwb) "Client $ipName responded."
     
     # If a central server, then the single socket must be used full duplex.
     # This is only valid only for the clients.
@@ -367,7 +367,7 @@ proc ::OpenConnection::WhenSocketOpensInits {nameOrIP server remoteServPort \
     }
     
     # Add line in the communication entry. Also updates 'allIPnumsTo'.
-    ::UI::SetCommEntry . $ipNum 1 -1
+    ::UI::SetCommEntry $wDlgs(mainwb) $ipNum 1 -1
     
     # Let all other now about the size change. propagateToClients and force.
     
@@ -378,7 +378,7 @@ proc ::OpenConnection::WhenSocketOpensInits {nameOrIP server remoteServPort \
     }
     
     # Update menus. If client only, allow only one connection, limited.
-    ::UI::FixMenusWhen . "connect"
+    ::UI::FixMenusWhen $wDlgs(mainwb) "connect"
     return $ipNum
 }
 
@@ -472,24 +472,24 @@ proc ::OpenConnection::ScheduleKiller {sock} {
     if {[info exists killerId($sock)]} {
 	after cancel $killerId($sock)
     }
-    set killerId($sock) [after [expr 1000*$prefs(timeout)]   \
+    set killerId($sock) [after $prefs(timeoutMillis)   \
       [list [namespace current]::Kill $sock]]
 }
 
 proc ::OpenConnection::Kill {sock} {
-    global  prefs
+    global  prefs wDlgs
     
     variable killerId    
 
     catch {close $sock}
     set statMess [::msgcat::mc messtimeout]
-    ::UI::SetStatusMessage . $statMess
+    ::UI::SetStatusMessage $wDlgs(mainwb) $statMess
     ::UI::StartStopAnimatedWaveOnMain 0
     if {[info exists killerId($sock)]} {
 	after cancel $killerId($sock)
 	catch {unset killerId($sock)}
     }
-    tk_messageBox -icon error -type ok -parent . -message \
+    tk_messageBox -icon error -type ok -parent $wDlgs(mainwb) -message \
       [FormatTextForMessageBox $statMess]
 }
 
@@ -549,11 +549,11 @@ proc ::OpenConnection::DoAutoConnect { } {
 #       This may happen when the user presses a stop button or something.
 
 proc ::OpenConnection::OpenCancelAllPending { } {
-    variable killerId    
+    variable killerId wDlgs
 
     Debug 2 "+OpenCancelAllPending::"
 
-    ::UI::SetStatusMessage . {}
+    ::UI::SetStatusMessage $wDlgs(mainwb) {}
     ::UI::StartStopAnimatedWaveOnMain 0
         
     # Pending Open connection:
@@ -581,7 +581,7 @@ proc ::OpenConnection::OpenCancelAllPending { } {
 #       none
 
 proc ::OpenConnection::DoCloseClientConnection {ipNum} {
-    global  prefs allIPnumsToSend allIPnumsTo ipNumTo
+    global  prefs allIPnumsToSend allIPnumsTo ipNumTo wDlgs
         
     Debug 2 "DoCloseClientConnection:: ipNum=$ipNum"    
     
@@ -595,11 +595,11 @@ proc ::OpenConnection::DoCloseClientConnection {ipNum} {
     catch {close $ipNumTo(socket,$ipNum)}
 
     # Update the communication frame; remove connection 'to'.
-    ::UI::SetCommEntry . $ipNum 0 -1
+    ::UI::SetCommEntry $wDlgs(mainwb) $ipNum 0 -1
 
     # If no more connections left, make menus consistent.
     if {[llength $allIPnumsToSend] == 0} {
-	::UI::FixMenusWhen . {disconnect}
+	::UI::FixMenusWhen $wDlgs(mainwb) {disconnect}
     }
 }
 
@@ -614,7 +614,7 @@ proc ::OpenConnection::DoCloseClientConnection {ipNum} {
 #       none
 
 proc ::OpenConnection::DoCloseServerConnection {ipNum args} {
-    global  ipNumTo allIPnumsToSend prefs
+    global  ipNumTo allIPnumsToSend prefs wDlgs
     
     Debug 2 "DoCloseServerConnection:: ipNum=$ipNum, ipNumTo(servSocket,$ipNum)=\
       $ipNumTo(servSocket,$ipNum)"
@@ -625,7 +625,7 @@ proc ::OpenConnection::DoCloseServerConnection {ipNum args} {
     array set opts $args
     
     # Switch off the comm 'from' button.
-    ::UI::SetCommEntry . $ipNum -1 0
+    ::UI::SetCommEntry $wDlgs(mainwb) $ipNum -1 0
     if {[string equal $prefs(protocol) "server"]} {
 	catch {close $ipNumTo(socket,$ipNum)}
 	catch {unset ipNumTo(socket,$ipNum)}
@@ -640,7 +640,7 @@ proc ::OpenConnection::DoCloseServerConnection {ipNum args} {
     }
     
     # If no more connections left, make menus consistent.
-    ::UI::FixMenusWhen . "disconnectserver"
+    ::UI::FixMenusWhen $wDlgs(mainwb) "disconnectserver"
 }
 
 #--- OpenMulticast stuff -------------------------------------------------------

@@ -236,6 +236,7 @@
 ::msgcat::mcset en mColor		{Color...}
 ::msgcat::mcset en mAddSpeechBubble	{Add Speech Bubble}
 ::msgcat::mcset en mUpdateCheck  	{Update Check}
+::msgcat::mcset en mReloadImage  	{Reload Image}
 
 # Popups
 ::msgcat::mcset en mMessage     	{Message...}

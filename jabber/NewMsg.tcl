@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.8 2003-07-26 13:54:23 matben Exp $
+# $Id: NewMsg.tcl,v 1.9 2003-08-23 07:19:16 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -584,7 +584,7 @@ proc ::Jabber::NewMsg::DoSend {w} {
     for {set i 1} {$i <= $locals($w,addrline)} {incr i} {
 	set addr $locals($w,addr$i)
 	if {[string length $addr] > 0} {
-	    if {![::Jabber::IsWellFormedJID $addr]} {
+	    if {![::Jabber::IsWellFormedJID $addr -type any]} {
 		if {$locals($w,addrline) > 1} {
 		    set msg [::msgcat::mc jamessskipsendq $addr]
 		    set type yesnocancel

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.11 2003-07-26 13:54:23 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.12 2003-08-23 07:19:16 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -399,7 +399,7 @@ proc ::PreferencesUtils::SetUserPreferences { } {
       [list prefs(userDir)         prefs_userDir         $prefs(userDir)]        \
       [list prefs(winGeom)         prefs_winGeom         $prefs(winGeom)]        \
       [list prefs(paneGeom)        prefs_paneGeom        $prefs(paneGeom)]       \
-      [list prefs(lastUpdateVersion) prefs_lastUpdateVersion $prefs(lastUpdateVersion)] \
+      [list prefs(lastAutoUpdateVersion) prefs_lastAutoUpdateVersion $prefs(lastAutoUpdateVersion)] \
       [list prefs(pluginBanList)   prefs_pluginBanList   $prefs(pluginBanList)]  \
       [list ::UI::dims(x)          dims_x                $::UI::dims(x)]         \
       [list ::UI::dims(y)          dims_y                $::UI::dims(y)]         \

@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: GetFileIface.tcl,v 1.2 2003-06-07 12:46:36 matben Exp $
+# $Id: GetFileIface.tcl,v 1.3 2003-08-23 07:19:16 matben Exp $
 
 package require getfile
 package require uriencode
@@ -34,8 +34,9 @@ namespace eval ::GetFileIface:: {
 proc ::GetFileIface::GetFile {wtop sock fileName optList} {
     global prefs noErr wDlgs
     variable uid
-    
-    Debug 2 "::GetFileIface::GetFile wtop=$wtop, fileName=$fileName"
+    upvar ::${wtop}::wapp wapp
+        
+    ::Debug 2 "::GetFileIface::GetFile wtop=$wtop, fileName=$fileName"
     
     array set optArr $optList
     
@@ -62,6 +63,7 @@ proc ::GetFileIface::GetFile {wtop sock fileName optList} {
     upvar 0 $gettoken getstate
     
     set getstate(wtop) $wtop
+    set getstate(can) $wapp(can)
     set getstate(sock) $sock
     set getstate(filetail) $fileTail
     set getstate(dstpath) $dstpath
@@ -76,9 +78,17 @@ proc ::GetFileIface::GetFile {wtop sock fileName optList} {
     # Check if this file is cached already, http transported instead,
     # or if you user wants something different. May modify 'getstate(dstpath)'!
     set code [::GetFileIface::Prepare $gettoken $fileTail $mime $optList]
-    Debug 2 "     code=$code"
-    
+    ::Debug 2 "     code=$code"
+        
     if {$code != $noErr} {
+	switch -- $code {
+	    320 - 323 {
+		# Empty; 320: cached; 323: via url
+	    }
+	    default {
+		::GetFileIface::NewBrokenImage $code $gettoken
+	    }
+	}
 	catch {
 	    puts $sock "TCLWB/1.0 $code [getfile::ncodetotext $code]"
 	    flush $sock
@@ -129,8 +139,9 @@ proc ::GetFileIface::GetFile {wtop sock fileName optList} {
 proc ::GetFileIface::GetFileFromServer {wtop ip port path optList} {
     global prefs wDlgs noErr
     variable uid
+    upvar ::${wtop}::wapp wapp
     
-    Debug 2 "::GetFileIface::GetFileFromServer wtop=$wtop, path=$path"
+    ::Debug 2 "::GetFileIface::GetFileFromServer wtop=$wtop, path=$path"
     
     array set optArr $optList
     
@@ -157,6 +168,7 @@ proc ::GetFileIface::GetFileFromServer {wtop ip port path optList} {
     upvar 0 $gettoken getstate
     
     set getstate(wtop) $wtop
+    set getstate(can) $wapp(can)
     set getstate(filetail) $fileTail
     set getstate(dstpath) $dstpath
     set getstate(optlist) $optList
@@ -170,8 +182,18 @@ proc ::GetFileIface::GetFileFromServer {wtop ip port path optList} {
     # Check if this file is cached already, http transported instead,
     # or if you user wants something different. May modify 'getstate(dstpath)'!
     set code [::GetFileIface::Prepare $gettoken $fileTail $mime $optList]
-    Debug 2 "     code=$code"
+    ::Debug 2 "     code=$code"
+
+    
     if {$code != $noErr} {
+	switch -- $code {
+	    320 - 323 {
+		# Empty; 320: cached; 323: via url
+	    }
+	    default {
+		::GetFileIface::NewBrokenImage $code $gettoken
+	    }
+	}
 	unset getstate
 	return
     } 
@@ -242,7 +264,7 @@ proc ::GetFileIface::Prepare {gettoken fileTail mime optList} {
 	    } else {
 		set ans [tk_chooseDirectory -initialdir $prefs(incomingPath) \
 		  -title [::msgcat::mc {Pick Directory}]]
-		if {[string length $ans] == 0} {
+		if {$ans == ""} {
 		    return 321
 		} else {
 		    set getstate(dstpath) [file join $ans $fileTail]
@@ -309,7 +331,7 @@ proc ::GetFileIface::Progress {gettoken token total current} {
     
     upvar #0 $gettoken getstate          
 
-    Debug 4 "::GetFileIface::Progress total=$total, current=$current"
+    ::Debug 4 "::GetFileIface::Progress total=$total, current=$current"
 
     # Be silent... except for a necessary update command to not block.
     if {[string equal $tcl_platform(platform) "windows"]} {
@@ -328,7 +350,7 @@ proc ::GetFileIface::Progress {gettoken token total current} {
       {$ms - $getstate(firstmillis) >= $prefs(millisToProgWin)} ? 1 : 0]
     if {$wantProgWin && ![winfo exists $getstate(wprog)]} {
 	::GetFileIface::UpdateProgress $gettoken $total $current
-    } elseif {[expr $ms - $getstate(lastmillis)] > $prefs(millisProgUpdate)} {
+    } elseif {[expr $ms - $getstate(lastmillis)] > $prefs(progUpdateMillis)} {
 	set getstate(lastmillis) $ms	    
 	::GetFileIface::UpdateProgress $gettoken $total $current
     }
@@ -342,7 +364,7 @@ proc ::GetFileIface::Command {gettoken token what msg} {
     global  prefs
     upvar #0 $gettoken getstate          
     
-    Debug 2 "+      Command:: token=$token, what=$what msg=$msg"
+    ::Debug 2 "+      Command:: token=$token, what=$what msg=$msg"
 
     set wtop $getstate(wtop)
     
@@ -364,7 +386,7 @@ proc ::GetFileIface::Command {gettoken token what msg} {
     } elseif {[string equal $what "ok"]} {
 	::UI::SetStatusMessage $wtop $msg
 
-	Debug 3 "+        status=[::getfile::status $token]"
+	::Debug 3 "+        status=[::getfile::status $token]"
 	if {[::getfile::status $token] == "ok"} {
 	    
 	    # Finished and ok!
@@ -404,7 +426,7 @@ proc ::GetFileIface::UpdateProgress {gettoken total current} {
     } else {
 	
 	# Create the progress window.
-	Debug 2 "::GetFileIface::UpdateProgress  create ProgWin"
+	::Debug 2 "::GetFileIface::UpdateProgress  create ProgWin"
 
 	::ProgressWindow::ProgressWindow $getstate(wprog) -name {Get File} \
 	  -filename $getstate(filetail) -text2 $msg \
@@ -422,7 +444,7 @@ proc ::GetFileIface::UpdateProgress {gettoken total current} {
 proc ::GetFileIface::DoImport {mime optList args} {
     global  prefs
     
-    Debug 3 "+        ::GetFileIface::DoImport"
+    ::Debug 3 "+        ::GetFileIface::DoImport"
 
     if {[string equal $prefs(protocol) "jabber"]} {
 	eval {::Jabber::WB::DispatchToImporter $mime $optList} $args
@@ -443,6 +465,59 @@ proc ::GetFileIface::DoImport {mime optList args} {
     }
 }
 
+# GetFileIface::NewBrokenImage --
+# 
+#       Wrapper for the NewBrokenImage call.
+
+proc ::GetFileIface::NewBrokenImage {code gettoken} {
+    upvar #0 $gettoken getstate     
+          
+    ::Debug 3 "::GetFileIface::NewBrokenImage"
+    
+    set msg "Failed importing $getstate(filetail): "
+    append msg [getfile::ncodetotext $code]
+    ::UI::SetStatusMessage $getstate(wtop) $msg
+
+    set optList $getstate(optlist)
+    array set optArr $optList
+    set opts {}
+    foreach {key value} $optList {
+	switch -- $key {
+	    width: {
+		lappend opts -width $value
+	    }
+	    height: {
+		lappend opts -height $value
+	    }
+	    Get-Url: {
+		lappend opts -url $value
+	    }
+	    size: {
+		lappend opts -size $value
+	    }
+	    Content-Type: {
+		lappend opts -mime $value
+	    }
+	    tags: {
+		lappend opts -tags $value
+	    }
+	    above: {
+		lappend opts -above $value
+	    }
+	    below: {
+		lappend opts -below $value
+	    }
+	}
+    }
+    if {![info exists optArr(coords:)]} {
+	# Should never happen!
+	return
+    }
+
+    eval {::ImageAndMovie::NewBrokenImage $getstate(can) $optArr(coords:)  \
+      -optlist $optList} $opts
+}
+
 # GetFileIface::CancelCmd, CancelAll, CancelAllWtop --
 #
 #   Are supposed to stop every put operation taking place.
@@ -451,7 +526,7 @@ proc ::GetFileIface::DoImport {mime optList args} {
 proc ::GetFileIface::CancelCmd {gettoken} {
     upvar #0 $gettoken getstate          
 
-    Debug 2 "+::GetFileIface::CancelCmd"
+    ::Debug 2 "+::GetFileIface::CancelCmd"
     set tok $getstate(token)
     getfile::reset $tok
     getfile::cleanup $tok
@@ -463,7 +538,7 @@ proc ::GetFileIface::CancelCmd {gettoken} {
 
 proc ::GetFileIface::CancelAll { } {
 
-    Debug 2 "+::GetFileIface::CancelAll"
+    ::Debug 2 "+::GetFileIface::CancelAll"
     
     # Close and clean up.
     set gettokenList [concat  \
@@ -486,7 +561,7 @@ proc ::GetFileIface::CancelAll { } {
 
 proc ::GetFileIface::CancelAllWtop {wtop} {
 
-    Debug 2 "+::GetFileIface::CancelAllWtop wtop=$wtop"
+    ::Debug 2 "+::GetFileIface::CancelAllWtop wtop=$wtop"
     
     # Close and clean up.
     set gettokenList [concat  \

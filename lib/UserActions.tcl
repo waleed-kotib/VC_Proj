@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UserActions.tcl,v 1.10 2003-07-26 13:54:23 matben Exp $
+# $Id: UserActions.tcl,v 1.11 2003-08-23 07:19:17 matben Exp $
 
 namespace eval ::UserActions:: {
     
@@ -30,6 +30,7 @@ proc ::UserActions::CancelAllPutGetAndPendingOpen {wtop} {
     # This must be instance specific!!!
     ::PutFileIface::CancelAllWtop $wtop
     ::GetFileIface::CancelAllWtop $wtop
+    ::ImageAndMovie::HttpResetAll $wtop
     if {[string equal $prefs(protocol) "jabber"]} {
 	::Network::KillAll
 	::UI::SetStatusMessage $wtop {}
@@ -731,15 +732,8 @@ proc ::UserActions::DoCloseWindow { } {
     
     # Do different things depending on type of toplevel.
     switch -glob -- [winfo class $w] {
-	Wish* {
+	Wish* - Whiteboard* - Coccinella* {
 	    # Main window.
-	    if {0 && $w == "."} {
-		::UserActions::DoQuit -warning 1
-	    } else {
-		::UI::CloseMain $wtop
-	    }
-	}
-	Whiteboard* {
 	    if {0 && $w == "."} {
 		::UserActions::DoQuit -warning 1
 	    } else {
@@ -756,7 +750,7 @@ proc ::UserActions::DoCloseWindow { } {
 	    ::Jabber::GroupChat::CloseToplevel $w
 	}
 	MailBox {
-	    ::Jabber::MailBox::Show $wDlgs(jinbox) -visible 0
+	    ::Jabber::MailBox::Show -visible 0
 	}
 	RostServ {
 	    ::UserActions::DoQuit -warning 1

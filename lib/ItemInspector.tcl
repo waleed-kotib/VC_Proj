@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ItemInspector.tcl,v 1.4 2003-07-26 13:54:23 matben Exp $
+# $Id: ItemInspector.tcl,v 1.5 2003-08-23 07:19:16 matben Exp $
 
 namespace eval ::ItemInspector::  {
     
@@ -98,16 +98,21 @@ proc ::ItemInspector::ItemInspector {wtop which args} {
     
     # We need to create an item specific instance. 
     # Use the item id for instance.
-    set itemIdList [$wCan find withtag $which]
-    if {$itemIdList == ""}  {
+    set idlist [$wCan find withtag $which]
+    if {$idlist == ""}  {
 	return
     }
     
     # Query the whiteboard's state.
     array set opts [::UI::ConfigureMain $wtop]
     array set opts $args
-    foreach itemId $itemIdList {
-	eval {::ItemInspector::Build $wtop $itemId} [array get opts]
+    foreach id $idlist {
+	set tags [$wCan gettags $id]
+	if {[lsearch $tags broken] >= 0} {
+	    eval {::ItemInspector::Broken $wtop $id} [array get opts]
+	} else {
+	    eval {::ItemInspector::Build $wtop $id} [array get opts]
+	}
     }
 }
 
@@ -678,6 +683,67 @@ proc ::ItemInspector::MovieCancel {w} {
     
     set ::ItemInspector::${w}::finished 0
     destroy $w
+}
+
+
+
+proc ::ItemInspector::Broken {wtop id args} {
+    global  this sysFont
+        
+    set w .itin${id}
+    if {[winfo exists $w]} {
+	return
+    }
+    toplevel $w
+    if {[string match "mac*" $this(platform)]} {
+	eval $::macWindowStyle $w documentProc
+    } else {
+	#
+    }
+    wm title $w {Item Inspector}
+    
+    # Global frame.
+    pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
+    set w1 $w.frall.fr1
+    set wcont1 [LabeledFrame2 $w1 {Broken Image}]
+    pack $w1 -fill x
+    
+    # Overall frame for whole container.
+    set fr [frame $wcont1.fr]
+    pack $fr -padx 10 -pady 10
+    
+    # Get any cached info for this id.
+    set itemcget [::UI::ItemCGet $wtop $id]
+    set i 0
+    foreach {key value} $itemcget {
+	if {$key == "-optlist"} {
+	    foreach {optkey optvalue} $value {
+		set name [string totitle [string trimright $optkey :]]
+		label $fr.l$i -text $name -font $sysFont(sb)
+		label $fr.v$i -text $optvalue
+		grid $fr.l$i -row $i -column 0 -sticky e
+		grid $fr.v$i -row $i -column 1 -sticky w
+		incr i
+	    }
+	} else {
+	    set name [string totitle [string trimleft $key -]]
+	    label $fr.l$i -text $name -font $sysFont(sb)
+	    label $fr.v$i -text $value
+	    grid $fr.l$i -row $i -column 0 -sticky e
+	    grid $fr.v$i -row $i -column 1 -sticky w
+	    incr i
+	}
+    }
+    
+    # Button part.
+    set frbot [frame $w.frall.frbot -borderwidth 0]
+    pack [button $frbot.ok -text [::msgcat::mc OK] -width 8  \
+      -command "destroy $w"]  \
+      -side right -padx 5 -pady 5
+    pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
+        
+    wm resizable $w 0 0
+    bind $w <Return> "$frbot.ok invoke"
 }
 
 #-------------------------------------------------------------------------------

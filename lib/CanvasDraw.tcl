@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasDraw.tcl,v 1.7 2003-07-26 13:54:23 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.8 2003-08-23 07:19:16 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 
@@ -82,6 +82,7 @@ proc ::CanvasDraw::InitMove {w x y {what item}} {
 	if {$it == ""} {
 	    return
 	}
+	set xDrag(origCoords,$id) [$w coords $id]
 	set xDrag(undocmd) "coords $it [$w coords $id]"
 	$w addtag selectedmovie withtag $id
 	set bbox [$w bbox $id]
@@ -244,6 +245,16 @@ proc ::CanvasDraw::InitMove {w x y {what item}} {
 	# Add specific tag to the item being moved for later use.
 	set id [$w find withtag current]	
 	$w addtag ismoved withtag $id
+	set ids [$w find withtag selected]
+	if {$id != ""} {
+	    set ids [lsort -unique [concat $ids $id]]
+	}
+	foreach id $ids {
+	    set utag [::CanvasUtils::GetUtag $w $id]
+	    if {$utag != ""} {
+		set xDrag(origCoords,$utag) [$w coords $id]
+	    }
+	}
     }
 }
 
@@ -522,7 +533,7 @@ proc ::CanvasDraw::DoMoveFrame {wcan wframe x y} {
 proc ::CanvasDraw::FinalizeMove {w x y {what item}} {    
     variable  xDrag
     
-    Debug 2 "FinalizeMove:: what=$what, info exists xDrag=[info exists xDrag]"
+    Debug 2 "FinalizeMove:: what=$what"
 
     if {![info exists xDrag]} {
 	return
@@ -543,26 +554,26 @@ proc ::CanvasDraw::FinalizeMove {w x y {what item}} {
     } else {
 	set id [$w find withtag ismoved]
     }
-    set theItno [::CanvasUtils::GetUtag $w $id]
-    Debug 2 "  FinalizeMove:: ids=$ids, id=$id, theItno=$theItno, x=$x, y=$y"
+    set utagList [::CanvasUtils::GetUtag $w $id]
+    Debug 2 "  FinalizeMove:: ids=$ids, id=$id, utagList=$utagList, x=$x, y=$y"
 
-    if {[string equal $what "item"] && $ids == "" && $theItno == ""} {
+    if {[string equal $what "item"] && ($ids == "") && ($utagList == "")} {
 	return
     }
     
-    # Find item tags ('theItno') for the items being moved.
+    # Find item tags ('utagList') for the items being moved.
     if {[string equal $what "item"] || [string equal $what "movie"]} {
 	
 	# If no selected items.
 	if {$ids == ""} {
 	    
-	    # We already have 'theItno' from above.
+	    # We already have 'utagList' from above.
 	} else {
 	    
 	    # If selected, move all items.
-	    set theItno {}
+	    set utagList {}
 	    foreach id $ids {
-		lappend theItno [::CanvasUtils::GetUtag $w $id]
+		lappend utagList [::CanvasUtils::GetUtag $w $id]
 	    }
 	} 
 	
@@ -574,8 +585,8 @@ proc ::CanvasDraw::FinalizeMove {w x y {what item}} {
 	if {![regexp " +id($id_)" [$w gettags current] match theItemId]} {
 	    return
 	}
-	set theItno [::CanvasUtils::GetUtag $w $theItemId]
-	if {$theItno == ""} {
+	set utagList [::CanvasUtils::GetUtag $w $theItemId]
+	if {$utagList == ""} {
 	    return
 	}
 	
@@ -625,12 +636,12 @@ proc ::CanvasDraw::FinalizeMove {w x y {what item}} {
 	    if {[string equal $xDrag(type) "arc"]} {
 		
 		# The arc item: update both angles.
-		set cmd "itemconfigure $theItno -start $xDrag(arcStart)   \
+		set cmd "itemconfigure $utagList -start $xDrag(arcStart)   \
 		  -extent $xDrag(arcExtent)"
 	    } else {
 		
 		# Not arc, and not closed line item.
-		set cmd "coords $theItno [$w coords $theItno]"
+		set cmd "coords $utagList [$w coords $utagList]"
 	    }
 	}
 	
@@ -644,7 +655,7 @@ proc ::CanvasDraw::FinalizeMove {w x y {what item}} {
 	$w move selectedmovie [expr $x - $xDrag(anchorX)]  \
 	  [expr $y - $xDrag(anchorY)]
 	$w dtag selectedmovie selectedmovie
-	set cmd "coords $theItno [$w coords $theItno]"
+	set cmd "coords $utagList [$w coords $utagList]"
     }
     
     # Delete the ghost rect or highlighted marker if any. Remove temporary tags.
@@ -671,25 +682,33 @@ proc ::CanvasDraw::FinalizeMove {w x y {what item}} {
 	}
     } else {
 	
-	# Have moved a bunch of ordinary items. Images coords?
+	# Have moved a bunch of ordinary items.
 	set dx [expr $x - $xDrag(anchorX)]
 	set dy [expr $y - $xDrag(anchorY)]
 	set mdx [expr -$dx]
 	set mdy [expr -$dy]
 	set cmdList {}
 	set cmdUndoList {}
-	foreach it $theItno {
+	
+	foreach utag $utagList {
 	    
 	    # Let images use coords instead since more robust if transported.
-	    switch -- [$w type $it] {
+	    switch -- [$w type $utag] {
 		image {
-		    lappend cmdList [list coords $it $x $y]
+		    
+		    # Find new coords.
+		    foreach {x0 y0} $xDrag(origCoords,$utag) {
+			set x [expr $x0 + $dx]
+			set y [expr $y0 + $dy]
+			break
+		    }
+		    lappend cmdList [list coords $utag $x $y]
 		    lappend cmdUndoList \
-		      [list coords $it $xDrag(anchorX) $xDrag(anchorY)]
+		      [concat coords $utag $xDrag(origCoords,$utag)]
 		}
 		default {
-		    lappend cmdList [list move $it $dx $dy]
-		    lappend cmdUndoList [list move $it $mdx $mdy]
+		    lappend cmdList [list move $utag $dx $dy]
+		    lappend cmdUndoList [list move $utag $mdx $mdy]
 		}
 	    }
 	}

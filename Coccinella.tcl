@@ -15,7 +15,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.1 2003-07-29 16:22:10 matben Exp $
+# $Id: Coccinella.tcl,v 1.2 2003-08-23 07:19:16 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -156,6 +156,7 @@ if {[string match "mac*" $this(platform)] &&   \
     catch {console hide}
 }
 
+# For debug purposes.
 proc Debug {num str} {
     global  debugLevel
     if {$num <= $debugLevel} {
@@ -703,7 +704,6 @@ if {$displaySetup} {
 # Is it the first time it is launched, then show the welcome canvas.
 if {$prefs(firstLaunch)} {
     ::Dialogs::Canvas $prefs(welcomeFile) -title [::msgcat::mc {Welcome}]
-    raise .twel
 }
 set prefs(firstLaunch) 0
 
@@ -755,7 +755,7 @@ if {$argc > 0} {
 
 # Auto update mechanism.
 if {!$prefs(doneAutoUpdate) &&  \
-  ([package vcompare $prefs(fullVers) $prefs(lastUpdateVersion)] > 0)} {
+  ([package vcompare $prefs(fullVers) $prefs(lastAutoUpdateVersion)] > 0)} {
     after 10000 ::AutoUpdate::Get $prefs(urlAutoUpdate)  
 }
 

@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: browse.tcl,v 1.11 2003-07-26 13:54:23 matben Exp $
+# $Id: browse.tcl,v 1.12 2003-08-23 07:19:16 matben Exp $
 # 
 #  locals($jid,parent):       the parent of $jid.
 #  locals($jid,parents):      list of all parent jid's,
@@ -818,9 +818,12 @@ proc browse::ClearAll {browseName} {
     
     upvar [namespace current]::${browseName}::locals locals
 
+    # Be sure to keep some entries! Separate array for these?
     set clientCmd $locals(cmd)
+    set fullBrowseName $locals(fullBrowseName)
     unset locals
     set locals(cmd) $clientCmd
+    set locals(fullBrowseName) $fullBrowseName
     set locals(confservers) {}
 }
 

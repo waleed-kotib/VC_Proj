@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Network.tcl,v 1.5 2003-07-26 13:54:23 matben Exp $
+# $Id: Network.tcl,v 1.6 2003-08-23 07:19:16 matben Exp $
 
 namespace eval ::Network:: {
     
@@ -165,7 +165,7 @@ proc ::Network::ScheduleKiller {sock cmd} {
     if {[info exists killerId($sock)]} {
 	after cancel $killerId($sock)
     }
-    set killerId($sock) [after [expr 1000*$opts(-timeout)]   \
+    set killerId($sock) [after [expr 1000 * $opts(-timeout)]   \
       [list [namespace current]::Kill $sock $cmd]]
 }
 

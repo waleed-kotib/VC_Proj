@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: SetupAss.tcl,v 1.4 2003-07-26 13:54:23 matben Exp $
+# $Id: SetupAss.tcl,v 1.5 2003-08-23 07:19:16 matben Exp $
 
 package require setupassistant
 package require chasearrows
@@ -170,7 +170,7 @@ proc ::Jabber::SetupAss::DoFinish {w} {
 }
 
 proc ::Jabber::SetupAss::ServersDlg {w} {
-    global  sysFont this
+    global  sysFont this prefs
 
     variable server
     variable finishedServ 0
@@ -243,10 +243,10 @@ proc ::Jabber::SetupAss::ServersDlg {w} {
     
     # HTTP get xml list of servers.
     set url $::Jabber::jprefs(urlServersList)
-    if {[string equal $this(platform) "macintosh"]} {
+    if {0 && [string equal $this(platform) "macintosh"]} {
 	set tmopts ""
     } else {
-	set tmopts [list -timeout 40000]
+	set tmopts [list -timeout $prefs(timeoutMillis)]
     }
     if {[catch {eval {
 	::http::geturl $url -progress [namespace current]::ServProgress  \

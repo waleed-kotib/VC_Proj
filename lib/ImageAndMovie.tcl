@@ -7,9 +7,10 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ImageAndMovie.tcl,v 1.10 2003-07-26 13:54:23 matben Exp $
+# $Id: ImageAndMovie.tcl,v 1.11 2003-08-23 07:19:16 matben Exp $
 
 package require http
+package require httpex
 
 namespace eval ::ImageAndMovie:: {
     
@@ -94,6 +95,7 @@ proc ::ImageAndMovie::ImportImageOrMovieDlg {wtop} {
 #                       not to own.
 #            -commmand  a callback command for errors that cannot be reported
 #                       right away, using -url http for instance.
+#            -progress  progress command if using -url
 #       
 # Side Effects:
 #       Shows the image or movie in canvas and initiates transfer to other
@@ -138,7 +140,7 @@ proc ::ImageAndMovie::DoImport {w optList args} {
 	set fileName $argsArr(-file)
 	set fileTail [file tail $fileName]
 	array set optArr [list   \
-	  Content-Type:     [::Types::GetMimeTypeForFileName $fileName]      \
+	  Content-Type:     [::Types::GetMimeTypeForFileName $fileName] \
 	  size:             [file size $fileName]                    \
 	  coords:           {0 0}                                    \
 	  tags:             [::CanvasUtils::NewUtag]                 ]
@@ -606,6 +608,8 @@ proc ::ImageAndMovie::DrawXanim {w fileName optListVar args} {
 # 
 #       Imports the specified file using http to file.
 #       The actual work done via callbacks to the http package.
+#       The principle is that if we have any -comman or -progress command
+#       all UI is redirected to these procs.
 #       
 # Arguments:
 #       wtop
@@ -618,6 +622,7 @@ proc ::ImageAndMovie::DrawXanim {w fileName optListVar args} {
 #       args:          
 #            -commmand  a callback command for errors that cannot be reported
 #                       right away, using -url http for instance.
+#            -progress  http progress command
 # Results:
 #       an error string which is empty if things went ok so far.
 
@@ -626,7 +631,8 @@ proc ::ImageAndMovie::HttpGet {wtop url importPackage optList args} {
     variable locals
     upvar ::${wtop}::wapp wapp
     
-    ::Debug 2 "::ImageAndMovie::HttpGet wtop=$wtop, url=$url, importPackage=$importPackage"
+    ::Debug 2 "::ImageAndMovie::HttpGet wtop=$wtop, url=$url, \
+      importPackage=$importPackage, args='$args'"
 
     # Make local state array for convenient storage. 
     # Use 'variable' for permanent storage.
@@ -640,10 +646,10 @@ proc ::ImageAndMovie::HttpGet {wtop url importPackage optList args} {
     if {[catch {open $dstPath w} dst]} {
 	return $dst
     }
-    if {[string equal $this(platform) "macintosh"]} {
+    if {0 && [string equal $this(platform) "macintosh"]} {
 	set tmopts ""
     } else {
-	set tmopts [list -timeout [expr 1000 * $prefs(timeout)]]
+	set tmopts [list -timeout $prefs(timeoutMillis)]
     }
     
     # Store stuff in gettoken array.
@@ -657,14 +663,20 @@ proc ::ImageAndMovie::HttpGet {wtop url importPackage optList args} {
     set getstate(dst) $dst
     set getstate(transport) http
     set getstate(status) ""
+    set getstate(error) ""
+    
+    # Timing data.
+    set getstate(firstmillis) [clock clicks -milliseconds]
+    set getstate(lastmillis) $getstate(firstmillis)
+    set getstate(timingkey) $gettoken
     
     # Be sure to set translation correctly for this MIME type.
-    # Should be auto detected by ::http::geturl!
-    set progCB [list ::ImageAndMovie::HttpProgress $gettoken]
-    set commandCB [list ::ImageAndMovie::HttpFinished $gettoken]
+    # Should be auto detected by ::httpex::get!
     
     if {[catch {eval {
-	::http::geturl $url -channel $dst -progress $progCB -command $commandCB
+	::httpex::get $url -channel $dst  \
+	  -progress [list ::ImageAndMovie::HttpProgress $gettoken]  \
+	  -command  [list ::ImageAndMovie::HttpCommand $gettoken]
     } $tmopts} token]} {
 	return $token
     }
@@ -685,116 +697,291 @@ proc ::ImageAndMovie::HttpGet {wtop url importPackage optList args} {
 # ImageAndMovie::HttpProgress --
 # 
 #       Progress callback for the http package.
+#       Any -progess command gets only called at an prefs(progUpdateMillis) 
+#       interval unless there is an error.
+
 
 proc ::ImageAndMovie::HttpProgress {gettoken token total current} {
+    global prefs
     
     upvar #0 $token state
     upvar #0 $gettoken getstate
     
-    set wtop $getstate(wtop)
-    set tail [file tail $getstate(dstPath)]
+    ::Debug 9 "."
+    array set argsArr $getstate(args)
+    if {[info exists argsArr(-progress)] && ($argsArr(-progress) != "")} {
+	set haveProgress 1
+    } else {
+	set haveProgress 0
+    }
     
-    ::Debug 4 "Getting file $tail: $current out of $total"
-    
-    ::UI::SetStatusMessage $wtop "Getting file $tail: $current out of $total"
+    # Cache timing info.
+    ::Timing::Set $getstate(timingkey) $current
     
     # Investigate 'state' for any exceptions.
-    if {[::http::status $token] == "error"} {
-	# some 2.3 versions seem to lack ::http::error !
-	if {[info exists state(error)]} {
-	    set errmsg $state(error)
-	} else {
-	    set errmsg "File transfer error for \"$getstate(url)\""
+    set status [::httpex::status $token]
+    
+    if {[string equal $status "error"]} {
+	if {$haveProgress} {
+	    uplevel #0 $argsArr(-progress)  \
+	      [list $status $gettoken $token $total $current]
+	} else {	
+	    # some 2.3 versions seem to lack ::http::error !
+	    if {[info exists state(error)]} {
+		set errmsg $state(error)
+	    } else {
+		set errmsg "File transfer error for \"$getstate(url)\""
+	    }
+	    tk_messageBox -title [::msgcat::mc Error] -icon error -type ok -message \
+	      [FormatTextForMessageBox "Failed getting url: $errmsg"]
 	}
-	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok -message \
-	  [FormatTextForMessageBox "Failed getting url: $errmsg"]
 	catch {file delete $getstate($dstPath)}
 	set getstate(status) "error"
-	::http::reset $token
+	
+	# Cleanup:
+	::httpex::cleanup $token
+	unset getstate
+    } else {
+	
+	# Update only when minimum time has passed.
+	set ms [clock clicks -milliseconds]
+	if {[expr $ms - $getstate(lastmillis)] > $prefs(progUpdateMillis)} {
+	    set getstate(lastmillis) $ms
+	    
+	    if {$haveProgress} {
+		uplevel #0 $argsArr(-progress)  \
+		  [list $status $gettoken $token $total $current]	
+	    } else {
+		set wtop $getstate(wtop)
+		set tail [file tail $getstate(dstPath)]
+		::UI::SetStatusMessage $wtop \
+		  "Getting file $tail: $current out of $total"
+	    }	    
+	}
     }
 }
 
-# ImageAndMovie::HttpFinished --
+# ImageAndMovie::HttpCommand --
 # 
-#       Callback for http package.
+#       Callback for httpex package.
 #       Invoked callback after the HTTP transaction completes.
+#       If ok it dispatches drawing to the right proc.
+#       
+#       httpex: The status sequence is normally: 
+#          putheader -> waiting -> getheader -> body -> ok
 
-proc ::ImageAndMovie::HttpFinished {gettoken token} {
+proc ::ImageAndMovie::HttpCommand {gettoken token} {
     
-    ::Debug 2 "::ImageAndMovie::HttpFinished gettoken=$gettoken, token=$token"
+    ::Debug 2 "::ImageAndMovie::HttpCommand gettoken=$gettoken, token=$token"
     
     upvar #0 $token state
-    upvar #0 $gettoken getstate          
+    upvar #0 $gettoken getstate 
+    
+    # Investigate 'state' for any exceptions and return code (404)!!!
+    set getstate(status) [::httpex::status $token]
+    set getstate(ncode) [httpex::ncode $token]
+    ::Debug 2 "\t::httpex::status = $getstate(status), httpex::ncode=$getstate(ncode)"
     
     set wtop $getstate(wtop)
     set wcan $getstate(wcan)
     set dstPath $getstate(dstPath)
     set optList $getstate(optList)
     set tail [file tail $getstate(dstPath)]
+    set status $getstate(status)
+    array set argsArr $getstate(args)
+    if {[info exists argsArr(-command)] && ($argsArr(-command) != "")} {
+	set haveCommand 1
+    } else {
+	set haveCommand 0
+    }
+    set errMsg ""
     
-    # Investigate 'state' for any exceptions.
-    set getstate(status) [::http::status $token]
-    ::Debug 2 "    ::http::status = $getstate(status)"
+    # Catch the case when we get a non 200 return code and is otherwise ok.
+    if {[httpex::isfinal $token] && ($status == "ok") && ($getstate(ncode) != "200")} {
+	set status error
+	set httpMsg [httpex::ncodetotext $getstate(ncode)]
+	set errMsg "Failed getting file $tail: $httpMsg"
+    }
     
-    switch -- $getstate(status) {
+    if {!$haveCommand} {
+	switch -- $status {
+	    timeout {
+		set msg "Timeout waiting for file $tail"
+		::UI::SetStatusMessage $wtop $msg
+		tk_messageBox -title [::msgcat::mc Timeout] -icon info \
+		  -type ok -message $msg
+	    }
+	    ok {
+		::UI::SetStatusMessage $wtop "Finished getting file $tail"
+	    }
+	    error {
+		::UI::SetStatusMessage $wtop $errMsg
+	    }
+	    default {
+		# ???
+	    }
+	}
+    }
+    
+    # httpex makes callbacks during the process as well. Important!
+    # We should be final here!
+    if {[httpex::isfinal $token]} {
+	catch {close $getstate(dst)}
+	
+	# Import stuff.
+	if {($status == "ok") && ($getstate(ncode) == "200")} {
+	    
+	    # Add to the lists of known files.
+	    ::FileCache::Set $getstate(url) $dstPath
+	    
+	    switch -- $getstate(importPackage) {
+		image {
+		    set errMsg [eval {
+			::ImageAndMovie::DrawImage $wcan $dstPath optList} \
+			  $getstate(args)]
+		}
+		QuickTimeTcl {
+		    
+		    # This transport method is different from the QT streaming http.
+		    set errMsg [eval {
+			::ImageAndMovie::DrawQuickTimeTcl $wcan $dstPath optList} \
+			  $getstate(args)]
+		}
+		snack {
+		    set errMsg [eval {
+			::ImageAndMovie::DrawSnack $wcan $dstPath optList} \
+			  $getstate(args)]
+		}
+		xanim {
+		    set errMsg [eval {
+			::ImageAndMovie::DrawXanim $wcan $dstPath optList} \
+			  $getstate(args)]
+		}
+		default {
+		    if {![catch {
+			set importProc [::Plugins::GetImportProcForPlugin  \
+			  $getstate(importPackage)]
+		    }]} {
+			set errMsg [eval {
+			    $importProc $wcan $dstPath optList
+			} $getstate(args)]
+			
+		    }
+		}
+	    }
+	}
+	
+	# Catch errors from 'errMsg'.
+	if {$errMsg != ""} {
+	    set status error
+	    set getstate(error) $errMsg
+	}
+	if {$haveCommand} {
+	    uplevel #0 $argsArr(-command) [list $status $gettoken $token]	
+	} elseif {$errMsg != ""} {
+	    ::UI::SetStatusMessage $wtop "Failed importing $tail: $errMsg"
+	}
+	
+	# Cleanup:
+	::httpex::cleanup $token
+	if {$errMsg != ""} {
+	    catch {file delete -force $getstate(dstPath)}
+	}
+	unset getstate
+    } else {
+	
+	# We are not final here!
+	if {$haveCommand} {
+	    uplevel #0 $argsArr(-command) [list $status $gettoken $token]	
+	}
+    }
+}
+
+# ImageAndMovie::ImportProgress --
+# 
+#       Handles http progress UI stuff. 
+#       Gets only called at an prefs(progUpdateMillis) interval unless 
+#       there is an error.
+
+proc ::ImageAndMovie::ImportProgress {line status gettoken httptoken total current} {
+
+    upvar #0 $token state
+    upvar #0 $gettoken getstate
+    
+    set wtop $getstate(wtop)
+    
+    if {[string equal $status "error"]} {
+	# some 2.3 versions seem to lack ::http::error !
+	if {[info exists state(error)]} {
+	    set errmsg $state(error)
+	} else {
+	    set errmsg "File transfer error for \"$getstate(url)\""
+	}
+	::UI::SetStatusMessage $wtop "Failed getting url: $errmsg"
+    } else {
+	set wcan $getstate(wcan)
+	set tail [file tail $getstate(dstPath)]
+	set msg "Getting $tail, [::Timing::FormMessage $getstate(timingkey) $total]"
+	::UI::SetStatusMessage $wtop $msg
+    }
+}
+
+# ImageAndMovie::ImportCommand --
+# 
+#       Callback procedure for the '::ImageAndMovie::HandleImportCmd'
+#       command. 
+#       Takes care of status reports not reported by direct return. 
+
+proc ::ImageAndMovie::ImportCommand {line status gettoken httptoken} {
+    upvar #0 $gettoken getstate          
+
+    Debug 2 "::ImageAndMovie::ImportCommand status=$status"
+    
+    if {[string equal $status "reset"]} {
+	return
+    }
+    set wcan $getstate(wcan)
+    set wtop $getstate(wtop)
+    set tail [file tail $getstate(dstPath)]
+
+    switch -- $status {
 	timeout {
-	    tk_messageBox -title [::msgcat::mc Timeout] -icon info -type ok  \
-	      -message timeout
 	    ::UI::SetStatusMessage $wtop "Timeout waiting for file $tail"
-	    catch {close $getstate(dst)}
-	    return
+	}
+	connect {
+	    set domain [GetDomainNameFromUrl $getstate(url)]
+	    ::UI::SetStatusMessage $wtop "Contacting $domain..."
 	}
 	ok {
 	    ::UI::SetStatusMessage $wtop "Finished getting file $tail"
-	    catch {close $getstate(dst)}
+	}
+	error {
+	    if {$getstate(ncode) != "200"} {
+		set status error
+		set httpMsg [httpex::ncodetotext $getstate(ncode)]
+		set msg "Failed getting file $tail: $httpMsg"
+	    } else {
+		set msg "Error getting file $tail: "
+		append msg [httpex::error $httptoken]
+		append msg $getstate(error)
+	    }
+	    ::UI::SetStatusMessage $wtop $msg
+	}
+	eof {
+	    ::UI::SetStatusMessage $wtop "Error getting file $tail"
 	}
 	default {
 	    # ???
 	}
     }
-    
-    if {$getstate(status) == "ok"} {
-	
-	# Add to the lists of known files.
-	::FileCache::Set $getstate(url) $dstPath
-	
-	switch -- $getstate(importPackage) {
-	    image {
-		eval {::ImageAndMovie::DrawImage $wcan $dstPath optList} \
-		  $getstate(args)
-	    }
-	    QuickTimeTcl {
-		
-		# This transport method is different from the QT streaming http.
-		eval {::ImageAndMovie::DrawQuickTimeTcl $wcan $dstPath optList} \
-		  $getstate(args)
-	    }
-	    snack {
-		eval {::ImageAndMovie::DrawSnack $wcan $dstPath optList} \
-		  $getstate(args)
-	    }
-	    xanim {
-		eval {::ImageAndMovie::DrawXanim $wcan $dstPath optList} \
-		  $getstate(args)
-	    }
-	    default {
-		if {![catch {
-		    set importProc [::Plugins::GetImportProcForPlugin  \
-		      $getstate(importPackage)]
-		}]} {
-		    eval {$importProc $wcan $dstPath optList} $getstate(args)
-		}
-	    }
+
+    # We should be final here!
+    if {[httpex::isfinal $httptoken]} {
+	if {$status != "ok"} {
+	    eval {::ImageAndMovie::NewBrokenImage $wcan [lrange $line 1 2]} \
+	      [lrange $line 3 end]
 	}
     }
-    array set argsArr $getstate(args)
-    if {[info exists argsArr(-command)] && ($argsArr(-command) != "")} {
-	uplevel #0 $argsArr(-command) [list $getstate(status) $gettoken $token]	
-    }
-    
-    # Cleanup:
-    ::http::cleanup $token
-    unset getstate
 }
 
 # ImageAndMovie::HttpResetAll --
@@ -808,19 +995,22 @@ proc ::ImageAndMovie::HttpResetAll {wtop} {
       [info vars ::ImageAndMovie::\[0-9\]\[0-9\]] \
       [info vars ::ImageAndMovie::\[0-9\]\[0-9\]\[0-9\]]]
     
-    ::Debug 2 "::ImageAndMovie::HttpResetAll gettokenList='$gettokenList'"
+    ::Debug 2 "::ImageAndMovie::HttpResetAll wtop=$wtop, gettokenList='$gettokenList'"
     
     foreach gettoken $gettokenList {
 	upvar #0 $gettoken getstate          
 
 	if {[info exists getstate(wtop)] &&  \
 	  [string equal $getstate(wtop) $wtop]} {
+	    ::Debug 3 "\twtop=$wtop, getstate(transport)=$getstate(transport)"
+	    
 	    switch -- $getstate(transport) {
 		http {
 		
-		# It may be that the http transaction never started.
+		    # It may be that the http transaction never started.
 		    if {[info exists getstate(token)]} {
-		    	::http::reset $getstate(token)
+			::Debug 3 "\t::httpex::reset $getstate(token)"
+		    	::httpex::reset $getstate(token)
 		    }
 		}
 		quicktimehttp {
@@ -1081,7 +1271,8 @@ proc ::ImageAndMovie::XanimReadOutput {w xpipe} {
 #               -below
 #               -basepath
 #               -commmand  a callback command for errors that cannot be reported
-#                       right away, using -url http for instance.
+#                          right away, using -url http for instance.
+#               -progress  http progress callback
 #               
 # Results:
 #       an error string which is empty if things went ok.
@@ -1391,6 +1582,129 @@ proc ::ImageAndMovie::GetAutoFitSize {w theMovie} {
     } else {
 	return [list $imw $imh]
     }
+}
+
+# SaveImageAsFile, ExportImageAsFile,... --
+#
+#       Some handy utilities for the popup menu callbacks.
+
+proc ::ImageAndMovie::SaveImageAsFile {w id} {
+
+    set imageName [$w itemcget $id -image]
+    set origFile [$imageName cget -file]
+    if {[string length $origFile]} {
+	set initFile [file tail $origFile]
+    } else {
+	set initFile {Untitled.gif}
+    }
+    set fileName [tk_getSaveFile -defaultextension gif   \
+      -title [::msgcat::mc {Save As GIF}] -initialfile $initFile]
+    if {$fileName != ""} {
+	$imageName write $fileName
+    }
+}
+
+proc ::ImageAndMovie::ExportImageAsFile {w id} {
+    
+    set imageName [$w itemcget $id -image]
+    catch {$imageName write {Untitled.gif} -format {quicktime -dialog}}
+}
+
+proc ::ImageAndMovie::ExportMovie {wtop winfr} {
+    
+    set wmov ${winfr}.m
+    $wmov export
+}
+
+# ImageAndMovie::ReloadImage --
+# 
+#       Reloads a binary entity, image and such.
+
+proc ::ImageAndMovie::ReloadImage {wtop id} {
+    upvar ::${wtop}::wapp wapp
+        
+    ::Debug 3 "::ImageAndMovie::ReloadImage"
+    
+    # Need to have an url stored here.
+    set opts [::UI::ItemCGet $wtop $id]
+    array set optsArr $opts  
+    set wcan $wapp(can)
+    set coords [$wcan coords $id]
+        
+    if {![info exists optsArr(-url)]} {
+	tk_messageBox -icon error -type ok -message \
+	  "No url found for the file \"$fileTail\" with MIME type $mime"
+	return
+    }
+
+    # Unselect and delete. Any new failure will make a new broken image.
+    # Only locally and not tracked by undo/redo.
+    ::CanvasDraw::DeselectItem $wtop $id
+    catch {$wcan delete $id}
+    set line [concat import $coords $opts]
+    
+    set errMsg [eval {
+	::ImageAndMovie::HandleImportCmd $wcan $line -where local   \
+	  -progess [list [namespace current]::ImportProgress $line] \
+	  -command [list [namespace current]::ImportCommand $line]
+    }]
+    if {$errMsg != ""} {
+
+	# Display a broken image to indicate for the user.
+	eval {::ImageAndMovie::NewBrokenImage $wcan $coords} $opts
+	tk_messageBox -icon error -type ok -message \
+	  "Failed loading \"$optsArr(-url)\": $errMsg"
+    }
+}
+
+# ImageAndMovie::NewBrokenImage --
+# 
+#       Draws a broken image instaed of an ordinary image to indicate some
+#       kind of failure somewhere.
+# 
+# Arguments:
+#
+# Results:
+
+proc ::ImageAndMovie::NewBrokenImage {w coords args} {
+
+    ::Debug 2 "::ImageAndMovie::NewBrokenImage coords=$coords, args='$args'"
+    
+    array set argsArr {
+	-width      0
+	-height     0
+    }
+    array set argsArr $args
+
+    foreach {key value} $args {
+	switch -- $key {
+	    -tags {
+		set utag $value
+	    }
+	}
+    }
+    if {![info exists utag]} {
+	set utag [::CanvasUtils::NewUtag]
+    }
+    
+    # Special 'broken' tag to make it distinct from ordinary images.
+    if {[lsearch $argsArr(-tags) broken] < 0} {
+	set argsArr(-tags) [list broken $utag]
+    }
+    set wtop [::UI::GetToplevelNS $w]
+
+    set name [::UI::CreateBrokenImage $wtop $argsArr(-width) $argsArr(-height)]
+
+    set id [eval {$w create image} $coords {-image $name -anchor nw  \
+      -tags $argsArr(-tags)}]
+    if {[info exists argsArr(-above)]} {
+	catch {$w raise $utag $argsArr(-above)}
+    } elseif {[info exists optArr(-below)]} {
+	catch {$w lower $utag $argsArr(-below)}
+    }
+
+    # Cache options.
+    eval {::UI::ItemSet $wtop $id} [array get argsArr]
 }
 
 #-------------------------------------------------------------------------------

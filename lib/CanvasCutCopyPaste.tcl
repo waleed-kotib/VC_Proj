@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasCutCopyPaste.tcl,v 1.3 2003-05-18 13:20:21 matben Exp $
+# $Id: CanvasCutCopyPaste.tcl,v 1.4 2003-08-23 07:19:16 matben Exp $
 
 package provide CanvasCutCopyPaste 1.0
 
@@ -99,7 +99,12 @@ proc ::CanvasCCP::CopySingleItemToClipboard {w doWhat id} {
     }
     set wtop [::UI::GetToplevelNS $w]
     set theTags [$w gettags $id]
-
+    
+    # Do not allow copies of broken images (mess).
+    if {[lsearch $theTags broken] >= 0} {
+	return
+    }
+    
     # Get all actual options.
     set opcmd [::CanvasUtils::GetItemOpts $w $id]
     
