@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.18 2003-11-08 08:54:44 matben Exp $
+# $Id: Roster.tcl,v 1.19 2003-11-09 11:47:03 matben Exp $
 
 package provide Roster 1.0
 
@@ -369,13 +369,16 @@ proc ::Jabber::Roster::PushProc {rostName what {jid {}} args} {
         
     switch -- $what {
 	presence {
+	    
+	    # We may get presence 'available' with empty resource (ICQ)!
 	    if {![info exists attrArr(-type)]} {
 		puts "   Error: no type attribute"
 		return
 	    }
 	    set type $attrArr(-type)
 	    set jid3 $jid
-	    if {[info exists attrArr(-resource)]} {
+	    if {[info exists attrArr(-resource)] &&  \
+	      [string length $attrArr(-resource)]} {
 		set jid3 ${jid}/$attrArr(-resource)
 	    }
 	    
@@ -526,7 +529,7 @@ proc ::Jabber::Roster::SetItem {jid args} {
 #       Sets the presence of the jid in our UI.
 #
 # Arguments:
-#       jid         3-tier jid usually but can be a 2-tier jid
+#       jid         3-tier jid usually but can be a 2-tier jid if ICQ...
 #       presence    "available", "unavailable", or "unsubscribed"
 #       args        list of '-key value' pairs of presence attributes.
 #       
@@ -881,18 +884,22 @@ proc ::Jabber::Roster::NewOrEditItem {which args} {
 	    if {[lsearch $jabbers $host] == -1} {
 		
 		# This is not a jabber host. Get true roster item.
-		puts "jid=$jid, host=$host"
+		#puts "jid=$jid, host=$host"
 		set isTransport 1
+		set subtype "unknown"
 		set users [$jstate(roster) getusers]
 		set jid [lsearch -inline -glob $users ${host}*]
 		set subscription [$jstate(roster) getsubscription $jid]
-		puts "jid=$jid, users=$users"
+		set typesubtype [$jstate(jlib) service gettype $host]
+		regexp {^[^/]+/(.+)$} $typesubtype match subtype
+		puts "jid=$jid, users=$users, host=$host"
 	    }
 	}
     }
     if {$isTransport} {
 	tk_messageBox -icon info -title "Transport Info" -message \
-	  "This is a server service that transports messages to other IM\
+	  "This is your own account at $subtype that acts as\
+	  a server service that transports messages to that IM\
 	  systems. It is necessary for it to be in your roster.\
 	  You have a subscription for \"$jid\": $subscription"
 	set ans cancel
@@ -1465,7 +1472,8 @@ proc ::Jabber::Roster::GetPresenceIcon {jid presence args} {
     
     array set argsArr $args
     
-    #puts "******** GetPresenceIcon jid=$jid, presence=$presence"
+    ::Jabber::Debug 5 "GetPresenceIcon jid=$jid, presence=$presence, args=$args"
+    
     # This gives the basic icons.
     set key $presence
     set keyBas $presence
@@ -1482,21 +1490,21 @@ proc ::Jabber::Roster::GetPresenceIcon {jid presence args} {
     
     # Foreign IM systems.
     if {$jprefs(haveIMsysIcons)} {
+	if {[regexp {^(.+@)?([^@/]+)(/.*)?} $jid match pre host]} {
+	    set typesubtype [$jstate(jlib) service gettype $host]
 	
-	# If browsed...
-	if {[$jstate(browse) isbrowsed $jserver(this)]} {
-	    
-	    # Use the host part of the jid to investigate the type of IM system.
-	    if {[regexp {^[^@]+@([^/]+)(/.*)?} $jid match host]} {
-		set typesubtype [$jstate(browse) gettype $host]
+	    # If empty we have likely not yet browsed etc.
+	    if {[string length $typesubtype] > 0} {
 		if {[regexp {[^/]+/([^/]+)} $typesubtype match subtype]} {
 		    if {[regexp {(aim|icq|msn|yahoo)} $subtype match]} {
 			append key ",$subtype"
 		    }
 		}
+	    } else {
+		
+		# Add callback to be executed when (if) we get info. TODO!
+	
 	    }
-	} elseif {[$jstate(jlib) have_agent $jserver(this)]} {
-	    
 	}
     }   
     
