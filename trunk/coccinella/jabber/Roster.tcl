@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.43 2004-03-13 15:21:41 matben Exp $
+# $Id: Roster.tcl,v 1.44 2004-03-25 08:11:14 matben Exp $
 
 package provide Roster 1.0
 
@@ -927,9 +927,26 @@ namespace eval ::Jabber::Roster:: {
 
 }
 
+# Jabber::Roster::GetAllTransportJids --
+# 
+#       Method to get the jids of all services that are not jabber.
+
+proc ::Jabber::Roster::GetAllTransportJids { } {
+    upvar ::Jabber::jserver jserver
+    
+    set allTransports [::Jabber::InvokeJlibCmd service gettransportjids *]
+    set jabbjids [::Jabber::InvokeJlibCmd service gettransportjids jabber]
+    
+    # Exclude jabber services and login server.
+    foreach jid $jabbjids {
+	set allTransports [lsearch -all -inline -not $allTransports $jid]
+    }
+    return [lsearch -all -inline -not $allTransports $jserver(this)]
+}
+
 # Jabber::Roster::NewOrEditItem --
 #
-#       
+#       This function is invoked from menu, popup, or button in interface.
 #
 # Arguments:
 #       which       "new" or "edit"
@@ -949,8 +966,9 @@ proc ::Jabber::Roster::NewOrEditItem {which args} {
     if {[info exists argsArr(-jid)]} {
 	set jid $argsArr(-jid)
 	if {[regexp {^([^@]+)$} $jid match host]} {
-	    set jabbers [::Jabber::InvokeJlibCmd service gettransportjids jabber]
-	    if {[lsearch $jabbers $host] == -1} {
+
+	    # Exclude jabber services.
+	    if {[lsearch [::Jabber::Roster::GetAllTransportJids] $host] >= 0} {    
 		
 		# This is not a jabber host. Get true roster item.
 		set isTransport 1
@@ -1328,16 +1346,16 @@ proc ::Jabber::Roster::EditSet {token} {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
 
-    set jid $dlgstate(jid)
-    set name $dlgstate(name)
-    set oldName $dlgstate(oldName)
-    set usersGroup $dlgstate(usersGroup)
-    set oldUsersGroup $dlgstate(oldUsersGroup)
-    set subscribe $dlgstate(subscribe)
-    set unsubscribe $dlgstate(unsubscribe)
-    set subscription $dlgstate(subscription)
+    set jid             $dlgstate(jid)
+    set name            $dlgstate(name)
+    set oldName         $dlgstate(oldName)
+    set usersGroup      $dlgstate(usersGroup)
+    set oldUsersGroup   $dlgstate(oldUsersGroup)
+    set subscribe       $dlgstate(subscribe)
+    set unsubscribe     $dlgstate(unsubscribe)
+    set subscription    $dlgstate(subscription)
     set oldSubscription $dlgstate(oldSubscription)
-    set which $dlgstate(which)
+    set which           $dlgstate(which)
     
     # General checks.
     foreach key {jid name usersGroup} {
@@ -1378,8 +1396,7 @@ proc ::Jabber::Roster::EditSet {token} {
 	if {[regexp {([^@]+)$} $jid match host]} {
 
 	    # Exclude jabber services.
-	    set jabbers [::Jabber::InvokeJlibCmd service gettransportjids jabber]
-	    if {[lsearch $jabbers $host] < 0} {	    
+	    if {[lsearch [::Jabber::Roster::GetAllTransportJids] $host] >= 0} {	    
 	    
 		# If this requires a transport component we must be registered.
 		set transport [lsearch -inline -regexp $allUsers "^${host}.*"]
