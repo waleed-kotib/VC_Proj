@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.24 2004-10-08 12:22:21 matben Exp $
+# $Id: Whiteboard.tcl,v 1.25 2004-10-26 12:46:52 matben Exp $
 
 package require entrycomp
 package require moviecontroller
@@ -607,18 +607,6 @@ proc ::WB::InitMenuDefs { } {
     set menuDefsInsertInd(main,info)   [expr [llength $menuDefs(main,info)]-2]
 }
 
-# WB::New --
-# 
-#       Protocol independent way of creating a new whiteboard. Bad?
-#       Only one registered hook mest exists!
-#       
-#       Perhaps it would be better to have hooks called from BuildWhiteboard?      
-
-proc ::WB::New {args} {
-    
-    eval {::hooks::run whiteboardNewHook} $args
-}
-
 # WB::NewWhiteboard --
 #
 #       Makes a unique whiteboard.
@@ -628,6 +616,7 @@ proc ::WB::New {args} {
 #               -state normal|disabled 
 #               -title name
 #               -usewingeom 0|1
+#               ?-key value ...? custom arguments
 #       
 # Results:
 #       toplevel window. (.) If not "." then ".top."; extra dot!
@@ -682,6 +671,8 @@ proc ::WB::BuildWhiteboard {wtop args} {
     upvar ::WB::${wtop}::state state
     upvar ::WB::${wtop}::opts opts
     upvar ::WB::${wtop}::canvasImages canvasImages
+    
+    eval {::hooks::run whiteboardPreBuildHook $wtop} $args
     
     if {[string equal $wtop "."]} {
 	set wbTitle "$prefs(theAppName) (Main)"
@@ -858,7 +849,7 @@ proc ::WB::BuildWhiteboard {wtop args} {
     if {[info exists opts(-file)]} {
 	::CanvasFile::DrawCanvasItemFromFile $wtop $opts(-file)
     }
-    Debug 3 "::WB::BuildWhiteboard wtop=$wtop EXIT EXIT EXIT....."
+    ::hooks::run whiteboardPostBuildHook $wtop
 }
 
 # WB::NewCanvas --
