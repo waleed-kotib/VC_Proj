@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.74 2004-11-30 15:11:10 matben Exp $
+# $Id: JUI.tcl,v 1.75 2004-12-28 07:43:47 matben Exp $
 
 package provide JUI 1.0
 
@@ -578,17 +578,15 @@ proc ::Jabber::UI::MailBoxState {mailboxstate} {
     
     set w $jwapp(wtopRost)
     set fall $jwapp(fall)
-    
-    set iconInboxLett   [::Theme::GetImage [option get $fall inboxLetterImage {}]]
-    set iconInboxLettDis  [::Theme::GetImage \
-      [option get $fall inboxLetterDisImage {}]]
-    
+        
     switch -- $mailboxstate {
 	empty {
-	    $jwapp(wtray) buttonconfigure inbox -image $iconInboxLett
+	    set im [::Theme::GetImage [option get $fall inboxImage {}]]
+	    $jwapp(wtray) buttonconfigure inbox -image $im
 	}
 	nonempty {
-	    $jwapp(wtray) buttonconfigure inbox -image $iconInboxLettDis
+	    set im [::Theme::GetImage [option get $fall inboxLetterImage {}]]
+	    $jwapp(wtray) buttonconfigure inbox -image $im
 	}
     }
 }
