@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.103 2004-12-21 15:14:42 matben Exp $
+# $Id: Chat.tcl,v 1.104 2005-01-05 09:40:27 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -1389,6 +1389,16 @@ proc ::Chat::ActiveCmd {chattoken} {
     set cprefs(lastActiveRet) $chatstate(active)
 }
 
+# Suggestion from marc@bruenink.de.
+# 
+#       inactive mode: 
+#       Ret: word-wrap
+#       Ctrl+Ret: send messgae
+#
+#       active mode:
+#       Ret: send message
+#       Ctrl+Ret: word-wrap
+
 proc ::Chat::ReturnKeyPress {chattoken} {
     variable cprefs
     variable $chattoken
@@ -1406,10 +1416,12 @@ proc ::Chat::CommandReturnKeyPress {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
 
-    Send $chatstate(dlgtoken)
+    if {!$chatstate(active)} {
+	Send $chatstate(dlgtoken)
 
-    # Stop further handling in Text.
-    return -code break
+	# Stop further handling in Text.
+	return -code break
+    }
 }
 
 proc ::Chat::Send {dlgtoken} {
