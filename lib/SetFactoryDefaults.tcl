@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.16 2003-12-13 17:54:41 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.17 2003-12-15 15:39:09 matben Exp $
 
 # SetWhiteboardFactoryState --
 # 
@@ -397,75 +397,53 @@ switch -- $this(platform) {
 	set osprefs(mod) Control
 	
 	# On a central installation need to have local dirs for write access.
-	set prefs(prefsDir) [file nativename ~/.coccinella]
 	set prefs(userPrefsFilePath)  \
-	  [file nativename [file join $prefs(prefsDir) whiteboard]]
+	  [file nativename [file join $this(prefsPath) whiteboard]]
 	set prefs(oldPrefsFilePath) [file nativename ~/.whiteboard]
 	set prefs(incomingPath)  \
-	  [file nativename [file join $prefs(prefsDir) incoming]]
+	  [file nativename [file join $this(prefsPath) incoming]]
 	set prefs(inboxCanvasPath)  \
-	  [file nativename [file join $prefs(prefsDir) canvases]]
+	  [file nativename [file join $this(prefsPath) canvases]]
 	set prefs(historyPath)  \
-	  [file nativename [file join $prefs(prefsDir) history]]
+	  [file nativename [file join $this(prefsPath) history]]
 	set prefs(webBrowser) mozilla
     }
     macintosh {
 	set osprefs(mod) Command
-	if {[info exists env(PREF_FOLDER)]} {
-	    set macPrefsDir $env(PREF_FOLDER)
-	} else {
-	    set macPrefsDir $this(path)
-	}
-	set prefs(prefsDir) [file join $macPrefsDir Coccinella]
 	set prefs(userPrefsFilePath)  \
-	  [file join $prefs(prefsDir) "Whiteboard Prefs"]
-	set prefs(oldPrefsFilePath) [file join $macPrefsDir "Whiteboard Prefs"]
-	set prefs(incomingPath) [file join $prefs(prefsDir) Incoming]
-	set prefs(inboxCanvasPath) [file join $prefs(prefsDir) Canvases]
-	set prefs(historyPath) [file join $prefs(prefsDir) History]
+	  [file join $this(prefsPath) "Whiteboard Prefs"]
+	set prefs(oldPrefsFilePath) [file join $env(PREF_FOLDER) "Whiteboard Prefs"]
+	set prefs(incomingPath) [file join $this(prefsPath) Incoming]
+	set prefs(inboxCanvasPath) [file join $this(prefsPath) Canvases]
+	set prefs(historyPath) [file join $this(prefsPath) History]
 	set prefs(webBrowser) {Internet Explorer}
     }
     macosx {
 	set osprefs(mod) Command
-	set macosxPrefsDir [file nativename ~/Library/Preferences]
-	set prefs(prefsDir) [file join $macosxPrefsDir Coccinella]
 	set prefs(userPrefsFilePath)  \
-	  [file join $prefs(prefsDir) "Whiteboard Prefs"]
+	  [file join $this(prefsPath) "Whiteboard Prefs"]
 	set prefs(oldPrefsFilePath) $prefs(userPrefsFilePath)
-	set prefs(incomingPath) [file join $prefs(prefsDir) Incoming]
-	set prefs(inboxCanvasPath) [file join $prefs(prefsDir) Canvases]
-	set prefs(historyPath) [file join $prefs(prefsDir) History]
-	set prefs(webBrowser) {Internet Explorer}
+	set prefs(incomingPath) [file join $this(prefsPath) Incoming]
+	set prefs(inboxCanvasPath) [file join $this(prefsPath) Canvases]
+	set prefs(historyPath) [file join $this(prefsPath) History]
+	set prefs(webBrowser) {Safari}
     }
     windows {
 	set osprefs(mod) Control
-	if {[info exists env(USERPROFILE)]} {
-	    set winPrefsDir $env(USERPROFILE)
-	} elseif {[info exists env(HOME)]} {
-	    set winPrefsDir $env(HOME)
-	} elseif {[lsearch -glob [file volumes] "c:*"] >= 0} {
-	    set winPrefsDir c:/
-	} elseif {[lsearch -glob [file volumes] "C:*"] >= 0} {
-	    set winPrefsDir C:/
-	} else {
-	    set winPrefsDir $this(path)
-	}
-	set prefs(prefsDir) [file join $winPrefsDir Coccinella]
-	set prefs(userPrefsFilePath) [file join $prefs(prefsDir) "WBPREFS.TXT"]
-	set prefs(oldPrefsFilePath) [file join $winPrefsDir "WBPREFS.TXT"]
-	set prefs(incomingPath) [file join $prefs(prefsDir) Incoming]
-	set prefs(inboxCanvasPath) [file join $prefs(prefsDir) Canvases]
-	set prefs(historyPath) [file join $prefs(prefsDir) History]
+	set prefs(userPrefsFilePath) [file join $this(prefsPath) "WBPREFS.TXT"]
+	set prefs(oldPrefsFilePath) [file join C: "WBPREFS.TXT"]
+	set prefs(incomingPath) [file join $this(prefsPath) Incoming]
+	set prefs(inboxCanvasPath) [file join $this(prefsPath) Canvases]
+	set prefs(historyPath) [file join $this(prefsPath) History]
 	
 	# Not used anymore. Uses the registry instead.
 	set prefs(webBrowser) {C:/Program/Internet Explorer/IEXPLORE.EXE}
     }
 }
-set prefs(optionsRdb) [file nativename [file join $prefs(prefsDir) default.rdb]]
 
 # Make sure we've got the necessary directories.
-if {![file isdirectory $prefs(prefsDir)]} {
-    file mkdir $prefs(prefsDir)
+if {![file isdirectory $this(prefsPath)]} {
+    file mkdir $this(prefsPath)
 }
 if {![file isdirectory $prefs(incomingPath)]} {
     file mkdir $prefs(incomingPath)

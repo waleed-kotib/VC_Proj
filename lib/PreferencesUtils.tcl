@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.19 2003-12-12 16:18:40 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.20 2003-12-15 15:39:09 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -273,14 +273,6 @@ proc ::PreferencesUtils::ResetToUserDefaults { } {
     # Read the user option database file once again.
     Init
     Add $thePrefs
-}
-
-proc ::PreferencesUtils::ReadOptionDatabase { } {
-    global  prefs
-    
-    if {[info exists $prefs(optionsRdb)]} {
-	catch {option readfile $prefs(optionsRdb) userDefault}
-    }
 }
 
 # PreferencesUtils::SetUserPreferences --

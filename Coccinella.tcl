@@ -15,7 +15,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.19 2003-12-15 08:20:52 matben Exp $
+# $Id: Coccinella.tcl,v 1.20 2003-12-15 15:39:08 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -47,12 +47,14 @@
 package provide app-Coccinella 1.0
 
 # TclKit requires this, can't harm.
-if {[catch {package require Tk}]} {
-    return -code error "We need Tk here. Run Wish!"
+if {[catch {package require Tk 8.4}]} {
+    return -code error "We need Tk 8.4 or later here. Run Wish!"
 }
 
 # Hide the main window during launch.
 wm withdraw .
+
+set state(launchSecs) [clock seconds]
 
 ### Command-line option "-privaria" indicates whether we're
 ### part of Ed Suominen's PRIVARIA distribution
@@ -63,21 +65,13 @@ if { [set k [lsearch $argv -privaria]] >= 0 } {
     incr argc -1
 }
 
-if {[package vcompare [info tclversion] 8.4] == -1} {
-    tk_messageBox -message  \
-      "This application requires Tcl/Tk version 8.4 or later."  \
-      -icon error -type ok
-    exit
-}
-
 # We use a variable 'this(platform)' that is more convenient for MacOS X.
 switch -- $tcl_platform(platform) {
     unix {
-	set this(platform) $tcl_platform(platform)
-	if {[package vcompare [info tclversion] 8.3] == 1} {	
-	    if {[string equal [tk windowingsystem] "aqua"]} {
-		set this(platform) "macosx"
-	    }
+	if {[string equal [tk windowingsystem] "aqua"]} {
+	    set this(platform) "macosx"
+	} else {
+	    set this(platform) $tcl_platform(platform)
 	}
     }
     windows - macintosh {
@@ -174,8 +168,7 @@ proc CallTrace {num} {
     }
 }
 
-#  Make sure that we are in the directory of the application itself.
-      
+#  Make sure that we are in the directory of the application itself.     
 if {[string equal $this(platform) "unix"]} {
     set thisPath [file dirname [resolve_cmd_realpath [info script]]]
     set thisTail [file tail [info script]]
@@ -196,6 +189,8 @@ if {[string equal $this(platform) "macintosh"] && [string equal $thisPath ":"]} 
 } elseif {[string equal $thisPath "."]} {
     set thisPath [pwd]
 }
+
+# Collect paths in this array.
 set this(path) $thisPath
 set this(script) $thisScript
 set this(imagePath) [file join $this(path) images]
@@ -286,51 +281,57 @@ if {$this(platform) == "unix"} {
 # Make cvs happy.
 regsub -all " " $machineSpecPath "" machineSpecPath
 
-
 # TclKits on macintosh can't load sharedlibs. Placed side-by-side with tclkit.
 if {($this(platform) == "macintosh") &&  \
   ([info exists tclkit::topdir] ||  \
   [string match -nocase tclkit* [file tail [info nameofexecutable]]])} {
-    set prefs(binDir) [file dirname [info nameofexecutable]]
+    set prefs(binPath) [file dirname [info nameofexecutable]]
 } else {
-    set prefs(binDir) [file join $this(path) bin $this(platform) $machineSpecPath]
+    set prefs(binPath) [file join $this(path) bin $this(platform) $machineSpecPath]
 }
-if {[file exists $prefs(binDir)]} {
-    set auto_path [concat [list $prefs(binDir)] $auto_path]
+if {[file exists $prefs(binPath)]} {
+    set auto_path [concat [list $prefs(binPath)] $auto_path]
 } else {
-    set prefs(binDir) {}
+    set prefs(binPath) {}
 }
 
-# On the mac we have some extras.
-if {[string equal $this(platform) "macintosh"]} {
-    if {![catch {package require MacMenuButton} msg]} {
-	rename menubutton menubuttonOrig
-	rename macmenubutton menubutton
+# Path where preferences etc are stored.
+switch -- $this(platform) {
+    unix {
+	set this(prefsPath) [file nativename ~/.coccinella]
     }
-    if {![catch {package require MovableAlerts} msg]} {
-	rename tk_messageBox ""
-	rename tk_newMessageBox tk_messageBox
+    macintosh {
+	if {[info exists env(PREF_FOLDER)]} {
+	    set this(prefsPath) [file join $env(PREF_FOLDER) Coccinella]
+	} else {
+	    set this(prefsPath) $this(path)
+	}
     }
-}
-if {[string equal $this(platform) "macosx"]} {
-    if {![catch {package require MovableAlerts} msg]} {
-	rename tk_messageBox ""
-	rename tk_newMessageBox tk_messageBox
-    }
-}
-if {[string match "mac*" $this(platform)]} {
-    
-    # documentProc, dBoxProc, plainDBox, altDBoxProc, movableDBoxProc, 
-    # zoomDocProc, rDocProc, floatProc, floatZoomProc, floatSideProc, 
-    # or floatSideZoomProc
-    if {[info tclversion] <= 8.3} {
-	set macWindowStyle "unsupported1 style"
-    } else {
-	set macWindowStyle "::tk::unsupported::MacWindowStyle style"
+    macosx {
+	set this(prefsPath)  \
+	  [file join [file nativename ~/Library/Preferences] Coccinella]
+    }    
+    windows {
+	if {[info exists env(USERPROFILE)]} {
+	    set winPrefsDir $env(USERPROFILE)
+	} elseif {[info exists env(HOME)]} {
+	    set winPrefsDir $env(HOME)
+	} elseif {[lsearch -glob [file volumes] "c:*"]} {
+	    set winPrefsDir c:/
+	} elseif {[lsearch -glob [file volumes] "C:*"]} {
+	    set winPrefsDir C:/
+	} else {
+	    set winPrefsDir $this(path)
+	}
+	set this(prefsPath) [file join $winPrefsDir Coccinella]
     }
 }
 
-set state(launchSecs) [clock seconds]
+# Read our prefs file, if any, containing the theme name.
+if {[file exists [file join $this(prefsPath) theme]]} {
+    option readfile [file join $this(prefsPath) theme]
+}
+set prefs(themeName) [option get . themeName {}]
 
 # Read resource database files in a hierarchical order.
 # 1) always read the default rdb file.
@@ -341,9 +342,27 @@ set f [file join $this(resourcedbPath) $this(platform).rdb]
 if {[file exists $f]} {
     option readfile $f startupFile
 }
+set f [file join $this(resourcedbPath) $prefs(themeName).rdb]
+if {[file exists $f]} {
+    option readfile $f startupFile
+}
+
 if {$debugLevel > 1} {
     option readfile [file join $this(resourcedbPath) theme.rdb] startupFile
 }
+
+
+# Search for image files in this order:
+# 1) imagePath/themeImageDir
+# 2) imagePath/platformName
+# 3) imagePath
+set this(imagePathList) {}
+set themeDir [option get . themeImageDir {}]
+if {$themeDir != ""} {
+    lappend this(imagePathList) [file join $this(imagePath) $themeDir]
+}
+lappend this(imagePathList)  \
+  [file join $this(imagePath) $this(platform)] $this(imagePath)
     
 # The message catalog for language customization.
 if {![info exists env(LANG)]} {
@@ -353,6 +372,13 @@ package require msgcat
 ::msgcat::mclocale en
 #::msgcat::mclocale sv
 ::msgcat::mcload [file join $this(path) msgs]
+
+if {[string match "mac*" $this(platform)]} {
+    # documentProc, dBoxProc, plainDBox, altDBoxProc, movableDBoxProc, 
+    # zoomDocProc, rDocProc, floatProc, floatZoomProc, floatSideProc, 
+    # or floatSideZoomProc
+    set macWindowStyle "::tk::unsupported::MacWindowStyle style"
+}
 
 # The splash screen is needed from the start. 
 # This also defines the wDlgs array.
@@ -397,6 +423,24 @@ foreach sourceName $allLibSourceFiles {
     }
 }
 
+# On the mac we have some extras.
+if {[string equal $this(platform) "macintosh"]} {
+    if {![catch {package require MacMenuButton} msg]} {
+	rename menubutton menubuttonOrig
+	rename macmenubutton menubutton
+    }
+    if {![catch {package require MovableAlerts} msg]} {
+	rename tk_messageBox ""
+	rename tk_newMessageBox tk_messageBox
+    }
+}
+if {[string equal $this(platform) "macosx"]} {
+    if {![catch {package require MovableAlerts} msg]} {
+	rename tk_messageBox ""
+	rename tk_newMessageBox tk_messageBox
+    }
+}
+
 switch -- $this(platform) {
     macintosh - macosx {
 	if {[catch {source [file join $this(path) lib MacintoshUtils.tcl]} msg]} {
@@ -412,20 +456,13 @@ switch -- $this(platform) {
     }
 }
 
-# The http package can be useful?
-if {![catch {package require http} msg]} {
-    set prefs(http) 1
-} else {
-    set prefs(http) 0
-}
-
 # Other utility packages that can be platform specific.
 # The 'Thread' package requires that the Tcl core has been built with support.
 array set extraPacksArr {
-    macintosh   {Tclapplescript MacPrint}
-    macosx      {Tclapplescript tls Thread MacCarbonPrint}
-    windows     {printer gdi tls Thread optcl tcom}
-    unix        {tls Thread}
+    macintosh   {http Tclapplescript MacPrint}
+    macosx      {http Tclapplescript tls Thread MacCarbonPrint}
+    windows     {http printer gdi tls Thread optcl tcom}
+    unix        {http tls Thread}
 }
 foreach {platform packList} [array get extraPacksArr] {
     foreach name $packList {
@@ -563,6 +600,7 @@ if {[info exists env(USER)]} {
 # Standard (factory) preferences are set here.
 # These are the hardcoded, application default, values, and can be
 # overridden by the ones in user default file.
+#source [file join $this(path) lib SetFactoryDefaults.tcl]
 if {[catch {source [file join $this(path) lib SetFactoryDefaults.tcl]} msg]} {
     tk_messageBox -message "Error sourcing SetFactoryDefaults.tcl  $msg"  \
       -icon error -type ok
@@ -570,9 +608,6 @@ if {[catch {source [file join $this(path) lib SetFactoryDefaults.tcl]} msg]} {
 }
 
 ::SplashScreen::SetMsg [::msgcat::mc splashprefs]
-
-# Overrule widget option if we have got a resource database file.
-::PreferencesUtils::ReadOptionDatabase
 
 # Manage the user preferences. Start by reading the preferences file.
 ::PreferencesUtils::Init

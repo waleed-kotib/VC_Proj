@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.39 2003-12-15 08:20:53 matben Exp $
+# $Id: Jabber.tcl,v 1.40 2003-12-15 15:39:08 matben Exp $
 #
 #  The $address is an ip name or number.
 #
@@ -370,13 +370,13 @@ proc ::Jabber::FactoryDefaults { } {
     
     switch $this(platform) {
 	macintosh - macosx {
-	    set jprefs(inboxPath) [file join $prefs(prefsDir) Inbox.tcl]
+	    set jprefs(inboxPath) [file join $this(prefsPath) Inbox.tcl]
 	}
 	windows {
-	    set jprefs(inboxPath) [file join $prefs(prefsDir) Inbox.tcl]
+	    set jprefs(inboxPath) [file join $this(prefsPath) Inbox.tcl]
 	}
 	unix {
-	    set jprefs(inboxPath) [file join $prefs(prefsDir) inbox.tcl]
+	    set jprefs(inboxPath) [file join $this(prefsPath) inbox.tcl]
 	}
     }
     
