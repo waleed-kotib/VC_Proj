@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.1.1.1 2002-12-08 11:00:35 matben Exp $
+# $Id: Jabber.tcl,v 1.2 2002-12-15 09:10:55 matben Exp $
 #
 #  The $address is an ip name or number.
 #
@@ -63,7 +63,7 @@ namespace eval ::Jabber:: {
     
     # Server port actually used.
     set jstate(servPort) {}
-    set jstate(debug) 0
+    set jstate(debug) 3
 
     # Login server.
     set jserver(this) {}

@@ -15,7 +15,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Whiteboard.tcl,v 1.1.1.1 2002-12-08 10:53:48 matben Exp $
+# $Id: Whiteboard.tcl,v 1.2 2002-12-15 09:10:55 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -129,9 +129,9 @@ if {[llength [namespace children :: "::browser*"]] > 0} {
 }
 
 # Level of detail for printouts. >= 2 for my outputs.
-set debugLevel 0
+set debugLevel 3
 # Level of detail for printouts for server. >= 2 for my outputs.
-set debugServerLevel 0
+set debugServerLevel 3
 # Macintosh only: if no debug printouts, no console. Also for windows?
 if {[string equal $this(platform) "macintosh"] &&   \
   $debugLevel == 0 && $debugServerLevel == 0} {
