@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.33 2003-11-14 10:00:27 matben Exp $
+# $Id: Jabber.tcl,v 1.34 2003-11-17 15:05:57 matben Exp $
 #
 #  The $address is an ip name or number.
 #
@@ -1631,8 +1631,8 @@ proc ::Jabber::EndSession { } {
 	    lappend opts -status $jprefs(logoutStatus)
 	}
 	catch {
-	    ::Jabber::SetStatus unavailable
-	    #eval {$jstate(jlib) send_presence -type unavailable} $opts
+	    #::Jabber::SetStatus unavailable
+	    eval {$jstate(jlib) send_presence -type unavailable} $opts
 	}
 	
 	# Do the actual closing.
@@ -1789,14 +1789,17 @@ proc ::Jabber::SetStatus {type {to {}}} {
     }
     
     # Trap network errors.
-    if {[catch {
+    if {[catch {	
 	switch -- $type {
-	    available - unavailable - invisible {
+	    available - invisible {
 		eval {$jstate(jlib) send_presence -type $type} $toArgs
 	    }
 	    away - dnd - xa {
 		eval {$jstate(jlib) send_presence -type "available"}  \
 		  -show $type $toArgs
+	    }
+	    unavailable {
+		::Jabber::DoCloseClientConnection $jstate(ipNum)
 	    }
 	}	
     } err]} {
