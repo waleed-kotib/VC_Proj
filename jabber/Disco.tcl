@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.33 2004-10-02 13:14:55 matben Exp $
+# $Id: Disco.tcl,v 1.34 2004-10-03 13:38:22 matben Exp $
 
 package provide Disco 1.0
 
@@ -886,12 +886,14 @@ proc ::Jabber::Disco::TryIdentifyCoccinella {jid3 presence args} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::coccixmlns coccixmlns
     
+    # Trigger only if unavailable before.
     if {[string equal $presence "available"]} {
 	set coccielem  \
 	  [$jstate(roster) getextras $jid3 $coccixmlns(servers)]
 	if {$coccielem == {}} {
 	    if {![::Jabber::Roster::IsTransportHeuristics $jid3]} {
-		if {![$jstate(disco) isdiscoed items $jid3]} {
+		if {![$jstate(disco) isdiscoed items $jid3] && \
+		  ![$jstate(roster) wasavailable $jid3]} {
 		    eval {AutoDisco $jid3 $presence} $args
 		}
 	    }

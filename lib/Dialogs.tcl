@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.46 2004-10-02 13:14:55 matben Exp $
+# $Id: Dialogs.tcl,v 1.47 2004-10-03 13:38:22 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -315,15 +315,22 @@ proc ::Dialogs::InfoComponents { } {
     pack [frame $fbox -bd 1 -relief sunken] -side top -padx 4 -pady 4  \
       -fill both -expand 1
 
-    set wtxt $w.frall.fbox.txt
-    set wysc $w.frall.fbox.ysc
+    set wtxt $fbox.txt
+    set wysc $fbox.ysc
     scrollbar $wysc -orient vertical -command [list $wtxt yview]
     text $wtxt -yscrollcommand [list $wysc set] -highlightthickness 0  \
-      -bg white -wrap word -width 50 -height 16  \
-      -exportselection 1
+      -bg white -wrap word -width 50 -height 16 -exportselection 1
+    #text $wtxt -yscrollcommand  \
+    #  [list ::UI::ScrollSet $wysc [list grid $wysc -row 0 -column 1 -sticky ns]]\
+    #  -highlightthickness 0  \
+    #  -bg white -wrap word -width 50 -height 16 -exportselection 1
     pack $wysc -side right -fill y
     pack $wtxt -side left -fill both -expand 1
-    
+    #grid $wtxt -row 0 -column 0 -sticky news
+    #grid $wysc -row 0 -column 1 -sticky ns
+    #grid columnconfigure $fbox 0 -weight 1
+    #grid rowconfigure $fbox 0 -weight 1    
+
     $wtxt tag configure ttitle -foreground black -background #dedede  \
       -spacing1 2 -spacing3 2 -lmargin1 20 -font $fontSB
     $wtxt tag configure ttxt -font $fontS -wrap word -lmargin1 10 -lmargin2 10 \
