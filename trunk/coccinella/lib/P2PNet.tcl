@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: P2PNet.tcl,v 1.5 2004-11-02 15:34:55 matben Exp $
+# $Id: P2PNet.tcl,v 1.6 2004-11-23 12:57:05 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -446,7 +446,7 @@ proc ::P2PNet::WhenSocketOpensInits {nameOrIP server remoteServPort \
     
     if {($prefs(protocol) == "central") || ($prefs(protocol) == "client")} {
 	fileevent $server readable    \
-	  [list HandleClientRequest $server $ipNum $remoteServPort]
+	  [list ::TheServer::HandleClientRequest $server $ipNum $remoteServPort]
     }    
     set listIPandPort {}
     foreach ip [::P2PNet::GetIP to] {

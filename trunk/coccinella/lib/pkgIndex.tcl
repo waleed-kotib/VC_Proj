@@ -19,6 +19,7 @@ package ifneeded Speech 1.0 [list source [file join $dir Speech.tcl]]
 package ifneeded Splash 1.0 [list source [file join $dir Splash.tcl]]
 package ifneeded TinyHttpd 1.0 [list source [file join $dir TinyHttpd.tcl]]
 package ifneeded Theme 1.0 [list source [file join $dir Theme.tcl]]
+package ifneeded TheServer 1.0 [list source [file join $dir TheServer.tcl]]
 package ifneeded Types 1.0 [list source [file join $dir Types.tcl]]
 
 if {[string equal $::tcl_platform(platform) "windows"]} {

@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.93 2004-11-23 08:55:22 matben Exp $
+# $Id: Coccinella.tcl,v 1.94 2004-11-23 12:57:05 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -406,7 +406,6 @@ set allLibSourceFiles {
   EditDialogs.tcl        \
   FileUtils.tcl          \
   Network.tcl            \
-  TheServer.tcl          \
   UI.tcl                 \
   UserActions.tcl        \
   Utils.tcl              \
@@ -469,7 +468,7 @@ if {$prefs(Thread)} {
 # Separate packages into two levels, basic support and application specific.
 ::SplashScreen::SetMsg [mc splashload]
 
-set listOfPackages {
+foreach packName {
     balloonhelp
     buttontray
     can2svg       
@@ -488,9 +487,9 @@ set listOfPackages {
     Plugins
     Pane
     ProgressWindow
+    TheServer
     Whiteboard
-}
-foreach packName $listOfPackages {
+} {
     package require $packName
 }
 
@@ -691,22 +690,6 @@ set prefs(firstLaunch) 0
 ### The server part ############################################################
 
 # We should do this using hooks instead!
-
-if {$prefs(makeSafeServ)} {
-    set canvasSafeInterp [interp create -safe]
-    
-    # Make an alias in the safe interpreter to enable drawing in the canvas.
-    $canvasSafeInterp alias SafeCanvasDraw ::CanvasUtils::CanvasDrawSafe
-}
-    
-# Start the server. It was necessary to have an 'update idletasks' command here
-# because when starting the script directly, and not from within wish, somehow
-# there was a timing problem in 'DoStartServer'.
-# Don't start the server if we are a client only.
-
-if {($prefs(protocol) != "client") && $prefs(autoStartServer)} {
-    after $prefs(afterStartServer) [list DoStartServer $prefs(thisServPort)]
-}
 
 # Start the tinyhttpd server, in its own thread if available.
 
