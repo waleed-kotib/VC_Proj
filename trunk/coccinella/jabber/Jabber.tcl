@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.83 2004-05-01 14:23:40 matben Exp $
+# $Id: Jabber.tcl,v 1.84 2004-05-06 13:41:10 matben Exp $
 
 package provide Jabber 1.0
 
@@ -77,6 +77,8 @@ namespace eval ::Jabber:: {
     
     # Server port actually used.
     set jstate(servPort) {}
+    
+    set jstate(haveJabberUI) 0
 
     # Login server.
     set jserver(this) ""
@@ -520,6 +522,7 @@ proc ::Jabber::Init { } {
     
     if {[string equal $prefs(protocol) "jabber"]} {
 	::Jabber::UI::Show $wDlgs(jrostbro)
+	set jstate(haveJabberUI) 1
     }
     
     # Stuff that need an instance of jabberlib register here.

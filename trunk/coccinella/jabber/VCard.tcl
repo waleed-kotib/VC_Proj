@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: VCard.tcl,v 1.17 2004-03-25 08:10:18 matben Exp $
+# $Id: VCard.tcl,v 1.18 2004-05-06 13:41:11 matben Exp $
 
 package provide VCard 1.0
 
@@ -106,7 +106,7 @@ proc ::VCard::ParseXmlList {subiq arrName} {
                 
                 # First child must be "home" or "work"
                 set where [string tolower \
-                  [lindex [lindex [wrapper::getchildren $c] 0] 0]]
+                  [lindex [wrapper::getchildren $c] 0 0]]
                 foreach sub [wrapper::getchildren $c] {
                     if {[lindex $sub 2]} {
                         continue

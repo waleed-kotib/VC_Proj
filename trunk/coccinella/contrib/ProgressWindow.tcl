@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ProgressWindow.tcl,v 1.14 2004-05-03 14:11:53 matben Exp $
+# $Id: ProgressWindow.tcl,v 1.15 2004-05-06 13:41:10 matben Exp $
 # 
 #-------------------------------------------------------------------------------
 #
@@ -175,6 +175,7 @@ proc ::ProgressWindow::ProgressWindow {w args} {
 	  {collapseBox verticalZoom}
     }
     wm resizable $w 0 0
+    wm protocol $w WM_DELETE_WINDOW [list [namespace current]::Close $w]
     
     # We use a frame for this specific widget class.
     set widgets(this) $w
@@ -336,6 +337,13 @@ proc ::ProgressWindow::Build {w} {
     wm deiconify $w
     raise $w
     focus $w
+}
+
+proc ::ProgressWindow::Close {w} {
+    
+    upvar ::ProgressWindow::${w}::widgets widgets
+
+    $widgets(cancel) invoke
 }
 
 proc ::ProgressWindow::ConfigurePercent {w percent} {

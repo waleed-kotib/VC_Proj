@@ -3,11 +3,11 @@
 #      This file is part of The Coccinella application. It implements some
 #      of the dialogs. 
 #      
-#  Copyright (c) 1999-2002  Mats Bengtsson
+#  Copyright (c) 1999-2004  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.38 2004-04-30 12:58:46 matben Exp $
+# $Id: Dialogs.tcl,v 1.39 2004-05-06 13:41:11 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -77,19 +77,20 @@ array set wDlgs {
 # Dialogs::GetCanvas --
 # 
 #       Implements the dialog for choosing which client to get the 
-#       canvas from.
+#       canvas from. P2P only!
 
 proc ::Dialogs::GetCanvas {w} {
-    global  ipNumTo ipName2Num prefs this
+    global  prefs this
     
     variable finished -1
     variable getIPName
     
     # Build list of ip names.
     set ipNames {}
-    foreach ip [::Network::GetIP to] {
-	if {[info exists ipNumTo(name,$ip)]} {
-	    lappend ipNames $ipNumTo(name,$ip)
+    foreach ip [::P2PNet::GetIP to] {
+	set name [::P2PNet::GetValueFromIP $ip name]
+	if {$name != ""} {
+	    lappend ipNames $name
 	}
     }
     if {[llength $ipNames] == 0} {
@@ -145,9 +146,8 @@ proc ::Dialogs::GetCanvas {w} {
     catch {grab release $w}
     catch {destroy $w}
     
-    if {$finished == 1 &&  \
-      [info exists ipName2Num($getIPName)]} {
-	return $ipName2Num($getIPName)
+    if {$finished == 1} {
+	return [::P2PNet::GetIPFromName $getIPName]
     } else {
 	return ""
     }
@@ -611,7 +611,7 @@ proc ::PSPageSetup::PushBtSave {  } {
 
 # Dialogs::ShowInfoClients --
 #
-#       It implements a dialog that shows client information.
+#       It implements a dialog that shows client information. ???
 #       
 # Arguments:
 #       
@@ -619,9 +619,9 @@ proc ::PSPageSetup::PushBtSave {  } {
 #       shows dialog.
 
 proc ::Dialogs::ShowInfoClients { } {
-    global  ipNumTo this wDlgs
+    global  this wDlgs
     
-    set allIPnumsFrom [::Network::GetIP from]
+    set allIPnumsFrom [::P2PNet::GetIP from]
     if {[llength $allIPnumsFrom] <= 0} {
 	return
     }
@@ -640,11 +640,11 @@ proc ::Dialogs::ShowInfoClients { } {
     
     # Treat each connected client in order and make a labelled frame for each.
     set n 0
-    foreach ip $allIPnumsFrom {
-	set channel $ipNumTo(servSocket,$ip)
+    foreach ip [::P2PNet::GetIP from] {
+	set channel  [::P2PNet::GetValueFromIP $ip servSocket]
 	set peername [fconfigure $channel -peername]
 	set sockname [fconfigure $channel -sockname]
-	set buff [fconfigure $channel -buffering]
+	set buff  [fconfigure $channel -buffering]
 	set block [fconfigure $channel -blocking]
 	set wcont $w.frtop$n
 	set wcont [labelframe $wcont -text [lindex $peername 1]]
@@ -657,16 +657,16 @@ proc ::Dialogs::ShowInfoClients { } {
 	label $fr.b1 -text "Host name:" -font $fontSB
 	label $fr.b2 -text "[lindex $peername 1]"
 	label $fr.c1 -text "User name:" -font $fontSB
-	label $fr.c2 -text $ipNumTo(user,$ip)
+	label $fr.c2 -text [::P2PNet::GetValueFromIP $ip user]
 	label $fr.d1 -text "Port number:" -font $fontSB
-	label $fr.d2 -text "$ipNumTo(servPort,$ip)"
+	label $fr.d2 -text [::P2PNet::GetValueFromIP $ip servPort]
 	label $fr.e1 -text "Buffering:" -font $fontSB
 	label $fr.e2 -text "$buff"
 	label $fr.f1 -text "Blocking:" -font $fontSB
 	label $fr.f2 -text "$block"
 	label $fr.g1 -text "Since:" -font $fontSB
-	label $fr.g2 -text   \
-	  "[clock format $ipNumTo(connectTime,$ip) -format "%X  %x"]"
+	label $fr.g2 -text [clock format [::P2PNet::GetValueFromIP $ip connectTime] \
+	  -format "%X  %x"]
 	grid $fr.a1 -column 0 -row 0 -sticky e
 	grid $fr.a2 -column 1 -row 0 -sticky w
 	grid $fr.b1 -column 0 -row 1 -sticky e
@@ -713,7 +713,7 @@ proc ::Dialogs::ShowInfoClients { } {
 #       none
 
 proc ::Dialogs::ShowInfoServer { } {
-    global  this ipNumTo wDlgs state prefs
+    global  this wDlgs state prefs
     
     set w $wDlgs(infoServ)
     if {[winfo exists $w]} {
@@ -760,22 +760,6 @@ proc ::Dialogs::ShowInfoServer { } {
 	label $fr.f2 -text [::msgcat::mc {Not available}]
 	label $fr.g2 -text "$boolToYesNo($prefs(makeSafeServ))"
 
-    } elseif {$state(isServerUp) && [llength [::Network::GetIP from]] > 0} {
-	
-	# Not sure here...
-	# Take any ip and get server side channel.
-	set channel $ipNumTo(servSocket,[lindex [::Network::GetIP from] 0])
-	set peername [fconfigure $channel -peername]
-	set sockname [fconfigure $channel -sockname]
-	set buff [fconfigure $channel -buffering]
-	set block [fconfigure $channel -blocking]
-	label $fr.a2 -text $this(ipnum)
-	label $fr.b2 -text $this(hostname)
-	label $fr.c2 -text $this(username)
-	label $fr.d2 -text $prefs(thisServPort)
-	label $fr.e2 -text $buff
-	label $fr.f2 -text "$block"
-	label $fr.g2 -text "$boolToYesNo($prefs(makeSafeServ))"
     }
     grid $fr.x1 -column 0 -row 0 -sticky e
     grid $fr.x2 -column 1 -row 0 -sticky w

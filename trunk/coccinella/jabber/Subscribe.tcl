@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Subscribe.tcl,v 1.16 2004-04-25 15:35:26 matben Exp $
+# $Id: Subscribe.tcl,v 1.17 2004-05-06 13:41:10 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -81,7 +81,7 @@ proc ::Jabber::Subscribe::Subscribe {jid args} {
     
     ::headlabel::headlabel $w.frall.head -text [::msgcat::mc Subscribe]
     pack $w.frall.head -side top -fill both -expand 1
-    message $w.frall.msg -width 260  \
+    label $w.frall.msg -wraplength 200 -justify left \
       -text [::msgcat::mc jasubwant $jid]
     pack $w.frall.msg -side top -fill both -expand 1
     
@@ -121,10 +121,10 @@ proc ::Jabber::Subscribe::Subscribe {jid args} {
       -variable [namespace current]::locals($uid,add)
     pack $fropt.pres $fropt.add -side top -anchor w -padx 10 -pady 4
     set frsub [frame $fropt.frsub]
-    pack $frsub -expand 1 -fill x -side top
+    pack $frsub -expand 1 -side top -anchor w -padx 10 -pady 2
     label $frsub.lnick -text "[::msgcat::mc {Nick name}]:" -font $fontSB \
       -anchor e
-    entry $frsub.enick -width 26  \
+    entry $frsub.enick -width 18  \
       -textvariable [namespace current]::locals($uid,name)
     label $frsub.lgroup -text "[::msgcat::mc Group]:" -font $fontSB -anchor e
     
@@ -156,8 +156,15 @@ proc ::Jabber::Subscribe::Subscribe {jid args} {
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
     
     wm resizable $w 0 0
-    bind $w <Return> "$frbot.btok invoke"
+    bind $w <Return> [list $frbot.btok invoke]
     focus $w
+    
+    # Trick to resize the labels wraplength.
+    set script [format {
+	update idletasks
+	%s.frall.msg configure -wraplength [expr [winfo reqwidth %s] - 30]
+    } $w $w]    
+    after idle $script
     
     # Wait here for a button press and window to be destroyed.
     tkwait window $w

@@ -2,7 +2,7 @@
 #      
 #  Copyright (c) 1999-2003  Mats Bengtsson
 #  
-# $Id: Multicast.tcl,v 1.1 2004-03-16 15:07:38 matben Exp $
+# $Id: Multicast.tcl,v 1.2 2004-05-06 13:41:11 matben Exp $
 
 package provide Multicast 1.0
 
@@ -151,7 +151,7 @@ proc ::Multicast::TraceSelMulticastName {name junk1 junk2} {
     variable txtvarEntMulticast
     
     set ind [lsearch [lindex $prefs(shortsMulticastQT) 0] $locName]
-    set txtvarEntMulticast [lindex [lindex $prefs(shortsMulticastQT) 1] $ind]
+    set txtvarEntMulticast [lindex $prefs(shortsMulticastQT) 1 $ind]
 }
 
 # Multicast::OpenMulticastQTStream --

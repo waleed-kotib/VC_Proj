@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.31 2004-04-25 10:14:17 matben Exp $
+# $Id: Whiteboard.tcl,v 1.32 2004-05-06 13:41:11 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -257,7 +257,7 @@ proc ::WB::InitPrefsHook { } {
 }
 
 proc ::WB::InitHook { } {
-    
+
     ::WB::Init
     ::WB::InitMenuDefs   
 }
@@ -367,6 +367,8 @@ proc ::WB::InitIcons {w} {
 proc ::WB::InitMenuDefs { } {
     global  prefs this
     variable menuDefs
+    
+    ::Debug 2 "::WB::InitMenuDefs"
 
     if {[string match "mac*" $this(platform)] && $prefs(haveMenus)} {
 	set haveAppleMenu 1
@@ -696,10 +698,11 @@ proc ::WB::BuildWhiteboard {wtop args} {
     set wapp(tray)      $wapp(frtop).on.fr
     set wapp(tool)      ${wall}.fmain.frleft.frbt
     set wapp(buglabel)  ${wall}.fmain.frleft.pad.bug
-    set wcomm           ${wall}.fcomm
+    set wapp(frcan)     ${wall}.fmain.fc
+    set wapp(comm)      ${wall}.fcomm
+    set wcomm           $wapp(comm)
     set wapp(statmess)  ${wcomm}.stat.lbl
     set wapp(frstat)    ${wcomm}.st
-    set wapp(frcan)     ${wall}.fmain.fc
     set wapp(topchilds) [list ${wall}.menu ${wall}.frtop ${wall}.fmain ${wall}.fcomm]
     
     # temporary...
@@ -1189,6 +1192,7 @@ proc ::WB::SetButtonTrayDefs {buttonDefs} {
 proc ::WB::SetMenuDefs {key menuDef} {
     variable menuDefs
     
+    puts "::WB::SetMenuDefs key=$key"
     set menuDefs(main,$key) $menuDef
 }
 
@@ -1263,6 +1267,11 @@ proc ::WB::GetButtonTray {wtop} {
     upvar ::WB::${wtop}::wapp wapp
 
     return $wapp(tray)
+}
+
+proc ::WB::GetMenu {wtop} {
+
+    return ${wtop}menu
 }
 
 # WB::GetAllWhiteboards --
@@ -2502,7 +2511,7 @@ proc ::WB::StartStopAnimatedWave {wtop start} {
 }
 
 proc ::WB::StartStopAnimatedWaveOnMain {start} {    
-    upvar ::.::wapp wapp
+    upvar ::WB::.::wapp wapp
     
     set waveImage [::Theme::GetImage [option get $wapp(frall) waveImage {}]]  
     ::UI::StartStopAnimatedWave $wapp(statmess) $waveImage $start

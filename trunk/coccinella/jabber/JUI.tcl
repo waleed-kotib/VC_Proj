@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.37 2004-04-25 15:35:25 matben Exp $
+# $Id: JUI.tcl,v 1.38 2004-05-06 13:41:10 matben Exp $
 
 package provide JUI 1.0
 
@@ -310,7 +310,7 @@ proc ::Jabber::UI::CloseHook {wclose} {
     variable jwapp
     
     set result ""
-    if {[string equal $jwapp(wtopRost) $wclose]} {
+    if {[info exists jwapp(wtopRost)] && [string equal $jwapp(wtopRost) $wclose]} {
 	set ans [::UserActions::DoQuit -warning 1]
 	if {$ans == "no"} {
 	    set result stop

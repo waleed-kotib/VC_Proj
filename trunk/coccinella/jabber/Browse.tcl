@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.42 2004-04-30 12:58:45 matben Exp $
+# $Id: Browse.tcl,v 1.43 2004-05-06 13:41:10 matben Exp $
 
 package require chasearrows
 
@@ -409,18 +409,6 @@ proc ::Jabber::Browse::ErrorProc {silent browseName type jid errlist} {
 	set jprefs(browseServers) [lreplace $jprefs(browseServers) $ind $ind]
     }
     
-    # Silent...
-    if {$silent} {
-	::Jabber::AddErrorLog [clock format [clock seconds] -format "%H:%M:%S"] \
-	  $jid  \
-	  "Failed browsing: Error code [lindex $errlist 0] and message:\
-	  [lindex $errlist 1]"
-    } else {
-	tk_messageBox -icon error -type ok -title [::msgcat::mc Error] \
-	  -message [FormatTextForMessageBox \
-	  [::msgcat::mc jamesserrbrowse $jid [lindex $errlist 1]]]
-    }
-    
     # As a fallback we use the disco or agents method instead if browsing 
     # the login server fails.
     if {[string equal $jid $jserver(this)]} {
@@ -434,6 +422,23 @@ proc ::Jabber::Browse::ErrorProc {silent browseName type jid errlist} {
 		::Jabber::Disco::GetItems $jserver(this)
 	    }
 	}	
+	::Jabber::AddErrorLog [clock format [clock seconds] -format "%H:%M:%S"] \
+	  $jid  \
+	  "Failed browsing: Error code [lindex $errlist 0] and message:\
+	  [lindex $errlist 1]"
+    } else {
+	
+	# Silent...
+	if {$silent} {
+	    ::Jabber::AddErrorLog [clock format [clock seconds] -format "%H:%M:%S"] \
+	      $jid  \
+	      "Failed browsing: Error code [lindex $errlist 0] and message:\
+	      [lindex $errlist 1]"
+	} else {
+	    tk_messageBox -icon error -type ok -title [::msgcat::mc Error] \
+	      -message [FormatTextForMessageBox \
+	      [::msgcat::mc jamesserrbrowse $jid [lindex $errlist 1]]]
+	}
     }
 }
 
