@@ -14,7 +14,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Plugins.tcl,v 1.17 2004-03-31 07:55:19 matben Exp $
+# $Id: Plugins.tcl,v 1.18 2004-04-08 09:57:43 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -115,7 +115,7 @@ namespace eval ::Plugins:: {
     
     # Search only for packages on platforms they can live on.
     array set packages2Platform {
-	QuickTimeTcl       {macintosh   macosx    windows} 
+	QuickTimeTcl       {            macosx    windows} 
 	TclSpeech          {macintosh   macosx}
 	MSSpeech           {windows}
 	snack              {windows     unix}

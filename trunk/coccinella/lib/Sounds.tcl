@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Sounds.tcl,v 1.19 2004-03-16 15:09:08 matben Exp $
+# $Id: Sounds.tcl,v 1.20 2004-04-08 09:57:44 matben Exp $
 
 package provide Sounds 1.0
 
@@ -347,8 +347,8 @@ proc ::Sounds::BuildPrefsPage {wpage} {
 	button $fr.b${name} -text [::msgcat::mc Play] \
 	  -font $fontS \
 	  -command [list [namespace current]::PlayTmpPrefSound $name]
-	grid $fr.$name    -column 0 -padx 8 -row $row -sticky w
-	grid $fr.b${name} -column 1 -padx 8 -row $row -sticky ew 
+	grid $fr.$name    -column 0 -row $row -sticky w  -padx 8
+	grid $fr.b${name} -column 1 -row $row -sticky ew -padx 8
 	incr row
     }
 }
