@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.128 2005-02-15 09:07:30 matben Exp $
+# $Id: Jabber.tcl,v 1.129 2005-02-16 14:26:45 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -166,9 +166,6 @@ namespace eval ::Jabber:: {
 	muc,owner   "http://jabber.org/protocol/muc#owner"
 	muc,user    "http://jabber.org/protocol/muc#user"
     }
-
-    variable capsExtList
-    set capsExtList {ftrans}
     
     # Standard xmlns supported. Components add their own.
     variable clientxmlns
@@ -481,6 +478,7 @@ proc ::Jabber::Init { } {
     variable jstate
     variable jprefs
     variable coccixmlns
+    variable xmppxmlns
     
     ::Debug 2 "::Jabber::Init"
     
@@ -519,6 +517,19 @@ proc ::Jabber::Init { } {
 	::Jabber::UI::Show $wDlgs(jrostbro)
 	set jstate(haveJabberUI) 1
     }
+    
+    # Register file transport mechanism used when responding to a disco info
+    # request to the specified node.
+    # In a component based system this should be done by the transport component.
+    set subtags [list [wrapper::createtag "identity" -attrlist  \
+      [list category hierarchy type leaf name "File transfer"]]]
+    lappend subtags [wrapper::createtag "feature" \
+      -attrlist [list var $xmppxmlns(disco,info)]]
+    lappend subtags [wrapper::createtag "feature" \
+      -attrlist [list var $coccixmlns(servers)]]
+    lappend subtags [wrapper::createtag "feature" \
+      -attrlist [list var jabber:iq:oob]]
+    ::Jabber::RegisterCapsExtKey ftrans $subtags
     
     # Stuff that need an instance of jabberlib register here.
     ::Debug 4 "--> jabberInitHook"
@@ -1290,27 +1301,37 @@ proc ::Jabber::CreateCoccinellaPresElement { } {
 proc ::Jabber::CreateCapsPresElement { } {
     global  prefs
     variable coccixmlns
-    variable capsExtList
+    variable capsExtArr
     variable xmppxmlns
 
     set node $coccixmlns(caps)
+    set exts [lsort [array names capsExtArr]]
     set xmllist [wrapper::createtag c -attrlist \
-      [list xmlns $xmppxmlns(caps) node $node ver $prefs(fullVers) ext $capsExtList]]
+      [list xmlns $xmppxmlns(caps) node $node ver $prefs(fullVers) ext $exts]]
 
     return $xmllist
 }
 
-proc ::Jabber::RegisterCapsExtKey {key} {    
-    variable capsExtList
+proc ::Jabber::RegisterCapsExtKey {name subtags} {    
+    variable capsExtArr
     
-    lappend capsExtList $key
-    set capsExtList [lsort -unique $capsExtList]
+    set capsExtArr($name) $subtags
 }
 
 proc ::Jabber::GetCapsExtKeyList { } {
-    variable capsExtList
+    variable capsExtArr
     
-    return $capsExtList
+    return [lsort [array names capsExtArr]]
+}
+
+proc ::Jabber::GetCapsExtSubtags {name} {
+    variable capsExtArr
+    
+    if {[info exists capsExtArr($name)]} {
+	return $capsExtArr($name)
+    } else {
+	return {}
+    }
 }
 
 # Jabber::SetStatusWithMessage --

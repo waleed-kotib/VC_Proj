@@ -9,6 +9,7 @@
 # full path name of this file's directory.
 
 package ifneeded browse 2.0   [list source [file join $dir browse.tcl]]
+package ifneeded caps 1.0     [list source [file join $dir caps.tcl]]
 package ifneeded disco 0.1    [list source [file join $dir disco.tcl]]
 package ifneeded groupchat 1.0 [list source [file join $dir groupchat.tcl]]
 package ifneeded jlib 2.0     [list source [file join $dir jabberlib.tcl]]

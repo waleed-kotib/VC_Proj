@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: ibb.tcl,v 1.4 2004-12-13 13:39:19 matben Exp $
+# $Id: ibb.tcl,v 1.5 2005-02-16 14:26:46 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -34,7 +34,6 @@ namespace eval jlib::ibb {
 
     variable uid  0
     variable usid 0
-    variable ibbxmlns "http://jabber.org/protocol/ibb"
     variable inited 0
 }
 
@@ -45,9 +44,9 @@ namespace eval jlib::ibb {
 proc jlib::ibb::new {jlibname cmd args} {
 
     variable uid
-    variable ibbxmlns
     variable jlib2ibbname
     variable inited
+    upvar jlib::jxmlns jxmlns
         
     if {!$inited} {
 	Init
@@ -70,7 +69,7 @@ proc jlib::ibb::new {jlibname cmd args} {
     set priv(binblock) [expr 6 * ($priv(binblock)/6)]    
     
     # Register some standard iq handlers that is handled internally.
-    $jlibname iq_register set $ibbxmlns [namespace current]::handle_set
+    $jlibname iq_register set $jxmlns(ibb) [namespace current]::handle_set
 
     # Create the actual instance procedure.
     proc $ibbname {cmd args}   \
@@ -83,13 +82,14 @@ proc jlib::ibb::Init { } {
     
     variable ampElem
     variable inited
+    upvar jlib::jxmlns jxmlns
     
     set rule1 [wrapper::createtag "rule"  \
       -attrlist {condition deliver-at value stored action error}]
     set rule2 [wrapper::createtag "rule"  \
       -attrlist {condition match-resource value exact action error}]
     set ampElem [wrapper::createtag "amp" -attrlist \
-      {xmlns http://jabber.org/protocol/amp} -subtags [list $rule1 $rule2]]
+      [list xmlns $jxmlns(ibb)] -subtags [list $rule1 $rule2]]
     set inited 1
 }
 
@@ -128,7 +128,7 @@ proc jlib::ibb::cmdproc {ibbname cmd args} {
 proc jlib::ibb::send {ibbname to cmd args} {
 
     variable usid
-    variable ibbxmlns
+    upvar jlib::jxmlns jxmlns
     upvar ${ibbname}::priv priv
     upvar ${ibbname}::opts opts
 
@@ -140,7 +140,7 @@ proc jlib::ibb::send {ibbname to cmd args} {
     }
     set sid [incr usid]
     set openElem [wrapper::createtag "open" -attrlist \
-      [list sid $sid block-size $argsArr(-block-size) xmlns $ibbxmlns]
+      [list sid $sid block-size $argsArr(-block-size) xmlns $jxmlns(ibb)]
     
     # Keep internal storage for this request.
     foreach {key value} $args {

@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.30 2005-02-09 14:30:33 matben Exp $
+# $Id: roster.tcl,v 1.31 2005-02-16 14:26:46 matben Exp $
 # 
 # Note that every jid in the rostArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -136,11 +136,6 @@ namespace eval roster {
     # ...and the presence arrays: 'presArr($jid/$resource,...)'
     # The list of resources is treated separately (presArr($jid,res))
     set rostGlobals(presTags) {type status priority show x}
-    
-    variable xmppxmlns
-    array set xmppxmlns {
-	caps    http://jabber.org/protocol/caps
-    }
 }
 
 # roster::roster --
@@ -1250,12 +1245,12 @@ proc roster::getextras {rostName jid xmlns} {
 
 proc roster::getcapsattr {rostName jid attrname} {
     
-    variable xmppxmlns
+    upvar jlib::jxmlns jxmlns
     upvar ${rostName}::presArr presArr
 
     set attr ""
     set jid [jlib::jidmap $jid]
-    set xmlnscaps $xmppxmlns(caps)
+    set xmlnscaps $jxmlns(caps)
     if {[info exists presArr($jid,extras,$xmlnscaps)]} {
 	set cElem $presArr($jid,extras,$xmlnscaps)
 	set attr [wrapper::getattribute $cElem $attrname]

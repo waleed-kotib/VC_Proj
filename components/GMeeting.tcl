@@ -2,7 +2,7 @@
 # 
 #       Interface for launching Gnome Meeting.
 #
-# $Id: GMeeting.tcl,v 1.6 2005-02-04 07:05:30 matben Exp $
+# $Id: GMeeting.tcl,v 1.7 2005-02-16 14:26:39 matben Exp $
 
 namespace eval ::GMeeting:: {
     
@@ -20,6 +20,19 @@ proc ::GMeeting::Init { } {
     if {$cmd == {}} {
 	return
     }	
+   
+    set xmlnsdiscoinfo "http://jabber.org/protocol/disco#info"
+    
+    # Need to create all elements when responding to a disco info
+    # request to the specified node.
+    foreach uri {h323 sip callto} name {"VoIP H323" "VoIP SIP" "VoIP callto"} {
+	set subtags($uri) [list [wrapper::createtag "identity" -attrlist  \
+	  [list category hierarchy type leaf name $name]]]
+	lappend subtags($uri) [wrapper::createtag "feature" \
+	  -attrlist [list var $xmlnsdiscoinfo]]
+	lappend subtags($uri) [wrapper::createtag "feature" \
+	  -attrlist [list var "http://jabber.org/protocol/voip/$uri"]]
+    }
     
     set menuspec [list  \
       command {Gnome Meeting...} [namespace current]::MenuCmd normal {} {} {}]
@@ -27,9 +40,9 @@ proc ::GMeeting::Init { } {
         
     #::Jabber::UI::RegisterMenuEntry jabber $menuspec
     ::Jabber::UI::RegisterPopupEntry roster $popMenuSpec
-    ::Jabber::RegisterCapsExtKey voip_h323
-    ::Jabber::RegisterCapsExtKey voip_sip
-    ::Jabber::RegisterCapsExtKey voipgm2
+    ::Jabber::RegisterCapsExtKey voip_h323  $subtags(h323)
+    ::Jabber::RegisterCapsExtKey voip_sip   $subtags(sip)
+    ::Jabber::RegisterCapsExtKey voipgm2    $subtags(callto)
 
     ::Jabber::AddClientXmlns "http://jabber.org/protocol/voip/h323"
     ::Jabber::AddClientXmlns "http://jabber.org/protocol/voip/sip"

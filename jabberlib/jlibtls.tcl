@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: jlibtls.tcl,v 1.4 2005-02-13 13:17:42 matben Exp $
+# $Id: jlibtls.tcl,v 1.5 2005-02-16 14:26:46 matben Exp $
 
 package require tls
 
@@ -48,7 +48,7 @@ proc jlib::tls_features_write {jlibname name1 name2 op} {
 proc jlib::tls_continue {jlibname} {
     
     upvar ${jlibname}::locals locals
-    variable xmppns
+    variable xmppxmlns
 
     Debug 2 "jlib::tls_continue"
     
@@ -56,7 +56,7 @@ proc jlib::tls_continue {jlibname} {
     if {![info exists locals(features,starttls)]} {
 	tls_finish $jlibname starttls-nofeature
     }
-    set xmllist [wrapper::createtag starttls -attrlist [list xmlns $xmppns(tls)]]
+    set xmllist [wrapper::createtag starttls -attrlist [list xmlns $xmppxmlns(tls)]]
     send $jlibname $xmllist
     
     # Wait for 'failure' or 'proceed' element.
@@ -67,11 +67,11 @@ proc jlib::tls_proceed {jlibname tag xmllist} {
     upvar ${jlibname}::locals locals
     upvar ${jlibname}::opts opts
     upvar ${jlibname}::lib lib
-    variable xmppns
+    variable xmppxmlns
     
     Debug 2 "jlib::tls_proceed"
     
-    if {[wrapper::getattribute $xmllist xmlns] != $xmppns(tls)} {
+    if {[wrapper::getattribute $xmllist xmlns] != $xmppxmlns(tls)} {
 	tls_finish $jlibname starttls-protocolerror \
 	  "received incorrectly namespaced proceed element"
     }
@@ -108,7 +108,7 @@ proc jlib::tls_proceed {jlibname tag xmllist} {
     stream_reset $jlibname
     
     set xml "<stream:stream\
-      xmlns='$opts(-streamnamespace)' xmlns:stream='$xmppns(stream)'\
+      xmlns='$opts(-streamnamespace)' xmlns:stream='$xmppxmlns(stream)'\
       to='$locals(server)' xml:lang='[getlang]' version='1.0'>"
 
     # The tls package resets the encoding to: -encoding binary
@@ -135,11 +135,11 @@ proc jlib::tls_features_write_2nd {jlibname name1 name2 op} {
 proc jlib::tls_failure {jlibname tag xmllist} {
 
     upvar ${jlibname}::locals locals
-    variable xmppns
+    variable xmppxmlns
 
     Debug 2 "jlib::tls_failure"
     
-    if {[wrapper::getattribute $xmllist xmlns] == $xmppns(tls)} {
+    if {[wrapper::getattribute $xmllist xmlns] == $xmppxmlns(tls)} {
 	tls_finish $jlibname startls-failure "tls failed"
     } else {
 	tls_finish $jlibname startls-failure "tls failed for an unknown reason"

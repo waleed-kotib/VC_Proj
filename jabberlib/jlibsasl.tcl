@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: jlibsasl.tcl,v 1.11 2004-12-13 13:39:19 matben Exp $
+# $Id: jlibsasl.tcl,v 1.12 2005-02-16 14:26:46 matben Exp $
 
 # We need to be flexible here since can have cyrus based sasl or our 
 # own special pure tcl saslmd5.
@@ -113,7 +113,7 @@ proc jlib::auth_sasl_continue {jlibname} {
     
     upvar ${jlibname}::lib lib
     upvar ${jlibname}::locals locals
-    variable xmppns
+    variable xmppxmlns
     variable cyrussasl 
 
     Debug 2 "jlib::auth_sasl_continue"
@@ -166,7 +166,7 @@ proc jlib::auth_sasl_continue {jlibname} {
 	    # ok
 	    array set outArr $out
 	    set xmllist [wrapper::createtag auth \
-	      -attrlist [list xmlns $xmppns(sasl) mechanism $outArr(mechanism)] \
+	      -attrlist [list xmlns $xmppxmlns(sasl) mechanism $outArr(mechanism)] \
 	      -chdata [encode64 $outArr(output)]]
 	    send $jlibname $xmllist
 	}
@@ -174,7 +174,7 @@ proc jlib::auth_sasl_continue {jlibname} {
 	    # continue
 	    array set outArr $out
 	    set xmllist [wrapper::createtag auth \
-	      -attrlist [list xmlns $xmppns(sasl) mechanism $outArr(mechanism)] \
+	      -attrlist [list xmlns $xmppxmlns(sasl) mechanism $outArr(mechanism)] \
 	      -chdata [encode64 $outArr(output)]]
 	    send $jlibname $xmllist
 	}
@@ -264,11 +264,11 @@ proc jlib::saslmd5_callback {jlibname data} {
 }
 
 proc jlib::sasl_challenge {jlibname tag xmllist} {
-    variable xmppns
+    variable xmppxmlns
     
     Debug 2 "jlib::sasl_challenge"
     
-    if {[wrapper::getattribute $xmllist xmlns] == $xmppns(sasl)} {
+    if {[wrapper::getattribute $xmllist xmlns] == $xmppxmlns(sasl)} {
 	sasl_step $jlibname [wrapper::getcdata $xmllist]
     }
     return {}
@@ -278,7 +278,7 @@ proc jlib::sasl_step {jlibname serverin64} {
     
     upvar ${jlibname}::lib lib
     upvar ${jlibname}::locals locals
-    variable xmppns
+    variable xmppxmlns
     variable cyrussasl
 
     set serverin [decode64 $serverin64]
@@ -299,14 +299,14 @@ proc jlib::sasl_step {jlibname serverin64} {
 	0 {	    
 	    # ok
 	    set xmllist [wrapper::createtag response \
-	      -attrlist [list xmlns $xmppns(sasl)] \
+	      -attrlist [list xmlns $xmppxmlns(sasl)] \
 	      -chdata [encode64 $output]]
 	    send $jlibname $xmllist
 	}
 	4 {	    
 	    # continue
 	    set xmllist [wrapper::createtag response \
-	      -attrlist [list xmlns $xmppns(sasl)] \
+	      -attrlist [list xmlns $xmppxmlns(sasl)] \
 	      -chdata [encode64 $output]]
 	    send $jlibname $xmllist
 	}
@@ -320,11 +320,11 @@ proc jlib::sasl_step {jlibname serverin64} {
 proc jlib::sasl_failure {jlibname tag xmllist} {
     
     upvar ${jlibname}::locals locals
-    variable xmppns
+    variable xmppxmlns
 
     Debug 2 "jlib::sasl_failure"
     
-    if {[wrapper::getattribute $xmllist xmlns] == $xmppns(sasl)} {
+    if {[wrapper::getattribute $xmllist xmlns] == $xmppxmlns(sasl)} {
 	set errelem [lindex [wrapper::getchildren $xmllist] 0]
 	puts "\t errelem=$errelem"
 	if {$errelem == ""} {
@@ -343,10 +343,10 @@ proc jlib::sasl_success {jlibname tag xmllist} {
     upvar ${jlibname}::lib lib
     upvar ${jlibname}::locals locals
     upvar ${jlibname}::opts opts
-    variable xmppns
+    variable xmppxmlns
 
     Debug 2 "jlib::sasl_success"
-    if {[wrapper::getattribute $xmllist xmlns] != $xmppns(sasl)} {
+    if {[wrapper::getattribute $xmllist xmlns] != $xmppxmlns(sasl)} {
 	return
     }
     
@@ -362,7 +362,7 @@ proc jlib::sasl_success {jlibname tag xmllist} {
     stream_reset $jlibname
     
     set xml "<stream:stream\
-      xmlns='$opts(-streamnamespace)' xmlns:stream='$xmppns(stream)'\
+      xmlns='$opts(-streamnamespace)' xmlns:stream='$xmppxmlns(stream)'\
       to='$locals(server)' xml:lang='[getlang]' version='1.0'>"
 
     eval $lib(transportsend) {$xml}
@@ -388,7 +388,7 @@ proc jlib::auth_sasl_features_write {jlibname name1 name2 op} {
 proc jlib::resource_bind_cb {jlibname type subiq} {
     
     upvar ${jlibname}::locals locals
-    variable xmppns
+    variable xmppxmlns
     
     switch -- $type {
 	error {
@@ -398,7 +398,7 @@ proc jlib::resource_bind_cb {jlibname type subiq} {
 	    
 	    # Establish the session.
 	    set xmllist [wrapper::createtag session \
-	      -attrlist [list xmlns $xmppns(session)]]
+	      -attrlist [list xmlns $xmppxmlns(session)]]
 	    send_iq $jlibname set [list $xmllist] -command \
 	      [list [namespace current]::send_session_cb $jlibname]
 	}
