@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Privacy.tcl,v 1.10 2004-12-02 08:22:34 matben Exp $
+# $Id: Privacy.tcl,v 1.11 2004-12-20 15:16:46 matben Exp $
 
 package provide Privacy 1.0
 
@@ -76,12 +76,7 @@ proc ::Privacy::BuildPrefsPage {page} {
     labelframe $fpage -text [mc Filter] -padx 4 -pady 2
     pack $fpage -side top -anchor w -padx 8 -pady 4
     
-    label $fpage.lmsg -wraplength 300 -justify left -text \
-      "Each user may administrate zero or many lists.\
-      Only the active or default list affect message processing.\
-      Any active list affects only the session.\
-      The default list is processed if there is no active list."
-    
+    label $fpage.lmsg -wraplength 300 -justify left -text [mc prefprivmsg]
     pack  $fpage.lmsg -side top -anchor w -padx 4 -pady 1
     
     frame  $fpage.bottom
@@ -157,12 +152,12 @@ proc ::Privacy::BuildPrefsPage {page} {
     pack $wfrbt.new $wfrbt.edit $wfrbt.del -side top -padx 6 -pady 4 \
       -fill x
     
-    ::Privacy::Deselected
-    if {![::Jabber::IsConnected]} {
-	set statmsg [mc {Filter options unavailable while not connected}]
-    } else {
+    Deselected
+    if {[::Jabber::IsConnected]} {
 	set statmsg [mc {Obtaining filter options}]
-	::Privacy::GetLists
+	GetLists
+    } else {
+	set statmsg [mc prefprivunav]
     }
         
     # Trick to resize the labels wraplength.
@@ -243,7 +238,7 @@ proc ::Privacy::TableSelect {w x y} {
 	set range [::Privacy::TextGetRange $w tname "$ind lineend"]
 	set name [eval $w get $range]
 	set selected $name
-	::Privacy::Selected $name
+	Selected $name
 	set tiline [lsearch -glob -inline [$w tag names $ind] tiline:*]
 	if {$tiline != ""} {
 	    set iline [string map {tiline: ""} $tiline]
@@ -355,13 +350,13 @@ proc ::Privacy::GetListsCB {jlibname type subiq args} {
     
     switch -- $type {
 	error {
-	    set statmsg [mc {Filter options unavailable at this server}]
+	    set statmsg [mc prefprivnotex]
 	    set cache(haveprivacy) 0
 	}
 	default {
 	    set cache(haveprivacy) 1
 	    $wbts(new) configure -state normal
-	    set statmsg [mc {Filter lists obtained from server}]
+	    set statmsg [mc prefprivobtained]
 	    
 	    # Cache xml.
 	    set cache(lists) $subiq
@@ -389,7 +384,7 @@ proc ::Privacy::GetListsCB {jlibname type subiq args} {
 			set cache(default) $name
 		    }
 		    list {
-			::Privacy::TableInsertLine $name
+			TableInsertLine $name
 			set cache(xml,$name) $c
 		    }
 		}
@@ -518,7 +513,7 @@ namespace eval ::Privacy::List:: {
     
     # Need to map from menu entry to actual tag or attribute.
     variable strToTag
-    set strToTag(type,[mc jid])          jid
+    set strToTag(type,[mc Jid])          jid
     set strToTag(type,[mc Group])        group
     set strToTag(type,[mc Subscription]) subscription
     set strToTag(block,[mc {Incoming Messages}]) message
@@ -545,7 +540,7 @@ proc ::Privacy::List::GetList {name} {
     upvar ::Privacy::statmsg statmsg
     upvar ::Jabber::jstate jstate
         
-    set statmsg "Getting filter list \"$name\""
+    set statmsg [mc prefprivgetlist $name]
     set subtags [list [wrapper::createtag "item"  -attrlist [list name $name]]]    
     $jstate(jlib) iq_get "jabber:iq:privacy" -sublists $subtags \
       -command [list [namespace current]::GetListCB $name]
@@ -632,19 +627,15 @@ proc ::Privacy::List::Build { } {
     frame $w.frall -borderwidth 1 -relief raised
     pack  $w.frall -fill both -expand 1 -ipadx 4
 
-    label $w.frall.msg -wraplength 440 -justify left -text \
-      "Each list contains one or many rules,\
-      each rule specify the type of events it acts on,\
-      and the action it shall take.\
-      If you specify a group to block it must exist in your roster."
-    pack    $w.frall.msg -side top -anchor w -pady 2 -padx 10
+    label $w.frall.msg -wraplength 440 -justify left -text [mc prefprivrules]
+    pack  $w.frall.msg -side top -anchor w -pady 2 -padx 10
     
     set wfr $w.frall.fr
     frame $wfr
     pack  $wfr -side top -anchor w
     
     set state(wname) $wfr.ename
-    label $wfr.lname -text [mc {Name of list}]:
+    label $wfr.lname -text "[mc {Name of list}]:"
     entry $wfr.ename -width 16 -textvariable $token\(name)
     pack $wfr.lname $wfr.ename -side left
     
@@ -790,7 +781,7 @@ proc ::Privacy::List::BuildItem {token} {
     entry         $wval -width 12 -textvariable $token\(value${i})
     eval {tk_optionMenu $wblk $token\(block${i})} $labels(block)
     eval {tk_optionMenu $wact $token\(action${i})} $labels(action)
-    button        $wdel -text Delete  \
+    button        $wdel -text [mc Delete]  \
       -command [list [namespace current]::Delete $token $i]
     
     grid $wtype $wval $wblk $wact $wdel -sticky e

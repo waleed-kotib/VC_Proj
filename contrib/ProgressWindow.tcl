@@ -10,7 +10,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ProgressWindow.tcl,v 1.21 2004-12-09 15:20:27 matben Exp $
+# $Id: ProgressWindow.tcl,v 1.22 2004-12-20 15:16:44 matben Exp $
 # 
 #-------------------------------------------------------------------------------
 #
@@ -61,7 +61,7 @@ namespace eval ::ProgressWindow:: {
     } else {
 	set this(haveprogressbar) 1
     }
-    if {1 || [catch {package require tile}]} {
+    if {1 || [catch {package require tile 0.6}]} {
 	set this(havetile) 0
     } else {
 	set this(havetile) 1
@@ -300,9 +300,12 @@ proc ::ProgressWindow::Build {w} {
 	puts "::ProgressWindow::Build:: w=$w"
     }
     set wall $widgets(frame)
-    $framecmd $wall
-    pack $wall -padx 16 -pady 6
-
+    if {$this(havetile)} {
+	tframe $wall -padding {16 6}
+	pack $wall
+    } else {
+	pack $wall -padx 16 -pady 6
+    }
     set wmid            $wall.mid
     set wbot            $wall.bot
 
@@ -321,7 +324,7 @@ proc ::ProgressWindow::Build {w} {
     pack $widgets(label)  -side top -anchor w -pady 4
     
     # Frame with progress bar and Cancel button.
-    frame $wmid
+    $framecmd $wmid
     pack  $wmid -side top -fill x
     if {$this(havetile)} {
 	tprogress $widgets(pbar) -from 0 -to 100 -length $dims(width) \
@@ -356,7 +359,7 @@ proc ::ProgressWindow::Build {w} {
     pack $widgets(cancel) -side right -padx 8
 
     # Frame for texts etc.
-    frame $wbot
+    $framecmd $wbot
     pack  $wbot -side top -fill x
     if {$options(-pausecmd) != ""} {
 	$labelcmd $wpause -text [::msgcat::mc Pause] -fg blue
@@ -416,7 +419,9 @@ proc ::ProgressWindow::ConfigurePercent {w percent} {
     }
 
     # Update progress bar.
-    if {$this(haveprogressbar)} {
+    if {$this(havetile)} {
+	$widgets(pbar) set [expr int($percent)]
+    } elseif {$this(haveprogressbar)} {
 	set ::ProgressWindow::${w}::percent [expr int($percent)]
     } else {
 	$widgets(canvas) coords progbar 0 0   \

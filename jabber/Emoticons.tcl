@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.25 2004-12-06 15:26:56 matben Exp $
+# $Id: Emoticons.tcl,v 1.26 2004-12-20 15:16:45 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -525,7 +525,7 @@ proc ::Emoticons::InsertTextLegend {w name args} {
 	$w insert insert "\n"
     }
     
-    $w insert insert "\tImage\tText\n"
+    $w insert insert "\t[mc Image]\t[mc Text]\n"
     
     # Smileys:
     foreach ind [lsort -dictionary [array names tmpiconsInv $name,*]] {
@@ -582,8 +582,8 @@ proc ::Emoticons::BuildPrefsPage {wpage} {
     if {[llength $allSets] == 0} {
 	set allSets None
     }
-    label $wpage.l -text "The selected iconset will take action when you save"
-    pack $wpage.l -side top -anchor w -padx 8 -pady 4
+    label $wpage.l -text [mc preficonsel]
+    pack  $wpage.l -side top -anchor w -padx 8 -pady 4
     eval {tk_optionMenu $wpop [namespace current]::tmpSet} $allSets
     labelframe $wfr -labelwidget $wpop -padx 6 -pady 4
     pack $wfr -side top -anchor w -padx 8 -pady 4 -fill both -expand 1

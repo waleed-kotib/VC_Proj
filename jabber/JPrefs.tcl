@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.20 2004-12-20 11:15:02 matben Exp $
+# $Id: JPrefs.tcl,v 1.21 2004-12-20 15:16:45 matben Exp $
 
 package provide JPrefs 1.0
 
@@ -31,7 +31,7 @@ proc ::JPrefs::InitPrefsHook { } {
     set jprefs(awaymin)      0
     set jprefs(xawaymin)     0
     set jprefs(awaymsg)      ""
-    set jprefs(xawaymsg)     "User has been inactive for a while"
+    set jprefs(xawaymsg)     [mc prefuserinactive]
     set jprefs(logoutStatus) ""
         
     # Save inbox when quit?

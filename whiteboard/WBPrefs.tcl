@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: WBPrefs.tcl,v 1.5 2004-12-02 08:22:35 matben Exp $
+# $Id: WBPrefs.tcl,v 1.6 2004-12-20 15:17:05 matben Exp $
 
 package provide WBPrefs 1.0
 
@@ -79,17 +79,16 @@ proc ::WBPrefs::BuildWhiteboardPage {page} {
     set tmpPrefs(canScrollHeight) $prefs(canScrollHeight)
     
     set wfr $page.fr
-    labelframe $wfr -text [mc {Scrollregion}]
+    labelframe $wfr -text [mc {Canvas Size}]
     pack $wfr -side top -padx 8 -pady 4 -anchor w
-    set str "You may set a larger size than the default\
-      $prefs(mincanScrollWidth)x$prefs(mincanScrollHeight)"
-    label $wfr.lh -text $str
-    pack $wfr.lh -side top -anchor w -padx 6
+    label $wfr.lh -text [mc prefwbscroll $prefs(mincanScrollWidth) \
+      $prefs(mincanScrollHeight)]
+    pack  $wfr.lh -side top -anchor w -padx 6
     set afr $wfr.fr
     frame $afr
     pack  $afr -side top -anchor w
-    label $afr.w -text "[mc width]:"
-    label $afr.h -text "[mc height]:"
+    label $afr.w -text "[mc Width]:"
+    label $afr.h -text "[mc Height]:"
     entry $afr.width  -width 6 \
       -textvariable [namespace current]::tmpPrefs(canScrollWidth)
     entry $afr.height -width 6 \

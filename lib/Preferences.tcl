@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.70 2004-12-04 15:01:06 matben Exp $
+# $Id: Preferences.tcl,v 1.71 2004-12-20 15:16:46 matben Exp $
  
 package require mnotebook
 package require tree
@@ -690,34 +690,36 @@ proc ::Preferences::Proxies::BuildPage {page} {
     grid $pcnat.cb -sticky w -pady $ypad
     grid $pcnat.eip -sticky ew -pady $ypad
     
-    set pca $page.fr
-    labelframe $pca -text {Http Proxy} -padx 12 -pady 4
-    pack $pca -side top -anchor w -padx 8 -pady 4
-
-    label $pca.msg -wraplength 300 -justify left \
-      -text "Usage of the Http proxy is determined\
-      by each profile settings. File transfers wont work if you use Http proxy!\
-      NOT YET WORKING!"
-    
-    label $pca.lserv -text [mc {Proxy Server}]:
-    entry $pca.eserv -textvariable [namespace current]::tmpPrefs(httpproxyserver)
-    label $pca.lport -text [mc {Proxy Port}]:
-    entry $pca.eport -textvariable [namespace current]::tmpPrefs(httpproxyport)
-    checkbutton $pca.auth -text " [mc {Use proxy authorization}]" \
-      -variable [namespace current]::tmpPrefs(httpproxyauth)
-    label $pca.luser -text [mc Username]:
-    entry $pca.euser -textvariable [namespace current]::tmpPrefs(httpproxyusername)
-    label $pca.lpass -text [mc Password]:
-    entry $pca.epass -textvariable [namespace current]::tmpPrefs(httpproxypassword)
-
-    grid $pca.msg   -          -sticky w
-    grid $pca.lserv $pca.eserv
-    grid $pca.lport $pca.eport
-    grid x          $pca.auth  -sticky w
-    grid $pca.luser $pca.euser
-    grid $pca.lpass $pca.epass
-    grid $pca.lserv $pca.lport $pca.luser $pca.lpass -sticky e
-    grid $pca.eserv $pca.eport $pca.euser $pca.epass -sticky ew
+    if {0} {
+	set pca $page.fr
+	labelframe $pca -text {Http Proxy} -padx 12 -pady 4
+	pack $pca -side top -anchor w -padx 8 -pady 4
+	
+	label $pca.msg -wraplength 300 -justify left \
+	  -text "Usage of the Http proxy is determined\
+	  by each profile settings. File transfers wont work if you use Http proxy!\
+	  NOT YET WORKING!"
+	
+	label $pca.lserv -text [mc {Proxy Server}]:
+	entry $pca.eserv -textvariable [namespace current]::tmpPrefs(httpproxyserver)
+	label $pca.lport -text [mc {Proxy Port}]:
+	entry $pca.eport -textvariable [namespace current]::tmpPrefs(httpproxyport)
+	checkbutton $pca.auth -text " [mc {Use proxy authorization}]" \
+	  -variable [namespace current]::tmpPrefs(httpproxyauth)
+	label $pca.luser -text [mc Username]:
+	entry $pca.euser -textvariable [namespace current]::tmpPrefs(httpproxyusername)
+	label $pca.lpass -text [mc Password]:
+	entry $pca.epass -textvariable [namespace current]::tmpPrefs(httpproxypassword)
+	
+	grid $pca.msg   -          -sticky w
+	grid $pca.lserv $pca.eserv
+	grid $pca.lport $pca.eport
+	grid x          $pca.auth  -sticky w
+	grid $pca.luser $pca.euser
+	grid $pca.lpass $pca.epass
+	grid $pca.lserv $pca.lport $pca.luser $pca.lpass -sticky e
+	grid $pca.eserv $pca.eport $pca.euser $pca.epass -sticky ew
+    }
 }
 
 proc ::Preferences::Proxies::SavePrefsHook { } {

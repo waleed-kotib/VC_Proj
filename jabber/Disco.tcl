@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.45 2004-12-20 11:15:02 matben Exp $
+# $Id: Disco.tcl,v 1.46 2004-12-20 15:16:44 matben Exp $
 
 package provide Disco 1.0
 
@@ -237,6 +237,7 @@ proc ::Disco::ItemsCB {disconame type from subiq args} {
 		}
 	    }
 	    ::Jabber::AddErrorLog $from "Failed disco $from"
+	    AddServerErrorCheck $from
 	    catch {$wwave animate -1}
 	}
 	ok - result {
@@ -282,6 +283,7 @@ proc ::Disco::InfoCB {disconame type from subiq args} {
     ::Debug 2 "::Disco::InfoCB type=$type, from=$from"
     if {$type == "error"} {
 	::Jabber::AddErrorLog $from $subiq
+	AddServerErrorCheck $from
 	return
     }
     
@@ -1177,6 +1179,17 @@ proc ::Disco::AddServerDo {w} {
 	      [concat $addservervar [list $jprefs(disco,autoServers)]]]
 	}
     }
+}
+
+# Disco::AddServerErrorCheck --
+# 
+#       If we get an error from a server on the 'autoServers' list we
+#       shall remove it from the list.
+
+proc ::Disco::AddServerErrorCheck {from} {
+    upvar ::Jabber::jprefs jprefs
+    
+    lprune jprefs(disco,autoServers) $from
 }
 
 if {0} {

@@ -4,16 +4,20 @@
 # Defined in global namespace and may therefore be used in any namespace.
 
 ::msgcat::mcset sv Accept               {Acceptera}
+::msgcat::mcset sv Action               {Åtgärd}
+::msgcat::mcset sv Active               {Aktiv}
 ::msgcat::mcset sv Add                  {Lägg till}
 ::msgcat::mcset sv Address              {Adress}
 ::msgcat::mcset sv Advanced             {Avancerat}
 ::msgcat::mcset sv Agents		{Agenter}
+::msgcat::mcset sv Allow                {Tillåt}
 ::msgcat::mcset sv Appearance           {Utseende}
 ::msgcat::mcset sv Apply		{Använd}
 ::msgcat::mcset sv Available		{Tillgänglig}
 ::msgcat::mcset sv Away			{Borta}
 ::msgcat::mcset sv Binary               {Binärt}
 ::msgcat::mcset sv Birthday		{Födelsedag}
+::msgcat::mcset sv Block                {Blockera}
 ::msgcat::mcset sv Blocking		{Blockerande}
 ::msgcat::mcset sv Blockers             {Blockeringar}
 ::msgcat::mcset sv Browser              {Browser}
@@ -60,8 +64,10 @@
 ::msgcat::mcset sv Group                {Grupp}
 ::msgcat::mcset sv Groupchat            {Grupp chatt}
 ::msgcat::mcset sv Handling             {Hantering}
+::msgcat::mcset sv Height               {Höjd}
 ::msgcat::mcset sv History		{Historik}
 ::msgcat::mcset sv Home			{Hemma}
+::msgcat::mcset sv Image                {Bild}
 ::msgcat::mcset sv Import               {Importera}
 ::msgcat::mcset sv Inbox                {Inkorg}
 ::msgcat::mcset sv Info 		{Info}
@@ -74,6 +80,7 @@
 ::msgcat::mcset sv Middle		{Mittinitial}
 ::msgcat::mcset sv Moderators           {Moderatorer}
 ::msgcat::mcset sv More                 {Mer}
+::msgcat::mcset sv Name                 {Namn}
 ::msgcat::mcset sv Never		{Aldrig}
 ::msgcat::mcset sv New 			{Nytt}
 ::msgcat::mcset sv Next 		{Nästa}
@@ -138,14 +145,17 @@
 ::msgcat::mcset sv To 			{Till}
 ::msgcat::mcset sv Topic                {Ämne}
 ::msgcat::mcset sv Trash 		{Kasta}
+::msgcat::mcset sv Type                 {Typ}
 ::msgcat::mcset sv Unregister		{Avregistrera}
 ::msgcat::mcset sv Unsubscribe		{Avsluta prenumeration}
 ::msgcat::mcset sv Unsubscribed		{Prenumeration avslutad}
 ::msgcat::mcset sv Username 		{Användarnamn}
+::msgcat::mcset sv Value                {Värde}
 ::msgcat::mcset sv Visitors             {Besökare}
 ::msgcat::mcset sv Warning              {Varning}
 ::msgcat::mcset sv Welcome              {Välkommen}
 ::msgcat::mcset sv Whiteboard           {Skrivtavla}
+::msgcat::mcset sv Width                {Bredd}
 ::msgcat::mcset sv Work			{Arbete}
 ::msgcat::mcset sv Yes 			{Ja}
 ::msgcat::mcset sv yes 			{ja}
@@ -331,6 +341,7 @@
 ::msgcat::mcset sv {Block JID}             {Blockera JID}
 ::msgcat::mcset sv {Built in server port}  {Inbyggd server port}
 ::msgcat::mcset sv {Cache folder}          {Filminnesmapp}
+::msgcat::mcset sv {Canvas Size}           {Dukstorlek}
 ::msgcat::mcset sv {Chat History}	   {Chatt historik}
 ::msgcat::mcset sv {Chat With}             {Chatta med}
 ::msgcat::mcset sv {Clear Disk Cache Now}  {Töm diskminnet nu}
@@ -341,6 +352,7 @@
 ::msgcat::mcset sv {Create Room}	   {Skapa rum}
 ::msgcat::mcset sv {Default group}         {Standard grupp}
 ::msgcat::mcset sv {Default Logout Status} {Standard utloggningsstatus}
+::msgcat::mcset sv {Delete Rule}           {Tag bort regel}
 ::msgcat::mcset sv {Disk Cache}            {Diskminne}
 ::msgcat::mcset sv {Different Passwords}   {Lösenorden skiljer}
 ::msgcat::mcset sv {Do Not Disturb}	   {Stör ej}
@@ -379,6 +391,8 @@
 ::msgcat::mcset sv {Import using}          {Importera med}
 ::msgcat::mcset sv {Import/Remove fonts}   {Importera/Tag bort typsnitt}
 ::msgcat::mcset sv {Incoming Message}	   {Inkommande meddelande}
+::msgcat::mcset sv {Incoming Messages}     {Inkommande meddelanden}
+::msgcat::mcset sv {Incoming Presence}     {Inkommande närvaro}
 ::msgcat::mcset sv {Inspect Associations}  {Inspektera association}
 ::msgcat::mcset sv {IP address}            {IP adress}
 ::msgcat::mcset sv {Is connected}          {Är uppkopplad}
@@ -402,6 +416,7 @@
 ::msgcat::mcset sv {MIME type}             {MIME typ}
 ::msgcat::mcset sv {Multi Connect}         {Multipelanslut}
 ::msgcat::mcset sv {My Status}		   {Min status}
+::msgcat::mcset sv {Name of list}          {Listnamn}
 ::msgcat::mcset sv {Network Error}         {Nätverksfel}
 ::msgcat::mcset sv {Network Setup}         {Nätverksinställning}
 ::msgcat::mcset sv {New Account}           {Nytt konto}
@@ -410,7 +425,9 @@
 ::msgcat::mcset sv {New Color}             {Ny färg}
 ::msgcat::mcset sv {New incoming message}  {Nytt meddelande}
 ::msgcat::mcset sv {New Message}           {Nytt meddelande}
+::msgcat::mcset sv {New Nickname}          {Nytt kortnamn}
 ::msgcat::mcset sv {New password}          {Nytt lösenord}
+::msgcat::mcset sv {New Rule}              {Ny regel}
 ::msgcat::mcset sv {New shortcut}          {Ny genväg}
 ::msgcat::mcset sv {New Topic}             {Nytt ämne}
 ::msgcat::mcset sv {New User}              {Ny kontakt}
@@ -433,6 +450,7 @@
 ::msgcat::mcset sv {Open Helpfile}         {Öppna hjälpfil}
 ::msgcat::mcset sv {Open Image/Movie}      {Öppna bild/film}
 ::msgcat::mcset sv {Open Stream}	   {Öppna ström}
+::msgcat::mcset sv {Outgoing Presence}     {Utgående närvaro}
 ::msgcat::mcset sv {Peer-to-Peer}          {Direktanslutning}
 ::msgcat::mcset sv {Personal Info}         {Personlig info}
 ::msgcat::mcset sv {Personal Information}  {Personlig information}
@@ -445,6 +463,7 @@
 ::msgcat::mcset sv {Postal Code}	   {Postnummer}
 ::msgcat::mcset sv {Preferred Protocol}    {Förstahands protokoll}
 ::msgcat::mcset sv {Presence Error}	   {Presence fel}
+::msgcat::mcset sv {Privacy List}          {Integritetslista}
 ::msgcat::mcset sv {Profile Name}          {Profil namn}
 ::msgcat::mcset sv {Proxy Setup}           {Proxyinställning}
 ::msgcat::mcset sv {Put File Error}        {Felektighet vid filöverföring}
@@ -469,12 +488,14 @@
 ::msgcat::mcset sv {Search results}	   {Sökresultat}
 ::msgcat::mcset sv {Search Service}        {Söktjänst}
 ::msgcat::mcset sv {Search Specifications} {Sökspecifikation}
+::msgcat::mcset sv {Select a new nickname} {Välj ett nytt kortnamn}
 ::msgcat::mcset sv {Select Font}           {Välj typsnitt}
 ::msgcat::mcset sv {Send File}             {Skicka fil}
 ::msgcat::mcset sv {Send Live}             {Skicka lajv}
 ::msgcat::mcset sv {Server Info}           {Server info}
 ::msgcat::mcset sv {Service server}	   {Tjänst server}
 ::msgcat::mcset sv {Set Directed Presence} {Riktad närvaro}
+::msgcat::mcset sv {Set New Nickname}      {Sätt nytt kortnamn}
 ::msgcat::mcset sv {Set New Topic}         {Sätt nytt ämne}
 ::msgcat::mcset sv {Set Status}            {Sätt status}
 ::msgcat::mcset sv {Settings Panels}       {Inställningspaneler}
@@ -765,6 +786,21 @@ detta typsnitt installerat på sina system.}
 ::msgcat::mcset sv prefprofname  {Skriv in önskat namn på användarprofilen}
 ::msgcat::mcset sv prefstabui    {Använd användargränssnitt med flikar}
 ::msgcat::mcset sv prefsusesasl  {Använd SASL autentisering}
+::msgcat::mcset sv prefprivmsg   {Varje användare kan utnyttja noll eller flera listor. Endast den aktiva eller standard listan berör meddelandehanteringen.\
+En aktiv lista berör endast en session. Standard listan används om det inte finns en aktiv lista.}
+::msgcat::mcset sv prefprivunav  {Filtrerings alternativ ej tillgängliga när ej ansluten}
+::msgcat::mcset sv prefprivnotex {Filtrerings alternativ ej tillgängliga}
+::msgcat::mcset sv prefprivobtained {Filterlistor hämtade från servern}
+::msgcat::mcset sv prefprivgetlist {Hämtar filterlista "%s"}
+::msgcat::mcset sv prefprivrules {Varje lista består av en eller flera regler, och varje regel specificerar typen den verkar på samt vad den skall göra.\
+Om du väljer att blockera en grupp så måste denna finnas i din roster.}
+# We keep it in english here!
+::msgcat::mcset sv prefuserinactive {User has been inactive for a while}  
+::msgcat::mcset sv preficonsel   {Den valda ikonuppsättningen kommer att användas när du sparar}
+::msgcat::mcset sv prefwbscroll  {Du kan öka storleken utöver standardstorleken %sx%s}
+::msgcat::mcset sv prefssbts     {Visa Nästa och Föregående knappar}
+::msgcat::mcset sv prefssresize  {Anpassa fönsterstorleken automatiskt för att passa bild}
+
 
 
 
@@ -823,6 +859,8 @@ kan ha speciella krav.}
 ::msgcat::mcset sv jasettopic   {Sätt nytt ämne för detta gruppsamtal.}
 ::msgcat::mcset sv jadirpresmsg {Skicka riktad närvaro till "%s".}
 ::msgcat::mcset sv jatlsnegot   {Förhandlar om TLS säkerhet...}
+::msgcat::mcset sv jamucentermsg {Skriv in ditt kortnamn och tryck på Enter för att gå in i rummet. Du kan "browsa" för att få alla tillgängliga rum för en tjänst.\
+Vissa rum kan kräva medlemskap och lösenord.}
 
 
 
