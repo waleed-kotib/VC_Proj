@@ -8,11 +8,11 @@
 #      prefs:       preferences, application global
 #      state:       state variables, specific to toplevel whiteboard
 #      
-#  Copyright (c) 2002-2003  Mats Bengtsson
+#  Copyright (c) 2002-2004  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.35 2004-07-26 12:50:38 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.36 2004-09-03 07:47:07 matben Exp $
 
 
 set noErr 0

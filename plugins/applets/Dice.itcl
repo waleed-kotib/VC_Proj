@@ -3,7 +3,7 @@
 #       Creates a dice in a whiteboard canvas. 
 # 
 # 
-# $Id: Dice.itcl,v 1.3 2004-08-12 06:49:14 matben Exp $
+# $Id: Dice.itcl,v 1.4 2004-09-03 07:47:07 matben Exp $
 
 namespace eval Dice {
     
@@ -57,6 +57,8 @@ if {[itcl::find classes Dice] == ""} {
 	protected {
 	    method Draw {x y args}
 	    method Turn {}
+	    method AnimateAndSet {n}
+	    method StopAnimation {n}
 	    method SetOwnSide {n}
 	    method GetValue {name}
 	    method MoveInit {x y} {}
@@ -73,6 +75,11 @@ if {[itcl::find classes Dice] == ""} {
 	    common cardstackMenu
 	    common inited 0
 	    common icons
+	    common animatemillis 200
+	    common animatelength 3000
+	    common animatesequence {3 1 5 4 6 2}
+	    common animateicons
+	    common animateuid
 	}
 	
 	# ---------------------------
@@ -111,9 +118,19 @@ if {[itcl::find classes Dice] == ""} {
 	RegisterCanvasInstBinds  Dice:$this $instBindList	
     }
     
+    body Dice::destructor {} {	
+	if {[info exists animateuid]} {
+	    ::Utils::AnimateStop $animateuid
+	}
+    }
+    
     body Dice::Init {} {
 	MakeImages
 	InitRand
+	set animateicons {}
+	foreach i $animatesequence {
+	    lappend animateicons $icons(marble-${i})
+	}
 	::WB::RegisterHandler DICE [code Handler]
 	set inited 1
     }
@@ -139,8 +156,22 @@ if {[itcl::find classes Dice] == ""} {
     body Dice::Turn {} {
 	
 	set n [expr [UnifRand 6] + 1]
-	SetOwnSide $n
+	AnimateAndSet  $n
 	GenCommand "DICE: turn $utagdice $n" remote
+    }
+    
+    body Dice::AnimateAndSet {n} {
+	
+	set animateuid [::Utils::AnimateStart $animatemillis $animateicons \
+	  [list $tkCanvas itemconfigure $iddice -image %v]]
+	after $animatelength [code $this StopAnimation $n]
+    }
+    
+    body Dice::StopAnimation {n} {
+	
+	::Utils::AnimateStop $animateuid
+	unset animateuid
+	SetOwnSide $n
     }
     
     body Dice::SetOwnSide {n} {
@@ -165,7 +196,7 @@ if {[itcl::find classes Dice] == ""} {
 		# Need to backtrace from utag to actual object.
 		set obj [GetThisFromDiceUtag $utag]
 		if {$obj != ""} {
-		    $obj SetOwnSide $num
+		    $obj AnimateAndSet $num
 		}
 	    }
 	}
@@ -206,6 +237,10 @@ if {[itcl::find classes Dice] == ""} {
     }
     
     body Dice::DeleteCmd {} {
+	
+	if {[info exists animateuid]} {
+	    ::Utils::AnimateStop $animateuid
+	}
 	
 	# This actually calls back to our Delete method.
 	DeleteCurrent

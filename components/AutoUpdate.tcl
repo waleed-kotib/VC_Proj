@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: AutoUpdate.tcl,v 1.1 2004-07-26 12:47:34 matben Exp $
+# $Id: AutoUpdate.tcl,v 1.2 2004-09-03 07:47:06 matben Exp $
 
 package require tinydom
 package require http 2.3
@@ -89,6 +89,9 @@ proc ::AutoUpdate::Command {token} {
     
     # Investigate 'state' for any exceptions.
     set status [::http::status $token]
+    
+    ::Debug 2 "::AutoUpdate::Command status=$status"
+    
     if {$status == "ok"} {
 	    
 	# Get and parse xml.
