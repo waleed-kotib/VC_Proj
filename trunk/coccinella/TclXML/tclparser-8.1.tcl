@@ -30,7 +30,7 @@
 # liability for all claims, expenses, losses, damages and costs any user may
 # incur as a result of using, copying or modifying the Software.
 #
-# $Id: tclparser-8.1.tcl,v 1.1.1.1 2002-12-08 11:08:16 matben Exp $
+# $Id: tclparser-8.1.tcl,v 1.2 2004-08-17 14:10:30 matben Exp $
 
 package require Tcl 8.1
 
