@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.29 2004-04-25 15:35:25 matben Exp $
+# $Id: Login.tcl,v 1.30 2004-05-02 12:35:24 matben Exp $
 
 package provide Login 1.0
 
@@ -70,12 +70,12 @@ proc ::Jabber::Login::Login { } {
     
     # Global frame.
     frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1 -ipadx 12 -ipady 4
+    pack  $w.frall -fill both -expand 1
                                  
     ::headlabel::headlabel $w.frall.head -text [::msgcat::mc Login]    
     pack $w.frall.head -side top -fill both -expand 1
-    message $w.frall.msg -width 280 -text [::msgcat::mc jalogin]
-    pack $w.frall.msg -side top -fill both -expand 1 -padx 2
+    label $w.frall.msg -wraplength 280 -justify left -text [::msgcat::mc jalogin]
+    pack $w.frall.msg -side top -fill both -expand 1 -padx 10
     
     # Entries etc.
     set frmid [frame $w.frall.frmid -borderwidth 0]
