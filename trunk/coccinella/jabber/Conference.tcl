@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Conference.tcl,v 1.26 2004-06-12 15:35:18 matben Exp $
+# $Id: Conference.tcl,v 1.27 2004-06-13 13:43:24 matben Exp $
 
 package provide Conference 1.0
 
@@ -327,8 +327,8 @@ proc ::Jabber::Conference::EnterGet {token} {
     ::Jabber::Conference::BusyEnterDlgIncr $token
     
     # Send get enter room.
-    set roomJid [string tolower $state(roomname)@$state(server)]    
-    ::Jabber::JlibCmd conference get_enter $roomJid  \
+    set roomJid [jlib::jidmap $state(roomname)@$state(server)]
+    $jstate(jlib) conference get_enter $roomJid  \
       [list [namespace current]::EnterGetCB $token]
 }
 
@@ -378,7 +378,7 @@ proc ::Jabber::Conference::DoEnter {token} {
     } else {
     	set subelements [::Jabber::Forms::GetScrollForm $state(wbox)]
     }
-    set roomJid [string tolower $state(roomname)@$state(server)]
+    set roomJid [jlib::jidmap $state(roomname)@$state(server)]
     $jstate(jlib) conference set_enter $roomJid $subelements  \
       [list [namespace current]::ResultCallback $roomJid]
     
@@ -564,7 +564,7 @@ proc ::Jabber::Conference::CancelCreate {token} {
     upvar 0 $token state
     upvar ::Jabber::jstate jstate
     
-    set roomJid [string tolower $state(roomname)@$state(server)]
+    set roomJid [jlib::jidmap $state(roomname)@$state(server)]
     if {$state(usemuc) && ($roomJid != "")} {
 	catch {$jstate(jlib) muc setroom $roomJid cancel}
     }
@@ -598,7 +598,7 @@ proc ::Jabber::Conference::CreateGet {token} {
     set state(stattxt) "-- [::msgcat::mc jawaitserver] --"
     
     # Send get create room. NOT the server!
-    set roomJid [string tolower $state(roomname)@$state(server)]
+    set roomJid [jlib::jidmap $state(roomname)@$state(server)]
     set state(roomjid) $roomJid
 
     ::Debug 2 "::Jabber::Conference::CreateGet usemuc=$state(usemuc)"
@@ -660,7 +660,7 @@ proc ::Jabber::Conference::CreateMUCCB {token jlibName type args} {
     if {![info exists argsArr(-created)]} {
     
     }
-    ::Jabber::JlibCmd muc getroom $state(roomjid)  \
+    $jstate(jlib) muc getroom $state(roomjid)  \
       [list [namespace current]::CreateGetGetCB $token]
 }
 
@@ -718,7 +718,7 @@ proc ::Jabber::Conference::DoCreate {token} {
 
     $state(wsearrows) stop
     
-    set roomJid [string tolower $state(roomname)@$state(server)]
+    set roomJid [jlib::jidmap $state(roomname)@$state(server)]
     set state(roomjid) $roomJid
     if {$UItype != 2} {
     	set subelements [::Jabber::Forms::GetXML $state(wbox)]
@@ -728,10 +728,10 @@ proc ::Jabber::Conference::DoCreate {token} {
     
     # Ask jabberlib to create the room for us.
     if {$state(usemuc)} {
-	::Jabber::JlibCmd muc setroom $roomJid form -form $subelements \
+	$jstate(jlib) muc setroom $roomJid submit -form $subelements \
 	  -command [list [namespace current]::DoCreateCallback $state(usemuc) $roomJid]
     } else {
-	::Jabber::JlibCmd conference set_create $roomJid $subelements  \
+	$jstate(jlib) conference set_create $roomJid $subelements  \
 	  [list [namespace current]::DoCreateCallback $state(usemuc) $roomJid]
     }
     

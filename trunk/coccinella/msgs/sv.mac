@@ -732,6 +732,11 @@ konversationen nŠr du stŠnger whiteboarden. Vill du verkligen avsluta denna chat
 tillgŠnglig och meddelandet skickas dŠrfšr ej.}
 ::msgcat::mcset sv jamessregloginok             {Du Šr nu registrerad\
 och automatiskt pŒloggad som "%s"}
+::msgcat::mcset sv jamessregerrinuse            {Registreringen misslyckades\
+dŠrfšr att anvŠndarnamnet redan anvŠnds. Om du redan har registrerat detta namn\
+logga pŒ istŠllet. Felmeddelande: %s}
+::msgcat::mcset sv jamessregerr                 {Registreringen misslyckades\
+med felmeddelande: %s}
 
 
 
