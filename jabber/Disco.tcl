@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.31 2004-09-30 12:43:06 matben Exp $
+# $Id: Disco.tcl,v 1.32 2004-10-01 12:44:11 matben Exp $
 
 package provide Disco 1.0
 
@@ -341,7 +341,7 @@ proc ::Jabber::Disco::ParseGetInfo {from subiq args} {
     global  prefs
     variable xmlns
     upvar ::Jabber::jstate jstate
-    upvar ::Jabber::privatexmlns privatexmlns
+    upvar ::Jabber::coccixmlns coccixmlns
 
     ::Debug 2 "::Jabber::Disco::ParseGetInfo: args='$args'"
     
@@ -366,12 +366,12 @@ proc ::Jabber::Disco::ParseGetInfo {from subiq args} {
 	foreach var $vars {
 	    lappend subtags [wrapper::createtag "feature" -attrlist [list var $var]]
 	}	
-    } elseif {[string equal $node "$privatexmlns(caps)#$prefs(fullVers)"]} {
+    } elseif {[string equal $node "$coccixmlns(caps)#$prefs(fullVers)"]} {
 	
 	# Return entity capabilities [JEP 0115]. Version number.
 	# ???
 	set subtags {}
-    } elseif {[string equal $node "$privatexmlns(caps)#ftrans"]} {
+    } elseif {[string equal $node "$coccixmlns(caps)#ftrans"]} {
 
 	# Return entity capabilities [JEP 0115]. File transfer.
 	# ???
@@ -854,7 +854,6 @@ proc ::Jabber::Disco::ControlArrows {step} {
 proc ::Jabber::Disco::PresenceHook {jid presence args} {
     variable wtree    
     upvar ::Jabber::jstate jstate
-    upvar ::Jabber::privatexmlns privatexmlns
     
     ::Debug 4 "::Jabber::Disco::PresenceHook $jid, $presence"
      
@@ -885,11 +884,11 @@ proc ::Jabber::Disco::PresenceHook {jid presence args} {
 
 proc ::Jabber::Disco::TryIdentifyCoccinella {jid3 presence args} {
     upvar ::Jabber::jstate jstate
-    upvar ::Jabber::privatexmlns privatexmlns
+    upvar ::Jabber::coccixmlns coccixmlns
     
     if {[string equal $presence "available"]} {
 	set coccielem  \
-	  [$jstate(roster) getextras $jid3 $privatexmlns(servers)]
+	  [$jstate(roster) getextras $jid3 $coccixmlns(servers)]
 	if {$coccielem == {}} {
 	    if {![::Jabber::Roster::IsTransportHeuristics $jid3]} {
 		if {![$jstate(disco) isdiscoed items $jid3]} {
@@ -917,7 +916,7 @@ proc ::Jabber::Disco::AutoDisco {jid presence args} {
 
 proc ::Jabber::Disco::AutoDiscoCmd {disconame type from subiq args} {
     upvar ::Jabber::jstate jstate
-    upvar ::Jabber::privatexmlns privatexmlns    
+    upvar ::Jabber::coccixmlns coccixmlns    
     
     ::Debug 4 "::Jabber::Disco::AutoDiscoCmd type=$type, from=$from"
     
@@ -926,8 +925,8 @@ proc ::Jabber::Disco::AutoDiscoCmd {disconame type from subiq args} {
 	    ::Jabber::AddErrorLog $from "Failed disco: $subiq"
 	}
 	result - ok {
-	    if {[$jstate(disco) hasfeature $privatexmlns(whiteboard) $from] || \
-	      [$jstate(disco) hasfeature $privatexmlns(coccinella) $from]} {
+	    if {[$jstate(disco) hasfeature $coccixmlns(whiteboard) $from] || \
+	      [$jstate(disco) hasfeature $coccixmlns(coccinella) $from]} {
 		::Jabber::Roster::SetCoccinella $from
 	    }
 	}

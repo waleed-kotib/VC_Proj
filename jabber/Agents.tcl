@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Agents.tcl,v 1.26 2004-09-30 12:43:06 matben Exp $
+# $Id: Agents.tcl,v 1.27 2004-10-01 12:44:11 matben Exp $
 
 package provide Agents 1.0
 
@@ -427,7 +427,6 @@ proc ::Jabber::Agents::Popup {w v x y} {
     global  wDlgs this
     variable popMenuDefs
     
-    upvar ::Jabber::privatexmlns privatexmlns
     upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::Jabber::Agents::Popup w=$w, v='$v', x=$x, y=$y"

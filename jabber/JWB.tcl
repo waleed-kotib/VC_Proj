@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.36 2004-09-28 13:50:17 matben Exp $
+# $Id: JWB.tcl,v 1.37 2004-10-01 12:44:11 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -33,7 +33,7 @@ proc ::Jabber::WB::Init {jlibName} {
     global  this prefs
     variable xmlnsSVGWB
     upvar ::Jabber::jstate jstate
-    upvar ::Jabber::privatexmlns privatexmlns
+    upvar ::Jabber::coccixmlns coccixmlns
     
     ::Debug 4 "::Jabber::WB::Init"
     
@@ -76,11 +76,11 @@ proc ::Jabber::WB::Init {jlibName} {
     $jstate(jlib) message_register groupchat coccinella:wb  \
       [namespace current]::HandleRawGroupchatMessage
 
-    $jstate(jlib) message_register normal $privatexmlns(whiteboard)  \
+    $jstate(jlib) message_register normal $coccixmlns(whiteboard)  \
       [namespace current]::HandleSpecialMessage 20
-    $jstate(jlib) message_register chat $privatexmlns(whiteboard)  \
+    $jstate(jlib) message_register chat $coccixmlns(whiteboard)  \
       [namespace current]::HandleRawChatMessage
-    $jstate(jlib) message_register groupchat $privatexmlns(whiteboard)  \
+    $jstate(jlib) message_register groupchat $coccixmlns(whiteboard)  \
       [namespace current]::HandleRawGroupchatMessage
 
     # Not completed SVG protocol...
@@ -1376,11 +1376,11 @@ proc ::Jabber::WB::PutIPnumber {jid id} {
 proc ::Jabber::WB::GetCoccinellaServers {jid3 {cmd {}}} {
     variable ipCache
     upvar ::Jabber::jstate jstate
-    upvar ::Jabber::privatexmlns privatexmlns
+    upvar ::Jabber::coccixmlns coccixmlns
     
     set mjid3 [jlib::jidmap $jid3]
     set ipCache(req,$mjid3) 1
-    $jstate(jlib) iq_get $privatexmlns(servers) -to $jid3  \
+    $jstate(jlib) iq_get $coccixmlns(servers) -to $jid3  \
       -command [list ::Jabber::WB::GetCoccinellaServersCallback $jid3 $cmd]
 }
 
@@ -1414,7 +1414,7 @@ proc ::Jabber::WB::GetCoccinellaServersCallback {jid3 cmd jlibname type subiq} {
 proc ::Jabber::WB::PresenceHook {jid type args} {
     variable ipCache
     upvar ::Jabber::jstate jstate
-    upvar ::Jabber::privatexmlns privatexmlns
+    upvar ::Jabber::coccixmlns coccixmlns
     
     ::Debug 2 "::Jabber::WB::PresenceHook jid=$jid, type=$type"
     
@@ -1434,7 +1434,7 @@ proc ::Jabber::WB::PresenceHook {jid type args} {
 	    
 	    # Starting with 0.95.1 we send server info along the initial 
 	    # presence element.
-	    set coccielem [$jstate(roster) getextras $mjid $privatexmlns(servers)]
+	    set coccielem [$jstate(roster) getextras $mjid $coccixmlns(servers)]
 	    if {$coccielem != {}} {
 		set ipElements [wrapper::getchildswithtag $coccielem ip]
 		set ip [wrapper::getcdata [lindex $ipElements 0]]

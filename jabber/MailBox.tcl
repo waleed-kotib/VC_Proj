@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.54 2004-09-30 12:43:06 matben Exp $
+# $Id: MailBox.tcl,v 1.55 2004-10-01 12:44:12 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -117,12 +117,12 @@ proc ::Jabber::MailBox::Init { } {
 
 proc ::Jabber::MailBox::InitHandler {jlibName} {
     upvar ::Jabber::jstate jstate
-    upvar ::Jabber::privatexmlns privatexmlns
+    upvar ::Jabber::coccixmlns coccixmlns
     
     # Register for the whiteboard messages we want. Duplicate protocols.
     $jstate(jlib) message_register normal coccinella:wb  \
       [namespace current]::HandleRawWBMessage
-    $jstate(jlib) message_register normal $privatexmlns(whiteboard)  \
+    $jstate(jlib) message_register normal $coccixmlns(whiteboard)  \
       [namespace current]::HandleRawWBMessage
     $jstate(jlib) message_register normal "http://jabber.org/protocol/svgwb" \
       [namespace current]::HandleSVGWBMessage

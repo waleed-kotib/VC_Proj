@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.77 2004-09-30 12:43:06 matben Exp $
+# $Id: Chat.tcl,v 1.78 2004-10-01 12:44:11 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -225,7 +225,7 @@ proc ::Jabber::Chat::DoStart {w} {
     set finished 1
     destroy $w
     if {$ans == "yes"} {
-	::Jabber::Chat::StartThread $user
+	StartThread $user
     }
 }
 
@@ -262,12 +262,12 @@ proc ::Jabber::Chat::GotMsg {body args} {
     # There are several cases to deal with: Have thread page, have dialog?
     if {[info exists argsArr(-thread)]} {
 	set threadID $argsArr(-thread)
-	set chattoken [::Jabber::Chat::GetTokenFrom chat threadid $threadID]
+	set chattoken [GetTokenFrom chat threadid $threadID]
     } else {
 	
 	# Try to find a reasonable fallback for clients that fail here (Psi).
 	# Find if we have registered any chat for this jid 2/3.
-	set chattoken [::Jabber::Chat::GetTokenFrom chat jid ${mjid2}*]
+	set chattoken [GetTokenFrom chat jid ${mjid2}*]
 	if {$chattoken == ""} {
 	    
 	    # Need to create a new thread ID.
@@ -288,18 +288,18 @@ proc ::Jabber::Chat::GotMsg {body args} {
 	    return
 	} else {
 	    if {$jprefs(chat,tabbedui)} {
-		set dlgtoken [::Jabber::Chat::GetFirstDlgToken]
+		set dlgtoken [GetFirstDlgToken]
 		if {$dlgtoken == ""} {
-		    set dlgtoken [eval {::Jabber::Chat::Build $threadID} $args]
-		    set chattoken [::Jabber::Chat::GetActiveChatToken $dlgtoken]
+		    set dlgtoken [eval {Build $threadID} $args]
+		    set chattoken [GetActiveChatToken $dlgtoken]
 		} else {
 		    set chattoken [eval {
-			::Jabber::Chat::NewPage $dlgtoken $threadID
+			NewPage $dlgtoken $threadID
 		    } $args]
 		}
 	    } else {
-		set dlgtoken [eval {::Jabber::Chat::Build $threadID} $args]		
-		set chattoken [::Jabber::Chat::GetActiveChatToken $dlgtoken]
+		set dlgtoken [eval {Build $threadID} $args]		
+		set chattoken [GetActiveChatToken $dlgtoken]
 	    }
 	    eval {::hooks::run newChatThreadHook $body} $args
 	    variable $chattoken
@@ -331,27 +331,33 @@ proc ::Jabber::Chat::GotMsg {body args} {
     if {[info exists argsArr(-subject)]} {
 	set chatstate(subject) $argsArr(-subject)
 	set chatstate(lastsubject) $chatstate(subject)
-	::Jabber::Chat::InsertMessage $chattoken systext "Subject: $chatstate(subject)\n"
+	InsertMessage $chattoken systext "Subject: $chatstate(subject)\n"
     }
     
     # See if we've got a jabber:x:event (JEP-0022).
+    # One msn transport sends a 'compose' tag along with an actual nonempty 
+    # message. Assume compose is cancelled when we receive a nonempty 'body'.
     # 
     #  Should we handle this with hooks????
-    if {[info exists argsArr(-x)]} {
-	set xevent [lindex [wrapper::getnamespacefromchilds  \
-	  $argsArr(-x) x "jabber:x:event"] 0]
-	if {[llength $xevent]} {
-	    eval {::Jabber::Chat::XEventRecv $chattoken $xevent} $args
+    if {$body == ""} {
+	if {[info exists argsArr(-x)]} {
+	    set xevent [lindex [wrapper::getnamespacefromchilds  \
+	      $argsArr(-x) x "jabber:x:event"] 0]
+	    if {[llength $xevent]} {
+		eval {XEventRecv $chattoken $xevent} $args
+	    }
 	}
+    } else {
+	XEventCancel $chattoken
     }
     
     # And put message in window if nonempty, and history file.
     if {$body != ""} {
-	::Jabber::Chat::InsertMessage $chattoken you $body
+	InsertMessage $chattoken you $body
 	set dateISO [clock format [clock seconds] -format "%Y%m%dT%H:%M:%S"]
-	::Jabber::Chat::PutMessageInHistoryFile $jid2 \
+	PutMessageInHistoryFile $jid2 \
 	  [list $jid2 $threadID $dateISO $body]
-	eval {::Jabber::Chat::TabAlert $chattoken} $args
+	eval {TabAlert $chattoken} $args
     }
     if {$dlgstate(got1stMsg) == 0} {
 	set dlgstate(got1stMsg) 1
@@ -373,7 +379,7 @@ proc ::Jabber::Chat::GotNormalMsg {body args} {
     if {$jprefs(chat,normalAsChat) && ($body != "")} {
 	
 	::Debug 2 "::Jabber::Chat::GotNormalMsg args='$args'"
-	eval {::Jabber::Chat::GotMsg $body} $args
+	eval {GotMsg $body} $args
     }
 }
 
@@ -466,7 +472,7 @@ proc ::Jabber::Chat::StartThread {jid args} {
 	set threadID $argsArr(-thread)
 	
 	# Do we already have a dialog with this thread?
-	set chattoken [::Jabber::Chat::GetTokenFrom chat threadid $threadID]
+	set chattoken [GetTokenFrom chat threadid $threadID]
 	if {$chattoken != ""} {
 	    set havedlg 1
 	    upvar 0 $chattoken chatstate
@@ -477,16 +483,16 @@ proc ::Jabber::Chat::StartThread {jid args} {
     
     if {!$havedlg} {
 	if {$jprefs(chat,tabbedui)} {
-	    set dlgtoken [::Jabber::Chat::GetFirstDlgToken]
+	    set dlgtoken [GetFirstDlgToken]
 	    if {$dlgtoken == ""} {
 		set dlgtoken [eval {
-		    ::Jabber::Chat::Build $threadID -from $jid} $args]
-		set chattoken [::Jabber::Chat::GetTokenFrom chat threadid $threadID]
+		    Build $threadID -from $jid} $args]
+		set chattoken [GetTokenFrom chat threadid $threadID]
 
 		variable $chattoken
 		upvar 0 $chattoken chatstate
 	    } else {
-		set chattoken [::Jabber::Chat::NewPage $dlgtoken $threadID \
+		set chattoken [NewPage $dlgtoken $threadID \
 		  -from $jid]
 		
 		# Make page frontmost.
@@ -500,7 +506,7 @@ proc ::Jabber::Chat::StartThread {jid args} {
 		$dlgstate(wnb) displaypage $chatstate(pagename)
 	    }
 	} else {
-	    eval {::Jabber::Chat::Build $threadID -from $jid} $args
+	    eval {Build $threadID -from $jid} $args
 	}
     }
 }
@@ -548,7 +554,7 @@ proc ::Jabber::Chat::Build {threadID args} {
 
     set fontSB [option get . fontSmallBold {}]
     if {$dlgstate(active)} {
-	::Jabber::Chat::ActiveCmd $dlgtoken
+	ActiveCmd $dlgtoken
     }
 
     # Global frame.
@@ -624,7 +630,7 @@ proc ::Jabber::Chat::Build {threadID args} {
     
     # Use an extra frame that contains everything thread specific.
     set chattoken [eval {
-	::Jabber::Chat::BuildThreadWidget $dlgtoken $wthread $threadID} $args]
+	BuildThreadWidget $dlgtoken $wthread $threadID} $args]
     pack $wthread -in $wcont -fill both -expand 1
     variable $chattoken
     upvar 0 $chattoken chatstate
@@ -635,7 +641,7 @@ proc ::Jabber::Chat::Build {threadID args} {
     if {$nwin == 1} {
 	::UI::SetWindowGeometry $w $wDlgs(jchat)
     }
-    ::Jabber::Chat::SetTitle $w $chatstate(rosterName) $chatstate(fromjid)
+    SetTitle $w $chatstate(rosterName) $chatstate(fromjid)
     wm minsize $w [expr {$shortBtWidth < 220} ? 220 : $shortBtWidth] 320
     wm maxsize $w 800 2000
     
@@ -726,7 +732,7 @@ proc ::Jabber::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set w [winfo toplevel $wthread]
     set chatstate(w) $w
 
-    ::Jabber::Chat::SetTitle $w $rosterName $chatstate(fromjid)
+    SetTitle $w $rosterName $chatstate(fromjid)
 
     set wfrmid      $wthread.frmid
     set wtxt        $wfrmid.frtxt
@@ -788,7 +794,7 @@ proc ::Jabber::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     grid rowconfigure $wtxt 0 -weight 1
     
     # The tags.
-    ::Jabber::Chat::ConfigureTextTags $w $wtext
+    ConfigureTextTags $w $wtext
 
     # Text send.
     frame $wtxtsnd
@@ -876,11 +882,11 @@ proc ::Jabber::Chat::NewPage {dlgtoken threadID args} {
 	set dlgstate(name2token,$name) $chattoken
 	
 	# Repack the ChatThread in notebook page.
-	::Jabber::Chat::MoveThreadToPage $dlgtoken $chattoken
+	MoveThreadToPage $dlgtoken $chattoken
     } 
 
     # Make fresh page with chat widget.
-    set chattoken [eval {::Jabber::Chat::MakeNewPage $dlgtoken $threadID} $args]
+    set chattoken [eval {MakeNewPage $dlgtoken $threadID} $args]
 
     # Make sure all "Close Thread" buttons enabled.
     if {$jprefs(chat,tabbedui)} {
@@ -916,7 +922,7 @@ proc ::Jabber::Chat::MakeNewPage {dlgtoken threadID args} {
     # able to reparent it when notebook gons.
     set wthread $dlgstate(wthread)[incr uidpage]
     set chattoken [eval {
-	::Jabber::Chat::BuildThreadWidget $dlgtoken $wthread $threadID
+	BuildThreadWidget $dlgtoken $wthread $threadID
     } $args]
     pack $wthread -in $wpage -fill both -expand true
     
@@ -953,11 +959,11 @@ proc ::Jabber::Chat::CloseThread {chattoken} {
     upvar 0 $chattoken chatstate
     
     set dlgtoken $chatstate(dlgtoken)
-    ::Jabber::Chat::DeletePage $chattoken
-     set newchattoken [::Jabber::Chat::GetActiveChatToken $dlgtoken]
+    DeletePage $chattoken
+     set newchattoken [GetActiveChatToken $dlgtoken]
 
     # Set state of new page.
-    ::Jabber::Chat::SetThreadState $dlgtoken $newchattoken
+    SetThreadState $dlgtoken $newchattoken
 }
 
 proc ::Jabber::Chat::DeletePage {chattoken} {
@@ -984,7 +990,7 @@ proc ::Jabber::Chat::DeletePage {chattoken} {
 	variable $chattoken
 	upvar 0 $chattoken chatstate
 
-	::Jabber::Chat::MoveThreadFromPage $dlgtoken $chattoken
+	MoveThreadFromPage $dlgtoken $chattoken
 	pack forget $chatstate(wclose)
     }
 }
@@ -1016,7 +1022,7 @@ proc ::Jabber::Chat::SelectPageCmd {dlgtoken w name} {
     Debug 3 "::Jabber::Chat::SelectPageCmd name=$name"
         
     set chattoken $dlgstate(name2token,$name)
-    ::Jabber::Chat::SetThreadState $dlgtoken $chattoken
+    SetThreadState $dlgtoken $chattoken
 }
 
 proc ::Jabber::Chat::SetThreadState {dlgtoken chattoken} {
@@ -1030,14 +1036,14 @@ proc ::Jabber::Chat::SetThreadState {dlgtoken chattoken} {
     Debug 3 "::Jabber::Chat::SetThreadState chattoken=$chattoken"
     jlib::splitjid $chatstate(jid) user res
     if {[$jstate(roster) isavailable $user]} {
-	::Jabber::Chat::SetState $chattoken normal
+	SetState $chattoken normal
     } else {
-	::Jabber::Chat::SetState $chattoken disabled
+	SetState $chattoken disabled
     }
     if {[winfo exists $dlgstate(wnb)]} {
 	$dlgstate(wnb) pageconfigure $chatstate(pagename) -image ""
     }
-    ::Jabber::Chat::SetTitle $dlgstate(w) $chatstate(rosterName) \
+    SetTitle $dlgstate(w) $chatstate(rosterName) \
       $chatstate(fromjid)
 }
 
@@ -1104,7 +1110,7 @@ proc ::Jabber::Chat::TabAlert {chattoken args} {
 
 proc ::Jabber::Chat::SmileyCmd {dlgtoken im key} {
     
-    set chattoken [::Jabber::Chat::GetActiveChatToken $dlgtoken]
+    set chattoken [GetActiveChatToken $dlgtoken]
     variable $chattoken
     upvar 0 $chattoken chatstate
     
@@ -1119,9 +1125,9 @@ proc ::Jabber::Chat::CloseHook {wclose} {
     global  wDlgs
     
     if {[string match $wDlgs(jchat)* $wclose]} {
-	set dlgtoken [::Jabber::Chat::GetTokenFrom dlg w $wclose]
+	set dlgtoken [GetTokenFrom dlg w $wclose]
 	if {$dlgtoken != ""} {
-	    ::Jabber::Chat::Close $dlgtoken
+	    Close $dlgtoken
 	}
     }   
     return ""
@@ -1129,21 +1135,21 @@ proc ::Jabber::Chat::CloseHook {wclose} {
 
 proc ::Jabber::Chat::LoginHook { } {
 
-    foreach dlgtoken [::Jabber::Chat::GetTokenList dlg] {
-	set chattoken [::Jabber::Chat::GetActiveChatToken $dlgtoken]
-	::Jabber::Chat::SetThreadState $dlgtoken $chattoken
+    foreach dlgtoken [GetTokenList dlg] {
+	set chattoken [GetActiveChatToken $dlgtoken]
+	SetThreadState $dlgtoken $chattoken
     }
     return ""
 }
 
 proc ::Jabber::Chat::LogoutHook { } {
     
-    foreach dlgtoken [::Jabber::Chat::GetTokenList dlg] {
+    foreach dlgtoken [GetTokenList dlg] {
 	variable $dlgtoken
 	upvar 0 $dlgtoken dlgstate
 
 	foreach ctoken $dlgstate(chattokens) {
-	    ::Jabber::Chat::SetState $ctoken disabled
+	    SetState $ctoken disabled
 	}
     }
     return ""
@@ -1154,11 +1160,11 @@ proc ::Jabber::Chat::QuitHook { } {
     
     ::UI::SaveWinGeom $wDlgs(jstartchat)
     ::UI::SaveWinPrefixGeom $wDlgs(jchat)
-    ::Jabber::Chat::GetFirstPanePos
+    GetFirstPanePos
     
     # This sends cancel compose to all.
-    foreach dlgtoken [::Jabber::Chat::GetTokenList dlg] {
-	::Jabber::Chat::Close $dlgtoken
+    foreach dlgtoken [GetTokenList dlg] {
+	Close $dlgtoken
     }    
     return ""
 }
@@ -1229,7 +1235,7 @@ proc ::Jabber::Chat::SetFont {theFont} {
 
 	set w $chatstate(w)
 	if {[winfo exists $w]} {
-	    ::Jabber::Chat::ConfigureTextTags $w $chatstate(wtext)
+	    ConfigureTextTags $w $chatstate(wtext)
 	    if {$jprefs(chatFont) == ""} {
 		
 		# This should be the font set throught the option database.
@@ -1259,7 +1265,7 @@ proc ::Jabber::Chat::ReturnKeyPress {dlgtoken} {
     upvar 0 $dlgtoken dlgstate
     
     if {$dlgstate(active)} {
-	::Jabber::Chat::Send $dlgtoken
+	Send $dlgtoken
 	
 	# Stop further handling in Text.
 	return -code break
@@ -1282,7 +1288,7 @@ proc ::Jabber::Chat::Send {dlgtoken} {
 	  -message [mc jamessnotconnected]
 	return
     }
-    set chattoken [::Jabber::Chat::GetActiveChatToken $dlgtoken]
+    set chattoken [GetActiveChatToken $dlgtoken]
     variable $chattoken
     upvar 0 $chattoken chatstate
 
@@ -1317,14 +1323,14 @@ proc ::Jabber::Chat::Send {dlgtoken} {
     # Put in history file.
     set secs [clock seconds]
     set dateISO [clock format $secs -format "%Y%m%dT%H:%M:%S"]
-    ::Jabber::Chat::PutMessageInHistoryFile $jid2 \
+    PutMessageInHistoryFile $jid2 \
       [list $jstate(mejid) $threadID $dateISO $allText]
     
     # Need to detect if subject changed.
     set opts {}
     if {![string equal $chatstate(subject) $chatstate(lastsubject)]} {
 	lappend opts -subject $chatstate(subject)
-	::Jabber::Chat::InsertMessage $chattoken sys  \
+	InsertMessage $chattoken sys  \
 	  "Subject: $chatstate(subject)\n"
     }
     set chatstate(lastsubject) $chatstate(subject)
@@ -1332,7 +1338,7 @@ proc ::Jabber::Chat::Send {dlgtoken} {
     # Cancellations of any message composing jabber:x:event
     if {$cprefs(usexevents) &&  \
       [string equal $chatstate(xevent,status) "composing"]} {
-	::Jabber::Chat::XEventCancelCompose $chattoken
+	XEventSendCancelCompose $chattoken
     }
     
     # Requesting composing notification.
@@ -1354,7 +1360,7 @@ proc ::Jabber::Chat::Send {dlgtoken} {
     set dlgstate(lastsentsecs) $secs
     
     # Add to chat window and clear send.        
-    ::Jabber::Chat::InsertMessage $chattoken me $allText
+    InsertMessage $chattoken me $allText
     $wtextsnd delete 1.0 end
 
     if {$dlgstate(got1stMsg) == 0} {
@@ -1376,7 +1382,7 @@ proc ::Jabber::Chat::TraceJid {dlgtoken name junk1 junk2} {
 
 proc ::Jabber::Chat::SendFile {dlgtoken} {
      
-    set chattoken [::Jabber::Chat::GetActiveChatToken $dlgtoken]
+    set chattoken [GetActiveChatToken $dlgtoken]
     variable $chattoken
     upvar 0 $chattoken chatstate
 
@@ -1386,7 +1392,7 @@ proc ::Jabber::Chat::SendFile {dlgtoken} {
 
 proc ::Jabber::Chat::Print {dlgtoken} {
     
-    set chattoken [::Jabber::Chat::GetActiveChatToken $dlgtoken]
+    set chattoken [GetActiveChatToken $dlgtoken]
     variable $chattoken
     upvar 0 $chattoken chatstate
 
@@ -1396,7 +1402,7 @@ proc ::Jabber::Chat::Print {dlgtoken} {
 proc ::Jabber::Chat::Save {dlgtoken} {
     global  this
     
-    set chattoken [::Jabber::Chat::GetActiveChatToken $dlgtoken]
+    set chattoken [GetActiveChatToken $dlgtoken]
     variable $chattoken
     upvar 0 $chattoken chatstate
 
@@ -1435,7 +1441,7 @@ proc ::Jabber::Chat::PresenceHook {jid type args} {
 	set from $argsArr(-from)
     }
     set mjid [jlib::jidmap $jid]
-    set chattoken [::Jabber::Chat::GetTokenFrom chat jid ${mjid}*]
+    set chattoken [GetTokenFrom chat jid ${mjid}*]
     if {$chattoken == ""} {
 	
 	# Likely no chat with this jid.
@@ -1457,13 +1463,13 @@ proc ::Jabber::Chat::PresenceHook {jid type args} {
     if {[info exists argsArr(-status)]} {
 	set status "$argsArr(-status)\n"
     }
-    ::Jabber::Chat::InsertMessage $chattoken sys  \
+    InsertMessage $chattoken sys  \
       "$from is: $mapShowTextToElem($show)\n$status"
     
     if {[string equal $type "available"]} {
-	::Jabber::Chat::SetState $chattoken normal
+	SetState $chattoken normal
     } else {
-	::Jabber::Chat::SetState $chattoken disabled
+	SetState $chattoken disabled
     }
     set icon [::Jabber::Roster::GetPresenceIconFromJid $from]
     if {$icon != ""} {
@@ -1486,7 +1492,7 @@ proc ::Jabber::Chat::HaveChat {jid} {
 
     jlib::splitjid $jid jid2 res
     set mjid2 [jlib::jidmap $jid2]
-    set chattoken [::Jabber::Chat::GetTokenFrom chat jid ${mjid2}*]
+    set chattoken [GetTokenFrom chat jid ${mjid2}*]
     if {$chattoken != ""} {
 	variable $chattoken
 	upvar 0 $chattoken chatstate
@@ -1516,7 +1522,7 @@ proc ::Jabber::Chat::HaveChat {jid} {
 proc ::Jabber::Chat::GetTokenFrom {type key pattern} {
     
     # Search all tokens for this key into state array.
-    foreach token [::Jabber::Chat::GetTokenList $type] {
+    foreach token [GetTokenList $type] {
 	
 	switch -- $type {
 	    dlg {
@@ -1539,7 +1545,7 @@ proc ::Jabber::Chat::GetTokenFrom {type key pattern} {
 proc ::Jabber::Chat::GetFirstDlgToken { } {
  
     set token ""
-    set dlgtokens [::Jabber::Chat::GetTokenList dlg]
+    set dlgtokens [GetTokenList dlg]
     foreach dlgtoken $dlgtokens {
 	variable $dlgtoken
 	upvar 0 $dlgtoken dlgstate    
@@ -1585,7 +1591,7 @@ proc ::Jabber::Chat::Close {dlgtoken} {
 	  -message [FormatTextForMessageBox [mc jamesschatclose]]]
     }
     if {$ans == "yes"} {
-	set chattoken [::Jabber::Chat::GetActiveChatToken $dlgtoken]
+	set chattoken [GetActiveChatToken $dlgtoken]
 	variable $chattoken
 	upvar 0 $chattoken chatstate
 
@@ -1594,9 +1600,9 @@ proc ::Jabber::Chat::Close {dlgtoken} {
 	destroy $dlgstate(w)
 	
 	foreach chattoken $dlgstate(chattokens) {
-	    ::Jabber::Chat::XEventCancelCompose $chattoken
+	    XEventSendCancelCompose $chattoken
 	}
-	::Jabber::Chat::Free $dlgtoken
+	Free $dlgtoken
     }
 }
 
@@ -1617,9 +1623,9 @@ proc ::Jabber::Chat::GetFirstPanePos { } {
     
     set win [::UI::GetFirstPrefixedToplevel $wDlgs(jchat)]
     if {$win != ""} {
-	set dlgtoken [::Jabber::Chat::GetTokenFrom dlg w $win]
+	set dlgtoken [GetTokenFrom dlg w $win]
 	if {$dlgtoken != ""} {
-	    set chattoken [::Jabber::Chat::GetActiveChatToken $dlgtoken]
+	    set chattoken [GetActiveChatToken $dlgtoken]
 	    variable $chattoken
 	    upvar 0 $chattoken chatstate
 
@@ -1684,6 +1690,14 @@ proc ::Jabber::Chat::XEventRecv {chattoken xevent args} {
     }
 }
 
+proc ::Jabber::Chat::XEventCancel {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    $chatstate(wnotifier) configure -image ""
+    set chatstate(notifier) " "
+}
+
 proc ::Jabber::Chat::KeyPressEvent {chattoken char} {
     variable $chattoken
     upvar 0 $chattoken chatstate
@@ -1699,11 +1713,11 @@ proc ::Jabber::Chat::KeyPressEvent {chattoken char} {
 	unset chatstate(xevent,afterid)
     }    
     if {[info exists chatstate(xevent,msgid)] && ($chatstate(xevent,status) == "")} {
-	::Jabber::Chat::XEventSendCompose $chattoken
+	XEventSendCompose $chattoken
     }
     if {$chatstate(xevent,status) == "composing"} {
 	set chatstate(xevent,afterid) [after $cprefs(xeventsmillis) \
-	  [list [namespace current]::XEventCancelCompose $chattoken]]
+	  [list [namespace current]::XEventSendCancelCompose $chattoken]]
     }
 }
 
@@ -1740,11 +1754,11 @@ proc ::Jabber::Chat::XEventSendCompose {chattoken} {
     }    
 }
 
-proc ::Jabber::Chat::XEventCancelCompose {chattoken} {
+proc ::Jabber::Chat::XEventSendCancelCompose {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
 
-    ::Debug 2 "::Jabber::Chat::XEventCancelCompose chattoken=$chattoken"
+    ::Debug 2 "::Jabber::Chat::XEventSendCancelCompose chattoken=$chattoken"
 
     # We may have been destroyed.
     if {![info exists chatstate]} {
@@ -1812,12 +1826,12 @@ proc ::Jabber::Chat::PutMessageInHistoryFile {jid msg} {
 
 proc ::Jabber::Chat::BuildHistory {dlgtoken} {
 
-    set chattoken [::Jabber::Chat::GetActiveChatToken $dlgtoken]
+    set chattoken [GetActiveChatToken $dlgtoken]
     variable $chattoken
     upvar 0 $chattoken chatstate
     
     jlib::splitjid $chatstate(jid) jid2 res
-    ::Jabber::Chat::BuildHistoryForJid $jid2
+    BuildHistoryForJid $jid2
 }
 
 # Jabber::Chat::BuildHistoryForJid --
@@ -1883,7 +1897,7 @@ proc ::Jabber::Chat::BuildHistoryForJid {jid} {
     grid rowconfigure $wtxt 0 -weight 1    
         
     # The tags.
-    ::Jabber::Chat::ConfigureTextTags $wchatframe $wtext    
+    ConfigureTextTags $wchatframe $wtext    
     
     set path [file join $prefs(historyPath) [uriencode::quote $jid]] 
     if {[file exists $path]} {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: jlibsasl.tcl,v 1.6 2004-09-26 13:52:02 matben Exp $
+# $Id: jlibsasl.tcl,v 1.7 2004-10-01 12:44:12 matben Exp $
 
 # We need to be flexible here since can have cyrus based sasl or our 
 # own special pure tcl saslmd5.
@@ -86,6 +86,11 @@ proc jlib::auth_sasl {jlibname username resource password cmd} {
     set locals(myjid2)   ${username}@$locals(server)
     set locals(myjid)    ${username}@$locals(server)/${resource}
     set locals(sasl,cmd) $cmd
+    
+    # Set up callbacks for elements that are of interest to us.
+    #element_register $jlibname challenge [namespace current]::sasl_challenge
+    #element_register $jlibname failure   [namespace current]::sasl_failure
+    #element_register $jlibname success   [namespace current]::sasl_success
 
     if {[info exists locals(features,mechanisms)]} {
 	auth_sasl_continue $jlibname
