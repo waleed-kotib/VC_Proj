@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.112 2005-02-02 09:02:21 matben Exp $
+# $Id: Roster.tcl,v 1.113 2005-02-03 08:43:58 matben Exp $
 
 package provide Roster 1.0
 
@@ -1358,9 +1358,11 @@ proc ::Roster::GetPresenceIconFromJid {jid} {
     } else {
 	set pres [$jstate(roster) getpresence $jid2 -resource $res]
     }
-    array set presArr $pres
+    set rost [$jstate(roster) getrosteritem $jid2]
+    array set argsArr $pres
+    array set argsArr $rost
     
-    return [eval {GetPresenceIcon $jid $presArr(-type)} $pres]
+    return [eval {GetPresenceIcon $jid $argsArr(-type)} [array get argsArr]]
 }
 
 # Roster::GetPresenceIcon --
