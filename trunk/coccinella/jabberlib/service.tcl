@@ -6,7 +6,7 @@
 #       
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: service.tcl,v 1.15 2005-02-16 14:26:47 matben Exp $
+# $Id: service.tcl,v 1.16 2005-02-18 13:58:54 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -494,7 +494,6 @@ proc jlib::service::gettype {jlibname jid} {
     set type ""
     
     # Browse service if any. Returns 'service/icq' etc.
-    #if {$serv(browse) && [$serv(browse,name) isbrowsed $jid]}
     if {$serv(browse)} {
 	set type [$serv(browse,name) gettype $jid]
     }
