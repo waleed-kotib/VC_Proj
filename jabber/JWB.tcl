@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.29 2004-08-18 12:08:58 matben Exp $
+# $Id: JWB.tcl,v 1.30 2004-08-23 12:44:36 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -51,6 +51,7 @@ proc ::Jabber::WB::Init {jlibName} {
     ::hooks::add autobrowsedCoccinellaHook    ::Jabber::WB::AutoBrowseHook
     ::hooks::add loginHook                    ::Jabber::WB::LoginHook
     ::hooks::add logoutHook                   ::Jabber::WB::LogoutHook
+    ::hooks::add groupchatEnterRoomHook       ::Jabber::WB::EnterRoomHook
     ::hooks::add groupchatExitRoomHook        ::Jabber::WB::ExitRoomHook
 
     # Configure the Tk->SVG translation to use http.
@@ -270,6 +271,9 @@ proc ::Jabber::WB::NewWhiteboardTo {jid args} {
     ::Debug 2 "\t isRoom=$isRoom, isUserInRoom=$isUserInRoom, isAvailable=$isAvailable"
  
     set wtop [::WB::GetNewToplevelPath]
+    set jwbstate($wtop,jid) $jid
+    set jwbstate($jid,wtop) $wtop
+    set doBuild 1
 
     if {$isRoom} {
 	
@@ -277,21 +281,26 @@ proc ::Jabber::WB::NewWhiteboardTo {jid args} {
 	set allRooms [$jstate(jlib) service allroomsin]
 	::Debug 3 "\t allRooms=$allRooms"
 	
-	if {[lsearch $allRooms $jid] < 0} {
-	    set ans [::Jabber::GroupChat::EnterOrCreate enter -roomjid $jid \
-	      -autoget 1]
-	    if {$ans == "cancel"} {
-		return
-	    }
-	}
 	set roomName [$jstate(jlib) service name $jid]
 	if {[llength $roomName]} {
 	    set title "Groupchat room $roomName"
 	} else {
 	    set title "Groupchat room $jid"
 	}
+	set jwbstate($wtop,title)  $title
 	set jwbstate($wtop,type)   groupchat
 	set jwbstate($wtop,send)   1
+	set jwbstate($wtop,ui)     whiteboard
+
+	if {[lsearch $allRooms $jid] < 0} {
+	    set ans [::Jabber::GroupChat::EnterOrCreate enter -roomjid $jid \
+	      -autoget 1]
+	    if {$ans == "cancel"} {
+		::Jabber::WB::Free $wtop
+		return
+	    }
+	    set doBuild 0
+	}
     } elseif {$isAvailable || $isUserInRoom} {
 	if {[info exists argsArr(-thread)]} {
 	    set thread $argsArr(-thread)
@@ -320,12 +329,33 @@ proc ::Jabber::WB::NewWhiteboardTo {jid args} {
 	set jwbstate($wtop,type)   normal
 	set jwbstate($wtop,send)   0
     }
-    set jwbstate($wtop,jid) $jid
-    set jwbstate($jid,wtop) $wtop
 
-    ::WB::BuildWhiteboard $wtop -title $title
-        
+    # This is too early to have a whiteboard for groupchat since we don't
+    # know if we succeed to enter.
+    if {$doBuild} {
+	::WB::BuildWhiteboard $wtop -title $title
+    }
     return $wtop
+}
+
+# ::Jabber::WB::EnterRoomHook --
+# 
+#       We create only whiteboard if enter succeeds.
+
+proc ::Jabber::WB::EnterRoomHook {roomjid protocol} {
+    variable jwbstate
+    
+    ::Debug 4 "::Jabber::WB::EnterRoomHook roomjid=$roomjid"
+    
+    if {[info exists jwbstate($roomjid,wtop)]} {
+	set wtop $jwbstate($roomjid,wtop)
+	if {[info exists jwbstate($wtop,ui)] && \
+	  ($jwbstate($wtop,ui) == "whiteboard")} {
+	    if {![winfo exists [::UI::GetToplevelFromPath $wtop]]} {
+		::WB::BuildWhiteboard $wtop -title $jwbstate($wtop,title)
+	    }
+	}
+    }
 }
 
 # ::Jabber::WB::BuildEntryHook --

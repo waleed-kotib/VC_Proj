@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.67 2004-08-18 12:08:58 matben Exp $
+# $Id: GroupChat.tcl,v 1.68 2004-08-23 12:44:36 matben Exp $
 
 package require History
 
@@ -210,31 +210,12 @@ proc ::Jabber::GroupChat::HaveMUC {{roomjid ""}} {
 	    }
 	}
     } else {
-	if {1} {
-	    
-	    # We must query the service, not the room, for browse to work.
-	    if {[regexp {^[^@]+@(.+)$} $roomjid match service]} {
-		if {[$jstate(jlib) service hasfeature $service  \
-		  "http://jabber.org/protocol/muc"]} {
-		    set ans 1
-		}
-	    }
-	}
 	
-	if {0} {
-	    if {[info exists jstate(browse)]} {
-		set confserver [$jstate(browse) getparentjid $roomjid]
-		if {[$jstate(browse) isbrowsed $confserver]} {
-		    set ans [$jstate(browse) hasnamespace $confserver  \
-		      "http://jabber.org/protocol/muc"]
-		}
-	    }
-	    if {[info exists jstate(disco)]} {
-		set confserver [$jstate(disco) parent $roomjid]
-		if {[$jstate(disco) isdiscoed info $confserver]} {
-		    set ans [$jstate(disco) hasfeature   \
-		      "http://jabber.org/protocol/muc" $confserver]
-		}
+	# We must query the service, not the room, for browse to work.
+	if {[regexp {^[^@]+@(.+)$} $roomjid match service]} {
+	    if {[$jstate(jlib) service hasfeature $service  \
+	      "http://jabber.org/protocol/muc"]} {
+		set ans 1
 	    }
 	}
     }

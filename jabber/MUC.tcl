@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.46 2004-08-07 13:34:22 matben Exp $
+# $Id: MUC.tcl,v 1.47 2004-08-23 12:44:36 matben Exp $
 
 package require entrycomp
 package require muc
@@ -96,7 +96,8 @@ proc ::Jabber::MUC::Init {jlibName} {
 #       Initiates the process of entering a MUC room. Multi instance.
 #       
 # Arguments:
-#       args        -server, -roomjid, -nickname, -password, -autobrowse
+#       args        -server, -roomjid, -nickname, -password, -autobrowse,
+#                   -command
 #       
 # Results:
 #       "cancel" or "enter".
@@ -143,6 +144,7 @@ proc ::Jabber::MUC::BuildEnter {args} {
       -usemacmainmenu 1
     wm title $w [mc {Enter Room}]
     set enter(w) $w
+    set enter(args) $args
     array set enter {
 	finished    -1
 	statuscount 0
@@ -201,6 +203,9 @@ proc ::Jabber::MUC::BuildEnter {args} {
 	set enter(server) $argsArr(-server)
 	set enter(server-state) disabled
 	$wpopupserver configure -state disabled
+    }
+    if {[info exists argsArr(-command)]} {
+	set enter(-command) $argsArr(-command)
     }
     
     label $frtop.lnick -text "[mc {Nick name}]:"
@@ -297,7 +302,11 @@ proc ::Jabber::MUC::BuildEnter {args} {
     trace vdelete $token\(server) w  \
       [list [namespace current]::ConfigRoomList $token]
     set finished $enter(finished)
-    unset enter
+    
+    # Unless cancelled we keep 'enter' until got callback.
+    if {$finished <= 0} {
+	unset enter
+    }
     return [expr {($finished <= 0) ? "cancel" : "enter"}]
 }
 
@@ -442,27 +451,10 @@ proc ::Jabber::MUC::DoEnter {token} {
 	lappend opts -password $enter(password)
     }
     eval {$jstate(muc) enter $roomJid $enter(nickname) -command \
-      [list [namespace current]::EnterCallback]} $opts
+      [list [namespace current]::EnterCallback $token]} $opts
     set enter(finished) 1
     ::Jabber::MUC::EnterCloseHook $enter(w)
     catch {destroy $enter(w)}
-   
-    # Cache groupchat protocol type (muc|conference|gc-1.0).
-    ::hooks::run groupchatEnterRoomHook $roomJid "muc"
-}
-
-# Jabber::MUC::EnterRoom --
-# 
-#       Programmatic way to enter a room.
-
-proc ::Jabber::MUC::EnterRoom {roomjid nick args} {
-    upvar ::Jabber::jstate jstate
-    
-    eval {$jstate(muc) enter $roomjid $nick -command \
-      [list [namespace current]::EnterCallback]} $args
-   
-    # Cache groupchat protocol type (muc|conference|gc-1.0).
-    ::hooks::run groupchatEnterRoomHook $roomjid "muc"
 }
 
 # Jabber::MUC::EnterCallback --
@@ -479,29 +471,34 @@ proc ::Jabber::MUC::EnterRoom {roomjid nick args} {
 # Results:
 #       None.
 
-proc ::Jabber::MUC::EnterCallback {mucname type args} {
+proc ::Jabber::MUC::EnterCallback {token mucname type args} {
+    variable $token
+    upvar 0 $token enter
     
     Debug 3 "::Jabber::MUC::EnterCallback type=$type, args='$args'"
+
     array set argsArr $args
+    jlib::splitjid $argsArr(-from) roomjid res
+    set retry 0
     
     if {$type == "error"} {
-    	set errcode ???
-    	set errmsg ""
-    	if {[info exists argsArr(-error)]} {
-    	    set errcode [lindex $argsArr(-error) 0]
+	set errcode ???
+	set errmsg ""
+	if {[info exists argsArr(-error)]} {
+	    set errcode [lindex $argsArr(-error) 0]
+	    set errmsg  [lindex $argsArr(-error) 1]
 	    
 	    switch -- $errcode {
 		401 {
 		    
 		    # Password required.
-		    set roomName ""
-		    regexp {^([^@]+)@} $argsArr(-from) m roomName
-		    set msg "Error when entering room \"$roomName\":\
-		      [lindex $argsArr(-error) 1] Do you want to retry?"
+		    set msg "Error when entering room \"$roomjid\":\
+		      $errmsg Do you want to retry?"
 		    set ans [tk_messageBox -type yesno -icon error  \
 		      -message $msg]
 		    if {$ans == "yes"} {
-			::Jabber::MUC::BuildEnter -roomjid $argsArr(-from)
+			set retry 1
+			eval {::Jabber::MUC::BuildEnter} $enter(args)
 		    }
 		}
 		default {
@@ -512,11 +509,60 @@ proc ::Jabber::MUC::EnterCallback {mucname type args} {
 		}
 	    }
 	}
-	return
     } else {
 	
-	::hooks::run groupchatEnterRoomHook $argsArr(-from) "muc"
+	# Cache groupchat protocol type (muc|conference|gc-1.0) etc.
+	::Debug 2 "--> groupchatEnterRoomHook $roomjid"
+	::hooks::run groupchatEnterRoomHook $roomjid "muc"
     }
+    if {!$retry && [info exists enter(-command)]} {
+	uplevel #0 $enter(-command) $type $args
+    }
+    unset -nocomplain enter
+}
+
+# Jabber::MUC::EnterRoom --
+# 
+#       Programmatic way to enter a room.
+
+proc ::Jabber::MUC::EnterRoom {roomjid nick args} {
+    variable enteruid
+    upvar ::Jabber::jstate jstate
+    
+    # State variable to collect instance specific variables.
+    set token [namespace current]::enter[incr enteruid]
+    variable $token
+    upvar 0 $token enter
+
+    set enter(nickname) $nick
+    set enter(args) [concat $args -roomjid $roomjid -nickname $nick]
+    jlib::splitjidex $roomjid enter(roomname) enter(server) z
+
+    set opts {}
+    foreach {key value} $args {
+	switch -- $key {
+	    -command {
+		set enter(-command) $value
+	    }
+	    -password {
+		lappend opts $key $value
+	    }
+	}
+    }
+    eval {$jstate(muc) enter $roomjid $nick -command \
+      [list [namespace current]::EnterCallback $token]} $opts
+}
+
+proc ::Jabber::MUC::EnterRoomCallbackXXX {token mucname type args} {
+    variable $token
+    upvar 0 $token enter
+
+    eval {::Jabber::MUC::EnterCallback $token $mucname $type} $args
+    
+    if {[info exists enter(-command)]} {
+	uplevel #0 $enter(-command) $type $args
+    }
+    unset -nocomplain enter
 }
 
 namespace eval ::Jabber::MUC:: {
@@ -1528,12 +1574,12 @@ proc ::Jabber::MUC::EditListDoAdd {roomjid} {
     lappend editlocals(listvar) $empty
     set indjid [lsearch $setListDefs($type) jid]
     array set indColumnFocus [list  \
-	voice      end  \
+	voice      end      \
 	ban        $indjid  \
-	member     end  \
-	moderator  end  \
+	member     end      \
+	moderator  end      \
 	admin      $indjid  \
-	owner      end  \
+	owner      end      \
     ]
     
     # Set focus.

@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  
-# $Id: mactabnotebook.tcl,v 1.16 2004-07-30 12:55:53 matben Exp $
+# $Id: mactabnotebook.tcl,v 1.17 2004-08-23 12:44:36 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -1025,6 +1025,7 @@ proc ::mactabnotebook::BuildWinxp {w} {
     
     variable toDrawPolyWinXP
     variable widgetGlobals
+    variable this
     upvar ::mactabnotebook::${w}::options options
     upvar ::mactabnotebook::${w}::tnInfo tnInfo
     upvar ::mactabnotebook::${w}::name2uid name2uid
@@ -1046,6 +1047,12 @@ proc ::mactabnotebook::BuildWinxp {w} {
     set margin2     $options(-margin2)
     array set metricsArr [font metrics $font]
     set fontHeight $metricsArr(-linespace)
+    
+    if {[string match mac* $this(platform)]} {
+	set xoff 1
+    } else {
+	set xoff 0
+    }
     
     # Find max height of any image.
     set maxh 0
@@ -1098,8 +1105,7 @@ proc ::mactabnotebook::BuildWinxp {w} {
 	set xleft $x
 	set xright [expr $xtext + $wd + $ipadx + 2]
 	set xlplus [expr $xleft+1]
-	set xrminus [expr $xright-1]
-	set xrminus $xright
+	set xrminus [expr $xright-$xoff]
 	
 	# Draw tabs.
 	foreach {coords ptags} $toDrawPolyWinXP {

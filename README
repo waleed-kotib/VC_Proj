@@ -177,7 +177,10 @@ Web interaction (uri bindings):
     xmpp:marilu@l4l.be?message&subject=hi&body=Hello%20World
     xmpp:marilu@l4l.be?message&subject=hi&body=Hello%20World&thread=abc123
     xmpp:mats@conference.l4l.be?groupchat&nick=matsnick
-        Enters the specified room using nick matsnick.
+        enters the specified room using nick matsnick.
+
+    xmpp:mats@muc.sgi.se?groupchat&nick=matsnick&xmlns=whiteboard
+        enters the specified room using the whiteboard
 
 
 XML/SVG:

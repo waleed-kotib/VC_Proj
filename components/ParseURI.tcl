@@ -4,7 +4,7 @@
 #       typically from an anchor element <a href='xmpp:jid[?query]'/>
 #       in a html page.
 # 
-# $Id: ParseURI.tcl,v 1.7 2004-08-07 13:34:22 matben Exp $
+# $Id: ParseURI.tcl,v 1.8 2004-08-23 12:44:36 matben Exp $
 
 package require uriencode
 
@@ -70,18 +70,26 @@ proc ::ParseURI::Parse { } {
     ::Jabber::Login::Connect $domain [list [namespace current]::ConnectCB $token]
 }
 
+# All these procedures are better collected somewhere so they can be used
+# by more components!
+
 proc ::ParseURI::ConnectCB {token status {msg {}}} {
     variable $token
     upvar 0 $token state
     
+    # The messages are ::Jabber:: namespaced!    
     switch $status {
 	error {
+	    set jamessnosocket [namespace eval ::Jabber:: \
+	      [list mc jamessnosocket $state(domain) $msg]]
 	    tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
-	      [mc jamessnosocket $state(domain) $msg]]
+	      $jamessnosocket]
 	}
 	timeout {
+	    set jamesstimeoutserver [namespace eval ::Jabber:: \
+	      [list mc jamesstimeoutserver $state(domain)]]
 	    tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
-	      [mc jamesstimeoutserver $state(domain)]]
+	      $jamesstimeoutserver]
 	}
 	default {
 	    # Go ahead...
@@ -139,9 +147,7 @@ proc ::ParseURI::InitStreamCB {token args} {
 proc ::ParseURI::AuthorizeCB {token type msg} {
     variable $token
     upvar 0 $token state
-    
-    #puts "::ParseURI::AuthorizeCB type=$type, msg=$msg"
-    
+        
     if {[string equal $type "error"]} {
 	tk_messageBox -icon error -type ok -title [mc Error]  \
 	  -message [FormatTextForMessageBox $msg]
@@ -204,16 +210,26 @@ proc ::ParseURI::DoPresence {token} {
 proc ::ParseURI::DoGroupchat {token} {
     variable $token
     upvar 0 $token state
+    upvar ::Jabber::jstate jstate
     
     # Get groupcat service from room.
     jlib::splitjidex $state(jid) roomname service res
     set state(service) $service
-    
-    # These must be one shot hooks.
+
     set state(browsecmd) [list ::ParseURI::BrowseSetHook $token]
     set state(discocmd)  [list ::ParseURI::DiscoInfoHook $token]
-    ::hooks::add browseSetHook  $state(browsecmd)
-    ::hooks::add discoInfoHook  $state(discocmd)
+
+    # We should check if we've got info before setting up the hooks.
+    if {[$jstate(disco) isdiscoed info $service]} {
+	::ParseURI::DiscoInfoHook $token result $service {}
+    } elseif {[$jstate(browse) isbrowsed $service]} {
+	::ParseURI::BrowseSetHook $token $service {}
+    } else {    
+	
+	# These must be one shot hooks.
+	::hooks::add browseSetHook  $state(browsecmd)
+	::hooks::add discoInfoHook  $state(discocmd)
+    }
 }
 
 proc ::ParseURI::BrowseSetHook {token from subiq} {
@@ -245,25 +261,22 @@ proc ::ParseURI::HandleGroupchat {token} {
     ::hooks::remove  discoInfoHook  $state(discocmd)
     
     # We brutaly assumes muc room here.
-    ::Jabber::MUC::EnterRoom $state(jid) $state(query,nick)
-
-    if {[info exists state(query,xmlns)] && \
-      [string equal $state(query,xmlns) "whiteboard"]} {
-	set state(enterroomcmd) [list ::ParseURI::EnterRoomHook $token]
-	::hooks::add groupchatEnterRoomHook $state(enterroomcmd)
-    } else {
-	::ParseURI::Free $token
-    }
+    ::Jabber::MUC::EnterRoom $state(jid) $state(query,nick) \
+      -command [list ::ParseURI::EnterRoomCB $token]
 }
 
-proc ::ParseURI::EnterRoomHook {token from protocol} {
+proc ::ParseURI::EnterRoomCB {token type args} {
     variable $token
     upvar 0 $token state
-    
-    # puts "---------------------::ParseURI::EnterRoomHook"
-    ::hooks::remove  groupchatEnterRoomHook  $state(enterroomcmd)
-    
-    ::Jabber::WB::NewWhiteboardTo $state(jid)
+        
+    if {$type != "error"} {
+	
+	# Check that this is actually a whiteboard.
+	if {[info exists state(query,xmlns)] && \
+	  [string equal $state(query,xmlns) "whiteboard"]} {
+	    ::Jabber::WB::NewWhiteboardTo $state(jid)
+	}
+    }
     ::ParseURI::Free $token
 }
 

@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Conference.tcl,v 1.29 2004-07-09 06:26:05 matben Exp $
+# $Id: Conference.tcl,v 1.30 2004-08-23 12:44:36 matben Exp $
 
 package provide Conference 1.0
 
@@ -217,15 +217,7 @@ proc ::Jabber::Conference::ConfigRoomList {token name junk1 junk2} {
     
     ::Debug 4 "::Jabber::Conference::ConfigRoomList"
 
-    # Fill in room list if exist else browse or disco.
-    #if {[$jstate(browse) isbrowsed $state(server)]} {
-#	::Jabber::Conference::FillRoomList $token
-    #} else {
-#	::Jabber::Conference::BusyEnterDlgIncr $token
-#	$jstate(browse) send_get $state(server)  \
-#	  [list [namespace current]::GetRoomsCB $token]
-    #}
-    
+    # Fill in room list if exist else browse or disco.    
     if {[$jstate(jlib) service isinvestigated $state(server)]} {
 	::Jabber::Conference::FillRoomList $token
     } else {

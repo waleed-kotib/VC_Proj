@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.68 2004-08-15 06:56:53 matben Exp $
+# $Id: UI.tcl,v 1.69 2004-08-23 12:44:36 matben Exp $
 
 package require entrycomp
 package require alertbox
@@ -225,6 +225,18 @@ proc ::UI::GetToplevel {w} {
     } else {
 	set w [string trimright $w "."]
 	return [winfo toplevel $w]
+    }
+}
+
+#       As GetToplevel but window need not exist.
+
+proc ::UI::GetToplevelFromPath {w} {
+
+    if {[string equal $w "."]} {
+	return $w
+    } else {
+	regexp {^(\.[^.]+)\.} $w match wpath
+	return $wpath
     }
 }
 
