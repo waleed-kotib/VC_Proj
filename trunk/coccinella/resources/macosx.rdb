@@ -1,12 +1,32 @@
 ! Resource database entries for Mac OS X
 !
 
-*Checkbutton.Font:                   {{Lucida Grande} 11}
+! General appearence
+!
+*fontSmall:                          {Lucida Grande} 11
+*fontSmallBold:                      {Lucida Grande} 11 bold
+*fontMedium:                         {Lucida Grande} 11
+*fontLarge:                          {Lucida Grande} 18
+*backgroundGeneral:                  #dedede
+
+! tk standard widgets
+!
+
+*Checkbutton.Font:                   {Lucida Grande} 11
 *Entry.HighlightThickness:           3
-*Entry.Font:                         {{Lucida Grande} 11}
-*Label.Font:                         {{Lucida Grande} 11}
+*Entry.Font:                         {Lucida Grande} 11
+*Label.Font:                         {Lucida Grande} 11
+*Listbox.Font:                       {Lucida Grande} 11
 *Listbox.HighlightThickness:         3
-*Radiobutton.Font:                   {{Lucida Grande} 11}
+*Message.Font:                       {Lucida Grande} 11
+*Radiobutton.Font:                   {Lucida Grande} 11
+*Text.Font:                          {Lucida Grande} 11
 *Text.HighlightThickness:            3
 
+! contributed widgets
+!
+*Combobox.Font:                      {Lucida Grande} 11
+*Tablelist.Font:                     {Lucida Grande} 11
 *Tablelist.HighlightThickness:       3
+*Tree.openIcons:                     triangle
+*Tree.treeColor:                     

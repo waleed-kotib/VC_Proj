@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Example.tcl,v 1.9 2003-10-12 13:12:56 matben Exp $
+# $Id: Example.tcl,v 1.10 2003-12-13 17:54:41 matben Exp $
 
 
 namespace eval ::Example:: {
@@ -159,12 +159,15 @@ proc ::Example::Save {wCan id args} {
 }
 
 proc ::Example::Clicked { } {
-    global sysFont
+ 
     variable locals
 
     set win .ty7532[incr locals(wuid)]
     toplevel $win
     wm title $win "Example Plugin:"
+    
+    set fontSB [option get . fontSmallBold {}]
+    
     pack [frame ${win}.f -borderwidth 1 -relief raised]   \
       -fill both -expand 1 -ipadx 12 -ipady 4
     if {[info exists locals(file)]} {
@@ -172,13 +175,13 @@ proc ::Example::Clicked { } {
     } else {
 	set txt "The content of the imported file: none"
     }
-    pack [label ${win}.f.la -text $txt -font $sysFont(sb)]  \
+    pack [label ${win}.f.la -text $txt -font $fontSB]  \
       -side top -anchor w -padx 12 -pady 6
     pack [frame ${win}.f.fr] -side top -fill both -expand 1
     set wtext ${win}.f.fr.t
     set wysc ${win}.f.fr.ysc
-    pack [text $wtext -width 80 -height 30 -yscrollcommand [list $wysc set] \
-      -font $sysFont(s)] -side left -fill both -expand 1
+    pack [text $wtext -width 80 -height 30 -yscrollcommand [list $wysc set]] \
+      -side left -fill both -expand 1
     pack [scrollbar $wysc -orient vertical -command [list $wtext yview]] \
       -side right -fill y
     

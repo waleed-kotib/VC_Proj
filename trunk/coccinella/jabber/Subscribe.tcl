@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Subscribe.tcl,v 1.2 2003-12-10 15:21:43 matben Exp $
+# $Id: Subscribe.tcl,v 1.3 2003-12-13 17:54:41 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -28,7 +28,7 @@ namespace eval ::Jabber::Subscribe:: {
 #       "deny" or "accept".
 
 proc ::Jabber::Subscribe::Subscribe {jid args} {
-    global  this sysFont prefs wDlgs
+    global  this prefs wDlgs
     
     variable locals   
     variable uid
@@ -50,6 +50,8 @@ proc ::Jabber::Subscribe::Subscribe {jid args} {
 
     }
     wm title $w [::msgcat::mc Subscribe]
+    set fontSB [option get . fontSmallBold {}]
+    set fontL [option get . fontLarge {}]
     
     # Find our present groups.
     set allGroups [$jstate(roster) getgroups]
@@ -76,10 +78,10 @@ proc ::Jabber::Subscribe::Subscribe {jid args} {
     pack [frame $w.frall -borderwidth 1 -relief raised]  \
       -fill both -expand 1 -ipadx 4
     
-    label $w.frall.head -text [::msgcat::mc Subscribe] -font $sysFont(l)  \
+    label $w.frall.head -text [::msgcat::mc Subscribe] -font $fontL  \
       -anchor w -padx 10 -pady 4 -bg #cecece
     pack $w.frall.head -side top -fill both -expand 1
-    message $w.frall.msg -width 260 -font $sysFont(s)  \
+    message $w.frall.msg -width 260  \
       -text [::msgcat::mc jasubwant $jid]
     pack $w.frall.msg -side top -fill both -expand 1
     
@@ -92,12 +94,12 @@ proc ::Jabber::Subscribe::Subscribe {jid args} {
 	
     # Some action buttons.
     set frmid [frame $w.frall.frmid -borderwidth 0]
-    label $frmid.lvcard -text "[::msgcat::mc jasubgetvcard]:" -font $sysFont(sb) \
+    label $frmid.lvcard -text "[::msgcat::mc jasubgetvcard]:" -font $fontSB \
       -anchor e
     button $frmid.bvcard -text "[::msgcat::mc {Get vCard}]..."   \
       -command [list ::VCard::Fetch other $jid]
     label $frmid.lmsg -text [::msgcat::mc jasubsndmsg]   \
-      -font $sysFont(sb) -anchor e
+      -font $fontSB -anchor e
     button $frmid.bmsg -text "[::msgcat::mc Send]..."    \
       -command [list ::Jabber::Subscribe::SendMsg $uid]
     grid $frmid.lvcard -column 0 -row 0 -sticky e -padx 6 -pady 2
@@ -120,13 +122,13 @@ proc ::Jabber::Subscribe::Subscribe {jid args} {
     pack $frcont.pres $frcont.add -side top -anchor w -padx 10 -pady 4
     set frsub [frame $frcont.frsub]
     pack $frsub -expand 1 -fill x -side top
-    label $frsub.lnick -text "[::msgcat::mc {Nick name}]:" -font $sysFont(sb) \
+    label $frsub.lnick -text "[::msgcat::mc {Nick name}]:" -font $fontSB \
       -anchor e
     entry $frsub.enick -width 26  \
       -textvariable [namespace current]::locals($uid,name)
-    label $frsub.lgroup -text "[::msgcat::mc Group]:" -font $sysFont(sb) -anchor e
+    label $frsub.lgroup -text "[::msgcat::mc Group]:" -font $fontSB -anchor e
     
-    ::combobox::combobox $frsub.egroup -font $sysFont(s) -width 18  \
+    ::combobox::combobox $frsub.egroup -width 18  \
       -textvariable [namespace current]::locals($uid,group)
     eval {$frsub.egroup list insert end} "None $allGroups"
     

@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Connections.tcl,v 1.11 2003-12-12 13:46:44 matben Exp $
+# $Id: Connections.tcl,v 1.12 2003-12-13 17:54:41 matben Exp $
 
 package provide Connections 1.0
 
@@ -42,7 +42,7 @@ namespace eval ::OpenConnection:: {
 #       where the last sequence is triggered by a fileevent.
 
 proc ::OpenConnection::OpenConnection {w} {
-    global  sysFont prefs this
+    global  prefs this
     
     variable txtvarEntIPnameOrNum
     variable menuShortVar
@@ -73,7 +73,7 @@ proc ::OpenConnection::OpenConnection {w} {
     # Overall frame for whole container.
     set frtot [frame $wcont1.fr]
     pack $frtot
-    message $frtot.msg -width 230 -font $sysFont(s) -text  \
+    message $frtot.msg -width 230 -text  \
       "Connect to a remote computer. Write remote computer name\
       or choose shortcut from the popup menu.\
       If necessary choose new remote port number."
@@ -88,8 +88,7 @@ proc ::OpenConnection::OpenConnection {w} {
     if {[string length $txtvarEntIPnameOrNum] == 0} {
 	set txtvarEntIPnameOrNum [lindex [lindex $prefs(shortcuts) 1] 0]
     }
-    $frtot.optm configure -highlightthickness 0  \
-      -background $prefs(bgColGeneral) -foreground black
+    $frtot.optm configure -highlightthickness 0 -foreground black
     grid $frtot.msg -column 0 -row 0 -columnspan 2 -sticky w -padx 6 -pady 2
     grid $frtot.lblip -column 0 -row 1 -sticky w -padx 6 -pady 2
     grid $frtot.optm -column 1 -row 1 -sticky e -padx 6 -pady 2
@@ -657,7 +656,7 @@ namespace eval ::OpenMulticast:: {
 #       shows dialog.
 
 proc ::OpenMulticast::OpenMulticast {wtop} {
-    global  sysFont prefs this wDlgs
+    global  prefs this wDlgs
     
     variable uid
     variable txtvarEntMulticast
@@ -674,6 +673,7 @@ proc ::OpenMulticast::OpenMulticast {wtop} {
 	#
     }
     wm title $w [::msgcat::mc {Open Stream}]
+    set fontSB [option get . fontSmallBold {}]
     
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
@@ -686,17 +686,16 @@ proc ::OpenMulticast::OpenMulticast {wtop} {
     # Overall frame for whole container.
     set frtot [frame $wcont.frin]
     pack $frtot
-    label $frtot.lbltop -text [::msgcat::mc writeurl] -font $sysFont(sb)
+    label $frtot.lbltop -text [::msgcat::mc writeurl] -font $fontSB
     set shorts [lindex $prefs(shortsMulticastQT) 0]
     set optMenu [eval {tk_optionMenu $frtot.optm  \
       [namespace current]::selMulticastName} $shorts]
-    $frtot.optm configure -highlightthickness 0  \
-      -background $prefs(bgColGeneral) -foreground black
+    $frtot.optm configure -highlightthickness 0 -foreground black
     #set selMulticastName [lindex [lindex $prefs(shortsMulticastQT) 0] 0]
-    label $frtot.lblhttp -text {http://} -font $sysFont(sb)
+    label $frtot.lblhttp -text {http://} -font $fontSB
     entry $frtot.entip -width 60   \
       -textvariable [namespace current]::txtvarEntMulticast
-    message $frtot.msg -borderwidth 0 -font $sysFont(s) -aspect 500 \
+    message $frtot.msg -borderwidth 0 -aspect 500 \
       -text [::msgcat::mc openquicktimeurlmsg]
     grid $frtot.lbltop -column 0 -row 0 -sticky sw -padx 0 -pady 2 -columnspan 2
     grid $frtot.optm -column 2 -row 0 -sticky e -padx 2 -pady 2
@@ -772,8 +771,7 @@ proc ::OpenMulticast::DoAddOrEditQTMulticastShort {what wOptMenu} {
 	destroy $wOptMenu
 	set optMenu [eval {tk_optionMenu $wOptMenu   \
 	  [namespace current]::selMulticastName} $shorts]
-	$wOptMenu configure -highlightthickness 0  \
-	  -background $prefs(bgColGeneral) -foreground black
+	$wOptMenu configure -highlightthickness 0 -foreground black
 	eval {grid $wOptMenu} $gridInfo
     }
 }

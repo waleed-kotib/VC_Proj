@@ -2,46 +2,50 @@
 ! It gives a light gray mac look on all widgets.  
 !
 
+! General appearence
+!
+! Fonts may be set to other if our system encoding is nonlatin.
+!
+*fontSmall:                          Helvetica 10
+*fontSmallBold:                      Helvetica 10 bold
+*fontMedium:                         Helvetica 10
+*fontLarge:                          Helvetica 18
+*backgroundGeneral:                  #dedede
+
+! general settings for all widgets
+!
+*background:                         #dedede
+*highlightBackground:                #dedede
+*highlightColor:                     #6363ce
+
 ! tk standard widgets
 !
-*Button.HighlightBackground:         #dedede
-*Button.Background:                  #dedede
-*Canvas.Background:                  #dedede
-*Checkbutton.Font:                   {Helvetica 10}
-*Checkbutton.Background:             #dedede
+*Checkbutton.Font:                   Helvetica 10
 *Entry.Background:                   white
 *Entry.BorderWidth:                  1
 *Entry.DisableBackground:            #dedede
 *Entry.DisableForeground:            gray20
-*Entry.Font:                         {Helvetica 10}
+*Entry.Font:                         Helvetica 10
 *Entry.Foreground:                   black
-*Entry.HighlightColor:               #6363ce
-*Entry.HighlightBackground:          #dedede
 *Entry.HighlightThickness:           2
-*Frame.Background:                   #dedede
-*Label.Background:                   #dedede
-*Label.Font:                         {Helvetica 10}
+*Label.Font:                         Helvetica 10
 *Listbox.Background:                 white
 *Listbox.BorderWidth:                1
-*Listbox.HighlightColor:             #6363ce
-*Listbox.HighlightBackground:        #dedede
+*Listbox.Font:                       Helvetica 10
 *Listbox.HighlightThickness:         2
-*Message.Background:                 #dedede
-*Progressbar.Background:             #dedede
-*Radiobutton.Font:                   {Helvetica 10}
-*Radiobutton.Background:             #dedede
+*Message.Font:                       Helvetica 10
+*Radiobutton.Font:                   Helvetica 10
 *Text.Background:                    white
-*Text.HighlightBackground:           #dedede
-*Text.HighlightColor:                #6363ce
+*Text.Font:                          Helvetica 10
 *Text.HighlightThickness:            2
 
 ! contributed widgets
 !
+*Combobox.Background:                white
+*Combobox.Font:                      Helvetica 10
 *Tablelist.BorderWidth:              1
-*Tablelist.HighlightColor:           #6363ce
-*Tablelist.HighlightBackground:      #dedede
+*Tablelist.Font:                     Helvetica 10
 *Tablelist.HighlightThickness:       2
 
 ! specific megawidgets
 !
-*ButtonTray.background:              #dedede

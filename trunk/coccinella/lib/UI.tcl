@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.29 2003-12-12 13:46:44 matben Exp $
+# $Id: UI.tcl,v 1.30 2003-12-13 17:54:41 matben Exp $
 
 # LabeledFrame --
 #
@@ -26,20 +26,22 @@
 package require entrycomp
 
 proc LabeledFrame {wpath txt args} {
-    global  sysFont
+    
+    set fontSB [option get . fontSmallBold {}]
     
     pack [frame $wpath.st -borderwidth 0]  \
       -side top -fill both -pady 2 -padx 2 -expand true
     pack [frame $wpath.st.fr -relief groove -bd 2]  \
       -side top -fill both -expand true -padx 10 -pady 10 -ipadx 0 -ipady 0  \
       -in $wpath.st
-    place [label $wpath.st.lbl -text $txt -font $sysFont(sb) -bd 0 -padx 6]  \
+    place [label $wpath.st.lbl -text $txt -font $fontSB -bd 0 -padx 6]  \
       -in $wpath.st -x 20 -y 14 -anchor sw
     return $wpath.st.fr
 }
 
 proc LabeledFrame2 {wpath txt args} {
-    global  sysFont
+
+    set fontSB [option get . fontSmallBold {}]
     
     frame $wpath -borderwidth 0
     pack [frame $wpath.st -borderwidth 0]  \
@@ -47,18 +49,19 @@ proc LabeledFrame2 {wpath txt args} {
     pack [frame $wpath.st.fr -relief groove -bd 2]  \
       -side top -fill both -expand true -padx 10 -pady 10 -ipadx 0 -ipady 0  \
       -in $wpath.st
-    place [label $wpath.st.lbl -text $txt -font $sysFont(sb) -bd 0 -padx 6]  \
+    place [label $wpath.st.lbl -text $txt -font $fontSB -bd 0 -padx 6]  \
       -in $wpath.st -x 20 -y 14 -anchor sw
     return $wpath.st.fr
 }
 
 proc LabeledFrame3 {w txt args} {
-    global  sysFont
+
+    set fontSB [option get . fontSmallBold {}]
     
     frame $w -borderwidth 0
     pack [frame $w.pad] -side top
     pack [frame $w.cont -relief groove -bd 2] -side top -fill both -expand 1
-    place [label $w.l -text $txt -font $sysFont(sb) -bd 0] -x 20 -y 0 -anchor nw
+    place [label $w.l -text $txt -font $fontSB -bd 0] -x 20 -y 0 -anchor nw
     set h [winfo reqheight $w.l]
     $w.pad configure -height [expr $h-4]
     return $w.cont
@@ -82,8 +85,7 @@ proc MessageText {w args} {
     
     array set argsArr {-text ""}
     array set argsArr $args
-    array set argsArr [list -borderwidth 0 -bd 0 -wrap word \
-      -bg $prefs(bgColGeneral) -width 20]
+    array set argsArr [list -borderwidth 0 -bd 0 -wrap word -width 20]
     set theText $argsArr(-text)
     unset argsArr(-text)
     catch {unset argsArr(-aspect)}
@@ -825,7 +827,7 @@ proc ::UI::NewWhiteboard {args} {
 #       new instance toplevel created.
 
 proc ::UI::BuildWhiteboard {wtop args} {
-    global  this prefs sysFont privariaFlag
+    global  this prefs privariaFlag
     
     variable allWhiteboards
     variable dims
@@ -908,6 +910,8 @@ proc ::UI::BuildWhiteboard {wtop args} {
     wm title $wtopReal $opts(-title)
     wm protocol $wtopReal WM_DELETE_WINDOW [list ::UI::CloseWhiteboard $wtop]
     
+    set fontS [option get . fontSmall {}]
+    
     # Note that the order of calls can be criticl as any 'update' may trigger
     # network events to attempt drawing etc. Beware!!!
      
@@ -937,7 +941,7 @@ proc ::UI::BuildWhiteboard {wtop args} {
       -side top -fill x -padx 10 -pady 2 -in ${wtop}fcomm.st
     pack [canvas $wapp(statmess) -bd 0 -highlightthickness 0 -height 14]  \
       -side left -pady 1 -padx 6 -fill x -expand true
-    $wapp(statmess) create text 0 0 -anchor nw -text {} -font $sysFont(s) \
+    $wapp(statmess) create text 0 0 -anchor nw -text {} -font $fontS \
       -tags stattxt
     
     # Build the header for the actual network setup.
@@ -957,7 +961,7 @@ proc ::UI::BuildWhiteboard {wtop args} {
     }
     
     # Make the tool button pad.
-    pack [frame ${wtop}fmain -borderwidth 0 -bg $prefs(bgColGeneral) -relief flat] \
+    pack [frame ${wtop}fmain -borderwidth 0 -relief flat] \
       -side top -fill both -expand true
     pack [frame ${wtop}fmain.frleft] -side left -fill y
     pack [frame $wapp(tool)] -side top
@@ -2318,7 +2322,7 @@ proc ::UI::ConfigShortcutButtonPad {wtop what {subSpec {}}} {
 #       Build the actual shortcut button pad.
 
 proc ::UI::BuildShortcutButtonPad {wtop} {
-    global  sysFont prefs wDlgs this
+    global  prefs wDlgs this
     
     variable icons
     variable btShortDefs
@@ -2374,7 +2378,7 @@ namespace eval ::UI:: {
 #       A mega widget dialog with a message and a single entry.
 
 proc ::UI::MegaDlgMsgAndEntry {title msg label varName btcancel btok} {
-    global this sysFont
+    global this
     
     variable finmega
     variable megauid
@@ -2392,15 +2396,17 @@ proc ::UI::MegaDlgMsgAndEntry {title msg label varName btcancel btok} {
     set finmega -1
     wm protocol $w WM_DELETE_WINDOW "set [namespace current]::finmega 0"
     
+    set fontSB [option get . fontSmallBold {}]
+    
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised] \
       -fill both -expand 1 -ipadx 4
-    pack [message $w.frall.msg -width 220 -font $sysFont(s) -text $msg] \
+    pack [message $w.frall.msg -width 220 -text $msg] \
       -side top -fill both -padx 4 -pady 2
     
     set wmid $w.frall.fr
     pack [frame $wmid] -side top -fill x -expand 1 -padx 6
-    label $wmid.la -font $sysFont(sb) -text $label
+    label $wmid.la -font $fontSB -text $label
     entry $wmid.en
     grid $wmid.la -column 0 -row 0 -sticky e -padx 2 
     grid $wmid.en -column 1 -row 0 -sticky ew -padx 2 
@@ -3237,7 +3243,7 @@ proc ::UI::WhiteboardGetFocus {wtop w} {
 #       UI updated.
 
 proc ::UI::SetCommHead {wtop type args} {
-    global  prefs sysFont
+    global  prefs
     
     variable thisType
     variable nEnt
@@ -3265,7 +3271,7 @@ proc ::UI::SetCommHead {wtop type args} {
 
 
 proc ::UI::BuildCommHead {wtop type args} {
-    global  prefs sysFont
+    global  prefs
     
     variable icons
     upvar ::${wtop}::wapp wapp
@@ -3275,13 +3281,17 @@ proc ::UI::BuildCommHead {wtop type args} {
     
     array set argsArr {-connected 0}
     array set argsArr $args
+    
+    set fontSB [option get . fontSmallBold {}]
+    
     pack [frame $wcomm -relief raised -borderwidth 1] -side left
+    
     switch -- $type {
 	jabber {
 	    label $wcomm.comm -text "  [::msgcat::mc {Jabber Server}]:"  \
-	      -width 18 -anchor w -font $sysFont(sb)
+	      -width 18 -anchor w -font $fontSB
 	    label $wcomm.user -text "  [::msgcat::mc {Jabber Id}]:"  \
-	      -width 18 -anchor w -font $sysFont(sb)
+	      -width 18 -anchor w -font $fontSB
 	    if {$argsArr(-connected)} {
 	    	label $wcomm.icon -image $icons(contact_on)
 	    } else {
@@ -3292,29 +3302,29 @@ proc ::UI::BuildCommHead {wtop type args} {
 	}
 	symmetric {
 	    label $wcomm.comm -text {  Remote address:} -width 22 -anchor w \
-	      -font $sysFont(sb)
+	      -font $fontSB
 	    label $wcomm.user -text {  User:} -width 14 -anchor w  \
-	      -font $sysFont(sb)
-	    label $wcomm.to -text [::msgcat::mc To] -font $sysFont(sb)
-	    label $wcomm.from -text [::msgcat::mc From] -font $sysFont(sb)
+	      -font $fontSB
+	    label $wcomm.to -text [::msgcat::mc To] -font $fontSB
+	    label $wcomm.from -text [::msgcat::mc From] -font $fontSB
 	    grid $wcomm.comm $wcomm.user $wcomm.to $wcomm.from \
 	      -sticky nws -pady 0
 	}
 	client {
 	    label $wcomm.comm -text {  Remote address:} -width 22 -anchor w \
-	      -font $sysFont(sb)
+	      -font $fontSB
 	    label $wcomm.user -text {  User:} -width 14 -anchor w \
-	      -font $sysFont(sb)
-	    label $wcomm.to -text [::msgcat::mc To] -font $sysFont(sb)
+	      -font $fontSB
+	    label $wcomm.to -text [::msgcat::mc To] -font $fontSB
 	    grid $wcomm.comm $wcomm.user $wcomm.to  \
 	      -sticky nws -pady 0
 	}
 	server {
 	    label $wcomm.comm -text {  Remote address:} -width 22 -anchor w \
-	      -font $sysFont(sb)
+	      -font $fontSB
 	    label $wcomm.user -text {  User:} -width 14 -anchor w \
-	      -font $sysFont(sb)
-	    label $wcomm.from -text [::msgcat::mc From] -font $sysFont(sb)
+	      -font $fontSB
+	    label $wcomm.from -text [::msgcat::mc From] -font $fontSB
 	    grid $wcomm.comm $wcomm.user $wcomm.from \
 	      -sticky nws -pady 0
 	}
@@ -3360,7 +3370,7 @@ proc ::UI::BuildCommHead {wtop type args} {
 #       UI updated.
 
 proc ::UI::BuildJabberEntry {wtop args} {
-    global  prefs sysFont
+    global  prefs
     
     upvar ::Jabber::jstate jstate
     upvar ::${wtop}::wapp wapp
@@ -3378,9 +3388,12 @@ proc ::UI::BuildJabberEntry {wtop args} {
     set wcomm $wapp(comm)
     set wtopReal $wapp(toplevel)
     
+    set fontSB [option get . fontSmallBold {}]
+    set bg [option get . backgroundGeneral {}]
+    
     set n 1
     set jidlist [$jstate(roster) getusers]
-    entry $wcomm.ad$n -width 16 -relief sunken -bg $prefs(bgColGeneral)
+    entry $wcomm.ad$n -width 16 -relief sunken -bg $bg
     ::entrycomp::entrycomp $wcomm.us$n $jidlist -width 22 -relief sunken \
       -bg white
     if {[info exists argsArr(-servervariable)]} {
@@ -3404,7 +3417,7 @@ proc ::UI::BuildJabberEntry {wtop args} {
     }
     eval {checkbutton $wcomm.to$n -highlightthickness 0  \
       -state $argsArr(-sendcheckstate) \
-      -text " [::msgcat::mc {Send Live}]" -font $sysFont(sb)} $checkOpts
+      -text " [::msgcat::mc {Send Live}]" -font $fontSB} $checkOpts
     grid $wcomm.ad$n $wcomm.us$n -padx 4 -pady 0
     grid $wcomm.to$n -row 1 -column 2 -columnspan 2 -padx 4 -pady 0
 
@@ -3594,7 +3607,7 @@ proc ::UI::SetCommEntry {wtop ipNum to from args} {
 #       updated communication frame with new client.
 
 proc ::UI::BuildCommEntry {wtop ipNum args} {
-    global  sysFont prefs ipNumTo
+    global  prefs ipNumTo
     
     variable icons
     variable commTo
@@ -3615,12 +3628,14 @@ proc ::UI::BuildCommEntry {wtop ipNum args} {
 	set wtopReal [string trimright $wtop .]
     }
     
+    set bg [option get . backgroundGeneral {}]
+    
     set size [::UI::ParseWMGeometry $wtopReal]
     set n $nEnt($wtop)
     
     # Add new status line.
     if {[string equal $thisType "jabber"]} {
-	entry $wcomm.ad$n -width 18 -relief sunken -bg $prefs(bgColGeneral)
+	entry $wcomm.ad$n -width 18 -relief sunken -bg $bg
 	entry $wcomm.us$n -width 22 -relief sunken -bg white
 	if {[info exists argsArr(-jidvariable)]} {
 	    $wcomm.us$n configure -textvariable $argsArr(-jidvariable)
@@ -3647,10 +3662,10 @@ proc ::UI::BuildCommEntry {wtop ipNum args} {
 	after 400 [list $wcomm.icon configure -image $icons(contact_on)]
     } elseif {[string equal $thisType "symmetric"]} {
 	entry $wcomm.ad$n -width 24  \
-	  -relief sunken -bg $prefs(bgColGeneral)
+	  -relief sunken -bg $bg
 	entry $wcomm.us$n -width 16   \
 	  -textvariable ipNumTo(user,$ipNum) -relief sunken  \
-	  -bg $prefs(bgColGeneral)
+	  -bg $bg
 	checkbutton $wcomm.to$n -variable ${ns}::commTo($wtop,$ipNum)   \
 	  -highlightthickness 0 -command [list ::UI::CheckCommTo $wtop $ipNum]
 	checkbutton $wcomm.from$n -variable ${ns}::commFrom($wtop,$ipNum)  \
@@ -3660,20 +3675,20 @@ proc ::UI::BuildCommEntry {wtop ipNum args} {
 	$wcomm.us$n configure -state disabled
     } elseif {[string equal $thisType "client"]} {
 	entry $wcomm.ad$n -width 24   \
-	  -relief sunken -bg $prefs(bgColGeneral)
+	  -relief sunken -bg $bg
 	entry $wcomm.us$n -width 16    \
 	  -textvariable ipNumTo(user,$ipNum) -relief sunken  \
-	  -bg $prefs(bgColGeneral)
+	  -bg $bg
 	checkbutton $wcomm.to$n -variable ${ns}::commTo($wtop,$ipNum)   \
 	  -highlightthickness 0 -command [list ::UI::CheckCommTo $wtop $ipNum]
 	grid $wcomm.ad$n $wcomm.us$n $wcomm.to$n -padx 4 -pady 0
 	$wcomm.us$n configure -state disabled
     } elseif {[string equal $thisType "server"]} {
 	entry $wcomm.ad$n -width 24   \
-	  -relief sunken -bg $prefs(bgColGeneral)
+	  -relief sunken -bg $bg
 	entry $wcomm.us$n -width 16    \
 	  -textvariable ipNumTo(user,$ipNum) -relief sunken  \
-	  -bg $prefs(bgColGeneral)
+	  -bg $bg
 	checkbutton $wcomm.from$n -variable ${ns}::commFrom($wtop,$ipNum)  \
 	  -highlightthickness 0 -state disabled
 	grid $wcomm.ad$n $wcomm.us$n $wcomm.from$n -padx 4 -pady 0

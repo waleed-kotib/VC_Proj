@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Conference.tcl,v 1.1 2003-11-14 09:54:36 matben Exp $
+# $Id: Conference.tcl,v 1.2 2003-12-13 17:54:40 matben Exp $
 
 package provide Conference 1.0
 
@@ -40,7 +40,7 @@ namespace eval ::Jabber::Conference:: {
 #       "cancel" or "enter".
      
 proc ::Jabber::Conference::BuildEnter {args} {
-    global  this sysFont wDlgs
+    global  this wDlgs
 
     variable enteruid
     variable dlguid
@@ -71,17 +71,19 @@ proc ::Jabber::Conference::BuildEnter {args} {
 	server      ""
 	roomname    ""
     }
+    set fontS [option get . fontSmall {}]
+    set fontSB [option get . fontSmallBold {}]
     
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised]   \
       -fill both -expand 1 -ipadx 12 -ipady 4
-    message $w.frall.msg -width 280  -justify left -font $sysFont(s)  \
+    message $w.frall.msg -width 280  -justify left  \
     	-text [::msgcat::mc jamessconfmsg]
     pack $w.frall.msg -side top -anchor w -padx 2 -pady 4
     set frtop $w.frall.top
     pack [frame $frtop] -side top -fill x
     label $frtop.lserv -text "[::msgcat::mc {Conference server}]:" \
-      -font $sysFont(sb) 
+      -font $fontSB 
     
     set confServers [$jstate(browse) getconferenceservers]
     
@@ -90,11 +92,11 @@ proc ::Jabber::Conference::BuildEnter {args} {
     set wcomboserver $frtop.eserv
     set wcomboroom $frtop.eroom
 
-    ::combobox::combobox $wcomboserver -width 20 -font $sysFont(s)  \
+    ::combobox::combobox $wcomboserver -width 20  \
       -textvariable $token\(server) -editable 0  \
       -command [list [namespace current]::ConfigRoomList $wcomboroom]
     eval {$frtop.eserv list insert end} $confServers
-    label $frtop.lroom -text "[::msgcat::mc {Room name}]:" -font $sysFont(sb)
+    label $frtop.lroom -text "[::msgcat::mc {Room name}]:" -font $fontSB
     
     # Find the default conferencing server.
     if {[info exists argsArr(-server)]} {
@@ -113,7 +115,7 @@ proc ::Jabber::Conference::BuildEnter {args} {
 	    lappend roomList $room
 	}
     }
-    ::combobox::combobox $wcomboroom -width 20 -font $sysFont(s)   \
+    ::combobox::combobox $wcomboroom -width 20  \
       -textvariable $token\(roomname) -editable 0
     eval {$frtop.eroom list insert end} $roomList
     if {[info exists argsArr(-roomjid)]} {
@@ -362,7 +364,7 @@ proc ::Jabber::Conference::ResultCallback {roomJid jlibName type subiq} {
 #       "cancel" or "create".
      
 proc ::Jabber::Conference::BuildCreate {args} {
-    global  this sysFont wDlgs
+    global  this wDlgs
     
     variable createuid
     variable dlguid
@@ -387,6 +389,7 @@ proc ::Jabber::Conference::BuildCreate {args} {
 	
     }
     wm title $w [::msgcat::mc {Create Room}]
+    set fontSB [option get . fontSmallBold {}]
 
     set create(w) $w
     array set create {
@@ -401,21 +404,21 @@ proc ::Jabber::Conference::BuildCreate {args} {
     } else {
 	set create(usemuc) 0
     }
-   
+    
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised]   \
       -fill both -expand 1 -ipadx 12 -ipady 4
-    message $w.frall.msg -font $sysFont(s) -anchor w -justify left  \
+    message $w.frall.msg -anchor w -justify left  \
       -text [::msgcat::mc jacreateroom] -width 300
     pack $w.frall.msg -side top -fill x -anchor w -padx 10 -pady 4
     set frtop $w.frall.top
     pack [frame $frtop] -side top -expand 0 -anchor w -padx 10
     label $frtop.lserv -text "[::msgcat::mc {Conference server}]:"  \
-      -font $sysFont(sb)
+      -font $fontSB
     
     set confServers [$jstate(browse) getconferenceservers]
     set wcomboserver $frtop.eserv
-    ::combobox::combobox $wcomboserver -width 20 -font $sysFont(s)   \
+    ::combobox::combobox $wcomboserver -width 20  \
       -textvariable $token\(server) -editable 0
     eval {$frtop.eserv list insert end} $confServers
     
@@ -429,14 +432,14 @@ proc ::Jabber::Conference::BuildCreate {args} {
     }
     
     label $frtop.lroom -text "[::msgcat::mc {Room name}]:" \
-      -font $sysFont(sb)    
+      -font $fontSB    
     entry $frtop.eroom -textvariable $token\(roomname)  \
       -validate key -validatecommand {::Jabber::ValidateJIDChars %S}
     label $frtop.lnick -text "[::msgcat::mc {Nick name}]:"  \
-      -font $sysFont(sb)    
+      -font $fontSB    
     entry $frtop.enick -textvariable $token\(nickname)  \
       -validate key -validatecommand {::Jabber::ValidateJIDChars %S}
-    label $frtop.ldesc -text "[::msgcat::mc Specifications]:" -font $sysFont(sb)
+    label $frtop.ldesc -text "[::msgcat::mc Specifications]:" -font $fontSB
     label $frtop.lstat -textvariable $token\(stattxt)
     
     grid $frtop.lserv -column 0 -row 0 -sticky e

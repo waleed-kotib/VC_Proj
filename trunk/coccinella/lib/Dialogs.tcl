@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.17 2003-12-12 13:46:44 matben Exp $
+# $Id: Dialogs.tcl,v 1.18 2003-12-13 17:54:41 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -61,7 +61,7 @@ array set wDlgs {
 #       canvas from.
 
 proc ::Dialogs::GetCanvas {w} {
-    global  ipNumTo ipName2Num sysFont prefs this
+    global  ipNumTo ipName2Num prefs this
     
     variable finished -1
     variable getIPName
@@ -99,12 +99,11 @@ proc ::Dialogs::GetCanvas {w} {
     # Overall frame for whole container.
     set frtot [frame $wcont.frin]
     pack $frtot
-    message $frtot.msg -borderwidth 0 -font $sysFont(s) -aspect 500 \
+    message $frtot.msg -borderwidth 0 -aspect 500 \
       -text {Choose client from which you want to get the canvas.\
       Your own canvas will be erased.}
     eval {tk_optionMenu $frtot.optm [namespace current]::getIPName} $ipNames
-    $frtot.optm configure -highlightthickness 0  \
-      -background $prefs(bgColGeneral) -foreground black
+    $frtot.optm configure -highlightthickness 0 -foreground black
     grid $frtot.msg -column 0 -row 0 -columnspan 2 -padx 4 -pady 2 -sticky news
     grid $frtot.optm -column 1 -row 1 -padx 4 -pady 0 -sticky e
     
@@ -145,7 +144,7 @@ proc ::Dialogs::GetCanvas {w} {
 #      applications.
 
 proc ::Dialogs::InfoOnPlugins { } {
-    global  sysFont prefs this wDlgs
+    global  prefs this wDlgs
     
     # Check first of there are *any* plugins.
     if {[llength [::Plugins::GetAllPackages loaded]] == 0} {
@@ -165,6 +164,9 @@ proc ::Dialogs::InfoOnPlugins { } {
 
     }
     wm title $w [::msgcat::mc {Plugin Info}]
+    set fontS [option get . fontSmall {}]
+    set fontSB [option get . fontSmallBold {}]
+    
     pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
 
     # Button part.
@@ -183,16 +185,16 @@ proc ::Dialogs::InfoOnPlugins { } {
     set wysc $w.frall.fbox.ysc
     scrollbar $wysc -orient vertical -command [list $wtxt yview]
     text $wtxt -yscrollcommand [list $wysc set] -highlightthickness 0  \
-      -bg white -wrap word -font $sysFont(s) -width 50 -height 30  \
+      -bg white -wrap word -width 50 -height 30  \
       -exportselection 1 -tabs [list $xtab1 right $xtab2 left]
     pack $wysc -side right -fill y
     pack $wtxt -side left -fill both -expand 1
     
     $wtxt tag configure ttitle -foreground black -background #dedede  \
-      -spacing1 2 -spacing3 2 -lmargin1 20 -font $sysFont(sb)
-    $wtxt tag configure tkey -font $sysFont(sb) -spacing1 2  \
+      -spacing1 2 -spacing3 2 -lmargin1 20 -font $fontSB
+    $wtxt tag configure tkey -font $fontSB -spacing1 2  \
       -tabs [list $xtab1 right $xtab2 left]
-    $wtxt tag configure ttxt -font $sysFont(s) -wrap word -lmargin1 $xtab2 \
+    $wtxt tag configure ttxt -font $fontS -wrap word -lmargin1 $xtab2 \
       -lmargin2 $xtab2
     $wtxt tag configure tline -font {Helvetica -1} -background black
     
@@ -286,7 +288,7 @@ namespace eval ::Dialogs:: {
 #       shows dialog.
 
 proc ::Dialogs::UnixPrintPS {w wtoprint} {
-    global  sysFont prefs this
+    global  prefs this
     
     variable psCmd
     variable finishedPrint
@@ -314,7 +316,7 @@ proc ::Dialogs::UnixPrintPS {w wtoprint} {
     set frtot [frame $wcont1.frin]
     pack $frtot -padx 10 -pady 10
     
-    message $frtot.msg -borderwidth 0 -font $sysFont(s) -aspect 1000 \
+    message $frtot.msg -borderwidth 0 -aspect 1000 \
       -text "Shell print command, edit if desired."
     entry $frtot.entcmd -width 20   \
       -textvariable [namespace current]::psCmd
@@ -396,7 +398,7 @@ namespace eval ::PSPageSetup:: {
 #       shows dialog.
 
 proc ::PSPageSetup::PSPageSetup { w } {
-    global  sysFont prefs this
+    global  prefs this
     
     variable copyOfPostscriptOpts
     variable txtvarEnt
@@ -444,6 +446,7 @@ proc ::PSPageSetup::PSPageSetup { w } {
 
     }
     wm title $w "Page Setup"
+    set fontSB [option get . fontSmallBold {}]
     
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
@@ -454,7 +457,7 @@ proc ::PSPageSetup::PSPageSetup { w } {
     set frtot [frame $wcont.frin]
     pack $frtot -padx 10 -pady 10
     
-    message $frtot.msg -width 200 -font $sysFont(s) -text  \
+    message $frtot.msg -width 200 -text  \
       "Set any of the following options for the postscript\
       generated when printing or saving the canvas as\
       a postscript file."
@@ -465,7 +468,7 @@ proc ::PSPageSetup::PSPageSetup { w } {
     set iLine 0
     foreach optName $allOptNames {
 	incr iLine
-	label $frtot.lbl$optName -text "${optName}:" -font $sysFont(sb)
+	label $frtot.lbl$optName -text "${optName}:" -font $fontSB
 	frame $frtot.fr$optName
 	
 	if {[string equal $optName "colormode"] ||  \
@@ -491,10 +494,9 @@ proc ::PSPageSetup::PSPageSetup { w } {
 	    set wMenu [eval {tk_optionMenu $frtot.menu$optName   \
 	      [namespace current]::menuBtVar($optName)}    \
 	      $theMenuOpts($optName)]
-	    $wMenu configure -font $sysFont(sb)
-	    $frtot.menu$optName configure -font $sysFont(sb)   \
-	      -highlightthickness 0 -background $prefs(bgColGeneral)   \
-	      -foreground black
+	    $wMenu configure -font $fontSB
+	    $frtot.menu$optName configure -font $fontSB   \
+	      -highlightthickness 0 -foreground black
 	    pack $frtot.menu$optName -in $frtot.fr$optName
 	    
 	} else {
@@ -515,10 +517,9 @@ proc ::PSPageSetup::PSPageSetup { w } {
 	    set wMenu [eval {tk_optionMenu $frtot.menu$optName   \
 	      [namespace current]::menuBtVar($optName)}   \
 	      $unitsFull]
-	    $wMenu configure -font $sysFont(sb)
-	    $frtot.menu$optName configure -font $sysFont(sb)   \
-	      -highlightthickness 0 -background $prefs(bgColGeneral)   \
-	      -foreground black
+	    $wMenu configure -font $fontSB
+	    $frtot.menu$optName configure -font $fontSB   \
+	      -highlightthickness 0 -foreground black
 	    pack $frtot.ent$optName $frtot.menu$optName   \
 	      -in $frtot.fr$optName -side left
 	}
@@ -616,7 +617,7 @@ proc ::PSPageSetup::PushBtSave {  } {
 #       shows dialog.
 
 proc ::Dialogs::ShowInfoClients { } {
-    global  sysFont ipNumTo this wDlgs
+    global  ipNumTo this wDlgs
     
     set allIPnumsFrom [::Network::GetIP from]
     if {[llength $allIPnumsFrom] <= 0} {
@@ -634,6 +635,8 @@ proc ::Dialogs::ShowInfoClients { } {
 
     }
     wm title $w "Client Info"
+    set fontSB [option get . fontSmallBold {}]
+    
     pack [frame $w.frall -borderwidth 1 -relief raised]
     pack [frame $w.frtop -borderwidth 0] -in $w.frall
     
@@ -651,19 +654,19 @@ proc ::Dialogs::ShowInfoClients { } {
 	
 	# Frame for everything inside the labeled container.
 	set fr [frame $wcont.fr]
-	label $fr.a1 -text "IP number:" -font $sysFont(sb)
+	label $fr.a1 -text "IP number:" -font $fontSB
 	label $fr.a2 -text "[lindex $peername 0]"
-	label $fr.b1 -text "Host name:" -font $sysFont(sb)
+	label $fr.b1 -text "Host name:" -font $fontSB
 	label $fr.b2 -text "[lindex $peername 1]"
-	label $fr.c1 -text "User name:" -font $sysFont(sb)
+	label $fr.c1 -text "User name:" -font $fontSB
 	label $fr.c2 -text $ipNumTo(user,$ip)
-	label $fr.d1 -text "Port number:" -font $sysFont(sb)
+	label $fr.d1 -text "Port number:" -font $fontSB
 	label $fr.d2 -text "$ipNumTo(servPort,$ip)"
-	label $fr.e1 -text "Buffering:" -font $sysFont(sb)
+	label $fr.e1 -text "Buffering:" -font $fontSB
 	label $fr.e2 -text "$buff"
-	label $fr.f1 -text "Blocking:" -font $sysFont(sb)
+	label $fr.f1 -text "Blocking:" -font $fontSB
 	label $fr.f2 -text "$block"
-	label $fr.g1 -text "Since:" -font $sysFont(sb)
+	label $fr.g1 -text "Since:" -font $fontSB
 	label $fr.g2 -text   \
 	  "[clock format $ipNumTo(connectTime,$ip) -format "%X  %x"]"
 	grid $fr.a1 -column 0 -row 0 -sticky e
@@ -713,7 +716,7 @@ proc ::Dialogs::ShowInfoClients { } {
 #       none
 
 proc ::Dialogs::ShowInfoServer {thisIPnum} {
-    global  sysFont this ipNumTo wDlgs  \
+    global  this ipNumTo wDlgs  \
       state listenServSocket this prefs
     
     set w $wDlgs(infoServ)
@@ -729,21 +732,23 @@ proc ::Dialogs::ShowInfoServer {thisIPnum} {
 
     }
     wm title $w [::msgcat::mc {Server Info}]
+    set fontSB [option get . fontSmallBold {}]
+    
     pack [frame $w.frall -borderwidth 1 -relief raised]
     set wcont [LabeledFrame2 $w.frtop [::msgcat::mc {Server Info}]]
     pack $w.frtop -in $w.frall    
     
     # Frame for everything inside the labeled container.
     set fr [frame $wcont.fr]
-    label $fr.x1 -text "[::msgcat::mc {Is server up}]:" -font $sysFont(sb)
+    label $fr.x1 -text "[::msgcat::mc {Is server up}]:" -font $fontSB
     label $fr.x2 -text $boolToYesNo($state(isServerUp))
-    label $fr.a1 -text "[::msgcat::mc {This IP number}]:" -font $sysFont(sb)
-    label $fr.b1 -text "[::msgcat::mc {Host name}]:" -font $sysFont(sb)
-    label $fr.c1 -text "[::msgcat::mc Username]:" -font $sysFont(sb)
-    label $fr.d1 -text "[::msgcat::mc {Port number}]:" -font $sysFont(sb)
-    label $fr.e1 -text "[::msgcat::mc Buffering]:" -font $sysFont(sb)
-    label $fr.f1 -text "[::msgcat::mc Blocking]:" -font $sysFont(sb)
-    label $fr.g1 -text "[::msgcat::mc {Is safe}]:" -font $sysFont(sb)
+    label $fr.a1 -text "[::msgcat::mc {This IP number}]:" -font $fontSB
+    label $fr.b1 -text "[::msgcat::mc {Host name}]:" -font $fontSB
+    label $fr.c1 -text "[::msgcat::mc Username]:" -font $fontSB
+    label $fr.d1 -text "[::msgcat::mc {Port number}]:" -font $fontSB
+    label $fr.e1 -text "[::msgcat::mc Buffering]:" -font $fontSB
+    label $fr.f1 -text "[::msgcat::mc Blocking]:" -font $fontSB
+    label $fr.g1 -text "[::msgcat::mc {Is safe}]:" -font $fontSB
 
     if {!$state(isServerUp)} {
 	
@@ -846,7 +851,7 @@ namespace eval ::SplashScreen:: {
 #       none
 
 proc ::SplashScreen::SplashScreen {w} {
-    global  sysFont this prefs
+    global  this prefs
     variable topwin
     variable canwin
     variable startMsg
@@ -865,6 +870,7 @@ proc ::SplashScreen::SplashScreen {w} {
     wm resizable $w 0 0
     foreach {screenW screenH} [GetScreenSize] break
     wm geometry $w +[expr ($screenW - 450)/2]+[expr ($screenH - 300)/2]
+    set fontS [option get . fontSmall {}]
     
     # If image not already there, get it.
     
@@ -884,7 +890,7 @@ proc ::SplashScreen::SplashScreen {w} {
     canvas $w.can -width $imWidth -height $imHeight -bd 0 -highlightthickness 0
     $w.can create image 0 0 -anchor nw -image mysplash
     $w.can create text 50 [expr $imHeight - 20] -anchor nw -tags tsplash  \
-      -font $sysFont(s) -text $startMsg -fill $textcol
+      -font $fontS -text $startMsg -fill $textcol
     
     # Print patch level for dev versions.
     if {$prefs(releaseVers) != ""} {

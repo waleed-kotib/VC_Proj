@@ -5,11 +5,15 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.12 2003-11-12 08:20:49 matben Exp $
+# $Id: Browse.tcl,v 1.13 2003-12-13 17:54:40 matben Exp $
 
 package provide Browse 1.0
 
 namespace eval ::Jabber::Browse:: {
+
+    # Use option database for customization. 
+    # Use priority 30 just to override the widgetDefault values!
+    #option add *Browse*Tree.background    green            30
 
     variable wtop {}
 
@@ -316,7 +320,7 @@ proc ::Jabber::Browse::Show {w} {
 }
 
 proc ::Jabber::Browse::BuildToplevel {w} {
-    global  this sysFont prefs
+    global  this prefs
 
     variable wtop
 
@@ -339,14 +343,16 @@ proc ::Jabber::Browse::BuildToplevel {w} {
     if {0 && [string match "mac*" $this(platform)]} {
 	$w configure -menu [::Jabber::UI::GetRosterWmenu]
     }
+    set fontS [option get . fontSmall {}]
+    set fontSB [option get . fontSmallBold {}]
     
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised]   \
       -fill both -expand 1 -ipadx 12 -ipady 4
     
-    message $w.frall.msg -width 220 -font $sysFont(sb) -anchor w -text \
+    message $w.frall.msg -width 220 -font $fontSB -anchor w -text \
       {Services that are available on each Jabber server listed.}
-    message $w.frall.msg2 -width 220 -font $sysFont(s) -anchor w -text  \
+    message $w.frall.msg2 -width 220 -font $fontS -anchor w -text  \
       {Open to display its properties}
     pack $w.frall.msg $w.frall.msg2 -side top -fill x -padx 4 -pady 2
 
@@ -368,7 +374,7 @@ proc ::Jabber::Browse::BuildToplevel {w} {
 #       w
 
 proc ::Jabber::Browse::Build {w} {
-    global  this sysFont prefs
+    global  this prefs
     
     variable wtree
     variable wsearrows
@@ -380,8 +386,8 @@ proc ::Jabber::Browse::Build {w} {
     
     ::Jabber::Debug 2 "::Jabber::Browse::Build"
     
-    # The frame.
-    frame $w -borderwidth 0 -relief flat
+    # The frame of class Browse.
+    frame $w -borderwidth 0 -relief flat -class Browse
     set wbrowser $w
     
     set frbot [frame $w.frbot -bd 0]
@@ -399,12 +405,12 @@ proc ::Jabber::Browse::Build {w} {
     scrollbar $wxsc -orient horizontal -command [list $wtree xview]
     scrollbar $wysc -orient vertical -command [list $wtree yview]
     ::tree::tree $wtree -width 180 -height 200 -silent 1  \
-      -openicons triangle -treecolor {} -scrollwidth 400 \
+      -scrollwidth 400 \
       -xscrollcommand [list $wxsc set]       \
       -yscrollcommand [list $wysc set]       \
       -selectcommand ::Jabber::Browse::SelectCmd   \
       -opencommand ::Jabber::Browse::OpenTreeCmd   \
-      -highlightcolor #6363CE -highlightbackground $prefs(bgColGeneral)
+      -highlightcolor #6363CE
 
     if {[string match "mac*" $this(platform)]} {
 	$wtree configure -buttonpresscommand [list ::Jabber::UI::Popup browse] \
@@ -713,7 +719,7 @@ proc ::Jabber::Browse::CloseDlg {w} {
 }
 
 proc ::Jabber::Browse::AddServer { } {
-    global  this sysFont prefs
+    global  this prefs
     
     variable finishedAdd -1
 
@@ -735,8 +741,7 @@ proc ::Jabber::Browse::AddServer { } {
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised]   \
       -fill both -expand 1 -ipadx 12 -ipady 4
-    message $w.frall.msg -width 220 -font $sysFont(s) -text \
-      [::msgcat::mc jabrowseaddserver]
+    message $w.frall.msg -width 220 -text [::msgcat::mc jabrowseaddserver]
     entry $w.frall.ent -width 24   \
       -textvariable "[namespace current]::addserver"
     pack $w.frall.msg $w.frall.ent -side top -fill x -anchor w -padx 10  \
@@ -837,7 +842,7 @@ proc ::Jabber::Browse::GetInfo {jid args} {
 }
 
 proc ::Jabber::Browse::InfoCB {browseName type jid subiq} {
-    global  sysFont this
+    global  this
     
     variable dlguid
     upvar ::Jabber::nsToText nsToText
@@ -851,6 +856,7 @@ proc ::Jabber::Browse::InfoCB {browseName type jid subiq} {
 
     }
     wm title $w "Browse Info: $jid"
+    set fontS [option get . fontSmall {}]
     
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised]   \
@@ -858,7 +864,7 @@ proc ::Jabber::Browse::InfoCB {browseName type jid subiq} {
     set wtext $w.frall.t
     label $w.frall.l -text "Description of services provided by $jid" \
       -justify left
-    text $wtext -font $sysFont(s) -wrap word -width 60 -bg gray80 \
+    text $wtext -wrap word -width 60 -bg gray80 \
       -tabs {180} -spacing1 3 -spacing3 2 -bd 0
 
     pack $w.frall.l $wtext -side top -fill x -anchor w -padx 10  \

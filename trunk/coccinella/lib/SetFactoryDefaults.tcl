@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.15 2003-11-30 11:46:47 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.16 2003-12-13 17:54:41 matben Exp $
 
 # SetWhiteboardFactoryState --
 # 
@@ -118,14 +118,6 @@ set prefs(afterStartServer) 0
 # EAS: Need to give server a chance to start, as occasionally
 # it isn't done when client connects
 set prefs(afterConnect) 1000
-
-if {[string equal $tcl_platform(platform) "windows"] &&  \
-  [string equal $tcl_platform(os) "XP"]} {
-    # Windows XP
-    set prefs(bgColGeneral) #e8e4d0
-} else {
-    set prefs(bgColGeneral) #dedede
-}
 
 # Side of selecting box .
 set prefs(aBBox) 2

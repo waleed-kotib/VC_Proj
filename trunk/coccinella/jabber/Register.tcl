@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.3 2003-12-10 15:21:43 matben Exp $
+# $Id: Register.tcl,v 1.4 2003-12-13 17:54:41 matben Exp $
 
 package provide Register 1.0
 
@@ -27,7 +27,7 @@ namespace eval ::Jabber::Register:: {
 #       "cancel" or "new".
 
 proc ::Jabber::Register::Register {args} {
-    global  this sysFont wDlgs
+    global  this wDlgs
     
     variable finished -1
     variable server
@@ -54,30 +54,33 @@ proc ::Jabber::Register::Register {args} {
     }
     wm title $w [::msgcat::mc {Register New Account}]
     
+    set fontSB [option get . fontSmallBold {}]
+    set fontL [option get . fontLarge {}]
+    
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised]   \
       -fill both -expand 1 -ipadx 12 -ipady 4
     
-    label $w.frall.head -text [::msgcat::mc {New Account}] -font $sysFont(l)  \
+    label $w.frall.head -text [::msgcat::mc {New Account}] -font $fontL  \
       -anchor w -padx 10 -pady 4 -bg #cecece
     pack $w.frall.head -side top -fill both -expand 1
-    message $w.frall.msg -width 260 -font $sysFont(s)  \
+    message $w.frall.msg -width 260  \
       -text [::msgcat::mc janewaccount]
     pack $w.frall.msg -side top -fill both -expand 1
     
     # Entries etc.
     set frmid [frame $w.frall.frmid -borderwidth 0]
     label $frmid.lserv -text "[::msgcat::mc {Jabber server}]:"  \
-      -font $sysFont(sb) -anchor e
+      -font $fontSB -anchor e
     entry $frmid.eserv -width 22    \
       -textvariable [namespace current]::server -validate key  \
       -validatecommand {::Jabber::ValidateJIDChars %S}
-    label $frmid.luser -text "[::msgcat::mc Username]:" -font $sysFont(sb)  \
+    label $frmid.luser -text "[::msgcat::mc Username]:" -font $fontSB  \
       -anchor e
     entry $frmid.euser -width 22   \
       -textvariable [namespace current]::username -validate key  \
       -validatecommand {::Jabber::ValidateJIDChars %S}
-    label $frmid.lpass -text "[::msgcat::mc Password]:" -font $sysFont(sb)  \
+    label $frmid.lpass -text "[::msgcat::mc Password]:" -font $fontSB  \
       -anchor e
     entry $frmid.epass -width 22   \
       -textvariable [namespace current]::password -validate key  \
@@ -353,7 +356,7 @@ namespace eval ::Jabber::GenRegister:: {
 #       "cancel" or "register".
      
 proc ::Jabber::GenRegister::BuildRegister {args} {
-    global  this sysFont wDlgs
+    global  this wDlgs
 
     variable wtop
     variable wbox
@@ -384,20 +387,22 @@ proc ::Jabber::GenRegister::BuildRegister {args} {
     wm title $w [::msgcat::mc {Register Service}]
     set wtop $w
     
+    set fontSB [option get . fontSmallBold {}]
+    
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised]   \
       -fill both -expand 1 -ipadx 12 -ipady 4
-    message $w.frall.msg -width 280 -font $sysFont(s) -text  \
+    message $w.frall.msg -width 280 -text  \
       [::msgcat::mc jaregmsg] -anchor w -justify left
     pack $w.frall.msg -side top -fill x -anchor w -padx 4 -pady 4
     set frtop $w.frall.top
     pack [frame $frtop] -side top -expand 0 -anchor w -padx 10
-    label $frtop.lserv -text "[::msgcat::mc {Service server}]:" -font $sysFont(sb)
+    label $frtop.lserv -text "[::msgcat::mc {Service server}]:" -font $fontSB
     
     # Get all (browsed) services that support registration.
     set regServers [$jstate(jlib) service getjidsfor "register"]
     set wcomboserver $frtop.eserv
-    ::combobox::combobox $wcomboserver -width 18 -font $sysFont(s)   \
+    ::combobox::combobox $wcomboserver -width 18   \
       -textvariable "[namespace current]::server" -editable 0
     eval {$frtop.eserv list insert end} $regServers
     
@@ -409,7 +414,7 @@ proc ::Jabber::GenRegister::BuildRegister {args} {
 	set server $argsArr(-server)
 	$wcomboserver configure -state disabled
     }
-    label $frtop.ldesc -text "[::msgcat::mc Specifications]:" -font $sysFont(sb)
+    label $frtop.ldesc -text "[::msgcat::mc Specifications]:" -font $fontSB
     label $frtop.lstat -textvariable [namespace current]::stattxt
 
     grid $frtop.lserv -column 0 -row 0 -sticky e
@@ -490,7 +495,7 @@ proc ::Jabber::GenRegister::BuildRegister {args} {
 #       "cancel" or "register".
      
 proc ::Jabber::GenRegister::Simple {w args} {
-    global  this sysFont
+    global  this
 
     variable wtop
     variable wbtregister
@@ -514,20 +519,22 @@ proc ::Jabber::GenRegister::Simple {w args} {
     wm title $w [::msgcat::mc {Register Service}]
     set wtop $w
     
+    set fontSB [option get . fontSmallBold {}]
+    
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised]   \
       -fill both -expand 1 -ipadx 12 -ipady 4
-    message $w.frall.msg -width 240 -font $sysFont(s) -text  \
+    message $w.frall.msg -width 240 -text  \
       [::msgcat::mc jaregmsg]
     pack $w.frall.msg -side top -fill x -anchor w -padx 4 -pady 4
     set frtop $w.frall.top
     pack [frame $frtop] -side top -fill x
-    label $frtop.lserv -text "[::msgcat::mc {Service server}]:" -font $sysFont(sb)
+    label $frtop.lserv -text "[::msgcat::mc {Service server}]:" -font $fontSB
     
     # Get all (browsed) services that support registration.
     set regServers [$jstate(jlib) service getjidsfor "register"]
     set wcomboserver $frtop.eserv
-    ::combobox::combobox $wcomboserver -width 20 -font $sysFont(s)   \
+    ::combobox::combobox $wcomboserver -width 20   \
       -textvariable [namespace current]::server -editable 0
     eval {$frtop.eserv list insert end} $regServers
     
@@ -542,12 +549,12 @@ proc ::Jabber::GenRegister::Simple {w args} {
     grid $frtop.lserv -column 0 -row 0 -sticky e
     grid $wcomboserver -column 1 -row 0 -sticky ew
     
-    label $frtop.luser -text "[::msgcat::mc Username]:" -font $sysFont(sb) \
+    label $frtop.luser -text "[::msgcat::mc Username]:" -font $fontSB \
       -anchor e
     entry $frtop.euser -width 26   \
       -textvariable [namespace current]::username -validate key  \
       -validatecommand {::Jabber::ValidateJIDChars %S}
-    label $frtop.lpass -text "[::msgcat::mc Password]:" -font $sysFont(sb) \
+    label $frtop.lpass -text "[::msgcat::mc Password]:" -font $fontSB \
       -anchor e
     entry $frtop.epass -width 26   \
       -textvariable [namespace current]::password -validate key \

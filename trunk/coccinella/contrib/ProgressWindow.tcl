@@ -10,7 +10,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ProgressWindow.tcl,v 1.3 2003-05-18 13:20:19 matben Exp $
+# $Id: ProgressWindow.tcl,v 1.4 2003-12-13 17:54:40 matben Exp $
 # 
 #-------------------------------------------------------------------------------
 #
@@ -322,8 +322,7 @@ proc ::ProgressWindow::Build {w} {
     if {$prefs(Progressbar)} {
 	set wpgb [::progressbar::progressbar $widgets(canvas).pr   \
 	  -variable ::ProgressWindow::${w}::percent \
-	  -width $prwidth -background $prefs(bgColGeneral)  \
-	  -percent $options(-percent)]
+	  -width $prwidth -percent $options(-percent)]
 	$widgets(canvas) create window $dims(xnw) [expr $dims(ymid) + 1] -anchor w \
 	  -window $wpgb
     } else {

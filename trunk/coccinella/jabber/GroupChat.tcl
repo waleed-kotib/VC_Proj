@@ -5,37 +5,40 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.19 2003-12-10 15:21:43 matben Exp $
+# $Id: GroupChat.tcl,v 1.20 2003-12-13 17:54:40 matben Exp $
 
 package provide GroupChat 1.0
 
 # Provides dialog for old-style gc-1.0 groupchat but the rest should work for 
 # both groupchat and conference protocols.
 
-# Use option database for customization. Not used yet...
-option add *GroupChat.textBackground       white                 widgetDefault
-option add *GroupChat.textFont             $sysFont(s)           widgetDefault
-option add *GroupChat.textSendBackground   white                 widgetDefault
-option add *GroupChat.textSendFont         $sysFont(s)           widgetDefault
-option add *GroupChat.meForeground         red                   widgetDefault
-option add *GroupChat.meBackground         #cecece               widgetDefault
-option add *GroupChat.meTextForeground     black                 widgetDefault
-option add *GroupChat.meTextBackground     #cecece               widgetDefault
-option add *GroupChat.meFont               $sysFont(sb)          widgetDefault                                     
-option add *GroupChat.themForeground       blue                  widgetDefault
-option add *GroupChat.themBackground       white                 widgetDefault
-option add *GroupChat.themTextForeground   black                 widgetDefault
-option add *GroupChat.themTextBackground   white                 widgetDefault
-option add *GroupChat.themFont             $sysFont(sb)          widgetDefault
-option add *GroupChat.usersForeground      blue                  widgetDefault
-option add *GroupChat.usersBackground      white                 widgetDefault
-option add *GroupChat.usersTextForeground  black                 widgetDefault
-option add *GroupChat.usersTextBackground  white                 widgetDefault
-option add *GroupChat.usersFont            $sysFont(sb)          widgetDefault
-option add *GroupChat.clockFormat         "%H:%M"                widgetDefault
-
 
 namespace eval ::Jabber::GroupChat:: {
+
+    # Use option database for customization. Not used yet...
+    set fontS [option get . fontSmall {}]
+    set fontSB [option get . fontSmallBold {}]
+
+    option add *GroupChat*textBackground       white            widgetDefault
+    option add *GroupChat*textFont             $fontS           widgetDefault
+    option add *GroupChat*textSendBackground   white            widgetDefault
+    option add *GroupChat*textSendFont         $fontS           widgetDefault
+    option add *GroupChat*meForeground         red              widgetDefault
+    option add *GroupChat*meBackground         #cecece          widgetDefault
+    option add *GroupChat*meTextForeground     black            widgetDefault
+    option add *GroupChat*meTextBackground     #cecece          widgetDefault
+    option add *GroupChat*meFont               $fontSB          widgetDefault                                     
+    option add *GroupChat*themForeground       blue             widgetDefault
+    option add *GroupChat*themBackground       white            widgetDefault
+    option add *GroupChat*themTextForeground   black            widgetDefault
+    option add *GroupChat*themTextBackground   white            widgetDefault
+    option add *GroupChat*themFont             $fontSB          widgetDefault
+    option add *GroupChat*usersForeground      blue             widgetDefault
+    option add *GroupChat*usersBackground      white            widgetDefault
+    option add *GroupChat*usersTextForeground  black            widgetDefault
+    option add *GroupChat*usersTextBackground  white            widgetDefault
+    option add *GroupChat*usersFont            $fontSB          widgetDefault
+    option add *GroupChat*clockFormat         "%H:%M"           widgetDefault
       
     # Local stuff
     variable locals
@@ -229,7 +232,7 @@ proc ::Jabber::GroupChat::SetProtocol {roomJid protocol} {
 #       "cancel" or "enter".
      
 proc ::Jabber::GroupChat::BuildEnter {args} {
-    global  this sysFont
+    global  this
 
     variable enteruid
     variable dlguid
@@ -266,6 +269,8 @@ proc ::Jabber::GroupChat::BuildEnter {args} {
 	nickname    ""
     }
     array set argsArr $args
+    
+    set fontSB [option get . fontSmallBold {}]
 
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised]   \
@@ -275,18 +280,18 @@ proc ::Jabber::GroupChat::BuildEnter {args} {
     set frmid $w.frall.mid
     pack [frame $frmid] -side top -fill both -expand 1
     set msg [::msgcat::mc jagchatmsg]
-    message $frmid.msg -width 260 -font $sysFont(s) -text $msg
-    label $frmid.lserv -text "[::msgcat::mc Servers]:" -font $sysFont(sb) -anchor e
+    message $frmid.msg -width 260 -text $msg
+    label $frmid.lserv -text "[::msgcat::mc Servers]:" -font $fontSB -anchor e
 
     set wcomboserver $frmid.eserv
-    ::combobox::combobox $wcomboserver -font $sysFont(s) -width 18  \
+    ::combobox::combobox $wcomboserver -width 18  \
       -textvariable $token\(server)
     eval {$frmid.eserv list insert end} $chatservers
-    label $frmid.lroom -text "[::msgcat::mc Room]:" -font $sysFont(sb) -anchor e
+    label $frmid.lroom -text "[::msgcat::mc Room]:" -font $fontSB -anchor e
     entry $frmid.eroom -width 24    \
       -textvariable $token\(roomname) -validate key  \
       -validatecommand {::Jabber::ValidateJIDChars %S}
-    label $frmid.lnick -text "[::msgcat::mc {Nick name}]:" -font $sysFont(sb) \
+    label $frmid.lnick -text "[::msgcat::mc {Nick name}]:" -font $fontSB \
       -anchor e
     entry $frmid.enick -width 24    \
       -textvariable $token\(nickname) -validate key  \
@@ -484,7 +489,7 @@ proc ::Jabber::GroupChat::GotMsg {body args} {
 #       shows window.
 
 proc ::Jabber::GroupChat::Build {roomJid args} {
-    global  this sysFont prefs
+    global  this prefs
     
     variable locals
     variable dlguid
@@ -508,6 +513,8 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     }
     set locals($roomJid,got1stMsg) 0
     set locals($roomJid,topic) ""
+    
+    # Toplevel of class GroupChat.
     toplevel $w -class GroupChat
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
@@ -532,6 +539,9 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     if {[string match "mac*" $this(platform)]} {
 	$w configure -menu [::Jabber::UI::GetRosterWmenu]
     }
+    set fontS [option get . fontSmall {}]
+    set fontSB [option get . fontSmallBold {}]
+    set bg [option get . backgroundGeneral {}]
     
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised]   \
@@ -574,13 +584,13 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     set wbtnick $w.frall.fccp.nick
     set wbtinfo $w.frall.fccp.info
     pack [button $wbtinfo -text "[::msgcat::mc Info]..."  \
-      -font $sysFont(s) -command [list ::Jabber::MUC::BuildInfo $roomJid]] \
+      -font $fontS -command [list ::Jabber::MUC::BuildInfo $roomJid]] \
       -side right -padx 4
     pack [button $wbtnick -text "[::msgcat::mc {Nick name}]..."  \
-      -font $sysFont(s) -command [list ::Jabber::MUC::SetNick $roomJid]] \
+      -font $fontS -command [list ::Jabber::MUC::SetNick $roomJid]] \
       -side right -padx 4
     pack [button $wbtinvite -text "[::msgcat::mc Invite]..."  \
-      -font $sysFont(s) -command [list ::Jabber::MUC::Invite $roomJid]] \
+      -font $fontS -command [list ::Jabber::MUC::Invite $roomJid]] \
       -side right -padx 4
     
     pack [frame $w.frall.div2 -bd 2 -relief sunken -height 2] -fill x -side top
@@ -599,7 +609,7 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     set wMenu [eval {tk_optionMenu $wpopup  \
       [namespace current]::locals($roomJid,status)} $allStatus]
     $wpopup configure -highlightthickness 0 -width 14 \
-      -background $prefs(bgColGeneral) -foreground black
+      -background $bg -foreground black
     pack $wpopup -side left -padx 5 -pady 5
     
     pack $frbot -side bottom -fill x -padx 10 -pady 8
@@ -611,12 +621,12 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     set frtop [frame $w.frall.frtop -borderwidth 0]
     pack $frtop -side top -fill x   
     label $frtop.la -text "[::msgcat::mc {Group chat in room}]:"  \
-      -font $sysFont(sb) -anchor e
-    entry $frtop.en -bg $prefs(bgColGeneral)
-    label $frtop.ltp -text "[::msgcat::mc Topic]:" -font $sysFont(sb) -anchor e
-    entry $frtop.etp -bg $prefs(bgColGeneral)  \
+      -font $fontSB -anchor e
+    entry $frtop.en -bg $bg
+    label $frtop.ltp -text "[::msgcat::mc Topic]:" -font $fontSB -anchor e
+    entry $frtop.etp -bg $bg  \
       -textvariable [namespace current]::locals($roomJid,topic)
-    button $frtop.btp -text "[::msgcat::mc Change]..." -font $sysFont(s)  \
+    button $frtop.btp -text "[::msgcat::mc Change]..." -font $fontS  \
       -command [list [namespace current]::SetTopic $roomJid]
     
     grid $frtop.la -column 0 -row 0 -sticky e -padx 4 -pady 1
@@ -633,12 +643,12 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     pack [frame $frmid -height 250 -width 300 -relief sunken -bd 1]  \
       -side top -fill both -expand 1 -padx 4 -pady 4
     frame $wtxt -height 200
-    frame $wtxt.0 -bg $prefs(bgColGeneral)
-    text $wtext -height 12 -width 1 -font $sysFont(s) -state disabled  \
+    frame $wtxt.0 -bg $bg
+    text $wtext -height 12 -width 1 -font $fontS -state disabled  \
       -borderwidth 1 -relief sunken -yscrollcommand [list $wysc set] -wrap word \
       -cursor {}
-    text $wusers -height 12 -width 12 -font $sysFont(s) -state disabled  \
-      -borderwidth 1 -relief sunken -background $prefs(bgColGeneral)  \
+    text $wusers -height 12 -width 12 -font $fontS -state disabled  \
+      -borderwidth 1 -relief sunken -background $bg  \
       -spacing1 1 -spacing3 1 -wrap none -cursor {}
     scrollbar $wysc -orient vertical -command [list $wtext yview]
     pack $wtext -side left -fill both -expand 1
@@ -654,17 +664,17 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     # The tags.
     set space 2
     $wtext tag configure metag -foreground red -background #cecece  \
-      -spacing1 $space -font $sysFont(sb)
+      -spacing1 $space -font $fontSB
     $wtext tag configure metxttag -foreground black -background #cecece  \
       -spacing1 $space -spacing3 $space -lmargin1 20 -lmargin2 20
     $wtext tag configure youtag -foreground blue -spacing1 $space  \
-      -font $sysFont(sb)
+      -font $fontSB
     $wtext tag configure youtxttag -foreground black -spacing1 $space  \
       -spacing3 $space -lmargin1 20 -lmargin2 20
     
     # Text send.
     frame $wtxtsnd -height 100 -width 300
-    text $wtextsnd -height 4 -width 1 -font $sysFont(s) -wrap word \
+    text $wtextsnd -height 4 -width 1 -font $fontS -wrap word \
       -borderwidth 1 -relief sunken -yscrollcommand [list $wyscsnd set]
     scrollbar $wyscsnd -orient vertical -command [list $wtextsnd yview]
     grid $wtextsnd -column 0 -row 0 -sticky news

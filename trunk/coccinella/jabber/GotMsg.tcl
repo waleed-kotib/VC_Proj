@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.10 2003-12-10 15:21:43 matben Exp $
+# $Id: GotMsg.tcl,v 1.11 2003-12-13 17:54:40 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -129,7 +129,7 @@ proc ::Jabber::GotMsg::Show {thisMsgId} {
 #       shows window.
 
 proc ::Jabber::GotMsg::Build { } {
-    global  this sysFont prefs
+    global  this prefs
 
     variable w
     variable finished 
@@ -170,6 +170,8 @@ proc ::Jabber::GotMsg::Build { } {
 	$w configure -menu [::Jabber::UI::GetRosterWmenu]
     }
     
+    set bg [option get . backgroundGeneral {}]
+    
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised]   \
       -fill both -expand 1 -ipadx 0   
@@ -195,11 +197,11 @@ proc ::Jabber::GotMsg::Build { } {
     pack $wfrom -side top -fill both -padx 4 -pady 2
     pack [entry $wcont.nick -width 14 \
       -textvariable [namespace current]::nick -state disabled \
-      -borderwidth 1 -relief sunken -background $prefs(bgColGeneral)] \
+      -borderwidth 1 -relief sunken -background $bg] \
       -side left 
     pack [entry $wcont.jid   \
       -textvariable [namespace current]::jid -state disabled \
-      -borderwidth 1 -relief sunken -background $prefs(bgColGeneral)] \
+      -borderwidth 1 -relief sunken -background $bg] \
       -side left -fill x -expand 1
     
     # Time field.
@@ -210,13 +212,13 @@ proc ::Jabber::GotMsg::Build { } {
       -side left -padx 2 -pady 0
     pack [entry $ftm.et -width 8 \
       -textvariable [namespace current]::theTime -state disabled  \
-      -borderwidth 1 -relief sunken -background $prefs(bgColGeneral)] \
+      -borderwidth 1 -relief sunken -background $bg] \
       -side left -padx 1 -pady 0
     pack [label $ftm.ld -text "[::msgcat::mc Date]:" \
       -anchor e] -side left -padx 1 -pady 0
     pack [entry $ftm.ed -width 11 \
       -textvariable [namespace current]::theDate -state disabled  \
-      -borderwidth 1 -relief sunken -background $prefs(bgColGeneral)] \
+      -borderwidth 1 -relief sunken -background $bg] \
       -side left -padx 1 -pady 0
     pack [frame $ftm.pad -relief raised -bd 1 -width 2]  \
       -padx 6 -fill y -side left
@@ -224,7 +226,7 @@ proc ::Jabber::GotMsg::Build { } {
       -anchor e -padx 0] -side left -padx 0 -pady 0    
     pack [entry $wonline -width 11 \
       -textvariable [namespace current]::isOnline -state disabled  \
-      -borderwidth 1 -relief sunken -background $prefs(bgColGeneral)] \
+      -borderwidth 1 -relief sunken -background $bg] \
       -side left -padx 4 -pady 0
     
     # Subject field.
@@ -232,7 +234,7 @@ proc ::Jabber::GotMsg::Build { } {
     pack [label $frmid.fsub.l -text "[::msgcat::mc Subject]:"  \
       -anchor e] -side left -padx 2 -pady 1
     pack [entry $frmid.fsub.e -width 10 \
-      -borderwidth 1 -relief sunken -background $prefs(bgColGeneral) \
+      -borderwidth 1 -relief sunken -background $bg \
       -textvariable [namespace current]::subject -state disabled] \
       -side left -padx 4 -pady 1 -fill x -expand 1
     
@@ -241,7 +243,7 @@ proc ::Jabber::GotMsg::Build { } {
     pack [frame $wtxtfr] -side top -fill both -expand 1 -padx 4 -pady 4
     set wtext $wtxtfr.text
     set wysc $wtxtfr.ysc
-    text $wtext -height 6 -width 48 -font $sysFont(s) -wrap word  \
+    text $wtext -height 6 -width 48 -wrap word  \
       -borderwidth 1 -relief sunken -yscrollcommand [list $wysc set]
     $wtext tag configure normal -foreground black
     ::Text::ConfigureLinkTagForTextWidget $wtext linktag tact

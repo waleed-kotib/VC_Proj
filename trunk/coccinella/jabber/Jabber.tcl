@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.37 2003-12-12 13:46:44 matben Exp $
+# $Id: Jabber.tcl,v 1.38 2003-12-13 17:54:41 matben Exp $
 #
 #  The $address is an ip name or number.
 #
@@ -249,7 +249,7 @@ proc ::Jabber::Debug {num str} {
 #       preferences.
 
 proc ::Jabber::FactoryDefaults { } {
-    global  sysFont this env prefs wDlgs
+    global  this env prefs wDlgs sysFont
 
     variable jstate
     variable jprefs
@@ -334,7 +334,8 @@ proc ::Jabber::FactoryDefaults { } {
     
     set jprefs(logoutStatus) ""
     
-    set jprefs(chatFont) [::Utils::GetFontListFromName $sysFont(s)]
+    #set jprefs(chatFont) [::Utils::GetFontListFromName $sysFont(s)]
+    set jprefs(chatFont) [option get . fontSmall {}]
     set jprefs(useXDataSearch) 1
     
     # Service discovery method: "agents" or "browse"
@@ -1250,7 +1251,7 @@ proc ::Jabber::DebugCmd { } {
 # Jabber::ErrorLogDlg
 
 proc ::Jabber::ErrorLogDlg {w} {
-    global  this sysFont
+    global  this
     
     variable jerror
 
@@ -1275,7 +1276,7 @@ proc ::Jabber::ErrorLogDlg {w} {
     pack [frame $wtxt] -side top -fill both -expand 1 -padx 4 -pady 4
     set wtext $wtxt.text
     set wysc $wtxt.ysc
-    text $wtext -height 12 -width 48 -font $sysFont(s) -wrap word \
+    text $wtext -height 12 -width 48 -wrap word \
       -borderwidth 1 -relief sunken -yscrollcommand [list $wysc set]
     scrollbar $wysc -orient vertical -command [list $wtext yview]
     grid $wtext -column 0 -row 0 -sticky news
@@ -1850,7 +1851,7 @@ proc ::Jabber::SetStatus {type args} {
 #       "cancel" or "set".
 
 proc ::Jabber::SetStatusWithMessage { } {
-    global  this sysFont wDlgs
+    global  this wDlgs
     
     variable finishedStat
     variable show
@@ -1873,6 +1874,8 @@ proc ::Jabber::SetStatusWithMessage { } {
     wm title $w [::msgcat::mc {Set Status}]
     set finishedStat -1
     
+    set fontSB [option get . fontSmallBold {}]
+    
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
     
@@ -1894,10 +1897,10 @@ proc ::Jabber::SetStatusWithMessage { } {
     set show $jstate(status)
     
     pack [label $w.frall.lbl -text "[::msgcat::mc {Status message}]:" \
-      -font $sysFont(sb)]  \
+      -font $fontSB]  \
       -side top -anchor w -padx 6 -pady 0
     set wtext $w.frall.txt
-    text $wtext -height 4 -width 36 -font $sysFont(s) -wrap word \
+    text $wtext -height 4 -width 36 -wrap word \
       -borderwidth 1 -relief sunken
     pack $wtext -expand 1 -fill both -padx 6 -pady 4    
     
@@ -2669,10 +2672,12 @@ proc ::Jabber::GetVersion {to args} {
 }
 
 proc ::Jabber::GetVersionResult {from silent jlibname type subiq} {
-    global  sysFont prefs this
+    global  prefs this
     
     variable jerror
     variable uidvers
+    
+    set fontSB [option get . fontSmallBold {}]
     
     if {[string equal $type "error"]} {
 	if {$silent} {
@@ -2685,7 +2690,7 @@ proc ::Jabber::GetVersionResult {from silent jlibname type subiq} {
 	}
     } else {
 	set w .jvers[incr uidvers]
-	toplevel $w -background $prefs(bgColGeneral)
+	toplevel $w
 	if {[string match "mac*" $this(platform)]} {
 	    eval $::macWindowStyle $w documentProc
 	    ::UI::MacUseMainMenu $w
@@ -2694,12 +2699,12 @@ proc ::Jabber::GetVersionResult {from silent jlibname type subiq} {
 	}
 	wm title $w [::msgcat::mc {Version Info}]
 	pack [label $w.icon -bitmap info] -side left -anchor n -padx 10 -pady 10
-	pack [label $w.msg -text [::msgcat::mc javersinfo $from] -font $sysFont(sb)] \
+	pack [label $w.msg -text [::msgcat::mc javersinfo $from] -font $fontSB] \
 	  -side top -padx 8 -pady 4
 	pack [frame $w.fr] -padx 10 -pady 4 -side top 
 	set i 0
 	foreach child [lindex $subiq 4] {
-	    label $w.fr.l$i -font $sysFont(sb) -text "[lindex $child 0]:"
+	    label $w.fr.l$i -font $fontSB -text "[lindex $child 0]:"
 	    label $w.fr.lr$i -text [lindex $child 3]
 	    grid $w.fr.l$i -column 0 -row $i -sticky e
 	    grid $w.fr.lr$i -column 1 -row $i -sticky w
@@ -3133,7 +3138,7 @@ namespace eval ::Jabber::Passwd:: {
 #       "cancel" or "set".
 
 proc ::Jabber::Passwd::Build { } {
-    global  this sysFont wDlgs
+    global  this wDlgs
     
     variable finished -1
     variable password
@@ -3153,6 +3158,8 @@ proc ::Jabber::Passwd::Build { } {
     }
     wm title $w [::msgcat::mc {New Password}]
     
+    set fontSB [option get . fontSmallBold {}]
+    
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised] \
       -fill both -expand 1 -ipadx 12 -ipady 4
@@ -3161,8 +3168,8 @@ proc ::Jabber::Passwd::Build { } {
     
     # Entries etc.
     set frmid [frame $w.frall.frmid -borderwidth 0]
-    label $frmid.ll -font $sysFont(sb) -text [::msgcat::mc janewpass]
-    label $frmid.le -font $sysFont(sb) -text $jstate(mejid)
+    label $frmid.ll -font $fontSB -text [::msgcat::mc janewpass]
+    label $frmid.le -font $fontSB -text $jstate(mejid)
     label $frmid.lserv -text "[::msgcat::mc {New password}]:" -anchor e
     entry $frmid.eserv -width 18 -show *  \
       -textvariable [namespace current]::password -validate key  \
@@ -3309,7 +3316,7 @@ proc ::Jabber::VerifyJIDWhiteboard {wtop} {
 namespace eval ::Jabber::Logout:: {}
 
 proc ::Jabber::Logout::WithStatus { } {
-    global  prefs this sysFont wDlgs
+    global  prefs this wDlgs
 
     variable finished -1
     variable status ""
@@ -3331,11 +3338,14 @@ proc ::Jabber::Logout::WithStatus { } {
     }
     wm title $w {Logout With Message}
     
+    set fontSB [option get . fontSmallBold {}]
+    set fontL [option get . fontLarge {}]
+    
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised]  \
       -fill both -expand 1 -ipadx 12 -ipady 4
     
-    label $w.frall.head -text {Logout} -font $sysFont(l)  \
+    label $w.frall.head -text {Logout} -font $fontL  \
       -anchor w -padx 10 -pady 4 -bg #cecece
     pack $w.frall.head -side top -fill both -expand 1
     
@@ -3343,7 +3353,7 @@ proc ::Jabber::Logout::WithStatus { } {
     set frmid [frame $w.frall.frmid -borderwidth 0]
     pack $frmid -side top -fill both -expand 1
     
-    label $frmid.lstat -text "Status:" -font $sysFont(sb) -anchor e
+    label $frmid.lstat -text "Status:" -font $fontSB -anchor e
     entry $frmid.estat -width 36  \
       -textvariable [namespace current]::status
     grid $frmid.lstat -column 0 -row 1 -sticky e

@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: VCard.tcl,v 1.7 2003-12-10 15:21:43 matben Exp $
+# $Id: VCard.tcl,v 1.8 2003-12-13 17:54:41 matben Exp $
 
 package provide VCard 1.0
 
@@ -142,7 +142,7 @@ proc ::VCard::ParseXmlList {subiq arrName} {
 #       shows dialog.
 
 proc ::VCard::Build {w type jid} {
-    global  this sysFont prefs
+    global  this prefs
     
     variable finished
     variable tmpPrefs
@@ -158,7 +158,7 @@ proc ::VCard::Build {w type jid} {
     if {[winfo exists $w]} {
         return
     }
-    toplevel $w -background $prefs(bgColGeneral)
+    toplevel $w
     if {[string match "mac*" $this(platform)]} {
         eval $::macWindowStyle $w documentProc
 	::UI::MacUseMainMenu $w
@@ -229,7 +229,7 @@ proc ::VCard::Build {w type jid} {
     set wdesctxt $pbi.fdes.t
     set wdysc $pbi.fdes.ysc
     text $wdesctxt -height 4 -yscrollcommand [list $wdysc set] -wrap word \
-      -borderwidth 1 -relief sunken -font $sysFont(s) -width 38
+      -borderwidth 1 -relief sunken -width 38
     scrollbar $wdysc -orient vertical -command [list $wdesctxt yview]
     grid $wdesctxt -column 0 -row 0 -sticky news
     grid $wdysc -column 1 -row 0 -sticky ns
@@ -264,7 +264,7 @@ proc ::VCard::Build {w type jid} {
     grid $pbp.email -column 0 -sticky w
     set wemails $pbp.emails
     text $wemails -wrap none -bd 1 -relief sunken \
-      -font $sysFont(s) -width 32 -height 8
+      -width 32 -height 8
     grid $pbp.emails -columnspan 2 -sticky w
     if {[info exists elem(email_internet)]} {
         foreach email $elem(email_internet) {

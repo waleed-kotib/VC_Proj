@@ -1,12 +1,36 @@
 ! Resource database entries for Mac OS Classic
 !
 
-*Checkbutton.Font:                   {Geneva 9}
+! General appearence
+!
+*fontSmall:                          Geneva 9
+*fontSmallBold:                      Geneva 9 bold
+*fontMedium:                         Geneva 9
+*fontLarge:                          Helvetica 18
+*backgroundGeneral:                  #dedede
+
+! general settings for all widgets
+!
+
+
+! tk standard widgets
+!
+
+*Checkbutton.Font:                   Geneva 9
+*Entry.Font:                         Geneva 9
 *Entry.HighlightThickness:           3
-*Entry.Font:                         {Geneva 9}
-*Label.Font:                         {Geneva 9}
+*Label.Font:                         Geneva 9
+*Listbox.Font:                       Geneva 9
 *Listbox.HighlightThickness:         3
-*Radiobutton.Font:                   {Geneva 9}
+*Message.Font:                       Geneva 9
+*Radiobutton.Font:                   Geneva 9
+*Text.Font:                          Geneva 9
 *Text.HighlightThickness:            3
 
+! contributed widgets
+!
+*Combobox.Font:                      Geneva 9
+*Tablelist.Font:                     Geneva 9
 *Tablelist.HighlightThickness:       3
+*Tree.openIcons:                     triangle
+*Tree.treeColor:                     
