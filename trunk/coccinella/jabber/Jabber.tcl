@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.58 2004-01-23 08:55:20 matben Exp $
+# $Id: Jabber.tcl,v 1.59 2004-01-23 14:28:17 matben Exp $
 
 package provide Jabber 1.0
 
@@ -163,10 +163,11 @@ namespace eval ::Jabber:: {
       http://jabber.org/protocol/disco {Feature discovery}
     }    
     
-    # <iq> XML namespaces defined here.
-    variable iqxmlns
-    array set iqxmlns {
+    # XML namespaces defined here.
+    variable privatexmlns
+    array set privatexmlns {
 	servers         http://coccinella.sourceforge.net/protocols/servers
+	whiteboard      http://coccinella.sourceforge.net/protocols/whiteboard
     }
   
     # Short error names.
@@ -641,7 +642,7 @@ proc ::Jabber::Init { } {
     
     variable jstate
     variable jprefs
-    variable iqxmlns
+    variable privatexmlns
     
     # Make the roster object.
     set jstate(roster) [::roster::roster ::Jabber::Roster::PushProc]
@@ -671,7 +672,7 @@ proc ::Jabber::Init { } {
     # Register handlers for various iq elements.
     $jstate(jlib) iq_register get jabber:iq:version ::Jabber::ParseGetVersion
     $jstate(jlib) iq_register get jabber:iq:browse  ::Jabber::ParseGetBrowse
-    $jstate(jlib) iq_register get $iqxmlns(servers) ::Jabber::ParseGetServers
+    $jstate(jlib) iq_register get $privatexmlns(servers) ::Jabber::ParseGetServers
     $jstate(jlib) iq_register set jabber:iq:oob     ::Jabber::OOB::ParseSet
     
     # Set the priority order of groupchat protocols.
@@ -724,6 +725,7 @@ proc ::Jabber::IqCallback {jlibName type args} {
 proc ::Jabber::MessageCallback {jlibName type args} {    
     variable jstate
     variable jprefs
+    variable privatexmlns
     
     ::Jabber::Debug 2 "::Jabber::MessageCallback type=$type, args='$args'"
     
@@ -763,6 +765,7 @@ proc ::Jabber::MessageCallback {jlibName type args} {
     } else {
 	
 	# Check if we've got an <x xmlns='coccinella:wb'><raw> element...
+	# New: uri based namespace.
 	set haveCoccinellaNS 0
 	set rawElemList {}
 	if {[info exists attrArr(-x)]} {
@@ -775,7 +778,7 @@ proc ::Jabber::MessageCallback {jlibName type args} {
 		    continue
 		}
 		switch -- $xattrArr(xmlns) {
-		    "jabber:x:coccinella" - "coccinella:wb" {
+		    "coccinella:wb" - $privatexmlns(whiteboard) {
 			set haveCoccinellaNS 1
 			foreach xsubtag $xsub {
 			    if {[string equal [lindex $xsubtag 0] "raw"]} {
@@ -1948,9 +1951,9 @@ proc ::Jabber::PutIPnumber {jid id} {
 
 proc ::Jabber::GetCoccinellaServers {jid3 {cmd {}}} {
     variable jstate
-    variable iqxmlns
+    variable privatexmlns
     
-    $jstate(jlib) iq_get $iqxmlns(servers) $jid3  \
+    $jstate(jlib) iq_get $privatexmlns(servers) $jid3  \
       -command [list ::Jabber::GetCoccinellaServersCallback $jid3 $cmd]
 }
 
@@ -2584,7 +2587,7 @@ proc ::Jabber::ParseGetVersion {jlibname from subiq args} {
 proc ::Jabber::ParseGetBrowse {jlibname from subiq args} {
     global  prefs    
     variable jstate
-    variable iqxmlns
+    variable privatexmlns
 
     ::Jabber::Debug 2 "::Jabber::ParseGetBrowse: args='$args'"
     
@@ -2610,11 +2613,12 @@ proc ::Jabber::ParseGetBrowse {jlibname from subiq args} {
       [wrapper::createtag "ns" -chdata "jabber:iq:time"]        \
       [wrapper::createtag "ns" -chdata "jabber:iq:version"]     \
       [wrapper::createtag "ns" -chdata "jabber:x:data"]         \
+      [wrapper::createtag "ns" -chdata "jabber:x:event"]        \
       [wrapper::createtag "ns" -chdata "coccinella:public"]     \
       [wrapper::createtag "ns" -chdata "coccinella:wb"]]
     
     # Adding private namespaces.
-    foreach {key ns} [array get iqxmlns] {
+    foreach {key ns} [array get privatexmlns] {
 	lappend subtags [wrapper::createtag "ns" -chdata $ns]
     }
     
@@ -2642,7 +2646,7 @@ proc ::Jabber::ParseGetServers  {jlibname from subiq args} {
     global  prefs
     
     variable jstate
-    variable iqxmlns
+    variable privatexmlns
     
     # Build tag and attributes lists to 'private_set'.
     set ip [::Network::GetThisOutsideIPAddress]
@@ -2662,7 +2666,7 @@ proc ::Jabber::ParseGetServers  {jlibname from subiq args} {
       [wrapper::createtag ip -chdata $ip -attrlist $attrputget]  \
       [wrapper::createtag ip -chdata $ip -attrlist $attrhttpd]]
     set xmllist [wrapper::createtag query -subtags $subtags  \
-      -attrlist [list xmlns $iqxmlns(servers)]]
+      -attrlist [list xmlns $privatexmlns(servers)]]
      eval {$jstate(jlib) send_iq "result" $xmllist} $opts
     
      # Tell jlib's iq-handler that we handled the event.
