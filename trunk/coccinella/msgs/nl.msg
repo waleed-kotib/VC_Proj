@@ -673,6 +673,12 @@
 ::msgcat::mcset nl jamessoobfailopen	{Openen van bestand %s mislukte}
 ::msgcat::mcset nl jamessoobgetfail	{Ophalen van URL "%s" mislukte: %s}
 ::msgcat::mcset nl jamessoobtimeout	{Tijdslimiet overschreden tijdens het ophalen van een bestand via HTTP}
+
+# translate!!!!
+::msgcat::mcset nl jamessooberr406      {The user %s rejected to accept the file %s.}
+::msgcat::mcset nl jamessooberr404      {Got an error when trying to send the file %s to %s. The code was %s, and error message: %s}
+# translate!!!!
+
 ::msgcat::mcset nl jamessnogchat	{Er is geen service gedetecteerd die groupchat aanbied}
 ::msgcat::mcset nl jamesserrinboxopen	{Openen van Postvak in-bestand %s tijdens het proberen op te slaan mislukte.}
 ::msgcat::mcset nl jamesserrinboxread	{Er is een fout opgetreden tijdens het proberen te lezen van het Jabber message box bestand "%s": %s}

@@ -679,6 +679,12 @@
 ::msgcat::mcset es jamessoobfailopen	{La apertura de "%s" ha fallado.}
 ::msgcat::mcset es jamessoobgetfail	{La URL "%s" no está accessible (%s).}
 ::msgcat::mcset es jamessoobtimeout	{Tiempo transcurrido durante el acceso al archivo vía HTTP}
+
+# translate!!!!
+::msgcat::mcset es jamessooberr406      {The user %s rejected to accept the file %s.}
+::msgcat::mcset es jamessooberr404      {Got an error when trying to send the file %s to %s. The code was %s, and error message: %s}
+# translate!!!!
+
 ::msgcat::mcset es jamessnogchat	{Ningún servicio propuesto para la sala es reconocido.}
 ::msgcat::mcset es jamesserrinboxopen	{Error de la apertura del correo entrante %s durante la copia de seguridad.}
 ::msgcat::mcset es jamesserrinboxread	{Error durante la lectura del mensaje en el diálogo Jabber "%s" : %s}
