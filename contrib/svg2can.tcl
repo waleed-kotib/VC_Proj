@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #
-# $Id: svg2can.tcl,v 1.16 2004-03-27 15:20:37 matben Exp $
+# $Id: svg2can.tcl,v 1.17 2004-06-24 13:48:35 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -87,6 +87,10 @@ namespace eval svg2can {
 	}
     }
 }
+
+# svg2can::config --
+# 
+#       Processes the configuration options.
 
 proc svg2can::config {args} {
     variable confopts
@@ -445,6 +449,7 @@ proc svg2can::ParseLine {xmllist paropts transformList args} {
 proc svg2can::ParsePath {xmllist paropts transformList args} {
     variable tmptag
     
+    set debug 0
     set cmdList {}
     set opts {}
     set presentationAttr {}
@@ -471,7 +476,7 @@ proc svg2can::ParsePath {xmllist paropts transformList args} {
 	    style {
 		# Need to parse separately for each canvas item since different
 		# default values.
-		set lineopts    [StyleToOpts line [StyleAttrToList $value]]
+		set lineopts    [StyleToOpts line    [StyleAttrToList $value]]
 		set polygonopts [StyleToOpts polygon [StyleAttrToList $value]]
 	    }
 	    default {
@@ -484,7 +489,7 @@ proc svg2can::ParsePath {xmllist paropts transformList args} {
     # Since the style parsing is different keep separate copies.
     lappend lineopts    -tags $tags
     lappend polygonopts -tags $tags
-    set lineopts    [MergePresentationAttr line $lineopts $presentationAttr]
+    set lineopts    [MergePresentationAttr line    $lineopts    $presentationAttr]
     set polygonopts [MergePresentationAttr polygon $polygonopts $presentationAttr]
     
     # Parse the actual path data. 
@@ -497,6 +502,13 @@ proc svg2can::ParsePath {xmllist paropts transformList args} {
     set path [string map {- " -"} $path]
     set path [string map {, " "} $path]
     
+    # Debug.
+    if {$debug} {
+	for {set i 0} {$i < [llength $path]} {incr i} {
+	    puts "$i: [lindex $path $i]"
+	}
+    }
+    
     set i 0
     set len  [llength $path]
     set len1 [expr $len - 1]
@@ -504,13 +516,17 @@ proc svg2can::ParsePath {xmllist paropts transformList args} {
     set len4 [expr $len - 4]
     set len6 [expr $len - 6]
     
+    # 'i' is the index into the path list; points to the command (character).
+    
     while {$i < $len} {
 	set elem [lindex $path $i]
 	set isabsolute 1
 	if {[string is lower $elem]} {
 	    set isabsolute 0
 	}
-	#puts "elem=$elem"
+	if {$debug} {
+	    puts "elem=$elem"
+	}
 	
 	switch -glob -- $elem {
 	    A - a {
@@ -589,15 +605,20 @@ proc svg2can::ParsePath {xmllist paropts transformList args} {
 			lappend co [lindex $path [incr i]] [lindex $path [incr i]]
 			set cpx [lindex $co end-1]
 			set cpy [lindex $co end]
-		    } else {			
+		    } else {
+			if {$debug} {
+			    puts "PathAddRelative i=$i, cpx=$cpx, cpy=$cpy"
+			}
 			PathAddRelative $path co i cpx cpy
 			PathAddRelative $path co i cpx cpy
 			PathAddRelative $path co i cpx cpy
 		    }
 		    
-		    # If S instruction do not finalize item.
+		    # Do not finalize item if S instruction.
 		    if {![string equal -nocase [lindex $path [expr $i+1]] "S"]} {
-			#puts "\ti=$i, current=($cpx,$cpy), co=$co"
+			if {$debug} {
+			    puts "\tfinalize item: i=$i, cp=($cpx,$cpy), co=$co"
+			}
 			lappend itemopts -smooth 1
 			set opts [concat $lineopts $itemopts]
 			lappend cmdList [concat create line $co $opts]
@@ -675,7 +696,7 @@ proc svg2can::ParsePath {xmllist paropts transformList args} {
 			PathAddRelative $path co i cpx cpy
 		    }
 		    
-		    # If T instruction do not finalize item.
+		    # Do not finalize item if T instruction.
 		    if {![string equal -nocase [lindex $path [expr $i+1]] "T"]} {
 			#puts "\ti=$i, current=($cpx,$cpy), co=$co"
 			lappend itemopts -smooth 1
@@ -798,20 +819,28 @@ proc svg2can::ParsePath {xmllist paropts transformList args} {
 		# ?
 		incr i
 	    }
-	}
+	}   ;# End switch.
 	
 	# Keep track of the pens current point.
-	set cpx [lindex $co end-1]
-	set cpy [lindex $co end]
-	#puts "cp=($cpx,$cpy)"
-    }
+	if {[llength $co]} {
+	    set cpx [lindex $co end-1]
+	    set cpy [lindex $co end]
+	}
+	if {$debug} {
+	    puts "end loop: cp=($cpx,$cpy)"
+	}
+    }   ;# End while loop.
     
     # Finalize the last element if any.
     if {[llength $co]} {
 	set opts [concat [set ${cantype}opts] $itemopts]
 	lappend cmdList [concat create $cantype $co $opts]
     }
-
+    if {$debug} {
+	foreach cmd $cmdList {
+	    puts "cmd=$cmd"
+	}
+    }
     return [AddAnyTransformCmds $cmdList $transformList]
 }
 

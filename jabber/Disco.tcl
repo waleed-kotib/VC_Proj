@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.21 2004-06-23 07:53:38 matben Exp $
+# $Id: Disco.tcl,v 1.22 2004-06-24 13:48:35 matben Exp $
 
 package provide Disco 1.0
 
@@ -431,8 +431,8 @@ proc ::Jabber::Disco::Build {w} {
     
     if {[string match "mac*" $this(platform)]} {
 	$wtree configure -buttonpresscommand [namespace current]::Popup \
-	  -eventlist [list [list <Control-Button-1> [namespace current]::Popup]]
-	$wtree configure -rightclickcommand [namespace current]::Popup
+	  -eventlist [list [list <Control-Button-1> [namespace current]::Popup] \
+	  [list <Button-2> [namespace current]::Popup]]
     } else {
 	$wtree configure -rightclickcommand [namespace current]::Popup
     }

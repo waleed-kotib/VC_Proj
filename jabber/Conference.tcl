@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Conference.tcl,v 1.27 2004-06-13 13:43:24 matben Exp $
+# $Id: Conference.tcl,v 1.28 2004-06-24 13:48:35 matben Exp $
 
 package provide Conference 1.0
 
@@ -566,7 +566,7 @@ proc ::Jabber::Conference::CancelCreate {token} {
     
     set roomJid [jlib::jidmap $state(roomname)@$state(server)]
     if {$state(usemuc) && ($roomJid != "")} {
-	catch {$jstate(jlib) muc setroom $roomJid cancel}
+	catch {$jstate(muc) setroom $roomJid cancel}
     }
     set state(finished) 0
     catch {destroy $state(w)}
@@ -604,7 +604,7 @@ proc ::Jabber::Conference::CreateGet {token} {
     ::Debug 2 "::Jabber::Conference::CreateGet usemuc=$state(usemuc)"
 
     if {$state(usemuc)} {
-	$jstate(jlib) muc create $roomJid $state(nickname) \
+	$jstate(muc) create $roomJid $state(nickname) \
 	  [list [namespace current]::CreateMUCCB $token]
     } else {
 	$jstate(jlib) conference get_create $roomJid  \
@@ -660,7 +660,7 @@ proc ::Jabber::Conference::CreateMUCCB {token jlibName type args} {
     if {![info exists argsArr(-created)]} {
     
     }
-    $jstate(jlib) muc getroom $state(roomjid)  \
+    $jstate(muc) getroom $state(roomjid)  \
       [list [namespace current]::CreateGetGetCB $token]
 }
 
@@ -728,7 +728,7 @@ proc ::Jabber::Conference::DoCreate {token} {
     
     # Ask jabberlib to create the room for us.
     if {$state(usemuc)} {
-	$jstate(jlib) muc setroom $roomJid submit -form $subelements \
+	$jstate(muc) setroom $roomJid submit -form $subelements \
 	  -command [list [namespace current]::DoCreateCallback $state(usemuc) $roomJid]
     } else {
 	$jstate(jlib) conference set_create $roomJid $subelements  \

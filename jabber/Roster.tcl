@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.69 2004-06-23 07:53:38 matben Exp $
+# $Id: Roster.tcl,v 1.70 2004-06-24 13:48:36 matben Exp $
 
 package provide Roster 1.0
 
@@ -126,7 +126,7 @@ namespace eval ::Jabber::Roster:: {
 	    ::Jabber::Roster::NewOrEditItem edit -jid $jid
 	}
 	mVersion       user      {::Jabber::GetVersion $jid3}
-	mChatHistory   user      {::Jabber::Chat::BuildHistory $jid}
+	mChatHistory   user      {::Jabber::Chat::BuildHistoryForJid $jid}
 	mRemoveUser    user      {::Jabber::Roster::SendRemove $jid}
 	separator      {}        {}
 	mDirStatus     user      {::Jabber::Roster::DirectedPresenceDlg $jid}
@@ -281,8 +281,8 @@ proc ::Jabber::Roster::Build {w} {
     
     if {[string match "mac*" $this(platform)]} {
 	$wtree configure -buttonpresscommand [namespace current]::Popup \
-	  -eventlist [list [list <Control-Button-1> [namespace current]::Popup]]
-	$wtree configure -rightclickcommand [namespace current]::Popup
+	  -eventlist [list [list <Control-Button-1> [namespace current]::Popup] \
+	  [list <Button-2> [namespace current]::Popup]]
     } else {
 	$wtree configure -rightclickcommand [namespace current]::Popup
     }

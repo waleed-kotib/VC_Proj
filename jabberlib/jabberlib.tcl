@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.51 2004-06-22 14:21:19 matben Exp $
+# $Id: jabberlib.tcl,v 1.52 2004-06-24 13:48:36 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -191,7 +191,7 @@
 #       
 #       040412   started with 2.0 version; 
 #                removed all browse stuff, added presence_register, muc as a
-#                standalone component,
+#                standalone component, jlibname now always fully qualified,
 
 package require wrapper
 package require roster
@@ -258,10 +258,11 @@ proc jlib::new {rostername clientcmd args} {
     variable uid
     
     # Generate unique command token for this jlib instance.
-    set jlibname jabberlib[incr uid]
+    # Fully qualified!
+    set jlibname [namespace current]::jlib[incr uid]
       
     # Instance specific namespace.
-    namespace eval [namespace current]::${jlibname} {
+    namespace eval $jlibname {
 	variable lib
 	variable locals
 	variable iqcmd
@@ -277,13 +278,13 @@ proc jlib::new {rostername clientcmd args} {
     }
             
     # Set simpler variable names.
-    upvar [namespace current]::${jlibname}::lib    lib
-    upvar [namespace current]::${jlibname}::iqcmd  iqcmd
-    upvar [namespace current]::${jlibname}::prescmd prescmd
-    upvar [namespace current]::${jlibname}::opts   opts
-    upvar [namespace current]::${jlibname}::conf   conf
-    upvar [namespace current]::${jlibname}::gchat  gchat
-    upvar [namespace current]::${jlibname}::locals locals
+    upvar ${jlibname}::lib      lib
+    upvar ${jlibname}::iqcmd    iqcmd
+    upvar ${jlibname}::prescmd  prescmd
+    upvar ${jlibname}::opts     opts
+    upvar ${jlibname}::conf     conf
+    upvar ${jlibname}::gchat    gchat
+    upvar ${jlibname}::locals   locals
     
     array set opts {
 	-iqcommand            ""
@@ -316,7 +317,6 @@ proc jlib::new {rostername clientcmd args} {
     
     set iqcmd(uid) 1001
     set prescmd(uid) 1001
-    set lib(fulljlibname) [namespace current]::${jlibname}
     set lib(rostername)   $rostername
     set lib(clientcmd)    $clientcmd
     set lib(wrap)         $wrapper
@@ -341,13 +341,13 @@ proc jlib::new {rostername clientcmd args} {
     set gchat(allroomsin) {}
 
     # Create the actual jlib instance procedure.
-    proc [namespace current]::${jlibname} {cmd args}   \
+    proc $jlibname {cmd args}   \
       "eval jlib::cmdproc {$jlibname} \$cmd \$args"
     
     # Init the service layer for this jlib instance.
     jlib::service::init $jlibname
     
-    return [namespace current]::${jlibname}
+    return $jlibname
 }
 
 # jlib::cmdproc --
@@ -367,7 +367,7 @@ proc jlib::cmdproc {jlibname cmd args} {
     Debug 5 "jlib::cmdproc: jlibname=$jlibname, cmd='$cmd', args='$args'"
 
     # Which command? Just dispatch the command to the right procedure.
-    return [eval $cmd $jlibname $args]
+    return [eval {$cmd $jlibname} $args]
 }
 
 # jlib::getrostername --
@@ -376,7 +376,7 @@ proc jlib::cmdproc {jlibname cmd args} {
 
 proc jlib::getrostername {jlibname} {
     
-    upvar [namespace current]::${jlibname}::lib lib
+    upvar ${jlibname}::lib lib
     
     return $lib(rostername)
 }
@@ -393,7 +393,7 @@ proc jlib::getrostername {jlibname} {
 
 proc jlib::config {jlibname args} {    
 
-    upvar [namespace current]::${jlibname}::opts opts
+    upvar ${jlibname}::opts opts
     
     array set argsArr $args
     set options [lsort [array names opts -*]]
@@ -447,7 +447,7 @@ proc jlib::config {jlibname args} {
 
 proc jlib::verify_options {jlibname args} {    
 
-    upvar [namespace current]::${jlibname}::opts opts
+    upvar ${jlibname}::opts opts
     
     set validopts [array names opts]
     set usage [join $validopts ", "]
@@ -482,8 +482,8 @@ proc jlib::verify_options {jlibname args} {
 
 proc jlib::initsocket {jlibname} {
 
-    upvar [namespace current]::${jlibname}::lib lib
-    upvar [namespace current]::${jlibname}::opts opts
+    upvar ${jlibname}::lib lib
+    upvar ${jlibname}::opts opts
 
     set sock $lib(sock)
     if {[catch {
@@ -516,7 +516,7 @@ proc jlib::initsocket {jlibname} {
 
 proc jlib::putssocket {jlibname xml} {
 
-    upvar [namespace current]::${jlibname}::lib lib
+    upvar ${jlibname}::lib lib
 
     Debug 2 "SEND: $xml"
     if {[catch {puts $lib(sock) $xml} err]} {
@@ -535,8 +535,8 @@ proc jlib::putssocket {jlibname xml} {
 
 proc jlib::resetsocket {jlibname} {
 
-    upvar [namespace current]::${jlibname}::lib lib
-    upvar [namespace current]::${jlibname}::locals locals
+    upvar ${jlibname}::lib lib
+    upvar ${jlibname}::locals locals
 
     catch {close $lib(sock)}
     catch {after cancel $locals(aliveid)}
@@ -555,7 +555,7 @@ proc jlib::resetsocket {jlibname} {
 
 proc jlib::recvsocket {jlibname} {
 
-    upvar [namespace current]::${jlibname}::lib lib
+    upvar ${jlibname}::lib lib
 
     if {[catch {eof $lib(sock)} iseof] || $iseof} {
 	end_of_parse $jlibname
@@ -583,7 +583,7 @@ proc jlib::recvsocket {jlibname} {
 
 proc jlib::recv {jlibname xml} {
 
-    upvar [namespace current]::${jlibname}::lib lib
+    upvar ${jlibname}::lib lib
 
     wrapper::parse $lib(wrap) $xml
 }
@@ -609,9 +609,9 @@ proc jlib::recv {jlibname xml} {
 
 proc jlib::connect {jlibname server args} {    
 
-    upvar [namespace current]::${jlibname}::lib lib
-    upvar [namespace current]::${jlibname}::locals locals
-    upvar [namespace current]::${jlibname}::opts opts
+    upvar ${jlibname}::lib lib
+    upvar ${jlibname}::locals locals
+    upvar ${jlibname}::opts opts
 
     array set argsArr $args
     set lib(server) $server
@@ -669,8 +669,8 @@ proc jlib::connect {jlibname server args} {
 
 proc jlib::disconnect {jlibname} {    
 
-    upvar [namespace current]::${jlibname}::lib lib
-    upvar [namespace current]::${jlibname}::opts opts
+    upvar ${jlibname}::lib lib
+    upvar ${jlibname}::opts opts
 
     Debug 3 "jlib::disconnect"
     set xml "</stream:stream>"
@@ -733,9 +733,9 @@ proc jlib::dispatcher {jlibname xmldata} {
 
 proc jlib::iq_handler {jlibname xmldata} {    
 
-    upvar [namespace current]::${jlibname}::lib lib
-    upvar [namespace current]::${jlibname}::iqcmd iqcmd
-    upvar [namespace current]::${jlibname}::opts opts    
+    upvar ${jlibname}::lib lib
+    upvar ${jlibname}::iqcmd iqcmd
+    upvar ${jlibname}::opts opts    
     
     Debug 5 "jlib::iq_handler: ------------"
 
@@ -897,8 +897,8 @@ proc jlib::iq_handler {jlibname xmldata} {
 
 proc jlib::message_handler {jlibname xmldata} {    
 
-    upvar [namespace current]::${jlibname}::opts opts    
-    upvar [namespace current]::${jlibname}::lib lib
+    upvar ${jlibname}::opts opts    
+    upvar ${jlibname}::lib lib
     
     # Extract the command level XML data items.
     set attrlist  [wrapper::getattrlist $xmldata]
@@ -978,9 +978,9 @@ proc jlib::message_handler {jlibname xmldata} {
 
 proc jlib::presence_handler {jlibname xmldata} { 
 
-    upvar [namespace current]::${jlibname}::lib lib
-    upvar [namespace current]::${jlibname}::prescmd prescmd
-    upvar [namespace current]::${jlibname}::opts opts
+    upvar ${jlibname}::lib lib
+    upvar ${jlibname}::prescmd prescmd
+    upvar ${jlibname}::opts opts
     
     # Extract the command level XML data items.
     set attrlist  [wrapper::getattrlist $xmldata]
@@ -1079,7 +1079,7 @@ proc jlib::presence_handler {jlibname xmldata} {
 
 proc jlib::got_stream {jlibname args} {
 
-    upvar [namespace current]::${jlibname}::lib lib
+    upvar ${jlibname}::lib lib
 
     Debug 3 "jlib::got_stream jlibname=$jlibname, args='$args'"
     
@@ -1106,8 +1106,8 @@ proc jlib::got_stream {jlibname args} {
 
 proc jlib::end_of_parse {jlibname} {
 
-    upvar [namespace current]::${jlibname}::lib lib
-    upvar [namespace current]::${jlibname}::opts opts
+    upvar ${jlibname}::lib lib
+    upvar ${jlibname}::opts opts
 
     Debug 3 "jlib::end_of_parse jlibname=$jlibname"
     
@@ -1128,8 +1128,8 @@ proc jlib::end_of_parse {jlibname} {
 
 proc jlib::xmlerror {jlibname args} {
 
-    upvar [namespace current]::${jlibname}::lib lib
-    upvar [namespace current]::${jlibname}::opts opts
+    upvar ${jlibname}::lib lib
+    upvar ${jlibname}::opts opts
 
     Debug 3 "jlib::xmlerror jlibname=$jlibname, args='$args'"
     
@@ -1150,11 +1150,11 @@ proc jlib::xmlerror {jlibname args} {
 
 proc jlib::reset {jlibname} {
 
-    upvar [namespace current]::${jlibname}::lib lib
-    upvar [namespace current]::${jlibname}::iqcmd iqcmd
-    upvar [namespace current]::${jlibname}::prescmd prescmd
-    upvar [namespace current]::${jlibname}::agent agent
-    upvar [namespace current]::${jlibname}::locals locals
+    upvar ${jlibname}::lib lib
+    upvar ${jlibname}::iqcmd iqcmd
+    upvar ${jlibname}::prescmd prescmd
+    upvar ${jlibname}::agent agent
+    upvar ${jlibname}::locals locals
     
     Debug 3 "jlib::reset"
 
@@ -1296,7 +1296,7 @@ proc jlib::invoke_iq_callback {jlibname cmd type subiq} {
 
 proc jlib::parse_roster_get {jlibname ispush cmd type thequery} {
 
-    upvar [namespace current]::${jlibname}::lib lib
+    upvar ${jlibname}::lib lib
 
     Debug 3 "jlib::parse_roster_get ispush=$ispush, cmd=$cmd, type=$type,"
     Debug 3 "   thequery=$thequery"
@@ -1397,7 +1397,7 @@ proc jlib::parse_roster_get {jlibname ispush cmd type thequery} {
 
 proc jlib::parse_roster_set {jlibname jid cmd groups name type thequery} {
 
-    upvar [namespace current]::${jlibname}::lib lib
+    upvar ${jlibname}::lib lib
 
     Debug 3 "jlib::parse_roster_set jid=$jid"
     if {[string equal $type "error"]} {
@@ -1443,7 +1443,7 @@ proc jlib::parse_roster_remove {jlibname jid cmd type thequery} {
 
 proc jlib::parse_search_set {jlibname cmd type subiq} {    
 
-    upvar [namespace current]::${jlibname}::lib lib
+    upvar ${jlibname}::lib lib
 
     uplevel #0 $cmd [list $type $subiq]
 }
@@ -1457,7 +1457,7 @@ proc jlib::parse_search_set {jlibname cmd type subiq} {
 
 proc jlib::iq_register {jlibname type xmlns func {seq 50}} {
     
-    upvar [namespace current]::${jlibname}::iqhook iqhook
+    upvar ${jlibname}::iqhook iqhook
     
     lappend iqhook($type,$xmlns) [list $func $seq]
     set iqhook($type,$xmlns) \
@@ -1466,7 +1466,7 @@ proc jlib::iq_register {jlibname type xmlns func {seq 50}} {
 
 proc jlib::iq_run_hook {jlibname type xmlns from subiq args} {
     
-    upvar [namespace current]::${jlibname}::iqhook iqhook
+    upvar ${jlibname}::iqhook iqhook
 
     set ishandled 0    
 
@@ -1501,7 +1501,7 @@ proc jlib::iq_run_hook {jlibname type xmlns from subiq args} {
 
 proc jlib::message_register {jlibname type xmlns func {seq 50}} {
     
-    upvar [namespace current]::${jlibname}::msghook msghook
+    upvar ${jlibname}::msghook msghook
     
     lappend msghook($type,$xmlns) [list $func $seq]
     set msghook($type,$xmlns) \
@@ -1510,7 +1510,7 @@ proc jlib::message_register {jlibname type xmlns func {seq 50}} {
 
 proc jlib::message_run_hook {jlibname type xmlns args} {
     
-    upvar [namespace current]::${jlibname}::msghook msghook
+    upvar ${jlibname}::msghook msghook
 
     set ishandled 0
     
@@ -1543,7 +1543,7 @@ proc jlib::message_run_hook {jlibname type xmlns args} {
 
 proc jlib::presence_register {jlibname type func {seq 50}} {
     
-    upvar [namespace current]::${jlibname}::preshook preshook
+    upvar ${jlibname}::preshook preshook
     
     lappend preshook($type) [list $func $seq]
     set preshook($type)  \
@@ -1552,7 +1552,7 @@ proc jlib::presence_register {jlibname type func {seq 50}} {
 
 proc jlib::presence_run_hook {jlibname from type args} {
     
-    upvar [namespace current]::${jlibname}::preshook preshook
+    upvar ${jlibname}::preshook preshook
 
     set ishandled 0
     
@@ -1606,10 +1606,10 @@ proc jlib::presence_run_hook {jlibname from type args} {
 
 proc jlib::send_iq {jlibname type xmldata args} {
 
-    upvar [namespace current]::${jlibname}::lib lib
-    upvar [namespace current]::${jlibname}::iqcmd iqcmd
-    upvar [namespace current]::${jlibname}::locals locals
-    upvar [namespace current]::${jlibname}::opts opts
+    upvar ${jlibname}::lib lib
+    upvar ${jlibname}::iqcmd iqcmd
+    upvar ${jlibname}::locals locals
+    upvar ${jlibname}::opts opts
         
     Debug 3 "jlib::send_iq type='$type', xmldata='$xmldata', args='$args'"
     
@@ -1740,8 +1740,8 @@ proc jlib::iq_set {jlibname xmlns args} {
 
 proc jlib::send_auth {jlibname username resource cmd args} {
 
-    upvar [namespace current]::${jlibname}::lib lib
-    upvar [namespace current]::${jlibname}::locals locals
+    upvar ${jlibname}::lib lib
+    upvar ${jlibname}::locals locals
 
     set subelements [list  \
       [wrapper::createtag "username" -chdata $username]  \
@@ -1966,9 +1966,9 @@ proc jlib::search_set {jlibname to cmd args} {
 
 proc jlib::send_message {jlibname to args} {
 
-    upvar [namespace current]::${jlibname}::lib lib
-    upvar [namespace current]::${jlibname}::locals locals
-    upvar [namespace current]::${jlibname}::opts opts
+    upvar ${jlibname}::lib lib
+    upvar ${jlibname}::locals locals
+    upvar ${jlibname}::opts opts
 
     Debug 3 "jlib::send_message to=$to, args=$args"
     
@@ -2038,10 +2038,10 @@ proc jlib::send_message {jlibname to args} {
 proc jlib::send_presence {jlibname args} {
 
     variable statics
-    upvar [namespace current]::${jlibname}::lib lib
-    upvar [namespace current]::${jlibname}::locals locals
-    upvar [namespace current]::${jlibname}::opts opts
-    upvar [namespace current]::${jlibname}::prescmd prescmd
+    upvar ${jlibname}::lib lib
+    upvar ${jlibname}::locals locals
+    upvar ${jlibname}::opts opts
+    upvar ${jlibname}::prescmd prescmd
     
     Debug 3 "jlib::send_presence args='$args'"
     
@@ -2122,7 +2122,7 @@ proc jlib::send_presence {jlibname args} {
 
 proc jlib::mystatus {jlibname} {
 
-    upvar [namespace current]::${jlibname}::locals locals
+    upvar ${jlibname}::locals locals
     
     return $locals(status)
 }
@@ -2133,7 +2133,7 @@ proc jlib::mystatus {jlibname} {
 
 proc jlib::myjid {jlibname} {
 
-    upvar [namespace current]::${jlibname}::locals locals
+    upvar ${jlibname}::locals locals
     
     return $locals(myjid)
 }
@@ -2208,8 +2208,8 @@ proc jlib::agents_get {jlibname to cmd} {
 
 proc jlib::parse_agent_get {jlibname jid cmd type subiq} {
 
-    upvar [namespace current]::${jlibname}::lib lib
-    upvar [namespace current]::${jlibname}::agent agent
+    upvar ${jlibname}::lib lib
+    upvar ${jlibname}::agent agent
     upvar [namespace current]::service::services services
 
     Debug 3 "jlib::parse_agent_get jid=$jid, cmd=$cmd, type=$type, subiq=$subiq"
@@ -2239,8 +2239,8 @@ proc jlib::parse_agent_get {jlibname jid cmd type subiq} {
 
 proc jlib::parse_agents_get {jlibname jid cmd type subiq} {
 
-    upvar [namespace current]::${jlibname}::lib lib
-    upvar [namespace current]::${jlibname}::agent agent
+    upvar ${jlibname}::lib lib
+    upvar ${jlibname}::agent agent
     upvar [namespace current]::service::services services
 
     Debug 3 "jlib::parse_agents_get jid=$jid, cmd=$cmd, type=$type, subiq=$subiq"
@@ -2292,7 +2292,7 @@ proc jlib::parse_agents_get {jlibname jid cmd type subiq} {
 
 proc jlib::getagent {jlibname jid} {
 
-    upvar [namespace current]::${jlibname}::agent agent
+    upvar ${jlibname}::agent agent
 
     if {[info exists agent($jid,parent)]} {
 	return [array get agent "$jid,*"]
@@ -2303,7 +2303,7 @@ proc jlib::getagent {jlibname jid} {
 
 proc jlib::have_agent {jlibname jid} {
 
-    upvar [namespace current]::${jlibname}::agent agent
+    upvar ${jlibname}::agent agent
 
     if {[info exists agent($jid,parent)]} {
 	return 1
@@ -2504,7 +2504,7 @@ proc jlib::get_last {jlibname to cmd} {
 
 proc jlib::handle_get_last {jlibname from subiq args} {    
 
-    upvar [namespace current]::${jlibname}::locals locals
+    upvar ${jlibname}::locals locals
     
     array set argsarr $args
 
@@ -2665,7 +2665,7 @@ proc jlib::roster_get {jlibname cmd args} {
  
 proc jlib::roster_set {jlibname jid cmd args} {
 
-    upvar [namespace current]::${jlibname}::lib lib
+    upvar ${jlibname}::lib lib
 
     Debug 3 "jlib::roster_set jid=$jid, cmd=$cmd, args='$args'"
     array set argsArr $args  
@@ -2731,9 +2731,9 @@ proc jlib::roster_remove {jlibname jid cmd args} {
 
 proc jlib::schedule_keepalive {jlibname} {   
 
-    upvar [namespace current]::${jlibname}::locals locals
-    upvar [namespace current]::${jlibname}::opts opts
-    upvar [namespace current]::${jlibname}::lib lib
+    upvar ${jlibname}::locals locals
+    upvar ${jlibname}::opts opts
+    upvar ${jlibname}::lib lib
 
     if {$opts(-keepalivesecs) && $lib(isinstream)} {
 	if {[catch {puts $lib(sock) "\n"} err]} {
@@ -2753,8 +2753,8 @@ proc jlib::schedule_keepalive {jlibname} {
 
 proc jlib::schedule_auto_away {jlibname} {       
 
-    upvar [namespace current]::${jlibname}::locals locals
-    upvar [namespace current]::${jlibname}::opts opts
+    upvar ${jlibname}::locals locals
+    upvar ${jlibname}::opts opts
     
     cancel_auto_away $jlibname
     if {$opts(-autoaway) && $opts(-awaymin) > 0} {
@@ -2769,7 +2769,7 @@ proc jlib::schedule_auto_away {jlibname} {
 
 proc jlib::cancel_auto_away {jlibname} {
 
-    upvar [namespace current]::${jlibname}::locals locals
+    upvar ${jlibname}::locals locals
 
     if {[info exists locals(afterawayid)]} {
 	after cancel $locals(afterawayid)
@@ -2787,9 +2787,9 @@ proc jlib::cancel_auto_away {jlibname} {
 
 proc jlib::auto_away_cmd {jlibname what} {      
 
-    upvar [namespace current]::${jlibname}::locals locals
-    upvar [namespace current]::${jlibname}::lib lib
-    upvar [namespace current]::${jlibname}::opts opts
+    upvar ${jlibname}::locals locals
+    upvar ${jlibname}::lib lib
+    upvar ${jlibname}::opts opts
 
     Debug 3 "jlib::auto_away_cmd what=$what"
     
@@ -2813,7 +2813,7 @@ proc jlib::auto_away_cmd {jlibname what} {
 
 proc jlib::getrecipientjid {jlibname jid} {
 
-    upvar [namespace current]::${jlibname}::lib lib
+    upvar ${jlibname}::lib lib
     
     jlib::splitjid $jid jid2 resource 
     set isroom [[namespace current]::service::isroom $jlibname $jid2]
@@ -3283,7 +3283,7 @@ proc jlib::conference::set_enter {jlibname room subelements cmd} {
 
 proc jlib::conference::parse_set_enter {jlibname room cmd type subiq} {    
 
-    upvar [namespace parent]::${jlibname}::conf conf
+    upvar ${jlibname}::conf conf
 
     [namespace parent]::Debug 3 "jlib::conference::parse_set_enter room=$room, cmd='$cmd', type=$type, subiq='$subiq'"
     
@@ -3371,8 +3371,8 @@ proc jlib::conference::delete {jlibname room cmd} {
 
 proc jlib::conference::exit {jlibname room} {
 
-    upvar [namespace parent]::${jlibname}::conf conf
-    upvar [namespace parent]::${jlibname}::lib lib
+    upvar ${jlibname}::conf conf
+    upvar ${jlibname}::lib lib
 
     [namespace parent]::send_presence $jlibname -to $room -type unavailable
     set ind [lsearch -exact $conf(allroomsin) $room]
@@ -3415,7 +3415,7 @@ proc jlib::conference::set_user {jlibname room name jid cmd} {
 
 proc jlib::conference::hashandnick {jlibname room} {
 
-    upvar [namespace parent]::${jlibname}::conf conf
+    upvar ${jlibname}::conf conf
 
     if {[info exists conf($room,hashandnick)]} {
 	return $conf($room,hashandnick)
@@ -3426,7 +3426,7 @@ proc jlib::conference::hashandnick {jlibname room} {
 
 proc jlib::conference::roomname {jlibname room} {
 
-    upvar [namespace parent]::${jlibname}::conf conf
+    upvar ${jlibname}::conf conf
 
     if {[info exists conf($room,roomname)]} {
 	return $conf($room,roomname)
@@ -3437,7 +3437,7 @@ proc jlib::conference::roomname {jlibname room} {
 
 proc jlib::conference::allroomsin {jlibname} {
 
-    upvar [namespace parent]::${jlibname}::conf conf
+    upvar ${jlibname}::conf conf
     
     set conf(allroomsin) [lsort -unique $conf(allroomsin)]
     return $conf(allroomsin)
@@ -3464,7 +3464,7 @@ proc jlib::groupchat {jlibname cmd args} {
 
 proc jlib::groupchat::enter {jlibname room nick args} {
 
-    upvar [namespace parent]::${jlibname}::gchat gchat
+    upvar ${jlibname}::gchat gchat
     
     set room [string tolower $room]
     set jid ${room}/${nick}
@@ -3480,8 +3480,8 @@ proc jlib::groupchat::enter {jlibname room nick args} {
 
 proc jlib::groupchat::exit {jlibname room} {
 
-    upvar [namespace parent]::${jlibname}::gchat gchat
-    upvar [namespace parent]::${jlibname}::lib lib
+    upvar ${jlibname}::gchat gchat
+    upvar ${jlibname}::lib lib
     
     set room [string tolower $room]
     if {[info exists gchat($room,mynick)]} {
@@ -3502,7 +3502,7 @@ proc jlib::groupchat::exit {jlibname room} {
 
 proc jlib::groupchat::mynick {jlibname room args} {
 
-    upvar [namespace parent]::${jlibname}::gchat gchat
+    upvar ${jlibname}::gchat gchat
 
     set room [string tolower $room]
     if {[llength $args] == 0} {
@@ -3522,7 +3522,7 @@ proc jlib::groupchat::mynick {jlibname room args} {
 
 proc jlib::groupchat::status {jlibname room args} {
 
-    upvar [namespace parent]::${jlibname}::gchat gchat
+    upvar ${jlibname}::gchat gchat
 
     set room [string tolower $room]
     if {[info exists gchat($room,mynick)]} {
@@ -3536,9 +3536,9 @@ proc jlib::groupchat::status {jlibname room args} {
 
 proc jlib::groupchat::participants {jlibname room} {
 
-    upvar [namespace parent]::${jlibname}::agent agent
-    upvar [namespace parent]::${jlibname}::gchat gchat
-    upvar [namespace parent]::${jlibname}::lib lib
+    upvar ${jlibname}::agent agent
+    upvar ${jlibname}::gchat gchat
+    upvar ${jlibname}::lib lib
 
     set room [string tolower $room]
     set isroom 0
@@ -3563,7 +3563,7 @@ proc jlib::groupchat::participants {jlibname room} {
 
 proc jlib::groupchat::allroomsin {jlibname} {
 
-    upvar [namespace parent]::${jlibname}::gchat gchat
+    upvar ${jlibname}::gchat gchat
 
     set gchat(allroomsin) [lsort -unique $gchat(allroomsin)]
     return $gchat(allroomsin)

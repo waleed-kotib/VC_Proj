@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: muc.tcl,v 1.13 2004-06-22 14:21:19 matben Exp $
+# $Id: muc.tcl,v 1.14 2004-06-24 13:48:36 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -433,12 +433,12 @@ proc jlib::muc::create {mucname roomjid nick callback} {
     set xelem [wrapper::createtag "x"  \
       -attrlist {xmlns "http://jabber.org/protocol/muc"}]
     $jlibname send_presence -to $jid -xlist [list $xelem]  \
-      -command [list [namespace current]::parse_create $roomjid]
+      -command [list [namespace current]::parse_create $mucname $roomjid]
     set cache($roomjid,mynick) $nick
     $jlibname service setroomprotocol $roomjid "muc"
 }
 
-proc jlib::muc::parse_create {mucname jlibname type args} {
+proc jlib::muc::parse_create {mucname roomjid jlibname type args} {
 
     variable muc2jlib
     upvar ${mucname}::cache cache
