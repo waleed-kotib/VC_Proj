@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Taskbar.tcl,v 1.6 2004-11-14 16:40:53 matben Exp $
+# $Id: Taskbar.tcl,v 1.7 2004-11-18 07:34:01 matben Exp $
 
 namespace eval ::Taskbar:: {
     
@@ -20,7 +20,6 @@ namespace eval ::Taskbar:: {
 proc ::Taskbar::Load { } {
     global  tcl_platform prefs this
     variable icon
-    variable wmenu
     variable iconFile
     
     ::Debug 2 "::Taskbar::Load"
@@ -59,6 +58,7 @@ proc ::Taskbar::Load { } {
       "Makes the taskbar icon on Windows which is handy as a shortcut"
     
     # Add all event hooks.
+    ::hooks::register initHook           ::Taskbar::InitHook
     ::hooks::register quitAppHook        ::Taskbar::QuitAppHook
     ::hooks::register setPresenceHook    ::Taskbar::SetPresenceHook
     ::hooks::register loginHook          ::Taskbar::LoginHook
@@ -73,7 +73,14 @@ proc ::Taskbar::Load { } {
     winico taskbar add $icon -callback  \
       [list [namespace current]::Cmd %m %X %Y] \
       -text "$prefs(theAppName) - $statusStr"
-    
+
+    return 1
+}
+
+proc ::Taskbar::InitHook { } {
+    global  prefs
+    variable wmenu
+     
     # Build popup menu.
     set m $wmenu
     menu $m -tearoff 1 -postcommand [list [namespace current]::Post $m] \
@@ -106,7 +113,6 @@ proc ::Taskbar::Load { } {
 	    $m add command -label [mc $item] -command $cmd
 	}
     }
-    return 1
 }
 
 proc ::Taskbar::Cmd {event x y} {
