@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Import.tcl,v 1.14 2004-12-04 15:01:10 matben Exp $
+# $Id: Import.tcl,v 1.15 2004-12-06 15:27:01 matben Exp $
 
 package require http
 package require httpex
@@ -16,7 +16,8 @@ package provide Import 1.0
 
 namespace eval ::Import:: {
     
-    #
+    # Filter all canvas commands to see if anyone related to anything
+    # just being transported but not yet in canvas.
     ::hooks::register whiteboardPostCanvasDraw   ::Import::TrptCachePostDrawHook
     
     # Specials for 'xanim'
@@ -136,7 +137,7 @@ proc ::Import::DoImport {w opts args} {
     }
     set wtopNS [::UI::GetToplevelNS $w]
     set errMsg ""
-    
+        
     # Define a standard set of put/import options that may be overwritten by
     # the options in the procedure argument 'opts'.
     
@@ -155,7 +156,7 @@ proc ::Import::DoImport {w opts args} {
 	  -coords   [::CanvasUtils::NewImportAnchor $w]         \
 	  -tags     [::CanvasUtils::NewUtag]]
     } else {
-	
+	    
 	# This was an Url.
 	set fileName [::Utils::GetFilePathFromUrl $argsArr(-url)]
 	array set optArr [list   \
@@ -213,12 +214,13 @@ proc ::Import::DoImport {w opts args} {
 	    if {$drawLocal} {
 		if {$isLocal} {
 		    set errMsg [eval {
-			::Import::DrawImage $w putOpts} [array get argsArr]]
-		} else {
-		    set errMsg [eval {
-			::Import::HttpGet $wtopNS $argsArr(-url) $importer \
-			  $putOpts
+			DrawImage $w putOpts
 		    } [array get argsArr]]
+		} else {
+		    #set errMsg [eval {
+		#	HttpGet $wtopNS $argsArr(-url) $importer $putOpts
+		    #} [array get argsArr]]
+		    HttpGet2 $wtopNS $argsArr(-url) $putOpts
 		}
 	    }
 	}
@@ -235,18 +237,19 @@ proc ::Import::DoImport {w opts args} {
 	    if {$drawLocal} {
 		if {$isLocal} {
 		    set errMsg [eval {
-			::Import::DrawQuickTimeTcl $w putOpts
+			DrawQuickTimeTcl $w putOpts
 		    } [array get argsArr]]
 		} else {
 		    set errMsg [eval {
-			::Import::HttpGetQuickTimeTcl $wtopNS $argsArr(-url) \
-			  $putOpts} [array get argsArr]]
+			HttpGetQuickTimeTcl $wtopNS $argsArr(-url) $putOpts
+		    } [array get argsArr]]
 			
 		    # Perhaps there shall be an option to get QT stuff via
 		    # http without streaming it?
 		    if {0} {
-			eval {::Import::HttpGet $wtopNS $argsArr(-url) \
-			  $importer $putOpts} [array get argsArr]
+			#eval {HttpGet $wtopNS $argsArr(-url) \
+			#  $importer $putOpts} [array get argsArr]
+			HttpGet2 $wtopNS $argsArr(-url) $putOpts
 		    }
 		}
 	    }
@@ -264,12 +267,13 @@ proc ::Import::DoImport {w opts args} {
 	    if {$drawLocal} {
 		if {$isLocal} {
 		    set errMsg [eval {
-			::Import::DrawSnack $w putOpts} [array get argsArr]]
-		} else {
-		    set errMsg [eval {
-			::Import::HttpGet $wtopNS $argsArr(-url) $importer \
-			  $putOpts
+			DrawSnack $w putOpts
 		    } [array get argsArr]]
+		} else {
+		    #set errMsg [eval {
+		#	HttpGet $wtopNS $argsArr(-url) $importer $putOpts
+		    #} [array get argsArr]]
+		    HttpGet2 $wtopNS $argsArr(-url) $putOpts
 		}    
 	    }
 	}	    
@@ -286,12 +290,13 @@ proc ::Import::DoImport {w opts args} {
 	    if {$drawLocal} {
 		if {$isLocal} {
 		    set errMsg [eval {
-			::Import::DrawXanim $w putOpts} [array get argsArr]]
-		} else {
-		    set errMsg [eval {
-			::Import::HttpGet $wtopNS $argsArr(-url) \
-			  $importer $putOpts
+			DrawXanim $w putOpts
 		    } [array get argsArr]]
+		} else {
+		    #set errMsg [eval {
+		#	HttpGet $wtopNS $argsArr(-url) $importer $putOpts
+		    #} [array get argsArr]]
+		    HttpGet2 $wtopNS $argsArr(-url) $putOpts
 		}
 	    }
 	}
@@ -315,10 +320,10 @@ proc ::Import::DoImport {w opts args} {
 			    $impHTTPProc $wtopNS $argsArr(-url) $putOpts
 			} [array get argsArr]]
 		    } else {			
-			set errMsg [eval {
-			    ::Import::HttpGet $wtopNS $argsArr(-url) \
-			      $importer $putOpts
-			} [array get argsArr]]
+			#set errMsg [eval {
+			#    HttpGet $wtopNS $argsArr(-url) $importer $putOpts
+			#} [array get argsArr]]
+			HttpGet2 $wtopNS $argsArr(-url) $putOpts
 		    }
 		}    
 	    }
@@ -726,6 +731,81 @@ proc ::Import::DrawXanim {w optsVar args} {
     return $errMsg
 }
 
+
+# Experimental!!!!!!!!!!!!!! Try using the general HttpTrpt packge.
+
+# Import::HttpGet2 --
+# 
+# 
+
+proc ::Import::HttpGet2 {wtop url opts} {
+    global  this prefs
+    variable locals
+    
+    ::Debug 2 "::Import::HttpGet2 wtop=$wtop, url=$url, \n\t opts=$opts"
+
+    # Make local state array for convenient storage. 
+    # Use 'variable' for permanent storage.
+    set gettoken [namespace current]::[incr locals(httpuid)]
+    variable $gettoken
+    upvar 0 $gettoken getstate
+
+    # We store file names with cached names to avoid name clashes.
+    set fileTail [::uriencode::decodefile [file tail  \
+      [::Utils::GetFilePathFromUrl $url]]]
+    set dstPath [::FileCache::MakeCacheFileName $fileTail]
+
+    set getstate(wtop)          $wtop
+    set getstate(url)           $url
+    set getstate(dstPath)       $dstPath
+    set getstate(opts)          $opts
+    set getstate(transport)     http
+    
+    set httptoken [::HttpTrpt::Get $url $dstPath \
+      -dialog 0 -silent 1   \
+      -command          [list [namespace current]::HttpCmd2 $gettoken] \
+      -progressmessage  [list [namespace current]::HttpProgress2 $gettoken]]
+    
+    set getstate(httptoken) $httptoken
+    return ""
+}
+
+proc ::Import::HttpCmd2 {gettoken httptoken status {msg ""}} {
+    variable $gettoken
+    upvar 0 $gettoken getstate
+
+    ::Debug 2 "::Import::HttpCmd2 status=$status"
+
+    set wtop $getstate(wtop)
+    set wcan [::WB::GetCanvasFromWtop $wtop]
+
+    switch -- $status {
+	ok {
+	    ::WB::SetStatusMessage $wtop $msg
+	    
+	    # Add to the lists of known files.
+	    ::FileCache::Set $getstate(url) $getstate(dstPath)
+	    
+	    # This should delegate the actual drawing to the correct proc.
+	    DoImport $wcan $getstate(opts) -file $getstate(dstPath) -where local
+	    TrptCachePostImport $gettoken
+	}
+	default {
+	    ::WB::SetStatusMessage $wtop $msg
+	    array set opts $getstate(opts)
+	    eval {NewBrokenImage $wcan $opts(-coords) -url $getstate(url)} \
+	      $getstate(opts)
+	}
+    }
+}
+
+proc ::Import::HttpProgress2 {gettoken str} {
+    variable $gettoken
+    upvar 0 $gettoken getstate
+    
+    ::WB::SetStatusMessage $getstate(wtop) $str
+}
+
 # Import::HttpGet --
 # 
 #       Imports the specified file using http to file.
@@ -831,7 +911,7 @@ proc ::Import::HttpProgress {gettoken token total current} {
     }
     
     # Cache timing info.
-    ::Timing::Set $getstate(timingkey) $current
+    ::timing::setbytes $getstate(timingkey) $current
     
     # Investigate 'state' for any exceptions.
     set status [::httpex::status $token]
@@ -862,7 +942,7 @@ proc ::Import::HttpProgress {gettoken token total current} {
 		uplevel #0 $argsArr(-progress)  \
 		  [list $status $gettoken $token $total $current]	
 	    } else {
-		set tmsg [::Timing::FormMessage $getstate(timingkey) $total]
+		set tmsg [::timing::getmessage $getstate(timingkey) $total]
 		set msg "Getting \"$getstate(tail)\", $tmsg"
 		::WB::SetStatusMessage $getstate(wtop) $msg
 	    }	    
@@ -1007,7 +1087,7 @@ proc ::Import::ImportProgress {line status gettoken httptoken total current} {
 	}
 	::WB::SetStatusMessage $wtop "Failed getting url: $errmsg"
     } else {
-	set tmsg [::Timing::FormMessage $getstate(timingkey) $total]
+	set tmsg [::timing::getmessage $getstate(timingkey) $total]
 	set msg "Getting \"$getstate(tail)\", $tmsg"
 	::WB::SetStatusMessage $wtop $msg
     }
@@ -1076,7 +1156,7 @@ proc ::Import::ImportCommand {line stateStatus gettoken httptoken} {
 
 proc ::Import::HttpResetAll {wtop} {
 
-    set gettokenList [::Import::GetTokenList]
+    set gettokenList [GetTokenList]
     
     ::Debug 2 "::Import::HttpResetAll wtop=$wtop, gettokenList='$gettokenList'"
     
@@ -1084,7 +1164,7 @@ proc ::Import::HttpResetAll {wtop} {
 	upvar #0 $gettoken getstate          
 
 	if {[info exists getstate(wtop)] && ($getstate(wtop) == $wtop)} {
-	    ::Import::HttpReset $gettoken
+	    HttpReset $gettoken
 	    ::WB::SetStatusMessage $wtop "All file transport reset"
 	}
     }
@@ -1099,10 +1179,8 @@ proc ::Import::HttpReset {gettoken} {
 	http {
 	    
 	    # It may be that the http transaction never started.
-	    if {[info exists getstate(token)]} {
-		::Debug 3 "\t ::httpex::reset $getstate(token)"
-		::httpex::reset $getstate(token)
-		#? catch {file delete -force $getstate(dstPath)}
+	    if {[info exists getstate(httptoken)]} {
+		::HttpTrpt::Reset $getstate(httptoken)
 	    }
 	}
 	quicktimehttp {
@@ -1115,7 +1193,7 @@ proc ::Import::HttpReset {gettoken} {
 
 proc ::Import::GetTokenFrom {key pattern} {
     
-    foreach gettoken [::Import::GetTokenList] {
+    foreach gettoken [GetTokenList] {
 	upvar #0 $gettoken getstate          
 
 	if {[info exists getstate($key)] && \
@@ -1518,15 +1596,14 @@ proc ::Import::HandleImportCmd {w line args} {
 	    }
 	}	
 
-	set errMsg [eval {::Import::DoImport $w $opts} $impArgs]
+	set errMsg [eval {DoImport $w $opts} $impArgs]
     }
     
     # Not -tryimport or error.
     if {$argsArr(-showbroken) && (($errMsg != "") || !$doImport)} {
 	
 	# Display a broken image to indicate for the user.
-	eval {::Import::NewBrokenImage $w [lrange $line 1 2]} \
-	  [lrange $line 3 end]
+	eval {NewBrokenImage $w [lrange $line 1 2]} [lrange $line 3 end]
     }
     
     return $errMsg
@@ -2094,8 +2171,8 @@ proc ::Import::NewBrokenImage {w coords args} {
 
     set name [::WB::CreateBrokenImage $wtop $argsArr(-width) $argsArr(-height)]
 
-    set id [eval {$w create image} $coords {-image $name -anchor nw  \
-      -tags $argsArr(-tags)}]
+    set id [eval {$w create image} $coords \
+      {-image $name -anchor nw -tags $argsArr(-tags)}]
     if {[info exists argsArr(-above)]} {
 	catch {$w raise $utag $argsArr(-above)}
     } 

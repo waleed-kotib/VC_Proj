@@ -57,6 +57,7 @@
 ::msgcat::mcset en From
 ::msgcat::mcset en General
 ::msgcat::mcset en Get
+::msgcat::mcset en Getting
 ::msgcat::mcset en Group
 ::msgcat::mcset en Groupchat
 ::msgcat::mcset en Handling
@@ -671,10 +672,11 @@ Alternatively, use your web browser to find the SDP file for a live transmission
 
 
 
-::msgcat::mcset en httptrpterror                {File transport error when getting the file %s from %s: %s}
-::msgcat::mcset en httptrpteof                  {The server at %s closed the socket without replying.}
-::msgcat::mcset en httptrptnon200               {File transport error when getting file the file %s from %s: code %s; %s}
-
+::msgcat::mcset en httptrptok                   {Finished getting file %s}
+::msgcat::mcset en httptrpterror                {File transport error when getting the file %s: %s}
+::msgcat::mcset en httptrpteof                  {The server closed the socket without replying.}
+::msgcat::mcset en httptrptnon200               {File transport error when getting the file %s: code %s; %s}
+::msgcat::mcset en httptrptreset                {File transport of %s was reset}
 
 ::msgcat::mcset en uastatpointmac 	{Point tool, click to mark, double click to inspect, press to popup}
 ::msgcat::mcset en uastatpoint		{Point tool, click to mark, double click to inspect, right click to popup}
