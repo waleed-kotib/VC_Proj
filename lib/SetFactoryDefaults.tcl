@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.41 2004-10-31 14:32:58 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.42 2004-11-23 12:57:05 matben Exp $
 
 
 set noErr 0
@@ -68,10 +68,6 @@ set prefs(afterConnect) 1000
 # How expressive shall we be with message boxes?
 set prefs(talkative) 0
 
-# Should we check that server commands do not contain any potentially harmful
-# instructions?
-set prefs(checkSafety) 1
-
 # Wraplength of text in message box for windows.
 set prefs(msgWrapLength) 60
 
@@ -100,7 +96,7 @@ set prefs(autoStartServer) 1
 # Open connection in async mode.
 set prefs(asyncOpen) 1
 
-# Safe server interpretator? (not working)
+# Safe server interpretator.
 set prefs(makeSafeServ) 1
 
 # Maximum time to wait for any network action to respond. (secs and millisecs)

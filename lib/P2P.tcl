@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: P2P.tcl,v 1.16 2004-11-08 15:52:52 matben Exp $
+# $Id: P2P.tcl,v 1.17 2004-11-23 12:57:05 matben Exp $
 
 package provide P2P 1.0
 
@@ -827,7 +827,7 @@ proc ::P2P::RegisterHandlerHook {prefix cmd} {
 #       none.
 
 proc ::P2P::HandleServerCmd {channel ip port line args} {
-    global  clientRecord prefs this canvasSafeInterp
+    global  clientRecord prefs this
 
     variable handler
     
@@ -868,8 +868,6 @@ proc ::P2P::HandleServerCmd {channel ip port line args} {
 		
 		# A client tells which server port number it has, its item prefix
 		# and its user name.
-		::Debug 2 "HandleClientRequest:: IDENTITY: remPort=$remPort, \
-		  id=$id, user=$user"
 		
 		# Save port and socket for the server side in array.
 		# This is done here so we are sure that it is not a temporary socket
@@ -900,8 +898,6 @@ proc ::P2P::HandleServerCmd {channel ip port line args} {
 		# If auto connect, then make a connection to the client as well.
 		if {[string equal $prefs(protocol) "symmetric"] &&  \
 		  $prefs(autoConnect) && [lsearch [::P2PNet::GetIP to] $ip] == -1} {
-		    ::Debug 2 "HandleClientRequest:: autoConnect:  \
-		      ip=$ip, name=$::P2PNet::ipNumTo(name,$ip), remPort=$remPort"
 		    
 		    # Handle the complete connection process.
 		    # Let propagateSizeToClients = false.
@@ -917,8 +913,6 @@ proc ::P2P::HandleServerCmd {channel ip port line args} {
 		
 		# A client tells which other ips it is connected to.
 		# 'remListIPandPort' contains: ip1 port1 ip2 port2 ...
-		::Debug 2 "HandleClientRequest:: IPS CONNECTED:  \
-		  remListIPandPort=$remListIPandPort"
 		
 		# If multi connect then connect to all other 'remAllIPnumsTo'.
 		if {[string equal $prefs(protocol) "symmetric"] &&  \

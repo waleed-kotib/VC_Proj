@@ -2,7 +2,7 @@
 	  The Coccinella : Jabber application with Whiteboard
 	  ---------------------------------------------------
 
-		version 0.95.1, October, 2004
+		version 0.95.2, December, 2004
 
 		       by Mats Bengtsson
 
@@ -138,7 +138,7 @@ Known Bugs:
           Unix/Linux       ~/.coccinella/whiteboard
 	  Windows          .../Coccinella/WBPREFS.TXT     (search for it)
 	  Mac OS 8/9       :Program Preferences:Coccinella:Whiteboard Prefs
-	  Mac OS X         ~/Library/Preferences/Whiteboard Prefs
+	  Mac OS X         ~/Library/Preferences/Coccinella/Whiteboard Prefs
 
     * Printer support is still in its infacy. You may export the canvas to
       XML/SVG format which can be imported into a web browser using the free
