@@ -4,9 +4,9 @@
 #	It maps 'key' (see below) to the local absolute native file path.
 #	Directories may also be time stamped with "best before date".
 #
-#  Copyright (c) 2002-2003  Mats Bengtsson
+#  Copyright (c) 2002-2004  Mats Bengtsson
 #
-# $Id: FileCache.tcl,v 1.15 2004-12-02 15:22:07 matben Exp $
+# $Id: FileCache.tcl,v 1.16 2004-12-04 15:01:06 matben Exp $
 # 
 #       The input key can be: 
 #               1) a full url, must be uri encoded 
@@ -29,17 +29,17 @@
 #
 # USAGE ########################################################################
 # 
-# ::FileCache::SetBasedir dir
+# ::FileCache::
 # 
-# ::FileCache::Set key ?locabspath?
-# 
-# ::FileCache::Get key
-# 
-# ::FileCache::IsCached key
-# 
-# ::FileCache::SetDirFiles dir ?pattern?
-#
-# ::FileCache::Dump
+# SetBaseDir dir
+# SetCacheDir dir
+# Set key ?locabspath?
+# Get key
+# GetNameFromCache fileName
+# IsCached key
+# SetDirFiles dir ?pattern?
+# MakeCacheFileName fileName
+# Dump
 
 package require tinyfileutils
 package require uriencode
@@ -81,9 +81,9 @@ proc ::FileCache::InitHook { } {
     global  prefs this
         
     # Init the file cache settings.
-    SetBasedir $this(path)
+    SetBaseDir $this(path)
     SetBestBefore $prefs(checkCache) $prefs(incomingPath)
-
+    SetCacheDir $prefs(incomingPath)
 }
 
 proc ::FileCache::QuitHook { } {
@@ -96,7 +96,7 @@ proc ::FileCache::QuitHook { } {
     }
 }
 
-proc ::FileCache::SetBasedir {dir} {
+proc ::FileCache::SetBaseDir {dir} {
     variable basedir
     
     if {![string equal [file pathtype $dir] "absolute"]} {
@@ -166,6 +166,7 @@ proc ::FileCache::Remove {key} {
     variable totbytes
     variable keylist
     variable cache
+    variable cacheToName
     
     set nkey [Normalize $key]
     if {[info exists cache($nkey)]} {
@@ -175,6 +176,7 @@ proc ::FileCache::Remove {key} {
 	set keylist [lreplace $keylist $ind $ind]
 	catch {file delete $f}
 	unset cache($nkey)
+	unset -nocomplain cacheToName([file tail $nkey])
     }    
 }
 
@@ -216,7 +218,7 @@ proc ::FileCache::SetDirFiles {dir {pattern *}} {
     # glob returns absolute paths but we must store them relative 'basedir'
     # and the key must be uri encoded!
     foreach f [glob -nocomplain -directory $dir $pattern] {
-	::FileCache::Set $f
+	Set $f
     }
 }
 
@@ -265,7 +267,7 @@ proc ::FileCache::IsLocal {key} {
 	    set abspath [file join $basedir $path]
 	    if {[file exists $abspath] && [file isfile $abspath]} {
 		set islocal 1
-		::FileCache::Set $key $abspath
+		Set $key $abspath
 	    }
 	}
     } else {
@@ -276,9 +278,62 @@ proc ::FileCache::IsLocal {key} {
 	} else {
 	    set abspath [file nativename $key]
 	}
-	::FileCache::Set $key $abspath
+	Set $key $abspath
     }
     return $islocal
+}
+
+# A few functions to handle a cache dir where files get unique names.
+# 
+
+proc ::FileCache::SetCacheDir {dir} {
+    variable cachedir
+    
+    if {![string equal [file pathtype $dir] "absolute"]} {
+	return -code error "The path \"$dir\" is not of type absolute"
+    }
+    if {[file isfile $dir]} {
+	return -code error "this is a regular file, not a directory"
+    }
+    if {![file exists $dir]} {
+	file mkdir $dir
+    }
+    set cachedir $dir
+}
+
+proc ::FileCache::MakeCacheFileName {uri} {
+    variable cachedir
+    variable cacheToName
+    
+    if {![file isdirectory $cachedir]} {
+	return -code error "the cache directory not set"
+    }
+    set name [::tfileutils::newuid][file extension $uri]
+    set cacheToName($name) [file tail $uri]
+    set fileName [file join $cachedir $name]
+    return $fileName
+}
+
+proc ::FileCache::GetNameFromCache {fileName} {
+    variable cacheToName
+    
+    set tail [file tail $fileName]
+    if {[info exists cacheToName($tail)]} {
+	return $cacheToName($tail)
+    } else {
+	return -code error "the file is not cached with a name"
+    }
+}
+
+proc ::FileCache::HasCacheName {fileName} {
+    variable cacheToName
+    
+    set tail [file tail $fileName]
+    if {[info exists cacheToName($tail)]} {
+	return 1
+    } else {
+	return 0
+    }
 }
 
 # --- Some functions for handling "best before" things -------------------------

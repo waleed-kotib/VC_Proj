@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: wizard.tcl,v 1.5 2004-01-26 07:34:49 matben Exp $
+# $Id: wizard.tcl,v 1.6 2004-12-04 15:01:06 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -40,7 +40,7 @@
 #       1.0     
 
 package require Tk 8.4
-package require notebook
+package require mnotebook
 package provide wizard 1.0
 
 namespace eval ::wizard::  {
@@ -213,7 +213,7 @@ proc ::wizard::wizard {w args} {
       -bg $options(-background)] -fill x -pady 2
     
     # Creating the notebook widget also makes all the database initializations.
-    eval {::notebook::notebook $widgets(nbframe)} $notebookArgs
+    eval {::mnotebook::mnotebook $widgets(nbframe)} $notebookArgs
     $widgets(frame) configure -bg $options(-background)
     pack $widgets(nbframe) -expand yes -fill both
     

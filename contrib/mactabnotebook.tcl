@@ -8,7 +8,7 @@
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: mactabnotebook.tcl,v 1.24 2004-11-14 13:53:26 matben Exp $
+# $Id: mactabnotebook.tcl,v 1.25 2004-12-04 15:01:06 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -63,7 +63,7 @@
 #       1.0     Original version
 #       2.0     added large number of stuff, mainly styling things
 
-package require notebook
+package require mnotebook
 package require colorutils
 
 package provide mactabnotebook 2.0
@@ -477,7 +477,7 @@ proc ::mactabnotebook::mactabnotebook {w args} {
     }
 
     # Creating the notebook widget also makes all the database initializations.
-    eval {::notebook::notebook $widgets(nbframe)} $notebookArgs
+    eval {::mnotebook::mnotebook $widgets(nbframe)} $notebookArgs
     pack $widgets(nbframe) -expand yes -fill both
 
     # Note the plus (+) signs here.

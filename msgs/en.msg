@@ -560,7 +560,7 @@
 ::msgcat::mcset en messprotocolch	{You have changed the network setup. This requires that you relaunch the application to take effect. Do you actually want to continue?}
 ::msgcat::mcset en messpasswddifferent  {The two passwords do not match. Please try again.}
 ::msgcat::mcset en messaupdatelatest    {You already have the latest version available (%s)}
-
+::msgcat::mcset en messprefsrestart     {For one or many of these settings to take effect you need to restart the application}
 
 # Messages for tk_messageBox:
 ::msgcat::mcset en jamesserrsend	{We received an error when sending a message to "%s". The error code is %s, and the error message: %s}
@@ -669,6 +669,11 @@ Alternatively, use your web browser to find the SDP file for a live transmission
 ::msgcat::mcset en printunixcmd                 {Shell print command, edit if desired}
 ::msgcat::mcset en enterpassword                {Enter the password for your account "%s"}
 
+
+
+::msgcat::mcset en httptrpterror                {File transport error when getting the file %s from %s: %s}
+::msgcat::mcset en httptrpteof                  {The server at %s closed the socket without replying.}
+::msgcat::mcset en httptrptnon200               {File transport error when getting file the file %s from %s: code %s; %s}
 
 
 ::msgcat::mcset en uastatpointmac 	{Point tool, click to mark, double click to inspect, press to popup}

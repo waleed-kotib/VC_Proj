@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Plugins.tcl,v 1.13 2004-11-06 08:15:26 matben Exp $
+# $Id: Plugins.tcl,v 1.14 2004-12-04 15:01:10 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -1310,7 +1310,7 @@ proc ::Plugins::BuildPrefsPage {page} {
     label ${pbl}.lhead -wraplength 300 -anchor w -justify left \
       -text [mc prefplugctrl]
     pack ${pbl}.lhead -padx 0 -pady 2 -side top -anchor w
-    
+        
     set pfr [frame ${pbl}.frpl]
     pack $pfr -side top -anchor w
     set i 0
@@ -1321,23 +1321,30 @@ proc ::Plugins::BuildPrefsPage {page} {
 	    grid ${pfr}.i${i} -row $i -column 0 -sticky w
 	}
 	set tmpPrefPlugins($plug) [::Plugins::IsLoaded $plug]
-	set prefplugins($plug) $tmpPrefPlugins($plug)
 	checkbutton ${pfr}.c${i} -anchor w -text " $plug"  \
 	  -variable [namespace current]::tmpPrefPlugins($plug)
 	grid ${pfr}.c${i} -row $i -column 1 -padx 2 -sticky ew
 	incr i
     }
+    foreach plug $prefs(pluginBanList) {
+	set tmpPrefPlugins($plug) 0
+	set prefplugins($plug) $tmpPrefPlugins($plug)
+    }
 }
 
 proc ::Plugins::SaveHook { } {
     global prefs
+    variable prefplugins
     variable tmpPrefPlugins
-
+    
     # To be correct we should also have loaded the pack here. TODO.
     set banList {}
     foreach name [array names tmpPrefPlugins] {
 	if {$tmpPrefPlugins($name) == 0} {
 	    lappend banList $name
+	}
+	if {$tmpPrefPlugins($name) != $prefplugins($name)} {
+	    ::Preferences::NeedRestart
 	}
     }
     set prefs(pluginBanList) [lsort -unique $banList]
