@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.12 2003-11-01 13:57:27 matben Exp $
+# $Id: NewMsg.tcl,v 1.13 2003-11-04 09:44:27 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -99,7 +99,6 @@ proc ::Jabber::NewMsg::Build {wbase args} {
     variable locals  
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
-    upvar ::UI::icons icons
     
     ::Jabber::Debug 2 "::Jabber::NewMsg::Build args='$args'"
 
@@ -148,17 +147,26 @@ proc ::Jabber::NewMsg::Build {wbase args} {
       -fill both -expand 1 -ipadx 4
     
     # Button part.
+    set iconSend      [::UI::GetIcon btsend]
+    set iconSendDis   [::UI::GetIcon btsenddis]
+    set iconQuote     [::UI::GetIcon btquote]
+    set iconQuoteDis  [::UI::GetIcon btquotedis]
+    set iconSave      [::UI::GetIcon btsave]
+    set iconSaveDis   [::UI::GetIcon btsavedis]
+    set iconPrint     [::UI::GetIcon btprint]
+    set iconPrintDis  [::UI::GetIcon btprintdis]
+    
     set frtop [frame $w.frall.frtop -borderwidth 0]
     pack $frtop -side top -fill x -padx 4 -pady 2
     ::UI::InitShortcutButtonPad $w $frtop 50
-    ::UI::NewButton $w send Send $icons(btsend) $icons(btsenddis)  \
+    ::UI::NewButton $w send Send $iconSend $iconSendDis  \
       [list ::Jabber::NewMsg::DoSend $w]
-    ::UI::NewButton $w quote Quote $icons(btquote) $icons(btquotedis)  \
+    ::UI::NewButton $w quote Quote $iconQuote $iconQuoteDis  \
       [list ::Jabber::NewMsg::DoQuote $w $opts(-quotemessage) $opts(-to) $opts(-time)] \
        -state $quotestate
-    ::UI::NewButton $w save Save $icons(btsave) $icons(btsavedis)  \
+    ::UI::NewButton $w save Save $iconSave $iconSaveDis  \
       [list ::Jabber::NewMsg::SaveMsg $w]
-    ::UI::NewButton $w print Print $icons(btprint) $icons(btprintdis)  \
+    ::UI::NewButton $w print Print $iconPrint $iconPrintDis  \
       [list ::Jabber::NewMsg::DoPrint $w]
     
     pack [frame $w.frall.divt -bd 2 -relief sunken -height 2] -fill x -side top

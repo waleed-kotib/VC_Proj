@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.14 2003-11-03 11:54:58 matben Exp $
+# $Id: Roster.tcl,v 1.15 2003-11-04 09:44:27 matben Exp $
 
 package provide Roster 1.0
 
@@ -115,7 +115,7 @@ proc ::Jabber::Roster::BuildToplevel {w} {
 
     }
     wm title $w {Roster (Contact list)}
-    wm protocol $w WM_DELETE_WINDOW [list ::Jabber::Roster::CloseDlg $w]
+    wm protocol $w WM_DELETE_WINDOW [list [namespace current]::CloseDlg $w]
     
     # Toplevel menu for mac only. Only when multiinstance.
     if {0 && [string match "mac*" $this(platform)]} {
@@ -186,8 +186,8 @@ proc ::Jabber::Roster::Build {w} {
       -openicons triangle -treecolor {} -scrollwidth 400  \
       -xscrollcommand [list $wxsc set]       \
       -yscrollcommand [list $wysc set]       \
-      -selectcommand ::Jabber::Roster::SelectCmd   \
-      -doubleclickcommand ::Jabber::Roster::DoubleClickCmd   \
+      -selectcommand [namespace current]::SelectCmd   \
+      -doubleclickcommand [namespace current]::DoubleClickCmd   \
       -highlightcolor #6363CE -highlightbackground $prefs(bgColGeneral)} $opts]
     set wtreecanvas [$wtree getcanvas]
     if {[string match "mac*" $this(platform)]} {
@@ -252,7 +252,7 @@ proc ::Jabber::Roster::Refresh { } {
     upvar ::Jabber::jstate jstate
 
     # Get my roster.
-    $jstate(jlib) roster_get ::Jabber::Roster::PushProc
+    $jstate(jlib) roster_get [namespace current]::PushProc
 }
 
 # Jabber::Roster::SendRemove --
@@ -276,7 +276,7 @@ proc ::Jabber::Roster::SendRemove { {jidArg {}} } {
       [FormatTextForMessageBox [::msgcat::mc jamesswarnremove]]  \
       -icon warning -type yesno]
     if {[string equal $ans "yes"]} {
-	$jstate(jlib) roster_remove $jid ::Jabber::Roster::PushProc
+	$jstate(jlib) roster_remove $jid [namespace current]::PushProc
     }
 }
 
@@ -646,7 +646,7 @@ proc ::Jabber::Roster::AutoBrowse {jid presence args} {
     if {[string equal $presence "available"]} {    
 	$jstate(jlib) browse_get $jid  \
 	  -errorcommand [list ::Jabber::Browse::ErrorProc 1]  \
-	  -command [list ::Jabber::Roster::AutoBrowseCallback]
+	  -command [list [namespace current]::AutoBrowseCallback]
     } elseif {[string equal $presence "unavailable"]} {    
 	$jstate(browse) clear $jid
     }
@@ -1331,24 +1331,27 @@ proc ::Jabber::Roster::EditSet {token} {
     }
     if {[string equal $which "new"]} {
 	eval {$jstate(jlib) roster_set $jid   \
-	  [list ::Jabber::Roster::EditSetCommand $jid]} $opts
+	  [list [namespace current]::EditSetCommand $jid]} $opts
     } else {
 	eval {$jstate(jlib) roster_set $jid   \
-	  [list ::Jabber::Roster::EditSetCommand $jid]} $opts
+	  [list [namespace current]::EditSetCommand $jid]} $opts
     }
     if {[string equal $which "new"]} {
 	
 	# Send subscribe request.
 	if {$subscribe} {
-	    $jstate(jlib) send_presence -type "subscribe" -to $jid
+	    $jstate(jlib) send_presence -type "subscribe" -to $jid \
+	      -command [namespace current]::PresError
 	}
     } else {
 	
 	# Send (un)subscribe request.
 	if {$subscribe} {
-	    $jstate(jlib) send_presence -type "subscribe" -to $jid
+	    $jstate(jlib) send_presence -type "subscribe" -to $jid \
+	    -command [namespace current]::PresError
 	} elseif {$unsubscribe} {
-	    $jstate(jlib) send_presence -type "unsubscribe" -to $jid
+	    $jstate(jlib) send_presence -type "unsubscribe" -to $jid \
+	    -command [namespace current]::PresError
 	}
     }
     
@@ -1373,6 +1376,20 @@ proc ::Jabber::Roster::EditSetCommand {jid type args} {
 	tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
 	  [::msgcat::mc jamessfailsetnick $jid $errcode $errmsg]]
     }	
+}
+
+
+proc ::Jabber::Roster::PresError {type args} {
+    
+    if {[string equal $type "error"]} {
+	set ans [tk_messageBox -icon error -type yesno -message  \
+	  "We received an error when (un)subscribing to ?.\
+	  The error is: ? Do you want to remove it from your roster?"]
+
+	
+    }
+    
+    puts "::Jabber::Roster::PresError type=$type, args=$args"
 }
 
 # Jabber::Roster::SetUIWhen --

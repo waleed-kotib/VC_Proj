@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: SetupAss.tcl,v 1.9 2003-11-03 11:54:58 matben Exp $
+# $Id: SetupAss.tcl,v 1.10 2003-11-04 09:44:27 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -30,7 +30,6 @@ namespace eval ::Jabber::SetupAss::  {
 proc ::Jabber::SetupAss::SetupAss {w} {
     global  this sysFont prefs
     
-    upvar ::UI::icons icons
     variable finished
 
     toplevel $w
@@ -112,7 +111,7 @@ proc ::Jabber::SetupAss::SetupAss {w} {
     pack [frame $p5.fr] -padx 10 -pady 8 -side top -anchor w
     message $p5.fr.msg1 -width 260 -font $sysFont(s) -text   \
       [::msgcat::mc sufinmsg]
-    label $p5.fr.piga -image $icons(igelpiga)    
+    label $p5.fr.piga -image [::UI::GetIcon igelpiga]
     grid $p5.fr.msg1 -sticky n
     grid $p5.fr.piga -sticky w
     

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.1 2003-11-03 11:37:10 matben Exp $
+# $Id: JUI.tcl,v 1.2 2003-11-04 09:44:27 matben Exp $
 
 package provide JUI 1.0
 
@@ -47,7 +47,6 @@ proc ::Jabber::UI::Show {w args} {
 proc ::Jabber::UI::Build {w} {
     global  this sysFont prefs wDlgs
     
-    upvar ::UI::icons icons
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::menuDefs menuDefs
@@ -94,22 +93,33 @@ proc ::Jabber::UI::Build {w} {
     $w configure -menu $wmenu
 	
     # Shortcut button part.
+    set iconConnect       [::UI::GetIcon btconnect]
+    set iconConnectDis    [::UI::GetIcon btconnectdis]
+    set iconInboxLett     [::UI::GetIcon btinboxLett]
+    set iconInboxLettDis  [::UI::GetIcon btinboxLettdis]
+    set iconInbox         [::UI::GetIcon btinbox]
+    set iconInboxDis      [::UI::GetIcon btinboxdis]
+    set iconNewUser       [::UI::GetIcon btnewuser]
+    set iconNewUserDis    [::UI::GetIcon btnewuserdis]
+    set iconStop          [::UI::GetIcon btstop]
+    set iconStopDis       [::UI::GetIcon btstopdis]
+    
     set frtop [frame ${wtop}top -bd 1 -relief raised]
     pack $frtop -side top -fill x
     ::UI::InitShortcutButtonPad $w $frtop 50
-    ::UI::NewButton $w connect Connect $icons(btconnect) $icons(btconnectdis)  \
+    ::UI::NewButton $w connect Connect $iconConnect $iconConnectDis  \
       [list ::Jabber::Login::Login $wDlgs(jlogin)]
     if {[::Jabber::MailBox::HaveMailBox]} {
-	::UI::NewButton $w inbox Inbox $icons(btinboxLett) $icons(btinboxLettdis)  \
+	::UI::NewButton $w inbox Inbox $iconInboxLett $iconInboxLettDis  \
 	  [list ::Jabber::MailBox::Show -visible 1]
     } else {
-	::UI::NewButton $w inbox Inbox $icons(btinbox) $icons(btinboxdis)  \
+	::UI::NewButton $w inbox Inbox $iconInbox $iconInboxDis  \
 	  [list ::Jabber::MailBox::Show -visible 1]
     }
-    ::UI::NewButton $w newuser "New User" $icons(btnewuser) $icons(btnewuserdis)  \
+    ::UI::NewButton $w newuser "New User" $iconNewUser $iconNewUserDis  \
       [list ::Jabber::Roster::NewOrEditItem new] \
       -state disabled
-    ::UI::NewButton $w stop Stop $icons(btstop) $icons(btstopdis)  \
+    ::UI::NewButton $w stop Stop $iconStop $iconStopDis  \
       [list ::Jabber::UI::StopConnect] -state disabled
     set shortBtWidth [::UI::ShortButtonPadMinWidth $w]
 
@@ -119,14 +129,16 @@ proc ::Jabber::UI::Build {w} {
     set jwapp(elplug) ${wbot}.icon
     set jwapp(mystatus) ${wbot}.stat
     set jwapp(myjid) ${wbot}.e
+    set iconResize     [::UI::GetIcon resizehandle]
+    set iconContactOff [::UI::GetIcon contact_off]
     
     pack [frame $wbot -relief raised -borderwidth 1]  \
       -side bottom -fill x -pady 0
     pack [label $jwapp(mystatus) -image [::Jabber::Roster::GetMyPresenceIcon]] \
       -side left -pady 0 -padx 4
-    pack [label ${wbot}.size -image $icons(resizehandle)]  \
+    pack [label ${wbot}.size -image $iconResize]  \
       -padx 0 -pady 0 -side right -anchor s
-    pack [label $jwapp(elplug) -image $icons(contact_off)]  \
+    pack [label $jwapp(elplug) -image $iconContactOff]  \
       -side right -pady 0 -padx 0
     pack [entry $jwapp(myjid) -state disabled -width 0  \
       -textvariable ::Jabber::jstate(mejid)] \
@@ -271,16 +283,15 @@ proc ::Jabber::UI::SetStatusMessage {msg} {
 
 proc ::Jabber::UI::MailBoxState {mailboxstate} {
     variable jwapp    
-    upvar ::UI::icons icons
     
     set w $jwapp(wtopRost)
     
     switch -- $mailboxstate {
 	empty {
-	    ::UI::ButtonConfigure $w inbox -image $icons(btinbox)
+	    ::UI::ButtonConfigure $w inbox -image [::UI::GetIcon btinbox]
 	}
 	nonempty {
-	    ::UI::ButtonConfigure $w inbox -image $icons(btinboxLett)
+	    ::UI::ButtonConfigure $w inbox -image [::UI::GetIcon btinboxLett]
 	}
     }
 }
@@ -679,9 +690,7 @@ proc ::Jabber::UI::Popup {what w v x y} {
 proc ::Jabber::UI::FixUIWhen {what} {
     global  allIPnumsToSend wDlgs
     variable jwapp
-    
-    upvar ::UI::icons icons
-    
+        
     set w $jwapp(wtopRost)
     set wtop ${w}.
     set wmenu $jwapp(wmenu)
@@ -699,7 +708,7 @@ proc ::Jabber::UI::FixUIWhen {what} {
 	    ::UI::ButtonConfigure $w connect -state disabled
 	    ::UI::ButtonConfigure $w newuser -state normal
 	    ::UI::ButtonConfigure $w stop -state disabled
-	    $jwapp(elplug) configure -image $icons(contact_on)
+	    $jwapp(elplug) configure -image [::UI::GetIcon contact_on]
 	    ::UI::MenuMethod $wmj entryconfigure mNewAccount -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mLogin  \
 	      -label [::msgcat::mc Logout] -state normal -command \
@@ -723,7 +732,7 @@ proc ::Jabber::UI::FixUIWhen {what} {
 	    ::UI::ButtonConfigure $w connect -state normal
 	    ::UI::ButtonConfigure $w newuser -state disabled
 	    ::UI::ButtonConfigure $w stop -state disabled
-	    $jwapp(elplug) configure -image $icons(contact_off)
+	    $jwapp(elplug) configure -image [::UI::GetIcon contact_off]
 	    ::UI::MenuMethod $wmj entryconfigure mNewAccount -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mLogin  \
 	      -label "[::msgcat::mc Login]..." -state normal \
@@ -745,6 +754,10 @@ proc ::Jabber::UI::FixUIWhen {what} {
 	}
     }
 }
+
+# Jabber::UI::SmileyMenuButton --
+# 
+#       A kind of general menubutton for inserting smileys into a text widget.
 
 proc ::Jabber::UI::SmileyMenuButton {w wtext} {
     global  prefs this

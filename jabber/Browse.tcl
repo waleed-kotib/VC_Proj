@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.8 2003-10-25 07:22:26 matben Exp $
+# $Id: Browse.tcl,v 1.9 2003-11-04 09:44:27 matben Exp $
 
 package provide Browse 1.0
 
@@ -429,7 +429,6 @@ proc ::Jabber::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
     variable options
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::nsToText nsToText
-    upvar ::UI::icons icons
     
     ::Jabber::Debug 2 "::Jabber::Browse::AddToTree parentsJidList='$parentsJidList', jid=$jid"
 
