@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: Theme.tcl,v 1.3 2003-12-18 14:19:35 matben Exp $
+# $Id: Theme.tcl,v 1.4 2003-12-22 15:04:58 matben Exp $
 
 package provide Theme 1.0
 
@@ -48,10 +48,10 @@ proc ::Theme::SavePrefsFile { } {
 }
 
 proc ::Theme::PreLoadImages { } {
-    global  this
     
+    puts "::Theme::PreLoadImages: '[option get . themePreloadImages {}]'"
     foreach name [option get . themePreloadImages {}] {
-	::Theme::GetImage $name
+	::Theme::GetImage $name -keepname 1
     }
 }
 
@@ -61,12 +61,21 @@ proc ::Theme::PreLoadImages { } {
 #       
 #       Returns empty if not found, else the internal tk image name.
 
-proc ::Theme::GetImage {name} {
+proc ::Theme::GetImage {name args} {
     global  this
-        
+    
+    array set argsArr {
+	-keepname 0
+    }
+    array set argsArr $args    
+    
     # It is recommended to create images in an own namespace since they 
     # may silently overwrite any existing command!
-    set nsname ::_img::${name}
+    if {$argsArr(-keepname)} {
+	set nsname $name
+    } else {
+	set nsname ::_img::${name}
+    }
     set ans ""
 	
     if {[lsearch [image names] $nsname] == -1} {

@@ -15,7 +15,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.24 2003-12-20 14:27:16 matben Exp $
+# $Id: Coccinella.tcl,v 1.25 2003-12-22 15:04:57 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -401,7 +401,6 @@ set allLibSourceFiles {
   GetFileIface.tcl       \
   Network.tcl            \
   PutFileIface.tcl       \
-  SequenceGrabber.tcl    \
   TheServer.tcl          \
   UI.tcl                 \
   UserActions.tcl        \
@@ -488,8 +487,18 @@ if {$prefs(Thread)} {
 ::SplashScreen::SetMsg [::msgcat::mc splashload]
 
 set listOfPackages {
+    balloonhelp
+    buttontray
+    can2svg       
+    combobox
+    fontselection
+    headlabel
     hooks
-    CanvasUtils
+    moviecontroller
+    mylabelframe
+    tablelist
+    undo
+    AutoUpdate
     Connections
     FilesAndCanvas
     FileCache
@@ -497,18 +506,7 @@ set listOfPackages {
     PreferencesUtils
     Types
     Plugins
-    AutoUpdate
     Pane
-    combobox
-    moviecontroller
-    fontselection
-    tablelist
-    balloonhelp
-    undo
-    can2svg       
-    buttontray
-    headlabel
-    mylabelframe
     Whiteboard
 }
 foreach packName $listOfPackages {
@@ -612,9 +610,6 @@ if {$argc > 0} {
 ::WB::Init
 ::WB::InitMenuDefs
 
-# Create the mapping between Html sizes and font point sizes dynamically.
-::CanvasUtils::CreateFontSizeMapping
-
 # Let main window "." be roster in jabber and whiteboard else.
 if {[string equal $prefs(protocol) "jabber"]} {
     set wDlgs(jrostbro) .
@@ -663,23 +658,6 @@ if {![string match "mac*" $this(platform)]} {
     foreach wclass {Toplevel Preferences Chat GroupChat MailBox} {
 	bind $wclass <$osprefs(mod)-Key-w>  \
 	  [list ::UserActions::DoCloseWindow %W]
-    }
-}
-
-# Mac OS X have the Quit menu on the Apple menu instead. Catch it!
-if {[string equal $this(platform) "macosx"]} {
-    if {![catch {package require tclAE}]} {
-	tclAE::installEventHandler aevt quit ::UI::AEQuitHandler
-    }
-    proc ::tk::mac::OpenDocument {args} {
-	foreach f $args {
-	    
-	    switch -- [file extension $f] {
-		.can {
-		    ::WB::NewWhiteboard -file $f
-		}
-	    }
-	}
     }
 }
 

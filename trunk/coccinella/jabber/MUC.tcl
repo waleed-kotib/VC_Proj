@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.11 2003-12-16 15:03:53 matben Exp $
+# $Id: MUC.tcl,v 1.12 2003-12-22 15:04:58 matben Exp $
 
 package require entrycomp
 
@@ -84,7 +84,7 @@ namespace eval ::Jabber::MUC:: {
 #       "cancel" or "enter".
 
 proc ::Jabber::MUC::BuildEnter {args} {
-    global  this
+    global  this wDlgs
 
     variable enteruid
     variable dlguid
@@ -97,7 +97,7 @@ proc ::Jabber::MUC::BuildEnter {args} {
     variable $token
     upvar 0 $token enter
     
-    set w .dlgmuc[incr dlguid]
+    set w $wDlgs(jmucenter)[incr dlguid]
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
@@ -229,6 +229,7 @@ proc ::Jabber::MUC::BuildEnter {args} {
     
     #catch {grab release $w}
     catch {focus $oldFocus}
+    ::UI::SaveWinGeom $w
     set finished $enter(finished)
     unset enter
     return [expr {($finished <= 0) ? "cancel" : "enter"}]
@@ -337,13 +338,13 @@ proc ::Jabber::MUC::EnterCallback {jlibName type args} {
 #       Make an invitation to a room.
 
 proc ::Jabber::MUC::Invite {roomjid} {
-    global this
+    global this wDlgs
     
     upvar ::Jabber::jstate jstate
     variable fininvite
     variable dlguid
     
-    set w .dlgmuc[incr dlguid]
+    set w $wDlgs(jmucinvite)[incr dlguid]
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
@@ -402,6 +403,7 @@ proc ::Jabber::MUC::Invite {roomjid} {
     
     set jid [$wmid.ejid get]
     set reason [$wmid.ere get]
+    ::UI::SaveWinGeom $w
 
     catch {grab release $w}
     catch {destroy $w}
@@ -478,7 +480,7 @@ proc ::Jabber::MUC::MUCMessage {from xlist} {
 #       Displays an info dialog for MUC room configuration.
 
 proc ::Jabber::MUC::BuildInfo {roomjid} {
-    global this
+    global this wDlgs
     
     variable dlguid
     upvar ::Jabber::jstate jstate
@@ -493,7 +495,7 @@ proc ::Jabber::MUC::BuildInfo {roomjid} {
 	raise $locals($roomjid,w)
 	return
     }    
-    set w .dlgmuc[incr dlguid]
+    set w $wDlgs(jmucinfo)[incr dlguid]
 
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
@@ -936,7 +938,7 @@ proc ::Jabber::MUC::Ban {roomjid} {
 #       "cancel" or "ok".
 
 proc ::Jabber::MUC::EditListBuild {roomjid type} {
-    global this
+    global this wDlgs
     
     upvar [namespace current]::${roomjid}::editlocals editlocals
     upvar ::Jabber::jstate jstate
@@ -972,7 +974,7 @@ proc ::Jabber::MUC::EditListBuild {roomjid type} {
     set tblwidth [expr 10 + 12 * [llength $setListDefs($type)]]
     set editlocals(listvar) {}
     
-    set w .dlgmuc[incr dlguid]
+    set w $wDlgs(jmucedit)[incr dlguid]
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
@@ -1150,7 +1152,7 @@ proc ::Jabber::MUC::EditListBuild {roomjid type} {
     # Wait here for a button press.
     tkwait variable [namespace current]::fineditlist
     
-
+    ::UI::SaveWinGeom $w
     catch {grab release $w}
     catch {destroy $w}
     catch {focus $oldFocus}
@@ -1417,7 +1419,7 @@ proc ::Jabber::MUC::EditListSet {roomjid} {
 # End edit lists ---------------------------------------------------------------
 
 proc ::Jabber::MUC::RoomConfig {roomjid} {
-    global  this
+    global  this wDlgs
     
     variable wbox
     variable wsearrows
@@ -1426,7 +1428,7 @@ proc ::Jabber::MUC::RoomConfig {roomjid} {
     upvar [namespace current]::${roomjid}::locals locals
     upvar ::Jabber::jstate jstate
     
-    set w .dlgmuc[incr dlguid]
+    set w $wDlgs(jmuccfg)[incr dlguid]
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
@@ -1481,6 +1483,7 @@ proc ::Jabber::MUC::RoomConfig {roomjid} {
     # Wait here for a button press and window to be destroyed. BAD?
     tkwait window $w
     
+    ::UI::SaveWinGeom $w
     catch {grab release $w}
     catch {focus $oldFocus}
     return
@@ -1565,13 +1568,13 @@ proc ::Jabber::MUC::SetNick {roomjid} {
 }
 
 proc ::Jabber::MUC::Destroy {roomjid} {
-    global this
+    global this wDlgs
     
     upvar ::Jabber::jstate jstate
     variable findestroy
     variable dlguid
     
-    set w .dlgmuc[incr dlguid]
+    set w $wDlgs(jmucdestroy)[incr dlguid]
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
@@ -1635,6 +1638,7 @@ proc ::Jabber::MUC::Destroy {roomjid} {
     
     set jid [$wmid.ejid get]
     set reason [$wmid.ere get]
+    ::UI::SaveWinGeom $w
 
     catch {grab release $w}
     catch {destroy $w}

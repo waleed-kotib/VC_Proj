@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.15 2003-12-20 14:27:16 matben Exp $
+# $Id: GotMsg.tcl,v 1.16 2003-12-22 15:04:57 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -258,9 +258,8 @@ proc ::Jabber::GotMsg::Build { } {
     grid columnconfigure $wtxtfr 0 -weight 1
     grid rowconfigure $wtxtfr 0 -weight 1
     
-    if {[info exists prefs(winGeom,$wDlgs(jgotmsg))]} {
-	wm geometry $w $prefs(winGeom,$wDlgs(jgotmsg))
-    }
+    ::UI::SetWindowGeometry $w
+
     wm minsize $w 240 220
     wm maxsize $w 600 600    
     

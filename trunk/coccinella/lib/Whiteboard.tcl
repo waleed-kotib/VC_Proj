@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.4 2003-12-20 14:27:16 matben Exp $
+# $Id: Whiteboard.tcl,v 1.5 2003-12-22 15:04:58 matben Exp $
 
 package require entrycomp
 package require CanvasDraw
@@ -124,6 +124,26 @@ proc ::WB::Init {} {
     
     # Init canvas utils.
     ::CanvasUtils::Init
+    
+    # Create the mapping between Html sizes and font point sizes dynamically.
+    ::CanvasUtils::CreateFontSizeMapping
+    
+    # Mac OS X have the Quit menu on the Apple menu instead. Catch it!
+    if {[string equal $this(platform) "macosx"]} {
+	if {![catch {package require tclAE}]} {
+	    tclAE::installEventHandler aevt quit ::UI::AEQuitHandler
+	}
+	proc ::tk::mac::OpenDocument {args} {
+	    foreach f $args {
+		
+		switch -- [file extension $f] {
+		    .can {
+			::WB::NewWhiteboard -file $f
+		    }
+		}
+	    }
+	}
+    }
 
     # For the communication entries.
     # variables:              $wtop is used as a key in these vars.
@@ -867,9 +887,7 @@ proc ::WB::BuildWhiteboard {wtop args} {
     # Set window position only for the first whiteboard on screen.
     # Subsequent whiteboards are placed by the window manager.
     if {[llength [::WB::GetAllWhiteboards]] == 1} {	
-	if {[info exists prefs(winGeom,whiteboard)]} {
-	    wm geometry $w $prefs(winGeom,whiteboard)
-	}
+	::UI::SetWindowGeometry $w whiteboard
     }
     catch {wm deiconify $w}
     #raise $w     This makes the window flashing when showed (linux)
@@ -2419,13 +2437,11 @@ proc ::WB::BuildJabberEntry {wtop args} {
     set wtopReal $wapp(toplevel)
     
     set fontSB [option get . fontSmallBold {}]
-    set bg [option get . backgroundGeneral {}]
     
     set n 1
     set jidlist [$jstate(roster) getusers]
-    entry $wcomm.ad$n -width 16 -relief sunken -bg $bg
-    ::entrycomp::entrycomp $wcomm.us$n $jidlist -width 22 -relief sunken \
-      -bg white
+    entry $wcomm.ad$n -width 16 -relief sunken
+    ::entrycomp::entrycomp $wcomm.us$n $jidlist -width 22 -relief sunken
     if {[info exists argsArr(-servervariable)]} {
 	$wcomm.ad$n configure -textvariable $argsArr(-servervariable)
     }

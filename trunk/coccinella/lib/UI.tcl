@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.36 2003-12-20 16:25:20 matben Exp $
+# $Id: UI.tcl,v 1.37 2003-12-22 15:04:58 matben Exp $
 
 package require entrycomp
 
@@ -290,6 +290,30 @@ proc ::UI::SavePanePos {key wpaned {orient horizontal}} {
 	    set prefs(paneGeom,$key)   \
 	      [list $infoArr(-relwidth) [expr 1.0 - $infoArr(-relwidth)]]
 	}
+    }
+}
+
+proc ::UI::SetWindowPosition {w {key ""}} {
+    global  prefs
+    
+    if {$key == ""} {
+	set key $w
+    }
+    if {[info exists prefs(winGeom,$key)]} {
+	regexp {^[^+-]+((\+|-).+$)} $prefs(winGeom,$key) match pos
+	wm geometry $w $pos
+    }
+}
+
+proc ::UI::SetWindowGeometry {w {key ""}} {
+    global  prefs
+    
+    if {$key == ""} {
+	set key $w
+    }
+    #puts "::UI::SetWindowGeometry w=$w, key=$key"
+    if {[info exists prefs(winGeom,$key)]} {
+	wm geometry $w $prefs(winGeom,$key)
     }
 }
 
@@ -700,7 +724,7 @@ proc ::UI::MegaDlgMsgAndEntry {title msg label varName btcancel btok} {
     }
     wm title $w $title
     set finmega -1
-    wm protocol $w WM_DELETE_WINDOW "set [namespace current]::finmega 0"
+    wm protocol $w WM_DELETE_WINDOW [list set [namespace current]::finmega 0]
     
     set fontSB [option get . fontSmallBold {}]
     
@@ -711,9 +735,10 @@ proc ::UI::MegaDlgMsgAndEntry {title msg label varName btcancel btok} {
       -side top -fill both -padx 4 -pady 2
     
     set wmid $w.frall.fr
+    set wentry $wmid.en
     pack [frame $wmid] -side top -fill x -expand 1 -padx 6
     label $wmid.la -font $fontSB -text $label
-    entry $wmid.en
+    entry $wentry
     grid $wmid.la -column 0 -row 0 -sticky e -padx 2 
     grid $wmid.en -column 1 -row 0 -sticky ew -padx 2 
     
@@ -721,10 +746,10 @@ proc ::UI::MegaDlgMsgAndEntry {title msg label varName btcancel btok} {
     set frbot [frame $w.frall.frbot -borderwidth 0]
     pack $frbot  -side bottom -fill x -padx 10 -pady 8
     pack [button $frbot.btok -text $btok -width 8  \
-      -default active -command "set [namespace current]::finmega 1"] \
+      -default active -command [list set [namespace current]::finmega 1]] \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcan -text $btcancel -width 8  \
-      -command "set [namespace current]::finmega 0"]  \
+      -command [list set [namespace current]::finmega 0]]  \
       -side right -padx 5 -pady 5  
     
     wm resizable $w 0 0
@@ -733,13 +758,13 @@ proc ::UI::MegaDlgMsgAndEntry {title msg label varName btcancel btok} {
     
     # Grab and focus.
     set oldFocus [focus]
-    focus $wmid.en
+    focus $wentry
     catch {grab $w}
     
     # Wait here for a button press.
     tkwait variable [namespace current]::finmega
     
-    set entryVar [$wmid.en get]
+    set entryVar [$wentry get]
     catch {grab release $w}
     catch {destroy $w}
     catch {focus $oldFocus}

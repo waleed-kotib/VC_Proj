@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.13 2003-12-19 15:47:39 matben Exp $
+# $Id: JUI.tcl,v 1.14 2003-12-22 15:04:57 matben Exp $
 
 package provide JUI 1.0
 
@@ -240,13 +240,8 @@ proc ::Jabber::UI::Build {w} {
 
     # Build only Browser and/or Agents page when needed.
     set minWidth [expr $shortBtWidth > 200 ? $shortBtWidth : 200]
-    if {[info exists prefs(winGeom,$w)]} {
-	wm geometry $w $prefs(winGeom,$w)
-    } else {
-	
-	# Set to min size.
-	wm geometry $w ${minWidth}x360
-    }
+    wm geometry $w ${minWidth}x360
+    ::UI::SetWindowGeometry $w
     wm minsize $w $minWidth 360
     wm maxsize $w 420 2000
     return $w

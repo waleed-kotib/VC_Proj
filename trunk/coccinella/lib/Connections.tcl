@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Connections.tcl,v 1.14 2003-12-18 14:19:35 matben Exp $
+# $Id: Connections.tcl,v 1.15 2003-12-22 15:04:58 matben Exp $
 
 package provide Connections 1.0
 
@@ -120,9 +120,7 @@ proc ::OpenConnection::OpenConnection {w} {
     trace variable [namespace current]::menuShortVar w  \
       [namespace current]::TraceOpenConnect
     
-    if {[info exists prefs(winGeom,$w)]} {
-	wm geometry $w $prefs(winGeom,$w)
-    }
+    ::UI::SetWindowPosition $w
     wm resizable $w 0 0
     focus $w
     catch {grab $w}

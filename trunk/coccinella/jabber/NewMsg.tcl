@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.24 2003-12-20 16:25:20 matben Exp $
+# $Id: NewMsg.tcl,v 1.25 2003-12-22 15:04:58 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -32,7 +32,7 @@ namespace eval ::Jabber::NewMsg:: {
     # Running number for unique toplevels.
     set locals(dlguid) 0
     set locals(inited) 0
-    set locals(wpopupbase) $wDlgs(jsendmsg)_trpt
+    set locals(wpopupbase) ._[string range $wDlgs(jsendmsg) 1 end]_trpt
     set locals(transports) {jabber icq aim msn yahoo irc smtp}
     
     # {subtype popupText entryText}
@@ -201,8 +201,7 @@ proc ::Jabber::NewMsg::Build {args} {
     pack $fradd -side top -fill x -padx 6 -pady 4
     scrollbar $fradd.ysc -command [list $fradd.can yview]
     pack $fradd.ysc -side right -fill y
-    set waddcan [canvas $fradd.can -highlightcolor #6363CE -bd 0  \
-      -highlightthickness 1 \
+    set waddcan [canvas $fradd.can -bd 0 -highlightthickness 1 \
       -yscrollcommand [list $fradd.ysc set]]
     pack $waddcan -side left -fill both -expand 1
     
@@ -289,8 +288,9 @@ $opts(-forwardmessage)"
     bind $waddcan <Configure> [list [namespace current]::ResizeCan $w]
     
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jsendmsg)]]
-    if {($nwin == 1) && [info exists prefs(winGeom,$wDlgs(jsendmsg))]} {
-	wm geometry $w $prefs(winGeom,$wDlgs(jsendmsg))
+    puts "nwin=$nwin"
+    if {$nwin == 1} {
+	::UI::SetWindowGeometry $w $wDlgs(jsendmsg)
     }
     wm minsize $w 300 260
     wm maxsize $w 1200 1000
@@ -326,10 +326,10 @@ proc ::Jabber::NewMsg::NewAddrLine {w wfr n} {
     }
     
     bind $wfr.addr$n <Button-1> [list ::Jabber::NewMsg::ButtonInAddr $w $wfr $n]
-    bind $wfr.addr$n <Tab> [list ::Jabber::NewMsg::TabInAddr $w $wfr $n]
+    bind $wfr.addr$n <Tab>      [list ::Jabber::NewMsg::TabInAddr $w $wfr $n]
     bind $wfr.addr$n <BackSpace> "+ ::Jabber::NewMsg::BackSpaceInAddr $w $wfr $n"
-    bind $wfr.addr$n <Return> [list ::Jabber::NewMsg::ReturnInAddr $w $wfr $n]
-    bind $wfr.addr$n <Key-Up> [list ::Jabber::NewMsg::KeyUpDown -1 $w $wfr $n]
+    bind $wfr.addr$n <Return>   [list ::Jabber::NewMsg::ReturnInAddr $w $wfr $n]
+    bind $wfr.addr$n <Key-Up>   [list ::Jabber::NewMsg::KeyUpDown -1 $w $wfr $n]
     bind $wfr.addr$n <Key-Down> [list ::Jabber::NewMsg::KeyUpDown 1 $w $wfr $n]
     
     grid $wfr.f${n} -padx 1 -pady 1 -column 0 -row $n -sticky ns
