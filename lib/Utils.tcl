@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.20 2004-06-06 07:02:22 matben Exp $
+# $Id: Utils.tcl,v 1.21 2004-06-07 13:43:56 matben Exp $
 
 namespace eval ::Utils:: {
 
@@ -166,6 +166,23 @@ namespace eval ::Utils:: {
     # Running counter for GenerateHexUID.
     variable uid 0
     variable maxuidpersec 10000
+}
+
+# ::Utils::FontEqual --
+# 
+#       Compares two fonts to see if identical.
+
+proc ::Utils::FontEqual {font1 font2} {
+    
+    set ans 1
+    array set font1Arr [font actual $font1]
+    foreach {key value} [font actual $font2] {
+	if {![string equal $font1Arr($key) $value]} {
+	    set ans 0
+	    break
+	}
+    }
+    return $ans
 }
 
 # ::Utils::GetMaxMsgcatWidth --

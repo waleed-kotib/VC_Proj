@@ -1,6 +1,6 @@
 #  Copyright (c) 2002  Mats Bengtsson
 #
-# $Id: fontselection.tcl,v 1.7 2004-06-06 07:02:20 matben Exp $
+# $Id: fontselection.tcl,v 1.8 2004-06-07 13:43:55 matben Exp $
 
 package require combobox
 
@@ -11,12 +11,8 @@ namespace eval ::fontselection:: {
     variable options
     
     set options {
-	-defaultfont    ""
-	-defaultsize    ""
-	-defaultweight  ""
-	-initialfont    Helvetica
-	-initialsize    12
-	-initialweight  normal
+	-defaultfont    {Helvetica 12 normal}
+	-initialfont    {Helvetica 12 normal}
     }
 }
 
@@ -31,7 +27,6 @@ proc ::fontselection::fontselection {w args} {
     variable font
     variable size
     variable weight
-    variable useDefault 0
     variable allFonts
     
     if {[winfo exists $w]} {
@@ -45,7 +40,9 @@ proc ::fontselection::fontselection {w args} {
     wm title $w [::msgcat::mc {Select Font}]
     set finished 0
     array set opts $options
-    array set opts $args    
+    array set opts $args
+    array set defaultFontArr [font actual $opts(-defaultfont)]
+    array set initialFontArr [font actual $opts(-initialfont)]
     
     # Global frame.
     frame $w.frall -borderwidth 1 -relief raised
@@ -57,7 +54,7 @@ proc ::fontselection::fontselection {w args} {
     pack $frtop -side top -fill x -padx 4 -pady 4
     
     # System fonts.
-    set font $opts(-initialfont)
+    set font $initialFontArr(-family)
     set allFonts [lsort [font families]]
     set frfont $w.frall.frtop.font
     frame $frfont
@@ -66,7 +63,7 @@ proc ::fontselection::fontselection {w args} {
     set ysc $frfont.ysc
     listbox $wlb -width 28 -height 10 -yscrollcommand [list $ysc set]
     scrollbar $ysc -orient vertical -command [list $wlb yview]
-    set ind [lsearch $allFonts $opts(-initialfont)]
+    set ind [lsearch $allFonts $initialFontArr(-family)]
     pack $wlb $ysc -side left -fill y
     eval $wlb insert 0 $allFonts
 
@@ -75,7 +72,7 @@ proc ::fontselection::fontselection {w args} {
     frame $frprop
     pack $frprop -side top -fill y -padx 8 -pady 8
 
-    set size $opts(-initialsize)
+    set size $initialFontArr(-size)
     label $frprop.lsize -text {Font size:}
     ::combobox::combobox $frprop.size -width 8  \
       -textvariable [namespace current]::size  \
@@ -83,9 +80,9 @@ proc ::fontselection::fontselection {w args} {
     eval {$frprop.size list insert end} {9 10 12 14 16 18 24 36 48 60 72}
 
     grid $frprop.lsize -sticky w
-    grid $frprop.size -sticky w
+    grid $frprop.size  -sticky ew
 
-    set weight $opts(-initialweight)
+    set weight $initialFontArr(-weight)
     label $frprop.lwe -text {Font weight:}
     ::combobox::combobox $frprop.we -width 10  \
       -textvariable [namespace current]::weight -editable 0  \
@@ -93,7 +90,7 @@ proc ::fontselection::fontselection {w args} {
     eval {$frprop.we list insert end} {normal bold italic}
 
     grid $frprop.lwe -sticky w
-    grid $frprop.we -sticky w
+    grid $frprop.we  -sticky ew
     
     # Font text.
     set frmid [frame $w.frall.frmid -borderwidth 0]
@@ -139,12 +136,7 @@ proc ::fontselection::fontselection {w args} {
     catch {destroy $w}
     trace vdelete [namespace current]::size w [namespace current]::TraceSize
     if {$finished == 1} {
-	if {$useDefault} {
-	    # Default font is here {{} {} {}}.
-	    return {{} {} {}}
-	} else {
-	    return [list $font $size $weight]
-	}
+	return [list $font $size $weight]
     } else {
 	return {}
     }
@@ -162,9 +154,7 @@ proc ::fontselection::Select {w what} {
     variable font
     variable size
     variable weight
-    variable useDefault
 
-    set useDefault 0
     if {$what == "font"} {
 	set selInd [$wlb curselection]
 	if {[llength $selInd]} {
@@ -182,18 +172,13 @@ proc ::fontselection::SetDefault { } {
     variable font
     variable size
     variable weight
-    variable useDefault
     variable allFonts
 
-    set useDefault 1
     if {$opts(-defaultfont) != ""} {
-	set font $opts(-defaultfont)
-    }
-    if {$opts(-defaultsize) != ""} {
-	set size $opts(-defaultsize)
-    }
-    if {$opts(-defaultweight) != ""} {
-	set weight $opts(-defaultweight)
+	array set defaultFontArr [font actual $opts(-defaultfont)]
+	set font   $defaultFontArr(-family)
+	set size   $defaultFontArr(-size)
+	set weight $defaultFontArr(-weight)
     }
     set ind [lsearch $allFonts $font]
     $wlb selection clear 0 end

@@ -2,7 +2,7 @@
 # 
 #       Provides a structure for code components.
 #       
-# $Id: component.tcl,v 1.4 2004-06-06 15:42:49 matben Exp $
+# $Id: component.tcl,v 1.5 2004-06-07 13:43:55 matben Exp $
 
 package provide component 1.0
 
@@ -27,11 +27,29 @@ proc component::attempt {name fileName initProc} {
     uplevel #0 $initProc
 }
 
-proc component::register {name {str ""}} {
+proc component::register {name str} {
     variable priv
     
-    set priv($name) 1
-    set priv($name,str) $str
+    set priv($name,name) $name
+    set priv($name,str)  $str
+}
+
+proc component::unregister {name} {
+    variable priv
+
+    # This is an incomplete way of removing a component.
+    array unset priv $name,*
+}
+
+proc component::getall { } {
+    variable priv
+
+    set ans {}
+    foreach {key value} [array get priv *,name] {
+	set name $priv($key)
+	lappend ans $name $priv($name,str)
+    }
+    return $ans
 }
 
 # component::load --

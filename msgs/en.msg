@@ -263,6 +263,7 @@
 ::msgcat::mcset en mUpdateCheck  	{Update Check}
 ::msgcat::mcset en mReloadImage  	{Reload Image}
 ::msgcat::mcset en mCoccinellaHome  	{Coccinella Home...}
+::msgcat::mcset en mComponents 	        {Components...}
 ::msgcat::mcset en mBugReport  	        {Report Bug...}
 
 

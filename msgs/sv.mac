@@ -262,6 +262,7 @@
 ::msgcat::mcset sv mUpdateCheck  	{Uppdaterings koll}
 ::msgcat::mcset sv mReloadImage  	{HŠmta bild igen}
 ::msgcat::mcset sv mCoccinellaHome  	{Coccinella hem...}
+::msgcat::mcset sv mComponents 	        {Komponenter...}
 ::msgcat::mcset sv mBugReport  	        {Rapportera bug...}
 
 

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.40 2004-06-06 15:42:49 matben Exp $
+# $Id: Dialogs.tcl,v 1.41 2004-06-07 13:43:56 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -175,7 +175,7 @@ proc ::Dialogs::InfoOnPlugins { } {
     }
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
     wm title $w [::msgcat::mc {Plugin Info}]
-    set fontS [option get . fontSmall {}]
+    set fontS  [option get . fontSmall {}]
     set fontSB [option get . fontSmallBold {}]
     
     frame $w.frall -borderwidth 1 -relief raised
@@ -210,7 +210,7 @@ proc ::Dialogs::InfoOnPlugins { } {
       -lmargin2 $xtab2
     $wtxt tag configure tline -font {Helvetica -1} -background black
     
-    # If mac (classic) or win and not QuickTime, make an ad as the first item.
+    # If mac or win and not QuickTime, make an ad as the first item.
     if {[::Plugins::IsHost QuickTimeTcl] &&  \
       ![::Plugins::HavePackage QuickTimeTcl]} {
 
@@ -228,6 +228,7 @@ proc ::Dialogs::InfoOnPlugins { } {
 	$wtxt insert end "\n\n"
     }
     
+    # OBSOLETE!!!!!!!!!!!!!
     # If Windows and not MSSpeech, make an ad as the first item.
     if {[::Plugins::IsHost MSSpeech] && ![::Plugins::HavePackage MSSpeech]} {
 
@@ -284,7 +285,8 @@ proc ::Dialogs::InfoComponents { } {
     global  prefs this wDlgs
     
     # Check first of there are *any* components.
-    if {0} {
+    set compList [component::getall]
+    if {[llength $compList] == 0} {
 	tk_messageBox -icon info -type ok -message   \
 	  [FormatTextForMessageBox [::msgcat::mc messnoplugs]]
 	return  
@@ -295,12 +297,45 @@ proc ::Dialogs::InfoComponents { } {
     }
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
     wm title $w [::msgcat::mc {Component Info}]
+    set fontS  [option get . fontSmall {}]
+    set fontSB [option get . fontSmallBold {}]
      
     frame $w.frall -borderwidth 1 -relief raised
     pack  $w.frall -fill both -expand 1
+
+    # Button part.
+    pack [frame $w.frall.frbot -borderwidth 0] -fill both -side bottom \
+      -padx 8 -pady 6
+    pack [button $w.frall.frbot.btok -text [::msgcat::mc OK]  \
+      -command [list destroy $w]] -side right -padx 5 -pady 5
+
+    set fbox $w.frall.fbox
+    pack [frame $fbox -bd 1 -relief sunken] -side top -padx 4 -pady 4  \
+      -fill both -expand 1
+
+    set wtxt $w.frall.fbox.txt
+    set wysc $w.frall.fbox.ysc
+    scrollbar $wysc -orient vertical -command [list $wtxt yview]
+    text $wtxt -yscrollcommand [list $wysc set] -highlightthickness 0  \
+      -bg white -wrap word -width 50 -height 16  \
+      -exportselection 1
+    pack $wysc -side right -fill y
+    pack $wtxt -side left -fill both -expand 1
     
+    $wtxt tag configure ttitle -foreground black -background #dedede  \
+      -spacing1 2 -spacing3 2 -lmargin1 20 -font $fontSB
+    $wtxt tag configure ttxt -font $fontS -wrap word -lmargin1 10 -lmargin2 10 \
+      -spacing1 6 -spacing3 6
+    $wtxt tag configure tline -font {Helvetica -1} -background black
     
-    
+    foreach {name str} $compList {
+	$wtxt insert end "\n" tline
+	$wtxt insert end "$name\n" ttitle
+	$wtxt insert end "\n" tline   
+	$wtxt insert end "$str\n" ttxt
+    }
+    $wtxt configure -state disabled
+    bind $w <Return> "$w.frall.frbot.btok invoke"
 }
 
 # Printing the canvas on Unix/Linux.

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.58 2004-06-06 07:02:20 matben Exp $
+# $Id: Chat.tcl,v 1.59 2004-06-07 13:43:56 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -67,6 +67,8 @@ namespace eval ::Jabber::Chat:: {
     option add *Chat*youTextFont          ""                    widgetDefault
     option add *Chat*sysPreForeground     #26b412               widgetDefault
     option add *Chat*sysTextForeground    #26b412               widgetDefault
+    option add *Chat*sysPreFont           ""                    widgetDefault
+    option add *Chat*sysTextFont          ""                    widgetDefault
     option add *Chat*histHeadForeground   ""                    widgetDefault
     option add *Chat*histHeadBackground   gray60                widgetDefault
     option add *Chat*histHeadFont         ""                    widgetDefault
@@ -87,7 +89,9 @@ namespace eval ::Jabber::Chat:: {
 	{youtext     -background          youTextBackground     Background}
 	{youtext     -font                youTextFont           Font}
 	{syspre      -foreground          sysPreForeground      Foreground}
+	{syspre      -font                sysPreFont            Font}
 	{systext     -foreground          sysTextForeground     Foreground}
+	{systext     -font                sysTextFont           Font}
 	{histhead    -foreground          histHeadForeground    Foreground}
 	{histhead    -background          histHeadBackground    Background}
 	{histhead    -font                histHeadFont          Font}
@@ -728,6 +732,10 @@ proc ::Jabber::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     grid columnconfigure $wtxtsnd 0 -weight 1
     grid rowconfigure $wtxtsnd 0 -weight 1
     
+    if {$jprefs(chatFont) != ""} {
+	$wtextsnd configure -font $jprefs(chatFont)
+    }
+    
     set imageHorizontal \
       [::Theme::GetImage [option get $wfrmid imageHorizontal {}]]
     set sashHBackground [option get $wfrmid sashHBackground {}]
@@ -1049,28 +1057,31 @@ proc ::Jabber::Chat::ConfigureTextTags {w wtext} {
     variable chatOptions
     upvar ::Jabber::jprefs jprefs
     
-    ::Debug 2 "::Jabber::Chat::ConfigureTextTags"
+    ::Debug 2 "::Jabber::Chat::ConfigureTextTags jprefs(chatFont)=$jprefs(chatFont)"
     
     set space 2
     set alltags {mepre metext youpre youtext syspre systext histhead}
         
     if {[string length $jprefs(chatFont)]} {
 	set chatFont $jprefs(chatFont)
-	set boldChatFont [lreplace $jprefs(chatFont) 2 2 bold]
+    } else {
+	set chatFont [option get $wtext font Font]
     }
+    set boldChatFont [lreplace $jprefs(chatFont) 2 2 bold]
+
     foreach tag $alltags {
 	set opts($tag) [list -spacing1 $space]
     }
     foreach spec $chatOptions {
 	foreach {tag optName resName resClass} $spec break
 	set value [option get $w $resName $resClass]
-	if {[string length $jprefs(chatFont)] && [string equal $optName "-font"]} {
+	if {[string equal $optName "-font"]} {
 	    
 	    switch $resName {
-		mePreFont - youPreFont {
+		mePreFont - youPreFont - sysPreFont {
 		    set value $chatFont
 		}
-		meTextFont - youTextFont {
+		meTextFont - youTextFont - sysTextFont {
 		    set value $chatFont
 		}
 	    }
@@ -1090,11 +1101,16 @@ proc ::Jabber::Chat::ConfigureTextTags {w wtext} {
     ::Text::ConfigureLinkTagForTextWidget $wtext urltag activeurltag
 }
 
+# Jabber::Chat::SetFont --
+# 
+#       Sets the chat font in all text widgets.
+
 proc ::Jabber::Chat::SetFont {theFont} {    
     upvar ::Jabber::jprefs jprefs
 
     ::Debug 2 "::Jabber::Chat::SetFont theFont=$theFont"
-
+    
+    # If theFont is empty it means the default font.
     set jprefs(chatFont) $theFont
         
     foreach chattoken [GetTokenList chat] {
@@ -1104,6 +1120,14 @@ proc ::Jabber::Chat::SetFont {theFont} {
 	set w $chatstate(w)
 	if {[winfo exists $w]} {
 	    ::Jabber::Chat::ConfigureTextTags $w $chatstate(wtext)
+	    if {$jprefs(chatFont) == ""} {
+		
+		# This should be the font set throught the option database.
+		$chatstate(wtextsnd) configure -font \
+		  [option get $chatstate(wtext) font Font]		
+	    } else {
+		$chatstate(wtextsnd) configure -font $jprefs(chatFont)
+	    }
 	} else {
 	    catch {unset chatstate}
 	}
@@ -1856,58 +1880,34 @@ proc ::Jabber::Chat::BuildPrefsPage {wpage} {
     
     set fontS  [option get . fontSmall {}]    
     set fontSB [option get . fontSmallBold {}]
-    
-    set tmpJPrefs(chatActiveRet) $jprefs(chatActiveRet)
-    set tmpJPrefs(chatFont)      $jprefs(chatFont)
-    set tmpJPrefs(chat,tabbedui) $jprefs(chat,tabbedui)
+
+    foreach key {chatActiveRet showMsgNewWin inbox2click} {
+	set tmpJPrefs($key) $jprefs($key)
+    }
     
     set labfr ${wpage}.alrt
     labelframe $labfr -text [::msgcat::mc {Chat}]
     pack $labfr -side top -anchor w -padx 8 -pady 4
     
     set fr $labfr.fr
-    pack [frame $fr] -side top -anchor w -padx 8 -pady 2
+    pack [frame $fr] -side top -anchor w -padx 10 -pady 2
  
-    label $fr.lfont -text [::msgcat::mc prefcufont]
-    button $fr.btfont -text "[::msgcat::mc Pick]..." -font $fontS \
-      -command [namespace current]::PickFont
+    checkbutton $fr.newwin -text " [::msgcat::mc prefcushow]" \
+      -variable [namespace current]::tmpJPrefs(showMsgNewWin)
+    label $fr.lmb2 -text [::msgcat::mc prefcu2clk]
+    radiobutton $fr.rb2new -text " [::msgcat::mc prefcuopen]" \
+      -value newwin -variable [namespace current]::tmpJPrefs(inbox2click)
+    radiobutton $fr.rb2re   \
+      -text " [::msgcat::mc prefcureply]" -value reply \
+      -variable [namespace current]::tmpJPrefs(inbox2click)
     checkbutton $fr.active -text "  [::msgcat::mc prefchactret]"  \
       -variable [namespace current]::tmpJPrefs(chatActiveRet)
-    checkbutton $fr.tabbed -text "  Use tabbed notebook interface"  \
-      -variable [namespace current]::tmpJPrefs(chat,tabbedui)
 
-    grid $fr.lfont $fr.btfont -padx 2 -sticky w
     grid $fr.active -sticky w
-    grid $fr.tabbed -sticky w
-}
-
-proc ::Jabber::Chat::PickFont { } {
-    variable tmpJPrefs
-    
-    set fontS [option get . fontSmall {}]
-    array set fontArr [font actual $fontS]
-
-    if {[string length $tmpJPrefs(chatFont)]} {
-	set opts [list  \
-	  -defaultfont    "" \
-	  -defaultsize    "" \
-	  -defaultweight  "" \
-	  -initialfont [lindex $tmpJPrefs(chatFont) 0]  \
-	  -initialsize [lindex $tmpJPrefs(chatFont) 1]  \
-	  -initialweight [lindex $tmpJPrefs(chatFont) 2]]
-    } else {
-	set opts {-defaultfont "" -defaultsize "" -defaultweight  ""}
-    }
-    
-    # Default font is here {{} {} {}} which shall match an empty chatFont.
-    set theFont [eval {::fontselection::fontselection .mnb} $opts]
-    if {[llength $theFont]} {
-	if {[lindex $theFont 0] == ""} {
-	    set tmpJPrefs(chatFont) ""
-	} else {
-	    set tmpJPrefs(chatFont) $theFont
-	}
-    }
+    grid $fr.newwin -sticky w
+    grid $fr.lmb2   -sticky w
+    grid $fr.rb2new -sticky w
+    grid $fr.rb2re  -sticky w
 }
 
 proc ::Jabber::Chat::SavePrefsHook { } {
@@ -1916,8 +1916,6 @@ proc ::Jabber::Chat::SavePrefsHook { } {
     
     array set jprefs [array get tmpJPrefs]
     unset tmpJPrefs
-    
-    ::Jabber::Chat::SetFont $jprefs(chatFont)
 }
 
 proc ::Jabber::Chat::CancelPrefsHook { } {

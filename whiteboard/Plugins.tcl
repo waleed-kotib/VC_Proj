@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Plugins.tcl,v 1.2 2004-06-06 15:42:50 matben Exp $
+# $Id: Plugins.tcl,v 1.3 2004-06-07 13:44:01 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -169,8 +169,6 @@ proc ::Plugins::Init { } {
     # Init the "standard" (internal and application) plugins.
     ::Plugins::InitTk
     ::Plugins::InitQuickTimeTcl
-    #::Plugins::InitTclSpeech
-    #::Plugins::InitMSSpeech
     ::Plugins::InitSnack
     ::Plugins::InitImg
     ::Plugins::InitXanim
@@ -252,46 +250,6 @@ proc ::Plugins::InitQuickTimeTcl { } {
       audio/x-midi        audio/vnd.qcelp     video/avi\
     }
     set plugin(QuickTimeTcl,mimes) $supportedMimeTypes(QuickTimeTcl)
-}
-
-
-proc ::Plugins::InitTclSpeech { } {
-    global this
-    variable plugin
-    variable supportedMimeTypes
-    variable supSuff
-    variable packages2Platform
-    
-    set plugin(TclSpeech,pack) "TclSpeech 2.0"
-    set plugin(TclSpeech,type) "internal"
-    set plugin(TclSpeech,desc) "When enabled, a synthetic voice speaks out\
-      text that is written in the canvas as well as text received\
-      from remote clients. It is triggered by a punctation character (,.;)."
-    set plugin(TclSpeech,platform) $packages2Platform(TclSpeech)
-    set plugin(TclSpeech,importProc) {}
-    set plugin(TclSpeech,mimes) {}
-    set supportedMimeTypes(TclSpeech) {}
-    set supSuff(TclSpeech) {}
-}
-
-#--- Microsoft Speech via tcom if available --------------------------------------
-  
-proc ::Plugins::InitMSSpeech { } {
-    variable plugin
-    variable supportedMimeTypes
-    variable supSuff
-    variable packages2Platform
-    
-    set plugin(MSSpeech,pack) "MSSpeech"
-    set plugin(MSSpeech,type) "internal"
-    set plugin(MSSpeech,desc) "When enabled, a synthetic voice speaks out\
-      text that is written in the canvas as well as text received\
-      from remote clients. It is triggered by a punctation character (,.;)."
-    set plugin(MSSpeech,platform) $packages2Platform(MSSpeech)
-    set plugin(MSSpeech,importProc) {}
-    set plugin(MSSpeech,mimes) {}
-    set supportedMimeTypes(MSSpeech) {}
-    set supSuff(MSSpeech) {}
 }
 
 #--- snack ---------------------------------------------------------------------
