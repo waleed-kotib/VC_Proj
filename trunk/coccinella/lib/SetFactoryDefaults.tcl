@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.22 2004-01-09 14:08:22 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.23 2004-01-10 14:53:39 matben Exp $
 
 # SetWhiteboardFactoryState --
 # 
@@ -204,7 +204,7 @@ set prefs(makeSafeServ) 1
 
 # Maximum time to wait for any network action to respond. (secs and millisecs)
 set prefs(timeoutSecs) 30
-#set prefs(timeoutSecs) 10
+#set prefs(timeoutSecs) 4
 set prefs(timeoutMillis) [expr 1000 * $prefs(timeoutSecs)]
 
 # How many milliseconds shall we wait before showing the progress window?

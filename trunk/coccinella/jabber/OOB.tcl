@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.13 2004-01-09 14:08:22 matben Exp $
+# $Id: OOB.tcl,v 1.14 2004-01-10 14:53:39 matben Exp $
 
 package provide OOB 1.0
 
@@ -235,16 +235,12 @@ proc ::Jabber::OOB::Get {jid url file id} {
     
     # Be sure to set translation correctly for this MIME type.
     # Should be auto detected by ::http::geturl!
-    set progCB [list [namespace current]::Progress $out]
-    set commandCB [list [namespace current]::Finished $jid $out $id]
-    if {0 && [string equal $this(platform) "macintosh"]} {
-	set tmopts ""
-    } else {
-	set tmopts [list -timeout $prefs(timeoutMillis)]
-    }
+    set tmopts [list -timeout $prefs(timeoutMillis)]
     
     if {[catch {eval {
-	::http::geturl $url -channel $out -progress $progCB -command $commandCB
+	::httpex::get $url -channel $out  \
+	  -progress [list [namespace current]::Progress $out] \
+	  -command  [list [namespace current]::HttpCmd $jid $out $id]
     } $tmopts} token]} {
 	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok -message \
 	  [FormatTextForMessageBox [::msgcat::mc jamessoobgetfail $url $token]]
@@ -252,62 +248,50 @@ proc ::Jabber::OOB::Get {jid url file id} {
     }
     upvar #0 $token state
 
-    # Handle URL redirects
-    foreach {name value} $state(meta) {
-        if {[regexp -nocase ^location$ $name]} {
-            return [::Jabber::OOB::Get $jid [string trim $value] $file $id]
-        }
-    }
     set wprog .joob$out
-    set cancelCB [list ::Jabber::OOB::Cancel $out $token]
+
     ::ProgressWindow::ProgressWindow $wprog -filename [file tail $file]  \
-      -text2 "[::msgcat::mc From]: $url" -cancelcmd $cancelCB
+      -cancelcmd [list [namespace current]::Cancel $out $token]
     update idletasks
 }
 
 proc ::Jabber::OOB::Progress {out token total current} {
     
     variable locals
-    upvar ::Jabber::jstate jstate
     upvar #0 $token state
     
-    set wprog .joob$out
-    if {$jstate(debug) > 1} {
-	if {$current < 10000} {
-	    foreach {name value} $state(meta) {
-		puts [format "%-*s %s" 20 $name $value]
-	    }
-	}
-    }
-    $wprog configure -percent [expr 100.0 * $current/($total + 1.0)]
-
     # Investigate 'state' for any exceptions.
-    if {[::http::status $token] == "error"} {
-	# some 2.3 versions seem to lack ::http::error !
-	if {[info exists state(error)]} {
-	    set errmsg $state(error)
-	} else {
-	    set errmsg "File transfer error"
-	}
+    set status [::httpex::status $token]
+    
+    if {[string equal $status "error"]} {
+	set errmsg "[httpex::error $token]"
 	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok -message \
 	  [FormatTextForMessageBox "Failed getting url: $errmsg"]
-	::http::reset $token
+	::httpex::cleanup $token
 	catch {file delete $locals($out,local)}
+    } else {
+	
+	# Update progress.
+	set wprog .joob$out
+	$wprog configure -percent [expr 100.0 * $current/($total + 1.0)]
     }
 }
 
-# Jabber::OOB::Finished --
+# Jabber::OOB::HttpCmd --
 # 
-#       Callback for the http package. Gets called when finished,
-#       timeout, or reset. 
+#       Callback for the httpex package.
 
-proc ::Jabber::OOB::Finished {jid out id token} {
+proc ::Jabber::OOB::HttpCmd {jid out id token} {
     
     upvar #0 $token state
-    upvar ::Jabber::jstate jstate
+    set httpstate  [::httpex::state $token]
+    set status [::httpex::status $token]
 
-    # Investigate 'state' for any exceptions.
-    set status [::http::status $token]
+    # Don't bother with intermediate callbacks.
+    if {![string equal $httpstate "final"]} {
+	return
+    }
+
     switch -- $status {
 	timeout {
 	    tk_messageBox -title [::msgcat::mc Timeout] -icon info -type ok \
@@ -316,7 +300,7 @@ proc ::Jabber::OOB::Finished {jid out id token} {
 	error {
 	    tk_messageBox -title "File transport error" -icon error -type ok \
 	      -message "File transport error when getting file from $jid:\
-	      [::http::error $token]"
+	      [::httpex::error $token]"
 	}
 	eof {
 	    tk_messageBox -title "File transport error" -icon error -type ok \
@@ -329,7 +313,7 @@ proc ::Jabber::OOB::Finished {jid out id token} {
     set wprog .joob$out
     catch {destroy $wprog}
     catch {close $out}
-    ::http::cleanup $token
+    ::httpex::cleanup $token
     
     # We shall send an <iq result> element here using the same 'id' to notify
     # the sender we are done.
