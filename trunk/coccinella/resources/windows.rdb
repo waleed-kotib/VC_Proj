@@ -43,6 +43,7 @@
 *Balloonhelp.background:             #ffff9f
 *Combobox.background:                white
 *Combobox.Font:                      Arial 8
+*HeadLabel.background:               #cecece
 *MacTabnotebook.Font:                Arial 8
 *Tablelist.background:               white
 *Tablelist.Font:                     Arial 8

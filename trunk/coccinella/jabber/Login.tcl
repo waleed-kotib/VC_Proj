@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.44 2004-09-18 14:43:28 matben Exp $
+# $Id: Login.tcl,v 1.45 2004-09-24 12:14:14 matben Exp $
 
 package provide Login 1.0
 
@@ -448,6 +448,7 @@ proc ::Jabber::Login::SetStatus {args} {
     if {$argsArr(-priority) != 0} {
 	lappend presArgs -priority $priority
     }
+    
     if {$argsArr(-invisible)} {
 	set jstate(status) "invisible"
 	eval {::Jabber::SetStatus invisible} $presArgs

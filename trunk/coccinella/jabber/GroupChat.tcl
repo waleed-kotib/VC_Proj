@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.68 2004-08-23 12:44:36 matben Exp $
+# $Id: GroupChat.tcl,v 1.69 2004-09-24 12:14:13 matben Exp $
 
 package require History
 
@@ -1278,7 +1278,9 @@ proc ::Jabber::GroupChat::SetUser {roomjid jid3 presence args} {
 	$wusers tag bind $resource <ButtonRelease-1>   \
 	  [list [namespace current]::PopupTimerCancel $token]
 	$wusers tag bind $resource <Control-Button-1>  \
-	  [list [namespace current]::Popup $token $jid3 %x %y]
+	  [list [namespace current]::Popup $wusers $jid3 %x %y]
+	$wusers tag bind $resource <Button-2>  \
+	  [list [namespace current]::Popup $wusers $jid3 %x %y]
     } else {
 	$wusers tag bind $resource <Button-3>  \
 	  [list [namespace current]::Popup $wusers $jid3 %x %y]

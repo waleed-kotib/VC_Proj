@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.64 2004-09-22 13:14:38 matben Exp $
+# $Id: jabberlib.tcl,v 1.65 2004-09-24 12:14:15 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -92,8 +92,6 @@
 #      jlibName mystatus
 #      jlibName oob_set to cmd url ?args?
 #      jlibName presence_register type cmd
-#      jlibName private_get to ns subtags cmd
-#      jlibName private_set ns cmd ?args?
 #      jlibName registertransport initProc sendProc resetProc
 #      jlibName register_set username password cmd ?args?
 #      jlibName register_get cmd ?args?
@@ -1098,6 +1096,7 @@ proc jlib::presence_handler {jlibname xmldata} {
 	
 	# Extract the presence sub-elements. Separate the x element.
 	set x {}
+	set extras {}
 	foreach child $childlist {
 	    
 	    # Extract the presence sub-elements XML data items.
@@ -1113,12 +1112,17 @@ proc jlib::presence_handler {jlibname xmldata} {
 		    lappend x $child
 		}
 		default {
-		    lappend arglist -$ctag $cchdata
+		    
+		    # This can be anything properly namespaced.
+		    lappend extras $child
 		}
 	    }
 	}	    
 	if {[llength $x] > 0} {
 	    lappend arglist -x $x
+	}
+	if {[llength $extras] > 0} {
+	    lappend arglist -extras $extras
 	}
 	
 	# Do different things depending on the 'type' attribute.
@@ -2326,6 +2330,7 @@ proc jlib::send_message {jlibname to args} {
 #           -priority
 #           -show
 #           -xlist
+#           -extras
 #           -command   Specify a callback to call if we may expect any reply
 #                   package, as entering a room with 'gc-1.0'.
 #     
@@ -2349,6 +2354,7 @@ proc jlib::send_presence {jlibname args} {
     
     foreach {key value} $args {
 	set par [string trimleft $key -]
+	
 	switch -- $par {
 	    type {
 		set type $value
@@ -2361,7 +2367,7 @@ proc jlib::send_presence {jlibname args} {
 	    from - to {
 		lappend attrlist $par $value
 	    }
-	    xlist {
+	    xlist - extras {
 		foreach xchild $value {
 		    lappend children $xchild
 		}
@@ -2728,72 +2734,9 @@ proc jlib::vcard_set {jlibname cmd args} {
 	}
     }
 
-    set xmllist [wrapper::createtag {vCard} -attrlist $attrlist \
+    set xmllist [wrapper::createtag vCard -attrlist $attrlist \
       -subtags $subelem]
     send_iq $jlibname "set" $xmllist -command \
-      [list [namespace current]::invoke_iq_callback $jlibname $cmd]    
-}
-
-# jlib::private_get --
-#
-#       It implements the private and public store data get method.
-#
-# Arguments:
-#       jlibname:   the instance of this jlib.
-#       to:
-#       ns:         namespace for the public/private data storage.
-#       subtags:    list of the tags we query.
-#       cmd:        client command to be executed at the iq "result" element.
-#       
-# Results:
-#       none.
-
-proc jlib::private_get {jlibname to ns subtags cmd} {
-
-    set attrlist [list xmlns $ns]    
-    foreach tag $subtags {
-	lappend subelements [wrapper::createtag $tag]
-    }
-    set xmllist [wrapper::createtag "query" -attrlist $attrlist  \
-      -subtags $subelements]
-    send_iq $jlibname "get" $xmllist -to $to -command   \
-      [list [namespace current]::invoke_iq_callback $jlibname $cmd]
-}
-
-# jlib::private_set --
-#
-#       It implements the private and public store data set method.
-#
-# Arguments:
-#       jlibname:   the instance of this jlib.
-#       ns:         namespace for the public/private data storage.
-#       cmd:        client command to be executed at the iq "result" element.
-#       args:       '-tagName {chdata ?{attr1 val1 ?attr2 val2 ...?}?}' pairs.
-#       
-# Results:
-#       none.
-
-proc jlib::private_set {jlibname ns cmd args} {
-    
-    set attrlist [list {xmlns} $ns]    
-    
-    # Form all the sub elements.
-    set subelem {}
-    foreach {mtag val} $args {
-	set tag [string trimleft $mtag {-}]
-	set chdata [lindex $val 0]
-	
-	# Any attributes?
-	if {[llength $val] > 1} {
-	    lappend subelem [wrapper::createtag $tag -chdata $chdata   \
-	      -attrlist [lindex $val 1]]
-	} else {
-	    lappend subelem [wrapper::createtag $tag -chdata $chdata]
-	}
-    }
-    set xmllist [wrapper::createtag "query" -attrlist [list {xmlns} $ns]  \
-      -subtags $subelem]
-    send_iq $jlibname "set" $xmllist -command        \
       [list [namespace current]::invoke_iq_callback $jlibname $cmd]    
 }
 

@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.20 2004-07-30 12:55:54 matben Exp $
+# $Id: roster.tcl,v 1.21 2004-09-24 12:14:15 matben Exp $
 # 
 # Note that every jid in the rostArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -72,6 +72,7 @@
 #      rostName getsubscription jid
 #      rostName getusers ?-type available|unavailable?
 #      rostName getx jid xmlns
+#      rostName getextras jid xmlns
 #      rostName isavailable jid
 #      rostName removeitem jid
 #      rostName reset
@@ -93,6 +94,7 @@
 #                    -priority      (optional)
 #                    -show          (optional)
 #                    -x             (optional)
+#                    -extras        (optional)
 #       remove:      no keys
 #       set:         -name          (optional)
 #                    -subscription  (optional)
@@ -459,6 +461,14 @@ proc roster::setpresence {rostName jid type args} {
 			regexp {http://jabber.org/protocol/(.*)$} $ns \
 			  match ns
 			set presArr($mjid,x,$ns) $xelem
+		    }
+		}
+		extras {
+
+		    # This can be anything properly namespaced.
+		    foreach xelem $value {
+			set ns [wrapper::getattribute $xelem xmlns]
+			set presArr($mjid,extras,$ns) $xelem
 		    }
 		}
 		default {
@@ -932,6 +942,31 @@ proc roster::getx {rostName jid xmlns} {
     set jid [jlib::jidmap $jid]
     if {[info exists presArr($jid,x,$xmlns)]} {
 	return $presArr($jid,x,$xmlns)
+    } else {
+	return ""
+    }
+}
+
+# roster::getextras --
+#
+#       Returns the xml list for this jid's extras element with given xml namespace.
+#       Returns empty if no matching info.
+#
+# Arguments:
+#       rostName:   the instance of this roster.
+#       jid:        any jid
+#       xmlns:      the (mandatory) full xmlns specifier.
+#       
+# Results:
+#       xml list or empty.
+
+proc roster::getextras {rostName jid xmlns} {
+
+    upvar ${rostName}::presArr presArr
+   
+    set jid [jlib::jidmap $jid]
+    if {[info exists presArr($jid,extras,$xmlns)]} {
+	return $presArr($jid,extras,$xmlns)
     } else {
 	return ""
     }

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.33 2004-09-11 14:21:50 matben Exp $
+# $Id: JWB.tcl,v 1.34 2004-09-24 12:14:13 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -57,8 +57,13 @@ proc ::Jabber::WB::Init {jlibName} {
     # Configure the Tk->SVG translation to use http.
     # Must be reconfigured when we know our address after connecting???
     set ip [::Network::GetThisPublicIPAddress]
-    can2svg::config -uritype http -httpaddr ${ip}:$prefs(httpdPort) \
-      -httpbasedir $this(httpdRootPath) -ovalasellipse 1 -reusedefs 0
+    can2svg::config                      \
+      -uritype http                      \
+      -httpaddr ${ip}:$prefs(httpdPort)  \
+      -httpbasedir $this(httpdRootPath)  \
+      -ovalasellipse 1                   \
+      -reusedefs 0                       \
+      -allownewlines 1
     #  -filtertags [namespace current]::FilterTags
     
     # Register for the messages we want. Duplicate protocols.
@@ -1290,6 +1295,10 @@ proc ::Jabber::WB::Free {wtop} {
     array unset jwbstate "$wtop,*"    
 }
 
+#--- Getting ip addresses ------------------------------------------------------
+#
+#       These are replaced by extra presence elements in most cases.
+
 # Jabber::WB::GetIPnumber / PutIPnumber --
 #
 #       Utilites to put/get ip numbers from clients.
@@ -1396,10 +1405,17 @@ proc ::Jabber::WB::GetCoccinellaServersCallback {jid3 cmd jlibname type subiq} {
     unset -nocomplain ipCache(req,$mjid3)
 }
 
+# Jabber::WB::PresenceHook --
+# 
+#       Administrate our internal ip cache.
+
 proc ::Jabber::WB::PresenceHook {jid type args} {
     variable ipCache
+    upvar ::Jabber::jstate jstate
+    upvar ::Jabber::privatexmlns privatexmlns
     
     ::Debug 2 "::Jabber::WB::PresenceHook jid=$jid, type=$type, args=$args"
+    
     array set argsArr $args
     if {[info exists argsArr(-resource)] && [string length $argsArr(-resource)]} {
 	set jid $jid/$argsArr(-resource)
@@ -1414,6 +1430,14 @@ proc ::Jabber::WB::PresenceHook {jid type args} {
 	}
 	available {
 	    
+	    # Starting with 0.95.1 we send server info along the initial 
+	    # presence element.
+	    set coccielem [$jstate(roster) getextras $mjid $privatexmlns(servers)]
+	    if {$coccielem != {}} {
+		set ipElements [wrapper::getchildswithtag $coccielem ip]
+		set ip [wrapper::getcdata [lindex $ipElements 0]]
+		set ipCache(ip,$mjid) $ip
+	    }
 	}
     }
 }
@@ -1432,7 +1456,8 @@ proc ::Jabber::WB::AutoBrowseHook {jid} {
     # Shall we query for its ip address right away?
     # Get only if not yet requested.
     set mjid [jlib::jidmap $jid]
-    if {$jprefs(preGetIP) && ![info exists ipCache(req,$mjid)]} {
+    if {$jprefs(preGetIP) && ![info exists ipCache(ip,$mjid)] && \
+      ![info exists ipCache(req,$mjid)]} {
 	if {$jprefs(getIPraw)} {
 	    ::Jabber::WB::GetIPnumber $jid
 	} else {
@@ -1472,7 +1497,7 @@ proc ::Jabber::WB::PutFileOrScheduleHook {wtop fileName opts} {
     }
     
     # Verify that jid is well formed.
-    if {![::Jabber::WB::VerifyJIDWhiteboard $wtop]} {
+    if {![VerifyJIDWhiteboard $wtop]} {
 	return
     }
     
@@ -1555,7 +1580,9 @@ proc ::Jabber::WB::PutFileOrScheduleHook {wtop fileName opts} {
 		# This jid is online but has not told us its ip number.
 		# We need to get this jid's ip number and register the
 		# PutFile as a callback when receiving this ip.
-		if {1} {
+		if {0} {
+		    
+		    # OBSOLETE !!!
 		    ::Jabber::WB::GetIPnumber $jid3 \
 		      [list ::Jabber::WB::PutFile $wtop $fileName $mime $optjidList]
 		} else {

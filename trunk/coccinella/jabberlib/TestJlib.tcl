@@ -138,10 +138,6 @@ $theJlib vcard_set VCardSetProc -fn Mats -n_family Bengtsson \
   -n_middle G -tel_home 136114
 $theJlib vcard_get $myJid VCardGetProc 
 
-# Private/public storage space (requires version 1.4 of server)
-$theJlib private_set public:coccinella MyClientProc -ip 111.111.111.111
-$theJlib private_get $myJid public:coccinella {ip} MyClientProc
-
 # Browse services available.
 $theJlib browse_get $theServer MyBrowseErrorProc
 $theJlib browse_get $theJud MyBrowseErrorProc

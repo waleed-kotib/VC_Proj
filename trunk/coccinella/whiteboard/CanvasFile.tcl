@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasFile.tcl,v 1.11 2004-08-30 07:46:08 matben Exp $
+# $Id: CanvasFile.tcl,v 1.12 2004-09-24 12:14:15 matben Exp $
  
 package require can2svg
 package require svg2can
@@ -613,10 +613,11 @@ proc ::CanvasFile::SaveCanvasFileDlg {wtop} {
     set ext [file extension $fileName]
     
     switch -- $ext {
-	".svg" {
+	.svg {
 	    
 	    # Not completely sure about -usetags.
 	    ::can2svg::canvas2file $wCan $fileName -uritype file -usetags all \
+	      -allownewlines 0  \
 	      -windowitemhandler ::CanvasUtils::GetSVGForeignFromWindowItem
 	}
 	default {
