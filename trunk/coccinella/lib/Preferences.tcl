@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.33 2004-01-06 15:59:22 matben Exp $
+# $Id: Preferences.tcl,v 1.34 2004-01-07 14:57:34 matben Exp $
  
 package require notebook
 package require tree
@@ -100,7 +100,7 @@ proc ::Preferences::Build { } {
     pack [frame $frtree] -fill both -expand 1 -side left
     pack [label $frtree.la -text [::msgcat::mc {Settings Panels}]  \
       -font $fontSB -relief raised -bd 1 -bg #bdbdbd] -side top -fill x
-    set wtree [::tree::tree $frtree.t -width 120 -height 300   \
+    set wtree [::tree::tree $frtree.t -width 120 -height 300 -indention 4 \
       -yscrollcommand [list $frtree.sby set]       \
       -selectcommand ::Preferences::SelectCmd   \
       -doubleclickcommand {}]
@@ -427,15 +427,15 @@ proc ::Preferences::BuildPageConf {page} {
     variable ypad 
 
     # Conference (groupchat) stuff.
-    set labfr [::mylabelframe::mylabelframe $page.fr [::msgcat::mc {Preferred Protocol}]]
+    set labfr [::mylabelframe::mylabelframe $page.fr  \
+      [::msgcat::mc {Preferred Protocol}]]
     pack $page.fr -side top -anchor w -fill x
     set pbl [frame $labfr.frin]
     pack $pbl -padx 10 -pady 6 -side left
     
-    foreach val {gc-1.0 muc}   \
-      txt {
-	{Groupchat-1.0 (fallback)} 
-	{Multi-User-Chat with Conference as fallback}} {
+    foreach  \
+      val {gc-1.0                     muc}   \
+      txt {{Groupchat-1.0 (fallback)} prefmucconf} {
 	set wrad ${pbl}.[string map {. ""} $val]
 	radiobutton $wrad -text [::msgcat::mc $txt] -value $val  \
 	  -variable [namespace current]::tmpJPrefs(prefgchatproto)	      
@@ -449,7 +449,7 @@ proc ::Preferences::BuildPagePersInfo {page} {
     pack $page.fr -side top -anchor w -ipadx 10 -ipady 6 -fill x
 
     message $ppers.msg -text [::msgcat::mc prefpers] -aspect 800
-    grid $ppers.msg -columnspan 2 -sticky ew
+    grid $ppers.msg -columnspan 2 -sticky w
     
     label $ppers.first -text "[::msgcat::mc {First name}]:"
     label $ppers.last -text "[::msgcat::mc {Last name}]:"
@@ -469,8 +469,6 @@ proc ::Preferences::BuildPagePersInfo {page} {
 	grid $ppers.ent$what -column 1 -row $row -sticky ew 
 	incr row
     }    
-    frame $ppers.bts
-    grid $ppers.bts -columnspan 2 -sticky ew
 }
 
 proc ::Preferences::BuildPageAutoAway {page} {
@@ -517,12 +515,13 @@ proc ::Preferences::BuildPageAutoAway {page} {
     grid $pbl.frmsg.examsg -column 1 -row 1 -sticky w
     
     # Default logout status.
-    set labfrstat [::mylabelframe::mylabelframe $page.frstat {Default Logout Status}]
+    set labfrstat [::mylabelframe::mylabelframe $page.frstat  \
+      [::msgcat::mc {Default Logout Status}]]
     pack $page.frstat -side top -anchor w -fill x
     set pstat [frame $labfrstat.frin]
     pack $pstat -padx 10 -pady 6 -side left
 
-    label $pstat.l -text "Status when logging out:"
+    label $pstat.l -text "[::msgcat::mc {Status when logging out}]:"
     entry $pstat.e -width 32  \
       -textvariable [namespace current]::tmpJPrefs(logoutStatus)
     grid $pstat.l -column 0 -row 0 -sticky e
@@ -553,7 +552,8 @@ proc ::Preferences::BuildPageSubscriptions {page} {
     label $psubs.lnot -text [::msgcat::mc prefsuisnot]
     grid $psubs.la1 -columnspan 2 -sticky w -pady $ypad
     grid $psubs.lin $psubs.lnot -sticky w -pady $ypad
-    foreach val {accept reject ask}   \
+    foreach  \
+      val {accept      reject      ask}   \
       txt {Auto-accept Auto-reject {Ask each time}} {
 	foreach val2 {inrost notinrost} {
 	    radiobutton $psubs.${val2}${val}  \
@@ -565,14 +565,13 @@ proc ::Preferences::BuildPageSubscriptions {page} {
 
     set frauto [frame $page.auto]
     pack $frauto -side top -anchor w -padx 10 -pady $ypad
-    checkbutton $frauto.autosub  \
-      -text "  [::msgcat::mc prefsuauto]"  \
+    checkbutton $frauto.autosub -text "  [::msgcat::mc prefsuauto]"  \
       -variable [namespace current]::tmpJPrefs(subsc,auto)
-    label $frauto.autola -text "      [::msgcat::mc {Default group}]:"
+    label $frauto.autola -text [::msgcat::mc {Default group}]:
     entry $frauto.autoent -width 22   \
       -textvariable [namespace current]::tmpJPrefs(subsc,group)
-    grid $frauto.autosub -sticky w -columnspan 2 -pady $ypad
-    grid $frauto.autola $frauto.autoent -sticky w -pady $ypad
+    pack $frauto.autosub -side top -pady $ypad
+    pack $frauto.autola $frauto.autoent -side left -pady $ypad -padx 4
 }
 
 proc ::Preferences::BuildPagePrivacy {page} {
@@ -796,11 +795,11 @@ proc ::Preferences::Customization::BuildPage {page} {
     
     set frrost $pbl.robg
     frame $frrost
-    pack [checkbutton $frrost.cb -text " Use background image (gif) in roster" \
+    pack [checkbutton $frrost.cb -text "  [::msgcat::mc prefrostbgim]" \
       -variable ::Preferences::tmpJPrefs(rost,useBgImage)] -side left
-    pack [button $frrost.btpick -text "Pick..." -font $fontSB  \
+    pack [button $frrost.btpick -text "[::msgcat::mc {Pick}]..." -font $fontSB  \
       -command [list [namespace current]::PickBgImage rost]] -side left -padx 4
-    pack [button $frrost.btdefk -text "Default" -font $fontSB  \
+    pack [button $frrost.btdefk -text "[::msgcat::mc {Default}]" -font $fontSB  \
       -command [list [namespace current]::DefaultBgImage rost]]  \
       -side left -padx 4
     
@@ -812,7 +811,7 @@ proc ::Preferences::Customization::BuildPage {page} {
 
     set wpopupmenuin [eval {tk_optionMenu $wpoptheme   \
       [namespace parent]::tmpPrefs(themeName)} $allrsrc]
-    pack [label $frtheme.l -text {Pick theme, need relaunch:}] -side left
+    pack [label $frtheme.l -text "[::msgcat::mc preftheme]:"] -side left
     pack $wpoptheme -side left
     
     grid $pbl.lfont $pbl.btfont -padx 2 -pady $ypad -sticky w
@@ -913,8 +912,7 @@ proc ::Preferences::Plugins::BuildPage {page} {
     pack $pbl -padx 10 -pady 6 -side left
     
     label ${pbl}.lhead -wraplength 300 -anchor w -justify left \
-      -text "You may unselect any of these packages if\
-      you don't want them loaded. You must relaunch for this to take effect."
+      -text [::msgcat::mc prefplugctrl]
     pack ${pbl}.lhead -padx 0 -pady 2 -side top -anchor w
     
     set pfr [frame ${pbl}.frpl]
@@ -1775,7 +1773,7 @@ proc ::Preferences::Shorts::BuildPage {page} {
       -command [namespace current]::Remove
     button $btedit -text "[::msgcat::mc Edit]..." -state disabled -font $fontS \
       -command [list [namespace current]::AddOrEdit edit]
-    pack $frtot.btfr -side top
+    pack $frtot.btfr -side top -anchor w
     pack $btadd $btrem $btedit -side top -fill x -padx 4 -pady 4
     
     pack $frtot -side left -padx 6 -pady 6    
@@ -2140,10 +2138,10 @@ proc ::Preferences::Proxies::BuildPage {page} {
     
     upvar ::Preferences::ypad ypad
     
-    set pcnat [::mylabelframe::mylabelframe $page.nat {NAT Address}]
+    set pcnat [::mylabelframe::mylabelframe $page.nat  \
+      [::msgcat::mc {NAT Address}]]
     pack $page.nat -side top -anchor w -ipadx 10 -ipady 6
-    checkbutton $pcnat.cb \
-      -text {  Use the following ip address as seen from the outside} \
+    checkbutton $pcnat.cb -text "  [::msgcat::mc prefnatip]" \
       -variable [namespace current]::tmpPrefs(setNATip)
     entry $pcnat.eip -textvariable [namespace current]::tmpPrefs(NATip) \
       -width 32

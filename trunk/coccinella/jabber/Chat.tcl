@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.29 2003-12-30 15:30:58 matben Exp $
+# $Id: Chat.tcl,v 1.30 2004-01-07 14:57:34 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -36,6 +36,9 @@ namespace eval ::Jabber::Chat:: {
     option add *Chat*youTextFont          ""                    widgetDefault
     option add *Chat*sysPreForeground     green                 widgetDefault
     option add *Chat*sysForeground        green                 widgetDefault
+    option add *Chat*histHeadForeground   ""                    widgetDefault
+    option add *Chat*histHeadBackground   gray60                widgetDefault
+    option add *Chat*histHeadFont         ""                    widgetDefault
     option add *Chat*clockFormat          "%H:%M"               widgetDefault
 
     # List of: {tagName optionName resourceName resourceClass}
@@ -54,6 +57,9 @@ namespace eval ::Jabber::Chat:: {
 	{youtext     -font                youTextFont           Font}
 	{syspre      -foreground          sysPreForeground      Foreground}
 	{sys         -foreground          sysForeground         Foreground}
+	{histhead    -foreground          histHeadForeground    Foreground}
+	{histhead    -background          histHeadBackground    Background}
+	{histhead    -font                histHeadFont          Font}
     }
 
     # Add all event hooks.
@@ -396,7 +402,7 @@ proc ::Jabber::Chat::Build {threadID args} {
 	set state(subject) $argsArr(-subject)
     }
 
-    wm title $w "Chat ($state(jid))"
+    wm title $w "[::msgcat::mc Chat] ($state(jid))"
     set fontSB [option get . fontSmallBold {}]
 
     # Global frame.
@@ -422,7 +428,7 @@ proc ::Jabber::Chat::Build {threadID args} {
       -side right -padx 5 -pady 2
     pack [::Jabber::UI::SmileyMenuButton $frbot.smile $wtextsnd]  \
       -side right -padx 5 -pady 2
-    pack [checkbutton $frbot.active -text "  Active <Return>"   \
+    pack [checkbutton $frbot.active -text "  [::msgcat::mc {Active <Return>}]" \
       -command [list [namespace current]::ActiveCmd $token] \
       -variable $token\(active)]  \
       -side left -padx 5 -pady 2
@@ -540,7 +546,7 @@ proc ::Jabber::Chat::ConfigureTextTags {w wtext} {
     ::Jabber::Debug 2 "::Jabber::Chat::ConfigureTextTags"
     
     set space 2
-    set alltags {mepre metext youpre youtext syspre sys}
+    set alltags {mepre metext youpre youtext syspre sys histhead}
         
     if {[string length $jprefs(chatFont)]} {
 	set chatFont $jprefs(chatFont)
@@ -567,9 +573,10 @@ proc ::Jabber::Chat::ConfigureTextTags {w wtext} {
 	    lappend opts($tag) $optName $value
 	}   
     }
-    lappend opts(metext)  -spacing3 $space -lmargin1 20 -lmargin2 20
-    lappend opts(youtext) -spacing3 $space -lmargin1 20 -lmargin2 20
-    lappend opts(sys)     -spacing3 $space -lmargin1 20 -lmargin2 20
+    lappend opts(metext)   -spacing3 $space -lmargin1 20 -lmargin2 20
+    lappend opts(youtext)  -spacing3 $space -lmargin1 20 -lmargin2 20
+    lappend opts(sys)      -spacing3 $space -lmargin1 20 -lmargin2 20
+    lappend opts(histhead) -spacing1 4 -spacing3 4 -lmargin1 20 -lmargin2 20
     foreach tag $alltags {
 	eval {$wtext tag configure $tag} $opts($tag)
     }
@@ -864,11 +871,12 @@ proc ::Jabber::Chat::PutMessageInHistoryFile {jid msg} {
 proc ::Jabber::Chat::BuildHistory {jid} {
     global  prefs this wDlgs
     variable uidhist
+    variable historyOptions
     upvar ::Jabber::jprefs jprefs
     
     set w $wDlgs(jchist)[incr uidhist]
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
-    wm title $w "Chat History: $jid"
+    wm title $w "[::msgcat::mc {Chat History}]: $jid"
     
     set wtxt  $w.frall.fr
     set wtext $wtxt.t
@@ -899,7 +907,7 @@ proc ::Jabber::Chat::BuildHistory {jid} {
     grid $wysc -column 1 -row 0 -sticky ns
     grid columnconfigure $wtxt 0 -weight 1
     grid rowconfigure $wtxt 0 -weight 1    
-    
+        
     # The tags.
     ::Jabber::Chat::ConfigureTextTags $wchatframe $wtext    
     
@@ -925,7 +933,7 @@ proc ::Jabber::Chat::BuildHistory {jid} {
 	foreach thread $allThreads {
 	    set when [clock format [clock scan $threadDate($thread)]  \
 	      -format "%A %e %B %Y"]
-	    $wtext insert end "Thread started $when\n" headtag
+	    $wtext insert end "[::msgcat::mc {Thread started}] $when\n" histhead
 	    
 	    for {set i $uidstart} {$i <= $uidstop} {incr i} {
 		foreach {cjid cthread time body} $message($i) break
@@ -948,7 +956,7 @@ proc ::Jabber::Chat::BuildHistory {jid} {
 	    }
 	}
     } else {
-	$wtext insert end "No registered chat history for $jid\n" headtag
+	$wtext insert end "No registered chat history for $jid\n" histhead
     }
     $wtext configure -state disabled
     ::UI::SetWindowGeometry $w $wDlgs(jchist)

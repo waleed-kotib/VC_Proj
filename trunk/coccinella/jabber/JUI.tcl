@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.18 2004-01-05 15:00:31 matben Exp $
+# $Id: JUI.tcl,v 1.19 2004-01-07 14:57:34 matben Exp $
 
 package provide JUI 1.0
 
@@ -366,7 +366,7 @@ proc ::Jabber::UI::NewPage {name} {
 
 	    # Agents page
 	    if {[lsearch $pages Agents] < 0} {
-		set ag [$nbframe newpage {Agents}]    
+		set ag [$nbframe newpage {Agents} -text [msgcat::mc Agents]]    
 		pack [::Jabber::Agents::Build $ag.ag] -fill both -expand 1
 	    }
 	}
@@ -374,7 +374,7 @@ proc ::Jabber::UI::NewPage {name} {
     
 	    # Browser page
 	    if {[lsearch $pages Browser] < 0} {
-		set br [$nbframe newpage {Browser}]    
+		set br [$nbframe newpage {Browser} -text [msgcat::mc Browser]]    
 		pack [::Jabber::Browse::Build $br.br] -fill both -expand 1
 	    }
 	}

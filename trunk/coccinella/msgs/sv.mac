@@ -7,6 +7,7 @@
 ::msgcat::mcset sv Add                  {Lägg till}
 ::msgcat::mcset sv Address              {Adress}
 ::msgcat::mcset sv Advanced             {Avancerat}
+::msgcat::mcset sv Agents		{Agenter}
 ::msgcat::mcset sv Apply		{Använd}
 ::msgcat::mcset sv Available		{Tillgänglig}
 ::msgcat::mcset sv Away			{Borta}
@@ -19,6 +20,8 @@
 ::msgcat::mcset sv Buffering		{Buffring}
 ::msgcat::mcset sv Cancel		{Avbryt}
 ::msgcat::mcset sv Change               {Ändra}
+::msgcat::mcset sv Chat			{Chatt}
+::msgcat::mcset sv Choose		{Välj}
 ::msgcat::mcset sv City                 {Stad}
 ::msgcat::mcset sv Clear 		{Radera}
 ::msgcat::mcset sv Close 		{Stäng}
@@ -45,6 +48,7 @@
 ::msgcat::mcset sv Get                  {Hämta}
 ::msgcat::mcset sv Group                {Grupp}
 ::msgcat::mcset sv Handling             {Hantering}
+::msgcat::mcset sv History		{Historik}
 ::msgcat::mcset sv Home			{Hemma}
 ::msgcat::mcset sv Import               {Importera}
 ::msgcat::mcset sv Inbox                {Inkorg}
@@ -55,6 +59,7 @@
 ::msgcat::mcset sv Logout               {Logga ut}
 ::msgcat::mcset sv Middle		{Mittinitial}
 ::msgcat::mcset sv More                 {Mer}
+::msgcat::mcset sv Never		{Aldrig}
 ::msgcat::mcset sv New 			{Nytt}
 ::msgcat::mcset sv Next 		{Nästa}
 ::msgcat::mcset sv No 			{Nej}
@@ -239,6 +244,8 @@
 ::msgcat::mcset sv mUpdateCheck  	{Uppdaterings koll}
 ::msgcat::mcset sv mReloadImage  	{Hämta bild igen}
 
+::msgcat::mcset sv mTakeSnapshot        {Ta skärmdump...}
+
 # Popups
 ::msgcat::mcset sv mMessage     	{Meddelande...}
 ::msgcat::mcset sv mWhiteboard     	{Skrivtavla...}
@@ -262,6 +269,7 @@
 ::msgcat::mcset sv {About Coccinella}      {Om Coccinella}
 ::msgcat::mcset sv {About Whiteboard}      {Om skrivtavlan}
 ::msgcat::mcset sv {About QuickTimeTcl}    {Om QuickTimeTcl}
+::msgcat::mcset sv {Active <Return>}	   {Aktiv <Return>}
 ::msgcat::mcset sv {Add New User}          {Lägg till ny kontakt}
 ::msgcat::mcset sv {Add Server}		   {Lägg till server}
 ::msgcat::mcset sv {Add Shortcut}          {Lägg till genväg}
@@ -280,11 +288,16 @@
 ::msgcat::mcset sv {Basic Info}		   {Basinfo}
 ::msgcat::mcset sv {Block JID}             {Blockera JID}
 ::msgcat::mcset sv {Built in server port}  {Inbyggd server port}
+::msgcat::mcset sv {Cache folder}          {Filminnesmapp}
+::msgcat::mcset sv {Chat History}	   {Chatt historik}
 ::msgcat::mcset sv {Chat With}             {Chatta med}
+::msgcat::mcset sv {Clear Disk Cache Now}  {Töm diskminnet nu}
 ::msgcat::mcset sv {Company Name}	   {Företag}
 ::msgcat::mcset sv {Conference server}	   {Konferanstjänst}
 ::msgcat::mcset sv {Create Room}	   {Skapa rum}
 ::msgcat::mcset sv {Default group}         {Standard grupp}
+::msgcat::mcset sv {Default Logout Status} {Standard utloggningsstatus}
+::msgcat::mcset sv {Disk Cache}            {Diskminne}
 ::msgcat::mcset sv {Do Not Disturb}	   {Stör ej}
 ::msgcat::mcset sv {Edit Fonts}            {Redigera typsnitt}
 ::msgcat::mcset sv {Edit Item}             {Redigera objekt}
@@ -296,6 +309,7 @@
 ::msgcat::mcset sv {Empty Fields}	   {Tomma fält}
 ::msgcat::mcset sv {Enter/Create Room}	   {Gå in/skapa rum}
 ::msgcat::mcset sv {Enter Room}		   {Stig in i rum}
+::msgcat::mcset sv {Every time}		   {Varje gång}
 ::msgcat::mcset sv {Extended Away status}  {Extra frånvarande status}
 ::msgcat::mcset sv {Factory Settings}      {Fabriksinställning}
 ::msgcat::mcset sv {Fatal Error}	   {Fatalt fel}
@@ -311,7 +325,8 @@
 ::msgcat::mcset sv {Get File}		   {Hämta fil}
 ::msgcat::mcset sv {Get File Error}        {Hämta fil fel}
 ::msgcat::mcset sv {Get vCard}             {Hämta vCard}
-::msgcat::mcset sv {Group chat in room}    {Gruppsamtal i rum}
+::msgcat::mcset sv {Group chat in room}    {Gruppchatt i rum}
+::msgcat::mcset sv {Groupchat-1.0 (fallback)} {Groupchat-1.0 (reserv)}
 ::msgcat::mcset sv {Handled By}            {Hanteras av}
 ::msgcat::mcset sv {Host name}		   {Värdnamn}
 ::msgcat::mcset sv {HTTP port}             {HTTP port}
@@ -350,6 +365,7 @@
 ::msgcat::mcset sv {New Topic}             {Nytt ämne}
 ::msgcat::mcset sv {New User}              {Ny kontakt}
 ::msgcat::mcset sv {My vCard}		   {Mitt vCard}
+::msgcat::mcset sv {NAT Address}	   {NAT adress}
 ::msgcat::mcset sv {Nick name}             {Kortnamn}
 ::msgcat::mcset sv {No Address}		   {Adress saknas}
 ::msgcat::mcset sv {No Inbox}		   {Ingen inkorg}
@@ -357,6 +373,7 @@
 ::msgcat::mcset sv {Not Available}	   {Ej tillgänligt}
 ::msgcat::mcset sv {Not available}	   {Ej tillgänligt}
 ::msgcat::mcset sv {Not Connected}	   {Ej ansluten}
+::msgcat::mcset sv {Once per session}      {En gång per start}
 ::msgcat::mcset sv {One day}               {En dag}
 ::msgcat::mcset sv {One hour}              {En timme}
 ::msgcat::mcset sv {One week}              {En vecka}
@@ -371,10 +388,11 @@
 ::msgcat::mcset sv {Personal URL}	   {Privat URL}
 ::msgcat::mcset sv {Pick Directory}        {Välj mapp}
 ::msgcat::mcset sv {Pick File}		   {Välj fil}
-::msgcat::mcset sv {Plugin Control}        {Pluginkontroll}
+::msgcat::mcset sv {Plugin Control}        {Plugin kontroll}
 ::msgcat::mcset sv {Plugin Info}           {Plugin info}
 ::msgcat::mcset sv {Port number}	   {Portnummer}
 ::msgcat::mcset sv {Postal Code}	   {Postnummer}
+::msgcat::mcset sv {Preferred Protocol}    {Förstahands protokoll}
 ::msgcat::mcset sv {Presence Error}	   {Presence fel}
 ::msgcat::mcset sv {Proxy Setup}           {Proxyinställning}
 ::msgcat::mcset sv {Put File Error}        {Felektighet vid filöverföring}
@@ -411,12 +429,14 @@
 ::msgcat::mcset sv {Sounds & Speech}       {Ljud & Tal}
 ::msgcat::mcset sv {Start Chat}            {Börja chatt}
 ::msgcat::mcset sv {Status message}        {Statusmeddelande}
+::msgcat::mcset sv {Status when logging out} {Utloggnings meddelande}
 ::msgcat::mcset sv {Subscription Pending}  {Vilande prenumerationer}
 ::msgcat::mcset sv {Synthetic speech}      {Syntetiskt tal}
 ::msgcat::mcset sv {System fonts}          {Systemtypsnitt}
 ::msgcat::mcset sv {Tel (voice)}  	   {Tele (vanlig)}
 ::msgcat::mcset sv {Tel (fax)}		   {Faxnummer}
 ::msgcat::mcset sv {This IP number}	   {Eget IP nummer}
+::msgcat::mcset sv {Thread started}	   {Diskussionstråd startad}
 ::msgcat::mcset sv {To/from JID}           {Till/från JID}
 ::msgcat::mcset sv {To Jabber id}          {Till Jabber id}
 ::msgcat::mcset sv {To Send or Not}	   {Skicka eller ej}
@@ -796,6 +816,20 @@ Objekt skapade av andra är inte möjliga att redigera.}
 ::msgcat::mcset sv prefshortip   {Fullständigt ipnummer eller namn}
 ::msgcat::mcset sv prefshortwa   {Varning: du har redigerat genvägarna.\
 Vill du inte spara dom?}
+
+::msgcat::mcset sv preffilecache {Filminnet sparar lokala kopior av\
+filer från andra användare vilket minskar transporttiden. Storleken\
+på filminnet begränsas av användarinställningarna nedan.}
+::msgcat::mcset sv prefcachecmp  {Jämför filminnet med transporterad}
+::msgcat::mcset sv prefnatip     {Använd följande ip adress att visa för andra}
+::msgcat::mcset sv prefmucconf   {Multi-User-Chat med Conference som reserv}
+::msgcat::mcset sv prefrostbgim  {Använd bakgrundsbild i rostern}
+::msgcat::mcset sv preftheme     {Välj tema, kräver uppstart}
+::msgcat::mcset sv prefplugctrl  {Du kan välja bort följande paket om\
+de inte ska användas. Programmet måste startas om för att detta ska vara\
+verksamt.}
+
+
 
 
 

@@ -6,7 +6,7 @@
 #
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #
-# $Id: FileCache.tcl,v 1.5 2004-01-06 15:59:22 matben Exp $
+# $Id: FileCache.tcl,v 1.6 2004-01-07 14:57:34 matben Exp $
 # 
 #       The input key can be: 
 #               1) a full url, must be uri encoded 
@@ -311,7 +311,8 @@ proc ::FileCache::Accept {locabspath} {
     foreach dir [array names bestbeforedir] {
 	if {[string match ${dir}* $locabspath]} {
 	    set timetoken $bestbeforedir($dir)
-	    set filemtime [file mtime $locabspath]	    
+	    set filemtime [file mtime $locabspath]
+	    
 	    switch -- $timetoken {
 		launch {
 		    set timelimit $launchtime
@@ -330,8 +331,12 @@ proc ::FileCache::Accept {locabspath} {
 }
 
 proc ::FileCache::ClearCache { } {
+    variable cache
     
-    
+    foreach nkey [array names cache] {
+	catch {file delete $chache($nkey)}
+    }
+    catch {unset cache}
 }
 
 proc ::FileCache::Dump { } {
@@ -387,25 +392,25 @@ proc ::FileCache::BuildPage {page} {
     pack $pca.msg -side top -anchor w
 
     set frca $pca.cas
-    pack [frame $frca] -fill x -padx 10
+    pack [frame $frca] -fill x -padx 10 -pady 2
     pack [label $frca.dsk -text "[::msgcat::mc {Disk Cache}]:"] -side left
     pack [entry $frca.emb -width 6  \
       -textvariable [namespace current]::tmpPrefs(mbsize)] -side left
     pack [label $frca.mb -text [::msgcat::mc {MBytes}]] -side left
-    pack [button $frca.bt -padx 6 -text [::msgcat::mc {Clear Disk Cache Now}] \
+    pack [button $frca.bt -padx 12 -text [::msgcat::mc {Clear Disk Cache Now}] \
       -command [namespace current]::ClearCache -font $fontS]  \
       -side right 
 
     set frfo $pca.fo
-    pack [frame $frfo] -fill x -padx 10
+    pack [frame $frfo] -fill x -padx 10 -pady 2
     pack [label $frfo.fo -text "[::msgcat::mc {Cache folder}]:"] -side left
     pack [button $frfo.bt -padx 6 -text "[::msgcat::mc {Choose}]..." \
-      -command [namespace current]::SetCachePath -font $fontS]  \
+      -command [namespace current]::SetCachePath -padx 12 -font $fontS]  \
       -side right 
     
     
     set pwhen [::mylabelframe::mylabelframe $page.frw \
-      [::msgcat::mc {Cached file compared with remote}]]
+      [::msgcat::mc prefcachecmp]]
     pack $page.frw -side top -anchor w -ipadx 10 -ipady 6 -fill x
     set frw $pwhen.cas
     pack [frame $frw] -side left -padx 16 -pady 2
