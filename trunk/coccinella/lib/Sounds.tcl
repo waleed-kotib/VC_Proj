@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Sounds.tcl,v 1.15 2004-01-23 08:59:01 matben Exp $
+# $Id: Sounds.tcl,v 1.16 2004-01-26 07:34:49 matben Exp $
 
 package provide Sounds 1.0
 
@@ -59,7 +59,7 @@ namespace eval ::Sounds:: {
 
 proc ::Sounds::InitHook { } {
     
-    after 1000 ::Sounds::Init
+    after 1200 ::Sounds::Init
 }
 
 # Sounds::Init --

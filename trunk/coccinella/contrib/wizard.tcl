@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: wizard.tcl,v 1.4 2004-01-13 14:50:20 matben Exp $
+# $Id: wizard.tcl,v 1.5 2004-01-26 07:34:49 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -221,11 +221,11 @@ proc ::wizard::wizard {w args} {
        -bg $options(-background)] -fill x -pady 2
     pack [frame $widgets(btframe) -bg $options(-background)]  \
       -fill x -side top
-    pack [button $widgets(btforward) -text {Next} -width 10   \
+    pack [button $widgets(btforward) -text [::msgcat::mc Next] -width 10   \
       -command [list [namespace current]::ForwardCmd $w]  \
       -highlightbackground $options(-background)]   \
       -side right -padx 5 -pady 5
-    pack [button $widgets(btbackward) -text {Close} -width 10 \
+    pack [button $widgets(btbackward) -text [::msgcat::mc Close] -width 10 \
        -command [list [namespace current]::BackwardCmd $w]  \
        -highlightbackground $options(-background)] \
        -side right -padx 5 -pady 5
@@ -262,28 +262,28 @@ proc ::wizard::WidgetProc {w command args} {
     
     # Which command?
     switch -- $command {
-	{cget} {
+	cget {
 	    if {[llength $args] != 1} {
 		error "wrong # args: should be $w cget option"
 	    }
 	    set result $options($args)
 	}
-	{configure} {
+	configure {
 	    set result [eval {Configure $w} $args]
 	}
-	{deletepage} {
+	deletepage {
 	    set result [eval {DeletePage $w} $args]
 	}
-	{displaypage} {
+	displaypage {
 	    if {[llength $args] != 1} {
 		error "wrong # args: should be $w displaypage pageName"
 	    }
 	    set result [eval {Display $w} $args]
 	}
-	{newpage} {
+	newpage {
 	    set result [eval {NewPage $w} $args]
 	}
-	{default} {
+	default {
 	    error "unknown command \"$command\" of the wizard widget.\
 	      Must be one of $widgetCommands"
 	}
@@ -555,19 +555,19 @@ proc ::wizard::Display {w name} {
     
     # Configure the buttons.
     if {$ind == 0} {
-	$widgets(btbackward) configure -text {Close}  \
+	$widgets(btbackward) configure -text [::msgcat::mc Close]  \
 	  -command $options(-closecommand)
-	$widgets(btforward) configure -text {Next}  \
+	$widgets(btforward) configure -text [::msgcat::mc Next]  \
 	  -command [list [namespace current]::ForwardCmd $w]
     } else {
-	$widgets(btbackward) configure -text {Previous}  \
+	$widgets(btbackward) configure -text [::msgcat::mc Previous]  \
 	  -command [list [namespace current]::BackwardCmd $w]
     } 
     if {$ind == $lastInd} {
-	$widgets(btforward) configure -text {Finish}   \
+	$widgets(btforward) configure -text [::msgcat::mc Finish]   \
 	  -command $options(-finishcommand)
     } else {
-	$widgets(btforward) configure -text {Next}	\
+	$widgets(btforward) configure -text [::msgcat::mc Next]	\
 	  -command [list [namespace current]::ForwardCmd $w]
     }
     

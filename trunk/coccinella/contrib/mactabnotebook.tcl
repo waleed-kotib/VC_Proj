@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  
-# $Id: mactabnotebook.tcl,v 1.10 2004-01-23 08:54:23 matben Exp $
+# $Id: mactabnotebook.tcl,v 1.11 2004-01-26 07:34:49 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -667,7 +667,7 @@ proc ::mactabnotebook::DeletePage {w name} {
     if {$ind < 0} {
 	return -code error "Page \"$name\" is not there"
     }
-    set newCurrentName $tnInfo(current)
+    set newCurrent $tnInfo(current)
     
     # If we are about to delete the current page, set another current.
     # Best to pick the same is 'notebook'.
@@ -675,15 +675,24 @@ proc ::mactabnotebook::DeletePage {w name} {
 	
 	# Set next page to current.
 	set newInd [expr $ind + 1]
-	set newCurrentName [lindex $tnInfo(tabs) $newInd]
+	set newCurrent [lindex $tnInfo(tabs) $newInd]
 	if {$newInd >= [llength $tnInfo(tabs)]} {
 	    
 	    # We are about to delete the last page, set current to next to last.
-	    set newCurrentName [lindex $tnInfo(tabs) end-1]
+	    set newCurrent [lindex $tnInfo(tabs) end-1]
 	}
-	set tnInfo(current) $newCurrentName
+	set tnInfo(current) $newCurrent
     }
+    if {[string equal $name $tnInfo(previous)]} {
+	set tnInfo(previous)  ""
+    }
+    if {[string equal $newCurrent $tnInfo(previous)]} {
+	set tnInfo(previous)  ""
+    }
+    
+    # Actually remove.
     set tnInfo(tabs) [lreplace $tnInfo(tabs) $ind $ind]
+    #unset name2uid($name)
     if {$tnInfo(pending) == ""} {
 	set id [after idle [list ::mactabnotebook::Build $w]]
 	set tnInfo(pending) $id
@@ -1139,7 +1148,7 @@ proc ::mactabnotebook::ConfigWinxpTabs {w} {
     upvar ::mactabnotebook::${w}::options options
     upvar ::mactabnotebook::${w}::tnInfo tnInfo
     upvar ::mactabnotebook::${w}::name2uid name2uid
-    
+        
     set current $tnInfo(current)
     set previous $tnInfo(previous)
     set tcurrent $name2uid($current)

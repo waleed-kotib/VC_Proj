@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.18 2004-01-23 08:56:15 matben Exp $
+# $Id: MUC.tcl,v 1.19 2004-01-26 07:34:49 matben Exp $
 
 package require entrycomp
 
@@ -541,7 +541,7 @@ proc ::Jabber::MUC::BuildInfo {roomjid} {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btsnd -text [::msgcat::mc Close] -width 8  \
+    pack [button $frbot.btcancel -text [::msgcat::mc Close]  \
       -command [list [namespace current]::Close $roomjid]] \
       -side right -padx 5 -pady 5
     pack $frbot -side bottom -fill x -padx 10 -pady 8

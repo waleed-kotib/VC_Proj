@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.38 2004-01-23 08:48:30 matben Exp $
+# $Id: Chat.tcl,v 1.39 2004-01-26 07:34:49 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -393,6 +393,7 @@ proc ::Jabber::Chat::Build {threadID args} {
     global  this prefs wDlgs
     
     variable uid
+    variable cprefs
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
@@ -407,14 +408,15 @@ proc ::Jabber::Chat::Build {threadID args} {
     set w $wDlgs(jchat)${uid}
     array set argsArr $args
 
-    set state(w)           $w
-    set state(threadid)    $threadID
-    set state(active)      0
-    set state(got1stMsg)   0
-    set state(subject)     ""
-    set state(lastsubject) ""
-    set state(notifier)    " "
-    set state(xevent,status) ""
+    set state(w)                $w
+    set state(threadid)         $threadID
+    set state(active)           0
+    set state(got1stMsg)        0
+    set state(subject)          ""
+    set state(lastsubject)      ""
+    set state(notifier)         " "
+    set state(xevent,status)    ""
+    set state(xevent,msgidlist) ""
     
     # Toplevel with class Chat.
     ::UI::Toplevel $w -class Chat -usemacmainmenu 1 -macstyle documentProc
@@ -581,9 +583,10 @@ proc ::Jabber::Chat::Build {threadID args} {
       [list [namespace current]::TraceJid $token]
     
     # jabber:x:event
-    bind $wtextsnd <KeyPress>  \
-      [list +[namespace current]::KeyPressEvent $token %A]
-
+    if {$cprefs(usexevents)} {
+	bind $wtextsnd <KeyPress>  \
+	  [list +[namespace current]::KeyPressEvent $token %A]
+    }
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jchat)]]
     if {$nwin == 1} {
 	::UI::SetWindowGeometry $w $wDlgs(jchat)
@@ -774,7 +777,8 @@ proc ::Jabber::Chat::Send {token} {
     set state(lastsubject) $state(subject)
     
     # Cancellations of any message composing jabber:x:event
-    if {[string equal $state(xevent,status) "composing"]} {
+    if {$cprefs(usexevents) &&  \
+      [string equal $state(xevent,status) "composing"]} {
 	::Jabber::Chat::XEventCancelCompose $token
     }
     
@@ -993,7 +997,8 @@ proc ::Jabber::Chat::XEventRecv {token xevent args} {
     }
     set composeElem [wrapper::getchildswithtag $xevent "composing"]
     set idElem [wrapper::getchildswithtag $xevent "id"]
-    puts "msgid=$msgid, composeElem=$composeElem, idElem=$idElem"
+    ::Jabber::Debug 6 "::Jabber::Chat::XEventRecv \
+      msgid=$msgid, composeElem=$composeElem, idElem=$idElem"
     if {($msgid != "") && ($composeElem != "") && ($idElem == "")} {
 	
 	# 1) Request for event notification
@@ -1010,7 +1015,7 @@ proc ::Jabber::Chat::XEventRecv {token xevent args} {
 	    }
 	}
 	$state(wnotifier) configure -image $state(iconNotifier)
-	set state(notifier) " $name is composing a reply"
+	set state(notifier) " [::msgcat::mc chatcompreply $name]"
     } elseif {($composeElem == "") && ($idElem != "")} {
 	
 	# 3) Cancellations of message composing
@@ -1024,20 +1029,24 @@ proc ::Jabber::Chat::KeyPressEvent {token char} {
     upvar 0 $token state
     variable cprefs
 
-    ::Jabber::Debug 2 "::Jabber::Chat::KeyPressEvent token=$token, char=$char"
+    ::Jabber::Debug 6 "::Jabber::Chat::KeyPressEvent token=$token, char=$char"
     
     if {$char == ""} {
 	return
     }
     if {[info exists state(xevent,afterid)]} {
 	after cancel $state(xevent,afterid)
+	# puts "cancels state(xevent,afterid)= $state(xevent,afterid)"
 	unset state(xevent,afterid)
     }    
     if {[info exists state(xevent,msgid)] && ($state(xevent,status) == "")} {
 	::Jabber::Chat::XEventSendCompose $token
     }
-    set state(xevent,afterid) [after $cprefs(xeventsmillis) \
-      [list [namespace current]::XEventCancelCompose $token]]
+    if {$state(xevent,status) == "composing"} {
+	set state(xevent,afterid) [after $cprefs(xeventsmillis) \
+	  [list [namespace current]::XEventCancelCompose $token]]
+	# puts "schedules state(xevent,afterid)= $state(xevent,afterid)"
+    }
 }
 
 proc ::Jabber::Chat::XEventSendCompose {token} {
@@ -1048,7 +1057,10 @@ proc ::Jabber::Chat::XEventSendCompose {token} {
     ::Jabber::Debug 2 "::Jabber::Chat::XEventSendCompose token=$token"
 
     set state(xevent,status) "composing"
-    set id $state(xevent,msgid)
+
+    # Pick the id of the most recent event request and skip any previous.
+    set id [lindex $state(xevent,msgidlist) end]
+    set state(xevent,msgidlist) [lindex $state(xevent,msgidlist) end]
     set state(xevent,composeid) $id
     
     set xelems [list \
@@ -1065,8 +1077,6 @@ proc ::Jabber::Chat::XEventSendCompose {token} {
 	  -message "Network error ocurred: $err"
 	return
     }    
-    set state(xevent,afterid) [after $cprefs(xeventsmillis) \
-      [list [namespace current]::XEventCancelCompose $token]]
 }
 
 proc ::Jabber::Chat::XEventCancelCompose {token} {
@@ -1077,6 +1087,8 @@ proc ::Jabber::Chat::XEventCancelCompose {token} {
 
     if {[info exists state(xevent,afterid)]} {
 	after cancel $state(xevent,afterid)
+	# puts "cancels state(xevent,afterid)= $state(xevent,afterid)"
+	unset state(xevent,afterid)
     }
     if {$state(xevent,status) == ""} {
 	return

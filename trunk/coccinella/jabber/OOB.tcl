@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.18 2004-01-23 08:50:20 matben Exp $
+# $Id: OOB.tcl,v 1.19 2004-01-26 07:34:49 matben Exp $
 
 package provide OOB 1.0
 
@@ -65,7 +65,7 @@ proc ::Jabber::OOB::BuildSet {jid} {
 
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btsnd -text [::msgcat::mc Send] -width 8 -default active \
+    pack [button $frbot.btok -text [::msgcat::mc Send] -width 8 -default active \
       -command [namespace current]::DoSend]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
