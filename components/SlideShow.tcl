@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-#       $Id: SlideShow.tcl,v 1.7 2004-08-23 12:44:36 matben Exp $
+#       $Id: SlideShow.tcl,v 1.8 2004-08-30 07:46:08 matben Exp $
 
 namespace eval ::SlideShow:: {
     
@@ -35,7 +35,7 @@ proc ::SlideShow::Load { } {
 
     ::hooks::add initHook                       ::SlideShow::InitHook
     ::hooks::add whiteboardBuildButtonTrayHook  ::SlideShow::BuildButtonsHook
-    ::hooks::add whiteboardCloseHook            ::SlideShow::CloseWhiteboard
+    ::hooks::add whiteboardCloseHook            ::SlideShow::CloseHook
 
     ::UI::Public::RegisterMenuEntry file $menuspec
     
@@ -275,15 +275,20 @@ proc ::SlideShow::OpenFile {wtop fileName} {
 	    ::Import::DoImport $wcan {-coords {0 0}} -file $fileName
 	}
     }
+    
+    # Auto resize.
     if {$prefs(slideShow,autosize)} {
 	foreach {cwidth cheight} [::WB::GetCanvasSize $wtop] {break}
-	foreach {bx by bw bh} [$wcan bbox all] {break}
-	if {($cwidth < $bw) && ($cheight < $bh)} {
-	    ::WB::SetCanvasSize $wtop $bw $bh
-	} elseif {$cwidth < $bw} {
-	    ::WB::SetCanvasSize $wtop $bw $cheight
-	} elseif {$cheight < $bh} {
-	    ::WB::SetCanvasSize $wtop $cwidth $bh
+	set bbox [$wcan bbox all]
+	if {[llength $bbox]} {
+	    foreach {bx by bw bh} $bbox {break}
+	    if {($cwidth < $bw) && ($cheight < $bh)} {
+		::WB::SetCanvasSize $wtop $bw $bh
+	    } elseif {$cwidth < $bw} {
+		::WB::SetCanvasSize $wtop $bw $cheight
+	    } elseif {$cheight < $bh} {
+		::WB::SetCanvasSize $wtop $cwidth $bh
+	    }
 	}
     }
 }
@@ -356,9 +361,12 @@ proc ::SlideShow::SaveCurrentCanvas {wtop} {
     ::CanvasFile::SaveCanvas $wcan $fileName
 }
 
-proc ::SlideShow::CloseWhiteboard {wtop} {
+proc ::SlideShow::CloseHook {wtop} {
     variable priv
 
+    # Be sure to save the current page. Need to know that we have slide show?
+    # SaveCurrentCanvas $wtop
+    
     array unset priv $wtop,*
 }
 

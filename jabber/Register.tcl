@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.24 2004-07-09 06:26:06 matben Exp $
+# $Id: Register.tcl,v 1.25 2004-08-30 07:46:08 matben Exp $
 
 package provide Register 1.0
 
@@ -220,7 +220,7 @@ proc ::Jabber::Register::ConnectCB {status msg} {
     switch $status {
 	error {
 	    tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
-	      [mc jamessnosocket $ip $msg]]
+	      [mc jamessnosocket $server $msg]]
 	}
 	timeout {
 	    tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.30 2004-08-23 12:44:36 matben Exp $
+# $Id: JWB.tcl,v 1.31 2004-08-30 07:46:08 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -665,6 +665,7 @@ proc ::Jabber::WB::SendMessageHook {wtop msg args} {
 	    # Perhaps we should give some aid here; set focus?
 	}
     }
+    return {}
 }
 
 # Jabber::WB::SendMessageListHook --
@@ -697,6 +698,7 @@ proc ::Jabber::WB::SendMessageListHook {wtop msgList args} {
 	    # Perhaps we should give some aid here; set focus?
 	}
     }
+    return {}
 }
 
 # Jabber::WB::SendGenMessageListHook --
@@ -727,6 +729,7 @@ proc ::Jabber::WB::SendGenMessageListHook {wtop msgList args} {
 	    eval {::Jabber::WB::SendRawMessageList $jid $msgList} $argsList
 	}    
     }
+    return {}
 }
 
 proc ::Jabber::WB::SendArgs {wtop} {
