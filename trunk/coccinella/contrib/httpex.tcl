@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson only for the new and rewritten parts.
 #
-# $Id: httpex.tcl,v 1.5 2003-10-18 07:43:55 matben Exp $
+# $Id: httpex.tcl,v 1.6 2003-10-18 14:45:05 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -29,6 +29,7 @@
 #       -command callback
 #	-handler callback
 #       -headers list 
+#       -httpvers 1.0|1.1
 #       -persistent boolean     If socket shall be kept open when finished
 #       -progress callback
 #       -socket name		If wants to reuse socket in a persistent connection
@@ -109,6 +110,7 @@
 #
 # TODO --------------------------------------------------------------------------
 #
+# o  Support for Transfer-Encoding: chunked
 
 package provide httpex 0.2
 
@@ -116,7 +118,7 @@ namespace eval httpex {
     
     variable opts
     variable locals
-    variable debug 4
+    variable debug 0
     variable codeToText
     
     # Only for the config command.
@@ -216,14 +218,14 @@ namespace eval httpex {
 
     # Client side options.
     set locals(opts,get) {-binary -blocksize -channel -command -headers \
-      -persistent -progress -socket -timeout -type}
-    set locals(opts,head) {-binary -command -headers -persistent -socket \
-      -timeout -type}
-    set locals(opts,post) {-binary -command -headers -persistent \
+      -httpvers -persistent -progress -socket -timeout -type}
+    set locals(opts,head) {-binary -command -headers -httpvers -persistent \
+      -socket -timeout -type}
+    set locals(opts,post) {-binary -command -headers -httpvers -persistent \
 	-query -querychannel -queryblocksize -queryprogress \
 	-socket -timeout -type}
     set locals(opts,put) {-binary -blocksize -channel -command -headers \
-      -persistent -progress -putchannel -putdata -putprogress \
+      -httpvers -persistent -progress -putchannel -putdata -putprogress \
       -socket -timeout -type}
 
     # Server side options.
@@ -363,11 +365,16 @@ proc httpex::Request {method url args} {
     
     # Process command options.
     # Note that totalsize can be 0 if missing Content-Length in header.
+    # Switches, '-key' are set by the user while similar nonswitches are
+    # obtained from the response.
+    # Example: state(-httpvers) HTTP version to use
+    #          state(httpvers) HTTP version in response
     
     array set state {
 	-binary		false
 	-blocksize 	8192
 	-headers 	{}
+	-httpvers       1.0
 	-persistent     0
 	-port           80
 	-queryblocksize	8192
@@ -602,7 +609,8 @@ proc httpex::Connect {token} {
     }
     
     if {[catch {
-	puts $s "[string toupper $state(method)] $state(srvurl) HTTP/1.1"
+	set method [string toupper $state(method)]
+	puts $s "$method $state(srvurl) HTTP/$state(-httpvers)"
 	puts $s "Accept: $opts(-accept)"
 	puts $s "Host: $state(host):$state(port)"
 	puts $s "User-Agent: $opts(-useragent)"
@@ -689,9 +697,8 @@ proc httpex::FinishedRequest {token} {
     upvar 0 $token state    
     
     Debug 1 "httpex::FinishedRequest state(state)=$state(state)"
-    set s $state(-socket)
 
-    fileevent $s readable [list httpex::Event $token]
+    fileevent $state(-socket) readable [list httpex::Event $token]
 }
 
 # httpex::readrequest
@@ -845,7 +852,7 @@ proc httpex::Event {token} {
     } elseif {$n == 0} {
 	variable encodings
 	
-	Debug 2 "   n=$n"
+	Debug 2 "\tn=$n"
 	fileevent $s readable {}
 	
 	# If we have got a "Content-Length" header filed, and the method allows
@@ -866,6 +873,7 @@ proc httpex::Event {token} {
 	
 	if {$state(-binary) || ![regexp -nocase ^text $state(type)] || \
 	  [regexp gzip|compress $state(coding)]} {
+	    Debug 2 "\tfconfigure $s -translation binary"
 	    
 	    # Turn off conversions for non-text data
 	    fconfigure $s -translation binary
@@ -882,6 +890,7 @@ proc httpex::Event {token} {
 	      [string tolower $state(charset)]]
 	    if {$idx >= 0} {
 		fconfigure $s -encoding [lindex $encodings $idx]
+		Debug 2 "\tfconfigure -encoding [lindex $encodings $idx]"
 	    }
 	}
 	
@@ -908,12 +917,12 @@ proc httpex::Event {token} {
 		# Initiate a sequence of background fcopies
 		CopyStart $s $token
 	    } else {
-		Debug 2 "    fileevent readable httpex::Read"
+		Debug 2 "\tfileevent readable httpex::Read"
 		fileevent $s readable [list httpex::Read $s $token]
 	    }
 	}
     } elseif {$n > 0} {
-	Debug 2 "   line=$line"
+	Debug 2 "\tline=$line"
 	if {[regexp -nocase {^content-type:(.+)$} $line x type]} {
 	    set state(type) [string trim $type]
 	    
