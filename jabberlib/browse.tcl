@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: browse.tcl,v 1.3 2003-01-30 17:33:47 matben Exp $
+# $Id: browse.tcl,v 1.4 2003-02-06 17:23:32 matben Exp $
 # 
 #  locals($jid,parent):       the parent of $jid.
 #  locals($jid,parents):      list of all parent jid's,
@@ -376,7 +376,6 @@ proc browse::isroom {browseName jid} {
     
     upvar [namespace current]::${browseName}::locals locals
     
-    #puts ">>>>>>>> browse::isroom jid=$jid"
     set parentJid [getparentjid $browseName $jid]
 
     # Check if this is in our list of conference servers.

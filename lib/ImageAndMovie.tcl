@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ImageAndMovie.tcl,v 1.3 2003-01-30 17:33:58 matben Exp $
+# $Id: ImageAndMovie.tcl,v 1.4 2003-02-06 17:23:33 matben Exp $
 
 package require http
 
@@ -97,14 +97,15 @@ proc ::ImageAndMovie::ImportImageOrMovieDlg {wtop} {
 #                       "local": write only to this canvas and not to any other.
 #                       ip number: write only to this remote client canvas and 
 #                       not to own.
+#            -commmand  a callback command for errors that cannot be reported
+#                       right away, using -url http for instance.
 #       
 # Side Effects:
 #       Shows the image or movie in canvas and initiates transfer to other
 #       clients if requested.
 #       
 # Results:
-#       boolean telling if the thing managed to be imported or not or if
-#       the http things ok so far.
+#       an error string which is empty if things went ok so far.
 
 proc ::ImageAndMovie::DoImport {w optList args} {
     global  prefs this prefMimeType2Package plugin
@@ -131,7 +132,7 @@ proc ::ImageAndMovie::DoImport {w optList args} {
 	set isLocal 0
     }
     set wtopNS [::UI::GetToplevelNS $w]
-    set didImport 1
+    set errMsg ""
     
     # Define a standard set of put/import options that may be overwritten by
     # the options in the procedure argument 'optList'.
@@ -177,10 +178,12 @@ proc ::ImageAndMovie::DoImport {w optList args} {
     if {[info exists prefMimeType2Package($theMIME)]} {
 	set importPackage $prefMimeType2Package($theMIME)
 	if {[llength $importPackage] == 0} {
-	    return 0
+	    return "No importer found for the file \"$fileTail\" with\
+	      MIME type $theMIME"
 	}
     } else {
-	return 0
+	return "No importer found for the file \"$fileTail\" with\
+	  MIME type $theMIME"
     }
     
     # Images are dispatched internally by tk's photo command.
@@ -197,23 +200,23 @@ proc ::ImageAndMovie::DoImport {w optList args} {
 		
 		# Either '-file localPath' or '-url http://...'
 		if {$isLocal} {
-		    set didImport [eval {
+		    set errMsg [eval {
 			::ImageAndMovie::DrawImage $wtopNS $fileName $putOpts
 		    } [array get argsArr]]
 		} else {
-		    set didImport [eval {
+		    set errMsg [eval {
 			::ImageAndMovie::HttpGet $wtopNS $argsArr(-url) \
 			  $importer $putOpts} [array get argsArr]]
 		}
 	    }
 	    QuickTimeTcl {	    
 		if {$isLocal} {
-		    set didImport [eval {
+		    set errMsg [eval {
 			::ImageAndMovie::DrawQuickTimeTcl $wtopNS $fileName \
 			  $putOpts
 		    } [array get argsArr]]
 		} else {
-		    set didImport [eval {
+		    set errMsg [eval {
 			::ImageAndMovie::HttpGetQuickTimeTcl $wtopNS  \
 			  $argsArr(-url) $putOpts} [array get argsArr]]
 		    
@@ -227,22 +230,22 @@ proc ::ImageAndMovie::DoImport {w optList args} {
 	    }
 	    snack {
 		if {$isLocal} {
-		    set didImport [eval {
+		    set errMsg [eval {
 			::ImageAndMovie::DrawSnack $wtopNS $fileName $putOpts
 		    } [array get argsArr]]
 		} else {
-		    set didImport [eval {
+		    set errMsg [eval {
 			::ImageAndMovie::HttpGet $wtopNS $argsArr(-url) \
 			  $importer $putOpts} [array get argsArr]]
 		}
 	    }	    
 	    xanim {	    
 		if {$isLocal} {
-		    set didImport [eval {
+		    set errMsg [eval {
 			::ImageAndMovie::DrawXanim $wtopNS $fileName $putOpts
 		    } [array get argsArr]]
 		} else {
-		    set didImport [eval {
+		    set errMsg [eval {
 			::ImageAndMovie::HttpGet $wtopNS $argsArr(-url) \
 			  $importer $putOpts} [array get argsArr]]
 		}
@@ -254,7 +257,7 @@ proc ::ImageAndMovie::DoImport {w optList args} {
 		# Dispatch to any registerd importer for this MIME type.
 		if {0} {
 		    if {$isLocal} {
-			set didImport [eval {
+			set errMsg [eval {
 			    $plugin($importer,importProc) $wtopNS $fileName \
 			      $putOpts
 			} [array get argsArr]]
@@ -262,11 +265,12 @@ proc ::ImageAndMovie::DoImport {w optList args} {
 			
 		    }
 		}
-		set didImport 0
+		set errMsg "No importer found for the file \"$fileTail\" with\
+		  MIME type $theMIME"
 	    }
 	}
     }
-    return $didImport
+    return $errMsg
 }
 
 # ImageAndMovie::DrawImage --
@@ -275,7 +279,7 @@ proc ::ImageAndMovie::DoImport {w optList args} {
 #       in 'optList' into account. May put image to remote peers.
 #       
 # Results:
-#       boolean telling if the thing managed to be imported or not.
+#       an error string which is empty if things went ok.
 
 proc ::ImageAndMovie::DrawImage {wtop fileName optList args} {
     global  allIPnumsToSend    
@@ -286,7 +290,7 @@ proc ::ImageAndMovie::DrawImage {wtop fileName optList args} {
     array set optArr $optList
     array set argsArr $args
     set w $wapp(can)
-    set didImport 1
+    set errMsg ""
     
     # Extract coordinates and tags which must be there. error checking?
     foreach {x y} $optArr(coords:) { break }
@@ -305,8 +309,8 @@ proc ::ImageAndMovie::DrawImage {wtop fileName optList args} {
     if {[string equal $mimeSubType "gif"]} {
 	image create photo $imageName -file $fileName -format gif
     } else {
-	if {[catch {image create photo $imageName -file $fileName}]} {
-	    return 0
+	if {[catch {image create photo $imageName -file $fileName} errMsg]} {
+	    return $errMsg
 	}
     }
     
@@ -341,7 +345,7 @@ proc ::ImageAndMovie::DrawImage {wtop fileName optList args} {
 	::ImageAndMovie::PutFile $wtop $fileName $argsArr(-where) $optList \
 	  $useTag
     }
-    return $didImport
+    return $errMsg
 }
 
 # ImageAndMovie::DrawQuickTimeTcl --
@@ -350,7 +354,7 @@ proc ::ImageAndMovie::DrawImage {wtop fileName optList args} {
 #       remote peers.
 #       
 # Results:
-#       boolean telling if the thing managed to be imported or not.
+#       an error string which is empty if things went ok.
 
 proc ::ImageAndMovie::DrawQuickTimeTcl {wtop fileName optList args} {
     global  allIPnumsToSend    
@@ -361,7 +365,7 @@ proc ::ImageAndMovie::DrawQuickTimeTcl {wtop fileName optList args} {
     array set optArr $optList
     array set argsArr $args
     set w $wapp(can)
-    set didImport 1
+    set errMsg ""
     
     # Extract coordinates and tags which must be there. error checking?
     foreach {x y} $optArr(coords:) { break }
@@ -374,9 +378,9 @@ proc ::ImageAndMovie::DrawQuickTimeTcl {wtop fileName optList args} {
     frame $wfr -height 1 -width 1 -bg gray40 -class QTFrame    
     set wmovie ${wfr}.m	
 
-    if {[catch {movie $wmovie -file $fileName -controller 1} msg]} {
+    if {[catch {movie $wmovie -file $fileName -controller 1} errMsg]} {
 	catch {destroy $wfr}
-	return 0
+	return $errMsg
     }
     
     $w create window $x $y -anchor nw -window $wfr   \
@@ -402,7 +406,7 @@ proc ::ImageAndMovie::DrawQuickTimeTcl {wtop fileName optList args} {
 	::ImageAndMovie::PutFile $wtop $fileName $argsArr(-where)  \
 	  $optList $useTag
     }
-    return $didImport
+    return $errMsg
 }
 
 # ImageAndMovie::DrawSnack --
@@ -411,7 +415,7 @@ proc ::ImageAndMovie::DrawQuickTimeTcl {wtop fileName optList args} {
 #       remote peers.
 #       
 # Results:
-#       boolean telling if the thing managed to be imported or not.
+#       an error string which is empty if things went ok.
 
 proc ::ImageAndMovie::DrawSnack {wtop fileName optList args} {
     global  allIPnumsToSend    
@@ -422,7 +426,7 @@ proc ::ImageAndMovie::DrawSnack {wtop fileName optList args} {
     array set optArr $optList
     array set argsArr $args
     set w $wapp(can)
-    set didImport 1
+    set errMsg ""
     
     # Extract coordinates and tags which must be there. error checking?
     foreach {x y} $optArr(coords:) { break }
@@ -432,8 +436,8 @@ proc ::ImageAndMovie::DrawSnack {wtop fileName optList args} {
     
     # The snack plug-in for audio. Make a snack sound object.
     
-    if {[catch {::snack::sound $uniqueName -file $fileName} msg]} {
-	return 0
+    if {[catch {::snack::sound $uniqueName -file $fileName} errMsg]} {
+	return $errMsg
     }
     set wfr ${w}.fr_${uniqueName}
     frame $wfr -height 1 -width 1 -bg gray40 -class SnackFrame
@@ -453,7 +457,7 @@ proc ::ImageAndMovie::DrawSnack {wtop fileName optList args} {
 	::ImageAndMovie::PutFile $wtop $fileName $argsArr(-where)  \
 	  $optList $useTag
     }
-    return $didImport
+    return $errMsg
 }
 
 # ImageAndMovie::DrawXanim --
@@ -462,7 +466,7 @@ proc ::ImageAndMovie::DrawSnack {wtop fileName optList args} {
 #       remote peers.
 #       
 # Results:
-#       boolean telling if the thing managed to be imported or not.
+#       an error string which is empty if things went ok.
 
 proc ::ImageAndMovie::DrawXanim {wtop fileName optList args} {
     global  allIPnumsToSend    
@@ -473,7 +477,7 @@ proc ::ImageAndMovie::DrawXanim {wtop fileName optList args} {
     array set optArr $optList
     array set argsArr $args
     set w $wapp(can)
-    set didImport 1
+    set errMsg ""
     
     # Extract coordinates and tags which must be there. error checking?
     foreach {x y} $optArr(coords:) { break }
@@ -509,7 +513,7 @@ proc ::ImageAndMovie::DrawXanim {wtop fileName optList args} {
     
     # Note trick to pipe stdout as well as stderr. Forks without &.
     if {[catch {open "|xanim +W$xatomid $fileName 2>@stdout"} xpipe]} {
-	return 0
+	return "Xanim failed: $xpipe"
     } else {
 	set xanimPipe2Frame($xpipe) $wfr
 	set xanimPipe2Item($xpipe) $useTag
@@ -520,7 +524,7 @@ proc ::ImageAndMovie::DrawXanim {wtop fileName optList args} {
 	::ImageAndMovie::PutFile $wtop $fileName $argsArr(-where)  \
 	  $optList $useTag
     }
-    return $didImport
+    return $errMsg
 }
 
 # ImageAndMovie::HttpGet --
@@ -528,8 +532,19 @@ proc ::ImageAndMovie::DrawXanim {wtop fileName optList args} {
 #       Imports the specified file using http to file.
 #       The actual work done via callbacks to the http package.
 #       
+# Arguments:
+#       wtop
+#       url
+#       importer
+#       optList   a list of 'key: value' pairs, resembling the html protocol 
+#                 for getting files, but where most keys correspond to a valid
+#                 "canvas create" option, and everything is on a single line.
+#                 BAD!
+#       args:          
+#            -commmand  a callback command for errors that cannot be reported
+#                       right away, using -url http for instance.
 # Results:
-#       boolean giving the error status so far.
+#       an error string which is empty if things went ok so far.
 
 proc ::ImageAndMovie::HttpGet {wtop url importer optList args} {
     global  this prefs
@@ -547,7 +562,7 @@ proc ::ImageAndMovie::HttpGet {wtop url importer optList args} {
     set dstPath [file join $prefs(incomingFilePath)  \
       [::uriencode::decodefile $fileTail]]
     if {[catch {open $dstPath w} dst]} {
-	return 0
+	return $dst
     }
     if {[string equal $this(platform) "macintosh"]} {
 	set tmopts ""
@@ -574,7 +589,7 @@ proc ::ImageAndMovie::HttpGet {wtop url importer optList args} {
     if {[catch {eval {
 	::http::geturl $url -channel $dst -progress $progCB -command $commandCB
     } $tmopts} token]} {
-	return 0
+	return $token
     }
     upvar #0 $token state
     set getstate(token) $token
@@ -587,7 +602,7 @@ proc ::ImageAndMovie::HttpGet {wtop url importer optList args} {
 	      $importer $optList} $args
         }
     }
-    return 1
+    return ""
 }
 
 # ImageAndMovie::HttpProgress --
@@ -689,32 +704,41 @@ proc ::ImageAndMovie::HttpFinished {gettoken token} {
 	    }
 	}
     }
+    array set argsArr $getstate(args)
+    if {[info exists argsArr(-command)] && ($argsArr(-command) != "")} {
+	uplevel #0 $argsArr(-command) [list $getstate(status) $gettoken $token]	
+    }
     
     # Cleanup:
     ::http::cleanup $token
     unset getstate
 }
 
-# ImageAndMovie::ResetAllHttp --
+# ImageAndMovie::HttpResetAll --
 # 
 #       Cancel and reset all ongoing http transactions for this wtop.
 
-proc ::ImageAndMovie::ResetAllHttp {wtop} {
+proc ::ImageAndMovie::HttpResetAll {wtop} {
 
     set gettokenList [concat  \
       [info vars ::ImageAndMovie::\[0-9\]] \
       [info vars ::ImageAndMovie::\[0-9\]\[0-9\]] \
       [info vars ::ImageAndMovie::\[0-9\]\[0-9\]\[0-9\]]]
     
-    ::Debug 2 "::ImageAndMovie::ResetAllHttp gettokenList='$gettokenList'"
+    ::Debug 2 "::ImageAndMovie::HttpResetAll gettokenList='$gettokenList'"
     
     foreach gettoken $gettokenList {
 	upvar #0 $gettoken getstate          
 
-	if {[info exists getstate(wtop)] && [string equal $getstate(wtop) $wtop]} {
+	if {[info exists getstate(wtop)] &&  \
+	  [string equal $getstate(wtop) $wtop]} {
 	    switch -- $getstate(transport) {
 		http {
-		    ::http::reset $getstate(token)
+		
+		# It may be that the http transaction never started.
+		    if {[info exists getstate(token)]} {
+		    	::http::reset $getstate(token)
+		    }
 		}
 		quicktimehttp {
 		    
@@ -977,9 +1001,11 @@ proc ::ImageAndMovie::XanimReadOutput {w xpipe} {
 #               -above
 #               -below
 #               -basepath
+#               -commmand  a callback command for errors that cannot be reported
+#                       right away, using -url http for instance.
 #               
 # Results:
-#       boolean telling if the thing managed to be imported or not.
+#       an error string which is empty if things went ok.
 
 proc ::ImageAndMovie::HandleImportCmd {w line args} {
 
@@ -1017,9 +1043,12 @@ proc ::ImageAndMovie::HandleImportCmd {w line args} {
 	    set path [::FileCache::Get $url]
 	    lappend impArgs -file $path
 	    
-	    Debug 2 "    url \"$url\" is cached"
+	    Debug 2 "    url is cached \"$url\""
 	} else {
 	    lappend impArgs -url $optArr(-url)
+	    if {[info exists argsArr(-command)]} {
+		lappend impArgs -command $argsArr(-command)
+	    }
 	}
     }
     
@@ -1040,8 +1069,8 @@ proc ::ImageAndMovie::HandleImportCmd {w line args} {
 	lappend optList "below:" $argsArr(-below)
     }
     
-    set didImport [eval {::ImageAndMovie::DoImport $w $optList} $impArgs]
-    return $didImport
+    set errMsg [eval {::ImageAndMovie::DoImport $w $optList} $impArgs]
+    return $errMsg
 }
 
 # ImageAndMovie::ImageImportCmd, QTImportCmd, SnackImportCmd --

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.4 2003-01-30 17:34:05 matben Exp $
+# $Id: UI.tcl,v 1.5 2003-02-06 17:23:34 matben Exp $
 
 # LabeledFrame --
 #
@@ -171,7 +171,7 @@ proc ::UI::Init {} {
     }
     
     # Get icons.
-    set icons(igelpiga) [image create photo igelpiga -format gif  \
+    set icons(igelpiga) [image create photo igelpiga -format gif \
       -file [file join $this(path) images igelpiga.gif]]
     set icons(brokenImage) [image create photo -format gif  \
       -file [file join $this(path) images brokenImage.gif]]
@@ -340,27 +340,28 @@ proc ::UI::InitMenuDefs { } {
       $menuDefs(main,info,aboutquicktimetcl)]
     
     set menuDefs(main,file) {
-	{command   mNew                {::UI::NewMain -sendcheckstate disabled}      normal N}
-	{command   mOpenConnection     {::UserActions::DoConnect}                    normal   O}
-	{command   mCloseWindow        {::UserActions::DoCloseWindow}                normal   W}
-	{command   mStartServer        {DoStartServer $prefs(thisServPort)}          normal   {}}
+	{command   mNew                {::UI::NewMain -sendcheckstate disabled}   normal   N}
+	{command   mOpenConnection     {::UserActions::DoConnect}                 normal   O}
+	{command   mCloseWindow        {::UserActions::DoCloseWindow}             normal   W}
+	{command   mStartServer        {DoStartServer $prefs(thisServPort)}       normal   {}}
 	{separator}
 	{command   mOpenImage/Movie    {::ImageAndMovie::ImportImageOrMovieDlg $wtop} normal  I}
 	{command   mOpenURLStream      {::OpenMulticast::OpenMulticast $wtop $wDlgs(openMulti)} normal {}}
 	{separator}
-	{command   mPutCanvas          {::UserActions::DoPutCanvasDlg $wtop}         disabled {}}
-	{command   mGetCanvas          {::UserActions::DoGetCanvas $wtop}            disabled {}}
-	{command   mPutFile            {::PutFileIface::PutFileDlg $wtop}            disabled {}}
+	{command   mPutCanvas          {::UserActions::DoPutCanvasDlg $wtop}      disabled {}}
+	{command   mGetCanvas          {::UserActions::DoGetCanvas $wtop}         disabled {}}
+	{command   mPutFile            {::PutFileIface::PutFileDlg $wtop}         disabled {}}
 	{command   mStopPut/Get/Open   {::UserActions::CancelAllPutGetAndPendingOpen $wtop} normal {}}
 	{separator}
-	{command   mOpenCanvas         {::CanvasFile::DoOpenCanvasFile $wtop}        normal   {}}
-	{command   mSaveCanvas         {::CanvasFile::DoSaveCanvasFile $wtop}        normal   S}
+	{command   mOpenCanvas         {::CanvasFile::DoOpenCanvasFile $wtop}     normal   {}}
+	{command   mSaveCanvas         {::CanvasFile::DoSaveCanvasFile $wtop}     normal   S}
 	{separator}
-	{command   mSaveAs             {::UserActions::SavePostscript $wtop}         normal   {}}
-	{command   mPageSetup          {::UserActions::PageSetup}                    normal   {}}
-	{command   mPrintCanvas        {::UserActions::DoPrintCanvas $wtop}          normal   P}
-	{command   mQuit               {::UserActions::DoQuit}                       normal   Q}
-    }	    
+	{command   mSaveAs             {::UserActions::SavePostscript $wtop}      normal   {}}
+	{command   mPageSetup          {::UserActions::PageSetup}                 normal   {}}
+	{command   mPrintCanvas        {::UserActions::DoPrintCanvas $wtop}       normal   P}
+	{command   mQuit               {::UserActions::DoQuit}                    normal   Q}
+    }
+    
     set menuDefs(main,edit) {    
 	{command     mUndo             {::UserActions::Undo $wtop}             normal   Z}
 	{command     mRedo             {::UserActions::Redo $wtop}             normal   {}}
@@ -608,18 +609,18 @@ proc ::UI::InitMenuDefs { } {
     
     # Menu definitions for a minimal setup. Used on mac only.
     set menuDefs(min,file) {
-	{command   mNew              {::UI::BuildMain .main}                       normal   N}
-	{command   mOpenConnection   {::UserActions::DoConnect}                    normal   O}
-	{command   mStartServer      {DoStartServer $prefs(thisServPort)}          normal   {}}
+	{command   mNew              {::UI::BuildMain .main}               normal   N}
+	{command   mOpenConnection   {::UserActions::DoConnect}            normal   O}
+	{command   mStartServer      {DoStartServer $prefs(thisServPort)}  normal   {}}
 	{separator}
 	{command   mStopPut/Get/Open {::UserActions::CancelAllPutGetAndPendingOpen $wtop} normal {}}
 	{separator}
-	{command   mQuit             {::UserActions::DoQuit}                       normal   Q}
+	{command   mQuit             {::UserActions::DoQuit}               normal   Q}
     }	    
     set menuDefs(min,edit) {    
-	{command   mCut              {::UI::CutCopyPasteCmd cut}             disabled X}
-	{command   mCopy             {::UI::CutCopyPasteCmd copy}            disabled C}
-	{command   mPaste            {::UI::CutCopyPasteCmd paste}           disabled V}
+	{command   mCut              {::UI::CutCopyPasteCmd cut}           disabled X}
+	{command   mCopy             {::UI::CutCopyPasteCmd copy}          disabled C}
+	{command   mPaste            {::UI::CutCopyPasteCmd paste}         disabled V}
     }
     
     # Popup menu definitions for the canvas. First definitions of individual entries.
@@ -884,6 +885,12 @@ proc ::UI::BuildMain {wtop args} {
 	::UI::ConfigShortcutButtonPad $wtop init
     } else {
 	::UI::ConfigShortcutButtonPad $wtop init off
+    }
+    
+    # Special configuration of shortcut buttons.
+    if {[info exists opts(-type)] && [string equal $opts(-type) "normal"]} {
+	::UI::ButtonConfigure $wtop stop -command  \
+	  [list ::ImageAndMovie::HttpResetAll $wtop]
     }
     
     # Make the tool button pad.
@@ -1983,7 +1990,7 @@ proc ::UI::DisableWhiteboardMenus {wmenu} {
     ::UI::MenuDisableAllBut ${wmenu}.file {
 	mNew mCloseWindow mSaveCanvas mPageSetup mPrintCanvas mQuit
     }
-    ::UI::MenuDisableAllBut ${wmenu}.edit {}
+    ::UI::MenuDisableAllBut ${wmenu}.edit {mAll}
     $wmenu entryconfigure [::msgcat::mc mPreferences] -state disabled
     $wmenu entryconfigure [::msgcat::mc mJabber] -state disabled
     $wmenu entryconfigure [::msgcat::mc mItems] -state disabled
@@ -2183,18 +2190,6 @@ proc ::UI::BuildShortcutButtonPad {wtop} {
     set inframe $wapp(topfr)
     ::UI::InitShortcutButtonPad $wtop $inframe $h
     
-    # Set commands valid for this platform and prefs.
-    if {($prefs(protocol) == "symmetric") || ($prefs(protocol) == "client")} {
-	set ind [expr [lsearch -exact $btShortDefs "connect"] + 1]
-	set btShortDefs  \
-	  [lreplace $btShortDefs $ind $ind {OpenConnection $wDlgs(openConn)}]
-    }
-    if {[string equal $this(platform) "unix"]} {
-	set ind [expr [lsearch -exact $btShortDefs "print"] + 1]
-	set btShortDefs [lreplace $btShortDefs $ind $ind  \
-	  {::PrintPSonUnix::PrintPSonUnix $wDlgs(print) $wCan}]
-    }
-    
     # We need to substitute $wCan, $wtop etc specific for this wb instance.
     foreach {name cmd} $btShortDefs {
 	set cmd [subst -nocommands -nobackslashes $cmd]
@@ -2214,10 +2209,14 @@ proc ::UI::DisableShortcutButtonPad {wtop} {
     variable btShortDefs
 
     foreach {name cmd} $btShortDefs {
-	if {($name == "save") || ($name == "print")} {
-	    continue
+	switch -- $name {
+	    save - print - stop {
+		continue
+	    }
+	    default {
+		::UI::ButtonConfigure $wtop $name -state disabled
+	    }
 	}
-	::UI::ButtonConfigure $wtop $name -state disabled
     }
 }
 
@@ -2534,13 +2533,15 @@ proc ::UI::CutCopyPasteCmd {cmd} {
 	}
 	Canvas - Wish* - Whiteboard {
 	    
-	    # Not sure about the last two.
+	    # Operate on the whiteboard's canvas.
+	    set wtop [::UI::GetToplevelNS $wfocus]
+	    upvar ::${wtop}::wapp wapp
 	    switch -- $cmd {
 		cut - copy {
-		    ::CanvasCCP::CopySelectedToClipboard $wfocus $cmd		    
+		    ::CanvasCCP::CopySelectedToClipboard $wapp(can) $cmd		    
 		}
 		paste {
-		    ::CanvasCCP::PasteFromClipboardTo $wfocus
+		    ::CanvasCCP::PasteFromClipboardTo $wapp(can)
 		}
 	    }
 	}
@@ -3147,6 +3148,7 @@ proc ::UI::SetNewWMMinsize {wtop} {
 proc ::UI::AppGetFocus {wtop w} {
     
     upvar ::${wtop}::opts opts
+    upvar ::${wtop}::wapp wapp
 
     # Bind to toplevel may fire multiple times.
     set wtopReal $wtop
@@ -3156,15 +3158,19 @@ proc ::UI::AppGetFocus {wtop w} {
     if {$wtopReal != $w} {
 	return
     }
-    Debug 8 "AppGetFocus:: wtop=$wtop, w=$w"
+    Debug 3 "AppGetFocus:: wtop=$wtop, w=$w"
     
     # Check the clipboard or selection.
     if {[catch {selection get -selection CLIPBOARD} sel]} {
-	return
-    } elseif {([string length $sel] > 0) && ($opts(-state) == "normal")} {
-	::UI::MenuMethod ${wtop}menu.edit entryconfigure mPaste -state normal
-    } else {
 	::UI::MenuMethod ${wtop}menu.edit entryconfigure mPaste -state disabled
+    } elseif {($sel != "") && ($opts(-state) == "normal")} {
+	::UI::MenuMethod ${wtop}menu.edit entryconfigure mPaste -state normal
+    }
+    
+    # If any selected items canvas. Text items ???
+    if {[llength [$wapp(can) find withtag selected]] > 0} {
+	::UI::MenuMethod ${wtop}menu.edit entryconfigure mCut -state normal
+	::UI::MenuMethod ${wtop}menu.edit entryconfigure mCopy -state normal
     }
 }
 
@@ -3940,7 +3946,7 @@ proc ::UI::FixMenusWhenSelection {w} {
     set wToplevel [winfo toplevel $w]
     set wToplevelClass [winfo class $wToplevel]
     
-    Debug 8 "::UI::FixMenusWhenSelection w=$w,\n\twtop=$wtop, wClass=$wClass,\
+    Debug 3 "::UI::FixMenusWhenSelection w=$w,\n\twtop=$wtop, wClass=$wClass,\
       wToplevelClass=$wToplevelClass"
     
     # Do different things dependent on the type of widget.
@@ -4065,6 +4071,10 @@ proc ::UI::FixMenusWhenSelection {w} {
     } 
 }
 
+proc ::UI::IsCanvasDrawCmd {cmd} {
+
+
+}
 
 # UI::FixMenusWhenCopy --
 # 

@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #
-# $Id: JForms.tcl,v 1.2 2003-01-11 16:16:09 matben Exp $
+# $Id: JForms.tcl,v 1.3 2003-02-06 17:23:31 matben Exp $
 # 
 #      Updated to the 2002-09-03 revision of JEP-0004
 #  
@@ -195,7 +195,7 @@ proc ::Jabber::Forms::FillInBoxOneTag {w child parentTag iName {template {}}} {
     set subchildren [lindex $child 4]
     set key ${parentTag}${tag}
     
-    if {[llength $subchildren] == 0} {
+    if {$subchildren == ""} {
 	set varName [namespace current]::cache($id,$key)
 
 	# Collect 'reported' keys.
@@ -328,7 +328,7 @@ proc ::Jabber::Forms::GetXMLForChild {w child parentTags template} {
     set id $locals($w,id)
     
     # Leaf tag.
-    if {[llength $subchildren] == 0} {
+    if {$subchildren == ""} {
 	set keyTag [join "$parentTags $tag" _]
 	if {$template == "room"} {
 	    

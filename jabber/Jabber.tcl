@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.4 2003-01-30 17:33:43 matben Exp $
+# $Id: Jabber.tcl,v 1.5 2003-02-06 17:23:31 matben Exp $
 #
 #  The $address is an ip name or number.
 #
@@ -582,7 +582,7 @@ proc ::Jabber::MessageCallback {jlibName type args} {
     set from $attrArr(-from)
     
     # Check if any blockers.
-    if {$jprefs(block,notinrost)} {
+    if {$jprefs(block,notinrost) && ($type == "normal")} {
 	
 	# Reject if not in roster.
 	set allUsers [$jstate(roster) getusers]
@@ -591,7 +591,7 @@ proc ::Jabber::MessageCallback {jlibName type args} {
 	    return
 	}
     }
-    if {[llength $jprefs(block,list)]} {
+    if {[llength $jprefs(block,list)] > 0} {
 	foreach blkjid $jprefs(block,list) {
 	    if {[string match $blkjid $from]} {
 		puts "Rejected message from: $from"
@@ -741,7 +741,7 @@ proc ::Jabber::DispatchNormalMessage {body iswb args} {
 		}
 	    }
 	}
-	if {[llength $restCmds]} {
+	if {[llength $restCmds] > 0} {
 		set argsArr(-whiteboard) $restCmds
 		eval {::Jabber::MailBox::GotMsg $body} [array get argsArr]
 	}
@@ -811,7 +811,7 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 		    eval {::Jabber::Subscribe::Subscribe $wDlgs(jsubsc) $from} $args
 		}
 	    }
-	    if {[llength $msg]} {
+	    if {$msg != ""} {
 		tk_messageBox -title [::msgcat::mc Info] -icon info -type ok \
 		  -message [FormatTextForMessageBox $msg]			      
 	    }
@@ -2574,7 +2574,7 @@ proc ::Jabber::GetLastResult {from silent jlibname type subiq} {
 	    }
 	    
 	    # Time interpreted differently for different jid types.
-	    if {[llength $from]} {
+	    if {$from != ""} {
 		if {[regexp {^.+@[^/]+/.+$} $from match]} {
 		    set msg1 [::msgcat::mc jamesstimeused $from]
 		} elseif {[regexp {^.+@[^/]+$} $from match]} {
@@ -3801,7 +3801,7 @@ proc ::Jabber::Roster::SetItem {jid args} {
     if {!$jprefs(rost,allowSubNone)} {
 	
 	# Do not add items with subscription='none'.
-	set ind [lsearch $args {-subscription}]
+	set ind [lsearch $args "-subscription"]
 	if {($ind >= 0) && [string equal [lindex $args [expr $ind + 1]] "none"]} {
 	    set doAdd 0
 	}
@@ -4052,6 +4052,14 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
 	set msg "${jid}: $gpresarr($presence)"
     }
     if {[string equal $presence "available"]} {
+	set delay [$jstate(roster) getx $jidx "jabber:x:delay"]
+	if {$delay != ""} {
+	    
+	    # An ISO 8601 point-in-time specification. clock works!
+	    set stamp [wrapper::getattr [lindex $delay 1] stamp]
+	    set tstr [SmartClockFormat [clock scan $stamp]]
+	    append msg "\nOnline since: $tstr"
+	}
 	if {[info exists argsArr(-show)]} {
 	    set show $argsArr(-show)
 	    if {[info exists mapShowElemToText($show)]} {
@@ -5512,7 +5520,7 @@ proc ::Jabber::Login::Doit { } {
     ::UI::StartStopAnimatedWaveOnMain 0
     
     # Check 'server', 'username' and 'password' if acceptable.
-    foreach name {server username password resource} {
+    foreach name {server username password} {
 	upvar 0 $name var
 	if {[string length $var] <= 1} {
 	    tk_messageBox -icon error -type ok -message  \
@@ -5627,6 +5635,9 @@ proc ::Jabber::Login::ConnectProc {jlibName args} {
     # Send authorization info for an existing account.
     # Perhaps necessary to get additional variables
     # from some user preferences.
+    if {$resource == ""} {
+    	set resource coccinella
+    }
     if {$digest} {
 	if {![info exists argsArray(id)]} {
 	    error "no id for digest in receiving <stream>"

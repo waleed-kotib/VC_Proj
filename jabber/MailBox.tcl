@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.3 2003-01-30 17:33:44 matben Exp $
+# $Id: MailBox.tcl,v 1.4 2003-02-06 17:23:31 matben Exp $
 
 package provide MailBox 1.0
 
@@ -45,14 +45,6 @@ proc ::Jabber::MailBox::Init { } {
     set locals(inited) 1
     
     if {$jstate(debug) > 1} {
-	set mailbox([incr locals(msgId)])  \
-	  [list "Kill me soft" matben@athlon.se/home "02-01-27 19:33:03" 0 $locals(msgId) "Hi,\n\nWhat's up doc?\nShit!"]
-	set mailbox([incr locals(msgId)])  \
-	  [list "Brute girl" mari@athlon.se/xx "02-01-28 19:33:04" 0 $locals(msgId) "Hi,\n\nAny :cool: news?"]
-	set mailbox([incr locals(msgId)])  \
-	  [list "Nice girl" mari@athlon.se/cvb "02-02-17 19:33:02" 0 $locals(msgId) "Hi,\n\nAny news?\nMost junk :-) !"]
-	set mailbox([incr locals(msgId)])  \
-	  [list "Kill me" matben@athlon.se/mm "02-02-27 19:33:01" 0 $locals(msgId) "www.gg.se Hi,\n\nWhat's up doc? ;-) andwww.ss.se"]
 	set mailbox([incr locals(msgId)])  \
 	  [list "Nasty" olle@athlon.se/ff "yesterday 19:10:01" 0 $locals(msgId) "Tja,\n\nwww.mats.se, Nytt?"]
 	set mailbox([incr locals(msgId)])  \
@@ -562,13 +554,13 @@ proc ::Jabber::MailBox::SelectMsg { } {
 	set wbtoplevel .maininbox
 	set title "Inbox: $jid2"
 	if {[winfo exists $wbtoplevel]} {
-	    ::ImageAndMovie::ResetAllHttp ${wbtoplevel}.
+	    ::ImageAndMovie::HttpResetAll ${wbtoplevel}.
 	    ::UserActions::EraseAll ${wbtoplevel}.
 	    ::UI::ConfigureMain ${wbtoplevel}. -title $title -jid $jid2
 	    undo::reset [::UI::GetUndoToken ${wbtoplevel}.]
 	} else {
 	    ::UI::BuildMain ${wbtoplevel}. -state disabled -title $title \
-	    -jid $jid2
+	    -jid $jid2 -type normal
 	}
 	
 	# Only if user available shall we try to import.

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasText.tcl,v 1.3 2003-01-30 17:33:53 matben Exp $
+# $Id: CanvasText.tcl,v 1.4 2003-02-06 17:23:33 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 
@@ -235,7 +235,7 @@ proc ::CanvasText::TextInsert {w char} {
     
     # First, find out if there are any text item with focus.
     # If not, then make one.
-    if {[llength [$w focus]] == 0} {
+    if {[$w focus] == ""} {
 	
     }
     set wtop [::UI::GetToplevelNS $w]
@@ -255,7 +255,7 @@ proc ::CanvasText::TextInsert {w char} {
     if {[string match "mac*" $this(platform)] ||   \
       ($this(platform) == "windows")} {
 	if {![catch {selection get} s]} {
-	    if {[llength $s] > 0} {
+	    if {$s != ""} {
 		Delete $w
 		selection clear
 	    }
@@ -367,7 +367,7 @@ proc ::CanvasText::MoveRight {w} {
 	
 	# If selection.
 	if {![catch {selection get} s]} {
-	    if {[llength $s] > 0} {
+	    if {$s != ""} {
 		$w icursor $foc [expr [$w index $foc sel.last] + 1]
 		$w select clear
 	    }
@@ -400,7 +400,7 @@ proc ::CanvasText::MoveLeft {w} {
 	
 	# If selection.
 	if {![catch {selection get} s]} {
-	    if {[llength $s] > 0} {
+	    if {$s != ""} {
 		$w icursor $foc [expr [$w index $foc sel.first] + 0]
 		$w select clear
 	    }
@@ -673,7 +673,6 @@ proc ::CanvasText::Delete {w {offset 0}} {
     if {[info exists cmd]} {
 	set redo [list ::CanvasUtils::Command $wtop $cmd]
 	set undo [list ::CanvasUtils::Command $wtop $undocmd]    
-	#eval {$w} $cmd
 	eval $redo
 	undo::add [::UI::GetUndoToken $wtop] $undo $redo
     }

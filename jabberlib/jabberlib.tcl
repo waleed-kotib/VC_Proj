@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.3 2003-01-30 17:33:50 matben Exp $
+# $Id: jabberlib.tcl,v 1.4 2003-02-06 17:23:32 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -1000,7 +1000,7 @@ proc jlib::presence_handler {jlibname xmldata} {
 		}
 	    }
 	}	    
-	if {[string length $x]} {
+	if {$x != ""} {
 	    lappend arglist -x $x
 	}
 	
