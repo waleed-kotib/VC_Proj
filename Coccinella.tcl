@@ -2,7 +2,7 @@
 # the next line restarts using wish \
 	exec wish "$0" -visual best "$@"
       
-#  Whiteboard.tcl ---
+#  Coccinella.tcl ---
 #  
 #      This file is the main of the whiteboard application. It depends on
 #      a number of other files. The 'lib' directory contains the other tcl
@@ -15,7 +15,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Whiteboard.tcl,v 1.14 2003-07-26 13:54:23 matben Exp $
+# $Id: Coccinella.tcl,v 1.1 2003-07-29 16:22:10 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -155,10 +155,21 @@ if {[string match "mac*" $this(platform)] &&   \
   $debugLevel == 0 && $debugServerLevel == 0} {
     catch {console hide}
 }
+
 proc Debug {num str} {
     global  debugLevel
     if {$num <= $debugLevel} {
 	puts $str
+    }
+}
+
+proc CallTrace {num} {
+    global  debugLevel
+    if {$num <= $debugLevel} {
+	puts "Tcl call trace:"
+	for {set i [expr [info level] - 1]} {$i > 0} {incr i -1} {
+	    puts "\t$i: [info level $i]"
+	}
     }
 }
 
@@ -187,7 +198,7 @@ if {[string equal $this(platform) "macintosh"] && ([info tclversion] < 8.4)} {
 	  folder in the following dialog."
 	set thisPath [tk_chooseDirectory -title "Pick Whiteboard-$prefs(fullVers)"]
     }
-    set thisScript [file join $thisPath Whiteboard.tcl]
+    set thisScript [file join $thisPath Coccinella.tcl]
 } elseif {[string equal $this(platform) "unix"]} {
     set thisPath [file dirname [resolve_cmd_realpath [info script]]]
     set thisTail [file tail [info script]]
@@ -196,7 +207,7 @@ if {[string equal $this(platform) "macintosh"] && ([info tclversion] < 8.4)} {
     set thisScript [info script]
     set thisTail [file tail $thisScript]
     if {$thisScript == ""} {
-	set thisScript [tk_getOpenFile -title "Pick Whiteboard.tcl"]
+	set thisScript [tk_getOpenFile -title "Pick Coccinella.tcl"]
 	if {$thisScript == ""} {
 	    exit
 	}
@@ -623,6 +634,8 @@ if {$argc > 0} {
 if {[string equal $prefs(protocol) "jabber"]} {
     set wDlgs(jrostbro) .jrostbro
     set wDlgs(mainwb) .
+    #set wDlgs(jrostbro) .
+    #set wDlgs(mainwb) .jrostbro
 } else {
     set wDlgs(mainwb) .
 }
@@ -631,10 +644,10 @@ if {[string equal $prefs(protocol) "jabber"]} {
 # Jabber has the roster window as "main" window.
 if {![string equal $prefs(protocol) "jabber"]} {
     ::SplashScreen::SetMsg [::msgcat::mc splashbuild]
-    ::UI::BuildMain . -serverentrystate disabled
+    ::UI::BuildMain $wDlgs(mainwb) -serverentrystate disabled
 }
 if {$prefs(firstLaunch) && !$prefs(stripJabber)} {
-    wm withdraw .
+    wm withdraw $wDlgs(mainwb)
     set displaySetup 1
 } else {
     set displaySetup 0
