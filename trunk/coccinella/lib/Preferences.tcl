@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.38 2004-01-16 15:01:10 matben Exp $
+# $Id: Preferences.tcl,v 1.39 2004-01-17 14:35:14 matben Exp $
  
 package require notebook
 package require tree
@@ -2175,6 +2175,7 @@ proc ::Preferences::HasChanged { } {
     variable hasChanged
 
     set hasChanged 1
+    CallTrace 4
 }
 
 # Preferences::SelectCmd --

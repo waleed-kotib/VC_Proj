@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Sounds.tcl,v 1.12 2004-01-17 11:42:54 matben Exp $
+# $Id: Sounds.tcl,v 1.13 2004-01-17 14:35:14 matben Exp $
 
 package provide Sounds 1.0
 
@@ -319,7 +319,8 @@ proc ::Sounds::BuildPrefsPage {wpage} {
 	set txt $nameToText($name)
 	checkbutton $fr.$name -text "  [::msgcat::mc $txt]"  \
 	  -variable [namespace current]::tmpPrefs($name)
-	button $fr.b${name} -text [::msgcat::mc Play] -font $fontS \
+	button $fr.b${name} -text [::msgcat::mc Play] -padx 4 -pady 1 \
+	  -font $fontS \
 	  -command [list [namespace current]::PlayTmpPrefSound $name]
 	grid $fr.$name    -column 0 -padx 8 -row $row -sticky w
 	grid $fr.b${name} -column 1 -padx 8 -row $row -sticky ew 
@@ -357,6 +358,7 @@ proc ::Sounds::PlayTmpPrefSound {name} {
     } elseif {$priv(snack)} {
 	catch {_tmp destroy}
 	catch {snack::sound _tmp -load $f}
+	catch {_tmp play}
     }
 }
 
@@ -386,6 +388,9 @@ proc ::Sounds::CancelPrefsHook { } {
 	if {$sprefs($name) != $tmpPrefs($name)} {
 	    ::Preferences::HasChanged
 	}
+    }
+    if {[string equal $tmpPrefs(soundSet) [::msgcat::mc Default]]} {
+	set tmpPrefs(soundSet) ""
     }
     if {![string equal $sprefs(soundSet) $tmpPrefs(soundSet)]} {
 	::Preferences::HasChanged
