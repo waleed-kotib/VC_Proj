@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: AutoUpdate.tcl,v 1.5 2004-10-14 10:22:11 matben Exp $
+# $Id: AutoUpdate.tcl,v 1.6 2004-10-27 14:42:33 matben Exp $
 
 package require tinydom
 package require http 2.3
@@ -165,7 +165,6 @@ proc ::AutoUpdate::Dialog {releaseAttr message changesList} {
       -font $fontSB
     $wtext tag configure itemtag -lmargin1 20 -lmargin2 30 \
       -spacing1 2 -spacing3 2
-    ::Text::ConfigureLinkTagForTextWidget $wtext urltag activeurltag
     $wtext configure -tabs {100 right 110 left}
         
     $wtext configure -state normal
@@ -177,7 +176,7 @@ proc ::AutoUpdate::Dialog {releaseAttr message changesList} {
 	
 	switch -- $name {
 	    url {
-		$wtext insert end "\t$value" urltag
+		::Text::ParseUrl $wtext "\t$value"
 	    }
 	    date {
 		set date [clock format [clock scan $value]  \

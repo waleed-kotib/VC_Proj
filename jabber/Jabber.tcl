@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.112 2004-10-16 13:32:50 matben Exp $
+# $Id: Jabber.tcl,v 1.113 2004-10-27 14:42:34 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -1402,40 +1402,6 @@ proc ::Jabber::BtSetStatus {w} {
     SetStatus $show -status $allText    
     set finishedStat 1
     destroy $w
-}
-
-# Jabber::ParseAndInsertText --
-#
-#       Parses for smileys and url's and insert into text widget.
-#       
-# Arguments:
-#       w           text widget
-#       str         raw text to process
-#       
-# Results:
-#       none.
-
-proc ::Jabber::ParseAndInsertText {w str tag linktag} {
-    
-    # Smileys.
-    set cmdList [::Emoticons::Parse $str]
-    
-    # Http links.
-    set textCmdList {}
-    foreach {txt icmd} $cmdList {
-	set httpCmd [::Text::ParseHttpLinks $txt $tag $linktag]
-	if {$icmd == ""} {
-	    eval lappend textCmdList $httpCmd
-	} else {
-	    eval lappend textCmdList $httpCmd [list $icmd]
-	}
-    }
-
-    # Insert into text widget.
-    foreach cmd $textCmdList {
-	eval {$w} $cmd
-    }
-    $w insert end "\n"
 }
     
 # Jabber::GetAnyDelayElem --

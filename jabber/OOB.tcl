@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.38 2004-10-02 13:14:55 matben Exp $
+# $Id: OOB.tcl,v 1.39 2004-10-27 14:42:36 matben Exp $
 
 package provide OOB 1.0
 
@@ -493,13 +493,13 @@ proc ::Jabber::OOB::BuildText {w xml args} {
     array set argsArr $args
     set nlines 1
     foreach c [wrapper::getchildren $xml] {
-	switch -- [lindex $c 0] {
+	switch -- [wrapper::gettag $c] {
 	    desc {
-		set desc [lindex $c 3]
+		set desc [wrapper::getcdata $c]
 		set nlines [expr [string length $desc]/$argsArr(-width) + 1]
 	    }
 	    url {
-		set url [lindex $c 3]
+		set url [wrapper::getcdata $c]
 	    }
 	}
     }
@@ -510,13 +510,7 @@ proc ::Jabber::OOB::BuildText {w xml args} {
       -background $bg -height $nlines  \
       -highlightthickness 0
     if {[info exists desc] && [info exists url]} {
-	$w tag configure normal -foreground blue -underline 1
-	$w tag configure active -foreground red -underline 1
-	
-	$w tag bind normal <Enter> [list ::Text::EnterLink $w %x %y normal active]
-	$w tag bind active <ButtonPress>  \
-	  [list ::Text::ButtonPressOnLink $w %x %y active]
-	$w insert end $desc normal
+	::Text::InsertURL $w $desc $url {}
     }
     return $w
 }

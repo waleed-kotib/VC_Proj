@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.84 2004-10-24 14:12:52 matben Exp $
+# $Id: Chat.tcl,v 1.85 2004-10-27 14:42:33 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -431,12 +431,14 @@ proc ::Jabber::Chat::InsertMessage {chattoken whom body} {
 	me {
 	    $wtext insert end $prefix mepre
 	    $wtext insert end "   " metext
-	    ::Jabber::ParseAndInsertText $wtext $body metext urltag
+	    ::Text::Parse $wtext $body metext
+	    $wtext insert end \n
 	}
 	you {
 	    $wtext insert end $prefix youpre
 	    $wtext insert end "   " youtext
-	    ::Jabber::ParseAndInsertText $wtext $body youtext urltag
+	    ::Text::Parse $wtext $body youtext
+	    $wtext insert end \n
 	}
 	sys {
 	    $wtext insert end $prefix syspre
@@ -1066,6 +1068,7 @@ proc ::Jabber::Chat::SetThreadState {dlgtoken chattoken} {
     upvar ::Jabber::jstate jstate
 
     Debug 3 "::Jabber::Chat::SetThreadState chattoken=$chattoken"
+    
     jlib::splitjid $chatstate(jid) user res
     if {[$jstate(roster) isavailable $user]} {
 	SetState $chattoken normal
@@ -1075,8 +1078,7 @@ proc ::Jabber::Chat::SetThreadState {dlgtoken chattoken} {
     if {[winfo exists $dlgstate(wnb)]} {
 	$dlgstate(wnb) pageconfigure $chatstate(pagename) -image ""
     }
-    SetTitle $dlgstate(w) $chatstate(rosterName) \
-      $chatstate(fromjid)
+    SetTitle $dlgstate(w) $chatstate(rosterName) $chatstate(fromjid)
 }
 
 # Jabber::Chat::SetState --
@@ -1243,8 +1245,6 @@ proc ::Jabber::Chat::ConfigureTextTags {w wtext} {
     foreach tag $alltags {
 	eval {$wtext tag configure $tag} $opts($tag)
     }
-    
-    ::Text::ConfigureLinkTagForTextWidget $wtext urltag activeurltag
 }
 
 # Jabber::Chat::SetFont --
@@ -1522,6 +1522,7 @@ proc ::Jabber::Chat::PresenceHook {jid type args} {
 	if {[info exists presArr(-show)]} {
 	    set chatstate(presence) $presArr(-show)
 	}
+	XEventCancel $chattoken
     }
 }
 
@@ -1946,7 +1947,8 @@ proc ::Jabber::Chat::BuildHistoryForJid {jid} {
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
     pack [button $frbot.btclose -text [mc Close] \
-      -command "destroy $w"] -side right -padx 5 -pady 5
+      -command [list [namespace current]::CloseHistory $w]] \
+      -side right -padx 5 -pady 5
     pack [button $frbot.btclear -text [mc Clear]  \
       -command [list [namespace current]::ClearHistory $jid $wtext]]  \
       -side right -padx 5 -pady 5
@@ -2013,7 +2015,8 @@ proc ::Jabber::Chat::BuildHistoryForJid {jid} {
 		$wtext insert end "\[$cwhen\] <$cjid>" $ptag
 		$wtext insert end "   " $ptxttag
 		
-		::Jabber::ParseAndInsertText $wtext $body $ptxttag urltag
+		::Text::Parse $wtext $body $ptxttag
+		$wtext insert end \n
 	    }
 	}
     } else {
@@ -2034,6 +2037,12 @@ proc ::Jabber::Chat::ClearHistory {jid wtext} {
     if {[file exists $path]} {
 	file delete $path
     }
+}
+
+proc ::Jabber::Chat::CloseHistory {w} {
+
+    CloseHistoryHook $w
+    destroy $w
 }
 
 proc ::Jabber::Chat::CloseHistoryHook {wclose} {
