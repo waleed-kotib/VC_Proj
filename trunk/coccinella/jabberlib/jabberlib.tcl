@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.86 2005-02-15 09:07:32 matben Exp $
+# $Id: jabberlib.tcl,v 1.87 2005-02-16 14:26:46 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -70,6 +70,7 @@
 #	-xautoawaymins        if > 0 send xaway message after this many minutes
 #	-awaymsg              the away message 
 #	-xawaymsg             the xaway message
+#	-autodiscocaps        0|1 should presence caps elements be auto discoed
 #	
 #   INSTANCE COMMANDS
 #      jlibName agent_get to cmd
@@ -201,6 +202,7 @@ package require service
 package require stanzaerror
 package require streamerror
 package require groupchat
+package require caps
 
 package provide jlib 2.0
 
@@ -225,8 +227,8 @@ namespace eval jlib {
     variable uid 0
     
     # Some common xmpp xml namespaces.
-    variable xmppns
-    array set xmppns {
+    variable xmppxmlns
+    array set xmppxmlns {
 	stream      http://etherx.jabber.org/streams
 	streams     urn:ietf:params:xml:ns:xmpp-streams
 	tls         urn:ietf:params:xml:ns:xmpp-tls
@@ -234,6 +236,20 @@ namespace eval jlib {
 	bind        urn:ietf:params:xml:ns:xmpp-bind
 	stanzas     urn:ietf:params:xml:ns:xmpp-stanzas
 	session     urn:ietf:params:xml:ns:xmpp-session
+    }
+    
+    variable jxmlns
+    array set jxmlns {
+	disco           http://jabber.org/protocol/disco 
+	disco,items     http://jabber.org/protocol/disco#items 
+	disco,info      http://jabber.org/protocol/disco#info
+	caps            http://jabber.org/protocol/caps
+	ibb             http://jabber.org/protocol/ibb
+	amp             http://jabber.org/protocol/amp
+	muc             http://jabber.org/protocol/muc
+	muc,user        http://jabber.org/protocol/muc#user
+	muc,admin       http://jabber.org/protocol/muc#admin
+	muc,owner       http://jabber.org/protocol/muc#owner
     }
 }
 
@@ -256,7 +272,8 @@ namespace eval jlib::conference { }
 #	-autoawaymins              
 #	-xautoawaymins             
 #	-awaymsg              
-#	-xawaymsg             
+#	-xawaymsg         
+#	-autodiscocaps    
 #       
 # Results:
 #       jlibname which is the namespaced instance command
@@ -303,6 +320,7 @@ proc jlib::new {rostername clientcmd args} {
 	-xautoawaymins        0
 	-awaymsg              ""
 	-xawaymsg             ""
+	-autodiscocaps        0
     }
     
     # Verify options.
@@ -342,8 +360,11 @@ proc jlib::new {rostername clientcmd args} {
     
     # Init conference and groupchat state.
     set conf(allroomsin) {}
-    jlib::groupchat::init $jlibname
-
+    groupchat::init $jlibname
+    if {$opts(-autodiscocaps)} {
+	caps::init $jlibname
+    }
+    
     # Create the actual jlib instance procedure.
     proc $jlibname {cmd args}   \
       "eval jlib::cmdproc {$jlibname} \$cmd \$args"
@@ -488,6 +509,13 @@ proc jlib::config {jlibname args} {
     if {[info exists argsArr(-xautoawaymins)] &&  \
       ($argsArr(-xautoawaymins) != $opts(-xautoawaymins))} {
 	schedule_auto_away $jlibname
+    }
+    if {[info exists argsArr(-autodiscocaps)]} {
+	if {$opts(-autodiscocaps)} {
+	    caps::init $jlibname
+	} else {
+	    caps::free $jlibname
+	}
     }
     return ""
 }
@@ -701,7 +729,7 @@ proc jlib::openstream {jlibname server args} {
     upvar ${jlibname}::lib lib
     upvar ${jlibname}::locals locals
     upvar ${jlibname}::opts opts
-    variable xmppns
+    variable xmppxmlns
 
     array set argsArr $args
     set locals(server) $server
@@ -733,7 +761,7 @@ proc jlib::openstream {jlibname server args} {
         
     	# Network errors if failed to open connection properly are likely to show here.
 	set xml "<?xml version='1.0' encoding='UTF-8'?><stream:stream\
-	  xmlns='$opts(-streamnamespace)' xmlns:stream='$xmppns(stream)'\
+	  xmlns='$opts(-streamnamespace)' xmlns:stream='$xmppxmlns(stream)'\
 	  xml:lang='[getlang]' to='$server'$optattr>"
 
 	eval $lib(transportsend) {$xml}
@@ -852,7 +880,7 @@ proc jlib::iq_handler {jlibname xmldata} {
     upvar ${jlibname}::lib lib
     upvar ${jlibname}::iqcmd iqcmd
     upvar ${jlibname}::opts opts    
-    variable xmppns
+    variable xmppxmlns
 
     Debug 5 "jlib::iq_handler: ------------"
 
@@ -987,7 +1015,7 @@ proc jlib::iq_handler {jlibname xmldata} {
 		set xmldata [wrapper::setattrlist $xmldata [array get attrArr]]
 		
 		set errstanza [wrapper::createtag "feature-not-implemented" \
-		  -attrlist [list xmlns $xmppns(stanzas)]]
+		  -attrlist [list xmlns $xmppxmlns(stanzas)]]
 		set errtag [wrapper::createtag "error" -subtags [list $errstanza] \
 		  -attrlist {code 501 type cancel}]
 		
@@ -1198,14 +1226,14 @@ proc jlib::presence_handler {jlibname xmldata} {
 proc jlib::features_handler {jlibname xmllist} {
 
     upvar ${jlibname}::locals locals
-    variable xmppns
+    variable xmppxmlns
     
     foreach child [wrapper::getchildren $xmllist] {
 	wrapper::splitxml $child tag attr chdata children
 	
 	switch -- $tag {
 	    mechanisms {
-		if {[wrapper::getattr $attr xmlns] == $xmppns(sasl)} {
+		if {[wrapper::getattr $attr xmlns] == $xmppxmlns(sasl)} {
 		    set mechanisms {}
 		    foreach mechelem $children {
 			wrapper::splitxml $mechelem mtag mattr mchdata mchild
@@ -1219,7 +1247,7 @@ proc jlib::features_handler {jlibname xmllist} {
 		}
 	    }
 	    starttls {
-		if {[wrapper::getattr $attr xmlns] == $xmppns(tls)} {
+		if {[wrapper::getattr $attr xmlns] == $xmppxmlns(tls)} {
 		    set locals(features,starttls) 1
 		    set childs [wrapper::getchildswithtag $xmllist required]
 		    if {$childs != ""} {
@@ -1269,7 +1297,7 @@ proc jlib::havefeatures {jlibname name {name2 ""}} {
 proc jlib::error_handler {jlibname xmllist} {
 
     upvar ${jlibname}::lib lib
-    variable xmppns
+    variable xmppxmlns
     
     closestream $jlibname
     
@@ -1485,7 +1513,7 @@ proc jlib::stream_reset {jlibname} {
 
 proc jlib::getstanzaerrorspec {stanza} {
     
-    variable xmppns
+    variable xmppxmlns
 
     set errcode ""
     set errmsg  ""
@@ -1553,7 +1581,7 @@ proc jlib::getstreamerrorspec {errelem} {
 
 proc jlib::geterrspecfromerror {errelem kind} {
        
-    variable xmppns
+    variable xmppxmlns
     variable errCodeToText
 
     array set msgproc {
@@ -1586,14 +1614,14 @@ proc jlib::geterrspecfromerror {errelem kind} {
 		    # Use only as a complement iff our language.
 		    set xmlns [wrapper::getattribute $c xmlns]
 		    set lang  [wrapper::getattribute $c xml:lang]
-		    if {[string equal $xmlns $xmppns($kind)] && \
+		    if {[string equal $xmlns $xmppxmlns($kind)] && \
 		      [string equal $lang [getlang]]} {
 			set errstr [wrapper::getcdata $c]
 		    }
 		} 
 		default {
 		    set xmlns [wrapper::getattribute $c xmlns]
-		    if {[string equal $xmlns $xmppns($kind)]} {
+		    if {[string equal $xmlns $xmppxmlns($kind)]} {
 			set errcode $tag
 			set errmsg [$msgproc($kind) $tag]
 		    }
@@ -1613,10 +1641,10 @@ proc jlib::geterrspecfromerror {errelem kind} {
 
 proc jlib::bind_resource {jlibname resource cmd} {
     
-    variable xmppns
+    variable xmppxmlns
 
     set xmllist [wrapper::createtag bind \
-      -attrlist [list xmlns $xmppns(bind)] \
+      -attrlist [list xmlns $xmppxmlns(bind)] \
       -subtags [list [wrapper::createtag resource -chdata $resource]]]
     send_iq $jlibname set [list $xmllist] -command \
       [list [namespace current]::parse_bind_resource $jlibname $cmd]
@@ -1625,11 +1653,11 @@ proc jlib::bind_resource {jlibname resource cmd} {
 proc jlib::parse_bind_resource {jlibname cmd type subiq args} {
     
     upvar ${jlibname}::locals locals
-    variable xmppns
+    variable xmppxmlns
     
     # The server MAY change the 'resource' why we need to check this here.
     if {[string equal [wrapper::gettag $subiq] bind] &&  \
-      [string equal [wrapper::getattribute $subiq xmlns] $xmppns(bind)]} {
+      [string equal [wrapper::getattribute $subiq xmlns] $xmppxmlns(bind)]} {
 	set jidelem [wrapper::getchildswithtag $subiq jid]
 	if {$jidelem != {}} {
 	    set sjid [wrapper::getcdata $jidelem]
@@ -1959,6 +1987,16 @@ proc jlib::presence_run_hook {jlibname from type args} {
 	}
     }
     return $ishandled
+}
+
+proc jlib::presence_deregister {jlibname type func} {
+    
+    upvar ${jlibname}::preshook preshook
+    
+    set ind [lsearch -glob $preshook($type) "$func *"]
+    if {$ind >= 0} {
+	set preshook($type) [lreplace $preshook($type) $ind $ind]
+    }
 }
 
 # jlib::element_register --

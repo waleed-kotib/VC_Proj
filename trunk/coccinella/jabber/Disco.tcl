@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.55 2005-02-14 13:48:37 matben Exp $
+# $Id: Disco.tcl,v 1.56 2005-02-16 14:26:44 matben Exp $
 
 package provide Disco 1.0
 
@@ -31,7 +31,7 @@ namespace eval ::Disco:: {
     option add *Disco.waveImage             wave            widgetDefault
 
     # Used for discoing ourselves using a node hierarchy.
-    variable debugNodes 1
+    variable debugNodes 0
     
     # If number children smaller than this do disco#info.
     variable discoInfoLimit 12
@@ -471,6 +471,7 @@ proc ::Disco::ParseGetInfo {from subiq args} {
 	set opts [list -id $argsArr(-id)]
     }
     set node [wrapper::getattribute $subiq node]
+    ::Debug 4 "\t node=$node"
     
     # Every entity MUST have at least one identity, and every entity MUST 
     # support at least the 'http://jabber.org/protocol/disco#info' feature; 
@@ -496,24 +497,12 @@ proc ::Disco::ParseGetInfo {from subiq args} {
 	
 	# Return version number.
 	set subtags [list [wrapper::createtag "identity" -attrlist  \
-	  [list category client type pc name Coccinella]]]
+	  [list category hierarchy type leaf name "Version"]]]
 	lappend subtags [wrapper::createtag "feature" \
 	  -attrlist [list var $xmppxmlns(disco,info)]]
 	# version number ???
 	lappend subtags [wrapper::createtag "feature" \
 	  -attrlist [list var "jabber:iq:version"]]
-	set found 1
-    } elseif {[string equal $node "$coccixmlns(caps)#ftrans"]} {
-
-	# Return entity capabilities [JEP 0115]. File transfer.
-	set subtags [list [wrapper::createtag "identity" -attrlist  \
-	  [list category client type pc name Coccinella]]]
-	lappend subtags [wrapper::createtag "feature" \
-	  -attrlist [list var $xmppxmlns(disco,info)]]
-	lappend subtags [wrapper::createtag "feature" \
-	  -attrlist [list var $coccixmlns(servers)]]
-	lappend subtags [wrapper::createtag "feature" \
-	  -attrlist [list var jabber:iq:oob]]
 	set found 1
    } else {
     
@@ -522,16 +511,9 @@ proc ::Disco::ParseGetInfo {from subiq args} {
 	foreach ext $exts {
 	    if {[string equal $node "$coccixmlns(caps)#$ext"]} {
 		set found 1
+		set subtags [::Jabber::GetCapsExtSubtags $ext]
 		break
 	    }
-	}
-	if {$found} {
-	    set subtags [list [wrapper::createtag "identity" -attrlist  \
-	      [list category client type pc name Coccinella]]]
-	    lappend subtags [wrapper::createtag "feature" \
-	      -attrlist [list var $xmppxmlns(disco,info)]]
-	    lappend subtags [wrapper::createtag "feature" \
-		  -attrlist [list var "$coccixmlns(caps)#$ext"]]
 	}
     }
     
@@ -581,9 +563,11 @@ proc ::Disco::ParseGetInfo {from subiq args} {
 #       none
 
 proc ::Disco::ParseGetItems {from subiq args} {
+    global  prefs
     variable xmlns
     variable debugNodes
     upvar ::Jabber::jstate jstate    
+    upvar ::Jabber::coccixmlns coccixmlns
     
     ::Debug 2 "::Disco::ParseGetItems from=$from args='$args'"
 
@@ -597,8 +581,9 @@ proc ::Disco::ParseGetItems {from subiq args} {
 	set opts [list -id $argsArr(-id)]
     }
     set node [wrapper::getattribute $subiq node]
-
-    if {$debugNodes && ($node == "")} {
+    
+    # Support for caps (JEP-0115).
+    if {$node == ""} {
 	set type "result"
 	set found 1
 	if {[info exists argsArr(-to)]} {
@@ -607,16 +592,24 @@ proc ::Disco::ParseGetItems {from subiq args} {
 	    set myjid [::Jabber::GetMyJid]
 	}
 	set subtags {}
-	
-	# This is just some dummy nodes used for debugging.
+	set cnode "$coccixmlns(caps)#$prefs(fullVers)"
 	lappend subtags [wrapper::createtag "item" \
-	  -attrlist [list jid $myjid node A name "Name A"]]
-	lappend subtags [wrapper::createtag "item" \
-	  -attrlist [list jid $myjid node B name "Empty branch"]]
-	set attr [list xmlns $xmlns(items)]
-	if {$node != ""} {
-	    lappend attr node $node
+	  -attrlist [list jid $myjid node $cnode]]
+	set exts [::Jabber::GetCapsExtKeyList]
+	foreach ext $exts {
+	    set cnode "$coccixmlns(caps)#$ext"
+	    lappend subtags [wrapper::createtag "item" \
+	      -attrlist [list jid $myjid node $cnode]]
 	}
+	if {$debugNodes} {
+	
+	    # This is just some dummy nodes used for debugging.
+	    lappend subtags [wrapper::createtag "item" \
+	      -attrlist [list jid $myjid node A name "Name A"]]
+	    lappend subtags [wrapper::createtag "item" \
+	      -attrlist [list jid $myjid node B name "Empty branch"]]
+	}
+	set attr [list xmlns $xmlns(items)]
 	set xmllist [wrapper::createtag "query" -attrlist $attr -subtags $subtags]
     }
     if {!$found} {
@@ -1058,7 +1051,7 @@ proc ::Disco::MakeBalloonHelp {jid node treectag} {
     if {$node != ""} {
 	append msg "\nnode: $node"
     }
-    set types [$jstate(disco) types $jid]
+    set types [$jstate(disco) types $jid $node]
     if {$types != {}} {
 	append msg "\ntype: $types"
     }
@@ -1263,6 +1256,8 @@ proc ::Disco::InfoResultCB {type jid subiq args} {
       -justify left -image $iconInfo -compound left
     text $wtext -wrap word -width 60 -bg gray80 \
       -tabs {180} -spacing1 3 -spacing3 2 -bd 0
+    set twidth [expr 10*[font measure [$wtext cget -font] "sixmmm"] + 10]
+    $w.frall.l configure -wraplength $twidth
 
     pack $w.frall.l $wtext -side top -anchor w -padx 10 -pady 1
     

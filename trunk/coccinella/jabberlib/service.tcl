@@ -6,7 +6,7 @@
 #       
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: service.tcl,v 1.14 2005-02-08 08:57:16 matben Exp $
+# $Id: service.tcl,v 1.15 2005-02-16 14:26:47 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -113,6 +113,17 @@ proc jlib::service::unregister {jlibname type} {
 
     set serv($type) 0
     array unset serv $type,*
+}
+
+proc jlib::service::get {jlibname type} {
+    
+    upvar ${jlibname}::serv serv
+    
+    if {$serv($type)} {
+	return $serv($type,name)
+    } else {
+	return ""
+    }
 }
 
 proc jlib::service::send_getchildren {jlibname jid cmd} {
