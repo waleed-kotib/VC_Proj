@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.27 2004-08-02 14:06:21 matben Exp $
+# $Id: Utils.tcl,v 1.28 2004-08-03 14:04:44 matben Exp $
 
 namespace eval ::Utils:: {
 
@@ -394,7 +394,7 @@ proc ::Utils::GetHttpFromFile {filePath} {
     
     set relPath [filerelative $this(httpdRootPath) $filePath]
     set relPath [uriencode::quotepath $relPath]
-    set ip [::Network::GetThisOutsideIPAddress]
+    set ip [::Network::GetThisPublicIPAddress]
     return "http://${ip}:$prefs(httpdPort)/$relPath"
 }
 

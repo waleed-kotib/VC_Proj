@@ -3,7 +3,7 @@
 #       Creates a card game in a whiteboard canvas. 
 # 
 # 
-# $Id: CardGame.itcl,v 1.5 2004-08-02 14:06:21 matben Exp $
+# $Id: CardGame.itcl,v 1.6 2004-08-03 14:04:44 matben Exp $
 
 namespace eval CardGame {
     
@@ -25,6 +25,8 @@ if {[itcl::find classes CardGame] == ""} {
 
 	private {
 	    proc Init {}
+	    proc Handler {w type cmd args}
+	    proc GetThisFromStackUtag {utag}
 	}
 
 	# ------------------
@@ -71,6 +73,8 @@ if {[itcl::find classes CardGame] == ""} {
 	    method ShowAll {}
 	    method Hide {}
 	    method MixStack {}
+	    method GetValue {name}
+	    method InvokeCardStack {args}
 	}
     
 	# ----------------------------
@@ -92,6 +96,7 @@ if {[itcl::find classes CardGame] == ""} {
 	
 	protected {
 	    variable idstack
+	    variable utagstack
 	    variable csObj
 	    variable move
 	    variable idcard
@@ -104,7 +109,7 @@ if {[itcl::find classes CardGame] == ""} {
 
     body CardGame::constructor {w x y args} {
 	
-	::Debug 4 "CardGame::constructor args='$args'"
+	::Debug 4 "CardGame::constructor $this, args='$args'"
 	
 	MakeMenus
 	
@@ -134,13 +139,13 @@ if {[itcl::find classes CardGame] == ""} {
 	switch -- [GetThis platform] {
 	    macintosh - macosx {
 		set b1PopupStack {%W bind cardstack <Control-Button-1>}
-		set b1PopupCard  {%W bind playcard <Control-Button-1>}
+		set b1PopupCard  {%W bind playcard  <Control-Button-1>}
 		set b2PopupStack {%W bind cardstack <Button-2>}
-		set b2PopupCard  {%W bind playcard <Button-2>}
+		set b2PopupCard  {%W bind playcard  <Button-2>}
 	    }
 	    default {
 		set b3PopupStack {%W bind cardstack <Button-3>}
-		set b3PopupCard  {%W bind playcard <Button-3>}
+		set b3PopupCard  {%W bind playcard  <Button-3>}
 	    }
 	}
 	
@@ -201,7 +206,51 @@ if {[itcl::find classes CardGame] == ""} {
 	    ::Sounds::Create swash [file join [GetThis soundsPath] swash.wav]
 	    set sound 1
 	}
+	::Jabber::WB::RegisterHandler CARDGAME [code Handler]
 	set inited 1
+    }
+    
+    body CardGame::Handler {w type cmd args} {
+	
+	::Debug 4 "CardGame::Handler w=$w, type=$type, cmd=$cmd"
+	
+	switch -- [lindex $cmd 1] {
+	    picked {
+
+		# The remote cardstack has picked this card. Remove from stack!
+		foreach {utag card} [lrange $cmd 2 3] {break}
+		set obj [GetThisFromStackUtag $utag]
+		if {$obj != ""} {
+		    $obj InvokeCardStack DrawCard $card
+		}
+	    }
+	}
+    }
+    
+    # GetThisFromStackUtag --
+    # 
+    #   Static method to map from a stacks utag to the actual object.
+    #   Needed since utags are the only globally uniqe identifier here.
+
+    body CardGame::GetThisFromStackUtag {utag} {
+	
+	set ansObj ""
+	foreach obj [itcl::find objects -class CardGame] {
+	    set tmputag [$obj GetValue utagstack]
+	    if {[string equal $utag $tmputag]} {
+		set ansObj $obj
+		break
+	    }
+	}
+	return $ansObj
+    }
+
+    body CardGame::GetValue {name} {
+	return [set $name]
+    }
+    
+    body CardGame::InvokeCardStack {args} {
+	eval {$csObj} $args
     }
     
     body CardGame::DrawCardStack {x y args} {
@@ -215,6 +264,7 @@ if {[itcl::find classes CardGame] == ""} {
 	set im [$csObj Image cardpile]
 	set idstack [$tkCanvas create image $x $y -image $im -anchor nw  \
 	  -tags [list image cardstack object:${this} $utag]]
+	set utagstack $utag
 
 	foreach {key value} $args {    
 	    switch -- $key {
@@ -307,7 +357,8 @@ if {[itcl::find classes CardGame] == ""} {
 	$tkCanvas delete $move(idshadow)
 	set x [$tkCanvas canvasx $x]
 	set y [$tkCanvas canvasy $y]
-	if {[expr hypot($x - $move(x0), $y - $move(y0))] < $stickyDistance} {
+	if {0 && [expr hypot($x - $move(x0), $y - $move(y0))] < $stickyDistance} {
+	    # We have already taken this card. Put back???
 	    $tkCanvas delete $idcard
 	} else {
 	    set imhalf [$csObj HalfImage $currentCard]
@@ -316,6 +367,9 @@ if {[itcl::find classes CardGame] == ""} {
 	    set cmd [list create image [$tkCanvas coords $idcard] \
 	      -image $imback -anchor nw -tags [$tkCanvas gettags $idcard]]
 	    Command $cmd remote
+	    
+	    # We must tell the remote cardstack to remove this card from stack.
+	    GenCommand "CARDGAME: picked $utagstack $currentCard" remote
 	}
 	if {[$csObj NumberOfCards] == 0} {
 	    RegisterCanvasInstBinds CardGame $emptyPointStackBinds
@@ -366,6 +420,8 @@ if {[itcl::find classes CardGame] == ""} {
     }
     
     body CardGame::DeleteCard {} {
+	
+	# This actually calls back to our Delete method.
 	DeleteCurrent
     }
     

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.21 2004-08-02 14:06:21 matben Exp $
+# $Id: JWB.tcl,v 1.22 2004-08-03 14:04:43 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -51,7 +51,7 @@ proc ::Jabber::WB::Init {jlibName} {
 
     # Configure the Tk->SVG translation to use http.
     # Must be reconfigured when we know our address after connecting???
-    set ip [::Network::GetThisOutsideIPAddress]
+    set ip [::Network::GetThisPublicIPAddress]
     can2svg::config -uritype http -httpaddr ${ip}:$prefs(httpdPort) \
       -httpbasedir $this(httpdRootPath) -ovalasellipse 1 -reusedefs 0 \
       -filtertags [namespace current]::FilterTags
@@ -570,7 +570,7 @@ proc ::Jabber::WB::CloseHook {wtop} {
 proc ::Jabber::WB::ExitRoomHook {roomJid} {
     variable jwbstate
     
-    set wtop [::Jabber::WB::GetWtopFromMessage "groupchat" $roomJid]
+    set wtop [::Jabber::WB::GetWtopFromMessage groupchat $roomJid]
     if {[string length $wtop]} {
 	::WB::DestroyMain $wtop
 	::Jabber::WB::Free $wtop
@@ -917,7 +917,7 @@ proc ::Jabber::WB::HandleSpecialMessage {jlibname xmlns args} {
 # Jabber::WB::HandleRawChatMessage --
 # 
 #       This is the dispatcher for "raw" chat whiteboard messages using the
-#       CANVAS: (and RESIZE IMAGE:) prefixed drawing commands.
+#       CANVAS: (and RESIZE IMAGE: etc.) prefixed drawing commands.
 
 proc ::Jabber::WB::HandleRawChatMessage {jlibname xmlns args} {
         
@@ -937,7 +937,7 @@ proc ::Jabber::WB::HandleRawChatMessage {jlibname xmlns args} {
 # Jabber::WB::HandleRawGroupchatMessage --
 # 
 #       This is the dispatcher for "raw" chat whiteboard messages using the
-#       CANVAS: (and RESIZE IMAGE:) prefixed drawing commands.
+#       CANVAS: (and RESIZE IMAGE: etc.) prefixed drawing commands.
 
 proc ::Jabber::WB::HandleRawGroupchatMessage {jlibname xmlns args} {
 	
@@ -965,8 +965,7 @@ proc ::Jabber::WB::HandleSVGWBChatMessage {jlibname xmlns args} {
 	
     # Need to have the actual canvas before doing svg -> canvas translation.
     # This is a duplicate; fix later...
-    set wtop [::Jabber::WB::GetWtopFromMessage "chat" $argsArr(-from)  \
-      $argsArr(-thread)]
+    set wtop [eval {::Jabber::WB::GetWtopFromMessage chat $argsArr(-from)} $args]
     if {$wtop == ""} {
 	set wtop [eval {::Jabber::WB::NewWhiteboardTo $argsArr(-from)} $args]
     }
@@ -989,7 +988,7 @@ proc ::Jabber::WB::HandleSVGWBGroupchatMessage {jlibname xmlns args} {
     # Need to have the actual canvas before doing svg -> canvas translation.
     # This is a duplicate; fix later...
     jlib::splitjid $argsArr(-from) roomjid resource
-    set wtop [::Jabber::WB::GetWtopFromMessage "groupchat" $roomjid]
+    set wtop [::Jabber::WB::GetWtopFromMessage groupchat $roomjid]
     if {$wtop == ""} {
 	set wtop [eval {::Jabber::WB::NewWhiteboardTo $roomjid} $args]
     }
@@ -1128,44 +1127,66 @@ proc ::Jabber::WB::SVGHttpHandler {wtop cmd} {
 #       Handles RESIZE IMAGE, strips off CANVAS: prefix of rest and returns this.
 
 proc ::Jabber::WB::HandleAnyResizeImage {type cmdList args} {
+    variable handler
     
     ::Debug 4 "::Jabber::WB::HandleAnyResizeImage type=$type"
     
     set canCmdList {}
     foreach cmd $cmdList {
+	regexp {^([^:]+):.*} $cmd match prefix
 	
-	switch -glob -- $cmd {
-	    "RESIZE IMAGE:*" {
+	switch -- $prefix {
+	    CANVAS {
+		lappend canCmdList [lrange $cmd 1 end]
+	    }
+	    "RESIZE IMAGE" {
 		if {[regexp {^RESIZE IMAGE: +([^ ]+) +([^ ]+) +([-0-9]+)$}  \
 		  $cmd match utag utagNew zoom]} {
 		    array set argsArr $args
+		    set wtop ""
 		
 		    # Make sure whiteboard exists.
 		    switch -- $type {
-			chat {
-			    set wtop [::Jabber::WB::GetWtopFromMessage "chat" $argsArr(-from)  \
-			      $argsArr(-thread)]
+			chat - groupchat {
+			    set wtop [eval {::Jabber::WB::GetWtopFromMessage \
+			      $type $argsArr(-from)} $args]
 			    if {$wtop == ""} {
 				set wtop [eval {::Jabber::WB::NewWhiteboardTo $argsArr(-from)} $args]
-			    }
-			}
-			groupchat {
-			    jlib::splitjid $argsArr(-from) roomjid resource
-			    set wtop [::Jabber::WB::GetWtopFromMessage "groupchat" $roomjid]
-			    if {$wtop == ""} {
-				set wtop [eval {::Jabber::WB::NewWhiteboardTo $roomjid} $args]
 			    }
 			}
 		    }
 		    ::Import::ResizeImage $wtop $zoom $utag $utagNew "local"
 		}
 	    }
-	    CANVAS:* {
-		lappend canCmdList [lrange $cmd 1 end]
+	    default {
+		if {[info exists handler($prefix)]} {
+		    array set argsArr $args
+		    set wtop ""
+
+		    switch -- $type {
+			chat - groupchat {
+			    set wtop [eval {::Jabber::WB::GetWtopFromMessage \
+			      $type $argsArr(-from)} $args]
+			}
+		    }
+		    if {$wtop != ""} {
+			set w [::WB::GetCanvasFromWtop $wtop]
+			set code [catch {
+			    uplevel #0 $handler($prefix) [list $w $type $cmd] $args
+			} ans]
+		    }
+		}
 	    }
 	}
     }
     return $canCmdList
+}
+
+
+proc ::Jabber::WB::RegisterHandler {prefix cmd} {
+    variable handler
+    
+    set handler($prefix) $cmd
 }
 
 # ::Jabber::WB::ChatMsg, GroupChatMsg --
@@ -1185,8 +1206,8 @@ proc ::Jabber::WB::ChatMsg {cmdList args} {
     ::Debug 2 "::Jabber::WB::ChatMsg args='$args'"
     
     # This one returns empty if not exists.
-    set wtop [::Jabber::WB::GetWtopFromMessage "chat" $argsArr(-from)  \
-      $argsArr(-thread)]
+    set wtop [eval {::Jabber::WB::GetWtopFromMessage chat $argsArr(-from)} \
+      $args]
     if {$wtop == ""} {
 	set wtop [eval {::Jabber::WB::NewWhiteboardTo $argsArr(-from)} $args]
     }
@@ -1204,7 +1225,7 @@ proc ::Jabber::WB::GroupChatMsg {cmdList args} {
     # The -from argument is either the room itself, or usually a user in
     # the room.
     jlib::splitjid $argsArr(-from) roomjid resource
-    set wtop [::Jabber::WB::GetWtopFromMessage "groupchat" $roomjid]
+    set wtop [::Jabber::WB::GetWtopFromMessage groupchat $roomjid]
     if {$wtop == ""} {
 	set wtop [eval {::Jabber::WB::NewWhiteboardTo $roomjid} $args]
     }
@@ -1287,7 +1308,7 @@ proc ::Jabber::WB::PutIPnumber {jid id} {
     
     ::Debug 2 "::Jabber::WB::PutIPnumber:: jid=$jid, id=$id"
     
-    set ip [::Network::GetThisOutsideIPAddress]
+    set ip [::Network::GetThisPublicIPAddress]
     ::Jabber::WB::SendRawMessageList $jid [list "PUT IP: $id $ip"]
 }
 
@@ -1599,8 +1620,8 @@ proc ::Jabber::WB::MakeWhiteboardExist {opts} {
 
     switch -- $optArr(-type) {
 	chat {
-	    set wtop [::Jabber::WB::GetWtopFromMessage "chat" $optArr(-from) \
-	      $optArr(-thread)]
+	    set wtop [eval {::Jabber::WB::GetWtopFromMessage chat \
+	      $optArr(-from)} $opts]
 	    if {$wtop == ""} {
 		set wtop [::Jabber::WB::NewWhiteboardTo $optArr(-from)  \
 		  -thread $optArr(-thread)]
@@ -1612,7 +1633,7 @@ proc ::Jabber::WB::MakeWhiteboardExist {opts} {
 		return -code error  \
 		  "The jid we got \"$optArr(-from)\" was not well-formed!"
 	    }
-	    set wtop [::Jabber::WB::GetWtopFromMessage "groupchat" $optArr(-from)]
+	    set wtop [::Jabber::WB::GetWtopFromMessage groupchat $optArr(-from)]
 	    if {$wtop == ""} {
 		set wtop [::Jabber::WB::NewWhiteboardTo $roomjid]
 	    }
@@ -1628,24 +1649,36 @@ proc ::Jabber::WB::MakeWhiteboardExist {opts} {
 # ::Jabber::WB::GetWtopFromMessage --
 # 
 #       Figures out if we've got an existing whiteboard for an incoming
-#       message. Need to map 'type', 'jid', and 'thread'. 
+#       message. Need to map 'type', 'jid', and -thread 'thread'. 
+#       
+# Arguments:
+#       type        chat | groupchat | normal
+#       jid
+#       args        -thread ...
+#       
+# Results:
+#       $wtop or empty
 
-proc ::Jabber::WB::GetWtopFromMessage {type jid {thread {}}} {
+proc ::Jabber::WB::GetWtopFromMessage {type jid args} {
     variable jwbstate
     
     set wtop ""
-    set mjid [jlib::jidmap $jid]
+    array set argsArr $args
     
     switch -- $type {
 	 chat {
-	     if {[info exists jwbstate($thread,wtop)]} {
-		 set wtop $jwbstate($thread,wtop)
+	     if {[info exists argsArr(-thread)]} {
+		 set thread $argsArr(-thread)
+		 if {[info exists jwbstate($thread,wtop)]} {
+		     set wtop $jwbstate($thread,wtop)
+		 }
 	     }	    
 	 }
 	 groupchat {
 	 
-	     # The jid is typically the 'roomjid/nickorhash' but can be the room itself.
-	     jlib::splitjid $mjid jid2 resource
+	     # The jid is typically the 'roomjid/nick' but can be the room itself.
+	     set mjid [jlib::jidmap $jid]
+	     jlib::splitjid $mjid jid2 res
 	     if {[info exists jwbstate($jid2,wtop)]} {
 		 set wtop $jwbstate($jid2,wtop)
 	     }	    
