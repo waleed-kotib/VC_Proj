@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.37 2004-05-26 07:36:36 matben Exp $
+# $Id: NewMsg.tcl,v 1.38 2004-06-06 07:02:21 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -247,13 +247,15 @@ proc ::Jabber::NewMsg::Build {args} {
     pack  $frsub.lsub -side left -padx 2
     pack  $frsub.esub -side left -padx 2 -fill x -expand 1
     
-    pack [::Emoticons::MenuButton $frsub.smile $wtext]  \
+    pack [::Emoticons::MenuButton $frsub.smile -text $wtext]  \
       -side right -padx 16 -pady 0
     
     # Text.
     pack [frame $wtxt] -side top -fill both -expand 1 -padx 6 -pady 2
     text $wtext -height 8 -width 48 -wrap word \
-      -borderwidth 1 -relief sunken -yscrollcommand [list $wysc set]
+      -borderwidth 1 -relief sunken  \
+      -yscrollcommand [list ::UI::ScrollSet $wysc \
+      [list grid $wysc -column 1 -row 0 -sticky ns]]
     scrollbar $wysc -orient vertical -command [list $wtext yview]
     grid $wtext -column 0 -row 0 -sticky news
     grid $wysc -column 1 -row 0 -sticky ns

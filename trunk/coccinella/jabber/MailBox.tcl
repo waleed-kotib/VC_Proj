@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.46 2004-05-26 07:36:36 matben Exp $
+# $Id: MailBox.tcl,v 1.47 2004-06-06 07:02:21 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -262,7 +262,8 @@ proc ::Jabber::MailBox::Build {args} {
       0 [::msgcat::mc Date] 0 {} 0 {}]
     scrollbar $wysctbl -orient vertical -command [list $wtbl yview]
     tablelist::tablelist $wtbl -columns $columns  \
-      -yscrollcommand [list $wysctbl set]  \
+      -yscrollcommand [list ::UI::ScrollSet $wysctbl \
+      [list grid $wysctbl -column 1 -row 0 -sticky ns]] \
       -labelcommand [namespace current]::LabelCommand  \
       -stretch all -width 60 -selectmode extended
     # Pressed -labelbackground #8c8c8c
@@ -289,7 +290,9 @@ proc ::Jabber::MailBox::Build {args} {
     set wtextmsg $wfrmsg.text
     set wyscmsg $wfrmsg.ysc
     text $wtextmsg -height 4 -width 1 -wrap word \
-      -borderwidth 1 -relief sunken -yscrollcommand [list $wyscmsg set] \
+      -borderwidth 1 -relief sunken  \
+      -yscrollcommand [list ::UI::ScrollSet $wyscmsg \
+      [list grid $wyscmsg -column 1 -row 0 -sticky ns]] \
       -state disabled
     $wtextmsg tag configure normal
     ::Text::ConfigureLinkTagForTextWidget $wtextmsg urltag activeurltag

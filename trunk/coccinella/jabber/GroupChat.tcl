@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.61 2004-05-26 07:36:35 matben Exp $
+# $Id: GroupChat.tcl,v 1.62 2004-06-06 07:02:20 matben Exp $
 
 package require History
 
@@ -695,7 +695,7 @@ proc ::Jabber::GroupChat::Build {roomjid args} {
     pack [button $frbot.btcancel -text [::msgcat::mc Exit]  \
       -command [list [namespace current]::Exit $token]]  \
       -side right -padx 5  
-    pack [::Emoticons::MenuButton $frbot.smile $wtextsnd]  \
+    pack [::Emoticons::MenuButton $frbot.smile -text $wtextsnd]  \
       -side right -padx 6
     set wbtstatus $frbot.stat
     

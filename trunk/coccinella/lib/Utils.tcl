@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.19 2004-05-09 12:14:38 matben Exp $
+# $Id: Utils.tcl,v 1.20 2004-06-06 07:02:22 matben Exp $
 
 namespace eval ::Utils:: {
 
@@ -299,10 +299,10 @@ proc ::Utils::UnixGetWebBrowser { } {
     return $browser
 }
 
-proc ::Utils::OpenHtmlInBrowser {url} {
+proc ::Utils::OpenURLInBrowser {url} {
     global  this prefs
     
-    ::Debug 2 "::Utils::OpenHtmlInBrowser url=$url"
+    ::Debug 2 "::Utils::OpenURLInBrowser url=$url"
     
     switch $this(platform) {
 	unix {
@@ -715,7 +715,7 @@ proc ::Text::ButtonPressOnLink {w x y linkactive} {
 	    set url "http://$url"
 	}
 	if {[::Utils::IsWellformedUrl $url]} {
-	    ::Utils::OpenHtmlInBrowser $url
+	    ::Utils::OpenURLInBrowser $url
 	}
     }
 }
@@ -755,7 +755,7 @@ proc ::Text::ButtonPressOnURL {w idurl} {
 	set url "http://$url"
     }
     if {[::Utils::IsWellformedUrl $url]} {
-	::Utils::OpenHtmlInBrowser $url
+	::Utils::OpenURLInBrowser $url
     }
 }
 

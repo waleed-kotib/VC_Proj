@@ -261,6 +261,8 @@
 ::msgcat::mcset en mAddSpeechBubble	{Add Speech Bubble}
 ::msgcat::mcset en mUpdateCheck  	{Update Check}
 ::msgcat::mcset en mReloadImage  	{Reload Image}
+::msgcat::mcset en mCoccinellaHome  	{Coccinella Home...}
+::msgcat::mcset en mBugReport  	        {Report Bug...}
 
 
 # Popups
@@ -367,6 +369,7 @@
 ::msgcat::mcset en {Last name}
 ::msgcat::mcset en {Launch time}
 ::msgcat::mcset en {Local Time}
+::msgcat::mcset en {Logged out}
 ::msgcat::mcset en {Login as invisible}
 ::msgcat::mcset en {Mailbox Error}
 ::msgcat::mcset en {MIME type}

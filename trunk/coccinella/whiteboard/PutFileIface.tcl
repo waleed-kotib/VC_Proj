@@ -8,10 +8,12 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: PutFileIface.tcl,v 1.1 2004-06-06 06:41:31 matben Exp $
+# $Id: PutFileIface.tcl,v 1.2 2004-06-06 07:02:23 matben Exp $
 
 package require putfile
 package require uriencode
+
+package provide PutFileIface 1.0
 
 namespace eval ::PutFileIface:: {
     

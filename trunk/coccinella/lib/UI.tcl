@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.57 2004-05-06 13:41:11 matben Exp $
+# $Id: UI.tcl,v 1.58 2004-06-06 07:02:22 matben Exp $
 
 package require entrycomp
 
@@ -223,6 +223,17 @@ proc ::UI::GetToplevel {w} {
     } else {
 	set w [string trimright $w "."]
 	return [winfo toplevel $w]
+    }
+}
+
+proc ::UI::ScrollSet {wscrollbar geocmd offset size} {
+    
+    if {($offset != 0.0) || ($size != 1.0)} {
+	eval $geocmd
+	$wscrollbar set $offset $size
+    } else {
+	set manager [lindex $geocmd 0]
+	$manager forget $wscrollbar
     }
 }
 

@@ -1,6 +1,6 @@
 #  Copyright (c) 2002  Mats Bengtsson
 #
-# $Id: fontselection.tcl,v 1.6 2004-03-13 15:21:40 matben Exp $
+# $Id: fontselection.tcl,v 1.7 2004-06-06 07:02:20 matben Exp $
 
 package require combobox
 
@@ -58,7 +58,7 @@ proc ::fontselection::fontselection {w args} {
     
     # System fonts.
     set font $opts(-initialfont)
-    set allFonts [font families]
+    set allFonts [lsort [font families]]
     set frfont $w.frall.frtop.font
     frame $frfont
     pack $frfont -side left -fill y -padx 4 -pady 4

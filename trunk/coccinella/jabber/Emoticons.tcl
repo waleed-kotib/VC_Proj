@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.11 2004-05-21 06:58:08 matben Exp $
+# $Id: Emoticons.tcl,v 1.12 2004-06-06 07:02:20 matben Exp $
 
 
 package provide Emoticons 1.0
@@ -521,8 +521,16 @@ proc ::Emoticons::FreeAllTmpSets { } {
 # Emoticons::MenuButton --
 # 
 #       A kind of general menubutton for inserting smileys into a text widget.
+#       
+# Arguments:
+#       w           widget path
+#       args        -text     inserts directly into text widget
+#                   -command  callback command
+#       
+# Results:
+#       chattoken
 
-proc ::Emoticons::MenuButton {w wtext} {
+proc ::Emoticons::MenuButton {w args} {
     global  prefs this    
     variable smiley
 
@@ -543,7 +551,6 @@ proc ::Emoticons::MenuButton {w wtext} {
       [string length [info command menubuttonOrig]]} {
 	set menubuttonImage menubuttonOrig
     } else {
-	#set menubuttonImage menubutton
 	set menubuttonImage button
     }
     
@@ -561,20 +568,33 @@ proc ::Emoticons::MenuButton {w wtext} {
 	}
     }
     set wmenu ${w}.m
-    #$menubuttonImage $w -menu $wmenu -image $smiley(:\))
     $menubuttonImage $w -image $btim -bd $btbd -width $size -height $size
     
-    ::Emoticons::BuildMenu $wmenu $wtext
+    eval {::Emoticons::BuildMenu $wmenu} $args
 
     bind $w <Button-1> [list [namespace current]::PostMenu $wmenu %X %Y]
     return $w
 }
 
-proc ::Emoticons::BuildMenu {wmenu wtext} {
+proc ::Emoticons::BuildMenu {wmenu args} {
     global  prefs
     variable smiley
     variable smileyInv
     
+    foreach {key value} $args {
+	
+	switch -- $key {
+	    -text {
+		set type text
+		set wtext $value
+	    }
+	    -command {
+		set type command
+		set cmd $value
+	    }
+	}
+    }
+
     set m [menu $wmenu -tearoff 0]
     set ims [lsort -dictionary [array names smileyInv]]
 
@@ -587,19 +607,27 @@ proc ::Emoticons::BuildMenu {wmenu wtext} {
 	set i 0
 	foreach im $ims {
 	    set key [lindex $smileyInv($im) 0]
-	    set cmd [list Emoticons::InsertSmiley $wtext $im $key]
+	    if {[string equal $type "text"]} {
+		set mcmd [list Emoticons::InsertSmiley $wtext $im $key]
+	    } else {
+		set mcmd [concat $cmd [list $im $key]]
+	    }
 	    set opts {-hidemargin 1}
 	    if {$i && ([expr $i % $nheight] == 0)} {
 		lappend opts -columnbreak 1
 	    }
-	    eval {$m add command -image $im -command $cmd} $opts
+	    eval {$m add command -image $im -command $mcmd} $opts
 	    incr i
 	}
     } else {
 	foreach im $ims {
 	    set key [lindex $smileyInv($im) 0]
-	    set cmd [list Emoticons::InsertSmiley $wtext $im $key]
-	    $m add command -label $key -command $cmd
+	    if {[string equal $type "text"]} {
+		set mcmd [list Emoticons::InsertSmiley $wtext $im $key]
+	    } else {
+		set mcmd [concat $cmd [list $im $key]]
+	    }
+	    $m add command -label $key -command $mcmd
 	}
     }
 }

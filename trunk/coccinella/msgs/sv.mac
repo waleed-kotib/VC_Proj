@@ -260,6 +260,8 @@
 ::msgcat::mcset sv mAddSpeechBubble	{LŠgg till pratbubbla}
 ::msgcat::mcset sv mUpdateCheck  	{Uppdaterings koll}
 ::msgcat::mcset sv mReloadImage  	{HŠmta bild igen}
+::msgcat::mcset sv mCoccinellaHome  	{Coccinella hem...}
+::msgcat::mcset sv mBugReport  	        {Rapportera bug...}
 
 
 # Popups
@@ -366,6 +368,7 @@
 ::msgcat::mcset sv {Last name}             {Efternamn}
 ::msgcat::mcset sv {Launch time}           {Programmuppstart}
 ::msgcat::mcset sv {Local Time}		   {Lokaltid}
+::msgcat::mcset sv {Logged out}            {Utloggad}
 ::msgcat::mcset sv {Login as invisible}    {Anslut som osynlig}
 ::msgcat::mcset sv {Mailbox Error}	   {Inkorgsfel}
 ::msgcat::mcset sv {MIME type}             {MIME typ}

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.46 2004-05-26 07:36:35 matben Exp $
+# $Id: Browse.tcl,v 1.47 2004-06-06 07:02:20 matben Exp $
 
 package require chasearrows
 
@@ -236,6 +236,7 @@ proc ::Jabber::Browse::Command {browseName type from subiq args} {
 
 proc ::Jabber::Browse::Callback {browseName type from subiq} {    
     variable wtop
+    variable tstate
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jprefs jprefs
@@ -243,6 +244,7 @@ proc ::Jabber::Browse::Callback {browseName type from subiq} {
     ::Debug 2 "::Jabber::Browse::Callback browseName=$browseName, type=$type,\
       from=$from, subiq='[string range $subiq 0 60] ...'"
 
+    catch {unset tstate(run,$from)}
     ::Jabber::Browse::ControlArrows -1
     array set attrArr [wrapper::getattrlist $subiq]
 
@@ -395,12 +397,14 @@ proc ::Jabber::Browse::DispatchUsers {jid subiq} {
 #
 
 proc ::Jabber::Browse::ErrorProc {silent browseName type jid errlist} {
+    variable tstate
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
     
     ::Debug 2 "::Jabber::Browse::ErrorProc type=$type, jid=$jid, errlist='$errlist'"
 
+    array unset tstate run,*
     ::Jabber::Browse::ControlArrows 0
     
     # If we got an error browsing an actual server, then remove from list.
@@ -422,16 +426,14 @@ proc ::Jabber::Browse::ErrorProc {silent browseName type jid errlist} {
 		::Jabber::Disco::GetItems $jserver(this)
 	    }
 	}	
-	::Jabber::AddErrorLog [clock format [clock seconds] -format "%H:%M:%S"] \
-	  $jid  \
+	::Jabber::AddErrorLog $jid  \
 	  "Failed browsing: Error code [lindex $errlist 0] and message:\
 	  [lindex $errlist 1]"
     } else {
 	
 	# Silent...
 	if {$silent} {
-	    ::Jabber::AddErrorLog [clock format [clock seconds] -format "%H:%M:%S"] \
-	      $jid  \
+	    ::Jabber::AddErrorLog $jid  \
 	      "Failed browsing: Error code [lindex $errlist 0] and message:\
 	      [lindex $errlist 1]"
 	} else {
@@ -540,10 +542,13 @@ proc ::Jabber::Browse::Build {w} {
     set wysc $wbox.ysc
     scrollbar $wxsc -orient horizontal -command [list $wtree xview]
     scrollbar $wysc -orient vertical -command [list $wtree yview]
-    ::tree::tree $wtree -width 180 -height 100 -silent 1 -scrollwidth 400 \
-      -xscrollcommand [list $wxsc set]       \
-      -yscrollcommand [list $wysc set]       \
+    ::tree::tree $wtree -width 100 -height 100 -silent 1 -scrollwidth 400 \
+      -xscrollcommand [list ::UI::ScrollSet $wxsc \
+      [list grid $wxsc -row 1 -column 0 -sticky ew]]  \
+      -yscrollcommand [list ::UI::ScrollSet $wysc \
+      [list grid $wysc -row 0 -column 1 -sticky ns]]  \
       -selectcommand ::Jabber::Browse::SelectCmd   \
+      -closecommand [namespace current]::CloseTreeCmd  \
       -opencommand ::Jabber::Browse::OpenTreeCmd
     
     if {[string match "mac*" $this(platform)]} {
@@ -1022,6 +1027,7 @@ proc ::Jabber::Browse::SelectCmd {w v} {
 
 proc ::Jabber::Browse::OpenTreeCmd {w v} {   
     variable wtree    
+    variable tstate
     upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::Jabber::Browse::OpenTreeCmd v=$v"
@@ -1032,6 +1038,7 @@ proc ::Jabber::Browse::OpenTreeCmd {w v} {
 	# If we have not yet browsed this jid, do it now!
 	# We should have a method to tell if children have been added to tree!!!
 	if {![$jstate(browse) isbrowsed $jid]} {
+	    set tstate(run,$jid) 1
 	    ::Jabber::Browse::ControlArrows 1
 	    
 	    # Browse services available.
@@ -1045,8 +1052,20 @@ proc ::Jabber::Browse::OpenTreeCmd {w v} {
     }    
 }
 
+proc ::Jabber::Browse::CloseTreeCmd {w v} {   
+    variable tstate
+    
+    ::Debug 2 "::Jabber::Browse::CloseTreeCmd v=$v"
+    set jid [lindex $v end]
+    if {[info exists tstate(run,$jid)]} {
+	unset tstate(run,$jid)
+	::Jabber::Browse::ControlArrows -1
+    }
+}
+
 proc ::Jabber::Browse::Refresh {jid} {    
     variable wtree    
+    variable tstate
     upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::Jabber::Browse::Refresh jid=$jid"
@@ -1060,6 +1079,7 @@ proc ::Jabber::Browse::Refresh {jid} {
     }
     
     # Browse once more, let callback manage rest.
+    set tstate(run,$jid) 1
     ::Jabber::Browse::ControlArrows 1
     ::Jabber::Browse::Get $jid
 }
