@@ -4,7 +4,7 @@
 #       This is just a first sketch.
 #       TODO: all message translations.
 #       
-# $Id: BuddyPounce.tcl,v 1.5 2004-06-17 13:32:55 matben Exp $
+# $Id: BuddyPounce.tcl,v 1.6 2004-06-19 13:25:38 matben Exp $
 
 namespace eval ::BuddyPounce:: {
     
@@ -162,36 +162,32 @@ proc ::BuddyPounce::Build {jid} {
     pack $w.frall.head -side top -fill both -expand 1
     label $w.frall.msg -wraplength 300 -justify left -padx 10 -pady 2 \
       -text "Set a specific action when something happens with \"$jid\",\
-      which can be a changed status, or if you receive a message etc."
+      which can be a changed status, or if you receive a message etc.\
+      Pick events using the tabs."
     pack $w.frall.msg -side top -anchor w
     
-    pack [frame $w.frall.fr -bg $contrastBg] -padx 4 -pady 2
-    set wfr $w.frall.fr.f
-    frame $wfr
-    pack  $wfr -padx 1 -pady 1
+    frame $w.frall.fr -bg $contrastBg -bd 0
+    pack  $w.frall.fr -padx 6 -pady 4
     
-    # Header labels.
-    label $wfr.lonline -text [::msgcat::mc {Event Type}]
-    label $wfr.lact    -text [::msgcat::mc {Perform Action}]
-    grid  $wfr.lonline $wfr.lact -sticky w -padx 6 -pady 2
-    
+    set wnb $w.frall.fr.nb
+    ::mactabnotebook::mactabnotebook $wnb
+    pack $wnb -padx 1 -pady 1
+        
     # Fake menubutton to compute max width.
-    set wtmp $wfr._tmp
+    set wtmp $w.frall._tmp
     menubutton $wtmp -text $maxstr
     set soundMaxWidth [winfo reqwidth $wtmp]
     destroy $wtmp
     
     set i 0
     foreach eventStr $events(str) key $events(keys) {
-	set wdiv $wfr.div[incr i]
-	frame $wdiv -height 1 -bg $contrastBg
-	
-	# Event.
-	label $wfr.$key -text " [::msgcat::mc $eventStr]"
-	
+
+	set wpage [$wnb newpage $eventStr -text [::msgcat::mc $eventStr]]	
+		
 	# Action
-	set wact $wfr.fact${key}
+	set wact $wpage.f${key}
 	frame $wact
+	pack  $wact -padx 6 -pady 2
 	checkbutton $wact.alrt -text " [::msgcat::mc {Show Popup}]" \
 	  -variable $token\($key,msgbox)
 	
@@ -213,12 +209,7 @@ proc ::BuddyPounce::Build {jid} {
 	grid x          x            $wpad
 	grid $wact.alrt $wact.lsound $wact.msound -sticky w -padx 4 -pady 1
 	grid $wact.chat $wact.msg    -            -sticky w -padx 4 -pady 1
-	#grid $wact.msound -sticky e
-	
-	grid $wdiv     -     -sticky ew
-	grid $wfr.$key $wact -padx 1 -pady 2 -sticky nw
-	grid $wact -sticky w
-	
+		
 	if {([llength audioSuffixes] == 0) || ![component::exists Sounds]} {
 	    $wact.lsound configure -state disabled
 	    $wact.msound configure -state disabled
