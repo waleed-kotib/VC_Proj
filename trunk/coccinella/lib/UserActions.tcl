@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UserActions.tcl,v 1.8 2003-06-07 12:46:36 matben Exp $
+# $Id: UserActions.tcl,v 1.9 2003-06-15 12:40:13 matben Exp $
 
 namespace eval ::UserActions:: {
     
@@ -715,8 +715,8 @@ proc ::UserActions::DoSendCanvas {wtop} {
 
 # UserActions::DoCloseWindow --
 #
-#       Typically called from 'wm protocol $w WM_DELETE_WINDOW'
-#       to take special actions before a window is closed.
+#       Typically called from the menu.
+#       Take special actions before a window is closed.
 
 proc ::UserActions::DoCloseWindow { } {
     global  wDlgs
@@ -727,6 +727,7 @@ proc ::UserActions::DoCloseWindow { } {
     } else {
 	set wtop ${w}.
     }
+    Debug 2 "::UserActions::DoCloseWindow winfo class $w=[winfo class $w]"
     
     # Do different things depending on type of toplevel.
     switch -glob -- [winfo class $w] {

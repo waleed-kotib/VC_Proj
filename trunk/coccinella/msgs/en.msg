@@ -852,7 +852,7 @@ about this when trying to register.}
 now if it is a new one? You must already be connected to a network\
 (without firewall) to register.}
 	::msgcat::mcset en sufinmsg	{That's all. If the registration was\
-succesful, you only have to press the Open button, or select the Jabber/Login menu.\
+succesful, you only have to press the Connect button, or select the Jabber/Login menu.\
 Also, be nice to the bug ;-)}
 	::msgcat::mcset en suheadtxt	{Coccinella Setup Assistant}
 

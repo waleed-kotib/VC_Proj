@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.11 2003-06-07 12:46:36 matben Exp $
+# $Id: jabberlib.tcl,v 1.12 2003-06-15 12:40:13 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -121,6 +121,7 @@
 #      jlibName vcard_set cmd ?args?
 #      jlibName setgroupchatpriority priorityList
 #      jlibName setgroupchatprotocol jid protocol
+#      jlibName setroomprotocol jid protocol
 #      
 #  o protocol independent methods for groupchats/conference:
 #      jlibName service parent jid
@@ -208,6 +209,7 @@
 #                'setgroupchatprotocol' and reworked all groupchat protocol
 #                dispatching.
 #       030523   added 'getagent' and 'haveagent' commands.
+#       030611   added 'setroomprotocol' command and modified service dispatching
 
 package require wrapper
 package require roster
@@ -2663,6 +2665,22 @@ proc jlib::registergcprotocol {jlibname jid gcprot} {
     }
 }
 
+# jlib::setroomprotocol --
+# 
+#       Set the groupchat protocol in use for room. This acts only as a
+#       dispatcher for 'service' commands.  
+#       Only called internally when entering a room!
+
+proc jlib::setroomprotocol {jlibname roomjid protocol} {
+    variable statics
+    upvar [namespace current]::${jlibname}::locals locals
+    
+    if {![regexp $statics(groupchatTypeExp) $protocol]} {
+	return -code error "Unrecognized groupchat protocol \"$protocol\""
+    }
+    set locals(roomprot,$roomjid) $protocol
+}
+
 #--- namespace jlib::service ---------------------------------------------------
 
 # jlib::service --
@@ -2803,36 +2821,47 @@ proc jlib::service::isroom {jlibname jid} {
 
 proc jlib::service::nick {jlibname jid} {   
     upvar [namespace parent]::${jlibname}::lib lib
-    upvar [namespace parent]::${jlibname}::gchat gchat
+    upvar [namespace parent]::${jlibname}::locals locals
 
     # All kind of conference components seem to support the old 'gc-1.0'
     # protocol, and we therefore must query our method for entering the room.
     if {![regexp {^([^/]+)/.+} $jid match room]} {
 	set room $jid
     } 
-    if {[lsearch $gchat(allroomsin) $room] >= 0} {
-	
-	# Old-style groupchat just has /nick.
-	if {[regexp {^[^@]+@[^@/]+/(.+)$} $jid match nick]} {
-
-	    # Else we just use the username. (If room for instance)
-	} elseif {![regexp {^([^@]+)@[^@/]+$} $jid match nick]} {
-	    set nick $jid
-	}
-    } elseif {[lsearch [[namespace parent]::muc::allroomsin $jlibname] $room] >= 0} {
-	
-	# The MUC conference method: nick is always the resource part. 
-	# Rooms lack the */res.
-	if {![regexp {^[^@]+@[^@/]+/(.+)$} $jid match nick]} {
-	    if {![regexp {^([^@]+)@.+} $jid match nick]} {
+    if {![info exists locals(roomprot,$room)]} {
+	return -code error "Does not know which protocol to use in $room"
+    }
+    set nick ""
+    
+    switch -- $locals(roomprot,$room) {
+	gc-1.0 {
+	    
+	    # Old-style groupchat just has /nick.
+	    if {[regexp {^[^@]+@[^@/]+/(.+)$} $jid match nick]} {
+		
+		# Else we just use the username. (If room for instance)
+	    } elseif {![regexp {^([^@]+)@[^@/]+$} $jid match nick]} {
 		set nick $jid
 	    }
 	}
-    } elseif {[$lib(browsename) isbrowsed $lib(server)]} {
-    
-	# Assume that if the login server is browsed we also should query
-	# the browse object.
-	set nick [$lib(browsename) getname $jid]
+	muc {
+	    
+	    # The MUC conference method: nick is always the resource part. 
+	    # Rooms lack the */res.
+	    if {![regexp {^[^@]+@[^@/]+/(.+)$} $jid match nick]} {
+		if {![regexp {^([^@]+)@.+} $jid match nick]} {
+		    set nick $jid
+		}
+	    }
+	}	
+	conference {
+	    if {[$lib(browsename) isbrowsed $lib(server)]} {
+		
+		# Assume that if the login server is browsed we also should query
+		# the browse object.
+		set nick [$lib(browsename) getname $jid]
+	    }
+	}
     }
     return $nick
 }
@@ -2851,27 +2880,40 @@ proc jlib::service::nick {jlibname jid} {
 
 proc jlib::service::hashandnick {jlibname room} {    
     upvar [namespace parent]::${jlibname}::lib lib
-    upvar [namespace parent]::${jlibname}::gchat gchat
+    upvar [namespace parent]::${jlibname}::locals locals
 
     # All kind of conference components seem to support the old 'gc-1.0'
     # protocol, and we therefore must query our method for entering the room.
-    
-    if {[lsearch $gchat(allroomsin) $room] >= 0} {
-	
-	# Old-style groupchat just has /nick.
-	set nick [[namespace parent]::groupchat::mynick $jlibname $room]
-	set hashandnick [list ${room}/${nick} $nick]   
-    } elseif {[lsearch [[namespace parent]::muc::allroomsin $jlibname] $room] >= 0} {
-	
-	# The MUC conference method.
-	set nick [[namespace parent]::muc::mynick $jlibname $room]
-	set hashandnick [list ${room}/${nick} $nick]   
-    } elseif {[$lib(browsename) isbrowsed $lib(server)]} {
-	set hashandnick  \
-	  [[namespace parent]::conference::hashandnick $jlibname $room]
+    if {![info exists locals(roomprot,$room)]} {
+	return -code error "Does not know which protocol to use in $room"
     }
+    set hashandnick [list ${room}/ ""]
+    
+    switch -- $locals(roomprot,$room) {
+	gc-1.0 {
+	
+	    # Old-style groupchat just has /nick.
+	    set nick [[namespace parent]::groupchat::mynick $jlibname $room]
+	    set hashandnick [list ${room}/${nick} $nick]   
+	} 
+	muc {
+	    set nick [[namespace parent]::muc::mynick $jlibname $room]
+	    set hashandnick [list ${room}/${nick} $nick]   
+	} 
+	conference {
+	    if {[$lib(browsename) isbrowsed $lib(server)]} {
+		set hashandnick  \
+		  [[namespace parent]::conference::hashandnick $jlibname $room]
+	    }
+	}
+    }
+    
     return $hashandnick
 }
+
+# jlib::service::allroomsin --
+# 
+# 
 
 proc jlib::service::allroomsin {jlibname} {    
     upvar [namespace parent]::${jlibname}::lib lib
@@ -2885,33 +2927,53 @@ proc jlib::service::allroomsin {jlibname} {
 
 proc jlib::service::roomparticipants {jlibname room} {
     upvar [namespace parent]::${jlibname}::lib lib
-    upvar [namespace parent]::${jlibname}::gchat gchat
+    upvar [namespace parent]::${jlibname}::locals locals
     
+    if {![info exists locals(roomprot,$room)]} {
+	return -code error "Does not know which protocol to use in $room"
+    }
+
     set everyone {}
     if {![[namespace current]::isroom $jlibname $room]} {
 	return -code error "The jid \"$room\" is not a room"
     }
 
-    if {[lsearch $gchat(allroomsin) $room] >= 0} {
-	set everyone [[namespace parent]::groupchat::participants $jlibname $room]
-    } elseif {[lsearch [[namespace parent]::muc::allroomsin $jlibname] $room] >= 0} {
-	set everyone [[namespace parent]::muc::participants $jlibname $room]
-    } elseif {[$lib(browsename) isbrowsed $lib(server)]} {
-	set everyone [$lib(browsename) getchilds $room]
+    switch -- $locals(roomprot,$room) {
+	gc-1.0 {
+	    set everyone [[namespace parent]::groupchat::participants $jlibname $room]
+	} 
+	muc {
+	    set everyone [[namespace parent]::muc::participants $jlibname $room]
+	}
+	conference {
+	    if {[$lib(browsename) isbrowsed $lib(server)]} {
+		set everyone [$lib(browsename) getchilds $room]
+	    }
+	}
     }
     return $everyone
 }
 
 proc jlib::service::exitroom {jlibname room} {    
     upvar [namespace parent]::${jlibname}::lib lib
-    upvar [namespace parent]::${jlibname}::gchat gchat
+    upvar [namespace parent]::${jlibname}::locals locals
 
-    if {[lsearch $gchat(allroomsin) $room] >= 0} {
-	[namespace parent]::groupchat::exit $jlibname $room
-    } elseif {[lsearch [[namespace parent]::muc::allroomsin $jlibname] $room] >= 0} {
-	[namespace parent]::muc::exit $jlibname $room
-    } elseif {[$lib(browsename) isbrowsed $lib(server)]} {
-	[namespace parent]::conference::exit $jlibname $room
+    if {![info exists locals(roomprot,$room)]} {
+	return -code error "Does not know which protocol to use in $room"
+    }
+
+    switch -- $locals(roomprot,$room) {
+	gc-1.0 {
+	    [namespace parent]::groupchat::exit $jlibname $room
+	}
+	muc {
+	    [namespace parent]::muc::exit $jlibname $room
+	}
+	conference {
+	    if {[$lib(browsename) isbrowsed $lib(server)]} {
+		[namespace parent]::conference::exit $jlibname $room
+	    }
+	}
     }
 }
 
@@ -2953,6 +3015,7 @@ proc jlib::conference::get_enter {jlibname room cmd} {
       -attrlist {xmlns jabber:iq:conference}]
     [namespace parent]::send_iq $jlibname "get" $xmllist -to $room -command  \
       [list [namespace parent]::parse_iq_response $jlibname $cmd]
+    [namespace parent]::setroomprotocol $jlibname $room "conference"
     return ""
 }
 
@@ -3040,6 +3103,7 @@ proc jlib::conference::set_create {jlibname room subelements cmd} {
       [wrapper::createtag "create" -attrlist {xmlns jabber:iq:conference} \
       -subtags $subelements] -to $room -command  \
       [list [namespace current]::parse_set_enter $jlibname $room $cmd]
+    [namespace parent]::setroomprotocol $jlibname $room "conference"
     return ""
 }
 
@@ -3163,6 +3227,7 @@ proc jlib::groupchat::enter {jlibname room nick args} {
     
     # This is not foolproof since it may not always success.
     lappend gchat(allroomsin) $room
+    [namespace parent]::setroomprotocol $jlibname $room "gc-1.0"
     set gchat(allroomsin) [lsort -unique $gchat(allroomsin)]
     return ""
 }
