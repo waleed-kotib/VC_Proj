@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.80 2004-11-11 15:38:29 matben Exp $
+# $Id: GroupChat.tcl,v 1.81 2004-11-14 13:53:26 matben Exp $
 
 package require History
 
@@ -698,9 +698,15 @@ proc ::Jabber::GroupChat::Build {roomjid args} {
     set wbtstatus $frbot.stat
     
     set state(wbstatus) $wbtstatus
-    BuildStatusMenuButton $token $wbtstatus
+
+    #BuildStatusMenuButton $token $wbtstatus
+    #ConfigStatusMenuButton $token $wbtstatus available
+
+    ::Jabber::Roster::BuildStatusButton3 $wbtstatus \
+      $token\(status) -command [list [namespace current]::StatusCmd3 $token] 
+    ::Jabber::Roster::ConfigStatusButton3 $wbtstatus available
+    
     pack $wbtstatus -side right -padx 6
-    ConfigStatusMenuButton $token $wbtstatus available
 
     pack [checkbutton $frbot.active -text " [mc {Active <Return>}]" \
       -command [list [namespace current]::ActiveCmd $token] \
@@ -902,6 +908,25 @@ proc ::Jabber::GroupChat::StatusCmd {token} {
     }
     $state(wbstatus) configure -image  \
       [::Jabber::Roster::GetPresenceIconFromKey $status]
+}
+
+proc ::Jabber::GroupChat::StatusCmd3 {token status} {
+    variable $token
+    upvar 0 $token state
+
+    ::Debug 2 "::Jabber::GroupChat::StatusCmd3 status=$status"
+
+    if {$status == "unavailable"} {
+	set ans [Exit $token]
+	if {$ans == "no"} {
+	    set state(status) $state(oldStatus)
+	}
+    } else {
+    
+	# Send our status.
+	::Jabber::SetStatus $status -to $state(roomjid)
+	set state(oldStatus) $status
+    }
 }
 
 # Jabber::GroupChat::InsertMessage --

@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.114 2004-11-08 15:52:51 matben Exp $
+# $Id: Jabber.tcl,v 1.115 2004-11-14 13:53:26 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -45,6 +45,7 @@ package require Privacy
 package require Profiles
 package require Register
 package require Roster
+package require Rosticons
 package require Search
 package require Subscribe
 package require VCard
@@ -121,7 +122,29 @@ namespace eval ::Jabber:: {
       xa              [mc mExtendedAway]  \
       invisible       [mc mInvisible]     \
       unavailable     [mc mNotAvailable]]
-        
+
+    variable mapShowMLabelToText
+    variable mapShowTextToMLabel
+    
+    array set mapShowMLabelToText {
+	mAvailable        available
+	mAway             away
+	mChat             chat
+	mDoNotDisturb     dnd
+	mExtendedAway     xa
+	mInvisible        invisible
+	mNotAvailable     unavailable
+    }
+    array set mapShowTextToMLabel {
+	available       mAvailable
+	away            mAway
+	chat            mChat
+	dnd             mDoNotDisturb
+	xa              mExtendedAway
+	invisible       mInvisible
+	unavailable     mNotAvailable
+    }
+
     # Array that maps namespace (ns) to a descriptive name.
     variable nsToText
     array set nsToText {

@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.91 2004-11-02 15:34:51 matben Exp $
+# $Id: Coccinella.tcl,v 1.92 2004-11-14 13:53:26 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -247,6 +247,8 @@ set this(appletsPath)       [file join $this(path) plugins applets]
 set this(componentPath)     [file join $this(path) components]
 set this(emoticonsPath)     [file join $this(path) iconsets emoticons]
 set this(altEmoticonsPath)  [file join $this(prefsPath) iconsets emoticons]
+set this(rosticonsPath)     [file join $this(path) iconsets roster]
+set this(altRosticonsPath)  [file join $this(prefsPath) iconsets roster]
 set this(appPath)           $thisPath
 if {[info exists starkit::topdir]} {
     set this(appPath) [file dirname [info nameofexecutable]]
