@@ -5,11 +5,11 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.54 2004-11-27 08:41:20 matben Exp $
+# $Id: Login.tcl,v 1.55 2004-11-27 14:52:54 matben Exp $
 
 package provide Login 1.0
 
-namespace eval ::Jabber::Login:: {
+namespace eval ::Login:: {
     
     variable server
     variable username
@@ -19,12 +19,12 @@ namespace eval ::Jabber::Login:: {
     set uid 0
     
     # Add all event hooks.
-    ::hooks::register quitAppHook     ::Jabber::Login::QuitAppHook
-    ::hooks::register closeWindowHook ::Jabber::Login::CloseHook
-    ::hooks::register launchFinalHook ::Jabber::Login::LaunchHook
+    ::hooks::register quitAppHook     ::Login::QuitAppHook
+    ::hooks::register closeWindowHook ::Login::CloseHook
+    ::hooks::register launchFinalHook ::Login::LaunchHook
 }
 
-# Jabber::Login::Dlg --
+# Login::Dlg --
 #
 #       Log in to a server with an existing user account.
 #
@@ -33,7 +33,7 @@ namespace eval ::Jabber::Login:: {
 # Results:
 #       none
 
-proc ::Jabber::Login::Dlg { } {
+proc ::Login::Dlg { } {
     global  this prefs wDlgs
     
     variable wtoplevel
@@ -159,11 +159,11 @@ proc ::Jabber::Login::Dlg { } {
     ::UI::SetWindowPosition $w
     wm resizable $w 0 0
     bind $w <Return>  [list $frbot.btok invoke]
-    bind $w <Escape>  [list ::Jabber::Login::DoCancel $w]
-    bind $w <Destroy> [list ::Jabber::Login::DoCancel $w]
+    bind $w <Escape>  [list ::Login::DoCancel $w]
+    bind $w <Destroy> [list ::Login::DoCancel $w]
 }
 
-proc ::Jabber::Login::LoadProfiles { } {
+proc ::Login::LoadProfiles { } {
     global  wDlgs
     variable tmpProfArr
     variable menuVar
@@ -199,7 +199,7 @@ proc ::Jabber::Login::LoadProfiles { } {
     set menuVar $profile
 }
 
-proc ::Jabber::Login::TraceMenuVar {name key op} {
+proc ::Login::TraceMenuVar {name key op} {
     global  prefs
     
     variable profile
@@ -228,7 +228,7 @@ proc ::Jabber::Login::TraceMenuVar {name key op} {
     }
 }
 
-proc ::Jabber::Login::CloseHook {wclose} {
+proc ::Login::CloseHook {wclose} {
     global  wDlgs
     variable finished
     
@@ -238,7 +238,7 @@ proc ::Jabber::Login::CloseHook {wclose} {
     }
 }
 
-proc ::Jabber::Login::MoreOpts {w} {
+proc ::Login::MoreOpts {w} {
     variable wtri
     variable wtrilab
     variable wfrmore
@@ -249,7 +249,7 @@ proc ::Jabber::Login::MoreOpts {w} {
     bind $wtri <Button-1> [list [namespace current]::LessOpts $w]
 }
 
-proc ::Jabber::Login::LessOpts {w} {
+proc ::Login::LessOpts {w} {
     variable wtri
     variable wtrilab
     variable wfrmore
@@ -260,19 +260,19 @@ proc ::Jabber::Login::LessOpts {w} {
     bind $wtri <Button-1> [list [namespace current]::MoreOpts $w]
 }
 
-proc ::Jabber::Login::DoCancel {w} {
+proc ::Login::DoCancel {w} {
     variable finished
 
     set finished 0
     Close $w
 }
 
-proc ::Jabber::Login::Profiles { } {
+proc ::Login::Profiles { } {
     
     ::Profiles::BuildDialog
 }
 
-proc ::Jabber::Login::Close {w} {
+proc ::Login::Close {w} {
     variable menuVar
     
     # Clean up.
@@ -284,11 +284,11 @@ proc ::Jabber::Login::Close {w} {
     catch {destroy $w}    
 }
 
-# Jabber::Login::DoLogin --
+# Login::DoLogin --
 # 
 #       Starts the login process.
 
-proc ::Jabber::Login::DoLogin {} {
+proc ::Login::DoLogin {} {
     global  prefs
 
     variable wtoplevel
@@ -301,7 +301,7 @@ proc ::Jabber::Login::DoLogin {} {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::Jabber::Login::DoLogin"
+    ::Debug 2 "::Login::DoLogin"
     
     # Kill any pending open states.
     ::Network::KillAll
@@ -351,22 +351,22 @@ proc ::Jabber::Login::DoLogin {} {
       [namespace current]::LoginCallback} $opts
 }
 
-proc ::Jabber::Login::LoginCallback {token status {errmsg ""}} {
+proc ::Login::LoginCallback {token status {errmsg ""}} {
     variable $token
     upvar 0 $token state
     
-    ::Debug 2 "::Jabber::Login::LoginCallback"
+    ::Debug 2 "::Login::LoginCallback"
     
     ShowAnyMessageBox $token $status $errmsg
 }
 
 #       Show message box if necessary.
 
-proc ::Jabber::Login::ShowAnyMessageBox {token status {errmsg ""}} {
+proc ::Login::ShowAnyMessageBox {token status {errmsg ""}} {
     variable $token
     upvar 0 $token state
     
-    ::Debug 2 "::Jabber::Login::DoLoginHighCB status=$status errmsg=$errmsg"
+    ::Debug 2 "::Login::DoLoginHighCB status=$status errmsg=$errmsg"
     
     set str ""
     
@@ -398,7 +398,7 @@ proc ::Jabber::Login::ShowAnyMessageBox {token status {errmsg ""}} {
     }
 }
 
-proc ::Jabber::Login::SetStatus {args} {
+proc ::Login::SetStatus {args} {
     upvar ::Jabber::jstate jstate
     
     array set argsArr {
@@ -418,11 +418,11 @@ proc ::Jabber::Login::SetStatus {args} {
     }    
 }
 
-# Jabber::Login::LaunchHook --
+# Login::LaunchHook --
 # 
 #       Method to automatically login after launch.
 
-proc ::Jabber::Login::LaunchHook { } {
+proc ::Login::LaunchHook { } {
     upvar ::Jabber::jprefs jprefs
     
     if {!$jprefs(autoLogin)} {
@@ -448,20 +448,20 @@ proc ::Jabber::Login::LaunchHook { } {
 	} else {
 	    set res "coccinella"
 	}
-	eval {::Jabber::Login::HighLogin $domain $node $res $password \
+	eval {::Login::HighLogin $domain $node $res $password \
 	  [namespace current]::AutoLoginCB} $opts
     }
 }
 
-proc ::Jabber::Login::QuitAppHook { } {
+proc ::Login::QuitAppHook { } {
     global  wDlgs
     
     ::UI::SaveWinGeom $wDlgs(jlogin)    
 }
 
-proc ::Jabber::Login::AutoLoginCB {logtoken status {errmsg ""}} {
+proc ::Login::AutoLoginCB {logtoken status {errmsg ""}} {
 
-    ::Jabber::Login::ShowAnyMessageBox $logtoken $status $errmsg
+    ::Login::ShowAnyMessageBox $logtoken $status $errmsg
 }
 
 #-------------------------------------------------------------------------------
@@ -470,7 +470,7 @@ proc ::Jabber::Login::AutoLoginCB {logtoken status {errmsg ""}} {
 # Sort of high level call at application level. Handles all UI except
 # any message boxes.
 
-# Jabber::Login::HighLogin --
+# Login::HighLogin --
 # 
 #       Initializes the login procedure. Callback when finished with status.
 #       
@@ -493,13 +493,13 @@ proc ::Jabber::Login::AutoLoginCB {logtoken status {errmsg ""}} {
 # Results:
 #       Callback initiated.
 
-proc ::Jabber::Login::HighLogin {server username resource password cmd args} {
+proc ::Login::HighLogin {server username resource password cmd args} {
     global  prefs
     variable uid
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::Jabber::Login::HighLogin args=$args"
+    ::Debug 2 "::Login::HighLogin args=$args"
     
     array set argsArr {
 	-digest         1
@@ -556,11 +556,11 @@ proc ::Jabber::Login::HighLogin {server username resource password cmd args} {
       -port $state(-port)} $opts
 }
 
-proc ::Jabber::Login::HighConnectCB {token status msg} {
+proc ::Login::HighConnectCB {token status msg} {
     variable $token
     upvar 0 $token state
     
-    ::Debug 2 "::Jabber::Login::HighConnectCB status=$status"
+    ::Debug 2 "::Login::HighConnectCB status=$status"
     
     switch $status {
 	error {
@@ -584,12 +584,12 @@ proc ::Jabber::Login::HighConnectCB {token status msg} {
     }
 }
 
-proc ::Jabber::Login::HighInitStreamCB {token args} {
+proc ::Login::HighInitStreamCB {token args} {
     variable $token
     upvar 0 $token state
     upvar ::Jabber::jstate jstate
 
-    ::Debug 2 "::Jabber::Login::HighInitStreamCB"
+    ::Debug 2 "::Login::HighInitStreamCB"
     
     array set argsArr $args
 
@@ -633,12 +633,12 @@ proc ::Jabber::Login::HighInitStreamCB {token args} {
     }    
 }
 
-proc ::Jabber::Login::HighStartTlsCB {token type args} {
+proc ::Login::HighStartTlsCB {token type args} {
     variable $token
     upvar 0 $token state
     upvar ::Jabber::jstate jstate
 
-    ::Debug 2 "::Jabber::Login::HighStartTlsCB type=$type args=$args"
+    ::Debug 2 "::Login::HighStartTlsCB type=$type args=$args"
     
     if {[string equal $type "error"]} {
 	foreach {errcode errmsg} [lindex $args 0] break
@@ -657,12 +657,12 @@ proc ::Jabber::Login::HighStartTlsCB {token type args} {
     }
 }
 
-proc ::Jabber::Login::HighAuthorizeCB {token type msg} {
+proc ::Login::HighAuthorizeCB {token type msg} {
     variable $token
     upvar 0 $token state
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::Jabber::Login::HighAuthorizeCB type=$type"
+    ::Debug 2 "::Login::HighAuthorizeCB type=$type"
 
     switch -- $type {
 	error {
@@ -685,7 +685,7 @@ proc ::Jabber::Login::HighAuthorizeCB {token type msg} {
     }
 }
 
-proc ::Jabber::Login::HighFinish {token {err ""} {msg ""}} {
+proc ::Login::HighFinish {token {err ""} {msg ""}} {
     variable $token
     upvar 0 $token state
    
@@ -713,7 +713,7 @@ proc ::Jabber::Login::HighFinish {token {err ""} {msg ""}} {
 # are set, but no message boxes are shown. That is up to the caller.
 
 
-# Jabber::Login::Connect --
+# Login::Connect --
 #
 #       Initiates a login to a server with an existing user account.
 #
@@ -728,13 +728,13 @@ proc ::Jabber::Login::HighFinish {token {err ""} {msg ""}} {
 # Results:
 #       Callback scheduled.
 
-proc ::Jabber::Login::Connect {server cmd args} {
+proc ::Login::Connect {server cmd args} {
     global  prefs
 
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::Jabber::Login::Connect args=$args"
+    ::Debug 2 "::Login::Connect args=$args"
     
     array set argsArr {
 	-ip         ""
@@ -797,9 +797,9 @@ proc ::Jabber::Login::Connect {server cmd args} {
     }
 }
 
-proc ::Jabber::Login::HttpProxyCmd {status msg} {
+proc ::Login::HttpProxyCmd {status msg} {
     
-    ::Debug 2 "::Jabber::Login::HttpProxyCmd status=$status, msg=$msg"
+    ::Debug 2 "::Login::HttpProxyCmd status=$status, msg=$msg"
     
     switch -- $status {
 	ok {
@@ -814,7 +814,7 @@ proc ::Jabber::Login::HttpProxyCmd {status msg} {
     }
 }
 
-# Jabber::Login::ConnectCB --
+# Login::ConnectCB --
 #
 #       Callback when socket has been opened. Logins.
 #       
@@ -825,10 +825,10 @@ proc ::Jabber::Login::HttpProxyCmd {status msg} {
 # Results:
 #       Callback initiated.
 
-proc ::Jabber::Login::ConnectCB {cmd sock ip port status {msg {}}} {    
+proc ::Login::ConnectCB {cmd sock ip port status {msg {}}} {    
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::Jabber::Login::ConnectCB"
+    ::Debug 2 "::Login::ConnectCB"
     
     switch $status {
 	error - timeout {
@@ -844,7 +844,7 @@ proc ::Jabber::Login::ConnectCB {cmd sock ip port status {msg {}}} {
     uplevel #0 $cmd [list $status $msg]
 }
 
-# Jabber::Login::InitStream --
+# Login::InitStream --
 # 
 #       Sends the init stream xml command. When received servers stream,
 #       invokes the cmd callback.
@@ -856,7 +856,7 @@ proc ::Jabber::Login::ConnectCB {cmd sock ip port status {msg {}}} {
 # Results:
 #       Callback initiated.
 
-proc ::Jabber::Login::InitStream {server cmd args} {
+proc ::Login::InitStream {server cmd args} {
     upvar ::Jabber::jstate jstate
     
     ::Jabber::UI::SetStatusMessage [mc jawaitxml $server]
@@ -881,24 +881,24 @@ proc ::Jabber::Login::InitStream {server cmd args} {
     }
 }
 
-proc ::Jabber::Login::InitStreamCB {cmd jlibName args} {
+proc ::Login::InitStreamCB {cmd jlibName args} {
     
     # One of args shall be -id hexnumber
     uplevel #0 $cmd $args
 }
 
-# Jabber::Login::StartTls --
+# Login::StartTls --
 # 
 # 
 
-proc ::Jabber::Login::StartTls {cmd} {
+proc ::Login::StartTls {cmd} {
     upvar ::Jabber::jstate jstate
     
     ::Jabber::UI::SetStatusMessage [mc jatlsnegot]
     $jstate(jlib) starttls [list [namespace current]::StartTlsCB $cmd]    
 }
 
-proc ::Jabber::Login::StartTlsCB {cmd jlibName type args} {
+proc ::Login::StartTlsCB {cmd jlibName type args} {
     upvar ::Jabber::jstate jstate
 
     if {[string equal $type "error"]} {	
@@ -908,7 +908,7 @@ proc ::Jabber::Login::StartTlsCB {cmd jlibName type args} {
     uplevel #0 $cmd $type $args
 }
 
-# Jabber::Login::Authorize --
+# Login::Authorize --
 # 
 #       A fairly general method for authentication. Handles UI stuff, but
 #       does not show any message boxes.
@@ -927,11 +927,11 @@ proc ::Jabber::Login::StartTlsCB {cmd jlibName type args} {
 # Results:
 #       Callback initiated.
 
-proc ::Jabber::Login::Authorize {server username resource password cmd args} {
+proc ::Login::Authorize {server username resource password cmd args} {
     variable uid
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::Jabber::Login::Authorize"
+    ::Debug 2 "::Login::Authorize"
     
     array set argsArr {
 	-digest     1
@@ -971,7 +971,7 @@ proc ::Jabber::Login::Authorize {server username resource password cmd args} {
     }
 }
 
-proc ::Jabber::Login::AuthorizeCB {token jlibName type theQuery} {
+proc ::Login::AuthorizeCB {token jlibName type theQuery} {
     global  this
 
     variable $token
@@ -979,7 +979,7 @@ proc ::Jabber::Login::AuthorizeCB {token jlibName type theQuery} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
 
-    ::Debug 2 "::Jabber::Login::AuthorizeCB type=$type, theQuery='$theQuery'"
+    ::Debug 2 "::Login::AuthorizeCB type=$type, theQuery='$theQuery'"
     
     set server   $state(server)
     set username $state(username)

@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.117 2004-11-20 08:13:51 matben Exp $
+# $Id: Jabber.tcl,v 1.118 2004-11-27 14:52:53 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -465,7 +465,7 @@ proc ::Jabber::Init { } {
     ::Debug 2 "::Jabber::Init"
     
     # Make the roster object.
-    set jstate(roster) [::roster::roster ::Jabber::Roster::PushProc]
+    set jstate(roster) [::roster::roster ::Roster::PushProc]
     
     # Check if we need to set any auto away options.
     set opts {}
@@ -623,7 +623,7 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 		$jstate(jlib) roster_set $from ::Jabber::Subscribe::ResProc
 		
 		set subtype [lindex [split $jidtype /] 1]
-		set typename [::Jabber::Roster::GetNameFromTrpt $subtype]
+		set typename [::Roster::GetNameFromTrpt $subtype]
 		tk_messageBox -title [mc {Transport Suscription}] \
 		  -icon info -type ok \
 		  -message [mc jamesstrptsubsc $typename]
@@ -692,7 +692,7 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 	    if {$jprefs(rost,rmIfUnsub)} {
 		
 		# Remove completely from our roster.
-		$jstate(jlib) roster_remove $from ::Jabber::Roster::PushProc
+		$jstate(jlib) roster_remove $from ::Roster::PushProc
 		tk_messageBox -title [mc Unsubscribe] \
 		  -icon info -type ok  \
 		  -message [FormatTextForMessageBox [mc jamessunsub $from]]
@@ -713,7 +713,7 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 		      [mc jamessunsubask $from $from]]]
 		    if {$ans == "yes"} {
 			$jstate(jlib) roster_remove $from \
-			  ::Jabber::Roster::PushProc
+			  ::Roster::PushProc
 		    }
 		}
 	    }
@@ -734,7 +734,7 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 		if {$jprefs(rost,rmIfUnsub)} {
 		    
 		    # Remove completely from our roster.
-		    $jstate(jlib) roster_remove $from ::Jabber::Roster::PushProc
+		    $jstate(jlib) roster_remove $from ::Roster::PushProc
 		}
 	    } else {		
 		tk_messageBox -title [mc Unsubscribed]  \
@@ -1306,7 +1306,7 @@ proc ::Jabber::SetStatusWithMessage { } {
     pack $frtop -side top -fill x -padx 4 -pady 4
     set i 0
     foreach val {available chat away xa dnd invisible} {
-	label ${frtop}.l${val} -image [::Jabber::Roster::GetPresenceIconFromKey $val]
+	label ${frtop}.l${val} -image [::Roster::GetPresenceIconFromKey $val]
 	radiobutton ${frtop}.${val} -text [mc jastat${val}]  \
 	  -variable [namespace current]::show -value $val
 	grid ${frtop}.l${val} -sticky e -column 0 -row $i -padx 4 -pady 3
@@ -1874,7 +1874,7 @@ proc ::Jabber::LoginLogout { } {
     if {[::Jabber::IsConnected]} {
 	::Jabber::DoCloseClientConnection
     } else {
-	::Jabber::Login::Dlg
+	::Login::Dlg
     }    
 }
 

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.16 2004-10-22 06:44:14 matben Exp $
+# $Id: JPrefs.tcl,v 1.17 2004-11-27 14:52:53 matben Exp $
 
 package provide JPrefs 1.0
 
@@ -427,10 +427,10 @@ proc ::Jabber::JPrefs::SavePrefsHook { } {
     ::Jabber::JPrefs::UpdateAutoAwaySettings    
 
     # Roster background image.
-    ::Jabber::Roster::SetBackgroundImage $tmpJPrefs(rost,useBgImage) \
+    ::Roster::SetBackgroundImage $tmpJPrefs(rost,useBgImage) \
       $tmpJPrefs(rost,bgImagePath)
     
-    ::Jabber::Chat::SetFont $jprefs(chatFont)
+    ::Chat::SetFont $jprefs(chatFont)
 
     unset tmpJPrefs
 }

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.60 2004-11-23 08:55:23 matben Exp $
+# $Id: MailBox.tcl,v 1.61 2004-11-27 14:52:54 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -22,7 +22,7 @@
 
 package provide MailBox 1.0
 
-namespace eval ::Jabber::MailBox:: {
+namespace eval ::MailBox:: {
     global  wDlgs
 
     # Use option database for customization.
@@ -47,9 +47,10 @@ namespace eval ::Jabber::MailBox:: {
     # Standard widgets.
     option add *MailBox.frall.borderWidth          1                50
     option add *MailBox.frall.relief               raised           50
-    option add *MailBox*top.padX                   4                50
-    option add *MailBox*top.padY                   2                50
+    option add *MailBox*top.padX                   0                50
+    option add *MailBox*top.padY                   0                50
     option add *MailBox*divt.borderWidth           2                50
+    option add *MailBox*divt.height                2               50
     option add *MailBox*divt.relief                sunken           50
     option add *MailBox*mid.padX                   4                50
     option add *MailBox*mid.padY                   4                50
@@ -60,11 +61,11 @@ namespace eval ::Jabber::MailBox:: {
     option add *MailBox*frmsg.text.relief          sunken           50
 
     # Add some hooks...
-    ::hooks::register initHook        ::Jabber::MailBox::Init
-    ::hooks::register newMessageHook  ::Jabber::MailBox::GotMsg
-    ::hooks::register closeWindowHook ::Jabber::MailBox::CloseHook
-    ::hooks::register jabberInitHook  ::Jabber::MailBox::InitHandler
-    ::hooks::register quitAppHook     ::Jabber::MailBox::Exit
+    ::hooks::register initHook        ::MailBox::Init
+    ::hooks::register newMessageHook  ::MailBox::GotMsg
+    ::hooks::register closeWindowHook ::MailBox::CloseHook
+    ::hooks::register jabberInitHook  ::MailBox::InitHandler
+    ::hooks::register quitAppHook     ::MailBox::Exit
 
     variable locals
     
@@ -110,11 +111,11 @@ namespace eval ::Jabber::MailBox:: {
     }
 }
 
-# Jabber::MailBox::Init --
+# MailBox::Init --
 # 
 #       Take care of things like translating any old version mailbox etc.
 
-proc ::Jabber::MailBox::Init { } {    
+proc ::MailBox::Init { } {    
     variable locals
     variable icons
    
@@ -147,7 +148,7 @@ proc ::Jabber::MailBox::Init { } {
     set locals(inited) 1
 }
 
-proc ::Jabber::MailBox::InitHandler {jlibName} {
+proc ::MailBox::InitHandler {jlibName} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::coccixmlns coccixmlns
     
@@ -161,12 +162,12 @@ proc ::Jabber::MailBox::InitHandler {jlibName} {
 
 }
 
-# Jabber::MailBox::ShowHide --
+# MailBox::ShowHide --
 # 
 #       Toggles the display of the inbox. With -visible 1 it forces it
 #       to be displayed.
 
-proc ::Jabber::MailBox::ShowHide {args} {
+proc ::MailBox::ShowHide {args} {
     global wDlgs
     upvar ::Jabber::jstate jstate
     variable locals  
@@ -207,11 +208,11 @@ proc ::Jabber::MailBox::ShowHide {args} {
     }
 }
 
-# Jabber::MailBox::Build --
+# MailBox::Build --
 # 
 #       Creates the inbox window.
 
-proc ::Jabber::MailBox::Build {args} {
+proc ::MailBox::Build {args} {
     global  this prefs wDlgs
     
     variable locals  
@@ -220,7 +221,7 @@ proc ::Jabber::MailBox::Build {args} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
-    ::Debug 2 "::Jabber::MailBox::Build args='$args'"
+    ::Debug 2 "::MailBox::Build args='$args'"
 
     # The inbox should only be read once to be economical.
     if {!$locals(mailboxRead)} {
@@ -258,15 +259,14 @@ proc ::Jabber::MailBox::Build {args} {
 
     # Since several of these are so frequently used, cache them!
     set locals(iconWb11)       [::Theme::GetImageFromExisting \
-      [option get $w wbIcon11Image {}] ::Jabber::MailBox::icons]
+      [option get $w wbIcon11Image {}] ::MailBox::icons]
     set locals(iconWb13)       [::Theme::GetImageFromExisting \
-      [option get $w wbIcon13Image {}] ::Jabber::MailBox::icons]
+      [option get $w wbIcon13Image {}] ::MailBox::icons]
     set locals(iconReadMsg)    [::Theme::GetImageFromExisting \
-      [option get $w readMsgImage {}] ::Jabber::MailBox::icons]
+      [option get $w readMsgImage {}] ::MailBox::icons]
     set locals(iconUnreadMsg)  [::Theme::GetImageFromExisting \
-      [option get $w unreadMsgImage {}] ::Jabber::MailBox::icons]
+      [option get $w unreadMsgImage {}] ::MailBox::icons]
 
-    # D = -padx 4 -pady 2
     set wtop $w.frall.top
     frame $wtop
     pack  $wtop -side top -fill x
@@ -278,22 +278,22 @@ proc ::Jabber::MailBox::Build {args} {
 
     $wtray newbutton new  \
       -text [mc New] -image $iconNew -disabledimage $iconNewDis  \
-      -command ::Jabber::NewMsg::Build
+      -command ::NewMsg::Build
     $wtray newbutton reply  \
       -text [mc Reply] -image $iconReply -disabledimage $iconReplyDis  \
-      -command ::Jabber::MailBox::ReplyTo -state disabled
+      -command ::MailBox::ReplyTo -state disabled
     $wtray newbutton forward  \
       -text [mc Forward] -image $iconForward -disabledimage $iconForwardDis  \
-      -command ::Jabber::MailBox::ForwardTo -state disabled
+      -command ::MailBox::ForwardTo -state disabled
     $wtray newbutton save  \
       -text [mc Save] -image $iconSave -disabledimage $iconSaveDis  \
-      -command ::Jabber::MailBox::SaveMsg -state disabled
+      -command ::MailBox::SaveMsg -state disabled
     $wtray newbutton print  \
       -text [mc Print] -image $iconPrint -disabledimage $iconPrintDis  \
-      -command ::Jabber::MailBox::DoPrint -state disabled
+      -command ::MailBox::DoPrint -state disabled
     $wtray newbutton trash  \
       -text [mc Trash] -image $iconTrash -disabledimage $iconTrashDis  \
-      -command ::Jabber::MailBox::TrashMsg -state disabled
+      -command ::MailBox::TrashMsg -state disabled
     
     ::hooks::run buildMailBoxButtonTrayHook $wtray
 
@@ -426,7 +426,7 @@ proc ::Jabber::MailBox::Build {args} {
 }
 
 
-proc ::Jabber::MailBox::CloseHook {wclose} {
+proc ::MailBox::CloseHook {wclose} {
     global  wDlgs
     
     set result ""
@@ -437,11 +437,11 @@ proc ::Jabber::MailBox::CloseHook {wclose} {
     return $result
 }
 
-# Jabber::MailBox::InsertRow --
+# MailBox::InsertRow --
 #
 #       Does the actual job of adding a line in the mailbox widget.
 
-proc ::Jabber::MailBox::InsertRow {wtbl row i} {
+proc ::MailBox::InsertRow {wtbl row i} {
     
     variable mailboxindex
     variable colindex
@@ -490,15 +490,13 @@ proc ::Jabber::MailBox::InsertRow {wtbl row i} {
     }
 }
 
-proc ::Jabber::MailBox::FormatDateCmd {secs} {
+proc ::MailBox::FormatDateCmd {secs} {
     
-    puts "::Jabber::MailBox::FormatDateCmd secs=$secs"
-    set displaytime [::Jabber::MailBox::FormatDateCmd $secs]
-    puts "displaytime=$displaytime"
-    return [::Jabber::MailBox::FormatDateCmd $secs]
+    set displaytime [::MailBox::FormatDateCmd $secs]
+    return [::MailBox::FormatDateCmd $secs]
 }
 
-proc ::Jabber::MailBox::UpdateDateAndTime {wtbl} {
+proc ::MailBox::UpdateDateAndTime {wtbl} {
     
     variable mailbox
     variable colindex
@@ -520,7 +518,7 @@ proc ::Jabber::MailBox::UpdateDateAndTime {wtbl} {
       [list [namespace current]::UpdateDateAndTime $wtbl]]
 }
 
-proc ::Jabber::MailBox::GetToplevel { } {    
+proc ::MailBox::GetToplevel { } {    
     variable locals
     
     if {[info exists locals(wtop)] && [winfo exists $locals(wtop)]} {
@@ -532,28 +530,28 @@ proc ::Jabber::MailBox::GetToplevel { } {
 
 # Various accessor functions.
 
-proc ::Jabber::MailBox::Get {id key} {
+proc ::MailBox::Get {id key} {
     variable mailbox
     variable mailboxindex
     
     return [lindex $mailbox($id) $mailboxindex($key)]
 }
 
-proc ::Jabber::MailBox::Set {id key value} {
+proc ::MailBox::Set {id key value} {
     variable mailbox
     variable mailboxindex
     
     lset mailbox($id) $mailboxindex($key) $value
 }
 
-proc ::Jabber::MailBox::IsLastMessage {id} {
+proc ::MailBox::IsLastMessage {id} {
     variable mailbox
 
     set sorted [lsort -integer [array names mailbox]]
     return [expr ($id >= [lindex $sorted end]) ? 1 : 0]
 }
 
-proc ::Jabber::MailBox::AllRead { } {
+proc ::MailBox::AllRead { } {
     variable mailbox
     variable mailboxindex
     
@@ -568,7 +566,7 @@ proc ::Jabber::MailBox::AllRead { } {
     return $allRead
 }
 
-proc ::Jabber::MailBox::GetNextMsgID {id} {
+proc ::MailBox::GetNextMsgID {id} {
     variable mailbox
 
     set nextid $id
@@ -580,7 +578,7 @@ proc ::Jabber::MailBox::GetNextMsgID {id} {
     return $next
 }
 
-proc ::Jabber::MailBox::GetMsgFromUid {id} {
+proc ::MailBox::GetMsgFromUid {id} {
     variable mailbox
     
     if {[info exists mailbox($id)]} {
@@ -590,11 +588,11 @@ proc ::Jabber::MailBox::GetMsgFromUid {id} {
     }
 }
 
-# Jabber::MailBox::GetCanvasHexUID --
+# MailBox::GetCanvasHexUID --
 #
 #       Returns the unique hex id for canvas if message has any, else empty.
 
-proc ::Jabber::MailBox::GetCanvasHexUID {id} {
+proc ::MailBox::GetCanvasHexUID {id} {
     variable mailbox
     variable mailboxindex
 
@@ -608,7 +606,7 @@ proc ::Jabber::MailBox::GetCanvasHexUID {id} {
     return $ans
 }
 
-proc ::Jabber::MailBox::MarkMsgAsRead {uid} {
+proc ::MailBox::MarkMsgAsRead {uid} {
     global  wDlgs
     variable mailbox
     variable mailboxindex
@@ -634,7 +632,7 @@ proc ::Jabber::MailBox::MarkMsgAsRead {uid} {
     }
 }
 
-# Jabber::MailBox::GotMsg --
+# MailBox::GotMsg --
 #
 #       Called when we get an incoming message. Stores the message.
 #       Should never be called for whiteboard messages.
@@ -646,7 +644,7 @@ proc ::Jabber::MailBox::MarkMsgAsRead {uid} {
 # Results:
 #       updates UI.
 
-proc ::Jabber::MailBox::GotMsg {bodytxt args} {
+proc ::MailBox::GotMsg {bodytxt args} {
     global  prefs
 
     variable locals
@@ -655,7 +653,7 @@ proc ::Jabber::MailBox::GotMsg {bodytxt args} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
-    ::Debug 2 "::Jabber::MailBox::GotMsg args='$args'"
+    ::Debug 2 "::MailBox::GotMsg args='$args'"
     
     # Non whiteboard 'normal' messages treated as chat messages.
     if {$jprefs(chat,normalAsChat)} {
@@ -685,22 +683,22 @@ proc ::Jabber::MailBox::GotMsg {bodytxt args} {
     
     # Any separate window.
     if {$jprefs(showMsgNewWin)} {
-	::Jabber::GotMsg::GotMsg $uidmsg
+	::GotMsg::GotMsg $uidmsg
     }
 }
 
-# Jabber::MailBox::HandleRawWBMessage --
+# MailBox::HandleRawWBMessage --
 # 
 #       Same as above, but for raw whiteboard messages.
 
-proc ::Jabber::MailBox::HandleRawWBMessage {jlibname xmlns args} {
+proc ::MailBox::HandleRawWBMessage {jlibname xmlns args} {
     global  prefs
 
     variable mailbox
     variable uidmsg
     variable locals
     
-    ::Debug 2 "::Jabber::MailBox::HandleRawWBMessage args=$args"
+    ::Debug 2 "::MailBox::HandleRawWBMessage args=$args"
     array set argsArr $args
 	
     # The inbox should only be read once to be economical.
@@ -730,18 +728,18 @@ proc ::Jabber::MailBox::HandleRawWBMessage {jlibname xmlns args} {
     return 1
 }
 
-# Jabber::MailBox::HandleSVGWBMessage --
+# MailBox::HandleSVGWBMessage --
 # 
 #       As above but for SVG whiteboard messages.
 
-proc ::Jabber::MailBox::HandleSVGWBMessage {jlibname xmlns args} {
+proc ::MailBox::HandleSVGWBMessage {jlibname xmlns args} {
     global  prefs
 
     variable mailbox
     variable uidmsg
     variable locals
     
-    ::Debug 2 "::Jabber::MailBox::HandleSVGWBMessage args='$args'"
+    ::Debug 2 "::MailBox::HandleSVGWBMessage args='$args'"
     array set argsArr $args
 	
     # The inbox should only be read once to be economical.
@@ -770,7 +768,7 @@ proc ::Jabber::MailBox::HandleSVGWBMessage {jlibname xmlns args} {
     return 1
 }
 
-proc ::Jabber::MailBox::MakeMessageList {body args} {
+proc ::MailBox::MakeMessageList {body args} {
     variable locals
     variable uidmsg
     
@@ -800,7 +798,7 @@ proc ::Jabber::MailBox::MakeMessageList {body args} {
     return [list $argsArr(-subject) $argsArr(-from) $date 0 [incr uidmsg] $body]
 }
 
-proc ::Jabber::MailBox::PutMessageInInbox {row} {
+proc ::MailBox::PutMessageInInbox {row} {
     global  this
     upvar ::Jabber::jprefs jprefs
     
@@ -820,7 +818,7 @@ proc ::Jabber::MailBox::PutMessageInInbox {row} {
     }
 }
 
-proc ::Jabber::MailBox::SaveMsg { } {
+proc ::MailBox::SaveMsg { } {
     global  this
     
     variable colindex
@@ -859,7 +857,7 @@ proc ::Jabber::MailBox::SaveMsg { } {
     }
 }
 
-proc ::Jabber::MailBox::TrashMsg { } {
+proc ::MailBox::TrashMsg { } {
     global  prefs
     
     variable locals
@@ -912,14 +910,14 @@ proc ::Jabber::MailBox::TrashMsg { } {
     }
 }
 
-# Jabber::MailBox::SelectMsg --
+# MailBox::SelectMsg --
 # 
 #       Executed when selecting a message in the inbox.
 #       Handles display of message, whiteboard, etc.
 #       
 #    mailbox(uid) = {subject from date isread uid message ?-key value ...?}
 
-proc ::Jabber::MailBox::SelectMsg { } {
+proc ::MailBox::SelectMsg { } {
     global  prefs wDlgs
 
     variable locals
@@ -969,7 +967,7 @@ proc ::Jabber::MailBox::SelectMsg { } {
     # If any whiteboard stuff in message...
     set uidcan [GetCanvasHexUID $uid]
     set svgElem [GetAnySVGElements $mailbox($uid)]
-    ::Debug 2 "::Jabber::MailBox::SelectMsg  uidcan=$uidcan, svgElem='$svgElem'"
+    ::Debug 2 "::MailBox::SelectMsg  uidcan=$uidcan, svgElem='$svgElem'"
      
     # The "raw" protocol stores the canvas in a separate file indicated by
     # the -canvasuid key in the message list.
@@ -984,7 +982,7 @@ proc ::Jabber::MailBox::SelectMsg { } {
     }
 }
 
-proc ::Jabber::MailBox::GetAnySVGElements {row} {
+proc ::MailBox::GetAnySVGElements {row} {
     
     set svgElem {}
     set idx [lsearch $row -x]
@@ -996,11 +994,11 @@ proc ::Jabber::MailBox::GetAnySVGElements {row} {
     return $svgElem
 }
 
-# Jabber::MailBox::DisplayRawMessage --
+# MailBox::DisplayRawMessage --
 # 
 #       Displays a raw whiteboard message when selected in inbox.
 
-proc ::Jabber::MailBox::DisplayRawMessage {jid3 uid} {
+proc ::MailBox::DisplayRawMessage {jid3 uid} {
     global  prefs wDlgs
 
     variable mailbox
@@ -1032,12 +1030,12 @@ proc ::Jabber::MailBox::DisplayRawMessage {jid3 uid} {
     }
 }
 
-proc ::Jabber::MailBox::DisplayXElementSVG {jid3 xlist} {
+proc ::MailBox::DisplayXElementSVG {jid3 xlist} {
     global  prefs wDlgs
 
     variable mailbox
     upvar ::Jabber::jstate jstate
-    ::Debug 2 "::Jabber::MailBox::DisplayXElementSVG jid3=$jid3"
+    ::Debug 2 "::MailBox::DisplayXElementSVG jid3=$jid3"
     
     jlib::splitjid $jid3 jid2 res
     
@@ -1056,11 +1054,11 @@ proc ::Jabber::MailBox::DisplayXElementSVG {jid3 xlist} {
     }         
 }
 
-# Jabber::MailBox::MakeWhiteboard --
+# MailBox::MakeWhiteboard --
 # 
 #       Creates or configures the inbox whiteboard window.
 
-proc ::Jabber::MailBox::MakeWhiteboard {jid2} {
+proc ::MailBox::MakeWhiteboard {jid2} {
     global  prefs wDlgs
     
     set wwb  $wDlgs(jwbinbox)
@@ -1081,7 +1079,7 @@ proc ::Jabber::MailBox::MakeWhiteboard {jid2} {
     return $wtop
 }
 
-proc ::Jabber::MailBox::DoubleClickMsg { } {
+proc ::MailBox::DoubleClickMsg { } {
     variable locals
     variable mailbox
     variable mailboxindex
@@ -1103,23 +1101,23 @@ proc ::Jabber::MailBox::DoubleClickMsg { } {
     set date    [lindex $mailbox($id) $mailboxindex(date)]
     
     if {[string equal $jprefs(inbox2click) "newwin"]} {
-	::Jabber::GotMsg::GotMsg $id
+	::GotMsg::GotMsg $id
     } elseif {[string equal $jprefs(inbox2click) "reply"]} {
 	if {![regexp -nocase {^ *re:} $subject]} {
 	    set subject "Re: $subject"
 	}	
-	::Jabber::NewMsg::Build -to $to -subject $subject  \
+	::NewMsg::Build -to $to -subject $subject  \
 	  -quotemessage $body -time $date
     }
 }
 
-proc ::Jabber::MailBox::LabelCommand {w column} {
+proc ::MailBox::LabelCommand {w column} {
     variable locals    
     
     tablelist::sortByColumn $w $column
 }
 
-proc ::Jabber::MailBox::SortTimeColumn {tm1 tm2} {
+proc ::MailBox::SortTimeColumn {tm1 tm2} {
     variable locals
     
     if {0} {
@@ -1145,14 +1143,14 @@ proc ::Jabber::MailBox::SortTimeColumn {tm1 tm2} {
     }
 }
 
-proc ::Jabber::MailBox::MsgDisplayClear { } {    
+proc ::MailBox::MsgDisplayClear { } {    
     variable locals
     
     set wtextmsg $locals(wtextmsg)    
     $wtextmsg delete 1.0 end
 }
 
-proc ::Jabber::MailBox::DisplayMsg {id} {
+proc ::MailBox::DisplayMsg {id} {
     global  prefs
 
     variable locals
@@ -1176,7 +1174,7 @@ proc ::Jabber::MailBox::DisplayMsg {id} {
     eval {::hooks::run displayMessageHook $body} $opts
 }
 
-proc ::Jabber::MailBox::ReplyTo { } {
+proc ::MailBox::ReplyTo { } {
     variable locals
     variable mailbox
     variable mailboxindex
@@ -1201,11 +1199,11 @@ proc ::Jabber::MailBox::ReplyTo { } {
     if {![regexp -nocase {^ *re:} $subject]} {
 	set subject "Re: $subject"
     }
-    ::Jabber::NewMsg::Build -to $to -subject $subject  \
+    ::NewMsg::Build -to $to -subject $subject  \
       -quotemessage $body -time $date
 }
 
-proc ::Jabber::MailBox::ForwardTo { } {
+proc ::MailBox::ForwardTo { } {
     variable locals
     variable mailbox
     variable mailboxindex
@@ -1226,10 +1224,10 @@ proc ::Jabber::MailBox::ForwardTo { } {
     set body    [lindex $mailbox($id) $mailboxindex(message)]
 
     set subject "Forwarded: $subject"
-    ::Jabber::NewMsg::Build -subject $subject -forwardmessage $body -time $date
+    ::NewMsg::Build -subject $subject -forwardmessage $body -time $date
 }
 
-proc ::Jabber::MailBox::DoPrint { } {
+proc ::MailBox::DoPrint { } {
 
     variable locals
 
@@ -1240,12 +1238,12 @@ proc ::Jabber::MailBox::DoPrint { } {
       -data $allText -font $fontS
 }
 
-proc ::Jabber::MailBox::SaveMailbox {args} {
+proc ::MailBox::SaveMailbox {args} {
 
     eval {SaveMailboxVer2} $args
 }
     
-proc ::Jabber::MailBox::SaveMailboxVer1 { } {
+proc ::MailBox::SaveMailboxVer1 { } {
     global  this
     
     variable locals
@@ -1292,7 +1290,7 @@ proc ::Jabber::MailBox::SaveMailboxVer1 { } {
     }
 }
 
-# Jabber::MailBox::SaveMailboxVer2 --
+# MailBox::SaveMailboxVer2 --
 # 
 #       Saves current mailbox to the inbox file provided it is necessary.
 #       
@@ -1300,7 +1298,7 @@ proc ::Jabber::MailBox::SaveMailboxVer1 { } {
 #       args:       -force 0|1 (D=0) forces save unconditionally
 #       
 
-proc ::Jabber::MailBox::SaveMailboxVer2 {args} {
+proc ::MailBox::SaveMailboxVer2 {args} {
     global  this
     
     variable mailbox
@@ -1318,7 +1316,7 @@ proc ::Jabber::MailBox::SaveMailboxVer2 {args} {
     } else {
 	set doSave 0
     }
-    ::Debug 2 "::Jabber::MailBox::SaveMailboxVer2 args=$args"
+    ::Debug 2 "::MailBox::SaveMailboxVer2 args=$args"
     if {$locals(mailboxRead)} {
 
 	# Be sure to not have any inbox that is empty.
@@ -1361,7 +1359,7 @@ proc ::Jabber::MailBox::SaveMailboxVer2 {args} {
     }
 }
 
-proc ::Jabber::MailBox::WriteInboxHeader {fid} {
+proc ::MailBox::WriteInboxHeader {fid} {
     global  prefs
     
     # Header information.
@@ -1370,7 +1368,7 @@ proc ::Jabber::MailBox::WriteInboxHeader {fid} {
     puts $fid "#   The data written at: [clock format [clock seconds]]\n#"    
 }
 
-proc ::Jabber::MailBox::ReadMailbox { } {
+proc ::MailBox::ReadMailbox { } {
     variable locals
     upvar ::Jabber::jprefs jprefs
 
@@ -1381,7 +1379,7 @@ proc ::Jabber::MailBox::ReadMailbox { } {
     }
 }
 
-proc ::Jabber::MailBox::TranslateAnyVer1ToCurrentVer { } {
+proc ::MailBox::TranslateAnyVer1ToCurrentVer { } {
     variable locals
     variable mailbox
     
@@ -1397,12 +1395,12 @@ proc ::Jabber::MailBox::TranslateAnyVer1ToCurrentVer { } {
     }
 }
 
-# Jabber::MailBox::GetMailboxVersion --
+# MailBox::GetMailboxVersion --
 # 
 #       Returns empty string if no mailbox exists, else the version number of
 #       any existing mailbox.
 
-proc ::Jabber::MailBox::GetMailboxVersion { } {
+proc ::MailBox::GetMailboxVersion { } {
     upvar ::Jabber::jprefs jprefs
     
     set version ""
@@ -1419,13 +1417,13 @@ proc ::Jabber::MailBox::GetMailboxVersion { } {
     return $version
 }
 
-proc ::Jabber::MailBox::ReadMailboxVer1 { } {
+proc ::MailBox::ReadMailboxVer1 { } {
     variable locals
     variable uidmsg
     variable mailbox
     upvar ::Jabber::jprefs jprefs
     
-    ::Debug 2 "::Jabber::MailBox::ReadMailboxVer1"
+    ::Debug 2 "::MailBox::ReadMailboxVer1"
 
     if {[catch {source $jprefs(inboxPath)} msg]} {
 	set tail [file tail $jprefs(inboxPath)]
@@ -1453,14 +1451,14 @@ proc ::Jabber::MailBox::ReadMailboxVer1 { } {
     }
 }
 
-proc ::Jabber::MailBox::ReadMailboxVer2 { } {
+proc ::MailBox::ReadMailboxVer2 { } {
     variable locals
     variable uidmsg
     variable mailbox
     variable mailboxindex
     upvar ::Jabber::jprefs jprefs
 
-    ::Debug 2 "::Jabber::MailBox::ReadMailboxVer2"
+    ::Debug 2 "::MailBox::ReadMailboxVer2"
 
     if {[catch {source $jprefs(inboxPath)} msg]} {
 	set tail [file tail $jprefs(inboxPath)]
@@ -1488,7 +1486,7 @@ proc ::Jabber::MailBox::ReadMailboxVer2 { } {
     }
 }
 
-proc ::Jabber::MailBox::HaveMailBox { } {
+proc ::MailBox::HaveMailBox { } {
     upvar ::Jabber::jprefs jprefs
 
     if {[file exist $jprefs(inboxPath)]} {
@@ -1499,7 +1497,7 @@ proc ::Jabber::MailBox::HaveMailBox { } {
     return $ans
 }
 
-proc ::Jabber::MailBox::DeleteMailbox { } {
+proc ::MailBox::DeleteMailbox { } {
     global prefs
     upvar ::Jabber::jprefs jprefs
 
@@ -1511,7 +1509,7 @@ proc ::Jabber::MailBox::DeleteMailbox { } {
     }
 }
 
-proc ::Jabber::MailBox::Exit { } {
+proc ::MailBox::Exit { } {
     upvar ::Jabber::jprefs jprefs
     variable locals
     
@@ -1524,7 +1522,7 @@ proc ::Jabber::MailBox::Exit { } {
     }
 }
 
-proc ::Jabber::MailBox::CloseDlg {w} {
+proc ::MailBox::CloseDlg {w} {
     global  prefs wDlgs
 
     variable locals

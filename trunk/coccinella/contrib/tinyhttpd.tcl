@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: tinyhttpd.tcl,v 1.20 2004-11-27 08:41:19 matben Exp $
+# $Id: tinyhttpd.tcl,v 1.21 2004-11-27 14:52:53 matben Exp $
 
 # ########################### USAGE ############################################
 #
@@ -26,6 +26,7 @@
 #      ::tinyhttpd::cleanup
 #      ::tinyhttpd::mount absPath name
 #      ::tinyhttpd::unmount name
+#      ::tinyhttpd::allmounted
 #      
 # ##############################################################################
 
@@ -1144,6 +1145,12 @@ proc ::tinyhttpd::unmount {name} {
     variable mounts
     
     unset -nocomplain mounts($name)
+}
+
+proc ::tinyhttpd::allmounted { } {
+    variable mounts
+    
+    return [array names mounts]
 }
 
 proc ::tinyhttpd::Debug {num str} {

@@ -5,25 +5,25 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.103 2004-11-23 08:55:23 matben Exp $
+# $Id: Roster.tcl,v 1.104 2004-11-27 14:52:55 matben Exp $
 
 package provide Roster 1.0
 
-namespace eval ::Jabber::Roster:: {
+namespace eval ::Roster:: {
     global  this
     
     # Add all event hooks we need.
-    ::hooks::register loginHook              ::Jabber::Roster::LoginCmd
-    ::hooks::register logoutHook             ::Jabber::Roster::LogoutHook
-    ::hooks::register browseSetHook          ::Jabber::Roster::BrowseSetHook
-    ::hooks::register discoInfoHook          ::Jabber::Roster::DiscoInfoHook
+    ::hooks::register loginHook              ::Roster::LoginCmd
+    ::hooks::register logoutHook             ::Roster::LogoutHook
+    ::hooks::register browseSetHook          ::Roster::BrowseSetHook
+    ::hooks::register discoInfoHook          ::Roster::DiscoInfoHook
     
     # Define all hooks for preference settings.
-    ::hooks::register prefsInitHook          ::Jabber::Roster::InitPrefsHook
-    ::hooks::register prefsBuildHook         ::Jabber::Roster::BuildPrefsHook
-    ::hooks::register prefsSaveHook          ::Jabber::Roster::SavePrefsHook
-    ::hooks::register prefsCancelHook        ::Jabber::Roster::CancelPrefsHook
-    ::hooks::register prefsUserDefaultsHook  ::Jabber::Roster::UserDefaultsHook
+    ::hooks::register prefsInitHook          ::Roster::InitPrefsHook
+    ::hooks::register prefsBuildHook         ::Roster::BuildPrefsHook
+    ::hooks::register prefsSaveHook          ::Roster::SavePrefsHook
+    ::hooks::register prefsCancelHook        ::Roster::CancelPrefsHook
+    ::hooks::register prefsUserDefaultsHook  ::Roster::UserDefaultsHook
 
     # Use option database for customization. 
     # Use priority 30 just to override the widgetDefault values!
@@ -103,8 +103,8 @@ namespace eval ::Jabber::Roster:: {
     
     # General.
     set popMenuDefs(roster,def) {
-	mMessage       users     {::Jabber::NewMsg::Build -to $jid}
-	mChat          user      {::Jabber::Chat::StartThread $jid3}
+	mMessage       users     {::NewMsg::Build -to $jid}
+	mChat          user      {::Chat::StartThread $jid3}
 	mWhiteboard    wb        {::Jabber::WB::NewWhiteboardTo $jid3}
 	mSendFile      user      {::Jabber::OOB::BuildSet $jid3}
 	separator      {}        {}
@@ -113,11 +113,11 @@ namespace eval ::Jabber::Roster:: {
 	mAddNewUser    any       {::Jabber::User::NewDlg}
 	mEditUser      user      {::Jabber::User::EditDlg $jid}
 	mVersion       user      {::Jabber::GetVersion $jid3}
-	mChatHistory   user      {::Jabber::Chat::BuildHistoryForJid $jid}
-	mRemoveContact user      {::Jabber::Roster::SendRemove $jid}
+	mChatHistory   user      {::Chat::BuildHistoryForJid $jid}
+	mRemoveContact user      {::Roster::SendRemove $jid}
 	separator      {}        {}
-	mDirStatus     user      {::Jabber::Roster::DirectedPresenceDlg $jid}
-	mRefreshRoster any       {::Jabber::Roster::Refresh}
+	mDirStatus     user      {::Roster::DirectedPresenceDlg $jid}
+	mRefreshRoster any       {::Roster::Refresh}
     }  
 
     # Transports.
@@ -127,10 +127,10 @@ namespace eval ::Jabber::Roster:: {
 	mAddNewUser    any       {::Jabber::User::NewDlg}
 	mEditUser      user      {::Jabber::User::EditDlg $jid}
 	mVersion       user      {::Jabber::GetVersion $jid3}
-	mLoginTrpt     trpt      {::Jabber::Roster::LoginTrpt $jid3}
-	mLogoutTrpt    trpt      {::Jabber::Roster::LogoutTrpt $jid3}
+	mLoginTrpt     trpt      {::Roster::LoginTrpt $jid3}
+	mLogoutTrpt    trpt      {::Roster::LogoutTrpt $jid3}
 	separator      {}        {}
-	mRefreshRoster any       {::Jabber::Roster::Refresh}
+	mRefreshRoster any       {::Roster::Refresh}
     }  
 
     # Can't run our http server on macs :-(
@@ -139,13 +139,13 @@ namespace eval ::Jabber::Roster:: {
     }
 }
 
-proc ::Jabber::Roster::MapShowToText {show} {
+proc ::Roster::MapShowToText {show} {
     variable mapShowTextToElem
     
     return $mapShowTextToElem($show)
 }
 
-# Jabber::Roster::Show --
+# Roster::Show --
 #
 #       Show the roster window.
 #
@@ -155,7 +155,7 @@ proc ::Jabber::Roster::MapShowToText {show} {
 # Results:
 #       shows window.
 
-proc ::Jabber::Roster::Show {w} {
+proc ::Roster::Show {w} {
     upvar ::Jabber::jstate jstate
 
     if {$jstate(rosterVis)} {
@@ -169,7 +169,7 @@ proc ::Jabber::Roster::Show {w} {
     }
 }
 
-# Jabber::Roster::BuildToplevel --
+# Roster::BuildToplevel --
 #
 #       Build the toplevel roster window.
 #
@@ -179,7 +179,7 @@ proc ::Jabber::Roster::Show {w} {
 # Results:
 #       shows window.
 
-proc ::Jabber::Roster::BuildToplevel {w} {
+proc ::Roster::BuildToplevel {w} {
     global  prefs
 
     variable wtop
@@ -216,7 +216,7 @@ proc ::Jabber::Roster::BuildToplevel {w} {
     wm minsize $w 180 240
 }
 
-# Jabber::Roster::Build --
+# Roster::Build --
 #
 #       Makes mega widget to show the roster.
 #
@@ -226,7 +226,7 @@ proc ::Jabber::Roster::BuildToplevel {w} {
 # Results:
 #       w
 
-proc ::Jabber::Roster::Build {w} {
+proc ::Roster::Build {w} {
     global  this wDlgs prefs
         
     variable wtree    
@@ -341,38 +341,38 @@ proc ::Jabber::Roster::Build {w} {
     return $w
 }
 
-proc ::Jabber::Roster::GetWtree { } {
+proc ::Roster::GetWtree { } {
     variable wtree
     
     return $wtree
 }
 
-proc ::Jabber::Roster::Animate {{step 1}} {
+proc ::Roster::Animate {{step 1}} {
     variable wwave
     
     $wwave animate $step
 }
 
-proc ::Jabber::Roster::Message {str} {
+proc ::Roster::Message {str} {
     variable wwave
     
     $wwave message $str
 }
 
-# Jabber::Roster::LoginCmd --
+# Roster::LoginCmd --
 # 
 #       The login hook command.
 
-proc ::Jabber::Roster::LoginCmd { } {
+proc ::Roster::LoginCmd { } {
     
-    ::Jabber::JlibCmd roster_get ::Jabber::Roster::PushProc
+    ::Jabber::JlibCmd roster_get ::Roster::PushProc
 
     set server [::Jabber::GetServerJid]
-    set ::Jabber::Roster::servtxt $server
+    set ::Roster::servtxt $server
     SetUIWhen "connect"
 }
 
-proc ::Jabber::Roster::LogoutHook { } {
+proc ::Roster::LogoutHook { } {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     
@@ -385,7 +385,7 @@ proc ::Jabber::Roster::LogoutHook { } {
     }
 }
 
-proc ::Jabber::Roster::SetBackgroundImage {useBgImage bgImagePath} {
+proc ::Roster::SetBackgroundImage {useBgImage bgImagePath} {
     upvar ::Jabber::jprefs jprefs
     variable wtree    
     variable wroster
@@ -417,13 +417,13 @@ proc ::Jabber::Roster::SetBackgroundImage {useBgImage bgImagePath} {
     }
 }
 
-proc ::Jabber::Roster::CloseDlg {w} {    
+proc ::Roster::CloseDlg {w} {    
 
     catch {wm withdraw $w}
     set jstate(rosterVis) 0
 }
 
-proc ::Jabber::Roster::Refresh { } {
+proc ::Roster::Refresh { } {
     variable wwave
 
     # Get my roster.
@@ -431,17 +431,17 @@ proc ::Jabber::Roster::Refresh { } {
     $wwave animate 1
 }
 
-# Jabber::Roster::SendRemove --
+# Roster::SendRemove --
 #
 #       Method to remove another user from my roster.
 #
 #
 
-proc ::Jabber::Roster::SendRemove {jidrm} {    
+proc ::Roster::SendRemove {jidrm} {    
     variable selItem
     upvar ::Jabber::jstate jstate
 
-    ::Debug 2 "::Jabber::Roster::SendRemove jidrm=$jidrm"
+    ::Debug 2 "::Roster::SendRemove jidrm=$jidrm"
 
     if {[string length $jidrm]} {
 	set jid $jidrm
@@ -456,7 +456,7 @@ proc ::Jabber::Roster::SendRemove {jidrm} {
     }
 }
 
-# Jabber::Roster::SelectCmd --
+# Roster::SelectCmd --
 #
 #       Callback when selecting roster item in tree.
 #
@@ -467,7 +467,7 @@ proc ::Jabber::Roster::SendRemove {jidrm} {
 # Results:
 #       button states set set.
 
-proc ::Jabber::Roster::SelectCmd {w v} {    
+proc ::Roster::SelectCmd {w v} {    
     variable btedit
     variable btremove
     variable selItem
@@ -485,7 +485,7 @@ proc ::Jabber::Roster::SelectCmd {w v} {
     }
 }
 
-# Jabber::Roster::DoubleClickCmd --
+# Roster::DoubleClickCmd --
 #
 #       Callback when double clicking roster item in tree.
 #
@@ -496,7 +496,7 @@ proc ::Jabber::Roster::SelectCmd {w v} {
 # Results:
 #       button states set set.
 
-proc ::Jabber::Roster::DoubleClickCmd {w v} {
+proc ::Roster::DoubleClickCmd {w v} {
     upvar ::Jabber::jprefs jprefs
 
     if {[llength $v] && ([$w itemconfigure $v -dir] == 0)} {
@@ -506,18 +506,18 @@ proc ::Jabber::Roster::DoubleClickCmd {w v} {
 	set jid [lindex $v end]
 	jlib::splitjid $jid jid2 res
 	if {[string equal $jprefs(rost,dblClk) "normal"]} {
-	    ::Jabber::NewMsg::Build -to $jid2
+	    ::NewMsg::Build -to $jid2
 	} else {
-	    ::Jabber::Chat::StartThread $jid2
+	    ::Chat::StartThread $jid2
 	}
     }    
 }
     
-# Jabber::Roster::RegisterPopupEntry --
+# Roster::RegisterPopupEntry --
 # 
 #       Components or plugins can add their own menu entries here.
 
-proc ::Jabber::Roster::RegisterPopupEntry {menuSpec} {
+proc ::Roster::RegisterPopupEntry {menuSpec} {
     variable popMenuDefs
     
     # Keeps track of all registered menu entries.
@@ -542,7 +542,7 @@ proc ::Jabber::Roster::RegisterPopupEntry {menuSpec} {
     set regPopMenuSpec [concat $regPopMenuSpec $menuSpec]
 }
 
-# Jabber::Roster::Popup --
+# Roster::Popup --
 #
 #       Handle popup menu in roster.
 #       
@@ -554,13 +554,13 @@ proc ::Jabber::Roster::RegisterPopupEntry {menuSpec} {
 # Results:
 #       popup menu displayed
 
-proc ::Jabber::Roster::Popup {w v x y} {
+proc ::Roster::Popup {w v x y} {
     global  wDlgs this
     variable popMenuDefs
     
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::Jabber::Roster::Popup w=$w, v='$v', x=$x, y=$y"
+    ::Debug 2 "::Roster::Popup w=$w, v='$v', x=$x, y=$y"
     
     # The last element of $v is either a jid, (a namespace,) 
     # a header in roster, a group,
@@ -734,7 +734,7 @@ proc ::Jabber::Roster::Popup {w v x y} {
     }
 }
 
-# Jabber::Roster::PushProc --
+# Roster::PushProc --
 #
 #       Our callback procedure for roster pushes.
 #       Populate our roster tree.
@@ -751,7 +751,7 @@ proc ::Jabber::Roster::Popup {w v x y} {
 # Results:
 #       updates the roster UI.
 
-proc ::Jabber::Roster::PushProc {rostName what {jid {}} args} {    
+proc ::Roster::PushProc {rostName what {jid {}} args} {    
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
 
@@ -822,7 +822,7 @@ proc ::Jabber::Roster::PushProc {rostName what {jid {}} args} {
     }
 }
 
-# Jabber::Roster::Clear --
+# Roster::Clear --
 #
 #       Clears the complete tree from all jid's and all groups.
 #
@@ -831,11 +831,11 @@ proc ::Jabber::Roster::PushProc {rostName what {jid {}} args} {
 # Results:
 #       clears tree.
 
-proc ::Jabber::Roster::Clear { } {    
+proc ::Roster::Clear { } {    
     variable wtree    
     variable dirNameArr
 
-    ::Debug 2 "::Jabber::Roster::Clear"
+    ::Debug 2 "::Roster::Clear"
 
     foreach v [$wtree find withtag head] {
 	$wtree delitem $v -childsonly 1
@@ -846,7 +846,7 @@ proc ::Jabber::Roster::Clear { } {
     }
 }
 
-proc ::Jabber::Roster::ExitRoster { } {
+proc ::Roster::ExitRoster { } {
     variable wwave
 
     ::Jabber::UI::SetStatusMessage [mc jarostupdate]
@@ -856,7 +856,7 @@ proc ::Jabber::Roster::ExitRoster { } {
     # appending (#items) for each headline.
 }
 
-# Jabber::Roster::SetItem --
+# Roster::SetItem --
 #
 #       Adds a jid item to the tree.
 #
@@ -870,11 +870,11 @@ proc ::Jabber::Roster::ExitRoster { } {
 # Results:
 #       updates tree.
 
-proc ::Jabber::Roster::SetItem {jid args} {    
+proc ::Roster::SetItem {jid args} {    
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
 
-    ::Debug 2 "::Jabber::Roster::SetItem jid=$jid, args='$args'"
+    ::Debug 2 "::Roster::SetItem jid=$jid, args='$args'"
     
     # Remove any old items first:
     # 1) If we 'get' the roster, the roster is cleared, so we can be
@@ -921,7 +921,7 @@ proc ::Jabber::Roster::SetItem {jid args} {
     RemoveEmptyRootDirs
 }
 
-# Jabber::Roster::Presence --
+# Roster::Presence --
 #
 #       Sets the presence of the jid in our UI.
 #
@@ -933,11 +933,11 @@ proc ::Jabber::Roster::SetItem {jid args} {
 # Results:
 #       roster tree updated.
 
-proc ::Jabber::Roster::Presence {jid presence args} {    
+proc ::Roster::Presence {jid presence args} {    
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
 
-    ::Debug 2 "::Jabber::Roster::Presence jid=$jid, presence=$presence, args='$args'"
+    ::Debug 2 "::Roster::Presence jid=$jid, presence=$presence, args='$args'"
     array set argsArr $args
 
     # All presence have a 3-tier jid as 'from' attribute:
@@ -968,7 +968,7 @@ proc ::Jabber::Roster::Presence {jid presence args} {
 	    
 	    # Must send a subscription remove here to get rid if it completely??
 	    # Think this is already been made from our presence callback proc.
-	    #$jstate(jlib) roster_remove $jid ::Jabber::Roster::PushProc
+	    #$jstate(jlib) roster_remove $jid ::Roster::PushProc
 	} else {
 	    eval {PutItemInTree $jid2 $treePres} \
 	      $itemAttr $args
@@ -997,7 +997,7 @@ proc ::Jabber::Roster::Presence {jid presence args} {
     RemoveEmptyRootDirs
 }
 
-# Jabber::Roster::Remove --
+# Roster::Remove --
 #
 #       Removes a jid item from all groups in the tree.
 #
@@ -1007,10 +1007,10 @@ proc ::Jabber::Roster::Presence {jid presence args} {
 # Results:
 #       updates tree.
 
-proc ::Jabber::Roster::Remove {jid} {    
+proc ::Roster::Remove {jid} {    
     variable wtree    
     
-    ::Debug 2 "::Jabber::Roster::Remove, jid=$jid"
+    ::Debug 2 "::Roster::Remove, jid=$jid"
     
     # If have 3-tier jid:
     #    presence = 'available'   => remove jid2 + jid3
@@ -1048,11 +1048,11 @@ proc ::Jabber::Roster::Remove {jid} {
     }
 }
 
-# Jabber::Roster::RemoveEmptyRootDirs --
+# Roster::RemoveEmptyRootDirs --
 # 
 #       Cleanup empty pending and transports dirs.
 
-proc ::Jabber::Roster::RemoveEmptyRootDirs { } {
+proc ::Roster::RemoveEmptyRootDirs { } {
     variable wtree    
     variable dirNameArr
     
@@ -1065,15 +1065,15 @@ proc ::Jabber::Roster::RemoveEmptyRootDirs { } {
     }
 }
 
-# Jabber::Roster::SetCoccinella --
+# Roster::SetCoccinella --
 # 
 #       Sets the roster icon of The Coccinella.
 
-proc ::Jabber::Roster::SetCoccinella {jid} {
+proc ::Roster::SetCoccinella {jid} {
     variable wtree    
     upvar ::Jabber::jstate jstate
     
-    ::Debug 4 "::Jabber::Roster::SetCoccinella jid=$jid"
+    ::Debug 4 "::Roster::SetCoccinella jid=$jid"
     
     set mjid [jlib::jidmap $jid]
     set icon [GetPresenceIconFromJid $jid]
@@ -1082,14 +1082,14 @@ proc ::Jabber::Roster::SetCoccinella {jid} {
     }
 }
 
-# Jabber::Roster::IsCoccinella --
+# Roster::IsCoccinella --
 # 
 #       Utility function to figure out if we have evidence that jid3 is a 
 #       Coccinella.
 #       NOTE: some entities (transports) return private presence elements
 #       when sending their presence! Workaround! BAD!!!
 
-proc ::Jabber::Roster::IsCoccinella {jid3} {
+proc ::Roster::IsCoccinella {jid3} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::coccixmlns coccixmlns
     
@@ -1109,7 +1109,7 @@ proc ::Jabber::Roster::IsCoccinella {jid3} {
     return $ans
 }
 
-# Jabber::Roster::PutItemInTree --
+# Roster::PutItemInTree --
 #
 #       Sets the jid in the correct place in our roster tree.
 #       Online users shall be put with full 3-tier jid.
@@ -1124,7 +1124,7 @@ proc ::Jabber::Roster::IsCoccinella {jid3} {
 # Results:
 #       roster tree updated.
 
-proc ::Jabber::Roster::PutItemInTree {jid presence args} {    
+proc ::Roster::PutItemInTree {jid presence args} {    
     variable wtree    
     variable treeuid
     variable presToNameArr
@@ -1133,7 +1133,7 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
     
-    ::Debug 3 "::Jabber::Roster::PutItemInTree jid=$jid, presence=$presence, args='$args'"
+    ::Debug 3 "::Roster::PutItemInTree jid=$jid, presence=$presence, args='$args'"
 
     array set argsArr $args
     
@@ -1244,7 +1244,7 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
     eval {BalloonMsg $jidx $presence $treectag} $args
 }
 
-proc ::Jabber::Roster::BalloonMsg {jidx presence treectag args} {
+proc ::Roster::BalloonMsg {jidx presence treectag args} {
     variable wtree    
     variable mapShowElemToText
     variable presToNameArr
@@ -1279,7 +1279,7 @@ proc ::Jabber::Roster::BalloonMsg {jidx presence treectag args} {
     ::balloonhelp::balloonfortree $wtree $treectag $msg
 }
 
-# Jabber::Roster::SetUIWhen --
+# Roster::SetUIWhen --
 #
 #       Update the roster buttons etc to reflect the current state.
 #
@@ -1287,7 +1287,7 @@ proc ::Jabber::Roster::BalloonMsg {jidx presence treectag args} {
 #       what        any of "connect", "disconnect"
 #
 
-proc ::Jabber::Roster::SetUIWhen {what} {    
+proc ::Roster::SetUIWhen {what} {    
     variable btedit
     variable btremove
     variable btrefresh
@@ -1309,16 +1309,16 @@ proc ::Jabber::Roster::SetUIWhen {what} {
     }
 }
 
-proc ::Jabber::Roster::GetPresenceIconFromKey {key} {
+proc ::Roster::GetPresenceIconFromKey {key} {
 
     return [::Rosticons::Get status/$key]
 }
 
-# Jabber::Roster::GetPresenceIconFromJid --
+# Roster::GetPresenceIconFromJid --
 # 
 #       Returns presence icon from jid, typically a full jid.
 
-proc ::Jabber::Roster::GetPresenceIconFromJid {jid} {
+proc ::Roster::GetPresenceIconFromJid {jid} {
     upvar ::Jabber::jstate jstate
     
     jlib::splitjid $jid jid2 res
@@ -1328,12 +1328,12 @@ proc ::Jabber::Roster::GetPresenceIconFromJid {jid} {
     return [eval {GetPresenceIcon $jid $presArr(-type)} $pres]
 }
 
-# Jabber::Roster::GetPresenceIcon --
+# Roster::GetPresenceIcon --
 #
 #       Returns the image appropriate for 'presence', and any 'show' attribute.
 #       If presence is to make sense, the jid shall be a 3-tier jid.
 
-proc ::Jabber::Roster::GetPresenceIcon {jid presence args} {    
+proc ::Roster::GetPresenceIcon {jid presence args} {    
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
@@ -1381,13 +1381,13 @@ proc ::Jabber::Roster::GetPresenceIcon {jid presence args} {
     return [::Rosticons::Get $itype/$isub]
 }
 
-proc ::Jabber::Roster::GetMyPresenceIcon { } {
+proc ::Roster::GetMyPresenceIcon { } {
 
     set status [::Jabber::GetMyStatus]
     return [::Rosticons::Get status/$status]
 }
 
-proc ::Jabber::Roster::DirectedPresenceDlg {jid} {
+proc ::Roster::DirectedPresenceDlg {jid} {
     global  this wDlgs
     
     variable uid
@@ -1454,7 +1454,7 @@ proc ::Jabber::Roster::DirectedPresenceDlg {jid} {
     after idle $script
 }
 
-proc ::Jabber::Roster::SetDirectedPresence {token} {
+proc ::Roster::SetDirectedPresence {token} {
     variable $token
     upvar 0 $token state
     
@@ -1467,7 +1467,7 @@ proc ::Jabber::Roster::SetDirectedPresence {token} {
     destroy $state(w)
 }
 
-proc ::Jabber::Roster::DirectedPresenceFree {token w} {
+proc ::Roster::DirectedPresenceFree {token w} {
     variable $token
     upvar 0 $token state
     
@@ -1476,22 +1476,22 @@ proc ::Jabber::Roster::DirectedPresenceFree {token w} {
     }
 }
 
-proc ::Jabber::Roster::LoginTrpt {jid3} {
+proc ::Roster::LoginTrpt {jid3} {
     
     ::Jabber::SetStatus available -to $jid3
 }
 
-proc ::Jabber::Roster::LogoutTrpt {jid3} {
+proc ::Roster::LogoutTrpt {jid3} {
     
     ::Jabber::SetStatus unavailable -to $jid3    
 }
 
-# Jabber::Roster::BrowseSetHook, DiscoInfoHook --
+# Roster::BrowseSetHook, DiscoInfoHook --
 # 
 #       It is first when we have obtained either browse or disco info it is
 #       possible to set icons of foreign IM users.
 
-proc ::Jabber::Roster::BrowseSetHook {from subiq} {
+proc ::Roster::BrowseSetHook {from subiq} {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jserver jserver
     
@@ -1501,7 +1501,7 @@ proc ::Jabber::Roster::BrowseSetHook {from subiq} {
     }
 }
 
-proc ::Jabber::Roster::DiscoInfoHook {type from subiq args} {
+proc ::Roster::DiscoInfoHook {type from subiq args} {
     variable wtree    
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
@@ -1514,7 +1514,7 @@ proc ::Jabber::Roster::DiscoInfoHook {type from subiq args} {
     }
 }
 
-# Jabber::Roster::PostProcessIcons --
+# Roster::PostProcessIcons --
 # 
 #       This is necessary to get icons for foreign IM systems set correctly.
 #       Usually we get the roster before we've got browse/agents/disco 
@@ -1531,7 +1531,7 @@ proc ::Jabber::Roster::DiscoInfoHook {type from subiq args} {
 # Results:
 #       none.
 
-proc ::Jabber::Roster::PostProcessIcons {method from} {
+proc ::Roster::PostProcessIcons {method from} {
     variable wtree    
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
@@ -1544,7 +1544,7 @@ proc ::Jabber::Roster::PostProcessIcons {method from} {
     } else {
 	set matchHost 1	
     }
-    ::Debug 5 "::Jabber::Roster::PostProcessIcons $from"
+    ::Debug 5 "::Roster::PostProcessIcons $from"
     
     set server [jlib::jidmap $jserver(this)]
 
@@ -1577,13 +1577,13 @@ proc ::Jabber::Roster::PostProcessIcons {method from} {
     }   
 }
 
-proc ::Jabber::Roster::ConfigureIcon {v} {
+proc ::Roster::ConfigureIcon {v} {
 
 }
 
 #--- Transport utilities -------------------------------------------------------
 
-namespace eval ::Jabber::Roster:: {
+namespace eval ::Roster:: {
     
     # name description ...
     # Excluding smtp since it works differently.
@@ -1627,7 +1627,7 @@ namespace eval ::Jabber::Roster:: {
     }
 }
 
-proc ::Jabber::Roster::GetNameFromTrpt {trpt} {
+proc ::Roster::GetNameFromTrpt {trpt} {
     variable  trptToNameArr
    
     if {[info exists trptToNameArr($trpt)]} {
@@ -1637,7 +1637,7 @@ proc ::Jabber::Roster::GetNameFromTrpt {trpt} {
     }
 }
 
-proc ::Jabber::Roster::GetTrptFromName {type} {
+proc ::Roster::GetTrptFromName {type} {
     variable nameToTrptArr
    
     if {[info exists nameToTrptArr($type)]} {
@@ -1647,11 +1647,11 @@ proc ::Jabber::Roster::GetTrptFromName {type} {
     }
 }
 
-# Jabber::Roster::GetAllTransportJids --
+# Roster::GetAllTransportJids --
 # 
 #       Method to get the jids of all services that are not jabber.
 
-proc ::Jabber::Roster::GetAllTransportJids { } {
+proc ::Roster::GetAllTransportJids { } {
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jstate jstate
     
@@ -1665,7 +1665,7 @@ proc ::Jabber::Roster::GetAllTransportJids { } {
     return [lsearch -all -inline -not $alltrpts $jserver(this)]
 }
 
-proc ::Jabber::Roster::GetTransportNames {token} {
+proc ::Roster::GetTransportNames {token} {
     variable $token
     upvar 0 $token state
     variable trptToName
@@ -1696,7 +1696,7 @@ proc ::Jabber::Roster::GetTransportNames {token} {
     return $names
 }
 
-proc ::Jabber::Roster::IsTransport {jid} {
+proc ::Roster::IsTransport {jid} {
     upvar ::Jabber::jstate jstate
     
     # Some transports (icq) have a jid = icq.jabber.se/registered
@@ -1710,7 +1710,7 @@ proc ::Jabber::Roster::IsTransport {jid} {
     return $transport
 }
 
-proc ::Jabber::Roster::IsTransportHeuristics {jid} {
+proc ::Roster::IsTransportHeuristics {jid} {
     upvar ::Jabber::jstate jstate
     
     # Some transports (icq) have a jid = icq.jabber.se/registered.
@@ -1725,7 +1725,7 @@ proc ::Jabber::Roster::IsTransportHeuristics {jid} {
 
 # Prefs page ...................................................................
 
-proc ::Jabber::Roster::InitPrefsHook { } {
+proc ::Roster::InitPrefsHook { } {
     upvar ::Jabber::jprefs jprefs
     
     # Defaults...
@@ -1747,7 +1747,7 @@ proc ::Jabber::Roster::InitPrefsHook { } {
     
 }
 
-proc ::Jabber::Roster::BuildPrefsHook {wtree nbframe} {
+proc ::Roster::BuildPrefsHook {wtree nbframe} {
     
     $wtree newitem {Jabber Roster} -text [mc Roster]
         
@@ -1756,7 +1756,7 @@ proc ::Jabber::Roster::BuildPrefsHook {wtree nbframe} {
     BuildPageRoster $wpage
 }
 
-proc ::Jabber::Roster::BuildPageRoster {page} {
+proc ::Roster::BuildPageRoster {page} {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
 
@@ -1782,7 +1782,7 @@ proc ::Jabber::Roster::BuildPageRoster {page} {
       $page.sysicons -side top -anchor w -pady $ypad -padx 10
 }
 
-proc ::Jabber::Roster::SavePrefsHook { } {
+proc ::Roster::SavePrefsHook { } {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
     
@@ -1790,7 +1790,7 @@ proc ::Jabber::Roster::SavePrefsHook { } {
     unset tmpJPrefs
 }
 
-proc ::Jabber::Roster::CancelPrefsHook { } {
+proc ::Roster::CancelPrefsHook { } {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
 	
@@ -1802,7 +1802,7 @@ proc ::Jabber::Roster::CancelPrefsHook { } {
     }
 }
 
-proc ::Jabber::Roster::UserDefaultsHook { } {
+proc ::Roster::UserDefaultsHook { } {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
 	

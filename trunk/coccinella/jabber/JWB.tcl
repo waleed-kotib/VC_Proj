@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.41 2004-11-23 08:55:23 matben Exp $
+# $Id: JWB.tcl,v 1.42 2004-11-27 14:52:53 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -283,7 +283,7 @@ proc ::Jabber::WB::NewWhiteboardTo {jid args} {
 	set argsArr(-type)  groupchat
 	set argsArr(-send)  1
 	if {!$force && ([lsearch $inrooms $jid] < 0)} {
-	    set ans [::Jabber::GroupChat::EnterOrCreate enter -roomjid $jid \
+	    set ans [::GroupChat::EnterOrCreate enter -roomjid $jid \
 	      -autoget 1]
 	    if {$ans == "cancel"} {
 		Free $wtop
@@ -627,7 +627,7 @@ proc ::Jabber::WB::CloseHook {wtop} {
 	groupchat {
 	    
 	    # Everything handled from Jabber::GroupChat
-	    set ans [::Jabber::GroupChat::ExitRoom $jwbstate($wtop,jid)]
+	    set ans [::GroupChat::ExitRoom $jwbstate($wtop,jid)]
 	    if {$ans != "yes"} {
 		return stop
 	    }

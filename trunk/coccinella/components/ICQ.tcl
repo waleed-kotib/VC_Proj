@@ -2,7 +2,7 @@
 # 
 #       Provides some specific ICQ handling elements.
 #       
-# $Id: ICQ.tcl,v 1.4 2004-09-28 13:50:17 matben Exp $
+# $Id: ICQ.tcl,v 1.5 2004-11-27 14:52:52 matben Exp $
 
 namespace eval ::ICQ:: {
     
@@ -49,7 +49,7 @@ proc ::ICQ::DiscoInfoHook {type from subiq args} {
 proc ::ICQ::InvestigateRoster { } {
     variable vcardnick
     
-    set wtree [::Jabber::Roster::GetWtree]
+    set wtree [::Roster::GetWtree]
     set server [::Jabber::GetServerJid]
     set icqHosts [::Jabber::JlibCmd service gettransportjids "icq"]
     

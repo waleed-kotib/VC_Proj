@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Taskbar.tcl,v 1.8 2004-11-20 08:13:51 matben Exp $
+# $Id: Taskbar.tcl,v 1.9 2004-11-27 14:52:53 matben Exp $
 
 namespace eval ::Taskbar:: {
     
@@ -68,7 +68,7 @@ proc ::Taskbar::Load { } {
     bind . <Map> [list [namespace current]::Update %W]
     
     set status [::Jabber::GetMyStatus]
-    set statusStr [::Jabber::Roster::MapShowToText $status]
+    set statusStr [::Roster::MapShowToText $status]
 
     winico taskbar add $icon -callback  \
       [list [namespace current]::Cmd %m %X %Y] \
@@ -90,12 +90,12 @@ proc ::Taskbar::InitHook { } {
 	mAboutCoccinella     {::SplashScreen::SplashScreen}
 	separator            {}
 	mStatus              @::Jabber::Status::BuildMenu
-	mLogin               ::Jabber::Login::Dlg
+	mLogin               ::Login::Dlg
 	mLogout              ::Jabber::DoCloseClientConnection
 	mLogoutWith          ::Jabber::Logout::WithStatus
 	mHideMain            ::Taskbar::HideMain
 	mShowMain            ::Taskbar::ShowMain
-	mSendMessage         ::Jabber::NewMsg::Build
+	mSendMessage         ::NewMsg::Build
 	separator            {}
 	mQuit                ::UserActions::DoQuit
     }
@@ -247,7 +247,7 @@ proc ::Taskbar::SetPresenceHook {type args} {
     # This can be used to update any specific icon in taskbar.
    if {$icon != ""} {
  	set status [::Jabber::GetMyStatus]
-	set statusStr [::Jabber::Roster::MapShowToText $status]
+	set statusStr [::Roster::MapShowToText $status]
 	winico taskbar modify $icon -text "$prefs(theAppName) - $statusStr"
     }
 }

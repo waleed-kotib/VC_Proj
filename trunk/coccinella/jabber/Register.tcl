@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.28 2004-09-30 13:11:35 matben Exp $
+# $Id: Register.tcl,v 1.29 2004-11-27 14:52:54 matben Exp $
 
 package provide Register 1.0
 
@@ -209,7 +209,7 @@ proc ::Jabber::Register::DoRegister {w} {
     destroy $w
     
     # Asks for a socket to the server.
-    ::Jabber::Login::Connect $server [namespace current]::ConnectCB -ssl $ssl
+    ::Login::Connect $server [namespace current]::ConnectCB -ssl $ssl
 }
 
 proc ::Jabber::Register::ConnectCB {status msg} {
@@ -229,7 +229,7 @@ proc ::Jabber::Register::ConnectCB {status msg} {
 	default {
 	    # Go ahead...
 	    if {[catch {
-		::Jabber::Login::InitStream $server \
+		::Login::InitStream $server \
 		  [namespace current]::SendRegister
 	    } err]} {
 		tk_messageBox -icon error -title [mc {Open Failed}] \
@@ -293,7 +293,7 @@ proc ::Jabber::Register::SendRegisterCB {jlibName type theQuery} {
 	
 	# Go on and authenticate.
 	set resource "coccinella"
-	::Jabber::Login::Authorize $server $username $resource $password \
+	::Login::Authorize $server $username $resource $password \
 	  [namespace current]::AuthorizeCB -streamid $streamid -digest 1
     } else {
 	tk_messageBox -icon info -type ok -message [FormatTextForMessageBox \
@@ -320,7 +320,7 @@ proc ::Jabber::Register::AuthorizeCB {type msg} {
     } else {
 	
 	# Login was succesful, set presence.
-	::Jabber::Login::SetStatus
+	::Login::SetStatus
 	set jid [jlib::joinjid $username $server $resource]
 	tk_messageBox -icon info -type ok -message [FormatTextForMessageBox \
 	  [mc jamessregloginok $jid]]

@@ -5,16 +5,16 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.37 2004-11-27 08:41:20 matben Exp $
+# $Id: GotMsg.tcl,v 1.38 2004-11-27 14:52:53 matben Exp $
 
 package provide GotMsg 1.0
 
-namespace eval ::Jabber::GotMsg:: {
+namespace eval ::GotMsg:: {
 
     # Add all event hooks.
-    ::hooks::register quitAppHook        ::Jabber::GotMsg::QuitAppHook
-    ::hooks::register closeWindowHook    ::Jabber::GotMsg::CloseHook
-    ::hooks::register presenceHook       ::Jabber::GotMsg::PresenceHook    
+    ::hooks::register quitAppHook        ::GotMsg::QuitAppHook
+    ::hooks::register closeWindowHook    ::GotMsg::CloseHook
+    ::hooks::register presenceHook       ::GotMsg::PresenceHook    
     
     # Wait for this variable to be set.
     variable finished  
@@ -27,16 +27,16 @@ namespace eval ::Jabber::GotMsg:: {
     set locals(updateDatems)  [expr 1000*60]
 }
 
-proc ::Jabber::GotMsg::QuitAppHook { } {
+proc ::GotMsg::QuitAppHook { } {
     global  wDlgs
     
     ::UI::SaveWinGeom $wDlgs(jgotmsg)
 }
 
-# Jabber::GotMsg::GotMsg --
+# GotMsg::GotMsg --
 #
 #       Called when we get an incoming message.
-#       Calls 'Jabber::GotMsg::Show' if not mapped.
+#       Calls 'GotMsg::Show' if not mapped.
 #
 # Arguments:
 #       id          the message id, see Inbox.
@@ -44,7 +44,7 @@ proc ::Jabber::GotMsg::QuitAppHook { } {
 # Results:
 #       may show message window.
 
-proc ::Jabber::GotMsg::GotMsg {id} {
+proc ::GotMsg::GotMsg {id} {
     global  wDlgs
     
     variable w
@@ -52,7 +52,7 @@ proc ::Jabber::GotMsg::GotMsg {id} {
     variable msgIdDisplay
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "Jabber::GotMsg::GotMsg id=$id"
+    ::Debug 2 "GotMsg::GotMsg id=$id"
     set w $wDlgs(jgotmsg)
     
     # Queue up this message or show right away?
@@ -63,11 +63,11 @@ proc ::Jabber::GotMsg::GotMsg {id} {
     }
 }
 
-# Jabber::GotMsg::Show --
+# GotMsg::Show --
 #
 #       Fills in all entries etc in message window.
 
-proc ::Jabber::GotMsg::Show {thisMsgId} {
+proc ::GotMsg::Show {thisMsgId} {
     global  prefs
     
     variable w
@@ -86,18 +86,18 @@ proc ::Jabber::GotMsg::Show {thisMsgId} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
-    ::Debug 2 "::Jabber::GotMsg::Show thisMsgId=$thisMsgId"
+    ::Debug 2 "::GotMsg::Show thisMsgId=$thisMsgId"
     
     # Build if not mapped.
     Build
     
     set msgIdDisplay $thisMsgId
-    ::Jabber::MailBox::MarkMsgAsRead $thisMsgId
+    ::MailBox::MarkMsgAsRead $thisMsgId
     
-    set subject [::Jabber::MailBox::Get $thisMsgId subject]
-    set jid     [::Jabber::MailBox::Get $thisMsgId from]
-    set date    [::Jabber::MailBox::Get $thisMsgId date]
-    set body    [::Jabber::MailBox::Get $thisMsgId message]
+    set subject [::MailBox::Get $thisMsgId subject]
+    set jid     [::MailBox::Get $thisMsgId from]
+    set date    [::MailBox::Get $thisMsgId date]
+    set body    [::MailBox::Get $thisMsgId message]
     
     set jid [::Jabber::JlibCmd getrecipientjid $jid]
     set jidtxt $jid
@@ -121,9 +121,9 @@ proc ::Jabber::GotMsg::Show {thisMsgId} {
 	if {[info exists presArr(-show)]} {
 	    set show $presArr(-show)
 	}
-	set prestext [::Jabber::Roster::MapShowToText $show]
+	set prestext [::Roster::MapShowToText $show]
     }
-    set icon [::Jabber::Roster::GetPresenceIconFromJid $jid]
+    set icon [::Roster::GetPresenceIconFromJid $jid]
     $wpresence configure -image $icon
     
     # Insert the actual body of the message.
@@ -134,7 +134,7 @@ proc ::Jabber::GotMsg::Show {thisMsgId} {
     $wtext configure -state disabled
     
     # If no more messages after this one...
-    if {[::Jabber::MailBox::IsLastMessage $msgIdDisplay]} {
+    if {[::MailBox::IsLastMessage $msgIdDisplay]} {
 	$wbtnext configure -state disabled
     }
     
@@ -143,7 +143,7 @@ proc ::Jabber::GotMsg::Show {thisMsgId} {
     eval {::hooks::run displayMessageHook $body} $opts
 }
 
-# Jabber::GotMsg::Build --
+# GotMsg::Build --
 #
 #       Builds the standard got message dialog.
 #
@@ -152,7 +152,7 @@ proc ::Jabber::GotMsg::Show {thisMsgId} {
 # Results:
 #       shows window.
 
-proc ::Jabber::GotMsg::Build { } {
+proc ::GotMsg::Build { } {
     global  this prefs wDlgs
 
     variable w
@@ -172,7 +172,7 @@ proc ::Jabber::GotMsg::Build { } {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
-    ::Debug 2 "::Jabber::GotMsg::Build"
+    ::Debug 2 "::GotMsg::Build"
 
     set w $wDlgs(jgotmsg)
     if {[winfo exists $w]} {
@@ -195,10 +195,10 @@ proc ::Jabber::GotMsg::Build { } {
     set wbtnext $frbot.btnext
     set bwidth [expr [::Utils::GetMaxMsgcatWidth Next Reply] + 2]
     pack [button $wbtnext -text [mc Next] -default active \
-      -width $bwidth -state normal -command [list ::Jabber::GotMsg::NextMsg]] \
+      -width $bwidth -state normal -command [list ::GotMsg::NextMsg]] \
       -side right -padx 5 -pady 5
     pack [button $frbot.btreply -text [mc Reply]   \
-      -width $bwidth -command [list ::Jabber::GotMsg::Reply]]  \
+      -width $bwidth -command [list ::GotMsg::Reply]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side bottom -fill x -padx 10 -pady 8
 
@@ -256,7 +256,7 @@ proc ::Jabber::GotMsg::Build { } {
     focus $w
 }
 
-proc ::Jabber::GotMsg::UpdateDate { } {
+proc ::GotMsg::UpdateDate { } {
     variable w
     variable locals
     variable date
@@ -272,7 +272,7 @@ proc ::Jabber::GotMsg::UpdateDate { } {
       [namespace current]::UpdateDate]
 }
 
-proc ::Jabber::GotMsg::CloseHook {wclose} {
+proc ::GotMsg::CloseHook {wclose} {
     global  wDlgs
     variable locals
     
@@ -284,14 +284,17 @@ proc ::Jabber::GotMsg::CloseHook {wclose} {
     }   
 }
 
-proc ::Jabber::GotMsg::PresenceHook {pjid2 type args} {
+proc ::GotMsg::PresenceHook {pjid2 type args} {
+    global  wDlgs
     variable w
     variable wpresence
     variable prestext
     variable jid
     
-    ::Debug 4 "::Jabber::GotMsg::PresenceHook pjid2=$pjid2, type=$type"
+    ::Debug 4 "::GotMsg::PresenceHook pjid2=$pjid2, type=$type"
 
+    set w $wDlgs(jgotmsg)
+    
     if {[winfo exists $w]} {
 	array set argsArr $args
 	set from $pjid2
@@ -304,23 +307,23 @@ proc ::Jabber::GotMsg::PresenceHook {pjid2 type args} {
 	    if {[info exists argsArr(-show)]} {
 		set show $argsArr(-show)
 	    }
-	    set prestext [::Jabber::Roster::MapShowToText $show]
-	    set icon [::Jabber::Roster::GetPresenceIconFromJid $from]
+	    set prestext [::Roster::MapShowToText $show]
+	    set icon [::Roster::GetPresenceIconFromJid $from]
 	    $wpresence configure -image $icon
 	}
     }
 }
 
-proc ::Jabber::GotMsg::NextMsg { } {
+proc ::GotMsg::NextMsg { } {
     
     variable msgIdDisplay
     
     # Query the mailbox for next message id.
-    set nextid [::Jabber::MailBox::GetNextMsgID $msgIdDisplay]
+    set nextid [::MailBox::GetNextMsgID $msgIdDisplay]
     Show $nextid  
 }
 
-proc ::Jabber::GotMsg::Reply { } {
+proc ::GotMsg::Reply { } {
     variable jid
     variable subject
     variable date
@@ -331,11 +334,11 @@ proc ::Jabber::GotMsg::Reply { } {
     } else {
 	set resubject $subject
     }
-    ::Jabber::NewMsg::Build -to $jid -subject $resubject  \
+    ::NewMsg::Build -to $jid -subject $resubject  \
       -quotemessage $body -time $date
 }
 
-proc ::Jabber::GotMsg::Close {w} {
+proc ::GotMsg::Close {w} {
     
     ::UI::SaveWinGeom $w  
     destroy $w

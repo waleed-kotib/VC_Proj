@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.93 2004-11-23 08:55:22 matben Exp $
+# $Id: Chat.tcl,v 1.94 2004-11-27 14:52:53 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -13,26 +13,26 @@ package require uriencode
 package provide Chat 1.0
 
 
-namespace eval ::Jabber::Chat:: {
+namespace eval ::Chat:: {
     global  wDlgs
     
     # Add all event hooks.
-    ::hooks::register quitAppHook                ::Jabber::Chat::QuitHook
-    ::hooks::register newChatMessageHook         ::Jabber::Chat::GotMsg
-    ::hooks::register newMessageHook             ::Jabber::Chat::GotNormalMsg
-    ::hooks::register presenceHook               ::Jabber::Chat::PresenceHook
-    ::hooks::register closeWindowHook            ::Jabber::Chat::CloseHook
-    ::hooks::register closeWindowHook            ::Jabber::Chat::CloseHistoryHook
-    ::hooks::register loginHook                  ::Jabber::Chat::LoginHook
-    ::hooks::register logoutHook                 ::Jabber::Chat::LogoutHook
+    ::hooks::register quitAppHook                ::Chat::QuitHook
+    ::hooks::register newChatMessageHook         ::Chat::GotMsg
+    ::hooks::register newMessageHook             ::Chat::GotNormalMsg
+    ::hooks::register presenceHook               ::Chat::PresenceHook
+    ::hooks::register closeWindowHook            ::Chat::CloseHook
+    ::hooks::register closeWindowHook            ::Chat::CloseHistoryHook
+    ::hooks::register loginHook                  ::Chat::LoginHook
+    ::hooks::register logoutHook                 ::Chat::LogoutHook
 
     # Define all hooks for preference settings.
-    ::hooks::register prefsInitHook          ::Jabber::Chat::InitPrefsHook
-    ::hooks::register prefsBuildHook         ::Jabber::Chat::BuildPrefsHook
-    ::hooks::register prefsSaveHook          ::Jabber::Chat::SavePrefsHook
-    ::hooks::register prefsCancelHook        ::Jabber::Chat::CancelPrefsHook
-    ::hooks::register prefsUserDefaultsHook  ::Jabber::Chat::UserDefaultsHook
-    ::hooks::register prefsDestroyHook       ::Jabber::Chat::DestroyPrefsHook
+    ::hooks::register prefsInitHook          ::Chat::InitPrefsHook
+    ::hooks::register prefsBuildHook         ::Chat::BuildPrefsHook
+    ::hooks::register prefsSaveHook          ::Chat::SavePrefsHook
+    ::hooks::register prefsCancelHook        ::Chat::CancelPrefsHook
+    ::hooks::register prefsUserDefaultsHook  ::Chat::UserDefaultsHook
+    ::hooks::register prefsDestroyHook       ::Chat::DestroyPrefsHook
 
     # Use option database for customization. 
     # These are nonstandard option valaues and we may therefore keep priority
@@ -108,6 +108,7 @@ namespace eval ::Jabber::Chat:: {
     option add *Chat*top.padX                   4               50
     option add *Chat*top.padY                   2               50
     option add *Chat*divt.borderWidth           2               50
+    option add *Chat*divt.height                2               50
     option add *Chat*divt.relief                sunken          50
 
     option add *ChatThread*fsub.padX            6               50
@@ -142,7 +143,7 @@ namespace eval ::Jabber::Chat:: {
     variable uidpage 0
 }
 
-# Jabber::Chat::StartThreadDlg --
+# Chat::StartThreadDlg --
 #
 #       Start a chat, ask for user in dialog.
 #       
@@ -152,14 +153,14 @@ namespace eval ::Jabber::Chat:: {
 # Results:
 #       updates UI.
 
-proc ::Jabber::Chat::StartThreadDlg {args} {
+proc ::Chat::StartThreadDlg {args} {
     global  prefs this wDlgs
 
     variable finished -1
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
 
-    ::Debug 2 "::Jabber::Chat::StartThreadDlg args='$args'"
+    ::Debug 2 "::Chat::StartThreadDlg args='$args'"
 
     set w $wDlgs(jstartchat)
     if {[winfo exists $w]} {
@@ -219,7 +220,7 @@ proc ::Jabber::Chat::StartThreadDlg {args} {
     return [expr {($finished <= 0) ? "cancel" : "ok"}]
 }
 
-proc ::Jabber::Chat::DoCancel {w} {
+proc ::Chat::DoCancel {w} {
     variable finished
     
     ::UI::SaveWinGeom $w
@@ -227,7 +228,7 @@ proc ::Jabber::Chat::DoCancel {w} {
     destroy $w
 }
 
-proc ::Jabber::Chat::DoStart {w} {
+proc ::Chat::DoStart {w} {
     variable finished
     variable user
     upvar ::Jabber::jstate jstate
@@ -260,7 +261,7 @@ proc ::Jabber::Chat::DoStart {w} {
     }
 }
 
-# Jabber::Chat::GotMsg --
+# Chat::GotMsg --
 #
 #       Just got a chat message. Fill in message in existing dialog.
 #       If no dialog, make a freash one.
@@ -272,13 +273,13 @@ proc ::Jabber::Chat::DoStart {w} {
 # Results:
 #       updates UI.
 
-proc ::Jabber::Chat::GotMsg {body args} {
+proc ::Chat::GotMsg {body args} {
     global  prefs
 
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
 
-    ::Debug 2 "::Jabber::Chat::GotMsg args='$args'"
+    ::Debug 2 "::Chat::GotMsg args='$args'"
 
     array set argsArr $args
     
@@ -413,29 +414,29 @@ proc ::Jabber::Chat::GotMsg {body args} {
     eval {::hooks::run displayChatMessageHook $body} $args
 }
 
-# Jabber::Chat::GotNormalMsg --
+# Chat::GotNormalMsg --
 # 
 #       Treats a 'normal' message as a chat message.
 
-proc ::Jabber::Chat::GotNormalMsg {body args} {
+proc ::Chat::GotNormalMsg {body args} {
     global  prefs
     upvar ::Jabber::jprefs jprefs
         
     # Whiteboard messages are handled elsewhere. A guard:
     if {$jprefs(chat,normalAsChat) && ($body != "")} {
 	
-	::Debug 2 "::Jabber::Chat::GotNormalMsg args='$args'"
+	::Debug 2 "::Chat::GotNormalMsg args='$args'"
 	eval {GotMsg $body} $args
     }
 }
 
-# Jabber::Chat::InsertMessage --
+# Chat::InsertMessage --
 # 
 #       Puts message in text chat window.
 #       
 #       args:   -secs seconds
 
-proc ::Jabber::Chat::InsertMessage {chattoken whom body args} {
+proc ::Chat::InsertMessage {chattoken whom body args} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     
@@ -512,12 +513,12 @@ proc ::Jabber::Chat::InsertMessage {chattoken whom body args} {
     $wtext see end
 }
 
-proc ::Jabber::Chat::InsertAnyThreadHistory {chattoken} {
+proc ::Chat::InsertAnyThreadHistory {chattoken} {
     global  prefs
     variable $chattoken
     upvar 0 $chattoken chatstate
     
-    ::Debug 2 "::Jabber::Chat::InsertAnyThreadHistory"
+    ::Debug 2 "::Chat::InsertAnyThreadHistory"
     
     # First find any matching history file.
     jlib::splitjid $chatstate(jid) jid2 res
@@ -551,18 +552,18 @@ proc ::Jabber::Chat::InsertAnyThreadHistory {chattoken} {
     }
 }
 
-# Jabber::Chat::StartThread --
+# Chat::StartThread --
 # 
 # Arguments:
 #       jid
 #       args        -message, -thread
 
-proc ::Jabber::Chat::StartThread {jid args} {
+proc ::Chat::StartThread {jid args} {
 
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
-    ::Debug 2 "::Jabber::Chat::StartThread jid=$jid, args=$args"
+    ::Debug 2 "::Chat::StartThread jid=$jid, args=$args"
     array set argsArr $args
     set havedlg 0
 
@@ -609,7 +610,7 @@ proc ::Jabber::Chat::StartThread {jid args} {
     }
 }
 
-# Jabber::Chat::Build --
+# Chat::Build --
 #
 #       Builds the chat dialog.
 #
@@ -620,7 +621,7 @@ proc ::Jabber::Chat::StartThread {jid args} {
 # Results:
 #       dlgtoken; shows window.
 
-proc ::Jabber::Chat::Build {threadID args} {
+proc ::Chat::Build {threadID args} {
     global  this prefs wDlgs
     
     variable uiddlg
@@ -628,7 +629,7 @@ proc ::Jabber::Chat::Build {threadID args} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
-    ::Debug 2 "::Jabber::Chat::Build threadID=$threadID, args='$args'"
+    ::Debug 2 "::Chat::Build threadID=$threadID, args='$args'"
 
     # Initialize the state variable, an array, that keeps is the storage.
     
@@ -743,7 +744,7 @@ proc ::Jabber::Chat::Build {threadID args} {
     return $dlgtoken
 }
 
-# Jabber::Chat::BuildThreadWidget --
+# Chat::BuildThreadWidget --
 # 
 #       Builds page with all thread specific ui parts.
 #       
@@ -755,7 +756,7 @@ proc ::Jabber::Chat::Build {threadID args} {
 # Results:
 #       chattoken
 
-proc ::Jabber::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
+proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     global  wDlgs prefs osprefs
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
@@ -843,7 +844,7 @@ proc ::Jabber::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set frtop [frame $wthread.frtop]
     pack $frtop -side top -anchor w -fill x
     
-    set icon [::Jabber::Roster::GetPresenceIconFromJid $jid]
+    set icon [::Roster::GetPresenceIconFromJid $jid]
 
     # D = -padx 6 -pady 2
     set   wsub $frtop.fsub
@@ -970,7 +971,7 @@ proc ::Jabber::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     return $chattoken
 }
 
-proc ::Jabber::Chat::SetTitle {w rosterName fromjid} {
+proc ::Chat::SetTitle {w rosterName fromjid} {
     
     if {$rosterName == ""} {
 	wm title $w "[mc Chat]: $fromjid"
@@ -979,12 +980,12 @@ proc ::Jabber::Chat::SetTitle {w rosterName fromjid} {
     }
 }
 
-# ::Jabber::Chat::NewPage, ... --
+# ::Chat::NewPage, ... --
 # 
 #       Several procs to handle the tabbed interface; creates and deletes
 #       notebook and pages.
 
-proc ::Jabber::Chat::NewPage {dlgtoken threadID args} {
+proc ::Chat::NewPage {dlgtoken threadID args} {
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
     upvar ::Jabber::jprefs jprefs
@@ -1009,7 +1010,7 @@ proc ::Jabber::Chat::NewPage {dlgtoken threadID args} {
     return $chattoken
 }
 
-proc ::Jabber::Chat::MakeNewPage {dlgtoken threadID args} {
+proc ::Chat::MakeNewPage {dlgtoken threadID args} {
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
     
@@ -1042,7 +1043,7 @@ proc ::Jabber::Chat::MakeNewPage {dlgtoken threadID args} {
     return $chattoken
 }
 
-proc ::Jabber::Chat::MoveThreadToPage {dlgtoken chattoken} {
+proc ::Chat::MoveThreadToPage {dlgtoken chattoken} {
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
     variable $chattoken
@@ -1064,7 +1065,7 @@ proc ::Jabber::Chat::MoveThreadToPage {dlgtoken chattoken} {
     raise $wthread
 }
 
-proc ::Jabber::Chat::CloseThread {chattoken} {
+proc ::Chat::CloseThread {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     
@@ -1076,7 +1077,7 @@ proc ::Jabber::Chat::CloseThread {chattoken} {
     SetThreadState $dlgtoken $newchattoken
 }
 
-proc ::Jabber::Chat::DeletePage {chattoken} {
+proc ::Chat::DeletePage {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     
@@ -1105,7 +1106,7 @@ proc ::Jabber::Chat::DeletePage {chattoken} {
     }
 }
 
-proc ::Jabber::Chat::MoveThreadFromPage {dlgtoken chattoken} {
+proc ::Chat::MoveThreadFromPage {dlgtoken chattoken} {
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
     variable $chattoken
@@ -1121,7 +1122,7 @@ proc ::Jabber::Chat::MoveThreadFromPage {dlgtoken chattoken} {
     pack $wthread -in $wcont -fill both -expand true
 }
 
-proc ::Jabber::Chat::ClosePageCmd {dlgtoken w name} {
+proc ::Chat::ClosePageCmd {dlgtoken w name} {
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
     
@@ -1136,21 +1137,21 @@ proc ::Jabber::Chat::ClosePageCmd {dlgtoken w name} {
     return -code break
 }
 
-# Jabber::Chat::SelectPageCmd --
+# Chat::SelectPageCmd --
 # 
 #       Callback command from tab notebook widget when selecting new tab.
 
-proc ::Jabber::Chat::SelectPageCmd {dlgtoken w name} {
+proc ::Chat::SelectPageCmd {dlgtoken w name} {
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
     
-    Debug 3 "::Jabber::Chat::SelectPageCmd name=$name"
+    Debug 3 "::Chat::SelectPageCmd name=$name"
         
     set chattoken $dlgstate(name2token,$name)
     SetThreadState $dlgtoken $chattoken
 }
 
-proc ::Jabber::Chat::SetThreadState {dlgtoken chattoken} {
+proc ::Chat::SetThreadState {dlgtoken chattoken} {
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
 
@@ -1158,7 +1159,7 @@ proc ::Jabber::Chat::SetThreadState {dlgtoken chattoken} {
     upvar 0 $chattoken chatstate
     upvar ::Jabber::jstate jstate
 
-    Debug 3 "::Jabber::Chat::SetThreadState chattoken=$chattoken"
+    Debug 3 "::Chat::SetThreadState chattoken=$chattoken"
     
     jlib::splitjid $chatstate(jid) user res
     if {[$jstate(roster) isavailable $user]} {
@@ -1172,15 +1173,15 @@ proc ::Jabber::Chat::SetThreadState {dlgtoken chattoken} {
     SetTitle $dlgstate(w) $chatstate(rosterName) $chatstate(fromjid)
 }
 
-# Jabber::Chat::SetState --
+# Chat::SetState --
 # 
 #       Set state of complete dialog to normal or disabled.
   
-proc ::Jabber::Chat::SetState {chattoken state} {
+proc ::Chat::SetState {chattoken state} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     
-    Debug 4 "::Jabber::Chat::SetState chattoken=$chattoken, state=$state"
+    Debug 4 "::Chat::SetState chattoken=$chattoken, state=$state"
     
     if {[string equal $state $chatstate(state)]} {
 	#return
@@ -1199,11 +1200,11 @@ proc ::Jabber::Chat::SetState {chattoken state} {
     set chatstate(state) $state
 }
 
-# Jabber::Chat::GetActiveChatToken --
+# Chat::GetActiveChatToken --
 # 
 #       Returns the chattoken corresponding to the frontmost thread.
 
-proc ::Jabber::Chat::GetActiveChatToken {dlgtoken} {
+proc ::Chat::GetActiveChatToken {dlgtoken} {
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
     
@@ -1216,7 +1217,7 @@ proc ::Jabber::Chat::GetActiveChatToken {dlgtoken} {
     return $chattoken
 }
 
-proc ::Jabber::Chat::TabAlert {chattoken args} {
+proc ::Chat::TabAlert {chattoken args} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     
@@ -1235,18 +1236,18 @@ proc ::Jabber::Chat::TabAlert {chattoken args} {
     }
 }
 
-proc ::Jabber::Chat::SmileyCmd {chattoken im key} {
+proc ::Chat::SmileyCmd {chattoken im key} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     
     Emoticons::InsertSmiley $chatstate(wtextsnd) $im $key
 }
 
-# Jabber::Chat::CloseHook, ... --
+# Chat::CloseHook, ... --
 # 
 #       Various hooks.
 
-proc ::Jabber::Chat::CloseHook {wclose} {
+proc ::Chat::CloseHook {wclose} {
     global  wDlgs
     
     if {[string match $wDlgs(jchat)* $wclose]} {
@@ -1258,7 +1259,7 @@ proc ::Jabber::Chat::CloseHook {wclose} {
     return ""
 }
 
-proc ::Jabber::Chat::LoginHook { } {
+proc ::Chat::LoginHook { } {
 
     # handled by presence hook instead
     return ""
@@ -1270,7 +1271,7 @@ proc ::Jabber::Chat::LoginHook { } {
     return ""
 }
 
-proc ::Jabber::Chat::LogoutHook { } {
+proc ::Chat::LogoutHook { } {
     
     foreach dlgtoken [GetTokenList dlg] {
 	variable $dlgtoken
@@ -1289,7 +1290,7 @@ proc ::Jabber::Chat::LogoutHook { } {
     return ""
 }
 
-proc ::Jabber::Chat::QuitHook { } {
+proc ::Chat::QuitHook { } {
     global  wDlgs
     
     ::UI::SaveWinGeom $wDlgs(jstartchat)
@@ -1303,11 +1304,11 @@ proc ::Jabber::Chat::QuitHook { } {
     return ""
 }
 
-proc ::Jabber::Chat::ConfigureTextTags {w wtext} {
+proc ::Chat::ConfigureTextTags {w wtext} {
     variable chatOptions
     upvar ::Jabber::jprefs jprefs
     
-    ::Debug 2 "::Jabber::Chat::ConfigureTextTags jprefs(chatFont)=$jprefs(chatFont)"
+    ::Debug 2 "::Chat::ConfigureTextTags jprefs(chatFont)=$jprefs(chatFont)"
     
     set space 2
     set alltags {mepre metext youpre youtext syspre systext histhead}
@@ -1349,14 +1350,14 @@ proc ::Jabber::Chat::ConfigureTextTags {w wtext} {
     }
 }
 
-# Jabber::Chat::SetFont --
+# Chat::SetFont --
 # 
 #       Sets the chat font in all text widgets.
 
-proc ::Jabber::Chat::SetFont {theFont} {    
+proc ::Chat::SetFont {theFont} {    
     upvar ::Jabber::jprefs jprefs
 
-    ::Debug 2 "::Jabber::Chat::SetFont theFont=$theFont"
+    ::Debug 2 "::Chat::SetFont theFont=$theFont"
     
     # If theFont is empty it means the default font.
     set jprefs(chatFont) $theFont
@@ -1382,7 +1383,7 @@ proc ::Jabber::Chat::SetFont {theFont} {
     }
 }
 
-proc ::Jabber::Chat::ActiveCmd {chattoken} {
+proc ::Chat::ActiveCmd {chattoken} {
     variable cprefs
     variable $chattoken
     upvar 0 $chattoken chatstate
@@ -1391,7 +1392,7 @@ proc ::Jabber::Chat::ActiveCmd {chattoken} {
     set cprefs(lastActiveRet) $chatstate(active)
 }
 
-proc ::Jabber::Chat::ReturnKeyPress {chattoken} {
+proc ::Chat::ReturnKeyPress {chattoken} {
     variable cprefs
     variable $chattoken
     upvar 0 $chattoken chatstate
@@ -1404,7 +1405,7 @@ proc ::Jabber::Chat::ReturnKeyPress {chattoken} {
     } 
 }
 
-proc ::Jabber::Chat::CommandReturnKeyPress {chattoken} {
+proc ::Chat::CommandReturnKeyPress {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
 
@@ -1414,7 +1415,7 @@ proc ::Jabber::Chat::CommandReturnKeyPress {chattoken} {
     return -code break
 }
 
-proc ::Jabber::Chat::Send {dlgtoken} {
+proc ::Chat::Send {dlgtoken} {
     global  prefs
     
     variable $dlgtoken
@@ -1422,7 +1423,7 @@ proc ::Jabber::Chat::Send {dlgtoken} {
     variable cprefs
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::Jabber::Chat::Send "
+    ::Debug 2 "::Chat::Send "
     
     # Check that still connected to server.
     if {![::Jabber::IsConnected]} {
@@ -1512,7 +1513,7 @@ proc ::Jabber::Chat::Send {dlgtoken} {
     eval {::hooks::run displayChatMessageHook $allText} $opts
 }
 
-proc ::Jabber::Chat::TraceJid {dlgtoken name junk1 junk2} {
+proc ::Chat::TraceJid {dlgtoken name junk1 junk2} {
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
     
@@ -1521,7 +1522,7 @@ proc ::Jabber::Chat::TraceJid {dlgtoken name junk1 junk2} {
     wm title $dlgstate(w) "[mc Chat] ($chatstate(fromjid))"
 }
 
-proc ::Jabber::Chat::SendFile {dlgtoken} {
+proc ::Chat::SendFile {dlgtoken} {
      
     set chattoken [GetActiveChatToken $dlgtoken]
     variable $chattoken
@@ -1531,12 +1532,12 @@ proc ::Jabber::Chat::SendFile {dlgtoken} {
     ::Jabber::OOB::BuildSet $jid2
 }
 
-proc ::Jabber::Chat::Settings {dlgtoken} {
+proc ::Chat::Settings {dlgtoken} {
     
     ::Preferences::Build -page {Jabber Chat}
 }
 
-proc ::Jabber::Chat::Print {dlgtoken} {
+proc ::Chat::Print {dlgtoken} {
     
     set chattoken [GetActiveChatToken $dlgtoken]
     variable $chattoken
@@ -1545,7 +1546,7 @@ proc ::Jabber::Chat::Print {dlgtoken} {
     ::UserActions::DoPrintText $chatstate(wtext)
 }
 
-proc ::Jabber::Chat::Save {dlgtoken} {
+proc ::Chat::Save {dlgtoken} {
     global  this
     
     set chattoken [GetActiveChatToken $dlgtoken]
@@ -1571,13 +1572,13 @@ proc ::Jabber::Chat::Save {dlgtoken} {
     }
 }
 
-proc ::Jabber::Chat::PresenceHook {jid type args} {
+proc ::Chat::PresenceHook {jid type args} {
     
     upvar ::Jabber::jstate jstate
 
-    Debug 4 "::Jabber::Chat::PresenceHook jid=$jid, type=$type"
+    Debug 4 "::Chat::PresenceHook jid=$jid, type=$type"
 
-    # ::Jabber::Chat::PresenceHook: args=marilu@jabber.dk unavailable 
+    # ::Chat::PresenceHook: args=marilu@jabber.dk unavailable 
     #-resource Psi -type unavailable -type unavailable -from marilu@jabber.dk/Psi
     #-to matben@jabber.dk -status Disconnected
     array set argsArr $args
@@ -1596,7 +1597,7 @@ proc ::Jabber::Chat::PresenceHook {jid type args} {
     set mjid [jlib::jidmap $jid]
     jlib::splitjid $from jid2 res
     array set presArr [$jstate(roster) getpresence $jid2 -resource $res]
-    set icon [::Jabber::Roster::GetPresenceIconFromJid $from]
+    set icon [::Roster::GetPresenceIconFromJid $from]
 
     foreach chattoken [GetAllTokensFrom chat jid ${mjid}*] {
 	variable $chattoken
@@ -1606,7 +1607,7 @@ proc ::Jabber::Chat::PresenceHook {jid type args} {
 	if {[string equal $chatstate(presence) $show]} {
 	    return
 	}
-	set showStr [::Jabber::Roster::MapShowToText $show]
+	set showStr [::Roster::MapShowToText $show]
 	InsertMessage $chattoken sys "$from is: $showStr\n$status"
 	
 	if {[string equal $type "available"]} {
@@ -1626,11 +1627,11 @@ proc ::Jabber::Chat::PresenceHook {jid type args} {
     }
 }
 
-# Jabber::Chat::HaveChat --
+# Chat::HaveChat --
 # 
 #       Returns toplevel window if have chat, else empty.
 
-proc ::Jabber::Chat::HaveChat {jid} {
+proc ::Chat::HaveChat {jid} {
 
     jlib::splitjid $jid jid2 res
     set mjid2 [jlib::jidmap $jid2]
@@ -1649,7 +1650,7 @@ proc ::Jabber::Chat::HaveChat {jid} {
     }
 }
 
-# Jabber::Chat::GetTokenFrom --
+# Chat::GetTokenFrom --
 # 
 #       Try to get the token state array from any stored key.
 #       Only one token is returned if any.
@@ -1662,7 +1663,7 @@ proc ::Jabber::Chat::HaveChat {jid} {
 # Results:
 #       token or empty if not found.
 
-proc ::Jabber::Chat::GetTokenFrom {type key pattern} {
+proc ::Chat::GetTokenFrom {type key pattern} {
     
     # Search all tokens for this key into state array.
     foreach token [GetTokenList $type] {
@@ -1685,11 +1686,11 @@ proc ::Jabber::Chat::GetTokenFrom {type key pattern} {
     return ""
 }
 
-# Jabber::Chat::GetAllTokensFrom --
+# Chat::GetAllTokensFrom --
 # 
 #       As above but all tokens.
 
-proc ::Jabber::Chat::GetAllTokensFrom {type key pattern} {
+proc ::Chat::GetAllTokensFrom {type key pattern} {
     
     set alltokens {}
     
@@ -1714,7 +1715,7 @@ proc ::Jabber::Chat::GetAllTokensFrom {type key pattern} {
     return $alltokens
 }
 
-proc ::Jabber::Chat::GetFirstDlgToken { } {
+proc ::Chat::GetFirstDlgToken { } {
  
     set token ""
     set dlgtokens [GetTokenList dlg]
@@ -1730,12 +1731,12 @@ proc ::Jabber::Chat::GetFirstDlgToken { } {
     return $token
 }
 
-# Jabber::Chat::GetTokenList --
+# Chat::GetTokenList --
 # 
 # Arguments:
 #       type        'dlg' or 'chat'
 
-proc ::Jabber::Chat::GetTokenList {type} {
+proc ::Chat::GetTokenList {type} {
     
     set nskey [namespace current]::$type
     return [concat  \
@@ -1746,17 +1747,17 @@ proc ::Jabber::Chat::GetTokenList {type} {
       [info vars ${nskey}\[0-9\]\[0-9\]\[0-9\]\[0-9\]\[0-9\]]]
 }
 
-# Jabber::Chat::Close --
+# Chat::Close --
 #
 #
 
-proc ::Jabber::Chat::Close {dlgtoken} {
+proc ::Chat::Close {dlgtoken} {
     global  wDlgs prefs
     
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate    
     
-    ::Debug 2 "::Jabber::Chat::Close: dlgtoken=$dlgtoken"
+    ::Debug 2 "::Chat::Close: dlgtoken=$dlgtoken"
     set ans "yes"
     if {0} {
 	set ans [tk_messageBox -icon info -parent $w -type yesno \
@@ -1778,7 +1779,7 @@ proc ::Jabber::Chat::Close {dlgtoken} {
     }
 }
 
-proc ::Jabber::Chat::Free {dlgtoken} {
+proc ::Chat::Free {dlgtoken} {
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate 
     
@@ -1790,7 +1791,7 @@ proc ::Jabber::Chat::Free {dlgtoken} {
     unset dlgstate
 }
 
-proc ::Jabber::Chat::GetFirstPanePos { } {
+proc ::Chat::GetFirstPanePos { } {
     global  wDlgs
     
     set win [::UI::GetFirstPrefixedToplevel $wDlgs(jchat)]
@@ -1810,7 +1811,7 @@ proc ::Jabber::Chat::GetFirstPanePos { } {
 
 # Handle incoming jabber:x:event (JEP-0022).
 
-proc ::Jabber::Chat::XEventRecv {chattoken xevent args} {
+proc ::Chat::XEventRecv {chattoken xevent args} {
     variable $chattoken
     upvar 0 $chattoken chatstate
 	
@@ -1829,7 +1830,7 @@ proc ::Jabber::Chat::XEventRecv {chattoken xevent args} {
     set composeElem [wrapper::getchildswithtag $xevent "composing"]
     set idElem [wrapper::getchildswithtag $xevent "id"]
     
-    ::Debug 6 "::Jabber::Chat::XEventRecv \
+    ::Debug 6 "::Chat::XEventRecv \
       msgid=$msgid, composeElem=$composeElem, idElem=$idElem"
     
     if {($msgid != "") && ($composeElem != "") && ($idElem == "")} {
@@ -1864,7 +1865,7 @@ proc ::Jabber::Chat::XEventRecv {chattoken xevent args} {
     }
 }
 
-proc ::Jabber::Chat::XEventCancel {chattoken} {
+proc ::Chat::XEventCancel {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     
@@ -1872,12 +1873,12 @@ proc ::Jabber::Chat::XEventCancel {chattoken} {
     set chatstate(notifier) " "
 }
 
-proc ::Jabber::Chat::KeyPressEvent {chattoken char} {
+proc ::Chat::KeyPressEvent {chattoken char} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     variable cprefs
 
-    ::Debug 6 "::Jabber::Chat::KeyPressEvent chattoken=$chattoken, char=$char"
+    ::Debug 6 "::Chat::KeyPressEvent chattoken=$chattoken, char=$char"
     
     if {$char == ""} {
 	return
@@ -1895,12 +1896,12 @@ proc ::Jabber::Chat::KeyPressEvent {chattoken char} {
     }
 }
 
-proc ::Jabber::Chat::XEventSendCompose {chattoken} {
+proc ::Chat::XEventSendCompose {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     variable cprefs
 
-    ::Debug 2 "::Jabber::Chat::XEventSendCompose chattoken=$chattoken"
+    ::Debug 2 "::Chat::XEventSendCompose chattoken=$chattoken"
     
     if {$chatstate(state) != "normal"} {
 	return
@@ -1928,11 +1929,11 @@ proc ::Jabber::Chat::XEventSendCompose {chattoken} {
     }    
 }
 
-proc ::Jabber::Chat::XEventSendCancelCompose {chattoken} {
+proc ::Chat::XEventSendCancelCompose {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
 
-    ::Debug 2 "::Jabber::Chat::XEventSendCancelCompose chattoken=$chattoken"
+    ::Debug 2 "::Chat::XEventSendCancelCompose chattoken=$chattoken"
 
     # We may have been destroyed.
     if {![info exists chatstate]} {
@@ -1971,12 +1972,12 @@ proc ::Jabber::Chat::XEventSendCancelCompose {chattoken} {
 
 # Various methods to handle chat history .......................................
 
-namespace eval ::Jabber::Chat:: {
+namespace eval ::Chat:: {
     
     variable uidhist 1000
 }
 
-# Jabber::Chat::PutMessageInHistoryFile --
+# Chat::PutMessageInHistoryFile --
 #
 #       Writes chat event send/received to history file.
 #       
@@ -1987,7 +1988,7 @@ namespace eval ::Jabber::Chat:: {
 # Results:
 #       none.
 
-proc ::Jabber::Chat::PutMessageInHistoryFile {jid msg} {
+proc ::Chat::PutMessageInHistoryFile {jid msg} {
     global  prefs
     
     set mjid [jlib::jidmap $jid]
@@ -1998,7 +1999,7 @@ proc ::Jabber::Chat::PutMessageInHistoryFile {jid msg} {
     }
 }
 
-proc ::Jabber::Chat::BuildHistory {dlgtoken} {
+proc ::Chat::BuildHistory {dlgtoken} {
 
     set chattoken [GetActiveChatToken $dlgtoken]
     variable $chattoken
@@ -2008,7 +2009,7 @@ proc ::Jabber::Chat::BuildHistory {dlgtoken} {
     BuildHistoryForJid $jid2
 }
 
-# Jabber::Chat::BuildHistoryForJid --
+# Chat::BuildHistoryForJid --
 #
 #       Builds chat history dialog for jid.
 #       
@@ -2018,7 +2019,7 @@ proc ::Jabber::Chat::BuildHistory {dlgtoken} {
 # Results:
 #       dialog displayed.
 
-proc ::Jabber::Chat::BuildHistoryForJid {jid} {
+proc ::Chat::BuildHistoryForJid {jid} {
     global  prefs this wDlgs
     variable uidhist
     variable historyOptions
@@ -2127,7 +2128,7 @@ proc ::Jabber::Chat::BuildHistoryForJid {jid} {
     wm minsize $w 200 320
 }
 
-proc ::Jabber::Chat::ClearHistory {jid wtext} {
+proc ::Chat::ClearHistory {jid wtext} {
     global  prefs
     
     $wtext configure -state normal
@@ -2139,13 +2140,13 @@ proc ::Jabber::Chat::ClearHistory {jid wtext} {
     }
 }
 
-proc ::Jabber::Chat::CloseHistory {w} {
+proc ::Chat::CloseHistory {w} {
 
     CloseHistoryHook $w
     destroy $w
 }
 
-proc ::Jabber::Chat::CloseHistoryHook {wclose} {
+proc ::Chat::CloseHistoryHook {wclose} {
     global  wDlgs
     
     if {[string match $wDlgs(jchist)* $wclose]} {
@@ -2153,12 +2154,12 @@ proc ::Jabber::Chat::CloseHistoryHook {wclose} {
     }   
 }
 
-proc ::Jabber::Chat::PrintHistory {wtext} {
+proc ::Chat::PrintHistory {wtext} {
         
     ::UserActions::DoPrintText $wtext
 }
 
-proc ::Jabber::Chat::SaveHistory {jid wtext} {
+proc ::Chat::SaveHistory {jid wtext} {
     global  this
 	
     set ans [tk_getSaveFile -title [mc Save] \
@@ -2177,7 +2178,7 @@ proc ::Jabber::Chat::SaveHistory {jid wtext} {
 
 # Preference page --------------------------------------------------------------
 
-proc ::Jabber::Chat::InitPrefsHook { } {
+proc ::Chat::InitPrefsHook { } {
     upvar ::Jabber::jprefs jprefs
     	
     set jprefs(chatActiveRet) 0
@@ -2192,15 +2193,15 @@ proc ::Jabber::Chat::InitPrefsHook { } {
       [list ::Jabber::jprefs(chatActiveRet) jprefs_chatActiveRet $jprefs(chatActiveRet)]]    
 }
 
-proc ::Jabber::Chat::BuildPrefsHook {wtree nbframe} {
+proc ::Chat::BuildPrefsHook {wtree nbframe} {
     
     $wtree newitem {Jabber Chat} -text [mc Chat]
     
     set wpage [$nbframe page {Chat}]    
-    ::Jabber::Chat::BuildPrefsPage $wpage
+    ::Chat::BuildPrefsPage $wpage
 }
 
-proc ::Jabber::Chat::BuildPrefsPage {wpage} {
+proc ::Chat::BuildPrefsPage {wpage} {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
     
@@ -2239,14 +2240,14 @@ proc ::Jabber::Chat::BuildPrefsPage {wpage} {
     grid $fr.rb2re  -sticky w
 }
 
-proc ::Jabber::Chat::SavePrefsHook { } {
+proc ::Chat::SavePrefsHook { } {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
     
     array set jprefs [array get tmpJPrefs]
 }
 
-proc ::Jabber::Chat::CancelPrefsHook { } {
+proc ::Chat::CancelPrefsHook { } {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
         
@@ -2258,7 +2259,7 @@ proc ::Jabber::Chat::CancelPrefsHook { } {
     }
 }
 
-proc ::Jabber::Chat::UserDefaultsHook { } {
+proc ::Chat::UserDefaultsHook { } {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
     
@@ -2267,7 +2268,7 @@ proc ::Jabber::Chat::UserDefaultsHook { } {
     }
 }
 
-proc ::Jabber::Chat::DestroyPrefsHook { } {
+proc ::Chat::DestroyPrefsHook { } {
     variable tmpJPrefs
     
     unset -nocomplain tmpJPrefs
