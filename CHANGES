@@ -1,4 +1,4 @@
-
+x
 Whiteboard CHANGES
 ------------------
 
@@ -19,10 +19,12 @@ Coccinella-0.95.0 (04????): 	Short summary --
 	- extra options for profiles now in tabbed notebook
 	- Itcl interface for applets accessing whiteboard functions
 	- Itcl runtime environment for applets
-	- card game applet as a first example
+	- mechanism to add custom protocol
+	- card game applet as a first example of runtime and custom protocol
 	- slide show component
 	- xmpp uri parser
 	- restricted to single instance on Windows
+	- synced playback for QuickTime
 
 
 Coccinella-0.94.11 (040601): 	Short summary --

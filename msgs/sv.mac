@@ -260,6 +260,7 @@
 ::msgcat::mcset sv mImageSmaller	{Fšrminska bilden}
 ::msgcat::mcset sv mExportImage		{Exportera bilden...}
 ::msgcat::mcset sv mExportMovie		{Exportera filmen...}
+::msgcat::mcset sv mSyncPlayback	{Synka uppspelning}
 ::msgcat::mcset sv mColor		{FŠrg...}
 ::msgcat::mcset sv mAddSpeechBubble	{LŠgg till pratbubbla}
 ::msgcat::mcset sv mUpdateCheck  	{Uppdaterings koll}

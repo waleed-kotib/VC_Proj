@@ -7,12 +7,14 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.66 2004-07-28 15:13:58 matben Exp $
+# $Id: UI.tcl,v 1.67 2004-08-06 07:46:54 matben Exp $
 
 package require entrycomp
 package require alertbox
 
 namespace eval ::UI:: {
+
+    #::hooks::add initHook               ::UI::InitHook
 
     # Icons
     option add *buttonOKImage            buttonok       widgetDefault
@@ -23,6 +25,15 @@ namespace eval ::UI:: {
     # components stuff.
     variable menuSpecPublic
     set menuSpecPublic(wpaths) {}
+}
+
+proc ::UI::InitHook { } {
+    
+    # In initHook UI before hooks BAD!
+
+    # Various initializations for canvas stuff and UI.
+    #::UI::Init
+    #::UI::InitMenuDefs  
 }
 
 # UI::Init --

@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.57 2004-07-30 12:55:54 matben Exp $
+# $Id: jabberlib.tcl,v 1.58 2004-08-06 07:46:53 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -694,7 +694,7 @@ proc jlib::closestream {jlibname} {
     Debug 3 "jlib::closestream"
     set xml "</stream:stream>"
     catch {eval $lib(transportsend) {$xml}}
-    eval $lib(transportreset)
+    catch {eval $lib(transportreset)}
     reset $jlibname
     
     # Be sure to reset the wrapper, which implicitly resets the XML parser.
@@ -1141,7 +1141,7 @@ proc jlib::end_of_parse {jlibname} {
 
     Debug 3 "jlib::end_of_parse jlibname=$jlibname"
     
-    eval $lib(transportreset)
+    catch {eval $lib(transportreset)}
     uplevel #0 $lib(clientcmd) [list $jlibname disconnect]
     reset $jlibname
 }
@@ -1162,7 +1162,7 @@ proc jlib::xmlerror {jlibname args} {
 
     Debug 3 "jlib::xmlerror jlibname=$jlibname, args='$args'"
     
-    eval $lib(transportreset)
+    catch {eval $lib(transportreset)}
     uplevel #0 $lib(clientcmd) [list $jlibname xmlerror -errormsg $args]
     reset $jlibname
 }

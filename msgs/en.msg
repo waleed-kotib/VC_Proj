@@ -261,6 +261,7 @@
 ::msgcat::mcset en mImageSmaller	{Image Smaller}
 ::msgcat::mcset en mExportImage		{Export Image...}
 ::msgcat::mcset en mExportMovie		{Export Movie...}
+::msgcat::mcset en mSyncPlayback	{Sync Playback}
 ::msgcat::mcset en mColor		{Color...}
 ::msgcat::mcset en mAddSpeechBubble	{Add Speech Bubble}
 ::msgcat::mcset en mUpdateCheck  	{Update Check}

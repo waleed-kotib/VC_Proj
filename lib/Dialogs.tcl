@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.42 2004-07-09 06:26:06 matben Exp $
+# $Id: Dialogs.tcl,v 1.43 2004-08-06 07:46:53 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -787,7 +787,7 @@ proc ::Dialogs::ShowInfoServer { } {
     pack [frame $w.frall -borderwidth 1 -relief raised]
     set wcont $w.frtop
     labelframe $wcont -text [mc {Server Info}]
-    pack $wcont -in $w.frall    
+    pack $wcont -in $w.frall -padx 8 -pady 6  
     
     # Frame for everything inside the labeled container.
     set fr [frame $wcont.fr]

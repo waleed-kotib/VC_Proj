@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.22 2004-08-03 14:04:43 matben Exp $
+# $Id: JWB.tcl,v 1.23 2004-08-06 07:46:53 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -34,6 +34,8 @@ proc ::Jabber::WB::Init {jlibName} {
     variable xmlnsSVGWB
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::privatexmlns privatexmlns
+    
+    ::Debug 4 "::Jabber::WB::Init"
     
     ::hooks::add whiteboardBuildEntryHook     ::Jabber::WB::BuildEntryHook
     ::hooks::add whiteboardSetMinsizeHook     ::Jabber::WB::SetMinsizeHook    
@@ -78,6 +80,9 @@ proc ::Jabber::WB::Init {jlibName} {
       [namespace current]::HandleSVGWBGroupchatMessage
 
     ::Jabber::AddClientXmlns [list "coccinella:wb"]
+    
+    # Get protocol handlers, present and future.
+    ::Jabber::WB::GetRegisteredHandlers
     
     # Add Advanced Message Processing elements. <amp/>
     # Deliver only to specified resource, and do not store offline?
@@ -925,7 +930,7 @@ proc ::Jabber::WB::HandleRawChatMessage {jlibname xmlns args} {
     array set argsArr $args
         
     set cmdList [::Jabber::WB::GetRawMessageList $argsArr(-x) $xmlns]
-    set cmdList [eval {::Jabber::WB::HandleAnyResizeImage chat $cmdList} $args]
+    set cmdList [eval {::Jabber::WB::HandleNonCanvasCmds chat $cmdList} $args]
 
     eval {::Jabber::WB::ChatMsg $cmdList} $args
     eval {::hooks::run newWBChatMessageHook} $args
@@ -948,7 +953,7 @@ proc ::Jabber::WB::HandleRawGroupchatMessage {jlibname xmlns args} {
     if {![::Jabber::IsMyGroupchatJid $argsArr(-from)]} {
 	set cmdList [::Jabber::WB::GetRawMessageList $argsArr(-x) $xmlns]
 	set cmdList [eval {
-	    ::Jabber::WB::HandleAnyResizeImage groupchat $cmdList} $args]
+	    ::Jabber::WB::HandleNonCanvasCmds groupchat $cmdList} $args]
 
 	eval {::Jabber::WB::GroupChatMsg $cmdList} $args
 	eval {::hooks::run newWBGroupChatMessageHook} $args
@@ -1120,16 +1125,16 @@ proc ::Jabber::WB::SVGHttpHandler {wtop cmd} {
 
 }
 
-# Jabber::WB::HandleAnyResizeImage --
+# Jabber::WB::HandleNonCanvasCmds --
 # 
 #       Until we have a better protocol for this handle it here.
 #       This really SUCKS!!!
 #       Handles RESIZE IMAGE, strips off CANVAS: prefix of rest and returns this.
 
-proc ::Jabber::WB::HandleAnyResizeImage {type cmdList args} {
+proc ::Jabber::WB::HandleNonCanvasCmds {type cmdList args} {
     variable handler
     
-    ::Debug 4 "::Jabber::WB::HandleAnyResizeImage type=$type"
+    ::Debug 4 "::Jabber::WB::HandleNonCanvasCmds type=$type"
     
     set canCmdList {}
     foreach cmd $cmdList {
@@ -1182,8 +1187,18 @@ proc ::Jabber::WB::HandleAnyResizeImage {type cmdList args} {
     return $canCmdList
 }
 
+# ::Jabber::WB::GetRegisteredHandlers --
+# 
+#       Get protocol handlers, present and future.
 
-proc ::Jabber::WB::RegisterHandler {prefix cmd} {
+proc ::Jabber::WB::GetRegisteredHandlers { } {
+    variable handler
+    
+    array set handler [::WB::GetRegisteredHandlers]
+    ::hooks::add whiteboardRegisterHandlerHook  ::Jabber::WB::RegisterHandlerHook
+}
+
+proc ::Jabber::WB::RegisterHandlerHook {prefix cmd} {
     variable handler
     
     set handler($prefix) $cmd

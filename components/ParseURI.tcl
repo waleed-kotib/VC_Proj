@@ -4,7 +4,7 @@
 #       typically from an anchor element <a href='xmpp:jid[?query]'/>
 #       in a html page.
 # 
-# $Id: ParseURI.tcl,v 1.4 2004-07-30 12:55:53 matben Exp $
+# $Id: ParseURI.tcl,v 1.5 2004-08-06 07:46:53 matben Exp $
 
 package require uriencode
 
@@ -68,14 +68,13 @@ proc ::ParseURI::Parse { } {
     set state(domain)   $domain
     
     ::Jabber::Login::Connect $domain [list [namespace current]::ConnectCB $token]
-    parray state
 }
 
 proc ::ParseURI::ConnectCB {token status {msg {}}} {
     variable $token
     upvar 0 $token state
     
-    puts "::ParseURI::ConnectCB status=$status"
+    #puts "::ParseURI::ConnectCB status=$status"
     
     switch $status {
 	error {
@@ -103,7 +102,7 @@ proc ::ParseURI::InitStreamCB {token args} {
     variable $token
     upvar 0 $token state
     
-    puts "::ParseURI::InitStreamCB args='$args'"
+    #puts "::ParseURI::InitStreamCB args='$args'"
 
     array set argsArr $args
 
@@ -145,7 +144,7 @@ proc ::ParseURI::AuthorizeCB {token type msg} {
     variable $token
     upvar 0 $token state
     
-    puts "::ParseURI::AuthorizeCB type=$type, msg=$msg"
+    #puts "::ParseURI::AuthorizeCB type=$type, msg=$msg"
     
     if {[string equal $type "error"]} {
 	tk_messageBox -icon error -type ok -title [mc Error]  \
@@ -210,6 +209,41 @@ proc ::ParseURI::DoGroupchat {token} {
     variable $token
     upvar 0 $token state
     
+    # Get groupcat service from room.
+    jlib::splitjidex $state(jid) roomname service res
+    set state(service) $service
+    
+    # These must be one shot hooks.
+    set state(browsecmd) [list ::ParseURI::BrowseSetHook $token]
+    set state(discocmd)  [list ::ParseURI::DiscoInfoHook $token]
+    ::hooks::add browseSetHook  $state(browsecmd)
+    ::hooks::add discoInfoHook  $state(discocmd)
+}
+
+proc ::ParseURI::BrowseSetHook {token from subiq} {
+    variable $token
+    upvar 0 $token state
+    
+    set server [::Jabber::GetServerJid]
+    if {![jlib::jidequal $from $server]} {
+	return
+    }
+    ::hooks::remove  browseSetHook  $state(browsecmd)
+    
+    # We brutaly assumes muc room here.
+    ::Jabber::MUC::EnterRoom $state(jid) $state(query,nick)
+    ::ParseURI::Free $token
+}
+
+proc ::ParseURI::DiscoInfoHook {token type from subiq args} {
+    variable $token
+    upvar 0 $token state
+
+    if {![jlib::jidequal $from $state(service)]} {
+	return
+    }
+    ::hooks::remove  discoInfoHook  $state(discocmd)
+
     # We brutaly assumes muc room here.
     ::Jabber::MUC::EnterRoom $state(jid) $state(query,nick)
     ::ParseURI::Free $token
