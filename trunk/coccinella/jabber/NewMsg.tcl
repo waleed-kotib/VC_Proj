@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.26 2003-12-23 08:54:53 matben Exp $
+# $Id: NewMsg.tcl,v 1.27 2003-12-23 10:16:01 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -61,7 +61,6 @@ proc ::Jabber::NewMsg::Init { } {
     # Icons.
     set locals(popupbt) [::UI::GetIcon popupbt]
     set locals(popupbtpush) [::UI::GetIcon popupbtpush]
-    set locals(whiterect) [::UI::GetIcon whiterect]
 }
 
 # Jabber::NewMsg::InitEach --
@@ -239,10 +238,10 @@ proc ::Jabber::NewMsg::Build {args} {
     pack $frsub.esub -side top -padx 2 -fill x
     
     # Text.
-    set wtxt $w.frall.frtxt
+    set wtxt  $w.frall.frtxt
+    set wtext ${wtxt}.text
+    set wysc  ${wtxt}.ysc
     pack [frame $wtxt] -side top -fill both -expand 1 -padx 6 -pady 4
-    set wtext $wtxt.text
-    set wysc $wtxt.ysc
     text $wtext -height 8 -width 48 -wrap word \
       -borderwidth 1 -relief sunken -yscrollcommand [list $wysc set]
     scrollbar $wysc -orient vertical -command [list $wtext yview]
@@ -253,16 +252,16 @@ proc ::Jabber::NewMsg::Build {args} {
     if {[string match "mac*" $this(platform)]} {
 	pack [frame $w.frall.pad -height 14] -side bottom
     }
-    set locals($w,w) $w
-    set locals($w,wtext) $wtext
-    set locals($w,waddcan) $waddcan
-    set locals($w,wfradd) $fradd
-    set locals($w,wfrport) $frport
-    set locals($w,wspacer) $wspacer
+    set locals($w,w)        $w
+    set locals($w,wtext)    $wtext
+    set locals($w,waddcan)  $waddcan
+    set locals($w,wfradd)   $fradd
+    set locals($w,wfrport)  $frport
+    set locals($w,wspacer)  $wspacer
     set locals($w,wsubject) $wsubject
-    set locals($w,wccp) $wccp
+    set locals($w,wccp)     $wccp
     set locals($w,finished) 0
-    set locals($w,wtray) $wtray
+    set locals($w,wtray)    $wtray
     
     if {[string length $opts(-forwardmessage)] > 0} {
 	$wtext insert end "\nForwarded message from $opts(-to) written at $opts(-time)\n\
@@ -288,7 +287,6 @@ $opts(-forwardmessage)"
     bind $waddcan <Configure> [list [namespace current]::ResizeCan $w]
     
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jsendmsg)]]
-    puts "nwin=$nwin"
     if {$nwin == 1} {
 	::UI::SetWindowGeometry $w $wDlgs(jsendmsg)
     }
@@ -313,9 +311,12 @@ proc ::Jabber::NewMsg::NewAddrLine {w wfr n} {
     frame $wfr.f${n} -bd 0
     entry $wfr.f${n}.trpt -width 18 -font $fontSB -bd 0 -highlightthickness 0 \
       -state disabled -textvariable [namespace current]::locals($w,poptrpt$n)
-    label $wfr.f${n}.la -image $locals(whiterect) -bd 0
-    pack $wfr.f${n}.trpt $wfr.f${n}.la -side left -fill y
-    ::entrycomp::entrycomp $wfr.addr${n} $jidlist -bd 0 -highlightthickness 0 \
+    label $wfr.f${n}.la -bd 0
+    pack $wfr.f${n}.trpt -side left -fill y -anchor w
+    pack $wfr.f${n}.la -side right -fill y
+    
+    set wentry $wfr.addr${n}
+    ::entrycomp::entrycomp $wentry $jidlist -bd 0 -highlightthickness 0 \
       -textvariable [namespace current]::locals($w,addr$n) -state disabled
     
     set m [menu $locals(wpopupbase)${num}_${n} -tearoff 0]
@@ -325,15 +326,15 @@ proc ::Jabber::NewMsg::NewAddrLine {w wfr n} {
 	  -command [list ::Jabber::NewMsg::PopupCmd $w $n]
     }
     
-    bind $wfr.addr$n <Button-1> [list ::Jabber::NewMsg::ButtonInAddr $w $wfr $n]
-    bind $wfr.addr$n <Tab>      [list ::Jabber::NewMsg::TabInAddr $w $wfr $n]
-    bind $wfr.addr$n <BackSpace> "+ ::Jabber::NewMsg::BackSpaceInAddr $w $wfr $n"
-    bind $wfr.addr$n <Return>   [list ::Jabber::NewMsg::ReturnInAddr $w $wfr $n]
-    bind $wfr.addr$n <Key-Up>   [list ::Jabber::NewMsg::KeyUpDown -1 $w $wfr $n]
-    bind $wfr.addr$n <Key-Down> [list ::Jabber::NewMsg::KeyUpDown 1 $w $wfr $n]
+    bind $wentry <Button-1> [list ::Jabber::NewMsg::ButtonInAddr $w $wfr $n]
+    bind $wentry <Tab>      [list ::Jabber::NewMsg::TabInAddr $w $wfr $n]
+    bind $wentry <BackSpace> "+ ::Jabber::NewMsg::BackSpaceInAddr $w $wfr $n"
+    bind $wentry <Return>   [list ::Jabber::NewMsg::ReturnInAddr $w $wfr $n]
+    bind $wentry <Key-Up>   [list ::Jabber::NewMsg::KeyUpDown -1 $w $wfr $n]
+    bind $wentry <Key-Down> [list ::Jabber::NewMsg::KeyUpDown 1 $w $wfr $n]
     
-    grid $wfr.f${n} -padx 1 -pady 1 -column 0 -row $n -sticky ns
-    grid $wfr.addr$n -padx 1 -pady 1 -column 1 -row $n -sticky news
+    grid $wfr.f${n} -padx 1 -pady 1 -column 0 -row $n -sticky news
+    grid $wentry -padx 1 -pady 1 -column 1 -row $n -sticky news
     grid columnconfigure $wfr 1 -weight 1
     grid rowconfigure $wfr $n -minsize 16
     set locals($w,addrline) $n
@@ -443,7 +444,7 @@ proc ::Jabber::NewMsg::EmptyAddrLine {w wfr n} {
     
     variable locals
     
-    $wfr.f${n}.la configure -image $locals(whiterect)
+    $wfr.f${n}.la configure -image {}
     $wfr.addr${n} configure -state disabled
     set locals($w,poptrpt$n) {}
     set locals($w,addr$n) {}
