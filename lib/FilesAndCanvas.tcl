@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: FilesAndCanvas.tcl,v 1.14 2003-12-18 14:19:35 matben Exp $
+# $Id: FilesAndCanvas.tcl,v 1.15 2003-12-20 14:27:16 matben Exp $
  
 package require can2svg
 package require undo
@@ -564,7 +564,7 @@ proc ::CanvasFile::DoOpenCanvasFile {wtop {filePath {}}} {
 	return
     }
     ::undo::reset [::WB::GetUndoToken $wtop]
-    ::UserActions::DoEraseAll $wtop     
+    ::CanvasCmd::DoEraseAll $wtop     
     FileToCanvas $wCan $fd $fileName
     close $fd
 }

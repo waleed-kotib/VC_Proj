@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.22 2003-12-19 15:47:39 matben Exp $
+# $Id: NewMsg.tcl,v 1.23 2003-12-20 14:27:16 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -288,7 +288,8 @@ $opts(-forwardmessage)"
     bind $frport <Configure> [list [namespace current]::AddrResize $w]
     bind $waddcan <Configure> [list [namespace current]::ResizeCan $w]
     
-    if {[info exists prefs(winGeom,$wDlgs(jsendmsg))]} {
+    set nwin [::UI::GetPrefixedToplevels $wDlgs(jsendmsg)]
+    if {($nwin == 1) && [info exists prefs(winGeom,$wDlgs(jsendmsg))]} {
 	wm geometry $w $prefs(winGeom,$wDlgs(jsendmsg))
     }
     wm minsize $w 300 260

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasText.tcl,v 1.8 2003-12-18 14:19:35 matben Exp $
+# $Id: CanvasText.tcl,v 1.9 2003-12-20 14:27:16 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 
@@ -515,7 +515,7 @@ proc ::CanvasText::Drag {w x y} {
     global  this
     
     set wtop [::UI::GetToplevelNS $w]
-    ::UserActions::DeselectAll $wtop
+    ::CanvasCmd::DeselectAll $wtop
     $w select to current @$x,$y
     
     # Mac text bindings.????
@@ -541,7 +541,7 @@ proc ::CanvasText::Drag {w x y} {
 proc ::CanvasText::SelectWord {w x y} {
     
     set wtop [::UI::GetToplevelNS $w]
-    ::UserActions::DeselectAll $wtop
+    ::CanvasCmd::DeselectAll $wtop
     $w focus current
     
     set id [$w find withtag current]

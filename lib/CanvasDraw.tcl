@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasDraw.tcl,v 1.18 2003-12-18 14:19:35 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.19 2003-12-20 14:27:16 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 #  
@@ -2307,7 +2307,7 @@ proc ::CanvasDraw::DeleteItem {w x y {id current} {where all}} {
     
     # Remove select marks.
     if {$needDeselect} {
-	::UserActions::DeselectAll $wtop
+	::CanvasCmd::DeselectAll $wtop
     }
 }
 
@@ -2430,7 +2430,7 @@ proc ::CanvasDraw::MarkBbox {w shift {which current}} {
     
     # If no shift key, deselect all.
     if {$shift == 0} {
-	::UserActions::DeselectAll $wtop
+	::CanvasCmd::DeselectAll $wtop
     }
     if {[string equal $which "current"]} {
 	set thebbox [$w bbox current]
@@ -2552,7 +2552,7 @@ proc ::CanvasDraw::LostSelection {wtop} {
     
     set wtopReal [::UI::GetToplevel $wtop]
     if {$wtopReal == [selection own]} {
-	::UserActions::DeselectAll $wtop
+	::CanvasCmd::DeselectAll $wtop
     }
 }
 

@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.18 2003-12-16 15:03:53 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.19 2003-12-20 14:27:16 matben Exp $
 
 # SetWhiteboardFactoryState --
 # 
@@ -90,11 +90,6 @@ if {[string equal $this(platform) "macintosh"]} {
 
 # Dialog window custom geometries: {pathName wxh+x+y ...}
 set prefs(winGeom) {}
-# List of toplevels that we want to manage their geometries.
-::Dialogs::AddToplevelToGeomList $wDlgs(fileAssoc) $wDlgs(openConn)  \
-  $wDlgs(prefs)  \
-  $wDlgs(jrostbro) $wDlgs(jinbox) $wDlgs(jlogin) $wDlgs(jsendmsg)  \
-  $wDlgs(jgotmsg) $wDlgs(jchat)
 
 # Same for panes.
 set prefs(paneGeom) {}

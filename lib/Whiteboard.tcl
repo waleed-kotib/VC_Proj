@@ -7,13 +7,14 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.3 2003-12-19 15:47:40 matben Exp $
+# $Id: Whiteboard.tcl,v 1.4 2003-12-20 14:27:16 matben Exp $
 
 package require entrycomp
 package require CanvasDraw
 package require CanvasText
 package require CanvasUtils
 package require CanvasCutCopyPaste
+package require CanvasCmd
 
 package provide Whiteboard 1.0
 
@@ -161,16 +162,16 @@ proc ::WB::Init {} {
 	import     {::Import::ImportImageOrMovieDlg $wtop}
 	send       {::Jabber::DoSendCanvas $wtop}
 	print      {::UserActions::DoPrintCanvas $wtop}
-	stop       {::UserActions::CancelAllPutGetAndPendingOpen $wtop}
+	stop       {::CanvasCmd::CancelAllPutGetAndPendingOpen $wtop}
     }
     set btShortDefs(symmetric) {
 	connect    {::OpenConnection::OpenConnection $wDlgs(openConn)}
 	save       {::CanvasFile::DoSaveCanvasFile $wtop}
 	open       {::CanvasFile::DoOpenCanvasFile $wtop}
 	import     {::Import::ImportImageOrMovieDlg $wtop}
-	send       {::UserActions::DoSendCanvas $wtop}
+	send       {::CanvasCmd::DoSendCanvas $wtop}
 	print      {::UserActions::DoPrintCanvas $wtop}
-	stop       {::UserActions::CancelAllPutGetAndPendingOpen $wtop}
+	stop       {::CanvasCmd::CancelAllPutGetAndPendingOpen $wtop}
     }
     set btShortDefs(client) $btShortDefs(symmetric)
     set btShortDefs(server) $btShortDefs(symmetric)
@@ -238,12 +239,12 @@ proc ::WB::InitMenuDefs { } {
 	{separator}
 	{command   mOpenImage/Movie    {::Import::ImportImageOrMovieDlg $wtop}    normal   I}
 	{command   mOpenURLStream      {::OpenMulticast::OpenMulticast $wtop}     normal   {}}
-	{command   mStopPut/Get/Open   {::UserActions::CancelAllPutGetAndPendingOpen $wtop} normal {}}
+	{command   mStopPut/Get/Open   {::CanvasCmd::CancelAllPutGetAndPendingOpen $wtop} normal {}}
 	{separator}
 	{command   mOpenCanvas         {::CanvasFile::DoOpenCanvasFile $wtop}     normal   {}}
 	{command   mSaveCanvas         {::CanvasFile::DoSaveCanvasFile $wtop}     normal   S}
 	{separator}
-	{command   mSaveAs             {::UserActions::SavePostscript $wtop}      normal   {}}
+	{command   mSaveAs             {::CanvasCmd::SavePostscript $wtop}      normal   {}}
 	{command   mPageSetup          {::UserActions::PageSetup $wtop}           normal   {}}
 	{command   mPrintCanvas        {::UserActions::DoPrintCanvas $wtop}       normal   P}
 	{separator}
@@ -259,15 +260,15 @@ proc ::WB::InitMenuDefs { } {
 	{command   mOpenImage/Movie    {::Import::ImportImageOrMovieDlg $wtop} normal  I}
 	{command   mOpenURLStream      {::OpenMulticast::OpenMulticast $wtop}     normal   {}}
 	{separator}
-	{command   mPutCanvas          {::UserActions::DoPutCanvasDlg $wtop}      disabled {}}
-	{command   mGetCanvas          {::UserActions::DoGetCanvas $wtop}         disabled {}}
+	{command   mPutCanvas          {::CanvasCmd::DoPutCanvasDlg $wtop}      disabled {}}
+	{command   mGetCanvas          {::CanvasCmd::DoGetCanvas $wtop}         disabled {}}
 	{command   mPutFile            {::PutFileIface::PutFileDlg $wtop}         disabled {}}
-	{command   mStopPut/Get/Open   {::UserActions::CancelAllPutGetAndPendingOpen $wtop} normal {}}
+	{command   mStopPut/Get/Open   {::CanvasCmd::CancelAllPutGetAndPendingOpen $wtop} normal {}}
 	{separator}
 	{command   mOpenCanvas         {::CanvasFile::DoOpenCanvasFile $wtop}     normal   {}}
 	{command   mSaveCanvas         {::CanvasFile::DoSaveCanvasFile $wtop}     normal   S}
 	{separator}
-	{command   mSaveAs             {::UserActions::SavePostscript $wtop}      normal   {}}
+	{command   mSaveAs             {::CanvasCmd::SavePostscript $wtop}      normal   {}}
 	{command   mPageSetup          {::UserActions::PageSetup $wtop}           normal   {}}
 	{command   mPrintCanvas        {::UserActions::DoPrintCanvas $wtop}       normal   P}
 	{separator}
@@ -288,25 +289,25 @@ proc ::WB::InitMenuDefs { } {
     }
 
     set menuDefs(main,edit) {    
-	{command     mUndo             {::UserActions::Undo $wtop}             normal   Z}
-	{command     mRedo             {::UserActions::Redo $wtop}             normal   {}}
+	{command     mUndo             {::CanvasCmd::Undo $wtop}             normal   Z}
+	{command     mRedo             {::CanvasCmd::Redo $wtop}             normal   {}}
 	{separator}
 	{command     mCut              {::UI::CutCopyPasteCmd cut}             disabled X}
 	{command     mCopy             {::UI::CutCopyPasteCmd copy}            disabled C}
 	{command     mPaste            {::UI::CutCopyPasteCmd paste}           disabled V}
-	{command     mAll              {::UserActions::SelectAll $wtop}        normal   A}
-	{command     mEraseAll         {::UserActions::DoEraseAll $wtop}       normal   {}}
+	{command     mAll              {::CanvasCmd::SelectAll $wtop}        normal   A}
+	{command     mEraseAll         {::CanvasCmd::DoEraseAll $wtop}       normal   {}}
 	{separator}
 	{command     mInspectItem      {::ItemInspector::ItemInspector $wtop selected} disabled {}}
 	{separator}
-	{command     mRaise            {::UserActions::RaiseOrLowerItems $wtop raise} disabled R}
-	{command     mLower            {::UserActions::RaiseOrLowerItems $wtop lower} disabled L}
+	{command     mRaise            {::CanvasCmd::RaiseOrLowerItems $wtop raise} disabled R}
+	{command     mLower            {::CanvasCmd::RaiseOrLowerItems $wtop lower} disabled L}
 	{separator}
-	{command     mLarger           {::UserActions::ResizeItem $wtop $prefs(scaleFactor)} disabled >}
-	{command     mSmaller          {::UserActions::ResizeItem $wtop $prefs(invScaleFac)} disabled <}
+	{command     mLarger           {::CanvasCmd::ResizeItem $wtop $prefs(scaleFactor)} disabled >}
+	{command     mSmaller          {::CanvasCmd::ResizeItem $wtop $prefs(invScaleFac)} disabled <}
 	{cascade     mFlip             {}                                      disabled {} {} {
-	    {command   mHorizontal     {::UserActions::FlipItem $wtop horizontal}  normal   {} {}}
-	    {command   mVertical       {::UserActions::FlipItem $wtop vertical}    normal   {} {}}}
+	    {command   mHorizontal     {::CanvasCmd::FlipItem $wtop horizontal}  normal   {} {}}
+	    {command   mVertical       {::CanvasCmd::FlipItem $wtop vertical}    normal   {} {}}}
 	}
 	{command     mImageLarger      {::Import::ResizeImage $wtop 2 sel auto} disabled {}}
 	{command     mImageSmaller     {::Import::ResizeImage $wtop -2 sel auto} disabled {}}
@@ -315,9 +316,9 @@ proc ::WB::InitMenuDefs { } {
     # These are used not only in the drop-down menus.
     set menuDefs(main,prefs,separator) 	{separator}
     set menuDefs(main,prefs,background)  \
-      {command     mBackgroundColor      {::UserActions::SetCanvasBgColor $wtop} normal   {}}
+      {command     mBackgroundColor      {::CanvasCmd::SetCanvasBgColor $wtop} normal   {}}
     set menuDefs(main,prefs,grid)  \
-      {checkbutton mGrid             {::UserActions::DoCanvasGrid $wtop}   normal   {} \
+      {checkbutton mGrid             {::CanvasCmd::DoCanvasGrid $wtop}   normal   {} \
       {-variable ::${wtop}::state(canGridOn)}}
     set menuDefs(main,prefs,thickness)  \
       {cascade     mThickness        {}                                    normal   {} {} {
@@ -850,7 +851,7 @@ proc ::WB::BuildWhiteboard {wtop args} {
     ::WB::SetToolButton $wtop [::WB::ToolBtNumToName $state(btState)]
 
     # Add things that are defined in the prefs file and not updated else.
-    ::UserActions::DoCanvasGrid $wtop
+    ::CanvasCmd::DoCanvasGrid $wtop
     if {$isConnected} {
 	::UI::FixMenusWhen $wtop "connect"
     }
@@ -1312,7 +1313,7 @@ proc ::WB::SetToolButton {wtop btName} {
 	$wCan select clear
     }
     if {$btName == "del" || $btName == "text"} {
-	::UserActions::DeselectAll $wtop
+	::CanvasCmd::DeselectAll $wtop
     }
     
     # Cancel any outstanding polygon drawings.
