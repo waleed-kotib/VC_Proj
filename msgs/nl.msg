@@ -1,6 +1,6 @@
 # English language version of the Coccinella message catalog.
 #
-# Dutch translation by Sander Devrieze (s.devrieze at pandora.be), 2004.
+# Dutch translation by Sander Devrieze (s.devrieze at pandora.be), 2004, 2005.
 # Bart Van Hove (bartvanhove at skynet.be), 2004.
 #
 # General type of text, such as "OK", "Cancel", and the like. 
@@ -33,7 +33,7 @@
 ::msgcat::mcset nl Choose		{Kiezen}
 ::msgcat::mcset nl City			{Stad}
 ::msgcat::mcset nl Clear		{Leegmaken}
-#::msgcat::mcset nl Client
+::msgcat::mcset nl Client		{Chatprogramma}
 ::msgcat::mcset nl Close		{Sluiten}
 ::msgcat::mcset nl Conference		{Groepsgesprek}
 ::msgcat::mcset nl Connect		{Aanmelden}
@@ -92,7 +92,7 @@
 ::msgcat::mcset nl No			{Nee}
 ::msgcat::mcset nl no			{nee}
 ::msgcat::mcset nl None			{Geen}
-#::msgcat::mcset nl Notes
+::msgcat::mcset nl Notes		{Opmerkingen}
 ::msgcat::mcset nl Occupation		{Beroep}
 ::msgcat::mcset nl Offline		{Offline}
 ::msgcat::mcset nl OK			{OK}
@@ -150,7 +150,7 @@
 ::msgcat::mcset nl Title		{Titel}
 ::msgcat::mcset nl To			{Aan}
 ::msgcat::mcset nl Topic		{Onderwerp}
-#::msgcat::mcset nl Transports
+::msgcat::mcset nl Transports		{Transporten}
 ::msgcat::mcset nl Trash		{Prullenbak}
 ::msgcat::mcset nl Type			{Soort}
 ::msgcat::mcset nl Unregister		{Registratie ongedaan maken}
@@ -310,9 +310,9 @@
 ::msgcat::mcset nl mCoccinellaHome  	{Coccinella's homepage...}
 ::msgcat::mcset nl mComponents 	 	{Componenten...}
 ::msgcat::mcset nl mBugReport  	 	{Fout melden...}
-#::msgcat::mcset nl mTakeSnapShot        {Take Snapshot}
-#::msgcat::mcset nl mTimeCode            {Timecode}
-#::msgcat::mcset nl mUserInfo            {User Info...}
+::msgcat::mcset nl mTakeSnapShot        {Momentopname}
+::msgcat::mcset nl mTimeCode            {Tijdcode}
+::msgcat::mcset nl mUserInfo            {Gebruikersgegevens...}
 
 
 # Popups
@@ -658,7 +658,7 @@
 ::msgcat::mcset nl jamessnotconnected	{Kan niet verzenden: er is geen verbinding met een server}
 ::msgcat::mcset nl jamessaddrmiss	{U moet minstens één geldig adres invullen}
 ::msgcat::mcset nl jamesschatclose	{Als u dit venster sluit, dan verliest u ook de volledige conversatie. Wilt u het werkelijk sluiten?}
-::msgcat::mcset nl jamessnogroupchat	{Er is geen service herkend die groepchat aanbied}
+::msgcat::mcset nl jamessnogroupchat	{Er is geen dienst herkend die groepchat aanbied}
 ::msgcat::mcset nl jamessinroommiss	{Het is verplicht dat alle velden ingevuld zijn voordat u een kamer betreedt}
 ::msgcat::mcset nl jamesswarnexitroom	{Wilt u werkelijk kamer "%s" verlaten?}
 ::msgcat::mcset nl jamesserrbrowse	{Er is een fout opgetreden tijdens het browsen naar "%s": %s}
@@ -679,13 +679,9 @@
 ::msgcat::mcset nl jamessoobfailopen	{Openen van bestand %s mislukte}
 ::msgcat::mcset nl jamessoobgetfail	{Ophalen van URL "%s" mislukte: %s}
 ::msgcat::mcset nl jamessoobtimeout	{Tijdslimiet overschreden tijdens het ophalen van een bestand via HTTP}
-
-# translate!!!!
-::msgcat::mcset nl jamessooberr406      {The user %s rejected to accept the file %s.}
-::msgcat::mcset nl jamessooberr404      {Got an error when trying to send the file %s to %s. The code was %s, and error message: %s}
-# translate!!!!
-
-::msgcat::mcset nl jamessnogchat	{Er is geen service gedetecteerd die groupchat aanbied}
+::msgcat::mcset nl jamessooberr406      {Gebruiker %s weigerde het bestand %s te ontvangen.}
+#::msgcat::mcset nl jamessooberr404      {Er deed zich een fout voor tijdens het verzenden van bestand %s naar %s. De foutcode is %s en de foutmelding: %s}
+::msgcat::mcset nl jamessnogchat	{Er is geen service gedetecteerd die groepchat aanbied}
 ::msgcat::mcset nl jamesserrinboxopen	{Openen van Postvak in-bestand %s tijdens het proberen op te slaan mislukte.}
 ::msgcat::mcset nl jamesserrinboxread	{Er is een fout opgetreden tijdens het proberen te lezen van het Jabber message box bestand "%s": %s}
 ::msgcat::mcset nl jamesschatclose	{Als u dit venster sluit dan verliest u de volledige conversatie. Wilt u het werkelijk sluiten?}
@@ -712,13 +708,9 @@
 ::msgcat::mcset nl jamessfailedsubsc            {Inschrijving op %s mislukte omdat de gebruiker weigerde.}
 ::msgcat::mcset nl jamessstarttls-nofeature     {Server "%s" heeft geen ondersteuning voor TLS.}
 ::msgcat::mcset nl jamessstarttls-failure       {Het tot stand brengen van een verbinding via TLS met server "%s" is mislukt.}
-
-# translate!!!!
-::msgcat::mcset nl jamessgcinvite               {You have been invited to the groupchat room %s by %s. Do you want to join?}
-
-
+::msgcat::mcset nl jamessgcinvite               {U werd uigenodigd op de chatruimte %s door %s. Wenst u deze ruimte te betreden?}
 ::msgcat::mcset nl openquicktime		{QuickTime live stream openen}
-::msgcat::mcset nl writeurl			{Typ URL of kies van snelkoppeling:}
+::msgcat::mcset nl writeurl			{Voer een URL in of kies een snelkoppeling:}
 ::msgcat::mcset nl openquicktimeurlmsg		{Open een URL die een SDP-bestand bevat met extensie .mov voor een QuickTime realtime live streaming verzending.\
   Dit kan zowel geluid (radio) als video (TV) zijn. Als alternatief kan u uw webbrowser gebruiken om het SDP bestand te vinden voor een live transmissie, download het op de harde schijf en\
   open het als een normaal filmbestand.}
@@ -783,11 +775,8 @@
 ::msgcat::mcset nl prefroclr     {Roster ledigen bij afmelden}
 ::msgcat::mcset nl prefrochat    {Chat starten i.p.v. een normaal bericht bij dubbelklik op een gebruiker}
 ::msgcat::mcset nl prefrosysicons {Andere iconen gebruiken voor andere IM netwerken}
-
-# translate
-::msgcat::mcset nl prefrohideoff {Do not show offline users}
-::msgcat::mcset nl prefrohidetrpt {Do not show transports}
-
+::msgcat::mcset nl prefrohideoff {Offline gebruikers verbergen}
+::msgcat::mcset nl prefrohidetrpt {Transporten verbergen}
 ::msgcat::mcset nl prefblonly    {Alleen berichten van mensen in mijn roster accepteren}
 ::msgcat::mcset nl prefblbl      {Volgende JID's blokkeren (* jokertekens mogelijk):}
 ::msgcat::mcset nl prefblmsg     {Geef de volledige JID van de gebruiker die u wilt blokkeren. (bv: "gargamel@jabber.org")}
@@ -802,10 +791,7 @@
 ::msgcat::mcset nl prefcubrowse  {Diensten via de "browse"-methode verkennen wanneer beschikbaar}
 ::msgcat::mcset nl prefcuagent   {Altijd de "agents"-methode gebruiken}
 ::msgcat::mcset nl prefcuupdate  {Automatisch op nieuwe Coccinella versie controleren}
-
-# translate
-::msgcat::mcset nl prefcuremdlgs {Remember open dialogs between sessions}
-
+::msgcat::mcset nl prefcuremdlgs {Openstaande chatvensters onthuoden tussen verschillende sessies}
 ::msgcat::mcset nl preffmhelp    {Helpplugins voor bestandstype}
 ::msgcat::mcset nl preffmsave    {Eenvoudigweg opslaan in inkomende map}
 ::msgcat::mcset nl preffontmsg   {Waarschuwing: wanneer u een ander lettertype importeert dan de standaardexemplaren (Times, Helvetica of Courier), dan moet u zich verzekeren dat alle clients dit ook\
@@ -902,9 +888,7 @@ Wilt u ze niet opslaan?}
 ::msgcat::mcset nl jainmsgshow {Inkomende berichten in dit venster laten zien}
 ::msgcat::mcset nl jadisaddserv {Hiermee kunt u een server toevoegen. U kunt een server permanent toevoegen waardoor die dan automatisch in de lijst verschijnt. Bij de server waarop u aanmeldt is dit altijd het geval.}
 ::msgcat::mcset nl jadisrmall {Alle permanente servers uit de lijst verwijderen.}
-
-# translate
-::msgcat::mcset nl jauserinnote {Add your personal notes about this user}
+::msgcat::mcset nl jauserinnote {Uw persoonlijke opmerkingen over deze gebruiker kunt u hier bewaren}
 
 
 
