@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: WindowsUtils.tcl,v 1.5 2004-01-13 14:50:21 matben Exp $
+# $Id: WindowsUtils.tcl,v 1.6 2004-02-07 11:39:29 matben Exp $
 
 #package require gdi
 #package require printer
@@ -30,13 +30,13 @@ proc ::Windows::OpenUrl {url} {
     
     # Get the command for opening HTML files
     if {[catch {registry get \
-      $root\\$appKey\\shell\\opennew\\command ""} appCmd]} {
+      $root\\$appKey\\shell\\open\\command ""} appCmd]} {
 	
 	if {[catch {
 	    
 	    # Try a different key.
 	    set appCmd [registry get \
-	      $root\\$appKey\\shell\\open\\command ""]
+	      $root\\$appKey\\shell\\opennew\\command ""]
 	} msg]} {
 	    return -code error $msg
 	}
@@ -47,7 +47,7 @@ proc ::Windows::OpenUrl {url} {
     
     # Substitute the url name into the command for %1
     # Not always needed (opennew).
-    #regsub {%1} $appCmd $url appCmd
+    regsub {%1} $appCmd $url appCmd
     
     # Invoke the command
     eval exec $appCmd $url &
