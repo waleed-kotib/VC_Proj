@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.52 2004-06-09 14:26:18 matben Exp $
+# $Id: Preferences.tcl,v 1.53 2004-06-30 08:52:40 matben Exp $
  
 package require notebook
 package require tree
@@ -69,7 +69,7 @@ namespace eval ::Preferences:: {
     option add *Preferences.yPadBig             $ypadbig      widgetDefault
 }
 
-proc ::Preferences::Build { } {
+proc ::Preferences::Build {args} {
     global  this prefs wDlgs
     
     variable tmpPrefs
@@ -80,6 +80,8 @@ proc ::Preferences::Build { } {
     variable finished
     variable nbframe
     variable lastPage
+    
+    array set argsArr $args
 
     set w $wDlgs(prefs)
     if {[winfo exists $w]} {
@@ -176,7 +178,9 @@ proc ::Preferences::Build { } {
     bind $w <Return> {}
     
     # Which page to be in front?
-    if {[llength $lastPage]} {
+    if {[info exists argsArr(-page)]} {
+	$wtree setselection $argsArr(-page)
+    } elseif {[llength $lastPage]} {
 	$wtree setselection $lastPage
     }    
     wm deiconify $w
@@ -567,8 +571,8 @@ proc ::Preferences::Proxies::BuildPage {page} {
     upvar ::Preferences::ypad ypad
     
     set pcnat $page.nat
-    labelframe $pcnat -text [::msgcat::mc {NAT Address}]
-    pack $pcnat -side top -anchor w -padx 8 -pady 4
+    labelframe $pcnat -text [::msgcat::mc {NAT Address}] -padx 4 -pady 2
+    pack $pcnat -side top -anchor w -padx 12 -pady 4
     checkbutton $pcnat.cb -text "  [::msgcat::mc prefnatip]" \
       -variable [namespace current]::tmpPrefs(setNATip)
     entry $pcnat.eip -textvariable [namespace current]::tmpPrefs(NATip) \
@@ -577,10 +581,29 @@ proc ::Preferences::Proxies::BuildPage {page} {
     grid $pcnat.eip -sticky ew -pady $ypad
     
     set pca $page.fr
-    labelframe $pca -text {Proxies}
+    labelframe $pca -text {Http Proxy} -padx 12 -pady 4
     pack $pca -side top -anchor w -padx 8 -pady 4
-    label $pca.la -text {No firewall support... yet}
-    grid $pca.la -sticky w
+
+    label $pca.msg -wraplength 300 -justify left \
+      -text "Usage of the Http proxy is determined\
+      by each profile settings. File transfers wont work if you use Http proxy!"
+    
+    label $pca.lserv -text [::msgcat::mc {Proxy Server}]:
+    entry $pca.eserv -textvariable [namespace current]::tmpPrefs(httpproxyserver)
+    label $pca.lport -text [::msgcat::mc {Proxy Port}]:
+    entry $pca.eport -textvariable [namespace current]::tmpPrefs(httpproxyport)
+    label $pca.luser -text [::msgcat::mc Username]:
+    entry $pca.euser -textvariable [namespace current]::tmpPrefs(httpproxyusername)
+    label $pca.lpass -text [::msgcat::mc Password]:
+    entry $pca.epass -textvariable [namespace current]::tmpPrefs(httpproxypassword)
+
+    grid $pca.msg   -          -sticky w
+    grid $pca.lserv $pca.eserv
+    grid $pca.lport $pca.eport
+    grid $pca.luser $pca.euser
+    grid $pca.lpass $pca.epass
+    grid $pca.lserv $pca.lport $pca.luser $pca.lpass -sticky e
+    grid $pca.eserv $pca.eport $pca.euser $pca.epass -sticky ew
 }
 
 #-------------------------------------------------------------------------------

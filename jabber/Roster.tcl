@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.70 2004-06-24 13:48:36 matben Exp $
+# $Id: Roster.tcl,v 1.71 2004-06-30 08:52:39 matben Exp $
 
 package provide Roster 1.0
 
@@ -778,6 +778,7 @@ proc ::Jabber::Roster::Clear { } {
     foreach v [$wtree find withtag head] {
 	$wtree delitem $v -childsonly 1
     }
+    catch {$wtree delitem {{Subscription Pending}}}
 }
 
 proc ::Jabber::Roster::ExitRoster { } {

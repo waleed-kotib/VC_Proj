@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.93 2004-06-22 14:21:18 matben Exp $
+# $Id: Jabber.tcl,v 1.94 2004-06-30 08:52:39 matben Exp $
 
 package provide Jabber 1.0
 
@@ -21,6 +21,8 @@ package require balloonhelp
 package require combobox
 package require tinyfileutils
 package require uriencode
+
+package require sha1pure
 
 # We should have some component mechanism that lets packages load themselves.
 package require MailBox

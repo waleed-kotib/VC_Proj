@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.61 2004-06-22 14:21:17 matben Exp $
+# $Id: Coccinella.tcl,v 1.62 2004-06-30 08:52:39 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -114,7 +114,7 @@ if {[llength [namespace children :: "::browser*"]] > 0} {
 }
 
 # Level of detail for printouts. >= 2 for my outputs.
-set debugLevel 0
+set debugLevel 4
 
 # Macintosh only: if no debug printouts, no console. Also for windows?
 if {[string match "mac*" $this(platform)] && $debugLevel == 0} {
@@ -455,7 +455,6 @@ set listOfPackages {
     fontselection
     headlabel
     hooks
-    sha1pure
     tablelist
     undo
     Dialogs
