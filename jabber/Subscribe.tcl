@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Subscribe.tcl,v 1.11 2004-03-13 15:21:41 matben Exp $
+# $Id: Subscribe.tcl,v 1.12 2004-03-16 15:09:08 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -105,15 +105,15 @@ proc ::Jabber::Subscribe::Subscribe {jid args} {
     set locals($uid,allow) 1
     set locals($uid,add) $jprefs(defSubscribe)
     set fropt $w.frall.fropt
-    set frcont [::mylabelframe::mylabelframe $fropt {Options}]
+    labelframe $fropt -text {Options}
     pack $fropt -side top -fill both -ipadx 10 -ipady 6
-    checkbutton $frcont.pres -text "  [::msgcat::mc jasuballow $jid]" \
+    checkbutton $fropt.pres -text "  [::msgcat::mc jasuballow $jid]" \
       -variable [namespace current]::locals($uid,allow)
     
-    checkbutton $frcont.add -text "  [::msgcat::mc jasubadd $jid]" \
+    checkbutton $fropt.add -text "  [::msgcat::mc jasubadd $jid]" \
       -variable [namespace current]::locals($uid,add)
-    pack $frcont.pres $frcont.add -side top -anchor w -padx 10 -pady 4
-    set frsub [frame $frcont.frsub]
+    pack $fropt.pres $fropt.add -side top -anchor w -padx 10 -pady 4
+    set frsub [frame $fropt.frsub]
     pack $frsub -expand 1 -fill x -side top
     label $frsub.lnick -text "[::msgcat::mc {Nick name}]:" -font $fontSB \
       -anchor e
@@ -133,7 +133,7 @@ proc ::Jabber::Subscribe::Subscribe {jid args} {
     # If we may NOT send a 'subscribe' presence to this user.
     if {!$maySendSubscribe} {
 	set locals($uid,add) 0
-	$frcont.add configure -state disabled
+	$fropt.add configure -state disabled
 	$frsub.enick configure -state disabled
 	$frsub.egroup configure -state disabled
     }

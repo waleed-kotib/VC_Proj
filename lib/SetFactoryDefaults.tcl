@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.28 2004-03-13 15:21:41 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.29 2004-03-16 15:09:08 matben Exp $
 
 # SetWhiteboardFactoryState --
 # 
@@ -216,13 +216,8 @@ set prefs(millisToProgWin) 0
 # How frequently shall the progress window be updated, in milliseconds.
 set prefs(progUpdateMillis) 500
 set prefs(progUpdateMillis) 1000
-    
-# Installation directories.
-set prefs(itemDir) [file join $this(path) items]
-set prefs(addonsDir) [file join $this(path) addons]
 
-# File open/save initialdirs.
-set prefs(userDir) $this(path)
+set prefs(userPath) $this(path)
 
 # If it is the first time the application is launched, then welcome.
 set prefs(firstLaunch) 1
@@ -232,9 +227,6 @@ set prefs(lastAutoUpdateVersion) 0.0
 set prefs(doneAutoUpdate) 0
 set prefs(urlAutoUpdate) "http://coccinella.sourceforge.net/updates/update_en.xml"
 #set prefs(urlAutoUpdate) "http://coccinella.sourceforge.net/updates/update_test.xml"
-
-# The file name of the welcoming canvas.
-set prefs(welcomeFile) [file join $this(path) welcome.can]
 
 # Shell print command in unix.
 if {[info exists env(PRINTER)]} {
@@ -250,17 +242,17 @@ set prefs(postscriptOpts) {-pageheight 280m -pagewidth 190m -pageanchor c}
 
 # Useful time constants in seconds. Not used.
 set tmsec(min) 60
-set tmsec(hour) [expr 60*$tmsec(min)]
-set tmsec(day) [expr 24*$tmsec(hour)]
-set tmsec(week) [expr 7*$tmsec(day)]
+set tmsec(hour)   [expr 60*$tmsec(min)]
+set tmsec(day)    [expr 24*$tmsec(hour)]
+set tmsec(week)   [expr 7*$tmsec(day)]
 set tmsec(30days) [expr 30*$tmsec(day)]
 
 # Various constants.
 set kPI 3.14159265359
 set kRad2Grad [expr 180.0/$kPI]
 set kGrad2Rad [expr $kPI/180.0]
-set kTan225 [expr tan($kPI/8.0)]
-set kTan675 [expr tan(3.0 * $kPI/8.0)]
+set kTan225   [expr tan($kPI/8.0)]
+set kTan675   [expr tan(3.0 * $kPI/8.0)]
 
 #---- The state variables: 'state' ------------------------------------------
 

@@ -30,6 +30,7 @@
 *Entry.foreground:                   black
 *Entry.highlightThickness:           2
 *Label.Font:                         Helvetica 10
+*Labelframe.Font:                    Helvetica 10 bold
 *Listbox.background:                 white
 *Listbox.borderWidth:                1
 *Listbox.Font:                       Helvetica 10
@@ -45,7 +46,6 @@
 *Combobox.background:                white
 *Combobox.Font:                      Helvetica 10
 *HeadLabel.background:               #cecece
-*MyLabelFrame.Font:                  Helvetica 10 bold
 *Tablelist.borderWidth:              1
 *Tablelist.Font:                     Helvetica 10
 *Tablelist.highlightThickness:       2

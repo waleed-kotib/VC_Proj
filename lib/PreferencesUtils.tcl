@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.28 2004-03-13 15:21:41 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.29 2004-03-16 15:09:08 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -295,13 +295,12 @@ proc ::PreferencesUtils::SetUserPreferences { } {
       [list prefs(remotePort)      prefs_remotePort      $prefs(remotePort)]     \
       [list prefs(setNATip)        prefs_setNATip        $prefs(setNATip)]       \
       [list prefs(NATip)           prefs_NATip           $prefs(NATip)]          \
-      [list prefs(shortcuts)       prefs_shortcuts       $prefs(shortcuts)       userDefault] \
       [list prefs(shortsMulticastQT) prefs_shortsMulticastQT $prefs(shortsMulticastQT) userDefault] \
       [list prefs(postscriptOpts)  prefs_postscriptOpts  $prefs(postscriptOpts)] \
       [list prefs(firstLaunch)     prefs_firstLaunch     $prefs(firstLaunch)     userDefault] \
       [list prefs(unixPrintCmd)    prefs_unixPrintCmd    $prefs(unixPrintCmd)]   \
       [list prefs(webBrowser)      prefs_webBrowser      $prefs(webBrowser)]     \
-      [list prefs(userDir)         prefs_userDir         $prefs(userDir)]        \
+      [list prefs(userPath)        prefs_userPath        $prefs(userPath)]        \
       [list prefs(winGeom)         prefs_winGeom         $prefs(winGeom)]        \
       [list prefs(paneGeom)        prefs_paneGeom        $prefs(paneGeom)]       \
       [list prefs(lastAutoUpdateVersion) prefs_lastAutoUpdateVersion $prefs(lastAutoUpdateVersion)] \

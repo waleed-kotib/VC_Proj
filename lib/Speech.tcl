@@ -248,8 +248,9 @@ proc ::Speech::BuildPrefsPage {page} {
     
     array set tmpPrefs [array get sprefs]
     
-    set labpsp [::mylabelframe::mylabelframe $page.sp [::msgcat::mc {Synthetic speech}]]
-    pack $page.sp -side top -anchor w -ipadx 10 -fill x
+    set labpsp $page.sp
+    labelframe $labpsp -text [::msgcat::mc {Synthetic speech}]
+    pack $labpsp -side top -anchor w -padx 8 -pady 4
     
     checkbutton $labpsp.speak     -text "  [::msgcat::mc prefsounsynwb]"  \
       -variable [namespace current]::tmpPrefs(speakWBText)

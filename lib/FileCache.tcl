@@ -6,7 +6,7 @@
 #
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #
-# $Id: FileCache.tcl,v 1.8 2004-01-15 14:13:00 matben Exp $
+# $Id: FileCache.tcl,v 1.9 2004-03-16 15:09:08 matben Exp $
 # 
 #       The input key can be: 
 #               1) a full url, must be uri encoded 
@@ -412,8 +412,9 @@ proc ::FileCache::BuildPage {page} {
     set tmpPrefs(checkCache) $prefs(checkCache)
     set tmpPrefs(mbsize)     [expr wide($prefs(cacheSize)/1e6)]
     
-    set pca [::mylabelframe::mylabelframe $page.fr [::msgcat::mc {File Cache}]]
-    pack $page.fr -side top -anchor w -ipadx 10 -ipady 6 -fill x
+    set pca $page.fr
+    labelframe $pca -text [::msgcat::mc {File Cache}]
+    pack $pca -side top -anchor w -padx 8 -pady 4
     message $pca.msg -width 300 -text [::msgcat::mc preffilecache]
     pack $pca.msg -side top -anchor w -pady 2
 
@@ -435,9 +436,9 @@ proc ::FileCache::BuildPage {page} {
       -side right 
     
     
-    set pwhen [::mylabelframe::mylabelframe $page.frw \
-      [::msgcat::mc prefcachecmp]]
-    pack $page.frw -side top -anchor w -ipadx 10 -ipady 6 -fill x
+    set pwhen $page.frw
+    labelframe $pwhen -text [::msgcat::mc prefcachecmp]
+    pack $pwhen -side top -anchor w -padx 8 -pady 4
     set frw $pwhen.cas
     pack [frame $frw] -side left -padx 16 -pady 2
     foreach  \

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Search.tcl,v 1.10 2004-03-13 15:21:41 matben Exp $
+# $Id: Search.tcl,v 1.11 2004-03-16 15:09:08 matben Exp $
 
 package provide Search 1.0
 
@@ -119,10 +119,10 @@ proc ::Jabber::Search::Build {args} {
     # This part must be built dynamically from the 'get' xml data.
     # May be different for each conference server.
     set wfr $wleft.frlab
-    set wcont [::mylabelframe::mylabelframe $wfr [::msgcat::mc {Search Specifications}]]
+    labelframe $wfr -text [::msgcat::mc {Search Specifications}]
     pack $wfr -side top -fill both -padx 2 -pady 2
 
-    set wbox [frame $wcont.box]
+    set wbox [frame $wfr.box]
     pack $wbox -side left -fill both -padx 4 -pady 4 -expand 1
     pack [label $wbox.la -textvariable "[namespace current]::stattxt"]  \
       -padx 0 -pady 10 -side left

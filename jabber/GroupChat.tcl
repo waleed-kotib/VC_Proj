@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.42 2004-03-13 15:21:40 matben Exp $
+# $Id: GroupChat.tcl,v 1.43 2004-03-16 15:09:08 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -602,13 +602,13 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     pack $wtray -side top -fill x -padx 4 -pady 2
 
     $wtray newbutton send    Send    $iconSend    $iconSendDis    \
-      [list [namespace current]::Send $token]
+      [list [namespace current]::Send $roomJid]
      $wtray newbutton save   Save    $iconSave    $iconSaveDis    \
        [list [namespace current]::Save $token]
     $wtray newbutton history History $iconHistory $iconHistoryDis \
-      [list [namespace current]::BuildHistory]
+      [list [namespace current]::BuildHistory $token]
     $wtray newbutton print   Print   $iconPrint   $iconPrintDis   \
-      [list [namespace current]::Print $token]
+      [list [namespace current]::Print $roomJid]
     
     ::hooks::run buildGroupChatButtonTrayHook $wtray $roomJid
     
@@ -1182,8 +1182,19 @@ proc ::Jabber::GroupChat::ConfigWBStatusMenu {wtop} {
       -state disabled
 }
 
+proc ::Jabber::GroupChat::BuildHistory {token} {
+
+    
+}
+
+proc ::Jabber::GroupChat::Save {token} {
+
+
+}
+
 proc ::Jabber::GroupChat::Print {roomJid} {
     variable locals
+    
     set wtext $locals($roomJid,wtext) 
     ::UserActions::DoPrintText $wtext
 }

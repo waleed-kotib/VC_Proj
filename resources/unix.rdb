@@ -14,6 +14,7 @@
 *Checkbutton.Font:                   Helvetica -10
 *Entry.Font:                         Helvetica -10
 *Label.Font:                         Helvetica -10
+*Labelframe.Font:                    Helvetica -10 bold
 *Listbox.Font:                       Helvetica -10
 *Menu.borderWidth:                   1
 *Menu.Font:                          Helvetica -10
@@ -34,5 +35,4 @@
 ! contributed widgets
 !
 *Combobox.Font:                      Helvetica -10
-*MyLabelFrame.Font:                  Helvetica -10 bold
 *Tablelist.Font:                     Helvetica -10

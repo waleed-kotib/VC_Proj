@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: TheServer.tcl,v 1.20 2004-03-15 13:26:11 matben Exp $
+# $Id: TheServer.tcl,v 1.21 2004-03-16 15:09:08 matben Exp $
     
 # DoStartServer ---
 #
@@ -18,14 +18,14 @@
 #       Therefore 'after idle'.(?)
 
 proc DoStartServer {thisServPort} {
-    global  prefs state listenServSocket this
+    global  prefs state this
     
     if {[catch {socket -server SetupChannel $thisServPort} sock]} {
 	after 500 {tk_messageBox -message [FormatTextForMessageBox \
 	  [::msgcat::mc messfailserver]]  \
 	  -icon error -type ok}
     } else {
-	set listenServSocket $sock
+	set state(serverSocket) $sock
 	set state(isServerUp) 1
 	
 	# Sometimes this gives 0.0.0.0, why I don't know.
@@ -47,9 +47,9 @@ proc DoStartServer {thisServPort} {
 #       none
 
 proc DoStopServer { } {
-    global  listenServSocket state
+    global  state
     
-    catch {close $listenServSocket}
+    catch {close $state(serverSocket)}
     set state(isServerUp) 0
 }
 

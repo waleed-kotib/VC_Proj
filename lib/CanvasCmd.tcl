@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasCmd.tcl,v 1.7 2004-03-15 13:26:11 matben Exp $
+# $Id: CanvasCmd.tcl,v 1.8 2004-03-16 15:09:08 matben Exp $
 
 package provide CanvasCmd 1.0
 
@@ -183,7 +183,7 @@ proc ::CanvasCmd::SavePostscript {wtop} {
 	{"Postscript File"    {.ps}}
 	{"XML/SVG"            {.svg}}
     }
-    set userDir [::Utils::GetDirIfExist $prefs(userDir)]
+    set userDir [::Utils::GetDirIfExist $prefs(userPath)]
     set opts [list -initialdir $userDir]
     if {$prefs(haveSaveFiletypes)} {
 	lappend opts -filetypes $typelist
@@ -192,7 +192,7 @@ proc ::CanvasCmd::SavePostscript {wtop} {
       -filetypes $typelist -defaultextension ".ps"  \
       -initialfile "canvas.ps"} $opts]
     if {[string length $ans] > 0} {
-	set prefs(userDir) [file dirname $ans]
+	set prefs(userPath) [file dirname $ans]
 	if {[file extension $ans] == ".svg"} {
 	    ::can2svg::canvas2file $w $ans
 	} else {

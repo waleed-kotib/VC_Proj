@@ -131,6 +131,7 @@
 ::msgcat::mcset nl Unsubscribed		{Uitgeschreven}
 ::msgcat::mcset nl Username		{Gebruikersnaam}
 ::msgcat::mcset nl Warning		{Waarschuwing}
+::msgcat::mcset nl Welcome              {Welkom}
 ::msgcat::mcset nl Whiteboard		{Whiteboard}
 ::msgcat::mcset nl Work			{Werk}
 ::msgcat::mcset nl Yes			{Ja}
@@ -156,6 +157,7 @@
 ::msgcat::mcset nl mAboutWhiteboard   	{Over whiteboard...}
 ::msgcat::mcset nl mAboutCoccinella   	{Over Coccinella...}
 ::msgcat::mcset nl mAboutQuickTimeTcl	{Over QuickTimeTcl...}
+::msgcat::mcset nl mWelcome     	{Welkom}
 ::msgcat::mcset nl mNew			{Nieuw}
 ::msgcat::mcset nl mNewWhiteboard	{&Nieuw whiteboard}
 ::msgcat::mcset nl mOpenConnection	{Verbinding &openen...}

@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: VCard.tcl,v 1.15 2004-03-13 15:21:41 matben Exp $
+# $Id: VCard.tcl,v 1.16 2004-03-16 15:09:08 matben Exp $
 
 package provide VCard 1.0
 
@@ -181,10 +181,11 @@ proc ::VCard::Build {nstoken} {
     } else {
         set ltxt $jid
     }
-    set frbi [$nbframe newpage {Basic Info} -text [::msgcat::mc {Basic Info}]]    
-    set labfrbi [::mylabelframe::mylabelframe $frbi.fr $ltxt]
-    pack $frbi.fr -side left -anchor n
-    set pbi [frame $labfrbi.frin]
+    set frbi [$nbframe newpage {Basic Info} -text [::msgcat::mc {Basic Info}]] 
+    set lfr $frbi.fr
+    labelframe $lfr -text $ltxt
+    pack $lfr.fr -side left -anchor n
+    set pbi [frame $lfr.frin]
     pack $pbi -padx 10 -pady 6 -side left
     
     # Name part.
@@ -204,6 +205,7 @@ proc ::VCard::Build {nstoken} {
     entry $pbi.enick  -textvariable ${nstoken}::elem(nickname)
     entry $pbi.eemail -textvariable ${nstoken}::elem(email_internet_pref)
     entry $pbi.ejid   -textvariable ${nstoken}::priv(vcardjid) -state disabled
+    
     grid $pbi.nick   -column 0 -row 2 -sticky e
     grid $pbi.enick  -column 1 -row 2 -sticky news -columnspan 2
     grid $pbi.email  -column 0 -row 3 -sticky e

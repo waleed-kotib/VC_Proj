@@ -14,7 +14,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Plugins.tcl,v 1.14 2004-03-15 13:26:11 matben Exp $
+# $Id: Plugins.tcl,v 1.15 2004-03-16 15:09:08 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -1189,13 +1189,14 @@ proc ::Plugins::InitAddons { } {
     global prefs this
     
     ::Debug 2 "::Plugins::InitAddons"
-        
+
     # Load all "external" addons.
     # It needs the 'dir' to be there.
-    set dir [file join $this(path) addons]
+    set dir $this(addonsPath)
 
+    # Load all "external" addons.
     # The 'pluginDefs' file is sourced in own namespace. 
-    set indexFile [file join $dir addonDefs.tcl]
+    set indexFile [file join $this(addonsPath) addonDefs.tcl]
     if {[file exists $indexFile]} {
 	source $indexFile
     }
@@ -1243,8 +1244,9 @@ proc ::Plugins::BuildPrefsPage {page} {
     variable tmpPrefPlugins
 
     # Conference (groupchat) stuff.
-    set labfr [::mylabelframe::mylabelframe $page.fr [::msgcat::mc {Plugin Control}]]
-    pack $page.fr -side top -anchor w -fill x
+    set labfr $page.fr
+    labelframe $labfr -text [::msgcat::mc {Plugin Control}]
+    pack $labfr -side top -anchor w -padx 8 -pady 4
     set pbl [frame $labfr.frin]
     pack $pbl -padx 10 -pady 6 -side left
     

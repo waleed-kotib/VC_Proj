@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: P2P.tcl,v 1.2 2004-03-15 13:26:11 matben Exp $
+# $Id: P2P.tcl,v 1.3 2004-03-16 15:09:08 matben Exp $
 
 package provide P2P 1.0
 
@@ -45,6 +45,12 @@ proc ::P2P::Init {} {
     ::hooks::add serverPutRequestHook         ::P2P::HandlePutRequest
     ::hooks::add serverCmdHook                ::P2P::HandleServerCmd
 
+    # Define all hooks for preference settings.
+    ::hooks::add prefsInitHook                ::P2P::Prefs::InitPrefsHook
+    ::hooks::add prefsBuildHook               ::P2P::Prefs::BuildPrefsHook
+    ::hooks::add prefsSaveHook                ::P2P::Prefs::SavePrefsHook
+    ::hooks::add prefsCancelHook              ::P2P::Prefs::CancelPrefsHook
+
     set buttonTrayDefs(symmetric) {
 	connect    {::OpenConnection::OpenConnection $wDlgs(openConn)}
 	save       {::CanvasFile::DoSaveCanvasFile $wtop}
@@ -68,7 +74,7 @@ proc ::P2P::Init {} {
 	{command   mStopPut/Get/Open   {::P2P::CancelAllPutGetAndPendingOpen $wtop} normal {}}
 	{separator}
 	{command   mOpenImage/Movie    {::Import::ImportImageOrMovieDlg $wtop}    normal  I}
-	{command   mOpenURLStream      {::OpenMulticast::OpenMulticast $wtop}     normal   {}}
+	{command   mOpenURLStream      {::Multicast::OpenMulticast $wtop}     normal   {}}
 	{separator}
 	{command   mOpenCanvas         {::CanvasFile::DoOpenCanvasFile $wtop}     normal   {}}
 	{command   mSaveCanvas         {::CanvasFile::DoSaveCanvasFile $wtop}     normal   S}
@@ -935,6 +941,275 @@ proc ::P2P::HandleServerCmd {channel ip port line args} {
 	    
 	    # We couldn't recognize this command as our own.
 	    
+	}
+    }
+}
+
+# Preference page --------------------------------------------------------------
+
+namespace eval ::P2P::Prefs:: { 
+    
+    variable finished
+}
+
+proc ::P2P::Prefs::InitPrefsHook { } {
+    global  prefs
+
+    ::PreferencesUtils::Add [list  \
+      [list prefs(shortcuts)  prefs_shortcuts  $prefs(shortcuts)  userDefault]]
+}
+
+proc ::P2P::Prefs::BuildPrefsHook {wtree nbframe} {
+    
+    $wtree newitem {General Shortcuts} -text [::msgcat::mc Shortcuts]
+    
+    set wpage [$nbframe page {Shortcuts}]    
+    ::P2P::Prefs::BuildPrefsPage $wpage
+}
+
+proc ::P2P::Prefs::BuildPrefsPage {wpage} {
+    global  prefs
+    
+    variable btadd
+    variable btrem
+    variable btedit
+    variable wlbox
+    variable shortListVar
+    variable tmpPrefs
+    
+    set tmpPrefs(shortcuts) $prefs(shortcuts)
+    
+    set fontS [option get . fontSmall {}]
+    
+    set wcont $wpage.frtop
+    labelframe $wcont -text [::msgcat::mc {Edit Shortcuts}]
+    pack $wcont -side top -anchor w -padx 8 -pady 4
+    
+    # Overall frame for whole container.
+    set frtot [frame $wcont.fr]
+    pack $frtot -side left -padx 6 -pady 6    
+    message $frtot.msg -borderwidth 0 -aspect 600 \
+      -text [::msgcat::mc prefshortcut]
+    pack $frtot.msg -side top -padx 4 -pady 6
+    
+    # Frame for listbox and scrollbar.
+    set frlist [frame $frtot.lst]
+    
+    # The listbox.
+    set wsb $frlist.sb
+    set shortListVar {}
+    foreach pair $tmpPrefs(shortcuts) {
+	lappend shortListVar [lindex $pair 0]
+    }
+    set wlbox [listbox $frlist.lb -height 10 -width 18   \
+      -listvar [namespace current]::shortListVar \
+      -yscrollcommand [list $wsb set] -selectmode extended]
+    scrollbar $wsb -command [list $wlbox yview]
+    pack $wlbox -side left -fill both
+    pack $wsb -side left -fill both
+    pack $frlist -side left
+    
+    # Buttons at the right side.
+    frame $frtot.btfr
+    set btadd $frtot.btfr.btadd
+    set btrem $frtot.btfr.btrem
+    set btedit $frtot.btfr.btedit
+    button $btadd -text "[::msgcat::mc Add]..." -font $fontS  \
+      -command [list [namespace current]::AddOrEdit add]
+    button $btrem -text [::msgcat::mc Remove] -font $fontS -state disabled  \
+      -command [namespace current]::Remove
+    button $btedit -text "[::msgcat::mc Edit]..." -state disabled -font $fontS \
+      -command [list [namespace current]::AddOrEdit edit]
+    pack $frtot.btfr -side top -anchor w
+    pack $btadd $btrem $btedit -side top -fill x -padx 4 -pady 4
+	
+    # Listbox bindings.
+    bind $wlbox <Button-1> {+ focus %W}
+    bind $wlbox <Double-Button-1> [list $btedit invoke]
+    bind $wlbox <<ListboxSelect>> [list [namespace current]::SelectCmd]
+}
+
+proc ::P2P::Prefs::SelectCmd { } {
+
+    variable btadd
+    variable btrem
+    variable btedit
+    variable wlbox
+
+    if {[llength [$wlbox curselection]]} {
+	$btrem configure -state normal
+    } else {
+	$btrem configure -state disabled
+	$btedit configure -state disabled
+    }
+    if {[llength [$wlbox curselection]] == 1} {
+	$btedit configure -state normal
+    }
+}
+
+proc ::P2P::Prefs::Remove { } {
+    
+    variable wlbox
+    variable shortListVar
+    variable tmpPrefs
+
+    set selInd [$wlbox curselection]
+    if {[llength $selInd]} {
+	foreach ind [lsort -integer -decreasing $selInd] {
+	    set shortListVar [lreplace $shortListVar $ind $ind]
+	    set tmpPrefs(shortcuts) [lreplace $tmpPrefs(shortcuts) $ind $ind]
+	}
+    }
+}
+
+# ::P2P::Prefs::AddOrEdit --
+#
+#       Callback when the "add" or "edit" buttons pushed. New toplevel dialog
+#       for editing an existing shortcut, or adding a fresh one.
+#
+# Arguments:
+#       what           "add" or "edit".
+#       
+# Results:
+#       shows dialog.
+
+proc ::P2P::Prefs::AddOrEdit {what} {
+    global  this
+    
+    variable wlbox
+    variable finAdd
+    variable shortListVar
+    variable shortTextVar
+    variable longTextVar
+    variable tmpPrefs
+    
+    Debug 2 "::P2P::Prefs::AddOrEdit"
+
+    set indShortcuts [lindex [$wlbox curselection] 0]
+    if {$what == "edit" && $indShortcuts == ""} {
+	return
+    } 
+    set w .taddshorts$what
+    if {[winfo exists $w]} {
+	return
+    }
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
+      -macclass {document closeBox}
+    if {$what == "add"} {
+	set txt [::msgcat::mc {Add Shortcut}]
+	set txt1 "[::msgcat::mc {New shortcut}]:"
+	set txt2 "[::msgcat::mc prefshortip]:"
+	set txtbt [::msgcat::mc Add]
+	set shortTextVar {}
+	set longTextVar {}
+    } elseif {$what == "edit"} {
+	set txt [::msgcat::mc {Edit Shortcut}]
+	set txt1 "[::msgcat::mc Shortcut]:"
+	set txt2 "[::msgcat::mc prefshortip]:"
+	set txtbt [::msgcat::mc Save]
+    }
+    set finAdd 0
+    wm title $w $txt
+    
+    set fontSB [option get . fontSmallBold {}]
+    
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall
+    
+    # The top part.
+    set wcont $w.frtop
+    labelframe $wcont -text $txt
+    pack $wcont -in $w.frall -padx 8 -pady 4
+    
+    # Overall frame for whole container.
+    set frtot [frame $wcont.fr]
+    label $frtot.lbl1 -text $txt1 -font $fontSB
+    entry $frtot.ent1 -width 36 -textvariable [namespace current]::shortTextVar
+    label $frtot.lbl2 -text $txt2 -font $fontSB
+    entry $frtot.ent2 -width 36 -textvariable [namespace current]::longTextVar
+    grid $frtot.lbl1 -sticky w -padx 6 -pady 1
+    grid $frtot.ent1 -sticky ew -padx 6 -pady 1
+    grid $frtot.lbl2 -sticky w -padx 6 -pady 1
+    grid $frtot.ent2 -sticky ew -padx 6 -pady 1
+    
+    pack $frtot -side left -padx 16 -pady 10
+    pack $wcont -fill x    
+    focus $frtot.ent1
+    
+    # Get the short pair to edit.
+    if {[string equal $what "edit"]} {
+	set shortTextVar [lindex [lindex $tmpPrefs(shortcuts) $indShortcuts] 0]
+	set longTextVar [lindex [lindex $tmpPrefs(shortcuts) $indShortcuts] 1]
+    } elseif {[string equal $what "add"]} {
+	
+    }
+    
+    # The bottom part.
+    pack [frame $w.frbot -borderwidth 0] -in $w.frall -fill both  \
+      -padx 8 -pady 6
+    button $w.frbot.bt1 -text "$txtbt" -default active  \
+      -command [list [namespace current]::PushBtAddOrEdit $what]
+    pack $w.frbot.bt1 -side right -padx 5 -pady 5
+    pack [button $w.frbot.btcancel -text [::msgcat::mc Cancel]  \
+      -command "set [namespace current]::finAdd 2"]  \
+      -side right -padx 5 -pady 5
+    
+    bind $w <Return> [list $w.frbot.bt1 invoke]
+    wm resizable $w 0 0
+    
+    # Grab and focus.
+    focus $w
+    catch {grab $w}
+    tkwait variable [namespace current]::finAdd
+    
+    catch {grab release $w}
+    destroy $w
+}
+
+proc ::P2P::Prefs::PushBtAddOrEdit {what} {
+    variable wlbox
+    variable finAdd
+    variable shortListVar
+    variable shortTextVar
+    variable longTextVar
+    variable tmpPrefs
+
+    if {($shortTextVar == "") || ($longTextVar == "")} {
+	set finAdd 1
+	return
+    }
+    if {$what == "add"} {
+ 
+	# Save shortcuts in listbox.
+	lappend shortListVar $shortTextVar
+	lappend tmpPrefs(shortcuts) [list $shortTextVar $longTextVar]
+    } else {
+	
+	# Edit. Replace old with new.
+	set ind [lindex [$wlbox curselection] 0]
+	set shortListVar [lreplace $shortListVar $ind $ind $shortTextVar]
+	set tmpPrefs(shortcuts) [lreplace $tmpPrefs(shortcuts) $ind $ind   \
+	  [list $shortTextVar $longTextVar]]
+    }
+    set finAdd 1
+}
+
+proc ::P2P::Prefs::SavePrefsHook { } {
+    global  prefs
+    variable tmpPrefs
+    
+    array set prefs [array get tmpPrefs]
+    unset tmpPrefs
+}
+
+proc ::P2P::Prefs::CancelPrefsHook { } {
+    global  prefs
+    variable tmpPrefs
+	
+    foreach key [array names tmpPrefs] {
+	if {![string equal $prefs($key) $tmpPrefs($key)]} {
+	    ::Preferences::HasChanged
+	    break
 	}
     }
 }

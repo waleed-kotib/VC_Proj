@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.25 2004-03-13 15:21:41 matben Exp $
+# $Id: MUC.tcl,v 1.26 2004-03-16 15:09:08 matben Exp $
 
 package require entrycomp
 
@@ -678,9 +678,9 @@ proc ::Jabber::MUC::BuildInfo {roomjid} {
     pack [frame $frgrantrevoke] -side top
         
     # Grant buttons ---
-    set frgrant $frgrantrevoke.grant
-    set wgrant [::mylabelframe::mylabelframe $frgrant "Grant:"]
-    pack $frgrant -side left
+    set wgrant $frgrantrevoke.grant
+    labelframe $wgrant -text "Grant:"
+    pack $wgrant -side left -padx 8 -pady 4
     foreach txt {Voice Member Moderator Admin Owner} {
 	set stxt [string tolower $txt]
 	button $wgrant.bt${stxt} -text $txt  \
@@ -689,9 +689,9 @@ proc ::Jabber::MUC::BuildInfo {roomjid} {
     }
     
     # Revoke buttons ---
-    set frrevoke $frgrantrevoke.rev
-    set wrevoke [::mylabelframe::mylabelframe $frrevoke "Revoke:"]
-    pack $frrevoke -side left
+    set wrevoke $frgrantrevoke.rev
+    labelframe $wrevoke -text "Revoke:"
+    pack $wrevoke -side left -padx 8 -pady 4
     foreach txt {Voice Member Moderator Admin Owner} {
 	set stxt [string tolower $txt]
 	button $wrevoke.bt${stxt} -text $txt  \
@@ -720,9 +720,9 @@ proc ::Jabber::MUC::BuildInfo {roomjid} {
     grid $wother.btdest -sticky ew -pady $pady
     
     # Edit lists ---
-    set fredit $frmid.lists
-    set wlist [::mylabelframe::mylabelframe $fredit "Edit Lists:"]
-    pack $fredit -side top -padx 2 -pady 2
+    set wlist $frmid.lists
+    labelframe $wlist -text "Edit Lists:"
+    pack $wlist -side top -padx 8 -pady 4
     foreach txt {Voice Ban Member Moderator Admin Owner} {
 	set stxt [string tolower $txt]	
 	button $wlist.bt${stxt} -text "$txt..."  \

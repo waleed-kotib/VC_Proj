@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.45 2004-03-15 13:25:56 matben Exp $
+# $Id: Coccinella.tcl,v 1.46 2004-03-16 15:09:08 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -205,15 +205,17 @@ set this(soundsPath)        [file join $this(path) sounds]
 set this(altSoundsPath)     [file join $this(prefsPath) sounds]
 set this(themePrefsPath)    [file join $this(prefsPath) theme]
 set this(msgcatPath)        [file join $this(path) msgs]
-set this(internalIPnum)     127.0.0.1
-set this(internalIPname)    "localhost"
+set this(docsPath)          [file join $this(path) docs]
+set this(itemPath)          [file join $this(path) items]
+set this(addonsPath)        [file join $this(path) addons]
 set this(httpdRootPath)     $this(path)
 if {[info exists starkit::topdir]} {
-    # Check these!!!!!!!
     set this(httpdRootPath)     $starkit::topdir
     set this(httpdRelPath)      \
-      [file join $starkit::topdir lib app-Coccinella httpd]
+      [file join $::starkit::topdir lib app-Coccinella httpd]
 }
+set this(internalIPnum)     127.0.0.1
+set this(internalIPname)    "localhost"
 
 # Set our IP number temporarily.
 set this(ipnum) $this(internalIPnum) 
@@ -445,7 +447,6 @@ set listOfPackages {
     headlabel
     hooks
     moviecontroller
-    mylabelframe
     sha1pure
     tablelist
     undo
@@ -624,7 +625,14 @@ if {$displaySetup} {
 
 # Is it the first time it is launched, then show the welcome canvas.
 if {$prefs(firstLaunch)} {
-    ::Dialogs::Canvas $prefs(welcomeFile) -title [::msgcat::mc {Welcome}]
+    set systemLocale [lindex [split $this(systemLocale) _] 0]
+    set floc [file join $this(docsPath) Welcome_${systemLocale}.can]
+    if {[file exists $floc]} {
+	set f $floc
+    } else {
+	set f [file join $this(docsPath) Welcome_en.can]
+    }
+    ::Dialogs::Canvas $f -title [::msgcat::mc {Welcome}]
 }
 set prefs(firstLaunch) 0
 

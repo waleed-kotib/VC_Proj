@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.69 2004-03-13 15:21:40 matben Exp $
+# $Id: Jabber.tcl,v 1.70 2004-03-16 15:09:08 matben Exp $
 
 package provide Jabber 1.0
 
@@ -513,7 +513,6 @@ proc ::Jabber::SetUserPreferences { } {
       [list ::Jabber::jprefs(awaymsg)          jprefs_awaymsg           $jprefs(awaymsg)]  \
       [list ::Jabber::jprefs(xawaymsg)         jprefs_xawaymsg          $jprefs(xawaymsg)]  \
       [list ::Jabber::jprefs(logoutStatus)     jprefs_logoutStatus      $jprefs(logoutStatus)]  \
-      [list ::Jabber::jprefs(chatFont)         jprefs_chatFont          $jprefs(chatFont)]  \
       [list ::Jabber::jprefs(haveIMsysIcons)   jprefs_haveIMsysIcons    $jprefs(haveIMsysIcons)]  \
       [list ::Jabber::jserver(profile)         jserver_profile          $jserver(profile)      userDefault] \
       [list ::Jabber::jserver(profile,selected) jserver_profile_selected $jserver(profile,selected) userDefault] \
@@ -1464,15 +1463,15 @@ proc ::Jabber::SetStatusWithMessage { } {
     
     # Top frame.
     set frtop $w.frall.frtop
-    set fr [::mylabelframe::mylabelframe $frtop [::msgcat::mc {My Status}]]
+    labelframe $frtop -text [::msgcat::mc {My Status}]
     pack $frtop -side top -fill x -padx 4 -pady 4
     set i 0
     foreach val {available chat away xa dnd invisible} {
-	label ${fr}.l${val} -image [::Jabber::Roster::GetPresenceIconFromKey $val]
+	label ${frtop}.l${val} -image [::Jabber::Roster::GetPresenceIconFromKey $val]
 	radiobutton ${fr}.${val} -text [::msgcat::mc jastat${val}]  \
 	  -variable [namespace current]::show -value $val
-	grid ${fr}.l${val} -sticky e -column 0 -row $i -padx 4 -pady 3
-	grid ${fr}.${val} -sticky w -column 1 -row $i -padx 8 -pady 3
+	grid ${frtop}.l${val} -sticky e -column 0 -row $i -padx 4 -pady 3
+	grid ${frtop}.${val} -sticky w -column 1 -row $i -padx 8 -pady 3
 	incr i
     }
     
