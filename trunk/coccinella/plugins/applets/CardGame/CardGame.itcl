@@ -3,7 +3,7 @@
 #       Creates a card game in a whiteboard canvas. 
 # 
 # 
-# $Id: CardGame.itcl,v 1.1 2004-07-23 10:15:37 matben Exp $
+# $Id: CardGame.itcl,v 1.2 2004-07-23 13:03:59 matben Exp $
 
 namespace eval CardGame {
     
@@ -246,7 +246,7 @@ if {[itcl::find classes CardGame] == ""} {
 
     body CardGame::PointPress {x y} {
 	
-	puts "CardGame::PointPress"
+	# puts "CardGame::PointPress"
 	NewCard
 	if {[$csObj NumberOfCards] == 0} {
 	    ItemConfigure $idstack -image [$csObj Image black]
@@ -292,7 +292,7 @@ if {[itcl::find classes CardGame] == ""} {
 
     body CardGame::PointRelease {x y} {
 	
-	puts "CardGame::PointRelease"
+	# puts "CardGame::PointRelease"
 	$tkCanvas delete $move(idshadow)
 	set x [$tkCanvas canvasx $x]
 	set y [$tkCanvas canvasy $y]
@@ -369,32 +369,29 @@ if {[itcl::find classes CardGame] == ""} {
 	if {[regexp {(state:([a-z]+))} $tags match stag state]} {
 	    set cardStatePopup $state
 	}
-	puts "CardGame::CardPopup this=$this"
 	tk_popup $cardMenu [expr int($x) - 10] [expr int($y) - 10]   
     }
     
     body CardGame::NewCard {} {
 	
-	puts "CardGame::NewCard csObj=$csObj"
+	# puts "CardGame::NewCard csObj=$csObj"
 	
 	set card [$csObj PopAndMix]
 	if {$card != ""} {
-	    puts "\t idstack=$idstack"
+	    #puts "\t idstack=$idstack"
 	    foreach {x y} [$tkCanvas coords $idstack] break
 	    set im [$csObj Image back]
 	    set tags [list image playcard object:${this} card:${card} \
 	      state:hide [NewUtag]]
 	    set idcard [$tkCanvas create image $x $y -image $im -anchor nw \
 	      -tags $tags]
-	    puts "\t idcard=$idcard"
+	    #puts "\t idcard=$idcard"
 	}
     }
 
     body CardGame::NewCardAutoPlace {} {
 	
-	# This one does not yet work properly!
-	puts "CardGame::NewCardAutoPlace csObj=$csObj"
-	
+	# This one does not yet work properly!	
 	NewCard
 	if {$idcard != ""} {
 	    foreach {xstack ystack} [$tkCanvas coords $idstack] break
