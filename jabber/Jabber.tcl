@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.14 2003-06-01 10:26:57 matben Exp $
+# $Id: Jabber.tcl,v 1.15 2003-06-07 12:46:35 matben Exp $
 #
 #  The $address is an ip name or number.
 #
@@ -2643,6 +2643,8 @@ proc ::Jabber::WB::NewWhiteboard {jid args} {
 	    
 	    # Must enter room in the usual way if not there already.
 	    set allRooms [$jstate(jlib) service allroomsin]
+	    ::Jabber::Debug 3 "\tallRooms=$allRooms"
+	    
 	    if {[lsearch $allRooms $jid] < 0} {
 		set ans [::Jabber::GroupChat::EnterOrCreate \
 		  enter -roomjid $jid -autoget 1]

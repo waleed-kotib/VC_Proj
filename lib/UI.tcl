@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.11 2003-06-01 10:26:58 matben Exp $
+# $Id: UI.tcl,v 1.12 2003-06-07 12:46:36 matben Exp $
 
 # LabeledFrame --
 #
@@ -717,6 +717,7 @@ proc ::UI::InitMenuDefs { } {
 	polygon    {thickness outline fillcolor dash smoothness inspect}
 	rectangle  {thickness fillcolor dash inspect}
 	text       {font fontsize fontweight color speechbubble inspect}
+	window     {}
 	qt         {inspectqt exportmovie}
 	snack      {}
     }
@@ -858,15 +859,9 @@ proc ::UI::BuildMain {wtop args} {
     # network events to attempt drawing etc. Beware!!!
      
     # Start with menus.
-    if {$wtop == "."} {
-	::SplashScreen::SetMsg [::msgcat::mc splashbuildmenu]
-    }
     ::UI::BuildWhiteboardMenus $wtop
         
     # Shortcut buttons at top? Do we want the toolbar to be visible.
-    if {$wtop == "."} {
-	::SplashScreen::SetMsg [::msgcat::mc splashbuild]
-    }
     if {$state(visToolbar)} {
 	::UI::ConfigShortcutButtonPad $wtop init
     } else {
@@ -968,24 +963,13 @@ proc ::UI::BuildMain {wtop args} {
 	if {$dims(y) > [expr [winfo vrootheight .] - 30]} {
 	    set dims(y) 30
 	}
-	wm geometry $wtop +$dims(x)+$dims(y)
 
-	# Setting total (root) size however, should only be done if set in pref file!
-	# This needs to be fixed!!!!!!!!!!!!!!!!!
-	if {$dims(wRoot) > 1 && $dims(hRoot) > 1} {
-	    wm geometry . $dims(wRoot)x$dims(hRoot)
+	# Setting total (root) size should only be done if set in pref file!
+	# Some window managers are tricky with the 'wm geometry' command.
+	if {($dims(wRoot) > 1) && ($dims(hRoot) > 1)} {
+	    wm geometry . $dims(wRoot)x$dims(hRoot)+$dims(x)+$dims(y)
+	    update
 	}
-	
-	# Mac OS X have the Quit menu on the Apple menu instead. Catch it!
-	if {[string equal $this(platform) "macosx"]} {
-	    if {![catch {package require tclAE}]} {
-		tclAE::installEventHandler aevt quit ::UI::AEQuitHandler
-	    }
-	}
-    } else {
-	    
-	# The minsize when no connected clients. Is updated when connect/disconnect.
-	wm minsize $wtopReal $dims(wMinTot) $dims(hMinTot)
     }
     wm protocol $wtopReal WM_DELETE_WINDOW [list ::UI::CloseMain $wtop]
 
@@ -1006,11 +990,8 @@ proc ::UI::BuildMain {wtop args} {
     catch {wm deiconify $wtopReal}
 
     # A trick to let the window manager be finished before getting the geometry.
-    # An 'update idletasks' needed anyway in 'FindWidgetGeometryAtLaunch'.
-    if {$wtop == "."} {
-	after idle ::UI::FindWidgetGeometryAtLaunch .
-	::SplashScreen::SetMsg ""
-    }
+    # An 'update idletasks' needed anyway in 'FindWBGeometry'.
+    after idle ::UI::FindWBGeometry $wtop
 }
 
 # UI::CloseMain --
@@ -1095,8 +1076,7 @@ proc ::UI::DestroyMain {wtop} {
     # We could do some cleanup here.
     foreach imName $tmpImages {
 	$imName delete
-    }
-    
+    }    
 }
 
 # UI::SaveWhiteboardState
@@ -1142,6 +1122,8 @@ proc ::UI::SaveWhiteboardDims {wtop} {
     set dims(x) [winfo x .]
     set dims(y) [winfo y .]
     set dims(wTot) $dims(wRoot)
+    
+    # hMenu seems unreliable!!!
     if {![string match "mac*" $this(platform)]} {
 	# MATS: seems to always give 1 Linux not...
         ### EAS BEGIN
@@ -1156,6 +1138,8 @@ proc ::UI::SaveWhiteboardDims {wtop} {
     set dims(hTot) [expr $dims(hRoot) + $dims(hMenu)]
     set dims(wCanvas) [winfo width $wCan]
     set dims(hCanvas) [winfo height $wCan]
+
+    Debug 3 "::UI::SaveWhiteboardDims dims(hRoot)=$dims(hRoot)"
 }
 
 # UI::SaveCleanWhiteboardDims --
@@ -1313,14 +1297,17 @@ proc ::UI::GetWtopFromJabberType {type jid {thread {}}} {
     # Verify that toplevel actually exists.
     if {[string length $wtop]} {
 	if {[string equal $wtop "."]} {
-	    set wtoplevel .
+	    set w .
 	} else {
-	    set wtoplevel [string trimright $wtop "."]
+	    set w [string trimright $wtop "."]
 	}
-	if {![winfo exists $wtoplevel]} {
+	if {![winfo exists $w]} {
+	    set wtop ""
+	} elseif {![winfo ismapped $w]} {
 	    set wtop ""
 	}
     }
+    ::Jabber::Debug 2 "\twtop=$wtop"
     return $wtop
 }
 
@@ -3062,20 +3049,22 @@ proc ::UI::ToolBtNumToName {num} {
     return $btNo2Name($num)
 }
 
-# UI::FindWidgetGeometryAtLaunch --
+# UI::FindWBGeometry --
 #
 #       Just after launch, find and set various geometries of the application.
 #       'hRoot' excludes the menu height, 'hTot' includes it.
-#       Note: [winfo height .#menu] gives the menu height when the menu is in the
-#       root window; [wm geometry .] gives and sets dimensions *without* the menu;
+#       Note: 
+#       [winfo height .#menu] gives the menu height when the menu is in the
+#       root window; 
+#       [wm geometry .] gives and sets dimensions *without* the menu;
 #       [wm minsize .] gives and sets dimensions *with* the menu included.
 #       EAS: TclKit w/ Tcl 8.4 returns an error "bad window path name ".#menu"
 #
 # dims array:
-#       wRoot, hRoot:      total size of the application not including any menu.
-#       wTot, hTot:        total size of the application including any menu.
+#       wRoot, hRoot:      total size of the toplevel not including any menu.
+#       wTot, hTot:        total size of the toplevel including any menu.
 #       hTop:              height of the shortcut button frame at top.
-#       hMenu:             height of any menu if present in the application window.
+#       hMenu:             height of any menu if present in the toplevel window.
 #       hStatus:           height of the status frame.
 #       hComm:             height of the communication frame including all client
 #                          frames.
@@ -3085,62 +3074,63 @@ proc ::UI::ToolBtNumToName {num} {
 #       wCanvas, hCanvas:  size of the actual canvas.
 #       x, y:              position of the app window.
 
-proc ::UI::FindWidgetGeometryAtLaunch {wtop} {
+proc ::UI::FindWBGeometry {wtop} {
     global  this prefs
     
     variable dims
     variable icons
     upvar ::${wtop}::wapp wapp
-
+    
     # Changed to reqwidth and reqheight instead of width and height.
     # EAS: Begin
     # update idletasks
     update
     # EAS: End
+    if {$wtop == "."} {
+	set w .
+    } else {
+	set w [string trimright $wtop "."]
+    }
     
     set wCan $wapp(can)
     
     # The actual dimensions.
-    set dims(wRoot) [winfo reqwidth .]
-    set dims(hRoot) [winfo reqheight .]
-    set dims(hTop) 0
-    if {[winfo exists .frtop]} {
-	set dims(hTop) [winfo reqheight .frtop]
+    set wRoot [winfo reqwidth $w]
+    set hRoot [winfo reqheight $w]
+    set hTop 0
+    if {[winfo exists ${wtop}frtop]} {
+	set hTop [winfo reqheight ${wtop}frtop]
     }
-    set dims(hTopOn) [winfo reqheight .frtop.on]
-    set dims(hTopOff) [winfo reqheight .frtop.barhoriz]
-    set dims(hStatus) [winfo reqheight .fcomm.st]
-    set dims(hComm) [winfo reqheight $wapp(comm)]
-    set dims(hCommClean) $dims(hComm)
-    set dims(wStatMess) [winfo reqwidth $wapp(statmess)]
+    set hTopOn [winfo reqheight ${wtop}frtop.on]
+    set hTopOff [winfo reqheight ${wtop}frtop.barhoriz]
+    set hStatus [winfo reqheight ${wtop}fcomm.st]
+    set hComm [winfo reqheight $wapp(comm)]
+    set hCommClean $hComm
+    set wStatMess [winfo reqwidth $wapp(statmess)]    
     
     # If we have a custom made menubar using a frame with labels (embedded).
     if {$prefs(haveMenus)} {
-	set dims(hFakeMenu) 0
+	set hFakeMenu 0
     } else {
-	set dims(hFakeMenu) [winfo reqheight .menu]
+	set hFakeMenu [winfo reqheight ${wtop}menu]
     }
     if {![string match "mac*" $this(platform)]} {
 	# MATS: seems to always give 1 Linux not...
-        ### EAS BEGIN
-        set dims(hMenu) 1
-	if {[winfo exists .#menu]} {
-	    set dims(hMenu) [winfo height .#menu]
+	### EAS BEGIN
+	set hMenu 1
+	if {[winfo exists ${wtop}#menu]} {
+	    set hMenu [winfo height ${wtop}#menu]
 	}
-        ### EAS END
+	### EAS END
     } else {
-	set dims(hMenu) 0
+	set hMenu 0
     }
-    set dims(wCanvas) [winfo width $wCan]
-    set dims(hCanvas) [winfo height $wCan]
-    set dims(wTot) $dims(wRoot)
-    set dims(hTot) [expr $dims(hRoot) + $dims(hMenu)]
     
-    # Position of root window.
-    set dimList [::UI::ParseWMGeometry .]
-    set dims(x) [lindex $dimList 2]  
-    set dims(y) [lindex $dimList 3]  
-
+    set wCanvas [winfo width $wCan]
+    set hCanvas [winfo height $wCan]
+    set wTot $wRoot
+    set hTot [expr $hRoot + $hMenu]
+    
     # The minimum dimensions. Check if 'wapp(comm)' is wider than wMinCanvas!
     # Take care of the case where there is no To or From checkbutton.
     
@@ -3152,19 +3142,32 @@ proc ::UI::FindWidgetGeometryAtLaunch {wtop} {
     if {[winfo exists $wapp(comm).from]} {
 	incr wMinCommFrame [winfo reqwidth $wapp(comm).from]
     }
-    set dims(wMinRoot) [max [expr $dims(wMinCanvas) + 56] $wMinCommFrame]
-    set dims(hMinRoot) [expr $dims(hMinCanvas) + $dims(hStatus) + $dims(hComm) + \
-      $dims(hTop) + $dims(hFakeMenu)]
+        
+    set wMinRoot [max [expr $dims(wMinCanvas) + 56] $wMinCommFrame]
+    set hMinRoot [expr $dims(hMinCanvas) + $hStatus + $hComm + $hTop + \
+      $hFakeMenu]
     if {$prefs(haveScrollbars)} {
 	# 2 for padding
-	incr dims(wMinRoot) [expr [winfo reqwidth $wapp(ysc)] + 2]
-	incr dims(hMinRoot) [expr [winfo reqheight $wapp(xsc)] + 2]
+	incr wMinRoot [expr [winfo reqwidth $wapp(ysc)] + 2]
+	incr hMinRoot [expr [winfo reqheight $wapp(xsc)] + 2]
     }
-    set dims(wMinTot) $dims(wMinRoot)
-    set dims(hMinTot) [expr $dims(hMinRoot) + $dims(hMenu)]
+    set wMinTot $wMinRoot
+    set hMinTot [expr $hMinRoot + $hMenu]
+        
+    # Cache dims only for "." ?
+    if {$w == "."} {
+	foreach key {
+	    wRoot hRoot hTop hTopOn hTopOff hStatus hComm hCommClean wStatMess \
+	      hFakeMenu hMenu wCanvas hCanvas wTot hTot wMinRoot hMinRoot \
+	      wMinTot hMinTot
+	} {
+	    set dims($key) [set $key]
+	}
+    }
     
-    # The minsize when no connected clients. Is updated when connect/disconnect.
-    wm minsize . $dims(wMinTot) $dims(hMinTot)
+    # The minsize when no connected clients. 
+    # Is updated when connect/disconnect (Not jabber).
+    wm minsize $w $wMinTot $hMinTot
 }
 
 # ::UI::ParseWMGeometry --
@@ -3317,6 +3320,7 @@ proc ::UI::SetNewWMMinsize {wtop} {
 	incr dims(hMinRoot) [expr [winfo reqheight $wapp(xsc)] + 2]
     }
     set dims(hMinTot) [expr $dims(hMinRoot) + $dims(hMenu)]
+    set dims(wMinTot) $dims(wMinRoot)
         
     # Note: wm minsize is *with* the menu!!!
     wm minsize $wtopReal $dims(wMinTot) $dims(hMinTot)

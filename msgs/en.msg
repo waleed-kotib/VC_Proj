@@ -301,6 +301,7 @@
 ::msgcat::mcset en {Font size}
 ::msgcat::mcset en {Font weight}
 ::msgcat::mcset en {Get File}
+::msgcat::mcset en {Get File Error}
 ::msgcat::mcset en {Get vCard}
 ::msgcat::mcset en {Group chat in room}
 ::msgcat::mcset en {Handled By}

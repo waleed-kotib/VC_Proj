@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.7 2003-06-01 10:26:58 matben Exp $
+# $Id: roster.tcl,v 1.8 2003-06-07 12:46:36 matben Exp $
 # 
 # Note that every jid in the rosterArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -57,6 +57,7 @@
 #      none
 #      
 #   INSTANCE COMMANDS
+#      rostName clearpresence ?jidpattern?
 #      rostName enterroster
 #      rostName exitroster
 #      rostName getgroups ?jid?
@@ -104,13 +105,12 @@
 #       1.0b1    added gethighestresource command
 #                changed setpresence arguments
 #       1.0b2    changed storage of x elements, added getx command.
+#       030602   added clearpresence command.
 
 package provide roster 1.0
 
 namespace eval roster {
     
-    # The public interface.
-    namespace export Roster
     variable rostGlobals
     
     # Globals same for all instances of this roster.
@@ -207,8 +207,7 @@ proc roster::CommandProc {rostName cmd args} {
 # Results:
 #       none.
 
-proc roster::setrosteritem {rostName jid args} {
-    
+proc roster::setrosteritem {rostName jid args} {    
     variable rostGlobals
     upvar [namespace current]::${rostName}::rosterArr rosterArr
     upvar [namespace current]::${rostName}::options options
@@ -257,8 +256,7 @@ proc roster::setrosteritem {rostName jid args} {
 # Results:
 #       none.
 
-proc roster::removeitem {rostName jid} {
-    
+proc roster::removeitem {rostName jid} {    
     variable rostGlobals
     upvar [namespace current]::${rostName}::rosterArr rosterArr
     upvar [namespace current]::${rostName}::options options
@@ -298,8 +296,7 @@ proc roster::removeitem {rostName jid} {
 # Results:
 #       none. Callback evaluated.
 
-proc roster::ClearRoster {rostName} {
-    
+proc roster::ClearRoster {rostName} {    
     variable rostGlobals
     upvar [namespace current]::${rostName}::rosterArr rosterArr
     upvar [namespace current]::${rostName}::options options
@@ -346,8 +343,7 @@ proc roster::enterroster {rostName} {
 # Results:
 #       none. Callback evaluated.
 
-proc roster::exitroster {rostName} {
-    
+proc roster::exitroster {rostName} {    
     upvar [namespace current]::${rostName}::options options
 
     # Be sure to evaluate the registered command procedure.
@@ -362,7 +358,6 @@ proc roster::exitroster {rostName} {
 #       items and any presence information.
 
 proc roster::reset {rostName} {
-
     upvar [namespace current]::${rostName}::rosterArr rosterArr
     upvar [namespace current]::${rostName}::presArr presArr
     
@@ -370,6 +365,28 @@ proc roster::reset {rostName} {
     catch {unset presArr}
     set rosterArr(users) {}
     set rosterArr(groups) {}
+}
+
+# roster::clearpresence --
+# 
+#       Removes all presence cached internally for jid glob pattern.
+#       Helpful when exiting a room.
+#       
+# Arguments:
+#       rostName:   the instance of this roster.
+#       jidpattern: glob pattern for items to remove.
+#       
+# Results:
+#       none.
+
+proc roster::clearpresence {rostName {jidpattern ""}} {
+    upvar [namespace current]::${rostName}::presArr presArr
+
+    if {$jidpattern == ""} {
+	catch {unset presArr}
+    } else {
+	array unset presArr $jidpattern
+    }
 }
 
 # roster::setpresence --
@@ -390,8 +407,7 @@ proc roster::reset {rostName} {
 # Results:
 #       none.
 
-proc roster::setpresence {rostName jid type args} {
-    
+proc roster::setpresence {rostName jid type args} { 
     variable rostGlobals
     upvar [namespace current]::${rostName}::rosterArr rosterArr
     upvar [namespace current]::${rostName}::presArr presArr
@@ -462,8 +478,7 @@ proc roster::setpresence {rostName jid type args} {
 #       a list of '-key value' pairs where key is any of: 
 #       name, groups, subscription, ask. Note GROUPS in plural!
 
-proc roster::getrosteritem {rostName jid} {
-    
+proc roster::getrosteritem {rostName jid} {    
     variable rostGlobals
     upvar [namespace current]::${rostName}::rosterArr rosterArr
     upvar [namespace current]::${rostName}::options options
@@ -519,8 +534,7 @@ proc roster::getusers {rostName} {
 #       If the 'resource' in argument is not given,
 #       the result contains a sublist for each resource. IMPORTANT! Bad?
 
-proc roster::getpresence {rostName jid args} {
-    
+proc roster::getpresence {rostName jid args} {    
     variable rostGlobals
     upvar [namespace current]::${rostName}::rosterArr rosterArr
     upvar [namespace current]::${rostName}::presArr presArr
@@ -534,14 +548,18 @@ proc roster::getpresence {rostName jid args} {
 	set resource $argsArr(-resource)
     }
     
-    # It may happen that there is no roster item for this jid.
-    # Can anyway have presence???
+    # It may happen that there is no roster item for this jid (groupchat).
     if {![info exists presArr($jid,res)] ||   \
       ([string length $presArr($jid,res)] == 0)} {
-    	if {$haveRes} {
-	    return [list -resource $resource -type unavailable]
-	} else {      
-	    return [list [list -resource "" -type unavailable]]
+	if {[info exists argsArr(-type)] &&  \
+	  [string equal $argsArr(-type) "available"]} {
+	    return {}
+	} else {
+	    if {$haveRes} {
+		return [list -resource $resource -type unavailable]
+	    } else {      
+		return [list [list -resource "" -type unavailable]]
+	    }
 	}
     }
     
@@ -597,8 +615,7 @@ proc roster::getpresence {rostName jid args} {
 # Results:
 #       a list of groups or empty.
 
-proc roster::getgroups {rostName {jid {}}} {
-    
+proc roster::getgroups {rostName {jid {}}} {    
     upvar [namespace current]::${rostName}::rosterArr rosterArr
    
     Debug 2 "roster::getgroups rostName=$rostName, jid='$jid'"

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ImageAndMovie.tcl,v 1.7 2003-06-01 10:26:58 matben Exp $
+# $Id: ImageAndMovie.tcl,v 1.8 2003-06-07 12:46:36 matben Exp $
 
 package require http
 
@@ -754,21 +754,21 @@ proc ::ImageAndMovie::HttpFinished {gettoken token} {
 	
 	switch -- $getstate(importPackage) {
 	    image {
-		eval {::ImageAndMovie::DrawImage $wtop $dstPath $optList} \
+		eval {::ImageAndMovie::DrawImage $wtop $dstPath optList} \
 		  $getstate(args)
 	    }
 	    QuickTimeTcl {
 		
 		# This transport method is different from the QT streaming http.
-		eval {::ImageAndMovie::DrawQuickTimeTcl $wtop $dstPath $optList} \
+		eval {::ImageAndMovie::DrawQuickTimeTcl $wtop $dstPath optList} \
 		  $getstate(args)
 	    }
 	    snack {
-		eval {::ImageAndMovie::DrawSnack $wtop $dstPath $optList} \
+		eval {::ImageAndMovie::DrawSnack $wtop $dstPath optList} \
 		  $getstate(args)
 	    }
 	    xanim {
-		eval {::ImageAndMovie::DrawXanim $wtop $dstPath $optList} \
+		eval {::ImageAndMovie::DrawXanim $wtop $dstPath optList} \
 		  $getstate(args)
 	    }
 	    default {
@@ -776,7 +776,7 @@ proc ::ImageAndMovie::HttpFinished {gettoken token} {
 		    set importProc [::Plugins::GetImportProcForPlugin  \
 		      $getstate(importPackage)]
 		}]} {
-		    eval {$importProc $wtop $dstPath $optList} $getstate(args)
+		    eval {$importProc $wtop $dstPath optList} $getstate(args)
 		}
 	    }
 	}

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.8 2003-06-01 10:26:58 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.9 2003-06-07 12:46:36 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -373,7 +373,7 @@ proc ::PreferencesUtils::SetWidgetDefaultOptions { } {
 # Note: it may prove useful to have the versions numbers as the first elements!
 
 proc ::PreferencesUtils::SetUserPreferences { } {
-    global  prefs dims state
+    global  prefs state
     
     ::PreferencesUtils::Add [list  \
       [list prefs(majorVers)       prefs_majorVers       $prefs(majorVers)       absolute] \

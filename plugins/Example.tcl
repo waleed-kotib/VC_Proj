@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Example.tcl,v 1.2 2003-06-01 10:26:58 matben Exp $
+# $Id: Example.tcl,v 1.3 2003-06-07 12:46:36 matben Exp $
 
 
 namespace eval ::Example:: {
@@ -86,6 +86,7 @@ proc ::Example::Import {wtop fileName optListVar args} {
 	set locals(body) [read $fd]
 	close $fd
     }
+    
     # Extract coordinates and tags which must be there. error checking?
     foreach {x y} $optArr(coords:) { break }
     if {[info exists optArr(tags:)]} {
@@ -102,7 +103,8 @@ proc ::Example::Import {wtop fileName optListVar args} {
     button $wbt -text {Example Plugin} -command [namespace current]::Clicked
     pack ${wfr}.bt -padx 3 -pady 3
     
-    set id [$wCan create window $x $y -anchor nw -window $wfr -tags [list tframe $useTag]]
+    set id [$wCan create window $x $y -anchor nw -window $wfr -tags  \
+      [list tframe $useTag]]
     set locals(id2file,$id) $fileName
 
     # We may let remote clients know our size.
@@ -115,15 +117,24 @@ proc ::Example::Import {wtop fileName optListVar args} {
 # ::Example::Save --
 # 
 #       Template proc for saving an 'import' command to file.
-#       Return empty of failure.
+#       Return empty if failure.
 
-proc ::Example::Save {wCan id} {
+proc ::Example::Save {wCan id args} {
     variable locals
     
-    ::Debug 2 "::Example::Save wCan=$wCan, id=$id"
+    ::Debug 2 "::Example::Save wCan=$wCan, id=$id, args=$args"
+    array set argsArr {
+	-uritype file
+    }
+    array set argsArr $args
 
     if {[info exists locals(id2file,$id)]} {
-	lappend impArgs -file $locals(id2file,$id)
+	set fileName $locals(id2file,$id)
+	if {$argsArr(-uritype) == "http"} {
+	    lappend impArgs -url [::CanvasUtils::GetHttpFromFile $fileName]
+	} else {
+	    lappend impArgs -file $fileName
+	}
 	lappend impArgs -tags [::CanvasUtils::GetUtag $wCan $id 1]
 	return "import [$wCan coords $id] $impArgs"
     } else {

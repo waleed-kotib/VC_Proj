@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.4 2003-05-18 13:20:22 matben Exp $
+# $Id: Utils.tcl,v 1.5 2003-06-07 12:46:36 matben Exp $
 
 # InvertArray ---
 #
@@ -779,7 +779,7 @@ proc ::Timing::GetRate {key} {
 	
     set timeList $timing($key)
     set n [llength $timeList]
-    set nAve 3
+    set nAve 6
     set istart [expr $n - $nAve]
     if {$istart < 0} {
 	set istart 0

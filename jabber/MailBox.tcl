@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.6 2003-04-28 13:32:29 matben Exp $
+# $Id: MailBox.tcl,v 1.7 2003-06-07 12:46:36 matben Exp $
 
 package provide MailBox 1.0
 
@@ -50,7 +50,7 @@ proc ::Jabber::MailBox::Init { } {
 	set mailbox([incr locals(msgId)])  \
 	  [list "Re: Shit" kk@athlon.se/hh "today 08:33:02" 0 $locals(msgId) "Hej,\n\nKass?\nlink www.apple.com\nshit www.mats.se/home"]
 	set mailbox([incr locals(msgId)])  \
-	  [list "Re: Shit" kk@athlon.se/zzz "today 08:43:02" 0 $locals(msgId) "Hej,\n\nAny :cool: stuff? I'm :bored: and :cheeky:."]
+	  [list "Re: Shit" kk@athlon.se/zzzzzzzzzzzzzzzzzzzzzzzzzzz "today 08:43:02" 0 $locals(msgId) "Hej,\n\nAny :cool: stuff? I'm :bored: and :cheeky:."]
 	set mailbox([incr locals(msgId)])  \
 	  [list "Re: special braces" brace@athlon.se/co "today 08:43:02" 0 $locals(msgId) "Testing unmatched braces:  if \{1\} \{"]
 	set mailbox([incr locals(msgId)])  \
@@ -158,7 +158,7 @@ proc ::Jabber::MailBox::Build {w args} {
     frame $wfrmbox
     set wtbl $wfrmbox.tbl
     set wysctbl $wfrmbox.ysc
-    set columns [list 0 {} 0 [::msgcat::mc Subject] 0 [::msgcat::mc From] \
+    set columns [list 0 {} 16 [::msgcat::mc Subject] 16 [::msgcat::mc From] \
       0 [::msgcat::mc Date] 0 {} 0 {}]
     scrollbar $wysctbl -orient vertical -command [list $wtbl yview]
     tablelist::tablelist $wtbl -columns $columns  \
@@ -239,7 +239,7 @@ proc ::Jabber::MailBox::Build {w args} {
 
 # Jabber::MailBox::InsertRow --
 #
-#
+#       Does the actual job of adding a line in the mailbox widget.
 
 proc ::Jabber::MailBox::InsertRow {wtbl row i} {
     global  sysFont
@@ -248,10 +248,12 @@ proc ::Jabber::MailBox::InsertRow {wtbl row i} {
     upvar ::UI::icons icons
 
     set jid [lindex $row 1]
-    if {![regexp {^(.+@[^/]+)(/(.+))?} $jid match jidNoRes x res]} {
-	set jidNoRes $jid
+    if {![regexp {^([^@]+@[^/]+)(/(.*))?} $jid match jid2 x res]} {
+	set jid2 $jid
     }
-    set row [lreplace $row 1 1 $jidNoRes]
+
+    # We keep any /res part.
+    #set row [lreplace $row 1 1 $jid2]
     set haswb 0
     if {([llength $row] > 6) && ([string length [lindex $row 6]] > 0)} {
 	set haswb 1
@@ -371,7 +373,7 @@ proc ::Jabber::MailBox::GotMsg {bodytxt args} {
 	-from unknown -subject {}
     }
     array set opts $args
-    regexp {^(.+@[^/]+)(/(.+))?} $opts(-from) match jid2 x res
+    regexp {^([^@]+@[^/]+)(/(.*))?} $opts(-from) match jid2 x res
         
     # Here we should probably check som 'jabber:x:delay' element...
     set timeDate ""
@@ -562,7 +564,7 @@ proc ::Jabber::MailBox::SelectMsg { } {
 	    undo::reset [::UI::GetUndoToken ${wbtoplevel}.]
 	} else {
 	    ::UI::BuildMain ${wbtoplevel}. -state disabled -title $title \
-	    -jid $jid2 -type normal
+	      -jid $jid2 -type normal
 	}
 	
 	# Only if user available shall we try to import.

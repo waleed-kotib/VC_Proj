@@ -300,6 +300,7 @@
 ::msgcat::mcset sv {Font size}             {Typsnittsstorlek}
 ::msgcat::mcset sv {Font weight}           {Typsnittsstil}
 ::msgcat::mcset sv {Get File}		   {HŠmta fil}
+::msgcat::mcset sv {Get File Error}        {HŠmta fil fel}
 ::msgcat::mcset sv {Get vCard}             {HŠmta vCard}
 ::msgcat::mcset sv {Group chat in room}    {Gruppsamtal i rum}
 ::msgcat::mcset sv {Handled By}            {Hanteras av}

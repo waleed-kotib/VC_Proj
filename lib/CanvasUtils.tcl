@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.6 2003-05-18 13:20:21 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.7 2003-06-07 12:46:36 matben Exp $
 
 package provide CanvasUtils 1.0
 package require sha1pure
@@ -701,7 +701,6 @@ proc ::CanvasUtils::DoItemPopup {w x y} {
     set m .popup${type}
     catch {destroy $m}
     if {![winfo exists $m]} {	
-	#::UI::MakeMenu $wtop $m {} $::UI::menuDefs(pop,$type) normal -id $id -w $w
 	::UI::NewMenu $wtop $m {} "pop,$type" normal -id $id -w $w
 	if {[string equal $type "text"]} {
 	    ::UI::BuildCanvasPopupFontMenu $w ${m}.mfont $id $prefs(canvasFonts)

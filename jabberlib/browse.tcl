@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: browse.tcl,v 1.8 2003-06-01 10:26:57 matben Exp $
+# $Id: browse.tcl,v 1.9 2003-06-07 12:46:36 matben Exp $
 # 
 #  locals($jid,parent):       the parent of $jid.
 #  locals($jid,parents):      list of all parent jid's,
@@ -175,7 +175,7 @@ proc browse::getparentjid {browseName jid} {
 
 proc browse::GetParentJidFromJid {browseName jid} {
         
-    Debug 3 "GetParentJidFromJid BAD!!!  jid=$jid"
+    Debug 3 "GetParentJidFromJid BADBADBADBADBADBAD!!!  jid=$jid"
 
     set c {[^@/.<>:]+}
     if {[regexp "(${c}@(${c}\.)+${c})/${c}" $jid match parJid junk]} {	
@@ -518,12 +518,24 @@ proc browse::setjid {browseName fromJid subiq args} {
     if {![info exists locals($fromJid,parent)]} {
 	
 	# This can be a completely new room not seen before.
-	#if {[string match *@* $fromJid]}
-	if {0} {
+	# Workoround for bug in 'conference 0.4.1' component. No parent!
+        # <iq type='set' to='matben@localhost/xx' 
+        #         from='junk@conference.localhost'>
+        #     <conference xmlns='jabber:iq:browse' name='Junk' type='public'/>
+        # </iq>
+	if {[string match *@* $fromJid]} {
+	#if {0} 
+	    # Ugly!!!
+	    set parentJid [GetParentJidFromJid $browseName $fromJid]
 	    set parentJid [getparentjid $browseName $fromJid]
 	    set locals($fromJid,parent) $parentJid
-	    set locals($fromJid,parents)  \
-	      [concat $locals($parentJid,parents) $parentJid]
+	    if {[info exists locals($parentJid,parents)]} {
+		set locals($fromJid,parents)  \
+		  [concat $locals($parentJid,parents) $parentJid]
+	    } else {
+		set locals($fromJid,parents) $parentJid
+		set locals($parentJid,parents) {}
+	    }
 	} else {
 	
 	    # Else we assume it is a root. Not correct!
