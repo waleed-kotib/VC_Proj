@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.72 2004-03-28 14:50:50 matben Exp $
+# $Id: Jabber.tcl,v 1.73 2004-03-29 13:56:27 matben Exp $
 
 package provide Jabber 1.0
 
@@ -89,10 +89,10 @@ namespace eval ::Jabber:: {
     set jprefs(valids) {[^\x00-\x20]|[^\r\n\t@:' <>&"]}
     
     # Popup menus.
-    set jstate(wpopup,roster) .jpopupro
-    set jstate(wpopup,browse) .jpopupbr
+    set jstate(wpopup,roster)    .jpopupro
+    set jstate(wpopup,browse)    .jpopupbr
     set jstate(wpopup,groupchat) .jpopupgc
-    set jstate(wpopup,agents) .jpopupag
+    set jstate(wpopup,agents)    .jpopupag
     
     # Keep noncritical error text here.
     set jerror {}
@@ -346,89 +346,6 @@ proc ::Jabber::FactoryDefaults { } {
 	{command   mCut              {::UI::CutCopyPasteCmd cut}           disabled X}
 	{command   mCopy             {::UI::CutCopyPasteCmd copy}          disabled C}
 	{command   mPaste            {::UI::CutCopyPasteCmd paste}         disabled V}
-    }
-    
-    # Templates for popup menus for the roster, browse, and groupchat windows.
-    # The roster:
-    variable popMenuDefs
-    
-    set popMenuDefs(roster,def) {
-	mMessage       users     {::Jabber::NewMsg::Build -to &jid}
-	mChat          user      {::Jabber::Chat::StartThread &jid3}
-	mWhiteboard    wb        {::Jabber::WB::NewWhiteboardTo &jid3}
-	mSendFile      user      {::Jabber::OOB::BuildSet &jid3}
-	separator      {}        {}
-	mLastLogin/Activity user {::Jabber::GetLast &jid}
-	mvCard         user      {::VCard::Fetch other &jid}
-	mAddNewUser    any       {
-	    ::Jabber::Roster::NewOrEditItem new
-	}
-	mEditUser      user      {
-	    ::Jabber::Roster::NewOrEditItem edit -jid &jid
-	}
-	mVersion       user      {::Jabber::GetVersion &jid3}
-	mChatHistory   user      {::Jabber::Chat::BuildHistory &jid}
-	mRemoveUser    user      {::Jabber::Roster::SendRemove &jid}
-	separator      {}        {}
-	mStatus        any       @::Jabber::Roster::BuildPresenceMenu
-	mRefreshRoster any       {::Jabber::Roster::Refresh}
-    }  
-    
-    # Can't run our http server on macs :-(
-    if {[string equal $this(platform) "macintosh"]} {
-	set popMenuDefs(roster,def) [lreplace $popMenuDefs(roster,def) 9 11]
-    }
-    
-    # The browse:
-    set popMenuDefs(browse,def) {
-	mMessage       user      {::Jabber::NewMsg::Build -to &jid}
-	mChat          user      {::Jabber::Chat::StartThread &jid}
-	mWhiteboard    wb        {::Jabber::WB::NewWhiteboardTo &jid}
-	mEnterRoom     room      {
-	    ::Jabber::GroupChat::EnterOrCreate enter -roomjid &jid -autoget 1
-	}
-	mCreateRoom    conference {::Jabber::GroupChat::EnterOrCreate create \
-	  -server &jid}
-	separator      {}        {}
-	mInfo          jid       {::Jabber::Browse::GetInfo &jid}
-	mLastLogin/Activity jid  {::Jabber::GetLast &jid}
-	mLocalTime     jid       {::Jabber::GetTime &jid}
-	mvCard         jid       {::VCard::Fetch other &jid}
-	mVersion       jid       {::Jabber::GetVersion &jid}
-	separator      {}        {}
-	mSearch        search    {
-	    ::Jabber::Search::Build -server &jid -autoget 1
-	}
-	mRegister      register  {
-	    ::Jabber::GenRegister::BuildRegister -server &jid -autoget 1
-	}
-	mUnregister    register  {::Jabber::Register::Remove &jid}
-	separator      {}        {}
-	mRefresh       jid       {::Jabber::Browse::Refresh &jid}
-	mAddServer     any       {::Jabber::Browse::AddServer}
-    }
-    
-    # The groupchat:
-    set popMenuDefs(groupchat,def) {
-	mMessage       user      {::Jabber::NewMsg::Build -to &jid}
-	mChat          user      {::Jabber::Chat::StartThread &jid}
-	mWhiteboard    wb        {::Jabber::WB::NewWhiteboardTo &jid}
-    }    
-    
-    # The agents stuff:
-    set popMenuDefs(agents,def) {
-	mSearch        search    {
-	    ::Jabber::Search::Build -server &jid -autoget 1
-	}
-	mRegister      register  {
-	    ::Jabber::GenRegister::BuildRegister -server &jid -autoget 1
-	}
-	mUnregister    register  {::Jabber::Register::Remove &jid}
-	separator      {}        {}
-	mEnterRoom     groupchat {::Jabber::GroupChat::EnterOrCreate enter}
-	mLastLogin/Activity jid  {::Jabber::GetLast &jid}
-	mLocalTime     jid       {::Jabber::GetTime &jid}
-	mVersion       jid       {::Jabber::GetVersion &jid}
     }    
 }
 

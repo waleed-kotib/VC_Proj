@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: FilePrefs.tcl,v 1.1 2004-03-28 14:49:24 matben Exp $
+# $Id: FilePrefs.tcl,v 1.2 2004-03-29 13:56:27 matben Exp $
 
 package provide FilePrefs 1.0
 
@@ -164,6 +164,9 @@ proc ::FilePrefs::DeleteAssociation {wmclist {indSel {}}} {
 
     if {$indSel == ""} {
 	set indSel [$wmclist curselection]
+	if {$indSel == ""} {
+	    return
+	}
     }
     foreach {name pack mime} [lrange [$wmclist get $indSel] 0 2] break
     $wmclist delete $indSel

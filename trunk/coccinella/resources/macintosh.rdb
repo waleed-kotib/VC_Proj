@@ -3,6 +3,7 @@
 
 ! General appearence
 !
+*fontTiny:                           Geneva 9
 *fontSmall:                          Geneva 9
 *fontSmallBold:                      Geneva 9 bold
 *fontMedium:                         Geneva 9

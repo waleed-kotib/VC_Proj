@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.31 2004-03-13 15:21:41 matben Exp $
+# $Id: NewMsg.tcl,v 1.32 2004-03-29 13:56:27 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -225,21 +225,25 @@ proc ::Jabber::NewMsg::Build {args} {
 	    incr n
 	}
     }
-    
-    # Subject.
-    set frsub [frame $w.frall.frsub -borderwidth 0]
-    pack $frsub -side top -fill x -padx 6 -pady 0
-    label $frsub.lsub -text "[::msgcat::mc Subject]:" -font $fontSB -anchor e
-    set wsubject $frsub.esub
-    entry $wsubject  \
-      -textvariable [namespace current]::locals($w,subject)
-    pack $frsub.lsub -side left -padx 2
-    pack $frsub.esub -side top -padx 2 -fill x
-    
     # Text.
     set wtxt  $w.frall.frtxt
     set wtext ${wtxt}.text
     set wysc  ${wtxt}.ysc
+    
+    # Subject.
+    set   frsub $w.frall.frsub
+    frame $frsub -borderwidth 0
+    pack  $frsub -side top -fill x -padx 6 -pady 0
+    label $frsub.lsub -text "[::msgcat::mc Subject]:" -font $fontSB -anchor e
+    set   wsubject $frsub.esub
+    entry $wsubject -textvariable [namespace current]::locals($w,subject)
+    pack  $frsub.lsub -side left -padx 2
+    pack  $frsub.esub -side left -padx 2 -fill x -expand 1
+    
+    pack [::Jabber::UI::SmileyMenuButton $frsub.smile $wtext]  \
+      -side right -padx 16
+    
+    # Text.
     pack [frame $wtxt] -side top -fill both -expand 1 -padx 6 -pady 4
     text $wtext -height 8 -width 48 -wrap word \
       -borderwidth 1 -relief sunken -yscrollcommand [list $wysc set]
@@ -645,7 +649,8 @@ proc ::Jabber::NewMsg::DoSend {w} {
 	return
     }
     set wtext $locals($w,wtext)
-    set allText [$wtext get 1.0 "end - 1 char"]
+    set allText [::Text::TransformToPureText $wtext]
+    
     if {[string length $locals($w,subject)] > 0} {
 	set subopt [list -subject $locals($w,subject)]
     } else {

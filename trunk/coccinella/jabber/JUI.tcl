@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.30 2004-03-13 15:21:40 matben Exp $
+# $Id: JUI.tcl,v 1.31 2004-03-29 13:56:27 matben Exp $
 
 package provide JUI 1.0
 
@@ -529,9 +529,21 @@ proc ::Jabber::UI::GroupChat {what roomJid} {
 #       Lets plugins/addons register their own menu entry.
 
 proc ::Jabber::UI::RegisterPopupEntry {which menuSpec} {
-    upvar ::Jabber::popMenuDefs popMenuDefs
     
-    set popMenuDefs($which,def) [concat $popMenuDefs($which,def) $menuSpec]
+    switch -- $which {
+	agents {
+	    ::Jabber::Agents::RegisterPopupEntry $menuSpec
+	}
+	browse {
+	    ::Jabber::Browse::RegisterPopupEntry $menuSpec	    
+	}
+	groupchat {
+	    ::Jabber::GroupChat::RegisterPopupEntry $menuSpec	    
+	}
+	roster {
+	    ::Jabber::Roster::RegisterPopupEntry $menuSpec	    
+	}
+    }
 }
 
 # Jabber::UI::RegisterMenuEntry --
@@ -565,293 +577,6 @@ proc ::Jabber::UI::RegisterMenuEntry {wpath name menuSpec} {
 	    set menuDefs(rost,file) [linsert $menuDefs(rost,file) end-2 $menuSpec]
 	    lappend rostMenuSpec(file) [list $menuSpec]
 	}
-    }
-}
-
-# Jabber::UI::Popup --
-#
-#       Handle popup menus in jabber dialogs, typically from right-clicking
-#       a thing in the roster, browser, etc.
-#       
-# Arguments:
-#       what        any of "roster", "browse", or "groupchat", or "agents"
-#       w           widget that issued the command: tree or text
-#       v           for the tree widget it is the item path, 
-#                   for text the jidhash.
-#       
-# Results:
-#       popup menu displayed
-
-proc ::Jabber::UI::Popup {what w v x y} {
-    global  wDlgs this
-    
-    upvar ::Jabber::privatexmlns privatexmlns
-    upvar ::Jabber::jstate jstate
-    upvar ::Jabber::popMenuDefs popMenuDefs
-    
-    ::Jabber::Debug 2 "::Jabber::UI::Popup what=$what, w=$w, v='$v', x=$x, y=$y"
-    
-    # The last element of $v is either a jid, (a namespace,) 
-    # a header in roster, a group, or an agents xml tag.
-    # The variables name 'jid' is a misnomer.
-    # Find also type of thing clicked, 'typeClicked'.
-    
-    set typeClicked ""
-    
-    switch -- $what {
-	roster {
-	    
-	    # The last element of atree item if user is usually a 3-tier jid for
-	    # online users and a 2-tier jid else, but some transports may
-	    # lack the resource part for online users, and have resource
-	    # even if unavailable. Beware!
-	    set jid [lindex $v end]
-	    set jid3 $jid
-	    set status [string tolower [lindex $v 0]]
-	    if {[llength $v]} {
-		set tags [$w itemconfigure $v -tags]
-	    } else {
-		set tags ""
-	    }
-	    
-	    switch -- $tags {
-		head {
-		    set typeClicked head
-		}
-		group {
-		
-		    # Get a list of all jid's in this group. type=user.
-		    # Must strip off all resources.
-		    set typeClicked group
-		    set jid {}
-		    foreach jid3 [$w children $v] {
-			jlib::splitjid $jid3 jid2 res
-			lappend jid $jid2
-		    }
-		    set jid [list $jid]
-		}
-		default {
-		    
-		    # Typically a user.
-		    jlib::splitjid $jid jid2 res
-			
-		    # Must let 'jid' refer to 2-tier jid for commands to work!
-		    set jid3 $jid
-		    set jid $jid2
-		    if {[$jstate(browse) havenamespace $jid3 "coccinella:wb"] || \
-		      [$jstate(browse) havenamespace $jid3 $privatexmlns(whiteboard)]} {
-			set typeClicked wb
-		    } else {
-			set typeClicked user
-		    }			
-		}		    
-	    }
-	}
-	browse {
-	    set jid [lindex $v end]
-	    set jid3 $jid
-	    set typesubtype [$jstate(browse) gettype $jid]
-	    if {[regexp {^.+@[^/]+(/.*)?$} $jid match res]} {
-		set typeClicked user
-		if {[::Jabber::InvokeJlibCmd service isroom $jid]} {
-		    set typeClicked room
-		}
-	    } elseif {[string match -nocase "conference/*" $typesubtype]} {
-		set typeClicked conference
-	    } elseif {$jid != ""} {
-		set typeClicked jid
-	    }
-	}
-	groupchat {	    
-	    set jid $v
-	    set jid3 $jid
-	    if {[regexp {^[^@]+@[^@]+(/.*)?$} $jid match res]} {
-		set typeClicked user
-	    }
-	}
-	agents {
-	    set jid [lindex $v end]
-	    set jid3 $jid
-	    set childs [$w children $v]
-	    if {[regexp {(register|search|groupchat)} $jid match service]} {
-		set typeClicked $service
-		set jid [lindex $v end-1]
-	    } elseif {$jid != ""} {
-		set typeClicked jid
-	    }
-	    set services {}
-	    foreach c $childs {
-		if {[regexp {(register|search|groupchat)} $c match service]} {
-		    lappend services $service
-		}
-	    }
-	}
-    }
-    if {[string length $jid] == 0} {
-	set typeClicked ""	
-    }
-    set X [expr [winfo rootx $w] + $x]
-    set Y [expr [winfo rooty $w] + $y]
-    
-    ::Jabber::Debug 2 "    jid=$jid, typeClicked=$typeClicked"
-    
-    # Mads Linden's workaround for menu post problem on mac:
-    # all in menubutton commands i add "after 40 the_command"
-    # this way i can never have to posting error.
-    # it is important after the tk_popup f.ex to
-    #
-    # destroy .mb
-    # update
-    #
-    # this way the .mb is destroyd before the next window comes up, thats how I
-    # got around this.
-    
-    # Make the appropriate menu.
-    set m $jstate(wpopup,$what)
-    set i 0
-    catch {destroy $m}
-    menu $m -tearoff 0
-    
-    foreach {item type cmd} $popMenuDefs($what,def) {
-	if {[string index $cmd 0] == "@"} {
-	    set mt [menu ${m}.sub${i} -tearoff 0]
-	    set locname [::msgcat::mc $item]
-	    $m add cascade -label $locname -menu $mt -state disabled
-	    eval [string range $cmd 1 end] $mt
-	    incr i
-	} elseif {[string equal $item "separator"]} {
-	    $m add separator
-	    continue
-	} else {
-	    
-	    # Really BAD BAD BAD solution here!
-	    regsub -all &jid3 $cmd [list $jid3] cmd
-	    regsub -all &jid $cmd [list $jid] cmd
-	    set cmd [subst -nocommands $cmd]
-	    set locname [::msgcat::mc $item]
-	    $m add command -label $locname -command "after 40 $cmd"  \
-	      -state disabled
-	}
-	
-	# Special BAD BAD!!! ------
-	if {$what == "roster" && $typeClicked == "user" && \
-	  [string match -nocase "*chat history*" $item]} {
-	    $m entryconfigure $locname -state normal
-	}
-	
-	if {![::Jabber::IsConnected]} {
-	    continue
-	}
-	if {[string equal $type "any"]} {
-	    $m entryconfigure $locname -state normal
-	    continue
-	}
-	
-	# State of menu entry. We use the 'type' and 'typeClicked' to sort
-	# out which capabilities to offer for the clicked item.
-	set state disabled
-	
-	switch -- $what {
-	    roster {
-		
-		switch -- $type {
-		    user {
-			if {[string equal $typeClicked "user"] || \
-			  [string equal $typeClicked "wb"]} {
-			    set state normal
-			}
-			if {[string equal $status "offline"]} {
-			    if {[string match -nocase "mchat" $item] || \
-			      [string match -nocase "*version*" $item]} {
-				set state disabled
-			    }
-			}
-		    }
-		    users {
-			if {($typeClicked == "user") ||  \
-			  ($typeClicked == "group") ||  \
-			  ($typeClicked == "wb")} {
-			    set state normal
-			}
-		    }
-		    wb {
-			if {[string equal $typeClicked "wb"]} {
-			    set state normal
-			}
-		    }
-		}
-	    }
-	    browse {
-		switch -- $type {
-		    user {
-			if {[string equal $typeClicked "user"]} {
-			    set state normal
-			}
-		    }
-		    room {
-			if {[string equal $typeClicked "room"]} {
-			    set state normal
-			}
-		    }
-		    jid {
-			switch -- $typeClicked {
-			    jid - user - conference {
-				set state normal
-			    }
-			}
-		    } 
-		    search - register {
-			if {[$jstate(browse) havenamespace $jid "jabber:iq:${type}"]} {
-			    set state normal
-			}
-		    }
-		    conference {
-			switch -- $typeClicked {
-			    conference {
-				set state normal
-			    }
-			}
-		    }
-		    wb {
-			switch -- $typeClicked {
-			    room {
-				set state normal
-			    }
-			}
-		    }
-		}
-	    }
-	    groupchat {	    
-
-		# We skip whiteboarding here since does not know if Coccinella.
-		if {($type == "user") && ($typeClicked == "user")} {
-		    set state normal
-		}
-	    }
-	    agents {
-		if {[string equal $type $typeClicked]} {
-		    set state normal
-		} elseif {[lsearch $services $type] >= 0} {
-		    set state normal
-		}
-	    }
-	}
-
-	if {[string equal $state "normal"]} {
-	    $m entryconfigure $locname -state normal
-	}
-    }   
-    
-    # This one is needed on the mac so the menu is built before it is posted.
-    update idletasks
-    
-    # Post popup menu.
-    tk_popup $m [expr int($X) - 10] [expr int($Y) - 10]   
-    
-    # Mac bug... (else can't post menu while already posted if toplevel...)
-    if {[string equal "macintosh" $this(platform)]} {
-	catch {destroy $m}
-	update
     }
 }
 

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.23 2004-03-16 15:09:08 matben Exp $
+# $Id: GotMsg.tcl,v 1.24 2004-03-29 13:56:27 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -68,7 +68,6 @@ proc ::Jabber::GotMsg::Show {thisMsgId} {
     variable nick
     variable subject
     variable theTime
-    variable theDate
     variable isOnline
     variable wtext
     variable wbtnext
@@ -91,8 +90,7 @@ proc ::Jabber::GotMsg::Show {thisMsgId} {
     foreach {subject jid timeAndDate isRead junk theMsg} $spec break
     set jid [::Jabber::InvokeJlibCmd getrecipientjid $jid]
     set jidtxt $jid
-    set _time {[0-9][0-9]:[0-9][0-9].*}
-    regexp "^(.*) (${_time})$" $timeAndDate match theDate theTime
+    set theTime [::Utils::SmartClockFormat [clock scan $timeAndDate]]
     
     # Split jid into jid2 and resource.
     jlib::splitjid $jid jid2 res
@@ -147,7 +145,6 @@ proc ::Jabber::GotMsg::Build { } {
     variable jidtxt
     variable subject
     variable theTime
-    variable theDate
     variable isOnline
     variable wtext
     variable wbtnext
@@ -207,14 +204,8 @@ proc ::Jabber::GotMsg::Build { } {
     pack [frame $ftm -border 0] -side top -fill x -expand 1 -pady 0
     pack [label $ftm.lt -text "[::msgcat::mc Time]:"] \
       -side left -padx 2 -pady 0
-    pack [entry $ftm.et -width 8 \
+    pack [entry $ftm.et -width 16 \
       -textvariable [namespace current]::theTime -state disabled  \
-      -borderwidth 1 -relief sunken -background $bg] \
-      -side left -padx 1 -pady 0
-    pack [label $ftm.ld -text "[::msgcat::mc Date]:" \
-      -anchor e] -side left -padx 1 -pady 0
-    pack [entry $ftm.ed -width 11 \
-      -textvariable [namespace current]::theDate -state disabled  \
       -borderwidth 1 -relief sunken -background $bg] \
       -side left -padx 1 -pady 0
     pack [frame $ftm.pad -relief raised -bd 1 -width 2]  \
@@ -281,7 +272,6 @@ proc ::Jabber::GotMsg::Reply { } {
     variable jid
     variable subject
     variable theTime
-    variable theDate
     variable theMsg
     
     if {![regexp -nocase {^ *re:} $subject]} {
@@ -290,7 +280,7 @@ proc ::Jabber::GotMsg::Reply { } {
 	set resubject $subject
     }
     ::Jabber::NewMsg::Build -to $jid -subject $resubject  \
-      -quotemessage $theMsg -time "$theDate $theTime"
+      -quotemessage $theMsg -time $theTime
 }
 
 proc ::Jabber::GotMsg::Close {w} {

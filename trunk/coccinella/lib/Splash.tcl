@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 1999-2002  Mats Bengtsson
 #  
-# $Id: Splash.tcl,v 1.2 2004-01-02 14:41:58 matben Exp $
+# $Id: Splash.tcl,v 1.3 2004-03-29 13:56:27 matben Exp $
    
 package provide Splash 1.0
 
@@ -63,7 +63,7 @@ proc ::SplashScreen::SplashScreen { } {
     set screenH [winfo vrootheight .]
 
     wm geometry $w +[expr ($screenW - 450)/2]+[expr ($screenH - 300)/2]
-    set fontS         [option get . fontSmall {}]
+    set fontTiny      [option get . fontTiny {}]
     set showMinor     [option get $w showMinor {}]
     set showCopyright [option get $w showCopyright {}]
     set copyrightX    [option get $w copyrightX {}]
@@ -89,7 +89,7 @@ proc ::SplashScreen::SplashScreen { } {
     canvas $w.can -width $imWidth -height $imHeight -bd 0 -highlightthickness 0
     $w.can create image 0 0 -anchor nw -image $imsplash
     $w.can create text 50 [expr $imHeight - 20] -anchor nw -tags tsplash  \
-      -font $fontS -text $startMsg -fill $textcol
+      -font $fontTiny -text $startMsg -fill $textcol
     
     # Print patch level for dev versions.
     if {$showMinor && ($prefs(releaseVers) != "")} {

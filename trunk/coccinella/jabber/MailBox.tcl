@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.40 2004-03-27 15:20:37 matben Exp $
+# $Id: MailBox.tcl,v 1.41 2004-03-29 13:56:27 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -38,7 +38,12 @@ namespace eval ::Jabber::MailBox:: {
     option add *MailBox*printDisImage         printDis         widgetDefault
     option add *MailBox*trashImage            trash            widgetDefault
     option add *MailBox*trashDisImage         trashDis         widgetDefault
-    
+
+    option add *MailBox*readMsgImage          readMsg          widgetDefault
+    option add *MailBox*unreadMsgImage        unreadMsg        widgetDefault
+    option add *MailBox*wbIcon11Image         wbIcon11         widgetDefault
+    option add *MailBox*wbIcon13Image         wbIcon13         widgetDefault
+
     # Add some hooks...
     ::hooks::add initHook        ::Jabber::MailBox::Init
     ::hooks::add newMessageHook  ::Jabber::MailBox::GotMsg
@@ -47,7 +52,6 @@ namespace eval ::Jabber::MailBox:: {
     ::hooks::add quitAppHook     ::Jabber::MailBox::Exit
 
     variable locals
-    upvar ::Jabber::jstate jstate
     
     set locals(inited)      0
     set locals(mailboxRead) 0
@@ -80,10 +84,35 @@ namespace eval ::Jabber::MailBox:: {
 
 proc ::Jabber::MailBox::Init { } {    
     variable locals
-    
-    set locals(inited) 1
+    variable icons
    
     ::Jabber::MailBox::TranslateAnyVer1ToCurrentVer
+    
+    # Icons for the mailbox.
+    set icons(readMsg) [image create photo -data {
+	R0lGODdhDgAKAKIAAP/////xsOjboMzMzHNzc2NjzjExYwAAACwAAAAADgAK
+	AAADJli6vFMhyinMm1NVAkPzxdZhkhh9kUmWBie8cLwZdG3XxEDsfM8nADs=
+    }]
+    set icons(unreadMsg) [image create photo -data {
+	R0lGODdhDgAKALMAAP/////xsOjboMzMzIHzeXNzc2Njzj7oGzXHFzExYwAA
+	AAAAAAAAAAAAAAAAAAAAACwAAAAADgAKAAAENtBIcpC8cpgQKOKgkGicB0pi
+	QazUUQVoUhhu/YXyZoNcugUvXsAnKBqPqYRyyVwWBoWodCqNAAA7
+    }]
+    set icons(wbIcon11) [image create photo -data {
+	R0lGODlhEQALALMAANnZ2U9PT////wrXAKGhocbK/wAV/+Pl/zlK/46X/3F9
+	//8cRf/G0P+quf8ALv///yH5BAEAAAAALAAAAAARAAsAAARmMMhJawABCinh
+	kFIIIQIJQhQDzxBCDCGECCQIKJBJQwgxhBAiQBJEMQrBIeVaTAQSBFIHmiOE
+	WK0tEUgo0ByBkhDCCeFEgCQgJURCQojVGlwikACNnEIIthYTgcAgJ62BAEjk
+	pJVEADs=
+    }]
+    set icons(wbIcon13) [image create photo -data {
+	R0lGODdhFQANALMAAP/////n5/9ze/9CQv8IEOfn/8bO/621/5ycnHN7/zlK
+	/wC9AAAQ/wAAAAAAAAAAACwAAAAAFQANAAAEWrDJSWtFDejN+27YZjAHt5wL
+	B2aaopAbmn4hMBYH7NGskmi5kiYwIAwCgJWNUdgkGBuBACBNhnyb4IawtWaY
+	QJ2GO/YCGGi0MDqtKnccohG5stgtiLx+z+8jIgA7	
+    }]
+    
+    set locals(inited) 1
 }
 
 proc ::Jabber::MailBox::InitHandler { } {
@@ -186,6 +215,16 @@ proc ::Jabber::MailBox::Build {args} {
     set iconTrash      [::Theme::GetImage [option get $w trashImage {}]]
     set iconTrashDis   [::Theme::GetImage [option get $w trashDisImage {}]]
 
+    # Since several of these are so frequently used, cache them!
+    set locals(iconWb11)       [::Theme::GetImageFromExisting \
+      [option get $w wbIcon11Image {}] ::Jabber::MailBox::icons]
+    set locals(iconWb13)       [::Theme::GetImageFromExisting \
+      [option get $w wbIcon13Image {}] ::Jabber::MailBox::icons]
+    set locals(iconReadMsg)    [::Theme::GetImageFromExisting \
+      [option get $w readMsgImage {}] ::Jabber::MailBox::icons]
+    set locals(iconUnreadMsg)  [::Theme::GetImageFromExisting \
+      [option get $w unreadMsgImage {}] ::Jabber::MailBox::icons]
+
     set wtray $w.frall.frtop
     ::buttontray::buttontray $wtray 50
     pack $wtray -side top -fill x -padx 4 -pady 2
@@ -214,8 +253,6 @@ proc ::Jabber::MailBox::Build {args} {
       -side top -fill both -expand 1 -padx 4 -pady 4
     
     # The actual mailbox list as a tablelist.
-    set iconWb [::UI::GetIcon wbicon]
-
     set wfrmbox $frmid.frmbox
     set locals(wfrmbox) $wfrmbox
     frame $wfrmbox
@@ -229,7 +266,7 @@ proc ::Jabber::MailBox::Build {args} {
       -labelcommand [namespace current]::LabelCommand  \
       -stretch all -width 60 -selectmode extended
     # Pressed -labelbackground #8c8c8c
-    $wtbl columnconfigure $colindex(iswb) -labelimage $iconWb  \
+    $wtbl columnconfigure $colindex(iswb) -labelimage $locals(iconWb13)  \
       -resizable 0 -align center -showarrow 0
     $wtbl columnconfigure $colindex(date) -sortmode command  \
       -sortcommand [namespace current]::SortTimeColumn
@@ -331,6 +368,7 @@ proc ::Jabber::MailBox::CloseHook {wclose} {
 proc ::Jabber::MailBox::InsertRow {wtbl row i} {
     
     variable colindex
+    variable locals
 
     set jid [lindex $row 1]
     jlib::splitjid $jid jid2 res
@@ -355,23 +393,20 @@ proc ::Jabber::MailBox::InsertRow {wtbl row i} {
     lset row 2 $smartDate
     set row "{} $row"
 
-    set iconWboard  [::UI::GetIcon wboard]
-    set iconUnread  [::UI::GetIcon unreadMsg]
-    set iconRead    [::UI::GetIcon readMsg]
     set fontS  [option get . fontSmall {}]
     set fontSB [option get . fontSmallBold {}]
 
     $wtbl insert end [lrange $row 0 5]
     if {$haswb} {
-	$wtbl cellconfigure "${i},$colindex(iswb)" -image $iconWboard
+	$wtbl cellconfigure "${i},$colindex(iswb)" -image $locals(iconWb11)
     }
     set colsub $colindex(subject)
     if {[lindex $row $colindex(isread)] == 0} {
 	$wtbl rowconfigure $i -font $fontSB
-	$wtbl cellconfigure "${i},${colsub}" -image $iconUnread
+	$wtbl cellconfigure "${i},${colsub}" -image $locals(iconUnreadMsg)
     } else {
 	$wtbl rowconfigure $i -font $fontS
-	$wtbl cellconfigure "${i},${colsub}" -image $iconRead
+	$wtbl cellconfigure "${i},${colsub}" -image $locals(iconReadMsg)
     }
 }
 
@@ -768,12 +803,11 @@ proc ::Jabber::MailBox::SelectMsg { } {
     jlib::splitjid $jid3 jid2 res
 
     # Mark as read.
-    set iconRead    [::UI::GetIcon readMsg]
     set fontS [option get . fontSmall {}]
     set colsub $colindex(subject)
     
     $wtbl rowconfigure $item -font $fontS
-    $wtbl cellconfigure "${item},${colsub}" -image $iconRead
+    $wtbl cellconfigure "${item},${colsub}" -image $locals(iconReadMsg)
     ::Jabber::MailBox::MarkMsgAsRead $id
     ::Jabber::MailBox::DisplayMsg $id
     

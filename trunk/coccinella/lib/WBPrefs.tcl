@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: WBPrefs.tcl,v 1.1 2004-03-28 14:49:24 matben Exp $
+# $Id: WBPrefs.tcl,v 1.2 2004-03-29 13:56:27 matben Exp $
 
 package provide WBPrefs 1.0
 
@@ -212,13 +212,24 @@ proc ::WBPrefs::PushBtRemove {indSel wapp} {
 }
     
 proc ::WBPrefs::PushBtSave { } {
-    global  prefs
-    
+    global  prefs    
     variable wlbwb
 
     # Do save.
     set prefs(canvasFonts) [$wlbwb get 0 end]
     ::WB::BuildAllFontMenus $prefs(canvasFonts)
+}
+
+proc ::WBPrefs::HaveFontListEdits { } {
+    global  prefs
+    variable wlbwb
+    
+    # Compare prefs(canvasFonts) with wlbwb content.
+    if {[string equal [lsort $prefs(canvasFonts)] [lsort [$wlbwb get 0 end]]]} {
+	return 0
+    } else {
+	return 1
+    }
 }
     
 proc ::WBPrefs::PushBtStandard {wapp} {
@@ -261,10 +272,14 @@ proc ::WBPrefs::CancelPrefsHook { } {
     global  prefs
     variable tmpPrefs
 	
-    foreach key [array names tmpJPrefs] {
-	if {![string equal $prefs($key) $tmpJPrefs($key)]} {
-	    ::Preferences::HasChanged
-	    break
+    if {[::WBPrefs::HaveFontListEdits]} {
+	::Preferences::HasChanged
+    } else {
+	foreach key [array names tmpJPrefs] {
+	    if {![string equal $prefs($key) $tmpJPrefs($key)]} {
+		::Preferences::HasChanged
+		break
+	    }
 	}
     }
 }

@@ -3,6 +3,7 @@
 
 ! General appearence
 !
+*fontTiny:                           Arial 8
 *fontSmall:                          Arial 8
 *fontSmallBold:                      Arial 8 bold
 *fontMedium:                         Arial 8
