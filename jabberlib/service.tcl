@@ -5,7 +5,7 @@
 #       
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: service.tcl,v 1.11 2004-08-06 15:19:20 matben Exp $
+# $Id: service.tcl,v 1.12 2004-09-08 13:13:14 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -117,12 +117,12 @@ proc jlib::service::unregister {jlibname type} {
 proc jlib::service::send_getchildren {jlibname jid cmd} {
     
     upvar ${jlibname}::serv serv
-    upvar ${jlibname}::lib lib
+    upvar ${jlibname}::locals locals
 
     # We must have a way to figure out which method to use!!!
-    if {$serv(browse) && [$serv(browse,name) isbrowsed $lib(server)]} {
+    if {$serv(browse) && [$serv(browse,name) isbrowsed $locals(server)]} {
 	$serv(browse,name) send_get $jid $cmd
-    } elseif {$serv(disco) && [$serv(disco,name) isdiscoed items $lib(server)]} {
+    } elseif {$serv(disco) && [$serv(disco,name) isdiscoed items $locals(server)]} {
 	$serv(disco,name) send_get items $jid $cmd
     }
 }
@@ -527,13 +527,13 @@ proc jlib::service::isroom {jlibname jid} {
 
     upvar ${jlibname}::agent agent
     upvar ${jlibname}::serv serv
-    upvar ${jlibname}::lib lib
+    upvar ${jlibname}::locals locals
     
     # Check if domain name supports the 'groupchat' service.
     set isroom 0
-    if {$serv(browse) && [$serv(browse,name) isbrowsed $lib(server)]} {
+    if {$serv(browse) && [$serv(browse,name) isbrowsed $locals(server)]} {
 	set isroom [$serv(browse,name) isroom $jid]
-    } elseif {$serv(disco) && [$serv(disco,name) isdiscoed info $lib(server)]} {
+    } elseif {$serv(disco) && [$serv(disco,name) isdiscoed info $locals(server)]} {
 	set isroom [$serv(disco,name) isroom $jid]	
     } elseif {[regexp {^[^@]+@([^@ ]+)$} $jid match domain]} {
 	if {[info exists agent($domain,groupchat)]} {
@@ -557,7 +557,7 @@ proc jlib::service::isroom {jlibname jid} {
 
 proc jlib::service::nick {jlibname jid} {   
 
-    upvar ${jlibname}::lib lib
+    upvar ${jlibname}::locals locals
     upvar ${jlibname}::serv serv
 
     # All kind of conference components seem to support the old 'gc-1.0'
@@ -596,7 +596,7 @@ proc jlib::service::nick {jlibname jid} {
 	    }
 	}	
 	conference {
-	    if {$serv(browse) && [$serv(browse,name) isbrowsed $lib(server)]} {
+	    if {$serv(browse) && [$serv(browse,name) isbrowsed $locals(server)]} {
 		
 		# Assume that if the login server is browsed we also should query
 		# the browse object.
@@ -621,7 +621,7 @@ proc jlib::service::nick {jlibname jid} {
 
 proc jlib::service::hashandnick {jlibname room} {    
 
-    upvar ${jlibname}::lib lib
+    upvar ${jlibname}::locals locals
     upvar ${jlibname}::serv serv
 
     set room [jlib::jidmap $room]
@@ -647,7 +647,7 @@ proc jlib::service::hashandnick {jlibname room} {
 	    }
 	} 
 	conference {
-	    if {$serv(browse) && [$serv(browse,name) isbrowsed $lib(server)]} {
+	    if {$serv(browse) && [$serv(browse,name) isbrowsed $locals(server)]} {
 		set hashandnick  \
 		  [[namespace parent]::conference::hashandnick $jlibname $room]
 	    }
@@ -678,7 +678,7 @@ proc jlib::service::allroomsin {jlibname} {
 
 proc jlib::service::roomparticipants {jlibname room} {
 
-    upvar ${jlibname}::lib lib
+    upvar ${jlibname}::locals locals
     upvar ${jlibname}::serv serv
     
     set room [jlib::jidmap $room]
@@ -699,7 +699,7 @@ proc jlib::service::roomparticipants {jlibname room} {
 	    set everyone [$serv(muc,name) participants $room]
 	}
 	conference {
-	    if {$serv(browse) && [$serv(browse,name) isbrowsed $lib(server)]} {
+	    if {$serv(browse) && [$serv(browse,name) isbrowsed $locals(server)]} {
 		set everyone [$serv(browse,name) getchilds $room]
 	    }
 	}
@@ -709,7 +709,7 @@ proc jlib::service::roomparticipants {jlibname room} {
 
 proc jlib::service::exitroom {jlibname room} {    
 
-    upvar ${jlibname}::lib lib
+    upvar ${jlibname}::locals locals
     upvar ${jlibname}::serv serv
 
     set room [jlib::jidmap $room]
@@ -725,7 +725,7 @@ proc jlib::service::exitroom {jlibname room} {
 	    $serv(muc,name) exit $room
 	}
 	conference {
-	    if {$serv(browse) && [$serv(browse,name) isbrowsed $lib(server)]} {
+	    if {$serv(browse) && [$serv(browse,name) isbrowsed $locals(server)]} {
 		[namespace parent]::conference::exit $jlibname $room
 	    }
 	}

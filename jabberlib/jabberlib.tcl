@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.60 2004-08-31 12:48:17 matben Exp $
+# $Id: jabberlib.tcl,v 1.61 2004-09-08 13:13:14 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -19,24 +19,23 @@
 # 
 # lib:
 #	lib(wrap)                  : Wrap ID
-#
 #       lib(clientcmd)             : Callback proc up to the client
-#       
 #       lib(rostername)            : the name of the roster object
-#       
-#       lib(server)                : The server domain name or ip number
-#       
 #	lib(sock)                  : socket name
-#
 #	lib(streamcmd)             : Callback command to run when the <stream>
 #	                             tag is received from the server.
 #
 # iqcmd:	                             
 #	iqcmd(uid)                 : Next iq id-number. Sent in 
 #                                    "id" attributes of <iq> packets.
-#
 #	iqcmd($id)                 : Callback command to run when iq result 
 #	                             packet of $id is received.
+#
+# locals:
+#       locals(server)             : The server domain name or ip number
+#       locals(username)
+#       locals(myjid)
+#       locals(myjid2)
 #	                               
 ############################# SCHEMA ###########################################
 #
@@ -58,6 +57,7 @@
 #      
 #   SYNOPSIS
 #      jlib::new rosterName clientCmd ?-opt value ...?
+#      jlib::havesasl
 #      
 #   OPTIONS
 #	-iqcommand            callback for <iq> elements not handled explicitly
@@ -108,6 +108,7 @@
 #      jlibName send_message to ?args?
 #      jlibName send_presence ?args?
 #      jlibName send_auth username resource ?args?
+#      jlibName send xmllist
 #      jlibName setsockettransport socket
 #      jlibName vcard_get to cmd
 #      jlibName vcard_set cmd ?args?
@@ -214,6 +215,7 @@ namespace eval jlib {
     }
     
     variable statics
+    set statics(inited) 0
     set statics(presenceTypeExp)  \
       {(available|unavailable|subscribe|unsubscribe|subscribed|unsubscribed|invisible)}
     
@@ -221,6 +223,18 @@ namespace eval jlib {
     
     # Running number.
     variable uid 0
+    
+    # Some common xmpp xml namespaces.
+    variable xmppns
+    array set xmppns {
+	stream      http://etherx.jabber.org/streams
+	streams     urn:ietf:params:xml:ns:xmpp-streams
+	tls         urn:ietf:params:xml:ns:xmpp-tls
+	sasl        urn:ietf:params:xml:ns:xmpp-sasl
+	bind        urn:ietf:params:xml:ns:xmpp-bind
+	stanzas     urn:ietf:params:xml:ns:xmpp-stanzas
+	session     urn:ietf:params:xml:ns:xmpp-session
+    }
 }
 
 # Collects the 'conference' subcommand.
@@ -254,6 +268,7 @@ namespace eval jlib::groupchat { }
   
 proc jlib::new {rostername clientcmd args} {    
 
+    variable statics
     variable objectmap
     variable uid
     
@@ -303,7 +318,11 @@ proc jlib::new {rostername clientcmd args} {
     # Verify options.
     if {[catch {eval jlib::verify_options $jlibname $args} msg]} {
 	return -code error $msg
-    }    
+    }
+    
+    if {!$statics(inited)} {
+	init
+    }
 
     set wrapper [wrapper::new [list [namespace current]::got_stream $jlibname] \
       [list [namespace current]::end_of_parse $jlibname]  \
@@ -317,7 +336,7 @@ proc jlib::new {rostername clientcmd args} {
     set lib(wrap)         $wrapper
     
     set lib(isinstream) 0
-    set lib(server) ""
+    set locals(server) ""
     
     # Register some standard iq handlers that is handled internally.
     iq_register $jlibname get jabber:iq:last    \
@@ -326,6 +345,10 @@ proc jlib::new {rostername clientcmd args} {
       [namespace current]::handle_get_time
     iq_register $jlibname get jabber:iq:version \
       [namespace current]::handle_get_version
+    
+    if {$statics(sasl)} {
+	jlib::sasl_new $jlibname
+    }
     
     # Any of {available away dnd invisible unavailable}
     set locals(status) "unavailable"
@@ -343,6 +366,37 @@ proc jlib::new {rostername clientcmd args} {
     jlib::service::init $jlibname
     
     return $jlibname
+}
+
+
+proc jlib::init {} {
+    variable statics
+    
+    if {[catch {package require jlibsasl}]} {
+	set statics(sasl) 0
+    } else {
+	set statics(sasl) 1
+	sasl::client_init -callbacks \
+	  [list [list log [namespace current]::sasl_log]]
+    }
+    set statics(inited) 1
+}
+
+# jlib::havesasl --
+# 
+#       Cache this info for effectiveness. It is needed att application level.
+
+proc jlib::havesasl { } {
+    variable statics
+    
+    if {![info exists statics(sasl)]} {
+	if {[catch {package require jlibsasl}]} {
+	    set statics(sasl) 0
+	} else {
+	    set statics(sasl) 1
+	}
+    }
+    return $statics(sasl)
 }
 
 # jlib::cmdproc --
@@ -588,8 +642,9 @@ proc jlib::recvsocket {jlibname} {
     # Read what we've got.
     if {[catch {read $lib(sock)} temp]} {
 	closestream $jlibname
-	uplevel #0 $lib(clientcmd) $jlibname "networkerror" -body \
-	  "Network error when reading from network"
+	set errmsg "Network error when reading from network"
+	uplevel #0 $lib(clientcmd) [list $jlibname networkerror -body $errmsg]
+	  
 	return
     }
     Debug 2 "RECV: $temp"
@@ -625,6 +680,7 @@ proc jlib::recv {jlibname xml} {
 #           -cmd    callback when we receive the <stream> tag from the server.
 #           -to     the receipients jabber id.
 #           -id
+#           -version
 #       
 # Results:
 #       none.
@@ -634,22 +690,28 @@ proc jlib::openstream {jlibname server args} {
     upvar ${jlibname}::lib lib
     upvar ${jlibname}::locals locals
     upvar ${jlibname}::opts opts
+    variable xmppns
 
     array set argsArr $args
-    set lib(server) $server
+    set locals(server) $server
     set locals(last) [clock seconds]
 
     # Register a <stream> callback proc.
     if {[info exists argsArr(-cmd)] && [llength $argsArr(-cmd)]} {
 	set lib(streamcmd) $argsArr(-cmd)
     }
-    set optattr {}
+    set optattr ""
     foreach {key value} $args {
-	if {[string equal $key "-cmd"] || [string equal $key "-socket"]} {
-	    continue
+	
+	switch -- $key {
+	    -cmd - -socket {
+		# empty
+	    }
+	    default {
+		set attr [string trimleft $key "-"]
+		append optattr " $attr='$value'"
+	    }
 	}
-	set attr [string trimleft $key "-"]
-	append optattr " $attr='$value'"
     }
 
     if {[catch {
@@ -660,9 +722,8 @@ proc jlib::openstream {jlibname server args} {
         
     	# Network errors if failed to open connection properly are likely to show here.
 	set xml "<?xml version='1.0' encoding='UTF-8'?><stream:stream\
-	  xmlns='$opts(-streamnamespace)'\
-	  xmlns:stream='http://etherx.jabber.org/streams'\
-	  to='$server'$optattr>"
+	  xmlns='$opts(-streamnamespace)' xmlns:stream='$xmppns(stream)'\
+	  xml:lang='[getlang]' to='$server'$optattr>"
 
 	eval $lib(transportsend) {$xml}
     } err]} {
@@ -718,7 +779,9 @@ proc jlib::dispatcher {jlibname xmldata} {
     Debug 5 "jlib::dispatcher jlibname=$jlibname, xmldata=$xmldata"
     
     # Which method?
-    switch -- [wrapper::gettag $xmldata] {
+    set tag [wrapper::gettag $xmldata]
+    
+    switch -- $tag {
 	iq {
 	    iq_handler $jlibname $xmldata
 	}
@@ -727,6 +790,15 @@ proc jlib::dispatcher {jlibname xmldata} {
 	}
 	presence {
 	    presence_handler $jlibname $xmldata	
+	}
+	features {
+	    features_handler $jlibname $xmldata
+	}
+	error {
+	    error_handler $jlibname $xmldata
+	}
+	default {
+	    element_run_hook $jlibname $tag $xmldata
 	}
     }
 }
@@ -755,7 +827,8 @@ proc jlib::iq_handler {jlibname xmldata} {
     upvar ${jlibname}::lib lib
     upvar ${jlibname}::iqcmd iqcmd
     upvar ${jlibname}::opts opts    
-    
+    variable xmppns
+
     Debug 5 "jlib::iq_handler: ------------"
 
     # Extract the command level XML data items.    
@@ -836,7 +909,7 @@ proc jlib::iq_handler {jlibname xmldata} {
 	    }
 	}
 	error {
-	    set errspec [jlib::geterrorspec $xmldata]
+	    set errspec [geterrorspec $xmldata]
 	    if {[info exists id] && [info exists iqcmd($id)]} {
 		uplevel #0 $iqcmd($id) [list error $errspec]
 		
@@ -887,7 +960,7 @@ proc jlib::iq_handler {jlibname xmldata} {
 		set xmldata [wrapper::setattrlist $xmldata [array get attrArr]]
 		
 		set errstanza [wrapper::createtag "feature-not-implemented" \
-		  -attrlist [list xmlns urn:ietf:params:xml:ns:xmpp-stanzas]]
+		  -attrlist [list xmlns $xmppns(stanzas)]]
 		set errtag [wrapper::createtag "error" -subtags [list $errstanza] \
 		  -attrlist {code 501 type cancel}]
 		
@@ -898,8 +971,9 @@ proc jlib::iq_handler {jlibname xmldata} {
 		set xml [wrapper::createxml $xmldata]
 		if {[catch {eval $lib(transportsend) {$xml}} err]} {
 		    closestream $jlibname
-		    uplevel #0 $lib(clientcmd) $jlibname "networkerror" -body \
-		      {Network error when responding}
+		    set errmsg "Network error when responding"
+		    uplevel #0 $lib(clientcmd) [list $jlibname networkerror \
+		      -body $errmsg]
 		}
 	    }
 	}
@@ -939,7 +1013,7 @@ proc jlib::message_handler {jlibname xmldata} {
     
     switch -- $type {
 	error {
-	    set errspec [jlib::geterrorspec $xmldata]
+	    set errspec [geterrorspec $xmldata]
 	    lappend arglist -error $errspec
 	}
     }
@@ -959,7 +1033,7 @@ proc jlib::message_handler {jlibname xmldata} {
 	    }
 	    x {
 		lappend x $child
-		lappend xxmlnsList [wrapper::getattribute $child "xmlns"]
+		lappend xxmlnsList [wrapper::getattribute $child xmlns]
 	    }
 	}
     }
@@ -1024,7 +1098,7 @@ proc jlib::presence_handler {jlibname xmldata} {
     
     # Check first if this is an error element (from conferencing?).
     if {[string equal $type "error"]} {
-	set errspec [jlib::geterrorspec $xmldata]
+	set errspec [geterrorspec $xmldata]
 	lappend arglist -error $errspec
     } else {
 	
@@ -1094,6 +1168,77 @@ proc jlib::presence_handler {jlibname xmldata} {
     } else {
 	# uplevel #0 $lib(clientcmd) [list $jlibname presence] $arglist
     }	
+}
+
+# jlib::features_handler --
+# 
+# 
+
+proc jlib::features_handler {jlibname xmllist} {
+
+    upvar ${jlibname}::locals locals
+    variable xmppns
+    
+    foreach child [wrapper::getchildren $xmllist] {
+	wrapper::splitxml $child tag attr chdata children
+	
+	switch -- $tag {
+	    mechanisms {
+		if {[wrapper::getattr $attr xmlns] == $xmppns(sasl)} {
+		    set mechanisms {}
+		    foreach mechelem $children {
+			wrapper::splitxml $mechelem mtag mattr mchdata mchild
+			if {$mtag == "mechanism"} {
+			    lappend mechanisms $mchdata
+			}
+		    }
+
+		    # Variable that may trigger a trace event.
+		    set locals(mechanisms) $mechanisms
+		}
+	    }
+	    starttls {
+		if {[wrapper::getattr $attr xmlns] == $xmppns(tls)} {
+		    set locals(starttls) 1
+		    set childs [wrapper::getchildswithtag $xmllist required]
+		    if {$childs != ""} {
+			set locals(starttls,required) 1
+		    }
+		}
+	    }
+	    default {
+		# empty
+	    }
+	}
+    }
+    
+    # Variable that may trigger a trace event.
+    set locals(features) 1
+}
+
+# jlib::error_handler --
+# 
+#       Callback when receiving an stream:error element. According to xmpp-core
+#       this is an unrecoverable error (4.7.1) and the stream MUST be closed
+#       and the TCP connection also be closed.
+#       
+#       jabberd 1.4.3: <stream:error>Disconnected</stream:error>
+
+proc jlib::error_handler {jlibname xmllist} {
+
+    upvar ${jlibname}::lib lib
+    variable xmppns
+    
+    closestream $jlibname
+    
+    # Be sure to reset the wrapper, which implicitly resets the XML parser.
+    wrapper::reset $lib(wrap)
+    if {[llength [wrapper::getchildren $xmllist]]} {
+	set errspec [geterrorspec $xmllist]
+    } else {
+	set errspec [list unknown [wrapper::getcdata $xmllist]]
+    }
+    uplevel #0 $lib(clientcmd) [list $jlibname streamerror -errormsg $errspec]
 }
 
 # jlib::got_stream --
@@ -1183,23 +1328,31 @@ proc jlib::reset {jlibname} {
     upvar ${jlibname}::prescmd prescmd
     upvar ${jlibname}::agent agent
     upvar ${jlibname}::locals locals
+    variable statics
     
     Debug 3 "jlib::reset"
-
-    # Be silent about this.
-    catch {
-	set num $iqcmd(uid)
-	unset iqcmd
-	set iqcmd(uid) $num
-	set num $prescmd(uid)
-	unset prescmd
-	set prescmd(uid) $num
-	unset agent
+    
+    if {$statics(sasl)} {
+	sasl_reset $jlibname
     }
     cancel_auto_away $jlibname
-    set lib(isinstream) 0
+    
+    set num $iqcmd(uid)
+    unset -nocomplain iqcmd
+    set iqcmd(uid) $num
+    
+    set num $prescmd(uid)
+    unset -nocomplain prescmd
+    set prescmd(uid) $num
+    
+    unset -nocomplain agent
+    
+    unset -nocomplain locals
     set locals(status) "unavailable"
-    set locals(myjid) ""
+    set locals(server) ""
+    set locals(myjid)  ""
+
+    set lib(isinstream) 0
 }
 
 # jlib::geterrorspec --
@@ -1231,9 +1384,10 @@ proc jlib::reset {jlibname} {
 
 proc jlib::geterrorspec {iqelem} {
     
+    variable xmppns
+
     set errcode {}
     set errmsg  {}
-    set xmppstanza "urn:ietf:params:xml:ns:xmpp-stanzas"
     
     # First search children of <iq> element (XMPP).
     foreach subiq [wrapper::getchildren $iqelem] {
@@ -1258,7 +1412,7 @@ proc jlib::geterrorspec {iqelem} {
     if {[info exists errelem]} {
 	
 	# The 'code' attribute is optional in XMPP!
-	set errcode [wrapper::getattribute $errelem "code"]
+	set errcode [wrapper::getattribute $errelem code]
 	set cchdata [wrapper::getcdata $errelem]
 	if {[string length $cchdata] > 0} {		
 	    set errmsg $cchdata
@@ -1267,13 +1421,13 @@ proc jlib::geterrorspec {iqelem} {
 		set tag [wrapper::gettag $c]
 		if {[string equal $tag "text"]} {
 		    set xmlns [wrapper::getattribute $c xmlns]
-		    if {[string equal $xmlns $xmppstanza]} {
+		    if {[string equal $xmlns $xmppns(stanzas)]} {
 			set errmsg [wrapper::getcdata $c]
 			break
 		    }
 		} else {
 		    set xmlns [wrapper::getattribute $c xmlns]
-		    if {[string equal $xmlns $xmppstanza]} {
+		    if {[string equal $xmlns $xmppns(stanzas)]} {
 			set errmsg [stanzaerror::getmsg $tag]
 			break
 		    }		    
@@ -1282,6 +1436,41 @@ proc jlib::geterrorspec {iqelem} {
 	}
     }
     return [list $errcode $errmsg]
+}
+
+# jlib::bind_resource --
+# 
+#       xmpp requires us to bind a resource to the stream.
+
+proc jlib::bind_resource {jlibname resource cmd} {
+    
+    variable xmppns
+
+    set xmllist [wrapper::createtag bind -attrlist [list xmlns $xmppns(bind)] \
+      -subtags [list [wrapper::createtag resource -chdata $resource]]]
+    send_iq $jlibname set $xmllist -command \
+      [list [namespace current]::parse_bind_resource $jlibname $cmd]
+}
+
+proc jlib::parse_bind_resource {jlibname cmd type subiq args} {
+    
+    upvar ${jlibname}::locals locals
+    variable xmppns
+    
+    # The server MAY change the 'resource' why we need to check this here.
+    if {[string equal [wrapper::gettag $subiq] bind] &&  \
+      [string equal [wrapper::getattribute $subiq xmlns] $xmppns(bind)]} {
+	set jidelem [wrapper::getchildswithtag $subiq jid]
+	if {$jidelem != {}} {
+	    set sjid [wrapper::getcdata $jidelem]
+	    splitjid $sjid sjid2 sresource
+	    if {![string equal [resourcemap $locals(resource)] $sresource]} {
+		set locals(resource) $sresource
+		set locals(myjid) "$locals(myjid2)/$sresource"
+	    }
+	}
+    }    
+    uplevel #0 $cmd [list $jlibname $type $subiq]
 }
    
 # jlib::invoke_iq_callback --
@@ -1602,6 +1791,43 @@ proc jlib::presence_run_hook {jlibname from type args} {
     return $ishandled
 }
 
+# jlib::element_register --
+# 
+#       Used to get callbacks from non stanza elements, like sasl etc.
+
+proc jlib::element_register {jlibname tag func {seq 50}} {
+    
+    upvar ${jlibname}::elementhook elementhook
+    
+    lappend elementhook($tag) [list $func $seq]
+    set elementhook($tag)  \
+      [lsort -integer -index 1 [lsort -unique $elementhook($tag)]]
+}
+
+proc jlib::element_run_hook {jlibname tag xmldata} {
+    
+    upvar ${jlibname}::elementhook elementhook
+
+    set ishandled 0
+    
+    if {[info exists elementhook($tag)]} {
+	foreach spec $elementhook($tag) {
+	    set func [lindex $spec 0]
+	    set code [catch {
+		uplevel #0 $func [list $jlibname $tag $xmldata]
+	    } ans]
+	    if {$code} {
+		bgerror "preshook $func failed: $code\n$::errorInfo"
+	    }
+	    if {[string equal $ans "1"]} {
+		set ishandled 1
+		break
+	    }
+	}
+    }
+    return $ishandled
+}
+
 # jlib::send_iq --
 #
 #       To send an iq (info/query) packet.
@@ -1767,7 +1993,6 @@ proc jlib::iq_set {jlibname xmlns args} {
 
 proc jlib::send_auth {jlibname username resource cmd args} {
 
-    upvar ${jlibname}::lib lib
     upvar ${jlibname}::locals locals
 
     set subelements [list  \
@@ -1793,7 +2018,10 @@ proc jlib::send_auth {jlibname username resource cmd args} {
       [list [namespace current]::invoke_iq_callback $jlibname $cmd]} $toopt
     
     # Cache our login jid.
-    set locals(myjid) ${username}@$lib(server)/${resource}
+    set locals(username) $username
+    set locals(resource) $resource
+    set locals(myjid2)   ${username}@$locals(server)
+    set locals(myjid)    ${username}@$locals(server)/${resource}
 }
 
 # jlib::register_get --
@@ -2126,7 +2354,7 @@ proc jlib::send_presence {jlibname args} {
     # Any of {available away dnd invisible unavailable}
     # Must be destined to login server (by default).
     if {![info exists argsArr(-to)] || \
-      [string equal $argsArr(-to) $lib(server)]} {
+      [string equal $argsArr(-to) $locals(server)]} {
 	set locals(status) $type
 	if {[info exists argsArr(-show)]} {
 	    set locals(status) $argsArr(-show)
@@ -2134,6 +2362,20 @@ proc jlib::send_presence {jlibname args} {
     }
     
     # Trap network errors.
+    set xml [wrapper::createxml $xmllist]
+    if {[catch {eval $lib(transportsend) {$xml}} err]} {
+	closestream $jlibname
+	return -code error $err	
+    }
+}
+
+# jlib::send --
+# 
+#       Sends general xml using a xmllist.
+
+proc jlib::send {jlibname xmllist} {
+    upvar ${jlibname}::lib lib
+    
     set xml [wrapper::createxml $xmllist]
     if {[catch {eval $lib(transportsend) {$xml}} err]} {
 	closestream $jlibname
@@ -2265,7 +2507,7 @@ proc jlib::parse_agent_get {jlibname jid cmd type subiq} {
 
 proc jlib::parse_agents_get {jlibname jid cmd type subiq} {
 
-    upvar ${jlibname}::lib lib
+    upvar ${jlibname}::locals locals
     upvar ${jlibname}::agent agent
     upvar [namespace current]::service::services services
 
@@ -2278,7 +2520,7 @@ proc jlib::parse_agents_get {jlibname jid cmd type subiq} {
 	default {
 	    
 	    # Be sure that the login jabber server is the root.
-	    if {[string equal $lib(server) $jid]} {
+	    if {[string equal $locals(server) $jid]} {
 		set agent($jid,parent) {}
 	    }
 	    # ???
@@ -2764,8 +3006,9 @@ proc jlib::schedule_keepalive {jlibname} {
     if {$opts(-keepalivesecs) && $lib(isinstream)} {
 	if {[catch {puts $lib(sock) "\n"} err]} {
 	    closestream $jlibname
-	    uplevel #0 $lib(clientcmd) $jlibname networkerror -body \
-	      "Network was disconnected"
+	    set errmsg "Network was disconnected"
+	    uplevel #0 $lib(clientcmd) [list $jlibname networkerror -body $errmsg]
+	      
 	    return
 	}
 	set locals(aliveid) [after [expr 1000 * $opts(-keepalivesecs)] \
@@ -2849,6 +3092,24 @@ proc jlib::getrecipientjid {jlibname jid} {
 	return $jid
     } else {
 	return $jid2
+    }
+}
+
+proc jlib::getlang {} {
+    
+    if {[catch {package require msgcat}]} {
+	return en
+    } else {
+	set lang [lindex [::msgcat::mcpreferences] end]
+    
+	switch -- $lang {
+	    "" - c - posix {
+		return en
+	    }
+	    default {
+		return $lang
+	    }
+	}
     }
 }
 

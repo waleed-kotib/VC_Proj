@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.79 2004-09-02 13:59:37 matben Exp $
+# $Id: Coccinella.tcl,v 1.80 2004-09-08 13:13:13 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -122,7 +122,7 @@ proc resolve_cmd_realpath {infile} {
 # default file, never read.
 set prefs(majorVers) 0
 set prefs(minorVers) 95
-set prefs(releaseVers) 0
+set prefs(releaseVers) 1
 set prefs(fullVers) $prefs(majorVers).$prefs(minorVers).$prefs(releaseVers)
 
 # We may be embedded in another application, say an ActiveX component.

@@ -11,7 +11,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: wrapper.tcl,v 1.8 2004-09-02 13:59:38 matben Exp $
+# $Id: wrapper.tcl,v 1.9 2004-09-08 13:13:14 matben Exp $
 # 
 # ########################### INTERNALS ########################################
 # 
@@ -71,7 +71,7 @@
 
 package provide wrapper 1.0
     
-# We have a dummy version number 99.0 as a workaround for the buggy tclxml20.dll
+# We have a dummy version number 99.0 as a workaround for the buggy tclparser.
 package require xml 99.0
 
 # For experiments...
@@ -185,7 +185,6 @@ proc wrapper::parse {id xml} {
     # This is not as innocent as it looks; the 'tcl' parser proc is created in
     # the creators namespace (wrapper::), but the 'expat' parser ???
     set parser $wrapper($id,parser)
-    #$parser parse $xml
     parsereentrant $parser $xml
     return {}
 }
@@ -608,6 +607,26 @@ proc wrapper::getattribute {xmllist attrname} {
 	}
     }
     return {}
+}
+
+proc wrapper::isattr {attrlist attrname} {
+
+    foreach {attr val} $attrlist {
+	if {[string equal $attr $attrname]} {
+	    return 1
+	}
+    }
+    return 0
+}
+
+proc wrapper::isattribute {xmllist attrname} {
+
+    foreach {attr val} [lindex $xmllist 1] {
+	if {[string equal $attr $attrname]} {
+	    return 1
+	}
+    }
+    return 0
 }
 
 proc wrapper::setattr {attrlist attrname value} {

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.100 2004-08-06 07:46:53 matben Exp $
+# $Id: Jabber.tcl,v 1.101 2004-09-08 13:13:14 matben Exp $
 
 package provide Jabber 1.0
 
@@ -800,7 +800,7 @@ proc ::Jabber::ClientProc {jlibName what args} {
     
     # For each 'what', split the argument list into the proper arguments,
     # and make the necessary calls.
-    array set attrArr $args
+    array set argsArr $args
     set ishandled 0
     
     switch -- $what {
@@ -831,17 +831,28 @@ proc ::Jabber::ClientProc {jlibName what args} {
 		::Jabber::SetStatus available
 	    }
 	}
+	streamerror {
+	    ::Jabber::DoCloseClientConnection
+	    if {[info exists argsArr(-errormsg)]} {
+		set msg "Receieved a fatal error:\
+		  $argsArr(-errormsg). The connection is closed."
+	    } else {
+		set msg "Receieved a fatal error. The connection is closed."
+	    }
+	    tk_messageBox -title [mc {Fatal Error}] -icon error -type ok \
+	      -message [FormatTextForMessageBox $msg]
+	}
 	xmlerror {
 	    
 	    # XML parsing error.
 	    # Disconnect. This should reset both wrapper and XML parser!
 	    ::Jabber::DoCloseClientConnection
-	    if {[info exists attrArr(-errormsg)]} {
+	    if {[info exists argsArr(-errormsg)]} {
 		set msg "Receieved a fatal XML parsing error:\
-		  $attrArr(-errormsg). The connection is closed down."
+		  $argsArr(-errormsg). The connection is closed down."
 	    } else {
-		set msg {Receieved a fatal XML parsing error.\
-		  The connection is closed down.}
+		set msg "Receieved a fatal XML parsing error.\
+		  The connection is closed down."
 	    }
 	    tk_messageBox -title [mc {Fatal Error}] -icon error -type ok \
 	      -message [FormatTextForMessageBox $msg]
@@ -851,7 +862,7 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	    # Disconnect. This should reset both wrapper and XML parser!
 	    ::Jabber::DoCloseClientConnection
 	    tk_messageBox -title [mc {Network Error}] \
-	      -message [FormatTextForMessageBox $attrArr(-body)] \
+	      -message [FormatTextForMessageBox $argsArr(-body)] \
 	      -icon error -type ok	    
 	}
     }
@@ -1042,7 +1053,6 @@ proc ::Jabber::EndSession { } {
 	    lappend opts -status $jprefs(logoutStatus)
 	}
 	catch {
-	    #::Jabber::SetStatus unavailable
 	    eval {$jstate(jlib) send_presence -type unavailable} $opts
 	}
 	

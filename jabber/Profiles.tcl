@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.26 2004-08-11 13:47:17 matben Exp $
+# $Id: Profiles.tcl,v 1.27 2004-09-08 13:13:14 matben Exp $
 
 package provide Profiles 1.0
 
@@ -464,12 +464,19 @@ proc ::Profiles::OptionsTabNotebook {w token} {
     if {!$prefs(tls)} {
 	$pageconn.cssl configure -state disabled
     }
+    checkbutton $pageconn.csasl -text " [mc {Use SASL authentization method}]" \
+      -variable $token\(sasl)   
+    if {![jlib::havesasl]} {
+	$pageconn.csasl configure -state disabled
+    }
     grid $pageconn.lip   $pageconn.eip  
     grid $pageconn.lport $pageconn.eport
     grid x               $pageconn.cssl
+    grid x               $pageconn.csasl
     grid $pageconn.lip $pageconn.lport -sticky e
     grid $pageconn.eip $pageconn.eport -sticky w
-    grid $pageconn.cssl -sticky w
+    grid $pageconn.cssl  -sticky w
+    grid $pageconn.csasl -sticky w
 
     # HTTP proxy. Still untested!
     if {0} {
@@ -524,6 +531,10 @@ proc ::Profiles::InitDefaultOptions { } {
     set defaultOptionsArr(ssl)  $jprefs(usessl)
     if {!$prefs(tls)} {
 	set defaultOptionsArr(ssl) 0
+    }
+    set defaultOptionsArr(sasl) 0
+    if {[catch {package require jlibsasl}]} {
+	set defaultOptionsArr(sasl) 0
     }
     set initedDefaultOptions 1
 }

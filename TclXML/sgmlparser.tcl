@@ -32,7 +32,7 @@
 # liability for all claims, expenses, losses, damages and costs any user may
 # incur as a result of using, copying or modifying the Software.
 #
-# $Id: sgmlparser.tcl,v 1.3 2004-09-02 13:59:38 matben Exp $
+# $Id: sgmlparser.tcl,v 1.4 2004-09-08 13:13:13 matben Exp $
 
 package require sgml 1.8
 
@@ -749,6 +749,11 @@ proc sgml::parseEvent {sgml args} {
 		# Syntax error
 	    	uplevel #0 $options(-errorcommand) [list syntaxerror "syntax error: closed/empty tag: tag $tag param $param empty $empty close $close around line $state(line)"]
 	    }
+	}
+	
+	# Mats: we could have been reset from any of the callbacks!
+	if {![info exists state(haveDocElement)]} {
+	    return {}
 	}
 
 	# Process character data
