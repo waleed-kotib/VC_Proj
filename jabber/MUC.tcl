@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.31 2004-04-21 13:21:12 matben Exp $
+# $Id: MUC.tcl,v 1.32 2004-04-22 13:48:43 matben Exp $
 
 package require entrycomp
 
@@ -106,6 +106,26 @@ proc ::Jabber::MUC::BuildEnter {args} {
     
     array set argsArr $args
 
+    #set confServers [$jstate(browse) getservicesforns  \
+    #  "http://jabber.org/protocol/muc"]
+    # We should only get services that provides muc!
+    set confServers {}
+    set allConfServ [$jstate(jlib) service getconferences]
+    foreach serv $allConfServ {
+	if {[$jstate(jlib) service hasfeature $serv  \
+	  "http://jabber.org/protocol/muc"]} {
+	    lappend confServers $serv
+	}
+    }
+
+    ::Jabber::Debug 2 "::Jabber::MUC::BuildEnter confServers='$confServers'; allConfServ=$allConfServ"
+
+    if {[llength $confServers] == 0} {
+	tk_messageBox -type ok -icon error -title "No Conference"  \
+	  -message "Failed to find any multi user chat service component"
+	return
+    }
+
     # State variable to collect instance specific variables.
     set token [namespace current]::enter[incr enteruid]
     variable $token
@@ -137,21 +157,7 @@ proc ::Jabber::MUC::BuildEnter {args} {
     set frtop $w.frall.top
     pack [frame $frtop] -side top -anchor w -padx 12
     label $frtop.lserv -text "[::msgcat::mc {Conference server}]:" 
-
-    #set confServers [$jstate(browse) getservicesforns  \
-    #  "http://jabber.org/protocol/muc"]
-    # We should only get services that provides muc!
-    set confServers {}
-    set allConfServ [$jstate(jlib) service getconferences]
-    foreach serv $allConfServ {
-	if {[$jstate(jlib) service hasfeature $serv  \
-	  "http://jabber.org/protocol/muc"]} {
-	    lappend confServers $serv
-	}
-    }
-
-    ::Jabber::Debug 2 "::Jabber::MUC::BuildEnter confServers='$confServers'; allConfServ=$allConfServ"
-
+    
     set wpopupserver $frtop.eserv
     set wpopuproom   $frtop.eroom
 
@@ -304,6 +310,12 @@ proc ::Jabber::MUC::FillRoomList {token} {
 	    lappend roomList $room
 	}
     }
+    if {[llength $roomList] == 0} {
+	tk_messageBox -type ok -icon error -title "No Rooms"  \
+	  -message "Failed to find any rooms at $enter(server)"
+	return
+    }
+    
     set roomList [lsort $roomList]
     $enter(wroommenu) delete 0 end
     foreach room $roomList {
@@ -366,7 +378,7 @@ proc ::Jabber::MUC::DoEnter {token} {
     }
     set roomJid [string tolower $enter(roomname)@$enter(server)]
     
-    ::Jabber::InvokeJlibCmd muc enter $roomJid $enter(nickname) -command \
+    $jstate(jlib) muc enter $roomJid $enter(nickname) -command \
       [list [namespace current]::EnterCallback]
     set enter(finished) 1
     catch {destroy $enter(w)}
