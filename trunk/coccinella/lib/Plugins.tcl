@@ -14,7 +14,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Plugins.tcl,v 1.9 2003-10-12 13:12:55 matben Exp $
+# $Id: Plugins.tcl,v 1.10 2004-01-09 14:08:22 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -1245,6 +1245,96 @@ proc ::Plugins::LoadAddon {fileName initProc} {
     
     uplevel #0 [list source $fileName]
     uplevel #0 $initProc
+}
+
+# Preference pages -------------------------------------------------------------
+
+namespace eval ::Plugins:: {
+    
+    ::hooks::add prefsInitHook          ::Plugins::InitPrefsHook
+    ::hooks::add prefsBuildHook         ::Plugins::BuildPrefsHook
+    ::hooks::add prefsUserDefaultsHook  ::Plugins::UserDefaultsHook
+    ::hooks::add prefsSaveHook          ::Plugins::SaveHook
+    ::hooks::add prefsCancelHook        ::Plugins::CancelHook
+}
+
+proc ::Plugins::InitPrefsHook { } {
+    global  prefs
+    
+    # Plugin ban list. Do not load these packages.
+    set prefs(pluginBanList) {}
+    
+    ::PreferencesUtils::Add [list  \
+      [list prefs(pluginBanList)   prefs_pluginBanList   $prefs(pluginBanList)]]
+}
+
+proc ::Plugins::BuildPrefsHook {wtree nbframe} {
+    
+    $wtree newitem {Whiteboard Plugins2} -text [::msgcat::mc Plugins]
+
+    set wpage [$nbframe page Plugins2]
+    ::Plugins::BuildPrefsPage $wpage
+}
+
+proc ::Plugins::BuildPrefsPage {page} {
+    global  prefs
+    
+    variable prefplugins
+    variable tmpPrefPlugins
+
+    # Conference (groupchat) stuff.
+    set labfr [::mylabelframe::mylabelframe $page.fr [::msgcat::mc {Plugin Control}]]
+    pack $page.fr -side top -anchor w -fill x
+    set pbl [frame $labfr.frin]
+    pack $pbl -padx 10 -pady 6 -side left
+    
+    label ${pbl}.lhead -wraplength 300 -anchor w -justify left \
+      -text [::msgcat::mc prefplugctrl]
+    pack ${pbl}.lhead -padx 0 -pady 2 -side top -anchor w
+    
+    set pfr [frame ${pbl}.frpl]
+    pack $pfr -side top -anchor w
+    set i 0
+    foreach plug [::Plugins::GetAllPackages platform] {
+	set icon [::Plugins::GetIconForPackage $plug 12]
+	if {$icon != ""} {
+	    label ${pfr}.i${i} -image $icon
+	    grid ${pfr}.i${i} -row $i -column 0 -sticky w
+	}
+	set tmpPrefPlugins($plug) [::Plugins::IsLoaded $plug]
+	set prefplugins($plug) $tmpPrefPlugins($plug)
+	checkbutton ${pfr}.c${i} -anchor w -text " $plug"  \
+	  -variable [namespace current]::tmpPrefPlugins($plug)
+	grid ${pfr}.c${i} -row $i -column 1 -padx 2 -sticky ew
+	incr i
+    }
+}
+
+proc ::Plugins::SaveHook { } {
+    global prefs
+    variable prefplugins
+
+    set banList {}
+    foreach name [array names prefplugins] {
+	if {$prefplugins($name) == 0} {
+	    lappend banList $name
+	}
+    }
+    set prefs(pluginBanList) [lsort -unique $banList]
+    catch {unset tmpPrefPlugins}
+}
+
+proc ::Plugins::CancelHook { } {
+    variable prefplugins
+    variable tmpPrefPlugins
+    
+    # Detect any changes.
+    foreach p [array names tmpPrefPlugins] {
+	if {$tmpPrefPlugins($p) != $prefplugins($p)} {
+	    ::Preferences::HasChanged
+	    return
+	}
+    }    
 }
 
 #-------------------------------------------------------------------------------

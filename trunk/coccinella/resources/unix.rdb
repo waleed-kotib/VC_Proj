@@ -15,6 +15,7 @@
 *Entry.Font:                         Helvetica -10
 *Label.Font:                         Helvetica -10
 *Listbox.Font:                       Helvetica -10
+*Menu.Font:                          Helvetica -10
 *Message.Font:                       Helvetica -10
 *Radiobutton.Font:                   Helvetica -10
 *Text.Font:                          Helvetica -10

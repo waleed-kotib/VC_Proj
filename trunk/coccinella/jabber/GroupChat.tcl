@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.33 2004-01-02 11:41:16 matben Exp $
+# $Id: GroupChat.tcl,v 1.34 2004-01-09 14:08:22 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -32,8 +32,8 @@ namespace eval ::Jabber::GroupChat:: {
     option add *GroupChat*theyTextForeground   ""               widgetDefault
     option add *GroupChat*theyTextBackground   ""               widgetDefault
     option add *GroupChat*theyTextFont         ""               widgetDefault
-    option add *GroupChat*sysPreForeground     green            widgetDefault
-    option add *GroupChat*sysForeground        green            widgetDefault
+    option add *GroupChat*sysPreForeground     #26b412          widgetDefault
+    option add *GroupChat*sysForeground        #26b412          widgetDefault
     option add *GroupChat*clockFormat          "%H:%M"          widgetDefault
       
     # List of: {tagName optionName resourceName resourceClass}

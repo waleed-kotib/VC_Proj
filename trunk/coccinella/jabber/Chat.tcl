@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.30 2004-01-07 14:57:34 matben Exp $
+# $Id: Chat.tcl,v 1.31 2004-01-09 14:08:22 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -34,8 +34,8 @@ namespace eval ::Jabber::Chat:: {
     option add *Chat*youTextForeground    ""                    widgetDefault
     option add *Chat*youTextBackground    ""                    widgetDefault
     option add *Chat*youTextFont          ""                    widgetDefault
-    option add *Chat*sysPreForeground     green                 widgetDefault
-    option add *Chat*sysForeground        green                 widgetDefault
+    option add *Chat*sysPreForeground     #26b412               widgetDefault
+    option add *Chat*sysForeground        #26b412               widgetDefault
     option add *Chat*histHeadForeground   ""                    widgetDefault
     option add *Chat*histHeadBackground   gray60                widgetDefault
     option add *Chat*histHeadFont         ""                    widgetDefault

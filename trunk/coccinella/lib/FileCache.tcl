@@ -6,7 +6,7 @@
 #
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #
-# $Id: FileCache.tcl,v 1.6 2004-01-07 14:57:34 matben Exp $
+# $Id: FileCache.tcl,v 1.7 2004-01-09 14:08:22 matben Exp $
 # 
 #       The input key can be: 
 #               1) a full url, must be uri encoded 
@@ -49,8 +49,10 @@ package provide FileCache 1.0
 namespace eval ::FileCache:: {
 
     # Define all hooks that is needed.
-    ::hooks::add prefsInitHook          ::FileCache::InitHook
-    ::hooks::add prefsBuildHook         ::FileCache::BuildHook
+    ::hooks::add initHook               ::FileCache::InitHook
+    ::hooks::add quitAppHook            ::FileCache::QuitHook
+    ::hooks::add prefsInitHook          ::FileCache::InitPrefsHook
+    ::hooks::add prefsBuildHook         ::FileCache::BuildPrefsHook
     ::hooks::add prefsUserDefaultsHook  ::FileCache::UserDefaultsHook
     ::hooks::add prefsSaveHook          ::FileCache::SaveHook
     ::hooks::add prefsCancelHook        ::FileCache::CancelHook
@@ -68,10 +70,29 @@ namespace eval ::FileCache:: {
     
     # Keep track of total size of cache in bytes (double).
     variable totbytes 0.0
-    variable maxbytes [expr 1e9]
+    variable maxbytes [expr 200e6]
     
     # Keep a time ordered list of keys.
     variable keylist {}
+}
+
+proc ::FileCache::InitHook { } {
+    global  prefs this
+        
+    # Init the file cache settings.
+    SetBasedir $this(path)
+    SetBestBefore $prefs(checkCache) $prefs(incomingPath)
+
+}
+
+proc ::FileCache::QuitHook { } {
+    global  prefs
+    
+    # Should we clean up our 'incoming' directory?
+    if {$prefs(clearCacheOnQuit)} {
+	catch {file delete -force -- $prefs(incomingPath)}
+	file mkdir $prefs(incomingPath)
+    }
 }
 
 proc ::FileCache::SetBasedir {dir} {
@@ -331,12 +352,16 @@ proc ::FileCache::Accept {locabspath} {
 }
 
 proc ::FileCache::ClearCache { } {
+    global  prefs
     variable cache
     
     foreach nkey [array names cache] {
 	catch {file delete $chache($nkey)}
     }
     catch {unset cache}
+
+    catch {file delete -force -- $prefs(incomingPath)}
+    file mkdir $prefs(incomingPath)
 }
 
 proc ::FileCache::Dump { } {
@@ -350,7 +375,7 @@ proc ::FileCache::Dump { } {
 
 #--- UI part etc ---------------------------------------------------------------
 
-proc ::FileCache::InitHook { } {
+proc ::FileCache::InitPrefsHook { } {
     global  prefs
     variable maxbytes
     
@@ -361,6 +386,7 @@ proc ::FileCache::InitHook { } {
 
     ::PreferencesUtils::Add [list  \
       [list prefs(checkCache)      prefs_checkCache      $prefs(checkCache)] \
+      [list prefs(incomingPath)    prefs_incomingPath    $prefs(incomingPath)] \
       [list prefs(cacheSize)       prefs_cacheSize       $prefs(cacheSize)]]
 
     if {[lsearch {always launch never} $prefs(checkCache)] < 0} {
@@ -368,7 +394,7 @@ proc ::FileCache::InitHook { } {
     }
 }
 
-proc ::FileCache::BuildHook {wtree nbframe} {
+proc ::FileCache::BuildPrefsHook {wtree nbframe} {
     
     $wtree newitem {Whiteboard {File Cache}} -text [::msgcat::mc {File Cache}]
 
@@ -389,10 +415,10 @@ proc ::FileCache::BuildPage {page} {
     set pca [::mylabelframe::mylabelframe $page.fr [::msgcat::mc {File Cache}]]
     pack $page.fr -side top -anchor w -ipadx 10 -ipady 6 -fill x
     message $pca.msg -width 300 -text [::msgcat::mc preffilecache]
-    pack $pca.msg -side top -anchor w
+    pack $pca.msg -side top -anchor w -pady 2
 
     set frca $pca.cas
-    pack [frame $frca] -fill x -padx 10 -pady 2
+    pack [frame $frca] -fill x -padx 10
     pack [label $frca.dsk -text "[::msgcat::mc {Disk Cache}]:"] -side left
     pack [entry $frca.emb -width 6  \
       -textvariable [namespace current]::tmpPrefs(mbsize)] -side left
@@ -402,7 +428,7 @@ proc ::FileCache::BuildPage {page} {
       -side right 
 
     set frfo $pca.fo
-    pack [frame $frfo] -fill x -padx 10 -pady 2
+    pack [frame $frfo] -fill x -padx 10
     pack [label $frfo.fo -text "[::msgcat::mc {Cache folder}]:"] -side left
     pack [button $frfo.bt -padx 6 -text "[::msgcat::mc {Choose}]..." \
       -command [namespace current]::SetCachePath -padx 12 -font $fontS]  \
@@ -443,8 +469,14 @@ proc ::FileCache::UserDefaultsHook { } {
 proc ::FileCache::SaveHook { } {
     global  prefs
     variable tmpPrefs
+    variable maxbytes
 
+    set maxbytes [expr 1e6 * double( $tmpPrefs(mbsize) )]
     set prefs(checkCache) $tmpPrefs(checkCache)
+    set prefs(cacheSize) $maxbytes
+    
+    # Reset file cache doesn't hurt.
+    SetBestBefore $prefs(checkCache) $prefs(incomingPath)
 }
 
 proc ::FileCache::CancelHook { } {

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.18 2003-12-29 09:02:30 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.19 2004-01-09 14:08:22 matben Exp $
 
 package require sha1pure
 
@@ -67,6 +67,148 @@ proc ::CanvasUtils::Init { } {
         regsub -all " " $user "" user
         set utagpref ${user}@${utagpref}
     }
+
+    # Popup menu definitions for the canvas. First definitions of individual entries.
+    variable menuDefs
+    
+    set menuDefs(pop,thickness)  \
+      {cascade     mThickness     {}                                       normal   {} {} {
+	{radio   1 {::CanvasUtils::ItemConfigure $w $id -width 1}          normal   {} \
+	  {-variable ::CanvasUtils::popupVars(-width)}}
+	{radio   2 {::CanvasUtils::ItemConfigure $w $id -width 2}          normal   {} \
+	  {-variable ::CanvasUtils::popupVars(-width)}}
+	{radio   4 {::CanvasUtils::ItemConfigure $w $id -width 4}          normal   {} \
+	  {-variable ::CanvasUtils::popupVars(-width)}}
+	{radio   6 {::CanvasUtils::ItemConfigure $w $id -width 6}          normal   {} \
+	  {-variable ::CanvasUtils::popupVars(-width)}}}
+    }
+    set menuDefs(pop,brushthickness)  \
+      {cascade     mBrushThickness  {}                                     normal   {} {} {
+	{radio   8 {::CanvasUtils::ItemConfigure $w $id -width 8}          normal   {} \
+	  {-variable ::CanvasUtils::popupVars(-brushwidth)}}
+	{radio  10 {::CanvasUtils::ItemConfigure $w $id -width 10}         normal   {} \
+	  {-variable ::CanvasUtils::popupVars(-brushwidth)}}
+	{radio  12 {::CanvasUtils::ItemConfigure $w $id -width 12}         normal   {} \
+	  {-variable ::CanvasUtils::popupVars(-brushwidth)}}
+	{radio  14 {::CanvasUtils::ItemConfigure $w $id -width 14}         normal   {} \
+	  {-variable ::CanvasUtils::popupVars(-brushwidth)}}}
+    }
+    set menuDefs(pop,arcs)  \
+      {cascade   mArcs             {}                                      normal   {} {} {
+	{radio   mPieslice         {}                                      normal   {} \
+	  {-value pieslice -variable ::CanvasUtils::popupVars(-arc)}}
+	{radio   mChord            {}                                      normal   {} \
+	  {-value chord -variable ::CanvasUtils::popupVars(-arc)}}
+	{radio   mArc              {}                                      normal   {} \
+	  {-value arc -variable ::CanvasUtils::popupVars(-arc)}}}
+    }
+    set menuDefs(pop,color)  \
+      {command   mColor        {::CanvasUtils::SetItemColorDialog $w $id -fill}  normal {}}
+    set menuDefs(pop,fillcolor)  \
+      {command   mFillColor    {::CanvasUtils::SetItemColorDialog $w $id -fill}  normal {}}
+    set menuDefs(pop,outline)  \
+      {command   mOutlineColor {::CanvasUtils::SetItemColorDialog $w $id -outline}  normal {}}
+    set menuDefs(pop,inspect)  \
+      {command   mInspectItem  {::ItemInspector::ItemInspector $wtop $id}   normal {}}
+    set menuDefs(pop,inspectqt)  \
+      {command   mInspectItem  {::ItemInspector::Movie $wtop $winfr}        normal {}}
+    set menuDefs(pop,saveimageas)  \
+      {command   mSaveImageAs  {::Import::SaveImageAsFile $w $id}    normal {}}
+    set menuDefs(pop,imagelarger)  \
+      {command   mImageLarger  {::Import::ResizeImage $wtop 2 $id auto}   normal {}}
+    set menuDefs(pop,imagesmaller)  \
+      {command   mImageSmaller {::Import::ResizeImage $wtop -2 $id auto}   normal {}}
+    set menuDefs(pop,exportimage)  \
+      {command   mExportImage  {::Import::ExportImageAsFile $w $id}  normal {}}
+    set menuDefs(pop,exportmovie)  \
+      {command   mExportMovie  {::Import::ExportMovie $wtop $winfr}  normal {}}
+    set menuDefs(pop,inspectbroken)  \
+      {command   mInspectItem  {::ItemInspector::Broken $wtop $id}          normal {}}
+    set menuDefs(pop,reloadimage)  \
+      {command   mReloadImage  {::Import::ReloadImage $wtop $id}     normal {}}
+    set menuDefs(pop,smoothness)  \
+      {cascade     mLineSmoothness   {}                                    normal   {} {} {
+	{radio None {::CanvasUtils::ItemConfigure $w $id -smooth 0 -splinesteps  0} normal {} \
+	  {-value 0 -variable ::CanvasUtils::popupVars(-smooth)}}
+	{radio 2    {::CanvasUtils::ItemConfigure $w $id -smooth 1 -splinesteps  2} normal {} \
+	  {-value 2 -variable ::CanvasUtils::popupVars(-smooth)}}
+	{radio 4    {::CanvasUtils::ItemConfigure $w $id -smooth 1 -splinesteps  4} normal {} \
+	  {-value 4 -variable ::CanvasUtils::popupVars(-smooth)}}
+	{radio 6    {::CanvasUtils::ItemConfigure $w $id -smooth 1 -splinesteps  6} normal {} \
+	  {-value 6 -variable ::CanvasUtils::popupVars(-smooth)}}
+	{radio 10   {::CanvasUtils::ItemConfigure $w $id -smooth 1 -splinesteps 10} normal {} \
+	  {-value 10 -variable ::CanvasUtils::popupVars(-smooth)}}}
+    }
+    set menuDefs(pop,smooth)  \
+      {checkbutton mLineSmoothness   {::CanvasUtils::ItemSmooth $w $id}    normal   {} \
+      {-variable ::CanvasUtils::popupVars(-smooth) -offvalue 0 -onvalue 1}}
+    set menuDefs(pop,straighten)  \
+      {command     mStraighten       {::CanvasUtils::ItemStraighten $w $id} normal   {} {}}
+    set menuDefs(pop,font)  \
+      {cascade     mFont             {}                                    normal   {} {} {}}
+    set menuDefs(pop,fontsize)  \
+      {cascade     mSize             {}                                    normal   {} {} {
+	{radio   1  {::CanvasUtils::SetTextItemFontSize $w $id 1}          normal   {} \
+	  {-variable ::CanvasUtils::popupVars(-fontsize)}}
+	{radio   2  {::CanvasUtils::SetTextItemFontSize $w $id 2}          normal   {} \
+	  {-variable ::CanvasUtils::popupVars(-fontsize)}}
+	{radio   3  {::CanvasUtils::SetTextItemFontSize $w $id 3}          normal   {} \
+	  {-variable ::CanvasUtils::popupVars(-fontsize)}}
+	{radio   4  {::CanvasUtils::SetTextItemFontSize $w $id 4}          normal   {} \
+	  {-variable ::CanvasUtils::popupVars(-fontsize)}}
+	{radio   5  {::CanvasUtils::SetTextItemFontSize $w $id 5}          normal   {} \
+	  {-variable ::CanvasUtils::popupVars(-fontsize)}}
+	{radio   6  {::CanvasUtils::SetTextItemFontSize $w $id 6}          normal   {} \
+	  {-variable ::CanvasUtils::popupVars(-fontsize)}}}
+    }
+    set menuDefs(pop,fontweight)  \
+      {cascade     mWeight           {}                                    normal   {} {} {
+	{radio   mNormal {::CanvasUtils::SetTextItemFontWeight $w $id normal} normal   {} \
+	  {-value normal -variable ::CanvasUtils::popupVars(-fontweight)}}
+	{radio   mBold {::CanvasUtils::SetTextItemFontWeight $w $id bold}  normal   {} \
+	  {-value bold   -variable ::CanvasUtils::popupVars(-fontweight)}}
+	{radio   mItalic {::CanvasUtils::SetTextItemFontWeight $w $id italic} normal   {} \
+	  {-value italic -variable ::CanvasUtils::popupVars(-fontweight)}}}
+    }	
+    set menuDefs(pop,speechbubble)  \
+      {command   mAddSpeechBubble  {::CanvasDraw::MakeSpeechBubble $w $id}   normal {}}
+    
+    # Dashes need a special build process.
+    set dashList {}
+    foreach dash [lsort -decreasing [array names ::WB::dashFull2Short]] {
+	set dashval $::WB::dashFull2Short($dash)
+	if {[string equal " " $dashval]} {
+	    set dopts {-value { } -variable ::CanvasUtils::popupVars(-dash)}
+	} else {
+	    set dopts [format {-value %s -variable ::CanvasUtils::popupVars(-dash)} $dashval]
+	}
+	lappend dashList [list radio $dash {} normal {} $dopts]
+    }
+    set menuDefs(pop,dash)  \
+      [list cascade   mDash          {}              normal   {} {} $dashList]
+    
+    # Now assemble menus from the individual entries above. List of which entries where.
+    array set menuArr {
+	arc        {thickness fillcolor outline dash arcs inspect}
+	brush      {brushthickness color smooth inspect}
+	image      {saveimageas imagelarger imagesmaller exportimage inspect}
+	line       {thickness dash smooth straighten inspect}
+	oval       {thickness outline fillcolor dash inspect}
+	pen        {thickness smooth inspect}
+	polygon    {thickness outline fillcolor dash smooth straighten inspect}
+	rectangle  {thickness fillcolor dash inspect}
+	text       {font fontsize fontweight color speechbubble inspect}
+	window     {}
+	qt         {inspectqt exportmovie}
+	snack      {}
+	broken     {inspectbroken reloadimage}
+    }
+    foreach name [array names menuArr] {
+	set menuDefs(pop,$name) {}
+	foreach key $menuArr($name) {
+	    lappend menuDefs(pop,$name) $menuDefs(pop,$key)
+	}
+    }    
 }
 
 # CanvasUtils::Command --
@@ -767,7 +909,7 @@ proc ::CanvasUtils::DoItemPopup {w x y} {
     global  prefs fontPoints2Size
     variable itemAfterId
     variable popupVars
-    upvar ::UI::menuDefs menuDefs
+    variable menuDefs
     
     Debug 2 "::CanvasUtils::DoItemPopup: w=$w"
 
@@ -801,7 +943,7 @@ proc ::CanvasUtils::DoItemPopup {w x y} {
     if {![winfo exists $m]} {	
 	::UI::NewMenu $wtop $m {} $menuDefs(pop,$type) normal -id $id -w $w
 	if {[string equal $type "text"]} {
-	    ::WB::BuildCanvasPopupFontMenu $w ${m}.mfont $id $prefs(canvasFonts)
+	    ::CanvasUtils::BuildCanvasPopupFontMenu $w ${m}.mfont $id $prefs(canvasFonts)
 	}
 	
 	# This one is needed on the mac so the menu is built before
@@ -811,14 +953,14 @@ proc ::CanvasUtils::DoItemPopup {w x y} {
     
     # Set actual values for this particular item.
     if {[regexp {arc|line|oval|rectangle|polygon} $type]} {
-	set ::UI::popupVars(-width) [expr int([$w itemcget $id -width])]
+	set popupVars(-width) [expr int([$w itemcget $id -width])]
 	set dashShort [$w itemcget $id -dash]
 	if {$dashShort == ""} {
 	    set dashShort " "
 	}
-	set ::UI::popupVars(-dash) $dashShort
+	set popupVars(-dash) $dashShort
 	if {!$prefs(haveDash)} {
-	    $m entryconfigure "*Dash*" -state disabled
+	    $m entryconfigure [msgcat::mc mDash] -state disabled
 	}
     }
     if {[regexp {line|polygon} $type]} {
@@ -826,17 +968,17 @@ proc ::CanvasUtils::DoItemPopup {w x y} {
 	if {[string equal $smooth "bezier"]} {
 	    set smooth 1
 	}
-	set ::UI::popupVars(-smooth) $smooth
+	set popupVars(-smooth) $smooth
     }
     if {[regexp {text} $type]} {
 	set fontOpt [$w itemcget $id -font]
 	if {[llength $fontOpt] >= 3} {
-	    set ::UI::popupVars(-fontfamily) [lindex $fontOpt 0]
+	    set popupVars(-fontfamily) [lindex $fontOpt 0]
 	    set pointSize [lindex $fontOpt 1]
 	    if {[info exists fontPoints2Size($pointSize)]} {
-		set ::UI::popupVars(-fontsize) $fontPoints2Size($pointSize)
+		set popupVars(-fontsize) $fontPoints2Size($pointSize)
 	    }
-	    set ::UI::popupVars(-fontweight) [lindex $fontOpt 2]
+	    set popupVars(-fontweight) [lindex $fontOpt 2]
 	}
     }
     
@@ -844,16 +986,26 @@ proc ::CanvasUtils::DoItemPopup {w x y} {
     tk_popup $m [expr int($x) - 10] [expr int($y) - 10]
 }
 
+proc ::CanvasUtils::BuildCanvasPopupFontMenu {w wmenu id allFonts} {
+
+    set mt $wmenu    
+    $mt delete 0 end
+    foreach afont $allFonts {
+	$mt add radio -label $afont -variable ::CanvasUtils::popupVars(-fontfamily)  \
+	  -command [list ::CanvasUtils::SetTextItemFontFamily $w $id $afont]
+    }
+}
+
 proc ::CanvasUtils::DoWindowPopup {w x y} {
     
     switch -- [winfo class $w] {
 	QTFrame {
 	    ::CanvasUtils::PostGeneralMenu $w $x $y .popupqt \
-	      $::UI::menuDefs(pop,qt)
+	      $menuDefs(pop,qt)
 	}
 	SnackFrame {
 	    ::CanvasUtils::PostGeneralMenu $w $x $y .popupsnack \
-	      $::UI::menuDefs(pop,snack)
+	      $menuDefs(pop,snack)
 	}
 	default {
 	    

@@ -38,10 +38,13 @@
 ::msgcat::mcset en Department
 ::msgcat::mcset en Description
 ::msgcat::mcset en Drawing
+::msgcat::mcset en Document
+::msgcat::mcset en Done
 ::msgcat::mcset en Edit
 ::msgcat::mcset en Enter
 ::msgcat::mcset en Error
 ::msgcat::mcset en Exit
+::msgcat::mcset en File
 ::msgcat::mcset en Finished
 ::msgcat::mcset en Forward
 ::msgcat::mcset en From
@@ -80,9 +83,11 @@
 ::msgcat::mcset en Print
 ::msgcat::mcset en Privacy
 ::msgcat::mcset en Profile
+::msgcat::mcset en Progress
 ::msgcat::mcset en Quit?
 ::msgcat::mcset en Quote
 ::msgcat::mcset en Register
+::msgcat::mcset en Remaining
 ::msgcat::mcset en Remove
 ::msgcat::mcset en Reply
 ::msgcat::mcset en Resource
@@ -245,7 +250,6 @@
 ::msgcat::mcset en mUpdateCheck  	{Update Check}
 ::msgcat::mcset en mReloadImage  	{Reload Image}
 
-::msgcat::mcset en mTakeSnapshot        {Take Snapshot...}
 
 # Popups
 ::msgcat::mcset en mMessage     	{Message...}
@@ -434,6 +438,7 @@
 ::msgcat::mcset en {Subscription Pending}
 ::msgcat::mcset en {Synthetic speech}
 ::msgcat::mcset en {System fonts}
+::msgcat::mcset en {Take Snapshot}
 ::msgcat::mcset en {Tel (voice)}
 ::msgcat::mcset en {Tel (fax)}
 ::msgcat::mcset en {This IP number}
@@ -454,6 +459,7 @@
 ::msgcat::mcset en {vCard Info}
 ::msgcat::mcset en {Version Info}
 ::msgcat::mcset en {Whiteboard fonts}
+::msgcat::mcset en {Writing file}
 
 
 # Splash screen:
@@ -921,6 +927,8 @@ Waiting for server response...}
 
 
 ::msgcat::mcset en autoupdatenot        {Do not automatically check for updates}
+::msgcat::mcset en oobmsg               {Let user %s download a file from your built\
+in server. The description is optional.}
 
 
 

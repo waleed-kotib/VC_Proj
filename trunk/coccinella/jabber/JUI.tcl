@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.19 2004-01-07 14:57:34 matben Exp $
+# $Id: JUI.tcl,v 1.20 2004-01-09 14:08:22 matben Exp $
 
 package provide JUI 1.0
 
@@ -953,14 +953,24 @@ proc ::Jabber::UI::SmileyMenuButton {w wtext} {
     set m [menu $wmenu -tearoff 0]
  
     if {$prefs(haveMenuImage)} {
+	set i 0
 	foreach name [array names smiley] {
-	    $m add command -image $smiley($name) \
-	      -command [list ::Jabber::UI::SmileyInsert $wtext $smiley($name) $name]
+	    set cmd [list ::Jabber::UI::SmileyInsert $wtext $smiley($name) $name]
+	    if {0} {
+		$m add command -image $smiley($name) -command $cmd
+	    } else {
+		set opts {-hidemargin 1}
+		if {$i && ([expr $i % 4] == 0)} {
+		    lappend opts -columnbreak 1
+		}
+		eval {$m add command -image $smiley($name) -command $cmd} $opts
+		incr i
+	    }
 	}
     } else {
 	foreach name [array names smiley] {
-	    $m add command -label $name \
-	      -command [list ::Jabber::UI::SmileyInsert $wtext $smiley($name) $name]
+	    set cmd [list ::Jabber::UI::SmileyInsert $wtext $smiley($name) $name]
+	    $m add command -label $name -command $cmd
 	}
     }
     return $w

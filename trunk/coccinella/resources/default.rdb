@@ -50,6 +50,7 @@
 *Tablelist.labelBackground:          #cecece
 *Tablelist.stripeBackground:         #dedeff
 *Tablelist.background:               white
+*Progressbar.borderWidth:            0
 
 ! specific megawidgets
 !

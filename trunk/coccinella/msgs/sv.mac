@@ -36,11 +36,14 @@
 ::msgcat::mcset sv Deny                 {Neka}
 ::msgcat::mcset sv Department	    	{Avdelning}
 ::msgcat::mcset sv Description          {Beskrivning}
+::msgcat::mcset sv Document		{Dokument}
+::msgcat::mcset sv Done			{Färdig}
 ::msgcat::mcset sv Drawing              {Rita}
 ::msgcat::mcset sv Edit 		{Redigera}
 ::msgcat::mcset sv Enter                {Enter}
 ::msgcat::mcset sv Error 		{Fel}
 ::msgcat::mcset sv Exit                 {Exit}
+::msgcat::mcset sv File			{Fil}
 ::msgcat::mcset sv Finished		{Klar}
 ::msgcat::mcset sv Forward              {Vidare}
 ::msgcat::mcset sv From 		{Från}
@@ -79,9 +82,11 @@
 ::msgcat::mcset sv Print 		{Utskrift}
 ::msgcat::mcset sv Privacy              {Integritet}
 ::msgcat::mcset sv Profile              {Profil}
+::msgcat::mcset sv Progress		{Framsteg}
 ::msgcat::mcset sv Quit?                {Avsluta?}
 ::msgcat::mcset sv Quote                {Citera}
 ::msgcat::mcset sv Register             {Registrera}
+::msgcat::mcset sv Remaining		{Återstående}
 ::msgcat::mcset sv Remove 		{Tag bort}
 ::msgcat::mcset sv Reply 		{Retur}
 ::msgcat::mcset sv Resource             {Resurs}
@@ -244,7 +249,6 @@
 ::msgcat::mcset sv mUpdateCheck  	{Uppdaterings koll}
 ::msgcat::mcset sv mReloadImage  	{Hämta bild igen}
 
-::msgcat::mcset sv mTakeSnapshot        {Ta skärmdump...}
 
 # Popups
 ::msgcat::mcset sv mMessage     	{Meddelande...}
@@ -433,6 +437,7 @@
 ::msgcat::mcset sv {Subscription Pending}  {Vilande prenumerationer}
 ::msgcat::mcset sv {Synthetic speech}      {Syntetiskt tal}
 ::msgcat::mcset sv {System fonts}          {Systemtypsnitt}
+::msgcat::mcset sv {Take Snapshot}	   {Ta skärmdump...}
 ::msgcat::mcset sv {Tel (voice)}  	   {Tele (vanlig)}
 ::msgcat::mcset sv {Tel (fax)}		   {Faxnummer}
 ::msgcat::mcset sv {This IP number}	   {Eget IP nummer}
@@ -453,6 +458,7 @@
 ::msgcat::mcset sv {vCard Info}		   {vCard Info}
 ::msgcat::mcset sv {Version Info}	   {Versions info}
 ::msgcat::mcset sv {Whiteboard fonts}      {Skrivtavlans typsnitt}
+::msgcat::mcset sv {Writing file}	   {Skriver fil}
 
 
 # Splash screen:
@@ -956,6 +962,8 @@ Väntar på serversvar...}
 
 
 ::msgcat::mcset sv autoupdatenot        {Leta ej automatiskt efter uppdatering}
+::msgcat::mcset sv oobmsg               {Låt användaren %s ladda ner en fil från\
+din inbyggda server. Beskrivningen är ej nödvändig.}
 
 
 # END --------------------------------------------------------------------------

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: PluginTextPlain.tcl,v 1.7 2003-12-13 17:54:41 matben Exp $
+# $Id: PluginTextPlain.tcl,v 1.8 2004-01-09 14:08:22 matben Exp $
 
 
 namespace eval ::TextImporter:: {
@@ -164,7 +164,7 @@ proc ::TextImporter::Import {wcan optListVar args} {
 
     if {[info exists optArr(-url)]} {
 	set name [::uriencode::decodefile  \
-	  [::Utils::GetFilePathFromUrl $optArr(-url)]]
+	  [file tail [::Utils::GetFilePathFromUrl $optArr(-url)]]]
     } else {
 	set name [file tail $fileName]
     }

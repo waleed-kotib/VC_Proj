@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.21 2004-01-06 15:59:23 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.22 2004-01-09 14:08:22 matben Exp $
 
 # SetWhiteboardFactoryState --
 # 
@@ -226,9 +226,6 @@ set prefs(voiceOther) ""
 set prefs(itemDir) [file join $this(path) items]
 set prefs(addonsDir) [file join $this(path) addons]
 
-# Plugin ban list. Do not load these packages.
-set prefs(pluginBanList) {}
-
 # File open/save initialdirs.
 set prefs(userDir) $this(path)
 
@@ -427,8 +424,6 @@ switch -- $this(platform) {
 	set prefs(userPrefsFilePath)  \
 	  [file nativename [file join $this(prefsPath) whiteboard]]
 	set prefs(oldPrefsFilePath) [file nativename ~/.whiteboard]
-	set prefs(incomingPath)  \
-	  [file nativename [file join $this(prefsPath) incoming]]
 	set prefs(inboxCanvasPath)  \
 	  [file nativename [file join $this(prefsPath) canvases]]
 	set prefs(historyPath)  \
@@ -440,7 +435,6 @@ switch -- $this(platform) {
 	set prefs(userPrefsFilePath)  \
 	  [file join $this(prefsPath) "Whiteboard Prefs"]
 	set prefs(oldPrefsFilePath) [file join $env(PREF_FOLDER) "Whiteboard Prefs"]
-	set prefs(incomingPath) [file join $this(prefsPath) Incoming]
 	set prefs(inboxCanvasPath) [file join $this(prefsPath) Canvases]
 	set prefs(historyPath) [file join $this(prefsPath) History]
 	set prefs(webBrowser) {Internet Explorer}
@@ -450,7 +444,6 @@ switch -- $this(platform) {
 	set prefs(userPrefsFilePath)  \
 	  [file join $this(prefsPath) "Whiteboard Prefs"]
 	set prefs(oldPrefsFilePath) $prefs(userPrefsFilePath)
-	set prefs(incomingPath) [file join $this(prefsPath) Incoming]
 	set prefs(inboxCanvasPath) [file join $this(prefsPath) Canvases]
 	set prefs(historyPath) [file join $this(prefsPath) History]
 	set prefs(webBrowser) {Safari}
@@ -459,7 +452,6 @@ switch -- $this(platform) {
 	set osprefs(mod) Control
 	set prefs(userPrefsFilePath) [file join $this(prefsPath) "WBPREFS.TXT"]
 	set prefs(oldPrefsFilePath) [file join C: "WBPREFS.TXT"]
-	set prefs(incomingPath) [file join $this(prefsPath) Incoming]
 	set prefs(inboxCanvasPath) [file join $this(prefsPath) Canvases]
 	set prefs(historyPath) [file join $this(prefsPath) History]
 	
@@ -467,6 +459,7 @@ switch -- $this(platform) {
 	set prefs(webBrowser) {C:/Program/Internet Explorer/IEXPLORE.EXE}
     }
 }
+set prefs(incomingPath) [file join $this(prefsPath) Incoming]
 
 # Make sure we've got the necessary directories.
 if {![file isdirectory $this(prefsPath)]} {
