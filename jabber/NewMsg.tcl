@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.55 2004-12-08 08:21:19 matben Exp $
+# $Id: NewMsg.tcl,v 1.56 2004-12-21 15:14:43 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -167,7 +167,7 @@ proc ::NewMsg::InitMultiAddress {wmulti} {
 #       shows window.
 
 proc ::NewMsg::Build {args} {
-    global  this prefs wDlgs osprefs
+    global  this prefs wDlgs
     
     variable locals  
     upvar ::Jabber::jstate jstate
@@ -420,7 +420,7 @@ $opts(-forwardmessage)"
     wm minsize $w 300 260
     wm maxsize $w 1200 1000
     
-    bind $w <$osprefs(mod)-Return> \
+    bind $w <$this(modkey)-Return> \
       [list [namespace current]::CommandReturnKeyPress $w]
     #bind $w <Destroy> [list [namespace current]::CloseDlg $w]
     wm protocol $w WM_DELETE_WINDOW [list [namespace current]::CloseDlg $w]

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.46 2004-12-20 15:16:44 matben Exp $
+# $Id: Disco.tcl,v 1.47 2004-12-21 15:14:42 matben Exp $
 
 package provide Disco 1.0
 
@@ -281,48 +281,52 @@ proc ::Disco::InfoCB {disconame type from subiq args} {
     upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::Disco::InfoCB type=$type, from=$from"
-    if {$type == "error"} {
-	::Jabber::AddErrorLog $from $subiq
-	AddServerErrorCheck $from
-	return
-    }
-    
-    # The info contains the name attribute (optional) which may
-    # need to be set since we get items before name.
-    # 
-    # BUT the items element may also have a name attribute???
-    if {![info exists wtree] || ![winfo exists $wtree]} {
-	return
-    }
+
     set from [jlib::jidmap $from]
-    set name [$jstate(disco) name $from]
-    
-    # Icon.
-    set cattype [lindex [$jstate(disco) types $from] 0]
-    set icon  ""
-    if {[info exists typeIcon($cattype)]} {
-	set icon $typeIcon($cattype)
-    }
-    
-    foreach v [$wtree find withtag $from] {
-	if {$name != ""} {
-	    $wtree itemconfigure $v -text $name
+    switch -- $type {
+	error {
+	    ::Jabber::AddErrorLog $from $subiq
+	    AddServerErrorCheck $from
 	}
-	if {$icon != ""} {
-	    $wtree itemconfigure $v -image $icon
+	ok - result {
+    
+	    # The info contains the name attribute (optional) which may
+	    # need to be set since we get items before name.
+	    # 
+	    # BUT the items element may also have a name attribute???
+	    if {![info exists wtree] || ![winfo exists $wtree]} {
+		return
+	    }
+	    set name [$jstate(disco) name $from]
+	    
+	    # Icon.
+	    set cattype [lindex [$jstate(disco) types $from] 0]
+	    set icon  ""
+	    if {[info exists typeIcon($cattype)]} {
+		set icon $typeIcon($cattype)
+	    }
+	    
+	    foreach v [$wtree find withtag $from] {
+		if {$name != ""} {
+		    $wtree itemconfigure $v -text $name
+		}
+		if {$icon != ""} {
+		    $wtree itemconfigure $v -image $icon
+		}
+		set treectag [$wtree itemconfigure $v -canvastags]
+		MakeBalloonHelp $from $treectag
+	    }
+	    SetDirItemUsingCategory $from
+	    
+	    # Use specific (discoInfoGatewayIcqHook, discoInfoServerImHook,...) 
+	    # and general (discoInfoHook) hooks.
+	    set ct [split $cattype /]
+	    set hookName [string totitle [lindex $ct 0]][string totitle [lindex $ct 1]]
+	    
+	    eval {::hooks::run discoInfo${hookName}Hook $type $from $subiq} $args
+	    eval {::hooks::run discoInfoHook $type $from $subiq} $args
 	}
-	set treectag [$wtree itemconfigure $v -canvastags]
-	MakeBalloonHelp $from $treectag
     }
-    SetDirItemUsingCategory $from
-    
-    # Use specific (discoInfoGatewayIcqHook, discoInfoServerImHook,...) 
-    # and general (discoInfoHook) hooks.
-    set ct [split $cattype /]
-    set hookName [string totitle [lindex $ct 0]][string totitle [lindex $ct 1]]
-    
-    eval {::hooks::run discoInfo${hookName}Hook $type $from $subiq} $args
-    eval {::hooks::run discoInfoHook $type $from $subiq} $args
 }
 
 proc ::Disco::SetDirItemUsingCategory {jid} {
@@ -1089,9 +1093,12 @@ proc ::Disco::InfoResultCB {type jid subiq args} {
 
 proc ::Disco::AutoDiscoServers { } {
     upvar ::Jabber::jprefs jprefs
+    upvar ::Jabber::jserver jserver
     
     foreach server $jprefs(disco,autoServers) {
-	DiscoServer $server
+	if {![jlib::jidequal $server $jserver(this]} {
+	    DiscoServer $server
+	}
     }
 }
 

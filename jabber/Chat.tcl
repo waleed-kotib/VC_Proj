@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.102 2004-12-12 14:55:19 matben Exp $
+# $Id: Chat.tcl,v 1.103 2004-12-21 15:14:42 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -760,7 +760,7 @@ proc ::Chat::Build {threadID args} {
 #       chattoken
 
 proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
-    global  wDlgs prefs osprefs
+    global  wDlgs prefs this
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
 
@@ -947,7 +947,7 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
 
     bind $wtextsnd <Return>  \
       [list [namespace current]::ReturnKeyPress $chattoken]    
-    bind $wtextsnd <$osprefs(mod)-Return> \
+    bind $wtextsnd <$this(modkey)-Return> \
       [list [namespace current]::CommandReturnKeyPress $chattoken]
     
     focus $wtextsnd

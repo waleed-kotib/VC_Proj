@@ -855,6 +855,8 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en jadirpresmsg {Send directed presence to the user "%s".}
 ::msgcat::mcset en jatlsnegot   {Negotiating TLS security...}
 ::msgcat::mcset en jamucentermsg {Enter your nick name and press Enter to go into the room. You may Browse to get the available rooms for the specific service.	Members only room may require a password.}
+::msgcat::mcset en jainmsgshow  {Show incoming messages in this window}
+
 
 
 # Setup assistant:

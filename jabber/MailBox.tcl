@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.62 2004-12-02 08:22:34 matben Exp $
+# $Id: MailBox.tcl,v 1.63 2004-12-21 15:14:43 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -654,6 +654,19 @@ proc ::MailBox::GotMsg {bodytxt args} {
     upvar ::Jabber::jprefs jprefs
     
     ::Debug 2 "::MailBox::GotMsg args='$args'"
+    
+    # Ignore messages with empty body and subject. 
+    # They are probably not for display.
+    if {$bodytxt == ""} {
+	array set argsArr $args
+	if {[info exists argsArr(-subject)]} {
+	    if {$argsArr(-subject) == ""} {
+		return
+	    }
+	} else {
+	    return
+	}
+    }
     
     # Non whiteboard 'normal' messages treated as chat messages.
     if {$jprefs(chat,normalAsChat)} {

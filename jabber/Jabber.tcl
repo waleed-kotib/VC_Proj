@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.122 2004-12-13 13:39:17 matben Exp $
+# $Id: Jabber.tcl,v 1.123 2004-12-21 15:14:42 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -562,39 +562,39 @@ proc ::Jabber::MessageCallback {jlibName type args} {
     
     ::Debug 2 "::Jabber::MessageCallback type=$type, args='$args'"
     
-    array set attrArr {-body ""}
-    array set attrArr $args
+    array set argsArr {-body ""}
+    array set argsArr $args
     
-    set from $attrArr(-from)
+    set from $argsArr(-from)
         
     switch -- $type {
 	error {
 	    
 	    # We must check if there is an error element sent along with the
 	    # body element. In that case the body element shall not be processed.
-	    if {[info exists attrArr(-error)]} {
-		set errcode [lindex $attrArr(-error) 0]
-		set errmsg [lindex $attrArr(-error) 1]
+	    if {[info exists argsArr(-error)]} {
+		set errcode [lindex $argsArr(-error) 0]
+		set errmsg [lindex $argsArr(-error) 1]
 		
 		::UI::MessageBox -title [mc Error] \
-		  -message [mc jamesserrsend $attrArr(-from) $errcode $errmsg] \
+		  -message [mc jamesserrsend $argsArr(-from) $errcode $errmsg] \
 		  -icon error -type ok		
 	    }
 	    eval {::hooks::run newErrorMessageHook} $args
 	}
 	chat {
-	    eval {::hooks::run newChatMessageHook $attrArr(-body)} $args
+	    eval {::hooks::run newChatMessageHook $argsArr(-body)} $args
 	}
 	groupchat {
-	    eval {::hooks::run newGroupChatMessageHook $attrArr(-body)} $args
+	    eval {::hooks::run newGroupChatMessageHook $argsArr(-body)} $args
 	}
 	headline {
-	    eval {::hooks::run newHeadlineMessageHook $attrArr(-body)} $args
+	    eval {::hooks::run newHeadlineMessageHook $argsArr(-body)} $args
 	}
 	default {
 	    
 	    # Normal message. Handles whiteboard stuff as well.
-	    eval {::hooks::run newMessageHook $attrArr(-body)} $args
+	    eval {::hooks::run newMessageHook $argsArr(-body)} $args
 	}
     }
 }
@@ -619,8 +619,8 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
     
     ::Debug 2 "::Jabber::PresenceCallback type=$type, args='$args'"
     
-    array set attrArr $args
-    set from $attrArr(-from)
+    array set argsArr $args
+    set from $argsArr(-from)
     
     switch -- $type {
 	subscribe {
@@ -741,8 +741,8 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 	    set sub [$jstate(roster) getsubscription $from]
 	    if {$sub == "none"} {
 		set msg [mc jamessfailedsubsc $from]
-		if {[info exists attrArr(-status)]} {
-		    append msg " Status message: $attrArr(-status)"
+		if {[info exists argsArr(-status)]} {
+		    append msg " Status message: $argsArr(-status)"
 		}
 		::UI::MessageBox -title [mc {Subscription Failed}]  \
 		  -icon info -type ok  \
@@ -759,7 +759,7 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 	    }
 	}
 	error {
-	    foreach {errcode errmsg} $attrArr(-error) break		
+	    foreach {errcode errmsg} $argsArr(-error) break		
 	    set msg [mc jamesserrpres $errcode $errmsg]
 	    if {$prefs(talkative)} {
 		::UI::MessageBox -icon error -type ok  \

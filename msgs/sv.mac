@@ -861,6 +861,7 @@ kan ha speciella krav.}
 ::msgcat::mcset sv jatlsnegot   {Förhandlar om TLS säkerhet...}
 ::msgcat::mcset sv jamucentermsg {Skriv in ditt kortnamn och tryck på Enter för att gå in i rummet. Du kan "browsa" för att få alla tillgängliga rum för en tjänst.\
 Vissa rum kan kräva medlemskap och lösenord.}
+::msgcat::mcset sv jainmsgshow  {Visa inkommande meddelanden i detta fönster}
 
 
 

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.38 2004-12-06 15:26:56 matben Exp $
+# $Id: Utils.tcl,v 1.39 2004-12-21 15:15:08 matben Exp $
 
 namespace eval ::Utils:: {
 
@@ -570,21 +570,6 @@ proc ::Text::UrlEnter {w tag fgcol} {
 proc ::Text::UrlLeave {w tag fgcol} {
     $w configure -cursor arrow
     $w tag configure $tag -foreground $fgcol -underline 1
-}
-
-# Text::URLLabel --
-#
-#       An url widget.
-
-proc ::Text::URLLabel {w url args} {
-    
-    array set opts [list -height 1 -width [string length $url] -bd 0   \
-      -wrap word -highlightthickness 0]
-    array set opts $args
-    eval {text $w} [array get opts]
-    ParseUrl $w $url 
-    
-    return $w
 }
 
 # Text::InsertURL --

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.83 2004-12-20 11:15:03 matben Exp $
+# $Id: UI.tcl,v 1.84 2004-12-21 15:14:43 matben Exp $
 
 package require entrycomp
 package require alertbox
@@ -53,7 +53,7 @@ proc ::UI::Init {} {
 }
 
 proc ::UI::InitCommonBinds { } {
-    global  this osprefs
+    global  this
     
     # A mechanism to set -state of cut/copy/paste. Not robust!!!
     # All selections are not detected (shift <- -> etc).
@@ -76,11 +76,11 @@ proc ::UI::InitCommonBinds { } {
 }
 
 proc ::UI::InitVirtualEvents { } {
-    global  this osprefs
+    global  this
     
     
     # Virtual events.
-    event add <<CloseWindow>> <$osprefs(mod)-Key-w>
+    event add <<CloseWindow>> <$this(modkey)-Key-w>
 
     switch -- $this(platform) {
 	macosx {
@@ -316,7 +316,7 @@ namespace eval ::UI:: {
 #       -usemacmainmenu
 
 proc ::UI::Toplevel {w args} {
-    global  this osprefs
+    global  this
     variable topcache
     
     array set argsArr {
@@ -363,7 +363,7 @@ proc ::UI::Toplevel {w args} {
 	    MacUseMainMenu $w
 	}
     } else {
-	#bind $w <$osprefs(mod)-Key-w> [list ::UI::DoCloseWindow $w]
+	#bind $w <$this(modkey)-Key-w> [list ::UI::DoCloseWindow $w]
 	bind $w <<CloseWindow>> [list ::UI::DoCloseWindow $w]
     }
     ::hooks::run newToplevelWindowHook $w
@@ -697,7 +697,7 @@ proc ::UI::NewMenu {wtop wmenu label menuSpec state args} {
 #       $wmenu
 
 proc ::UI::BuildMenu {wtop wmenu label menuDef state args} {
-    global  this wDlgs prefs osprefs
+    global  this wDlgs prefs
 
     variable menuKeyToIndex
     variable menuNameToWmenu
@@ -731,7 +731,7 @@ proc ::UI::BuildMenu {wtop wmenu label menuDef state args} {
 	bind ${wmenu}la <Button-1> [list ::UI::DoTopMenuPopup %W $wtop $wmenu]
     }
     
-    set mod $osprefs(mod)
+    set mod $this(modkey)
     set i 0
     foreach line $menuDef {
 	foreach {type name cmd mstate accel mopts subdef} $line {
@@ -833,7 +833,7 @@ proc ::UI::FreeMenu {wtop} {
 #       binds to toplevel changed
 
 proc ::UI::MenuMethod {wmenu cmd key args} {
-    global  this prefs wDlgs osprefs
+    global  this prefs wDlgs
             
     variable menuKeyToIndex
     variable mapWmenuToWtop
@@ -885,9 +885,9 @@ proc ::UI::MenuMethod {wmenu cmd key args} {
 		      [string tolower $acc]]
 		    foreach w $topw {
 			if {[string equal $val "normal"]} {
-			    bind $w <$osprefs(mod)-Key-${acckey}> $mcmd
+			    bind $w <$this(modkey)-Key-${acckey}> $mcmd
 			} else {
-			    bind $w <$osprefs(mod)-Key-${acckey}> {}
+			    bind $w <$this(modkey)-Key-${acckey}> {}
 			}
 		    }
 		}
@@ -908,7 +908,7 @@ proc ::UI::MenuMethod {wmenu cmd key args} {
 #       none
 
 proc ::UI::MacUseMainMenu {w} {
-    global  this osprefs
+    global  this
     variable mapWmenuToWtop
     variable cachedMenuSpec
     variable menuKeyToIndex
@@ -946,8 +946,8 @@ proc ::UI::MacUseMainMenu {w} {
 		    if {[string equal $state "normal"]} {
 			set acckey [string map {< less > greater}  \
 			  [string tolower $accel]]
-			bind $w <$osprefs(mod)-Key-${acckey}> [lindex $line 2]
-			#bind $w <$osprefs(mod)-Key-${acckey}> \
+			bind $w <$this(modkey)-Key-${acckey}> [lindex $line 2]
+			#bind $w <$this(modkey)-Key-${acckey}> \
 			 # [list $wmenu invoke $mind]
 		    }
 		}
@@ -1204,6 +1204,39 @@ proc ::UI::OpenCanvasInfoFile {wtop theFile} {
     }
 }
 
+# UI::LabelButton --
+# 
+#       A html link type button from a label widget.
+
+proc ::UI::LabelButton {w args} {
+
+    array set eopts {
+	-command          {}
+    }
+    array set lopts {
+	-foreground       blue
+	-activeforeground red
+    }    
+    foreach {key value} $args {	
+	switch -- $key {
+	    -command {
+		set eopts($key) $value
+	    }
+	    default {
+		set lopts($key) $value
+	    }
+	}
+    }    
+    eval {label $w} [array get lopts]
+    set cursor [$w cget -cursor]
+    array set fontArr [font actual [$w cget -font]]
+    set fontArr(-underline) 1
+    $w configure -font [array get fontArr]
+    bind $w <Button-1> $eopts(-command)
+    bind $w <Enter> [list $w configure -fg $lopts(-activeforeground) -cursor hand2]
+    bind $w <Leave> [list $w configure -fg $lopts(-foreground) -cursor $cursor]
+    return $w
+}
 
 namespace eval ::UI:: {
     
