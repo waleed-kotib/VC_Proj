@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Sounds.tcl,v 1.1.1.1 2002-12-08 11:04:28 matben Exp $
+# $Id: Sounds.tcl,v 1.2 2003-05-18 13:20:22 matben Exp $
 
 package provide Sounds 1.0
 
@@ -38,20 +38,20 @@ proc ::Sounds::Init { } {
     set allSoundFiles {}
     
     foreach f $allSounds {
-        if {$::privariaFlag} {
-            lappend allSoundFiles [file join c:/ PRIVARIA media]
-        } else {
-	lappend allSoundFiles [file join $this(path) sounds ${f}.${suff}]
+	if {$::privariaFlag} {
+	    lappend allSoundFiles [file join c:/ PRIVARIA media]
+	} else {
+	    lappend allSoundFiles [file join $this(path) sounds ${f}.${suff}]
+	}
     }
-    }
-    if {$prefs(QuickTimeTcl)} {
+    if {[::Plugins::HavePackage QuickTimeTcl]} {
 	
 	# Should never be mapped.
 	frame .fake
 	foreach f $allSoundFiles m $allSounds {
 	    movie .fake.$m -file $f -controller 0
 	}
-    } elseif {$prefs(snack)} {
+    } elseif {[::Plugins::HavePackage snack]} {
 	foreach f $allSoundFiles m $allSounds {
 	    snack::sound $m -load $f
 	}
@@ -68,9 +68,9 @@ proc ::Sounds::Play {snd} {
     if {!$jprefs(snd,$snd)} {
 	return
     }
-    if {$prefs(QuickTimeTcl)} {
+    if {[::Plugins::HavePackage QuickTimeTcl]} {
 	.fake.${snd} play
-    } elseif {$prefs(snack)} {
+    } elseif {[::Plugins::HavePackage snack]} {
 	$snd play
     }
 }

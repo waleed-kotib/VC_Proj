@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Network.tcl,v 1.3 2003-04-28 13:32:32 matben Exp $
+# $Id: Network.tcl,v 1.4 2003-05-18 13:20:21 matben Exp $
 
 namespace eval ::Network:: {
     
@@ -40,7 +40,7 @@ proc ::Network::OpenConnection {nameOrIP port cmd args} {
 	puts "::Network::OpenConnection, nameOrIP=$nameOrIP, port=$port"
     }
     array set opts {
-	-timeout 60
+	-timeout 0
 	-tls     0
     }
     array set opts $args
@@ -53,7 +53,7 @@ proc ::Network::OpenConnection {nameOrIP port cmd args} {
     # Try opening socket async.
     if {[catch {eval $socketCmd {-async $nameOrIP $port}} sock]} {
 	uplevel #0 "$cmd [list {} $nameOrIP $port error $sock]"
-	return {}
+	return ""
     }
     
     # Write/read line by line.
@@ -74,8 +74,11 @@ proc ::Network::OpenConnection {nameOrIP port cmd args} {
       $port $cmd $opts(-tls)]
     
     # Set up timer event for timeouts.
-    OpenConnectionScheduleKiller $sock $cmd
-    return {}
+    if {$opts(-timeout) > 0} {
+	::Network::ScheduleKiller $sock $cmd
+    }
+    
+    return ""
 }
 
 # Network::WhenSocketOpensInits --
@@ -143,7 +146,7 @@ proc ::Network::WhenSocketOpensInits {sock nameOrIP port cmd tls} {
     uplevel #0 "$cmd [list $sock $nameOrIP $port ok]"
 }
 
-# OpenConnectionScheduleKiller, OpenConnectionKill --
+# ScheduleKiller, Kill --
 #
 #       Cancel 'OpenConnection' process if timeout.
 #       Should probably go in ::OpenConnection:: in the future.
@@ -155,7 +158,7 @@ proc ::Network::WhenSocketOpensInits {sock nameOrIP port cmd tls} {
 #       
 # Results:
 
-proc ::Network::OpenConnectionScheduleKiller {sock cmd} {  
+proc ::Network::ScheduleKiller {sock cmd} {  
     variable killerId    
     variable opts
 
@@ -163,10 +166,10 @@ proc ::Network::OpenConnectionScheduleKiller {sock cmd} {
 	after cancel $killerId($sock)
     }
     set killerId($sock) [after [expr 1000*$opts(-timeout)]   \
-      [list [namespace current]::OpenConnectionKill $sock $cmd]]
+      [list [namespace current]::Kill $sock $cmd]]
 }
 
-proc ::Network::OpenConnectionKill {sock cmd} {    
+proc ::Network::Kill {sock cmd} {    
     variable killerId    
 
     catch {close $sock}
@@ -179,12 +182,12 @@ proc ::Network::OpenConnectionKill {sock cmd} {
     uplevel #0 "$cmd [list $sock {} {} timeout]"
 }
 
-# Network::OpenConnectionKillAll --
+# Network::KillAll --
 #
 #       Kills all pending open states.
 #       Should probably go in ::OpenConnection:: in the future.
 
-proc ::Network::OpenConnectionKillAll { } {
+proc ::Network::KillAll { } {
     variable killerId
 
     foreach sock [array names killerId] {

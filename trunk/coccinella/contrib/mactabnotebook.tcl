@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: mactabnotebook.tcl,v 1.2 2003-04-28 13:32:25 matben Exp $
+# $Id: mactabnotebook.tcl,v 1.3 2003-05-18 13:20:19 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -747,7 +747,7 @@ proc ::mactabnotebook::Display {w name {opt {}}} {
 proc ::mactabnotebook::DestroyHandler {w} {
     
     # Remove the namespace with the widget.
-    if {[string compare [winfo class $w] {MacTabnotebook}] == 0} {
+    if {[string equal [winfo class $w] "MacTabnotebook"]} {
 	namespace delete ::mactabnotebook::${w}
     }
 }

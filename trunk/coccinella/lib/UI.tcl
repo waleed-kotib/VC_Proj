@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.8 2003-04-28 13:32:34 matben Exp $
+# $Id: UI.tcl,v 1.9 2003-05-18 13:20:22 matben Exp $
 
 # LabeledFrame --
 #
@@ -194,33 +194,29 @@ proc ::UI::Init {} {
 	  -file [file join $this(path) images ${fname}Dis.gif]]
     }	
 	
-    foreach iconFile {resizehandle bluebox contact_off contact_on wave}  \
-      name {im_handle bluebox contact_off contact_on im_wave} {
-	set icons($name) [image create photo $name -format gif  \
+    foreach iconFile {resizehandle bluebox contact_off contact_on wave} {
+	set icons($iconFile) [image create photo -format gif  \
 	  -file [file join $this(path) images $iconFile.gif]]
     }
     set icons(bwrect) [image create photo bwrect -format gif  \
       -file [file join $this(path) images transparent_rect.gif]]
     
     # Icons for the mailbox.
-    set readmsgdata {
+    set icons(readMsg) [image create photo -data {
 R0lGODdhDgAKAKIAAP/////xsOjboMzMzHNzc2NjzjExYwAAACwAAAAADgAK
-AAADJli6vFMhyinMm1NVAkPzxdZhkhh9kUmWBie8cLwZdG3XxEDsfM8nADs=}
-
-    set unreadmsgdata {
+AAADJli6vFMhyinMm1NVAkPzxdZhkhh9kUmWBie8cLwZdG3XxEDsfM8nADs=
+}]
+    set icons(unreadMsg) [image create photo -data {
 R0lGODdhDgAKALMAAP/////xsOjboMzMzIHzeXNzc2Njzj7oGzXHFzExYwAA
 AAAAAAAAAAAAAAAAAAAAACwAAAAADgAKAAAENtBIcpC8cpgQKOKgkGicB0pi
-QazUUQVoUhhu/YXyZoNcugUvXsAnKBqPqYRyyVwWBoWodCqNAAA7}
-
-    set wbicon {
+QazUUQVoUhhu/YXyZoNcugUvXsAnKBqPqYRyyVwWBoWodCqNAAA7
+}]
+    set icons(wbicon) [image create photo -data {
 R0lGODdhFQANALMAAP/////n5/9ze/9CQv8IEOfn/8bO/621/5ycnHN7/zlK
 /wC9AAAQ/wAAAAAAAAAAACwAAAAAFQANAAAEWrDJSWtFDejN+27YZjAHt5wL
 B2aaopAbmn4hMBYH7NGskmi5kiYwIAwCgJWNUdgkGBuBACBNhnyb4IawtWaY
-QJ2GO/YCGGi0MDqtKnccohG5stgtiLx+z+8jIgA7}	
-
-    set icons(readMsg) [image create photo -data $readmsgdata]
-    set icons(unreadMsg) [image create photo -data $unreadmsgdata]
-    set icons(wbicon) [image create photo -data $wbicon]
+QJ2GO/YCGGi0MDqtKnccohG5stgtiLx+z+8jIgA7	
+}]
     set icons(wboard) [image create photo -format gif \
       -file [file join $this(path) images wb.gif]]
     
@@ -517,7 +513,7 @@ proc ::UI::InitMenuDefs { } {
     }
     
     # Make platform specific things and special menus etc. Indices!!! BAD!
-    if {$haveAppleMenu && !$prefs(QuickTimeTcl)} {
+    if {$haveAppleMenu && ![::Plugins::HavePackage QuickTimeTcl]} {
 	lset menuDefs(main,apple) 1 3 disabled
     }
     if {[string equal $prefs(protocol) "jabber"]} {
@@ -525,11 +521,7 @@ proc ::UI::InitMenuDefs { } {
     } else {
 	lset menuDefs(main,file) 0 3 disabled
     }
-    if {[string equal $prefs(protocol) "client"] ||   \
-      [string equal $prefs(protocol) "central"]} {
-	lset menuDefs(main,file) 3 3 disabled
-    }
-    if {!$prefs(QuickTimeTcl)} {
+    if {![::Plugins::HavePackage QuickTimeTcl]} {
 	lset menuDefs(main,file) 5 3 disabled
     }
     if {!$prefs(haveDash)} {
@@ -538,7 +530,7 @@ proc ::UI::InitMenuDefs { } {
     if {!$haveAppleMenu} {
 	lappend menuDefs(main,info) $menuDefs(main,info,aboutwhiteboard)
     }
-    if {!$haveAppleMenu && $prefs(QuickTimeTcl)} {
+    if {!$haveAppleMenu && [::Plugins::HavePackage QuickTimeTcl]} {
 	lappend menuDefs(main,info) $menuDefs(main,info,aboutquicktimetcl)
     }
 	    
@@ -572,9 +564,9 @@ proc ::UI::InitMenuDefs { } {
 	{command     mChat          {::Jabber::Chat::StartThreadDlg .jchat} disabled {}}
 	{cascade     mStatus        {}                                      disabled {} {} {}}
 	{separator}
-	{command     mEnterRoom     {::Jabber::GroupChat::EnterRoom $wDlgs(jenterroom)} disabled {}}
+	{command     mEnterRoom     {::Jabber::GroupChat::EnterOrCreate $wDlgs(jenterroom) enter} disabled {}}
 	{cascade     mExitRoom      {}                                    disabled {} {} {}}
-	{command     mCreateRoom    {::Jabber::GroupChat::CreateRoom $wDlgs(jcreateroom)} disabled {}}
+	{command     mCreateRoom    {::Jabber::GroupChat::EnterOrCreate $wDlgs(jcreateroom) create} disabled {}}
 	{separator}
 	{command     mvCard         {::VCard::Fetch .jvcard own}          disabled {}}
 	{separator}
@@ -590,7 +582,7 @@ proc ::UI::InitMenuDefs { } {
 
     # The status menu is built dynamically due to the -image options on 8.4.
     if {!$prefs(stripJabber)} {
-	lset menuDefs(rost,jabber) 12 6 [::Jabber::BuildStatusMenuDef]
+	lset menuDefs(rost,jabber) 12 6 [::Jabber::Roster::BuildStatusMenuDef]
     }
     
     # Menu definitions for a minimal setup. Used on mac only.
@@ -783,6 +775,7 @@ proc ::UI::BuildMain {wtop args} {
     
     variable allWhiteboards
     variable dims
+    variable icons
     variable threadToWtop
     variable jidToWtop
     
@@ -794,6 +787,7 @@ proc ::UI::BuildMain {wtop args} {
     upvar ::${wtop}::wapp wapp
     upvar ::${wtop}::state state
     upvar ::${wtop}::opts opts
+    upvar ::${wtop}::tmpImages tmpImages
     
     Debug 3 "::UI::BuildMain args='$args'"
     
@@ -844,6 +838,8 @@ proc ::UI::BuildMain {wtop args} {
     set wapp(servCan)   $wapp(can)
     set wapp(topchilds) [list ${wtop}menu ${wtop}frtop ${wtop}fmain ${wtop}fcomm]
     
+    set tmpImages {}
+    
     # Init some of the state variables.
     # Inherit from the factory + preferences state.
     array set state [array get ::state]
@@ -863,13 +859,13 @@ proc ::UI::BuildMain {wtop args} {
      
     # Start with menus.
     if {$wtop == "."} {
-	set ::SplashScreen::startMsg [::msgcat::mc splashbuildmenu]
+	::SplashScreen::SetMsg [::msgcat::mc splashbuildmenu]
     }
     ::UI::BuildWhiteboardMenus $wtop
         
     # Shortcut buttons at top? Do we want the toolbar to be visible.
     if {$wtop == "."} {
-	set ::SplashScreen::startMsg [::msgcat::mc splashbuild]
+	::SplashScreen::SetMsg [::msgcat::mc splashbuild]
     }
     if {$state(visToolbar)} {
 	::UI::ConfigShortcutButtonPad $wtop init
@@ -948,7 +944,8 @@ proc ::UI::BuildMain {wtop args} {
     ::UI::SetCommHead $wtop $prefs(protocol) -connected $isConnected
     pack [frame ${wtop}fcomm.pad -relief raised -borderwidth 1]  \
       -side right -fill both -expand true
-    pack [label ${wtop}fcomm.pad.hand -relief flat -borderwidth 0 -image im_handle] \
+    pack [label ${wtop}fcomm.pad.hand -relief flat -borderwidth 0  \
+      -image $icons(resizehandle)] \
       -side right -anchor sw
     
     # Do we want a persistant jabber entry?
@@ -1012,6 +1009,7 @@ proc ::UI::BuildMain {wtop args} {
     # An 'update idletasks' needed anyway in 'FindWidgetGeometryAtLaunch'.
     if {$wtop == "."} {
 	after idle ::UI::FindWidgetGeometryAtLaunch .
+	::SplashScreen::SetMsg ""
     }
 }
 
@@ -1020,7 +1018,6 @@ proc ::UI::BuildMain {wtop args} {
 #       Called when closing whiteboard window; cleanup etc.
 
 proc ::UI::CloseMain {wtop} {
-
     upvar ::${wtop}::wapp wapp
     upvar ::${wtop}::opts opts
     
@@ -1055,7 +1052,7 @@ proc ::UI::CloseMain {wtop} {
     
     # Reset and cancel all put/get file operations related to this window!
     ::PutFileIface::CancelAllWtop $wtop
-    ::GetFile::CancelAllWtop $wtop
+    ::GetFileIface::CancelAllWtop $wtop
 }
 
 # UI::DestroyMain --
@@ -1069,6 +1066,7 @@ proc ::UI::DestroyMain {wtop} {
     variable menuKeyToIndex
     upvar ::${wtop}::wapp wapp
     upvar ::${wtop}::opts opts
+    upvar ::${wtop}::tmpImages tmpImages
     
     if {$wtop == "."} {
 	if {[string equal $prefs(protocol) "jabber"]} {
@@ -1094,7 +1092,10 @@ proc ::UI::DestroyMain {wtop} {
 	array unset menuKeyToIndex "${wtop}*"
     }
     
-    # We could do some better cleanup here.
+    # We could do some cleanup here.
+    foreach imName $tmpImages {
+	$imName delete
+    }
     
 }
 
@@ -1397,8 +1398,9 @@ proc ::UI::GetAllWhiteboards { } {
 #       tool buttons created and mapped
 
 proc ::UI::ClickToolButton {wtop btName} {
-    global  prefs wapp plugin this
+    global  prefs wapp this
     
+    variable icons
     upvar ::${wtop}::wapp wapp
     upvar ::${wtop}::state state
     upvar ::${wtop}::opts opts
@@ -1409,12 +1411,13 @@ proc ::UI::ClickToolButton {wtop btName} {
     set state(btState) [::UI::ToolBtNameToNum $btName]
     set irow [string index $state(btState) 0]
     set icol [string index $state(btState) 1]
-    $wapp(tool).bt$irow$icol configure -image im_on$irow$icol
+    $wapp(tool).bt$irow$icol configure -image $icons(on${irow}${icol})
     if {$state(btState) != $state(btStateOld)} {
 	set irow [string index $state(btStateOld) 0]
 	set icol [string index $state(btStateOld) 1]
-	$wapp(tool).bt$irow$icol configure -image im_off$irow$icol
+	$wapp(tool).bt$irow$icol configure -image $icons(off${irow}${icol})
     }
+    set oldButton $state(btStateOld)
     set state(btStateOld) $state(btState)
     ::UI::RemoveAllBindings $wCan
     
@@ -1497,50 +1500,50 @@ proc ::UI::ClickToolButton {wtop btName} {
 	    # The frame with the movie the mouse events, not the canvas.
 	    # With shift constrained move.
 	    bind $wCan <Button-1> {
-		InitMove %W [%W canvasx %x] [%W canvasy %y]
+		::CanvasDraw::InitMove %W [%W canvasx %x] [%W canvasy %y]
 	    }
 	    bind $wCan <B1-Motion> {
-		DoMove %W [%W canvasx %x] [%W canvasy %y] item
+		::CanvasDraw::DoMove %W [%W canvasx %x] [%W canvasy %y] item
 	    }
 	    bind $wCan <ButtonRelease-1> {
-		FinalizeMove %W [%W canvasx %x] [%W canvasy %y]
+		::CanvasDraw::FinalizeMove %W [%W canvasx %x] [%W canvasy %y]
 	    }
 	    bind $wCan <Shift-B1-Motion> {
-		DoMove %W [%W canvasx %x] [%W canvasy %y] item 1
+		::CanvasDraw::DoMove %W [%W canvasx %x] [%W canvasy %y] item 1
 	    }
 	    
 	    # Moving single coordinates.
 	    $wCan bind tbbox <Button-1> {
-		InitMove %W [%W canvasx %x] [%W canvasy %y] point
+		::CanvasDraw::InitMove %W [%W canvasx %x] [%W canvasy %y] point
 	    }
 	    $wCan bind tbbox <B1-Motion> {
-		DoMove %W [%W canvasx %x] [%W canvasy %y] point
+		::CanvasDraw::DoMove %W [%W canvasx %x] [%W canvasy %y] point
 	    }
 	    $wCan bind tbbox <ButtonRelease-1> {
-		FinalizeMove %W [%W canvasx %x] [%W canvasy %y] point
+		::CanvasDraw::FinalizeMove %W [%W canvasx %x] [%W canvasy %y] point
 	    }
 	    $wCan bind tbbox <Shift-B1-Motion> {
-		DoMove %W [%W canvasx %x] [%W canvasy %y] point 1
+		::CanvasDraw::DoMove %W [%W canvasx %x] [%W canvasy %y] point 1
 	    }
 		
 	    # Needed this to get wCan substituted in callbacks. Note %%.
 	    set scriptInitMove [format {
-		InitMove %s  \
+		::CanvasDraw::InitMove %s  \
 		  [%s canvasx [expr [winfo x %%W] + %%x]]  \
 		  [%s canvasy [expr [winfo y %%W] + %%y]] movie
 	    } $wCan $wCan $wCan]	
 	    set scriptDoMove [format {
-		DoMove %s  \
+		::CanvasDraw::DoMove %s  \
 		  [%s canvasx [expr [winfo x %%W] + %%x]]  \
 		  [%s canvasy [expr [winfo y %%W] + %%y]] movie
 	    } $wCan $wCan $wCan]	
 	    set scriptFinalizeMove [format {
-		FinalizeMove %s  \
+		::CanvasDraw::FinalizeMove %s  \
 		  [%s canvasx [expr [winfo x %%W] + %%x]]  \
 		  [%s canvasy [expr [winfo y %%W] + %%y]] movie
 	    } $wCan $wCan $wCan]	
 	    set scriptDoMoveCon [format {
-		DoMove %s  \
+		::CanvasDraw::DoMove %s  \
 		  [%s canvasx [expr [winfo x %%W] + %%x]]  \
 		  [%s canvasy [expr [winfo y %%W] + %%y]] movie 1
 	    } $wCan $wCan $wCan]	
@@ -1567,37 +1570,37 @@ proc ::UI::ClickToolButton {wtop btName} {
 	}
 	line {
 	    bind $wCan <Button-1> {
-		InitLine %W [%W canvasx %x] [%W canvasy %y]
+		::CanvasDraw::InitLine %W [%W canvasx %x] [%W canvasy %y]
 	    }
 	    bind $wCan <B1-Motion> {
-		LineDrag %W [%W canvasx %x] [%W canvasy %y] 0
+		::CanvasDraw::LineDrag %W [%W canvasx %x] [%W canvasy %y] 0
 	    }
 	    bind $wCan <Shift-B1-Motion> {
-		LineDrag %W [%W canvasx %x] [%W canvasy %y] 1
+		::CanvasDraw::LineDrag %W [%W canvasx %x] [%W canvasy %y] 1
 	    }
 	    bind $wCan <ButtonRelease-1> {
-		FinalizeLine %W [%W canvasx %x] [%W canvasy %y] 0
+		::CanvasDraw::FinalizeLine %W [%W canvasx %x] [%W canvasy %y] 0
 	    }
 	    bind $wCan <Shift-ButtonRelease-1> {
-		FinalizeLine %W [%W canvasx %x] [%W canvasy %y] 1
+		::CanvasDraw::FinalizeLine %W [%W canvasx %x] [%W canvasy %y] 1
 	    }
 	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatline]
 	}
 	arrow {
 	    bind $wCan <Button-1> {
-		InitLine %W [%W canvasx %x] [%W canvasy %y] arrow
+		::CanvasDraw::InitLine %W [%W canvasx %x] [%W canvasy %y] arrow
 	    }
 	    bind $wCan <B1-Motion> {
-		LineDrag %W [%W canvasx %x] [%W canvasy %y] 0 arrow
+		::CanvasDraw::LineDrag %W [%W canvasx %x] [%W canvasy %y] 0 arrow
 	    }
 	    bind $wCan <Shift-B1-Motion> {
-		LineDrag %W [%W canvasx %x] [%W canvasy %y] 1 arrow
+		::CanvasDraw::LineDrag %W [%W canvasx %x] [%W canvasy %y] 1 arrow
 	    }
 	    bind $wCan <ButtonRelease-1> {
-		FinalizeLine %W [%W canvasx %x] [%W canvasy %y] 0 arrow
+		::CanvasDraw::FinalizeLine %W [%W canvasx %x] [%W canvasy %y] 0 arrow
 	    }
 	    bind $wCan <Shift-ButtonRelease-1> {
-		FinalizeLine %W [%W canvasx %x] [%W canvasy %y] 1 arrow
+		::CanvasDraw::FinalizeLine %W [%W canvasx %x] [%W canvasy %y] 1 arrow
 	    }
 	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatarrow]
 	}
@@ -1659,65 +1662,65 @@ proc ::UI::ClickToolButton {wtop btName} {
 	}
 	pen {
 	    bind $wCan <Button-1> {
-		InitStroke %W [%W canvasx %x] [%W canvasy %y]
+		::CanvasDraw::InitStroke %W [%W canvasx %x] [%W canvasy %y]
 	    }
 	    bind $wCan <B1-Motion> {
-		StrokeDrag %W [%W canvasx %x] [%W canvasy %y]
+		::CanvasDraw::StrokeDrag %W [%W canvasx %x] [%W canvasy %y]
 	    }
 	    bind $wCan <ButtonRelease-1> {
-		FinalizeStroke %W [%W canvasx %x] [%W canvasy %y]
+		::CanvasDraw::FinalizeStroke %W [%W canvasx %x] [%W canvasy %y]
 	    }
 	    $wCan config -cursor pencil
 	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatpen]
 	}
 	brush {
 	    bind $wCan <Button-1> {
-		InitStroke %W [%W canvasx %x] [%W canvasy %y]
+		::CanvasDraw::InitStroke %W [%W canvasx %x] [%W canvasy %y]
 	    }
 	    bind $wCan <B1-Motion> {
-		StrokeDrag %W [%W canvasx %x] [%W canvasy %y] 1
+		::CanvasDraw::StrokeDrag %W [%W canvasx %x] [%W canvasy %y] 1
 	    }
 	    bind $wCan <ButtonRelease-1> {
-		FinalizeStroke %W [%W canvasx %x] [%W canvasy %y] 1
+		::CanvasDraw::FinalizeStroke %W [%W canvasx %x] [%W canvasy %y] 1
 	    }
 	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatbrush]
 	}
 	paint {
 	    bind $wCan  <Button-1> {
-		DoPaint %W [%W canvasx %x] [%W canvasy %y]
+		::CanvasDraw::DoPaint %W [%W canvasx %x] [%W canvasy %y]
 	    }
 	    bind $wCan  <Shift-Button-1> {
-		DoPaint %W [%W canvasx %x] [%W canvasy %y] 1
+		::CanvasDraw::DoPaint %W [%W canvasx %x] [%W canvasy %y] 1
 	    }
 	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatpaint]	      
 	}
 	poly {
             bind $wCan  <Button-1> {
-		PolySetPoint %W [%W canvasx %x] [%W canvasy %y]
+		::CanvasDraw::PolySetPoint %W [%W canvasx %x] [%W canvasy %y]
 	    }
 	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatpoly]	      
         }       
 	arc {
 	    bind $wCan <Button-1> {
-		InitArc %W [%W canvasx %x] [%W canvasy %y]
+		::CanvasDraw::InitArc %W [%W canvasx %x] [%W canvasy %y]
 	    }
 	    bind $wCan <Shift-Button-1> {
-		InitArc %W [%W canvasx %x] [%W canvasy %y] 1
+		::CanvasDraw::InitArc %W [%W canvasx %x] [%W canvasy %y] 1
 	    }
 	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatarc]	      
 	}
 	rot {
 	    bind $wCan <Button-1> {
-		InitRotateItem %W [%W canvasx %x] [%W canvasy %y]
+		::CanvasDraw::InitRotateItem %W [%W canvasx %x] [%W canvasy %y]
 	    }
 	    bind $wCan <B1-Motion> {
-		DoRotateItem %W [%W canvasx %x] [%W canvasy %y] 0
+		::CanvasDraw::DoRotateItem %W [%W canvasx %x] [%W canvasy %y] 0
 	    }
 	    bind $wCan <Shift-B1-Motion> {
-		DoRotateItem %W [%W canvasx %x] [%W canvasy %y] 1
+		::CanvasDraw::DoRotateItem %W [%W canvasx %x] [%W canvasy %y] 1
 	    }
 	    bind $wCan <ButtonRelease-1> {
-		FinalizeRotate %W [%W canvasx %x] [%W canvasy %y]
+		::CanvasDraw::FinalizeRotate %W [%W canvasx %x] [%W canvasy %y]
 	    }
 	    $wCan config -cursor exchange
 	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatrot]	      
@@ -1730,10 +1733,8 @@ proc ::UI::ClickToolButton {wtop btName} {
     }
 
     # This is a hook for plugins to register their own bindings.
-    # Call any registered bindings for the plugin. ???
-    foreach key [array names plugin "*,bindProc"] {
-	$plugin($key) $btName
-    }
+    # Calls any registered bindings for the plugin, and deregisters old ones.
+    ::Plugins::SetCanvasBinds $wCan $oldButton $btName
 }
 
 proc ::UI::GenericNonTextBindings {wtop} {
@@ -2195,6 +2196,7 @@ proc ::UI::ConfigShortcutButtonPad {wtop what {subSpec {}}} {
     global  this wDlgs prefs
     
     variable dims
+    variable icons
     upvar ::${wtop}::wapp wapp
     upvar ::${wtop}::opts opts
     upvar ::${wtop}::state state    
@@ -2212,11 +2214,11 @@ proc ::UI::ConfigShortcutButtonPad {wtop what {subSpec {}}} {
     if {![winfo exists ${wtop}frtop]} {
 	pack [frame ${wtop}frtop -relief raised -borderwidth 0] -side top -fill x
 	pack [frame ${wtop}frtop.on -borderwidth 0] -fill x -side left -expand 1
-	pack [label $wonbar -image barvert -bd 1 -relief raised] \
+	pack [label $wonbar -image $icons(barvert) -bd 1 -relief raised] \
 	  -padx 0 -pady 0 -side left
 	pack [frame $wapp(topfr) -relief raised -borderwidth 1]  \
 	  -side left -fill both -expand 1
-	label $woffbar -image barhoriz -relief raised -borderwidth 1
+	label $woffbar -image $icons(barhoriz) -relief raised -borderwidth 1
 	bind $wonbar <Button-1> [list $wonbar configure -relief sunken]
 	bind $wonbar <ButtonRelease-1>  \
 	  [list ::UI::ConfigShortcutButtonPad $wtop "off"]
@@ -2282,11 +2284,12 @@ proc ::UI::ConfigShortcutButtonPad {wtop what {subSpec {}}} {
 proc ::UI::BuildShortcutButtonPad {wtop} {
     global  sysFont prefs wDlgs this
     
+    variable icons
     variable btShortDefs
     upvar ::${wtop}::wapp wapp
     
     set wCan $wapp(can)
-    set h [image height barvert]
+    set h [image height $icons(barvert)]
     set inframe $wapp(topfr)
     ::UI::InitShortcutButtonPad $wtop $inframe $h
     
@@ -2803,6 +2806,7 @@ proc ::UI::CreateAllButtons {wtop} {
     
     variable btNo2Name 
     variable btName2No
+    variable icons
     upvar ::${wtop}::state state
     upvar ::${wtop}::wapp wapp
     upvar ::${wtop}::opts opts
@@ -2813,7 +2817,7 @@ proc ::UI::CreateAllButtons {wtop} {
 	for {set irow 0} {$irow <= 6} {incr irow} {
 	    
 	    # The icons are Mime coded gifs.
-	    set lwi [label $wtool.bt$irow$icol -image im_off$irow$icol \
+	    set lwi [label $wtool.bt$irow$icol -image $icons(off${irow}${icol}) \
 	      -borderwidth 0]
 	    grid $lwi -row $irow -column $icol -padx 0 -pady 0
 	    set name $btNo2Name($irow$icol)
@@ -2838,10 +2842,10 @@ proc ::UI::CreateAllButtons {wtop} {
     ::UI::BuildToolPopupFontMenu $wtop $prefs(canvasFonts)
     
     # Color selector.
-    set imheight [image height imcolor]
+    set imheight [image height $icons(imcolor)]
     set wColSel [canvas $wtool.cacol -width 56 -height $imheight  \
       -highlightthickness 0]
-    $wtool.cacol create image 0 0 -anchor nw -image imcolor
+    $wtool.cacol create image 0 0 -anchor nw -image $icons(imcolor)
     set idColSel [$wtool.cacol create rect 7 7 33 30	\
       -fill $state(fgCol) -outline {} -tags tcolSel]
     set wapp(colSel) $wColSel
@@ -3016,6 +3020,7 @@ proc ::UI::FindWidgetGeometryAtLaunch {wtop} {
     global  this prefs
     
     variable dims
+    variable icons
     upvar ::${wtop}::wapp wapp
 
     # Changed to reqwidth and reqheight instead of width and height.
@@ -3071,7 +3076,7 @@ proc ::UI::FindWidgetGeometryAtLaunch {wtop} {
     # Take care of the case where there is no To or From checkbutton.
     
     set wMinCommFrame [expr [winfo width $wapp(comm).comm] +  \
-      [winfo width $wapp(comm).user] + [image width im_handle] + 2]
+      [winfo width $wapp(comm).user] + [image width $icons(resizehandle)] + 2]
     if {[winfo exists $wapp(comm).to]} {
 	incr wMinCommFrame [winfo reqwidth $wapp(comm).to]
     }
@@ -3347,6 +3352,7 @@ proc ::UI::SetCommHead {wtop type args} {
 proc ::UI::BuildCommHead {wtop type args} {
     global  prefs sysFont
     
+    variable icons
     upvar ::${wtop}::wapp wapp
     set wcomm $wapp(comm)
     
@@ -3362,9 +3368,9 @@ proc ::UI::BuildCommHead {wtop type args} {
 	    label $wcomm.user -text "  [::msgcat::mc {Jabber Id}]:"  \
 	      -width 18 -anchor w -font $sysFont(sb)
 	    if {$argsArr(-connected)} {
-	    	label $wcomm.icon -image contact_on
+	    	label $wcomm.icon -image $icons(contact_on)
 	    } else {
-	    	label $wcomm.icon -image contact_off
+	    	label $wcomm.icon -image $icons(contact_off)
 	    }
 	    grid $wcomm.comm $wcomm.user -sticky nws -pady 0
 	    grid $wcomm.icon -row 0 -column 3 -sticky w -pady 0
@@ -3404,7 +3410,7 @@ proc ::UI::BuildCommHead {wtop type args} {
 	    label $wcomm.comm -text {  Remote address:} -width 22 -anchor w
 	    label $wcomm.user -text {  User:} -width 14 -anchor w
 	    label $wcomm.to -text [::msgcat::mc To]
-	    label $wcomm.icon -image contact_off
+	    label $wcomm.icon -image $icons(contact_off)
 	    grid $wcomm.comm $wcomm.user $wcomm.to $wcomm.icon  \
 	      -sticky nws -pady 0
 	}
@@ -3513,6 +3519,7 @@ proc ::UI::ConfigureAllJabberEntries {ipNum args} {
 
 proc ::UI::ConfigureJabberEntry {wtop ipNum args} {
     
+    variable icons
     upvar ::${wtop}::wapp wapp
     upvar ::${wtop}::opts opts
     
@@ -3531,11 +3538,13 @@ proc ::UI::ConfigureJabberEntry {wtop ipNum args} {
 			}
 			
 			# Update "electric plug" icon.
-			after 400 [list ${wcomm}.icon configure -image contact_on]
+			after 400 [list ${wcomm}.icon configure  \
+			  -image $icons(contact_on)]
 		    }
 		    disconnect {
 			${wcomm}.to${n} configure -state disabled
-			after 400 [list ${wcomm}.icon configure -image contact_off]	    
+			after 400 [list ${wcomm}.icon configure  \
+			  -image $icons(contact_off)]	    
 		    }
 		}
 	    }
@@ -3686,6 +3695,7 @@ proc ::UI::SetCommEntry {wtop ipNum to from args} {
 proc ::UI::BuildCommEntry {wtop ipNum args} {
     global  sysFont prefs ipNumTo allIPnumsTo
     
+    variable icons
     variable commTo
     variable commFrom
     variable ipNum2iEntry
@@ -3734,7 +3744,7 @@ proc ::UI::BuildCommEntry {wtop ipNum args} {
 	
 	# Update "electric plug" icon if first connection.
 	if {[llength $allIPnumsTo] == 1} {
-	    after 400 [list $wcomm.icon configure -image contact_on]
+	    after 400 [list $wcomm.icon configure -image $icons(contact_on)]
 	}
     } elseif {[string equal $thisType "symmetric"]} {
 	entry $wcomm.ad$n -width 24  \
@@ -3837,12 +3847,12 @@ proc ::UI::CheckCommTo {wtop ipNum} {
 	    set commTo($wtop,$ipNum) 1
 	    return
 	} elseif {$res == "yes"} {
-	    DoCloseClientConnection $ipNum
+	    ::OpenConnection::DoCloseClientConnection $ipNum
 	}
     } elseif {$commTo($wtop,$ipNum) == 1} {
 	
 	# Open connection. Let propagateSizeToClients = true.
-	DoConnect $ipNum $ipNumTo(servPort,$ipNum) 1
+	::OpenConnection::DoConnect $ipNum $ipNumTo(servPort,$ipNum) 1
 	::UI::SetCommEntry $wtop $ipNum 1 -1
     }
 }
@@ -3861,6 +3871,7 @@ proc ::UI::CheckCommTo {wtop ipNum} {
 proc ::UI::RemoveCommEntry {wtop ipNum} {
     global  prefs allIPnumsTo
     
+    variable icons
     variable commTo
     variable commFrom
     variable ipNum2iEntry
@@ -3907,7 +3918,7 @@ proc ::UI::RemoveCommEntry {wtop ipNum} {
     if {([string equal $prefs(protocol) "central"] || \
       [string equal $prefs(protocol) "jabber"]) &&   \
       ([llength $allIPnumsTo] == 0)} {
-	after 400 [list $wcomm.icon configure -image contact_off]
+	after 400 [list $wcomm.icon configure -image $icons(contact_off)]
     }
     update idletasks
     
@@ -4391,7 +4402,8 @@ proc ::UI::CenterWindow {win} {
 #       none
 
 proc ::UI::StartStopAnimatedWave {w start} {
-    variable  animateWave
+    variable icons
+    variable animateWave
     
     # Define speed and update frequency. Pix per sec and times per sec.
     set speed 150
@@ -4405,7 +4417,7 @@ proc ::UI::StartStopAnimatedWave {w start} {
 	if {[info exists animateWave($w,id)]} {
 	    return
 	}
-	set id [$w create image 0 0 -anchor nw -image im_wave]
+	set id [$w create image 0 0 -anchor nw -image $icons(wave)]
 	set animateWave($w,id) $id
 	$w lower $id
 	set animateWave($w,x) 0
@@ -4438,6 +4450,22 @@ proc ::UI::AnimateWave {w} {
     $w move $animateWave($w,id) $deltax 0
     set animateWave($w,killId)   \
       [after $animateWave(wait) [list ::UI::AnimateWave $w]]
+}
+
+
+proc ::UI::CreateBrokenImage {wtop width height} {
+    variable icons    
+    upvar ::${wtop}::tmpImages tmpImages
+
+    set name [image create photo -width $width -height $height]
+    lappend tmpImages $name
+    $name blank
+    set zoomx [expr [winfo width $icons(brokenImage)]/$width]
+    set zoomy [expr [winfo height $icons(brokenImage)]/$height]
+    set zoom [expr  ]
+    $name copy $icons(brokenImage) -to 0 0 $width $height -zoom $zoom \
+      -compositingrule overlay
+    return $name
 }
 
 #-------------------------------------------------------------------------------

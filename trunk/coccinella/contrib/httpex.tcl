@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson only for the new and rewritten parts.
 #
-# $Id: httpex.tcl,v 1.1.1.1 2002-12-08 10:55:29 matben Exp $
+# $Id: httpex.tcl,v 1.2 2003-05-18 13:20:19 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -1690,7 +1690,7 @@ proc httpex::formatQuery {args} {
     set sep ""
     foreach i $args {
 	append result $sep [mapReply $i]
-	if {[string compare $sep "="]} {
+	if {![string equal $sep "="]} {
 	    set sep =
 	} else {
 	    set sep &

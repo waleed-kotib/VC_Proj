@@ -19,12 +19,14 @@
 ::msgcat::mcset en Both
 ::msgcat::mcset en Buffering
 ::msgcat::mcset en Cancel
+::msgcat::mcset en Change
 ::msgcat::mcset en City
 ::msgcat::mcset en Clear
 ::msgcat::mcset en Close
 ::msgcat::mcset en Conference
 ::msgcat::mcset en Connect
 ::msgcat::mcset en Country
+::msgcat::mcset en Create
 ::msgcat::mcset en Customization
 ::msgcat::mcset en Date
 ::msgcat::mcset en Default
@@ -99,6 +101,7 @@
 ::msgcat::mcset en Timeout
 ::msgcat::mcset en Title
 ::msgcat::mcset en To
+::msgcat::mcset en Topic
 ::msgcat::mcset en Trash
 ::msgcat::mcset en Unregister
 ::msgcat::mcset en Unsubscribe
@@ -298,6 +301,7 @@
 ::msgcat::mcset en {Font weight}
 ::msgcat::mcset en {Get File}
 ::msgcat::mcset en {Get vCard}
+::msgcat::mcset en {Group chat in room}
 ::msgcat::mcset en {Handled By}
 ::msgcat::mcset en {Host name}
 ::msgcat::mcset en {HTTP port:}
@@ -331,6 +335,7 @@
 ::msgcat::mcset en {New incoming message}
 ::msgcat::mcset en {New Message}
 ::msgcat::mcset en {New password}
+::msgcat::mcset en {New Topic}
 ::msgcat::mcset en {New shortcut}
 ::msgcat::mcset en {New User}
 ::msgcat::mcset en {My vCard}
@@ -386,6 +391,7 @@
 ::msgcat::mcset en {Send Live}
 ::msgcat::mcset en {Server Info}
 ::msgcat::mcset en {Service server}
+::msgcat::mcset en {Set New Topic}
 ::msgcat::mcset en {Set Status}
 ::msgcat::mcset en {Settings Panels}
 ::msgcat::mcset en {Setup Assistant}
@@ -818,6 +824,8 @@ want to add to the list of services, for instance, "jabber.org".}
 	::msgcat::mcset en jaupdatepri	{This update is %s}
 	::msgcat::mcset en jaupdatenewver {The new version is: %s}
 	::msgcat::mcset en jaupdateremind {Don't remind me about this anymore}
+	::msgcat::mcset en jasettopic   {Set new topic for this groupchat.\
+It is set with the first message you send.}
 
 
 }

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.3 2003-02-24 17:52:12 matben Exp $
+# $Id: Utils.tcl,v 1.4 2003-05-18 13:20:22 matben Exp $
 
 # InvertArray ---
 #
@@ -741,6 +741,109 @@ proc ::Text::TransformToPureTextCallback {w key value index} {
 	    append puretext($w) {]}
 	}
     }
+}
+
+#--- Timing --------------------------------------------------------------------
+
+namespace eval ::Timing:: {
+    variable timing
+}
+
+# Timing::Set, Reset, GetRate, FormMessage --
+# 
+#       A number of utils that handle timing objects. Mainly to get bytes
+#       per second during file transfer.
+#       
+# Arguments:
+#       key         a unique key to identify a particular timing object,
+#                   typically use the socket token or a running namespaced 
+#                   number.
+#       bytes       number of bytes transported so far
+#       totalbytes  total file size in bytes
+
+proc ::Timing::Set {key bytes} {
+    variable timing
+    
+    lappend timing($key) [list [clock clicks -milliseconds] $bytes]
+    return {}
+}
+
+proc ::Timing::Reset {key} {
+    variable timing
+    
+    unset timing($key)
+}
+
+proc ::Timing::GetRate {key} {
+    variable timing
+	
+    set timeList $timing($key)
+    set n [llength $timeList]
+    set nAve 3
+    set istart [expr $n - $nAve]
+    if {$istart < 0} {
+	set istart 0
+    }
+    set iend [expr $n - 1]
+    set sumBytes [expr [lindex [lindex $timeList $iend] 1] -  \
+      [lindex [lindex $timeList $istart] 1]]
+    set sumMillis [expr [lindex [lindex $timeList $iend] 0] -  \
+      [lindex [lindex $timeList $istart] 0]]
+    
+    # Treat the case with wrap around. (Guess)
+    if {$sumMillis <= 0} {
+	set sumMillis 1000000
+    }
+    
+    # Returns average bytes per second.
+    return [expr 1000.0 * $sumBytes / ($sumMillis + 1.0)]
+}
+
+proc ::Timing::GetPercent {key totalbytes} {
+    variable timing
+
+    if {[llength $timing($key)] > 1} {
+	set bytes [lindex [lindex $timing($key) end] 1]
+    } else {
+	set bytes 0
+    }
+    set percent [format "%3.0f" [expr 100.0 * $bytes/($totalbytes + 1.0)]]
+    set percent [expr $percent < 0 ? 0 : $percent]
+    set percent [expr $percent > 100 ? 100 : $percent]
+    return $percent
+}
+
+proc ::Timing::FormMessage {key totalbytes} {
+    variable timing
+    
+    set bytesPerSec [::Timing::GetRate $key]
+
+    # Find format: bytes or k.
+    if {$bytesPerSec < 1000} {
+	set txtRate "[expr int($bytesPerSec)] bytes/sec"
+    } elseif {$bytesPerSec < 1000000} {
+	set txtRate [list [format "%.1f" [expr $bytesPerSec/1000.0] ]Kb/sec]
+    } else {
+	set txtRate [list [format "%.1f" [expr $bytesPerSec/1000000.0] ]Mb/sec]
+    }
+
+    # Remaining time.
+    if {[llength $timing($key)] > 1} {
+	set bytes [lindex [lindex $timing($key) end] 1]
+    } else {
+	set bytes 0
+    }
+    set percent [format "%3.0f" [expr 100.0 * $bytes/($totalbytes + 1.0)]]
+    set secsLeft  \
+      [expr int(ceil(($totalbytes - $bytes)/($bytesPerSec + 1.0)))]
+    if {$secsLeft < 60} {
+	set txtTimeLeft ", $secsLeft secs remaining"
+    } elseif {$secsLeft < 120} {
+	set txtTimeLeft ", one minute and [expr $secsLeft - 60] secs remaining"
+    } else {
+	set txtTimeLeft ", [expr $secsLeft/60] minutes remaining"
+    }
+    return "${txtRate}${txtTimeLeft}"
 }
 
 #-------------------------------------------------------------------------------

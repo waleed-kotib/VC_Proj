@@ -6,7 +6,8 @@ Whiteboard CHANGES
 Whiteboard-0.94.4 (03????): 	Short summary --
 
 	- all jabber UI elements moved from whiteboard window to roster window
-
+	- get side of file transport rewritten from scratch
+	-
 
 
 Whiteboard-0.94.3 (03????): 	Short summary --

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.1 2003-04-28 13:22:54 matben Exp $
+# $Id: GroupChat.tcl,v 1.2 2003-05-18 13:20:20 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -43,13 +43,12 @@ proc ::Jabber::GroupChat::AllConference { } {
     }
 }
 
-# Jabber::GroupChat::UseOriginalConference --
+# Jabber::GroupChat::HaveOrigConference --
 #
 #       Ad hoc method for finding out if possible to use the original
-#       jabber:iq:conference method (not MUC).
+#       jabber:iq:conference method.
 
-proc ::Jabber::GroupChat::UseOriginalConference {{roomjid {}}} {
-    
+proc ::Jabber::GroupChat::HaveOrigConference {{roomjid {}}} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
 
@@ -73,21 +72,51 @@ proc ::Jabber::GroupChat::UseOriginalConference {{roomjid {}}} {
     return $ans
 }
 
-# Jabber::GroupChat::EnterRoom --
+# Jabber::GroupChat::HaveMUC --
+# 
+# 
+
+proc ::Jabber::GroupChat::HaveMUC {{roomjid {}}} {
+    upvar ::Jabber::jstate jstate
+    upvar ::Jabber::jserver jserver
+
+    set ans 0
+    if {[string length $roomjid] == 0} {
+	
+	# Require at least one service that supports muc.
+	set jids [$jstate(browse) getservicesforns  \
+	  "http://jabber.org/protocol/muc"]
+	if {[llength $jids] > 0} {
+	    set ans 1
+	}
+    } else {
+	set confserver [$jstate(browse) getparentjid $roomjid]
+	if {[$jstate(browse) isbrowsed $confserver]} {
+	    set ans [$jstate(browse) havenamespace $roomjid  \
+	      "http://jabber.org/protocol/muc"]
+	}
+    }
+    return $ans
+}
+
+# Jabber::GroupChat::EnterOrCreate --
 #
-#       Dispatch entering a room to either 'groupchat' or 'conference' methods.
-#       The 'conference' method requires jabber:iq:browse and jabber:iq:conference
+#       Dispatch entering or creating a room to either 'groupchat' (gc-1.0), 
+#       'conference', or 'muc' methods depending on preferences.
+#       The 'conference' method requires jabber:iq:browse and 
+#       jabber:iq:conference.
 #       
 # Arguments:
 #       w           toplevel widget
+#       what        'enter' or 'create'
 #       args        -server, -roomjid, -autoget
 #       
 # Results:
 #       "cancel" or "enter".
 
-proc ::Jabber::GroupChat::EnterRoom {w args} {
-
+proc ::Jabber::GroupChat::EnterOrCreate {w what args} {
     upvar ::Jabber::jserver jserver
+    upvar ::Jabber::jprefs jprefs
     
     array set argsArr $args
     if {[info exists argsArr(-roomjid)]} {
@@ -95,29 +124,45 @@ proc ::Jabber::GroupChat::EnterRoom {w args} {
     } else {
 	set roomjid ""
     }
-    if {[::Jabber::GroupChat::UseOriginalConference $roomjid]} {
-	set ans [eval {::Jabber::Conference::BuildEnterRoom $w} $args]
-    } else {
-	set ans [eval {::Jabber::GroupChat::BuildEnter $w} $args]
-    }
-    return $ans
-}
 
-proc ::Jabber::GroupChat::CreateRoom {w args} {
-
-    upvar ::Jabber::jserver jserver
-
-    array set argsArr $args
-    if {[info exists argsArr(-roomjid)]} {
-	set roomjid $argsArr(-roomjid)
-    } else {
-	set roomjid ""
+    # Preferred groupchat protocol (gc-1.0|conference|muc).
+    # Use 'gc-1.0' as fallback.
+    set gchatprotocol "gc-1.0"
+    switch -- $jprefs(prefgchatproto) {
+	gc-1.0 {
+	    # Empty
+	}
+	conference {
+	    if {[::Jabber::GroupChat::HaveOrigConference $roomjid]} {
+		set gchatprotocol "conference"
+	    }
+	}
+	muc {
+	    if {[::Jabber::GroupChat::HaveMUC $roomjid]} {
+		set gchatprotocol "muc"
+	    }
+	}
     }
-    if {[::Jabber::GroupChat::UseOriginalConference $roomjid]} {
-	set ans [eval {::Jabber::Conference::BuildCreateRoom $w} $args]
-    } else {
-	set ans [eval {::Jabber::GroupChat::BuildEnter $w} $args]
-    }
+    
+    switch -- $gchatprotocol {
+	gc-1.0 {
+	    set ans [eval {::Jabber::GroupChat::BuildEnter $w} $args]
+	}
+	conference {
+	    if {$what == "enter"} {
+		set ans [eval {::Jabber::Conference::BuildEnter $w} $args]
+	    } elseif {$what == "create"} {
+		set ans [eval {::Jabber::Conference::BuildCreate $w} $args]
+	    }
+	}
+	muc {
+	    if {$what == "enter"} {
+		set ans [eval {::Jabber::MUC::BuildEnter $w} $args]
+	    } elseif {$what == "create"} {
+		set ans [eval {::Jabber::Conference::BuildCreate $w} $args]
+	    }
+	}
+    }    
     return $ans
 }
 
@@ -177,12 +222,12 @@ proc ::Jabber::GroupChat::BuildEnter {w args} {
     eval {$frmid.eserv list insert end} $chatservers
     label $frmid.lroom -text "[::msgcat::mc Room]:" -font $sysFont(sb) -anchor e
     entry $frmid.eroom -width 24    \
-      -textvariable "[namespace current]::gchatroom" -validate key  \
+      -textvariable [namespace current]::gchatroom -validate key  \
       -validatecommand {::Jabber::ValidateJIDChars %S}
     label $frmid.lnick -text "[::msgcat::mc {Nick name}]:" -font $sysFont(sb) \
       -anchor e
     entry $frmid.enick -width 24    \
-      -textvariable "[namespace current]::gchatnick" -validate key  \
+      -textvariable [namespace current]::gchatnick -validate key  \
       -validatecommand {::Jabber::ValidateJIDChars %S}
     grid $frmid.msg -column 0 -columnspan 2 -row 0 -sticky ew
     grid $frmid.lserv -column 0 -row 1 -sticky e
@@ -316,6 +361,9 @@ proc ::Jabber::GroupChat::GotMsg {body args} {
     } else {
 	eval {::Jabber::GroupChat::Build $roomJid} $args
     }       
+    if {[info exists argsArr(-subject)]} {
+	set locals($roomJid,topic) $argsArr(-subject)
+    }
     
     # This can be room name or nick name.
     foreach {meRoomJid mynick} [$jstate(jlib) service hashandnick $roomJid] { break }
@@ -395,6 +443,8 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
 	set locals($roomJid,jid) $argsArr(-from)
     }
     set locals($roomJid,got1stMsg) 0
+    set locals($roomJid,topic) ""
+    set locals($roomJid,topicset) 0
     toplevel $w -class GroupChat
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
@@ -439,7 +489,8 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     ::UI::CutCopyPasteConfigure $wccp cut -state disabled
     ::UI::CutCopyPasteConfigure $wccp copy -state disabled
     ::UI::CutCopyPasteConfigure $wccp paste -state disabled
-    pack [frame $w.frall.fccp.div -bd 2 -relief raised -width 2] -fill y -side left
+    pack [frame $w.frall.fccp.div -bd 2 -relief raised -width 2]  \
+      -fill y -side left
     pack [::UI::NewPrint $w.frall.fccp.pr [list [namespace current]::Print $roomJid]] \
       -side left -padx 10
     pack [frame $w.frall.div2 -bd 2 -relief sunken -height 2] -fill x -side top
@@ -463,13 +514,24 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     # Header fields.
     set frtop [frame $w.frall.frtop -borderwidth 0]
     pack $frtop -side top -fill x   
-    label $frtop.la -text {Group chat in room:} -font $sysFont(sb) -anchor e
+    label $frtop.la -text "[::msgcat::mc {Group chat in room}]:"  \
+      -font $sysFont(sb) -anchor e
     entry $frtop.en -bg $prefs(bgColGeneral)
-    grid $frtop.la -column 0 -row 0 -sticky e -padx 8 -pady 2
-    grid $frtop.en -column 1 -row 0 -sticky ew -padx 4 -pady 2
+    label $frtop.ltp -text "[::msgcat::mc Topic]:" -font $sysFont(sb) -anchor e
+    entry $frtop.etp -bg $prefs(bgColGeneral)  \
+      -textvariable [namespace current]::locals($roomJid,topic)
+    button $frtop.btp -text "[::msgcat::mc Change]..." -font $sysFont(s)  \
+      -command [list [namespace current]::SetTopic ${w}tp $roomJid]
+    
+    grid $frtop.la -column 0 -row 0 -sticky e -padx 4 -pady 1
+    grid $frtop.en -column 1 -row 0 -sticky ew -padx 4 -pady 1 -columnspan 2
+    grid $frtop.ltp -column 0 -row 1 -sticky e -padx 4 -pady 1
+    grid $frtop.etp -column 1 -row 1 -sticky ew -padx 4 -pady 1
+    grid $frtop.btp -column 2 -row 1 -sticky w -padx 6 -pady 1
     grid columnconfigure $frtop 1 -weight 1
     $frtop.en insert end $roomJid
     $frtop.en configure -state disabled
+    $frtop.etp configure -state disabled
     
     # Text chat and user list.
     set frmid $w.frall.frmid
@@ -551,6 +613,71 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     focus $w
 }
 
+proc ::Jabber::GroupChat::SetTopic {w roomJid} {
+    global  prefs this sysFont
+    
+    variable locals
+    variable fintopic
+    upvar ::Jabber::jstate jstate
+    
+    toplevel $w
+    if {[string match "mac*" $this(platform)]} {
+	eval $::macWindowStyle $w documentProc
+    } else {
+	
+    }
+    wm title $w [::msgcat::mc {Set New Topic}]
+    set fintopic -1
+    set locals($roomJid,newtopic) $locals($roomJid,topic)
+    
+    # Global frame.
+    pack [frame $w.frall -borderwidth 1 -relief raised]   \
+      -fill both -expand 1 -ipadx 4
+    pack [message $w.frall.msg -width 220 -font $sysFont(s)  \
+      -text [::msgcat::mc jasettopic]] -side top -fill both -padx 4 -pady 2
+    
+    set wmid $w.frall.fr
+    pack [frame $wmid] -side top -fill x -expand 1 -padx 6
+    label $wmid.la -font $sysFont(sb) -text "[::msgcat::mc {New Topic}]:"
+    entry $wmid.en -textvariable [namespace current]::locals($roomJid,newtopic)
+    grid $wmid.la -column 0 -row 0 -sticky e -padx 2 
+    grid $wmid.en -column 1 -row 0 -sticky ew -padx 2 
+    
+    # Button part.
+    set frbot [frame $w.frall.frbot -borderwidth 0]
+    pack $frbot  -side bottom -fill x -padx 10 -pady 8
+    pack [button $frbot.btok -text [::msgcat::mc OK] -width 8  \
+      -default active -command [list [namespace current]::DoSetTopic $roomJid]] \
+      -side right -padx 5 -pady 5
+    pack [button $frbot.btcan -text [::msgcat::mc Cancel] -width 8  \
+      -command "set [namespace current]::fintopic 0"]  \
+      -side right -padx 5 -pady 5  
+    
+    wm resizable $w 0 0
+    bind $w <Return> [list $frbot.btok invoke]
+    
+    # Grab and focus.
+    set oldFocus [focus]
+    focus $w
+    catch {grab $w}
+    
+    # Wait here for a button press.
+    tkwait variable [namespace current]::fintopic
+    
+    catch {grab release $w}
+    destroy $w
+    focus $oldFocus
+    return $fintopic
+}
+
+proc ::Jabber::GroupChat::DoSetTopic {roomJid} {
+    variable locals
+    variable fintopic
+
+    set locals($roomJid,topicset) 1
+    set fintopic 1
+}
+
 proc ::Jabber::GroupChat::Send {roomJid} {
     global  prefs
     
@@ -564,13 +691,19 @@ proc ::Jabber::GroupChat::Send {roomJid} {
 	return
     }
     set wtextsnd $locals($roomJid,wtextsnd)
+    set extras {}
+    
+    # Possibly set new topic (subject).
+    if {$locals($roomJid,topicset)} {
+	set extras [list -subject $locals($roomJid,newtopic)]
+    }
 
     # Get text to send.
     set allText [$wtextsnd get 1.0 "end - 1 char"]
     if {$allText != ""} {	
 	if {[catch {
-	    $jstate(jlib) send_message $roomJid -type groupchat \
-	      -body $allText
+	    eval {$jstate(jlib) send_message $roomJid -type groupchat \
+	      -body $allText} $extras
 	} err]} {
 	    tk_messageBox -type ok -icon error -title "Network Error" \
 	      -message "Network error ocurred: $err"
@@ -641,11 +774,11 @@ proc ::Jabber::GroupChat::Presence {jid presence args} {
     
     # Since there should not be any /resource.
     set roomJid $jid
-    set jidhash ${jid}/$attrArr(-resource)
+    set jid3 ${jid}/$attrArr(-resource)
     if {[string equal $presence "available"]} {
-	eval {::Jabber::GroupChat::SetUser $roomJid $jidhash $presence} $args
+	eval {::Jabber::GroupChat::SetUser $roomJid $jid3 $presence} $args
     } elseif {[string equal $presence "unavailable"]} {
-	::Jabber::GroupChat::RemoveUser $roomJid $jidhash
+	::Jabber::GroupChat::RemoveUser $roomJid $jid3
     }
 }
 
@@ -686,7 +819,7 @@ proc ::Jabber::GroupChat::BrowseUser {userXmlList} {
 #       
 # Arguments:
 #       roomJid     the room's jid
-#       jidhash     $roomjid/hashornick
+#       jid3     $roomjid/hashornick
 #       presence    "available", "unavailable", or "unsubscribed"
 #       args        list of '-key value' pairs where '-key' can be
 #                   -resource, -from, -type, -show...
@@ -694,14 +827,14 @@ proc ::Jabber::GroupChat::BrowseUser {userXmlList} {
 # Results:
 #       updated UI.
 
-proc ::Jabber::GroupChat::SetUser {roomJid jidhash presence args} {
+proc ::Jabber::GroupChat::SetUser {roomJid jid3 presence args} {
     global  this
 
     variable locals
     upvar ::Jabber::jstate jstate
 
     ::Jabber::Debug 2 "::Jabber::GroupChat::SetUser roomJid=$roomJid,\
-      jidhash=$jidhash presence=$presence"
+      jid3=$jid3 presence=$presence"
 
     array set attrArr $args
 
@@ -715,7 +848,7 @@ proc ::Jabber::GroupChat::SetUser {roomJid jidhash presence args} {
     # Get the hex string to use as tag. 
     # In old-style groupchat this is the nick name which should be unique
     # within this room aswell.
-    if {![regexp {[^@]+@[^/]+/(.+)} $jidhash match hexstr]} {
+    if {![regexp {[^@]+@[^/]+/(.+)} $jid3 match hexstr]} {
 	error {Failed finding hex string}
     }    
     
@@ -737,8 +870,8 @@ proc ::Jabber::GroupChat::SetUser {roomJid jidhash presence args} {
     set wusers $locals($roomJid,wusers)
     
     # Old-style groupchat and browser compatibility layer.
-    set nick [$jstate(jlib) service nick $jidhash]
-    set icon [eval {::Jabber::GetPresenceIcon $jidhash $presence} $args]
+    set nick [$jstate(jlib) service nick $jid3]
+    set icon [eval {::Jabber::Roster::GetPresenceIcon $jid3 $presence} $args]
     $wusers configure -state normal
     set insertInd end
     set begin end
@@ -762,31 +895,31 @@ proc ::Jabber::GroupChat::SetUser {roomJid jidhash presence args} {
     # For popping up menu.
     if {[string match "mac*" $this(platform)]} {
 	$wusers tag bind $hexstr <Button-1>  \
-	  [list ::Jabber::GroupChat::PopupTimer $wusers $jidhash %x %y]
+	  [list ::Jabber::GroupChat::PopupTimer $wusers $jid3 %x %y]
 	$wusers tag bind $hexstr <ButtonRelease-1>   \
 	  ::Jabber::GroupChat::PopupTimerCancel
     } else {
 	$wusers tag bind $hexstr <Button-3>  \
-	  [list ::Jabber::UI::Popup groupchat $wusers $jidhash %x %y]
+	  [list ::Jabber::UI::Popup groupchat $wusers $jid3 %x %y]
     }
     
     # Noise.
     ::Sounds::Play online
 }
     
-proc ::Jabber::GroupChat::PopupTimer {w jidhash x y} {
+proc ::Jabber::GroupChat::PopupTimer {w jid3 x y} {
     
     variable locals
     upvar ::Jabber::jstate jstate
 
-    ::Jabber::Debug 2 "::Jabber::GroupChat::PopupTimer w=$w, jidhash=$jidhash"
+    ::Jabber::Debug 2 "::Jabber::GroupChat::PopupTimer w=$w, jid3=$jid3"
 
     # Set timer for this callback.
     if {[info exists locals(afterid)]} {
 	catch {after cancel $locals(afterid)}
     }
     set locals(afterid) [after 1000  \
-      [list ::Jabber::UI::Popup groupchat $w $jidhash $x $y]]
+      [list ::Jabber::UI::Popup groupchat $w $jid3 $x $y]]
 }
 
 proc ::Jabber::GroupChat::PopupTimerCancel { } {
@@ -794,7 +927,7 @@ proc ::Jabber::GroupChat::PopupTimerCancel { } {
     catch {after cancel $locals(afterid)}
 }
 
-proc ::Jabber::GroupChat::RemoveUser {roomJid jidhash} {
+proc ::Jabber::GroupChat::RemoveUser {roomJid jid3} {
 
     variable locals    
     if {![winfo exists $locals($roomJid,wusers)]} {
@@ -802,7 +935,7 @@ proc ::Jabber::GroupChat::RemoveUser {roomJid jidhash} {
     }
     
     # Get the hex string to use as tag.
-    if {![regexp {[^@]+@[^/]+/(.+)} $jidhash match hexstr]} {
+    if {![regexp {[^@]+@[^/]+/(.+)} $jid3 match hexstr]} {
 	error {Failed finding hex string}
     }    
     set wusers $locals($roomJid,wusers)

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.1 2003-04-28 13:22:54 matben Exp $
+# $Id: Browse.tcl,v 1.2 2003-05-18 13:20:20 matben Exp $
 
 package provide Browse 1.0
 
@@ -141,8 +141,16 @@ proc ::Jabber::Browse::Callback {browseName type jid subiq} {
 		::Jabber::UI::NewPage "Browser"
 	    }
 	    
-	    # We shall fill in the browse tree.
+	    # We shall fill in the browse tree. 
+	    # Check that server is not configured with identical jid's.
 	    set parents [$jstate(browse) getparents $jid]
+	    if {[string equal [lindex $parents end] $jid]} {
+		tk_messageBox -type ok -title "Server Error" -message \
+		  "The Jabber server has an error in its configuration.\
+		  The jid \"$jid\" is duplicated for different services.\
+		  Contact the system administrator of $jserver(this)."
+		return
+	    }
 	    ::Jabber::Browse::AddToTree $parents $jid $subiq 1
 	    
 	    # If we have a conference (groupchat) window.
@@ -184,10 +192,14 @@ proc ::Jabber::Browse::Callback {browseName type jid subiq} {
 			    set jstate(conference,$confjid) 0
 			}
 			
-			# General: (groupchat | conference | muc)
-			if {![info exists jstate(groupchattype,$confjid)]} {
-			    set jstate(groupchattype,$confjid) "groupchat"
+			# Protocol: (groupchat | conference | muc)
+			if {![info exists jstate(groupchatprotocol,$confjid)]} {
+			    set jstate(groupchatprotocol,$confjid) "groupchat"
 			}
+			
+			# In principle the <ns/> elements shall signal type
+			# of protocol.
+			
 			
 			# Version query only for jabber conferences 
 			#        (type='private' or 'public')
@@ -417,6 +429,7 @@ proc ::Jabber::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
     variable options
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::nsToText nsToText
+    upvar ::UI::icons icons
     
     ::Jabber::Debug 2 "::Jabber::Browse::AddToTree parentsJidList='$parentsJidList', jid=$jid"
 
@@ -473,7 +486,7 @@ proc ::Jabber::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
 		if {[regexp {.+@[^/]+/.+} $jid match]} {
 		    if {[string equal $tag "user"]} {
 			$wtree newitem $jidList -dir 0  \
-			  -text $txt -image $::tree::machead -tags $jid
+			  -text $txt -image $icons(machead) -tags $jid
 		    } else {
 			$wtree newitem $jidList -text $txt -tags $jid
 		    }
@@ -536,7 +549,7 @@ proc ::Jabber::Browse::Presence {jid presence args} {
     if {$presence == "available"} {
     
 	# Add first if not there?    
-	set icon [eval {::Jabber::GetPresenceIcon $jidhash $presence} $args]
+	set icon [eval {::Jabber::Roster::GetPresenceIcon $jidhash $presence} $args]
 	$wtree itemconfigure $jidList -image $icon
     } elseif {$presence == "unavailable"} {
 
@@ -646,7 +659,6 @@ proc ::Jabber::Browse::ClearRoom {roomJid} {
 
     set parentList [$jstate(browse) getparents $roomJid]
     set jidList "$parentList $roomJid"
-    #$wtree delitem $jidList -childsonly 1
     foreach v [$wtree find withtag $roomJid] {
 	$wtree delitem $v -childsonly 1
     }

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.5 2003-04-28 13:32:32 matben Exp $
+# $Id: Dialogs.tcl,v 1.6 2003-05-18 13:20:21 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -148,17 +148,10 @@ proc ::GetCanvas::GetCanvas {w} {
 #      applications.
 
 proc InfoOnPlugins {w} {
-    global  sysFont prefs plugin supSuff this
+    global  sysFont prefs this
     
     # Check first of there are *any* plugins.
-    set anyPlugin 0
-    foreach plugtype $plugin(all) {
-	if {$prefs($plugtype)} {
-	    set anyPlugin 1
-	    break
-	}
-    }
-    if {!$anyPlugin} {
+    if {[llength [::Plugins::GetAllPackages loaded]] == 0} {
 	tk_messageBox -icon info -type ok -message   \
 	  [FormatTextForMessageBox [::msgcat::mc messnoplugs]]
 	return  
@@ -205,7 +198,8 @@ proc InfoOnPlugins {w} {
     $wtxt tag configure tline -font {Helvetica -1} -background black
     
     # If mac (classic) or win and not QuickTime, make an ad as the first item.
-    if {$prefs(QuickTimeTcl,ishost) && !$prefs(QuickTimeTcl)} {
+    if {[::Plugins::IsHost QuickTimeTcl] &&  \
+      ![::Plugins::HavePackage QuickTimeTcl]} {
 
 	::Text::ConfigureLinkTagForTextWidget $wtxt linktag linkactive
 	set ad {Get QuickTime for free from Apple at www.apple.com/quicktime.\
@@ -222,7 +216,7 @@ proc InfoOnPlugins {w} {
     }
     
     # If Windows and not MSSpeech, make an ad as the first item.
-    if {$prefs(MSSpeech,ishost) && !$prefs(MSSpeech)} {
+    if {[::Plugins::IsHost MSSpeech] && ![::Plugins::HavePackage MSSpeech]} {
 
 	$wtxt insert end "\n" tline
 	$wtxt insert end "Microsoft Speech\n" ttitle
@@ -237,33 +231,29 @@ proc InfoOnPlugins {w} {
     }
         
     # Try the known plugind and apps, and make a labelled frame for each.
-    foreach plug $plugin(all) {
+    foreach plug [::Plugins::GetAllPackages loaded] {
 	
-	if {$prefs($plug)} {
-	    if {[info exists plugin($plug,ver)]} {
-		set txtver $plugin($plug,ver)
-	    } else {
-		set txtver {unknown}
-	    }
-	    if {[info exists supSuff($plug)] && \
-	      [llength $supSuff($plug)] > 0} {
-		set txtsuf [join [split $supSuff($plug)] {, }]
-	    } else {
-		set txtsuf {none}
-	    }
-	    $wtxt insert end "\n" tline
-	    $wtxt insert end "$plug\n" ttitle
-	    $wtxt insert end "\n" tline
-	    $wtxt insert end "\tType:\t" tkey
-	    $wtxt insert end "$plugin($plug,type)\n" ttxt
-	    $wtxt insert end "\tDescription:\t" tkey
-	    $wtxt insert end "$plugin($plug,desc)\n" ttxt
-	    $wtxt insert end "\tVersion:\t" tkey
-	    $wtxt insert end "$txtver\n" ttxt
-	    $wtxt insert end "\tSuffixes:\t" tkey
-	    $wtxt insert end "$txtsuf\n" ttxt
-	    $wtxt insert end "\n"
+	set txtver [::Plugins::GetVersionForPackage $plug]
+	if {$txtver == ""} {
+	    set txtver "unknown"
 	}
+	set txtsuf [::Plugins::GetSuffixes $plug]
+	if {$txtsuf == ""} {
+	    set txtsuff "none"
+	}
+	
+	$wtxt insert end "\n" tline
+	$wtxt insert end "$plug\n" ttitle
+	$wtxt insert end "\n" tline
+	$wtxt insert end "\tType:\t" tkey
+	$wtxt insert end "[::Plugins::GetTypeDesc $plug]\n" ttxt
+	$wtxt insert end "\tDescription:\t" tkey
+	$wtxt insert end "[::Plugins::GetDescForPlugin $plug]\n" ttxt
+	$wtxt insert end "\tVersion:\t" tkey
+	$wtxt insert end "$txtver\n" ttxt
+	$wtxt insert end "\tSuffixes:\t" tkey
+	$wtxt insert end "$txtsuf\n" ttxt
+	$wtxt insert end "\n"
     }
     $wtxt configure -state disabled
     bind $w <Return> "$w.frall.frbot.ok invoke"
@@ -592,14 +582,14 @@ proc ::PSPageSetup::PSPageSetup { w } {
 	label $frtot.lbl$optName -text "${optName}:" -font $sysFont(sb)
 	frame $frtot.fr$optName
 	
-	if {([string compare $optName "colormode"] == 0) ||  \
-	  ([string compare $optName "pageanchor"] == 0) ||  \
-	  ([string compare $optName "rotate"] == 0)} {
+	if {[string equal $optName "colormode"] ||  \
+	  [string equal $optName "pageanchor"] ||  \
+	  [string equal $optName "rotate"]} {
 	    
 	    # Only menubutton.
 	    # Get value if exists.
 	    if {[info exists copyOfPostscriptOpts(-$optName)]} {
-		if {[string compare $optName "rotate"] == 0} {
+		if {[string equal $optName "rotate"]} {
 		    
 		    # Get full menu name.
 		    set menuBtVar($optName)   \
@@ -695,10 +685,10 @@ proc ::PSPageSetup::PushBtSave {  } {
     set allNewOpts {}
     foreach optName $allOptNames {
 	
-	if {([string compare $optName "colormode"] == 0) ||  \
-	  ([string compare $optName "pageanchor"] == 0) ||  \
-	  ([string compare $optName "rotate"] == 0)} {
-	    if {[string compare $optName "rotate"] == 0} {
+	if {[string equal $optName "colormode"] ||  \
+	  [string equal $optName "pageanchor"] ||  \
+	  [string equal $optName "rotate"]} {
+	    if {[string equal $optName "rotate"]} {
 		
 		# Get short name from full name in menu.
 		set val $rotFull2Short($menuBtVar($optName))
@@ -957,11 +947,10 @@ proc ShowInfoServer {w thisIPnum} {
 # Handles the splash screen.
 
 namespace eval ::SplashScreen:: {
-    
-    namespace export SplashScreen
-    
-    # Trace variable to show progress in splash screen.
+        
+    # Name of variable for message displat.
     variable startMsg ""
+    variable topwin ""
 }
 
 # SplashScreen::SplashScreen --
@@ -976,8 +965,11 @@ namespace eval ::SplashScreen:: {
 
 proc ::SplashScreen::SplashScreen {w} {
     global  sysFont this prefs
-    
+    variable topwin
+    variable canwin
     variable startMsg
+    
+    set topwin $w
     if [catch {toplevel $w}] {
 	return
     }
@@ -989,7 +981,7 @@ proc ::SplashScreen::SplashScreen {w} {
     }
     wm title $w [::msgcat::mc {About Coccinella}]
     wm resizable $w 0 0
-    foreach {screenW screenH} [GetScreenSize] {}
+    foreach {screenW screenH} [GetScreenSize] { break }
     wm geometry $w +[expr ($screenW - 450)/2]+[expr ($screenH - 300)/2]
     
     # If image not already there, get it.
@@ -1006,6 +998,7 @@ proc ::SplashScreen::SplashScreen {w} {
     } else {
 	set textcol white
     }
+    set canwin $w.can
     canvas $w.can -width $imWidth -height $imHeight -bd 0 -highlightthickness 0
     $w.can create image 0 0 -anchor nw -image mysplash
     $w.can create text 50 [expr $imHeight - 20] -anchor nw -tags tsplash  \
@@ -1018,8 +1011,90 @@ proc ::SplashScreen::SplashScreen {w} {
     }
     
     pack $w.can
-    bind $w <Return> "destroy $w"
-    bind $w <Button-1> "destroy $w"
+    bind $w <Return> [list destroy $w]
+    bind $w <Button-1> [list destroy $w]
+}
+
+proc ::SplashScreen::SetMsg {msg} {
+    variable topwin
+    variable canwin
+    variable startMsg
+    
+    set startMsg $msg
+    
+    # Update needed to force display (bad?).
+    if {[winfo exists $topwin]} {
+	$canwin itemconfigure tsplash -text $startMsg
+	update idletasks
+    }
+}
+
+# SplashScreen::Canvas --
+# 
+#       Display a *.can file into simple canvas window.
+
+proc ::SplashScreen::Canvas {w filePath} {
+    global this prefs
+    
+    if {[catch {open $filePath r} fd]} {
+	return
+    }
+    if [catch {toplevel $w}] {
+	return
+    }
+    if {[string match "mac*" $this(platform)]} {
+	eval $::macWindowStyle $w documentProc
+    } else {
+
+    }
+    wm title $w [::msgcat::mc {Welcome}]
+    wm resizable $w 0 0
+    foreach {screenW screenH} [GetScreenSize] { break }
+    set xmax 200
+    set ymax 200
+    set wcan $w.can
+    canvas $wcan -width $xmax -height $ymax -highlightthickness 0 -bg white
+    pack $wcan
+    
+    while {[gets $fd line] >= 0} { 
+	
+	# Skip any comment lines and empty lines.
+	if {[regexp {(^ *#|^[ \n\t]*$)} $line]} {
+	    continue
+	}
+	set cmd [lindex $line 0]
+	set type [lindex $line 1]
+	
+	switch -- $cmd {
+	    create {
+		
+		# Make newline substitutions.
+		set cmd [subst -nocommands -novariables $line]
+		if {[string equal $type "text"]} {
+		    set cmd [::CanvasUtils::FontHtmlToPointSize $cmd]
+		}
+		set id [eval $wcan $cmd]
+	    }
+	    import {
+		set ind [lsearch -exact $line -file]
+		if {$ind >= 0} {
+		    set co [lrange $line 1 2]
+		    set impath [lindex $line [incr ind]]
+		    set suff [file extension $impath]
+		    if {$suff == ".gif"} {
+			set imname [image create photo -file $impath]
+			set id [eval {$wcan create image} $co \
+			  {-anchor nw -image $imname}]
+		    }
+		}
+	    }
+	}
+    }
+    foreach {x0 y0 x1 y1} [eval {$wcan bbox} [$wcan find all]] { break }
+    incr x1 20
+    incr y1 20
+    $wcan configure -width $x1 -height $y1
+    catch {close $fd}
 }
 
 proc AboutQuickTimeTcl { } {

@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: PutFileIface.tcl,v 1.4 2003-04-28 13:32:34 matben Exp $
+# $Id: PutFileIface.tcl,v 1.5 2003-05-18 13:20:22 matben Exp $
 
 package require putfile
 package require uriencode
@@ -25,7 +25,7 @@ namespace eval ::PutFileIface:: {
 #       the file to all other clients.
 
 proc ::PutFileIface::PutFileDlg {wtop} {
-    global  allIPnumsToSend typelistImageMovie typelistText
+    global  allIPnumsToSend
     
     if {[llength $allIPnumsToSend] == 0} {
 	return
@@ -36,7 +36,7 @@ proc ::PutFileIface::PutFileDlg {wtop} {
     
     set typelist [concat $typelistText $typelistImageMovie]
     set ans [tk_getOpenFile -title [::msgcat::mc {Put Image/Movie}] \
-      -filetypes $typelist]
+      -filetypes [::Plugins::GetTypeListDialogOption]]
     if {$ans == ""} {
 	return
     }
@@ -53,7 +53,7 @@ proc ::PutFileIface::PutFileDlg {wtop} {
 #       
 # Arguments:
 #       wtop
-#       fileName   the path to the file to be put.
+#       fileName   the local path to the file to be put.
 #       where = "remote" or "all": put only to remote clients.
 #       where = ip number: put only to this remote client.
 #   
@@ -83,6 +83,7 @@ proc ::PutFileIface::PutFile {wtop fileName where {optList {}}} {
     switch -- $prefs(protocol) {
 	server {
 	    set relFilePath [filerelative $this(path) $fileName]
+	    set relFilePath [uriencode::quotepath $relFilePath]
 	    set putCmd "PUT NEW: [list $relFilePath] $optList"
 	    if {$where == "remote" || $where == "all"} {
 		SendClientCommand $wtop $putCmd
@@ -108,10 +109,10 @@ proc ::PutFileIface::PutFile {wtop fileName where {optList {}}} {
 	    }
     
 	    # This must never fail (application/octet-stream as fallback).
-	    set mime [GetMimeTypeFromFileName $fileName]
+	    set mime [::Types::GetMimeTypeForFileName $fileName]
 	
 	    # Get the remote (network) file name (no path, no uri encoding).
-	    set dstFile [NativeToNetworkFileName $fileName]
+	    set dstFile [::Types::GetFileTailAddSuffix $fileName]
 	    
 	    # Loop over all connected servers or only the specified one.
 	    foreach ip $allPutIP {
@@ -119,8 +120,8 @@ proc ::PutFileIface::PutFile {wtop fileName where {optList {}}} {
 		    ::putfile::put $fileName $ip $prefs(remotePort)  \
 		      -mimetype $mime -timeout [expr 1000 * $prefs(timeout)] \
 		      -optlist $optList -filetail $dstFile  \
-		      -progress ::PutFileIface::PutProgress  \
-		      -command [list ::PutFileIface::PutCommand $wtop]
+		      -progress [namespace current]::PutProgress  \
+		      -command [list [namespace current]::PutCommand $wtop]
 		} tok]} {
 		    tk_messageBox -title [::msgcat::mc {File Transfer Error}]  \
 		      -type ok -message $tok
@@ -178,10 +179,10 @@ proc ::PutFileIface::PutCommand {wtop token what msg} {
 	::UI::SetStatusMessage $wtop $msg
 	if {[::putfile::status $token] == "ok"} {
 	    ::putfile::cleanup $token
+	    ::PutFileIface::DeRegisterPutSession $token
 	}
     }
-    ::PutFileIface::DeRegisterPutSession $token
-    update
+    #update
 }
 
 # PutFileIface::PutFileToClient --
@@ -198,7 +199,7 @@ proc ::PutFileIface::PutCommand {wtop token what msg} {
 #    none.
 
 proc ::PutFileIface::PutFileToClient {wtop s ip relativeFilePath optList} {
-    global  tclwbProtMsg this chunkSize mimeTypeIsText
+    global  tclwbProtMsg this chunkSize
     
     Debug 2 "+      PutFileToClient:: s=$s, ip=$ip,\
       relativeFilePath=$relativeFilePath"
@@ -208,7 +209,7 @@ proc ::PutFileIface::PutFileToClient {wtop s ip relativeFilePath optList} {
     set filePath [addabsolutepathwithrelative $this(path) $relativeFilePath]
     
     # This must never fail (application/octet-stream as fallback).
-    set mime [GetMimeTypeFromFileName $filePath]
+    set mime [::Types::GetMimeTypeForFileName $filePath]
     
     # And finally...    
     if {[catch {

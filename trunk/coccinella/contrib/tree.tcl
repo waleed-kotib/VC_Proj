@@ -25,7 +25,7 @@
 # 
 # Copyright (C) 2002-2003 Mats Bengtsson
 # 
-# $Id: tree.tcl,v 1.2 2003-01-30 17:33:40 matben Exp $
+# $Id: tree.tcl,v 1.3 2003-05-18 13:20:20 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -174,62 +174,6 @@ namespace eval tree {
 	R0lGODdhEAAQAKIAAP///+/v797e3s7OzgAAAAAAAAAAAAAAACwAAAAAEAAQAAADNCi03PKQ
 	hEnngk9WSgbB2hY4mbh9pclF1igtFqvGaePSyoxrcL/rI9kMldMRQ6pjY8l4JAAAOw==
     }]
-    set widgetGlobals(machead) [image create photo -data {
-	R0lGODdhCgAMAKIAAP//////zv/OnN7e3s6cYwAAAAAAAAAAACwAAAAACgAMAAADIzi1vBow
-	BrGmuJdUTIUu1lV4G0eC5hmKTDhSD8fEnDYojTMkADs=
-    }]
-    set widgetGlobals(macheadaway) [image create photo -data {
-	R0lGODdhEAAOALMAAP//////zv/OnN7e3s7O/86cY2NjzjExYwAAAAAAAAAAAAAAAAAAAAAA
-	AAAAAAAAACwAAAAAEAAOAAAER3DIKZG9iFIUuheZNnBCWRahRpaIgE7YCrppHZhnFmMmLxAm
-	IKgFGrkMroKhgBrqjkwlk/hqSZlL1KUCxU5VrkNU/FLtLKIIADs=
-    }]
-    set widgetGlobals(macheadtalk) [image create photo -data {
-	R0lGODdhDgAOAKIAAP//////zv/OnN7e3s6cYwAAYwAAAAAAACwAAAAADgAOAAADOTi2vPPP
-	hEmDMFBZwTnBkNRdwpeJnVGC0TaaRTt6YIyOS2y7zaPfLN+gcLs4hsMiB6OLNI7CjDSaAAA7
-    }]
-    set widgetGlobals(macheadunav) [image create photo -data {
-	R0lGODdhDQANALMAAP//////zv/Ozv/OnP9jY/8xAN7e3t4AAM6cY70AAK0AAIwAAHMAAFJS
-	UlIAAAAAACwAAAAADQANAAAETtCYI6uk17zNN5vCQyxBmQjK86WLogxHoTRP9bRK/KS1dLsu
-	FaKnCRyAjMHQlpABFUsfwcUIbi6/5C6lmBBuycGAo/gwHg6x2lM5d9iGCAA7
-    }]
-    set widgetGlobals(macheadsleep) [image create photo -data {
-	R0lGODdhDQAPAKIAAP//////zv/OnN7e3s6cYwAAAAAAAAAAACwAAAAADQAPAAADNDiq1bUQ
-	PtnWjNfd4aKnWuYEZCAITxGoxekS6eqeLczJcx3Ps63yrx1Q4AsQjkjkJBQaJAAAOw==
-    }]
-    set widgetGlobals(macheadgray) [image create photo -data {
-	R0lGODdhCgAMAKIAAP///97e3sbGxoSEhAAAAAAAAAAAAAAAACwAAAAACgAMAAADIxi0vAow
-	ArGmuHdUjDWxFCF4YLdx44k15UU8KwNzWqA0TpAAADs=
-    }]
-    set widgetGlobals(dndim) [image create photo -data {
-	R0lGODdhEAALALMAAP//////zv/Ozv/OnM6cnM6cY85jY5xjY5xjMZwxMQAAAAAAAAAAAAAA
-	AAAAAAAAACwAAAAAEAALAAAERVDJSasMQoxBevmgJEhEoRiIYipIqoyDQkimGbvxPKv8LcUm
-	HUnGGh6IO6FhmJoVUjmelJAqHGOKwaqQ6HZbLcNnZylLIgA7
-    }]
-    set widgetGlobals(naim) [image create photo -data {
-	R0lGODdhEAALALMAAP///87//5z//5zO/2PO/2Oc/2OczjGczjFjzjFjnABjnAAAAAAAAAAA
-	AAAAAAAAACwAAAAAEAALAAAESHDJSasEIAQxOiFFSFzBEozDgUhJK22SsAzJPMy1ec/4vNIx
-	lAQ4IQ4KvF5qIVjNDMofVACdHZTXo6lKUHgVhFYLMTBULWhJBAA7
-    }]
-    set widgetGlobals(questmark) [image create photo -data {
-	R0lGODdhCAANAKIAAP////9jY97e3q0AAFIAAAAAAAAAAAAAACwAAAAACAANAAADHCgSMaPL
-	yfiEdNA6kgfxUMOFIDlCZXdmrNK0aQIAOw==
-    }]    
-    set widgetGlobals(macheadwb) [image create photo -data {
-	R0lGODlhEAAOAPMAAP//////zv/OnN7e3s6cY29vbwAAAAAAAAAAAAAAAAAA
-	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAMALAAAAAAQAA4AAARCcJhJ57hYhs2D
-	MNlleEJZEmA4mp+AhhpruEZh3ytLAzxf5CxUzwcsUYaAH6n1QSaLR6RSJ5RK
-	KhNnMlTQ+ri38C0CADs=
-    }]
-    set widgetGlobals(macheadtalkwb) [image create photo -data {
-	R0lGODlhEAAOAPMAAP//////zv/OnN7e3s6cY29vbwAAYwAAAAAAAAAAAAAA
-	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAMALAAAAAAQAA4AAARKcJxJ57hYhs2D
-	ONl1eEJZEmA4mp+Ahhp7uEdh3ytLAwbgFzkWytcDAEmyQ694NFWIPGPw4Ksu
-	pcjPBNpr6qhXo6Sytf5Ct5shHQEAOw==
-    }]
-    set widgetGlobals(macheadinv) [image create photo -data {
-	R0lGODlhCgAMAPEAAP///wsb6QAAAAAAACH5BAEAAAEALAAAAAAKAAwAAAIY
-	jI5nwc3qGpRPRGtwzLvu5GCWVo2dmEAFADs=
-    }]
     
     # Some icons remade with transparency and 16 pixels width.
     # May be display problems with 8.3.
@@ -264,143 +208,12 @@ namespace eval tree {
 	FuraxfshA4UKXmuc8AAB4V0XHzp4tTFig2DHeENYteFhQULHMm7cAOF5QEAA
 	Ow==
     }] 
-    set widgetGlobals(machead) [image create photo -data {
-	R0lGODlhEAAMAPMAAP//////zv/OnN7e3s6cYwAAAAAAAAAAAAAAAAAAAAAA
-	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAMALAAAAAAQAAwAAAQxcJRJ57hYhs2D
-	KNlVeEJZEmA4mp+AhhpbuGm2sjR8s69KmhTdb/aBxYAWIa6nqyRhEQA7
-    }]
-    set widgetGlobals(macheadaway) [image create photo -data {
-	R0lGODlhEAAOAPMAAP//////zv/OnN7e3s7O/86cY2NjzjExYwAAAAAAAAAA
-	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAMALAAAAAAQAA4AAARHcMgpkb2IUhS6
-	F5k2cEJZFqFGloiATtgKumkdmGcWYyYvECYgqAUauQyugqGAGuqOTCWT+GpJ
-	mUvUpQLFTlWuQ1T8Uu0soggAOw==
-    }]
-    set widgetGlobals(macheadgray) [image create photo -data {
-	R0lGODlhEAAMAPMAAP///97e3sbGxoSEhAAAAAAAAAAAAAAAAAAAAAAAAAAA
-	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAEALAAAAAAQAAwAAAQxMJBJZ7hYgs2B
-	INlFeEJZDmA4miYaauYkuCrJ0tnKzmlul5SXjtXzxYLCH+8lqliYEQA7
-    }]
-    set widgetGlobals(macheadinv) [image create photo -data {
-	R0lGODlhEAAMAPEAAP///97e3gAAAAAAACH5BAEAAAEALAAAAAAQAAwAAAIl
-	jI4XywYPn2hLxDipxZI6DmTNdoUeeYkMKikaqK6p+5bxmtBUAQA7
-    }]
-    set widgetGlobals(macheadsleep) [image create photo -data {
-	R0lGODlhEAAPAPMAAP//////zv/OnN7e3s6cYwAAAAAAAAAAAAAAAAAAAAAA
-	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAMALAAAAAAQAA8AAAQ+cEhZapk4U03r
-	vNzWeZoVnoOlllbgBoIAUkFRxzgxpzcuCzqMreD7BT+wYuxIUy53NicQGiBY
-	r9ddSsXFRAAAOw==
-    }]
-    set widgetGlobals(macheadtalk) [image create photo -data {
-	R0lGODlhEAAOAPMAAP//////zv/OnN7e3s6cYwAAYwAAAAAAAAAAAAAAAAAA
-	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAMALAAAAAAQAA4AAAQ/cJhJ57hYhs2D
-	MNlleEJZEmA4mp+AhhpruGm2svRQ2CT76pibzLDbiXqVS/FoqimBsaYFaBQ2
-	qbbK9AnrGi8RADs=
-    }]
-    set widgetGlobals(macheadunav) [image create photo -data {
-	R0lGODlhEAANAPMAAP//////zv/Ozv/OnP9jY/8xAN7e3t4AAM6cY70AAK0A
-	AIwAAHMAAFJSUlIAAAAAACH5BAEAAAYALAAAAAAQAA0AAARV0Jgjq6R2msc7
-	Z9YhPMQSnImgPGC1LooyHIXSPNkGK/Sz4pnHLsZCAC2PwCGmYAyMuUeixlRA
-	g4QYg8jJHITNgW+lCBGEzoGY07QwHg61/JN7e+iWCAA7
-    }]
-    set widgetGlobals(questmark) [image create photo -data {
-	R0lGODlhEAANAPMAAP////9jY97e3q0AAFIAAAAAAAAAAAAAAAAAAAAAAAAA
-	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAIALAAAAAAQAA0AAAQmUIgQxpA4y2qt
-	zpzUfeKFeeRAZCoptBvsxutM22eNv/ruxz+ZKwIAOw==
-    }]
-    
-    # With whiteboard icon.
-    set widgetGlobals(macheadwb) [image create photo -data {
-	R0lGODlhEAAOAPMAAP//////zv/OnN7e3s6cY29vbwAAAAAAAAAAAAAAAAAA
-	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAMALAAAAAAQAA4AAARCcJhJ57hYhs2D
-	MNlleEJZEmA4mp+AhhpruEZh3ytLAzxf5CxUzwcsUYaAH6n1QSaLR6RSJ5RK
-	KhNnMlTQ+ri38C0CADs=
-    }]
-    set widgetGlobals(macheadtalkwb) [image create photo -data {
-	R0lGODlhEAAOAPMAAP//////zv/OnN7e3s6cY29vbwAAYwAAAAAAAAAAAAAA
-	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAMALAAAAAAQAA4AAARKcJxJ57hYhs2D
-	ONl1eEJZEmA4mp+Ahhp7uEdh3ytLAwbgFzkWytcDAEmyQ694NFWIPGPw4Ksu
-	pcjPBNpr6qhXo6Sytf5Ct5shHQEAOw==
-    }]
-    set widgetGlobals(macheadawaywb) [image create photo -data {
-	R0lGODlhEAAOAPMAAP//////zv/OnN7e3s7O/86cY29vb2NjzjExYwAAAAAA
-	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAMALAAAAAAQAA4AAARNcMgpk72J0hS6
-	F5k2cEJZFqFGlomATtgKumkdmGcWYyYvECYgqAUytAoHF7KAGiaMrgNz2aRB
-	qVQM4CpldhOA8PaImJZR4u1oZzG43xEAOw==
-    }]
-    set widgetGlobals(macheadinvwb) [image create photo -data {
-	R0lGODlhEAAOAPMAAP////7+/vr6+vb29t7e3nV1dW9vbwAAAAAAAAAAAAAA
-	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAQALAAAAAAQAA4AAAQ7kJxJJ7lYgs33
-	ydfRdR8okh6oocBhvPA5tkNnyOMR2Lg3jQXcSTe65X7FnmdmkFQmAibIMOM0
-	M7BsNgIAOw==
-    }]
-    set widgetGlobals(macheadunavwb) [image create photo -data {
-	R0lGODlhEAAOAPcAAP//////zv/Ozv/OnP9jY/8xAN7e3t4AAM6cY70AAK0A
-	AIwAAHMAAG9vb1JSUlIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAYALAAAAAAQAA4AAAiJAA0YOCCwoECC
-	BgcagMCwIUMGBg8IgEBgQYCLCQQogACx4MYFChQMOFBAgQMICReCVEASwkYI
-	DWI2EAhhZUiOCCAA2DlzYYADIRUwGJBzJ4CeEBKUDKqgKE+aBEIyuMnQ6MwD
-	NYUOcLlRgdUDBGoOHbCVodCnDCA8IMv2oVWBaR26fZtSpt2YAQEAOw==
-    }]
-    set widgetGlobals(macheadsleepwb) [image create photo -data {
-	R0lGODlhEAAPAPMAAP//////zv/OnN7e3s6cY29vbwAAAAAAAAAAAAAAAAAA
-	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAMALAAAAAAQAA8AAAREcEhpqpk4U03r
-	vNzWeZoVnoOlFmwxGkEcCIIBAC6s0zxh46mAgUcb+m45IbEmOAJhy94vGaU5
-	qdVrkMDtdqcvVaVViAAAOw==
-    }]
-    set widgetGlobals(questmarkwb) [image create photo -data {
-	R0lGODlhEAAOAPMAAP////9jY97e3q0AAG9vb1IAAAAAAAAAAAAAAAAAAAAA
-	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAIALAAAAAAQAA4AAAQ9UIgQxpA4y2qt
-	zpzUfeKFeeRQYIRKvPCrYlUB3DhAgGqe75ueDwcUuIbEU4GAvBUlzGaxEkUW
-	j1JNbPuKAAA7
-    }]
-    set widgetGlobals(macheadgraywb) [image create photo -data {
-	R0lGODlhEAAOAPMAAP///97e3sbGxoSEhG9vbwAAAAAAAAAAAAAAAAAAAAAA
-	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAEALAAAAAAQAA4AAAQ/MJRJZ7hYgs2B
-	KNlVeEJZDmA4miYaauYkoERtr+w8dgTOoh1AjxSbBIe5T1DoqyyRvx1PUjE+
-	Q4Qlh4C1eW0RADs=
-    }]
-
-    
+        
     # Let them be accesible from the outside. 
     set ::tree::idir            $widgetGlobals(idir)
     set ::tree::ifile           $widgetGlobals(ifile)
     set ::tree::folderimmac     $widgetGlobals(folderim)
     set ::tree::fileimmac       $widgetGlobals(fileim)
-    set ::tree::machead         $widgetGlobals(machead)
-    set ::tree::macheadaway     $widgetGlobals(macheadaway)    
-    set ::tree::macheadtalk     $widgetGlobals(macheadtalk)
-    
-    set ::tree::macheadunav     $widgetGlobals(macheadunav)
-    set ::tree::macheadsleep    $widgetGlobals(macheadsleep)
-    set ::tree::macheadgray     $widgetGlobals(macheadgray)
-    set ::tree::dndim           $widgetGlobals(dndim)
-    set ::tree::naim            $widgetGlobals(naim)
-    set ::tree::questmark       $widgetGlobals(questmark)
-    set ::tree::macheadinv      $widgetGlobals(macheadinv)
-    
-    set ::tree::macheadwb       $widgetGlobals(macheadwb)
-    set ::tree::macheadtalkwb   $widgetGlobals(macheadtalkwb)    
-    set ::tree::macheadawaywb   $widgetGlobals(macheadawaywb)    
-    set ::tree::macheadinvwb    $widgetGlobals(macheadinvwb)    
-    set ::tree::macheadunavwb   $widgetGlobals(macheadunavwb)     
-    set ::tree::macheadsleepwb  $widgetGlobals(macheadsleepwb)    
-    set ::tree::questmarkwb     $widgetGlobals(questmarkwb)    
-    set ::tree::macheadgraywb   $widgetGlobals(macheadgraywb)    
 }
 
 # ::tree::Init --
@@ -967,7 +780,7 @@ proc ::tree::Configure {w args} {
 	    }
 	    -sortorder {
 		
-		if {[string compare $newValue $oldValue] != 0} {
+		if {![string equal $newValue $oldValue]} {
 		    
 		    # Here we need to go through all 'children' and sort.
 		    
@@ -1335,7 +1148,7 @@ proc ::tree::SetSelection {w v} {
     if {$widgetGlobals(debug) > 1} {
 	puts "::tree::SetSelection w=$w, v=$v"
     }    
-    if {([string compare $v $treestate(selection)] != 0) && \
+    if {![string equal $v $treestate(selection)] && \
       ([llength $options(-selectcommand)] > 0)} {
 	uplevel #0 "$options(-selectcommand) [list $w $v]"
     }
@@ -1436,10 +1249,10 @@ proc ::tree::Build {w} {
 	puts "::tree::Build w=$w"
     }    
     set can $widgets(canvas)
-    if {[string compare $options(-openicons) {plusminus}] == 0} {
+    if {[string equal $options(-openicons) "plusminus"]} {
 	set widgetGlobals(openbm) $widgetGlobals(openbmplusmin)
 	set widgetGlobals(closedbm) $widgetGlobals(closedbmplusmin)	
-    } elseif {[string compare $options(-openicons) {triangle}] == 0} {
+    } elseif {[string equal $options(-openicons) "triangle"]} {
 	set widgetGlobals(openbm) $widgetGlobals(openbmmac)
 	set widgetGlobals(closedbm) $widgetGlobals(closedbmmac)	
     } else {
@@ -1774,9 +1587,9 @@ proc ::tree::NextLabel {w direction} {
 
 proc ::tree::FileTree {cmd arg} {
     
-    if {[string compare $cmd {dirname}] == 0} {
+    if {[string equal $cmd "dirname"]} {
 	return [lrange $arg 0 [expr [llength $arg] - 2]]
-    } elseif {[string compare $cmd {tail}] == 0} {
+    } elseif {[string equal $cmd "tail"]} {
 	return [lindex $arg end]
     }
 }

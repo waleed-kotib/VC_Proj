@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: EditDialogs.tcl,v 1.1.1.1 2002-12-08 11:02:56 matben Exp $
+# $Id: EditDialogs.tcl,v 1.2 2003-05-18 13:20:21 matben Exp $
 
 
 #       ::EditShortcuts:: implements dialogs for editing shortcuts. 
@@ -178,13 +178,13 @@ proc ::EditShortcuts::DoCancel {nameOfShortcutList} {
     if {$anyChange} {
 	set ans [tk_messageBox -icon error -type yesnocancel -message \
 	  [FormatTextForMessageBox [::msgcat::mc shortwarn]]]
-	if {[string compare $ans "yes"] == 0} {
+	if {[string equal $ans "yes"]} {
 	    DoSaveEditedShortcuts $nameOfShortcutList
 	    return
-	} elseif {[string compare $ans "no"] == 0} {
+	} elseif {[string equal $ans "no"]} {
 	    set finEdit 0
 	    return
-	} elseif {[string compare $ans "cancel"] == 0} {
+	} elseif {[string equal $ans "cancel"]} {
 	    return
 	}
     }
@@ -266,10 +266,10 @@ proc ::EditShortcuts::AddOrEditShortcuts {what nameOfShortsCopy indShortcuts  \
     focus $frtot.ent1
     
     # Get the short pair to edit.
-    if {[string compare $what "edit"] == 0} {
+    if {[string equal $what "edit"]} {
 	$frtot.ent1 insert 0 [lindex [lindex $theShortCopy 0] $indShortcuts]
 	$frtot.ent2 insert 0 [lindex [lindex $theShortCopy 1] $indShortcuts]
-    } elseif {[string compare $what "add"] == 0} {
+    } elseif {[string equal $what "add"]} {
 	
     }
     

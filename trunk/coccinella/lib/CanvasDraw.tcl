@@ -7,25 +7,14 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasDraw.tcl,v 1.5 2003-04-28 13:32:31 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.6 2003-05-18 13:20:21 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 
 package provide CanvasDraw 1.0
 
 namespace eval ::CanvasDraw:: {
-    
-    # Not sure that all should be exported.
-    namespace export InitMove DoMove FinalizeMove
-    namespace export InitBox BoxDrag FinalizeBox
-    namespace export InitArc ArcDrag FinalizeArc ArcCancel
-    namespace export InitLine LineDrag FinalizeLine
-    namespace export InitStroke StrokeDrag FinalizeStroke
-    namespace export PolySetPoint PolyDrag FinalizePoly
-    namespace export InitRotateItem DoRotateItem FinalizeRotate
-    namespace export DoPaint
-    namespace export DeleteItem ConstrainedDrag
-    
+        
     # Arrays that collects a information needed for the move, box etc..
     # Is unset when finished.
     variable xDrag
@@ -258,6 +247,59 @@ proc ::CanvasDraw::InitMove {w x y {what item}} {
     }
 }
 
+# CanvasDraw::InitMoveFrame --
+# 
+#       Generic and general move function for framed objects.
+
+proc ::CanvasDraw::InitMoveFrame {wcan wframe x y} {
+    global  kGrad2Rad    
+    variable  xDrag
+    
+    # Fix x and y.
+    set x [$wcan canvasx [expr [winfo x $wframe] + $x]]
+    set y [$wcan canvasx [expr [winfo y $wframe] + $y]]
+    Debug 2 "InitMoveFrame:: wcan=$wcan, x=$x, y=$y"
+        
+    # If more than one item triggered, choose the "point".
+    if {[info exists xDrag(what)] && $xDrag(what) == "point"} {
+	Debug 2 "  InitMoveFrame:: rejected"
+	return
+    }
+    set xDrag(what) "frame"
+    set xDrag(baseX) $x
+    set xDrag(baseY) $y
+    set xDrag(anchorX) $x
+    set xDrag(anchorY) $y
+    
+    # In some cases we need the anchor point to be an exact item 
+    # specific coordinate.
+    
+    set xDrag(type) [$wcan type current]
+    
+    # If frame then make ghost rectangle. 
+    # Movies (and windows) do not obey the usual stacking order!
+    
+    set id [::CanvasUtils::FindTypeFromOverlapping $wcan $x $y tframe]
+    if {$id == ""} {
+	Debug 2 "  InitMoveFrame:: FindTypeFromOverlapping rejected"
+	return
+    }
+    set it [::CanvasUtils::GetUtag $wcan $id]
+    if {$it == ""} {
+	Debug 2 "  InitMoveFrame:: GetUtag rejected"
+	return
+    }
+    set xDrag(undocmd) "coords $it [$wcan coords $id]"
+    $wcan addtag selectedframe withtag $id
+    set bbox [$wcan bbox $id]
+    set x1 [expr [lindex $bbox 0] - 1]
+    set y1 [expr [lindex $bbox 1] - 1]
+    set x2 [expr [lindex $bbox 2] + 1]
+    set y2 [expr [lindex $bbox 3] + 1]
+    $wcan create rectangle $x1 $y1 $x2 $y2 -outline gray50 -width 3 \
+      -stipple gray50 -tags "ghostrect"	
+}
+
 # CanvasDraw::DoMove --
 #
 #       If selected items, move them, else move current item if exists.
@@ -275,14 +317,13 @@ proc ::CanvasDraw::InitMove {w x y {what item}} {
 #       none
 
 proc ::CanvasDraw::DoMove {w x y what {shift 0}} {
-    global  kGrad2Rad kRad2Grad
-    
+    global  kGrad2Rad kRad2Grad    
     variable  xDrag
 
     if {![info exists xDrag]} {
 	return
     }
-    
+   
     # If we drag a point, then reject events triggered by non-point events.
     if {[string equal $xDrag(what) "point"] && ![string equal $what "point"]} {
 	return
@@ -378,7 +419,7 @@ proc ::CanvasDraw::DoMove {w x y what {shift 0}} {
 	    set newAng [expr $kRad2Grad * atan2($cy - $y,-($cx - $x))]
 	    
 	    # Dragging the 'extent' point or the 'start' point?
-	    if {[string compare $xDrag(arcHit) "extent"] == 0} { 
+	    if {[string equal $xDrag(arcHit) "extent"]} { 
 		set extentAng [expr $newAng - $xDrag(arcStart)]
 		
 		# Same trick as when drawing it; take care of the branch cut.
@@ -432,6 +473,33 @@ proc ::CanvasDraw::DoMove {w x y what {shift 0}} {
 	    $w move lightBbox [expr $x - $xDrag(baseX)] [expr $y - $xDrag(baseY)]
 	}
     }
+    set xDrag(baseX) $x
+    set xDrag(baseY) $y
+}
+
+# CanvasDraw::DoMoveFrame --
+# 
+# 
+
+proc ::CanvasDraw::DoMoveFrame {wcan wframe x y} {
+    variable  xDrag
+
+    if {![info exists xDrag]} {
+	return
+    }
+    
+    # If we drag a point, then reject events triggered by non-point events.
+    if {[string equal $xDrag(what) "point"] && ![string equal $what "point"]} {
+	return
+    }
+
+    # Fix x and y.
+    set x [$wcan canvasx [expr [winfo x $wframe] + $x]]
+    set y [$wcan canvasx [expr [winfo y $wframe] + $y]]
+    
+    # Moving a frame window item (ghostrect).
+    $wcan move ghostrect [expr $x - $xDrag(baseX)] [expr $y - $xDrag(baseY)]
+    
     set xDrag(baseX) $x
     set xDrag(baseY) $y
 }
@@ -623,6 +691,55 @@ proc ::CanvasDraw::FinalizeMove {w x y {what item}} {
 	undo::add [::UI::GetUndoToken $wtop] $undo $redo
     }
     
+    catch {unset xDrag}
+}
+
+# CanvasDraw::FinMoveFrame --
+# 
+# 
+
+proc ::CanvasDraw::FinMoveFrame {wcan wframe  x y} {
+    variable  xDrag
+    
+    Debug 2 "FinMoveFrame info exists xDrag=[info exists xDrag]"
+
+    if {![info exists xDrag]} {
+	return
+    }
+   
+    # If we drag a point, then reject events triggered by non-point events.
+    if {$xDrag(what) == "point" && $what != "point"} {
+	return
+    }    
+
+    # Fix x and y.
+    set x [$wcan canvasx [expr [winfo x $wframe] + $x]]
+    set y [$wcan canvasx [expr [winfo y $wframe] + $y]]
+    set id [$wcan find withtag selectedframe]
+    set utag [::CanvasUtils::GetUtag $wcan $id]
+    set wtop [::UI::GetToplevelNS $wcan]
+    Debug 2 "  FinMoveFrame id=$id, utag=$utag, x=$x, y=$y"
+
+    if {$utag == ""} {
+	return
+    }
+    $wcan move selectedframe [expr $x - $xDrag(anchorX)]  \
+      [expr $y - $xDrag(anchorY)]
+    $wcan dtag selectedframe selectedframe
+    set cmd "coords $utag [$wcan coords $utag]"
+    
+    # Delete the ghost rect or highlighted marker if any. Remove temporary tags.
+    $wcan delete ghostrect
+    
+    # Do send to all connected.
+    set redo [list ::CanvasUtils::Command $wtop $cmd]
+    if {[info exists xDrag(undocmd)]} {
+	set undo [list ::CanvasUtils::Command $wtop $xDrag(undocmd)]
+    }
+    eval $redo "remote"
+    if {[info exists undo]} {
+	undo::add [::UI::GetUndoToken $wtop] $undo $redo
+    }    
     catch {unset xDrag}
 }
 
@@ -888,7 +1005,9 @@ proc ::CanvasDraw::InitArc {w x y {shift 0}} {
 	    $w create line $x [expr $y - 5] $x [expr $y + 6] -fill gray50 -tag tcent 
 	}
 	focus $w
-	bind $w <KeyPress-space> {ArcCancel %W}
+	bind $w <KeyPress-space> {
+	    ::CanvasDraw::ArcCancel %W
+	}
 	::UI::SetStatusMessage $wtop [::msgcat::mc uastatarc2]
 	
     } else {
@@ -908,9 +1027,15 @@ proc ::CanvasDraw::InitArc {w x y {shift 0}} {
 	set y1 [expr $cy + $r]
 	set arcBox($w,co1) [list $x1 $y1]
 	set arcBox($w,co2) [list [expr $cx - $r] [expr $cy - $r]]
-	bind $w <B1-Motion> {ArcDrag %W [%W canvasx %x] [%W canvasy %y]}
-	bind $w <Shift-B1-Motion> {ArcDrag %W [%W canvasx %x] [%W canvasy %y] 1}
-	bind $w <ButtonRelease-1> {FinalizeArc %W [%W canvasx %x] [%W canvasy %y]}
+	bind $w <B1-Motion> {
+	    ::CanvasDraw::ArcDrag %W [%W canvasx %x] [%W canvasy %y]
+	}
+	bind $w <Shift-B1-Motion> {
+	    ::CanvasDraw::ArcDrag %W [%W canvasx %x] [%W canvasy %y] 1
+	}
+	bind $w <ButtonRelease-1> {
+	    ::CanvasDraw::FinalizeArc %W [%W canvasx %x] [%W canvasy %y]
+	}
     }
     catch {unset arcBox($w,last)}
 }
@@ -1091,9 +1216,15 @@ proc ::CanvasDraw::PolySetPoint {w x y} {
     
     # Let the latest line segment follow the mouse movements.
     focus $w
-    bind $w <Motion> {PolyDrag %W [%W canvasx %x] [%W canvasy %y]}
-    bind $w <Shift-Motion> {PolyDrag %W [%W canvasx %x] [%W canvasy %y] 1}
-    bind $w <KeyPress-space> {FinalizePoly %W [%W canvasx %x] [%W canvasy %y]}
+    bind $w <Motion> {
+	::CanvasDraw::PolyDrag %W [%W canvasx %x] [%W canvasy %y]
+    }
+    bind $w <Shift-Motion> {
+	::CanvasDraw::PolyDrag %W [%W canvasx %x] [%W canvasy %y] 1
+    }
+    bind $w <KeyPress-space> {
+	::CanvasDraw::FinalizePoly %W [%W canvasx %x] [%W canvasy %y]
+    }
 }               
 
 # CanvasDraw::PolyDrag --
@@ -1276,7 +1407,7 @@ proc ::CanvasDraw::LineDrag {w x y shift {opt 0}} {
     }
 
     catch {$w delete $theLine($w,last)}
-    if {[string compare $opt "arrow"] == 0} {
+    if {[string equal $opt "arrow"]} {
 	set extras [list -arrow last]
     } else {
 	set extras {}
@@ -1328,7 +1459,7 @@ proc ::CanvasDraw::FinalizeLine {w x y shift {opt 0}} {
     if {![info exists theLine($w,last)]} {
 	return
     }
-    if {[string compare $opt {arrow}] == 0} {
+    if {[string equal $opt "arrow"]} {
 	set extras [list -arrow last]
     } else {
 	set extras {}
@@ -1939,6 +2070,37 @@ proc ::CanvasDraw::DeleteItem {w x y {id current} {where all}} {
     if {$needDeselect} {
 	::UserActions::DeselectAll $wtop
     }
+}
+
+# CanvasDraw::DeleteFrame --
+# 
+#       Generic binding for deleting a frame that typically contains
+#       something from a plugin.
+
+proc ::CanvasDraw::DeleteFrame {wcan wframe x y {where all}} {
+        
+    # Fix x and y.
+    set x [$wcan canvasx [expr [winfo x $wframe] + $x]]
+    set y [$wcan canvasx [expr [winfo y $wframe] + $y]]
+    set wtop [::UI::GetToplevelNS $wcan]
+    set cmdList {}
+    set undoList {}
+
+    set id [lindex [$wcan find closest $x $y 3] 0]
+    set utag [::CanvasUtils::GetUtag $wcan $id]
+    if {$utag == ""} {
+	return
+    }
+    
+    # Delete both the window item and the window (with subwindows).
+    lappend cmdList [list delete $utag]
+    set extraCmd [list destroy $wframe]
+    
+    # Undo missing here...
+
+    set redo [list ::CanvasUtils::CommandList $wtop $cmdList $where]
+    set redo [list EvalCommandList [list $redo $extraCmd]]
+    eval $redo    
 }
 
 # CanvasDraw::MarkBbox --

@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: browse.tcl,v 1.6 2003-04-28 13:32:31 matben Exp $
+# $Id: browse.tcl,v 1.7 2003-05-18 13:20:20 matben Exp $
 # 
 #  locals($jid,parent):       the parent of $jid.
 #  locals($jid,parents):      list of all parent jid's,
@@ -53,6 +53,7 @@
 #      browseName getalltypes globpattern
 #      browseName getalljidfortypes globpattern
 #      browseName getusers jid
+#      browseName havenamespace jid namespace
 #      browseName isbrowsed jid
 #      browseName isroom jid
 #      browseName remove jid
@@ -86,13 +87,6 @@ namespace eval browse {
 	-setbrowsedjid 1
     }
 }	
-
-proc browse::Debug {num str} {
-    variable browseGlobals
-    if {$num <= $browseGlobals(debug)} {
-	puts $str
-    }
-}
 
 # browse::browse --
 #
@@ -212,7 +206,7 @@ proc browse::get {browseName jid} {
     if {[info exists locals($jid,xmllist)]} {
 	return $locals($jid,xmllist)
     } else {
-	return {}
+	return ""
     }
 }
 
@@ -268,7 +262,7 @@ proc browse::getparents {browseName jid} {
     if {[info exists locals($jid,parents)]} {
 	return $locals($jid,parents)
     } else {
-	return {}
+	return ""
     }
 }
     
@@ -289,7 +283,7 @@ proc browse::getchilds {browseName jid} {
     if {[info exists locals($jid,childs)]} {
 	return $locals($jid,childs)
     } else {
-	return {}
+	return ""
     }
 }
     
@@ -312,7 +306,7 @@ proc browse::getname {browseName jid} {
     if {[info exists locals($jid,name)]} {
 	return $locals($jid,name)
     } else {
-	return {}
+	return ""
     }
 }
     
@@ -335,7 +329,7 @@ proc browse::getusers {browseName jid} {
     if {[info exists locals($jid,allusers)]} {
 	return $locals($jid,allusers)
     } else {
-	return {}
+	return ""
     }
 }
     
@@ -362,7 +356,7 @@ proc browse::getservicesforns {browseName ns} {
     if {[info exists locals(ns,$ns)]} {
 	return $locals(ns,$ns)
     } else {
-	return {}
+	return ""
     }
 }
 
@@ -392,7 +386,7 @@ proc browse::gettype {browseName jid} {
     if {[info exists locals($jid,type)]} {
 	return $locals($jid,type)
     } else {
-	return {}
+	return ""
     }
 }    
 
@@ -402,7 +396,7 @@ proc browse::gettype {browseName jid} {
 #       
 # Arguments:
 #       browseName:   the instance of this conference browse.
-#       typepattern:  a globa pattern of jid type/subtype (service/*).
+#       typepattern:  a global pattern of jid type/subtype (service/*).
 #
 # Results:
 #       List of jid's matching the type pattern.
@@ -468,7 +462,31 @@ proc browse::getnamespaces {browseName jid} {
     if {[info exists locals($jid,ns)]} {
 	return $locals($jid,ns)
     } else {
-	return {}
+	return ""
+    }
+}
+
+# browse::havenamespace --
+#
+#       Returns 0/1 if jid supports this namespace.
+#
+# Arguments:
+#       browseName:   the instance of this conference browse.
+#       jid:          .
+#       ns            namespace.
+#       
+# Results:
+#       0/1
+
+proc browse::havenamespace {browseName jid ns} {
+    upvar [namespace current]::${browseName}::locals locals
+    
+    Debug 3 "browse::havenamespace  jid=$jid, ns=$ns"
+
+    if {[info exists locals($jid,ns)]} {
+	return [expr [lsearch $locals($jid,ns) $ns] < 0 ? 0 : 1]
+    } else {
+	return 0
     }
 }
 
@@ -573,8 +591,13 @@ proc browse::setsinglejid {browseName parentJid jid xmllist {browsedjid 0}} {
     Debug 3 "browse::setsinglejid browseName=$browseName, parentJid=$parentJid\
       jid=$jid, xmllist='$xmllist'"
     
-    set theTag [lindex $xmllist 0]
+    set category [lindex $xmllist 0]
     array set attr [lindex $xmllist 1]
+
+    # Check for any 'category' attribute introduced in the 1.2 rev. of JEP-0011.
+    if {[info exists attr(category)]} {
+    	set category $attr(category)
+    }
     
     # If the 'jid' is empty we get it from our attributes!
     if {[string length $jid] == 0} {
@@ -583,7 +606,7 @@ proc browse::setsinglejid {browseName parentJid jid xmllist {browsedjid 0}} {
     
     # First, is this a "set" or a "remove" type?
     if {[info exists attr(type)] && [string equal $attr(type) "remove"]} {
-	if {[string equal $theTag "user"]} {
+	if {[string equal $category "user"]} {
 	    
 	    # Be sure to update the room's list of participants.
 	    set ind [lsearch $locals($parentJid,allusers) $jid]
@@ -614,14 +637,7 @@ proc browse::setsinglejid {browseName parentJid jid xmllist {browsedjid 0}} {
 	}
 	
 	if {[info exists attr(type)]} {
-	    
-	    # Check for any 'category' attribute introduced in the 1.2 rev.
-	    # of JEP-0011.
-	    if {[info exists attr(category)]} {
-		set jidtype "$attr(category)/$attr(type)"
-	    } else {		
-		set jidtype "$theTag/$attr(type)"
-	    }
+	    set jidtype $category/$attr(type)
 	    set locals($jid,type) $jidtype
 	    lappend locals($jidtype,typelist) $jid
 	    lappend locals(alltypes) $jidtype
@@ -631,7 +647,7 @@ proc browse::setsinglejid {browseName parentJid jid xmllist {browsedjid 0}} {
 	}
 	
 	# Cache additional info depending on the tag.
-	switch -exact -- $theTag {
+	switch -exact -- $category {
 	    conference {
 	    
 		# This is either a conference server or one of its rooms.
@@ -644,9 +660,6 @@ proc browse::setsinglejid {browseName parentJid jid xmllist {browsedjid 0}} {
 		} else {
 		
 		    # Cache all conference servers. Don't count the rooms.
-		    if {![info exists locals(confservers)]} {
-			set locals(confservers) {}
-		    }
 		    if {[lsearch -exact $locals(confservers) $jid] < 0} {		    
 			lappend locals(confservers) $jid
 		    }
@@ -657,7 +670,7 @@ proc browse::setsinglejid {browseName parentJid jid xmllist {browsedjid 0}} {
 		# If with 'user' tag in conferencing, keep internal table that
 		# maps the 'room@server/hexname' to nickname.
 		if {[info exists attr(name)]} {
-			set locals($jid,name) $attr(name)
+		    set locals($jid,name) $attr(name)
 		}
 		
 		# Keep list of all 'user'«s in a room. The 'parentJid' must
@@ -665,16 +678,16 @@ proc browse::setsinglejid {browseName parentJid jid xmllist {browsedjid 0}} {
 		if {![info exists locals($parentJid,allusers)]} {
 		    set locals($parentJid,allusers) {}
 		}
-		if {[lsearch -exact $locals($parentJid,allusers) $jid] < 0} {
-		    lappend locals($parentJid,allusers) $jid
-		}
+		lappend locals($parentJid,allusers) $jid
+		set locals($parentJid,allusers)  \
+		  [lsort -unique $locals($parentJid,allusers)]
 	    }	    
 	}
     }
     # End set type.
     
     # Loop through the children if any. Defines a parentship.
-    # Only exception is a namespace definition <ns>.
+    # Only exception is a namespace definition <ns/>.
     foreach child [wrapper::getchildren $xmllist] {
 	if {[string equal [lindex $child 0] "ns"]} {
 	    
@@ -818,6 +831,13 @@ proc browse::ClearAll {browseName} {
 proc browse::delete {browseName} {
     
     namespace delete [namespace current]::$browseName
+}
+
+proc browse::Debug {num str} {
+    variable browseGlobals
+    if {$num <= $browseGlobals(debug)} {
+	puts $str
+    }
 }
 
 #-------------------------------------------------------------------------------

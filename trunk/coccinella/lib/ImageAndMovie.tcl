@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ImageAndMovie.tcl,v 1.5 2003-02-24 17:52:10 matben Exp $
+# $Id: ImageAndMovie.tcl,v 1.6 2003-05-18 13:20:21 matben Exp $
 
 package require http
 
@@ -36,12 +36,10 @@ namespace eval ::ImageAndMovie:: {
 # Results:
 #       Defines option arrays and icons for movie controllers.
 
-proc ::ImageAndMovie::ImportImageOrMovieDlg {wtop} {
-    global  typelistImageMovie prefMimeType2Package plugin
-    
+proc ::ImageAndMovie::ImportImageOrMovieDlg {wtop} {    
     variable initialDir
     upvar ::${wtop}::wapp wapp
-
+    
     set wCan $wapp(can)
     if {[info exists initialDir]} {
 	set opts {-initialdir $initialDir}
@@ -49,7 +47,7 @@ proc ::ImageAndMovie::ImportImageOrMovieDlg {wtop} {
 	set opts {}
     }
     set fileName [eval {tk_getOpenFile -title [::msgcat::mc {Open Image/Movie}] \
-      -filetypes $typelistImageMovie} $opts]
+      -filetypes [::Plugins::GetTypeListDialogOption binary]} $opts]
     if {$fileName == ""} {
 	return
     }
@@ -58,33 +56,26 @@ proc ::ImageAndMovie::ImportImageOrMovieDlg {wtop} {
     # Once the file name is chosen continue...
     # Perhaps we should dispatch to the registered import procedure for
     # this MIME type.
-    set theMime [GetMimeTypeFromFileName $fileName]
-    if {[llength $theMime]} {
-	set importPackage $prefMimeType2Package($theMime)
-	if {[llength $importPackage]} {
-	    set errMsg [eval [list $plugin($importPackage,importProc) $wCan  \
-	      [list coords: [::CanvasUtils::NewImportAnchor]] -file $fileName]]
-	    if {$errMsg != ""} {
-		tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
-		  -message "Failed importing: $errMsg"
-	    }
-	} else {
+    set mime [::Types::GetMimeTypeForFileName $fileName]
+    if {[::Plugins::HaveImporterForMime $mime]} {
+	set optList [list coords: [::CanvasUtils::NewImportAnchor]]	
+	set errMsg [::ImageAndMovie::DoImport $wCan $optList -file $fileName]
+	if {$errMsg != ""} {
 	    tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
-	      -message [::msgcat::mc messfailmimeimp $theMime]
+	      -message "Failed importing: $errMsg"
 	}
     } else {
-	set tail [file tail $fileName]
-	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok -message \
-	  [FormatTextForMessageBox [::msgcat::mc messfailnomime $tail]]
+	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
+	  -message [::msgcat::mc messfailmimeimp $mime]
     }
 }
 
 # ImageAndMovie::DoImport --
 # 
-#       Opens an image in the canvas and puts it to all other clients.
-#       If QuickTime is supported, a movie can be opened as well.
-#       This is the preferred import procedure for QuickTimeTcl, xanim, 
-#       and the snack package.
+#       Dispatches importing images/audio/video etc., to the whiteboard.  
+#       There shall be a registered import procedure for the mime type
+#       to be imported. It may import from local disk (-file) or remotely
+#       (-url). 
 #
 # Arguments:
 #       w         the canvas widget path.
@@ -112,7 +103,7 @@ proc ::ImageAndMovie::ImportImageOrMovieDlg {wtop} {
 #       an error string which is empty if things went ok so far.
 
 proc ::ImageAndMovie::DoImport {w optList args} {
-    global  prefs this prefMimeType2Package plugin allIPnumsToSend
+    global  prefs this allIPnumsToSend
     
     variable xanimPipe2Frame 
     variable xanimPipe2Item
@@ -147,7 +138,7 @@ proc ::ImageAndMovie::DoImport {w optList args} {
 	set fileName $argsArr(-file)
 	set fileTail [file tail $fileName]
 	array set optArr [list   \
-	  Content-Type:     [GetMimeTypeFromFileName $fileName]      \
+	  Content-Type:     [::Types::GetMimeTypeForFileName $fileName]      \
 	  size:             [file size $fileName]                    \
 	  coords:           {0 0}                                    \
 	  tags:             [::CanvasUtils::NewUtag]                 ]
@@ -157,7 +148,7 @@ proc ::ImageAndMovie::DoImport {w optList args} {
 	set fileName [GetFilePathFromUrl $argsArr(-url)]
 	set fileTail [file tail $fileName]
 	array set optArr [list   \
-	  Content-Type:     [GetMimeTypeFromFileName $fileName]   \
+	  Content-Type:     [::Types::GetMimeTypeForFileName $fileName]   \
 	  coords:           {0 0}                                 \
 	  tags:             [::CanvasUtils::NewUtag]              ]
     }
@@ -171,19 +162,14 @@ proc ::ImageAndMovie::DoImport {w optList args} {
     # Depending on the MIME type do different things; the MIME type is the
     # primary key for classifying the file. 
     # Note: image/* always through tk's photo handler; package neutral.
-    set theMIME $optArr(Content-Type:)
-    regexp {([^/]+)/([^/]+)} $theMIME match mimeBase mimeSubType
+    set mime $optArr(Content-Type:)
+    regexp {([^/]+)/([^/]+)} $mime match mimeBase mimeSubType
     
     # Find import package if any for this MIME type.
-    if {[info exists prefMimeType2Package($theMIME)]} {
-	set importPackage $prefMimeType2Package($theMIME)
-	if {[llength $importPackage] == 0} {
-	    return "No importer found for the file \"$fileTail\" with\
-	      MIME type $theMIME"
-	}
-    } else {
+    set importPackage [::Plugins::GetPreferredPackageForMime $mime]
+    if {$importPackage == ""} {
 	return "No importer found for the file \"$fileTail\" with\
-	  MIME type $theMIME"
+	  MIME type $mime"
     }
     
     # Images are dispatched internally by tk's photo command.
@@ -220,7 +206,8 @@ proc ::ImageAndMovie::DoImport {w optList args} {
 		} else {
 		    set errMsg [eval {
 			::ImageAndMovie::HttpGet $wtopNS $argsArr(-url) \
-			  $importer $putOpts} [array get argsArr]]
+			  $importer $putOpts
+		    } [array get argsArr]]
 		}
 	    }
 	}
@@ -249,7 +236,8 @@ proc ::ImageAndMovie::DoImport {w optList args} {
 		    # http but without streaming it?
 		    if {0} {
 			eval {::ImageAndMovie::HttpGet $wtopNS $argsArr(-url) \
-			  $importer $putOpts} [array get argsArr]
+			  $importer $putOpts
+		    } [array get argsArr]
 		    }
 		}    
 	    }
@@ -272,7 +260,8 @@ proc ::ImageAndMovie::DoImport {w optList args} {
 		} else {
 		    set errMsg [eval {
 			::ImageAndMovie::HttpGet $wtopNS $argsArr(-url) \
-			  $importer $putOpts} [array get argsArr]]
+			  $importer $putOpts
+		    } [array get argsArr]]
 		}    
 	    }
 	}	    
@@ -294,7 +283,8 @@ proc ::ImageAndMovie::DoImport {w optList args} {
 		} else {
 		    set errMsg [eval {
 			::ImageAndMovie::HttpGet $wtopNS $argsArr(-url) \
-			  $importer $putOpts} [array get argsArr]]
+			  $importer $putOpts
+		    } [array get argsArr]]
 		}
 	    }
 	}
@@ -302,18 +292,30 @@ proc ::ImageAndMovie::DoImport {w optList args} {
 		
 	    # Dispatch to any registerd importer for this MIME type.
 	    set putOpts [array get optArr]
-	    if {0} {
+	    if {$drawLocal} {
 		if {$isLocal} {
+		    set importProc [::Plugins::GetImportProcForMime $mime]
 		    set errMsg [eval {
-			$plugin($importer,importProc) $wtopNS $fileName \
-			  $putOpts
+			$importProc $wtopNS $fileName $putOpts
 		    } [array get argsArr]]
 		} else {
 		    
-		}
+		    # Find out if this plugin has registerd a special proc
+		    # to get from http.
+		    if {[::Plugins::HaveHTTPTransportForPlugin $importer]} {
+			set impHTTPProc \
+			  [::Plugins::GetHTTPImportProcForPlugin $importer]
+			set errMsg [eval {
+			    $impHTTPProc $wtopNS $argsArr(-url) $putOpts
+			} [array get argsArr]]
+		    } else {			
+			set errMsg [eval {
+			    ::ImageAndMovie::HttpGet $wtopNS $argsArr(-url) \
+			      $importer $putOpts
+			} [array get argsArr]]
+		    }
+		}    
 	    }
-	    set errMsg "No importer found for the file \"$fileTail\" with\
-	      MIME type $theMIME"
 	}
     }
     
@@ -353,8 +355,8 @@ proc ::ImageAndMovie::DrawImage {wtop fileName optList args} {
     # Extract coordinates and tags which must be there. error checking?
     foreach {x y} $optArr(coords:) { break }
     set useTag $optArr(tags:)
-    set theMIME $optArr(Content-Type:)
-    regexp {([^/]+)/([^/]+)} $theMIME match mimeBase mimeSubType
+    set mime $optArr(Content-Type:)
+    regexp {([^/]+)/([^/]+)} $mime match mimeBase mimeSubType
     
     if {[info exists optArr(Image-Name:)]} {
 	set imageName $optArr(Image-Name:)
@@ -574,7 +576,7 @@ proc ::ImageAndMovie::DrawXanim {wtop fileName optList args} {
 # Arguments:
 #       wtop
 #       url
-#       importer
+#       importPackage
 #       optList   a list of 'key: value' pairs, resembling the html protocol 
 #                 for getting files, but where most keys correspond to a valid
 #                 "canvas create" option, and everything is on a single line.
@@ -585,11 +587,11 @@ proc ::ImageAndMovie::DrawXanim {wtop fileName optList args} {
 # Results:
 #       an error string which is empty if things went ok so far.
 
-proc ::ImageAndMovie::HttpGet {wtop url importer optList args} {
+proc ::ImageAndMovie::HttpGet {wtop url importPackage optList args} {
     global  this prefs
     variable locals
     
-    ::Debug 2 "::ImageAndMovie::HttpGet wtop=$wtop, url=$url, importer=$importer"
+    ::Debug 2 "::ImageAndMovie::HttpGet wtop=$wtop, url=$url, importPackage=$importPackage"
 
     # Make local state array for convenient storage. 
     # Use 'variable' for permanent storage.
@@ -598,7 +600,7 @@ proc ::ImageAndMovie::HttpGet {wtop url importer optList args} {
     upvar 0 $gettoken getstate
     
     set fileTail [file tail [GetFilePathFromUrl $url]]
-    set dstPath [file join $prefs(incomingFilePath)  \
+    set dstPath [file join $prefs(incomingPath)  \
       [::uriencode::decodefile $fileTail]]
     if {[catch {open $dstPath w} dst]} {
 	return $dst
@@ -612,7 +614,7 @@ proc ::ImageAndMovie::HttpGet {wtop url importer optList args} {
     # Store stuff in gettoken array.
     set getstate(wtop) $wtop
     set getstate(url) $url
-    set getstate(importer) $importer
+    set getstate(importPackage) $importPackage
     set getstate(optList) $optList
     set getstate(args) $args
     set getstate(dstPath) $dstPath
@@ -638,7 +640,7 @@ proc ::ImageAndMovie::HttpGet {wtop url importer optList args} {
         if {[regexp -nocase ^location$ $name]} {
 	    close $dst
             eval {::ImageAndMovie::HttpGet $wtop [string trim $value] \
-	      $importer $optList} $args
+	      $importPackage $optList} $args
         }
     }
     return ""
@@ -719,7 +721,7 @@ proc ::ImageAndMovie::HttpFinished {gettoken token} {
 	# Add to the lists of known files.
 	::FileCache::Set $getstate(url) $dstPath
 	
-	switch -- $getstate(importer) {
+	switch -- $getstate(importPackage) {
 	    image {
 		eval {::ImageAndMovie::DrawImage $wtop $dstPath $optList} \
 		  $getstate(args)
@@ -739,7 +741,12 @@ proc ::ImageAndMovie::HttpFinished {gettoken token} {
 		  $getstate(args)
 	    }
 	    default {
-		# ? Registered callback ???
+		if {![catch {
+		    set importProc [::Plugins::GetImportProcForPlugin  \
+		      $getstate(importPackage)]
+		}]} {
+		    eval {$importProc $wtop $dstPath $optList} $getstate(args)
+		}
 	    }
 	}
     }
@@ -946,7 +953,7 @@ proc ::ImageAndMovie::DrawQuickTimeTclFromHttp {gettoken} {
 proc ::ImageAndMovie::PutFile {wtop fileName where optList tag} {
     upvar ::${wtop}::wapp wapp
 
-    ::Debug 2 "::ImageAndMovie::PutFile"
+    ::Debug 2 "::ImageAndMovie::PutFile fileName=$fileName, where=$where"
         
     set w $wapp(can)
     array set optArr $optList
@@ -977,7 +984,6 @@ proc ::ImageAndMovie::PutFile {wtop fileName where optList tag} {
 #       Check also version number ( >= 2.70 ).
 
 proc ::ImageAndMovie::XanimQuerySize {fileName} {
-    global  plugin
     
     set num_ {[0-9]+}
     set ver_ {[0-9]+\.[0-9]+}
@@ -985,7 +991,6 @@ proc ::ImageAndMovie::XanimQuerySize {fileName} {
 	
 	# Check version number.
 	if {[regexp "Rev +($ver_)" $res match ver]} {
-	    set plugin(xanim,ver) $ver
 	    if {$ver < 2.7} {
 		puts stderr "[::msgcat::mc Error]: xanim must have at least version 2.7"
 		return {}

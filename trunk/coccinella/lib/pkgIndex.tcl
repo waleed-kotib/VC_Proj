@@ -20,3 +20,5 @@ package ifneeded PreferencesUtils 1.0 [list source [file join $dir PreferencesUt
 package ifneeded Preferences 1.0 [list source [file join $dir Preferences.tcl]]
 package ifneeded Sounds 1.0 [list source [file join $dir Sounds.tcl]]
 package ifneeded TinyHttpd 1.0 [list source [file join $dir TinyHttpd.tcl]]
+package ifneeded Types 1.0 [list source [file join $dir Types.tcl]]
+package ifneeded Plugins 1.0 [list source [file join $dir Plugins.tcl]]

@@ -5,20 +5,16 @@
 #      to make the connection.
 #      Contains also open streaming media dialogs.
 #      
-#  Copyright (c) 1999-2002  Mats Bengtsson
+#  Copyright (c) 1999-2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Connections.tcl,v 1.1.1.1 2002-12-08 11:02:41 matben Exp $
+# $Id: Connections.tcl,v 1.2 2003-05-18 13:20:21 matben Exp $
 
 package provide Connections 1.0
 
 namespace eval ::OpenConnection:: {
-    
-    namespace export OpenConnection OpenCancelAllPending DoConnect \
-      IsConnectedToQ DoAutoConnect DoCloseClientConnection  \
-      DoCloseServerConnection
-    
+        
     # The textvariable for the adress entry widget.
     variable txtvarEntIPnameOrNum
     
@@ -159,7 +155,7 @@ proc ::OpenConnection::PushBtConnect { } {
     
     if {[string equal $txtvarEntIPnameOrNum $internalIPnum] ||  \
       [string equal $txtvarEntIPnameOrNum $internalIPname]} {
-	set connIPnum [DoConnect $txtvarEntIPnameOrNum $compPort 1]
+	set connIPnum [::OpenConnection::DoConnect $txtvarEntIPnameOrNum $compPort 1]
 	set finished 1
 	destroy $wtoplevel
 	return
@@ -186,7 +182,7 @@ proc ::OpenConnection::PushBtConnect { } {
 	return
     }
     set prefs(remotePort) $compPort
-    set connIPnum [DoConnect $txtvarEntIPnameOrNum $compPort 1]
+    set connIPnum [::OpenConnection::DoConnect $txtvarEntIPnameOrNum $compPort 1]
     set finished 1
     ::UI::SaveWinGeom $wtoplevel
     destroy $wtoplevel
@@ -273,7 +269,7 @@ proc ::OpenConnection::DoConnect {toNameOrNum toPort {propagateSizeToClients 1}}
 	  $remoteServPort $propagateSizeToClients]
 	
 	# Set up timer event for timeouts.
-	OpenConnectionScheduleKiller $server
+	ScheduleKiller $server
 	set ans ""
     } else {
 	
@@ -466,11 +462,11 @@ proc ::OpenConnection::SetIpArrays {nameOrIP sock remoteServPort} {
     return 1
 }
 
-# OpenConnectionScheduleKiller, OpenConnectionKill --
+# ScheduleKiller, Kill --
 #
 #       Cancel 'OpenConnection' process if timeout.
 
-proc ::OpenConnection::OpenConnectionScheduleKiller {sock} {
+proc ::OpenConnection::ScheduleKiller {sock} {
     global  prefs
     
     variable killerId    
@@ -479,10 +475,10 @@ proc ::OpenConnection::OpenConnectionScheduleKiller {sock} {
 	after cancel $killerId($sock)
     }
     set killerId($sock) [after [expr 1000*$prefs(timeout)]   \
-      [list [namespace current]::OpenConnectionKill $sock]]
+      [list [namespace current]::Kill $sock]]
 }
 
-proc ::OpenConnection::OpenConnectionKill {sock} {
+proc ::OpenConnection::Kill {sock} {
     global  prefs
     
     variable killerId    
@@ -513,8 +509,8 @@ proc ::OpenConnection::IsConnectedToQ {ipNameOrNum} {
     Debug 2 "IsConnectedToQ:: ipNameOrNum=$ipNameOrNum, this(ipnum)=$this(ipnum)"
     
     # Always allow local connections to ourselves (127.0.0.1 and localhost).
-    if {([string compare $ipNameOrNum $internalIPnum] == 0) ||  \
-      ([string compare $ipNameOrNum "localhost"] == 0)} {
+    if {[string equal $ipNameOrNum $internalIPnum] ||  \
+      [string equal $ipNameOrNum "localhost"]} {
 	return 0
     }
     
@@ -642,7 +638,7 @@ proc ::OpenConnection::DoCloseServerConnection {ipNum args} {
     # If we are running an internal server, close client connections.
     # Applies only to the case with symmetric network topology.    
     if {($prefs(protocol) == "symmetric") && $prefs(autoDisconnect)} {
-	DoCloseClientConnection $ipNum
+	::OpenConnection::DoCloseClientConnection $ipNum
     }
     
     # If no more connections left, make menus consistent.
@@ -770,12 +766,12 @@ proc ::OpenMulticast::DoAddOrEditQTMulticastShort {what wOptMenu} {
     
     variable selMulticastName
     
-    if {[string compare $what "add"] == 0} {
+    if {[string equal $what "add"]} {
 	
 	# Use the standard edit shortcuts dialogs. (0: cancel, 1 added)
 	set btAns [::EditShortcuts::AddOrEditShortcuts add   \
 	  prefs(shortsMulticastQT) -1]
-    } elseif {[string compare $what "edit"] == 0} {
+    } elseif {[string equal $what "edit"]} {
 	set btAns [::EditShortcuts::EditShortcuts .edtstrm   \
 	  prefs(shortsMulticastQT)]
     }
@@ -846,7 +842,7 @@ proc ::OpenMulticast::OpenMulticastQTStream {wtop wentry} {
     
     # Somehow we need to pad an extra / here.
     set fileTail [string trim [file tail "junk/[string trim $path /]"] /]
-    set fullName [file join $prefs(incomingFilePath) $fileTail]
+    set fullName [file join $prefs(incomingPath) $fileTail]
     
     if {[string length $fileTail] == 0} {
 	tk_dialog .wrfn "No Path" "No file name in path." \
@@ -875,12 +871,12 @@ proc ::OpenMulticast::CleanupMulticastQTStream {wtop fid fullName token} {
     # Access state as a Tcl array.
     # Check errors. 
     if {[info exists state(status)] &&  \
-      ([string compare $state(status) "timeout"] == 0)} {
+      [string equal $state(status) "timeout"]} {
 	tk_messageBox -icon error -type ok -message   \
 	  "Timout event for url=$state(url)" 
 	return
     } elseif {[info exists state(status)] &&  \
-      ([string compare $state(status) "ok"] != 0)} {
+      ![string equal $state(status) "ok"]} {
 	tk_messageBox -icon error -type ok -message   \
 	  "Not ok return code from url=$state(url); status=$state(status)"	  
 	return
@@ -895,7 +891,7 @@ proc ::OpenMulticast::CleanupMulticastQTStream {wtop fid fullName token} {
     
     # Check that type of data is the wanted. Check further.
     if {[info exists state(type)] &&  \
-      ([string compare $state(type) "video/quicktime"] != 0)} {
+      [string equal $state(type) "video/quicktime"]} {
 	tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
 	  "Not correct file type returned from url=$state(url); \
 	  filetype=$state(type); expected video/quicktime."]	  
