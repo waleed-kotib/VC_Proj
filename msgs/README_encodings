@@ -83,14 +83,14 @@ if {$::tcl_platform(platform) == "macintosh"} {
 
 ........................................................................
 
-# If you want to compare an exiisting message catalog with the original
+# If you want to compare an existing message catalog with the original
 # en.msg to see if any parts missing use the script below.
 # Quit Wish when finished!
 
 namespace eval ::msgcat:: {}
 proc ::msgcat::mcset {lang key {str ""}} {
     global arr
-    set arr($lang,$key) 1
+    set arr($lang,$key) [uplevel 1 {namespace current}]
 }
 set src [tk_getOpenFile -title {Pick en.msg File} \
 	-filetypes {{{Message Catalog}       {.msg}}}]
@@ -109,8 +109,11 @@ foreach name [array names arr en,*] {
     regexp {en,(.*)} $name match key
     if {![info exists arr($rootdst,$key)]} {
          puts "Missing: $key"
+    } elseif {$arr(en,$key) != $arr($rootdst,$key)} {
+        puts "Wrong namespace: $key, \t$arr($rootdst,$key) -> $arr(en,$key)"
     }
 }
 unset arr
+puts "\n::msgcat::mcset has been redefined; do not reuse this shell"
 
 ........................................................................
