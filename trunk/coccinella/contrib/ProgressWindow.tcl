@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ProgressWindow.tcl,v 1.7 2004-01-09 14:08:21 matben Exp $
+# $Id: ProgressWindow.tcl,v 1.8 2004-01-10 14:52:15 matben Exp $
 # 
 #-------------------------------------------------------------------------------
 #
@@ -30,6 +30,7 @@
 #      -percent, percent, Percent
 #      -text, text, Text
 #      -text2, text2, Text2
+#      -text3, text3, Text3
 #      
 #    WIDGET COMMAND
 #       pathName cget option
@@ -84,27 +85,15 @@ namespace eval ::ProgressWindow:: {
         -percent             {percent              Percent             }  \
         -text                {text                 Text                }  \
 	-text2               {text2                Text2               }  \
+	-text3               {text3                Text3               }  \
       }
     set widgetCommands {cget configure}
     
-    # Dimensions, same for all windows.
+    # Dimensions.
     variable dims
     array set dims {
-	wwidth  282 
-	wheight  96 
-	xnw      12 
-	ynw      42 
-	xse     198 
-	yse      54
-	ymid     48
-	xtxt0    11 
-	ytxt0    23 
-	xtxt1    11 
-	ytxt1    64 
-	xtxt2     0 
-	ytxt2    76
-	xcanbt  212
-	xtxt0off  0
+	width  200 
+	height  16 
     }
 
     # Options for this widget
@@ -115,6 +104,7 @@ namespace eval ::ProgressWindow:: {
     option add *ProgressWindow.percent       0                widgetDefault
     option add *ProgressWindow.text          "[::msgcat::mc {Writing file}]:" widgetDefault
     option add *ProgressWindow.text2         {}               widgetDefault
+    option add *ProgressWindow.text3         {}               widgetDefault
     
     # Platform specifics...
     switch -glob -- $this(platform) {
@@ -178,7 +168,7 @@ proc ::ProgressWindow::ProgressWindow {w args} {
     upvar ::ProgressWindow::${w}::options options
     upvar ::ProgressWindow::${w}::widgets widgets
     
-    toplevel $w
+    toplevel $w -class ProgressWindow
     wm withdraw $w
     if {[string equal $tcl_platform(platform) "macintosh"]} {
 	::tk::unsupported::MacWindowStyle style $w documentProc
@@ -188,17 +178,13 @@ proc ::ProgressWindow::ProgressWindow {w args} {
     # We use a frame for this specific widget class.
     set widgets(this) $w
     set widgets(frame) $w.fr
-    set widgets(canvas) $w.fr.c
     set widgets(toplevel) ::ProgressWindow::${w}::${w}
     
-    frame $widgets(frame) -class ProgressWindow
-    pack $widgets(frame)
-
     # Parse options. First get widget defaults.
     foreach name [array names widgetOptions] {
 	set optName        [lindex $widgetOptions($name) 0]
 	set optClass       [lindex $widgetOptions($name) 1]
-	set options($name) [option get $widgets(frame) $optName $optClass]
+	set options($name) [option get $w $optName $optClass]
 	if {$debugLevel > 1} {
 	    puts "   name=$name, optName=$optName, optClass=$optClass"
 	}
@@ -219,6 +205,7 @@ proc ::ProgressWindow::ProgressWindow {w args} {
       "eval ::ProgressWindow::WidgetProc {$w} \$command \$args"
     
     # Ready to actually make it.
+    wm title $w $options(-name)
     Build $w
     
     # Cleanup things when finished.
@@ -287,85 +274,94 @@ proc ::ProgressWindow::Build {w} {
     if {$debugLevel >= 3} {
 	puts "::ProgressWindow::Build:: w=$w"
     }
-    wm title $w $options(-name)
-
-    # Width of progress bar.
-    set prwidth [expr $dims(xse) - $dims(xnw)]
+    pack [frame $widgets(frame)] -padx 16 -pady 6
     
-    # Build.
-    canvas $widgets(canvas) -scrollregion [list 0 0 $dims(wwidth) $dims(wheight)] \
-      -width $dims(wwidth) -height $dims(wheight) -highlightthickness 0  \
-      -bd 1 -relief raised -background $options(-background)
-    pack $widgets(canvas) -side top -fill x
-    set id [$widgets(canvas) create text $dims(xtxt0) $dims(ytxt0) -anchor sw \
-      -font $options(-font1) -text $options(-text) -tags {ttext topttxt}]
-    set xoff [expr [lindex [$widgets(canvas) bbox $id] 2] + 10]
-    set dims(xtxt0off) $xoff
-    if {[info exists options(-filename)]} {
-	$widgets(canvas) create text $xoff $dims(ytxt0) -anchor sw   \
-	  -text $options(-filename) -font $options(-font1) -tags {ttext tfilename}
-    }
+    set widgets(label)  $widgets(frame).la
+    set widgets(label2) $widgets(frame).la2
+    set widgets(label3) $widgets(frame).la3
+    set frmid           $widgets(frame).mid
+    set widgets(pbar)   ${frmid}.pb
+    set widgets(canvas) ${frmid}.pb
+    set widgets(cancel) ${frmid}.bt
     
-    # Small text below progress bar.
-    if {[llength $options(-text2)]} {
-	set id [$widgets(canvas) create text $dims(xtxt1) $dims(ytxt1) -anchor nw \
-	  -text $options(-text2) -font $options(-font2) -tags {ttext txt2}]
-    } else {
-	if {$options(-percent) >= 100} {
-	    set str "[::msgcat::mc {Document}]: [::msgcat::mc {Done}]"
-	    $widgets(canvas) create text $dims(xtxt1) $dims(ytxt2) -anchor sw  \
-	      -text $str -font $options(-font2) -tags {ttext percent} -fill black
-	} else {
-	    set id [$widgets(canvas) create text $dims(xtxt1) $dims(ytxt2) -anchor sw \
-	      -text "[::msgcat::mc {Remaining}]: " -font $options(-font2) \
-	      -tags {ttext txt2}]
-	    set dims(xtxt2) [expr [lindex [$widgets(canvas) bbox $id] 2] + 10]
-	    $widgets(canvas) create text $dims(xtxt2) $dims(ytxt2) -anchor sw  \
-	      -text "[expr 100 - int($options(-percent))]% left"  \
-	      -font $options(-font2) -tags {ttext percent} -fill black
-	}    
-    }
+    set str "$options(-text) $options(-filename)"
+    pack [label $widgets(label) -font $options(-font1) -text $str -justify left] \
+      -side top -anchor w
     
-    # Either use the "Progressbar" package or make our own.
+    # Frame with progress bar and Cancel button.
+    pack [frame $frmid] -side top -fill x
     if {$this(haveprogressbar)} {
-	set wpgb [::progressbar::progressbar $widgets(canvas).pr   \
+	::progressbar::progressbar $widgets(pbar)  \
 	  -variable ::ProgressWindow::${w}::percent \
-	  -width $prwidth -percent $options(-percent)]
-	$widgets(canvas) create window $dims(xnw) [expr $dims(ymid) + 1] -anchor w \
-	  -window $wpgb
+	  -width $dims(width) -percent $options(-percent)
+	pack $widgets(pbar) -side left -fill x -expand 1
     } else {
-	$widgets(canvas) create rectangle $dims(xnw) $dims(ynw) $dims(xse) $dims(yse)  \
+	set width  $dims(width)
+	set height $dims(height)
+	canvas $widgets(canvas) -width $width -height $height \
+	  -borderwidth 0 -relief sunken -highlightthickness 0
+	$widgets(canvas) create rectangle 0 0 $width $height  \
 	  -fill #ceceff -outline {}
-	$widgets(canvas) create rectangle $dims(xnw) $dims(ynw) $dims(xnw) $dims(yse)  \
+	$widgets(canvas) create rectangle 0 0 0 0  \
 	  -outline {} -fill #424242 -tag progbar
-	$widgets(canvas) create line $dims(xnw) $dims(ynw) $dims(xnw) $dims(yse)   \
-	  $dims(xse) $dims(yse) $dims(xse) $dims(ynw) $dims(xnw) $dims(ynw)  \
-	  -width 1 -fill black -tag trect
+	$widgets(canvas) create rectangle 0 0 $width $height  \
+	  -fill {} -outline black
 	if {$options(-percent) > 0} {
-	    $widgets(canvas) coords progbar $dims(xnw) $dims(ynw)   \
-	      [expr $options(-percent)*($dims(xse) - $dims(xnw))/100 + $dims(xnw)] \
-	      $dims(yse)
+	    $widgets(canvas) coords progbar 0 0  \
+	      [expr ($options(-percent) * $width)/100] $height
 	}
+	pack $widgets(canvas) -side left -fill x -expand 1
     }
+    button $widgets(cancel) -text [::msgcat::mc Cancel]  \
+      -command [list [namespace current]::CancelBt $w $options(-cancelcmd)]
+    pack $widgets(cancel) -side right -padx 4
+
+    # Small text below progress bar.
+    pack [label $widgets(label2) -font $options(-font2)] \
+      -side top -anchor w
+    pack [label $widgets(label3) -font $options(-font2) -text $options(-text3)] \
+      -side top -anchor w
+    
+    ::ProgressWindow::ConfigurePercent $w $options(-percent)
     
     # Change to flat when no focus, to 3d when focus. Standard MacOS.
-    if {$this(haveprogressbar)} {
-	bind $w <FocusOut> [list ::ProgressWindow::PBFocusOut $w $wpgb]
-	bind $w <FocusIn>  [list ::ProgressWindow::PBFocusIn $w $wpgb]
-    } else {
-	bind $w <FocusOut> [list ::ProgressWindow::PBFocusOut $w junk]
-	bind $w <FocusIn>  [list ::ProgressWindow::PBFocusIn $w junk]
-    }
-    focus $w
-    button $widgets(canvas).bt -text "Cancel"  \
-      -command [list ::ProgressWindow::CancelBt $w $options(-cancelcmd)]  \
-      -highlightbackground $options(-background)
-    $widgets(canvas) create window $dims(xcanbt) $dims(ymid)   \
-      -window $widgets(canvas).bt -anchor w
-    #update idletasks
+    bind $w <FocusOut> [list ::ProgressWindow::PBFocusOut $w]
+    bind $w <FocusIn>  [list ::ProgressWindow::PBFocusIn $w]
+
+    update idletasks
+    set wrapwidth [winfo reqwidth $frmid]
+    $widgets(label) configure -wraplength $wrapwidth
+    
     wm deiconify $w
     raise $w
-    #update idletasks
+    focus $w
+}
+
+proc ::ProgressWindow::ConfigurePercent {w percent} {
+
+    variable this
+    variable dims
+    upvar ::ProgressWindow::${w}::options options
+    upvar ::ProgressWindow::${w}::widgets widgets
+    
+    if {[string length $options(-text2)] == 0} {
+	if {$percent >= 100} {
+	    set str2 "[::msgcat::mc {Document}]: "
+	    append str2 [::msgcat::mc {Done}]
+	} else {
+	    set str2 "[::msgcat::mc {Remaining}]: "
+	    append str2 "[expr 100 - int($percent)]%"
+	}
+	$widgets(label2) configure -text $str2
+    }
+
+    # Update progress bar.
+    if {$this(haveprogressbar)} {
+	set ::ProgressWindow::${w}::percent [expr int($percent)]
+    } else {
+	$widgets(canvas) coords progbar 0 0   \
+	  [expr ($percent * $dims(width))/100] $dims(height)
+    }
 }
 
 # ::ProgressWindow::Configure ---
@@ -375,7 +371,6 @@ proc ::ProgressWindow::Build {w} {
 proc ::ProgressWindow::Configure {w args} {
 
     variable this
-    variable dims
     variable widgetOptions
     variable debugLevel
     
@@ -434,61 +429,39 @@ proc ::ProgressWindow::Configure {w args} {
 	if {[string equal $opts($optName) $options($optName)]} {
 	    continue
 	}
+	
 	switch -- $optName {
 	    -percent       {
-		set perc $opts(-percent)
-		
-		# Only update progress bar
-		if {$this(haveprogressbar)} {
-		    set ::ProgressWindow::${w}::percent [expr int($perc)]
-		} else {
-		    $widgets(canvas) coords progbar $dims(xnw) $dims(ynw)   \
-		      [expr $perc*($dims(xse) - $dims(xnw))/100 + $dims(xnw)]  \
-		      $dims(yse)
-		}
-		
-		# Percentage left.
-		if {$options(-text2) == ""} {
-		    $widgets(canvas) delete percent
-		    if {$perc >= 100} {
-			$widgets(canvas) create text $dims(xtxt2) $dims(ytxt2) -anchor sw   \
-			  -text "Document: done" -font $options(-font2)    \
-			  -tags {ttext percent} -fill $col
-		    } else {
-			$widgets(canvas) create text $dims(xtxt2) $dims(ytxt2) -anchor sw   \
-			  -text "[expr 100 - int($perc)]% left"  \
-			  -font $options(-font2) -tags {ttext percent} -fill $col
-		    }
-		}
+		::ProgressWindow::ConfigurePercent $w $opts(-percent)
 	    }
 	    -name        {
 		wm title $w $opts(-name)
 	    }
 	    -filename    {
-		$widgets(canvas) delete tfilename
-		$widgets(canvas) create text $dims(xtxt0off) $dims(ytxt0) -anchor sw   \
-		  -text $opts(-filename) -fill $col   \
-		  -font $options(-font1) -tags {ttext tfilename}
+		set str "$options(-text) $opts(-filename)"
+		$widgets(label) configure -text $str
 	    }
 	    -cancelcmd   {
-		$widgets(canvas).bt configure  \
+		$widgets(cancel) configure  \
 		  -command [list ::ProgressWindow::CancelBt $w $opts(-cancelcmd)]
 	    }
 	    -text        {
-		error "-text should only be set when creating the progress window"
+		return -code error "-text should only be set when creating the progress window"
 	    }
 	    -text2       {
-		$widgets(canvas) itemconfigure txt2 -text $opts(-text2)
+		$widgets(label2) configure -text $opts(-text2)
+	    }
+	    -text3       {
+		$widgets(label3) configure -text $opts(-text3)
 	    }
 	    default      {
-		
+		return -code error "unrecognized option \"$optName\""
 	    }
 	}
     }
     
     # Save newly set options.
     array set options $args
-    update idletasks    
 }
 
 # ::ProgressWindow::CancelBt ---
@@ -515,34 +488,36 @@ proc ::ProgressWindow::Cleanup {w} {
     catch {namespace delete ::ProgressWindow::$w}
 }
 
-proc ::ProgressWindow::PBFocusIn {w wpgb} {
+proc ::ProgressWindow::PBFocusIn {w} {
     variable this
     
     upvar ::ProgressWindow::${w}::widgets widgets
 
     if {$this(haveprogressbar)} {
-	$wpgb configure -shape 3d -color @blue0
+	$widgets(pbar) configure -shape 3d -color @blue0
     } else {
 	$widgets(canvas) itemconfigure progbar -fill #424242
 	$widgets(canvas) itemconfigure trect -fill black
     }
-    $widgets(canvas) itemconfigure ttext -fill black
-    $widgets(canvas).bt configure -state normal
+    $widgets(label) configure -foreground black
+    $widgets(label2) configure -foreground black
+    $widgets(label3) configure -foreground black
 }
 
-proc ::ProgressWindow::PBFocusOut {w wpgb} {
+proc ::ProgressWindow::PBFocusOut {w} {
     variable this
     
     upvar ::ProgressWindow::${w}::widgets widgets
 
     if {$this(haveprogressbar)} {
-	$wpgb configure -shape flat -color #9C9CFF
+	$widgets(pbar) configure -shape flat -color #9C9CFF
     } else {
 	$widgets(canvas) itemconfigure progbar -fill #9C9CFF
 	$widgets(canvas) itemconfigure trect -fill #6B6B6B
     }
-    $widgets(canvas) itemconfigure ttext -fill #6B6B6B
-    $widgets(canvas).bt configure -state disabled
+    $widgets(label) configure -foreground #6B6B6B
+    $widgets(label2) configure -foreground #6B6B6B
+    $widgets(label3) configure -foreground #6B6B6B
 }
 
 #-------------------------------------------------------------------------------
