@@ -3,7 +3,7 @@
 #       Creates a dice in a whiteboard canvas. 
 # 
 # 
-# $Id: Dice.itcl,v 1.2 2004-08-11 14:26:30 matben Exp $
+# $Id: Dice.itcl,v 1.3 2004-08-12 06:49:14 matben Exp $
 
 namespace eval Dice {
     
@@ -28,6 +28,8 @@ if {[itcl::find classes Dice] == ""} {
 	    proc MakeImages {}
 	    proc InitRand {}
 	    proc UnifRand {x}
+	    proc Handler {w type cmd args}
+	    proc GetThisFromDiceUtag {utag}
 	}
 
 	# ------------------
@@ -44,7 +46,8 @@ if {[itcl::find classes Dice] == ""} {
 	# --------------
 
 	public {
-	    method Save {id}
+	    method Save {id args}
+	    method Delete {id}
 	}
 	
 	# ----------------------
@@ -53,14 +56,24 @@ if {[itcl::find classes Dice] == ""} {
 	
 	protected {
 	    method Draw {x y args}
+	    method Turn {}
+	    method SetOwnSide {n}
+	    method GetValue {name}
+	    method MoveInit {x y} {}
+	    method MoveMotion {x y} {}
+	    method MoveRelease {x y} {}
+	    method DeleteCmd {}
 	}
     
 	# ----------------------------
 	# Private static data members.
 	# ----------------------------
 
-	private common cardstackMenu
-	private common inited 0
+	private {
+	    common cardstackMenu
+	    common inited 0
+	    common icons
+	}
 	
 	# ---------------------------
 	# Private class data members.
@@ -68,7 +81,7 @@ if {[itcl::find classes Dice] == ""} {
 	
 	protected {
 	    variable iddice
-	    variable icons
+	    variable utagdice
 	}    
     }
 
@@ -77,26 +90,173 @@ if {[itcl::find classes Dice] == ""} {
 	    Init
 	}
 	eval {Draw $x $y} $args
+	
+	set b1          {%W bind dice <Button-1>}
+	set b1Motion    {%W bind dice <B1-Motion>}
+	set b1Release   {%W bind dice <ButtonRelease-1>}
+
+	set b1DoubleInst  [list %W bind $iddice <Double-1>]
+	
+	set classBindList [list \
+	  move    [list $b1        [code $this MoveInit %x %y]] \
+	  move    [list $b1Motion  [code $this MoveMotion %x %y]] \
+	  move    [list $b1Release [code $this MoveRelease %x %y]] \
+	  del     [list $b1        [code $this DeleteCmd]] \
+	  ]
+	set instBindList [list \
+	  point   [list $b1DoubleInst   [code $this Turn]] \
+	  ]
+	
+	RegisterCanvasClassBinds Dice $classBindList
+	RegisterCanvasInstBinds  Dice:$this $instBindList	
     }
     
     body Dice::Init {} {
 	MakeImages
+	InitRand
+	::WB::RegisterHandler DICE [code Handler]
 	set inited 1
     }
     
     body Dice::Draw {x y args} {
 	
+	array set argsArr {
+	    -number   1
+	}
 	array set argsArr $args
 	if {[info exists argsArr(-tags)]} {
 	    set utag $argsArr(-tags)
 	} else {
 	    set utag [NewUtag]
 	}
-	set im $icons(marble-1)
+	set utagdice $utag
+	set n $argsArr(-number)
+	set im $icons(marble-${n})
 	set iddice [$tkCanvas create image $x $y -image $im -anchor nw  \
-	  -tags [list image dice object:${this} $utag]]
+	  -tags [list image dice n:${n} object:${this} $utag]]
     }
     
+    body Dice::Turn {} {
+	
+	set n [expr [UnifRand 6] + 1]
+	SetOwnSide $n
+	GenCommand "DICE: turn $utagdice $n" remote
+    }
+    
+    body Dice::SetOwnSide {n} {
+    
+	# First remove old number tag before adding new one.
+	set tags [$tkCanvas gettags $iddice]
+	regexp {n:([1-6])} $tags match number
+	$tkCanvas dtag $iddice n:${number}
+	$tkCanvas itemconfigure $iddice -image $icons(marble-${n})
+	$tkCanvas addtag n:${n} withtag $iddice
+    }
+    
+    body Dice::Handler {w type cmd args} {
+		
+	switch -- [lindex $cmd 1] {
+	    turn {
+
+		# The remote cardstack has picked this card. Remove from stack!
+		set utag [lindex $cmd 2]
+		set num  [lindex $cmd 3]
+		
+		# Need to backtrace from utag to actual object.
+		set obj [GetThisFromDiceUtag $utag]
+		if {$obj != ""} {
+		    $obj SetOwnSide $num
+		}
+	    }
+	}
+    }
+    
+    # GetThisFromDiceUtag --
+    # 
+    #   Static method to map from a stacks utag to the actual object.
+    #   Needed since utags are the only globally uniqe identifier here.
+
+    body Dice::GetThisFromDiceUtag {utag} {
+	
+	set ansObj ""
+	foreach obj [itcl::find objects -class Dice] {
+	    set tmputag [$obj GetValue utagdice]
+	    if {[string equal $utag $tmputag]} {
+		set ansObj $obj
+		break
+	    }
+	}
+	return $ansObj
+    }
+
+    body Dice::GetValue {name} {
+	return [set $name]
+    }
+
+    body Dice::MoveInit {x y} {  
+	InitMoveCurrent $x $y
+    }
+    
+    body Dice::MoveMotion {x y} {
+	DragMoveCurrent $x $y
+    }
+    
+    body Dice::MoveRelease {x y} {
+	FinalMoveCurrent $x $y
+    }
+    
+    body Dice::DeleteCmd {} {
+	
+	# This actually calls back to our Delete method.
+	DeleteCurrent
+    }
+    
+    # Dice::Save --
+    #
+    #       Returns a oneline import command. Used from app.
+    #       
+    # Arguments:
+    #       id          item id or tag
+    #       args:
+    #           -basepath absolutePath    translate image -file to a relative path.
+    #           -uritype ( file | http )
+    #           -keeputag 0|1
+    #       
+    # Results:
+    #       a single command line.
+
+    body Dice::Save {id args} {
+	
+	# Seemed to be the only way :-(
+	upvar [namespace current]::infoScript infoScript
+
+	set tags [$tkCanvas gettags $id]
+	if {[lsearch $tags dice] < 0} {
+	    return ""
+	}
+	array set argsArr {
+	    -uritype file
+	}
+	array set argsArr $args
+	set uriopts [eval {
+	    ::CanvasUtils::GetImportOptsURI $argsArr(-uritype) $infoScript
+	} $args]
+
+	set impcmd [concat "import" [$tkCanvas coords $id] $uriopts]
+	set im [$tkCanvas itemcget $id -image]
+	lappend impcmd -mime application/x-itcl
+	lappend impcmd -width [image width $im] -height [image height $im]
+	regexp {n:([1-6])} $tags match number
+	lappend impcmd -number $number
+	
+	return $impcmd
+    }
+    
+    body Dice::Delete {id} {
+	set utag [GetUtag $id]
+	return [list [list delete $utag] {}]
+    }
+
     body Dice::InitRand {} {    
 	set seed [expr {abs([pid]+[clock clicks]%100000)}]
 	expr {srand(int($seed))}
@@ -474,6 +634,5 @@ if {[itcl::find classes Dice] == ""} {
 # We must instantiate ourself...
 
 eval {Dice #auto $w $x $y} $args
-
 
 
