@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.114 2005-02-21 07:59:08 matben Exp $
+# $Id: Chat.tcl,v 1.115 2005-02-24 13:58:07 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -326,6 +326,8 @@ proc ::Chat::StartThread {jid args} {
     jlib::splitjid $jid jid2 res
     set chatstate(fromjid) $jid2
     SetTitle $chattoken
+    
+    return $chattoken
 }
 
 # Chat::GotMsg --
@@ -422,7 +424,11 @@ proc ::Chat::GotMsg {body args} {
     
     # If new chat dialog check to see if we have got a thread history to insert.
     if {$newdlg} {
-	InsertAnyThreadHistory $chattoken
+	if {[info exists argsArr(-thread)]} {
+	    InsertHistory $chattoken
+	} else {
+	    InsertHistory $chattoken last 10
+	}
     }
     set w $dlgstate(w)
 
@@ -586,42 +592,67 @@ proc ::Chat::InsertMessage {chattoken whom body args} {
     $wtext see end
 }
 
-proc ::Chat::InsertAnyThreadHistory {chattoken} {
+# Chat::InsertHistory --
+# 
+#       Find any matching history record and insert into dialog.
+
+proc ::Chat::InsertHistory {chattoken {which thread} {detail ""}} {
     global  prefs this
     variable $chattoken
     upvar 0 $chattoken chatstate
     
-    ::Debug 2 "::Chat::InsertAnyThreadHistory"
+    ::Debug 2 "::Chat::InsertHistory"
     
     # First find any matching history file.
-    jlib::splitjid $chatstate(jid) jid2 res
+    set jid2 $chatstate(jid2)
     set path [file join $this(historyPath) [uriencode::quote $jid2]] 
-    if {[file exists $path]} {
+    if {![file exists $path]} {
+	return
+    }
+
+    set threadID $chatstate(threadid)
+    set uidstart 1000
+    set uid $uidstart
+    incr uidstart
+    if {[catch {source $path}]} {
+	return
+    }
+    set uidstop $uid
+    set keys {}
+
+    if {[string equal $which "thread"]} {
 	
-	# Collect all matching threads.
-	set threadID $chatstate(threadid)
-	set uidstart 1000
-	set uid $uidstart
-	incr uidstart
-	catch {source $path}
-	set uidstop $uid
-	
-	set msgList {}
-	for {set i $uidstart} {$i <= $uidstop} {incr i} {
+	# Collect all matching threads.	
+	foreach i [lsort -integer [array names message]] {
 	    set cthread [lindex $message($i) 1]
 	    if {[string equal $cthread $threadID]} {
-		set cjid [lindex $message($i) 0]
-		set date [lindex $message($i) 2]
-		set body [lindex $message($i) 3]
-		set secs [clock scan $date]
-		if {[string equal $cjid $jid2]} {
-		    set whom you
-		} else {
-		    set whom me
-		}
-		InsertMessage $chattoken $whom $body -secs $secs
+		lappend keys $i
 	    }
 	}
+    } elseif {[string equal $which "all"]} {
+	
+	# All.
+	set keys [lsort -integer [array names message]]
+    } elseif {[string equal $which "last"]} {
+	
+	# Last number
+	if {[string is integer -strict $detail]} {
+	    set keys [lsort -integer [array names message]]
+	    set keys [lrange $keys end-$detail end]
+	}
+    }
+    
+    foreach i $keys {
+	set cjid [lindex $message($i) 0]
+	set date [lindex $message($i) 2]
+	set body [lindex $message($i) 3]
+	set secs [clock scan $date]
+	if {[string equal $cjid $jid2]} {
+	    set whom you
+	} else {
+	    set whom me
+	}
+	InsertMessage $chattoken $whom $body -secs $secs
     }
 }
 
@@ -812,6 +843,7 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     
     set chatstate(fromjid)          $jid
     set chatstate(jid)              $mjid
+    set chatstate(jid2)             $jid2
     set chatstate(shortname)        [::Roster::GetDisplayName $mjid]
     set chatstate(dlgtoken)         $dlgtoken
     set chatstate(threadid)         $threadID
@@ -1314,14 +1346,13 @@ proc ::Chat::CloseHook {wclose} {
 }
 
 proc ::Chat::LoginHook { } {
+    variable cprefs
+    upvar ::Jabber::jstate jstate
 
-    # handled by presence hook instead
-    return ""
+    # Must keep track of last own jid.
+    set cprefs(lastmejid) $jstate(mejidmap)
+    BuildSavedDialogs
     
-    foreach dlgtoken [GetTokenList dlg] {
-	set chattoken [GetActiveChatToken $dlgtoken]
-	SetThreadState $dlgtoken $chattoken
-    }
     return ""
 }
 
@@ -1350,12 +1381,64 @@ proc ::Chat::QuitHook { } {
     ::UI::SaveWinGeom $wDlgs(jstartchat)
     ::UI::SaveWinPrefixGeom $wDlgs(jchat)
     GetFirstPanePos
+    SaveDialogs
     
     # This sends cancel compose to all.
     foreach dlgtoken [GetTokenList dlg] {
 	Close $dlgtoken
-    }    
+    }
     return ""
+}
+
+proc ::Chat::BuildSavedDialogs { } {
+    variable cprefs
+    upvar ::Jabber::jprefs jprefs
+    upvar ::Jabber::jstate jstate
+
+    if {!$jprefs(rememberDialogs)} {
+	return
+    }
+    if {$jprefs(chat,dialogs) == {}} {
+	return
+    }
+    set mejidmap $jstate(mejidmap)
+    array set dlgArr $jprefs(chat,dialogs)
+    if {![info exists dlgArr($mejidmap)]} {
+	return
+    }
+    
+    # Build dialog only if not exists.
+    foreach spec $dlgArr($mejidmap) {
+	set jid  [lindex $spec 0]
+	set opts [lindex $spec 1 end]
+	set chattoken [GetTokenFrom chat jid ${jid}*]
+	if {$chattoken == ""} {
+	    set chattoken [StartThread $jid]
+	    InsertHistory $chattoken last 10
+	}
+    }
+}
+
+proc ::Chat::SaveDialogs { } {
+    variable cprefs
+    upvar ::Jabber::jprefs jprefs
+
+    if {!$jprefs(rememberDialogs)} {
+	return
+    }
+    if {![info exists cprefs(lastmejid)]} {
+	return
+    }
+    set mejidmap $cprefs(lastmejid)
+    array set dlgArr $jprefs(chat,dialogs)
+
+    foreach chattoken [GetTokenList chat] {
+	variable $chattoken
+	upvar 0 $chattoken chatstate
+
+	set dlgArr($mejidmap) [list $chatstate(jid2)]
+    }
+    set jprefs(chat,dialogs) [array get dlgArr]
 }
 
 proc ::Chat::ConfigureTextTags {w wtext} {

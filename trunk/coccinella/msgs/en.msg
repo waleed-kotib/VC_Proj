@@ -765,6 +765,7 @@ If you haven't explicitly picked the "peer-to-peer" option in the "Network Setup
 ::msgcat::mcset en prefroclr     {Clear roster when logout}
 ::msgcat::mcset en prefrochat    {Chat when double-click user, else normal message}
 ::msgcat::mcset en prefrosysicons {Use foreign IM system icons}
+::msgcat::mcset en prefroshowoff {Show also offline users}
 ::msgcat::mcset en prefblonly    {Only accept messages from people in my roster}
 ::msgcat::mcset en prefblbl      {Block the following JID's (* wildcards possible):}
 ::msgcat::mcset en prefblmsg     {Write the complete JID for the user you want to block. A JID must be of the form "joewest@jabber.org"}
@@ -779,6 +780,7 @@ If you haven't explicitly picked the "peer-to-peer" option in the "Network Setup
 ::msgcat::mcset en prefcubrowse  {Browse services if method available}
 ::msgcat::mcset en prefcuagent   {Always use agents method}
 ::msgcat::mcset en prefcuupdate  {Automatically check for new Coccinella version}
+::msgcat::mcset en prefcuremdlgs {Remember open dialogs between sessions}
 ::msgcat::mcset en preffmhelp    {Helper plugins for file type}
 ::msgcat::mcset en preffmsave    {Just save to disk in incoming directory}
 ::msgcat::mcset en preffontmsg   {Warning: by importing any other fonts than the standard three ones (Times, Helvetica or Courier), you must be confident that all remote clients also have\

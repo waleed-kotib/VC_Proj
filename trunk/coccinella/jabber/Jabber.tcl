@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.130 2005-02-18 13:58:53 matben Exp $
+# $Id: Jabber.tcl,v 1.131 2005-02-24 13:58:08 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -66,9 +66,10 @@ namespace eval ::Jabber:: {
     variable jerror
     
     # Our own jid, and jid/resource respectively.
-    set jstate(mejid) ""
+    set jstate(mejid)    ""
     set jstate(mejidres) ""
-    set jstate(meres) ""
+    set jstate(mejidmap) ""
+    set jstate(meres)    ""
     
     #set jstate(alljid) {}   not implemented yet...
     set jstate(sock) {}
@@ -1052,12 +1053,13 @@ proc ::Jabber::SetClosedState { } {
     ::Debug 2 "::Jabber::SetClosedState"
 
     # Ourself.
-    set jstate(mejid) ""
-    set jstate(meres) ""
+    set jstate(mejid)    ""
+    set jstate(meres)    ""
     set jstate(mejidres) ""
-    set jstate(status) "unavailable"
-    set jserver(this) ""
-    set jstate(ipNum) ""
+    set jstate(mejidmap) ""
+    set jstate(status)   "unavailable"
+    set jserver(this)    ""
+    set jstate(ipNum)    ""
     
     # Run all logout hooks.
     ::hooks::run logoutHook

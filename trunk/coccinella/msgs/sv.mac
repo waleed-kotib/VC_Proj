@@ -764,6 +764,7 @@ Uppgifter som är serverlagrade är sökbara för samtliga användare.}
 ::msgcat::mcset sv prefroclr     {Radera rostern när loggar ut}
 ::msgcat::mcset sv prefrochat    {Chatta när dubbelklickar användare, annars normalt meddelande}
 ::msgcat::mcset sv prefrosysicons {Använd anpassade ikoner för främmande IM system}
+::msgcat::mcset sv prefroshowoff {Visa också ej tillgängliga kontakter}
 ::msgcat::mcset sv prefblonly    {Acceptera endast meddelanden från användare i min roster}
 ::msgcat::mcset sv prefblbl      {Blockera följande JID:er (* jokertecken tillåtna):}
 ::msgcat::mcset sv prefblmsg     {Skriv in den kompletta JID:n för användaren du vill blockera. En JID ska ha formen "joewest@jabber.org"}
@@ -778,6 +779,7 @@ Uppgifter som är serverlagrade är sökbara för samtliga användare.}
 ::msgcat::mcset sv prefcubrowse  {Browse service om möjligt}
 ::msgcat::mcset sv prefcuagent   {Använd alltid Agent metod}
 ::msgcat::mcset sv prefcuupdate  {Kontrollera automatiskt om ny Coccinella version finns}
+::msgcat::mcset sv prefcuremdlgs {Kom ihåg öppna dialoger mellen sessionerna}
 ::msgcat::mcset sv preffmhelp    {Hjälpplugg för filtyp}
 ::msgcat::mcset sv preffmsave    {Spara på disk i inmappen}
 ::msgcat::mcset sv preffontmsg   {Varning: om importerar ett annat typsnitt än de tre standard (Times, Helvetica or Courier) så måste du vara säker på att alla andra klienter också har\

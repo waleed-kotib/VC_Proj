@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.24 2005-02-17 10:30:06 matben Exp $
+# $Id: JPrefs.tcl,v 1.25 2005-02-24 13:58:08 matben Exp $
 
 package provide JPrefs 1.0
 
@@ -52,6 +52,12 @@ proc ::JPrefs::InitPrefsHook { } {
     # Empty here means use option database.
     set jprefs(chatFont) ""
     set jprefs(chat,tabbedui) 1
+    
+    # Open dialogs must be saved specifically for each login jid as:
+    # {mejid_1 {jid ?-option value ...?} mejid_2 {...} ...}
+    set jprefs(chat,dialogs) {}
+    
+    set jprefs(rememberDialogs) 0
 
     ::PreferencesUtils::Add [list  \
       [list ::Jabber::jprefs(autoaway)         jprefs_autoaway          $jprefs(autoaway)]  \
@@ -95,6 +101,8 @@ proc ::JPrefs::InitPrefsHook { } {
       [list ::Jabber::jprefs(serviceMethod)    jprefs_serviceMethod2    $jprefs(serviceMethod)]  \
       [list ::Jabber::jprefs(autoLogin)        jprefs_autoLogin         $jprefs(autoLogin)]  \
       [list ::Jabber::jprefs(disco,autoServers)  jprefs_disco_autoServers  $jprefs(disco,autoServers)]  \
+      [list ::Jabber::jprefs(rememberDialogs)  jprefs_rememberDialogs   $jprefs(rememberDialogs)]  \
+      [list ::Jabber::jprefs(chat,dialogs)     jprefs_chat_dialogs      $jprefs(chat,dialogs)]  \
       ]
     
     if {$jprefs(chatFont) != ""} {
@@ -331,7 +339,7 @@ proc ::JPrefs::BuildCustomPage {page} {
     set ypad   [option get [winfo toplevel $page] yPad {}]
 
     foreach key {inboxSave rost,useBgImage rost,bgImagePath serviceMethod \
-      autoLogin notifier,state} {
+      autoLogin notifier,state rememberDialogs} {
 	if {[info exists jprefs($key)]} {
 	    set tmpJPrefs($key) $jprefs($key)
 	}
@@ -347,6 +355,8 @@ proc ::JPrefs::BuildCustomPage {page} {
       -variable [namespace current]::tmpJPrefs(inboxSave)
     checkbutton $pbl.log -text " [mc prefcuautologin]" \
       -variable [namespace current]::tmpJPrefs(autoLogin)
+    checkbutton $pbl.rem -text " [mc prefcuremdlgs]" \
+      -variable [namespace current]::tmpJPrefs(rememberDialogs)
     if {[string equal $this(platform) "windows"]} {
 	checkbutton $pbl.not -text " Show notfier window" \
 	  -variable [namespace current]::tmpJPrefs(notifier,state)
@@ -365,6 +375,7 @@ proc ::JPrefs::BuildCustomPage {page} {
     
     grid $pbl.savein -padx 2 -pady $ypad -sticky w -columnspan 2
     grid $pbl.log    -padx 2 -pady $ypad -sticky w -columnspan 2
+    grid $pbl.rem    -padx 2 -pady $ypad -sticky w -columnspan 2
     if {[string equal $this(platform) "windows"]} {
 	grid $pbl.not    -padx 2 -pady $ypad -sticky w -columnspan 2
     }

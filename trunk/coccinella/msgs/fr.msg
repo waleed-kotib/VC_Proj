@@ -784,6 +784,10 @@
 ::msgcat::mcset fr prefroclr     {Nettoyer la liste de contacts à la déconnexion}
 ::msgcat::mcset fr prefrochat    {Double-clic : discuter, clic : message normal}
 ::msgcat::mcset fr prefrosysicons {Utiliser les icônes système du protocole de messagerie étranger}
+
+# translate
+::msgcat::mcset fr prefroshowoff {Show also offline users}
+
 ::msgcat::mcset fr prefblonly    {N'accepter que les messages de mes contacts}
 ::msgcat::mcset fr prefblbl      {Bloquer les JIDs suivants (* étoile pour "tous") : }
 ::msgcat::mcset fr prefblmsg     {Écrire la JID complète pour les utilisateurs que vous voulez bloquer (les JID sont de la forme "utilisateur@jabber.org)}
@@ -798,6 +802,10 @@
 ::msgcat::mcset fr prefcubrowse  {Naviguer dans les services si la méthode est disponible}
 ::msgcat::mcset fr prefcuagent   {Toujours utiliser la méthode des agents}
 ::msgcat::mcset fr prefcuupdate  {Chercher automatiquement les mises-à-jour de Coccinella}
+
+# translate
+::msgcat::mcset fr prefcuremdlgs {Remember open dialogs between sessions}
+
 ::msgcat::mcset fr preffmhelp    {Plugins d'aide pour les types de fichiers}
 ::msgcat::mcset fr preffmsave    {Juste "sauver sur le disque" dans le dossier entrant}
 ::msgcat::mcset fr preffontmsg   {Attention : en important d'autres polices\

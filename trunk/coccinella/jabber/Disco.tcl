@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.56 2005-02-16 14:26:44 matben Exp $
+# $Id: Disco.tcl,v 1.57 2005-02-24 13:58:07 matben Exp $
 
 package provide Disco 1.0
 
@@ -366,8 +366,8 @@ proc ::Disco::InfoCB {disconame type from subiq args} {
 	    }
 	    set treectag [$wtree itemconfigure $v -canvastags]
 	    MakeBalloonHelp $from $node $treectag
+	    SetDirItemUsingCategory $from $node
 	}
-	SetDirItemUsingCategory $from $node
 	
 	# Use specific (discoInfoGatewayIcqHook, discoInfoServerImHook,...) 
 	# and general (discoInfoHook) hooks.
@@ -382,13 +382,11 @@ proc ::Disco::InfoCB {disconame type from subiq args} {
 proc ::Disco::SetDirItemUsingCategory {jid {node ""}} {
     variable wtree
     upvar ::Jabber::jstate jstate
-    
-    #puts "::Disco::SetDirItemUsingCategory jid=$jid, node=$node"
-    
+        
     if {[IsBranchCategory $jid $node]} {
 	set v [$jstate(disco) getflatlist $jid $node]
-	#puts "\t v=$v isdir"
-	$wtree itemconfigure $v -dir 1 -sortcommand {lsort -dictionary}
+	$wtree itemconfigure $v -dir 1 -sortcommand {lsort -dictionary} \
+	  -style bold
     }
 }
 
@@ -991,7 +989,9 @@ proc ::Disco::AddToTree {v} {
     
     # Make the first two levels, server and its children bold, rest normal style.
     set style normal
-    if {[llength $v] <= 2} {
+    if {[llength $v] <= 1} {
+	set style bold
+    } elseif {$isdir} {
 	set style bold
     }
     set isopen 0

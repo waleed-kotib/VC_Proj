@@ -776,6 +776,10 @@ bei der entsprechenden Transportkomponente registriert haben. Wollen Sie das jet
 ::msgcat::mcset de prefroclr     {Kontaktliste bei Abmeldung bereinigen}
 ::msgcat::mcset de prefrochat    {Bei Doppelklick Chat starten, sonst normale Nachricht}
 ::msgcat::mcset de prefrosysicons {Benutze System-Icons anderer IMs}
+
+# translate
+::msgcat::mcset de prefroshowoff {Show also offline users}
+
 ::msgcat::mcset de prefblonly    {Nur Nachrichten von Personen meiner Kontaktliste akzeptieren}
 ::msgcat::mcset de prefblbl      {Folgende JIDs blockieren (*-Regeln möglich):}
 ::msgcat::mcset de prefblmsg     {Geben Sie die vollständige JID des Benutzers ein, Sie blockieren möchten. Eine JID hat die Form "Name@Server.org"}
@@ -790,6 +794,10 @@ bei der entsprechenden Transportkomponente registriert haben. Wollen Sie das jet
 ::msgcat::mcset de prefcubrowse  {Dienste anzeigen, wenn Methode verfügbar ist}
 ::msgcat::mcset de prefcuagent   {Immer Agenten-Methode benutzen}
 ::msgcat::mcset de prefcuupdate  {Automatisch auf neue Coccinella-Version prüfen}
+
+# translate
+::msgcat::mcset de prefcuremdlgs {Remember open dialogs between sessions}
+
 ::msgcat::mcset de preffmhelp    {Hilfsprogramme für Dateityp/en}
 ::msgcat::mcset de preffmsave    {Einfach im Eingangsverzeichnis speichern}
 ::msgcat::mcset de preffontmsg   {Warnung: Vor dem Import anderer Schriften als den drei Standardschriften (Times, Helvetica oder Courier), sollten Sie sicher sein, das alle entfernten Clients auch\
