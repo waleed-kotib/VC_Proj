@@ -2,9 +2,9 @@
 #
 # French translation by Guillaume Ayoub (xovni at wanadoo.fr), 2004
 #
-# General type of text, such as "OK", "Cancel", and the like.
-# We use the source string as the message.
-# Defined in global namespace and may therefore be used in any namespace.
+# Textes standards, tels que "OK", "Annluer", etc...
+# La chaîne source est utilisée comme message.
+# Défini dans l'espace des chaînes de base, peut donc être repris dans n'importe quelle chaîne.
 
 ::msgcat::mcset fr Accept		{Accepter}
 ::msgcat::mcset fr Add			{Ajouter}
@@ -59,7 +59,7 @@
 ::msgcat::mcset fr From			{De}
 ::msgcat::mcset fr General		{Général}
 ::msgcat::mcset fr Get			{Recevoir}
-#::msgcat::mcset fr Getting
+::msgcat::mcset fr Getting		{Réception}
 ::msgcat::mcset fr Group		{Groupe}
 ::msgcat::mcset fr Groupchat            {Groupe de discussion}
 ::msgcat::mcset fr Handling		{Ergonomie}
@@ -75,7 +75,7 @@
 ::msgcat::mcset fr Logout		{Se déconnecter}
 ::msgcat::mcset fr Message		{Message}
 ::msgcat::mcset fr Middle		{Milieu}
-#::msgcat::mcset fr Moderators
+::msgcat::mcset fr Moderators		{Modérateurs}
 ::msgcat::mcset fr More			{Plus}
 ::msgcat::mcset fr Never		{Jamais}
 ::msgcat::mcset fr New			{Nouveau}
@@ -89,7 +89,7 @@
 ::msgcat::mcset fr Online		{Connecté}
 ::msgcat::mcset fr Open			{Ouvrir}
 ::msgcat::mcset fr Options		{Options}
-#::msgcat::mcset fr Participants
+::msgcat::mcset fr Participants		{Participants}
 ::msgcat::mcset fr Password		{Mot de passe}
 ::msgcat::mcset fr Pick			{Choisir}
 ::msgcat::mcset fr Phone		{Téléphone}
@@ -120,7 +120,7 @@
 ::msgcat::mcset fr Server		{Serveur}
 ::msgcat::mcset fr Servers		{Serveurs}
 ::msgcat::mcset fr Set			{Installer}
-#::msgcat::mcset fr Settings
+::msgcat::mcset fr Settings		{Paramètres}
 ::msgcat::mcset fr Shortcut		{Raccourci}
 ::msgcat::mcset fr Shortcuts		{Raccourcis}
 ::msgcat::mcset fr Sounds		{Sons}
@@ -145,7 +145,7 @@
 ::msgcat::mcset fr Unsubscribe		{Se désinscrire}
 ::msgcat::mcset fr Unsubscribed		{Désinscrit}
 ::msgcat::mcset fr Username		{Nom}
-#::msgcat::mcset fr Visitors
+::msgcat::mcset fr Visitors		{Visitors}
 ::msgcat::mcset fr Warning		{Attention}
 ::msgcat::mcset fr Welcome              {Bienvenue}
 ::msgcat::mcset fr Whiteboard		{Tableau}
@@ -153,14 +153,14 @@
 ::msgcat::mcset fr Yes			{Oui}
 ::msgcat::mcset fr yes			{oui}
 
-# dashes.
+# Tirets.
 ::msgcat::mcset fr none			{Aucun}
 ::msgcat::mcset fr dotted		{Points}
 ::msgcat::mcset fr dash-dotted		{Tirets mixtes}
 ::msgcat::mcset fr dashed		{Tirets}
 
 
-# All menu labels; concateneted and prepended with 'm' for the database key.
+# Titres de tous les menus ; concaténés avec 'm' pour la clé de la base de données.
 ::msgcat::mcset fr mFile		{Fichier}
 ::msgcat::mcset fr mEdit		{Édition}
 ::msgcat::mcset fr mPreferences		{Préférences}
@@ -287,7 +287,7 @@
 ::msgcat::mcset fr mBugReport           {Signaler un bug...}
 
 
-# Popups
+# Popups.
 ::msgcat::mcset fr mMessage     	{Message...}
 ::msgcat::mcset fr mWhiteboard     	{Tableau...}
 ::msgcat::mcset fr mLastLogin/Activity  {Dernière connexion/activité}
@@ -308,7 +308,7 @@
 
 
 
-# Short texts only. Use english as database key.
+# Courts textes uniquement. Anglais pour les clés de la base de données.
 ::msgcat::mcset fr {30 days}			{30 jours}
 ::msgcat::mcset fr {About Coccinella}		{À propos de Coccinella}
 ::msgcat::mcset fr {About Whiteboard}		{À propos du tableau}
@@ -517,7 +517,7 @@
 ::msgcat::mcset fr {Writing file}		{Écriture du fichier}
 
 
-# Splash screen:
+# Écran de démarrage :
 ::msgcat::mcset fr splashsource 	{Mise en source du code Tcl...}
 ::msgcat::mcset fr splashload 		{Chargement des paquetages Tcl...}
 ::msgcat::mcset fr splashloadsha1 	{Chargement des paquetages sha1...}
@@ -530,7 +530,7 @@
 ::msgcat::mcset fr splashlook 		{Recherche de}
 
 
-# Messages for tk_messageBox:
+# Messages pour tk_messageBox :
 ::msgcat::mcset fr messfailedhttp	{Échec lors du démarrage du serveur http interne %s}
 ::msgcat::mcset fr messinfoscript	{À cause d'un bug du "script info" sous Mac, vous devez indiquer explicitement le dossier "Tableau-%s" dans la boîte de dialogue suivante}
 ::msgcat::mcset fr messfailedsock	{Impossible d'initialiser le flux vers le serveur. Peut-être que le réseau ne fonctionne pas ou que le serveur est indisponible. Le message d'erreur est : %s}
@@ -563,11 +563,11 @@
 ::msgcat::mcset fr messprotocolch	{Vous avez changé la configuration du réseau, vous devez relancer l'application pour que les changements prennent effet. Voulez-vous continuer ?}
 ::msgcat::mcset fr messpasswddifferent  {Les deux mots de passe sont différents, Veuillez recommencer s'il vous plaît}
 ::msgcat::mcset fr messaupdatelatest    {Vous avez déjà la dernière version(%s)}
-#::msgcat::mcset fr messprefsrestart     {For one or many of these settings to take effect you need to restart the application}
+::msgcat::mcset fr messprefsrestart     {Vous devez redémarrer l'application pour que certains changements prennent effet}
 
 
 
-# Messages for tk_messageBox:
+# Messages pour tk_messageBox :
 ::msgcat::mcset fr jamesserrsend	{Une erreur est survenue lors de l'envoi du\
   message à "%s" ; le message d'erreur est "%s"}
 ::msgcat::mcset fr jamessallowsub	{L'utilisateur %s vous autorise à l'ajouter à vos contacts}
@@ -671,8 +671,8 @@
 ::msgcat::mcset fr jamessregerr                 {L'inscription a échoué avec le message d'erreur "%s"}
 ::msgcat::mcset fr jamesstrptsubsc              {Votre compte enregistré avec le service %s sera ajouté à vos contacts pour fonctionner comme un serveur de transport avec le service.}
 ::msgcat::mcset fr jamessfailedsubsc            {Échec de l'inscription à %s. L'utilisateur a refusé l'inscription.}
-#::msgcat::mcset fr jamessstarttls-nofeature     {The server "%s" has no support for TLS.}
-#::msgcat::mcset fr jamessstarttls-failure        {TLS negotiating with server "%s" failed.}
+::msgcat::mcset fr jamessstarttls-nofeature     {Le serveur "%s" ne supporte pas le TLS.}
+::msgcat::mcset fr jamessstarttls-failure       {Erreur lors de la sécurisation TLS avec le serveur "%s".}
 
 
 
@@ -681,15 +681,15 @@
 ::msgcat::mcset fr openquicktimeurlmsg		{Ouvrir l'URL d'un fichier SDP avec l'extension .mov pour un streaming QuickTime. Cela peut être du son (radio) ou de la vidéo (TV).\
   Vous pouvez également utiliser votre navigateur pour trouver le fichier SDP, l'enregistrer sur le disque et l'ouvrir comme une vidéo classique.}
 ::msgcat::mcset fr printunixcmd                 {Commande d'impression, peut être changée}
-#::msgcat::mcset fr enterpassword                {Enter the password for your account "%s"}
+::msgcat::mcset fr enterpassword                {Entrez le mot de passe pour le compte "%s"}
 
 
 
-#::msgcat::mcset fr httptrptok                   {Finished getting file %s}
-#::msgcat::mcset fr httptrpterror                {File transport error when getting the file %s: %s}
-#::msgcat::mcset fr httptrpteof                  {The server closed the socket without replying.}
-#::msgcat::mcset fr httptrptnon200               {File transport error when getting the file %s: code %s; %s}
-#::msgcat::mcset fr httptrptreset                {File transport of %s was reset}
+::msgcat::mcset fr httptrptok                   {Fin du télachargement du fichier %s}
+::msgcat::mcset fr httptrpterror                {Erreur de transfert lors du téléchargement du fichier %s : %s}
+::msgcat::mcset fr httptrpteof                  {Le serveur a arrêté la connexion sans réponse.}
+::msgcat::mcset fr httptrptnon200               {Erreur de transfert lors du téléchargement du fichier %s : code %s ; %s}
+::msgcat::mcset fr httptrptreset                {Le transfert du fichier %s a été relancé}
 
 
 ::msgcat::mcset fr uastatpointmac 	{Pointeur (clic : marquer, double clic : inspecter, press : popup)}
@@ -710,7 +710,7 @@
 ::msgcat::mcset fr uastatrot		{Rotation (d'abord sélectionner les objets)}
 
 
-# Preferences:
+# Préférences :
 ::msgcat::mcset fr prefnetconf  {Configuration Réseau et Serveur}
 ::msgcat::mcset fr prefnethead  {Vous pouvez soit vous connecter à un serveur Jabber, soit directement à un autre client. Beaucoup d'éléments de l'interface dépendent\
   de la configuration que vous choisissez.}
@@ -747,7 +747,7 @@
 ::msgcat::mcset fr prefblmsg     {Écrire la JID complète pour les utilisateurs que vous voulez bloquer (les JID sont de la forme "utilisateur@jabber.org)}
 ::msgcat::mcset fr prefcufont    {Sélectionner la police pour la fenêtre de discussions : }
 ::msgcat::mcset fr prefcushow    {Montrer les messages dans une nouvelle fenêtre}
-#::msgcat::mcset fr prefcuautologin  {Automatically login when launched}
+::msgcat::mcset fr prefcuautologin  {Se connecter automatiquement au démarrage}
 ::msgcat::mcset fr prefcusave    {Enregistrer la boîte de courriers entrants entre les sessions}
 ::msgcat::mcset fr prefcu2clk    {Message du double-clic dans la boîte des messages : }
 ::msgcat::mcset fr prefcuopen    {Ouvrir le message dans une nouvelle fenêtre}
@@ -785,7 +785,7 @@ que les polices standard (Times, Helvetica ou Courier), vous devez vous assurer 
 
 
 
-# EditShortcuts namespace:
+# Espace EditShortcuts :
 namespace eval ::EditShortcuts:: {
 	::msgcat::mcset fr shortip       {Compléter l'adresse IP ou le nom}
 	::msgcat::mcset fr shortwarn     {Attention : vous avez édité les raccourcis.. Voulez-vous les enregistrer ?}
@@ -837,14 +837,14 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset fr jaupdateremind {Ne plus me rappeler cela}
 ::msgcat::mcset fr jasettopic   {Mettre un nouveau thème pour ce groupe de discussion}
 ::msgcat::mcset fr jadirpresmsg {Envoyer le statut désiré à l'utilisateur "%s".}
-#::msgcat::mcset fr jatlsnegot   {Negotiating TLS security...}
+::msgcat::mcset fr jatlsnegot   {Sécurisation TLS...}
 
 
 
-# Setup assistant:
+# Assistant de configuration :
 ::msgcat::mcset fr suintro1 	{Bienvenue sur l'assistant de configuration qui vous aidera à remplir les informations nécessaires pour un ancien ou nouveau compte sur un serveur Jabber.}
-::msgcat::mcset fr suintro2 	{Si vous voulez utiliser le mode peer-to-peer, vous devez juste l'indiquer dans le panneau de préférences, et redémarrer Coccinella.}
-::msgcat::mcset fr suintro3 	{À tout moment vous pouvez cliquer sur "Précédent" pour revenir en arrière. Suivez les instructions sur chaque page, et cliquez sur "Suivant"\
+::msgcat::mcset fr suintro2 	{Si vous voulez utiliser le mode peer-to-peer, vous devez juste l'indiquer dans le panneau de préférences et redémarrer Coccinella.}
+::msgcat::mcset fr suintro3 	{À tout moment vous pouvez cliquer sur "Précédent" pour revenir en arrière. Suivez les instructions sur chaque page et cliquez sur "Suivant"\
   dès que vous avez terminé.}
 ::msgcat::mcset fr sulang       {Choisissez votre langue. Si vous changez la langue, les modifications ne seront effectuées que sur les éléments d'interface chargés après la modification.}
 ::msgcat::mcset fr suservmsg	{Indiquez le nom du serveur Jabber sur lequel vous voulez être enregistré. Si vous avez déjà un compte, indiquez le serveur sur lequel vous êtes inscrit\
@@ -870,7 +870,7 @@ namespace eval ::VCard:: {
 ::msgcat::mcset fr oobmsg               {Laisser l'utilisateur %s télécharger un de vos fichiers sur le serveur. La description est facultative.}
 ::msgcat::mcset fr chatcompreply        {%s rédige une réponse}
 
-# Get file
+# Réception de fichiers
 ::msgcat::mcset fr getcontacting   {Contact de %s. En attente d'une réponse...}
 ::msgcat::mcset fr geteoferr       {La connexion à %s a échoué : réception d'une EOF.}
 ::msgcat::mcset fr getconnerr      {La connexion à %s a échoué.}
@@ -883,7 +883,7 @@ namespace eval ::VCard:: {
 ::msgcat::mcset fr getfinished     {Le fichier "%s" de %s a été reçu.}
 ::msgcat::mcset fr getneterr       {Erreur de transfert lors de la réception de %s.}
 
-# Put file
+# Envoi de fichiers
 ::msgcat::mcset fr putcontacting   {Contact de %s. En attente d'une réponse...}
 ::msgcat::mcset fr puteoferr       {La connexion à %s a échoué : réception d'une EOF.}
 ::msgcat::mcset fr putconnerr      {La connexion à %s a échoué.}
