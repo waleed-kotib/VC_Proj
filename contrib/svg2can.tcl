@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #
-# $Id: svg2can.tcl,v 1.2 2004-02-18 08:56:22 matben Exp $
+# $Id: svg2can.tcl,v 1.3 2004-02-18 14:14:55 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -36,6 +36,12 @@ package provide svg2can 0.1
 
 namespace eval svg2can {
 
+    variable textAnchorMap
+    array set textAnchorMap {
+	start   w
+	middle  c
+	end     e
+    }
 }
 
 
@@ -55,7 +61,7 @@ proc svg2can::parseelement {xmllist args} {
     set tag [gettag $xmllist]
     
     switch -- $tag {
-	circle - image - line - polyline - polygon - rect {
+	circle - ellipse - image - line - polyline - polygon - rect - text {
 	    lappend cmd [parse${tag} $xmllist]
 	}
 	g {
@@ -308,7 +314,44 @@ proc svg2can::parseimage {xmllist} {
     lappend opts -image \[image create photo -file $uri]
     return [concat create image $x $y $opts]
 }
+
+proc svg2can::parsetext {xmllist} {
+    
+    set x 0
+    set y 0    
+    set presentationAttr {}
+
+    foreach {key value} [getattr $xmllist] {
+	
+	switch -- $key {
+	    id {
+		lappend opts -tags $value
+	    }
+	    style {
+		set opts [StyleToOpts polygon [StyleAttrToList $value]]
+	    }
+	    x - y {
+		set $key $value
+	    }
+	    default {
+		lappend presentationAttr $key $value
+	    }
+	}
+    }
+    set opts [MergePresentationAttr text $opts $presentationAttr]
+    lappend opts -text [getcdata $xmllist]
+    return [concat create text $x $y $opts]
 }
+
+# svg2can::parseColor --
+# 
+#       Takes a SVG color definition and turns it into a Tk color.
+#       
+# Arguments:
+#       color       SVG color
+#       
+# Results:
+#       tk color
 
 proc svg2can::parseColor {color} {
     
@@ -343,6 +386,8 @@ proc svg2can::parseColor {color} {
 #       list of canvas options
 
 proc svg2can::StyleToOpts {type styleList} {
+    
+    variable textAnchorMap
     
     set opts {}
     set font {Helvetica 12 normal}
@@ -412,7 +457,7 @@ proc svg2can::StyleToOpts {type styleList} {
 		lappend opts -width $value
 	    }
 	    text-anchor {
-		
+		lappend opts -anchor $textAnchorMap($value)
 	    }
 	    text-decoration {
 
