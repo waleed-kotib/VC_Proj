@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.22 2004-10-03 13:38:22 matben Exp $
+# $Id: roster.tcl,v 1.23 2004-10-29 13:17:16 matben Exp $
 # 
 # Note that every jid in the rostArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -163,6 +163,9 @@ proc roster::roster {clientCmd args} {
 	variable rostArr
 	variable presArr
 	variable options
+	
+	array set rostArr {}
+	array set presArr {}
     }
     
     # Set simpler variable names.
@@ -448,10 +451,8 @@ proc roster::setpresence {rostName jid type args} {
     } else {
 	
 	# Keep cache of any old state.
-	if {[array exists presArr]} {
-	    array unset oldpresArr "${mjid},*"
-	    array set oldpresArr [array get presArr "${mjid},*"]
-	}
+	array unset oldpresArr "${mjid},*"
+	array set oldpresArr [array get presArr "${mjid},*"]
 	
 	# Clear out the old presence state since elements may still be lurking.
 	array unset presArr "${mjid},*"
@@ -498,6 +499,47 @@ proc roster::setpresence {rostName jid type args} {
     # Be sure to evaluate the registered command procedure.
     if {[string length $options(cmd)]} {
 	uplevel #0 $options(cmd) [list $rostName presence $jid2] $argList
+    }
+    return {}
+}
+
+
+# Firts attempt to keep the jid's as they are reported, with no separate
+# resource part.
+
+proc roster::setpresence2 {rostName jid type args} { 
+
+    variable rostGlobals
+    upvar ${rostName}::rostArr2 rostArr2
+    upvar ${rostName}::presArr2 presArr2
+    upvar ${rostName}::oldpresArr2 oldpresArr2
+    upvar ${rostName}::options options
+
+    Debug 2 "roster::setpresence2 rostName=$rostName, jid='$jid', \
+      type='$type', args='$args'"
+    
+    set mjid [jlib::jidmap $jid]
+    set argList {}
+    
+    if {[string equal $type "unsubscribed"]} {
+	lappend argList -type $type
+    } else {
+	
+	# Keep cache of any old state.
+	array unset oldpresArr2 "${mjid},*"
+	array set oldpresArr2 [array get presArr2 "${mjid},*"]
+	
+	# Clear out the old presence state since elements may still be lurking.
+	array unset presArr2 "${mjid},*"
+    
+	
+	
+	
+    }    
+    
+    # Be sure to evaluate the registered command procedure.
+    if {[string length $options(cmd)]} {
+	uplevel #0 $options(cmd) [list $rostName presence $jid] $argList
     }
     return {}
 }

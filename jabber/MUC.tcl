@@ -5,9 +5,9 @@
 #      
 #      This code is not completed!!!!!!!
 #      
-#  Copyright (c) 2003  Mats Bengtsson
+#  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.49 2004-09-28 13:50:18 matben Exp $
+# $Id: MUC.tcl,v 1.50 2004-10-29 13:17:15 matben Exp $
 
 package require entrycomp
 package require muc
@@ -260,7 +260,7 @@ proc ::Jabber::MUC::BuildEnter {args} {
     if {$enter(-autobrowse) && [string equal $enter(room-state) "normal"]} {
 
 	# Get a freash list each time.
-	::Jabber::MUC::BusyEnterDlgIncr $token
+	BusyEnterDlgIncr $token
 	update idletasks
 	$jstate(jlib) service send_getchildren $enter(server)  \
 	  [list [namespace current]::GetRoomsCB $token]
@@ -314,7 +314,7 @@ proc ::Jabber::MUC::CancelEnter {token} {
     variable $token
     upvar 0 $token enter
 
-    ::Jabber::MUC::EnterCloseHook $enter(w)
+    EnterCloseHook $enter(w)
     set enter(finished) 0
     catch {destroy $enter(w)}
 }
@@ -332,7 +332,7 @@ proc ::Jabber::MUC::Browse {token} {
     upvar 0 $token enter
     upvar ::Jabber::jstate jstate
        
-    ::Jabber::MUC::BusyEnterDlgIncr $token
+    BusyEnterDlgIncr $token
     $jstate(jlib) service send_getchildren $enter(server)  \
       [list [namespace current]::GetRoomsCB $token]
 }
@@ -351,10 +351,10 @@ proc ::Jabber::MUC::ConfigRoomList {token name junk1 junk2} {
 
     # Fill in room list if exist else get.    
     if {[$jstate(jlib) service isinvestigated $enter(server)]} {
-	::Jabber::MUC::FillRoomList $token
+	FillRoomList $token
     } else {
 	if {$enter(-autobrowse)} {
-	    ::Jabber::MUC::Browse $token
+	    Browse $token
 	} else {
 	    $enter(wpopuproom) list delete 0 end
 	    set enter(roomname) ""
@@ -429,10 +429,10 @@ proc ::Jabber::MUC::GetRoomsCB {token browsename type jid subiq args} {
 	    # ???
 	}
 	result - ok {
-	    ::Jabber::MUC::FillRoomList $token
+	    FillRoomList $token
 	}
     }
-    ::Jabber::MUC::BusyEnterDlgIncr $token -1
+    BusyEnterDlgIncr $token -1
 }
 
 proc ::Jabber::MUC::DoEnter {token} {
@@ -458,7 +458,7 @@ proc ::Jabber::MUC::DoEnter {token} {
     eval {$jstate(muc) enter $roomJid $enter(nickname) -command \
       [list [namespace current]::EnterCallback $token]} $opts
     set enter(finished) 1
-    ::Jabber::MUC::EnterCloseHook $enter(w)
+    EnterCloseHook $enter(w)
     catch {destroy $enter(w)}
 }
 
@@ -503,7 +503,7 @@ proc ::Jabber::MUC::EnterCallback {token mucname type args} {
 		      -message $msg]
 		    if {$ans == "yes"} {
 			set retry 1
-			eval {::Jabber::MUC::BuildEnter} $enter(args)
+			eval {BuildEnter} $enter(args)
 		    }
 		}
 		default {
@@ -556,18 +556,6 @@ proc ::Jabber::MUC::EnterRoom {roomjid nick args} {
     }
     eval {$jstate(muc) enter $roomjid $nick -command \
       [list [namespace current]::EnterCallback $token]} $opts
-}
-
-proc ::Jabber::MUC::EnterRoomCallbackXXX {token mucname type args} {
-    variable $token
-    upvar 0 $token enter
-
-    eval {::Jabber::MUC::EnterCallback $token $mucname $type} $args
-    
-    if {[info exists enter(-command)]} {
-	uplevel #0 $enter(-command) $type $args
-    }
-    unset -nocomplain enter
 }
 
 namespace eval ::Jabber::MUC:: {
@@ -662,7 +650,7 @@ proc ::Jabber::MUC::CancelInvite {token} {
     variable $token
     upvar 0 $token invite
 
-    ::Jabber::MUC::InviteCloseHook $invite(w)
+    InviteCloseHook $invite(w)
     set invite(finished) 0
     catch {destroy $invite(w)}
 }
@@ -675,7 +663,7 @@ proc ::Jabber::MUC::DoInvite {token} {
     set jid     $invite(jid)
     set reason  $invite(reason)
     set roomjid $invite(roomjid)
-    ::Jabber::MUC::InviteCloseHook $invite(w)
+    InviteCloseHook $invite(w)
     
     set opts {}
     if {$reason != ""} {
@@ -747,7 +735,7 @@ proc ::Jabber::MUC::MUCMessage {jlibname xmlns args} {
 	set ans [tk_messageBox -icon info -type yesno -title "Invitation" \
 	  -message $msg]
 	if {$ans == "yes"} {
-	    eval {::Jabber::MUC::BuildEnter -roomjid $from} $opts
+	    eval {BuildEnter -roomjid $from} $opts
 	}
     }
 }
@@ -856,7 +844,7 @@ proc ::Jabber::MUC::BuildInfo {roomjid} {
     
     # Fill in tablelist.
     set locals(wtbl) $wtbl
-    ::Jabber::MUC::FillTable $roomjid
+    FillTable $roomjid
     
     # A frame.
     set frgrantrevoke $froom.grrev
@@ -922,7 +910,7 @@ proc ::Jabber::MUC::BuildInfo {roomjid} {
     set locals(wrevoke) $wrevoke
     set locals(wother) $wother
     
-    ::Jabber::MUC::SetButtonsState $roomjid  \
+    SetButtonsState $roomjid  \
       $locals($roomjid,myrole) $locals($roomjid,myaff) 
     
     wm resizable $w 0 0    
@@ -975,7 +963,7 @@ proc ::Jabber::MUC::FillTable {roomjid} {
 
 proc ::Jabber::MUC::Refresh {roomjid} {
 
-    ::Jabber::MUC::FillTable $roomjid
+    FillTable $roomjid
 }
 
 proc ::Jabber::MUC::DoubleClickPart {roomjid} {
@@ -992,9 +980,9 @@ proc ::Jabber::MUC::SelectPart {roomjid} {
     set item [$wtbl curselection]
     return 
     if {[string length $item] == 0} {
-	::Jabber::MUC::DisableAll $roomjid
+	DisableAll $roomjid
     } else {
-    	::Jabber::MUC::SetButtonsState $roomjid  \
+    	SetButtonsState $roomjid  \
     	  $locals($roomjid,myrole) $locals($roomjid,myaff) 
     }  
 }
@@ -1010,7 +998,7 @@ proc ::Jabber::MUC::SetButtonsState {roomjid role affiliation} {
     set wrevoke $locals(wrevoke)
     set wother $locals(wother)
     
-    ::Jabber::MUC::DisableAll $roomjid
+    DisableAll $roomjid
 
     foreach wbt $enabledBtRoleList($role) {
 	set wbt [subst -nobackslashes -nocommands $wbt]
@@ -1435,7 +1423,7 @@ proc ::Jabber::MUC::EditListBuild {roomjid type} {
     set opts {}
 
     if {$fineditlist > 0} {
-	::Jabber::MUC::EditListSet $roomjid
+	EditListSet $roomjid
     }
     return [expr {($fineditlist <= 0) ? "cancel" : "ok"}]
 }
@@ -1479,8 +1467,9 @@ proc ::Jabber::MUC::EditListGetCB {roomjid callid mucname type subiq} {
     set editlocals(subiq) $subiq
 
     # Fill tablelist.
-    ::Jabber::MUC::FillEditList $roomjid
+    FillEditList $roomjid
     $wbtok configure -state normal -default active
+
     switch -- $type {
 	voice {
 	    $wbtrm configure -state normal
@@ -2006,7 +1995,7 @@ proc ::Jabber::MUC::InfoCloseHook {wclose} {
 	foreach ns [namespace children [namespace current]] {
 	    set roomjid [namespace tail $ns]
 	    if {[string equal [set ${ns}::locals($roomjid,w)] $wclose]} {
-		::Jabber::MUC::Close $roomjid
+		Close $roomjid
 	    }
 	}
     }   

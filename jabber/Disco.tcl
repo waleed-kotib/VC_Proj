@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.37 2004-10-28 07:37:33 matben Exp $
+# $Id: Disco.tcl,v 1.38 2004-10-29 13:17:15 matben Exp $
 
 package provide Disco 1.0
 
@@ -300,7 +300,7 @@ proc ::Jabber::Disco::SetDirItemUsingCategory {jid} {
     
     if {[IsBranchCategory $jid]} {
 	foreach v [$wtree find withtag $jid] {
-	    $wtree itemconfigure $v -dir 1
+	    $wtree itemconfigure $v -dir 1 -sortcommand {lsort -dictionary}
 	}
     }
 }
@@ -466,8 +466,8 @@ proc ::Jabber::Disco::Build {w} {
 	$wtree configure -rightclickcommand [namespace current]::Popup
     }
     grid $wtree -row 0 -column 0 -sticky news
-    grid $wysc -row 0 -column 1 -sticky ns
-    grid $wxsc -row 1 -column 0 -sticky ew
+    grid $wysc  -row 0 -column 1 -sticky ns
+    grid $wxsc  -row 1 -column 0 -sticky ew
     grid columnconfigure $wbox 0 -weight 1
     grid rowconfigure $wbox 0 -weight 1
 	
@@ -747,7 +747,7 @@ proc ::Jabber::Disco::AddToTree {v} {
     if {[$jstate(disco) isroom $jid2] && [string length $res]} {
 	set name [$jstate(jlib) service nick $jid]
 	set isdir 0
-	set icon [::Jabber::Roster::GetPresenceIcon $jid "available"]
+	set icon [::Jabber::Roster::GetPresenceIconFromJid $jid]
     } else {
 	set name [$jstate(disco) name $item]
 	if {$name == ""} {
@@ -768,8 +768,12 @@ proc ::Jabber::Disco::AddToTree {v} {
     # Do not create if exists which preserves -open.
     if {![$wtree isitem $v]} {
 	set treectag item[incr treeuid]
-	$wtree newitem $v -text $name -tags $item -style $style -dir $isdir \
-	  -image $icon -open $isopen -canvastags $treectag
+	set opts [list -text $name -tags $item -style $style -dir $isdir \
+	  -image $icon -open $isopen -canvastags $treectag]
+	if {$isdir && ([llength $v] >= 2)} {
+	    lappend opts -sortcommand {lsort -dictionary}
+	}
+	eval {$wtree newitem $v} $opts
 	
 	# Balloon.
 	MakeBalloonHelp $item $treectag

@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.71 2004-10-18 14:01:04 matben Exp $
+# $Id: jabberlib.tcl,v 1.72 2004-10-29 13:17:16 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -2537,7 +2537,7 @@ proc jlib::send {jlibname xmllist} {
     
     set xml [wrapper::createxml $xmllist]
     
-    puts "lib(isinstream)=$lib(isinstream)"
+    #puts "lib(isinstream)=$lib(isinstream)"
     
     # We fail only if already in stream.
     # The first failure reports the network error, closes the stream,
