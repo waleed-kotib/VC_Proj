@@ -32,9 +32,9 @@
 ::msgcat::mcset de Close	Schließen
 ::msgcat::mcset de Conference	Konferenz
 ::msgcat::mcset de Connect	Verbinden
-#::msgcat::mcset de Connection
+::msgcat::mcset de Connection   Verbindung
 ::msgcat::mcset de Contact	Kontakt
-#::msgcat::mcset de Contacts
+::msgcat::mcset de Contacts	Kontakte
 ::msgcat::mcset de Country	Land
 ::msgcat::mcset de Create	Erstellen
 ::msgcat::mcset de Customization	Anpassung
@@ -54,7 +54,7 @@
 ::msgcat::mcset de File		Datei
 ::msgcat::mcset de Finish	Ende
 ::msgcat::mcset de Finished	Beendet
-#::msgcat::mcset de First
+::msgcat::mcset de First	Erste
 ::msgcat::mcset de Friends      Freunden
 ::msgcat::mcset de Forward	Weiterleiten
 ::msgcat::mcset de From		Von
@@ -69,11 +69,11 @@
 ::msgcat::mcset de Inbox	Posteingang
 ::msgcat::mcset de Info		Information
 ::msgcat::mcset de Invite	Einladen
-#::msgcat::mcset de Last
+::msgcat::mcset de Last		Letzte
 ::msgcat::mcset de Less		Weniger
 ::msgcat::mcset de Login	Anmelden
 ::msgcat::mcset de Logout	Abmelden
-#::msgcat::mcset de Message
+::msgcat::mcset de Message	Nachricht
 ::msgcat::mcset de Middle	{2. Vorname}
 ::msgcat::mcset de More		Mehr
 ::msgcat::mcset de Never	Niemals
@@ -93,7 +93,7 @@
 ::msgcat::mcset de Phone	Telefon
 ::msgcat::mcset de Play		Abspielen
 ::msgcat::mcset de Plugins	Erweiterungen
-#::msgcat::mcset de Port
+::msgcat::mcset de Port		Port
 ::msgcat::mcset de Preferences  Einstellungen
 ::msgcat::mcset de Previous	zurück
 ::msgcat::mcset de Print	Drucken
@@ -300,7 +300,7 @@
 ::msgcat::mcset de mChatHistory     	{Chat-Verlauf}
 ::msgcat::mcset de mLoginTrpt     	{Beim Transport anmelden}
 ::msgcat::mcset de mLogoutTrpt     	{Beim Transport abmelden}
-#::msgcat::mcset de mRemoveContact  	{Remove Contact...}
+::msgcat::mcset de mRemoveContact  	{Kontakt entfernen...}
 
 
 
@@ -334,9 +334,9 @@
 ::msgcat::mcset de {Chat With}            {Chat mit}
 ::msgcat::mcset de {Clear Disk Cache Now} {Zwischenspeicher jetzt leeren}
 ::msgcat::mcset de {Company Name}         {Firmen-Name}
-#::msgcat::mcset de {Component Info}
+::msgcat::mcset de {Component Info}	  {Komponenten-Information}
 ::msgcat::mcset de {Conference server}    {Konferenz-Server}
-#::msgcat::mcset de {Contact Type}
+::msgcat::mcset de {Contact Type}	  {Kontakt-Art}
 ::msgcat::mcset de {Create Room}          {Raum erstellen}
 ::msgcat::mcset de {Default group}        {Standard-Gruppe}
 ::msgcat::mcset de {Default Logout Status}  {Standard-Abmeldestatus}
@@ -366,7 +366,7 @@
 ::msgcat::mcset de {First name}           {Vorname}
 ::msgcat::mcset de {Font size}            {Schriftgröße}
 ::msgcat::mcset de {Font weight}          {Schrift-Gewichtung}
-#::msgcat::mcset de {Format mm/dd/yyyy}
+::msgcat::mcset de {Format mm/dd/yyyy}    {Format mm/tt/jjjj}
 ::msgcat::mcset de {Get File}             {Datei abrufen}
 ::msgcat::mcset de {Get File Error}       {Fehler Dateiabruf}
 ::msgcat::mcset de {Get vCard}            {vCard abrufen}
@@ -413,7 +413,7 @@
 ::msgcat::mcset de {New Topic}            {Neues Thema}
 ::msgcat::mcset de {New shortcut}         {Neue Abkürzung}
 ::msgcat::mcset de {New User}             {Neue Person}
-#::msgcat::mcset de {New Version}
+::msgcat::mcset de {New Version}	  {Neue Version}
 ::msgcat::mcset de {My vCard}             {Meine vCard}
 ::msgcat::mcset de {NAT Address}          {NAT-Adresse}
 ::msgcat::mcset de {Nick name}            {Spitzname}
@@ -478,8 +478,8 @@
 ::msgcat::mcset de {Set Status}           {Status setzen}
 ::msgcat::mcset de {Settings Panels}      {Einrichtungs-Dialog}
 ::msgcat::mcset de {Setup Assistant}      {Einrichtungs-Assistent}
-#::msgcat::mcset de {Slide Show}
-#::msgcat::mcset de {Slide Show Folder}
+::msgcat::mcset de {Slide Show}		  {Präsentation}
+::msgcat::mcset de {Slide Show Folder}    {Präsentations-Ordner}
 ::msgcat::mcset de {Software Update}      {Software-Aktualisierung}
 ::msgcat::mcset de {Sounds & Speech}      {Klänge & Sprache}
 ::msgcat::mcset de {Start Chat}           {Start Chat}
@@ -579,7 +579,7 @@ Dies erfordert einen Neustart der Anwendung.\
 Wollen Sie wirklich weitermachen ?}
 ::msgcat::mcset de messpasswddifferent {Die beiden Passwörter stimmen nicht\
 überein. Bitte versuchen Sie es erneut.}
-#::msgcat::mcset de messaupdatelatest    {You already have the latest version available (%s)}
+::msgcat::mcset de messaupdatelatest    {Sie verfügen bereits über die letzte Version von (%s)}
 
 
 
@@ -771,7 +771,7 @@ mit Erweiterung .mov zum Senden eines QuickTime-Echtzeit-Datenstroms.\
 Es kann sich um Audio (Radio) oder Video (TV) handeln. Alternativ können Sie\
 über Ihren Webbrowser die SDP-Datei auf Platte speichern und\
 sie dann als gewöhnliche Filmdatei öffnen.}
-#::msgcat::mcset de printunixcmd                 {Shell print command, edit if desired}
+::msgcat::mcset de printunixcmd                 {Druckbefehl, wenn nötig anpassen}
 
 
 
