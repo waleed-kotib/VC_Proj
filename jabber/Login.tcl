@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.1 2003-11-01 13:51:21 matben Exp $
+# $Id: Login.tcl,v 1.2 2003-11-01 14:31:14 matben Exp $
 
 package provide Login 1.0
 
@@ -40,6 +40,9 @@ proc ::Jabber::Login::Login {w} {
     variable digest
     variable ssl 0
     variable invisible 0
+    variable wtri
+    variable wtrilab
+    variable wfrmore
     variable tmpJServArr
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jprefs jprefs
@@ -119,14 +122,7 @@ proc ::Jabber::Login::Login {w} {
     entry $frmid.eres -width 26   \
       -textvariable [namespace current]::resource -validate key  \
       -validatecommand {::Jabber::ValidateJIDChars %S}
-    checkbutton $frmid.cdig -text "  [::msgcat::mc {Scramble password}]"  \
-      -variable [namespace current]::digest
-    checkbutton $frmid.cssl -text "  [::msgcat::mc {Use SSL for security}]"  \
-      -variable [namespace current]::ssl
-    checkbutton $frmid.cinv  \
-      -text "  [::msgcat::mc {Login as invisible}]"  \
-      -variable [namespace current]::invisible
-
+    
     grid $frmid.lserv -column 0 -row 1 -sticky e
     grid $frmid.eserv -column 1 -row 1 -sticky w
     grid $frmid.luser -column 0 -row 2 -sticky e
@@ -135,13 +131,37 @@ proc ::Jabber::Login::Login {w} {
     grid $frmid.epass -column 1 -row 3 -sticky w
     grid $frmid.lres -column 0 -row 4 -sticky e
     grid $frmid.eres -column 1 -row 4 -sticky w
-    grid $frmid.cdig -column 1 -row 5 -sticky w -pady 2
-    grid $frmid.cssl -column 1 -row 6 -sticky w -pady 2
-    grid $frmid.cinv -column 1 -row 7 -sticky w -pady 2
+    
+    # Triangle switch for more options.
+    set frtri [frame $w.frall.tri -borderwidth 0]
+    pack $frtri -side top -fill both -expand 1 -padx 6
+    set wtri $frtri.tri
+    set wtrilab $frtri.l
+    label $wtri -image [::UI::GetIcon mactriangleclosed]
+    label $wtrilab -text "More..."
+    pack $wtri $wtrilab -side left -padx 2
+    bind $wtri <Button-1> [list [namespace current]::MoreOpts $w]
+    
+    # More options.
+    set frcont [frame $w.frall.frc -borderwidth 0]
+    pack $frcont -side top -fill both -expand 1
+    set wfrmore [frame $frcont.frmore -borderwidth 0]
+    
+    checkbutton $wfrmore.cdig -text "  [::msgcat::mc {Scramble password}]"  \
+      -variable [namespace current]::digest
+    checkbutton $wfrmore.cssl -text "  [::msgcat::mc {Use SSL for security}]"  \
+      -variable [namespace current]::ssl
+    checkbutton $wfrmore.cinv  \
+      -text "  [::msgcat::mc {Login as invisible}]"  \
+      -variable [namespace current]::invisible
+
+    grid $wfrmore.cdig -column 1 -row 5 -sticky w -pady 2
+    grid $wfrmore.cssl -column 1 -row 6 -sticky w -pady 2
+    grid $wfrmore.cinv -column 1 -row 7 -sticky w -pady 2
 
     if {!$prefs(tls)} {
 	set ssl 0
-	$frmid.cssl configure -state disabled
+	$frmore.cssl configure -state disabled
     }
 	
     # Button part.
@@ -179,6 +199,33 @@ proc ::Jabber::Login::Login {w} {
     ::Jabber::Login::Close $w
     catch {focus $oldFocus}
     return [expr {($finished <= 0) ? "cancel" : "login"}]
+}
+
+
+proc ::Jabber::Login::MoreOpts {w} {
+    variable wtri
+    variable wtrilab
+    variable wfrmore
+      
+    wm resizable $w
+    pack $wfrmore -side left -fill x -padx 20
+    $wtri configure -image [::UI::GetIcon mactriangleopen]
+    $wtrilab configure -text "Less..."
+    bind $wtri <Button-1> [list [namespace current]::LessOpts $w]
+    wm resizable $w 0 0
+}
+
+proc ::Jabber::Login::LessOpts {w} {
+    variable wtri
+    variable wtrilab
+    variable wfrmore
+    
+    wm resizable $w
+    pack forget $wfrmore
+    $wtri configure -image [::UI::GetIcon mactriangleclosed]
+    $wtrilab configure -text "More..."
+    bind $wtri <Button-1> [list [namespace current]::MoreOpts $w]
+    wm resizable $w 0 0
 }
 
 proc ::Jabber::Login::DoCancel {w} {
