@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.28 2004-02-14 14:01:50 matben Exp $
+# $Id: JUI.tcl,v 1.29 2004-03-01 07:25:12 matben Exp $
 
 package provide JUI 1.0
 
@@ -323,8 +323,10 @@ proc ::Jabber::UI::CloseHook {wclose} {
 
 proc ::Jabber::UI::QuitHook { } {
     variable jwapp
-    
-    ::UI::SaveWinGeom $jwapp(wtopRost)
+
+    if {[info exists jwapp(wtopRost)]} {
+	::UI::SaveWinGeom $jwapp(wtopRost)
+    }
 }
 
 # Jabber::UI::LoginCmd --
