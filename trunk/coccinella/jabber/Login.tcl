@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.37 2004-07-02 14:08:02 matben Exp $
+# $Id: Login.tcl,v 1.38 2004-07-07 13:07:13 matben Exp $
 
 package provide Login 1.0
 
@@ -517,10 +517,8 @@ proc ::Jabber::Login::Connect {server cmd args} {
 	if {[string length $prefs(httpproxyport)]} {
 	    lappend opts -proxyport $prefs(httpproxyport)
 	}
-	if {[string length $prefs(httpproxyusername)]} {
+	if {$prefs(httpproxyauth)} {
 	    lappend opts -proxyusername $prefs(httpproxyusername)
-	}
-	if {[string length $prefs(httpproxypassword)]} {
 	    lappend opts -proxypasswd $prefs(httpproxypassword)
 	}
 	eval {jlib::http::new $jstate(jlib) $host \
@@ -669,6 +667,7 @@ proc ::Jabber::Login::Authorize {server username resource password cmd args} {
 }
 
 proc ::Jabber::Login::AuthorizeCB {token jlibName type theQuery} {
+    global  this
 
     variable $token
     upvar 0 $token state

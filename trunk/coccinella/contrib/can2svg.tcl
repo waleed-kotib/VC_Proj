@@ -6,7 +6,7 @@
 #  
 #  This particular package is BSD licensed. 
 #
-# $Id: can2svg.tcl,v 1.11 2004-05-18 05:56:00 matben Exp $
+# $Id: can2svg.tcl,v 1.12 2004-07-07 13:07:13 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -28,6 +28,7 @@
 #                       -uritype    file|http
 #                       -usestyleattribute 0|1
 #                       -usetags    0|all|first|last
+#                       -windowitemhandler
 #                       
 #      can2svg::config ?options?
 #           options:	-allownewlines      0
@@ -38,6 +39,7 @@
 #	                -uritype            file
 #	                -usetags            all
 #	                -usestyleattribute  1
+#                       -windowitemhandler
 #
 # ########################### CHANGES ##########################################
 #
@@ -75,6 +77,7 @@ namespace eval can2svg {
 	-uritype              file
 	-usetags              all
 	-usestyleattribute    1
+	-windowitemhandler    ""
     }
     set confopts(-httpbasedir) [info script]
     
@@ -408,6 +411,18 @@ proc can2svg::svgasxmllist {cmd args} {
 		  -chdata $chdata]
 	    }
 	}
+	window {
+	    
+	    # There is no svg for this; must be handled by application layer.	    
+	    #puts "window: $cmd"
+	    if {[string length $argsArr(-windowitemhandler)]} {
+		set xmllist \
+		  [uplevel #0 $argsArr(-windowitemhandler) [list $cmd] $args]
+		if {[llength $xmllist]} {
+		    lappend xmlListList $xmllist
+		}
+	    }
+	}
     }
     return $xmlListList
 }
@@ -498,7 +513,12 @@ proc can2svg::MakeArcPath {coo opts} {
     variable anglesToRadians
     variable pi
 
-    array set optArr {-style pieslice}
+    # Canvas defaults.
+    array set optArr {
+	-extent 90
+	-start  0
+	-style  pieslice
+    }
     array set optArr $opts
 
     # Extract center and radius from bounding box.
@@ -668,6 +688,9 @@ proc can2svg::MakeStyleList {type opts args} {
 		    set styleArr(stroke-dashoffset) $value
 		}
 	    }
+	    -extent {
+		# empty
+	    }
 	    -fill {
 		
 		# Need to translate names to hex spec.
@@ -714,6 +737,9 @@ proc can2svg::MakeStyleList {type opts args} {
 	    }
 	    -outlinestipple {
 		set outlineStippleValue $value
+	    }
+	    -start {
+		# empty
 	    }
 	    -stipple {
 		set stippleValue $value

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.1 2004-06-06 06:41:31 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.2 2004-07-07 13:07:14 matben Exp $
 
 package require sha1pure
 
@@ -96,12 +96,12 @@ proc ::CanvasUtils::Init { } {
 	  {-variable ::CanvasUtils::popupVars(-brushwidth)}}}
     }
     set menuDefs(pop,arcs)  \
-      {cascade   mArcs             {}                                      normal   {} {} {
-	{radio   mPieslice         {}                                      normal   {} \
+      {cascade   mArcs      {}                                      normal   {} {} {
+	{radio   mPieslice  {::CanvasUtils::ItemConfigure $w $id -style pieslice}  normal   {} \
 	  {-value pieslice -variable ::CanvasUtils::popupVars(-arc)}}
-	{radio   mChord            {}                                      normal   {} \
+	{radio   mChord     {::CanvasUtils::ItemConfigure $w $id -style chord}     normal   {} \
 	  {-value chord -variable ::CanvasUtils::popupVars(-arc)}}
-	{radio   mArc              {}                                      normal   {} \
+	{radio   mArc       {::CanvasUtils::ItemConfigure $w $id -style arc}       normal   {} \
 	  {-value arc -variable ::CanvasUtils::popupVars(-arc)}}}
     }
     set menuDefs(pop,color)  \
@@ -535,34 +535,40 @@ proc ::CanvasUtils::GetOnelinerForAny {w id args} {
 	    set line [eval {::CanvasUtils::GetOnelinerForImage $w $id} $args]
 	}
 	window {
-	    
-	    # A movie: for QT we have a complete widget; 
-	    set windowName [$w itemcget $id -window]
-	    set windowClass [winfo class $windowName]
-	    
-	    switch -- $windowClass {
-		QTFrame {
-		    set line [eval {
-			::CanvasUtils::GetOnelinerForQTMovie $w $id} $args]
-		}
-		SnackFrame {			
-		    set line [eval {
-			::CanvasUtils::GetOnelinerForSnack $w $id} $args]
-		}
-		XanimFrame {
-		    # ?
-		}
-		default {
-		    if {[::Plugins::HaveSaveProcForWinClass $windowClass]} {
-			set procName \
-			  [::Plugins::GetSaveProcForWinClass $windowClass]
-			set line [eval {$procName $w $id} $args]
-		    }
-		}
-	    }
+	    set line [eval {::CanvasUtils::GetOneLinerForWindow $w $id} $args]
 	}
 	default {
 	    set line [::CanvasUtils::GetOnelinerForItem $w $id]
+	}
+    }
+    return $line
+}
+
+proc ::CanvasUtils::GetOneLinerForWindow {w id args} {
+       
+    # A movie: for QT we have a complete widget; 
+    set windowName [$w itemcget $id -window]
+    set windowClass [winfo class $windowName]
+    set line {}
+    
+    switch -- $windowClass {
+	QTFrame {
+	    set line [eval {
+		::CanvasUtils::GetOnelinerForQTMovie $w $id} $args]
+	}
+	SnackFrame {			
+	    set line [eval {
+		::CanvasUtils::GetOnelinerForSnack $w $id} $args]
+	}
+	XanimFrame {
+	    # ?
+	}
+	default {
+	    if {[::Plugins::HaveSaveProcForWinClass $windowClass]} {
+		set procName \
+		  [::Plugins::GetSaveProcForWinClass $windowClass]
+		set line [eval {$procName $w $id} $args]
+	    }
 	}
     }
     return $line
@@ -694,6 +700,7 @@ proc ::CanvasUtils::GetOnelinerForImage {w id args} {
 		return -code error "Unknown -uritype \"$argsArr(-uritype)\""
 	    }
 	}
+	set impArr(-mime) [::Types::GetMimeTypeForFileName $imageFile]
     }
     
     # -above & -below??? Be sure to overwrite any cached options.
@@ -704,52 +711,17 @@ proc ::CanvasUtils::GetOnelinerForImage {w id args} {
 }
 
 proc ::CanvasUtils::GetOnelinerForQTMovie {w id args} {
-    
+        
     array set argsArr {
 	-uritype file
     }
     array set argsArr $args
-    set wtop [::UI::GetToplevelNS $w]
-    array set impArr [::CanvasUtils::ItemCGet $wtop $id]
 
-    # Ad hoc way of getting -file and -url BAD!
-    set windowName [$w itemcget $id -window]
-    set windowClass [winfo class $windowName]
-    set movieName ${windowName}.m
-    set movFile [$movieName cget -file]
-    set movUrl [$movieName cget -url]
-    set impArr(-width) [winfo width $windowName]
-    set impArr(-height) [winfo height $windowName]
-    
-    switch -- $argsArr(-uritype) {
-	file {
-	    if {$movFile != ""} {
-		if {[info exists argsArr(-basepath)]} {
-		    set movFile [filerelative $argsArr(-basepath) $movFile]	    
-		} 
-		set impArr(-file) $movFile
-		catch {unset impArr(-url)}
-	    } elseif {$movUrl != ""} {
-		
-		# In this case we don't have access to QT's internal cache.
-		set impArr(-url) $movUrl
-	    }
-	}
-	http {
-	    if {$movFile != ""} {
-		set impArr(-url) [::Utils::GetHttpFromFile $movFile]
-	    } elseif {$movUrl != ""} {
-		set impArr(-url) $movUrl
-	    }	    
-	    catch {unset impArr(-file)}
-	}
-	default {
-	    return -code error "Unknown -uritype \"$argsArr(-uritype)\""
-	}
-    }
-    set impArr(-tags) [::CanvasUtils::GetUtag $w $id 1]
-    
-    return [concat import [$w coords $id] [array get impArr]]
+    set wtop [::UI::GetToplevelNS $w]
+    set opts [::CanvasUtils::GetItemOpts $w $id]
+    set opts [concat $opts [::CanvasUtils::ItemCGet $wtop $id]]
+    set cmd  [concat create window [$w coords $id] $opts]
+    return [eval {::CanvasUtils::GetImportCmdForQTMovie $cmd} $args]
 }
 
 proc ::CanvasUtils::GetOnelinerForSnack {w id args} {
@@ -758,39 +730,246 @@ proc ::CanvasUtils::GetOnelinerForSnack {w id args} {
 	-uritype file
     }
     array set argsArr $args
+    
     set wtop [::UI::GetToplevelNS $w]
-    array set impArr [::CanvasUtils::ItemCGet $wtop $id]
+    set opts [::CanvasUtils::GetItemOpts $w $id]
+    set opts [concat $opts [::CanvasUtils::ItemCGet $wtop $id]]
+    set cmd  [concat create window [$w coords $id] $opts]
+    return [eval {::CanvasUtils::GetImportCmdForSnack $cmd} $args]
+}
 
-    # Ad hoc way of getting -file and -url BAD!
-    set windowName [$w itemcget $id -window]
-    set windowClass [winfo class $windowName]
-    set movieName ${windowName}.m
+proc ::CanvasUtils::GetImportCmdForQTMovie {cmd args} {
+    
+    array set argsArr {
+	-uritype file
+    }
+    array set argsArr $args
+    
+    # Need this here to get the windows size.
+    update idletasks
+
+    # 'create window 0 0 -window ...'
+    set indopts [lsearch -regexp $cmd {^-[a-z]}]
+    set coords [lrange $cmd 2 [expr $indopts-1]]
+    array set optsArr [lrange $cmd $indopts end]
+    set windowName [lindex $cmd [expr [lsearch $cmd -window] + 1]]
+    
+    set movieName   [lindex [winfo children $windowName] 0]
+    set movFile     [$movieName cget -file]
+    set movUrl      [$movieName cget -url]
+    set optsArr(-width)  [winfo width $windowName]
+    set optsArr(-height) [winfo height $windowName]
+
+    switch -- $argsArr(-uritype) {
+	file {
+	    if {$movFile != ""} {
+		if {[info exists argsArr(-basepath)]} {
+		    set movFile [filerelative $argsArr(-basepath) $movFile]	    
+		} 
+		set optsArr(-file) $movFile
+		catch {unset impArr(-url)}
+	    } elseif {$movUrl != ""} {
+		
+		# In this case we don't have access to QT's internal cache.
+		set optsArr(-url) $movUrl
+	    }
+	}
+	http {
+	    if {$movFile != ""} {
+		set optsArr(-url) [::Utils::GetHttpFromFile $movFile]
+	    } elseif {$movUrl != ""} {
+		set optsArr(-url) $movUrl
+	    }	    
+	    catch {unset optsArr(-file)}
+	}
+	default {
+	    return -code error "Unknown -uritype \"$argsArr(-uritype)\""
+	}
+    }
+    set optsArr(-tags) [::CanvasUtils::GetUtagFromCmd $cmd]
+    set optsArr(-mime) [::Types::GetMimeTypeForFileName $movFile]
+    
+    return [concat import $coords [array get optsArr]]
+}
+
+proc ::CanvasUtils::GetImportCmdForSnack {cmd args} {
+    
+    array set argsArr {
+	-uritype file
+    }
+    array set argsArr $args
+    
+    # 'create window 0 0 -window ...'
+    set indopts [lsearch -regexp $cmd {^-[a-z]}]
+    set coords [lrange $cmd 2 [expr $indopts-1]]
+    array set optsArr [lrange $cmd $indopts end]
+    set windowName [lindex $cmd [expr [lsearch $cmd -window] + 1]]
+
+    set movieName   [lindex [winfo children $windowName] 0]
     set soundObject [$movieName cget -snacksound]
-    set soundFile [$soundObject cget -file]
-    set impArr(-width) [winfo width $windowName]
-    set impArr(-height) [winfo height $windowName]
-
-    set cachedOpts [::CanvasUtils::ItemCGet $wtop $id]
+    set soundFile   [$soundObject cget -file]
+    set optsArr(-width)  [winfo width $windowName]
+    set optsArr(-height) [winfo height $windowName]
     
     switch -- $argsArr(-uritype) {
 	file {
 	    if {[info exists argsArr(-basepath)]} {
 		set soundFile [filerelative $argsArr(-basepath) $soundFile]
 	    }
-	    set impArr(-file) $soundFile
-	    catch {unset impArr(-url)}
+	    set optsArr(-file) $soundFile
+	    catch {unset optsArr(-url)}
 	}
 	http {
-	    set impArr(-url) [::Utils::GetHttpFromFile $soundFile]
-	    catch {unset impArr(-file)}
+	    set optsArr(-url) [::Utils::GetHttpFromFile $soundFile]
+	    catch {unset optsArr(-file)}
 	}
 	default {
 	    return -code error "Unknown -uritype \"$argsArr(-uritype)\""
 	}
     }
-    set impArr(-tags) [::CanvasUtils::GetUtag $w $id 1]
+    set optsArr(-tags) [::CanvasUtils::GetUtagFromCmd $cmd]
+    set optsArr(-mime) [::Types::GetMimeTypeForFileName $soundFile]
     
-    return [concat import [$w coords $id] [array get impArr]]
+    return [concat import $coords [array get optsArr]]
+}
+
+# CanvasUtils::GetSVGForeignFromWindowItem --
+# 
+#       The 'cmd' is typically 'create window 80.0 80.0 -height 58 -window ...'
+#       a canvas create command for window items.
+
+proc ::CanvasUtils::GetSVGForeignFromWindowItem {cmd args} {
+    
+    ::Debug 2 "::CanvasUtils::GetSVGForeignFromWindowItem cmd=$cmd, args='$args'"
+    
+    set windowName  [lindex $cmd [expr [lsearch $cmd -window] + 1]]
+    set windowClass [winfo class $windowName]
+    
+    switch -- $windowClass {
+	QTFrame {
+	    set line [eval {
+		::CanvasUtils::GetImportCmdForQTMovie $cmd} $args]
+	}
+	SnackFrame {			
+	    set line [eval {
+	    ::CanvasUtils::GetImportCmdForSnack $cmd} $args]
+	}
+	XanimFrame {
+	    # ?
+	}
+	default {
+	    if {[::Plugins::HaveSaveProcForWinClass $windowClass]} {
+		set procName \
+		  [::Plugins::GetSaveProcForWinClass $windowClass]
+		set line [eval {$procName $cmd} $args]
+	    }
+	}
+    }
+    return [eval {::CanvasUtils::GetSVGForeignFromImportCmd $line} $args]
+}
+
+# CanvasUtils::GetSVGForeignFromImportCmd --
+# 
+#       Makes an xmllist from an 'import' command that is not an image.
+ 
+proc ::CanvasUtils::GetSVGForeignFromImportCmd {cmd args} {
+
+    # Assuming '-anchor nw'
+    set attr [list x [lindex $cmd 1] y [lindex $cmd 2]]
+    set embedattr [list xmlns http://jabber.org/protocol/svgwb/embed/]
+    set indopts [lsearch -regexp $cmd {^-[a-z]}]
+    foreach {key value} [lrange $cmd $indopts end] {
+	
+	switch -- $key {
+	    -height - -width {
+		lappend attr [string trimleft $key -] $value
+	    }
+	    -file {
+		lappend embedattr xlink:href [can2svg::FileUriFromLocalFile $value]
+		lappend embedattr size [file size $value]
+		lappend embedattr mime [::Types::GetMimeTypeForFileName $value]
+	    }
+	    -tags {
+		lappend embedattr id $value
+	    }
+	    -url {
+		lappend embedattr xlink:href $value
+		lappend embedattr mime [::Types::GetMimeTypeForFileName $value]
+	    }
+	}
+    }
+    set embedElem [wrapper::createtag "embed" -attrlist $embedattr]
+    set xmllist [wrapper::createtag "foreignObject" -attrlist $attr \
+      -subtags [list $embedElem]]
+   
+    return $xmllist
+}
+
+# CanvasUtils::SVGForeignObjectHandler --
+# 
+#       Tries to import a 'foreignObject' element to canvas using any
+#       suitable importer.
+
+proc ::CanvasUtils::SVGForeignObjectHandler {wtop xmllist paropts transformList args} {
+    
+    ::Debug 4 "::CanvasUtils::SVGForeignObjectHandler \n\
+      \t xmllist=$xmllist\n\t args=$args"
+    
+    # xmllist=foreignObject {x 32.0 y 32.0 width 166 height 22} 0 {} {
+    #     {embed {xmlns http://jabber.org/protocol/svgwb/embed/ 
+    #        id foo113-120.visit.se/219777630 
+    #        xlink:href file:///Users/sounds/startup.wav 
+    #        size 22270 mime audio/wav} 0 {} {}}}
+
+    set w [::WB::GetCanvasFromWtop $wtop]
+    set embedElems [wrapper::getchildwithtaginnamespace $xmllist "embed" \
+      "http://jabber.org/protocol/svgwb/embed/"]
+    if {[llength $embedElems]} {
+	set x 0
+	set y 0
+	set basecmd {}
+	foreach {key val} [wrapper::getattrlist $xmllist] {
+	    switch -- $key {
+		x - y {
+		    set $key $val
+		} 
+		height - width {
+		    lappend basecmd -$key $val
+		}
+	    }
+	}
+	
+	foreach elem $embedElems {
+	    set haveXlink 0
+	    set cmd [concat import $x $y $basecmd] 
+	    foreach {key val} [wrapper::getattrlist $elem] {
+		switch -- $key {
+		    id {
+			lappend cmd -tags $val
+		    }
+		    size - mime {
+			lappend cmd -$key $val
+		    }
+		    xlink:href {
+			if {[string match "file:/*" $val]} {
+			    set haveXlink 1
+			    set path [uriencode::decodefile $val]
+			    set path [string map {file:/// /} $path]
+			    lappend cmd -file $path
+			} elseif {[string match "http:/*" $val]} {
+			    set haveXlink 1
+			    lappend cmd -url $val
+			}
+		    }
+		}
+	    }
+	    if {$haveXlink} {
+		::Import::HandleImportCmd $w $cmd  \
+		  -progess [list ::Import::ImportProgress $cmd]  \
+		  -command [list ::Import::ImportCommand $cmd]
+	    }
+	}
+    }
 }
 
 # CanvasUtils::ItemConfigure --
@@ -1014,6 +1193,9 @@ proc ::CanvasUtils::DoItemPopup {w x y} {
 	    }
 	    set popupVars(-fontweight) [lindex $fontOpt 2]
 	}
+    }
+    if {$type == "arc"} {
+	set popupVars(-arc) [$w itemcget $id -style]
     }
     
     # Post popup menu.

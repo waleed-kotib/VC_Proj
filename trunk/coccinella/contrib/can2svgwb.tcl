@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #
-# $Id: can2svgwb.tcl,v 1.4 2004-03-27 15:20:37 matben Exp $
+# $Id: can2svgwb.tcl,v 1.5 2004-07-07 13:07:13 matben Exp $
 
 package require can2svg
 
@@ -27,6 +27,7 @@ namespace eval can2svgwb {
 #       cmd         canvas command without prepending widget path.
 #       args    -canvas     widgetPath
 #               -httpbasedir  path
+#               -unknownimporthandler
 #               -uritype    file|http
 #               -usetags    0|all|first|last
 #               -usestyleattribute 0|1
@@ -74,8 +75,24 @@ proc can2svgwb::Parseconfigure {cmd args} {
 	# Fallback.
 	set type polygon
     }
-    set attrlist [can2svg::MakeStyleList $type $opts -setdefaults 0]
+    #puts "-------type=$type, cmd=$cmd, opts=$opts"
+    
+    # Some switches influences coordinates (d attribute).
+    switch -- $type {
+	arc {
+	    # Make a new one seems simplest.
+	    set arccmd [concat {create arc} [$argsArr(-canvas) coords $id] $opts]
+	    set xmllist [lindex [eval {can2svg::svgasxmllist $arccmd} $args] 0]
+	    set attrlist [wrapper::getattrlist $xmllist]
+	    #puts "------arccomd=$arccmd"
+	    #puts "------xmllist=$xmllist"
+	}
+	default {
+	    set attrlist [can2svg::MakeStyleList $type $opts -setdefaults 0]
+	}
+    }    
     lappend attrlist id $id
+    #puts "-------attrlist=$attrlist"
     return [wrapper::createtag configure -attrlist $attrlist]
 }
 
@@ -95,7 +112,7 @@ proc can2svgwb::Parsecoords {cmd args} {
     }
     
     switch -- $type {
-	image {
+	image - window {
 	    set attrlist [list x [lindex $coo 0] y [lindex $coo 1]]
 	}
 	default {
@@ -135,8 +152,23 @@ proc can2svgwb::Parseimport {cmd args} {
 
     # Assume image for the moment...
     # We don't have the -image option here.
-
-    return [ParseImportImage $cmd]
+    
+    array set argsArr $args
+    
+    # How to know if image or window item? -mime REQUIRED!
+    set ind [lsearch $cmd -mime]
+    if {$ind == -1} {
+	puts "missing mime option in \"$cmd\""
+	return
+    }
+    set type [lindex [split [lindex $cmd [incr ind]] /] 0]
+    if {[string equal $type "image"]} {
+	return [ParseImportImage $cmd]
+    } else {
+	if {[string length $argsArr(-unknownimporthandler)]} {
+	    return [uplevel #0 $argsArr(-unknownimporthandler) [list $cmd] $args]
+	}
+    }
 }
 
 proc can2svgwb::ParseImportImage {cmd} {
