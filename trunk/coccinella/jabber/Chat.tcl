@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.10 2003-08-23 07:19:16 matben Exp $
+# $Id: Chat.tcl,v 1.11 2003-10-05 13:36:17 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -44,6 +44,7 @@ proc ::Jabber::Chat::StartThreadDlg {w args} {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 
     }
@@ -258,6 +259,7 @@ proc ::Jabber::Chat::Build {threadID args} {
     toplevel $w -class Chat
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 
     }
@@ -639,6 +641,7 @@ proc ::Jabber::Chat::BuildHistory {jid} {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 	
     }

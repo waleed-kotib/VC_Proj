@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.11 2003-09-28 06:29:08 matben Exp $
+# $Id: GroupChat.tcl,v 1.12 2003-10-05 13:36:17 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -230,6 +230,7 @@ proc ::Jabber::GroupChat::BuildEnter {args} {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 
     }
@@ -493,6 +494,7 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     toplevel $w -class GroupChat
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 	
     }

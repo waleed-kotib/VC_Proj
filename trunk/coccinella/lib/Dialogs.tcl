@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.11 2003-09-28 06:29:08 matben Exp $
+# $Id: Dialogs.tcl,v 1.12 2003-10-05 13:36:20 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -77,6 +77,7 @@ proc ::Dialogs::GetCanvas {w} {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 
     }
@@ -154,6 +155,7 @@ proc ::Dialogs::InfoOnPlugins {w} {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 
     }
@@ -292,6 +294,7 @@ proc ::Dialogs::UnixPrintPS {w wtoprint} {
     catch {toplevel $w}
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 
     }
@@ -431,6 +434,7 @@ proc ::PSPageSetup::PSPageSetup { w } {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 
     }
@@ -620,6 +624,7 @@ proc ::Dialogs::ShowInfoClients {w allIPnumsFrom} {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 
     }
@@ -714,6 +719,7 @@ proc ::Dialogs::ShowInfoServer {w thisIPnum} {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 
     }
@@ -923,6 +929,7 @@ proc ::Dialogs::Canvas {filePath args} {
     }
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 
     }

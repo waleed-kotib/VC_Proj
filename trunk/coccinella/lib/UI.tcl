@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.19 2003-09-28 06:29:08 matben Exp $
+# $Id: UI.tcl,v 1.20 2003-10-05 13:36:21 matben Exp $
 
 # LabeledFrame --
 #
@@ -88,6 +88,13 @@ namespace eval ::UI:: {
     set dims(screenW) [winfo vrootwidth .]
     # Unique id for main toplevels
     variable uidmain 0
+    
+    variable accelBindsToMain {}
+    
+    # Addon stuff.
+    variable fixMenusCallback {}
+    variable menuSpecPublic
+    set menuSpecPublic(wpaths) {}
 }
 
 # UI::Init --
@@ -96,6 +103,8 @@ namespace eval ::UI:: {
 
 proc ::UI::Init {} {
     global  this prefs
+    
+    ::Debug 2 "::UI::Init"
     
     # For the communication entries.
     # variables:              $wtop is used as a key in these vars.
@@ -134,9 +143,6 @@ proc ::UI::Init {} {
     
     # Defines canvas binding tags suitable for each tool.
     ::CanvasUtils::DefineWhiteboardBindtags
-    
-    # Addon menus
-    variable menuSpecAddon {}
     
     variable allWhiteboards {}
 
@@ -340,8 +346,27 @@ proc ::UI::InitMenuDefs { } {
     set menuDefs(main,apple) [list $menuDefs(main,info,aboutwhiteboard)  \
       $menuDefs(main,info,aboutquicktimetcl)]
     
-    set menuDefs(main,file) {
-	{command   mNew                {::UI::NewMain}                            normal   N}
+    set menuDefsMainFileJabber {
+	{command   mNew                {::UI::NewMain -sendcheckstate disabled}   normal   N}
+	{command   mCloseWindow        {::UserActions::DoCloseWindow}             normal   W}
+	{separator}
+	{command   mOpenImage/Movie    {::Import::ImportImageOrMovieDlg $wtop} normal  I}
+	{command   mOpenURLStream      {::OpenMulticast::OpenMulticast $wtop $wDlgs(openMulti)} normal {}}
+	{command   mStopPut/Get/Open   {::UserActions::CancelAllPutGetAndPendingOpen $wtop} normal {}}
+	{separator}
+	{command   mOpenCanvas         {::CanvasFile::DoOpenCanvasFile $wtop}     normal   {}}
+	{command   mSaveCanvas         {::CanvasFile::DoSaveCanvasFile $wtop}     normal   S}
+	{separator}
+	{command   mSaveAs             {::UserActions::SavePostscript $wtop}      normal   {}}
+	{command   mPageSetup          {::UserActions::PageSetup}                 normal   {}}
+	{command   mPrintCanvas        {::UserActions::DoPrintCanvas $wtop}       normal   P}
+	{separator}
+	{command   mQuit               {::UserActions::DoQuit}                    normal   Q}
+    }
+    if {![::Plugins::HavePackage QuickTimeTcl]} {
+	lset menuDefsMainFileJabber 4 3 disabled
+    }
+    set menuDefsMainFileP2P {
 	{command   mOpenConnection     {::UserActions::DoConnect}                 normal   O}
 	{command   mCloseWindow        {::UserActions::DoCloseWindow}             normal   W}
 	{separator}
@@ -362,7 +387,20 @@ proc ::UI::InitMenuDefs { } {
 	{separator}
 	{command   mQuit               {::UserActions::DoQuit}                    normal   Q}
     }
-    
+    if {![::Plugins::HavePackage QuickTimeTcl]} {
+	lset menuDefsMainFileP2P 4 3 disabled
+    }
+    if {[string equal $prefs(protocol) "jabber"]} {
+	set menuDefs(main,file) $menuDefsMainFileJabber
+    } else {
+	set menuDefs(main,file) $menuDefsMainFileP2P
+    }
+	    
+    # If embedded the embedding app should close us down.
+    if {$prefs(embedded)} {
+	lset menuDefs(main,file) end 3 disabled
+    }
+
     set menuDefs(main,edit) {    
 	{command     mUndo             {::UserActions::Undo $wtop}             normal   Z}
 	{command     mRedo             {::UserActions::Redo $wtop}             normal   {}}
@@ -437,8 +475,8 @@ proc ::UI::InitMenuDefs { } {
       {checkbutton mLineSmoothness   {}                                    normal   {} \
       {-variable ::${wtop}::state(smooth)}}
     if {0} {
-    set menuDefs(main,prefs,straighten)  \
-      {command     mStraighten       {::CanvasUtils::ItemStraighten $w $id} normal   {} {}}
+	set menuDefs(main,prefs,straighten)  \
+	  {command     mStraighten       {::CanvasUtils::ItemStraighten $w $id} normal   {} {}}
     }
     set menuDefs(main,prefs,arcs)  \
       {cascade     mArcs             {}                                    normal   {} {} {
@@ -527,11 +565,6 @@ proc ::UI::InitMenuDefs { } {
     if {$haveAppleMenu && ![::Plugins::HavePackage QuickTimeTcl]} {
 	lset menuDefs(main,apple) 1 3 disabled
     }
-    if {[string equal $prefs(protocol) "jabber"]} {
-	lset menuDefs(main,file) 0 2 {::UI::NewMain -sendcheckstate disabled}
-    } else {
-	lset menuDefs(main,file) 0 3 disabled
-    }
     if {![::Plugins::HavePackage QuickTimeTcl]} {
 	lset menuDefs(main,file) 5 3 disabled
     }
@@ -543,11 +576,6 @@ proc ::UI::InitMenuDefs { } {
     }
     if {!$haveAppleMenu && [::Plugins::HavePackage QuickTimeTcl]} {
 	lappend menuDefs(main,info) $menuDefs(main,info,aboutquicktimetcl)
-    }
-	    
-    # If embedded the embedding app should close us down.
-    if {$prefs(embedded)} {
-	lset menuDefs(main,file) end 3 disabled
     }
     
     # Menu definitions for the Roster/services window. Collects minimal Jabber
@@ -977,8 +1005,8 @@ proc ::UI::BuildMain {wtop args} {
     }
 
     # Set up paste menu if something on the clipboard.
-    ::UI::AppGetFocus $wtop $wtopReal
-    bind $wtopReal <FocusIn> [list ::UI::AppGetFocus $wtop %W]
+    ::UI::WhiteboardGetFocus $wtop $wtopReal
+    bind $wtopReal <FocusIn> [list ::UI::WhiteboardGetFocus $wtop %W]
     
     # Create the undo/redo object.
     set state(undotoken) [undo::new -command [list ::UI::UndoConfig $wtop]]
@@ -1098,6 +1126,7 @@ proc ::UI::DestroyMain {wtop} {
     # We could do some cleanup here.
     eval {image delete} $tmpImages
     ::CanvasUtils::ItemFree $wtop
+    ::UI::FreeMenu $wtop
 }
 
 # UI::SaveWhiteboardState
@@ -1519,6 +1548,8 @@ proc ::UI::SetToolButton {wtop btName} {
 	    
 	    # Bindings for moving items; movies need special class.
 	    # The frame with the movie gets the mouse events, not the canvas.
+	    # Binds directly to canvas widget since we want to move selected 
+	    # items as well.
 	    # With shift constrained move.
 	    bindtags $wCan [list $wCan WhiteboardMove WhiteboardNonText . all]
 	    
@@ -1723,47 +1754,47 @@ proc ::UI::SavePanePos {wtoplevel wpaned {orient horizontal}} {
 #       wtop        toplevel window. ("." or ".main2." with extra dot!)
 #       wmenu       the menus widget path name (".menu.file" etc.).
 #       label       its label.
-#       menuKey     the array key to the 'menuDefs' array.
+#       menuSpec    a hierarchical list that defines the menu content.
+#                   {{type name cmd state accelerator opts} {{...} {...} ...}}
 #       state       'normal' or 'disabled'.
 #       args        form ?-varName value? list that defines local variables to set.
 #       
 # Results:
 #       $wmenu
 
-proc ::UI::NewMenu {wtop wmenu label menuKey state args} {    
-    variable menuDefs    
-    variable mapWmenuToMenuDefKey
+proc ::UI::NewMenu {wtop wmenu label menuSpec state args} {    
     variable mapWmenuToWtop
-    
-    if {![info exists menuDefs($menuKey)]} {
-	return -code error "Missing menuDefs entry for \"$menuKey\""
-    }
-    set mapWmenuToMenuDefKey($wmenu) $menuKey
+    variable cachedMenuSpec
+        
+    # Need to cache the complete menuSpec's since needed in MenuMethod.
+    set cachedMenuSpec($wtop,$wmenu) $menuSpec
     set mapWmenuToWtop($wmenu) $wtop
-    
-    eval {::UI::MakeMenu $wtop $wmenu $label $menuDefs($menuKey) $state} $args
+
+    eval {::UI::BuildMenu $wtop $wmenu $label $menuSpec $state} $args
 }
 
-# UI::MakeMenu --
+# UI::BuildMenu --
 #
 #       Make menus recursively from a hierarchical menu definition list.
-#       Usually only called from ::UI::NewMenu!
+#       Only called from ::UI::NewMenu!
 #
 # Arguments:
 #       wtop        toplevel window. ("." or ".main2." with extra dot!)
 #       wmenu       the menus widget path name (".menu.file" etc.).
 #       label       its label.
 #       menuDef     a hierarchical list that defines the menu content.
+#                   {{type name cmd state accelerator opts} {{...} {...} ...}}
 #       state       'normal' or 'disabled'.
 #       args        form ?-varName value? list that defines local variables to set.
 #       
 # Results:
 #       $wmenu
 
-proc ::UI::MakeMenu {wtop wmenu label menuDef state args} {
+proc ::UI::BuildMenu {wtop wmenu label menuDef state args} {
     global  this wDlgs prefs dashFull2Short osprefs
     
     variable menuKeyToIndex
+    variable accelBindsToMain
     
     if {$wtop == "."} {
 	set topw .
@@ -1812,7 +1843,7 @@ proc ::UI::MakeMenu {wtop wmenu label menuDef state args} {
 		# Make cascade menu recursively.
 		regsub -all -- " " [string tolower $name] "" mt
 		regsub -all -- {\.} $mt "" mt
-		eval {::UI::MakeMenu $wtop ${wmenu}.${mt} $name $subdef $state} $args
+		eval {::UI::BuildMenu $wtop ${wmenu}.${mt} $name $subdef $state} $args
 		
 		# Explicitly set any disabled state of cascade.
 		::UI::MenuMethod $m entryconfigure $name -state $mstate
@@ -1825,9 +1856,17 @@ proc ::UI::MakeMenu {wtop wmenu label menuDef state args} {
 		    lappend mopts -accelerator ${mod}+${accel}
 		    if {![string equal $this(platform) "macintosh"]} {
 			set key [string map {< less > greater} [string tolower $accel]]
+			
 			if {[string equal $state "normal"]} {
 			    if {[string equal $mstate "normal"]} {
 				bind $topw <${mod}-Key-${key}> $cmd
+				
+				# Cache bindings for use in dialogs that inherit
+				# main menu.
+				if {$wtop == "."} {
+				    lappend accelBindsToMain  \
+				      [list <${mod}-Key-${key}> $cmd]
+				}
 			    }
 			} else {
 			    bind $topw <${mod}-Key-${key}> {}
@@ -1842,43 +1881,67 @@ proc ::UI::MakeMenu {wtop wmenu label menuDef state args} {
     return $wmenu
 }
 
+proc ::UI::FreeMenu {wtop} {
+    variable mapWmenuToWtop
+    variable cachedMenuSpec
+    variable menuKeyToIndex
+    
+    foreach key [array names cachedMenuSpec "$wtop,*"] {
+	set wmenu [string map [list "$wtop," ""] $key]
+	unset mapWmenuToWtop($wmenu)
+	array unset menuKeyToIndex "$wmenu,*"
+    }
+    array unset cachedMenuSpec "$wtop,*"
+}
+
 # UI::MenuMethod --
 #  
 #       Utility to use instead of 'menuPath cmd index args'.
+#
+# Arguments:
+#       wmenu       menu's widget path
+#       cmd         valid menu command
+#       key         key to menus index
+#       args
+#       
+# Results:
+#       binds to toplevel changed
 
 proc ::UI::MenuMethod {wmenu cmd key args} {
     global  this prefs wDlgs osprefs
-    variable menuKeyToIndex
-    variable menuDefs
-    variable mapWmenuToMenuDefKey
-    variable mapWmenuToWtop
             
+    variable menuKeyToIndex
+    variable mapWmenuToWtop
+    variable cachedMenuSpec
+        
+    # Need to cache the complete menuSpec's since needed in MenuMethod.
+    set wtop $mapWmenuToWtop($wmenu)
+    set menuSpec $cachedMenuSpec($wtop,$wmenu)
     set mind $menuKeyToIndex($wmenu,$key)
+    
+    # This would be enough unless we need working accelerator keys.
     eval {$wmenu $cmd $mind} $args
     
     # Handle any menu accelerators as well. 
     # Make sure the necessary variables for the command exist here!
-    if {![string equal $this(platform) "macintosh"] && \
-      [info exists mapWmenuToMenuDefKey($wmenu)]} {
+    if {![string equal $this(platform) "macintosh"]} {
 	set ind [lsearch $args "-state"]
 	if {$ind >= 0} {
 	    set mstate [lindex $args [incr ind]]
-	    set menuDefKey $mapWmenuToMenuDefKey($wmenu)
-	    set wtop $mapWmenuToWtop($wmenu)
 	    if {$wtop == "."} {
 		set topw .
 	    } else {
 		set topw [string trimright $wtop "."]
 	    }
-	    set mcmd [lindex [lindex $menuDefs($menuDefKey) $mind] 2]
+	    set mcmd [lindex [lindex $menuSpec $mind] 2]
 	    set mcmd [subst -nocommands $mcmd]
-	    set acc [lindex [lindex $menuDefs($menuDefKey) $mind] 4]
+	    set acc [lindex [lindex $menuSpec $mind] 4]
 	    if {[string length $acc]} {
-		set key [string map {< less > greater} [string tolower $acc]]
+		set acckey [string map {< less > greater} [string tolower $acc]]
 		if {[string equal $mstate "normal"]} {
-		    bind $topw <$osprefs(mod)-Key-${key}> $mcmd
+		    bind $topw <$osprefs(mod)-Key-${acckey}> $mcmd
 		} else {
-		    bind $topw <$osprefs(mod)-Key-${key}> {}
+		    bind $topw <$osprefs(mod)-Key-${acckey}> {}
 		}			
 	    }
 	}
@@ -1898,7 +1961,7 @@ proc ::UI::MenuMethod {wmenu cmd key args} {
 proc ::UI::BuildWhiteboardMenus {wtop} {
     global  this wDlgs prefs dashFull2Short osprefs
     
-    variable menuSpecAddon
+    variable menuDefs
     upvar ::${wtop}::wapp wapp
     upvar ::${wtop}::state state
     upvar ::${wtop}::opts opts
@@ -1917,20 +1980,19 @@ proc ::UI::BuildWhiteboardMenus {wtop} {
 	set haveAppleMenu 0
     }
     if {$haveAppleMenu} {
-	::UI::NewMenu $wtop ${wmenu}.apple {}        "main,apple" $opts(-state)
+	::UI::BuildAppleMenu $wtop ${wmenu}.apple $opts(-state)
     }
-    ::UI::NewMenu $wtop ${wmenu}.file   mFile        "main,file"  $opts(-state)
-    ::UI::NewMenu $wtop ${wmenu}.edit   mEdit        "main,edit"  $opts(-state)
-    ::UI::NewMenu $wtop ${wmenu}.prefs  mPreferences "main,prefs" $opts(-state)
+    ::UI::NewMenu $wtop ${wmenu}.file   mFile        $menuDefs(main,file)  $opts(-state)
+    ::UI::NewMenu $wtop ${wmenu}.edit   mEdit        $menuDefs(main,edit)  $opts(-state)
+    ::UI::NewMenu $wtop ${wmenu}.prefs  mPreferences $menuDefs(main,prefs) $opts(-state)
         
     # Item menu (temporary placement).
     ::UI::BuildItemMenu $wtop ${wmenu}.items $prefs(itemDir)
     
     # Addon or Plugin menus if any.
-    ::UI::BuildAddonMenu $wmenu
-    ::UI::BuildPluginMenu $wmenu
+    ::UI::BuildPublicMenus $wmenu
     
-    ::UI::NewMenu $wtop ${wmenu}.info mInfo "main,info" $opts(-state)
+    ::UI::NewMenu $wtop ${wmenu}.info mInfo $menuDefs(main,info) $opts(-state)
 
     # Handle '-state disabled' option. Keep Edit/Copy.
     if {$opts(-state) == "disabled"} {
@@ -1948,11 +2010,18 @@ proc ::UI::BuildWhiteboardMenus {wtop} {
     }
 }
 
+proc ::UI::BuildAppleMenu {wtop wmenuapple state} {
+    variable menuDefs
+    
+    ::UI::NewMenu $wtop $wmenuapple {} $menuDefs(main,apple) $state
+}
+
 # UI::DisableWhiteboardMenus --
 #
 #       Handle '-state disabled' option. Sets in a readonly state.
 
 proc ::UI::DisableWhiteboardMenus {wmenu} {
+    variable menuSpecPublic
     
     ::UI::MenuDisableAllBut ${wmenu}.file {
 	mNew mCloseWindow mSaveCanvas mPageSetup mPrintCanvas mQuit
@@ -1962,7 +2031,11 @@ proc ::UI::DisableWhiteboardMenus {wmenu} {
     $wmenu entryconfigure [::msgcat::mc mItems] -state disabled
     $wmenu entryconfigure [::msgcat::mc mInfo] -state disabled
         
-    catch {$wmenu entryconfigure [::msgcat::mc mAddons] -state disabled}
+    # Handle all 'addons'.
+    foreach wpath $menuSpecPublic(wpaths) {
+	set name $menuSpecPublic($wpath,name)
+	$wmenu entryconfigure $name -state disabled
+    }
 }
 
 proc ::UI::MenuDisableAllBut {mw normalList} {
@@ -1978,51 +2051,64 @@ proc ::UI::MenuDisableAllBut {mw normalList} {
     }
 }
 
-# UI::RegisterAddonMenuEntry --
+#--- The public interfaces -----------------------------------------------------
+
+namespace eval ::UI::Public:: {
+    
+    # This is supposed to collect some "public" interfaces useful for
+    # 'plugins' and 'addons'.
+}
+
+# UI::Public::RegisterMenuEntry --
 #
 #       
 # Arguments:
-#       menuSpec    'type' 'label' 'command' 'opts' {subspec}
+#       wpath       
+#       name
+#       menuSpec    {type label command state accelerator opts {subspec}}
 #       
 # Results:
 #       menu entries added when whiteboard built.
 
-proc ::UI::RegisterAddonMenuEntry {menuSpec} {    
-    variable menuSpecAddon
-    
-    lappend menuSpecAddon $menuSpec
-}
+proc ::UI::Public::RegisterMenuEntry {wpath name menuSpec} {    
+    upvar ::UI::menuSpecPublic menuSpecPublic 
+    upvar ::UI::menuDefs menuDefs 
 
-# UI::RegisterPluginMenuEntry --
-#
-# Arguments:
-#       plugMenuDef   'type' 'label' 'command' 'opts' {subspec}
-
-proc ::UI::RegisterPluginMenuEntry {plugMenuDef} {
-    variable menuSpecPlugin
-    
-    lappend menuSpecPlugin $plugMenuDef
-}
-
-proc ::UI::BuildAddonMenu {wmenu} {
-    variable menuSpecAddon
-    
-    if {[llength $menuSpecAddon]} {
-	set m [menu ${wmenu}.addon -tearoff 0]
-	$wmenu add cascade -label [::msgcat::mc mAddons] -menu $m
-	foreach menuSpec $menuSpecAddon {
-	    ::UI::BuildMenuEntryFromSpec $m $menuSpec
+    switch -- $wpath {
+	edit {
+	    
+	    # Entries should go in specific positions...
+	    # lappend menuDefs(main,edit)
+	    
+	}
+	prefs - items {
+	    
+	}
+	default {
+	    if {[lsearch $menuSpecPublic(wpaths) $wpath] < 0} {
+		lappend menuSpecPublic(wpaths) $wpath
+	    }
+	    set menuSpecPublic($wpath,name) $name
+	    set menuSpecPublic($wpath,specs) [list $menuSpec]
 	}
     }
 }
 
-proc ::UI::BuildPluginMenu {wmenu} {
-    variable menuSpecPlugin
+proc ::UI::Public::RegisterCallbackFixMenus {procName} {    
+    upvar ::UI::fixMenusCallback fixMenusCallback
     
-    if {[info exists menuSpecPlugin] && [llength $menuSpecPlugin]} {
-	set m [menu ${wmenu}.addon -tearoff 0]
-	$wmenu add cascade -label [::msgcat::mc mPlugins] -menu $m
-	foreach menuSpec $menuSpecPlugin {
+    lappend fixMenusCallback $procName
+}
+
+#--- There are actually more; sort out later -----------------------------------
+
+proc ::UI::BuildPublicMenus {wmenu} {
+    variable menuSpecPublic
+    
+    foreach wpath $menuSpecPublic(wpaths) {	
+	set m [menu ${wmenu}.${wpath} -tearoff 0]
+	$wmenu add cascade -label $menuSpecPublic($wpath,name) -menu $m
+	foreach menuSpec $menuSpecPublic($wpath,specs) {
 	    ::UI::BuildMenuEntryFromSpec $m $menuSpec
 	}
     }
@@ -2033,11 +2119,14 @@ proc ::UI::BuildPluginMenu {wmenu} {
 #       Builds a single menu entry for a menu. Can be called recursively.
 #       
 # Arguments:
-#       menuSpec    'type' 'label' 'command' 'opts' {subspec}
+#       menuSpec    {type label command state accelerator opts {subspec}}
+#      
+# Results:
+#       none
 
 proc ::UI::BuildMenuEntryFromSpec {m menuSpec} {
     
-    foreach {type label cmd opts submenu} $menuSpec {
+    foreach {type label cmd state accel opts submenu} $menuSpec {
 	if {[llength $submenu]} {
 	    set mt [menu ${m}.sub -tearoff 0]
 	    $m add cascade -label $label -menu $mt
@@ -2045,7 +2134,7 @@ proc ::UI::BuildMenuEntryFromSpec {m menuSpec} {
 		::UI::BuildMenuEntryFromSpec $mt $subm
 	    }
 	} else {
-	    eval {$m add $type -label $label -command $cmd} $opts
+	    eval {$m add $type -label $label -command $cmd -state $state} $opts
 	}
     }
 }
@@ -2057,12 +2146,14 @@ proc ::UI::BuildMenuEntryFromSpec {m menuSpec} {
 
 proc ::UI::UndoConfig {wtop token what mstate} {
         
+    set medit ${wtop}menu.edit
+    
     switch -- $what {
 	undo {
-	    ::UI::MenuMethod ${wtop}menu.edit entryconfigure mUndo -state $mstate
+	    ::UI::MenuMethod $medit entryconfigure mUndo -state $mstate
 	}
 	redo {
-	    ::UI::MenuMethod ${wtop}menu.edit entryconfigure mRedo -state $mstate	    
+	    ::UI::MenuMethod $medit entryconfigure mRedo -state $mstate	    
 	}
     }
 }
@@ -2422,6 +2513,7 @@ proc ::UI::MegaDlgMsgAndEntry {title msg label varName btcancel btok} {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 	
     }
@@ -2607,7 +2699,7 @@ proc ::UI::NewCutCopyPaste {w} {
     set locals($w,wtop) [winfo toplevel $w]
     
     # Set binding to focus to set normal/disabled correctly.
-    bind $locals($w,wtop) <FocusIn> [list ::UI::CutCopyPasteFocusIn $w]
+    bind $locals($w,wtop) <FocusIn> "+ ::UI::CutCopyPasteFocusIn $w"
     bind $w.cut <Button-1> [list $w.cut configure -image $locals(imcutPush)]
     bind $w.copy <Button-1> [list $w.copy configure -image $locals(imcopyPush)]
     bind $w.paste <Button-1> [list $w.paste configure -image $locals(impastePush)]
@@ -2745,17 +2837,22 @@ proc ::UI::CutCopyPasteFocusIn {w} {
     }
 }
 
-proc ::UI::CutCopyPasteCheckState {state clipState} {
+proc ::UI::CutCopyPasteCheckState {w state clipState} {
 
     upvar ::UI::CCP::locals locals
 
+    set wtoplevel [winfo toplevel $w]
     set tmp {}
-    foreach w $locals(wccpList) {
-	if {[winfo exists $w]} {
-	    lappend tmp $w
-	    ::UI::CutCopyPasteConfigure $w cut -state $state
-	    ::UI::CutCopyPasteConfigure $w copy -state $state	    
-	    ::UI::CutCopyPasteConfigure $w paste -state $clipState	    	    
+    
+    # Find any ccp widget that's in the same toplevel as 'w'.
+    foreach wccp $locals(wccpList) {
+	if {[winfo exists $wccp]} {
+	    lappend tmp $wccp
+	    if {[string equal $wtoplevel [winfo toplevel $wccp]]} {
+		::UI::CutCopyPasteConfigure $wccp cut -state $state
+		::UI::CutCopyPasteConfigure $wccp copy -state $state	    
+		::UI::CutCopyPasteConfigure $wccp paste -state $clipState	    	    
+	    }
 	}
     }
     set locals(wccpList) $tmp
@@ -2880,7 +2977,7 @@ proc ::UI::BuildToolPopups {wtop} {
 	foreach key $menuArr($name) {
 	    lappend mDef($name) $menuDefs(main,prefs,$key)
 	}
-	::UI::MakeMenu $wtop ${wtool}.pop${name} {} $mDef($name) normal
+	::UI::NewMenu $wtop ${wtool}.pop${name} {} $mDef($name) normal
 	if {!$prefs(haveDash) && ([lsearch $menuArr($name) dash] >= 0)} {
 	    ::UI::MenuMethod ${wtool}.pop${name} entryconfigure mDash -state disabled
 	}
@@ -3273,14 +3370,14 @@ proc ::UI::SetNewWMMinsize {wtop} {
       dims(hTop)=$dims(hTop)"
 }	    
 
-# UI::AppGetFocus --
+# UI::WhiteboardGetFocus --
 #
 #       Check clipboard and activate corresponding menus.    
 #       
 # Results:
 #       updates state of menus.
 
-proc ::UI::AppGetFocus {wtop w} {
+proc ::UI::WhiteboardGetFocus {wtop w} {
     
     upvar ::${wtop}::opts opts
     upvar ::${wtop}::wapp wapp
@@ -3293,24 +3390,25 @@ proc ::UI::AppGetFocus {wtop w} {
     if {$wtopReal != $w} {
 	return
     }
-    Debug 3 "AppGetFocus:: wtop=$wtop, w=$w"
+    Debug 3 "WhiteboardGetFocus:: wtop=$wtop, w=$w"
     
     # Can't see why this should happen?
-    if {![winfo exists ${wtop}menu.edit]} {
+    set medit ${wtop}menu.edit
+    if {![winfo exists $medit]} {
 	return
     }
     
     # Check the clipboard or selection.
     if {[catch {selection get -selection CLIPBOARD} sel]} {
-	::UI::MenuMethod ${wtop}menu.edit entryconfigure mPaste -state disabled
+	::UI::MenuMethod $medit entryconfigure mPaste -state disabled
     } elseif {($sel != "") && ($opts(-state) == "normal")} {
-	::UI::MenuMethod ${wtop}menu.edit entryconfigure mPaste -state normal
+	::UI::MenuMethod $medit entryconfigure mPaste -state normal
     }
     
     # If any selected items canvas. Text items ???
     if {[llength [$wapp(can) find withtag selected]] > 0} {
-	::UI::MenuMethod ${wtop}menu.edit entryconfigure mCut -state normal
-	::UI::MenuMethod ${wtop}menu.edit entryconfigure mCopy -state normal
+	::UI::MenuMethod $medit entryconfigure mCut -state normal
+	::UI::MenuMethod $medit entryconfigure mCopy -state normal
     }
 }
 
@@ -3960,6 +4058,7 @@ proc ::UI::FixMenusWhen {wtop what} {
     
     upvar ::${wtop}::wapp wapp
     upvar ::${wtop}::opts opts
+    variable fixMenusCallback
     
     set mfile ${wtop}menu.file 
     
@@ -3974,7 +4073,6 @@ proc ::UI::FixMenusWhen {wtop what} {
 		      [string equal $opts(-sendbuttonstate) "normal"]} {
 			::UI::ButtonConfigure $wtop send -state normal
 		    }
-		    ::UI::MenuMethod $mfile entryconfigure mOpenConnection -state disabled
 		}
 		symmetric {
 		    ::UI::MenuMethod $mfile entryconfigure mPutFile -state normal
@@ -4005,7 +4103,6 @@ proc ::UI::FixMenusWhen {wtop what} {
 		jabber {
 		    #::UI::ButtonConfigure $wtop connect -state normal
 		    ::UI::ButtonConfigure $wtop send -state disabled
-		    ::UI::MenuMethod $mfile entryconfigure mOpenConnection -state normal
 		}
 		client {
 		    ::UI::ButtonConfigure $wtop connect -state normal
@@ -4037,6 +4134,11 @@ proc ::UI::FixMenusWhen {wtop what} {
 	    }
 	}
     }
+    
+    # Invoke any callbacks from 'addons'.
+    foreach cmd $fixMenusCallback {
+	eval {$cmd} ${wtop}menu $what
+    }
 }
 
 # UI::FixMenusWhenSelection --
@@ -4051,11 +4153,13 @@ proc ::UI::FixMenusWhen {wtop what} {
 
 proc ::UI::FixMenusWhenSelection {w} {
     global  this
+    variable fixMenusCallback
     
     set wtop [::UI::GetToplevelNS $w]
     set wClass [winfo class $w]
     set wToplevel [winfo toplevel $w]
     set wToplevelClass [winfo class $wToplevel]
+    set medit ${wtop}menu.edit 
     
     Debug 3 "::UI::FixMenusWhenSelection w=$w,\n\twtop=$wtop, wClass=$wClass,\
       wToplevelClass=$wToplevelClass"
@@ -4101,41 +4205,41 @@ proc ::UI::FixMenusWhenSelection {w} {
 	    
 	    # There is no selection in the canvas.
 	    if {$isDisabled} {
-		::UI::MenuMethod ${wtop}menu.edit entryconfigure mCopy -state disabled
-		::UI::MenuMethod ${wtop}menu.edit entryconfigure mInspectItem -state disabled
+		::UI::MenuMethod $medit entryconfigure mCopy -state disabled
+		::UI::MenuMethod $medit entryconfigure mInspectItem -state disabled
 	    } else {		
-		::UI::MenuMethod ${wtop}menu.edit entryconfigure mCut -state disabled
-		::UI::MenuMethod ${wtop}menu.edit entryconfigure mCopy -state disabled
-		::UI::MenuMethod ${wtop}menu.edit entryconfigure mInspectItem -state disabled
-		::UI::MenuMethod ${wtop}menu.edit entryconfigure mRaise -state disabled
-		::UI::MenuMethod ${wtop}menu.edit entryconfigure mLower -state disabled
-		::UI::MenuMethod ${wtop}menu.edit entryconfigure mLarger -state disabled
-		::UI::MenuMethod ${wtop}menu.edit entryconfigure mSmaller -state disabled
-		::UI::MenuMethod ${wtop}menu.edit entryconfigure mFlip -state disabled
-		::UI::MenuMethod ${wtop}menu.edit entryconfigure mImageLarger -state disabled
-		::UI::MenuMethod ${wtop}menu.edit entryconfigure mImageSmaller -state disabled
+		::UI::MenuMethod $medit entryconfigure mCut -state disabled
+		::UI::MenuMethod $medit entryconfigure mCopy -state disabled
+		::UI::MenuMethod $medit entryconfigure mInspectItem -state disabled
+		::UI::MenuMethod $medit entryconfigure mRaise -state disabled
+		::UI::MenuMethod $medit entryconfigure mLower -state disabled
+		::UI::MenuMethod $medit entryconfigure mLarger -state disabled
+		::UI::MenuMethod $medit entryconfigure mSmaller -state disabled
+		::UI::MenuMethod $medit entryconfigure mFlip -state disabled
+		::UI::MenuMethod $medit entryconfigure mImageLarger -state disabled
+		::UI::MenuMethod $medit entryconfigure mImageSmaller -state disabled
 	    }
 	} else {
 	    if {$isDisabled} {
-		::UI::MenuMethod ${wtop}menu.edit entryconfigure mCopy -state normal
-		::UI::MenuMethod ${wtop}menu.edit entryconfigure mInspectItem -state normal
+		::UI::MenuMethod $medit entryconfigure mCopy -state normal
+		::UI::MenuMethod $medit entryconfigure mInspectItem -state normal
 	    } else {		
-		::UI::MenuMethod ${wtop}menu.edit entryconfigure mCut -state normal
-		::UI::MenuMethod ${wtop}menu.edit entryconfigure mCopy -state normal
-		::UI::MenuMethod ${wtop}menu.edit entryconfigure mInspectItem -state normal
-		::UI::MenuMethod ${wtop}menu.edit entryconfigure mRaise -state normal
-		::UI::MenuMethod ${wtop}menu.edit entryconfigure mLower -state normal
+		::UI::MenuMethod $medit entryconfigure mCut -state normal
+		::UI::MenuMethod $medit entryconfigure mCopy -state normal
+		::UI::MenuMethod $medit entryconfigure mInspectItem -state normal
+		::UI::MenuMethod $medit entryconfigure mRaise -state normal
+		::UI::MenuMethod $medit entryconfigure mLower -state normal
 		if {$anyNotImageSel} {
-		    ::UI::MenuMethod ${wtop}menu.edit entryconfigure mLarger -state normal
-		    ::UI::MenuMethod ${wtop}menu.edit entryconfigure mSmaller -state normal
+		    ::UI::MenuMethod $medit entryconfigure mLarger -state normal
+		    ::UI::MenuMethod $medit entryconfigure mSmaller -state normal
 		}
 		if {$anyImageSel} {
-		    ::UI::MenuMethod ${wtop}menu.edit entryconfigure mImageLarger -state normal
-		    ::UI::MenuMethod ${wtop}menu.edit entryconfigure mImageSmaller -state normal
+		    ::UI::MenuMethod $medit entryconfigure mImageLarger -state normal
+		    ::UI::MenuMethod $medit entryconfigure mImageSmaller -state normal
 		}
 		if {$allowFlip} {
 		    # Seems to be buggy on mac...
-		    ::UI::MenuMethod ${wtop}menu.edit entryconfigure mFlip -state normal
+		    ::UI::MenuMethod $medit entryconfigure mFlip -state normal
 		}
 	    }
 	}
@@ -4164,14 +4268,28 @@ proc ::UI::FixMenusWhenSelection {w} {
 	    }
 	}	
 	if {[winfo exists ${wtop}menu]} {
-	    ::UI::MenuMethod ${wtop}menu.edit entryconfigure mCut -state $setState
-	    ::UI::MenuMethod ${wtop}menu.edit entryconfigure mCopy -state $setState
-	    ::UI::MenuMethod ${wtop}menu.edit entryconfigure mPaste -state $haveClipState
+	    
+	    # We have an explicit menu for this window.
+	    ::UI::MenuMethod $medit entryconfigure mCut -state $setState
+	    ::UI::MenuMethod $medit entryconfigure mCopy -state $setState
+	    ::UI::MenuMethod $medit entryconfigure mPaste -state $haveClipState
+	} elseif {[string equal $this(platform) "macintosh"] || \
+	  [string equal $this(platform) "macosx"]} {
+	    
+	    # Else we use the menu associated with "." since it is default one.
+	    ::UI::MenuMethod .menu.edit entryconfigure mCut -state $setState
+	    ::UI::MenuMethod .menu.edit entryconfigure mCopy -state $setState
+	    ::UI::MenuMethod .menu.edit entryconfigure mPaste -state $haveClipState
 	}
 	
 	# If we have a cut/copy/paste row of buttons need to set their state.
-	::UI::CutCopyPasteCheckState $setState $haveClipState
+	::UI::CutCopyPasteCheckState $w $setState $haveClipState
     } 
+    
+    # Invoke any callbacks from 'addons'.
+    foreach cmd $fixMenusCallback {
+	eval {$cmd} ${wtop}menu "select"
+    }
 }
 
 # UI::FixMenusWhenCopy --
@@ -4184,6 +4302,7 @@ proc ::UI::FixMenusWhenSelection {w} {
 # Results:
 
 proc ::UI::FixMenusWhenCopy {w} {
+    variable fixMenusCallback
 
     set wtop [::UI::GetToplevelNS $w]
     upvar ::${wtop}::opts opts
@@ -4193,6 +4312,80 @@ proc ::UI::FixMenusWhenCopy {w} {
     } else {
 	::UI::MenuMethod ${wtop}menu.edit entryconfigure mPaste -state disabled
     }
+    
+    # Invoke any callbacks from 'addons'.
+    foreach cmd $fixMenusCallback {
+	eval {$cmd} ${wtop}menu "copy"
+    }
+}
+
+# UI::MacUseMainMenu --
+# 
+#       Used on MacOSX to set accelerator keys for a toplevel that inherits
+#       the menu from ".".
+#       Used on all Macs to set state on edit menus.
+#       
+# Arguments:
+#       w           toplevel widget that uses the "." menu.
+#       
+# Results:
+#       none
+
+proc ::UI::MacUseMainMenu {w} {
+    global  this
+    variable accelBindsToMain
+    
+    if {![string match "mac*" $this(platform)]} {
+	return
+    }
+    ::Debug 3 "::UI::MacUseMainMenu w=$w"
+        
+    # Set up menu accelerators from ".".
+    # Cached accelerators to ".".
+    if {($w != ".") && [string equal $this(platform) "macosx"]} {
+	foreach mentry $accelBindsToMain {
+	    foreach {sequence cmd} $mentry {
+		bind $w $sequence $cmd
+	    }
+	}
+    }
+    
+    # This sets up the edit menu that we inherit from ".".
+    bind $w <FocusIn> "+ ::UI::MacFocusFixEditMenu $w . %W"
+    
+    # If we hand over to a 3rd party toplevel window, it by default inherits
+    # the "." menu bar, so we need to take precautions.
+    bind $w <FocusOut> "+ ::UI::MacFocusFixEditMenu $w . %W"
+}
+
+# UI::MacFocusFixEditMenu --
+# 
+#       Called when a window using the main menubar gets focus in/out.
+#       Mac only.
+#       
+# Arguments:
+#       w           the toplevel which gets focus
+#       wtopmenu    the 'wtop' which cooresponds to the menu to use (".").
+#       wfocus      the %W which is either equal to $w or a children of it.
+#       
+# Results:
+#       none
+
+proc ::UI::MacFocusFixEditMenu {w wtopmenu wfocus} {
+    
+    # Binding to a toplevel is also triggered by its children.
+    if {$w != $wfocus} {
+	return
+    }    
+    ::Debug 3 "MacFocusFixEditMenu: w=$w, wfocus=$wfocus"
+    
+    # The <FocusIn> events are sent in order, from toplevel and down
+    # to the actual window with focus.
+    # Any '::UI::FixMenusWhenSelection' will therefore be called after this.
+    set medit ${wtopmenu}menu.edit
+    ::UI::MenuMethod $medit entryconfigure mPaste -state disabled
+    ::UI::MenuMethod $medit entryconfigure mCut -state disabled
+    ::UI::MenuMethod $medit entryconfigure mCopy -state disabled
 }
 
 # UI::BuildItemMenu --

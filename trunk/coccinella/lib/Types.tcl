@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Types.tcl,v 1.3 2003-07-26 13:54:23 matben Exp $
+# $Id: Types.tcl,v 1.4 2003-10-05 13:36:20 matben Exp $
 
 package provide Types 1.0
 
@@ -37,6 +37,10 @@ namespace eval ::Types:: {
 	application/x-javascript {.js}
 	application/x-tex    {.tex}
 	application/x-tar    {.tar}
+	application/abiword  {.abi}
+	application/vnd.ms-excel {.xls .xlc .xlw}
+	application/vnd.ms-powerpoint {.pps .ppt}
+	application/msword   {.doc}
 	audio/mpeg           {.mpeg .m1s  .m15  .m1a  .m1v  .m64  .m75  \
 	  .mp2  .mpa  .mpg  .mpm  .mpv  .mp3}
 	audio/x-mpeg         {.mpeg .m1s  .m15  .m1a  .m1v  .m64  .m75  \
@@ -96,6 +100,10 @@ namespace eval ::Types:: {
 	application/x-javascript {Java Script}
 	application/x-tex    {TeX Document}
 	application/x-tar    {Tape Archive}
+	application/abiword  {Abi Word Document}
+	application/vnd.ms-excel {MS Excel Document}
+	application/vnd.ms-powerpoint {PowerPoint Slide Show}
+	application/msword   {Word Document}
 	audio/mpeg           {MPEG Audio}
 	audio/x-mpeg         {MPEG Audio}
 	audio/aiff           {AIFF Audio}
@@ -152,6 +160,10 @@ namespace eval ::Types:: {
 	application/x-javascript {TEXT}
 	application/x-tex    {TEXT}
 	application/x-tar    {TARF}
+	application/abiword  {}
+	application/vnd.ms-excel {"XLS " "XLC " XLC3}
+	application/vnd.ms-powerpoint {SLD3 SLD8 PPSS}
+	application/msword   {WDBN W6BN W8BN}
 	audio/mpeg           {MPEG MPGa MPGv MPGx "Mp3 " SwaT PLAY MPG3 "MP3 "}
 	audio/x-mpeg         {MPEG MPGa MPGv MPGx "Mp3 " SwaT PLAY MPG3 "MP3 "}
 	audio/aiff           {AIFF AIFC}

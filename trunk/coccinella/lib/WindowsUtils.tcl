@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: WindowsUtils.tcl,v 1.3 2003-09-28 06:29:08 matben Exp $
+# $Id: WindowsUtils.tcl,v 1.4 2003-10-05 13:36:21 matben Exp $
 
 #package require gdi
 #package require printer
@@ -47,7 +47,7 @@ proc ::Windows::OpenUrl {url} {
     
     # Substitute the url name into the command for %1
     # Not always needed (opennew).
-    regsub {%1} $appCmd $url appCmd
+    #regsub {%1} $appCmd $url appCmd
     
     # Invoke the command
     eval exec $appCmd $url &

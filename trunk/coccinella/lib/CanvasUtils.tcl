@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.12 2003-09-28 06:29:08 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.13 2003-10-05 13:36:20 matben Exp $
 
 package provide CanvasUtils 1.0
 package require sha1pure
@@ -735,6 +735,7 @@ proc ::CanvasUtils::DoItemPopup {w x y} {
     global  prefs fontPoints2Size
     variable itemAfterId
     variable popupVars
+    upvar ::UI::menuDefs menuDefs
     
     Debug 2 "::CanvasUtils::DoItemPopup: w=$w"
 
@@ -766,7 +767,7 @@ proc ::CanvasUtils::DoItemPopup {w x y} {
     set m .popup${type}
     catch {destroy $m}
     if {![winfo exists $m]} {	
-	::UI::NewMenu $wtop $m {} "pop,$type" normal -id $id -w $w
+	::UI::NewMenu $wtop $m {} $menuDefs(pop,$type) normal -id $id -w $w
 	if {[string equal $type "text"]} {
 	    ::UI::BuildCanvasPopupFontMenu $w ${m}.mfont $id $prefs(canvasFonts)
 	}
@@ -840,7 +841,7 @@ proc ::CanvasUtils::PostGeneralMenu {w x y m mDef} {
     # Build popup menu.
     catch {destroy $m}
     if {![winfo exists $m]} {
-	::UI::MakeMenu $wtop $m {} $mDef normal -winfr $w
+	::UI::BuildMenu $wtop $m {} $mDef normal -winfr $w
 	
 	# This one is needed on the mac so the menu is built before
 	# it is posted.
@@ -1352,33 +1353,6 @@ proc ::CanvasUtils::HandleCanvasDraw {wtop instr} {
     }
 }
 
-# CanvasUtils::ItemSet, ItemCGet, ItemFree --
-#
-#       Handling cached info for items not set elsewhere.
-#       Automatically garbage collected.
-
-proc ::CanvasUtils::ItemSet {wtop id args} {
-    upvar ::${wtop}::itemopts itemopts
-
-    set itemopts($id) $args
-}
-
-proc ::CanvasUtils::ItemCGet {wtop id} {
-    upvar ::${wtop}::itemopts itemopts
-    
-    if {[info exists itemopts($id)]} {
-	return $itemopts($id)
-    } else {
-	return ""
-    }
-}
-
-proc ::CanvasUtils::ItemFree {wtop} {
-    upvar ::${wtop}::itemopts itemopts
-    
-    catch {unset itemopts}
-}
-
 # CanvasUtils::DefineWhiteboardBindtags --
 # 
 #       Defines a number of binding tags for the whiteboard canvas.
@@ -1408,6 +1382,8 @@ proc ::CanvasUtils::DefineWhiteboardBindtags { } {
     # WhiteboardMove
     # Bindings for moving items; movies need special class.
     # The frame with the movie the mouse events, not the canvas.
+    # Binds directly to canvas widget since we want to move selected items
+    # as well.
     # With shift constrained move.
     bind WhiteboardMove <Button-1> {
 	::CanvasDraw::InitMove %W [%W canvasx %x] [%W canvasy %y]
@@ -1569,6 +1545,33 @@ proc ::CanvasUtils::DefineWhiteboardBindtags { } {
     bind WhiteboardNonText <Control-d> {
 	::CanvasDraw::DeleteItem %W %x %y selected
     }
+}
+
+# CanvasUtils::ItemSet, ItemCGet, ItemFree --
+#
+#       Handling cached info for items not set elsewhere.
+#       Automatically garbage collected.
+
+proc ::CanvasUtils::ItemSet {wtop id args} {
+    upvar ::${wtop}::itemopts itemopts
+
+    set itemopts($id) $args
+}
+
+proc ::CanvasUtils::ItemCGet {wtop id} {
+    upvar ::${wtop}::itemopts itemopts
+    
+    if {[info exists itemopts($id)]} {
+	return $itemopts($id)
+    } else {
+	return ""
+    }
+}
+
+proc ::CanvasUtils::ItemFree {wtop} {
+    upvar ::${wtop}::itemopts itemopts
+    
+    catch {unset itemopts}
 }
 
 #-------------------------------------------------------------------------------

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.12 2003-09-28 06:29:08 matben Exp $
+# $Id: Preferences.tcl,v 1.13 2003-10-05 13:36:20 matben Exp $
  
 package require notebook
 package require tree
@@ -64,6 +64,7 @@ proc ::Preferences::Build {w} {
     switch -glob -- $this(platform) {
 	mac* {
 	    eval $::macWindowStyle $w documentProc
+	    ::UI::MacUseMainMenu $w
 	    set ypadtiny 1
 	    set ypad     3
 	    set ypadbig  4
@@ -981,6 +982,7 @@ proc ::Preferences::Block::Add {w} {
     if {[string match "mac*" $this(platform)]} {
 	toplevel $w
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 	toplevel $w
     }
@@ -1442,6 +1444,7 @@ proc ::Preferences::FileMap::Inspect {w doWhat wlist {indSel {}}} {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 
     }
@@ -1917,6 +1920,7 @@ proc ::Preferences::NetSetup::Advanced {  } {
     if {[string match "mac*" $this(platform)]} {
 	toplevel $w
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 	toplevel $w
     }
@@ -2147,6 +2151,7 @@ proc ::Preferences::Shorts::AddOrEdit {what} {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 	#
     }
@@ -2570,10 +2575,12 @@ proc ::Preferences::CancelPushBt { } {
 		set locName ${tmpName}($key)
 		upvar 0 $locName tmpVal 
 		if {![info exists $tmpName]} {
+		    ::Debug 3 "\tdiff: locName=$locName"
 		    set hasChanged 1
 		    break
 		}
 		if {$arrVal != $tmpVal} {
+		    ::Debug 3 "\tdiff: locName=$locName, tmpVal=$tmpVal"
 		    set hasChanged 1
 		    break
 		}

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Import.tcl,v 1.1 2003-09-28 06:19:38 matben Exp $
+# $Id: Import.tcl,v 1.2 2003-10-05 13:36:20 matben Exp $
 
 package require http
 package require httpex
@@ -85,6 +85,7 @@ proc ::Import::ImportImageOrMovieDlg {wtop} {
 #       args:          
 #            -file      the complete absolute and native path name to the file 
 #                       containing the image or movie.
+#            -data      base64 encoded data (preliminary)
 #            -url       complete URL, then where="local".
 #            -where     "all": write to this canvas and all others,
 #                       "remote": write only to remote client canvases,
@@ -114,16 +115,27 @@ proc ::Import::DoImport {w opts args} {
 	-addundo    1
     }
     array set argsArr $args
-    if {![info exists argsArr(-file)] && ![info exists argsArr(-url)]} {
-	return -code error "::Import::DoImport needs -file or -url"
+    
+    # We must have exactly one of -file, -data, -url.
+    set haveSource 0
+    foreach {key value} [array get argsArr] {
+	switch -- $key {
+	    -file - -data - -url {
+		if {$haveSource} {
+		    return -code error  \
+		      "::Import::DoImport needs one of -file, -data, or -url"
+		}
+		set haveSource 1
+	    }
+	}
+    }    
+    if {!$haveSource} {
+	return -code error "::Import::DoImport needs -file, -data, or -url"
     }
-    if {[info exists argsArr(-file)] && [info exists argsArr(-url)]} {
-	return -code error "::Import::DoImport needs -file or -url, not both"
-    }
-    if {[info exists argsArr(-file)]} {
-	set isLocal 1
-    } else {
+    if {[info exists argsArr(-url)]} {
 	set isLocal 0
+    } else {
+	set isLocal 1
     }
     set wtopNS [::UI::GetToplevelNS $w]
     set errMsg ""
@@ -195,12 +207,11 @@ proc ::Import::DoImport {w opts args} {
 	    }
 	    set putOpts [array get optArr]
 	    
-	    # Either '-file localPath' or '-url http://...'
+	    # Either '-file localPath', '-data bytes', or '-url http://...'
 	    if {$drawLocal} {
 		if {$isLocal} {
 		    set errMsg [eval {
-			::Import::DrawImage $w $fileName putOpts
-		    } [array get argsArr]]
+			::Import::DrawImage $w putOpts} [array get argsArr]]
 		} else {
 		    set errMsg [eval {
 			::Import::HttpGet $wtopNS $argsArr(-url) \
@@ -222,8 +233,7 @@ proc ::Import::DoImport {w opts args} {
 	    if {$drawLocal} {
 		if {$isLocal} {
 		    set errMsg [eval {
-			::Import::DrawQuickTimeTcl $w $fileName \
-			  putOpts
+			::Import::DrawQuickTimeTcl $w putOpts
 		    } [array get argsArr]]
 		} else {
 		    set errMsg [eval {
@@ -252,8 +262,7 @@ proc ::Import::DoImport {w opts args} {
 	    if {$drawLocal} {
 		if {$isLocal} {
 		    set errMsg [eval {
-			::Import::DrawSnack $w $fileName putOpts
-		    } [array get argsArr]]
+			::Import::DrawSnack $w putOpts} [array get argsArr]]
 		} else {
 		    set errMsg [eval {
 			::Import::HttpGet $wtopNS $argsArr(-url) \
@@ -275,8 +284,7 @@ proc ::Import::DoImport {w opts args} {
 	    if {$drawLocal} {
 		if {$isLocal} {
 		    set errMsg [eval {
-			::Import::DrawXanim $w $fileName putOpts
-		    } [array get argsArr]]
+			::Import::DrawXanim $w putOpts} [array get argsArr]]
 		} else {
 		    set errMsg [eval {
 			::Import::HttpGet $wtopNS $argsArr(-url) \
@@ -293,7 +301,7 @@ proc ::Import::DoImport {w opts args} {
 		if {$isLocal} {
 		    set importProc [::Plugins::GetImportProcForMime $mime]
 		    set errMsg [eval {
-			$importProc $w $fileName putOpts} [array get argsArr]]
+			$importProc $w putOpts} [array get argsArr]]
 		} else {
 		    
 		    # Find out if this plugin has registerd a special proc
@@ -343,20 +351,25 @@ proc ::Import::DoImport {w opts args} {
 #       
 # Arguments:
 #       w           canvas path
-#       fileName
 #       optsVar     the *name* of the 'opts' variable.
 #       args
 #       
 # Results:
 #       an error string which is empty if things went ok.
 
-proc ::Import::DrawImage {w fileName optsVar args} {
+proc ::Import::DrawImage {w optsVar args} {
     upvar $optsVar opts
 
     ::Debug 2 "::Import::DrawImage args='$args',\n\topts=$opts"
     
+    array set argsArr $args
     array set optArr $opts
     set errMsg ""
+    
+    # These are programming errors which are reported directly.
+    if {![info exists argsArr(-file)] && ![info exists argsArr(-data)]} {
+	return -code error "Missing both -file and -data options"
+    }
     
     # Extract coordinates and tags which must be there. error checking?
     foreach {x y} $optArr(-coords) break
@@ -371,15 +384,19 @@ proc ::Import::DrawImage {w fileName optsVar args} {
     }
         
     # Create internal image.
-    if {[string equal $mimeSubType "gif"]} {
-	if {[catch {
-	    image create photo $imageName -file $fileName -format gif} err]} {
-	    return $err
-	}
+    set photoOpts {}
+    if {[info exists argsArr(-file)]} {
+	lappend photoOpts -file $argsArr(-file)
     } else {
-	if {[catch {image create photo $imageName -file $fileName} err]} {
-	    return $err
-	}
+	lappend photoOpts -data $argsArr(-data)
+    }
+    if {[string equal $mimeSubType "gif"]} {
+	lappend photoOpts -format gif
+    }
+    if {[catch {
+	eval {image create photo $imageName} $photoOpts
+    } err]} {
+	return $err
     }
     
     # Treat if image should be zoomed.
@@ -418,21 +435,27 @@ proc ::Import::DrawImage {w fileName optsVar args} {
 #       
 # Arguments:
 #       w           canvas path
-#       fileName
 #       optsVar     the *name* of the 'opts' variable.
 #       args
 #
 # Results:
 #       an error string which is empty if things went ok.
 
-proc ::Import::DrawQuickTimeTcl {w fileName optsVar args} {
+proc ::Import::DrawQuickTimeTcl {w optsVar args} {
     upvar $optsVar opts
     
     ::Debug 2 "::Import::DrawQuickTimeTcl args='$args'"
     
-    array set optArr $opts
     array set argsArr $args
+    array set optArr $opts
     set errMsg ""
+    if {![info exists argsArr(-file)] && ![info exists argsArr(-data)]} {
+	return -code error "Missing both -file and -data options"
+    }
+    if {[info exists argsArr(-data)]} {
+	return -code error "Does not yet support -data option"
+    }
+    set fileName $argsArr(-file)
     
     # Extract coordinates and tags which must be there. error checking?
     foreach {x y} $optArr(-coords) break
@@ -495,20 +518,27 @@ proc ::Import::QuickTimeBalloonMsg {wmovie fileName} {
 #       
 # Arguments:
 #       w           canvas path
-#       fileName
 #       optsVar  the *name* of the opts variable.
 #       args
 #
 # Results:
 #       an error string which is empty if things went ok.
 
-proc ::Import::DrawSnack {w fileName optsVar args} {
+proc ::Import::DrawSnack {w optsVar args} {
     upvar $optsVar opts
     
     ::Debug 2 "::Import::DrawSnack args='$args'"
     
+    array set argsArr $args
     array set optArr $opts
     set errMsg ""
+    if {![info exists argsArr(-file)] && ![info exists argsArr(-data)]} {
+	return -code error "Missing both -file and -data options"
+    }
+    if {[info exists argsArr(-data)]} {
+	return -code error "Does not yet support -data option"
+    }
+    set fileName $argsArr(-file)
     
     # Extract coordinates and tags which must be there. error checking?
     foreach {x y} $optArr(-coords) break
@@ -548,14 +578,13 @@ proc ::Import::DrawSnack {w fileName optsVar args} {
 #       
 # Arguments:
 #       w           canvas path
-#       fileName
 #       optsVar     the *name* of the opts variable.
 #       args
 #
 # Results:
 #       an error string which is empty if things went ok.
 
-proc ::Import::DrawXanim {w fileName optsVar args} {
+proc ::Import::DrawXanim {w optsVar args} {
     upvar $optsVar opts
     
     variable xanimPipe2Frame 
@@ -563,8 +592,16 @@ proc ::Import::DrawXanim {w fileName optsVar args} {
     
     ::Debug 2 "::Import::DrawXanim args='$args'"
     
+    array set argsArr $args
     array set optArr $opts
     set errMsg ""
+    if {![info exists argsArr(-file)] && ![info exists argsArr(-data)]} {
+	return -code error "Missing both -file and -data options"
+    }
+    if {[info exists argsArr(-data)]} {
+	return -code error "Does not yet support -data option"
+    }
+    set fileName $argsArr(-file)
     
     # Extract coordinates and tags which must be there. error checking?
     foreach {x y} $optArr(-coords) break

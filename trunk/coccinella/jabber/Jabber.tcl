@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.22 2003-09-28 06:29:08 matben Exp $
+# $Id: Jabber.tcl,v 1.23 2003-10-05 13:36:17 matben Exp $
 #
 #  The $address is an ip name or number.
 #
@@ -43,7 +43,7 @@ package require GroupChat
 package require MUC
 
 namespace eval ::Jabber:: {
-    global  this
+    global  this prefs
     
     # Jabber internal storage.
     variable jstate
@@ -219,85 +219,6 @@ namespace eval ::Jabber:: {
       conf_message_dir,408    {The message timed out while being sent,\
       the user may resend}  \
     }
-      
-    # Templates for popup menus for the roster, browse, and groupchat windows.
-    # The roster:
-    set jstate(popup,roster,def) {
-      mMessage       users     {::Jabber::NewMsg::Build $wDlgs(jsendmsg) -to &jid}
-      mChat          user      {::Jabber::Chat::StartThread &jid}
-      mWhiteboard    wb        {::Jabber::WB::NewWhiteboard &jid}
-      separator      {}        {}
-      mLastLogin/Activity user {::Jabber::GetLast &jid}
-      mvCard         user      {::VCard::Fetch .jvcard other &jid}
-      mAddNewUser    any       {
-	  ::Jabber::Roster::NewOrEditItem $wDlgs(jrostnewedit) new
-      }
-      mEditUser      user      {
-	  ::Jabber::Roster::NewOrEditItem $wDlgs(jrostnewedit) edit -jid &jid
-      }
-      mVersion       user      {::Jabber::GetVersion &jid3}
-      mChatHistory   user      {::Jabber::Chat::BuildHistory &jid}
-      mRemoveUser    user      {::Jabber::Roster::SendRemove &jid}
-      separator      {}        {}
-      mStatus        any       @::Jabber::Roster::BuildPresenceMenu
-      mRefreshRoster any       {::Jabber::Roster::Refresh}
-    }  
-  
-    # Can't run our http server on macs :-(
-    if {![string equal $this(platform) "macintosh"]} {
-	set jstate(popup,roster,def) [linsert $jstate(popup,roster,def) 9  \
-	  mSendFile     user      {::Jabber::OOB::BuildSet .joobs &jid}]
-    }
-    
-    # The browse:
-    set jstate(popup,browse,def) {
-      mMessage       user      {::Jabber::NewMsg::Build $wDlgs(jsendmsg) -to &jid}
-      mChat          user      {::Jabber::Chat::StartThread &jid}
-      mWhiteboard    wb        {::Jabber::WB::NewWhiteboard &jid}
-      mEnterRoom     room      {
-	  ::Jabber::GroupChat::EnterOrCreate enter -roomjid &jid -autoget 1
-      }
-      mCreateRoom    conference {::Jabber::GroupChat::EnterOrCreate create}
-      separator      {}        {}
-      mLastLogin/Activity jid  {::Jabber::GetLast &jid}
-      mLocalTime     jid       {::Jabber::GetTime &jid}
-      mvCard         jid       {::VCard::Fetch .jvcard other &jid}
-      mVersion       jid       {::Jabber::GetVersion &jid}
-      separator      {}        {}
-      mSearch        search    {
-	  ::Jabber::Search::Build .jsearch -server &jid -autoget 1
-      }
-      mRegister      register  {
-	  ::Jabber::GenRegister::BuildRegister .jreg -server &jid -autoget 1
-      }
-      mUnregister    register  {::Jabber::Register::Remove &jid}
-      separator      {}        {}
-      mRefresh       jid       {::Jabber::Browse::Refresh &jid}
-      mAddServer     any       {::Jabber::Browse::AddServer}
-    }
-    
-    # The groupchat:
-    set jstate(popup,groupchat,def) {
-      mMessage       user      {::Jabber::NewMsg::Build $wDlgs(jsendmsg) -to &jid}
-      mChat          user      {::Jabber::Chat::StartThread &jid}
-      mWhiteboard    wb        {::Jabber::WB::NewWhiteboard &jid}
-    }    
-    
-    # The agents stuff:
-    set jstate(popup,agents,def) {
-      mSearch        search    {
-	  ::Jabber::Search::Build .jsearch -server &jid -autoget 1
-      }
-      mRegister      register  {
-	  ::Jabber::GenRegister::BuildRegister .jreg -server &jid -autoget 1
-      }
-      mUnregister    register  {::Jabber::Register::Remove &jid}
-      separator      {}        {}
-      mEnterRoom     groupchat {::Jabber::GroupChat::EnterOrCreate enter}
-      mLastLogin/Activity jid  {::Jabber::GetLast &jid}
-      mLocalTime     jid       {::Jabber::GetTime &jid}
-      mVersion       jid       {::Jabber::GetVersion &jid}
-   }    
   
     variable killerId 
 }
@@ -344,6 +265,9 @@ proc ::Jabber::FactoryDefaults { } {
     set jprefs(block,list) {}
     set jprefs(speakMsg) 0
     set jprefs(speakChat) 0
+    
+    # Shall we query ip number directly when verified Coccinella?
+    set jprefs(preGetIP) 1
     
     # Create background images.
     if {[catch {
@@ -441,6 +365,143 @@ proc ::Jabber::FactoryDefaults { } {
 	    set jprefs(inboxPath) [file join $prefs(prefsDir) inbox.tcl]
 	}
     }
+    
+    # Menu definitions for the Roster/services window. Collects minimal Jabber
+    # stuff.
+    variable menuDefs
+
+    set menuDefs(rost,file) {
+	{command   mNewWhiteboard      {::UI::NewMain}                            normal   N}
+	{command   mCloseWindow        {::UserActions::DoCloseWindow}             normal   W}
+	{command   mPreferences...     {::Preferences::Build $wDlgs(prefs)}       normal   {}}
+	{command   mUpdateCheck        {
+	    ::AutoUpdate::Get $prefs(urlAutoUpdate) -silent 0}       normal   {}}
+	{separator}
+	{command   mQuit               {::UserActions::DoQuit}                    normal   Q}
+    }
+    set menuDefs(rost,jabber) {    
+	{command     mNewAccount    {::Jabber::Register::Register $wDlgs(jreg)} normal   {}}
+	{command     mLogin         {::Jabber::Login::Login $wDlgs(jlogin)} normal   {}}
+	{command     mLogoutWith    {::Jabber::Logout::WithStatus .joutst}  disabled {}}
+	{command     mPassword      {::Jabber::Passwd::Build .jpasswd}      disabled {}}
+	{separator}
+	{checkbutton mMessageInbox  {::Jabber::MailBox::Show}               normal   {} \
+	  {-variable ::Jabber::jstate(inboxVis)}}
+	{separator}
+	{command     mSearch        {::Jabber::Search::Build .jsearch}      disabled {}}
+	{command     mAddNewUser    {::Jabber::Roster::NewOrEditItem $wDlgs(jrostnewedit) new} disabled {}}
+	{separator}
+	{command     mSendMessage   {::Jabber::NewMsg::Build $wDlgs(jsendmsg)} disabled {}}
+	{command     mChat          {::Jabber::Chat::StartThreadDlg .jchat} disabled {}}
+	{cascade     mStatus        {}                                      disabled {} {} {}}
+	{separator}
+	{command     mEnterRoom     {::Jabber::GroupChat::EnterOrCreate enter} disabled {}}
+	{cascade     mExitRoom      {}                                    disabled {} {} {}}
+	{command     mCreateRoom    {::Jabber::GroupChat::EnterOrCreate create} disabled {}}
+	{separator}
+	{command     mvCard         {::VCard::Fetch .jvcard own}          disabled {}}
+	{separator}
+	{command     mSetupAssistant {
+	    package require SetupAss
+	    ::Jabber::SetupAss::SetupAss .setupass}                       normal {}}
+	{command     mRemoveAccount {::Jabber::Register::Remove}          disabled {}}	
+	{separator}
+	{command     mErrorLog      {::Jabber::ErrorLogDlg .jerrdlg}      normal   {}}
+	{checkbutton mDebug         {::Jabber::DebugCmd}                  normal   {} \
+	  {-variable ::Jabber::jstate(debugCmd)}}
+    }    
+
+    # The status menu is built dynamically due to the -image options on 8.4.
+    if {!$prefs(stripJabber)} {
+	lset menuDefs(rost,jabber) 12 6 [::Jabber::Roster::BuildStatusMenuDef]
+    }
+    
+    set menuDefs(min,edit) {    
+	{command   mCut              {::UI::CutCopyPasteCmd cut}           disabled X}
+	{command   mCopy             {::UI::CutCopyPasteCmd copy}          disabled C}
+	{command   mPaste            {::UI::CutCopyPasteCmd paste}         disabled V}
+    }
+      
+    # Templates for popup menus for the roster, browse, and groupchat windows.
+    # The roster:
+    variable popMenuDefs
+
+    set popMenuDefs(roster,def) {
+      mMessage       users     {::Jabber::NewMsg::Build $wDlgs(jsendmsg) -to &jid}
+      mChat          user      {::Jabber::Chat::StartThread &jid}
+      mWhiteboard    wb        {::Jabber::WB::NewWhiteboard &jid}
+      separator      {}        {}
+      mLastLogin/Activity user {::Jabber::GetLast &jid}
+      mvCard         user      {::VCard::Fetch .jvcard other &jid}
+      mAddNewUser    any       {
+	  ::Jabber::Roster::NewOrEditItem $wDlgs(jrostnewedit) new
+      }
+      mEditUser      user      {
+	  ::Jabber::Roster::NewOrEditItem $wDlgs(jrostnewedit) edit -jid &jid
+      }
+      mVersion       user      {::Jabber::GetVersion &jid3}
+      mChatHistory   user      {::Jabber::Chat::BuildHistory &jid}
+      mRemoveUser    user      {::Jabber::Roster::SendRemove &jid}
+      separator      {}        {}
+      mStatus        any       @::Jabber::Roster::BuildPresenceMenu
+      mRefreshRoster any       {::Jabber::Roster::Refresh}
+    }  
+      
+    # Can't run our http server on macs :-(
+    if {![string equal $this(platform) "macintosh"]} {
+	set popMenuDefs(roster,def) [linsert $popMenuDefs(roster,def) 9  \
+	  mSendFile     user      {::Jabber::OOB::BuildSet .joobs &jid}]
+    }
+    
+    # The browse:
+    set popMenuDefs(browse,def) {
+      mMessage       user      {::Jabber::NewMsg::Build $wDlgs(jsendmsg) -to &jid}
+      mChat          user      {::Jabber::Chat::StartThread &jid}
+      mWhiteboard    wb        {::Jabber::WB::NewWhiteboard &jid}
+      mEnterRoom     room      {
+	  ::Jabber::GroupChat::EnterOrCreate enter -roomjid &jid -autoget 1
+      }
+      mCreateRoom    conference {::Jabber::GroupChat::EnterOrCreate create}
+      separator      {}        {}
+      mLastLogin/Activity jid  {::Jabber::GetLast &jid}
+      mLocalTime     jid       {::Jabber::GetTime &jid}
+      mvCard         jid       {::VCard::Fetch .jvcard other &jid}
+      mVersion       jid       {::Jabber::GetVersion &jid}
+      separator      {}        {}
+      mSearch        search    {
+	  ::Jabber::Search::Build .jsearch -server &jid -autoget 1
+      }
+      mRegister      register  {
+	  ::Jabber::GenRegister::BuildRegister .jreg -server &jid -autoget 1
+      }
+      mUnregister    register  {::Jabber::Register::Remove &jid}
+      separator      {}        {}
+      mRefresh       jid       {::Jabber::Browse::Refresh &jid}
+      mAddServer     any       {::Jabber::Browse::AddServer}
+    }
+    
+    # The groupchat:
+    set popMenuDefs(groupchat,def) {
+      mMessage       user      {::Jabber::NewMsg::Build $wDlgs(jsendmsg) -to &jid}
+      mChat          user      {::Jabber::Chat::StartThread &jid}
+      mWhiteboard    wb        {::Jabber::WB::NewWhiteboard &jid}
+    }    
+    
+    # The agents stuff:
+    set popMenuDefs(agents,def) {
+      mSearch        search    {
+	  ::Jabber::Search::Build .jsearch -server &jid -autoget 1
+      }
+      mRegister      register  {
+	  ::Jabber::GenRegister::BuildRegister .jreg -server &jid -autoget 1
+      }
+      mUnregister    register  {::Jabber::Register::Remove &jid}
+      separator      {}        {}
+      mEnterRoom     groupchat {::Jabber::GroupChat::EnterOrCreate enter}
+      mLastLogin/Activity jid  {::Jabber::GetLast &jid}
+      mLocalTime     jid       {::Jabber::GetTime &jid}
+      mVersion       jid       {::Jabber::GetVersion &jid}
+   }    
 }
 
 # Jabber::SetUserPreferences --
@@ -1168,6 +1229,7 @@ proc ::Jabber::ErrorLogDlg {w} {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 
     }
@@ -1740,6 +1802,7 @@ proc ::Jabber::SetStatusWithMessage {w} {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 
     }
@@ -1852,15 +1915,15 @@ proc ::Jabber::GetIPnumber {jid {cmd {}}} {
 
     ::Jabber::Debug 2 "::Jabber::GetIPnumber:: jid=$jid, cmd='$cmd'"
     
-    if {[string length $cmd]} {
+    if {$cmd != ""} {
 	set getcmd($getid) $cmd
-	
-	# What shall we do when we already have the IP number?
-	if {[info exists jidToIP($jid)]} {
-	    ::Jabber::GetIPCallback $jid $getid $jidToIP($jid)
-	} else {
-	    ::Jabber::SendMessage $jid "GET IP: $getid"
-	}
+    }
+    
+    # What shall we do when we already have the IP number?
+    if {[info exists jidToIP($jid)]} {
+	::Jabber::GetIPCallback $jid $getid $jidToIP($jid)
+    } else {
+	::Jabber::SendMessage $jid "GET IP: $getid"
     }
     incr getid
 }
@@ -2509,6 +2572,7 @@ proc ::Jabber::GetVersionResult {from silent jlibname type subiq} {
 	toplevel $w -background $prefs(bgColGeneral)
 	if {[string match "mac*" $this(platform)]} {
 	    eval $::macWindowStyle $w documentProc
+	    ::UI::MacUseMainMenu $w
 	} else {
 
 	}
@@ -2979,6 +3043,7 @@ proc ::Jabber::UI::Build {w} {
     upvar ::UI::icons icons
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
+    upvar ::Jabber::menuDefs menuDefs
     variable jwapp
 
     ::Jabber::Debug 2 "::Jabber::UI::Build w=$w"
@@ -2994,7 +3059,10 @@ proc ::Jabber::UI::Build {w} {
     } else {
 	set wtop .
     }
-    
+    if {[string match "mac*" $this(platform)]} {
+	bind $w <FocusIn> "+ ::UI::MacFocusFixEditMenu $w $wtop %W"
+	bind $w <FocusOut> "+ ::UI::MacFocusFixEditMenu $w $wtop %W"
+    }    
     set jwapp(wtopRost) $w
     wm title $w "The Coccinella"
     wm protocol $w WM_DELETE_WINDOW [list ::Jabber::UI::CloseRoster $w]
@@ -3009,13 +3077,13 @@ proc ::Jabber::UI::Build {w} {
 	set haveAppleMenu 0
     }
     if {$haveAppleMenu} {
-	::UI::NewMenu $wtop ${wmenu}.apple {}      "main,apple" normal
+	::UI::BuildAppleMenu $wtop ${wmenu}.apple normal
     }
-    ::UI::NewMenu $wtop ${wmenu}.file    mFile     "rost,file"  normal
+    ::UI::NewMenu $wtop ${wmenu}.file    mFile     $menuDefs(rost,file)  normal
     if {[string match "mac*" $this(platform)]} {
-	::UI::NewMenu $wtop ${wmenu}.edit  mEdit   "min,edit"   normal
+	::UI::NewMenu $wtop ${wmenu}.edit  mEdit   $menuDefs(min,edit)   normal
     }
-    ::UI::NewMenu $wtop ${wmenu}.jabber  mJabber   "rost,jabber" normal
+    ::UI::NewMenu $wtop ${wmenu}.jabber  mJabber   $menuDefs(rost,jabber) normal
     $w configure -menu $wmenu
         
     # Shortcut button part.
@@ -3253,6 +3321,50 @@ proc ::Jabber::UI::GroupChat {what roomJid} {
     }
 }
 
+# Jabber::UI::RegisterPopupEntry --
+# 
+#       Lets plugins/addons register their own menu entry.
+
+proc ::Jabber::UI::RegisterPopupEntry {which menuSpec} {
+    upvar ::Jabber::popMenuDefs popMenuDefs
+    
+    set popMenuDefs($which,def) [concat $popMenuDefs($which,def) $menuSpec]
+}
+
+# Jabber::UI::RegisterMenuEntry --
+# 
+#       Lets plugins/addons register their own menu entry.
+
+proc ::Jabber::UI::RegisterMenuEntry {wpath name menuSpec} {
+    upvar ::Jabber::menuDefs menuDefs 
+    variable rostMenuSpec
+    
+    # Add these entries in a section above the bottom section.
+    # Add separator to section addon entries.
+    
+    switch -- $wpath {
+	jabber {
+	    set ind [lindex [lsearch -all $menuDefs(rost,jabber) "separator"] end]
+	    if {![info exists rostMenuSpec(jabber)]} {
+		set menuDefs(rost,jabber) [linsert $menuDefs(rost,jabber)  \
+		  $ind {separator}]
+		incr ind
+	    }
+	    set menuDefs(rost,jabber) [linsert $menuDefs(rost,jabber)  \
+	      $ind $menuSpec]
+	    lappend rostMenuSpec(jabber) [list $menuSpec]
+	}
+	file {	    
+	    if {![info exists rostMenuSpec(file)]} {
+		set menuDefs(rost,file) [linsert $menuDefs(rost,file) end-2 \
+		  {separator}]
+	    }
+	    set menuDefs(rost,file) [linsert $menuDefs(rost,file) end-2 $menuSpec]
+	    lappend rostMenuSpec(file) [list $menuSpec]
+	}
+    }
+}
+
 # Jabber::UI::Popup --
 #
 #       Handle popup menus in jabber dialogs, typically from right-clicking
@@ -3387,7 +3499,7 @@ proc ::Jabber::UI::Popup {what w v x y} {
     catch {destroy $m}
     menu $m -tearoff 0
     
-    foreach {item type cmd} $jstate(popup,$what,def) {
+    foreach {item type cmd} $popMenuDefs($what,def) {
 	if {[string index $cmd 0] == "@"} {
 	    set mt [menu ${m}.sub${i} -tearoff 0]
 	    set locname [::msgcat::mc $item]
@@ -4559,6 +4671,7 @@ proc ::Jabber::Login::Login {w} {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 
     }

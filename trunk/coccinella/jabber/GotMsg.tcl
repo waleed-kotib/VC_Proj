@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.5 2003-07-26 13:54:23 matben Exp $
+# $Id: GotMsg.tcl,v 1.6 2003-10-05 13:36:17 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -165,6 +165,7 @@ proc ::Jabber::GotMsg::Build { } {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 
     }
