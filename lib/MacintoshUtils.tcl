@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: MacintoshUtils.tcl,v 1.5 2003-10-12 13:12:55 matben Exp $
+# $Id: MacintoshUtils.tcl,v 1.6 2003-10-29 07:45:31 matben Exp $
 
 #package require TclSpeech 2.0
 #package require Tclapplescript
@@ -41,7 +41,7 @@ proc ::Mac::Printer::Print {wtop} {
 	    ::Mac::MacPrint::PrintCanvas $wtop
 	}
 	macosx {
-
+	    ::Mac::MacCarbonPrint::PrintCanvas $wtop
 	}
     }
 }
@@ -99,8 +99,14 @@ proc ::Mac::MacCarbonPrint::PageSetup {wtop} {
     global  prefs
     variable cache
     
+    if {$wtop == "."} {
+	set wparent .
+    } else {
+	set wparent [string trimright $wtop .]
+    }
+    
     if {$prefs(MacCarbonPrint)} {
-	set pageFormat [maccarbonprint::pagesetup]
+	set pageFormat [maccarbonprint::pagesetup -parent $wparent]
 	if {$pageFormat != ""} {
 	    set cache($wtop,pageFormat) $pageFormat
 	}
@@ -117,14 +123,41 @@ proc ::Mac::MacCarbonPrint::PrintCanvas {wtop} {
     set wCan [::UI::GetCanvasFromWtop $wtop]
 
     if {$prefs(MacCarbonPrint)} {
-	set ans [maccarbonprint::print -parent [winfo toplevel $wCan]]
+	set opts [list -parent [winfo toplevel $wCan]]
+	if {[info exists cache($wtop,pageFormat)]} {
+	    lappend opts -pageformat $cache($wtop,pageFormat)
+	}
+	set ans [eval {maccarbonprint::print} $opts]
 	if {$ans != ""} {
 	    foreach {type printObject} $ans break
-	    set opts {}
-	    if {[info exists cache($wtop,pageFormat)]} {
-		lappend opts -pageformat $cache($wtop,pageFormat)
-	    }
-	    eval {maccarbonprint::printcanvas $wCan $printObject} $opts
+	    eval {maccarbonprint::printcanvas $wCan $printObject}
+	}
+    } else {
+	tk_messageBox -icon error -title [::msgcat::mc {No Printing}] \
+	  -message [::msgcat::mc messprintnoextension]
+    }	    
+}
+
+proc ::Mac::MacCarbonPrint::PrintText {wtext args} {
+    global  prefs
+    variable cache
+    
+    set wintop [winfo toplevel $wtext]
+    if {$wintop == "."} {
+	set wtop .
+    } else {
+	set wtop ${wintop}.
+    }
+
+    if {$prefs(MacCarbonPrint)} {
+	set opts [list -parent $wintop]
+	if {[info exists cache($wtop,pageFormat)]} {
+	    lappend opts -pageformat $cache($wtop,pageFormat)
+	}
+	set ans [eval {maccarbonprint::print} $opts]
+	if {$ans != ""} {
+	    foreach {type printObject} $ans break
+	    eval {maccarbonprint::printtext $wtext $printObject} $args
 	}
     } else {
 	tk_messageBox -icon error -title [::msgcat::mc {No Printing}] \
