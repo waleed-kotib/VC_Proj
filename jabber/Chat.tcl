@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.44 2004-02-13 14:11:48 matben Exp $
+# $Id: Chat.tcl,v 1.45 2004-02-21 08:10:08 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -332,13 +332,20 @@ proc ::Jabber::Chat::InsertMessage {token whom body} {
 	    }
 	}
     }
-    
+
+    set prefix ""
     if {$clockFormat != ""} {
 	set theTime [clock format $secs -format $clockFormat]
-	set prefix "\[$theTime\] <$username>"
-    } else {
-	set prefix <$username>
+	set prefix "\[$theTime\] "
     }        
+    
+    switch -- $whom {
+	me - you {
+	    append prefix "<$username>"
+	}
+	sys {
+	}
+    }
     $wtext configure -state normal
     
     switch -- $whom {
