@@ -41,17 +41,9 @@ will be automatically used. You may also pick a different
 name, but then you must specify a new value for the resource
 that is also the file name. Examplevise:
 *JMain.connectImage       imageMyConnect
-
 where the 'imageMyConnect.gif' file is inside the themes image directory.
 
-7) It is extremely important that the name you pick is a unique
-name, not only for images, but also for all tcl procs since an image
-name is also the name of a tcl procedure. Therefore prefix all
-names with, say 'image'. 
-
-8) Some widgets...
-
-9) Images are searched for in this order:
+7) Images are searched for in this order:
    o the images/themeImageDir, in this case images/galileolinux
    o then images/platformName where the platformName is any of
      unix, windows, macintosh, or macosx

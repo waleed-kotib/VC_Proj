@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.15 2003-12-22 15:04:58 matben Exp $
+# $Id: Login.tcl,v 1.16 2003-12-23 14:41:01 matben Exp $
 
 package provide Login 1.0
 
@@ -561,9 +561,6 @@ proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
     
     # Run all login hooks.
     hooks::run loginHook
-    
-    # Any noise.
-    ::Sounds::PlayWhenIdle "connected"
 }
 
 #-------------------------------------------------------------------------------

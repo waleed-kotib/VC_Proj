@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.27 2003-12-15 15:39:09 matben Exp $
+# $Id: Roster.tcl,v 1.28 2003-12-23 14:41:01 matben Exp $
 
 package provide Roster 1.0
 
@@ -426,8 +426,7 @@ proc ::Jabber::Roster::PushProc {rostName what {jid {}} args} {
 	    	}
 	    }
 	    
-	    # Any noise?
-	    eval {::Jabber::Roster::PresenceSounds $jid $type} $args	    
+	    eval {hooks::run presenceHook $jid $type} $args
 	}
 	remove {
 	    
@@ -1550,32 +1549,6 @@ proc ::Jabber::Roster::GetMyPresenceIcon { } {
     upvar ::Jabber::jstate jstate
 
     return $presenceIcon($jstate(status))
-}
-
-# Jabber::Roster::PresenceSounds --
-#
-#       Makes an alert sound corresponding to the jid's presence status.
-#
-# Arguments:
-#       jid  
-#       presence    "available", "unavailable", or "unsubscribed"
-#       args        list of '-key value' pairs of presence attributes.
-#       
-# Results:
-#       roster tree updated.
-
-proc ::Jabber::Roster::PresenceSounds {jid presence args} {
-    
-    array set argsArr $args
-    
-    # Alert sounds.
-    if {[info exists argsArr(-show)] && [string equal $argsArr(-show) "chat"]} {
-	::Sounds::PlayWhenIdle statchange
-    } elseif {[string equal $presence "available"]} {
-	::Sounds::PlayWhenIdle online
-    } elseif {[string equal $presence "unavailable"]} {
-	::Sounds::PlayWhenIdle offline
-    }    
 }
 
 # Jabber::Roster::BuildPresenceMenu --

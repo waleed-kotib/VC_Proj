@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.23 2003-12-23 08:54:52 matben Exp $
+# $Id: Chat.tcl,v 1.24 2003-12-23 14:41:01 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -233,7 +233,7 @@ proc ::Jabber::Chat::GotMsg {body args} {
 
 	# If we haven't a window for this thread, make one!
 	eval {::Jabber::Chat::Build $threadID} $args
-	eval {hooks::run newChatThreadHook $boby} $args
+	eval {hooks::run newChatThreadHook $body} $args
     }   
     set w $locals($threadID,wtop)
     if {[info exists argsArr(-subject)]} {
@@ -433,7 +433,8 @@ proc ::Jabber::Chat::Build {threadID args} {
     grid columnconfigure $wtxtsnd 0 -weight 1
     grid rowconfigure $wtxtsnd 0 -weight 1
     
-    set imageHorizontal [option get $frmid imageHorizontal {}]
+    set imageHorizontal \
+      [::Theme::GetImage [option get $frmid imageHorizontal {}]]
     set sashHBackground [option get $frmid sashHBackground {}]
 
     set paneopts [list -orient vertical -limit 0.0]
@@ -721,11 +722,11 @@ proc ::Jabber::Chat::PutMessageInHistoryFile {jid msg} {
 #       dialog displayed.
 
 proc ::Jabber::Chat::BuildHistory {jid} {
-    global  prefs this
+    global  prefs this wDlgs
     variable uidhist
     upvar ::Jabber::jprefs jprefs
     
-    set w .jchist[incr uidhist]
+    set w $wDlgs(jchist)[incr uidhist]
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
@@ -734,10 +735,11 @@ proc ::Jabber::Chat::BuildHistory {jid} {
 	
     }
     wm title $w "Chat History: $jid"
-    set wtxt $w.frall.fr
+    wm protocol $w WM_DELETE_WINDOW [list [namespace current]::CloseHistory]
+    
+    set wtxt  $w.frall.fr
     set wtext $wtxt.t
-    set wysc $wtxt.ysc
-    set boldChatFont [lreplace $jprefs(chatFont) 2 2 bold]
+    set wysc  $wtxt.ysc
     
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
@@ -755,7 +757,8 @@ proc ::Jabber::Chat::BuildHistory {jid} {
     pack $frbot -side bottom -fill x -padx 8 -pady 6
     
     # Text.
-    pack [frame $w.frall.fr] -fill both -expand 1
+    set wchatframe $w.frall.fr
+    pack [frame $wchatframe -class Chat] -fill both -expand 1
     text $wtext -height 20 -width 72 -font $jprefs(chatFont) -cursor {} \
       -borderwidth 1 -relief sunken -yscrollcommand [list $wysc set] -wrap word
     scrollbar $wysc -orient vertical -command [list $wtext yview]
@@ -765,19 +768,7 @@ proc ::Jabber::Chat::BuildHistory {jid} {
     grid rowconfigure $wtxt 0 -weight 1    
     
     # The tags.
-    set space 2
-    $wtext tag configure headtag -foreground black -background #cecece  \
-      -spacing1 4 -spacing3 4 -font $boldChatFont -lmargin1 20
-    $wtext tag configure me -foreground red  \
-      -spacing1 $space -font $boldChatFont
-    $wtext tag configure metext -foreground black \
-      -spacing1 $space -spacing3 $space -lmargin1 20 -lmargin2 20
-    $wtext tag configure you -foreground blue -spacing1 $space  \
-       -font $boldChatFont
-    $wtext tag configure youtext -foreground black -spacing1 $space  \
-      -spacing3 $space -lmargin1 20 -lmargin2 20
-    ::Text::ConfigureLinkTagForTextWidget $wtext linktag tact
-    
+    ::Jabber::Chat::ConfigureTextTags $wchatframe $wtext    
     
     set path [file join $prefs(historyPath) [uriencode::quote $jid]] 
     if {[file exists $path]} {
@@ -827,6 +818,7 @@ proc ::Jabber::Chat::BuildHistory {jid} {
 	$wtext insert end "No registered chat history for $jid\n" headtag
     }
     $wtext configure -state disabled
+    ::UI::SetWindowGeometry $w $wDlgs(jchist)
     wm minsize $w 200 320
 }
 
@@ -840,6 +832,12 @@ proc ::Jabber::Chat::ClearHistory {jid wtext} {
     if {[file exists $path]} {
 	file delete $path
     }
+}
+
+proc ::Jabber::Chat::CloseHistory { } {
+    global  wDlgs
+    
+    ::UI::SaveWinPrefixGeom $wDlgs(jchist)
 }
 
 proc ::Jabber::Chat::PrintHistory {wtext} {

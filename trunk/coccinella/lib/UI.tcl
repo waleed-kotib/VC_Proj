@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.37 2003-12-22 15:04:58 matben Exp $
+# $Id: UI.tcl,v 1.38 2003-12-23 14:41:01 matben Exp $
 
 package require entrycomp
 
@@ -201,6 +201,11 @@ proc ::UI::GetIcon {name} {
 proc ::UI::AEQuitHandler {theAEDesc theReplyAE} {
     
     ::UserActions::DoQuit
+}
+
+proc ::UI::GetScreenSize { } {
+    
+    return [list [winfo vrootwidth .] [winfo vrootheight .]]
 }
 
 # UI::GetToplevelNS --

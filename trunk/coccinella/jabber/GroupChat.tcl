@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.26 2003-12-23 08:54:52 matben Exp $
+# $Id: GroupChat.tcl,v 1.27 2003-12-23 14:41:01 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -677,8 +677,10 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     pack $wtext -side left -fill both -expand 1
     pack $wysc -side right -fill y -padx 2
     
-    set imageVertical   [option get $frmid imageVertical {}]
-    set imageHorizontal [option get $frmid imageHorizontal {}]
+    set imageVertical   \
+      [::Theme::GetImage [option get $frmid imageVertical {}]]
+    set imageHorizontal \
+      [::Theme::GetImage [option get $frmid imageHorizontal {}]]
     set sashVBackground [option get $frmid sashVBackground {}]
     set sashHBackground [option get $frmid sashHBackground {}]
 

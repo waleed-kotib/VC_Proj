@@ -9,7 +9,33 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Connections.tcl,v 1.15 2003-12-22 15:04:58 matben Exp $
+# $Id: Connections.tcl,v 1.16 2003-12-23 14:41:01 matben Exp $
+
+#--Descriptions of some central variables and their usage-----------------------
+#            
+#  The ip number is central to all administration of connections.
+#  Each connection has a unique ip number from which all other necessary
+#  variables are looked up using arrays:
+#  
+#  ipNumTo(name,$ip):    maps ip number to the specific domain name.
+#  
+#  ipName2Num:       inverse of above.
+#  
+#  ipNumTo(socket,$ip):  maps ip number to the specific socket that is used for 
+#                    sending canvas commands and other commands. It is the 
+#                    socket opened by the client, except in the case this is 
+#                    the central server in a centralized network.
+#                    
+#  ipNumTo(servSocket,$ip): maps ip number to the server side socket opened from
+#                    a remote client.
+#                                      
+#  ipNumTo(servPort,$ip): maps ip number to the specific remote server port number.
+#  
+#  ipNumTo(user,$ip):    maps ip number to the user name.
+#  
+#  ipNumTo(connectTime,$ip):    maps ip number to time when connected.
+#  
+#-------------------------------------------------------------------------------
 
 package provide Connections 1.0
 
