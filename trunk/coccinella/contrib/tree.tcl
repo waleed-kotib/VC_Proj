@@ -6,7 +6,7 @@
 # Copyright (C) 2002-2004 Mats Bengtsson
 # This source file is distributed under the BSD license.
 # 
-# $Id: tree.tcl,v 1.40 2004-11-03 10:28:55 matben Exp $
+# $Id: tree.tcl,v 1.41 2004-11-06 08:15:25 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -395,9 +395,9 @@ proc ::tree::Init { } {
 	windows {
 	    option add *Tree.selectBackground systemHighlight     widgetDefault
 	    option add *Tree.selectForeground systemHighlightText widgetDefault
-	    set widgetGlobals(font)             {Arial 8 normal}
-	    set widgetGlobals(fontbold)         {Arial 8 bold}
-	    set widgetGlobals(fontitalic)       {Arial 8 italic}
+	    set widgetGlobals(font)             {{MS Sans Serif} 8 normal}
+	    set widgetGlobals(fontbold)         {{MS Sans Serif} 8 bold}
+	    set widgetGlobals(fontitalic)       {{MS Sans Serif} 8 italic}
 	}
 	macintosh {
 	    option add *Tree.selectBackground systemHighlight     widgetDefault

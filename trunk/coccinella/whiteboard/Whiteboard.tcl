@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.25 2004-10-26 12:46:52 matben Exp $
+# $Id: Whiteboard.tcl,v 1.26 2004-11-06 08:15:26 matben Exp $
 
 package require entrycomp
 package require moviecontroller
@@ -142,9 +142,6 @@ namespace eval ::WB:: {
 
     # Want to fit all movies within canvas?
     set prefs(autoFitMovies) 1
-
-    set prefs(canScrollWidth)  1800
-    set prefs(canScrollHeight) 1200
 
     # Html sizes or point sizes when transferring text items?
     set prefs(useHtmlSizes) 1
@@ -824,7 +821,7 @@ proc ::WB::BuildWhiteboard {wtop args} {
     bind $wapp(can) <<Cut>>   [list ::CanvasCCP::CutCopyPasteCmd cut]
     bind $wapp(can) <<Copy>>  [list ::CanvasCCP::CutCopyPasteCmd copy]
     bind $wapp(can) <<Paste>> [list ::CanvasCCP::CutCopyPasteCmd paste]
-    
+        
     if {$opts(-usewingeom)} {
 	::UI::SetWindowGeometry $w
     } else {
@@ -885,6 +882,11 @@ proc ::WB::NewCanvas {w args} {
 
     ::CanvasText::Init $wcan
     
+    bind $wcan <Control-Right> [list $wcan xview scroll  1 units]
+    bind $wcan <Control-Left>  [list $wcan xview scroll -1 units]
+    bind $wcan <Control-Down>  [list $wcan yview scroll  1 units]
+    bind $wcan <Control-Up>    [list $wcan yview scroll -1 units]
+    
     return $wcan
 }
 
@@ -913,7 +915,8 @@ proc ::WB::MoveCanvasToPage {wtop name} {
     # Repack the WBCanvas in notebook page.
     pack forget $wapp(frcan)
     ::mactabnotebook::mactabnotebook $wapp(nb)  \
-      -selectcommand [namespace current]::SelectPageCmd
+      -selectcommand [namespace current]::SelectPageCmd  \
+      -closebutton 1
     pack $wapp(nb) -in $wapp(ccon) -fill both -expand true -side right
     set wpage [$wapp(nb) newpage $name]	
     pack $wapp(frcan) -in $wpage -fill both -expand true -side right
@@ -1205,6 +1208,12 @@ proc ::WB::SetMenuDefs {key menuDef} {
     variable menuDefs
     
     set menuDefs(main,$key) $menuDef
+}
+
+proc ::WB::GetMenuDefs {key} {
+    variable menuDefs
+    
+    return $menuDefs(main,$key)
 }
 
 proc ::WB::LoginHook { } {
@@ -2344,6 +2353,18 @@ proc ::WB::GetCanvasSize {wtop} {
     upvar ::WB::${wtop}::wapp wapp
 
     return [list [winfo width $wapp(can)] [winfo height $wapp(can)]]
+}
+
+proc ::WB::SetScrollregion {w swidth sheight} {
+    
+    if {$w == "."} {
+	set wtop .
+    } else {
+	set wtop ${w}.
+    }
+    upvar ::WB::${wtop}::wapp wapp
+
+    $wapp(can) configure -scrollregion [list 0 0 $swidth $sheight]
 }
 
 # WB::GetFocus --

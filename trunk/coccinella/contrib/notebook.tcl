@@ -7,7 +7,7 @@
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: notebook.tcl,v 1.10 2004-10-31 14:32:58 matben Exp $
+# $Id: notebook.tcl,v 1.11 2004-11-06 08:15:25 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -28,6 +28,7 @@
 #      pathName configure ?option? ?value option value ...?
 #      pathName deletepage pageName
 #      pathName displaypage ?pageName?
+#      pathName exists pageName
 #      pathName page pageName
 #      pathName pages
 #
@@ -229,6 +230,9 @@ proc ::notebook::WidgetProc {w command args} {
 		return -code error "wrong # args: should be $w displaypage ?pageName?"
 	    }
 	}
+	exists {
+	    set result [eval {Exists $w} $args]
+	}
 	page {
 	    set result [eval {Page $w} $args]
 	}
@@ -350,6 +354,17 @@ proc ::notebook::Pages {w} {
 	lappend names $nbInfo($key)
     }
     return $names
+}
+
+proc ::notebook::Exists {w name} {
+
+    upvar ::notebook::${w}::nbInfo nbInfo
+    
+    if {[info exists nbInfo(page-$name)]} {
+	return 1
+    } else {
+	return 0
+    }
 }
 
 # notebook::DeletePage --

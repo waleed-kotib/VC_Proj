@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: P2P.tcl,v 1.14 2004-09-28 13:50:19 matben Exp $
+# $Id: P2P.tcl,v 1.15 2004-11-06 08:15:25 matben Exp $
 
 package provide P2P 1.0
 
@@ -109,11 +109,11 @@ proc ::P2P::Init {} {
 
     # Get any registered menu entries.
     # I don't like this solution!
-    set insertInd [expr [llength $menuDefsFile] - 1]
+    set ind [expr [lindex [lsearch -exact -all $menuDefsFile separator] end] + 1]
     set mdef [::UI::Public::GetRegisteredMenuDefs file]
-    if {$mdef != ""} {
-	set menuDefsFile [linsert $menuDefsFile $insertInd {separator}]
-	set menuDefsFile [linsert $menuDefsFile $insertInd $mdef]
+    if {$mdef != {}} {
+	set menuDefsFile [linsert $menuDefsFile $ind {separator}]
+	set menuDefsFile [linsert $menuDefsFile $ind $mdef]
     }
     ::WB::SetMenuDefs file $menuDefsFile
     

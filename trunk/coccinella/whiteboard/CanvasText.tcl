@@ -7,14 +7,20 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasText.tcl,v 1.3 2004-09-22 13:14:41 matben Exp $
+# $Id: CanvasText.tcl,v 1.4 2004-11-06 08:15:26 matben Exp $
 
 #  All code in this file is placed in one common namespace.
+
+package require sha1pure
 
 package provide CanvasText 1.0
 
 namespace eval ::CanvasText:: {
 
+    # Array that holds private stuff.
+    variable priv
+    set priv(font) {}
+    set priv(sha1) {}
 }
 
 
@@ -80,7 +86,7 @@ proc ::CanvasText::EditBind {w} {
 	::CanvasText::NewLine %W
     }
     $w bind text <KeyPress> {
-	::CanvasText::TextInsert %W %A
+	::CanvasText::Insert %W %A
     }
     $w bind text <Key-Right> {
 	::CanvasText::MoveRight %W
@@ -139,7 +145,55 @@ proc ::CanvasText::EditBind {w} {
     }
 }
 
-# CanvasText::CanvasFocus --
+# CanvasText::Copy --
+#  
+#       Just copies text from text items. If selected text, copy that,
+#       else if text item has focus copy complete text item.
+#       
+# Arguments:
+#       c      the canvas widget.
+#       
+# Results:
+#       none
+
+proc ::CanvasText::Copy {c} {
+    variable priv
+    
+    Debug 2 "::CanvasText::Copy select item=[$c select item]"
+
+    if {[$c select item] != {}}	 { 
+	clipboard clear
+	set t [$c select item]
+	set text [$c itemcget $t -text]
+	set start [$c index $t sel.first]
+	set end [$c index $t sel.last]
+	set str [string range $text $start $end]
+	clipboard append $str
+	
+	# Keep track of font in clipboard and a hash to see if changed
+	# before pasting it.
+	set priv(font) [$c itemcget $t -font]
+	set priv(sha1) [sha1pure::sha1 $str]
+	#OwnClipboard $c
+    }
+    puts "priv(font)=$priv(font) "
+}
+
+proc ::CanvasText::OwnClipboard {c} {
+    
+    # this creates some weird behaviour???
+    selection own -command [list [namespace current]::LostClipboard $c] \
+      -selection CLIPBOARD $c
+}
+
+proc ::CanvasText::LostClipboard {c} {
+    variable priv
+    
+    puts "::CanvasText::LostClipboard"
+    set priv(font) {}
+}
+
+# CanvasText::SetFocus --
 #
 #       Puts a text insert bar in the canvas. If already text item under 
 #       the mouse then give focus to that item. If 'forceNew', then always 
@@ -153,7 +207,7 @@ proc ::CanvasText::EditBind {w} {
 # Results:
 #       none
 
-proc ::CanvasText::CanvasFocus {w x y {forceNew 0}} {
+proc ::CanvasText::SetFocus {w x y {forceNew 0}} {
     global  prefs fontSize2Points
     
     set wtop [::UI::GetToplevelNS $w]
@@ -162,7 +216,7 @@ proc ::CanvasText::CanvasFocus {w x y {forceNew 0}} {
     focus $w
     set id [::CanvasUtils::FindTypeFromOverlapping $w $x $y "text"]
 
-    Debug 2 "CanvasFocus:: id=$id"
+    Debug 2 "SetFocus:: id=$id"
     
     # If we have an unsent buffer, be sure to send it first.
     if {$prefs(batchText)} {
@@ -185,9 +239,9 @@ proc ::CanvasText::CanvasFocus {w x y {forceNew 0}} {
 	} else {
 	    set fontsRemote $fontsLocal
 	}
-	set cmdlocal [concat $cmd -font [list $fontsLocal]]
+	set cmdlocal  [concat $cmd -font [list $fontsLocal]]
 	set cmdremote [concat $cmd -font [list $fontsRemote]]
-	set undocmd [list delete $utag]
+	set undocmd   [list delete $utag]
 
 	set redo [list ::CanvasUtils::CommandExList $wtop  \
 	  [list [list $cmdlocal local] [list $cmdremote remote]]]
@@ -201,7 +255,7 @@ proc ::CanvasText::CanvasFocus {w x y {forceNew 0}} {
     }
 }
 
-# CanvasText::TextInsert --
+# CanvasText::Insert --
 #
 #       Inserts text string 'char' at the insert point of the text item
 #       with focus. Handles newlines as well.
@@ -213,8 +267,9 @@ proc ::CanvasText::CanvasFocus {w x y {forceNew 0}} {
 # Results:
 #       none
 
-proc ::CanvasText::TextInsert {w char} {
+proc ::CanvasText::Insert {w char} {
     global  this prefs
+    variable priv
         
     upvar ::CanvasText::${w}::buffer buffer
         
@@ -231,7 +286,7 @@ proc ::CanvasText::TextInsert {w char} {
     # Find the 'itno'.
     set utag [::CanvasUtils::GetUtag $w focus]
     if {$utag == "" || $char == ""}	 {
-	Debug 4 "TextInsert:: utag == {}"
+	Debug 4 "Insert:: utag == {}"
 	return
     }
     set itfocus [$w focus]
@@ -250,6 +305,13 @@ proc ::CanvasText::TextInsert {w char} {
 	}
     }
     
+    # If this is an empty text item then reuse any cached font.
+    if {([$w itemcget $itfocus -text] == "") && ($priv(font) != {})} {
+	if {[string equal $priv(sha1) [sha1pure::sha1 $char]]} {
+	    ::CanvasUtils::ItemConfigure $w $itfocus -font $priv(font)
+	}
+    }
+    
     # The actual canvas text insertion; note that 'ind' is found above.
     set cmd [list insert $itfocus insert $char]
     set undocmd [list dchars $utag $ind [expr $ind + [string length $char]]]
@@ -258,7 +320,7 @@ proc ::CanvasText::TextInsert {w char} {
     eval {$w} $cmd
     undo::add [::WB::GetUndoToken $wtop] $undo $redo
         
-    Debug 9 "TextInsert:: utag = $utag, ind = $ind, char: $char"
+    Debug 9 "\t utag = $utag, ind = $ind, char: $char"
     
     # Need to treat the case with actual newlines in char string.
     # Write to all other clients; need to make a one liner first.
@@ -610,6 +672,7 @@ proc ::CanvasText::NewLine {w} {
 
 proc ::CanvasText::Delete {w {offset 0}} {
     global  prefs
+    variable priv
     
     Debug 2 "::CanvasText::Delete"
 
@@ -632,7 +695,6 @@ proc ::CanvasText::Delete {w {offset 0}} {
 	set str [string range $thetext $sfirst $slast]
 	set cmd [list dchars $utag $sfirst $slast]
 	set undocmd [list insert $utag $sfirst $str]
-
     } elseif {$idfocus != {}} {
 	set ind [expr [$w index $idfocus insert] - 1 + $offset]
 	set thetext [$w itemcget $idfocus -text]
@@ -646,6 +708,33 @@ proc ::CanvasText::Delete {w {offset 0}} {
 	eval $redo
 	undo::add [::WB::GetUndoToken $wtop] $undo $redo
     }
+}
+
+# CanvasText::Paste --
+#
+#       Unix style paste using button 2.
+#       
+# Arguments:
+#       c      the canvas widget.
+#       x,y
+#       
+# Results:
+#       none
+
+proc ::CanvasText::Paste {c {x {}} {y {}}} {
+    
+    Debug 2 "::CanvasText::Paste"
+    
+    # If no selection just return.
+    if {[catch {selection get} _s] &&   \
+      [catch {selection get -selection CLIPBOARD} _s]} {
+	Debug 2 "\t no selection"
+	return
+    }
+    Debug 2 "\t CanvasTextPaste:: selection=$_s"
+    
+    # Once the text string is found use...
+    Insert $c $_s
 }
 
 # CanvasText::ScheduleTextBuffer --

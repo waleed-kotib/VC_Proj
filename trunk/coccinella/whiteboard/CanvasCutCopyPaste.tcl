@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasCutCopyPaste.tcl,v 1.5 2004-08-10 13:03:51 matben Exp $
+# $Id: CanvasCutCopyPaste.tcl,v 1.6 2004-11-06 08:15:26 matben Exp $
 
 package provide CanvasCutCopyPaste 1.0
 
@@ -90,7 +90,7 @@ proc ::CanvasCCP::CopySelectedToClipboard {w doWhat} {
     
     # If selected text within text item.
     if {$ids == {}} {
-	CanvasTextCopy $w
+	::CanvasText::Copy $w
 	if {[string equal $doWhat "cut"]} {
 	    ::CanvasText::Delete $w
 	}
@@ -255,7 +255,7 @@ proc ::CanvasCCP::PasteFromClipboardToCanvas {w} {
     ::CanvasCmd::DeselectAll [::UI::GetToplevelNS $w]
         
     # Check first if it has the potential of a canvas command.
-    if {[string equal [lindex $str 0] $magicToken]} {
+    if {[regexp ^$magicToken $str]} {
 	set clipToken "item"
     } else {
 	set clipToken "string"	    
@@ -263,16 +263,20 @@ proc ::CanvasCCP::PasteFromClipboardToCanvas {w} {
         
     # Depending on clipToken, either paste simple text string, or complete item(s).
     switch -- $clipToken {
-	"string" {
+	string {
 	
 	    # Find out if there is a current focus on a text item.
-	    if {[$w focus] == ""} {
-		eval ::CanvasText::CanvasFocus $w \
+	    set itemfocus [$w focus]
+	    if {$itemfocus == ""} {
+		eval ::CanvasText::SetFocus $w \
 		  [::CanvasUtils::NewImportAnchor $w] 1
 	    }
-	    ::CanvasText::TextInsert $w $str
+	    ::CanvasText::Insert $w $str
+	    
+	    # ...and remove (set) focus if not there before.
+	    $w focus $itemfocus
 	} 
-	"item" {
+	item {
 	    foreach cmd [lindex $str 1] {
 		PasteSingleFromClipboardToCanvas $w $cmd
 	    }
@@ -368,64 +372,6 @@ proc ::CanvasCCP::PasteSingleFromClipboardToCanvas {w cmd} {
     
     # Copy the newly pasted object to clipboard.
     CopySelectedToClipboard $w copy
-}
-
-# CanvasCCP::CanvasTextCopy --
-#  
-#       Just copies text from text items. If selected text, copy that,
-#       else if text item has focus copy complete text item.
-#       
-# Arguments:
-#       c      the canvas widget.
-#       
-# Results:
-#       none
-
-proc ::CanvasCCP::CanvasTextCopy {c} {
-    
-    Debug 2 "CanvasTextCopy::"
-
-    if {[$c select item] != {}}	 { 
-	clipboard clear
-	set t [$c select item]
-	set text [$c itemcget $t -text]
-	set start [$c index $t sel.first]
-	set end [$c index $t sel.last]
-	clipboard append [string range $text $start $end]
-    } elseif {[$c focus] != {}}	 {
-	clipboard clear
-	set t [$c focus]
-	set text [$c itemcget $t -text]
-	clipboard append $text
-    }
-}
-
-# CanvasCCP::CanvasTextPaste --
-#
-#       Unix style paste using button 2.
-#       
-# Arguments:
-#       c      the canvas widget.
-#       x,y
-#       
-# Results:
-#       none
-
-proc ::CanvasCCP::CanvasTextPaste {c {x {}} {y {}}} {
-    
-    Debug 2 "CanvasTextPaste::"
-    
-    # If no selection just return.
-    if {[catch {selection get} _s] &&   \
-      [catch {selection get -selection CLIPBOARD} _s]} {
-	Debug 2 "  CanvasTextPaste:: no selection"
-	return
-    }
-    Debug 2 "  CanvasTextPaste:: selection=$_s"
-    
-    # Once the text string is found use...
-    ::CanvasText::TextInsert $c $_s
-    return
 }
 
 # CanvasCCP::CmdToken --

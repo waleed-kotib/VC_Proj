@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Plugins.tcl,v 1.12 2004-09-28 13:50:21 matben Exp $
+# $Id: Plugins.tcl,v 1.13 2004-11-06 08:15:26 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -406,7 +406,8 @@ proc ::Plugins::CompileAndLoadPackages { } {
     # And all helper applications... only apps on Unix/Linux.
     foreach helperApp $plugin(allApps) {
 	if {[string equal $this(platform) "unix"]} {
-	    if {![catch {exec which $helperApp} apath]} {
+	    set apath [lindex [auto_execok $helperApp] 0]
+	    if {[llength $apath]} {
 		set plugin($helperApp,loaded) 1
 	    } else  {
 		set plugin($helperApp,loaded) 0
@@ -1284,6 +1285,9 @@ proc ::Plugins::InitPrefsHook { } {
 
 proc ::Plugins::BuildPrefsHook {wtree nbframe} {
     
+    if {![$wtree isitem Whiteboard]} {
+	$wtree newitem {Whiteboard} -text [mc Whiteboard]
+    }
     $wtree newitem {Whiteboard Plugins2} -text [mc Plugins]
 
     set wpage [$nbframe page Plugins2]

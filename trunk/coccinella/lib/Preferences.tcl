@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.66 2004-11-02 15:34:55 matben Exp $
+# $Id: Preferences.tcl,v 1.67 2004-11-06 08:15:25 matben Exp $
  
 package require notebook
 package require tree
@@ -136,7 +136,6 @@ proc ::Preferences::Build {args} {
     if {!$prefs(stripJabber)} {
 	$wtree newitem {Jabber}
     }
-    $wtree newitem {Whiteboard} -text [mc Whiteboard]
     
     # The notebook and its pages.
     set nbframe [notebook::notebook $w.frall.fr.nb -borderwidth 1 -relief sunken]
@@ -911,7 +910,13 @@ proc ::Preferences::SelectCmd {w v} {
     variable nbframe
 
     if {[llength $v] && ([$w itemconfigure $v -dir] == 0)} {
-	$nbframe displaypage [lindex $v end]
+	#$nbframe displaypage [lindex $v end]
+    }    
+    if {[llength $v]} {
+	set page [lindex $v end]
+	if {[$nbframe exists $page]} {
+	    $nbframe displaypage $page
+	}
     }    
 }
 

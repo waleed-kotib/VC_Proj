@@ -1,6 +1,6 @@
 
-README --- Coccinella Web Integration
-
+               README --- Coccinella Web Integration
+               -------------------------------------
 
 You can put an url in a web page to launch The Coccinella. Use a link:
 <a href="xmpp:matben@athlon.se">The Coccinella</a>
@@ -13,11 +13,15 @@ is the target address for any action specified. The login uses the
 active profile in the application, not the jid in the uri!
 
 Some examples of supported uri's (The official specification for this
-is currently floating; changes are likely to appear in the future.):
+is currently floating; changes are likely to appear in the future):
 
 xmpp:matben@athlon.se
 xmpp:marilu@l4l.be?message&subject=hi&body=Hello%20World
+    presents a send message dialog
+
 xmpp:marilu@l4l.be?message&subject=hi&body=Hello%20World&thread=abc123
+    starts a chat
+
 xmpp:mats@conference.l4l.be?groupchat&nick=matsnick
     enters the specified room using nick matsnick.
 
