@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: GetFileIface.tcl,v 1.5 2004-12-04 15:01:10 matben Exp $
+# $Id: GetFileIface.tcl,v 1.6 2004-12-06 15:27:01 matben Exp $
 
 package require getfile
 package require uriencode
@@ -75,7 +75,7 @@ proc ::GetFileIface::GetFile {wtop sock fileName opts} {
     set getstate(firstmillis) [clock clicks -milliseconds]
     set getstate(lastmillis)  $getstate(firstmillis)
     set getstate(wprog)       $wDlgs(prog)${uid}
-    set getstate(timingkey)   $gettoken
+    set getstate(timingtok)   $gettoken
     if {[info exists optArr(-url)]} {
 	set getstate(url) $optArr(-url)
     }
@@ -187,7 +187,7 @@ proc ::GetFileIface::GetFileFromServer {wtop ip port path opts} {
     set getstate(firstmillis) [clock clicks -milliseconds]
     set getstate(lastmillis) $getstate(firstmillis)
     set getstate(wprog)      $wDlgs(prog)${uid}
-    set getstate(timingkey)  $gettoken
+    set getstate(timingtok)  $gettoken
     
     # Check if this file is cached already, http transported instead,
     # or if you user wants something different. May modify 'getstate(dstpath)'!
@@ -353,7 +353,7 @@ proc ::GetFileIface::Progress {gettoken token total current} {
     }
     
     # Cache timing info.
-    ::Timing::Set $getstate(timingkey) $current
+    ::timing::setbytes $getstate(timingtok) $current
 
     # Update only when minimum time has passed, and only at certain interval.
     # Perhaps we should set a timer for 'millisToProgWin' instead?
@@ -394,7 +394,7 @@ proc ::GetFileIface::Command {gettoken token what msg} {
 	# Cleanup...
 	catch {destroy $getstate(wprog)}
 	catch {file delete $getstate(dstpath)}
-	::Timing::Reset $getstate(timingkey)
+	::timing::free $getstate(timingtok)
 	unset getstate
 	getfile::cleanup $token
     } elseif {[string equal $what "ok"]} {
@@ -412,7 +412,7 @@ proc ::GetFileIface::Command {gettoken token what msg} {
 		::FileCache::Set $getstate(url) $getstate(dstpath)
 	    }	    
 	    catch {destroy $getstate(wprog)}
-	    ::Timing::Reset $getstate(timingkey)
+	    ::timing::free $getstate(timingtok)
 	    unset getstate
 	    getfile::cleanup $token
 	}
@@ -474,7 +474,7 @@ proc ::GetFileIface::UpdateProgress {gettoken total current} {
     upvar #0 $gettoken getstate          
     
     set msg2 "From: $getstate(fromname)"
-    append msg3 "Rate: [::Timing::FormMessage $getstate(timingkey) $total]"
+    append msg3 "Rate: [::timing::getmessage $getstate(timingtok) $total]"
     
     if {[winfo exists $getstate(wprog)]} {
 

@@ -1,15 +1,16 @@
 #  HttpTrpt.tcl ---
 #  
 #      This file is part of The Coccinella application. 
-#      It is a wrapper for httpex and ProgressWindow to isolate
+#      It is a wrapper for httpex, timing, and ProgressWindow to isolate
 #      the application from the details.
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: HttpTrpt.tcl,v 1.1 2004-12-04 15:01:06 matben Exp $
+# $Id: HttpTrpt.tcl,v 1.2 2004-12-06 15:26:56 matben Exp $
 
 package require httpex
 package require timing
+package require uriencode
 package require ProgressWindow
 
 package provide HttpTrpt 1.0
@@ -24,9 +25,17 @@ namespace eval ::HttpTrpt:: {
 # 
 #       Initiates a http get operation. 
 #       Returns a token if succesful, else empty.
+#       All errors reported through -command.
 #       
+# Arguments:
+#       url
+#       fileName
+#       opts:       ?-command, -dialog, -progressmessage, silent?
+#       
+# Results:
+#       token if succesful so far, else empty.
 
-proc ::HttpTrpt::Get {url fileName from args} {
+proc ::HttpTrpt::Get {url fileName args} {
     global  prefs
     variable uid
     variable wbase
@@ -34,13 +43,21 @@ proc ::HttpTrpt::Get {url fileName from args} {
     ::Debug 2 "::HttpTrpt::Get url=$url, fileName=$fileName"
     
     array set opts {
-	-command    ""
-	-dialog     1
+	-command          ""
+	-dialog           1
+	-progressmessage  ""
+	-silent           0
     }
     array set opts $args
     if {[catch {open $fileName w} fd]} {
-	::UI::MessageBox -title [mc Error] -icon error -type ok \
-	  -message [mc jamessoobfailopen $fileName]
+	set errstr [mc jamessoobfailopen $fileName]
+	if {$state(-command) != {}} {
+	    uplevel #0 $state(-command) [list $token error $errstr]
+	}
+	if {!$state(-silent)} {
+	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
+	      -message $errstr
+	}
 	return ""
     }
 
@@ -50,14 +67,14 @@ proc ::HttpTrpt::Get {url fileName from args} {
     upvar 0 $token state
 
     set w ${wbase}${uid}
-    set state(fd)        $fd
-    set state(w)         $w
-    set state(timetok)   $fd
-    set state(url)       $url
-    set state(fileName)  $fileName
-    set state(fileTail)  [file tail $fileName]
-    set state(from)      $from
-    set state(first)     1
+    set state(fd)           $fd
+    set state(w)            $w
+    set state(timetok)      $fd
+    set state(url)          $url
+    set state(fileName)     $fileName
+    set state(fileTailEnc)  [file tail [::Utils::GetFilePathFromUrl $url]]
+    set state(fileTail)     [uriencode::decodefile $state(fileTailEnc)]
+    set state(first)        1
     foreach {key value} [array get opts] {
 	set state($key) $value
     }
@@ -67,8 +84,14 @@ proc ::HttpTrpt::Get {url fileName from args} {
 	  -progress [list [namespace current]::Progress $token] \
 	  -command  [list [namespace current]::Cmd $token]
     } httptoken]} {
-	::UI::MessageBox -title [mc Error] -icon error -type ok \
-	  -message [mc jamessoobgetfail $url $httptoken]
+	set errmsg [mc httptrpterror $state(fileTail) $errmsg]
+	if {$state(-command) != {}} {
+ 	    uplevel #0 $state(-command) [list $token error $errstr]
+	}
+	if {!$state(-silent)} {
+	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
+	      -message $errmsg
+	}
 	return ""
     }
     set state(httptoken) $httptoken
@@ -86,10 +109,16 @@ proc ::HttpTrpt::Progress {token httptoken total current} {
     if {[string equal $status "error"]} {
 	set errmsg [httpex::error $token]
 	if {$state(-command) != {}} {
-	    uplevel #0 $state(-command) $token error $errmsg
+	    uplevel #0 $state(-command) [list $token error $errmsg]
 	}
-	::UI::MessageBox -title [mc Error] -icon error -type ok \
-	  -message "Failed getting url: $errmsg"
+	if {$state(-progressmessage) != {}} {
+	    uplevel #0 $state(-progressmessage) [list $errmsg]
+	}
+	if {!$state(-silent)} {
+	    set str [mc httptrpterror $state(fileTail) $errmsg]
+	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
+	      -message $str
+	}
 	Free $token
     } else {
 	ProgressWindow $token $total $current
@@ -119,17 +148,26 @@ proc ::HttpTrpt::ProgressWindow {token total current} {
 	      -cancelcmd [list [namespace current]::Cancel $token]
 	    set needupdate 1
 	}
+	if {$state(-progressmessage) != {}} {
+	    set msg "[mc Getting] \"$state(fileTail)\""
+	    uplevel #0 $state(-progressmessage) [list $msg]
+	}
 	set state(startmillis) $ms
 	set state(lastmillis)  $ms
 	set state(first) 0
     } elseif {[expr $ms - $state(lastmillis)] > $prefs(progUpdateMillis)} {
 
 	# Update the progress window.
-	set msg3 "[mc Rate]: [::timing::getmessage $state(timetok) $total]"	
+	set timsg [::timing::getmessage $state(timetok) $total]
 	if {$state(-dialog)} {
+	    set msg3 "[mc Rate]: $timsg"	
 	    set percent [expr 100.0 * $current/($total + 0.001)]
 	    $w configure -percent $percent -text3 $msg3
 	    set needupdate 1
+	}
+	if {$state(-progressmessage) != {}} {
+	    set msg "[mc Getting] \"$state(fileTail)\", $timsg"
+	    uplevel #0 $state(-progressmessage) [list $msg]
 	}
 	set state(lastmillis) $ms
     }
@@ -165,45 +203,51 @@ proc ::HttpTrpt::Cmd {token httptoken} {
     set ncode   [::httpex::ncode $httptoken]
     set httperr [::httpex::error $httptoken]
     set retstatus $status
-    set errmsg ""
+    set msg ""
+    set show 1
     #puts "\t status=$status, ncode=$ncode, httperr=$httperr"
 
     switch -- $status {
 	timeout {
 	    set etitle [mc Timeout]
-	    set errmsg [mc jamessoobtimeout]
+	    set msg [mc jamessoobtimeout]
 	    set eicon info
 	}
 	error {
 	    set etitle [mc "File transport error"]
-	    set errmsg [mc httptrpterror $state(fileTail) $state(from) $httperr]
+	    set msg [mc httptrpterror $state(fileTail) $httperr]
 	    set eicon error
 	}
 	eof {
 	    set etitle [mc "File transport error"]
-	    set errmsg [mc httptrpteof $state(from)]
+	    set msg [mc httptrpteof]
 	    set eicon error
 	}
 	ok {
 	    if {$ncode != 200} {
 		set etitle [mc "File transport error"]
 		set txt [httpex::ncodetotext $ncode]
-		set errmsg [mc httptrptnon200 $state(fileTail) $state(from) $ncode $txt]
+		set msg [mc httptrptnon200 $state(fileTail) $ncode $txt]
 		set eicon error
 		set retstatus error
+	    } else {
+		set show 0
+		set msg [mc httptrptok $state(fileTail)]
 	    }
 	}
 	reset {
 	    # Did this ourself?
+	    set show 0
+	    set msg [mc httptrptreset $state(fileTail)]
 	}
     }
     if {$state(-command) != {}} {
-	uplevel #0 $state(-command) $token $retstatus $errmsg
+	uplevel #0 $state(-command) [list $token $retstatus $msg]
     }
 
     # Any error?
-    if {$errmsg != ""} {
-	::UI::MessageBox -title $etitle -icon $eicon -type ok -message $errmsg
+    if {!$state(-silent) && $show} {
+	::UI::MessageBox -title $etitle -icon $eicon -type ok -message $msg
     }
     Free $token
 }
@@ -213,11 +257,16 @@ proc ::HttpTrpt::Cancel {token} {
     upvar 0 $token state
     
     if {$state(-command) != {}} {
-	uplevel #0 $state(-command) $token reset
+	uplevel #0 $state(-command) [list $token reset]
     }
     ::httpex::reset $state(httptoken)
     catch {file delete $state(fileName)}
     Free $token
+}
+
+proc ::HttpTrpt::Reset {token} {
+    
+    Cancel $token
 }
 
 proc ::HttpTrpt::Free {token} {
@@ -228,6 +277,7 @@ proc ::HttpTrpt::Free {token} {
     catch {destroy $state(w)}
     ::timing::free $state(timetok)
     ::httpex::cleanup $state(httptoken)
+    catch {close $state(fd)}
     unset $token
 }
 

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.24 2004-12-02 15:22:07 matben Exp $
+# $Id: Emoticons.tcl,v 1.25 2004-12-06 15:26:56 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -423,7 +423,7 @@ proc ::Emoticons::MenuButton {w args} {
     
     eval {::Emoticons::BuildMenu $wmenu} $args
 
-    bind $w <Button-1> [list [namespace current]::PostMenu $wmenu %X %Y]
+    bind $w <Button-1> [list [namespace current]::PostMenu $w $wmenu %X %Y]
     return $w
 }
 
@@ -488,9 +488,11 @@ proc ::Emoticons::SortLength {str1 str2} {
     return [expr {[string length $str1] < [string length $str2]} ? -1 : 1]
 }
 
-proc ::Emoticons::PostMenu {m x y} {
+proc ::Emoticons::PostMenu {w m x y} {
 
-    tk_popup $m [expr int($x)] [expr int($y)]
+    if {[string equal [$w cget -state] "normal"]} {
+	tk_popup $m [expr int($x)] [expr int($y)]
+    }
 }
 
 proc ::Emoticons::InsertSmiley {wtext imname name} {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.96 2004-12-02 08:22:33 matben Exp $
+# $Id: Chat.tcl,v 1.97 2004-12-06 15:26:56 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -157,6 +157,7 @@ proc ::Chat::StartThreadDlg {args} {
     global  prefs this wDlgs
 
     variable finished -1
+    variable user ""
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
 
@@ -736,6 +737,8 @@ proc ::Chat::Build {threadID args} {
 	::UI::SetWindowGeometry $w $wDlgs(jchat)
     }
     SetTitle $w $chatstate(rosterName) $chatstate(fromjid)
+    SetThreadState $dlgtoken $chattoken
+
     wm minsize $w [expr {$shortBtWidth < 220} ? 220 : $shortBtWidth] 320
     wm maxsize $w 800 2000
     
@@ -789,6 +792,7 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     jlib::splitjidex $jid node domain res
     jlib::splitjid   $mjid jid2 x
     set rosterName [$jstate(roster) getname $jid2]
+    # [::Jabber::RosterCmd getdisplayname $jid2]
     if {$rosterName != ""} {
 	set username $rosterName
     } elseif {$node == ""} {
@@ -967,6 +971,8 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set chatstate(wsmile)   $wsmile
     set chatstate(wpresimage) $wpresimage
  
+    after idle [list raise $w]
+    
     return $chattoken
 }
 
@@ -1017,12 +1023,7 @@ proc ::Chat::MakeNewPage {dlgtoken threadID args} {
     array set argsArr $args
         
     # Make fresh page with chat widget.
-    jlib::splitjidex $argsArr(-from) node domain res
-    if {$node == ""} {
-	set name $domain
-    } else {
-	set name $node
-    }
+    set name [::Jabber::RosterCmd getdisplayname $argsArr(-from)]
     set wnb $dlgstate(wnb)
     set name [$wnb getuniquename $name]
     set wpage [$wnb newpage $name]

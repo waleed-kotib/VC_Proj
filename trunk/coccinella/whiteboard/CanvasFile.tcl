@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasFile.tcl,v 1.17 2004-12-02 15:22:08 matben Exp $
+# $Id: CanvasFile.tcl,v 1.18 2004-12-06 15:27:01 matben Exp $
  
 package require can2svg
 package require svg2can
@@ -250,8 +250,7 @@ proc ::CanvasFile::FileToCanvasVer1 {w fd absPath args} {
 	    }
 	    
 	    # Let the import procedure do the job; manufacture an option list.
-	    ::Import::DoImport $w $opts -file $filePath \
-	      -where $where
+	    ::Import::DoImport $w $opts -file $filePath -where $where
 	    
 	} else {
 	    set wtop [::UI::GetToplevelNS $w]

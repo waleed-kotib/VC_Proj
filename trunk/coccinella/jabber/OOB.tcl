@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.44 2004-12-04 15:01:06 matben Exp $
+# $Id: OOB.tcl,v 1.45 2004-12-06 15:26:56 matben Exp $
 
 package require uriencode
 
@@ -300,8 +300,9 @@ proc ::OOB::ParseSet {jlibname from subiq args} {
 	return $ishandled
     }
     set tail [file tail [::Utils::GetFilePathFromUrl $url]]
+    set tailDec [uriencode::decodefile $tail]
     set ans [::UI::MessageBox -title [mc {Get File}] -icon info  \
-      -type yesno -default yes -message [mc jamessoobask $from $tail $desc]]
+      -type yesno -default yes -message [mc jamessoobask $from $tailDec $desc]]
     if {$ans == "no"} {
 	return $ishandled
     }
@@ -322,9 +323,8 @@ proc ::OOB::ParseSet {jlibname from subiq args} {
 	return $ishandled
     }
     set userDir [::Utils::GetDirIfExist $prefs(userPath)]
-    set decodedTail [uriencode::decodefile $tail]
     set localPath [tk_getSaveFile -title [mc {Save File}] \
-      -initialfile $decodedTail -initialdir $userDir]
+      -initialfile $tailDec -initialdir $userDir]
     if {$localPath == ""} {
 	return $ishandled
     }
@@ -338,7 +338,7 @@ proc ::OOB::ParseSet {jlibname from subiq args} {
 
 proc ::OOB::Get {jid url file id} {
     
-    set token [::HttpTrpt::Get $url $file $jid \
+    set token [::HttpTrpt::Get $url $file \
       -command [list ::OOB::HttpCmd $jid $id]]
 }
 

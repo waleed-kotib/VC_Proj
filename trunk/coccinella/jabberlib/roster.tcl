@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.25 2004-11-06 08:15:25 matben Exp $
+# $Id: roster.tcl,v 1.26 2004-12-06 15:26:56 matben Exp $
 # 
 # Note that every jid in the rostArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -66,6 +66,7 @@
 #      rostName exitroster
 #      rostName getgroups ?jid?
 #      rostName getask jid
+#      rostName getdisplayname jid
 #      rostName getname jid
 #      rostName getpresence jid ?-resource, -type?
 #      rostName getresources jid
@@ -873,6 +874,20 @@ proc roster::getname {rostName jid} {
     } else {
 	return {}
     }
+}
+
+proc roster::getdisplayname {rostName jid} {
+    
+    set name [getname $rostName $jid]
+    if {$name == ""} {
+	jlib::splitjidex $jid node domain res
+	if {$node == ""} {
+	    set name $domain
+	} else {
+	    set name $node
+	}
+    }
+    return $name
 }
 
 # roster::getsubscription --

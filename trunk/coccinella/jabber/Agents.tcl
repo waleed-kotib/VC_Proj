@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Agents.tcl,v 1.33 2004-12-02 08:22:33 matben Exp $
+# $Id: Agents.tcl,v 1.34 2004-12-06 15:26:56 matben Exp $
 
 package provide Agents 1.0
 
@@ -33,6 +33,9 @@ namespace eval ::Agents:: {
 	mLocalTime     jid       {::Jabber::GetTime $jid}
 	mVersion       jid       {::Jabber::GetVersion $jid}
     }    
+
+    # Temporary.
+    variable wagents xxx
 }
 
 proc ::Agents::LoginCmd { } {
