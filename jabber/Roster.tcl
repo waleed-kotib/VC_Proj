@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.57 2004-04-25 15:35:26 matben Exp $
+# $Id: Roster.tcl,v 1.58 2004-05-09 12:14:38 matben Exp $
 
 package provide Roster 1.0
 
@@ -1244,8 +1244,8 @@ proc ::Jabber::Roster::NewOrEditDlg {which args} {
     } elseif {[string equal $which "edit"]} {
 	set msg [::msgcat::mc jarostset $jid]
     }
-    message $w.frall.msg -width 300 -text $msg
-    pack $w.frall.msg -side top -fill both -expand 1
+    label $w.frall.msg -wraplength 300 -justify left -text $msg
+    pack  $w.frall.msg -side top -fill both -expand 1 -padx 10
 
     # Entries etc.
     set frmid [frame $w.frall.frmid -borderwidth 0]
@@ -1373,6 +1373,13 @@ proc ::Jabber::Roster::NewOrEditDlg {which args} {
     ::UI::SetWindowPosition $w $wDlgs(jrostnewedit)
     wm resizable $w 0 0
     bind $w <Return> [list ::Jabber::Roster::EditSet $token]
+	
+    # Trick to resize the labels wraplength.
+    set script [format {
+	update idletasks
+	%s configure -wraplength [expr [winfo reqwidth %s] - 20]
+    } $w.frall.msg $w.frall]    
+    after idle $script
     
     # Grab and focus.
     set oldFocus [focus]

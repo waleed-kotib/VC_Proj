@@ -157,6 +157,12 @@ Known Bugs:
 
     set debugLevel 3
 
+XML/SVG:
+
+    You may try using SVG for drawing. Start Coccinella with arguments:
+    "-jprefs_useSVGT 1 -jprefs_getIPraw 0 -prefs_trptMethod http"
+    Still in its infancy, though.
+
 Distribution:
 
     It is distributed under the standard GPL.

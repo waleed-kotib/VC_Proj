@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.18 2004-05-06 13:41:11 matben Exp $
+# $Id: Utils.tcl,v 1.19 2004-05-09 12:14:38 matben Exp $
 
 namespace eval ::Utils:: {
 
@@ -421,7 +421,7 @@ proc ::Utils::ProgressWindow {token total current args} {
     # Create progress dialog if not exists.
     if {![info exists progress($token,w)]} {
 	set progress($token,token) $token
-	set w $wDlgs(prog)2${puid}
+	set w $wDlgs(prog)2[incr puid]
 	set progress($token,w) $w
 	eval {::ProgressWindow::ProgressWindow $w} $args
 	set progress($token,startmillis) $ms
