@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.43 2004-03-16 15:09:08 matben Exp $
+# $Id: GroupChat.tcl,v 1.44 2004-03-27 15:20:37 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -23,7 +23,7 @@ namespace eval ::Jabber::GroupChat:: {
     ::hooks::add closeWindowHook         ::Jabber::GroupChat::CloseHook
     ::hooks::add loginHook               ::Jabber::GroupChat::LoginHook
     ::hooks::add logoutHook              ::Jabber::GroupChat::LogoutHook
-    ::hooks::add presenceHook            ::Jabber::GroupChat::PresenceCallback
+    ::hooks::add presenceHook            ::Jabber::GroupChat::PresenceHook
 
     # Use option database for customization. Not used yet...
     set fontS [option get . fontSmall {}]
@@ -941,13 +941,13 @@ proc ::Jabber::GroupChat::TraceStatus {roomJid name key op} {
 # Results:
 #       groupchat member list updated.
 
-proc ::Jabber::GroupChat::PresenceCallback {jid presence args} {
+proc ::Jabber::GroupChat::PresenceHook {jid presence args} {
     
     variable locals
     upvar ::Jabber::jstate jstate
     
     if {[::Jabber::InvokeJlibCmd service isroom $jid]} {
-	::Jabber::Debug 2 "::Jabber::GroupChat::PresenceCallback jid=$jid, presence=$presence, args='$args'"
+	::Jabber::Debug 2 "::Jabber::GroupChat::PresenceHook jid=$jid, presence=$presence, args='$args'"
 	
 	array set attrArr $args
 	

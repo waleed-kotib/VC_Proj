@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.51 2004-03-24 14:43:11 matben Exp $
+# $Id: UI.tcl,v 1.52 2004-03-27 15:20:37 matben Exp $
 
 package require entrycomp
 
@@ -38,10 +38,6 @@ proc ::UI::Init {} {
     variable smileyLongNames
     
     ::Debug 2 "::UI::Init"    
-        
-    # Get icons.
-    set icons(brokenImage) [image create photo -format gif  \
-      -file [file join $this(imagePath) brokenImage.gif]]	
     
     # Icons for the mailbox.
     set icons(readMsg) [image create photo -data {

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.70 2004-03-16 15:09:08 matben Exp $
+# $Id: Jabber.tcl,v 1.71 2004-03-27 15:20:37 matben Exp $
 
 package provide Jabber 1.0
 
@@ -281,6 +281,10 @@ proc ::Jabber::FactoryDefaults { } {
     
     # Shall we query ip number directly when verified Coccinella?
     set jprefs(preGetIP) 1
+    
+    # Get ip addresses through <iq> element.
+    # Switch off the raw stuff in later version.
+    set jprefs(getIPraw) 1
     
     # Preferred groupchat protocol (gc-1.0|muc).
     # 'muc' uses 'conference' as fallback.
@@ -657,7 +661,8 @@ proc ::Jabber::Init { } {
     # Make an instance of jabberlib and fill in our roster object.
     set jstate(jlib) [eval {
 	::jlib::new $jstate(roster) ::Jabber::ClientProc  \
-	  -browsename $jstate(browse)} $opts]
+	  -browsename $jstate(browse)
+    } $opts]
 
     # Register handlers for various iq elements.
     $jstate(jlib) iq_register get jabber:iq:version ::Jabber::ParseGetVersion
@@ -1246,9 +1251,6 @@ proc ::Jabber::EndSession { } {
 	#       callback which makes the subsequent parsing to fail. (after idle?)
 	$jstate(jlib) disconnect
     }
-    
-    # Either save inbox or delete.
-    ::Jabber::MailBox::Exit
 }
 
 # Jabber::IsWellFormedJID --

@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.35 2004-03-13 15:21:41 matben Exp $
+# $Id: jabberlib.tcl,v 1.36 2004-03-27 15:20:37 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -3184,8 +3184,7 @@ proc jlib::service::gettransportjids {jlibname what} {
     
     # Browse service if any.
     if {$opts(havebrowse)} {
-	set subtype $what
-	set jids [$lib(browsename) getalljidfortypes "service/$subtype"]
+	set jids [$lib(browsename) getalljidfortypes "service/$what"]
     }
 
     # Agent service if any.

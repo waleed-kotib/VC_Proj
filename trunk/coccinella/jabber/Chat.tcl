@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.47 2004-03-16 15:09:08 matben Exp $
+# $Id: Chat.tcl,v 1.48 2004-03-27 15:20:37 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -21,7 +21,7 @@ namespace eval ::Jabber::Chat:: {
     ::hooks::add quitAppHook        [list ::UI::SaveWinPrefixGeom $wDlgs(jchat)]
     ::hooks::add quitAppHook        ::Jabber::Chat::GetFirstPanePos    
     ::hooks::add newChatMessageHook ::Jabber::Chat::GotMsg
-    ::hooks::add presenceHook       ::Jabber::Chat::PresenceCallback
+    ::hooks::add presenceHook       ::Jabber::Chat::PresenceHook
     ::hooks::add closeWindowHook    ::Jabber::Chat::CloseHook
     ::hooks::add closeWindowHook    ::Jabber::Chat::CloseHistoryHook
     ::hooks::add loginHook          ::Jabber::Chat::LoginHook
@@ -879,11 +879,11 @@ proc ::Jabber::Chat::Save {token} {
     }
 }
 
-proc ::Jabber::Chat::PresenceCallback {jid type args} {
+proc ::Jabber::Chat::PresenceHook {jid type args} {
     
     upvar ::Jabber::mapShowTextToElem mapShowTextToElem
 
-    # ::Jabber::Chat::PresenceCallback: args=marilu@jabber.dk unavailable 
+    # ::Jabber::Chat::PresenceHook: args=marilu@jabber.dk unavailable 
     #-resource Psi -type unavailable -type unavailable -from marilu@jabber.dk/Psi
     #-to matben@jabber.dk -status Disconnected
     array set argsArr $args

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: FilesAndCanvas.tcl,v 1.23 2004-03-24 14:43:11 matben Exp $
+# $Id: FilesAndCanvas.tcl,v 1.24 2004-03-27 15:20:37 matben Exp $
  
 package require can2svg
 package require svg2can
@@ -717,12 +717,27 @@ proc ::CanvasFile::SVGFileToCanvas {wtop filePath} {
     set xmllist [tinydom::documentElement [tinydom::parse $xml]]
     
     # Update the utags...
-    foreach cmd [svg2can::parsesvgdocument $xmllist] {
+    set cmdList [svg2can::parsesvgdocument $xmllist  \
+      -imagehandler [list ::CanvasFile::SVGImageHandler $wtop]]
+    foreach cmd $cmdList {
 	set utag [::CanvasUtils::NewUtag]
 	set cmd [::CanvasUtils::ReplaceUtag $cmd $utag]
 	eval $wCan $cmd
     }
     close $fd
+}
+
+# CanvasFile::SVGImageHandler --
+# 
+#       Callback for svg to canvas translator to be able to garbage collect
+#       image when window closed.
+
+proc ::CanvasFile::SVGImageHandler {wtop cmd} {
+    
+    #puts "::CanvasFile::SVGImageHandler cmd=$cmd"
+    set idx [lsearch -regexp $cmd {-[a-z]+}]
+    array set argsArr [lrange $cmd $idx end]
+    return [::WB::CreateImageForWtop $wtop "" -file $argsArr(-file)]
 }
 
 #-------------------------------------------------------------------------------

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.5 2004-03-24 14:43:11 matben Exp $
+# $Id: JWB.tcl,v 1.6 2004-03-27 15:20:37 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -605,7 +605,7 @@ proc ::Jabber::WB::SendMessageHook {wtop msg args} {
 proc ::Jabber::WB::SendMessageListHook {wtop msgList args} {
     variable jwbstate
     
-    ::Jabber::Debug 2 "::Jabber::WB::SendMessageListHook"
+    ::Jabber::Debug 2 "::Jabber::WB::SendMessageListHook msgList=$msgList; $args"
     
     if {![::Jabber::IsConnected]} {
 	return
@@ -779,6 +779,7 @@ proc ::Jabber::WB::CanvasCmdListToMessageXElement {wtop cmdList} {
 	set wcan [::WB::GetCanvasFromWtop $wtop]
 	foreach cmd $cmdList {
 	    set cmd [::CanvasUtils::FontHtmlToPixelSize $cmd]
+	    #puts "cmd=$cmd"
 	    set subx [concat $subx \
 	      [can2svgwb::svgasxmllist $cmd -usestyleattribute 0 -canvas $wcan]]
 	}
@@ -940,8 +941,10 @@ proc ::Jabber::WB::HandleSVGWBChatMessage {jlibname xmlns args} {
     }
     
     set cmdList [::Jabber::WB::GetSVGWBMessageList $wtop $argsArr(-x)]
-    eval {::Jabber::WB::ChatMsg $cmdList} $args
-    eval {::hooks::run newWBChatMessageHook} $args
+    if {[llength $cmdList]} {
+	eval {::Jabber::WB::ChatMsg $cmdList} $args
+	eval {::hooks::run newWBChatMessageHook} $args
+    }
     
     # We have handled this message completely.
     return 1
@@ -950,7 +953,26 @@ proc ::Jabber::WB::HandleSVGWBChatMessage {jlibname xmlns args} {
 proc ::Jabber::WB::HandleSVGWBGroupchatMessage {jlibname xmlns args} {
     
     ::Jabber::Debug 2 "::Jabber::WB::HandleSVGWBGroupchatMessage"
+    array set argsArr $args
     
+    # Need to have the actual canvas before doing svg -> canvas translation.
+    # This is a duplicate; fix later...
+    jlib::splitjid $argsArr(-from) roomjid resource
+    set wtop [::Jabber::WB::GetWtopFromMessage "groupchat" $roomjid]
+    if {$wtop == ""} {
+	set wtop [eval {::Jabber::WB::NewWhiteboardTo $roomjid} $args]
+    }
+
+    # Do not duplicate ourselves!
+    if {![::Jabber::IsMyGroupchatJid $argsArr(-from)]} {
+	set cmdList [::Jabber::WB::GetSVGWBMessageList $wtop $argsArr(-x)]
+
+	if {[llength $cmdList]} {
+	    eval {::Jabber::WB::GroupChatMsg $cmdList} $args
+	    eval {::hooks::run newWBGroupChatMessageHook} $args
+	}
+    }
+        
     # We have handled this message completely.
     return 1
 }
@@ -1019,20 +1041,51 @@ proc ::Jabber::WB::GetSVGWBMessageList {wtop xlist} {
     foreach xelem $xlist {
 	array set attrArr [wrapper::getattrlist $xelem]
 	if {[string equal $attrArr(xmlns) $xmlnsSVGWB]} {
-	    set cmdList [svgwb2can::parsesvgdocument $xelem -canvas $wcan]
-	    puts "---cmdList=$cmdList"
+	    set cmdList [svgwb2can::parsesvgdocument $xelem -canvas $wcan \
+	      -httphandler [list [namespace current]::SVGHttpHandler $wtop]]
+	    #puts "---cmdList=$cmdList"
 	}
-    }
-    # We should already have pixel sizes here (with minus sign) which 
-    # should work.
-    if {0} {
-	set transCmdList {}
-	foreach cmd $cmdList {
-	    lappend transCmdList [::CanvasUtils::FontHtmlToPixelSize $cmd 1]
-	}
-	return $transCmdList
     }
     return $cmdList
+}
+
+# Jabber::WB::SVGHttpHandler --
+# 
+#       Callback for SVG to canvas translator for http uri's.
+#       
+#       cmd:        create image $x $y -key value ...
+
+proc ::Jabber::WB::SVGHttpHandler {wtop cmd} {
+    variable jwbstate
+    upvar ::Jabber::jstate jstate
+    
+    #puts "::Jabber::WB::SVGHttpHandler cmd=$cmd"
+    
+    # Design the import line.
+    # import 226.0 104.0 -http ... -below */117748804 -tags */117748801
+    set line [concat import [lrange $cmd 2 end]]
+    set wcan [::WB::GetCanvasFromWtop $wtop]
+    
+    # We should make sure wtop exists!
+    
+    # Only if user available shall we try to import.
+    set tryimport 0
+    # THIS IS NOT A 3-tier JID!!!!!
+    set jid3 $jwbstate($wtop,jid)
+
+    if {[$jstate(roster) isavailable $jid3] || \
+      [string equal $jid3 $jstate(mejidres)]} {
+	set tryimport 1
+    }
+    #puts "::Jabber::WB::SVGHttpHandler line=$line"
+    
+    set errMsg [eval {
+	 ::Import::HandleImportCmd $wcan $line -where local   \
+	   -progress [list ::Import::ImportProgress $line] \
+	   -command [list ::Import::ImportCommand $line] \
+	   -tryimport $tryimport
+     }]
+
 }
 
 # Jabber::WB::HandleAnyResizeImage --
@@ -1210,9 +1263,11 @@ proc ::Jabber::WB::PutIPnumber {jid id} {
 #       Get Coccinella server ports and ip via <iq>.
 
 proc ::Jabber::WB::GetCoccinellaServers {jid3 {cmd {}}} {
+    variable ipCache
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::privatexmlns privatexmlns
     
+    set ipCache(req,$jid3) 1
     $jstate(jlib) iq_get $privatexmlns(servers) $jid3  \
       -command [list ::Jabber::WB::GetCoccinellaServersCallback $jid3 $cmd]
 }
@@ -1236,6 +1291,7 @@ proc ::Jabber::WB::GetCoccinellaServersCallback {jid3 cmd jlibname type subiq} {
     if {$cmd != ""} {
 	eval $cmd
     }
+    catch {unset ipCache(req,$jid3)}
 }
 
 proc ::Jabber::WB::PresenceHook {jid type args} {
@@ -1259,6 +1315,11 @@ proc ::Jabber::WB::PresenceHook {jid type args} {
     }
 }
 
+# Jabber::WB::AutoBrowseHook --
+# 
+#       Gets called when we have identified a Coccinella user using
+#       browsing. Query for its ip address.
+
 proc ::Jabber::WB::AutoBrowseHook {jid} {
     variable ipCache
     upvar ::Jabber::jprefs jprefs
@@ -1266,17 +1327,11 @@ proc ::Jabber::WB::AutoBrowseHook {jid} {
     ::Jabber::Debug 2 "::Jabber::WB::AutoBrowseHook jid=$jid"
     
     # Shall we query for its ip address right away?
-    if {$jprefs(preGetIP)} {
-	if {1} {
-	    
-	    # Get only if not yet requested.
-	    if {![info exists ipCache(req,$jid)]} {
-		::Jabber::WB::GetIPnumber $jid
-	    }
+    # Get only if not yet requested.
+    if {$jprefs(preGetIP) && ![info exists ipCache(req,$jid)]} {
+	if {$jprefs(getIPraw)} {
+	    ::Jabber::WB::GetIPnumber $jid
 	} else {
-	    
-	    # New through <iq> element.
-	    # Switch to this with version 0.94.9 or later!
 	    ::Jabber::WB::GetCoccinellaServers $jid
 	}
     }    
@@ -1504,7 +1559,7 @@ proc ::Jabber::WB::MakeWhiteboardExist {opts} {
 
     switch -- $optArr(-type) {
 	chat {
-	    set wtop [::Jabber::WB::GetWtopFromMessage chat $optArr(-from) \
+	    set wtop [::Jabber::WB::GetWtopFromMessage "chat" $optArr(-from) \
 	      $optArr(-thread)]
 	    if {$wtop == ""} {
 		set wtop [::Jabber::WB::NewWhiteboardTo $optArr(-from)  \
@@ -1516,7 +1571,7 @@ proc ::Jabber::WB::MakeWhiteboardExist {opts} {
 		return -code error  \
 		  "The jid we got \"$optArr(-from)\" was not well-formed!"
 	    }
-	    set wtop [::Jabber::WB::GetWtopFromMessage groupchat $optArr(-from)]
+	    set wtop [::Jabber::WB::GetWtopFromMessage "groupchat" $optArr(-from)]
 	    if {$wtop == ""} {
 		set wtop [::Jabber::WB::NewWhiteboardTo $roomjid]
 	    }

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Import.tcl,v 1.15 2004-03-24 14:43:11 matben Exp $
+# $Id: Import.tcl,v 1.16 2004-03-27 15:20:37 matben Exp $
 
 package require http
 package require httpex
@@ -415,17 +415,8 @@ proc ::Import::DrawImage {w optsVar args} {
     }
         
     # Create internal image.
-    set photoOpts {}
-    if {[info exists argsArr(-file)]} {
-	lappend photoOpts -file $argsArr(-file)
-    } else {
-	lappend photoOpts -data $argsArr(-data)
-    }
-    if {[string equal $mimeSubType "gif"]} {
-	lappend photoOpts -format gif
-    }
     if {[catch {
-	eval {image create photo $imageName} $photoOpts
+	eval {::WB::CreateImageForWtop $wtop $imageName} $args
     } err]} {
 	return $err
     }
@@ -437,6 +428,7 @@ proc ::Import::DrawImage {w optsVar args} {
 	
 	# Make new scaled image.
 	image create photo $newImName
+	::WB::AddImageToGarbageCollector $wtop $newImName
 	if {$zoomFactor > 0} {
 	    $newImName copy $imageName -zoom $zoomFactor
 	} else {
@@ -470,6 +462,7 @@ proc ::Import::DrawImage {w optsVar args} {
 	lappend configOpts -zoom-factor $optArr(-zoom-factor)
     }
     eval {::CanvasUtils::ItemSet $wtop $id} $configOpts
+    
     return $errMsg
 }
 
@@ -772,23 +765,23 @@ proc ::Import::HttpGet {wtop url importPackage opts args} {
     }
     
     # Store stuff in gettoken array.
-    set getstate(wtop) $wtop
-    set getstate(wcan) [::WB::GetCanvasFromWtop $wtop]
-    set getstate(url) $url
+    set getstate(wtop)          $wtop
+    set getstate(wcan)          [::WB::GetCanvasFromWtop $wtop]
+    set getstate(url)           $url
     set getstate(importPackage) $importPackage
-    set getstate(optList) $opts
-    set getstate(args) $args
-    set getstate(dstPath) $dstPath
-    set getstate(dst) $dst
-    set getstate(tail) $fileTail
-    set getstate(transport) http
-    set getstate(status) ""
-    set getstate(error) ""
+    set getstate(optList)       $opts
+    set getstate(args)          $args
+    set getstate(dstPath)       $dstPath
+    set getstate(dst)           $dst
+    set getstate(tail)          $fileTail
+    set getstate(transport)     http
+    set getstate(status)        ""
+    set getstate(error)         ""
     
     # Timing data.
     set getstate(firstmillis) [clock clicks -milliseconds]
-    set getstate(lastmillis) $getstate(firstmillis)
-    set getstate(timingkey) $gettoken
+    set getstate(lastmillis)  $getstate(firstmillis)
+    set getstate(timingkey)   $gettoken
     
     # Be sure to set translation correctly for this MIME type.
     # Should be auto detected by ::httpex::get!
@@ -1037,11 +1030,11 @@ proc ::Import::ImportCommand {line stateStatus gettoken httptoken} {
     if {[string equal $stateStatus "reset"]} {
 	return
     }
-    set wcan $getstate(wcan)
-    set wtop $getstate(wtop)
-    set tail $getstate(tail)
+    set wcan     $getstate(wcan)
+    set wtop     $getstate(wtop)
+    set tail     $getstate(tail)
     set thestate $getstate(state)
-    set status $getstate(status)
+    set status   $getstate(status)
 
     switch -- $stateStatus {
 	timeout {

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.30 2004-03-24 14:43:11 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.31 2004-03-27 15:20:37 matben Exp $
 
 package require sha1pure
 
@@ -1506,11 +1506,13 @@ proc ::CanvasUtils::CreateFontSizeMapping { } {
 # Arguments:
 #       wtop        toplevel window. ("." or ".main2." with extra dot!)
 #       instr       everything after CANVAS:
+#       args
+#               -tryimport (0|1)
 #
 # Returns:
 #       none.
 
-proc ::CanvasUtils::HandleCanvasDraw {wtop instr} {
+proc ::CanvasUtils::HandleCanvasDraw {wtop instr args} {
     global  prefs canvasSafeInterp
     
     # Special chars.
@@ -1536,9 +1538,9 @@ proc ::CanvasUtils::HandleCanvasDraw {wtop instr} {
     # '\}' to protect them.
     # Seems like an identity operation but is not!
     
-    regsub -all "$bs_$lb_" $instr "$bs_$lb_" padinstr
-    regsub -all "$bs_$rb_" $padinstr "$bs_$rb_" padinstr
-    set bsinstr [subst -nocommands -novariables $padinstr]
+    regsub -all "$bs_$lb_" $instr "$bs_$lb_" instr
+    regsub -all "$bs_$rb_" $instr "$bs_$rb_" instr
+    set bsinstr [subst -nocommands -novariables $instr]
     
     # Intercept the canvas command if delete to remove any markers
     # *before* it is deleted! See below for other commands.
@@ -1560,7 +1562,7 @@ proc ::CanvasUtils::HandleCanvasDraw {wtop instr} {
     
     # The 'import' command is an exception case (for the future). 
     if {[string equal $cmd "import"]} {
-	::Import::HandleImportCmd $wServCan $bsinstr -where local
+	eval {::Import::HandleImportCmd $wServCan $bsinstr -where local} $args
     } else {
 		
 	# Make the actual canvas command, either straight or in the 
@@ -1583,35 +1585,34 @@ proc ::CanvasUtils::HandleCanvasDraw {wtop instr} {
     # If moving a selected item, be sure to move the markers with it.
     # The item can either be selected by remote client or here.
     
-    if {[string equal $cmd "move"] ||  \
-      [string equal $cmd "coords"] || \
-      [string equal $cmd "scale"] ||  \
-      [string equal $cmd "itemconfigure"]} {
-	set utag [lindex $instr 1]
-	set id [$wServCan find withtag $utag]
-	set idsMarker [$wServCan find withtag id$id]
-	
-	# If we have selected the item in question.
-	if {[string length $idsMarker] > 0} {
-	    $wServCan delete id$id
-	    $wServCan dtag $id "selected"
-	    ::CanvasDraw::MarkBbox $wServCan 1 $id
-	}
-    } 
-    
-    # If text then invoke hook.
-    if {[string equal $cmd "create"] || [string equal $cmd "insert"]} {
-	if {[string equal $cmd "create"]} {
-	    set utag $idnew
-	} else {
+    switch -- $cmd {
+	move - coords - scale - itemconfigure {
 	    set utag [lindex $instr 1]
-	}
-	set type [$wServCan type $utag]
-	if {[string equal $type "text"]} {
+	    set id [$wServCan find withtag $utag]
+	    set idsMarker [$wServCan find withtag id$id]
 	    
-	    # Extract the actual text. TclSpeech not foolproof!
-	    set theText [$wServCan itemcget $utag -text]
-	    ::hooks::run whiteboardTextInsertHook other $theText
+	    # If we have selected the item in question.
+	    if {[string length $idsMarker] > 0} {
+		$wServCan delete id$id
+		$wServCan dtag $id "selected"
+		::CanvasDraw::MarkBbox $wServCan 1 $id
+	    }
+	}
+	create - insert {
+	    
+	    # If text then invoke hook.
+	    if {[string equal $cmd "create"]} {
+		set utag $idnew
+	    } else {
+		set utag [lindex $instr 1]
+	    }
+	    set type [$wServCan type $utag]
+	    if {[string equal $type "text"]} {
+		
+		# Extract the actual text. TclSpeech not foolproof!
+		set theText [$wServCan itemcget $utag -text]
+		::hooks::run whiteboardTextInsertHook other $theText
+	    }
 	}
     }
 }
