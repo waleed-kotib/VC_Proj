@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #
-# $Id: can2svg.tcl,v 1.3 2004-03-01 15:06:01 matben Exp $
+# $Id: can2svg.tcl,v 1.4 2004-03-03 08:04:39 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -82,6 +82,7 @@ namespace eval can2svg {
 # Arguments:
 #       cmd         canvas command without prepending widget path.
 #       args    -usetags    0|all|first|last
+#               -usestyleattribute 0|1
 #       
 # Results:
 #   xml data
@@ -102,6 +103,7 @@ proc can2svg::can2svg {cmd args} {
 # Arguments:
 #       cmd         canvas command without prepending widget path.
 #       args    -usetags    0|all|first|last
+#               -usestyleattribute 0|1
 #       
 # Results:
 #       a list of xmllist = {tag attrlist isempty cdata {child1 child2 ...}}
@@ -118,7 +120,10 @@ proc can2svg::svgasxmllist {cmd args} {
     set wsp_ {[ ]+}
     set xmlListList {}
     
-    array set argsArr {-usetags all}
+    array set argsArr {
+	-usestyleattribute    1
+	-usetags              all
+    }
     array set argsArr $args
         
     switch -- [lindex $cmd 0] {
@@ -154,6 +159,10 @@ proc can2svg::svgasxmllist {cmd args} {
 		set fillValue black
 	    }
 	    if {($argsArr(-usetags) != "0") && [info exists optArr(-tags)]} {
+		
+		# Remove any 'current' tag.
+		set optArr(-tags) \
+		  [lsearch -all -not -inline $optArr(-tags) current]
 		
 		switch -- $argsArr(-usetags) {
 		    all {			
@@ -211,8 +220,7 @@ proc can2svg::svgasxmllist {cmd args} {
 		    # Had to do it the hard way! (?)
 		    # "Wrong" coordinate system :-(
 		    set elem "path"
-		    set style [MakeStyle $type $opts]
-		    foreach {x1 y1 x2 y2} $coo {}
+		    foreach {x1 y1 x2 y2} $coo break
 		    set cx [expr ($x1 + $x2)/2.0]
 		    set cy [expr ($y1 + $y2)/2.0]
 		    set rx [expr abs($x1 - $x2)/2.0]
@@ -225,7 +233,7 @@ proc can2svg::svgasxmllist {cmd args} {
 		    set start [expr $anglesToRadians * $optArr(-start)]
 		    set nsteps [expr int(abs($extent)/$deltaPhi) + 2]
 		    set delta [expr $extent/$nsteps]
-		    set data [format "M %.1f %.1f L"   \
+		    set data [format "M %.1f %.1f L"  \
 		      [expr $cx + $rx*cos($start)] [expr $cy - $ry*sin($start)]]
 		    for {set i 0} {$i <= $nsteps} {incr i} {
 			set phi [expr $start + $i * $delta]
@@ -247,10 +255,12 @@ proc can2svg::svgasxmllist {cmd args} {
 			# Pieslice is the default.
 			append data [format " %.1f %.1f Z" $cx $cy]
 		    }
-		    set attr [list "d" $data "style" $style]
+		    set attr [list "d" $data]
 		    if {[string length $idAttr] > 0} {
 			set attr [concat $attr $idAttr]
 		    }
+		    set attr [concat $attr [MakeAttrList \
+		      $type $opts $argsArr(-usestyleattribute)]]
 		    lappend xmlListList [MakeXMLList $elem -attrlist $attr]
 		}
 		image - bitmap {
@@ -264,17 +274,17 @@ proc can2svg::svgasxmllist {cmd args} {
 		line {
 		    if {$haveSpline} {
 			set elem "path"
-			set style [MakeStyle $type $opts]						
 			set data [ParseSplineToPath $type $coo]
-			set attr [list "d" $data "style" $style]
+			set attr [list "d" $data]
 		    } else {
 			set elem "polyline"
-			set style [MakeStyle $type $opts]
-			set attr [list "points" $coo "style" $style]
+			set attr [list "points" $coo]
 		    }
 		    if {[string length $idAttr] > 0} {
 			set attr [concat $attr $idAttr]
-		    }
+		    }		    
+		    set attr [concat $attr [MakeAttrList \
+		      $type $opts $argsArr(-usestyleattribute)]]
 		    lappend xmlListList [MakeXMLList $elem -attrlist $attr]
 		}
 		oval {
@@ -293,46 +303,44 @@ proc can2svg::svgasxmllist {cmd args} {
 			  "rx" [expr $w/2.0]       \
 			  "ry" [expr $h/2.0]]
 		    }
-		    set style [MakeStyle $type $opts]
-		    lappend attr "style" $style
 		    if {[string length $idAttr] > 0} {
 			set attr [concat $attr $idAttr]
 		    }
+		    set attr [concat $attr [MakeAttrList \
+		      $type $opts $argsArr(-usestyleattribute)]]
 		    lappend xmlListList [MakeXMLList $elem -attrlist $attr]
 		}
 		polygon {
 		    if {$haveSpline} {
 			set elem "path"
-			set style [MakeStyle $type $opts]
 			set data [ParseSplineToPath $type $coo]
-
-			set attr [list "d" $data "style" $style]
+			set attr [list "d" $data]
 		    } else {
 			set elem "polygon"
-			set style [MakeStyle $type $opts]
-			set attr [list "points" $coo "style" $style]
+			set attr [list "points" $coo]
 		    }
 		    if {[string length $idAttr] > 0} {
 			set attr [concat $attr $idAttr]
 		    }
+		    set attr [concat $attr [MakeAttrList \
+		      $type $opts $argsArr(-usestyleattribute)]]
 		    lappend xmlListList [MakeXMLList $elem -attrlist $attr]
 		}
 		rectangle {
 		    set elem "rect"
-		    set style [MakeStyle $type $opts]
 
 		    # width and height must be non-negative!
 		    foreach {x y w h} [NormalizeRectCoords $coo] {}
 		    set attr [list "x" $x "y" $y "width" $w "height" $h]
-		    lappend attr "style" $style
 		    if {[string length $idAttr] > 0} {
 			set attr [concat $attr $idAttr]
 		    }
+		    set attr [concat $attr [MakeAttrList \
+		      $type $opts $argsArr(-usestyleattribute)]]
 		    lappend xmlListList [MakeXMLList $elem -attrlist $attr]
 		}
 		text {
 		    set elem "text"
-		    set style [MakeStyle $type $opts]
 		    set nlines 1
 		    if {[info exists optArr(-text)]} {
 			set chdata $optArr(-text)
@@ -358,10 +366,11 @@ proc can2svg::svgasxmllist {cmd args} {
 		      [GetTextSVGCoords $coo $anchor $chdata $theFont $nlines] {}
 		    		    
 		    set attr [list "x" $xbase "y" $ybase]
-		    lappend attr "style" $style
 		    if {[string length $idAttr] > 0} {
 			set attr [concat $attr $idAttr]
 		    }
+		    set attr [concat $attr [MakeAttrList \
+		      $type $opts $argsArr(-usestyleattribute)]]
 		    set dy 0
 		    if {$nlines > 1} {
 			
@@ -391,7 +400,21 @@ proc can2svg::svgasxmllist {cmd args} {
     return $xmlListList
 }
 
-# can2svg::MakeStyle --
+# can2svg::MakeAttrList --
+# 
+#       Handles the use of style attributes or presenetation attributes.
+
+proc can2svg::MakeAttrList {type opts usestyleattribute} {
+    
+    if {$usestyleattribute} {
+	set attrList [list style [MakeStyleAttr $type $opts]]
+    } else {
+	set attrList [MakeStyleList $type $opts]
+    }
+    return $attrList
+}
+
+# can2svg::MakeStyleAttr --
 #
 #       Produce the SVG style attribute from the canvas item options.
 #
@@ -402,8 +425,17 @@ proc can2svg::svgasxmllist {cmd args} {
 # Results:
 #       The SVG style attribute as a a string.
 
-proc can2svg::MakeStyle {type opts} {
+proc can2svg::MakeStyleAttr {type opts} {
+    
+    set style ""
+    foreach {key value} [MakeStyleList $type $opts] {
+	append style "${key}: ${value}; "
+    }
+    return [string trim $style]
+}
 
+proc can2svg::MakeStyleList {type opts} {
+    
     # Defaults for everything except text.
     if {![string equal $type "text"]} {
 	array set styleArr {fill none stroke black}
@@ -451,7 +483,7 @@ proc can2svg::MakeStyle {type opts} {
 	    -font {
 		set styleArr(font-family) [lindex $value 0]
 		if {[llength $value] > 1} {
-		    set styleArr(font-size) [lindex $value 1]
+		    set styleArr(font-size) [expr abs([lindex $value 1])]
 		}
 		if {[llength $value] > 2} {
 		    set tkstyle [lindex $value 2]
@@ -562,11 +594,7 @@ proc can2svg::MakeStyle {type opts} {
 	set styleArr(fill-rule) "evenodd"
     }
         
-    set style ""
-    foreach {key value} [array get styleArr] {
-	append style "${key}: ${value}; "
-    }
-    return [string trim $style]
+    return [array get styleArr]
 }
 
 proc can2svg::FormatColorName {value} {
