@@ -52,6 +52,7 @@
 ::msgcat::mcset en General
 ::msgcat::mcset en Get
 ::msgcat::mcset en Group
+::msgcat::mcset en Groupchat
 ::msgcat::mcset en Handling
 ::msgcat::mcset en History
 ::msgcat::mcset en Home

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.47 2004-03-31 07:55:18 matben Exp $
+# $Id: GroupChat.tcl,v 1.48 2004-04-02 12:26:37 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -24,16 +24,13 @@ namespace eval ::Jabber::GroupChat:: {
     ::hooks::add loginHook               ::Jabber::GroupChat::LoginHook
     ::hooks::add logoutHook              ::Jabber::GroupChat::LogoutHook
     ::hooks::add presenceHook            ::Jabber::GroupChat::PresenceHook
+    ::hooks::add groupchatEnterRoomHook  ::Jabber::GroupChat::EnterHook
     
     # Define all hooks for preference settings.
     ::hooks::add prefsInitHook           ::Jabber::GroupChat::InitPrefsHook
     ::hooks::add prefsBuildHook          ::Jabber::GroupChat::BuildPrefsHook
     ::hooks::add prefsSaveHook           ::Jabber::GroupChat::SavePrefsHook
     ::hooks::add prefsCancelHook         ::Jabber::GroupChat::CancelPrefsHook
-
-    # Use option database for customization. Not used yet...
-    set fontS [option get . fontSmall {}]
-    set fontSB [option get . fontSmallBold {}]
 
     # Icons
     option add *GroupChat*sendImage            send             widgetDefault
@@ -42,6 +39,10 @@ namespace eval ::Jabber::GroupChat:: {
     option add *GroupChat*saveDisImage         saveDis          widgetDefault
     option add *GroupChat*historyImage         history          widgetDefault
     option add *GroupChat*historyDisImage      historyDis       widgetDefault
+    option add *GroupChat*inviteImage          invite           widgetDefault
+    option add *GroupChat*inviteDisImage       inviteDis        widgetDefault
+    option add *GroupChat*infoImage            info             widgetDefault
+    option add *GroupChat*infoDisImage         infoDis          widgetDefault
     option add *GroupChat*printImage           print            widgetDefault
     option add *GroupChat*printDisImage        printDis         widgetDefault
 
@@ -58,7 +59,7 @@ namespace eval ::Jabber::GroupChat:: {
     option add *GroupChat*theyTextBackground   ""               widgetDefault
     option add *GroupChat*theyTextFont         ""               widgetDefault
     option add *GroupChat*sysPreForeground     #26b412          widgetDefault
-    option add *GroupChat*sysForeground        #26b412          widgetDefault
+    option add *GroupChat*sysTextForeground    #26b412          widgetDefault
     option add *GroupChat*clockFormat          "%H:%M"          widgetDefault
 
     option add *GroupChat*userForeground       ""               widgetDefault
@@ -80,21 +81,25 @@ namespace eval ::Jabber::GroupChat:: {
 	{theytext    -background          theyTextBackground    Background}
 	{theytext    -font                theyTextFont          Font}
 	{syspre      -foreground          sysPreForeground      Foreground}
-	{sys         -foreground          sysForeground         Foreground}
+	{systext     -foreground          sysTextForeground     Foreground}
     }
     
     # Local stuff
-    variable locals
     variable enteruid 0
     variable dlguid 0
 
     # Running number for groupchat thread token.
     variable uid 0
 
+    # Local preferences.
+    variable cprefs
+    set cprefs(lastActiveRet) 0
+
     variable popMenuDefs
     set popMenuDefs(groupchat,def) {
 	mMessage       user      {::Jabber::NewMsg::Build -to $jid}
 	mChat          user      {::Jabber::Chat::StartThread $jid}
+	mSendFile      user      {::Jabber::OOB::BuildSet $jid}
 	mWhiteboard    wb        {::Jabber::WB::NewWhiteboardTo $jid}
     }    
     
@@ -197,7 +202,6 @@ proc ::Jabber::GroupChat::HaveMUC {{roomjid {}}} {
 #       "cancel" or "enter".
 
 proc ::Jabber::GroupChat::EnterOrCreate {what args} {
-    variable locals
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jprefs jprefs
     
@@ -255,21 +259,35 @@ proc ::Jabber::GroupChat::EnterOrCreate {what args} {
     return $ans
 }
 
+proc ::Jabber::GroupChat::EnterHook {roomJid protocol} {
+    
+    ::Jabber::GroupChat::SetProtocol $roomJid $protocol
+}
+
 # Jabber::GroupChat::SetProtocol --
 # 
 #       Cache groupchat protocol in use for specific room.
 
-proc ::Jabber::GroupChat::SetProtocol {roomJid protocol} {
-    variable locals
-
-    set locals($roomJid,protocol) $protocol
+proc ::Jabber::GroupChat::SetProtocol {roomJid inprotocol} {
     
-    # If groupchat window already exists.
-    if {[info exists locals($roomJid,wtop)] && \
-    [winfo exists $locals($roomJid,wtop)]} {
-	$locals($roomJid,wbtinfo)   configure -state normal
-	$locals($roomJid,wbtnick)   configure -state normal
-	$locals($roomJid,wbtinvite) configure -state normal
+    variable protocol
+
+    # We need a separate cache for this since the room may not yet exist.
+    set protocol($roomJid) $inprotocol
+    
+    set token [::Jabber::GroupChat::GetTokenFrom roomjid $roomJid]
+    #puts "::Jabber::GroupChat::SetProtocol token=$token, protocol=$inprotocol"
+    if {$token == ""} {
+	return
+    }
+    variable $token
+    upvar 0 $token state
+    
+    if {$inprotocol == "muc"} {
+	set wtray           $state(wtray)
+	$wtray buttonconfigure invite -state normal
+	$wtray buttonconfigure info   -state normal
+	$state(wbtnick)   configure -state normal
     }
 }
 
@@ -430,7 +448,7 @@ proc ::Jabber::GroupChat::EnterCallback {jlibName type args} {
     }
     
     # Cache groupchat protocol type (muc|conference|gc-1.0).
-    ::Jabber::GroupChat::SetProtocol $argsArr(-from) "gc-1.0"
+    ::hooks::run groupchatEnterRoomHook $argsArr(-from) "gc-1.0"
 }
 
 # Jabber::GroupChat::GotMsg --
@@ -448,7 +466,6 @@ proc ::Jabber::GroupChat::EnterCallback {jlibName type args} {
 proc ::Jabber::GroupChat::GotMsg {body args} {
     global  prefs
     
-    variable locals
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     
@@ -473,49 +490,22 @@ proc ::Jabber::GroupChat::GotMsg {body args} {
 	return -code error "The jid we got \"$fromJid\"was not well-formed!"
     }
     
-    # If we haven't a window for this thread, make one!
-    if {[info exists locals($roomJid,wtop)] &&  \
-      [winfo exists $locals($roomJid,wtop)]} {
-    } else {
-	eval {::Jabber::GroupChat::Build $roomJid} $args
-    }       
+    # If we haven't a window for this roomjid, make one!
+    set token [::Jabber::GroupChat::GetTokenFrom roomjid $roomJid]
+    if {$token == ""} {
+	set token [eval {::Jabber::GroupChat::Build $roomJid} $args]
+    }
+    variable $token
+    upvar 0 $token state
+    
     if {[info exists argsArr(-subject)]} {
-	set locals($roomJid,topic) $argsArr(-subject)
+	set state(subject) $argsArr(-subject)
     }
     if {[string length $body] > 0} {
-	set w $locals($roomJid,wtop)
-	
-	# This can be room name or nick name.
-	foreach {meRoomJid mynick}  \
-	  [::Jabber::InvokeJlibCmd service hashandnick $roomJid] break
-	
-	# Old-style groupchat and browser compatibility layer.
-	set nick [::Jabber::InvokeJlibCmd service nick $fromJid]
-	
-	set wtext $locals($roomJid,wtext)
-	
-	set clockFormat [option get $w clockFormat {}]
-	if {$clockFormat != ""} {
-	    set theTime [clock format [clock seconds] -format $clockFormat]
-	    set txt "\[$theTime\] <$nick>"
-	} else {
-	    set txt <$nick>
-	}
 
-	$wtext configure -state normal
-	if {[string equal $meRoomJid $fromJid]} {
-	    set methey me
-	} else {
-	    set methey they
-	}
-	$wtext insert end $txt ${methey}pre
-	::Jabber::ParseAndInsertText $wtext "  $body" ${methey}text urltag
-	$wtext configure -state disabled
-	$wtext see end
-
-	if {$locals($roomJid,got1stMsg) == 0} {
-	    set locals($roomJid,got1stMsg) 1
-	}
+	# And put message in window.
+	::Jabber::GroupChat::InsertMessage $token $fromJid $body
+	set state(got1stmsg) 1
 	
 	# Run display hooks (speech).
 	eval {::hooks::run displayGroupChatMessageHook $body} $args
@@ -532,15 +522,15 @@ proc ::Jabber::GroupChat::GotMsg {body args} {
 #       args        ??
 #       
 # Results:
-#       shows window.
+#       shows window, returns token.
 
 proc ::Jabber::GroupChat::Build {roomJid args} {
     global  this prefs wDlgs
     
+    variable protocol
     variable groupChatOptions
-    variable locals
     variable uid
-    upvar ::Jabber::mapShowElemToText mapShowElemToText
+    variable cprefs
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
@@ -554,18 +544,19 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
 
     # Make unique toplevel name.
     set w $wDlgs(jgc)[incr uid]
-    
-    set locals($roomJid,wtop) $w
-    set locals($w,room) $roomJid
-    if {[winfo exists $w]} {
-	return
-    }
     array set argsArr $args
-    if {[info exists argsArr(-from)]} {
-	set locals($roomJid,jid) $argsArr(-from)
+
+    set state(w)                $w
+    set state(roomjid)          $roomJid
+    set state(subject)          ""
+    set state(status)           "available"
+    set state(oldStatus)        "available"
+    set state(got1stmsg)        0
+    if {$jprefs(chatActiveRet)} {
+	set state(active) 1
+    } else {
+	set state(active)       $cprefs(lastActiveRet)
     }
-    set locals($roomJid,got1stMsg) 0
-    set locals($roomJid,topic)     ""
     
     # Toplevel of class GroupChat.
     ::UI::Toplevel $w -class GroupChat -usemacmainmenu 1 -macstyle documentProc
@@ -578,7 +569,7 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     } else {
 	set tittxt $roomJid
     }
-    wm title $w $tittxt
+    wm title $w "[::msgcat::mc Groupchat]: $tittxt"
     
     set fontS  [option get . fontSmall {}]
     set fontSB [option get . fontSmallBold {}]
@@ -609,6 +600,10 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     set iconSaveDis     [::Theme::GetImage [option get $w saveDisImage {}]]
     set iconHistory     [::Theme::GetImage [option get $w historyImage {}]]
     set iconHistoryDis  [::Theme::GetImage [option get $w historyDisImage {}]]
+    set iconInvite      [::Theme::GetImage [option get $w inviteImage {}]]
+    set iconInviteDis   [::Theme::GetImage [option get $w inviteDisImage {}]]
+    set iconInfo        [::Theme::GetImage [option get $w infoImage {}]]
+    set iconInfoDis     [::Theme::GetImage [option get $w infoDisImage {}]]
     set iconPrint       [::Theme::GetImage [option get $w printImage {}]]
     set iconPrintDis    [::Theme::GetImage [option get $w printDisImage {}]]
 
@@ -616,97 +611,68 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     pack $wtray -side top -fill x -padx 4 -pady 2
 
     $wtray newbutton send    Send    $iconSend    $iconSendDis    \
-      [list [namespace current]::Send $roomJid]
+      [list [namespace current]::Send $token]
      $wtray newbutton save   Save    $iconSave    $iconSaveDis    \
        [list [namespace current]::Save $token]
     $wtray newbutton history History $iconHistory $iconHistoryDis \
       [list [namespace current]::BuildHistory $token]
+    $wtray newbutton invite  Invite  $iconInvite  $iconInviteDis  \
+      [list ::Jabber::MUC::Invite $roomJid]
+    $wtray newbutton info    Info    $iconInfo    $iconInfoDis    \
+      [list ::Jabber::MUC::BuildInfo $roomJid]
     $wtray newbutton print   Print   $iconPrint   $iconPrintDis   \
-      [list [namespace current]::Print $roomJid]
+      [list [namespace current]::Print $token]
     
     ::hooks::run buildGroupChatButtonTrayHook $wtray $roomJid
     
-    set shortBtWidth [$wtray minwidth]
+    set shortBtWidth [expr [$wtray minwidth] + 8]
 
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
+    pack $frbot -side bottom -fill x -padx 10 -pady 8
     pack [button $frbot.btok -text [::msgcat::mc Send]  \
-      -default active -command [list [namespace current]::Send $roomJid]] \
+      -default active -command [list [namespace current]::Send $token]] \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Exit]  \
-      -command [list [namespace current]::Exit $roomJid]]  \
-      -side right -padx 5 -pady 5  
-    pack [::Jabber::UI::SmileyMenuButton $frbot.smile $wtextsnd]  \
-      -side right -padx 5 -pady 5  
+      -command [list [namespace current]::Exit $token]]  \
+      -side right -padx 5  
+    pack [::Emoticons::MenuButton $frbot.smile $wtextsnd]  \
+      -side right -padx 6
+    set wbtstatus $frbot.stat
     
-    # CCP
-    pack [frame $w.frall.fccp] -side top -fill x
-    set wccp $w.frall.fccp.ccp
-    pack [::UI::NewCutCopyPaste $wccp] -padx 10 -pady 2 -side left
-    ::UI::CutCopyPasteConfigure $wccp cut -state disabled
-    ::UI::CutCopyPasteConfigure $wccp copy -state disabled
-    ::UI::CutCopyPasteConfigure $wccp paste -state disabled
-    pack [frame $w.frall.fccp.div -bd 2 -relief raised -width 2]  \
-      -fill y -side left
-    pack [::UI::NewPrint $w.frall.fccp.pr [list [namespace current]::Print $roomJid]] \
-      -side left -padx 10
-    
-    set wbtinvite $w.frall.fccp.inv
-    set wbtnick $w.frall.fccp.nick
-    set wbtinfo $w.frall.fccp.info
-    pack [button $wbtinfo -text "[::msgcat::mc Info]..."  \
-      -font $fontS -command [list ::Jabber::MUC::BuildInfo $roomJid]] \
-      -side right -padx 4
-    pack [button $wbtnick -text "[::msgcat::mc {Nick name}]..."  \
-      -font $fontS -command [list ::Jabber::MUC::SetNick $roomJid]] \
-      -side right -padx 4
-    pack [button $wbtinvite -text "[::msgcat::mc Invite]..."  \
-      -font $fontS -command [list ::Jabber::MUC::Invite $roomJid]] \
-      -side right -padx 4
-    
-    pack [frame $w.frall.div2 -bd 2 -relief sunken -height 2] -fill x -side top
-    if {!( [info exists locals($roomJid,protocol)] &&  \
-      ($locals($roomJid,protocol) == "muc") )} {
-	$wbtinfo configure -state disabled
-	$wbtnick configure -state disabled
-	$wbtinvite configure -state disabled
-    }
+    set state(wbstatus) $wbtstatus
+    ::Jabber::GroupChat::BuildStatusMenuButton $token $wbtstatus
+    pack $wbtstatus -side right -padx 6
+    ::Jabber::GroupChat::ConfigStatusMenuButton $token $wbtstatus available
 
-    # Popup for setting status to this room.
-    set allStatus [array names mapShowElemToText]
-    set locals($roomJid,status) [::msgcat::mc Available]
-    set locals($roomJid,oldStatus) [::msgcat::mc Available]
-    set wpopup $frbot.popup
-    set wMenu [eval {tk_optionMenu $wpopup  \
-      [namespace current]::locals($roomJid,status)} $allStatus]
-    $wpopup configure -highlightthickness 0 -width 14 -foreground black
-    pack $wpopup -side left -padx 5 -pady 5
-    
-    pack $frbot -side bottom -fill x -padx 10 -pady 8
-    
-    # Keep track of all buttons that need to be disabled on logout.
-    set locals($roomJid,allBts) [list $frbot.btok $frbot.btcancel $wpopup]
+    pack [checkbutton $frbot.active -text " [::msgcat::mc {Active <Return>}]" \
+      -command [list [namespace current]::ActiveCmd $token] \
+      -variable $token\(active)]  \
+      -side left -padx 5
+            
+    pack [frame $w.frall.div2 -bd 2 -relief sunken -height 2] -fill x -side top
     
     # Header fields.
-    set frtop [frame $w.frall.frtop -borderwidth 0]
-    pack $frtop -side top -fill x   
-    label $frtop.la -text "[::msgcat::mc {Group chat in room}]:" -anchor e
-    entry $frtop.en
-    label $frtop.ltp -text "[::msgcat::mc Topic]:" -anchor e
-    entry $frtop.etp  \
-      -textvariable [namespace current]::locals($roomJid,topic)
-    button $frtop.btp -text "[::msgcat::mc Change]..." -font $fontS  \
-      -command [list [namespace current]::SetTopic $roomJid]
+    set   frtop [frame $w.frall.frtop -borderwidth 0]
+    pack  $frtop -side top -fill x
+    set wbtsubject $frtop.btp
+    button $frtop.btp -text "[::msgcat::mc Topic]:" -font $fontS  \
+      -command [list [namespace current]::SetTopic $token]
+    entry $frtop.etp -textvariable $token\(subject) -state disabled
+    set wbtnick $frtop.bni
+    button $wbtnick -text "[::msgcat::mc {Nick name}]..."  \
+      -font $fontS -command [list ::Jabber::MUC::SetNick $roomJid]
     
-    grid $frtop.la -column 0 -row 0 -sticky e -padx 4 -pady 1
-    grid $frtop.en -column 1 -row 0 -sticky ew -padx 4 -pady 1 -columnspan 2
-    grid $frtop.ltp -column 0 -row 1 -sticky e -padx 4 -pady 1
-    grid $frtop.etp -column 1 -row 1 -sticky ew -padx 4 -pady 1
-    grid $frtop.btp -column 2 -row 1 -sticky w -padx 6 -pady 1
+    grid $frtop.btp -column 0 -row 0 -sticky w -padx 6 -pady 1
+    grid $frtop.etp -column 1 -row 0 -sticky ew -padx 4 -pady 1
+    grid $frtop.bni -column 2 -row 0 -sticky ew -padx 6 -pady 1
     grid columnconfigure $frtop 1 -weight 1
-    $frtop.en insert end $roomJid
-    $frtop.en configure -state disabled
-    $frtop.etp configure -state disabled
+    
+    if {!( [info exists protocol($roomJid)] && ($protocol($roomJid) == "muc") )} {
+	$wbtnick configure -state disabled
+	$wtray buttonconfigure invite -state disabled
+	$wtray buttonconfigure info   -state disabled
+    }
     
     # Text chat and user list.
     pack [frame $frmid -height 250 -width 300 -relief sunken -bd 1 -class Pane] \
@@ -748,7 +714,7 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     
     # Text send.
     frame $wtxtsnd -height 100 -width 300
-    text $wtextsnd -height 4 -width 1 -font $fontS -wrap word \
+    text  $wtextsnd -height 4 -width 1 -font $fontS -wrap word \
       -borderwidth 1 -relief sunken -yscrollcommand [list $wyscsnd set]
     scrollbar $wyscsnd -orient vertical -command [list $wtextsnd yview]
     grid $wtextsnd -column 0 -row 0 -sticky news
@@ -769,42 +735,153 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     }    
     eval {::pane::pane $wtxt $wtxtsnd} $paneopts
     
-    set locals($roomJid,wtext)      $wtext
-    set locals($roomJid,wtextsnd)   $wtextsnd
-    set locals($roomJid,wusers)     $wusers
-    set locals($roomJid,wtxt.0)     $wtxt.0
-    set locals($roomJid,wtxt)       $wtxt
-    set locals($roomJid,wbtinvite)  $wbtinvite
-    set locals($roomJid,wbtnick)    $wbtnick
-    set locals($roomJid,wbtinfo)    $wbtinfo
+    set state(wtray)      $wtray
+    set state(wbtnick)    $wbtnick
+    set state(wbtsubject) $wbtsubject
+    set state(wbtstatus)  $wbtstatus
+    set state(wtext)      $wtext
+    set state(wtextsnd)   $wtextsnd
+    set state(wusers)     $wusers
+    set state(wtxt.0)     $wtxt.0
+    set state(wtxt)       $wtxt
     
-    # Add to exit menu.
-    ::Jabber::UI::GroupChat "enter" $roomJid
-    
-    # Necessary to trace the popup menu variable.
-    trace variable [namespace current]::locals($roomJid,status) w  \
-      [list [namespace current]::TraceStatus $roomJid]
-    
+    if {$state(active)} {
+	::Jabber::GroupChat::ActiveCmd $token
+    }
+        
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jgc)]]
     if {$nwin == 1} {
 	::UI::SetWindowGeometry $w $wDlgs(jgc)
     }
-    wm minsize $w 240 320
+    wm minsize $w [expr {$shortBtWidth < 240} ? 240 : $shortBtWidth] 320
     wm maxsize $w 800 2000
     
     focus $w
+    return $token
+}
+
+# Jabber::GroupChat::BuildStatusMenuButton --
+# 
+#       Status megawidget menubutton.
+#       
+# Arguments:
+#       w       widgetPath
+
+proc ::Jabber::GroupChat::BuildStatusMenuButton {token w} {
+    variable $token
+    upvar 0 $token state
+    
+    set wmenu $w.menu
+    button $w -bd 2 -width 16 -height 16 -image  \
+      [::Jabber::Roster::GetPresenceIconFromKey $state(status)]
+    $w configure -state disabled
+    menu $wmenu -tearoff 0
+    ::Jabber::Roster::BuildGenPresenceMenu $wmenu -variable $token\(status) \
+      -command [list [namespace current]::StatusCmd $token]
+    return $w
+}
+
+proc ::Jabber::GroupChat::ConfigStatusMenuButton {token w type} {
+    variable $token
+    upvar 0 $token state
+    
+    $w configure -image  \
+      [::Jabber::Roster::GetPresenceIconFromKey $state(status)]
+    if {[string equal $type "unavailable"]} {
+	$w configure -state disabled
+	bind $w <Button-1> {}
+    } else {
+	$w configure -state normal
+	bind $w <Button-1> [list [namespace current]::PostMenu $w.menu %X %Y]
+    }
+}
+
+proc ::Jabber::GroupChat::PostMenu {w x y} {
+    tk_popup $w [expr int($x)] [expr int($y)]
+}
+
+proc ::Jabber::GroupChat::StatusCmd {token} {
+    variable $token
+    upvar 0 $token state
+
+    set status $state(status)
+    ::Jabber::Debug 2 "::Jabber::GroupChat::StatusCmd status=$state(status)"
+
+    if {$status == "unavailable"} {
+	set ans [::Jabber::GroupChat::Exit $token]
+	if {$ans == "no"} {
+	    set state(status) $state(oldStatus)
+	}
+    } else {
+    
+	# Send our status.
+	::Jabber::SetStatus $status -to $state(roomjid)
+	set state(oldStatus) $status
+    }
+    $state(wbstatus) configure -image  \
+      [::Jabber::Roster::GetPresenceIconFromKey $status]
+}
+
+# Jabber::GroupChat::InsertMessage --
+# 
+#       Puts message in text groupchat window.
+
+proc ::Jabber::GroupChat::InsertMessage {token from body} {
+    variable $token
+    upvar 0 $token state
+    
+    set w       $state(w)
+    set wtext   $state(wtext)
+    set roomjid $state(roomjid)
+    set secs  [clock seconds]
+    set clockFormat [option get $w clockFormat {}]
+    
+    # Old-style groupchat and browser compatibility layer.
+    set nick [::Jabber::InvokeJlibCmd service nick $from]
+    
+    # This can be room name or nick name.
+    foreach {meRoomJid mynick}  \
+      [::Jabber::InvokeJlibCmd service hashandnick $roomjid] break
+    if {[string equal $meRoomJid $from]} {
+	set whom me
+    } elseif {[string equal $roomjid $from]} {
+	set whom sys
+    } else {
+	set whom they
+    }
+
+    set prefix ""
+    if {$clockFormat != ""} {
+	set theTime [clock format $secs -format $clockFormat]
+	set prefix "\[$theTime\] "
+    }        
+    append prefix "<$nick>"
+    
+    $wtext configure -state normal
+    $wtext insert end $prefix ${whom}pre
+    ::Jabber::ParseAndInsertText $wtext "  $body" ${whom}text urltag	
+    
+    $wtext configure -state disabled
+    $wtext see end
+}
+
+proc ::Jabber::GroupChat::SetState {token theState} {
+    variable $token
+    upvar 0 $token state
+
+    $state(wtray) buttonconfigure send -state $theState
+    $state(wbtsubject) configure -state $theState
 }
 
 proc ::Jabber::GroupChat::CloseHook {wclose} {
     global  wDlgs
-    variable locals
     
     set result ""
     if {[string match $wDlgs(jgc)* $wclose]} {
-	set w $wclose
-	if {[info exists locals($w,room)]} {
-	    set roomJid $locals($w,room)
-	    set ans [::Jabber::GroupChat::Exit $roomJid]
+	set token [::Jabber::GroupChat::GetTokenFrom w $wclose]
+	if {$token != ""} {
+	    set w $wclose
+	    set ans [::Jabber::GroupChat::Exit $token]
 	    if {$ans == "no"} {
 		set result stop
 	    }
@@ -820,7 +897,7 @@ proc ::Jabber::GroupChat::ConfigureTextTags {w wtext} {
     ::Jabber::Debug 2 "::Jabber::GroupChat::ConfigureTextTags"
     
     set space 2
-    set alltags {mepre metext theypre theytext syspre sys}
+    set alltags {mepre metext theypre theytext syspre systext}
 	
     if {[string length $jprefs(chatFont)]} {
 	set chatFont $jprefs(chatFont)
@@ -841,7 +918,7 @@ proc ::Jabber::GroupChat::ConfigureTextTags {w wtext} {
     }
     lappend opts(metext)   -spacing3 $space -lmargin1 20 -lmargin2 20
     lappend opts(theytext) -spacing3 $space -lmargin1 20 -lmargin2 20
-    lappend opts(sys)      -spacing3 $space -lmargin1 20 -lmargin2 20
+    lappend opts(systext)  -spacing3 $space -lmargin1 20 -lmargin2 20
     foreach tag $alltags {
 	eval {$wtext tag configure $tag} $opts($tag)
     }
@@ -849,11 +926,13 @@ proc ::Jabber::GroupChat::ConfigureTextTags {w wtext} {
     ::Text::ConfigureLinkTagForTextWidget $wtext urltag activeurltag
 }
 
-proc ::Jabber::GroupChat::SetTopic {roomJid} {
-    variable locals
+proc ::Jabber::GroupChat::SetTopic {token} {
+    variable $token
+    upvar 0 $token state
     upvar ::Jabber::jstate jstate
     
-    set topic $locals($roomJid,topic)
+    set topic   $state(subject)
+    set roomJid $state(roomjid)
     set ans [::UI::MegaDlgMsgAndEntry  \
       [::msgcat::mc {Set New Topic}]  \
       [::msgcat::mc jasettopic]  \
@@ -873,10 +952,10 @@ proc ::Jabber::GroupChat::SetTopic {roomJid} {
     return $ans
 }
 
-proc ::Jabber::GroupChat::Send {roomJid} {
+proc ::Jabber::GroupChat::Send {token} {
     global  prefs
-    
-    variable locals
+    variable $token
+    upvar 0 $token state
     upvar ::Jabber::jstate jstate
     
     # Check that still connected to server.
@@ -885,7 +964,8 @@ proc ::Jabber::GroupChat::Send {roomJid} {
 	  -message [::msgcat::mc jamessnotconnected]
 	return
     }
-    set wtextsnd $locals($roomJid,wtextsnd)
+    set wtextsnd $state(wtextsnd)
+    set roomJid  $state(roomjid)
 
     # Get text to send. Strip off any ending newlines from Return.
     # There might by smiley icons in the text widget. Parse them to text.
@@ -904,42 +984,64 @@ proc ::Jabber::GroupChat::Send {roomJid} {
     
     # Clear send.
     $wtextsnd delete 1.0 end
-    if {$locals($roomJid,got1stMsg) == 0} {
-	set locals($roomJid,got1stMsg) 1
-    }
+    set state(hot1stmsg) 1
+    
+    # Stop the actual return to be inserted.
+    return -code break
 }
 
-# Jabber::GroupChat::TraceStatus --
-# 
-#       Callback via trace when the status is changed via the menubutton.
-#
+proc ::Jabber::GroupChat::ActiveCmd {token} {
+    variable cprefs
+    variable $token
+    upvar 0 $token state
 
-proc ::Jabber::GroupChat::TraceStatus {roomJid name key op} {
-
-    variable locals
-    upvar ::Jabber::mapShowElemToText mapShowElemToText
-    upvar ::Jabber::jstate jstate
-	
-    # Call by name. Must be array.
-    #upvar #0 ${name}(${key}) locName    
-    upvar ${name}(${key}) locName
-
-    ::Jabber::Debug 3 "::Jabber::GroupChat::TraceStatus roomJid=$roomJid, name=$name, \
-      key=$key"
-    ::Jabber::Debug 3 "    locName=$locName"
-
-    set status $mapShowElemToText($locName)
-    if {$status == "unavailable"} {
-	set ans [::Jabber::GroupChat::Exit $roomJid]
-	if {$ans == "no"} {
-	    set locals($roomJid,status) $locals($roomJid,oldStatus)
-	}
-    } else {
+    ::Jabber::Debug 2 "::Jabber::GroupChat::ActiveCmd token=$token"
     
-	# Send our status.
-	::Jabber::SetStatus $status -to $roomJid
-	set locals($roomJid,oldStatus) $locName
+    set wtextsnd $state(wtextsnd)
+    if {$state(active)} {
+	bind $wtextsnd <Return> [list [namespace current]::Send $token]
+    } else {
+	bind $wtextsnd <Return> {}
     }
+    
+    # Remember last setting.
+    set cprefs(lastActiveRet) $state(active)
+}
+
+# Jabber::GroupChat::GetTokenFrom --
+# 
+#       Try to get the token state array from any stored key.
+#       
+# Arguments:
+#       key         w, jid, roomjid etc...
+#       pattern     glob matching
+#       
+# Results:
+#       token or empty if not found.
+
+proc ::Jabber::GroupChat::GetTokenFrom {key pattern} {
+    
+    # Search all tokens for this key into state array.
+    foreach token [::Jabber::GroupChat::GetTokenList] {
+	variable $token
+	upvar 0 $token state
+	
+	if {[info exists state($key)] && [string match $pattern $state($key)]} {
+	    return $token
+	}
+    }
+    return ""
+}
+
+proc ::Jabber::GroupChat::GetTokenList { } {
+    
+    set ns [namespace current]
+    return [concat  \
+      [info vars ${ns}::\[0-9\]] \
+      [info vars ${ns}::\[0-9\]\[0-9\]] \
+      [info vars ${ns}::\[0-9\]\[0-9\]\[0-9\]] \
+      [info vars ${ns}::\[0-9\]\[0-9\]\[0-9\]\[0-9\]] \
+      [info vars ${ns}::\[0-9\]\[0-9\]\[0-9\]\[0-9\]\[0-9\]]]
 }
 
 # Jabber::GroupChat::Presence --
@@ -957,7 +1059,6 @@ proc ::Jabber::GroupChat::TraceStatus {roomJid name key op} {
 
 proc ::Jabber::GroupChat::PresenceHook {jid presence args} {
     
-    variable locals
     upvar ::Jabber::jstate jstate
     
     if {[::Jabber::InvokeJlibCmd service isroom $jid]} {
@@ -1007,7 +1108,6 @@ proc ::Jabber::GroupChat::PresenceHook {jid presence args} {
 
 proc ::Jabber::GroupChat::BrowseUser {userXmlList} {
     
-    variable locals
     upvar ::Jabber::jstate jstate
     
     ::Jabber::Debug 2 "::Jabber::GroupChat::BrowseUser userXmlList='$userXmlList'"
@@ -1047,7 +1147,6 @@ proc ::Jabber::GroupChat::BrowseUser {userXmlList} {
 proc ::Jabber::GroupChat::SetUser {roomJid jid3 presence args} {
     global  this
 
-    variable locals
     upvar ::Jabber::jstate jstate
 
     ::Jabber::Debug 2 "::Jabber::GroupChat::SetUser roomJid=$roomJid,\
@@ -1056,18 +1155,17 @@ proc ::Jabber::GroupChat::SetUser {roomJid jid3 presence args} {
     array set attrArr $args
 
     # If we haven't a window for this thread, make one!
-    if {[info exists locals($roomJid,wtop)] &&  \
-      [winfo exists $locals($roomJid,wtop)]} {
-    } else {
-	eval {::Jabber::GroupChat::Build $roomJid} $args
+    set token [::Jabber::GroupChat::GetTokenFrom roomjid $roomJid]
+    if {$token == ""} {
+	set token [eval {::Jabber::GroupChat::Build $roomJid} $args]
     }       
+    variable $token
+    upvar 0 $token state
     
     # Get the hex string to use as tag. 
     # In old-style groupchat this is the nick name which should be unique
     # within this room aswell.
-    if {![regexp {[^@]+@[^/]+/(.+)} $jid3 match hexstr]} {
-	error {Failed finding hex string}
-    }    
+    jlib::splitjid $jid3 jid2 hexstr
     
     # If we got a browse push with a <user>, asume is available.
     if {[string length $presence] == 0} {
@@ -1084,7 +1182,7 @@ proc ::Jabber::GroupChat::SetUser {roomJid jid3 presence args} {
     }
     
     # Remove any "old" line first. Image takes one character's space.
-    set wusers $locals($roomJid,wusers)
+    set wusers $state(wusers)
     
     # Old-style groupchat and browser compatibility layer.
     set nick [::Jabber::InvokeJlibCmd service nick $jid3]
@@ -1112,11 +1210,11 @@ proc ::Jabber::GroupChat::SetUser {roomJid jid3 presence args} {
     # For popping up menu.
     if {[string match "mac*" $this(platform)]} {
 	$wusers tag bind $hexstr <Button-1>  \
-	  [list ::Jabber::GroupChat::PopupTimer $wusers $jid3 %x %y]
+	  [list [namespace current]::PopupTimer $token $jid3 %x %y]
 	$wusers tag bind $hexstr <ButtonRelease-1>   \
-	  ::Jabber::GroupChat::PopupTimerCancel
+	  [list [namespace current]::PopupTimerCancel $token]
 	$wusers tag bind $hexstr <Control-Button-1>  \
-	  [list [namespace current]::Popup $wusers $jid3 %x %y]
+	  [list [namespace current]::Popup $token $jid3 %x %y]
     } else {
 	$wusers tag bind $hexstr <Button-3>  \
 	  [list [namespace current]::Popup $wusers $jid3 %x %y]
@@ -1132,24 +1230,27 @@ proc ::Jabber::GroupChat::RegisterPopupEntry {menuSpec} {
     set popMenuDefs(groupchat,def) [concat $popMenuDefs(groupchat,def) $menuSpec]
 }
 
-proc ::Jabber::GroupChat::PopupTimer {w jid3 x y} {
-    
-    variable locals
+proc ::Jabber::GroupChat::PopupTimer {token jid3 x y} {
+    variable $token
+    upvar 0 $token state
     upvar ::Jabber::jstate jstate
 
-    ::Jabber::Debug 2 "::Jabber::GroupChat::PopupTimer w=$w, jid3=$jid3"
+    ::Jabber::Debug 2 "::Jabber::GroupChat::PopupTimer jid3=$jid3"
 
     # Set timer for this callback.
-    if {[info exists locals(afterid)]} {
-	catch {after cancel $locals(afterid)}
+    if {[info exists state(afterid)]} {
+	catch {after cancel $state(afterid)}
     }
-    set locals(afterid) [after 1000  \
+    set w $state(wusers)
+    set state(afterid) [after 1000  \
       [list [namespace current]::Popup $w $jid3 $x $y]]
 }
 
-proc ::Jabber::GroupChat::PopupTimerCancel { } {
-    variable locals
-    catch {after cancel $locals(afterid)}
+proc ::Jabber::GroupChat::PopupTimerCancel {token} {
+    variable $token
+    upvar 0 $token state
+
+    catch {after cancel $state(afterid)}
 }
 
 # Jabber::GroupChat::Popup --
@@ -1267,16 +1368,16 @@ proc ::Jabber::GroupChat::Popup {w v x y} {
 
 proc ::Jabber::GroupChat::RemoveUser {roomJid jid3} {
 
-    variable locals    
-    if {![winfo exists $locals($roomJid,wusers)]} {
+    set token [::Jabber::GroupChat::GetTokenFrom roomjid $roomJid]
+    if {$token == ""} {
 	return
     }
+    variable $token
+    upvar 0 $token state
     
     # Get the hex string to use as tag.
-    if {![regexp {[^@]+@[^/]+/(.+)} $jid3 match hexstr]} {
-	error {Failed finding hex string}
-    }    
-    set wusers $locals($roomJid,wusers)
+    jlib::splitjid $jid3 jid2 hexstr
+    set wusers $state(wusers)
     $wusers configure -state normal
     set range [$wusers tag ranges $hexstr]
     if {[llength $range]} {
@@ -1289,47 +1390,44 @@ proc ::Jabber::GroupChat::RemoveUser {roomJid jid3} {
     ::Sounds::PlayWhenIdle offline
 }
 
-# Jabber::GroupChat::ConfigWBStatusMenu --
-# 
-#       Sets the Jabber/Status menu for groupchat:
-#       -variable ... -command {}
-
-proc ::Jabber::GroupChat::ConfigWBStatusMenu {wtop} {   
-    variable locals
-
-    array set wbOpts [::WB::ConfigureMain $wtop]
-    set roomJid $wbOpts(-jid)
-
-    # Orig: {-variable ::Jabber::jstate(status) -value available}
-    # Not same values due to the design of the tk_optionMenu.
-    foreach mName {mAvailable mAway mDoNotDisturb mNotAvailable} {
-	::UI::MenuMethod ${wtop}menu.jabber.mstatus entryconfigure $mName \
-	  -command {} -variable [namespace current]::locals($roomJid,status) \
-	  -value [::msgcat::mc $mName]
-    }
-    ::UI::MenuMethod ${wtop}menu.jabber.mstatus entryconfigure mAttachMessage \
-      -command {} -state disabled
-    
-    # Just skip this menu entry.
-    ::UI::MenuMethod ${wtop}menu.jabber entryconfigure mExitRoom \
-      -state disabled
-}
-
 proc ::Jabber::GroupChat::BuildHistory {token} {
 
     
 }
 
 proc ::Jabber::GroupChat::Save {token} {
-
-
+    global  this
+    variable $token
+    upvar 0 $token state
+    
+    set wtext   $state(wtext)
+    set roomjid $state(roomjid)
+    
+    set ans [tk_getSaveFile -title [::msgcat::mc Save] \
+      -initialfile "Groupchat ${roomjid}.txt"]
+    
+    if {[string length $ans]} {
+	set allText [::Text::TransformToPureText $wtext]
+	foreach {meRoomJid mynick}  \
+	  [::Jabber::InvokeJlibCmd service hashandnick $roomjid] break
+	set fd [open $ans w]
+	puts $fd "Groupchat in:\t$roomjid"
+	puts $fd "Subject:     \t$state(subject)"
+	puts $fd "My nick:     \t$mynick"
+	puts $fd "\n"
+	puts $fd $allText	
+	close $fd
+	if {[string equal $this(platform) "macintosh"]} {
+	    file attributes $ans -type TEXT -creator ttxt
+	}
+    }
 }
 
-proc ::Jabber::GroupChat::Print {roomJid} {
-    variable locals
+proc ::Jabber::GroupChat::Print {token} {
+    variable $token
+    upvar 0 $token state
     
-    set wtext $locals($roomJid,wtext) 
-    ::UserActions::DoPrintText $wtext
+    ::UserActions::DoPrintText $state(wtext) 
 }
 
 # Jabber::GroupChat::Exit --
@@ -1342,14 +1440,16 @@ proc ::Jabber::GroupChat::Print {roomJid} {
 # Results:
 #       yes/no if actually exited or not.
 
-proc ::Jabber::GroupChat::Exit {roomJid} {
-    
-    variable locals
+proc ::Jabber::GroupChat::Exit {token} {
+    variable $token
+    upvar 0 $token state
     upvar ::Jabber::jstate jstate
+
+    set roomJid $state(roomjid)
+    #puts "::Jabber::GroupChat::Exit token=$token"
     
-    if {[info exists locals($roomJid,wtop)] && \
-      [winfo exists $locals($roomJid,wtop)]} {
-	set opts [list -parent $locals($roomJid,wtop)]
+    if {[info exists state(w)] && [winfo exists $state(w)]} {
+	set opts [list -parent $state(w)]
     } else {
 	set opts ""
     }
@@ -1358,13 +1458,13 @@ proc ::Jabber::GroupChat::Exit {roomJid} {
 	set ans [eval {tk_messageBox -icon warning -type yesno  \
 	  -message [::msgcat::mc jamesswarnexitroom $roomJid]} $opts]
 	if {$ans == "yes"} {
-	    ::Jabber::GroupChat::Close $roomJid
+	    ::Jabber::GroupChat::Close $token
 	    ::Jabber::InvokeJlibCmd service exitroom $roomJid
-	    ::Jabber::UI::GroupChat "exit" $roomJid
+	    ::hooks::run groupchatExitRoomHook $roomJid
 	}
     } else {
 	set ans "yes"
-	::Jabber::GroupChat::Close $roomJid
+	::Jabber::GroupChat::Close $token
     }
     return $ans
 }
@@ -1373,21 +1473,26 @@ proc ::Jabber::GroupChat::Exit {roomJid} {
 #
 #       Handles the closing of a groupchat. Both text and whiteboard dialogs.
 
-proc ::Jabber::GroupChat::Close {roomJid} {
+proc ::Jabber::GroupChat::Close {token} {
     global  wDlgs
-    variable locals
+    variable $token
+    upvar 0 $token state
     
-    if {[info exists locals($roomJid,wtop)] &&  \
-      [winfo exists $locals($roomJid,wtop)]} {
-	::UI::SaveWinGeom $wDlgs(jgc) $locals($roomJid,wtop)
-    	::UI::SavePanePos groupchatDlgVert $locals($roomJid,wtxt)
-    	::UI::SavePanePos groupchatDlgHori $locals($roomJid,wtxt.0) vertical
+    set roomJid $state(roomjid)
+    #puts "::Jabber::GroupChat::Close token=$token"
 
+    if {[info exists state(w)] && [winfo exists $state(w)]} {
+	::UI::SaveWinGeom $wDlgs(jgc) $state(w)
+    	::UI::SavePanePos groupchatDlgVert $state(wtxt)
+    	::UI::SavePanePos groupchatDlgHori $state(wtxt.0) vertical
 	
     	# after idle seems to be needed to avoid crashing the mac :-(
-    	after idle destroy $locals($roomJid,wtop)
-    	trace vdelete [namespace current]::locals($roomJid,status) w  \
-      	[list [namespace current]::TraceStatus $roomJid]
+    	# trace variable ???
+    	#after idle destroy $state(w)
+	destroy $state(w)
+	
+	# Array cleanup?
+	unset state
     }
     
     # Make sure any associated whiteboard is closed as well.
@@ -1398,48 +1503,42 @@ proc ::Jabber::GroupChat::Close {roomJid} {
 #
 #       Sets logged out status on all groupchats, that is, disable all buttons.
 
-proc ::Jabber::GroupChat::LogoutHook { } {
-    
-    variable locals
+proc ::Jabber::GroupChat::LogoutHook { } {    
     upvar ::Jabber::jstate jstate
 
-    set allRooms [::Jabber::InvokeJlibCmd service allroomsin]
-    foreach room $allRooms {
-	set w $locals($room,wtop)
-	::Jabber::UI::GroupChat "exit" $room
-	if {[winfo exists $w]} {
-	    foreach wbt $locals($room,allBts) {
-		$wbt configure -state disabled
-	    }
-	}
+    set tokenList [::Jabber::GroupChat::GetTokenList]
+    foreach token $tokenList {
+	variable $token
+	upvar 0 $token state
+
+	::Jabber::GroupChat::SetState $token disabled
+	::hooks::run groupchatExitRoomHook $state(roomjid)
     }
 }
 
-proc ::Jabber::GroupChat::LoginHook { } {
-    
-    variable locals
+proc ::Jabber::GroupChat::LoginHook { } {    
     upvar ::Jabber::jstate jstate
 
-    set allRooms [::Jabber::InvokeJlibCmd service allroomsin]
-    foreach room $allRooms {
-	set w $locals($room,wtop)
-	if {[winfo exists $w]} {
-	    foreach wbt $locals($room,allBts) {
-		$wbt configure -state normal
-	    }
-	}
+    set tokenList [::Jabber::GroupChat::GetTokenList]
+    foreach token $tokenList {
+	variable $token
+	upvar 0 $token state
+
+	::Jabber::GroupChat::SetState $token normal
     }
 }
 
 proc ::Jabber::GroupChat::GetFirstPanePos { } {
     global  wDlgs
-    variable locals
     
     set win [::UI::GetFirstPrefixedToplevel $wDlgs(jgc)]
-    if {$win != ""} {
-	set roomJid $locals($win,room) 
-	::UI::SavePanePos groupchatDlgVert $locals($roomJid,wtxt)
-	::UI::SavePanePos groupchatDlgHori $locals($roomJid,wtxt.0) vertical
+    set token [::Jabber::GroupChat::GetTokenFrom w $win]
+    if {$token != ""} {
+	variable $token
+	upvar 0 $token state
+
+	::UI::SavePanePos groupchatDlgVert $state(wtxt)
+	::UI::SavePanePos groupchatDlgHori $state(wtxt.0) vertical
     }
 }
 

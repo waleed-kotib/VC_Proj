@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.26 2004-03-16 15:09:08 matben Exp $
+# $Id: MUC.tcl,v 1.27 2004-04-02 12:26:37 matben Exp $
 
 package require entrycomp
 
@@ -356,7 +356,7 @@ proc ::Jabber::MUC::DoEnter {token} {
     catch {destroy $enter(w)}
    
     # Cache groupchat protocol type (muc|conference|gc-1.0).
-    ::Jabber::GroupChat::SetProtocol $roomJid "muc"
+    ::hooks::run groupchatEnterRoomHook $roomJid "muc"
 }
 
 proc ::Jabber::MUC::CancelEnter {token} {

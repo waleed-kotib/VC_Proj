@@ -55,6 +55,7 @@
 ::msgcat::mcset nl General		{Algemeen}
 ::msgcat::mcset nl Get			{Ophalen}
 ::msgcat::mcset nl Group		{Groep}
+::msgcat::mcset nl Groupchat            {Groepsgesprek}
 ::msgcat::mcset nl Handling		{Behandeling}
 ::msgcat::mcset nl History		{Geschiedenis}
 ::msgcat::mcset nl Home			{Start}

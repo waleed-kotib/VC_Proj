@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.32 2004-03-29 13:56:27 matben Exp $
+# $Id: NewMsg.tcl,v 1.33 2004-04-02 12:26:38 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -240,7 +240,7 @@ proc ::Jabber::NewMsg::Build {args} {
     pack  $frsub.lsub -side left -padx 2
     pack  $frsub.esub -side left -padx 2 -fill x -expand 1
     
-    pack [::Jabber::UI::SmileyMenuButton $frsub.smile $wtext]  \
+    pack [::Emoticons::MenuButton $frsub.smile $wtext]  \
       -side right -padx 16
     
     # Text.

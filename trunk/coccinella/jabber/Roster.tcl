@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.47 2004-03-31 07:55:19 matben Exp $
+# $Id: Roster.tcl,v 1.48 2004-04-02 12:26:38 matben Exp $
 
 package provide Roster 1.0
 
@@ -1830,6 +1830,45 @@ proc ::Jabber::Roster::GetMyPresenceIcon { } {
     return $presenceIcon($jstate(status))
 }
 
+# Jabber::Roster::BuildStatusMenuButton --
+# 
+#       Status megawidget menubutton.
+#       
+# Arguments:
+#       w       widgetPath
+
+proc ::Jabber::Roster::BuildStatusMenuButton {w} {
+    
+    set wmenu $w.menu
+    #label $w -bd 1 -image [::Jabber::Roster::GetMyPresenceIcon]
+    button $w -bd 1 -image [::Jabber::Roster::GetMyPresenceIcon] \
+      -width 16 -height 16
+    $w configure -state disabled
+    menu $wmenu -tearoff 0
+    ::Jabber::Roster::BuildPresenceMenu $wmenu
+    return $w
+}
+
+proc ::Jabber::Roster::ConfigStatusMenuButton {w type} {
+    
+    $w configure -image [::Jabber::Roster::GetMyPresenceIcon]
+    if {[string equal $type "unavailable"]} {
+	$w configure -state disabled
+	#bind $w <Enter>    {}
+	#bind $w <Leave>    {}
+	bind $w <Button-1> {}
+    } else {
+	$w configure -state normal
+	#bind $w <Enter>    [list %W configure -relief raised]
+	#bind $w <Leave>    [list %W configure -relief flat]
+	bind $w <Button-1> [list [namespace current]::PostMenu $w.menu %X %Y]
+    }
+}
+
+proc ::Jabber::Roster::PostMenu {w x y} {
+    tk_popup $w [expr int($x)] [expr int($y)]
+}
+
 # Jabber::Roster::BuildPresenceMenu --
 # 
 #       Adds all presence manu entries to menu.
@@ -1846,17 +1885,39 @@ proc ::Jabber::Roster::BuildPresenceMenu {mt} {
     upvar ::Jabber::mapShowTextToElem mapShowTextToElem
 
     if {$prefs(haveMenuImage)} {
-	foreach name {available away chat dnd invisible unavailable} {
+	foreach name {available away chat dnd xa invisible unavailable} {
 	    $mt add radio -label $mapShowTextToElem($name)  \
 	      -variable ::Jabber::jstate(status) -value $name   \
 	      -command [list ::Jabber::SetStatus $name]  \
 	      -compound left -image $presenceIcon($name)
 	}
     } else {
-	foreach name {available away chat dnd invisible unavailable} {
+	foreach name {available away chat dnd xa invisible unavailable} {
 	    $mt add radio -label $mapShowTextToElem($name)  \
 	      -variable ::Jabber::jstate(status) -value $name   \
 	      -command [list ::Jabber::SetStatus $name]
+	}
+    }
+}
+
+# Jabber::Roster::BuildGenPresenceMenu --
+# 
+#       As above but a more general form.
+
+proc ::Jabber::Roster::BuildGenPresenceMenu {mt args} {
+    global  prefs
+    variable presenceIcon
+    upvar ::Jabber::mapShowTextToElem mapShowTextToElem
+
+    if {$prefs(haveMenuImage)} {
+	foreach name {available away chat dnd xa invisible unavailable} {
+	    eval {$mt add radio -label $mapShowTextToElem($name)  \
+	      -value $name -compound left -image $presenceIcon($name)} $args
+	}
+    } else {
+	foreach name {available away chat dnd xa invisible unavailable} {
+	    eval {$mt add radio -label $mapShowTextToElem($name) -value $name} \
+	      $args
 	}
     }
 }

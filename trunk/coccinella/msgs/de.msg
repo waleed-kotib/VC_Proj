@@ -55,6 +55,7 @@
 ::msgcat::mcset de General	Allgemein
 ::msgcat::mcset de Get		Abrufen
 ::msgcat::mcset de Group	Gruppe
+::msgcat::mcset de Groupchat    Gruppen-Chat
 ::msgcat::mcset de Handling	Behandlung
 ::msgcat::mcset de History	Verlauf
 ::msgcat::mcset de Home		Privat
