@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.108 2004-12-13 13:39:18 matben Exp $
+# $Id: Roster.tcl,v 1.109 2004-12-29 08:17:46 matben Exp $
 
 package provide Roster 1.0
 
@@ -1760,16 +1760,22 @@ proc ::Roster::IsTransport {jid} {
     return $transport
 }
 
+# This is a really BAD thing to do but I there seems to be no robust method.
+
 proc ::Roster::IsTransportHeuristics {jid} {
     upvar ::Jabber::jstate jstate
     
     # Some transports (icq) have a jid = icq.jabber.se/registered.
+    # Others, like MSN, have a jid = msn.jabber.ccc.de.
     set transport 0
     if {![catch {jlib::splitjidex $jid node host res}]} {
 	if {($node == "") && ($res == "registered")} {
 	    set transport 1
 	}
-    }    
+    }
+    if {!$transport} {
+	set transport [IsTransport $jid]
+    }
     return $transport
 }
 

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JUser.tcl,v 1.10 2004-12-02 08:22:34 matben Exp $
+# $Id: JUser.tcl,v 1.11 2004-12-29 08:17:46 matben Exp $
 
 package provide JUser 1.0
 
@@ -314,8 +314,12 @@ proc ::Jabber::User::EditTransportDlg {jid} {
     upvar ::Jabber::jstate jstate
     
     # We get jid2 here. For transports we need the full jid!
-    set res [$jstate(roster) getresources $jid]
-    set jid3 $jid/$res
+    set res [lindex [$jstate(roster) getresources $jid] 0]
+    if {$res == ""} {
+	set jid3 $jid
+    } else {
+	set jid3 $jid/$res
+    }
     set subscription [$jstate(roster) getsubscription $jid3]
     jlib::splitjidex $jid node host x
     set trpttype [$jstate(jlib) service gettype $host]
