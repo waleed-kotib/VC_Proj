@@ -144,6 +144,7 @@
 ::msgcat::mcset sv Title		{Jobbtitel}
 ::msgcat::mcset sv To 			{Till}
 ::msgcat::mcset sv Topic                {Ämne}
+::msgcat::mcset sv Transports           {Transporter}
 ::msgcat::mcset sv Trash 		{Kasta}
 ::msgcat::mcset sv Type                 {Typ}
 ::msgcat::mcset sv Unregister		{Avregistrera}
@@ -764,7 +765,8 @@ Uppgifter som är serverlagrade är sökbara för samtliga användare.}
 ::msgcat::mcset sv prefroclr     {Radera rostern när loggar ut}
 ::msgcat::mcset sv prefrochat    {Chatta när dubbelklickar användare, annars normalt meddelande}
 ::msgcat::mcset sv prefrosysicons {Använd anpassade ikoner för främmande IM system}
-::msgcat::mcset sv prefroshowoff {Visa också ej tillgängliga kontakter}
+::msgcat::mcset sv prefrohideoff {Visa ej icke tillgängliga kontakter}
+::msgcat::mcset sv prefrohidetrpt {Visa ej transporter}
 ::msgcat::mcset sv prefblonly    {Acceptera endast meddelanden från användare i min roster}
 ::msgcat::mcset sv prefblbl      {Blockera följande JID:er (* jokertecken tillåtna):}
 ::msgcat::mcset sv prefblmsg     {Skriv in den kompletta JID:n för användaren du vill blockera. En JID ska ha formen "joewest@jabber.org"}

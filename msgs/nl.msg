@@ -148,6 +148,7 @@
 ::msgcat::mcset nl Title		{Titel}
 ::msgcat::mcset nl To			{Aan}
 ::msgcat::mcset nl Topic		{Onderwerp}
+#::msgcat::mcset nl Transports
 ::msgcat::mcset nl Trash		{Prullenbak}
 ::msgcat::mcset nl Type			{Soort}
 ::msgcat::mcset nl Unregister		{Registratie ongedaan maken}
@@ -779,7 +780,8 @@
 ::msgcat::mcset nl prefrosysicons {Andere iconen gebruiken voor andere IM netwerken}
 
 # translate
-::msgcat::mcset nl prefroshowoff {Show also offline users}
+::msgcat::mcset nl prefrohideoff {Do not show offline users}
+::msgcat::mcset nl prefrohidetrpt {Do not show transports}
 
 ::msgcat::mcset nl prefblonly    {Alleen berichten van mensen in mijn roster accepteren}
 ::msgcat::mcset nl prefblbl      {Volgende JID's blokkeren (* jokertekens mogelijk):}

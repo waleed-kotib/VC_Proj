@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.66 2005-02-02 15:21:19 matben Exp $
+# $Id: MailBox.tcl,v 1.67 2005-02-25 14:08:55 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -50,7 +50,7 @@ namespace eval ::MailBox:: {
     option add *MailBox*top.padX                   0                50
     option add *MailBox*top.padY                   0                50
     option add *MailBox*divt.borderWidth           2                50
-    option add *MailBox*divt.height                2               50
+    option add *MailBox*divt.height                2                50
     option add *MailBox*divt.relief                sunken           50
     option add *MailBox*mid.padX                   4                50
     option add *MailBox*mid.padY                   4                50
@@ -62,10 +62,12 @@ namespace eval ::MailBox:: {
 
     # Add some hooks...
     ::hooks::register initHook        ::MailBox::Init
+    ::hooks::register prefsInitHook   ::MailBox::InitPrefsHook
+    ::hooks::register launchFinalHook ::MailBox::LaunchHook
     ::hooks::register newMessageHook  ::MailBox::GotMsg
     ::hooks::register closeWindowHook ::MailBox::CloseHook
     ::hooks::register jabberInitHook  ::MailBox::InitHandler
-    ::hooks::register quitAppHook     ::MailBox::Exit
+    ::hooks::register quitAppHook     ::MailBox::QuitHook
 
     variable locals
     
@@ -148,6 +150,16 @@ proc ::MailBox::Init { } {
     set locals(inited) 1
 }
 
+proc ::MailBox::InitPrefsHook { } {
+    upvar ::Jabber::jprefs jprefs
+        
+    set jprefs(mailbox,dialog) 0
+    
+    ::PreferencesUtils::Add [list  \
+      [list ::Jabber::jprefs(mailbox,dialog)  jprefs_mailbox_dialog  $jprefs(mailbox,dialog)]  \
+      ]
+}
+
 proc ::MailBox::InitHandler {jlibName} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::coccixmlns coccixmlns
@@ -160,6 +172,15 @@ proc ::MailBox::InitHandler {jlibName} {
     $jstate(jlib) message_register normal "http://jabber.org/protocol/svgwb" \
       [namespace current]::HandleSVGWBMessage
 
+}
+
+
+proc ::MailBox::LaunchHook { } {
+    upvar ::Jabber::jprefs jprefs
+    
+    if {$jprefs(rememberDialogs) && $jprefs(mailbox,dialog)} {
+	ShowHide -visible 1
+    }
 }
 
 # MailBox::ShowHide --
@@ -1522,9 +1543,16 @@ proc ::MailBox::DeleteMailbox { } {
     }
 }
 
-proc ::MailBox::Exit { } {
+proc ::MailBox::QuitHook { } {
+    global wDlgs
     upvar ::Jabber::jprefs jprefs
     variable locals
+    
+    if {[winfo exists $wDlgs(jinbox)] && [winfo ismapped $wDlgs(jinbox)]} {
+	set jprefs(mailbox,dialog) 1
+    } else {
+	set jprefs(mailbox,dialog) 0
+    }
     
     if {$jprefs(inboxSave)} {
 	if {$locals(haveEdits)} {

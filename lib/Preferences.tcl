@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.72 2005-01-31 14:06:59 matben Exp $
+# $Id: Preferences.tcl,v 1.73 2005-02-25 14:08:59 matben Exp $
  
 package require mnotebook
 package require tree
@@ -130,7 +130,9 @@ proc ::Preferences::Build {args} {
       -yscrollcommand [list ::UI::ScrollSet $frtree.sby \
       [list pack $frtree.sby -side right -fill y]]  \
       -selectcommand ::Preferences::SelectCmd   \
-      -doubleclickcommand {}
+      -doubleclickcommand {} \
+      -showrootbutton 1 -indention 0 -xmargin 6
+    #  -showrootbutton 1 -indention {0 10} -xmargin {0 8}
     scrollbar $frtree.sby -orient vertical -command [list $wtree yview]
     
     pack $wtree -side left -fill both -expand 1

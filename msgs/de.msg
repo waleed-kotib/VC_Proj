@@ -148,6 +148,7 @@
 ::msgcat::mcset de Title	Titel
 ::msgcat::mcset de To		An	
 ::msgcat::mcset de Topic	Thema
+#::msgcat::mcset de Transports
 ::msgcat::mcset de Trash	Müll
 ::msgcat::mcset de Type  	Typ
 ::msgcat::mcset de Unregister	Abmelden
@@ -778,7 +779,8 @@ bei der entsprechenden Transportkomponente registriert haben. Wollen Sie das jet
 ::msgcat::mcset de prefrosysicons {Benutze System-Icons anderer IMs}
 
 # translate
-::msgcat::mcset de prefroshowoff {Show also offline users}
+::msgcat::mcset de prefrohideoff {Do not show offline users}
+::msgcat::mcset de prefrohidetrpt {Do not show transports}
 
 ::msgcat::mcset de prefblonly    {Nur Nachrichten von Personen meiner Kontaktliste akzeptieren}
 ::msgcat::mcset de prefblbl      {Folgende JIDs blockieren (*-Regeln möglich):}

@@ -145,6 +145,7 @@
 ::msgcat::mcset en Title
 ::msgcat::mcset en To
 ::msgcat::mcset en Topic
+::msgcat::mcset en Transports
 ::msgcat::mcset en Trash
 ::msgcat::mcset en Type
 ::msgcat::mcset en Unregister
@@ -765,7 +766,8 @@ If you haven't explicitly picked the "peer-to-peer" option in the "Network Setup
 ::msgcat::mcset en prefroclr     {Clear roster when logout}
 ::msgcat::mcset en prefrochat    {Chat when double-click user, else normal message}
 ::msgcat::mcset en prefrosysicons {Use foreign IM system icons}
-::msgcat::mcset en prefroshowoff {Show also offline users}
+::msgcat::mcset en prefrohideoff {Do not show offline users}
+::msgcat::mcset en prefrohidetrpt {Do not show transports}
 ::msgcat::mcset en prefblonly    {Only accept messages from people in my roster}
 ::msgcat::mcset en prefblbl      {Block the following JID's (* wildcards possible):}
 ::msgcat::mcset en prefblmsg     {Write the complete JID for the user you want to block. A JID must be of the form "joewest@jabber.org"}
