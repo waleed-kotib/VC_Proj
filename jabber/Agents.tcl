@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Agents.tcl,v 1.12 2004-03-13 15:21:40 matben Exp $
+# $Id: Agents.tcl,v 1.13 2004-03-29 13:56:27 matben Exp $
 
 package provide Agents 1.0
 
@@ -18,6 +18,24 @@ namespace eval ::Jabber::Agents:: {
     # sent, and decremented by one for each response.
     variable arrowRefCount 0
     variable arrMsg ""
+    
+    # Template for the agent popup menu.
+    variable popMenuDefs
+    
+    set popMenuDefs(agents,def) {
+	mSearch        search    {
+	    ::Jabber::Search::Build -server $jid -autoget 1
+	}
+	mRegister      register  {
+	    ::Jabber::GenRegister::BuildRegister -server $jid -autoget 1
+	}
+	mUnregister    register  {::Jabber::Register::Remove $jid}
+	separator      {}        {}
+	mEnterRoom     groupchat {::Jabber::GroupChat::EnterOrCreate enter}
+	mLastLogin/Activity jid  {::Jabber::GetLast $jid}
+	mLocalTime     jid       {::Jabber::GetTime $jid}
+	mVersion       jid       {::Jabber::GetVersion $jid}
+    }    
 }
 
 proc ::Jabber::Agents::LoginCmd { } {
@@ -330,11 +348,10 @@ proc ::Jabber::Agents::Build {w args} {
       -opencommand ::Jabber::Agents::OpenTreeCmd
     set wtreecanvas [$wtree getcanvas]
     if {[string match "mac*" $this(platform)]} {
-	$wtree configure -buttonpresscommand [list ::Jabber::UI::Popup agents] \
-	  -eventlist [list [list <Control-Button-1> [list ::Jabber::UI::Popup agents]]]
+	$wtree configure -buttonpresscommand [namespace current]::Popup \
+	  -eventlist [list [list <Control-Button-1> [namespace current]::Popup]]
     } else {
-	$wtree configure -rightclickcommand  \
-	  [list ::Jabber::UI::Popup agents]
+	$wtree configure -rightclickcommand [namespace current]::Popup
     }
     grid $wtree -row 0 -column 0 -sticky news
     grid $wysc -row 0 -column 1 -sticky ns
@@ -377,6 +394,136 @@ proc ::Jabber::Agents::OpenTreeCmd {w v} {
     
     
     
+}
+    
+proc ::Jabber::Agents::RegisterPopupEntry {menuSpec} {
+    variable popMenuDefs
+    
+    set popMenuDefs(agents,def) [concat $popMenuDefs(agents,def) $menuSpec]
+}
+
+# Jabber::Agents::Popup --
+#
+#       Handle popup menus in agent, typically from right-clicking.
+#       
+# Arguments:
+#       w           widget that issued the command: tree or text
+#       v           for the tree widget it is the item path, 
+#                   for text the jidhash.
+#       
+# Results:
+#       popup menu displayed
+
+proc ::Jabber::Agents::Popup {w v x y} {
+    global  wDlgs this
+    variable popMenuDefs
+    
+    upvar ::Jabber::privatexmlns privatexmlns
+    upvar ::Jabber::jstate jstate
+    
+    ::Jabber::Debug 2 "::Jabber::Agents::Popup w=$w, v='$v', x=$x, y=$y"
+    
+    # The last element of $v is either a jid, (a namespace,) 
+    # a header in roster, a group, or an agents xml tag.
+    # The variables name 'jid' is a misnomer.
+    # Find also type of thing clicked, 'typeClicked'.
+    
+    set typeClicked ""
+    
+    set jid [lindex $v end]
+    set jid3 $jid
+    set childs [$w children $v]
+    if {[regexp {(register|search|groupchat)} $jid match service]} {
+	set typeClicked $service
+	set jid [lindex $v end-1]
+    } elseif {$jid != ""} {
+	set typeClicked jid
+    }
+    set services {}
+    foreach c $childs {
+	if {[regexp {(register|search|groupchat)} $c match service]} {
+	    lappend services $service
+	}
+    }
+    if {[string length $jid] == 0} {
+	set typeClicked ""	
+    }
+    set X [expr [winfo rootx $w] + $x]
+    set Y [expr [winfo rooty $w] + $y]
+    
+    ::Jabber::Debug 2 "\t jid=$jid, typeClicked=$typeClicked"
+    
+    # Mads Linden's workaround for menu post problem on mac:
+    # all in menubutton commands i add "after 40 the_command"
+    # this way i can never have to posting error.
+    # it is important after the tk_popup f.ex to
+    #
+    # destroy .mb
+    # update
+    #
+    # this way the .mb is destroyd before the next window comes up, thats how I
+    # got around this.
+    
+    # Make the appropriate menu.
+    set m $jstate(wpopup,agents)
+    set i 0
+    catch {destroy $m}
+    menu $m -tearoff 0
+    
+    foreach {item type cmd} $popMenuDefs(agents,def) {
+	if {[string index $cmd 0] == "@"} {
+	    set mt [menu ${m}.sub${i} -tearoff 0]
+	    set locname [::msgcat::mc $item]
+	    $m add cascade -label $locname -menu $mt -state disabled
+	    eval [string range $cmd 1 end] $mt
+	    incr i
+	} elseif {[string equal $item "separator"]} {
+	    $m add separator
+	    continue
+	} else {
+	    
+	    # Substitute the jid arguments.
+	    set cmd [subst -nocommands $cmd]
+	    set locname [::msgcat::mc $item]
+	    $m add command -label $locname -command "after 40 $cmd"  \
+	      -state disabled
+	}
+	
+	# If a menu should be enabled even if not connected do it here.
+	
+	if {![::Jabber::IsConnected]} {
+	    continue
+	}
+	if {[string equal $type "any"]} {
+	    $m entryconfigure $locname -state normal
+	    continue
+	}
+	
+	# State of menu entry. We use the 'type' and 'typeClicked' to sort
+	# out which capabilities to offer for the clicked item.
+	set state disabled
+	
+	if {[string equal $type $typeClicked]} {
+	    set state normal
+	} elseif {[lsearch $services $type] >= 0} {
+	    set state normal
+	}
+	if {[string equal $state "normal"]} {
+	    $m entryconfigure $locname -state normal
+	}
+    }   
+    
+    # This one is needed on the mac so the menu is built before it is posted.
+    update idletasks
+    
+    # Post popup menu.
+    tk_popup $m [expr int($X) - 10] [expr int($Y) - 10]   
+    
+    # Mac bug... (else can't post menu while already posted if toplevel...)
+    if {[string equal "macintosh" $this(platform)]} {
+	catch {destroy $m}
+	update
+    }
 }
 
 proc ::Jabber::Agents::ControlArrows {step} {

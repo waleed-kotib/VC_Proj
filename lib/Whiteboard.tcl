@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.27 2004-03-28 14:50:51 matben Exp $
+# $Id: Whiteboard.tcl,v 1.28 2004-03-29 13:56:27 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -208,7 +208,7 @@ proc ::WB::InitIcons {w} {
     
     set wbicons(barhoriz) [::WB::GetThemeImage [option get $w barhorizImage {}]]
     set wbicons(barvert)  [::WB::GetThemeImage [option get $w barvertImage {}]]
-    
+
     # Drawing tool buttons.
     for {set icol 0} {$icol <= 1} {incr icol} {
 	for {set irow 0} {$irow <= 6} {incr irow} {
@@ -221,8 +221,8 @@ proc ::WB::InitIcons {w} {
     }
     
     # Color selector.
-    set wbicons(imcolor)  [::WB::GetThemeImage [option get $w imcolorImage {}]]
-    set wbicons(bwrect)   [::WB::GetThemeImage [option get $w bwrectImage {}]]
+    set wbicons(imcolor) [::WB::GetThemeImage [option get $w imcolorImage {}]]
+    set wbicons(bwrect)  [::WB::GetThemeImage [option get $w bwrectImage {}]]
 }
 
 # WB::InitMenuDefs --
@@ -2470,13 +2470,8 @@ proc ::WB::DnDLeave {w data type} {
 #       the standard theme engine, but use hardcoded icons as fallback.
 
 proc ::WB::GetThemeImage {name} {
-    variable iconsPreloaded
     
-    set imname [::Theme::GetImage $name]
-    if {$imname == ""} {
-	set imname $iconsPreloaded($name)
-    }
-    return $imname
+    return [::Theme::GetImageFromExisting $name ::WB::iconsPreloaded]
 }
 
 #       Some stuff to handle sending messages using hooks.

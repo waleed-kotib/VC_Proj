@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.34 2004-03-27 15:20:37 matben Exp $
+# $Id: Browse.tcl,v 1.35 2004-03-29 13:56:27 matben Exp $
 
 package require chasearrows
 
@@ -43,6 +43,37 @@ namespace eval ::Jabber::Browse:: {
     # This is needed for the balloons that need a real canvas tag, and that
     # we can't use jid's for this since they may contain special chars (!)!
     variable treeuid 0
+
+    # Template for the browse popup menu.
+    variable popMenuDefs
+
+    set popMenuDefs(browse,def) {
+	mMessage       user      {::Jabber::NewMsg::Build -to $jid}
+	mChat          user      {::Jabber::Chat::StartThread $jid}
+	mWhiteboard    wb        {::Jabber::WB::NewWhiteboardTo $jid}
+	mEnterRoom     room      {
+	    ::Jabber::GroupChat::EnterOrCreate enter -roomjid $jid -autoget 1
+	}
+	mCreateRoom    conference {::Jabber::GroupChat::EnterOrCreate create \
+	  -server $jid}
+	separator      {}        {}
+	mInfo          jid       {::Jabber::Browse::GetInfo $jid}
+	mLastLogin/Activity jid  {::Jabber::GetLast $jid}
+	mLocalTime     jid       {::Jabber::GetTime $jid}
+	mvCard         jid       {::VCard::Fetch other $jid}
+	mVersion       jid       {::Jabber::GetVersion $jid}
+	separator      {}        {}
+	mSearch        search    {
+	    ::Jabber::Search::Build -server $jid -autoget 1
+	}
+	mRegister      register  {
+	    ::Jabber::GenRegister::BuildRegister -server $jid -autoget 1
+	}
+	mUnregister    register  {::Jabber::Register::Remove $jid}
+	separator      {}        {}
+	mRefresh       jid       {::Jabber::Browse::Refresh $jid}
+	mAddServer     any       {::Jabber::Browse::AddServer}
+    }
 }
 
 proc ::Jabber::Browse::LoginCmd { } {
@@ -436,11 +467,10 @@ proc ::Jabber::Browse::Build {w} {
       -opencommand ::Jabber::Browse::OpenTreeCmd
     
     if {[string match "mac*" $this(platform)]} {
-	$wtree configure -buttonpresscommand [list ::Jabber::UI::Popup browse] \
-	  -eventlist [list [list <Control-Button-1> [list ::Jabber::UI::Popup browse]]]
+	$wtree configure -buttonpresscommand [namespace current]::Popup \
+	  -eventlist [list [list <Control-Button-1> [namespace current]::Popup]]
     } else {
-	$wtree configure -rightclickcommand  \
-	  [list ::Jabber::UI::Popup browse]
+	$wtree configure -rightclickcommand [namespace current]::Popup
     }
     grid $wtree -row 0 -column 0 -sticky news
     grid $wysc -row 0 -column 1 -sticky ns
@@ -451,6 +481,167 @@ proc ::Jabber::Browse::Build {w} {
     # All tree content is set from browse callback from the browse object.
     
     return $w
+}
+    
+proc ::Jabber::Browse::RegisterPopupEntry {menuSpec} {
+    variable popMenuDefs
+    
+    set popMenuDefs(browse,def) [concat $popMenuDefs(browse,def) $menuSpec]
+}
+
+# Jabber::Browse::Popup --
+#
+#       Handle popup menu in browse dialog.
+#       
+# Arguments:
+#       w           widget that issued the command: tree or text
+#       v           for the tree widget it is the item path, 
+#                   for text the jidhash.
+#       
+# Results:
+#       popup menu displayed
+
+proc ::Jabber::Browse::Popup {w v x y} {
+    global  wDlgs this
+    
+    variable popMenuDefs
+    upvar ::Jabber::privatexmlns privatexmlns
+    upvar ::Jabber::jstate jstate
+    
+    ::Jabber::Debug 2 "::Jabber::Browse::Popup w=$w, v='$v', x=$x, y=$y"
+    
+    # The last element of $v is either a jid, (a namespace,) 
+    # a header in roster, a group, or an agents xml tag.
+    # The variables name 'jid' is a misnomer.
+    # Find also type of thing clicked, 'typeClicked'.
+    
+    set typeClicked ""
+    
+    set jid [lindex $v end]
+    set jid3 $jid
+    set typesubtype [$jstate(browse) gettype $jid]
+    if {[regexp {^.+@[^/]+(/.*)?$} $jid match res]} {
+	set typeClicked user
+	if {[::Jabber::InvokeJlibCmd service isroom $jid]} {
+	    set typeClicked room
+	}
+    } elseif {[string match -nocase "conference/*" $typesubtype]} {
+	set typeClicked conference
+    } elseif {$jid != ""} {
+	set typeClicked jid
+    }
+    if {[string length $jid] == 0} {
+	set typeClicked ""	
+    }
+    set X [expr [winfo rootx $w] + $x]
+    set Y [expr [winfo rooty $w] + $y]
+    
+    ::Jabber::Debug 2 "\t jid=$jid, typeClicked=$typeClicked"
+    
+    # Mads Linden's workaround for menu post problem on mac:
+    # all in menubutton commands i add "after 40 the_command"
+    # this way i can never have to posting error.
+    # it is important after the tk_popup f.ex to
+    #
+    # destroy .mb
+    # update
+    #
+    # this way the .mb is destroyd before the next window comes up, thats how I
+    # got around this.
+    
+    # Make the appropriate menu.
+    set m $jstate(wpopup,browse)
+    set i 0
+    catch {destroy $m}
+    menu $m -tearoff 0
+    
+    foreach {item type cmd} $popMenuDefs(browse,def) {
+	if {[string index $cmd 0] == "@"} {
+	    set mt [menu ${m}.sub${i} -tearoff 0]
+	    set locname [::msgcat::mc $item]
+	    $m add cascade -label $locname -menu $mt -state disabled
+	    eval [string range $cmd 1 end] $mt
+	    incr i
+	} elseif {[string equal $item "separator"]} {
+	    $m add separator
+	    continue
+	} else {
+	    
+	    # Substitute the jid arguments.
+	    set cmd [subst -nocommands $cmd]
+	    set locname [::msgcat::mc $item]
+	    $m add command -label $locname -command "after 40 $cmd"  \
+	      -state disabled
+	}
+	
+	# If a menu should be enabled even if not connected do it here.
+	
+	if {![::Jabber::IsConnected]} {
+	    continue
+	}
+	if {[string equal $type "any"]} {
+	    $m entryconfigure $locname -state normal
+	    continue
+	}
+	
+	# State of menu entry. We use the 'type' and 'typeClicked' to sort
+	# out which capabilities to offer for the clicked item.
+	set state disabled
+	
+	switch -- $type {
+	    user {
+		if {[string equal $typeClicked "user"]} {
+		    set state normal
+		}
+	    }
+	    room {
+		if {[string equal $typeClicked "room"]} {
+		    set state normal
+		}
+	    }
+	    jid {
+		switch -- $typeClicked {
+		    jid - user - conference {
+			set state normal
+		    }
+		}
+	    } 
+	    search - register {
+		if {[$jstate(browse) havenamespace $jid "jabber:iq:${type}"]} {
+		    set state normal
+		}
+	    }
+	    conference {
+		switch -- $typeClicked {
+		    conference {
+			set state normal
+		    }
+		}
+	    }
+	    wb {
+		switch -- $typeClicked {
+		    room {
+			set state normal
+		    }
+		}
+	    }
+	}
+	if {[string equal $state "normal"]} {
+	    $m entryconfigure $locname -state normal
+	}
+    }   
+    
+    # This one is needed on the mac so the menu is built before it is posted.
+    update idletasks
+    
+    # Post popup menu.
+    tk_popup $m [expr int($X) - 10] [expr int($Y) - 10]   
+    
+    # Mac bug... (else can't post menu while already posted if toplevel...)
+    if {[string equal "macintosh" $this(platform)]} {
+	catch {destroy $m}
+	update
+    }
 }
 
 # Jabber::Browse::AddToTree --

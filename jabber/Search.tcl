@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Search.tcl,v 1.11 2004-03-16 15:09:08 matben Exp $
+# $Id: Search.tcl,v 1.12 2004-03-29 13:56:27 matben Exp $
 
 package provide Search 1.0
 
@@ -53,7 +53,10 @@ proc ::Jabber::Search::Build {args} {
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
     wm title $w [::msgcat::mc {Search Service}]
     set wtop $w
-    
+
+    set fontS [option get . fontSmall {}]
+    set fontSB [option get . fontSmallBold {}]
+
     # Global frame.
     frame $w.frall -borderwidth 1 -relief raised
     pack  $w.frall -fill both -expand 1 -ipadx 6 -ipady 4

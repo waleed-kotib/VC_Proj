@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: Theme.tcl,v 1.9 2004-02-12 08:48:26 matben Exp $
+# $Id: Theme.tcl,v 1.10 2004-03-29 13:56:27 matben Exp $
 
 package provide Theme 1.0
 
@@ -216,6 +216,24 @@ proc ::Theme::GetImage {name args} {
 	set ans $nsname
     }
     return $ans
+}
+
+# ::Theme::GetImageFromExisting --
+# 
+#       This is a method to first search for any image file using
+#       the standard theme engine, but use an existing image as fallback.
+#       The arrName($name) must be an existing image.
+
+proc ::Theme::GetImageFromExisting {name arrName} {
+    
+    set imname [::Theme::GetImage $name]
+    if {$imname == ""} {
+
+	# Call by name.
+	upvar $arrName arr
+	set imname $arr($name)
+    }
+    return $imname
 }
 
 #-------------------------------------------------------------------------------

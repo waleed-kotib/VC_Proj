@@ -5,11 +5,12 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.45 2004-03-28 14:50:51 matben Exp $
+# $Id: Roster.tcl,v 1.46 2004-03-29 13:56:27 matben Exp $
 
 package provide Roster 1.0
 
 namespace eval ::Jabber::Roster:: {
+    global  this
     
     # Add all event hooks we need.
     ::hooks::add loginHook   ::Jabber::Roster::LoginCmd
@@ -92,7 +93,37 @@ namespace eval ::Jabber::Roster:: {
       {away,yahoo}        [::UI::GetIcon yahoo_away]     \
       {xa,yahoo}          [::UI::GetIcon yahoo_xa]       \
       {online,yahoo}      [::UI::GetIcon yahoo_online]   \
-    ]
+      ]
+    
+    # Template for the roster popup menu.
+    variable popMenuDefs
+    
+    set popMenuDefs(roster,def) {
+	mMessage       users     {::Jabber::NewMsg::Build -to $jid}
+	mChat          user      {::Jabber::Chat::StartThread $jid3}
+	mWhiteboard    wb        {::Jabber::WB::NewWhiteboardTo $jid3}
+	mSendFile      user      {::Jabber::OOB::BuildSet $jid3}
+	separator      {}        {}
+	mLastLogin/Activity user {::Jabber::GetLast $jid}
+	mvCard         user      {::VCard::Fetch other $jid}
+	mAddNewUser    any       {
+	    ::Jabber::Roster::NewOrEditItem new
+	}
+	mEditUser      user      {
+	    ::Jabber::Roster::NewOrEditItem edit -jid $jid
+	}
+	mVersion       user      {::Jabber::GetVersion $jid3}
+	mChatHistory   user      {::Jabber::Chat::BuildHistory $jid}
+	mRemoveUser    user      {::Jabber::Roster::SendRemove $jid}
+	separator      {}        {}
+	mStatus        any       @::Jabber::Roster::BuildPresenceMenu
+	mRefreshRoster any       {::Jabber::Roster::Refresh}
+    }  
+    
+    # Can't run our http server on macs :-(
+    if {[string equal $this(platform) "macintosh"]} {
+	set popMenuDefs(roster,def) [lreplace $popMenuDefs(roster,def) 9 11]
+    }
 }
 
 # Jabber::Roster::Show --
@@ -229,11 +260,10 @@ proc ::Jabber::Roster::Build {w} {
       -doubleclickcommand [namespace current]::DoubleClickCmd} $opts
     
     if {[string match "mac*" $this(platform)]} {
-	$wtree configure -buttonpresscommand [list ::Jabber::UI::Popup roster] \
-	  -eventlist [list [list <Control-Button-1> [list ::Jabber::UI::Popup roster]]]
+	$wtree configure -buttonpresscommand [namespace current]::Popup \
+	  -eventlist [list [list <Control-Button-1> [namespace current]::Popup]]
     } else {
-	$wtree configure -rightclickcommand  \
-	  [list ::Jabber::UI::Popup roster]
+	$wtree configure -rightclickcommand [namespace current]::Popup
     }
 
     scrollbar $wxsc -orient horizontal -command [list $wtree xview]
@@ -410,6 +440,190 @@ proc ::Jabber::Roster::DoubleClickCmd {w v} {
 	    ::Jabber::Chat::StartThread $jid2
 	}
     }    
+}
+    
+proc ::Jabber::Roster::RegisterPopupEntry {menuSpec} {
+    variable popMenuDefs
+    
+    set popMenuDefs(roster,def) [concat $popMenuDefs(roster,def) $menuSpec]
+}
+
+# Jabber::Roster::Popup --
+#
+#       Handle popup menu in roster.
+#       
+# Arguments:
+#       w           widget that issued the command: tree or text
+#       v           for the tree widget it is the item path, 
+#                   for text the jidhash.
+#       
+# Results:
+#       popup menu displayed
+
+proc ::Jabber::Roster::Popup {w v x y} {
+    global  wDlgs this
+    variable popMenuDefs
+    
+    upvar ::Jabber::privatexmlns privatexmlns
+    upvar ::Jabber::jstate jstate
+    
+    ::Jabber::Debug 2 "::Jabber::Roster::Popup w=$w, v='$v', x=$x, y=$y"
+    
+    # The last element of $v is either a jid, (a namespace,) 
+    # a header in roster, a group,
+    # The variables name 'jid' is a misnomer.
+    # Find also type of thing clicked, 'typeClicked'.
+    
+    set typeClicked ""
+    
+    # The last element of atree item if user is usually a 3-tier jid for
+    # online users and a 2-tier jid else, but some transports may
+    # lack the resource part for online users, and have resource
+    # even if unavailable. Beware!
+    set jid [lindex $v end]
+    set jid3 $jid
+    set status [string tolower [lindex $v 0]]
+    if {[llength $v]} {
+	set tags [$w itemconfigure $v -tags]
+    } else {
+	set tags ""
+    }
+    
+    switch -- $tags {
+	head {
+	    set typeClicked head
+	}
+	group {
+	    
+	    # Get a list of all jid's in this group. type=user.
+	    # Must strip off all resources.
+	    set typeClicked group
+	    set jid {}
+	    foreach jid3 [$w children $v] {
+		jlib::splitjid $jid3 jid2 res
+		lappend jid $jid2
+	    }
+	    set jid [list $jid]
+	}
+	default {
+	    
+	    # Typically a user.
+	    jlib::splitjid $jid jid2 res
+	    
+	    # Must let 'jid' refer to 2-tier jid for commands to work!
+	    set jid3 $jid
+	    set jid $jid2
+	    if {[$jstate(browse) havenamespace $jid3 "coccinella:wb"] || \
+	      [$jstate(browse) havenamespace $jid3 $privatexmlns(whiteboard)]} {
+		set typeClicked wb
+	    } else {
+		set typeClicked user
+	    }			
+	}		    
+    }
+    if {[string length $jid] == 0} {
+	set typeClicked ""	
+    }
+    set X [expr [winfo rootx $w] + $x]
+    set Y [expr [winfo rooty $w] + $y]
+    
+    ::Jabber::Debug 2 "\t jid=$jid, typeClicked=$typeClicked"
+    
+    # Mads Linden's workaround for menu post problem on mac:
+    # all in menubutton commands i add "after 40 the_command"
+    # this way i can never have to posting error.
+    # it is important after the tk_popup f.ex to
+    #
+    # destroy .mb
+    # update
+    #
+    # this way the .mb is destroyd before the next window comes up, thats how I
+    # got around this.
+    
+    # Make the appropriate menu.
+    set m $jstate(wpopup,roster)
+    set i 0
+    catch {destroy $m}
+    menu $m -tearoff 0
+    
+    foreach {item type cmd} $popMenuDefs(roster,def) {
+	if {[string index $cmd 0] == "@"} {
+	    set mt [menu ${m}.sub${i} -tearoff 0]
+	    set locname [::msgcat::mc $item]
+	    $m add cascade -label $locname -menu $mt -state disabled
+	    eval [string range $cmd 1 end] $mt
+	    incr i
+	} elseif {[string equal $item "separator"]} {
+	    $m add separator
+	    continue
+	} else {
+
+	    # Substitute the jid arguments.
+	    set cmd [subst -nocommands $cmd]
+	    set locname [::msgcat::mc $item]
+	    $m add command -label $locname -command "after 40 $cmd"  \
+	      -state disabled
+	}
+	
+	# If a menu should be enabled even if not connected do it here.
+	if {$typeClicked == "user" &&  \
+	  [string match -nocase "*chat history*" $item]} {
+	    $m entryconfigure $locname -state normal
+	}
+	if {![::Jabber::IsConnected]} {
+	    continue
+	}
+	if {[string equal $type "any"]} {
+	    $m entryconfigure $locname -state normal
+	    continue
+	}
+	
+	# State of menu entry. We use the 'type' and 'typeClicked' to sort
+	# out which capabilities to offer for the clicked item.
+	set state disabled
+	
+	switch -- $type {
+	    user {
+		if {[string equal $typeClicked "user"] || \
+		  [string equal $typeClicked "wb"]} {
+		    set state normal
+		}
+		if {[string equal $status "offline"]} {
+		    if {[string match -nocase "mchat" $item] || \
+		      [string match -nocase "*version*" $item]} {
+			set state disabled
+		    }
+		}
+	    }
+	    users {
+		if {($typeClicked == "user") ||  \
+		  ($typeClicked == "group") ||  \
+		  ($typeClicked == "wb")} {
+		    set state normal
+		}
+	    }
+	    wb {
+		if {[string equal $typeClicked "wb"]} {
+		    set state normal
+		}
+	    }
+	} 
+	if {[string equal $state "normal"]} {
+	    $m entryconfigure $locname -state normal
+	}   
+    }
+    
+    # This one is needed on the mac so the menu is built before it is posted.
+    update idletasks
+    
+    # Post popup menu.
+    tk_popup $m [expr int($X) - 10] [expr int($Y) - 10]   
+    
+    # Mac bug... (else can't post menu while already posted if toplevel...)
+    if {[string equal "macintosh" $this(platform)]} {
+	catch {destroy $m}
+	update
+    }
 }
 
 # Jabber::Roster::PushProc --

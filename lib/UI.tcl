@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.52 2004-03-27 15:20:37 matben Exp $
+# $Id: UI.tcl,v 1.53 2004-03-29 13:56:27 matben Exp $
 
 package require entrycomp
 
@@ -32,36 +32,15 @@ namespace eval ::UI:: {
 proc ::UI::Init {} {
     global  this prefs
 
-    variable icons
     variable smiley
     variable smileyExp
     variable smileyLongNames
     
     ::Debug 2 "::UI::Init"    
     
-    # Icons for the mailbox.
-    set icons(readMsg) [image create photo -data {
-R0lGODdhDgAKAKIAAP/////xsOjboMzMzHNzc2NjzjExYwAAACwAAAAADgAK
-AAADJli6vFMhyinMm1NVAkPzxdZhkhh9kUmWBie8cLwZdG3XxEDsfM8nADs=
-}]
-    set icons(unreadMsg) [image create photo -data {
-R0lGODdhDgAKALMAAP/////xsOjboMzMzIHzeXNzc2Njzj7oGzXHFzExYwAA
-AAAAAAAAAAAAAAAAAAAAACwAAAAADgAKAAAENtBIcpC8cpgQKOKgkGicB0pi
-QazUUQVoUhhu/YXyZoNcugUvXsAnKBqPqYRyyVwWBoWodCqNAAA7
-}]
-    set icons(wbicon) [image create photo -data {
-R0lGODdhFQANALMAAP/////n5/9ze/9CQv8IEOfn/8bO/621/5ycnHN7/zlK
-/wC9AAAQ/wAAAAAAAAAAACwAAAAAFQANAAAEWrDJSWtFDejN+27YZjAHt5wL
-B2aaopAbmn4hMBYH7NGskmi5kiYwIAwCgJWNUdgkGBuBACBNhnyb4IawtWaY
-QJ2GO/YCGGi0MDqtKnccohG5stgtiLx+z+8jIgA7	
-}]
-    set icons(wboard) [image create photo -format gif \
-      -file [file join $this(imagePath) wb.gif]]
-    
     # Standard button icons.
     ::Theme::GetImage [option get . buttonOKImage {}] -keepname 1
-    ::Theme::GetImage [option get . buttonCancelImage {}] -keepname 1
-    
+    ::Theme::GetImage [option get . buttonCancelImage {}] -keepname 1    
     
     # Smiley icons. The "short" types.
     foreach {key name} {
@@ -185,6 +164,11 @@ proc ::UI::InitMenuDefs { } {
     if {$haveAppleMenu && ![::Plugins::HavePackage QuickTimeTcl]} {
 	lset menuDefs(main,apple) 1 3 disabled
     }
+}
+
+proc ::UI::GetIcon {name} {
+    
+    return [::Theme::GetImageFromExisting $name ::UI::icons]
 }
 
 proc ::UI::GetIcon {name} {
