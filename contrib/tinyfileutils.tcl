@@ -2,11 +2,12 @@
 #  
 #      A collection of some small file utility procedures.
 #      
-#  Copyright (c) 2002  Mats Bengtsson
+#  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: tinyfileutils.tcl,v 1.1.1.1 2002-12-08 10:56:27 matben Exp $
+# $Id: tinyfileutils.tcl,v 1.2 2003-01-11 16:16:08 matben Exp $
 
 package provide tinyfileutils 1.0
+
 
 # filenormalize --
 #
@@ -20,13 +21,14 @@ package provide tinyfileutils 1.0
 #       The normalized absolute path, always returns native paths.
 
 proc filenormalize {path} {
+    global  tcl_platform
     
     if {![string equal [file pathtype $path] "absolute"]} {
 	return -code error "The path \"$path\" is not of type absolute"
     }
     
     # Mac needs special treatment.
-    if {[string equal $::tcl_platform(platform) "macintosh"]} {
+    if {[string equal $tcl_platform(platform) "macintosh"]} {
 	return [filenormalizemac $path]
     } else {
 	set up_ {..}
@@ -61,7 +63,9 @@ proc filenormalizemac {path} {
     
     # Example: 'file split aaa:bbb:ccc::xxx' -> 'aaa: bbb ccc :: xxx'
     set splitList [file split $path]
-    set tmp [lindex $splitList 0]
+    
+    # Make proper list element in case of spaces!
+    set tmp [list [lindex $splitList 0]]
     set splitList [lrange $splitList 1 end]
     foreach part $splitList {
 	set nup [expr [regsub -all : $part "" x] - 1]
@@ -88,6 +92,7 @@ proc filenormalizemac {path} {
 #       The relative (unix-style) path from 'srcpath' to 'dstpath'.
 
 proc filerelative {srcpath dstpath} {
+    global  tcl_platform
 
     if {![string equal [file pathtype $srcpath] "absolute"]} {
 	return -code error "filerelative: the path \"$srcpath\" is not of type absolute"
@@ -101,10 +106,13 @@ proc filerelative {srcpath dstpath} {
     set up {../}
     set srclist [file split $srcpath]
     set dstlist [file split $dstpath]
-    # not sure this is a good idea...
-    if {0 && [string equal $::tcl_platform(platform) "windows"]} {
-	set srclist [string tolower $srclist]
-	set dstlist [string tolower $dstlist]
+    
+    # Must get rid of the extra ":" volume specifier on mac.
+    if {[string equal $tcl_platform(platform) "macintosh"]} {
+	set srclist [lreplace $srclist 0 0  \
+	  [string trimright [lindex $srclist 0] :]]
+	set dstlist [lreplace $dstlist 0 0  \
+	  [string trimright [lindex $dstlist 0] :]]
     }
     set lensrc [llength $srclist]
     set lendst [llength $dstlist]
@@ -122,7 +130,7 @@ proc filerelative {srcpath dstpath} {
     for {set i 1} {$i <=$numUp} {incr i} {
 	append tmp $up
     }
-    return "$tmp[join [lrange $dstlist $n end] /]"
+    return "${tmp}[join [lrange $dstlist $n end] /]"
 }
 
 # unixpathtype --
@@ -136,12 +144,13 @@ proc filerelative {srcpath dstpath} {
 #       The unix-style path of path.
 
 proc unixpathtype {path} {
+    global  tcl_platform
     
     set isabs [string equal [file pathtype $path] "absolute"]
     set plist [file split $path]
 	
     # The volume specifier always leaves a ":"; {Macintosh HD:}
-    if {$isabs && [string equal $::tcl_platform(platform) "macintosh"]} {
+    if {$isabs && [string equal $tcl_platform(platform) "macintosh"]} {
 	set volume [string trimright [lindex $plist 0] ":"]
 	set plist [lreplace $plist 0 0 $volume]
     }

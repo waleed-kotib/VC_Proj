@@ -373,6 +373,7 @@
 ::msgcat::mcset sv {Search Service}        {Söktjänst}
 ::msgcat::mcset sv {Search Specifications} {Sökspecifikation}
 ::msgcat::mcset sv {Select Font}           {Välj typsnitt}
+::msgcat::mcset sv {Send Live}             {Skicka lajv}
 ::msgcat::mcset sv {Server Info}           {Server info}
 ::msgcat::mcset sv {Service server}	   {Tjänst server}
 ::msgcat::mcset sv {Set Status}            {Sätt status}
@@ -546,6 +547,8 @@ när försökte avregistrera "%s". Felkoden %s och felmeddelandet: %s}
 	::msgcat::mcset sv jamessokunreg	{Du är nu avregistrerad från "%s"}
 	::msgcat::mcset sv jamesspasswddiff	{Lösenorden överensstämmer ej.\
 Kontrollera en gång till.}
+	::msgcat::mcset sv jamesspasswderr	{Bytet av lösenord misslyckades med\
+felkod %s och felmeddelande "%s"}
 	::msgcat::mcset sv jamesspasswdok	{Att sätta nytt lösenord fungerade.}
 	::msgcat::mcset sv jamessregnoserver	{Vi kräver att serverns namn fylls i.}
 	::msgcat::mcset sv jamesserrregget	{Misslyckades med att få\

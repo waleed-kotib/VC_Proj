@@ -4,11 +4,11 @@
 #       server part and contains procedures for creating new server side sockets,
 #       handling canvas operations and file transfer.
 #      
-#  Copyright (c) 1999-2002  Mats Bengtsson
+#  Copyright (c) 1999-2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: TheServer.tcl,v 1.1.1.1 2002-12-08 11:04:32 matben Exp $
+# $Id: TheServer.tcl,v 1.2 2003-01-11 16:16:09 matben Exp $
     
 # DoStartServer ---
 #
@@ -290,9 +290,6 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 		regsub -all "$bs_$lb_" $instr "$bs_$lb_" padinstr
 		regsub -all "$bs_$rb_" $padinstr "$bs_$rb_" padinstr
 		set bsinstr [subst -nocommands -novariables $padinstr]
-		if {$debugServerLevel >= 4} {
-		    puts "--->bsinstr: $bsinstr"
-		}
 		
 		# Intercept the canvas command if delete to remove any markers
 		# *before* it is deleted! See below for other commands.
@@ -313,18 +310,24 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 		    undo::add [::UI::GetUndoToken $wtop] $undo $redo
 		}
 		
-		# Make the actual canvas command, either straight or in the 
-		# safe interpreter.
-		if {$prefs(makeSafeServ)} {
-		    if {[catch {$canvasSafeInterp eval SafeCanvasDraw  \
-		      $wServCan $bsinstr} idnew]} {
-			puts stderr "--->error: did not understand: $idnew"
-			return
-		    }
+		# The 'import' command is an exception case (for the future). 
+		if {[string equal $cmd "import"]} {
+		    ::ImageAndMovie::HandleImportCmd $wServCan $bsinstr
 		} else {
-		    if {[catch {eval $wServCan $bsinstr} idnew]} {
-			puts stderr "--->error: did not understand: $idnew"
-			return
+		    		
+		    # Make the actual canvas command, either straight or in the 
+		    # safe interpreter.
+		    if {$prefs(makeSafeServ)} {
+			if {[catch {$canvasSafeInterp eval SafeCanvasDraw  \
+			  $wServCan $bsinstr} idnew]} {
+			    puts stderr "--->error: did not understand: $idnew"
+			    return
+			}
+		    } else {
+			if {[catch {eval $wServCan $bsinstr} idnew]} {
+			    puts stderr "--->error: did not understand: $idnew"
+			    return
+			}
 		    }
 		}
 		

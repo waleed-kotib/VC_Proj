@@ -3,11 +3,11 @@
 #      This file is part of the whiteboard application. It implements the
 #      text commands associated with the text tool.
 #      
-#  Copyright (c) 2000-2002  Mats Bengtsson
+#  Copyright (c) 2000-2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasText.tcl,v 1.1.1.1 2002-12-08 11:02:25 matben Exp $
+# $Id: CanvasText.tcl,v 1.2 2003-01-11 16:16:09 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 
@@ -243,7 +243,7 @@ proc ::CanvasText::TextInsert {c char} {
     # Find the 'itno'.
     set utag [::CanvasUtils::GetUtag $c focus]
     if {$utag == "" || $char == ""}	 {
-	Debug 2 "TextInsert:: utag == {}"
+	Debug 4 "TextInsert:: utag == {}"
 	return
     }
     set itfocus [$c focus]
@@ -270,7 +270,7 @@ proc ::CanvasText::TextInsert {c char} {
     eval {$c} $cmd
     undo::add [::UI::GetUndoToken $wtop] $undo $redo
         
-    Debug 3 "TextInsert:: utag = $utag, ind = $ind, char: $char"
+    Debug 9 "TextInsert:: utag = $utag, ind = $ind, char: $char"
     
     # Need to treat the case with actual newlines in char string.
     # Write to all other clients; need to make a one liner first.

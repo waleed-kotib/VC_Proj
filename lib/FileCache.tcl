@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2002  Mats Bengtsson
 #
-# $Id: FileCache.tcl,v 1.1.1.1 2002-12-08 11:02:56 matben Exp $
+# $Id: FileCache.tcl,v 1.2 2003-01-11 16:16:09 matben Exp $
 # 
 #       The input key can be: 
 #               1) a full url, must be uri encoded 
@@ -14,9 +14,9 @@
 #
 #	The key in the database (denoted nkey for normalized key), 
 #	the array index, can be:
-#		1) complete url without the protocol part (http) and no port spec
-#		   ://server.com/../dir1/file.mov
-#		   the :// is mandatory for defining an url
+#		1) complete url without the protocol part (http) and no port 
+#		   spec "://server.com/../dir1/file.mov"
+#		   the "://" is mandatory for defining an url
 #		2) a relative file path, which means local file
 #		3) in any case it is always uri encoded
 #		4) it's always using unix dir separators "/"
@@ -86,6 +86,7 @@ proc ::FileCache::Get {key} {
     } else {
     	return -code error "The cache does not contain an entry with key \"$key\""
     }
+    return $ans
 }
 
 proc ::FileCache::IsCached {key} {
@@ -123,7 +124,7 @@ proc ::FileCache::Normalize {key} {
     set host ""
     
     # Split off any protocol part.
-    if {[regexp {[^:]*(://[^:/]+)(:[0-9]+)?/(.*)} $key  \
+    if {[regexp {[^:]*(://[^:/]+)(:[0-9]+)?(/.*$)} $key  \
       match host port path]} {
     } elseif {[string equal [file pathtype $key] "absolute"]} {
 	set path [filerelative $basedir $key]
@@ -133,7 +134,8 @@ proc ::FileCache::Normalize {key} {
     } else {
 	return -code error "The key \"$key\" has not a valid form"
     }
-    set nkey ${host}$path
+    set nkey ${host}${path}
+    # Not sure this is a good idea...
     if {[string equal $::tcl_platform(platform) "windows"]} {
 	set nkey [string tolower $nkey]
     }

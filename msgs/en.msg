@@ -374,6 +374,7 @@
 ::msgcat::mcset en {Search Service}
 ::msgcat::mcset en {Search Specifications}
 ::msgcat::mcset en {Select Font}
+::msgcat::mcset en {Send Live}
 ::msgcat::mcset en {Server Info}
 ::msgcat::mcset en {Service server}
 ::msgcat::mcset en {Set Status}
@@ -543,6 +544,8 @@ to unregister from "%s". Code %s, and message %s}
 	::msgcat::mcset en jamessokunreg	{You are now unregistered from "%s"}
 	::msgcat::mcset en jamesspasswddiff	{The passwords do not agree.\
 Please check once again.}
+	::msgcat::mcset en jamesspasswderr	{Setting new password failed with\
+the error code %s and message: "%s"}
 	::msgcat::mcset en jamesspasswdok	{Setting new password was succesful}
 	::msgcat::mcset en jamessregnoserver	{We require the server to be set.}
 	::msgcat::mcset en jamesserrregget	{Failed obtaining registration info.\

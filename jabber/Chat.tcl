@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.1.1.1 2002-12-08 10:59:22 matben Exp $
+# $Id: Chat.tcl,v 1.2 2003-01-11 16:16:08 matben Exp $
 
 package provide Chat 1.0
 
@@ -41,7 +41,7 @@ proc ::Jabber::Chat::GotMsg {body args} {
     if {[info exists argsArr(-thread)]} {
 	set threadID $argsArr(-thread)
     } else {
-	error "Missing thread ID!!!"
+	return -code error "Missing thread ID!!!"
     }
 
     if {[info exists locals($threadID,wtop)] &&  \
@@ -62,7 +62,7 @@ proc ::Jabber::Chat::GotMsg {body args} {
     }
     $wtext insert end <$username> youtag
     $wtext insert end "   " youtxttag
-    #$wtext insert end "$body\n" youtxttag
+
     set textCmds [::Text::ParseAllForTextWidget $body youtxttag linktag]
     foreach cmd $textCmds {
 	eval $wtext $cmd
@@ -84,21 +84,16 @@ proc ::Jabber::Chat::GotMsg {body args} {
 # Jabber::Chat::StartThread --
 # 
 # Arguments:
-#       args        -to jid
+#       jid
 
-proc ::Jabber::Chat::StartThread {args} {
+proc ::Jabber::Chat::StartThread {jid} {
 
     variable locals
     upvar ::Jabber::jstate jstate
 
-    array set argsArr $args
-    
     # Make unique thread id.
     set threadID [::sha1pure::sha1 "$jstate(mejid)[clock seconds]"]
-    set locals($threadID,jid) $jstate(.,tojid)
-    if {[info exists argsArr(-to)]} {
-	set locals($threadID,jid) $argsArr(-to)
-    }
+    set locals($threadID,jid) $jid
     ::Jabber::Chat::Build $threadID    
 }
 
@@ -143,7 +138,7 @@ proc ::Jabber::Chat::Build {threadID args} {
     }
     set locals($threadID,got1stMsg) 0
     wm title $w "Chat ($locals($threadID,jid))"
-    wm protocol $w WM_DELETE_WINDOW   \
+    wm protocol $w WM_DELETE_WINDOW  \
       [list ::Jabber::Chat::Close -threadid $threadID]
     wm group $w .
     

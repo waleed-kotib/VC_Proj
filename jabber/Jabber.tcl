@@ -3,19 +3,19 @@
 #      This file is part of the whiteboard application. 
 #      It implements the "glue" between the whiteboard and jabberlib.
 #      
-#  Copyright (c) 2001-2002  Mats Bengtsson
+#  Copyright (c) 2001-2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.2 2002-12-15 09:10:55 matben Exp $
+# $Id: Jabber.tcl,v 1.3 2003-01-11 16:16:09 matben Exp $
 #
 #  The $address is an ip name or number.
 #
-#  jserver(all)                    list of all profiles in array
-#  jserver(profile,selected)       profile picked in user info
-#  jserver(this)                   present connected $address
-#  jserver(profile):               {$profile1 {$server1 $username $password $resource} \
-#                                   $profile2 {$server2 $username2 $password2 $resource2} ... }
+#  jserver(all)               list of all profiles in array
+#  jserver(profile,selected)  profile picked in user info
+#  jserver(this)              present connected $address
+#  jserver(profile):          {$profile1 {$server1 $username $password $resource} \
+#                              $profile2 {$server2 $username2 $password2 $resource2} ... }
 
 package provide Jabber 1.0
 
@@ -59,11 +59,11 @@ namespace eval ::Jabber:: {
     set jstate(sock) {}
     set jstate(ipNum) {}
     set jstate(inroster) 0
-    set jstate(status) {unavailable}
+    set jstate(status) "unavailable"
     
     # Server port actually used.
     set jstate(servPort) {}
-    set jstate(debug) 3
+    set jstate(debug) 0
 
     # Login server.
     set jserver(this) {}
@@ -215,8 +215,8 @@ namespace eval ::Jabber:: {
     # The roster:
     set jstate(popup,roster,def) {
       mMessage       users     {::Jabber::NewMsg::Build $wDlgs(jsendmsg) -to &jid}
-      mChat          user      {::Jabber::Chat::StartThread -to &jid}
-      mWhiteboard    user      {::Jabber::DoWhiteboard &jid}
+      mChat          user      {::Jabber::Chat::StartThread &jid}
+      mWhiteboard    wb        {::Jabber::WB::NewWhiteboard &jid}
       separator      {}        {}
       mLastLogin/Activity user {::Jabber::GetLast &jid}
       mvCard         user      {::VCard::Fetch .jvcard other &jid}
@@ -238,8 +238,8 @@ namespace eval ::Jabber:: {
     # The browse:
     set jstate(popup,browse,def) {
       mMessage       user      {::Jabber::NewMsg::Build $wDlgs(jsendmsg) -to &jid}
-      mChat          user      {::Jabber::Chat::StartThread -to &jid}
-      mWhiteboard    user      {::Jabber::DoWhiteboard &jid}
+      mChat          user      {::Jabber::Chat::StartThread &jid}
+      mWhiteboard    wb        {::Jabber::WB::NewWhiteboard &jid}
       mEnterRoom     room      {::Jabber::GroupChat::EnterRoom  \
 	$wDlgs(jenterroom) -roomjid &jid -autoget 1}
       separator      {}        {}
@@ -261,8 +261,8 @@ namespace eval ::Jabber:: {
     # The groupchat:
     set jstate(popup,groupchat,def) {
       mMessage       user      {::Jabber::NewMsg::Build $wDlgs(jsendmsg) -to &jid}
-      mChat          user      {::Jabber::Chat::StartThread -to &jid}
-      mWhiteboard    user      {::Jabber::DoWhiteboard &jid}
+      mChat          user      {::Jabber::Chat::StartThread &jid}
+      mWhiteboard    wb        {::Jabber::WB::NewWhiteboard &jid}
     }    
     
     # The agents stuff:
@@ -309,7 +309,7 @@ proc ::Jabber::FactoryDefaults { } {
     set jprefs(defSubscribe) 1
     set jprefs(rost,rmIfUnsub) 1
     set jprefs(rost,allowSubNone) 1
-    set jprefs(rost,clrLogout) 0
+    set jprefs(rost,clrLogout) 1
     set jprefs(rost,dblClk) normal
     set jprefs(subsc,inrost) ask
     set jprefs(subsc,notinrost) ask
@@ -321,13 +321,16 @@ proc ::Jabber::FactoryDefaults { } {
     set jprefs(speakMsg) 0
     set jprefs(speakChat) 0
     
+    # Automatically browse users with resource?
+    set jprefs(autoBrowseUsers) 1
+    
     # Dialog pane positions.
     set prefs(paneGeom,$wDlgs(jchat)) {0.75 0.25}
     set prefs(paneGeom,$wDlgs(jinbox)) {0.5 0.5}
     set prefs(paneGeom,groupchatDlgVert) {0.8 0.2}
     set prefs(paneGeom,groupchatDlgHori) {0.8 0.2}
     
-    # Autoupdate; be sure to use version key since a new version must not inherit
+    # Autoupdate; be sure to use version key since a new version must not inherit.
     set jprefs(autoupdateCheck) 1
     set jprefs(autoupdateShow,$prefs(fullVers)) 1
     
@@ -410,9 +413,9 @@ proc ::Jabber::FactoryDefaults { } {
 proc ::Jabber::InitWhiteboard {wtop} {
     variable jstate
     
-    set jstate($wtop,doSend) 1
+    set jstate($wtop,doSend) 0
     # The current receiver of our messages. 'textvariable' in UI entry.
-    set jstate($wtop,tojid) {}
+    set jstate($wtop,tojid) ""
     # Identical to 'tojid' for standard chats, but a list of jid's
     # with /nick for groupchat's.
 }
@@ -449,8 +452,8 @@ proc ::Jabber::Init { } {
     
     # Add the three element callbacks.
     lappend opts -iqcommand ::Jabber::IqCallback  \
-    	-messagecommand ::Jabber::MessageCallback  \
-	-presencecommand ::Jabber::PresenceCallback
+      -messagecommand ::Jabber::MessageCallback  \
+      -presencecommand ::Jabber::PresenceCallback
 
     # Make an instance of jabberlib and fill in our roster object.
     set jstate(jlib) [eval {::jlib::new jlib0 $jstate(roster) $jstate(browse)  \
@@ -524,7 +527,7 @@ proc ::Jabber::IqCallback {jlibName type args} {
 
 # ::Jabber::MessageCallback --
 #
-#       Registered callback proc for <Message> elements.
+#       Registered callback proc for <message> elements.
 #       
 # Arguments:
 #       type        normal|chat|groupchat
@@ -575,8 +578,7 @@ proc ::Jabber::MessageCallback {jlibName type args} {
 	  -icon error -type ok		
     } else {
 	
-	# Check if we've got an <x xmlns='jabber:x:coccinella'><raw> element...
-	# Mistake! jabber:x: reserved! use coccinella:wb instead.
+	# Check if we've got an <x xmlns='coccinella:wb'><raw> element...
 	set haveCoccinellaNS 0
 	set rawElemList {}
 	if {[info exists attrArr(-x)]} {
@@ -606,21 +608,11 @@ proc ::Jabber::MessageCallback {jlibName type args} {
 		}
 	    }
 	}
-	
-	# Figure out if we've got something that could be a coccinella
-	# command. For compatibility with version 0.93.0 
-	# TO BE REMOVED LATER
-	set haveCoccinellaBody 0
-	if {[info exists attrArr(-body)] &&  \
-	  [regexp {^[A-Z]+ *[A-Z]+: } $attrArr(-body) junk]} {
-	    set theBody $attrArr(-body)
-	    set haveCoccinellaBody 1
-	}
-	
+		
 	# If a room message sent from us we don't want to duplicate it.
 	# Whiteboard only.
 	set doShow 1
-	if {$haveCoccinellaBody || $haveCoccinellaNS} {
+	if {$haveCoccinellaNS} {
 	    if {[string equal $type "groupchat"]} {
 		if {[regexp {^(.+@[^/]+)(/(.+))?} $attrArr(-from) match roomJid x]} {
 		    foreach {meHash nick}  \
@@ -632,66 +624,96 @@ proc ::Jabber::MessageCallback {jlibName type args} {
 	    }
 	}
 	
-	# Need a mechanism to dispatch whiteboard messages to the correct
-	# instance, similar to groupchat.
-	
-	# Fix dispatcher later!!!   && ![string equal $type "normal"]
-	if {$haveCoccinellaNS} {
-	    if {$doShow} {
-		foreach line $rawElemList {
-		    eval {ExecuteClientRequest . $jstate(sock) ip port $line} $args
-		}
-	    }
-	} elseif {$haveCoccinellaBody} {
-	    
-	    # TO BE REMOVED LATER. OUTDATED!!!!!!!!!!!!
-	    if {$doShow} {
-		eval {ExecuteClientRequest . $jstate(sock) ip port  \
-		  $attrArr(-body)} $args
-	    }
-	} else {
-	    set msgArgs $args
-	    if {$haveCoccinellaNS} {
-		lappend msgArgs -whiteboard $rawElemList
-	    }
-	    	    
-	    # Interpret this as an ordinary jabber message element.
-	    eval {::Jabber::HandleMessage $type $attrArr(-body)} $msgArgs    
+	# Send message to dispatcher for 'type' and whiteboard.
+	set msgArgs $args
+	if {$doShow && $haveCoccinellaNS} {
+	    lappend msgArgs -whiteboard $rawElemList
 	}
+	
+	# Interpret this as an ordinary jabber message element.
+	eval {::Jabber::MessageDispatcher $type $attrArr(-body)} $msgArgs    
     }
 }
 
-# Jabber::HandleMessage --
+# ::Jabber::MessageDispatcher --
 #
 #       Dispatch a jabber message to either the "normal" dialog, chat window,
 #       or groupchat window.
 #       
 # Arguments:
 #       type        message type attribute
-#       body        the <body> element.
-#       args
+#       body        the <body> element. Empty if have -whiteboard.
+#       args        -type, -from, -whiteboard, -x, -thread
 #       
 # Results:
 #       dispatch procedure called.
 
-proc ::Jabber::HandleMessage {type body args} {
+proc ::Jabber::MessageDispatcher {type body args} {
+    
+    set iswb 0
+    if {[lsearch -exact $args "-whiteboard"] >= 0} {
+	set iswb 1
+    }
     
     switch -- $type {
 	chat {
-	
-	    # Chat message
-	    eval {::Jabber::Chat::GotMsg $body} $args
+	    if {$iswb} {
+		eval {::Jabber::WB::ChatMsg} $args
+	    } elseif {[string length $body]} {
+		eval {::Jabber::Chat::GotMsg $body} $args
+	    }	    
 	}
 	groupchat {
-	
-	    # Groupchat message
-	    eval {::Jabber::GroupChat::GotMsg $body} $args
+	    if {$iswb} {
+		eval {::Jabber::WB::GroupChatMsg} $args
+	    } elseif {[string length $body]} {
+		eval {::Jabber::GroupChat::GotMsg $body} $args
+	    }	    
 	}
 	default {
 	
-	    # Normal message.
-	    eval {::Jabber::MailBox::GotMsg $body} $args
+	    # Normal message. Handles whiteboard stuff as well.
+	    eval {::Jabber::DispatchNormalMessage $body $iswb} $args
 	}
+    }
+}
+
+# ::Jabber::DispatchNormalMessage --
+# 
+#       Take care of commands that must be responded to, and forward rest
+#       to inbox.
+
+proc ::Jabber::DispatchNormalMessage {body iswb args} {
+    variable  jstate
+    
+    # We need to split up whiteboard commands (messages) that must be
+    # handled immediately and those destined for drawing etc. 
+    # BAD DESIGN HERE!!!!!!!!!
+    if {$iswb} {
+	array set argsArr $args
+	set restCmds {}
+	foreach raw $argsArr(-whiteboard) {
+	    switch -glob -- $raw {
+		"GET IP:*" - "PUT IP:*" {
+		    eval {ExecuteClientRequest . $jstate(sock) ip port $raw} \
+		      $args
+		}
+		"IDENTITY:*" - "IPS CONNECTED:*" - "CLIENT:*" -  \
+		  "DISCONNECTED:*" - "RESIZE:*" {
+		    
+		    # Junk.
+		}
+		default {
+		    lappend restCmds $raw
+		}
+	    }
+	}
+	if {[llength $restCmds]} {
+		set argsArr(-whiteboard) $restCmds
+		eval {::Jabber::MailBox::GotMsg $body} [array get argsArr]
+	}
+    } else {
+	eval {::Jabber::MailBox::GotMsg $body} $args
     }
 }
 
@@ -740,7 +762,7 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 	    }
 		
 	    # Accept, deny, or ask depending on preferences we've set.
-	    set msg {}
+	    set msg ""
 	    set autoaccepted 0
 	    switch -- $jprefs(subsc,$key) {
 		accept {
@@ -753,7 +775,7 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 		    set msg [::msgcat::mc jamessautoreject $from]
 		}
 		ask {
-		    ::Jabber::Subscribe::Subscribe $wDlgs(jsubsc) $from
+		    eval {::Jabber::Subscribe::Subscribe $wDlgs(jsubsc) $from} $args
 		}
 	    }
 	    if {[llength $msg]} {
@@ -1052,12 +1074,7 @@ proc ::Jabber::SendWhiteboardMessage {wtop msg args} {
     
     # Here we shall decide the 'type' of message sent (normal, chat, groupchat)
     # depending on the type of whiteboard (via wtop).
-    set argsList {}
-    if {0} {
-	if {[$jstate(jlib) service isroom $tojid]} {
-	    lappend argsList -type "groupchat"
-	}
-    }
+    set argsList [::Jabber::SendWhiteboardArgs $wtop]
     if {$jstate($wtop,doSend) || $opts(-force)} {
 	if {[::Jabber::VerifyJIDWhiteboard $wtop]} {
 	    eval {::Jabber::SendMessage $tojid $msg} $argsList
@@ -1079,12 +1096,7 @@ proc ::Jabber::SendWhiteboardMessageList {wtop msgList args} {
     array set opts $args
     set tojid $jstate($wtop,tojid)
 
-    set argsList {}
-    if {0} {
-	if {[$jstate(jlib) service isroom $tojid]} {
-	    lappend argsList -type "groupchat"
-	}
-    }
+    set argsList [::Jabber::SendWhiteboardArgs $wtop]
     if {$jstate($wtop,doSend) || $opts(-force)} {
 	if {[::Jabber::VerifyJIDWhiteboard $wtop]} {
 	    eval {::Jabber::SendMessageList $tojid $msgList} $argsList
@@ -1093,6 +1105,19 @@ proc ::Jabber::SendWhiteboardMessageList {wtop msgList args} {
 	    # Perhaps we should give some aid here; set focus?
 	}
     }
+}
+
+proc ::Jabber::SendWhiteboardArgs {wtop} {
+
+    set argsList {}
+    set type [::UI::GetJabberType $wtop]
+    if {[llength $type] > 0} {
+	lappend argsList -type $type
+	if {[string equal $type "chat"]} {
+		lappend argsList -thread [::UI::GetJabberChatThread $wtop]
+	}
+    }
+    return $argsList
 }
 
 # Jabber::SendMessage --
@@ -1165,6 +1190,30 @@ proc ::Jabber::SendMessageList {jid msgList args} {
     }
 }
 
+proc ::Jabber::DoSendCanvas {wtop} {
+    variable jstate
+    upvar ::${wtop}::wapp wapp
+
+    set wtopReal $wapp(toplevel)
+
+    set jid $jstate($wtop,tojid)
+    if {[::Jabber::IsWellFormedJID $jid]} {
+	::UserActions::DoSendCanvas $wtop
+    
+	    # Should we clear the window, or perhaps destroy it?
+	    if {$wtop == "."} {
+		::UserActions::EraseAll $wtop
+		set msg "Whiteboard message sent to $jid"
+		::UI::SetStatusMessage $wtop $msg
+	    } else {
+		destroy $wtopReal
+	    }
+    } else {
+	tk_messageBox -icon warning -type ok -parent $wapp(toplevel) -message \
+	  [FormatTextForMessageBox [::msgcat::mc jamessinvalidjid]]
+    }
+}
+
 # Jabber::UpdateAutoAwaySettings --
 #
 #       If changed present auto away settings, may need to configure
@@ -1229,7 +1278,7 @@ proc ::Jabber::DoCloseClientConnection {ipNum} {
     
     # Update the communication frame; remove connection 'to'.
     if {$prefs(jabberCommFrame)} {
-	::UI::ConfigureAllJabberEntries $ipNum "disconnect"
+	::UI::ConfigureAllJabberEntries $ipNum -netstate "disconnect"
     } else {
 	::UI::SetCommEntry . $ipNum 0 -1
     }
@@ -1307,6 +1356,28 @@ proc ::Jabber::BuildJabberEntry {wtop args} {
       -servervariable ::Jabber::jserver(this)  \
       -jidvariable ::Jabber::jstate($wtop,tojid) \
       -dosendvariable ::Jabber::jstate($wtop,doSend)} $args
+      
+    eval {::Jabber::ConfigureJabberEntry $wtop} $args
+}
+
+# Jabber::ConfigureJabberEntry --
+#
+#       A utility procedure to configure the jabber entry.
+#       Used to hide jabber stuff away from ::UI
+
+proc ::Jabber::ConfigureJabberEntry {wtop args} {
+
+    variable jstate
+
+    Debug 2 "::Jabber::ConfigureJabberEntry wtop=$wtop args='$args'"
+    foreach {key value} $args {
+    	switch -- $key {
+    	    -jid {
+    	    	set jstate($wtop,tojid) $value
+	    }
+
+	}
+    }
 }
 
 # Jabber::IsWellFormedJID --
@@ -1399,7 +1470,7 @@ proc ::Jabber::SetStatus {type {to {}}} {
 		eval {$jstate(jlib) send_presence -type $type} $toArgs
 	    }
 	    away - dnd - xa {
-		eval {$jstate(jlib) send_presence -type {available}}  \
+		eval {$jstate(jlib) send_presence -type "available"}  \
 		  -show $type $toArgs
 	    }
 	}	
@@ -1411,6 +1482,16 @@ proc ::Jabber::SetStatus {type {to {}}} {
 	  -message [FormatTextForMessageBox $err]
     }
 }
+
+# Jabber::SetStatusWithMessage --
+#
+#       Dialog for setting user's status with message.
+#       
+# Arguments:
+#       w
+#       
+# Results:
+#       "cancel" or "set".
 
 proc ::Jabber::SetStatusWithMessage {w} {
     global  this sysFont
@@ -1427,8 +1508,8 @@ proc ::Jabber::SetStatusWithMessage {w} {
 	wm transient $w .
     }
     wm title $w [::msgcat::mc {Set Status}]
-    set finishedStat 0
-    set show {chat}
+    set finishedStat -1
+    set show "chat"
     
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
@@ -1454,10 +1535,10 @@ proc ::Jabber::SetStatusWithMessage {w} {
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
     pack [button $frbot.btset -text [::msgcat::mc Set] -default active -width 8 \
-      -command ::Jabber::BtSetStatus]  \
+      -command [list [namespace current]::BtSetStatus $w]]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
-      -command "set [namespace current]::finishedStat 2"]  \
+      -command [list [namespace current]::SetStatusCancel $w]] \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
     
@@ -1465,17 +1546,26 @@ proc ::Jabber::SetStatusWithMessage {w} {
     bind $w <Return> {}
     
     # Grab and focus.
+    set oldFocus [focus]
     focus $w
     catch {grab $w}
     
-    # Wait here for a button press.
-    tkwait variable [namespace current]::finishedStat
+    # Wait here for a button press and window to be destroyed.
+    tkwait window $w
     
     catch {grab release $w}
-    catch {destroy $w}    
+    focus $oldFocus
+    return [expr {($finishedStat <= 0) ? "cancel" : "set"}]
 }
 
-proc ::Jabber::BtSetStatus {} {
+proc ::Jabber::SetStatusCancel {w} {    
+    variable finishedStat
+
+    set finishedStat 0
+    destroy $w
+}
+
+proc ::Jabber::BtSetStatus {w} {
     
     variable finishedStat
     variable show
@@ -1487,8 +1577,9 @@ proc ::Jabber::BtSetStatus {} {
     if {[string length $allText]} {
 	set statusOpt [list {-status} $allText]
     }    
-    eval {$jstate(jlib) send_presence -type {available} -show $show} $statusOpt
+    eval {$jstate(jlib) send_presence -type "available" -show $show} $statusOpt
     set finishedStat 1
+    destroy $w
 }
 
 # Jabber::GetIPnumber / PutIPnumber --
@@ -1561,53 +1652,64 @@ proc ::Jabber::GetIPCallback {fromjid id clientIP} {
     }
 }
 
-# Jabber::GetAvailableIPsAndSchedulePutFile --
+# Jabber::PutFileAndSchedule --
 # 
-#       If single chat, it returns ip number if client available and
-#       with known ip number. If available but with unknown ip, we
-#       make a GET IP, and schedule a separate Put file operation.
-#       
-#       A slight problem when caching ip numbers of clients is that if a jid
-#       is connected from more than one resource it is the servers 
-#       responsibility to figure out which should receive the message.
-#       For a file transfer it is, however, our responsibilty. 
-#       
-#       If 'jstate(.,tojid)' is without a resource, put to all resources of
-#       this jid.
+#       Handles everything needed to put a file to the jid's corresponding
+#       to the 'wtop'. Users that we haven't got ip number from are scheduled
+#       for delivery as a callback.
 #       
 # Arguments:
-#       fileName   the path to the file to be put.
-#       'optList'  a list of 'key: value' pairs, resembling the html 
-#                  protocol for getting files, but where most keys correspond
-#                  to a valid "canvas create" option.
+#       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
+#       fileName    the path to the file to be put.
+#       'optList'   a list of 'key: value' pairs, resembling the html 
+#                   protocol for getting files, but where most keys correspond
+#                   to a valid "canvas create" option.
 #       
 # Results:
-#       list of ip numbers for immediate delivery, or empty.
+#       none.
 
-proc ::Jabber::GetAvailableIPsAndSchedulePutFile {fileName optList} {
+proc ::Jabber::PutFileAndSchedule {wtop fileName optList} {
     
     variable jidToIP
     variable jstate
     
-    ::Jabber::Debug 2 "::Jabber::GetAvailableIPsAndSchedulePutFile: fileName=$fileName,\
-      optList='$optList'"
+    ::Jabber::Debug 2 "::Jabber::PutFileAndSchedule: \
+      wtop=$wtop, fileName=$fileName, optList='$optList'"
     
-    # Before doing anything check that the Send checkbutton is on.
-    if {!$jstate(.,doSend)} {
+    # Before doing anything check that the Send checkbutton is on. ???
+    if {!$jstate($wtop,doSend)} {
+    	::Jabber::Debug 2 "    doSend=0 => return"
 	return
     }
     
     # Verify that jid is well formed.
-    if {![::Jabber::VerifyJIDWhiteboard .]} {
+    if {![::Jabber::VerifyJIDWhiteboard $wtop]} {
 	return
     }
-    set ipList {}
-    set tojid $jstate(.,tojid)
-    ::Jabber::Debug 2 "   tojid=$tojid"
+    
+    # This must never fail (application/octet-stream as fallback).
+    set mime [GetMimeTypeFromFileName $fileName]
+    
+    # Need to add jabber specific info to the 'optList', such as
+    # to:, from:, type:, thread: etc.
+    # 
+    # -type and 'tojid' shall never be in conflict???
+    foreach {key value} [::UI::ConfigureMain $wtop] {
+	switch -- $key {
+	    -type - -thread {
+		lappend optList [string trimleft $key -]: $value
+	    }
+	}
+    }
+    
+    set tojid $jstate($wtop,tojid)
     set isRoom 0
     
     if {[regexp {^(.+)@([^/]+)/([^/]+)} $tojid match name host res]} {
+	
+	# The 'tojid' is already complete with resource.
 	set allJidLong $tojid
+    	lappend optList from: $jstate(mejidres)
     } else {
 	
 	# If 'tojid' is without a resource, it can be a room.
@@ -1616,27 +1718,30 @@ proc ::Jabber::GetAvailableIPsAndSchedulePutFile {fileName optList} {
 	    set allJidLong [$jstate(jlib) service roomparticipants $tojid]
 	    
 	    # Exclude ourselves.
-	    foreach {meHash nick} [$jstate(jlib) service hashandnick $tojid] \
+	    foreach {meRoomJid nick} [$jstate(jlib) service hashandnick $tojid] \
 	      { break }
-	    set ind [lsearch $allJidLong $meHash]
+	    set ind [lsearch $allJidLong $meRoomJid]
 	    if {$ind >= 0} {
 		set allJidLong [lreplace $allJidLong $ind $ind]
 	    }
+	    
+	    # Be sure to have our room jid and not the real one.
+     	    lappend optList from: $meRoomJid
 	} else {
 	    
-	    # Else put to all resources that we've got presence from.
-	    set allResrc [$jstate(roster) getresources $tojid]
-	    if {[llength $allResrc] > 0} {
-	    foreach res $allResrc {
-		lappend allJidLong "$tojid/$res"
-	    }
-	    } else {
+	    # Else put to resource with highest priority.
+	    set res [$jstate(roster) gethighestresource $tojid]
+	    if {$res == ""} {
 		
 		# This is someone we haven't got presence from.
 		set allJidLong $tojid
+	    } else {
+		set allJidLong $tojid/$res
 	    }
+	    lappend optList from: $jstate(mejidres)
 	}
     }
+    
     ::Jabber::Debug 2 "   allJidLong=$allJidLong"
     
     # We shall put to all resources. Treat each in turn.
@@ -1648,57 +1753,64 @@ proc ::Jabber::GetAvailableIPsAndSchedulePutFile {fileName optList} {
 	} else {
 	    set avail [$jstate(roster) isavailable $jidLong]
 	}
+	
+	# Each jid must get its own to: attribute.
+	set optjidList [concat $optList to: $jidLong]
+	
 	::Jabber::Debug 2 "   jidLong=$jidLong, avail=$avail"
+	
 	if {$avail} {
 	    if {[info exists jidToIP($jidLong)]} {
 		
 		# This one had already told us its ip number, good!
-		lappend ipList $jidToIP($jidLong)
+		::Jabber::PutFile $wtop $fileName $mime $optjidList $jidLong
 	    } else {
 		
 		# This jid is online but has not told us its ip number.
 		# We need to get this jid's ip number and register the
 		# PutFile as a callback when receiving this ip.
-		GetIPnumber $jidLong [list ::Jabber::PutFile $fileName $optList]
+		GetIPnumber $jidLong [list ::Jabber::PutFile $wtop $fileName \
+		  $mime $optjidList]
 	    }
 	} else {
-	
+	    
 	    # We need to tell this jid to get this file from a server,
 	    # possibly as an OOB http transfer.
 	    array set optArr $optList
 	    if {[info exists optArr(Get-Url:)]} {
 		$jstate(jlib) oob_set $jidLong ::Jabber::OOB::SetCallback  \
-		  $optArr(Get-Url:) -desc {You were not online when I opened this file}
+		  $optArr(Get-Url:)  \
+		  -desc {This file is part of a whiteboard conversation.\
+		  You were not online when I opened this file}
 	    } else {
 		puts "   missing optArr(Get-Url:)"
 	    }
 	}
     }
-    
+        
     # This is an activity that may not be registered with jabberlib's auto away
     # functions, and must therefore schedule it here. ???????
     $jstate(jlib) schedule_auto_away
-    
-    return $ipList
 }
 
 # Jabber::PutFile --
 #
 #       Puts the file to the given jid provided the client has
-#       told us its ip number. Typically a callback from 'GetIPnumber'.
+#       told us its ip number.
 #       Calls '::PutFileIface::PutFile' to do the real work for us.
 #
 # Arguments:
-#       fileName   the path to the file to be put.
-#       'optList'  a list of 'key: value' pairs, resembling the html 
-#                  protocol for getting files, but where most keys correspond
-#                  to a valid "canvas create" option.
-#       jid        fully qualified  "username@host/resource"
+#       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
+#       fileName    the path to the file to be put.
+#       'optList'   a list of 'key: value' pairs, resembling the html 
+#                   protocol for getting files, but where most keys correspond
+#                   to a valid "canvas create" option.
+#       jid         fully qualified  "username@host/resource"
 #       
 # Results:
 
-proc ::Jabber::PutFile {fileName optList jid} {
-    
+proc ::Jabber::PutFile {wtop fileName mime optList jid} {
+    global  prefs
     variable jidToIP
     variable jstate
     
@@ -1710,19 +1822,17 @@ proc ::Jabber::PutFile {fileName optList jid} {
 	return
     }
     
-    # Finally, the usual PutFile proc does the job for us.
-    ::PutFileIface::PutFile . $fileName $jidToIP($jid) $optList
-}
+    # Get the remote (network) file name (no path, no uri encoding).
+    set dstFile [NativeToNetworkFileName $fileName]
 
-# Jabber::GetJabberPutData --
-#
-#       Jabber extra address labels when putting files.
-
-proc ::Jabber::GetJabberPutData {wtop} {
-    variable jstate
-    
-    # Possibly add 'type' as well.
-    return [list "to:" $jstate($wtop,tojid) "from:" $jstate(mejidres)]
+    if {[catch {::putfile::put $fileName $jidToIP($jid) $prefs(remotePort) \
+      -mimetype $mime -timeout [expr 1000 * $prefs(timeout)]  \
+      -optlist $optList -filetail $dstFile  \
+      -progress ::PutFileIface::PutProgress  \
+      -command ::PutFileIface::PutCommand} tok]} {
+	tk_messageBox -title [::msgcat::mc {File Transfer Error}]  \
+	  -type ok -message $tok
+    }
 }
 
 # Jabber::SetPrivateData --
@@ -1743,7 +1853,7 @@ proc ::Jabber::SetPrivateData { } {
     # Build tag and attributes lists to 'private_set'.
     $jstate(jlib) private_set "coccinella:public"     \
       [list ::Jabber::SetPrivateDataCallback private_set]   \
-      -server [list $this(ipnum) [list resource $jstate(meres)   \
+      -server [list $this(ipnum) [list resource $jstate(meres)  \
       port $prefs(thisServPort)]]       \
       -httpd [list $this(ipnum) [list resource $jstate(meres)   \
       port $prefs(httpdPort)]]
@@ -1834,8 +1944,11 @@ proc ::Jabber::SetServerShortcut {profile server username password {res {home}}}
     
     variable jserver
     
-    #puts "::Jabber::SetServerShortcut profile=$profile, $server, $username, $password"
+    ::Jabber::Debug 2 "profile=$profile, s=$server, u=$username, p=$password"
+
     # Be sure to sync jserver(all) first.
+    #  jserver(profile): {$profile1 {$server1 $username $password $resource} \
+    #                     $profile2 {$server2 $username2 $password2 $resource2} ... }
     set jserver(all) {}
     array set jserverArr $jserver(profile)
     foreach prof [array names jserverArr] {
@@ -1848,9 +1961,9 @@ proc ::Jabber::SetServerShortcut {profile server username password {res {home}}}
 	set ind [lsearch -exact $jserver(profile) $profile]
 	#puts "    ind=$ind"
 	if {$ind >= 0} {
-	    set new [list $profile [list $username $password $res]]
-	    set jserver(profile) [lreplace $jserver(profile)  \
-	      $ind [expr $ind + 1] $new]
+	    incr ind
+	    set new [list $server $username $password $res]
+	    set jserver(profile) [lreplace $jserver(profile) $ind $ind $new]
 	    set newProfile 0
 	} else {
 	    set newProfile 1
@@ -1865,10 +1978,10 @@ proc ::Jabber::SetServerShortcut {profile server username password {res {home}}}
 	if {[lsearch -exact $jserver(all) $profile] >= 0} {
 	    #puts "    Create a new unique profile name"
 	    set i 2
-	    set profile ${server}-$i
+	    set profile ${server}-${i}
 	    while {[lsearch -exact $jserver(all) $profile] >= 0} {
 		incr i
-		set profile ${server}-$i
+		set profile ${server}-${i}
 	    }
 	}
 	#puts "    profile=$profile"
@@ -2078,7 +2191,6 @@ proc ::Jabber::Popup {what w v x y} {
     menu $m -tearoff 0
     
     foreach {item type cmd} $jstate(popup,$what,def) {
-	#puts "item=$item, type=$type, cmd=$cmd"
 	if {[string index $cmd 0] == "@"} {
 	    set mt [menu ${m}.sub${i} -tearoff 0]
 	    set locname [::msgcat::mc $item]
@@ -2089,10 +2201,8 @@ proc ::Jabber::Popup {what w v x y} {
 	    $m add separator
 	    continue
 	} else {
-	    #puts "1: cmd=$cmd"
 	    regsub -all &jid $cmd [list $jid] cmd
 	    set cmd [subst -nocommands $cmd]
-	    #puts "2: cmd=$cmd"
 	    set locname [::msgcat::mc $item]
 	    $m add command -label $locname -command "after 40 $cmd" -state disabled
 	}
@@ -2115,13 +2225,18 @@ proc ::Jabber::Popup {what w v x y} {
 			    set state normal
 			}
 			if {($status == "offline") &&  \
-			  ([string match -nocase "*chat*" $item] ||  \
-			  [string match -nocase "*whiteboard*" $item])} {
+			  ([string match -nocase "*chat*" $item])} {
 			    set state disabled
 			}
 		    }
 		    users {
-			if {($typeClicked == "user") || ($typeClicked == "group")} {
+			if {($typeClicked == "user") ||  \
+			  ($typeClicked == "group")} {
+			    set state normal
+			}
+		    }
+		    wb {
+			if {[string equal $typeClicked "user"]} {
 			    set state normal
 			}
 		    }
@@ -2151,10 +2266,20 @@ proc ::Jabber::Popup {what w v x y} {
 			    set state normal
 			}
 		    }
+		    wb {
+			switch -- $typeClicked {
+			    room - user {
+				set state normal
+			    }
+			}
+		    }
 		}
 	    }
 	    groupchat {	    
 		if {($type == "user") && ($typeClicked == "user")} {
+		    set state normal
+		}
+		if {($type == "wb") && ($typeClicked == "user")} {
 		    set state normal
 		}
 	    }
@@ -2184,11 +2309,17 @@ proc ::Jabber::Popup {what w v x y} {
     }
 }
 
+# Jabber::BuildPresenceMenu --
+# 
+#       Sets presence status. Used in popup only so far.
+
 proc ::Jabber::BuildPresenceMenu {mt} {
     
     # The -label and -image can't be combined, yet.
     variable gShowIcon
 
+    # Need to fix -variable
+    
     foreach name {available away dnd unavilable}  \
       mStr {mAvailable mAway mDoNotDisturb mNotAvailable} {
 	$mt add radio -label [::msgcat::mc $mStr]  \
@@ -2541,9 +2672,9 @@ proc ::Jabber::ParseGetVersion {args} {
     set xmllist [wrapper::createtag {query} -subtags $subtags  \
       -attrlist {xmlns jabber:iq:version}]
     if {[info exists argsArr(-from)]} {
-	$jstate(jlib) send_iq {result} $xmllist -to $argsArr(-from)
+	$jstate(jlib) send_iq "result" $xmllist -to $argsArr(-from)
     } else {
-	$jstate(jlib) send_iq {result} $xmllist
+	$jstate(jlib) send_iq "result" $xmllist
     }
 }
     
@@ -2555,11 +2686,11 @@ proc ::Jabber::ParseGetVersion {args} {
 #       boolean (0/1) telling if this was handled or not.
 
 proc ::Jabber::ParseGetBrowse {args} {
-    global  prefs
-    
+    global  prefs    
     variable jstate
 
     ::Jabber::Debug 2 "::Jabber::ParseGetBrowse: args='$args'"
+    
     array set argsArr $args
     if {![info exists argsArr(-from)]} {
 	return 0
@@ -2580,6 +2711,7 @@ proc ::Jabber::ParseGetBrowse {args} {
       [wrapper::createtag "ns" -chdata "jabber:x:data"]         \
       [wrapper::createtag "ns" -chdata "coccinella:public"]     \
       [wrapper::createtag "ns" -chdata "coccinella:wb"]]
+    
     set attr [list xmlns jabber:iq:browse jid $jstate(mejidres)  \
       type client category user]
     set xmllist [wrapper::createtag "user" -subtags $subtags -attrlist $attr]
@@ -2589,15 +2721,98 @@ proc ::Jabber::ParseGetBrowse {args} {
     return 1
 }
 
-# Jabber::DoWhiteboard --
-#
+# The ::Jabber::WB:: namespace -------------------------------------------------
 
-proc ::Jabber::DoWhiteboard {jid} {
+namespace eval ::Jabber::WB:: {
+   
+}
+
+# Jabber::WB::NewWhiteboard --
+#
+#       Starts a new whiteboard session.
+#       
+# Arguments:
+#       jid
+#       args        -thread
+#       
+# Results:
+#       $wtop; may create new toplevel whiteboard
+
+proc ::Jabber::WB::NewWhiteboard {jid args} {
+    global  wDlgs    
+    upvar ::Jabber::jstate jstate
     
-    variable jstate
+    ::Jabber::Debug 2 "::Jabber::WB::NewWhiteboard jid=$jid, args='$args'"
     
-    # Warning?
-    if {1} {
+    set haveMultiinstance 1
+    array set argsArr $args
+    
+    if {$haveMultiinstance} {
+	
+	# Make a fresh whiteboard window:
+	#    jid is room: groupchat live
+	#    jid is ordinary available user: chat
+	#    jid is ordinary but unavailable user: normal message	
+	set isRoom [$jstate(jlib) service isroom $jid]
+	set isAvailable [$jstate(roster) isavailable $jid]
+	
+    	::Jabber::Debug 2 "    isRoom=$isRoom, isAvailable=$isAvailable"
+	
+	if {$isRoom} {
+	    
+	    # Must enter room in the usual way if not there already.
+	    set allRooms [$jstate(jlib) service allroomsin]
+	    if {[lsearch $allRooms $jid] < 0} {
+		set ans [::Jabber::GroupChat::EnterRoom $wDlgs(jenterroom) \
+		  -roomjid $jid -autoget 1]
+		if {$ans == "cancel"} {
+		    return
+		}
+	    }
+	    set roomName [$jstate(browse) getname $jid]    
+	    if {[llength $roomName]} {
+		set title "Groupchat room $roomName"
+	    } else {
+		set title "Groupchat room $jid"
+	    }
+	    set wbOpts [list -type groupchat -title $title -jid $jid \
+	      -toentrystate disabled -sendbuttonstate disabled \
+	      -serverentrystate disabled]
+	    set sendLive 1
+	} elseif {$isAvailable} {
+	    if {[info exists argsArr(-thread)]} {
+	        set threadID $argsArr(-thread)
+	    } else {
+	    
+	    	# Make unique thread id.
+	    	set threadID [::sha1pure::sha1 "$jstate(mejid)[clock seconds]"]
+	    }
+	    set name [$jstate(roster) getname $jid]
+	    if {[string length $name]} {
+	    	set title "Chat with $name"
+	    } else {
+	    	set title "Chat with $jid"
+	    }
+	    set wbOpts [list -type chat -thread $threadID -title $title  \
+	      -toentrystate disabled -jid $jid -sendbuttonstate disabled  \
+	      -serverentrystate disabled]
+	    set sendLive 1
+	} else {
+	    set name [$jstate(roster) getname $jid]
+	    if {[string length $name]} {
+	    	set title "Send Message to $name"
+	    } else {
+	    	set title "Send Message to $jid"
+	    }
+	    set wbOpts [list -type normal -title $title -jid $jid  \
+	      -toentrystate disabled -serverentrystate disabled]
+	    set sendLive 0
+	}
+	
+	set wtop [eval {::UI::NewMain} $wbOpts]
+	set jstate($wtop,doSend) $sendLive
+    } else {
+	set wtop .
 	set ans [tk_messageBox -type yesno -default yes -icon warning  \
 	  -message [FormatTextForMessageBox [::msgcat::mc jamesswarberasewb]]]
 	if {$ans == "yes"} {
@@ -2609,12 +2824,109 @@ proc ::Jabber::DoWhiteboard {jid} {
 	}
 	set jstate(.,tojid) $jid
 	raise .
-    } else {
+    }
+    return $wtop
+}
+
+# ::Jabber::WB::ChatMsg, GroupChatMsg --
+# 
+#       Handles incoming chat/groupchat message aimed for a whiteboard.
+#       It may not exist, for instance, if we receive a new chat thread.
+#       
+# Arguments:
+#       args        -from, -thread,...
+
+proc ::Jabber::WB::ChatMsg {args} {
     
-	# Make unique toplevel window.
-	set wtop [::UI::NewMain]
-	set jstate($wtop,doSend) 1
-	set jstate($wtop,tojid) $jid
+    upvar ::Jabber::jstate jstate
+
+    array set argsArr $args
+    ::Jabber::Debug 2 "::Jabber::WB::ChatMsg args='$args'"
+
+    # This one returns empty if not exists.
+    set wtop [::UI::GetWtopFromJabberType "chat" $argsArr(-from)  \
+      $argsArr(-thread)]
+    if {$wtop == ""} {
+	set wtop [eval {::Jabber::WB::NewWhiteboard $argsArr(-from)} $args]
+    }
+    foreach line $argsArr(-whiteboard) {
+	eval {ExecuteClientRequest $wtop $jstate(sock) ip port $line} $args
+    }     
+}
+
+proc ::Jabber::WB::GroupChatMsg {args} {
+    
+    upvar ::Jabber::jstate jstate
+
+    array set argsArr $args
+    
+    # The -from argument is either the room itself, or usually a user in
+    # the room.
+    if {![regexp {(^[^@]+@[^/]+)(/.+)?} $argsArr(-from) match roomjid]} {
+	return -code error "The jid we got \"$argsArr(-from)\" was not well-formed!"
+    }
+    set wtop [::UI::GetWtopFromJabberType "groupchat" $roomjid]
+    if {$wtop == ""} {
+	set wtop [eval {::Jabber::WB::NewWhiteboard $roomjid} $args]
+    }
+    foreach line $argsArr(-whiteboard) {
+	eval {ExecuteClientRequest $wtop $jstate(sock) ip port $line} $args
+    } 
+}
+
+# ::Jabber::WB::DispatchToImporter --
+# 
+#       Is called as a response to a GET file event. 
+#       We've received a file that should be imported somewhere.
+#       
+# Arguments:
+#       mime
+#       optList
+#       args        -file, -where; for importer proc.
+
+proc ::Jabber::WB::DispatchToImporter {mime optList args} {
+    global  plugin
+        
+    set display 1
+    array set optArr $optList
+    switch -- $optArr(type:) {
+	chat {
+	    set wtop [::UI::GetWtopFromJabberType chat $optArr(from:) \
+	      $optArr(thread:)]
+	    if {$wtop == ""} {
+		set wtop [::Jabber::WB::NewWhiteboard $optArr(from:)  \
+		  -thread $optArr(thread:)]
+	    }
+	}
+	groupchat {
+	    if {![regexp {(^[^@]+@[^/]+)(/.+)?} $optArr(from:) match roomjid]} {
+		return -code error  \
+		  "The jid we got \"$optArr(from:)\" was not well-formed!"
+	    }
+	    set wtop [::UI::GetWtopFromJabberType groupchat $optArr(from:)]
+	    if {$wtop == ""} {
+		set wtop [::Jabber::WB::NewWhiteboard $roomjid]
+	    }
+	}
+	default {
+	    
+	    # Normal message. Shall go in inbox ???????????
+	    # We have no solution for this at the moment:
+	    # 1) Offline users can never be sent to since no offline storage.
+	    # 2) Online users may get these entities, but it is the importers
+	    #    responsibility to import it which is not designed for
+	    #    delayed display.
+	    
+	    set wtop [::UI::GetWtopFromJabberType normal $optArr(from:)]
+	    set display 0
+	}
+    }
+    
+    set importPackage [GetPreferredPackage $mime]
+    if {$display && [llength $importPackage]} {
+	upvar ::${wtop}::wapp wapp
+	
+	eval {$plugin($importPackage,importProc) $wapp(can) $optList} $args
     }
 }
 
@@ -3008,7 +3320,7 @@ proc ::Jabber::Roster::DoubleClickCmd {w v} {
 	if {[string equal $jprefs(rost,dblClk) "normal"]} {
 	    ::Jabber::NewMsg::Build $wDlgs(jsendmsg) -to $jid
 	} else {
-	    ::Jabber::Chat::StartThread -to $jid
+	    ::Jabber::Chat::StartThread $jid
 	}
     }    
 }
@@ -3031,8 +3343,9 @@ proc ::Jabber::Roster::DoubleClickCmd {w v} {
 
 proc ::Jabber::Roster::PushProc {rostName what {jid {}} args} {
     
-    upvar ::Jabber::jstate jstate
+    upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jserver jserver
+    upvar ::Jabber::jstate jstate
 
     ::Jabber::Debug 2 "--roster-> rostName=$rostName, what=$what, jid=$jid, \
       args='$args'"
@@ -3053,13 +3366,17 @@ proc ::Jabber::Roster::PushProc {rostName what {jid {}} args} {
 		eval {::Jabber::GroupChat::Presence $jid $attrArr(-type)} $args
 		
 		# What if agent(s) instead???
-		# Dont do this unless we've got browsing for this server.
-		
+		# Dont do this unless we've got browsing for this server.		
 		if {[::Jabber::Browse::HaveBrowseTree $jid]} {
 		    eval {::Jabber::Browse::Presence $jid $attrArr(-type)} $args
 		}
 	    } else {
 		eval {::Jabber::Roster::Presence $jid $attrArr(-type)} $args
+	    
+	    	# If users shall be automatically browsed to.
+	    	if {$jprefs(autoBrowseUsers)} {
+			#eval {::Jabber::Roster::AutoBrowse $jid $attrArr(-type)} $args
+	    	}
 	    }
 	    
 	    # Any noise?
@@ -3265,6 +3582,25 @@ proc ::Jabber::Roster::Presence {jid presence args} {
     }
 }
 
+# Jabber::Roster::AutoBrowse --
+# 
+#       If presence from user browse that user including its resource.
+
+proc ::Jabber::Roster::AutoBrowse {jid presence args} {
+    
+    upvar ::Jabber::jprefs jprefs
+    upvar ::Jabber::jstate jstate
+
+    ::Jabber::Debug 2 "::Jabber::Roster::AutoBrowse jid=$jid, presence=$presence, args='$args'"
+
+    array set argsArr $args
+    if {[string equal $presence "available"]} {    
+	$jstate(jlib) browse_get $jid [list ::Jabber::Browse::ErrorProc 1]	
+    } elseif {[string equal $presence "unavailable"]} {    
+	$jstate(browse) clear $jid
+    }
+}
+
 # Jabber::Roster::PutItemInTree --
 #
 #       Sets the jid in the correct place in our roster tree.
@@ -3291,9 +3627,9 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
     
     # What shall we do with any 'name' ???
     if {[info exists argsArr(-name)] && [string length $argsArr(-name)]} {
-	set itemTxt [list {-text} $argsArr(-name)]
+	set itemTxt [list "-text" $argsArr(-name)]
     } else {
-	set itemTxt {}
+	set itemTxt ""
     }
     set icon [eval {::Jabber::GetPresenceIcon $presence} $args]
 	
@@ -3313,15 +3649,17 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
 	    if {[lsearch -exact $childs $grp] < 0} {
 		$wtree newitem [list $gpresarr($presence) $grp] -dir 1
 	    }
-	    eval {$wtree newitem [list $gpresarr($presence) $grp $jid]  \
+	    eval {$wtree newitem [list $gpresarr($presence) $grp $jid] \
 	      -image $icon -tags $jid} $itemTxt
 	}
     } else {
 	
 	# No groups associated with this item.
-	eval {$wtree newitem [list $gpresarr($presence) $jid]   \
+	eval {$wtree newitem [list $gpresarr($presence) $jid] \
 	  -image $icon -tags $jid} $itemTxt
-    }    
+    }
+    
+    # Design the balloon help window message.
     if {[info exists argsArr(-name)] && [string length $argsArr(-name)]} {
 	set msg "$argsArr(-name): $gpresarr($presence)"
     } else {
@@ -3343,14 +3681,14 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
 #       args      -jid theJid
 #       
 # Results:
-#       toplevel window shown.
+#       "cancel" or "add".
 
 proc ::Jabber::Roster::NewOrEditItem {w which args} {
     global  sysFont this prefs wDlgs
 
     variable selItem
     variable menuVar
-    variable finishedNew
+    variable finishedNew -1
     variable jid
     variable name
     variable oldName
@@ -3367,7 +3705,6 @@ proc ::Jabber::Roster::NewOrEditItem {w which args} {
 	return
     }    
     array set argsArr $args
-    set finishedNew -1
         
     # Find all our groups for any jid.
     set allGroups [$jstate(roster) getgroups]    
@@ -3444,14 +3781,15 @@ proc ::Jabber::Roster::NewOrEditItem {w which args} {
     } else {
 	
 	# Give user an opportunity to subscribe/unsubscribe other jid.
-	if {[string equal $subscription "none"] ||  \
-	  [string equal $subscription "from"]} {
-	    checkbutton $frmid.csubs -text "  [::msgcat::mc jarostsub]"  \
-	      -variable "[namespace current]::subscribe"
-	} elseif {[string equal $subscription "to"] ||  \
-	  [string equal $subscription "both"]} {
-	    checkbutton $frmid.csubs -text "  [::msgcat::mc jarostunsub]" \
-	      -variable "[namespace current]::unsubscribe"
+	switch -- $subscription {
+	    from - none {
+		checkbutton $frmid.csubs -text "  [::msgcat::mc jarostsub]"  \
+		  -variable "[namespace current]::subscribe"
+	    }
+	    both - to {
+		checkbutton $frmid.csubs -text "  [::msgcat::mc jarostunsub]" \
+		  -variable "[namespace current]::unsubscribe"
+	    }
 	}
 	
 	# Present subscription.
@@ -3507,10 +3845,10 @@ proc ::Jabber::Roster::NewOrEditItem {w which args} {
     }
     set frbot [frame $w.frall.frbot -borderwidth 0]
     pack [button $frbot.btconn -text $bttxt -default active -width 8 \
-      -command [list ::Jabber::Roster::EditSet $which]]  \
+      -command [list [namespace current]::EditSet $w $which]]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8   \
-      -command "set [namespace current]::finishedNew 2"]  \
+      -command [list [namespace current]::Cancel $w]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
     
@@ -3518,14 +3856,26 @@ proc ::Jabber::Roster::NewOrEditItem {w which args} {
     bind $w <Return> [list ::Jabber::Roster::EditSet $which]
     
     # Grab and focus.
+    set oldFocus [focus]
     focus $w
     catch {grab $w}
     
-    # Wait here for a button press.
-    tkwait variable [namespace current]::finishedNew
-    
+    # Wait here for a button press and window to be destroyed.
+    tkwait window $w
+
     catch {grab release $w}
-    catch {destroy $w}    
+    focus $oldFocus
+    return [expr {($finishedNew <= 0) ? "cancel" : "add"}]
+}
+
+# Jabber::Roster::Cancel --
+#
+
+proc ::Jabber::Roster::Cancel {w} {
+    variable finishedNew
+
+    set finishedNew 0
+    destroy $w
 }
 
 # Jabber::Roster::EditSet --
@@ -3538,7 +3888,7 @@ proc ::Jabber::Roster::NewOrEditItem {w which args} {
 # Results:
 #       sends roster set.
 
-proc ::Jabber::Roster::EditSet {which} {
+proc ::Jabber::Roster::EditSet {w which} {
     
     variable selItem
     variable finishedNew
@@ -3623,6 +3973,8 @@ proc ::Jabber::Roster::EditSet {which} {
 	    $jstate(jlib) send_presence -type {unsubscribe} -to $jid
 	}
     }
+    
+    destroy $w
 }
 
 # Jabber::Roster::EditSetCommand --
@@ -3680,9 +4032,6 @@ proc ::Jabber::Roster::SetUIWhen {what} {
 
 namespace eval ::Jabber::Register:: {
 
-    # Wait for this variable to be set.
-    variable finished   
-    
     variable server
     variable username
     variable password
@@ -3697,20 +4046,21 @@ namespace eval ::Jabber::Register:: {
 #       args   -server, -username, -password
 #       
 # Results:
-#       shows window.
+#       "cancel" or "new".
 
 proc ::Jabber::Register::Register {w args} {
     global  this sysFont
     
-    variable finished
+    variable finished -1
     variable server
     variable username
     variable password
+    variable topw $w
     
     if {[winfo exists $w]} {
 	return
     }
-    set finished 0
+    set finished -1
     array set argsArr $args
     foreach name {server username password} {
 	if {[info exists argsArr(-$name)]} {
@@ -3737,15 +4087,18 @@ proc ::Jabber::Register::Register {w args} {
     
     # Entries etc.
     set frmid [frame $w.frall.frmid -borderwidth 0]
-    label $frmid.lserv -text "[::msgcat::mc {Jabber server}]:" -font $sysFont(sb) -anchor e
+    label $frmid.lserv -text "[::msgcat::mc {Jabber server}]:"  \
+      -font $sysFont(sb) -anchor e
     entry $frmid.eserv -width 26    \
       -textvariable "[namespace current]::server" -validate key  \
       -validatecommand {::Jabber::ValidateJIDChars %S}
-    label $frmid.luser -text "[::msgcat::mc Username]:" -font $sysFont(sb) -anchor e
+    label $frmid.luser -text "[::msgcat::mc Username]:" -font $sysFont(sb)  \
+      -anchor e
     entry $frmid.euser -width 26   \
       -textvariable "[namespace current]::username" -validate key  \
       -validatecommand {::Jabber::ValidateJIDChars %S}
-    label $frmid.lpass -text "[::msgcat::mc Password]:" -font $sysFont(sb) -anchor e
+    label $frmid.lpass -text "[::msgcat::mc Password]:" -font $sysFont(sb)  \
+      -anchor e
     entry $frmid.epass -width 26   \
       -textvariable "[namespace current]::password" -validate key  \
       -validatecommand {::Jabber::ValidatePasswdChars %S}
@@ -3760,31 +4113,41 @@ proc ::Jabber::Register::Register {w args} {
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
     pack [button $frbot.btconn -text [::msgcat::mc New] -width 8 -default active \
-      -command "::Jabber::Register::Doit"]  \
+      -command [list [namespace current]::Doit]]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8   \
-      -command "set [namespace current]::finished 2"]  \
+      -command [list [namespace current]::Cancel $w]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
     
     wm resizable $w 0 0
-    bind $w <Return> ::Jabber::Register::Doit
+    bind $w <Return> "$frbot.btconn invoke"
     
     # Grab and focus.
+    set oldFocus [focus]
     focus $w
     catch {grab $w}
     
-    # Wait here for a button press.
-    tkwait variable [namespace current]::finished
+    # Wait here for a button press and window to be destroyed.
+    tkwait window $w
     
     catch {grab release $w}
-    catch {destroy $w}    
+    focus $oldFocus
+    return [expr {($finished <= 0) ? "cancel" : "new"}]
+}
+
+proc ::Jabber::Register::Cancel {w} {
+    variable finished
+
+    set finished 0
+    destroy $w
 }
 
 # Jabber::Register::Doit --
 #
 #       Initiates a register operation.
 # Arguments:
+#       w
 #       
 # Results:
 #       .
@@ -3792,6 +4155,7 @@ proc ::Jabber::Register::Register {w args} {
 proc ::Jabber::Register::Doit { } {
     global  errorCode prefs
 
+    variable finished
     variable server
     variable username
     variable password
@@ -3802,7 +4166,7 @@ proc ::Jabber::Register::Doit { } {
     
     # Kill any pending open states.
     ::Network::OpenConnectionKillAll
-    ::UI::SetStatusMessage . {}
+    ::UI::SetStatusMessage . ""
     ::UI::StartStopAnimatedWaveOnMain 0
     
     # Check 'server', 'username' if acceptable.
@@ -3826,7 +4190,7 @@ proc ::Jabber::Register::Doit { } {
 
     # Set callback procedure for the async socket open.
     set jstate(servPort) $jprefs(port)
-    set cmd ::Jabber::Register::SocketIsOpen
+    set cmd [namespace current]::SocketIsOpen
     ::Network::OpenConnection $server $jprefs(port) $cmd -timeout $prefs(timeout)
     
     # Not sure about this...
@@ -3885,7 +4249,7 @@ proc ::Jabber::Register::SocketIsOpen {sock ip port status {msg {}}} {
     # Make a new account. Perhaps necessary to get additional variables
     # from some user preferences.
     $jstate(jlib) register_set $username $password   \
-      ::Jabber::Register::ResponseProc
+      [namespace current]::ResponseProc
 
     # Just wait for a callback to the procedure.
 }
@@ -3901,6 +4265,7 @@ proc ::Jabber::Register::SocketIsOpen {sock ip port status {msg {}}} {
 
 proc ::Jabber::Register::ResponseProc {jlibName type theQuery} {
     
+    variable topw
     variable finished
     variable server
     variable username
@@ -3922,8 +4287,8 @@ proc ::Jabber::Register::ResponseProc {jlibName type theQuery} {
 	    set msg "The registration failed with the error code $errcode and\
 	      message: \"$errmsg\""
 	}
-	tk_messageBox -title [::msgcat::mc Error] -message [FormatTextForMessageBox $msg] \
-	  -icon error -type ok
+	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
+	  -message [FormatTextForMessageBox $msg] \	  
     } else {
 	tk_messageBox -icon info -type ok -message [FormatTextForMessageBox \
 	  [::msgcat::mc jamessregisterok $server]]
@@ -3937,6 +4302,7 @@ proc ::Jabber::Register::ResponseProc {jlibName type theQuery} {
     # and need to be sure to exit from it before resetting!
     after idle $jlibName disconnect
     set finished 1
+    destroy $topw
 }
 
 # Jabber::Register::Remove --
@@ -3984,11 +4350,11 @@ proc ::Jabber::Register::RemoveCallback {jid jlibName type theQuery} {
 }
 
 # The ::Jabber::Passwd:: namespace -------------------------------------------
+#  jserver(profile): {$profile1 {$server1 $username $password $resource} \
+#                     $profile2 {$server2 $username2 $password2 $resource2} ... }
 
 namespace eval ::Jabber::Passwd:: {
 
-    # Wait for this variable to be set.
-    variable finished   
     variable password
 }
 
@@ -4000,12 +4366,12 @@ namespace eval ::Jabber::Passwd:: {
 #       w      the toplevel window.
 #       
 # Results:
-#       shows window.
+#       "cancel" or "set".
 
 proc ::Jabber::Passwd::Build {w} {
     global  this sysFont
     
-    variable finished
+    variable finished -1
     variable password
     variable validate
     upvar ::Jabber::jstate jstate
@@ -4013,7 +4379,6 @@ proc ::Jabber::Passwd::Build {w} {
     if {[winfo exists $w]} {
 	return
     }
-    set finished 0
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
@@ -4024,7 +4389,9 @@ proc ::Jabber::Passwd::Build {w} {
     
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised] \
-      -fill both -expand 1 -ipadx 12 -ipady 4    
+      -fill both -expand 1 -ipadx 12 -ipady 4
+    set password ""
+    set validate ""
     
     # Entries etc.
     set frmid [frame $w.frall.frmid -borderwidth 0]
@@ -4032,11 +4399,11 @@ proc ::Jabber::Passwd::Build {w} {
     label $frmid.le -font $sysFont(sb) -text $jstate(mejid)
     label $frmid.lserv -text "[::msgcat::mc {New password}]:" -anchor e
     entry $frmid.eserv -width 18 -show *  \
-      -textvariable "[namespace current]::password" -validate key  \
+      -textvariable [namespace current]::password -validate key  \
       -validatecommand {::Jabber::ValidatePasswdChars %S}
     label $frmid.lvalid -text "[::msgcat::mc {Retype password}]:" -anchor e
     entry $frmid.evalid -width 18 -show * \
-      -textvariable "[namespace current]::validate" -validate key  \
+      -textvariable [namespace current]::validate -validate key  \
       -validatecommand {::Jabber::ValidatePasswdChars %S}
     grid $frmid.ll -column 0 -row 0 -sticky e
     grid $frmid.le -column 1 -row 0 -sticky w
@@ -4048,37 +4415,47 @@ proc ::Jabber::Passwd::Build {w} {
 
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btconn -text [::msgcat::mc Set] -width 8 -default active \
-      -command "::Jabber::Passwd::Doit"]  \
+    pack [button $frbot.btset -text [::msgcat::mc Set] -width 8 -default active \
+      -command [list [namespace current]::Doit $w]]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8   \
-      -command "set [namespace current]::finished 2"]  \
+      -command [list [namespace current]::Cancel $w]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
     
     wm resizable $w 0 0
-    bind $w <Return> ::Jabber::Passwd::Doit
+    bind $w <Return> "$frbot.btset invoke"
     
     # Grab and focus.
+    set oldFocus [focus]
     focus $w
     catch {grab $w}
     
-    # Wait here for a button press.
-    tkwait variable [namespace current]::finished
+    # Wait here for a button press and window to be destroyed.
+    tkwait window $w
     
     catch {grab release $w}
-    catch {destroy $w}    
+    focus $oldFocus
+    return [expr {($finished <= 0) ? "cancel" : "set"}]
+}
+
+proc ::Jabber::Passwd::Cancel {w} {
+    variable finished
+    
+    set finished 0
+    destroy $w
 }
 
 # Jabber::Passwd::Doit --
 #
-#       Initiates a register operation.
+#       Initiates a register operation. Must be connected already!
+#
 # Arguments:
 #       
 # Results:
 #       .
 
-proc ::Jabber::Passwd::Doit { } {
+proc ::Jabber::Passwd::Doit {w} {
     global  errorCode prefs
 
     variable validate
@@ -4097,7 +4474,8 @@ proc ::Jabber::Passwd::Doit { } {
     set finished 1
     regexp -- {^([^@]+)@.+$} $jstate(mejid) match username
     $jstate(jlib) register_set $username $password \
-      ::Jabber::Passwd::ResponseProc -to $jserver(this)
+      [list [namespace current]::ResponseProc] -to $jserver(this)
+    destroy $w
 
     # Just wait for a callback to the procedure.
 }
@@ -4110,10 +4488,10 @@ proc ::Jabber::Passwd::ResponseProc {jlibName type theQuery} {
     if {[string equal $type "error"]} {
 	set errcode [lindex $theQuery 0]
 	set errmsg [lindex $theQuery 1]
-	set msg "Setting new password failed with the error code $errcode and\
-	  message: \"$errmsg\""
-	tk_messageBox -title [::msgcat::mc Error] -message [FormatTextForMessageBox $msg] \
-	  -icon error -type ok
+	set msg 
+	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
+	  -message [FormatTextForMessageBox  \
+	  [::msgcat::mc jamesspasswderr $errcode $errmsg]] \
     } else {
 	
 	# Make sure the new password is stored in our internal state array.
@@ -4124,8 +4502,8 @@ proc ::Jabber::Passwd::ResponseProc {jlibName type theQuery} {
 	    eval {::Jabber::SetServerShortcut $jserver(this)} $userSpec
 	}
 	
-	tk_messageBox -title [::msgcat::mc {New Password}] -icon info -type ok -message \
-	  [FormatTextForMessageBox [::msgcat::mc jamesspasswdok]]
+	tk_messageBox -title [::msgcat::mc {New Password}] -icon info -type ok \
+	  -message [FormatTextForMessageBox [::msgcat::mc jamesspasswdok]]
     }
 }
 
@@ -4146,7 +4524,7 @@ namespace eval ::Jabber::GenRegister:: {
 #       args   -server, -autoget 0/1
 #       
 # Results:
-#       .
+#       "cancel" or "register".
      
 proc ::Jabber::GenRegister::BuildRegister {w args} {
     global  this sysFont
@@ -4159,13 +4537,13 @@ proc ::Jabber::GenRegister::BuildRegister {w args} {
     variable server
     variable wsearrows
     variable stattxt
+    variable finished -1
     upvar ::Jabber::jstate jstate
     
     if {[winfo exists $w]} {
 	return
     }
     array set argsArr $args
-    set finished 0
     
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
@@ -4193,7 +4571,7 @@ proc ::Jabber::GenRegister::BuildRegister {w args} {
       -textvariable "[namespace current]::server" -editable 0
     eval {$frtop.eserv list insert end} $regServers
     
-    # Find the default conferencing server.
+    # Find the default registration server.
     if {[llength $regServers]} {
 	set server [lindex $regServers 0]
     }
@@ -4224,13 +4602,13 @@ proc ::Jabber::GenRegister::BuildRegister {w args} {
     set wbtregister $frbot.btenter
     set wbtget $frbot.btget
     pack [button $wbtget -text [::msgcat::mc Get] -width 8 -default active \
-      -command "::Jabber::GenRegister::Get"]  \
+      -command [namespace current]::Get]  \
       -side right -padx 5 -pady 5
     pack [button $wbtregister -text [::msgcat::mc Register] -width 8 -state disabled \
-      -command "::Jabber::GenRegister::DoRegister"]  \
+      -command [namespace current]::DoRegister]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
-      -command "set [namespace current]::finished 2"]  \
+      -command [list [namespace current]::Cancel $w]]  \
       -side right -padx 5 -pady 5
     pack [::chasearrows::chasearrows $wsearrows -background gray87 -size 16] \
       -side left -padx 5 -pady 5
@@ -4246,11 +4624,12 @@ proc ::Jabber::GenRegister::BuildRegister {w args} {
 	::Jabber::GenRegister::Get
     }
     
-    # Wait here for a button press.
-    tkwait variable [namespace current]::finished
+    # Wait here for a button press and window to be destroyed.
+    tkwait window $w
+    
     catch {grab release $w}
     focus $oldFocus
-    catch {destroy $w}            
+    return [expr {($finished <= 0) ? "cancel" : "register"}]
 }
 
 # Jabber::GenRegister::Simple --
@@ -4263,7 +4642,7 @@ proc ::Jabber::GenRegister::BuildRegister {w args} {
 #       args   -server
 #       
 # Results:
-#       .
+#       "cancel" or "register".
      
 proc ::Jabber::GenRegister::Simple {w args} {
     global  this sysFont
@@ -4271,13 +4650,13 @@ proc ::Jabber::GenRegister::Simple {w args} {
     variable wtop
     variable wbtregister
     variable server
+    variable finished -1
     upvar ::Jabber::jstate jstate
     
     if {[winfo exists $w]} {
 	return
     }
     array set argsArr $args
-    set finished 0
     
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
@@ -4336,10 +4715,10 @@ proc ::Jabber::GenRegister::Simple {w args} {
     set frbot [frame $w.frall.frbot -borderwidth 0]
     set wbtregister $frbot.btenter
     pack [button $wbtregister -text [::msgcat::mc Register] \
-      -default active -command "::Jabber::GenRegister::DoSimple"]  \
+      -default active -command [namespace current]::DoSimple]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
-      -command "set [namespace current]::finished 2"]  \
+      -command [list [namespace current]::Cancel $w]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
         
@@ -4349,11 +4728,19 @@ proc ::Jabber::GenRegister::Simple {w args} {
     set oldFocus [focus]
     catch {grab $w}
     
-    # Wait here for a button press.
-    tkwait variable [namespace current]::finished
+    # Wait here for a button press and window to be destroyed.
+    tkwait window $w
+
     catch {grab release $w}
     focus $oldFocus
-    catch {destroy $w}            
+    return [expr {($finished <= 0) ? "cancel" : "register"}]
+}
+
+proc ::Jabber::GenRegister::Cancel {w} {
+    variable finished
+    
+    set finished 0
+    destroy $w
 }
 
 proc ::Jabber::GenRegister::Get { } {
@@ -4417,6 +4804,7 @@ proc ::Jabber::GenRegister::DoRegister { } {
     variable wsearrows
     variable wtop
     variable wbox
+    variable finished
     upvar ::Jabber::jstate jstate
     
     if {[winfo exists $wsearrows]} {
@@ -4429,6 +4817,7 @@ proc ::Jabber::GenRegister::DoRegister { } {
       [wrapper::createtag "query" -attrlist {xmlns jabber:iq:register}   \
       -subtags $subelements] -to $server   \
       -command [list [namespace current]::ResultCallback $server]
+    set finished 1
     destroy $wtop
 }
 
@@ -4438,10 +4827,12 @@ proc ::Jabber::GenRegister::DoSimple { } {
     variable server
     variable username
     variable password
+    variable finished
     upvar ::Jabber::jstate jstate
     
     $jstate(jlib) register_set $username $password  \
       [list [namespace current]::SimpleCallback $server] -to $server
+    set finished 1
     destroy $wtop
 }
 
@@ -4480,9 +4871,6 @@ proc ::Jabber::GenRegister::SimpleCallback {server jlibName type subiq} {
 # The ::Jabber::Login:: namespace ----------------------------------------------
 
 namespace eval ::Jabber::Login:: {
-
-    # Wait for this variable to be set.
-    variable finished   
     
     variable server
     variable username
@@ -4497,13 +4885,13 @@ namespace eval ::Jabber::Login:: {
 #       w      the toplevel window.
 #       
 # Results:
-#       shows window.
+#       name of button pressed; "cancel" or "login".
 
 proc ::Jabber::Login::Login {w} {
     global  this sysFont prefs
     
     variable wtoplevel $w
-    variable finished
+    variable finished -1
     variable menuVar
     variable profile
     variable server
@@ -4519,7 +4907,6 @@ proc ::Jabber::Login::Login {w} {
     if {[winfo exists $w]} {
 	return
     }
-    set finished 0
     
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
@@ -4618,8 +5005,8 @@ proc ::Jabber::Login::Login {w} {
 	
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btconn -text [::msgcat::mc Login] -width 8 -default active \
-      -command [namespace current]::Doit]  \
+    pack [button $frbot.btconn -text [::msgcat::mc Login] -width 8 \
+      -default active -command [namespace current]::Doit]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
       -command [list [namespace current]::DoCancel $w]]  \
@@ -4637,24 +5024,30 @@ proc ::Jabber::Login::Login {w} {
     bind $w <Return> ::Jabber::Login::Doit
     
     # Grab and focus.
+    set oldFocus [focus]
     focus $w
     catch {grab $w}
     
-    # Wait here for a button press.
+    # Wait here for a button press and window to be destroyed.
     tkwait window $w
     
     # Clean up.
+    catch {grab release $w}
     ::Jabber::Login::Close $w
+    focus $oldFocus
+    return [expr {($finished <= 0) ? "cancel" : "login"}]
 }
 
 proc ::Jabber::Login::DoCancel {w} {
+    variable finished
     
     ::UI::SaveWinGeom $w
-    destroy $w
+    set finished 0
+    catch {destroy $w}
 }
 
 proc ::Jabber::Login::Close {w} {
-    
+
     variable menuVar
     upvar ::Jabber::jserver jserver
     
@@ -4712,7 +5105,7 @@ proc ::Jabber::Login::Doit { } {
     
     # Kill any pending open states.
     ::Network::OpenConnectionKillAll
-    ::UI::SetStatusMessage . {}
+    ::UI::SetStatusMessage . ""
     ::UI::StartStopAnimatedWaveOnMain 0
     
     # Check 'server', 'username' and 'password' if acceptable.
@@ -4774,17 +5167,17 @@ proc ::Jabber::Login::SocketIsOpen {sock ip port status {msg {}}} {
     ::Jabber::Debug 2 "::Jabber::Login::SocketIsOpen"
     
     if {[string equal $status "error"]} {
+	::UI::SetStatusMessage . ""
+	::UI::StartStopAnimatedWaveOnMain 0
 	tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
 	  [::msgcat::mc jamessnosocket $ip $msg]]
-	::UI::SetStatusMessage . {}
-	::UI::StartStopAnimatedWaveOnMain 0
-	return {}
+	return ""
     } elseif {[string equal $status "timeout"]} {
+	::UI::SetStatusMessage . ""
+	::UI::StartStopAnimatedWaveOnMain 0
 	tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
 	  [::msgcat::mc jamesstimeoutserver $server]]
-	::UI::SetStatusMessage . {}
-	::UI::StartStopAnimatedWaveOnMain 0
-	return {}
+	return ""
     }    
     set jstate(sock) $sock
     ::UI::SetStatusMessage . [::msgcat::mc jawaitxml $server]
@@ -4792,7 +5185,7 @@ proc ::Jabber::Login::SocketIsOpen {sock ip port status {msg {}}} {
     # Initiate a new stream. Perhaps we should wait for the server <stream>?
     if {[catch {$jstate(jlib) connect $server -socket $sock  \
 		-cmd ::Jabber::Login::ConnectProc} err]} {
-	::UI::SetStatusMessage . {}
+	::UI::SetStatusMessage . ""
 	::UI::StartStopAnimatedWaveOnMain 0
 	tk_messageBox -icon error -title [::msgcat::mc {Open Failed}] -type ok \
 	  -message [FormatTextForMessageBox $err]
@@ -4909,13 +5302,13 @@ proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
     set jstate(mejid) "${username}@${server}"
     set jstate(meres) $resource
     set jstate(mejidres) "${username}@${server}/${resource}"
-    set jstate(status) {available}
+    set jstate(status) "available"
     set jserver(profile,selected) $profile
     set jserver(this) $server
     
     # Set communication entry in UI.
     if {$prefs(jabberCommFrame)} {
-	::UI::ConfigureAllJabberEntries $ipNum "connect"	
+	::UI::ConfigureAllJabberEntries $ipNum -netstate "connect"	
     } else {
 	::UI::SetCommEntry . $ipNum 1 -1 -jidvariable ::Jabber::jstate(.,tojid)  \
 	  -dosendvariable ::Jabber::jstate(.,doSend)
@@ -5023,11 +5416,12 @@ namespace eval ::Jabber::Subscribe:: {
 # Arguments:
 #       wbase  the toplevel window's base path.
 #       jid    the jid we receive a 'subscribe' presence element from.
+#       args   ?-key value ...? look for any '-status' only.
 #       
 # Results:
-#       shows window.
+#       "deny" or "accept".
 
-proc ::Jabber::Subscribe::Subscribe {wbase jid} {
+proc ::Jabber::Subscribe::Subscribe {wbase jid args} {
     global  this sysFont prefs wDlgs
     
     variable locals   
@@ -5038,9 +5432,11 @@ proc ::Jabber::Subscribe::Subscribe {wbase jid} {
     ::Jabber::Debug 2 "::Jabber::Subscribe::Subscribe jid=$jid"
 
     incr uid
-    set w $wbase$uid
-    set locals($uid,finished) 0
+    set w ${wbase}${uid}
+    set locals($uid,finished) -1
+    set locals($uid,wtop) $w
     set locals($uid,jid) $jid
+    array set argsArr $args
     
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
@@ -5067,7 +5463,7 @@ proc ::Jabber::Subscribe::Subscribe {wbase jid} {
     }
 
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised]   \
+    pack [frame $w.frall -borderwidth 1 -relief raised]  \
       -fill both -expand 1 -ipadx 4
     
     label $w.frall.head -text [::msgcat::mc Subscribe] -font $sysFont(l)  \
@@ -5076,10 +5472,17 @@ proc ::Jabber::Subscribe::Subscribe {wbase jid} {
     message $w.frall.msg -width 260 -font $sysFont(s)  \
       -text [::msgcat::mc jasubwant $jid]
     pack $w.frall.msg -side top -fill both -expand 1
+    
+    # Any -status attribute?
+    if {[info exists argsArr(-status)] && [string length $argsArr(-status)]} {
+    	set txt "Message: \"$argsArr(-status)\""
+    	label $w.frall.status -wraplength 260 -text $txt
+    	pack $w.frall.status -side top -anchor w -padx 10
+    }
         
     # Some action buttons.
     set frmid [frame $w.frall.frmid -borderwidth 0]
-    label $frmid.lvcard -text [::msgcat::mc jasubgetvcard] -font $sysFont(sb) \
+    label $frmid.lvcard -text "[::msgcat::mc jasubgetvcard]:" -font $sysFont(sb) \
       -anchor e
     button $frmid.bvcard -text "[::msgcat::mc {Get vCard}]..."   \
       -command [list ::VCard::Fetch .kass other $jid]
@@ -5134,25 +5537,26 @@ proc ::Jabber::Subscribe::Subscribe {wbase jid} {
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
     pack [button $frbot.btconn -text [::msgcat::mc Accept] -width 8 -default active \
-      -command [list ::Jabber::Subscribe::Doit $uid]]  \
+      -command [list [namespace current]::Doit $uid]]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Deny] -width 8   \
-      -command [list ::Jabber::Subscribe::Cancel $uid]]  \
+      -command [list [namespace current]::Cancel $uid]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
     
     wm resizable $w 0 0
-    bind $w <Return> [list ::Jabber::Subscribe::Doit $uid]
+    bind $w <Return> "$frbot.btconn invoke"
     focus $w
     
-    # Wait here for a button press.
-    tkwait variable [namespace current]::locals($uid,finished)
+    # Wait here for a button press and window to be destroyed.
+    tkwait window $w
     
     # Cleanup.
+    set finito $locals($uid,finished)
     foreach key [array names locals "$uid,*"] {
 	unset locals($key)
     }
-    catch {destroy $w}    
+    return [expr {($finito <= 0) ? "deny" : "accept"}]
 }
 
 proc ::Jabber::Subscribe::SendMsg {uid} {
@@ -5176,9 +5580,9 @@ proc ::Jabber::Subscribe::Doit {uid} {
     
     # Accept (allow) or deny subscription.
     if {$locals($uid,allow)} {
-	$jstate(jlib) send_presence -to $jid -type {subscribed}
+	$jstate(jlib) send_presence -to $jid -type "subscribed"
     } else {
-	$jstate(jlib) send_presence -to $jid -type {unsubscribed}
+	$jstate(jlib) send_presence -to $jid -type "unsubscribed"
     }
 	
     # Add user to my roster. Send subscription request.	
@@ -5192,9 +5596,10 @@ proc ::Jabber::Subscribe::Doit {uid} {
 	}
 	eval {$jstate(jlib) roster_set $jid ::Jabber::Subscribe::ResProc} \
 	  $arglist
-	$jstate(jlib) send_presence -to $jid -type {subscribe}
+	$jstate(jlib) send_presence -to $jid -type "subscribe"
     }
-    set locals($uid,finished) 1   
+    set locals($uid,finished) 1
+    destroy $locals($uid,wtop)
 }
 
 proc ::Jabber::Subscribe::Cancel {uid} {
@@ -5205,10 +5610,12 @@ proc ::Jabber::Subscribe::Cancel {uid} {
     set jid $locals($uid,jid)
 
     ::Jabber::Debug 2 "::Jabber::Subscribe::Cancel jid=$jid"
-    set locals($uid,finished) 2   
     
     # Deny presence to this user.
     $jstate(jlib) send_presence -to $jid -type {unsubscribed}
+
+    set locals($uid,finished) 0
+    destroy $locals($uid,wtop)
 }
 
 # Jabber::Subscribe::ResProc --
@@ -5229,180 +5636,27 @@ proc ::Jabber::Subscribe::ResProc {jlibName what} {
     
 }
 
-# The ::Jabber::SendMsg:: namespace --------------------------------------------
-
-#...............................................................
-#   OBSOLETE!
-#...............................................................
-
-namespace eval ::Jabber::SendMsg:: {
-
-    # Wait for this variable to be set.
-    variable finished   
-    
-    # Running number for unique toplevels.
-    variable num 0
-    
-}
-
-# Jabber::SendMsg::SendMsg --
-#
-#       The standard send message dialog.
-#
-# Arguments:
-#       w      the toplevel window.
-#       args   ?-to jid -subject theSubject?
-#       
-# Results:
-#       shows window.
-
-proc ::Jabber::SendMsg::SendMsg {w args} {
-    global  this sysFont prefs
-    
-    variable finished  
-    variable jid
-    variable subject
-    variable wtext
-    upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jprefs jprefs
-    
-    ::Jabber::Debug 2 "::Jabber::SendMsg::SendMsg w=$w, args='$args'"
-
-    if {[winfo exists $w]} {
-	return
-    }
-    set finished 0
-    array set arrargs $args
-    if {[info exists arrargs(-to)]} {
-	set jid $arrargs(-to)
-    } else {
-	set jid $jstate(.,tojid)
-    }
-    if {[info exists arrargs(-subject)]} {
-	set subject $arrargs(-subject)
-    } else {
-	set subject {}
-    }
-    if {[string match "mac*" $this(platform)]} {
-	toplevel $w
-	eval $::macWindowStyle $w documentProc
-    } else {
-	toplevel $w
-	wm transient $w .
-    }
-    wm title $w {Send Message}
-
-    # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised]   \
-      -fill both -expand 1 -ipadx 4
-    
-    label $w.frall.head -text {Send Message} -font $sysFont(l) \
-      -anchor w -padx 10 -pady 4
-    pack $w.frall.head -side top -fill x -anchor w
-    
-    # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btconn -text {Send} -width 8 -default active \
-      -command [list ::Jabber::SendMsg::Doit]]  \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8   \
-      -command [list ::Jabber::SendMsg::Cancel]]  \
-      -side right -padx 5 -pady 5
-    pack $frbot -side bottom -fill x -padx 10 -pady 8
-        
-    # To and subject fields.
-    set frmid [frame $w.frall.frmid -borderwidth 0]
-    pack $frmid -side top -fill x   
-    label $frmid.lto -text "[::msgcat::mc To] jid:" -font $sysFont(sb) \
-      -anchor e
-    entry $frmid.eto -textvariable [namespace current]::jid
-    label $frmid.lsub -text "[::msgcat::mc Subject]:" -font $sysFont(sb) \
-      -anchor e
-    entry $frmid.esub -textvariable [namespace current]::subject
-    grid $frmid.lto -column 0 -row 0 -sticky e -padx 6
-    grid $frmid.eto -column 1 -row 0 -sticky ew -padx 6
-    grid $frmid.lsub -column 0 -row 1 -sticky e -padx 6
-    grid $frmid.esub -column 1 -row 1 -sticky ew -padx 6
-    grid columnconfigure $frmid 1 -weight 1
-
-    # Text.
-    set wtxt $w.frall.frtxt
-    pack [frame $wtxt] -side top -fill both -expand 1 -padx 4 -pady 4
-    set wtext $wtxt.text
-    set wysc $wtxt.ysc
-    text $wtext -height 6 -width 48 -font $sysFont(s) -wrap word \
-      -borderwidth 1 -relief sunken -yscrollcommand [list $wysc set]
-    scrollbar $wysc -orient vertical -command [list $wtext yview]
-    grid $wtext -column 0 -row 0 -sticky news
-    grid $wysc -column 1 -row 0 -sticky ns
-    grid columnconfigure $wtxt 0 -weight 1
-    grid rowconfigure $wtxt 0 -weight 1
-    
-    wm minsize $w 220 220
-    wm maxsize $w 600 600
-    
-    # Grab and focus.
-    focus $w
-    catch {grab $w}
-    
-    # Wait here for a button press.
-    tkwait variable [namespace current]::finished
-    
-    catch {grab release $w}
-    catch {destroy $w}    
-}
-
-proc ::Jabber::SendMsg::Doit { } {
-    global  prefs
-    
-    variable jid
-    variable subject
-    variable wtext
-    variable finished
-    upvar ::Jabber::jstate jstate
-    
-    # Check that still connected to server.
-    if {![::Jabber::IsConnected]} {
-	tk_messageBox -type ok -icon error -title [::msgcat::mc {Not Connected}]  \
-	  -message [::msgcat::mc jamessnotconnected]
-	return
-    }
-    
-    # Verify if well formed jid.
-    if {![::Jabber::IsWellFormedJID $jid]} {
-	tk_messageBox -type ok -message [FormatTextForMessageBox \
-	  "The jid \"$jid\" is not well formed.\
-	  Please write a jid of the form \"matben@athlon.se\""]
-	return
-    }
-    set allText [$wtext get 1.0 "end - 1 char"]
-    if {[string length $allText]} {
-	$jstate(jlib) send_message $jid -subject $subject -body $allText
-    }
-    set finished 1
-}
-
-proc ::Jabber::SendMsg::Cancel { } {
-    
-    variable finished
-    
-    set finished 2
-}
-
 # The ::Jabber::GroupChat:: namespace ------------------------------------------
 
-# Provides dialog for old-style groupchat but the rest should work for both
-# groupchat and conference protocols.
+# Provides dialog for old-style gc-1.0 groupchat but the rest should work for 
+# both groupchat and conference protocols.
 
 namespace eval ::Jabber::GroupChat:: {
 
     variable statusTxtToMsg
+    variable msgToStatusTxt
+    
     array set statusTxtToMsg  \
-      [list [::msgcat::mc Available] available  \
-      [::msgcat::mc Away] away  \
-      [::msgcat::mc {Do Not Disturb}] dnd  \
-      [::msgcat::mc {Not Available}] unavailable]
-
+      [list [::msgcat::mc mAvailable] available  \
+      [::msgcat::mc mAway] away  \
+      [::msgcat::mc mDoNotDisturb] dnd  \
+      [::msgcat::mc mNotAvailable] unavailable]
+    array set msgToStatusTxt  \
+      [list available [::msgcat::mc mAvailable]  \
+      away [::msgcat::mc mAway]  \
+      dnd [::msgcat::mc mDoNotDisturb]  \
+      unavailable [::msgcat::mc mNotAvailable]]
+      
     # Local stuff
     variable locals
 }
@@ -5437,7 +5691,7 @@ proc ::Jabber::GroupChat::AllConference { } {
 #       Ad hoc method for finding out if possible to use the original
 #       jabber:iq:conference method (not MUC).
 
-proc ::Jabber::GroupChat::UseOriginalConference { {roomjid {}} } {
+proc ::Jabber::GroupChat::UseOriginalConference {{roomjid {}}} {
     
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
@@ -5470,6 +5724,9 @@ proc ::Jabber::GroupChat::UseOriginalConference { {roomjid {}} } {
 # Arguments:
 #       w           toplevel widget
 #       args        -server, -roomjid, -autoget
+#       
+# Results:
+#       "cancel" or "enter".
 
 proc ::Jabber::GroupChat::EnterRoom {w args} {
 
@@ -5482,10 +5739,11 @@ proc ::Jabber::GroupChat::EnterRoom {w args} {
 	set roomjid ""
     }
     if {[::Jabber::GroupChat::UseOriginalConference $roomjid]} {
-	eval {::Jabber::Conference::BuildEnterRoom $w} $args
+	set ans [eval {::Jabber::Conference::BuildEnterRoom $w} $args]
     } else {
-	eval {::Jabber::GroupChat::BuildEnter $w} $args
+	set ans [eval {::Jabber::GroupChat::BuildEnter $w} $args]
     }
+    return $ans
 }
 
 proc ::Jabber::GroupChat::CreateRoom {w args} {
@@ -5499,10 +5757,11 @@ proc ::Jabber::GroupChat::CreateRoom {w args} {
 	set roomjid ""
     }
     if {[::Jabber::GroupChat::UseOriginalConference $roomjid]} {
-	eval {::Jabber::Conference::BuildCreateRoom $w} $args
+	set ans [eval {::Jabber::Conference::BuildCreateRoom $w} $args]
     } else {
-	eval {::Jabber::GroupChat::BuildEnter $w} $args
+	set ans [eval {::Jabber::GroupChat::BuildEnter $w} $args]
     }
+    return $ans
 }
 
 # Jabber::GroupChat::BuildEnter --
@@ -5515,7 +5774,7 @@ proc ::Jabber::GroupChat::CreateRoom {w args} {
 #       args        -server, -roomjid, -autoget
 #       
 # Results:
-#       .
+#       "cancel" or "enter".
      
 proc ::Jabber::GroupChat::BuildEnter {w args} {
     global  this sysFont
@@ -5589,26 +5848,35 @@ proc ::Jabber::GroupChat::BuildEnter {w args} {
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
     pack [button $frbot.btconn -text [::msgcat::mc Enter] -width 8 -default active \
-      -command [list ::Jabber::GroupChat::DoEnter]]  \
+      -command [list [namespace current]::DoEnter $w]]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btexit -text [::msgcat::mc Cancel] -width 8   \
-      -command "set [namespace current]::finishedEnter 0"]  \
+      -command [list [namespace current]::Cancel $w]]  \
       -side right -padx 5 -pady 5  
     pack $frbot -side bottom -fill x
     
     # Grab and focus.
+    set oldFocus [focus]
     focus $w
     catch {grab $w}
     bind $w <Return> "$frbot.btconn invoke"
     
-    # Wait here for a button press.
-    tkwait variable [namespace current]::finishedEnter
+    # Wait here for a button press and window to be destroyed.
+    tkwait window $w
     
     catch {grab release $w}
-    catch {destroy $w}    
+    focus $oldFocus
+    return [expr {($finishedEnter <= 0) ? "cancel" : "enter"}]
 }
 
-proc ::Jabber::GroupChat::DoEnter { } {
+proc ::Jabber::GroupChat::Cancel {w} {
+    variable finishedEnter
+    
+    set finishedEnter 0
+    destroy $w
+}
+
+proc ::Jabber::GroupChat::DoEnter {w} {
 
     variable finishedEnter
     variable gchatserver
@@ -5625,12 +5893,10 @@ proc ::Jabber::GroupChat::DoEnter { } {
 	return
     }
     set finishedEnter 1
+    destroy $w
 
     $jstate(jlib) groupchat enter ${gchatroom}@${gchatserver} $gchatnick \
-      -command ::Jabber::GroupChat::EnterCallback
-    
-    # There seems to be no explicit verification when we enter room.
-    set jstate(.,tojid) ${gchatroom}@${gchatserver}
+      -command [namespace current]::EnterCallback
 }
 
 proc ::Jabber::GroupChat::EnterCallback {jlibName type args} {
@@ -5684,7 +5950,7 @@ proc ::Jabber::GroupChat::GotMsg {body args} {
 	    # From the room itself.
 	}
     } else {
-	error {The jid we got was not well-formed!}
+	return -code error "The jid we got \"$fromJid\"was not well-formed!"
     }
 
     # If we haven't a window for this thread, make one!
@@ -5695,7 +5961,7 @@ proc ::Jabber::GroupChat::GotMsg {body args} {
     }       
     
     # This can be room name or nick name.
-    foreach {meHash mynick} [$jstate(jlib) service hashandnick $roomJid] { break }
+    foreach {meRoomJid mynick} [$jstate(jlib) service hashandnick $roomJid] { break }
 
     # Old-style groupchat and browser compatibility layer.
     set nick [$jstate(jlib) service nick $fromJid]
@@ -5708,7 +5974,7 @@ proc ::Jabber::GroupChat::GotMsg {body args} {
 	set txt <$nick>
     }
     $wtext configure -state normal
-    if {[string equal $meHash $fromJid]} {
+    if {[string equal $meRoomJid $fromJid]} {
 	set meyou me
     } else {
 	set meyou you
@@ -5784,7 +6050,8 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
 	set tittxt $roomJid
     }
     wm title $w $tittxt
-    wm protocol $w WM_DELETE_WINDOW [list ::Jabber::GroupChat::Exit -room $roomJid]
+    wm protocol $w WM_DELETE_WINDOW  \
+      [list ::Jabber::GroupChat::Exit $roomJid]
     wm group $w .
 
     # Global frame.
@@ -5793,11 +6060,11 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
         
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btsnd -text [::msgcat::mc Send] -width 8 -default active \
-      -command [list ::Jabber::GroupChat::Send $roomJid]]  \
+    pack [button $frbot.btsnd -text [::msgcat::mc Send] -width 8  \
+      -default active -command [list [namespace current]::Send $roomJid]] \
       -side right -padx 5 -pady 5
     pack [button $frbot.btexit -text [::msgcat::mc Exit] -width 8   \
-      -command [list ::Jabber::GroupChat::Exit -room $roomJid]]  \
+      -command [list [namespace current]::Exit $roomJid]]  \
       -side right -padx 5 -pady 5  
     
     # CCP
@@ -5808,12 +6075,11 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     ::UI::CutCopyPasteConfigure $wccp copy -state disabled
     ::UI::CutCopyPasteConfigure $wccp paste -state disabled
     pack [frame $w.frall.fccp.div -bd 2 -relief raised -width 2] -fill y -side left
-    pack [::UI::NewPrint $w.frall.fccp.pr [list ::Jabber::GroupChat::Print $roomJid]] \
+    pack [::UI::NewPrint $w.frall.fccp.pr [list [namespace current]::Print $roomJid]] \
       -side left -padx 10
     pack [frame $w.frall.div2 -bd 2 -relief sunken -height 2] -fill x -side top
 
     # Popup for setting status to this room.
-    #set allStatus {Available Away {Do Not Disturb} {Not Available}}
     set allStatus [array names statusTxtToMsg]
     set locals($roomJid,status) [::msgcat::mc Available]
     set locals($roomJid,oldStatus) [::msgcat::mc Available]
@@ -5906,7 +6172,7 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
 	
     # Add to exit menu.
     $locals(exitmenu) add command -label $roomJid  \
-      -command [list ::Jabber::GroupChat::Exit -room $roomJid]
+      -command [list ::Jabber::GroupChat::Exit $roomJid]
     
     # Necessary to trace the popup menu variable.
     trace variable [namespace current]::locals($roomJid,status) w  \
@@ -5961,14 +6227,16 @@ proc ::Jabber::GroupChat::TraceStatus {roomJid name key op} {
     upvar ::Jabber::jstate jstate
 	
     # Call by name. Must be array.
-    upvar #0 ${name}(${key}) locName
-    
+    #upvar #0 ${name}(${key}) locName    
+    upvar ${name}(${key}) locName
+
     ::Jabber::Debug 3 "::Jabber::GroupChat::TraceStatus roomJid=$roomJid, name=$name, \
-      locName=$locName, key=$key"
+      key=$key"
+    ::Jabber::Debug 3 "    locName=$locName"
 
     set status $statusTxtToMsg($locName)
     if {$status == "unavailable"} {
-	set ans [::Jabber::GroupChat::Exit -room $roomJid]
+	set ans [::Jabber::GroupChat::Exit $roomJid]
 	if {$ans == "no"} {
 	    set locals($roomJid,status) $locals($roomJid,oldStatus)
 	}
@@ -6185,6 +6453,32 @@ proc ::Jabber::GroupChat::SetAllRoomsMenu {theMenu} {
     set locals(exitmenu) $theMenu
 }
 
+# Jabber::GroupChat::ConfigWBStatusMenu --
+# 
+#       Sets the Jabber/Status menu for groupchat:
+#       -variable ... -command {}
+
+proc ::Jabber::GroupChat::ConfigWBStatusMenu {wtop} {   
+    variable locals
+
+    array set wbOpts [::UI::ConfigureMain $wtop]
+    set roomJid $wbOpts(-jid)
+
+    # Orig: {-variable ::Jabber::jstate(status) -value available}
+    # Not same values due to the design of the tk_optionMenu.
+    foreach mName {mAvailable mAway mDoNotDisturb mNotAvailable} {
+	::UI::MenuMethod ${wtop}menu.jabber.mstatus entryconfigure $mName \
+	  -command {} -variable [namespace current]::locals($roomJid,status) \
+	  -value [::msgcat::mc $mName]
+    }
+    ::UI::MenuMethod ${wtop}menu.jabber.mstatus entryconfigure mAttachMessage \
+      -command {} -state disabled
+    
+    # Just skip this menu entry.
+    ::UI::MenuMethod ${wtop}menu.jabber entryconfigure mExitRoom \
+      -state disabled
+}
+
 proc ::Jabber::GroupChat::Print {roomJid} {
     variable locals
     set wtext $locals($roomJid,wtext) 
@@ -6193,29 +6487,17 @@ proc ::Jabber::GroupChat::Print {roomJid} {
 
 # Jabber::GroupChat::Exit --
 #
-#       Closes window and exits room.
-#       
-#       args: must be any of -room or -toplevel
+#       Ask if wants to exit room. If then calls GroupChat::Close to do it.
 
-
-proc ::Jabber::GroupChat::Exit {args} {
+proc ::Jabber::GroupChat::Exit {roomJid} {
     
     variable locals
     upvar ::Jabber::jstate jstate
     
-    array set argsArr $args
-    if {[info exists argsArr(-room)]} {
-	set roomJid $argsArr(-room)
-	set w $locals($roomJid,wtop)
-    } elseif {[info exists argsArr(-toplevel)]} {
-	set w $argsArr(-toplevel)
-	set roomJid $locals($w,room)
-    } else {
-	return -code error  \
-	  {::Jabber::GroupChat::Exit must have any of -room or -toplevel}
-    }
+    set w $locals($roomJid,wtop)
+
     if {[::Jabber::IsConnected]} {
-	set ans [tk_messageBox -icon warning -type yesno -parent $w  \
+	set ans [tk_messageBox -icon warning -parent $w -type yesno  \
 	  -message [::msgcat::mc jamesswarnexitroom $roomJid]]
 	if {$ans == "yes"} {
 	    ::Jabber::GroupChat::Close $roomJid
@@ -6228,13 +6510,19 @@ proc ::Jabber::GroupChat::Exit {args} {
     }
     return $ans
 }
+
+proc ::Jabber::GroupChat::CloseToplevel {w} {
+    variable locals
     
+    set roomJid $locals($w,room)     
+    ::Jabber::GroupChat::Close $roomJid
+}
+
 # Jabber::GroupChat::Close --
 #
-#       Pressing the Close button in chat window exits room.
+#       Handles the closing of a groupchat. Both text and whiteboard dialogs.
 
 proc ::Jabber::GroupChat::Close {roomJid} {
-
     variable locals
     upvar ::Jabber::jstate jstate
     
@@ -6247,6 +6535,12 @@ proc ::Jabber::GroupChat::Close {roomJid} {
     after idle destroy $locals($roomJid,wtop)
     trace vdelete [namespace current]::locals($roomJid,status) w  \
       [list [namespace current]::TraceStatus $roomJid]
+	
+    # Make sure any associated whiteboard is closed as well.
+    set wbwtop [::UI::GetWtopFromJabberType "groupchat" $roomJid]
+    if {[string length $wbwtop]} {
+	::UI::DestroyMain $wbwtop
+    }
 }
 
 # Jabber::GroupChat::Logout --
@@ -6429,7 +6723,6 @@ proc ::Jabber::Browse::HaveBrowseTree {jid} {
 #       jabber:iq:browse namespace.
 #
 # Arguments:
-# 
 #       what:       can be 'set', or 'error'.
 #       jid:        the jid of the first element in 'subiq'.
 #       subiq:      xml list starting after the <iq> tag.
@@ -7003,7 +7296,7 @@ proc ::Jabber::Browse::CloseDlg {w} {
 proc ::Jabber::Browse::AddServer { } {
     global  this sysFont prefs
     
-    variable finishedAdd
+    variable finishedAdd -1
 
     set w .jaddsrv
     if {[winfo exists $w]} {
@@ -7032,10 +7325,10 @@ proc ::Jabber::Browse::AddServer { } {
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
     pack [button $frbot.btadd -text [::msgcat::mc Add] -width 8 -default active \
-      -command "::Jabber::Browse::DoAddServer"]  \
+      -command [list [namespace current]::DoAddServer $w]]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
-      -command "set [namespace current]::finishedAdd 2"]  \
+      -command [list [namespace current]::CancelAdd $w]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
         
@@ -7046,20 +7339,29 @@ proc ::Jabber::Browse::AddServer { } {
     focus $w.frall.ent
     catch {grab $w}
     
-    # Wait here for a button press.
-    tkwait variable [namespace current]::finishedAdd
+    # Wait here for a button press and window to be destroyed.
+    tkwait window $w
+
     catch {grab release $w}
     focus $oldFocus
-    catch {destroy $w}            
+    return [expr {($finished <= 0) ? "cancel" : "add"}]
 }
 
-proc ::Jabber::Browse::DoAddServer { } {
+proc ::Jabber::Browse::DoAddServer {w} {
+    variable finishedAdd
+
+    set finishedAdd 0
+    destroy $w
+}
+
+proc ::Jabber::Browse::DoAddServer {w} {
     
     variable addserver
     variable finishedAdd
     upvar ::Jabber::jprefs jprefs
     
     set finishedAdd 1
+    destroy $w
     if {[llength $addserver] == 0} {
 	return
     }
@@ -7108,6 +7410,7 @@ proc ::Jabber::Browse::SetUIWhen {what} {
 # that we use the 'jabber:iq:browse' for this to work.
 # We only handle the enter/create dialogs here since the rest is handled
 # in ::GroupChat::
+# The 'jabber:iq:conference' is in a transition to be replaced by MUC.
 
 namespace eval ::Jabber::Conference:: {
 
@@ -7125,7 +7428,7 @@ namespace eval ::Jabber::Conference:: {
 #       args    -server, -roomjid, -roomname, -autoget 0/1
 #       
 # Results:
-#       .
+#       "cancel" or "enter".
      
 proc ::Jabber::Conference::BuildEnterRoom {w args} {
     global  this sysFont
@@ -7140,15 +7443,16 @@ proc ::Jabber::Conference::BuildEnterRoom {w args} {
     variable roomname
     variable wsearrows
     variable stattxt
+    variable finishedEnter -1
     upvar ::Jabber::jstate jstate
     
+    ::Jabber::Debug 2 "::Jabber::Conference::BuildEnterRoom"
     if {[winfo exists $w]} {
 	return
     }
     array set argsArr $args
-    set finishedEnter 0
-    set server {}
-    set roomname {}
+    set server ""
+    set roomname ""
     
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
@@ -7162,9 +7466,9 @@ proc ::Jabber::Conference::BuildEnterRoom {w args} {
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised]   \
       -fill both -expand 1 -ipadx 12 -ipady 4
-    message $w.frall.msg -width 220 -font $sysFont(s) -text  \
-      [::msgcat::mc jamessconfmsg]
-    pack $w.frall.msg -side top -fill x -anchor w -padx 10 -pady 4
+    message $w.frall.msg -width 260 -font $sysFont(s)  \
+    	-text [::msgcat::mc jamessconfmsg]
+    pack $w.frall.msg -side top -fill x -anchor w -padx 2 -pady 4
     set frtop $w.frall.top
     pack [frame $frtop] -side top -fill x
     label $frtop.lserv -text "[::msgcat::mc {Conference server}]:" \
@@ -7230,7 +7534,7 @@ proc ::Jabber::Conference::BuildEnterRoom {w args} {
     set wbox $wcont.box
     frame $wbox
     pack $wbox -side top -fill x -padx 4 -pady 10
-    pack [label $wbox.la -textvariable "[namespace current]::stattxt"]  \
+    pack [label $wbox.la -textvariable [namespace current]::stattxt]  \
       -padx 0 -pady 10
     set stattxt "-- [::msgcat::mc jasearchwait] --"
     
@@ -7240,13 +7544,13 @@ proc ::Jabber::Conference::BuildEnterRoom {w args} {
     set wbtenter $frbot.btenter
     set wbtget $frbot.btget
     pack [button $wbtget -text [::msgcat::mc Get] -width 8 -default active \
-      -command "::Jabber::Conference::EnterGet"]  \
+      -command [namespace current]::EnterGet]  \
       -side right -padx 5 -pady 5
     pack [button $wbtenter -text [::msgcat::mc Enter] -width 8 -state disabled \
-      -command ::Jabber::Conference::DoEnter]  \
+      -command [list [namespace current]::DoEnter $w]]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
-      -command "set [namespace current]::finishedEnter 2"]  \
+      -command [list [namespace current]::CancelEnter $w]]  \
       -side right -padx 5 -pady 5
     pack [::chasearrows::chasearrows $wsearrows -background gray87 -size 16] \
       -side left -padx 5 -pady 5
@@ -7263,11 +7567,19 @@ proc ::Jabber::Conference::BuildEnterRoom {w args} {
     }
     bind $w <Return> "$wbtget invoke"
     
-    # Wait here for a button press.
-    tkwait variable [namespace current]::finishedEnter
+    # Wait here for a button press and window to be destroyed.
+    tkwait window $w
+
     catch {grab release $w}
     focus $oldFocus
-    catch {destroy $w}            
+    return [expr {($finishedEnter <= 0) ? "cancel" : "enter"}]
+}
+
+proc ::Jabber::Conference::CancelEnter {w} {
+    variable finishedEnter
+
+    set finishedEnter 0
+    destroy $w
 }
 
 proc ::Jabber::Conference::ConfigRoomList {wcombo pickedServ} {
@@ -7336,45 +7648,41 @@ proc ::Jabber::Conference::EnterGetCB {jlibName type subiq} {
 	return
     }
     catch {destroy $wbox}
+    
+    update
+    after 2000
+    
     set subiqChildList [wrapper::getchildren $subiq]
     ::Jabber::Forms::Build $wbox $subiqChildList -template "room"
+    
+    update
+    after 2000
+    
     pack $wbox -side top -fill x -padx 2 -pady 10
     $wbtenter configure -state normal -default active
     $wbtget configure -state normal -default disabled
-    bind $wtop <Return> "$wbtenter invoke"    
+    bind $wtop <Return> [list $wbtenter invoke]
 }
 
-proc ::Jabber::Conference::DoEnter { } {
+proc ::Jabber::Conference::DoEnter {w} {
     
     variable server
     variable roomname
     variable wsearrows
-    variable wtop
     variable wbox
-    variable locals
+    variable finishedEnter
     upvar ::Jabber::jstate jstate
     
-    # Warning?
-    set ans [tk_messageBox -type yesno -default yes -icon warning  \
-      -message [FormatTextForMessageBox [::msgcat::mc jamessinroomerasewb]]]
-    if {$ans == "yes"} {
-	
-	# Probably should not send this???
-	set jstate(.,doSend) 0
-	DoEraseAll .
-	set jstate(.,doSend) 1
-    }
-
     $wsearrows start
     
     set theRoomJid ${roomname}@${server}
     set subelements [::Jabber::Forms::GetXML $wbox]
-    
-    # NEW
     $jstate(jlib) conference set_enter $theRoomJid $subelements  \
       [list [namespace current]::ResultCallback $theRoomJid]
     
-    destroy $wtop
+    # This triggers the tkwait, and destroys the enter dialog.
+    set finishedEnter 1
+    destroy $w
 }
 
 # Jabber::Conference::ResultCallback --
@@ -7395,7 +7703,7 @@ proc ::Jabber::Conference::ResultCallback {roomJid jlibName type subiq} {
     } else {
 	
 	# Handle the wb UI. Could be the room's name.
-	set jstate(.,tojid) $roomJid
+	#set jstate(.,tojid) $roomJid
     
 	# This should be something like:
 	# <query><id>myroom@server/7y3jy7f03</id><nick/>snuffie<nick><query/>
@@ -7428,7 +7736,7 @@ proc ::Jabber::Conference::ResultCallback {roomJid jlibName type subiq} {
 #       args    -server, -roomname
 #       
 # Results:
-#       .
+#       "cancel" or "create".
      
 proc ::Jabber::Conference::BuildCreateRoom {w args} {
     global  this sysFont
@@ -7442,13 +7750,13 @@ proc ::Jabber::Conference::BuildCreateRoom {w args} {
     variable roomname
     variable stattxt
     variable wsearrows
+    variable finishedCreate -1
     upvar ::Jabber::jstate jstate
     
     if {[winfo exists $w]} {
 	return
     }
     array set argsArr $args
-    set finishedCreate 0
     
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
@@ -7516,13 +7824,13 @@ proc ::Jabber::Conference::BuildCreateRoom {w args} {
     set wbtenter $frbot.btenter
     set wbtget $frbot.btget
     pack [button $wbtget -text [::msgcat::mc Get] -width 8 -default active \
-      -command "::Jabber::Conference::CreateGet"]  \
+      -command [namespace current]::CreateGet]  \
       -side right -padx 5 -pady 5
     pack [button $wbtenter -text [::msgcat::mc Enter] -width 8 -state disabled \
-      -command "::Jabber::Conference::DoCreate"]  \
+      -command [list [namespace current]::DoCreate $w]]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
-      -command "set [namespace current]::finishedCreate 2"]  \
+      -command [list [namespace current]::CancelCreate $w]]  \
       -side right -padx 5 -pady 5
     pack [::chasearrows::chasearrows $wsearrows -background gray87 -size 16] \
       -side left -padx 5 -pady 5
@@ -7535,11 +7843,19 @@ proc ::Jabber::Conference::BuildCreateRoom {w args} {
     set oldFocus [focus]
     catch {grab $w}
     
-    # Wait here for a button press.
-    tkwait variable [namespace current]::finishedCreate
+    # Wait here for a button press and window to be destroyed.
+    tkwait window $w
+
     catch {grab release $w}
     focus $oldFocus
-    catch {destroy $w}            
+    return [expr {($finished <= 0) ? "cancel" : "create"}]
+}
+
+proc ::Jabber::Conference::CancelCreate {w} {
+    variable finishedCreate
+
+    set finishedCreate 0
+    destroy $w
 }
 
 proc ::Jabber::Conference::CreateGet { } {
@@ -7601,7 +7917,7 @@ proc ::Jabber::Conference::CreateGetGetCB {jlibName type subiq} {
     bind $wtop <Return> [list $wbtenter invoke]    
 }
 
-proc ::Jabber::Conference::DoCreate { } {
+proc ::Jabber::Conference::DoCreate {w} {
     
     variable server
     variable roomname
@@ -7609,19 +7925,9 @@ proc ::Jabber::Conference::DoCreate { } {
     variable wtop
     variable wbox
     variable locals
+    variable finishedCreate
     upvar ::Jabber::jstate jstate
     
-    # Warning?
-    set ans [tk_messageBox -type yesno -default yes -icon warning  \
-      -message [FormatTextForMessageBox [::msgcat::mc jamessinroomerasewb]]]
-    if {$ans == "yes"} {
-	
-	# Probably should not send this???
-	set jstate(.,doSend) 0
-	DoEraseAll .
-	set jstate(.,doSend) 1
-    }
-
     $wsearrows start
     
     set theRoomJid ${roomname}@${server}
@@ -7631,7 +7937,9 @@ proc ::Jabber::Conference::DoCreate { } {
     $jstate(jlib) conference set_create $theRoomJid $subelements  \
       [list [namespace current]::ResultCallback $theRoomJid]
     
-    destroy $wtop
+    # This triggers the tkwait, and destroys the create dialog.
+    set finishedCreate 1
+    destroy $w
 }
 
 # The ::Jabber::Agents:: namespace ----------------------------------------------
@@ -8054,7 +8362,7 @@ proc ::Jabber::Search::Build {w args} {
 	return
     }
     array set argsArr $args
-    set finished 0
+    set finished -1
     
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
@@ -8089,7 +8397,7 @@ proc ::Jabber::Search::Build {w args} {
     set wsearrows $frbot.arr
     set wbtsearch $frbot.btenter
     pack [button $wbtsearch -text [::msgcat::mc Search] -width 8 -state disabled \
-      -command "::Jabber::Search::DoSearch"]  \
+      -command [namespace current]::DoSearch]  \
       -side right -padx 5 -pady 2
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
       -command "destroy $w"]  \
@@ -8106,7 +8414,7 @@ proc ::Jabber::Search::Build {w args} {
     set searchServ [$jstate(jlib) service getjidsfor "search"]
     set wcomboserver $frtop.eserv
     ::combobox::combobox $wcomboserver -width 20 -font $sysFont(s)   \
-      -textvariable "[namespace current]::server" -editable 0
+      -textvariable [namespace current]::server -editable 0
     eval {$frtop.eserv list insert end} $searchServ
     
     # Find the default search server.

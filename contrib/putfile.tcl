@@ -4,7 +4,7 @@
 #
 #  Copyright (c) 2002  Mats Bengtsson
 #
-# $Id: putfile.tcl,v 1.1.1.1 2002-12-08 10:56:15 matben Exp $
+# $Id: putfile.tcl,v 1.2 2003-01-11 16:16:08 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -178,16 +178,16 @@ proc putfile::reset {token {why reset}} {
 
 # putfile::put --
 #
-#	Establishes a connection to a remote peer and initiates a put file process.
-#	Enclose this call in a 'catch'.
+#	Establishes a connection to a remote peer and initiates a put file 
+#	process. Enclose this call in a 'catch'.
 #
 # Arguments:
-#       fileName		The complete file path on local disk to put.
+#       fileName	The complete file path on local disk to put.
 #       ip              IP number or address name to remote peer.
 #	  port            peer's port number.
 #       args		Option value pairs. Valid options include:
-#				-blocksize, -mimetype, -progress, -timeout, -optlist,
-#				-filetail
+#				-blocksize, -mimetype, -progress, -timeout, 
+#				-optlist, -filetail
 # Results:
 #	Returns a token for this connection.
 #	This token is the name of an array that the caller should
@@ -558,7 +558,7 @@ proc putfile::Eof {token} {
 
 # putfile::puttoclient --
 #
-#	Initiates a put file process to a client on add already opeb channel.
+#	Initiates a put file process to a client on add already open channel.
 #	Enclose this call in a 'catch'.
 #
 # Arguments:
@@ -595,13 +595,13 @@ proc putfile::puttoclient {sock fileName args} {
     
     array set state {
 	-blocksize 	8192
-	-mimetype   application/octet-stream 
-	-optlist    {}
+	-mimetype       application/octet-stream 
+	-optlist        {}
 	state		header
 	currentsize	0
 	totalsize	0
-	status 	""
-	ncode       ""
+	status 	        ""
+	ncode           ""
     }
     set options {-blocksize -command -filetail -mimetype -optlist -progress}
     set state(-filetail) [file tail $fileName]
