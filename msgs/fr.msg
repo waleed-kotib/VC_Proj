@@ -59,6 +59,7 @@
 ::msgcat::mcset fr From			{De}
 ::msgcat::mcset fr General		{Général}
 ::msgcat::mcset fr Get			{Recevoir}
+#::msgcat::mcset fr Getting
 ::msgcat::mcset fr Group		{Groupe}
 ::msgcat::mcset fr Groupchat            {Groupe de discussion}
 ::msgcat::mcset fr Handling		{Ergonomie}
@@ -74,6 +75,7 @@
 ::msgcat::mcset fr Logout		{Se déconnecter}
 ::msgcat::mcset fr Message		{Message}
 ::msgcat::mcset fr Middle		{Milieu}
+#::msgcat::mcset fr Moderators
 ::msgcat::mcset fr More			{Plus}
 ::msgcat::mcset fr Never		{Jamais}
 ::msgcat::mcset fr New			{Nouveau}
@@ -87,6 +89,7 @@
 ::msgcat::mcset fr Online		{Connecté}
 ::msgcat::mcset fr Open			{Ouvrir}
 ::msgcat::mcset fr Options		{Options}
+#::msgcat::mcset fr Participants
 ::msgcat::mcset fr Password		{Mot de passe}
 ::msgcat::mcset fr Pick			{Choisir}
 ::msgcat::mcset fr Phone		{Téléphone}
@@ -117,6 +120,7 @@
 ::msgcat::mcset fr Server		{Serveur}
 ::msgcat::mcset fr Servers		{Serveurs}
 ::msgcat::mcset fr Set			{Installer}
+#::msgcat::mcset fr Settings
 ::msgcat::mcset fr Shortcut		{Raccourci}
 ::msgcat::mcset fr Shortcuts		{Raccourcis}
 ::msgcat::mcset fr Sounds		{Sons}
@@ -141,6 +145,7 @@
 ::msgcat::mcset fr Unsubscribe		{Se désinscrire}
 ::msgcat::mcset fr Unsubscribed		{Désinscrit}
 ::msgcat::mcset fr Username		{Nom}
+#::msgcat::mcset fr Visitors
 ::msgcat::mcset fr Warning		{Attention}
 ::msgcat::mcset fr Welcome              {Bienvenue}
 ::msgcat::mcset fr Whiteboard		{Tableau}
@@ -558,7 +563,7 @@
 ::msgcat::mcset fr messprotocolch	{Vous avez changé la configuration du réseau, vous devez relancer l'application pour que les changements prennent effet. Voulez-vous continuer ?}
 ::msgcat::mcset fr messpasswddifferent  {Les deux mots de passe sont différents, Veuillez recommencer s'il vous plaît}
 ::msgcat::mcset fr messaupdatelatest    {Vous avez déjà la dernière version(%s)}
-
+#::msgcat::mcset fr messprefsrestart     {For one or many of these settings to take effect you need to restart the application}
 
 
 
@@ -666,6 +671,8 @@
 ::msgcat::mcset fr jamessregerr                 {L'inscription a échoué avec le message d'erreur "%s"}
 ::msgcat::mcset fr jamesstrptsubsc              {Votre compte enregistré avec le service %s sera ajouté à vos contacts pour fonctionner comme un serveur de transport avec le service.}
 ::msgcat::mcset fr jamessfailedsubsc            {Échec de l'inscription à %s. L'utilisateur a refusé l'inscription.}
+#::msgcat::mcset fr jamessstarttls-nofeature     {The server "%s" has no support for TLS.}
+#::msgcat::mcset fr jamessstarttls-failure        {TLS negotiating with server "%s" failed.}
 
 
 
@@ -674,7 +681,15 @@
 ::msgcat::mcset fr openquicktimeurlmsg		{Ouvrir l'URL d'un fichier SDP avec l'extension .mov pour un streaming QuickTime. Cela peut être du son (radio) ou de la vidéo (TV).\
   Vous pouvez également utiliser votre navigateur pour trouver le fichier SDP, l'enregistrer sur le disque et l'ouvrir comme une vidéo classique.}
 ::msgcat::mcset fr printunixcmd                 {Commande d'impression, peut être changée}
+#::msgcat::mcset fr enterpassword                {Enter the password for your account "%s"}
 
+
+
+#::msgcat::mcset fr httptrptok                   {Finished getting file %s}
+#::msgcat::mcset fr httptrpterror                {File transport error when getting the file %s: %s}
+#::msgcat::mcset fr httptrpteof                  {The server closed the socket without replying.}
+#::msgcat::mcset fr httptrptnon200               {File transport error when getting the file %s: code %s; %s}
+#::msgcat::mcset fr httptrptreset                {File transport of %s was reset}
 
 
 ::msgcat::mcset fr uastatpointmac 	{Pointeur (clic : marquer, double clic : inspecter, press : popup)}
@@ -732,6 +747,7 @@
 ::msgcat::mcset fr prefblmsg     {Écrire la JID complète pour les utilisateurs que vous voulez bloquer (les JID sont de la forme "utilisateur@jabber.org)}
 ::msgcat::mcset fr prefcufont    {Sélectionner la police pour la fenêtre de discussions : }
 ::msgcat::mcset fr prefcushow    {Montrer les messages dans une nouvelle fenêtre}
+#::msgcat::mcset fr prefcuautologin  {Automatically login when launched}
 ::msgcat::mcset fr prefcusave    {Enregistrer la boîte de courriers entrants entre les sessions}
 ::msgcat::mcset fr prefcu2clk    {Message du double-clic dans la boîte des messages : }
 ::msgcat::mcset fr prefcuopen    {Ouvrir le message dans une nouvelle fenêtre}
@@ -821,6 +837,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset fr jaupdateremind {Ne plus me rappeler cela}
 ::msgcat::mcset fr jasettopic   {Mettre un nouveau thème pour ce groupe de discussion}
 ::msgcat::mcset fr jadirpresmsg {Envoyer le statut désiré à l'utilisateur "%s".}
+#::msgcat::mcset fr jatlsnegot   {Negotiating TLS security...}
 
 
 

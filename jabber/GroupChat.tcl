@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.89 2004-12-13 13:39:17 matben Exp $
+# $Id: GroupChat.tcl,v 1.90 2004-12-14 14:08:45 matben Exp $
 
 package require History
 
@@ -131,7 +131,7 @@ namespace eval ::GroupChat:: {
     set userRoleToStr(moderator)   [mc Moderators]
     set userRoleToStr(none)        [mc None]
     set userRoleToStr(participant) [mc Participants]
-    set userRoleToStr(visitor)     [mc Vistors]
+    set userRoleToStr(visitor)     [mc Visitors]
 }
 
 proc ::GroupChat::QuitAppHook { } {

@@ -142,7 +142,7 @@
 ::msgcat::mcset sv Unsubscribe		{Avsluta prenumeration}
 ::msgcat::mcset sv Unsubscribed		{Prenumeration avslutad}
 ::msgcat::mcset sv Username 		{Användarnamn}
-::msgcat::mcset sv Vistors              {Besökare}
+::msgcat::mcset sv Visitors             {Besökare}
 ::msgcat::mcset sv Warning              {Varning}
 ::msgcat::mcset sv Welcome              {Välkommen}
 ::msgcat::mcset sv Whiteboard           {Skrivtavla}
@@ -559,7 +559,7 @@
 ::msgcat::mcset sv messprotocolch	{Du har ändrat nätverks uppställiningen. Detta kräver att programmet startas om. Vill du verkligen fortsätta?}
 ::msgcat::mcset sv messpasswddifferent  {De två lösenorden matchar ej. Försök igen.}
 ::msgcat::mcset sv messaupdatelatest    {Du har redan den senast tillgängliga versionen (%s)}
-
+::msgcat::mcset sv messprefsrestart     {För ett eller flera av inställningarna att verka krävs att programmet startas på nytt}
 
 
 # Messages for tk_messageBox:
@@ -657,7 +657,7 @@ Det är nödvändigt att den finns i din roster. Du har prenumeration för %s: %s.}
 ::msgcat::mcset sv jamesstrptsubsc              {Ditt registrerade konto hos %s kommer att placeras i din kompislista för att fungera som transport till denna tjänsten.}
 ::msgcat::mcset sv jamessfailedsubsc            {Misslyckades med prenumerationen till %s. Användaren nekade.}
 ::msgcat::mcset sv jamessstarttls-nofeature     {Servern "%s" saknar stöd för TLS.}
-::msgcat::mcset sv jamessstartls-failure        {TLS förhandling med servern "%s" misslyckades.}
+::msgcat::mcset sv jamessstarttls-failure        {TLS förhandling med servern "%s" misslyckades.}
 
 
 

@@ -7,7 +7,7 @@
 #       Most recent reference at the time of writing:
 #       http://www.ietf.org/internet-drafts/draft-saintandre-xmpp-uri-06.txt
 # 
-# $Id: ParseURI.tcl,v 1.19 2004-11-30 15:11:10 matben Exp $
+# $Id: ParseURI.tcl,v 1.20 2004-12-14 14:08:45 matben Exp $
 
 package require uriencode
 
@@ -53,8 +53,9 @@ proc ::ParseURI::Parse {args} {
     # {^xmpp:([^\?#]+)(\?([^&]+)&([^#]+))?(#(.+))?$}
     # 
     #         {^xmpp:([^\?#]+) \?([^&#]+)  (& [^#]+){0,}?(#(.+)){0,1}}
-    set reexp {^xmpp:([^\?#]+)(\?([^&#]+))?(&([^#]+))?(#(.+))?$}
-    if {![regexp $reexp $uri match jid x querytype y query z fragment]} {
+    set re {^xmpp:([^\?#]+)(\?([^&#]+)){0,1}(&([^#]+)){0,1}(#(.+)){0,1}$}
+    if {![regexp $re $uri match jid x querytype y query z fragment]} {
+	::Debug 2 "\t regexp failed"
 	return
     }
     jlib::splitjid $jid jid2 resource

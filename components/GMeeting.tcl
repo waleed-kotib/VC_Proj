@@ -2,7 +2,7 @@
 # 
 #       Interface for launching Gnome Meeting.
 #
-# $Id: GMeeting.tcl,v 1.4 2004-12-12 15:03:30 matben Exp $
+# $Id: GMeeting.tcl,v 1.5 2004-12-14 14:08:45 matben Exp $
 
 namespace eval ::GMeeting:: {
     
@@ -29,6 +29,11 @@ proc ::GMeeting::Init { } {
     ::Jabber::UI::RegisterPopupEntry roster $popMenuSpec
     ::Jabber::RegisterCapsExtKey voip_h323
     ::Jabber::RegisterCapsExtKey voip_sip
+    ::Jabber::RegisterCapsExtKey voipgm2
+
+    ::Jabber::AddClientXmlns "http://jabber.org/protocol/voip/h323"
+    ::Jabber::AddClientXmlns "http://jabber.org/protocol/voip/sip"
+    ::Jabber::AddClientXmlns "http://jabber.org/protocol/voip/callto"
     
     component::register GnomeMeeting  \
       "Provides a method to launch Gnome Meeting"
