@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.14 2004-08-15 06:56:53 matben Exp $
+# $Id: Whiteboard.tcl,v 1.15 2004-08-17 06:19:54 matben Exp $
 
 package require entrycomp
 package require moviecontroller
@@ -1376,6 +1376,9 @@ proc ::WB::SetToolButton {wtop btName} {
 	    # This one is needed to cancel selection since we compete
 	    # with Button-1 binding to canvas.
 	    $wCan bind std <Control-ButtonRelease-1> {
+		::CanvasDraw::CancelBox %W
+	    }
+	    $wCan bind std <Control-B1-Motion> {
 		::CanvasDraw::CancelBox %W
 	    }
 	    bind QTFrame <Control-Button-1> {

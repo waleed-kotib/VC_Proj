@@ -9,9 +9,9 @@
 ::msgcat::mcset fr Accept		{Accepter}
 ::msgcat::mcset fr Add			{Ajouter}
 ::msgcat::mcset fr Address		{Adresse}
-::msgcat::mcset fr Advanced		{Avancé}
+::msgcat::mcset fr Advanced		{AvancÃ©}
 ::msgcat::mcset fr Agents		{Agents}
-#::msgcat::mcset fr Appearence   Appearence
+::msgcat::mcset fr Appearance           {Apparence}
 ::msgcat::mcset fr Apply		{Appliquer}
 ::msgcat::mcset fr Available		{Disponible}
 ::msgcat::mcset fr Away			{Parti}
@@ -29,43 +29,43 @@
 ::msgcat::mcset fr City			{Ville}
 ::msgcat::mcset fr Clear		{Nettoyer}
 ::msgcat::mcset fr Close		{Fermer}
-::msgcat::mcset fr Conference		{Conférence}
+::msgcat::mcset fr Conference		{ConfÃ©rence}
 ::msgcat::mcset fr Connect		{Se connecter}
 ::msgcat::mcset fr Country		{Pays}
-::msgcat::mcset fr Create		{Créer}
+::msgcat::mcset fr Create		{CrÃ©er}
 ::msgcat::mcset fr Customization	{Affichage}
 ::msgcat::mcset fr Date			{Date}
 ::msgcat::mcset fr Default		{Standard}
 ::msgcat::mcset fr Delete		{Supprimer}
 ::msgcat::mcset fr Deny			{Rejeter}
-::msgcat::mcset fr Department		{Dépertement}
+::msgcat::mcset fr Department		{DÃ©pertement}
 ::msgcat::mcset fr Description		{Description}
 ::msgcat::mcset fr Drawing		{Dessin}
 ::msgcat::mcset fr Document		{Document}
 ::msgcat::mcset fr Done			{Fait}
-::msgcat::mcset fr Edit			{Éditer}
+::msgcat::mcset fr Edit			{Ã‰diter}
 ::msgcat::mcset fr Enter		{Entrer}
 ::msgcat::mcset fr Error		{Erreur}
 ::msgcat::mcset fr Exit			{Sortie}
 ::msgcat::mcset fr File			{Fichier}
 ::msgcat::mcset fr Finish		{Terminer}
-::msgcat::mcset fr Finished		{Terminé}
+::msgcat::mcset fr Finished		{TerminÃ©}
 ::msgcat::mcset fr Forward		{Faire suivre}
 ::msgcat::mcset fr From			{De}
-::msgcat::mcset fr General		{Général}
+::msgcat::mcset fr General		{GÃ©nÃ©ral}
 ::msgcat::mcset fr Get			{Recevoir}
 ::msgcat::mcset fr Group		{Groupe}
 ::msgcat::mcset fr Groupchat            {Groupe de discussion}
 ::msgcat::mcset fr Handling		{Behandeling}
 ::msgcat::mcset fr History		{Historique}
-::msgcat::mcset fr Home			{Démarrer}
+::msgcat::mcset fr Home			{DÃ©marrer}
 ::msgcat::mcset fr Import		{Importer}
-::msgcat::mcset fr Inbox		{Messages entrant}
+::msgcat::mcset fr Inbox		{Messages}
 ::msgcat::mcset fr Info			{Infos}
 ::msgcat::mcset fr Invite		{Inviter}
 ::msgcat::mcset fr Less			{Moins}
 ::msgcat::mcset fr Login		{Se connecter}
-::msgcat::mcset fr Logout		{Se déconnecter}
+::msgcat::mcset fr Logout		{Se dÃ©connecter}
 ::msgcat::mcset fr Middle		{Milieu}
 ::msgcat::mcset fr More			{Plus}
 ::msgcat::mcset fr Never		{Jamais}
@@ -74,21 +74,21 @@
 ::msgcat::mcset fr No			{Non}
 ::msgcat::mcset fr no			{non}
 ::msgcat::mcset fr None			{Aucun}
-::msgcat::mcset fr Occupation		{Occupé}
-::msgcat::mcset fr Offline		{Déconnecté}
+::msgcat::mcset fr Occupation		{OccupÃ©}
+::msgcat::mcset fr Offline		{DÃ©connectÃ©}
 ::msgcat::mcset fr OK			{OK}
-::msgcat::mcset fr Online		{Connecté}
+::msgcat::mcset fr Online		{ConnectÃ©}
 ::msgcat::mcset fr Open			{Ouvrir}
 ::msgcat::mcset fr Password		{Mot de passe}
 ::msgcat::mcset fr Pick			{Choisir}
-::msgcat::mcset fr Phone		{Téléphone}
+::msgcat::mcset fr Phone		{TÃ©lÃ©phone}
 ::msgcat::mcset fr Play			{Jouer}
 ::msgcat::mcset fr Plugins		{Plugins}
-::msgcat::mcset fr Preferences		{Préférences}
-::msgcat::mcset fr Previous		{Précédent}
+::msgcat::mcset fr Preferences		{PrÃ©fÃ©rences}
+::msgcat::mcset fr Previous		{PrÃ©cÃ©dent}
 ::msgcat::mcset fr Print		{Imprimer}
-::msgcat::mcset fr Priority		{Priorité}
-::msgcat::mcset fr Privacy		{Confidentialité}
+::msgcat::mcset fr Priority		{PrioritÃ©}
+::msgcat::mcset fr Privacy		{ConfidentialitÃ©}
 ::msgcat::mcset fr Profile		{Profil}
 ::msgcat::mcset fr Profiles		{Profils}
 ::msgcat::mcset fr Progress		{Progression}
@@ -97,7 +97,7 @@
 ::msgcat::mcset fr Register		{S'enregistrer}
 ::msgcat::mcset fr Remaining		{Restant}
 ::msgcat::mcset fr Remove		{Enlever}
-::msgcat::mcset fr Reply		{Répondre}
+::msgcat::mcset fr Reply		{RÃ©pondre}
 ::msgcat::mcset fr Resource		{Ressources}
 ::msgcat::mcset fr Room			{Salon}
 ::msgcat::mcset fr Roster		{Contacts}
@@ -111,11 +111,11 @@
 ::msgcat::mcset fr Shortcut		{Raccourci}
 ::msgcat::mcset fr Shortcuts		{Raccourcis}
 ::msgcat::mcset fr Sounds		{Sons}
-::msgcat::mcset fr Specifications	{Spécifications}
+::msgcat::mcset fr Specifications	{SpÃ©cifications}
 ::msgcat::mcset fr Speech		{Dialoguer}
-::msgcat::mcset fr State		{État}
-::msgcat::mcset fr State/Region		{État/Région}
-::msgcat::mcset fr Stop			{Arrêter}
+::msgcat::mcset fr State		{Ã‰tat}
+::msgcat::mcset fr State/Region		{Ã‰tat/RÃ©gion}
+::msgcat::mcset fr Stop			{ArrÃªter}
 ::msgcat::mcset fr Subject		{Sujet}
 ::msgcat::mcset fr Subscribe		{S'inscrire}
 ::msgcat::mcset fr Subscribed		{Inscrit}
@@ -125,12 +125,12 @@
 ::msgcat::mcset fr Time			{Heure}
 ::msgcat::mcset fr Timeout		{Timeout}
 ::msgcat::mcset fr Title		{Titre}
-::msgcat::mcset fr To			{À}
-::msgcat::mcset fr Topic		{Thème}
+::msgcat::mcset fr To			{Ã€}
+::msgcat::mcset fr Topic		{ThÃ¨me}
 ::msgcat::mcset fr Trash		{Corbeille}
-::msgcat::mcset fr Unregister		{Se désinscrire}
-::msgcat::mcset fr Unsubscribe		{Se désinscrire}
-::msgcat::mcset fr Unsubscribed		{Désinscrit}
+::msgcat::mcset fr Unregister		{Se dÃ©sinscrire}
+::msgcat::mcset fr Unsubscribe		{Se dÃ©sinscrire}
+::msgcat::mcset fr Unsubscribed		{DÃ©sinscrit}
 ::msgcat::mcset fr Username		{Nom}
 ::msgcat::mcset fr Warning		{Attention}
 ::msgcat::mcset fr Welcome              {Bienvenue}
@@ -148,39 +148,39 @@
 
 # All menu labels; concateneted and prepended with 'm' for the database key.
 ::msgcat::mcset fr mFile		{Fichier}
-::msgcat::mcset fr mEdit		{Édition}
-::msgcat::mcset fr mPreferences		{Préférences}
+::msgcat::mcset fr mEdit		{Ã‰dition}
+::msgcat::mcset fr mPreferences		{PrÃ©fÃ©rences}
 ::msgcat::mcset fr mJabber		{Jabber}
 ::msgcat::mcset fr mItems		{Outils}
-#::msgcat::mcset fr mLibrary		{Library}
+::msgcat::mcset fr mLibrary		{BibliothÃ¨ques}
 ::msgcat::mcset fr mInfo		{Infos}
 ::msgcat::mcset fr mAddons		{Add-ons}
 ::msgcat::mcset fr mPlugins		{Plugins}
 
-::msgcat::mcset fr mAboutWhiteboard   	{À propos du tableau}
-::msgcat::mcset fr mAboutCoccinella   	{À propos de Coccinella...}
-::msgcat::mcset fr mAboutQuickTimeTcl	{À propos de QuickTimeTcl...}
+::msgcat::mcset fr mAboutWhiteboard   	{Ã€ propos du tableau}
+::msgcat::mcset fr mAboutCoccinella   	{Ã€ propos de Coccinella...}
+::msgcat::mcset fr mAboutQuickTimeTcl	{Ã€ propos de QuickTimeTcl...}
 ::msgcat::mcset fr mWelcome     	{Bienvenue}
 ::msgcat::mcset fr mNew			{&Nouveau}
 ::msgcat::mcset fr mNewWhiteboard	{Nouveau &tableau}
 ::msgcat::mcset fr mOpenConnection	{Se &connecter...}
-::msgcat::mcset fr mCloseWindow		{&Fermer la fenêtre}
+::msgcat::mcset fr mCloseWindow		{&Fermer la fenÃªtre}
 ::msgcat::mcset fr mStartServer		{Lancer le &serveur}
-::msgcat::mcset fr mOpenImage/Movie	{Ouvrir l'&image/la vidéo...}
+::msgcat::mcset fr mOpenImage/Movie	{Ouvrir l'&image/la vidÃ©o...}
 ::msgcat::mcset fr mOpenURLStream	{Lancer le s&treaming...}
-::msgcat::mcset fr mPutCanvas		{Insérer un dessin}
+::msgcat::mcset fr mPutCanvas		{InsÃ©rer un dessin}
 ::msgcat::mcset fr mGetCanvas		{Importer un dessin}
-::msgcat::mcset fr mPutFile		{Insérer un fichier}
-::msgcat::mcset fr mStopPut/Get/Open	{Arrêter l'insertion/l'ouverture}
+::msgcat::mcset fr mPutFile		{InsÃ©rer un fichier}
+::msgcat::mcset fr mStopPut/Get/Open	{ArrÃªter l'insertion/l'ouverture}
 ::msgcat::mcset fr mOpenCanvas		{Ouvrir un dessin}
 ::msgcat::mcset fr mSaveCanvas		{Enregistrer le dessin}
 ::msgcat::mcset fr mSaveAs		{E&nregistrer sous...}
-#::msgcat::mcset fr mSaveAsItem          {Save As Item...}
+::msgcat::mcset fr mSaveAsItem          {Enregistrer en tant qu'objet...}
 ::msgcat::mcset fr mSaveImageAs         {Enregistrer l'&image sous...}
-::msgcat::mcset fr mPageSetup		{&Propriétés de la page...}
+::msgcat::mcset fr mPageSetup		{&PropriÃ©tÃ©s de la page...}
 ::msgcat::mcset fr mPrintCanvas		{Imprimer le dessin}
 ::msgcat::mcset fr mQuit		{&Quitter}
-::msgcat::mcset fr mAll			{&Tout sélectionner}
+::msgcat::mcset fr mAll			{&Tout sÃ©lectionner}
 ::msgcat::mcset fr mEraseAll		{Tout supprimer}
 ::msgcat::mcset fr mUndo		{Annuler}
 ::msgcat::mcset fr mRedo		{Refaire}
@@ -196,94 +196,94 @@
 ::msgcat::mcset fr mHorizontal		{Horizontal}
 ::msgcat::mcset fr mVertical		{Vertical}
 ::msgcat::mcset fr mImageLarger		{Agrandir l'image}
-::msgcat::mcset fr mImageSmaller	{Rétrécir l'image}
-::msgcat::mcset fr mBackgroundColor	{Couleur d'arrière-plan...}
+::msgcat::mcset fr mImageSmaller	{RÃ©trÃ©cir l'image}
+::msgcat::mcset fr mBackgroundColor	{Couleur d'arriÃ¨re-plan...}
 ::msgcat::mcset fr mGrid		{Grille}
-::msgcat::mcset fr mThickness		{Épaisseur}
-::msgcat::mcset fr mBrushThickness	{Épaisseur de la brosse}
+::msgcat::mcset fr mThickness		{Ã‰paisseur}
+::msgcat::mcset fr mBrushThickness	{Ã‰paisseur de la brosse}
 ::msgcat::mcset fr mFill		{Remplir}
 ::msgcat::mcset fr mFillColor		{Remplir la couleur...}
 ::msgcat::mcset fr mOutlineColor	{Couleur du contour}
 ::msgcat::mcset fr mLineSmoothness	{Lissage de la ligne}
 ::msgcat::mcset fr mStraighten   	{Redresser}
 ::msgcat::mcset fr mArcs		{Arcs}
-::msgcat::mcset fr mPieslice		{Part de gâteau}
+::msgcat::mcset fr mPieslice		{Part de gÃ¢teau}
 ::msgcat::mcset fr mChord		{Corde}
 ::msgcat::mcset fr mArc			{Arc}
-::msgcat::mcset fr mDash		{Pointillés}
+::msgcat::mcset fr mDash		{PointillÃ©s}
 ::msgcat::mcset fr mShiftConstrain	{Changer la contrainte}
-::msgcat::mcset fr mTo90degrees		{Tourner de 90 degrés}
-::msgcat::mcset fr mTo45degrees		{Tourner de 45 degrés}
+::msgcat::mcset fr mTo90degrees		{Tourner de 90 degrÃ©s}
+::msgcat::mcset fr mTo45degrees		{Tourner de 45 degrÃ©s}
 ::msgcat::mcset fr mFont		{Police}
 ::msgcat::mcset fr mSize		{Taille}
 ::msgcat::mcset fr mWeight		{Largeur}
 ::msgcat::mcset fr mNormal		{Normal}
 ::msgcat::mcset fr mBold		{Gras}
 ::msgcat::mcset fr mItalic		{Italique}
-::msgcat::mcset fr mPreferences...	{&Préférences...}
+::msgcat::mcset fr mPreferences...	{&PrÃ©fÃ©rences...}
 ::msgcat::mcset fr mNewAccount		{Nouveau compte...}
-::msgcat::mcset fr mLogin		{Se conn&ecter...}
-::msgcat::mcset fr mLogout		{Se déconnecter}
-::msgcat::mcset fr mLogoutWith          {Se déconnecter avec le message...}
+::msgcat::mcset fr mLogin		{Se connecter...}
+::msgcat::mcset fr mLogout		{Se dÃ©connecter}
+::msgcat::mcset fr mLogoutWith          {Se dÃ©connecter avec le message...}
 ::msgcat::mcset fr mHideMain            {Cacher}
 ::msgcat::mcset fr mShowMain            {Montrer}
 ::msgcat::mcset fr mPassword		{&Mot de passe...}
 ::msgcat::mcset fr mRoster/Services	{Contacts/services}
-::msgcat::mcset fr mMessageInbox	{Messages entrant}
+::msgcat::mcset fr mMessageInbox	{Messages}
 ::msgcat::mcset fr mSearch		{Cherche&r...}
 ::msgcat::mcset fr mAddNewUser		{Ajouter un nouvel utilisateur...}
 ::msgcat::mcset fr mSendMessage		{Envo&yer un message...}
 ::msgcat::mcset fr mChat		{Discussion}
 ::msgcat::mcset fr mStatus		{Statut}
-#::msgcat::mcset fr mDirStatus           {Directed Status}
+::msgcat::mcset fr mDirStatus           {Statut dÃ©sirÃ©}
 ::msgcat::mcset fr mAvailable		{Disponible}
 ::msgcat::mcset fr mAway		{Parti}
-::msgcat::mcset fr mDoNotDisturb	{Ne pas déranger}
+::msgcat::mcset fr mDoNotDisturb	{Ne pas dÃ©ranger}
 ::msgcat::mcset fr mNotAvailable	{Indisponible}
 ::msgcat::mcset fr mExtendedAway        {Parti pour longtemps}
 ::msgcat::mcset fr mInvisible           {Invisible}
 ::msgcat::mcset fr mAttachMessage	{Message joint...}
 ::msgcat::mcset fr mEnterRoom		{Entrer dans le salon...}
 ::msgcat::mcset fr mExitRoom		{Sortir du salon}
-::msgcat::mcset fr mCreateRoom		{Créer un salon...}
+::msgcat::mcset fr mCreateRoom		{CrÃ©er un salon...}
 ::msgcat::mcset fr mvCard		{Carte de visite...}
 ::msgcat::mcset fr mRemoveAccount	{Enlever un compte}
 ::msgcat::mcset fr mErrorLog		{Messages d'erreur...}
 ::msgcat::mcset fr mDebug		{Debuggage}
-::msgcat::mcset fr mOnServer		{À propos du serveur...}
-::msgcat::mcset fr mOnClients		{À propos des clients...}
-::msgcat::mcset fr mOnPlugins		{À propos des plugins...}
+::msgcat::mcset fr mOnServer		{Ã€ propos du serveur...}
+::msgcat::mcset fr mOnClients		{Ã€ propos des clients...}
+::msgcat::mcset fr mOnPlugins		{Ã€ propos des plugins...}
 ::msgcat::mcset fr mHelpOn		{Aide}
-::msgcat::mcset fr mNetworkSetup	{Propriétés du réseau}
+::msgcat::mcset fr mNetworkSetup	{PropriÃ©tÃ©s du rÃ©seau}
 ::msgcat::mcset fr mServers		{Serveurs}
 ::msgcat::mcset fr mJabberTransport	{Transport Jabber}
-::msgcat::mcset fr mSmileyLegend	{Légende des frimousses}
+::msgcat::mcset fr mSmileyLegend	{LÃ©gende des frimousses}
 ::msgcat::mcset fr mSetupAssistant	{&Assistant de configuration}
 ::msgcat::mcset fr mImageLarger		{Agrandir l'image}
-::msgcat::mcset fr mImageSmaller	{Rétrécir l'image}
+::msgcat::mcset fr mImageSmaller	{RÃ©trÃ©cir l'image}
 ::msgcat::mcset fr mExportImage		{Exporter l'image...}
-::msgcat::mcset fr mExportMovie		{Exporter la vidéo...}
-#::msgcat::mcset fr mSyncPlayback	{Sync Playback}
+::msgcat::mcset fr mExportMovie		{Exporter la vidÃ©o...}
+::msgcat::mcset fr mSyncPlayback	{Lecture synchronisÃ©e}
 ::msgcat::mcset fr mColor		{Couleur...}
 ::msgcat::mcset fr mAddSpeechBubble	{Ajouter une bulle}
-::msgcat::mcset fr mUpdateCheck  	{Voir les mises-à-jour}
+::msgcat::mcset fr mUpdateCheck  	{Voir les mises-Ã -jour}
 ::msgcat::mcset fr mReloadImage  	{Recharger l'image}
-#::msgcat::mcset fr mCoccinellaHome  	 {Coccinella Home...}
-#::msgcat::mcset fr mComponents 	 {Components...}
-#::msgcat::mcset fr mBugReport  	 {Report Bug...}
+::msgcat::mcset fr mCoccinellaHome  	{Dossier de Coccinella...}
+::msgcat::mcset fr mComponents          {Composants...}
+::msgcat::mcset fr mBugReport           {Signaler un bug...}
 
 
 # Popups
 ::msgcat::mcset fr mMessage     	{Message...}
 ::msgcat::mcset fr mWhiteboard     	{Tableau...}
-::msgcat::mcset fr mLastLogin/Activity  {Dernière connection/activité}
-::msgcat::mcset fr mEditUser     	{Éditer l'utilisateur...}
+::msgcat::mcset fr mLastLogin/Activity  {DerniÃ¨re connection/activitÃ©}
+::msgcat::mcset fr mEditUser     	{Ã‰diter l'utilisateur...}
 ::msgcat::mcset fr mRemoveUser     	{Supprimer l'utilisateur...}
-::msgcat::mcset fr mRefreshRoster     	{Rafraîchir la liste des contacts}
+::msgcat::mcset fr mRefreshRoster     	{RafraÃ®chir la liste des contacts}
 ::msgcat::mcset fr mVersion     	{Version}
 ::msgcat::mcset fr mRegister     	{S'inscrire}
-::msgcat::mcset fr mUnregister     	{Se désinscrire}
-::msgcat::mcset fr mRefresh     	{Rafraîchir}
+::msgcat::mcset fr mUnregister     	{Se dÃ©sinscrire}
+::msgcat::mcset fr mRefresh     	{RafraÃ®chir}
 ::msgcat::mcset fr mAddServer     	{Ajouter un serveur...}
 ::msgcat::mcset fr mLocalTime     	{Heure locale...}
 ::msgcat::mcset fr mSendFile     	{Envoyer un message...}
@@ -293,21 +293,21 @@
 
 # Short texts only. Use english as database key.
 ::msgcat::mcset fr {30 days}			{30 jours}
-::msgcat::mcset fr {About Coccinella}		{À propos de Coccinella}
-::msgcat::mcset fr {About Whiteboard}		{À propos du tableau}
-::msgcat::mcset fr {About QuickTimeTcl}		{À propos de QuickTimeTcl}
-::msgcat::mcset fr {Active <Return>}		{Appuyer sur <entrée>}
+::msgcat::mcset fr {About Coccinella}		{Ã€ propos de Coccinella}
+::msgcat::mcset fr {About Whiteboard}		{Ã€ propos du tableau}
+::msgcat::mcset fr {About QuickTimeTcl}		{Ã€ propos de QuickTimeTcl}
+::msgcat::mcset fr {Active <Return>}		{Appuyer sur <entrÃ©e>}
 ::msgcat::mcset fr {Add New User}		{Ajouter un nouvel utilisateur}
 ::msgcat::mcset fr {Add Server}			{Ajouter un serveur}
 ::msgcat::mcset fr {Add Shortcut}		{Ajouter un raccourci}
 ::msgcat::mcset fr {Address 1}			{Adresse 1}
 ::msgcat::mcset fr {Address 2}			{Adresse 2}
-::msgcat::mcset fr {Advanced Setup}		{Préférences avancées}
-::msgcat::mcset fr {Advanced Configuration}	{Configuration avancée}
+::msgcat::mcset fr {Advanced Setup}		{PrÃ©fÃ©rences avancÃ©es}
+::msgcat::mcset fr {Advanced Configuration}	{Configuration avancÃ©e}
 ::msgcat::mcset fr {Alert sounds}		{Sons d'alerte}
 ::msgcat::mcset fr {As text}			{Comme texte}
 ::msgcat::mcset fr {Ask each time}		{Demander chaque fois}
-::msgcat::mcset fr {Auto Away}			{Départ automatique}
+::msgcat::mcset fr {Auto Away}			{DÃ©part automatique}
 ::msgcat::mcset fr {Auto Connect}		{Connection automatique}
 ::msgcat::mcset fr {Auto-accept}		{Accepter automatiquement}
 ::msgcat::mcset fr {Auto-reject}		{Rejeter automatiquement}
@@ -315,31 +315,31 @@
 ::msgcat::mcset fr {Basic Info}			{Informations de bases}
 ::msgcat::mcset fr {Block JID}			{Bloquage JID}
 ::msgcat::mcset fr {Built in server port}	{Port du serveur interne}
-::msgcat::mcset fr {Cache folder}		{Répertoire du cache}
+::msgcat::mcset fr {Cache folder}		{RÃ©pertoire du cache}
 ::msgcat::mcset fr {Chat History}		{Historique de la discussion}
 ::msgcat::mcset fr {Chat With}			{Discuter avec}
 ::msgcat::mcset fr {Clear Disk Cache Now}	{Vider le cache}
 ::msgcat::mcset fr {Company Name}		{Nom de l'entreprise}
-::msgcat::mcset fr {Conference server}		{Serveur de la conférence}
-::msgcat::mcset fr {Create Room}		{Créer un salon}
-::msgcat::mcset fr {Default group}		{Groupe par défaut}
-::msgcat::mcset fr {Default Logout Status}	{Déconnexion par défaut}
+::msgcat::mcset fr {Conference server}		{Serveur de la confÃ©rence}
+::msgcat::mcset fr {Create Room}		{CrÃ©er un salon}
+::msgcat::mcset fr {Default group}		{Groupe par dÃ©faut}
+::msgcat::mcset fr {Default Logout Status}	{DÃ©connexion par dÃ©faut}
 ::msgcat::mcset fr {Disk Cache}			{Cache}
-::msgcat::mcset fr {Different Passwords}        {Différents mots de passe}
-::msgcat::mcset fr {Do Not Disturb}		{Ne pas déranger}
-::msgcat::mcset fr {Edit Fonts}			{Éditer les polices}
-::msgcat::mcset fr {Edit Item}			{Éditer l'outil}
-::msgcat::mcset fr {Edit Shortcut}		{Éditer le raccourci}
-::msgcat::mcset fr {Edit Shortcuts}		{Éditer les raccourcis}
-::msgcat::mcset fr {Edit User}			{Éditer l'utilisateur}
+::msgcat::mcset fr {Different Passwords}        {DiffÃ©rents mots de passe}
+::msgcat::mcset fr {Do Not Disturb}		{Ne pas dÃ©ranger}
+::msgcat::mcset fr {Edit Fonts}			{Ã‰diter les polices}
+::msgcat::mcset fr {Edit Item}			{Ã‰diter l'outil}
+::msgcat::mcset fr {Edit Shortcut}		{Ã‰diter le raccourci}
+::msgcat::mcset fr {Edit Shortcuts}		{Ã‰diter les raccourcis}
+::msgcat::mcset fr {Edit User}			{Ã‰diter l'utilisateur}
 ::msgcat::mcset fr {Email address}		{Adresse courriel}
 ::msgcat::mcset fr {Email addresses}		{Adresses courriel}
 ::msgcat::mcset fr {Empty Fields}		{Champs libres}
-::msgcat::mcset fr {Enter/Create Room}		{Entrer/Créer un salon}
+::msgcat::mcset fr {Enter/Create Room}		{Entrer/CrÃ©er un salon}
 ::msgcat::mcset fr {Enter Room}			{Entrer dans un salon}
 ::msgcat::mcset fr {Every time}			{Chaque fois}
 ::msgcat::mcset fr {Extended Away status}	{Statut "Parti pour longtemps"}
-::msgcat::mcset fr {Factory Settings}		{Propriétés par défaut}
+::msgcat::mcset fr {Factory Settings}		{PropriÃ©tÃ©s par dÃ©faut}
 ::msgcat::mcset fr {Fatal Error}		{Erreur fatale}
 ::msgcat::mcset fr {File Cache}			{Cache}
 ::msgcat::mcset fr {File coding}		{Encodage des fichiers}
@@ -347,15 +347,15 @@
 ::msgcat::mcset fr {File suffixes}		{Extension des fichiers}
 ::msgcat::mcset fr {File Transfer}		{Transfert de fichiers}
 ::msgcat::mcset fr {File Transfer Error}	{Erreur dans le transfert}
-::msgcat::mcset fr {First name}			{Prénom}
+::msgcat::mcset fr {First name}			{PrÃ©nom}
 ::msgcat::mcset fr {Font size}			{Taille de la police}
-::msgcat::mcset fr {Font weight}		{Épaisseur de la police}
+::msgcat::mcset fr {Font weight}		{Ã‰paisseur de la police}
 ::msgcat::mcset fr {Get File}			{Voir le fichier}
-::msgcat::mcset fr {Get File Error}		{Erreur dans la réceprion du fichier}
+::msgcat::mcset fr {Get File Error}		{Erreur dans la rÃ©ceprion du fichier}
 ::msgcat::mcset fr {Get vCard}			{Voir la carte de visite}
 ::msgcat::mcset fr {Group chat in room}		{Grouper la discussion et le salon}
 ::msgcat::mcset fr {Groupchat-1.0 (fallback)}	{Groupchat 1.0 (fallback)}
-::msgcat::mcset fr {Handled By}			{Géré par}
+::msgcat::mcset fr {Handled By}			{GÃ©rÃ© par}
 ::msgcat::mcset fr {Host name}			{Nom de domaine}
 ::msgcat::mcset fr {HTTP port}			{Port HTTP}
 ::msgcat::mcset fr {Import using}		{Importer en utilisant...}
@@ -363,28 +363,28 @@
 ::msgcat::mcset fr {Incoming Message}		{Message entrant}
 ::msgcat::mcset fr {Inspect Associations}	{Inspecter les associations}
 ::msgcat::mcset fr {IP address}			{Adresse IP}
-::msgcat::mcset fr {Is connected}		{Est connecté}
-::msgcat::mcset fr {Is safe}			{Est sûr}
-::msgcat::mcset fr {Is server up}		{Est connecté}
+::msgcat::mcset fr {Is connected}		{ConnectÃ©}
+::msgcat::mcset fr {Is safe}			{SÃ»r}
+::msgcat::mcset fr {Is server up}		{ConnectÃ©}
 ::msgcat::mcset fr {Jabber address}		{Adresse Jabber}
 ::msgcat::mcset fr {Jabber Client}		{Client Jabber}
 ::msgcat::mcset fr {Jabber Server}		{Serveur Jabber}
 ::msgcat::mcset fr {Jabber server port}		{Port du serveur Jabber}
 ::msgcat::mcset fr {Jabber user id}		{Identifiant de l'utilisateur Jabber}
 ::msgcat::mcset fr {Jabber Id}			{Identifiant Jabber}
-::msgcat::mcset fr {JID to block}		{JID à bloquer}
-::msgcat::mcset fr {Last Activity}		{Dernière activité}
+::msgcat::mcset fr {JID to block}		{JID Ã  bloquer}
+::msgcat::mcset fr {Last Activity}		{DerniÃ¨re activitÃ©}
 ::msgcat::mcset fr {Last name}			{Nom}
 ::msgcat::mcset fr {Launch time}		{Heure de lancement}
 ::msgcat::mcset fr {Local Time}			{Heure locale}
-#::msgcat::mcset fr {Logged out}           {Logged out}
+::msgcat::mcset fr {Logged out}                 {DÃ©connecter}
 ::msgcat::mcset fr {Login as invisible}		{Se connecter avec le statut "Invisible"}
-::msgcat::mcset fr {Mailbox Error}		{Erreur de boîte aux lettres}
+::msgcat::mcset fr {Mailbox Error}		{Erreur de boÃ®te aux lettres}
 ::msgcat::mcset fr {MIME type}			{Type MIME}
 ::msgcat::mcset fr {Multi Connect}		{Multi-connexion}
 ::msgcat::mcset fr {My Status}			{Mon statut}
-::msgcat::mcset fr {Network Error}		{Erreur de Réseau}
-::msgcat::mcset fr {Network Setup}		{Configuration du réseau}
+::msgcat::mcset fr {Network Error}		{Erreur de RÃ©seau}
+::msgcat::mcset fr {Network Setup}		{Configuration du rÃ©seau}
 ::msgcat::mcset fr {New Account}		{&Nouvel utilisateur}
 ::msgcat::mcset fr {New chat message}		{Nouveau message dans la discussion}
 ::msgcat::mcset fr {New chat thread}		{Nouvelle discussion}
@@ -403,15 +403,15 @@
 ::msgcat::mcset fr {No Printing}		{Pas d'impression}
 ::msgcat::mcset fr {Not Available}		{Indisponible}
 ::msgcat::mcset fr {Not available}		{Indisponible}
-::msgcat::mcset fr {Not Connected}		{Déconnecté}
+::msgcat::mcset fr {Not Connected}		{DÃ©connectÃ©}
 ::msgcat::mcset fr {Once per session}		{Une fois par session}
 ::msgcat::mcset fr {One hour} 			{Une heure}
 ::msgcat::mcset fr {One day} 			{Un jour}
 ::msgcat::mcset fr {One week}	 		{Une semaine}
 ::msgcat::mcset fr {Open Canvas}		{Ouvrir dessin}
-::msgcat::mcset fr {Open Failed}		{Échec de l'ouverture}
+::msgcat::mcset fr {Open Failed}		{Ã‰chec de l'ouverture}
 ::msgcat::mcset fr {Open Helpfile}		{Ouvrir le fichier d'aide}
-::msgcat::mcset fr {Open Image/Movie}		{Ouvrir image/vidéo}
+::msgcat::mcset fr {Open Image/Movie}		{Ouvrir image/vidÃ©o}
 ::msgcat::mcset fr {Open Stream}		{Ouvrir streaming}
 ::msgcat::mcset fr {Peer-to-Peer}		{Peer-to-peer}
 ::msgcat::mcset fr {Personal Info}		{Infos personnelles}
@@ -420,19 +420,19 @@
 ::msgcat::mcset fr {Pick Directory}		{Choisir un dossier}
 ::msgcat::mcset fr {Pick File}			{Choisir un fichier}
 ::msgcat::mcset fr {Plugin Info}		{Infos sur le plugin}
-::msgcat::mcset fr {Plugin Control}		{Contrôle du plugin}
-::msgcat::mcset fr {Port number}		{Numéro de port}
+::msgcat::mcset fr {Plugin Control}		{ContrÃ´le du plugin}
+::msgcat::mcset fr {Port number}		{NumÃ©ro de port}
 ::msgcat::mcset fr {Postal Code}		{Code postal}
-::msgcat::mcset fr {Preferred Protocol}		{Protocol préféré}
+::msgcat::mcset fr {Preferred Protocol}		{Protocol prÃ©fÃ©rÃ©}
 ::msgcat::mcset fr {Presence Error}		{Erreur de statut}
-#::msgcat::mcset fr {Profile Name}         {Profile Name}
+::msgcat::mcset fr {Profile Name}               {Nom du profil}
 ::msgcat::mcset fr {Proxy Setup}		{Configuration du proxy}
 ::msgcat::mcset fr {Put File Error}		{Erreur lors de l'insertion du fichier}
-::msgcat::mcset fr {Put Image/Movie}		{Insérer image/vidéo}
-::msgcat::mcset fr {Reject receive}		{Rejeter la réception}
-::msgcat::mcset fr {Request To User}		{Demande à l'utilisateur}
+::msgcat::mcset fr {Put Image/Movie}		{InsÃ©rer image/vidÃ©o}
+::msgcat::mcset fr {Reject receive}		{Rejeter la rÃ©ception}
+::msgcat::mcset fr {Request To User}		{Demande Ã  l'utilisateur}
 ::msgcat::mcset fr {Retype password}		{Retaper le mot de passe}
-::msgcat::mcset fr {Revert Panel}		{Retourner le panneau}
+::msgcat::mcset fr {Revert Panel}		{Annuler les changements}
 ::msgcat::mcset fr {Register New Account}	{Enregistrer nouveau compte}
 ::msgcat::mcset fr {Register Now}		{S'enregistrer maintenant}
 ::msgcat::mcset fr {Register Service}		{Service d'enregistrement}
@@ -446,113 +446,113 @@
 ::msgcat::mcset fr {Save File}			{Enregistrer le fichier}
 ::msgcat::mcset fr {Save Message}		{Enregistrer le message}
 ::msgcat::mcset fr {Scramble password}		{Brouiller le mot de passe}
-::msgcat::mcset fr {Search results}		{Chercher les résultats}
+::msgcat::mcset fr {Search results}		{Chercher les rÃ©sultats}
 ::msgcat::mcset fr {Search Service}		{Chercher le service}
-::msgcat::mcset fr {Search Specifications}	{Chercher les spécifications}
+::msgcat::mcset fr {Search Specifications}	{Chercher les spÃ©cifications}
 ::msgcat::mcset fr {Select Font}		{Choisir police}
 ::msgcat::mcset fr {Send File}			{Envoyer fichier}
 ::msgcat::mcset fr {Send Live}			{Envoyer live}
 ::msgcat::mcset fr {Server Info}		{Infos sur le serveur}
 ::msgcat::mcset fr {Service server}		{Service du serveur}
-#::msgcat::mcset fr {Set Directed Presence} {Set Directed Presence}
+::msgcat::mcset fr {Set Directed Presence}      {Appliquer le statut dÃ©sirÃ©}
 ::msgcat::mcset fr {Set New Topic}		{Choisir nouveau sujet}
 ::msgcat::mcset fr {Set Status}			{Choisir statut}
 ::msgcat::mcset fr {Settings Panels}		{Panneau de configuration}
 ::msgcat::mcset fr {Setup Assistant}		{Assistant de configuration}
-::msgcat::mcset fr {Software Update}		{Mise-à-jour du logiciel}
+::msgcat::mcset fr {Software Update}		{Mise-Ã -jour du logiciel}
 ::msgcat::mcset fr {Sounds & Speech}		{Sons & langage}
 ::msgcat::mcset fr {Start Chat}			{Lancer la discussion}
 ::msgcat::mcset fr {Status message}		{Message du statut}
-::msgcat::mcset fr {Status when logging out}	{Statut lors de la déconnexion}
+::msgcat::mcset fr {Status when logging out}	{Statut lors de la dÃ©connexion}
 ::msgcat::mcset fr {Subscription Pending}	{Enregistrement imminent}
-::msgcat::mcset fr {Synthetic speech}		{Langage de synthèse}
-::msgcat::mcset fr {System fonts}		{Polices système}
-::msgcat::mcset fr {Take Snapshot}		{Capture d'écran}
+::msgcat::mcset fr {Synthetic speech}		{Langage de synthÃ¨se}
+::msgcat::mcset fr {System fonts}		{Polices systÃ¨me}
+::msgcat::mcset fr {Take Snapshot}		{Capture d'Ã©cran}
 ::msgcat::mcset fr {Tel (voice)}		{Tel}
 ::msgcat::mcset fr {Tel (fax)}			{Fax}
 ::msgcat::mcset fr {This IP number}		{Cette adresse IP}
-::msgcat::mcset fr {Thread started}		{Flux initialisé}
-::msgcat::mcset fr {To/from JID}		{À/De JID}
-::msgcat::mcset fr {To Jabber id}		{À l'ID Jabber}
-::msgcat::mcset fr {To Send or Not}		{À envoyer ou non}
+::msgcat::mcset fr {Thread started}		{Flux initialisÃ©}
+::msgcat::mcset fr {To/from JID}		{Ã€/De JID}
+::msgcat::mcset fr {To Jabber id}		{Ã€ l'ID Jabber}
+::msgcat::mcset fr {To Send or Not}		{Ã€ envoyer ou non}
 ::msgcat::mcset fr {Type of File}		{Type de fichier}
 ::msgcat::mcset fr {Unknown: Prompt user}	{Inconnu : Nom d'utilisateur}
-::msgcat::mcset fr {Url of homepage}		{URL de la page de démarrage}
-::msgcat::mcset fr {Use SSL for security}	{Utiliser SSL pour la sécurité}
+::msgcat::mcset fr {Url of homepage}		{URL de la page de dÃ©marrage}
+::msgcat::mcset fr {Use SSL for security}	{Utiliser SSL pour la sÃ©curitÃ©}
 ::msgcat::mcset fr {User is}			{L'utilisateur est}
-::msgcat::mcset fr {User is offline}		{L'utilisateur est déconnecté}
-::msgcat::mcset fr {User is online}		{L'utilisateur est connecté}
+::msgcat::mcset fr {User is offline}		{L'utilisateur est dÃ©connectÃ©}
+::msgcat::mcset fr {User is online}		{L'utilisateur est connectÃ©}
 ::msgcat::mcset fr {User Profiles}		{Profils d'utilisateur}
-::msgcat::mcset fr {User's status changed}	{Le statut de l'utilisateur a changé}
+::msgcat::mcset fr {User's status changed}	{Le statut de l'utilisateur a changÃ©}
 ::msgcat::mcset fr {Username & Password}	{Nom & mot de passe}
 ::msgcat::mcset fr {vCard Info}			{Infos sur la carte de visite}
 ::msgcat::mcset fr {Version Info}		{Infos sur la version}
 ::msgcat::mcset fr {Whiteboard fonts}		{Polices du tableau}
-::msgcat::mcset fr {Writing file}		{Écriture du fichier}
+::msgcat::mcset fr {Writing file}		{Ã‰criture du fichier}
 
 
 # Splash screen:
 ::msgcat::mcset fr splashsource 	{Mise en source du code Tcl...}
 ::msgcat::mcset fr splashload 		{Chargement des paquetages Tcl...}
 ::msgcat::mcset fr splashloadsha1 	{Chargement des paquetages sha1...}
-::msgcat::mcset fr splashsourcejabb 	{Mise en source du code Jabber...}
-::msgcat::mcset fr splashhost 		{Recherche du nom d'hôte...}
+::msgcat::mcset fr splashsourcejabb 	{Chargement des sources de Jabber...}
+::msgcat::mcset fr splashhost 		{Recherche du nom d'hÃ´te...}
 ::msgcat::mcset fr splashinit 		{Initialisation...}
-::msgcat::mcset fr splashprefs 		{Chargement et application des préférences...}
+::msgcat::mcset fr splashprefs 		{Chargement et application des prÃ©fÃ©rences...}
 ::msgcat::mcset fr splashbuildmenu	{Construction des menus...}
 ::msgcat::mcset fr splashbuild 		{Construction de l'interface...}
 ::msgcat::mcset fr splashlook 		{Recherche de}
 
 
 # Messages for tk_messageBox:
-::msgcat::mcset fr messfailedhttp	{Échec lors du démarrage du serveur http interne %s}
-::msgcat::mcset fr messinfoscript	{À cause d'un bug du "script info" sous Mac, vous\
-devez indiquer explicitement le dossier "Tableau-%s" dans la boîte de dialogue suivante}
-::msgcat::mcset fr messfailedsock	{Impossible d'initialiser le flux vers le serveur. Peut-être que le réseau ne\
+::msgcat::mcset fr messfailedhttp	{Ã‰chec lors du dÃ©marrage du serveur http interne %s}
+::msgcat::mcset fr messinfoscript	{Ã€ cause d'un bug du "script info" sous Mac, vous\
+devez indiquer explicitement le dossier "Tableau-%s" dans la boÃ®te de dialogue suivante}
+::msgcat::mcset fr messfailedsock	{Impossible d'initialiser le flux vers le serveur. Peut-Ãªtre que le rÃ©seau ne\
 fonctionne pas ou que le serveur est indisponible. Le message d'erreur est : %s}
 ::msgcat::mcset fr messeofconnect	{Erreur lors de l'ouverture de la connexion :\
-Réception d'un eof}
-::msgcat::mcset fr messfailconnect	{Erreur lors de l'ouverture de la connexion à %s}
-::msgcat::mcset fr messtimeout		{Temps dépassé lors de la connexion}
-::msgcat::mcset fr messnoplugs		{Il n'y a pas de plugin ou d'aide détectée sur ce système}
+RÃ©ception d'un eof}
+::msgcat::mcset fr messfailconnect	{Erreur lors de l'ouverture de la connexion Ã  %s}
+::msgcat::mcset fr messtimeout		{Temps dÃ©passÃ© lors de la connexion}
+::msgcat::mcset fr messnoplugs		{Il n'y a pas de plugin ou d'aide dÃ©tectÃ©e sur ce systÃ¨me}
 ::msgcat::mcset fr messfailopread	{Impossible d'ouvrir %s pour lire %s}
-::msgcat::mcset fr messfailopwrite	{Impossible d'ouvrir %s pour écrire %s}
+::msgcat::mcset fr messfailopwrite	{Impossible d'ouvrir %s pour Ã©crire %s}
 ::msgcat::mcset fr messcanerasewarn	{Ouvrir un nouveau dessin efface tout\
 dans le dessin actuel !}
-::msgcat::mcset fr messaskreceive	{Prêt à recevoir %s, voulez-vous le recevoir ?}
+::msgcat::mcset fr messaskreceive	{PrÃªt Ã  recevoir %s, voulez-vous le recevoir ?}
 ::msgcat::mcset fr messfailmimeimp 	{Impossible d'importer les fichiers de type MIME %s}
 ::msgcat::mcset fr messfailnomime 	{Impossible de trouver le type MIME por le fichier %s}
-::msgcat::mcset fr messfailsend		{Erreur lors de l'envoi à %s}
-::msgcat::mcset fr messfactorydefaults	{Vous êtes sur le point de supprimer la plupart de\
-vos préférences. Voules-vous continuer ?}
+::msgcat::mcset fr messfailsend		{Erreur lors de l'envoi Ã  %s}
+::msgcat::mcset fr messfactorydefaults	{Vous Ãªtes sur le point de supprimer la plupart de\
+vos prÃ©fÃ©rences. Voules-vous continuer ?}
 ::msgcat::mcset fr messremoveprofile	{Voulez-vous supprimer ce profil ?\
-Votre compte ne sera pas supprimé lors de cette opération}
+Votre compte ne sera pas supprimÃ© lors de cette opÃ©ration}
 ::msgcat::mcset fr messfillserveruser	{Vous devez au moins remplir\
 le nom de l'utilisateur et du serveur}
-::msgcat::mcset fr messprofinuse	{Ce profil est déjà utilisé, voulez-vous\
+::msgcat::mcset fr messprofinuse	{Ce profil est dÃ©jÃ  utilisÃ©, voulez-vous\
 le remplacer ?}
 ::msgcat::mcset fr messblockbadjid	{Les champs du JID %s ne sont pas correctement\
-renseignés, voulez-vous tout de même l'ajouter ?}
+renseignÃ©s, voulez-vous tout de mÃªme l'ajouter ?}
 ::msgcat::mcset fr messfieldsmissing	{Un ou plusieurs champs sont vides,\
 recommencez ou annulez}
 ::msgcat::mcset fr messrmstandardfonts	{Les polices standard\
-Times, Helvetica et Courier ne peuvent pas être supprimées}
-::msgcat::mcset fr messprefschanged	{Les préférences ont été changées,\
-voulez-vous tout de même annuler ?}
+Times, Helvetica et Courier ne peuvent pas Ãªtre supprimÃ©es}
+::msgcat::mcset fr messprefschanged	{Les prÃ©fÃ©rences ont Ã©tÃ© changÃ©es,\
+voulez-vous tout de mÃªme annuler ?}
 ::msgcat::mcset fr messerrpreffile	{Erreur lors de l'ouverture de %s}
 ::msgcat::mcset fr messfailserver	{Impossible d'ouvrir le socket du serveur,\
-vous n'êtes peut-être pas connecté}
-::msgcat::mcset fr messopenhelpfile	{Vous êtes sur le point d'ouvrir un fichier d'aide\
+vous n'Ãªtes peut-Ãªtre pas connectÃ©}
+::msgcat::mcset fr messopenhelpfile	{Vous Ãªtes sur le point d'ouvrir un fichier d'aide\
 dans le dessin et donc d'effacer le dessin actuel ; voulez-vous continuer ?}
 ::msgcat::mcset fr messprintnoextension	{Il n'y a pas d'extension Tcl qui pourrait nous aider ici :-(}
-::msgcat::mcset fr messdoquit?		{Êtes-vous sûr de vouloir quitter ?}
-::msgcat::mcset fr messsuassfillin	{Vérifiez que vous avez complété tous les champs avant de continuer !}
-::msgcat::mcset fr messsuassclose	{Êtes-vous sûr de vouloir fermer l'assistant\
-de configuration ? Vous pouvez le relancer ultérieurement depuis le menu}
-::msgcat::mcset fr messprotocolch	{Vous avez changé la configuration du réseau,\
+::msgcat::mcset fr messdoquit?		{ÃŠtes-vous sÃ»r de vouloir quitter ?}
+::msgcat::mcset fr messsuassfillin	{VÃ©rifiez que vous avez complÃ©tÃ© tous les champs avant de continuer !}
+::msgcat::mcset fr messsuassclose	{ÃŠtes-vous sÃ»r de vouloir fermer l'assistant\
+de configuration ? Vous pouvez le relancer ultÃ©rieurement depuis le menu}
+::msgcat::mcset fr messprotocolch	{Vous avez changÃ© la configuration du rÃ©seau,\
 vous devez relancer l'application pour que les changements prennent effet. Voulez-vous continuer ?}
-::msgcat::mcset fr messpasswddifferent  {Les deux mots de passe sont différents,\
-Veuillez recommencer s'il vous plaît}
+::msgcat::mcset fr messpasswddifferent  {Les deux mots de passe sont diffÃ©rents,\
+Veuillez recommencer s'il vous plaÃ®t}
 
 
 
@@ -560,165 +560,165 @@ Veuillez recommencer s'il vous plaît}
 # Messages for tk_messageBox in Jabber namespace etc.:
 namespace eval ::Jabber:: {
 	::msgcat::mcset fr jamesserrsend	{Une erreur est survenue lors de l'envoi du\
-message à "%s" ; le message d'erreur est "%s"}
-	::msgcat::mcset fr jamessallowsub	{L'utilisateur %s vous autorise à l'ajouter à vos contacts}
-	::msgcat::mcset fr jamessunsub		{L'utilisateur %s vous a enlevé de ses contacts\
+message Ã  "%s" ; le message d'erreur est "%s"}
+	::msgcat::mcset fr jamessallowsub	{L'utilisateur %s vous autorise Ã  l'ajouter Ã  vos contacts}
+	::msgcat::mcset fr jamessunsub		{L'utilisateur %s vous a enlevÃ© de ses contacts\
 et n'est plus parmi vos contacts.}
-	::msgcat::mcset fr jamessunsubpres	{L'utilisateur %s vous a enlevé de ses contacts}
-	::msgcat::mcset fr jamessunsubask	{L'utilisateur %s vous a enlevé de ses contacts,\
+	::msgcat::mcset fr jamessunsubpres	{L'utilisateur %s vous a enlevÃ© de ses contacts}
+	::msgcat::mcset fr jamessunsubask	{L'utilisateur %s vous a enlevÃ© de ses contacts,\
 Voulez-vous enlever %s de vos contacts ?}
 	::msgcat::mcset fr jamessunsubscribed	{Vous ne faites plus partie des contacts de %s}
-	::msgcat::mcset fr jamesserrpres	{Il y a une erreur du statut "Présence",\
+	::msgcat::mcset fr jamesserrpres	{Il y a une erreur du statut "PrÃ©sence",\
 Le code de l'erreur est %s (%s)}
-	::msgcat::mcset fr jamessautoaccepted	{Vous avez automatiquement accepté une requête\
+	::msgcat::mcset fr jamessautoaccepted	{Vous avez automatiquement acceptÃ© une requÃªte\
 d'autorisation de la part de %s}
-	::msgcat::mcset fr jamessautoreject	{Vous avez automatiquement rejeté une requête\
+	::msgcat::mcset fr jamessautoreject	{Vous avez automatiquement rejetÃ© une requÃªte\
 d'autorisation de la part de %s}
-	::msgcat::mcset fr jamessautosubs	{Vous avez automatiquement ajouté %s\
-à la liste de vos contacts}
+	::msgcat::mcset fr jamessautosubs	{Vous avez automatiquement ajoutÃ© %s\
+Ã  la liste de vos contacts}
 
 
-	::msgcat::mcset fr jamessconnbroken	{La connexion a été inopinément coupée}
-	::msgcat::mcset fr jamessautoawayset 	{Le statut "Départ automatique" a été envoyé à %s.\
-Voulez-vous de nouveau apparaître comme "Disponible" ?}
-	::msgcat::mcset fr jamesserrgetpublic	{Erreur lors de la demande des données publiques\
+	::msgcat::mcset fr jamessconnbroken	{La connexion a Ã©tÃ© inopinÃ©ment coupÃ©e}
+	::msgcat::mcset fr jamessautoawayset 	{Le statut "DÃ©part automatique" a Ã©tÃ© envoyÃ© Ã  %s.\
+Voulez-vous de nouveau apparaÃ®tre comme "Disponible" ?}
+	::msgcat::mcset fr jamesserrgetpublic	{Erreur lors de la demande des donnÃ©es publiques\
 de %s, le code de l'erreur est %s (%s)}
-	::msgcat::mcset fr jamesserrlastactive	{Erreur lors de la demande de la dernière activité de %s,\
+	::msgcat::mcset fr jamesserrlastactive	{Erreur lors de la demande de la derniÃ¨re activitÃ© de %s,\
 le code de l'erreur est %s (%s)}
-	::msgcat::mcset fr jamesserrnotimeinfo	{Le client/service %s n'a pas retourné\
+	::msgcat::mcset fr jamesserrnotimeinfo	{Le client/service %s n'a pas retournÃ©\
 l'information de temps.}
-	::msgcat::mcset fr jamesstimeused	{Temps écoulé depuis la dernière activité\
+	::msgcat::mcset fr jamesstimeused	{Temps Ã©coulÃ© depuis la derniÃ¨re activitÃ©\
 de %s : }
-	::msgcat::mcset fr jamesstimeconn	{Temps écoulé depuis la dernière connexion\
+	::msgcat::mcset fr jamesstimeconn	{Temps Ã©coulÃ© depuis la derniÃ¨re connexion\
 de %s : }
-	::msgcat::mcset fr jamesstimeservstart	{Temps écoulé depuis le démarrage du serveur "%s" : }
+	::msgcat::mcset fr jamesstimeservstart	{Temps Ã©coulÃ© depuis le dÃ©marrage du serveur "%s" : }
 	::msgcat::mcset fr jamessuptime		{L'uptime (pour les services)\
-ou la dernière activité de l'utilisateur est : }
-	::msgcat::mcset fr jamesserrtime	{Erreur lors de la demande d'heure à %s (%s).}
+ou la derniÃ¨re activitÃ© de l'utilisateur est : }
+	::msgcat::mcset fr jamesserrtime	{Erreur lors de la demande d'heure Ã  %s (%s).}
 	::msgcat::mcset fr jamesslocaltime	{L'heure locale de %s est : %s}
-	::msgcat::mcset fr jamesserrvers	{Erreur lors de la demande de version à %s (%s).}
-	::msgcat::mcset fr jamesserrautoupdate 	{Erreur lors de la demande de mise-à-jour du serveur\
-à %s (%s).}
+	::msgcat::mcset fr jamesserrvers	{Erreur lors de la demande de version Ã  %s (%s).}
+	::msgcat::mcset fr jamesserrautoupdate 	{Erreur lors de la demande de mise-Ã -jour du serveur\
+Ã  %s (%s).}
 	::msgcat::mcset fr jamesswarberasewb	{Voulez-vous d'abord effacer le tableau ?}
 	::msgcat::mcset fr jamesswarnremove	{Enlever un outil de votre liste de contacts\
-peut être annulée. Vous devez vous réinscrire auprès de l'utilisateur si vous voulez l'ajouter de nouveau.\
-Voulez-vous tout de même continuer ?}
-	::msgcat::mcset fr jamessillegalchar	{Le(s) caractère(s) illégal(aux) dans %s sont : "%s" !}
-	::msgcat::mcset fr jamessbadjid		{Le JID "%s" est mal configuré.\
-Voulez-vous tout de même continuer ?}
-	::msgcat::mcset fr jamessalreadyinrost	{Le JID "%s" est déjà dans votre liste de contacts.\
-Voulez-vous tout de même continuer ?}
+peut Ãªtre annulÃ©e. Vous devez vous rÃ©inscrire auprÃ¨s de l'utilisateur si vous voulez l'ajouter de nouveau.\
+Voulez-vous tout de mÃªme continuer ?}
+	::msgcat::mcset fr jamessillegalchar	{Le(s) caractÃ¨re(s) illÃ©gal(aux) dans %s sont : "%s" !}
+	::msgcat::mcset fr jamessbadjid		{Le JID "%s" est mal configurÃ©.\
+Voulez-vous tout de mÃªme continuer ?}
+	::msgcat::mcset fr jamessalreadyinrost	{Le JID "%s" est dÃ©jÃ  dans votre liste de contacts.\
+Voulez-vous tout de mÃªme continuer ?}
 	::msgcat::mcset fr jamessfailsetnick	{Erreur lors de l'attribution du pseudo ou du nom de groupe "%s".\
 Code de l'erreur : %s (%s).}
 	::msgcat::mcset fr jamessnamemissing	{%s manque ou est trop court !}
-	::msgcat::mcset fr jamessnosocket	{Impossible de créer le serveur "%s".\
-Peut-être que le réseau ne fonctionne pas ou que le serveur est inutilisable (%s).}
-	::msgcat::mcset fr jamesstimeoutserver	{Temps écoulé lors de l'accession au serveur "%s".}
-	::msgcat::mcset fr jamessregisterok	{L'enregistrement au serveur "%s" a fonctionné.\
-Il ne vous reste plus qu'à vous connecter avec les mêmes noms d'utilisateur et mot de passe.}
-	::msgcat::mcset fr jamessremoveaccount	{Vous êtes sur le point de supprimer votre compte\
-du serveur ; cette opération ne peut pas être annulée. Voulez-vous continuer ?}
-	::msgcat::mcset fr jamesserrunreg	{Erreur lors de la désinscription\
+	::msgcat::mcset fr jamessnosocket	{Impossible de crÃ©er le serveur "%s".\
+Peut-Ãªtre que le rÃ©seau ne fonctionne pas ou que le serveur est inutilisable (%s).}
+	::msgcat::mcset fr jamesstimeoutserver	{Temps Ã©coulÃ© lors de l'accession au serveur "%s".}
+	::msgcat::mcset fr jamessregisterok	{L'enregistrement au serveur "%s" a fonctionnÃ©.\
+Il ne vous reste plus qu'Ã  vous connecter avec les mÃªmes noms d'utilisateur et mot de passe.}
+	::msgcat::mcset fr jamessremoveaccount	{Vous Ãªtes sur le point de supprimer votre compte\
+du serveur ; cette opÃ©ration ne peut pas Ãªtre annulÃ©e. Voulez-vous continuer ?}
+	::msgcat::mcset fr jamesserrunreg	{Erreur lors de la dÃ©sinscription\
 de "%s". Code de l'erreur : %s (%s).}
-	::msgcat::mcset fr jamessokunreg	{Vous n'êtes plus inscrit sur "%s".}
+	::msgcat::mcset fr jamessokunreg	{Vous n'Ãªtes plus inscrit sur "%s".}
 	::msgcat::mcset fr jamesspasswddiff	{Les mots de passe ne correspondent pas.\
 Veuillez recommencer.}
-	::msgcat::mcset fr jamesspasswderr	{L'enregistrement du nouveau mot de passe n'a pas fonctionné.\
+	::msgcat::mcset fr jamesspasswderr	{L'enregistrement du nouveau mot de passe n'a pas fonctionnÃ©.\
 Code de l'erreur : %s (%s).}
-	::msgcat::mcset fr jamesspasswdok	{Le nouveau mot de passe est enregistré.}
-	::msgcat::mcset fr jamessregnoserver	{Le serveur doit être configuré.}
-	::msgcat::mcset fr jamesserrregget	{La récupération des informations d'inscription a échoué.\
+	::msgcat::mcset fr jamesspasswdok	{Le nouveau mot de passe est enregistrÃ©.}
+	::msgcat::mcset fr jamessregnoserver	{Le serveur doit Ãªtre configurÃ©.}
+	::msgcat::mcset fr jamesserrregget	{La rÃ©cupÃ©ration des informations d'inscription a Ã©chouÃ©.\
 Code de l'erreur : %s (%s)}
-	::msgcat::mcset fr jamesserrregset	{L'inscription au sercice "%s" a échoué.\
+	::msgcat::mcset fr jamesserrregset	{L'inscription au sercice "%s" a Ã©chouÃ©.\
 Code de l'erreur : %s (%s)}
-	::msgcat::mcset fr jamessokreg		{L'inscription au service "%s" a été réalisée.}
-	::msgcat::mcset fr jamessinvalidjid	{Le JID est mal configuré.\
-Vérifiez tout d'abord que la case en bas du tableau contient une adresse correcte,\
-elle doit être de la forme "contact@jabber.org".}
+	::msgcat::mcset fr jamessokreg		{L'inscription au service "%s" a Ã©tÃ© rÃ©alisÃ©e.}
+	::msgcat::mcset fr jamessinvalidjid	{Le JID est mal configurÃ©.\
+VÃ©rifiez tout d'abord que la case en bas du tableau contient une adresse correcte,\
+elle doit Ãªtre de la forme "contact@jabber.org".}
 	::msgcat::mcset fr jamessnotconnected	{Vous devez vous connecter au serveur pour envoyer !}
 	::msgcat::mcset fr jamessaddrmiss	{Vous devez renseigner au moins\
 une adresse correcte.}
-	::msgcat::mcset fr jamesschatclose	{Si vous fermez cette fenêtre, vous perdrez la conversation\
-en cours. Voulez-vous tout de même la fermer ?}
+	::msgcat::mcset fr jamesschatclose	{Si vous fermez cette fenÃªtre, vous perdrez la conversation\
+en cours. Voulez-vous tout de mÃªme la fermer ?}
 	::msgcat::mcset fr jamessnogroupchat	{Aucun service du groupe de discussion\
 n'est reconnu.}
-	::msgcat::mcset fr jamessinroommiss	{Tous les champs doivent être renseignés\
+	::msgcat::mcset fr jamessinroommiss	{Tous les champs doivent Ãªtre renseignÃ©s\
 avant d'entrer dans le salon.}
 	::msgcat::mcset fr jamesswarnexitroom	{Voulez-vous quitter le salon %s ?}
 	::msgcat::mcset fr jamesserrbrowse	{Erreur lors de la navigation\
 dans "%s": %s}
 	::msgcat::mcset fr jamessenterroomempty	{Le nom du serveur et du salon\
-doivent être indiqués correctement.}
-	::msgcat::mcset fr jamesserrconfget	{La récupération des infos concernant\
-l'entrée dans le salon a échoué. Code de l'erreur : %s (%s).}
-	::msgcat::mcset fr jamesserrconfgetcre	{La récupération des infos concernant\
-la création du salon a échoué. Code de l'erreur : %s (%s).}
+doivent Ãªtre indiquÃ©s correctement.}
+	::msgcat::mcset fr jamesserrconfget	{La rÃ©cupÃ©ration des infos concernant\
+l'entrÃ©e dans le salon a Ã©chouÃ©. Code de l'erreur : %s (%s).}
+	::msgcat::mcset fr jamesserrconfgetcre	{La rÃ©cupÃ©ration des infos concernant\
+la crÃ©ation du salon a Ã©chouÃ©. Code de l'erreur : %s (%s).}
 	::msgcat::mcset fr jamessinroomerasewb 	{Voulez-vous effacer le tableau\
 avant d'entrer dans le salon ?}
-	::msgcat::mcset fr jamessconffailed	{Erreur lors de l'entrée/la création du salon.\
+	::msgcat::mcset fr jamessconffailed	{Erreur lors de l'entrÃ©e/la crÃ©ation du salon.\
 Code de l'erreur : %s (%s).}
-	::msgcat::mcset fr jamessconfservempty	{Le serveur doit être configuré\
+	::msgcat::mcset fr jamessconfservempty	{Le serveur doit Ãªtre configurÃ©\
 avec un nom correct.}
-	::msgcat::mcset fr jamesserragentget	{Erreur lors de la récupération\
+	::msgcat::mcset fr jamesserragentget	{Erreur lors de la rÃ©cupÃ©ration\
 des agents : %s}
-	::msgcat::mcset fr jamesserrsearch	{Erreur lors des spécifications de la recherche.\
+	::msgcat::mcset fr jamesserrsearch	{Erreur lors des spÃ©cifications de la recherche.\
 Code de l'erreur : %s (%s).}
-	::msgcat::mcset fr jamessoobok		{Transfert de fichiers effectué.}
-	::msgcat::mcset fr jamessoobok2         {Transfert de %s à %s effectué.}
-	::msgcat::mcset fr jamessoobnourl	{Lors de la demande de téléchargement\
-effectuée par, aucune URL n'a été spécifiée.}
-	::msgcat::mcset fr jamessoobask		{L'utilisateur %s à mis à votre disposition\
-un fichier sur %s. Description : %s. Voulez-vous la télécharger ?}
+	::msgcat::mcset fr jamessoobok		{Transfert de fichiers effectuÃ©.}
+	::msgcat::mcset fr jamessoobok2         {Transfert de %s Ã  %s effectuÃ©.}
+	::msgcat::mcset fr jamessoobnourl	{Lors de la demande de tÃ©lÃ©chargement\
+effectuÃ©e par, aucune URL n'a Ã©tÃ© spÃ©cifiÃ©e.}
+	::msgcat::mcset fr jamessoobask		{L'utilisateur %s Ã  mis Ã  votre disposition\
+un fichier sur %s. Description : %s. Voulez-vous la tÃ©lÃ©charger ?}
 	::msgcat::mcset fr jamessoobbad		{L'URL de "%s"\
 n'est pas correcte. (URL : "%s").}
 	::msgcat::mcset fr jamessoonnohttp	{L'URL de "%s"\
-n'utilise pas le protocole "HTTP", mais "%s" (non supporté).}
-	::msgcat::mcset fr jamessoobfailopen	{L'ouverture de "%s" a échoué.}
+n'utilise pas le protocole "HTTP", mais "%s" (non supportÃ©).}
+	::msgcat::mcset fr jamessoobfailopen	{L'ouverture de "%s" a Ã©chouÃ©.}
 	::msgcat::mcset fr jamessoobgetfail	{L'URL "%s" n'est pas accessible (%s).}
-	::msgcat::mcset fr jamessoobtimeout	{Temps écoulé lors de l'accession\
+	::msgcat::mcset fr jamessoobtimeout	{Temps Ã©coulÃ© lors de l'accession\
 au fichier via HTTP}
-	::msgcat::mcset fr jamessnogchat	{Aucun service proposé par le salon\
+	::msgcat::mcset fr jamessnogchat	{Aucun service proposÃ© par le salon\
 n'est reconnu.}
 	::msgcat::mcset fr jamesserrinboxopen	{Erreur de l'ouverture du courrier entrant %s\
 lors de la sauvegarde.}
 	::msgcat::mcset fr jamesserrinboxread	{Erreur lors de la lecture du message\
-dans la boîte Jabber "%s" : %s}
-	::msgcat::mcset fr jamesschatclose	{Si vous fermez cette fenêtre, vous perdrez\
+dans la boÃ®te Jabber "%s" : %s}
+	::msgcat::mcset fr jamesschatclose	{Si vous fermez cette fenÃªtre, vous perdrez\
 toute la conversation. Voulez-vous continuer ?}
-	::msgcat::mcset fr jamessgchatfields	{Tous les champs doivent être renseignés\
+	::msgcat::mcset fr jamessgchatfields	{Tous les champs doivent Ãªtre renseignÃ©s\
 avant d'entrer dans le salon.}
-	::msgcat::mcset fr jamessconfmsg	{Choisissez un service de conférence\
-et un nom de salon. Cliquez ensuite sur "Recevoir" pour obtenir les spécifications d'entrée\
-dans le salon désiré (chaque salon peut avoir ses propres spécifications).}
+	::msgcat::mcset fr jamessconfmsg	{Choisissez un service de confÃ©rence\
+et un nom de salon. Cliquez ensuite sur "Recevoir" pour obtenir les spÃ©cifications d'entrÃ©e\
+dans le salon dÃ©sirÃ© (chaque salon peut avoir ses propres spÃ©cifications).}
 	::msgcat::mcset fr jamesssavemsg	{Voulez-vous enregistrer le message ?}
 	::msgcat::mcset fr jamessskipsendq	{L'adresse \"%s\" est incorrecte.\
 Voulez-vous envoyer aux autres ?}
 	::msgcat::mcset fr jamessillformresend	{L'adresse \"%s\" est incorrecte.\
-Modifiez-la pour envoyer à nouveau.}
-	::msgcat::mcset fr jamesslogin409	{La connexion a échoué avec\
-le code d'erreur %s (Ce nom d'utilisateur est déjà utilisé).\
-Si c'est vous qui utilisez ce nom, tentez plutôt de vous connecter.}
-	::msgcat::mcset fr jamessloginerr	{La connexion a échoué.\
+Modifiez-la pour envoyer Ã  nouveau.}
+	::msgcat::mcset fr jamesslogin409	{La connexion a Ã©chouÃ© avec\
+le code d'erreur %s (Ce nom d'utilisateur est dÃ©jÃ  utilisÃ©).\
+Si c'est vous qui utilisez ce nom, tentez plutÃ´t de vous connecter.}
+	::msgcat::mcset fr jamessloginerr	{La connexion a Ã©chouÃ©.\
 Code de l'erreur : %s (%s).}
-::msgcat::mcset fr jamessaddforeign	        {L'ajout d'un utilisateur inscrit à un système de messagerie\
-différant de Jabber nécessite que vous ayez déjà un compte sur ce système, et que\
-vous ayez utilisé ce compte pour l'enregistrement au serveur de transport correspondant\
+::msgcat::mcset fr jamessaddforeign	        {L'ajout d'un utilisateur inscrit Ã  un systÃ¨me de messagerie\
+diffÃ©rant de Jabber nÃ©cessite que vous ayez dÃ©jÃ  un compte sur ce systÃ¨me, et que\
+vous ayez utilisÃ© ce compte pour l'enregistrement au serveur de transport correspondant\
 (%s). Voulez-vous faire cela maintenant ?}
 ::msgcat::mcset fr jamessowntrpt	        {C'est votre propre compte sur %s\
-qui joue le rôle du service qui transporte vos messages à ce système de messagerie.\
-Il est nécessaire qu'il soit dans votre liste de contacts.\
-Vous êtes enregistré auprès de %s : %s.}
-::msgcat::mcset fr jamesswbchatlost	        {La discussion entière sera perdue\
+qui joue le rÃ´le du service qui transporte vos messages Ã  ce systÃ¨me de messagerie.\
+Il est nÃ©cessaire qu'il soit dans votre liste de contacts.\
+Vous Ãªtes enregistrÃ© auprÃ¨s de %s : %s.}
+::msgcat::mcset fr jamesswbchatlost	        {La discussion entiÃ¨re sera perdue\
 si vous fermez le tableau. Voulez-vous terminer la conversation ?}
 ::msgcat::mcset fr jamesschatoffline            {Cet utilisateur n'est plus en ligne,\
-le message n'est donc pas envoyé.}
-#::msgcat::mcset fr jamessregloginok             {You are now registered and\
-#automatically logged on as "%s"}
-#::msgcat::mcset fr jamessregerrinuse            {The registration failed\
-#because this username is already in use by another user. If this user is you,\
-#try to login instead. Error message: %s}
-#::msgcat::mcset fr jamessregerr                 {The registration failed\
-#with error message: %s}
+le message n'est donc pas envoyÃ©.}
+::msgcat::mcset fr jamessregloginok             {Vous Ãªtes maintenant identifiÃ© et\
+automatiquement connectÃ© en tant que "%s"}
+::msgcat::mcset fr jamessregerrinuse            {L'inscription a Ã©chouÃ©\
+parce que ce nom est dÃ©jÃ  employÃ© par un autre utilisateur. Si vous Ãªtes cet utilisateur,\
+essayez plutÃ´t de vous connecter. Code de l'erreur : %s}
+::msgcat::mcset fr jamessregerr                 {L'inscription a Ã©chouÃ©\
+avec le message d'erreur "%s"}
     
     
 
@@ -726,130 +726,130 @@ le message n'est donc pas envoyé.}
 
 
 ::msgcat::mcset fr openquicktime		{Ouvrir le streaming QuickTime}
-::msgcat::mcset fr writeurl			{Écrire l'URL ou choisir le raccourci : }
+::msgcat::mcset fr writeurl			{Ã‰crire l'URL ou choisir le raccourci : }
 ::msgcat::mcset fr openquicktimeurlmsg		{Ouvrir l'URL d'un fichier SDP\
-avec l'extension .mov pour un streaming QuickTime. Cela peut être du son (radio) ou de la vidéo (TV).\
-Vous pouvez également utiliser votre navigateur pour trouver le fichier SDP, l'enregistrer sur le disque\
-et l'ouvrir comme une vidéo classique.}
+avec l'extension .mov pour un streaming QuickTime. Cela peut Ãªtre du son (radio) ou de la vidÃ©o (TV).\
+Vous pouvez Ã©galement utiliser votre navigateur pour trouver le fichier SDP, l'enregistrer sur le disque\
+et l'ouvrir comme une vidÃ©o classique.}
 
 
 
 ::msgcat::mcset fr uastatpointmac 	{Pointeur (clic : marquer, double clic : inspecter, press : popup)}
 ::msgcat::mcset fr uastatpoint		{Pointeur (clic : marquer, double clic : inspecter, clic droit : popup)}
-::msgcat::mcset fr uastatmove		{Déplacer}
+::msgcat::mcset fr uastatmove		{DÃ©placer}
 ::msgcat::mcset fr uastatline		{Ligne}
 ::msgcat::mcset fr uastatarrow		{Croix}
 ::msgcat::mcset fr uastatrect		{Rectangle}
-::msgcat::mcset fr uastatoval		{Élipse}
+::msgcat::mcset fr uastatoval		{Ã‰lipse}
 ::msgcat::mcset fr uastattext		{Texte}
 ::msgcat::mcset fr uastatdel		{Cliquez pour supprimer}
 ::msgcat::mcset fr uastatpen		{Crayon}
 ::msgcat::mcset fr uastatbrush		{Brosse}
 ::msgcat::mcset fr uastatpaint		{Peinture (+ <shift> : transparent)}
 ::msgcat::mcset fr uastatpoly		{Polygone (<espace> : annuler)}
-::msgcat::mcset fr uastatarc		{Arc (clic : définir le centre, <espace> : annuler)}
-::msgcat::mcset fr uastatarc2		{Arc (cliquer-déplacer)}
-::msgcat::mcset fr uastatrot		{Rotation (d'abord séléctionner les objets)}
+::msgcat::mcset fr uastatarc		{Arc (clic : dÃ©finir le centre, <espace> : annuler)}
+::msgcat::mcset fr uastatarc2		{Arc (cliquer-dÃ©placer)}
+::msgcat::mcset fr uastatrot		{Rotation (d'abord sÃ©lÃ©ctionner les objets)}
 
 
 # Preferences:
-::msgcat::mcset fr prefnetconf  {Configuration Réseau et Serveur}
-::msgcat::mcset fr prefnethead  {Vous pouvez soit vous connecter à un serveur Jabber,\
-soit directement à un autre client. Beaucoup d'éléments de l'interface dépendent\
+::msgcat::mcset fr prefnetconf  {Configuration RÃ©seau et Serveur}
+::msgcat::mcset fr prefnethead  {Vous pouvez soit vous connecter Ã  un serveur Jabber,\
+soit directement Ã  un autre client. Beaucoup d'Ã©lÃ©ments de l'interface dÃ©pendent\
 de la configuration que vous choisissez.}
-::msgcat::mcset fr prefnetauto  {Si un client se connecte à ce serveur,\
-une connexion au serveur de ce client est automatiquement réalisée.}
-::msgcat::mcset fr prefnetjabb  {Le système de serveur Jabber.\
-Configuration avancée via le menu "Jabber".\
-Utilise un protocole basé sur XML.}
-::msgcat::mcset fr prefnetmulti {Connecter automatiquement à tous les clients\
-de ce réseau lors de la connection à l'un d'entre eux.}
-::msgcat::mcset fr prefnetadv   {Un client lance normalement deux serveurs différents,\
-le serveur intégré (toujours présent en cas de peer-to-peer),\
-et le serveur HTTP. Le serveur Jabber se réfère normalement à un serveur\
+::msgcat::mcset fr prefnetauto  {Si un client se connecte Ã  ce serveur,\
+une connexion au serveur de ce client est automatiquement rÃ©alisÃ©e.}
+::msgcat::mcset fr prefnetjabb  {Le systÃ¨me de serveur Jabber.\
+Configuration avancÃ©e via le menu "Jabber".\
+Utilise un protocole basÃ© sur XML.}
+::msgcat::mcset fr prefnetmulti {Connecter automatiquement Ã  tous les clients\
+de ce rÃ©seau lors de la connection Ã  l'un d'entre eux.}
+::msgcat::mcset fr prefnetadv   {Un client lance normalement deux serveurs diffÃ©rents,\
+le serveur intÃ©grÃ© (toujours prÃ©sent en cas de peer-to-peer),\
+et le serveur HTTP. Le serveur Jabber se rÃ©fÃ¨re normalement Ã  un serveur\
 distant par le port 5222.\
-Vous devez redémarrer Coccinella pour que les nouveaux numéros de ports soient pris en compte.}
-::msgcat::mcset fr prefsounsynwb {Synthèse du texte saisi\
+Vous devez redÃ©marrer Coccinella pour que les nouveaux numÃ©ros de ports soient pris en compte.}
+::msgcat::mcset fr prefsounsynwb {SynthÃ¨se du texte saisi\
 dans le tableau}
-::msgcat::mcset fr prefsounsynno {Synthèse des messages normaux}
-::msgcat::mcset fr prefsounsynch {Synthèse des discussions}
+::msgcat::mcset fr prefsounsynno {SynthÃ¨se des messages normaux}
+::msgcat::mcset fr prefsounsynch {SynthÃ¨se des discussions}
 ::msgcat::mcset fr prefsounvoin  {Choisir une voix pour le texte entrant :}
-::msgcat::mcset fr prefsounvoou  {Choisir une voix pour le texte écrit :}
+::msgcat::mcset fr prefsounvoou  {Choisir une voix pour le texte Ã©crit :}
 ::msgcat::mcset fr prefsounpick  {Choisir les alertes sonores\
-pour les évènements ci-dessous :}
+pour les Ã©vÃ¨nements ci-dessous :}
 ::msgcat::mcset fr prefshortcut  {Ici, vous pouvez ajouter ou modifier les racourcis\
-applicables uniquement aux connexions peer-to-peer, non utilisées\
-par le système Jabber. Si vous n'avez pas choisi explicitement choisi l'option "peer-to-peer"\
-dans le panneau "Configuration du réseau", ces raccourcis ne seront pas appliqués.}
+applicables uniquement aux connexions peer-to-peer, non utilisÃ©es\
+par le systÃ¨me Jabber. Si vous n'avez pas choisi explicitement choisi l'option "peer-to-peer"\
+dans le panneau "Configuration du rÃ©seau", ces raccourcis ne seront pas appliquÃ©s.}
 ::msgcat::mcset fr prefprof      {Ici, vous pouvez modifier les options\
-spécifiques aux comptes Jabber. Le serveur que vous indiquez ici\
-est également celui sur lequel vous vous connecterez.}
-::msgcat::mcset fr prefpers      {Vos informations personnelles sont enregistrées\
-dans le fichier de vos préférences, mais peuvent également l'être dans le dossier utilisateur Jabber.\
-Les informations enregistrées par le serveur sont accessibles par n'importe quel utilisateur.}
-::msgcat::mcset fr prefaaset     {Mettre le statut "Départ automatique" : }
+spÃ©cifiques aux comptes Jabber. Le serveur que vous indiquez ici\
+est Ã©galement celui sur lequel vous vous connecterez.}
+::msgcat::mcset fr prefpers      {Vos informations personnelles sont enregistrÃ©es\
+dans le fichier de vos prÃ©fÃ©rences, mais peuvent Ã©galement l'Ãªtre dans le dossier utilisateur Jabber.\
+Les informations enregistrÃ©es par le serveur sont accessibles par n'importe quel utilisateur.}
+::msgcat::mcset fr prefaaset     {Mettre le statut "DÃ©part automatique" : }
 ::msgcat::mcset fr prefminaw     {Minutes avant le statut "Parti" : }
 ::msgcat::mcset fr prefminea     {Minutes avant le statut "Parti pour longtemps" : }
-::msgcat::mcset fr prefsuif      {Si quelqu'un veut m'ajouter à ses contacts et...}
-::msgcat::mcset fr prefsuis      {...est déjà dans mes contacts : }
+::msgcat::mcset fr prefsuif      {Si quelqu'un veut m'ajouter Ã  ses contacts et...}
+::msgcat::mcset fr prefsuis      {...est dÃ©jÃ  dans mes contacts : }
 ::msgcat::mcset fr prefsuisnot   {...ne fait pas partie de mes contacts : }
 ::msgcat::mcset fr prefsuauto    {S'enregistrer automatiquement chez ceux qui m'enregistrent}
-::msgcat::mcset fr prefrorm      {Enlever l'utilisateur s'il n'est pas enregistré}
-::msgcat::mcset fr prefroallow   {Autoriser les utilisateurs non-enregistrés}
-::msgcat::mcset fr prefroclr     {Nettoyer la liste de contacts à la déconnexion}
+::msgcat::mcset fr prefrorm      {Enlever l'utilisateur s'il n'est pas enregistrÃ©}
+::msgcat::mcset fr prefroallow   {Autoriser les utilisateurs non-enregistrÃ©s}
+::msgcat::mcset fr prefroclr     {Nettoyer la liste de contacts Ã  la dÃ©connexion}
 ::msgcat::mcset fr prefrochat    {Double-clic : discuter, clic : message normal}
-::msgcat::mcset fr prefrosysicons {Utiliser les icônes système du protocole de messagerie étranger}
+::msgcat::mcset fr prefrosysicons {Utiliser les icÃ´nes systÃ¨me du protocole de messagerie Ã©tranger}
 ::msgcat::mcset fr prefblonly    {N'accepter que les messages de mes contacs}
-::msgcat::mcset fr prefblbl      {Bloquer les JIDs suiants (* étoile pour "tous") : }
-::msgcat::mcset fr prefblmsg     {Écrire la JID complète pour les utilisateurs\
+::msgcat::mcset fr prefblbl      {Bloquer les JIDs suiants (* Ã©toile pour "tous") : }
+::msgcat::mcset fr prefblmsg     {Ã‰crire la JID complÃ¨te pour les utilisateurs\
 que vous voulez bloquer (les JID sont de la forme "utilisateur@jabber.org)}
-::msgcat::mcset fr prefcufont    {Sélectionner la police pour la fenêtre de discussions : }
-::msgcat::mcset fr prefcushow    {Montrer les messages entrants dans une nouvelle fenêtre}
-::msgcat::mcset fr prefcusave    {Enregistrer la boîte de courriers entrants entre les sessions}
-::msgcat::mcset fr prefcu2clk    {Message du double-clic dans la boîte des messages entrants : }
-::msgcat::mcset fr prefcuopen    {Ouvrir le message dans une nouvelle fenêtre}
-::msgcat::mcset fr prefcureply   {Répondre à l'expéditeur}
-::msgcat::mcset fr prefcudisc    {Méthode "Découverte des services" préférée : }
-::msgcat::mcset fr prefcubrowse  {Naviguer dans les services si la méthode est disponible}
-::msgcat::mcset fr prefcuagent   {Toujours utiliser la méthode des agents}
-::msgcat::mcset fr prefcuupdate  {Chercher automatiquement les mises-à-jour de Coccinella}
+::msgcat::mcset fr prefcufont    {SÃ©lectionner la police pour la fenÃªtre de discussions : }
+::msgcat::mcset fr prefcushow    {Montrer les messages dans une nouvelle fenÃªtre}
+::msgcat::mcset fr prefcusave    {Enregistrer la boÃ®te de courriers entrants entre les sessions}
+::msgcat::mcset fr prefcu2clk    {Message du double-clic dans la boÃ®te des messages : }
+::msgcat::mcset fr prefcuopen    {Ouvrir le message dans une nouvelle fenÃªtre}
+::msgcat::mcset fr prefcureply   {RÃ©pondre Ã  l'expÃ©diteur}
+::msgcat::mcset fr prefcudisc    {MÃ©thode "DÃ©couverte des services" prÃ©fÃ©rÃ©e : }
+::msgcat::mcset fr prefcubrowse  {Naviguer dans les services si la mÃ©thode est disponible}
+::msgcat::mcset fr prefcuagent   {Toujours utiliser la mÃ©thode des agents}
+::msgcat::mcset fr prefcuupdate  {Chercher automatiquement les mises-Ã -jour de Coccinella}
 ::msgcat::mcset fr preffmhelp    {Plug-ins d'aide pour les types de fichiers}
 ::msgcat::mcset fr preffmsave    {Juste "sauver sur le disque" dans le dossier entrant}
 ::msgcat::mcset fr preffontmsg   {Attention : en important d'autres polices\
 que les polices standard (Times, Helvetica of Courier),\
 vous devez vous assurer que vos correspondants\
-ont également installé ces polices.}
-::msgcat::mcset fr prefcahow     {Comment gérer les fichiers déjà reçus : }
-::msgcat::mcset fr prefcanev     {Ne jamais accepter les fichiers en cache, toujours télécharger}
-::msgcat::mcset fr prefcaalw     {Toujours accepter les fichiers en cache, ne jamais télécharger} 
+ont Ã©galement installÃ© ces polices.}
+::msgcat::mcset fr prefcahow     {Comment gÃ©rer les fichiers dÃ©jÃ  reÃ§us : }
+::msgcat::mcset fr prefcanev     {Ne jamais accepter les fichiers en cache, toujours tÃ©lÃ©charger}
+::msgcat::mcset fr prefcaalw     {Toujours accepter les fichiers en cache, ne jamais tÃ©lÃ©charger} 
 ::msgcat::mcset fr prefcaor      {...ou accepter les fichiers en cache s'ils ne datent pas de plus de : }
-::msgcat::mcset fr prefpriv      {En cochant la case "Confidentialité",\
-vous n'êtes autorisé à modifier que vos propres outils de dessin. Les outils\
-créés par les autres utilisateurs ne sont pas modifiables.}
-::msgcat::mcset fr prefshortip   {Compléter l'adresse IP ou le nom}
-::msgcat::mcset fr prefshortwa   {Attention : vous avez édité les raccourcis..\
+::msgcat::mcset fr prefpriv      {En cochant la case "ConfidentialitÃ©",\
+vous n'Ãªtes autorisÃ© Ã  modifier que vos propres outils de dessin. Les outils\
+crÃ©Ã©s par les autres utilisateurs ne sont pas modifiables.}
+::msgcat::mcset fr prefshortip   {ComplÃ©ter l'adresse IP ou le nom}
+::msgcat::mcset fr prefshortwa   {Attention : vous avez Ã©ditÃ© les raccourcis..\
 Voulez-vous les enregistrer ?}
 
-::msgcat::mcset fr preffilecache {Le cache est utilisé pour garder en local une copie des fichiers\
-des autres utilisateur, ce qui réduit le traffic du réseau. La taille du cache\
-est limitée par l'utilisateur grâce aux paramètres ci-dessous : }
+::msgcat::mcset fr preffilecache {Le cache est utilisÃ© pour garder en local une copie des fichiers\
+des autres utilisateur, ce qui rÃ©duit le traffic du rÃ©seau. La taille du cache\
+est limitÃ©e par l'utilisateur grÃ¢ce aux paramÃ¨tres ci-dessous : }
 ::msgcat::mcset fr prefcachecmp  {Comparer les fichiers du cache avec les fichiers distants}
-::msgcat::mcset fr prefnatip     {Utiliser les adresses IP suivantes comme vues de l'extérieur}
-::msgcat::mcset fr prefmucconf   {Utiliser les discussions multi-utilisateur avec le retour "conférence"}
+::msgcat::mcset fr prefnatip     {Utiliser les adresses IP suivantes comme vues de l'extÃ©rieur}
+::msgcat::mcset fr prefmucconf   {Utiliser les discussions multi-utilisateur avec le retour "confÃ©rence"}
 ::msgcat::mcset fr prefrostbgim  {Utiliser l'image de fond (gif) dans la liste de contacts}
-::msgcat::mcset fr preftheme     {Choisir un thème (Coccinella doit être redémarré)}
-::msgcat::mcset fr prefplugctrl  {Vous pouvez dé-sélectionner ces paquetages\
-pour ne pas avoir à les charger. Coccinella doit être redémarré pour que les changements soient pris en compte.}
-::msgcat::mcset fr prefchactret  {Toujours activer <Entrée> dans la boîte de discussion}
-#::msgcat::mcset fr prefprofname  {Enter desired name of user profile}
-#::msgcat::mcset fr prefstabui    {Use tabbed notebook interface}
+::msgcat::mcset fr preftheme     {Choisir un thÃ¨me (Coccinella doit Ãªtre redÃ©marrÃ©)}
+::msgcat::mcset fr prefplugctrl  {Vous pouvez dÃ©-sÃ©lectionner ces paquetages\
+pour ne pas avoir Ã  les charger. Coccinella doit Ãªtre redÃ©marrÃ© pour que les changements soient pris en compte.}
+::msgcat::mcset fr prefchactret  {Toujours activer <EntrÃ©e> dans la boÃ®te de discussion}
+::msgcat::mcset fr prefprofname  {Entrez le nom du profil d'utilisateur}
+::msgcat::mcset fr prefstabui    {Utiliser l'interface du bloc-notes avec les onglets}
 
 
 
 # EditShortcuts namespace:
 namespace eval ::EditShortcuts:: {
-	::msgcat::mcset fr shortip       {Compléter l'adresse IP ou le nom}
-	::msgcat::mcset fr shortwarn     {Attention : vous avez édité les raccourcis..\
+	::msgcat::mcset fr shortip       {ComplÃ©ter l'adresse IP ou le nom}
+	::msgcat::mcset fr shortwarn     {Attention : vous avez Ã©ditÃ© les raccourcis..\
 Voulez-vous les enregistrer ?}
 
 
@@ -857,91 +857,91 @@ Voulez-vous les enregistrer ?}
 
 # Jabber namespace:
 namespace eval ::Jabber:: {
-	::msgcat::mcset fr jalogin 	{Écrire l'adresse IP ou le nom du serveur Jabber,\
-ou choisir à partir du menu popup. Vous devez déjà avoir un compte sur ce serveur.}
-	::msgcat::mcset fr janewaccount {Écrire l'adresse IP ou le nom du serveur Jabber,\
+	::msgcat::mcset fr jalogin 	{Ã‰crire l'adresse IP ou le nom du serveur Jabber,\
+ou choisir Ã  partir du menu popup. Vous devez dÃ©jÃ  avoir un compte sur ce serveur.}
+	::msgcat::mcset fr janewaccount {Ã‰crire l'adresse IP ou le nom du serveur Jabber,\
 choisir un nom d'utilisateur et un mot de passe.}
 	::msgcat::mcset fr janewpass    {Choisir le mot de passe pour : }
-	::msgcat::mcset fr jasubwant    {L'utilisateur "%s" veut vous ajouter à ses contacts.\
+	::msgcat::mcset fr jasubwant    {L'utilisateur "%s" veut vous ajouter Ã  ses contacts.\
 Choisissez une option ci-dessous. Choisir un pseudo et un groupe est optionnel,\
 pour votre usage personnel seulement.}
 	::msgcat::mcset fr jasubgetvcard {Voir la carte de visite de cette personne}
-	::msgcat::mcset fr jasubsndmsg  {Envoyer un message à cette personne : }
-	::msgcat::mcset fr jasuballow   {Autoriser "%s" à voir ma présence}
-	::msgcat::mcset fr jasubadd     {Ajouter "%s" à mes contacts}
-	::msgcat::mcset fr jarostadd	{Ajouter un utilisateur Jabber à mes contacts.\
-Les utilisateurs sont normalement ajoutés avec un enregistrement, mais peuvent être ajoutés sans.\
-Le pseudo et le groupe peuvent être changés à tout moment.\
-Pour ajouter un utilisateur d'un système de messagerie étranger, vous devez avoir un compte actif\
-sur ce système qui doit être enregistré sur les serveurs de transport Jabber.}
-	::msgcat::mcset fr jarostset	{Choisir un pseudo et un groupe à l'utilisateur "%s".\
-Ces informations peuvent être modifiées ultérieurement..}
-	::msgcat::mcset fr jarostsub	{S'inscrire auprès de cet utilisateur}
-	::msgcat::mcset fr jarostunsub	{Se désinscrire auprès de cet utilisateur}
-	::msgcat::mcset fr jasearch	{Rechercher l'utilisateur avec le service spécifié.\
-Cliquer sur le bouton "Recevoir" pour obtenir un nouveau formulaire à remplir.}
-	::msgcat::mcset fr jasearchwait	{Cliquez sur "Recevoir" lorsque vous êtes prêt}
-	::msgcat::mcset fr jaservclosed	{Connexion au serveur fermée}
-	::msgcat::mcset fr jarostupdate {La liste de contacts est à jour}
-	::msgcat::mcset fr jawaitresp 	{%s est contacté, en attente d'une réponse}
-	::msgcat::mcset fr jawaitxml 	{Connecté à "%s".\
+	::msgcat::mcset fr jasubsndmsg  {Envoyer un message Ã  cette personne : }
+	::msgcat::mcset fr jasuballow   {Autoriser "%s" Ã  voir ma prÃ©sence}
+	::msgcat::mcset fr jasubadd     {Ajouter "%s" Ã  mes contacts}
+	::msgcat::mcset fr jarostadd	{Ajouter un utilisateur Jabber Ã  mes contacts.\
+Les utilisateurs sont normalement ajoutÃ©s avec un enregistrement, mais peuvent Ãªtre ajoutÃ©s sans.\
+Le pseudo et le groupe peuvent Ãªtre changÃ©s Ã  tout moment.\
+Pour ajouter un utilisateur d'un systÃ¨me de messagerie Ã©tranger, vous devez avoir un compte actif\
+sur ce systÃ¨me qui doit Ãªtre enregistrÃ© sur les serveurs de transport Jabber.}
+	::msgcat::mcset fr jarostset	{Choisir un pseudo et un groupe Ã  l'utilisateur "%s".\
+Ces informations peuvent Ãªtre modifiÃ©es ultÃ©rieurement..}
+	::msgcat::mcset fr jarostsub	{S'inscrire auprÃ¨s de cet utilisateur}
+	::msgcat::mcset fr jarostunsub	{Se dÃ©sinscrire auprÃ¨s de cet utilisateur}
+	::msgcat::mcset fr jasearch	{Rechercher l'utilisateur avec le service spÃ©cifiÃ©.\
+Cliquer sur le bouton "Recevoir" pour obtenir un nouveau formulaire Ã  remplir.}
+	::msgcat::mcset fr jasearchwait	{Cliquez sur "Recevoir" lorsque vous Ãªtes prÃªt}
+	::msgcat::mcset fr jaservclosed	{Connexion au serveur fermÃ©e}
+	::msgcat::mcset fr jarostupdate {La liste de contacts est Ã  jour}
+	::msgcat::mcset fr jawaitresp 	{%s est contactÃ©, en attente d'une rÃ©ponse}
+	::msgcat::mcset fr jawaitxml 	{ConnectÃ© Ã  "%s".\
 Initialisation du flux XML...}
-	::msgcat::mcset fr jasendauth	{Réponse du serveur "%s".\
+	::msgcat::mcset fr jasendauth	{RÃ©ponse du serveur "%s".\
 Envoi de la demande d'autorisation.}
-	::msgcat::mcset fr jaerrlogin	{La connexion à %s a échoué : %s}
+	::msgcat::mcset fr jaerrlogin	{La connexion Ã  %s a Ã©chouÃ© : %s}
 	::msgcat::mcset fr jaauthok	{Autorisation du serveur "%s" obtenue.\
 Chargement de la liste des contacts...}
 	::msgcat::mcset fr jagchatmsg	{Choisissez un groupe de discussion et un nom de salon,\
 ainsi que votre pseudo.}
-	::msgcat::mcset fr jacreateroom	{Sélectionnez un service de conférence et accessoirement\
-un nom de salon. Cliquez ensuite sur "Recevoir" pour obtenir les spécifications pour créer le salon\
-désiré (chaque serveur peut avoir des spécifications différentes).}
-	::msgcat::mcset fr jawaitserver	{En attente de la réponse du serveur...}
-	::msgcat::mcset fr jaregmsg	{Enregistrement pour un service spécifique pour ce serveur.\
-Si vous êtes déjà enregistré, vous pouvez perdre des informations personnelles.}
+	::msgcat::mcset fr jacreateroom	{SÃ©lectionnez un service de confÃ©rence et accessoirement\
+un nom de salon. Cliquez ensuite sur "Recevoir" pour obtenir les spÃ©cifications pour crÃ©er le salon\
+dÃ©sirÃ© (chaque serveur peut avoir des spÃ©cifications diffÃ©rentes).}
+	::msgcat::mcset fr jawaitserver	{En attente de la rÃ©ponse du serveur...}
+	::msgcat::mcset fr jaregmsg	{Enregistrement pour un service spÃ©cifique pour ce serveur.\
+Si vous Ãªtes dÃ©jÃ  enregistrÃ©, vous pouvez perdre des informations personnelles.}
 	::msgcat::mcset fr jastatavailable {Disponible}
-	::msgcat::mcset fr jastatchat	{Discussion : disponible pour un contact immédiat}
+	::msgcat::mcset fr jastatchat	{Discussion : disponible pour un contact immÃ©diat}
 	::msgcat::mcset fr jastataway	{Parti : en ligne, mais parti pour un petit moment}
 	::msgcat::mcset fr jastatxa	{Parti pour longtemps : en ligne, mais inactif depuis un long moment}
-	::msgcat::mcset fr jastatdnd	{Ne pas déranger}
+	::msgcat::mcset fr jastatdnd	{Ne pas dÃ©ranger}
 	::msgcat::mcset fr jastatinvisible {Invisible}
 	::msgcat::mcset fr javersinfo	{Informations de la version de %s}
 	::msgcat::mcset fr jabrowseaddserver	{Entrer la JID du serveur\
-que vous voulez ajouter à la liste des services (de la forme jabber.org).}
+que vous voulez ajouter Ã  la liste des services (de la forme jabber.org).}
 	::msgcat::mcset fr jaupdatemsg	{Une nouvelle version de Coccinella est disponible}
 	::msgcat::mcset fr jaupdatevers	{La version actuelle est : %s}
-	::msgcat::mcset fr jaupdatepri	{La mise-à-jour est %s}
+	::msgcat::mcset fr jaupdatepri	{La mise-Ã -jour est %s}
 	::msgcat::mcset fr jaupdatenewver {La nouvelle version est : %s}
 	::msgcat::mcset fr jaupdateremind {Ne plus me rappeler cela}
-	::msgcat::mcset fr jasettopic   {Mettre un nouveau thème pour ce groupe de discussion}
-#	::msgcat::mcset fr jadirpresmsg {Send directed presence to the user \"%s\".}
+	::msgcat::mcset fr jasettopic   {Mettre un nouveau thÃ¨me pour ce groupe de discussion}
+ 	::msgcat::mcset fr jadirpresmsg {Envoyer le statut dÃ©sirÃ© Ã  l'utilisateur \"%s\".}
 
 
 }
 
 namespace eval ::Jabber::SetupAss:: {
 	::msgcat::mcset fr suintro1 	{Bienvenue sur l'assistant de configuration\
-qui vous aidera à remplir les informations nécessaires pour un ancien ou nouveau compte\
+qui vous aidera Ã  remplir les informations nÃ©cessaires pour un ancien ou nouveau compte\
 sur un serveur Jabber.}
 	::msgcat::mcset fr suintro2 	{Si vous voulez utiliser le mode peer-to-peer,\
-vous devez juste l'indiquer dans le panneau de préférences, et redémarrer Coccinella.}
-	::msgcat::mcset fr suintro3 	{À tout moment vous pouvez cliquer sur "Précédent"\
-pour revenir en arrière. Suivez les instructions sur chaque page, et cliquez sur "Suivant"\
-dès que vous avez terminé.}
+vous devez juste l'indiquer dans le panneau de prÃ©fÃ©rences, et redÃ©marrer Coccinella.}
+	::msgcat::mcset fr suintro3 	{Ã€ tout moment vous pouvez cliquer sur "PrÃ©cÃ©dent"\
+pour revenir en arriÃ¨re. Suivez les instructions sur chaque page, et cliquez sur "Suivant"\
+dÃ¨s que vous avez terminÃ©.}
         ::msgcat::mcset fr sulang       {Choisissez votre langue.\
-Si vous changez la langue, les modifications ne seront effectuées\
-que sur les éléments d'interface chargés après la modification.}
+Si vous changez la langue, les modifications ne seront effectuÃ©es\
+que sur les Ã©lÃ©ments d'interface chargÃ©s aprÃ¨s la modification.}
 	::msgcat::mcset fr suservmsg	{Indiquez le nom du serveur Jabber\
-sur lequel vous voulez être enregistré. Si vous avez déjà un compte,\
-indiquez le serveur sur lequel vous êtes inscrit (de la forme jabber.org).}
+sur lequel vous voulez Ãªtre enregistrÃ©. Si vous avez dÃ©jÃ  un compte,\
+indiquez le serveur sur lequel vous Ãªtes inscrit (de la forme jabber.org).}
 	::msgcat::mcset fr suusermsg	{Indiquez votre nom d'utilisateur et votre mot de passe.\
-Le nom d'utilisateur ne doit pas être utilisé par quelqu'un d'autre sur le serveur spécifié.\
+Le nom d'utilisateur ne doit pas Ãªtre utilisÃ© par quelqu'un d'autre sur le serveur spÃ©cifiÃ©.\
 Si c'est le cas, vous recevrez un message vous l'idiquant\
 lorsque vous tenterez de vous enregistrer.}
 	::msgcat::mcset fr suregmsg	{Voulez-vous enregistrer votre compte maintenant\
-(si c'est un nouveau compte) ? Vous devez être connecté au réseau (sans firewall).}
-	::msgcat::mcset fr sufinmsg	{C'est tout ! Si l'enregistrement a fonctionné,\
-il ne vous reste qu'à cliquer sur "Se connecter", ou à choisir le menu Jabber/Connexion.\
+(si c'est un nouveau compte) ? Vous devez Ãªtre connectÃ© au rÃ©seau (sans firewall).}
+	::msgcat::mcset fr sufinmsg	{C'est tout ! Si l'enregistrement a fonctionnÃ©,\
+il ne vous reste qu'Ã  cliquer sur "Se connecter", ou Ã  choisir le menu Jabber/Connexion.\
 Quoi qu'il en soit, soyez gentil avec l'insecte ;-)}
 	::msgcat::mcset fr suheadtxt	{Assistant de configuration de Coccinella}
 
@@ -950,42 +950,42 @@ Quoi qu'il en soit, soyez gentil avec l'insecte ;-)}
 
 namespace eval ::VCard:: {
 	::msgcat::mcset fr vcardget	{Chargement de la carte de visite de l'utilisateur %s..\
-En attente de la réponse du serveur...}
-	::msgcat::mcset fr vcarderrget	{Le chargement de la carte de visite a échoué (%s).}
-	::msgcat::mcset fr vcardrec	{La carte de visite a été reçue.}
+En attente de la rÃ©ponse du serveur...}
+	::msgcat::mcset fr vcarderrget	{Le chargement de la carte de visite a Ã©chouÃ© (%s).}
+	::msgcat::mcset fr vcardrec	{La carte de visite a Ã©tÃ© reÃ§ue.}
 
 }
 
 
-::msgcat::mcset fr autoupdatenot        {Ne pas vérifier automatiquement les mises-à-jour}
-::msgcat::mcset fr oobmsg               {Laisser l'utilisateur %s télécharger un de vos fichiers\
+::msgcat::mcset fr autoupdatenot        {Ne pas vÃ©rifier automatiquement les mises-Ã -jour}
+::msgcat::mcset fr oobmsg               {Laisser l'utilisateur %s tÃ©lÃ©charger un de vos fichiers\
 sur le serveur. La description est facultative.}
-::msgcat::mcset fr chatcompreply        {%s rédige une réponse}
+::msgcat::mcset fr chatcompreply        {%s rÃ©dige une rÃ©ponse}
 
 # Get file
-::msgcat::mcset fr getcontacting   {Contact de %s. En attente d'une réponse...}
-::msgcat::mcset fr geteoferr       {La connexion à %s a échoué : réception d'une eof.}
-::msgcat::mcset fr getconnerr      {La connexion à %s a échoué.}
-::msgcat::mcset fr getnegotiate    {Client contacté : %s ; négociations en cours...}
-::msgcat::mcset fr getreaderr      {Erreur de réponse du serveur %s.}
-::msgcat::mcset fr getunknownprot  {Le serveur %s ne répond en utilisant le bon protocol.}
-::msgcat::mcset fr getnot200       {Le serveur %s a répondu avec le code %s (%s).}
-::msgcat::mcset fr getstarts       {Le client %s a accepté le fichier "%s". Début du transfert...}
-::msgcat::mcset fr getended        {Le transfert de %s s'est terminé prématurément.}
-::msgcat::mcset fr getfinished     {Le fichier "%s" de %s a été reçu.}
-::msgcat::mcset fr getneterr       {Erreur de transfert lors de la réception de %s.}
+::msgcat::mcset fr getcontacting   {Contact de %s. En attente d'une rÃ©ponse...}
+::msgcat::mcset fr geteoferr       {La connexion Ã  %s a Ã©chouÃ© : rÃ©ception d'une eof.}
+::msgcat::mcset fr getconnerr      {La connexion Ã  %s a Ã©chouÃ©.}
+::msgcat::mcset fr getnegotiate    {Client contactÃ© : %s ; nÃ©gociations en cours...}
+::msgcat::mcset fr getreaderr      {Erreur de rÃ©ponse du serveur %s.}
+::msgcat::mcset fr getunknownprot  {Le serveur %s ne rÃ©pond en utilisant le bon protocol.}
+::msgcat::mcset fr getnot200       {Le serveur %s a rÃ©pondu avec le code %s (%s).}
+::msgcat::mcset fr getstarts       {Le client %s a acceptÃ© le fichier "%s". DÃ©but du transfert...}
+::msgcat::mcset fr getended        {Le transfert de %s s'est terminÃ© prÃ©maturÃ©ment.}
+::msgcat::mcset fr getfinished     {Le fichier "%s" de %s a Ã©tÃ© reÃ§u.}
+::msgcat::mcset fr getneterr       {Erreur de transfert lors de la rÃ©ception de %s.}
 
 # Put file
-::msgcat::mcset fr putcontacting   {Contact de %s. En attente d'une réponse...}
-::msgcat::mcset fr puteoferr       {La connexion à %s a échoué : réception d'une eof.}
-::msgcat::mcset fr putconnerr      {La connexion à %s a échoué.}
-::msgcat::mcset fr putnegotiate    {Client contacté : %s ; négociations en cours...}
-::msgcat::mcset fr putreaderr      {Erreur de réponse du serveur %s.}
-::msgcat::mcset fr putunknownprot  {Le serveur %s ne répond en utilisant le bon protocol.}
-::msgcat::mcset fr putnot200       {Le serveur %s a répondu avec le code %s (%s).}
-::msgcat::mcset fr putstarts       {Le client %s a accepté le fichier "%s". Début du transfert...}
-::msgcat::mcset fr putended        {Le transfert de %s s'est terminé prématurément.}
-::msgcat::mcset fr putfinished     {Le fichier "%s" de %s a été reçu.}
-::msgcat::mcset fr putneterr       {Erreur de transfert lors de la réception de %s.}
+::msgcat::mcset fr putcontacting   {Contact de %s. En attente d'une rÃ©ponse...}
+::msgcat::mcset fr puteoferr       {La connexion Ã  %s a Ã©chouÃ© : rÃ©ception d'une eof.}
+::msgcat::mcset fr putconnerr      {La connexion Ã  %s a Ã©chouÃ©.}
+::msgcat::mcset fr putnegotiate    {Client contactÃ© : %s ; nÃ©gociations en cours...}
+::msgcat::mcset fr putreaderr      {Erreur de rÃ©ponse du serveur %s.}
+::msgcat::mcset fr putunknownprot  {Le serveur %s ne rÃ©pond en utilisant le bon protocol.}
+::msgcat::mcset fr putnot200       {Le serveur %s a rÃ©pondu avec le code %s (%s).}
+::msgcat::mcset fr putstarts       {Le client %s a acceptÃ© le fichier "%s". DÃ©but du transfert...}
+::msgcat::mcset fr putended        {Le transfert de %s s'est terminÃ© prÃ©maturÃ©ment.}
+::msgcat::mcset fr putfinished     {Le fichier "%s" de %s a Ã©tÃ© reÃ§u.}
+::msgcat::mcset fr putneterr       {Erreur de transfert lors de la rÃ©ception de %s.}
 
 # END --------------------------------------------------------------------------

@@ -1,7 +1,8 @@
 # AppleEvents.tcl --
 # 
+#       Experimental!
 # 
-# $Id: AppleEvents.tcl,v 1.1 2004-08-15 06:55:21 matben Exp $
+# $Id: AppleEvents.tcl,v 1.2 2004-08-17 06:19:53 matben Exp $
 
 namespace eval ::AppleEvents:: { }
 
@@ -28,28 +29,44 @@ proc ::AppleEvents::Init { } {
     # Mac OS X have the Quit menu on the Apple menu instead. Catch it!
     tclAE::installEventHandler aevt quit ::AppleEvents::QuitHandler
 
+    # test...
+    tclAE::installEventHandler WWW! OURL ::AppleEvents::HandleOURL
     
     component::register AppleEvents  \
       {Apple event handlers for Launch Services.}
 }
 
-proc ::AppleEvents::PrintHandler {theAESubDesc theReplyAE} {
+proc ::AppleEvents::HandleOURL {theAppleEvent theReplyAE} {
 
-    puts "theAESubDesc=$theAESubDesc"
+    puts "theAppleEvent=$theAppleEvent"
     puts "theReplyAE=$theReplyAE"
+}
+
+proc ::AppleEvents::PrintHandler {theAppleEvent theReplyAE} {
+
+    puts "theAppleEvent=$theAppleEvent"
+    puts "theReplyAE=$theReplyAE"
+    set eventClass [tclAE::getAttributeData $theAppleEvent evcl]
+    set eventID [tclAE::getAttributeData $theAppleEvent evid]
+    set pathDesc [tclAE::getKeyDesc $theAppleEvent ----]
+    puts "eventClass=$eventClass, eventID=$eventID"
+    puts "pathDesc=$pathDesc"
+    
+    
+    #tclAE::disposeDesc $pathDesc
+
+}
+
+proc ::AppleEvents::HandleGURL {theAppleEvent theReplyAE} {
+    
+    puts "theAppleEvent=$theAppleEvent"
+    puts "theReplyAE=$theReplyAE"
+    set eventClass [tclAE::getAttributeData $theAppleEvent evcl]
+    set eventID [tclAE::getAttributeData $theAppleEvent evid]
     
 }
 
-proc ::AppleEvents::HandleGURL {theAESubDesc theReplyAE} {
-    
-    puts "theAESubDesc=$theAESubDesc"
-    puts "theReplyAE=$theReplyAE"
-    set code [tclAE::subdesc::getKeyData $theAESubDesc ----]
-    
-
-}
-
-proc ::AppleEvents::QuitHandler {theAESubDesc theReplyAE} {
+proc ::AppleEvents::QuitHandler {theAppleEvent theReplyAE} {
     
     ::UserActions::DoQuit
 }

@@ -1,8 +1,8 @@
-! Default resource database to give a reasonable appearence on all platforms.
+! Default resource database to give a reasonable appearance on all platforms.
 ! It gives a light gray mac look on all widgets.  
 !
 
-! General appearence
+! General appearance
 !
 ! Fonts may be set to other if our system encoding is nonlatin.
 !

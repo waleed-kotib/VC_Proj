@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasDraw.tcl,v 1.8 2004-08-10 13:03:51 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.9 2004-08-17 06:19:54 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 #  
@@ -1207,7 +1207,6 @@ proc ::CanvasDraw::FinalizeBox {w x y shift type {mark 0}} {
 proc ::CanvasDraw::CancelBox {w} {
     
     variable theBox
-
     unset -nocomplain theBox
     $w delete withtag markbox
 }
