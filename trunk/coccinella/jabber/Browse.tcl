@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.48 2004-06-11 07:44:43 matben Exp $
+# $Id: Browse.tcl,v 1.49 2004-06-16 14:17:30 matben Exp $
 
 package require chasearrows
 
@@ -571,7 +571,26 @@ proc ::Jabber::Browse::Build {w} {
 proc ::Jabber::Browse::RegisterPopupEntry {menuSpec} {
     variable popMenuDefs
     
-    set popMenuDefs(browse,def) [concat $popMenuDefs(browse,def) $menuSpec]
+    # Keeps track of all registered menu entries.
+    variable regPopMenuSpec
+    
+    # Index of last separator.
+    set ind [lindex [lsearch -all $popMenuDefs(browse,def) "separator"] end]
+    if {![info exists regPopMenuSpec]} {
+	
+	# Add separator if this is the first addon entry.
+	incr ind 3
+	set popMenuDefs(browse,def) [linsert $popMenuDefs(browse,def)  \
+	  $ind {separator} {} {}]
+	set regPopMenuSpec {}
+	set ind [lindex [lsearch -all $popMenuDefs(browse,def) "separator"] end]
+    }
+    
+    # Add new entry just before the last separator
+    set v $popMenuDefs(browse,def)
+    set popMenuDefs(browse,def) [concat [lrange $v 0 [expr $ind-1]] $menuSpec \
+      [lrange $v $ind end]]
+    set regPopMenuSpec [concat $regPopMenuSpec $menuSpec]
 }
 
 # Jabber::Browse::Popup --

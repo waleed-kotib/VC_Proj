@@ -3,7 +3,7 @@
 #       Buddy pouncing...
 #       This is just a first sketch.
 #       
-# $Id: BuddyPounce.tcl,v 1.2 2004-06-15 14:30:44 matben Exp $
+# $Id: BuddyPounce.tcl,v 1.3 2004-06-16 14:17:33 matben Exp $
 
 namespace eval ::BuddyPounce:: {
     
@@ -16,12 +16,13 @@ proc ::BuddyPounce::Init { } {
       [list {Buddy Pouncing} user {::BuddyPounce::Build $jid}]
     
     # Add all hooks we need.
-    ::hooks::add quitAppHook        ::BuddyPounce::QuitHook
-    ::hooks::add newMessageHook     ::BuddyPounce::NewMsgHook
-    ::hooks::add newChatMessageHook ::BuddyPounce::NewChatMsgHook
-    ::hooks::add presenceHook       ::BuddyPounce::PresenceHook    
-    ::hooks::add prefsInitHook      ::BuddyPounce::InitPrefsHook
-    ::hooks::add closeWindowHook    ::BuddyPounce::CloseHook
+    ::hooks::add quitAppHook              ::BuddyPounce::QuitHook
+    ::hooks::add newMessageHook           ::BuddyPounce::NewMsgHook
+    ::hooks::add newChatMessageHook       ::BuddyPounce::NewChatMsgHook
+    ::hooks::add presenceUnavailableHook  ::BuddyPounce::PresenceUnavailableHook    
+    ::hooks::add presenceDelayHook        ::BuddyPounce::PresenceHook    
+    ::hooks::add prefsInitHook            ::BuddyPounce::InitPrefsHook
+    ::hooks::add closeWindowHook          ::BuddyPounce::CloseHook
     
     # Register popmenu entry.
     ::Jabber::UI::RegisterPopupEntry roster $popMenuSpec
@@ -53,7 +54,11 @@ proc ::BuddyPounce::Init { } {
 	    }	    
 	}
     }
-    set audioSuffixes [lsort -unique $audioSuffixes]
+    foreach subtype {aiff aiff wav mpeg} suff {.aif .aiff .wav .mp3} {
+	if {[::Plugins::HaveImporterForMime audio/$subtype]} {
+	    lappend audioSuffixes $suff
+	}
+    }
     
     variable uid 0
     variable wdlg .budpounce
@@ -70,6 +75,22 @@ proc ::BuddyPounce::Init { } {
     # The action keys correspond to option being on.
     #   budprefs(jid2) {event {list-of-action-keys} event {...} ...}
     variable budprefs
+    
+    variable alertStr
+    array set alertStr {
+	available   {The user "%s" just went online!}
+	unavailable {The user "%s" just went offline!}
+	msg         {The user "%s" just sent you a message!}
+	chat        {The user "%s" just started a chat!}
+    }
+    
+    variable alertTitle 
+    array set alertTitle {
+	available   {Online!}
+	unavailable {Offline!}
+	msg         {New message!}
+	chat        {New chat!}
+    }
 }
 
 proc ::BuddyPounce::InitPrefsHook { } {
@@ -112,7 +133,17 @@ proc ::BuddyPounce::Build {jid} {
     
     # Get all sounds.
     set allSounds [::BuddyPounce::GetAllSounds]
-    set fontS  [option get . fontSmall {}]
+    set fontS      [option get . fontSmall {}]
+    set contrastBg [option get . backgroundLightContrast {}]
+    set maxlen 0
+    set maxstr ""
+    foreach f $allSounds {
+	set len [string length $f]
+	if {$len > $maxlen} {
+	    set maxlen $len
+	    set maxstr $f
+	}
+    }
     
     # Toplevel with class BuddyPounce.
     ::UI::Toplevel $w -class BuddyPounce -usemacmainmenu 1 -macstyle documentProc
@@ -128,7 +159,7 @@ proc ::BuddyPounce::Build {jid} {
       which can be a changed status, or if you receive a message etc."
     pack $w.frall.msg -side top -anchor w
     
-    pack [frame $w.frall.fr -bg red] -padx 4 -pady 2
+    pack [frame $w.frall.fr -bg $contrastBg] -padx 4 -pady 2
     set wfr $w.frall.fr.f
     frame $wfr
     pack  $wfr -padx 1 -pady 1
@@ -138,17 +169,24 @@ proc ::BuddyPounce::Build {jid} {
     label $wfr.lact    -text [::msgcat::mc {Perform Action}]
     grid  $wfr.lonline $wfr.lact -sticky w -padx 6 -pady 2
     
+    # Fake menubutton to compute max width.
+    set wtmp $wfr._tmp
+    menubutton $wtmp -text $maxstr
+    set soundMaxWidth [winfo reqwidth $wtmp]
+    destroy $wtmp
+    puts "soundMaxWidth=$soundMaxWidth"
+    
     set i 0
     foreach eventStr $events(str) key $events(keys) {
 	set wdiv $wfr.div[incr i]
-	frame $wdiv -height 1 -bg red
+	frame $wdiv -height 1 -bg $contrastBg
 	
 	# Event.
 	label $wfr.$key -text " [::msgcat::mc $eventStr]"
 	
 	# Action
 	set wact $wfr.fact${key}
-	frame $wact -bg gray70
+	frame $wact
 	checkbutton $wact.alrt -text " [::msgcat::mc {Show Popup}]" \
 	  -variable $token\($key,msgbox)
 	
@@ -158,14 +196,19 @@ proc ::BuddyPounce::Build {jid} {
 	    tk_optionMenu $wact.msound $token\($key,soundfile)
 	} $allSounds]
 	$wmenu configure -font $fontS
-	
+
+	set wpad $wact.pad[incr i]
+	frame $wpad -width [expr $soundMaxWidth + 30] -height 1
+
 	checkbutton $wact.chat -text " [::msgcat::mc {Start Chat}]" \
 	  -variable $token\($key,chat)
 	checkbutton $wact.msg -text " [::msgcat::mc {Send Message}]" \
 	  -variable $token\($key,msg)
 	
+	grid x          x            $wpad
 	grid $wact.alrt $wact.lsound $wact.msound -sticky w -padx 4 -pady 1
 	grid $wact.chat $wact.msg    -            -sticky w -padx 4 -pady 1
+	grid $wact.msound -sticky e
 	
 	grid $wdiv     -     -sticky ew
 	grid $wfr.$key $wact -padx 1 -pady 2 -sticky nw
@@ -221,6 +264,8 @@ proc ::BuddyPounce::PrefsToState {token} {
 	foreach {ekey actlist} $budprefs($jid) {
 	    foreach akey $actlist {
 		set state($ekey,$akey) 1
+		
+		# The sound file is treated specially.
 		if {[string match "soundfile:*" $akey]} {
 		    set state($ekey,soundfile)  \
 		      [string map {soundfile: ""} $akey]
@@ -244,6 +289,8 @@ proc ::BuddyPounce::StateToPrefs {token} {
 	foreach akey $actions(keys) {
 	    if {$state($ekey,$akey) == 1} {
 		lappend actlist $akey
+		
+		# If sound we also need the soundfile.
 		if {[string equal $akey "sound"]} {
 		    lappend actlist soundfile:$state($ekey,soundfile)
 		}
@@ -306,6 +353,8 @@ proc ::BuddyPounce::Cancel {token} {
 
 proc ::BuddyPounce::Event {from eventkey} {
     variable budprefs
+    variable alertStr
+    variable alertTitle 
 
     set jid [jlib::jidmap $from]
     if {[info exists budprefs($jid)]} {
@@ -315,11 +364,11 @@ proc ::BuddyPounce::Event {from eventkey} {
 		
 		switch -- $action {
 		    msgbox {
-			tk_messageBox -icon info -message \
-			  "The user \"$jid\" just went online!"
+			::UI::AlertBox [format $alertStr($eventkey) $from] \
+			  -title $alertTitle($eventkey)
 		    }
 		    sound {
-			
+			::BuddyPounce::PlaySound $eventkey
 		    }
 		    chat {
 			::Jabber::Chat::StartThread $from
@@ -331,6 +380,12 @@ proc ::BuddyPounce::Event {from eventkey} {
 	    }
 	}
     }
+}
+
+proc ::BuddyPounce::PlaySound {eventkey} {
+    
+    
+    
 }
 
 proc ::BuddyPounce::QuitHook { } {
@@ -364,17 +419,16 @@ proc ::BuddyPounce::PresenceHook {jid type args} {
     
     ::Debug 4 "::BuddyPounce::PresenceHook jid=$jid, type=$type"
     
-    ::BuddyPounce::Event $jid $type
+    switch -- $type {
+	available - unavailable {
+	    ::BuddyPounce::Event $jid $type
+	}
+    }
 }
 
-proc ::GetOptionMenuMaxWidth {w} {
+proc ::BuddyPounce::PresenceUnavailableHook  {jid type args} {
     
-    set wmenu [lindex [winfo children $w] 0]
-    
-    set wtmp .__mbhy634
-    menubutton $wtmp -text
-    
+    ::BuddyPounce::Event $jid unavailable
 }
-
 
 #-------------------------------------------------------------------------------

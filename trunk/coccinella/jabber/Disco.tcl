@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.17 2004-06-13 15:33:39 matben Exp $
+# $Id: Disco.tcl,v 1.18 2004-06-16 14:17:30 matben Exp $
 
 package provide Disco 1.0
 
@@ -417,6 +417,35 @@ proc ::Jabber::Disco::Build {w} {
     # All tree content is set from browse callback from the browse object.
     
     return $w
+}
+    
+# Jabber::Disco::RegisterPopupEntry --
+# 
+#       Components or plugins can add their own menu entries here.
+
+proc ::Jabber::Disco::RegisterPopupEntry {menuSpec} {
+    variable popMenuDefs
+    
+    # Keeps track of all registered menu entries.
+    variable regPopMenuSpec
+    
+    # Index of last separator.
+    set ind [lindex [lsearch -all $popMenuDefs(disco,def) "separator"] end]
+    if {![info exists regPopMenuSpec]} {
+	
+	# Add separator if this is the first addon entry.
+	incr ind 3
+	set popMenuDefs(disco,def) [linsert $popMenuDefs(disco,def)  \
+	  $ind {separator} {} {}]
+	set regPopMenuSpec {}
+	set ind [lindex [lsearch -all $popMenuDefs(disco,def) "separator"] end]
+    }
+    
+    # Add new entry just before the last separator
+    set v $popMenuDefs(disco,def)
+    set popMenuDefs(disco,def) [concat [lrange $v 0 [expr $ind-1]] $menuSpec \
+      [lrange $v $ind end]]
+    set regPopMenuSpec [concat $regPopMenuSpec $menuSpec]
 }
 
 # Jabber::Disco::Popup --

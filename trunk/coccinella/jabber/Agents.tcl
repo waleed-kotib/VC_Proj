@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Agents.tcl,v 1.20 2004-06-06 07:02:20 matben Exp $
+# $Id: Agents.tcl,v 1.21 2004-06-16 14:17:30 matben Exp $
 
 package provide Agents 1.0
 
@@ -116,7 +116,7 @@ proc ::Jabber::Agents::GetAgent {parentJid jid args} {
 #       
 # Arguments:
 #       jid         The jid we query, the parent of all <agent> elements
-#       type        "ok" or "error"
+#       type        "result" or "error"
 #       
 # Results:
 #       none.
@@ -189,7 +189,7 @@ proc ::Jabber::Agents::AgentsCallback {jid jlibName type subiq} {
 #
 # Arguments:
 #       jid:        the jid that we sent get jabber:iq:agent to (from attribute).
-#       type:       can be 'ok', or 'error'.
+#       type:       can be 'result', or 'error'.
 #       
 # Results:
 #       none. UI maybe updated

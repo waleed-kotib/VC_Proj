@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.36 2004-06-13 13:43:25 matben Exp $
+# $Id: MUC.tcl,v 1.37 2004-06-16 14:17:31 matben Exp $
 
 package require entrycomp
 
@@ -1061,7 +1061,7 @@ namespace eval ::Jabber::MUC:: {
 #       type        voice, ban, member, moderator, admin, owner
 #       
 # Results:
-#       "cancel" or "ok".
+#       "cancel" or "result".
 
 proc ::Jabber::MUC::EditListBuild {roomjid type} {
     global this wDlgs

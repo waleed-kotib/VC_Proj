@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.21 2004-06-13 13:43:25 matben Exp $
+# $Id: Register.tcl,v 1.22 2004-06-16 14:17:31 matben Exp $
 
 package provide Register 1.0
 
@@ -372,7 +372,7 @@ proc ::Jabber::Register::RemoveCallback {jid jlibName type theQuery} {
 	tk_messageBox -icon error -title [::msgcat::mc Unregister] -type ok  \
 	  -message [FormatTextForMessageBox \
 	  [::msgcat::mc jamesserrunreg $jid $errcode $errmsg]]
-    } elseif {[string equal $type "ok"]} {
+    } else {
 	tk_messageBox -icon info -title [::msgcat::mc Unregister] -type ok  \
 	  -message [FormatTextForMessageBox \
 	  [::msgcat::mc jamessokunreg $jid]]

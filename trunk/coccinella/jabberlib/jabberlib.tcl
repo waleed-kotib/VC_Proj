@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.48 2004-06-12 15:35:18 matben Exp $
+# $Id: jabberlib.tcl,v 1.49 2004-06-16 14:17:32 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -819,8 +819,9 @@ proc jlib::iq_handler {jlibname xmldata} {
 	    if {[info exists id] && [info exists iqcmd($id)]} {
 		
 		# TODO: add attrArr to callback.
-		uplevel #0 $iqcmd($id) [list ok $subiq]
+		#uplevel #0 $iqcmd($id) [list ok $subiq]
 		
+		uplevel #0 $iqcmd($id) [list result $subiq]
 		#uplevel #0 $iqcmd($id) [list result $subiq] $arglist
 		
 		# We need a catch here since the callback my in turn 

@@ -1,10 +1,10 @@
 # alertbox.tcl ---
 #
-#       An alerbox that returns immediately.
+#       An alerbox that returns immediately (nonmodal).
 #       
 #  Copyright (c) 2004
 #  
-#  $Id: alertbox.tcl,v 1.1 2004-06-15 14:30:11 matben Exp $
+#  $Id: alertbox.tcl,v 1.2 2004-06-16 14:17:30 matben Exp $
 
 package provide alertbox 1.0
 
@@ -13,10 +13,7 @@ namespace eval ::alertbox:: {
 
     variable this
     set this(wbase)      .alrtb7ysxzt5
-    set this(offx)       20
-    set this(offy)       20
-    
-    variable uid         0
+    set this(uid)        0
     
     # We use a variable 'this(platform)' that is more convenient for MacOS X.
     switch -- $tcl_platform(platform) {
@@ -33,66 +30,125 @@ namespace eval ::alertbox:: {
 	}
     }
     
-    option add *AlertBox.msg.wrapLength 180 widgetDefault
-    switch -- $this(platform) {
-	macintosh - macosx {
-	    option add *AlertBox.msg.font system widgetDefault
-	}
-	windows {
-	    option add *AlertBox.msg.font {Arial 8} widgetDefault	    
-	}
-	default {
-	    option add *AlertBox.msg.font {Times 10} widgetDefault
-	}
+    # List all allowed options with their database names and class names.
+    
+    array set widgetOptions {
+	-image        {image        Image     }      \
+	-parent       {parent       Parent    }      \
+	-title        {title        Title     }      \
     }
 
+    option add *AlertBox.image           ""     widgetDefault
+    option add *AlertBox.parent          ""     widgetDefault
+    option add *AlertBox.title           ""     widgetDefault
+    option add *AlertBox.msg.wrapLength 300     widgetDefault
+    option add *AlertBox.offX            20     widgetDefault
+    option add *AlertBox.offY            20     widgetDefault
+
+    # A 'widgetDefault' lets resources override which we do not want.
+    switch -- $this(platform) {
+	macintosh - macosx {
+	    option add *AlertBox.msg.font system
+	}
+	windows {
+	    option add *AlertBox.msg.font {Arial 8}	    
+	}
+	default {
+	    option add *AlertBox.msg.font {Times 10} 
+	}
+    }
+    bind AlertBox <Return> {destroy %W}
 }
 
 # alertbox::alertbox --
 # 
-# 
+#       Makes an alert dialog wich is nonmodel; i.e. no grab.
+#       Returns immediately!
+#       
+# Arguments:
+#       msg         test message to display
+#       args    -image
+#               -parent
+#               -title
+# Results:
+#       widget toplevel path
 
 proc ::alertbox::alertbox {msg args} {
+
     variable this
-    variable uid
+    variable widgetOptions
     
-    set w $this(wbase)[incr uid]
+    foreach {name value} $args {
+	if {![info exists widgetOptions($name)]} {
+	    return -code error "unknown option \"$name\" for the alertbox widget"
+	}
+    }    
+    set w $this(wbase)[incr this(uid)]
     toplevel $w -class AlertBox
+    
     switch -- $this(platform) {
-	macintosh - macosx {
-	    #::tk::unsupported::MacWindowStyle style $w dBoxProc
+	macintosh {
+	    ::tk::unsupported::MacWindowStyle style $w movableDBoxProc
+	}
+	macosx {
+	    ::tk::unsupported::MacWindowStyle style $w document closeBox
 	}
     }
-    wm title $w ""
-    wm protocol $w WM_DELETE_WINDOW { }
+
+    # Parse options for the notebook. First get widget defaults.
+    foreach name [array names widgetOptions] {
+	set optName [lindex $widgetOptions($name) 0]
+	set optClass [lindex $widgetOptions($name) 1]
+	set options($name) [option get $w $optName $optClass]
+    }
     
+    # Apply the options supplied in the widget command.
+    # Overwrites defaults when option set in command.
+    if {[llength $args] > 0}  {
+	array set options $args
+    }
+    wm title $w $options(-title)
     
     frame $w.bot
     frame $w.top
-    pack $w.bot -side bottom -fill both
-    pack $w.top -side top -fill both -expand 1
+    pack  $w.bot -side bottom -fill both
+    pack  $w.top -side top -fill both -expand 1
     label $w.msg -justify left -text $msg
-    pack  $w.msg -in $w.top -side right -expand 1 -fill both -padx 3m -pady 3m
-    button $w.bot.btok -text [::msgcat::mc OK] -default active \
-      -command [list destroy $w]
-    pack $w.bot.btok -side right -padx 12 -pady 6
+    pack  $w.msg -in $w.top -side right -expand 1 -fill both -padx 16 -pady 4
+    if {[string length $options(-image)]} {
+	label $w.top.icon -image $options(-image)
+	pack $w.top.icon -side left -padx 8 -pady 4
+    }
+    button $w.bot.btok -text [::msgcat::mc OK] -command [list destroy $w]
+    pack $w.bot.btok -side right -padx 16 -pady 10
     
     
     # An alone window shall always be positioned in the middle of the screen.
     set allAlerts [lsearch -all -inline -glob [wm stackorder .] $this(wbase)*]
     wm withdraw $w
     update idletasks
-    if {[llength $allAlerts] == 0} {
-	set x [expr {[winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 \
-	  - [winfo vrootx [winfo parent $w]]}]
-	set y [expr {[winfo screenheight $w]/2 - [winfo reqheight $w]/2 \
-	  - [winfo vrooty [winfo parent $w]]}]
+    
+    if {[string length $options(-parent)]} {
+	set geom [wm geometry [winfo toplevel $options(-parent)]]
+	regexp {([0-9]+)x([0-9]+)\+(\-?[0-9]+)\+(\-?[0-9]+)}  \
+	  $geom m pwidth pheight px py
+	
+	
     } else {
-	set geom [wm geometry [lindex $allAlerts end]]
-	regexp {[0-9]+x[0-9]+\+(\-?[0-9]+)\+(\-?[0-9]+)}  \
-	  $geom m x y
-	incr x $this(offx)
-	incr y $this(offy)
+	if {[llength $allAlerts] == 0} {
+	    set x [expr {[winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 \
+	      - [winfo vrootx [winfo parent $w]]}]
+	    set y [expr {[winfo screenheight $w]/2 - [winfo reqheight $w]/2 \
+	      - [winfo vrooty [winfo parent $w]]}]
+	} else {
+	    set geom [wm geometry [lindex $allAlerts end]]
+	    regexp {[0-9]+x[0-9]+\+(\-?[0-9]+)\+(\-?[0-9]+)}  \
+	      $geom m x y
+	    set x [winfo x [lindex $allAlerts end]]
+	    set y [winfo y [lindex $allAlerts end]]
+	    incr x [option get $w offX {}]
+	    incr y [option get $w offY {}]
+	}
     }
     if {$x < 0} {
 	set x 0
@@ -101,11 +157,10 @@ proc ::alertbox::alertbox {msg args} {
 	set y 0
     }
     wm maxsize $w [winfo screenwidth $w] [winfo screenheight $w]
+    wm resizable $w 0 0
     wm geom $w +$x+$y
     wm deiconify $w
-    
-    
-    
+    return $w
 }
 
 #-------------------------------------------------------------------------------

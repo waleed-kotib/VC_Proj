@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: Theme.tcl,v 1.10 2004-03-29 13:56:27 matben Exp $
+# $Id: Theme.tcl,v 1.11 2004-06-16 14:17:32 matben Exp $
 
 package provide Theme 1.0
 
@@ -172,6 +172,15 @@ proc ::Theme::PreLoadImages { } {
 #       Returns empty if not found, else the internal tk image name.
 #       
 #       Must have method to get .png images etc.
+#       
+# Arguments:
+#       name      name of image file without suffix
+#       args:
+#            -keepname
+#            -suffixes
+#       
+# Results:
+#       empty or image name.
 
 proc ::Theme::GetImage {name args} {
     global  this
@@ -179,6 +188,7 @@ proc ::Theme::GetImage {name args} {
     
     array set argsArr {
 	-keepname 0
+	-suffixes {}
     }
     array set argsArr $args    
     
@@ -196,7 +206,7 @@ proc ::Theme::GetImage {name args} {
 	
 	# Search dirs in order.
 	foreach dir $this(imagePathList) {
-	    foreach suff $allImageSuffixes {
+	    foreach suff [concat $allImageSuffixes $argsArr(-suffixes)] {
 		set f [file join $dir ${name}${suff}]
 		if {[file exists $f]} {
 		    if {[string equal $suff .gif]} {

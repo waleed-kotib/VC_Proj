@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Search.tcl,v 1.14 2004-05-26 07:36:38 matben Exp $
+# $Id: Search.tcl,v 1.15 2004-06-16 14:17:31 matben Exp $
 
 package provide Search 1.0
 
@@ -274,7 +274,7 @@ proc ::Jabber::Search::DoSearch { } {
 #       
 # Arguments:
 #       server:
-#       type:       "ok", "error", or "set"
+#       type:       "result", "error", or "set"
 #       subiq:
 
 proc ::Jabber::Search::ResultCallback {server type subiq} {   
@@ -301,7 +301,7 @@ proc ::Jabber::Search::ResultCallback {server type subiq} {
 	}
 	tk_messageBox -type ok -icon error -message [FormatTextForMessageBox $msg]
 	return
-    } elseif {[string equal $type "ok"]} {
+    } else {
 	
 	# This returns the search result and sets the reported stuff.
 	set columnSpec {}

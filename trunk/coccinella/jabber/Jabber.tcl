@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.91 2004-06-12 15:35:18 matben Exp $
+# $Id: Jabber.tcl,v 1.92 2004-06-16 14:17:30 matben Exp $
 
 package provide Jabber 1.0
 
@@ -949,7 +949,7 @@ proc ::Jabber::ErrorLogDlg { } {
 # Arguments:
 #       method      description of the original call.
 #       jlibName:   the instance of this jlib.
-#       type:       "error" or "ok".
+#       type:       "error" or "result".
 #       thequery:   if type="error", this is a list {errcode errmsg},
 #                   else it is the query element as a xml list structure.
 #       

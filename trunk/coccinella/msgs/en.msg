@@ -851,6 +851,7 @@ is limited by user's settings below.}
 you don't want them loaded. You must relaunch for this to take effect.}
 ::msgcat::mcset en prefchactret  {Always use active <Return> in chat dialog}
 ::msgcat::mcset en prefprofname  {Enter desired name of user profile}
+::msgcat::mcset en prefstabui    {Use tabbed notebook interface}
 
 
 
