@@ -43,11 +43,10 @@ For the "message" type the following key-value pairs are handled:
 "thread"        unique string   this starts a chat with the jid in the uri
 
 For the "groupchat" type the following key-value pairs are handled
-(note that the jid you specify here must be a room):
+(note that the jid you specify here must be room/nickname):
 
-"nick"          string
 "password"      string        this is the password for entering the room if necessary
-
+"xmlns"         "whiteboard"
 
 Some examples of supported uri's (The official specification for this
 is currently floating; changes are likely to appear in the future):
@@ -59,10 +58,10 @@ xmpp:marilu@l4l.be?message&subject=hi&body=Hello%20World
 xmpp:marilu@l4l.be?message&subject=hi&body=Hello%20World&thread=abc123
     starts a chat
 
-xmpp:mats@conference.l4l.be?groupchat&nick=matsnick
+xmpp:mats@conference.l4l.be/matsnick?groupchat
     enters the specified room using nick matsnick.
 
-xmpp:mats@conference.l4l.be?groupchat&nick=matsnick&xmlns=whiteboard
+xmpp:mats@conference.l4l.be/matsnick?groupchat&xmlns=whiteboard
     enters the specified room using the whiteboard
 
 
@@ -92,23 +91,23 @@ xmpp:marilu@l4l.be?message&subject=hi&body=Hello%20World&thread=abc123
 </a>
 
 <p>
-<a href="xmpp:mats@conference.l4l.be?groupchat&nick=matsnick">
-xmpp:mats@conference.l4l.be?groupchat&nick=matsnick
+<a href="xmpp:mats@conference.l4l.be/matsnick?groupchat">
+xmpp:mats@conference.l4l.be/matsnick?groupchat
 </a>
 
 <p>
-<a href="xmpp:mats@conference.l4l.be?groupchat&nick=matsnick&xmlns=whiteboard">
-xmpp:mats@conference.l4l.be?groupchat&nick=matsnick&xmlns=whiteboard
+<a href="xmpp:mats@conference.l4l.be/matsnick?groupchat&xmlns=whiteboard">
+xmpp:mats@conference.l4l.be/matsnick?groupchat&xmlns=whiteboard
 </a>
 
 <p>
-<a href="xmpp:secret@conference.l4l.be?groupchat&nick=matsnick">
-xmpp:secret@conference.l4l.be?groupchat&nick=matsnick
+<a href="xmpp:secret@conference.l4l.be/matsnick?groupchat">
+xmpp:secret@conference.l4l.be/matsnick?groupchat
 </a>
 
 <p>
-<a href="xmpp:secret@conference.l4l.be?groupchat&nick=matsnick&xmlns=whiteboard">
-xmpp:secret@conference.l4l.be?groupchat&nick=matsnick&xmlns=whiteboard
+<a href="xmpp:secret@conference.l4l.be/matsnick?groupchat&xmlns=whiteboard">
+xmpp:secret@conference.l4l.be/matsnick?groupchat&xmlns=whiteboard
 </a>
 
 <p>
@@ -117,8 +116,13 @@ xmpp:sgi@sgi.se?message&subject=hi&body=Hello%20World&ip=192.169.0.10&invisible=
 </a>
 
 <p>
-<a href="xmpp:secret@muc.sgi.se?groupchat&nick=matsnick&password=xxxxxx">
-xmpp:secret@muc.sgi.se?groupchat&nick=matsnick&password=xxxxxx
+<a href="xmpp:secret@muc.sgi.se/matsnick?groupchat&password=xxxxxx">
+xmpp:secret@muc.sgi.se/matsnick?groupchat&&password=xxxxxx
+</a>
+
+<p>
+<a href="xmpp:mats@muc.sgi.se/matsnick?groupchat">
+xmpp:mats@muc.sgi.se/matsnick?groupchat
 </a>
 
 </body>

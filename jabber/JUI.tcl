@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.65 2004-11-10 10:08:43 matben Exp $
+# $Id: JUI.tcl,v 1.66 2004-11-11 15:38:29 matben Exp $
 
 package provide JUI 1.0
 
@@ -313,30 +313,36 @@ proc ::Jabber::UI::Build {w} {
     
     set wtray $wmain.top
     # D = -borderwidth 1 -relief raised
-    ::buttontray::buttontray $wtray 52
+    ::buttontray::buttontray $wtray
     pack $wtray -side top -fill x
     set jwapp(wtray) $wtray
     
-    $wtray newbutton connect Connect $iconConnect $iconConnectDis  \
-      [list ::Jabber::Login::Dlg]
+    $wtray newbutton connect -text [mc Connect] \
+      -image $iconConnect -disabledimage $iconConnectDis \
+      -command ::Jabber::Login::Dlg
     if {[::Jabber::MailBox::HaveMailBox]} {
-	$wtray newbutton inbox Inbox $iconInboxLett $iconInboxLettDis  \
-	  [list ::Jabber::MailBox::ShowHide -visible 1]
+	$wtray newbutton inbox -text [mc Inbox] \
+	  -image $iconInboxLett -disabledimage $iconInboxLettDis  \
+	  -command [list ::Jabber::MailBox::ShowHide -visible 1]
     } else {
-	$wtray newbutton inbox Inbox $iconInbox $iconInboxDis  \
-	  [list ::Jabber::MailBox::ShowHide -visible 1]
+	$wtray newbutton inbox -text [mc Inbox] \
+	  -image $iconInbox -disabledimage $iconInboxDis  \
+	  -command [list ::Jabber::MailBox::ShowHide -visible 1]
     }
-    $wtray newbutton newuser Contact $iconNewUser $iconNewUserDis  \
-      ::Jabber::User::NewDlg -state disabled
-    $wtray newbutton stop Stop $iconStop $iconStopDis  \
-      [list ::Jabber::UI::StopConnect] -state disabled
+    $wtray newbutton newuser -text [mc Contact] \
+      -image $iconNewUser -disabledimage $iconNewUserDis  \
+      -command ::Jabber::User::NewDlg -state disabled
+    $wtray newbutton stop -text [mc Stop] \
+      -image $iconStop -disabledimage $iconStopDis \
+      -command ::Jabber::UI::StopConnect \
+      -state disabled
 
     ::hooks::run buildJMainButtonTrayHook $wtray
 
     set shortBtWidth [$wtray minwidth]
 
     # Keep empty frame for any padding.
-    frame $wmain.bpad -bg red -height 0
+    frame $wmain.bpad
     if {[$wmain.bpad cget -height] > 0} {
 	pack  $wmain.bpad -side bottom -fill x
     }
@@ -356,7 +362,7 @@ proc ::Jabber::UI::Build {w} {
     ::Jabber::Roster::BuildStatusMenuButton $jwapp(mystatus)
     pack  $jwapp(mystatus) -side left -pady 2 -padx 6
     label $wbot.size -image $iconResize
-    pack  $wbot.size -padx 0 -pady 0 -side right -anchor s
+    pack  $wbot.size -side right -anchor s
     label $jwapp(elplug) -image $iconContactOff
     pack  $jwapp(elplug) -side right -pady 0 -padx 0
     entry $jwapp(myjid) -state disabled -width 0 \

@@ -7,7 +7,7 @@
 #       Most recent reference at the time of writing:
 #       http://www.ietf.org/internet-drafts/draft-saintandre-xmpp-uri-06.txt
 # 
-# $Id: ParseURI.tcl,v 1.14 2004-11-10 10:08:43 matben Exp $
+# $Id: ParseURI.tcl,v 1.15 2004-11-11 15:38:28 matben Exp $
 
 package require uriencode
 
@@ -49,11 +49,13 @@ proc ::ParseURI::Parse {args} {
     ::Debug 2 "::ParseURI::Parse uri=$uri"
 
     # Actually parse the uri.
-    # set reexp {^xmpp:([^\?]+)(\?([^&]+)&(.+))?$}
+    # {^xmpp:([^\?]+)(\?([^&]+)&(.+))?$}
     set reexp {^xmpp:([^\?#]+)(\?([^&]+)&([^#]+))?(#(.+))?$}
-    if {![regexp $reexp $uri match jid x querytype query y fragment]} {
+    set reexp {^xmpp:([^\?#]+)(\?([^&]+))?(&([^#]+))?(#(.+))?$}
+    if {![regexp $reexp $uri match jid x querytype y query z fragment]} {
 	return
     }
+    jlib::splitjid $jid jid2 resource
     
     # Initialize the state variable, an array, that keeps is the storage.
     set token [namespace current]::[incr uid]
@@ -62,6 +64,8 @@ proc ::ParseURI::Parse {args} {
 
     set state(uri)       $uri
     set state(jid)       $jid
+    set state(jid2)      $jid2
+    set state(resource)  $resource
     set state(querytype) $querytype
     set state(query)     $query
     set state(fragment)  $fragment
@@ -252,12 +256,27 @@ proc ::ParseURI::HandleGroupchat {token} {
     ::hooks::deregister  browseSetHook  $state(browsecmd)
     ::hooks::deregister  discoInfoHook  $state(discocmd)
     
+    ::Debug 2 [parray state]
+    
+    # We require a nick name (resource part).
+    set nick $state(resource)
+    if {$nick == ""} {
+	set ans [::UI::MegaDlgMsgAndEntry  \
+	  [mc {Nick name}] \
+	  "Please enter your desired nick name for the room $state(jid2)" \
+	  "[mc {Nick name}]:" \
+	  nick [mc Cancel] [mc OK]]
+	if {($ans != "ok") || ($nick == "")} {
+	    return
+	}
+    }
+    
     # We brutaly assumes muc room here.
     set opts {}
     if {[info exists state(query,password)]} {
 	lappend opts -password $state(query,password)
     }
-    eval {::Jabber::MUC::EnterRoom $state(jid) $state(query,nick) \
+    eval {::Jabber::MUC::EnterRoom $state(jid2) $nick \
       -command [list [namespace current]::EnterRoomCB $token]} $opts
 }
 
