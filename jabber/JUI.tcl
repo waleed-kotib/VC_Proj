@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.55 2004-10-02 13:14:55 matben Exp $
+# $Id: JUI.tcl,v 1.56 2004-10-04 09:22:19 matben Exp $
 
 package provide JUI 1.0
 
@@ -83,12 +83,21 @@ proc ::Jabber::UI::Init { } {
     variable menuDefs
     variable inited
     
-    set menuDefs(rost,file) {
-	{command   mNewWhiteboard      {::Jabber::WB::NewWhiteboard}  normal   N}
-	{command   mCloseWindow        {::UI::DoCloseWindow}          normal   W}
-	{command   mPreferences...     {::Preferences::Build}         normal   {}}
-	{separator}
-	{command   mQuit               {::UserActions::DoQuit}        normal   Q}
+    if {[string match "mac*" $this(platform)]} {
+	set menuDefs(rost,file) {
+	    {command   mNewWhiteboard      {::Jabber::WB::NewWhiteboard}  normal   N}
+	    {command   mCloseWindow        {::UI::DoCloseWindow}          normal   W}
+	    {command   mPreferences...     {::Preferences::Build}         normal   {}}
+	    {separator}
+	    {command   mQuit               {::UserActions::DoQuit}        normal   Q}
+	}
+    } else {
+	set menuDefs(rost,file) {
+	    {command   mNewWhiteboard      {::Jabber::WB::NewWhiteboard}  normal   N}
+	    {command   mPreferences...     {::Preferences::Build}         normal   {}}
+	    {separator}
+	    {command   mQuit               {::UserActions::DoQuit}        normal   Q}
+	}
     }
     set menuDefs(rost,jabber) {    
 	{command     mNewAccount    {::Jabber::Register::NewDlg}      normal   {}}
@@ -154,6 +163,7 @@ proc ::Jabber::UI::Init { } {
     
     # When registering new menu entries they shall be added at:
     variable menuDefsInsertInd
+
     set menuDefsInsertInd(rost,file)   [expr [llength $menuDefs(rost,file)]-2]
     set menuDefsInsertInd(rost,edit)   [expr [llength $menuDefs(rost,edit)]]
     set menuDefsInsertInd(rost,jabber) [expr [llength $menuDefs(rost,jabber)]-2]

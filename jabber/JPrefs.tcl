@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.14 2004-09-28 13:50:17 matben Exp $
+# $Id: JPrefs.tcl,v 1.15 2004-10-04 09:22:19 matben Exp $
 
 package provide JPrefs 1.0
 
@@ -98,7 +98,7 @@ proc ::Jabber::JPrefs::InitPrefsHook { } {
 proc ::Jabber::JPrefs::BuildPrefsHook {wtree nbframe} {
     
     $wtree newitem {Jabber {Auto Away}} -text [mc {Auto Away}]
-    $wtree newitem {Jabber {Personal Info}} -text [mc {Personal Info}]
+    #$wtree newitem {Jabber {Personal Info}} -text [mc {Personal Info}]
     $wtree newitem {Jabber Appearance} -text [mc Appearance]
     $wtree newitem {Jabber Customization} -text [mc Customization]
 
@@ -107,8 +107,8 @@ proc ::Jabber::JPrefs::BuildPrefsHook {wtree nbframe} {
     ::Jabber::JPrefs::BuildAutoAwayPage $wpage
 
     # Personal Info page ---------------------------------------------------
-    set wpage [$nbframe page {Personal Info}]    
-    ::Jabber::JPrefs::BuildPersInfoPage $wpage
+    #set wpage [$nbframe page {Personal Info}]    
+    #::Jabber::JPrefs::BuildPersInfoPage $wpage
 	    
     # Appearance page -------------------------------------------------------
     set wpage [$nbframe page {Appearance}]    

@@ -80,7 +80,7 @@
 ::msgcat::mcset nl OK			{OK}
 ::msgcat::mcset nl Online		{Online}
 ::msgcat::mcset nl Open			{Openen}
-#::msgcat::mcset en Options
+#::msgcat::mcset nl Options
 ::msgcat::mcset nl Password		{Wachtwoord}
 ::msgcat::mcset nl Pick			{Kies}
 ::msgcat::mcset nl Phone		{Telefoon}
@@ -290,8 +290,8 @@
 ::msgcat::mcset nl mLocalTime     	{Lokale tijd...}
 ::msgcat::mcset nl mSendFile     	{Bestand verzenden...}
 ::msgcat::mcset nl mChatHistory     	{Berichtengeschiedenis}
-#::msgcat::mcset en mLoginTrpt     	{Login To Transport}
-#::msgcat::mcset en mLogoutTrpt     	{Logout From Transport}
+#::msgcat::mcset nl mLoginTrpt     	{Login To Transport}
+#::msgcat::mcset nl mLogoutTrpt     	{Logout From Transport}
 
 
 
@@ -469,7 +469,7 @@
 ::msgcat::mcset nl {Start Chat}			{Chat starten}
 ::msgcat::mcset nl {Status message}		{Statusbericht}
 ::msgcat::mcset nl {Status when logging out}	{Status bij afmelden}
-#::msgcat::mcset en {Subscription Failed}
+#::msgcat::mcset nl {Subscription Failed}
 ::msgcat::mcset nl {Subscription Pending}	{Wachtend op authorizatie}
 ::msgcat::mcset nl {Synthetic speech}		{Synthetische spraak}
 ::msgcat::mcset nl {System fonts}		{Systeemlettertypes}
@@ -736,9 +736,9 @@ omdat deze gebruikersnaam reeds in gebruik is door een andere gebruiker. Als u d
 probeer dan opnieuw aan te melden. Foutmelding: %s}
 ::msgcat::mcset nl jamessregerr                 {De registratie mislukte\
 met foutmelding: %s}
-#::msgcat::mcset en jamesstrptsubsc              {Your registered account with the %s\
+#::msgcat::mcset nl jamesstrptsubsc              {Your registered account with the %s\
 #service will be put in your roster to work as a transport with this service.}
-#::msgcat::mcset en jamessfailedsubsc            {Failed to make a subscription to %s. The user denied the subscription.}
+#::msgcat::mcset nl jamessfailedsubsc            {Failed to make a subscription to %s. The user denied the subscription.}
 
     
 
@@ -863,10 +863,10 @@ wordt gelimiteerd door de instellingen hieronder.}
 ::msgcat::mcset nl prefplugctrl  {U kan elk pakket deselecteren waarvan u\
 het laden wilt verhinderen. U moet Coccinella herstarten voordat de wijzigingen worden doorgevoerd.}
 ::msgcat::mcset nl prefchactret  {Altijd actieve <enter> in chatvenster gebruiken}
-#::msgcat::mcset en prefchnormal  {Treat normal messages as chat messages}
+#::msgcat::mcset nl prefchnormal  {Treat normal messages as chat messages}
 ::msgcat::mcset nl prefprofname  {Voer de gewenste naam voor het gebruikersprofiel in}
 ::msgcat::mcset nl prefstabui    {Laptopinterface met tabbladen aanzetten}
-#::msgcat::mcset en prefsusesasl  {Use SASL authentization method}
+#::msgcat::mcset nl prefsusesasl  {Use SASL authentization method}
 
 
 
@@ -886,8 +886,8 @@ of selecteer een server uit het popup menu. Verzeker u ervan dat u al een accoun
 	::msgcat::mcset nl janewaccount {Typ het IP nummer of de naam van de Jabberserver in.\
 Kies uw gebruikersnaam en wachtwoord.}
 	::msgcat::mcset nl janewpass    {Stel nieuw wachtwoord in voor:}
-	::msgcat::mcset nl jasubwant    {Gebruiker "%s" wilt u toevoegen aan zijn roster.\
-Kies uit de onderstaande opties. Het opgeven van een bijnaam en groep is\
+	::msgcat::mcset nl jasubwant    {Gebruiker "%s" wilt u toevoegen aan zijn roster.}
+        ::msgcat::mcset nl jasubopts    {Kies uit de onderstaande opties. Het opgeven van een bijnaam en groep is\
 optioneel.}
 	::msgcat::mcset nl jasubgetvcard {vCard van deze persoon bekijken}
 	::msgcat::mcset nl jasubsndmsg  {Bericht naar deze persoon verzenden:}

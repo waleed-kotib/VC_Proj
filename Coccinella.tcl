@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.85 2004-09-28 13:50:16 matben Exp $
+# $Id: Coccinella.tcl,v 1.86 2004-10-04 09:22:19 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -373,8 +373,8 @@ if {!$havecat} {
     ::msgcat::mclocale en
 }
 
-# Test here if you wabt a prticular message catalog.
-#::msgcat::mclocale de
+# Test here if you want a prticular message catalog (en, nl, de, fr, sv,...).
+#::msgcat::mclocale en
 ::msgcat::mcload $this(msgcatPath)
 namespace import ::msgcat::mc
 

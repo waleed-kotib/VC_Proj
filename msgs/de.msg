@@ -80,7 +80,7 @@
 ::msgcat::mcset de OK		OK
 ::msgcat::mcset de Online	Angemeldet
 ::msgcat::mcset de Open		Öffnen
-#::msgcat::mcset en Options
+#::msgcat::mcset de Options
 ::msgcat::mcset de Password	Passwort
 ::msgcat::mcset de Pick		Auswählen
 ::msgcat::mcset de Phone	Telefon
@@ -290,8 +290,8 @@
 ::msgcat::mcset de mLocalTime     	{Lokale Zeit...}
 ::msgcat::mcset de mSendFile     	{Datei senden...}
 ::msgcat::mcset de mChatHistory     	{Chat-Verlauf}
-#::msgcat::mcset en mLoginTrpt     	{Login To Transport}
-#::msgcat::mcset en mLogoutTrpt     	{Logout From Transport}
+#::msgcat::mcset de mLoginTrpt     	{Login To Transport}
+#::msgcat::mcset de mLogoutTrpt     	{Logout From Transport}
 
 
 
@@ -469,7 +469,7 @@
 ::msgcat::mcset de {Start Chat}           {Start Chat}
 ::msgcat::mcset de {Status message}       {Status-Nachricht}
 ::msgcat::mcset de {Status when logging out}  {Status bei Abmeldung}
-#::msgcat::mcset en {Subscription Failed}
+#::msgcat::mcset de {Subscription Failed}
 ::msgcat::mcset de {Subscription Pending} {Zulassung anhängig}
 ::msgcat::mcset de {Synthetic speech}     {Künstliche Sprache}
 ::msgcat::mcset de {System fonts}         {System-Schriften}
@@ -738,9 +738,9 @@ weil dieser Benutzername bereits von jemand benutzt wird. Wenn Sie dieser Benutz
 melden Sie sich an. Fehlernachricht: %s}
 ::msgcat::mcset de jamessregerr                 {Fehler bei Registrierung\
 mit Fehlernachricht: %s}
-#::msgcat::mcset en jamesstrptsubsc              {Your registered account with the %s\
+#::msgcat::mcset de jamesstrptsubsc              {Your registered account with the %s\
 #service will be put in your roster to work as a transport with this service.}
-#::msgcat::mcset en jamessfailedsubsc            {Failed to make a subscription to %s. The user denied the subscription.}
+#::msgcat::mcset de jamessfailedsubsc            {Failed to make a subscription to %s. The user denied the subscription.}
 
 
 
@@ -866,10 +866,10 @@ wird über die Benutzereinstellungen begrenzt.}
 ::msgcat::mcset de prefplugctrl  {Sie können jedes dieser Pakete deselektieren,\
 wenn es nicht geladen werden soll. Es ist ein Neustart erforderlich.}
 ::msgcat::mcset de prefchactret  {<Return> im Chat-Dialog immer aktiv}
-#::msgcat::mcset en prefchnormal  {Treat normal messages as chat messages}
+#::msgcat::mcset de prefchnormal  {Treat normal messages as chat messages}
 ::msgcat::mcset de prefprofname  {Namen des gewünschten Profils eingeben}
 ::msgcat::mcset de prefstabui    {Tab-Oberfläche benutzen}
-#::msgcat::mcset en prefsusesasl  {Use SASL authentization method}
+#::msgcat::mcset de prefsusesasl  {Use SASL authentization method}
 
 
 
@@ -889,8 +889,8 @@ oder Auswahl aus dem Popup-Menü. Sie müssen bereits ein Konto auf diesem Server 
 	::msgcat::mcset de janewaccount {IP-Nummer oder Name des Jabber-Servers.\
 Wählen Sie Benutzername und Passwort.}
 	::msgcat::mcset de janewpass    {Setze neues Passwort für:}
-	::msgcat::mcset de jasubwant    {Benutzer "%s" möchte sich bei Ihnen anmelden.\
-Wählen Sie aus den folgenden Optionen. Wahl eines Spitznamens und Gruppe ist\
+	::msgcat::mcset de jasubwant    {Benutzer "%s" möchte sich bei Ihnen anmelden.}
+        ::msgcat::mcset de jasubopts    {Wahl eines Spitznamens und Gruppe ist\
 optional und nur für Ihren persönlichen Gebrauch.}
 	::msgcat::mcset de jasubgetvcard {vCard dieser Person abrufen}
 	::msgcat::mcset de jasubsndmsg  {Dieser Person eine Nachricht senden:}

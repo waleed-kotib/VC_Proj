@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.63 2004-09-28 13:50:19 matben Exp $
+# $Id: Preferences.tcl,v 1.64 2004-10-04 09:22:19 matben Exp $
  
 package require notebook
 package require tree
@@ -692,7 +692,8 @@ proc ::Preferences::Proxies::BuildPage {page} {
 
     label $pca.msg -wraplength 300 -justify left \
       -text "Usage of the Http proxy is determined\
-      by each profile settings. File transfers wont work if you use Http proxy!"
+      by each profile settings. File transfers wont work if you use Http proxy!\
+      NOT YET WORKING!"
     
     label $pca.lserv -text [mc {Proxy Server}]:
     entry $pca.eserv -textvariable [namespace current]::tmpPrefs(httpproxyserver)
