@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.70 2004-10-14 10:22:11 matben Exp $
+# $Id: jabberlib.tcl,v 1.71 2004-10-18 14:01:04 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -923,10 +923,11 @@ proc jlib::iq_handler {jlibname xmldata} {
 		
 		# TODO: add attrArr to callback.
 		uplevel #0 $iqcmd($id) [list result $subiq]
+		        
 		#uplevel #0 $iqcmd($id) [list result $subiq] $arglist
 		
-		# We need a catch here since the callback my in turn 
-		# call 'closestream' which unsets all iq before returning.
+		# The callback my in turn call 'closestream' which unsets 
+		# all iq before returning.
 		unset -nocomplain iqcmd($id)
 		set ishandled 1
 	    }
@@ -1459,6 +1460,12 @@ proc jlib::stream_reset {jlibname} {
 #       <error code='..'> ... </error>
 #     </query>
 #   </iq>
+#   
+#   or:
+#   <iq type='error'>
+#     <error code='401'/>
+#     <query ...>...</query>
+#   </iq>
 
 proc jlib::getstanzaerrorspec {stanza} {
     
@@ -1531,20 +1538,27 @@ proc jlib::getstreamerrorspec {errelem} {
 proc jlib::geterrspecfromerror {errelem kind} {
        
     variable xmppns
+    variable errCodeToText
 
-    set errcode ""
-    set errmsg  ""
     set cchdata [wrapper::getcdata $errelem]
     array set msgproc {
 	stanzas  stanzaerror::getmsg
 	streams  streamerror::getmsg
     }
-    if {[string length $cchdata] > 0} {
+    set errcode [wrapper::getattribute $errelem code]
+    if {[string is integer $errcode]} {
+	if {[info exists errCodeToText($errcode)]} {
+	    set errmsg $errCodeToText($errcode)
+	} else {
+	    set errmsg "Unknown"
+	}
+    } elseif {$cchdata != ""} {
 	
 	# Old jabber way.
-	set errcode [wrapper::getattribute $errelem code]
 	set errmsg $cchdata
     } else {
+	set errcode ""
+	set errmsg  ""
 	
 	# xmpp way.
 	foreach c [wrapper::getchildren $errelem] {
@@ -2523,6 +2537,8 @@ proc jlib::send {jlibname xmllist} {
     
     set xml [wrapper::createxml $xmllist]
     
+    puts "lib(isinstream)=$lib(isinstream)"
+    
     # We fail only if already in stream.
     # The first failure reports the network error, closes the stream,
     # which stops multiple errors to be reported to client.
@@ -3197,6 +3213,55 @@ proc jlib::getlang {} {
 		return $lang
 	    }
 	}
+    }
+}
+
+namespace eval jlib {
+    
+    # We just the http error codes here since may be useful if we only
+    # get the 'code' attribute in an error element.
+    variable errCodeToText
+    array set errCodeToText {
+	100 Continue
+	101 {Switching Protocols}
+	200 OK
+	201 Created
+	202 Accepted
+	203 {Non-Authoritative Information}
+	204 {No Content}
+	205 {Reset Content}
+	206 {Partial Content}
+	300 {Multiple Choices}
+	301 {Moved Permanently}
+	302 Found
+	303 {See Other}
+	304 {Not Modified}
+	305 {Use Proxy}
+	307 {Temporary Redirect}
+	400 {Bad Request}
+	401 Unauthorized
+	402 {Payment Required}
+	403 Forbidden
+	404 {Not Found}
+	405 {Method Not Allowed}
+	406 {Not Acceptable}
+	407 {Proxy Authentication Required}
+	408 {Request Time-out}
+	409 Conflict
+	410 Gone
+	411 {Length Required}
+	412 {Precondition Failed}
+	413 {Request Entity Too Large}
+	414 {Request-URI Too Large}
+	415 {Unsupported Media Type}
+	416 {Requested Range Not Satisfiable}
+	417 {Expectation Failed}
+	500 {Internal Server Error}	
+	501 {Not Implemented}
+	502 {Bad Gateway}
+	503 {Service Unavailable}
+	504 {Gateway Time-out}
+	505 {HTTP Version not supported}
     }
 }
 
