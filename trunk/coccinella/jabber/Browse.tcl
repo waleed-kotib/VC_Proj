@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.43 2004-05-06 13:41:10 matben Exp $
+# $Id: Browse.tcl,v 1.44 2004-05-21 07:40:41 matben Exp $
 
 package require chasearrows
 
@@ -1241,9 +1241,11 @@ proc ::Jabber::Browse::GetInfo {jid args} {
 
 proc ::Jabber::Browse::InfoCB {browseName type jid subiq args} {
     
+    ::Debug 4 "::Jabber::Browse::InfoCB type=$type, jid=$jid, '$subiq'"
+    
     switch -- $type {
 	error {
-	    ::Jabber::Browse::ErrorProc
+	    ::Jabber::Browse::ErrorProc 0 $browseName error $jid $subiq
 	}
 	result - ok {
 	    eval {::Jabber::Browse::InfoResultCB $browseName $type $jid $subiq} $args
