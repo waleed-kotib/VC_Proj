@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.21 2005-01-26 08:21:41 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.22 2005-01-30 15:12:29 matben Exp $
 
 package require sha1pure
 
@@ -128,8 +128,11 @@ proc ::CanvasUtils::Init { } {
     set menuDefs(pop,syncplay)  \
       {checkbutton  mSyncPlayback {::Import::SyncPlay $wtop $winfr}  normal {} {} \
 	{-variable ::CanvasUtils::popupVars(-syncplay)}}
-     set menuDefs(pop,shot)  \
-	{command   mTakeSnapShot  {::Import::TakeShot $wtop $winfr}  normal {}}
+    set menuDefs(pop,shot)  \
+      {command   mTakeSnapShot  {::Import::TakeShot $wtop $winfr}  normal {}}
+    set menuDefs(pop,timecode)  \
+	{checkbutton  mTimeCode {::Import::TimeCode $wtop $winfr}  normal {} {} \
+	  {-variable ::CanvasUtils::popupVars(-timecode)}}
     set menuDefs(pop,inspectbroken)  \
       {command   mInspectItem  {::ItemInspector::Broken $wtop $id}          normal {}}
     set menuDefs(pop,reloadimage)  \
@@ -207,7 +210,7 @@ proc ::CanvasUtils::Init { } {
 	rectangle  {thickness fillcolor dash inspect}
 	text       {font fontsize fontweight color speechbubble inspect}
 	window     {}
-	qt         {inspectqt exportmovie syncplay}
+	qt         {inspectqt exportmovie syncplay shot timecode}
 	snack      {}
 	broken     {inspectbroken reloadimage}
     }
@@ -1370,6 +1373,16 @@ proc ::CanvasUtils::DoQuickTimePopup {w x y} {
 	set popupVars(-syncplay) 0
     } else {
 	set popupVars(-syncplay) 1
+    }
+    set trackid [$wmov tracks list -mediatype tmcd]
+    if {$trackid == {}} {
+	set popupVars(-timecode) 0
+    } else {
+	if {[$wmov tracks configure $trackid -enabled]} {
+	    set popupVars(-timecode) 1
+	} else {
+	    set popupVars(-timecode) 0
+	}
     }
     
     # This one is needed on the mac so the menu is built before it is posted.

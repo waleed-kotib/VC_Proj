@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Import.tcl,v 1.17 2005-01-26 08:21:41 matben Exp $
+# $Id: Import.tcl,v 1.18 2005-01-30 15:12:29 matben Exp $
 
 package require http
 package require httpex
@@ -2077,15 +2077,58 @@ proc ::Import::QuickTimeHandler {wcan type cmd args} {
 }
 
 proc ::Import::TakeShot {wtop winfr} {
+    global  this
     
+    set utag [::CanvasUtils::GetUtagFromWindow $winfr]
+    if {$utag == ""} {
+	return
+    }
     set wcan [::WB::GetCanvasFromWtop $wtop]
     set wmov ${winfr}.m
-    set name [image create photo]
-    $wmov picture [$wmov time] name
+    set im [image create photo]
+    $wmov picture [$wmov time] $im
     
+    # We must save the image on disk in order to transport it.
+    set tmpfile [::tfileutils::tempfile $this(tmpPath) shot]
+    append tmpfile .jpg
+    $im write $tmpfile -format quicktimejpeg
+    set coo [$wcan coords $utag]
+    set height [winfo height $winfr]
+    set x [lindex $coo 0]
+    set y [expr [lindex $coo 1] + $height]
     
+    set opts [list -coords [list $x $y]]
+    DoImport $wcan $opts -file $tmpfile
+}
+
+proc ::Import::TimeCode {wtop winfr} {
     
-    DrawImage $w opts
+    set wmov ${winfr}.m
+    if {![$wmov isvisual]} {
+	return
+    }
+    set videoTrackID [lindex [$wmov tracks list -mediatype vide] 0]
+    if {$videoTrackID == {}} {
+	return
+    }
+    set tmTrackID [$wmov tracks list -mediatype tmcd]
+    if {$tmTrackID == {}} {
+	
+	# Create a timecode track.
+	array set tmarr [$wmov nextinterestingtime vide]
+	array set moarr [$wmov gettime]
+	set frameduration $tmarr(-sampleduration)
+	set timescale $moarr(-movietimescale)
+	set framespersecond [expr $timescale/$frameduration]
+	
+	set res [$wmov timecode new $videoTrackID -foreground black \
+	  -background white -frameduration $tmarr(-sampleduration) \
+	  -timescale $timescale -framespersecond $framespersecond]
+	set id [lindex $res 1]
+	$wmov tracks configure $id -graphicsmode addmin
+    } else {
+	$wmov timecode toggle
+    }
 }
 
 # Import::ReloadImage --
