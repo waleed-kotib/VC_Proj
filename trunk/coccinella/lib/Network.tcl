@@ -7,14 +7,14 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Network.tcl,v 1.12 2004-05-06 13:41:11 matben Exp $
+# $Id: Network.tcl,v 1.13 2004-06-12 15:35:18 matben Exp $
 
 namespace eval ::Network:: {
     
     variable debug 0
 }
 
-# Network::OpenConnection --
+# Network::Open --
 #
 #       This is supposed to be a fairly general method of opening sockets
 #       async.
@@ -30,14 +30,14 @@ namespace eval ::Network:: {
 # Results:
 #       only via the callback cmd.
 
-proc ::Network::OpenConnection {nameOrIP port cmd args} {
+proc ::Network::Open {nameOrIP port cmd args} {
     global  errorCode
     
     variable debug
     variable opts
     
     if {$debug > 1} {
-	puts "::Network::OpenConnection, nameOrIP=$nameOrIP, port=$port"
+	puts "::Network::Open, nameOrIP=$nameOrIP, port=$port"
     }
     array set opts {
 	-timeout 0

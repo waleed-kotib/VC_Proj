@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Conference.tcl,v 1.25 2004-05-26 07:36:35 matben Exp $
+# $Id: Conference.tcl,v 1.26 2004-06-12 15:35:18 matben Exp $
 
 package provide Conference 1.0
 
@@ -379,7 +379,7 @@ proc ::Jabber::Conference::DoEnter {token} {
     	set subelements [::Jabber::Forms::GetScrollForm $state(wbox)]
     }
     set roomJid [string tolower $state(roomname)@$state(server)]
-    ::Jabber::JlibCmd conference set_enter $roomJid $subelements  \
+    $jstate(jlib) conference set_enter $roomJid $subelements  \
       [list [namespace current]::ResultCallback $roomJid]
     
     # This triggers the tkwait, and destroys the enter dialog.

@@ -730,6 +730,8 @@ roster. Du har prenumeration för %s: %s.}
 konversationen när du stänger whiteboarden. Vill du verkligen avsluta denna chatt?}
 ::msgcat::mcset sv jamesschatoffline            {Användaren är inte längre\
 tillgänglig och meddelandet skickas därför ej.}
+::msgcat::mcset sv jamessregloginok             {Du är nu registrerad\
+och automatiskt påloggad som "%s"}
 
 
 

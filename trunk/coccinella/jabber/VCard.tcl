@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: VCard.tcl,v 1.20 2004-05-28 12:41:15 matben Exp $
+# $Id: VCard.tcl,v 1.21 2004-06-12 15:35:18 matben Exp $
 
 package provide VCard 1.0
 
@@ -57,9 +57,10 @@ proc ::VCard::Fetch {type {jid {}}} {
 proc ::VCard::FetchCallback {nstoken jlibName result theQuery} {
     
     if {$result == "error"} {
+	set errmsg "([lindex $theQuery 0]) [lindex $theQuery 1]"
         tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
           -message [FormatTextForMessageBox  \
-          [::msgcat::mc vcarderrget $theQuery]]
+          [::msgcat::mc vcarderrget $errmsg]]
         ::Jabber::UI::SetStatusMessage ""
 	::VCard::Free $nstoken
         return

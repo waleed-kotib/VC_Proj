@@ -21,11 +21,11 @@
 #   drh@acm.org
 #   http://www.hwaci.com/drh/
 #
-# Complete rewrite by Mats Bengtsson   (matben@privat.utfors.se)
+# Complete rewrite by Mats Bengtsson   (matben@users.sourceforge.net)
 # 
 # Copyright (C) 2002-2004 Mats Bengtsson
 # 
-# $Id: tree.tcl,v 1.26 2004-06-06 07:02:20 matben Exp $
+# $Id: tree.tcl,v 1.27 2004-06-12 15:35:18 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
