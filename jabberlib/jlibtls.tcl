@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: jlibtls.tcl,v 1.3 2004-10-14 10:22:11 matben Exp $
+# $Id: jlibtls.tcl,v 1.4 2005-02-13 13:17:42 matben Exp $
 
 package require tls
 
@@ -111,6 +111,8 @@ proc jlib::tls_proceed {jlibname tag xmllist} {
       xmlns='$opts(-streamnamespace)' xmlns:stream='$xmppns(stream)'\
       to='$locals(server)' xml:lang='[getlang]' version='1.0'>"
 
+    # The tls package resets the encoding to: -encoding binary
+    fconfigure $sock -encoding utf-8
     eval $lib(transportsend) {$xml}
 
     # Must be careful so this is not triggered by a reset or something...
