@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.21 2004-09-24 12:14:15 matben Exp $
+# $Id: roster.tcl,v 1.22 2004-10-03 13:38:22 matben Exp $
 # 
 # Note that every jid in the rostArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -43,6 +43,8 @@
 #       presArr($from,x,xmlns)      : Storage for x elements.
 #                                     xmlns is a namespace but where any
 #                                     http://jabber.org/protocol/ stripped off
+#                  
+#       oldpresArr                  : As presArr but any previous state.
 #                                      
 ############################# USAGE ############################################
 #
@@ -78,6 +80,7 @@
 #      rostName reset
 #      rostName setpresence jid type ?-option value -option ...?
 #      rostName setrosteritem jid ?-option value -option ...?
+#      rostName wasavailable jid
 #      
 #   The 'clientCommand' procedure must have the following form:
 #   
@@ -265,10 +268,12 @@ proc roster::setrosteritem {rostName jid args} {        variable rostGlobals
 # Results:
 #       none.
 
-proc roster::removeitem {rostName jid} {        variable rostGlobals
+proc roster::removeitem {rostName jid} {       
+    variable rostGlobals
 
-upvar ${rostName}::rostArr rostArr
+    upvar ${rostName}::rostArr rostArr
     upvar ${rostName}::presArr presArr
+    upvar ${rostName}::oldpresArr oldpresArr
     upvar ${rostName}::options options
     
     Debug 2 "roster::removeitem rostName=$rostName, jid='$jid'"
@@ -289,6 +294,7 @@ upvar ${rostName}::rostArr rostArr
     
     # Be sure to unset all, also jid3 entries!
     array unset presArr "${mjid}*"
+    array unset oldpresArr "${mjid}*"
     return {}
 }
 
@@ -391,11 +397,13 @@ proc roster::reset {rostName} {
 proc roster::clearpresence {rostName {jidpattern ""}} {
 
     upvar ${rostName}::presArr presArr
+    upvar ${rostName}::oldpresArr oldpresArr
 
     if {$jidpattern == ""} {
 	unset -nocomplain presArr
     } else {
 	array unset presArr $jidpattern
+	array unset oldpresArr $jidpattern
     }
 }
 
@@ -422,6 +430,7 @@ proc roster::setpresence {rostName jid type args} {
     variable rostGlobals
     upvar ${rostName}::rostArr rostArr
     upvar ${rostName}::presArr presArr
+    upvar ${rostName}::oldpresArr oldpresArr
     upvar ${rostName}::options options
     
     Debug 2 "roster::setpresence rostName=$rostName, jid='$jid', \
@@ -438,6 +447,12 @@ proc roster::setpresence {rostName jid type args} {
 	set argList [list -type $type]
     } else {
 	
+	# Keep cache of any old state.
+	if {[array exists presArr]} {
+	    array unset oldpresArr "${mjid},*"
+	    array set oldpresArr [array get presArr "${mjid},*"]
+	}
+	
 	# Clear out the old presence state since elements may still be lurking.
 	array unset presArr "${mjid},*"
 	
@@ -449,6 +464,7 @@ proc roster::setpresence {rostName jid type args} {
 	  $resource]]
 	
 	set presArr($mjid,type) $type
+	
 	foreach {name value} $args {
 	    set par [string trimleft $name "-"]
 	    
@@ -912,6 +928,50 @@ proc roster::isavailable {rostName jid} {
 	# Be sure to allow for 'user@domain' with empty resource.
 	foreach key [array names presArr "${jid2}*,type"] {
 	    if {[string equal $presArr($key) "available"]} {
+		return 1
+	    }
+	}
+	return 0
+    }
+}
+
+# roster::wasavailable --
+#
+#       As 'isavailable' but for any "old" former presence state.
+#
+# Arguments:
+#       rostName:   the instance of this roster.
+#       jid:        either 'username$hostname', or 'username$hostname/resource'.
+#       
+# Results:
+#       0/1.
+
+proc roster::wasavailable {rostName jid} {
+
+    upvar ${rostName}::oldpresArr oldpresArr
+   
+    Debug 2 "roster::wasavailable rostName=$rostName, jid='$jid'"
+	
+    set jid [jlib::jidmap $jid]
+
+    # If any resource in jid, we get it here.
+    jlib::splitjid $jid jid2 resource
+
+    if {[string length $resource] > 0} {
+	if {[info exists oldpresArr($jid2/$resource,type)]} {
+	    if {[string equal $oldpresArr($jid2/$resource,type) "available"]} {
+		return 1
+	    } else {
+		return 0
+	    }
+	} else {
+	    return 0
+	}
+    } else {
+	
+	# Be sure to allow for 'user@domain' with empty resource.
+	foreach key [array names oldpresArr "${jid2}*,type"] {
+	    if {[string equal $oldpresArr($key) "available"]} {
 		return 1
 	    }
 	}

@@ -4,7 +4,7 @@
 #       This is just a first sketch.
 #       TODO: all message translations.
 #       
-# $Id: BuddyPounce.tcl,v 1.3 2004-09-28 13:50:17 matben Exp $
+# $Id: BuddyPounce.tcl,v 1.4 2004-10-03 13:38:21 matben Exp $
 
 namespace eval ::BuddyPounce:: {
     
@@ -22,8 +22,7 @@ proc ::BuddyPounce::Init { } {
     ::hooks::register quitAppHook              ::BuddyPounce::QuitHook
     ::hooks::register newMessageHook           ::BuddyPounce::NewMsgHook
     ::hooks::register newChatMessageHook       ::BuddyPounce::NewChatMsgHook
-    ::hooks::register presenceUnavailableHook  ::BuddyPounce::PresenceUnavailableHook    
-    ::hooks::register presenceDelayHook        ::BuddyPounce::PresenceHook    
+    ::hooks::register presenceHook             ::BuddyPounce::PresenceHook    
     ::hooks::register prefsInitHook            ::BuddyPounce::InitPrefsHook
     ::hooks::register closeWindowHook          ::BuddyPounce::CloseHook
     
@@ -33,7 +32,7 @@ proc ::BuddyPounce::Init { } {
     component::register BuddyPounce  \
       "Buddy pouncing enables you to make various things happen when\
       a particular user becomes online, offline etc."
-    
+        
     # Audio formats.
     variable audioSuffixes {}
     
@@ -343,15 +342,26 @@ proc ::BuddyPounce::Cancel {token} {
     unset state
 }
 
+# BuddyPounce::Event --
+# 
+# 
+# Arguments:
+#       from        2-tier jid.
+#       eventkey    available, unavailable, chat, msg.
+#       
+# Results:
+#       none.
+
 proc ::BuddyPounce::Event {from eventkey} {
     variable budprefs
     variable alertStr
     variable alertTitle 
-
+    
     set jid [jlib::jidmap $from]
     if {[info exists budprefs($jid)]} {
 	array set prefsArr $budprefs($jid)
 	if {[info exists prefsArr($eventkey)]} {
+	    
 	    foreach action $prefsArr($eventkey) {
 		
 		switch -- $action {
@@ -368,7 +378,7 @@ proc ::BuddyPounce::Event {from eventkey} {
 			}
 		    }
 		    chat {			
-			# If already have chat
+			# If already have chat.
 			set w [::Jabber::Chat::HaveChat $jid]
 			if {$w != ""} {
 			    raise $w
@@ -378,7 +388,7 @@ proc ::BuddyPounce::Event {from eventkey} {
 		    }
 		    msg {
 			::Jabber::NewMsg::Build -to $from  \
-			  -subject "Auto Reply" -message "Insert your message!"
+			  -subject [mc {Auto Reply}] -message "Insert your message!"
 		    }
 		}
 	    }
@@ -432,7 +442,7 @@ proc ::BuddyPounce::NewChatMsgHook {body args} {
 
     array set argsArr $args
     if {[info exists argsArr(-from)]} {
-	::BuddyPounce::Event $argsArr(-from) chat
+	Event $argsArr(-from) chat
     }
 }
 
@@ -445,15 +455,22 @@ proc ::BuddyPounce::PresenceHook {jid type args} {
     ::Debug 4 "::BuddyPounce::PresenceHook jid=$jid, type=$type"
     
     switch -- $type {
-	available - unavailable {
-	    ::BuddyPounce::Event $jid $type
+	available {
+	    if {![::Jabber::RosterCmd wasavailable $jid]} {
+		Event $jid $type
+	    }
+	}
+	unavailable {
+	    if {[::Jabber::RosterCmd wasavailable $jid]} {
+		Event $jid $type
+	    }
 	}
     }
 }
 
 proc ::BuddyPounce::PresenceUnavailableHook  {jid type args} {
     
-    ::BuddyPounce::Event $jid unavailable
+    Event $jid unavailable
 }
 
 #-------------------------------------------------------------------------------
