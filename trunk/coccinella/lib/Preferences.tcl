@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.28 2003-12-30 15:30:58 matben Exp $
+# $Id: Preferences.tcl,v 1.29 2004-01-01 12:08:22 matben Exp $
  
 package require notebook
 package require tree
@@ -51,7 +51,7 @@ proc ::Preferences::Build { } {
 	raise $w
 	return
     }
-    ::UI::Toplevel $w -class Preferences
+    ::UI::Toplevel $w -class Preferences -usemacmainmenu 1 -macstyle documentProc
     wm title $w [::msgcat::mc Preferences]
 
     set finished 0
@@ -61,8 +61,6 @@ proc ::Preferences::Build { } {
     # get the pages to look nice.
     switch -glob -- $this(platform) {
 	mac* {
-	    eval $::macWindowStyle $w documentProc
-	    ::UI::MacUseMainMenu $w
 	    set ypadtiny 1
 	    set ypad     3
 	    set ypadbig  4
@@ -270,16 +268,6 @@ proc ::Preferences::Build { } {
       ::Preferences::NetSetup::TraceNetConfig
     catch {grab release $w}
     catch {destroy $w}  
-}
-
-
-proc ::Preferences::CloseHook {wclose} {
-    global  wDlgs
-    
-    if {[string equal $wclose $wDlgs(prefs)]} {
-	puts ::Preferences::CloseHook
-	::Preferences::CancelPushBt
-    }   
 }
 
 # Preferences::ResetToFactoryDefaults --
@@ -999,13 +987,7 @@ proc ::Preferences::Block::Add {w} {
     if {[winfo exists $w]} {
 	return
     }
-    if {[string match "mac*" $this(platform)]} {
-	toplevel $w
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-	toplevel $w
-    }
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
     wm title $w [::msgcat::mc {Block JID}]
     
     # Global frame.
@@ -1487,13 +1469,7 @@ proc ::Preferences::FileMap::Inspect {w doWhat wlist {indSel {}}} {
     if {[string length $indSel] == 0} {
 	return
     }
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-
-    }
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
     wm title $w [::msgcat::mc {Inspect Associations}]
     set finishedInspect -1
     
@@ -1964,13 +1940,7 @@ proc ::Preferences::NetSetup::Advanced {  } {
     variable finishedAdv -1
     
     set w .dlgAdvNet
-    if {[string match "mac*" $this(platform)]} {
-	toplevel $w
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-	toplevel $w
-    }
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
     wm title $w [::msgcat::mc {Advanced Setup}]
     
     set fontSB [option get . fontSmallBold {}]
@@ -2199,13 +2169,7 @@ proc ::Preferences::Shorts::AddOrEdit {what} {
     if {[winfo exists $w]} {
 	return
     }
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-	#
-    }
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
     if {$what == "add"} {
 	set txt [::msgcat::mc {Add Shortcut}]
 	set txt1 "[::msgcat::mc {New shortcut}]:"
@@ -2602,7 +2566,20 @@ proc ::Preferences::SavePushBt { } {
     
     set finished 1
 }
+
+proc ::Preferences::CloseHook {wclose} {
+    global  wDlgs
     
+    set result ""
+    if {[string equal $wclose $wDlgs(prefs)]} {
+	set ans [::Preferences::CancelPushBt]
+	if {$ans == "no"} {
+	    set result stop
+	}
+    }   
+    return $result
+}
+
 # Preferences::CancelPushBt --
 #
 #       User presses the cancel button. Warn if anything changed.
@@ -2617,6 +2594,8 @@ proc ::Preferences::CancelPushBt { } {
     variable tmpJServer
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jprefs jprefs
+    
+    set ans yes
     
     # Make all temporary prefs reflect the current settings of the panels.
     if {!$prefs(stripJabber)} {
@@ -2668,6 +2647,7 @@ proc ::Preferences::CancelPushBt { } {
     if {$finished == 2} {
 	::UI::SaveWinGeom $wtoplevel
     }
+    return $ans
 }
 
 # Preferences::SelectCmd --

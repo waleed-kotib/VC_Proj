@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: TheServer.tcl,v 1.15 2003-12-20 14:27:16 matben Exp $
+# $Id: TheServer.tcl,v 1.16 2004-01-01 12:08:22 matben Exp $
     
 # DoStartServer ---
 #
@@ -298,7 +298,7 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 		    # Let propagateSizeToClients = false.
 		    ::OpenConnection::DoConnect $ip $ipNumTo(servPort,$ip) 0
 		} elseif {[string equal $prefs(protocol) "server"]} {
-		    ::UI::FixMenusWhen . "connect"
+		    ::WB::FixMenusWhen . "connect"
 		}
 	    }		
 	}

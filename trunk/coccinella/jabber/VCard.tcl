@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: VCard.tcl,v 1.9 2003-12-16 15:03:53 matben Exp $
+# $Id: VCard.tcl,v 1.10 2004-01-01 12:08:21 matben Exp $
 
 package provide VCard 1.0
 
@@ -158,13 +158,7 @@ proc ::VCard::Build {w type jid} {
     if {[winfo exists $w]} {
         return
     }
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-        eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-
-    }    
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
     wm title $w [::msgcat::mc {vCard Info}]
     
     # Toplevel menu for mac only.

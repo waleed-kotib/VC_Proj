@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: AutoUpdate.tcl,v 1.5 2003-12-13 17:54:41 matben Exp $
+# $Id: AutoUpdate.tcl,v 1.6 2004-01-01 12:08:21 matben Exp $
 
 package require tinydom
 package require http 2.3
@@ -100,13 +100,7 @@ proc ::AutoUpdate::Dialog {releaseAttr message changesList} {
     if {[winfo exists $w]} {
 	return
     }
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
- 	::UI::MacUseMainMenu $w
-   } else {
-	
-    }
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
     wm title $w "New Version"
     set fontSB [option get . fontSmallBold {}]
     

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.25 2003-12-23 14:41:01 matben Exp $
+# $Id: Dialogs.tcl,v 1.26 2004-01-01 12:08:22 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -91,13 +91,7 @@ proc ::Dialogs::GetCanvas {w} {
     if {[winfo exists $w]} {
 	return
     }
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-
-    }
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
     wm title $w {Get Canvas}
     
     # Global frame.
@@ -168,13 +162,7 @@ proc ::Dialogs::InfoOnPlugins { } {
     if {[winfo exists $w]} {
 	return
     }
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-
-    }
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
     wm title $w [::msgcat::mc {Plugin Info}]
     set fontS [option get . fontSmall {}]
     set fontSB [option get . fontSmallBold {}]
@@ -310,13 +298,7 @@ proc ::Dialogs::UnixPrintPS {w wtoprint} {
     set finishedPrint -1
     set psCmd $prefs(unixPrintCmd)
     
-    catch {toplevel $w}
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-
-    }
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
     wm title $w {Print Canvas}
     
     # Global frame.
@@ -450,13 +432,7 @@ proc ::PSPageSetup::PSPageSetup { w } {
     if {[winfo exists $w]} {
 	return
     }
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-
-    }
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
     wm title $w "Page Setup"
     set fontSB [option get . fontSmallBold {}]
     
@@ -639,13 +615,7 @@ proc ::Dialogs::ShowInfoClients { } {
     if {[winfo exists $w]} {
 	return
     }
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-
-    }
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
     wm title $w "Client Info"
     set fontSB [option get . fontSmallBold {}]
     
@@ -736,13 +706,7 @@ proc ::Dialogs::ShowInfoServer {thisIPnum} {
 	return
     }
     array set boolToYesNo [list 0 [::msgcat::mc no] 1 [::msgcat::mc yes]]
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-
-    }
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
     wm title $w [::msgcat::mc {Server Info}]
     set fontSB [option get . fontSmallBold {}]
     
@@ -860,15 +824,7 @@ proc ::Dialogs::Canvas {filePath args} {
 	return
     }
     set w .spcan[incr uidcan]
-    if {[catch {toplevel $w}]} {
-	return
-    }
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-
-    }
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
     
     # Make the namespace exist.
     set wtop ${w}.

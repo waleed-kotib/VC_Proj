@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.31 2003-12-30 15:30:58 matben Exp $
+# $Id: Roster.tcl,v 1.32 2004-01-01 12:08:21 matben Exp $
 
 package provide Roster 1.0
 
@@ -123,7 +123,7 @@ proc ::Jabber::Roster::Show {w} {
 #       shows window.
 
 proc ::Jabber::Roster::BuildToplevel {w} {
-    global  this prefs
+    global  prefs
 
     variable wtop
     variable servtxt
@@ -134,29 +134,12 @@ proc ::Jabber::Roster::BuildToplevel {w} {
     }
     set wtop $w
     
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
- 	::UI::MacUseMainMenu $w
-   } else {
-
-    }
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
     wm title $w {Roster (Contact list)}
     wm protocol $w WM_DELETE_WINDOW [list [namespace current]::CloseDlg $w]
     
     set fontSB [option get . fontSmallBold {}]
-    
-    # Toplevel menu for mac only. Only when multiinstance.
-    if {0 && [string match "mac*" $this(platform)]} {
-	set wmenu ${w}.menu
-	menu $wmenu -tearoff 0
-	::UI::BuildAppleMenu $wtop ${wmenu}.apple normal
-	::UI::NewMenu $w ${wmenu}.file    mFile    $menuDefs(min,file)     normal
-	::UI::NewMenu $w ${wmenu}.edit    mEdit    $menuDefs(min,edit)     normal
-	::UI::NewMenu $w ${wmenu}.jabber  mJabber  $menuDefs(main,jabber)  normal
-	$w configure -menu ${wmenu}
-    }
-    
+        
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
     

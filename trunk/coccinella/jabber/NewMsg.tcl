@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.27 2003-12-23 10:16:01 matben Exp $
+# $Id: NewMsg.tcl,v 1.28 2004-01-01 12:08:21 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -13,6 +13,8 @@ package provide NewMsg 1.0
 
 namespace eval ::Jabber::NewMsg:: {
     global  wDlgs
+
+    hooks::add closeWindowHook    ::Jabber::NewMsg::CloseHook
 
     # Use option database for customization.
     option add *NewMsg.sendImage            send            widgetDefault
@@ -142,15 +144,8 @@ proc ::Jabber::NewMsg::Build {args} {
     }
     
     # Toplevel of class NewMsg.
-    toplevel $w -class NewMsg
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-
-    }
+    ::UI::Toplevel $w -class NewMsg -usemacmainmenu 1 -macstyle documentProc
     wm title $w [::msgcat::mc {New Message}]
-    wm protocol $w WM_DELETE_WINDOW [list [namespace current]::CloseDlg $w]
     
     # Toplevel menu for mac only.
     if {[string match "mac*" $this(platform)]} {
@@ -716,12 +711,19 @@ proc ::Jabber::NewMsg::DoPrint {w} {
       -data $allText -font $fontS    
 }
 
+proc ::Jabber::NewMsg::CloseHook {wclose} {
+    global  wDlgs
+    variable locals
+	
+    if {[string match $wDlgs(jsendmsg)* $wclose]} {
+	::Jabber::NewMsg::CloseDlg $wclose
+    }   
+}
+
 proc ::Jabber::NewMsg::CloseDlg {w} {
     global  wDlgs
     variable locals
     
-    puts "::Jabber::NewMsg::CloseDlg"
-
     set wtext $locals($w,wtext)
     set allText [$wtext get 1.0 "end - 1 char"]
     set doDestroy 0
