@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.23 2005-02-15 09:07:30 matben Exp $
+# $Id: JPrefs.tcl,v 1.24 2005-02-17 10:30:06 matben Exp $
 
 package provide JPrefs 1.0
 
@@ -232,14 +232,24 @@ proc ::JPrefs::UpdateAutoAwaySettings { } {
     global  prefs
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
-    
+        
     if {!$jstate(haveJabberUI)} {
 	return
     }
-    
+   
     set opts {}
-    lappend opts -autoawaymins $jprefs(awaymin) -awaymsg $jprefs(awaymsg)
-    lappend opts -xautoawaymins $jprefs(xawaymin) -xawaymsg $jprefs(xawaymsg)
+    if {$jprefs(autoaway) && [string is integer -strict $jprefs(awaymin)]} {
+	lappend opts -autoawaymins $jprefs(awaymin)
+    } else {
+	lappend opts -autoawaymins 0
+    }
+    lappend opts -awaymsg $jprefs(awaymsg)
+    if {$jprefs(xautoaway) && [string is integer -strict $jprefs(xawaymin)]} {
+	lappend opts -xautoawaymins $jprefs(xawaymin)
+    } else {
+	lappend opts -xautoawaymins 0
+    }
+    lappend opts -xawaymsg $jprefs(xawaymsg)
     eval {$jstate(jlib) config} $opts
 }
 
@@ -253,8 +263,8 @@ proc ::JPrefs::BuildAppearancePage {page} {
     variable tmpPrefs
     upvar ::Jabber::jprefs jprefs
     
-    set fontS  [option get . fontSmall {}]    
-    set ypad   [option get [winfo toplevel $page] yPad {}]
+    set fontS [option get . fontSmall {}]    
+    set ypad  [option get [winfo toplevel $page] yPad {}]
 
     foreach key {rost,useBgImage rost,bgImagePath chat,tabbedui chatFont} {
 	set tmpJPrefs($key) $jprefs($key)

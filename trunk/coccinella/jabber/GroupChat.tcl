@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.99 2005-02-14 13:48:38 matben Exp $
+# $Id: GroupChat.tcl,v 1.100 2005-02-17 10:30:06 matben Exp $
 
 package require History
 
@@ -1288,7 +1288,7 @@ proc ::GroupChat::SetUser {roomjid jid3 presence args} {
 	set role [GetAnyRoleFromXElem $argsArr(-x)]
     }
     if {$role == ""} {
-	$wusers newitem $jid3 -text $nick -image $icon -tags $jid3
+	$wusers newitem $jid3 -text $nick -image $icon -tags [list $jid3]
     } else {
 	if {![$wusers isitem $role]} {
 	    $wusers newitem $role -text $userRoleToStr($role) -dir 1 \
@@ -1297,7 +1297,8 @@ proc ::GroupChat::SetUser {roomjid jid3 presence args} {
 		$wusers raiseitem $role
 	    }
 	}
-	$wusers newitem [list $role $jid3] -text $nick -image $icon -tags $jid3
+	$wusers newitem [list $role $jid3] -text $nick -image $icon  \
+	  -tags [list $jid3]
     }
     
     # Noise.

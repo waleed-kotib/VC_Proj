@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.72 2005-02-14 13:48:37 matben Exp $
+# $Id: Browse.tcl,v 1.73 2005-02-17 10:30:06 matben Exp $
 
 package provide Browse 1.0
 
@@ -821,21 +821,21 @@ proc ::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
 			  "available"]
 			
 			$wtree newitem $jidList -dir 0 -text $txt \
-			  -image $icon -tags $jid -canvastags $treectag
+			  -image $icon -tags [list $jid] -canvastags $treectag
 		    } else {
-			$wtree newitem $jidList -text $txt -tags $jid \
+			$wtree newitem $jidList -text $txt -tags [list $jid] \
 			  -canvastags $treectag
 		    }
 		} elseif {[string equal $category "service"]} {
-		    $wtree newitem $jidList -text $txt -tags $jid -style $style \
-		      -canvastags $treectag
+		    $wtree newitem $jidList -text $txt -tags [list $jid] \
+		      -style $style -canvastags $treectag
 		} else {
 		    
 		    # This is a service, transport, room, etc.
 		    # Do not create if exists which preserves -open.
 		    if {![$wtree isitem $jidList]} {
 			$wtree newitem $jidList -dir 1 -open 0 -text $txt \
-			  -tags $jid -canvastags $treectag
+			  -tags [list $jid] -canvastags $treectag
 		    }
 		}
 

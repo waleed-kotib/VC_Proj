@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.87 2005-02-16 14:26:46 matben Exp $
+# $Id: jabberlib.tcl,v 1.88 2005-02-17 10:30:07 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -492,6 +492,16 @@ proc jlib::config {jlibname args} {
 	    return -code error "Unknown option $flag, must be: $usage"
 	}
     } else {
+	
+	# Reschedule auto away only if changed. Before setting new opts!
+	if {[info exists argsArr(-autoawaymins)] &&  \
+	  ($argsArr(-autoawaymins) != $opts(-autoawaymins))} {
+	    schedule_auto_away $jlibname
+	}
+	if {[info exists argsArr(-xautoawaymins)] &&  \
+	  ($argsArr(-xautoawaymins) != $opts(-xautoawaymins))} {
+	    schedule_auto_away $jlibname
+	}
 	foreach {flag value} $args {
 	    if {[regexp -- $pat $flag]} {
 		set opts($flag) $value		
@@ -499,16 +509,6 @@ proc jlib::config {jlibname args} {
 		return -code error "Unknown option $flag, must be: $usage"
 	    }
 	}
-    }
-    
-    # Reschedule auto away only if changed.
-    if {[info exists argsArr(-autoawaymins)] &&  \
-      ($argsArr(-autoawaymins) != $opts(-autoawaymins))} {
-	schedule_auto_away $jlibname
-    }
-    if {[info exists argsArr(-xautoawaymins)] &&  \
-      ($argsArr(-xautoawaymins) != $opts(-xautoawaymins))} {
-	schedule_auto_away $jlibname
     }
     if {[info exists argsArr(-autodiscocaps)]} {
 	if {$opts(-autodiscocaps)} {
