@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.34 2004-09-24 12:14:13 matben Exp $
+# $Id: JWB.tcl,v 1.35 2004-09-28 07:05:49 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -17,7 +17,6 @@ package provide JWB 1.0
 namespace eval ::Jabber::WB:: {
        
     ::hooks::add jabberInitHook               ::Jabber::WB::Init
-    #::hooks::add initHook                     ::Jabber::WB::InitUI
     
     # Internal storage for jabber specific parts of whiteboard.
     variable jwbstate
@@ -48,7 +47,10 @@ proc ::Jabber::WB::Init {jlibName} {
     ::hooks::add whiteboardConfigureHook      ::Jabber::WB::Configure
     ::hooks::add serverPutRequestHook         ::Jabber::WB::HandlePutRequest
     ::hooks::add presenceHook                 ::Jabber::WB::PresenceHook
+
+    #       OUTDATED!!!
     ::hooks::add autobrowsedCoccinellaHook    ::Jabber::WB::AutoBrowseHook
+    
     ::hooks::add loginHook                    ::Jabber::WB::LoginHook
     ::hooks::add logoutHook                   ::Jabber::WB::LogoutHook
     ::hooks::add groupchatEnterRoomHook       ::Jabber::WB::EnterRoomHook
@@ -1414,7 +1416,7 @@ proc ::Jabber::WB::PresenceHook {jid type args} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::privatexmlns privatexmlns
     
-    ::Debug 2 "::Jabber::WB::PresenceHook jid=$jid, type=$type, args=$args"
+    ::Debug 2 "::Jabber::WB::PresenceHook jid=$jid, type=$type"
     
     array set argsArr $args
     if {[info exists argsArr(-resource)] && [string length $argsArr(-resource)]} {
@@ -1446,6 +1448,8 @@ proc ::Jabber::WB::PresenceHook {jid type args} {
 # 
 #       Gets called when we have identified a Coccinella user using
 #       browsing. Query for its ip address.
+#       
+#       OUTDATED!!!
 
 proc ::Jabber::WB::AutoBrowseHook {jid} {
     variable ipCache

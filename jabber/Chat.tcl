@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.74 2004-09-27 12:57:37 matben Exp $
+# $Id: Chat.tcl,v 1.75 2004-09-28 07:05:49 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -1415,7 +1415,7 @@ proc ::Jabber::Chat::PresenceHook {jid type args} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::mapShowTextToElem mapShowTextToElem
 
-    Debug 4 "::Jabber::Chat::PresenceHook jid=$jid, type=$type, args=$args"
+    Debug 4 "::Jabber::Chat::PresenceHook jid=$jid, type=$type"
 
     # ::Jabber::Chat::PresenceHook: args=marilu@jabber.dk unavailable 
     #-resource Psi -type unavailable -type unavailable -from marilu@jabber.dk/Psi

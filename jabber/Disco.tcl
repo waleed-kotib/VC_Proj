@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.28 2004-09-26 13:52:01 matben Exp $
+# $Id: Disco.tcl,v 1.29 2004-09-28 07:05:49 matben Exp $
 
 package provide Disco 1.0
 
@@ -849,23 +849,24 @@ proc ::Jabber::Disco::ControlArrows {step} {
 proc ::Jabber::Disco::PresenceHook {jid presence args} {
     variable wtree    
     upvar ::Jabber::jstate jstate
+    upvar ::Jabber::privatexmlns privatexmlns
     
-    if {![info exists wtree] || ![winfo exists $wtree]} {
-	return
-    }
+    ::Debug 4 "::Jabber::Disco::PresenceHook $jid, $presence"
+     
     jlib::splitjid $jid jid2 res
-    
-    ::Debug 4 "::Jabber::Disco::PresenceHook $jid, $presence, $args"
-    
     array set argsArr $args
     set res ""
     if {[info exists argsArr(-resource)]} {
 	set res $argsArr(-resource)
     }
     set jid3 $jid2/$res
-    set presList [$jstate(roster) getpresence $jid2 -resource $res]
+    eval {TryIdentifyCoccinella $jid3 $presence} $args
 
+    if {![info exists wtree] || ![winfo exists $wtree]} {
+	return
+    }
     if {[$jstate(jlib) service isroom $jid2]} {
+	set presList [$jstate(roster) getpresence $jid2 -resource $res]
 	array set presArr $presList
 	set icon [eval {
 	    ::Jabber::Roster::GetPresenceIcon $jid3 $presArr(-type)
@@ -874,14 +875,57 @@ proc ::Jabber::Disco::PresenceHook {jid presence args} {
 	if {[$wtree isitem $v]} {
 	    $wtree itemconfigure $v -image $icon
 	}
-    } else {
-	
-	# As a method to identify Coccinellas, way may disco users.
-	if {[string equal $presence "available"] && \
-	  ![$jstate(disco) isdiscoed items $jid3]} {
-	    #eval {::Jabber::Disco::AutoDisco $jid3 $presence} $args
-	}	
+    }
+}
 
+proc ::Jabber::Disco::TryIdentifyCoccinella {jid3 presence args} {
+    upvar ::Jabber::jstate jstate
+    upvar ::Jabber::privatexmlns privatexmlns
+    
+    if {[string equal $presence "available"]} {
+	set coccielem  \
+	  [$jstate(roster) getextras $jid3 $privatexmlns(servers)]
+	if {$coccielem == {}} {
+	    if {![::Jabber::Roster::IsTransportHeuristics $jid3]} {
+		if {![$jstate(disco) isdiscoed items $jid3]} {
+		    eval {AutoDisco $jid3 $presence} $args
+		}
+	    }
+	}
+    }	
+}
+
+proc ::Jabber::Disco::AutoDisco {jid presence args} {
+    upvar ::Jabber::jstate jstate
+    
+    # Disco only potential Coccinella (all jabber) clients.
+    jlib::splitjidex $jid node host x
+    set type [lindex [$jstate(disco) types $host] 0]
+    
+    ::Debug 4 "::Jabber::Disco::AutoDisco jid=$jid, type=$type"
+
+    # We may not yet have discoed this (empty).
+    if {($type == "") || ($type == "service/jabber")} {		
+	$jstate(disco) send_get info $jid [namespace current]::AutoDiscoCmd
+    }
+}
+
+proc ::Jabber::Disco::AutoDiscoCmd {disconame type from subiq args} {
+    upvar ::Jabber::jstate jstate
+    upvar ::Jabber::privatexmlns privatexmlns    
+    
+    ::Debug 4 "::Jabber::Disco::AutoDiscoCmd type=$type, from=$from"
+    
+    switch -- $type {
+	error {
+	    ::Jabber::AddErrorLog $from "Failed disco: $subiq"
+	}
+	result - ok {
+	    if {[$jstate(disco) hasfeature $privatexmlns(whiteboard) $from] || \
+	      [$jstate(disco) hasfeature $privatexmlns(coccinella) $from]} {
+		::Jabber::Roster::SetCoccinella $from
+	    }
+	}
     }
 }
 

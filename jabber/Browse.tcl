@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.55 2004-09-24 12:14:13 matben Exp $
+# $Id: Browse.tcl,v 1.56 2004-09-28 07:05:49 matben Exp $
 
 package require chasearrows
 
@@ -15,7 +15,6 @@ namespace eval ::Jabber::Browse:: {
 
     ::hooks::add jabberInitHook     ::Jabber::Browse::NewJlibHook
     ::hooks::add loginHook          ::Jabber::Browse::LoginCmd
-    ::hooks::add closeWindowHook    ::Jabber::Browse::CloseHook
     ::hooks::add logoutHook         ::Jabber::Browse::LogoutHook
     ::hooks::add presenceHook       ::Jabber::Browse::PresenceHook
 
@@ -489,15 +488,6 @@ proc ::Jabber::Browse::BuildToplevel {w} {
     wm minsize $w 180 260
     wm maxsize $w 420 2000
 }
-
-proc ::Jabber::Browse::CloseHook {wclose} {
-    global  wDlgs
-    variable wtop
-    
-    if {[string equal $wtop $wclose]} {
-	::Jabber::Browse::CloseDlg $wtop
-    }   
-}
     
 # Jabber::Browse::Build --
 #
@@ -917,7 +907,7 @@ proc ::Jabber::Browse::PresenceHook {jid type args} {
     }
 
     if {[$jstate(jlib) service isroom $jid]} {
-	if {[::Jabber::Browse::HaveBrowseTree $jid]} {
+	if {[HaveBrowseTree $jid]} {
 	    
 	    if {![winfo exists $wtree]} {
 		return
@@ -938,18 +928,29 @@ proc ::Jabber::Browse::PresenceHook {jid type args} {
 	    }
 	}
     } else {
+	
+	# Replaced by presence element, and disco as a fallback.
+	# OUTDATED!!!!!!!!!!!!!
+	if {0} {
     
 	# If users shall be automatically browsed to.
 	# Seems only necessary to find out if Coccinella or not.
-	set coccielem [$jstate(roster) getextras $jid3 $privatexmlns(servers)]
-	
-	if {($coccielem == {}) && $jprefs(autoBrowseUsers) && \
-	  [string equal $type "available"] && ![$jstate(browse) isbrowsed $jid3]} {
-	    eval {::Jabber::Browse::AutoBrowse $jid3 $type} $args
-	}	
+	if {$jprefs(autoBrowseUsers) && [string equal $type "available"]} {
+	    set coccielem \
+	      [$jstate(roster) getextras $jid3 $privatexmlns(servers)]
+	    if {$coccielem == {}} {
+		if {![::Jabber::Roster::IsTransportHeuristics $jid3]} {
+		    if {![$jstate(browse) isbrowsed $jid3]} {
+			eval {AutoBrowse $jid3 $type} $args
+		    }
+		}
+	    }	
+	}
+	}
     }
 }
 
+#       OUTDATED!!!
 # Jabber::Browse::AutoBrowse --
 # 
 #       If presence from user browse that user including its resource.
@@ -966,22 +967,27 @@ proc ::Jabber::Browse::AutoBrowse {jid presence args} {
 
     array set argsArr $args
     
-    if {[string equal $presence "available"]} {   
+    switch -- $presence {
+	available {
 	
-	# Browse only potential Coccinella (all jabber) clients.
-	jlib::splitjidex $jid node host x
-	set type [$jstate(browse) gettype $host]
-	::Debug 4 "\t type=$type"
-	
-	# We may not yet have browsed this (empty).
-	if {($type == "") || ($type == "service/jabber")} {
+	    # Browse only potential Coccinella (all jabber) clients.
+	    jlib::splitjidex $jid node host x
+	    set type [$jstate(browse) gettype $host]
 	    
-	    $jstate(browse) send_get $jid [namespace current]::AutoBrowseCmd
+	    ::Debug 4 "\t type=$type"
+	    
+	    # We may not yet have browsed this (empty).
+	    if {($type == "") || ($type == "service/jabber")} {		
+		$jstate(browse) send_get $jid [namespace current]::AutoBrowseCmd
+	    }
 	}
-    } elseif {[string equal $presence "unavailable"]} {
-	#$jstate(browse) clear $jid
+	unavailable {
+	    # empty
+	}
     }
 }
+
+#       OUTDATED!!!
 
 proc ::Jabber::Browse::AutoBrowseCmd {browseName type jid subiq args} {
     
@@ -997,6 +1003,7 @@ proc ::Jabber::Browse::AutoBrowseCmd {browseName type jid subiq args} {
     }
 }
 
+#       OUTDATED!!!
 # Jabber::Browse::AutoBrowseCallback --
 # 
 #       The intention here is to signal which services a particular client
