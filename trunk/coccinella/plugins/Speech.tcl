@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Speech.tcl,v 1.2 2004-06-07 06:23:35 matben Exp $
+# $Id: Speech.tcl,v 1.3 2004-06-07 07:05:42 matben Exp $
 
 namespace eval ::Speech:: { }
 
@@ -44,7 +44,10 @@ proc ::Speech::Load { } {
     
     # We should register ourselves.
     component::register Speech "Provides synthetic speech on Macs using\
-      TclSpeech and on Windows using MSSpeech"
+      TclSpeech and on Windows using MSSpeech.\
+      When enabled, a synthetic voice speaks out\
+      text that is written in the canvas as well as text received\
+      from remote clients. It is triggered by a punctation character (,.;)."
 }
 
 proc ::Speech::Init { } {
