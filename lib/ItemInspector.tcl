@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ItemInspector.tcl,v 1.17 2004-01-23 08:58:36 matben Exp $
+# $Id: ItemInspector.tcl,v 1.18 2004-01-27 08:48:06 matben Exp $
 
 namespace eval ::ItemInspector::  {
     
@@ -164,7 +164,8 @@ proc ::ItemInspector::Build {wtop itemId args} {
     if {[lsearch [$wCan gettags $itPrefNo] "frame"] >= 0}  {
 	#return
     }	
-    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
+      -macclass {document closeBox}
     wm title $w {Item Inspector}
     
     set fontSB [option get . fontSmallBold {}]
@@ -567,7 +568,8 @@ proc ::ItemInspector::Movie {wtop winfr} {
     if {[winfo exists $w]}  {
 	error "window name $w already exists!"
     }
-    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
+      -macclass {document closeBox}
     wm title $w {Movie Inspector}
     set fontSB [option get . fontSmallBold {}]
     
@@ -686,7 +688,8 @@ proc ::ItemInspector::Broken {wtop id args} {
     if {[winfo exists $w]} {
 	return
     }
-    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
+      -macclass {document closeBox}
     wm title $w {Item Inspector}
     set wcan [::UI::GetCanvasFromWtop $wtop]
     

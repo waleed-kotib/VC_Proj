@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.41 2004-01-26 07:34:49 matben Exp $
+# $Id: Preferences.tcl,v 1.42 2004-01-27 08:48:06 matben Exp $
  
 package require notebook
 package require tree
@@ -51,7 +51,8 @@ proc ::Preferences::Build { } {
 	raise $w
 	return
     }
-    ::UI::Toplevel $w -class Preferences -usemacmainmenu 1 -macstyle documentProc
+    ::UI::Toplevel $w -class Preferences -usemacmainmenu 1  \
+      -macstyle documentProc -macclass {document closeBox}
     wm title $w [::msgcat::mc Preferences]
 
     set finished 0
@@ -196,7 +197,7 @@ proc ::Preferences::Build { } {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btok -text [::msgcat::mc Save] -default active -width 8 \
+    pack [button $frbot.btok -text [::msgcat::mc Save] -default active \
       -command ::Preferences::SavePushBt]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
@@ -566,7 +567,8 @@ proc ::Preferences::Block::Add {w} {
     if {[winfo exists $w]} {
 	return
     }
-    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
+      -macclass {document closeBox}
     wm title $w [::msgcat::mc {Block JID}]
     
     # Global frame.
@@ -994,7 +996,8 @@ proc ::Preferences::FileMap::Inspect {w doWhat wlist {indSel {}}} {
     if {[string length $indSel] == 0} {
 	return
     }
-    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
+      -macclass {document closeBox}
     wm title $w [::msgcat::mc {Inspect Associations}]
     set finishedInspect -1
     
@@ -1465,7 +1468,8 @@ proc ::Preferences::NetSetup::Advanced {  } {
     variable finishedAdv -1
     
     set w .dlgAdvNet
-    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
+      -macclass {document closeBox}
     wm title $w [::msgcat::mc {Advanced Setup}]
     
     set fontSB [option get . fontSmallBold {}]
@@ -1694,7 +1698,8 @@ proc ::Preferences::Shorts::AddOrEdit {what} {
     if {[winfo exists $w]} {
 	return
     }
-    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
+      -macclass {document closeBox}
     if {$what == "add"} {
 	set txt [::msgcat::mc {Add Shortcut}]
 	set txt1 "[::msgcat::mc {New shortcut}]:"

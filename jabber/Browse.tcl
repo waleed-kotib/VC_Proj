@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.25 2004-01-23 08:54:25 matben Exp $
+# $Id: Browse.tcl,v 1.26 2004-01-27 08:48:03 matben Exp $
 
 package require chasearrows
 
@@ -774,7 +774,8 @@ proc ::Jabber::Browse::AddServer { } {
     }
     set finishedAdd 0
     
-    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
+      -macclass {document closeBox}
     wm title $w [::msgcat::mc {Add Server}]
     
     # Global frame.
@@ -886,7 +887,8 @@ proc ::Jabber::Browse::InfoCB {browseName type jid subiq} {
     upvar ::Jabber::nsToText nsToText
 
     set w .brres[incr dlguid]
-    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
+      -macclass {document closeBox}
     wm title $w "Browse Info: $jid"
     set fontS [option get . fontSmall {}]
     
@@ -894,13 +896,13 @@ proc ::Jabber::Browse::InfoCB {browseName type jid subiq} {
     pack [frame $w.frall -borderwidth 1 -relief raised]   \
       -fill both -expand 1 -ipadx 12 -ipady 4
     set wtext $w.frall.t
+    set iconInfo [::Theme::GetImage info]
     label $w.frall.l -text "Description of services provided by $jid" \
-      -justify left
+      -justify left -image $iconInfo -compound left
     text $wtext -wrap word -width 60 -bg gray80 \
       -tabs {180} -spacing1 3 -spacing3 2 -bd 0
 
-    pack $w.frall.l $wtext -side top -fill x -anchor w -padx 10  \
-      -pady 4
+    pack $w.frall.l $wtext -side top -anchor w -padx 10 -pady 1
     
     $wtext tag configure head -background gray70
     $wtext insert end "XML namespace\tDescription\n" head

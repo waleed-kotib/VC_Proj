@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Conference.tcl,v 1.8 2004-01-23 08:54:25 matben Exp $
+# $Id: Conference.tcl,v 1.9 2004-01-27 08:48:03 matben Exp $
 
 package provide Conference 1.0
 
@@ -57,7 +57,8 @@ proc ::Jabber::Conference::BuildEnter {args} {
     upvar 0 $token enter
     
     set w $wDlgs(jenterroom)[incr dlguid]    
-    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
+      -macclass {document closeBox}
     wm title $w [::msgcat::mc {Enter Room}]
     set enter(w) $w
     array set enter {

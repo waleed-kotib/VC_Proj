@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.25 2004-01-26 07:34:49 matben Exp $
+# $Id: Login.tcl,v 1.26 2004-01-27 08:48:05 matben Exp $
 
 package provide Login 1.0
 
@@ -60,7 +60,8 @@ proc ::Jabber::Login::Login { } {
     }
     set wtoplevel $w
     
-    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
+      -macclass {document closeBox}
     wm title $w [::msgcat::mc Login]
     set digest 1
     set ssl $jprefs(usessl)

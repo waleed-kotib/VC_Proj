@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.60 2004-01-26 07:34:49 matben Exp $
+# $Id: Jabber.tcl,v 1.61 2004-01-27 08:48:03 matben Exp $
 
 package provide Jabber 1.0
 
@@ -390,6 +390,7 @@ proc ::Jabber::FactoryDefaults { } {
       mMessage       users     {::Jabber::NewMsg::Build -to &jid}
       mChat          user      {::Jabber::Chat::StartThread &jid3}
       mWhiteboard    wb        {::Jabber::WB::NewWhiteboard &jid3}
+      mSendFile      user      {::Jabber::OOB::BuildSet &jid3}
       separator      {}        {}
       mLastLogin/Activity user {::Jabber::GetLast &jid}
       mvCard         user      {::VCard::Fetch other &jid}
@@ -408,9 +409,8 @@ proc ::Jabber::FactoryDefaults { } {
     }  
       
     # Can't run our http server on macs :-(
-    if {![string equal $this(platform) "macintosh"]} {
-	set popMenuDefs(roster,def) [linsert $popMenuDefs(roster,def) 9  \
-	  mSendFile     user      {::Jabber::OOB::BuildSet &jid}]
+    if {[string equal $this(platform) "macintosh"]} {
+	set popMenuDefs(roster,def) [lreplace $popMenuDefs(roster,def) 9 11]
     }
     
     # The browse:
@@ -1781,7 +1781,8 @@ proc ::Jabber::SetStatusWithMessage { } {
 	raise $w
 	return
     }
-    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
+      -macclass {document closeBox}
     wm title $w [::msgcat::mc {Set Status}]
     set finishedStat -1
     
@@ -2484,9 +2485,11 @@ proc ::Jabber::GetVersionResult {from silent jlibname type subiq} {
 	}
     } else {
 	set w .jvers[incr uidvers]
-	::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
+	::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
+	  -macclass {document closeBox}
 	wm title $w [::msgcat::mc {Version Info}]
-	pack [label $w.icon -bitmap info] -side left -anchor n -padx 10 -pady 10
+	set iconInfo [::Theme::GetImage info]
+	pack [label $w.icon -image $iconInfo] -side left -anchor n -padx 10 -pady 10
 	pack [label $w.msg -text [::msgcat::mc javersinfo $from] -font $fontSB] \
 	  -side top -padx 8 -pady 4
 	pack [frame $w.fr] -padx 10 -pady 4 -side top 
@@ -2947,7 +2950,8 @@ proc ::Jabber::Passwd::Build { } {
     if {[winfo exists $w]} {
 	return
     }
-    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
+      -macclass {document closeBox}
     wm title $w [::msgcat::mc {New Password}]
     
     set fontSB [option get . fontSmallBold {}]
@@ -3135,7 +3139,8 @@ proc ::Jabber::Logout::WithStatus { } {
 	return
     }
     
-    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
+      -macclass {document closeBox}
     wm title $w {Logout With Message}
     
     set fontSB [option get . fontSmallBold {}]

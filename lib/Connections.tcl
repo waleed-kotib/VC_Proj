@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Connections.tcl,v 1.19 2004-01-23 08:57:52 matben Exp $
+# $Id: Connections.tcl,v 1.20 2004-01-27 08:48:06 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -81,7 +81,8 @@ proc ::OpenConnection::OpenConnection {w} {
     if {[winfo exists $w]} {
 	return
     }
-    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
+      -macclass {document closeBox}
     wm title $w {Open Connection}
     
     # Global frame.
@@ -683,7 +684,8 @@ proc ::OpenMulticast::OpenMulticast {wtop} {
 
     set finished -1
     set w $wDlgs(openMulti)[incr uid]
-    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
+      -macclass {document closeBox}
     wm title $w [::msgcat::mc {Open Stream}]
     set fontSB [option get . fontSmallBold {}]
     

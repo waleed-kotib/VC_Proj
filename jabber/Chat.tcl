@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.39 2004-01-26 07:34:49 matben Exp $
+# $Id: Chat.tcl,v 1.40 2004-01-27 08:48:03 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -122,7 +122,8 @@ proc ::Jabber::Chat::StartThreadDlg {args} {
 	return
     }
     
-    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
+      -macclass {document closeBox}
     wm title $w [::msgcat::mc {Start Chat}]
     
     set fontSB [option get . fontSmallBold {}]
