@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: tinydom.tcl,v 1.6 2004-07-30 12:55:55 matben Exp $
+# $Id: tinydom.tcl,v 1.7 2005-02-18 08:32:44 matben Exp $
 
 package require xml
 
@@ -48,6 +48,10 @@ proc tinydom::XmlElementStart {tagname attrlist args} {
     variable xmlobj
     variable level
 
+    array set argsarr $args
+    if {[info exists argsarr(-namespacedecls)]} {
+	lappend attrlist xmlns [lindex $argsarr(-namespacedecls) 0]
+    }
     set xmlobj([incr level]) [list $tagname $attrlist 0 {} {}]
 }
 
@@ -58,7 +62,7 @@ proc tinydom::XmlElementEnd {tagname args} {
     if {$level > 1} {
     
 	# Insert the child tree in the parent tree.
-	tinydom::XmlAppend [expr $level-1] $xmlobj($level)
+	XmlAppend [expr $level-1] $xmlobj($level)
     }
     incr level -1
 }
