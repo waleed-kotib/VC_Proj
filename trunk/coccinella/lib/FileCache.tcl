@@ -6,7 +6,7 @@
 #
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #
-# $Id: FileCache.tcl,v 1.4 2003-10-05 13:36:20 matben Exp $
+# $Id: FileCache.tcl,v 1.5 2004-01-06 15:59:22 matben Exp $
 # 
 #       The input key can be: 
 #               1) a full url, must be uri encoded 
@@ -48,6 +48,13 @@ package provide FileCache 1.0
 
 namespace eval ::FileCache:: {
 
+    # Define all hooks that is needed.
+    ::hooks::add prefsInitHook          ::FileCache::InitHook
+    ::hooks::add prefsBuildHook         ::FileCache::BuildHook
+    ::hooks::add prefsUserDefaultsHook  ::FileCache::UserDefaultsHook
+    ::hooks::add prefsSaveHook          ::FileCache::SaveHook
+    ::hooks::add prefsCancelHook        ::FileCache::CancelHook
+
     # Main storage in array
     variable cache
     variable basedir [pwd]
@@ -58,15 +65,33 @@ namespace eval ::FileCache:: {
     
     # Any of "never" or "always".
     variable usecache "always"
+    
+    # Keep track of total size of cache in bytes (double).
+    variable totbytes 0.0
+    variable maxbytes [expr 1e9]
+    
+    # Keep a time ordered list of keys.
+    variable keylist {}
 }
 
 proc ::FileCache::SetBasedir {dir} {
-
     variable basedir
+    
     if {![string equal [file pathtype $dir] "absolute"]} {
 	return -code error "The path \"$dir\" is not of type absolute"
     }
     set basedir $dir
+}
+
+proc ::FileCache::Init { } {    
+    variable basedir
+    variable totbytes 0
+    
+    if {[file isdirectory $basedir]} {
+	foreach f [glob -nocomplain -directory $basedir *] {
+	    set totbytes [expr $totbytes + double([file size $f])]
+	}
+    }
 }
 
 # FileCache::Set --
@@ -74,21 +99,32 @@ proc ::FileCache::SetBasedir {dir} {
 #       Sets an entry in the file data base. If no 'locabspath' then the key
 #       is assumed to be a local absolute file path.
 
-proc ::FileCache::Set {key {locabspath {}}} {
-
+proc ::FileCache::Set {key {locabspath {}}} { 
+    variable totbytes
+    variable maxbytes
+    variable keylist
     variable cache
+    
     if {[string length $locabspath] == 0} {
 	set locabspath $key
     }
     if {![string equal [file pathtype $locabspath] "absolute"]} {
 	return -code error "The path \"$locabspath\" is not of type absolute"
     }
-    return [set cache([Normalize $key]) $locabspath]
+    set nkey [Normalize $key]
+    lappend keylist $nkey
+    set totbytes [expr $totbytes + double([file size $locabspath])]
+    set rmkey [lindex $keylist 0]
+    while {[expr $totbytes > $maxbytes] && ([llength $keylist] > 2)} {	
+	Remove $rmkey
+	set rmkey [lindex $keylist 0]
+    }
+    return [set cache($nkey) $locabspath]
 }
 
 proc ::FileCache::Get {key} {
-
     variable cache
+    
     set nkey [Normalize $key]
     if {[info exists cache($nkey)]} {
 	set ans $cache($nkey)
@@ -100,12 +136,31 @@ proc ::FileCache::Get {key} {
     return $ans
 }
 
+# FileCache::Remove --
+# 
+#       Removes file cache corresponding to 'key' and deletes the cached file.
+
+proc ::FileCache::Remove {key} {
+    variable totbytes
+    variable keylist
+    variable cache
+    
+    set nkey [Normalize $key]
+    if {[info exists cache($nkey)]} {
+	set f $cache($nkey)
+	set totbytes [expr $totbytes - double([file size $f])]
+	set ind [lsearch -exact $keylist $nkey]
+	set keylist [lreplace $keylist $ind $ind]
+	catch {file delete $f}
+	unset cache($nkey)
+    }    
+}
+
 # FileCache::IsCached --
 # 
 #       Checks if this key is stored in cache and acceptable.
 
-proc ::FileCache::IsCached {key} {
-    
+proc ::FileCache::IsCached {key} {    
     variable cache
     variable usecache
 
@@ -120,7 +175,7 @@ proc ::FileCache::IsCached {key} {
 	    set iscached 1
 	}
 	if {$iscached} {
-	    set iscached [::FileCache::Accept $cache($nkey)]
+	    set iscached [Accept $cache($nkey)]
 	}
     }
     return $iscached
@@ -147,9 +202,9 @@ proc ::FileCache::SetDirFiles {dir {pattern *}} {
 # 
 #	The key can be a full url, an absolute path, or a relative path.
 
-proc ::FileCache::Normalize {key} {
-    
+proc ::FileCache::Normalize {key} {    
     variable basedir
+    
     set host ""
     
     # Split off any protocol part.
@@ -177,8 +232,7 @@ proc ::FileCache::Normalize {key} {
 #       If an uri, then if path local to installation dir, and if the file
 #       exists, then it is local, and is cached.
 
-proc ::FileCache::IsLocal {key} {
-    
+proc ::FileCache::IsLocal {key} {    
     variable basedir
     variable cache
 
@@ -215,8 +269,7 @@ proc ::FileCache::IsLocal {key} {
 #       
 #       timetoken:  any of "never", "always", "launch", "min", "hour", "day", "month"
 
-proc ::FileCache::SetBestBefore {timetoken {dir {}}} {
- 
+proc ::FileCache::SetBestBefore {timetoken {dir {}}} { 
     variable launchtime
     variable bestbeforedir
     variable usecache
@@ -244,8 +297,7 @@ proc ::FileCache::SetBestBefore {timetoken {dir {}}} {
 #
 #       locabspath:   local native not uri encoded abslute path.
 
-proc ::FileCache::Accept {locabspath} {
- 
+proc ::FileCache::Accept {locabspath} { 
     variable launchtime
     variable bestbeforedir
     
@@ -277,12 +329,127 @@ proc ::FileCache::Accept {locabspath} {
     return $accept
 }
 
+proc ::FileCache::ClearCache { } {
+    
+    
+}
+
 proc ::FileCache::Dump { } {
     variable cache
     
     puts "::FileCache::Dump:\n"
     if {[info exists cache]} {
 	parray cache
+    }
+}
+
+#--- UI part etc ---------------------------------------------------------------
+
+proc ::FileCache::InitHook { } {
+    global  prefs
+    variable maxbytes
+    
+    # When and how old is a cached file allowed to be before downloading a new?
+    # Options. "never", "always", "launch", "hour", "day", "week", "month"
+    set prefs(checkCache) "launch"
+    set prefs(cacheSize)  $maxbytes
+
+    ::PreferencesUtils::Add [list  \
+      [list prefs(checkCache)      prefs_checkCache      $prefs(checkCache)] \
+      [list prefs(cacheSize)       prefs_cacheSize       $prefs(cacheSize)]]
+
+    if {[lsearch {always launch never} $prefs(checkCache)] < 0} {
+	set prefs(checkCache) launch
+    }
+}
+
+proc ::FileCache::BuildHook {wtree nbframe} {
+    
+    $wtree newitem {Whiteboard {File Cache}} -text [::msgcat::mc {File Cache}]
+
+    set wpage [$nbframe page {File Cache}]    
+    ::FileCache::BuildPage $wpage
+}
+
+proc ::FileCache::BuildPage {page} {
+    global  prefs
+    variable tmpPrefs
+        
+    set fontS [option get . fontSmall {}]
+    set fontSB [option get . fontSmallBold {}]
+
+    set tmpPrefs(checkCache) $prefs(checkCache)
+    set tmpPrefs(mbsize)     [expr wide($prefs(cacheSize)/1e6)]
+    
+    set pca [::mylabelframe::mylabelframe $page.fr [::msgcat::mc {File Cache}]]
+    pack $page.fr -side top -anchor w -ipadx 10 -ipady 6 -fill x
+    message $pca.msg -width 300 -text [::msgcat::mc preffilecache]
+    pack $pca.msg -side top -anchor w
+
+    set frca $pca.cas
+    pack [frame $frca] -fill x -padx 10
+    pack [label $frca.dsk -text "[::msgcat::mc {Disk Cache}]:"] -side left
+    pack [entry $frca.emb -width 6  \
+      -textvariable [namespace current]::tmpPrefs(mbsize)] -side left
+    pack [label $frca.mb -text [::msgcat::mc {MBytes}]] -side left
+    pack [button $frca.bt -padx 6 -text [::msgcat::mc {Clear Disk Cache Now}] \
+      -command [namespace current]::ClearCache -font $fontS]  \
+      -side right 
+
+    set frfo $pca.fo
+    pack [frame $frfo] -fill x -padx 10
+    pack [label $frfo.fo -text "[::msgcat::mc {Cache folder}]:"] -side left
+    pack [button $frfo.bt -padx 6 -text "[::msgcat::mc {Choose}]..." \
+      -command [namespace current]::SetCachePath -font $fontS]  \
+      -side right 
+    
+    
+    set pwhen [::mylabelframe::mylabelframe $page.frw \
+      [::msgcat::mc {Cached file compared with remote}]]
+    pack $page.frw -side top -anchor w -ipadx 10 -ipady 6 -fill x
+    set frw $pwhen.cas
+    pack [frame $frw] -side left -padx 16 -pady 2
+    foreach  \
+      val {always       launch             never}   \
+      txt {{Every time} {Once per session} {Never}} {
+	radiobutton $frw.$val -text [::msgcat::mc $txt]   \
+	  -variable [namespace current]::tmpPrefs(checkCache) -value $val
+	grid $frw.$val -sticky w
+    }
+}
+
+proc ::FileCache::SetCachePath { } {
+    global  this prefs
+    
+    set dir [tk_chooseDirectory -title [::msgcat::mc {Pick Cache Folder}] \
+      -initialdir $prefs(incomingPath) -mustexist 1]
+    if {$dir != ""} {
+	set prefs(incomingPath) $dir
+    }
+}
+
+proc ::FileCache::UserDefaultsHook { } {
+    global  prefs
+    variable tmpPrefs
+    
+    
+}
+
+proc ::FileCache::SaveHook { } {
+    global  prefs
+    variable tmpPrefs
+
+    set prefs(checkCache) $tmpPrefs(checkCache)
+}
+
+proc ::FileCache::CancelHook { } {
+    global  prefs
+    variable tmpPrefs
+    
+    # Detect any changes.
+    if {![string equal $prefs(checkCache) $tmpPrefs(checkCache)]} {
+	::Preferences::HasChanged
+	return
     }
 }
 

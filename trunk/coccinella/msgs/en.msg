@@ -699,87 +699,89 @@ spacebar to cancel}
 ::msgcat::mcset en uastatrot		{Rotate tool, select item first}
 
 
-# Preferences namespace:
-namespace eval ::Preferences:: {
-	::msgcat::mcset en prefnetconf  {Network and Server Configuration}
-	::msgcat::mcset en prefnethead  {We can either connect to a Jabber server,\
+# Preferences:
+::msgcat::mcset en prefnetconf  {Network and Server Configuration}
+::msgcat::mcset en prefnethead  {We can either connect to a Jabber server,\
 or connect directly to another client. Many user interface elements depend on which\
 configuration you pick.}
-	::msgcat::mcset en prefnetauto  {If a client connects to this server,\
+::msgcat::mcset en prefnetauto  {If a client connects to this server,\
 a connection to that clients server is made automatically.}
-	::msgcat::mcset en prefnetjabb  {The Jabber server system.\
+::msgcat::mcset en prefnetjabb  {The Jabber server system.\
 Extensive user administration using dialogs via the "Jabber" menu.\
 Uses a XML based protocol.}
-  	::msgcat::mcset en prefnetmulti {Connect automatically to all clients\
+::msgcat::mcset en prefnetmulti {Connect automatically to all clients\
 in this network when connecting any of them.}
-  	::msgcat::mcset en prefnetadv   {A client normally runs two different\
+::msgcat::mcset en prefnetadv   {A client normally runs two different\
 servers, the built in server, which is always present in the peer-to-peer case,\
 and a http server. The jabber server refers normally to a remote\
 server, and its port is usually 5222.\
 The port numbers set below usually only take effect after a relaunch.}
-  	::msgcat::mcset en prefsounsynwb {Have synthetic speech of text written in\
+::msgcat::mcset en prefsounsynwb {Have synthetic speech of text written in\
 the whiteboard}
-  	::msgcat::mcset en prefsounsynno {Have synthetic speech of normal messages}
-	::msgcat::mcset en prefsounsynch {Have synthetic speech of chat}
-	::msgcat::mcset en prefsounvoin  {Pick voice for incoming text:}
-	::msgcat::mcset en prefsounvoou  {Pick voice for text you write:}
-	::msgcat::mcset en prefsounpick  {Pick alert sounds for the\
+::msgcat::mcset en prefsounsynno {Have synthetic speech of normal messages}
+::msgcat::mcset en prefsounsynch {Have synthetic speech of chat}
+::msgcat::mcset en prefsounvoin  {Pick voice for incoming text:}
+::msgcat::mcset en prefsounvoou  {Pick voice for text you write:}
+::msgcat::mcset en prefsounpick  {Pick alert sounds for the\
 events given below:}
-	::msgcat::mcset en prefshortcut  {Here you add or edit shortcuts that\
+::msgcat::mcset en prefshortcut  {Here you add or edit shortcuts that\
 are only applicable to "peer-to-peer" connections, and are not used by the\
 Jabber system. If you haven't explicitly picked the "peer-to-peer" option in the\
 "Network Setup" panel, these shortcuts don't apply.}
-	::msgcat::mcset en prefprof      {Here you set the necessary things that are\
+::msgcat::mcset en prefprof      {Here you set the necessary things that are\
 specific to an account on a Jabber server. The server you pick here\
 will also be the server you logon to.}
-	::msgcat::mcset en prefpers      {Your personal info is stored in your\
+::msgcat::mcset en prefpers      {Your personal info is stored in your\
 preferences file, but may also be stored on the Jabber User Directory.\
 Server stored info is searchable by any user.}
-	::msgcat::mcset en prefaaset     {Set automatic away status:}
-	::msgcat::mcset en prefminaw     {Minutes before status Away:}
-	::msgcat::mcset en prefminea     {Minutes before status Extended Away:}
-	::msgcat::mcset en prefsuif      {If someone wants to subscribe to my presence and...}
-	::msgcat::mcset en prefsuis      {...is already in my roster:}
-	::msgcat::mcset en prefsuisnot   {...is not in my roster:}
-	::msgcat::mcset en prefsuauto    {Automatically subscribe to subscribers to me}
-	::msgcat::mcset en prefrorm      {Remove user if unsubscribed}
-	::msgcat::mcset en prefroallow   {Allow users without subscription}
-	::msgcat::mcset en prefroclr     {Clear roster when logout}
-	::msgcat::mcset en prefrochat    {Chat when double-click user, else normal message}
-	::msgcat::mcset en prefrosysicons {Use foreign IM system icons}
-	::msgcat::mcset en prefblonly    {Only accept messages from people in my roster}
-	::msgcat::mcset en prefblbl      {Block the following JID's (* wildcards possible):}
-	::msgcat::mcset en prefblmsg     {Write the complete JID for the user you\
+::msgcat::mcset en prefaaset     {Set automatic away status:}
+::msgcat::mcset en prefminaw     {Minutes before status Away:}
+::msgcat::mcset en prefminea     {Minutes before status Extended Away:}
+::msgcat::mcset en prefsuif      {If someone wants to subscribe to my presence and...}
+::msgcat::mcset en prefsuis      {...is already in my roster:}
+::msgcat::mcset en prefsuisnot   {...is not in my roster:}
+::msgcat::mcset en prefsuauto    {Automatically subscribe to subscribers to me}
+::msgcat::mcset en prefrorm      {Remove user if unsubscribed}
+::msgcat::mcset en prefroallow   {Allow users without subscription}
+::msgcat::mcset en prefroclr     {Clear roster when logout}
+::msgcat::mcset en prefrochat    {Chat when double-click user, else normal message}
+::msgcat::mcset en prefrosysicons {Use foreign IM system icons}
+::msgcat::mcset en prefblonly    {Only accept messages from people in my roster}
+::msgcat::mcset en prefblbl      {Block the following JID's (* wildcards possible):}
+::msgcat::mcset en prefblmsg     {Write the complete JID for the user you\
 want to block. A JID must be of the form "joewest@jabber.org"}
-	::msgcat::mcset en prefcufont    {Select font for chat window:}
-	::msgcat::mcset en prefcushow    {Show incoming messages in new window}
-	::msgcat::mcset en prefcusave    {Save message inbox between sessions}
-	::msgcat::mcset en prefcu2clk    {Double click message in inbox:}
-	::msgcat::mcset en prefcuopen    {Open message in new window}
-	::msgcat::mcset en prefcureply   {Reply to sender}
-	::msgcat::mcset en prefcudisc    {Preferred service discovery method:}
-	::msgcat::mcset en prefcubrowse  {Browse services if method available}
-	::msgcat::mcset en prefcuagent   {Always use agents method}
-	::msgcat::mcset en prefcuupdate  {Automatically check for new Coccinella version}
-	::msgcat::mcset en preffmhelp    {Helper plugins for file type}
-	::msgcat::mcset en preffmsave    {Just save to disk in incoming directory}
-	::msgcat::mcset en preffontmsg   {Warning: by importing any other fonts\
+::msgcat::mcset en prefcufont    {Select font for chat window:}
+::msgcat::mcset en prefcushow    {Show incoming messages in new window}
+::msgcat::mcset en prefcusave    {Save message inbox between sessions}
+::msgcat::mcset en prefcu2clk    {Double click message in inbox:}
+::msgcat::mcset en prefcuopen    {Open message in new window}
+::msgcat::mcset en prefcureply   {Reply to sender}
+::msgcat::mcset en prefcudisc    {Preferred service discovery method:}
+::msgcat::mcset en prefcubrowse  {Browse services if method available}
+::msgcat::mcset en prefcuagent   {Always use agents method}
+::msgcat::mcset en prefcuupdate  {Automatically check for new Coccinella version}
+::msgcat::mcset en preffmhelp    {Helper plugins for file type}
+::msgcat::mcset en preffmsave    {Just save to disk in incoming directory}
+::msgcat::mcset en preffontmsg   {Warning: by importing any other fonts\
 than the standard three ones (Times, Helvetica or Courier),\
 you must be confident that all remote clients also have\
 this font installed on their system.}
-	::msgcat::mcset en prefcahow     {How to handle files already received:}
-	::msgcat::mcset en prefcanev     {Never accept a cached file, always load a new one}
-	::msgcat::mcset en prefcaalw     {Always accept a cached file, never load a new one} 
-	::msgcat::mcset en prefcaor      {..or accept cached file if not older than:}
-	::msgcat::mcset en prefpriv      {If checking the privacy button,\
+::msgcat::mcset en prefcahow     {How to handle files already received:}
+::msgcat::mcset en prefcanev     {Never accept a cached file, always load a new one}
+::msgcat::mcset en prefcaalw     {Always accept a cached file, never load a new one} 
+::msgcat::mcset en prefcaor      {..or accept cached file if not older than:}
+::msgcat::mcset en prefpriv      {If checking the privacy button,\
 you are only able to edit your own canvas items. Items created\
 by others are not possible to edit.}
-	::msgcat::mcset en prefshortip   {Complete ip number or name}
-	::msgcat::mcset en prefshortwa   {Warning: you have edited the shortcuts.\
+::msgcat::mcset en prefshortip   {Complete ip number or name}
+::msgcat::mcset en prefshortwa   {Warning: you have edited the shortcuts.\
 Don't you want to save them?}
 
+::msgcat::mcset en preffilecache {The cache is used to keep local copies of files from\
+other users which reduces time for network transport. The size of the local disk cache\
+is limited by user's settings below.}
 
-}
+
 
 
 # EditShortcuts namespace:

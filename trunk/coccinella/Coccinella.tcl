@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.32 2004-01-05 15:00:31 matben Exp $
+# $Id: Coccinella.tcl,v 1.33 2004-01-06 15:59:22 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -304,13 +304,14 @@ package require Theme
 ::Theme::Init
 
 # The message catalog for language customization.
-if {![info exists env(LANG)]} {
-    set env(LANG) en
-}
 package require msgcat
-set lang [::msgcat::mclocale]
+set this(msgcatPath) [file join $this(path) msgs]
+if {[string equal [::msgcat::mclocale] "C"]} {
+    ::msgcat::mclocale en
+}  
+# tmp...
 ::msgcat::mclocale en
-::msgcat::mcload [file join $this(path) msgs]
+::msgcat::mcload $this(msgcatPath)
 
 # Show it! Need a full update here, at least on Windows.
 package require Splash

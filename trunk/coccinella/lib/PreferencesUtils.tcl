@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.22 2004-01-05 15:00:32 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.23 2004-01-06 15:59:23 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -288,7 +288,6 @@ proc ::PreferencesUtils::SetUserPreferences { } {
       [list prefs(canvasFonts)     prefs_canvasFonts     $prefs(canvasFonts)]    \
       [list prefs(privacy)         prefs_privacy         $prefs(privacy)]        \
       [list prefs(45)              prefs_45              $prefs(45)]             \
-      [list prefs(checkCache)      prefs_checkCache      $prefs(checkCache)]     \
       [list prefs(protocol)        prefs_protocol        $prefs(protocol)]       \
       [list prefs(autoConnect)     prefs_autoConnect     $prefs(autoConnect)]    \
       [list prefs(multiConnect)    prefs_multiConnect    $prefs(multiConnect)]   \
@@ -323,10 +322,6 @@ proc ::PreferencesUtils::SetUserPreferences { } {
       [list state(canGridOn)       state_canGridOn       $state(canGridOn)]      \
       [list state(visToolbar)      state_visToolbar      $state(visToolbar)]  ]
     
-    #[list ::UI::dims(x)          dims_x                $::UI::dims(x)]         \
-    #[list ::UI::dims(y)          dims_y                $::UI::dims(y)]         \
-    #[list ::UI::dims(wRoot)      dims_wRoot            $::UI::dims(wRoot)]     \
-    #[list ::UI::dims(hRoot)      dims_hRoot            $::UI::dims(hRoot)]     \
 
     # All MIME type stuff... The problem is that they are all arrays... 
     # Invented the ..._array resource specifier!    
@@ -350,11 +345,6 @@ proc ::PreferencesUtils::SetUserPreferences { } {
     # The prefs(stripJabber) option always overrides overrides prefs(protocol)!
     if {$prefs(stripJabber)} {
 	set prefs(protocol) "symmetric"
-    }
-    
-    # Moved 30days -> month
-    if {$prefs(checkCache) == "30days"} {
-	set prefs(checkCache) "month"
     }
 }
 

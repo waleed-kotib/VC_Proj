@@ -707,99 +707,97 @@ dubbelklicka för inspektion, högerklicka för popup}
 ::msgcat::mcset sv uastatrot		{Rotations verktyg, markera objekt först}
 
 
-# Preferences namespace:
-namespace eval ::Preferences:: {
-	::msgcat::mcset sv prefnetconf  {Nätverks och server konfiguration}
-	::msgcat::mcset sv prefnethead  {Vi kan antingen öppna förbindelse\
+# Preferences:
+::msgcat::mcset sv prefnetconf  {Nätverks och server konfiguration}
+::msgcat::mcset sv prefnethead  {Vi kan antingen öppna förbindelse\
 med en Jabber server, eller direkt till en annan klient. Utseendet på\
 programmet beror på vilket du väljer.}
-	::msgcat::mcset sv prefnetauto  {Om en klient kopplar upp sig mot\
+::msgcat::mcset sv prefnetauto  {Om en klient kopplar upp sig mot\
 vår server, så sker en uppkoppling till denna klient automatiskt.}
-	::msgcat::mcset sv prefnetjabb  {Jabber server systemet.\
+::msgcat::mcset sv prefnetjabb  {Jabber server systemet.\
 Omfattande användar administration via "Jabber" menyn. Använder ett XML\
 baserat protokoll.}
-  	::msgcat::mcset sv prefnetmulti {Automatisk förbindelse till alla\
+::msgcat::mcset sv prefnetmulti {Automatisk förbindelse till alla\
 klienter i detta nätverket när uppkoppling mot någon.}
-  	::msgcat::mcset sv prefnetadv   {En klient kör normalt två olika\
+::msgcat::mcset sv prefnetadv   {En klient kör normalt två olika\
 servrar, den inbyggda som alltid existerar för peer-to-peer,\
 samt en http server. Jabber servern hänvisar typiskt till en extern
 server vars portnummer normalt är 5222.\
 Portnummerna nedan verkställs normalt endast när programmet startas om.}
-  	::msgcat::mcset sv prefsounsynwb {Använd syntetiskt tal för\
+::msgcat::mcset sv prefsounsynwb {Använd syntetiskt tal för\
 text i skrivtavlan}
-  	::msgcat::mcset sv prefsounsynno {Använd syntetiskt tal för normala\
+::msgcat::mcset sv prefsounsynno {Använd syntetiskt tal för normala\
 meddelanden}
-	::msgcat::mcset sv prefsounsynch {Använd syntetiskt tal när chattar}
-	::msgcat::mcset sv prefsounvoin  {Välj röst för inkommande text:}
-	::msgcat::mcset sv prefsounvoou  {Välj röst för egen text:}
-	::msgcat::mcset sv prefsounpick  {Välj pling & plong ljud för\
+::msgcat::mcset sv prefsounsynch {Använd syntetiskt tal när chattar}
+::msgcat::mcset sv prefsounvoin  {Välj röst för inkommande text:}
+::msgcat::mcset sv prefsounvoou  {Välj röst för egen text:}
+::msgcat::mcset sv prefsounpick  {Välj pling & plong ljud för\
 händelserna nedan:}
-	::msgcat::mcset sv prefshortcut  {Här lägger du till eller redigerar\
+::msgcat::mcset sv prefshortcut  {Här lägger du till eller redigerar\
 genvägar för "peer-to-peer" anslutningar. Dessa används ej av Jabber systemet.}
-	::msgcat::mcset sv prefprof      {Här sätter du upp en profil med\
+::msgcat::mcset sv prefprof      {Här sätter du upp en profil med\
 nödvändig information för ett Jabber konto. Servern som sätts här blir också\
 standard kontot när du loggar på.}
-	::msgcat::mcset sv prefpers      {Dina personuppgifter sparas i den\
+::msgcat::mcset sv prefpers      {Dina personuppgifter sparas i den\
 inställningsfil men kan också sparas på serverns "Jabber User Directory".\
 Uppgifter som är serverlagrade är sökbara för samtliga användare.}
-	::msgcat::mcset sv prefaaset     {Sätt automatisk frånvarande status:}
-	::msgcat::mcset sv prefminaw     {Minuter innan automatisk frånvarande status:}
-	::msgcat::mcset sv prefminea     {Minuter innan automatisk extra frånvarande status:}
-	::msgcat::mcset sv prefsuif      {Om någon vill prenumerera på min\
+::msgcat::mcset sv prefaaset     {Sätt automatisk frånvarande status:}
+::msgcat::mcset sv prefminaw     {Minuter innan automatisk frånvarande status:}
+::msgcat::mcset sv prefminea     {Minuter innan automatisk extra frånvarande status:}
+::msgcat::mcset sv prefsuif      {Om någon vill prenumerera på min\
 närvaro och...}
-	::msgcat::mcset sv prefsuis      {...redan finns i min roster:}
-	::msgcat::mcset sv prefsuisnot   {...ej finns i min roster:}
-	::msgcat::mcset sv prefsuauto    {Prenumerera automatiskt på de som\
+::msgcat::mcset sv prefsuis      {...redan finns i min roster:}
+::msgcat::mcset sv prefsuisnot   {...ej finns i min roster:}
+::msgcat::mcset sv prefsuauto    {Prenumerera automatiskt på de som\
 prenumererar på mig}
-	::msgcat::mcset sv prefrorm      {Ta bort användare om prenumerationen\
+::msgcat::mcset sv prefrorm      {Ta bort användare om prenumerationen\
 upphör}	
-	::msgcat::mcset sv prefroallow   {Tillåt användare utan prenumeration}
-	::msgcat::mcset sv prefroclr     {Radera rostern när loggar ut}
-	::msgcat::mcset sv prefrochat    {Chatta när dubbelklickar användare,\
+::msgcat::mcset sv prefroallow   {Tillåt användare utan prenumeration}
+::msgcat::mcset sv prefroclr     {Radera rostern när loggar ut}
+::msgcat::mcset sv prefrochat    {Chatta när dubbelklickar användare,\
 annars normalt meddelande}
-	::msgcat::mcset sv prefrosysicons {Använd anpassade ikoner för\
+::msgcat::mcset sv prefrosysicons {Använd anpassade ikoner för\
 främmande IM system}
-	::msgcat::mcset sv prefblonly    {Acceptera endast meddelanden från\
+::msgcat::mcset sv prefblonly    {Acceptera endast meddelanden från\
 användare i min roster}
-	::msgcat::mcset sv prefblbl      {Blockera följande JID:er (* jokertecken\
+::msgcat::mcset sv prefblbl      {Blockera följande JID:er (* jokertecken\
 tillåtna):}
-	::msgcat::mcset sv prefblmsg     {Skriv in den kompletta JID:n för\
+::msgcat::mcset sv prefblmsg     {Skriv in den kompletta JID:n för\
 användaren du vill blockera. En JID ska ha formen "joewest@jabber.org"}
-	::msgcat::mcset sv prefcufont    {Välj typsnitt för chatt fönster:}
-	::msgcat::mcset sv prefcushow    {Visa inkommande meddelande i nytt fönster}
-	::msgcat::mcset sv prefcusave    {Spara inkorgen mellan sessionerna}
-	::msgcat::mcset sv prefcu2clk    {Dubbelklicka meddelande i inkorgen:}
-	::msgcat::mcset sv prefcuopen    {Öppna meddelande i nytt fönster}
-	::msgcat::mcset sv prefcureply   {Returnera till avsändaren}
-	::msgcat::mcset sv prefcudisc    {Önskad service metod:}
-	::msgcat::mcset sv prefcubrowse  {Browse service om möjligt}
-	::msgcat::mcset sv prefcuagent   {Använd alltid Agent metod}
-	::msgcat::mcset sv prefcuupdate  {Kontrollera automatiskt om ny\
+::msgcat::mcset sv prefcufont    {Välj typsnitt för chatt fönster:}
+::msgcat::mcset sv prefcushow    {Visa inkommande meddelande i nytt fönster}
+::msgcat::mcset sv prefcusave    {Spara inkorgen mellan sessionerna}
+::msgcat::mcset sv prefcu2clk    {Dubbelklicka meddelande i inkorgen:}
+::msgcat::mcset sv prefcuopen    {Öppna meddelande i nytt fönster}
+::msgcat::mcset sv prefcureply   {Returnera till avsändaren}
+::msgcat::mcset sv prefcudisc    {Önskad service metod:}
+::msgcat::mcset sv prefcubrowse  {Browse service om möjligt}
+::msgcat::mcset sv prefcuagent   {Använd alltid Agent metod}
+::msgcat::mcset sv prefcuupdate  {Kontrollera automatiskt om ny\
 Coccinella version finns}
-	::msgcat::mcset sv preffmhelp    {Hjälpplugg för filtyp}
-	::msgcat::mcset sv preffmsave    {Spara på disk i inmappen}
-	::msgcat::mcset sv preffontmsg   {Varning: om importerar ett annat\
+::msgcat::mcset sv preffmhelp    {Hjälpplugg för filtyp}
+::msgcat::mcset sv preffmsave    {Spara på disk i inmappen}
+::msgcat::mcset sv preffontmsg   {Varning: om importerar ett annat\
 typsnitt än de tre standard (Times, Helvetica or Courier) så måste du vara\
 säker på att alla andra klienter också har detta typsnitt installerat på\
 sina system.}
-	::msgcat::mcset sv prefcahow     {Hur ska filer hanteras som redan har\
+::msgcat::mcset sv prefcahow     {Hur ska filer hanteras som redan har\
 mottagits:}
-	::msgcat::mcset sv prefcahow     {Hur hantera redan mottagen fil:}
-	::msgcat::mcset sv prefcanev     {Acceptera aldrig en sparad fil, ladda\
+::msgcat::mcset sv prefcahow     {Hur hantera redan mottagen fil:}
+::msgcat::mcset sv prefcanev     {Acceptera aldrig en sparad fil, ladda\
 alltid en ny}
-	::msgcat::mcset sv prefcaalw     {Acceptera alltid en sparad fil, ladda\
+::msgcat::mcset sv prefcaalw     {Acceptera alltid en sparad fil, ladda\
 aldrig en ny}
-	::msgcat::mcset sv prefcaor      {..eller acceptera sparad fil om inte\
+::msgcat::mcset sv prefcaor      {..eller acceptera sparad fil om inte\
 äldre än:}
-	::msgcat::mcset sv prefpriv      {Om integritets knappen förkryssad\
+::msgcat::mcset sv prefpriv      {Om integritets knappen förkryssad\
 så kan du endast redigera canvas objekt som du skapat själv.\
 Objekt skapade av andra är inte möjliga att redigera.}
-	::msgcat::mcset sv prefshortip   {Fullständigt ipnummer eller namn}
-	::msgcat::mcset sv prefshortwa   {Varning: du har redigerat genvägarna.\
+::msgcat::mcset sv prefshortip   {Fullständigt ipnummer eller namn}
+::msgcat::mcset sv prefshortwa   {Varning: du har redigerat genvägarna.\
 Vill du inte spara dom?}
 
 
-}
 
 # EditShortcuts namespace:
 namespace eval ::EditShortcuts:: {
