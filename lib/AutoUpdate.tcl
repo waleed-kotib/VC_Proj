@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: AutoUpdate.tcl,v 1.2 2003-08-23 07:19:16 matben Exp $
+# $Id: AutoUpdate.tcl,v 1.3 2003-10-05 13:36:20 matben Exp $
 
 package require tinydom
 package require http 2.3
@@ -103,7 +103,8 @@ proc ::AutoUpdate::Dialog {releaseAttr message changesList} {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
-    } else {
+ 	::UI::MacUseMainMenu $w
+   } else {
 	
     }
     wm title $w "New Version"

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Example.tcl,v 1.7 2003-09-28 06:29:08 matben Exp $
+# $Id: Example.tcl,v 1.8 2003-10-05 13:36:21 matben Exp $
 
 
 namespace eval ::Example:: {
@@ -29,6 +29,7 @@ proc ::Example::Init { } {
     set defList {\
       pack        Example                 \
       desc        "Example dummy plugin"  \
+      ver         0.1                     \
       platform    {macintosh   macosx    windows   unix} \
       importProc  ::Example::Import       \
       mimes       {application/x-junk}    \
@@ -58,9 +59,6 @@ proc ::Example::Init { } {
     # Register nonsense mime type for this.
     #::Types::NewMimeType "application/x-junk" "Junk File" {.junk} 0 {TEXT}
     
-    # Any specific menu for operations...
-    set menuSpec [list command "Throw Junk" {puts "Throw junk"} {} {}]
-    #::UI::RegisterPluginMenuEntry $menuSpec
 }
 
 # Example::Import --
@@ -69,20 +67,26 @@ proc ::Example::Init { } {
 #       
 # Arguments:
 #       wcan        canvas widget path
-#       fileName
 #       optListVar  the *name* of the optList variable.
 #       args
 #       
 # Results:
 #       an error string which is empty if things went ok so far.
 
-proc ::Example::Import {wcan fileName optListVar args} {
+proc ::Example::Import {wcan optListVar args} {
     upvar $optListVar optList
     variable uid
     variable locals
     
     array set argsArr $args
     array set optArr $optList
+    if {![info exists argsArr(-file)] && ![info exists argsArr(-data)]} {
+	return -code error "Missing both -file and -data options"
+    }
+    if {[info exists argsArr(-data)]} {
+	return -code error "Does not yet support -data option"
+    }
+    set fileName $argsArr(-file)
     set locals(file) $fileName    
     set errMsg ""
     if {![catch {open $locals(file) r} fd]} {

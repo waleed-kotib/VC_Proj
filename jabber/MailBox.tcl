@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.13 2003-09-28 06:29:08 matben Exp $
+# $Id: MailBox.tcl,v 1.14 2003-10-05 13:36:20 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -132,6 +132,7 @@ proc ::Jabber::MailBox::Build {w args} {
     toplevel $w -class MailBox
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 
     }
@@ -1034,10 +1035,10 @@ proc ::Jabber::MailBox::ReadMailboxVer1 { } {
 	    # to be compatible with new mailbox format.
 	    if {[llength $row] == 7} {
 	     	if {[string length [lindex $row 6]]} {
-				set mailbox($id) [lreplace $row 6 end -canvasuid [lindex $row 6]]
-			} else {
-				set mailbox($id) [lrange $row 0 5]
-			}
+		    set mailbox($id) [lreplace $row 6 end -canvasuid [lindex $row 6]]
+		} else {
+		    set mailbox($id) [lrange $row 0 5]
+		}
 	    }
 	}
     }

@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: GetFileIface.tcl,v 1.6 2003-09-28 06:29:08 matben Exp $
+# $Id: GetFileIface.tcl,v 1.7 2003-10-05 13:36:20 matben Exp $
 
 package require getfile
 package require uriencode
@@ -37,8 +37,7 @@ proc ::GetFileIface::GetFile {wtop sock fileName opts} {
         
     ::Debug 2 "::GetFileIface::GetFile wtop=$wtop, fileName=$fileName"
     
-    array set optArr $opts
-    
+    array set optArr $opts    
     if {[info exists optArr(-mime)]} {
 	set mime $optArr(-mime)
     } else {
@@ -53,7 +52,8 @@ proc ::GetFileIface::GetFile {wtop sock fileName opts} {
     # Unquote the disallowed characters according to the RFC for URN scheme.
     # ref: RFC2141 sec2.2
     set fileTail [::uriencode::decodefile $fileName]
-    set dstpath [file join $prefs(incomingPath) $fileTail]   
+    #set dstpath [file join $prefs(incomingPath) $fileTail]
+    set dstpath [::GetFileIface::NewCacheFilePath $fileTail]
         
     # Make local state array for convenient storage. 
     # Use 'variable' for permanent storage.
@@ -73,6 +73,9 @@ proc ::GetFileIface::GetFile {wtop sock fileName opts} {
     set getstate(lastmillis) $getstate(firstmillis)
     set getstate(wprog) $wDlgs(prog)${uid}
     set getstate(timingkey) $gettoken
+    if {[info exists optArr(-url)]} {
+	set getstate(url) $optArr(-url)
+    }
     
     # Check if this file is cached already, http transported instead,
     # or if you user wants something different. May modify 'getstate(dstpath)'!
@@ -100,7 +103,7 @@ proc ::GetFileIface::GetFile {wtop sock fileName opts} {
     # Do get the file.
     if {[catch {
 	::getfile::get $sock $getstate(dstpath)  \
-	  -mimetype $mime -size $size  \
+	  -mimetype $mime -size $size -displayname $fileTail  \
 	  -progress [list [namespace current]::Progress $gettoken] \
 	  -command [list [namespace current]::Command $gettoken]
     } token]} {
@@ -157,8 +160,9 @@ proc ::GetFileIface::GetFileFromServer {wtop ip port path opts} {
     # Unquote the disallowed characters according to the RFC for URN scheme.
     # ref: RFC2141 sec2.2
     set fileTail [::uriencode::decodefile [file tail $path]]
-    set dstpath [file join $prefs(incomingPath) $fileTail]   
-        
+    #set dstpath [file join $prefs(incomingPath) $fileTail]   
+    set dstpath [::GetFileIface::NewCacheFilePath $fileTail]
+
     # Make local state array for convenient storage. 
     # Use 'variable' for permanent storage.
     set gettoken [namespace current]::[incr uid]
@@ -199,7 +203,7 @@ proc ::GetFileIface::GetFileFromServer {wtop ip port path opts} {
     # Do get the file.
     if {[catch {
 	getfile::getfromserver $path $dstpath $ip $port  \
-	  -mimetype $mime -size $size  \
+	  -mimetype $mime -size $size -displayname $fileTail  \
 	  -progress [list [namespace current]::Progress $gettoken] \
 	  -command [list [namespace current]::Command $gettoken]
     } token]} {
@@ -322,6 +326,14 @@ proc ::GetFileIface::Prepare {gettoken fileTail mime opts} {
     return $noErr
 }
 
+
+proc ::GetFileIface::NewCacheFilePath {fileName} {
+    global  prefs
+    
+    set tail "[::Utils::GenerateHexUID][file extension $fileName]"
+    return [file join $prefs(incomingPath) $tail]
+}
+
 # GetFileIface::Progress, Command --
 #
 #	Callbacks for the getfile command.
@@ -392,6 +404,11 @@ proc ::GetFileIface::Command {gettoken token what msg} {
 	    # Finished and ok!
 	    ::GetFileIface::DoImport $getstate(mime) $getstate(optlist)  \
 	      -file $getstate(dstpath) -where "local"
+
+	    # Add to the lists of known files.
+	    if {[info exists getstate(url)]} {
+		::FileCache::Set $getstate(url) $getstate(dstpath)
+	    }	    
 	    catch {destroy $getstate(wprog)}
 	    ::Timing::Reset $getstate(timingkey)
 	    unset getstate

@@ -14,7 +14,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Plugins.tcl,v 1.7 2003-09-28 06:29:08 matben Exp $
+# $Id: Plugins.tcl,v 1.8 2003-10-05 13:36:20 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -148,6 +148,8 @@ proc ::Plugins::Init { } {
     variable plugin
     variable inited
     
+    ::Debug 2 "::Plugins::Init"
+    
     foreach mime [::Types::GetAllMime] {
 	set mimeTypeDoWhat($mime) "unavailable"
 	set prefMimeType2Package($mime) {}
@@ -174,22 +176,9 @@ proc ::Plugins::Init { } {
     
     # This must be done after all plugins identified and loaded.
     ::Plugins::MakeTypeListDialogOption
+    
     set inited 1
 }
-
-# Plugins::InitAddons --
-
-proc ::Plugins::InitAddons { } {
-    global prefs this
-    
-    set allFiles [glob [file join [file join $this(path) addons] *.tcl]]
-    Debug 2 "::Plugins::InitAddons allFiles=$allFiles"
-    
-    foreach addonFile $allFiles {
-	catch {source $addonFile}
-    }
-}
-
 
 proc ::Plugins::InitTk { } {
     global this
@@ -200,6 +189,7 @@ proc ::Plugins::InitTk { } {
 
     set plugin(tk,type) "internal"
     set plugin(tk,desc) "Supported by the core"
+    set plugin(tk,ver) [info tclversion]
     set plugin(tk,importProc) ::Import::DrawImage
     set plugin(tk,icon,12) [image create photo -format gif -file \
       [file join $this(path) images tklogo12.gif]]
@@ -1113,6 +1103,8 @@ proc ::Plugins::DeleteMimeType {mime} {
 
 proc ::Plugins::LoadPluginDirectory {dir} {
     
+    ::Debug 2 "::Plugins::LoadPluginDirectory"
+    
     # The 'pluginDefs' file is sourced in own namespace. 
     # It needs the 'dir' to be there.
     set indexFile [file join $dir pluginDefs.tcl]
@@ -1221,6 +1213,34 @@ proc ::Plugins::SetCanvasBinds {wcan oldTool newTool} {
 	    }
 	}
     }    
+}
+
+# Plugins::InitAddons --
+# 
+#       Support for stuff in the addons directory. These are more general
+#       than 'plugins' since they can create their own interfaces, menus
+#       and such.
+
+proc ::Plugins::InitAddons { } {
+    global prefs this
+    
+    ::Debug 2 "::Plugins::InitAddons"
+        
+    # Load all "external" addons.
+    # It needs the 'dir' to be there.
+    set dir [file join $this(path) addons]
+
+    # The 'pluginDefs' file is sourced in own namespace. 
+    set indexFile [file join $dir addonDefs.tcl]
+    if {[file exists $indexFile]} {
+	source $indexFile
+    }
+}
+
+proc ::Plugins::LoadAddon {fileName initProc} {
+    
+    uplevel #0 [list source $fileName]
+    uplevel #0 $initProc
 }
 
 #-------------------------------------------------------------------------------

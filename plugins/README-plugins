@@ -1,4 +1,6 @@
 README-plugins
 
+A plugin imports documents, or some representation of it like an
+icon, with specific mime type into a whiteboard.
 This is where plugins should go. Only experimental so far.
 See Example.tcl for an example.

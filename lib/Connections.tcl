@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Connections.tcl,v 1.7 2003-09-28 06:29:08 matben Exp $
+# $Id: Connections.tcl,v 1.8 2003-10-05 13:36:20 matben Exp $
 
 package provide Connections 1.0
 
@@ -58,6 +58,7 @@ proc ::OpenConnection::OpenConnection {w} {
     if {[string match "mac*" $this(platform)]} {
 	toplevel $w
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 	toplevel $w
     }
@@ -679,6 +680,7 @@ proc ::OpenMulticast::OpenMulticast {wtop w} {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 	#
     }

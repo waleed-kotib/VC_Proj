@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ItemInspector.tcl,v 1.8 2003-09-28 06:29:08 matben Exp $
+# $Id: ItemInspector.tcl,v 1.9 2003-10-05 13:36:20 matben Exp $
 
 namespace eval ::ItemInspector::  {
     
@@ -165,6 +165,7 @@ proc ::ItemInspector::Build {wtop itemId args} {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 	#
     }
@@ -568,6 +569,7 @@ proc ::ItemInspector::Movie {wtop winfr} {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 	#
     }
@@ -692,6 +694,7 @@ proc ::ItemInspector::Broken {wtop id args} {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 	#
     }

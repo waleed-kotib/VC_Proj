@@ -15,7 +15,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.6 2003-09-28 06:29:08 matben Exp $
+# $Id: Coccinella.tcl,v 1.7 2003-10-05 13:36:16 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -324,6 +324,10 @@ if {[string equal $this(platform) "macosx"]} {
     }
 }
 if {[string match "mac*" $this(platform)]} {
+    
+    # documentProc, dBoxProc, plainDBox, altDBoxProc, movableDBoxProc, 
+    # zoomDocProc, rDocProc, floatProc, floatZoomProc, floatSideProc, 
+    # or floatSideZoomProc
     if {[info tclversion] <= 8.3} {
 	set macWindowStyle "unsupported1 style"
     } else {
@@ -625,6 +629,10 @@ if {$argc > 0} {
     ::PreferencesUtils::ParseCommandLineOptions $argc $argv
 }
 
+#--- Initializations -----------------------------------------------------------
+#
+# Order important!
+
 # Define MIME types etc.
 ::Types::Init
 
@@ -646,8 +654,6 @@ if {$argc > 0} {
 # Init the file cache settings.
 ::FileCache::SetBasedir $this(path)
 ::FileCache::SetBestBefore $prefs(checkCache) $prefs(incomingPath)
-
-#--- User Interface ------------------------------------------------------------
 
 # Various initializations for canvas stuff and UI.
 ::CanvasUtils::Init
@@ -683,6 +689,7 @@ if {$prefs(firstLaunch) && !$prefs(stripJabber)} {
 }
 
 # A mechanism to set -state of cut/copy/paste. Not robust!!!
+# All selections are not detected (shift <- -> etc).
 # Entry copy/paste.
 bind Entry <FocusIn> "+ ::UI::FixMenusWhenSelection %W"
 bind Entry <ButtonRelease-1> "+ ::UI::FixMenusWhenSelection %W"

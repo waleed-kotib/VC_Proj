@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: mactabnotebook.tcl,v 1.3 2003-05-18 13:20:19 matben Exp $
+# $Id: mactabnotebook.tcl,v 1.4 2003-10-05 13:36:17 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -311,8 +311,8 @@ proc ::mactabnotebook::mactabnotebook {w args} {
     pack $widgets(nbframe) -expand yes -fill both
 
     # Note the plus (+) signs here.
-    bind [winfo toplevel $w] <FocusOut> +[list ::mactabnotebook::ConfigTabs $w]
-    bind [winfo toplevel $w] <FocusIn> +[list ::mactabnotebook::ConfigTabs $w]
+    bind [winfo toplevel $w] <FocusOut> "+ ::mactabnotebook::ConfigTabs $w"
+    bind [winfo toplevel $w] <FocusIn> "+ ::mactabnotebook::ConfigTabs $w"
     
     set tnInfo(tabs) {}
     set tnInfo(current) {}

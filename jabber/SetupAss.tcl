@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: SetupAss.tcl,v 1.5 2003-08-23 07:19:16 matben Exp $
+# $Id: SetupAss.tcl,v 1.6 2003-10-05 13:36:20 matben Exp $
 
 package require setupassistant
 package require chasearrows
@@ -36,6 +36,7 @@ proc ::Jabber::SetupAss::SetupAss {w} {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 	#
     }
@@ -187,6 +188,7 @@ proc ::Jabber::SetupAss::ServersDlg {w} {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 
     }

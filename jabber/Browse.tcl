@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.6 2003-09-13 06:39:25 matben Exp $
+# $Id: Browse.tcl,v 1.7 2003-10-05 13:36:17 matben Exp $
 
 package provide Browse 1.0
 
@@ -322,6 +322,7 @@ proc ::Jabber::Browse::BuildToplevel {w} {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 
     }
@@ -724,6 +725,7 @@ proc ::Jabber::Browse::AddServer { } {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 
     }

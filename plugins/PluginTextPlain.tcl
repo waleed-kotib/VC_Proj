@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: PluginTextPlain.tcl,v 1.4 2003-09-28 06:29:08 matben Exp $
+# $Id: PluginTextPlain.tcl,v 1.5 2003-10-05 13:36:21 matben Exp $
 
 
 namespace eval ::TextImporter:: {
@@ -62,6 +62,7 @@ YWMKCRwoU6p8E+RHDypYtHDp8iWMmDFm0rSBA8SHjkAAOw==
     set defList [list \
       pack        TextImporter                 \
       desc        "Text importer plugin"       \
+      ver         0.1                          \
       platform    {macintosh   macosx    windows   unix} \
       importProc  ::TextImporter::Import       \
       mimes       {text/plain}                 \
@@ -107,20 +108,26 @@ mQOi0n264h3k5d0xzSvsyJbwM+TBi84zBpna+vv8AAocSHBfBAA7
 #       
 # Arguments:
 #       wcan        canvas widget path
-#       fileName
 #       optListVar  the *name* of the optList variable.
 #       args
 #       
 # Results:
 #       an error string which is empty if things went ok so far.
 
-proc ::TextImporter::Import {wcan fileName optListVar args} {
+proc ::TextImporter::Import {wcan optListVar args} {
     upvar $optListVar optList
     variable uid
     variable locals
     
     array set argsArr $args
     array set optArr $optList
+    if {![info exists argsArr(-file)] && ![info exists argsArr(-data)]} {
+	return -code error "Missing both -file and -data options"
+    }
+    if {[info exists argsArr(-data)]} {
+	return -code error "Does not yet support -data option"
+    }
+    set fileName $argsArr(-file)
     set wtop [::UI::GetToplevelNS $wcan]
     set errMsg ""
     
@@ -137,7 +144,7 @@ proc ::TextImporter::Import {wcan fileName optListVar args} {
     # Make actual object in a frame with special -class.
     frame $wfr -bg gray50 -class TextDocFrame
     label $wfr.icon -background white -image $locals(icon)
-    pack $wfr.icon -padx 3 -pady 3
+    pack $wfr.icon -padx 4 -pady 4
     
     set id [$wcan create window $x $y -anchor nw -window $wfr -tags  \
       [list frame $useTag]]

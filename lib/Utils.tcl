@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.8 2003-09-21 13:02:12 matben Exp $
+# $Id: Utils.tcl,v 1.9 2003-10-05 13:36:21 matben Exp $
 
 # InvertArray ---
 #
@@ -451,17 +451,21 @@ namespace eval ::Utils:: {
     
     # Running counter for GenerateHexUID.
     variable uid 0
+    variable maxuidpersec 10000
 }
 
 # Utils::GenerateHexUID --
 #
 #       Makes a unique hex string stamped by time.
+#       Can generate max 'maxuidpersec' uid's per second.
 
 proc ::Utils::GenerateHexUID { } {
     variable uid
+    variable maxuidpersec
     
-    set rem [expr [incr uid] % 1000]
-    set hex1 [format %x [clock format [clock seconds] -format "%Y%j%H"]]
+    set rem [expr [incr uid] % $maxuidpersec]
+    # how to avoid octal interpretation???
+    set hex1 [format %x [clock format [clock seconds] -format "1%y%j%H"]]
     set hex2 [format %x [clock format [clock seconds] -format "1%M%S${rem}"]]
     return ${hex1}${hex2}
 }

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.9 2003-08-23 07:19:16 matben Exp $
+# $Id: NewMsg.tcl,v 1.10 2003-10-05 13:36:20 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -130,6 +130,7 @@ proc ::Jabber::NewMsg::Build {wbase args} {
     toplevel $w -class NewMsg
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 
     }

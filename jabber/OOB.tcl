@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.8 2003-09-21 13:02:12 matben Exp $
+# $Id: OOB.tcl,v 1.9 2003-10-05 13:36:20 matben Exp $
 
 package provide OOB 1.0
 
@@ -35,6 +35,7 @@ proc ::Jabber::OOB::BuildSet {w jid} {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 
     }

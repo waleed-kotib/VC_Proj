@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: VCard.tcl,v 1.4 2003-09-08 12:46:36 matben Exp $
+# $Id: VCard.tcl,v 1.5 2003-10-05 13:36:20 matben Exp $
 
 package provide VCard 1.0
 
@@ -161,6 +161,7 @@ proc ::VCard::Build {w type jid} {
     toplevel $w -background $prefs(bgColGeneral)
     if {[string match "mac*" $this(platform)]} {
         eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 
     }    

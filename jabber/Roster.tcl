@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.8 2003-09-28 06:29:08 matben Exp $
+# $Id: Roster.tcl,v 1.9 2003-10-05 13:36:20 matben Exp $
 
 package provide Roster 1.0
 
@@ -96,6 +96,7 @@ proc ::Jabber::Roster::BuildToplevel {w} {
 
     variable wtop
     variable servtxt
+    upvar ::UI::menuDefs menuDefs
 
     if {[winfo exists $w]} {
 	return
@@ -105,7 +106,8 @@ proc ::Jabber::Roster::BuildToplevel {w} {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
-    } else {
+ 	::UI::MacUseMainMenu $w
+   } else {
 
     }
     wm title $w {Roster (Contact list)}
@@ -115,10 +117,10 @@ proc ::Jabber::Roster::BuildToplevel {w} {
     if {0 && [string match "mac*" $this(platform)]} {
 	set wmenu ${w}.menu
 	menu $wmenu -tearoff 0
-	::UI::NewMenu $w ${wmenu}.apple   {}       "main,apple"   normal
-	::UI::NewMenu $w ${wmenu}.file    mFile    "min,file"     normal
-	::UI::NewMenu $w ${wmenu}.edit    mEdit    "min,edit"     normal
-	::UI::NewMenu $w ${wmenu}.jabber  mJabber  "main,jabber"  normal
+	::UI::BuildAppleMenu $wtop ${wmenu}.apple normal
+	::UI::NewMenu $w ${wmenu}.file    mFile    $menuDefs(min,file)     normal
+	::UI::NewMenu $w ${wmenu}.edit    mEdit    $menuDefs(min,edit)     normal
+	::UI::NewMenu $w ${wmenu}.jabber  mJabber  $menuDefs(main,jabber)  normal
 	$w configure -menu ${wmenu}
     }
     
@@ -655,11 +657,18 @@ proc ::Jabber::Roster::AutoBrowseCallback {browseName type jid subiq} {
     variable wtree    
     variable presenceIcon
     upvar ::Jabber::jstate jstate
+    upvar ::Jabber::jprefs jprefs
     
     ::Jabber::Debug 2 "::Jabber::Roster::AutoBrowseCallback, jid=$jid,\
       [string range "subiq='$subiq'" 0 40]..."
     
     if {[$jstate(browse) havenamespace $jid "coccinella:wb"]} {
+	
+	# Shall we query for its ip address right away?
+	if {$jprefs(preGetIP)} {
+	    ::Jabber::GetIPnumber $jid
+	}
+	
 	if {[regexp {^(.+@[^/]+)/(.+)$} $jid match jid2 res]} {
 	    set presArr(-show) "normal"
 	    array set presArr [$jstate(roster) getpresence $jid2 -resource $res]
@@ -848,6 +857,7 @@ proc ::Jabber::Roster::NewOrEditItem {w which args} {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 
     }

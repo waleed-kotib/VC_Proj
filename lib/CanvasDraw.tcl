@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasDraw.tcl,v 1.11 2003-09-28 06:29:08 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.12 2003-10-05 13:36:20 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 #  
@@ -41,6 +41,8 @@ namespace eval ::CanvasDraw:: {
 # CanvasDraw::InitMove --
 #
 #       Initializes a move operation.
+#       Binds directly to canvas widget since we want to move selected items
+#       as well.
 #   
 # Arguments:
 #       w      the canvas widget.
@@ -64,16 +66,22 @@ proc ::CanvasDraw::InitMove {w x y {what item}} {
 	return
     }
     set id_ {[0-9]+}
+    
+    # In some cases we need the anchor point to be an exact item 
+    # specific coordinate.
+    
+    set xDrag(type) [$w type current]
     set xDrag(what) $what
     set xDrag(baseX) $x
     set xDrag(baseY) $y
     set xDrag(anchorX) $x
     set xDrag(anchorY) $y
     
-    # In some cases we need the anchor point to be an exact item 
-    # specific coordinate.
-    
-    set xDrag(type) [$w type current]
+    # Window items have their own methods. Good or bad?
+    if {$xDrag(type) == "window"} {
+	unset xDrag
+	return
+    }
     
     # Are we moving one point of a single segment line?
     set xDrag(singleSeg) 0
@@ -253,6 +261,8 @@ proc ::CanvasDraw::InitMove {w x y {what item}} {
     } elseif {$what == "item"} {
 
 	# Add specific tag to the item being moved for later use.
+	# We might need to check if item has a 'std' tag to not interfere
+	# with stuff from plugins.
 	set id [$w find withtag current]	
 	$w addtag ismoved withtag $id
 	set ids [$w find withtag selected]

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.6 2003-09-13 06:39:25 matben Exp $
+# $Id: MUC.tcl,v 1.7 2003-10-05 13:36:19 matben Exp $
 
 package provide MUC 1.0
 
@@ -99,6 +99,7 @@ proc ::Jabber::MUC::BuildEnter {args} {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 
     }
@@ -342,6 +343,7 @@ proc ::Jabber::MUC::Invite {roomjid} {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 	
     }
@@ -489,6 +491,7 @@ proc ::Jabber::MUC::BuildInfo {roomjid} {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 
     }
@@ -967,6 +970,7 @@ proc ::Jabber::MUC::EditListBuild {roomjid type} {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 	
     }
@@ -1420,6 +1424,7 @@ proc ::Jabber::MUC::RoomConfig {roomjid} {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 
     }
@@ -1564,6 +1569,7 @@ proc ::Jabber::MUC::Destroy {roomjid} {
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
     } else {
 	
     }
