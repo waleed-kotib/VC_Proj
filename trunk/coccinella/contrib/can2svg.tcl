@@ -6,7 +6,7 @@
 #  
 #  This particular package is BSD licensed. 
 #
-# $Id: can2svg.tcl,v 1.13 2004-07-30 12:55:53 matben Exp $
+# $Id: can2svg.tcl,v 1.14 2004-08-10 13:03:51 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -864,17 +864,21 @@ proc can2svg::MakeImageAttr {coo opts args} {
     array set optArr $opts
     array set argsArr $args
     
+    set attrList [ImageCoordsToAttr $coo $opts]
+
     # We should make this an URI.
     set theImage $optArr(-image)
     set theFile [$theImage cget -file]
-    if {[string equal $argsArr(-uritype) "file"]} {
-	set uri [FileUriFromLocalFile $theFile]
-    } elseif {[string equal $argsArr(-uritype) "http"]} {
-	set uri [HttpFromLocalFile $theFile]
-    }
-    set attrList [ImageCoordsToAttr $coo $opts]
-    lappend attrList "xlink:href" $uri
-    
+    if {$theFile != ""} {
+	if {[string equal $argsArr(-uritype) "file"]} {
+	    set uri [FileUriFromLocalFile $theFile]
+	} elseif {[string equal $argsArr(-uritype) "http"]} {
+	    set uri [HttpFromLocalFile $theFile]
+	}
+	lappend attrList "xlink:href" $uri
+    } else {
+	# Unclear if we can use base64 data in svg.
+    }    
     return $attrList
 }
 

@@ -152,7 +152,6 @@ Known Bugs:
     at the command line as:
 
     set argv "-debugLevel 3"
-    set argc 2
 
     and launch it. You need to have the source distribution and a Tcl/Tk
     installation to do this.

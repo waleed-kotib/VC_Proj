@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Import.tcl,v 1.6 2004-08-06 12:52:25 matben Exp $
+# $Id: Import.tcl,v 1.7 2004-08-10 13:03:51 matben Exp $
 
 package require http
 package require httpex
@@ -1835,12 +1835,6 @@ proc ::Import::QuickTimeMCCallback {utag w msg {par {}}} {
 	    set str "QUICKTIME: play $utag $time $par"
 	    ::CanvasUtils::GenCommand $wtop $str remote
 	}
-	xxx-goToTime {
-	    # We can't use this since it fills our karma!
-	    # Seems not necessary anyway.
-	    set str "QUICKTIME: goToTime $utag $par"
-	    ::CanvasUtils::GenCommand $wtop $str remote
-	}
     }
 }
 
@@ -1862,22 +1856,24 @@ proc ::Import::QuickTimeHandler {wcan type cmd args} {
     }
     set wmov [lindex [winfo children $w] 0]
     
+    # It is very easy to end up in an infinite loop here!
+    
     switch -- $instr {
 	play {
 	    set time [lindex $cmd 3]
 	    set rate [lindex $cmd 4]
-	    if {$rate == 0.0} {
+	    if {[$wmov time] != $time} {
 		$wmov time $time
-		$wmov stop
-	    } else {
-		$wmov time $time
-		$wmov play
 	    }
-	}
-	goToTime {
-	    # Unused.
-	    foreach {hiTime loTime timeScale} [lrange $cmd 3 5] {break}
-	    $wmov time $loTime
+	    if {$rate == 0.0} {
+		if {[$wmov rate] != $rate} {
+		    $wmov stop
+		}
+	    } else {
+		if {[$wmov rate] != $rate} {
+		    $wmov play
+		}
+	    }
 	}
     }
 }
