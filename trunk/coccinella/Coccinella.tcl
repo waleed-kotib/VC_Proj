@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.96 2004-11-24 07:07:28 matben Exp $
+# $Id: Coccinella.tcl,v 1.97 2004-11-24 07:13:34 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -198,7 +198,6 @@ package require Theme
 
 # Find our language and load message catalog.
 ::Init::InitMsgcat
-namespace import ::msgcat::mc
 
 # Show it! Need a full update here, at least on Windows.
 package require Splash
@@ -493,42 +492,6 @@ if {$prefs(firstLaunch)} {
 set prefs(firstLaunch) 0
 
 ::Debug 7 "auto_path:\n[join $auto_path \n]"
-
-if {0} {
-### The server part ############################################################
-
-# We should do this using hooks instead!
-
-# Start the tinyhttpd server, in its own thread if available.
-
-if {($prefs(protocol) != "client") && $prefs(haveHttpd)} {
-    set httpdScript [list ::tinyhttpd::start -port $prefs(httpdPort)  \
-      -rootdirectory $this(httpdRootPath)]
-    if {$debugLevel > 0} {
-	lappend httpdScript -directorylisting 1
-    }
-    
-    if {[catch {
-	if {$prefs(Thread)} {
-	    thread::send $this(httpdthreadid) $httpdScript
-	
-	    # Add more Mime types than the standard built in ones.
-	    thread::send $this(httpdthreadid)  \
-	      [list ::tinyhttpd::addmimemappings [::Types::GetSuffMimeArr]]
-	} else {
-	    eval $httpdScript
-	    ::tinyhttpd::addmimemappings [::Types::GetSuffMimeArr]
-	}
-    } msg]} {
-	tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
-	  [mc messfailedhttp $msg]]	  
-    } else {
-	
-	# Stop before quitting.
-	::hooks::register quitAppHook ::tinyhttpd::stop
-    }
-}
-}
 
 # Handle any actions we need to do (-connect) according to command line options.
 if {$argc > 0} {
