@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.88 2004-10-09 13:21:57 matben Exp $
+# $Id: Roster.tcl,v 1.89 2004-10-12 13:48:56 matben Exp $
 
 package provide Roster 1.0
 
@@ -38,6 +38,7 @@ namespace eval ::Jabber::Roster:: {
     option add *Roster*rootBackground       ""             widgetDefault
     option add *Roster*rootBackgroundBd     0              widgetDefault
     option add *Roster*rootForeground       ""             widgetDefault
+    option add *Roster.waveImage            wave           widgetDefault
 
     variable wtree    
     variable servtxt
@@ -182,7 +183,7 @@ proc ::Jabber::Roster::Show {w} {
 	if {[winfo exists $w]} {
 	    catch {wm deiconify $w}
 	} else {
-	    ::Jabber::Roster::BuildToplevel $w
+	    BuildToplevel $w
 	}
     } else {
 	catch {wm withdraw $w}
@@ -256,6 +257,7 @@ proc ::Jabber::Roster::Build {w} {
     variable btrefresh
     variable selItem
     variable wroster
+    variable wwave
     variable closedTreeDirs
     variable dirNameArr
     upvar ::Jabber::jprefs jprefs
@@ -274,13 +276,11 @@ proc ::Jabber::Roster::Build {w} {
     pack [frame $wbox -border 1 -relief sunken]   \
       -side top -fill both -expand 1 -padx 4 -pady 4
     
-    if {0} {
-	frame $w.fs -relief groove -bd 2
-	canvas $w.fs.c -bd 0 -highlightthickness 0 -height 14
-	pack $w.fs.c -side left -pady 1 -padx 6 -fill x -expand true
-	$w.fs.c create text 0 0 -anchor nw -text {Some junk...} -font $fontS
-	pack $w.fs -side bottom -fill x -padx 8 -pady 2
-    }
+    set wwave $w.fs
+    set waveImage [::Theme::GetImage [option get $w waveImage {}]]  
+    ::wavelabel::wavelabel $wwave -relief groove -bd 2 \
+      -type image -image $waveImage
+    pack $wwave -side bottom -fill x -padx 8 -pady 2
     
     set opts {}
     if {$jprefs(rost,useBgImage)} {
@@ -354,6 +354,18 @@ proc ::Jabber::Roster::GetWtree { } {
     return $wtree
 }
 
+proc ::Jabber::Roster::Animate {{step 1}} {
+    variable wwave
+    
+    $wwave animate $step
+}
+
+proc ::Jabber::Roster::Message {str} {
+    variable wwave
+    
+    $wwave message $str
+}
+
 # Jabber::Roster::LoginCmd --
 # 
 #       The login hook command.
@@ -419,9 +431,11 @@ proc ::Jabber::Roster::CloseDlg {w} {
 }
 
 proc ::Jabber::Roster::Refresh { } {
+    variable wwave
 
     # Get my roster.
     ::Jabber::JlibCmd roster_get [namespace current]::PushProc
+    $wwave animate 1
 }
 
 # Jabber::Roster::SendRemove --
@@ -839,9 +853,11 @@ proc ::Jabber::Roster::Clear { } {
 }
 
 proc ::Jabber::Roster::ExitRoster { } {
+    variable wwave
 
     ::Jabber::UI::SetStatusMessage [mc jarostupdate]
-    
+    $wwave animate -1
+
     # Should perhaps fix the directories of the tree widget, such as
     # appending (#items) for each headline.
 }

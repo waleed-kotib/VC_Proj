@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.35 2004-10-05 12:16:23 matben Exp $
+# $Id: Disco.tcl,v 1.36 2004-10-12 13:48:56 matben Exp $
 
 package provide Disco 1.0
 
@@ -15,6 +15,8 @@ namespace eval ::Jabber::Disco:: {
     ::hooks::register loginHook          ::Jabber::Disco::LoginHook
     ::hooks::register logoutHook         ::Jabber::Disco::LogoutHook
     ::hooks::register presenceHook       ::Jabber::Disco::PresenceHook
+
+    option add *Disco.waveImage            wave           widgetDefault
 
     # Common xml namespaces.
     variable xmlns
@@ -79,10 +81,6 @@ namespace eval ::Jabber::Disco:: {
     # This is needed for the balloons that need a real canvas tag, and that
     # we can't use jid's for this since they may contain special chars (!)!
     variable treeuid 0
-
-    # We keep an reference count that gets increased by one for each request
-    # sent, and decremented by one for each response.
-    variable arrowRefCount 0
     
     # We could add more icons for other categories here!
     variable typeIcon
@@ -114,17 +112,17 @@ proc ::Jabber::Disco::LoginHook { } {
     #
     # We disco servers jid 'items+info', and disco its childrens 'info'.
     if {[string equal $jprefs(serviceMethod) "disco"]} {
-	::Jabber::Disco::GetItems $jserver(this)
-	::Jabber::Disco::GetInfo  $jserver(this)
+	GetItems $jserver(this)
+	GetInfo  $jserver(this)
     }
 }
 
 proc ::Jabber::Disco::LogoutHook { } {
     
     if {[lsearch [::Jabber::UI::Pages] "Disco"] >= 0} {
-	#::Jabber::Disco::SetUIWhen "disconnect"
+	#SetUIWhen "disconnect"
     }
-    ::Jabber::Disco::Clear
+    Clear
 }
 
 proc ::Jabber::Disco::HaveTree { } {    
@@ -181,9 +179,9 @@ proc ::Jabber::Disco::Command {disconame discotype from subiq args} {
     ::Debug 2 "::Jabber::Disco::Command discotype=$discotype, from=$from"
 
     if {[string equal $discotype "info"]} {
-	eval {::Jabber::Disco::ParseGetInfo $from $subiq} $args
+	eval {ParseGetInfo $from $subiq} $args
     } elseif {[string equal $discotype "items"]} {
-	eval {::Jabber::Disco::ParseGetItems $from $subiq} $args
+	eval {ParseGetItems $from $subiq} $args
     }
         
     # Tell jlib's iq-handler that we handled the event.
@@ -192,6 +190,7 @@ proc ::Jabber::Disco::Command {disconame discotype from subiq args} {
 
 proc ::Jabber::Disco::ItemsCB {disconame type from subiq args} {
     variable tstate
+    variable wwave
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
@@ -215,7 +214,7 @@ proc ::Jabber::Disco::ItemsCB {disconame type from subiq args} {
 		}
 	    }
 	    ::Jabber::AddErrorLog $from "Failed disco $from"
-	    catch {::Jabber::Disco::ControlArrows -1}
+	    catch {$wwave animate -1}
 	}
 	ok - result {
 
@@ -224,12 +223,12 @@ proc ::Jabber::Disco::ItemsCB {disconame type from subiq args} {
 		::Jabber::UI::NewPage "Disco"
 	    }
 	    unset -nocomplain tstate(run,$from)
-	    ::Jabber::Disco::ControlArrows -1
+	    $wwave animate -1
 
 	    # Add to tree.
 	    set parents [$jstate(disco) parents $from]
 	    set v [concat $parents $from]
-	    ::Jabber::Disco::AddToTree $v
+	    AddToTree $v
 
 	    # Get info for the login servers children.
 	    set childs [$jstate(disco) children $from]
@@ -239,7 +238,7 @@ proc ::Jabber::Disco::ItemsCB {disconame type from subiq args} {
 		# 
 		# Perhaps we should discover depending on items category?
 		if {[jlib::jidequal $from $jserver(this)]} {
-		    ::Jabber::Disco::GetInfo $cjid
+		    GetInfo $cjid
 		}		
 	    }	    
 	}
@@ -284,9 +283,9 @@ proc ::Jabber::Disco::InfoCB {disconame type from subiq args} {
 	    $wtree itemconfigure $v -image $icon
 	}
 	set treectag [$wtree itemconfigure $v -canvastags]
-	::Jabber::Disco::MakeBalloonHelp $from $treectag
+	MakeBalloonHelp $from $treectag
     }
-    ::Jabber::Disco::SetDirItemUsingCategory $from
+    SetDirItemUsingCategory $from
     
     # Use specific (discoInfoGatewayIcqHook, discoInfoServerImHook,...) 
     # and general (discoInfoHook) hooks.
@@ -299,7 +298,7 @@ proc ::Jabber::Disco::InfoCB {disconame type from subiq args} {
 proc ::Jabber::Disco::SetDirItemUsingCategory {jid} {
     variable wtree
     
-    if {[::Jabber::Disco::IsDirCategory $jid]} {
+    if {[IsDirCategory $jid]} {
 	foreach v [$wtree find withtag $jid] {
 	    $wtree itemconfigure $v -dir 1
 	}
@@ -416,8 +415,8 @@ proc ::Jabber::Disco::Build {w} {
     global  this prefs
     
     variable wtree
-    variable wsearrows
     variable wtop
+    variable wwave
     variable btaddserv
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
@@ -430,20 +429,12 @@ proc ::Jabber::Disco::Build {w} {
     # The frame of class Disco.
     frame $w -borderwidth 0 -relief flat -class Disco
     set wbrowser $w
-    
-    set frbot [frame $w.frbot -bd 0]
-    set wsearrows $frbot.arr        
-    pack [::chasearrows::chasearrows $wsearrows -size 16] \
-      -side left -padx 5 -pady 0
-    pack $frbot -side bottom -fill x -padx 8 -pady 2
-    
-    if {0} {
-	frame $w.fs -relief groove -bd 2
-	canvas $w.fs.c -bd 0 -highlightthickness 0 -height 14
-	pack $w.fs.c -side left -pady 1 -padx 6 -fill x -expand true
-	$w.fs.c create text 0 0 -anchor nw -text {Some junk...} -font $fontS
-	pack $w.fs -side bottom -fill x -padx 8 -pady 2
-    }
+        
+    set wwave $w.fs
+    set waveImage [::Theme::GetImage [option get $w waveImage {}]]  
+    ::wavelabel::wavelabel $wwave -relief groove -bd 2 \
+      -type image -image $waveImage
+    pack $wwave -side bottom -fill x -padx 8 -pady 2
     
     set wbox $w.box
     pack [frame $wbox -border 1 -relief sunken]   \
@@ -674,6 +665,7 @@ proc ::Jabber::Disco::SelectCmd {w v} {
 
 proc ::Jabber::Disco::OpenTreeCmd {w v} {   
     variable wtree
+    variable wwave
     variable tstate
     upvar ::Jabber::jstate jstate
     
@@ -688,16 +680,16 @@ proc ::Jabber::Disco::OpenTreeCmd {w v} {
 	# We should have a method to tell if children have been added to tree!!!
 	if {![$jstate(disco) isdiscoed items $item]} {
 	    set tstate(run,$jid) 1
-	    ::Jabber::Disco::ControlArrows 1
+	    $wwave animate 1
 	    
 	    # Discover services available.
-	    ::Jabber::Disco::GetItems $jid
+	    GetItems $jid
 	} elseif {[llength [$wtree children $v]] == 0} {
 	    
 	    # An item may have been discoed but not from here.
 	    set children [$jstate(disco) children $item]
 	    foreach c $children {
-		::Jabber::Disco::AddToTree [concat $v [list $c]]
+		AddToTree [concat $v [list $c]]
 	    }
 	}
 	
@@ -705,14 +697,15 @@ proc ::Jabber::Disco::OpenTreeCmd {w v} {
     }    
 }
 
-proc ::Jabber::Disco::CloseTreeCmd {w v} {   
+proc ::Jabber::Disco::CloseTreeCmd {w v} {
+    variable wwave
     variable tstate
     
     ::Debug 2 "::Jabber::Disco::CloseTreeCmd v=$v"
     set jid [lindex $v end]
     if {[info exists tstate(run,$jid)]} {
 	unset tstate(run,$jid)
-	::Jabber::Disco::ControlArrows -1
+	$wwave animate -1
     }
 }
 
@@ -742,7 +735,7 @@ proc ::Jabber::Disco::AddToTree {v} {
     if {[llength $v] == 1} {
 	set isdir 1
     } else {
-	set isdir [::Jabber::Disco::IsDirCategory $jid]
+	set isdir [IsDirCategory $jid]
     }
     
     # Display text string. Room participants with their nicknames.
@@ -775,14 +768,14 @@ proc ::Jabber::Disco::AddToTree {v} {
 	  -image $icon -open $isopen -canvastags $treectag
 	
 	# Balloon.
-	::Jabber::Disco::MakeBalloonHelp $item $treectag
+	MakeBalloonHelp $item $treectag
     }
 
     # Add all child elements as well.
     set childs [$jstate(disco) children $item]
     foreach citem $childs {
 	set cv [concat $v [list $citem]]
-	::Jabber::Disco::AddToTree $cv
+	AddToTree $cv
      }	    
 }
 
@@ -807,6 +800,7 @@ proc ::Jabber::Disco::MakeBalloonHelp {item treectag} {
 
 proc ::Jabber::Disco::Refresh {jid} {    
     variable wtree
+    variable wwave
     variable tstate
     upvar ::Jabber::jstate jstate
     
@@ -822,39 +816,15 @@ proc ::Jabber::Disco::Refresh {jid} {
     
     # Disco once more, let callback manage rest.
     set tstate(run,$jid) 1
-    ::Jabber::Disco::ControlArrows 1
-    ::Jabber::Disco::GetInfo  $jid
-    ::Jabber::Disco::GetItems $jid
+    $wwave animate 1
+    GetInfo  $jid
+    GetItems $jid
 }
 
 proc ::Jabber::Disco::Clear { } {    
     upvar ::Jabber::jstate jstate
     
     $jstate(disco) reset
-}
-
-proc ::Jabber::Disco::ControlArrows {step} {    
-    variable wsearrows
-    variable arrowRefCount
-    
-    if {![winfo exists $wsearrows]} {
-	return
-    }
-    if {$step == 1} {
-	incr arrowRefCount
-	if {$arrowRefCount == 1} {
-	    $wsearrows start
-	}
-    } elseif {$step == -1} {
-	incr arrowRefCount -1
-	if {$arrowRefCount <= 0} {
-	    set arrowRefCount 0
-	    $wsearrows stop
-	}
-    } elseif {$step == 0} {
-	set arrowRefCount 0
-	$wsearrows stop
-    }
 }
 
 # Jabber::Disco::PresenceHook --
@@ -952,7 +922,7 @@ proc ::Jabber::Disco::InfoCmd {jid} {
     
     if {![$jstate(disco) isdiscoed info $jid]} {
 	set xmllist [$jstate(disco) get info $jid xml]
-	::Jabber::Disco::InfoResultCB result $jid $xmllist
+	InfoResultCB result $jid $xmllist
     } else {
 	$jstate(disco) send_get info $jid [namespace current]::InfoCmdCB
     }

@@ -5,9 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.62 2004-10-05 13:18:46 matben Exp $
-
-package require chasearrows
+# $Id: Browse.tcl,v 1.63 2004-10-12 13:48:56 matben Exp $
 
 package provide Browse 1.0
 
@@ -21,12 +19,10 @@ namespace eval ::Jabber::Browse:: {
     # Use option database for customization. 
     # Use priority 30 just to override the widgetDefault values!
     #option add *Browse*Tree.background    green            30
+    option add *Browse.waveImage            wave           widgetDefault
 
-    variable wtop {}
-
-    # We keep an reference count that gets increased by one for each request
-    # sent, and decremented by one for each response.
-    variable arrowRefCount 0
+    variable wtop  ""
+    variable wwave ""
     
     # Options only for internal use. EXPERIMENTAL! See browse.tcl
     #     -setbrowsedjid:   default=1, store the browsed jid even if cached already
@@ -34,9 +30,6 @@ namespace eval ::Jabber::Browse:: {
     array set options {
 	-setbrowsedjid 1
     }
-    
-    # Just a dummy widget name for the running arrows until it's built.
-    variable wsearrows .xx
     variable dlguid 0
     
     # Use a unique canvas tag in the tree widget for each jid put there.
@@ -238,6 +231,7 @@ proc ::Jabber::Browse::Command {browseName type from subiq args} {
 
 proc ::Jabber::Browse::Callback {browseName type from subiq} {    
     variable wtop
+    variable wwave
     variable tstate
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
@@ -247,7 +241,9 @@ proc ::Jabber::Browse::Callback {browseName type from subiq} {
       from=$from, subiq='[string range $subiq 0 60] ...'"
 
     unset -nocomplain tstate(run,$from)
-    ControlArrows -1
+    if {[winfo exists $wwave]} {
+	$wwave animate -1
+    }
     array set attrArr [wrapper::getattrlist $subiq]
 
     # Docs say that jid is required attribute but... 
@@ -398,6 +394,7 @@ proc ::Jabber::Browse::DispatchUsers {jid subiq} {
 
 proc ::Jabber::Browse::ErrorProc {silent browseName type jid errlist} {
     variable tstate
+    variable wwave
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
@@ -405,7 +402,7 @@ proc ::Jabber::Browse::ErrorProc {silent browseName type jid errlist} {
     ::Debug 2 "::Jabber::Browse::ErrorProc type=$type, jid=$jid, errlist='$errlist'"
 
     array unset tstate run,*
-    ControlArrows 0
+    $wwave animate 0
     
     # If we got an error browsing an actual server, then remove from list.
     set ind [lsearch -exact $jprefs(browseServers) $jid]
@@ -506,8 +503,8 @@ proc ::Jabber::Browse::Build {w} {
     global  this prefs
     
     variable wtree
-    variable wsearrows
     variable wtop
+    variable wwave
     variable btaddserv
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
@@ -520,20 +517,12 @@ proc ::Jabber::Browse::Build {w} {
     # The frame of class Browse.
     frame $w -borderwidth 0 -relief flat -class Browse
     set wbrowser $w
-    
-    set frbot [frame $w.frbot -bd 0]
-    set wsearrows $frbot.arr        
-    pack [::chasearrows::chasearrows $wsearrows -size 16] \
-      -side left -padx 5 -pady 0
-    pack $frbot -side bottom -fill x -padx 8 -pady 2
-    
-    if {0} {
-	frame $w.fs -relief groove -bd 2
-	canvas $w.fs.c -bd 0 -highlightthickness 0 -height 14
-	pack $w.fs.c -side left -pady 1 -padx 6 -fill x -expand true
-	$w.fs.c create text 0 0 -anchor nw -text {Some junk...} -font $fontS
-	pack $w.fs -side bottom -fill x -padx 8 -pady 2
-    }
+        
+    set wwave $w.fs
+    set waveImage [::Theme::GetImage [option get $w waveImage {}]]  
+    ::wavelabel::wavelabel $wwave -relief groove -bd 2 \
+      -type image -image $waveImage
+    pack $wwave -side bottom -fill x -padx 8 -pady 2
 
     set wbox $w.box
     pack [frame $wbox -border 1 -relief sunken]   \
@@ -548,9 +537,9 @@ proc ::Jabber::Browse::Build {w} {
       [list grid $wxsc -row 1 -column 0 -sticky ew]]  \
       -yscrollcommand [list ::UI::ScrollSet $wysc \
       [list grid $wysc -row 0 -column 1 -sticky ns]]  \
-      -selectcommand ::Jabber::Browse::SelectCmd   \
+      -selectcommand [namespace current]::SelectCmd   \
       -closecommand [namespace current]::CloseTreeCmd  \
-      -opencommand ::Jabber::Browse::OpenTreeCmd
+      -opencommand [namespace current]::OpenTreeCmd
     
     if {[string match "mac*" $this(platform)]} {
 	$wtree configure -buttonpresscommand [namespace current]::Popup \
@@ -1067,7 +1056,8 @@ proc ::Jabber::Browse::SelectCmd {w v} {
 #       none.
 
 proc ::Jabber::Browse::OpenTreeCmd {w v} {   
-    variable wtree    
+    variable wtree
+    variable wwave
     variable tstate
     upvar ::Jabber::jstate jstate
     
@@ -1080,7 +1070,7 @@ proc ::Jabber::Browse::OpenTreeCmd {w v} {
 	# We should have a method to tell if children have been added to tree!!!
 	if {![$jstate(browse) isbrowsed $jid]} {
 	    set tstate(run,$jid) 1
-	    ControlArrows 1
+	    $wwave animate 1
 	    
 	    # Browse services available.
 	    Get $jid
@@ -1094,18 +1084,20 @@ proc ::Jabber::Browse::OpenTreeCmd {w v} {
 }
 
 proc ::Jabber::Browse::CloseTreeCmd {w v} {   
+    variable wwave
     variable tstate
     
     ::Debug 2 "::Jabber::Browse::CloseTreeCmd v=$v"
     set jid [lindex $v end]
     if {[info exists tstate(run,$jid)]} {
 	unset tstate(run,$jid)
-	ControlArrows -1
+	$wwave animate -1
     }
 }
 
 proc ::Jabber::Browse::Refresh {jid} {    
-    variable wtree    
+    variable wtree
+    variable wwave
     variable tstate
     upvar ::Jabber::jstate jstate
     
@@ -1121,32 +1113,8 @@ proc ::Jabber::Browse::Refresh {jid} {
     
     # Browse once more, let callback manage rest.
     set tstate(run,$jid) 1
-    ControlArrows 1
+    $wwave animate 1
     Get $jid
-}
-
-proc ::Jabber::Browse::ControlArrows {step} {    
-    variable wsearrows
-    variable arrowRefCount
-    
-    if {![winfo exists $wsearrows]} {
-	return
-    }
-    if {$step == 1} {
-	incr arrowRefCount
-	if {$arrowRefCount == 1} {
-	    $wsearrows start
-	}
-    } elseif {$step == -1} {
-	incr arrowRefCount -1
-	if {$arrowRefCount <= 0} {
-	    set arrowRefCount 0
-	    $wsearrows stop
-	}
-    } elseif {$step == 0} {
-	set arrowRefCount 0
-	$wsearrows stop
-    }
 }
 
 # Jabber::Browse::ClearRoom --

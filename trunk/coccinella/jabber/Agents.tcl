@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Agents.tcl,v 1.29 2004-10-05 12:16:23 matben Exp $
+# $Id: Agents.tcl,v 1.30 2004-10-12 13:48:56 matben Exp $
 
 package provide Agents 1.0
 
@@ -14,10 +14,7 @@ namespace eval ::Jabber::Agents:: {
     ::hooks::register loginHook      ::Jabber::Agents::LoginCmd
     ::hooks::register logoutHook     ::Jabber::Agents::LogoutHook
 
-    # We keep an reference count that gets increased by one for each request
-    # sent, and decremented by one for each response.
-    variable arrowRefCount 0
-    variable arrMsg ""
+    option add *Agent.waveImage            wave           widgetDefault
     
     # Template for the agent popup menu.
     variable popMenuDefs
@@ -44,7 +41,7 @@ proc ::Jabber::Agents::LoginCmd { } {
     # Get the services for all our servers on the list. Depends on our settings:
     # If browsing fails must use "agents" as a fallback.
     if {[string equal $jprefs(serviceMethod) "agents"]} {
-	::Jabber::Agents::GetAll
+	GetAll
     }
 }
 
@@ -70,8 +67,8 @@ proc ::Jabber::Agents::GetAll { } {
     
     set allServers [lsort -unique [concat $jserver(this) $jprefs(agentsServers)]]
     foreach server $allServers {
-	::Jabber::Agents::Get $server
-	::Jabber::Agents::GetAgent {} $server -silent 1
+	Get $server
+	GetAgent {} $server -silent 1
     }
 }
 
@@ -175,8 +172,8 @@ proc ::Jabber::Agents::AgentsCallback {jid jlibName type subiq} {
 		}
 		
 		# Fill in tree items.
-		::Jabber::Agents::AddAgentToTree $jid $jidAgent $subAgent
-		::Jabber::Agents::GetAgent $jid $jidAgent -silent 1
+		AddAgentToTree $jid $jidAgent $subAgent
+		GetAgent $jid $jidAgent -silent 1
 	    }
 	}
     }
@@ -197,10 +194,9 @@ proc ::Jabber::Agents::AgentsCallback {jid jlibName type subiq} {
 proc ::Jabber::Agents::GetAgentCallback {parentJid jid silent jlibName type subiq} {
     
     variable wagents
-    variable warrows
     variable wtree
+    variable wwave
     variable wtreecanvas
-    variable arrMsg
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jprefs jprefs
@@ -209,7 +205,7 @@ proc ::Jabber::Agents::GetAgentCallback {parentJid jid silent jlibName type subi
       jid=$jid, type=$type"
     
     if {[winfo exists $wagents]} {
-	::Jabber::Agents::ControlArrows -1
+	$wwave animate -1
     }
     
     switch -- $type {
@@ -223,7 +219,7 @@ proc ::Jabber::Agents::GetAgentCallback {parentJid jid silent jlibName type subi
 	result - ok {
 	
 	    # Fill in tree.
-	    ::Jabber::Agents::AddAgentToTree $parentJid $jid  \
+	    AddAgentToTree $parentJid $jid  \
 	      [wrapper::getchildren $subiq]
 	}
     }
@@ -315,10 +311,9 @@ proc ::Jabber::Agents::Build {w args} {
     global  prefs this
 
     variable wagents
-    variable warrows
     variable wtree
     variable wtreecanvas
-    variable arrMsg
+    variable wwave
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jprefs jprefs
@@ -330,22 +325,12 @@ proc ::Jabber::Agents::Build {w args} {
     # The frame.
     frame $w -borderwidth 0 -relief flat -class Agent
     set wagents $w
-
-    # Start with running arrows and message.
-    pack [frame $w.bot] -side bottom -fill x -anchor w -padx 8 -pady 6
-    set warrows $w.bot.arr
-    pack [::chasearrows::chasearrows $warrows -size 16] \
-      -side left -padx 5 -pady 5
-    pack [label $w.bot.la   \
-      -textvariable [namespace current]::arrMsg] -side left -padx 8 -pady 6
     
-    if {0} {
-	frame $w.fs -relief groove -bd 2
-	canvas $w.fs.c -bd 0 -highlightthickness 0 -height 14
-	pack $w.fs.c -side left -pady 1 -padx 6 -fill x -expand true
-	$w.fs.c create text 0 0 -anchor nw -text {Some junk...} -font $fontS
-	pack $w.fs -side bottom -fill x -padx 8 -pady 2
-    }
+    set wwave $w.fs
+    set waveImage [::Theme::GetImage [option get $w waveImage {}]]  
+    ::wavelabel::wavelabel $wwave -relief groove -bd 2 \
+      -type image -image $waveImage
+    pack $wwave -side bottom -fill x -padx 8 -pady 2
     
     # Tree part
     set wbox $w.box
@@ -541,28 +526,6 @@ proc ::Jabber::Agents::Popup {w v x y} {
     if {[string equal "macintosh" $this(platform)]} {
 	catch {destroy $m}
 	update
-    }
-}
-
-proc ::Jabber::Agents::ControlArrows {step} {
-    
-    variable warrows
-    variable arrowRefCount
-    
-    if {$step == 1} {
-	incr arrowRefCount
-	if {$arrowRefCount == 1} {
-	    $warrows start
-	}
-    } elseif {$step == -1} {
-	incr arrowRefCount -1
-	if {$arrowRefCount <= 0} {
-	    set arrowRefCount 0
-	    $warrows stop
-	}
-    } elseif {$step == 0} {
-	set arrowRefCount 0
-	$warrows stop
     }
 }
 

@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.67 2004-09-30 12:43:07 matben Exp $
+# $Id: jabberlib.tcl,v 1.68 2004-10-12 13:48:56 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -58,6 +58,7 @@
 #   SYNOPSIS
 #      jlib::new rosterName clientCmd ?-opt value ...?
 #      jlib::havesasl
+#      jlib::havetls
 #      
 #   OPTIONS
 #	-iqcommand            callback for <iq> elements not handled explicitly
@@ -346,11 +347,7 @@ proc jlib::new {rostername clientcmd args} {
       [namespace current]::handle_get_time
     iq_register $jlibname get jabber:iq:version \
       [namespace current]::handle_get_version
-    
-    if {$statics(sasl)} {
-	jlib::sasl_new $jlibname
-    }
-    
+        
     # Any of {available away dnd invisible unavailable}
     set locals(status) "unavailable"
     set locals(myjid) ""
@@ -379,12 +376,17 @@ proc jlib::init {} {
 	set statics(sasl) 1
 	sasl_init
     }
+    if {[catch {package require jlibtls}]} {
+	set statics(tls) 0
+    } else {
+	set statics(tls) 1
+    }
     set statics(inited) 1
 }
 
 # jlib::havesasl --
 # 
-#       Cache this info for effectiveness. It is needed att application level.
+#       Cache this info for effectiveness. It is needed at application level.
 
 proc jlib::havesasl { } {
     variable statics
@@ -397,6 +399,23 @@ proc jlib::havesasl { } {
 	}
     }
     return $statics(sasl)
+}
+
+# jlib::havetls --
+# 
+#       Cache this info for effectiveness. It is needed at application level.
+
+proc jlib::havetls { } {
+    variable statics
+    
+    if {![info exists statics(tls)]} {
+	if {[catch {package require jlibtls}]} {
+	    set statics(tls) 0
+	} else {
+	    set statics(tls) 1
+	}
+    }
+    return $statics(tls)
 }
 
 # jlib::cmdproc --

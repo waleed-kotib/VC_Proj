@@ -4,6 +4,11 @@ Whiteboard CHANGES
 
 Not to mention all bugfixes and rewrites.
 
+Coccinella-0.95.2 (04????): 	Short summary --
+
+        - each page, roster, disco, browser, agents, now have their own status
+	  widget
+
 Coccinella-0.95.1 (040930): 	Short summary --
 
 	- SASL authentication

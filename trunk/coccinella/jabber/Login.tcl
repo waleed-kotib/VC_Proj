@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.46 2004-09-28 13:50:18 matben Exp $
+# $Id: Login.tcl,v 1.47 2004-10-12 13:48:56 matben Exp $
 
 package provide Login 1.0
 
@@ -87,7 +87,7 @@ proc ::Jabber::Login::Dlg { } {
     grid $frmid.lpop -column 0 -row 0 -sticky e
     grid $wpopup -column 1 -row 0 -sticky e
     
-    ::Jabber::Login::LoadProfiles
+    LoadProfiles
 
     label $frmid.lserv -text "[mc {Jabber server}]:" -font $fontSB -anchor e
     entry $frmid.eserv -width 22    \
@@ -234,7 +234,7 @@ proc ::Jabber::Login::CloseHook {wclose} {
     
     if {[string equal $wclose $wDlgs(jlogin)]} {
 	set finished 0
-	::Jabber::Login::Close $wclose
+	Close $wclose
     }
 }
 
@@ -264,7 +264,7 @@ proc ::Jabber::Login::DoCancel {w} {
     variable finished
 
     set finished 0
-    ::Jabber::Login::Close $w
+    Close $w
 }
 
 proc ::Jabber::Login::Profiles { } {
@@ -337,14 +337,20 @@ proc ::Jabber::Login::DoLogin {} {
 	}
     }    
     set finished 1
-    ::Jabber::Login::Close $wtoplevel
-    
+    Close $wtoplevel
+
+    # The "old" jabber protocol uses a designated port number for ssl
+    # connections. 
+    # In xmpp tls negotiating is made in stream using the standard port.
     set opts {}
+    if {!$moreOpts(sasl) && $moreOpts(ssl)} {
+	lappend opts -ssl 1
+    }
     if {$moreOpts(httpproxy)} {
 	lappend opts -httpproxy 1
     }
-    eval {::Jabber::Login::Connect $server [namespace current]::DoLoginCB \
-      -ssl $moreOpts(ssl) -ip $moreOpts(ip) -port $moreOpts(port)} $opts
+    eval {Connect $server [namespace current]::DoLoginCB \
+      -ip $moreOpts(ip) -port $moreOpts(port)} $opts
 }
 
 proc ::Jabber::Login::DoLoginCB {status msg} {
@@ -363,14 +369,15 @@ proc ::Jabber::Login::DoLoginCB {status msg} {
 	      [mc jamesstimeoutserver $server]]
 	}
 	default {
+	    
 	    # Go ahead...
 	    set opts {}
 	    if {$moreOpts(sasl)} {
 		lappend opts -sasl 1
 	    }
 	    if {[catch {
-		eval {::Jabber::Login::InitStream $server \
-		  [namespace current]::DoAuthorize} $opts
+		eval {InitStream $server \
+		  [namespace current]::InitStreamResult} $opts
 	    } err]} {
 		tk_messageBox -icon error -title [mc {Open Failed}] \
 		  -type ok -message [FormatTextForMessageBox $err]
@@ -379,23 +386,22 @@ proc ::Jabber::Login::DoLoginCB {status msg} {
     }
 }
 
-proc ::Jabber::Login::DoAuthorize {args} {
+proc ::Jabber::Login::InitStreamResult {args} {
     variable server
     variable username
     variable password
     variable resource
     variable moreOpts
+
+    ::Debug 2 "::Jabber::Login::InitStreamResult args=$args"
     
-    ::Debug 2 "::Jabber::Login::DoAuthorize args=$args"
     array set argsArr $args
+
     if {![info exists argsArr(id)]} {
 	tk_messageBox -icon error -type ok -message \
 	  "no id for digest in receiving <stream>"
     } else {
-	if {$resource == ""} {
-	    set resource "coccinella"
-	}
-	
+
 	# If we are trying to use sasl indicated by version='1.0' we must also
 	# be sure to receive a version attribute larger or equal to 1.0.
 	set trysasl $moreOpts(sasl)
@@ -412,7 +418,43 @@ proc ::Jabber::Login::DoAuthorize {args} {
 	    ::Jabber::AddErrorLog $server  \
 	      "SASL authentization failed since server does not support version=1.0"
 	}
-	::Jabber::Login::Authorize $server $username $resource $password \
+	set starttls 0
+	if {$moreOpts(sasl) && $moreOpts(ssl)} {
+	    set starttls 1
+	}
+	
+	# We either start tls or authorize.
+	if {$starttls} {
+	    StartTls [namespace current]::StartTlsResult
+	} else {
+	    if {$resource == ""} {
+		set resource "coccinella"
+	    }
+	    Authorize $server $username $resource $password \
+	      [namespace current]::Finish -streamid $argsArr(id)  \
+	      -digest $moreOpts(digest) -sasl $moreOpts(sasl)
+	}    
+    }    
+}
+
+proc ::Jabber::Login::StartTlsResult {jlibname type args} {
+    variable server
+    variable username
+    variable password
+    variable resource
+    variable moreOpts
+    
+    ::Debug 2 "::Jabber::Login::StartTlsResult type=$type, args=$args"
+    
+    if {[string equal $type "error"]} {
+	foreach {errcode errmsg} [lindex $args 0] break
+	tk_messageBox -icon error -type ok -title [mc Error]  \
+	  -message [FormatTextForMessageBox $errmsg]
+    } else {
+	if {$resource == ""} {
+	    set resource "coccinella"
+	}
+	Authorize $server $username $resource $password \
 	  [namespace current]::Finish -streamid $argsArr(id)  \
 	  -digest $moreOpts(digest) -sasl $moreOpts(sasl)
     }
@@ -431,7 +473,7 @@ proc ::Jabber::Login::Finish {type msg} {
 	::Profiles::SetSelectedName $profile
 	
 	# Login was succesful, set presence.
-	::Jabber::Login::SetStatus -priority $moreOpts(priority)  \
+	SetStatus -priority $moreOpts(priority)  \
 	  -invisible $moreOpts(invisible)
     }
 }
@@ -464,6 +506,7 @@ proc ::Jabber::Login::SetStatus {args} {
 # component:
 #       o connect socket
 #       o initialize the stream
+#       o start tls
 #       o authorize
 #       
 # They get and set jstate and other state variables. User interface elements
@@ -492,6 +535,7 @@ proc ::Jabber::Login::Connect {server cmd args} {
     upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::Jabber::Login::Connect args=$args"
+    
     array set argsArr {
 	-ip         ""
 	-ssl        0
@@ -520,6 +564,10 @@ proc ::Jabber::Login::Connect {server cmd args} {
     } else {
 	set host $argsArr(-ip)
     }
+    
+    # The "old" jabber protocol uses a designated port number for ssl
+    # connections. 
+    # In xmpp tls negotiating is made in stream using the standard port.
     
     # Open socket unless we are using a http proxy.
     if {!$argsArr(-httpproxy)} {
@@ -590,7 +638,6 @@ proc ::Jabber::Login::ConnectCB {cmd sock ip port status {msg {}}} {
 	}
 	default {
 	    set jstate(sock) $sock
-	    
 	    $jstate(jlib) setsockettransport $jstate(sock)
 	}
     }    
@@ -637,6 +684,22 @@ proc ::Jabber::Login::InitStream {server cmd args} {
 proc ::Jabber::Login::InitStreamCB {cmd jlibName args} {
     
     # One of args shall be -id hexnumber
+    uplevel #0 $cmd $args
+}
+
+# Jabber::Login::StartTls --
+# 
+# 
+
+proc ::Jabber::Login::StartTls {cmd} {
+    upvar ::Jabber::jstate jstate
+    
+    ::Jabber::UI::SetStatusMessage "Negotiating TLS security"
+    $jstate(jlib) starttls [list [namespace current]::StartTlsCB $cmd]    
+}
+
+proc ::Jabber::Login::StartTlsCB {cmd jlibName args} {
+
     uplevel #0 $cmd $args
 }
 

@@ -4,9 +4,9 @@
 #      It implements a combined label and dynamic status animation.
 #      
 #  Copyright (c) 2004  Mats Bengtsson
-#  This source file is distributed under the BSD licens.
+#  This source file is distributed under the BSD license.
 #
-# $Id: wavelabel.tcl,v 1.3 2004-10-11 06:14:20 matben Exp $
+# $Id: wavelabel.tcl,v 1.4 2004-10-12 13:48:56 matben Exp $
 #
 # ########################### USAGE ############################################
 #
@@ -24,6 +24,7 @@
 #      -type, type, Type
 #      
 #   WIDGET COMMANDS
+#      pathName animate ?+1|0|-1?
 #      pathName cget option
 #      pathName configure ?option? ?value option value ...?
 #      pathName message str
@@ -41,14 +42,14 @@ namespace eval ::wavelabel:: {
     # Static variables.
     variable stat
     
-    set stat(debug) 2
+    set stat(debug) 0
     
     # Define speed and update frequency. Pix per sec and times per sec.
     set speed 150
     set freq  16
     set stat(pix)   [expr int($speed/$freq)]
     set stat(wait)  [expr int(1000.0/$freq)]
-    set stat(swait) 1000
+    set stat(swait) 200
 }
 
 # ::wavelabel::Init --
@@ -90,29 +91,36 @@ proc ::wavelabel::Init { } {
 
     # List all allowed options with their database names and class names.
     array set widgetOptions {
-	-background    {background    Background }      \
-	-font          {font          Font       }      \
-	-foreground    {foreground    Foreground }      \
-	-height        {height        Height     }      \
-	-image         {image         Image      }      \
-	-takefocus     {takeFocus     TakeFocus  }      \
-	-type          {type          Type       }      \
-	-width         {width         Width      }      \
+	-background    {background    Background   }    \
+	-bd            {borderWidth   BorderWidth  }    \
+	-font          {font          Font         }    \
+	-foreground    {foreground    Foreground   }    \
+	-height        {height        Height       }    \
+	-image         {image         Image        }    \
+	-relief        {relief        Relief       }    \
+	-takefocus     {takeFocus     TakeFocus    }    \
+	-textvariable  {textVariable  TextVariable }    \
+	-type          {type          Type         }    \
+	-width         {width         Width        }    \
     }
   
     # The legal widget commands.
-    set widgetCommands {cget configure message start stop}
+    set widgetCommands {animate cget configure message start stop}
 
     # Drawing stuff for the arrows.
 
     
     # Options for this widget
     option add *WaveLabel.background    white        widgetDefault
+    option add *WaveLabel.borderWidth   0            widgetDefault
     option add *WaveLabel.foreground    black        widgetDefault
-    option add *WaveLabel.height        14           widgetDefault
+    option add *WaveLabel.height        0            widgetDefault
     option add *WaveLabel.image         ""           widgetDefault
+    option add *WaveLabel.relief        flat         widgetDefault
     option add *WaveLabel.takeFocus     0            widgetDefault
+    option add *WaveLabel.textVariable  ""           widgetDefault
     option add *WaveLabel.type          image        widgetDefault
+    option add *WaveLabel.width         200          widgetDefault
 
     # Platform specifics...
     switch -- $this(platform) {
@@ -172,7 +180,6 @@ proc ::wavelabel::wavelabel {w args} {
     return [eval Build $w $args]
 }
 
-
 # ::wavelabel::Build --
 #
 #       Parses options, creates widget command, and calls the Configure 
@@ -203,6 +210,7 @@ proc ::wavelabel::Build {w args} {
     # Set simpler variable names.
     upvar ::wavelabel::${w}::options options
     upvar ::wavelabel::${w}::widgets widgets
+    upvar ::wavelabel::${w}::priv    priv
 
     # We use a frame for this specific widget class.
     set widgets(this) [frame $w -class WaveLabel]
@@ -220,7 +228,6 @@ proc ::wavelabel::Build {w args} {
 	set optName [lindex $widgetOptions($name) 0]
 	set optClass [lindex $widgetOptions($name) 1]
 	set options($name) [option get $w $optName $optClass]
-	#puts "name=$name, optName=$optName, optClass=$optClass, options=$options($name)"
     }
     
     # Apply the options supplied in the widget command.
@@ -233,12 +240,16 @@ proc ::wavelabel::Build {w args} {
     proc ::${w} {command args}   \
       "eval ::wavelabel::WidgetProc {$w} \$command \$args"
 
-    canvas $widgets(canvas) -height $options(-height)  \
+    # The height is just temporary.
+    canvas $widgets(canvas) -height 14  \
       -bd 0 -highlightthickness 0 -bg $options(-background)
     pack $widgets(canvas) -fill both
     
     $widgets(canvas) create text 10 0 -anchor nw -text "" -font $options(-font) \
       -tags tstr
+    $widgets(frame) configure -relief $options(-relief) -bd $options(-bd)
+    
+    set priv(refcount) 0
 
     # The actual drawing takes place from 'Configure' which calls
     # the 'Draw' procedure when necessary.
@@ -278,6 +289,9 @@ proc ::wavelabel::WidgetProc {w command args} {
     
     # Which command?
     switch -- $command {
+	animate {
+	    set result [eval {Animate $w} $args]
+	}
 	cget {
 	    if {[llength $args] != 1} {
 		error "wrong # args: should be $w cget option"
@@ -380,14 +394,46 @@ proc ::wavelabel::Configure {w args} {
 	    -height {
 		$widgets(canvas) configure -height $newValue
 	    }
+	    -textvariable {
+		if {($newValue != $oldValue) && ($oldValue != "")} {
+		    uplevel #0 [list trace remove variable $oldValue write \
+		      [list [namespace current]::Trace $w]]
+		}
+		if {$newValue != ""} {
+		    uplevel #0 [list trace add variable $newValue write \
+		      [list [namespace current]::Trace $w]]
+		}
+	    }
 	    -width {
 		$widgets(canvas) configure -width $newValue
 	    }
 	}
     }
+    if {$options(-height) == 0} {
+	set linespace [font metrics $options(-font) -linespace]
+	$widgets(canvas) configure -height [expr $linespace + 1]
+    }
     if {[string equal $options(-type) "image"] && ($options(-image) == "")} {
 	error "-image option missing"
     }
+}
+
+proc ::wavelabel::Trace {w name1 name2 op} {
+
+    variable stat
+    upvar ::wavelabel::${w}::widgets widgets
+
+    if {$stat(debug) > 1} {
+	puts "::wavelabel::Trace name1=$name1, name2=$name2"
+    }
+
+    # Not foolproof!
+    if {$name2 == ""} {
+	upvar #0 $name1 locVar
+    } else {
+	upvar #0 $name1($name2) locVar
+    }
+    $widgets(canvas) itemconfigure tstr -text $locVar
 }
 	
 # ::wavelabel::Start --
@@ -403,6 +449,7 @@ proc ::wavelabel::Start {w} {
 
     variable stat
     upvar ::wavelabel::${w}::options options
+    upvar ::wavelabel::${w}::priv    priv
 
     if {$stat(debug) > 1} {
 	puts "::wavelabel::Start w=$w"
@@ -415,7 +462,37 @@ proc ::wavelabel::Start {w} {
 	    StartStep $w
 	}
     }
+    set priv(refcount) 1
     return {}
+}
+
+# ::wavelabel::Animate --
+#
+#       Starts the running arrows.
+#       
+# Arguments:
+#       w       the widget path.
+# Results:
+#       none.
+
+proc ::wavelabel::Animate {w {step 1}} {
+
+    upvar ::wavelabel::${w}::priv  priv
+
+    if {$step == 1} {
+	incr priv(refcount)
+	if {$priv(refcount) == 1} {
+	     Start $w
+	}
+    } elseif {$step == -1} {
+	incr priv(refcount) -1
+	if {$priv(refcount) <= 0} {
+	    Stop $w
+	}
+    } elseif {$step == 0} {
+	Stop $w
+    }
+    return $priv(refcount)
 }
 
 proc ::wavelabel::StartImage {w} {
@@ -558,7 +635,7 @@ proc ::wavelabel::AnimateStep {w} {
 	$c raise tstepleft
 	set priv(left) 1
     }    
-    if {!$priv(right) && ($xleft(l) < 0)} {
+    if {!$priv(right) && ($xleft(l) < $dx)} {
 	puts "trigger right: xleft(l)=$xleft(l), xleft(r)=$xleft(r)"
 	$c raise tstepright
 	set priv(right) 1
@@ -600,6 +677,7 @@ proc ::wavelabel::Stop {w} {
 	    }
 	}
     }
+    set priv(refcount) 0
     return {}
 }
 
@@ -619,10 +697,15 @@ proc ::wavelabel::X {t a k} {
 
 proc ::wavelabel::DestroyHandler {w} {
 
-    upvar ::wavelabel::${w}::priv priv
+    upvar ::wavelabel::${w}::options options
+    upvar ::wavelabel::${w}::priv    priv
  
     if {[info exists priv(killerId)]} {
 	catch {after cancel $priv(killerId)}
+    }
+    if {$options(-textvariable) != ""} {
+	uplevel #0 [list trace remove variable $options(-textvariable) write \
+	  [list [namespace current]::Trace $w]]
     }
      
     # Remove the namespace with the widget.
