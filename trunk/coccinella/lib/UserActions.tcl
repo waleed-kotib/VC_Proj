@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UserActions.tcl,v 1.7 2003-06-01 10:26:58 matben Exp $
+# $Id: UserActions.tcl,v 1.8 2003-06-07 12:46:36 matben Exp $
 
 namespace eval ::UserActions:: {
     
@@ -686,17 +686,19 @@ proc ::UserActions::DoSendCanvas {wtop} {
 		    }
 		    XanimFrame {
 			# ?
-		    }
-		    default {
-			
-			# What about other formats that are put in their own
-			# window widget? We should have some hook here for
-			# 3rd party extensions such VTK.
-			
 			continue
 		    }
+		    default {
+			if {[::Plugins::HaveSaveProcForWinClass $windowClass]} {
+			    set procName \
+			      [::Plugins::GetSaveProcForWinClass $windowClass]
+			    set line [$procName $w $id -uritype http]
+			}
+		    }
 		}
-		lappend cmdList [concat "CANVAS:" $line]
+		if {$line != ""} {
+		    lappend cmdList [concat "CANVAS:" $line]
+		}
 	    }
 	    default {
 		set cmd [::CanvasUtils::GetOnelinerForItem $w $id]
@@ -704,6 +706,7 @@ proc ::UserActions::DoSendCanvas {wtop} {
 	    }
 	}
     }
+    puts $cmdList
     
     # Be sure to send jabber stuff in a single batch. 
     # Jabber: override doSend checkbutton!
@@ -792,8 +795,9 @@ proc ::UserActions::DoQuit {args} {
     # Before quitting, save whiteboard preferences and geom state. 
     if {[wm state .] == "normal"} {
 	::UI::SaveWhiteboardState .
-	::UI::SaveWhiteboardDims .
-	::UI::SaveCleanWhiteboardDims .
+	if {![string equal $prefs(protocol) "jabber"]} {
+	    ::UI::SaveCleanWhiteboardDims .
+	}
     }
     
     # If we used 'Edit/Revert To/Application Defaults' be sure to reset...

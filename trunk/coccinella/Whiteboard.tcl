@@ -15,7 +15,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Whiteboard.tcl,v 1.11 2003-06-01 10:26:57 matben Exp $
+# $Id: Whiteboard.tcl,v 1.12 2003-06-07 12:46:35 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -378,12 +378,21 @@ set allLibSourceFiles {
 }
 
 foreach sourceName $allLibSourceFiles {
-    if {0 && [catch {source [file join $this(path) lib $sourceName]} msg]} {
-	after idle {tk_messageBox -message "Error sourcing $sourceName:  $msg"  \
-	  -icon error -type ok; exit}
-    }    
-    source [file join $this(path) lib $sourceName]
+    if {$debugLevel == 0} {
+	if {[catch {source [file join $this(path) lib $sourceName]} msg]} {
+	    after idle {tk_messageBox -message "Error sourcing $sourceName:  $msg"  \
+	      -icon error -type ok; exit}
+	}    
+    } else {
+	source [file join $this(path) lib $sourceName]
+    }
 }
+
+proc Dump {name1 name2 op} {
+    upvar $name1 value
+    puts "Dump name1=$name1, name2=$name2"
+}
+#trace add variable ::UI::dims(hRoot) write Dump
 
 # The http package can be useful?
 if {![catch {package require http} msg]} {
@@ -398,6 +407,7 @@ set prefs(printer) 0
 set prefs(tls) 0
 set prefs(optcl) 0
 set prefs(tcom) 0
+
 switch -- $this(platform) {
     macintosh - macosx {
 	if {[catch {source [file join $this(path) lib MacintoshUtils.tcl]} msg]} {
@@ -613,6 +623,7 @@ if {$argc > 0} {
 # Make the actual whiteboard with canvas, tool buttons etc...
 # Jabber has the roster window as "main" window.
 if {![string equal $prefs(protocol) "jabber"]} {
+    ::SplashScreen::SetMsg [::msgcat::mc splashbuild]
     ::UI::BuildMain . -serverentrystate disabled
 }
 if {$prefs(firstLaunch) && !$prefs(stripJabber)} {
@@ -634,6 +645,13 @@ bind Text <FocusIn> "+ ::UI::FixMenusWhenSelection %W"
 bind Text <ButtonRelease-1> "+ ::UI::FixMenusWhenSelection %W"
 bind Text <<Cut>> "+ ::UI::FixMenusWhenSelection %W"
 bind Text <<Copy>> "+ ::UI::FixMenusWhenSelection %W"
+	
+# Mac OS X have the Quit menu on the Apple menu instead. Catch it!
+if {[string equal $this(platform) "macosx"]} {
+    if {![catch {package require tclAE}]} {
+	tclAE::installEventHandler aevt quit ::UI::AEQuitHandler
+    }
+}
 
 # At this point we should be finished with the launch and delete the splash 
 # screen.

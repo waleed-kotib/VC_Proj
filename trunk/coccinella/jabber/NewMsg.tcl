@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.5 2003-05-18 13:20:20 matben Exp $
+# $Id: NewMsg.tcl,v 1.6 2003-06-07 12:46:36 matben Exp $
 
 package provide NewMsg 1.0
 
@@ -194,12 +194,12 @@ proc ::Jabber::NewMsg::Build {wbase args} {
 	    if {$n > 1} {
 		::Jabber::NewMsg::FillAddrLine $w $frport $n
 	    }	    
-	    regexp {^([^/]+)(/.+)?$} $jid match jidNoRes x
-	    set isroom [$jstate(jlib) service isroom $jidNoRes]
+	    regexp {^([^/]+)(/.*)?$} $jid match jid2 x
+	    set isroom [$jstate(jlib) service isroom $jid2]
 	    if {$isroom} {
 		set tojid $jid
 	    } else {
-		set tojid $jidNoRes
+		set tojid $jid2
 	    }
 	    set locals($w,addr$n) $tojid
 	    incr n

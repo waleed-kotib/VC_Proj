@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: GetFileIface.tcl,v 1.1 2003-05-18 13:01:35 matben Exp $
+# $Id: GetFileIface.tcl,v 1.2 2003-06-07 12:46:36 matben Exp $
 
 package require getfile
 package require uriencode
@@ -102,7 +102,11 @@ proc ::GetFileIface::GetFile {wtop sock fileName optList} {
     }
     set getstate(token) $token
     set getstate(peername) [fconfigure $sock -peername]
-    set getstate(fromname) $getstate(peername)
+    if {[info exists optArr(from:)]} {	
+	set getstate(fromname) $optArr(from:)
+    } else {
+	set getstate(fromname) [lindex $getstate(peername) 1]
+    }
 }
 
 # GetFileIface::GetFileFromServer --
@@ -185,7 +189,11 @@ proc ::GetFileIface::GetFileFromServer {wtop ip port path optList} {
 	return
     }
     set getstate(token) $token
-    set getstate(fromname) $ip
+    if {[info exists optArr(from:)]} {	
+	set getstate(fromname) $optArr(from:)
+    } else {
+	set getstate(fromname) $ip
+    }
 }
 
 # GetFileIface::Prepare --
@@ -301,7 +309,7 @@ proc ::GetFileIface::Progress {gettoken token total current} {
     
     upvar #0 $gettoken getstate          
 
-    Debug 3 "::GetFileIface::Progress total=$total, current=$current"
+    Debug 4 "::GetFileIface::Progress total=$total, current=$current"
 
     # Be silent... except for a necessary update command to not block.
     if {[string equal $tcl_platform(platform) "windows"]} {
@@ -326,6 +334,10 @@ proc ::GetFileIface::Progress {gettoken token total current} {
     }
 }
 
+# GetFileIface::Command --
+# 
+#       Command callback for the getfile package.
+
 proc ::GetFileIface::Command {gettoken token what msg} {
     global  prefs
     upvar #0 $gettoken getstate          
@@ -335,30 +347,20 @@ proc ::GetFileIface::Command {gettoken token what msg} {
     set wtop $getstate(wtop)
     
     if {[string equal $what "error"]} {
-	set ncode [::getfile::ncode $token]
-	set codetxt [::getfile::ncodetotext $ncode]
-
-	# Depending on the flavour of the return code do different things.
+	::UI::SetStatusMessage $wtop $msg
 	if {$prefs(talkative) >= 1} {
-	    tk_messageBox -title [::msgcat::mc {Put File Error}]  \
+	    tk_messageBox -title [::msgcat::mc {Get File Error}] \
 	      -type ok -message $msg
-	} else {
-	    ::UI::SetStatusMessage $wtop $msg
-	    switch -- $ncode {
-		320 - 323 {
-		    # empty
-		} 
-		default {
-		    if {$prefs(talkative) >= 1} {
-			tk_messageBox -title [::msgcat::mc {Put File Error}] \
-			  -type ok -message $msg
-		    }
-		}		
-	    }
 	}
+	
+	# Perhaps we should show a broken image here???
+	
+	# Cleanup...
 	catch {destroy $getstate(wprog)}
+	catch {file delete $getstate(dstpath)}
 	::Timing::Reset $getstate(timingkey)
 	unset getstate
+	getfile::cleanup $token
     } elseif {[string equal $what "ok"]} {
 	::UI::SetStatusMessage $wtop $msg
 
@@ -368,10 +370,10 @@ proc ::GetFileIface::Command {gettoken token what msg} {
 	    # Finished and ok!
 	    ::GetFileIface::DoImport $getstate(mime) $getstate(optlist)  \
 	      -file $getstate(dstpath) -where "local"
-	    ::getfile::cleanup $token
 	    catch {destroy $getstate(wprog)}
 	    ::Timing::Reset $getstate(timingkey)
 	    unset getstate
+	    getfile::cleanup $token
 	}
     }    
 }
@@ -405,7 +407,7 @@ proc ::GetFileIface::UpdateProgress {gettoken total current} {
 	Debug 2 "::GetFileIface::UpdateProgress  create ProgWin"
 
 	::ProgressWindow::ProgressWindow $getstate(wprog) -name {Get File} \
-	  -filename getstate(filetail) -text2 $msg \
+	  -filename $getstate(filetail) -text2 $msg \
 	  -cancelcmd [list [namespace current]::CancelCmd $gettoken]
     }
 }
@@ -450,7 +452,7 @@ proc ::GetFileIface::CancelCmd {gettoken} {
     upvar #0 $gettoken getstate          
 
     Debug 2 "+::GetFileIface::CancelCmd"
-    set tok $getstate(tok)
+    set tok $getstate(token)
     getfile::reset $tok
     getfile::cleanup $tok
     
@@ -472,7 +474,7 @@ proc ::GetFileIface::CancelAll { } {
     foreach gettoken $gettokenList {
 	upvar #0 $gettoken getstate          
 
-	set tok $getstate(tok)
+	set tok $getstate(token)
 	getfile::reset $tok
 	getfile::cleanup $tok
 	
@@ -495,9 +497,10 @@ proc ::GetFileIface::CancelAllWtop {wtop} {
     foreach gettoken $gettokenList {
 	upvar #0 $gettoken getstate          
 
+	parray getstate
 	if {[info exists getstate(wtop)] &&  \
 	  [string equal $getstate(wtop) $wtop]} {
-	    set tok $getstate(tok)
+	    set tok $getstate(token)
 	    getfile::reset $tok
 	    getfile::cleanup $tok
 

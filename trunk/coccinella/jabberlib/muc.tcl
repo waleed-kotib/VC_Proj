@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: muc.tcl,v 1.6 2003-06-01 10:26:58 matben Exp $
+# $Id: muc.tcl,v 1.7 2003-06-07 12:46:36 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -24,12 +24,13 @@
 #      jlibName muc create roomjid nick callback
 #      jlibName muc destroy roomjid ?-command, -reason, alternativejid?
 #      jlibName muc enter roomjid nick ?-command?
-#      jlibName muc exit roomjid nick
+#      jlibName muc exit roomjid
 #      jlibName muc getaffiliation roomjid affiliation callback
 #      jlibName muc getrole roomjid role callback
 #      jlibName muc getroom roomjid callback
 #      jlibName muc invite roomjid jid ?-reason?
 #      jlibName muc mynick roomjid
+#      jlibName muc participants roomjid
 #      jlibName muc setaffiliation roomjid nick affiliation ?-command, -reason?
 #      jlibName muc setnick roomjid nick ?-command?
 #      jlibName muc setrole roomjid nick role ?-command, -reason?
@@ -107,12 +108,16 @@ proc jlib::muc::enter {jlibname roomjid nick args} {
 # 
 # 
 
-proc jlib::muc::exit {jlibname roomjid nick} {
+proc jlib::muc::exit {jlibname roomjid} {
     upvar [namespace current]::${jlibname}::cache cache    
+    upvar [namespace parent]::${jlibname}::lib lib
     
-    set jid ${roomjid}/${nick}
-    [namespace parent]::send_presence $jlibname -to $jid -type "unavailable"
-    catch {unset cache($roomjid,mynick)}
+    if {[info exists cache($roomjid,mynick)]} {
+	set jid ${roomjid}/$cache($roomjid,mynick)
+	[namespace parent]::send_presence $jlibname -to $jid -type "unavailable"
+	catch {unset cache($roomjid,mynick)}
+    }
+    $lib(rostername) clearpresence "${roomjid}*"
 }
 
 # jlib::muc::setnick --
@@ -444,6 +449,24 @@ proc jlib::muc::allroomsin {jlibname} {
 	lappend roomList $room
     }
     return $roomList
+}
+
+# jlib::muc::participants --
+#
+#
+
+proc jlib::muc::participants {jlibname roomjid} {
+    upvar [namespace parent]::${jlibname}::lib lib
+    
+    set everyone {}
+
+    # The rosters presence elements should give us all info we need.
+    foreach userAttr [$lib(rostername) getpresence $roomjid -type available] {
+	catch {unset attrArr}
+	array set attrArr $userAttr
+	lappend everyone ${roomjid}/$attrArr(-resource)
+    }
+    return $everyone
 }
 
 proc jlib::muc::Debug {num str} {

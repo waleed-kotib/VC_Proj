@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.5 2003-06-01 10:26:57 matben Exp $
+# $Id: GroupChat.tcl,v 1.6 2003-06-07 12:46:35 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -1112,7 +1112,7 @@ proc ::Jabber::GroupChat::Logout { } {
     set allRooms [$jstate(jlib) service allroomsin]
     foreach room $allRooms {
 	set w $locals($room,wtop)
-	::Jabber::UI::GroupChat "exit" $roomJid
+	::Jabber::UI::GroupChat "exit" $room
 	if {[winfo exists $w]} {
 	    foreach wbt $locals($room,allBts) {
 		$wbt configure -state disabled

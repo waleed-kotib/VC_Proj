@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.5 2003-05-18 13:20:22 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.6 2003-06-07 12:46:36 matben Exp $
 
 # SetWhiteboardFactoryState --
 # 
@@ -215,8 +215,7 @@ set prefs(timeout) 60
 set prefs(millisToProgWin) 0
 
 # How frequently shall the progress window be updated, in milliseconds.
-set prefs(millisProgUpdate) 2000
-set prefs(millisProgUpdate) 100
+set prefs(millisProgUpdate) 500
 
 # When and how old is a cached file allowed to be before downloading a new?
 # Options. "never", "always", "launch", "hour", "day", "week", "month"

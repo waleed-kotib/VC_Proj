@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.10 2003-06-01 10:26:57 matben Exp $
+# $Id: jabberlib.tcl,v 1.11 2003-06-07 12:46:36 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -267,8 +267,7 @@ proc jlib::muc {jlibname args} {
 # Results:
 #       jlibname
   
-proc jlib::new {jlibname rostername browsename clientcmd args} {
-    
+proc jlib::new {jlibname rostername browsename clientcmd args} {    
     variable objectmap
     
     # Check that we may have a command [jlibname].
@@ -393,8 +392,7 @@ proc jlib::cmdproc {jlibname cmd args} {
 # Results:
 #       depending on args.
 
-proc jlib::config {jlibname args} {
-    
+proc jlib::config {jlibname args} {    
     upvar [namespace current]::${jlibname}::opts opts
     
     array set argsArr $args
@@ -447,8 +445,7 @@ proc jlib::config {jlibname args} {
 # Side Effects
 #	Sets error
 
-proc jlib::verify_options {jlibname args} {
-    
+proc jlib::verify_options {jlibname args} {    
     upvar [namespace current]::${jlibname}::opts opts
     
     set validopts [array names opts]
@@ -479,7 +476,6 @@ proc jlib::verify_options {jlibname args} {
 #       never makes any calls to jlib.
 
 proc jlib::invokefrombrowser {browsename cmd} {
-
     variable objectmap
 
     if {![info exists objectmap(jlibname,$browsename)]} {
@@ -501,7 +497,6 @@ proc jlib::invokefrombrowser {browsename cmd} {
 #	none
 
 proc jlib::initsocket {jlibname} {
-
     upvar [namespace current]::${jlibname}::lib lib
     upvar [namespace current]::${jlibname}::opts opts
 
@@ -535,7 +530,6 @@ proc jlib::initsocket {jlibname} {
 #	none
 
 proc jlib::putssocket {jlibname xml} {
-
     upvar [namespace current]::${jlibname}::lib lib
 
     Debug 2 "SEND: $xml"
@@ -554,7 +548,6 @@ proc jlib::putssocket {jlibname xml} {
 #	none
 
 proc jlib::resetsocket {jlibname} {
-
     upvar [namespace current]::${jlibname}::lib lib
     upvar [namespace current]::${jlibname}::locals locals
 
@@ -574,7 +567,6 @@ proc jlib::resetsocket {jlibname} {
 #       none.
 
 proc jlib::recvsocket {jlibname} {
-
     upvar [namespace current]::${jlibname}::lib lib
 
     if {[eof $lib(sock)]} {
@@ -602,7 +594,6 @@ proc jlib::recvsocket {jlibname} {
 # 	we get a callback to 'jlib::dispatcher'.
 
 proc jlib::recv {jlibname xml} {
-
     upvar [namespace current]::${jlibname}::lib lib
     wrapper::parse $lib(wrap) $xml
 }
@@ -626,8 +617,7 @@ proc jlib::recv {jlibname xml} {
 # Results:
 #       none.
 
-proc jlib::connect {jlibname server args} {
-    
+proc jlib::connect {jlibname server args} {    
     upvar [namespace current]::${jlibname}::lib lib
     upvar [namespace current]::${jlibname}::locals locals
     upvar [namespace current]::${jlibname}::opts opts
@@ -686,8 +676,7 @@ proc jlib::connect {jlibname server args} {
 # Results:
 #       none.
 
-proc jlib::disconnect {jlibname} {
-    
+proc jlib::disconnect {jlibname} {    
     upvar [namespace current]::${jlibname}::lib lib
     upvar [namespace current]::${jlibname}::opts opts
 
@@ -736,8 +725,7 @@ proc jlib::dispatcher {jlibname xmldata} {
 #       Callback for incoming <iq> elements. Most client callbacks are handled
 #       with predetermined functions (via 'iq($id)'). See 'jlib::dispatcher'.
 
-proc jlib::iq_handler {jlibname xmldata} {
-    
+proc jlib::iq_handler {jlibname xmldata} {    
     upvar [namespace current]::${jlibname}::lib lib
     upvar [namespace current]::${jlibname}::iq iq
     upvar [namespace current]::${jlibname}::opts opts    
@@ -920,8 +908,7 @@ proc jlib::iq_handler {jlibname xmldata} {
 #
 #       Callback for incoming <message> elements. See 'jlib::dispatcher'.
 
-proc jlib::message_handler {jlibname xmldata} {
-    
+proc jlib::message_handler {jlibname xmldata} {    
     upvar [namespace current]::${jlibname}::opts opts    
     upvar [namespace current]::${jlibname}::lib lib
     
@@ -974,8 +961,7 @@ proc jlib::message_handler {jlibname xmldata} {
 #
 #       Callback for incoming <presence> elements. See 'jlib::dispatcher'.
 
-proc jlib::presence_handler {jlibname xmldata} {
-    
+proc jlib::presence_handler {jlibname xmldata} { 
     upvar [namespace current]::${jlibname}::lib lib
     upvar [namespace current]::${jlibname}::iq iq
     upvar [namespace current]::${jlibname}::opts opts
@@ -1085,7 +1071,6 @@ proc jlib::presence_handler {jlibname xmldata} {
 #       none.
 
 proc jlib::got_stream {jlibname args} {
-
     upvar [namespace current]::${jlibname}::lib lib
 
     Debug 3 "jlib::got_stream jlibname=$jlibname, args='$args'"
@@ -1112,7 +1097,6 @@ proc jlib::got_stream {jlibname args} {
 #       none.
 
 proc jlib::end_of_parse {jlibname} {
-
     upvar [namespace current]::${jlibname}::lib lib
     upvar [namespace current]::${jlibname}::opts opts
 
@@ -1134,7 +1118,6 @@ proc jlib::end_of_parse {jlibname} {
 #       none.
 
 proc jlib::xmlerror {jlibname args} {
-
     upvar [namespace current]::${jlibname}::lib lib
     upvar [namespace current]::${jlibname}::opts opts
 
@@ -1156,7 +1139,6 @@ proc jlib::xmlerror {jlibname args} {
 #       none.
 
 proc jlib::reset {jlibname} {
-
     upvar [namespace current]::${jlibname}::lib lib
     upvar [namespace current]::${jlibname}::iq iq
     upvar [namespace current]::${jlibname}::agent agent
@@ -1220,7 +1202,6 @@ proc jlib::parse_iq_response {jlibname cmd type subiq} {
 #       the roster object is populated.
 
 proc jlib::parse_roster_get {jlibname ispush cmd type thequery} {
-
     upvar [namespace current]::${jlibname}::lib lib
 
     Debug 3 "jlib::parse_roster_get ispush=$ispush, cmd=$cmd, type=$type,"
@@ -1367,8 +1348,7 @@ proc jlib::parse_roster_remove {jlibname jid cmd type thequery} {
 #       type:       "ok" or "error"
 #       subiq:
 
-proc jlib::parse_browse_get {jlibname jid cmd errcmd type subiq} {
-    
+proc jlib::parse_browse_get {jlibname jid cmd errcmd type subiq} {    
     upvar [namespace current]::${jlibname}::lib lib
 
     Debug 3 "jlib::parse_browse_get jid=$jid, cmd='$cmd', type=$type, subiq='$subiq'"
@@ -1402,8 +1382,7 @@ proc jlib::parse_browse_get {jlibname jid cmd errcmd type subiq} {
 #       type:       "ok", "error", or "set"
 #       subiq:
 
-proc jlib::parse_search_set {jlibname cmd type subiq} {
-    
+proc jlib::parse_search_set {jlibname cmd type subiq} {    
     upvar [namespace current]::${jlibname}::lib lib
 
     uplevel #0 $cmd [list $type $subiq]
@@ -1440,7 +1419,6 @@ proc jlib::parse_search_set {jlibname cmd type subiq} {
 #       none.
 
 proc jlib::send_iq {jlibname type xmldata args} {
-
     upvar [namespace current]::${jlibname}::lib lib
     upvar [namespace current]::${jlibname}::iq iq
     upvar [namespace current]::${jlibname}::locals locals
@@ -1502,7 +1480,6 @@ proc jlib::send_iq {jlibname type xmldata args} {
 #       none.
 
 proc jlib::send_auth {jlibname username resource cmd args} {
-
     upvar [namespace current]::${jlibname}::lib lib
     upvar [namespace current]::${jlibname}::locals locals
 
@@ -1728,7 +1705,6 @@ proc jlib::search_set {jlibname to cmd args} {
 #       none.
 
 proc jlib::send_message {jlibname to args} {
-
     upvar [namespace current]::${jlibname}::lib lib
     upvar [namespace current]::${jlibname}::locals locals
     upvar [namespace current]::${jlibname}::opts opts
@@ -1791,7 +1767,6 @@ proc jlib::send_message {jlibname to args} {
 #       none.
 
 proc jlib::send_presence {jlibname args} {
-
     variable statics
     upvar [namespace current]::${jlibname}::lib lib
     upvar [namespace current]::${jlibname}::locals locals
@@ -1876,7 +1851,6 @@ proc jlib::send_presence {jlibname args} {
 #       for our status with the login server.
 
 proc jlib::mystatus {jlibname} {
-
     upvar [namespace current]::${jlibname}::locals locals
     
     return $locals(status)
@@ -1887,7 +1861,6 @@ proc jlib::mystatus {jlibname} {
 #       Returns our 3-tier jid as authorized with the login server.
 
 proc jlib::myjid {jlibname} {
-
     upvar [namespace current]::${jlibname}::locals locals
     
     return $locals(myjid)
@@ -2030,7 +2003,6 @@ proc jlib::agents_get {jlibname to cmd} {
 #       none.
 
 proc jlib::parse_agent_get {jlibname jid cmd type subiq} {
-
     upvar [namespace current]::${jlibname}::lib lib
     upvar [namespace current]::${jlibname}::agent agent
     upvar [namespace current]::service::services services
@@ -2057,7 +2029,6 @@ proc jlib::parse_agent_get {jlibname jid cmd type subiq} {
 }
 
 proc jlib::parse_agents_get {jlibname jid cmd type subiq} {
-
     upvar [namespace current]::${jlibname}::lib lib
     upvar [namespace current]::${jlibname}::agent agent
     upvar [namespace current]::service::services services
@@ -2303,8 +2274,7 @@ proc jlib::private_set {jlibname ns cmd args} {
 #
 #       Seconds since last activity. Response to 'jabber:iq:last' get.
 
-proc jlib::parse_get_last {jlibname args} {
-    
+proc jlib::parse_get_last {jlibname args} {    
     upvar [namespace current]::${jlibname}::locals locals
     
     array set argsarr $args
@@ -2440,7 +2410,6 @@ proc jlib::roster_get {jlibname cmd args} {
 #       none.
  
 proc jlib::roster_set {jlibname jid cmd args} {
-
     upvar [namespace current]::${jlibname}::lib lib
 
     Debug 3 "jlib::roster_set jid=$jid, cmd=$cmd, args='$args'"
@@ -2505,8 +2474,7 @@ proc jlib::roster_remove {jlibname jid cmd args} {
       [list [namespace current]::parse_roster_remove $jlibname $jid $cmd]
 }
 
-proc jlib::schedule_keepalive {jlibname} {
-    
+proc jlib::schedule_keepalive {jlibname} {   
     upvar [namespace current]::${jlibname}::locals locals
     upvar [namespace current]::${jlibname}::opts opts
     upvar [namespace current]::${jlibname}::lib lib
@@ -2527,8 +2495,7 @@ proc jlib::schedule_keepalive {jlibname} {
 #
 #       Procedures for auto away things.
 
-proc jlib::schedule_auto_away {jlibname} {
-       
+proc jlib::schedule_auto_away {jlibname} {       
     upvar [namespace current]::${jlibname}::locals locals
     upvar [namespace current]::${jlibname}::opts opts
     
@@ -2544,7 +2511,6 @@ proc jlib::schedule_auto_away {jlibname} {
 }
 
 proc jlib::cancel_auto_away {jlibname} {
-    
     upvar [namespace current]::${jlibname}::locals locals
 
     catch {after cancel $locals(afterawayid)}
@@ -2555,8 +2521,7 @@ proc jlib::cancel_auto_away {jlibname} {
 # 
 #       what:       "away", or "xaway"
 
-proc jlib::auto_away_cmd {jlibname what} {
-       
+proc jlib::auto_away_cmd {jlibname what} {      
     upvar [namespace current]::${jlibname}::locals locals
     upvar [namespace current]::${jlibname}::lib lib
     upvar [namespace current]::${jlibname}::opts opts
@@ -2611,7 +2576,6 @@ proc jlib::Debug {num str} {
 #       describing which to pick if multiple options.
 
 proc jlib::setgroupchatpriority {jlibname priorityList} {
-
     variable statics
     upvar [namespace current]::${jlibname}::locals locals
 
@@ -2636,7 +2600,6 @@ proc jlib::setgroupchatpriority {jlibname priorityList} {
 #       None.
 
 proc jlib::setgroupchatprotocol {jlibname jid prot} {
-
     variable statics
     upvar [namespace current]::${jlibname}::locals locals
     upvar [namespace current]::${jlibname}::agent agent
@@ -2676,7 +2639,6 @@ proc jlib::setgroupchatprotocol {jlibname jid prot} {
 #       presently set. Only called internally!
 
 proc jlib::registergcprotocol {jlibname jid gcprot} {
-
     upvar [namespace current]::${jlibname}::locals locals
     
     Debug 2 "jlib::registergcprotocol jid=$jid, gcprot=$gcprot"
@@ -2715,8 +2677,7 @@ proc jlib::service {jlibname cmd args} {
     return $ans
 }
     
-proc jlib::service::parent {jlibname jid} {
-    
+proc jlib::service::parent {jlibname jid} {    
     upvar [namespace parent]::${jlibname}::agent agent
     upvar [namespace parent]::${jlibname}::lib lib
 
@@ -2731,8 +2692,7 @@ proc jlib::service::parent {jlibname jid} {
     }
 }
 
-proc jlib::service::childs {jlibname jid} {
-    
+proc jlib::service::childs {jlibname jid} {    
     upvar [namespace parent]::${jlibname}::agent agent
     upvar [namespace parent]::${jlibname}::lib lib
 
@@ -2763,8 +2723,7 @@ proc jlib::service::childs {jlibname jid} {
 #       list of jids supporting this service, possibly empty.
 
 proc jlib::service::getjidsfor {jlibname what} {
-    
-    variable services
+        variable services
     upvar [namespace parent]::${jlibname}::agent agent
     upvar [namespace parent]::${jlibname}::lib lib
     
@@ -2812,8 +2771,7 @@ proc jlib::service::getjidsfor {jlibname what} {
 #       If we've browsed it it's been registered in our browse object.
 #       If using agent(s) method, check the agent for this jid
 
-proc jlib::service::isroom {jlibname jid} {
-    
+proc jlib::service::isroom {jlibname jid} {    
     upvar [namespace parent]::${jlibname}::agent agent
     upvar [namespace parent]::${jlibname}::lib lib
     
@@ -2843,8 +2801,7 @@ proc jlib::service::isroom {jlibname jid} {
 #       jid:        'roomname@conference.jabber.org/nickOrHex' typically,
 #                   or just room jid.
 
-proc jlib::service::nick {jlibname jid} {
-    
+proc jlib::service::nick {jlibname jid} {   
     upvar [namespace parent]::${jlibname}::lib lib
     upvar [namespace parent]::${jlibname}::gchat gchat
 
@@ -2892,8 +2849,7 @@ proc jlib::service::nick {jlibname jid} {
 # Results:
 #       list {kitchen@conf.athlon.se/63264ba6724.. mynickname}
 
-proc jlib::service::hashandnick {jlibname room} {
-    
+proc jlib::service::hashandnick {jlibname room} {    
     upvar [namespace parent]::${jlibname}::lib lib
     upvar [namespace parent]::${jlibname}::gchat gchat
 
@@ -2917,47 +2873,45 @@ proc jlib::service::hashandnick {jlibname room} {
     return $hashandnick
 }
 
-proc jlib::service::allroomsin {jlibname} {
-    
+proc jlib::service::allroomsin {jlibname} {    
     upvar [namespace parent]::${jlibname}::lib lib
+    upvar [namespace parent]::${jlibname}::gchat gchat
 
-    # Assume that if the login server is browsed we also should query
-    # the browse object.
-    if {[$lib(browsename) isbrowsed $lib(server)]} {
-	return [[namespace parent]::conference::allroomsin $jlibname]
-    } else {
-	return [[namespace parent]::groupchat::allroomsin $jlibname]
-    }
+    set roomList [concat $gchat(allroomsin) \
+      [[namespace parent]::muc::allroomsin $jlibname] \
+      [[namespace parent]::conference::allroomsin $jlibname]]
+    return [lsort -unique $roomList]
 }
 
 proc jlib::service::roomparticipants {jlibname room} {
-    
     upvar [namespace parent]::${jlibname}::lib lib
+    upvar [namespace parent]::${jlibname}::gchat gchat
     
+    set everyone {}
     if {![[namespace current]::isroom $jlibname $room]} {
 	return -code error "The jid \"$room\" is not a room"
     }
 
-    # Assume that if the login server is browsed we also should query
-    # the browse object.
-    if {[$lib(browsename) isbrowsed $lib(server)]} {
-	set everyone [$lib(browsename) getchilds $room]
-    } else {
+    if {[lsearch $gchat(allroomsin) $room] >= 0} {
 	set everyone [[namespace parent]::groupchat::participants $jlibname $room]
+    } elseif {[lsearch [[namespace parent]::muc::allroomsin $jlibname] $room] >= 0} {
+	set everyone [[namespace parent]::muc::participants $jlibname $room]
+    } elseif {[$lib(browsename) isbrowsed $lib(server)]} {
+	set everyone [$lib(browsename) getchilds $room]
     }
     return $everyone
 }
 
-proc jlib::service::exitroom {jlibname room} {
-    
+proc jlib::service::exitroom {jlibname room} {    
     upvar [namespace parent]::${jlibname}::lib lib
+    upvar [namespace parent]::${jlibname}::gchat gchat
 
-    # Assume that if the login server is browsed we also should query
-    # the browse object.
-    if {[$lib(browsename) isbrowsed $lib(server)]} {
-	[namespace parent]::conference::exit $jlibname $room
-    } else {
+    if {[lsearch $gchat(allroomsin) $room] >= 0} {
 	[namespace parent]::groupchat::exit $jlibname $room
+    } elseif {[lsearch [[namespace parent]::muc::allroomsin $jlibname] $room] >= 0} {
+	[namespace parent]::muc::exit $jlibname $room
+    } elseif {[$lib(browsename) isbrowsed $lib(server)]} {
+	[namespace parent]::conference::exit $jlibname $room
     }
 }
 
@@ -3024,8 +2978,7 @@ proc jlib::conference::set_enter {jlibname room subelements cmd} {
 #       type:       "ok" or "error"
 #       subiq:
 
-proc jlib::conference::parse_set_enter {jlibname room cmd type subiq} {
-    
+proc jlib::conference::parse_set_enter {jlibname room cmd type subiq} {    
     upvar [namespace parent]::${jlibname}::conf conf
 
     [namespace parent]::Debug 3 "jlib::conference::parse_set_enter room=$room, cmd='$cmd', type=$type, subiq='$subiq'"
@@ -3112,14 +3065,15 @@ proc jlib::conference::delete {jlibname room cmd} {
 }
 
 proc jlib::conference::exit {jlibname room} {
-
     upvar [namespace parent]::${jlibname}::conf conf
+    upvar [namespace parent]::${jlibname}::lib lib
 
     [namespace parent]::send_presence $jlibname -to $room -type unavailable
     set ind [lsearch -exact $conf(allroomsin) $room]
     if {$ind >= 0} {
 	set conf(allroomsin) [lreplace $conf(allroomsin) $ind $ind]
     }
+    $lib(rostername) clearpresence "${room}*"
     return ""
 }
 
@@ -3154,7 +3108,6 @@ proc jlib::conference::set_user {jlibname room name jid cmd} {
 #       Returns list {kitchen@conf.athlon.se/63264ba6724.. mynickname}
 
 proc jlib::conference::hashandnick {jlibname room} {
-
     upvar [namespace parent]::${jlibname}::conf conf
 
     if {[info exists conf($room,hashandnick)]} {
@@ -3165,7 +3118,6 @@ proc jlib::conference::hashandnick {jlibname room} {
 }
 
 proc jlib::conference::roomname {jlibname room} {
-
     upvar [namespace parent]::${jlibname}::conf conf
 
     if {[info exists conf($room,roomname)]} {
@@ -3176,7 +3128,6 @@ proc jlib::conference::roomname {jlibname room} {
 }
 
 proc jlib::conference::allroomsin {jlibname} {
-
     upvar [namespace parent]::${jlibname}::conf conf
     
     set conf(allroomsin) [lsort -unique $conf(allroomsin)]
@@ -3203,7 +3154,6 @@ proc jlib::groupchat {jlibname cmd args} {
 #       args:  -command callback
 
 proc jlib::groupchat::enter {jlibname room nick args} {
-
     upvar [namespace parent]::${jlibname}::gchat gchat
     
     set room [string tolower $room]
@@ -3218,8 +3168,8 @@ proc jlib::groupchat::enter {jlibname room nick args} {
 }
 
 proc jlib::groupchat::exit {jlibname room} {
-
     upvar [namespace parent]::${jlibname}::gchat gchat
+    upvar [namespace parent]::${jlibname}::lib lib
     
     set room [string tolower $room]
     if {[info exists gchat($room,mynick)]} {
@@ -3234,11 +3184,11 @@ proc jlib::groupchat::exit {jlibname room} {
     if {$ind >= 0} {
 	set gchat(allroomsin) [lreplace $gchat(allroomsin) $ind $ind]
     }
+    $lib(rostername) clearpresence "${room}*"
     return ""
 }
 
 proc jlib::groupchat::mynick {jlibname room args} {
-
     upvar [namespace parent]::${jlibname}::gchat gchat
 
     set room [string tolower $room]
@@ -3258,7 +3208,6 @@ proc jlib::groupchat::mynick {jlibname room args} {
 }
 
 proc jlib::groupchat::status {jlibname room args} {
-
     upvar [namespace parent]::${jlibname}::gchat gchat
 
     set room [string tolower $room]
@@ -3272,7 +3221,6 @@ proc jlib::groupchat::status {jlibname room args} {
 }
 
 proc jlib::groupchat::participants {jlibname room} {
-
     upvar [namespace parent]::${jlibname}::agent agent
     upvar [namespace parent]::${jlibname}::gchat gchat
     upvar [namespace parent]::${jlibname}::lib lib
@@ -3289,9 +3237,8 @@ proc jlib::groupchat::participants {jlibname room} {
     }
     
     # The rosters presence elements should give us all info we need.
-    set presList [$lib(rostername) getpresence $room]
     set everyone {}
-    foreach userAttr $presList {
+    foreach userAttr [$lib(rostername) getpresence $room -type available] {
 	catch {unset attrArr}
 	array set attrArr $userAttr
 	lappend everyone ${room}/$attrArr(-resource)
@@ -3300,7 +3247,6 @@ proc jlib::groupchat::participants {jlibname room} {
 }
 
 proc jlib::groupchat::allroomsin {jlibname} {
-
     upvar [namespace parent]::${jlibname}::gchat gchat
 
     set gchat(allroomsin) [lsort -unique $gchat(allroomsin)]
