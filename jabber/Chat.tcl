@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.20 2003-12-20 14:27:16 matben Exp $
+# $Id: Chat.tcl,v 1.21 2003-12-20 16:25:20 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -49,9 +49,9 @@ namespace eval ::Jabber::Chat:: {
     }
 
     # Add all event hooks.
-    hooks::add quitAppHook [list ::UI::SaveWinPrefixGeom $wDlgs(jchat)]
     hooks::add quitAppHook [list ::UI::SaveWinGeom $wDlgs(jstartchat)]
-    
+    hooks::add quitAppHook [list ::UI::SaveWinPrefixGeom $wDlgs(jchat)]
+    hooks::add quitAppHook ::Jabber::Chat::GetFirstPanePos
     
     variable locals
 }
@@ -136,6 +136,7 @@ proc ::Jabber::Chat::StartThreadDlg {args} {
     tkwait window $w
     
     # Clean up.
+    ::UI::SaveWinGeom $wDlgs(jstartchat)
     catch {grab release $w}
     catch {focus $oldFocus}
     return [expr {($finished <= 0) ? "cancel" : "ok"}]
@@ -431,7 +432,7 @@ proc ::Jabber::Chat::Build {threadID args} {
     grid columnconfigure $wtxtsnd 0 -weight 1
     grid rowconfigure $wtxtsnd 0 -weight 1
     
-    set nwin [::UI::GetPrefixedToplevels $wDlgs(jchat)]
+    set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jchat)]]
     if {($nwin == 1) && [info exists prefs(paneGeom,$wDlgs(jchat))]} {
 	set relpos $prefs(paneGeom,$wDlgs(jchat))
     } else {
@@ -660,6 +661,17 @@ proc ::Jabber::Chat::Close {args} {
 	
 	# Array cleanup?
 	array unset locals "${threadID},*"
+    }
+}
+
+proc ::Jabber::Chat::GetFirstPanePos { } {
+    global  wDlgs
+    
+    set win [::UI::GetFirstPrefixedToplevel $wDlgs(jchat)]
+    if {$win != ""} {
+	set threadID $locals($win,threadid)
+
+	::UI::SavePanePos $wDlgs(jchat) $locals($threadID,wtxt)
     }
 }
 

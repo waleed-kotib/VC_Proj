@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.35 2003-12-20 14:27:16 matben Exp $
+# $Id: UI.tcl,v 1.36 2003-12-20 16:25:20 matben Exp $
 
 package require entrycomp
 
@@ -266,25 +266,10 @@ proc ::UI::SaveWinPrefixGeom {wprefix {key ""}} {
     if {$key == ""} {
 	set key $wprefix
     }
-    
-    set wins [lsearch -all -inline -glob [winfo children .] ${wprefix}*]
-    if {[llength $wins]} {
-	
-	# 1st priority, pick if on top.
-	set wfocus [focus]
-	if {$wfocus != ""} {
-	    set win [winfo toplevel $wfocus]
-	}
-	set win [lsearch -inline $wins $wfocus]
-	if {$win == ""} {
-	    
-	    # 2nd priority, just get first in list.
-	    set win [lindex $wins 0]
-	}
-	if {$win != ""} {
-	    ::UI::SaveWinGeom $key $win
-	}	
-    }
+    set win [::UI::GetFirstPrefixedToplevel $wprefix]
+    if {$win != ""} {
+	::UI::SaveWinGeom $key $win
+    }	
 }
 
 # UI::SavePanePos --
@@ -308,17 +293,12 @@ proc ::UI::SavePanePos {key wpaned {orient horizontal}} {
     }
 }
 
-proc ::UI::SavePrefixPanePos {wprefix wpaned {key ""} {orient horizontal}} {
-
-    XXX
+proc ::UI::GetFirstPrefixedToplevel {wprefix} {
     
-    if {$key == ""} {
-	set key $wprefix
-    }
-
+    set win ""
     set wins [lsearch -all -inline -glob [winfo children .] ${wprefix}*]
     if {[llength $wins]} {
-
+	
 	# 1st priority, pick if on top.
 	set wfocus [focus]
 	if {$wfocus != ""} {
@@ -330,10 +310,8 @@ proc ::UI::SavePrefixPanePos {wprefix wpaned {key ""} {orient horizontal}} {
 	    # 2nd priority, just get first in list.
 	    set win [lindex $wins 0]
 	}
-	if {$win != ""} {
-	    ::UI::SavePanePos $key $win
-	}	
     }
+    return $win
 }
 
 proc ::UI::GetPrefixedToplevels {wprefix} {
