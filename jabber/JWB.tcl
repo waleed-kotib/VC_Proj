@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 20042005  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.48 2005-04-04 09:14:49 matben Exp $
+# $Id: JWB.tcl,v 1.49 2005-04-04 12:31:07 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -1007,17 +1007,26 @@ proc ::Jabber::WB::HandleRawGroupchatMessage {jlibname xmlns args} {
     ::Debug 2 "::Jabber::WB::HandleRawGroupchatMessage args=$args"	
     array set argsArr $args
     
-    # Do not duplicate ourselves!
-    if {![::Jabber::IsMyGroupchatJid $argsArr(-from)]} {
-	set cmdList [GetRawMessageList $argsArr(-x) $xmlns]
-	set cmdList [eval {HandleNonCanvasCmds groupchat $cmdList} $args]
-
-	eval {GroupChatMsg $cmdList} $args
-	eval {::hooks::run newWBGroupChatMessageHook} $args
+    # Don't do anything if we haven't entered the room using whiteboard.
+    set mjid [jlib::jidmap $argsArr(-from)]
+    jlib::splitjid $mjid roomjid res
+    if {[HaveGroupchatWhiteboard $roomjid]} {
+	
+	# Do not duplicate ourselves!
+	if {![::Jabber::IsMyGroupchatJid $argsArr(-from)]} {
+	    set cmdList [GetRawMessageList $argsArr(-x) $xmlns]
+	    set cmdList [eval {HandleNonCanvasCmds groupchat $cmdList} $args]
+	    
+	    eval {GroupchatMsg $cmdList} $args
+	    eval {::hooks::run newWBGroupChatMessageHook} $args
+	}
+	
+	# We have handled this message completely.
+	set ishandled 1
+    } else {
+	set ishandled 0
     }
-    
-    # We have handled this message completely.
-    return 1
+    return $ishandled
 }
 
 proc ::Jabber::WB::HandleSVGWBChatMessage {jlibname xmlns args} {
@@ -1047,26 +1056,34 @@ proc ::Jabber::WB::HandleSVGWBGroupchatMessage {jlibname xmlns args} {
     ::Debug 2 "::Jabber::WB::HandleSVGWBGroupchatMessage"
     array set argsArr $args
     
-    # Need to have the actual canvas before doing svg -> canvas translation.
-    # This is a duplicate; fix later...
-    jlib::splitjid $argsArr(-from) roomjid resource
-    set wtop [GetWtopFromMessage groupchat $roomjid]
-    if {$wtop == ""} {
-	set wtop [eval {NewWhiteboardTo $roomjid -force 1} $args]
-    }
-    
-    # Do not duplicate ourselves!
-    if {![::Jabber::IsMyGroupchatJid $argsArr(-from)]} {
-	set cmdList [GetSVGWBMessageList $wtop $argsArr(-x)]
-	
-	if {[llength $cmdList]} {
-	    eval {GroupChatMsg $cmdList} $args
-	    eval {::hooks::run newWBGroupChatMessageHook} $args
+    # Don't do anything if we haven't entered the room using whiteboard.
+    set mjid [jlib::jidmap $argsArr(-from)]
+    jlib::splitjid $mjid roomjid res
+    if {[HaveGroupchatWhiteboard $roomjid]} {
+
+	# Need to have the actual canvas before doing svg -> canvas translation.
+	# This is a duplicate; fix later...
+	set wtop [GetWtopFromMessage groupchat $roomjid]
+	if {$wtop == ""} {
+	    set wtop [eval {NewWhiteboardTo $roomjid -force 1} $args]
 	}
+	
+	# Do not duplicate ourselves!
+	if {![::Jabber::IsMyGroupchatJid $argsArr(-from)]} {
+	    set cmdList [GetSVGWBMessageList $wtop $argsArr(-x)]
+	    
+	    if {[llength $cmdList]} {
+		eval {GroupchatMsg $cmdList} $args
+		eval {::hooks::run newWBGroupChatMessageHook} $args
+	    }
+	}
+	
+	# We have handled this message completely.
+	set ishandled 1
+    } else {
+	set ishandled 0
     }
-        
-    # We have handled this message completely.
-    return 1
+    return $ishandled
 }
 
 # Jabber::WB::GetRawMessageList --
@@ -1271,7 +1288,7 @@ proc ::Jabber::WB::RegisterHandlerHook {prefix cmd} {
     set handler($prefix) $cmd
 }
 
-# ::Jabber::WB::ChatMsg, GroupChatMsg --
+# ::Jabber::WB::ChatMsg, GroupchatMsg --
 # 
 #       Handles incoming chat/groupchat message aimed for a whiteboard.
 #       It may not exist, for instance, if we receive a new chat thread.
@@ -1298,11 +1315,11 @@ proc ::Jabber::WB::ChatMsg {cmdList args} {
     }     
 }
 
-proc ::Jabber::WB::GroupChatMsg {cmdList args} {    
+proc ::Jabber::WB::GroupchatMsg {cmdList args} {    
     upvar ::Jabber::jstate jstate
 
     array set argsArr $args
-    ::Debug 2 "::Jabber::WB::GroupChatMsg args='$args'"
+    ::Debug 2 "::Jabber::WB::GroupchatMsg args='$args'"
     
     # The -from argument is either the room itself, or usually a user in
     # the room.
@@ -1752,6 +1769,16 @@ proc ::Jabber::WB::MakeWhiteboardExist {opts} {
 	}
     }
     return $wtop
+}
+
+proc ::Jabber::WB::HaveGroupchatWhiteboard {roomjid} {
+    variable jwbstate
+    
+    if {[info exists jwbstate($roomjid,jid,wtop)]} {
+	return 1
+    } else {
+	return 0
+    }
 }
 
 # ::Jabber::WB::GetWtopFromMessage --
