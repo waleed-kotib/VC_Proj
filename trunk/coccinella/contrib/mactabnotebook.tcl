@@ -8,7 +8,7 @@
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: mactabnotebook.tcl,v 1.25 2004-12-04 15:01:06 matben Exp $
+# $Id: mactabnotebook.tcl,v 1.26 2004-12-10 10:01:42 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -1191,7 +1191,7 @@ proc ::mactabnotebook::BuildWinxp {w} {
 	if {$closebt} {
 	    DrawWinxpButton $w $name [expr {$contenth/2-1}]
 	    $w.tabs move $tname&&bt [expr {$xright-$contenth/2-4}]  \
-	      [expr {$ym-1+$xoff}]
+	      [expr {$ym+$xoff}]
 	}	
 	
 	# New x for next tab.

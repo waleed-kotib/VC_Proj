@@ -5,22 +5,23 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.18 2004-12-04 15:01:06 matben Exp $
+# $Id: JPrefs.tcl,v 1.19 2004-12-10 10:01:42 matben Exp $
 
 package provide JPrefs 1.0
 
-namespace eval ::Jabber::JPrefs:: {
+namespace eval ::JPrefs:: {
     
     # Define all hooks for preference settings.
-    ::hooks::register prefsInitHook          ::Jabber::JPrefs::InitPrefsHook
-    ::hooks::register prefsBuildHook         ::Jabber::JPrefs::BuildPrefsHook
-    ::hooks::register prefsSaveHook          ::Jabber::JPrefs::SavePrefsHook
-    ::hooks::register prefsCancelHook        ::Jabber::JPrefs::CancelPrefsHook
-    ::hooks::register prefsUserDefaultsHook  ::Jabber::JPrefs::UserDefaultsHook
+    ::hooks::register prefsInitHook          ::JPrefs::InitPrefsHook
+    ::hooks::register prefsBuildHook         ::JPrefs::BuildPrefsHook
+    ::hooks::register prefsSaveHook          ::JPrefs::SavePrefsHook
+    ::hooks::register prefsCancelHook        ::JPrefs::CancelPrefsHook
+    ::hooks::register prefsUserDefaultsHook  ::JPrefs::UserDefaultsHook
+    ::hooks::register prefsDestroyHook       ::JPrefs::DestroyPrefsHook
 }
 
 
-proc ::Jabber::JPrefs::InitPrefsHook { } {
+proc ::JPrefs::InitPrefsHook { } {
     upvar ::Jabber::jprefs jprefs
     
     # Defaults...
@@ -97,7 +98,7 @@ proc ::Jabber::JPrefs::InitPrefsHook { } {
     }
 }
 
-proc ::Jabber::JPrefs::BuildPrefsHook {wtree nbframe} {
+proc ::JPrefs::BuildPrefsHook {wtree nbframe} {
     
     $wtree newitem {Jabber {Auto Away}} -text [mc {Auto Away}]
     #$wtree newitem {Jabber {Personal Info}} -text [mc {Personal Info}]
@@ -106,22 +107,22 @@ proc ::Jabber::JPrefs::BuildPrefsHook {wtree nbframe} {
 
     # Auto Away page -------------------------------------------------------
     set wpage [$nbframe page {Auto Away}]
-    ::Jabber::JPrefs::BuildAutoAwayPage $wpage
+    ::JPrefs::BuildAutoAwayPage $wpage
 
     # Personal Info page ---------------------------------------------------
     #set wpage [$nbframe page {Personal Info}]    
-    #::Jabber::JPrefs::BuildPersInfoPage $wpage
+    #::JPrefs::BuildPersInfoPage $wpage
 	    
     # Appearance page -------------------------------------------------------
     set wpage [$nbframe page {Appearance}]    
-    ::Jabber::JPrefs::BuildAppearancePage $wpage
+    ::JPrefs::BuildAppearancePage $wpage
 	    
     # Customization page -------------------------------------------------------
     set wpage [$nbframe page {Customization}]    
-    ::Jabber::JPrefs::BuildCustomPage $wpage
+    ::JPrefs::BuildCustomPage $wpage
 }
 
-proc ::Jabber::JPrefs::BuildAutoAwayPage {page} {
+proc ::JPrefs::BuildAutoAwayPage {page} {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
 
@@ -186,7 +187,7 @@ proc ::Jabber::JPrefs::BuildAutoAwayPage {page} {
     grid $pstat.e -column 1 -row 0 -sticky w
 }
 
-proc ::Jabber::JPrefs::BuildPersInfoPage {wpage} {
+proc ::JPrefs::BuildPersInfoPage {wpage} {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
     
@@ -218,12 +219,12 @@ proc ::Jabber::JPrefs::BuildPersInfoPage {wpage} {
     }    
 }
 
-# Jabber::JPrefs::UpdateAutoAwaySettings --
+# JPrefs::UpdateAutoAwaySettings --
 #
 #       If changed present auto away settings, may need to configure
 #       our jabber object.
 
-proc ::Jabber::JPrefs::UpdateAutoAwaySettings { } { 
+proc ::JPrefs::UpdateAutoAwaySettings { } { 
     global  prefs
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
@@ -251,7 +252,7 @@ proc ::Jabber::JPrefs::UpdateAutoAwaySettings { } {
     }
 }
 
-proc ::Jabber::JPrefs::BuildAppearancePage {page} {
+proc ::JPrefs::BuildAppearancePage {page} {
     global  this prefs
     
     variable wlbblock
@@ -313,7 +314,7 @@ proc ::Jabber::JPrefs::BuildAppearancePage {page} {
     grid $frtheme   -           -           -padx 2 -pady $ypad -sticky w
 }
 
-proc ::Jabber::JPrefs::BuildCustomPage {page} {
+proc ::JPrefs::BuildCustomPage {page} {
     global  this prefs
     
     variable wlbblock
@@ -329,8 +330,10 @@ proc ::Jabber::JPrefs::BuildCustomPage {page} {
     set ypad   [option get [winfo toplevel $page] yPad {}]
 
     foreach key {inboxSave rost,useBgImage rost,bgImagePath serviceMethod \
-      autoLogin} {
-	set tmpJPrefs($key) $jprefs($key)
+      autoLogin notifier,state} {
+	if {[info exists jprefs($key)]} {
+	    set tmpJPrefs($key) $jprefs($key)
+	}
     }
 
     set labfrpbl $page.fr
@@ -343,6 +346,10 @@ proc ::Jabber::JPrefs::BuildCustomPage {page} {
       -variable [namespace current]::tmpJPrefs(inboxSave)
     checkbutton $pbl.log -text " [mc prefcuautologin]" \
       -variable [namespace current]::tmpJPrefs(autoLogin)
+    if {[string equal $this(platform) "windows"]} {
+	checkbutton $pbl.not -text " Show notfier window" \
+	  -variable [namespace current]::tmpJPrefs(notifier,state)
+    }
         
     label $pbl.lserv -text [mc prefcudisc]
     radiobutton $pbl.disco   \
@@ -357,13 +364,16 @@ proc ::Jabber::JPrefs::BuildCustomPage {page} {
     
     grid $pbl.savein -padx 2 -pady $ypad -sticky w -columnspan 2
     grid $pbl.log    -padx 2 -pady $ypad -sticky w -columnspan 2
+    if {[string equal $this(platform) "windows"]} {
+	grid $pbl.not    -padx 2 -pady $ypad -sticky w -columnspan 2
+    }
     grid $pbl.lserv  -padx 2 -pady $ypad -sticky w
     grid $pbl.disco  -padx 2 -pady $ypad -sticky w
     grid $pbl.browse -padx 2 -pady $ypad -sticky w
     grid $pbl.agents -padx 2 -pady $ypad -sticky w
 }
 
-proc ::Jabber::JPrefs::PickFont { } {
+proc ::JPrefs::PickFont { } {
     variable tmpJPrefs
     
     set fontS [option get . fontSmall {}]
@@ -386,7 +396,7 @@ proc ::Jabber::JPrefs::PickFont { } {
     }
 }
 
-proc ::Jabber::JPrefs::PickBgImage {where} {
+proc ::JPrefs::PickBgImage {where} {
     variable tmpJPrefs
 
     set types {
@@ -400,13 +410,13 @@ proc ::Jabber::JPrefs::PickBgImage {where} {
     }
 }
 
-proc ::Jabber::JPrefs::DefaultBgImage {where} {
+proc ::JPrefs::DefaultBgImage {where} {
     variable tmpJPrefs
 
     set tmpJPrefs($where,bgImagePath) ""
 }
 
-proc ::Jabber::JPrefs::SavePrefsHook { } {
+proc ::JPrefs::SavePrefsHook { } {
     global  prefs
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
@@ -426,18 +436,16 @@ proc ::Jabber::JPrefs::SavePrefsHook { } {
     set prefs(themeName) $tmpPrefs(themeName)
 
     # If changed present auto away settings, may need to reconfigure.
-    ::Jabber::JPrefs::UpdateAutoAwaySettings    
+    ::JPrefs::UpdateAutoAwaySettings    
 
     # Roster background image.
     ::Roster::SetBackgroundImage $tmpJPrefs(rost,useBgImage) \
       $tmpJPrefs(rost,bgImagePath)
     
     ::Chat::SetFont $jprefs(chatFont)
-
-    unset tmpJPrefs
 }
 
-proc ::Jabber::JPrefs::CancelPrefsHook { } {
+proc ::JPrefs::CancelPrefsHook { } {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
 	
@@ -449,13 +457,19 @@ proc ::Jabber::JPrefs::CancelPrefsHook { } {
     }
 }
 
-proc ::Jabber::JPrefs::UserDefaultsHook { } {
+proc ::JPrefs::UserDefaultsHook { } {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
 	
     foreach key [array names tmpJPrefs] {
 	set tmpJPrefs($key) $jprefs($key)
     }
+}
+
+proc ::JPrefs::DestroyPrefsHook { } {
+    variable tmpJPrefs
+
+    unset tmpJPrefs
 }
 
 #-------------------------------------------------------------------------------

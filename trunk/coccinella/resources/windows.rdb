@@ -3,10 +3,10 @@
 
 ! General appearance
 !
-*fontTiny:                           {MS Sans Serif} 8
-*fontSmall:                          {MS Sans Serif} 8
-*fontSmallBold:                      {MS Sans Serif} 8 bold
-*fontMedium:                         {MS Sans Serif} 8
+*fontTiny:                           Arial 8
+*fontSmall:                          Arial 8
+*fontSmallBold:                      Arial 8 bold
+*fontMedium:                         Arial 8
 *fontLarge:                          Helvetica 16
 *backgroundGeneral:                  #e5e4e8
 
@@ -19,18 +19,18 @@
 !
 *Button.padX:                        10
 *Button.padY:                        2
-*Checkbutton.Font:                   {MS Sans Serif} 8
+*Checkbutton.Font:                   Arial 8
 *Entry.background:                   white
-*Entry.Font:                         {MS Sans Serif} 8
-*Label.Font:                         {MS Sans Serif} 8
-*Labelframe.Font:                    {MS Sans Serif} 8 bold
+*Entry.Font:                         Arial 8
+*Label.Font:                         Arial 8
+*Labelframe.Font:                    Arial 8 bold
 *Listbox.background:                 white
-*Listbox.Font:                       {MS Sans Serif} 8
-*Message.Font:                       {MS Sans Serif} 8
-*Radiobutton.Font:                   {MS Sans Serif} 8
-*Scale.Font:                         {MS Sans Serif} 8
+*Listbox.Font:                       Arial 8
+*Message.Font:                       Arial 8
+*Radiobutton.Font:                   Arial 8
+*Scale.Font:                         Arial 8
 *Text.background:                    white
-*Text.Font:                          {MS Sans Serif} 8
+*Text.Font:                          Arial 8
 
 ! button icons for ok and cancel buttons
 !
@@ -43,11 +43,11 @@
 !
 *Balloonhelp.background:             #ffff9f
 *Combobox.background:                white
-*Combobox.Font:                      {MS Sans Serif} 8
+*Combobox.Font:                      Arial 8
 *HeadLabel.background:               #cecece
-*MacTabnotebook.Font:                {MS Sans Serif} 8
+*MacTabnotebook.Font:                Arial 8
 *Tablelist.background:               white
-*Tablelist.Font:                     {MS Sans Serif} 8
+*Tablelist.Font:                     Arial 8
 
 ! specific megawidgets
 !
