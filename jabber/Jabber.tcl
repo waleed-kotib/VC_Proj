@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.25 2003-10-18 07:43:55 matben Exp $
+# $Id: Jabber.tcl,v 1.26 2003-10-23 06:27:59 matben Exp $
 #
 #  The $address is an ip name or number.
 #
@@ -321,7 +321,7 @@ proc ::Jabber::FactoryDefaults { } {
     
     set jprefs(logoutStatus) ""
     
-    set jprefs(chatFont) $sysFont(s)
+    set jprefs(chatFont) [::Utils::GetFontListFromName $sysFont(s)]
     set jprefs(useXDataSearch) 1
     
     # Service discovery method: "agents" or "browse"
@@ -446,6 +446,7 @@ proc ::Jabber::FactoryDefaults { } {
       mStatus        any       @::Jabber::Roster::BuildPresenceMenu
       mRefreshRoster any       {::Jabber::Roster::Refresh}
     }  
+#      Junk           any       {puts junk}
       
     # Can't run our http server on macs :-(
     if {![string equal $this(platform) "macintosh"]} {
@@ -571,6 +572,7 @@ proc ::Jabber::SetUserPreferences { } {
 	      $jprefs(iq:register,$key) userDefault]
 	}
 	::PreferencesUtils::Add $jprefsRegList
+	set jprefs(chatFont) [::Utils::GetFontListFromName $jprefs(chatFont)]
 }
 
 # Jabber::GetjprefsArray, GetjserverArray, ... --
@@ -1672,7 +1674,7 @@ proc ::Jabber::IsWellFormedJID {jid args} {
     
     switch -- $argsArr(-type) {
 	user {
-	    if {[regexp {(.+)@([^/]+)(/(.*))?} $jid match name host junk res]} {
+	    if {[regexp {^(.+)@([^/]+)(/(.*))?$} $jid match name host junk res]} {
 		if {[regexp $jprefs(invalsExp) $name match junk]} {
 		    return 0
 		} elseif {[regexp $jprefs(invalsExp) $host match junk]} {
@@ -2940,8 +2942,9 @@ proc ::Jabber::WB::ChatMsg {args} {
     array set argsArr $args
     ::Jabber::Debug 2 "::Jabber::WB::ChatMsg args='$args'"
     
-    set jid2 $argsArr(-from)
-    regexp {^(.+@[^/]+)(/.*)?$} $argsArr(-from) match jid2 res
+    #set jid2 $argsArr(-from)
+    #regexp {^(.+@[^/]+)(/.*)?$} $argsArr(-from) match jid2 res
+    foreach {jid2 res} [jlib::splitjid $argsArr(-from)] break
 
     # This one returns empty if not exists.
     set wtop [::UI::GetWtopFromJabberType "chat" $argsArr(-from)  \
@@ -3434,6 +3437,21 @@ proc ::Jabber::UI::RegisterMenuEntry {wpath name menuSpec} {
 # Results:
 #       popup menu displayed
 
+proc ::Jabber::UI::PopupBU {what w v x y} {
+    
+    set m $w.m32menu
+    catch {destroy $m}
+    menu $m -tearoff 0
+    $m add command -label Test1 -command {puts Test1}
+    $m add command -label Test2 -command {puts Test2}
+    
+    set X [expr [winfo rootx $w] + $x]
+    set Y [expr [winfo rooty $w] + $y]
+    puts "v=$v"
+    update idletasks
+    tk_popup $m $X $Y   
+}
+
 proc ::Jabber::UI::Popup {what w v x y} {
     global  wDlgs this
     
@@ -3448,25 +3466,46 @@ proc ::Jabber::UI::Popup {what w v x y} {
     # Find also type of thing clicked, 'typeClicked'.
     
     set typeClicked ""
+    if {[llength $v]} {
+	set tags [$w itemconfigure $v -tags]
+    } else {
+	set tags ""
+    }
+    ::Jabber::Debug 3 "\ttags=$tags"
     
     switch -- $what {
 	roster {
 	    
-	    # The last element of atree item if user is a 3-tier jid for
-	    # online users and a 2-tier jid else.
+	    # The last element of atree item if user is usually a 3-tier jid for
+	    # online users and a 2-tier jid else, but some transports may
+	    # lack the resource part for online users. Beware!
 	    set jid [lindex $v end]
 	    set jid3 $jid
 	    set status [string tolower [lindex $v 0]]
 	    
-	    switch -- [llength $v] {
-		1 {
+	    switch -- $tags {
+		head {
 		    set typeClicked head
+		}
+		group {
+		
+		    # Get a list of all jid's in this group. type=user.
+		    # Must strip off all resources.
+		    set typeClicked group
+		    set jid {}
+		    foreach jid3 [$w children $v] {
+			foreach {jid2 res} [jlib::splitjid $jid3] break
+			lappend jid $jid2
+		    }
+		    set jid [list $jid]
 		}
 		default {
 		    
-		    # Must let 'jid' refer to 2-tier jid for commands to work!
-		    if {[regexp {^(.+@[^/]+)(/.*)?$} $jid match jid2 res]} {
+		    # Typically a user.
+		    foreach {jid2 res} [jlib::splitjid $jid] break
+		    if {[regexp {^[^@]+@[^@]+$} $jid2]} {
 			
+			# Must let 'jid' refer to 2-tier jid for commands to work!
 			set jid3 $jid
 			set jid $jid2
 			if {[$jstate(browse) havenamespace $jid3 "coccinella:wb"]} {
@@ -3474,19 +3513,7 @@ proc ::Jabber::UI::Popup {what w v x y} {
 			} else {
 			    set typeClicked user
 			}			
-		    } elseif {[llength $v] == 2} {
-			
-			# Get a list of all jid's in this group. type=user.
-			# Must strip off all resources.
-			set typeClicked group
-			set jid {}
-			foreach jid3 [$w children $v] {
-			    set jid2 $jid3
-			    regexp {^(.+@[^/]+)(/.*)?$} $jid3 match jid2
-			    lappend jid $jid2
-			}
-			set jid [list $jid]
-		    }
+		    }		    
 		}
 	    }
 	}
@@ -3508,7 +3535,7 @@ proc ::Jabber::UI::Popup {what w v x y} {
 	groupchat {	    
 	    set jid $v
 	    set jid3 $jid
-	    if {[regexp {^.+@[^/]+(/.*)?$} $jid match res]} {
+	    if {[regexp {^[^@]+@[^@]+(/.*)?$} $jid match res]} {
 		set typeClicked user
 	    }
 	}
@@ -3567,12 +3594,14 @@ proc ::Jabber::UI::Popup {what w v x y} {
 	    continue
 	} else {
 	    
-	    # Really bad solution here!
+	    # Really BAD BAD BAD solution here!
 	    regsub -all &jid3 $cmd [list $jid3] cmd
 	    regsub -all &jid $cmd [list $jid] cmd
 	    set cmd [subst -nocommands $cmd]
 	    set locname [::msgcat::mc $item]
-	    $m add command -label $locname -command "after 40 $cmd" -state disabled
+	    #puts "cmd=$cmd"
+	    $m add command -label $locname -command "after 40 $cmd"  \
+	      -state disabled
 	}
 	
 	# Special BAD BAD!!! ------
@@ -3580,6 +3609,9 @@ proc ::Jabber::UI::Popup {what w v x y} {
 	  [string match -nocase "*chat history*" $item]} {
 	    $m entryconfigure $locname -state normal
 	}
+	#if {$item == "Junk"} {
+	#    $m entryconfigure $locname -state normal
+	#}
 	#--------
 	
 	if {![::Jabber::IsConnected]} {
@@ -3693,7 +3725,7 @@ proc ::Jabber::UI::Popup {what w v x y} {
     tk_popup $m [expr int($X) - 10] [expr int($Y) - 10]   
     
     # Mac bug... (else can't post menu while already posted if toplevel...)
-    if {[string match "mac*" $this(platform)]} {
+    if {[string equal "macintosh" $this(platform)]} {
 	catch {destroy $m}
 	update
     }

@@ -15,7 +15,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.9 2003-10-18 07:43:55 matben Exp $
+# $Id: Coccinella.tcl,v 1.10 2003-10-23 06:27:59 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -405,11 +405,11 @@ set allLibSourceFiles {
   GetFileIface.tcl       \
   Network.tcl            \
   PutFileIface.tcl       \
-  Utils.tcl              \
   SequenceGrabber.tcl    \
   TheServer.tcl          \
   UI.tcl                 \
   UserActions.tcl        \
+  Utils.tcl              \
 }
 
 foreach sourceName $allLibSourceFiles {

@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.10 2003-09-13 06:39:25 matben Exp $
+# $Id: roster.tcl,v 1.11 2003-10-23 06:28:00 matben Exp $
 # 
 # Note that every jid in the rosterArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -414,9 +414,10 @@ proc roster::setpresence {rostName jid type args} {
     Debug 2 "roster::setpresence rostName=$rostName, jid='$jid', \
       type='$type', args='$args'"
     
-    set jid2 $jid
-    set resource ""
-    regexp {([^/]+)/([^/]+)} $jid match jid2 resource
+    #set jid2 $jid
+    #set resource ""
+    #regexp {^([^/]+)/([^/]+)$} $jid match jid2 resource
+    foreach {jid2 resource} [jlib::splitjid $jid] break
     
     if {[string equal $type "unsubscribed"]} {
 	
@@ -829,15 +830,17 @@ proc roster::isavailable {rostName jid} {
     Debug 2 "roster::isavailable rostName=$rostName, jid='$jid'"
         
     # If any resource in jid, we get it here.
-    if {[regexp "(.+)@(.+)/(.+)" $jid match name host resource]} {
-	set ajid ${name}@${host}
-    } else {
-	set ajid $jid
-	set resource {}
-    }
-    if {[llength $resource]} {
-	if {[info exists presArr($ajid/$resource,type)]} {
-	    if {[string equal $presArr($ajid/$resource,type) "available"]} {
+    #if {[regexp "(.+)@(.+)/(.+)" $jid match name host resource]} {
+#	set jid2 ${name}@${host}
+    #} else {
+#	set jid2 $jid
+#	set resource ""
+    #}
+    foreach {jid2 resource} [jlib::splitjid $jid] break
+
+    if {[string length $resource] > 0} {
+	if {[info exists presArr($jid2/$resource,type)]} {
+	    if {[string equal $presArr($jid2/$resource,type) "available"]} {
 		return 1
 	    } else {
 		return 0
@@ -846,7 +849,7 @@ proc roster::isavailable {rostName jid} {
 	    return 0
 	}
     } else {
-	set allKeys [array names presArr "$ajid/*,type"]
+	set allKeys [array names presArr "$jid2/*,type"]
 	if {[llength $allKeys]} {
 	    foreach key $allKeys {
 		if {[string equal $presArr($key) "available"]} {

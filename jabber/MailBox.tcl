@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.15 2003-10-12 13:12:55 matben Exp $
+# $Id: MailBox.tcl,v 1.16 2003-10-23 06:28:00 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -279,9 +279,10 @@ proc ::Jabber::MailBox::InsertRow {wtbl row i} {
     upvar ::UI::icons icons
 
     set jid [lindex $row 1]
-    if {![regexp {^([^@]+@[^/]+)(/(.*))?} $jid match jid2 x res]} {
-	set jid2 $jid
-    }
+    #if {![regexp {^([^@]+@[^/]+)(/(.*))?} $jid match jid2 x res]} {
+#	set jid2 $jid
+    #}
+    foreach {jid2 res} [jlib::splitjid $jid] break
 
     # We keep any /res part.
     #set row [lreplace $row 1 1 $jid2]
@@ -440,8 +441,9 @@ proc ::Jabber::MailBox::GotMsg {bodytxt args} {
     if {!$locals(mailboxRead)} {
 	::Jabber::MailBox::ReadMailbox
     }
-    regexp {^([^@]+@[^/]+)(/(.*))?} $argsArr(-from) match jid2 x res
-        
+    #regexp {^([^@]+@[^/]+)(/(.*))?} $argsArr(-from) match jid2 x res
+    foreach {jid2 res} [jlib::splitjid $argsArr(-from)] break
+       
     # Here we should probably check som 'jabber:x:delay' element...
     # This is ISO 8601.
     set timeStamp ""

@@ -25,7 +25,7 @@
 # 
 # Copyright (C) 2002-2003 Mats Bengtsson
 # 
-# $Id: tree.tcl,v 1.6 2003-10-22 05:53:52 matben Exp $
+# $Id: tree.tcl,v 1.7 2003-10-23 06:27:59 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -583,7 +583,7 @@ proc ::tree::ButtonPress {w v x y} {
     
     upvar ::tree::${w}::options options
 
-    uplevel #0 "$options(-buttonpresscommand) [list $w $v $x $y]"
+    uplevel #0 $options(-buttonpresscommand) [list $w $v $x $y]
 }
 
 proc ::tree::ButtonRelease {w} {
@@ -1057,7 +1057,6 @@ proc ::tree::NewItem {w v args} {
 	}
     } else {
 	lappend treestate($uidDir:children) $tail
-	#puts "tail=$tail, treestate($uidDir:children)=$treestate($uidDir:children)"
     }
     if {[llength $options(-sortorder)]} {
 	set treestate($uidDir:children)   \
@@ -1413,9 +1412,7 @@ proc ::tree::BuildLayer {w v in} {
 	
 	# We may get vxc={a b c {[junk]}} here if special chars. Cure!
 	set vxc [concat $vx [list $c]]
-	#puts "vxc=$vxc"
 	set uidc $v2uid($vxc)
-	#puts "uidc=$uidc"
 	
 	set isDir 0
 	if {[info exists treestate($uidc:dir)] && ($treestate($uidc:dir) == 1)} {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.7 2003-10-12 13:12:55 matben Exp $
+# $Id: GotMsg.tcl,v 1.8 2003-10-23 06:27:59 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -88,9 +88,10 @@ proc ::Jabber::GotMsg::Show {thisMsgId} {
     regexp "^(.*) (${_time})$" $timeAndDate match theDate theTime
     
     # Split jid into jid2 and resource.
-    set jid2 $jid
-    set res {}
-    regexp {([^/]+)/(.*)} $jid match jid2 res
+    #set jid2 $jid
+    #set res {}
+    #regexp {([^/]+)/(.*)} $jid match jid2 res
+    foreach {jid2 res} [jlib::splitjid $jid] break
     
     # Use nick name.
     set nick [$jstate(roster) getname $jid2]

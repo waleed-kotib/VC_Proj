@@ -4,13 +4,14 @@
 #
 #  Code idee from Harrison & McLennan
 #  
-# $Id: balloonhelp.tcl,v 1.3 2003-07-26 13:54:23 matben Exp $
+# $Id: balloonhelp.tcl,v 1.4 2003-10-23 06:27:59 matben Exp $
 
 package provide balloonhelp 1.0
 
 namespace eval ::balloonhelp:: {
     
     variable locals
+    variable debug 0
     
     set locals(active) 1
     set locals(millisecs) 1200
@@ -123,7 +124,7 @@ proc ::balloonhelp::balloonforwindow {win msg args} {
 proc ::balloonhelp::balloonforcanvas {win itemid msg args} {
 
     variable locals    
-    #puts "::balloonhelp::balloonforcanvas win=$win, itemid=$itemid"
+    Debug 2 "::balloonhelp::balloonforcanvas win=$win, itemid=$itemid"
     set locals($win,$itemid) $msg
     set locals($win,args) $args
     $win bind $itemid <Enter>  \
@@ -135,7 +136,7 @@ proc ::balloonhelp::balloonforcanvas {win itemid msg args} {
 proc ::balloonhelp::balloonfortext {win tag msg args} {
 
     variable locals    
-    #puts "::balloonhelp::balloonfortext win=$win, tag=$tag"
+    Debug 2 "::balloonhelp::balloonfortext win=$win, tag=$tag"
     set locals($win,$tag) $msg
     set locals($win,args) $args
     $win tag bind $tag <Enter>  \
@@ -153,7 +154,7 @@ proc ::balloonhelp::balloonfortext {win tag msg args} {
 proc ::balloonhelp::Pending {win type args} {
 
     variable locals
-    #puts "::balloonhelp::Pending win=$win, args='$args'"
+    Debug 2 "::balloonhelp::Pending win=$win, args='$args'"
     foreach {key value} $args {
 	set locals($win,[string trimleft $key -]) $value
     }
@@ -165,7 +166,7 @@ proc ::balloonhelp::Pending {win type args} {
 proc ::balloonhelp::Cancel {win} {
     
     variable locals    
-    #puts "::balloonhelp::Cancel"
+    Debug 2 "::balloonhelp::Cancel"
     if {[info exists locals(pending)]} {
 	after cancel $locals(pending)
 	unset locals(pending)
@@ -219,6 +220,13 @@ proc ::balloonhelp::Show {win type} {
 	raise .balloonhelp
     }
     unset locals(pending)
+}
+
+proc ::balloonhelp::Debug {num str} {
+    variable debug
+    if {$num <= $debug} {
+	puts $str
+    }
 }
 
 #-------------------------------------------------------------------------------
