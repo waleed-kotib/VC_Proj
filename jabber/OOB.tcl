@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.47 2005-01-31 14:06:58 matben Exp $
+# $Id: OOB.tcl,v 1.48 2005-02-21 08:48:43 matben Exp $
 
 package require uriencode
 
@@ -257,10 +257,18 @@ proc ::OOB::SetCallback {token jlibName type theQuery} {
     
     if {$type == "error"} {
 	foreach {errcode errmsg} $theQuery break
-	set msg "Got an error when trying to send a file: code was $errcode,\
-	  and error message: $errmsg"
-	::UI::MessageBox -icon error -type ok -title [mc Error] \
-	  -message $msg
+	
+	switch -- $errcode {
+	    406 {
+		set msg [mc jamessooberr406 $state(jid) $state(tail)]
+	    }
+	    default {
+		set msg [mc jamessooberr404 $state(tail) $state(jid) \
+		  $errcode $errmsg]
+	    }
+	}
+	
+	::UI::MessageBox -icon error -type ok -title [mc Error] -message $msg
     } else {
 	::UI::MessageBox -icon info -type ok -title [mc {File Transfer}] \
 	  -message [mc jamessoobok2 $state(tail) $state(jid)]

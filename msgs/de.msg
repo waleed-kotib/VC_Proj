@@ -673,6 +673,12 @@
 ::msgcat::mcset de jamessoobfailopen	{Fehler beim Öffnen der Datei %s}
 ::msgcat::mcset de jamessoobgetfail	{Fehler beim Abruf der Url "%s": %s}
 ::msgcat::mcset de jamessoobtimeout	{Zeitüberschreitung beim Abruf der Datei über http}
+
+# translate!!!!
+::msgcat::mcset de jamessooberr406      {The user %s rejected to accept the file %s.}
+::msgcat::mcset de jamessooberr404      {Got an error when trying to send the file %s to %s. The code was %s, and error message: %s}
+# translate!!!!
+
 ::msgcat::mcset de jamessnogchat	{Wir konnten keinen Server finden, der groupchat bietet.}
 ::msgcat::mcset de jamesserrinboxopen	{Fehler beim Öffnen der Postdatei %s zur Sicherhung.}
 ::msgcat::mcset de jamesserrinboxread	{Fehler beim Versuch, die Jabber-Postdatei zu lesen "%s": %s}

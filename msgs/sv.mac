@@ -668,13 +668,15 @@ Den ska vara av typen 'username@jabber.org'.}
 ::msgcat::mcset sv jamessoobfailopen	{Misslyckades med att öppna filen %s}
 ::msgcat::mcset sv jamessoobgetfail	{Misslyckades med att skaffa url:en "%s": %s}
 ::msgcat::mcset sv jamessoobtimeout	{Vi fick timeout när skaffade fil över HTTP.}
+::msgcat::mcset sv jamessooberr406      {Användaren %s nekade att ta emot filen %s.}
+::msgcat::mcset sv jamessooberr404      {Fick ett fel när försökte skicka filen %s till %s. Felkod %s och meddelande %s}
 ::msgcat::mcset sv jamessnogchat	{Vi hittade ingen tjänst som stöder gruppsamtal}
 ::msgcat::mcset sv jamesserrinboxopen	{Misslyckades med att öppna filen %s för inkorgen.}
 ::msgcat::mcset sv jamesserrinboxread	{Fick ett fel när försökte att läsa Jabber inkorgs filen "%s": %s}
 ::msgcat::mcset sv jamesschatclose	{Om du stänger det här fönstret så förlorar du också hela konversationen. Vill du verkligen stänga fönstret?}
 ::msgcat::mcset sv jamessgchatfields	{Vi kräver att samtliga fält är ifyllda innan går in i rum.}
-::msgcat::mcset sv jamessconfmsg	{Välj en konferanstjänst och ett rumsnamn. Tryck sedan på "Hämta" för att få specifikationen för att gå\
-in i det önskade rummet eftersom varje rum och tjänst kan ha speciella villkor.}
+::msgcat::mcset sv jamessconfmsg	{Välj en konferanstjänst och ett rumsnamn. Tryck sedan på "Hämta" för att få specifikationen för att gå in i det önskade rummet eftersom varje rum och tjänst\
+kan ha speciella villkor.}
 ::msgcat::mcset sv jamesssavemsg	{Vill du spara det här meddelandet innan fönstret stängs?}
 ::msgcat::mcset sv jamessskipsendq	{Adressen "%s" är inte riktigt formad. Vill du hoppa över denna och skicka till resterande?}
 ::msgcat::mcset sv jamessillformresend	{Adressen "%s" är inte riktigt formad. Korrigera och skicka igen.}
