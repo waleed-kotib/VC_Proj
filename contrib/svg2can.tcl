@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #
-# $Id: svg2can.tcl,v 1.6 2004-02-21 16:02:18 matben Exp $
+# $Id: svg2can.tcl,v 1.7 2004-02-22 15:03:18 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -392,7 +392,7 @@ proc svg2can::parsetext {xmllist} {
     set y 0
     set xAttr 0
     set yAttr 0
-    set cmdList [ParseTspan $xmllist x y xAttr yAttr 1 {}]
+    set cmdList [ParseTspan $xmllist x y xAttr yAttr {}]
     return [FlattenList $cmdList]
 }
 
@@ -401,7 +401,7 @@ proc svg2can::parsetext {xmllist} {
 #       Takes a tspan or text element and returns a list of canvas
 #       create text commands.
 
-proc svg2can::ParseTspan {xmllist xVar yVar xAttrVar yAttrVar inherit opts} { 
+proc svg2can::ParseTspan {xmllist xVar yVar xAttrVar yAttrVar opts} { 
     variable systemFont
     upvar $xVar x
     upvar $yVar y
@@ -416,21 +416,24 @@ proc svg2can::ParseTspan {xmllist xVar yVar xAttrVar yAttrVar inherit opts} {
     array set optsArr $opts
     array set optsArr [ParseTextAttr $xmllist xAttr yAttr]
     set opts [array get optsArr]
-    if {1 || $inherit} {
-	set x $xAttr
-	set y $yAttr
-    }
 
+    set tag [gettag $xmllist]
     set childList [getchildren $xmllist]
     set cmdList {}
-    puts "x=$x, y=$y, xAttr=$xAttr, yAttr=$yAttr, inherit=$inherit"
+    puts "x=$x, y=$y, xAttr=$xAttr, yAttr=$yAttr"
     
     if {[llength $childList]} {
+	
+	# Nested tspan elements do not inherit x, y set via attributes.
+	if {[string equal $tag "tspan"]} {
+	    set xAttr $x
+	    set yAttr $y
+	}
 	foreach c $childList {
 	    
 	    switch -- [gettag $c] {
 		tspan {
-		    lappend cmdList [ParseTspan $c x y xAttr yAttr 0 $opts]
+		    lappend cmdList [ParseTspan $c x y xAttr yAttr $opts]
 		}
 		default {
 		    # empty
@@ -438,15 +441,15 @@ proc svg2can::ParseTspan {xmllist xVar yVar xAttrVar yAttrVar inherit opts} {
 	    }
 	}
     } else {
-	
-	# Each text insert moves the running x coordinate.
 	set str [getcdata $xmllist]
 	lappend opts -text $str
-	set cmdList [concat create text $x $y $opts]
+	set cmdList [concat create text $xAttr $yAttr $opts]
 	set theFont $systemFont
 	if {[info exists optsArr(-font)]} {
 	    set theFont $optsArr(-font)
 	}
+	
+	# Each text insert moves both the running coordinate sets.
 	# newlines???
 	set deltax [font measure $theFont $str]
 	set x     [expr $x + $deltax]
@@ -461,6 +464,7 @@ proc svg2can::ParseTspan {xmllist xVar yVar xAttrVar yAttrVar inherit opts} {
 #       option list.
 
 proc svg2can::ParseTextAttr {xmllist xVar yVar} {    
+    variable systemFont
     upvar $xVar x
     upvar $yVar y
 
@@ -472,15 +476,7 @@ proc svg2can::ParseTextAttr {xmllist xVar yVar} {
 	
 	switch -- $key {
 	    baseline-shift {
-		
-		switch -- $value {
-		    sub {
-			
-		    }
-		    super {
-			
-		    }
-		}
+		set baselineshift $value
 	    }
 	    dx {
 		set x [expr $x + $value]
@@ -502,6 +498,14 @@ proc svg2can::ParseTextAttr {xmllist xVar yVar} {
 		lappend presentationAttr $key $value
 	    }
 	}
+    }
+    array set optsArr $opts
+    set theFont $systemFont
+    if {[info exists optsArr(-font)]} {
+	set theFont $optsArr(-font)
+    }
+    if {[info exists baselineshift]} {
+	set y [expr $y + [BaselineShiftToDy $baselineshift $theFont]]
     }
     return [MergePresentationAttr text $opts $presentationAttr]
 }
@@ -680,31 +684,60 @@ proc svg2can::ParseStraightPath {path} {
     set cantype line
     set i 0
     set len [llength $path]
+    set len1 [expr $len - 1]
+    set len2 [expr $len - 2]
+    set len4 [expr $len - 4]
+    set len6 [expr $len - 6]
 
     while {$i < $len} {
 	set elem [lindex $path $i]
 	
-	switch -glob -- $elem {
+	switch -- $elem {
 	    A - a {
 		# ?
 		incr i
 	    }
-	    C - c {
-		# ?
+	    C {
+		# We could have a sequence of pairs of points here...
+		# This is wrong! Must not be smooth.
+		# Approximate by quadratic bezier.
+		lappend co [lindex $path [incr i]] [lindex $path [incr i]]
+		lappend co [lindex $path [incr i]] [lindex $path [incr i]]
+		lappend co [lindex $path [incr i]] [lindex $path [incr i]]
+		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && ($i < $len6)} {
+		    lappend co [lindex $path [incr i]] [lindex $path [incr i]]
+		    lappend co [lindex $path [incr i]] [lindex $path [incr i]]
+		    lappend co [lindex $path [incr i]] [lindex $path [incr i]]
+		}
+		incr i
+		set smooth 1
+	    }
+	    c {
 		incr i
 	    }
 	    H {
 		lappend co [lindex $path [incr i]] [lindex $co end]
+		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && ($i < $len1)} {
+		    lappend co [lindex $path [incr i]] [lindex $co end]
+		}
 		incr i
 	    }
 	    h {
 		lappend co [expr [lindex $co end-1] + [lindex $path [incr i]]] \
 		  [lindex $co end]
+		while {![regexp {[a-zA-Z]} [lindex $path $i]] && ($i < $len1)} {
+		    lappend co [expr [lindex $co end-1] + \
+		      [lindex $path [incr i]]] [lindex $co end]
+		}
 		incr i
 	    }
-	    L - {[0-9]*} - {-[0-9]*} {
-		if {$elem != "L"} {incr i -1}
+	    L {
+		puts "L: i=$i, path=$path"
 		lappend co [lindex $path [incr i]] [lindex $path [incr i]]
+		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && ($i < $len2)} {
+		    puts "\ti=$i, [lindex $path $i]"
+		    lappend co [lindex $path [incr i]] [lindex $path [incr i]]
+		}
 		incr i
 	    }
 	    l {
@@ -717,29 +750,86 @@ proc svg2can::ParseStraightPath {path} {
 		incr i
 	    }
 	    Q {
-		# ?
+		# We could have a sequence of pairs of points here...
+		# This is wrong! Must not be smooth.
+		lappend co [lindex $path [incr i]] [lindex $path [incr i]]
+		lappend co [lindex $path [incr i]] [lindex $path [incr i]]
+		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && ($i < $len4)} {
+		    lappend co [lindex $path [incr i]] [lindex $path [incr i]]
+		    lappend co [lindex $path [incr i]] [lindex $path [incr i]]
+		}
 		incr i
+		set smooth 1
 	    }
 	    q {
 		# ?
 		incr i
 	    }
+	    T {
+		# Must annihilate last point added and use its mirror instead.
+		set xanch [expr 2 * [lindex $co end-1] - [lindex $co end-3]]
+		set yanch [expr 2 * [lindex $co end] - [lindex $co end-2]]
+		lset co end-1 $xanch
+		lset co end $yanch
+		# Not sure about this!!!!!!!
+		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && ($i < $len2)} {
+		    set xanch [expr 2 * [lindex $co end-1] - [lindex $co end-3]]
+		    set yanch [expr 2 * [lindex $co end] - [lindex $co end-2]]
+		    lset co end-1 $xanch
+		    lset co end $yanch
+		}		
+		incr i
+		set smooth 1
+	    }
 	    V {
 		lappend co [lindex $co end-1] [lindex $path [incr i]]
+		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && ($i < $len1)} {
+		    lappend co [lindex $co end-1] [lindex $path [incr i]]
+		}
 		incr i
 	    }
 	    v {
 		lappend co [lindex $co end-1] \
 		  [expr [lindex $co end] + [lindex $path [incr i]]]
+		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && ($i < $len1)} {
+		    lappend co [lindex $co end-1] \
+		      [expr [lindex $co end] + [lindex $path [incr i]]]
+		}
 		incr i
 	    }
 	    Z - z {
 		set cantype polygon
 		incr i
 	    }
+	    default {
+		# ?
+		incr i
+	    }
 	}
     }
     return $co
+}
+
+proc svg2can::BaselineShiftToDy {baselineshift fontSpec} {
+    
+    set linespace [font metrics $fontSpec -linespace]
+    
+    switch -regexp -- $baselineshift {
+	sub {
+	    set dy [expr 0.8 * $linespace]
+	}
+	super {
+	    set dy [expr -0.8 * $linespace]
+	}
+	{-?[0-9]+%} {
+	    set dy [expr 0.01 * $linespace * [string trimright $baselineshift %]]
+	}
+	default {
+	    # 0.5em ?
+	    set dy $baselineshift
+	}
+    }
+    return $dy
 }
 
 proc svg2can::PointsToList {points} {
@@ -818,9 +908,23 @@ if {0} {
     set xml(3) {<text x='10.0' y='60.0' \
       style='stroke-width: 0; font-family: Helvetica; font-size: 12; \
       fill: #000000;' id='std text t003'>\
-      <tspan>Online</tspan><tspan dy='6'>dy=6</tspan><tspan>End</tspan></text>}
+      <tspan>Online</tspan><tspan dy='6'>dy=6</tspan><tspan dy='-6'>End</tspan></text>}
+    set xml(4) {<text x='10.0' y='90.0' \
+      style='stroke-width: 0; font-family: Helvetica; font-size: 16; \
+      fill: #000000;' id='std text t004'>\
+      <tspan>First</tspan>\
+      <tspan dy='10'>Online (dy=10)</tspan>\
+      <tspan><tspan>Nested</tspan></tspan><tspan>End</tspan></text>}
     
-    foreach i [array names xml] {
+    set xml(5) {<path d='M 100 100 L 200 100 200 200 100 200 Z' \
+      style='fill-rule: evenodd; stroke: black; stroke-width: 1.0;\
+      stroke-linejoin: round; fill: #fffda8;' id='std poly t005'/>}
+    set xml(6) {<path d='M 30 100 Q 80 30 100 100 130 65 200 80' \
+      style='fill-rule: evenodd; stroke: black; stroke-width: 1.0;\
+      stroke-linejoin: round; fill: #fffda8;' id='std poly t006'/>}
+    
+    
+    foreach i [lsort -integer [array names xml]] {
 	set xmllist [tinydom::documentElement [tinydom::parse $xml($i)]]
 	set cmdList [svg2can::parseelement $xmllist]
 	foreach c $cmdList {
