@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.31 2004-01-14 14:27:30 matben Exp $
+# $Id: jabberlib.tcl,v 1.32 2004-01-23 08:57:16 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -1877,12 +1877,13 @@ proc jlib::search_set {jlibname to cmd args} {
 #                   -body text            : 
 #                   
 #                   -type $type           : normal, chat or groupchat
+#                   
+#                   -id token
 #
 #                   -xlist $xlist         : A list containing *X* xml_data. 
 #                   Anything can be put inside an *X*. Please make sure you 
 #                   created it with "wrapper::createtag" procedure, 
 #                   and also, it has a "xmlns" attribute in its root tag. 
-#                   If root tag's name isn't "x", then it'll be renamed to "x".
 #                   
 # Results:
 #       none.
@@ -1899,19 +1900,27 @@ proc jlib::send_message {jlibname to args} {
     set locals(last) [clock seconds]
     set attrlist [list to $to]
     set children {}
-    foreach name [array names argsArr] {
+    
+    foreach {name value} $args {
 	set par [string trimleft $name "-"]
-	if {[string equal $par "xlist"]} {
-	    foreach xchild $argsArr(-xlist) {
-		lappend children $xchild
+	
+	switch -- $name {
+	    -xlist {
+		foreach xchild $value {
+		    lappend children $xchild
+		}
 	    }
-	} elseif {[string equal $par "type"]} {
-	    if {![string equal $argsArr($name) "normal"]} {
-		lappend attrlist "type" $argsArr($name)
+	    -type {
+		if {![string equal $value "normal"]} {
+		    lappend attrlist "type" $value
+		}
 	    }
-	} else {
-	    lappend children [wrapper::createtag $par  \
-	      -chdata $argsArr($name)]
+	    -id {
+		lappend attrlist $par $value
+	    }
+	    default {
+		lappend children [wrapper::createtag $par -chdata $value]
+	    }
 	}
     }
     set xmllist [wrapper::createtag "message" -attrlist $attrlist  \

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.24 2004-01-20 14:21:35 matben Exp $
+# $Id: Browse.tcl,v 1.25 2004-01-23 08:54:25 matben Exp $
 
 package require chasearrows
 
@@ -615,7 +615,7 @@ proc ::Jabber::Browse::PresenceCallback {jid type args} {
 	    }
 	    set jidhash ${jid}/$argsArr(-resource)
 	    set parentList [$jstate(browse) getparents $jidhash]
-	    set jidList [concat $parentList $jidhash]
+	    set jidList [concat $parentList [list $jidhash]]
 	    if {![$wtree isitem $jidList]} {
 		return
 	    }
@@ -791,7 +791,7 @@ proc ::Jabber::Browse::AddServer { } {
     pack [button $frbot.btadd -text [::msgcat::mc Add] -width 8 -default active \
       -command [list [namespace current]::DoAddServer $w]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
+    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
       -command [list [namespace current]::CancelAdd $w]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6

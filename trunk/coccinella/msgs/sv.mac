@@ -429,6 +429,7 @@
 ::msgcat::mcset sv {Search Service}        {Söktjänst}
 ::msgcat::mcset sv {Search Specifications} {Sökspecifikation}
 ::msgcat::mcset sv {Select Font}           {Välj typsnitt}
+::msgcat::mcset sv {Send File}             {Skicka fil}
 ::msgcat::mcset sv {Send Live}             {Skicka lajv}
 ::msgcat::mcset sv {Server Info}           {Server info}
 ::msgcat::mcset sv {Service server}	   {Tjänst server}

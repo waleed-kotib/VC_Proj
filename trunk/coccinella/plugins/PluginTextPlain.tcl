@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: PluginTextPlain.tcl,v 1.9 2004-01-13 14:50:21 matben Exp $
+# $Id: PluginTextPlain.tcl,v 1.10 2004-01-23 09:00:06 matben Exp $
 
 
 namespace eval ::TextImporter:: {
@@ -224,7 +224,7 @@ proc ::TextImporter::Clicked {id} {
     pack [button $frbot.btset -text [::msgcat::mc {Save As}] -width 8 \
       -command [list [namespace current]::SaveAs $id]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Close] -width 8  \
+    pack [button $frbot.btcancel -text [::msgcat::mc Close]  \
       -command [list destroy $win]] \
       -side right -padx 5 -pady 5
     pack $frbot -side bottom -fill both -expand 1 -padx 8 -pady 6

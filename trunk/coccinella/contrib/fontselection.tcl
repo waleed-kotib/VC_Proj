@@ -1,6 +1,6 @@
 #  Copyright (c) 2002  Mats Bengtsson
 #
-# $Id: fontselection.tcl,v 1.4 2004-01-02 14:41:58 matben Exp $
+# $Id: fontselection.tcl,v 1.5 2004-01-23 08:54:23 matben Exp $
 
 package require combobox
 
@@ -106,7 +106,7 @@ proc ::fontselection::fontselection {w args} {
     pack [button $frbot.btset -text {Select} -default active -width 8 \
       -command "set [namespace current]::finished 1"]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text {Cancel} -width 8   \
+    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
       -command "set [namespace current]::finished 2"]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btdef -text {Default} -width 8   \

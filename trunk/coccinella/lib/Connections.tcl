@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Connections.tcl,v 1.18 2004-01-13 14:50:21 matben Exp $
+# $Id: Connections.tcl,v 1.19 2004-01-23 08:57:52 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -720,7 +720,7 @@ proc ::OpenMulticast::OpenMulticast {wtop} {
     pack [button $frbot.btconn -text [::msgcat::mc Open] -default active -width 8 \
       -command [list OpenMulticast::OpenMulticastQTStream $wtop $frtot.entip]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
+    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
       -command "set [namespace current]::finished 0"]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btedit -text "[::msgcat::mc Edit]..." -width 8  \

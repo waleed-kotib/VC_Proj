@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.30 2004-01-14 14:27:30 matben Exp $
+# $Id: Dialogs.tcl,v 1.31 2004-01-23 08:57:58 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -67,6 +67,7 @@ array set wDlgs {
     jmucdestroy     .jmucdestroy
     jchist          .jchist
     jprofiles       .jprofiles
+    joobs           .joobs
 }
 
 # Dialogs::GetCanvas --
@@ -120,7 +121,7 @@ proc ::Dialogs::GetCanvas {w} {
     pack [button $frbot.btconn -text {    Get    } -width 8 -default active \
       -command "set [namespace current]::finished 1"]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
+    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
       -command "set [namespace current]::finished 2"]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
@@ -174,7 +175,7 @@ proc ::Dialogs::InfoOnPlugins { } {
     # Button part.
     pack [frame $w.frall.frbot -borderwidth 0] -fill both -side bottom \
       -padx 8 -pady 6
-    pack [button $w.frall.frbot.ok -text [::msgcat::mc OK] -width 8  \
+    pack [button $w.frall.frbot.btok -text [::msgcat::mc OK]  \
       -command "destroy $w"] -side right -padx 5 -pady 5
 
     set fbox $w.frall.fbox
@@ -264,7 +265,7 @@ proc ::Dialogs::InfoOnPlugins { } {
 	$wtxt insert end "\n"
     }
     $wtxt configure -state disabled
-    bind $w <Return> "$w.frall.frbot.ok invoke"
+    bind $w <Return> "$w.frall.frbot.btok invoke"
     
     tkwait window $w
     grab release $w
@@ -325,7 +326,7 @@ proc ::Dialogs::UnixPrintPS {w wtoprint} {
     pack [button $frbot.btpr -text [::msgcat::mc Print] -width 8 -default active  \
       -command "set [namespace current]::finishedPrint 1"]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
+    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
       -command "set [namespace current]::finishedPrint 0"]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -in $w.frall  \
@@ -523,7 +524,7 @@ proc ::PSPageSetup::PSPageSetup { w } {
     pack [button $frbot.btsave -text [::msgcat::mc Save] -width 8 -default active  \
       -command [list [namespace current]::PushBtSave]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
+    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
       -command "set [namespace current]::finished 0"]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -in $w.frall  \
@@ -675,11 +676,11 @@ proc ::Dialogs::ShowInfoClients { } {
     # Button part.
     pack [frame $w.frbot -borderwidth 0] -in $w.frall -fill both  \
       -padx 8 -pady 6
-    pack [button $w.ok -text [::msgcat::mc OK] -default active  \
-      -width 8 -command "destroy $w"] \
+    pack [button $w.btok -text [::msgcat::mc OK] -default active  \
+      -command "destroy $w"] \
       -in $w.frbot -side right -padx 5 -pady 5
     wm resizable $w 0 0
-    bind $w <Return> "$w.ok invoke"
+    bind $w <Return> "$w.btok invoke"
 
     tkwait window $w
     grab release $w
@@ -797,11 +798,11 @@ proc ::Dialogs::ShowInfoServer {thisIPnum} {
     # button part
     pack [frame $w.frbot -borderwidth 0] -in $w.frall -fill both  \
       -padx 8 -pady 6
-    pack [button $w.ok -text [::msgcat::mc OK] -width 8  \
+    pack [button $w.btok -text [::msgcat::mc OK]  \
       -command "destroy $w"]  \
       -in $w.frbot -side right -padx 5 -pady 5
     wm resizable $w 0 0
-    bind $w <Return> "$w.ok invoke"
+    bind $w <Return> "$w.btok invoke"
     
     tkwait window $w
     grab release $w

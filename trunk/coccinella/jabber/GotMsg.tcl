@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.20 2004-01-14 14:27:30 matben Exp $
+# $Id: GotMsg.tcl,v 1.21 2004-01-23 08:54:42 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -123,7 +123,7 @@ proc ::Jabber::GotMsg::Show {thisMsgId} {
     
     # Run display message hook (speech).
     set opts [list -subject $subject -from $jid -time $timeAndDate]
-    eval {hooks::run displayMessageHook $theMsg} $opts
+    eval {::hooks::run displayMessageHook $theMsg} $opts
 }
 
 # Jabber::GotMsg::Build --

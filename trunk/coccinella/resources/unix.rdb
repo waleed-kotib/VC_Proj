@@ -15,6 +15,7 @@
 *Entry.Font:                         Helvetica -10
 *Label.Font:                         Helvetica -10
 *Listbox.Font:                       Helvetica -10
+*Menu.borderWidth:                   1
 *Menu.Font:                          Helvetica -10
 *Message.Font:                       Helvetica -10
 *Radiobutton.Font:                   Helvetica -10
@@ -22,6 +23,11 @@
 *Scrollbar.borderWidth:              1
 *Scrollbar.width:                    12
 *Scrollbar.troughColor:              #bdbdbd
+
+*btok.image:                         buttonok
+*btok.compound:                      left
+*btcancel.image:                     buttoncancel
+*btcancel.compound:                  left
 
 ! contributed widgets
 !

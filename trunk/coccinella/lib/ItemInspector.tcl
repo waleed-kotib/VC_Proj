@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ItemInspector.tcl,v 1.16 2004-01-13 14:50:21 matben Exp $
+# $Id: ItemInspector.tcl,v 1.17 2004-01-23 08:58:36 matben Exp $
 
 namespace eval ::ItemInspector::  {
     
@@ -367,7 +367,7 @@ proc ::ItemInspector::Build {wtop itemId args} {
       -command [list [namespace current]::CanvasConfigureItem $w $wCan  \
       $itemId $listOfAllOptions]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
+    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
       -command "[namespace current]::Cancel $w"]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -in $w.frall  \
@@ -630,7 +630,7 @@ proc ::ItemInspector::Movie {wtop winfr} {
     pack [button $frbot.btsave -text [::msgcat::mc Save] -width 8 -default active  \
       -command [list [namespace current]::MovieConfigure $w $wmov]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
+    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
       -command "[namespace current]::MovieCancel $w"]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -in $w.frall  \
@@ -727,13 +727,13 @@ proc ::ItemInspector::Broken {wtop id args} {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.ok -text [::msgcat::mc OK] -width 8  \
+    pack [button $frbot.btok -text [::msgcat::mc OK]  \
       -command "destroy $w"]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
         
     wm resizable $w 0 0
-    bind $w <Return> "$frbot.ok invoke"
+    bind $w <Return> "$frbot.btok invoke"
 }
 
 #-------------------------------------------------------------------------------

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.37 2004-01-20 14:21:35 matben Exp $
+# $Id: Roster.tcl,v 1.38 2004-01-23 08:56:26 matben Exp $
 
 package provide Roster 1.0
 
@@ -450,7 +450,7 @@ proc ::Jabber::Roster::PushProc {rostName what {jid {}} args} {
 		eval {::Jabber::Roster::Presence $jid3 $type} $args
 	    }
 	    
-	    eval {hooks::run presenceHook $jid $type} $args
+	    eval {::hooks::run presenceHook $jid $type} $args
 	}
 	remove {
 	    
@@ -1180,10 +1180,10 @@ proc ::Jabber::Roster::NewOrEditDlg {which args} {
 	set bttxt [::msgcat::mc Add]
     }
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btconn -text $bttxt -default active -width 8 \
+    pack [button $frbot.btok -text $bttxt -default active \
       -command [list [namespace current]::EditSet $token]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8   \
+    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
       -command [list [namespace current]::Cancel $token]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.39 2004-01-17 14:35:14 matben Exp $
+# $Id: Preferences.tcl,v 1.40 2004-01-23 08:58:40 matben Exp $
  
 package require notebook
 package require tree
@@ -208,10 +208,10 @@ proc ::Preferences::Build { } {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btconn -text [::msgcat::mc Save] -default active -width 8 \
+    pack [button $frbot.btok -text [::msgcat::mc Save] -default active -width 8 \
       -command ::Preferences::SavePushBt]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8   \
+    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
       -command ::Preferences::CancelPushBt]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btfactory -text [::msgcat::mc {Factory Settings}]   \
@@ -604,7 +604,7 @@ proc ::Preferences::Block::Add {w} {
     pack [button $frbot.btconn -text [::msgcat::mc Add] -width 8 -default active \
       -command [list ::Preferences::Block::DoAdd]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
+    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
       -command "set [namespace current]::finished 2"]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
@@ -1139,15 +1139,15 @@ proc ::Preferences::FileMap::Inspect {w doWhat wlist {indSel {}}} {
     # Button part
     pack [frame $w.frbot -borderwidth 0] -in $w.frall -fill both  \
       -padx 8 -pady 6
-    button $w.ok -text [::msgcat::mc Save] -width 8 -default active  \
+    button $w.btok -text [::msgcat::mc Save] -default active  \
       -command [list [namespace current]::SaveThisAss $wlist $indSel]
-    button $w.cancel -text [::msgcat::mc Cancel] -width 8   \
+    button $w.btcancel -text [::msgcat::mc Cancel]  \
       -command "set [namespace current]::finishedInspect 0"
-    pack $w.ok $w.cancel -in $w.frbot -side right -padx 5 -pady 5
+    pack $w.btok $w.btcancel -in $w.frbot -side right -padx 5 -pady 5
     
     ::UI::SetWindowPosition $w
     wm resizable $w 0 0
-    bind $w <Return> "$w.ok invoke"
+    bind $w <Return> "$w.btok invoke"
     
     # Wait here for a button press.
     tkwait variable [namespace current]::finishedInspect
@@ -1529,14 +1529,14 @@ proc ::Preferences::NetSetup::Advanced {  } {
     # Button part.
     pack [frame $w.frbot -borderwidth 0] -in $w.frall -fill both  \
       -padx 8 -pady 6 -side bottom
-    pack [button $w.ok -text [::msgcat::mc Save] -width 8 -default active \
+    pack [button $w.btok -text [::msgcat::mc Save] -default active \
       -command [namespace current]::AdvSetupSave]  \
       -in $w.frbot -side right -padx 5 -pady 5
-    pack [button $w.cancel -text [::msgcat::mc Cancel] -width 8   \
+    pack [button $w.btcancel -text [::msgcat::mc Cancel]  \
       -command "set [namespace current]::finishedAdv 0"]  \
       -in $w.frbot -side right -padx 5 -pady 5
     wm resizable $w 0 0
-    bind $w <Return> "$w.ok invoke"
+    bind $w <Return> "$w.btok invoke"
     
     # Grab and focus.
     focus $w
@@ -1760,7 +1760,7 @@ proc ::Preferences::Shorts::AddOrEdit {what} {
     button $w.frbot.bt1 -text "$txtbt" -width 8 -default active  \
       -command [list [namespace current]::PushBtAddOrEdit $what]
     pack $w.frbot.bt1 -side right -padx 5 -pady 5
-    pack [button $w.frbot.bt2 -text [::msgcat::mc Cancel] -width 8  \
+    pack [button $w.frbot.btcancel -text [::msgcat::mc Cancel]  \
       -command "set [namespace current]::finAdd 2"]  \
       -side right -padx 5 -pady 5
     

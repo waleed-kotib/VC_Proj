@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Subscribe.tcl,v 1.8 2004-01-14 14:27:30 matben Exp $
+# $Id: Subscribe.tcl,v 1.9 2004-01-23 08:56:54 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -140,16 +140,16 @@ proc ::Jabber::Subscribe::Subscribe {jid args} {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btconn -text [::msgcat::mc Accept] -width 8 -default active \
+    pack [button $frbot.btok -text [::msgcat::mc Accept] -default active \
       -command [list [namespace current]::Doit $uid]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Deny] -width 8   \
+    pack [button $frbot.btcancel -text [::msgcat::mc Deny]  \
       -command [list [namespace current]::Cancel $uid]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
     
     wm resizable $w 0 0
-    bind $w <Return> "$frbot.btconn invoke"
+    bind $w <Return> "$frbot.btok invoke"
     focus $w
     
     # Wait here for a button press and window to be destroyed.

@@ -7,7 +7,12 @@
 *fontSmallBold:                      Arial 8 bold
 *fontMedium:                         Arial 8
 *fontLarge:                          Helvetica 16
-*backgroundGeneral:                  #dedede
+*backgroundGeneral:                  #e5e4e8
+
+! general settings for all widgets
+!
+*background:                         #e5e4e8
+*highlightBackground:                #e5e4e8
 
 ! tk standard widgets
 !

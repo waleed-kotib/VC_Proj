@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Sounds.tcl,v 1.14 2004-01-20 14:21:35 matben Exp $
+# $Id: Sounds.tcl,v 1.15 2004-01-23 08:59:01 matben Exp $
 
 package provide Sounds 1.0
 
@@ -59,7 +59,7 @@ namespace eval ::Sounds:: {
 
 proc ::Sounds::InitHook { } {
     
-    after 600 ::Sounds::Init
+    after 1000 ::Sounds::Init
 }
 
 # Sounds::Init --
@@ -173,6 +173,11 @@ proc ::Sounds::PlayWhenIdle {snd} {
 proc ::Sounds::Msg {type snd body args} {
     
     array set argsArr $args
+    
+    # We sometimes get non text stuff messages, like jabber:x:event etc.
+    if {[string length $body] == 0} {
+	return
+    }
     set from ""
     if {[info exists argsArr(-from)]} {
 	set from $argsArr(-from)

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.22 2004-01-14 10:24:55 matben Exp $
+# $Id: Login.tcl,v 1.23 2004-01-23 08:56:00 matben Exp $
 
 package provide Login 1.0
 
@@ -173,10 +173,10 @@ proc ::Jabber::Login::Login { } {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btconn -text [::msgcat::mc Login] -width 8 \
+    pack [button $frbot.btok -text [::msgcat::mc Login] \
       -default active -command [namespace current]::Doit]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
+    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
       -command [list [namespace current]::DoCancel $w]]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btprof -text [::msgcat::mc Profiles]  \
