@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.7 2003-12-10 15:21:43 matben Exp $
+# $Id: JUI.tcl,v 1.8 2003-12-12 13:46:44 matben Exp $
 
 package provide JUI 1.0
 
@@ -161,8 +161,9 @@ proc ::Jabber::UI::Build {w} {
     
     pack [frame $wbot -relief raised -borderwidth 1]  \
       -side bottom -fill x -pady 0
-    pack [label $jwapp(mystatus) -image [::Jabber::Roster::GetMyPresenceIcon]] \
-      -side left -pady 0 -padx 4
+    pack [label $jwapp(mystatus) -bd 1 \
+      -image [::Jabber::Roster::GetMyPresenceIcon]] \
+      -side left -pady 2 -padx 6
     pack [label ${wbot}.size -image $iconResize]  \
       -padx 0 -pady 0 -side right -anchor s
     pack [label $jwapp(elplug) -image $iconContactOff]  \
@@ -342,8 +343,12 @@ proc ::Jabber::UI::WhenSetStatus {type} {
 	
     $jwapp(mystatus) configure -image [::Jabber::Roster::GetMyPresenceIcon]
     if {[string equal $type "unavailable"]} {
+	bind $jwapp(mystatus) <Enter> {}
+	bind $jwapp(mystatus) <Leave> {}
 	bind $jwapp(mystatus) <Button-1> {}
     } else {
+	bind $jwapp(mystatus) <Enter> [list %W configure -relief raised]
+	bind $jwapp(mystatus) <Leave> [list %W configure -relief flat]
 	bind $jwapp(mystatus) <Button-1>  \
 	  [list [namespace current]::PostPresenceMenu %X %Y]
     }
@@ -730,7 +735,6 @@ proc ::Jabber::UI::Popup {what w v x y} {
 # Results:
 
 proc ::Jabber::UI::FixUIWhen {what} {
-    global  allIPnumsToSend
     variable jwapp
         
     set w $jwapp(wtopRost)
@@ -755,7 +759,7 @@ proc ::Jabber::UI::FixUIWhen {what} {
 	    ::UI::MenuMethod $wmj entryconfigure mNewAccount -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mLogin  \
 	      -label [::msgcat::mc Logout] -state normal -command \
-	      [list ::Jabber::DoCloseClientConnection $allIPnumsToSend]
+	      ::Jabber::DoCloseClientConnection
 	    ::UI::MenuMethod $wmj entryconfigure mLogoutWith -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mPassword -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mSearch -state normal

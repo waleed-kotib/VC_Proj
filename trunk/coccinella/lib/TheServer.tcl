@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: TheServer.tcl,v 1.13 2003-11-17 15:07:30 matben Exp $
+# $Id: TheServer.tcl,v 1.14 2003-12-12 13:46:44 matben Exp $
     
 # DoStartServer ---
 #
@@ -149,7 +149,7 @@ proc HandleClientRequest {channel ip port} {
 	    if {[string equal $prefs(protocol) "jabber"]} {
 		
 		# Am not sure we ever end up here...
-		::Jabber::DoCloseClientConnection $ip
+		::Jabber::DoCloseClientConnection
 	    } elseif {[string equal $prefs(protocol) "symmetric"]} {
 	    
 		# Close the 'from' part.
@@ -213,7 +213,7 @@ proc HandleClientRequest {channel ip port} {
 
 proc ExecuteClientRequest {wtop channel ip port line args} {
     global  tempChannel ipNumTo debugServerLevel   \
-      clientRecord prefs allIPnumsTo this  \
+      clientRecord prefs this  \
       canvasSafeInterp
     
     # regexp patterns. Defined globally to speedup???
@@ -288,7 +288,7 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 		
 		# If auto connect, then make a connection to the client as well.
 		if {[string equal $prefs(protocol) "symmetric"] &&  \
-		  $prefs(autoConnect) && [lsearch $allIPnumsTo $ip] == -1} {
+		  $prefs(autoConnect) && [lsearch [::Network::GetIP to] $ip] == -1} {
 		    if {$debugServerLevel >= 2} {
 			puts "HandleClientRequest:: autoConnect:  \
 			  ip=$ip, name=$ipNumTo(name,$ip), remPort=$remPort"

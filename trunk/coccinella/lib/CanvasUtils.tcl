@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.15 2003-10-25 07:22:27 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.16 2003-12-12 13:46:44 matben Exp $
 
 package provide CanvasUtils 1.0
 package require sha1pure
@@ -81,14 +81,13 @@ proc ::CanvasUtils::Init { } {
 #               ip       name or number; send only to this address, not local.
 
 proc ::CanvasUtils::Command {wtop cmd {where all}} {
-    global  allIPnumsToSend
     
     set w [::UI::GetCanvasFromWtop $wtop]
     if {[string equal $where "all"] || [string equal $where "local"]} {
         eval {$w} $cmd
     }
     if {[string equal $where "all"] || [string equal $where "remote"]} {
-        if {[llength $allIPnumsToSend]} {
+        if {[llength [::Network::GetIP to]]} {
             SendClientCommand $wtop "CANVAS: $cmd"
         }    
     } elseif {![string equal $where "local"]} {
@@ -125,14 +124,13 @@ proc ::CanvasUtils::CommandExList {wtop cmdExList} {
 # "CANVAS:" prefix. The prefix shall be included in 'cmd'.
 
 proc ::CanvasUtils::GenCommand {wtop cmd {where all}} {
-    global  allIPnumsToSend
     
     set w [::UI::GetCanvasFromWtop $wtop]
     if {[string equal $where "all"] || [string equal $where "local"]} {
         eval {$w} $cmd
     }
     if {[string equal $where "all"] || [string equal $where "remote"]} {
-        if {[llength $allIPnumsToSend]} {
+        if {[llength [::Network::GetIP to]]} {
             SendClientCommand $wtop $cmd
         }    
     } elseif {![string equal $where "local"]} {

@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasCutCopyPaste.tcl,v 1.5 2003-09-13 06:39:25 matben Exp $
+# $Id: CanvasCutCopyPaste.tcl,v 1.6 2003-12-12 13:46:44 matben Exp $
 
 package provide CanvasCutCopyPaste 1.0
 
@@ -245,7 +245,7 @@ proc ::CanvasCCP::PasteFromClipboardToCanvas {w} {
 #       copied canvas item, sent to all clients.
 
 proc ::CanvasCCP::PasteSingleFromClipboardToCanvas {w cmd} {
-    global  prefs allIPnumsToSend
+    global  prefs
 
     set nl_ "\\n"
     Debug 2 "PasteSingleFromClipboardToCanvas:: cmd=$cmd"

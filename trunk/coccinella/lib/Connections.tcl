@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Connections.tcl,v 1.10 2003-12-10 15:21:43 matben Exp $
+# $Id: Connections.tcl,v 1.11 2003-12-12 13:46:44 matben Exp $
 
 package provide Connections 1.0
 
@@ -290,7 +290,7 @@ proc ::OpenConnection::DoConnect {toNameOrNum toPort {propagateSizeToClients 1}}
 
 proc ::OpenConnection::WhenSocketOpensInits {nameOrIP server remoteServPort \
   {propagateSizeToClients 1}} {	
-    global  ipName2Num ipNumTo this allIPnumsTo prefs wDlgs
+    global  ipName2Num ipNumTo this prefs wDlgs
     
     variable killerId
     
@@ -349,7 +349,7 @@ proc ::OpenConnection::WhenSocketOpensInits {nameOrIP server remoteServPort \
 	  [list HandleClientRequest $server $ipNum $remoteServPort]
     }    
     set listIPandPort {}
-    foreach ip $allIPnumsTo {
+    foreach ip [::Network::GetIP to] {
 	lappend listIPandPort $ip $ipNumTo(servPort,$ipNum)
     }
     if {[catch {
@@ -357,9 +357,6 @@ proc ::OpenConnection::WhenSocketOpensInits {nameOrIP server remoteServPort \
 	# Let the remote computer know port and itpref used by this client.
 	set utagPref [::CanvasUtils::GetUtagPrefix]
 	puts $server [list "IDENTITY:" $prefs(thisServPort) $utagPref $this(username)]
-	
-	# Let connecting client now this 'allIPnumsTo' (for multi connect).????
-	# 'allIPnumsTo' not yet updated with the new ip; doesn't matter!
 	puts $server "IPS CONNECTED: $listIPandPort"
     }]} {
 	tk_messageBox -type ok -title [::msgcat::mc {Network Error}] -icon error -message \
@@ -367,16 +364,8 @@ proc ::OpenConnection::WhenSocketOpensInits {nameOrIP server remoteServPort \
 	return
     }
     
-    # Add line in the communication entry. Also updates 'allIPnumsTo'.
+    # Add line in the communication entry.
     ::UI::SetCommEntry $wDlgs(mainwb) $ipNum 1 -1
-    
-    # Let all other now about the size change. propagateToClients and force.
-    
-    if {$propagateSizeToClients} {
-	::UI::CanvasSizeChange $allIPnumsTo 1
-    } else {
-	::UI::CanvasSizeChange 0 1
-    }
     
     # Update menus. If client only, allow only one connection, limited.
     ::UI::FixMenusWhen $wDlgs(mainwb) "connect"
@@ -496,14 +485,14 @@ proc ::OpenConnection::Kill {sock} {
 
 # OpenConnection::IsConnectedToQ --
 #
-#       Finds if connected to 'ipNameOrNum' by searching 'allIPnumsTo'.
+#       Finds if connected to 'ipNameOrNum'.
 #       Always allow local connections to ourselves (127.0.0.1 and localhost).
 #       Also, alllow to connect to ourselves if we have got a real ip number;
 #       This is good if we want to start a ReflectorServer.
 #
 
 proc ::OpenConnection::IsConnectedToQ {ipNameOrNum} {
-    global  ipName2Num allIPnumsTo this
+    global  ipName2Num this
 
     Debug 2 "IsConnectedToQ:: ipNameOrNum=$ipNameOrNum, this(ipnum)=$this(ipnum)"
     
@@ -529,7 +518,7 @@ proc ::OpenConnection::IsConnectedToQ {ipNameOrNum} {
     }
     
     # Here we are sure that 'ipNum' is an ip number.
-    if {[lsearch -exact $allIPnumsTo $ipNum] >= 0} {
+    if {[lsearch -exact [::Network::IsRegistered to] $ipNum] >= 0} {
 	return 1
     } else {
 	return 0
@@ -582,12 +571,12 @@ proc ::OpenConnection::OpenCancelAllPending { } {
 #       none
 
 proc ::OpenConnection::DoCloseClientConnection {ipNum} {
-    global  prefs allIPnumsToSend allIPnumsTo ipNumTo wDlgs
+    global  prefs ipNumTo wDlgs
         
     Debug 2 "DoCloseClientConnection:: ipNum=$ipNum"    
     
     # If it is not there, just return.
-    set ind [lsearch $allIPnumsTo $ipNum]
+    set ind [lsearch [::Network::GetIP to] $ipNum]
     if {$ind == -1} {
 	return
     }
@@ -599,7 +588,7 @@ proc ::OpenConnection::DoCloseClientConnection {ipNum} {
     ::UI::SetCommEntry $wDlgs(mainwb) $ipNum 0 -1
 
     # If no more connections left, make menus consistent.
-    if {[llength $allIPnumsToSend] == 0} {
+    if {[llength [::Network::GetIP to]] == 0} {
 	::UI::FixMenusWhen $wDlgs(mainwb) {disconnect}
     }
 }
@@ -615,7 +604,7 @@ proc ::OpenConnection::DoCloseClientConnection {ipNum} {
 #       none
 
 proc ::OpenConnection::DoCloseServerConnection {ipNum args} {
-    global  ipNumTo allIPnumsToSend prefs wDlgs
+    global  ipNumTo prefs wDlgs
     
     Debug 2 "DoCloseServerConnection:: ipNum=$ipNum, ipNumTo(servSocket,$ipNum)=\
       $ipNumTo(servSocket,$ipNum)"

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.28 2003-12-10 15:21:43 matben Exp $
+# $Id: UI.tcl,v 1.29 2003-12-12 13:46:44 matben Exp $
 
 # LabeledFrame --
 #
@@ -589,7 +589,7 @@ proc ::UI::InitMenuDefs { } {
 
     set menuDefs(main,info) {    
 	{command     mOnServer       {::Dialogs::ShowInfoServer \$this(ipnum)} normal {}}	
-	{command     mOnClients      {::Dialogs::ShowInfoClients \$allIPnumsFrom} disabled {}}	
+	{command     mOnClients      {::Dialogs::ShowInfoClients} disabled {}}	
 	{command     mOnPlugins      {::Dialogs::InfoOnPlugins}         normal {}}	
 	{separator}
 	{cascade     mHelpOn             {}                                    normal   {} {} {}}
@@ -3094,70 +3094,6 @@ proc ::UI::ParseWMGeometry {w} {
     return [list $wid $hei $x $y]
 }
 
-# UI::CanvasConfigureCallback --
-#   
-#       This is the callback from a canvas configure event. 
-#       'CanvasSizeChange' is called delayed in an after event.
-#   
-# Arguments:
-#       where           "all" if tell all other connected clients,
-#                       0 if none, and an ip number if only this one.
-# Results:
-#       A 'CanvasSizeChange' call scheduled.
-
-proc ::UI::CanvasConfigureCallback {where} {
-    global  configAfterId
-    
-    if {[info exists configAfterId]} {
-	catch {after cancel $configAfterId}
-    }
-    set configAfterId [after 1000 [list ::UI::CanvasSizeChange $where]]
-}
-
-# ::UI::CanvasSizeChange --
-#   
-#       If size change in canvas (application), then let other clients know.
-#   
-# Arguments:
-#       where           "all" if tell all other connected clients,
-#                       0 if none, and an ip number if only this one.
-#       force           should we insist on telling other clients even if
-#                       the canvas size not changed.
-
-proc ::UI::CanvasSizeChange {where {force 0}} {
-    global  allIPnumsToSend prefs this
-    
-    upvar ::.::wapp wapp
-    upvar ::UI::dims dims
-        
-    # Get new sizes.
-    #update idletasks
-    update
-    
-    # Sizes without any menu.
-    set wCan $wapp(can)
-    set wCanvas [winfo width $wCan]
-    set hCanvas [winfo height $wCan]
-        
-    # Only if size changed or if force.
-    if {!$prefs(haveScrollbars) && ($where != "0") && [llength $allIPnumsToSend]} {
-	if {($dims(wCanvas) != $wCanvas) || ($dims(hCanvas) != $hCanvas) || \
-	  $force } {
-	    set cmd "RESIZE: $wCanvas $hCanvas"
-	    if {$where == "all"} {
-		SendClientCommand [::UI::GetToplevelNS $wCan] $cmd
-	    } else {
-		
-		# We must have a valid ip number.
-		SendClientCommand [::UI::GetToplevelNS $wCan] $cmd -ips $where
-	    }
-	}
-    }
-
-    # Save whiteboard geom in 'dims' array.
-    ::UI::SaveWhiteboardDims .
-}
-
 # ::UI::SetCanvasSize --
 #
 #       From the canvas size, 'cw' and 'ch', set the total application size.
@@ -3553,8 +3489,6 @@ proc ::UI::DeleteJabberEntry {wtop} {
 #       If 'to' or 'from' is -1 then disregard this variable.
 #       If neither 'to' or 'from', then remove the entry completely for this
 #       specific ipNum.
-#       It updates all lists of type 'allIPnums...', but doesn't do anything
-#       with channels.
 #       The actual job of handling the widgets are done in 'RemoveCommEntry' 
 #       and 'BuildCommEntry'.
 #       
@@ -3576,7 +3510,7 @@ proc ::UI::DeleteJabberEntry {wtop} {
 #       updated communication frame.
 
 proc ::UI::SetCommEntry {wtop ipNum to from args} { 
-    global  allIPnumsToSend allIPnums allIPnumsTo allIPnumsFrom prefs
+    global  prefs
     
     variable commTo
     variable commFrom
@@ -3615,34 +3549,21 @@ proc ::UI::SetCommEntry {wtop ipNum to from args} {
 	return
     }
     
-    # Update 'allIPnumsTo' to contain each ip num connected to.
-    set ind [lsearch $allIPnumsTo $ipNum]
-    if {($ind == -1) && ($commTo($wtop,$ipNum) == 1)} {
-	lappend allIPnumsTo $ipNum
-    } elseif {($ind >= 0) && ($commTo($wtop,$ipNum) == 0)} {
-	set allIPnumsTo [lreplace $allIPnumsTo $ind $ind]
+    # Update network register to contain each ip num connected to.
+    if {$commTo($wtop,$ipNum) == 1} {
+	::Network::RegisterIP $ipNum to
+    } elseif {$commTo($wtop,$ipNum) == 0} {
+	::Network::DeRegisterIP $ipNum to
     }
     
-    # Update 'allIPnumsFrom' to contain each ip num connected to our server
+    # Update network register to contain each ip num connected to our server
     # from a remote client.
-    set ind [lsearch $allIPnumsFrom $ipNum]
-    if {($ind == -1) && ($commFrom($wtop,$ipNum) == 1)} {
-	lappend allIPnumsFrom $ipNum
-    } elseif {($ind >= 0) && ($commFrom($wtop,$ipNum) == 0)} {
-	set allIPnumsFrom [lreplace $allIPnumsFrom $ind $ind]
+    if {$commFrom($wtop,$ipNum) == 1} {
+	::Network::RegisterIP $ipNum from
+    } elseif {$commFrom($wtop,$ipNum) == 0} {
+	::Network::DeRegisterIP $ipNum from
     }
-    
-    # Update sending list. 
-    if {[string equal $prefs(protocol) "server"]} {
-	set allIPnumsToSend $allIPnumsFrom    
-    } else {
-	set allIPnumsToSend $allIPnumsTo
-    }
-    
-    # Update 'allIPnums' to be the union of 'allIPnumsTo' and 'allIPnumsFrom'.
-    # If both to and from 0 then remove from list.
-    set allIPnums [lsort -unique [concat $allIPnumsTo $allIPnumsFrom]]
-    
+        
     # Build new or remove entry line.
     if {![string equal $prefs(protocol) "jabber"] &&  \
       ($commTo($wtop,$ipNum) == 0) && ($commFrom($wtop,$ipNum) == 0)} {
@@ -3656,8 +3577,6 @@ proc ::UI::SetCommEntry {wtop ipNum to from args} {
 	    ::UI::RemoveCommEntry $wtop $ipNum
 	}
     } 
-    Debug 2 "  SetCommEntry (exit):: allIPnums=$allIPnums, \
-      allIPnumsToSend=$allIPnumsToSend"
 }
 
 # ::UI::BuildCommEntry --
@@ -3675,7 +3594,7 @@ proc ::UI::SetCommEntry {wtop ipNum to from args} {
 #       updated communication frame with new client.
 
 proc ::UI::BuildCommEntry {wtop ipNum args} {
-    global  sysFont prefs ipNumTo allIPnumsTo
+    global  sysFont prefs ipNumTo
     
     variable icons
     variable commTo
@@ -3724,10 +3643,8 @@ proc ::UI::BuildCommEntry {wtop ipNum args} {
 	eval {checkbutton $wcomm.to$n -highlightthickness 0} $checkOpts
 	grid $wcomm.ad$n $wcomm.us$n $wcomm.to$n -padx 4 -pady 0
 	
-	# Update "electric plug" icon if first connection.
-	if {[llength $allIPnumsTo] == 1} {
-	    after 400 [list $wcomm.icon configure -image $icons(contact_on)]
-	}
+	# Update "electric plug".
+	after 400 [list $wcomm.icon configure -image $icons(contact_on)]
     } elseif {[string equal $thisType "symmetric"]} {
 	entry $wcomm.ad$n -width 24  \
 	  -relief sunken -bg $prefs(bgColGeneral)
@@ -3851,7 +3768,7 @@ proc ::UI::CheckCommTo {wtop ipNum} {
 #       updated communication frame.
 
 proc ::UI::RemoveCommEntry {wtop ipNum} {
-    global  prefs allIPnumsTo
+    global  prefs
     
     variable icons
     variable commTo
@@ -3897,9 +3814,7 @@ proc ::UI::RemoveCommEntry {wtop ipNum} {
     catch {unset commFrom($wtop,$ipNum)}
     
     # Electric plug disconnect? Only for client only (and jabber).
-    if {([string equal $prefs(protocol) "central"] || \
-      [string equal $prefs(protocol) "jabber"]) &&   \
-      ([llength $allIPnumsTo] == 0)} {
+    if {[string equal $prefs(protocol) "jabber"]} {
 	after 400 [list $wcomm.icon configure -image $icons(contact_off)]
     }
     update idletasks
@@ -3925,7 +3840,7 @@ proc ::UI::RemoveCommEntry {wtop ipNum} {
 # Results:
 
 proc ::UI::FixMenusWhen {wtop what} {
-    global  prefs wDlgs allIPnumsToSend
+    global  prefs wDlgs
     
     upvar ::${wtop}::wapp wapp
     upvar ::${wtop}::opts opts
@@ -3981,14 +3896,7 @@ proc ::UI::FixMenusWhen {wtop what} {
 	    }
 	    
 	    # If no more connections left, make menus consistent.
-	    if {[llength $allIPnumsToSend] == 0} {
-		
-		# In case we are the client in a centralized network, 
-		# make sure ww can make a new connection when closed the old one.
-		
-		if {[string equal $prefs(protocol) "central"]} {
-		    ::UI::MenuMethod $mfile entryconfigure mOpenConnection -state normal
-		}
+	    if {[llength [::Network::GetIP to]] == 0} {
 		::UI::MenuMethod $mfile entryconfigure mPutFile -state disabled
 		::UI::MenuMethod $mfile entryconfigure mPutCanvas -state disabled
 		::UI::MenuMethod $mfile entryconfigure mGetCanvas -state disabled
@@ -3997,7 +3905,7 @@ proc ::UI::FixMenusWhen {wtop what} {
 	disconnectserver {
 	    
 	    # If no more connections left, make menus consistent.
-	    if {[llength $allIPnumsToSend] == 0} {
+	    if {[llength [::Network::GetIP to]] == 0} {
 		::UI::MenuMethod $mfile entryconfigure mPutFile -state disabled
 		::UI::MenuMethod $mfile entryconfigure mPutCanvas -state disabled
 		::UI::MenuMethod $mfile entryconfigure mGetCanvas -state disabled
@@ -4417,7 +4325,7 @@ proc ::UI::BuildAllFontMenus {allFonts} {
 #       updates text item, sends to all clients.
 
 proc ::UI::FontChanged {wtop what} {
-    global  allIPnumsToSend fontSize2Points fontPoints2Size
+    global  fontSize2Points fontPoints2Size
 
     upvar ::${wtop}::wapp wapp
     upvar ::${wtop}::state state

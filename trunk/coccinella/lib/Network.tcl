@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Network.tcl,v 1.6 2003-08-23 07:19:16 matben Exp $
+# $Id: Network.tcl,v 1.7 2003-12-12 13:46:44 matben Exp $
 
 namespace eval ::Network:: {
     
@@ -211,42 +211,148 @@ proc ::Network::GetThisOutsideIPAddress { } {
     }
 }
 
+namespace eval ::Network:: {
+    variable ipNums
+
+    set ipNums(to) {}
+    set ipNums(from) {}
+}
+
 # Network::RegisterIP --
 # 
 #       Sets ip number for internal use.
 #   
 # Arguments:
 #       ipNum       ip number to be de/registered
-#       type        any of 'none', 'to', 'from', 'both'
+#       type        any of 'to', 'from', 'both'
 
 proc ::Network::RegisterIP {ipNum {type "both"}} {
-    global  prefs allIPnumsToSend allIPnums allIPnumsTo
-    
+    global  prefs
+    variable ipNums
+
+    # Keep lists of ip numbers for connected clients and servers.
+    #    to: all we have a cllient connection to
+    #    from: all we have another clinet connected to our server socket
+
     switch -- $prefs(protocol) {
 	jabber {
+	    
 	    switch -- $type {
-		both - to {
-		    set allIPnumsTo $ipNum
-		    set allIPnumsToSend $ipNum
-		    set allIPnums $ipNum
-		}
-		none {
-		    set allIPnumsTo {}
-		    set allIPnumsToSend {}
-		    set allIPnums {}
+		to {
+		    set ipNums(to) $ipNum
 		}
 	    }
 	}
-	symmetric {
-	    # To Do.
-	}
-	client {
-	    # To Do.
-	}
-	server {
-	    # To Do.
+	default {
+	    
+	    switch -- $type {
+		to - from {
+		    lappend ipNums($type) $ipNum
+		}
+		both {
+		    lappend ipNums(to) $ipNum
+		    lappend ipNums(from) $ipNum
+		}
+	    }
 	}
     }
+
+    switch -- $type {
+	to - from {
+	    set ipNums($type) [lsort -unique $ipNums($type)]
+	}
+    }
+}
+
+# Network::DeRegisterIP --
+# 
+#       Remove ip number from register for the specified type.
+#       
+# Arguments:
+#       ipNum       ip number to be de/registered
+#       type        any of 'to', 'from', 'both'
+
+proc ::Network::DeRegisterIP {ipNum {type "both"}} {
+    global  prefs
+    variable ipNums
+    
+    switch -- $prefs(protocol) {
+	jabber {
+	    set ipNums(to) {}
+	}
+	default {
+	    
+	    switch -- $type {
+		to - from {
+		    lprune ipNums($type) $ipNum
+		}
+		both {
+		    lprune ipNums(to) $ipNum
+		    lprune ipNums(from) $ipNum
+		}
+	    }	    
+	}
+    }
+    set ipNums(to) [lsort -unique $ipNums(to)]
+    set ipNums(from) [lsort -unique $ipNums(from)]
+}
+
+proc ::Network::IsRegistered {ipNum {type "both"}} {
+    global  prefs
+    variable ipNums
+
+    switch -- $type {
+	to - from {
+	    set ans [expr {[lsearch $ipNums $ipNum] >= 0} ? 1 : 0]
+	}
+	default {
+	    set ans [expr  \
+	      {[lsearch [concat $ipNums(from) $ipNums(to)]] >= 0} ? 1 : 0]
+	}
+    }
+    return $ans
+}
+
+# Network::GetIP --
+# 
+#       
+#   
+# Arguments:
+#       type        any of 'to', 'from', 'both'
+#       
+# Results:
+#       empty or one or more ip numbers
+
+proc ::Network::GetIP {type} {
+    global  prefs
+    variable ipNums
+    
+    set ans {}
+    
+    if {[string equal $type "both"]} {
+	set ans [lsort -unique [concat $ipNums(from) $ipNums(to)]]
+    } else {
+
+	switch -- $prefs(protocol) {
+	    server {
+		if {$type == "to"} {
+		    set ans $ipNums(from)
+		} else {
+		    set ans $ipNums($type)	    
+		}
+	    }
+	    default {
+		set ans $ipNums($type)
+	    }
+	}
+    }
+    return $ans
+}
+
+proc ::Network::IsConnected {ipNum type} {
+    
+    set all [::Network::GetIP $type]
+    return [expr {[lsearch $all $ipNum] >= 0} ? 1 : 0]
 }
 
 # These one need another home??? ...............................................
@@ -260,7 +366,7 @@ proc ::Network::RegisterIP {ipNum {type "both"}} {
 #       wtop
 #       cmd         the command (line) to send which must be protocol compliant.
 #       args   ?-key value ...?
-#       -ips         (D=$allIPnumsToSend) send to this list of ip numbers. 
+#       -ips         (D=all ips) send to this list of ip numbers. 
 #                    Not for jabber.
 #       -force 0|1  (D=1) overrides the doSend checkbutton in jabber.
 #       
@@ -268,9 +374,9 @@ proc ::Network::RegisterIP {ipNum {type "both"}} {
 #       none
 
 proc SendClientCommand {wtop cmd args} {
-    global  allIPnumsToSend ipNumTo prefs
+    global  ipNumTo prefs
     
-    array set opts [list -ips $allIPnumsToSend -force 0]
+    array set opts [list -ips [::Network::GetIP to] -force 0]
     array set opts $args
     
     if {[string equal $prefs(protocol) "jabber"]} {
@@ -293,9 +399,9 @@ proc SendClientCommand {wtop cmd args} {
 #       As 'SendClientCommand' but accepts a list of commands.
 
 proc SendClientCommandList {wtop cmdList args} {
-    global  allIPnumsToSend ipNumTo prefs
+    global  ipNumTo prefs
     
-    array set opts [list -ips $allIPnumsToSend -force 0]
+    array set opts [list -ips [::Network::GetIP to] -force 0]
     array set opts $args
 
     if {[string equal $prefs(protocol) "jabber"]} {

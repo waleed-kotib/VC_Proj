@@ -15,7 +15,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.15 2003-12-10 15:21:43 matben Exp $
+# $Id: Coccinella.tcl,v 1.16 2003-12-12 13:46:44 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -583,24 +583,6 @@ if {[info exists env(USER)]} {
 } else {
     set this(username) "Unknown"
 }
-
-# Keep lists of ip numbers for connected clients and servers.
-# For the jabber configuration, 'allIPnums', 'allIPnumsTo', and 
-# 'allIPnumsToSend', all just contain the IP number of the jabber server.
-# 'allIPnums' contains all ip nums that are either connected to, or from.
-# It is the union of 'allIPnumsTo' and 'allIPnumsFrom'.
-set allIPnums {}
-
-# 'allIPnumsTo' contains all ip nums that we have made a client side connect to.
-set allIPnumsTo {}
-
-# 'allIPnumsFrom' contains all ip nums that are connected to our server.
-set allIPnumsFrom {}
-
-# 'allIPnumsToSend' is identical to 'allIPnumsTo' except when this is
-# the server in a centralized network because then we do not make
-# any connections, but all connections are connected 'from'.
-set allIPnumsToSend {}
     
 # Standard (factory) preferences are set here.
 # These are the hardcoded, application default, values, and can be
