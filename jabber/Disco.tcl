@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.32 2004-10-01 12:44:11 matben Exp $
+# $Id: Disco.tcl,v 1.33 2004-10-02 13:14:55 matben Exp $
 
 package provide Disco 1.0
 
@@ -568,10 +568,10 @@ proc ::Jabber::Disco::Popup {w v x y} {
 	    continue
 	} else {
 	    
-	    # Substitute the jid arguments.
-	    set cmd [subst -nocommands $cmd]
+	    # Substitute the jid arguments. Preserve list structure!
+	    set cmd [eval list $cmd]
 	    set locname [mc $item]
-	    $m add command -label $locname -command "after 40 $cmd"  \
+	    $m add command -label $locname -command [list after 40 $cmd]  \
 	      -state disabled
 	}
 	

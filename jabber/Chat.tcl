@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.78 2004-10-01 12:44:11 matben Exp $
+# $Id: Chat.tcl,v 1.79 2004-10-02 13:14:55 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -485,8 +485,7 @@ proc ::Jabber::Chat::StartThread {jid args} {
 	if {$jprefs(chat,tabbedui)} {
 	    set dlgtoken [GetFirstDlgToken]
 	    if {$dlgtoken == ""} {
-		set dlgtoken [eval {
-		    Build $threadID -from $jid} $args]
+		set dlgtoken [eval {Build $threadID -from $jid} $args]
 		set chattoken [GetTokenFrom chat threadid $threadID]
 
 		variable $chattoken

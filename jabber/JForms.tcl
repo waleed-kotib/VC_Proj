@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #
-# $Id: JForms.tcl,v 1.16 2004-10-01 12:44:11 matben Exp $
+# $Id: JForms.tcl,v 1.17 2004-10-02 13:14:55 matben Exp $
 # 
 #      Updated to version 2.1 of JEP-0004
 #  
@@ -358,7 +358,7 @@ proc ::Jabber::Forms::FillInBoxOneTag {w child parentTag iName {template ""}} {
 	    # Registering & searching.
 	} elseif {($template == "register") || ($template == "search")} {
 	    if {$tag == "registered"} {
-		label $w.l$i -wraplength $width \
+		label $w.l$i -wraplength $width -justify left \
 		  -text {You are already registered with this service.\
 		  These are your current settings of your login parameters.}
 		grid $w.l$i -column 0 -row $i -sticky w -columnspan 2
@@ -571,7 +571,7 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
 			set isrequired 1
 		    } elseif {[string equal $ctag "desc"]} {
 			label $w.m$i -text [wrapper::getcdata $c] \
-			  -wraplength $argsArr(-width)
+			  -wraplength $argsArr(-width) -justify left
 			grid $w.m$i -row $i -column 0 -columnspan 2 -sticky ew
 			incr i
 		    } elseif {[string equal $ctag "value"]} {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.54 2004-09-30 12:43:06 matben Exp $
+# $Id: JUI.tcl,v 1.55 2004-10-02 13:14:55 matben Exp $
 
 package provide JUI 1.0
 
@@ -77,6 +77,7 @@ namespace eval ::Jabber::UI:: {
 
 
 proc ::Jabber::UI::Init { } {
+    global  this
     
     # Menu definitions for the Roster/services window.
     variable menuDefs
@@ -113,17 +114,33 @@ proc ::Jabber::UI::Init { } {
 	{separator}
 	{command     mRemoveAccount {::Jabber::Register::Remove}      disabled {}}	
     }
-    set menuDefs(rost,info) {    
-	{command     mSetupAssistant {
-	    package require SetupAss
-	    ::Jabber::SetupAss::SetupAss}                             normal {}}
-	{command     mComponents    {::Dialogs::InfoComponents}   normal   {}}
-	{command     mErrorLog      {::Jabber::ErrorLogDlg}       normal   {}}
-	{checkbutton mDebug         {::Jabber::DebugCmd}          normal   {} \
-	  {-variable ::Jabber::jstate(debugCmd)}}
-	{separator}
-	{command     mCoccinellaHome {::Jabber::UI::OpenCoccinellaURL} normal {}}
-	{command     mBugReport     {::Jabber::UI::OpenBugURL}   normal {}}
+    if {[string match "mac*" $this(platform)]} {
+	set menuDefs(rost,info) {    
+	    {command     mSetupAssistant {
+		package require SetupAss; ::Jabber::SetupAss::SetupAss
+	    }                             normal {}}
+	    {command     mComponents    {::Dialogs::InfoComponents}   normal   {}}
+	    {command     mErrorLog      {::Jabber::ErrorLogDlg}       normal   {}}
+	    {checkbutton mDebug         {::Jabber::DebugCmd}          normal   {} \
+	      {-variable ::Jabber::jstate(debugCmd)}}
+	    {separator}
+	    {command     mCoccinellaHome {::Jabber::UI::OpenCoccinellaURL} normal {}}
+	    {command     mBugReport      {::Jabber::UI::OpenBugURL}   normal {}}
+	}
+    } else {
+	set menuDefs(rost,info) {    
+	    {command     mSetupAssistant {
+		package require SetupAss; ::Jabber::SetupAss::SetupAss
+	    }                             normal {}}
+	    {command     mComponents    {::Dialogs::InfoComponents}   normal   {}}
+	    {command     mErrorLog      {::Jabber::ErrorLogDlg}       normal   {}}
+	    {checkbutton mDebug         {::Jabber::DebugCmd}          normal   {} \
+	      {-variable ::Jabber::jstate(debugCmd)}}
+	    {separator}
+	    {command     mAboutCoccinella  {::SplashScreen::SplashScreen} normal   {}}
+	    {command     mCoccinellaHome   {::Jabber::UI::OpenCoccinellaURL} normal {}}
+	    {command     mBugReport        {::Jabber::UI::OpenBugURL}   normal {}}
+	}
     }
 
     # The status menu is built dynamically due to the -image options on 8.4.
@@ -140,8 +157,11 @@ proc ::Jabber::UI::Init { } {
     set menuDefsInsertInd(rost,file)   [expr [llength $menuDefs(rost,file)]-2]
     set menuDefsInsertInd(rost,edit)   [expr [llength $menuDefs(rost,edit)]]
     set menuDefsInsertInd(rost,jabber) [expr [llength $menuDefs(rost,jabber)]-2]
-    set menuDefsInsertInd(rost,info)   [expr [llength $menuDefs(rost,info)]-3]
-    
+    if {[string match "mac*" $this(platform)]} {
+	set menuDefsInsertInd(rost,info)   [expr [llength $menuDefs(rost,info)]-3]
+    } else {
+	set menuDefsInsertInd(rost,info)   [expr [llength $menuDefs(rost,info)]-4]
+    }
     set inited 1
 }
 

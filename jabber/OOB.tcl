@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.37 2004-09-28 13:50:18 matben Exp $
+# $Id: OOB.tcl,v 1.38 2004-10-02 13:14:55 matben Exp $
 
 package provide OOB 1.0
 
@@ -272,7 +272,7 @@ proc ::Jabber::OOB::SetCallback {token jlibName type theQuery} {
 #       another user sends us an url to fetch a file from.
 
 proc ::Jabber::OOB::ParseSet {jlibname from subiq args} {
-    
+    global  prefs
     variable locals
     
     array set argsArr $args
@@ -321,12 +321,14 @@ proc ::Jabber::OOB::ParseSet {jlibname from subiq args} {
 	  [mc jamessoonnohttp $from $proto]]
 	return $ishandled
     }
+    set userDir [::Utils::GetDirIfExist $prefs(userPath)]
     set localPath [tk_getSaveFile -title [mc {Save File}] \
-      -initialfile $tail]
+      -initialfile $tail -initialdir $userDir]
     if {[string length $localPath] == 0} {
 	return $ishandled
     }
-    
+    set prefs(userPath) [file dirname $localPath]
+
     # And get it.
     ::Jabber::OOB::Get $from $url $localPath $id
     set ishandled 1
