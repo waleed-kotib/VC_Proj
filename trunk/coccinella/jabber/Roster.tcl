@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.9 2003-10-05 13:36:20 matben Exp $
+# $Id: Roster.tcl,v 1.10 2003-10-12 13:12:55 matben Exp $
 
 package provide Roster 1.0
 
@@ -798,7 +798,7 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
 	    
 	    # An ISO 8601 point-in-time specification. clock works!
 	    set stamp [wrapper::getattribute $delay stamp]
-	    set tstr [SmartClockFormat [clock scan $stamp]]
+	    set tstr [::Utils::SmartClockFormat [clock scan $stamp]]
 	    append msg "\nOnline since: $tstr"
 	}
 	if {[info exists argsArr(-show)]} {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.11 2003-10-05 13:36:17 matben Exp $
+# $Id: Chat.tcl,v 1.12 2003-10-12 13:12:54 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -179,7 +179,7 @@ proc ::Jabber::Chat::GotMsg {body args} {
 
     if {[info exists locals($threadID,wtop)] &&  \
       [winfo exists $locals($threadID,wtop)]} {
-
+	# empty
     } else {
 
 	# If we haven't a window for this thread, make one!
@@ -193,11 +193,8 @@ proc ::Jabber::Chat::GotMsg {body args} {
     $wtext insert end <$username> youtag
     $wtext insert end "   " youtxttag
 
-    set textCmds [::Text::ParseAllForTextWidget $body youtxttag linktag]
-    foreach cmd $textCmds {
-	eval $wtext $cmd
-    }
-    $wtext insert end "\n"
+    ::Text::ParseAndInsert $wtext $body youtxttag linktag
+
     $wtext configure -state disabled
     $wtext see end
     if {$locals($threadID,got1stMsg) == 0} {
@@ -356,7 +353,6 @@ proc ::Jabber::Chat::Build {threadID args} {
       -side top -fill both -expand 1 -padx 4 -pady 4
     set locals($threadID,wtxt) $wtxt
     frame $wtxt
-    set boldChatFont [lreplace $jprefs(chatFont) 2 2 bold]
     
     set locals($threadID,wtext) $wtext
     text $wtext -height 12 -width 1 -font $jprefs(chatFont) -state disabled -cursor {} \
@@ -368,16 +364,7 @@ proc ::Jabber::Chat::Build {threadID args} {
     grid rowconfigure $wtxt 0 -weight 1
     
     # The tags.
-    set space 2
-    $wtext tag configure metag -foreground red -background #cecece  \
-      -spacing1 $space -font $boldChatFont
-    $wtext tag configure metxttag -foreground black -background #cecece  \
-      -spacing1 $space -spacing3 $space -lmargin1 20 -lmargin2 20
-    $wtext tag configure youtag -foreground blue -spacing1 $space  \
-       -font $boldChatFont
-    $wtext tag configure youtxttag -foreground black -spacing1 $space  \
-      -spacing3 $space -lmargin1 20 -lmargin2 20
-    ::Text::ConfigureLinkTagForTextWidget $wtext linktag tact
+    ::Jabber::Chat::ConfigureTextTags $wtext
 
     # Text send.
     frame $wtxtsnd
@@ -410,6 +397,24 @@ proc ::Jabber::Chat::Build {threadID args} {
     wm maxsize $w 800 2000
     
     focus $w
+}
+
+proc ::Jabber::Chat::ConfigureTextTags {wtext} {
+    upvar ::Jabber::jprefs jprefs
+        
+    set space 2
+    set boldChatFont [lreplace $jprefs(chatFont) 2 2 bold]
+    
+    $wtext tag configure metag -foreground red -background #cecece  \
+      -spacing1 $space -font $boldChatFont
+    $wtext tag configure metxttag -foreground black -background #cecece  \
+      -spacing1 $space -spacing3 $space -lmargin1 20 -lmargin2 20
+    $wtext tag configure youtag -foreground blue -spacing1 $space  \
+       -font $boldChatFont
+    $wtext tag configure youtxttag -foreground black -spacing1 $space  \
+      -spacing3 $space -lmargin1 20 -lmargin2 20
+    
+    ::Text::ConfigureLinkTagForTextWidget $wtext linktag tact
 }
 
 proc ::Jabber::Chat::SetFont {theFont} {
@@ -502,11 +507,9 @@ proc ::Jabber::Chat::Send {threadID} {
 	set username $jstate(mejid)
     }
     $wtext insert end <$username> metag
-    set textCmds [::Text::ParseAllForTextWidget "   $allText" metxttag linktag]
-    foreach cmd $textCmds {
-	eval $wtext $cmd
-    }
-    $wtext insert end "\n"
+    
+    ::Text::ParseAndInsert $wtext "   $allText" metxttag linktag
+
     $wtext configure -state disabled
     $wtextsnd delete 1.0 end
     $wtext see end
@@ -731,11 +734,8 @@ proc ::Jabber::Chat::BuildHistory {jid} {
 		}
 		$wtext insert end "$cwhen <$cjid>" $ptag
 		$wtext insert end "   " $ptxttag
-		set textCmds [::Text::ParseAllForTextWidget $body $ptxttag linktag]
-		foreach cmd $textCmds {
-		    eval $wtext $cmd
-		}
-		$wtext insert end "\n"
+		
+		::Text::ParseAndInsert $wtext $body $ptxttag linktag
 	    }
 	}
     } else {

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.20 2003-10-05 13:36:21 matben Exp $
+# $Id: UI.tcl,v 1.21 2003-10-12 13:12:55 matben Exp $
 
 # LabeledFrame --
 #
@@ -347,7 +347,7 @@ proc ::UI::InitMenuDefs { } {
       $menuDefs(main,info,aboutquicktimetcl)]
     
     set menuDefsMainFileJabber {
-	{command   mNew                {::UI::NewMain -sendcheckstate disabled}   normal   N}
+	{command   mNew                {::UI::NewWhiteboard -sendcheckstate disabled}   normal   N}
 	{command   mCloseWindow        {::UserActions::DoCloseWindow}             normal   W}
 	{separator}
 	{command   mOpenImage/Movie    {::Import::ImportImageOrMovieDlg $wtop} normal  I}
@@ -358,7 +358,7 @@ proc ::UI::InitMenuDefs { } {
 	{command   mSaveCanvas         {::CanvasFile::DoSaveCanvasFile $wtop}     normal   S}
 	{separator}
 	{command   mSaveAs             {::UserActions::SavePostscript $wtop}      normal   {}}
-	{command   mPageSetup          {::UserActions::PageSetup}                 normal   {}}
+	{command   mPageSetup          {::UserActions::PageSetup $wtop}           normal   {}}
 	{command   mPrintCanvas        {::UserActions::DoPrintCanvas $wtop}       normal   P}
 	{separator}
 	{command   mQuit               {::UserActions::DoQuit}                    normal   Q}
@@ -382,7 +382,7 @@ proc ::UI::InitMenuDefs { } {
 	{command   mSaveCanvas         {::CanvasFile::DoSaveCanvasFile $wtop}     normal   S}
 	{separator}
 	{command   mSaveAs             {::UserActions::SavePostscript $wtop}      normal   {}}
-	{command   mPageSetup          {::UserActions::PageSetup}                 normal   {}}
+	{command   mPageSetup          {::UserActions::PageSetup $wtop}           normal   {}}
 	{command   mPrintCanvas        {::UserActions::DoPrintCanvas $wtop}       normal   P}
 	{separator}
 	{command   mQuit               {::UserActions::DoQuit}                    normal   Q}
@@ -581,7 +581,7 @@ proc ::UI::InitMenuDefs { } {
     # Menu definitions for the Roster/services window. Collects minimal Jabber
     # stuff.
     set menuDefs(rost,file) {
-	{command   mNewWhiteboard      {::UI::NewMain}                            normal   N}
+	{command   mNewWhiteboard      {::UI::NewWhiteboard}                            normal   N}
 	{command   mCloseWindow        {::UserActions::DoCloseWindow}             normal   W}
 	{command   mPreferences...     {::Preferences::Build $wDlgs(prefs)}       normal   {}}
 	{command   mUpdateCheck        {
@@ -628,7 +628,7 @@ proc ::UI::InitMenuDefs { } {
     
     # Menu definitions for a minimal setup. Used on mac only.
     set menuDefs(min,file) {
-	{command   mNewWhiteboard    {::UI::NewMain}                       normal   N}
+	{command   mNewWhiteboard    {::UI::NewWhiteboard}                       normal   N}
 	{command   mCloseWindow      {::UserActions::DoCloseWindow}        normal   W}
 	{separator}
 	{command   mQuit             {::UserActions::DoQuit}               normal   Q}
@@ -780,7 +780,7 @@ proc ::UI::InitMenuDefs { } {
     }    
 }
 
-# UI::NewMain --
+# UI::NewWhiteboard --
 #
 #       Makes a unique whiteboard.
 #
@@ -798,7 +798,7 @@ proc ::UI::InitMenuDefs { } {
 # Results:
 #       toplevel window. (.) If not "." then ".top."; extra dot!
 
-proc ::UI::NewMain {args} {    
+proc ::UI::NewWhiteboard {args} {    
     variable uidmain
     
     # Need to reuse ".". Outdated!
@@ -807,11 +807,11 @@ proc ::UI::NewMain {args} {
     } else {
 	set wtop .
     }
-    eval {::UI::BuildMain $wtop} $args
+    eval {::UI::BuildWhiteboard $wtop} $args
     return $wtop
 }
 
-# UI::BuildMain --
+# UI::BuildWhiteboard --
 #
 #       Makes the main toplevel window.
 #
@@ -822,7 +822,7 @@ proc ::UI::NewMain {args} {
 # Results:
 #       new instance toplevel created.
 
-proc ::UI::BuildMain {wtop args} {
+proc ::UI::BuildWhiteboard {wtop args} {
     global  this prefs sysFont privariaFlag
     
     variable allWhiteboards
@@ -831,7 +831,7 @@ proc ::UI::BuildMain {wtop args} {
     variable threadToWtop
     variable jidToWtop
     
-    Debug 2 "::UI::BuildMain args='$args'"
+    Debug 2 "::UI::BuildWhiteboard wtop=$wtop, args='$args'"
     
     if {![string equal [string index $wtop end] "."]} {
 	set wtop ${wtop}.
@@ -904,7 +904,7 @@ proc ::UI::BuildMain {wtop args} {
 	wm withdraw $wtopReal
     }
     wm title $wtopReal $opts(-title)
-    wm protocol $wtopReal WM_DELETE_WINDOW [list ::UI::CloseMain $wtop]
+    wm protocol $wtopReal WM_DELETE_WINDOW [list ::UI::CloseWhiteboard $wtop]
     
     # Note that the order of calls can be criticl as any 'update' may trigger
     # network events to attempt drawing etc. Beware!!!
@@ -1039,18 +1039,18 @@ proc ::UI::BuildMain {wtop args} {
     after idle ::UI::FindWBGeometry $wtop
 }
 
-# UI::CloseMain --
+# UI::CloseWhiteboard --
 #
 #       Called when closing whiteboard window; cleanup etc.
 
-proc ::UI::CloseMain {wtop} {
+proc ::UI::CloseWhiteboard {wtop} {
     upvar ::${wtop}::wapp wapp
     upvar ::${wtop}::opts opts
     
     set topw $wapp(toplevel)
     set jtype [::UI::GetJabberType $wtop]
 
-    Debug 3 "::UI::CloseMain wtop=$wtop, jtype=$jtype"
+    Debug 3 "::UI::CloseWhiteboard wtop=$wtop, jtype=$jtype"
 
     switch -- $jtype {
 	chat {
@@ -1077,7 +1077,8 @@ proc ::UI::CloseMain {wtop} {
     }
     
     # Reset and cancel all put/get file operations related to this window!
-    ::PutFileIface::CancelAllWtop $wtop
+    # I think we let put operations go on.
+    #::PutFileIface::CancelAllWtop $wtop
     ::GetFileIface::CancelAllWtop $wtop
     ::Import::HttpResetAll $wtop
 }
@@ -1094,6 +1095,8 @@ proc ::UI::DestroyMain {wtop} {
     upvar ::${wtop}::wapp wapp
     upvar ::${wtop}::opts opts
     upvar ::${wtop}::tmpImages tmpImages
+
+    set wcan [::UI::GetCanvasFromWtop $wtop]
     
     # The last whiteboard that is destroyed sets preference state & dims.
     if {[llength [::UI::GetAllWhiteboards]] == 1} {
@@ -1362,6 +1365,14 @@ proc ::UI::GetWtopFromJabberType {type jid {thread {}}} {
 
 proc ::UI::SetStatusMessage {wtop msg} {
     
+    # Make it failsafe.
+    set w $wtop
+    if {![string equal $wtop "."]} {
+	set w [string trimright $wtop "."]
+    }
+    if {![winfo exists $w]} {
+	return
+    }
     upvar ::${wtop}::wapp wapp
     $wapp(statmess) itemconfigure stattxt -text $msg
 }
@@ -1463,6 +1474,7 @@ proc ::UI::SetToolButton {wtop btName} {
     Debug 3 "SetToolButton:: wtop=$wtop, btName=$btName"
     
     set wCan $wapp(can)
+    set wtoplevel $wapp(toplevel)
     set state(btState) [::UI::ToolBtNameToNum $btName]
     set irow [string index $state(btState) 0]
     set icol [string index $state(btState) 1]
@@ -1499,7 +1511,8 @@ proc ::UI::SetToolButton {wtop btName} {
     
     switch -- $btName {
 	point {
-	    bindtags $wCan [list $wCan WhiteboardPoint WhiteboardNonText . all]
+	    bindtags $wCan  \
+	      [list $wCan WhiteboardPoint WhiteboardNonText $wtoplevel all]
 
 	    $wCan bind $stdTag <Double-Button-1>  \
 	      [list ::ItemInspector::ItemInspector $wtop current]
@@ -1551,7 +1564,8 @@ proc ::UI::SetToolButton {wtop btName} {
 	    # Binds directly to canvas widget since we want to move selected 
 	    # items as well.
 	    # With shift constrained move.
-	    bindtags $wCan [list $wCan WhiteboardMove WhiteboardNonText . all]
+	    bindtags $wCan  \
+	      [list $wCan WhiteboardMove WhiteboardNonText $wtoplevel all]
 	    
 	    # Moving single coordinates.
 	    $wCan bind tbbox <Button-1> {
@@ -1590,29 +1604,35 @@ proc ::UI::SetToolButton {wtop btName} {
 	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatmove]
 	}
 	line {
-	    bindtags $wCan [list $wCan WhiteboardLine WhiteboardNonText . all]
+	    bindtags $wCan  \
+	      [list $wCan WhiteboardLine WhiteboardNonText $wtoplevel all]
 	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatline]
 	}
 	arrow {
-	    bindtags $wCan [list $wCan WhiteboardArrow WhiteboardNonText . all]
+	    bindtags $wCan  \
+	      [list $wCan WhiteboardArrow WhiteboardNonText $wtoplevel all]
 	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatarrow]
 	}
 	rect {
-	    bindtags $wCan [list $wCan WhiteboardRect WhiteboardNonText . all]
+	    bindtags $wCan  \
+	      [list $wCan WhiteboardRect WhiteboardNonText $wtoplevel all]
 	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatrect]
 	}
 	oval {
-	    bindtags $wCan [list $wCan WhiteboardOval WhiteboardNonText . all]
+	    bindtags $wCan  \
+	      [list $wCan WhiteboardOval WhiteboardNonText $wtoplevel all]
 	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatoval]
 	}
 	text {
-	    bindtags $wCan [list $wCan WhiteboardText . all]
+	    bindtags $wCan  \
+	      [list $wCan WhiteboardText $wtoplevel all]
 	    ::CanvasText::EditBind $wCan
 	    $wCan config -cursor xterm
 	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastattext]
 	}
 	del {
-	    bindtags $wCan [list $wCan WhiteboardDel WhiteboardNonText . all]
+	    bindtags $wCan  \
+	      [list $wCan WhiteboardDel WhiteboardNonText $wtoplevel all]
 	    bind QTFrame <Button-1>  \
 	      [subst {::CanvasDraw::DeleteFrame $wCan %W %x %y}]
 	    bind SnackFrame <Button-1>  \
@@ -1620,28 +1640,34 @@ proc ::UI::SetToolButton {wtop btName} {
 	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatdel]
 	}
 	pen {
-	    bindtags $wCan [list $wCan WhiteboardPen WhiteboardNonText . all]
+	    bindtags $wCan  \
+	      [list $wCan WhiteboardPen WhiteboardNonText $wtoplevel all]
 	    $wCan config -cursor pencil
 	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatpen]
 	}
 	brush {
-	    bindtags $wCan [list $wCan WhiteboardBrush WhiteboardNonText . all]
+	    bindtags $wCan  \
+	      [list $wCan WhiteboardBrush WhiteboardNonText $wtoplevel all]
 	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatbrush]
 	}
 	paint {
-	    bindtags $wCan [list $wCan WhiteboardPaint WhiteboardNonText . all]
+	    bindtags $wCan  \
+	      [list $wCan WhiteboardPaint WhiteboardNonText $wtoplevel all]
 	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatpaint]	      
 	}
 	poly {
-	    bindtags $wCan [list $wCan WhiteboardPoly WhiteboardNonText . all]
+	    bindtags $wCan  \
+	      [list $wCan WhiteboardPoly WhiteboardNonText $wtoplevel all]
 	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatpoly]	      
         }       
 	arc {
-	    bindtags $wCan [list $wCan WhiteboardArc WhiteboardNonText . all]
+	    bindtags $wCan  \
+	      [list $wCan WhiteboardArc WhiteboardNonText $wtoplevel all]
 	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatarc]	      
 	}
 	rot {
-	    bindtags $wCan [list $wCan WhiteboardRot WhiteboardNonText . all]
+	    bindtags $wCan  \
+	      [list $wCan WhiteboardRot WhiteboardNonText $wtoplevel all]
 	    $wCan config -cursor exchange
 	    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatrot]	      
 	}
@@ -1990,7 +2016,7 @@ proc ::UI::BuildWhiteboardMenus {wtop} {
     ::UI::BuildItemMenu $wtop ${wmenu}.items $prefs(itemDir)
     
     # Addon or Plugin menus if any.
-    ::UI::BuildPublicMenus $wmenu
+    ::UI::BuildPublicMenus $wtop $wmenu
     
     ::UI::NewMenu $wtop ${wmenu}.info mInfo $menuDefs(main,info) $opts(-state)
 
@@ -2102,14 +2128,14 @@ proc ::UI::Public::RegisterCallbackFixMenus {procName} {
 
 #--- There are actually more; sort out later -----------------------------------
 
-proc ::UI::BuildPublicMenus {wmenu} {
+proc ::UI::BuildPublicMenus {wtop wmenu} {
     variable menuSpecPublic
     
     foreach wpath $menuSpecPublic(wpaths) {	
 	set m [menu ${wmenu}.${wpath} -tearoff 0]
 	$wmenu add cascade -label $menuSpecPublic($wpath,name) -menu $m
 	foreach menuSpec $menuSpecPublic($wpath,specs) {
-	    ::UI::BuildMenuEntryFromSpec $m $menuSpec
+	    ::UI::BuildMenuEntryFromSpec $wtop $m $menuSpec
 	}
     }
 }
@@ -2124,7 +2150,7 @@ proc ::UI::BuildPublicMenus {wmenu} {
 # Results:
 #       none
 
-proc ::UI::BuildMenuEntryFromSpec {m menuSpec} {
+proc ::UI::BuildMenuEntryFromSpec {wtop m menuSpec} {
     
     foreach {type label cmd state accel opts submenu} $menuSpec {
 	if {[llength $submenu]} {
@@ -2134,6 +2160,7 @@ proc ::UI::BuildMenuEntryFromSpec {m menuSpec} {
 		::UI::BuildMenuEntryFromSpec $mt $subm
 	    }
 	} else {
+	    set cmd [subst -nocommands $cmd]
 	    eval {$m add $type -label $label -command $cmd -state $state} $opts
 	}
     }
@@ -4247,6 +4274,7 @@ proc ::UI::FixMenusWhenSelection {w} {
     } elseif {[string equal $wClass "Entry"] ||  \
       [string equal $wClass "Text"]} {
 	set setState disabled
+	
 	switch -- $wClass {
 	    Entry {
 		if {[$w selection present] == "1"} {

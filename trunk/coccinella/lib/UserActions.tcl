@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UserActions.tcl,v 1.15 2003-09-28 06:29:08 matben Exp $
+# $Id: UserActions.tcl,v 1.16 2003-10-12 13:12:55 matben Exp $
 
 namespace eval ::UserActions:: {
     
@@ -26,7 +26,8 @@ proc ::UserActions::CancelAllPutGetAndPendingOpen {wtop} {
     global  prefs
     
     # This must be instance specific!!!
-    ::PutFileIface::CancelAllWtop $wtop
+    # I think we let put operations go on.
+    #::PutFileIface::CancelAllWtop $wtop
     ::GetFileIface::CancelAllWtop $wtop
     ::Import::HttpResetAll $wtop
     if {[string equal $prefs(protocol) "jabber"]} {
@@ -237,8 +238,8 @@ proc ::UserActions::DoPrintCanvas {wtop} {
     set wCan [::UI::GetCanvasFromWtop $wtop]
     
     switch -- $this(platform) {
-	macintosh {
-	    ::UserActions::SavePostscript $wtop
+	macintosh - macosx {
+	    ::Mac::Printer::Print $wtop
 	}
 	windows {
 	    if {!$prefs(printer)} {
@@ -248,7 +249,7 @@ proc ::UserActions::DoPrintCanvas {wtop} {
 		::Windows::Printer::Print $wCan
 	    }
 	}
-	unix - macosx {
+	unix {
 	    ::Dialogs::UnixPrintPS $wDlgs(print) $wCan
 	}
     }
@@ -269,6 +270,10 @@ proc ::UserActions::DoPrintText {wtext args} {
 	    tk_messageBox -icon error -title [::msgcat::mc {No Printing}] \
 	      -message [::msgcat::mc messprintnoextension]
 	}
+	macosx {
+	    tk_messageBox -icon error -title [::msgcat::mc {No Printing}] \
+	      -message [::msgcat::mc messprintnoextension]
+	}
 	windows {
 	    if {!$prefs(printer)} {
 		tk_messageBox -icon error -title [::msgcat::mc {No Printing}] \
@@ -277,19 +282,21 @@ proc ::UserActions::DoPrintText {wtext args} {
 		eval {::Windows::Printer::Print $wtext} $args
 	    }
 	}
-	unix - macosx {
+	unix {
 	    ::Dialogs::UnixPrintPS $wDlgs(print) $wtext
 	}
     }
 }
 
-proc ::UserActions::PageSetup { } {
+proc ::UserActions::PageSetup {wtop} {
     global  this prefs wDlgs
     
     switch -- $this(platform) {
 	macintosh {
-	    tk_messageBox -icon error -title [::msgcat::mc {No Printing}] \
-	      -message [::msgcat::mc messprintnoextension]
+	    ::Mac::MacPrint::PageSetup $wtop
+	}
+	macosx {
+	    ::Mac::MacCarbonPrint::PageSetup $wtop
 	}
 	windows {
 	    if {!$prefs(printer)} {
@@ -299,7 +306,7 @@ proc ::UserActions::PageSetup { } {
 		::Windows::Printer::PageSetup
 	    }
 	}
-	unix - macosx {
+	unix {
 	    ::PSPageSetup::PSPageSetup .page
 	}
     }
@@ -694,10 +701,15 @@ proc ::UserActions::DoSendCanvas {wtop} {
 #       Typically called from the menu.
 #       Take special actions before a window is closed.
 
-proc ::UserActions::DoCloseWindow { } {
+proc ::UserActions::DoCloseWindow {{wevent {}}} {
     global  wDlgs
     
     set w [winfo toplevel [focus]]
+    
+    # If we bind to toplevel descriminate events coming from childrens.
+    if {($wevent != "") && ($wevent != $w)} {
+	return
+    }
     if {$w == "."} {
 	set wtop $w
     } else {
@@ -705,17 +717,23 @@ proc ::UserActions::DoCloseWindow { } {
     }
     Debug 2 "::UserActions::DoCloseWindow winfo class $w=[winfo class $w]"
     
-    if {$w == "."} {
-    	::UI::CloseMain $wtop
-    	return
-    }	    
+    switch -- $w \
+      $wDlgs(mainwb) {
+	::UI::CloseWhiteboard $wtop
+	return
+    } \
+      $wDlgs(jrostbro) {
+	::UserActions::DoQuit -warning 1
+	return
+    }
     
     # Do different things depending on type of toplevel.
     switch -glob -- [winfo class $w] {
 	Wish* - Whiteboard* - Coccinella* - Tclkit* {
 	
+	    # NOT ALWAYS CORRECT!!!!!!!
 	    # Whiteboard window.
-	    ::UI::CloseMain $wtop
+	    ::UI::CloseWhiteboard $wtop
 	}
 	Preferences {
 	    ::Preferences::CancelPushBt
@@ -810,6 +828,10 @@ proc ::UserActions::DoQuit {args} {
     ::PreferencesUtils::SaveToFile
     
     # Should we clean up our 'incoming' directory?
+    if {$prefs(clearCacheOnQuit)} {
+	file delete -force -- $prefs(incomingPath)
+	file mkdir $prefs(incomingPath)
+    }
     
     # Cleanup. Beware, no windows with open movies must exist here!
     file delete -force $this(tmpDir)

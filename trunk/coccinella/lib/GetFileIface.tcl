@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: GetFileIface.tcl,v 1.7 2003-10-05 13:36:20 matben Exp $
+# $Id: GetFileIface.tcl,v 1.8 2003-10-12 13:12:55 matben Exp $
 
 package require getfile
 package require uriencode
@@ -53,7 +53,9 @@ proc ::GetFileIface::GetFile {wtop sock fileName opts} {
     # ref: RFC2141 sec2.2
     set fileTail [::uriencode::decodefile $fileName]
     #set dstpath [file join $prefs(incomingPath) $fileTail]
-    set dstpath [::GetFileIface::NewCacheFilePath $fileTail]
+
+    # We store file names with cached names to avoid name clashes.
+    set dstpath [::Import::NewCacheFilePath $fileTail]
         
     # Make local state array for convenient storage. 
     # Use 'variable' for permanent storage.
@@ -161,7 +163,9 @@ proc ::GetFileIface::GetFileFromServer {wtop ip port path opts} {
     # ref: RFC2141 sec2.2
     set fileTail [::uriencode::decodefile [file tail $path]]
     #set dstpath [file join $prefs(incomingPath) $fileTail]   
-    set dstpath [::GetFileIface::NewCacheFilePath $fileTail]
+
+    # We store file names with cached names to avoid name clashes.
+    set dstpath [::Import::NewCacheFilePath $fileTail]
 
     # Make local state array for convenient storage. 
     # Use 'variable' for permanent storage.
@@ -326,14 +330,6 @@ proc ::GetFileIface::Prepare {gettoken fileTail mime opts} {
     return $noErr
 }
 
-
-proc ::GetFileIface::NewCacheFilePath {fileName} {
-    global  prefs
-    
-    set tail "[::Utils::GenerateHexUID][file extension $fileName]"
-    return [file join $prefs(incomingPath) $tail]
-}
-
 # GetFileIface::Progress, Command --
 #
 #	Callbacks for the getfile command.
@@ -343,7 +339,7 @@ proc ::GetFileIface::Progress {gettoken token total current} {
     
     upvar #0 $gettoken getstate          
 
-    ::Debug 4 "::GetFileIface::Progress total=$total, current=$current"
+    ::Debug 8 "::GetFileIface::Progress total=$total, current=$current"
 
     # Be silent... except for a necessary update command to not block.
     if {[string equal $tcl_platform(platform) "windows"]} {
@@ -376,7 +372,7 @@ proc ::GetFileIface::Command {gettoken token what msg} {
     global  prefs
     upvar #0 $gettoken getstate          
     
-    ::Debug 2 "+      Command:: token=$token, what=$what msg=$msg"
+    ::Debug 2 "+\t\t::GetFileIface::Command token=$token, what=$what msg=$msg"
 
     set wtop $getstate(wtop)
     
@@ -558,7 +554,6 @@ proc ::GetFileIface::CancelAllWtop {wtop} {
     foreach gettoken $gettokenList {
 	upvar #0 $gettoken getstate          
 
-	parray getstate
 	if {[info exists getstate(wtop)] &&  \
 	  [string equal $getstate(wtop) $wtop]} {
 	    set tok $getstate(token)

@@ -7,8 +7,12 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.9 2003-10-05 13:36:21 matben Exp $
+# $Id: Utils.tcl,v 1.10 2003-10-12 13:12:55 matben Exp $
 
+namespace eval ::Utils:: {
+
+}
+    
 # InvertArray ---
 #
 #    Inverts an array so that ...
@@ -52,21 +56,6 @@ proc min {a args} {
         }
     }
     return $a
-}
-
-# lsort -unique
-#
-#    Removes duplicate list items (from the Wiki page)
-
-proc luniq {theList} {
-    
-    set t {}
-    foreach i $theList {
-        if {[lsearch -exact $t $i] == -1} {
-            lappend t $i
-        }
-    }
-    return $t
 }
 
 # lset --
@@ -133,198 +122,35 @@ proc getdirname {filePath} {
     }
 }
 
-# GetRelativePath ---         OUTDATED!!!!!!!!!!!
-#
-#       Returns the relative path from fromPath to toPath. 
-#       Both fromPath and toPath must be absolute paths.
-#       
-#       PROBLEM: different drives on Windows????
-#    
-# Arguments:
-#       fromPath       an absolute path which is the "original" path.
-#       toPath         an absolute path which is the "destination" path.
-#                      It may contain a file name at end.
-# Results:
-#       The relative (unix-style) path from 'fromPath' to 'toPath'.
-
-proc GetRelativePath {fromPath toPath} {
-    global  this
-    
-    set debug 0
-    if {$debug} {
-	puts "GetRelativePath:: fromPath=$fromPath, toPath=$toPath"
-    }
-    switch -glob -- $this(platform) {
-	mac* {
-	    set sep {:/}
-	}
-	windows {
-	    set sep {/\\}
-	}
-	unix {
-	    set sep {/}
-	}
-    }
-    
-    # Need real paths, not fake, for getdirname.
-    set fromPath [getdirname $fromPath]
-    if {[file pathtype $fromPath] != "absolute"} {
-	error "both paths must be absolute paths"
-    } elseif {[file pathtype $toPath] != "absolute"} {
-	error "both paths must be absolute paths"
-    }
-    set up {../}
-    
-    # This is the method to reach platform independence.
-    # We must be sure that there are no path separators left.   
-    # Mess with upper/lower on Windows.
-    set fromP {}
-    foreach elem [file split $fromPath] {
-	if {[string equal $this(platform) "windows"]} {
-	    lappend fromP [string tolower [string trim $elem $sep]]
-	} else {
-	    lappend fromP [string trim $elem $sep]
-	}
-    }
-    set toP {}
-    foreach elem [file split $toPath] {
-	if {[string equal $this(platform) "windows"]} {
-	    lappend toP [string tolower [string trim $elem $sep]]
-	} else {
-	    lappend toP [string trim $elem $sep]
-	}
-    }
-    set lenFrom [llength $fromP]
-    set lenTo [llength $toP]
-    set lenMin [min $lenFrom $lenTo]
-    if {$debug} {
-	puts "  fromP=$fromP"
-	puts "  toP=$toP"
-	puts "  lenFrom=$lenFrom, lenTo=$lenTo"
-    }
-    
-    # Find first nonidentical dir; iid = index of lowest common directory.
-    # If there are no common dirs we are left with iid = -1.    
-    set iid 0
-    while {[string equal [lindex $fromP $iid] [lindex $toP $iid]] && \
-      ($iid < $lenMin)} {
-	incr iid
-    }
-    incr iid -1
-    set numUp [expr $lenFrom - 1 - $iid]
-    if {$debug} {
-	puts "  iid=$iid, numUp=$numUp"
-    }
-    
-    # Start building the relative path.
-    set relPath {}
-    if {$numUp > 0} {
-	for {set i 1} {$i <= $numUp} {incr i} {
-	    append relPath $up
-	}
-    }
-    
-    # Append the remaining unique path from 'toPath'.
-    set relPath   \
-      "$relPath[join [lrange $toP [expr $iid + 1] [expr $lenTo - 1]] /]"
-    return $relPath
-}
-
-# AddAbsolutePathWithRelative ---       OUTDATED!!!!!!!!!!!!
-#
-#       Adds the second, relative path, to the first, absolute path.
-#       IMPORTANT: any changes should be copied to 'tinyhttpd.tcl'.
-#           
-# Arguments:
-#       absPath        an absolute path which is the "original" path.
-#       toPath         a relative path which should be added.
-#       
-# Results:
-#       The absolute path by adding 'absPath' with 'relPath'.
-
-proc AddAbsolutePathWithRelative {absPath relPath} {
-    global  this
-    
-    # For 'tinyhttpd.tcl'.
-    #variable state
-    set state(debug) 0
-    if {$state(debug) >= 3} {
-	puts "AddAbsolutePathWithRelative:: absPath=$absPath, relPath=$relPath"
-    }
-
-    # Be sure to strip off any filename.
-    set absPath [getdirname $absPath]
-    if {[file pathtype $absPath] != "absolute"} {
-	error "first path must be an absolute path"
-    } elseif {[file pathtype $relPath] != "relative"} {
-	error "second path must be a relative path"
-    }
-
-    # This is the method to reach platform independence.
-    # We must be sure that there are no path separators left.
-    
-    set absP {}
-    foreach elem [file split $absPath] {
-	lappend absP [string trim $elem "/:\\"]
-    }
-    
-    # If any up dir (../ ::  ), find how many. Only unix style.
-    set numUp [regsub -all {\.\./} $relPath {} newRelPath]
-   
-    # Delete the same number of elements from the end of the absolute path
-    # as there are up dirs in the relative path.
-    
-    if {$numUp > 0} {
-	set iend [expr [llength $absP] - 1]
-	set upAbsP [lreplace $absP [expr $iend - $numUp + 1] $iend]
-    } else {
-	set upAbsP $absP
-    }
-    set relP {}
-    foreach elem [file split $newRelPath] {
-	lappend relP [string trim $elem "/:\\"]
-    }
-    set completePath "$upAbsP $relP"
-
-    # On Windows we need special treatment of the "C:/" type drivers.
-    if {$this(platform) == "windows"} {
-    	set finalAbsPath   \
-	    "[lindex $completePath 0]:/[join [lrange $completePath 1 end] "/"]"
-    } else {
-        set finalAbsPath "/[join $completePath "/"]"
-    }
-    return $finalAbsPath
-}
-
-# IsIPNumber --
+# ::Utils::IsIPNumber --
 #
 #       Tests if the arguments is a ip number, that is, 200.54.2.0
 #       Not foolproof! Should be able to tell the difference between
 #       a ip name and a ip number.
 
-proc IsIPNumber {thing} {
+proc ::Utils::IsIPNumber {thing} {
     
     set sub_ {([0-2][0-9][0-9]|[0-9][0-9]|[0-9])}
     set d_ {\.}
     return [regexp "^${sub_}${d_}${sub_}${d_}${sub_}${d_}${sub_}$" $thing]
 }
 
-# IsWellformedUrl --
+# ::Utils::IsWellformedUrl --
 #
 #       Returns boolean depending on if argument is a well formed URL.
 #       Not foolproof!
 
-proc IsWellformedUrl {url} {
+proc ::Utils::IsWellformedUrl {url} {
     
     return [regexp {[^:]+://[^:/]+(:[0-9]+)?[^ ]*} $url]
 }
 
-# GetFilePathFromUrl --
+# ::Utils::GetFilePathFromUrl --
 #
 #       Returns the file path part from a well formed url, or empty if
 #       didn't recognize it as a valid url.
 
-proc GetFilePathFromUrl {url} {
+proc ::Utils::GetFilePathFromUrl {url} {
     
     if {[regexp {[^:]+://[^:/]+(:[0-9]+)?/(.*)} $url match port path]} {
 	return $path
@@ -333,7 +159,7 @@ proc GetFilePathFromUrl {url} {
     }
 }
 
-proc GetDomainNameFromUrl {url} {
+proc ::Utils::GetDomainNameFromUrl {url} {
     
     if {[regexp {[^:]+://([^:/]+)(:[0-9]+)?/.*} $url match domain port]} {
 	return $domain
@@ -342,7 +168,7 @@ proc GetDomainNameFromUrl {url} {
     }
 }
 
-# SmartClockFormat --
+# ::Utils::SmartClockFormat --
 #
 #       Pretty formatted time & date.
 #
@@ -352,7 +178,7 @@ proc GetDomainNameFromUrl {url} {
 # Results:
 #       nice time string that still can be used by 'clock scan'
 
-proc SmartClockFormat {secs args} {
+proc ::Utils::SmartClockFormat {secs args} {
     
     array set opts {
 	-weekdays 0
@@ -390,16 +216,39 @@ proc SmartClockFormat {secs args} {
     return "$date $time"
 }
 
-proc OpenHtmlInBrowser {url} {
-    global  this
+proc ::Utils::UnixGetWebBrowser { } {
+    global  this prefs
     
-    ::Debug 2 "OpenHtmlInBrowser url=$url"
+    set browser ""
+    if {$this(platform) == "unix"} {
+
+	# Try in order.
+	set found 0
+	set browsers [list $prefs(webBrowser) netscape mozilla konqueror]
+	foreach app $browsers {
+	    if {![catch {exec which $app}]} {
+		set prefs(webBrowser) $app
+		set browser $app
+		break
+	    }
+	}
+    }
+    return $browser
+}
+
+proc ::Utils::OpenHtmlInBrowser {url} {
+    global  this prefs
+    
+    ::Debug 2 "::Utils::OpenHtmlInBrowser url=$url"
     
     switch $this(platform) {
 	unix {
-	    set cmd "exec netscape $url &"
-	    if {[catch {eval $cmd}]} {
-		exec netscape &
+	    set browser [::Utils::UnixGetWebBrowser]
+	    if {$browser == ""} {
+		tk_messageBox -icon error -type ok -message \
+		  "Couldn't localize a web browser on this system"
+	    } else {
+		exec $browser $url &
 	    }
 	}
 	windows {	    
@@ -457,16 +306,20 @@ namespace eval ::Utils:: {
 # Utils::GenerateHexUID --
 #
 #       Makes a unique hex string stamped by time.
-#       Can generate max 'maxuidpersec' uid's per second.
+#       Can generate max 'maxuidpersec' (uniques) uid's per second.
 
 proc ::Utils::GenerateHexUID { } {
     variable uid
     variable maxuidpersec
     
     set rem [expr [incr uid] % $maxuidpersec]
-    # how to avoid octal interpretation???
-    set hex1 [format %x [clock format [clock seconds] -format "1%y%j%H"]]
-    set hex2 [format %x [clock format [clock seconds] -format "1%M%S${rem}"]]
+    set secs [clock seconds]
+    
+    # Remove any leading 0 to avoid octal interpretation.
+    set hex1 [format %x [string trimleft \
+      [clock format $secs -format "%y%j%H"] 0]]
+    set hex2 [format %x [string trimleft \
+      [clock format $secs -format "%M%S${rem}"] 0]]
     return ${hex1}${hex2}
 }
 
@@ -517,7 +370,7 @@ proc ::Text::URLLabel {w url args} {
     return $w
 }
 
-# Text::ParseHttpLinksForTextWidget --
+# Text::ParseHttpLinks --
 # 
 #       Parses text translating elements that may be interpreted as an url
 #       to a clickable thing.
@@ -531,7 +384,7 @@ proc ::Text::URLLabel {w url args} {
 #       A list {textcmd textcmd ...} where textcmd is typically:
 #       "insert end {Some text} $tag"
 
-proc ::Text::ParseHttpLinksForTextWidget {str tag linktag} {
+proc ::Text::ParseHttpLinks {str tag linktag} {
     
     # Protect all  *regexp*  special characters.
     #regsub -all {\\|&} $str {\\\0} str
@@ -596,8 +449,8 @@ proc ::Text::ButtonPressOnLink {w x y linkactive} {
 	if {![regexp {^http://.+} $url]} {
 	    set url "http://$url"
 	}
-	if {[IsWellformedUrl $url]} {
-	    OpenHtmlInBrowser $url
+	if {[::Utils::IsWellformedUrl $url]} {
+	    ::Utils::OpenHtmlInBrowser $url
 	}
     }
 }
@@ -636,12 +489,12 @@ proc ::Text::ButtonPressOnURL {w idurl} {
     if {![regexp {^http://.+} $url]} {
 	set url "http://$url"
     }
-    if {[IsWellformedUrl $url]} {
-	OpenHtmlInBrowser $url
+    if {[::Utils::IsWellformedUrl $url]} {
+	::Utils::OpenHtmlInBrowser $url
     }
 }
 
-# Text::ParseSmileysForTextWidget --
+# Text::ParseSmileys --
 # 
 #
 # Arguments:
@@ -650,7 +503,7 @@ proc ::Text::ButtonPressOnURL {w idurl} {
 # Results:
 #       A list {str textimage ?str textimage ...?}
 
-proc ::Text::ParseSmileysForTextWidget {str} {
+proc ::Text::ParseSmileys {str} {
     global  this
     
     upvar ::UI::smiley smiley
@@ -658,20 +511,21 @@ proc ::Text::ParseSmileysForTextWidget {str} {
     upvar ::UI::smileyLongIm smileyLongIm
     
     # Since there are about 60 smileys we need to be economical here.    
-    # Check first if there is any short smiley.
+    # Check first if there are any short smileys.
 	
     # Protect all  *regexp*  special characters. Regexp hell!!!
-    #regsub -all {\\|&} $str {\\\0} str
+    # Carefully embrace $smile since may contain ; etc.
     
     foreach smile [array names smiley] {
-	set sub "\} \{image create end -image $smiley($smile) -name $smile\} \{"
-	regsub  {[)(|]} $smile {\\\0} smileExp
+	set sub "\} \{image create end -image $smiley($smile) -name \{$smile\}\} \{"
+	regsub -all {[);(|]} $smile {\\\0} smileExp
 	regsub -all $smileExp $str $sub str
     }
 	
     # Now check for any "long" names, such as :angry: :cool: etc.
     set candidates {}
     set ndx 0
+    
     while {[regexp -start $ndx -indices -- {:[a-zA-Z]+:} $str ind]} {
         set ndx [lindex $ind 1]
 	set candidate [string range $str [lindex $ind 0] [lindex $ind 1]]
@@ -697,9 +551,9 @@ proc ::Text::ParseSmileysForTextWidget {str} {
     return "\{$str\}"
 }
 
-# Text::ParseAllForTextWidget --
+# Text::ParseAll --
 # 
-#       Combines 'ParseSmileysForTextWidget' and 'ParseHttpLinksForTextWidget'.
+#       Combines 'ParseSmileys' and 'ParseHttpLinks'.
 #
 # Arguments:
 #       str         the text string
@@ -708,14 +562,15 @@ proc ::Text::ParseSmileysForTextWidget {str} {
 #       A list {textcmd textcmd ...} where textcmd is typically:
 #       "insert end {Some text} $tag"
 
-proc ::Text::ParseAllForTextWidget {str tag linktag} {
+proc ::Text::ParseAll {str tag linktag} {
         
     # Protect Tcl special characters, quotes included.
     regsub -all {([][$\\{}"])} $str {\\\1} str
 
-    set strSmile [ParseSmileysForTextWidget $str]
+    set strSmile [::Text::ParseSmileys $str]
+    
     foreach {txt icmd} $strSmile {
-	set httpCmd [ParseHttpLinksForTextWidget $txt $tag $linktag]
+	set httpCmd [::Text::ParseHttpLinks $txt $tag $linktag]
 	if {$icmd == ""} {
 	    eval lappend res $httpCmd
 	} else {
@@ -723,6 +578,14 @@ proc ::Text::ParseAllForTextWidget {str tag linktag} {
 	}
     }
     return $res
+}
+
+proc ::Text::ParseAndInsert {w str tag linktag} {
+    
+    foreach cmd [::Text::ParseAll $str $tag $linktag] {
+	eval {$w} $cmd
+    }
+    $w insert end "\n"
 }
 
 proc ::Text::TransformToPureText {w args} {    

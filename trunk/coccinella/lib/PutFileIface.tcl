@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: PutFileIface.tcl,v 1.9 2003-09-28 06:29:08 matben Exp $
+# $Id: PutFileIface.tcl,v 1.10 2003-10-12 13:12:55 matben Exp $
 
 package require putfile
 package require uriencode
@@ -16,7 +16,7 @@ package require uriencode
 namespace eval ::PutFileIface:: {
     
     # Internal vars only.
-    variable putSessionArr
+    variable uid 0
 }
 
 # PutFileIface::PutFileDlg --
@@ -38,10 +38,10 @@ proc ::PutFileIface::PutFileDlg {wtop} {
     set fileName $ans
     
     # Do the actual putting once the file is chosen. 
-    PutFile $wtop $fileName "all"
+    ::PutFileIface::PutFileToAll $wtop $fileName "all"
 }
 
-# PutFileIface::PutFile --
+# PutFileIface::PutFileToAll --
 #   
 #       Transfers a file to all remote servers. It needs some negotiation to 
 #       work.
@@ -55,7 +55,7 @@ proc ::PutFileIface::PutFileDlg {wtop} {
 #                 to a valid "canvas create" option, and everything is on 
 #                 a single line.
 
-proc ::PutFileIface::PutFile {wtop fileName where {opts {}}} {
+proc ::PutFileIface::PutFileToAll {wtop fileName where {opts {}}} {
     global  allIPnumsToSend prefs this
     
     Debug 2 "+PutFile:: fileName=$fileName, opts=$opts"
@@ -107,31 +107,56 @@ proc ::PutFileIface::PutFile {wtop fileName where {opts {}}} {
 		}    
 	    }
     
-	    # This must never fail (application/octet-stream as fallback).
-	    set mime [::Types::GetMimeTypeForFileName $fileName]
-	
-	    # Get the remote (network) file name (no path, no uri encoding).
-	    set dstFile [::Types::GetFileTailAddSuffix $fileName]
-    
 	    # Translate tcl type '-key value' list to 'Key: value' option list.
 	    set optList [::Import::GetTransportSyntaxOptsFromTcl $opts]
 	    
 	    # Loop over all connected servers or only the specified one.
 	    foreach ip $allPutIP {
-		if {[catch {
-		    ::putfile::put $fileName $ip $prefs(remotePort)  \
-		      -mimetype $mime -timeout $prefs(timeoutMillis) \
-		      -optlist $optList -filetail $dstFile  \
-		      -progress [namespace current]::PutProgress  \
-		      -command [list [namespace current]::PutCommand $wtop]
-		} tok]} {
-		    tk_messageBox -title [::msgcat::mc {File Transfer Error}]  \
-		      -type ok -message $tok
-		} else {
-		    ::PutFileIface::RegisterPutSession $tok $wtop
-		}
+		::PutFileIface::PutFile $wtop $fileName $ip $optList
 	    }
 	}
+    }
+}
+
+# PutFileIface::PutFile --
+# 
+#       Puts the given fileName to the specified ip address.
+
+proc ::PutFileIface::PutFile {wtop fileName ip optList} {
+    global  prefs
+    variable uid
+    
+    # This must never fail (application/octet-stream as fallback).
+    set mime [::Types::GetMimeTypeForFileName $fileName]
+    
+    # Get the remote (network) file name (no path, no uri encoding).
+    set dstFile [::Types::GetFileTailAddSuffix $fileName]
+    
+    # Make local state array for convenient storage. 
+    # Use 'variable' for permanent storage.
+    set puttoken [namespace current]::[incr uid]
+    variable $puttoken
+    upvar 0 $puttoken putstate
+
+    set putstate(wtop) $wtop
+    set putstate(file) $fileName
+    set putstate(tail) [file tail $fileName]
+    set putstate(mime) $mime
+    set putstate(ip) $ip
+    set putstate(optlist) $optList
+    
+    if {[catch {
+	::putfile::put $fileName $ip $prefs(remotePort)  \
+	  -mimetype $mime -timeout $prefs(timeoutMillis) \
+	  -optlist $optList -filetail $dstFile  \
+	  -progress [list [namespace current]::PutProgress $puttoken] \
+	  -command [list [namespace current]::PutCommand $puttoken]
+    } tok]} {
+	tk_messageBox -title [::msgcat::mc {File Transfer Error}]  \
+	  -type ok -message $tok
+	unset putstate
+    } else {
+	set putstate(token) $tok
     }
 }
 
@@ -139,8 +164,9 @@ proc ::PutFileIface::PutFile {wtop fileName where {opts {}}} {
 #
 #	Callbacks for the putfile command.
 
-proc ::PutFileIface::PutProgress {token total current} {
+proc ::PutFileIface::PutProgress {puttoken token total current} {
     global  tcl_platform
+    upvar #0 $puttoken putstate          
  
     # Be silent... except for a necessary update command to not block.
     if {[string equal $tcl_platform(platform) "windows"]} {
@@ -150,41 +176,47 @@ proc ::PutFileIface::PutProgress {token total current} {
     }
 }
 
-proc ::PutFileIface::PutCommand {wtop token what msg} {
+proc ::PutFileIface::PutCommand {puttoken token what msg} {
     global  prefs
+    upvar #0 $puttoken putstate          
     
     Debug 2 "+      PutCommand:: token=$token, what=$what msg=$msg"
+
+    set wtop $putstate(wtop)
 
     if {[string equal $what "error"]} {
 	set ncode [::putfile::ncode $token]
 	set codetxt [::putfile::ncodetotext $ncode]
-
+	
 	# Depending on the flavour of the return code do different things.
 	if {$prefs(talkative) >= 1} {
 	    tk_messageBox -title [::msgcat::mc {Put File Error}]  \
 	      -type ok -message $msg
 	} else {
-	    ::UI::SetStatusMessage $wtop $msg
+	    
+	    # The 'msg' is typically a low level error msg.
 	    switch -- $ncode {
 		320 - 323 {
-		    # empty
+		    ::UI::SetStatusMessage $wtop $msg
 		} 
 		default {
+		    set errmsg "Failed while putting file \"$putstate(tail)\""
 		    if {$prefs(talkative) >= 1} {
 			tk_messageBox -title [::msgcat::mc {Put File Error}] \
-			  -type ok -message $msg
+			  -type ok -message $errmsg
 		    }
+		    ::UI::SetStatusMessage $wtop $errmsg
 		}		
 	    }
 	}
+	unset putstate
     } elseif {[string equal $what "ok"]} {
 	::UI::SetStatusMessage $wtop $msg
 	if {[::putfile::status $token] == "ok"} {
 	    ::putfile::cleanup $token
-	    ::PutFileIface::DeRegisterPutSession $token
+	    unset putstate
 	}
     }
-    #update
 }
 
 # PutFileIface::PutFileToClient --
@@ -205,52 +237,46 @@ proc ::PutFileIface::PutCommand {wtop token what msg} {
 
 proc ::PutFileIface::PutFileToClient {wtop s ip relativeFilePath opts} {
     global  tclwbProtMsg this
+    variable uid
     
     Debug 2 "+      PutFileToClient:: s=$s, ip=$ip,\
       relativeFilePath=$relativeFilePath"
     
     # Need to find the absolute path to 'relativeFilePath' with respect to
     # our base directory 'this(path)'.
-    set filePath [addabsolutepathwithrelative $this(path) $relativeFilePath]
+    set fileName [addabsolutepathwithrelative $this(path) $relativeFilePath]
     
     # This must never fail (application/octet-stream as fallback).
-    set mime [::Types::GetMimeTypeForFileName $filePath]
+    set mime [::Types::GetMimeTypeForFileName $fileName]
     
     # Translate tcl type '-key value' list to 'Key: value' option list.
     set optList [::Import::GetTransportSyntaxOptsFromTcl $opts]
     
-    # And finally...    
+    # Make local state array for convenient storage. 
+    # Use 'variable' for permanent storage.
+    set puttoken [namespace current]::[incr uid]
+    variable $puttoken
+    upvar 0 $puttoken putstate
+
+    set putstate(wtop) $wtop
+    set putstate(file) $fileName
+    set putstate(tail) [file tail $fileName]
+    set putstate(mime) $mime
+    set putstate(ip) $ip
+    set putstate(optlist) $optList
+    
+    # And finally...
     if {[catch {
-	::putfile::puttoclient $s $filePath        \
+	::putfile::puttoclient $s $fileName        \
 	  -mimetype $mime -optlist $optList        \
 	  -progress ::PutFileIface::PutProgress    \
 	  -command [list ::PutFileIface::PutCommand $wtop]
     } tok]} {
 	tk_messageBox -title [::msgcat::mc {File Transfer Error}] \
 	  -type ok -message $tok
+	unset putstate
     } else {
-	::PutFileIface::RegisterPutSession $tok $wtop
-    }
-}
-
-# PutFileIface::RegisterPutSession, DeRegisterPutSession --
-# 
-#       Keeps track of ongoing put sessions.
-
-proc ::PutFileIface::RegisterPutSession {token wtop} {
-    variable putSessionArr
-    
-    set putSessionArr($wtop,token) $token
-    set putSessionArr($token,wtop) $wtop
-}
-
-proc ::PutFileIface::DeRegisterPutSession {token} {
-    variable putSessionArr
-    
-    catch {
-	set wtop $putSessionArr($token,wtop)
-	unset putSessionArr($wtop,token)
-	unset putSessionArr($token,wtop)
+	set putstate(token) $tok
     }
 }
 
@@ -261,28 +287,45 @@ proc ::PutFileIface::DeRegisterPutSession {token} {
 #   
 
 proc ::PutFileIface::CancelAll { } {
-    variable putSessionArr
 
     Debug 2 "+::PutFileIface::CancelAll"
     
     # Close and clean up.
-    foreach {key tok} [array get putSessionArr "*,token"] {
+    set puttokenList [concat  \
+      [info vars ::PutFileIface::\[0-9\]] \
+      [info vars ::PutFileIface::\[0-9\]\[0-9\]] \
+      [info vars ::PutFileIface::\[0-9\]\[0-9\]\[0-9\]]]
+    
+    foreach puttoken $puttokenList {
+	upvar #0 $puttoken putstate          
+
+	set tok $putstate(token)
 	putfile::reset $tok
 	putfile::cleanup $tok
-	::PutFileIface::DeRegisterPutSession $tok
+	unset putstate
     }
 }
 
 proc ::PutFileIface::CancelAllWtop {wtop} {
-    variable putSessionArr
 
     Debug 2 "+::PutFileIface::CancelAllWtop wtop=$wtop"
     
     # Close and clean up.
-    foreach {key tok} [array get putSessionArr "${wtop},token"] {
-	putfile::reset $tok
-	putfile::cleanup $tok
-	::PutFileIface::DeRegisterPutSession $tok
+    set puttokenList [concat  \
+      [info vars ::PutFileIface::\[0-9\]] \
+      [info vars ::PutFileIface::\[0-9\]\[0-9\]] \
+      [info vars ::PutFileIface::\[0-9\]\[0-9\]\[0-9\]]]
+    
+    foreach puttoken $puttokenList {
+	upvar #0 $puttoken putstate          
+
+	if {[info exists putstate(wtop)] &&  \
+	  [string equal $putstate(wtop) $wtop]} {
+	    set tok $putstate(token)
+	    putfile::reset $tok
+	    putfile::cleanup $tok
+	    unset putstate
+	}
     }
 }
 

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.12 2003-10-05 13:36:20 matben Exp $
+# $Id: Dialogs.tcl,v 1.13 2003-10-12 13:12:55 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -202,7 +202,7 @@ proc ::Dialogs::InfoOnPlugins {w} {
 	$wtxt insert end "QuickTimeTcl\n" ttitle
 	$wtxt insert end "\n" tline
 	$wtxt insert end "\tDownload:\t" tkey
-	set textCmds [::Text::ParseHttpLinksForTextWidget $ad ttxt linktag]
+	set textCmds [::Text::ParseHttpLinks $ad ttxt linktag]
 	foreach cmd $textCmds {
 	    eval $wtxt $cmd
 	}	
@@ -933,6 +933,11 @@ proc ::Dialogs::Canvas {filePath args} {
     } else {
 
     }
+    
+    # Make the namespace exist.
+    set wtop ${w}.
+    namespace eval ::${wtop}:: "set wtop $wtop"
+
     array set argsArr [list -title [file rootname [file tail $filePath]]]
     array set argsArr $args
     wm title $w $argsArr(-title)

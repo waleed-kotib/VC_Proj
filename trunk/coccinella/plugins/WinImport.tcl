@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: WinImport.tcl,v 1.1 2003-10-05 13:43:45 matben Exp $
+# $Id: WinImport.tcl,v 1.2 2003-10-12 13:12:56 matben Exp $
 
 #package require WindowsUtils
 
@@ -40,6 +40,7 @@ proc ::WinImport::Init { } {
 	application/vnd.ms-excel
 	application/vnd.ms-powerpoint
 	application/msword
+	application/rtf
     }
     set mimes {}
     foreach mime $mimeList {
@@ -190,7 +191,7 @@ proc ::WinImport::Import {wcan optListVar args} {
     # Extract coordinates and tags which must be there. error checking?
     foreach {x y} $optArr(-coords) break
     if {[info exists optArr(-tags)]} {
-	set useTag $optArr(-tags)
+	set useTag [::CanvasUtils::GetUtagFromTagList $optArr(-tags)]
     } else {
 	set useTag [::CanvasUtils::NewUtag]
     }
@@ -212,7 +213,11 @@ proc ::WinImport::Import {wcan optListVar args} {
     set locals(id2file,$id) $fileName
     
     # Need explicit permanent storage for import options.
-    ::CanvasUtils::ItemSet $wtop $useTag -file $fileName
+    set configOpts [list -file $fileName]
+    if {[info exists optArr(-url)]} {
+	lappend configOpts -url $optArr(-url)
+    }
+    eval {::CanvasUtils::ItemSet $wtop $id} $configOpts
     
     bind $wfr.icon <Double-Button-1> [list [namespace current]::Clicked $id]
 
@@ -220,7 +225,13 @@ proc ::WinImport::Import {wcan optListVar args} {
     lappend optList -width [winfo reqwidth $wfr] -height [winfo reqheight $wfr]
 
     set desc [::Types::GetDescriptionForMime $mime]
-    set msg "$desc: [file tail $fileName]"
+    if {[info exists optArr(-url)]} {
+	set name [::uriencode::decodefile  \
+	  [::Utils::GetFilePathFromUrl $optArr(-url)]]
+    } else {
+	set name [file tail $fileName]
+    }
+    set msg "$desc: $name"
     ::balloonhelp::balloonforwindow $wfr.icon $msg
     
     # Success.

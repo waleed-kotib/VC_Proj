@@ -14,7 +14,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Plugins.tcl,v 1.8 2003-10-05 13:36:20 matben Exp $
+# $Id: Plugins.tcl,v 1.9 2003-10-12 13:12:55 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -91,7 +91,7 @@ namespace eval ::Plugins:: {
     # Supported binary files, that is, images movies etc.
     # Start with the core Tk supported formats. Mac 'TYPE'.
     set plugin(tk,loaded) 1
-    set supSuff(text) {.txt .tcl}
+    set supSuff(text) {.txt}
     set supSuff(image) {}
     set supSuff(audio) {}
     set supSuff(video) {}
@@ -608,60 +608,64 @@ proc ::Plugins::MakeTypeListDialogOption { } {
 	set typelist(text) [list  \
 	  [list Text $supSuff(text)]]
     }
-    if {[string match "mac*" $this(platform)] ||   \
-      ($this(platform) == "windows")}  {
+    
+    switch -- $this(platform) {
 	
-	set typelist(image) [list   \
-	  [list Image $supSuff(image)]  \
-	  [list Image {} $supMacTypes(image)] ]
-	if {[llength $supSuff(audio)] > 0}  {
-	    set typelist(audio) [list  \
-	      [list Audio $supSuff(audio)]  \
-	      [list Audio {} $supMacTypes(audio)]]
-	}
-	if {[llength $supSuff(video)] > 0}  {
-	    set typelist(video) [list  \
-	      [list Video $supSuff(video)]  \
-	      [list Video {} $supMacTypes(video)]]
-	}	
-	if {[llength $supSuff(application)] > 0}  {
-	    set typelist(application) [list  \
-	      [list Application $supSuff(application)]  \
-	      [list Application {} $supMacTypes(application)]]
-	}	
-	if {[llength $supSuff(text)] > 0}  {
-	    set typelist(text) [list  \
-	      [list Text $supSuff(text)]  \
-	      [list Text {} $supMacTypes(text)]]
-	}	
-	
-	# Use mime description as entries.
-	set mimeTypeList {}
-	foreach mime $supportedMimeTypes(all) {
-	    lappend mimeTypeList   \
-	      [list [::Types::GetDescriptionForMime $mime]  \
-	      [::Types::GetSuffixListForMime $mime]  \
-	      [::Types::GetMacTypeListForMime $mime]]
-	}
-	set mimeTypeList [lsort -index 0 $mimeTypeList]
-	set typelist(binary) [concat $typelist(image) $typelist(audio) \
-	  $typelist(video) $typelist(application)]
-	set typelist(binary) [concat $typelist(binary) $mimeTypeList]
-	lappend typelist(binary) [list "Any File" *]
-    } else {
-	
-	# Make a separate entry for each file extension. Sort.
-	foreach mimeBase {text image audio video application} {
-	    foreach ext $supSuff($mimeBase) {
-		lappend typelist($mimeBase)  \
-		  [list [string toupper [string trim $ext .]] $ext]
+	macintosh - macosx - windows - unix {    
+	    set typelist(image) [list   \
+	      [list Image $supSuff(image)]  \
+	      [list Image {} $supMacTypes(image)] ]
+	    if {[llength $supSuff(audio)] > 0}  {
+		set typelist(audio) [list  \
+		  [list Audio $supSuff(audio)]  \
+		  [list Audio {} $supMacTypes(audio)]]
 	    }
-	}
-	set sortlist [lsort -index 0 [concat $typelist(image) $typelist(audio) \
-	  $typelist(video) $typelist(application)]]
-	set typelist(binary) $sortlist
-	set typelist(binary) "$sortlist {{Any File} *}"	    
-    }  
+	    if {[llength $supSuff(video)] > 0}  {
+		set typelist(video) [list  \
+		  [list Video $supSuff(video)]  \
+		  [list Video {} $supMacTypes(video)]]
+	    }	
+	    if {[llength $supSuff(application)] > 0}  {
+		set typelist(application) [list  \
+		  [list Application $supSuff(application)]  \
+		  [list Application {} $supMacTypes(application)]]
+	    }	
+	    if {[llength $supSuff(text)] > 0}  {
+		set typelist(text) [list  \
+		  [list Text $supSuff(text)]  \
+		  [list Text {} $supMacTypes(text)]]
+	    }	
+	    
+	    # Use mime description as entries.
+	    set mimeTypeList {}
+	    foreach mime $supportedMimeTypes(all) {
+		lappend mimeTypeList   \
+		  [list [::Types::GetDescriptionForMime $mime]  \
+		  [::Types::GetSuffixListForMime $mime]  \
+		  [::Types::GetMacTypeListForMime $mime]]
+	    }
+	    set mimeTypeList [lsort -index 0 $mimeTypeList]
+	    set typelist(binary) [concat $typelist(image) $typelist(audio) \
+	      $typelist(video) $typelist(application)]
+	    set typelist(binary) [concat $typelist(binary) $mimeTypeList]
+	    lappend typelist(binary) [list "Any File" *]
+	    
+	} 
+	
+	default {
+	    # Make a separate entry for each file extension. Sort.
+	    foreach mimeBase {text image audio video application} {
+		foreach ext $supSuff($mimeBase) {
+		    lappend typelist($mimeBase)  \
+		      [list [string toupper [string trim $ext .]] $ext]
+		}
+	    }
+	    set sortlist [lsort -index 0 [concat $typelist(image) $typelist(audio) \
+	      $typelist(video) $typelist(application)]]
+	    set typelist(binary) $sortlist
+	    set typelist(binary) "$sortlist {{Any File} *}"	    
+	}  
+    }
     
     # Complete -typelist option.
     set typelist(all) [concat $typelist(text) $typelist(binary)]

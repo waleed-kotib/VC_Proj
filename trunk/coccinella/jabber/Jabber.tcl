@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.23 2003-10-05 13:36:17 matben Exp $
+# $Id: Jabber.tcl,v 1.24 2003-10-12 13:12:55 matben Exp $
 #
 #  The $address is an ip name or number.
 #
@@ -371,7 +371,7 @@ proc ::Jabber::FactoryDefaults { } {
     variable menuDefs
 
     set menuDefs(rost,file) {
-	{command   mNewWhiteboard      {::UI::NewMain}                            normal   N}
+	{command   mNewWhiteboard      {::UI::NewWhiteboard}                            normal   N}
 	{command   mCloseWindow        {::UserActions::DoCloseWindow}             normal   W}
 	{command   mPreferences...     {::Preferences::Build $wDlgs(prefs)}       normal   {}}
 	{command   mUpdateCheck        {
@@ -1469,7 +1469,7 @@ proc ::Jabber::DoSendCanvas {wtop} {
 	    }
 	}
 	::UserActions::DoSendCanvas $wtop
-	::UI::CloseMain $wtop
+	::UI::CloseWhiteboard $wtop
     } else {
 	tk_messageBox -icon warning -type ok -parent $wtoplevel -message \
 	  [FormatTextForMessageBox [::msgcat::mc jamessinvalidjid]]
@@ -2109,7 +2109,7 @@ proc ::Jabber::PutFileAndSchedule {wtop fileName opts} {
 #
 #       Puts the file to the given jid provided the client has
 #       told us its ip number.
-#       Calls '::PutFileIface::PutFile' to do the real work for us.
+#       Calls '::PutFileIface::PutFileToAll' to do the real work for us.
 #
 # Arguments:
 #       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
@@ -2145,24 +2145,10 @@ proc ::Jabber::PutFile {wtop fileName mime opts jid} {
 	return
     }
     
-    # Get the remote (network) file name (no path, no uri encoding).
-    set dstFile [::Types::GetFileTailAddSuffix $fileName]
-
     # Translate tcl type '-key value' list to 'Key: value' option list.
     set optList [::Import::GetTransportSyntaxOptsFromTcl $opts]
 
-    if {[catch {
-	::putfile::put $fileName $jidToIP($jid) $prefs(remotePort)   \
-	  -mimetype $mime -timeout $prefs(timeoutMillis)             \
-	  -optlist $optList -filetail $dstFile                       \
-	  -progress ::PutFileIface::PutProgress                      \
-	  -command [list ::PutFileIface::PutCommand $wtop]
-    } tok]} {
-	tk_messageBox -title [::msgcat::mc {File Transfer Error}]  \
-	  -type ok -message $tok
-    } else {
-	::PutFileIface::RegisterPutSession $tok $wtop
-    }
+    ::PutFileIface::PutFile $wtop $fileName $jidToIP($jid) $optList
 }
 
 # Jabber::HandlePutRequest --
@@ -2278,8 +2264,8 @@ proc ::Jabber::GetPrivateDataCallback {jid jlibName what theQuery} {
 #
 #       Sets or replaces a user profile. Format:
 #  jserver(profile,selected)  profile picked in user info
-#  jserver(profile):          {$profile1 {$server1 $username $password $resource} \
-#                              $profile2 {$server2 $username2 $password2 $resource2} ... }
+#  jserver(profile):          {profile1 {server1 username1 password1 resource1} \
+#                              profile2 {server2 username2 password2 resource2} ... }
 #       
 # Arguments:
 #       profile     if empty, make a new unique profile, else, create this,
@@ -2298,18 +2284,18 @@ proc ::Jabber::SetUserProfile {profile server username password {res {coccinella
 
     # 
     array set jserverArr $jserver(profile)
-    set jserverList [::Jabber::GetAllProfileNames]
+    set profileList [::Jabber::GetAllProfileNames]
     
     # Create a new unique profile name.
     if {[string length $profile] == 0} {
 	set profile $server
 
 	# Make sure that 'profile' is unique.
-	if {[lsearch -exact $jserverList $profile] >= 0} {
+	if {[lsearch -exact $profileList $profile] >= 0} {
 	    set i 2
 	    set tmpprof $profile
 	    set profile ${tmpprof}-${i}
-	    while {[lsearch -exact $jserverList $profile] >= 0} {
+	    while {[lsearch -exact $profileList $profile] >= 0} {
 		incr i
 		set profile ${tmpprof}-${i}
 	    }
@@ -2321,18 +2307,79 @@ proc ::Jabber::SetUserProfile {profile server username password {res {coccinella
     return ""
 }
 
+
+proc ::Jabber::RemoveUserProfile {profile} {
+    variable jserver
+    
+    ::Jabber::Debug 2 "::Jabber::RemoveUserProfile profile=$profile"
+ 
+    set ind [lsearch -exact $jserver(profile) $profile]
+    if {$ind >= 0} {
+	if {[string equal $jserver(profile,selected) $profile]} {
+	    set jserver(profile,selected) [lindex $jserver(profile) 0]
+	}
+	set jserver(profile) [lreplace $jserver(profile) $ind [incr ind]]
+    }
+    return ""
+}
+
+# Jabber::FindProfileFromJid --
+# 
+#       Returns first matching 'profile' for jid.
+#       It makes only sence for jid2's.
+
+proc ::Jabber::FindProfileFromJid {jid} {
+    variable jserver
+    
+    set profile ""
+    
+    # If jid2 the resource == "". Find any match.
+    if {[regexp {(^.+)@([^/]+)(/(.*))?} $jid match name host junk resource]} {    
+	foreach {prof spec} $jserver(profile) {
+	    foreach {serv user pass res} $spec break
+	    if {($serv == $host) && ($user == $name)} {
+		if {$resource != ""} {
+		    if {$resource == $res} {
+			set profile $prof
+			break
+		    }
+		} else {
+		    set profile $prof
+		    break
+		}
+	    }
+	}
+    }
+    return $profile
+}
+
 # Jabber::GetAllProfileNames --
 # 
-#       Utlity function to get a list of the names of all profiles.
+#       Utlity function to get a list of the names of all profiles. Sorted!
 
 proc ::Jabber::GetAllProfileNames { } {
     variable jserver
 
-    set jserverList {}
+    set profiles {}
     foreach {name spec} $jserver(profile) {
-	lappend jserverList $name
+	lappend profiles $name
     }    
-    return [lsort -dictionary $jserverList]
+    return [lsort -dictionary $profiles]
+}
+
+# Jabber::SortProfileList --
+# 
+#       Just sorts the jserver(profile) list using names only.
+
+proc ::Jabber::SortProfileList { } {
+    variable jserver
+
+    set tmp {}
+    array set jserverArr $jserver(profile)
+    foreach name [::Jabber::GetAllProfileNames] {
+	lappend tmp $name $jserverArr($name)
+    }
+    set jserver(profile) $tmp
 }
     
 proc ::Jabber::GetAllWinGeom { } {
@@ -2868,7 +2915,7 @@ proc ::Jabber::WB::NewWhiteboard {jid args} {
 	set sendLive 0
     }
     
-    set wtop [eval {::UI::NewMain} $wbOpts]
+    set wtop [eval {::UI::NewWhiteboard} $wbOpts]
     set jstate($wtop,doSend) $sendLive
     
     return $wtop
@@ -3151,10 +3198,14 @@ proc ::Jabber::UI::Build {w} {
     pack [::Jabber::Roster::Build $ro.ro] -fill both -expand 1
 
     # Build only Browser and/or Agents page when needed.
+    set minWidth [expr $shortBtWidth > 200 ? $shortBtWidth : 200]
     if {[info exists prefs(winGeom,$w)]} {
 	wm geometry $w $prefs(winGeom,$w)
+    } else {
+	
+	# Set to min size.
+	wm geometry $w ${minWidth}x360
     }
-    set minWidth [expr $shortBtWidth > 200 ? $shortBtWidth : 200]
     wm minsize $w $minWidth 360
     wm maxsize $w 420 2000
     return $w
@@ -3383,6 +3434,7 @@ proc ::Jabber::UI::Popup {what w v x y} {
     global  wDlgs this
     
     upvar ::Jabber::jstate jstate
+    upvar ::Jabber::popMenuDefs popMenuDefs
     
     ::Jabber::Debug 2 "::Jabber::UI::Popup what=$what, w=$w, v='$v', x=$x, y=$y"
     
@@ -3785,7 +3837,6 @@ proc ::Jabber::Register::Register {w args} {
     variable server
     variable username
     variable password
-    variable topw $w
     
     if {[winfo exists $w]} {
 	return
@@ -3820,17 +3871,17 @@ proc ::Jabber::Register::Register {w args} {
     label $frmid.lserv -text "[::msgcat::mc {Jabber server}]:"  \
       -font $sysFont(sb) -anchor e
     entry $frmid.eserv -width 26    \
-      -textvariable "[namespace current]::server" -validate key  \
+      -textvariable [namespace current]::server -validate key  \
       -validatecommand {::Jabber::ValidateJIDChars %S}
     label $frmid.luser -text "[::msgcat::mc Username]:" -font $sysFont(sb)  \
       -anchor e
     entry $frmid.euser -width 26   \
-      -textvariable "[namespace current]::username" -validate key  \
+      -textvariable [namespace current]::username -validate key  \
       -validatecommand {::Jabber::ValidateJIDChars %S}
     label $frmid.lpass -text "[::msgcat::mc Password]:" -font $sysFont(sb)  \
       -anchor e
     entry $frmid.epass -width 26   \
-      -textvariable "[namespace current]::password" -validate key  \
+      -textvariable [namespace current]::password -validate key  \
       -validatecommand {::Jabber::ValidatePasswdChars %S}
     grid $frmid.lserv -column 0 -row 0 -sticky e
     grid $frmid.eserv -column 1 -row 0 -sticky w
@@ -3843,7 +3894,7 @@ proc ::Jabber::Register::Register {w args} {
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
     pack [button $frbot.btconn -text [::msgcat::mc New] -width 8 -default active \
-      -command [list [namespace current]::Doit]]  \
+      -command [list [namespace current]::Doit $w]]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8   \
       -command [list [namespace current]::Cancel $w]]  \
@@ -3882,7 +3933,7 @@ proc ::Jabber::Register::Cancel {w} {
 # Results:
 #       .
 
-proc ::Jabber::Register::Doit { } {
+proc ::Jabber::Register::Doit {w} {
     global  errorCode prefs
 
     variable finished
@@ -3921,7 +3972,8 @@ proc ::Jabber::Register::Doit { } {
     # Set callback procedure for the async socket open.
     set jstate(servPort) $jprefs(port)
     set cmd [namespace current]::SocketIsOpen
-    ::Network::OpenConnection $server $jprefs(port) $cmd -timeout $prefs(timeoutSecs)
+    ::Network::OpenConnection $server $jprefs(port) $cmd  \
+      -timeout $prefs(timeoutSecs)
     
     # Not sure about this...
     if {0} {
@@ -3933,6 +3985,7 @@ proc ::Jabber::Register::Doit { } {
 	::Network::OpenConnection $server $port $cmd -timeout $prefs(timeoutSecs) \
 	  -tls $ssl
     }
+    destroy $w
 }
 
 # Jabber::Register::SocketIsOpen --
@@ -3993,7 +4046,6 @@ proc ::Jabber::Register::SocketIsOpen {sock ip port status {msg {}}} {
 #       .
 
 proc ::Jabber::Register::ResponseProc {jlibName type theQuery} {    
-    variable topw
     variable finished
     variable server
     variable username
@@ -4030,7 +4082,6 @@ proc ::Jabber::Register::ResponseProc {jlibName type theQuery} {
     # and need to be sure to exit from it before resetting!
     after idle $jstate(jlib) disconnect
     set finished 1
-    destroy $topw
 }
 
 # Jabber::Register::Remove --
@@ -4048,6 +4099,8 @@ proc ::Jabber::Register::Remove {{jid {}}} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
 
+    ::Jabber::Debug 2 "::Jabber::Register::Remove jid=$jid"
+    
     set ans "yes"
     if {$jid == ""} {
 	set jid $jserver(this)
@@ -4060,6 +4113,12 @@ proc ::Jabber::Register::Remove {{jid {}}} {
 	# Do we need to obtain a key for this???
 	$jstate(jlib) register_remove $jid  \
 	  [list ::Jabber::Register::RemoveCallback $jid]
+	
+	# Remove also from our profile.
+	set profile [::Jabber::FindProfileFromJid $jstate(mejid)]
+	if {$profile != ""} {
+	    ::Jabber::RemoveUserProfile $profile
+	}
     }
 }
 
@@ -4225,7 +4284,6 @@ proc ::Jabber::Passwd::ResponseProc {jlibName type theQuery} {
 	set ind [lsearch $jserver(profile) $jserver(profile,selected)]
 	if {$ind >= 0} {
 	    set userSpec [lindex $jserver(profile) [expr $ind + 1]]
-	    #set userSpec [lreplace $userSpec 2 2 $password]
 	    lset userSpec 2 $password
 	   
 	    # Save to our jserver variable. Create a new profile.
@@ -4696,8 +4754,8 @@ proc ::Jabber::Login::Login {w} {
     # Option menu for selecting user profile.
     label $frmid.lpop -text "[::msgcat::mc Profile]:" -font $sysFont(sb) -anchor e
     set wpopup $frmid.popup
-    set jserverList [::Jabber::GetAllProfileNames]
-    eval {tk_optionMenu $wpopup [namespace current]::menuVar} $jserverList
+    set profileList [::Jabber::GetAllProfileNames]
+    eval {tk_optionMenu $wpopup [namespace current]::menuVar} $profileList
     $wpopup configure -highlightthickness 0  \
       -background $prefs(bgColGeneral) -foreground black
     grid $frmid.lpop -column 0 -row 0 -sticky e
@@ -5064,7 +5122,7 @@ proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
 	::Jabber::UI::SetStatusMessage ""
 	return
     }
-    if {[IsIPNumber $server]} {
+    if {[::Utils::IsIPNumber $server]} {
 	set ipNum $server
     } else {
 	set ipNum $ipName2Num($server)

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasDraw.tcl,v 1.12 2003-10-05 13:36:20 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.13 2003-10-12 13:12:55 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 #  
@@ -1131,14 +1131,14 @@ proc ::CanvasDraw::InitArc {w x y {shift 0}} {
 	# Hack.
 	if {[string match "mac*" $this(platform)]} {
 	    $w create oval [expr $x - 2] [expr $y - 2] [expr $x + 3] [expr $y + 3]  \
-		    -outline gray50 -fill {} -tag tcent
-	    $w create line [expr $x - 5] $y [expr $x + 5] $y -fill gray50 -tag tcent
-	    $w create line $x [expr $y - 5] $x [expr $y + 5] -fill gray50 -tag tcent 
+	      -outline gray50 -fill {} -tags tcent
+	    $w create line [expr $x - 5] $y [expr $x + 5] $y -fill gray50 -tags tcent
+	    $w create line $x [expr $y - 5] $x [expr $y + 5] -fill gray50 -tags tcent 
 	} else {
 	    $w create oval [expr $x - 3] [expr $y - 3] [expr $x + 3] [expr $y + 3]  \
-		    -outline gray50 -fill {} -tag tcent
-	    $w create line [expr $x - 5] $y [expr $x + 6] $y -fill gray50 -tag tcent
-	    $w create line $x [expr $y - 5] $x [expr $y + 6] -fill gray50 -tag tcent 
+	      -outline gray50 -fill {} -tags tcent
+	    $w create line [expr $x - 5] $y [expr $x + 6] $y -fill gray50 -tags tcent
+	    $w create line $x [expr $y - 5] $x [expr $y + 6] -fill gray50 -tags tcent 
 	}
 	focus $w
 	bind $w <KeyPress-space> {
@@ -1473,13 +1473,13 @@ proc ::CanvasDraw::FinalizePoly {w x y} {
     if {$isClosed} {
 	
 	# This is a (closed) polygon.
-	set cmd "create polygon $coords -tags {std poly $utag}  \
+	set cmd "create polygon $coords -tags {std polygon $utag}  \
 	  -outline $state(fgCol) $theFill -width $state(penThick)  \
 	  -smooth $state(smooth) $extras"
     } else {
 	
 	# This is an open line segment.
-	set cmd "create line $coords -tags {std poly $utag}  \
+	set cmd "create line $coords -tags {std line $utag}  \
 	  -fill $state(fgCol) -width $state(penThick)  \
 	  -smooth $state(smooth) $extras"
     }
@@ -2571,7 +2571,7 @@ proc ::CanvasDraw::SpeechBubbleCmd {w bbox args} {
     array set optsArr {-outline black -fill white -smooth 1 -splinesteps 10}
     array set optsArr $args
     set utag [::CanvasUtils::NewUtag]
-    set cmd "create polygon $coords -tags {std polylines $utag} [array get optsArr]"
+    set cmd "create polygon $coords -tags {std polygon $utag} [array get optsArr]"
     return [list $utag $cmd]
 }
 

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.14 2003-10-05 13:36:20 matben Exp $
+# $Id: MailBox.tcl,v 1.15 2003-10-12 13:12:55 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -169,11 +169,14 @@ proc ::Jabber::MailBox::Build {w args} {
     
     pack [frame $w.frall.divt -bd 2 -relief sunken -height 2] -fill x -side top
     set wccp $w.frall.ccp
-    pack [::UI::NewCutCopyPaste $wccp] -padx 10 -pady 2 -side top -anchor w
-    ::UI::CutCopyPasteConfigure $wccp cut -state disabled
-    ::UI::CutCopyPasteConfigure $wccp copy -state disabled
-    ::UI::CutCopyPasteConfigure $wccp paste -state disabled
-    pack [frame $w.frall.div2 -bd 2 -relief sunken -height 2] -fill x -side top
+    if {0} {
+	# All widgets are disabled anyway...
+	pack [::UI::NewCutCopyPaste $wccp] -padx 10 -pady 2 -side top -anchor w
+	::UI::CutCopyPasteConfigure $wccp cut -state disabled
+	::UI::CutCopyPasteConfigure $wccp copy -state disabled
+	::UI::CutCopyPasteConfigure $wccp paste -state disabled
+	pack [frame $w.frall.div2 -bd 2 -relief sunken -height 2] -fill x -side top
+    }
     
     # Frame to serve as container for the pane geometry manager.
     set frmid $w.frall.frmid
@@ -218,9 +221,9 @@ proc ::Jabber::MailBox::Build {w args} {
     frame $wfrmsg
     set wtextmsg $wfrmsg.text
     set wyscmsg $wfrmsg.ysc
-    text $wtextmsg -height 4 -width 1 -font $sysFont(s) -wrap word  \
-      -borderwidth 1 -relief sunken -yscrollcommand [list $wyscmsg set]  \
-      -state normal
+    text $wtextmsg -height 4 -width 1 -font $sysFont(s) -wrap word \
+      -borderwidth 1 -relief sunken -yscrollcommand [list $wyscmsg set] \
+      -state disabled
     $wtextmsg tag configure normal -foreground black
     ::Text::ConfigureLinkTagForTextWidget $wtextmsg linktag tact
     scrollbar $wyscmsg -orient vertical -command [list $wtextmsg yview]
@@ -294,7 +297,7 @@ proc ::Jabber::MailBox::InsertRow {wtbl row i} {
     }
 
     # The date is ISO 8601 and clock scan shall work here.
-    set smartDate [SmartClockFormat [clock scan [lindex $row 2]]]
+    set smartDate [::Utils::SmartClockFormat [clock scan [lindex $row 2]]]
     lset row 2 $smartDate
     set row "{} $row"
 
@@ -662,7 +665,7 @@ proc ::Jabber::MailBox::SelectMsg { } {
 	    ::UI::SetStatusMessage ${wbtoplevel}. ""
 	    undo::reset [::UI::GetUndoToken ${wbtoplevel}.]
 	} else {
-	    ::UI::BuildMain ${wbtoplevel}. -state disabled -title $title \
+	    ::UI::BuildWhiteboard ${wbtoplevel}. -state disabled -title $title \
 	      -jid $jid2 -type normal
 	}
 	
@@ -758,14 +761,11 @@ proc ::Jabber::MailBox::DisplayMsg {id} {
     upvar ::Jabber::jprefs jprefs
     
     set wtextmsg $locals(wtextmsg)    
-    #$wtextmsg configure -state normal
-    $wtextmsg delete 1.0 end
     set body [lindex $mailbox($id) 5]
-    set textCmds [::Text::ParseAllForTextWidget $body normal linktag]
-    foreach cmd $textCmds {
-	eval $wtextmsg $cmd
-    }
-    #$wtextmsg configure -state disabled
+    $wtextmsg configure -state normal
+    $wtextmsg delete 1.0 end
+    ::Text::ParseAndInsert $wtextmsg $body normal linktag
+    $wtextmsg configure -state disabled
     
     if {$jprefs(speakMsg)} {
 	::UserActions::Speak $body $prefs(voiceOther)

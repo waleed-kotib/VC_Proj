@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.10 2003-09-28 06:29:08 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.11 2003-10-12 13:12:55 matben Exp $
 
 # SetWhiteboardFactoryState --
 # 
@@ -266,6 +266,8 @@ if {[info exists env(PRINTER)]} {
     set prefs(unixPrintCmd) "lpr"
 }
 
+set prefs(clearCacheOnQuit) 0
+
 # Postscript options. A4 paper minus some margin (297m 210m).
 set prefs(postscriptOpts) {-pageheight 280m -pagewidth 190m -pageanchor c}
 
@@ -407,7 +409,7 @@ switch -- $this(platform) {
 	  [file nativename [file join $prefs(prefsDir) canvases]]
 	set prefs(historyPath)  \
 	  [file nativename [file join $prefs(prefsDir) history]]
-	set prefs(webBrowser) netscape
+	set prefs(webBrowser) mozilla
     }
     macintosh {
 	set osprefs(mod) Command

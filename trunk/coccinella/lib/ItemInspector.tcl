@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ItemInspector.tcl,v 1.9 2003-10-05 13:36:20 matben Exp $
+# $Id: ItemInspector.tcl,v 1.10 2003-10-12 13:12:55 matben Exp $
 
 namespace eval ::ItemInspector::  {
     
@@ -27,12 +27,14 @@ namespace eval ::ItemInspector::  {
     set notWantedOpts {
 	activedash
 	activefill
+	activeimage
 	activeoutline
 	activeoutlinestipple
 	activestipple
 	activewidth
 	disableddash
 	disabledfill
+	disabledimage
 	disabledoutline
 	disabledoutlinestipple
 	disabledstipple
@@ -234,6 +236,11 @@ proc ::ItemInspector::Build {wtop itemId args} {
 	  [list {-fontweight} {} {} {} [lindex $fontOpts 2]]]
     }
     
+    # Get any cached info for this id. Flat list!
+    foreach {key value} [::CanvasUtils::ItemCGet $wtop $itemId] {
+	lappend opts [list $key {} {} {} $value]
+    }
+    
     # Loop over all options.
     foreach opt $opts {
 	incr iLine
@@ -421,7 +428,8 @@ proc ::ItemInspector::CanvasConfigureItem {w wCan itemId listOfAllOptions} {
 	# Intercept options for nontext output.
 	switch -- $op {
 	    type         -
-	    coords       {
+	    coords       -
+	    -file        {
 		
 		# Do nothing
 		continue
@@ -699,6 +707,7 @@ proc ::ItemInspector::Broken {wtop id args} {
 	#
     }
     wm title $w {Item Inspector}
+    set wcan [::UI::GetCanvasFromWtop $wtop]
     
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
