@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.65 2004-10-22 15:05:34 matben Exp $
+# $Id: Preferences.tcl,v 1.66 2004-11-02 15:34:55 matben Exp $
  
 package require notebook
 package require tree
@@ -120,7 +120,7 @@ proc ::Preferences::Build {args} {
     pack [label $frtree.la -text [mc {Settings Panels}]  \
       -font $fontSB -relief raised -width 24 -bd 1 -bg #bdbdbd] -side top -fill x
     set wtree $frtree.t
-    ::tree::tree $wtree -width 100 -height 300 \
+    ::tree::tree $wtree -width 100 -height 300 -indention 0 \
       -yscrollcommand [list ::UI::ScrollSet $frtree.sby \
       [list pack $frtree.sby -side right -fill y]]  \
       -selectcommand ::Preferences::SelectCmd   \
@@ -787,6 +787,7 @@ proc ::Preferences::SavePushBt { } {
     
     set finished 1
     destroy $wtoplevel
+    ::hooks::run prefsDestroyHook
 }
 
 proc ::Preferences::CloseHook {wclose} {
@@ -861,6 +862,7 @@ proc ::Preferences::CancelPushBt { } {
     if {$finished == 2} {
 	::Preferences::CleanUp
 	destroy $wtoplevel
+	::hooks::run prefsDestroyHook
     }
     return $ans
 }

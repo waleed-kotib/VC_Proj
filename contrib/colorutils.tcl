@@ -6,7 +6,7 @@
 #  Copyright (c) 2004
 #  This source file is distributed under the BSD license.
 #  
-#  $Id: colorutils.tcl,v 1.3 2004-10-12 13:48:56 matben Exp $
+#  $Id: colorutils.tcl,v 1.4 2004-11-02 15:34:51 matben Exp $
 
 package provide colorutils 1.0
 
@@ -20,15 +20,15 @@ proc ::colorutils::getdarker {color} {
     variable maxintensity
     
     foreach {r g b} [winfo rgb . $color] break
-    if {[expr $r*0.5*$r + $g*1.0*$g + $b*0.28*$b] < \
-      [expr $maxintensity*0.05*$maxintensity]} {
-	set darkred   [expr (($maxintensity + 3*$r)/4) >> 8]
-	set darkgreen [expr (($maxintensity + 3*$g)/4 >> 8]
-	set darkblue  [expr (($maxintensity + 3*$b)/4 >> 8]
+    if {[expr {$r*0.5*$r + $g*1.0*$g + $b*0.28*$b}] < \
+      [expr {$maxintensity*0.05*$maxintensity}]} {
+	set darkred   [expr {(($maxintensity + 3*$r)/4) >> 8}]
+	set darkgreen [expr {(($maxintensity + 3*$g)/4) >> 8}]
+	set darkblue  [expr {(($maxintensity + 3*$b)/4) >> 8}]
     } else {
-	set darkred   [expr ((60 * $r)/100) >> 8]
-	set darkgreen [expr ((60 * $g)/100) >> 8]
-	set darkblue  [expr ((60 * $b)/100) >> 8]
+	set darkred   [expr {((60 * $r)/100) >> 8}]
+	set darkgreen [expr {((60 * $g)/100) >> 8}]
+	set darkblue  [expr {((60 * $b)/100) >> 8}]
     }
     return [format "#%02x%02x%02x" $darkred $darkgreen $darkblue]
 }
@@ -37,32 +37,32 @@ proc ::colorutils::getlighter {color} {
     variable maxintensity
     
     foreach {r g b} [winfo rgb . $color] break
-    if {$g > [expr $maxintensity*0.95]} {
-	set lightred   [expr ((90 * $r)/100) >> 8]
-	set lightgreen [expr ((90 * $g)/100) >> 8]
-	set lightblue  [expr ((90 * $b)/100) >> 8]
+    if {$g > [expr {$maxintensity*0.95}]} {
+	set lightred   [expr {((90 * $r)/100) >> 8}]
+	set lightgreen [expr {((90 * $g)/100) >> 8}]
+	set lightblue  [expr {((90 * $b)/100) >> 8}]
     } else {
-	set tmp1 [expr (14 * $r)/10]
+	set tmp1 [expr {(14 * $r)/10}]
 	if {$tmp1 > $maxintensity} {
 	    set tmp1 $maxintensity
 	}
-	set tmp2 [expr ($maxintensity + $r)/2]
-	set lightred [expr ($tmp1 > $tmp2) ? $tmp1 : $tmp2]
-	set tmp1 [expr (14 * $g)/10]
+	set tmp2 [expr {($maxintensity + $r)/2}]
+	set lightred [expr {($tmp1 > $tmp2) ? $tmp1 : $tmp2}]
+	set tmp1 [expr {(14 * $g)/10}]
 	if {$tmp1 > $maxintensity} {
 	    set tmp1 $maxintensity
 	}
-	set tmp2 [expr ($maxintensity + $g)/2]
-	set lightgreen [expr ($tmp1 > $tmp2) ? $tmp1 : $tmp2]
-	set tmp1 [expr (14 * $b)/10]
+	set tmp2 [expr {($maxintensity + $g)/2}]
+	set lightgreen [expr {($tmp1 > $tmp2) ? $tmp1 : $tmp2}]
+	set tmp1 [expr {(14 * $b)/10}]
 	if {$tmp1 > $maxintensity} {
 	    set tmp1 $maxintensity
 	}
-	set tmp2 [expr ($maxintensity + $b)/2]
-	set lightblue [expr ($tmp1 > $tmp2) ? $tmp1 : $tmp2]
-	set lightred   [expr $lightred >> 8]
-	set lightgreen [expr $lightgreen >> 8]
-	set lightblue  [expr $lightblue >> 8]
+	set tmp2 [expr {($maxintensity + $b)/2}]
+	set lightblue [expr {($tmp1 > $tmp2) ? $tmp1 : $tmp2}]
+	set lightred   [expr {$lightred >> 8}]
+	set lightgreen [expr {$lightgreen >> 8}]
+	set lightblue  [expr {$lightblue >> 8}]
     }
     
     return [format "#%02x%02x%02x" $lightred $lightgreen $lightblue]

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.87 2004-10-31 14:32:58 matben Exp $
+# $Id: Chat.tcl,v 1.88 2004-11-02 15:34:51 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -625,26 +625,6 @@ proc ::Jabber::Chat::Build {threadID args} {
     ::hooks::run buildChatButtonTrayHook $wtray $dlgtoken
     
     set shortBtWidth [$wtray minwidth]
-
-    # Button part.
-    if {0} {
-	pack [frame $w.frall.pady -height 8] -side bottom
-	set frbot [frame $w.frall.frbot -borderwidth 0]
-	pack [button $frbot.btok -text [mc Send] -default active \
-	  -command [list [namespace current]::Send $dlgtoken]]  \
-	  -side right -padx 5
-	pack [button $frbot.btcancel -text [mc Close]  \
-	  -command [list [namespace current]::Close $dlgtoken]]  \
-	  -side right -padx 5
-	set cmd [list [namespace current]::SmileyCmd $dlgtoken]
-	pack [::Emoticons::MenuButton $frbot.smile -command $cmd]  \
-	  -side right -padx 5
-	pack [checkbutton $frbot.active -text " [mc {Active <Return>}]" \
-	  -command [list [namespace current]::ActiveCmd $dlgtoken] \
-	  -variable $dlgtoken\(active)]  \
-	  -side left -padx 5
-	pack $frbot -side bottom -fill x -padx 10
-    }
     
     pack [frame $w.frall.div2 -bd 2 -relief sunken -height 2] -fill x -side top
 
@@ -772,9 +752,8 @@ proc ::Jabber::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set wtextsnd    $wtxtsnd.text
     set wyscsnd     $wtxtsnd.ysc
     set wfrbot      $wthread.f
-    set wfrnot      $wfrbot.fn
-    set wnotifier   $wfrnot.lnot
-    set wclose      $wfrbot.close
+    set wnotifier   $wfrbot.lnot
+    set wsmile      $wfrbot.smile
     set wsubject    $wthread.frtop.fsub.e
     set wpresimage  $wthread.frtop.fsub.i
     
@@ -795,47 +774,20 @@ proc ::Jabber::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
 
     # Notifier label.
     set chatstate(wnotifier) $wnotifier
+        
+    # The bottom frame.
     frame $wfrbot
     pack  $wfrbot -side bottom -anchor w -fill x -padx 16 -pady 0
-    frame $wfrbot.fn
-    pack  $wfrbot.fn -side top -anchor w -fill x
-    
-    if {0} {
-	pack [frame $wfrbot.pad -width 1 -height  \
-	  [image height $dlgstate(iconNotifier)]] -side left -pady 0
-	pack [label $wnotifier -textvariable $chattoken\(notifier)  \
-	  -pady 0 -bd 0 -compound left] -side left -pady 0
-	if {$jprefs(chat,tabbedui)} {
-	    pack [button $wclose -text [mc {Close Thread}] \
-	      -command [list [namespace current]::CloseThread $chattoken] \
-	      -font $fontS] \
-	      -pady 2 -padx 0 -side right
-	}
-	if {[llength $dlgstate(chattokens)] == 1} {
-	    pack forget $wclose
-	}
-    } else {
-	checkbutton $wfrbot.active -text " [mc {Active <Return>}]" \
-	  -command [list [namespace current]::ActiveCmd $chattoken] \
-	  -variable $chattoken\(active)
-	pack $wfrbot.active -side left
-	set cmd [list [namespace current]::SmileyCmd $chattoken]
-	::Emoticons::MenuButton $wfrbot.smile -command $cmd
-	pack $wfrbot.smile -side left -padx 8	
-	if {$jprefs(chat,tabbedui)} {
-	    button $wclose -text [mc {Close Thread}] -font $fontS \
-	      -command [list [namespace current]::CloseThread $chattoken]	      
-	    pack $wclose -pady 2 -padx 0 -side right
-	    if {[llength $dlgstate(chattokens)] == 1} {
-		pack forget $wclose
-	    }
-	}
-	frame $wfrnot.pad -width 1 -height [image height $dlgstate(iconNotifier)]
-	pack  $wfrnot.pad -side left -pady 0
-	label $wnotifier -textvariable $chattoken\(notifier) -pady 0 -bd 0 \
-	  -compound left
-	pack $wnotifier -side left -pady 0
-    }
+    checkbutton $wfrbot.active -text " [mc {Active <Return>}]" \
+      -command [list [namespace current]::ActiveCmd $chattoken] \
+      -variable $chattoken\(active)
+    pack $wfrbot.active -side left
+    set cmd [list [namespace current]::SmileyCmd $chattoken]
+    ::Emoticons::MenuButton $wfrbot.smile -command $cmd
+    pack $wfrbot.smile -side left -padx 8 -pady 2	
+    label $wnotifier -textvariable $chattoken\(notifier) -pady 0 -bd 0 \
+      -compound left
+    pack $wnotifier -side left -pady 0    
     
     # Text chat.
     pack [frame $wfrmid -height 250 -width 300 -relief sunken -bd 1 -class Pane] \
@@ -908,8 +860,9 @@ proc ::Jabber::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set chatstate(wtext)    $wtext
     set chatstate(wtxt)     $wtxt
     set chatstate(wtextsnd) $wtextsnd
-    set chatstate(wclose)   $wclose
+    #set chatstate(wclose)   $wclose
     set chatstate(wsubject) $wsubject
+    set chatstate(wsmile)   $wsmile
     set chatstate(wpresimage) $wpresimage
  
     return $chattoken
@@ -951,16 +904,6 @@ proc ::Jabber::Chat::NewPage {dlgtoken threadID args} {
 
     # Make fresh page with chat widget.
     set chattoken [eval {MakeNewPage $dlgtoken $threadID} $args]
-
-    # Make sure all "Close Thread" buttons enabled.
-    if {$jprefs(chat,tabbedui)} {
-	foreach ctoken $dlgstate(chattokens) {
-	    variable $ctoken
-	    upvar 0 $ctoken cstate
-
-	    pack $cstate(wclose) -pady 0 -padx 2 -side right
-	}
-    }
     return $chattoken
 }
 
@@ -1010,7 +953,8 @@ proc ::Jabber::Chat::MoveThreadToPage {dlgtoken chattoken} {
     set name    $chatstate(pagename)
     
     pack forget $wthread
-    ::mactabnotebook::mactabnotebook $wnb  \
+    ::mactabnotebook::mactabnotebook $wnb -closebutton 1  \
+      -closecommand [list [namespace current]::ClosePageCmd $dlgtoken]  \
       -selectcommand [list [namespace current]::SelectPageCmd $dlgtoken]
     pack $wnb -in $wcont -fill both -expand true -side right
     set wpage [$wnb newpage $name]	
@@ -1075,6 +1019,21 @@ proc ::Jabber::Chat::MoveThreadFromPage {dlgtoken chattoken} {
     pack $wthread -in $wcont -fill both -expand true
 }
 
+proc ::Jabber::Chat::ClosePageCmd {dlgtoken w name} {
+    variable $dlgtoken
+    upvar 0 $dlgtoken dlgstate
+    
+    # We could issue some kind of info/warning here?
+    
+    set chattoken [GetTokenFrom chat pagename $name]
+    if {$chattoken != ""} {	
+	CloseThread $chattoken
+    }
+    
+    # We handle the page destruction here already since need to clean up after.
+    return -code break
+}
+
 # Jabber::Chat::SelectPageCmd --
 # 
 #       Callback command from tab notebook widget when selecting new tab.
@@ -1134,6 +1093,7 @@ proc ::Jabber::Chat::SetState {chattoken state} {
     #$dlgstate(wbtsend)   configure -state $state
     $chatstate(wtextsnd) configure -state $state
     $chatstate(wsubject) configure -state $state
+    $chatstate(wsmile)   configure -state $state
     set chatstate(state) $state
 }
 

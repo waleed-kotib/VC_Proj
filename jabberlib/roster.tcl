@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.23 2004-10-29 13:17:16 matben Exp $
+# $Id: roster.tcl,v 1.24 2004-11-02 15:34:51 matben Exp $
 # 
 # Note that every jid in the rostArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -510,7 +510,7 @@ proc roster::setpresence {rostName jid type args} {
 proc roster::setpresence2 {rostName jid type args} { 
 
     variable rostGlobals
-    upvar ${rostName}::rostArr2 rostArr2
+    upvar ${rostName}::rostArr rostArr
     upvar ${rostName}::presArr2 presArr2
     upvar ${rostName}::oldpresArr2 oldpresArr2
     upvar ${rostName}::options options
@@ -519,10 +519,12 @@ proc roster::setpresence2 {rostName jid type args} {
       type='$type', args='$args'"
     
     set mjid [jlib::jidmap $jid]
-    set argList {}
     
+    set argList $args
+    lappend argList -type $type
+
     if {[string equal $type "unsubscribed"]} {
-	lappend argList -type $type
+	# empty
     } else {
 	
 	# Keep cache of any old state.
@@ -532,13 +534,39 @@ proc roster::setpresence2 {rostName jid type args} {
 	# Clear out the old presence state since elements may still be lurking.
 	array unset presArr2 "${mjid},*"
     
-	
-	
-	
-    }    
+	set presArr2($mjid,type) $type
+		
+	foreach {name value} $args {
+	    set par [string trimleft $name "-"]
+	    
+	    switch -- $par {
+		x {
+		    
+		    # This is a list of <x> lists.
+		    foreach xelem $value {
+			set ns [wrapper::getattribute $xelem xmlns]
+			regexp {http://jabber.org/protocol/(.*)$} $ns \
+			  match ns
+			set presArr2($mjid,x,$ns) $xelem
+		    }
+		}
+		extras {
+
+		    # This can be anything properly namespaced.
+		    foreach xelem $value {
+			set ns [wrapper::getattribute $xelem xmlns]
+			set presArr2($mjid,extras,$ns) $xelem
+		    }
+		}
+		default {
+		    set presArr2($mjid,$par) $value
+		}
+	    }
+	}
+    }
     
     # Be sure to evaluate the registered command procedure.
-    if {[string length $options(cmd)]} {
+    if {$options(cmd) != ""} {
 	uplevel #0 $options(cmd) [list $rostName presence $jid] $argList
     }
     return {}
@@ -674,8 +702,7 @@ proc roster::getpresence {rostName jid args} {
     }
     
     # It may happen that there is no roster item for this jid (groupchat).
-    if {![info exists presArr($jid,res)] ||   \
-      ([string length $presArr($jid,res)] == 0)} {
+    if {![info exists presArr($jid,res)] || ($presArr($jid,res) == "")} {
 	if {[info exists argsArr(-type)] &&  \
 	  [string equal $argsArr(-type) "available"]} {
 	    return {}
@@ -733,6 +760,48 @@ proc roster::getpresence {rostName jid args} {
 		}
 		lappend result $thisRes
 	    }
+	}
+    }
+    return $result
+}
+
+proc roster::getpresence2 {rostName jid args} {    
+
+    variable rostGlobals
+    upvar ${rostName}::rostArr rostArr
+    upvar ${rostName}::presArr2 presArr2
+    upvar ${rostName}::options options
+    
+    Debug 2 "roster::getpresence2 rostName=$rostName, jid=$jid, args='$args'"
+    
+    array set argsArr {
+	-type *
+    }
+    array set argsArr $args
+
+    set mjid [jlib::jidmap $jid]
+    jlib::splitjid $mjid jid2 resource
+    set result {}
+    
+    # If 2-tier jid match any resource.
+    # If 3-tier jid return only exact match.
+    if {$resource == ""} {
+	
+	# 2-tier jid.
+	
+	[array names presArr2 ]
+	
+	
+    } else {
+	
+	# 3-tier jid.
+	if {[info exists presArr2($mjid,type)]} {
+	    if {[string match $argsArr(-type) $presArr2($mjid,type)]} {
+	    
+	    } else {
+	    }
+	} else {
+	    set result {-type unavailable}
 	}
     }
     return $result
@@ -932,6 +1001,37 @@ proc roster::gethighestresource {rostName jid} {
     return $maxres
 }
 
+proc roster::gethighestresource2 {rostName jid} {
+
+    upvar ${rostName}::presArr presArr
+   
+    Debug 2 "roster::gethighestresource rostName=$rostName, jid='$jid'"
+    
+    set maxres ""
+    if {[info exists presArr($jid,res)]} {
+	
+	# Find the resource corresponding to the highest priority (D=0).
+	set maxpri 0
+	set maxres [lindex $presArr($jid,res) 0]
+	foreach res $presArr($jid,res) {
+
+	    # Be sure to handle empty resources as well: '1234@icq.host'
+	    if {$res== ""} {
+		set jid3 $jid
+	    } else {
+		set jid3 $jid/$res
+	    }
+	    if {[info exists presArr($jid3,priority)]} {
+		if {$presArr($jid3,priority) > $maxpri} {
+		    set maxres $res
+		    set maxpri $presArr($jid3,priority)
+		}
+	    }
+	}
+    }
+    return $maxres
+}
+
 # roster::isavailable --
 #
 #       Returns boolean 0/1. Returns 1 only if presence is equal to available.
@@ -950,6 +1050,39 @@ proc roster::isavailable {rostName jid} {
    
     Debug 2 "roster::isavailable rostName=$rostName, jid='$jid'"
         
+    set jid [jlib::jidmap $jid]
+
+    # If any resource in jid, we get it here.
+    jlib::splitjid $jid jid2 resource
+
+    if {[string length $resource] > 0} {
+	if {[info exists presArr($jid2/$resource,type)]} {
+	    if {[string equal $presArr($jid2/$resource,type) "available"]} {
+		return 1
+	    } else {
+		return 0
+	    }
+	} else {
+	    return 0
+	}
+    } else {
+	
+	# Be sure to allow for 'user@domain' with empty resource.
+	foreach key [array names presArr "${jid2}*,type"] {
+	    if {[string equal $presArr($key) "available"]} {
+		return 1
+	    }
+	}
+	return 0
+    }
+}
+
+proc roster::isavailable2 {rostName jid} {
+
+    upvar ${rostName}::presArr2 presArr2
+   
+    Debug 2 "roster::isavailable rostName=$rostName, jid='$jid'"
+	
     set jid [jlib::jidmap $jid]
 
     # If any resource in jid, we get it here.
