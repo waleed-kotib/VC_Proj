@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.5 2004-04-16 13:59:29 matben Exp $
+# $Id: disco.tcl,v 1.6 2004-04-17 14:02:02 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -20,8 +20,9 @@
 #   INSTANCE COMMANDS
 #      discoName send_get discotype jid callbackProc ?-opt value ...?
 #      discoName isdiscoed discotype jid ?node?
-#      discoName get jid key ?node?
+#      discoName get discotype jid key ?node?
 #      discoName name jid ?node?
+#      discoName types jid ?node?
 #      discoName reset ?jid?
 #      
 #      where discotype = (items|info)
@@ -233,12 +234,13 @@ proc disco::parse_get {disconame discotype from cmd jlibname type subiq args} {
 			# 'type' attributes. (category/type)
 			# Each identity element SHOULD have the same name value.
 			set category $attr(category)
-			set type     $attr(type)
+			set ctype    $attr(type)
 			set name     ""
 			if {[info exists attr(name)]} {
 			    set name $attr(name)
-			}
-			set info($from,$pnode,identity,$category,$type,name) $name
+			}			
+			lappend info($from,$pnode,types) $category/$ctype
+			set info($from,$pnode,name) $name
 		    }
 		    feature {
 			lappend info($from,$pnode,features) $attr(var)
@@ -267,29 +269,46 @@ proc disco::isdiscoed {disconame discotype jid {node ""}} {
     }
 }
 
-proc disco::get {disconame jid key {node ""}} {
+proc disco::get {disconame discotype jid key {node ""}} {
     
     upvar ${disconame}::items items
     upvar ${disconame}::info  info
     
-    if {[info exists items($jid,$node,$key)]} {
-	return $items($jid,$node,$key)
-    } elseif {[info exists info($jid,$node,$key)]} {
-	return $info($jid,$node,$key)
-    } else {
-	return ""
+    switch -- $discotype {
+	items {
+	    if {[info exists items($jid,$node,$key)]} {
+		return $items($jid,$node,$key)
+	    }
+	}
+	info {
+	    if {[info exists info($jid,$node,$key)]} {
+		return $info($jid,$node,$key)
+	    }
+	}
     }
+    return ""
 }
 
 proc disco::name {disconame jid {node ""}} {
     
     upvar ${disconame}::info  info
     
-    # Each identity element SHOULD have the same name value.
-    foreach {key value} [array get info "$from,$node,identity,*,name"] {
-	return $value
+    if {[info exists info($jid,$node,name)]} {
+	return $info($jid,$node,name)
+    } else {
+	return {}
     }
-    return ""
+}
+
+proc disco::types {disconame jid {node ""}} {
+    
+    upvar ${disconame}::info  info
+    
+    if {[info exists info($jid,$node,types)]} {
+	return $info($jid,$node,types)
+    } else {
+	return {}
+    }
 }
 
 proc disco::children {disconame jid {node ""}} {
@@ -302,6 +321,8 @@ proc disco::children {disconame jid {node ""}} {
 	return {}
     }
 }
+
+# How to return nodes???
 
 proc disco::parent {disconame jid {node ""}} {
     
@@ -336,7 +357,7 @@ proc disco::handle_get {disconame discotype jlibname from subiq args} {
     return $ishandled
 }
 
-proc disco::reset {disconame {jid ""}} {
+proc disco::reset {disconame {jid ""} {node ""}} {
     
     upvar ${disconame}::items items
     upvar ${disconame}::info  info
