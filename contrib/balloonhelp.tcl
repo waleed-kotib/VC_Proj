@@ -4,7 +4,7 @@
 #
 #  Code idee from Harrison & McLennan
 #  
-# $Id: balloonhelp.tcl,v 1.7 2003-12-15 08:20:53 matben Exp $
+# $Id: balloonhelp.tcl,v 1.8 2004-05-16 15:04:26 matben Exp $
 
 package provide balloonhelp 1.0
 
@@ -195,6 +195,8 @@ proc ::balloonhelp::Show {win type} {
 	::balloonhelp::Build
 	update idletasks
     }
+    set exists 0
+    
     if {$locals(active)} {
 	switch -- $type {
 	    canvas {
@@ -209,31 +211,48 @@ proc ::balloonhelp::Show {win type} {
 		    set yoff [expr int($sheight * [lindex [$win yview] 0])]
 		}
 		set itemid $locals($win,itemid)
-		set msg $locals($win,$itemid) 
-		foreach {x0 y0 x1 y1} [$win bbox $itemid] break
-		set x $locals($win,x)
-		set y [expr [winfo rooty $win] - $yoff + $y1 + 2]
+		set msg $locals($win,$itemid)
+		set bbox [$win bbox $itemid]
+		
+		# If no bounding box the item has been deleted.
+		if {[llength $bbox] == 4} {
+		    set exists 1
+		    foreach {x0 y0 x1 y1} $bbox break
+		    set x $locals($win,x)
+		    set y [expr [winfo rooty $win] - $yoff + $y1 + 2]
+		}
 	    }
 	    text {
 		set tag $locals($win,tag)
 		set msg $locals($win,$tag) 
 		set range [$win tag nextrange $tag 1.0]
-		foreach {x0 y0 w0 h0} [$win bbox [lindex $range 1]] break
-		set ymax [expr $y0+$h0]
-		set x $locals($win,x)
-		set y [expr [winfo rooty $win] + $ymax + 2]
+		set bbox [$win bbox [lindex $range 1]]
+
+		# If no bounding box the item has been deleted.
+		if {[llength $bbox] == 4} {
+		    set exists 1
+		    foreach {x0 y0 w0 h0} $bbox break
+		    set ymax [expr $y0+$h0]
+		    set x $locals($win,x)
+		    set y [expr [winfo rooty $win] + $ymax + 2]
+		}
 	    }
 	    window {
-		set msg $locals($win)
-		set x [expr [winfo rootx $win] + 10]
-		set y [expr [winfo rooty $win] + [winfo height $win]]
+		if {[winfo exists $win]} {
+		    set exists 1
+		    set msg $locals($win)
+		    set x [expr [winfo rootx $win] + 10]
+		    set y [expr [winfo rooty $win] + [winfo height $win]]
+		}
 	    }
 	}
-	eval {.balloonhelp.info configure -text $msg} $locals($win,args)
-	wm geometry .balloonhelp +$x+$y
-	update idletasks
-	wm deiconify .balloonhelp
-	raise .balloonhelp
+	if {$exists} {
+	    eval {.balloonhelp.info configure -text $msg} $locals($win,args)
+	    wm geometry .balloonhelp +$x+$y
+	    update idletasks
+	    wm deiconify .balloonhelp
+	    raise .balloonhelp
+	}
     }
     unset locals(pending)
 }
