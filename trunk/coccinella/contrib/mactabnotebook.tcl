@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  
-# $Id: mactabnotebook.tcl,v 1.12 2004-03-24 14:43:11 matben Exp $
+# $Id: mactabnotebook.tcl,v 1.13 2004-05-09 12:14:37 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -49,7 +49,7 @@
 # ########################### CHANGES ##########################################
 #
 #       1.0     Original version
-#       2.0     added large number stuff, mainly styling things
+#       2.0     added large number of stuff, mainly styling things
 
 package require notebook
 package provide mactabnotebook 2.0

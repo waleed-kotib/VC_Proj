@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.57 2004-05-07 12:24:05 matben Exp $
+# $Id: GroupChat.tcl,v 1.58 2004-05-09 12:14:37 matben Exp $
 
 package require History
 
@@ -211,7 +211,7 @@ proc ::Jabber::GroupChat::HaveMUC {{roomjid ""}} {
 	}
     } else {
 	if {1} {
-	    if {[$jstate(jlib) service hasfeature $serv  \
+	    if {[$jstate(jlib) service hasfeature $roomjid  \
 	      "http://jabber.org/protocol/muc"]} {
 		return 1
 	    }
