@@ -4,7 +4,7 @@
 #       typically from an anchor element <a href='xmpp:jid[?query]'/>
 #       in a html page.
 # 
-# $Id: ParseURI.tcl,v 1.5 2004-08-06 07:46:53 matben Exp $
+# $Id: ParseURI.tcl,v 1.6 2004-08-06 15:19:20 matben Exp $
 
 package require uriencode
 
@@ -25,7 +25,7 @@ proc ::ParseURI::Init { } {
 
 # ParseURI::Parse --
 # 
-# 
+#       Uses any -uri in the command line and process it accordingly.
 
 proc ::ParseURI::Parse { } {
     global  argv

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.23 2004-08-06 07:46:53 matben Exp $
+# $Id: JWB.tcl,v 1.24 2004-08-06 15:19:20 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -260,7 +260,7 @@ proc ::Jabber::WB::NewWhiteboardTo {jid args} {
     }
     set isAvailable [$jstate(roster) isavailable $jid]
     
-    ::Debug 2 "\tisRoom=$isRoom, isUserInRoom=$isUserInRoom, isAvailable=$isAvailable"
+    ::Debug 2 "\t isRoom=$isRoom, isUserInRoom=$isUserInRoom, isAvailable=$isAvailable"
  
     set wtop [::WB::GetNewToplevelPath]
 
@@ -268,11 +268,11 @@ proc ::Jabber::WB::NewWhiteboardTo {jid args} {
 	
 	# Must enter room in the usual way if not there already.
 	set allRooms [$jstate(jlib) service allroomsin]
-	::Debug 3 "\tallRooms=$allRooms"
+	::Debug 3 "\t allRooms=$allRooms"
 	
 	if {[lsearch $allRooms $jid] < 0} {
-	    set ans [::Jabber::GroupChat::EnterOrCreate \
-	      enter -roomjid $jid -autoget 1]
+	    set ans [::Jabber::GroupChat::EnterOrCreate enter -roomjid $jid \
+	      -autoget 1]
 	    if {$ans == "cancel"} {
 		return
 	    }
@@ -560,7 +560,7 @@ proc ::Jabber::WB::CloseHook {wtop} {
 	groupchat {
 	    
 	    # Everything handled from Jabber::GroupChat
-	    set ans [::Jabber::GroupChat::Exit $jwbstate($wtop,jid)]
+	    set ans [::Jabber::GroupChat::ExitRoom $jwbstate($wtop,jid)]
 	    if {$ans != "yes"} {
 		return stop
 	    }
