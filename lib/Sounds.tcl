@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Sounds.tcl,v 1.2 2003-05-18 13:20:22 matben Exp $
+# $Id: Sounds.tcl,v 1.3 2003-06-15 12:40:13 matben Exp $
 
 package provide Sounds 1.0
 
@@ -71,7 +71,7 @@ proc ::Sounds::Play {snd} {
     if {[::Plugins::HavePackage QuickTimeTcl]} {
 	.fake.${snd} play
     } elseif {[::Plugins::HavePackage snack]} {
-	$snd play
+	catch {$snd play}
     }
 }
 

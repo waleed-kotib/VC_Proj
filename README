@@ -1,8 +1,8 @@
 
-	  The Coccinella : Whiteboard application in Tcl
+	  The Coccinella : Jabber/Whiteboard application
 	  ----------------------------------------------
 
-		version 0.94.3, ??th ??????, 2003
+		version 0.94.4, 15th June, 2003
 
 		       by: Mats Bengtsson
 
@@ -58,9 +58,10 @@ Installation:
 
     * Obtain Tcl/Tk for your specific platform from "tcl.activestate.com".
       This is for Windows and Unix/Linux.  Mac OS Classic get it from:
-      "http://prdownloads.sourceforge.net/tcl/MacTclTk_8.4.1_RuntimeInstl.bin?download"
+      "http://prdownloads.sf.net/tcl/MacTclTk_8.4.2_RuntimeInstl.bin?download"
+
       Or if you want to try Mac OS X, look at: 
-      "http://prdownloads.sourceforge.net/tcl/TclTkAquaStandalone-8.4.1.dmg?download"
+      "http://prdownloads.sf.net/tcl/TclTkAquaStandalone-8.4.2.0.dmg?download"
 
     * Obtain this whiteboard (if not already done that since you are reading
       this) from http://hem.fyristorg.com/matben.  Its main directory may be

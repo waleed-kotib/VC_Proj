@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.15 2003-06-07 12:46:35 matben Exp $
+# $Id: Jabber.tcl,v 1.16 2003-06-15 12:40:13 matben Exp $
 #
 #  The $address is an ip name or number.
 #
@@ -1346,11 +1346,12 @@ proc ::Jabber::DoCloseClientConnection {ipNum args} {
     if {$prefs(jabberCommFrame)} {
 	::UI::ConfigureAllJabberEntries $ipNum -netstate "disconnect"
     }
+    ::Jabber::UI::SetStatusMessage "Logged out"
 
     # Multiinstance whiteboard UI stuff.
     foreach w [::UI::GetAllWhiteboards] {
 	set wtop [::UI::GetToplevelNS $w]
-	::UI::SetStatusMessage $wtop [::msgcat::mc jaservclosed]
+	#::UI::SetStatusMessage $wtop [::msgcat::mc jaservclosed]
 
 	# If no more connections left, make menus consistent.
 	::UI::FixMenusWhen $wtop "disconnect"
@@ -2615,7 +2616,7 @@ namespace eval ::Jabber::WB:: {
 #       
 # Arguments:
 #       jid         2-tier jid with no /resource (room participants???)
-#       args        -thread
+#       args        -thread, -from, -to, -type, -x
 #       
 # Results:
 #       $wtop; may create new toplevel whiteboard
@@ -2625,89 +2626,81 @@ proc ::Jabber::WB::NewWhiteboard {jid args} {
     
     ::Jabber::Debug 2 "::Jabber::WB::NewWhiteboard jid=$jid, args='$args'"
     
-    set haveMultiinstance 1
-    array set argsArr $args
+    array set argsArr $args    
     
-    if {$haveMultiinstance} {
-	
-	# Make a fresh whiteboard window:
-	#    jid is room: groupchat live
-	#    jid is ordinary available user: chat
-	#    jid is ordinary but unavailable user: normal message	
-	set isRoom [$jstate(jlib) service isroom $jid]
-	set isAvailable [$jstate(roster) isavailable $jid]
-	
-    	::Jabber::Debug 2 "    isRoom=$isRoom, isAvailable=$isAvailable"
-	
-	if {$isRoom} {
-	    
-	    # Must enter room in the usual way if not there already.
-	    set allRooms [$jstate(jlib) service allroomsin]
-	    ::Jabber::Debug 3 "\tallRooms=$allRooms"
-	    
-	    if {[lsearch $allRooms $jid] < 0} {
-		set ans [::Jabber::GroupChat::EnterOrCreate \
-		  enter -roomjid $jid -autoget 1]
-		if {$ans == "cancel"} {
-		    return
-		}
-	    }
-	    set roomName [$jstate(browse) getname $jid]    
-	    if {[llength $roomName]} {
-		set title "Groupchat room $roomName"
-	    } else {
-		set title "Groupchat room $jid"
-	    }
-	    set wbOpts [list -type groupchat -title $title -jid $jid \
-	      -toentrystate disabled -sendbuttonstate disabled \
-	      -serverentrystate disabled]
-	    set sendLive 1
-	} elseif {$isAvailable} {
-	    if {[info exists argsArr(-thread)]} {
-	        set threadID $argsArr(-thread)
-	    } else {
-	    
-	    	# Make unique thread id.
-	    	set threadID [::sha1pure::sha1 "$jstate(mejid)[clock seconds]"]
-	    }
-	    set name [$jstate(roster) getname $jid]
-	    if {[string length $name]} {
-	    	set title "Chat with $name"
-	    } else {
-	    	set title "Chat with $jid"
-	    }
-	    set wbOpts [list -type chat -thread $threadID -title $title  \
-	      -toentrystate disabled -jid $jid -sendbuttonstate disabled  \
-	      -serverentrystate disabled]
-	    set sendLive 1
-	} else {
-	    set name [$jstate(roster) getname $jid]
-	    if {[string length $name]} {
-	    	set title "Send Message to $name"
-	    } else {
-	    	set title "Send Message to $jid"
-	    }
-	    set wbOpts [list -type normal -title $title -jid $jid  \
-	      -toentrystate disabled -serverentrystate disabled]
-	    set sendLive 0
-	}
-	
-	set wtop [eval {::UI::NewMain} $wbOpts]
-	set jstate($wtop,doSend) $sendLive
-    } else {
-	set wtop .
-	set ans [tk_messageBox -type yesno -default yes -icon warning  \
-	  -message [FormatTextForMessageBox [::msgcat::mc jamesswarberasewb]]]
-	if {$ans == "yes"} {
-	    
-	    # Probably should not send this???
-	    set jstate(.,doSend) 0
-	    ::UserActions::DoEraseAll .
-	    set jstate(.,doSend) 1
-	}
-	set jstate(.,tojid) $jid
-	raise .
+    # Make a fresh whiteboard window. Use any -type argument.
+    # Note that the jid can belong to a room but we may still have a p2p chat.
+    #    jid is room: groupchat live
+    #    jid is ordinary available user: chat
+    #    jid is ordinary but unavailable user: normal message
+    set isRoom 0
+    if {[info exists argsArr(-type)]} {
+	if {[string equal $argsArr(-type) "groupchat"]} {
+	    set isRoom 1
+	}	
+    } elseif {[$jstate(jlib) service isroom $jid]} {
+	set isRoom 1
     }
+    set isAvailable [$jstate(roster) isavailable $jid]
+    
+    ::Jabber::Debug 2 "    isRoom=$isRoom, isAvailable=$isAvailable"
+    
+    if {$isRoom} {
+	
+	# Must enter room in the usual way if not there already.
+	set allRooms [$jstate(jlib) service allroomsin]
+	::Jabber::Debug 3 "\tallRooms=$allRooms"
+	
+	if {[lsearch $allRooms $jid] < 0} {
+	    set ans [::Jabber::GroupChat::EnterOrCreate \
+	      enter -roomjid $jid -autoget 1]
+	    if {$ans == "cancel"} {
+		return
+	    }
+	}
+	set roomName [$jstate(browse) getname $jid]    
+	if {[llength $roomName]} {
+	    set title "Groupchat room $roomName"
+	} else {
+	    set title "Groupchat room $jid"
+	}
+	set wbOpts [list -type groupchat -title $title -jid $jid \
+	  -toentrystate disabled -sendbuttonstate disabled \
+	  -serverentrystate disabled]
+	set sendLive 1
+    } elseif {$isAvailable} {
+	if {[info exists argsArr(-thread)]} {
+	    set threadID $argsArr(-thread)
+	} else {
+	    
+	    # Make unique thread id.
+	    set threadID [::sha1pure::sha1 "$jstate(mejid)[clock seconds]"]
+	}
+	set name [$jstate(roster) getname $jid]
+	if {[string length $name]} {
+	    set title "Chat with $name"
+	} else {
+	    set title "Chat with $jid"
+	}
+	set wbOpts [list -type chat -thread $threadID -title $title  \
+	  -toentrystate disabled -jid $jid -sendbuttonstate disabled  \
+	  -serverentrystate disabled]
+	set sendLive 1
+    } else {
+	set name [$jstate(roster) getname $jid]
+	if {[string length $name]} {
+	    set title "Send Message to $name"
+	} else {
+	    set title "Send Message to $jid"
+	}
+	set wbOpts [list -type normal -title $title -jid $jid  \
+	  -toentrystate disabled -serverentrystate disabled]
+	set sendLive 0
+    }
+    
+    set wtop [eval {::UI::NewMain} $wbOpts]
+    set jstate($wtop,doSend) $sendLive
+    
     return $wtop
 }
 
@@ -2718,7 +2711,7 @@ proc ::Jabber::WB::NewWhiteboard {jid args} {
 #       Then create a specific whiteboard for this chat/groupchat.
 #       
 # Arguments:
-#       args        -from, -thread,...
+#       args        -from, -to, -type, -thread,...
 
 proc ::Jabber::WB::ChatMsg {args} {    
     upvar ::Jabber::jstate jstate
@@ -4764,7 +4757,7 @@ proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
     foreach w [::UI::GetAllWhiteboards] {
 	set wtop [::UI::GetToplevelNS $w]
 	set ::Jabber::jstate($wtop,tojid) "@${server}"
-	::UI::SetStatusMessage $wtop [::msgcat::mc jaauthok $server]
+	#::UI::SetStatusMessage $wtop [::msgcat::mc jaauthok $server]
 
 	# Make menus consistent.
 	::UI::FixMenusWhen $wtop "connect"

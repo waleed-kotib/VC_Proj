@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.6 2003-06-07 12:46:35 matben Exp $
+# $Id: GroupChat.tcl,v 1.7 2003-06-15 12:40:13 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -1068,7 +1068,7 @@ proc ::Jabber::GroupChat::CloseToplevel {w} {
     variable locals
     
     set roomJid $locals($w,room)     
-    ::Jabber::GroupChat::Close $roomJid
+    ::Jabber::GroupChat::Exit $roomJid
 }
 
 # Jabber::GroupChat::Close --

@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: muc.tcl,v 1.7 2003-06-07 12:46:36 matben Exp $
+# $Id: muc.tcl,v 1.8 2003-06-15 12:40:13 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -72,7 +72,8 @@ proc jlib::muc::CommandProc {jlibname cmd args} {
 
 # jlib::muc::enter --
 # 
-# 
+#       Enter room.
+#       
 # Arguments:
 #       jlibname    name of jabberlib instance.
 #       roomjiid
@@ -85,11 +86,10 @@ proc jlib::muc::CommandProc {jlibname cmd args} {
 proc jlib::muc::enter {jlibname roomjid nick args} {
     upvar [namespace current]::${jlibname}::cache cache    
     
-    set opts {}
     foreach {name value} $args {
 	switch -- $name {
 	    -command {
-		lappend opts $name $value
+		set cache($roomjid,entercb) $value
 	    }
 	    default {
 		return -code error "Unrecognized option \"$name\""
@@ -99,14 +99,38 @@ proc jlib::muc::enter {jlibname roomjid nick args} {
     set jid ${roomjid}/${nick}
     set xelem [wrapper::createtag "x"  \
       -attrlist {xmlns "http://jabber.org/protocol/muc"}]
-    eval {[namespace parent]::send_presence $jlibname -to $jid  \
-      -xlist [list $xelem]} $opts
+    [namespace parent]::send_presence $jlibname -to $jid -xlist [list $xelem] \
+      -command [list [namespace current]::parse_enter $roomjid]
     set cache($roomjid,mynick) $nick
+    [namespace parent]::setroomprotocol $jlibname $roomjid "muc"
+}
+
+# jlib::muc::parse_enter --
+# 
+#       Callback when entering room to make sure there are no error.
+# 
+# Arguments:
+#       jlibname 
+#       type    presence typ attribute, 'available', 'error', etc.
+#       args    -from, -id, -to, -x ...
+
+proc jlib::muc::parse_enter {roomjid jlibname type args} {
+    upvar [namespace current]::${jlibname}::cache cache    
+
+    if {[string equal $type "error"]} {
+	catch {unset cache($roomjid,mynick)}
+    } else {
+	set cache($roomjid,inside) 1
+    }
+    if {[info exists cache($roomjid,entercb)]} {
+	uplevel #0 $cache($roomjid,entercb) $jlibname $type $args
+	catch {unset cache($roomjid,entercb)}
+    }
 }
 
 # jlib::muc::exit --
 # 
-# 
+#       Exit room.
 
 proc jlib::muc::exit {jlibname roomjid} {
     upvar [namespace current]::${jlibname}::cache cache    
@@ -117,12 +141,13 @@ proc jlib::muc::exit {jlibname roomjid} {
 	[namespace parent]::send_presence $jlibname -to $jid -type "unavailable"
 	catch {unset cache($roomjid,mynick)}
     }
+    catch {unset cache($roomjid,inside)}
     $lib(rostername) clearpresence "${roomjid}*"
 }
 
 # jlib::muc::setnick --
 # 
-# 
+#       Set new nick name for room.
 
 proc jlib::muc::setnick {jlibname roomjid nick args} {
     upvar [namespace current]::${jlibname}::cache cache    
@@ -306,11 +331,28 @@ proc jlib::muc::create {jlibname roomjid nick callback} {
     upvar [namespace current]::${jlibname}::cache cache    
 
     set jid ${roomjid}/${nick}
+    set cache($roomjid,createcb) $callback
     set xelem [wrapper::createtag "x"  \
       -attrlist {xmlns "http://jabber.org/protocol/muc"}]
     [namespace parent]::send_presence $jlibname -to $jid  \
-      -xlist [list $xelem] -command $callback
+      -xlist [list $xelem]  \
+      -command [list [namespace current]::parse_create $roomjid]
     set cache($roomjid,mynick) $nick
+    [namespace parent]::setroomprotocol $jlibname $roomjid "muc"
+}
+
+proc jlib::muc::parse_create {roomjid jlibname type args} {
+    upvar [namespace current]::${jlibname}::cache cache    
+
+    if {[string equal $type "error"]} {
+	catch {unset cache($roomjid,mynick)}
+    } else {
+	set cache($roomjid,inside) 1
+    }
+    if {[info exists cache($roomjid,createcb)]} {
+	uplevel #0 $cache($roomjid,createcb) $jlibname $type $args
+	catch {unset cache($roomjid,createcb)}
+    }
 }
 
 # jlib::muc::setroom --
@@ -442,10 +484,9 @@ proc jlib::muc::mynick {jlibname roomjid} {
 proc jlib::muc::allroomsin {jlibname} {
     upvar [namespace current]::${jlibname}::cache cache    
     
-    set keyList [array names cache "*,mynick"]
     set roomList {}
-    foreach key $keyList {
-	regexp {(.+),mynick} $key match room
+    foreach key [array names cache "*,inside"] {
+	regexp {(.+),inside} $key match room
 	lappend roomList $room
     }
     return $roomList
