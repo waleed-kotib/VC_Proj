@@ -32,7 +32,7 @@
 ::msgcat::mcset de Close	Schließen
 ::msgcat::mcset de Conference	Konferenz
 ::msgcat::mcset de Connect	Verbinden
-#::msgcat::mcset de Contact
+::msgcat::mcset de Contact	Kontakt
 ::msgcat::mcset de Country	Land
 ::msgcat::mcset de Create	Erstellen
 ::msgcat::mcset de Customization	Anpassung
@@ -81,7 +81,7 @@
 ::msgcat::mcset de OK		OK
 ::msgcat::mcset de Online	Angemeldet
 ::msgcat::mcset de Open		Öffnen
-#::msgcat::mcset de Options
+::msgcat::mcset de Options	Optionen
 ::msgcat::mcset de Password	Passwort
 ::msgcat::mcset de Pick		Auswählen
 ::msgcat::mcset de Phone	Telefon
@@ -291,8 +291,8 @@
 ::msgcat::mcset de mLocalTime     	{Lokale Zeit...}
 ::msgcat::mcset de mSendFile     	{Datei senden...}
 ::msgcat::mcset de mChatHistory     	{Chat-Verlauf}
-#::msgcat::mcset de mLoginTrpt     	{Login To Transport}
-#::msgcat::mcset de mLogoutTrpt     	{Logout From Transport}
+::msgcat::mcset de mLoginTrpt     	{Beim Transport anmelden}
+::msgcat::mcset de mLogoutTrpt     	{Beim Transport abmelden}
 
 
 
@@ -470,7 +470,7 @@
 ::msgcat::mcset de {Start Chat}           {Start Chat}
 ::msgcat::mcset de {Status message}       {Status-Nachricht}
 ::msgcat::mcset de {Status when logging out}  {Status bei Abmeldung}
-#::msgcat::mcset de {Subscription Failed}
+::msgcat::mcset de {Subscription Failed}  {Fehler bei Zulassung}
 ::msgcat::mcset de {Subscription Pending} {Zulassung anhängig}
 ::msgcat::mcset de {Synthetic speech}     {Künstliche Sprache}
 ::msgcat::mcset de {System fonts}         {System-Schriften}
@@ -739,9 +739,9 @@ weil dieser Benutzername bereits von jemand benutzt wird. Wenn Sie dieser Benutz
 melden Sie sich an. Fehlernachricht: %s}
 ::msgcat::mcset de jamessregerr                 {Fehler bei Registrierung\
 mit Fehlernachricht: %s}
-#::msgcat::mcset de jamesstrptsubsc              {Your registered account with the %s\
-#service will be put in your roster to work as a transport with this service.}
-#::msgcat::mcset de jamessfailedsubsc            {Failed to make a subscription to %s. The user denied the subscription.}
+::msgcat::mcset de jamesstrptsubsc              {Ihr registriertes Konto beim Dienst %s\
+wird in Ihrer Liste als Transport für diesen Dienst eingetragen.}
+::msgcat::mcset de jamessfailedsubsc            {Anmeldung bei %s nicht möglich. Der Benutzer verweigerte die Anmeldung.}
 
 
 
@@ -867,10 +867,10 @@ wird über die Benutzereinstellungen begrenzt.}
 ::msgcat::mcset de prefplugctrl  {Sie können jedes dieser Pakete deselektieren,\
 wenn es nicht geladen werden soll. Es ist ein Neustart erforderlich.}
 ::msgcat::mcset de prefchactret  {<Return> im Chat-Dialog immer aktiv}
-#::msgcat::mcset de prefchnormal  {Treat normal messages as chat messages}
+::msgcat::mcset de prefchnormal  {Normale Nachrichten als Chat-Nachrichten behandeln}
 ::msgcat::mcset de prefprofname  {Namen des gewünschten Profils eingeben}
 ::msgcat::mcset de prefstabui    {Tab-Oberfläche benutzen}
-#::msgcat::mcset de prefsusesasl  {Use SASL authentization method}
+::msgcat::mcset de prefsusesasl  {SASL-Authentifizierungsmethode benutzen}
 
 
 
