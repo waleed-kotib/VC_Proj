@@ -7,9 +7,10 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.39 2004-06-20 10:47:02 matben Exp $
+# $Id: MUC.tcl,v 1.40 2004-06-21 14:40:07 matben Exp $
 
 package require entrycomp
+package require muc
 
 package provide MUC 1.0
 
@@ -21,7 +22,7 @@ namespace eval ::Jabber::MUC:: {
     # Local stuff
     variable dlguid 0
     variable editcalluid 0
-    variable enteruid 0
+    variable enteruid  0
     
     # Map action to button widget.
     variable mapAction2Bt
@@ -82,6 +83,8 @@ namespace eval ::Jabber::MUC:: {
 proc ::Jabber::MUC::Init {jlibName} {
     upvar ::Jabber::jstate jstate
    
+    set jstate(muc) [jlib::muc::new $jlibName]
+
     $jstate(jlib) message_register * "http://jabber.org/protocol/muc#user" \
       ::Jabber::MUC::MUCMessage
     
@@ -159,14 +162,13 @@ proc ::Jabber::MUC::BuildEnter {args} {
 	You may Browse to get the available rooms for the specific service.\
 	Members only room may require a password."
     pack $w.frall.msg -side top -fill x -anchor w -padx 8 -pady 4
+
     set frtop $w.frall.top
     pack [frame $frtop] -side top -anchor w -padx 12
     label $frtop.lserv -text "[::msgcat::mc {Conference server}]:" 
     
-    set wpopupserver $frtop.eserv
-    set wpopuproom   $frtop.eroom
-
     # First menubutton: servers. (trace below)
+    set wpopupserver $frtop.eserv
      eval {tk_optionMenu $wpopupserver $token\(server)} $confServers
     label $frtop.lroom -text "[::msgcat::mc {Room name}]:"
     
@@ -182,18 +184,18 @@ proc ::Jabber::MUC::BuildEnter {args} {
 
     # Second menubutton: rooms for above server. Fill in below.
     # Combobox since we sometimes want to enter room manually.
-    #set enter(wroommenu) [tk_optionMenu $wpopuproom $token\(roomname) ""]
-    ::combobox::combobox $wpopuproom -width 8 -textvariable $token\(roomname)
+    set wpopuproom     $frtop.eroom
     set enter(wbrowse) $frtop.browse
-    button $frtop.browse -text [::msgcat::mc Browse] \
-      -command [list [namespace current]::Browse $token]
     
+    ::combobox::combobox $wpopuproom -width 8 -textvariable $token\(roomname)
+    button $enter(wbrowse) -text [::msgcat::mc Browse] \
+      -command [list [namespace current]::Browse $token]
     if {[info exists argsArr(-roomjid)]} {
 	jlib::splitjidex $argsArr(-roomjid) enter(roomname) enter(server) z
 	set enter(server-state) disabled
 	set enter(room-state)   disabled
 	$wpopupserver configure -state disabled
-	$wpopuproom configure -state disabled
+	$wpopuproom   configure -state disabled
     }
     if {[info exists argsArr(-server)]} {
 	set enter(server) $argsArr(-server)
@@ -216,13 +218,12 @@ proc ::Jabber::MUC::BuildEnter {args} {
     pack [label $wstatus -textvariable $token\(status) -pady 0 -bd 0] \
       -side left -padx 5 -pady 0
     
-    grid $frtop.lserv   $wpopupserver -             -sticky e
-    grid $frtop.lroom   $wpopuproom   $frtop.browse -sticky e
-    grid $frtop.lnick   $frtop.enick  -             -sticky e
-    grid $frtop.lpass   $frtop.epass  -             -sticky e
-    grid $frtop.st      -             -             -sticky w
+    grid $frtop.lserv   $wpopupserver -  -sticky e
+    grid $frtop.lroom   $wpopuproom   $enter(wbrowse)  -sticky e
+    grid $frtop.lnick   $frtop.enick  -  -sticky e
+    grid $frtop.lpass   $frtop.epass  -  -sticky e
+    grid $frtop.st      -             -  -sticky w
     grid $wpopupserver  $wpopuproom  $frtop.enick  $frtop.epass  -sticky ew
-    grid $frtop.browse -padx 4
     
     if {[info exists argsArr(-nickname)]} {
 	set enter(nickname) $argsArr(-nickname)
@@ -289,7 +290,7 @@ proc ::Jabber::MUC::BuildEnter {args} {
 	::UI::SetWindowPosition $w $wDlgs(jmucenter)
     }
     
-    # Wait here for a button press and window to be destroyed. BAD?
+    # Wait here for a button press and window to be destroyed.
     tkwait window $w
     
     catch {focus $oldFocus}
@@ -298,6 +299,23 @@ proc ::Jabber::MUC::BuildEnter {args} {
     set finished $enter(finished)
     unset enter
     return [expr {($finished <= 0) ? "cancel" : "enter"}]
+}
+
+proc ::Jabber::MUC::CancelEnter {token} {
+    variable $token
+    upvar 0 $token enter
+
+    ::Jabber::MUC::EnterCloseHook $enter(w)
+    set enter(finished) 0
+    catch {destroy $enter(w)}
+}
+
+proc ::Jabber::MUC::EnterCloseHook {wclose} {
+    global  wDlgs
+
+    if {[string match $wDlgs(jmucenter)* $wclose]} {
+	::UI::SaveWinGeom $wDlgs(jmucenter) $wclose
+    }
 }
 
 proc ::Jabber::MUC::Browse {token} {
@@ -423,29 +441,14 @@ proc ::Jabber::MUC::DoEnter {token} {
     if {$enter(password) != ""} {
 	lappend opts -password $enter(password)
     }
-    eval {$jstate(jlib) muc enter $roomJid $enter(nickname) -command \
+    eval {$jstate(muc) enter $roomJid $enter(nickname) -command \
       [list [namespace current]::EnterCallback]} $opts
     set enter(finished) 1
+    ::Jabber::MUC::EnterCloseHook $enter(w)
     catch {destroy $enter(w)}
    
     # Cache groupchat protocol type (muc|conference|gc-1.0).
     ::hooks::run groupchatEnterRoomHook $roomJid "muc"
-}
-
-proc ::Jabber::MUC::CancelEnter {token} {
-    variable $token
-    upvar 0 $token enter
-
-    set enter(finished) 0
-    catch {destroy $enter(w)}
-}
-
-proc ::Jabber::MUC::EnterCloseHook {wclose} {
-    global  wDlgs
-
-    if {[string match $wDlgs(jmucenter)* $wclose]} {
-	::UI::SaveWinGeom $wDlgs(jmucenter) $wclose
-    }
 }
 
 # Jabber::MUC::EnterCallback --
@@ -501,6 +504,8 @@ proc ::Jabber::MUC::EnterCallback {jlibName type args} {
 
 namespace eval ::Jabber::MUC:: {
     
+    variable inviteuid 0
+
     ::hooks::add closeWindowHook    ::Jabber::MUC::InviteCloseHook
 }
 
@@ -511,14 +516,23 @@ namespace eval ::Jabber::MUC:: {
 proc ::Jabber::MUC::Invite {roomjid} {
     global this wDlgs
     
-    upvar ::Jabber::jstate jstate
-    variable fininvite -1
+    variable inviteuid
     variable dlguid
+    upvar ::Jabber::jstate jstate
+
+    # State variable to collect instance specific variables.
+    set token [namespace current]::invite[incr inviteuid]
+    variable $token
+    upvar 0 $token invite
     
     set w $wDlgs(jmucinvite)[incr dlguid]
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document closeBox}
     wm title $w {Invite User}
+    set invite(w)        $w
+    set invite(reason)   ""
+    set invite(finished) -1
+    set invite(roomjid)  $roomjid
     
     set fontSB [option get . fontSmallBold {}]
     
@@ -534,9 +548,9 @@ proc ::Jabber::MUC::Invite {roomjid} {
     set wmid $w.frall.fr
     pack [frame $wmid] -side top -fill x -expand 1 -padx 6
     label $wmid.la -font $fontSB -text "Invite Jid:"
-    ::entrycomp::entrycomp $wmid.ejid $jidlist
+    ::entrycomp::entrycomp $wmid.ejid $jidlist -textvariable $token\(jid)
     label $wmid.lre -font $fontSB -text "Reason:"
-    entry $wmid.ere
+    entry $wmid.ere -textvariable $token\(reason)
     
     grid $wmid.la -column 0 -row 0 -sticky e -padx 2 
     grid $wmid.ejid -column 1 -row 0 -sticky ew -padx 2 
@@ -547,52 +561,73 @@ proc ::Jabber::MUC::Invite {roomjid} {
     set frbot [frame $w.frall.frbot -borderwidth 0]
     pack $frbot  -side bottom -fill x -padx 10 -pady 8
     pack [button $frbot.btok -text [::msgcat::mc OK]  \
-      -default active -command "set [namespace current]::fininvite 1"] \
+      -default active -command [list [namespace current]::DoInvite $token]] \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
-      -command "set [namespace current]::fininvite 0"]  \
+      -command [list [namespace current]::CancelInvite $token]]  \
       -side right -padx 5 -pady 5  
     
     wm resizable $w 0 0
     bind $w <Return> [list $frbot.btok invoke]
     bind $w <Escape> [list $frbot.btcancel invoke]
+
+    set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jmucinvite)]]
+    if {$nwin == 1} {
+	::UI::SetWindowPosition $w $wDlgs(jmucinvite)
+    }
     
     # Grab and focus.
     set oldFocus [focus]
     focus $wmid.ejid
     
-    # Wait here for a button press.
-    tkwait variable [namespace current]::fininvite
-    
-    set jid [$wmid.ejid get]
-    set reason [$wmid.ere get]
-    ::UI::SaveWinGeom $w
+    # Wait here for a button press and window to be destroyed.
+    tkwait window $w
 
-    catch {destroy $w}
     catch {focus $oldFocus}
+    
+    set finished $invite(finished)
+    unset invite
+    return [expr {($finished <= 0) ? "cancel" : "ok"}]
+}
+
+proc ::Jabber::MUC::CancelInvite {token} {
+    variable $token
+    upvar 0 $token invite
+
+    ::Jabber::MUC::InviteCloseHook $invite(w)
+    set invite(finished) 0
+    catch {destroy $invite(w)}
+}
+
+proc ::Jabber::MUC::DoInvite {token} {
+    variable $token
+    upvar 0 $token invite
+    upvar ::Jabber::jstate jstate
+
+    set jid     $invite(jid)
+    set reason  $invite(reason)
+    set roomjid $invite(roomjid)
+    ::Jabber::MUC::InviteCloseHook $invite(w)
     
     set opts {}
     if {$reason != ""} {
 	set opts [list -reason $reason]
     }
-
-    if {$fininvite > 0} {
-	if {[catch {
-	    eval {::Jabber::JlibCmd muc invite $roomjid $jid} $opts
-	} err]} {
-	    tk_messageBox -type ok -icon error -title "Network Error" \
-	      -message "Network error ocurred: $err"
-	}
+    if {[catch {
+	eval {$jstate(muc) invite $roomjid $jid} $opts
+    } err]} {
+	tk_messageBox -type ok -icon error -title "Network Error" \
+	  -message "Network error ocurred: $err"
     }
-    return [expr {($fininvite <= 0) ? "cancel" : "ok"}]
+    set invite(finished) 1
+    catch {destroy $invite(w)}
 }
 
 proc ::Jabber::MUC::InviteCloseHook {wclose} {
     global  wDlgs
-    variable fininvite
         
     if {[string match $wDlgs(jmucinvite)* $wclose]} {
-	set fininvite 0
+	::UI::SaveWinGeom $wDlgs(jmucinvite) $wclose
     }   
 }
 
@@ -612,6 +647,7 @@ proc ::Jabber::MUC::MUCMessage {jlibname xmlns args} {
     
     set invite 0
     foreach c [wrapper::getchildren $xlist] {
+	
 	switch -- [lindex $c 0] {
 	    invite {
 		set invite 1
@@ -686,7 +722,7 @@ proc ::Jabber::MUC::BuildInfo {roomjid} {
     wm title $w "Info Room: $roomName"
     set locals($roomjid,w) $w
     set locals($w,roomjid) $roomjid
-    set locals($roomjid,mynick) [::Jabber::JlibCmd muc mynick $roomjid]
+    set locals($roomjid,mynick) [$jstate(muc) mynick $roomjid]
     set locals($roomjid,myrole) none
     set locals($roomjid,myaff) none
     switch -- $this(platform) {
@@ -1020,7 +1056,7 @@ proc ::Jabber::MUC::GrantRevoke {roomjid which type} {
 
     if {$ans == "ok"} {
 	if {[catch {
-	    eval {::Jabber::JlibCmd muc $actionDefs($which,$type,cmd) $roomjid  \
+	    eval {$jstate(muc) $actionDefs($which,$type,cmd) $roomjid  \
 	      $nick $actionDefs($which,$type,what)  \
 	      -command [list [namespace current]::IQCallback $roomjid]} $opts
 	} err]} {
@@ -1056,7 +1092,7 @@ proc ::Jabber::MUC::Kick {roomjid} {
     
     if {$ans == "ok"} {
 	if {[catch {
-	    eval {::Jabber::JlibCmd muc setrole $roomjid $nick "none" \
+	    eval {$jstate(muc) setrole $roomjid $nick "none" \
 	      -command [list [namespace current]::IQCallback $roomjid]} $opts
 	} err]} {
 	    tk_messageBox -type ok -icon error -title "Network Error" \
@@ -1091,7 +1127,7 @@ proc ::Jabber::MUC::Ban {roomjid} {
     
     if {$ans == "ok"} {
 	if {[catch {
-	    eval {::Jabber::JlibCmd muc setaffiliation $roomjid $nick "outcast" \
+	    eval {$jstate(muc) setaffiliation $roomjid $nick "outcast" \
 	      -command [list [namespace current]::IQCallback $roomjid]} $opts
 	} err]} {
 	    tk_messageBox -type ok -icon error -title "Network Error" \
@@ -1313,7 +1349,7 @@ proc ::Jabber::MUC::EditListBuild {roomjid type} {
     $wsearrows start
     set editlocals(callid) [incr editcalluid]
     if {[catch {
-	::Jabber::JlibCmd muc $getact $roomjid $what \
+	$jstate(muc) $getact $roomjid $what \
 	  [list [namespace current]::EditListGetCB $roomjid $editlocals(callid)]
     } err]} {
 	$wsearrows stop
@@ -1548,6 +1584,7 @@ proc ::Jabber::MUC::EditListReset {roomjid} {
 proc ::Jabber::MUC::EditListSet {roomjid} {
     upvar [namespace current]::${roomjid}::editlocals editlocals
     variable setListDefs
+    upvar ::Jabber::jstate jstate
 
     # Original and present content of tablelist.
     set origlist $editlocals(origlistvar)
@@ -1588,7 +1625,7 @@ proc ::Jabber::MUC::EditListSet {roomjid} {
     
     
     if {[catch {eval {
-	::Jabber::JlibCmd muc $setact $roomjid xxx \
+	$jstate(muc) $setact $roomjid xxx \
 	  -command [list [namespace current]::IQCallback $roomjid]} $opts
     } err]} {
 	tk_messageBox -type ok -icon error -title "Network Error" \
@@ -1647,7 +1684,7 @@ proc ::Jabber::MUC::RoomConfig {roomjid} {
     # Now, go and get it!
     $wsearrows start
     if {[catch {
-	::Jabber::JlibCmd muc getroom $roomjid  \
+	$jstate(muc) getroom $roomjid  \
 	  [list [namespace current]::ConfigGetCB $roomjid]
     }]} {
 	$wsearrows stop
@@ -1682,7 +1719,7 @@ proc ::Jabber::MUC::CancelConfig {roomjid w} {
     upvar [namespace current]::${roomjid}::locals locals
     upvar ::Jabber::jstate jstate
 
-    catch {::Jabber::JlibCmd muc setroom $roomjid cancel}
+    catch {$jstate(muc) setroom $roomjid cancel}
     destroy $w
 }
 
@@ -1707,7 +1744,7 @@ proc ::Jabber::MUC::DoRoomConfig {roomjid w} {
     set subelements [::Jabber::Forms::GetScrollForm $wbox]
     
     if {[catch {
-	::Jabber::JlibCmd muc setroom $roomjid submit -form $subelements \
+	$jstate(muc) setroom $roomjid submit -form $subelements \
 	  -command [list [namespace current]::RoomConfigResult $roomjid]
     }]} {
 	tk_messageBox -type ok -icon error -title "Network Error" \
@@ -1746,7 +1783,7 @@ proc ::Jabber::MUC::SetNick {roomjid} {
 
     if {($ans == "ok") && ($nickname != "")} {
 	if {[catch {
-	    ::Jabber::JlibCmd muc setnick $roomjid $nickname \
+	    $jstate(muc) setnick $roomjid $nickname \
 	      -command [list [namespace current]::PresCallback $roomjid]
 	} err]} {
 	    tk_messageBox -type ok -icon error -title "Network Error" \
@@ -1842,7 +1879,7 @@ proc ::Jabber::MUC::Destroy {roomjid} {
 
     if {$findestroy > 0} {
 	if {[catch {eval {
-	    ::Jabber::JlibCmd muc destroy $roomjid  \
+	    $jstate(muc) destroy $roomjid  \
 	      -command [list [namespace current]::IQCallback $roomjid]} $opts
 	} err]} {
 	    tk_messageBox -type ok -icon error -title "Network Error" \

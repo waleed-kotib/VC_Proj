@@ -5,7 +5,7 @@
 #       
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: service.tcl,v 1.7 2004-05-26 07:36:38 matben Exp $
+# $Id: service.tcl,v 1.8 2004-06-21 14:40:08 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -68,10 +68,12 @@ proc jlib::service::init {jlibname} {
     
     upvar [namespace parent]::${jlibname}::serv serv
 
+    # Init defaults.
     array set serv {
 	agent    1
 	browse   0
 	disco    0
+	muc      0
     }
 	    
     # Maintain a priority list of groupchat protocols in decreasing priority.
@@ -81,7 +83,7 @@ proc jlib::service::init {jlibname} {
 
 # jlib::service::register --
 # 
-#       Let components (browse/disco etc.) register that their services
+#       Let components (browse/disco/muc etc.) register that their services
 #       are available.
 
 proc jlib::service::register {jlibname type name} {
@@ -627,8 +629,10 @@ proc jlib::service::hashandnick {jlibname room} {
 	    set hashandnick [list ${room}/${nick} $nick]   
 	} 
 	muc {
-	    set nick [[namespace parent]::muc::mynick $jlibname $room]
-	    set hashandnick [list ${room}/${nick} $nick]   
+	    if {$serv(muc)} {
+		set nick [$serv(muc,name) mynick $room]
+		set hashandnick [list ${room}/${nick} $nick]   
+	    }
 	} 
 	conference {
 	    if {$serv(browse) && [$serv(browse,name) isbrowsed $lib(server)]} {
@@ -653,6 +657,9 @@ proc jlib::service::allroomsin {jlibname} {
     set roomList [concat $gchat(allroomsin) \
       [[namespace parent]::muc::allroomsin $jlibname] \
       [[namespace parent]::conference::allroomsin $jlibname]]
+    if {$serv(muc)} {
+	set roomList [concat $roomList [$serv(muc,name) allroomsin]]
+    }
     return [lsort -unique $roomList]
 }
 
@@ -676,7 +683,7 @@ proc jlib::service::roomparticipants {jlibname room} {
 	    set everyone [[namespace parent]::groupchat::participants $jlibname $room]
 	} 
 	muc {
-	    set everyone [[namespace parent]::muc::participants $jlibname $room]
+	    set everyone [$serv(muc,name) participants $room]
 	}
 	conference {
 	    if {$serv(browse) && [$serv(browse,name) isbrowsed $lib(server)]} {
@@ -702,7 +709,7 @@ proc jlib::service::exitroom {jlibname room} {
 	    [namespace parent]::groupchat::exit $jlibname $room
 	}
 	muc {
-	    [namespace parent]::muc::exit $jlibname $room
+	    $serv(muc,name) exit $room
 	}
 	conference {
 	    if {$serv(browse) && [$serv(browse,name) isbrowsed $lib(server)]} {
