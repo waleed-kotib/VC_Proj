@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.115 2004-11-14 13:53:26 matben Exp $
+# $Id: Jabber.tcl,v 1.116 2004-11-14 16:40:53 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -101,50 +101,6 @@ namespace eval ::Jabber:: {
     variable jidPublic
     set jidPublic(haveit) 0
     
-    # Mappings from <show> element to displayable text and vice versa.
-    # chat away xa dnd
-    variable mapShowElemToText
-    variable mapShowTextToElem
-    
-    array set mapShowElemToText [list \
-      [mc mAvailable]       available  \
-      [mc mAway]            away       \
-      [mc mChat]            chat       \
-      [mc mDoNotDisturb]    dnd        \
-      [mc mExtendedAway]    xa         \
-      [mc mInvisible]       invisible  \
-      [mc mNotAvailable]    unavailable]
-    array set mapShowTextToElem [list \
-      available       [mc mAvailable]     \
-      away            [mc mAway]          \
-      chat            [mc mChat]          \
-      dnd             [mc mDoNotDisturb]  \
-      xa              [mc mExtendedAway]  \
-      invisible       [mc mInvisible]     \
-      unavailable     [mc mNotAvailable]]
-
-    variable mapShowMLabelToText
-    variable mapShowTextToMLabel
-    
-    array set mapShowMLabelToText {
-	mAvailable        available
-	mAway             away
-	mChat             chat
-	mDoNotDisturb     dnd
-	mExtendedAway     xa
-	mInvisible        invisible
-	mNotAvailable     unavailable
-    }
-    array set mapShowTextToMLabel {
-	available       mAvailable
-	away            mAway
-	chat            mChat
-	dnd             mDoNotDisturb
-	xa              mExtendedAway
-	invisible       mInvisible
-	unavailable     mNotAvailable
-    }
-
     # Array that maps namespace (ns) to a descriptive name.
     variable nsToText
     array set nsToText {
@@ -450,16 +406,6 @@ proc ::Jabber::GetMyStatus { } {
     variable jstate
     
     return $jstate(status)
-}
-
-proc ::Jabber::GetStatusText {status} {    
-    variable mapShowTextToElem
-    
-    if {[info exists mapShowTextToElem($status)]} {
-	return $mapShowTextToElem($status)
-    } else {
-	return ""
-    }
 }
 
 proc ::Jabber::JlibCmd {args} {

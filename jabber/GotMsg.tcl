@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.35 2004-10-27 14:42:34 matben Exp $
+# $Id: GotMsg.tcl,v 1.36 2004-11-14 16:40:53 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -79,7 +79,6 @@ proc ::Jabber::GotMsg::Show {thisMsgId} {
     variable date
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::mapShowTextToElem mapShowTextToElem
     
     ::Debug 2 "::Jabber::GotMsg::Show thisMsgId=$thisMsgId"
     
@@ -116,7 +115,7 @@ proc ::Jabber::GotMsg::Show {thisMsgId} {
 	if {[info exists presArr(-show)]} {
 	    set show $presArr(-show)
 	}
-	set prestext $mapShowTextToElem($show)
+	set prestext [::Jabber::Roster::MapShowToText $show]
     }
     set icon [::Jabber::Roster::GetPresenceIconFromJid $jid]
     $wpresence configure -image $icon
@@ -283,7 +282,6 @@ proc ::Jabber::GotMsg::PresenceHook {pjid2 type args} {
     variable wpresence
     variable prestext
     variable jid
-    upvar ::Jabber::mapShowTextToElem mapShowTextToElem
     
     ::Debug 4 "::Jabber::GotMsg::PresenceHook pjid2=$pjid2, type=$type"
 
@@ -299,7 +297,7 @@ proc ::Jabber::GotMsg::PresenceHook {pjid2 type args} {
 	    if {[info exists argsArr(-show)]} {
 		set show $argsArr(-show)
 	    }
-	    set prestext $mapShowTextToElem($show)
+	    set prestext [::Jabber::Roster::MapShowToText $show]
 	    set icon [::Jabber::Roster::GetPresenceIconFromJid $from]
 	    $wpresence configure -image $icon
 	}

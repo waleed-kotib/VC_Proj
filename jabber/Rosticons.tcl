@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Rosticons.tcl,v 1.1 2004-11-14 13:51:50 matben Exp $
+# $Id: Rosticons.tcl,v 1.2 2004-11-14 16:41:10 matben Exp $
 
 package provide Rosticons 1.0
 
@@ -113,6 +113,7 @@ proc ::Rosticons::Exists {key} {
 
 proc ::Rosticons::Get {statuskey} {
     variable rosticons
+    variable priv
     upvar ::Jabber::jprefs jprefs
     
     #::Debug 4 "::Rosticons::Get-------statuskey=$statuskey"
@@ -134,7 +135,7 @@ proc ::Rosticons::Get {statuskey} {
     }
     
     # See if we can match the 'type'.
-    if {[array names rosticons $type/*] == {}} {
+    if {[lsearch -exact $priv(alltypes) $type] == -1} {
 	return $rosticons(status/$suborig)
     }
     

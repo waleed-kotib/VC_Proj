@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.91 2004-11-11 15:38:29 matben Exp $
+# $Id: Chat.tcl,v 1.92 2004-11-14 16:40:53 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -1528,7 +1528,6 @@ proc ::Jabber::Chat::Save {dlgtoken} {
 proc ::Jabber::Chat::PresenceHook {jid type args} {
     
     upvar ::Jabber::jstate jstate
-    upvar ::Jabber::mapShowTextToElem mapShowTextToElem
 
     Debug 4 "::Jabber::Chat::PresenceHook jid=$jid, type=$type"
 
@@ -1561,8 +1560,8 @@ proc ::Jabber::Chat::PresenceHook {jid type args} {
 	if {[string equal $chatstate(presence) $show]} {
 	    return
 	}
-	InsertMessage $chattoken sys  \
-	  "$from is: $mapShowTextToElem($show)\n$status"
+	set showStr [::Jabber::Roster::MapShowToText $show]
+	InsertMessage $chattoken sys "$from is: $showStr\n$status"
 	
 	if {[string equal $type "available"]} {
 	    SetState $chattoken normal

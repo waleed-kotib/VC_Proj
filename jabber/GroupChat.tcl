@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.81 2004-11-14 13:53:26 matben Exp $
+# $Id: GroupChat.tcl,v 1.82 2004-11-14 16:40:53 matben Exp $
 
 package require History
 
@@ -699,12 +699,9 @@ proc ::Jabber::GroupChat::Build {roomjid args} {
     
     set state(wbstatus) $wbtstatus
 
-    #BuildStatusMenuButton $token $wbtstatus
-    #ConfigStatusMenuButton $token $wbtstatus available
-
-    ::Jabber::Roster::BuildStatusButton3 $wbtstatus \
-      $token\(status) -command [list [namespace current]::StatusCmd3 $token] 
-    ::Jabber::Roster::ConfigStatusButton3 $wbtstatus available
+    ::Jabber::Roster::BuildStatusButton $wbtstatus \
+      $token\(status) -command [list [namespace current]::StatusCmd $token] 
+    ::Jabber::Roster::ConfigStatusButton $wbtstatus available
     
     pack $wbtstatus -side right -padx 6
 
@@ -847,74 +844,11 @@ proc ::Jabber::GroupChat::Build {roomjid args} {
     return $token
 }
 
-# Jabber::GroupChat::BuildStatusMenuButton --
-# 
-#       Status megawidget menubutton.
-#       
-# Arguments:
-#       w       widgetPath
-
-proc ::Jabber::GroupChat::BuildStatusMenuButton {token w} {
-    variable $token
-    upvar 0 $token state
-    
-    set wmenu $w.menu
-    button $w -bd 2 -width 16 -height 16 -image  \
-      [::Jabber::Roster::GetPresenceIconFromKey $state(status)]
-    $w configure -state disabled
-    menu $wmenu -tearoff 0
-    ::Jabber::Roster::BuildGenPresenceMenu $wmenu -variable $token\(status) \
-      -command [list [namespace current]::StatusCmd $token]
-    return $w
-}
-
-proc ::Jabber::GroupChat::ConfigStatusMenuButton {token w type} {
-    variable $token
-    upvar 0 $token state
-    
-    $w configure -image  \
-      [::Jabber::Roster::GetPresenceIconFromKey $state(status)]
-    if {[string equal $type "unavailable"]} {
-	$w configure -state disabled
-	bind $w <Button-1> {}
-    } else {
-	$w configure -state normal
-	bind $w <Button-1> [list [namespace current]::PostMenu $w.menu %X %Y]
-    }
-}
-
-proc ::Jabber::GroupChat::PostMenu {w x y} {
-    
-    tk_popup $w [expr int($x)] [expr int($y)]
-}
-
-proc ::Jabber::GroupChat::StatusCmd {token} {
+proc ::Jabber::GroupChat::StatusCmd {token status} {
     variable $token
     upvar 0 $token state
 
-    set status $state(status)
-    ::Debug 2 "::Jabber::GroupChat::StatusCmd status=$state(status)"
-
-    if {$status == "unavailable"} {
-	set ans [Exit $token]
-	if {$ans == "no"} {
-	    set state(status) $state(oldStatus)
-	}
-    } else {
-    
-	# Send our status.
-	::Jabber::SetStatus $status -to $state(roomjid)
-	set state(oldStatus) $status
-    }
-    $state(wbstatus) configure -image  \
-      [::Jabber::Roster::GetPresenceIconFromKey $status]
-}
-
-proc ::Jabber::GroupChat::StatusCmd3 {token status} {
-    variable $token
-    upvar 0 $token state
-
-    ::Debug 2 "::Jabber::GroupChat::StatusCmd3 status=$status"
+    ::Debug 2 "::Jabber::GroupChat::StatusCmd status=$status"
 
     if {$status == "unavailable"} {
 	set ans [Exit $token]
