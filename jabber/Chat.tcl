@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.26 2003-12-29 09:02:29 matben Exp $
+# $Id: Chat.tcl,v 1.27 2003-12-29 14:14:41 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -245,8 +245,12 @@ proc ::Jabber::Chat::GotMsg {body args} {
     set w $state(w)
     if {[info exists argsArr(-subject)]} {
 	set state(subject) $argsArr(-subject)
+	set state(lastsubject) $state(subject)
+	::Jabber::Chat::InsertMessage $token sys  \
+	  "Subject: $state(subject)\n"
     }
 
+    # And put message in window.
     ::Jabber::Chat::InsertMessage $token you $body
     
     if {$state(got1stMsg) == 0} {
@@ -296,7 +300,7 @@ proc ::Jabber::Chat::InsertMessage {token whom body} {
 		set prefix <$username>
 	    }    
 	}
-	presence {
+	sys {
 	    if {$clockFormat != ""} {
 		set theTime [clock format $secs -format $clockFormat]
 		set prefix "\[$theTime\] "
@@ -319,10 +323,7 @@ proc ::Jabber::Chat::InsertMessage {token whom body} {
 	    $wtext insert end "   " youtext
 	    ::Text::ParseAndInsert $wtext $body youtext linktag
 	}
-	subject {
-	    $wtext insert end "Subject: $state(subject)" sys
-	}
-	presence {
+	sys {
 	    $wtext insert end $prefix syspre
 	    $wtext insert end $body sys
 	}
@@ -375,11 +376,12 @@ proc ::Jabber::Chat::Build {threadID args} {
     set w $wDlgs(jchat)${uid}
     array set argsArr $args
 
-    set state(w)          $w
-    set state(threadid)   $threadID
-    set state(active)     0
-    set state(got1stMsg)  0
-    set state(subject)    ""
+    set state(w)           $w
+    set state(threadid)    $threadID
+    set state(active)      0
+    set state(got1stMsg)   0
+    set state(subject)     ""
+    set state(lastsubject) ""
     
     # Toplevel with class Chat.
     toplevel $w -class Chat
@@ -579,7 +581,7 @@ proc ::Jabber::Chat::ConfigureTextTags {w wtext} {
     }
     lappend opts(metext)  -spacing3 $space -lmargin1 20 -lmargin2 20
     lappend opts(youtext) -spacing3 $space -lmargin1 20 -lmargin2 20
-    lappend opts(sys) -spacing3 $space -lmargin1 20 -lmargin2 20
+    lappend opts(sys)     -spacing3 $space -lmargin1 20 -lmargin2 20
     foreach tag $alltags {
 	eval {$wtext tag configure $tag} $opts($tag)
     }
@@ -670,10 +672,15 @@ proc ::Jabber::Chat::Send {token} {
     ::Jabber::Chat::PutMessageInHistoryFile $jid2 \
       [list $jstate(mejid) $threadID $dateISO $allText]
     
+    # Need to detect if subject changed.
     set opts {}
-    if {$state(subject) != ""} {
+    if {![string equal $state(subject) $state(lastsubject)]} {
 	lappend opts -subject $state(subject)
+	::Jabber::Chat::InsertMessage $token sys  \
+	  "Subject: $state(subject)\n"
     }
+    set state(lastsubject) $state(subject)
+    
     if {[catch {
 	eval {$jstate(jlib) send_message $jid  \
 	  -thread $threadID -type chat -body $allText} $opts
@@ -744,7 +751,7 @@ proc ::Jabber::Chat::PresenceCallback {jid type args} {
     if {[info exists argsArr(-status)]} {
 	set status "$argsArr(-status)\n"
     }
-    ::Jabber::Chat::InsertMessage $token presence  \
+    ::Jabber::Chat::InsertMessage $token sys  \
       "$jid is: $mapShowTextToElem($show)\n$status"
     
 }
