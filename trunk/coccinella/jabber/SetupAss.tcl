@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: SetupAss.tcl,v 1.13 2003-12-13 17:54:41 matben Exp $
+# $Id: SetupAss.tcl,v 1.14 2003-12-15 08:20:53 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -222,9 +222,9 @@ proc ::Jabber::SetupAss::ServersDlg {w} {
     set wysc $wtbfr.ysc
     set wtbl $wtbfr.wtbl
     tablelist::tablelist $wtbl \
-      -columns [list 16 Address 30 Name] -background white  \
+      -columns [list 16 Address 30 Name]  \
       -yscrollcommand [list $wysc set] -stretch all \
-      -labelbackground #cecece -stripebackground #dedeff -width 70 -height 16
+      -width 70 -height 16
     scrollbar $wysc -orient vertical -command [list $wtbl yview]
     grid $wtbl $wysc -sticky news
     grid columnconfigure $wtbfr 0 -weight 1
@@ -233,7 +233,7 @@ proc ::Jabber::SetupAss::ServersDlg {w} {
     # Chasing arrows and status message.
     pack [frame $w.frall.frarr] -side top -anchor w -padx 4 -pady 0
     set warrows $w.frall.frarr.arr
-    pack [::chasearrows::chasearrows $warrows -background gray87 -size 16] \
+    pack [::chasearrows::chasearrows $warrows -size 16] \
       -side left -padx 5 -pady 5
     pack [label $w.frall.frarr.msg  \
       -textvariable [namespace current]::servStatVar] -side left -padx 4

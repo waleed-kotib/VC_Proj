@@ -15,7 +15,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.18 2003-12-13 17:54:40 matben Exp $
+# $Id: Coccinella.tcl,v 1.19 2003-12-15 08:20:52 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -183,12 +183,6 @@ if {[string equal $this(platform) "unix"]} {
 } else {
     set thisScript [info script]
     set thisTail [file tail $thisScript]
-    if {$thisScript == ""} {
-	set thisScript [tk_getOpenFile -title "Pick Coccinella.tcl"]
-	if {$thisScript == ""} {
-	    exit
-	}
-    }
     set thisPath [file dirname $thisScript]
 }
 
@@ -209,27 +203,27 @@ set this(resourcedbPath) [file join $this(path) resources]
 
 # Need a tmp directory, typically in a StarKit when QuickTime movies are opened.
 if {[info exists env(TMP)] && [file exists $env(TMP)]} {
-    set this(tmpDir) [file join $env(TMP) tmpcoccinella]
+    set this(tmpPath) [file join $env(TMP) tmpcoccinella]
 } elseif {[info exists env(TEMP)] && [file exists $env(TEMP)]} {
-    set this(tmpDir) [file join $env(TEMP) tmpcoccinella]
+    set this(tmpPath) [file join $env(TEMP) tmpcoccinella]
 } else {
     switch -- $this(platform) {
 	unix {
-	    set this(tmpDir) [file join /tmp tmpcoccinella]
+	    set this(tmpPath) [file join /tmp tmpcoccinella]
 	}
 	macintosh {
-	    set this(tmpDir) [file join [lindex [file volumes] 0] tmpcoccinella]
+	    set this(tmpPath) [file join [lindex [file volumes] 0] tmpcoccinella]
 	}
 	macosx {
-	    set this(tmpDir) [file join /tmp tmpcoccinella]
+	    set this(tmpPath) [file join /tmp tmpcoccinella]
 	}
 	windows {
-	    set this(tmpDir) [file join C:/ tmpcoccinella]
+	    set this(tmpPath) [file join C:/ tmpcoccinella]
 	}
     }
 }
-if {![file isdirectory $this(tmpDir)]} {
-    file mkdir $this(tmpDir)
+if {![file isdirectory $this(tmpPath)]} {
+    file mkdir $this(tmpPath)
 }
 
 # Privaria-specific stuff
@@ -481,6 +475,7 @@ set listOfPackages {
     undo
     can2svg       
     buttontray
+    headlabel
 }
 foreach packName $listOfPackages {
     package require $packName

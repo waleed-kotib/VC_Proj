@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: buttontray.tcl,v 1.2 2003-11-08 08:54:44 matben Exp $
+# $Id: buttontray.tcl,v 1.3 2003-12-15 08:20:53 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -104,16 +104,16 @@ proc ::buttontray::Init { } {
     # Platform specifics...
     switch -- $this(platform) {
 	unix {
-	    option add *ButtonTray.font  {Helvetica -10 normal}   widgetDefault
+	    option add *ButtonTray.font  {Helvetica -10}   widgetDefault
 	}
 	windows {
-	    option add *ButtonTray.font  {Arial 8 normal}         widgetDefault
+	    option add *ButtonTray.font  {Arial 8}         widgetDefault
 	}
 	macintosh {
-	    option add *ButtonTray.font  {Geneva 9 normal}        widgetDefault
+	    option add *ButtonTray.font  {Geneva 9}        widgetDefault
 	}
 	macosx {
-	    option add *ButtonTray.font  {{Lucida Grande} 11 normal} widgetDefault
+	    option add *ButtonTray.font  {{Lucida Grande} 11} widgetDefault
 	}
     }
     

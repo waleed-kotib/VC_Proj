@@ -5,35 +5,41 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.9 2003-12-13 17:54:41 matben Exp $
+# $Id: JUI.tcl,v 1.10 2003-12-15 08:20:53 matben Exp $
 
 package provide JUI 1.0
 
 
 namespace eval ::Jabber::UI:: {
 
-    # Use option database for customization. Not used yet...
-    option add *RostServ*Tree.background            #dedede         widgetDefault
-    option add *RostServ*Tree.backgroundImage       {}              widgetDefault
-    option add *RostServ*Tree.highlightBackground   white           widgetDefault
-    option add *RostServ*Tree.highlightColor        black           widgetDefault
-    option add *RostServ*Tree.indention             14              widgetDefault
-    option add *RostServ*Tree.openIcons             plusminus       widgetDefault
-    option add *RostServ*Tree.pyjamasColor          white           widgetDefault
-    option add *RostServ*Tree.selectBackground      black           widgetDefault
-    option add *RostServ*Tree.selectForeground      white           widgetDefault
-    option add *RostServ*Tree.selectMode            1               widgetDefault
-    option add *RostServ*Tree.treeColor             gray50          widgetDefault
+    # Use option database for customization.
+    option add *JMain*Tree.background            #dedede         widgetDefault
+    option add *JMain*Tree.backgroundImage       {}              widgetDefault
+    option add *JMain*Tree.highlightBackground   white           widgetDefault
+    option add *JMain*Tree.highlightColor        black           widgetDefault
+    option add *JMain*Tree.indention             14              widgetDefault
+    option add *JMain*Tree.openIcons             plusminus       widgetDefault
+    option add *JMain*Tree.pyjamasColor          white           widgetDefault
+    option add *JMain*Tree.selectBackground      black           widgetDefault
+    option add *JMain*Tree.selectForeground      white           widgetDefault
+    option add *JMain*Tree.selectMode            1               widgetDefault
+    option add *JMain*Tree.treeColor             gray50          widgetDefault
 
-    option add *RostServ*MacTabnotebook.activeForeground    black        widgetDefault
-    option add *RostServ*MacTabnotebook.activeTabColor      #efefef      widgetDefault
-    option add *RostServ*MacTabnotebook.activeTabBackground #cdcdcd      widgetDefault
-    option add *RostServ*MacTabnotebook.activeTabOutline    black        widgetDefault
-    option add *RostServ*MacTabnotebook.background          white        widgetDefault
-    option add *RostServ*MacTabnotebook.style               classic      widgetDefault
-    option add *RostServ*MacTabnotebook.tabBackground       #dedede      widgetDefault
-    option add *RostServ*MacTabnotebook.tabColor            #cecece      widgetDefault
-    option add *RostServ*MacTabnotebook.tabOutline          gray20       widgetDefault
+    option add *JMain*MacTabnotebook.activeForeground    black        widgetDefault
+    option add *JMain*MacTabnotebook.activeTabColor      #efefef      widgetDefault
+    option add *JMain*MacTabnotebook.activeTabBackground #cdcdcd      widgetDefault
+    option add *JMain*MacTabnotebook.activeTabOutline    black        widgetDefault
+    option add *JMain*MacTabnotebook.background          white        widgetDefault
+    option add *JMain*MacTabnotebook.style               classic      widgetDefault
+    option add *JMain*MacTabnotebook.tabBackground       #dedede      widgetDefault
+    option add *JMain*MacTabnotebook.tabColor            #cecece      widgetDefault
+    option add *JMain*MacTabnotebook.tabOutline          gray20       widgetDefault
+    
+    variable treeOpts {background backgroundImage highlightBackground \
+      highlightColor indention openIcons pyjamasColor selectBackground \
+      selectForeground selectMode treeColor}
+    variable macTabOpts {activeForeground activeTabColor activeTabBackground \
+      activeTabOutline background style tabBackground tabColor tabOutline}
     
     # Collection of useful and common widget paths.
     variable jwapp
@@ -79,9 +85,7 @@ proc ::Jabber::UI::Build {w} {
     ::Jabber::Debug 2 "::Jabber::UI::Build w=$w"
     
     if {$w != "."} {
-	
-	# Toplevel of class RostServ.
-	toplevel $w -class RostServ
+	toplevel $w
 	if {[string match "mac*" $this(platform)]} {
 	    eval $::macWindowStyle $w documentProc
 	} else {
@@ -132,7 +136,12 @@ proc ::Jabber::UI::Build {w} {
     
     set fontS [option get . fontSmall {}]
     
-    set wtray ${wtop}top
+    # Use a frame here just to be able to set the class (JMain) which
+    # is useful for setting options.
+    set fall [frame $w.f -class JMain]
+    pack $fall -fill both -expand 1
+    
+    set wtray ${fall}.top
     ::buttontray::buttontray $wtray 52 -borderwidth 1 -relief raised
     pack $wtray -side top -fill x
     set jwapp(wtray) $wtray
@@ -155,7 +164,7 @@ proc ::Jabber::UI::Build {w} {
 
     # Build bottom and up to handle clipping when resizing.
     # Jid entry with electric plug indicator.
-    set wbot ${wtop}jid
+    set wbot ${fall}.jid
     set jwapp(elplug) ${wbot}.icon
     set jwapp(mystatus) ${wbot}.stat
     set jwapp(myjid) ${wbot}.e
@@ -177,7 +186,7 @@ proc ::Jabber::UI::Build {w} {
       -side left -fill x -expand 1 -pady 0 -padx 0
         
     # Build status feedback elements.
-    set wstat ${wtop}st
+    set wstat ${fall}.st
     set jwapp(statmess) ${wstat}.g.c
 
     pack [frame ${wstat} -relief raised -borderwidth 1]  \
@@ -193,7 +202,7 @@ proc ::Jabber::UI::Build {w} {
     ::Jabber::Roster::BuildPresenceMenu $jwapp(mypresmenu)
     
     # Notebook frame.
-    set frtbook ${wtop}fnb
+    set frtbook ${fall}.fnb
     pack [frame $frtbook -bd 1 -relief raised] -fill both -expand 1    
     set nbframe [::mactabnotebook::mactabnotebook ${frtbook}.tn]
     set jwapp(nbframe) $nbframe

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: wizard.tcl,v 1.2 2003-12-13 17:54:40 matben Exp $
+# $Id: wizard.tcl,v 1.3 2003-12-15 08:20:53 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -39,6 +39,7 @@
 #
 #       1.0     
 
+package require Tk 8.4
 package require notebook
 package provide wizard 1.0
 
@@ -103,13 +104,13 @@ proc ::wizard::Init { } {
     
     # Platform specifics...
     switch $tcl_platform(platform) {
-	{unix} {
+	unix {
 	    option add *Wizard.font    {Helvetica -12 bold}   widgetDefault
 	}
-	{windows} {
+	windows {
 	    option add *Wizard.font    {system}    widgetDefault
 	}
-	{macintosh} {
+	macintosh {
 	    option add *Wizard.font    {system}    widgetDefault
 	}
     }

@@ -5,7 +5,7 @@
 ##
 ## Large rewrite by Mats Bengtsson 2001-2002
 ##
-# $Id: pane.tcl,v 1.1.1.1 2002-12-08 10:55:56 matben Exp $
+# $Id: pane.tcl,v 1.2 2003-12-15 08:20:53 matben Exp $
 
 package provide Pane 1.0
 
@@ -68,6 +68,10 @@ package provide Pane 1.0
 namespace eval ::pane:: {
     namespace export pane
     
+    option add *Pane.background          white             widgetDefault
+    option add *Pane.imageHorizontal     pane::imh         widgetDefault
+    option add *Pane.imageVertical       pane::imv         widgetDefault
+
     variable PANE    
 
     set dataPaneH {
@@ -97,12 +101,13 @@ ZcydNT/mPJhyYsuLh32GDPCn5NKeT4OGLXo16cimM6PerFo2a4quc4fePbq3
 7tm4Yx//DTO48uHIW7cVTpu4bePQmRN1Xtv3belzASfvvvw78OnPq0c/H17w
 eOvesavXbhX8Zfp27afGl938vQQAOw==}
 	
-    set PANE(impaneh) [image create photo -data $dataPaneH]
-    set PANE(impanev) [image create photo -data $dataPaneV]
+    set PANE(impaneh) [image create photo pane::imh -data $dataPaneH]
+    set PANE(impanev) [image create photo pane::imv -data $dataPaneV]
 }
 
 proc ::pane::pane {opt args} {
     variable PANE    
+    
     switch -glob -- $opt {
 	c* { eval pane_config $args }
 	f* {
@@ -243,6 +248,7 @@ proc ::pane::pane {opt args} {
     }
     place $w -$wh 0
     set frac 1.0
+    
     while {[incr ll -1]} {
 	set frac [expr $frac - [lindex $fracl $ll]]
 	set h [eval label [list $p.__h$ll] -bd 1 -relief raised \

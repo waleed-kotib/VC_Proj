@@ -4,7 +4,7 @@
 #
 #  Code idee from Harrison & McLennan
 #  
-# $Id: balloonhelp.tcl,v 1.6 2003-11-06 08:38:39 matben Exp $
+# $Id: balloonhelp.tcl,v 1.7 2003-12-15 08:20:53 matben Exp $
 
 package provide balloonhelp 1.0
 
@@ -16,11 +16,11 @@ namespace eval ::balloonhelp:: {
     set locals(active) 1
     set locals(millisecs) 1200
     
-    option add *Balloonhelp*background white widgetDefault
-    option add *Balloonhelp*foreground black widgetDefault
-    option add *Balloonhelp.info.wrapLength 180 widgetDefault
-    option add *Balloonhelp.info.justify left widgetDefault
-    option add *Balloonhelp.millisecs 1200 widgetDefault
+    option add *Balloonhelp*background            white     widgetDefault
+    option add *Balloonhelp*foreground            black     widgetDefault
+    option add *Balloonhelp.info.wrapLength       180       widgetDefault
+    option add *Balloonhelp.info.justify          left      widgetDefault
+    option add *Balloonhelp.millisecs             1200      widgetDefault
     
     # We use a variable 'locals(platform)' that is more convenient for Mac OS X.
     switch -- $::tcl_platform(platform) {

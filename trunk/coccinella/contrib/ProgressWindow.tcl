@@ -10,7 +10,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ProgressWindow.tcl,v 1.4 2003-12-13 17:54:40 matben Exp $
+# $Id: ProgressWindow.tcl,v 1.5 2003-12-15 08:20:53 matben Exp $
 # 
 #-------------------------------------------------------------------------------
 #
@@ -110,17 +110,17 @@ namespace eval ::ProgressWindow:: {
     # Platform specifics...
     switch -glob -- $this(platform) {
 	unix {
-	    option add *ProgressWindow.font1            {Helvetica 10 bold}
-	    option add *ProgressWindow.font2            {Helvetica 10 normal}
+	    option add *ProgressWindow.font1    {Helvetica 10 bold}   widgetDefault
+	    option add *ProgressWindow.font2    {Helvetica 10 normal} widgetDefault
 	}
 	windows {
-	    option add *ProgressWindow.font1            {Arial 8 bold}
-	    option add *ProgressWindow.font2            {Arial 8 normal}
+	    option add *ProgressWindow.font1    {Arial 8 bold}        widgetDefault
+	    option add *ProgressWindow.font2    {Arial 8 normal}      widgetDefault
 	}
 	mac* {
-	    option add *ProgressWindow.font1            {Geneva 9 bold}
-	    option add *ProgressWindow.font1            system
-	    option add *ProgressWindow.font2            {Geneva 9 normal}
+	    option add *ProgressWindow.font1    {Geneva 9 bold}       widgetDefault
+	    option add *ProgressWindow.font1    system                widgetDefault
+	    option add *ProgressWindow.font2    {Geneva 9 normal}     widgetDefault
 	}
     }
     

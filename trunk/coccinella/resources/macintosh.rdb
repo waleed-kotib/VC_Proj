@@ -18,19 +18,19 @@
 
 *Checkbutton.Font:                   Geneva 9
 *Entry.Font:                         Geneva 9
-*Entry.HighlightThickness:           3
+*Entry.highlightThickness:           3
 *Label.Font:                         Geneva 9
 *Listbox.Font:                       Geneva 9
-*Listbox.HighlightThickness:         3
+*Listbox.highlightThickness:         3
 *Message.Font:                       Geneva 9
 *Radiobutton.Font:                   Geneva 9
 *Text.Font:                          Geneva 9
-*Text.HighlightThickness:            3
+*Text.highlightThickness:            3
 
 ! contributed widgets
 !
 *Combobox.Font:                      Geneva 9
 *Tablelist.Font:                     Geneva 9
-*Tablelist.HighlightThickness:       3
+*Tablelist.highlightThickness:       3
 *Tree.openIcons:                     triangle
 *Tree.treeColor:                     

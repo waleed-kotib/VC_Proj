@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Subscribe.tcl,v 1.3 2003-12-13 17:54:41 matben Exp $
+# $Id: Subscribe.tcl,v 1.4 2003-12-15 08:20:53 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -51,7 +51,6 @@ proc ::Jabber::Subscribe::Subscribe {jid args} {
     }
     wm title $w [::msgcat::mc Subscribe]
     set fontSB [option get . fontSmallBold {}]
-    set fontL [option get . fontLarge {}]
     
     # Find our present groups.
     set allGroups [$jstate(roster) getgroups]
@@ -78,8 +77,7 @@ proc ::Jabber::Subscribe::Subscribe {jid args} {
     pack [frame $w.frall -borderwidth 1 -relief raised]  \
       -fill both -expand 1 -ipadx 4
     
-    label $w.frall.head -text [::msgcat::mc Subscribe] -font $fontL  \
-      -anchor w -padx 10 -pady 4 -bg #cecece
+    ::headlabel::headlabel $w.frall.head -text [::msgcat::mc Subscribe]
     pack $w.frall.head -side top -fill both -expand 1
     message $w.frall.msg -width 260  \
       -text [::msgcat::mc jasubwant $jid]

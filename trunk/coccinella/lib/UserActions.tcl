@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UserActions.tcl,v 1.21 2003-12-10 15:21:43 matben Exp $
+# $Id: UserActions.tcl,v 1.22 2003-12-15 08:20:53 matben Exp $
 
 namespace eval ::UserActions:: {
     
@@ -745,7 +745,7 @@ proc ::UserActions::DoCloseWindow {{wevent {}}} {
 	MailBox {
 	    ::Jabber::MailBox::Show -visible 0
 	}
-	RostServ {
+	JMain {
 	    ::UserActions::DoQuit -warning 1
 	}
 	default {
@@ -832,7 +832,7 @@ proc ::UserActions::DoQuit {args} {
     }
     
     # Cleanup. Beware, no windows with open movies must exist here!
-    file delete -force $this(tmpDir)
+    file delete -force $this(tmpPath)
     exit
 }
 

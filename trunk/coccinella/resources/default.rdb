@@ -21,31 +21,34 @@
 ! tk standard widgets
 !
 *Checkbutton.Font:                   Helvetica 10
-*Entry.Background:                   white
-*Entry.BorderWidth:                  1
-*Entry.DisableBackground:            #dedede
-*Entry.DisableForeground:            gray20
+*Entry.background:                   white
+*Entry.borderWidth:                  1
+*Entry.disableBackground:            #dedede
+*Entry.disableForeground:            gray20
 *Entry.Font:                         Helvetica 10
-*Entry.Foreground:                   black
-*Entry.HighlightThickness:           2
+*Entry.foreground:                   black
+*Entry.highlightThickness:           2
 *Label.Font:                         Helvetica 10
-*Listbox.Background:                 white
-*Listbox.BorderWidth:                1
+*Listbox.background:                 white
+*Listbox.borderWidth:                1
 *Listbox.Font:                       Helvetica 10
-*Listbox.HighlightThickness:         2
+*Listbox.highlightThickness:         2
 *Message.Font:                       Helvetica 10
 *Radiobutton.Font:                   Helvetica 10
-*Text.Background:                    white
+*Text.background:                    white
 *Text.Font:                          Helvetica 10
-*Text.HighlightThickness:            2
+*Text.highlightThickness:            2
 
 ! contributed widgets
 !
-*Combobox.Background:                white
+*Combobox.background:                white
 *Combobox.Font:                      Helvetica 10
-*Tablelist.BorderWidth:              1
+*Tablelist.borderWidth:              1
 *Tablelist.Font:                     Helvetica 10
-*Tablelist.HighlightThickness:       2
+*Tablelist.highlightThickness:       2
+*Tablelist.labelBackground:          #cecece
+*Tablelist.stripeBackground:         #dedeff
+*Tablelist.background:               white
 
 ! specific megawidgets
 !

@@ -13,20 +13,21 @@
 !
 
 *Checkbutton.Font:                   {Lucida Grande} 11
-*Entry.HighlightThickness:           3
+*Entry.highlightThickness:           3
 *Entry.Font:                         {Lucida Grande} 11
 *Label.Font:                         {Lucida Grande} 11
 *Listbox.Font:                       {Lucida Grande} 11
-*Listbox.HighlightThickness:         3
+*Listbox.highlightThickness:         3
 *Message.Font:                       {Lucida Grande} 11
 *Radiobutton.Font:                   {Lucida Grande} 11
 *Text.Font:                          {Lucida Grande} 11
-*Text.HighlightThickness:            3
+*Text.highlightThickness:            3
 
 ! contributed widgets
 !
 *Combobox.Font:                      {Lucida Grande} 11
 *Tablelist.Font:                     {Lucida Grande} 11
-*Tablelist.HighlightThickness:       3
+*Tablelist.highlightThickness:       3
+*Tablelist.BorderWidth:              1              
 *Tree.openIcons:                     triangle
 *Tree.treeColor:                     

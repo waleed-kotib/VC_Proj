@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Search.tcl,v 1.3 2003-12-13 17:54:41 matben Exp $
+# $Id: Search.tcl,v 1.4 2003-12-15 08:20:53 matben Exp $
 
 package provide Search 1.0
 
@@ -89,7 +89,7 @@ proc ::Jabber::Search::Build {args} {
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
       -command "destroy $w"]  \
       -side right -padx 5 -pady 2
-    pack [::chasearrows::chasearrows $wsearrows -background gray87 -size 16] \
+    pack [::chasearrows::chasearrows $wsearrows -size 16] \
       -side left -padx 5 -pady 2
     pack $frbot -side bottom -fill x -padx 8 -pady 6
     
@@ -143,9 +143,8 @@ proc ::Jabber::Search::Build {args} {
     set wysc $frsearch.ysc
     tablelist::tablelist $wtb \
       -columns [list 60 [::msgcat::mc {Search results}]]  \
-      -background white  \
       -xscrollcommand [list $wxsc set] -yscrollcommand [list $wysc set]  \
-      -labelbackground #cecece -stripebackground #dedeff -width 60 -height 20
+      -width 60 -height 20
     #-labelcommand "[namespace current]::LabelCommand"  \
     
     scrollbar $wysc -orient vertical -command [list $wtb yview]
