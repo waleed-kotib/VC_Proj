@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.13 2004-08-07 13:34:22 matben Exp $
+# $Id: Whiteboard.tcl,v 1.14 2004-08-15 06:56:53 matben Exp $
 
 package require entrycomp
 package require moviecontroller
@@ -298,11 +298,8 @@ proc ::WB::Init {} {
     # Create the mapping between Html sizes and font point sizes dynamically.
     ::CanvasUtils::CreateFontSizeMapping
     
-    # Mac OS X have the Quit menu on the Apple menu instead. Catch it!
+    # Default Apple Event open handler.
     if {[string equal $this(platform) "macosx"]} {
-	if {![catch {package require tclAE}]} {
-	    tclAE::installEventHandler aevt quit ::UI::AEQuitHandler
-	}
 	proc ::tk::mac::OpenDocument {args} {
 	    foreach f $args {
 		
@@ -1922,6 +1919,7 @@ namespace eval ::WB:: {
 #       Build the actual shortcut button pad.
 
 proc ::WB::BuildShortcutButtonPad {wtop} {
+    global  wDlgs
     variable wbicons
     variable btShortDefs
     variable extButtonDefs

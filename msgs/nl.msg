@@ -12,6 +12,7 @@
 ::msgcat::mcset nl Address		{Adres}
 ::msgcat::mcset nl Advanced		{Geavanceerd}
 ::msgcat::mcset nl Agents		{Agenten}
+#::msgcat::mcset nl Appearence   Appearence
 ::msgcat::mcset nl Apply		{Toepassen}
 ::msgcat::mcset nl Available		{Beschikbaar}
 ::msgcat::mcset nl Away			{Afwezig}
@@ -152,7 +153,7 @@
 ::msgcat::mcset nl mPreferences		{Voorkeuren}
 ::msgcat::mcset nl mJabber		{Jabber}
 ::msgcat::mcset nl mItems		{Items}
-::msgcat::mcset nl mLibrary		{Library}
+#::msgcat::mcset nl mLibrary		{Library}
 ::msgcat::mcset nl mInfo		{Info}
 ::msgcat::mcset nl mAddons		{Uitbreidingen}
 ::msgcat::mcset nl mPlugins		{Plugins}
@@ -175,6 +176,7 @@
 ::msgcat::mcset nl mOpenCanvas		{Doek openen...}
 ::msgcat::mcset nl mSaveCanvas		{Doek op&slaan...}
 ::msgcat::mcset nl mSaveAs		{Opslaan &als...}
+#::msgcat::mcset nl mSaveAsItem          {Save As Item...}
 ::msgcat::mcset nl mSaveImageAs         {Afbeelding opslaan als...}
 ::msgcat::mcset nl mPageSetup		{Pagina setup...}
 ::msgcat::mcset nl mPrintCanvas		{Doek afdrukken...}
@@ -234,6 +236,7 @@
 ::msgcat::mcset nl mSendMessage		{&Bericht verzenden...}
 ::msgcat::mcset nl mChat		{Chat}
 ::msgcat::mcset nl mStatus		{Status}
+#::msgcat::mcset nl mDirStatus           {Directed Status}
 ::msgcat::mcset nl mAvailable		{Beschikbaar}
 ::msgcat::mcset nl mAway		{Afwezig}
 ::msgcat::mcset nl mDoNotDisturb	{Niet storen}
@@ -261,10 +264,14 @@
 ::msgcat::mcset nl mImageSmaller	{Afbeelding verkleinen}
 ::msgcat::mcset nl mExportImage		{Afbeelding exporteren...}
 ::msgcat::mcset nl mExportMovie		{Film exporteren...}
+#::msgcat::mcset nl mSyncPlayback	{Sync Playback}
 ::msgcat::mcset nl mColor		{Kleur...}
 ::msgcat::mcset nl mAddSpeechBubble	{Tekstballon toevoegen}
 ::msgcat::mcset nl mUpdateCheck  	{&Controle op updates}
 ::msgcat::mcset nl mReloadImage  	{Afbeelding herladen}
+#::msgcat::mcset nl mCoccinellaHome  	 {Coccinella Home...}
+#::msgcat::mcset nl mComponents 	 {Components...}
+#::msgcat::mcset nl mBugReport  	 {Report Bug...}
 
 
 # Popups
@@ -371,6 +378,7 @@
 ::msgcat::mcset nl {Last name}			{Achternaam}
 ::msgcat::mcset nl {Launch time}		{Opstarttijd}
 ::msgcat::mcset nl {Local Time}			{Lokale tijd}
+#::msgcat::mcset nl {Logged out}           {Logged out}
 ::msgcat::mcset nl {Login as invisible}		{Als onzichtbaar inloggen}
 ::msgcat::mcset nl {Mailbox Error}		{Mailbox fout}
 ::msgcat::mcset nl {MIME type}			{Bestandstype}
@@ -418,6 +426,7 @@
 ::msgcat::mcset nl {Postal Code}		{Postnummer}
 ::msgcat::mcset nl {Preferred Protocol}		{Geprefereerd protocol}
 ::msgcat::mcset nl {Presence Error}		{Statusheidsfout}
+#::msgcat::mcset nl {Profile Name}         {Profile Name}
 ::msgcat::mcset nl {Proxy Setup}		{Proxy setup}
 ::msgcat::mcset nl {Put File Error}		{Bestandsplaatsingsfout}
 ::msgcat::mcset nl {Put Image/Movie}		{Plaats afbeelding/film}
@@ -446,6 +455,7 @@
 ::msgcat::mcset nl {Send Live}			{Live verzenden}
 ::msgcat::mcset nl {Server Info}		{Servergegevens}
 ::msgcat::mcset nl {Service server}		{Service server}
+#::msgcat::mcset nl {Set Directed Presence} {Set Directed Presence}
 ::msgcat::mcset nl {Set New Topic}		{Nieuw onderwerp instellen}
 ::msgcat::mcset nl {Set Status}			{Status instellen}
 ::msgcat::mcset nl {Settings Panels}		{Instellingen}
@@ -715,7 +725,14 @@ gaan wanneer u dit whiteboard sluit. Wilt u werkelijk deze conversatie\
 beëindigen?}
 ::msgcat::mcset nl jamesschatoffline            {Deze gebruiker is niet meer online\
 waardoor het bericht niet is verzonden.}
-    
+#::msgcat::mcset nl jamessregloginok             {You are now registered and\
+#automatically logged on as "%s"}
+#::msgcat::mcset nl jamessregerrinuse            {The registration failed\
+#because this username is already in use by another user. If this user is you,\
+#try to login instead. Error message: %s}
+#::msgcat::mcset nl jamessregerr                 {The registration failed\
+#with error message: %s}
+
     
 
 }
@@ -839,6 +856,8 @@ wordt gelimiteerd door de instellingen hieronder.}
 ::msgcat::mcset nl prefplugctrl  {U kan elk pakket deselecteren waarvan u\
 het laden wilt verhinderen. U moet Coccinella herstarten voordat de wijzigingen worden doorgevoerd.}
 ::msgcat::mcset nl prefchactret  {Gebruik altijd actieve <Return> in chatvenster}
+#::msgcat::mcset nl prefprofname  {Enter desired name of user profile}
+#::msgcat::mcset nl prefstabui    {Use tabbed notebook interface}
 
 
 
@@ -912,6 +931,7 @@ wilt toevoegen aan de lijst met services (bv: "jabber.org").}
 	::msgcat::mcset nl jaupdatenewver {De nieuwe versie is: %s}
 	::msgcat::mcset nl jaupdateremind {Deze boodschap niet meer tonen}
 	::msgcat::mcset nl jasettopic   {Stel nieuw onderwerp in voor deze kamer.}
+#	::msgcat::mcset nl jadirpresmsg {Send directed presence to the user \"%s\".}
 
 
 }

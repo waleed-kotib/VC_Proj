@@ -14,8 +14,9 @@ if {[string equal $::tcl_platform(platform) "windows"]} {
     component::attempt URIRegistry [file join $dir URIRegistry.tcl] ::URIRegistry::Init
 }
 
-# Problem to determine if app hidden or not!
 if {[string equal $::tcl_platform(platform) "unix"] && [string equal [tk windowingsystem] "aqua"]} {
+    component::attempt AppleEvents [file join $dir AppleEvents.tcl] ::AppleEvents::Init
+    # Problem to determine if app hidden or not!
     #component::attempt CarbonNotification [file join $dir CarbonNotification.tcl] ::CarbonNotification::Init
 }
 
