@@ -9,11 +9,13 @@
 #      It makes also sure to disco only a single unique client of all
 #      clients we have obtained presence from according to JEP-0115.
 #      
-#      UNFINISHED!!!
-#      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: caps.tcl,v 1.1 2005-02-16 14:26:46 matben Exp $
+# $Id: caps.tcl,v 1.2 2005-02-17 10:30:07 matben Exp $
+
+#      UNFINISHED!!!
+#      
+# EXPERIMENTAL!!!
 
 package provide caps 1.0
 
@@ -22,6 +24,7 @@ namespace eval jlib::caps {}
 proc jlib::caps::init {jlibname} {
     
     jlib::presence_register $jlibname available   [namespace current]::presence_cb
+    jlib::presence_register $jlibname unavailable [namespace current]::unavail_cb
     
     namespace eval ${jlibname}::caps {
 
@@ -36,8 +39,9 @@ proc jlib::caps::init {jlibname} {
 proc jlib::caps::presence_cb {jlibname jid type args} {
 
     upvar jlib::jxmlns jxmlns
-    upvar ${jlibname}::caps::discoed discoed
-    upvar ${jlibname}::caps::cache   cache
+    upvar ${jlibname}::caps::discoed  discoed
+    upvar ${jlibname}::caps::cache    cache
+    upvar ${jlibname}::caps::capsjids capsjids
     
     set disco [jlib::service::get $jlibname disco]
     if {$disco == ""} {
@@ -61,6 +65,15 @@ proc jlib::caps::presence_cb {jlibname jid type args} {
 	    set node [wrapper::getattribute $cElem node]
 	    set ver  [wrapper::getattribute $cElem ver]
 	    set ext  [wrapper::getattribute $cElem ext]
+	    
+	    # Keep track of all jid <-> node+ver combinations.
+	    # The exts may be different for identical node+ver and must be
+	    # obtained for individual jids using 'roster getcapsattr'.
+	    
+	    if {[lsearch $capsjids($node,$ver) $jid] < 0} {
+		lappend capsjids($node,$ver) $jid
+	    }
+	    
 	    if {![info exists discoed(ver,$node,$ver)]} {
 		array set argsArr $args
 		
@@ -75,8 +88,9 @@ proc jlib::caps::presence_cb {jlibname jid type args} {
 
 proc jlib::caps::disco_cb {jlibname disconame type from subiq args} {
     
-    upvar ${jlibname}::caps::discoed discoed
-    upvar ${jlibname}::caps::cache   cache
+    upvar ${jlibname}::caps::discoed  discoed
+    upvar ${jlibname}::caps::cache    cache
+    upvar ${jlibname}::caps::capsjids capsjids
 
     set node [wrapper::getattribute $subiq node]
     #puts "++++++++++++++++++++++++type=$type, from=$from, node=$node, $subiq, $args"
@@ -91,15 +105,36 @@ proc jlib::caps::disco_cb {jlibname disconame type from subiq args} {
     }
 }
 
+proc jlib::caps::unavail_cb {jlibname jid type args} {
+
+    upvar ${jlibname}::caps::discoed  discoed
+    upvar ${jlibname}::caps::cache    cache
+    upvar ${jlibname}::caps::capsjids capsjids
+
+    set roster [jlib::getrostername $jlibname]
+    set node [$roster getcapsattr $jid node]
+    set ver  [$roster getcapsattr $jid ver]
+    
+    if {[info exists capsjids($node,$ver)]} {
+	if {[set ind [lsearch $capsjids($node,$ver) $jid]] >= 0} {
+	    set capsjids($node,$ver) [lreplace $capsjids($node,$ver) $ind $ind]
+	}
+    }
+    
+}
+
 proc jlib::caps::free {jlibname} {
 
-    upvar ${jlibname}::discoed discoed
-    upvar ${jlibname}::cache cache
+    upvar ${jlibname}::caps::discoed  discoed
+    upvar ${jlibname}::caps::cache    cache
+    upvar ${jlibname}::caps::capsjids capsjids
 
     array unset discoed
     array unset cache
+    array unset capsjids
 
-    jlib::presence_deregister $jlibname available [namespace current]::presence_cb
+    jlib::presence_deregister $jlibname available   [namespace current]::presence_cb
+    jlib::presence_deregister $jlibname unavailable [namespace current]::unavail_cb
 }
 
 
