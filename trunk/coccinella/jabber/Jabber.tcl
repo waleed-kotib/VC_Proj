@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.98 2004-07-27 14:25:19 matben Exp $
+# $Id: Jabber.tcl,v 1.99 2004-08-03 14:04:43 matben Exp $
 
 package provide Jabber 1.0
 
@@ -1378,7 +1378,7 @@ proc ::Jabber::SetPrivateData { } {
     variable privatexmlns
     
     # Build tag and attributes lists to 'private_set'.
-    set ip [::Network::GetThisOutsideIPAddress]
+    set ip [::Network::GetThisPublicIPAddress]
     $jstate(jlib) private_set $privatexmlns(public)  \
       [list ::Jabber::SetPrivateDataCallback $jserver(this)]   \
       -server [list $ip [list resource $jstate(meres)  \
@@ -1758,7 +1758,7 @@ proc ::Jabber::ParseGetServers  {jlibname from subiq args} {
     variable privatexmlns
     
     # Build tag and attributes lists to 'private_set'.
-    set ip [::Network::GetThisOutsideIPAddress]
+    set ip [::Network::GetThisPublicIPAddress]
     
     array set argsArr $args
     

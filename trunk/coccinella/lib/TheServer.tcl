@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: TheServer.tcl,v 1.23 2004-07-09 06:26:06 matben Exp $
+# $Id: TheServer.tcl,v 1.24 2004-08-03 14:04:44 matben Exp $
     
 # DoStartServer ---
 #
@@ -156,6 +156,7 @@ proc ExecuteClientRequest {channel ip port line args} {
 	    set optList [lrange $instr 1 end]
 	    set opts [::Import::GetTclSyntaxOptsFromTransport $optList]
 	    set fileTransportChannel($channel) 1
+	    
 	    ::hooks::run serverGetRequestHook $channel $ip $fileName $opts
 	}
 	PUT {
@@ -164,6 +165,7 @@ proc ExecuteClientRequest {channel ip port line args} {
 	    set optList [lrange $instr 1 end]
 	    set opts [::Import::GetTclSyntaxOptsFromTransport $optList]
 	    set fileTransportChannel($channel) 1
+	    
 	    ::hooks::run serverPutRequestHook $channel $fileName $opts
 	}
 	default {

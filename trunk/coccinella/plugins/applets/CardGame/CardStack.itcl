@@ -3,7 +3,7 @@
 #       Supposed to handle cardstacks. It doesn't handle any display things,
 #       and not any user interaction or interface stuff.
 # 
-# $Id: CardStack.itcl,v 1.3 2004-07-24 10:55:47 matben Exp $
+# $Id: CardStack.itcl,v 1.4 2004-08-03 14:04:45 matben Exp $
 
 class CardStack {
         
@@ -22,6 +22,7 @@ class CardStack {
 
     public {
 	method MixCards {}
+	method DrawCard {card}
 	method Pop {}
 	method PopAndMix {}
 	method Image {card}
@@ -149,6 +150,14 @@ body CardStack::MixCards {} {
 	lappend currHand [lindex $cards $ind]
 	set cards [lreplace $cards $ind $ind]
 	incr remaining -1
+    }
+}
+
+body CardStack::DrawCard {card} {
+    
+    set ind [lsearch $currHand $card]
+    if {$ind >= 0} {
+	set currHand [lreplace $currHand $ind $ind]
     }
 }
 
