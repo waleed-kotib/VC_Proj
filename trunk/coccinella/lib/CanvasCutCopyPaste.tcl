@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasCutCopyPaste.tcl,v 1.8 2004-01-13 14:50:21 matben Exp $
+# $Id: CanvasCutCopyPaste.tcl,v 1.9 2004-01-29 08:09:43 matben Exp $
 
 package provide CanvasCutCopyPaste 1.0
 
@@ -22,6 +22,39 @@ namespace eval ::CanvasCCP:: {
     # Perhaps it is enough to use a nonprintable character; 
     # what happens with binary data?    BAD!!!!!!!!!
     variable clipItemSep " ANDqzU\06 "
+}
+
+# CanvasCCP::CutCopyPasteCmd ---
+#
+#       Cut/copy/paste command for the whiteboard.
+#       
+# Arguments:
+#       cmd      cut/copy/paste
+#       
+# Results:
+#       none
+
+proc ::CanvasCCP::CutCopyPasteCmd {cmd} {
+    
+    set wfocus [focus]
+    ::Debug 2 "::CanvasCCP::CutCopyPasteCmd cmd=$cmd, wfocus=$wfocus"
+    
+    if {$wfocus == ""} {
+	return
+    }
+	    
+    # Operate on the whiteboard's canvas.
+    set wtop [::UI::GetToplevelNS $wfocus]
+    upvar ::${wtop}::wapp wapp
+    
+    switch -- $cmd {
+	cut - copy {
+	    ::CanvasCCP::CopySelectedToClipboard $wapp(can) $cmd		    
+	}
+	paste {
+	    ::CanvasCCP::PasteFromClipboardTo $wapp(can)
+	}
+    }
 }
 
 # CanvasCCP::CopySelectedToClipboard --

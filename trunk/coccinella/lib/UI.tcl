@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.46 2004-01-27 08:48:06 matben Exp $
+# $Id: UI.tcl,v 1.47 2004-01-29 08:09:40 matben Exp $
 
 package require entrycomp
 
@@ -560,17 +560,18 @@ proc ::UI::BuildMenu {wtop wmenu label menuDef state args} {
 		# All variables (and commands) in menuDef's cmd shall be 
 		# substituted! Be sure they are all in here.
 		set cmd [subst -nocommands $cmd]
-		if {[string length $accel] > 0} {
+		if {[string length $accel]} {
 		    lappend mopts -accelerator ${mod}+${accel}
-		    if {![string equal $this(platform) "macintosh"]} {
+
+		    # Cut, Copy & Paste handled by widgets internally!
+		    if {![string equal $this(platform) "macintosh"] \
+		      && ![regexp {(X|C|V)} $accel]} {
 			set key [string map {< less > greater}  \
 			  [string tolower $accel]]
 			
 			if {[string equal $state "normal"]} {
 			    if {[string equal $mstate "normal"]} {
 				bind $topw <${mod}-Key-${key}> $cmd
-				#bind $topw <${mod}-Key-${key}> \
-				#  [list $wmenu invoke $i]
 			    }
 			} else {
 			    bind $topw <${mod}-Key-${key}> {}
@@ -659,14 +660,14 @@ proc ::UI::MenuMethod {wmenu cmd key args} {
 		set mcmd [lindex [lindex $menuSpec $mind] 2]
 		set mcmd [subst -nocommands $mcmd]
 		set acc [lindex [lindex $menuSpec $mind] 4]
-		if {[string length $acc]} {
+
+		# Cut, Copy & Paste handled by widgets internally!
+		if {[string length $acc] && ![regexp {(X|C|V)} $acc]} {
 		    set acckey [string map {< less > greater}  \
 		      [string tolower $acc]]
 		    foreach w $topw {
 			if {[string equal $val "normal"]} {
 			    bind $w <$osprefs(mod)-Key-${acckey}> $mcmd
-			    #bind $w <$osprefs(mod)-Key-${acckey}> \
-			     # [list $wmenu invoke $mind]
 			} else {
 			    bind $w <$osprefs(mod)-Key-${acckey}> {}
 			}
@@ -716,8 +717,9 @@ proc ::UI::MacUseMainMenu {w} {
 	    foreach line $cachedMenuSpec(.,$wmenu) {
 		
 		# {type name cmd mstate accel mopts subdef} $line
+		# Cut, Copy & Paste handled by widgets internally!
 		set accel [lindex $line 4]
-		if {[string length $accel]} {
+		if {[string length $accel] && ![regexp {(X|C|V)} $accel]} {
 
 		    # Must check the actual state of menu!
 		    set name [lindex $line 1]
@@ -1118,7 +1120,7 @@ proc ::UI::NewCutCopyPaste {w} {
 
 # UI::CutCopyPasteCmd ---
 #
-#       Supposed to be a generic cut/copy/paste function.
+#       Supposed to be a generic cut/copy/paste function for menu commands.
 #       
 # Arguments:
 #       cmd      cut/copy/paste
@@ -1128,43 +1130,22 @@ proc ::UI::NewCutCopyPaste {w} {
 
 proc ::UI::CutCopyPasteCmd {cmd} {
     
-    upvar ::UI::CCP::locals locals
-    
-    set wfocus [focus]
-    
+    set wfocus [focus]    
     ::Debug 2 "::UI::CutCopyPasteCmd cmd=$cmd, wfocus=$wfocus"
     
     if {$wfocus == ""} {
 	return
     }
-    set wclass [winfo class $wfocus]
-    switch -glob -- $wclass {
-	Text - Entry {	    
-	    switch -- $cmd {
-		cut {
-		    event generate $wfocus <<Cut>>
-		}
-		copy {
-		    event generate $wfocus <<Copy>>			    
-		}
-		paste {
-		    event generate $wfocus <<Paste>>	
-		}
-	    }
+
+    switch -- $cmd {
+	cut {
+	    event generate $wfocus <<Cut>>
 	}
-	Canvas - Wish* - Whiteboard {
-	    
-	    # Operate on the whiteboard's canvas.
-	    set wtop [::UI::GetToplevelNS $wfocus]
-	    upvar ::${wtop}::wapp wapp
-	    switch -- $cmd {
-		cut - copy {
-		    ::CanvasCCP::CopySelectedToClipboard $wapp(can) $cmd		    
-		}
-		paste {
-		    ::CanvasCCP::PasteFromClipboardTo $wapp(can)
-		}
-	    }
+	copy {
+	    event generate $wfocus <<Copy>>			    
+	}
+	paste {
+	    event generate $wfocus <<Paste>>	
 	}
     }
 }
@@ -1180,6 +1161,7 @@ proc ::UI::CutCopyPasteConfigure {w which args} {
 	-state   normal
     }
     array set opts $args
+    
     foreach opt [array names opts] {
 	set val $opts($opt)
 	switch -- $opt {
