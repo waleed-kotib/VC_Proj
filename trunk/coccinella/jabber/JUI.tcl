@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.63 2004-11-07 14:22:58 matben Exp $
+# $Id: JUI.tcl,v 1.64 2004-11-08 15:52:51 matben Exp $
 
 package provide JUI 1.0
 
@@ -27,12 +27,24 @@ namespace eval ::Jabber::UI:: {
     option add *JMain.roster16Image               roster16        widgetDefault
     option add *JMain.browser16Image              browser16       widgetDefault
 
+    # Top header image if any.
+    option add *JMain.headImage                   ""              widgetDefault
+    
     # Other icons.
     option add *JMain.contactOffImage             contactOff      widgetDefault
     option add *JMain.contactOnImage              contactOn       widgetDefault
     option add *JMain.waveImage                   wave            widgetDefault
     option add *JMain.resizeHandleImage           resizehandle    widgetDefault
 
+    # Standard widgets.
+    option add *JMain.fnb.borderWidth             1               widgetDefault
+    option add *JMain.fnb.relief                  raised          widgetDefault
+    option add *JMain.bot.borderWidth             1               widgetDefault
+    option add *JMain.bot.padX                    0               widgetDefault
+    option add *JMain.bot.padY                    0               widgetDefault
+    option add *JMain.bot.relief                  raised          widgetDefault
+    
+    # Generic tree options.
     option add *JMain*Tree.background             #dedede         widgetDefault
     option add *JMain*Tree.backgroundImage        {}              widgetDefault
     option add *JMain*Tree.highlightBackground    white           widgetDefault
@@ -44,6 +56,7 @@ namespace eval ::Jabber::UI:: {
     option add *JMain*Tree.selectMode             1               widgetDefault
     option add *JMain*Tree.treeColor              gray50          widgetDefault
 
+    # The tab notebook options.
     option add *JMain*MacTabnotebook.activeForeground    black        widgetDefault
     option add *JMain*MacTabnotebook.activeTabColor      #efefef      widgetDefault
     option add *JMain*MacTabnotebook.activeTabBackground #cdcdcd      widgetDefault
@@ -256,32 +269,43 @@ proc ::Jabber::UI::Build {w} {
     
     # Use a frame here just to be able to set the class (JMain) which
     # is useful for setting options.
-    set  fall [frame $w.f -class JMain]
-    pack $fall -fill both -expand 1
-    set jwapp(fall) $fall
-    	
+    if {$w == "."} {
+	set wmain .f
+    } else {
+	set wmain $w.f
+    }
+    set jwapp(fall) $wmain
+    frame $wmain -class JMain
+    pack  $wmain -fill both -expand 1
+    
+    # Any header image?
+    set headImage [::Theme::GetImage [option get $wmain headImage {}]]
+    if {$headImage != ""} {
+	label $wmain.head -image $headImage
+	pack  $wmain.head -side top -anchor w -padx 0 -pady 0
+    }
+    
     # Shortcut button part.
-    set iconConnect     [::Theme::GetImage [option get $fall connectImage {}]]
-    set iconConnectDis  [::Theme::GetImage [option get $fall connectDisImage {}]]
-    set iconInboxLett   [::Theme::GetImage [option get $fall inboxLetterImage {}]]
+    set iconConnect     [::Theme::GetImage [option get $wmain connectImage {}]]
+    set iconConnectDis  [::Theme::GetImage [option get $wmain connectDisImage {}]]
+    set iconInboxLett   [::Theme::GetImage [option get $wmain inboxLetterImage {}]]
     set iconInboxLettDis  [::Theme::GetImage \
-      [option get $fall inboxLetterDisImage {}]]
-    set iconInbox       [::Theme::GetImage [option get $fall inboxImage {}]]
-    set iconInboxDis    [::Theme::GetImage [option get $fall inboxDisImage {}]]
-    set iconNewUser     [::Theme::GetImage [option get $fall newuserImage {}]]
-    set iconNewUserDis  [::Theme::GetImage [option get $fall newuserDisImage {}]]
-    set iconStop        [::Theme::GetImage [option get $fall stopImage {}]]
-    set iconStopDis     [::Theme::GetImage [option get $fall stopDisImage {}]]
+      [option get $wmain inboxLetterDisImage {}]]
+    set iconInbox       [::Theme::GetImage [option get $wmain inboxImage {}]]
+    set iconInboxDis    [::Theme::GetImage [option get $wmain inboxDisImage {}]]
+    set iconNewUser     [::Theme::GetImage [option get $wmain newuserImage {}]]
+    set iconNewUserDis  [::Theme::GetImage [option get $wmain newuserDisImage {}]]
+    set iconStop        [::Theme::GetImage [option get $wmain stopImage {}]]
+    set iconStopDis     [::Theme::GetImage [option get $wmain stopDisImage {}]]
 
     # Other icons.
-    set iconContactOff [::Theme::GetImage [option get $fall contactOffImage {}]]
-    set iconResize     [::Theme::GetImage [option get $fall resizeHandleImage {}]]
-    set iconRoster     [::Theme::GetImage [option get $fall roster16Image {}]]
-    
-    
+    set iconContactOff [::Theme::GetImage [option get $wmain contactOffImage {}]]
+    set iconResize     [::Theme::GetImage [option get $wmain resizeHandleImage {}]]
+    set iconRoster     [::Theme::GetImage [option get $wmain roster16Image {}]]
+        
     set fontS [option get . fontSmall {}]
     
-    set wtray ${fall}.top
+    set wtray ${wmain}.top
     ::buttontray::buttontray $wtray 52 -borderwidth 1 -relief raised
     pack $wtray -side top -fill x
     set jwapp(wtray) $wtray
@@ -306,13 +330,16 @@ proc ::Jabber::UI::Build {w} {
 
     # Build bottom and up to handle clipping when resizing.
     # Jid entry with electric plug indicator.
-    set wbot              ${fall}.bot
+    set wbot              ${wmain}.bot.f
     set jwapp(elplug)     ${wbot}.icon
     set jwapp(mystatus)   ${wbot}.stat
     set jwapp(myjid)      ${wbot}.jid
 
-    frame $wbot -relief raised -borderwidth 1
-    pack  $wbot -side bottom -fill x -pady 0
+    frame $wmain.bot
+    pack  $wmain.bot -side bottom -fill x
+
+    frame $wbot
+    pack  $wbot -side bottom -fill x
     ::Jabber::Roster::BuildStatusMenuButton $jwapp(mystatus)
     pack  $jwapp(mystatus) -side left -pady 2 -padx 6
     label ${wbot}.size -image $iconResize
@@ -324,8 +351,10 @@ proc ::Jabber::UI::Build {w} {
     pack  $jwapp(myjid) -side left -fill x -expand 1 -pady 0 -padx 0
         
     # Notebook frame.
-    set frtbook ${fall}.fnb
-    pack [frame $frtbook -bd 1 -relief raised] -fill both -expand 1    
+    set frtbook ${wmain}.fnb
+    # D = -bd 1 -relief raised
+    frame $frtbook    
+    pack  $frtbook -fill both -expand 1
     set nbframe [::mactabnotebook::mactabnotebook ${frtbook}.tn]
     set jwapp(nbframe) $nbframe
     pack $nbframe -fill both -expand 1

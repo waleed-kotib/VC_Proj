@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.26 2004-11-06 08:15:26 matben Exp $
+# $Id: Whiteboard.tcl,v 1.27 2004-11-08 15:52:52 matben Exp $
 
 package require entrycomp
 package require moviecontroller
@@ -379,10 +379,10 @@ proc ::WB::InitMenuDefs { } {
 	{command   mOpenImage/Movie {::Import::ImportImageOrMovieDlg $wtop} normal  I}
 	{command   mOpenURLStream   {::Multicast::OpenMulticast $wtop}  normal   {}}
 	{separator}
-	{command   mOpenCanvas      {::CanvasFile::OpenCanvasFileDlg $wtop}  normal   {}}
-	{command   mSaveCanvas      {::CanvasFile::SaveCanvasFileDlg $wtop}  normal   S}
+	{command   mOpenCanvas      {::CanvasFile::OpenCanvasFileDlg $wtop} normal   {}}
+	{command   mSaveCanvas      {::CanvasFile::Save $wtop}              normal   S}
 	{separator}
-	{command   mSaveAs          {::CanvasCmd::SavePostscript $wtop}     normal   {}}
+	{command   mSaveAs          {::CanvasFile::SaveAsDlg $wtop}         normal   {}}
 	{command   mSaveAsItem      {::CanvasCmd::DoSaveAsItem $wtop}       normal   {}}
 	{command   mPageSetup       {::UserActions::PageSetup $wtop}        normal   {}}
 	{command   mPrintCanvas     {::UserActions::DoPrintCanvas $wtop}    normal   P}
@@ -725,6 +725,7 @@ proc ::WB::BuildWhiteboard {wtop args} {
     # Init some of the state variables.
     # Inherit from the factory + preferences state.
     array set state [array get ::state]
+    set state(fileName) ""
     if {$opts(-state) == "disabled"} {
 	set state(btState) 00
     }

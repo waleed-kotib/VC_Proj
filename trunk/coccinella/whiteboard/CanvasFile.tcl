@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasFile.tcl,v 1.14 2004-10-27 14:42:37 matben Exp $
+# $Id: CanvasFile.tcl,v 1.15 2004-11-08 15:52:52 matben Exp $
  
 package require can2svg
 package require svg2can
@@ -433,28 +433,6 @@ proc ::CanvasFile::FileToCanvasVer2 {w fd absPath args} {
     return $nimports
 }
 
-# CanvasFile::SaveCanvas --
-# 
-#       Just a wrapper for CanvasToFile.
-
-proc ::CanvasFile::SaveCanvas {w fileName args} {
-    
-    # If not .txt make sure it's .can extension.
-    if {[file extension $fileName] != ".txt"} {
-	set fileName "[file rootname $fileName].can"
-    }
-
-    # Opens the data file.
-    if {[catch {open $fileName w} fd]} {
-	set tail [file tail $fileName]
-	tk_messageBox -icon error -type ok \
-	  -message [mc messfailopwrite $tail $fd]
-	return
-    }	    
-    ::CanvasFile::CanvasToFile $w $fd $fileName
-    close $fd
-}
-
 # CanvasFile::CanvasToFile --
 #
 #       Writes line by line to file. Each line contains an almost complete 
@@ -574,6 +552,48 @@ proc ::CanvasFile::OpenCanvasFileDlg {wtop {filePath {}}} {
 	}
     }
 }
+    
+# ::CanvasFile::Save --
+#
+#       Executes the menu File/Save command. If not linked to a file it
+#       displays a Save As dialog instead.
+#       
+# Arguments:
+#       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
+#       
+# Results:
+#       file save dialog shown if needed, file written.
+
+proc ::CanvasFile::Save {wtop} {
+    upvar ::WB::${wtop}::state state
+    
+    if {$state(fileName) == ""} {
+	set fileName [::CanvasFile::SaveAsDlg $wtop]
+    } else {
+	set wCan [::WB::GetCanvasFromWtop $wtop]
+	set fileName [::CanvasFile::SaveCanvas $wCan $state(fileName)]
+    }
+    return $fileName
+}
+    
+# ::CanvasFile::SaveAsDlg --
+#
+#       Displays a Save As dialog and acts correspondingly.
+#       
+# Arguments:
+#       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
+#       
+# Results:
+#       file save dialog shown, file written.
+
+proc ::CanvasFile::SaveAsDlg {wtop} {
+    upvar ::WB::${wtop}::state state
+    
+    set fileName [::CanvasFile::SaveCanvasFileDlg $wtop]
+    if {$fileName != ""} {
+	set state(fileName) $fileName
+    }
+}
 
 # SaveCanvasFileDlg --
 #
@@ -584,7 +604,7 @@ proc ::CanvasFile::OpenCanvasFileDlg {wtop {filePath {}}} {
 #       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
 #       
 # Results:
-#       none
+#       fileName or empty
 
 proc ::CanvasFile::SaveCanvasFileDlg {wtop} {
     global  prefs this
@@ -593,6 +613,7 @@ proc ::CanvasFile::SaveCanvasFileDlg {wtop} {
     set typelist {
 	{"Canvas"            {.can}}
 	{"XML/SVG"           {.svg}}
+	{"Postscript File"   {.ps} }
 	{"Text"              {.txt}}
     }
     set userDir [::Utils::GetDirIfExist $prefs(userPath)]
@@ -603,15 +624,27 @@ proc ::CanvasFile::SaveCanvasFileDlg {wtop} {
     if {[string match "mac*" $this(platform)]} {
 	lappend opts -message "Pick .svg suffix for SVG, .can as default"
     }
-    set ans [eval {tk_getSaveFile -title [mc {Save Canvas}] \
+    set fileName [eval {tk_getSaveFile -title [mc {Save Canvas}] \
       -defaultextension ".can"} $opts]
-    if {$ans == ""} {
-	return
+    if {$fileName == ""} {
+	return ""
     }
-    set prefs(userPath) [file dirname $ans]
-    set fileName $ans
-    set ext [file extension $fileName]
+    set prefs(userPath) [file dirname $fileName]
+    ::CanvasFile::SaveCanvas $wCan $fileName
     
+    return $fileName
+}
+
+# CanvasFile::SaveCanvas --
+# 
+#       Write canvas to specified file name taking any specific file
+#       extension as an indication of format.
+
+proc ::CanvasFile::SaveCanvas {wCan fileName args} {
+    global  prefs this
+    
+    set ext [file extension $fileName]
+
     switch -- $ext {
 	.svg {
 	    
@@ -619,6 +652,12 @@ proc ::CanvasFile::SaveCanvasFileDlg {wtop} {
 	    ::can2svg::canvas2file $wCan $fileName -uritype file -usetags all \
 	      -allownewlines 0  \
 	      -windowitemhandler ::CanvasUtils::GetSVGForeignFromWindowItem
+	}
+	.ps {
+	    eval {$wCan postscript} $prefs(postscriptOpts) {-file $fileName}
+	    if {[string equal $this(platform) "macintosh"]} {
+		file attributes $ans -type TEXT -creator vgrd
+	    }
 	}
 	default {
 	    
@@ -632,7 +671,7 @@ proc ::CanvasFile::SaveCanvasFileDlg {wtop} {
 		set tail [file tail $fileName]
 		tk_messageBox -icon error -type ok \
 		  -message [mc messfailopwrite $tail $fd]
-		return
+		return ""
 	    }	    
 	    ::CanvasFile::CanvasToFile $wCan $fd $fileName
 	    close $fd

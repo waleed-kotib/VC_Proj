@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: P2P.tcl,v 1.15 2004-11-06 08:15:25 matben Exp $
+# $Id: P2P.tcl,v 1.16 2004-11-08 15:52:52 matben Exp $
 
 package provide P2P 1.0
 
@@ -68,7 +68,7 @@ proc ::P2P::Init {} {
 
     set buttonTrayDefs(symmetric) {
 	connect    {::P2PNet::OpenConnection $wDlgs(openConn)}
-	save       {::CanvasFile::SaveCanvasFileDlg $wtop}
+	save       {::CanvasFile::Save $wtop}
 	open       {::CanvasFile::OpenCanvasFileDlg $wtop}
 	import     {::Import::ImportImageOrMovieDlg $wtop}
 	send       {::CanvasCmd::DoPutCanvasDlg $wtop}
@@ -92,10 +92,10 @@ proc ::P2P::Init {} {
 	{command   mOpenURLStream      {::Multicast::OpenMulticast $wtop}     normal   {}}
 	{separator}
 	{command   mOpenCanvas         {::CanvasFile::OpenCanvasFileDlg $wtop}     normal   {}}
-	{command   mSaveCanvas         {::CanvasFile::SaveCanvasFileDlg $wtop}     normal   S}
+	{command   mSaveCanvas         {::CanvasFile::Save $wtop}             normal   S}
 	{separator}
-	{command   mSaveAs             {::CanvasCmd::SavePostscript $wtop}        normal   {}}
-	{command   mSaveAsItem         {::CanvasCmd::DoSaveAsItem $wtop}       normal   {}}
+	{command   mSaveAs             {::CanvasFile::SaveAsDlg $wtop}        normal   {}}
+	{command   mSaveAsItem         {::CanvasCmd::DoSaveAsItem $wtop}      normal   {}}
 	{command   mPageSetup          {::UserActions::PageSetup $wtop}           normal   {}}
 	{command   mPrintCanvas        {::UserActions::DoPrintCanvas $wtop}       normal   P}
 	{separator}

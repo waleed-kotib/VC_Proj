@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.39 2004-11-06 08:15:25 matben Exp $
+# $Id: JWB.tcl,v 1.40 2004-11-08 15:52:51 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -113,7 +113,7 @@ proc ::Jabber::WB::InitUI { } {
     ::Debug 2 "::Jabber::WB::InitUI"
 
     set buttonTrayDefs {
-	save       {::CanvasFile::SaveCanvasFileDlg $wtop}
+	save       {::CanvasFile::Save $wtop}
 	open       {::CanvasFile::OpenCanvasFileDlg $wtop}
 	import     {::Import::ImportImageOrMovieDlg $wtop}
 	send       {::Jabber::WB::DoSendCanvas $wtop}
@@ -131,10 +131,10 @@ proc ::Jabber::WB::InitUI { } {
 	{command   mStopPut/Get/Open   {::Jabber::WB::Stop $wtop}        normal {}}
 	{separator}
 	{command   mOpenCanvas         {::CanvasFile::OpenCanvasFileDlg $wtop}     normal   O}
-	{command   mSaveCanvas         {::CanvasFile::SaveCanvasFileDlg $wtop}     normal   S}
+	{command   mSaveCanvas         {::CanvasFile::Save $wtop}           normal   S}
 	{separator}
-	{command   mSaveAs             {::CanvasCmd::SavePostscript $wtop}      normal   {}}
-	{command   mSaveAsItem         {::CanvasCmd::DoSaveAsItem $wtop}       normal   {}}
+	{command   mSaveAs             {::CanvasFile::SaveAsDlg $wtop}      normal   {}}
+	{command   mSaveAsItem         {::CanvasCmd::DoSaveAsItem $wtop}    normal   {}}
 	{command   mPageSetup          {::UserActions::PageSetup $wtop}           normal   {}}
 	{command   mPrintCanvas        {::UserActions::DoPrintCanvas $wtop}       normal   P}
 	{separator}
