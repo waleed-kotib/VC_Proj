@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.2 2004-01-05 15:00:32 matben Exp $
+# $Id: Profiles.tcl,v 1.3 2004-01-06 15:59:22 matben Exp $
 
 package provide Profiles 1.0
 
@@ -283,7 +283,7 @@ proc ::Profiles::BuildPage {page} {
     set fontSB [option get . fontSmallBold {}]
     
     set labpui [::mylabelframe::mylabelframe $page.fr [::msgcat::mc {User Profiles}]]
-    pack $page.fr -side left -anchor n -ipadx 10 -ipady 6
+    pack $page.fr -side top -anchor w -ipadx 10 -ipady 6 -fill x
     
     message $labpui.msg -text [::msgcat::mc prefprof] -aspect 800
     pack $labpui.msg -side top -fill x

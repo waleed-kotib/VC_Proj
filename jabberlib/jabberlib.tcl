@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.26 2003-12-29 09:02:29 matben Exp $
+# $Id: jabberlib.tcl,v 1.27 2004-01-06 15:59:22 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -416,7 +416,7 @@ proc jlib::new {rostername clientcmd args} {
 
 proc jlib::cmdproc {jlibname cmd args} {
     
-    Debug 4 "jlib::cmdproc: jlibname=$jlibname, cmd='$cmd', args='$args'"
+    Debug 5 "jlib::cmdproc: jlibname=$jlibname, cmd='$cmd', args='$args'"
 
     # Which command? Just dispatch the command to the right procedure.
     return [eval $cmd $jlibname $args]

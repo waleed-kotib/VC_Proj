@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.32 2004-01-05 15:00:32 matben Exp $
+# $Id: Preferences.tcl,v 1.33 2004-01-06 15:59:22 matben Exp $
  
 package require notebook
 package require tree
@@ -132,7 +132,6 @@ proc ::Preferences::Build { } {
     $wtree newitem {Whiteboard Plugins} -text [::msgcat::mc Plugins]
     $wtree newitem {Whiteboard {File Mappings}} -text [::msgcat::mc {File Mappings}]
     $wtree newitem {Whiteboard {Edit Fonts}} -text [::msgcat::mc {Edit Fonts}]
-    $wtree newitem {Whiteboard {File Cache}} -text [::msgcat::mc {File Cache}]
     $wtree newitem {Whiteboard Privacy} -text [::msgcat::mc Privacy]
     
     # The notebook and its pages.
@@ -209,10 +208,6 @@ proc ::Preferences::Build { } {
     # File Mappings ------------------------------------------------------------
     set frfm [$nbframe page {File Mappings}]    
     ::Preferences::FileMap::BuildPage $frfm
-    
-    # Cache page ---------------------------------------------------------------
-    set frca [$nbframe page {File Cache}]  
-    ::Preferences::BuildPageCache $frca
     
     # Privacy page -------------------------------------------------------------
     set frppriv [$nbframe page {Privacy}]
@@ -313,8 +308,6 @@ proc ::Preferences::ResetToFactoryDefaults {maxPriorityNum} {
 	    }
 	}
     }
-
-    ::hooks::run prefsFactoryDefaultsHook
 }
 
 # Preferences::ResetToUserDefaults --
@@ -347,7 +340,7 @@ proc ::Preferences::BuildPageSounds {page} {
     set fontSB [option get . fontSmallBold {}]
     
     set labpsp [::mylabelframe::mylabelframe $page.sp [::msgcat::mc {Synthetic speech}]]
-    pack $page.sp -side top -anchor w -ipadx 10
+    pack $page.sp -side top -anchor w -ipadx 10 -fill x
     
     checkbutton $labpsp.speak -text "  [::msgcat::mc prefsounsynwb]"  \
       -variable "[namespace current]::tmpPrefs(SpeechOn)"
@@ -390,7 +383,7 @@ proc ::Preferences::BuildPageSounds {page} {
     }    
     
     set labpalrt [::mylabelframe::mylabelframe $page.alrt [::msgcat::mc {Alert sounds}]]
-    pack $page.alrt -side top -anchor w -ipadx 10
+    pack $page.alrt -side top -anchor w -ipadx 10 -fill x
     label $labpalrt.lbl -text [::msgcat::mc prefsounpick]
     pack $labpalrt.lbl -side top -anchor w -padx 6 -pady $ypad
     foreach name {online offline newmsg statchange connected} txt {
@@ -435,7 +428,7 @@ proc ::Preferences::BuildPageConf {page} {
 
     # Conference (groupchat) stuff.
     set labfr [::mylabelframe::mylabelframe $page.fr [::msgcat::mc {Preferred Protocol}]]
-    pack $page.fr -side top -anchor w
+    pack $page.fr -side top -anchor w -fill x
     set pbl [frame $labfr.frin]
     pack $pbl -padx 10 -pady 6 -side left
     
@@ -453,7 +446,7 @@ proc ::Preferences::BuildPageConf {page} {
 proc ::Preferences::BuildPagePersInfo {page} {
 
     set ppers [::mylabelframe::mylabelframe $page.fr [::msgcat::mc {Personal Information}]]
-    pack $page.fr -side left -anchor n -ipadx 10 -ipady 6
+    pack $page.fr -side top -anchor w -ipadx 10 -ipady 6 -fill x
 
     message $ppers.msg -text [::msgcat::mc prefpers] -aspect 800
     grid $ppers.msg -columnspan 2 -sticky ew
@@ -487,7 +480,7 @@ proc ::Preferences::BuildPageAutoAway {page} {
     
     # Auto away stuff.
     set labfrpbl [::mylabelframe::mylabelframe $page.fr [::msgcat::mc {Auto Away}]]
-    pack $page.fr -side top -anchor w
+    pack $page.fr -side top -anchor w -fill x
     set pbl [frame $labfrpbl.frin]
     pack $pbl -padx 10 -pady 6 -side left
     pack [label $pbl.lab -text [::msgcat::mc prefaaset]] \
@@ -525,7 +518,7 @@ proc ::Preferences::BuildPageAutoAway {page} {
     
     # Default logout status.
     set labfrstat [::mylabelframe::mylabelframe $page.frstat {Default Logout Status}]
-    pack $page.frstat -side top -anchor w
+    pack $page.frstat -side top -anchor w -fill x
     set pstat [frame $labfrstat.frin]
     pack $pstat -padx 10 -pady 6 -side left
 
@@ -551,7 +544,7 @@ proc ::Preferences::BuildPageSubscriptions {page} {
     variable ypad
     
     set labfrpsubs [::mylabelframe::mylabelframe $page.fr [::msgcat::mc Subscribe]]
-    pack $page.fr -side top -anchor w
+    pack $page.fr -side top -anchor w -fill x
     set psubs [frame $labfrpsubs.frin]
     pack $psubs -padx 10 -pady 6 -side left
 
@@ -588,7 +581,7 @@ proc ::Preferences::BuildPagePrivacy {page} {
     variable xpadbt
     
     set labfrpbl [::mylabelframe::mylabelframe $page.fr [::msgcat::mc Privacy]]
-    pack $page.fr -side left -anchor n
+    pack $page.fr -side top -anchor w -fill x
     set pbl [frame $labfrpbl.frin]
     pack $pbl -padx 10 -pady 6 -side left
     
@@ -618,7 +611,7 @@ proc ::Preferences::Block::BuildPage {page} {
     set fontS [option get . fontSmall {}]
     
     set labfrpbl [::mylabelframe::mylabelframe $page.fr [::msgcat::mc Blockers]]
-    pack $page.fr -side left -anchor n
+    pack $page.fr -side top -anchor w -fill x
     set pbl [frame $labfrpbl.frin]
     pack $pbl -padx 10 -pady 6 -side left
     checkbutton $pbl.only  \
@@ -686,7 +679,7 @@ proc ::Preferences::Block::Add {w} {
     # Labelled frame.
     set wcfr $w.frall.fr
     set wcont [::mylabelframe::mylabelframe $wcfr [::msgcat::mc {JID to block}]]
-    pack $wcfr -side top -fill both -ipadx 10 -ipady 6 -in $w.frall
+    pack $wcfr -side top -fill both -ipadx 10 -ipady 6 -in $w.frall -fill x
     
     # Overall frame for whole container.
     set frtot [frame $wcont.frin]
@@ -780,7 +773,7 @@ proc ::Preferences::Customization::BuildPage {page} {
     set fontSB [option get . fontSmallBold {}]
 
     set labfrpbl [::mylabelframe::mylabelframe $page.fr [::msgcat::mc Customization]]
-    pack $page.fr -side top -anchor w
+    pack $page.fr -side top -anchor w -fill x
     set pbl [frame $labfrpbl.frin]
     pack $pbl -padx 10 -pady 6 -side left
     
@@ -833,7 +826,7 @@ proc ::Preferences::Customization::BuildPage {page} {
     
     # Agents or Browse.
     set frdisc [::mylabelframe::mylabelframe $page.ag {Agents or Browse}]
-    pack $page.ag -side top -anchor w
+    pack $page.ag -side top -anchor w -fill x
     set pdisc [frame $frdisc.frin]
     pack $pdisc -padx 10 -pady 6 -side left
     label $pdisc.la -text [::msgcat::mc prefcudisc]
@@ -915,7 +908,7 @@ proc ::Preferences::Plugins::BuildPage {page} {
 
     # Conference (groupchat) stuff.
     set labfr [::mylabelframe::mylabelframe $page.fr [::msgcat::mc {Plugin Control}]]
-    pack $page.fr -side top -anchor w
+    pack $page.fr -side top -anchor w -fill x
     set pbl [frame $labfr.frin]
     pack $pbl -padx 10 -pady 6 -side left
     
@@ -994,7 +987,7 @@ proc ::Preferences::FileMap::BuildPage {page} {
     
     # Frame for everything inside the labeled container.
     set wcont1 [::mylabelframe::mylabelframe $page.frtop [::msgcat::mc preffmhelp]]
-    pack $page.frtop -side top -anchor w
+    pack $page.frtop -side top -anchor w -fill x
     set fr1 [frame $wcont1.fr]
     
     pack $fr1 -side left -padx 16 -pady 10 -fill x
@@ -1451,11 +1444,11 @@ proc ::Preferences::NetSetup::BuildPage {page} {
     set fontSB [option get . fontSmallBold {}]
         
     set wcont [::mylabelframe::mylabelframe $page.fr [::msgcat::mc prefnetconf]]
-    pack $page.fr -side top -anchor w
+    pack $page.fr -side top -anchor w -fill x
 
     # Frame for everything inside the labeled container.
     set fr [frame $wcont.fr]    
-    message $fr.msg -width 260 -text [::msgcat::mc prefnethead]
+    message $fr.msg -width 300 -text [::msgcat::mc prefnethead]
     
     # The actual options.
     set fropt [frame $fr.fropt]
@@ -2164,33 +2157,6 @@ proc ::Preferences::Proxies::BuildPage {page} {
 }
 
 #-------------------------------------------------------------------------------
-
-proc ::Preferences::BuildPageCache {page} {
-    
-    variable ypad
-    
-    set pca [::mylabelframe::mylabelframe $page.fr [::msgcat::mc {File Cache}]]
-    pack $page.fr -side left -anchor n -ipadx 10 -ipady 6
-    label $pca.la -text [::msgcat::mc prefcahow]
-    radiobutton $pca.never    \
-      -variable [namespace current]::tmpPrefs(checkCache) -value never \
-      -text [::msgcat::mc prefcanev]
-    radiobutton $pca.always    \
-      -variable [namespace current]::tmpPrefs(checkCache) -value always \
-      -text [::msgcat::mc prefcaalw]
-    label $pca.la2 -text "     [::msgcat::mc prefcaor]"
-    grid $pca.la -sticky w
-    grid $pca.never -sticky w -pady $ypad
-    grid $pca.always -sticky w -pady $ypad
-    grid $pca.la2 -sticky w
-
-    foreach val {launch hour day week month}   \
-      txt {{Launch time} {One hour} {One day} {One week} {One month}} {
-	radiobutton $pca.$val -text [::msgcat::mc $txt]   \
-	  -variable [namespace current]::tmpPrefs(checkCache) -value $val
-	grid $pca.$val -sticky w -pady $ypad
-    }
-}
 
 # Preferences::SavePushBt --
 #
