@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: browse.tcl,v 1.7 2003-05-18 13:20:20 matben Exp $
+# $Id: browse.tcl,v 1.8 2003-06-01 10:26:57 matben Exp $
 # 
 #  locals($jid,parent):       the parent of $jid.
 #  locals($jid,parents):      list of all parent jid's,
@@ -142,9 +142,7 @@ proc browse::browse {browseName clientCmd args} {
 #       none.
 
 proc browse::CommandProc {browseName cmd args} {
-    
-    Debug 5 "browse::CommandProc browseName=$browseName, cmd='$cmd', args='$args'"
-    
+        
     # Which command? Just dispatch the command to the right procedure.
     return [eval {$cmd $browseName} $args]
 }
@@ -160,8 +158,7 @@ proc browse::CommandProc {browseName cmd args} {
 # Results:
 #       another jid or empty if failed
 
-proc browse::getparentjid {browseName jid} {
-    
+proc browse::getparentjid {browseName jid} {   
     upvar [namespace current]::${browseName}::locals locals
 
     if {[info exists locals($jid,parent)]} {
@@ -337,8 +334,7 @@ proc browse::getusers {browseName jid} {
 #
 #
 
-proc browse::getconferenceservers {browseName} {
-    
+proc browse::getconferenceservers {browseName} {    
     upvar [namespace current]::${browseName}::locals locals
     
     return $locals(confservers)
@@ -349,8 +345,7 @@ proc browse::getconferenceservers {browseName} {
 #       Gets all jid's that support a certain namespace.
 #       Only for the browsed services.
 
-proc browse::getservicesforns {browseName ns} {
-    
+proc browse::getservicesforns {browseName ns} {    
     upvar [namespace current]::${browseName}::locals locals
     
     if {[info exists locals(ns,$ns)]} {
@@ -365,7 +360,6 @@ proc browse::getservicesforns {browseName ns} {
 #       If 'jid' is a child of a conference server, that is, a room.
 
 proc browse::isroom {browseName jid} {
-    
     upvar [namespace current]::${browseName}::locals locals
     
     set parentJid [getparentjid $browseName $jid]
@@ -379,8 +373,7 @@ proc browse::isroom {browseName jid} {
 #
 #       Returns the jidType/subType if found.
 
-proc browse::gettype {browseName jid} {
-    
+proc browse::gettype {browseName jid} {    
     upvar [namespace current]::${browseName}::locals locals
     
     if {[info exists locals($jid,type)]} {
@@ -402,7 +395,6 @@ proc browse::gettype {browseName jid} {
 #       List of jid's matching the type pattern.
 
 proc browse::getalljidfortypes {browseName typepattern} {
-    
     upvar [namespace current]::${browseName}::locals locals
     
     set allkeys [array names locals "$typepattern,typelist"]
@@ -427,8 +419,7 @@ proc browse::getalljidfortypes {browseName typepattern} {
 # Results:
 #       List of types matching the type pattern.
 
-proc browse::getalltypes {browseName typepattern} {
-    
+proc browse::getalltypes {browseName typepattern} {    
     upvar [namespace current]::${browseName}::locals locals
     
     set ans {}
@@ -493,7 +484,7 @@ proc browse::havenamespace {browseName jid ns} {
 # browse::setjid --
 #
 #       Called when receiving a 'set' or 'result' iq element in jabber:iq:browse
-#       Shall only be called from jabberlib" 
+#       Shall only be called from jabberlib
 #       Sets internal state, and makes callback to client proc. 
 #       Could be called with type='remove' attribute.
 #       For 'user' elements we need to build a table that maps the

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.4 2003-05-25 15:03:27 matben Exp $
+# $Id: Browse.tcl,v 1.5 2003-06-01 10:26:57 matben Exp $
 
 package provide Browse 1.0
 
@@ -492,10 +492,25 @@ proc ::Jabber::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
 		# Note: it is very unclear how to determine if dead-end without
 		# an additional browse of that jid.
 		# This is very ad hoc!!!
-		if {[regexp {.+@[^/]+/.*} $jid match]} {
+		if {[regexp {^([^@]+@[^/]+)/(.*)$} $jid match jid2 res]} {
 		    if {[string equal $category "user"]} {
+			
+			# This seems to work well only for MUC; skip it.
+			# No presence seem to exist for the room jid in conference.
+			if {0} {
+			    set presList [$jstate(roster) getpresence $jid2 \
+			      -resource $res]
+			    array set presArr $presList
+			    set icon [eval {
+				::Jabber::Roster::GetPresenceIcon $jid $presArr(-type)
+			    } $presList]
+			}
+			
+			set icon [::Jabber::Roster::GetPresenceIcon $jid \
+			  "available"]
+			
 			$wtree newitem $jidList -dir 0  \
-			  -text $txt -image $icons(machead) -tags $jid
+			  -text $txt -image $icon -tags $jid
 		    } else {
 			$wtree newitem $jidList -text $txt -tags $jid
 		    }
@@ -745,7 +760,7 @@ proc ::Jabber::Browse::AddServer { } {
     tkwait window $w
 
     catch {grab release $w}
-    focus $oldFocus
+    catch {focus $oldFocus}
     return [expr {($finishedAdd <= 0) ? "cancel" : "add"}]
 }
 

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ImageAndMovie.tcl,v 1.6 2003-05-18 13:20:21 matben Exp $
+# $Id: ImageAndMovie.tcl,v 1.7 2003-06-01 10:26:58 matben Exp $
 
 package require http
 
@@ -201,7 +201,7 @@ proc ::ImageAndMovie::DoImport {w optList args} {
 	    if {$drawLocal} {
 		if {$isLocal} {
 		    set errMsg [eval {
-			::ImageAndMovie::DrawImage $wtopNS $fileName $putOpts
+			::ImageAndMovie::DrawImage $wtopNS $fileName putOpts
 		    } [array get argsArr]]
 		} else {
 		    set errMsg [eval {
@@ -225,7 +225,7 @@ proc ::ImageAndMovie::DoImport {w optList args} {
 		if {$isLocal} {
 		    set errMsg [eval {
 			::ImageAndMovie::DrawQuickTimeTcl $wtopNS $fileName \
-			  $putOpts
+			  putOpts
 		    } [array get argsArr]]
 		} else {
 		    set errMsg [eval {
@@ -236,10 +236,9 @@ proc ::ImageAndMovie::DoImport {w optList args} {
 		    # http but without streaming it?
 		    if {0} {
 			eval {::ImageAndMovie::HttpGet $wtopNS $argsArr(-url) \
-			  $importer $putOpts
-		    } [array get argsArr]
+			  $importer $putOpts} [array get argsArr]
 		    }
-		}    
+		}
 	    }
 	}
 	snack {
@@ -255,7 +254,7 @@ proc ::ImageAndMovie::DoImport {w optList args} {
 	    if {$drawLocal} {
 		if {$isLocal} {
 		    set errMsg [eval {
-			::ImageAndMovie::DrawSnack $wtopNS $fileName $putOpts
+			::ImageAndMovie::DrawSnack $wtopNS $fileName putOpts
 		    } [array get argsArr]]
 		} else {
 		    set errMsg [eval {
@@ -278,7 +277,7 @@ proc ::ImageAndMovie::DoImport {w optList args} {
 	    if {$drawLocal} {
 		if {$isLocal} {
 		    set errMsg [eval {
-			::ImageAndMovie::DrawXanim $wtopNS $fileName $putOpts
+			::ImageAndMovie::DrawXanim $wtopNS $fileName putOpts
 		    } [array get argsArr]]
 		} else {
 		    set errMsg [eval {
@@ -296,7 +295,7 @@ proc ::ImageAndMovie::DoImport {w optList args} {
 		if {$isLocal} {
 		    set importProc [::Plugins::GetImportProcForMime $mime]
 		    set errMsg [eval {
-			$importProc $wtopNS $fileName $putOpts
+			$importProc $wtopNS $fileName putOpts
 		    } [array get argsArr]]
 		} else {
 		    
@@ -338,11 +337,17 @@ proc ::ImageAndMovie::DoImport {w optList args} {
 #       Draws the image in 'fileName' onto canvas, taking options
 #       in 'optList' into account.
 #       
+# Arguments:
+#       wtop
+#       fileName
+#       optListVar  the *name* of the optList variable.
+#       args
+#       
 # Results:
 #       an error string which is empty if things went ok.
 
-proc ::ImageAndMovie::DrawImage {wtop fileName optList args} {
-
+proc ::ImageAndMovie::DrawImage {wtop fileName optListVar args} {
+    upvar $optListVar optList
     upvar ::${wtop}::wapp wapp
 
     ::Debug 2 "::ImageAndMovie::DrawImage wtop=$wtop, args='$args'"
@@ -400,6 +405,8 @@ proc ::ImageAndMovie::DrawImage {wtop fileName optList args} {
     } elseif {[info exists optArr(below:)]} {
 	catch {$w lower $useTag $optArr(below:)}
     }
+    lappend optList "width:" [image width $imageName]  \
+      "height:" [image height $imageName]
     return $errMsg
 }
 
@@ -407,11 +414,17 @@ proc ::ImageAndMovie::DrawImage {wtop fileName optList args} {
 # 
 #       Draws a local QuickTime movie onto canvas.
 #       
+# Arguments:
+#       wtop
+#       fileName
+#       optListVar  the *name* of the optList variable.
+#       args
+#
 # Results:
 #       an error string which is empty if things went ok.
 
-proc ::ImageAndMovie::DrawQuickTimeTcl {wtop fileName optList args} {
-
+proc ::ImageAndMovie::DrawQuickTimeTcl {wtop fileName optListVar args} {
+    upvar $optListVar optList
     upvar ::${wtop}::wapp wapp
     
     ::Debug 2 "::ImageAndMovie::DrawQuickTimeTcl args='$args'"
@@ -455,7 +468,9 @@ proc ::ImageAndMovie::DrawQuickTimeTcl {wtop fileName optList args} {
     set qtBalloonMsg "$fileTail\nLength: ${lenMin}:$secs"
     
     ::balloonhelp::balloonforwindow $wmovie $qtBalloonMsg
-    
+    lappend optList "width:" [winfo reqwidth $wmovie]  \
+      "height:" [winfo reqheight $wmovie]
+
     return $errMsg
 }
 
@@ -463,11 +478,17 @@ proc ::ImageAndMovie::DrawQuickTimeTcl {wtop fileName optList args} {
 # 
 #       Draws a local snack movie onto canvas. 
 #       
+# Arguments:
+#       wtop
+#       fileName
+#       optListVar  the *name* of the optList variable.
+#       args
+#
 # Results:
 #       an error string which is empty if things went ok.
 
-proc ::ImageAndMovie::DrawSnack {wtop fileName optList args} {
-
+proc ::ImageAndMovie::DrawSnack {wtop fileName optListVar args} {
+    upvar $optListVar optList
     upvar ::${wtop}::wapp wapp
     
     ::Debug 2 "::ImageAndMovie::DrawSnack args='$args'"
@@ -503,6 +524,9 @@ proc ::ImageAndMovie::DrawSnack {wtop fileName optList args} {
     set qtBalloonMsg $fileTail
     ::balloonhelp::balloonforwindow $wmovie $qtBalloonMsg
     
+    lappend optList "width:" [winfo reqwidth $wmovie]  \
+      "height:" [winfo reqheight $wmovie]
+
     return $errMsg
 }
 
@@ -510,11 +534,17 @@ proc ::ImageAndMovie::DrawSnack {wtop fileName optList args} {
 # 
 #       Draws a local xanim movie onto canvas.
 #       
+# Arguments:
+#       wtop
+#       fileName
+#       optListVar  the *name* of the optList variable.
+#       args
+#
 # Results:
 #       an error string which is empty if things went ok.
 
-proc ::ImageAndMovie::DrawXanim {wtop fileName optList args} {
-
+proc ::ImageAndMovie::DrawXanim {wtop fileName optListVar args} {
+    upvar $optListVar optList
     upvar ::${wtop}::wapp wapp
     
     ::Debug 2 "::ImageAndMovie::DrawXanim args='$args'"
@@ -564,6 +594,7 @@ proc ::ImageAndMovie::DrawXanim {wtop fileName optList args} {
 	set xanimPipe2Item($xpipe) $useTag
 	fileevent $xpipe readable [list XanimReadOutput $w $xpipe]
     }    
+    lappend optList "width:" $width "height:" $height
     
     return $errMsg
 }

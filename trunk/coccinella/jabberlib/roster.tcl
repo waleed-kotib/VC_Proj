@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.6 2003-05-25 15:03:27 matben Exp $
+# $Id: roster.tcl,v 1.7 2003-06-01 10:26:58 matben Exp $
 # 
 # Note that every jid in the rosterArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -560,7 +560,7 @@ proc roster::getpresence {rostName jid args} {
 	}
 	foreach key $rostGlobals(presTags) {
 	    if {[info exists presArr($jid3,$key)]} {
-		lappend result $key $presArr($jid3,$key)
+		lappend result -$key $presArr($jid3,$key)
 	    }
 	}
     } else {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.4 2003-05-25 15:03:27 matben Exp $
+# $Id: Roster.tcl,v 1.5 2003-06-01 10:26:57 matben Exp $
 
 package provide Roster 1.0
 
@@ -979,7 +979,7 @@ proc ::Jabber::Roster::NewOrEditItem {w which args} {
     tkwait window $w
 
     catch {grab release $w}
-    focus $oldFocus
+    catch {focus $oldFocus}
     return [expr {($finishedNew <= 0) ? "cancel" : "add"}]
 }
 

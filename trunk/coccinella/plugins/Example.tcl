@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Example.tcl,v 1.1 2003-05-18 13:04:13 matben Exp $
+# $Id: Example.tcl,v 1.2 2003-06-01 10:26:58 matben Exp $
 
 
 namespace eval ::Example:: {
@@ -64,12 +64,16 @@ proc ::Example::Init { } {
 #       Template import procedure.
 #       
 # Arguments:
-#
+#       wtop
+#       fileName
+#       optListVar  the *name* of the optList variable.
+#       args
 #       
 # Results:
 #       an error string which is empty if things went ok so far.
 
-proc ::Example::Import {wtop fileName optList args} {
+proc ::Example::Import {wtop fileName optListVar args} {
+    upvar $optListVar optList
     upvar ::${wtop}::wapp wapp
     variable uid
     variable locals
@@ -93,12 +97,16 @@ proc ::Example::Import {wtop fileName optList args} {
     set wfr ${wCan}.fr_${uniqueName}    
     
     # Make actual object in a frame with special -class.
+    set wbt ${wfr}.bt
     frame $wfr -bg gray50 -class ExampleFrame
-    button ${wfr}.bt -text {Example Plugin} -command [namespace current]::Clicked
+    button $wbt -text {Example Plugin} -command [namespace current]::Clicked
     pack ${wfr}.bt -padx 3 -pady 3
     
     set id [$wCan create window $x $y -anchor nw -window $wfr -tags [list tframe $useTag]]
     set locals(id2file,$id) $fileName
+
+    # We may let remote clients know our size.
+    lappend optList "width:" [winfo reqwidth $wbt] "height:" [winfo reqheight $wbt]
     
     # Success.
     return ""

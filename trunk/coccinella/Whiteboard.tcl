@@ -15,7 +15,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Whiteboard.tcl,v 1.10 2003-05-25 15:03:26 matben Exp $
+# $Id: Whiteboard.tcl,v 1.11 2003-06-01 10:26:57 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -310,18 +310,20 @@ if {1} {
 	    set sysFont(l) {Helvetica -18 normal}
 	}
 	macintosh {
-	    set sysFont(s) {Geneva 9 normal}
-	    set sysFont(sb) {Geneva 9 bold}
+	    set sysFont(s) [font create -family Geneva -size 9]
+	    set sysFont(sb) [font create -family Geneva -size 9 -weight bold]
 	    set sysFont(m) application
-	    set sysFont(l) {Helvetica 18 normal}
+	    set sysFont(l) [font create -family Helvetica -size 18]
 	}
 	macosx {
-	    set sysFont(s) {Geneva 9 normal}
-	    set sysFont(sb) {Geneva 9 bold}
-	    set sysFont(s) {{Lucida Grande} 11 normal}
-	    set sysFont(sb) {{Lucida Grande} 11 bold}
+	    #set sysFont(s) {{Lucida Grande} 11 normal}
+	    #set sysFont(sb) {{Lucida Grande} 11 bold}
+	    #set sysFont(m) application
+	    #set sysFont(l) {Helvetica 18 normal}
+	    set sysFont(s) [font create -family {Lucida Grande} -size 11]
+	    set sysFont(sb) [font create -family {Lucida Grande} -size 11 -weight bold]
 	    set sysFont(m) application
-	    set sysFont(l) {Helvetica 18 normal}
+	    set sysFont(l) [font create -family Helvetica -size 18]
 	}
 	windows {
 	    set sysFont(s) {Arial 8 normal}

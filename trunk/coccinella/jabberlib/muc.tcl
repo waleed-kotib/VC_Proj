@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: muc.tcl,v 1.5 2003-05-25 15:03:27 matben Exp $
+# $Id: muc.tcl,v 1.6 2003-06-01 10:26:58 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -44,7 +44,7 @@ package provide muc 0.1
 namespace eval jlib::muc {
     
     # Globals same for all instances of this jlib.
-    variable debug 3
+    variable debug 0
     
     variable muc
     set muc(affiliationExp) {(owner|admin|member|outcast|none)}
@@ -229,13 +229,20 @@ proc jlib::muc::setaffiliation {jlibname roomjid nick affiliation args} {
 	    }
 	}
     }
+    switch -- $affiliation {
+    	owner {
+    	    set xmlns "http://jabber.org/protocol/muc#owner"
+    	}
+    	default {
+    	    set xmlns "http://jabber.org/protocol/muc#admin"
+    	}
+    }
     
     set subelements [list [wrapper::createtag "item" -subtags $subitem \
       -attrlist [list nick $nick affiliation $affiliation]]]
     
     set xmllist [wrapper::createtag "query" \
-      -attrlist {xmlns "http://jabber.org/protocol/muc#admin"} \
-      -subtags $subelements]
+      -attrlist [list xmlns $xmlns] -subtags $subelements]
     eval {[namespace parent]::send_iq $jlibname "set" $xmllist -to $roomjid} \
       $opts
 }
@@ -271,9 +278,17 @@ proc jlib::muc::getaffiliation {jlibname roomjid affiliation callback} {
     }
     set subelements [list [wrapper::createtag "item" \
       -attrlist [list affiliation $affiliation]]]
+    switch -- $affiliation {
+    	owner - admin {
+    	    set xmlns "http://jabber.org/protocol/muc#owner"
+    	}
+    	default {
+    	    set xmlns "http://jabber.org/protocol/muc#admin"
+    	}
+    }
     
     set xmllist [wrapper::createtag "query" -subtags $subelements \
-      -attrlist {xmlns "http://jabber.org/protocol/muc#admin"}]
+      -attrlist [list xmlns $xmlns]]
     [namespace parent]::send_iq $jlibname "get" $xmllist -to $roomjid \
       -command [list [namespace parent]::parse_iq_response $jlibname $callback]
 }
@@ -370,7 +385,7 @@ proc jlib::muc::destroy {jlibname roomjid args} {
     set destroyelem [wrapper::createtag "destroy" -subtags $subelements \
       -attrlist [list jid $roomjid]]
 
-    set xmllist [wrapper::createtag "query" -subtags $destroyelem \
+    set xmllist [wrapper::createtag "query" -subtags [list $destroyelem] \
       -attrlist {xmlns "http://jabber.org/protocol/muc#owner"}]
     eval {[namespace parent]::send_iq $jlibname "set" $xmllist -to $roomjid} \
       $opts

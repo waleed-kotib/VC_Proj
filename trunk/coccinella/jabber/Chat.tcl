@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.6 2003-04-28 13:32:27 matben Exp $
+# $Id: Chat.tcl,v 1.7 2003-06-01 10:26:57 matben Exp $
 
 package provide Chat 1.0
 
@@ -79,7 +79,7 @@ proc ::Jabber::Chat::StartThreadDlg {w args} {
 	wm geometry $w $pos
     }
     wm resizable $w 0 0
-    bind $w <Return> "$frbot.btok invoke"
+    bind $w <Return> [list $frbot.btok invoke]
     
     # Grab and focus.
     set oldFocus [focus]
@@ -91,7 +91,7 @@ proc ::Jabber::Chat::StartThreadDlg {w args} {
     
     # Clean up.
     catch {grab release $w}
-    focus $oldFocus
+    catch {focus $oldFocus}
     return [expr {($finished <= 0) ? "cancel" : "ok"}]
 }
 
@@ -106,6 +106,8 @@ proc ::Jabber::Chat::DoStart {w} {
     variable finished
     variable user
     upvar ::Jabber::jstate jstate
+    
+    set ans yes
     
     # User must be online.
     if {![$jstate(roster) isavailable $user]} {

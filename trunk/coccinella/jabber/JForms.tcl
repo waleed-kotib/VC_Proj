@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #
-# $Id: JForms.tcl,v 1.5 2003-05-20 16:22:27 matben Exp $
+# $Id: JForms.tcl,v 1.6 2003-06-01 10:26:57 matben Exp $
 # 
 #      Updated to version 2.1 of JEP-0004
 #  
@@ -31,6 +31,16 @@ namespace eval ::Jabber::Forms:: {
     
     # List of pairs 'varName label' for each search entry received.
     variable reported
+    
+    variable pady
+    switch -- $::this(platform) {
+	macintosh {
+	    set pady 2
+	}
+	default {
+	    set pady 0
+	}
+    }
 }
 
 # Jabber::Forms::Build --
@@ -479,6 +489,7 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
     variable reported
     variable type
     variable locals
+    variable pady
     variable optionLabel2Value
     variable optionValue2Label
 
@@ -599,7 +610,7 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
 			grid columnconfigure $wfr 0 -weight 1
 			grid rowconfigure $wfr 0 -weight 1
 			
-			grid $wfr -row $i -column 0 -sticky news
+			grid $wfr -row $i -column 0 -sticky ew
 			incr i
 		    }
 		    list-single {
@@ -624,7 +635,7 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
 			if {[info exists defValue]} {
 			    set cache($id,$var) $optionValue2Label($id,$var,$defValue)
 			}
-			grid $w.pop$i -row $i -column 0 -sticky ew			
+			grid $w.pop$i -row $i -column 0 -sticky w			
 			incr i
 		    }
 		    list-multi - jid-multi {
@@ -657,7 +668,7 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
 			grid columnconfigure $wfr 0 -weight 1
 			grid rowconfigure $wfr 0 -weight 1
 						
-			grid $wfr -row $i -column 0 -sticky news
+			grid $wfr -row $i -column 0 -sticky ew
 			
 			set ind [lsearch $optionList  \
 			  $optionValue2Label($id,$var,$defValue)]
@@ -672,7 +683,8 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
 			set type($id,$var) $attrArr(type)
 			eval {checkbutton $w.c$i -text $lab \
 			  -variable [namespace current]::cache($id,$var)} $opts
-			grid $w.c$i -row $i -column 0 -columnspan 1 -sticky ew
+			grid $w.c$i -row $i -column 0 -columnspan 1 -sticky w \
+			  -pady $pady
 			incr i
 		    }
 		    fixed {

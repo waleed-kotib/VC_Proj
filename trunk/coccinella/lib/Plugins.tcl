@@ -14,7 +14,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Plugins.tcl,v 1.1 2003-05-18 13:02:52 matben Exp $
+# $Id: Plugins.tcl,v 1.2 2003-06-01 10:26:58 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -580,6 +580,13 @@ proc ::Plugins::MakeTypeListDialogOption { } {
     variable supMacTypes
     variable supportedMimeTypes
     variable typelist
+    
+    array set typelist {
+	text        {}
+	audio       {}
+	video       {}
+	application {}
+    }
     
     if {$this(platform) == "macintosh"}  {
 	

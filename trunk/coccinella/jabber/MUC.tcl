@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.3 2003-05-25 15:03:27 matben Exp $
+# $Id: MUC.tcl,v 1.4 2003-06-01 10:26:57 matben Exp $
 
 package provide MUC 1.0
 
@@ -14,6 +14,7 @@ namespace eval ::Jabber::MUC:: {
     # Local stuff
     variable dlguid 0
     variable editcalluid 0
+    variable enteruid 0
     
     # Map action to button widget.
     variable mapAction2Bt
@@ -68,46 +69,48 @@ namespace eval ::Jabber::MUC:: {
 	    $wgrant.btvoice      $wrevoke.btvoice      $wlist.btvoice
 	    $wother.btkick}
     }
-    
-    
 }
 
 # Jabber::MUC::BuildEnter --
 #
-#       Initiates the process of entering a MUC room.
+#       Initiates the process of entering a MUC room. Multi instance.
 #       
 # Arguments:
-#       w           toplevel widget
-#       args        -server, -roomjid
+#       args        -server, -roomjid, -nickname, -password
 #       
 # Results:
 #       "cancel" or "enter".
 
-proc ::Jabber::MUC::BuildEnter {w args} {
+proc ::Jabber::MUC::BuildEnter {args} {
     global  this sysFont
 
-    variable server
-    variable roomname
-    variable wcomboroom
-    variable nickname
-    variable password
-    variable finishedEnter -1
+    variable enteruid
+    variable dlguid
     upvar ::Jabber::jstate jstate
     
-    if {[winfo exists $w]} {
-	raise $w
-	return
-    }
     array set argsArr $args
+
+    # State variable to collect instance specific variables.
+    set token [namespace current]::enter[incr enteruid]
+    variable $token
+    upvar 0 $token enter
+    
+    set w .dlgmuc[incr dlguid]
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
     } else {
 
     }
-    wm title $w {Enter Room}
-    set server ""
-    set roomname ""
+    wm title $w [::msgcat::mc {Enter Room}]
+    set enter(w) $w
+    array set enter {
+	finished    -1
+	server      ""
+	roomname    ""
+	nickname    ""
+	password    ""
+    }
     
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
@@ -123,49 +126,51 @@ proc ::Jabber::MUC::BuildEnter {w args} {
     set confServers [$jstate(browse) getservicesforns  \
       "http://jabber.org/protocol/muc"]
     
-    ::Jabber::Debug 2 "BuildEnterRoom: confServers='$confServers'"
+    ::Jabber::Debug 2 "::Jabber::MUC::BuildEnter confServers='$confServers'"
 
     set wcomboserver $frtop.eserv
+    set wcomboroom $frtop.eroom
+
     ::combobox::combobox $wcomboserver -width 20 -font $sysFont(s)  \
-      -textvariable [namespace current]::server  \
-      -command [namespace current]::ConfigRoomList -editable 0
+      -textvariable $token\(server)  \
+      -command [list [namespace current]::ConfigRoomList $wcomboroom] -editable 0
     eval {$frtop.eserv list insert end} $confServers
     label $frtop.lroom -text "[::msgcat::mc {Room name}]:" -font $sysFont(sb)
     
     # Find the default conferencing server.
     if {[info exists argsArr(-server)]} {
-	set server $argsArr(-server)
+	set enter(server) $argsArr(-server)
     } elseif {[llength $confServers]} {
-	set server [lindex $confServers 0]
+	set enter(server) [lindex $confServers 0]
     }
 
     set roomList {}
-    if {[string length $server] > 0} {
-	set allRooms [$jstate(browse) getchilds $server]
+    if {[string length $enter(server)] > 0} {
+	set allRooms [$jstate(browse) getchilds $enter(server)]
 	foreach roomJid $allRooms {
 	    regexp {([^@]+)@.+} $roomJid match room
 	    lappend roomList $room
 	}
     }
-    set wcomboroom $frtop.eroom
     ::combobox::combobox $wcomboroom -width 20 -font $sysFont(s)   \
-      -textvariable [namespace current]::roomname -editable 0
+      -textvariable $token\(roomname) -editable 0
     eval {$frtop.eroom list insert end} $roomList
 
     if {[info exists argsArr(-roomjid)]} {
-	regexp {^([^@]+)@([^/]+)} $argsArr(-roomjid) match roomname server	
+	regexp {^([^@]+)@([^/]+)} $argsArr(-roomjid) match enter(roomname)  \
+	  enter(server)	
 	$wcomboserver configure -state disabled
 	$wcomboroom configure -state disabled
     }
     if {[info exists argsArr(-server)]} {
-	set server $argsArr(-server)
+	set enter(server) $argsArr(-server)
 	$wcomboserver configure -state disabled
     }
     
     label $frtop.lnick -text "[::msgcat::mc {Nick name}]:" -font $sysFont(sb)
-    entry $frtop.enick -textvariable [namespace current]::nickname
+    entry $frtop.enick -textvariable $token\(nickname)
     label $frtop.lpass -text "[::msgcat::mc Password]:" -font $sysFont(sb)
-    entry $frtop.epass -textvariable [namespace current]::password
+    entry $frtop.epass -textvariable $token\(password)
     
     grid $frtop.lserv -column 0 -row 0 -sticky e
     grid $frtop.eserv -column 1 -row 0 -sticky w
@@ -175,16 +180,25 @@ proc ::Jabber::MUC::BuildEnter {w args} {
     grid $frtop.enick -column 1 -row 2 -sticky w
     grid $frtop.lpass -column 0 -row 3 -sticky e
     grid $frtop.epass -column 1 -row 3 -sticky w
+    
+    if {[info exists argsArr(-nickname)]} {
+	set enter(nickname) $argsArr(-nickname)
+	$frtop.enick configure -state disabled
+    }
+    if {[info exists argsArr(-password)]} {
+	set enter(password) $argsArr(-password)
+	$frtop.epass configure -state disabled
+    }
        
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
     set wsearrows $frbot.arr
     set wbtenter $frbot.btenter
     pack [button $wbtenter -text [::msgcat::mc Enter] -width 8 \
-      -default active -command [list [namespace current]::DoEnter $w]]  \
+      -default active -command [list [namespace current]::DoEnter $token]]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
-      -command [list [namespace current]::CancelEnter $w]]  \
+      -command [list [namespace current]::CancelEnter $token]]  \
       -side right -padx 5 -pady 5
     pack [::chasearrows::chasearrows $wsearrows -background gray87 -size 16] \
       -side left -padx 5 -pady 5
@@ -203,21 +217,27 @@ proc ::Jabber::MUC::BuildEnter {w args} {
     } else {
     	focus $frtop.eserv
     }
-    catch {grab $w}
+    #catch {grab $w}
     
     # Wait here for a button press and window to be destroyed. BAD?
     tkwait window $w
     
-    catch {grab release $w}
-    focus $oldFocus
-    return [expr {($finishedEnter <= 0) ? "cancel" : "create"}]
+    #catch {grab release $w}
+    catch {focus $oldFocus}
+    set finished $enter(finished)
+    unset enter
+    return [expr {($finished <= 0) ? "cancel" : "enter"}]
 }
 
-proc ::Jabber::MUC::ConfigRoomList {wcombo pickedServ} {    
-    variable wcomboroom
+# Jabber::MUC::ConfigRoomList --
+# 
+#       When a conference server is picked in the server combobox, the 
+#       room combobox must get the available rooms for this particular server.
+
+proc ::Jabber::MUC::ConfigRoomList {wcomboroom wcombo confserver} {    
     upvar ::Jabber::jstate jstate
 
-    set allRooms [$jstate(browse) getchilds $pickedServ]
+    set allRooms [$jstate(browse) getchilds $confserver]
     set roomList {}
     foreach roomJid $allRooms {
 	regexp {([^@]+)@.+} $roomJid match room
@@ -227,34 +247,33 @@ proc ::Jabber::MUC::ConfigRoomList {wcombo pickedServ} {
     eval {$wcomboroom list insert end} $roomList
 }
 
-proc ::Jabber::MUC::DoEnter {w} {
-    variable server
-    variable roomname
-    variable nickname
-    variable finishedEnter
+proc ::Jabber::MUC::DoEnter {token} {
+    variable $token
+    upvar 0 $token enter
     upvar ::Jabber::jstate jstate
     
-    if {($roomname == "") || ($nickname == "")} {
+    if {($enter(roomname) == "") || ($enter(nickname) == "")} {
 	tk_messageBox -type ok -icon error  \
 	  -message "We require that all fields are nonempty"
 	return
     }
-    set roomJid ${roomname}@${server}
+    set roomJid [string tolower $enter(roomname)@$enter(server)]
     
-    $jstate(jlib) muc enter $roomJid $nickname -command \
-      [list [namespace current]::EnterCallback $w]
-    set finishedEnter 1
-    catch {destroy $w}
+    $jstate(jlib) muc enter $roomJid $enter(nickname) -command \
+      [list [namespace current]::EnterCallback]
+    set enter(finished) 1
+    catch {destroy $enter(w)}
    
     # Cache groupchat protocol type (muc|conference|gc-1.0).
     ::Jabber::GroupChat::SetProtocol $roomJid "muc"
 }
 
-proc ::Jabber::MUC::CancelEnter {w} {
-    variable finishedEnter
-    
-    set finishedEnter 0
-    catch {destroy $w}
+proc ::Jabber::MUC::CancelEnter {token} {
+    variable $token
+    upvar 0 $token enter
+
+    set enter(finished) 0
+    catch {destroy $enter(w)}
 }
 
 # Jabber::MUC::EnterCallback --
@@ -271,7 +290,7 @@ proc ::Jabber::MUC::CancelEnter {w} {
 # Results:
 #       None.
 
-proc ::Jabber::MUC::EnterCallback {w jlibName type args} {
+proc ::Jabber::MUC::EnterCallback {jlibName type args} {
     
     Debug 3 "::Jabber::MUC::EnterCallback type=$type, args='$args'"
     array set argsArr $args
@@ -293,7 +312,7 @@ proc ::Jabber::MUC::EnterCallback {w jlibName type args} {
 		    set ans [tk_messageBox -type yesno -icon error  \
 		      -message $msg]
 		    if {$ans == "yes"} {
-			::Jabber::MUC::BuildEnter $w -roomjid $argsArr(-from)
+			::Jabber::MUC::BuildEnter -roomjid $argsArr(-from)
 		    }
 		}
 		default {
@@ -376,8 +395,8 @@ proc ::Jabber::MUC::Invite {roomjid} {
     set reason [$wmid.ere get]
 
     catch {grab release $w}
-    destroy $w
-    focus $oldFocus
+    catch {destroy $w}
+    catch {focus $oldFocus}
     
     set opts {}
     if {$reason != ""} {
@@ -395,21 +414,78 @@ proc ::Jabber::MUC::Invite {roomjid} {
     return [expr {($fininvite <= 0) ? "cancel" : "ok"}]
 }
 
+# Jabber::MUC::MUCMessage --
+# 
+#       Handle incoming message tagged with muc namespaced x-element.
+#       Invitation?
+
+proc ::Jabber::MUC::MUCMessage {from xlist} {
+   
+    # This seems handled by the muc component by sending a message.
+    return
+   
+    set invite 0
+    foreach c [wrapper::getchildren $xlist] {
+	switch -- [lindex $c 0] {
+	    invite {
+		set invite 1
+		set inviter [wrapper::getattr [lindex $c 1] "from"]
+		foreach cc [wrapper::getchildren $c] {
+		    if {[string equal [lindex $cc 0] "reason"]} {
+			set reason [lindex $cc 3]
+		    }
+		}		
+	    }
+	    password {
+		set password [lindex $c 3]
+	    }	    
+	}
+    }
+    
+    if {$invite} {
+	set msg "You have received an invitation from $inviter to join\
+	  a groupchat in the room $from."
+	set opts {}
+	if {[info exists reason]} {
+	    append msg " The reason: $reason"
+	}
+	if {[info exists password]} {
+	    append msg " The password \"$password\" is needed for entry."
+	    lappend opts -password $password
+	}
+	append msg " Do you want to join right away?"
+	set ans [tk_messageBox -icon info -type yesno -title "Invitation" \
+	  -message $msg]
+	if {$ans == "yes"} {
+	    eval {::Jabber::MUC::BuildEnter -roomjid $from} $opts
+	}
+    }
+}
+
 #--- The Info Dialog -----------------------------------------------------------
 
 # Jabber::MUC::BuildInfo --
 # 
 #       Displays an info dialog for MUC room configuration.
 
-proc ::Jabber::MUC::BuildInfo {w roomjid} {
+proc ::Jabber::MUC::BuildInfo {roomjid} {
     global this sysFont
     
+    variable dlguid
     upvar ::Jabber::jstate jstate
-    
-    if {[winfo exists $w]} {
-	raise $w
-	return
+
+    # Instance specific namespace.
+    namespace eval [namespace current]::${roomjid} {
+	variable locals
     }
+    upvar [namespace current]::${roomjid}::locals locals
+    
+    if {[info exists locals($roomjid,w)] && [winfo exists $locals($roomjid,w)]} {
+	raise $locals($roomjid,w)
+	return
+    }    
+    set w .dlgmuc[incr dlguid]
+
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
@@ -423,21 +499,33 @@ proc ::Jabber::MUC::BuildInfo {w roomjid} {
     wm title $w "Info Room: $roomName"
     wm protocol $w WM_DELETE_WINDOW  \
       [list [namespace current]::Close $roomjid]
-
-    # Instance specific namespace.
-    namespace eval [namespace current]::${roomjid} {
-	variable locals
-    }
-    upvar [namespace current]::${roomjid}::locals locals
     set locals($roomjid,w) $w
     set locals($w,roomjid) $roomjid
     set locals($roomjid,mynick) [$jstate(jlib) muc mynick $roomjid]
     set locals($roomjid,myrole) none
     set locals($roomjid,myaff) none
-    set pady 2
+    switch -- $this(platform) {
+	macintosh {
+	    set pady 4
+	}
+	macosx {
+	    set pady 2
+	}
+	default {
+	    set pady 4
+	}
+    }
     
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
+    
+    # 
+    pack [message $w.frall.msg -width 400 -font $sysFont(s) -text \
+      "This dialog makes available a number of options and actions for a\
+      room. Your role and affiliation determines your privilege to act.\
+      Further restrictions may exist depending on specific room\
+      configuration."]  \
+      -side top -anchor w -padx 4 -pady 4
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
@@ -447,25 +535,26 @@ proc ::Jabber::MUC::BuildInfo {w roomjid} {
     pack $frbot -side bottom -fill x -padx 10 -pady 8
     
     # A frame.
-    set frtop $w.frall.top
-    pack [frame $frtop] -side top
+    set froom $w.frall.room
+    pack [frame $froom] -side left -padx 4 -pady 4
     
     # Tablelist with scrollbar ---
-    set frtab $frtop.frtab    
+    set frtab $froom.frtab    
     set wysc $frtab.ysc
     set wtbl $frtab.tb
-    pack [frame $frtab] -padx 0 -pady 0 -side left
-    label $frtab.l -text "Participants:" -font $sysFont(sb)
+    pack [frame $frtab] -padx 0 -pady 0 -side top
+    #label $frtab.l -text "Participants:" -font $sysFont(sb)
     set columns [list 0 Nickname 0 Role 0 Affiliation]
+    
     tablelist::tablelist $wtbl  \
-      -columns $columns -stretch all \
+      -columns $columns -stretch all -selectmode single \
       -font $sysFont(s) -labelfont $sysFont(s) -background white  \
       -yscrollcommand [list $wysc set]  \
       -labelbackground #cecece -stripebackground #dedeff -width 36 -height 8
     scrollbar $wysc -orient vertical -command [list $wtbl yview]
     button $frtab.ref -text Refresh -font $sysFont(s) -command  \
       [list [namespace current]::Refresh $roomjid]
-    grid $frtab.l -sticky w
+    #grid $frtab.l -sticky w
     grid $wtbl $wysc -sticky news
     grid columnconfigure $frtab 0 -weight 1
     grid $frtab.ref -sticky e -pady 2
@@ -481,8 +570,8 @@ proc ::Jabber::MUC::BuildInfo {w roomjid} {
     ::Jabber::MUC::FillTable $roomjid
     
     # A frame.
-    set frgrantrevoke $frtop.grrev
-    pack [frame $frgrantrevoke] -side right -anchor n
+    set frgrantrevoke $froom.grrev
+    pack [frame $frgrantrevoke] -side top
         
     # Grant buttons ---
     set frgrant $frgrantrevoke.grant
@@ -510,20 +599,9 @@ proc ::Jabber::MUC::BuildInfo {w roomjid} {
     set frmid $w.frall.mid
     pack [frame $frmid] -side top
     
-    # Edit lists ---
-    set fredit $frmid.lists
-    set wlist [LabeledFrame2 $fredit "Edit Lists:"]
-    pack $fredit -side right
-    foreach txt {Voice Ban Member Moderator Admin Owner} {
-	set stxt [string tolower $txt]	
-	button $wlist.bt${stxt} -text "$txt..."  \
-	  -command [list [namespace current]::EditList $roomjid $stxt]
-	grid $wlist.bt${stxt} -sticky ew -padx 8 -pady $pady
-    }
-    
     # Other buttons ---
     set wother $frmid.fraff
-    pack [frame $wother] -side left
+    pack [frame $wother] -side top -padx 2 -pady 2
     button $wother.btkick -text "Kick Participant"  \
       -command [list [namespace current]::Kick $roomjid]
     button $wother.btban -text "Ban Participant"  \
@@ -536,6 +614,17 @@ proc ::Jabber::MUC::BuildInfo {w roomjid} {
     grid $wother.btban -sticky ew -pady $pady
     grid $wother.btconf -sticky ew -pady $pady
     grid $wother.btdest -sticky ew -pady $pady
+    
+    # Edit lists ---
+    set fredit $frmid.lists
+    set wlist [LabeledFrame2 $fredit "Edit Lists:"]
+    pack $fredit -side top -padx 2 -pady 2
+    foreach txt {Voice Ban Member Moderator Admin Owner} {
+	set stxt [string tolower $txt]	
+	button $wlist.bt${stxt} -text "$txt..."  \
+	  -command [list [namespace current]::EditListBuild $roomjid $stxt]
+	grid $wlist.bt${stxt} -sticky ew -padx 8 -pady $pady
+    }
 
     # Collect various widget paths.
     set locals(wtbl) $wtbl
@@ -549,6 +638,10 @@ proc ::Jabber::MUC::BuildInfo {w roomjid} {
     
     wm resizable $w 0 0    
     
+    set idleScript [format {
+	%s.frall.msg configure -width [winfo reqwidth %s]} $w $w]
+    #after idle $idleScript
+    return ""
 }
 
 proc ::Jabber::MUC::FillTable {roomjid} {
@@ -585,7 +678,7 @@ proc ::Jabber::MUC::FillTable {roomjid} {
 	if {[string equal $res $mynick]} {
 	    set locals($roomjid,myaff) $aff
 	    set locals($roomjid,myrole) $role
-	    $wtbl rowconfigure $irow -bg red
+	    $wtbl rowconfigure $irow -bg #ffa090
 	}
 	incr irow
     }
@@ -822,7 +915,7 @@ proc ::Jabber::MUC::Ban {roomjid} {
     }
 }
 
-# Jabber::MUC::EditList --
+# Jabber::MUC::EditListBuild --
 #
 #       Shows and handles a dialog for edit various lists of room content.
 #       
@@ -833,7 +926,7 @@ proc ::Jabber::MUC::Ban {roomjid} {
 # Results:
 #       "cancel" or "ok".
 
-proc ::Jabber::MUC::EditList {roomjid type} {
+proc ::Jabber::MUC::EditListBuild {roomjid type} {
     global this sysFont
     
     upvar [namespace current]::${roomjid}::editlocals editlocals
@@ -852,21 +945,18 @@ proc ::Jabber::MUC::EditList {roomjid type} {
 	admin     {Edit the admin list}
 	owner     {Edit the owner list}
     }
-    array set columns {
-	voice     {0 Nickname 0 Affiliation 0 Jid 0 Reason}
-	ban       {0 Jid 0 Reason}
-	member    {0 Nickname 0 Role 0 Jid 0 Reason}
-	moderator {0 Nickname 0 Jid 0 Reason}
-	admin     {0 Jid 0 Reason}
-	owner     {0 Jid 0 Reason}
-    }
     array set setListDefs {
-	voice     {nick affiliation jid reason}
+	voice     {nick affiliation role jid reason}
 	ban       {jid reason}
-	member    {nick role jid reason}
-	moderator {nick jid reason}
-	admin     {jid reason}
+	member    {nick affiliation role jid reason}
+	moderator {nick role jid reason}
+	admin     {jid affiliation reason}
 	owner     {jid reason}
+    }
+    foreach what {voice ban member moderator admin owner} {
+	foreach txt $setListDefs($what) {
+	    lappend columns($what) 0 [string totitle $txt]
+	}
     }
     
     set titleType [string totitle $type]
@@ -904,19 +994,18 @@ proc ::Jabber::MUC::EditList {roomjid type} {
     set wtbl $frtab.tb
     pack [frame $frtab] -padx 0 -pady 0 -side left
     tablelist::tablelist $wtbl -width $tblwidth -height 8 \
-      -columns $columns($type) -stretch all  \
+      -columns $columns($type) -stretch all -selectmode single \
       -font $sysFont(s) -labelfont $sysFont(s) -background white  \
       -yscrollcommand [list $wysc set]  \
       -labelbackground #cecece -stripebackground #dedeff \
-      -editendcommand [namespace current]::VerifyEditEntry \
+      -editendcommand [list [namespace current]::VerifyEditEntry $roomjid] \
       -listvariable [namespace current]::${roomjid}::editlocals(listvar)
     scrollbar $wysc -orient vertical -command [list $wtbl yview]
     grid $wtbl $wysc -sticky news
     grid columnconfigure $frtab 0 -weight 1
 
-    option add $wtbl*Entry.background		LightYellow
-    option add $wtbl*selectBackground		navy
-    option add $wtbl*selectForeground		white
+    option add *$wtbl*selectBackground		navy
+    option add *$wtbl*selectForeground		white
 
     $wtbl columnconfigure end -editable yes
 
@@ -942,7 +1031,7 @@ proc ::Jabber::MUC::EditList {roomjid type} {
     set body [$wtbl bodypath]
     bind $body <Button-1> {+ focus %W}
     #bind $body <Double-1> [list [namespace current]::XXX $roomjid]
-    bind $wtbl <<ListboxSelect>> [list [namespace current]::SelectEditList $roomjid]
+    bind $wtbl <<ListboxSelect>> [list [namespace current]::EditListSelect $roomjid]
     
     # Action buttons.
     set wbts $wmid.fr
@@ -951,11 +1040,11 @@ proc ::Jabber::MUC::EditList {roomjid type} {
     set wbtrm $wbts.rm
     pack [frame $wbts] -side right -anchor n -padx 4 -pady 4
     button $wbtadd -text "Add" -font $sysFont(s) -state disabled -command \
-      [list [namespace current]::DoEditAddList $roomjid]
+      [list [namespace current]::EditListDoAdd $roomjid]
     button $wbtedit -text "Edit" -font $sysFont(s) -state disabled -command \
-      [list [namespace current]::DoEditList $roomjid]
+      [list [namespace current]::EditListDoEdit $roomjid]
     button $wbtrm -text "Remove" -font $sysFont(s) -state disabled -command \
-      [list [namespace current]::DoEditRemoveList $roomjid]
+      [list [namespace current]::EditListDoRemove $roomjid]
     
     grid $wbtadd -pady 2 -sticky ew
     grid $wbtedit -pady 2 -sticky ew
@@ -975,7 +1064,7 @@ proc ::Jabber::MUC::EditList {roomjid type} {
     pack [::chasearrows::chasearrows $wsearrows -background gray87 -size 16] \
       -side left -padx 5 -pady 5
     pack [button $frbot.btres -text [::msgcat::mc Reset] -width 8  \
-      -command [list [namespace current]::ResetEditList]]  \
+      -command [list [namespace current]::EditListReset $roomjid]]  \
       -side left -padx 5 -pady 5  
     
     wm resizable $w 0 0
@@ -986,37 +1075,6 @@ proc ::Jabber::MUC::EditList {roomjid type} {
     set oldFocus [focus]
     catch {grab $w}
     
-    # How and what to get.
-    switch -- $type {
-	voice {
-	   set getact getrole
-	   set what participant
-	}
-	ban {
-	   set getact getaffiliation
-	   set what outcast
-	}
-	member {
-	   set getact getaffiliation
-	   set what member
-	}
-	moderator {
-	   set getact getrole
-	   set what moderator
-	}
-	admin {
-	   set getact getaffiliation
-	   set what admin
-	}
-	owner {    
-	   set getact getaffiliation
-	   set what owner
-	} 
-	default {
-	    return -code error "Unrecognized type \"$type\""
-	}
-    }
-    
     # Cache local variables.
     set editlocals(wtbl) $wtbl
     set editlocals(wsearrows) $wsearrows
@@ -1025,16 +1083,58 @@ proc ::Jabber::MUC::EditList {roomjid type} {
     set editlocals(wbtadd) $wbtadd
     set editlocals(wbtedit) $wbtedit
     set editlocals(wbtrm) $wbtrm
+    set editlocals(origlistvar) {}
+    set editlocals(listvar) {}
+    
+    # How and what to get.
+    switch -- $type {
+	voice {
+	   set getact getrole
+	   set setact setrole
+	   set what participant
+	}
+	ban {
+	   set getact getaffiliation
+	   set setact setaffiliation
+	   set what outcast
+	}
+	member {
+	   set getact getaffiliation
+	   set setact setaffiliation
+	   set what member
+	}
+	moderator {
+	   set getact getrole
+	   set setact setrole
+	   set what moderator
+	}
+	admin {
+	   set getact getaffiliation
+	   set setact setaffiliation
+	   set what admin
+	}
+	owner {    
+	   set getact getaffiliation
+	   set setact setaffiliation
+	   set what owner
+	} 
+	default {
+	    return -code error "Unrecognized type \"$type\""
+	}
+    }
+    set editlocals(getact) $getact
+    set editlocals(setact) $setact
     
     # Now, go and get it!
     $wsearrows start
-    set editlocals(editcallid) [incr editcalluid]
+    set editlocals(callid) [incr editcalluid]
     if {[catch {
 	$jstate(jlib) muc $getact $roomjid $what \
-	  [list [namespace current]::EditListGetCB $roomjid $locals(editcallid)]
-    }]} {
+	  [list [namespace current]::EditListGetCB $roomjid $editlocals(callid)]
+    } err]} {
 	$wsearrows stop
-	tk_messageBox
+	tk_messageBox -type ok -icon error -title "Network Error" \
+	  -message "Network error ocurred: $err"
     }      
     
     # Wait here for a button press.
@@ -1042,19 +1142,13 @@ proc ::Jabber::MUC::EditList {roomjid type} {
     
 
     catch {grab release $w}
-    destroy $w
-    focus $oldFocus
+    catch {destroy $w}
+    catch {focus $oldFocus}
 
     set opts {}
 
     if {$fineditlist > 0} {
-	if {[catch {eval {
-	    $jstate(jlib) muc setrole $roomjid  \
-	      -command [list [namespace current]::IQCallback $roomjid]} $opts
-	} err]} {
-	    tk_messageBox -type ok -icon error -title "Network Error" \
-	      -message "Network error ocurred: $err"
-	}
+	::Jabber::MUC::EditListSet $roomjid
     }
     return [expr {($fineditlist <= 0) ? "cancel" : "ok"}]
 }
@@ -1072,7 +1166,7 @@ proc ::Jabber::MUC::EditListGetCB {roomjid callid jlibname type subiq} {
     set wbtrm $editlocals(wbtrm)
 
     # Verify that this callback does indeed be the most recent.
-    if {$callid != $editlocals(editcallid)} {
+    if {$callid != $editlocals(callid)} {
 	return
     }
     if {![winfo exists $wsearrows]} {
@@ -1081,7 +1175,7 @@ proc ::Jabber::MUC::EditListGetCB {roomjid callid jlibname type subiq} {
     
     $wsearrows stop
     if {$type == "error"} {
-	tk_messageBox 
+	tk_messageBox -type ok -icon error -message $subiq
 	return
     }
     
@@ -1109,6 +1203,7 @@ proc ::Jabber::MUC::EditListGetCB {roomjid callid jlibname type subiq} {
 	    $wbtrm configure -state normal
 	}
 	owner {    
+	    $wbtedit configure -state normal
 	} 
     }
 }
@@ -1123,14 +1218,163 @@ proc ::Jabber::MUC::FillEditList {roomjid} {
     set wbtok $editlocals(wbtok)
     set type $editlocals(type)
     
-    $editlocals(subiq)
-    set childList [wrapper::getchildren $editlocals(subiq)]
+    set queryElem [wrapper::getchildren $editlocals(subiq)]
     set tmplist {}
+    
+    foreach item [wrapper::getchildren $queryElem] {
+	set row {}
+	array set val {nick "" role none affiliation none jid "" reason ""}
+	array set val [lindex $item 1]
+	foreach c [wrapper::getchildren $item] {
+	    if {[string equal [lindex $c 0] "reason"]} {
+		set val(reason) [lindex $c 3]
+		break
+	    }
+	}
+	foreach key $setListDefs($type) {
+	    lappend row $val($key)
+	}
+	lappend $tmplist $row
+    }
+    
+    # Fill table. Cache orig result.
+    set editlocals(origlistvar) $tmplist
+    set editlocals(listvar) $tmplist
+}
 
-    # Fill in tablelist.
+proc ::Jabber::MUC::VerifyEditEntry {roomjid wtbl row col text} {
+    upvar [namespace current]::${roomjid}::editlocals editlocals
+    variable setListDefs
+
+    set type $editlocals(type)
+
+    # Is this a jid entry?
+    if {[lsearch $setListDefs($type) jid] != $col} {
+	return
+    }
+    
+    if {![::Jabber::IsWellFormedJID $text]} {
+	bell
+	tk_messageBox -icon error -message "Illegal jid \"$text\"" \
+	  -parent [winfo toplevel $wtbl] -type ok
+	$wtbl rejectinput
+	return ""
+    }
+}
+
+proc ::Jabber::MUC::EditListSelect {roomjid} {
+    upvar [namespace current]::${roomjid}::editlocals editlocals
+    
+    set wtbl $editlocals(wtbl)
+    
+}
+
+proc ::Jabber::MUC::EditListDoAdd {roomjid} {
+    upvar [namespace current]::${roomjid}::editlocals editlocals
+    variable setListDefs
+
+    set wtbl $editlocals(wtbl)
+    set type $editlocals(type)
+    set len [llength $setListDefs($type)]
+    for {set i 0} {$i < $len} {incr i} {
+	lappend empty {}
+    }
+    lappend editlocals(listvar) $empty
+    set indjid [lsearch $setListDefs($type) jid]
+    array set indColumnFocus [list  \
+	voice      end  \
+	ban        $indjid  \
+	member     end  \
+	moderator  end  \
+	admin      $indjid  \
+	owner      end  \
+    ]
+    
+    # Set focus.
+    $wtbl editcell end,$indColumnFocus($type)
+    focus [$wtbl entrypath]
+}
+
+proc ::Jabber::MUC::EditListDoEdit {roomjid} {
+    upvar [namespace current]::${roomjid}::editlocals editlocals
+
+    set wtbl $editlocals(wtbl)
+    set type $editlocals(type)
+
+    switch -- $type {
+	owner {
+	    $wtbl editcell end,0
+	}
+    }
+}
+
+proc ::Jabber::MUC::EditListDoRemove {roomjid} {
+    upvar [namespace current]::${roomjid}::editlocals editlocals
+    variable setListDefs
+
+    set wtbl $editlocals(wtbl)
+    set type $editlocals(type)
+    set item [$wtbl curselection]
+    if {[string length $item] == 0} {
+	return 
+    }
+    
     switch -- $type {
 	voice {
-	    lappend tmplist 
+	    set ind [lsearch $setListDefs($type) "role"]
+	    $wtbl cellconfigure $item,$ind -text "visitor"
+	}
+	ban {
+	}
+	member {
+	    set ind [lsearch $setListDefs($type) "affiliation"]
+	    $wtbl cellconfigure $item,$ind -text "none"
+	}
+	moderator {
+	    set ind [lsearch $setListDefs($type) "role"]
+	    $wtbl cellconfigure $item,$ind -text "participant"
+	}
+	admin {
+	    set ind [lsearch $setListDefs($type) "affiliation"]
+	    $wtbl cellconfigure $item,$ind -text "none"
+	}
+	owner {
+	}
+    }
+}
+
+proc ::Jabber::MUC::EditListReset {roomjid} {
+    upvar [namespace current]::${roomjid}::editlocals editlocals
+
+    set editlocals(listvar) $editlocals(origlistvar)
+}
+
+# Jabber::MUC::EditListSet --
+# 
+#       Set (send) the dited list to the muc service.
+
+proc ::Jabber::MUC::EditListSet {roomjid} {
+    upvar [namespace current]::${roomjid}::editlocals editlocals
+    variable setListDefs
+
+    # Original and present content of tablelist.
+    set origlist $editlocals(origlistvar)
+    set thislist $editlocals(listvar)
+    set type $editlocals(type)
+    set setact $editlocals(setact)
+    
+    # Only the 'diff' is necessary to send.
+    # Loop through each row in the tablelist.
+    foreach row $thislist {
+	
+	
+	
+	
+    }
+    
+    switch -- $type {
+	voice {
+
 	}
 	ban {
 
@@ -1144,67 +1388,23 @@ proc ::Jabber::MUC::FillEditList {roomjid} {
 	admin {
 
 	}
-	owner {    
+	owner {
 
-	} 
+	}
     }
-    set editlocals(listvar) $tmplist
-}
-
-proc ::Jabber::MUC::VerifyEditEntry {wtbl row col text} {
-
-
-    if {![::Jabber::IsWellFormedJID $text]} {
-	bell
-	tk_messageBox -icon error -message "Kass" \
-	  -parent [winfo toplevel $wtbl] -type ok
-	$wtbl rejectinput
-	return ""
-    }
-}
-
-proc ::Jabber::MUC::SelectEditList {roomjid} {
-    upvar [namespace current]::${roomjid}::editlocals editlocals
-    
-    set wtbl $editlocals(wtbl)
-    set wsearrows $editlocals(wsearrows)
 
     
-}
-
-proc ::Jabber::MUC::DoEditAddList {roomjid} {
-    upvar [namespace current]::${roomjid}::editlocals editlocals
-
-    set wtbl $editlocals(wtbl)
-
     
+    if {[catch {eval {
+	$jstate(jlib) muc $setact $roomjid xxx \
+	  -command [list [namespace current]::IQCallback $roomjid]} $opts
+    } err]} {
+	tk_messageBox -type ok -icon error -title "Network Error" \
+	  -message "Network error ocurred: $err"
+    }    
 }
-
-proc ::Jabber::MUC::DoEditList {roomjid} {
-    upvar [namespace current]::${roomjid}::editlocals editlocals
-
-    set wtbl $editlocals(wtbl)
-
     
-}
-
-proc ::Jabber::MUC::DoEditRemoveList {roomjid} {
-    upvar [namespace current]::${roomjid}::editlocals editlocals
-
-    set wtbl $editlocals(wtbl)
-
-    
-}
-
-proc ::Jabber::MUC::ResetEditList {roomjid} {
-    upvar [namespace current]::${roomjid}::editlocals editlocals
-
-    set wtbl $editlocals(wtbl)
-
-    
-}
-
-# End edit lists ---
+# End edit lists ---------------------------------------------------------------
 
 proc ::Jabber::MUC::RoomConfig {roomjid} {
     global  this sysFont
@@ -1212,10 +1412,11 @@ proc ::Jabber::MUC::RoomConfig {roomjid} {
     variable wbox
     variable wsearrows
     variable wbtok
+    variable dlguid
     upvar [namespace current]::${roomjid}::locals locals
     upvar ::Jabber::jstate jstate
     
-    set w .qwerty65
+    set w .dlgmuc[incr dlguid]
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
@@ -1270,7 +1471,7 @@ proc ::Jabber::MUC::RoomConfig {roomjid} {
     tkwait window $w
     
     catch {grab release $w}
-    focus $oldFocus
+    catch {focus $oldFocus}
     return
 }
 
@@ -1278,7 +1479,7 @@ proc ::Jabber::MUC::CancelConfig {roomjid w} {
     upvar [namespace current]::${roomjid}::locals locals
     upvar ::Jabber::jstate jstate
 
-    catch {$jstate(jlib) muc setroom $roomJid cancel}
+    catch {$jstate(jlib) muc setroom $roomjid cancel}
     destroy $w
 }
 
@@ -1381,8 +1582,8 @@ proc ::Jabber::MUC::Destroy {roomjid} {
     set msg "You are about to destroy the room \"$roomName\".\
       Optionally you may give any present room particpants an\
       alternative room jid and a reason."
-    pack [message $w.frall.msg -width 220 -font $sysFont(s) -text $msg] \
-      -side top -fill both -padx 4 -pady 2
+    pack [message $w.frall.msg -width 280 -font $sysFont(s) -text $msg] \
+      -side top -anchor w -padx 4 -pady 2
     
     set wmid $w.frall.fr
     pack [frame $wmid] -side top -fill x -expand 1 -padx 6
@@ -1422,8 +1623,8 @@ proc ::Jabber::MUC::Destroy {roomjid} {
     set reason [$wmid.ere get]
 
     catch {grab release $w}
-    destroy $w
-    focus $oldFocus
+    catch {destroy $w}
+    catch {focus $oldFocus}
 
     set opts {}
     if {$reason != ""} {
@@ -1445,13 +1646,16 @@ proc ::Jabber::MUC::Destroy {roomjid} {
     return [expr {($findestroy <= 0) ? "cancel" : "ok"}]
 }
 
+# Jabber::MUC::IQCallback, PresCallback --
+# 
+#       Generic callbacks when setting things via <iq/> or <presence/>
+
 proc ::Jabber::MUC::IQCallback {roomjid jlibname type subiq} {
     
-    puts "::Jabber::MUC::IQCallback roomjid=$roomjid, type=$type,subiq=$subiq"
     if {$type == "error"} {
     	regexp {^([^@]+)@.*} $roomjid match roomName
     	set msg "We received an error when interaction with the room\
-    	\"$roomName\": "
+    	\"$roomName\": $subiq"
 	tk_messageBox -type ok -icon error -title "Error" -message $msg
     }
 }
@@ -1459,7 +1663,6 @@ proc ::Jabber::MUC::IQCallback {roomjid jlibname type subiq} {
 
 proc ::Jabber::MUC::PresCallback {roomjid jlibname type args} {
     
-    puts "::Jabber::MUC::PresCallback roomjid=$roomjid, type=$type, args=$args"
     if {$type == "error"} {
     	set errcode ???
     	set errmsg ""
