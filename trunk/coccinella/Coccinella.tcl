@@ -15,7 +15,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.22 2003-12-18 14:19:34 matben Exp $
+# $Id: Coccinella.tcl,v 1.23 2003-12-19 15:47:39 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -488,6 +488,7 @@ if {$prefs(Thread)} {
 ::SplashScreen::SetMsg [::msgcat::mc splashload]
 
 set listOfPackages {
+    hooks
     CanvasUtils
     Connections
     FilesAndCanvas
@@ -760,6 +761,10 @@ if {($prefs(protocol) != "client") && $prefs(haveHttpd)} {
     } msg]} {
 	tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
 	  [::msgcat::mc messfailedhttp $msg]]	  
+    } else {
+	
+	# Stop before quitting.
+	hooks::add quitAppHook ::tinyhttpd::stop
     }
 }
 

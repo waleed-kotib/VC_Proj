@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.22 2003-12-18 14:19:35 matben Exp $
+# $Id: Preferences.tcl,v 1.23 2003-12-19 15:47:39 matben Exp $
  
 package require notebook
 package require tree
@@ -20,23 +20,12 @@ namespace eval ::Preferences:: {
     
     # Variable to be used in tkwait.
     variable finished
-    
-    variable dlguid 0
-    
+        
     # Name of the page that was in front last time.
     variable lastPage {}
-}
 
-proc ::Preferences::Display {w} {
-
-    variable finished
-
-    if {[winfo exists $w]} {
-	set finished 0
-	wm deiconify $w
-    } else {
-	Build $w
-    }
+    # Add all event hooks.
+    hooks::add quitAppHook [list ::UI::SaveWinGeom $::wDlgs(prefs)]
 }
 
 proc ::Preferences::Build { } {
@@ -54,9 +43,12 @@ proc ::Preferences::Build { } {
     variable ypadtiny
     variable ypadbig
     variable lastPage
-    variable dlguid
 
-    set w $wDlgs(prefs)[incr dlguid]
+    set w $wDlgs(prefs)
+    if {[winfo exists $w]} {
+	raise $w
+	return
+    }
     toplevel $w -class Preferences
     wm title $w [::msgcat::mc Preferences]
     wm protocol $w WM_DELETE_WINDOW ::Preferences::CancelPushBt
@@ -281,7 +273,6 @@ proc ::Preferences::Build { } {
       ::Preferences::NetSetup::TraceNetConfig
     catch {grab release $w}
     catch {destroy $w}  
-    #wm withdraw $w
 }
 
 # Preferences::ResetToFactoryDefaults --

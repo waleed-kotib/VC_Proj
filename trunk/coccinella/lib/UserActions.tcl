@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UserActions.tcl,v 1.24 2003-12-18 14:19:35 matben Exp $
+# $Id: UserActions.tcl,v 1.25 2003-12-19 15:47:40 matben Exp $
 
 namespace eval ::UserActions:: {
     
@@ -780,20 +780,11 @@ proc ::UserActions::DoQuit {args} {
 	}
     }
     
-    catch ::tinyhttpd::stop
+    # Run all quit hooks.
+    hooks::run quitAppHook
+    
 
-    # Before quitting, save whiteboard preferences and geom state. 
-    set wbList [::WB::GetAllWhiteboards]
-    if {[llength $wbList] > 0} {
-	set wtop [::UI::GetToplevelNS [lindex $wbList 0]]
-	::WB::SaveWhiteboardState $wtop
-	
-	# P2p needs to be saved without extra entries.
-	if {![string equal $prefs(protocol) "jabber"]} {
-	    ::WB::SaveCleanWhiteboardDims $wtop
-	}
-    }
-        
+            
     # If we used 'Edit/Revert To/Application Defaults' be sure to reset...
     set prefs(firstLaunch) 0
         
@@ -806,17 +797,7 @@ proc ::UserActions::DoQuit {args} {
     ::Sounds::Free
     ::Dialogs::Free
      
-    # Get dialog window geometries. Some jabber dialogs special.
-    set prefs(winGeom) {}
-    foreach win [::Dialogs::GetToplevelGeomList] {
-	if {[winfo exists $win] && [winfo ismapped $win]} {
-	    lappend prefs(winGeom) $win [wm geometry $win]
-	} elseif {[info exists prefs(winGeom,$win)]} {
-	    lappend prefs(winGeom) $win $prefs(winGeom,$win)
-	}
-    }
     if {[string equal $prefs(protocol) "jabber"]} {
-	set prefs(winGeom) [concat $prefs(winGeom) [::Jabber::GetAllWinGeom]]
 	
 	# Same for pane positions.
 	set prefs(paneGeom) [::Jabber::GetAllPanePos] 

@@ -5,13 +5,14 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.21 2003-12-16 15:03:53 matben Exp $
+# $Id: NewMsg.tcl,v 1.22 2003-12-19 15:47:39 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
 
 
 namespace eval ::Jabber::NewMsg:: {
+    global  wDlgs
 
     # Use option database for customization.
     option add *NewMsg.sendImage            send            widgetDefault
@@ -23,12 +24,15 @@ namespace eval ::Jabber::NewMsg:: {
     option add *NewMsg.printImage           print           widgetDefault
     option add *NewMsg.printDisImage        printDis        widgetDefault
 
+    # Add all event hooks.
+    hooks::add quitAppHook [list ::UI::SaveWinPrefixGeom $wDlgs(jsendmsg)]
+
     variable locals
     
     # Running number for unique toplevels.
     set locals(dlguid) 0
     set locals(inited) 0
-    set locals(wpopupbase) .jsndtrpt
+    set locals(wpopupbase) $wDlgs(jsendmsg)_trpt
     set locals(transports) {jabber icq aim msn yahoo irc smtp}
     
     # {subtype popupText entryText}
@@ -118,7 +122,7 @@ proc ::Jabber::NewMsg::Build {args} {
     }
     Jabber::NewMsg::InitEach
    
-    set w "$wDlgs(jsendmsg)[incr locals(dlguid)]"
+    set w $wDlgs(jsendmsg)[incr locals(dlguid)]
     set locals($w,num) $locals(dlguid)
     if {[winfo exists $w]} {
 	return
@@ -284,18 +288,16 @@ $opts(-forwardmessage)"
     bind $frport <Configure> [list [namespace current]::AddrResize $w]
     bind $waddcan <Configure> [list [namespace current]::ResizeCan $w]
     
-    if {[info exists prefs(winGeom,$w)]} {
-	wm geometry $w $prefs(winGeom,$w)
+    if {[info exists prefs(winGeom,$wDlgs(jsendmsg))]} {
+	wm geometry $w $prefs(winGeom,$wDlgs(jsendmsg))
     }
     wm minsize $w 300 260
     wm maxsize $w 1200 1000
     
+    #bind $w <Destroy> [list [namespace current]::CloseDlg $w]
+    wm protocol $w WM_DELETE_WINDOW [list [namespace current]::CloseDlg $w]
+    
     focus $frport.addr1
-    
-    # Wait here for a button press.
-    tkwait variable [namespace current]::locals($w,finished)
-    
-    catch {destroy $w}    
 }
 
 proc ::Jabber::NewMsg::NewAddrLine {w wfr n} {
@@ -310,7 +312,7 @@ proc ::Jabber::NewMsg::NewAddrLine {w wfr n} {
     frame $wfr.f${n} -bd 0
     entry $wfr.f${n}.trpt -width 18 -font $fontSB -bd 0 -highlightthickness 0 \
       -state disabled -textvariable [namespace current]::locals($w,poptrpt$n)
-    label $wfr.f${n}.la -image $locals(whiterect) -bd 0 -bg white
+    label $wfr.f${n}.la -image $locals(whiterect) -bd 0
     pack $wfr.f${n}.trpt $wfr.f${n}.la -side left -fill y
     ::entrycomp::entrycomp $wfr.addr${n} $jidlist -bd 0 -highlightthickness 0 \
       -textvariable [namespace current]::locals($w,addr$n) -state disabled
@@ -440,7 +442,7 @@ proc ::Jabber::NewMsg::EmptyAddrLine {w wfr n} {
     
     variable locals
     
-    $wfr.f${n}.la configure -image $locals(whiterect) -bg white
+    $wfr.f${n}.la configure -image $locals(whiterect)
     $wfr.addr${n} configure -state disabled
     set locals($w,poptrpt$n) {}
     set locals($w,addr$n) {}
@@ -592,7 +594,7 @@ proc ::Jabber::NewMsg::TrptPopupRelease {w n} {
 #       Send the message. Validate addresses in address list.
 
 proc ::Jabber::NewMsg::DoSend {w} {
-    global  prefs
+    global  prefs wDlgs
     
     variable locals
     upvar ::Jabber::jstate jstate
@@ -654,6 +656,8 @@ proc ::Jabber::NewMsg::DoSend {w} {
 	}
     }
     set locals($w,finished) 1
+    ::UI::SaveWinGeom $wDlgs(jsendmsg) $w
+    destroy $w
 }
 
 proc ::Jabber::NewMsg::DoQuote {w message to time} {
@@ -710,8 +714,10 @@ proc ::Jabber::NewMsg::DoPrint {w} {
 }
 
 proc ::Jabber::NewMsg::CloseDlg {w} {
-
+    global  wDlgs
     variable locals
+    
+    puts "::Jabber::NewMsg::CloseDlg"
 
     set wtext $locals($w,wtext)
     set allText [$wtext get 1.0 "end - 1 char"]
@@ -734,10 +740,8 @@ proc ::Jabber::NewMsg::CloseDlg {w} {
 	set doDestroy 1
     }
     if {$doDestroy} {
-	if {[regexp {(\.[a-z]+)[0-9]+} $w match wbase]} {
-	    ::UI::SaveWinGeom $wbase $w
-	}
-	unset locals($w,w)
+	::UI::SaveWinGeom $wDlgs(jsendmsg) $w
+	array unset locals $w,*
 	destroy $w
     }
 }

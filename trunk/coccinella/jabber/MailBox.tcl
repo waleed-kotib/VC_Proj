@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.24 2003-12-18 14:19:34 matben Exp $
+# $Id: MailBox.tcl,v 1.25 2003-12-19 15:47:39 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -38,6 +38,10 @@ namespace eval ::Jabber::MailBox:: {
     option add *MailBox*trashImage            trash            widgetDefault
     option add *MailBox*trashDisImage         trashDis         widgetDefault
 
+    # Add all event hooks.
+    hooks::add quitAppHook [list ::UI::SaveWinGeom $::wDlgs(jinbox)]
+    
+    
     variable locals
     upvar ::Jabber::jstate jstate
     
@@ -245,7 +249,7 @@ proc ::Jabber::MailBox::Build {w args} {
     text $wtextmsg -height 4 -width 1 -wrap word \
       -borderwidth 1 -relief sunken -yscrollcommand [list $wyscmsg set] \
       -state disabled
-    $wtextmsg tag configure normal -foreground black
+    $wtextmsg tag configure normal
     ::Text::ConfigureLinkTagForTextWidget $wtextmsg linktag tact
     scrollbar $wyscmsg -orient vertical -command [list $wtextmsg yview]
     grid $wtextmsg -column 0 -row 0 -sticky news

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.21 2003-12-18 14:19:35 matben Exp $
+# $Id: Dialogs.tcl,v 1.22 2003-12-19 15:47:39 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -31,6 +31,7 @@ array set wDlgs {
     prog            .prog
     splash          .splash
     plugs           .plugs
+    wb              .wb
 }
 
 # Toplevel dialogs for the jabber part.
@@ -42,6 +43,7 @@ array set wDlgs {
     jsubsc          .jsubsc
     jsendmsg        .jsendmsg
     jgotmsg         .jgotmsg
+    jstartchat      .jstartchat
     jchat           .jchat
     jbrowse         .jbrowse
     jrostbro        .jrostbro
