@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Sounds.tcl,v 1.1 2004-06-08 13:59:33 matben Exp $
+# $Id: Sounds.tcl,v 1.2 2004-06-17 13:24:19 matben Exp $
 
 namespace eval ::Sounds:: {
         
@@ -224,6 +224,28 @@ proc ::Sounds::PlayWhenIdle {snd} {
 	set afterid($snd) 1
 	after idle [list ::Sounds::Play $snd]
     }    
+}
+
+proc ::Sounds::PlaySoundTmp {path} {
+    global  this
+    variable priv
+    
+    if {$priv(QuickTimeTcl)} {
+	if {[namespace exists ::vfs]} {
+	    set tmp [file join $this(tmpPath) [file tail $path]]
+	    file copy -force $path $tmp
+	    set path $tmp
+	}
+	catch {destroy .fake._tmp}
+	catch {
+	    movie .fake._tmp -file $path -controller 0
+	    .fake._tmp play
+	}
+    } elseif {$priv(snack)} {
+	catch {_tmp destroy}
+	catch {snack::sound _tmp -load $path}
+	catch {_tmp play}
+    }
 }
 
 proc ::Sounds::Msg {type snd body args} {

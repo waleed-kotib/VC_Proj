@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.62 2004-06-11 07:44:44 matben Exp $
+# $Id: Chat.tcl,v 1.63 2004-06-17 13:24:18 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -17,13 +17,14 @@ namespace eval ::Jabber::Chat:: {
     global  wDlgs
     
     # Add all event hooks.
-    ::hooks::add quitAppHook        ::Jabber::Chat::QuitHook
-    ::hooks::add newChatMessageHook ::Jabber::Chat::GotMsg
-    ::hooks::add presenceHook       ::Jabber::Chat::PresenceHook
-    ::hooks::add closeWindowHook    ::Jabber::Chat::CloseHook
-    ::hooks::add closeWindowHook    ::Jabber::Chat::CloseHistoryHook
-    ::hooks::add loginHook          ::Jabber::Chat::LoginHook
-    ::hooks::add logoutHook         ::Jabber::Chat::LogoutHook
+    ::hooks::add quitAppHook                ::Jabber::Chat::QuitHook
+    ::hooks::add newChatMessageHook         ::Jabber::Chat::GotMsg
+    ::hooks::add presenceDelayHook          ::Jabber::Chat::PresenceHook
+    ::hooks::add presenceUnavailableHook    ::Jabber::Chat::PresenceHook
+    ::hooks::add closeWindowHook            ::Jabber::Chat::CloseHook
+    ::hooks::add closeWindowHook            ::Jabber::Chat::CloseHistoryHook
+    ::hooks::add loginHook                  ::Jabber::Chat::LoginHook
+    ::hooks::add logoutHook                 ::Jabber::Chat::LogoutHook
 
     # Define all hooks for preference settings.
     ::hooks::add prefsInitHook          ::Jabber::Chat::InitPrefsHook
@@ -1374,6 +1375,29 @@ proc ::Jabber::Chat::PresenceHook {jid type args} {
 	::Jabber::Chat::SetState $chattoken normal
     } else {
 	::Jabber::Chat::SetState $chattoken disabled
+    }
+}
+
+# Jabber::Chat::HaveChat --
+# 
+#       Returns toplevel window if have chat, else empty.
+
+proc ::Jabber::Chat::HaveChat {jid} {
+
+    jlib::splitjid $jid jid2 res
+    set mjid2 [jlib::jidmap $jid2]
+    set chattoken [::Jabber::Chat::GetTokenFrom chat jid ${mjid2}*]
+    if {$chattoken != ""} {
+	variable $chattoken
+	upvar 0 $chattoken chatstate
+
+	if {[winfo exists $chatstate(w)]} {
+	    return $chatstate(w)
+	} else {
+	    return ""
+	}
+    } else {
+	return ""
     }
 }
 

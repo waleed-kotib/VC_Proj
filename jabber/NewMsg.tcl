@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.38 2004-06-06 07:02:21 matben Exp $
+# $Id: NewMsg.tcl,v 1.39 2004-06-17 13:24:18 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -109,7 +109,7 @@ proc ::Jabber::NewMsg::InitEach { } {
 #
 # Arguments:
 #       args   ?-to jidlist -subject theSubject -quotemessage msg -time time
-#              -forwardmessage msg?
+#              -forwardmessage msg -message msg?
 #       
 # Results:
 #       shows window.
@@ -135,11 +135,12 @@ proc ::Jabber::NewMsg::Build {args} {
 	return
     }
     array set opts {
-	-to             {}
-	-subject        {}
-	-quotemessage   {}
-	-forwardmessage {}
-	-time           {}
+	-to             ""
+	-subject        ""
+	-quotemessage   ""
+	-forwardmessage ""
+	-time           ""
+	-message        ""
     }
     array set opts $args
     set locals($w,subject) $opts(-subject)
@@ -190,15 +191,6 @@ proc ::Jabber::NewMsg::Build {args} {
     ::hooks::run buildNewMsgButtonTrayHook $wtray
 
     pack [frame $w.frall.divt -bd 2 -relief sunken -height 2] -fill x -side top
-    if {0} {
-	set wccp $w.frall.ccp
-	pack [::UI::NewCutCopyPaste $wccp] -padx 10 -pady 2 -side top \
-	  -anchor w
-	::UI::CutCopyPasteConfigure $wccp cut -state disabled
-	::UI::CutCopyPasteConfigure $wccp copy -state disabled
-	::UI::CutCopyPasteConfigure $wccp paste -state disabled
-	pack [frame $w.frall.div2 -bd 2 -relief sunken -height 2] -fill x -side top
-    }
     
     # Address list.    
     set fradd [frame $w.frall.fradd -borderwidth 1 -relief sunken]
@@ -278,6 +270,9 @@ proc ::Jabber::NewMsg::Build {args} {
 	$wtext insert end "\nForwarded message from $opts(-to) written at $opts(-time)\n\
 --------------------------------------------------------------------\n\
 $opts(-forwardmessage)"
+    }
+    if {[string length $opts(-message)] > 0} {
+	$wtext insert end $opts(-message)
     }
     
     # Fix geometry stuff after idle.

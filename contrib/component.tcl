@@ -2,7 +2,7 @@
 # 
 #       Provides a structure for code components.
 #       
-# $Id: component.tcl,v 1.5 2004-06-07 13:43:55 matben Exp $
+# $Id: component.tcl,v 1.6 2004-06-17 13:24:17 matben Exp $
 
 package provide component 1.0
 
@@ -87,7 +87,7 @@ proc component::loaddir {dir} {
 proc component::exists {name} {
     variable priv
     
-    return [info exists priv($name)]
+    return [info exists priv($name,name)]
 }
 
 #-------------------------------------------------------------------------------
