@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.27 2004-02-13 14:11:48 matben Exp $
+# $Id: JUI.tcl,v 1.28 2004-02-14 14:01:50 matben Exp $
 
 package provide JUI 1.0
 
@@ -736,10 +736,6 @@ proc ::Jabber::UI::Popup {what w v x y} {
 	  [string match -nocase "*chat history*" $item]} {
 	    $m entryconfigure $locname -state normal
 	}
-	#if {$item == "Junk"} {
-	#    $m entryconfigure $locname -state normal
-	#}
-	#--------
 	
 	if {![::Jabber::IsConnected]} {
 	    continue

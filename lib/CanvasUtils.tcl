@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.24 2004-02-12 11:22:24 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.25 2004-02-14 14:01:50 matben Exp $
 
 package require sha1pure
 
@@ -1589,7 +1589,7 @@ proc ::CanvasUtils::HandleCanvasDraw {wtop instr} {
 	    
 	    # Extract the actual text. TclSpeech not foolproof!
 	    set theText [$wServCan itemcget $utag -text]
-	    ::hooks::run whiteboardTextInsertHook other
+	    ::hooks::run whiteboardTextInsertHook other $theText
 	}
     }
 }
