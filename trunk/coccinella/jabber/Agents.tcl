@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Agents.tcl,v 1.13 2004-03-29 13:56:27 matben Exp $
+# $Id: Agents.tcl,v 1.14 2004-04-15 05:55:17 matben Exp $
 
 package provide Agents 1.0
 
@@ -116,12 +116,12 @@ proc ::Jabber::Agents::GetAgent {parentJid jid args} {
 #       
 # Arguments:
 #       jid         The jid we query, the parent of all <agent> elements
-#       what        "ok" or "error"
+#       type        "ok" or "error"
 #       
 # Results:
 #       none.
 
-proc ::Jabber::Agents::AgentsCallback {jid jlibName what subiq} {
+proc ::Jabber::Agents::AgentsCallback {jid jlibName type subiq} {
 
     variable wagents
     variable wtree
@@ -130,51 +130,54 @@ proc ::Jabber::Agents::AgentsCallback {jid jlibName what subiq} {
     upvar ::Jabber::jserver jserver
     
     ::Jabber::Debug 2 "::Jabber::Agents::AgentsCallback jid=$jid, \
-      what=$what\n\tsubiq=$subiq"
+      type=$type\n\tsubiq=$subiq"
     
-    if {[string equal $what "error"]} {
+    switch -- $type {
+	error {
 	    
-	# Shall we be silent? 
-	if {[winfo exists $wagents]} {
-	    tk_messageBox -type ok -icon error \
-	      -message [FormatTextForMessageBox  \
-	      [::msgcat::mc jamesserragentget [lindex $subiq 1]]]
+	    # Shall we be silent? 
+	    if {[winfo exists $wagents]} {
+		tk_messageBox -type ok -icon error \
+		  -message [FormatTextForMessageBox  \
+		  [::msgcat::mc jamesserragentget [lindex $subiq 1]]]
+	    }
 	}
-    } elseif {[string equal $what "ok"]} {
-    
-	# It is at this stage we are confident that an Agents page is needed.
-	::Jabber::UI::NewPage "Agents"
+	ok - result {
 
-	$wtree newitem $jid -dir 1 -open 1 -tags $jid
-	set bmsg "jid: $jid"
-	::balloonhelp::balloonforcanvas $wtreecanvas $jid $bmsg	    
-
-	# Loop through all <agent> elements and:
-	# 1) fill in what we've got so far.
-	# 2) send get jabber:iq:agent.
-	foreach agent [wrapper::getchildren $subiq] {
-	    if {![string equal [wrapper::gettag $agent] "agent"]} {
-		continue
-	    }
-	    set subAgent [wrapper::getchildren $agent]
-	    set jidAgent [wrapper::getattribute $agent jid]
+	    # It is at this stage we are confident that an Agents page is needed.
+	    ::Jabber::UI::NewPage "Agents"
 	    
-	    # If any groupchat/conference service we need to query its
-	    # version number to know which protocol to use.
-	    foreach elem $subAgent {
-		if {[string equal [wrapper::gettag $elem] "groupchat"]} {
-		    ::Jabber::InvokeJlibCmd get_version $jidAgent   \
-		      [list ::Jabber::CacheGroupchatType $jidAgent]
-		    
-		    # The old groupchat protocol is used as a fallback.
-		    set jstate(conference,$jidAgent) 0
-		    break
+	    $wtree newitem $jid -dir 1 -open 1 -tags $jid
+	    set bmsg "jid: $jid"
+	    ::balloonhelp::balloonforcanvas $wtreecanvas $jid $bmsg	    
+	    
+	    # Loop through all <agent> elements and:
+	    # 1) fill in what we've got so far.
+	    # 2) send get jabber:iq:agent.
+	    foreach agent [wrapper::getchildren $subiq] {
+		if {![string equal [wrapper::gettag $agent] "agent"]} {
+		    continue
 		}
-	    }
+		set subAgent [wrapper::getchildren $agent]
+		set jidAgent [wrapper::getattribute $agent jid]
 		
-	    # Fill in tree items.
-	    ::Jabber::Agents::AddAgentToTree $jid $jidAgent $subAgent
-	    ::Jabber::Agents::GetAgent $jid $jidAgent -silent 1
+		# If any groupchat/conference service we need to query its
+		# version number to know which protocol to use.
+		foreach elem $subAgent {
+		    if {[string equal [wrapper::gettag $elem] "groupchat"]} {
+			::Jabber::InvokeJlibCmd get_version $jidAgent   \
+			  [list ::Jabber::CacheGroupchatType $jidAgent]
+			
+			# The old groupchat protocol is used as a fallback.
+			set jstate(conference,$jidAgent) 0
+			break
+		    }
+		}
+		
+		# Fill in tree items.
+		::Jabber::Agents::AddAgentToTree $jid $jidAgent $subAgent
+		::Jabber::Agents::GetAgent $jid $jidAgent -silent 1
+	    }
 	}
     }
 }
@@ -186,12 +189,12 @@ proc ::Jabber::Agents::AgentsCallback {jid jlibName what subiq} {
 #
 # Arguments:
 #       jid:        the jid that we sent get jabber:iq:agent to (from attribute).
-#       what:       can be 'ok', or 'error'.
+#       type:       can be 'ok', or 'error'.
 #       
 # Results:
 #       none. UI maybe updated
 
-proc ::Jabber::Agents::GetAgentCallback {parentJid jid silent jlibName what subiq} {
+proc ::Jabber::Agents::GetAgentCallback {parentJid jid silent jlibName type subiq} {
     
     variable wagents
     variable warrows
@@ -204,22 +207,26 @@ proc ::Jabber::Agents::GetAgentCallback {parentJid jid silent jlibName what subi
     upvar ::Jabber::jerror jerror
     
     ::Jabber::Debug 2 "::Jabber::Agents::GetAgentCallback parentJid=$parentJid,\
-      jid=$jid, what=$what"
+      jid=$jid, type=$type"
     
     if {[winfo exists $wagents]} {
 	::Jabber::Agents::ControlArrows -1
     }
-    if {[string equal $what "error"]} {
-	if {$silent} {
-	    lappend jerror [list [clock format [clock seconds] -format "%H:%M:%S"]  \
-	      $jid "Failed getting agent info. The error was: [lindex $subiq 1]"]	    
-	} else {
+    
+    switch -- $type {
+	error {
+	    if {$silent} {
+		lappend jerror [list [clock format [clock seconds] -format "%H:%M:%S"]  \
+		  $jid "Failed getting agent info. The error was: [lindex $subiq 1]"]	    
+	    } else {
+	    }
 	}
-    } elseif {[string equal $what "ok"]} {
+	result - ok {
 	
-	# Fill in tree.
-	::Jabber::Agents::AddAgentToTree $parentJid $jid  \
-	  [wrapper::getchildren $subiq]
+	    # Fill in tree.
+	    ::Jabber::Agents::AddAgentToTree $parentJid $jid  \
+	      [wrapper::getchildren $subiq]
+	}
     }
 }
 

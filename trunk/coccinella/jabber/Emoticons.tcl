@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.6 2004-04-09 10:32:25 matben Exp $
+# $Id: Emoticons.tcl,v 1.7 2004-04-15 05:55:17 matben Exp $
 
 
 package provide Emoticons 1.0
@@ -681,7 +681,7 @@ proc ::Emoticons::BuildPrefsPage {wpage} {
     set wpreftext $wfr.t
     set wysc $wfr.ysc
     set allSets [::Emoticons::GetAllSets]
-    label $wpage.l -text "The iconset selected will take action when you save"
+    label $wpage.l -text "The selected iconset will take action when you save"
     pack $wpage.l -side top -anchor w -padx 8 -pady 4
     eval {tk_optionMenu $wpop [namespace current]::tmpSet} $allSets
     labelframe $wfr -labelwidget $wpop -padx 6 -pady 4

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.6 2004-03-27 15:20:37 matben Exp $
+# $Id: JWB.tcl,v 1.7 2004-04-15 05:55:17 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -29,7 +29,7 @@ namespace eval ::Jabber::WB:: {
     variable xmlnsSVGWB "http://jabber.org/protocol/svgwb"
 }
 
-proc ::Jabber::WB::Init { } {
+proc ::Jabber::WB::Init {jlibName} {
     global  this prefs
     variable xmlnsSVGWB
     upvar ::Jabber::jstate jstate

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.51 2004-04-09 10:32:25 matben Exp $
+# $Id: GroupChat.tcl,v 1.52 2004-04-15 05:55:17 matben Exp $
 
 package require History
 
@@ -270,7 +270,15 @@ proc ::Jabber::GroupChat::EnterOrCreate {what args} {
 
 proc ::Jabber::GroupChat::EnterHook {roomJid protocol} {
     
+    ::Jabber::Debug 2 "::Jabber::GroupChat::EnterHook roomJid=$roomJid"
+    
     ::Jabber::GroupChat::SetProtocol $roomJid $protocol
+    
+    # If we are using the 'conference' protocol we must browse
+    # the room to get the participants.
+    if {$protocol == "conference"} {
+	::Jabber::Browse::Get $roomJid
+    }
 }
 
 # Jabber::GroupChat::SetProtocol --
@@ -285,7 +293,6 @@ proc ::Jabber::GroupChat::SetProtocol {roomJid inprotocol} {
     set protocol($roomJid) $inprotocol
     
     set token [::Jabber::GroupChat::GetTokenFrom roomjid $roomJid]
-    #puts "::Jabber::GroupChat::SetProtocol token=$token, protocol=$inprotocol"
     if {$token == ""} {
 	return
     }
@@ -513,7 +520,7 @@ proc ::Jabber::GroupChat::GotMsg {body args} {
     if {[string length $body] > 0} {
 
 	# And put message in window.
-	::Jabber::GroupChat::InsertMessage $token $fromJid $body
+	eval {::Jabber::GroupChat::InsertMessage $token $fromJid $body} $args
 	set state(got1stmsg) 1
 	
 	# Run display hooks (speech).
@@ -835,15 +842,15 @@ proc ::Jabber::GroupChat::StatusCmd {token} {
 # 
 #       Puts message in text groupchat window.
 
-proc ::Jabber::GroupChat::InsertMessage {token from body} {
+proc ::Jabber::GroupChat::InsertMessage {token from body args} {
     variable $token
     upvar 0 $token state
     
     set w       $state(w)
     set wtext   $state(wtext)
     set roomjid $state(roomjid)
-    set secs  [clock seconds]
     set clockFormat [option get $w clockFormat {}]
+    array set argsArr $args
     
     # Old-style groupchat and browser compatibility layer.
     set nick [::Jabber::InvokeJlibCmd service nick $from]
@@ -857,11 +864,21 @@ proc ::Jabber::GroupChat::InsertMessage {token from body} {
 	set whom sys
     } else {
 	set whom they
+    }    
+    set tm ""
+    if {[info exists argsArr(-x)]} {
+	set tm [::Jabber::GetAnyDelayElem $argsArr(-x)]
+	if {$tm != ""} {
+	    set tm [clock scan $tm -gmt 1]
+	}
+    }
+    if {$tm == ""} {
+	set tm [clock seconds]
     }
 
     set prefix ""
     if {$clockFormat != ""} {
-	set theTime [clock format $secs -format $clockFormat]
+	set theTime [clock format $tm -format $clockFormat]
 	set prefix "\[$theTime\] "
     }        
     append prefix "<$nick>"
@@ -874,7 +891,7 @@ proc ::Jabber::GroupChat::InsertMessage {token from body} {
     $wtext see end
 
     # History.
-    set dateISO [clock format [clock seconds] -format "%Y%m%dT%H:%M:%S"]
+    set dateISO [clock format $tm -format "%Y%m%dT%H:%M:%S"]
     ::History::PutToFile $roomjid [list $nick $dateISO $body $whom]
 }
 
@@ -1451,6 +1468,14 @@ proc ::Jabber::GroupChat::Print {token} {
     upvar 0 $token state
     
     ::UserActions::DoPrintText $state(wtext) 
+}
+
+proc ::Jabber::GroupChat::ExitRoom {roomjid} {
+    
+    set token [::Jabber::GroupChat::GetTokenFrom roomjid $roomjid]
+    if {$token != ""} {
+	::Jabber::GroupChat::Exit $token
+    }
 }
 
 # Jabber::GroupChat::Exit --

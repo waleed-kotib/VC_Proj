@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: muc.tcl,v 1.8 2003-06-15 12:40:13 matben Exp $
+# $Id: muc.tcl,v 1.9 2004-04-15 05:55:19 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -102,7 +102,7 @@ proc jlib::muc::enter {jlibname roomjid nick args} {
     [namespace parent]::send_presence $jlibname -to $jid -xlist [list $xelem] \
       -command [list [namespace current]::parse_enter $roomjid]
     set cache($roomjid,mynick) $nick
-    [namespace parent]::setroomprotocol $jlibname $roomjid "muc"
+    [namespace parent]::service::setroomprotocol $jlibname $roomjid "muc"
 }
 
 # jlib::muc::parse_enter --
@@ -338,7 +338,7 @@ proc jlib::muc::create {jlibname roomjid nick callback} {
       -xlist [list $xelem]  \
       -command [list [namespace current]::parse_create $roomjid]
     set cache($roomjid,mynick) $nick
-    [namespace parent]::setroomprotocol $jlibname $roomjid "muc"
+    [namespace parent]::service::setroomprotocol $jlibname $roomjid "muc"
 }
 
 proc jlib::muc::parse_create {roomjid jlibname type args} {

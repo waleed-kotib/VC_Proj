@@ -3,11 +3,11 @@
 #      This file is part of The Coccinella application. 
 #      It implements the "glue" between the whiteboard and jabberlib.
 #      
-#  Copyright (c) 2001-2003  Mats Bengtsson
+#  Copyright (c) 2001-2004  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.76 2004-04-09 10:32:25 matben Exp $
+# $Id: Jabber.tcl,v 1.77 2004-04-15 05:55:18 matben Exp $
 
 package provide Jabber 1.0
 
@@ -492,9 +492,6 @@ proc ::Jabber::Init { } {
     # Make the roster object.
     set jstate(roster) [::roster::roster ::Jabber::Roster::PushProc]
     
-    # Make the browse object.
-    set jstate(browse) [::browse::browse ::Jabber::Browse::Callback]
-    
     # Check if we need to set any auto away options.
     set opts {}
     if {$jprefs(autoaway) || $jprefs(xautoaway)} {
@@ -511,33 +508,24 @@ proc ::Jabber::Init { } {
 
     # Make an instance of jabberlib and fill in our roster object.
     set jstate(jlib) [eval {
-	::jlib::new $jstate(roster) ::Jabber::ClientProc  \
-	  -browsename $jstate(browse)
+	::jlib::new $jstate(roster) ::Jabber::ClientProc
     } $opts]
 
     # Register handlers for various iq elements.
     $jstate(jlib) iq_register get jabber:iq:version ::Jabber::ParseGetVersion
-    $jstate(jlib) iq_register get jabber:iq:browse  ::Jabber::Browse::ParseGet
     $jstate(jlib) iq_register get $privatexmlns(servers) ::Jabber::ParseGetServers
     $jstate(jlib) iq_register set jabber:iq:oob     ::Jabber::OOB::ParseSet
     
     # Set the priority order of groupchat protocols.
-    $jstate(jlib) setgroupchatpriority [list $jprefs(prefgchatproto) "gc-1.0"]
-      
-    # Browse 2.0.
-    set jstate(browse2) [browse::new $jstate(jlib) -command  \
-      ::Jabber::Browse::Callback]
-      
-    # Disco.
-    set jstate(disco) [disco::new $jstate(jlib) -command  \
-      ::Jabber::Disco::Command]
+    $jstate(jlib) service setgroupchatpriority  \
+      [list $jprefs(prefgchatproto) "gc-1.0"]
     
     if {[string equal $prefs(protocol) "jabber"]} {
 	::Jabber::UI::Show $wDlgs(jrostbro)
     }
     
     # Stuff that need an instance of jabberlib register here.
-    ::hooks::run jabberInitHook
+    ::hooks::run jabberInitHook $jstate(jlib)
 }
 
 # ::Jabber::IqCallback --
