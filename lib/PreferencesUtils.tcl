@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.16 2003-11-08 08:54:44 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.17 2003-11-09 15:07:32 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -365,7 +365,7 @@ proc ::PreferencesUtils::ReadOptionDatabase { } {
     global  prefs
     
     if {[info exists $prefs(optionsRdb)]} {
-	catch {option readfile $prefs(optionsRdb)}
+	catch {option readfile $prefs(optionsRdb) userDefault}
     }
 }
 

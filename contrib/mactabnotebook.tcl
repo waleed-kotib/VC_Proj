@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: mactabnotebook.tcl,v 1.6 2003-11-08 08:52:14 matben Exp $
+# $Id: mactabnotebook.tcl,v 1.7 2003-11-09 15:07:32 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -112,6 +112,7 @@ proc ::mactabnotebook::Init { } {
     
     array set widgetOptions {
 	-activeforeground    {activeForeground     ActiveForeground    }  \
+	-activetabbackground {activeTabBackground  ActiveTabBackground }  \
 	-activetabcolor      {activeTabColor       ActiveTabColor      }  \
 	-activetaboutline    {activeTabOutline     ActiveTabOutline    }  \
 	-background          {background           Background          }  \
@@ -136,6 +137,7 @@ proc ::mactabnotebook::Init { } {
 
     option add *MacTabnotebook.activeForeground    black        widgetDefault
     option add *MacTabnotebook.activeTabColor      #efefef      widgetDefault
+    option add *MacTabnotebook.activeTabBackground #cdcdcd      widgetDefault
     option add *MacTabnotebook.activeTabOutline    black        widgetDefault
     option add *MacTabnotebook.background          white        widgetDefault
     option add *MacTabnotebook.margin              6            widgetDefault
@@ -145,6 +147,14 @@ proc ::mactabnotebook::Init { } {
     option add *MacTabnotebook.tabOutline          gray20       widgetDefault
     option add *Notebook.takeFocus                 0            widgetDefault
 
+    # Aqua
+    if {0} {
+	option add *MacTabnotebook.activeTabBackground #cdcdcd      widgetDefault
+	option add *MacTabnotebook.tabBackground       #acacac      widgetDefault    
+	option add *MacTabnotebook.outline             #656565      widgetDefault    
+	option add *MacTabnotebook.foreground          #3a3a3a      widgetDefault    
+    }
+    
     # Platform specifics...
     switch -- $this(platform) {
 	unix {

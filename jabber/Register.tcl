@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.1 2003-11-09 11:28:02 matben Exp $
+# $Id: Register.tcl,v 1.2 2003-11-09 15:07:32 matben Exp $
 
 package provide Register 1.0
 
@@ -69,17 +69,17 @@ proc ::Jabber::Register::Register {w args} {
     set frmid [frame $w.frall.frmid -borderwidth 0]
     label $frmid.lserv -text "[::msgcat::mc {Jabber server}]:"  \
       -font $sysFont(sb) -anchor e
-    entry $frmid.eserv -width 26    \
+    entry $frmid.eserv -width 22    \
       -textvariable [namespace current]::server -validate key  \
       -validatecommand {::Jabber::ValidateJIDChars %S}
     label $frmid.luser -text "[::msgcat::mc Username]:" -font $sysFont(sb)  \
       -anchor e
-    entry $frmid.euser -width 26   \
+    entry $frmid.euser -width 22   \
       -textvariable [namespace current]::username -validate key  \
       -validatecommand {::Jabber::ValidateJIDChars %S}
     label $frmid.lpass -text "[::msgcat::mc Password]:" -font $sysFont(sb)  \
       -anchor e
-    entry $frmid.epass -width 26   \
+    entry $frmid.epass -width 22   \
       -textvariable [namespace current]::password -validate key  \
       -validatecommand {::Jabber::ValidatePasswdChars %S}
     grid $frmid.lserv -column 0 -row 0 -sticky e
@@ -387,7 +387,7 @@ proc ::Jabber::GenRegister::BuildRegister {w args} {
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised]   \
       -fill both -expand 1 -ipadx 12 -ipady 4
-    message $w.frall.msg -width 240 -font $sysFont(s) -text  \
+    message $w.frall.msg -width 280 -font $sysFont(s) -text  \
       [::msgcat::mc jaregmsg] -anchor w -justify left
     pack $w.frall.msg -side top -fill x -anchor w -padx 4 -pady 4
     set frtop $w.frall.top
@@ -397,7 +397,7 @@ proc ::Jabber::GenRegister::BuildRegister {w args} {
     # Get all (browsed) services that support registration.
     set regServers [$jstate(jlib) service getjidsfor "register"]
     set wcomboserver $frtop.eserv
-    ::combobox::combobox $wcomboserver -width 20 -font $sysFont(s)   \
+    ::combobox::combobox $wcomboserver -width 18 -font $sysFont(s)   \
       -textvariable "[namespace current]::server" -editable 0
     eval {$frtop.eserv list insert end} $regServers
     

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.4 2003-11-08 08:54:44 matben Exp $
+# $Id: JUI.tcl,v 1.5 2003-11-09 15:07:32 matben Exp $
 
 package provide JUI 1.0
 
@@ -131,6 +131,7 @@ proc ::Jabber::UI::Build {w} {
     set jwapp(elplug) ${wbot}.icon
     set jwapp(mystatus) ${wbot}.stat
     set jwapp(myjid) ${wbot}.e
+    set jwapp(mypresmenu) ${wbot}.stat.mt
     set iconResize     [::UI::GetIcon resizehandle]
     set iconContactOff [::UI::GetIcon contact_off]
     
@@ -145,7 +146,7 @@ proc ::Jabber::UI::Build {w} {
     pack [entry $jwapp(myjid) -state disabled -width 0  \
       -textvariable ::Jabber::jstate(mejid)] \
       -side left -fill x -expand 1 -pady 0 -padx 0
-    
+        
     # Build status feedback elements.
     set wstat ${wtop}st
     set jwapp(statmess) ${wstat}.g.c
@@ -158,6 +159,9 @@ proc ::Jabber::UI::Build {w} {
       -side left -pady 1 -padx 6 -fill x -expand true
     $jwapp(statmess) create text 0 0 -anchor nw -text {} -font $sysFont(s) \
       -tags stattxt
+    
+    menu $jwapp(mypresmenu) -tearoff 0
+    ::Jabber::Roster::BuildPresenceMenu $jwapp(mypresmenu)
     
     # Notebook frame.
     set frtbook ${wtop}fnb
@@ -313,6 +317,19 @@ proc ::Jabber::UI::WhenSetStatus {type} {
     variable jwapp
 	
     $jwapp(mystatus) configure -image [::Jabber::Roster::GetMyPresenceIcon]
+    if {[string equal $type "unavailable"]} {
+	bind $jwapp(mystatus) <Button-1> {}
+    } else {
+	bind $jwapp(mystatus) <Button-1>  \
+	  [list [namespace current]::PostPresenceMenu %X %Y]
+    }
+}
+
+
+proc ::Jabber::UI::PostPresenceMenu {x y} {
+    variable jwapp
+    
+    tk_popup $jwapp(mypresmenu) [expr int($x)] [expr int($y)]
 }
 
 # Jabber::UI::GroupChat --

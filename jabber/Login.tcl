@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.7 2003-11-08 08:54:44 matben Exp $
+# $Id: Login.tcl,v 1.8 2003-11-09 15:07:32 matben Exp $
 
 package provide Login 1.0
 
@@ -70,8 +70,8 @@ proc ::Jabber::Login::Login {w} {
     label $w.frall.head -text [::msgcat::mc Login] -font $sysFont(l)  \
       -anchor w -padx 10 -pady 4 -bg #cecece
     pack $w.frall.head -side top -fill both -expand 1
-    message $w.frall.msg -width 260 -font $sysFont(s) -text [::msgcat::mc jalogin]
-    pack $w.frall.msg -side top -fill both -expand 1
+    message $w.frall.msg -width 280 -font $sysFont(s) -text [::msgcat::mc jalogin]
+    pack $w.frall.msg -side top -fill both -expand 1 -padx 2
     
     # Entries etc.
     set frmid [frame $w.frall.frmid -borderwidth 0]
@@ -108,19 +108,19 @@ proc ::Jabber::Login::Login {w} {
     set resource $tmpJServArr($menuVar,resource)
     
     label $frmid.lserv -text "[::msgcat::mc {Jabber server}]:" -font $sysFont(sb) -anchor e
-    entry $frmid.eserv -width 26    \
+    entry $frmid.eserv -width 22    \
       -textvariable [namespace current]::server -validate key  \
       -validatecommand {::Jabber::ValidateJIDChars %S}
     label $frmid.luser -text "[::msgcat::mc Username]:" -font $sysFont(sb) -anchor e
-    entry $frmid.euser -width 26   \
+    entry $frmid.euser -width 22   \
       -textvariable [namespace current]::username -validate key  \
       -validatecommand {::Jabber::ValidateJIDChars %S}
     label $frmid.lpass -text "[::msgcat::mc Password]:" -font $sysFont(sb) -anchor e
-    entry $frmid.epass -width 26   \
+    entry $frmid.epass -width 22   \
       -textvariable [namespace current]::password -show {*} -validate key \
       -validatecommand {::Jabber::ValidatePasswdChars %S}
     label $frmid.lres -text "[::msgcat::mc Resource]:" -font $sysFont(sb) -anchor e
-    entry $frmid.eres -width 26   \
+    entry $frmid.eres -width 22   \
       -textvariable [namespace current]::resource -validate key  \
       -validatecommand {::Jabber::ValidateJIDChars %S}
     
