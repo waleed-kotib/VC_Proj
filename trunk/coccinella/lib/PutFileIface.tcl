@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: PutFileIface.tcl,v 1.14 2004-01-13 14:50:21 matben Exp $
+# $Id: PutFileIface.tcl,v 1.15 2004-01-17 11:42:54 matben Exp $
 
 package require putfile
 package require uriencode
@@ -92,7 +92,7 @@ proc ::PutFileIface::PutFileToAll {wtop fileName where {opts {}}} {
 	jabber {
 	    
 	    # Jabber is special and handled internally.
-	    ::Jabber::PutFileAndSchedule $wtop $fileName $opts
+	    ::Jabber::PutFileOrSchedule $wtop $fileName $opts
 	}
 	default {
 	    

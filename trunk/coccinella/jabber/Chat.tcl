@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.36 2004-01-15 14:12:59 matben Exp $
+# $Id: Chat.tcl,v 1.37 2004-01-17 11:42:53 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -267,7 +267,6 @@ proc ::Jabber::Chat::GotMsg {body args} {
     ::Jabber::Chat::InsertMessage $token you $body
     
     if {$state(got1stMsg) == 0} {
-	$state(wtojid) configure -state disabled
 	set state(got1stMsg) 1
     }
     set dateISO [clock format [clock seconds] -format "%Y%m%dT%H:%M:%S"]
@@ -507,8 +506,6 @@ proc ::Jabber::Chat::Build {threadID args} {
     pack $frtop.fsub.l -side left -padx 2
     pack $frtop.fsub.e -side top -padx 2 -fill x
 
-    set state(wtojid) $frtop.fsub.e
-
     # Text chat.
     pack [frame $frmid -height 250 -width 300 -relief sunken -bd 1 -class Pane] \
       -side top -fill both -expand 1 -padx 4 -pady 4
@@ -734,7 +731,6 @@ proc ::Jabber::Chat::Send {token} {
     $wtextsnd delete 1.0 end
 
     if {$state(got1stMsg) == 0} {
-	$state(wtojid) configure -state disabled
 	set state(got1stMsg) 1
     }
     

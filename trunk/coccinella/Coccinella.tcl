@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.36 2004-01-15 14:12:59 matben Exp $
+# $Id: Coccinella.tcl,v 1.37 2004-01-17 11:42:53 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -162,12 +162,13 @@ if {[string equal $this(platform) "macintosh"] && [string equal $thisPath ":"]} 
 }
 
 # Collect paths in this array.
-set this(path) $thisPath
-set this(script) $thisScript
-set this(imagePath) [file join $this(path) images]
-set this(resourcedbPath) [file join $this(path) resources]
-set this(internalIPnum) 127.0.0.1
-set this(internalIPname) "localhost"
+set this(path)            $thisPath
+set this(script)          $thisScript
+set this(imagePath)       [file join $this(path) images]
+set this(resourcedbPath)  [file join $this(path) resources]
+set this(soundsPath)      [file join $this(path) sounds]
+set this(internalIPnum)   127.0.0.1
+set this(internalIPname)  "localhost"
 
 # Set our IP number temporarily.
 set this(ipnum) $this(internalIPnum) 
@@ -575,7 +576,6 @@ after 500 {catch {destroy $wDlgs(splash)}}
 # Do we need all the jabber stuff? Is this the right place? Need it for setup!
 if {!$prefs(stripJabber)} {
     ::Jabber::Init
-    after 600 {::Sounds::Init}
 } else {
     
     # The most convinient solution is to create the namespaces at least.

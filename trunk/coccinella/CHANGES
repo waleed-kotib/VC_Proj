@@ -12,6 +12,8 @@ Coccinella-0.94.7 (04????): 	Short summary --
 	- using a hooks mechanism to handle callbacks in a more
 	  modular way
   	- user profiles rewritten from scratch
+	- alert sounds part rewritten; added a few more sound events;
+          added possiblity to use sound sets
 
 Coccinella-0.94.6 (03????): 	Short summary --
 

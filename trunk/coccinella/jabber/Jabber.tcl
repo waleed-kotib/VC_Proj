@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.55 2004-01-15 15:41:13 matben Exp $
+# $Id: Jabber.tcl,v 1.56 2004-01-17 11:42:53 matben Exp $
 
 package provide Jabber 1.0
 
@@ -493,11 +493,6 @@ proc ::Jabber::SetUserPreferences { } {
       [list ::Jabber::jprefs(subsc,group)      jprefs_subsc_group       $jprefs(subsc,group)]  \
       [list ::Jabber::jprefs(block,notinrost)  jprefs_block_notinrost   $jprefs(block,notinrost)]  \
       [list ::Jabber::jprefs(block,list)       jprefs_block_list        $jprefs(block,list)    userDefault] \
-      [list ::Jabber::jprefs(snd,online)       jprefs_snd_online        $jprefs(snd,online)]  \
-      [list ::Jabber::jprefs(snd,offline)      jprefs_snd_offline       $jprefs(snd,offline)]  \
-      [list ::Jabber::jprefs(snd,statchange)   jprefs_snd_statchange    $jprefs(snd,statchange)]  \
-      [list ::Jabber::jprefs(snd,newmsg)       jprefs_snd_newmsg        $jprefs(snd,newmsg)]  \
-      [list ::Jabber::jprefs(snd,connected)    jprefs_snd_connected     $jprefs(snd,connected)]  \
       [list ::Jabber::jprefs(agentsOrBrowse)   jprefs_agentsOrBrowse    $jprefs(agentsOrBrowse)]  \
       [list ::Jabber::jprefs(agentsServers)    jprefs_agentsServers     $jprefs(agentsServers)]  \
       [list ::Jabber::jprefs(browseServers)    jprefs_browseServers     $jprefs(browseServers)]  \
