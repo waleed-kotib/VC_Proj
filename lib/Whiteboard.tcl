@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.18 2004-02-12 08:48:26 matben Exp $
+# $Id: Whiteboard.tcl,v 1.19 2004-02-12 10:31:54 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -627,8 +627,6 @@ proc ::WB::BuildWhiteboard {wtop args} {
     if {[info exists opts(-jid)]} {
 	set jidToWtop($opts(-jid)) $wtop
     }
-    Debug 3 "\tjidToWtop="
-    Debug 3 "[parray jidToWtop]"
     if {[string equal $prefs(protocol) "jabber"]} {
 	set isConnected [::Jabber::IsConnected]
     } else {
