@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.84 2005-02-14 13:48:44 matben Exp $
+# $Id: jabberlib.tcl,v 1.85 2005-02-14 14:16:31 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -1559,13 +1559,13 @@ proc jlib::geterrspecfromerror {errelem kind} {
     variable xmppns
     variable errCodeToText
 
-    set cchdata [wrapper::getcdata $errelem]
     array set msgproc {
 	stanzas  stanzaerror::getmsg
 	streams  streamerror::getmsg
     }
+    set cchdata [wrapper::getcdata $errelem]
     set errcode [wrapper::getattribute $errelem code]
-    if {[string is integer $errcode]} {
+    if {($errcode != "") && [string is integer $errcode]} {
 	if {[info exists errCodeToText($errcode)]} {
 	    set errmsg $errCodeToText($errcode)
 	} else {
@@ -3132,8 +3132,7 @@ proc jlib::schedule_keepalive {jlibname} {
 	} err]} {
 	    closestream $jlibname
 	    set errmsg "Network was disconnected"
-	    uplevel #0 $lib(clientcmd) [list $jlibname networkerror -body $errmsg]
-	      
+	    uplevel #0 $lib(clientcmd) [list $jlibname networkerror -body $errmsg]   
 	    return
 	}
 	set locals(aliveid) [after [expr 1000 * $opts(-keepalivesecs)] \
