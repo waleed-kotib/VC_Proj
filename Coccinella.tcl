@@ -12,11 +12,11 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.107 2005-01-31 14:06:52 matben Exp $
+# $Id: Coccinella.tcl,v 1.108 2005-02-02 15:21:15 matben Exp $
 	
 
 # Level of detail for printouts. >= 2 for my outputs.
-set debugLevel 0
+set debugLevel 4
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -120,6 +120,8 @@ set prefs(majorVers)    0
 set prefs(minorVers)   95
 set prefs(releaseVers)  5
 set prefs(fullVers) $prefs(majorVers).$prefs(minorVers).$prefs(releaseVers)
+set prefs(appName)    "Coccinella"
+set prefs(theAppName) "The Coccinella"
 
 # We may be embedded in another application, say an ActiveX component.
 # Need a way to detect if we are run in the Tcl plugin.
@@ -158,11 +160,11 @@ if {![catch {package require Itcl 3.2}]} {
     namespace import ::itcl::*
     set prefs(haveItcl) 1
 }
-set prefs(appName)    "Coccinella"
-set prefs(theAppName) "The Coccinella"
 
-# Read our theme prefs file, if any, containing the theme name and locale.
+# Read our prefs file containing the theme name and locale needed before splash.
+package require PreferencesUtils
 package require Theme
+::PreferencesUtils::Init
 ::Theme::Init
 
 # Find our language and load message catalog.
@@ -178,11 +180,7 @@ update
 set allLibSourceFiles {
   Base64Icons.tcl        \
   EditDialogs.tcl        \
-  FileUtils.tcl          \
   Network.tcl            \
-  UI.tcl                 \
-  UserActions.tcl        \
-  Utils.tcl              \
 }
 
 foreach sourceName $allLibSourceFiles {
@@ -208,7 +206,6 @@ switch -- $this(platform) {
 
 ::Init::LoadPackages
 
-# As an alternative to sourcing tcl code directly, use the package mechanism.
 # We should make this a little different!
 # Separate packages into two levels, basic support and application specific.
 ::SplashScreen::SetMsg [mc splashload]
@@ -229,12 +226,14 @@ foreach packName {
     Httpd
     HttpTrpt
     Preferences
-    PreferencesUtils
     Types
     Plugins
     Pane
     ProgressWindow
     TheServer
+    UI
+    UserActions
+    Utils
     Whiteboard
 } {
     package require $packName
@@ -259,9 +258,6 @@ set this(hostname) [info hostname]
 # overridden by the ones in user default file.
 source [file join $this(path) lib SetFactoryDefaults.tcl]
 ::SplashScreen::SetMsg [mc splashprefs]
-
-# Manage the user preferences. Start by reading the preferences file.
-::PreferencesUtils::Init
 
 # Set the user preferences from the preferences file if they are there,
 # else take the hardcoded defaults.

@@ -4,7 +4,9 @@
 #       
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-#       $Id: SlideShow.tcl,v 1.12 2004-12-20 15:16:44 matben Exp $
+#       $Id: SlideShow.tcl,v 1.13 2005-02-02 15:21:18 matben Exp $
+
+package require undo
 
 namespace eval ::SlideShow:: {
     

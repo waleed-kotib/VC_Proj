@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.65 2005-01-31 14:06:57 matben Exp $
+# $Id: MailBox.tcl,v 1.66 2005-02-02 15:21:19 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -705,7 +705,7 @@ proc ::MailBox::GotMsg {bodytxt args} {
 #       Same as above, but for raw whiteboard messages.
 
 proc ::MailBox::HandleRawWBMessage {jlibname xmlns args} {
-    global  prefs
+    global  prefs this
 
     variable mailbox
     variable uidmsg
@@ -721,7 +721,7 @@ proc ::MailBox::HandleRawWBMessage {jlibname xmlns args} {
     set messageList [eval {MakeMessageList ""} $args]
     set rawList     [::Jabber::WB::GetRawCanvasMessageList $argsArr(-x) $xmlns]
     set canvasuid   [::Utils::GenerateHexUID]
-    set filePath    [file join $prefs(inboxCanvasPath) ${canvasuid}.can]
+    set filePath    [file join $this(inboxCanvasPath) ${canvasuid}.can]
     ::CanvasFile::DataToFile $filePath $rawList
     lappend messageList -canvasuid $canvasuid
     set mailbox($uidmsg) $messageList
@@ -872,7 +872,7 @@ proc ::MailBox::SaveMsg { } {
 }
 
 proc ::MailBox::TrashMsg { } {
-    global  prefs
+    global  prefs this
     
     variable locals
     variable mailbox
@@ -897,7 +897,7 @@ proc ::MailBox::TrashMsg { } {
 	set uid [GetCanvasHexUID $id]
 	if {[string length $uid] > 0} {
 	    set fileName ${uid}.can
-	    set filePath [file join $prefs(inboxCanvasPath) $fileName]
+	    set filePath [file join $this(inboxCanvasPath) $fileName]
 	    catch {file delete $filePath}
 	}
 	unset mailbox($id)
@@ -1013,7 +1013,7 @@ proc ::MailBox::GetAnySVGElements {row} {
 #       Displays a raw whiteboard message when selected in inbox.
 
 proc ::MailBox::DisplayRawMessage {jid3 uid} {
-    global  prefs wDlgs
+    global  prefs this wDlgs
 
     variable mailbox
     upvar ::Jabber::jstate jstate
@@ -1029,7 +1029,7 @@ proc ::MailBox::DisplayRawMessage {jid3 uid} {
     }
 	    
     set fileName ${uid}.can
-    set filePath [file join $prefs(inboxCanvasPath) $fileName]
+    set filePath [file join $this(inboxCanvasPath) $fileName]
     set numImports [::CanvasFile::DrawCanvasItemFromFile $wtop \
       $filePath -where local -tryimport $tryimport]
     if {!$tryimport && $numImports > 0} {
@@ -1511,13 +1511,13 @@ proc ::MailBox::HaveMailBox { } {
 }
 
 proc ::MailBox::DeleteMailbox { } {
-    global prefs
+    global prefs this
     upvar ::Jabber::jprefs jprefs
 
     if {[file exist $jprefs(inboxPath)]} {
 	catch {file delete $jprefs(inboxPath)}
     }    
-    foreach f [glob -nocomplain -directory $prefs(inboxCanvasPath) *.can] {
+    foreach f [glob -nocomplain -directory $this(inboxCanvasPath) *.can] {
 	catch {file delete $f}
     }
 }

@@ -3,11 +3,14 @@
 #      This file is part of The Coccinella application. We collect some handy 
 #      small utility procedures here.
 #      
-#  Copyright (c) 1999-2003  Mats Bengtsson
+#  Copyright (c) 1999-2005  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.40 2005-01-09 14:33:52 matben Exp $
+# $Id: Utils.tcl,v 1.41 2005-02-02 15:21:22 matben Exp $
+
+
+package provide Utils 1.0
 
 namespace eval ::Utils:: {
 

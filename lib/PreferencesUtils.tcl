@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.39 2005-01-18 07:43:40 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.40 2005-02-02 15:21:20 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -58,10 +58,10 @@ namespace eval ::PreferencesUtils:: {
 #       updates the internal option database.
 
 proc ::PreferencesUtils::Init { } {
-    global  prefs this
+    global  this
     
-    set prefsFilePath $prefs(userPrefsFilePath)
-    set old $prefs(oldPrefsFilePath)
+    set prefsFilePath $this(userPrefsFilePath)
+    set old $this(oldPrefsFilePath)
     
     if {[file exists $prefsFilePath]} {
 	if {[catch {option readfile $prefsFilePath} err]} {
@@ -176,7 +176,7 @@ proc ::PreferencesUtils::SaveToFile { } {
     global prefs this
 
     # Work on a temporary file and switch later.
-    set tmpFile $prefs(userPrefsFilePath).tmp
+    set tmpFile $this(userPrefsFilePath).tmp
     if {[catch {open $tmpFile w} fid]} {
 	::UI::MessageBox -icon error -type ok \
 	  -message [mc messerrpreffile $tmpFile]
@@ -204,13 +204,13 @@ proc ::PreferencesUtils::SaveToFile { } {
 	}
     }
     close $fid
-    if {[catch {file rename -force $tmpFile $prefs(userPrefsFilePath)} msg]} {
+    if {[catch {file rename -force $tmpFile $this(userPrefsFilePath)} msg]} {
 	::UI::MessageBox -type ok -message {Error renaming preferences file.}  \
 	  -icon error
 	return
     }
     if {[string equal $this(platform) "macintosh"]} {
-	file attributes $prefs(userPrefsFilePath) -type pref
+	file attributes $this(userPrefsFilePath) -type pref
     }
 }
 
