@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.56 2005-02-04 10:35:04 matben Exp $
+# $Id: Dialogs.tcl,v 1.57 2005-02-19 11:10:55 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -931,8 +931,8 @@ proc ::Dialogs::InitAboutQuickTimeTcl { } {
     
     # QuickTime doesn't understand vfs; need to copy out to tmp dir.
     if {[namespace exists ::vfs]} {
-	#set tmp [file join $this(tmpPath) FakeSample.mov]
 	set tmp [::tfileutils::tempfile $this(tmpPath) FakeSample]
+	append tmp .mov
 	file copy -force $origMovie $tmp
 	set fakeQTSampleFile $tmp
     }

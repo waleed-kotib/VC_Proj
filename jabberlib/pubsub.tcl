@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: pubsub.tcl,v 1.1 2005-02-19 08:17:41 matben Exp $
+# $Id: pubsub.tcl,v 1.2 2005-02-19 11:10:55 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -46,8 +46,6 @@ proc jlib::pubsub::affiliations {jlibname jid node args} {
     
     upvar jlib::jxmlns jxmlns
 
-    
-    
     
     
 }
@@ -92,9 +90,6 @@ proc jlib::pubsub::delete {jlibname jid node args} {
     upvar jlib::jxmlns jxmlns
 
     
-    
-    
-    
 }
 
 proc jlib::pubsub::entities {jlibname jid node args} {
@@ -102,9 +97,7 @@ proc jlib::pubsub::entities {jlibname jid node args} {
     upvar jlib::jxmlns jxmlns
 
     
-    
-    
-    
+
 }
 
 proc jlib::pubsub::entity {jlibname jid node args} {
@@ -112,9 +105,7 @@ proc jlib::pubsub::entity {jlibname jid node args} {
     upvar jlib::jxmlns jxmlns
 
     
-    
-    
-    
+
 }
 
 proc jlib::pubsub::items {jlibname jid node args} {
@@ -122,19 +113,13 @@ proc jlib::pubsub::items {jlibname jid node args} {
     upvar jlib::jxmlns jxmlns
 
     
-    
-    
-    
 }
 
 proc jlib::pubsub::options {jlibname jid node args} {
     
     upvar jlib::jxmlns jxmlns
 
-    
-    
-    
-    
+
 }
 
 # jlib::pubsub::publish --
@@ -142,6 +127,7 @@ proc jlib::pubsub::options {jlibname jid node args} {
 #       Publish an item to a node.
 
 proc jlib::pubsub::publish {jlibname jid node args} {
+
     upvar jlib::jxmlns jxmlns
     
     set opts [list -to $jid]
@@ -175,32 +161,51 @@ proc jlib::pubsub::purge {jlibname jid node args} {
     
 }
 
-proc jlib::pubsub::retract {jlibname jid node args} {
+# jlib::pubsub::retract --
+# 
+#       Delete an item from a node.
+
+proc jlib::pubsub::retract {jlibname jid node itemids args} {
     
     upvar jlib::jxmlns jxmlns
 
-    
-    
-    
-    
+    set opts [list -to $jid]
+    set items {}
+    foreach id $itemids {
+	lappend items [wrapper::createtag item -attrlist [list id $õd]]
+    }
+    set subtags [list [wrapper::createtag retract \
+      -attrlist [list node $node] -subtags $items]]
+    set xmllist [list [wrapper::createtag pubsub \
+      -attrlist [list xmlns $jxmlns(pubsub)] -subtags $subtags]]
+    eval {jlib::send_iq $jlibname set $xmllist} $opts $args
 }
 
-proc jlib::pubsub::subscribe {jlibname jid node args} {
+# jlib::pubsub::subscribe --
+# 
+#       Subscribe to a specific node with the 'subscribejid' as the delivery
+#       address.
+
+proc jlib::pubsub::subscribe {jlibname jid node subscribejid args} {
     
     upvar jlib::jxmlns jxmlns
-
     
-    
-    
-    
+    set opts [list -to $jid]
+    set subtags [list [wrapper::createtag subscribe \
+      -attrlist [list node $node jid $subscribejid]]]
+    set xmllist [list [wrapper::createtag pubsub \
+      -attrlist [list xmlns $jxmlns(pubsub)] -subtags $subtags]]
+    eval {jlib::send_iq $jlibname set $xmllist} $opts $args
 }
 
-proc jlib::pubsub::unsubscribe {jlibname jid node args} {
+proc jlib::pubsub::unsubscribe {jlibname jid node subscribejid args} {
     
     upvar jlib::jxmlns jxmlns
-
     
-    
-    
-    
+    set opts [list -to $jid]
+    set subtags [list [wrapper::createtag unsubscribe \
+      -attrlist [list node $node jid $subscribejid]]]
+    set xmllist [list [wrapper::createtag pubsub \
+      -attrlist [list xmlns $jxmlns(pubsub)] -subtags $subtags]]
+    eval {jlib::send_iq $jlibname set $xmllist} $opts $args
 }
