@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.27 2004-04-25 15:35:26 matben Exp $
+# $Id: OOB.tcl,v 1.28 2004-05-03 14:11:54 matben Exp $
 
 package provide OOB 1.0
 
@@ -264,7 +264,6 @@ proc ::Jabber::OOB::Get {jid url file id} {
     set locals($out,local) $file
     
     # Be sure to set translation correctly for this MIME type.
-    # Should be auto detected by ::http::geturl!
     set tmopts [list -timeout $prefs(timeoutMillis)]
     
     if {[catch {eval {
@@ -278,11 +277,9 @@ proc ::Jabber::OOB::Get {jid url file id} {
     }
     upvar #0 $token state
 
-    set wprog .joob$out
-
-    ::ProgressWindow::ProgressWindow $wprog -filename [file tail $file]  \
+    set str "[::msgcat::mc {Writing file}]: [file tail $file]"
+    ::Utils::ProgressWindow $token 1000000 0 -text $str \
       -cancelcmd [list [namespace current]::Cancel $out $token]
-    update idletasks
 }
 
 proc ::Jabber::OOB::Progress {out token total current} {
@@ -299,14 +296,9 @@ proc ::Jabber::OOB::Progress {out token total current} {
 	  [FormatTextForMessageBox "Failed getting url: $errmsg"]
 	::httpex::cleanup $token
 	catch {file delete $locals($out,local)}
+	::Utils::ProgressFree $token
     } else {
-	
-	# Update progress.
-	set wprog .joob$out
-	$wprog configure -percent [expr 100.0 * $current/($total + 1.0)]
-	if {[string equal $tcl_platform(platform) "windows"]} {
-	    update
-	}
+	::Utils::ProgressWindow $token $total $current
     }
 }
 
@@ -343,20 +335,29 @@ proc ::Jabber::OOB::HttpCmd {jid out id token} {
 	    # Did this ourself?
 	}
     }
-    set wprog .joob$out
-    catch {destroy $wprog}
     catch {close $out}
     ::httpex::cleanup $token
+    ::Utils::ProgressFree $token
     
     # We shall send an <iq result> element here using the same 'id' to notify
     # the sender we are done.
-    ::Jabber::InvokeJlibCmd send_iq "result" {} -to $jid -id $id
+
+    switch -- $status {
+	ok {
+	    ::Jabber::InvokeJlibCmd send_iq "result" {} -to $jid -id $id
+	} 
+	default {
+	    ::Jabber::InvokeJlibCmd send_iq "error" {} -to $jid -id $id
+	}
+    }
 }
 
 proc ::Jabber::OOB::Cancel {out token} {
     
     variable locals
-    ::http::reset $token
+    
+    ::httpex::reset $token
+    ::Utils::ProgressFree $token
     catch {file delete $locals($out,local)}
 }
 

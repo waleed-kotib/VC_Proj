@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Import.tcl,v 1.16 2004-03-27 15:20:37 matben Exp $
+# $Id: Import.tcl,v 1.17 2004-05-03 14:11:54 matben Exp $
 
 package require http
 package require httpex
@@ -1002,7 +1002,6 @@ proc ::Import::ImportProgress {line status gettoken httptoken total current} {
     set wtop $getstate(wtop)
     
     if {[string equal $status "error"]} {
-	# some 2.3 versions seem to lack ::http::error !
 	if {[info exists state(error)]} {
 	    set errmsg $state(error)
 	} else {

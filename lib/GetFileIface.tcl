@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: GetFileIface.tcl,v 1.17 2004-03-15 13:26:11 matben Exp $
+# $Id: GetFileIface.tcl,v 1.18 2004-05-03 14:11:54 matben Exp $
 
 package require getfile
 package require uriencode
@@ -486,8 +486,9 @@ proc ::GetFileIface::UpdateProgress {gettoken total current} {
 	# Create the progress window.
 	::Debug 2 "::GetFileIface::UpdateProgress  create ProgWin"
 
+	set str "[::msgcat::mc {Writing file}]: $getstate(filetail)"
 	::ProgressWindow::ProgressWindow $getstate(wprog)  \
-	  -filename $getstate(filetail) -text2 $msg2 -text3 $msg3 \
+	  -text $str -text2 $msg2 -text3 $msg3 \
 	  -cancelcmd [list [namespace current]::CancelCmd $gettoken]
     }
 }

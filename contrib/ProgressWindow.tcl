@@ -5,11 +5,11 @@
 #       The 'cancelCmd' should contain the fully qualified command for the 
 #       cancel operation.
 #      
-#  Copyright (c) 2000-2003  Mats Bengtsson
+#  Copyright (c) 2000-2004  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ProgressWindow.tcl,v 1.13 2004-01-30 15:33:50 matben Exp $
+# $Id: ProgressWindow.tcl,v 1.14 2004-05-03 14:11:53 matben Exp $
 # 
 #-------------------------------------------------------------------------------
 #
@@ -23,7 +23,6 @@
 #      
 #   SPECIFIC OPTIONS
 #      -cancelcmd, cancelCmd, CancelCmd
-#      -filename, fileName, FileName
 #      -font1, font1, Font1
 #      -font2, font2, Font2
 #      -name, name, Name
@@ -78,7 +77,6 @@ namespace eval ::ProgressWindow:: {
     array set widgetOptions {
 	-background          {background           Background          }  \
 	-cancelcmd           {cancelCmd            CancelCmd           }  \
-	-filename            {fileName             FileName            }  \
 	-font1               {font1                Font1               }  \
         -font2               {font2                Font2               }  \
         -name                {name                 Name                }  \
@@ -99,10 +97,9 @@ namespace eval ::ProgressWindow:: {
     # Options for this widget
     option add *ProgressWindow.background    #dedede          widgetDefault
     option add *ProgressWindow.cancelCmd     {}               widgetDefault
-    option add *ProgressWindow.fileName      {}               widgetDefault
     option add *ProgressWindow.name          [::msgcat::mc {Progress}] widgetDefault
     option add *ProgressWindow.percent       0                widgetDefault
-    option add *ProgressWindow.text          "[::msgcat::mc {Writing file}]:" widgetDefault
+    option add *ProgressWindow.text          "Writing file"   widgetDefault
     option add *ProgressWindow.text2         {}               widgetDefault
     option add *ProgressWindow.text3         {}               widgetDefault
     
@@ -288,9 +285,9 @@ proc ::ProgressWindow::Build {w} {
     set widgets(canvas) ${frmid}.pb
     set widgets(cancel) ${frmid}.btcancel
     
-    set str "$options(-text) $options(-filename)"
-    pack [label $widgets(label) -font $options(-font1) -text $str -justify left] \
-      -side top -anchor w -pady 4
+    label $widgets(label) -font $options(-font1) -text $options(-text) \
+      -justify left
+    pack $widgets(label)  -side top -anchor w -pady 4
     
     # Frame with progress bar and Cancel button.
     pack [frame $frmid] -side top -fill x
@@ -321,7 +318,7 @@ proc ::ProgressWindow::Build {w} {
     pack $widgets(cancel) -side right -padx 8
 
     # Small text below progress bar.
-    pack [label $widgets(label2) -font $options(-font2)] \
+    pack [label $widgets(label2) -font $options(-font2) -text $options(-text2)] \
       -side top -anchor w
     pack [label $widgets(label3) -font $options(-font2) -text $options(-text3)] \
       -side top -anchor w
@@ -354,7 +351,7 @@ proc ::ProgressWindow::ConfigurePercent {w percent} {
 	    append str2 [::msgcat::mc {Done}]
 	} else {
 	    set str2 "[::msgcat::mc {Remaining}]: "
-	    append str2 "[expr 100 - int($percent)]%"
+	    append str2 "[expr 100 - int($percent + 0.5)]%"
 	}
 	$widgets(label2) configure -text $str2
     }
@@ -429,34 +426,30 @@ proc ::ProgressWindow::Configure {w args} {
     }
 
     # Process all configuration options.
-    foreach optName [array names opts] {
+    foreach {optName value} [array get opts] {
 	if {[string equal $opts($optName) $options($optName)]} {
 	    continue
 	}
 	
 	switch -- $optName {
 	    -percent       {
-		::ProgressWindow::ConfigurePercent $w $opts(-percent)
+		::ProgressWindow::ConfigurePercent $w $value
 	    }
 	    -name        {
-		wm title $w $opts(-name)
-	    }
-	    -filename    {
-		set str "$options(-text) $opts(-filename)"
-		$widgets(label) configure -text $str
+		wm title $w $value
 	    }
 	    -cancelcmd   {
 		$widgets(cancel) configure  \
-		  -command [list ::ProgressWindow::CancelBt $w $opts(-cancelcmd)]
+		  -command [list ::ProgressWindow::CancelBt $w $value]
 	    }
 	    -text        {
-		return -code error "-text should only be set when creating the progress window"
+		$widgets(label) configure -text $value
 	    }
 	    -text2       {
-		$widgets(label2) configure -text $opts(-text2)
+		$widgets(label2) configure -text $value
 	    }
 	    -text3       {
-		$widgets(label3) configure -text $opts(-text3)
+		$widgets(label3) configure -text $value
 	    }
 	    default      {
 		return -code error "unrecognized option \"$optName\""
