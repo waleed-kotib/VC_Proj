@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Sounds.tcl,v 1.9 2004-12-02 15:22:06 matben Exp $
+# $Id: Sounds.tcl,v 1.10 2005-02-19 11:10:55 matben Exp $
 
 namespace eval ::Sounds:: {
         
@@ -177,7 +177,8 @@ proc ::Sounds::Create {name path} {
     
     # QuickTime doesn't understand vfs; need to copy out to tmp dir.
     if {$priv(QuickTimeTcl) && [info exists ::starkit::topdir]} {
-	set tmp [::tfileutils::tempfile $this(tmpPath) [file rootname [file tail $path]]]
+	set tmp [::tfileutils::tempfile $this(tmpPath) sound]
+	append tmp [file extension $path]
 	file copy -force $path $tmp
 	set path $tmp
     }
@@ -232,8 +233,8 @@ proc ::Sounds::PlaySoundTmp {path} {
     
     if {$priv(QuickTimeTcl)} {
 	if {[info exists ::starkit::topdir]} {
-	    #set tmp [file join $this(tmpPath) [file tail $path]]
-	    set tmp [::tfileutils::tempfile $this(tmpPath) [file rootname [file tail $path]]]
+	    set tmp [::tfileutils::tempfile $this(tmpPath) sound]
+	    append tmp [file extension $path]
 	    file copy -force $path $tmp
 	    set path $tmp
 	}
@@ -453,8 +454,8 @@ proc ::Sounds::PlayTmpPrefSound {name} {
 
     if {$priv(QuickTimeTcl)} {
 	if {[info exists ::starkit::topdir]} {
-	    #set tmp [file join $this(tmpPath) [file tail $f]]
-	    set tmp [::tfileutils::tempfile $this(tmpPath) [file rootname [file tail $f]]]
+	    set tmp [::tfileutils::tempfile $this(tmpPath) sound]
+	    append tmp [file extension $f]
 	    file copy -force $f $tmp
 	    set f $tmp
 	}
