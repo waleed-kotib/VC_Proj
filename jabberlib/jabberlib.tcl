@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.55 2004-07-07 13:07:13 matben Exp $
+# $Id: jabberlib.tcl,v 1.56 2004-07-30 09:33:15 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -1018,6 +1018,10 @@ proc jlib::presence_handler {jlibname xmldata} {
 	lappend arglist -$attrkey $attrval
     }
     
+    if {[info exists id] && [info exists prescmd($id)]} {
+	set prescallback $prescmd($id)
+    }
+    
     # Check first if this is an error element (from conferencing?).
     if {[string equal $type "error"]} {
 	set errspec [jlib::geterrorspec $xmldata]
@@ -1053,8 +1057,13 @@ proc jlib::presence_handler {jlibname xmldata} {
 	if {[string equal $type "available"] ||  \
 	  [string equal $type "unavailable"]} {
 	    
-	    # Set presence in our roster object
-	    eval {$lib(rostername) setpresence $from $type} $arglist
+	    # Not sure if we should exclude roster here since this
+	    # is not pushed to us but requested.
+	    if {![info exists prescallback]} {
+		
+		# Set presence in our roster object
+		eval {$lib(rostername) setpresence $from $type} $arglist
+	    }
 	} else {
 	    
 	    # We probably need to respond to the 'presence' element;
@@ -1082,9 +1091,9 @@ proc jlib::presence_handler {jlibname xmldata} {
 	uplevel #0 $prescmd($id) [list $jlibname $type] $arglist
 	catch {unset prescmd($id)}
     } elseif {[string length $opts(-presencecommand)]} {
-	#uplevel #0 $opts(-presencecommand) [list $jlibname $type] $arglist
+	# uplevel #0 $opts(-presencecommand) [list $jlibname $type] $arglist
     } else {
-	#uplevel #0 $lib(clientcmd) [list $jlibname presence] $arglist
+	# uplevel #0 $lib(clientcmd) [list $jlibname presence] $arglist
     }	
 }
 

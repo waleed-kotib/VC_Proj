@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasFile.tcl,v 1.7 2004-07-26 08:37:16 matben Exp $
+# $Id: CanvasFile.tcl,v 1.8 2004-07-30 09:33:15 matben Exp $
  
 package require can2svg
 package require svg2can
@@ -474,66 +474,17 @@ proc ::CanvasFile::CanvasToFile {w fd absPath args} {
     
     array set argsArr {
 	-keeputag     1
-	-pathtype     relative
     }
     array set argsArr $args
-    set keepUtag $argsArr(-keeputag)
+    set argsArr(-basepath) $absPath
     
     puts $fd "# Version: 2"
     
     foreach id [$w find all] {
-	
-	# Save only items here that have a 'std' in its taglist (not windows).
-	set tags [$w gettags $id]
-	set type [$w type $id]
-	set havestd [expr [lsearch -exact $tags std] < 0 ? 0 : 1]
-		   
-	switch -glob -- $type,$havestd {
-	    image,1 {
-		set line [::CanvasUtils::GetOnelinerForImage $w $id  \
-		  -basepath $absPath]
-		if {!$keepUtag} {
-		    set line [::CanvasUtils::ReplaceUtagPrefix $line *]
-		}
-		puts $fd $line
-	    } 
-	    window,* {
-		set line [::CanvasUtils::GetOneLinerForWindow $w $id \
-		  -basepath $absPath]
-		if {$line != {}} {
-		    if {!$keepUtag} {
-			set line [::CanvasUtils::ReplaceUtagPrefix $line *]
-		    }
-		    puts $fd $line		    
-		}
-	    }
-	    *,1 {
-	
-		# A standard canvas item with 'std' tag.	
-		# Skip text items without any text.	
-		if {($type == "text") && ([$w itemcget $id -text] == "")} {
-		    continue
-		}
-		set line [::CanvasUtils::GetOnelinerForItem $w $id]
-		if {!$keepUtag} {
-		    set line [::CanvasUtils::ReplaceUtagPrefix $line *]
-		}
-		puts $fd $line
-	    }
-	    default {
-		
-		# A non window item witout 'std' tag.
-		# Look for any Itcl object with a Save method.
-		if {$prefs(haveItcl)} {
-		    if {[regexp {object:([^ ]+)} $tags match object]} {
-			if {![catch {$object Save $id} line]} {
-			    if {$line != {}} {
-				puts $fd $line		    
-			    }
-			}
-		    }
-		}
-	    }
+	set line [eval {::CanvasUtils::GetOneLinerForAny $w $id} \
+	  [array get argsArr]]
+	if {$line != {}} {
+	    puts $fd $line		    
 	}
     }
 }

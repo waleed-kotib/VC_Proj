@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.71 2004-07-27 14:25:19 matben Exp $
+# $Id: Coccinella.tcl,v 1.72 2004-07-30 09:33:15 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -51,6 +51,23 @@ switch -- $tcl_platform(platform) {
     }
     windows - macintosh {
 	set this(platform) $tcl_platform(platform)
+    }
+}
+
+# We should only allow a single instance of this application.
+switch -- $this(platform) {
+    windows {
+	
+	# A COM interface would be better...
+	package require dde
+	
+	# If any services available for coccinella then provide the argv.
+	set services [dde services TclEval coccinella]
+	if {$services != {}} {
+	    dde execute TclEval coccinella [list SecondCoccinella $argv]
+	    exit
+	}
+	dde servername coccinella
     }
 }
 

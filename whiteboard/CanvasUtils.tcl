@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.6 2004-07-24 10:55:47 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.7 2004-07-30 09:33:15 matben Exp $
 
 package require sha1pure
 
@@ -524,7 +524,7 @@ proc ::CanvasUtils::RegisterUndoRedoCmd {cmd} {
 
 }
 
-# CanvasUtils::GetOnelinerForAny --
+# CanvasUtils::GetOneLinerForAny --
 #
 #       Dispatcher for the GetOneLiner procs.
 #       
@@ -534,24 +534,67 @@ proc ::CanvasUtils::RegisterUndoRedoCmd {cmd} {
 #       args:
 #           -basepath absolutePath    translate image -file to a relative path.
 #           -uritype ( file | http )
+#           -keeputag 0|1
 #       
 # Results:
 #       a single command line.
 
-proc ::CanvasUtils::GetOnelinerForAny {w id args} {
 
-    set type [$w type $id]
-    set line ""
+proc ::CanvasUtils::GetOneLinerForAny {w id args} {
+    global  prefs
+
+    array set argsArr {
+	-keeputag     1
+    }
+    array set argsArr $args
+    set keeputag $argsArr(-keeputag)
     
-    switch -- $type {
-	image {
+    set tags [$w gettags $id]
+    set type [$w type $id]
+    set havestd [expr [lsearch -exact $tags std] < 0 ? 0 : 1]
+    set line ""
+ 
+    switch -glob -- $type,$havestd {
+	image,1 {
 	    set line [eval {::CanvasUtils::GetOnelinerForImage $w $id} $args]
-	}
-	window {
+	    if {!$keeputag} {
+		set line [::CanvasUtils::ReplaceUtagPrefix $line *]
+	    }
+	} 
+	window,* {
 	    set line [eval {::CanvasUtils::GetOneLinerForWindow $w $id} $args]
+	    if {$line != {}} {
+		if {!$keeputag} {
+		    set line [::CanvasUtils::ReplaceUtagPrefix $line *]
+		}
+	    }
+	}
+	*,1 {
+    
+	    # A standard canvas item with 'std' tag.	
+	    # Skip text items without any text.	
+	    if {($type == "text") && ([$w itemcget $id -text] == "")} {
+		# empty
+	    } else {
+		set line [::CanvasUtils::GetOneLinerForItem $w $id]
+		if {!$keeputag} {
+		    set line [::CanvasUtils::ReplaceUtagPrefix $line *]
+		}
+	    }
 	}
 	default {
-	    set line [::CanvasUtils::GetOnelinerForItem $w $id]
+	    
+	    # A non window item witout 'std' tag.
+	    # Look for any Itcl object with a Save method.
+	    if {$prefs(haveItcl)} {
+		if {[regexp {object:([^ ]+)} $tags match object]} {
+		    if {![catch {
+			eval {$object Save $id} $args
+		    } ans]} {
+			set line $ans
+		    }
+		}
+	    }
 	}
     }
     return $line
@@ -587,13 +630,13 @@ proc ::CanvasUtils::GetOneLinerForWindow {w id args} {
     return $line
 }
 
-# CanvasUtils::GetOnelinerForItem --
+# CanvasUtils::GetOneLinerForItem --
 #
 #       Returns an item as a single line suitable for storing on file or
 #       sending on network. Not for images or windows!
 #       Doesn't add values equal to defaults.
 
-proc ::CanvasUtils::GetOnelinerForItem {w id} {
+proc ::CanvasUtils::GetOneLinerForItem {w id} {
     global  prefs fontPoints2Size
     
     set opts [$w itemconfigure $id]
@@ -697,22 +740,10 @@ proc ::CanvasUtils::GetOnelinerForImage {w id args} {
 	set impArr(-width) [image width $imageName]
 	set impArr(-height) [image height $imageName]
 	
-	switch -- $argsArr(-uritype) {
-	    file {
-		if {[info exists argsArr(-basepath)]} {
-		    set imageFile [filerelative $argsArr(-basepath) $imageFile]
-		}
-		set impArr(-file) $imageFile
-		catch {unset impArr(-url)}
-	    }
-	    http {
-		set impArr(-url) [::Utils::GetHttpFromFile $imageFile]
-		catch {unset impArr(-file)}
-	    }
-	    default {
-		return -code error "Unknown -uritype \"$argsArr(-uritype)\""
-	    }
-	}
+	unset -nocomplain impArr(-file) impArr(-url)
+	array set impArr [eval {
+	    ::CanvasUtils::GetImportOptsURI $argsArr(-uritype) $imageFile
+	} $args]
 	set impArr(-mime) [::Types::GetMimeTypeForFileName $imageFile]
     }
     
@@ -824,26 +855,36 @@ proc ::CanvasUtils::GetImportCmdForSnack {cmd args} {
     set optsArr(-width)  [winfo width $windowName]
     set optsArr(-height) [winfo height $windowName]
     
-    switch -- $argsArr(-uritype) {
-	file {
-	    if {[info exists argsArr(-basepath)]} {
-		set soundFile [filerelative $argsArr(-basepath) $soundFile]
-	    }
-	    set optsArr(-file) $soundFile
-	    catch {unset optsArr(-url)}
-	}
-	http {
-	    set optsArr(-url) [::Utils::GetHttpFromFile $soundFile]
-	    catch {unset optsArr(-file)}
-	}
-	default {
-	    return -code error "Unknown -uritype \"$argsArr(-uritype)\""
-	}
-    }
+    unset -nocomplain optsArr(-file) optsArr(-url)
+    array set optsArr [eval {
+	::CanvasUtils::GetImportOptsURI $argsArr(-uritype) $soundFile
+    } $args]
     set optsArr(-tags) [::CanvasUtils::GetUtagFromCmd $cmd]
     set optsArr(-mime) [::Types::GetMimeTypeForFileName $soundFile]
     
     return [concat import $coords [array get optsArr]]
+}
+
+proc ::CanvasUtils::GetImportOptsURI {uritype filePath args} {
+    
+    array set argsArr $args
+    
+    switch -- $uritype {
+	file {
+	    if {[info exists argsArr(-basepath)]} {
+		set opts [list -file [filerelative $argsArr(-basepath) $filePath]]
+	    } else {
+		set opts [list -file $filePath]
+	    }
+	}
+	http {
+	    lappend opts -url [::Utils::GetHttpFromFile $filePath]
+	}
+	default {
+	    return -code error "Unknown -uritype \"$-uritype\""
+	}
+    }
+    return $opts
 }
 
 # CanvasUtils::GetSVGForeignFromWindowItem --
@@ -2079,7 +2120,7 @@ proc ::CanvasUtils::GetCompleteCanvas {wcan} {
 	if {([lsearch $tags grid] >= 0) || ([lsearch $tags tbbox] >= 0)} {
 	    continue
 	}
-	set line [::CanvasUtils::GetOnelinerForAny $wcan $id -uritype http]
+	set line [::CanvasUtils::GetOneLinerForAny $wcan $id -uritype http]
 	if {$line != ""} {
 	    lappend cmdList $line
 	}

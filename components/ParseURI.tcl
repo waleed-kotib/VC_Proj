@@ -4,7 +4,7 @@
 #       typically from an anchor element <a href='xmpp:jid[?query]'/>
 #       in a html page.
 # 
-# $Id: ParseURI.tcl,v 1.2 2004-07-28 15:13:57 matben Exp $
+# $Id: ParseURI.tcl,v 1.3 2004-07-30 09:33:15 matben Exp $
 
 package require uriencode
 
@@ -19,7 +19,7 @@ proc ::ParseURI::Init { } {
     
     ::hooks::add launchFinalHook ::ParseURI::Parse
     
-    component::register ::ParseURI::Init  \
+    component::register ParseURI  \
       {Any command line -uri xmpp:jid[?query] is parsed and processed.}
 }
 
@@ -189,7 +189,7 @@ proc ::ParseURI::DoMessage {token} {
     
     # Chat or normal message?
     if {[info exists thread]} {
-	::Jabber::Chat::StartThread $state(jid) -thread $thread
+	eval {::Jabber::Chat::StartThread $state(jid) -thread $thread} $opts
     } else {
 	eval {::Jabber::NewMsg::Build -to $state(jid)} $opts
     }
@@ -210,7 +210,8 @@ proc ::ParseURI::DoGroupchat {token} {
     variable $token
     upvar 0 $token state
     
-    
+    # We brutaly assumes muc room here.
+    ::Jabber::MUC::EnterRoom $state(jid) $state(query,nick)
     ::ParseURI::Free $token
 }
 

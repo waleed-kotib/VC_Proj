@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Plugins.tcl,v 1.7 2004-07-24 10:55:47 matben Exp $
+# $Id: Plugins.tcl,v 1.8 2004-07-30 09:33:15 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -1212,6 +1212,7 @@ proc ::Plugins::SetCanvasBinds {wcan oldTool newTool} {
     }
     
     # Instance specific bindings.
+    # Beware: 'bind itemID' fails if not exists. Catch.
     foreach key [array names canvasInstBinds $wcan,*,name] {
 	set name $canvasInstBinds($key)
     
@@ -1221,7 +1222,7 @@ proc ::Plugins::SetCanvasBinds {wcan oldTool newTool} {
 		foreach {bindDef cmd} $binds {
 		    regsub -all {\\|&} $bindDef {\\\0} bindDef
 		    regsub -all {%W} $bindDef $wcan bindDef
-		    eval $bindDef {{}}
+		    catch {eval $bindDef {{}}}
 		}
 	    }
 	}
@@ -1239,7 +1240,7 @@ proc ::Plugins::SetCanvasBinds {wcan oldTool newTool} {
 	    foreach {bindDef cmd} $binds {
 		regsub -all {\\|&} $bindDef {\\\0} bindDef
 		regsub -all {%W} $bindDef $wcan bindDef
-		eval $bindDef [list $cmd]
+		catch {eval $bindDef [list $cmd]}
 	    }
 	}
     }    
