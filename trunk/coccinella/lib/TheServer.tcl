@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: TheServer.tcl,v 1.12 2003-09-28 06:29:08 matben Exp $
+# $Id: TheServer.tcl,v 1.13 2003-11-17 15:07:30 matben Exp $
     
 # DoStartServer ---
 #
@@ -20,28 +20,18 @@
 proc DoStartServer {thisServPort} {
     global  prefs state listenServSocket this
     
-    set res "ok"
-    
-    # If it's a centralized net config, ask first.
-    if {[string equal $prefs(protocol) "central"]} {
-	after 1000 {set res [tk_messageBox -message [FormatTextForMessageBox \
-	  {Are you sure that this is the central server?}] \
-	  -icon warning -type okcancel -default ok]}
-    }
-    if {[string equal $res "ok"]} {
-	if {[catch {socket -server SetupChannel $thisServPort} sock]} {
-	    after 500 {tk_messageBox -message [FormatTextForMessageBox \
-	      [::msgcat::mc messfailserver]]  \
-	      -icon error -type ok}
-	} else {
-	    set listenServSocket $sock
-	    set state(isServerUp) 1
-	    
-	    # Sometimes this gives 0.0.0.0, why I don't know.
-	    set sockname [fconfigure $sock -sockname]
-	    if {[lindex $sockname 0] != "0.0.0.0"} {
-		set this(ipnum) [lindex $sockname 0]
-	    }
+    if {[catch {socket -server SetupChannel $thisServPort} sock]} {
+	after 500 {tk_messageBox -message [FormatTextForMessageBox \
+	  [::msgcat::mc messfailserver]]  \
+	  -icon error -type ok}
+    } else {
+	set listenServSocket $sock
+	set state(isServerUp) 1
+	
+	# Sometimes this gives 0.0.0.0, why I don't know.
+	set sockname [fconfigure $sock -sockname]
+	if {[lindex $sockname 0] != "0.0.0.0"} {
+	    set this(ipnum) [lindex $sockname 0]
 	}
     }
 }
@@ -364,17 +354,6 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 		}
 	    }		
 	}
-	RESIZE {
-	    if {[regexp "^RESIZE: +($int_) +($int_)$" $line match w h]} {
-		
-		# OBSOLETE!!!
-		# Received resize request.
-		
-		if {$debugServerLevel >= 2 } {
-		    puts "HandleClientRequest:: RESIZE: w=$w, h=$h"
-		}
-	    }
-	}
 	PUT - GET {
 		
 	    # Put file to receive file; handles via temporary socket.
@@ -387,6 +366,9 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 	    set optList [lrange $instr 1 end]
 	    set opts [::Import::GetTclSyntaxOptsFromTransport $optList]
 	    set tempChannel($channel) 1
+	    
+	    # Do not interfer with put/get operations.
+	    fileevent $channel readable {}
 	    
 	    if {$prefixCmd == "PUT"} {
 		
