@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.35 2004-01-13 14:50:20 matben Exp $
+# $Id: GroupChat.tcl,v 1.36 2004-01-14 14:27:30 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -35,7 +35,11 @@ namespace eval ::Jabber::GroupChat:: {
     option add *GroupChat*sysPreForeground     #26b412          widgetDefault
     option add *GroupChat*sysForeground        #26b412          widgetDefault
     option add *GroupChat*clockFormat          "%H:%M"          widgetDefault
-      
+
+    option add *GroupChat*userForeground       ""               widgetDefault
+    option add *GroupChat*userBackground       ""               widgetDefault
+    option add *GroupChat*userFont             ""               widgetDefault
+
     # List of: {tagName optionName resourceName resourceClass}
     variable groupChatOptions {
 	{mepre       -foreground          mePreForeground       Foreground}
@@ -76,10 +80,8 @@ namespace eval ::Jabber::GroupChat:: {
 
 proc ::Jabber::GroupChat::AllConference { } {
 
-    upvar ::Jabber::jstate jstate
-
     set anyNonConf 0
-    foreach confjid [$jstate(jlib) service getjidsfor "groupchat"] {
+    foreach confjid [::Jabber::InvokeJlibCmd service getjidsfor "groupchat"] {
 	if {[info exists jstate(conference,$confjid)] &&  \
 	  ($jstate(conference,$confjid) == 0)} {
 	    set anyNonConf 1
@@ -260,7 +262,7 @@ proc ::Jabber::GroupChat::BuildEnter {args} {
     variable dlguid
     upvar ::Jabber::jstate jstate
 
-    set chatservers [$jstate(jlib) service getjidsfor "groupchat"]
+    set chatservers [::Jabber::InvokeJlibCmd service getjidsfor "groupchat"]
     ::Jabber::Debug 2 "::Jabber::GroupChat::BuildEnter args='$args'"
     ::Jabber::Debug 2 "    service getjidsfor groupchat: '$chatservers'"
     
@@ -378,7 +380,7 @@ proc ::Jabber::GroupChat::DoEnter {token} {
     }
 
     set roomJid [string tolower $enter(roomname)@$enter(server)]
-    $jstate(jlib) groupchat enter $roomJid $enter(nickname) \
+    ::Jabber::InvokeJlibCmd groupchat enter $roomJid $enter(nickname) \
       -command [namespace current]::EnterCallback
 
     set enter(finished) 1
@@ -456,10 +458,10 @@ proc ::Jabber::GroupChat::GotMsg {body args} {
 	
 	# This can be room name or nick name.
 	foreach {meRoomJid mynick}  \
-	  [$jstate(jlib) service hashandnick $roomJid] break
+	  [::Jabber::InvokeJlibCmd service hashandnick $roomJid] break
 	
 	# Old-style groupchat and browser compatibility layer.
-	set nick [$jstate(jlib) service nick $fromJid]
+	set nick [::Jabber::InvokeJlibCmd service nick $fromJid]
 	
 	set wtext $locals($roomJid,wtext)
 	
@@ -801,7 +803,7 @@ proc ::Jabber::GroupChat::SetTopic {roomJid} {
 
     if {($ans == "ok") && ($topic != "")} {
 	if {[catch {
-	    $jstate(jlib) send_message $roomJid -type groupchat \
+	    ::Jabber::InvokeJlibCmd send_message $roomJid -type groupchat \
 	      -subject $topic
 	} err]} {
 	    tk_messageBox -type ok -icon error -title "Network Error" \
@@ -832,7 +834,7 @@ proc ::Jabber::GroupChat::Send {roomJid} {
     set allText [string trimright $allText "\n"]
     if {$allText != ""} {	
 	if {[catch {
-	    $jstate(jlib) send_message $roomJid -type groupchat \
+	    ::Jabber::InvokeJlibCmd send_message $roomJid -type groupchat \
 	      -body $allText
 	} err]} {
 	    tk_messageBox -type ok -icon error -title "Network Error" \
@@ -899,7 +901,7 @@ proc ::Jabber::GroupChat::PresenceCallback {jid presence args} {
     variable locals
     upvar ::Jabber::jstate jstate
     
-    if {[$jstate(jlib) service isroom $jid]} {
+    if {[::Jabber::InvokeJlibCmd service isroom $jid]} {
 	::Jabber::Debug 2 "::Jabber::GroupChat::PresenceCallback jid=$jid, presence=$presence, args='$args'"
 	
 	array set attrArr $args
@@ -960,7 +962,7 @@ proc ::Jabber::GroupChat::BrowseUser {userXmlList} {
     
     # Do something only if joined that room.
     if {[$jstate(browse) isroom $parent] &&  \
-      ([lsearch [$jstate(jlib) conference allroomsin] $parent] >= 0)} {
+      ([lsearch [::Jabber::InvokeJlibCmd conference allroomsin] $parent] >= 0)} {
 	if {[info exists attrArr(type)] && [string equal $attrArr(type) "remove"]} {
 	    ::Jabber::GroupChat::RemoveUser $parent $jid
 	} else {
@@ -1026,7 +1028,7 @@ proc ::Jabber::GroupChat::SetUser {roomJid jid3 presence args} {
     set wusers $locals($roomJid,wusers)
     
     # Old-style groupchat and browser compatibility layer.
-    set nick [$jstate(jlib) service nick $jid3]
+    set nick [::Jabber::InvokeJlibCmd service nick $jid3]
     set icon [eval {::Jabber::Roster::GetPresenceIcon $jid3 $presence} $args]
     $wusers configure -state normal
     set insertInd end
@@ -1168,7 +1170,7 @@ proc ::Jabber::GroupChat::Exit {roomJid} {
 	  -message [::msgcat::mc jamesswarnexitroom $roomJid]} $opts]
 	if {$ans == "yes"} {
 	    ::Jabber::GroupChat::Close $roomJid
-	    $jstate(jlib) service exitroom $roomJid
+	    ::Jabber::InvokeJlibCmd service exitroom $roomJid
 	    ::Jabber::UI::GroupChat "exit" $roomJid
 	}
     } else {
@@ -1215,7 +1217,7 @@ proc ::Jabber::GroupChat::Logout { } {
     variable locals
     upvar ::Jabber::jstate jstate
 
-    set allRooms [$jstate(jlib) service allroomsin]
+    set allRooms [::Jabber::InvokeJlibCmd service allroomsin]
     foreach room $allRooms {
 	set w $locals($room,wtop)
 	::Jabber::UI::GroupChat "exit" $room

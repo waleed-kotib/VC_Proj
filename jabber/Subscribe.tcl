@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Subscribe.tcl,v 1.7 2004-01-13 14:50:21 matben Exp $
+# $Id: Subscribe.tcl,v 1.8 2004-01-14 14:27:30 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -175,16 +175,15 @@ proc ::Jabber::Subscribe::SendMsg {uid} {
 
 proc ::Jabber::Subscribe::Doit {uid} {    
     variable locals   
-    upvar ::Jabber::jstate jstate
     
     set jid $locals($uid,jid)
     ::Jabber::Debug 2 "::Jabber::Subscribe::Doit jid=$jid, locals($uid,add)=$locals($uid,add), locals($uid,allow)=$locals($uid,allow)"
     
     # Accept (allow) or deny subscription.
     if {$locals($uid,allow)} {
-	$jstate(jlib) send_presence -to $jid -type "subscribed"
+	::Jabber::InvokeJlibCmd send_presence -to $jid -type "subscribed"
     } else {
-	$jstate(jlib) send_presence -to $jid -type "unsubscribed"
+	::Jabber::InvokeJlibCmd send_presence -to $jid -type "unsubscribed"
     }
 	
     # Add user to my roster. Send subscription request.	
@@ -196,9 +195,9 @@ proc ::Jabber::Subscribe::Doit {uid} {
 	if {($locals($uid,group) != "") && ($locals($uid,group) != "None")} {
 	    lappend arglist -groups [list $locals($uid,group)]
 	}
-	eval {$jstate(jlib) roster_set $jid ::Jabber::Subscribe::ResProc} \
+	eval {::Jabber::InvokeJlibCmd roster_set $jid ::Jabber::Subscribe::ResProc} \
 	  $arglist
-	$jstate(jlib) send_presence -to $jid -type "subscribe"
+	::Jabber::InvokeJlibCmd send_presence -to $jid -type "subscribe"
     }
     set locals($uid,finished) 1
     destroy $locals($uid,wtop)
@@ -206,14 +205,13 @@ proc ::Jabber::Subscribe::Doit {uid} {
 
 proc ::Jabber::Subscribe::Cancel {uid} {    
     variable locals   
-    upvar ::Jabber::jstate jstate
     
     set jid $locals($uid,jid)
 
     ::Jabber::Debug 2 "::Jabber::Subscribe::Cancel jid=$jid"
     
     # Deny presence to this user.
-    $jstate(jlib) send_presence -to $jid -type {unsubscribed}
+    ::Jabber::InvokeJlibCmd send_presence -to $jid -type "unsubscribed"
 
     set locals($uid,finished) 0
     destroy $locals($uid,wtop)
@@ -225,9 +223,7 @@ proc ::Jabber::Subscribe::Cancel {uid} {
 #       subscription dialog. Catch any errors here.
 
 proc ::Jabber::Subscribe::ResProc {jlibName what} {
-    
-    upvar ::Jabber::jstate jstate
-    
+        
     ::Jabber::Debug 2 "::Jabber::Subscribe::ResProc: jlibName=$jlibName, what=$what"
 
     if {[string equal $what "error"]} {

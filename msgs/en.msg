@@ -81,8 +81,10 @@
 ::msgcat::mcset en Preferences
 ::msgcat::mcset en Previous
 ::msgcat::mcset en Print
+::msgcat::mcset en Priority
 ::msgcat::mcset en Privacy
 ::msgcat::mcset en Profile
+::msgcat::mcset en Profiles
 ::msgcat::mcset en Progress
 ::msgcat::mcset en Quit?
 ::msgcat::mcset en Quote

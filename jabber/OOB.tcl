@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.16 2004-01-13 14:50:21 matben Exp $
+# $Id: OOB.tcl,v 1.17 2004-01-14 14:27:30 matben Exp $
 
 package provide OOB 1.0
 
@@ -126,7 +126,7 @@ proc ::Jabber::OOB::DoSend { } {
     if {[string length $desc]} {
 	set opts [list -desc $desc]
     }
-    eval {$jstate(jlib) oob_set $jid ::Jabber::OOB::SetCallback $url} $opts
+    eval {::Jabber::InvokeJlibCmd oob_set $jid ::Jabber::OOB::SetCallback $url} $opts
 }
 
 # Jabber::OOB::SetCallback --
@@ -317,7 +317,7 @@ proc ::Jabber::OOB::HttpCmd {jid out id token} {
     
     # We shall send an <iq result> element here using the same 'id' to notify
     # the sender we are done.
-    $jstate(jlib) send_iq "result" {} -to $jid -id $id
+    ::Jabber::InvokeJlibCmd send_iq "result" {} -to $jid -id $id
 }
 
 proc ::Jabber::OOB::Cancel {out token} {

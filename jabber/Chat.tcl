@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.34 2004-01-14 07:53:33 matben Exp $
+# $Id: Chat.tcl,v 1.35 2004-01-14 14:27:30 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -17,13 +17,13 @@ namespace eval ::Jabber::Chat:: {
     global  wDlgs
     
     # Add all event hooks.
-    hooks::add quitAppHook        [list ::UI::SaveWinGeom $wDlgs(jstartchat)]
-    hooks::add quitAppHook        [list ::UI::SaveWinPrefixGeom $wDlgs(jchat)]
-    hooks::add quitAppHook        ::Jabber::Chat::GetFirstPanePos    
-    hooks::add newChatMessageHook ::Jabber::Chat::GotMsg
-    hooks::add presenceHook       ::Jabber::Chat::PresenceCallback
-    hooks::add closeWindowHook    ::Jabber::Chat::CloseHook
-    hooks::add closeWindowHook    ::Jabber::Chat::CloseHistoryHook
+    ::hooks::add quitAppHook        [list ::UI::SaveWinGeom $wDlgs(jstartchat)]
+    ::hooks::add quitAppHook        [list ::UI::SaveWinPrefixGeom $wDlgs(jchat)]
+    ::hooks::add quitAppHook        ::Jabber::Chat::GetFirstPanePos    
+    ::hooks::add newChatMessageHook ::Jabber::Chat::GotMsg
+    ::hooks::add presenceHook       ::Jabber::Chat::PresenceCallback
+    ::hooks::add closeWindowHook    ::Jabber::Chat::CloseHook
+    ::hooks::add closeWindowHook    ::Jabber::Chat::CloseHistoryHook
 
     # Use option database for customization. 
     # These are nonstandard option valaues and we may therefore keep priority
@@ -106,6 +106,7 @@ proc ::Jabber::Chat::StartThreadDlg {args} {
 
     set w $wDlgs(jstartchat)
     if {[winfo exists $w]} {
+	raise $w
 	return
     }
     
@@ -150,14 +151,14 @@ proc ::Jabber::Chat::StartThreadDlg {args} {
     # Grab and focus.
     set oldFocus [focus]
     focus $frmid.euser
-    catch {grab $w}
+    #catch {grab $w}
     
     # Wait here for a button press and window to be destroyed.
     tkwait window $w
     
     # Clean up.
     ::UI::SaveWinGeom $wDlgs(jstartchat)
-    catch {grab release $w}
+    #catch {grab release $w}
     catch {focus $oldFocus}
     return [expr {($finished <= 0) ? "cancel" : "ok"}]
 }
@@ -491,20 +492,22 @@ proc ::Jabber::Chat::Build {threadID args} {
     
     # To and subject fields.
     set frtop [frame $w.frall.frtop -borderwidth 0]
-    pack $frtop -side top -fill x   
-    label $frtop.lto -text "[::msgcat::mc {To/from JID}]:" -font $fontSB \
-      -anchor e
-    entry $frtop.eto -textvariable $token\(jid)
-    label $frtop.lsub -text "[::msgcat::mc Subject]:" -font $fontSB \
-      -anchor e
-    entry $frtop.esub -textvariable $token\(subject)
-    grid $frtop.lto -column 0 -row 0 -sticky e -padx 6
-    grid $frtop.eto -column 1 -row 0 -sticky ew -padx 6
-    grid $frtop.lsub -column 0 -row 1 -sticky e -padx 6
-    grid $frtop.esub -column 1 -row 1 -sticky ew -padx 6
-    grid columnconfigure $frtop 1 -weight 1
+    pack $frtop -side top -anchor w -fill x
+    
+    frame $frtop.fjid
+    label $frtop.fjid.l -text "[::msgcat::mc {Chat with}]:"
+    label $frtop.fjid.ljid -textvariable $token\(jid)
+    pack $frtop.fjid -side top -anchor w -padx 6
+    grid $frtop.fjid.l $frtop.fjid.ljid -sticky w -padx 2
+    
+    frame $frtop.fsub
+    label $frtop.fsub.l -text "[::msgcat::mc Subject]:" -font $fontSB
+    entry $frtop.fsub.e -textvariable $token\(subject)
+    pack $frtop.fsub -side top -anchor w -padx 6
+    grid $frtop.fsub.l -row 0 -column 0 -sticky w -padx 2
+    grid $frtop.fsub.e -row 0 -column 1 -sticky ew -padx 2
 
-    set state(wtojid) $frtop.eto
+    set state(wtojid) $frtop.fsub.e
 
     # Text chat.
     pack [frame $frmid -height 250 -width 300 -relief sunken -bd 1 -class Pane] \

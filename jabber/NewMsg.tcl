@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.29 2004-01-13 14:50:21 matben Exp $
+# $Id: NewMsg.tcl,v 1.30 2004-01-14 14:27:30 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -82,7 +82,7 @@ proc ::Jabber::NewMsg::InitEach { } {
     # We must be indenpendent of method; agent, browse, disco
     set trpts {}
     foreach subtype $locals(transports) {
-	set jids [$jstate(jlib) service gettransportjids $subtype]
+	set jids [::Jabber::InvokeJlibCmd service gettransportjids $subtype]
 	if {[llength $jids]} {
 	    lappend trpts $subtype
 	    set locals(servicejid,$subtype) [lindex $jids 0]
@@ -221,7 +221,7 @@ proc ::Jabber::NewMsg::Build {args} {
 	    if {$n > 1} {
 		::Jabber::NewMsg::FillAddrLine $w $frport $n
 	    }	    
-	    set locals($w,addr$n) [$jstate(jlib) getrecipientjid $jid]
+	    set locals($w,addr$n) [::Jabber::InvokeJlibCmd getrecipientjid $jid]
 	    incr n
 	}
     }
@@ -653,7 +653,7 @@ proc ::Jabber::NewMsg::DoSend {w} {
     }
     if {[string length $allText]} {
 	foreach jid $addrList {
-	    eval {$jstate(jlib) send_message $jid} $subopt {-body $allText}
+	    eval {::Jabber::InvokeJlibCmd send_message $jid} $subopt {-body $allText}
 	}
     }
     set locals($w,finished) 1

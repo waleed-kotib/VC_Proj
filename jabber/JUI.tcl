@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.21 2004-01-13 14:50:20 matben Exp $
+# $Id: JUI.tcl,v 1.22 2004-01-14 14:27:30 matben Exp $
 
 package provide JUI 1.0
 
@@ -72,31 +72,31 @@ namespace eval ::Jabber::UI:: {
     # Menu definitions for the Roster/services window.
     variable menuDefs
     set menuDefs(rost,file) {
-	{command   mNewWhiteboard      {::WB::NewWhiteboard}                  normal   N}
-	{command   mCloseWindow        {::UI::DoCloseWindow}                  normal   W}
-	{command   mPreferences...     {::Preferences::Build}                 normal   {}}
+	{command   mNewWhiteboard      {::WB::NewWhiteboard}                normal   N}
+	{command   mCloseWindow        {::UI::DoCloseWindow}                normal   W}
+	{command   mPreferences...     {::Preferences::Build}               normal   {}}
 	{command   mUpdateCheck        {
 	    ::AutoUpdate::Get $prefs(urlAutoUpdate) -silent 0}       normal   {}}
 	{separator}
-	{command   mQuit               {::UserActions::DoQuit}                    normal   Q}
+	{command   mQuit               {::UserActions::DoQuit}              normal   Q}
     }
     set menuDefs(rost,jabber) {    
 	{command     mNewAccount    {::Jabber::Register::Register}          normal   {}}
-	{command     mLogin         {::Jabber::Login::Login}                normal   {}}
+	{command     mLogin         {::Jabber::Login::Login}                normal   L}
 	{command     mLogoutWith    {::Jabber::Logout::WithStatus}          disabled {}}
 	{command     mPassword      {::Jabber::Passwd::Build}               disabled {}}
 	{separator}
-	{checkbutton mMessageInbox  {::Jabber::MailBox::Show}               normal   {} \
+	{checkbutton mMessageInbox  {::Jabber::MailBox::Show}               normal   I \
 	  {-variable ::Jabber::jstate(inboxVis)}}
 	{separator}
 	{command     mSearch        {::Jabber::Search::Build}               disabled {}}
 	{command     mAddNewUser    {::Jabber::Roster::NewOrEditItem new}   disabled {}}
 	{separator}
-	{command     mSendMessage   {::Jabber::NewMsg::Build}               disabled {}}
-	{command     mChat          {::Jabber::Chat::StartThreadDlg}        disabled {}}
+	{command     mSendMessage   {::Jabber::NewMsg::Build}               disabled M}
+	{command     mChat          {::Jabber::Chat::StartThreadDlg}        disabled T}
 	{cascade     mStatus        {}                                      disabled {} {} {}}
 	{separator}
-	{command     mEnterRoom     {::Jabber::GroupChat::EnterOrCreate enter} disabled {}}
+	{command     mEnterRoom     {::Jabber::GroupChat::EnterOrCreate enter} disabled R}
 	{cascade     mExitRoom      {}                                      disabled {} {} {}}
 	{command     mCreateRoom    {::Jabber::GroupChat::EnterOrCreate create} disabled {}}
 	{separator}
@@ -641,7 +641,7 @@ proc ::Jabber::UI::Popup {what w v x y} {
 	    set typesubtype [$jstate(browse) gettype $jid]
 	    if {[regexp {^.+@[^/]+(/.*)?$} $jid match res]} {
 		set typeClicked user
-		if {[$jstate(jlib) service isroom $jid]} {
+		if {[::Jabber::InvokeJlibCmd service isroom $jid]} {
 		    set typeClicked room
 		}
 	    } elseif {[string match -nocase "conference/*" $typesubtype]} {

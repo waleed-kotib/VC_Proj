@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.16 2004-01-13 14:50:21 matben Exp $
+# $Id: MUC.tcl,v 1.17 2004-01-14 14:27:30 matben Exp $
 
 package require entrycomp
 
@@ -261,7 +261,7 @@ proc ::Jabber::MUC::DoEnter {token} {
     }
     set roomJid [string tolower $enter(roomname)@$enter(server)]
     
-    $jstate(jlib) muc enter $roomJid $enter(nickname) -command \
+    ::Jabber::InvokeJlibCmd muc enter $roomJid $enter(nickname) -command \
       [list [namespace current]::EnterCallback]
     set enter(finished) 1
     catch {destroy $enter(w)}
@@ -409,7 +409,7 @@ proc ::Jabber::MUC::Invite {roomjid} {
 
     if {$fininvite > 0} {
 	if {[catch {
-	    eval {$jstate(jlib) muc invite $roomjid $jid} $opts
+	    eval {::Jabber::InvokeJlibCmd muc invite $roomjid $jid} $opts
 	} err]} {
 	    tk_messageBox -type ok -icon error -title "Network Error" \
 	      -message "Network error ocurred: $err"
@@ -512,7 +512,7 @@ proc ::Jabber::MUC::BuildInfo {roomjid} {
     wm title $w "Info Room: $roomName"
     set locals($roomjid,w) $w
     set locals($w,roomjid) $roomjid
-    set locals($roomjid,mynick) [$jstate(jlib) muc mynick $roomjid]
+    set locals($roomjid,mynick) [::Jabber::InvokeJlibCmd muc mynick $roomjid]
     set locals($roomjid,myrole) none
     set locals($roomjid,myaff) none
     switch -- $this(platform) {
@@ -845,7 +845,7 @@ proc ::Jabber::MUC::GrantRevoke {roomjid which type} {
 
     if {$ans == "ok"} {
 	if {[catch {
-	    eval {$jstate(jlib) muc $actionDefs($which,$type,cmd) $roomjid  \
+	    eval {::Jabber::InvokeJlibCmd muc $actionDefs($which,$type,cmd) $roomjid  \
 	      $nick $actionDefs($which,$type,what)  \
 	      -command [list [namespace current]::IQCallback $roomjid]} $opts
 	} err]} {
@@ -881,7 +881,7 @@ proc ::Jabber::MUC::Kick {roomjid} {
     
     if {$ans == "ok"} {
 	if {[catch {
-	    eval {$jstate(jlib) muc setrole $roomjid $nick "none" \
+	    eval {::Jabber::InvokeJlibCmd muc setrole $roomjid $nick "none" \
 	      -command [list [namespace current]::IQCallback $roomjid]} $opts
 	} err]} {
 	    tk_messageBox -type ok -icon error -title "Network Error" \
@@ -916,7 +916,7 @@ proc ::Jabber::MUC::Ban {roomjid} {
     
     if {$ans == "ok"} {
 	if {[catch {
-	    eval {$jstate(jlib) muc setaffiliation $roomjid $nick "outcast" \
+	    eval {::Jabber::InvokeJlibCmd muc setaffiliation $roomjid $nick "outcast" \
 	      -command [list [namespace current]::IQCallback $roomjid]} $opts
 	} err]} {
 	    tk_messageBox -type ok -icon error -title "Network Error" \
@@ -1138,7 +1138,7 @@ proc ::Jabber::MUC::EditListBuild {roomjid type} {
     $wsearrows start
     set editlocals(callid) [incr editcalluid]
     if {[catch {
-	$jstate(jlib) muc $getact $roomjid $what \
+	::Jabber::InvokeJlibCmd muc $getact $roomjid $what \
 	  [list [namespace current]::EditListGetCB $roomjid $editlocals(callid)]
     } err]} {
 	$wsearrows stop
@@ -1414,7 +1414,7 @@ proc ::Jabber::MUC::EditListSet {roomjid} {
     
     
     if {[catch {eval {
-	$jstate(jlib) muc $setact $roomjid xxx \
+	::Jabber::InvokeJlibCmd muc $setact $roomjid xxx \
 	  -command [list [namespace current]::IQCallback $roomjid]} $opts
     } err]} {
 	tk_messageBox -type ok -icon error -title "Network Error" \
@@ -1473,7 +1473,7 @@ proc ::Jabber::MUC::RoomConfig {roomjid} {
     # Now, go and get it!
     $wsearrows start
     if {[catch {
-	$jstate(jlib) muc getroom $roomjid  \
+	::Jabber::InvokeJlibCmd muc getroom $roomjid  \
 	  [list [namespace current]::ConfigGetCB $roomjid]
     }]} {
 	$wsearrows stop
@@ -1510,7 +1510,7 @@ proc ::Jabber::MUC::CancelConfig {roomjid w} {
     upvar [namespace current]::${roomjid}::locals locals
     upvar ::Jabber::jstate jstate
 
-    catch {$jstate(jlib) muc setroom $roomjid cancel}
+    catch {::Jabber::InvokeJlibCmd muc setroom $roomjid cancel}
     destroy $w
 }
 
@@ -1535,7 +1535,7 @@ proc ::Jabber::MUC::DoRoomConfig {roomjid w} {
     set subelements [::Jabber::Forms::GetScrollForm $wbox]
     
     if {[catch {
-	$jstate(jlib) muc setroom $roomjid form -form $subelements \
+	::Jabber::InvokeJlibCmd muc setroom $roomjid form -form $subelements \
 	  -command [list [namespace current]::RoomConfigResult $roomjid]
     }]} {
 	tk_messageBox -type ok -icon error -title "Network Error" \
@@ -1574,7 +1574,7 @@ proc ::Jabber::MUC::SetNick {roomjid} {
 
     if {($ans == "ok") && ($nickname != "")} {
 	if {[catch {
-	    $jstate(jlib) muc setnick $roomjid $nickname \
+	    ::Jabber::InvokeJlibCmd muc setnick $roomjid $nickname \
 	      -command [list [namespace current]::PresCallback $roomjid]
 	} err]} {
 	    tk_messageBox -type ok -icon error -title "Network Error" \
@@ -1669,7 +1669,7 @@ proc ::Jabber::MUC::Destroy {roomjid} {
 
     if {$findestroy > 0} {
 	if {[catch {eval {
-	    $jstate(jlib) muc destroy $roomjid  \
+	    ::Jabber::InvokeJlibCmd muc destroy $roomjid  \
 	      -command [list [namespace current]::IQCallback $roomjid]} $opts
 	} err]} {
 	    tk_messageBox -type ok -icon error -title "Network Error" \
