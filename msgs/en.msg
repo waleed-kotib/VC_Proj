@@ -275,7 +275,7 @@
 
 
 
-# Short texts only. Use english as database key.
+# Short texts only. Use english text as database key.
 ::msgcat::mcset en {30 days}
 ::msgcat::mcset en {About Coccinella}
 ::msgcat::mcset en {About Whiteboard}

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.67 2004-03-01 07:57:40 matben Exp $
+# $Id: Jabber.tcl,v 1.68 2004-03-04 07:53:16 matben Exp $
 
 package provide Jabber 1.0
 
@@ -21,6 +21,7 @@ package require balloonhelp
 package require combobox
 package require tinyfileutils
 package require uriencode
+
 package require MailBox
 package require NewMsg
 package require GotMsg
@@ -264,6 +265,9 @@ proc ::Jabber::FactoryDefaults { } {
     set jprefs(port) 5222
     set jprefs(sslport) 5223
     set jprefs(usessl) 0
+    
+    # Protocol parts
+    set jprefs(useSVGT) 0
     
     # Other
     set jprefs(defSubscribe)        1
@@ -771,6 +775,9 @@ proc ::Jabber::MessageCallback {jlibName type args} {
 	
 	# Check if we've got an <x xmlns='coccinella:wb'><raw> element...
 	# New: uri based namespace.
+	# 
+	# We should have something like iq_register here where each
+	# component may register for a specific event type.
 	set haveCoccinellaNS 0
 	set rawElemList {}
 	if {[info exists attrArr(-x)]} {
@@ -1349,7 +1356,7 @@ proc ::Jabber::SendWhiteboardArgs {wtop} {
     if {[llength $type] > 0} {
 	lappend argsList -type $type
 	if {[string equal $type "chat"]} {
-		lappend argsList -thread [::WB::GetJabberChatThread $wtop]
+	    lappend argsList -thread [::WB::GetJabberChatThread $wtop]
 	}
     }
     return $argsList
@@ -1370,10 +1377,7 @@ proc ::Jabber::SendWhiteboardArgs {wtop} {
 proc ::Jabber::SendMessage {jid msg args} {    
     variable jstate
     
-    # Form an <x xmlns='coccinella:wb'><raw> element in message.
-    set subx [list [wrapper::createtag "raw" -chdata $msg]]
-    set xlist [list [wrapper::createtag x -attrlist  \
-      {xmlns coccinella:wb} -subtags $subx]]
+    set xlist [::Jabber::CanvasCmdListToMessageXElement [list $msg]]
     if {[catch {
 	eval {$jstate(jlib) send_message $jid -xlist $xlist} $args
     } err]} {
@@ -1390,14 +1394,7 @@ proc ::Jabber::SendMessage {jid msg args} {
 proc ::Jabber::SendMessageList {jid msgList args} {
     variable jstate
     
-    # Form <x xmlns='coccinella:wb'> element with any number of <raw>
-    # elements as childs.
-    set subx {}
-    foreach msg $msgList {
-	lappend subx [wrapper::createtag "raw" -chdata $msg]
-    }
-    set xlist [list [wrapper::createtag x -attrlist  \
-      {xmlns coccinella:wb} -subtags $subx]]
+    set xlist [::Jabber::CanvasCmdListToMessageXElement $msgList]
     if {[catch {
 	eval {$jstate(jlib) send_message $jid -xlist $xlist} $args
     } err]} {
@@ -1405,6 +1402,40 @@ proc ::Jabber::SendMessageList {jid msgList args} {
 	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
 	  -message [FormatTextForMessageBox $err]
     }
+}
+
+# Jabber::CanvasCmdListToMessageXElement --
+# 
+#       Takes a list of canvas commands and returns the xml
+#       x element xmllist appropriate.
+
+proc ::Jabber::CanvasCmdListToMessageXElement {cmdList} {
+    variable jprefs
+    
+    if {$jprefs(useSVGT)} {
+	
+	# Form SVG element.
+	set subx {}
+	foreach cmd $cmdList {
+	    
+	    # We've got the CANVAS:  BAD!!!!!!!!
+	    set cmd [lrange $cmd 1 end]
+	    set subx [concat $subx \
+	      [can2svg::svgasxmllist $cmd -usestyleattribute 0]]
+	}
+	set xlist [list [wrapper::createtag x -attrlist  \
+	  {xmlns http://jabber.org/protocol/svgwb} -subtags $subx]]
+    } else {
+    
+	# Form an <x xmlns='coccinella:wb'><raw> element in message.
+	set subx {}
+	foreach cmd $cmdList {
+	    lappend subx [wrapper::createtag "raw" -chdata $cmd]
+	}
+	set xlist [list [wrapper::createtag x -attrlist  \
+	  {xmlns coccinella:wb} -subtags $subx]]
+    }
+    return $xlist
 }
 
 # Jabber::DoSendCanvas --

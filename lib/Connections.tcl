@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Connections.tcl,v 1.21 2004-02-22 08:29:13 matben Exp $
+# $Id: Connections.tcl,v 1.22 2004-03-04 07:53:17 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -383,7 +383,7 @@ proc ::OpenConnection::WhenSocketOpensInits {nameOrIP server remoteServPort \
     }
     
     # Add line in the communication entry.
-    ::UI::SetCommEntry $wDlgs(mainwb) $ipNum 1 -1
+    ::WB::SetCommEntry $wDlgs(mainwb) $ipNum 1 -1
     
     # Update menus. If client only, allow only one connection, limited.
     ::WB::FixMenusWhen $wDlgs(mainwb) "connect"
@@ -536,11 +536,7 @@ proc ::OpenConnection::IsConnectedToQ {ipNameOrNum} {
     }
     
     # Here we are sure that 'ipNum' is an ip number.
-    if {[lsearch -exact [::Network::IsRegistered to] $ipNum] >= 0} {
-	return 1
-    } else {
-	return 0
-    }
+    return [::Network::IsRegistered $ipNum to]
 }
 
 #   Sets auto disconnect identical to autoConnect.
@@ -603,7 +599,7 @@ proc ::OpenConnection::DoCloseClientConnection {ipNum} {
     catch {close $ipNumTo(socket,$ipNum)}
 
     # Update the communication frame; remove connection 'to'.
-    ::UI::SetCommEntry $wDlgs(mainwb) $ipNum 0 -1
+    ::WB::SetCommEntry $wDlgs(mainwb) $ipNum 0 -1
 
     # If no more connections left, make menus consistent.
     if {[llength [::Network::GetIP to]] == 0} {
@@ -633,7 +629,7 @@ proc ::OpenConnection::DoCloseServerConnection {ipNum args} {
     array set opts $args
     
     # Switch off the comm 'from' button.
-    ::UI::SetCommEntry $wDlgs(mainwb) $ipNum -1 0
+    ::WB::SetCommEntry $wDlgs(mainwb) $ipNum -1 0
     if {[string equal $prefs(protocol) "server"]} {
 	catch {close $ipNumTo(socket,$ipNum)}
 	catch {unset ipNumTo(socket,$ipNum)}

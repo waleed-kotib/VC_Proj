@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Network.tcl,v 1.9 2004-01-13 14:50:21 matben Exp $
+# $Id: Network.tcl,v 1.10 2004-03-04 07:53:17 matben Exp $
 
 namespace eval ::Network:: {
     
@@ -303,11 +303,11 @@ proc ::Network::IsRegistered {ipNum {type "both"}} {
 
     switch -- $type {
 	to - from {
-	    set ans [expr {[lsearch $ipNums $ipNum] >= 0} ? 1 : 0]
+	    set ans [expr {[lsearch $ipNums($type) $ipNum] >= 0} ? 1 : 0]
 	}
 	default {
-	    set ans [expr  \
-	      {[lsearch [concat $ipNums(from) $ipNums(to)]] >= 0} ? 1 : 0]
+	    set ans [expr {[lsearch \
+	      [concat $ipNums(from) $ipNums(to)] $ipNum] >= 0} ? 1 : 0]
 	}
     }
     return $ans

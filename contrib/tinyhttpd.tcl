@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: tinyhttpd.tcl,v 1.9 2004-01-30 15:33:50 matben Exp $
+# $Id: tinyhttpd.tcl,v 1.10 2004-03-04 07:53:16 matben Exp $
 
 # ########################### USAGE ############################################
 #
@@ -209,7 +209,7 @@ proc ::tinyhttpd::start {args} {
 	-port                 80
 	httpddirectory        httpd
     }
-    set opts(-rootdirectory) $this(path)
+    set opts(-rootdirectory) [info script]
     array set opts $args
     if {[file pathtype $opts(-rootdirectory)] != "absolute"} {
 	return -code error "the path must be an absolute path"

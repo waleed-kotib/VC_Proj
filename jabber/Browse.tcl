@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.31 2004-02-13 14:05:09 matben Exp $
+# $Id: Browse.tcl,v 1.32 2004-03-04 07:53:16 matben Exp $
 
 package require chasearrows
 
@@ -980,7 +980,7 @@ proc ::Jabber::Browse::ParseGet {jlibname from subiq args} {
       [wrapper::createtag "ns" -chdata "jabber:iq:version"]     \
       [wrapper::createtag "ns" -chdata "jabber:x:data"]         \
       [wrapper::createtag "ns" -chdata "jabber:x:event"]        \
-      [wrapper::createtag "ns" -chdata "http://jabber.org/protocol/muc "] \
+      [wrapper::createtag "ns" -chdata "http://jabber.org/protocol/muc"] \
       [wrapper::createtag "ns" -chdata "coccinella:wb"]]
     
     # Adding private namespaces.

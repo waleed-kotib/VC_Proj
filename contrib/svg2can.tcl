@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #
-# $Id: svg2can.tcl,v 1.12 2004-02-29 07:08:04 matben Exp $
+# $Id: svg2can.tcl,v 1.13 2004-03-04 07:53:16 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -126,7 +126,7 @@ proc svg2can::parseelement {xmllist transformList args} {
 	    set cmdList [concat $cmdList \
 	      [eval {parse${tag} $xmllist $transformList} $args]]
 	}
-	g {
+	a - g {
 	    # Need to collect the attributes for the g element since
 	    # the child elements inherit them. g elements may be nested!
 	    array set attrArr $args
@@ -180,7 +180,7 @@ proc svg2can::parsecircle {xmllist transformList args} {
 		set $key $value
 	    }
 	    id {
-		lappend tags $value
+		set tags [concat $tags $value]
 	    }
 	    style {
 		set opts [StyleToOpts oval [StyleAttrToList $value]]
@@ -223,7 +223,7 @@ proc svg2can::parseellipse {xmllist transformList args} {
 		set $key $value
 	    }
 	    id {
-		lappend tags $value
+		set tags [concat $tags $value]
 	    }
 	    style {
 		set opts [StyleToOpts oval [StyleAttrToList $value]]
@@ -260,7 +260,7 @@ proc svg2can::parseimage {xmllist transformList args} {
 	
 	switch -- $key {
 	    id {
-		lappend tags $value
+		set tags [concat $tags $value]
 	    }
 	    style {
 		set opts [StyleToOpts image [StyleAttrToList $value]]
@@ -271,7 +271,11 @@ proc svg2can::parseimage {xmllist transformList args} {
 	    xlink:href {
 		set path [uriencode::decodefile $value]
 		set path [string map {file:/// /} $path]
-		set photo [image create photo -file $path]
+		if {[string tolower [file extension $path]] == ".gif"} {
+		    set photo [image create photo -file $path -format gif]
+		} else {
+		    set photo [image create photo -file $path]
+		}
 		lappend opts -image $photo
 	    }
 	    default {
@@ -279,7 +283,7 @@ proc svg2can::parseimage {xmllist transformList args} {
 	    }
 	}
     }
-    lappend opts -tags $tags
+    lappend opts -tags $tags -anchor nw
     set opts [MergePresentationAttr image $opts $presentationAttr]
     set cmdList [list [concat create image $x $y $opts]]
 
@@ -303,7 +307,7 @@ proc svg2can::parseline {xmllist transformList args} {
 	
 	switch -- $key {
 	    id {
-		lappend tags $value
+		set tags [concat $tags $value]
 	    }
 	    style {
 		set opts [StyleToOpts line [StyleAttrToList $value]]
@@ -356,12 +360,12 @@ proc svg2can::parsepath {xmllist transformList args} {
 		set path $value
 	    }
 	    id {
-		lappend tags $value
+		set tags [concat $tags $value]
 	    }
 	    style {
 		# Need to parse separately for each canvas item since different
 		# default values.
-		set lineopts [StyleToOpts line [StyleAttrToList $value]]
+		set lineopts    [StyleToOpts line [StyleAttrToList $value]]
 		set polygonopts [StyleToOpts polygon [StyleAttrToList $value]]
 	    }
 	    default {
@@ -407,27 +411,38 @@ proc svg2can::parsepath {xmllist transformList args} {
 		# Not part of Tiny SVG.
 		incr i
 		foreach {rx ry phi fa fs x y} [lrange $path $i [expr $i + 6]] break
+		if {!$isabsolute} {
+		    set x [expr $cpx + $x] 
+		    set y [expr $cpy + $y]
+		    
+		}
 		set arcpars \
 		  [EllipticArcParameters $cpx $cpy $rx $ry $phi $fa $fs $x $y]
-
+		
 		# Handle special cases.
 		switch -- $arcpars {
 		    skip {
 			# Empty
 		    }
 		    lineto {
-			
+			lappend co [lindex $path [expr $i + 5]] \
+			  [lindex $path [expr $i + 6]]
 		    }
 		    default {
+			
+			# Need to end any previous path.
+			if {[llength $co] > 2} {
+			    set opts [concat [set ${cantype}opts] $itemopts]
+			    lappend cmdList [concat create $cantype $co $opts]
+			}
+
 			# Cannot handle rotations.
 			foreach {cx cy rx ry theta delta phi} $arcpars break
 			set box [list [expr $cx-$rx] [expr $cy-$ry] \
 			  [expr $cx+$rx] [expr $cy+$ry]]
-			if {[llength $co]} {
-			    set opts [concat [set ${cantype}opts] $itemopts]
-			    lappend cmdList [concat create $cantype $co $opts]
-			}
-			lappend opts -style arc -start $theta -extent $delta
+			set itemopts [list -style arc -start $theta \
+			  -extent $delta]
+			set opts [concat $polygonopts $itemopts]
 			lappend cmdList [concat create arc $box $opts]
 			set co {}
 			set itemopts {}
@@ -554,6 +569,7 @@ proc svg2can::parsepath {xmllist transformList args} {
 		#puts "S: i=$i, path=$path"
 		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && \
 		  ($i < $len4)} {
+		    
 		    # Control point from mirroring.
 		    set ctrlpx [expr 2 * $cpx - [lindex $co end-3]]
 		    set ctrlpy [expr 2 * $cpy - [lindex $co end-2]]
@@ -569,15 +585,33 @@ proc svg2can::parsepath {xmllist transformList args} {
 			PathAddRelative $path co i cpx cpy
 		    }
 		    #puts "\ti=$i, ctrl=($ctrlpx,$ctrlpy), co=$co"
-		}		
-		incr i
+		}
+		
+		# Finalize item.
 		lappend itemopts -smooth 1
+		set dx [expr [lindex $co 0] - [lindex $co end-1]]
+		set dy [expr [lindex $co 1] - [lindex $co end]]
+		
+		# Check endpoints to see if closed polygon.
+		# Remove first AND end points if closed!
+		if {[expr hypot($dx, $dy)] < 0.5} {
+		    set opts [concat $polygonopts $itemopts]
+		    set co [lrange $co 2 end-2]
+		    lappend cmdList [concat create polygon $co $opts]
+		} else {
+		    set opts [concat $lineopts $itemopts]
+		    lappend cmdList [concat create line $co $opts]
+		}
+		set co {}
+		set itemopts {}
+		incr i
 	    }
 	    T - t {
 		# Must annihilate last point added and use its mirror instead.
 		#puts "T: i=$i, path=$path"
 		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && \
 		  ($i < $len2)} {
+		    
 		    # Control point from mirroring.
 		    set ctrlpx [expr 2 * $cpx - [lindex $co end-3]]
 		    set ctrlpy [expr 2 * $cpy - [lindex $co end-2]]
@@ -592,8 +626,26 @@ proc svg2can::parsepath {xmllist transformList args} {
 		    }
 		    #puts "\ti=$i, ctrl=($ctrlpx,$ctrlpy), co=$co"
 		}		
-		incr i
+		
+		# Finalize item.
 		lappend itemopts -smooth 1
+		set dx [expr [lindex $co 0] - [lindex $co end-1]]
+		set dy [expr [lindex $co 1] - [lindex $co end]]
+		#puts "\tco=$co"
+		
+		# Check endpoints to see if closed polygon.
+		# Remove first AND end points if closed!
+		if {[expr hypot($dx, $dy)] < 0.5} {
+		    set opts [concat $polygonopts $itemopts]
+		    set co [lrange $co 2 end-2]
+		    lappend cmdList [concat create polygon $co $opts]
+		} else {
+		    set opts [concat $lineopts $itemopts]
+		    lappend cmdList [concat create line $co $opts]		    
+		}
+		set co {}
+		set itemopts {}
+		incr i
 	    }
 	    V {
 		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && \
@@ -660,7 +712,7 @@ proc svg2can::parsepolyline {xmllist transformList args} {
 		set coords [PointsToList $value]
 	    }
 	    id {
-		lappend tags $value
+		set tags [concat $tags $value]
 	    }
 	    style {
 		set opts [StyleToOpts line [StyleAttrToList $value]]
@@ -694,7 +746,7 @@ proc svg2can::parsepolygon {xmllist transformList args} {
 	
 	switch -- $key {
 	    id {
-		lappend tags $value
+		set tags [concat $tags $value]
 	    }
 	    points {
 		set coords [PointsToList $value]
@@ -731,7 +783,7 @@ proc svg2can::parserect {xmllist transformList args} {
 	
 	switch -- $key {
 	    id {
-		lappend tags $value
+		set tags [concat $tags $value]
 	    }
 	    rx - ry {
 		# unsupported :-(
@@ -804,7 +856,6 @@ proc svg2can::ParseTspan {xmllist transformList xVar yVar xAttrVar yAttrVar opts
     # Inherit opts.
     array set optsArr $opts
     array set optsArr [ParseTextAttr $xmllist xAttr yAttr baselineShift]
-    set opts [array get optsArr]
 
     set tag [gettag $xmllist]
     set childList [getchildren $xmllist]
@@ -822,6 +873,7 @@ proc svg2can::ParseTspan {xmllist transformList xVar yVar xAttrVar yAttrVar opts
 	    set xAttr $x
 	    set yAttr $y
 	}
+	set opts [array get optsArr]
 	foreach c $childList {
 	    
 	    switch -- [gettag $c] {
@@ -836,18 +888,22 @@ proc svg2can::ParseTspan {xmllist transformList xVar yVar xAttrVar yAttrVar opts
 	}
     } else {
 	set str [getcdata $xmllist]
-	lappend opts -text $str
-	set tags {}
+	set optsArr(-text) $str
 	if {[llength $transformList]} {
-	    lappend tags $tmptag
+	    lappend optsArr(-tags) $tmptag
 	}
-	set cmdList [list [concat create text  \
-	  $xAttr [expr $yAttr + $baselineShift] $opts]]	
-	set cmdList [AddAnyTransformCmds $cmdList $transformList]
+	set opts [array get optsArr]
 	set theFont $systemFont
 	if {[info exists optsArr(-font)]} {
 	    set theFont $optsArr(-font)
 	}
+	
+	# Need to adjust the text position so that the baseline matches y.
+	# nw to baseline
+	set descent [font metrics $theFont -descent]
+	set cmdList [list [concat create text  \
+	  $xAttr [expr $yAttr + $descent + $baselineShift] $opts]]	
+	set cmdList [AddAnyTransformCmds $cmdList $transformList]
 	
 	# Each text insert moves both the running coordinate sets.
 	# newlines???
@@ -869,8 +925,8 @@ proc svg2can::ParseTextAttr {xmllist xVar yVar baselineShiftVar} {
     upvar $yVar y
     upvar $baselineShiftVar baselineShift
 
-    # svg defaults to start (w) while tk default is c.
-    set opts {-anchor w}
+    # svg defaults to start with y being the baseline while tk default is c.
+    set opts {-anchor sw}
     set presentationAttr {}
     set baselineShift 0
     
@@ -986,10 +1042,13 @@ proc svg2can::StyleToOpts {type styleList} {
 		set haveFont 1
 	    }
 	    font-size {
+		
+		# Use pixels instead of points.
 		if {[regexp {([0-9]+)pt} $value match pts]} {
-		    lset fontSpec 1 $pts
+		    set pix [expr int($pts * [tk scaling] + 0.1)]
+		    lset fontSpec 1 "-$pix"
 		} else {
-		    lset fontSpec 1 $value
+		    lset fontSpec 1 "-$value"
 		}
 		set haveFont 1
 	    }
@@ -1008,6 +1067,12 @@ proc svg2can::StyleToOpts {type styleList} {
 		    }
 		}
 		set haveFont 1
+	    }
+	    marker-end {
+		set optsArr(-arrow) last
+	    }
+	    marker-start {
+		set optsArr(-arrow) first		
 	    }
 	    stroke {
 		switch -- $type {
@@ -1090,7 +1155,7 @@ proc svg2can::EllipticArcParameters {x1 y1 rx ry phi fa fs x2 y2} {
     }
     set rx [expr abs($rx)]
     set ry [expr abs($ry)]
-    set phi [expr ($phi % 360) * $pi/180.0]
+    set phi [expr fmod($phi, 360) * $pi/180.0]
     if {$fa != 0} {
 	set fa 1
     }
@@ -1121,8 +1186,9 @@ proc svg2can::EllipticArcParameters {x1 y1 rx ry phi fa fs x2 y2} {
     
     # Compute cx' and cy'
     set sign [expr {$fa == $fs} ? -1 : 1]
-    set root [expr sqrt(($rx2 - $rx2 * $y1prime2 - $ry2 * $x1prime2) /  \
-      ($rx2 * $y1prime2 + $ry2 * $x1prime2))]
+    set square [expr ($rx2 * $ry2 - $rx2 * $y1prime2 - $ry2 * $x1prime2) /  \
+      ($rx2 * $y1prime2 + $ry2 * $x1prime2)]
+    set root [expr sqrt(abs($square))]
     set cxprime [expr  $sign * $root * $rx * $y1prime/$ry]
     set cyprime [expr -$sign * $root * $ry * $x1prime/$rx]
     
@@ -1141,13 +1207,13 @@ proc svg2can::EllipticArcParameters {x1 y1 rx ry phi fa fs x2 y2} {
 
     set sign [expr {$ux * $vy - $uy * $vx > 0} ? 1 : -1]
     set delta [expr $sign * acos( ($ux * $vx + $uy * $vy) /  \
-      (hypot($ux, $uy) * hypot($vx, $vy))]
+      (hypot($ux, $uy) * hypot($vx, $vy)) )]
     
     # To degrees
     set theta [expr $theta * 180.0/$pi]
     set delta [expr $delta * 180.0/$pi]
-    #set delta [expr $delta % 360]
-    set phi   [expr $phi % 360]
+    #set delta [expr fmod($delta, 360)]
+    set phi   [expr fmod($phi, 360)]
     
     if {($fs == 0) && ($delta > 0)} {
 	set delta [expr $delta - 360]
@@ -1398,8 +1464,14 @@ if {0} {
     set xml([incr i]) {<path d="M100,200 C100,100 250,100 250,200 \
       S400,300 400,200" />}
 
-    set xml([incr i]) {<path d="M 125 75 A 100 50 0 0 0 225 125"/>}
-
+    set xml([incr i]) {<path d="M 125 75 A 100 50 0 0 0 225 125" \
+      style='stroke: blue; stroke-width: 2.0;'/>}
+    set xml([incr i]) {<path d="M 125 75 A 100 50 0 0 1 225 125" \
+      style='stroke: red; stroke-width: 2.0;'/>}
+    set xml([incr i]) {<path d="M 125 75 A 100 50 0 1 0 225 125" \
+      style='stroke: green; stroke-width: 2.0;'/>}
+    set xml([incr i]) {<path d="M 125 75 A 100 50 0 1 1 225 125" \
+      style='stroke: gray50; stroke-width: 2.0;'/>}
 
     # g
     set xml([incr i]) {<g fill="none" stroke="red" stroke-width="3" > \
@@ -1416,6 +1488,9 @@ if {0} {
     set xml([incr i]) {<circle id="t0013" cx="10" cy="10" r="20" \
       style="stroke: yellow; fill: none; stroke-width: 2.0;"\
       transform="translate(200,300)"/>}
+    set xml([incr i]) {<text x='10.0' y='40.0' transform="translate(200,300)" \
+      style='font-family: Helvetica; font-size: 24; \
+      fill: #000000;'>Translated Text</text>}
     
     foreach i [lsort -integer [array names xml]] {
 	set xmllist [tinydom::documentElement [tinydom::parse $xml($i)]]

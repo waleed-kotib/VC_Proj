@@ -3,14 +3,17 @@
 #      This file is part of The Coccinella application. It implements procedures
 #      for transfering the items of a canvas to and from files.
 #      
-#  Copyright (c) 2002-2003  Mats Bengtsson
+#  Copyright (c) 2002-2004  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: FilesAndCanvas.tcl,v 1.18 2004-01-15 14:13:00 matben Exp $
+# $Id: FilesAndCanvas.tcl,v 1.19 2004-03-04 07:53:17 matben Exp $
  
 package require can2svg
+package require svg2can
+package require tinydom
 package require undo
+
 package provide FilesAndCanvas 1.0
 
 namespace eval ::CanvasFile:: {}
@@ -539,6 +542,7 @@ proc ::CanvasFile::DoOpenCanvasFile {wtop {filePath {}}} {
     if {[string length $filePath] == 0} {
 	set typelist {
 	    {"Canvas"     {.can}}
+	    {"XML/SVG"    {.svg}}
 	    {"Text"       {.txt}}
 	}
 	set ans [tk_messageBox -icon warning -type okcancel -default ok \
@@ -559,17 +563,27 @@ proc ::CanvasFile::DoOpenCanvasFile {wtop {filePath {}}} {
 	set fileName $filePath
     }  
     
-    # Opens the data file.
-    if {[catch {open $fileName r} fd]} {
-	set tail [file tail $fileName]
-	tk_messageBox -message [::msgcat::mc messfailopread $tail $fd] \
-	  -icon error -type ok
-	return
+    switch -- [file extension $fileName] {
+	.svg {
+	    ::undo::reset [::WB::GetUndoToken $wtop]
+	    ::CanvasCmd::DoEraseAll $wtop     
+	    ::CanvasFile::SVGFileToCanvas $wtop $fileName
+	}
+	.can {	    
+	    
+	    # Opens the data file.
+	    if {[catch {open $fileName r} fd]} {
+		set tail [file tail $fileName]
+		tk_messageBox -message [::msgcat::mc messfailopread $tail $fd] \
+		  -icon error -type ok
+		return
+	    }
+	    ::undo::reset [::WB::GetUndoToken $wtop]
+	    ::CanvasCmd::DoEraseAll $wtop     
+	    FileToCanvas $wCan $fd $fileName
+	    close $fd
+	}
     }
-    ::undo::reset [::WB::GetUndoToken $wtop]
-    ::CanvasCmd::DoEraseAll $wtop     
-    FileToCanvas $wCan $fd $fileName
-    close $fd
 }
 
 # DoSaveCanvasFile --
@@ -686,4 +700,29 @@ proc ::CanvasFile::ImagePathTranslation {optList absFilePath} {
     }
     return $newOptList
 }
+
+
+proc ::CanvasFile::SVGFileToCanvas {wtop filePath} {
+    
+    set wCan [::UI::GetCanvasFromWtop $wtop]
+
+    # Opens the data file.
+    if {[catch {open $filePath r} fd]} {
+	set tail [file tail $filePath]
+	tk_messageBox -icon error -type ok -parent $wCan -message  \
+	  [FormatTextForMessageBox [::msgcat::mc messfailopread $tail $fd]]
+	return
+    }
+    set xml [read $fd]
+    set xmllist [tinydom::documentElement [tinydom::parse $xml]]
+    
+    # Update the utags...
+    foreach cmd [svg2can::parsesvgdocument $xmllist] {
+	set utag [::CanvasUtils::NewUtag]
+	set cmd [::CanvasUtils::ReplaceUtag $cmd $utag]
+	eval $wCan $cmd
+    }
+    close $fd
+}
+
 #-------------------------------------------------------------------------------
