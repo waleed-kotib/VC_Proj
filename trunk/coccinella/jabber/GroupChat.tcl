@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.95 2005-02-02 09:02:18 matben Exp $
+# $Id: GroupChat.tcl,v 1.96 2005-02-03 07:38:14 matben Exp $
 
 package require History
 
@@ -219,7 +219,8 @@ proc ::GroupChat::HaveMUC {{jid ""}} {
     } else {
 	
 	# We must query the service, not the room, for browse to work.
-	if {[regexp {^[^@]+@(.+)$} $jid match service]} {
+	jlib::splitjidex $jid node service res
+	if {$service != ""} {
 	    if {[$jstate(jlib) service hasfeature $service $xmppxmlns(muc)]} {
 		set ans 1
 	    }
