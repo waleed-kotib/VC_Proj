@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.28 2004-11-11 15:38:29 matben Exp $
+# $Id: Whiteboard.tcl,v 1.29 2004-11-27 08:41:21 matben Exp $
 
 package require entrycomp
 package require moviecontroller
@@ -30,11 +30,9 @@ package require WBPrefs
 package provide Whiteboard 1.0
 
 namespace eval ::WB:: {
-    global  wDlgs
         
     # Add all event hooks.
-    ::hooks::register quitAppHook         \
-      [list ::UI::SaveWinPrefixGeom $wDlgs(wb) whiteboard]
+    ::hooks::register quitAppHook         ::WB::QuitAppHook
     ::hooks::register quitAppHook         ::WB::SaveAnyState
     ::hooks::register closeWindowHook     ::WB::CloseHook
     ::hooks::register whiteboardCloseHook ::WB::CloseWhiteboard
@@ -604,6 +602,12 @@ proc ::WB::InitMenuDefs { } {
     set menuDefsInsertInd(main,info)   [expr [llength $menuDefs(main,info)]-2]
 }
 
+proc ::WB::QuitAppHook { } {
+    global  wDlgs
+    
+    ::UI::SaveWinPrefixGeom $wDlgs(wb) whiteboard
+}
+
 # WB::NewWhiteboard --
 #
 #       Makes a unique whiteboard.
@@ -1153,7 +1157,7 @@ proc ::WB::SaveCleanWhiteboardDims {wtop} {
     if {$wtop != "."} {
 	return
     }
-    foreach {dims(wRoot) hRoot dims(x) dims(y)} [::UI::ParseWMGeometry .] break
+    foreach {dims(wRoot) hRoot dims(x) dims(y)} [::UI::ParseWMGeometry [wm geometry .]] break
     set dims(hRoot) [expr $dims(hCanvas) + $dims(hStatus) +  \
       $dims(hCommClean) + $dims(hTop) + $dims(hFakeMenu)]
     incr dims(hRoot) [expr [winfo height $wapp(xsc)] + 4]
@@ -1875,7 +1879,7 @@ proc ::WB::ConfigShortcutButtonPad {wtop what {subSpec {}}} {
 	    wm minsize $topw 0 0
 	    
 	    # New size, keep width.
-	    foreach {width height x y} [::UI::ParseWMGeometry $topw] break
+	    foreach {width height x y} [::UI::ParseWMGeometry [wm geometry $topw]] break
 	    set hNew    [expr $height - $dims(hTopOn) + $dims(hTopOff)]
 	    set hMinNew [expr $hMin - $dims(hTopOn) + $dims(hTopOff)]
 	    wm geometry $topw ${width}x${hNew}
@@ -1893,7 +1897,7 @@ proc ::WB::ConfigShortcutButtonPad {wtop what {subSpec {}}} {
 	
 	    # New size, keep width.
 	    foreach {wMin hMin} [wm minsize $topw] break
-	    foreach {width height x y} [::UI::ParseWMGeometry $topw] break
+	    foreach {width height x y} [::UI::ParseWMGeometry [wm geometry $topw]] break
 	    set hNew    [expr $height - $dims(hTopOff) + $dims(hTopOn)]
 	    set hMinNew [expr $hMin - $dims(hTopOff) + $dims(hTopOn)]
 	    wm geometry $topw ${width}x${hNew}

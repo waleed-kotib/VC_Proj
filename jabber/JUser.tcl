@@ -5,18 +5,23 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JUser.tcl,v 1.6 2004-09-30 12:43:06 matben Exp $
+# $Id: JUser.tcl,v 1.7 2004-11-27 08:41:20 matben Exp $
 
 package provide JUser 1.0
 
 namespace eval ::Jabber::User:: {
-    global  wDlgs
 	
     # A unique running identifier.
     variable uid 0
 
     # Hooks for add user dialog.
-    ::hooks::register quitAppHook        [list ::UI::SaveWinGeom $wDlgs(jrostadduser)]
+    ::hooks::register quitAppHook  ::Jabber::User::QuitAppHook 
+}
+
+proc ::Jabber::User::QuitAppHook { } {
+    global  wDlgs
+    
+    ::UI::SaveWinGeom $wDlgs(jrostadduser)    
 }
 
 # Jabber::User::NewDlg --

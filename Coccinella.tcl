@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.98 2004-11-24 08:23:43 matben Exp $
+# $Id: Coccinella.tcl,v 1.99 2004-11-27 08:41:19 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -262,6 +262,8 @@ if {!$prefs(stripJabber)} {
     package require Jabber
 }
 
+::UI::InitDlgs
+
 # Beware! [info hostname] can be very slow on Macs first time it is called.
 ::SplashScreen::SetMsg [mc splashhost]
 set this(hostname) [info hostname]
@@ -323,6 +325,7 @@ switch -- $prefs(protocol) {
 # In initHook UI before hooks BAD!
 ::UI::Init
 ::UI::InitMenuDefs
+::UI::InitCommonBinds
 
 # All components that requires some kind of initialization should register here.
 # Beware, order may be important!
@@ -357,24 +360,6 @@ if {$prefs(firstLaunch) && !$prefs(stripJabber)} {
     set displaySetup 0
 }
 
-# A mechanism to set -state of cut/copy/paste. Not robust!!!
-# All selections are not detected (shift <- -> etc).
-# Entry copy/paste.
-bind Entry <FocusIn>         "+ ::UI::FixMenusWhenSelection %W"
-bind Entry <ButtonRelease-1> "+ ::UI::FixMenusWhenSelection %W"
-bind Entry <<Cut>>           "+ ::UI::FixMenusWhenSelection %W"
-bind Entry <<Copy>>          "+ ::UI::FixMenusWhenSelection %W"
-    
-# Text copy/paste.
-bind Text <FocusIn>         "+ ::UI::FixMenusWhenSelection %W"
-bind Text <ButtonRelease-1> "+ ::UI::FixMenusWhenSelection %W"
-bind Text <<Cut>>           "+ ::UI::FixMenusWhenSelection %W"
-bind Text <<Copy>>          "+ ::UI::FixMenusWhenSelection %W"
-
-# Linux has a strange binding by default. Handled by <<Paste>>.
-if {[string equal $this(platform) "unix"]} {
-    bind Text <Control-Key-v> {}
-}
 if {[string equal $this(platform) "windows"]} {
     wm iconbitmap . -default [file join $this(imagePath) coccinella.ico]
 }

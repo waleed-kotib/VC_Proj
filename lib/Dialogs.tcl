@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.49 2004-10-27 14:42:37 matben Exp $
+# $Id: Dialogs.tcl,v 1.50 2004-11-27 08:41:20 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -15,67 +15,6 @@ namespace eval ::Dialogs:: {
     
     # Add all event hooks.
     ::hooks::register quitAppHook ::Dialogs::Free 10
-}
-
-# Define the toplevel windows here so they don't collide.
-# Toplevel dialogs.
-array set wDlgs {
-    comp            .comp
-    editFonts       .edfnt
-    editShorts      .tshcts
-    fileAssoc       .fass
-    infoClient      .infocli
-    infoServ        .infoserv
-    netSetup        .netsetup
-    openConn        .opc
-    openMulti       .opqtmulti
-    prefs           .prefs
-    print           .prt
-    prog            .prog
-    plugs           .plugs
-    setupass        .setupass
-    wb              .wb
-}
-
-# Toplevel dialogs for the jabber part.
-array set wDlgs {
-    jreg            .jreg
-    jlogin          .jlogin
-    jrost           .jrost
-    jrostnewedit    .jrostnewedit
-    jrostadduser    .jrostadduser
-    jrostedituser   .jrostedituser
-    jsubsc          .jsubsc
-    jsendmsg        .jsendmsg
-    jgotmsg         .jgotmsg
-    jstartchat      .jstartchat
-    jchat           .jchat
-    jbrowse         .jbrowse
-    jrostbro        .jrostbro
-    jenterroom      .jenterroom
-    jcreateroom     .jcreateroom
-    jinbox          .jinbox
-    jpresmsg        .jpresmsg
-    joutst          .joutst
-    jpasswd         .jpasswd
-    jsearch         .jsearch
-    jvcard          .jvcard
-    jgcenter        .jgcenter
-    jgc             .jgc
-    jmucenter       .jmucenter
-    jmucinvite      .jmucinvite
-    jmucinfo        .jmucinfo
-    jmucedit        .jmucedit
-    jmuccfg         .jmuccfg
-    jmucdestroy     .jmucdestroy
-    jchist          .jchist
-    jhist           .jhist
-    jprofiles       .jprofiles
-    joobs           .joobs
-    jerrdlg         .jerrdlg
-    jwbinbox        .jwbinbox
-    jprivacy        .jprivacy
-    jdirpres        .jdirpres
 }
 
 # Dialogs::GetCanvas --

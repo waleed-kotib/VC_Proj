@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Theme.tcl,v 1.17 2004-11-23 08:55:23 matben Exp $
+# $Id: Theme.tcl,v 1.18 2004-11-27 08:41:21 matben Exp $
 
 package provide Theme 1.0
 
@@ -129,6 +129,12 @@ proc ::Theme::SavePrefsFile { } {
 	tk_messageBox -icon error -type ok -message \
 	  [FormatTextForMessageBox [mc messerrpreffile $tmpFile]]
 	return
+    }
+    
+    # Use empty themName if match 'default' or 'this(platform)'.
+    if {[string equal $prefs(themeName) "default"] || \
+      [string equal $prefs(themeName) $this(platform)]} {
+	set prefs(themeName) ""
     }
     
     # Header information.

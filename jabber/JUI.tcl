@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.71 2004-11-23 08:55:23 matben Exp $
+# $Id: JUI.tcl,v 1.72 2004-11-27 08:41:20 matben Exp $
 
 package provide JUI 1.0
 
@@ -56,25 +56,25 @@ namespace eval ::Jabber::UI:: {
     option add *JMain.ButtonTray.relief           raised          50
 
     # Generic tree options.
-    option add *JMain*Tree.background             #dedede         50
-    option add *JMain*Tree.backgroundImage        {}              50
-    option add *JMain*Tree.highlightBackground    white           50
-    option add *JMain*Tree.highlightColor         black           50
-    option add *JMain*Tree.styleIcons             plusminus       50
-    option add *JMain*Tree.pyjamasColor           white           50
-    option add *JMain*Tree.selectBackground       black           50
-    option add *JMain*Tree.selectForeground       white           50
-    option add *JMain*Tree.selectMode             1               50
-    option add *JMain*Tree.treeColor              gray50          50
+    option add *JMain*Tree.background             #dedede         30
+    option add *JMain*Tree.backgroundImage        {}              30
+    option add *JMain*Tree.highlightBackground    white           30
+    option add *JMain*Tree.highlightColor         black           30
+    option add *JMain*Tree.styleIcons             plusminus       30
+    option add *JMain*Tree.pyjamasColor           white           30
+    option add *JMain*Tree.selectBackground       black           30
+    option add *JMain*Tree.selectForeground       white           30
+    option add *JMain*Tree.selectMode             1               30
+    option add *JMain*Tree.treeColor              gray50          30
 
     # The tab notebook options.
-    option add *JMain*MacTabnotebook.activeForeground    black        50
-    option add *JMain*MacTabnotebook.activeTabColor      #efefef      50
-    option add *JMain*MacTabnotebook.activeTabBackground #cdcdcd      50
-    option add *JMain*MacTabnotebook.activeTabOutline    black        50
-    option add *JMain*MacTabnotebook.tabBackground       #dedede      50
-    option add *JMain*MacTabnotebook.tabColor            #cecece      50
-    option add *JMain*MacTabnotebook.tabOutline          gray20       50
+    option add *JMain*MacTabnotebook.activeForeground     black         50
+    option add *JMain*MacTabnotebook.activeTabColor       #efefef       50
+    option add *JMain*MacTabnotebook.activeTabBackground  #cdcdcd       50
+    option add *JMain*MacTabnotebook.activeTabOutline     black         50
+    option add *JMain*MacTabnotebook.tabBackground        #dedede       50
+    option add *JMain*MacTabnotebook.tabColor             #cecece       50
+    option add *JMain*MacTabnotebook.tabOutline           gray20        50
 
     variable treeOpts {background backgroundImage highlightBackground \
       highlightColor indention styleIcons pyjamasColor selectBackground \
