@@ -15,7 +15,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.4 2003-09-13 06:39:25 matben Exp $
+# $Id: Coccinella.tcl,v 1.5 2003-09-21 13:02:12 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -176,31 +176,7 @@ proc CallTrace {num} {
 
 #  Make sure that we are in the directory of the application itself.
       
-if {[string equal $this(platform) "macintosh"] && ([info tclversion] < 8.4)} {
-    
-    # The first launch the path must be specified, else we store it in a
-    # special prefs file.
-    set haveMacSpecialPrefs 0
-    set specialMacPrefPath [file join $env(PREF_FOLDER) CoccinellaInstallPath]
-    if {[file exists $specialMacPrefPath]} {
-	if {![catch {option readfile $specialMacPrefPath} err]} {
-	    set thisPath [option get . thisPath {}]
-	    set installDirName "Whiteboard-$prefs(fullVers)"
-	    if {[file exists $thisPath] &&  \
-	      [string equal [lindex [file split $thisPath] end] $installDirName]} {
-		set haveMacSpecialPrefs 1
-	    }
-	}
-    }
-    if {!$haveMacSpecialPrefs} {
-	tk_messageBox -icon info -type ok -message  \
-	  "Due to the 'info script' bug on Mac you\
-	  need to explicitly pick the 'Whiteboard-$prefs(fullVers)'\
-	  folder in the following dialog."
-	set thisPath [tk_chooseDirectory -title "Pick Whiteboard-$prefs(fullVers)"]
-    }
-    set thisScript [file join $thisPath Coccinella.tcl]
-} elseif {[string equal $this(platform) "unix"]} {
+if {[string equal $this(platform) "unix"]} {
     set thisPath [file dirname [resolve_cmd_realpath [info script]]]
     set thisTail [file tail [info script]]
     set thisScript [file join $thisPath $thisTail]
@@ -374,10 +350,6 @@ if {1} {
 	    set sysFont(l) [font create -family Helvetica -size 18]
 	}
 	macosx {
-	    #set sysFont(s) {{Lucida Grande} 11 normal}
-	    #set sysFont(sb) {{Lucida Grande} 11 bold}
-	    #set sysFont(m) application
-	    #set sysFont(l) {Helvetica 18 normal}
 	    set sysFont(s) [font create -family {Lucida Grande} -size 11]
 	    set sysFont(sb) [font create -family {Lucida Grande} -size 11 -weight bold]
 	    set sysFont(m) application
@@ -446,33 +418,6 @@ foreach sourceName $allLibSourceFiles {
     }
 }
 
-# The http package can be useful?
-if {![catch {package require http} msg]} {
-    set prefs(http) 1
-} else {
-    set prefs(http) 0
-}
-
-# Other utility packages.
-foreach name {Tclapplescript printer gdi tls optcl tcom} {
-    set prefs($name) 0
-}
-array set extraPacksArr {
-    macintosh   {Tclapplescript}
-    macosx      {Tclapplescript tls}
-    windows     {printer gdi tls optcl tcom}
-    unix        {tls}
-}
-
-foreach name $extraPacksArr($this(platform)) {
-    if {![catch {package require $name} msg]} {
-	set prefs($name) 1
-    }
-}
-if {!($prefs(printer) && $prefs(gdi))} {
-    set prefs(printer) 0
-}
-
 switch -- $this(platform) {
     macintosh - macosx {
 	if {[catch {source [file join $this(path) lib MacintoshUtils.tcl]} msg]} {
@@ -488,6 +433,42 @@ switch -- $this(platform) {
     }
 }
 
+# The http package can be useful?
+if {![catch {package require http} msg]} {
+    set prefs(http) 1
+} else {
+    set prefs(http) 0
+}
+
+# Other utility packages that can be platform specific.
+# The 'Thread' package requires that the Tcl core has been built with support.
+foreach name {Tclapplescript printer gdi tls Thread optcl tcom} {
+    set prefs($name) 0
+}
+array set extraPacksArr {
+    macintosh   {Tclapplescript}
+    macosx      {Tclapplescript tls Thread}
+    windows     {printer gdi tls Thread optcl tcom}
+    unix        {tls Thread}
+}
+
+foreach name $extraPacksArr($this(platform)) {
+    if {![catch {package require $name} msg]} {
+	set prefs($name) 1
+    }
+}
+if {!($prefs(printer) && $prefs(gdi))} {
+    set prefs(printer) 0
+}
+
+set prefs(Thread) 0
+
+# Start httpd thread. It enters its event loop if created without a sript.
+if {$prefs(Thread)} {
+    set this(httpdthreadid) [thread::create]
+    thread::send $this(httpdthreadid) [list set auto_path $auto_path]
+}
+
 # As an alternative to sourcing tcl code directly, use the package mechanism.
 
 ::SplashScreen::SetMsg [::msgcat::mc splashload]
@@ -501,12 +482,11 @@ set listOfPackages {
     FileCache
     Preferences
     PreferencesUtils
-    TinyHttpd
     Types
     Plugins
     AutoUpdate
-    combobox
     Pane
+    combobox
     moviecontroller
     fontselection
     tablelist
@@ -516,6 +496,13 @@ set listOfPackages {
 }
 foreach packName $listOfPackages {
     package require $packName
+}
+
+# The 'tinyhttpd' package must be loaded in its threads interpreter if exists.
+if {$prefs(Thread)} {
+    thread::send $this(httpdthreadid) {package require tinyhttpd}
+} else {
+    package require tinyhttpd
 }
 if {[catch {package require progressbar} msg]} {
     set prefs(Progressbar) 0
@@ -668,13 +655,13 @@ if {$argc > 0} {
 
 # Let main window "." be roster in jabber and whiteboard else.
 if {[string equal $prefs(protocol) "jabber"]} {
-    set wDlgs(jrostbro) .jrostbro
-    set wDlgs(mainwb) .
-    #set wDlgs(jrostbro) .
-    #set wDlgs(mainwb) .jrostbro
+    set wDlgs(jrostbro) .
+    set wDlgs(mainwb) .wb0
 } else {
     set wDlgs(mainwb) .
 }
+# Need to do this here after reading preferences.
+lappend prefs(winGeomList) $wDlgs(jrostbro)
 
 # Make the actual whiteboard with canvas, tool buttons etc...
 # Jabber has the roster window as "main" window.
@@ -683,7 +670,9 @@ if {![string equal $prefs(protocol) "jabber"]} {
     ::UI::BuildMain $wDlgs(mainwb) -serverentrystate disabled
 }
 if {$prefs(firstLaunch) && !$prefs(stripJabber)} {
-    wm withdraw $wDlgs(mainwb)
+    if {[winfo exists $wDlgs(mainwb)]} {
+	wm withdraw $wDlgs(mainwb)
+    }
     set displaySetup 1
 } else {
     set displaySetup 0
@@ -765,17 +754,27 @@ if {($prefs(protocol) != "client") && $prefs(autoStartServer)} {
     after $prefs(afterStartServer) [list DoStartServer $prefs(thisServPort)]
 }
 
-# Start the TinyHttpd server. Perhaps this should go in its own thread...?
+# Start the tinyhttpd server, in its own thread if available.
 
 if {($prefs(protocol) != "client") && $prefs(haveHttpd)} {
-    if {[catch {  \
-      ::TinyHttpd::Start -port $prefs(httpdPort) -rootdirectory $prefs(httpdRootDir)} msg]} {
+    set httpdScript [list ::tinyhttpd::start -port $prefs(httpdPort)  \
+      -rootdirectory $prefs(httpdRootDir)]
+    
+    if {[catch {
+	if {$prefs(Thread)} {
+	    set this(httpdthreadid) [thread::send $this(httpdthreadid)  \
+	      $httpdScript]
+	
+	    # Add more Mime types than the standard built in ones.
+	    thread::send $this(httpdthreadid)  \
+	      [list ::tinyhttpd::addmimemappings [array get prefSuffix2MimeType]]
+	} else {
+	    eval $httpdScript
+	    ::tinyhttpd::addmimemappings [array get prefSuffix2MimeType]
+	}
+    } msg]} {
 	tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
 	  [::msgcat::mc messfailedhttp $msg]]	  
-    } else {
-	
-	# Add more Mime types than the standard built in ones.
-	::TinyHttpd::AddMimeMappings prefSuffix2MimeType
     }
 }
 

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: PluginTextPlain.tcl,v 1.2 2003-07-26 13:54:23 matben Exp $
+# $Id: PluginTextPlain.tcl,v 1.3 2003-09-21 13:02:12 matben Exp $
 
 
 namespace eval ::TextImporter:: {
@@ -121,11 +121,12 @@ proc ::TextImporter::Import {wcan fileName optListVar args} {
     
     array set argsArr $args
     array set optArr $optList
+    set wtop [::UI::GetToplevelNS $wcan]
     
     # Extract coordinates and tags which must be there. error checking?
-    foreach {x y} $optArr(coords:) break
-    if {[info exists optArr(tags:)]} {
-	set useTag $optArr(tags:)
+    foreach {x y} $optArr(-coords) break
+    if {[info exists optArr(-tags)]} {
+	set useTag $optArr(-tags)
     } else {
 	set useTag [::CanvasUtils::NewUtag]
     }
@@ -140,10 +141,14 @@ proc ::TextImporter::Import {wcan fileName optListVar args} {
     set id [$wcan create window $x $y -anchor nw -window $wfr -tags  \
       [list tframe $useTag]]
     set locals(id2file,$id) $fileName
+    
+    # Need explicit permanent storage for import options.
+    ::CanvasUtils::ItemSet $wtop $useTag -file $fileName
+    
     bind $wfr.icon <Double-Button-1> [list [namespace current]::Clicked $id]
 
     # We may let remote clients know our size.
-    lappend optList "width:" [winfo reqwidth $wfr] "height:" [winfo reqheight $wfr]
+    lappend optList -width [winfo reqwidth $wfr] -height [winfo reqheight $wfr]
 
     set msg "Plain text: [file tail $fileName]"
     ::balloonhelp::balloonforwindow $wfr.icon $msg

@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ItemInspector.tcl,v 1.6 2003-09-13 06:39:25 matben Exp $
+# $Id: ItemInspector.tcl,v 1.7 2003-09-21 13:02:12 matben Exp $
 
 namespace eval ::ItemInspector::  {
     
@@ -708,7 +708,7 @@ proc ::ItemInspector::Broken {wtop id args} {
     pack $fr -padx 10 -pady 10
     
     # Get any cached info for this id.
-    set itemcget [::UI::ItemCGet $wtop $id]
+    set itemcget [::CanvasUtils::ItemCGet $wtop $id]
     set i 0
     foreach {key value} $itemcget {
 	if {$key == "-optlist"} {

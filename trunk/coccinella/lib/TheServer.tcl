@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: TheServer.tcl,v 1.10 2003-09-13 06:39:25 matben Exp $
+# $Id: TheServer.tcl,v 1.11 2003-09-21 13:02:12 matben Exp $
     
 # DoStartServer ---
 #
@@ -242,13 +242,7 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
     set int_ {[0-9]+}
     set signint_ {[-0-9]+}
     set punct {[.,;?!]}
-    
-    # Special chars.
-    set nl_ {\\n}
-    set bs_ {\\}
-    set lb_ {\{}
-    set rb_ {\}}
-    
+        
     if {$debugServerLevel >= 2} {
 	puts "ExecuteClientRequest:: wtop=$wtop, line='$line', args='$args'"
     }
@@ -261,109 +255,7 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
     switch -exact -- $prefixCmd {
 	CANVAS {
 	    if {[string length $instr] > 0} {
-		
-		# Regular drawing commands in the canvas.
-		set wServCan [::UI::GetServerCanvasFromWtop $wtop]
-		
-		# If html sizes in text items, be sure to translate them into
-		# platform specific point sizes.
-		
-		if {$prefs(useHtmlSizes) && ([lsearch -exact $instr "-font"] >= 0)} {
-		    set instr [::CanvasUtils::FontHtmlToPointSize $instr]
-		}
-		
-		# Careful, make newline (backslash) substitutions only for the command
-		# being eval'd, else the tcl interpretation may be screwed up.
-		# Fix special chars such as braces since they are parsed 
-		# when doing 'subst' below. Pad extra backslash for each '\{' and
-		# '\}' to protect them.
-		# Seems like an identity operation but is not!
-		
-		regsub -all "$bs_$lb_" $instr "$bs_$lb_" padinstr
-		regsub -all "$bs_$rb_" $padinstr "$bs_$rb_" padinstr
-		set bsinstr [subst -nocommands -novariables $padinstr]
-		
-		# Intercept the canvas command if delete to remove any markers
-		# *before* it is deleted! See below for other commands.
-		
-		set cmd [lindex $instr 0]
-		if {[string equal $cmd "delete"]} {
-		    set utag [lindex $instr 1]
-		    set id [$wServCan find withtag $utag]
-		    $wServCan delete id$id
-		}
-		
-		# Find and register the undo command (and redo), and push
-		# on our undo/redo stack. Security ???
-		if {$prefs(privacy) == 0} {
-		    set undocmd [::CanvasUtils::GetUndoCommand $wtop $instr]
-		    set redo [list ::CanvasUtils::Command $wtop $instr]
-		    set undo [list ::CanvasUtils::Command $wtop $undocmd]
-		    undo::add [::UI::GetUndoToken $wtop] $undo $redo
-		}
-		
-		# The 'import' command is an exception case (for the future). 
-		if {[string equal $cmd "import"]} {
-		    ::ImageAndMovie::HandleImportCmd $wServCan $bsinstr
-		} else {
-		    		
-		    # Make the actual canvas command, either straight or in the 
-		    # safe interpreter.
-		    if {$prefs(makeSafeServ)} {
-			if {[catch {$canvasSafeInterp eval SafeCanvasDraw  \
-			  $wServCan $bsinstr} idnew]} {
-			    puts stderr "--->error: did not understand: $idnew"
-			    return
-			}
-		    } else {
-			if {[catch {eval $wServCan $bsinstr} idnew]} {
-			    puts stderr "--->error: did not understand: $idnew"
-			    return
-			}
-		    }
-		}
-		
-		# Intercept the canvas command in certain cases:
-		# If moving a selected item, be sure to move the markers with it.
-		# The item can either be selected by remote client or here.
-		
-		if {[string equal $cmd "move"] ||  \
-		  [string equal $cmd "coords"] || \
-		  [string equal $cmd "scale"] ||  \
-		  [string equal $cmd "itemconfigure"]} {
-		    set utag [lindex $instr 1]
-		    set id [$wServCan find withtag $utag]
-		    set idsMarker [$wServCan find withtag id$id]
-		    
-		    # If we have selected the item in question.
-		    if {[string length $idsMarker] > 0} {
-			$wServCan delete id$id
-			$wServCan dtag $id "selected"
-			::CanvasDraw::MarkBbox $wServCan 1 $id
-		    }
-		} 
-		
-		# If text then speak up to last punct.
-		
-		if {$prefs(SpeechOn)} {
-		    if {[string equal $cmd "create"] ||  \
-		      [string equal $cmd "insert"]} {
-			if {[string equal $cmd "create"]} {
-			    set utag $idnew
-			} else {
-			    set utag [lindex $instr 1]
-			}
-			set type [$wServCan type $utag]
-			if {[string equal $type "text"]} {
-			    
-			    # Extract the actual text. TclSpeech not foolproof!
-			    set theText [$wServCan itemcget $utag -text]
-			    if {[string match *${punct}* $theText]} {
-				catch {::UserActions::Speak $theText $prefs(voiceOther)}
-			    }
-			}
-		    }
-		}
+		::CanvasUtils::HandleCanvasDraw $wtop $instr
 	    }		
 	}
 	IDENTITY {
@@ -493,6 +385,7 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 	    
 	    set fileName [lindex $instr 0]
 	    set optList [lrange $instr 1 end]
+	    set opts [::ImageAndMovie::GetTclSyntaxOptsFromTransport $optList]
 	    set tempChannel($channel) 1
 	    
 	    if {$prefixCmd == "PUT"} {
@@ -500,12 +393,12 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 		# The problem is that we get a direct connection with
 		# PUT/GET request outside the Jabber framework.
 		if {[string equal $prefs(protocol) "jabber"]} {
-		    ::Jabber::HandlePutRequest $channel $fileName $optList
+		    ::Jabber::HandlePutRequest $channel $fileName $opts
 		} else {
 		    
 		    # Be sure to strip off any path. (this(path))??? Mac bug for /file?
 		    set fileName [file tail $fileName]
-		    ::GetFileIface::GetFile $wtop $channel $fileName $optList
+		    ::GetFileIface::GetFile $wtop $channel $fileName $opts
 		}
 	    } elseif {$prefixCmd == "GET"} {
 		
@@ -514,7 +407,7 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 		# 'PutFileToClient'.
 		
 		::PutFileIface::PutFileToClient $wtop $channel $ip \
-		  $fileName $optList
+		  $fileName $opts
 	    }		
 	}
 	"PUT NEW" {

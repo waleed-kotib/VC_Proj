@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.7 2003-09-13 06:39:25 matben Exp $
+# $Id: OOB.tcl,v 1.8 2003-09-21 13:02:12 matben Exp $
 
 package provide OOB 1.0
 
@@ -237,16 +237,16 @@ proc ::Jabber::OOB::Copy {jid url file id} {
 	return
     }
     set locals($out,local) $file
+    
+    # Be sure to set translation correctly for this MIME type.
+    # Should be auto detected by ::http::geturl!
+    set progCB [list [namespace current]::Progress $out]
+    set commandCB [list [namespace current]::Finished $jid $out $id]
     if {0 && [string equal $this(platform) "macintosh"]} {
 	set tmopts ""
     } else {
 	set tmopts [list -timeout $prefs(timeoutMillis)]
     }
-    
-    # Be sure to set translation correctly for this MIME type.
-    # Should be auto detected by ::http::geturl!
-    set progCB [list ::Jabber::OOB::Progress $out]
-    set commandCB [list ::Jabber::OOB::Finished $jid $out $id]
     
     if {[catch {eval {
 	::http::geturl $url -channel $out -progress $progCB -command $commandCB

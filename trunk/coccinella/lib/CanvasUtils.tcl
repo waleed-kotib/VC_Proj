@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.10 2003-09-13 06:39:25 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.11 2003-09-21 13:02:12 matben Exp $
 
 package provide CanvasUtils 1.0
 package require sha1pure
@@ -280,24 +280,24 @@ proc ::CanvasUtils::ReplaceUtag {str newUtag} {
 #       cmd         a canvas command without pathName.
 #       
 # Results:
-#       a canvas command without pathName
+#       a complete command
 
 proc ::CanvasUtils::GetUndoCommand {wtop cmd} {
-
+    
     set w [::UI::GetCanvasFromWtop $wtop]
     set undo {}
-
+    
     switch -- [lindex $cmd 0] {
 	coords {
 	    set utag [lindex $cmd 1]
-	    set undo [concat [list coords $utag] [$w coords $utag]]
+	    set canUndo [concat [list coords $utag] [$w coords $utag]]
 	}
 	create {
 	    set ind [lsearch -exact $cmd "-tags"]
 	    if {$ind > 0} {
 		set tags [lindex $cmd [expr $ind + 1]]
 		if {[regexp {([^ ]+/[0-9]+)} $tags match utag]} {
-		    set undo [list delete $utag]
+		    set canUndo [list delete $utag]
 		}
 	    }
 	}
@@ -307,11 +307,12 @@ proc ::CanvasUtils::GetUndoCommand {wtop cmd} {
 	    set ilast [lindex $cmd end]
 	    set thetext [$w itemcget $utag -text]
 	    set str [string range $thetext $ind $ilast]
-	    set undo [list insert $utag $ind $str]
+	    set canUndo [list insert $utag $ind $str]
 	}
 	delete {
 	    set utag [lindex $cmd 1]
 	    set type [$w type $utag]
+	    
 	    switch -- $type {
 		window {
 		    
@@ -319,7 +320,9 @@ proc ::CanvasUtils::GetUndoCommand {wtop cmd} {
 		    # We need to reconstruct how it was imported.
 		    set win [$w itemcget $utag -window]
 		    if {$win != ""} {
-			switch -- [winfo class $win] {
+			set winClass [winfo class $win]
+
+			switch -- $winClass {
 			    QTFrame {
 				set undo [::ImageAndMovie::QTImportCmd $w $utag]
 			    }
@@ -327,9 +330,9 @@ proc ::CanvasUtils::GetUndoCommand {wtop cmd} {
 				set undo [::ImageAndMovie::SnackImportCmd $w $utag]
 			    }
 			    default {
-				
-				# Here we may have code to call custom handlers.
-				
+
+				# Typically a plugin.
+				set undo [::ImageAndMovie::FrameImportCmd $w $utag]
 			    }
 			}
 		    }
@@ -337,22 +340,29 @@ proc ::CanvasUtils::GetUndoCommand {wtop cmd} {
 		default {
 		    set co [$w coords $utag]
 		    set opts [GetItemOpts $w $utag]
-		    set undo [concat [list create $type] $co $opts]
+		    set canUndo [concat [list create $type] $co $opts]
+		    #set canUndo [concat [list create $type] $co $opts  \
+		    #  [::CanvasUtils::GetStackingOption $w $utag]]
 		}
 	    }
 	}
 	insert {
 	    foreach {dum utag ind str} $cmd break
-	    set undo [list dchars $utag $ind [expr $ind + [string length $str]]]
+	    set canUndo [list dchars $utag $ind [expr $ind + [string length $str]]]
 	}
 	move {
 	    foreach {dum utag dx dy} $cmd break
-	    set undo [list move $utag [expr -$dx] [expr -$dy]]
+	    set canUndo [list move $utag [expr -$dx] [expr -$dy]]
 	}
 	lower - raise {
 	    set utag [lindex $cmd 1]
-	    set undo [GetStackingCmd $w $utag]
+	    set canUndo [GetStackingCmd $w $utag]
 	}
+    }
+    
+    # If we've got a canvas command, make a complete command.
+    if {[info exists canUndo]} {
+	set undo [list ::CanvasUtils::Command $wtop $canUndo]	
     }
     return $undo
 }
@@ -433,7 +443,7 @@ proc ::CanvasUtils::GetOnelinerForImage {w id args} {
     
     set type [$w type $id]
     if {![string equal $type "image"]} {
-	return -code error {must have an "image" item type}
+	return -code error "must have an \"image\" item type"
     }
     array set argsArr {
 	-uritype file
@@ -443,13 +453,13 @@ proc ::CanvasUtils::GetOnelinerForImage {w id args} {
     set wtop [::UI::GetToplevelNS $w]
     
     # The 'broken image' options are cached.
-    set cachedOpts [::UI::ItemCGet $wtop $id]
+    set cachedOpts [::CanvasUtils::ItemCGet $wtop $id]
     
     if {$cachedOpts == ""} {
 	set imageName [$w itemcget $id -image]
    
 	# Find out if zoomed.		
-	if {[regexp {(.+)_zoom(|-)([0-9]+)} $imageName match origImName  \
+	if {[regexp {(.+)_zoom(|-)([0-9]+)} $imageName match origImName \
 	  sign factor]} {
 	    
 	    # Find out the '-file' option from the original image.
@@ -458,7 +468,7 @@ proc ::CanvasUtils::GetOnelinerForImage {w id args} {
 	} else {
 	    set imageFile [$imageName cget -file]		    
 	}
-	lappend impArgs -width [image width $imageName]  \
+	lappend impArgs -width [image width $imageName] \
 	  -height [image height $imageName]
 	
 	switch -- $argsArr(-uritype) {
@@ -481,7 +491,7 @@ proc ::CanvasUtils::GetOnelinerForImage {w id args} {
     array set impArr $impArgs
     
     # -above & -below??? Be sure to overwrite any cached options.
-    array set impArr [::CanvasUtils::GetStackingOption $w $id]
+    #array set impArr [::CanvasUtils::GetStackingOption $w $id]
     array set impArr [list -tags [::CanvasUtils::GetUtag $w $id 1]]
     return "import [$w coords $id] [array get impArr]"
 }
@@ -1036,17 +1046,15 @@ proc ::CanvasUtils::FindBelowUtag {w id} {
 
 proc ::CanvasUtils::GetStackingOption {w id} {
     
-    # We could return both...
     # below before above since stacking order when saving to file.
     set opt {}
     set belowutag [FindBelowUtag $w $id]
     if {[string length $belowutag]} {
-	set opt [list -above $belowutag]
-    } else {
-	set aboveutag [FindAboveUtag $w $id]
-	if {[string length $aboveutag]} {
-	    set opt [list -below $aboveutag]
-	}
+	lappend opt -above $belowutag
+    }
+    set aboveutag [FindAboveUtag $w $id]
+    if {[string length $aboveutag]} {
+	lappend opt -below $aboveutag
     }
     return $opt
 }
@@ -1219,6 +1227,156 @@ proc ::CanvasUtils::CreateFontSizeMapping { } {
     foreach pt [array names fontSize2Points] {
 	set fontPoints2Size($fontSize2Points($pt)) $pt
     }
+}
+
+# CanvasUtils::HandleCanvasDraw --
+# 
+#       Handle a CANVAS drawing command from the server.
+#       
+# Arguments:
+#       wtop        toplevel window. ("." or ".main2." with extra dot!)
+#       instr       everything after CANVAS:
+#
+# Returns:
+#       none.
+
+proc ::CanvasUtils::HandleCanvasDraw {wtop instr} {
+    global  prefs canvasSafeInterp
+    
+    # Special chars.
+    set bs_ {\\}
+    set lb_ {\{}
+    set rb_ {\}}
+    set punct_ {[.,;?!]}
+
+    # Regular drawing commands in the canvas.
+    set wServCan [::UI::GetServerCanvasFromWtop $wtop]
+    
+    # If html sizes in text items, be sure to translate them into
+    # platform specific point sizes.
+    
+    if {$prefs(useHtmlSizes) && ([lsearch -exact $instr "-font"] >= 0)} {
+	set instr [::CanvasUtils::FontHtmlToPointSize $instr]
+    }
+    
+    # Careful, make newline (backslash) substitutions only for the command
+    # being eval'd, else the tcl interpretation may be screwed up.
+    # Fix special chars such as braces since they are parsed 
+    # when doing 'subst' below. Pad extra backslash for each '\{' and
+    # '\}' to protect them.
+    # Seems like an identity operation but is not!
+    
+    regsub -all "$bs_$lb_" $instr "$bs_$lb_" padinstr
+    regsub -all "$bs_$rb_" $padinstr "$bs_$rb_" padinstr
+    set bsinstr [subst -nocommands -novariables $padinstr]
+    
+    # Intercept the canvas command if delete to remove any markers
+    # *before* it is deleted! See below for other commands.
+    
+    set cmd [lindex $instr 0]
+    if {[string equal $cmd "delete"]} {
+	set utag [lindex $instr 1]
+	set id [$wServCan find withtag $utag]
+	$wServCan delete id$id
+    }
+    
+    # Find and register the undo command (and redo), and push
+    # on our undo/redo stack. Security ???
+    if {$prefs(privacy) == 0} {
+	set redo [list ::CanvasUtils::Command $wtop $instr]
+	set undo [::CanvasUtils::GetUndoCommand $wtop $instr]
+	undo::add [::UI::GetUndoToken $wtop] $undo $redo
+    }
+    
+    # The 'import' command is an exception case (for the future). 
+    if {[string equal $cmd "import"]} {
+	::ImageAndMovie::HandleImportCmd $wServCan $bsinstr
+    } else {
+	
+	# Make the actual canvas command, either straight or in the 
+	# safe interpreter.
+	if {$prefs(makeSafeServ)} {
+	    if {[catch {$canvasSafeInterp eval SafeCanvasDraw  \
+	      $wServCan $bsinstr} idnew]} {
+		puts stderr "--->error: did not understand: $idnew"
+		return
+	    }
+	} else {
+	    if {[catch {eval $wServCan $bsinstr} idnew]} {
+		puts stderr "--->error: did not understand: $idnew"
+		return
+	    }
+	}
+    }
+    
+    # Intercept the canvas command in certain cases:
+    # If moving a selected item, be sure to move the markers with it.
+    # The item can either be selected by remote client or here.
+    
+    if {[string equal $cmd "move"] ||  \
+      [string equal $cmd "coords"] || \
+      [string equal $cmd "scale"] ||  \
+      [string equal $cmd "itemconfigure"]} {
+	set utag [lindex $instr 1]
+	set id [$wServCan find withtag $utag]
+	set idsMarker [$wServCan find withtag id$id]
+	
+	# If we have selected the item in question.
+	if {[string length $idsMarker] > 0} {
+	    $wServCan delete id$id
+	    $wServCan dtag $id "selected"
+	    ::CanvasDraw::MarkBbox $wServCan 1 $id
+	}
+    } 
+    
+    # If text then speak up to last punct.
+    
+    if {$prefs(SpeechOn)} {
+	if {[string equal $cmd "create"] ||  \
+	  [string equal $cmd "insert"]} {
+	    if {[string equal $cmd "create"]} {
+		set utag $idnew
+	    } else {
+		set utag [lindex $instr 1]
+	    }
+	    set type [$wServCan type $utag]
+	    if {[string equal $type "text"]} {
+		
+		# Extract the actual text. TclSpeech not foolproof!
+		set theText [$wServCan itemcget $utag -text]
+		if {[string match *${punct_}* $theText]} {
+		    catch {::UserActions::Speak $theText $prefs(voiceOther)}
+		}
+	    }
+	}
+    }
+}
+
+# CanvasUtils::ItemSet, ItemCGet, ItemFree --
+#
+#       Handling cached info for items not set elsewhere.
+#       Automatically garbage collected.
+
+proc ::CanvasUtils::ItemSet {wtop id args} {
+    upvar ::${wtop}::itemopts itemopts
+
+    set itemopts($id) $args
+}
+
+proc ::CanvasUtils::ItemCGet {wtop id} {
+    upvar ::${wtop}::itemopts itemopts
+    
+    if {[info exists itemopts($id)]} {
+	return $itemopts($id)
+    } else {
+	return ""
+    }
+}
+
+proc ::CanvasUtils::ItemFree {wtop} {
+    upvar ::${wtop}::itemopts itemopts
+    
+    catch {unset itemopts}
 }
 
 #-------------------------------------------------------------------------------

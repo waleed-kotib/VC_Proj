@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: undo.tcl,v 1.1.1.1 2002-12-08 10:56:46 matben Exp $
+# $Id: undo.tcl,v 1.2 2003-09-21 13:02:12 matben Exp $
 
 package provide undo 0.1
 
@@ -101,7 +101,7 @@ proc undo::undo {token} {
     variable opts
     
     if {$stackPtr($token) <= 0} {
-	return -code error "Undo stack reached botton"
+	return -code error "Undo stack reached bottom"
     }
     incr stackPtr($token) -1
     set cmd [lindex $undoStack($token) $stackPtr($token)]

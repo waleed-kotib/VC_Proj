@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.20 2003-09-13 06:39:25 matben Exp $
+# $Id: Jabber.tcl,v 1.21 2003-09-21 13:02:12 matben Exp $
 #
 #  The $address is an ip name or number.
 #
@@ -1801,19 +1801,19 @@ proc ::Jabber::PutIPnumber {jid id} {
 # Arguments:
 #       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
 #       fileName    the path to the file to be put.
-#       'optList'   a list of 'key: value' pairs, resembling the html 
-#                   protocol for getting files, but where most keys correspond
-#                   to a valid "canvas create" option.
+#       opts        a list of '-key value' pairs, where most keys correspond 
+#                   to a valid "canvas create" option, and everything is on 
+#                   a single line.
 #       
 # Results:
 #       none.
 
-proc ::Jabber::PutFileAndSchedule {wtop fileName optList} {    
+proc ::Jabber::PutFileAndSchedule {wtop fileName opts} {    
     variable jidToIP
     variable jstate
     
     ::Jabber::Debug 2 "::Jabber::PutFileAndSchedule: \
-      wtop=$wtop, fileName=$fileName, optList='$optList'"
+      wtop=$wtop, fileName=$fileName, opts='$opts'"
     
     # Before doing anything check that the Send checkbutton is on. ???
     if {!$jstate($wtop,doSend)} {
@@ -1830,13 +1830,13 @@ proc ::Jabber::PutFileAndSchedule {wtop fileName optList} {
     set mime [::Types::GetMimeTypeForFileName $fileName]
     
     # Need to add jabber specific info to the 'optList', such as
-    # to:, from:, type:, thread: etc.
+    # -to, -from, -type, -thread etc.
     # 
     # -type and 'tojid' shall never be in conflict???
     foreach {key value} [::UI::ConfigureMain $wtop] {
 	switch -- $key {
 	    -type - -thread {
-		lappend optList [string trimleft $key -]: $value
+		lappend opts $key $value
 	    }
 	}
     }
@@ -1848,7 +1848,7 @@ proc ::Jabber::PutFileAndSchedule {wtop fileName optList} {
 	
 	# The 'tojid' is already complete with resource.
 	set allJid3 $tojid
-    	lappend optList from: $jstate(mejidres)
+    	lappend opts -from $jstate(mejidres)
     } else {
 	
 	# If 'tojid' is without a resource, it can be a room.
@@ -1865,7 +1865,7 @@ proc ::Jabber::PutFileAndSchedule {wtop fileName optList} {
 	    }
 	    
 	    # Be sure to have our room jid and not the real one.
-     	    lappend optList from: $meRoomJid
+     	    lappend opts -from $meRoomJid
 	} else {
 	    
 	    # Else put to resource with highest priority.
@@ -1877,7 +1877,7 @@ proc ::Jabber::PutFileAndSchedule {wtop fileName optList} {
 	    } else {
 		set allJid3 $tojid/$res
 	    }
-	    lappend optList from: $jstate(mejidres)
+	    lappend opts -from $jstate(mejidres)
 	}
     }
     
@@ -1893,8 +1893,8 @@ proc ::Jabber::PutFileAndSchedule {wtop fileName optList} {
 	    set avail [$jstate(roster) isavailable $jid3]
 	}
 	
-	# Each jid must get its own to: attribute.
-	set optjidList [concat $optList to: $jid3]
+	# Each jid must get its own -to attribute.
+	set optjidList [concat $opts -to $jid3]
 	
 	::Jabber::Debug 2 "   jid3=$jid3, avail=$avail"
 	
@@ -1915,14 +1915,14 @@ proc ::Jabber::PutFileAndSchedule {wtop fileName optList} {
 	    
 	    # We need to tell this jid to get this file from a server,
 	    # possibly as an OOB http transfer.
-	    array set optArr $optList
-	    if {[info exists optArr(Get-Url:)]} {
+	    array set optArr $opts
+	    if {[info exists optArr(-url)]} {
 		$jstate(jlib) oob_set $jid3 ::Jabber::OOB::SetCallback  \
-		  $optArr(Get-Url:)  \
+		  $optArr(-url)  \
 		  -desc {This file is part of a whiteboard conversation.\
 		  You were not online when I opened this file}
 	    } else {
-		puts "   missing optArr(Get-Url:)"
+		puts "   missing optArr(-url)"
 	    }
 	}
     }
@@ -1941,19 +1941,19 @@ proc ::Jabber::PutFileAndSchedule {wtop fileName optList} {
 # Arguments:
 #       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
 #       fileName    the path to the file to be put.
-#       'optList'   a list of 'key: value' pairs, resembling the html 
-#                   protocol for getting files, but where most keys correspond
-#                   to a valid "canvas create" option.
+#       opts        a list of '-key value' pairs, where most keys correspond 
+#                   to a valid "canvas create" option, and everything is on 
+#                   a single line.
 #       jid         fully qualified  "username@host/resource"
 #       
 # Results:
 
-proc ::Jabber::PutFile {wtop fileName mime optList jid} {
+proc ::Jabber::PutFile {wtop fileName mime opts jid} {
     global  prefs
     variable jidToIP
     variable jstate
     
-    ::Jabber::Debug 2 "::Jabber::PutFile: fileName=$fileName, optList='$optList', jid=$jid"
+    ::Jabber::Debug 2 "::Jabber::PutFile: fileName=$fileName, opts='$opts', jid=$jid"
  
     if {![info exists jidToIP($jid)]} {
 	puts "::Jabber::PutFile: Houston, we have a problem. \
@@ -1975,9 +1975,12 @@ proc ::Jabber::PutFile {wtop fileName mime optList jid} {
     # Get the remote (network) file name (no path, no uri encoding).
     set dstFile [::Types::GetFileTailAddSuffix $fileName]
 
+    # Translate tcl type '-key value' list to 'Key: value' option list.
+    set optList [::ImageAndMovie::GetTransportSyntaxOptsFromTcl $opts]
+
     if {[catch {
 	::putfile::put $fileName $jidToIP($jid) $prefs(remotePort)   \
-	  -mimetype $mime -timeout $prefs(timeoutMillis)                   \
+	  -mimetype $mime -timeout $prefs(timeoutMillis)             \
 	  -optlist $optList -filetail $dstFile                       \
 	  -progress ::PutFileIface::PutProgress                      \
 	  -command [list ::PutFileIface::PutCommand $wtop]
@@ -1995,14 +1998,14 @@ proc ::Jabber::PutFile {wtop fileName mime optList jid} {
 #       The problem is that we get a direct connection with
 #       PUT/GET request outside the Jabber framework.
 
-proc ::Jabber::HandlePutRequest {channel fileName optList} {
+proc ::Jabber::HandlePutRequest {channel fileName opts} {
         
     # The whiteboard must exist!
-    set wtop [::Jabber::WB::MakeWhiteboardExist $optList]
+    set wtop [::Jabber::WB::MakeWhiteboardExist $opts]
     
     # Be sure to strip off any path. (this(path))??? Mac bug for /file?
     set tail [file tail $fileName]
-    ::GetFileIface::GetFile $wtop $channel $tail $optList
+    ::GetFileIface::GetFile $wtop $channel $tail $opts
 }
 
 # Jabber::SetPrivateData --
@@ -2627,7 +2630,7 @@ proc ::Jabber::WB::NewWhiteboard {jid args} {
     }
     set isAvailable [$jstate(roster) isavailable $jid]
     
-    ::Jabber::Debug 2 "    isRoom=$isRoom, isAvailable=$isAvailable"
+    ::Jabber::Debug 2 "\tisRoom=$isRoom, isAvailable=$isAvailable"
     
     if {$isRoom} {
 	
@@ -2742,39 +2745,39 @@ proc ::Jabber::WB::GroupChatMsg {args} {
 #       Verifies that there exists a whiteboard for this message.
 #       
 # Arguments:
-#       optList
+#       opts
 #       
 # Results:
 #       $wtop; may create new toplevel whiteboard
 
-proc ::Jabber::WB::MakeWhiteboardExist {optList} {
+proc ::Jabber::WB::MakeWhiteboardExist {opts} {
 
+    array set optArr $opts
+    
     ::Jabber::Debug 2 "::Jabber::WB::MakeWhiteboardExist"
 
-    array set optArr $optList
-    
-    switch -- $optArr(type:) {
+    switch -- $optArr(-type) {
 	chat {
-	    set wtop [::UI::GetWtopFromJabberType chat $optArr(from:) \
-	      $optArr(thread:)]
+	    set wtop [::UI::GetWtopFromJabberType chat $optArr(-from) \
+	      $optArr(-thread)]
 	    if {$wtop == ""} {
-		set wtop [::Jabber::WB::NewWhiteboard $optArr(from:)  \
-		  -thread $optArr(thread:)]
+		set wtop [::Jabber::WB::NewWhiteboard $optArr(-from)  \
+		  -thread $optArr(-thread)]
 	    }
 	}
 	groupchat {
-	    if {![regexp {(^[^@]+@[^/]+)(/.*)?} $optArr(from:) match roomjid]} {
+	    if {![regexp {(^[^@]+@[^/]+)(/.*)?} $optArr(-from) match roomjid]} {
 		return -code error  \
-		  "The jid we got \"$optArr(from:)\" was not well-formed!"
+		  "The jid we got \"$optArr(-from)\" was not well-formed!"
 	    }
-	    set wtop [::UI::GetWtopFromJabberType groupchat $optArr(from:)]
+	    set wtop [::UI::GetWtopFromJabberType groupchat $optArr(-from)]
 	    if {$wtop == ""} {
 		set wtop [::Jabber::WB::NewWhiteboard $roomjid]
 	    }
 	}
 	default {
 	    # Normal message. Shall go in inbox ???????????
-	    set wtop [::UI::GetWtopFromJabberType normal $optArr(from:)]
+	    set wtop [::UI::GetWtopFromJabberType normal $optArr(-from)]
 	}
     }
     return $wtop
@@ -2787,19 +2790,19 @@ proc ::Jabber::WB::MakeWhiteboardExist {optList} {
 #       
 # Arguments:
 #       mime
-#       optList
+#       opts
 #       args        -file, -where; for importer proc.
 
-proc ::Jabber::WB::DispatchToImporter {mime optList args} {
+proc ::Jabber::WB::DispatchToImporter {mime opts args} {
         
     ::Jabber::Debug 2 "::Jabber::WB::DispatchToImporter"
 
-    array set optArr $optList
+    array set optArr $opts
 
     # Creates WB if not exists.
-    set wtop [::Jabber::WB::MakeWhiteboardExist $optList]
+    set wtop [::Jabber::WB::MakeWhiteboardExist $opts]
 
-    switch -- $optArr(type:) {
+    switch -- $optArr(-type) {
 	chat - groupchat {
 	    set display 1
 	}
@@ -2810,7 +2813,7 @@ proc ::Jabber::WB::DispatchToImporter {mime optList args} {
     
     if {$display && [::Plugins::HaveImporterForMime $mime]} {
 	set wCan [::UI::GetCanvasFromWtop $wtop]
-	eval {::ImageAndMovie::DoImport $wCan $optList} $args
+	eval {::ImageAndMovie::DoImport $wCan $opts} $args
     }
 }
 
@@ -2832,11 +2835,9 @@ proc ::Jabber::UI::Show {w args} {
     ::Jabber::Debug 2 "::Jabber::UI::Show w=$w, jstate(rostBrowseVis)=$jstate(rostBrowseVis)"
 
     if {$jstate(rostBrowseVis)} {
-	if {[winfo exists $w]} {
-	    wm deiconify $w
-	} else {
-	    ::Jabber::UI::Build $w
-	}
+	::Jabber::UI::Build $w
+	wm deiconify $w
+	raise $w
     } else {
 	catch {wm withdraw $w}
     }
@@ -2846,6 +2847,12 @@ proc ::Jabber::UI::Show {w args} {
 #
 #       A combination tabbed window with roster/agents/browser...
 #       Must be persistant since roster/browser etc. are built once.
+#       
+# Arguments:
+#       w         the real toplevel path
+#       
+# Results:
+#       $w
 
 proc ::Jabber::UI::Build {w} {
     global  this sysFont prefs wDlgs
@@ -2855,9 +2862,6 @@ proc ::Jabber::UI::Build {w} {
     upvar ::Jabber::jprefs jprefs
     variable jwapp
 
-    if {[winfo exists $w]} {
-	return
-    }
     ::Jabber::Debug 2 "::Jabber::UI::Build w=$w"
     
     if {$w != "."} {
@@ -2867,13 +2871,17 @@ proc ::Jabber::UI::Build {w} {
 	} else {
 	    
 	}
+	set wtop ${w}.
+    } else {
+	set wtop .
     }
+    
     set jwapp(wtopRost) $w
     wm title $w "The Coccinella"
     wm protocol $w WM_DELETE_WINDOW [list ::Jabber::UI::CloseRoster $w]
 
     # Build minimal menu for Jabber stuff.
-    set wmenu ${w}.menu
+    set wmenu ${wtop}menu
     set jwapp(wmenu) $wmenu
     menu $wmenu -tearoff 0
     if {[string match "mac*" $this(platform)] && $prefs(haveMenus)} {
@@ -2882,17 +2890,17 @@ proc ::Jabber::UI::Build {w} {
 	set haveAppleMenu 0
     }
     if {$haveAppleMenu} {
-	::UI::NewMenu ${w}. ${wmenu}.apple {}      "main,apple" normal
+	::UI::NewMenu $wtop ${wmenu}.apple {}      "main,apple" normal
     }
-    ::UI::NewMenu ${w}. ${wmenu}.file    mFile     "rost,file"  normal
+    ::UI::NewMenu $wtop ${wmenu}.file    mFile     "rost,file"  normal
     if {[string match "mac*" $this(platform)]} {
-	::UI::NewMenu ${w}. ${wmenu}.edit  mEdit   "min,edit"   normal
+	::UI::NewMenu $wtop ${wmenu}.edit  mEdit   "min,edit"   normal
     }
-    ::UI::NewMenu ${w}. ${wmenu}.jabber  mJabber   "rost,jabber" normal
+    ::UI::NewMenu $wtop ${wmenu}.jabber  mJabber   "rost,jabber" normal
     $w configure -menu $wmenu
         
     # Shortcut button part.
-    set frtop [frame ${w}.top -bd 1 -relief raised]
+    set frtop [frame ${wtop}top -bd 1 -relief raised]
     pack $frtop -side top -fill x
     ::UI::InitShortcutButtonPad $w $frtop 50
     ::UI::NewButton $w connect Connect $icons(btconnect) $icons(btconnectdis)  \
@@ -2913,37 +2921,42 @@ proc ::Jabber::UI::Build {w} {
 
     # Build bottom and up to handle clipping when resizing.
     # Jid entry with electric plug indicator.
-    set jwapp(elplug) ${w}.jid.icon
-    set jwapp(mystatus) ${w}.jid.stat
-    pack [frame ${w}.jid -relief raised -borderwidth 1]  \
+    set wbot ${wtop}jid
+    set jwapp(elplug) ${wbot}.icon
+    set jwapp(mystatus) ${wbot}.stat
+    set jwapp(myjid) ${wbot}.e
+    
+    pack [frame $wbot -relief raised -borderwidth 1]  \
       -side bottom -fill x -pady 0
     pack [label $jwapp(mystatus) -image [::Jabber::Roster::GetMyPresenceIcon]] \
       -side left -pady 0 -padx 4
-    pack [entry ${w}.jid.e -state disabled -width 0  \
-      -textvariable ::Jabber::jstate(mejid)] \
-      -side left -fill x -expand 1 -pady 0 -padx 0
-    pack [label ${w}.jid.size -image $icons(resizehandle)]  \
+    pack [label ${wbot}.size -image $icons(resizehandle)]  \
       -padx 0 -pady 0 -side right -anchor s
     pack [label $jwapp(elplug) -image $icons(contact_off)]  \
       -side right -pady 0 -padx 0
+    pack [entry $jwapp(myjid) -state disabled -width 0  \
+      -textvariable ::Jabber::jstate(mejid)] \
+      -side left -fill x -expand 1 -pady 0 -padx 0
     
     # Build status feedback elements.
-    pack [frame ${w}.st -relief raised -borderwidth 1]  \
+    set wstat ${wtop}st
+    set jwapp(statmess) ${wstat}.g.c
+
+    pack [frame ${wstat} -relief raised -borderwidth 1]  \
       -side bottom -fill x -pady 0
-    pack [frame ${w}.st.g -relief groove -bd 2]  \
+    pack [frame ${wstat}.g -relief groove -bd 2]  \
       -side top -fill x -padx 8 -pady 2
-    set jwapp(statmess) ${w}.st.g.c
     pack [canvas $jwapp(statmess) -bd 0 -highlightthickness 0 -height 14]  \
       -side left -pady 1 -padx 6 -fill x -expand true
     $jwapp(statmess) create text 0 0 -anchor nw -text {} -font $sysFont(s) \
       -tags stattxt
     
     # Notebook frame.
-    set frtbook ${w}.fnb
+    set frtbook ${wtop}fnb
     pack [frame $frtbook -bd 1 -relief raised] -fill both -expand 1    
     set nbframe [::mactabnotebook::mactabnotebook ${frtbook}.tn]
-    pack $nbframe -fill both -expand 1
     set jwapp(nbframe) $nbframe
+    pack $nbframe -fill both -expand 1
     
     # Make the notebook pages.
     # Start with the Roster page -----------------------------------------------
@@ -2957,6 +2970,7 @@ proc ::Jabber::UI::Build {w} {
     set minWidth [expr $shortBtWidth > 200 ? $shortBtWidth : 200]
     wm minsize $w $minWidth 360
     wm maxsize $w 420 2000
+    return $w
 }
 
 

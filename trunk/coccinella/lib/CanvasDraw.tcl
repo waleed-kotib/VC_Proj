@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasDraw.tcl,v 1.9 2003-09-13 06:39:25 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.10 2003-09-21 13:02:12 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 
@@ -923,12 +923,12 @@ proc ::CanvasDraw::FinalizeBox {w x y shift type {mark 0}} {
 	    set utag [::CanvasUtils::NewUtag]
 	}
 	if {$state(fill) == 1} {
-	    append extras " -fill $state(fgCol)"
+	    lappend extras -fill $state(fgCol)
 	}
 	set cmd "create $type $boxOrig $x $y	\
 	  -tags {$type $utag} -outline $state(fgCol)  \
 	  -width $state(penThick) $extras"
-	set undocmd "delete $utag"
+	set undocmd [list delete $utag]
 	set redo [list ::CanvasUtils::Command $wtop $cmd]
 	set undo [list ::CanvasUtils::Command $wtop $undocmd]
 	eval $redo
@@ -2008,19 +2008,23 @@ proc ::CanvasDraw::DeleteItem {w x y {id current} {where all}} {
     Debug 4 "DeleteItem:: w=$w, x=$x, y=$y, id=$id, where=$where"
 
     set wtop [::UI::GetToplevelNS $w]
-    set cmdList {}
-    set undoList {}
+    
+    # List of canvas commands without widget path.
+    set canCmdList {}
+    
+    # List of complete commands.
+    set redoCmdList {}
+    set undoCmdList {}
+    
+    set utagList {}
     set needDeselect 0
     
-    # Get item.
+    # Get item's utag in a list.
     switch -- $id {
 	current {
 	    set utag [::CanvasUtils::GetUtag $w current]
 	    if {[string length $utag] > 0} {
-		lappend cmdList [list delete $utag]
-		set opts [::CanvasUtils::GetItemOpts $w $id]
-		set undocmd "create [$w type $id] [$w coords $id] $opts"
-		lappend undoList $undocmd [::CanvasUtils::GetStackingCmd $w $utag]
+		lappend utagList $utag
 	    }
 	}
 	selected {
@@ -2029,11 +2033,7 @@ proc ::CanvasDraw::DeleteItem {w x y {id current} {where all}} {
 	    foreach id [$w find withtag selected] {
 		set utag [::CanvasUtils::GetUtag $w $id]
 		if {[string length $utag] > 0} {
-		    lappend cmdList [list delete $utag]
-		    set opts [::CanvasUtils::GetItemOpts $w $id]
-		    set undocmd "create [$w type $id] [$w coords $id] $opts"
-		    lappend undoList $undocmd  \
-		      [::CanvasUtils::GetStackingCmd $w $utag]
+		    lappend utagList $utag
 		}
 	    }
 	    set needDeselect 1
@@ -2042,60 +2042,51 @@ proc ::CanvasDraw::DeleteItem {w x y {id current} {where all}} {
 	    set id [lindex [$w find closest $x $y 3] 0]
 	    set utag [::CanvasUtils::GetUtag $w $id]
 	    if {[string length $utag] > 0} {
-	    
-		# Delete both the window item and the window (with subwindows).
-		lappend cmdList [list delete $utag]
-		set win [$w itemcget $utag -window]
-		set extraCmd [list destroy $win]
-		
-		# We need to reconstruct how it was imported.
-		switch -- [winfo class $win] {
-		    QTFrame {
-			set extraUndo [::ImageAndMovie::QTImportCmd $w $utag]
-		    }
-		    SnackFrame {
-			set extraUndo [::ImageAndMovie::SnackImportCmd $w $utag]
-		    }
-		    default {
-			# ?
-		    }
-		}
+		lappend utagList $utag
 	    }
 	}
-	window {
-	    
-	    # Here we may have code to call custom handlers.
-	    
+	window {	    
+	    # Here we may have code to call custom handlers?	    
 	}
 	default {
 	
 	    # 'id' is an actual item number.
 	    set utag [::CanvasUtils::GetUtag $w $id]
 	    if {[string length $utag] > 0} {
-		lappend cmdList [list delete $utag]
-		set opts [::CanvasUtils::GetItemOpts $w $id]
-		set undocmd "create [$w type $id] [$w coords $id] $opts"
-		lappend undoList $undocmd [::CanvasUtils::GetStackingCmd $w $utag]
+		lappend utagList $utag
 	    }
 	}
     }
-    if {[llength $cmdList] == 0} {
+    if {[llength $utagList] == 0} {
 	return
     }
-    if {[llength $cmdList] > 0} {
-	set redo [list ::CanvasUtils::CommandList $wtop $cmdList $where]
-	if {[info exists extraCmd]} {
-	    set redo [list ::CanvasDraw::EvalCommandList [list $redo $extraCmd]]
+    
+    foreach utag $utagList {
+	lappend canCmdList [list delete $utag]
+	if {[string equal [$w type $utag] "window"]} {
+	    set win [$w itemcget $utag -window]
+	    lappend redoCmdList [list destroy $win]		
 	}
+	lappend undoCmdList [::CanvasUtils::GetUndoCommand $wtop  \
+	  [list delete $utag]]
     }
-    if {[llength $undoList] > 0} {
-	set undo [list ::CanvasUtils::CommandList $wtop $undoList $where]
-	if {[info exists extraUndo]} {
-	    set undo [list ::CanvasDraw::EvalCommandList [list $undo $extraUndo]]
-	}
+    if {[llength $canCmdList] == 0} {
+	return
+    }
+    #puts "canCmdList=$canCmdList"
+    
+    # Manufacture complete commands.
+    if {[llength $canCmdList] > 0} {
+	set canRedo [list ::CanvasUtils::CommandList $wtop $canCmdList $where]
     } else {
-	set undo [list ::CanvasDraw::EvalCommandList [list $extraUndo]]
+	set canRedo {}
     }
+    set redo [list ::CanvasDraw::EvalCommandList  \
+      [concat [list $canRedo] $redoCmdList]]
+    set undo [list ::CanvasDraw::EvalCommandList $undoCmdList]
+
+    #puts "redo=$redo"
+    #puts "undo=$undo"
     eval $redo
     undo::add [::UI::GetUndoToken $wtop] $undo $redo
     
@@ -2108,17 +2099,33 @@ proc ::CanvasDraw::DeleteItem {w x y {id current} {where all}} {
 # CanvasDraw::DeleteFrame --
 # 
 #       Generic binding for deleting a frame that typically contains
-#       something from a plugin.
+#       something from a plugin. 
+#       Note that this is trigger by the frame's event handler and not the 
+#       canvas!
+#       
+# Arguments:
+#       w      the frame widget.
+#       x,y    the mouse coordinates.
+#       where    "all": erase this canvas and all others.
+#                "remote": erase only client canvases.
+#                "local": erase only own canvas.
+#       
+# Results:
+#       none
 
 proc ::CanvasDraw::DeleteFrame {wcan wframe x y {where all}} {
-        
-    # Fix x and y.
+    
+    ::Debug 2 "::CanvasDraw::DeleteFrame wframe=$wframe, x=$x, y=$y"
+    
+    # Fix x and y (frame to canvas coordinates).
     set x [$wcan canvasx [expr [winfo x $wframe] + $x]]
     set y [$wcan canvasx [expr [winfo y $wframe] + $y]]
     set wtop [::UI::GetToplevelNS $wcan]
-    set cmdList {}
-    set undoList {}
-
+    set canCmdList {}
+    set canUndoList {}
+    set undoCmdList {}
+    
+    # BAD solution...
     set id [lindex [$wcan find closest $x $y 3] 0]
     set utag [::CanvasUtils::GetUtag $wcan $id]
     if {$utag == ""} {
@@ -2126,14 +2133,18 @@ proc ::CanvasDraw::DeleteFrame {wcan wframe x y {where all}} {
     }
     
     # Delete both the window item and the window (with subwindows).
-    lappend cmdList [list delete $utag]
+    lappend canCmdList [list delete $utag]
     set extraCmd [list destroy $wframe]
     
-    # Undo missing here...
-
-    set redo [list ::CanvasUtils::CommandList $wtop $cmdList $where]
+    set redo [list ::CanvasUtils::CommandList $wtop $canCmdList $where]
     set redo [list ::CanvasDraw::EvalCommandList [list $redo $extraCmd]]
-    eval $redo    
+        
+    # We need to reconstruct how it was imported.
+    set undo [::CanvasUtils::GetUndoCommand $wtop [list delete $utag]]
+    puts "redo=$redo"
+    puts "undo=$undo"
+    eval $redo
+    undo::add [::UI::GetUndoToken $wtop] $undo $redo
 }
 
 # CanvasDraw::MarkBbox --
@@ -2571,9 +2582,9 @@ proc ::CanvasDraw::ThreePointRadius {p} {
 #       A utility function to evaluate more than a single command.
 #       Useful for the undo/redo implementation.
 
-proc ::CanvasDraw::EvalCommandList {cmdList} {
+proc ::CanvasDraw::EvalCommandList {canCmdList} {
     
-    foreach cmd $cmdList {
+    foreach cmd $canCmdList {
 	eval $cmd
     }
 }

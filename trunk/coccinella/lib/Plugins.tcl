@@ -14,7 +14,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Plugins.tcl,v 1.5 2003-08-23 07:19:16 matben Exp $
+# $Id: Plugins.tcl,v 1.6 2003-09-21 13:02:12 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -887,6 +887,17 @@ proc ::Plugins::GetImportProcForPlugin {name} {
     }
 }
 
+proc ::Plugins::GetImportProcForWinClass {winClass} {
+    variable plugin
+    
+    if {[info exists plugin($winClass,importProc)] &&  \
+      [string length $plugin($winClass,importProc)]} {
+	return $plugin($winClass,importProc)
+    } else {
+	return -code error "No import procedure found for window class \"$winClass\""
+    }
+}
+
 proc ::Plugins::SetDoWhatForMime {mime action} {
     variable mimeTypeDoWhat
     
@@ -1125,6 +1136,7 @@ proc ::Plugins::Register {name defList canvasBindList} {
     variable canvasbinds
     
     ::Debug 2 "::Plugins::Register name=$name"
+    
     set defListDefaults {\
       type          external          \
       desc          ""                \
@@ -1144,6 +1156,7 @@ proc ::Plugins::Register {name defList canvasBindList} {
     }
     if {[info exists plugin($name,winClass)]} {
 	set winClass $plugin($name,winClass)
+	set plugin($winClass,importProc) $plugin($name,importProc)
 	set plugin($winClass,saveProc) $plugin($name,saveProc)
     }
     

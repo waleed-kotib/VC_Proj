@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UserActions.tcl,v 1.13 2003-09-13 06:39:25 matben Exp $
+# $Id: UserActions.tcl,v 1.14 2003-09-21 13:02:12 matben Exp $
 
 namespace eval ::UserActions:: {
     
@@ -605,7 +605,7 @@ proc ::UserActions::DoPutCanvas {w {toIPnum all}} {
 proc ::UserActions::DoGetCanvas {wtop} {
     
     # The dialog to select remote client.
-    set getCanIPNum [::GetCanvas::GetCanvas .getcan]
+    set getCanIPNum [::Dialogs::GetCanvas .getcan]
     Debug 2 "DoGetCanvas:: getCanIPNum=$getCanIPNum"
 
     if {$getCanIPNum == ""} {
@@ -750,7 +750,7 @@ proc ::UserActions::DoCloseWindow { } {
 #       boolean, qid quit or not
 
 proc ::UserActions::DoQuit {args} {
-    global  prefs specialMacPrefPath this
+    global  prefs this
     
     array set argsArr {
 	-warning      0
@@ -764,20 +764,24 @@ proc ::UserActions::DoQuit {args} {
 	}
     }
     
-    catch ::TinyHttpd::Stop
+    catch ::tinyhttpd::stop
 
     # Before quitting, save whiteboard preferences and geom state. 
-    if {[wm state .] == "normal"} {
-	::UI::SaveWhiteboardState .
+    set wbList [::UI::GetAllWhiteboards]
+    if {[llength $wbList] > 0} {
+	set wtop [::UI::GetToplevelNS [lindex $wbList 0]]
+	::UI::SaveWhiteboardState $wtop
+	
+	# P2p needs to be saved without extra entries.
 	if {![string equal $prefs(protocol) "jabber"]} {
-	    ::UI::SaveCleanWhiteboardDims .
+	    ::UI::SaveCleanWhiteboardDims $wtop
 	}
     }
-    
+        
     # If we used 'Edit/Revert To/Application Defaults' be sure to reset...
     set prefs(firstLaunch) 0
         
-    # If we are a jabber client, put us unavailable etc.
+    # If we are a jabber client, put us unavailable, logout, etc.
     if {[string equal $prefs(protocol) "jabber"]} {
 	::Jabber::EndSession
     }
@@ -785,22 +789,7 @@ proc ::UserActions::DoQuit {args} {
     # Delete widgets with sounds.
     ::Sounds::Free
     ::Dialogs::Free
- 
-    # A workaround for the 'info script' bug on MacTk 8.3
-    # Work on a temporary file and switch later.
-    if {[string equal $this(platform) "macintosh"] && \
-      [info exists specialMacPrefPath]} {
-	set tmpFile ${specialMacPrefPath}.tmp
-	if {![catch {open $tmpFile w} fid]} {
-	    puts $fid "!\n!   Install path for the Whiteboard application."
-	    puts $fid "!   The data written at: [clock format [clock seconds]]\n!"
-	    puts $fid [format "%-24s\t%s" *thisPath: $this(path)]
-	    close $fid
-	    catch {file rename -force $tmpFile $specialMacPrefPath}
-	    file attributes $specialMacPrefPath -type pref
-	}
-    }
-    
+     
     # Get dialog window geometries. Some jabber dialogs special.
     set prefs(winGeom) {}
     foreach win $prefs(winGeomList) {

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Example.tcl,v 1.5 2003-08-23 07:19:17 matben Exp $
+# $Id: Example.tcl,v 1.6 2003-09-21 13:02:12 matben Exp $
 
 
 namespace eval ::Example:: {
@@ -90,9 +90,9 @@ proc ::Example::Import {wcan fileName optListVar args} {
     }
     
     # Extract coordinates and tags which must be there. error checking?
-    foreach {x y} $optArr(coords:) break
-    if {[info exists optArr(tags:)]} {
-	set useTag $optArr(tags:)
+    foreach {x y} $optArr(-coords) break
+    if {[info exists optArr(-tags)]} {
+	set useTag $optArr(-tags)
     } else {
 	set useTag [::CanvasUtils::NewUtag]
     }
@@ -110,7 +110,7 @@ proc ::Example::Import {wcan fileName optListVar args} {
     set locals(id2file,$id) $fileName
 
     # We may let remote clients know our size.
-    lappend optList "width:" [winfo reqwidth $wbt] "height:" [winfo reqheight $wbt]
+    lappend optList -width [winfo reqwidth $wbt] -height [winfo reqheight $wbt]
     
     # Success.
     return ""
