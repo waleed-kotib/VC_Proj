@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: VCard.tcl,v 1.12 2004-01-13 11:37:50 matben Exp $
+# $Id: VCard.tcl,v 1.13 2004-01-23 08:57:00 matben Exp $
 
 package provide VCard 1.0
 
@@ -157,8 +157,11 @@ proc ::VCard::Build {nstoken} {
     set type $priv(type)
     
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
-    wm title $w [::msgcat::mc {vCard Info}]
-
+    if {$type == "own"} {
+	wm title $w [::msgcat::mc {vCard Info}]
+    } else {
+	wm title $w "[::msgcat::mc {vCard Info}]: $jid"
+    }
     set priv(vcardjid) $jid
     
     # Global frame.
@@ -313,27 +316,28 @@ proc ::VCard::Build {nstoken} {
     }
         
     # Button part.
-    frame $w.frbot -borderwidth 0
+    pack [frame $w.frall.frbot -borderwidth 0]  \
+      -side top -fill x -expand 1 -padx 8 -pady 6
+    set fr $w.frall.frbot
     if {$type == "own"} {
-        pack [button $w.btsave -text [::msgcat::mc Save] -width 8  \
+        pack [button $fr.btsave -text [::msgcat::mc Save] -width 8  \
           -default active -command [list [namespace current]::SetVCard $nstoken]] \
-          -in $w.frbot -side right -padx 5 -pady 5
-        pack [button $w.btcancel -text [::msgcat::mc Cancel] -width 8   \
+	  -side right -padx 5 -pady 5
+        pack [button $fr.btcancel -text [::msgcat::mc Cancel]  \
           -command [list [namespace current]::Close $nstoken]]  \
-          -in $w.frbot -side right -padx 5 -pady 5
+	  -side right -padx 5 -pady 5
     } else {
-        pack [button $w.btcancel -text [::msgcat::mc Close] -width 8 \
+        pack [button $fr.btcancel -text [::msgcat::mc Close] \
           -command [list [namespace current]::Close $nstoken]]  \
-          -in $w.frbot -side right -padx 5 -pady 5
+	  -side right -padx 5 -pady 5
     }
-    pack $w.frbot -side top -fill both -expand 1 -in $frall -padx 8 -pady 6
 
     set priv(wemails)  $wemails
     set priv(wdesctxt) $wdesctxt
     
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jvcard)]]
     if {$nwin == 1} {
-	::UI::SetWindowGeometry $w $wDlgs(jvcard)
+	::UI::SetWindowPosition $w $wDlgs(jvcard)
     }
     wm resizable $w 0 0
     focus $w

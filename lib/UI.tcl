@@ -7,12 +7,16 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.43 2004-01-13 14:50:21 matben Exp $
+# $Id: UI.tcl,v 1.44 2004-01-23 08:59:23 matben Exp $
 
 package require entrycomp
 
 
 namespace eval ::UI:: {
+
+    # Icons
+    option add *buttonOKImage            buttonok       widgetDefault
+    option add *buttonCancelImage        buttoncancel   widgetDefault
 
     variable accelBindsToMain {}
     
@@ -38,7 +42,7 @@ proc ::UI::Init {} {
         
     # Get icons.
     set icons(brokenImage) [image create photo -format gif  \
-      -file [file join $this(path) images brokenImage.gif]]	
+      -file [file join $this(imagePath) brokenImage.gif]]	
     
     # Icons for the mailbox.
     set icons(readMsg) [image create photo -data {
@@ -57,7 +61,11 @@ B2aaopAbmn4hMBYH7NGskmi5kiYwIAwCgJWNUdgkGBuBACBNhnyb4IawtWaY
 QJ2GO/YCGGi0MDqtKnccohG5stgtiLx+z+8jIgA7	
 }]
     set icons(wboard) [image create photo -format gif \
-      -file [file join $this(path) images wb.gif]]
+      -file [file join $this(imagePath) wb.gif]]
+    
+    # Standard button icons.
+    ::Theme::GetImage [option get . buttonOKImage {}] -keepname 1
+    ::Theme::GetImage [option get . buttonCancelImage {}] -keepname 1
     
     
     # Smiley icons. The "short" types.
@@ -821,16 +829,16 @@ proc ::UI::MegaDlgMsgAndEntry {title msg label varName btcancel btok} {
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
     pack $frbot  -side bottom -fill x -padx 10 -pady 8
-    pack [button $frbot.btok -text $btok -width 8  \
+    pack [button $frbot.btok -text $btok  \
       -default active -command [list set [namespace current]::finmega 1]] \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcan -text $btcancel -width 8  \
+    pack [button $frbot.btcancel -text $btcancel -width 8  \
       -command [list set [namespace current]::finmega 0]]  \
       -side right -padx 5 -pady 5  
     
     wm resizable $w 0 0
     bind $w <Return> [list $frbot.btok invoke]
-    bind $w <Escape> [list $frbot.btcan invoke]
+    bind $w <Escape> [list $frbot.btcancel invoke]
     
     # Grab and focus.
     set oldFocus [focus]

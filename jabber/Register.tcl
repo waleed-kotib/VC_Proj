@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.10 2004-01-14 14:27:30 matben Exp $
+# $Id: Register.tcl,v 1.11 2004-01-23 08:56:25 matben Exp $
 
 package provide Register 1.0
 
@@ -87,16 +87,16 @@ proc ::Jabber::Register::Register {args} {
 
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btconn -text [::msgcat::mc New] -width 8 -default active \
+    pack [button $frbot.btok -text [::msgcat::mc New] -default active \
       -command [list [namespace current]::Doit $w]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8   \
+    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
       -command [list [namespace current]::Cancel $w]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
     
     wm resizable $w 0 0
-    #bind $w <Return> "$frbot.btconn invoke"
+    #bind $w <Return> "$frbot.btok invoke"
     
     # Grab and focus.
     set oldFocus [focus]
@@ -419,7 +419,7 @@ proc ::Jabber::GenRegister::BuildRegister {args} {
     pack [button $wbtregister -text [::msgcat::mc Register] -width 8 -state disabled \
       -command [namespace current]::DoRegister]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
+    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
       -command [list [namespace current]::Cancel $w]]  \
       -side right -padx 5 -pady 5
     pack [::chasearrows::chasearrows $wsearrows -size 16] \
@@ -551,7 +551,7 @@ proc ::Jabber::GenRegister::Simple {w args} {
     pack [button $wbtregister -text [::msgcat::mc Register] \
       -default active -command [namespace current]::DoSimple]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
+    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
       -command [list [namespace current]::Cancel $w]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6

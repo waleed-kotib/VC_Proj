@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.36 2004-01-14 14:27:30 matben Exp $
+# $Id: GroupChat.tcl,v 1.37 2004-01-23 08:54:59 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -335,10 +335,10 @@ proc ::Jabber::GroupChat::BuildEnter {args} {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btconn -text [::msgcat::mc Enter] -width 8 -default active \
+    pack [button $frbot.btok -text [::msgcat::mc Enter] -default active \
       -command [list [namespace current]::DoEnter $token]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btexit -text [::msgcat::mc Cancel] -width 8   \
+    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]   \
       -command [list [namespace current]::Cancel $token]]  \
       -side right -padx 5 -pady 5  
     pack $frbot -side bottom -fill x
@@ -346,7 +346,7 @@ proc ::Jabber::GroupChat::BuildEnter {args} {
     # Grab and focus.
     set oldFocus [focus]
     focus $w
-    bind $w <Return> [list $frbot.btconn invoke]
+    bind $w <Return> [list $frbot.btok invoke]
     
     # Wait here for a button press and window to be destroyed.
     tkwait window $w
@@ -468,7 +468,7 @@ proc ::Jabber::GroupChat::GotMsg {body args} {
 	set clockFormat [option get $w clockFormat {}]
 	if {$clockFormat != ""} {
 	    set theTime [clock format [clock seconds] -format $clockFormat]
-	    set txt "$theTime <$nick>"
+	    set txt "\[$theTime\] <$nick>"
 	} else {
 	    set txt <$nick>
 	}
@@ -489,7 +489,7 @@ proc ::Jabber::GroupChat::GotMsg {body args} {
 	}
 	
 	# Run display hooks (speech).
-	eval {hooks::run displayGroupChatMessageHook $body} $args
+	eval {::hooks::run displayGroupChatMessageHook $body} $args
     }
 }
 
@@ -545,10 +545,6 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     }
     wm title $w $tittxt
     
-    # Toplevel menu for mac only.
-    if {[string match "mac*" $this(platform)]} {
-	#$w configure -menu [::Jabber::UI::GetRosterWmenu]
-    }
     set fontS [option get . fontSmall {}]
     set fontSB [option get . fontSmallBold {}]
     set bg [option get . backgroundGeneral {}]
@@ -573,10 +569,10 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btsnd -text [::msgcat::mc Send] -width 8  \
+    pack [button $frbot.btok -text [::msgcat::mc Send]  \
       -default active -command [list [namespace current]::Send $roomJid]] \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btexit -text [::msgcat::mc Exit] -width 8   \
+    pack [button $frbot.btcancel -text [::msgcat::mc Exit]  \
       -command [list [namespace current]::Exit $roomJid]]  \
       -side right -padx 5 -pady 5  
     pack [::Jabber::UI::SmileyMenuButton $frbot.smile $wtextsnd]  \
@@ -628,7 +624,7 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     pack $frbot -side bottom -fill x -padx 10 -pady 8
     
     # Keep track of all buttons that need to be disabled on logout.
-    set locals($roomJid,allBts) [list $frbot.btsnd $frbot.btexit $wpopup]
+    set locals($roomJid,allBts) [list $frbot.btok $frbot.btcancel $wpopup]
     
     # Header fields.
     set frtop [frame $w.frall.frtop -borderwidth 0]
@@ -776,6 +772,9 @@ proc ::Jabber::GroupChat::ConfigureTextTags {w wtext} {
     foreach spec $groupChatOptions {
 	foreach {tag optName resName resClass} $spec break
 	set value [option get $w $resName $resClass]
+	if {[string length $jprefs(chatFont)] && [string equal $optName "-font"]} {
+	    set value $chatFont
+	}
 	if {[string length $value]} {
 	    lappend opts($tag) $optName $value
 	}   

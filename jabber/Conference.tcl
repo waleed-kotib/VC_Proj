@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Conference.tcl,v 1.7 2004-01-14 14:27:30 matben Exp $
+# $Id: Conference.tcl,v 1.8 2004-01-23 08:54:25 matben Exp $
 
 package provide Conference 1.0
 
@@ -167,7 +167,7 @@ proc ::Jabber::Conference::BuildEnter {args} {
     pack [button $wbtenter -text [::msgcat::mc Enter] -width 8 -state disabled \
       -command [list [namespace current]::DoEnter $token]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
+    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
       -command [list [namespace current]::CancelEnter $token]]  \
       -side right -padx 5 -pady 5
     pack [::chasearrows::chasearrows $wsearrows -size 16] \
@@ -450,7 +450,7 @@ proc ::Jabber::Conference::BuildCreate {args} {
     pack [button $wbtenter -text [::msgcat::mc Create] -width 8 -state disabled \
       -command [list [namespace current]::DoCreate $token]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
+    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
       -command [list [namespace current]::CancelCreate $token]]  \
       -side right -padx 5 -pady 5
     pack [::chasearrows::chasearrows $wsearrows -size 16] \

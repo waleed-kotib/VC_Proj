@@ -430,6 +430,7 @@
 ::msgcat::mcset en {Search Service}
 ::msgcat::mcset en {Search Specifications}
 ::msgcat::mcset en {Select Font}
+::msgcat::mcset en {Send File}
 ::msgcat::mcset en {Send Live}
 ::msgcat::mcset en {Server Info}
 ::msgcat::mcset en {Service server}

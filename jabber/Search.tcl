@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Search.tcl,v 1.8 2004-01-14 14:27:30 matben Exp $
+# $Id: Search.tcl,v 1.9 2004-01-23 08:56:31 matben Exp $
 
 package provide Search 1.0
 
@@ -80,7 +80,7 @@ proc ::Jabber::Search::Build {args} {
     pack [button $wbtsearch -text [::msgcat::mc Search] -width 8 -state disabled \
       -command [namespace current]::DoSearch]  \
       -side right -padx 5 -pady 2
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
+    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
       -command "destroy $w"]  \
       -side right -padx 5 -pady 2
     pack [::chasearrows::chasearrows $wsearrows -size 16] \

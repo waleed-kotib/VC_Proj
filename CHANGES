@@ -8,12 +8,15 @@ Coccinella-0.94.7 (04????): 	Short summary --
 
 	- separating actual whiteboard code from rest.
 	- uses resource database for everything, also images
-	- chat dialog rewritten
+	- chat dialog rewritten; new buttons, jabber:x:event support
 	- using a hooks mechanism to handle callbacks in a more
 	  modular way
   	- user profiles rewritten from scratch
 	- alert sounds part rewritten; added a few more sound events;
           added possiblity to use sound sets
+	- reworked tabbed notebook interface
+	- 
+
 
 Coccinella-0.94.6 (03????): 	Short summary --
 

@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  
-# $Id: mactabnotebook.tcl,v 1.9 2004-01-20 14:20:43 matben Exp $
+# $Id: mactabnotebook.tcl,v 1.10 2004-01-23 08:54:23 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -182,13 +182,13 @@ proc ::mactabnotebook::Init { } {
     # tabbackground       #848484 - #949494
     option add *MacTabnotebook.activeForegroundAqua    #3a3a3a      widgetDefault
     option add *MacTabnotebook.activeTabBackgroundAqua #bbbbbb      widgetDefault
-    option add *MacTabnotebook.margin1Aqua             0            widgetDefault
+    option add *MacTabnotebook.margin1Aqua             2            widgetDefault
     option add *MacTabnotebook.margin2Aqua             0            widgetDefault
     option add *MacTabnotebook.tabBackgroundAqua       #8a8a8a      widgetDefault    
     option add *MacTabnotebook.tabOutlineAqua          #575757      widgetDefault    
     option add *MacTabnotebook.backgroundAqua          #bebebe      widgetDefault
     option add *MacTabnotebook.foregroundAqua          #3a3a3a      widgetDefault    
-    option add *MacTabnotebook.yMargin1Aqua            1            widgetDefault
+    option add *MacTabnotebook.yMargin1Aqua            6            widgetDefault
     
     # Winxp:
     # taboutline          #a0b4bf

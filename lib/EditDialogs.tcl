@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: EditDialogs.tcl,v 1.7 2004-01-13 14:50:21 matben Exp $
+# $Id: EditDialogs.tcl,v 1.8 2004-01-23 08:58:28 matben Exp $
 
 
 #       ::EditShortcuts:: implements dialogs for editing shortcuts. 
@@ -112,7 +112,7 @@ proc ::EditShortcuts::EditShortcuts {w nameOfShortcutList} {
       -command [list [namespace current]::DoSaveEditedShortcuts   \
       $nameOfShortcutList]]   \
       -side right -padx 5 -pady 5
-    pack [button $w.frbot.bt2 -text [::msgcat::mc Cancel] -width 8   \
+    pack [button $w.frbot.btcancel -text [::msgcat::mc Cancel]  \
       -command [list [namespace current]::DoCancel $nameOfShortcutList]]  \
       -side right -padx 5 -pady 5
     
@@ -272,7 +272,7 @@ proc ::EditShortcuts::AddOrEditShortcuts {what nameOfShortsCopy indShortcuts  \
       -command "[namespace current]::PushBtAddOrEditShortcut $what  \
       $nameOfShortsCopy $indShortcuts \[$frtot.ent1 get] \[$frtot.ent2 get] "
     pack $w.frbot.bt1 -side right -padx 5 -pady 5
-    pack [button $w.frbot.bt2 -text [::msgcat::mc Cancel] -width 8  \
+    pack [button $w.frbot.btcancel -text [::msgcat::mc Cancel]  \
       -command "set [namespace current]::finAdd 0"]  \
       -side right -padx 5 -pady 5
     

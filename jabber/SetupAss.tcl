@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: SetupAss.tcl,v 1.17 2004-01-05 15:00:32 matben Exp $
+# $Id: SetupAss.tcl,v 1.18 2004-01-23 08:56:48 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -195,12 +195,12 @@ proc ::Jabber::SetupAss::ServersDlg {w} {
     pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
        
     # Button part.
-    set wbservbt $w.frall.frbot.btset
+    set wbservbt $w.frall.frbot.btok
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $wbservbt -text [::msgcat::mc Set] -default active -width 8 \
+    pack [button $wbservbt -text [::msgcat::mc Set] -default active \
       -state disabled -command [list [namespace current]::ServSet $w]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
+    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
       -command [list [namespace current]::ServCancel $w]] \
       -side right -padx 5 -pady 5
     pack $frbot -side bottom -fill both -padx 8 -pady 6

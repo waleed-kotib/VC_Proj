@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.57 2004-01-20 14:21:35 matben Exp $
+# $Id: Jabber.tcl,v 1.58 2004-01-23 08:55:20 matben Exp $
 
 package provide Jabber 1.0
 
@@ -407,7 +407,7 @@ proc ::Jabber::FactoryDefaults { } {
     # Can't run our http server on macs :-(
     if {![string equal $this(platform) "macintosh"]} {
 	set popMenuDefs(roster,def) [linsert $popMenuDefs(roster,def) 9  \
-	  mSendFile     user      {::Jabber::OOB::BuildSet .joobs &jid}]
+	  mSendFile     user      {::Jabber::OOB::BuildSet &jid}]
     }
     
     # The browse:
@@ -844,17 +844,17 @@ proc ::Jabber::MessageDispatcher {type body args} {
 	chat {
 	    if {$iswb} {
 		eval {::Jabber::WB::ChatMsg} $args
-		eval {hooks::run newWBChatMessageHook} $args
+		eval {::hooks::run newWBChatMessageHook} $args
 	    } else {
-		eval {hooks::run newChatMessageHook $body} $args
+		eval {::hooks::run newChatMessageHook $body} $args
 	    }	    
 	}
 	groupchat {
 	    if {$iswb} {
 		eval {::Jabber::WB::GroupChatMsg} $args
-		eval {hooks::run newWBGroupChatMessageHook} $args
+		eval {::hooks::run newWBGroupChatMessageHook} $args
 	    } else {
-		eval {hooks::run newGroupChatMessageHook $body} $args
+		eval {::hooks::run newGroupChatMessageHook $body} $args
 	    }	    
 	}
 	default {
@@ -907,10 +907,10 @@ proc ::Jabber::DispatchNormalMessage {body iswb args} {
 	}
 	if {[llength $restCmds] > 0} {
 	    set argsArr(-whiteboard) $restCmds
-	    eval {hooks::run newMessageHook $body} [array get argsArr]
+	    eval {::hooks::run newMessageHook $body} [array get argsArr]
 	}
     } else {
-	eval {hooks::run newMessageHook $body} $args
+	eval {::hooks::run newMessageHook $body} $args
     }
 }
 
@@ -1811,10 +1811,10 @@ proc ::Jabber::SetStatusWithMessage { } {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btset -text [::msgcat::mc Set] -default active -width 8 \
+    pack [button $frbot.btok -text [::msgcat::mc Set] -default active \
       -command [list [namespace current]::BtSetStatus $w]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
+    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
       -command [list [namespace current]::SetStatusCancel $w]] \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
@@ -2490,10 +2490,10 @@ proc ::Jabber::GetVersionResult {from silent jlibname type subiq} {
 	    grid $w.fr.lr$i -column 1 -row $i -sticky w
 	    incr i
 	}
-	pack [button $w.ok -text [::msgcat::mc OK] -width 8 \
+	pack [button $w.btok -text [::msgcat::mc OK] \
 	  -command "destroy $w"] -side right -padx 10 -pady 8
 	wm resizable $w 0 0
-	bind $w <Return> "$w.ok invoke"
+	bind $w <Return> "$w.btok invoke"
     }
 }
 
@@ -2972,16 +2972,16 @@ proc ::Jabber::Passwd::Build { } {
 
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btset -text [::msgcat::mc Set] -width 8 -default active \
+    pack [button $frbot.btok -text [::msgcat::mc Set] -default active \
       -command [list [namespace current]::Doit $w]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8   \
+    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]   \
       -command [list [namespace current]::Cancel $w]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
     
     wm resizable $w 0 0
-    bind $w <Return> "$frbot.btset invoke"
+    bind $w <Return> "$frbot.btok invoke"
     
     # Grab and focus.
     set oldFocus [focus]
@@ -3140,7 +3140,7 @@ proc ::Jabber::Logout::WithStatus { } {
     pack [button $frbot.btout -text [::msgcat::mc Logout] -width 8 \
       -default active -command [list [namespace current]::DoLogout $w]] \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
+    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
       -command [list [namespace current]::DoCancel $w]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6

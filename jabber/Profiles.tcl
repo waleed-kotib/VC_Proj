@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.6 2004-01-15 14:13:00 matben Exp $
+# $Id: Profiles.tcl,v 1.7 2004-01-23 08:56:22 matben Exp $
 
 package provide Profiles 1.0
 
@@ -621,7 +621,7 @@ proc ::Profiles::BuildDialog { } {
     pack [button $frbot.btconn -text [::msgcat::mc Save] -width 8 \
       -default active -command [list [namespace current]::SaveDlg $w]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
+    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
       -command [list [namespace current]::CancelDlg $w]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side bottom -fill both -expand 1 -padx 8 -pady 6

@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.17 2004-01-14 14:27:30 matben Exp $
+# $Id: MUC.tcl,v 1.18 2004-01-23 08:56:15 matben Exp $
 
 package require entrycomp
 
@@ -194,11 +194,11 @@ proc ::Jabber::MUC::BuildEnter {args} {
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
     set wsearrows $frbot.arr
-    set wbtenter $frbot.btenter
-    pack [button $wbtenter -text [::msgcat::mc Enter] -width 8 \
+    set wbtenter $frbot.btok
+    pack [button $wbtenter -text [::msgcat::mc Enter] \
       -default active -command [list [namespace current]::DoEnter $token]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
+    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
       -command [list [namespace current]::CancelEnter $token]]  \
       -side right -padx 5 -pady 5
     pack [::chasearrows::chasearrows $wsearrows -size 16] \
@@ -375,16 +375,16 @@ proc ::Jabber::MUC::Invite {roomjid} {
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
     pack $frbot  -side bottom -fill x -padx 10 -pady 8
-    pack [button $frbot.btok -text [::msgcat::mc OK] -width 8  \
+    pack [button $frbot.btok -text [::msgcat::mc OK]  \
       -default active -command "set [namespace current]::fininvite 1"] \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcan -text [::msgcat::mc Cancel] -width 8  \
+    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
       -command "set [namespace current]::fininvite 0"]  \
       -side right -padx 5 -pady 5  
     
     wm resizable $w 0 0
     bind $w <Return> [list $frbot.btok invoke]
-    bind $w <Escape> [list $frbot.btcan invoke]
+    bind $w <Escape> [list $frbot.btcancel invoke]
     
     # Grab and focus.
     set oldFocus [focus]
@@ -1064,10 +1064,10 @@ proc ::Jabber::MUC::EditListBuild {roomjid type} {
     set wsearrows $frbot.arr
     set wbtok $frbot.btok
     pack $frbot  -side bottom -fill x -padx 10 -pady 8
-    pack [button $wbtok -text [::msgcat::mc OK] -width 8 -state disabled \
+    pack [button $wbtok -text [::msgcat::mc OK] -state disabled \
       -default active -command "set [namespace current]::fineditlist 1"] \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcan -text [::msgcat::mc Cancel] -width 8  \
+    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
       -command "set [namespace current]::fineditlist 0"]  \
       -side right -padx 5 -pady 5  
     pack [::chasearrows::chasearrows $wsearrows -size 16] \
@@ -1078,7 +1078,7 @@ proc ::Jabber::MUC::EditListBuild {roomjid type} {
     
     wm resizable $w 0 0
     bind $w <Return> [list $frbot.btok invoke]
-    bind $w <Escape> [list $frbot.btcan invoke]
+    bind $w <Escape> [list $frbot.btcancel invoke]
     
     # Grab and focus.
     set oldFocus [focus]
@@ -1454,11 +1454,11 @@ proc ::Jabber::MUC::RoomConfig {roomjid} {
     set wsearrows $frbot.arr
     set wbtok $frbot.btok
     set wbtcancel $frbot.btcancel
-    pack [button $wbtok -text [::msgcat::mc OK] -width 8 -default active \
+    pack [button $wbtok -text [::msgcat::mc OK] -default active \
       -state disabled -command  \
         [list [namespace current]::DoRoomConfig $roomjid $w]]  \
       -side right -padx 5 -pady 5
-    pack [button $wbtcancel -text [::msgcat::mc Cancel] -width 8  \
+    pack [button $wbtcancel -text [::msgcat::mc Cancel]  \
       -command [list [namespace current]::CancelConfig $roomjid $w]]  \
       -side right -padx 5 -pady 5
     pack [::chasearrows::chasearrows $wsearrows -size 16] \
@@ -1632,16 +1632,16 @@ proc ::Jabber::MUC::Destroy {roomjid} {
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
     pack $frbot  -side bottom -fill x -padx 10 -pady 8
-    pack [button $frbot.btok -text [::msgcat::mc OK] -width 8  \
+    pack [button $frbot.btok -text [::msgcat::mc OK]  \
       -default active -command "set [namespace current]::findestroy 1"] \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcan -text [::msgcat::mc Cancel] -width 8  \
+    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
       -command "set [namespace current]::findestroy 0"]  \
       -side right -padx 5 -pady 5  
     
     wm resizable $w 0 0
     bind $w <Return> [list $frbot.btok invoke]
-    bind $w <Escape> [list $frbot.btcan invoke]
+    bind $w <Escape> [list $frbot.btcancel invoke]
     
     # Grab and focus.
     set oldFocus [focus]

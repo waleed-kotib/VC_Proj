@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ProgressWindow.tcl,v 1.9 2004-01-13 14:50:20 matben Exp $
+# $Id: ProgressWindow.tcl,v 1.10 2004-01-23 08:54:23 matben Exp $
 # 
 #-------------------------------------------------------------------------------
 #
@@ -282,7 +282,7 @@ proc ::ProgressWindow::Build {w} {
     set frmid           $widgets(frame).mid
     set widgets(pbar)   ${frmid}.pb
     set widgets(canvas) ${frmid}.pb
-    set widgets(cancel) ${frmid}.bt
+    set widgets(cancel) ${frmid}.btcancel
     
     set str "$options(-text) $options(-filename)"
     pack [label $widgets(label) -font $options(-font1) -text $str -justify left] \
