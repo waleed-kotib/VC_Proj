@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.46 2005-02-02 09:02:18 matben Exp $
+# $Id: JWB.tcl,v 1.47 2005-02-08 08:57:14 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -60,7 +60,7 @@ proc ::Jabber::WB::Init {jlibName} {
 
     # Configure the Tk->SVG translation to use http.
     # Must be reconfigured when we know our address after connecting???
-    set ip [::Network::GetThisPublicIPAddress]
+    set ip [::Network::GetThisPublicIP]
     can2svg::config                      \
       -uritype http                      \
       -httpaddr ${ip}:$prefs(httpdPort)  \
@@ -1395,7 +1395,7 @@ proc ::Jabber::WB::PutIPnumber {jid id} {
     
     ::Debug 2 "::Jabber::WB::PutIPnumber:: jid=$jid, id=$id"
     
-    set ip [::Network::GetThisPublicIPAddress]
+    set ip [::Network::GetThisPublicIP]
     SendRawMessageList $jid [list "PUT IP: $id $ip"]
 }
 

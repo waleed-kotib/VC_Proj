@@ -169,6 +169,17 @@
 ::msgcat::mcset fr dash-dotted		{Tirets mixtes}
 ::msgcat::mcset fr dashed		{Tirets}
 
+# Status messages.
+::msgcat::mcset fr available		{disponible}
+::msgcat::mcset fr away		        {parti}
+::msgcat::mcset fr {do not disturb}	{ne pas déranger}
+::msgcat::mcset fr {not available}	{indisponible}
+::msgcat::mcset fr {extended away}      {parti pour longtemps}
+::msgcat::mcset fr invisible            {invisible}
+::msgcat::mcset fr chat                 {discussion}
+::msgcat::mcset fr subscribed           {inscrit}
+::msgcat::mcset fr unsubscribed         {désinscrit}
+
 
 # Titres de tous les menus ; concaténés avec 'm' pour la clé de la base de données.
 ::msgcat::mcset fr mFile		{Fichier}

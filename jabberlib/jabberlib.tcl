@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.80 2005-02-02 09:02:22 matben Exp $
+# $Id: jabberlib.tcl,v 1.81 2005-02-08 08:57:16 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -1128,10 +1128,6 @@ proc jlib::presence_handler {jlibname xmldata} {
 	lappend arglist -$attrkey $attrval
     }
     
-    if {[info exists id] && [info exists prescmd($id)]} {
-	set prescallback $prescmd($id)
-    }
-    
     # Check first if this is an error element (from conferencing?).
     if {[string equal $type "error"]} {
 	set errspec [getstanzaerrorspec $xmldata]
@@ -1196,16 +1192,19 @@ proc jlib::presence_handler {jlibname xmldata} {
 	}
     }
     
-    #     Handle callbacks specific for 'type' that have been
-    #     registered with 'presence_register'
-
-    eval {presence_run_hook $jlibname $from $type} $arglist
-    
-    # Invoke any callback.
+    # Invoke any callback before the rosters callback.
     if {[info exists id] && [info exists prescmd($id)]} {
 	uplevel #0 $prescmd($id) [list $jlibname $type] $arglist
 	unset -nocomplain prescmd($id)
     }	
+    if {![string equal $type "error"]} {
+	eval {$lib(rostername) invokecommand $from $type} $arglist
+    }
+    
+    #     Handle callbacks specific for 'type' that have been
+    #     registered with 'presence_register'
+
+    eval {presence_run_hook $jlibname $from $type} $arglist
 }
 
 # jlib::features_handler --

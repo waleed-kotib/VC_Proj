@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Agents.tcl,v 1.35 2005-02-04 07:05:30 matben Exp $
+# $Id: Agents.tcl,v 1.36 2005-02-08 08:57:13 matben Exp $
 
 package provide Agents 1.0
 
@@ -87,8 +87,7 @@ proc ::Agents::GetAll { } {
 
 proc ::Agents::Get {jid} {
     
-    ::Jabber::JlibCmd agents_get $jid  \
-      [list ::Agents::AgentsCallback $jid]
+    ::Jabber::JlibCmd agents_get $jid [list ::Agents::AgentsCallback $jid]
 }
 
 # Agents::GetAgent --

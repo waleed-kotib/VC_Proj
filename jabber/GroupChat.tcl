@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.97 2005-02-04 07:05:31 matben Exp $
+# $Id: GroupChat.tcl,v 1.98 2005-02-08 08:57:14 matben Exp $
 
 package require History
 
@@ -697,7 +697,8 @@ proc ::GroupChat::Build {roomjid args} {
     # Button part.
     set frbot [frame $w.frall.bot]
     pack $frbot -side bottom -fill x
-    pack [button $frbot.btok -text [mc Send]  \
+    set wbtsend $frbot.btok
+    pack [button $wbtsend -text [mc Send]  \
       -default active -command [list [namespace current]::Send $token]] \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [mc Exit]  \
@@ -833,6 +834,7 @@ proc ::GroupChat::Build {roomjid args} {
     set state(wusers)     $wusers
     set state(wtxt.0)     $wtxt.0
     set state(wtxt)       $wtxt
+    set state(wbtsend)    $wbtsend
     
     if {$state(active)} {
 	ActiveCmd $token
@@ -845,6 +847,8 @@ proc ::GroupChat::Build {roomjid args} {
     wm minsize $w [expr {$shortBtWidth < 240} ? 240 : $shortBtWidth] 320
     wm maxsize $w 800 2000
 
+    bind $wtextsnd <Return> \
+      [list [namespace current]::ReturnKeyPress $token]
     bind $wtextsnd <$this(modkey)-Return> \
       [list [namespace current]::CommandReturnKeyPress $token]
     
@@ -938,8 +942,11 @@ proc ::GroupChat::SetState {token theState} {
     variable $token
     upvar 0 $token state
 
-    $state(wtray) buttonconfigure send -state $theState
+    $state(wtray) buttonconfigure send   -state $theState
+    $state(wtray) buttonconfigure invite -state $theState
+    $state(wtray) buttonconfigure info   -state $theState
     $state(wbtsubject) configure -state $theState
+    $state(wbtsend)    configure -state $theState
 }
 
 proc ::GroupChat::CloseHook {wclose} {
@@ -1042,38 +1049,47 @@ proc ::GroupChat::Send {token} {
     set state(hot1stmsg) 1
 }
 
-proc ::GroupChat::ReturnCmd {token} {
-
-    Send $token
-    
-    # Stop the actual return to be inserted.
-    return -code break
-}
-
 proc ::GroupChat::ActiveCmd {token} {
     variable cprefs
     variable $token
     upvar 0 $token state
-
-    ::Debug 2 "::GroupChat::ActiveCmd token=$token"
-    
-    set wtextsnd $state(wtextsnd)
-    if {$state(active)} {
-	bind $wtextsnd <Return> [list [namespace current]::ReturnCmd $token]
-    } else {
-	bind $wtextsnd <Return> {}
-    }
     
     # Remember last setting.
     set cprefs(lastActiveRet) $state(active)
 }
 
+# Suggestion from marc@bruenink.de.
+# 
+#       inactive mode: 
+#       Ret: word-wrap
+#       Ctrl+Ret: send messgae
+#
+#       active mode:
+#       Ret: send message
+#       Ctrl+Ret: word-wrap
+
+proc ::GroupChat::ReturnKeyPress {token} {
+    variable $token
+    upvar 0 $token state
+
+    if {$state(active)} {
+	Send $token
+	
+	# Stop the actual return to be inserted.
+	return -code break
+    }
+}
+
 proc ::GroupChat::CommandReturnKeyPress {token} {
+    variable $token
+    upvar 0 $token state
     
-    Send $token
-    
-    # Stop further handling in Text.
-    return -code break
+    if {!$state(active)} {
+	Send $token
+	
+	# Stop further handling in Text.
+	return -code break
+    }
 }
 
 # GroupChat::GetTokenFrom --
@@ -1129,6 +1145,14 @@ proc ::GroupChat::PresenceHook {jid presence args} {
     
     upvar ::Jabber::jstate jstate
     
+    # Only if we actually entered the room.
+    if {0} {
+	set allrooms [$jstate(jlib) service allroomsin]
+	puts "---------------allrooms=$allrooms"
+	if {[lsearch $allrooms $jid] < 0} {
+	    return
+	}
+    }
     if {[$jstate(jlib) service isroom $jid]} {
 	::Debug 2 "::GroupChat::PresenceHook jid=$jid, presence=$presence, args='$args'"
 	

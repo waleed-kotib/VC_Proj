@@ -170,6 +170,17 @@
 ::msgcat::mcset nl dash-dotted		{stippen en strepen}
 ::msgcat::mcset nl dashed		{onderstreept}
 
+# Status messages.
+::msgcat::mcset nl available		{beschikbaar}
+::msgcat::mcset nl away 		{afwezig}
+::msgcat::mcset nl {do not disturb}	{niet storen}
+::msgcat::mcset nl {not available}	{niet beschikbaar}
+::msgcat::mcset nl {extended away}      {langdurig afwezig}
+::msgcat::mcset nl invisible            {onzichtbaar}
+::msgcat::mcset nl chat                 {chat}
+::msgcat::mcset nl subscribed		{ingeschreven}
+::msgcat::mcset nl unsubscribed		{uitgeschreven}
+
 
 # All menu labels; concateneted and prepended with 'm' for the database key.
 ::msgcat::mcset nl mFile		{Bestand}

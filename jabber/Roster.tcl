@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.114 2005-02-04 07:05:32 matben Exp $
+# $Id: Roster.tcl,v 1.115 2005-02-08 08:57:15 matben Exp $
 
 package provide Roster 1.0
 
@@ -423,7 +423,6 @@ proc ::Roster::CancelTimedMessage { } {
 }
 
 proc ::Roster::SetPresenceMessage {jid presence args} {
-    variable mapShowTextToElem
     
     array set argsArr $args
     set show $presence
@@ -431,8 +430,7 @@ proc ::Roster::SetPresenceMessage {jid presence args} {
 	set show $argsArr(-show)
     }
     set name [GetDisplayName $jid]
-    set str [mc {%s is %s} $name $mapShowTextToElem($show)]
-    TimedMessage $str
+    TimedMessage "$name [mc $show]"
 }
 
 # Roster::LoginCmd --
@@ -833,11 +831,22 @@ proc ::Roster::PushProc {rostName what {jid {}} args} {
 	    if {[info exists attrArr(-resource)] &&  \
 	      [string length $attrArr(-resource)]} {
 		set jid3 ${jid}/$attrArr(-resource)
-	    }	    
+	    }
+	    
+	    # This 'isroom' gives wrong answer if a gateway also supports
+	    # conference (groupchat).
 	    if {![$jstate(jlib) service isroom $jid]} {
 		eval {Presence $jid3 $type} $args
 	    }
-	    
+	    #set isroom [$jstate(jlib) service isroom $jid]
+	    if {0} {
+		set allrooms [$jstate(jlib) service allroomsin]
+		puts "\t allrooms=$allrooms"
+		if {[lsearch $allrooms $jid] < 0} {
+		    eval {Presence $jid3 $type} $args
+		}
+	    }
+		
 	    # General type presence hooks.
 	    eval {::hooks::run presenceHook $jid $type} $args
 

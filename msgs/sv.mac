@@ -166,6 +166,17 @@
 ::msgcat::mcset sv dash-dotted          {Streck-prickad}
 ::msgcat::mcset sv dashed               {Streckad}
 
+# Status messages.
+::msgcat::mcset sv available		{tillgänglig}
+::msgcat::mcset sv away	        	{borta}
+::msgcat::mcset sv {do not disturb}	{stör ej}
+::msgcat::mcset sv {extended away}      {borta länge}
+::msgcat::mcset sv invisible            {osynlig}
+::msgcat::mcset sv {not available}	{ej tillgänglig}
+::msgcat::mcset sv chat         	{chatta}
+::msgcat::mcset sv subscribed		{prenumererat}
+::msgcat::mcset sv unsubscribed		{prenumeration avslutad}
+
 
 # All menu labels; concateneted and prepended with 'm' for the database key.
 ::msgcat::mcset sv mFile		{Arkiv}

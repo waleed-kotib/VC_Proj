@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: muc.tcl,v 1.18 2004-12-13 13:39:19 matben Exp $
+# $Id: muc.tcl,v 1.19 2005-02-08 08:57:16 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -29,6 +29,7 @@
 #      mucName getrole roomjid role callback
 #      mucName getroom roomjid callback
 #      mucName invite roomjid jid ?-reason?
+#      mucName isroom jid
 #      mucName mynick roomjid
 #      mucName participants roomjid
 #      mucName setaffiliation roomjid nick affiliation ?-command, -reason?
@@ -81,8 +82,10 @@ proc jlib::muc::new {jlibname args} {
     # Instance specific namespace.
     namespace eval $mucname {
 	variable cache
+	variable rooms
     }
     upvar ${mucname}::cache cache
+    upvar ${mucname}::rooms rooms
 
     foreach {key value} $args {
 	switch -- $key {
@@ -150,6 +153,7 @@ proc jlib::muc::enter {mucname roomjid nick args} {
 
     variable muc2jlib
     upvar ${mucname}::cache cache
+    upvar ${mucname}::rooms rooms
     
     set jlibname $muc2jlib($mucname)
     set xsub {}
@@ -178,6 +182,7 @@ proc jlib::muc::enter {mucname roomjid nick args} {
     $jlibname send_presence -to $jid -xlist [list $xelem] -extras $extras \
       -command [list [namespace current]::parse_enter $mucname $roomjid]
     set cache($roomjid,mynick) $nick
+    set rooms($roomjid) 1
     $jlibname service setroomprotocol $roomjid "muc"
 }
 
@@ -432,6 +437,7 @@ proc jlib::muc::create {mucname roomjid nick callback} {
 
     variable muc2jlib
     upvar ${mucname}::cache cache
+    upvar ${mucname}::rooms rooms
 
     set jlibname $muc2jlib($mucname)
     set jid ${roomjid}/${nick}
@@ -441,6 +447,7 @@ proc jlib::muc::create {mucname roomjid nick callback} {
     $jlibname send_presence -to $jid -xlist [list $xelem]  \
       -command [list [namespace current]::parse_create $mucname $roomjid]
     set cache($roomjid,mynick) $nick
+    set rooms($roomjid) 1
     $jlibname service setroomprotocol $roomjid "muc"
 }
 
@@ -597,6 +604,17 @@ proc jlib::muc::allroomsin {mucname} {
 	lappend roomList $room
     }
     return $roomList
+}
+
+proc jlib::muc::isroom {mucname jid} {
+    
+    upvar ${mucname}::rooms rooms
+    
+    if {[info exists rooms($jid)]} {
+	return 1
+    } else {
+	return 0
+    }
 }
 
 # jlib::muc::participants --
