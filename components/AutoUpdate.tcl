@@ -7,13 +7,19 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: AutoUpdate.tcl,v 1.4 2004-10-09 13:21:54 matben Exp $
+# $Id: AutoUpdate.tcl,v 1.5 2004-10-14 10:22:11 matben Exp $
 
 package require tinydom
 package require http 2.3
 
 namespace eval ::AutoUpdate:: {
     
+    # Allow the update url to be set via the option database.
+    set url "http://coccinella.sourceforge.net/updates/update_en.xml"
+    #set url "http://coccinella.sourceforge.net/updates/update_test.xml"
+
+    option add *autoupdateURL            $url                  widgetDefault
+
     variable newVersion 1.0
 }
 
@@ -38,8 +44,6 @@ proc ::AutoUpdate::InitPrefsHook { } {
     # Auto update mechanism: if lastAutoUpdateVersion < run version => autoupdate
     set prefs(lastAutoUpdateVersion) 0.0
     set prefs(doneAutoUpdate) 0
-    set prefs(urlAutoUpdate) "http://coccinella.sourceforge.net/updates/update_en.xml"
-    #set prefs(urlAutoUpdate) "http://coccinella.sourceforge.net/updates/update_test.xml"
     
     ::PreferencesUtils::Add [list  \
       [list prefs(lastAutoUpdateVersion) prefs_lastAutoUpdateVersion \
@@ -61,7 +65,7 @@ proc ::AutoUpdate::Get {args} {
     
     ::Debug 2 "::AutoUpdate::Get"
     
-    set url $prefs(urlAutoUpdate)
+    set url [option get . autoupdateURL {}]
     array set opts {
 	-silent 1
     }

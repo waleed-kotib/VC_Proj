@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.48 2004-10-13 14:08:38 matben Exp $
+# $Id: Login.tcl,v 1.49 2004-10-14 10:22:11 matben Exp $
 
 package provide Login 1.0
 
@@ -339,70 +339,16 @@ proc ::Jabber::Login::DoLogin {} {
     set finished 1
     Close $wtoplevel
     
-    if {0} {
-
-	# The "old" jabber protocol uses a designated port number for ssl
-	# connections. 
-	# In xmpp tls negotiating is made in stream using the standard port.
-	set opts {}
-	if {!$moreOpts(sasl) && $moreOpts(ssl)} {
-	    lappend opts -tls 1
-	}
-	if {$moreOpts(httpproxy)} {
-	    lappend opts -httpproxy 1
-	}
-	eval {Connect $server [namespace current]::DoLoginCB \
-	  -ip $moreOpts(ip) -port $moreOpts(port)} $opts
-    } else {
-	set opts {}
-	foreach {key value} [array get moreOpts] {
-	    lappend opts -$key $value
-	}
-	# ssl vs. tls naming conflict.
-	if {$moreOpts(ssl)} {
-	    lappend opts -tls 1
-	}
-	eval {HighLogin $server $username $resource $password \
-	  [namespace current]::DoLoginHighCB} $opts
+    set opts {}
+    foreach {key value} [array get moreOpts] {
+	lappend opts -$key $value
     }
-}
-
-#       Show message box if necessary.
-
-proc ::Jabber::Login::DoLoginHighCB {token type {errmsg ""}} {
-    variable $token
-    upvar 0 $token state
-    
-    ::Debug 2 "::Jabber::Login::DoLoginHighCB type=$type errmsg=$errmsg"
-    
-    set str ""
-    
-    switch -- $type {
-	ok {
-	    
-	}
-	missingid {
-	    set str $errmsg
-	}
-	error {
-	    set str [mc jamessnosocket $state(server) $errmsg]
-	}
-	timeout {
-	    set str [mc jamesstimeoutserver $state(server)]
-	}
-	openfailed {
-	    set str [mc jamessnosocket $state(server) $errmsg]
-	}
-	authfail {
-	    set str $errmsg
-	}
-	missingstarttls {
-	    set str $errmsg
-	}
+    # ssl vs. tls naming conflict.
+    if {$moreOpts(ssl)} {
+	lappend opts -tls 1
     }
-    if {$str != ""} {
-	tk_messageBox -icon error -type ok -message [FormatTextForMessageBox $str]
-    }
+    eval {HighLogin $server $username $resource $password \
+      [namespace current]::HighFinalCB} $opts
 }
 
 proc ::Jabber::Login::DoLoginCB {status msg} {
@@ -638,6 +584,8 @@ proc ::Jabber::Login::HighLogin {server username resource password cmd args} {
     if {$state(-ip) != ""} {
 	lappend opts -ip $argsArr(-ip)
     }
+    
+    # Make a network connection.
     eval {Connect $server [list [namespace current]::HighConnectCB $token] \
       -port $state(-port)} $opts
 }
@@ -649,8 +597,11 @@ proc ::Jabber::Login::HighConnectCB {token status msg} {
     ::Debug 2 "::Jabber::Login::HighConnectCB status=$status"
     
     switch $status {
-	error - timeout {
-	    HighFinish $token $status $msg
+	error {
+	    HighFinish $token connect-failed $msg
+	}
+	timeout {
+	    HighFinish $token timeout $msg
 	}
 	default {
 	    set opts {}
@@ -661,7 +612,7 @@ proc ::Jabber::Login::HighConnectCB {token status msg} {
 		eval {InitStream $state(server) \
 		  [list [namespace current]::HighInitStreamCB $token]} $opts
 	    } err]} {
-		HighFinish $token openfailed $err
+		HighFinish $token connect-failed $err
 	    }
 	}
     }
@@ -693,7 +644,7 @@ proc ::Jabber::Login::HighInitStreamCB {token args} {
 	    }
 	}
 	if {$trysasl && !$state(-sasl)} {
-	    ::Jabber::AddErrorLog $server  \
+	    ::Jabber::AddErrorLog $state(server)  \
 	      "SASL authentization failed since server does not support version=1.0"
 	}
 	set starttls 0
@@ -701,20 +652,9 @@ proc ::Jabber::Login::HighInitStreamCB {token args} {
 	    set starttls 1
 	}
 	
-	# Need to check that server supports starttls.
-	set suppstarttls [$jstate(jlib) havefeatures starttls]
-	if {$starttls && !$suppstarttls} {
-	    HighFinish $token missingstarttls "server lacks support for tls" 
-	    return
-	}
-	
-	# Does this server require starttls?
-	set requirestarttls [$jstate(jlib) havefeatures starttls required]
-	if {!$starttls && $requirestarttls} {
-	    HighFinish $token requirestarttls "server requires tls" 
-	    return
-	}
-	
+	# We cannot verify that server supports tls since we have not yet
+	# received the 'features' element. Done inside jlib.
+		
 	# We either start tls or authorize.
 	if {$starttls} {
 	    StartTls [list [namespace current]::HighStartTlsCB $token]
@@ -727,20 +667,27 @@ proc ::Jabber::Login::HighInitStreamCB {token args} {
     }    
 }
 
-proc ::Jabber::Login::HighStartTlsCB {token jlibname type args} {
+proc ::Jabber::Login::HighStartTlsCB {token type args} {
     variable $token
     upvar 0 $token state
+    upvar ::Jabber::jstate jstate
 
-    ::Debug 2 "::Jabber::Login::HighStartTlsCB"
-
-    set id [$jstate(jlib) getstreamattr id]
-    if {$id == ""} {
-	HighFinish $token missingid "no id for digest in receiving <stream>"
+    ::Debug 2 "::Jabber::Login::HighStartTlsCB type=$type args=$args"
+    
+    if {[string equal $type "error"]} {
+	foreach {errcode errmsg} [lindex $args 0] break
+	HighFinish $token $errcode $errmsg
     } else {
-	Authorize $state(server) $state(username) $state(resource) \
-	  $state(password) \
-	  [list [namespace current]::HighAuthorizeCB $token] \
-	  -streamid $argsArr(id) -digest $state(-digest) -sasl $state(-sasl)
+	set id [$jstate(jlib) getstreamattr id]
+	if {$id == ""} {
+	    HighFinish $token missingid \
+	      "no id for digest in receiving <stream>"
+	} else {
+	    Authorize $state(server) $state(username) $state(resource) \
+	      $state(password) \
+	      [list [namespace current]::HighAuthorizeCB $token] \
+	      -streamid $id -digest $state(-digest) -sasl $state(-sasl)
+	}
     }
 }
 
@@ -789,6 +736,44 @@ proc ::Jabber::Login::HighFinish {token {err ""} {msg ""}} {
     unset state
 }
 
+
+#       Show message box if necessary.
+
+proc ::Jabber::Login::HighFinalCB {token status {errmsg ""}} {
+    variable $token
+    upvar 0 $token state
+    
+    ::Debug 2 "::Jabber::Login::DoLoginHighCB status=$status errmsg=$errmsg"
+    
+    set str ""
+    
+    switch -- $status {
+	ok {
+	    # empty
+	}
+	connect-failed {
+	    set str [mc jamessnosocket $state(server) $errmsg]
+	}
+	timeout {
+	    set str [mc jamesstimeoutserver $state(server)]
+	}
+	authfail {
+	    set str $errmsg
+	}
+	starttls-nofeature {
+	    set str [mc jamessstarttls-nofeature $state(server)]
+	}
+	startls-failure {
+	    set str [mc jamessstartls-failure $state(server)]
+	}
+	default {
+	    set str $errmsg
+	}
+    }
+    if {$str != ""} {
+	tk_messageBox -icon error -type ok -message [FormatTextForMessageBox $str]
+    }
+}
 
 #-------------------------------------------------------------------------------
 
@@ -984,13 +969,18 @@ proc ::Jabber::Login::InitStreamCB {cmd jlibName args} {
 proc ::Jabber::Login::StartTls {cmd} {
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::UI::SetStatusMessage "Negotiating TLS security"
+    ::Jabber::UI::SetStatusMessage [mc jatlsnegot]
     $jstate(jlib) starttls [list [namespace current]::StartTlsCB $cmd]    
 }
 
-proc ::Jabber::Login::StartTlsCB {cmd jlibName args} {
+proc ::Jabber::Login::StartTlsCB {cmd jlibName type args} {
+    upvar ::Jabber::jstate jstate
 
-    uplevel #0 $cmd $args
+    if {[string equal $type "error"]} {	
+	::Jabber::UI::FixUIWhen "disconnect"
+	after idle $jstate(jlib) closestream
+    }    
+    uplevel #0 $cmd $type $args
 }
 
 # Jabber::Login::Authorize --
@@ -1073,8 +1063,7 @@ proc ::Jabber::Login::AuthorizeCB {token jlibName type theQuery} {
     ::Jabber::UI::StartStopAnimatedWave 0
     
     if {[string equal $type "error"]} {	
-	set errcode [lindex $theQuery 0]
-	set errmsg [lindex $theQuery 1]
+	foreach {errcode errmsg} $theQuery break
 	::Jabber::UI::SetStatusMessage [mc jaerrlogin $server $errmsg]
 	::Jabber::UI::FixUIWhen "disconnect"
 	if {$errcode == 409} {
