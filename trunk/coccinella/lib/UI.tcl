@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.16 2003-08-30 09:41:00 matben Exp $
+# $Id: UI.tcl,v 1.17 2003-09-13 06:39:25 matben Exp $
 
 # LabeledFrame --
 #
@@ -1352,6 +1352,15 @@ proc ::UI::GetToplevelNS {w} {
     }
 }
 
+proc ::UI::GetToplevel {w} {
+
+    if {[string equal $w "."]} {
+	return $w
+    } else {
+	set w [string trimright $w "."]
+	return [winfo toplevel $w]
+    }
+}
 
 proc ::UI::GetServerCanvasFromWtop {wtop} {    
     upvar ::${wtop}::wapp wapp
@@ -4394,6 +4403,12 @@ proc ::UI::BuildItemMenu {wtop wmenu itemDir} {
 		continue
 	    }
 	    
+	    # Skip if no *.can file.
+	    if {[llength [glob -nocomplain -directory  \
+	      [file join $itemDir $itemFile] *.can]] == 0} {
+		continue
+	    }
+	    
 	    # Build menus recursively. Consider: 1) large chars, 2) multi words,
 	    # 3) dots.
 	    regsub -all -- " " [string tolower $itemFile] "_" mt
@@ -4546,7 +4561,7 @@ proc ::UI::CenterWindow {win} {
 #       Utility routines for animating the wave in the status message frame.
 #       
 # Arguments:
-#       w           canvas widget path
+#       w           canvas widget path (not the whiteboard)
 #       
 # Results:
 #       none
@@ -4579,6 +4594,12 @@ proc ::UI::StartStopAnimatedWave {w start} {
 	$w delete $animateWave($w,id)
 	array unset animateWave $w,*
     }
+}
+
+proc ::UI::StartStopAnimatedWaveInWB {wtop start} {    
+    upvar ::${wtop}::wapp wapp
+    
+    ::UI::StartStopAnimatedWave $wapp(statmess) $start
 }
 
 proc ::UI::StartStopAnimatedWaveOnMain {start} {    

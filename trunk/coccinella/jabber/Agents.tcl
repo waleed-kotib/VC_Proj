@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Agents.tcl,v 1.1 2003-04-28 13:22:53 matben Exp $
+# $Id: Agents.tcl,v 1.2 2003-09-13 06:39:25 matben Exp $
 
 package provide Agents 1.0
 
@@ -124,12 +124,12 @@ proc ::Jabber::Agents::AgentsCallback {jid jlibName what subiq} {
 		continue
 	    }
 	    set subAgent [wrapper::getchildren $agent]
-	    set jidAgent [wrapper::getattr [lindex $agent 1] jid]
+	    set jidAgent [wrapper::getattribute $agent jid]
 	    
 	    # If any groupchat/conference service we need to query its
 	    # version number to know which protocol to use.
 	    foreach elem $subAgent {
-		if {[string equal [lindex $elem 0] "groupchat"]} {
+		if {[string equal [wrapper::gettag $elem] "groupchat"]} {
 		    $jstate(jlib) get_version $jidAgent   \
 		      [list ::Jabber::CacheGroupchatType $jidAgent]
 		    

@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ItemInspector.tcl,v 1.5 2003-08-23 07:19:16 matben Exp $
+# $Id: ItemInspector.tcl,v 1.6 2003-09-13 06:39:25 matben Exp $
 
 namespace eval ::ItemInspector::  {
     
@@ -91,10 +91,8 @@ namespace eval ::ItemInspector::  {
 
 proc ::ItemInspector::ItemInspector {wtop which args} {
     
-    upvar ::${wtop}::wapp wapp
-
     Debug 2 "ItemInspector:: wtop=$wtop, which=$which"
-    set wCan $wapp(can)
+    set wCan [::UI::GetCanvasFromWtop $wtop]
     
     # We need to create an item specific instance. 
     # Use the item id for instance.
@@ -124,11 +122,9 @@ proc ::ItemInspector::Build {wtop itemId args} {
     global  sysFont prefs fontSize2Points fontPoints2Size  \
       dashShort2Full this
     
-    upvar ::${wtop}::wapp wapp
-
     Debug 2 "::ItemInspector::Build wtop=$wtop, itemId=$itemId"
     set w .itinsp${itemId}
-    set wCan $wapp(can)
+    set wCan [::UI::GetCanvasFromWtop $wtop]
     
     # If window already there, just return silently.
     if {[winfo exists $w]}  {
@@ -548,11 +544,10 @@ proc ::ItemInspector::Movie {wtop winfr} {
     variable skipMovieOpts
     variable boolFull2Short
     variable boolShort2Full
-    upvar ::${wtop}::wapp wapp
 
     incr uid
     set w ".itinsp${uid}"
-    set wCan $wapp(can)
+    set wCan [::UI::GetCanvasFromWtop $wtop]
     
     # Need to have instance specific namespace for regional variables.
     namespace eval ::ItemInspector::$w  {

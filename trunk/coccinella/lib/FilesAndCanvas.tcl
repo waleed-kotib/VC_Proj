@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: FilesAndCanvas.tcl,v 1.7 2003-08-23 07:19:16 matben Exp $
+# $Id: FilesAndCanvas.tcl,v 1.8 2003-09-13 06:39:25 matben Exp $
  
 package require can2svg
 package require undo
@@ -28,9 +28,8 @@ namespace eval ::CanvasFile:: {}
 #       none
 
 proc ::CanvasFile::DrawCanvasItemFromFile {wtop filePath args} {
-    upvar ::${wtop}::wapp wapp
     
-    set wCan $wapp(can)
+    set wCan [::UI::GetCanvasFromWtop $wtop]
 
     # Opens the data file.
     if {[catch {open $filePath r} fd]} {
@@ -526,14 +525,9 @@ proc ::CanvasFile::DataToFile {filePath canvasList} {
 proc ::CanvasFile::DoOpenCanvasFile {wtop {filePath {}}} {
     global  prefs
     
-    upvar ::${wtop}::wapp wapp
+    set w [::UI::GetToplevel $wtop]
+    set wCan [::UI::GetCanvasFromWtop $wtop]
     
-    if {[string equal $wtop "."]} {
-	set w .
-    } else {
-	set w [string trimright $wtop .]
-    }
-    set wCan $wapp(can)
     if {[string length $filePath] == 0} {
 	set typelist {
 	    {"Canvas"     {.can}}
@@ -583,10 +577,8 @@ proc ::CanvasFile::DoOpenCanvasFile {wtop {filePath {}}} {
 
 proc ::CanvasFile::DoSaveCanvasFile {wtop} {
     global  prefs this
-    
-    upvar ::${wtop}::wapp wapp
-    
-    set wCan $wapp(can)
+        
+    set wCan [::UI::GetCanvasFromWtop $wtop]
     set typelist {
 	{"Canvas"            {.can}}
 	{"Adobe XML/SVG"     {.svg}}

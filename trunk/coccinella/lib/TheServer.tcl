@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: TheServer.tcl,v 1.9 2003-08-23 07:19:16 matben Exp $
+# $Id: TheServer.tcl,v 1.10 2003-09-13 06:39:25 matben Exp $
     
 # DoStartServer ---
 #
@@ -253,14 +253,14 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 	puts "ExecuteClientRequest:: wtop=$wtop, line='$line', args='$args'"
     }
     array set attrarr $args
-    if {![regexp {^([A-Z]+ *[A-Z]+):} $line x prefixCmd]} {
+    if {![regexp {^([A-Z ]+): *(.*)$} $line x prefixCmd instr]} {
 	return
     }
     
     # Branch into the right command prefix.
     switch -exact -- $prefixCmd {
 	CANVAS {
-	    if {[regexp "^CANVAS: +(.*)$" $line junk instr]} {
+	    if {[string length $instr] > 0} {
 		
 		# Regular drawing commands in the canvas.
 		set wServCan [::UI::GetServerCanvasFromWtop $wtop]
@@ -484,40 +484,37 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 	    }
 	}
 	PUT - GET {
-	    if {[regexp "^(PUT|GET): +($llist_|$wrd_) *($optlist_)$" \
-	      $line what cmd fileName optList]} {
 		
-		# Put file to receive file; handles via temporary socket.
-		# The 'optList' is a list of 'key: value' pairs, resembling
-		# the html protocol for getting files, but where most keys 
-		# correspond to a valid "canvas create" option, and everything 
-		# is on a single line.
+	    # Put file to receive file; handles via temporary socket.
+	    # The 'optList' is a list of 'key: value' pairs, resembling
+	    # the html protocol for getting files, but where most keys 
+	    # correspond to a valid "canvas create" option, and everything 
+	    # is on a single line.
+	    
+	    set fileName [lindex $instr 0]
+	    set optList [lrange $instr 1 end]
+	    set tempChannel($channel) 1
+	    
+	    if {$prefixCmd == "PUT"} {
 		
-		# For some reason the outer {} must be stripped off.
-		set fileName [lindex $fileName 0]
-		set tempChannel($channel) 1
-		
-		if {$cmd == "PUT"} {
+		# The problem is that we get a direct connection with
+		# PUT/GET request outside the Jabber framework.
+		if {[string equal $prefs(protocol) "jabber"]} {
+		    ::Jabber::HandlePutRequest $channel $fileName $optList
+		} else {
 		    
-		    # The problem is that we get a direct connection with
-		    # PUT/GET request outside the Jabber framework.
-		    if {[string equal $prefs(protocol) "jabber"]} {
-			::Jabber::HandlePutRequest $channel $fileName $optList
-		    } else {
-		    
-			# Be sure to strip off any path. (this(path))??? Mac bug for /file?
-			set fileName [file tail $fileName]
-			::GetFileIface::GetFile $wtop $channel $fileName $optList
-		    }
-		} elseif {$cmd == "GET"} {
-		    
-		    # A file is requested from this server. 'fileName' may be
-		    # a relative path so beware. This should be taken care for in
-		    # 'PutFileToClient'.
-		    
-		    ::PutFileIface::PutFileToClient $wtop $channel $ip \
-		      $fileName $optList
+		    # Be sure to strip off any path. (this(path))??? Mac bug for /file?
+		    set fileName [file tail $fileName]
+		    ::GetFileIface::GetFile $wtop $channel $fileName $optList
 		}
+	    } elseif {$prefixCmd == "GET"} {
+		
+		# A file is requested from this server. 'fileName' may be
+		# a relative path so beware. This should be taken care for in
+		# 'PutFileToClient'.
+		
+		::PutFileIface::PutFileToClient $wtop $channel $ip \
+		  $fileName $optList
 	    }		
 	}
 	"PUT NEW" {

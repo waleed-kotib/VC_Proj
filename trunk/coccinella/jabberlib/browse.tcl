@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: browse.tcl,v 1.12 2003-08-23 07:19:16 matben Exp $
+# $Id: browse.tcl,v 1.13 2003-09-13 06:39:25 matben Exp $
 # 
 #  locals($jid,parent):       the parent of $jid.
 #  locals($jid,parents):      list of all parent jid's,
@@ -591,8 +591,8 @@ proc browse::setsinglejid {browseName parentJid jid xmllist {browsedjid 0}} {
     Debug 3 "browse::setsinglejid browseName=$browseName, parentJid=$parentJid\
       jid=$jid, xmllist='$xmllist'"
     
-    set category [lindex $xmllist 0]
-    array set attr [lindex $xmllist 1]
+    set category [wrapper::gettag $xmllist]
+    array set attr [wrapper::getattrlist $xmllist]
 
     # Check for any 'category' attribute introduced in the 1.2 rev. of JEP-0011.
     if {[info exists attr(category)]} {

@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasCutCopyPaste.tcl,v 1.4 2003-08-23 07:19:16 matben Exp $
+# $Id: CanvasCutCopyPaste.tcl,v 1.5 2003-09-13 06:39:25 matben Exp $
 
 package provide CanvasCutCopyPaste 1.0
 
@@ -150,8 +150,8 @@ proc ::CanvasCCP::PasteFromClipboardTo {w} {
 	
 	    # We assume that it is the canvas that should receive this?
 	    set wtop [::UI::GetToplevelNS $w]
-	    upvar ::${wtop}::wapp wapp
-	    ::CanvasCCP::PasteFromClipboardToCanvas $wapp(can)
+	    set wCan [::UI::GetCanvasFromWtop $wtop]
+	    ::CanvasCCP::PasteFromClipboardToCanvas $wCan
 	}
 	default {
 	

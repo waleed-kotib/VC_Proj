@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Connections.tcl,v 1.5 2003-08-23 07:19:16 matben Exp $
+# $Id: Connections.tcl,v 1.6 2003-09-13 06:39:25 matben Exp $
 
 package provide Connections 1.0
 
@@ -671,8 +671,7 @@ proc ::OpenMulticast::OpenMulticast {wtop w} {
     variable txtvarEntMulticast
     variable selMulticastName
     variable finished
-    upvar ::${wtop}::wapp wapp
-    
+
     set finished -1
     if {[winfo exists $w]} {
 	return
@@ -806,12 +805,10 @@ proc ::OpenMulticast::TraceSelMulticastName {name junk1 junk2} {
 #       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
 
 proc ::OpenMulticast::OpenMulticastQTStream {wtop wentry} {
-    global  this prefs
-    
+    global  this prefs    
     variable finished
-    upvar ::${wtop}::wapp wapp
 
-    set wCan $wapp(can)
+    set wCan [::UI::GetCanvasFromWtop $wtop]
 
     # Patterns.
     set proto_ {[^:]+}
@@ -856,15 +853,14 @@ proc ::OpenMulticast::OpenMulticastQTStream {wtop wentry} {
 proc ::OpenMulticast::CleanupMulticastQTStream {wtop fid fullName token} { 
 
     upvar #0 $token state    
-    upvar ::${wtop}::wapp wapp
 
-    set wCan $wapp(can)
+    set wCan [::UI::GetCanvasFromWtop $wtop]
     set no_ {^2[0-9]+}
     catch {close $fid}
     #parray state
     
     # Waiting is over.
-    ::UI::StartStopAnimatedWave $wapp(statmess) 0
+    ::UI::StartStopAnimatedWaveOnMain 0
     
     # Access state as a Tcl array.
     # Check errors. 
@@ -908,7 +904,6 @@ proc ::OpenMulticast::CleanupMulticastQTStream {wtop fid fullName token} {
 proc ::OpenMulticast::ProgressMulticastQTStream {wtop fileTail token totalBytes currentBytes} {
 
     upvar #0 $token state
-    upvar ::${wtop}::wapp wapp
     
     # Access state as a Tcl array.
     if {$totalBytes != 0} {

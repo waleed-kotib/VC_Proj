@@ -15,7 +15,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.3 2003-08-30 09:40:59 matben Exp $
+# $Id: Coccinella.tcl,v 1.4 2003-09-13 06:39:25 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -136,7 +136,7 @@ proc resolve_cmd_realpath {infile} {
 # default file, never read.
 set prefs(majorVers) 0
 set prefs(minorVers) 94
-set prefs(releaseVers) 5
+set prefs(releaseVers) 6
 set prefs(fullVers) $prefs(majorVers).$prefs(minorVers).$prefs(releaseVers)
 
 # We may be embedded in another application, say an ActiveX component.
@@ -230,7 +230,7 @@ set this(path) $thisPath
 set this(script) $thisScript
 
 
-# Need a tmp directory.
+# Need a tmp directory, typically in a StarKit when QuickTime movies are opened.
 if {[info exists env(TMP)] && [file exists $env(TMP)]} {
     set this(tmpDir) [file join $env(TMP) tmpcoccinella]
 } elseif {[info exists env(TEMP)] && [file exists $env(TEMP)]} {

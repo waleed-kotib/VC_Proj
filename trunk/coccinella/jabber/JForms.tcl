@@ -7,12 +7,13 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #
-# $Id: JForms.tcl,v 1.6 2003-06-01 10:26:57 matben Exp $
+# $Id: JForms.tcl,v 1.7 2003-09-13 06:39:25 matben Exp $
 # 
 #      Updated to version 2.1 of JEP-0004
 #  
 #-------------------------------------------------------------------------------
 
+package require wrapper
 package provide JForms 1.0
 
 # Just make sure that we have the parent namespace here.
@@ -69,8 +70,8 @@ proc ::Jabber::Forms::Build {w xmllist args} {
 
     if {$jprefs(useXDataSearch)} {
 	foreach c $xmllist {
-	    if {[string equal [lindex $c 0] "x"]} {
-		array set cattrArr [lindex $c 1]
+	    if {[string equal [wrapper::gettag $c] "x"]} {
+		array set cattrArr [wrapper::getattrlist $c]
 		if {[info exists cattrArr(xmlns)] &&  \
 		  [string equal $cattrArr(xmlns) "jabber:x:data"]} {
 		    set hasXDataForm 1
@@ -257,7 +258,7 @@ proc ::Jabber::Forms::BuildSimple {w xmllist {template ""}} {
     
     # Handle tag by tag.
     foreach child $xmllist {
-	set tag [lindex $child 0]
+	set tag [wrapper::gettag $child]
 	FillInBoxOneTag $w $child {} i $template
 	incr i
     }
@@ -493,10 +494,10 @@ proc ::Jabber::Forms::BuildXData {w xml args} {
     variable optionLabel2Value
     variable optionValue2Label
 
-    if {[lindex $xml 0] != "x"} {
+    if {[wrapper::gettag $xml] != "x"} {
 	return -code error {Not proper xml data here}
     }
-    array set attrArr [lindex $xml 1]
+    array set attrArr [wrapper::getattrlist $xml]
     if {![info exists attrArr(xmlns)]} {
 	return -code error {Not proper xml data here}
     }

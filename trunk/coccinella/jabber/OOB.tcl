@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.6 2003-08-23 07:19:16 matben Exp $
+# $Id: OOB.tcl,v 1.7 2003-09-13 06:39:25 matben Exp $
 
 package provide OOB 1.0
 
@@ -363,10 +363,10 @@ proc ::Jabber::OOB::Cancel {out token} {
 proc ::Jabber::OOB::BuildText {w xml args} {
     global  sysFont prefs
 
-    if {[lindex $xml 0] != "x"} {
+    if {[wrapper::gettag $xml] != "x"} {
 	error {Not proper xml data here}
     }
-    array set attr [lindex $xml 1]
+    array set attr [wrapper::getattrlist $xml]
     if {![info exists attr(xmlns)]} {
 	error {Not proper xml data here}
     }
