@@ -5,7 +5,7 @@
 ##
 ## Large rewrite by Mats Bengtsson 2001-2002
 ##
-# $Id: pane.tcl,v 1.3 2003-12-22 15:04:57 matben Exp $
+# $Id: pane.tcl,v 1.4 2003-12-23 08:54:52 matben Exp $
 
 package provide Pane 1.0
 
@@ -25,6 +25,7 @@ package provide Pane 1.0
 ##	OPTIONS
 ##	-dynamic	Whether to dynamically resize or to resize only
 ##			when the user lets go of the handle
+##	-image          Image to use as sash.
 ##      -limit          How large fraction of a frame that is its
 ##                      min value. Defaults to 0.1.
 ##	-orient		Orientation of window to determing tiling.
@@ -68,10 +69,6 @@ package provide Pane 1.0
 namespace eval ::pane:: {
     namespace export pane
     
-    option add *Pane.sashBackground      white             widgetDefault
-    option add *Pane.imageHorizontal     pane::imh         widgetDefault
-    option add *Pane.imageVertical       pane::imv         widgetDefault
-
     variable PANE    
 
     set dataPaneH {
@@ -169,7 +166,7 @@ proc ::pane::pane {opt args} {
 ;proc ::pane::pane_config args {
     variable PANE    
 
-    array set opt {orn none par {} dyn 0 hpl {} hlk {} rel none lim none}
+    array set opt {orn none par {} dyn 0 hpl {} hlk {} rel none lim none ima none}
     set wids {}
     for {set i 0;set num [llength $args];set cargs {}} {$i<$num} {incr i} {
 	set arg [lindex $args $i]
@@ -179,6 +176,7 @@ proc ::pane::pane {opt args} {
 	    -d*	{ set key dyn; set val [regexp -nocase {^(1|yes|true|on)$} $val] }
 	    -o*	{ set key orn }
 	    -p*	{ set key par }
+	    -image      { set key ima }
 	    -handlep*	{ set key hpl }
 	    -handlel*	{ set key hlk }
 	    -relative   { set key rel }
@@ -235,22 +233,20 @@ proc ::pane::pane {opt args} {
 	set hndconf(-$wh) [image $wh $PANE(impane$ohv)]	
     }
     
-    # Uses the parent to get options which must have -class Pane.
-    set bg  [option get $p sashBackground Background]
-    set imh [option get $p imageHorizontal {}]
-    set imv [option get $p imageVertical {}]
-    #puts "imv=$imv, imh=$imh"
-    if {[set im${ohv}] == ""} {
+    # Label with image or plain frame.
+    if {$opt(ima) == ""} {
 	set widget frame
 	lappend widopts -$wh 8
 	set off $hndconf(-$wh)
     } else {
 	set widget label
-	lappend widopts -anchor nw -image [set im${ohv}]
+	if {$opt(ima) == "none"} {
+	    set im $PANE(impane$ohv)
+	} else {
+	    set im $opt(ima)
+	}
+	lappend widopts -anchor nw -image $im
 	set off [expr $hndconf(-$wh) + 2]
-    }
-    if {$bg != ""} {
-	lappend widopts -background $bg
     }
 
     set pos 0.0

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.25 2003-12-22 15:04:58 matben Exp $
+# $Id: NewMsg.tcl,v 1.26 2003-12-23 08:54:53 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -670,6 +670,7 @@ proc ::Jabber::NewMsg::DoQuote {w message to time} {
     regsub -all "\n" $message "\n> " quoteMsg
     set quoteMsg "\nAt $time, $to wrote:\n> $quoteMsg"
     $wtext insert end $quoteMsg
+    $wtext insert end \n
     
     # Quote only once.
     $locals($w,wtray) buttonconfigure quote -state disabled

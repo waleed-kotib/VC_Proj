@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.27 2003-12-22 15:04:58 matben Exp $
+# $Id: MailBox.tcl,v 1.28 2003-12-23 08:54:53 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -257,12 +257,21 @@ proc ::Jabber::MailBox::Build {args} {
     grid columnconfigure $wfrmsg 0 -weight 1
     grid rowconfigure $wfrmsg 0 -weight 1
     
-    if {[info exists prefs(paneGeom,$w)]} {
-	set relpos $prefs(paneGeom,$w)
+    set imageHorizontal [option get $frmid imageHorizontal {}]
+    set sashHBackground [option get $frmid sashHBackground {}]
+
+    set paneopts [list -orient vertical -limit 0.0]
+    if {[info exists prefs(paneGeom,$w]} {
+	lappend paneopts -relative $prefs(paneGeom,$w)
     } else {
-	set relpos {0.5 0.5}
+	lappend paneopts -relative {0.75 0.25}
     }
-    ::pane::pane $wfrmbox $wfrmsg -orient vertical -limit 0.0 -relative $relpos
+    if {$sashHBackground != ""} {
+	lappend paneopts -image "" -handlelook [list -background $sashHBackground]
+    } elseif {$imageHorizontal != ""} {
+	lappend paneopts -image $imageHorizontal
+    }    
+    eval {::pane::pane $wfrmbox $wfrmsg} $paneopts
     
     if {[string match "mac*" $this(platform)]} {
 	pack [frame $w.frall.pad -height 14] -side bottom
