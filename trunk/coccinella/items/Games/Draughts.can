@@ -1,0 +1,26 @@
+# Version: 2
+import 16.0 16.0 -tags */116547649 -width 314 -file chessimages/board.gif -height 308
+create oval 272.0 263.0 301.0 292.0 -disabledwidth 0 -fill #d9d9d9 -tags {oval */116547750 std}
+create oval 240.0 231.0 269.0 260.0 -disabledwidth 0 -fill #d9d9d9 -tags {oval */116547751 std}
+create oval 80.0 263.0 109.0 292.0 -disabledwidth 0 -fill #d9d9d9 -tags {oval */116547752 std}
+create oval 144.0 263.0 173.0 292.0 -disabledwidth 0 -fill #d9d9d9 -tags {oval */116547753 std}
+create oval 208.0 263.0 237.0 292.0 -disabledwidth 0 -fill #d9d9d9 -tags {oval */116547754 std}
+create oval 176.0 231.0 205.0 260.0 -disabledwidth 0 -fill #d9d9d9 -tags {oval */116547755 std}
+create oval 208.0 199.0 237.0 228.0 -disabledwidth 0 -fill #d9d9d9 -tags {oval */116547756 std}
+create oval 273.0 199.0 302.0 228.0 -disabledwidth 0 -fill #d9d9d9 -tags {oval */116547757 std}
+create oval 112.0 231.0 141.0 260.0 -disabledwidth 0 -fill #d9d9d9 -tags {oval */116547758 std}
+create oval 48.0 231.0 77.0 260.0 -disabledwidth 0 -fill #d9d9d9 -tags {oval */116547759 std}
+create oval 144.0 199.0 173.0 228.0 -disabledwidth 0 -fill #d9d9d9 -tags {oval */116547760 std}
+create oval 80.0 199.0 109.0 228.0 -disabledwidth 0 -fill #d9d9d9 -tags {oval */116547761 std}
+create oval 272.0 71.0 301.0 100.0 -disabledwidth 0 -fill #000000 -tags {oval */116547762 std}
+create oval 240.0 39.0 269.0 68.0 -disabledwidth 0 -fill #000000 -tags {oval */116547763 std}
+create oval 240.0 103.0 269.0 132.0 -disabledwidth 0 -fill #000000 -tags {oval */116547764 std}
+create oval 48.0 39.0 77.0 68.0 -disabledwidth 0 -fill #000000 -tags {oval */116547765 std}
+create oval 112.0 39.0 141.0 68.0 -disabledwidth 0 -fill #000000 -tags {oval */116547766 std}
+create oval 80.0 71.0 109.0 100.0 -disabledwidth 0 -fill #000000 -tags {oval */116547767 std}
+create oval 176.0 39.0 205.0 68.0 -disabledwidth 0 -fill #000000 -tags {oval */116547768 std}
+create oval 48.0 103.0 77.0 132.0 -disabledwidth 0 -fill #000000 -tags {oval */116547769 std}
+create oval 112.0 103.0 141.0 132.0 -disabledwidth 0 -fill #000000 -tags {oval */116547770 std}
+create oval 144.0 71.0 173.0 100.0 -disabledwidth 0 -fill #000000 -tags {oval */116547771 std}
+create oval 208.0 71.0 237.0 100.0 -disabledwidth 0 -fill #000000 -tags {oval */116547772 std}
+create oval 176.0 103.0 205.0 132.0 -disabledwidth 0 -fill #000000 -tags {oval */116547773 std}
