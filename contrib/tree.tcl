@@ -6,7 +6,7 @@
 # Copyright (C) 2002-2004 Mats Bengtsson
 # This source file is distributed under the BSD license.
 # 
-# $Id: tree.tcl,v 1.35 2004-10-20 13:35:59 matben Exp $
+# $Id: tree.tcl,v 1.36 2004-10-22 15:05:33 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -49,7 +49,7 @@
 #       -sortlevels, sortLevels, SortLevels
 #	-sortorder, sortOrder, SortOrder                      (decreasing|increasing)?
 #       -stripecolors, stripeColors, StripeColors
-#	-styleicons, styleIcons, StyleIcons                  (plusminus|triangle)
+#	-styleicons, styleIcons, StyleIcons                  (plusminus|triangle|crystal)
 #	-treecolor, treeColor, TreeColor                      color?
 #	-treedash, treeDash, TreeDash                         dash
 #	-width, width, Width
@@ -155,13 +155,13 @@ namespace eval tree {
       -foreground black -background white]
     
     set widgetGlobals(openPM) [image create photo -data {
-    R0lGODdhCQAJAKIAAP//////wsLCwsLCibS0tFOJwgAAAAAAACwAAAAACQAJ
-    AAADHUi1XAowgiUjrYKavXOBQSh4YzkuAkEMrKI0C5EAADs=
+	R0lGODdhCQAJAKIAAP//////wsLCwsLCibS0tFOJwgAAAAAAACwAAAAACQAJ
+	AAADHUi1XAowgiUjrYKavXOBQSh4YzkuAkEMrKI0C5EAADs=
     }]
-     
+    
     set widgetGlobals(closePM) [image create photo -data {
-    R0lGODdhCQAJAKIAAP//////wsLCwsLCibS0tFOJwgAAAAAAACwAAAAACQAJ
-    AAADIEi1XAowghVNpNACQY33XAEFRiCEp2Cki0AQQ6wozUIkADs=
+	R0lGODdhCQAJAKIAAP//////wsLCwsLCibS0tFOJwgAAAAAAACwAAAAACQAJ
+	AAADIEi1XAowghVNpNACQY33XAEFRiCEp2Cki0AQQ6wozUIkADs=
     }]
 
     set widgetGlobals(idir) [image create photo ::tree::idir -data {
@@ -219,7 +219,23 @@ namespace eval tree {
 	FuraxfshA4UKXmuc8AAB4V0XHzp4tTFig2DHeENYteFhQULHMm7cAOF5QEAA
 	Ow==
     }] 
-        
+
+    # Crystal arrows.
+    set widgetGlobals(openCrystal) [image create photo -data {
+	R0lGODlhDAAKAPQAMfEI5KTK/Hyq9HSq9Fyi/FyGzFSa/FSS9FSO9FSCzEyK
+	9ESG7ESC7DyC7Dx67Dx65Dx25DR67DR25DRy5DRqzCxm1CRazAQ2rAQCxAAA
+	AAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAAAAALAAAAAAMAAoAAAU7ICAKREkU
+	YgoMQctc6hgcyAPHLKJAN5AMA0NAwZhcjrBCS9FoSAKvVGVBdUSMMQojcu2p
+	LN2YCuMFhAAAOw==
+    }]
+    set widgetGlobals(closeCrystal) [image create photo -data {
+	R0lGODlhCgAMAPQAMfEI5Lza/KzO/Iy2/Iyy9IS+/Hy2/Hyy/HSy/HSq/Gyu
+	/Gym/GSm/GSi9FyW9FSS9FSO9Eya/EyG9ESG7Dx67AQ2rAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAAAAALAAAAAAKAAwAAAU7ICAC0WiK
+	UXWOUaCKTBM3QfPShYEszaMygUJC0YhAJhXaIdFwHCkVhmA6eEiggIpWC8Ge
+	IoTXV3wiA0IAOw==
+    }]
+
     # Let them be accesible from the outside. 
     set ::tree::idir            $widgetGlobals(idir)
     set ::tree::ifile           $widgetGlobals(ifile)
@@ -976,14 +992,22 @@ proc ::tree::ConfigureIcons {w} {
     upvar ::tree::${w}::options options
     upvar ::tree::${w}::priv priv
 
-    if {[string equal $options(-styleicons) "plusminus"]} {
-	set priv(imclose) $widgetGlobals(closePM)	
-	set priv(imopen)  $widgetGlobals(openPM)
-    } elseif {[string equal $options(-styleicons) "triangle"]} {
-	set priv(imclose) $widgetGlobals(closeMac)	
-	set priv(imopen)  $widgetGlobals(openMac)
-    } else {
-	return -code error "unrecognized value \"$options(-styleicons)\" for -styleicons"
+    switch -- $options(-styleicons) {
+	plusminus {
+	    set priv(imclose) $widgetGlobals(closePM)	
+	    set priv(imopen)  $widgetGlobals(openPM)
+	}
+	triangle {
+	    set priv(imclose) $widgetGlobals(closeMac)	
+	    set priv(imopen)  $widgetGlobals(openMac)
+	}
+	crystal {
+	    set priv(imclose) $widgetGlobals(closeCrystal)	
+	    set priv(imopen)  $widgetGlobals(openCrystal)
+	}
+	default {
+	    return -code error "unrecognized value \"$options(-styleicons)\" for -styleicons"
+	}
     }
 
     # Let any -closeimage or -openimage override.

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.72 2004-10-02 13:14:55 matben Exp $
+# $Id: GroupChat.tcl,v 1.73 2004-10-22 15:05:33 matben Exp $
 
 package require History
 
@@ -629,7 +629,9 @@ proc ::Jabber::GroupChat::Build {roomjid args} {
     set wtxt      $frmid.frtxt
     set wtext     $wtxt.0.text
     set wysc      $wtxt.0.ysc
-    set wusers    $wtxt.users
+    set wfrusers  $wtxt.1
+    set wusers    $wfrusers.text
+    set wyscusers $wfrusers.ysc
     set wtxtsnd   $frmid.frtxtsnd
     set wtextsnd  $wtxtsnd.text
     set wyscsnd   $wtxtsnd.ysc
@@ -721,14 +723,26 @@ proc ::Jabber::GroupChat::Build {roomjid args} {
     frame $wtxt -height 200
     frame $wtxt.0
     text $wtext -height 12 -width 1 -font $fontS -state disabled  \
-      -borderwidth 1 -relief sunken -yscrollcommand [list $wysc set] -wrap word \
-      -cursor {}
+      -borderwidth 1 -relief sunken -wrap word -cursor {}  \
+      -yscrollcommand [list ::UI::ScrollSet $wysc \
+      [list grid $wysc -column 1 -row 0 -sticky ns -padx 2]]
+    scrollbar $wysc -orient vertical -command [list $wtext yview]
+    grid $wtext -column 0 -row 0 -sticky news
+    grid $wysc  -column 1 -row 0 -sticky ns -padx 2
+    grid columnconfigure $wtxt.0 0 -weight 1
+    grid rowconfigure    $wtxt.0 0 -weight 1
+    
+    frame $wfrusers
     text $wusers -height 12 -width 12 -state disabled  \
       -borderwidth 1 -relief sunken  \
-      -spacing1 1 -spacing3 1 -wrap none -cursor {}
-    scrollbar $wysc -orient vertical -command [list $wtext yview]
-    pack $wtext -side left -fill both -expand 1
-    pack $wysc -side right -fill y -padx 2
+      -spacing1 1 -spacing3 1 -wrap none -cursor {} \
+      -yscrollcommand [list ::UI::ScrollSet $wyscusers \
+      [list grid $wyscusers -column 1 -row 0 -sticky ns -padx 2]]
+    scrollbar $wyscusers -orient vertical -command [list $wusers yview]
+    grid $wusers    -column 0 -row 0 -sticky news
+    grid $wyscusers -column 1 -row 0 -sticky ns -padx 2
+    grid columnconfigure $wfrusers 0 -weight 1
+    grid rowconfigure    $wfrusers 0 -weight 1
     
     set imageVertical   \
       [::Theme::GetImage [option get $frmid imageVertical {}]]
@@ -748,7 +762,7 @@ proc ::Jabber::GroupChat::Build {roomjid args} {
     } elseif {$imageVertical != ""} {
 	lappend paneopts -image $imageVertical
     }    
-    eval {::pane::pane $wtxt.0 $wusers} $paneopts
+    eval {::pane::pane $wtxt.0 $wfrusers} $paneopts
     
     # The tags.
     ::Jabber::GroupChat::ConfigureTextTags $w $wtext
@@ -756,12 +770,14 @@ proc ::Jabber::GroupChat::Build {roomjid args} {
     # Text send.
     frame $wtxtsnd -height 100 -width 300
     text  $wtextsnd -height 4 -width 1 -font $fontS -wrap word \
-      -borderwidth 1 -relief sunken -yscrollcommand [list $wyscsnd set]
+      -borderwidth 1 -relief sunken -yscrollcommand \
+      [list ::UI::ScrollSet $wyscsnd \
+      [list grid $wyscsnd -column 1 -row 0 -sticky ns]]
     scrollbar $wyscsnd -orient vertical -command [list $wtextsnd yview]
     grid $wtextsnd -column 0 -row 0 -sticky news
-    grid $wyscsnd -column 1 -row 0 -sticky ns
+    grid $wyscsnd  -column 1 -row 0 -sticky ns
     grid columnconfigure $wtxtsnd 0 -weight 1
-    grid rowconfigure $wtxtsnd 0 -weight 1
+    grid rowconfigure    $wtxtsnd 0 -weight 1
     
     set paneopts [list -orient vertical -limit 0.0]
     if {[info exists prefs(paneGeom,groupchatDlgVert)]} {

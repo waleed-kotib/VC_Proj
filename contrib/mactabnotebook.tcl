@@ -8,7 +8,7 @@
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: mactabnotebook.tcl,v 1.20 2004-10-12 13:48:56 matben Exp $
+# $Id: mactabnotebook.tcl,v 1.21 2004-10-22 15:05:33 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -51,6 +51,7 @@
 #      pathName displaypage ?pageName?
 #      pathName getuniquename pageName
 #      pathName newpage pageName ?-text value -image imageName?
+#      pathName nextpage
 #      pathName pageconfigure pageName ?-text value -image imageName?
 #      pathName pages
 #
@@ -175,7 +176,8 @@ proc ::mactabnotebook::Init { } {
     }
   
     # The legal widget commands. These are actually the Notebook commands.
-    set widgetCommands {cget configure deletepage displaypage newpage pages}
+    set widgetCommands \
+      {cget configure deletepage displaypage newpage nextpage pages}
 
     # Nonstyled options.
     option add *MacTabnotebook.background              white        widgetDefault
@@ -535,6 +537,9 @@ proc ::mactabnotebook::WidgetProc {w command args} {
 	newpage {
 	    set result [eval {NewPage $w} $args]
 	}
+	nextpage {
+	    set result [NextPage $w]
+	}
 	pageconfigure {
 	    set result [eval {PageConfigure $w} $args]
 	}
@@ -722,6 +727,20 @@ proc ::mactabnotebook::ConfigurePage {w name args} {
 	    }
 	}
     }
+}
+
+proc ::mactabnotebook::NextPage {w} {
+    
+    upvar ::mactabnotebook::${w}::tnInfo tnInfo
+
+    set ind [lsearch -exact $tnInfo(tabs) $tnInfo(current)]
+    if {$ind >= 0} {
+	if {$ind == [expr [llength $tnInfo(tabs)]-1]} {
+	    set ind 0
+	}
+	Display $w [lindex $tnInfo(tabs) $ind]
+    }
+    return $tnInfo(current)
 }
 
 proc ::mactabnotebook::Pages {w} {

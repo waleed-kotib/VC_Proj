@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: VCard.tcl,v 1.25 2004-10-09 13:21:57 matben Exp $
+# $Id: VCard.tcl,v 1.26 2004-10-22 15:05:33 matben Exp $
 
 package provide VCard 1.0
 
@@ -350,6 +350,8 @@ proc ::VCard::Build {nstoken} {
 
     set priv(wemails)  $wemails
     set priv(wdesctxt) $wdesctxt
+    
+    #bind $nbframe <Control-Tab-Key> [list $nbframe nextpage]
     
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jvcard)]]
     if {$nwin == 1} {

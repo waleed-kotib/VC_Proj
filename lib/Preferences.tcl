@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.64 2004-10-04 09:22:19 matben Exp $
+# $Id: Preferences.tcl,v 1.65 2004-10-22 15:05:34 matben Exp $
  
 package require notebook
 package require tree
@@ -700,7 +700,7 @@ proc ::Preferences::Proxies::BuildPage {page} {
     label $pca.lport -text [mc {Proxy Port}]:
     entry $pca.eport -textvariable [namespace current]::tmpPrefs(httpproxyport)
     checkbutton $pca.auth -text " [mc {Use proxy authorization}]" \
-      -textvariable [namespace current]::tmpPrefs(httpproxyauth)
+      -variable [namespace current]::tmpPrefs(httpproxyauth)
     label $pca.luser -text [mc Username]:
     entry $pca.euser -textvariable [namespace current]::tmpPrefs(httpproxyusername)
     label $pca.lpass -text [mc Password]:
