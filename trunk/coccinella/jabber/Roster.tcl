@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.21 2003-11-12 08:20:49 matben Exp $
+# $Id: Roster.tcl,v 1.22 2003-11-14 10:00:29 matben Exp $
 
 package provide Roster 1.0
 
@@ -801,8 +801,8 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
     # If we have an ask attribute, put in Pending tree dir.
     if {[info exists argsArr(-ask)] &&  \
       [string equal $argsArr(-ask) "subscribe"]} {
-	eval {$wtree newitem [list {Subscription Pending} $jid] -tags $jidx} \
-	  $itemOpts
+	eval {$wtree newitem [list {Subscription Pending} $jid]  \
+	  -image $icon -tags $jidx} $itemOpts
     } elseif {[info exists argsArr(-groups)] && ($argsArr(-groups) != "")} {
 	set groups $argsArr(-groups)
 	
@@ -1216,9 +1216,7 @@ proc ::Jabber::Roster::TrptPopupCmd {token} {
 
     set wjid $dlgstate(wjid)
     set popuptrpt $dlgstate(popuptrpt)
-    
-    #puts "token=$token, popuptrpt=$popuptrpt"
-    
+        
     # Seems to be necessary to achive any selection.
     focus $wjid
 
@@ -1228,12 +1226,12 @@ proc ::Jabber::Roster::TrptPopupCmd {token} {
 	    $wjid selection range 0 8
 	}
 	aim {
-	    set dlgstate(jid) "usersName@$dlgstate(servicejid,aim)"
-	    
+	    set dlgstate(jid) "userName@$dlgstate(servicejid,aim)"
+	    $wjid selection range 0 8
 	}
 	yahoo {
-	    set dlgstate(jid) "usersName@$dlgstate(servicejid,yahoo)"
-	    
+	    set dlgstate(jid) "userName@$dlgstate(servicejid,yahoo)"
+	    $wjid selection range 0 8
 	}
 	icq {
 	    set dlgstate(jid) "screeNumber@$dlgstate(servicejid,icq)"
