@@ -6,39 +6,13 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasCmd.tcl,v 1.6 2004-03-13 15:21:41 matben Exp $
+# $Id: CanvasCmd.tcl,v 1.7 2004-03-15 13:26:11 matben Exp $
 
 package provide CanvasCmd 1.0
 
 
 namespace eval ::CanvasCmd:: {
     
-}
-
-# CanvasCmd::CancelAllPutGetAndPendingOpen ---
-#
-#       It is supposed to stop every put and get operation taking place.
-#       This may happen when the user presses a stop button or something.
-#       
-# Arguments:
-#
-# Results:
-
-proc ::CanvasCmd::CancelAllPutGetAndPendingOpen {wtop} {
-    global  prefs
-    
-    # This must be instance specific!!!
-    # I think we let put operations go on.
-    #::PutFileIface::CancelAllWtop $wtop
-    ::GetFileIface::CancelAllWtop $wtop
-    ::Import::HttpResetAll $wtop
-    if {[string equal $prefs(protocol) "jabber"]} {
-	::Network::KillAll
-	::WB::SetStatusMessage $wtop {}
-	::WB::StartStopAnimatedWave $wtop 0
-    } else {
-	::OpenConnection::OpenCancelAllPending
-    }
 }
 
 # CanvasCmd::SelectAll --

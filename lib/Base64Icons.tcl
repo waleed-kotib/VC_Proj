@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Base64Icons.tcl,v 1.5 2004-01-13 14:50:21 matben Exp $
+# $Id: Base64Icons.tcl,v 1.6 2004-03-15 13:26:11 matben Exp $
  
 ### First all the tool buttons, both on and off states. ########################
 
@@ -542,62 +542,6 @@ set ::UI::icons(mactriangleclosed) [image create photo -data {
     R0lGODlhCwALAPMAAP///97e3s7O/729vZyc/4yMjGNjzgAAAAAAAAAAAAAA
     AAAAAAAAAAAAAAAAAAAAACH5BAEAAAEALAAAAAALAAsAAAQiMMgjqw2H3nqE
     3h3xWaEICgRhjBi6FgMpvDEpwuCBg3sVAQA7
-}]
-
-
-### Miscellaneous images that has no transparency in them. #####################
-
-set ::UI::icons(barvert) [image create photo -data {
-    R0lGODlhCwAyAPcAAP//////////////////////////////////////////////////////
-    //////////////////////////////////////e1vfe1vfe1vfe1vfe1vfe1vfe1vfe1vfe1
-    vfe1vfe1vfe1vfe1vfe1vfe1vfe1vfe1vfe1vfe1vfe1vfe1ve+cre+cre+cre+cre+cre+c
-    re+cre+cre+cre+cre+cre+cre+cre+cre+cre+cre+cre+cre+cre+cre+cre9zhO9zhO9z
-    hO9zhO9zhO9zhO9zhO9zhO9zhO9zhO9zhO9zhO9zhO9zhO9zhO9zhO9zhO9zhO9zhO9zhO9z
-    hOdae+dae+dae+dae+dae+dae+dae+dae+dae+dae+dae+dae+dae+dae+dae+dae+dae+da
-    e+dae+dae+dae+dKY+dKY+dKY+dKY+dKY+dKY+dKY+dKY+dKY+dKY+dKY+dKY+dKY+dKY+dK
-    Y+dKY+dKY+dKY+dKY+dKY+dKY94xUt4xUt4xUt4xUt4xUt4xUt4xUt4xUt4xUt4xUt4xUt4x
-    Ut4xUt4xUt4xUt4xUt4xUt4xUt4xUt4xUt4xUtYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYA
-    IdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIc7Ozs7Ozs7Ozs7Ozs7Ozs7O
-    zs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OzpycnJycnJyc
-    nJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJyc
-    nISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISE
-    hISEhISEhISEhFJSUlJSUlJSUlJSUlJSUlJSUlJSUlJSUlJSUlJSUlJSUlJSUlJSUlJSUlJS
-    UlJSUlJSUlJSUlJSUlJSUlJSUlJSUgAAACwAAAAACwAyAAAIfABVCRxIsKBBgRdYBLHC0Moa
-    QNQEVppIsRK1XwMrWsRIkOLFgxsPilQFgGDJgukIphxZ8KRAlwNXCpTJ8qVJgzRp1oQJc6bK
-    mjcH9lSVE6jQoD9jGrV5FGVSozxxPgUa1anSpVWn6mSZ9apPrEi9El1KMuzXs1TNjhU7MiAA
-    Ow==
-}]
-
-set ::UI::icons(barhoriz) [image create photo -data {
-    R0lGODdhQQALAOcAAP//////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////
-    /////++Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+U
-    pe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe+Upe97lO97lO97lO97
-    lO97lO97lO97lO97lO97lO97lO97lO97lO97lO97lO97lO97lO97lO97lO97lO97lO97lO97
-    lO97lO97lO97lO97lO97lO97lO97lO97lO97lO97lNYAIdYAIdYAIdYAIdYAIdYAIdYAIdYA
-    IdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYAIdYA
-    IdYAIdYAIdYAIdYAIdYAIdYAIc7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O
-    zs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O
-    zs7Ozs7OzpycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJyc
-    nJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnJycnISEhISEhISE
-    hISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISE
-    hISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhFJSUv//////////////////////
-    ////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////ywAAAAAQQALAAAIdwABCRxIsKDBgwgTKlzIsKHD
-    hw9DIAQgkCIgixgrary4MSPHjx4tHgwBBgzCbwJRAlLJMqXLlS9bwpwpU2VBkiVNQtzJc2TO
-    nD2D8gTy86fQow5/KV26dGDIjlBBRn0q9SCoq1ivEqwZsytNr1y/Ih1LtqxZhAEBADs=
-}]
-
-set ::UI::icons(imcolor) [image create photo -data {
-    R0lGODlhOAA0AOMAAAAAAHBwcHh4eIiIiJCQkKCgoMDAwNDQ0NjY2Pj4+AAAAAAAAAAAAAAA
-    AAAAAAAAACH+Dk1hZGUgd2l0aCBHSU1QACwAAAAAOAA0AAAE/jDJSau9OGuQjv9gKI5kWXJm
-    qq4jgbJw3L5yHbvdR+x87//AnYigwoFcgKRyyWw2czoA0WSMaq6VA/SA5JWqHhx2rI0yp0Ma
-    lzPGls086Wwrbmve0akLbT2y7Rl4On58a3R/gBeCM4VghokYiyE7UnyOdZBZW5MAnZ1ol4iZ
-    E5J+n36HoxalhJypqhSsR2mvsBKyVGqYsLhfuqKqWnYAfVa2t5smxGG/x8htLsXMzh120dOo
-    zsJj14bZx9tY3aHU4VfjzdrWy97G4OvSj+/Q7KE2JPDYOtSJ6Mkq1fj5qxGQ2kAZBZ0dDANE
-    RMJjC9d4OhXioa2ISCYWKsMvAcaJXRRBWIT1EaQPDyNVldQ4YUrKUSs9EWiJ0tzFerqA0OQo
-    EOc/LhZc2iTpk8TMCkI7RjwStGaQp1ApxTvS8ADIq1izXp16r+scr2CNqglL1kjUs2jTxtHK
-    tq3btwAiAAA7
 }]
 
 #-------------------------------------------------------------------------------

@@ -951,6 +951,31 @@ Waiting for server response...}
 in server. The description is optional.}
 ::msgcat::mcset en chatcompreply        {%s is composing a reply}
 
+# Get file
+::msgcat::mcset en getcontacting   {Contacting %s. Waiting for response...}
+::msgcat::mcset en geteoferr       {Connection to %s failed: received an eof.}
+::msgcat::mcset en getconnerr	    {Connection to %s failed.}
+::msgcat::mcset en getnegotiate    {Client contacted: %s; negotiating...}
+::msgcat::mcset en getreaderr      {Error reading server response from %s.}
+::msgcat::mcset en getunknownprot  {The server at %s didn't respond with a well formed protocol.}
+::msgcat::mcset en getnot200	    {The server at %s responded with a code %s: "%s"}
+::msgcat::mcset en getstarts	    {Client at %s accepted file "%s". Starts transfer...}
+::msgcat::mcset en getended	    {Transfer from %s ended prematurely.}
+::msgcat::mcset en getfinished	    {Finished getting file "%s" from %s.}
+::msgcat::mcset en getneterr	    {Network error when getting from %s.}
+
+# Put file
+::msgcat::mcset en putcontacting   {Contacting %s. Waiting for response...}
+::msgcat::mcset en puteoferr       {Connection to %s failed: received an eof.}
+::msgcat::mcset en putconnerr	    {Connection to %s failed.}
+::msgcat::mcset en putnegotiate    {Client contacted: %s; negotiating...}
+::msgcat::mcset en putreaderr      {Error reading server response from %s.}
+::msgcat::mcset en putunknownprot  {The server at %s didn't respond with a well formed protocol.}
+::msgcat::mcset en putnot200	    {The server at %s responded with a code %s: "%s"}
+::msgcat::mcset en putstarts	    {Client at %s accepted file %s. Starts transfer...}
+::msgcat::mcset en putended	    {Transfer to %s ended prematurely.}
+::msgcat::mcset en putfinished	    {Finished putting file "%s" to %s.}
+::msgcat::mcset en putneterr	    {Network error when putting to %s.}
 
 
 # END --------------------------------------------------------------------------

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.24 2004-03-13 15:21:41 matben Exp $
+# $Id: OOB.tcl,v 1.25 2004-03-15 13:26:11 matben Exp $
 
 package provide OOB 1.0
 
@@ -205,7 +205,7 @@ proc ::Jabber::OOB::ParseSet {jlibname from subiq args} {
 	set id $locals(id)
 	incr locals(id)
     }
-    set desc {}
+    set desc [::msgcat::mc None]
     foreach child [wrapper::getchildren $subiq] {
 	set tag  [wrapper::gettag $child]
 	set $tag [wrapper::getcdata $child]

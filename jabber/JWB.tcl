@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.1 2004-03-13 15:16:10 matben Exp $
+# $Id: JWB.tcl,v 1.2 2004-03-15 13:25:56 matben Exp $
 
 package provide JWB 1.0
 
@@ -90,7 +90,7 @@ proc ::Jabber::WB::InitUI { } {
 	{separator}
 	{command   mOpenImage/Movie    {::Import::ImportImageOrMovieDlg $wtop}    normal   I}
 	{command   mOpenURLStream      {::OpenMulticast::OpenMulticast $wtop}     normal   {}}
-	{command   mStopPut/Get/Open   {::CanvasCmd::CancelAllPutGetAndPendingOpen $wtop} normal {}}
+	{command   mStopPut/Get/Open   {::Jabber::WB::Stop $wtop}        normal {}}
 	{separator}
 	{command   mOpenCanvas         {::CanvasFile::DoOpenCanvasFile $wtop}     normal   O}
 	{command   mSaveCanvas         {::CanvasFile::DoSaveCanvasFile $wtop}     normal   S}
@@ -447,17 +447,29 @@ proc ::Jabber::WB::SetMinsize {wtop} {
     wm minsize $w $wMin $hMin
 }
 
+# Jabber::WB::Stop --
+#
+#       It is supposed to stop every put and get operation taking place.
+#       This may happen when the user presses a stop button or something.
+#       
+# Arguments:
+#
+# Results:
+
 proc ::Jabber::WB::Stop {wtop} {
     variable jwbstate
     
     switch -- $jwbstate($wtop,type) {
 	chat - groupchat {
-	    ::CanvasCmd::CancelAllPutGetAndPendingOpen $wtop
+	    ::GetFileIface::CancelAllWtop $wtop
+	    ::Import::HttpResetAll $wtop
 	}
 	default {
 	    ::Import::HttpResetAll $wtop
 	}
     }
+    ::WB::SetStatusMessage $wtop {}
+    ::WB::StartStopAnimatedWave $wtop 0
 }
 
 # Jabber::WB::LoginHook --

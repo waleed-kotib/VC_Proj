@@ -14,7 +14,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Plugins.tcl,v 1.13 2004-03-01 13:30:51 matben Exp $
+# $Id: Plugins.tcl,v 1.14 2004-03-15 13:26:11 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -194,7 +194,7 @@ proc ::Plugins::InitTk { } {
     set plugin(tk,icon,12) [image create photo -format gif -file \
       [file join $this(path) images tklogo12.gif]]
     #set supSuff(tk) {.gif}
-    set supportedMimeTypes(tk) image/gif
+    set supportedMimeTypes(tk) {image/gif image/x-portable-pixmap}
     set plugin(tk,mimes) $supportedMimeTypes(tk)
 }
 

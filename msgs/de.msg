@@ -4,7 +4,8 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-# The German catalog provided by Hermann J. Beckers
+# The German catalog provided by Hermann J. Beckers 
+#     (hj dot beckers at onlinehome dot de)
 
 ::msgcat::mcset de Accept	Akzeptieren
 ::msgcat::mcset de Add		Hinzufügen
@@ -949,6 +950,32 @@ Warte auf Server-Antwort...}
 ::msgcat::mcset de oobmsg               {Erlaubt Benutzer %s den Abruf einer Datei über Ihren\
 eingebauten Server. Die Beschreibung ist optional.}
 ::msgcat::mcset de chatcompreply        {%s erstellt eine Antwort}
+
+# Get file
+::msgcat::mcset de getcontacting   {Kontaktiere %s. Warte auf Antwort...}
+::msgcat::mcset de geteoferr       {Fehler bei Verbindung zu %s: EOF erhalten.}
+::msgcat::mcset de getconnerr	    {Fehler bei Verbindung zu %s}
+::msgcat::mcset de getnegotiate    {Client kontaktiert: %s; Aushandeln...}
+::msgcat::mcset de getreaderr      {Fehler beim Lesen der Serverantwort von %s.}
+::msgcat::mcset de getunknownprot  {Der Server auf %s antwortete nicht mit einem gültigen Protokoll.}
+::msgcat::mcset de getnot200	    {Der Server auf %s antwortete mit Code %s: "%s"}
+::msgcat::mcset de getstarts	    {Client auf %s hat Datei %s akzeptiert. Übertragung gestartet...}
+::msgcat::mcset de getended	    {Übertragung von %s endete vorzeitig.}
+::msgcat::mcset de getfinished	    {Übertragung der Datei "%s" von %s beendet.}
+::msgcat::mcset de getneterr	    {Netzwerkfehler bei Übertragung von %s.}
+
+# Put file
+::msgcat::mcset de putcontacting   {Kontaktiere %s. Warte auf Antwort...}
+::msgcat::mcset de puteoferr       {Fehler bei Verbindung zu %s: EOF erhalten.}
+::msgcat::mcset de putconnerr	    {Fehler bei Verbindung zu %s.}
+::msgcat::mcset de putnegotiate    {Client kontaktiert: %s; Aushandeln...}
+::msgcat::mcset de putreaderr      {Fehler beim Lesen der Serverantwort von %s.}
+::msgcat::mcset de putunknownprot  {Der Server auf %s antwortete nicht mit einem gültigen Protokoll.}
+::msgcat::mcset de putnot200	    {Der Server auf %s antwortete mit Code %s: "%s"}
+::msgcat::mcset de putstarts	    {Client auf %s hat Datei %s akzeptiert. Übertragung gestartet...}
+::msgcat::mcset de putended	    {Übertragung zu %s endete vorzeitig.}
+::msgcat::mcset de putfinished	    {Übertragung der Datei "%s" zu %s beendet.}
+::msgcat::mcset de putneterr	    {Netzwerkfehler bei Übertragung zu %s.}
 
 
 # END --------------------------------------------------------------------------

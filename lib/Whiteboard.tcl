@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.21 2004-03-13 15:21:42 matben Exp $
+# $Id: Whiteboard.tcl,v 1.22 2004-03-15 13:26:11 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -713,7 +713,7 @@ proc ::WB::BuildWhiteboard {wtop args} {
 proc ::WB::CloseHook {wclose} {
     global  wDlgs
     
-    if {[string match $wDlgs(wb)* $wclose]} {
+    if {[string equal [winfo class $wclose] "Whiteboard"]} {
 	if {$wclose == "."} {
 	    set wtop .
 	} else {
