@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.60 2004-08-26 12:24:18 matben Exp $
+# $Id: Preferences.tcl,v 1.61 2004-09-21 14:56:21 matben Exp $
  
 package require notebook
 package require tree
@@ -484,7 +484,7 @@ proc ::Preferences::NetSetup::Advanced {  } {
     set py 0
     set px 2
     set row 0
-    foreach wid {serv http jab} {
+    foreach wid {serv http} {
 	grid $fropt.l$wid -column 0 -row $row -sticky e   \
 	  -padx $px -pady $py
 	grid $fropt.e$wid -column 1 -row $row -sticky w   \
