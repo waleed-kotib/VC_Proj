@@ -8,16 +8,20 @@
 # Defined in global namespace and may therefore be used in any namespace.
 
 ::msgcat::mcset nl Accept		{Accepteren}
+#::msgcat::mcset nl Action {}
+#::msgcat::mcset nl Active {}
 ::msgcat::mcset nl Add			{Toevoegen}
 ::msgcat::mcset nl Address		{Adres}
 ::msgcat::mcset nl Advanced		{Geavanceerd}
 ::msgcat::mcset nl Agents		{Agenten}
+#::msgcat::mcset nl Allow {}
 ::msgcat::mcset nl Appearance   	{Uiterlijk}
 ::msgcat::mcset nl Apply		{Toepassen}
 ::msgcat::mcset nl Available		{Beschikbaar}
 ::msgcat::mcset nl Away			{Afwezig}
 ::msgcat::mcset nl Binary		{Binair}
 ::msgcat::mcset nl Birthday		{Geboortedatum}
+#::msgcat::mcset nl Block {}
 ::msgcat::mcset nl Blockers		{Geblokkeerde JID's}
 ::msgcat::mcset nl Blocking		{Bezig met blokkeren}
 ::msgcat::mcset nl Browser		{Browser}
@@ -64,8 +68,10 @@
 ::msgcat::mcset nl Group		{Groep}
 ::msgcat::mcset nl Groupchat            {Groepsgesprek}
 ::msgcat::mcset nl Handling		{Behandeling}
+#::msgcat::mcset nl Height {}
 ::msgcat::mcset nl History		{Geschiedenis}
 ::msgcat::mcset nl Home			{Start}
+#::msgcat::mcset nl Image {}
 ::msgcat::mcset nl Import		{Importeren}
 ::msgcat::mcset nl Inbox		{Postvak in}
 ::msgcat::mcset nl Info			{Info}
@@ -78,6 +84,7 @@
 ::msgcat::mcset nl Middle		{Tussennaam}
 ::msgcat::mcset nl Moderators		{Moderators}
 ::msgcat::mcset nl More			{Meer}
+#::msgcat::mcset nl Name {}
 ::msgcat::mcset nl Never		{Nooit}
 ::msgcat::mcset nl New			{Nieuw}
 ::msgcat::mcset nl Next			{Volgende}
@@ -142,14 +149,17 @@
 ::msgcat::mcset nl To			{Aan}
 ::msgcat::mcset nl Topic		{Onderwerp}
 ::msgcat::mcset nl Trash		{Prullenbak}
+#::msgcat::mcset nl Type {}
 ::msgcat::mcset nl Unregister		{Registratie ongedaan maken}
 ::msgcat::mcset nl Unsubscribe		{Uitschrijven}
 ::msgcat::mcset nl Unsubscribed		{Uitgeschreven}
 ::msgcat::mcset nl Username		{Gebruikersnaam}
+#::msgcat::mcset nl Value {}
 ::msgcat::mcset nl Visitors		{Bezoekers}
 ::msgcat::mcset nl Warning		{Waarschuwing}
 ::msgcat::mcset nl Welcome              {Welkom}
 ::msgcat::mcset nl Whiteboard		{Whiteboard}
+#::msgcat::mcset nl Width {}
 ::msgcat::mcset nl Work			{Werk}
 ::msgcat::mcset nl Yes			{Ja}
 ::msgcat::mcset nl yes			{ja}
@@ -317,6 +327,7 @@
 ::msgcat::mcset nl {About %s}                   {Over %s}
 ::msgcat::mcset nl {Active <Return>}		{Actieve <enter>}
 ::msgcat::mcset nl {Add New User}		{Nieuwe gebruiker toevoegen}
+#::msgcat::mcset nl {Add permanently} {}
 ::msgcat::mcset nl {Add Server}			{Server toevoegen}
 ::msgcat::mcset nl {Add Shortcut}		{Snelkoppeling toevoegen}
 ::msgcat::mcset nl {Address 1}			{Adres 1}
@@ -335,6 +346,7 @@
 ::msgcat::mcset nl {Block JID}			{JID blokkeren}
 ::msgcat::mcset nl {Built in server port}	{Ingebouwde serverpoort}
 ::msgcat::mcset nl {Cache folder}		{Cachemap}
+#::msgcat::mcset nl {Canvas Size} {}
 ::msgcat::mcset nl {Chat History}		{Berichtengeschiedenis}
 ::msgcat::mcset nl {Chat With}			{Chat met}
 ::msgcat::mcset nl {Clear Disk Cache Now}	{Wis schijfcache nu}
@@ -345,6 +357,7 @@
 ::msgcat::mcset nl {Create Room}		{Kamer aanmaken}
 ::msgcat::mcset nl {Default group}		{Standaard groep}
 ::msgcat::mcset nl {Default Logout Status}	{Standaard afmeldstatus}
+#::msgcat::mcset nl {Delete Rule} {}
 ::msgcat::mcset nl {Disk Cache}			{Schijfcache}
 ::msgcat::mcset nl {Different Passwords}        {Verschillende wachtwoorden}
 ::msgcat::mcset nl {Do Not Disturb}		{Niet storen}
@@ -383,6 +396,8 @@
 ::msgcat::mcset nl {Import using}		{Importeer gebruik makend van}
 ::msgcat::mcset nl {Import/Remove fonts}	{Lettertypes importeren/verwijderen}
 ::msgcat::mcset nl {Incoming Message}		{Inkomend bericht}
+#::msgcat::mcset nl {Incoming Messages} {}
+#::msgcat::mcset nl {Incoming Presence} {}
 ::msgcat::mcset nl {Inspect Associations}	{Associaties inspecteren}
 ::msgcat::mcset nl {IP address}			{IP-adres}
 ::msgcat::mcset nl {Is connected}		{Is verbonden}
@@ -406,6 +421,7 @@
 ::msgcat::mcset nl {MIME type}			{Bestandstype}
 ::msgcat::mcset nl {Multi Connect}		{Multi connecteren}
 ::msgcat::mcset nl {My Status}			{Mijn status}
+#::msgcat::mcset nl {Name of list} {}
 ::msgcat::mcset nl {Network Error}		{Netwerkfout}
 ::msgcat::mcset nl {Network Setup}		{Netwerk instellen}
 ::msgcat::mcset nl {New Account}		{&Nieuwe account}
@@ -414,7 +430,9 @@
 ::msgcat::mcset nl {New Color}			{Nieuwe kleur}
 ::msgcat::mcset nl {New incoming message}	{Nieuw inkomend bericht}
 ::msgcat::mcset nl {New Message}		{Nieuw bericht}
+#::msgcat::mcset nl {New Nickname} {}
 ::msgcat::mcset nl {New password}		{Nieuw wachtwoord}
+#::msgcat::mcset nl {New Rule} {}
 ::msgcat::mcset nl {New Topic}			{Nieuw onderwerp}
 ::msgcat::mcset nl {New shortcut}		{Nieuwe snelkoppeling}
 ::msgcat::mcset nl {New User}			{Nieuwe gebruiker}
@@ -437,6 +455,7 @@
 ::msgcat::mcset nl {Open Helpfile}		{Helpbestand openen}
 ::msgcat::mcset nl {Open Image/Movie}		{Afbeelding/film openen}
 ::msgcat::mcset nl {Open Stream}		{Stream openen}
+#::msgcat::mcset nl {Outgoing Presence} {}
 ::msgcat::mcset nl {Peer-to-Peer}		{Peer-to-peer}
 ::msgcat::mcset nl {Personal Info}		{Persoonlijke gegevens}
 ::msgcat::mcset nl {Personal Information}	{Persoonelijke gegevens}
@@ -449,6 +468,7 @@
 ::msgcat::mcset nl {Postal Code}		{Postnummer}
 ::msgcat::mcset nl {Preferred Protocol}		{Geprefereerd protocol}
 ::msgcat::mcset nl {Presence Error}		{Statusfout}
+#::msgcat::mcset nl {Privacy List} {}
 ::msgcat::mcset nl {Profile Name}         	{Profielnaam}
 ::msgcat::mcset nl {Proxy Setup}		{Proxy instellen}
 ::msgcat::mcset nl {Put File Error}		{Bestandsplaatsingsfout}
@@ -473,12 +493,14 @@
 ::msgcat::mcset nl {Search results}		{Zoekresultaten}
 ::msgcat::mcset nl {Search Service}		{Service zoeken}
 ::msgcat::mcset nl {Search Specifications}	{Specificaties zoeken}
+#::msgcat::mcset nl {Select a new nickname} {}
 ::msgcat::mcset nl {Select Font}		{Lettertype selecteren}
 ::msgcat::mcset nl {Send File}			{Bestand verzenden}
 ::msgcat::mcset nl {Send Live}			{Live verzenden}
 ::msgcat::mcset nl {Server Info}		{Servergegevens}
 ::msgcat::mcset nl {Service server}		{Service server}
 ::msgcat::mcset nl {Set Directed Presence} 	{Voorgeschreven status instellen}
+#::msgcat::mcset nl {Set New Nickname} {}
 ::msgcat::mcset nl {Set New Topic}		{Nieuw onderwerp instellen}
 ::msgcat::mcset nl {Set Status}			{Status instellen}
 ::msgcat::mcset nl {Settings Panels}		{Instellingen}
@@ -775,6 +797,17 @@
 ::msgcat::mcset nl prefprofname  {Voer de gewenste naam voor het gebruikersprofiel in}
 ::msgcat::mcset nl prefstabui    {Laptopinterface met tabbladen aanzetten}
 ::msgcat::mcset nl prefsusesasl  {Authenticatie met SASL doen}
+#::msgcat::mcset nl prefprivmsg {Each user may administrate zero or many lists. Only the active or default list affect message processing. Any active list affects only the session. The default list is processed if there is no active list.}
+#::msgcat::mcset nl prefprivunav {Filter options unavailable while not connected}
+#::msgcat::mcset nl prefprivnotex {Filter options unavailable at this server}
+#::msgcat::mcset nl prefprivobtained {Filter lists obtained from server}
+#::msgcat::mcset nl prefprivgetlist {Getting filter list "%s"}
+#::msgcat::mcset nl prefprivrules {Each list contains one or many rules, each rule specify the type of events it acts on, and the action it shall take. If you specify a group to block it must exist in your roster.}
+#::msgcat::mcset nl prefuserinactive {User has been inactive for a while}
+#::msgcat::mcset nl preficonsel {The selected iconset will take action when you save}
+#::msgcat::mcset nl prefwbscroll {You may set a larger size than the default %sx%s}
+#::msgcat::mcset nl prefssbts {Show next and previous buttons}
+#::msgcat::mcset nl prefssresize {Resize canvas automatically to fit image}
 
 
 
@@ -831,6 +864,10 @@ Wilt u ze niet opslaan?}
 ::msgcat::mcset nl jasettopic   {Nieuw onderwerp instellen voor deze kamer.}
 ::msgcat::mcset nl jadirpresmsg {Voorgeschreven status verzenden naar gebruiker "%s".}
 ::msgcat::mcset nl jatlsnegot   {Bezig met het tot stand brengen van een met TLS beveiligde verbinding...}
+#::msgcat::mcset nl jamucentermsg {Enter your nick name and press Enter to go into the room. You may Browse to get the available rooms for the specific service.	Members only room may require a password.}
+#::msgcat::mcset nl jainmsgshow {Show incoming messages in this window}
+#::msgcat::mcset nl jadisaddserv {Discover another server for groupchat rooms and other services. You may add a server permanently which is then automatically discovered. The login server is always discovered.}
+#::msgcat::mcset nl jadisrmall {Remove all servers that are automatically and permanently discovered.}
 
 
 

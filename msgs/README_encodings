@@ -88,7 +88,6 @@ if {$::tcl_platform(platform) == "macintosh"} {
 # Quit Wish when finished!
 
 namespace eval ::msgcat:: {}
-set keylist {}
 proc ::msgcat::mcset {lang key {str ""}} {
     global arr keylist table
     if {$lang == "en"} {
@@ -97,6 +96,7 @@ proc ::msgcat::mcset {lang key {str ""}} {
     set table($lang,$key) $str
     set arr($lang,$key) [uplevel 1 {namespace current}]
 }
+set keylist {}
 set src [tk_getOpenFile -title {Pick en.msg File} \
 	-filetypes {{{Message Catalog}       {.msg}}}]
 if {$src == ""} return
@@ -121,7 +121,7 @@ foreach name [lsort [array names arr en,*]] {
 }
 
 if {0} {
-# Create 'new' catalog.
+# Create 'new' catalog. Encoding wrong!!!
 set dir [file dirname $dst]
 set new [file join $dir ${lang}_new.msg]
 set fd [open $new w]
@@ -134,6 +134,7 @@ foreach key $keylist {
     }
 }
 close $fd
+unset keylist
 }
 unset arr
 puts "\n::msgcat::mcset has been redefined; do not reuse this shell"
