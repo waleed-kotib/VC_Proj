@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.25 2004-07-30 12:55:54 matben Exp $
+# $Id: Profiles.tcl,v 1.26 2004-08-11 13:47:17 matben Exp $
 
 package provide Profiles 1.0
 
@@ -471,21 +471,23 @@ proc ::Profiles::OptionsTabNotebook {w token} {
     grid $pageconn.eip $pageconn.eport -sticky w
     grid $pageconn.cssl -sticky w
 
-    # HTTP proxy.
-    set wpage [$w newpage {Proxy} -text [mc {HTTP Proxy}]] 
-    set pageproxy $wpage.f
-    pack [frame $pageproxy] -side top -anchor w -padx 6 -pady 4
-    checkbutton $pageproxy.http -text " [mc {Connect using Http proxy}]" \
-      -variable $token\(httpproxy)
-    label $pageproxy.lpoll -text [mc {Poll interval (secs)}]
-    spinbox $pageproxy.spoll -textvariable $token\(pollsecs) \
-      -width 4 -state readonly -increment 1 -from 1 -to 120
-    button $pageproxy.set -font $fontS -text [mc {Proxy Settings}] \
-      -command [list ::Preferences::Build -page {General {Proxy Setup}}]
-    grid $pageproxy.http  -   -sticky w
-    grid $pageproxy.lpoll $pageproxy.spoll -sticky e
-    grid $pageproxy.set   -   -sticky w
-
+    # HTTP proxy. Still untested!
+    if {0} {
+	set wpage [$w newpage {Proxy} -text [mc {HTTP Proxy}]] 
+	set pageproxy $wpage.f
+	pack [frame $pageproxy] -side top -anchor w -padx 6 -pady 4
+	checkbutton $pageproxy.http -text " [mc {Connect using Http proxy}]" \
+	  -variable $token\(httpproxy)
+	label $pageproxy.lpoll -text [mc {Poll interval (secs)}]
+	spinbox $pageproxy.spoll -textvariable $token\(pollsecs) \
+	  -width 4 -state readonly -increment 1 -from 1 -to 120
+	button $pageproxy.set -font $fontS -text [mc {Proxy Settings}] \
+	  -command [list ::Preferences::Build -page {General {Proxy Setup}}]
+	grid $pageproxy.http  -   -sticky w
+	grid $pageproxy.lpoll $pageproxy.spoll -sticky e
+	grid $pageproxy.set   -   -sticky w
+    }
+    
     # Set defaults.
     ::Profiles::DefaultOptionsTabNotebook $token
 
