@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: FilesAndCanvas.tcl,v 1.15 2003-12-20 14:27:16 matben Exp $
+# $Id: FilesAndCanvas.tcl,v 1.16 2003-12-29 09:02:30 matben Exp $
  
 package require can2svg
 package require undo
@@ -259,7 +259,7 @@ proc ::CanvasFile::FileToCanvasVer1 {w fd absPath args} {
 	    # Speak...
 	    if {[string equal $where "all"] || [string equal $where "local"]} {
 		if {$prefs(SpeechOn) && [string equal $type "text"]} {
-		    ::UserActions::Speak [$w itemcget $ittag -text] $prefs(voiceUs)
+		    ::Speech::Speak [$w itemcget $ittag -text] $prefs(voiceUs)
 		}
 	    }
 	}
@@ -362,7 +362,7 @@ proc ::CanvasFile::FileToCanvasVer2 {w fd absPath args} {
 		if {[string equal $where "all"] || \
 		  [string equal $where "local"]} {
 		    if {$prefs(SpeechOn) && [string equal $type "text"]} {
-			::UserActions::Speak [$w itemcget $utag -text] $prefs(voiceUs)
+			::Speech::Speak [$w itemcget $utag -text] $prefs(voiceUs)
 		    }
 		}
 	    }

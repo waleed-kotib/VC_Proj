@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.27 2003-12-27 12:07:33 matben Exp $
+# $Id: Coccinella.tcl,v 1.28 2003-12-29 09:02:29 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -466,6 +466,7 @@ set listOfPackages {
     Plugins
     Pane
     ProgressWindow
+    Speech
     Whiteboard
 }
 foreach packName $listOfPackages {
@@ -604,7 +605,7 @@ if {[string equal $this(platform) "unix"]} {
 
 # On non macs we need to explicitly bind certain commands.
 if {![string match "mac*" $this(platform)]} {
-    foreach wclass {Toplevel Preferences Chat GroupChat MailBox} {
+    foreach wclass {Toplevel} {
 	bind $wclass <$osprefs(mod)-Key-w>  \
 	  [list ::UserActions::DoCloseWindow %W]
     }

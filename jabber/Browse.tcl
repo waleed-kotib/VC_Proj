@@ -5,7 +5,9 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.15 2003-12-15 15:39:08 matben Exp $
+# $Id: Browse.tcl,v 1.16 2003-12-29 09:02:29 matben Exp $
+
+package require chasearrows
 
 package provide Browse 1.0
 

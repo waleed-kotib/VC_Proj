@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.17 2003-12-18 14:19:35 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.18 2003-12-29 09:02:30 matben Exp $
 
 package require sha1pure
 
@@ -1379,7 +1379,7 @@ proc ::CanvasUtils::HandleCanvasDraw {wtop instr} {
 		# Extract the actual text. TclSpeech not foolproof!
 		set theText [$wServCan itemcget $utag -text]
 		if {[string match *${punct_}* $theText]} {
-		    catch {::UserActions::Speak $theText $prefs(voiceOther)}
+		    catch {::Speech::Speak $theText $prefs(voiceOther)}
 		}
 	    }
 	}

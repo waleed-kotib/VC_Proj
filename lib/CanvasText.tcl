@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasText.tcl,v 1.9 2003-12-20 14:27:16 matben Exp $
+# $Id: CanvasText.tcl,v 1.10 2003-12-29 09:02:30 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 
@@ -280,7 +280,7 @@ proc ::CanvasText::TextInsert {w char} {
 	if {[string match *${punct}* $char]} {
 	    set theText [$w itemcget $utag -text]
 	    if {[string length $theText]} {
-		::UserActions::Speak $theText $prefs(voiceUs)
+		::Speech::Speak $theText $prefs(voiceUs)
 	    }
 	}
     }

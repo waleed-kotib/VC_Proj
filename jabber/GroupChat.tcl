@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.27 2003-12-23 14:41:01 matben Exp $
+# $Id: GroupChat.tcl,v 1.28 2003-12-29 09:02:29 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -20,9 +20,9 @@ namespace eval ::Jabber::GroupChat:: {
     set fontS [option get . fontSmall {}]
     set fontSB [option get . fontSmallBold {}]
 
-    option add *GroupChat*meForeground         red              widgetDefault
-    option add *GroupChat*meBackground         #cecece          widgetDefault
-    option add *GroupChat*meFont               $fontSB          widgetDefault                                     
+    option add *GroupChat*mePreForeground         red              widgetDefault
+    option add *GroupChat*mePreBackground         #cecece          widgetDefault
+    option add *GroupChat*mePreFont               $fontSB          widgetDefault                                     
     option add *GroupChat*meTextForeground     black            widgetDefault
     option add *GroupChat*meTextBackground     #cecece          widgetDefault
     option add *GroupChat*meTextFont           $fontS           widgetDefault                                     
@@ -36,9 +36,9 @@ namespace eval ::Jabber::GroupChat:: {
       
     # List of: {tagName optionName resourceName resourceClass}
     variable groupChatOptions {
-	{me          -foreground          meForeground          Foreground}
-	{me          -background          meBackground          Background}
-	{me          -font                meFont                Font}
+	{me          -foreground          mePreForeground          Foreground}
+	{me          -background          mePreBackground          Background}
+	{me          -font                mePreFont                Font}
 	{metext      -foreground          meTextForeground      Foreground}
 	{metext      -background          meTextBackground      Background}
 	{metext      -font                meTextFont            Font}
@@ -53,7 +53,7 @@ namespace eval ::Jabber::GroupChat:: {
     # Add all event hooks.
     hooks::add quitAppHook [list ::UI::SaveWinPrefixGeom $wDlgs(jgc)]
     hooks::add quitAppHook ::Jabber::GroupChat::GetFirstPanePos
-
+    hooks::add newGroupChatMessageHook ::Jabber::GroupChat::GotMsg
     
     # Local stuff
     variable locals
@@ -485,13 +485,8 @@ proc ::Jabber::GroupChat::GotMsg {body args} {
 	    set locals($roomJid,got1stMsg) 1
 	}
 	
-	if {$jprefs(speakChat)} {
-	    if {$meyou == "me"} {
-		::UserActions::Speak $body $prefs(voiceUs)
-	    } else {
-		::UserActions::Speak $body $prefs(voiceOther)
-	    }
-	}
+	# Run display hooks (speech).
+	eval {hooks::run displayGroupChatMessageHook $body} $args
     }
 }
 
@@ -508,7 +503,7 @@ proc ::Jabber::GroupChat::GotMsg {body args} {
 #       shows window.
 
 proc ::Jabber::GroupChat::Build {roomJid args} {
-    global  this prefs wDlgs
+    global  this prefs wDlgs osprefs
     
     variable groupChatOptions
     variable locals
@@ -554,6 +549,12 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     wm title $w $tittxt
     wm protocol $w WM_DELETE_WINDOW  \
       [list ::Jabber::GroupChat::Exit $roomJid]
+
+    # On non macs we need to explicitly bind certain commands.
+    if {![string match "mac*" $this(platform)]} {
+	bind $w <$osprefs(mod)-Key-w>  \
+	  [list ::Jabber::GroupChat::Exit $roomJid]
+    }
     
     # Toplevel menu for mac only.
     if {[string match "mac*" $this(platform)]} {
@@ -1159,13 +1160,6 @@ proc ::Jabber::GroupChat::Exit {roomJid} {
 	::Jabber::GroupChat::Close $roomJid
     }
     return $ans
-}
-
-proc ::Jabber::GroupChat::CloseToplevel {w} {
-    variable locals
-    
-    set roomJid $locals($w,room)     
-    ::Jabber::GroupChat::Exit $roomJid
 }
 
 # Jabber::GroupChat::Close --

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UserActions.tcl,v 1.28 2003-12-23 14:41:01 matben Exp $
+# $Id: UserActions.tcl,v 1.29 2003-12-29 09:02:30 matben Exp $
 
 namespace eval ::UserActions:: {
     
@@ -96,38 +96,6 @@ proc ::UserActions::PageSetup {wtop} {
     }
 }
 
-proc ::UserActions::Speak {msg {voice {}}} {
-    global  this prefs
-    
-    switch -- $this(platform) {
-	macintosh - macosx {
-	    ::Mac::Speech::Speak $msg $voice
-	}
-	windows {
-	    ::MSSpeech::Speak $msg $voice
-	}
-	unix - macosx {
-	    # empty.
-	}
-    }
-}
-
-proc ::UserActions::SpeakGetVoices { } {
-    global  this prefs
-    
-    switch -- $this(platform) {
-	macintosh - macosx {
-	    return [::Mac::Speech::GetVoices]
-	}
-	windows {
-	    return [::MSSpeech::GetVoices]
-	}
-	unix - macosx {
-	    return {}
-	}
-    }
-}
-
 # UserActions::DoConnect --
 #
 #       Protocol independent open connection to server.
@@ -180,18 +148,6 @@ proc ::UserActions::DoCloseWindow {{wevent {}}} {
 	    # NOT ALWAYS CORRECT!!!!!!!
 	    # Whiteboard window.
 	    ::WB::CloseWhiteboard $wtop
-	}
-	Preferences {
-	    ::Preferences::CancelPushBt
-	}
-	Chat {
-	    ::Jabber::Chat::Close -toplevel $w
-	}
-	GroupChat {
-	    ::Jabber::GroupChat::CloseToplevel $w
-	}
-	MailBox {
-	    ::Jabber::MailBox::Show -visible 0
 	}
 	JMain {
 	    ::UserActions::DoQuit -warning 1

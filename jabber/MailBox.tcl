@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.29 2003-12-23 14:41:01 matben Exp $
+# $Id: MailBox.tcl,v 1.30 2003-12-29 09:02:29 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -39,6 +39,8 @@ namespace eval ::Jabber::MailBox:: {
     option add *MailBox*trashImage            trash            widgetDefault
     option add *MailBox*trashDisImage         trashDis         widgetDefault
     
+    # Add some hooks...
+    hooks::add newMessageHook ::Jabber::MailBox::GotMsg
     
     variable locals
     upvar ::Jabber::jstate jstate
@@ -128,7 +130,7 @@ proc ::Jabber::MailBox::Show {args} {
 }
 
 proc ::Jabber::MailBox::Build {args} {
-    global  this prefs wDlgs
+    global  this prefs wDlgs osprefs
     
     variable locals  
     variable colindex
@@ -157,6 +159,11 @@ proc ::Jabber::MailBox::Build {args} {
     }
     wm title $w [::msgcat::mc Inbox]
     # wm protocol $w WM_DELETE_WINDOW [list [namespace current]::CloseDlg $w]
+
+    # On non macs we need to explicitly bind certain commands.
+    if {![string match "mac*" $this(platform)]} {
+	bind $w <$osprefs(mod)-Key-w> {::Jabber::MailBox::Show -visible 0}
+    }
     
     # Toplevel menu for mac only.
     if {[string match "mac*" $this(platform)]} {
@@ -786,18 +793,17 @@ proc ::Jabber::MailBox::DisplayMsg {id} {
 
     variable locals
     variable mailbox
-    upvar ::Jabber::jprefs jprefs
     
     set wtextmsg $locals(wtextmsg)    
-    set body [lindex $mailbox($id) 5]
+    foreach {subject from time junk muid body} $mailbox($id) break
     $wtextmsg configure -state normal
     $wtextmsg delete 1.0 end
     ::Text::ParseAndInsert $wtextmsg $body normal linktag
     $wtextmsg configure -state disabled
     
-    if {$jprefs(speakMsg)} {
-	::UserActions::Speak $body $prefs(voiceOther)
-    }
+    # Run this hook (speech).
+    set opts [list -subject $subject -from $from -time $time]
+    eval {hooks::run displayMessageHook $body} $opts
 }
 
 proc ::Jabber::MailBox::ReplyTo { } {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.28 2003-12-23 14:41:01 matben Exp $
+# $Id: Roster.tcl,v 1.29 2003-12-29 09:02:29 matben Exp $
 
 package provide Roster 1.0
 
@@ -1592,8 +1592,15 @@ proc ::Jabber::Roster::BuildPresenceMenu {mt} {
 #       menuDef list.
 
 proc ::Jabber::Roster::BuildStatusMenuDef { } {
-    global  prefs
+    global  prefs this
     variable presenceIcon
+    
+    # If we have -compound left -image ... -label ... working.
+    set prefs(haveMenuImage) 0
+    if {([package vcompare [info tclversion] 8.4] >= 0) &&  \
+      ![string equal $this(platform) "macosx"]} {
+	set prefs(haveMenuImage) 1
+    }
 
     set statMenuDef {}
     if {$prefs(haveMenuImage)} {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.16 2003-12-22 15:04:57 matben Exp $
+# $Id: GotMsg.tcl,v 1.17 2003-12-29 09:02:29 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -13,7 +13,8 @@ namespace eval ::Jabber::GotMsg:: {
     global  wDlgs
 
     # Add all event hooks.
-    hooks::add quitAppHook [list ::UI::SaveWinGeom $wDlgs(jgotmsg)]
+    hooks::add quitAppHook        [list ::UI::SaveWinGeom $wDlgs(jgotmsg)]
+    hooks::add displayMessageHook [list ::Speech::SpeakMessage normal]
     
     
     # Wait for this variable to be set.
@@ -118,9 +119,10 @@ proc ::Jabber::GotMsg::Show {thisMsgId} {
     if {[::Jabber::MailBox::IsLastMessage $msgIdDisplay]} {
 	$wbtnext configure -state disabled
     }
-    if {$jprefs(speakMsg)} {
-	::UserActions::Speak $theMsg $prefs(voiceOther)
-    }
+    
+    # Run display message hook (speech).
+    set opts [list -subject $subject -from $jid -time $timeAndDate]
+    eval {hooks::run displayMessageHook $theMsg} $opts
 }
 
 # Jabber::GotMsg::Build --

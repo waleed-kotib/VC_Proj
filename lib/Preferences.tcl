@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.25 2003-12-27 12:07:34 matben Exp $
+# $Id: Preferences.tcl,v 1.26 2003-12-29 09:02:30 matben Exp $
  
 package require notebook
 package require tree
@@ -29,7 +29,7 @@ namespace eval ::Preferences:: {
 }
 
 proc ::Preferences::Build { } {
-    global  this prefs wDlgs
+    global  this prefs wDlgs osprefs
     
     variable tmpPrefs
     variable tmpJPrefs
@@ -52,6 +52,12 @@ proc ::Preferences::Build { } {
     toplevel $w -class Preferences
     wm title $w [::msgcat::mc Preferences]
     wm protocol $w WM_DELETE_WINDOW ::Preferences::CancelPushBt
+
+    # On non macs we need to explicitly bind certain commands.
+    if {![string match "mac*" $this(platform)]} {
+	bind $w <$osprefs(mod)-Key-w> ::Preferences::CancelPushBt
+    }
+
     set finished 0
     set wtoplevel $w
     
@@ -381,7 +387,7 @@ proc ::Preferences::BuildPageSounds {page} {
     if {[::Plugins::HavePackage TclSpeech] || [::Plugins::HavePackage MSSpeech]} {
 	
 	# Get a list of voices
-	set voicelist "None [::UserActions::SpeakGetVoices]"
+	set voicelist "None [::Speech::SpeakGetVoices]"
     } else {
 	set voicelist {None}
 	$labpsp.speak configure -state disabled
