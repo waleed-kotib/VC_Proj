@@ -3,7 +3,7 @@
 #       Creates a card game in a whiteboard canvas. 
 # 
 # 
-# $Id: CardGame.itcl,v 1.8 2004-08-13 15:27:26 matben Exp $
+# $Id: CardGame.itcl,v 1.9 2004-08-17 06:19:54 matben Exp $
 
 namespace eval CardGame {
     
@@ -67,6 +67,7 @@ if {[itcl::find classes CardGame] == ""} {
 	    method DeleteCard {} {}
 	    method StackPopup {x y} {}
 	    method CardPopup {x y} {}
+	    method PopupRelease {}
 	    method NewCard {x y}
 	    method NewBlankCard {}
 	    method NewCardAutoPlace {}
@@ -142,6 +143,7 @@ if {[itcl::find classes CardGame] == ""} {
 	    macintosh - macosx {
 		set b1PopupStack {%W bind cardstack <Control-Button-1>}
 		set b1PopupCard  {%W bind playcard  <Control-Button-1>}
+		set b1PopupRel   {%W bind playcard  <Control-ButtonRelease-1>}
 		set b2PopupStack {%W bind cardstack <Button-2>}
 		set b2PopupCard  {%W bind playcard  <Button-2>}
 	    }
@@ -180,6 +182,7 @@ if {[itcl::find classes CardGame] == ""} {
 		lappend classBindList \
 		  point   [list $b1PopupStack   [code $this StackPopup %X %Y]] \
 		  *       [list $b1PopupCard    [code $this CardPopup %X %Y]]  \
+		  *       [list $b1PopupRel     [code $this PopupRelease]]  \
 		  point   [list $b2PopupStack   [code $this StackPopup %X %Y]] \
 		  *       [list $b2PopupCard    [code $this CardPopup %X %Y]]
 	    }
@@ -431,7 +434,6 @@ if {[itcl::find classes CardGame] == ""} {
 	DeregisterCanvasInstBinds CardGame:$this
 	
 	# Delete all cards as well.
-	#foreach id [$tkCanvas find withtag object:${this}]
 	foreach id [$tkCanvas find withtag cardstackutag:${utagstack}] {
 	    lappend cmdList [list delete [GetUtag $id]]
 	}
@@ -447,7 +449,7 @@ if {[itcl::find classes CardGame] == ""} {
     body CardGame::StackPopup {x y} {
 	
 	set idpopup [$tkCanvas find withtag current]
-	tk_popup $cardstackMenu [expr int($x) - 10] [expr int($y) - 10]   
+	tk_popup $cardstackMenu [expr int($x) - 10] [expr int($y) - 10] 
     }
 
     body CardGame::CardPopup {x y} {
@@ -459,13 +461,16 @@ if {[itcl::find classes CardGame] == ""} {
 	tk_popup $cardMenu [expr int($x) - 10] [expr int($y) - 10]   
     }
     
+    body CardGame::PopupRelease {} {
+	CancelBox
+    }
+    
     body CardGame::NewCard {x y} {
 	
 	set card [$csObj PopAndMix]
 	set currentCard $card
 	if {$card != ""} {
 	    set im [$csObj Image back]
-	    #set tags [list image playcard object:${this} card:${card} [NewUtag]]
 	    set tags [list image playcard cardstackutag:${utagstack} \
 	      card:${card} [NewUtag]]
 	    set idcard [$tkCanvas create image $x $y -image $im -anchor nw \
@@ -502,6 +507,7 @@ if {[itcl::find classes CardGame] == ""} {
     
     body CardGame::ShowMe {} {
 	
+	CancelBox
 	set tags [$tkCanvas gettags $idpopup]
 	if {[regexp {card:([a-z0-9]{2})} $tags match card]} {
 	    $tkCanvas itemconfigure $idpopup -image [$csObj HalfImage $card]
@@ -512,6 +518,7 @@ if {[itcl::find classes CardGame] == ""} {
     
     body CardGame::ShowAll {} {
 	
+	CancelBox
 	set tags [$tkCanvas gettags $idpopup]
 	if {[regexp {card:([a-z0-9]{2})} $tags match card]} {
 	    ItemConfigure $idpopup -image [$csObj Image $card]
@@ -522,6 +529,7 @@ if {[itcl::find classes CardGame] == ""} {
     
     body CardGame::Hide {} {
 	
+	CancelBox
 	set tags [$tkCanvas gettags $idpopup]
 	if {[regexp {card:([a-z0-9]{2})} $tags match card]} {
 	    ItemConfigure $idpopup -image [$csObj Image back]

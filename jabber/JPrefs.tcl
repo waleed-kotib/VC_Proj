@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.11 2004-07-09 06:26:05 matben Exp $
+# $Id: JPrefs.tcl,v 1.12 2004-08-17 06:19:53 matben Exp $
 
 package provide JPrefs 1.0
 
@@ -94,7 +94,7 @@ proc ::Jabber::JPrefs::BuildPrefsHook {wtree nbframe} {
     
     $wtree newitem {Jabber {Auto Away}} -text [mc {Auto Away}]
     $wtree newitem {Jabber {Personal Info}} -text [mc {Personal Info}]
-    $wtree newitem {Jabber Appearence} -text [mc Appearence]
+    $wtree newitem {Jabber Appearance} -text [mc Appearance]
     $wtree newitem {Jabber Customization} -text [mc Customization]
 
     # Auto Away page -------------------------------------------------------
@@ -105,9 +105,9 @@ proc ::Jabber::JPrefs::BuildPrefsHook {wtree nbframe} {
     set wpage [$nbframe page {Personal Info}]    
     ::Jabber::JPrefs::BuildPersInfoPage $wpage
 	    
-    # Appearence page -------------------------------------------------------
-    set wpage [$nbframe page {Appearence}]    
-    ::Jabber::JPrefs::BuildAppearencePage $wpage
+    # Appearance page -------------------------------------------------------
+    set wpage [$nbframe page {Appearance}]    
+    ::Jabber::JPrefs::BuildAppearancePage $wpage
 	    
     # Customization page -------------------------------------------------------
     set wpage [$nbframe page {Customization}]    
@@ -244,7 +244,7 @@ proc ::Jabber::JPrefs::UpdateAutoAwaySettings { } {
     }
 }
 
-proc ::Jabber::JPrefs::BuildAppearencePage {page} {
+proc ::Jabber::JPrefs::BuildAppearancePage {page} {
     global  this prefs
     
     variable wlbblock
@@ -268,7 +268,7 @@ proc ::Jabber::JPrefs::BuildAppearencePage {page} {
     }
 
     set labfrpbl $page.fr
-    labelframe $labfrpbl -text [mc Appearence]
+    labelframe $labfrpbl -text [mc Appearance]
     pack $labfrpbl -side top -anchor w -padx 8 -pady 2
     set pbl [frame $labfrpbl.frin]
     pack $pbl -padx 10 -pady 6 -side left
