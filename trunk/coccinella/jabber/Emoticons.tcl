@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.2 2004-04-02 12:26:37 matben Exp $
+# $Id: Emoticons.tcl,v 1.3 2004-04-04 13:37:26 matben Exp $
 
 
 package provide Emoticons 1.0
@@ -21,11 +21,38 @@ namespace eval ::Emoticons:: {
 proc ::Emoticons::Init { } {
     global  this
     
+    variable priv
     variable smiley
     variable smileyExp
     variable smileyLongNames
+
+    # 'iconsets(name,key)' map from a text string (key) and iconset name
+    # to an image name.
+    variable iconsets
     
-    ::Debug 2 "::Emoticons::Init"    
+    # 'iconsetsInv(name,image)' map from an image and named iconset to a
+    # list of keys, which is the inverse of the above.
+    variable iconsetsInv
+
+    ::Debug 2 "::Emoticons::Init"
+    
+    # Cache stuff we need later.
+    if {[catch {package require vfs::zip}]} {
+	set priv(havezip) 0
+    } else {
+	set priv(havezip) 1
+    }
+    set priv(havepng)      [::Plugins::HaveImporterForMime image/png]
+    set priv(QuickTimeTcl) [::Plugins::HavePackage QuickTimeTcl]
+    set priv(Img)          [::Plugins::HavePackage Img]
+    if {$priv(Img)} {
+	set priv(needtmp)   0
+	set priv(pngformat) [list -format png]
+    } else {
+	set priv(needtmp)   1
+	set priv(pngformat) {}
+    }
+    #parray priv
     
     # Smiley icons. The "short" types.
     foreach {key name} {
@@ -178,21 +205,61 @@ proc ::Emoticons::Parse {str} {
 }
 
 
-proc ::Emoticons::Load {dir} {
-
+proc ::Emoticons::Load {path} {
+    
+    variable priv
+    
+    # The dir variable points to the (virtual) directory containing it all.
+    set dir $path
+    set name [file rootname [file tail $path]]
+    cd [file dirname $path]
+    puts "1: [pwd]: [glob *]"
+    
+    if {[file extension $path] == ".jisp"} {
+	if {$priv(havezip)} {
+	    set name [file rootname [file tail $path]]
+	    if {[catch {
+		set fd [vfs::zip::Mount $path $name]
+		puts "mounts $path"
+		puts "2: [pwd]: [glob *]"
+	    } err]} {
+		return -code error $err
+	    }
+	    set dir1 [file join [file dirname $path] $name]
+	    puts "dir1=$dir1"
+	    cd $dir1
+	    puts "name=$name"
+	    puts "3: [pwd]: [glob *]"
+	    set dir [file join [file dirname $path] $name $name]
+	} else {
+	    return -code error "cannot read jisp archive without vfs::zip"
+	}
+    }
+    puts "path=$path"
+    puts "dir =$dir"
     set icondefPath [file join $dir icondef.xml]
+    puts "icondefPath=$icondefPath"
+    cd $dir
+    puts "4: [pwd]: [glob *]"
     if {![file isfile $icondefPath]} {
-	return
+	return -code error "missing icondef.xml file in archive"
     }
     set f [open $icondefPath]
     set xmldata [read $f]
     close $f
     
+    FreeSet $name
+    
     # Parse data.
-    ParseIconDef $dir $xmldata
+    ParseIconDef $name $dir $xmldata
+    
+    cd $::this(path)
+    if {[info exists name]} {
+	#vfs::zip::Unmount $fd $name
+    }
 }
 
-proc ::Emoticons::ParseIconDef {dir xmldata} {
+proc ::Emoticons::ParseIconDef {name dir xmldata} {
 
     set token [tinydom::parse $xmldata]
     set xmllist [tinydom::documentElement $token]
@@ -200,14 +267,85 @@ proc ::Emoticons::ParseIconDef {dir xmldata} {
     foreach elem [tinydom::children $xmllist] {
 	
 	switch -- [tinydom::tagname $elem] {
-    
+	    meta {
+		ParseMeta $name $dir $elem
+	    }
+	    icon {
+		ParseIcon $name $dir $elem
+	    }
 	}
+    }
+    tinydom::cleanup $token
+}
+
+proc ::Emoticons::ParseMeta {name dir xmllist} {
+    variable meta
+    
+    foreach elem [tinydom::children $xmllist] {
+	set tag [tinydom::tagname $elem]
+	lappend meta($name,$tag) [tinydom::chdata $elem]
+    }
+    parray meta
+}
+
+proc ::Emoticons::ParseIcon {name dir xmllist} {
+    global  this
+    
+    variable iconsets
+    variable iconsetsInv
+    variable priv
+
+    foreach elem [tinydom::children $xmllist] {
+	set tag [tinydom::tagname $elem]
+	
+	switch -- $tag {
+	    text {
+		lappend keyList [tinydom::chdata $elem]
+	    }
+	    object {
+		set object [tinydom::chdata $elem]
+		array set attrArr [tinydom::attrlist $elem]
+		set mime $attrArr(mime)
+	    }
+	}
+    }
+    
+    switch -- $mime {
+	image/gif {
+	    set im [image create photo -format gif  \
+	      -file [file join $dir $object]]
+	    foreach key $keyList {
+		set iconsets($name,$key) $im
+	    }
+	}
+	image/png {
+	    # If we rely on QuickTimeTcl here we cannot be in vfs.
+	    puts "object=$object,\t keyList=$keyList"
+	    set f [file join $dir $object]
+	    if {$priv(needtmp)} {
+		set tmp [file join $this(tmpPath) $object]
+		file copy -force $f $tmp
+		set f $tmp
+	    }
+	    set im [eval {image create photo -file $f} $priv(pngformat)]
+	    foreach key $keyList {
+		set iconsets($name,$key) $im
+	    }
+	}
+    }
+    if {[info exists im]} {
+	set iconsetsInv($name,$im) $keyList
     }
 }
 
-proc ::Emoticons::ParseIcon {dir items} {
-
+proc ::Emoticons::FreeSet {name} {
+    variable meta
+    variable iconsets
+    variable iconsetsInv
     
+    array unset meta $name,*
+    array unset iconsets $name,*
+    array unset iconsetsInv $name,*
 }
 
 # Emoticons::MenuButton --
@@ -237,11 +375,23 @@ proc ::Emoticons::MenuButton {w wtext} {
     set wmenu ${w}.m
     #$menubuttonImage $w -menu $wmenu -image $smiley(:\))
     $menubuttonImage $w -image $smiley(:\)) -bd 2 -width 16 -height 16
+    
+    ::Emoticons::BuildMenu $wmenu $wtext
+
+    bind $w <Button-1> [list [namespace current]::PostMenu $wmenu %X %Y]
+    return $w
+}
+
+proc ::Emoticons::BuildMenu {wmenu wtext} {
+    global  prefs
+    variable smiley
+    
     set m [menu $wmenu -tearoff 0]
- 
+
     if {$prefs(haveMenuImage)} {
+	set names [array names smiley]
 	set i 0
-	foreach name [array names smiley] {
+	foreach name $names {
 	    set cmd [list Emoticons::InsertSmiley $wtext $smiley($name) $name]
 	    set opts {-hidemargin 1}
 	    if {$i && ([expr $i % 4] == 0)} {
@@ -256,12 +406,45 @@ proc ::Emoticons::MenuButton {w wtext} {
 	    $m add command -label $name -command $cmd
 	}
     }
-    bind $w <Button-1> [list [namespace current]::PostMenu $m %X %Y]
-    return $w
 }
 
-proc ::Emoticons::PostMenu {w x y} {
-    tk_popup $w [expr int($x)] [expr int($y)]
+proc ::Emoticons::BuildMenuNEW {name wmenu wtext} {
+    global  prefs
+    variable iconsets
+    variable iconsetsInv
+    
+    set m [menu $wmenu -tearoff 0]
+    set ims [array names iconsetsInv]
+
+    if {$prefs(haveMenuImage)} {
+	
+	# Figure out a reasonable width and height.
+	set len [llength $ims]
+	set nheight [expr int(sqrt($len/1.4)) + 1]
+	
+	set i 0
+	foreach im $ims {
+	    set key [lindex $iconsetsInv($name,$im)]
+	    set cmd [list Emoticons::InsertSmiley $wtext $im $key]
+	    set opts {-hidemargin 1}
+	    if {$i && ([expr $i % $nheight] == 0)} {
+		lappend opts -columnbreak 1
+	    }
+	    eval {$m add command -image $im -command $cmd} $opts
+	    incr i
+	}
+    } else {
+	foreach im $ims {
+	    set key [lindex $iconsetsInv($name,$im)]
+	    set cmd [list Emoticons::InsertSmiley $wtext $im $key]
+	    $m add command -label $iconsetsInv($name,$im) -command $cmd
+	}
+    }
+}
+
+proc ::Emoticons::PostMenu {m x y} {
+
+    tk_popup $m [expr int($x)] [expr int($y)]
 }
 
 proc ::Emoticons::InsertSmiley {wtext imname name} {
@@ -269,6 +452,41 @@ proc ::Emoticons::InsertSmiley {wtext imname name} {
     $wtext insert insert " "
     $wtext image create insert -image $imname -name $name
     $wtext insert insert " "
+}
+
+proc ::Emoticons::TextLegend {w name args} {
+    variable meta
+    variable iconsetsInv
+    
+    array set argsArr {-tabs {20 60} -spacing1 2 -wrap word}
+    array set argsArr $args
+    eval {text $w} [array get argsArr]
+    $w tag configure tmeta -spacing1 1 -spacing3 1 -lmargin1 10 -lmargin2 20 \
+      -tabs [expr [font measure [$w cget -font] Description] + 30]
+    
+    # Meta data:
+    foreach ind [array names meta $name,*] {
+	set key [string map [list "$name," ""] $ind]
+	$w insert insert "[string totitle $key]:\t" tmeta
+	foreach val $meta($ind) {
+	    $w insert insert $val tmeta
+	}
+	$w insert insert "\n"
+    }
+    
+    $w insert insert "\tImage\tText\n"
+    
+    foreach ind [array names iconsetsInv $name,*] {
+	set im [string map [list "$name," ""] $ind]
+	$w insert insert \t
+	$w image create insert -image $im
+	$w insert insert \t
+	foreach key $iconsetsInv($ind) {
+	    $w insert insert "$key   "
+	}
+	$w insert insert "\n"
+    }
+    return $w
 }
 
 #-------------------------------------------------------------------------------

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.51 2004-04-02 12:26:28 matben Exp $
+# $Id: Chat.tcl,v 1.52 2004-04-04 13:37:09 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -677,7 +677,6 @@ proc ::Jabber::Chat::ConfigureTextTags {w wtext} {
 	    
 	    switch $resName {
 		mePreFont - youPreFont {
-		    #set value $boldChatFont
 		    set value $chatFont
 		}
 		meTextFont - youTextFont {

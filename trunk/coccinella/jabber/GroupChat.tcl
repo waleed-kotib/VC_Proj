@@ -5,7 +5,9 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.48 2004-04-02 12:26:37 matben Exp $
+# $Id: GroupChat.tcl,v 1.49 2004-04-04 13:37:26 matben Exp $
+
+package require History
 
 package provide GroupChat 1.0
 
@@ -60,6 +62,9 @@ namespace eval ::Jabber::GroupChat:: {
     option add *GroupChat*theyTextFont         ""               widgetDefault
     option add *GroupChat*sysPreForeground     #26b412          widgetDefault
     option add *GroupChat*sysTextForeground    #26b412          widgetDefault
+    option add *GroupChat*histHeadForeground   ""               widgetDefault
+    option add *GroupChat*histHeadBackground   gray60           widgetDefault
+    option add *GroupChat*histHeadFont         ""               widgetDefault
     option add *GroupChat*clockFormat          "%H:%M"          widgetDefault
 
     option add *GroupChat*userForeground       ""               widgetDefault
@@ -82,6 +87,9 @@ namespace eval ::Jabber::GroupChat:: {
 	{theytext    -font                theyTextFont          Font}
 	{syspre      -foreground          sysPreForeground      Foreground}
 	{systext     -foreground          sysTextForeground     Foreground}
+	{histhead    -foreground          histHeadForeground    Foreground}
+	{histhead    -background          histHeadBackground    Background}
+	{histhead    -font                histHeadFont          Font}
     }
     
     # Local stuff
@@ -863,6 +871,10 @@ proc ::Jabber::GroupChat::InsertMessage {token from body} {
     
     $wtext configure -state disabled
     $wtext see end
+
+    # History.
+    set dateISO [clock format [clock seconds] -format "%Y%m%dT%H:%M:%S"]
+    ::History::PutToFile $roomjid [list $nick $dateISO $body $whom]
 }
 
 proc ::Jabber::GroupChat::SetState {token theState} {
@@ -897,7 +909,7 @@ proc ::Jabber::GroupChat::ConfigureTextTags {w wtext} {
     ::Jabber::Debug 2 "::Jabber::GroupChat::ConfigureTextTags"
     
     set space 2
-    set alltags {mepre metext theypre theytext syspre systext}
+    set alltags {mepre metext theypre theytext syspre systext histhead}
 	
     if {[string length $jprefs(chatFont)]} {
 	set chatFont $jprefs(chatFont)
@@ -919,6 +931,7 @@ proc ::Jabber::GroupChat::ConfigureTextTags {w wtext} {
     lappend opts(metext)   -spacing3 $space -lmargin1 20 -lmargin2 20
     lappend opts(theytext) -spacing3 $space -lmargin1 20 -lmargin2 20
     lappend opts(systext)  -spacing3 $space -lmargin1 20 -lmargin2 20
+    lappend opts(histhead) -spacing1 4 -spacing3 4 -lmargin1 20 -lmargin2 20
     foreach tag $alltags {
 	eval {$wtext tag configure $tag} $opts($tag)
     }
@@ -1391,8 +1404,12 @@ proc ::Jabber::GroupChat::RemoveUser {roomJid jid3} {
 }
 
 proc ::Jabber::GroupChat::BuildHistory {token} {
+    variable $token
+    upvar 0 $token state
 
     
+    ::History::BuildHistory $state(roomjid) -class GroupChat  \
+      -tagscommand ::Jabber::GroupChat::ConfigureTextTags
 }
 
 proc ::Jabber::GroupChat::Save {token} {
@@ -1446,7 +1463,6 @@ proc ::Jabber::GroupChat::Exit {token} {
     upvar ::Jabber::jstate jstate
 
     set roomJid $state(roomjid)
-    #puts "::Jabber::GroupChat::Exit token=$token"
     
     if {[info exists state(w)] && [winfo exists $state(w)]} {
 	set opts [list -parent $state(w)]
@@ -1479,7 +1495,6 @@ proc ::Jabber::GroupChat::Close {token} {
     upvar 0 $token state
     
     set roomJid $state(roomjid)
-    #puts "::Jabber::GroupChat::Close token=$token"
 
     if {[info exists state(w)] && [winfo exists $state(w)]} {
 	::UI::SaveWinGeom $wDlgs(jgc) $state(w)

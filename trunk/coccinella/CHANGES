@@ -9,6 +9,7 @@ Coccinella-0.94.9 (04????): 	Short summary --
         - prepared for using xml/svg for all whiteboard stuff
 	- major internal code reorganizations to separate whiteboard code
           from rest and be independent of protocols
+	- reworked the groupchat dialog from scratch
 	- 
 
 Coccinella-0.94.8 (040305): 	Short summary --

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.36 2004-03-31 07:55:19 matben Exp $
+# $Id: Dialogs.tcl,v 1.37 2004-04-04 13:37:26 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -66,6 +66,7 @@ array set wDlgs {
     jmuccfg         .jmuccfg
     jmucdestroy     .jmucdestroy
     jchist          .jchist
+    jhist           .jhist
     jprofiles       .jprofiles
     joobs           .joobs
     jerrdlg         .jerrdlg
