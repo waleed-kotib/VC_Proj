@@ -506,6 +506,8 @@ allt i nuvarande canvasen!}
 Vill du ta emot den?}
 ::msgcat::mcset sv messfailmimeimp 	{Misslyckades med att hitta en\
 importerare för MIME typen %s}
+::msgcat::mcset sv messfailnomime 	{Misslyckades med att hitta MIME\
+typen för filen %s}
 ::msgcat::mcset sv messfailsend		{Misslyckades med att skicka till %s}
 ::msgcat::mcset sv messfactorydefaults	{Du håller på att ersätta många av dina\
 personliga inställningar. Vill du verkligen fortsätta?}
@@ -523,6 +525,7 @@ Försök igen eller avbryt.}
 eller Courier får ej tas bort.}
 ::msgcat::mcset sv messprefschanged	{Inställningarna har ändrats.\
 Vill du avbryta ändå?}
+::msgcat::mcset sv messerrpreffile	{Misslyckades med att öppna filen %s.}
 ::msgcat::mcset sv messfailserver	{Misslyckades med att starta servern.\
 Kanske är du inte nätverksansluten.}
 ::msgcat::mcset sv messopenhelpfile	{Du håller på att öppna en hjälpfil\
@@ -675,7 +678,7 @@ fil över HTTP.}
 stöder gruppsamtal}
 	::msgcat::mcset sv jamesserrinboxopen	{Misslyckades med att öppna\
 filen %s för inkorgen.}
-	::msgcat::mcset en jamesserrinboxread	{Fick ett fel när försökte\
+	::msgcat::mcset sv jamesserrinboxread	{Fick ett fel när försökte\
 att läsa Jabber inkorgs filen "%s": %s}
 	::msgcat::mcset sv jamesschatclose	{Om du stänger det här fönstret\
 så förlorar du också hela konversationen. Vill du verkligen stänga fönstret?}
@@ -939,6 +942,9 @@ mod så anger du detta i Inställnings dialogen och startar om Coccinella.}
 	::msgcat::mcset sv suintro3 	{När som helst kan du trycka på\
 Föregående knappen för att gå tillbaks. Följ instruktionerna på varje sida\
 och tryck på Nästa knappen till sista sidan.}
+::msgcat::mcset sv sulang       {Välj språkkatalog.\
+Om du ändrar språkkatalogen kommer detta endast att få effekt på textelement\
+som skapas efter denna ändring.}
 	::msgcat::mcset sv suservmsg	{Fyll i namnet på Jabber servern\
 som du önskar ha ditt konto på. Om du redan har ett konto på en Jabber\
 server så fyll i det namnet. Ett typiskt namn är "jabber.org".}

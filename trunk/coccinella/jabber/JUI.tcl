@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.25 2004-01-26 07:34:49 matben Exp $
+# $Id: JUI.tcl,v 1.26 2004-02-12 08:48:26 matben Exp $
 
 package provide JUI 1.0
 
@@ -816,7 +816,7 @@ proc ::Jabber::UI::Popup {what w v x y} {
 		    }
 		    wb {
 			switch -- $typeClicked {
-			    room - user {
+			    room {
 				set state normal
 			    }
 			}
@@ -824,10 +824,9 @@ proc ::Jabber::UI::Popup {what w v x y} {
 		}
 	    }
 	    groupchat {	    
+
+		# We skip whiteboarding here since does not know if Coccinella.
 		if {($type == "user") && ($typeClicked == "user")} {
-		    set state normal
-		}
-		if {($type == "wb") && ($typeClicked == "user")} {
 		    set state normal
 		}
 	    }

@@ -20,3 +20,10 @@
 *Combobox.background:               #eeeeff
 *Tablelist.background:              #eeeeff
 *Tablelist.labelBackground:         #bebede
+
+*MacTabnotebook.style:                   aqua
+*MacTabnotebook.activeTabBackgroundAqua: #bbbbdd
+*MacTabnotebook.tabBackgroundAqua:       #8a8aaa
+*MacTabnotebook.backgroundAqua:          #bebebe
+
+*HeadLabel.background:                   #cecede

@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: Theme.tcl,v 1.8 2004-02-09 08:26:07 matben Exp $
+# $Id: Theme.tcl,v 1.9 2004-02-12 08:48:26 matben Exp $
 
 package provide Theme 1.0
 
@@ -99,6 +99,7 @@ proc ::Theme::ReadPrefsFile { } {
     } else {
 	set prefs(themeName) ""
     }
+    set prefs(messageLocale) [option get . messageLocale {}] 
 }
 
 proc ::Theme::SavePrefsFile { } {
@@ -113,10 +114,11 @@ proc ::Theme::SavePrefsFile { } {
     }
     
     # Header information.
-    puts $fid "!\n!   User preferences for the theme name."
+    puts $fid "!\n!   User preferences for the theme name and locale."
     puts $fid "!   The data written at: [clock format [clock seconds]]\n!"
     
     puts $fid [format "%-24s\t%s" *themeName: $prefs(themeName)]
+    puts $fid [format "%-24s\t%s" *messageLocale: $prefs(messageLocale)]
     
     close $fid
     if {[catch {file rename -force $tmpFile $this(themePrefsPath)} msg]} {
