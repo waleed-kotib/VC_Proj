@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #
-# $Id: JForms.tcl,v 1.14 2004-07-30 12:55:54 matben Exp $
+# $Id: JForms.tcl,v 1.15 2004-08-31 12:48:17 matben Exp $
 # 
 #      Updated to version 2.1 of JEP-0004
 #  
@@ -940,6 +940,10 @@ proc ::Jabber::Forms::ResultList {w subiq} {
 #       See ::Jabber::Forms::ResultList
 #       Complete xml: <query ...><iq ...><x xmlns='jabber:x:data' ...>
 #       subiq: <iq ...><x ...
+#       
+#       or: <iq from='users.jabber.org' id='1014' to='..' type='result'>
+#               <query xmlns='jabber:iq:search'><truncated/>
+#                   <x type='result' xmlns='jabber:x:data'>
 
 proc ::Jabber::Forms::ResultListXData {w subiq} {
     
@@ -951,15 +955,19 @@ proc ::Jabber::Forms::ResultListXData {w subiq} {
     }
     set id $locals($w,id)
     set res {}
-    set xElem [lindex [wrapper::getchildren $subiq] 0]    
-    if {![string equal [lindex $xElem 0] "x"]} {
+    set xlist [wrapper::getchildwithtaginnamespace $subiq x jabber:x:data]
+    if {[llength $xlist] == 0} {
 	return -code error {Did not identify the <x> element in search result}
     }
+    
+    # We expect just a single x element.
+    set xElem [lindex $xlist 0]    
     
     # Loop through the items. The first one must be a <reported> element.
     # We are not guaranteed to receive every field.
     
     foreach item [wrapper::getchildren $xElem] {
+	
 	switch -- [lindex $item 0] {
 	    title {
 		#

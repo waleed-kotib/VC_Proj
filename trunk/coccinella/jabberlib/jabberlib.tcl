@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.59 2004-08-07 13:34:22 matben Exp $
+# $Id: jabberlib.tcl,v 1.60 2004-08-31 12:48:17 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -3237,8 +3237,13 @@ proc jlib::setdebug {args} {
 }
 
 proc jlib::Debug {num str} {
+    global  fdDebug
     variable debug
     if {$num <= $debug} {
+	if {[info exists fdDebug]} {
+	    puts $fdDebug $str
+	    flush $fdDebug
+	}
 	puts $str
     }
 }
