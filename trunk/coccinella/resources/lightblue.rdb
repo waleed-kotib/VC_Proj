@@ -1,0 +1,22 @@
+!
+*background:                        #dedeee
+*highlightBackground:               #dedeee
+
+! Scrollbar bed color
+*troughColor:			    #b3b3d3
+
+
+! Colors, which are used when mouse is over the item
+!*activeBackground:		    #550066
+
+! tk standard widgets
+!
+*Listbox.background:		    #eeeeff
+*Text.background:		    #eeeeff
+*Entry.background:		    #eeeeff
+
+! contributed widgets
+!
+*Combobox.background:               #eeeeff
+*Tablelist.background:              #eeeeff
+*Tablelist.labelBackground:         #bebede
