@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #
-# $Id: jlibhttp.tcl,v 1.1 2004-10-17 14:20:36 matben Exp $
+# $Id: jlibhttp.tcl,v 1.2 2004-10-18 14:01:04 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -56,7 +56,7 @@ namespace eval jlib::http {
     # All non-options should be in this array.
     variable priv
 
-    variable debug 2
+    variable debug 4
     variable errcode
     array set errcode {
 	0       "unknown error"
@@ -125,6 +125,8 @@ proc jlib::http::new {jlibname url args} {
       [namespace current]::transportinit \
       [namespace current]::send \
       [namespace current]::transportreset
+
+    return ""
 }
 
 # jlib::http::BuildProxyHeader --
@@ -291,6 +293,8 @@ proc jlib::http::Post {xml} {
 	set priv(lastsecs) [clock seconds]
 	
 	# Reschedule next poll.
+	Debug 4 "after $opts(-maxpollms) Poll"
+	
 	set priv(pollid) [after $opts(-maxpollms) \
 	  [namespace current]::Poll]
     }
@@ -312,6 +316,7 @@ proc jlib::http::Poll { } {
     }
     
     # Reschedule next poll.
+    Debug 4 "after $opts(-maxpollms) Poll"
     set priv(pollid) [after $opts(-maxpollms) [namespace current]::Poll]]
 }
 
@@ -331,7 +336,7 @@ proc jlib::http::Response {token} {
     set status [::http::status $token]
     
     Debug 2 "jlib::http::Response status=$status, [::http::ncode $token]"
-    Debug 2 "bady='[::http::data $token]'"
+    Debug 2 "data='[::http::data $token]'"
 
     switch -- $status {
 	ok {	    
@@ -339,6 +344,8 @@ proc jlib::http::Response {token} {
 		Finish error [::http::ncode $token]
 		return
 	    }
+	    Debug 4 "[parray state(meta)]"
+	    
 	    set haveCookie 0
 	    set haveContentType 0
 	    
