@@ -143,7 +143,7 @@
 ::msgcat::mcset en Unsubscribe
 ::msgcat::mcset en Unsubscribed
 ::msgcat::mcset en Username
-::msgcat::mcset en Vistors
+::msgcat::mcset en Visitors
 ::msgcat::mcset en Warning
 ::msgcat::mcset en Welcome
 ::msgcat::mcset en Whiteboard
@@ -659,7 +659,7 @@ You have a subscription for %s: %s.}
 ::msgcat::mcset en jamesstrptsubsc              {Your registered account with the %s service will be put in your roster to work as a transport with this service.}
 ::msgcat::mcset en jamessfailedsubsc            {Failed to make a subscription to %s. The user denied the subscription.}
 ::msgcat::mcset en jamessstarttls-nofeature     {The server "%s" has no support for TLS.}
-::msgcat::mcset en jamessstartls-failure        {TLS negotiating with server "%s" failed.}
+::msgcat::mcset en jamessstarttls-failure        {TLS negotiating with server "%s" failed.}
 
 
 

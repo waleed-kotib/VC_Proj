@@ -60,6 +60,7 @@
 ::msgcat::mcset de From		Von
 ::msgcat::mcset de General	Allgemein
 ::msgcat::mcset de Get		Abrufen
+#::msgcat::mcset de Getting
 ::msgcat::mcset de Group	Gruppe
 ::msgcat::mcset de Groupchat    Gruppen-Chat
 ::msgcat::mcset de Handling	Behandlung
@@ -75,6 +76,7 @@
 ::msgcat::mcset de Logout	Abmelden
 ::msgcat::mcset de Message	Nachricht
 ::msgcat::mcset de Middle	{2. Vorname}
+#::msgcat::mcset de Moderators
 ::msgcat::mcset de More		Mehr
 ::msgcat::mcset de Never	Niemals
 ::msgcat::mcset de New		Neu
@@ -88,6 +90,7 @@
 ::msgcat::mcset de Online	Angemeldet
 ::msgcat::mcset de Open		Öffnen
 ::msgcat::mcset de Options	Optionen
+#::msgcat::mcset de Participants
 ::msgcat::mcset de Password	Passwort
 ::msgcat::mcset de Pick		Auswählen
 ::msgcat::mcset de Phone	Telefon
@@ -118,6 +121,7 @@
 ::msgcat::mcset de Server	Server
 ::msgcat::mcset de Servers	Server
 ::msgcat::mcset de Set		Setzen
+#::msgcat::mcset de Settings
 ::msgcat::mcset de Shortcut	Abkürzung
 ::msgcat::mcset de Shortcuts	Abkürzungen
 ::msgcat::mcset de Sounds	Klänge
@@ -142,6 +146,7 @@
 ::msgcat::mcset de Unsubscribe	Abmelden
 ::msgcat::mcset de Unsubscribed	Abgemeldet 
 ::msgcat::mcset de Username	Benutzername
+#::msgcat::mcset de Visitors
 ::msgcat::mcset de Warning	Warnung
 ::msgcat::mcset de Welcome      Willkommen
 ::msgcat::mcset de Whiteboard	Zeichenwand
@@ -559,6 +564,7 @@
 ::msgcat::mcset de messprotocolch	{Sie haben die Netzwerkeinstellungen geändert. Dies erfordert einen Neustart der Anwendung. Wollen Sie wirklich weitermachen ?}
 ::msgcat::mcset de messpasswddifferent {Die beiden Passwörter stimmen nicht überein. Bitte versuchen Sie es erneut.}
 ::msgcat::mcset de messaupdatelatest    {Sie verfügen bereits über die letzte Version von (%s)}
+#::msgcat::mcset de messprefsrestart     {For one or many of these settings to take effect you need to restart the application}
 
 
 # Messages for tk_messageBox:
@@ -658,6 +664,8 @@ bei der entsprechenden Transportkomponente registriert haben. Wollen Sie das jet
 ::msgcat::mcset de jamessregerr                 {Fehler bei Registrierung mit Fehlernachricht: %s}
 ::msgcat::mcset de jamesstrptsubsc              {Ihr registriertes Konto beim Dienst %s wird in Ihrer Liste als Transport für diesen Dienst eingetragen.}
 ::msgcat::mcset de jamessfailedsubsc            {Anmeldung bei %s nicht möglich. Der Benutzer verweigerte die Anmeldung.}
+#::msgcat::mcset de jamessstarttls-nofeature     {The server "%s" has no support for TLS.}
+#::msgcat::mcset de jamessstarttls-failure        {TLS negotiating with server "%s" failed.}
 
 
 
@@ -667,7 +675,14 @@ bei der entsprechenden Transportkomponente registriert haben. Wollen Sie das jet
 ::msgcat::mcset de openquicktimeurlmsg		{Öffnet eine URL mit einer SDP-Datei mit Erweiterung .mov zum Senden eines QuickTime-Echtzeit-Datenstroms.\
   Es kann sich um Audio (Radio) oder Video (TV) handeln. Alternativ können Sie über Ihren Webbrowser die SDP-Datei auf Platte speichern und sie dann als gewöhnliche Filmdatei öffnen.}
 ::msgcat::mcset de printunixcmd                 {Druckbefehl, wenn nötig anpassen}
+#::msgcat::mcset de enterpassword                {Enter the password for your account "%s"}
 
+
+#::msgcat::mcset de httptrptok                   {Finished getting file %s}
+#::msgcat::mcset de httptrpterror                {File transport error when getting the file %s: %s}
+#::msgcat::mcset de httptrpteof                  {The server closed the socket without replying.}
+#::msgcat::mcset de httptrptnon200               {File transport error when getting the file %s: code %s; %s}
+#::msgcat::mcset de httptrptreset                {File transport of %s was reset}
 
 
 ::msgcat::mcset de uastatpointmac 	{Zeiger, Klick für Markierung, Doppelklick zur Anzeige, Drücken für Popup}
@@ -726,6 +741,7 @@ bei der entsprechenden Transportkomponente registriert haben. Wollen Sie das jet
 ::msgcat::mcset de prefcufont    {Schrift für Chat-Fenster wählen:}
 ::msgcat::mcset de prefcushow    {Eingehende Nachrichten in neuem Fenster zeigen}
 ::msgcat::mcset de prefcusave    {Nachrichten-Eingangsfach zwischen Sitzungen speichern}
+#::msgcat::mcset de prefcuautologin  {Automatically login when launched}
 ::msgcat::mcset de prefcu2clk    {Doppelklick auf Nachricht im Postfach:}
 ::msgcat::mcset de prefcuopen    {Nachricht in neuem Fenster öffnen}
 ::msgcat::mcset de prefcureply   {Anwort an Absender}
@@ -811,6 +827,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset de jaupdateremind {Bitte nicht mehr daran erinnern}
 ::msgcat::mcset de jasettopic   {Neues Thema für diesen Gruppen-Chat setzen.}
 ::msgcat::mcset de jadirpresmsg {Spezielle Anwesenheit an Benutzer "%s" senden.}
+#::msgcat::mcset de jatlsnegot   {Negotiating TLS security...}
 
 
 

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.56 2004-12-02 08:22:34 matben Exp $
+# $Id: Login.tcl,v 1.57 2004-12-14 14:08:45 matben Exp $
 
 package provide Login 1.0
 
@@ -387,7 +387,7 @@ proc ::Login::ShowAnyMessageBox {token status {errmsg ""}} {
 	    set str [mc jamessstarttls-nofeature $state(server)]
 	}
 	startls-failure {
-	    set str [mc jamessstartls-failure $state(server)]
+	    set str [mc jamessstarttls-failure $state(server)]
 	}
 	default {
 	    set str $errmsg

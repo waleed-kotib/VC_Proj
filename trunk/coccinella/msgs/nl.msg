@@ -60,6 +60,7 @@
 ::msgcat::mcset nl From			{Van}
 ::msgcat::mcset nl General		{Algemeen}
 ::msgcat::mcset nl Get			{Ophalen}
+#::msgcat::mcset nl Getting
 ::msgcat::mcset nl Group		{Groep}
 ::msgcat::mcset nl Groupchat            {Groepsgesprek}
 ::msgcat::mcset nl Handling		{Behandeling}
@@ -75,6 +76,7 @@
 ::msgcat::mcset nl Logout		{Afmelden}
 ::msgcat::mcset nl Message		{Bericht}
 ::msgcat::mcset nl Middle		{Tussennaam}
+#::msgcat::mcset nl Moderators
 ::msgcat::mcset nl More			{Meer}
 ::msgcat::mcset nl Never		{Nooit}
 ::msgcat::mcset nl New			{Nieuw}
@@ -88,6 +90,7 @@
 ::msgcat::mcset nl Online		{Online}
 ::msgcat::mcset nl Open			{Openen}
 ::msgcat::mcset nl Options		{Opties}
+#::msgcat::mcset nl Participants
 ::msgcat::mcset nl Password		{Wachtwoord}
 ::msgcat::mcset nl Pick			{Kies}
 ::msgcat::mcset nl Phone		{Telefoon}
@@ -118,6 +121,7 @@
 ::msgcat::mcset nl Server		{Server}
 ::msgcat::mcset nl Servers		{Servers}
 ::msgcat::mcset nl Set			{Instellen}
+#::msgcat::mcset nl Settings
 ::msgcat::mcset nl Shortcut		{Snelkoppeling}
 ::msgcat::mcset nl Shortcuts		{Snelkoppelingen}
 ::msgcat::mcset nl Sounds		{Geluiden}
@@ -142,6 +146,7 @@
 ::msgcat::mcset nl Unsubscribe		{Uitschrijven}
 ::msgcat::mcset nl Unsubscribed		{Uitgeschreven}
 ::msgcat::mcset nl Username		{Gebruikersnaam}
+#::msgcat::mcset nl Visitors
 ::msgcat::mcset nl Warning		{Waarschuwing}
 ::msgcat::mcset nl Welcome              {Welkom}
 ::msgcat::mcset nl Whiteboard		{Whiteboard}
@@ -559,7 +564,7 @@
 ::msgcat::mcset nl messprotocolch	{U hebt de netwerk setup gewijzigd. Dit vereist dat u Coccinella herstart voordat de wijzigingen worden doorgevoerd. Wilt u werkelijk verder gaan?}
 ::msgcat::mcset nl messpasswddifferent  {De wachtwoorden komen niet overeen. Probeer alstublieft opnieuw.}
 ::msgcat::mcset nl messaupdatelatest    {U hebt reeds de laatste versie (%s)}
-
+#::msgcat::mcset nl messprefsrestart     {For one or many of these settings to take effect you need to restart the application}
 
 
 
@@ -660,8 +665,9 @@
 ::msgcat::mcset nl jamessregerr                 {De registratie mislukte met foutmelding: %s}
 ::msgcat::mcset nl jamesstrptsubsc              {Uw geregistreerde account op de dienst %s zal in uw roster geplaatst worden om te dienen als transport voor die dienst.}
 ::msgcat::mcset nl jamessfailedsubsc            {Inschrijving op %s mislukte omdat de gebruiker weigerde.}
+#::msgcat::mcset nl jamessstarttls-nofeature     {The server "%s" has no support for TLS.}
+#::msgcat::mcset nl jamessstarttls-failure        {TLS negotiating with server "%s" failed.}
 
-    
 
 
 ::msgcat::mcset nl openquicktime		{QuickTime live stream openen}
@@ -670,7 +676,15 @@
   Dit kan zowel geluid (radio) als video (TV) zijn. Als alternatief kan u uw webbrowser gebruiken om het SDP bestand te vinden voor een live transmissie, download het op de harde schijf en\
   open het als een normaal filmbestand.}
 ::msgcat::mcset nl printunixcmd                 {Afdrukcommando, bewerk indien gewenst}
+#::msgcat::mcset nl enterpassword                {Enter the password for your account "%s"}
 
+
+
+#::msgcat::mcset nl httptrptok                   {Finished getting file %s}
+#::msgcat::mcset nl httptrpterror                {File transport error when getting the file %s: %s}
+#::msgcat::mcset nl httptrpteof                  {The server closed the socket without replying.}
+#::msgcat::mcset nl httptrptnon200               {File transport error when getting the file %s: code %s; %s}
+#::msgcat::mcset nl httptrptreset                {File transport of %s was reset}
 
 
 ::msgcat::mcset nl uastatpointmac 	{Aanwijsgereedschap}
@@ -728,6 +742,7 @@
 ::msgcat::mcset nl prefcufont    {Selecteer lettertype voor chatvenster:}
 ::msgcat::mcset nl prefcushow    {Inkomende berichten in een nieuw venster tonen}
 ::msgcat::mcset nl prefcusave    {Berichten in Postvak in opslaan tussen sessies}
+#::msgcat::mcset nl prefcuautologin  {Automatically login when launched}
 ::msgcat::mcset nl prefcu2clk    {Dubbele klik op bericht in Postvak in:}
 ::msgcat::mcset nl prefcuopen    {Bericht openen in een nieuw venster}
 ::msgcat::mcset nl prefcureply   {Afzender beantwoorden}
@@ -815,6 +830,7 @@ Wilt u ze niet opslaan?}
 ::msgcat::mcset nl jaupdateremind {Deze boodschap niet meer tonen}
 ::msgcat::mcset nl jasettopic   {Nieuw onderwerp instellen voor deze kamer.}
 ::msgcat::mcset nl jadirpresmsg {Voorgeschreven status verzenden naar gebruiker "%s".}
+#::msgcat::mcset nl jatlsnegot   {Negotiating TLS security...}
 
 
 

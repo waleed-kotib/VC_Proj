@@ -105,7 +105,7 @@ if {$dst == ""} return
 set rootdst [file rootname [file tail $dst]]
 source $src
 source $dst
-foreach name [array names arr en,*] {
+foreach name [lsort [array names arr en,*]] {
     regexp {en,(.*)} $name match key
     if {![info exists arr($rootdst,$key)]} {
          puts "Missing: $key"

@@ -67,15 +67,17 @@ For the <CODE>groupchat</CODE> type the following key-value pairs are handled
 "password"      string        this is the password for entering the room if necessary
 "xmlns"         "whiteboard"
 </pre>
+The server must support the disco method for service discovery, and the
+groupchat must be of the MUC type. All modern servers comply with this.
 
 <h3>01 Perform a Coccinella login ##
-<small>protocol:admin_user_node@our_domain</small></h3>
+<small>xmpp:admin_user_node@our_domain</small></h3>
 Perform a Coccinella login using your <EM>current selected profile</EM>. This is not very useful
 since there is no query type. The jid you specify is supposed to be the target of your action,
 or query, but since this is missing, it just performs a standard login.
 
 <h3>02 Prepare to send an instant message ##
-<small>protocol:contact_user_node@our_domain</small></h3>
+<small>xmpp:contact_user_node@our_domain</small></h3>
 Prepare to send a "Hello World" message to JTCorbet on Jabber host ag:
 <a href="xmpp:JTCorbet@ag?message&subject=Hi&body=Hello%20World">
 xmpp:JTCorbet@ag?message&subject=Hi&body=Hello%20World</a>.
@@ -85,13 +87,13 @@ is providing the necessary authentication for this activity on the server.
 Valid in all cases below!
 
 <h3>03 Prepare to start a chat session ##
-<small>protocol:contact_user_node@our_domain</small></h3>
+<small>xmpp:contact_user_node@our_domain</small></h3>
 Prepare to start a chat session with JTCorbet on Jabber host ag using thread 100:
 <a href="xmpp:JTCorbet@ag?message&subject=Hi&body=Hello%20World&thread=100">
 xmpp:JTCorbet@ag?message&subject=Hi&body=Hello%20World&thread=100</a>.
 
 <h3>04 Enter a chat room ##
-<small>protocol:roomname@conference.our_domain/nickname</small></h3>
+<small>xmpp:roomname@conference.our_domain/nickname</small></h3>
 Enter the sss chat room using nickname Terry:
 <a href="xmpp:sss@conference.ag/Terry?groupchat">
 xmpp:sss@conference.ag/Terry?groupchat</a>.
@@ -103,7 +105,7 @@ has automatic access irrespective of password also is at play here because
 the 'sss' room requires a password.
 
 <h3>05 Start a whiteboard session ##
-<small>protocol:roomname@conference.our_domain/nickname</small></h3>
+<small>xmpp:roomname@conference.our_domain/nickname</small></h3>
 Start a whiteboard session in the sss chat room with nickname Terry:
 <a href="xmpp:sss@conference.ag/Terry?groupchat&xmlns=whiteboard">
 xmpp:sss@conference.ag/Terry?groupchat&xmlns=whiteboard</a>.
