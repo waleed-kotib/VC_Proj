@@ -11,7 +11,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: wrapper.tcl,v 1.3 2003-09-13 06:39:25 matben Exp $
+# $Id: wrapper.tcl,v 1.4 2003-11-04 09:42:45 matben Exp $
 # 
 # ########################### INTERNALS ########################################
 # 
@@ -50,6 +50,7 @@
 #      wrapper::getattribute xmllist attrname
 #      wrapper::setattrlist xmllist attrlist
 #      wrapper::setcdata xmllist cdata
+#      wrapper::splitxml xmllist tagVar attrVar cdataVar childVar
 #
 # ########################### LIMITATIONS ######################################
 # 
@@ -66,6 +67,7 @@
 #                return break at stream end
 #       1.0b2    fix to make parser reentrant
 #       030910   added accessor functions to get/set xmllist elements
+#       031103   added splitxml command
 
 package provide wrapper 1.0
     
@@ -642,6 +644,15 @@ proc wrapper::getcdata {xmllist} {
 
 proc wrapper::getchildren {xmllist} {
     return [lindex $xmllist 4]
+}
+
+proc wrapper::splitxml {xmllist tagVar attrVar cdataVar childVar} {
+    
+    foreach {tag attr empty cdata children} $xmllist break
+    uplevel 1 [list set $tagVar $tag]
+    uplevel 1 [list set $attrVar $attr]
+    uplevel 1 [list set $cdataVar $cdata]
+    uplevel 1 [list set $childVar $children]    
 }
 
 proc wrapper::getchildswithtag {xmllist tag} {
