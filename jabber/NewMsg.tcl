@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.58 2005-02-02 09:02:21 matben Exp $
+# $Id: NewMsg.tcl,v 1.59 2005-02-18 13:58:54 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -137,10 +137,10 @@ proc ::NewMsg::InitEach { } {
     set locals(servicejid,jabber) $jserver(this)
     set locals(ourtransports) $trpts
     
-    # Build popup defs. Keep order of transportDefs. Flatten!
+    # Build popup defs. Keep order of transportDefs.
     set locals(menuDefs) {}
     foreach trpt $trpts {
-	eval {lappend locals(menuDefs)} $transportDefs($trpt)
+	lappend locals(menuDefs) $trpt [lindex $transportDefs($trpt) 0]
     }
 }
 
@@ -419,11 +419,16 @@ $opts(-forwardmessage)"
 
 proc ::NewMsg::FillInAddresses {w to} {
     variable locals
+    variable transportDefs
     upvar ::Jabber::jstate jstate
     
     # If -to option. This can have jid's with and without any resource.
     # Be careful to treat this according to the XMPP spec!
 
+    foreach {key value} [array get locals servicejid,*] {
+	set type [lindex [split $key ,] 1]
+	set host2type($value) $type
+    }
     set waddr $locals($w,wfrport)
     set n 1
     foreach jid $to {
@@ -434,6 +439,14 @@ proc ::NewMsg::FillInAddresses {w to} {
 	    FillAddrLine $w $waddr $n
 	}	    
 	set locals($w,addr$n) [$jstate(jlib) getrecipientjid $jid]
+	
+	# Set popup if transport.
+	jlib::splitjidex $jid node host res
+	if {[info exists host2type($host)]} {
+	    set type $host2type($host)
+	    set locals($w,poptrpt$n) $type
+	    set locals($w,enttrpt$n) [lindex $transportDefs($type) 1]
+	}
 	incr n
     }
 }
@@ -459,7 +472,7 @@ proc ::NewMsg::NewAddrLine {w wfr n} {
     set num $locals($w,num)
     frame $wfr.f${n} -bd 0
     entry $wfr.f${n}.trpt -width 18 -bd 0 -highlightthickness 0 \
-      -state disabled -textvariable [namespace current]::locals($w,poptrpt$n) \
+      -state disabled -textvariable [namespace current]::locals($w,enttrpt$n) \
       -disabledforeground $fg1 -disabledbackground $bg3
     label $wfr.f${n}.la -bd 0 -bg $bgpop
     pack  $wfr.f${n}.trpt -side left -fill y -anchor w
@@ -471,8 +484,8 @@ proc ::NewMsg::NewAddrLine {w wfr n} {
       -bg $bg2 -fg $fg2 -disabledbackground $bg4
     
     set m [menu $locals(wpopupbase)${num}_${n} -tearoff 0]
-    foreach {name desc} $locals(menuDefs) {
-	$m add radiobutton -label $name -value $desc  \
+    foreach {type name} $locals(menuDefs) {
+	$m add radiobutton -label $name -value $type  \
 	  -variable [namespace current]::locals($w,poptrpt$n)  \
 	  -command [list ::NewMsg::PopupCmd $w $n]
     }
@@ -507,7 +520,9 @@ proc ::NewMsg::FillAddrLine {w wfr n} {
     bind $wfr.f${n}.la <Button-1> [list ::NewMsg::TrptPopup $w $n %X %Y]
     bind $wfr.f${n}.la <ButtonRelease-1> [list ::NewMsg::TrptPopupRelease $w $n]
     set locals($w,fillline) $n
-    set locals($w,poptrpt$n) [lindex $transportDefs(jabber) 1]
+    #set locals($w,poptrpt$n) [lindex $transportDefs(jabber) 1]
+    set locals($w,poptrpt$n) jabber
+    set locals($w,enttrpt$n) [lindex $transportDefs(jabber) 1]
 }
 
 proc ::NewMsg::ButtonInAddr {w wfr n} {
@@ -659,34 +674,37 @@ proc ::NewMsg::KeyUpDown {updown w wfr n} {
 proc ::NewMsg::PopupCmd {w n} {
     
     variable locals
+    variable transportDefs
     upvar ::Jabber::jserver jserver
     
     set num     $locals($w,num)
     set wfrport $locals($w,wfrport)
-    set pick    $locals($w,poptrpt$n)
-
+    set trpt    $locals($w,poptrpt$n)
+    if {[info exists transportDefs($trpt)]} {
+	set locals($w,enttrpt$n) [lindex $transportDefs($trpt) 1]
+    }
+    
     # Seems to be necessary to achive any selection.
     set wentry $wfrport.addr${n}
     focus $wentry
 
-    switch -glob -- [string tolower $pick] {
-	*jabber* {
+    switch -- $trpt {
+	jabber {
 	    set locals($w,addr$n) "userName@$locals(servicejid,jabber)"
 	}
-	*aim* {
+	aim {
 	    set locals($w,addr$n) "usersName@$locals(servicejid,aim)"
-	    
 	}
-	*yahoo* {
+	yahoo {
 	    set locals($w,addr$n) "usersName@$locals(servicejid,yahoo)"
 	}
-	*icq* {
+	icq {
 	    set locals($w,addr$n) "screeNumber@$locals(servicejid,icq)"
 	}
-	*msn* {
+	msn {
 	    set locals($w,addr$n) "userName%hotmail.com@$locals(servicejid,msn)"
 	}
-	*email* {
+	email {
 	    set locals($w,addr$n) "userName%emailserver@$locals(servicejid,smtp)"
 	}
 	default {

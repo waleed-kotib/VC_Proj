@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.129 2005-02-16 14:26:45 matben Exp $
+# $Id: Jabber.tcl,v 1.130 2005-02-18 13:58:53 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -1602,7 +1602,8 @@ proc ::Jabber::GetVersion {to args} {
 	-silent 0
     }
     array set opts $args    
-    $jstate(jlib) get_version $to [list ::Jabber::GetVersionResult $to $opts(-silent)]
+    $jstate(jlib) get_version $to  \
+      [list ::Jabber::GetVersionResult $to $opts(-silent)]
 }
 
 proc ::Jabber::GetVersionResult {from silent jlibname type subiq} {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.117 2005-02-09 14:30:31 matben Exp $
+# $Id: Roster.tcl,v 1.118 2005-02-18 13:58:54 matben Exp $
 
 package provide Roster 1.0
 
@@ -775,13 +775,14 @@ proc ::Roster::GetAllUsersInItem {w v} {
     set jid3 {}
     foreach u [$w children $v] {
 	set ipath [concat $v [list $u]]
-	set c [$w children $ipath]
-	if {[llength $c] > 0} {
+	set cList [$w children $ipath]
+	foreach c $cList {
 	    set iipath [concat $ipath [list $c]]
 	    if {[lsearch [$w itemconfigure $iipath -tags] user] >= 0} {
 		lappend jid3 $c
 	    }
-	} else {
+	} 
+	if {$cList == {}} {
 	    if {[lsearch [$w itemconfigure $ipath -tags] user] >= 0} {
 		lappend jid3 $u
 	    }
