@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.10 2003-10-12 13:12:55 matben Exp $
+# $Id: Roster.tcl,v 1.11 2003-10-18 07:43:55 matben Exp $
 
 package provide Roster 1.0
 
@@ -1182,6 +1182,16 @@ proc ::Jabber::Roster::SetUIWhen {what} {
     }
 }
 
+proc ::Jabber::Roster::GetPresenceIconFromKey {key} {
+    variable presenceIcon
+    
+    if {[info exists presenceIcon($key)]} {
+	return $presenceIcon($key)
+    } else {
+	return ""
+    }
+}
+
 # Jabber::Roster::GetPresenceIcon --
 #
 #       Returns the image appropriate for 'presence', and any 'show' attribute.
@@ -1210,6 +1220,7 @@ proc ::Jabber::Roster::GetPresenceIcon {jid presence args} {
     }
     #puts "key=$key"
     
+    # Foreign IM systems.
     if {$jprefs(haveIMsysIcons)} {
 	
 	# If browsed...

@@ -15,7 +15,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.8 2003-10-12 13:12:54 matben Exp $
+# $Id: Coccinella.tcl,v 1.9 2003-10-18 07:43:55 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -467,6 +467,7 @@ if {!($prefs(printer) && $prefs(gdi))} {
     set prefs(printer) 0
 }
 
+# Not ready for this yet.
 set prefs(Thread) 0
 
 # Start httpd thread. It enters its event loop if created without a sript.
@@ -704,6 +705,11 @@ bind Text <ButtonRelease-1> "+ ::UI::FixMenusWhenSelection %W"
 bind Text <<Cut>> "+ ::UI::FixMenusWhenSelection %W"
 bind Text <<Copy>> "+ ::UI::FixMenusWhenSelection %W"
 
+# Linux has a strange binding by default. Handled by <<Paste>>.
+if {[string equal $this(platform) "unix"]} {
+    bind Text <Control-Key-v> {}
+}
+
 # On non macs we need to explicitly bind certain commands.
 if {![string match "mac*" $this(platform)]} {
     foreach wclass {Toplevel Preferences Chat GroupChat MailBox} {
@@ -783,8 +789,7 @@ if {($prefs(protocol) != "client") && $prefs(haveHttpd)} {
     
     if {[catch {
 	if {$prefs(Thread)} {
-	    set this(httpdthreadid) [thread::send $this(httpdthreadid)  \
-	      $httpdScript]
+	    thread::send $this(httpdthreadid) $httpdScript
 	
 	    # Add more Mime types than the standard built in ones.
 	    thread::send $this(httpdthreadid)  \

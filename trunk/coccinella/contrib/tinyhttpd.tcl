@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: tinyhttpd.tcl,v 1.1 2003-09-21 13:07:19 matben Exp $
+# $Id: tinyhttpd.tcl,v 1.2 2003-10-18 07:43:55 matben Exp $
 
 # ########################### USAGE ############################################
 #
@@ -44,28 +44,17 @@ namespace eval ::tinyhttpd:: {
     # Internal statistics and state for each request.
     variable logstate
     
-    # We use a variable 'this(platform)' that is more convenient for MacOS X.
     switch -- $::tcl_platform(platform) {
-	unix {
-	    set this(platform) $::tcl_platform(platform)
-	    if {[package vcompare [info tclversion] 8.3] == 1} {	
-		if {[string equal [tk windowingsystem] "aqua"]} {
-		    set this(platform) "macosx"
-		}
-	    }
-	}
-	windows - macintosh {
-	    set this(platform) $::tcl_platform(platform)
-	}
-    }
-    switch -- $this(platform) {
 	macintosh {
 	    set this(sep) :
 	}
 	windows {
 	    set this(sep) {\\}
 	}
-	unix - macosx {
+	unix {
+	    set this(sep) /
+	}
+	default {
 	    set this(sep) /
 	}
     }
@@ -388,7 +377,7 @@ proc ::tinyhttpd::ReadKeyValueLine {s ip cmd inPath} {
 #       fcopy called.
 
 proc ::tinyhttpd::RespondToClient {s ip cmd inPath} {
-    global  this
+    global  this tcl_platform
     
     variable opts
     variable state
@@ -422,11 +411,11 @@ proc ::tinyhttpd::RespondToClient {s ip cmd inPath} {
     
     # Add the new base path with the stripped incoming path.
     # On Windows we need special treatment of the "C:/" type drivers.
-    if {[string equal $this(platform) "windows"]} {
+    if {[string equal $tcl_platform(platform) "windows"]} {
 	set vol "[lindex $newBasePathL 0]:/"
     	set localPath   \
 	  "${vol}[join [lrange [concat $newBasePathL $stripPathL] 1 end] "/"]"
-    } elseif {[string equal $this(platform) "macintosh"]} {
+    } elseif {[string equal $tcl_platform(platform) "macintosh"]} {
         set localPath "[join [concat $newBasePathL $stripPathL] ":"]"
     } else {
         set localPath [join [concat $newBasePathL $stripPathL] "/"]
@@ -455,7 +444,7 @@ proc ::tinyhttpd::RespondToClient {s ip cmd inPath} {
 		puts $s [BuildHtmlDirectoryListing $opts(-rootdirectory) \
 		  $inPath httpd]
 	    }
-	    Finish $s "ok"
+	    Finish $s ok
 	    ::tinyhttpd::Debug 2 "  RespondToClient:: No default html file exists, return directory listing."
 	    return
 	} else {
@@ -464,7 +453,7 @@ proc ::tinyhttpd::RespondToClient {s ip cmd inPath} {
 	    } else {
 		puts $s $http(404)
 	    }
-	    Finish $s "ok"
+	    Finish $s ok
 	    return
 	}
     }
@@ -482,7 +471,7 @@ proc ::tinyhttpd::RespondToClient {s ip cmd inPath} {
 	} else {
 	    puts $s $http(404)
 	}
-	Finish $s "ok"
+	Finish $s ok
 	::tinyhttpd::Debug 2 "  RespondToClient:: open $localPath failed"
 	return
     } else  {
@@ -499,7 +488,7 @@ proc ::tinyhttpd::RespondToClient {s ip cmd inPath} {
 	::tinyhttpd::Debug 3 "  RespondToClient::\n'$data'"
     }
     if {[string equal $cmd "HEAD"]}  {
-	Finish $s "ok" $fid
+	Finish $s ok $fid
 	return
     }
     
@@ -547,7 +536,7 @@ proc ::tinyhttpd::CopyMore {in out total bytes {error {}}} {
     
     if {[eof $out]} {
 	::tinyhttpd::Debug 2 "  CopyMore:: ended prematurely because of eof on out"
-	Finish $out "eof" $in
+	Finish $out eof $in
 	return
     }
     incr total $bytes
@@ -677,7 +666,8 @@ proc ::tinyhttpd::BuildHtmlDirectoryListing {rootDir relPath httpdRelPath} {
     variable this
     variable html
     
-    ::tinyhttpd::Debug 2 "----BuildHtmlDirectoryListing: rootDir=$rootDir, relPath=$relPath"
+    ::tinyhttpd::Debug 2 "----BuildHtmlDirectoryListing: rootDir=$rootDir,\
+      relPath=$relPath, httpdRelPath=$httpdRelPath"
     
     # Check paths?
     if {$httpdRelPath == "/"} {
@@ -803,7 +793,7 @@ proc ::tinyhttpd::AddAbsolutePathWithRelativeUnix {absPath relPath} {
 #       The absolute path by adding 'absPath' with 'relPath'.
 
 proc ::tinyhttpd::AddAbsolutePathWithRelative {absPath relPath}  {
-    global  this
+    global  this tcl_platform
     
     # For 'tinyhttpd.tcl'.
     variable state
@@ -843,7 +833,7 @@ proc ::tinyhttpd::AddAbsolutePathWithRelative {absPath relPath}  {
     set completePath "$upAbsP $relP"
 
     # On Windows we need special treatment of the "C:/" type drivers.
-    if {$this(platform) == "windows"} {
+    if {$tcl_platform(platform) == "windows"} {
     	set finalAbsPath   \
 	    "[lindex $completePath 0]:/[join [lrange $completePath 1 end] "/"]"
     } else {

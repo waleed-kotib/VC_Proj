@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #
-# $Id: jabberhttptransport.tcl,v 1.1.1.1 2002-12-08 11:01:12 matben Exp $
+# $Id: jabberhttptransport.tcl,v 1.2 2003-10-18 07:43:56 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -154,7 +154,7 @@ proc jlibhttp::senddone {token} {
     switch -- $status {
 	error - timeout - reset {
 	    if {[info exists opts(-command)]} {
-		uplevel #0 "$opts(-command) {$status [httpex::error $token]}"
+		uplevel #0 $opts(-command) {$status [httpex::error $token]}
 	    }
 	}
 	ok {
