@@ -33,6 +33,7 @@
 ::msgcat::mcset es Choose		{Elegir}
 ::msgcat::mcset es City			{Ciudad}
 ::msgcat::mcset es Clear		{Limpiar}
+#::msgcat::mcset es Client
 ::msgcat::mcset es Close		{Cerrar}
 ::msgcat::mcset es Conference		{Conferencia}
 ::msgcat::mcset es Connect		{Conectarse}
@@ -91,6 +92,7 @@
 ::msgcat::mcset es No			{No}
 ::msgcat::mcset es no			{no}
 ::msgcat::mcset es None			{Ningún}
+#::msgcat::mcset es Notes
 ::msgcat::mcset es Occupation		{Profesión}
 ::msgcat::mcset es Offline		{Desconectado}
 ::msgcat::mcset es OK			{OK}
@@ -308,6 +310,7 @@
 ::msgcat::mcset es mCoccinellaHome  	{Inicio de Coccinella...}
 ::msgcat::mcset es mComponents          {Componentes...}
 ::msgcat::mcset es mBugReport           {Informar de un fallo...}
+#::msgcat::mcset es mUserInfo            {User Info...}
 
 
 # Popups.
@@ -910,6 +913,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset es jainmsgshow {Show incoming messages in this window}
 ::msgcat::mcset es jadisaddserv {Discover another server for groupchat rooms and other services. You may add a server permanently which is then automatically discovered. The login server is always discovered.}
 ::msgcat::mcset es jadisrmall {Remove all servers that are automatically and permanently discovered.}
+::msgcat::mcset es jauserinnote {Add your personal notes about this user}
 #--- Translate ---
 
 
@@ -931,12 +935,10 @@ namespace eval ::EditShortcuts:: {
 
 
 
-namespace eval ::VCard:: {
-	::msgcat::mcset es vcardget	{Cargando de la tarjeta del usuario %s.. Esperando de la respuesta del servidor...}
-	::msgcat::mcset es vcarderrget	{La carga de la tarjeta ha fallado (%s).}
-	::msgcat::mcset es vcardrec	{La tarjeta ha sido recibida.}
+::msgcat::mcset es vcardget	{Cargando de la tarjeta del usuario %s.. Esperando de la respuesta del servidor...}
+::msgcat::mcset es vcarderrget	{La carga de la tarjeta ha fallado (%s).}
+::msgcat::mcset es vcardrec	{La tarjeta ha sido recibida.}
 
-}
 
 
 ::msgcat::mcset es autoupdatenot        {No comprobar automáticamente las actualizaciones}

@@ -9,7 +9,8 @@ Coccinella-0.95.5 (050226):
 
         - added support for kprinter on unix
 	- status changes displayed in roster
-	-
+	- roster remembers which dir items opened/closed
+	- can hide offline/transports in roster
 
 
 Coccinella-0.95.4 (050126):

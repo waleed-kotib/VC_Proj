@@ -32,6 +32,7 @@
 ::msgcat::mcset fr Choose		{Choisir}
 ::msgcat::mcset fr City			{Ville}
 ::msgcat::mcset fr Clear		{Nettoyer}
+#::msgcat::mcset fr Client
 ::msgcat::mcset fr Close		{Fermer}
 ::msgcat::mcset fr Conference		{Conférence}
 ::msgcat::mcset fr Connect		{Se connecter}
@@ -90,6 +91,7 @@
 ::msgcat::mcset fr No			{Non}
 ::msgcat::mcset fr no			{non}
 ::msgcat::mcset fr None			{Aucun}
+#::msgcat::mcset fr Notes
 ::msgcat::mcset fr Occupation		{Occupé}
 ::msgcat::mcset fr Offline		{Déconnecté}
 ::msgcat::mcset fr OK			{OK}
@@ -307,6 +309,7 @@
 ::msgcat::mcset fr mCoccinellaHome  	{Dossier de Coccinella...}
 ::msgcat::mcset fr mComponents          {Composants...}
 ::msgcat::mcset fr mBugReport           {Signaler un bug...}
+#::msgcat::mcset fr mUserInfo            {User Info...}
 
 
 # Popups.
@@ -906,6 +909,9 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset fr jadisaddserv {Découvrez un autre serveur pour les salons de discussions et autres services. Vous pouvez ajouter un serveur définitivement quand il est découvert automatiquement. Le serveur de connexion est automatiquement découvert.}
 ::msgcat::mcset fr jadisrmall {Enlever les serveurs qui étaient automatiquement et définitivement découverts.}
 
+# translate
+::msgcat::mcset fr jauserinnote {Add your personal notes about this user}
+
 
 
 # Assistant de configuration :
@@ -925,12 +931,10 @@ namespace eval ::EditShortcuts:: {
 
 
 
-namespace eval ::VCard:: {
-	::msgcat::mcset fr vcardget	{Chargement de la carte de visite de l'utilisateur %s.. En attente de la réponse du serveur...}
-	::msgcat::mcset fr vcarderrget	{Le chargement de la carte de visite a échoué (%s).}
-	::msgcat::mcset fr vcardrec	{La carte de visite a été reçue.}
+::msgcat::mcset fr vcardget	{Chargement de la carte de visite de l'utilisateur %s.. En attente de la réponse du serveur...}
+::msgcat::mcset fr vcarderrget	{Le chargement de la carte de visite a échoué (%s).}
+::msgcat::mcset fr vcardrec	{La carte de visite a été reçue.}
 
-}
 
 
 ::msgcat::mcset fr autoupdatenot        {Ne pas vérifier automatiquement les mises-à-jour}

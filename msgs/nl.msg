@@ -33,6 +33,7 @@
 ::msgcat::mcset nl Choose		{Kiezen}
 ::msgcat::mcset nl City			{Stad}
 ::msgcat::mcset nl Clear		{Leegmaken}
+#::msgcat::mcset nl Client
 ::msgcat::mcset nl Close		{Sluiten}
 ::msgcat::mcset nl Conference		{Groepsgesprek}
 ::msgcat::mcset nl Connect		{Aanmelden}
@@ -91,6 +92,7 @@
 ::msgcat::mcset nl No			{Nee}
 ::msgcat::mcset nl no			{nee}
 ::msgcat::mcset nl None			{Geen}
+#::msgcat::mcset nl Notes
 ::msgcat::mcset nl Occupation		{Beroep}
 ::msgcat::mcset nl Offline		{Offline}
 ::msgcat::mcset nl OK			{OK}
@@ -308,6 +310,7 @@
 ::msgcat::mcset nl mCoccinellaHome  	{Coccinella's homepage...}
 ::msgcat::mcset nl mComponents 	 	{Componenten...}
 ::msgcat::mcset nl mBugReport  	 	{Fout melden...}
+#::msgcat::mcset nl mUserInfo            {User Info...}
 
 
 # Popups
@@ -898,6 +901,9 @@ Wilt u ze niet opslaan?}
 ::msgcat::mcset nl jadisaddserv {Hiermee kunt u een server toevoegen. U kunt een server permanent toevoegen waardoor die dan automatisch in de lijst verschijnt. Bij de server waarop u aanmeldt is dit altijd het geval.}
 ::msgcat::mcset nl jadisrmall {Alle permanente servers uit de lijst verwijderen.}
 
+# translate
+::msgcat::mcset nl jauserinnote {Add your personal notes about this user}
+
 
 
 # Setup assistant:
@@ -914,12 +920,10 @@ Wilt u ze niet opslaan?}
 
 
 
-namespace eval ::VCard:: {
-	::msgcat::mcset nl vcardget	{vCard van gebruiker %s ophalen. Waiting for server response...}
-	::msgcat::mcset nl vcarderrget	{Fout tijdens ophalen van vCard. Het resultaat was: %s}
-	::msgcat::mcset nl vcardrec	{vCard-gegevens ontvangen.}
+::msgcat::mcset nl vcardget	{vCard van gebruiker %s ophalen. Waiting for server response...}
+::msgcat::mcset nl vcarderrget	{Fout tijdens ophalen van vCard. Het resultaat was: %s}
+::msgcat::mcset nl vcardrec	{vCard-gegevens ontvangen.}
 
-}
 
 
 ::msgcat::mcset nl autoupdatenot        {Automatische controle voor updates uitschakelen}

@@ -30,6 +30,7 @@
 ::msgcat::mcset en Choose
 ::msgcat::mcset en City
 ::msgcat::mcset en Clear
+::msgcat::mcset en Client
 ::msgcat::mcset en Close
 ::msgcat::mcset en Conference
 ::msgcat::mcset en Connect
@@ -88,6 +89,7 @@
 ::msgcat::mcset en No
 ::msgcat::mcset en no
 ::msgcat::mcset en None
+::msgcat::mcset en Notes
 ::msgcat::mcset en Occupation
 ::msgcat::mcset en Offline
 ::msgcat::mcset en OK
@@ -307,7 +309,7 @@
 ::msgcat::mcset en mBugReport  	        {Report Bug...}
 ::msgcat::mcset en mTakeSnapShot        {Take Snapshot}
 ::msgcat::mcset en mTimeCode            {Timecode}
-
+::msgcat::mcset en mUserInfo            {User Info...}
 
 # Popups
 ::msgcat::mcset en mMessage     	{Message...}
@@ -881,6 +883,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en jainmsgshow  {Show incoming messages in this window}
 ::msgcat::mcset en jadisaddserv {Discover another server for groupchat rooms and other services. You may add a server permanently which is then automatically discovered. The login server is always discovered.}
 ::msgcat::mcset en jadisrmall   {Remove all servers that are automatically and permanently discovered.}
+::msgcat::mcset en jauserinnote {Add your personal notes about this user}
 
 
 
@@ -900,12 +903,10 @@ namespace eval ::EditShortcuts:: {
 
 
 
-namespace eval ::VCard:: {
-	::msgcat::mcset en vcardget	{Getting vCard from user %s. Waiting for server response...}
-	::msgcat::mcset en vcarderrget	{Failed getting the vCard. The result was: %s}
-	::msgcat::mcset en vcardrec	{vCard data received.}
+::msgcat::mcset en vcardget	{Getting vCard from user %s. Waiting for server response...}
+::msgcat::mcset en vcarderrget	{Failed getting the vCard. The result was: %s}
+::msgcat::mcset en vcardrec	{vCard data received.}
 
-}
 
 
 ::msgcat::mcset en autoupdatenot        {Do not automatically check for updates}

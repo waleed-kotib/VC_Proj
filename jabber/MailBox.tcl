@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.67 2005-02-25 14:08:55 matben Exp $
+# $Id: MailBox.tcl,v 1.68 2005-02-27 14:11:06 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -834,17 +834,16 @@ proc ::MailBox::MakeMessageList {body args} {
 
 proc ::MailBox::PutMessageInInbox {row} {
     global  this
-    upvar ::Jabber::jprefs jprefs
     
     set exists 0
-    if {[file exists $jprefs(inboxPath)]} {
+    if {[file exists $this(inboxFile)]} {
 	set exists 1
     }
-    if {![catch {open $jprefs(inboxPath) a} fd]} {
+    if {![catch {open $this(inboxFile) a} fd]} {
 	if {!$exists} {
 	    WriteInboxHeader $fd
 	    if {[string equal $this(platform) "macintosh"]} {
-		file attributes $jprefs(inboxPath) -type pref
+		file attributes $this(inboxFile) -type pref
 	    }
 	}
 	puts $fd "set mailbox(\[incr uidmsg]) {$row}"
@@ -1284,7 +1283,6 @@ proc ::MailBox::SaveMailboxVer1 { } {
     
     variable locals
     variable mailbox
-    upvar ::Jabber::jprefs jprefs
     
     # Do not store anything if empty.
     if {[llength [array names mailbox]] == 0} {
@@ -1292,7 +1290,7 @@ proc ::MailBox::SaveMailboxVer1 { } {
     }
     
     # Work on a temporary file and switch later.
-    set tmpFile $jprefs(inboxPath).tmp
+    set tmpFile $this(inboxFile).tmp
     if {[catch {open $tmpFile w} fid]} {
 	::UI::MessageBox -type ok -icon error \
 	  -message [mc jamesserrinboxopen $tmpFile]
@@ -1316,13 +1314,13 @@ proc ::MailBox::SaveMailboxVer1 { } {
     }
     puts $fid "}"
     close $fid
-    if {[catch {file rename -force $tmpFile $jprefs(inboxPath)} msg]} {
+    if {[catch {file rename -force $tmpFile $this(inboxFile)} msg]} {
 	::UI::MessageBox -type ok -message {Error renaming preferences file.}  \
 	  -icon error
 	return
     }
     if {[string equal $this(platform) "macintosh"]} {
-	file attributes $jprefs(inboxPath) -type pref
+	file attributes $this(inboxFile) -type pref
     }
 }
 
@@ -1339,7 +1337,6 @@ proc ::MailBox::SaveMailboxVer2 {args} {
     
     variable mailbox
     variable locals
-    upvar ::Jabber::jprefs jprefs
     
     array set argsArr {
 	-force      0
@@ -1357,7 +1354,7 @@ proc ::MailBox::SaveMailboxVer2 {args} {
 
 	# Be sure to not have any inbox that is empty.
 	if {[llength [array names mailbox]] == 0} {
-	    catch {file delete $jprefs(inboxPath)}
+	    catch {file delete $this(inboxFile)}
 	    ::Debug 2 "\tdelete inbox"
 	    return
 	} else {
@@ -1372,7 +1369,7 @@ proc ::MailBox::SaveMailboxVer2 {args} {
     }
         
     # Work on a temporary file and switch later.
-    set tmpFile $jprefs(inboxPath).tmp
+    set tmpFile $this(inboxFile).tmp
     if {[catch {open $tmpFile w} fid]} {
 	::UI::MessageBox -type ok -icon error \
 	  -message [mc jamesserrinboxopen $tmpFile]
@@ -1385,13 +1382,13 @@ proc ::MailBox::SaveMailboxVer2 {args} {
 	puts $fid "set mailbox(\[incr uidmsg]) {$mailbox($id)}"
     }
     close $fid
-    if {[catch {file rename -force $tmpFile $jprefs(inboxPath)} msg]} {
+    if {[catch {file rename -force $tmpFile $this(inboxFile)} msg]} {
 	::UI::MessageBox -type ok -message {Error renaming preferences file.}  \
 	  -icon error
 	return
     }
     if {[string equal $this(platform) "macintosh"]} {
-	file attributes $jprefs(inboxPath) -type pref
+	file attributes $this(inboxFile) -type pref
     }
 }
 
@@ -1405,12 +1402,12 @@ proc ::MailBox::WriteInboxHeader {fid} {
 }
 
 proc ::MailBox::ReadMailbox { } {
+    global  this
     variable locals
-    upvar ::Jabber::jprefs jprefs
 
     # Set this even if not there.
     set locals(mailboxRead) 1
-    if {[file exists $jprefs(inboxPath)]} {
+    if {[file exists $this(inboxFile)]} {
 	ReadMailboxVer2
     }
 }
@@ -1437,11 +1434,11 @@ proc ::MailBox::TranslateAnyVer1ToCurrentVer { } {
 #       any existing mailbox.
 
 proc ::MailBox::GetMailboxVersion { } {
-    upvar ::Jabber::jprefs jprefs
+    global  this
     
     set version ""
-    if {[file exist $jprefs(inboxPath)]} {
-	if {![catch {open $jprefs(inboxPath) r} fd]} {
+    if {[file exist $this(inboxFile)]} {
+	if {![catch {open $this(inboxFile) r} fd]} {
 	    if {[gets $fd line] >= 0} { 
 		if {![regexp -nocase {^ *# *version: *([0-9]+)} $line match version]} {
 		    set version 1
@@ -1454,15 +1451,15 @@ proc ::MailBox::GetMailboxVersion { } {
 }
 
 proc ::MailBox::ReadMailboxVer1 { } {
+    global  this
     variable locals
     variable uidmsg
     variable mailbox
-    upvar ::Jabber::jprefs jprefs
     
     ::Debug 2 "::MailBox::ReadMailboxVer1"
 
-    if {[catch {source $jprefs(inboxPath)} msg]} {
-	set tail [file tail $jprefs(inboxPath)]
+    if {[catch {source $this(inboxFile)} msg]} {
+	set tail [file tail $this(inboxFile)]
 	::UI::MessageBox -title [mc {Mailbox Error}] -icon error  \
 	  -type ok -message [mc jamesserrinboxread $tail $msg]
     } else {
@@ -1487,16 +1484,16 @@ proc ::MailBox::ReadMailboxVer1 { } {
 }
 
 proc ::MailBox::ReadMailboxVer2 { } {
+    global  this
     variable locals
     variable uidmsg
     variable mailbox
     variable mailboxindex
-    upvar ::Jabber::jprefs jprefs
 
     ::Debug 2 "::MailBox::ReadMailboxVer2"
 
-    if {[catch {source $jprefs(inboxPath)} msg]} {
-	set tail [file tail $jprefs(inboxPath)]
+    if {[catch {source $this(inboxFile)} msg]} {
+	set tail [file tail $this(inboxFile)]
 	::UI::MessageBox -title [mc {Mailbox Error}] -icon error  \
 	  -type ok -message [mc jamesserrinboxread $tail $msg]
     } else {
@@ -1521,9 +1518,9 @@ proc ::MailBox::ReadMailboxVer2 { } {
 }
 
 proc ::MailBox::HaveMailBox { } {
-    upvar ::Jabber::jprefs jprefs
+    global  this
 
-    if {[file exist $jprefs(inboxPath)]} {
+    if {[file exist $this(inboxFile)]} {
 	set ans 1
     } else {
 	set ans 0
@@ -1533,10 +1530,9 @@ proc ::MailBox::HaveMailBox { } {
 
 proc ::MailBox::DeleteMailbox { } {
     global prefs this
-    upvar ::Jabber::jprefs jprefs
 
-    if {[file exist $jprefs(inboxPath)]} {
-	catch {file delete $jprefs(inboxPath)}
+    if {[file exist $this(inboxFile)]} {
+	catch {file delete $this(inboxFile)}
     }    
     foreach f [glob -nocomplain -directory $this(inboxCanvasPath) *.can] {
 	catch {file delete $f}

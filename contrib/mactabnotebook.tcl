@@ -8,7 +8,7 @@
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: mactabnotebook.tcl,v 1.28 2005-01-31 14:06:53 matben Exp $
+# $Id: mactabnotebook.tcl,v 1.29 2005-02-27 14:11:04 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -1065,7 +1065,7 @@ proc ::mactabnotebook::BuildAqua {w} {
     $w.tabs raise talu
     $w.tabs raise ttxt
     $w.tabs raise tim
-    $w.tabs configure -width $x -height $height
+    $w.tabs configure -width [expr $x + $margin1] -height $height
     if {[string equal $options(-orient) "hang"]} {
 	$w.tabs scale all 0 0 1 -1
 	$w.tabs move all 0 $height
@@ -1207,7 +1207,7 @@ proc ::mactabnotebook::BuildWinxp {w} {
     $w.tabs raise ttxt
     $w.tabs raise tim
     $w.tabs raise bt
-    $w.tabs configure -width $x -height $height
+    $w.tabs configure -width [expr $x + $margin1] -height $height
     if {[string equal $options(-orient) "hang"]} {
 	$w.tabs scale all 0 0 1 -1
 	$w.tabs move all 0 $height

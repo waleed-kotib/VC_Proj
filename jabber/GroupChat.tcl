@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.103 2005-02-22 13:58:44 matben Exp $
+# $Id: GroupChat.tcl,v 1.104 2005-02-27 14:11:04 matben Exp $
 
 package require History
 
@@ -1274,8 +1274,11 @@ proc ::GroupChat::AddUsers {token} {
 	unset -nocomplain presArr
 	array set presArr $pres
 	
-	set jid3 $roomjid/$presArr(-resource)
-	eval {SetUser $roomjid $jid3 $presArr(-type)} $pres
+	set res $presArr(-resource)
+	if {$res != ""} {
+	    set jid3 $roomjid/$res
+	    eval {SetUser $roomjid $jid3 $presArr(-type)} $pres
+	}
     }
 }
 

@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: VCard.tcl,v 1.29 2005-01-31 14:06:58 matben Exp $
+# $Id: VCard.tcl,v 1.30 2005-02-27 14:11:07 matben Exp $
 
 package provide VCard 1.0
 
@@ -171,23 +171,61 @@ proc ::VCard::Build {nstoken} {
 	wm title $w "[mc {vCard Info}]: $jid"
     }
     set priv(vcardjid) $jid
+    set elem(jid) $jid
     
     # Global frame.
     set   frall $w.frall
     frame $frall -borderwidth 0 -relief raised
     pack  $frall -fill both -expand 1
     
-    set nbframe [::mactabnotebook::mactabnotebook ${frall}.tn]
+    set nbframe [::mactabnotebook::mactabnotebook $frall.tn]
     pack $nbframe
-    
-    # Make the notebook pages.
-    # Start with the Basic Info -------------------------------------------------
-    
+        
+    Pages $nbframe ${nstoken}::elem $type
+	
+    # Button part.
+    pack [frame $w.frall.frbot -borderwidth 0]  \
+      -side top -fill x -expand 1 -padx 8 -pady 6
+    set fr $w.frall.frbot
     if {$type == "own"} {
-        set ltxt [mc {My vCard}]
+	pack [button $fr.btsave -text [mc Save]  \
+	  -default active -command [list [namespace current]::SetVCard $nstoken]] \
+	  -side right -padx 5 -pady 5
+	pack [button $fr.btcancel -text [mc Cancel]  \
+	  -command [list [namespace current]::Close $nstoken]]  \
+	  -side right -padx 5 -pady 5
     } else {
-        set ltxt $jid
+	pack [button $fr.btcancel -text [mc Close] \
+	  -command [list [namespace current]::Close $nstoken]]  \
+	  -side right -padx 5 -pady 5
     }
+    
+    #bind $nbframe <Control-Tab-Key> [list $nbframe nextpage]
+    
+    set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jvcard)]]
+    if {$nwin == 1} {
+	::UI::SetWindowPosition $w $wDlgs(jvcard)
+    }
+    wm resizable $w 0 0
+    focus $w
+}
+
+# VCard::Pages --
+# 
+#       Make the notebook pages.
+
+proc ::VCard::Pages {nbframe token type} {
+    upvar $token elem    
+        
+    set jid $elem(jid)
+    
+    # Start with the Basic Info -------------------------------------------------
+    if {$type == "own"} {
+	set ltxt [mc {My vCard}]
+    } else {
+	set ltxt $jid
+    }
+
     set frbi [$nbframe newpage {Basic Info} -text [mc {Basic Info}]] 
 
     set lfr $frbi.fr
@@ -199,23 +237,23 @@ proc ::VCard::Build {nstoken} {
     pack  $pbi -padx 10 -pady 6 -side left
     
     # Name part.
-    label $pbi.first -text [mc {First name}]
+    label $pbi.first  -text [mc {First name}]
     label $pbi.middle -text [mc Middle]
-    label $pbi.fam -text [mc {Last name}]
-    entry $pbi.efirst -width 16 -textvariable ${nstoken}::elem(n_given)
-    entry $pbi.emiddle -width 4 -textvariable ${nstoken}::elem(n_middle)
-    entry $pbi.efam -width 18   -textvariable ${nstoken}::elem(n_family)
+    label $pbi.fam    -text [mc {Last name}]
+    entry $pbi.efirst  -width 16 -textvariable $token\(n_given)
+    entry $pbi.emiddle -width 4 -textvariable $token\(n_middle)
+    entry $pbi.efam    -width 18 -textvariable $token\(n_family)
 
-    grid $pbi.first $pbi.middle $pbi.fam -sticky w
+    grid $pbi.first  $pbi.middle  $pbi.fam  -sticky w
     grid $pbi.efirst $pbi.emiddle $pbi.efam -sticky ew
     
     # Other part.
     label $pbi.nick   -text "[mc {Nick name}]:"
     label $pbi.email  -text "[mc {Email address}]:"
     label $pbi.jid    -text "[mc {Jabber Id}]:"
-    entry $pbi.enick  -textvariable ${nstoken}::elem(nickname)
-    entry $pbi.eemail -textvariable ${nstoken}::elem(email_internet_pref)
-    entry $pbi.ejid   -textvariable ${nstoken}::priv(vcardjid) -state disabled
+    entry $pbi.enick  -textvariable $token\(nickname)
+    entry $pbi.eemail -textvariable $token\(email_internet_pref)
+    entry $pbi.ejid   -textvariable $token\(jid) -state disabled
     
     grid $pbi.nick   -column 0 -row 2 -sticky e
     grid $pbi.enick  -column 1 -row 2 -sticky news -columnspan 2
@@ -243,9 +281,8 @@ proc ::VCard::Build {nstoken} {
     }
     
     # Personal Info page -------------------------------------------------------
-    set frppers [$nbframe newpage {Personal Info}  \
-      -text [mc {Personal Info}]]
-    set pbp [frame $frppers.frin]
+    set frppers [$nbframe newpage {Personal Info} -text [mc {Personal Info}]]
+    set  pbp [frame $frppers.frin]
     pack $pbp -padx 10 -pady 6 -side left -anchor n
 
     foreach {name tag} {
@@ -254,19 +291,18 @@ proc ::VCard::Build {nstoken} {
         Birthday          bday
     } {
         label $pbp.l$tag -text "[mc $name]:"
-        entry $pbp.e$tag -width 28  \
-          -textvariable ${nstoken}::elem($tag)
-        grid $pbp.l$tag $pbp.e$tag -sticky e
+        entry $pbp.e$tag -width 28 -textvariable $token\($tag)
+        grid  $pbp.l$tag  $pbp.e$tag -sticky e
     }
     label $pbp.frmt -text [mc {Format mm/dd/yyyy}]
-    grid $pbp.frmt -column 1 -sticky w
+    grid  $pbp.frmt -column 1 -sticky w
 
     label $pbp.email -text "[mc {Email addresses}]:"
-    grid $pbp.email -column 0 -sticky w
-    set wemails $pbp.emails
-    text $wemails -wrap none -bd 1 -relief sunken \
-      -width 32 -height 8
-    grid $pbp.emails -columnspan 2 -sticky w
+    grid  $pbp.email -column 0 -sticky w
+    set  wemails $pbp.emails
+    text $wemails -wrap none -bd 1 -relief sunken -width 32 -height 8
+    grid $pbp.emails -columnspan 2 -sticky ew
+    
     if {[info exists elem(email_internet)]} {
         foreach email $elem(email_internet) {
             $wemails insert end "$email\n"
@@ -289,9 +325,8 @@ proc ::VCard::Build {nstoken} {
         {Tel (fax)}       tel_fax_home
     } {
         label $pbh.l$tag -text "[mc $name]:"
-        entry $pbh.e$tag -width 28  \
-          -textvariable ${nstoken}::elem($tag)
-        grid $pbh.l$tag $pbh.e$tag -sticky e
+        entry $pbh.e$tag -width 28 -textvariable $token\($tag)
+        grid  $pbh.l$tag  $pbh.e$tag -sticky e
     }
     
     # Work page ----------------------------------------------------------
@@ -313,8 +348,8 @@ proc ::VCard::Build {nstoken} {
         {Tel (fax)}       tel_fax_work
     } {
         label $pbw.l$tag -text "[mc $name]:"
-        entry $pbw.e$tag -width 28 -textvariable ${nstoken}::elem($tag)
-        grid $pbw.l$tag $pbw.e$tag -sticky e
+        entry $pbw.e$tag -width 28 -textvariable $token\($tag)
+        grid  $pbw.l$tag  $pbw.e$tag -sticky e
     }
 
     # If not our card, disable all entries.
@@ -329,35 +364,9 @@ proc ::VCard::Build {nstoken} {
         $wemails  configure -state disabled
         $wdesctxt configure -state disabled
     }
-        
-    # Button part.
-    pack [frame $w.frall.frbot -borderwidth 0]  \
-      -side top -fill x -expand 1 -padx 8 -pady 6
-    set fr $w.frall.frbot
-    if {$type == "own"} {
-        pack [button $fr.btsave -text [mc Save]  \
-          -default active -command [list [namespace current]::SetVCard $nstoken]] \
-	  -side right -padx 5 -pady 5
-        pack [button $fr.btcancel -text [mc Cancel]  \
-          -command [list [namespace current]::Close $nstoken]]  \
-	  -side right -padx 5 -pady 5
-    } else {
-        pack [button $fr.btcancel -text [mc Close] \
-          -command [list [namespace current]::Close $nstoken]]  \
-	  -side right -padx 5 -pady 5
-    }
 
-    set priv(wemails)  $wemails
-    set priv(wdesctxt) $wdesctxt
-    
-    #bind $nbframe <Control-Tab-Key> [list $nbframe nextpage]
-    
-    set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jvcard)]]
-    if {$nwin == 1} {
-	::UI::SetWindowPosition $w $wDlgs(jvcard)
-    }
-    wm resizable $w 0 0
-    focus $w
+    set elem(wemails)  $wemails
+    set elem(wdesctxt) $wdesctxt
 }
 
 proc ::VCard::SetVCard {nstoken}  {
@@ -365,8 +374,8 @@ proc ::VCard::SetVCard {nstoken}  {
     upvar ${nstoken}::elem elem
     upvar ${nstoken}::priv priv
     
-    set wemails  $priv(wemails)
-    set wdesctxt $priv(wdesctxt)
+    set wemails  $elem(wemails)
+    set wdesctxt $elem(wdesctxt)
 
     if {($elem(n_given) != "") && ($elem(n_family) != "")} {
         set elem(fn) "$elem(n_given) $elem(n_family)"
@@ -384,7 +393,7 @@ proc ::VCard::SetVCard {nstoken}  {
 	}
     }
     eval {::Jabber::JlibCmd vcard_set ::VCard::SetVCardCallback} $argList
-    ::VCard::Close $nstoken
+    Close $nstoken
 }
 
 proc ::VCard::CloseHook {wclose} {
@@ -393,7 +402,7 @@ proc ::VCard::CloseHook {wclose} {
     if {[string match $wDlgs(jvcard)* $wclose]} {
 	set nstoken [::VCard::GetNSTokenFrom w $wclose]
 	if {$nstoken != ""} {
-	    ::VCard::Close $nstoken
+	    Close $nstoken
 	}
     }   
 }
@@ -416,7 +425,7 @@ proc ::VCard::Close {nstoken} {
     
     ::UI::SaveWinGeom $wDlgs(jvcard) $priv(w)
     destroy $priv(w)
-    ::VCard::Free $nstoken
+    Free $nstoken
 }
 
 # VCard::SetVCardCallback --

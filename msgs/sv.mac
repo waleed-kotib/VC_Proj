@@ -29,6 +29,7 @@
 ::msgcat::mcset sv Choose		{Välj}
 ::msgcat::mcset sv City                 {Stad}
 ::msgcat::mcset sv Clear 		{Radera}
+::msgcat::mcset sv Client               {Klient}
 ::msgcat::mcset sv Close 		{Stäng}
 ::msgcat::mcset sv Conference           {Konferans}
 ::msgcat::mcset sv Connect              {Anslut}
@@ -87,6 +88,7 @@
 ::msgcat::mcset sv No 			{Nej}
 ::msgcat::mcset sv no 			{nej}
 ::msgcat::mcset sv None                 {Ingen}
+::msgcat::mcset sv Notes                {Anteckningar}
 ::msgcat::mcset sv Occupation		{Yrke}
 ::msgcat::mcset sv Offline              {Borta}
 ::msgcat::mcset sv OK	 		{OK}
@@ -306,6 +308,7 @@
 ::msgcat::mcset sv mBugReport  	        {Rapportera bug...}
 ::msgcat::mcset sv mTakeSnapShot        {Tag bild}
 ::msgcat::mcset sv mTimeCode            {Tidskod}
+::msgcat::mcset sv mUserInfo            {Kontaktinfo...}
 
 
 # Popups
@@ -886,6 +889,7 @@ Vissa rum kan kräva medlemskap och lösenord.}
 ::msgcat::mcset sv jadisaddserv {Undersök en annan server för gruppchatt rum eller andra tjänster. Du kan välja att lägga till den permanent och den kommer då att upptäckas automatiskt.\
 Inloggningsservern upptäcks alltid.}
 ::msgcat::mcset sv jadisrmall   {Tag bort samtliga servrar som permanent upptäcks automatiskt.}
+::msgcat::mcset sv jauserinnote {Lägg till dina personliga anteckningar om denna kontakt}
 
 
 
@@ -906,14 +910,10 @@ En sak till, var snäll mot nyckelpigan ;-)}
 
 
 
-namespace eval ::VCard:: {
-	::msgcat::mcset sv vcardget	{Hämtar vCard från %s. Väntar på serversvar...}
-	::msgcat::mcset sv vcarderrget	{Misslyckades hämta vCard. Resultat: %s}
-	::msgcat::mcset sv vcardrec	{vCard data mottaget.}
+::msgcat::mcset sv vcardget	{Hämtar vCard från %s. Väntar på serversvar...}
+::msgcat::mcset sv vcarderrget	{Misslyckades hämta vCard. Resultat: %s}
+::msgcat::mcset sv vcardrec	{vCard data mottaget.}
 
-
-
-}
 
 
 ::msgcat::mcset sv autoupdatenot        {Leta ej automatiskt efter uppdatering}
