@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.7 2003-06-07 12:46:36 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.8 2003-07-26 13:54:23 matben Exp $
 
 package provide CanvasUtils 1.0
 package require sha1pure
@@ -19,7 +19,7 @@ namespace eval ::CanvasUtils:: {
 }
 
 proc ::CanvasUtils::Init { } {
-    global  this internalIPname prefs env
+    global  this prefs env
     variable utaguid
     variable utagpref
     variable utagpref2
@@ -47,7 +47,7 @@ proc ::CanvasUtils::Init { } {
     # Unique tag prefix for items created by this client.
     set utagpref $this(hostname)
     if {$utagpref == ""} {
-        set utagpref $internalIPname
+        set utagpref $this(internalIPname)
     }
     
     # Incompatible change!!!
@@ -347,11 +347,11 @@ proc ::CanvasUtils::GetUndoCommand {wtop cmd} {
 	    }
 	}
 	insert {
-	    foreach {dum utag ind str} $cmd { break }
+	    foreach {dum utag ind str} $cmd break
 	    set undo [list dchars $utag $ind [expr $ind + [string length $str]]]
 	}
 	move {
-	    foreach {dum utag dx dy} $cmd { break }
+	    foreach {dum utag dx dy} $cmd break
 	    set undo [list move $utag [expr -$dx] [expr -$dy]]
 	}
 	lower - raise {
@@ -558,7 +558,7 @@ proc ::CanvasUtils::GetOnelinerForSnack {w id args} {
 proc ::CanvasUtils::GetHttpFromFile {filePath} {
     global  prefs this
     
-    set relPath [filerelative $prefs(httpdBaseDir) $filePath]
+    set relPath [filerelative $prefs(httpdRootDir) $filePath]
     set relPath [uriencode::quotepath $relPath]
     set ip [::Network::GetThisOutsideIPAddress]
     return "http://${ip}:$prefs(httpdPort)/$relPath"
@@ -598,6 +598,44 @@ proc ::CanvasUtils::ItemConfigure {w id args} {
       [list [list $cmd "local"] [list $cmdremote "remote"]]]
     set undo [list ::CanvasUtils::CommandExList $wtop  \
       [list [list $undocmd "local"] [list $undocmdremote "remote"]]]
+    eval $redo
+    undo::add [::UI::GetUndoToken $wtop] $undo $redo
+    
+    # If selected, redo the selection to fit.
+    set idsMarker [$w find withtag id$id]
+    if {[string length $idsMarker] > 0} {
+	$w delete id$id
+	::CanvasDraw::MarkBbox $w 1 $id
+    }
+}
+
+# CanvasUtils::ItemCoords --
+#
+#       Makes an canvas coords that propagates to all clients.
+#       Selection, if any, redone.
+#       
+# Arguments:
+#       w      the canvas.
+#       id     the item id to configure, could be "current" etc.
+#       coords
+#       
+# Results:
+#       item coords set, here and there.
+
+proc ::CanvasUtils::ItemCoords {w id coords} {
+    global  prefs
+    
+    Debug 2 "::CanvasUtils::ItemCoords id=$id"
+
+    set wtop [::UI::GetToplevelNS $w]
+    
+    # Be sure to get the real id (number).
+    set id [$w find withtag $id]
+    set utag [::CanvasUtils::GetUtag $w $id]
+    set cmd "coords $utag $coords"
+    set undocmd "coords $utag [$w coords $id]"
+    set redo [list ::CanvasUtils::Command $wtop $cmd]
+    set undo [list ::CanvasUtils::Command $wtop $undocmd]
     eval $redo
     undo::add [::UI::GetUndoToken $wtop] $undo $redo
     
@@ -719,18 +757,16 @@ proc ::CanvasUtils::DoItemPopup {w x y} {
 	    set dashShort " "
 	}
 	set ::UI::popupVars(-dash) $dashShort
+	if {!$prefs(haveDash)} {
+	    $m entryconfigure "*Dash*" -state disabled
+	}
     }
     if {[regexp {line|polygon} $type]} {
 	set smooth [$w itemcget $id -smooth]
 	if {[string equal $smooth "bezier"]} {
 	    set smooth 1
 	}
-	set splinesteps [$w itemcget $id -splinesteps]
-	if {$smooth} {
-	    set ::UI::popupVars(-smooth) $splinesteps
-	} else {
-	    set ::UI::popupVars(-smooth) 0
-	}
+	set ::UI::popupVars(-smooth) $smooth
     }
     if {[regexp {text} $type]} {
 	set fontOpt [$w itemcget $id -font]
@@ -742,7 +778,7 @@ proc ::CanvasUtils::DoItemPopup {w x y} {
 	    }
 	    set ::UI::popupVars(-fontweight) [lindex $fontOpt 2]
 	}
-    }    
+    }
     
     # Post popup menu.
     tk_popup $m [expr int($x) - 10] [expr int($y) - 10]
@@ -819,6 +855,42 @@ proc ::CanvasUtils::ExportMovie {wtop winfr} {
     
     set wmov ${winfr}.m
     $wmov export
+}
+
+proc ::CanvasUtils::ItemSmooth {w id} {
+    
+    set smooth [$w itemcget $id -smooth]
+    if {[string equal $smooth "bezier"]} {
+	set smooth 1
+    }
+    
+    # Just toggle smooth state.
+    ::CanvasUtils::ItemConfigure $w $id -smooth [expr 1 - $smooth]
+}
+
+proc ::CanvasUtils::ItemStraighten {w id} {
+    global  prefs
+    
+    set frac $prefs(straightenFrac)
+    set coords [$w coords $id]
+    set len [expr [llength $coords]/2]
+    set type [$w type $id]
+    switch -- $type {
+	line {
+	    if {$len <= 2} {
+		return
+	    }
+	}
+	polygon {
+	    if {$len <= 3} {
+		return
+	    }
+	}
+    }
+    set dsorted [lsort -real [::CanvasDraw::GetDistList $coords]]
+    set dlimit [lindex $dsorted [expr int($len * $frac + 1)]]
+    set coords [::CanvasDraw::StripClosePoints $coords $dlimit]
+    ::CanvasUtils::ItemCoords $w $id $coords
 }
 
 proc ::CanvasUtils::SetItemColorDialog {w id opt} {

@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: PutFileIface.tcl,v 1.5 2003-05-18 13:20:22 matben Exp $
+# $Id: PutFileIface.tcl,v 1.6 2003-07-26 13:54:23 matben Exp $
 
 package require putfile
 package require uriencode
@@ -71,7 +71,7 @@ proc ::PutFileIface::PutFile {wtop fileName where {optList {}}} {
     }
     
     # Add an alternative way of getting this file via an URL.
-    set relPath [filerelative $prefs(httpdBaseDir) $fileName]
+    set relPath [filerelative $prefs(httpdRootDir) $fileName]
     set relPath [uriencode::quotepath $relPath]
     set ip [::Network::GetThisOutsideIPAddress]
     lappend optList  \
@@ -199,7 +199,7 @@ proc ::PutFileIface::PutCommand {wtop token what msg} {
 #    none.
 
 proc ::PutFileIface::PutFileToClient {wtop s ip relativeFilePath optList} {
-    global  tclwbProtMsg this chunkSize
+    global  tclwbProtMsg this
     
     Debug 2 "+      PutFileToClient:: s=$s, ip=$ip,\
       relativeFilePath=$relativeFilePath"

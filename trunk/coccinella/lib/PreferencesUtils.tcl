@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.10 2003-07-05 13:37:54 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.11 2003-07-26 13:54:23 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -97,7 +97,7 @@ proc ::PreferencesUtils::Add {thePrefs} {
 
     set isOldPrefFile 0
     foreach item $thePrefs {
-	foreach {varName resourceName defaultValue} $item { break }
+	foreach {varName resourceName defaultValue} $item break
 	
 	# The default priority for hardcoded values are 20 (factoryDefault).
 	if {[llength $item] >= 4} {
@@ -227,7 +227,7 @@ proc ::PreferencesUtils::SaveToFile { } {
 	  -icon error
 	return
     }
-    if {$this(platform) == "macintosh"} {
+    if {[string equal $this(platform) "macintosh"]} {
 	file attributes $prefs(userPrefsFilePath) -type pref
     }
 }
@@ -399,6 +399,8 @@ proc ::PreferencesUtils::SetUserPreferences { } {
       [list prefs(userDir)         prefs_userDir         $prefs(userDir)]        \
       [list prefs(winGeom)         prefs_winGeom         $prefs(winGeom)]        \
       [list prefs(paneGeom)        prefs_paneGeom        $prefs(paneGeom)]       \
+      [list prefs(lastUpdateVersion) prefs_lastUpdateVersion $prefs(lastUpdateVersion)] \
+      [list prefs(pluginBanList)   prefs_pluginBanList   $prefs(pluginBanList)]  \
       [list ::UI::dims(x)          dims_x                $::UI::dims(x)]         \
       [list ::UI::dims(y)          dims_y                $::UI::dims(y)]         \
       [list ::UI::dims(wRoot)      dims_wRoot            $::UI::dims(wRoot)]     \
@@ -414,14 +416,13 @@ proc ::PreferencesUtils::SetUserPreferences { } {
       [list state(font)            state_font            $state(font)]           \
       [list state(fontWeight)      state_fontWeight      $state(fontWeight)]     \
       [list state(smooth)          state_smooth          $state(smooth)]         \
-      [list state(splinesteps)     state_splinesteps     $state(splinesteps)]    \
       [list state(dash)            state_dash            $state(dash)]           \
       [list state(canGridOn)       state_canGridOn       $state(canGridOn)]      \
       [list state(visToolbar)      state_visToolbar      $state(visToolbar)]  ]
     
     # All MIME type stuff... The problem is that they are all arrays... 
     # Invented the ..._array resource specifier!    
-    # We should have used accesor functions and not direct access to internal 
+    # We should have used accesor functions and not direct access to internal
     # arrays. Sorry for this.
     # 
     ::PreferencesUtils::Add [list  \
@@ -470,7 +471,6 @@ proc ::PreferencesUtils::SetUserPreferences { } {
 	  [list ::Jabber::jprefs(logoutStatus)     jprefs_logoutStatus      $::Jabber::jprefs(logoutStatus)]  \
 	  [list ::Jabber::jprefs(chatFont)         jprefs_chatFont          $::Jabber::jprefs(chatFont)]  \
 	  [list ::Jabber::jprefs(haveIMsysIcons)   jprefs_haveIMsysIcons    $::Jabber::jprefs(haveIMsysIcons)]  \
-	  [list ::Jabber::jprefs(autoupdateShow,$ver) jprefs_autoupdateShow_ver $::Jabber::jprefs(autoupdateShow,$ver)]  \
 	  [list ::Jabber::jserver(profile)         jserver_profile          $::Jabber::jserver(profile)      userDefault] \
 	  [list ::Jabber::jserver(profile,selected) jserver_profile_selected $::Jabber::jserver(profile,selected) userDefault] \
 	  ]

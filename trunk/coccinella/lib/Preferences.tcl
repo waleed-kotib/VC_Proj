@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.9 2003-07-05 13:37:54 matben Exp $
+# $Id: Preferences.tcl,v 1.10 2003-07-26 13:54:23 matben Exp $
  
 package require notebook
 package require tree
@@ -147,6 +147,7 @@ proc ::Preferences::Build {w} {
     $wtree newitem {Whiteboard} -text [::msgcat::mc Whiteboard]
     $wtree newitem {Whiteboard Drawing} -text [::msgcat::mc Drawing]
     $wtree newitem {Whiteboard Text} -text [::msgcat::mc Text]
+    $wtree newitem {Whiteboard Plugins} -text [::msgcat::mc Plugins]
     $wtree newitem {Whiteboard {File Mappings}} -text [::msgcat::mc {File Mappings}]
     $wtree newitem {Whiteboard {Edit Fonts}} -text [::msgcat::mc {Edit Fonts}]
     $wtree newitem {Whiteboard {File Cache}} -text [::msgcat::mc {File Cache}]
@@ -173,10 +174,6 @@ proc ::Preferences::Build {w} {
     # Shortcuts page -----------------------------------------------------------
     set frpshort [$nbframe page Shortcuts]
     ::Preferences::Shorts::BuildPage $frpshort    
-    
-    # Plugin page --------------------------------------------------------------
-    #set frpplug [$nbframe page Plugins]
-    #::Preferences::Plugins::BuildPage $frpplug    
     
     if {!$prefs(stripJabber)} {
 	
@@ -226,6 +223,10 @@ proc ::Preferences::Build {w} {
     # Edit Fonts page ----------------------------------------------------------
     set frpfont [$nbframe page {Edit Fonts}]
     ::Preferences::EditFonts::BuildPage $frpfont
+    
+    # Plugin page --------------------------------------------------------------
+    set frpplug [$nbframe page Plugins]
+    ::Preferences::Plugins::BuildPage $frpplug    
     
     # File Mappings ------------------------------------------------------------
     set frfm [$nbframe page {File Mappings}]    
@@ -563,7 +564,7 @@ proc ::Preferences::Profiles::MakeTmpServArr { } {
 	  tmpJServArr($name,server)   \
 	  tmpJServArr($name,username) \
 	  tmpJServArr($name,password) \
-	  tmpJServArr($name,resource)] $spec { break }
+	  tmpJServArr($name,resource)] $spec break
     }
 }
 
@@ -915,30 +916,6 @@ proc ::Preferences::BuildPagePrivacy {page} {
     pack $pbl.msg $pbl.only -side top -fill x -anchor w
 }
 
-# namespace  ::Preferences::Plugins:: ------------------------------------------
-
-namespace eval ::Preferences::Plugins:: {
-    
-}
-
-proc ::Preferences::Plugins::BuildPage {page} {
-    global  sysFont prefs
-
-    upvar ::Preferences::ypad ypad
-
-    set fr [LabeledFrame2 $page.fr {Plugin Control}]
-    pack $page.fr -side left -anchor n
-    set pbl [frame $fr.frin]
-    pack $pbl -padx 10 -pady 6 -side left
-
-    set i 0
-    foreach packName [::Plugins::GetAllPackages loaded] {
-	checkbutton $pbl.c$i -anchor w -text "   $packName" -pady $ypad
-	grid $pbl.c$i -sticky w
-	incr i
-    }
-}
-
 # namespace  ::Preferences::Block:: --------------------------------------------
 
 namespace eval ::Preferences::Block:: {
@@ -1180,11 +1157,11 @@ proc ::Preferences::Customization::PickFont { } {
     
     upvar ::Preferences::tmpJPrefs tmpJPrefs
     
-    set actual [font actual $sysFont(s)]
+    array set fontArr [font actual $sysFont(s)]
 
-    set opts [list -defaultfont [lindex $sysFont(s) 0]  \
-      -defaultsize [lindex $sysFont(s) 1]  \
-      -defaultweight [lindex $sysFont(s) 2]  \
+    set opts [list -defaultfont $fontArr(-family)  \
+      -defaultsize $fontArr(-size)  \
+      -defaultweight $fontArr(-weight)  \
       -initialfont [lindex $tmpJPrefs(chatFont) 0]  \
       -initialsize [lindex $tmpJPrefs(chatFont) 1]  \
       -initialweight [lindex $tmpJPrefs(chatFont) 2]]
@@ -1192,6 +1169,60 @@ proc ::Preferences::Customization::PickFont { } {
     if {[llength $theFont]} {
 	set tmpJPrefs(chatFont) $theFont
     }
+}
+
+# namespace  ::Preferences::Plugins:: ------------------------------------------
+
+namespace eval ::Preferences::Plugins:: {
+    
+    variable plugins
+}
+
+proc ::Preferences::Plugins::BuildPage {page} {
+    global  sysFont prefs
+    
+    variable plugins
+    upvar ::Preferences::ypad ypad
+
+    # Conference (groupchat) stuff.
+    set labfr [LabeledFrame2 $page.fr [::msgcat::mc {Plugin Control}]]
+    pack $page.fr -side top -anchor w
+    set pbl [frame $labfr.frin]
+    pack $pbl -padx 10 -pady 6 -side left
+    
+    label ${pbl}.lhead -wraplength 300 -anchor w -justify left \
+      -text "You may unselect any of these packages if\
+      you don't want them loaded. You must relaunch for this to take effect."
+    pack ${pbl}.lhead -padx 0 -pady 2 -side top -anchor w
+    
+    set pfr [frame ${pbl}.frpl]
+    pack $pfr -side top -anchor w
+    set i 0
+    foreach plug [::Plugins::GetAllPackages platform] {
+	set icon [::Plugins::GetIconForPackage $plug 12]
+	if {$icon != ""} {
+	    label ${pfr}.i${i} -image $icon
+	    grid ${pfr}.i${i} -row $i -column 0 -sticky w
+	}
+	set plugins($plug) [::Plugins::IsLoaded $plug]
+	checkbutton ${pfr}.c${i} -anchor w -text " $plug"  \
+	  -variable [namespace current]::plugins($plug)
+	grid ${pfr}.c${i} -row $i -column 1 -padx 2 -pady $ypad -sticky ew
+	incr i
+    }
+}
+
+proc ::Preferences::Plugins::Save { } {
+    global prefs
+    variable plugins
+
+    set banList {}
+    foreach name [array names plugins] {
+	if {$plugins($name) == 0} {
+	    lappend banList $name
+	}
+    }
+    set prefs(pluginBanList) [lsort -unique $banList]
 }
 
 # namespace  ::Preferences::FileMap:: ------------------------------------------
@@ -1319,7 +1350,7 @@ proc ::Preferences::FileMap::DeleteAssociation {wmclist {indSel {}}} {
     if {$indSel == ""} {
 	return
     }
-    foreach {name pack mime} [lrange [$wmclist get $indSel] 0 2] { break }
+    foreach {name pack mime} [lrange [$wmclist get $indSel] 0 2] break
     $wmclist delete $indSel
     catch {unset tmpMime2Description($mime)}
     catch {unset tmpMimeTypeIsText($mime)}
@@ -1413,7 +1444,7 @@ proc ::Preferences::FileMap::Inspect {w doWhat wlist {indSel {}}} {
 	}
 	
 	# Find the corresponding MIME type.
-	foreach {name pack mime} [lrange [$wlist get $indSel] 0 2] { break }
+	foreach {name pack mime} [lrange [$wlist get $indSel] 0 2] break
 	set textVarMime $mime
 	set textVarDesc $tmpMime2Description($mime)
 	set textVarSuffix $tmpMime2SuffixList($mime)
@@ -2489,6 +2520,8 @@ proc ::Preferences::SavePushBt { } {
     
     # Reset file cache doesn't hurt.
     ::FileCache::SetBestBefore $prefs(checkCache) $prefs(incomingPath)
+    
+    ::Preferences::Plugins::Save
     
     # Save the preference file.
     ::PreferencesUtils::SaveToFile

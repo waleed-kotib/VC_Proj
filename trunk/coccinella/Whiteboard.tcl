@@ -15,7 +15,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Whiteboard.tcl,v 1.13 2003-07-05 13:37:54 matben Exp $
+# $Id: Whiteboard.tcl,v 1.14 2003-07-26 13:54:23 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -42,11 +42,17 @@
 #  ipNumTo(connectTime,$ip):    maps ip number to time when connected.
 #  
 #-------------------------------------------------------------------------------
-      
+
+# TclKit loading mechanism.
+package provide app-Coccinella 1.0
+
 # TclKit requires this, can't harm.
 if {[catch {package require Tk}]} {
-    error {We need Tk here. Run Wish!}
+    return -code error "We need Tk here. Run Wish!"
 }
+
+# Hide the main window during launch.
+wm withdraw .
 
 ### Command-line option "-privaria" indicates whether we're
 ### part of Ed Suominen's PRIVARIA distribution
@@ -57,10 +63,10 @@ if { [set k [lsearch $argv -privaria]] >= 0 } {
     incr argc -1
 }
 
-if {[package vcompare [info tclversion] 8.3] == -1} {
+if {[package vcompare [info tclversion] 8.4] == -1} {
     tk_messageBox -message  \
-      {This application requires Tcl/Tk version 8.3 or later.}  \
-	  -icon error -type ok
+      "This application requires Tcl/Tk version 8.4 or later."  \
+      -icon error -type ok
     exit
 }
 
@@ -81,7 +87,7 @@ switch -- $tcl_platform(platform) {
 
 # Find program real pathname, resolve all links in between. Unix only.
 #
-# Contributed by Raymond Tang.
+# Contributed by Raymond Tang. Starkit fix by David Zolli.
 
 proc resolve_cmd_realpath {infile} {
     global env
@@ -116,7 +122,13 @@ proc resolve_cmd_realpath {infile} {
 		return [resolve_cmd_realpath $filename]
 	    }
 	}
-	return $infile
+
+	# Kroc : for tclkit support :
+        if {[info exists ::starkit::topdir]} {
+            return $::starkit::topdir
+        } else {
+            return $infile
+        }
     }
 }
 
@@ -178,9 +190,11 @@ if {[string equal $this(platform) "macintosh"] && ([info tclversion] < 8.4)} {
     set thisScript [file join $thisPath Whiteboard.tcl]
 } elseif {[string equal $this(platform) "unix"]} {
     set thisPath [file dirname [resolve_cmd_realpath [info script]]]
-    set thisScript [file join $thisPath Whiteboard.tcl]
+    set thisTail [file tail [info script]]
+    set thisScript [file join $thisPath $thisTail]
 } else {
     set thisScript [info script]
+    set thisTail [file tail $thisScript]
     if {$thisScript == ""} {
 	set thisScript [tk_getOpenFile -title "Pick Whiteboard.tcl"]
 	if {$thisScript == ""} {
@@ -272,7 +286,7 @@ if {[file exists $prefs(binDir)]} {
 # On the mac we have some extras.
 if {[string equal $this(platform) "macintosh"]} {
     if {![catch {package require MacMenuButton} msg]} {
-	rename menubutton ""
+	rename menubutton menubuttonOrig
 	rename macmenubutton menubutton
     }
     if {![catch {package require MovableAlerts} msg]} {
@@ -295,9 +309,6 @@ if {[string match "mac*" $this(platform)]} {
 }
 
 set state(launchSecs) [clock seconds]
-
-# Hide the main window during launch.
-wm withdraw .
 
 # Fonts needed in the splash screen and elsewhere.
 # These should work allright for latin character sets.
@@ -388,12 +399,6 @@ foreach sourceName $allLibSourceFiles {
     }
 }
 
-proc Dump {name1 name2 op} {
-    upvar $name1 value
-    puts "Dump name1=$name1, name2=$name2"
-}
-#trace add variable ::UI::dims(hRoot) write Dump
-
 # The http package can be useful?
 if {![catch {package require http} msg]} {
     set prefs(http) 1
@@ -402,11 +407,24 @@ if {![catch {package require http} msg]} {
 }
 
 # Other utility packages.
-set prefs(applescript) 0
-set prefs(printer) 0
-set prefs(tls) 0
-set prefs(optcl) 0
-set prefs(tcom) 0
+foreach name {Tclapplescript printer gdi tls optcl tcom} {
+    set prefs($name) 0
+}
+array set extraPacksArr {
+    macintosh   {Tclapplescript}
+    macosx      {Tclapplescript tls}
+    windows     {printer gdi tls optcl tcom}
+    unix        {tls}
+}
+
+foreach name $extraPacksArr($this(platform)) {
+    if {![catch {package require $name} msg]} {
+	set prefs($name) 1
+    }
+}
+if {!($prefs(printer) && $prefs(gdi))} {
+    set prefs(printer) 0
+}
 
 switch -- $this(platform) {
     macintosh - macosx {
@@ -414,33 +432,12 @@ switch -- $this(platform) {
 	    after idle {tk_messageBox -message "Error sourcing MacintoshUtils.tcl  $msg"  \
 	      -icon error -type ok; exit}
 	}    
-	if {![catch {package require Tclapplescript} msg]} {
-	    set prefs(applescript) 1
-	}
     }
     windows {
 	if {[catch {source [file join $this(path) lib WindowsUtils.tcl]} msg]} {
 	    after idle {tk_messageBox -message "Error sourcing WindowsUtils.tcl  $msg"  \
 	      -icon error -type ok; exit}
 	}    
-	if {![catch {package require printer} msg] &&  \
-	  ![catch {package require gdi} msg]} {
-	    set prefs(printer) 1
-	}
-	if {![catch {package require tls} msg]} {
-	    set prefs(tls) 1
-	}
-	if {![catch {package require optcl} msg]} {
-	    set prefs(optcl) 1
-	}
-	if {![catch {package require tcom} msg]} {
-	    set prefs(tcom) 1
-	}
-    }
-    unix {
-	if {![catch {package require tls} msg]} {
-	    set prefs(tls) 1
-	}
     }
 }
 
@@ -460,6 +457,7 @@ set listOfPackages {
     TinyHttpd
     Types
     Plugins
+    AutoUpdate
     combobox
     Pane
     moviecontroller
@@ -493,20 +491,11 @@ if {!$prefs(stripJabber)} {
     package require Sounds
 }
 
-# Define MIME types etc.
-::Types::Init
-
-# Load all plugins available.
-::Plugins::Init
-
-# Addons.
-::Plugins::InitAddons
-
-set internalIPnum 127.0.0.1
-set internalIPname "localhost"
+set this(internalIPnum) 127.0.0.1
+set this(internalIPname) "localhost"
 
 # Set our IP number temporarily.
-set thisIPnum $internalIPnum 
+set this(ipnum) $this(internalIPnum) 
 
 # Beware! [info hostname] can be very slow on Macs first time it is called.
 ::SplashScreen::SetMsg [::msgcat::mc splashhost]
@@ -517,22 +506,22 @@ set this(hostname) [info hostname]
 # 127.0.0.1 instead of the real number.
 
 if {![catch {socket -server puts 0} s]} {
-    set thisIPnum [lindex [fconfigure $s -sockname] 0]
+    set this(ipnum) [lindex [fconfigure $s -sockname] 0]
     catch {close $s}
-    Debug 2 "1st: thisIPnum=$thisIPnum"
+    Debug 2 "1st: this(ipnum)=$this(ipnum)"
 }
 
 # If localhost or zero, try once again with '-myaddr'. 
 # My Linux box is not helped by this either!!!
-if {[string equal $thisIPnum "0.0.0.0"] ||  \
-  [string equal $thisIPnum "127.0.0.1"]} {
+# Multiple ip interfaces are not recognized!
+if {[string equal $this(ipnum) "0.0.0.0"] ||  \
+  [string equal $this(ipnum) "127.0.0.1"]} {
     if {![catch {socket -server xxx -myaddr $this(hostname) 0} s]} {
-	set thisIPnum [lindex [fconfigure $s -sockname] 0]
+	set this(ipnum) [lindex [fconfigure $s -sockname] 0]
 	catch {close $s}
-	Debug 2 "2nd: thisIPnum=$thisIPnum"
+	Debug 2 "2nd: this(ipnum)=$this(ipnum)"
     }
 }
-set this(ipnum) $thisIPnum
 if {[regexp {[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+} $this(ipnum)]} {
     set this(ipver) 4
 } else {
@@ -551,7 +540,7 @@ if {[info exists env(USER)]} {
 } elseif {[llength $this(hostname)]} {
     set this(username) $this(hostname)
 } else {
-    set this(username) {Unknown}
+    set this(username) "Unknown"
 }
 
 # Keep lists of ip numbers for connected clients and servers.
@@ -572,7 +561,6 @@ set allIPnumsFrom {}
 # any connections, but all connections are connected 'from'.
 set allIPnumsToSend {}
     
-
 # Standard (factory) preferences are set here.
 # These are the hardcoded, application default, values, and can be
 # overridden by the ones in user default file.
@@ -599,12 +587,23 @@ if {$argc > 0} {
     ::PreferencesUtils::ParseCommandLineOptions $argc $argv
 }
 
+# Define MIME types etc.
+::Types::Init
+
+# Load all plugins available.
+::Plugins::SetBanList $prefs(pluginBanList)
+::Plugins::Init
+
+# Addons.
+::Plugins::InitAddons
+
 # Check that the mime type preference settings are consistent.
 ::Types::VerifyInternal
 
 # Goes through all the logic of verifying that the actual packages are 
-# available on our system.
+# available on our system. Speech special.
 ::Plugins::VerifyPackagesForMimeTypes
+::Plugins::VerifySpeech
 
 # Init the file cache settings.
 ::FileCache::SetBasedir $this(path)
@@ -619,6 +618,14 @@ if {$argc > 0} {
 
 # Create the mapping between Html sizes and font point sizes dynamically.
 ::CanvasUtils::CreateFontSizeMapping
+
+# Let main window "." be roster in jabber and whiteboard else.
+if {[string equal $prefs(protocol) "jabber"]} {
+    set wDlgs(jrostbro) .jrostbro
+    set wDlgs(mainwb) .
+} else {
+    set wDlgs(mainwb) .
+}
 
 # Make the actual whiteboard with canvas, tool buttons etc...
 # Jabber has the roster window as "main" window.
@@ -682,7 +689,7 @@ if {$displaySetup} {
 
 # Is it the first time it is launched, then show the welcome canvas.
 if {$prefs(firstLaunch)} {
-    ::SplashScreen::Canvas .twel $prefs(welcomeFile)
+    ::Dialogs::Canvas $prefs(welcomeFile) -title [::msgcat::mc {Welcome}]
     raise .twel
 }
 set prefs(firstLaunch) 0
@@ -714,7 +721,7 @@ if {($prefs(protocol) != "client") && $prefs(autoStartServer)} {
 
 if {($prefs(protocol) != "client") && $prefs(haveHttpd)} {
     if {[catch {  \
-      ::TinyHttpd::StartHttpServer $prefs(httpdPort) $prefs(httpdBaseDir)} msg]} {
+      ::TinyHttpd::Start -port $prefs(httpdPort) -rootdirectory $prefs(httpdRootDir)} msg]} {
 	tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
 	  [::msgcat::mc messfailedhttp $msg]]	  
     } else {
@@ -731,6 +738,12 @@ if {$argc > 0} {
 	after $prefs(afterConnect) [list ::OpenConnection::DoConnect  \
 	  $argvArr(-connect) $prefs(remotePort)]
     }
+}
+
+# Auto update mechanism.
+if {!$prefs(doneAutoUpdate) &&  \
+  ([package vcompare $prefs(fullVers) $prefs(lastUpdateVersion)] > 0)} {
+    after 10000 ::AutoUpdate::Get $prefs(urlAutoUpdate)  
 }
 
 #-------------------------------------------------------------------------------

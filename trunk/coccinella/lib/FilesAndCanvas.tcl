@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: FilesAndCanvas.tcl,v 1.5 2003-05-18 13:20:21 matben Exp $
+# $Id: FilesAndCanvas.tcl,v 1.6 2003-07-26 13:54:23 matben Exp $
  
 package require can2svg
 package require undo
@@ -36,7 +36,8 @@ proc ::CanvasFile::DrawCanvasItemFromFile {wtop filePath args} {
     if {[catch {open $filePath r} fd]} {
 	set tail [file tail $filePath]
 	tk_messageBox -icon error -type ok -parent $wCan -message  \
-	  [FormatTextForMessageBox [::msgcat::mc messfailopread $tail $fd]]	  
+	  [FormatTextForMessageBox [::msgcat::mc messfailopread $tail $fd]]
+	return
     }
     eval {::CanvasFile::FileToCanvas $wCan $fd $filePath} $args
     close $fd
@@ -276,7 +277,7 @@ proc ::CanvasFile::FileToCanvasVer2 {w fd absPath args} {
     global  prefs
     upvar ::UI::icons icons
     
-    Debug 2 "FileToCanvasVer2 absPath=$absPath"
+    Debug 2 "FileToCanvasVer2 absPath=$absPath args='$args'"
     
     array set argsArr {
 	-showbroken   1

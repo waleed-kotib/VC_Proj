@@ -5,7 +5,20 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.8 2003-07-05 13:37:54 matben Exp $
+# $Id: MailBox.tcl,v 1.9 2003-07-26 13:54:23 matben Exp $
+
+# There are two versions of the mailbox file, 1 and 2. Only version 2 is 
+# described here.
+# Each message is stored as a list in the 'mailbox' array as:
+# 
+#    mailbox(uid) = {subject from date isread uid message ?-key value ...?}
+#
+# where 'uid' is an integer unique for each message, but updated when the 
+# mailbox is read. The date is ISO 8601. The keys can be: '-canvasuid',
+# 
+# The inbox must be read to memory when mailbox is displayed, or when (before)
+# receiving first message. This is to keep the mailbox array in sync.
+# The inbox needs only be saved if we have edits.
 
 package provide MailBox 1.0
 
@@ -15,13 +28,15 @@ namespace eval ::Jabber::MailBox:: {
     upvar ::Jabber::jstate jstate
     
     set locals(inited) 0
+    set locals(mailboxRead) 0
+    set locals(haveEdits) 0
     set jstate(inboxVis) 0
     
     # Running id for incoming messages; never reused.
-    set locals(msguid) 1000
+    variable uidmsg 1000
 
     # The actual mailbox content.
-    # Content: {subject from date isread msgid message ?canvasid?}
+    # Content: {subject from date isread uidmsg message ?canvasid?}
     variable mailbox
     
     # Keep a level of abstraction between column index and name.
@@ -32,33 +47,39 @@ namespace eval ::Jabber::MailBox:: {
 	from      2
 	date      3
 	isread    4
-	msgid     5
+	uidmsg    5
     }
 }
 
-proc ::Jabber::MailBox::Init { } {
-    
+proc ::Jabber::MailBox::Init { } {    
     variable locals
     variable mailbox
+    variable uidmsg
     upvar ::Jabber::jstate jstate
     
     set locals(inited) 1
     
-    if {1 && $jstate(debug) > 1} {
-	set mailbox([incr locals(msguid)])  \
-	  [list "Nasty" olle@athlon.se/ff "yesterday 19:10:01" 0 $locals(msguid) "Tja,\n\nwww.mats.se, Nytt?"]
-	set mailbox([incr locals(msguid)])  \
-	  [list "Re: Shit" kk@athlon.se/hh "today 08:33:02" 0 $locals(msguid) "Hej,\n\nKass?\nlink www.apple.com\nshit www.mats.se/home"]
-	set mailbox([incr locals(msguid)])  \
-	  [list "Re: Shit" kk@athlon.se/zzzzzzzzzzzzzzzzzzzzzzzzzzz "today 08:43:02" 0 $locals(msguid) "Hej,\n\nAny :cool: stuff? I'm :bored: and :cheeky:."]
-	set mailbox([incr locals(msguid)])  \
-	  [list "Re: special braces" brace@athlon.se/co "today 08:43:02" 0 $locals(msguid) "Testing unmatched braces:  if \{1\} \{"]
-	set mailbox([incr locals(msguid)])  \
-	  [list "Re: special amp" brace@athlon.se/co "today 08:43:02" 0 $locals(msguid) "Testing ampersand:  amp &"]
-	set mailbox([incr locals(msguid)])  \
-	  [list "Re: special brackets" bracket@athlon.se/co "today 08:43:02" 0 $locals(msguid) "Testing brackets  \[\["]
-	set mailbox([incr locals(msguid)])  \
-	  [list "Re: special quotes" quote@athlon.se/co "today 08:43:02" 0 $locals(msguid) "Testing \"quotes\" "]
+    ::Jabber::MailBox::TranslateAnyVer1ToCurrentVer
+    
+    if {0 && $jstate(debug) > 1} {
+	set mailbox([incr uidmsg])  \
+	  [list "Nasty" olle@athlon.se/ff "yesterday 19:10:01" 0 $uidmsg "Tja,\n\nwww.mats.se, Nytt?"]
+	set mailbox([incr uidmsg])  \
+	  [list "Re: Shit" kk@athlon.se/hh "today 08:33:02" 0 $uidmsg "Hej,\n\nKass?\nlink www.apple.com\nshit www.mats.se/home"]
+	set mailbox([incr uidmsg])  \
+	  [list "Re: Shit" kk@athlon.se/zzzzzzzzzzzzzzzzzzzzzzzzzzz "today 08:43:02" 0 $uidmsg "Hej,\n\nAny :cool: stuff? I'm :bored: and :cheeky:."]
+	set mailbox([incr uidmsg])  \
+	  [list "Re: special braces" brace@athlon.se/co "today 08:43:02" 0 $uidmsg "Testing unmatched braces:  if \{1\} \{"]
+	set mailbox([incr uidmsg])  \
+	  [list "Re: special amp" brace@athlon.se/co "today 08:43:02" 0 $uidmsg "Testing ampersand:  amp &"]
+	set mailbox([incr uidmsg])  \
+	  [list "Re: special brackets" bracket@athlon.se/co "today 08:43:02" 0 $uidmsg "Testing brackets  \[\["]
+	set mailbox([incr uidmsg])  \
+	  [list "Re: special quotes" quote@athlon.se/co "today 08:43:02" 0 $uidmsg "Testing \"quotes\" "]
+	if {1} {
+	set mailbox([incr uidmsg])  \
+	  [list "Re: whiteboard" quote@athlon.se/co "today 08:43:02" 0 $uidmsg "" -canvasuid ahextest]
+	}
     }
 }
 
@@ -99,11 +120,9 @@ proc ::Jabber::MailBox::Build {w args} {
     
     ::Jabber::Debug 2 "::Jabber::MailBox::Build args='$args'"
 
-    if {!$locals(inited)} {
-	::Jabber::MailBox::Init
-	if {$jprefs(inboxSave)} {
-	    ::Jabber::MailBox::ReadMailbox
-	}
+    # The inbox should only be read once to be economical.
+    if {!$locals(mailboxRead)} {
+	::Jabber::MailBox::ReadMailbox
     }
     if {[winfo exists $w]} {
 	return
@@ -177,9 +196,9 @@ proc ::Jabber::MailBox::Build {w args} {
     $wtbl columnconfigure $colindex(iswb) -labelimage $icons(wbicon)  \
       -resizable 0 -align center -showarrow 0
     $wtbl columnconfigure $colindex(date) -sortmode command  \
-      -sortcommand "[namespace current]::SortTimeColumn"
+      -sortcommand [namespace current]::SortTimeColumn
     $wtbl columnconfigure $colindex(isread) -hide 1
-    $wtbl columnconfigure $colindex(msgid) -hide 1
+    $wtbl columnconfigure $colindex(uidmsg) -hide 1
     grid $wtbl -column 0 -row 0 -sticky news
     grid $wysctbl -column 1 -row 0 -sticky ns
     grid columnconfigure $wfrmbox 0 -weight 1
@@ -232,7 +251,7 @@ proc ::Jabber::MailBox::Build {w args} {
     
     # Make selection available in text widget but not editable!
     # Seems to stop the tablelist from getting focus???
-    #$wtextmsg bind <Key> {break}
+    #$wtextmsg bind <Key> break
 
     # Special bindings for the tablelist.
     set body [$wtbl bodypath]
@@ -261,10 +280,18 @@ proc ::Jabber::MailBox::InsertRow {wtbl row i} {
     # We keep any /res part.
     #set row [lreplace $row 1 1 $jid2]
     set haswb 0
-    if {([llength $row] > 6) && ([string length [lindex $row 6]] > 0)} {
-	set haswb 1
+    if {[llength $row] > 6} {
+	array set rowOpts [lrange $row 6 end]
+	if {[info exists rowOpts(-canvasuid)]} {
+	    set haswb 1
+	}
     }
+
+    # The date is ISO 8601 and clock scan shall work here.
+    set smartDate [SmartClockFormat [clock scan [lindex $row 2]]]
+    lset row 2 $smartDate
     set row "{} $row"
+
     $wtbl insert end [lrange $row 0 5]
     if {$haswb} {
 	$wtbl cellconfigure "${i},$colindex(iswb)" -image $icons(wboard)
@@ -279,9 +306,9 @@ proc ::Jabber::MailBox::InsertRow {wtbl row i} {
     }
 }
 
-proc ::Jabber::MailBox::GetToplevel { } {
-    
+proc ::Jabber::MailBox::GetToplevel { } {    
     variable locals
+    
     if {[info exists locals(wtop)] && [winfo exists $locals(wtop)]} {
 	return $locals(wtop)
     } else {
@@ -289,9 +316,9 @@ proc ::Jabber::MailBox::GetToplevel { } {
     }
 }
 
-proc ::Jabber::MailBox::GetCCP { } {
-    
+proc ::Jabber::MailBox::GetCCP { } {    
     variable locals
+    
     if {[info exists locals(wccp)]} {
 	return $locals(wccp)
     } else {
@@ -311,8 +338,8 @@ proc ::Jabber::MailBox::AllRead { } {
     
     # Find first that is not read.
     set allRead 1
-    foreach msgid [array names mailbox] {
-	if {![lindex $mailbox($msgid) 3]} {
+    foreach uid [array names mailbox] {
+	if {![lindex $mailbox($uid) 3]} {
 	    set allRead 0
 	    break
 	}
@@ -332,7 +359,7 @@ proc ::Jabber::MailBox::GetNextMsgID {id} {
     return $next
 }
 
-proc ::Jabber::MailBox::GetMsgFromId {id} {
+proc ::Jabber::MailBox::GetMsgFromUid {id} {
     variable mailbox
     
     if {[info exists mailbox($id)]} {
@@ -344,27 +371,32 @@ proc ::Jabber::MailBox::GetMsgFromId {id} {
 
 # Jabber::MailBox::GetCanvasHexUID --
 #
-#       Rteurns the unique hex id for canvas if message has any, else empty.
+#       Returns the unique hex id for canvas if message has any, else empty.
 
 proc ::Jabber::MailBox::GetCanvasHexUID {id} {
     variable mailbox
 
     set ans ""
-    set row $mailbox($id)
-    if {[llength $row] > 6} {
-	set ans [lindex $row 6]
+    if {[llength $mailbox($id)] > 6} {
+	array set optsArr [lrange $mailbox($id) 6 end]
+	if {[info exists optsArr(-canvasuid)]} {
+	    set ans $optsArr(-canvasuid)
+	}
     }
     return $ans
 }
 
-proc ::Jabber::MailBox::MarkMsgAsRead {id} {
-    
+proc ::Jabber::MailBox::MarkMsgAsRead {id} {    
     variable mailbox
+    variable locals
 
     # Incomplete.
     #$wtbl rowconfigure $item -font $sysFont(s)
     #$wtbl cellconfigure "$item,0" -image $icons(readMsg)
-    set mailbox($id) [lreplace $mailbox($id) 3 3 1]
+    if {[lindex $mailbox($id) 3] == 0} {
+	set mailbox($id) [lreplace $mailbox($id) 3 3 1]
+	set locals(haveEdits) 1
+    }
 }
 
 # Jabber::MailBox::GotMsg --
@@ -383,60 +415,92 @@ proc ::Jabber::MailBox::GotMsg {bodytxt args} {
 
     variable locals
     variable mailbox
+    variable uidmsg
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     upvar ::UI::icons icons
     
     ::Jabber::Debug 2 "::Jabber::MailBox::GotMsg args='$args'"
 
-    array set opts {
+    array set argsArr {
 	-from unknown -subject {}
     }
-    array set opts $args
-    regexp {^([^@]+@[^/]+)(/(.*))?} $opts(-from) match jid2 x res
+    array set argsArr $args
+    
+    # The inbox should only be read once to be economical.
+    if {!$locals(mailboxRead)} {
+	::Jabber::MailBox::ReadMailbox
+    }
+    regexp {^([^@]+@[^/]+)(/(.*))?} $argsArr(-from) match jid2 x res
         
     # Here we should probably check som 'jabber:x:delay' element...
-    set timeDate ""
-    if {[info exists opts(-x)]} {
-	set timeDate [::Jabber::FormatAnyDelayElem $opts(-x)]
+    # This is ISO 8601.
+    set timeStamp ""
+    if {[info exists argsArr(-x)]} {
+	set timeStamp [::Jabber::GetAnyDelayElem $argsArr(-x)]
     }
-    if {$timeDate == ""} {
-	set timeDate [SmartClockFormat [clock seconds]]
+    if {$timeStamp == ""} {
+	set timeStamp [clock format [clock seconds] -format "%Y%m%dT%H:%M:%S"]
     }
+    
+    # List format for messages.
+    incr uidmsg
+    set messageList [list $argsArr(-subject) $argsArr(-from)  \
+      $timeStamp 0 $uidmsg $bodytxt]
     
     # If any whiteboard elements in this message (binary entities?).
     # Generate unique hex id which is stored in mailbox and used in file name.
-    if {[info exists opts(-whiteboard)]} {
-	set uid [::Utils::GenerateHexUID]
-	set fileName ${uid}.can
-	set filePath [file join $prefs(inboxCanvasPath) $fileName]
-	::CanvasFile::DataToFile $filePath $opts(-whiteboard)
+    if {[info exists argsArr(-whiteboard)]} {
+	set canvasuid [::Utils::GenerateHexUID]
+	set filePath [file join $prefs(inboxCanvasPath) ${canvasuid}.can]
+	::CanvasFile::DataToFile $filePath $argsArr(-whiteboard)
+	lappend messageList -canvasuid $canvasuid
+	set isWhiteboard 1
     } else {
-	set uid ""
+	set isWhiteboard 0
     }
+
+    # All messages cached in 'mailbox' array.
+    set mailbox($uidmsg) $messageList
     
-    # Collect this message.
-    incr locals(msguid)
-    set mailbox($locals(msguid)) [list $opts(-subject) $opts(-from)  \
-      $timeDate 0 $locals(msguid) $bodytxt $uid]
-    
+    # Always cache it in inbox.
+    ::Jabber::MailBox::PutMessageInInbox $messageList
+        
     # Alert sound?
     ::Sounds::Play newmsg
 
-    set readQ 0
-    if {$jprefs(showMsgNewWin) && ([string length $bodytxt] > 0)} {
-	::Jabber::GotMsg::GotMsg $locals(msguid)
-	::Jabber::MailBox::MarkMsgAsRead $locals(msguid)
-	set readQ 1
+    if {$jprefs(showMsgNewWin) && !$isWhiteboard} {
+	::Jabber::GotMsg::GotMsg $uidmsg
+	::Jabber::MailBox::MarkMsgAsRead $uidmsg
     }
 
     # Show in mailbox. Sorting?
     set w [::Jabber::MailBox::GetToplevel]
     if {$w != ""} {
-	::Jabber::MailBox::InsertRow $locals(wtbl) $mailbox($locals(msguid)) end
+	::Jabber::MailBox::InsertRow $locals(wtbl) $mailbox($uidmsg) end
 	$locals(wtbl) see end
     }
     ::Jabber::UI::MailBoxState nonempty
+}
+
+proc ::Jabber::MailBox::PutMessageInInbox {row} {
+    global  this
+    upvar ::Jabber::jprefs jprefs
+    
+    set exists 0
+    if {[file exists $jprefs(inboxPath)]} {
+	set exists 1
+    }
+    if {![catch {open $jprefs(inboxPath) a} fd]} {
+	if {!$exists} {
+	    ::Jabber::MailBox::WriteInboxHeader $fd
+	    if {[string equal $this(platform) "macintosh"]} {
+		file attributes $jprefs(inboxPath) -type pref
+	    }
+	}
+	puts $fd "set mailbox(\[incr uidmsg]) {$row}"
+	close $fd
+    }
 }
 
 proc ::Jabber::MailBox::SaveMsg { } {
@@ -455,15 +519,16 @@ proc ::Jabber::MailBox::SaveMsg { } {
     }
     set ans [tk_getSaveFile -title {Save message} -initialfile Untitled.txt]
     if {[string length $ans] > 0} {
-	set row [$wtbl get $item]
-	set from [lindex $row $colindex(from)]
-	set subject [lindex $row $colindex(subject)]
-	set time [lindex $row $colindex(date)]
 	if {[catch {open $ans w} fd]} {
 	    tk_messageBox -title {Open Failed} -parent $wtbl -type ok \
 	      -message "Failed opening file [file tail $ans]: $fd"
 	    return
 	}
+	set row [$wtbl get $item]
+	set from [lindex $row $colindex(from)]
+	set subject [lindex $row $colindex(subject)]
+	set time [lindex $row $colindex(date)]
+	set time [clock format [clock scan $time]]
 	set maxw 14
 	puts $fd [format "%-*s %s" $maxw "From:" $from]
 	puts $fd [format "%-*s %s" $maxw "Subject:" $subject]
@@ -471,7 +536,7 @@ proc ::Jabber::MailBox::SaveMsg { } {
 	puts $fd "\n"
 	puts $fd [::Text::TransformToPureText $wtextmsg]
 	close $fd
-	if {[string match "mac*" $this(platform)]} {
+	if {[string equal $this(platform) "macintosh"]} {
 	    file attributes $ans -type TEXT -creator ttxt
 	}
     }
@@ -484,6 +549,8 @@ proc ::Jabber::MailBox::TrashMsg { } {
     variable mailbox
     variable colindex
     
+    set locals(haveEdits) 1
+
     # Need selected line here.
     set wtbl $locals(wtbl)
     set items [$wtbl curselection]
@@ -496,7 +563,7 @@ proc ::Jabber::MailBox::TrashMsg { } {
     
     # Careful, delete in reversed order!
     foreach item [lsort -integer -decreasing $items] {
-	set id [lindex [$wtbl get $item] $colindex(msgid)]
+	set id [lindex [$wtbl get $item] $colindex(uidmsg)]
 	set uid [::Jabber::MailBox::GetCanvasHexUID $id]
 	if {[string length $uid] > 0} {
 	    set fileName ${uid}.can
@@ -523,6 +590,7 @@ proc ::Jabber::MailBox::TrashMsg { } {
 	::UI::ButtonConfigure $wtop print -state disabled
 	::UI::ButtonConfigure $wtop trash -state disabled
 	::Jabber::MailBox::MsgDisplayClear
+	::Jabber::UI::MailBoxState empty
     }
 }
 
@@ -552,7 +620,7 @@ proc ::Jabber::MailBox::SelectMsg { } {
 	return
     }
     set row [$wtbl get $item]
-    set id [lindex $row $colindex(msgid)]
+    set id [lindex $row $colindex(uidmsg)]
     
     # 2-tier jid.
     set jid2 [lindex $row $colindex(from)]
@@ -576,6 +644,8 @@ proc ::Jabber::MailBox::SelectMsg { } {
     
     # If any whiteboard stuff in message...
     set uid [::Jabber::MailBox::GetCanvasHexUID $id]
+    ::Jabber::Debug 2 "::Jabber::MailBox::SelectMsg  uid=$uid"
+    
     if {[string length $uid] > 0} {
 	set wbtoplevel .maininbox
 	set title "Inbox: $jid2"
@@ -627,11 +697,11 @@ proc ::Jabber::MailBox::DoubleClickMsg { } {
 	return
     }
     set row [$wtbl get $item]
-    set id [lindex $row $colindex(msgid)]
+    set id [lindex $row $colindex(uidmsg)]
 
     # We shall have the original, unparsed, text here.
     set allText [lindex $mailbox($id) 5]
-    foreach {subject to time} [lrange $mailbox($id) 0 2] { break }
+    foreach {subject to time} [lrange $mailbox($id) 0 2] break
 
     if {[string equal $jprefs(inbox2click) "newwin"]} {
 	::Jabber::GotMsg::GotMsg $id
@@ -708,11 +778,11 @@ proc ::Jabber::MailBox::ReplyTo { } {
 	return
     }
     set row [$wtbl get $item]
-    set id [lindex $row $colindex(msgid)]
+    set id [lindex $row $colindex(uidmsg)]
 
     # We shall have the original, unparsed, text here.
     set allText [lindex $mailbox($id) 5]
-    foreach {subject to time} [lrange $mailbox($id) 0 2] { break }
+    foreach {subject to time} [lrange $mailbox($id) 0 2] break
     if {![regexp -nocase {^ *re:} $subject]} {
 	set subject "Re: $subject"
     }
@@ -733,11 +803,11 @@ proc ::Jabber::MailBox::ForwardTo { } {
 	return
     }
     set row [$wtbl get $item]
-    set id [lindex $row $colindex(msgid)]
+    set id [lindex $row $colindex(uidmsg)]
 
     # We shall have the original, unparsed, text here.
     set allText [lindex $mailbox($id) 5]
-    foreach {subject to time} [lrange $mailbox($id) 0 2] { break }
+    foreach {subject to time} [lrange $mailbox($id) 0 2] break
     set subject "Forwarded: $subject"
     ::Jabber::NewMsg::Build $wDlgs(jsendmsg) -subject $subject  \
       -forwardmessage $allText -time $time
@@ -754,12 +824,22 @@ proc ::Jabber::MailBox::DoPrint { } {
       -data $allText -font $sysFont(s)
 }
 
-proc ::Jabber::MailBox::SaveMailbox { } {
+proc ::Jabber::MailBox::SaveMailbox {args} {
+
+    eval {::Jabber::MailBox::SaveMailboxVer2} $args
+}
+    
+proc ::Jabber::MailBox::SaveMailboxVer1 { } {
     global  this
     
     variable locals
     variable mailbox
     upvar ::Jabber::jprefs jprefs
+    
+    # Do not store anything if empty.
+    if {[llength [array names mailbox]] == 0} {
+	return
+    }
     
     # Work on a temporary file and switch later.
     set tmpFile $jprefs(inboxPath).tmp
@@ -770,6 +850,7 @@ proc ::Jabber::MailBox::SaveMailbox { } {
     }
     
     # Header information.
+    puts $fid "# Version: 1"
     puts $fid "#\n#   User's Jabber Message Box for the Whiteboard application."
     puts $fid "#   The data written at: [clock format [clock seconds]]\n#"
     
@@ -790,52 +871,223 @@ proc ::Jabber::MailBox::SaveMailbox { } {
 	  -icon error
 	return
     }
-    if {[string match "mac*" $this(platform)]} {
+    if {[string equal $this(platform) "macintosh"]} {
 	file attributes $jprefs(inboxPath) -type pref
     }
 }
 
-proc ::Jabber::MailBox::ReadMailbox { } {
+# Jabber::MailBox::SaveMailboxVer2 --
+# 
+#       Saves current mailbox to the inbox file provided it is necessary.
+#       
+# Arguments:
+#       args:       -force 0|1 (D=0) forces save unconditionally
+#       
 
-    variable locals
+proc ::Jabber::MailBox::SaveMailboxVer2 {args} {
+    global  this
+    
     variable mailbox
+    variable locals
     upvar ::Jabber::jprefs jprefs
+    
+    array set argsArr {
+	-force      0
+    }
+    array set argsArr $args
+    
+    # If the mailbox is read there can be edits. Needs therefore to save state.
+    if {$argsArr(-force)} {
+	set doSave 1
+    } else {
+	set doSave 0
+    }
+    ::Jabber::Debug 2 "::Jabber::MailBox::SaveMailboxVer2 args=$args"
+    if {$locals(mailboxRead)} {
 
-    if {![file exist $jprefs(inboxPath)]} {
-	
-	# Think we should keep quiet about this.
-	return
-	
-	set ans [tk_messageBox -title [::msgcat::mc {No Inbox}] -icon error  \
-	  -type yesno -message [FormatTextForMessageBox \
-	  "Couldn't find the mailbox file \"[file tail $jprefs(inboxPath)]\".\
-	  Do you want to locate it?"]]
-	if {$ans == "no"} {
+	# Be sure to not have any inbox that is empty.
+	if {[llength [array names mailbox]] == 0} {
+	    catch {file delete $jprefs(inboxPath)}
+	    ::Jabber::Debug 2 "\tdelete inbox"
 	    return
 	} else {
-	    set new [tk_getOpenFile -title {Pick Mailbox File}  \
-	      -filetypes {{{Tcl File} {.tcl}}}]
-	    if {[string length $new] == 0} {
-		return
-	    }
-	    set jprefs(inboxPath) $new
+	    
+	    # Save only if mailbox read and have nonempty mailbox array.
+	    set doSave 1
 	}
     }
+    ::Jabber::Debug 2 "\tdoSave=$doSave"
+    if {!$doSave} {
+	return
+    }
+        
+    # Work on a temporary file and switch later.
+    set tmpFile $jprefs(inboxPath).tmp
+    if {[catch {open $tmpFile w} fid]} {
+	tk_messageBox -type ok -icon error -message  \
+	  [FormatTextForMessageBox [::msgcat::mc jamesserrinboxopen $tmpFile]]
+	return
+    }
+    
+    # Start by writing the header info.
+    ::Jabber::MailBox::WriteInboxHeader $fid
+    foreach id [lsort -integer [array names mailbox]] {
+	puts $fid "set mailbox(\[incr uidmsg]) {$mailbox($id)}"
+    }
+    close $fid
+    if {[catch {file rename -force $tmpFile $jprefs(inboxPath)} msg]} {
+	tk_messageBox -type ok -message {Error renaming preferences file.}  \
+	  -icon error
+	return
+    }
+    if {[string equal $this(platform) "macintosh"]} {
+	file attributes $jprefs(inboxPath) -type pref
+    }
+}
+
+proc ::Jabber::MailBox::WriteInboxHeader {fid} {
+    
+    # Header information.
+    puts $fid "# Version: 2"
+    puts $fid "#\n#   User's Jabber Message Box for The Coccinella."
+    puts $fid "#   The data written at: [clock format [clock seconds]]\n#"    
+}
+
+proc ::Jabber::MailBox::ReadMailbox { } {
+    variable locals
+    upvar ::Jabber::jprefs jprefs
+
+    # Set this even if not there.
+    set locals(mailboxRead) 1
+    if {[file exists $jprefs(inboxPath)]} {
+	::Jabber::MailBox::ReadMailboxVer2
+    }
+}
+
+proc ::Jabber::MailBox::TranslateAnyVer1ToCurrentVer { } {
+    variable locals
+    variable mailbox
+    
+    set ver [::Jabber::MailBox::GetMailboxVersion]
+    if {[string equal $ver "1"]} {
+	::Jabber::MailBox::ReadMailboxVer1
+	
+	# This should save the inbox in its current version.
+	::Jabber::MailBox::SaveMailbox -force 1
+	
+	# Cleanup state variables.
+	catch {unset locals(mailbox)}
+	catch {unset mailbox}
+    }
+}
+
+# Jabber::MailBox::GetMailboxVersion --
+# 
+#       Returns empty string if no mailbox exists, else the version number of
+#       any existing mailbox.
+
+proc ::Jabber::MailBox::GetMailboxVersion { } {
+    upvar ::Jabber::jprefs jprefs
+    
+    set version ""
+    if {[file exist $jprefs(inboxPath)]} {
+	if {![catch {open $jprefs(inboxPath) r} fd]} {
+	    if {[gets $fd line] >= 0} { 
+		if {![regexp -nocase {^ *# *version: *([0-9]+)} $line match version]} {
+		    set version 1
+		}
+	    }
+	    close $fd
+	}
+    }
+    return $version
+}
+
+proc ::Jabber::MailBox::ReadMailboxVer1 { } {
+    variable locals
+    variable uidmsg
+    variable mailbox
+    upvar ::Jabber::jprefs jprefs
+    
+    ::Jabber::Debug 2 "::Jabber::MailBox::ReadMailboxVer1"
+
     if {[catch {source $jprefs(inboxPath)} msg]} {
 	set tail [file tail $jprefs(inboxPath)]
 	tk_messageBox -title [::msgcat::mc {Mailbox Error}] -icon error  \
 	  -type ok -message [FormatTextForMessageBox \
-	  [::msgcat::mcset en jamesserrinboxread $tail $msg]]
+	  [::msgcat::mc jamesserrinboxread $tail $msg]]
     } else {
 	
 	# The mailbox on file is just a hierarchical list that needs to be
-	# translated to an array. Be sure to update the msgId's!
-	set msgId $locals(msguid)
+	# translated to an array. Be sure to update the uidmsg's!
 	foreach row $locals(mailbox) {
-	    set id [incr msgId]
+	    set id [incr uidmsg]
 	    set mailbox($id) [lreplace $row 4 4 $id]
+
+	    # Any canvas uid must be translated to '-canvasuid hex' option
+	    # to be compatible with new mailbox format.
+	    if {([llength $row] == 7)  && [string length [lindex $row 6]]} {
+		set mailbox($id) [lreplace $row 6 end -canvasuid [lindex $row 6]]
+	    }
 	}
-	set locals(msguid) $msgId
+    }
+}
+
+proc ::Jabber::MailBox::ReadMailboxVer2 { } {
+    variable locals
+    variable uidmsg
+    variable mailbox
+    upvar ::Jabber::jprefs jprefs
+
+    ::Jabber::Debug 2 "::Jabber::MailBox::ReadMailboxVer2"
+
+    if {[catch {source $jprefs(inboxPath)} msg]} {
+	set tail [file tail $jprefs(inboxPath)]
+	tk_messageBox -title [::msgcat::mc {Mailbox Error}] -icon error  \
+	  -type ok -message [FormatTextForMessageBox \
+	  [::msgcat::mc jamesserrinboxread $tail $msg]]
+    } else {
+	
+	# Keep the uidmsg in sync for each list in mailbox.
+	foreach id [lsort -integer [array names mailbox]] {
+	    set mailbox($id) [lreplace $mailbox($id) 4 4 $id]   
+	}
+    }
+}
+
+proc ::Jabber::MailBox::HaveMailBox { } {
+    upvar ::Jabber::jprefs jprefs
+
+    if {[file exist $jprefs(inboxPath)]} {
+	set ans 1
+    } else {
+	set ans 0
+    }
+    return $ans
+}
+
+proc ::Jabber::MailBox::DeleteMailbox { } {
+    global prefs
+    upvar ::Jabber::jprefs jprefs
+
+    if {[file exist $jprefs(inboxPath)]} {
+	catch {file delete $jprefs(inboxPath)}
+    }    
+    foreach f [glob -nocomplain -directory $prefs(inboxCanvasPath) *.can] {
+	catch {file delete $f}
+    }
+}
+
+proc ::Jabber::MailBox::Exit { } {
+    upvar ::Jabber::jprefs jprefs
+    variable locals
+    
+    if {$jprefs(inboxSave)} {
+	if {$locals(haveEdits)} {
+	    ::Jabber::MailBox::SaveMailbox
+	}
+    } else {
+	::Jabber::MailBox::DeleteMailbox
     }
 }
 

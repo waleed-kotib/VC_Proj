@@ -5,11 +5,12 @@
 #
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: SetupAss.tcl,v 1.3 2003-07-05 13:27:32 matben Exp $
+# $Id: SetupAss.tcl,v 1.4 2003-07-26 13:54:23 matben Exp $
 
 package require setupassistant
 package require chasearrows
 package require http 2.3
+package require tinydom
 package require tablelist
 
 package provide SetupAss 1.0
@@ -172,7 +173,7 @@ proc ::Jabber::SetupAss::ServersDlg {w} {
     global  sysFont this
 
     variable server
-    variable finishedServ
+    variable finishedServ 0
     variable warrows
     variable servStatVar
     variable wbservbt
@@ -315,7 +316,6 @@ proc ::Jabber::SetupAss::ServCommand {w token} {
     }
     set servStatVar ""
     $warrows stop
-    set publicServerList {}
     
     # Investigate 'state' for any exceptions.
     set status [::http::status $token]
@@ -340,23 +340,25 @@ proc ::Jabber::SetupAss::ServCommand {w token} {
 	    
 	    # Get and parse xml.
 	    set xml [::http::data $token]    
-	    set xmlparser [xml::parser]
-	    $xmlparser configure -reportempty 1   \
-	      -elementstartcommand [namespace current]::XmlElementStart
-	    $xmlparser parse $xml
+	    set token [tinydom::parse $xml]
+	    set xmllist [tinydom::documentElement $token]
+	    set publicServerList {}
+	    
+	    foreach elem [tinydom::children $xmllist] {
+		switch -- [tinydom::tagname $elem] {
+		    item {
+			catch {unset attrArr}
+			array set attrArr [tinydom::attrlist $elem]
+			lappend publicServerList  \
+			  [list $attrArr(jid) $attrArr(name)]
+		    }
+		}
+	    }
+
 	    $wtbl insertlist end $publicServerList
 	}
     }
     ::http::cleanup $token    
-}
-
-proc ::Jabber::SetupAss::XmlElementStart {tagname attrlist args} {
-    variable publicServerList
-    
-    if {$tagname == "item"} {
-	array set attrArr $attrlist
-	lappend publicServerList [list $attrArr(jid) $attrArr(name)]
-    }
 }
 
 #-------------------------------------------------------------------------------

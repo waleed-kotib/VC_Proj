@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ItemInspector.tcl,v 1.3 2003-02-06 17:23:33 matben Exp $
+# $Id: ItemInspector.tcl,v 1.4 2003-07-26 13:54:23 matben Exp $
 
 namespace eval ::ItemInspector::  {
     
@@ -39,6 +39,7 @@ namespace eval ::ItemInspector::  {
 	disabledwidth
 	outlineoffset
 	state
+	splinesteps
     }
 
     # On 8.3 and earlier we use '-background' for disabled entries,

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Example.tcl,v 1.3 2003-06-07 12:46:36 matben Exp $
+# $Id: Example.tcl,v 1.4 2003-07-26 13:54:23 matben Exp $
 
 
 namespace eval ::Example:: {
@@ -56,7 +56,11 @@ proc ::Example::Init { } {
     ::Plugins::Register Example $defList $bindList
     
     # Register nonsense mime type for this.
-    ::Types::NewMimeType "application/x-junk" "Junk File" {.junk} 0 {TEXT}
+    #::Types::NewMimeType "application/x-junk" "Junk File" {.junk} 0 {TEXT}
+    
+    # Any specific menu for operations...
+    set menuSpec [list command "Throw Junk" {puts "Throw junk"} {} {}]
+    #::UI::RegisterPluginMenuEntry $menuSpec
 }
 
 # Example::Import --
@@ -64,7 +68,7 @@ proc ::Example::Init { } {
 #       Template import procedure.
 #       
 # Arguments:
-#       wtop
+#       wcan        canvas widget path
 #       fileName
 #       optListVar  the *name* of the optList variable.
 #       args
@@ -72,15 +76,13 @@ proc ::Example::Init { } {
 # Results:
 #       an error string which is empty if things went ok so far.
 
-proc ::Example::Import {wtop fileName optListVar args} {
+proc ::Example::Import {wcan fileName optListVar args} {
     upvar $optListVar optList
-    upvar ::${wtop}::wapp wapp
     variable uid
     variable locals
     
     array set argsArr $args
     array set optArr $optList
-    set wCan $wapp(can)
     set locals(file) $fileName    
     if {![catch {open $locals(file) r} fd]} {
 	set locals(body) [read $fd]
@@ -88,14 +90,14 @@ proc ::Example::Import {wtop fileName optListVar args} {
     }
     
     # Extract coordinates and tags which must be there. error checking?
-    foreach {x y} $optArr(coords:) { break }
+    foreach {x y} $optArr(coords:) break
     if {[info exists optArr(tags:)]} {
 	set useTag $optArr(tags:)
     } else {
 	set useTag [::CanvasUtils::NewUtag]
     }
     set uniqueName [::CanvasUtils::UniqueImageName]		
-    set wfr ${wCan}.fr_${uniqueName}    
+    set wfr ${wcan}.fr_${uniqueName}    
     
     # Make actual object in a frame with special -class.
     set wbt ${wfr}.bt
@@ -103,7 +105,7 @@ proc ::Example::Import {wtop fileName optListVar args} {
     button $wbt -text {Example Plugin} -command [namespace current]::Clicked
     pack ${wfr}.bt -padx 3 -pady 3
     
-    set id [$wCan create window $x $y -anchor nw -window $wfr -tags  \
+    set id [$wcan create window $x $y -anchor nw -window $wfr -tags  \
       [list tframe $useTag]]
     set locals(id2file,$id) $fileName
 

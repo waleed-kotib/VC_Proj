@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.13 2003-07-05 13:37:54 matben Exp $
+# $Id: jabberlib.tcl,v 1.14 2003-07-26 13:54:23 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -24,11 +24,11 @@
 #       
 #       lib(rostername)            : the name of the roster object
 #       
-#       lib(browsename)            : the name of the browse object
+#       lib(browsename)            : (optional) the name of any browse object
 #       
 #       lib(server)                : The server domain name or ip number
 #       
-#	lib(sock)                  : SocketName
+#	lib(sock)                  : socket name
 #
 #	lib(streamcmd)             : Callback command to run when the <stream>
 #	                             tag is received from the server.
@@ -211,6 +211,7 @@
 #       030523   added 'getagent' and 'haveagent' commands.
 #       030611   added 'setroomprotocol' command and modified service dispatching
 #       030705   jlib::new generates self token
+#       030726   made browse object optional, jlib::new api changed!
 
 package require wrapper
 package require roster
@@ -268,16 +269,31 @@ proc jlib::muc {jlibname args} {
 #       
 # Arguments:
 #       rostername: the name of the roster object
-#       browsename: the name of the browse object
 #       clientcmd:  callback procedure for the client
+#       args:       
+#       -browsename           the name of the browse object
+#	-iqcommand            
+#	-messagecommand       
+#	-presencecommand      
+#	-streamnamespace      
+#	-keepalivesecs        
+#	-autoaway             
+#	-xautoaway            
+#	-awaymin              
+#	-xawaymin             
+#	-awaymsg              
+#	-xawaymsg             
+#	-transportinit
+#	-transportsend
+#	-transportreset
 #       
 # Results:
 #       jlibname which is the namespaced instance command
   
-proc jlib::new {rostername browsename clientcmd args} {    
+proc jlib::new {rostername clientcmd args} {    
     variable objectmap
     variable uid
-          
+    
     # Generate unique command token for this roster instance.
     set jlibname jabberlib[incr uid]
       
@@ -308,17 +324,18 @@ proc jlib::new {rostername browsename clientcmd args} {
     upvar [namespace current]::${jlibname}::locals locals
     
     array set opts {
-	-iqcommand            {}
-	-messagecommand       {}
-	-presencecommand      {}
+	-iqcommand            ""
+	-messagecommand       ""
+	-presencecommand      ""
 	-streamnamespace      "jabber:client"
 	-keepalivesecs        30
 	-autoaway             0
 	-xautoaway            0
 	-awaymin              0
 	-xawaymin             0
-	-awaymsg              {}
-	-xawaymsg             {}
+	-awaymsg              ""
+	-xawaymsg             ""
+	-browsename           ""
     }
     
     # Defaults for the raw socket transport layer.
@@ -334,7 +351,7 @@ proc jlib::new {rostername browsename clientcmd args} {
     set iq(uid) 1001
     set lib(fulljlibname) [namespace current]::${jlibname}
     set lib(rostername) $rostername
-    set lib(browsename) $browsename
+    set lib(browsename) $opts(-browsename)
     set lib(clientcmd) $clientcmd
     set lib(wrap)   \
       [wrapper::new [list [namespace current]::got_stream $jlibname]  \
@@ -344,11 +361,16 @@ proc jlib::new {rostername browsename clientcmd args} {
     
     set lib(isinstream) 0
     set lib(server) ""
-    
+
     # Mapper between objects.
-    set objectmap(browsename,$jlibname) $browsename
-    set objectmap(jlibname,$browsename) $jlibname
-    
+    if {$opts(-browsename) != ""} {
+	set objectmap(browsename,$jlibname) $opts(-browsename)
+	set objectmap(jlibname,$opts(-browsename)) $jlibname
+	set opts(havebrowse) 1
+    } else {
+	set opts(havebrowse) 0
+    }
+        
     # Maintain a priority list of groupchat protocols in decreasing priority.
     # Entries must match: ( gc-1.0 | conference | muc )
     set locals(gcProtoPriority) {muc conference gc-1.0}
@@ -736,7 +758,7 @@ proc jlib::iq_handler {jlibname xmldata} {
     upvar [namespace current]::${jlibname}::opts opts    
     
     # Extract the command level XML data items.
-    foreach {tag attrlist isempty chdata childlist} $xmldata { break }
+    foreach {tag attrlist isempty chdata childlist} $xmldata break
     array set attrArr $attrlist
     
     # Make an argument list ('-key value' pairs) suitable for callbacks.
@@ -828,7 +850,9 @@ proc jlib::iq_handler {jlibname xmldata} {
 		    
 		    # This is the same as the one we get from a 'browse_get'.
 		    # This contains no error element so skip callback.
-		    parse_browse_get $jlibname $from {} {} ok $subiq
+		    if {$opts(havebrowse)} {
+			parse_browse_get $jlibname $from {} {} ok $subiq
+		    }
 		}
 		jabber:iq:search {
 		    
@@ -836,6 +860,10 @@ proc jlib::iq_handler {jlibname xmldata} {
 		    if {[info exists id] && [info exists iq($id)]} {
 			uplevel #0 $iq($id) [list set $subiq]
 		    }
+		}
+		jabber:iq:disco {
+		    
+		    # To do
 		}
 		default {
 		    set iqcallback [concat  \
@@ -857,7 +885,7 @@ proc jlib::iq_handler {jlibname xmldata} {
 		    
 		    # Found it!
 		    foreach {ctag cattrlist cisempty cchdata cchildlist} \
-		      $errorchild { break }
+		      $errorchild break
 		    set errcode [wrapper::getattr $cattrlist "code"]
 		    set errmsg $cchdata
 		    break
@@ -918,7 +946,7 @@ proc jlib::message_handler {jlibname xmldata} {
     upvar [namespace current]::${jlibname}::lib lib
     
     # Extract the command level XML data items.
-    foreach {tag attrlist isempty chdata childlist} $xmldata { break }
+    foreach {tag attrlist isempty chdata childlist} $xmldata break
     set attrArr(type) "normal"
     array set attrArr $attrlist
     set type $attrArr(type)
@@ -935,7 +963,7 @@ proc jlib::message_handler {jlibname xmldata} {
     foreach child $childlist {
 	
 	# Extract the message sub-elements XML data items.
-	foreach {ctag cattrlist cisempty cchdata cchildlist} $child { break }		
+	foreach {ctag cattrlist cisempty cchdata cchildlist} $child break		
 	switch -- $ctag {
 	    body - subject - thread {
 		lappend arglist -$ctag $cchdata
@@ -972,7 +1000,7 @@ proc jlib::presence_handler {jlibname xmldata} {
     upvar [namespace current]::${jlibname}::opts opts
     
     # Extract the command level XML data items.
-    foreach {tag attrlist isempty chdata childlist} $xmldata { break }
+    foreach {tag attrlist isempty chdata childlist} $xmldata break
     array set attrArr $attrlist
     
     # Make an argument list ('-key value' pairs) suitable for callbacks.
@@ -993,7 +1021,7 @@ proc jlib::presence_handler {jlibname xmldata} {
 	foreach errorchild $childlist {
 	    if {[string equal [lindex $errorchild 0] "error"]} {
 		foreach {ctag cattrlist cisempty cchdata cchildlist} \
-		  $errorchild { break }
+		  $errorchild break
 		set errcode [wrapper::getattr $cattrlist "code"]
 		set errmsg $cchdata
 		break
@@ -1007,7 +1035,7 @@ proc jlib::presence_handler {jlibname xmldata} {
 	foreach child $childlist {
 	    
 	    # Extract the presence sub-elements XML data items.
-	    foreach {ctag cattrlist cisempty cchdata cchildlist} $child { break }
+	    foreach {ctag cattrlist cisempty cchdata cchildlist} $child break
 	    switch -- $ctag {
 		status - priority - show {
 		    lappend params $ctag $cchdata
@@ -1033,7 +1061,7 @@ proc jlib::presence_handler {jlibname xmldata} {
 	    eval {$lib(rostername) setpresence $from $type} $arglist
 	    
 	    # If unavailable be sure to clear browse object for this jid.
-	    if {[string equal $type "unavailable"]} {
+	    if {$opts(havebrowse) && [string equal $type "unavailable"]} {
 		$lib(browsename) clear $from
 	    }
 	} else {
@@ -1226,7 +1254,7 @@ proc jlib::parse_roster_get {jlibname ispush cmd type thequery} {
     }
     
     # Extract the XML data items.
-    foreach {tag attrlist isempty chdata childlist} $thequery { break }		
+    foreach {tag attrlist isempty chdata childlist} $thequery break		
     if {![string equal [wrapper::getattr $attrlist xmlns] "jabber:iq:roster"]} {
     
 	# Here we should issue a warning:
@@ -1355,25 +1383,29 @@ proc jlib::parse_roster_remove {jlibname jid cmd type thequery} {
 
 proc jlib::parse_browse_get {jlibname jid cmd errcmd type subiq} {    
     upvar [namespace current]::${jlibname}::lib lib
+    upvar [namespace current]::${jlibname}::opts opts    
 
     Debug 3 "jlib::parse_browse_get jid=$jid, cmd='$cmd', type=$type, subiq='$subiq'"
-    
-    set opts {}
+
+    if {!$opts(havebrowse)} {
+	return
+    }    
+    set browseopts {}
     
     # A server push should not be able to send an error element.
     if {[string equal $type "error"]} {
 	if {[string length $errcmd]} {
-	    lappend opts -errorcommand $errcmd
+	    lappend browseopts -errorcommand $errcmd
 	}
-	eval {$lib(browsename) errorcallback $jid $subiq} $opts
+	eval {$lib(browsename) errorcallback $jid $subiq} $browseopts
     } else {
     
 	# Fill in our browse object with this. Client callback is executed from
 	# within this procedure.
 	if {[string length $cmd]} {
-	    lappend opts -command $cmd
+	    lappend browseopts -command $cmd
 	}
-	eval {$lib(browsename) setjid $jid $subiq} $opts
+	eval {$lib(browsename) setjid $jid $subiq} $browseopts
     }
 }
 
@@ -1937,7 +1969,11 @@ proc jlib::oob_set {jlibname to cmd url args} {
 #       none.
 
 proc jlib::browse_get {jlibname to args} {
+    upvar [namespace current]::${jlibname}::opts opts    
 
+    if {!$opts(havebrowse)} {
+	return -code error "there is no browse object associated with this jlib"
+    }    
     array set argsArr {
 	-command        ""
 	-errorcommand   ""
@@ -1947,25 +1983,6 @@ proc jlib::browse_get {jlibname to args} {
     send_iq $jlibname get $xmllist -to $to -command   \
       [list [namespace current]::parse_browse_get $jlibname $to  \
       $argsArr(-command) $argsArr(-errorcommand)]
-}
-
-# jlib::browse_set --
-#
-#       It implements the 'jabber:iq:browse' set method.
-#
-# Arguments:
-#       jlibname:   the instance of this jlib.
-#       to:         the jid to browse ('conference.jabber.org', for instance)
-#       cmd:        client command to be executed if error???
-#                   The browse object takes care of client callbacks.
-#       
-# Results:
-#       none.
-
-proc jlib::browse_set {jlibname to cmd} {
-
-
-
 }
 
 # jlib::agent_get --
@@ -2609,6 +2626,7 @@ proc jlib::setgroupchatprotocol {jlibname jid prot} {
     upvar [namespace current]::${jlibname}::locals locals
     upvar [namespace current]::${jlibname}::agent agent
     upvar [namespace parent]::${jlibname}::lib lib
+    upvar [namespace parent]::${jlibname}::opts opts
 
     if {![regexp $statics(groupchatTypeExp) $prot]} {
 	return -code error "Unrecognized groupchat type \"$prot\""
@@ -2621,6 +2639,10 @@ proc jlib::setgroupchatprotocol {jlibname jid prot} {
 	    }
 	}
 	conference {
+	    if {!$opts(havebrowse)} {
+		return -code error \
+		  "there is no browse object associated with this jlib"
+	    }    
 	    set confServicesJids [$lib(browsename) getconferenceservers]
 	    if {[lsearch -exact $confServicesJids $jid] < 0} {
 		return -code error \
@@ -2628,6 +2650,11 @@ proc jlib::setgroupchatprotocol {jlibname jid prot} {
 	    }
 	}
 	muc {
+	    if {!$opts(havebrowse)} {
+		# This must be changed when disco is coming...
+		return -code error \
+		  "there is no browse object associated with this jlib"
+	    }    
 	    if {![$lib(browsename) havenamespace $jid  \
 	      "http://jabber.org/protocol/muc"]} {
 		return -code error \
@@ -2701,8 +2728,9 @@ proc jlib::service {jlibname cmd args} {
 proc jlib::service::parent {jlibname jid} {    
     upvar [namespace parent]::${jlibname}::agent agent
     upvar [namespace parent]::${jlibname}::lib lib
+    upvar [namespace parent]::${jlibname}::opts opts
 
-    if {[$lib(browsename) isbrowsed $jid]} {
+    if {$opts(havebrowse) && [$lib(browsename) isbrowsed $jid]} {
 	return [$lib(browsename) getparentjid $jid]
     } else {
 	if {[info exists agent($jid,parent)]} {
@@ -2716,8 +2744,9 @@ proc jlib::service::parent {jlibname jid} {
 proc jlib::service::childs {jlibname jid} {    
     upvar [namespace parent]::${jlibname}::agent agent
     upvar [namespace parent]::${jlibname}::lib lib
+    upvar [namespace parent]::${jlibname}::opts opts
 
-    if {[$lib(browsename) isbrowsed $jid]} {
+    if {$opts(havebrowse) && [$lib(browsename) isbrowsed $jid]} {
 	return [$lib(browsename) getchilds $jid]
     } else {
 	if {[info exists agent($jid,childs)]} {
@@ -2744,9 +2773,10 @@ proc jlib::service::childs {jlibname jid} {
 #       list of jids supporting this service, possibly empty.
 
 proc jlib::service::getjidsfor {jlibname what} {
-        variable services
+    variable services
     upvar [namespace parent]::${jlibname}::agent agent
     upvar [namespace parent]::${jlibname}::lib lib
+    upvar [namespace parent]::${jlibname}::opts opts
     
     if {[lsearch $services $what] < 0} {
 	return -code error "\"$what\" is not a recognized service"
@@ -2754,27 +2784,31 @@ proc jlib::service::getjidsfor {jlibname what} {
     set jids {}
     
     # Browse service if any.
-    set browseNS [$lib(browsename) getservicesforns jabber:iq:${what}]
-    if {[llength $browseNS]} {
-	set jids $browseNS
-    }
-    switch -- $what {
-	groupchat {
-	    
-	    # These server components support 'groupchat 1.0' as well.
-	    # The 'jabber:iq:conference' seems to be lacking in many jabber.xml.
-	    # Use 'getconferenceservers' as fallback.
-	    set jids [concat $jids \
-	      [$lib(browsename) getservicesforns jabber:iq:conference]]	    
-	    set jids [concat $jids [$lib(browsename) getconferenceservers]]
-	    set jids [concat $jids [$lib(browsename) getservicesforns  \
-	      "http://jabber.org/protocol/muc"]]
+    if {$opts(havebrowse)} {
+	set browseNS [$lib(browsename) getservicesforns jabber:iq:${what}]
+	if {[llength $browseNS]} {
+	    set jids $browseNS
 	}
-	muc {
-	    set jids [concat $jids [$lib(browsename) getservicesforns  \
-	      "http://jabber.org/protocol/muc"]]
+	
+	switch -- $what {
+	    groupchat {
+		
+		# These server components support 'groupchat 1.0' as well.
+		# The 'jabber:iq:conference' seems to be lacking in many jabber.xml.
+		# Use 'getconferenceservers' as fallback.
+		set jids [concat $jids \
+		  [$lib(browsename) getservicesforns jabber:iq:conference]]	    
+		set jids [concat $jids [$lib(browsename) getconferenceservers]]
+		set jids [concat $jids [$lib(browsename) getservicesforns  \
+		  "http://jabber.org/protocol/muc"]]
+	    }
+	    muc {
+		set jids [concat $jids [$lib(browsename) getservicesforns  \
+		  "http://jabber.org/protocol/muc"]]
+	    }
 	}
     }
+    
     
     # Agent service if any.
     if {[info exists agent($what)]} {
@@ -2795,10 +2829,11 @@ proc jlib::service::getjidsfor {jlibname what} {
 proc jlib::service::isroom {jlibname jid} {    
     upvar [namespace parent]::${jlibname}::agent agent
     upvar [namespace parent]::${jlibname}::lib lib
+    upvar [namespace parent]::${jlibname}::opts opts
     
     # Check if domain name supports the 'groupchat' service.
     set isroom 0
-    if {[$lib(browsename) isbrowsed $lib(server)]} {
+    if {$opts(havebrowse) && [$lib(browsename) isbrowsed $lib(server)]} {
 	if {[$lib(browsename) isroom $jid]} {
 	    set isroom 1
 	}

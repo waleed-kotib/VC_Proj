@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.13 2003-07-05 13:37:54 matben Exp $
+# $Id: UI.tcl,v 1.14 2003-07-26 13:54:23 matben Exp $
 
 # LabeledFrame --
 #
@@ -133,7 +133,7 @@ proc ::UI::Init {} {
     }
     
     # Addon menus
-    variable addonMenus {}
+    variable menuSpecAddon {}
     
     variable allWhiteboards {}
 
@@ -331,7 +331,7 @@ proc ::UI::InitMenuDefs { } {
     set menuDefs(main,info,aboutwhiteboard)  \
       {command   mAboutCoccinella    {::SplashScreen::SplashScreen $wDlgs(splash)} normal   {}}
     set menuDefs(main,info,aboutquicktimetcl)  \
-      {command   mAboutQuickTimeTcl  {AboutQuickTimeTcl}                           normal   {}}
+      {command   mAboutQuickTimeTcl  {::Dialogs::AboutQuickTimeTcl}                normal   {}}
 
     # Mac only.
     set menuDefs(main,apple) [list $menuDefs(main,info,aboutwhiteboard)  \
@@ -430,6 +430,13 @@ proc ::UI::InitMenuDefs { } {
 	{radio   10                {set ::${wtop}::state(smooth) 1}        normal   {} \
 	  {-value 10 -variable ::${wtop}::state(splinesteps)}}}
     }
+    set menuDefs(main,prefs,smooth)  \
+      {checkbutton mLineSmoothness   {}                                    normal   {} \
+      {-variable ::${wtop}::state(smooth)}}
+    if {0} {
+    set menuDefs(main,prefs,straighten)  \
+      {command     mStraighten       {::CanvasUtils::ItemStraighten $w $id} normal   {} {}}
+    }
     set menuDefs(main,prefs,arcs)  \
       {cascade     mArcs             {}                                    normal   {} {} {
 	{radio   mPieslice         {}                                      normal   {} \
@@ -492,27 +499,26 @@ proc ::UI::InitMenuDefs { } {
     
     # Build hierarchical list.
     set menuDefs(main,prefs) {}
-    foreach key {background grid thickness brushthickness fill smoothness  \
+    foreach key {background grid thickness brushthickness fill smooth  \
       arcs dash constrain separator font fontsize fontweight separator prefs} {
 	lappend menuDefs(main,prefs) $menuDefs(main,prefs,$key)
     }
 
     set menuDefs(main,info) {    
-	{command     mOnServer       {ShowInfoServer $wDlgs(infoServ) \$this(ipnum)} normal {}}	
-	{command     mOnClients      {::InfoClients::ShowInfoClients $wDlgs(infoClient) \$allIPnumsFrom} disabled {}}	
-	{command     mOnPlugins      {InfoOnPlugins .plugs}                    normal {}}	
+	{command     mOnServer       {::Dialogs::ShowInfoServer $wDlgs(infoServ) \$this(ipnum)} normal {}}	
+	{command     mOnClients      {::Dialogs::ShowInfoClients $wDlgs(infoClient) \$allIPnumsFrom} disabled {}}	
+	{command     mOnPlugins      {::Dialogs::InfoOnPlugins .plugs}         normal {}}	
 	{separator}
-	{cascade     mHelpOn             {}                                    normal   {} {} {
-	    {command mNetworkSetup       \
-	      {::UI::OpenCanvasInfoFile $wtop NetworkSetup.can}                normal {}}
-	    {command mServers           \
-	      {::UI::OpenCanvasInfoFile $wtop Servers.can}                     normal {}}
-	    {command mJabberTransport   \
-	      {::UI::OpenCanvasInfoFile $wtop JabberTransport.can}             normal {}}
-	    {command mSmileyLegend      \
-	      {::UI::OpenCanvasInfoFile $wtop SmileyLegend.can}                normal {}}}
-	}
+	{cascade     mHelpOn             {}                                    normal   {} {} {}}
     }
+    
+    # Build "Help On" menu dynamically.
+    set infoDefs {}
+    foreach f [glob -nocomplain -directory [file join $this(path) docs] *.can] {
+	set name [file rootname [file tail $f]]
+	lappend infoDefs [list command m${name} [list ::Dialogs::Canvas $f] normal {}]
+    }
+    lset menuDefs(main,info) end end $infoDefs
     
     # Make platform specific things and special menus etc. Indices!!! BAD!
     if {$haveAppleMenu && ![::Plugins::HavePackage QuickTimeTcl]} {
@@ -547,6 +553,8 @@ proc ::UI::InitMenuDefs { } {
 	{command   mNewWhiteboard      {::UI::NewMain}                            normal   N}
 	{command   mCloseWindow        {::UserActions::DoCloseWindow}             normal   W}
 	{command   mPreferences...     {::Preferences::Build $wDlgs(prefs)}       normal   {}}
+	{command   mUpdateCheck        {
+	    ::AutoUpdate::Get $prefs(urlAutoUpdate) -silent 0}       normal   {}}
 	{separator}
 	{command   mQuit               {::UserActions::DoQuit}                    normal   Q}
     }
@@ -665,6 +673,11 @@ proc ::UI::InitMenuDefs { } {
 	{radio 10   {::CanvasUtils::ItemConfigure $w $id -smooth 1 -splinesteps 10} normal {} \
 	  {-value 10 -variable ::UI::popupVars(-smooth)}}}
     }
+    set menuDefs(pop,smooth)  \
+      {checkbutton mLineSmoothness   {::CanvasUtils::ItemSmooth $w $id}    normal   {} \
+      {-variable ::UI::popupVars(-smooth) -offvalue 0 -onvalue 1}}
+    set menuDefs(pop,straighten)  \
+      {command     mStraighten       {::CanvasUtils::ItemStraighten $w $id} normal   {} {}}
     set menuDefs(pop,font)  \
       {cascade     mFont             {}                                    normal   {} {} {}}
     set menuDefs(pop,fontsize)  \
@@ -711,12 +724,12 @@ proc ::UI::InitMenuDefs { } {
     # Now assemble menus from the individual entries above. List of which entries where.
     array set menuArr {
 	arc        {thickness fillcolor outline dash arcs inspect}
-	brush      {brushthickness color smoothness inspect}
+	brush      {brushthickness color smooth inspect}
 	image      {saveimageas imagelarger imagesmaller exportimage inspect}
-	line       {thickness dash smoothness inspect}
+	line       {thickness dash smooth straighten inspect}
 	oval       {thickness outline fillcolor dash inspect}
-	pen        {thickness smoothness inspect}
-	polygon    {thickness outline fillcolor dash smoothness inspect}
+	pen        {thickness smooth inspect}
+	polygon    {thickness outline fillcolor dash smooth straighten inspect}
 	rectangle  {thickness fillcolor dash inspect}
 	text       {font fontsize fontweight color speechbubble inspect}
 	window     {}
@@ -885,15 +898,8 @@ proc ::UI::BuildMain {wtop args} {
       -fill both -expand true
     
     # The 'Coccinella'.
-    if {$prefs(coccinellaMovie)} {
-	pack [movie ${wtop}fmain.frleft.padphoto -controller 0  \
-	  -file [file join images beetle<->igelpiga.mov]]  \
-	  -in ${wtop}fmain.frleft.pad -side bottom
-	${wtop}fmain.frleft.padphoto palindromeloopstate 1
-    } else {
-	pack [label ${wtop}fmain.frleft.padphoto -borderwidth 0 -image igelpiga]  \
-	  -in ${wtop}fmain.frleft.pad -side bottom
-    }
+    pack [label ${wtop}fmain.frleft.padphoto -borderwidth 0 -image igelpiga]  \
+      -in ${wtop}fmain.frleft.pad -side bottom
     
     # ...and the drawing canvas.
     if {$prefs(haveScrollbars)} {
@@ -990,6 +996,7 @@ proc ::UI::BuildMain {wtop args} {
     bind $wtopReal <FocusIn> [list ::UI::AppGetFocus $wtop %W]
 
     catch {wm deiconify $wtopReal}
+    raise $wtopReal
 
     # A trick to let the window manager be finished before getting the geometry.
     # An 'update idletasks' needed anyway in 'FindWBGeometry'.
@@ -1159,7 +1166,7 @@ proc ::UI::SaveCleanWhiteboardDims {wtop} {
     if {$wtop != "."} {
 	return
     }
-    foreach {dims(wRoot) hRoot dims(x) dims(y)} [::UI::ParseWMGeometry .] { break }
+    foreach {dims(wRoot) hRoot dims(x) dims(y)} [::UI::ParseWMGeometry .] break
     set dims(hRoot) [expr $dims(hCanvas) + $dims(hStatus) +  \
       $dims(hCommClean) + $dims(hTop) + $dims(hFakeMenu)]
     if {$prefs(haveScrollbars)} {
@@ -1843,8 +1850,7 @@ proc ::UI::SavePanePos {wtoplevel wpaned {orient horizontal}} {
 # Results:
 #       $wmenu
 
-proc ::UI::NewMenu {wtop wmenu label menuKey state args} {
-    
+proc ::UI::NewMenu {wtop wmenu label menuKey state args} {    
     variable menuDefs    
     variable mapWmenuToMenuDefKey
     variable mapWmenuToWtop
@@ -2012,7 +2018,7 @@ proc ::UI::MenuMethod {wmenu cmd key args} {
 proc ::UI::BuildWhiteboardMenus {wtop} {
     global  this wDlgs prefs dashFull2Short osprefs
     
-    variable addonMenus
+    variable menuSpecAddon
     upvar ::${wtop}::wapp wapp
     upvar ::${wtop}::state state
     upvar ::${wtop}::opts opts
@@ -2039,17 +2045,13 @@ proc ::UI::BuildWhiteboardMenus {wtop} {
         
     # Item menu (temporary placement).
     ::UI::BuildItemMenu $wtop ${wmenu}.items $prefs(itemDir)
+    
+    # Addon or Plugin menus if any.
+    ::UI::BuildAddonMenu $wmenu
+    ::UI::BuildPluginMenu $wmenu
+    
     ::UI::NewMenu $wtop ${wmenu}.info mInfo "main,info" $opts(-state)
-    
-    # Addon menu.
-    if {[llength $addonMenus]} {
-	set m [menu ${wmenu}.addon -tearoff 0]
-	$wmenu add cascade -label [::msgcat::mc mAddons] -menu $m
-	foreach menuSpec $addonMenus {
-	    ::UI::BuildAddonMenuEntry $m $menuSpec
-	}
-    }
-    
+
     # Handle '-state disabled' option. Keep Edit/Copy.
     if {$opts(-state) == "disabled"} {
 	::UI::DisableWhiteboardMenus $wmenu
@@ -2057,9 +2059,6 @@ proc ::UI::BuildWhiteboardMenus {wtop} {
     
     # Use a function for this to dynamically build this menu if needed.
     ::UI::BuildFontMenu $wtop $prefs(canvasFonts)    
-    if {0 && !$prefs(stripJabber) && ![string equal $prefs(protocol) "jabber"]} {
-	$wmenu entryconfigure *Jabber* -state disabled
-    }
         
     # End menus; place the menubar.
     if {$prefs(haveMenus)} {
@@ -2106,28 +2105,64 @@ proc ::UI::MenuDisableAllBut {mw normalList} {
 #       menuSpec    'type' 'label' 'command' 'opts' {subspec}
 #       
 # Results:
-#       menu entries added.
+#       menu entries added when whiteboard built.
 
-proc ::UI::RegisterAddonMenuEntry {menuSpec} {
+proc ::UI::RegisterAddonMenuEntry {menuSpec} {    
+    variable menuSpecAddon
     
-    variable addonMenus
-    
-    lappend addonMenus $menuSpec
+    lappend menuSpecAddon $menuSpec
 }
 
-# UI::BuildAddonMenuEntry  --
+# UI::RegisterPluginMenuEntry --
 #
-#       Builds a single menu entry for the addon menu.
-#       Can be called recursively.
+# Arguments:
+#       plugMenuDef   'type' 'label' 'command' 'opts' {subspec}
 
-proc ::UI::BuildAddonMenuEntry {m menuSpec} {
+proc ::UI::RegisterPluginMenuEntry {plugMenuDef} {
+    variable menuSpecPlugin
+    
+    lappend menuSpecPlugin $plugMenuDef
+}
+
+proc ::UI::BuildAddonMenu {wmenu} {
+    variable menuSpecAddon
+    
+    if {[llength $menuSpecAddon]} {
+	set m [menu ${wmenu}.addon -tearoff 0]
+	$wmenu add cascade -label [::msgcat::mc mAddons] -menu $m
+	foreach menuSpec $menuSpecAddon {
+	    ::UI::BuildMenuEntryFromSpec $m $menuSpec
+	}
+    }
+}
+
+proc ::UI::BuildPluginMenu {wmenu} {
+    variable menuSpecPlugin
+    
+    if {[info exists menuSpecPlugin] && [llength $menuSpecPlugin]} {
+	set m [menu ${wmenu}.addon -tearoff 0]
+	$wmenu add cascade -label [::msgcat::mc mPlugins] -menu $m
+	foreach menuSpec $menuSpecPlugin {
+	    ::UI::BuildMenuEntryFromSpec $m $menuSpec
+	}
+    }
+}
+
+# UI::BuildMenuEntryFromSpec  --
+#
+#       Builds a single menu entry for a menu. Can be called recursively.
+#       
+# Arguments:
+#       menuSpec    'type' 'label' 'command' 'opts' {subspec}
+
+proc ::UI::BuildMenuEntryFromSpec {m menuSpec} {
     
     foreach {type label cmd opts submenu} $menuSpec {
 	if {[llength $submenu]} {
 	    set mt [menu ${m}.sub -tearoff 0]
 	    $m add cascade -label $label -menu $mt
 	    foreach subm $submenu {
-		::UI::BuildAddonMenuEntry $mt $subm
+		::UI::BuildMenuEntryFromSpec $mt $subm
 	    }
 	} else {
 	    eval {$m add $type -label $label -command $cmd} $opts
@@ -2954,10 +2989,10 @@ proc ::UI::BuildToolPopups {wtop} {
 	arrow      {thickness dash constrain}
 	rect       {thickness fill dash}
 	oval       {thickness fill dash}
-	pen        {thickness smoothness}
-	brush      {brushthickness smoothness}
+	pen        {thickness smooth}
+	brush      {brushthickness smooth}
 	text       {font fontsize fontweight}
-	poly       {thickness fill dash smoothness}
+	poly       {thickness fill dash smooth}
 	arc        {thickness fill dash arcs}
     }
     foreach name [array names menuArr] {
@@ -3342,7 +3377,7 @@ proc ::UI::SetNewWMMinsize {wtop} {
     wm minsize $wtopReal $dims(wMinTot) $dims(hMinTot)
 
     # Be sure it is respected. Note: wm geometry is *without* the menu!
-    foreach {wmx wmy} [::UI::ParseWMGeometry $wtopReal] { break }
+    foreach {wmx wmy} [::UI::ParseWMGeometry $wtopReal] break
     if {($wmx < $dims(wMinRoot)) || ($wmy < $dims(hMinRoot))} {
 	wm geometry $wtopReal $dims(wMinRoot)x$dims(hMinRoot)
     }
@@ -4074,7 +4109,6 @@ proc ::UI::FixMenusWhen {wtop what} {
 		    ::UI::ButtonConfigure $wtop connect -state disabled
 		}
 	    }	    
-	    ::UI::MenuMethod ${wtop}menu.info entryconfigure mHelpOn -state disabled
 	}
 	disconnect {
 	    
@@ -4089,7 +4123,6 @@ proc ::UI::FixMenusWhen {wtop what} {
 		    ::UI::MenuMethod ${wtop}menu.file entryconfigure mOpenConnection -state normal
 		}
 	    }
-	    ::UI::MenuMethod ${wtop}menu.info entryconfigure mHelpOn -state normal
 	    
 	    # If no more connections left, make menus consistent.
 	    if {[llength $allIPnumsToSend] == 0} {

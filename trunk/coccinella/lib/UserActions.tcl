@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UserActions.tcl,v 1.9 2003-06-15 12:40:13 matben Exp $
+# $Id: UserActions.tcl,v 1.10 2003-07-26 13:54:23 matben Exp $
 
 namespace eval ::UserActions:: {
     
@@ -262,7 +262,7 @@ proc ::UserActions::DoPrintCanvas {wtop} {
 	    }
 	}
 	unix - macosx {
-	    ::PrintPSonUnix::PrintPSonUnix $wDlgs(print) $wCan
+	    ::Dialogs::UnixPrintPS $wDlgs(print) $wCan
 	}
     }
 }
@@ -291,7 +291,7 @@ proc ::UserActions::DoPrintText {wtext args} {
 	    }
 	}
 	unix - macosx {
-	    ::PrintPSonUnix::PrintPSonUnix $wDlgs(print) $wtext
+	    ::Dialogs::UnixPrintPS $wDlgs(print) $wtext
 	}
     }
 }
@@ -408,7 +408,7 @@ proc ::UserActions::ResizeItem {wtop factor} {
 	    continue
 	}
 	if {!$prefs(scaleCommonCG)} {
-	    foreach {left top right bottom} [$w bbox $id] { break }
+	    foreach {left top right bottom} [$w bbox $id] break
 	    set cgx [expr ($left + $right)/2.0]
 	    set cgy [expr ($top + $bottom)/2.0]
 	}
@@ -447,7 +447,7 @@ proc ::UserActions::FlipItem {wtop direction} {
 	return
     }
     set utag [::CanvasUtils::GetUtag $w $id]
-    foreach {left top right bottom} [$w bbox $id] { break }
+    foreach {left top right bottom} [$w bbox $id] break
     set xmid [expr ($left + $right)/2]
     set ymid [expr ($top + $bottom)/2]
     set flipco {}
@@ -792,6 +792,8 @@ proc ::UserActions::DoQuit {args} {
 	    return $ans
 	}
     }
+    
+    catch ::TinyHttpd::Stop
 
     # Before quitting, save whiteboard preferences and geom state. 
     if {[wm state .] == "normal"} {

@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Types.tcl,v 1.2 2003-05-18 13:20:22 matben Exp $
+# $Id: Types.tcl,v 1.3 2003-07-26 13:54:23 matben Exp $
 
 package provide Types 1.0
 
@@ -252,6 +252,8 @@ proc ::Types::Init { } {
 	    lappend macType2MimeList($macType) $mime
 	}
     }    
+    # Make TEXT map to text/plain
+    set macType2MimeList(TEXT) text/plain
     foreach {macType suff} [array get macType2Suff] {
 	set suff2MacType($suff) $macType
     }    

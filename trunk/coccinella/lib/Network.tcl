@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Network.tcl,v 1.4 2003-05-18 13:20:21 matben Exp $
+# $Id: Network.tcl,v 1.5 2003-07-26 13:54:23 matben Exp $
 
 namespace eval ::Network:: {
     
@@ -113,7 +113,7 @@ proc ::Network::WhenSocketOpensInits {sock nameOrIP port cmd tls} {
     if {[eof $sock]} {
 	catch {close $sock}
 	set msg "Failed to open network socket to $nameOrIP."
-	uplevel #0 "$cmd [list $sock $nameOrIP $port error $msg]"
+	uplevel #0 $cmd [list $sock $nameOrIP $port error $msg]
 	return
     }
     
@@ -121,13 +121,13 @@ proc ::Network::WhenSocketOpensInits {sock nameOrIP port cmd tls} {
     # The jabber server gives: <stream:error>Invalid XML</stream:error>
     if {0 && [catch {puts -nonewline $sock { }} msg]} {
 	set msg "Failed to open network socket to $nameOrIP."
-	uplevel #0 "$cmd [list $sock $nameOrIP $port error $msg]"
+	uplevel #0 $cmd [list $sock $nameOrIP $port error $msg]
 	return
     }
     
     # Check if something went wrong first.
     if {[catch {fconfigure $sock -sockname} sockname]} {
-	uplevel #0 "$cmd [list $sock $nameOrIP $port error $sockname]"
+	uplevel #0 $cmd [list $sock $nameOrIP $port error $sockname]
 	return
     }
     
@@ -136,14 +136,14 @@ proc ::Network::WhenSocketOpensInits {sock nameOrIP port cmd tls} {
 	fconfigure $sock -blocking 1
 	if {[catch {::tls::handshake $sock} msg]} {
 	    catch {close $sock}
-	    uplevel #0 "$cmd [list $sock $nameOrIP $port error $msg]"
+	    uplevel #0 $cmd [list $sock $nameOrIP $port error $msg]
 	    return
 	}
 	fconfigure $sock -blocking 0
     }
     
     # Evaluate our callback procedure.
-    uplevel #0 "$cmd [list $sock $nameOrIP $port ok]"
+    uplevel #0 $cmd [list $sock $nameOrIP $port ok]
 }
 
 # ScheduleKiller, Kill --
@@ -179,7 +179,7 @@ proc ::Network::Kill {sock cmd} {
     }
     
     # Evaluate our callback procedure.
-    uplevel #0 "$cmd [list $sock {} {} timeout]"
+    uplevel #0 $cmd [list $sock {} {} timeout]
 }
 
 # Network::KillAll --
@@ -191,6 +191,7 @@ proc ::Network::KillAll { } {
     variable killerId
 
     foreach sock [array names killerId] {
+	catch {close $sock}
 	after cancel $killerId($sock)
     }
     catch {unset killerId}

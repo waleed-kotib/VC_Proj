@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.4 2003-06-07 12:46:35 matben Exp $
+# $Id: GotMsg.tcl,v 1.5 2003-07-26 13:54:23 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -77,12 +77,12 @@ proc ::Jabber::GotMsg::Show {thisMsgId} {
     ::Jabber::GotMsg::Build
     
     set msgIdDisplay $thisMsgId
-    set spec [::Jabber::MailBox::GetMsgFromId $thisMsgId]
+    set spec [::Jabber::MailBox::GetMsgFromUid $thisMsgId]
     ::Jabber::MailBox::MarkMsgAsRead $thisMsgId
     if {$spec == ""} {
 	return
     }
-    foreach {subject jid timeAndDate isRead junk theMsg} $spec { break }
+    foreach {subject jid timeAndDate isRead junk theMsg} $spec break
     set jidtxt $jid
     set _time {[0-9][0-9]:[0-9][0-9].*}
     regexp "^(.*) (${_time})$" $timeAndDate match theDate theTime

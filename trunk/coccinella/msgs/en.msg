@@ -67,6 +67,7 @@
 ::msgcat::mcset en Password
 ::msgcat::mcset en Pick
 ::msgcat::mcset en Phone
+::msgcat::mcset en Plugins
 ::msgcat::mcset en Preferences
 ::msgcat::mcset en Previous
 ::msgcat::mcset en Print
@@ -129,6 +130,7 @@
 ::msgcat::mcset en mItems		{Items}
 ::msgcat::mcset en mInfo		{Info}
 ::msgcat::mcset en mAddons		{Addons}
+::msgcat::mcset en mPlugins		{Plugins}
 
 ::msgcat::mcset en mAboutWhiteboard   	{About Whiteboard...}
 ::msgcat::mcset en mAboutCoccinella   	{About Coccinella...}
@@ -176,6 +178,7 @@
 ::msgcat::mcset en mFillColor		{Fill Color...}
 ::msgcat::mcset en mOutlineColor	{Outline Color}
 ::msgcat::mcset en mLineSmoothness	{Line Smoothness}
+::msgcat::mcset en mStraighten   	{Straighten}
 ::msgcat::mcset en mArcs		{Arcs}
 ::msgcat::mcset en mPieslice		{Pieslice}
 ::msgcat::mcset en mChord		{Chord}
@@ -232,6 +235,7 @@
 ::msgcat::mcset en mExportMovie		{Export Movie...}
 ::msgcat::mcset en mColor		{Color...}
 ::msgcat::mcset en mAddSpeechBubble	{Add Speech Bubble}
+::msgcat::mcset en mUpdateCheck  	{Update Check}
 
 # Popups
 ::msgcat::mcset en mMessage     	{Message...}
@@ -247,6 +251,7 @@
 ::msgcat::mcset en mAddServer     	{Add Server...}
 ::msgcat::mcset en mLocalTime     	{Local Time...}
 ::msgcat::mcset en mSendFile     	{Send File...}
+::msgcat::mcset en mChatHistory     	{Chat History}
 
 
 
@@ -363,6 +368,7 @@
 ::msgcat::mcset en {Pick Directory}
 ::msgcat::mcset en {Pick File}
 ::msgcat::mcset en {Plugin Info}
+::msgcat::mcset en {Plugin Control}
 ::msgcat::mcset en {Port number}
 ::msgcat::mcset en {Postal Code}
 ::msgcat::mcset en {Presence Error}

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ImageAndMovie.tcl,v 1.9 2003-07-05 13:30:35 matben Exp $
+# $Id: ImageAndMovie.tcl,v 1.10 2003-07-26 13:54:23 matben Exp $
 
 package require http
 
@@ -201,7 +201,7 @@ proc ::ImageAndMovie::DoImport {w optList args} {
 	    if {$drawLocal} {
 		if {$isLocal} {
 		    set errMsg [eval {
-			::ImageAndMovie::DrawImage $wtopNS $fileName putOpts
+			::ImageAndMovie::DrawImage $w $fileName putOpts
 		    } [array get argsArr]]
 		} else {
 		    set errMsg [eval {
@@ -224,7 +224,7 @@ proc ::ImageAndMovie::DoImport {w optList args} {
 	    if {$drawLocal} {
 		if {$isLocal} {
 		    set errMsg [eval {
-			::ImageAndMovie::DrawQuickTimeTcl $wtopNS $fileName \
+			::ImageAndMovie::DrawQuickTimeTcl $w $fileName \
 			  putOpts
 		    } [array get argsArr]]
 		} else {
@@ -254,7 +254,7 @@ proc ::ImageAndMovie::DoImport {w optList args} {
 	    if {$drawLocal} {
 		if {$isLocal} {
 		    set errMsg [eval {
-			::ImageAndMovie::DrawSnack $wtopNS $fileName putOpts
+			::ImageAndMovie::DrawSnack $w $fileName putOpts
 		    } [array get argsArr]]
 		} else {
 		    set errMsg [eval {
@@ -277,7 +277,7 @@ proc ::ImageAndMovie::DoImport {w optList args} {
 	    if {$drawLocal} {
 		if {$isLocal} {
 		    set errMsg [eval {
-			::ImageAndMovie::DrawXanim $wtopNS $fileName putOpts
+			::ImageAndMovie::DrawXanim $w $fileName putOpts
 		    } [array get argsArr]]
 		} else {
 		    set errMsg [eval {
@@ -295,8 +295,7 @@ proc ::ImageAndMovie::DoImport {w optList args} {
 		if {$isLocal} {
 		    set importProc [::Plugins::GetImportProcForMime $mime]
 		    set errMsg [eval {
-			$importProc $wtopNS $fileName putOpts
-		    } [array get argsArr]]
+			$importProc $w $fileName putOpts} [array get argsArr]]
 		} else {
 		    
 		    # Find out if this plugin has registerd a special proc
@@ -338,7 +337,7 @@ proc ::ImageAndMovie::DoImport {w optList args} {
 #       in 'optList' into account.
 #       
 # Arguments:
-#       wtop
+#       w           canvas path
 #       fileName
 #       optListVar  the *name* of the optList variable.
 #       args
@@ -346,19 +345,17 @@ proc ::ImageAndMovie::DoImport {w optList args} {
 # Results:
 #       an error string which is empty if things went ok.
 
-proc ::ImageAndMovie::DrawImage {wtop fileName optListVar args} {
+proc ::ImageAndMovie::DrawImage {w fileName optListVar args} {
     upvar $optListVar optList
-    upvar ::${wtop}::wapp wapp
 
-    ::Debug 2 "::ImageAndMovie::DrawImage wtop=$wtop, args='$args'"
+    ::Debug 2 "::ImageAndMovie::DrawImage args='$args'"
     
     array set optArr $optList
     array set argsArr $args
-    set w $wapp(can)
     set errMsg ""
     
     # Extract coordinates and tags which must be there. error checking?
-    foreach {x y} $optArr(coords:) { break }
+    foreach {x y} $optArr(coords:) break
     set useTag $optArr(tags:)
     set mime $optArr(Content-Type:)
     regexp {([^/]+)/([^/]+)} $mime match mimeBase mimeSubType
@@ -415,7 +412,7 @@ proc ::ImageAndMovie::DrawImage {wtop fileName optListVar args} {
 #       Draws a local QuickTime movie onto canvas.
 #       
 # Arguments:
-#       wtop
+#       w           canvas path
 #       fileName
 #       optListVar  the *name* of the optList variable.
 #       args
@@ -423,19 +420,17 @@ proc ::ImageAndMovie::DrawImage {wtop fileName optListVar args} {
 # Results:
 #       an error string which is empty if things went ok.
 
-proc ::ImageAndMovie::DrawQuickTimeTcl {wtop fileName optListVar args} {
+proc ::ImageAndMovie::DrawQuickTimeTcl {w fileName optListVar args} {
     upvar $optListVar optList
-    upvar ::${wtop}::wapp wapp
     
     ::Debug 2 "::ImageAndMovie::DrawQuickTimeTcl args='$args'"
     
     array set optArr $optList
     array set argsArr $args
-    set w $wapp(can)
     set errMsg ""
     
     # Extract coordinates and tags which must be there. error checking?
-    foreach {x y} $optArr(coords:) { break }
+    foreach {x y} $optArr(coords:) break
     set useTag $optArr(tags:)    
     
     # Make a frame for the movie; need special class to catch 
@@ -491,7 +486,7 @@ proc ::ImageAndMovie::QuickTimeBalloonMsg {wmovie fileName} {
 #       Draws a local snack movie onto canvas. 
 #       
 # Arguments:
-#       wtop
+#       w           canvas path
 #       fileName
 #       optListVar  the *name* of the optList variable.
 #       args
@@ -499,19 +494,17 @@ proc ::ImageAndMovie::QuickTimeBalloonMsg {wmovie fileName} {
 # Results:
 #       an error string which is empty if things went ok.
 
-proc ::ImageAndMovie::DrawSnack {wtop fileName optListVar args} {
+proc ::ImageAndMovie::DrawSnack {w fileName optListVar args} {
     upvar $optListVar optList
-    upvar ::${wtop}::wapp wapp
     
     ::Debug 2 "::ImageAndMovie::DrawSnack args='$args'"
     
     array set optArr $optList
     array set argsArr $args
-    set w $wapp(can)
     set errMsg ""
     
     # Extract coordinates and tags which must be there. error checking?
-    foreach {x y} $optArr(coords:) { break }
+    foreach {x y} $optArr(coords:) break
     set useTag $optArr(tags:)    
     
     set uniqueName [::CanvasUtils::UniqueImageName]		
@@ -547,7 +540,7 @@ proc ::ImageAndMovie::DrawSnack {wtop fileName optListVar args} {
 #       Draws a local xanim movie onto canvas.
 #       
 # Arguments:
-#       wtop
+#       w           canvas path
 #       fileName
 #       optListVar  the *name* of the optList variable.
 #       args
@@ -555,19 +548,17 @@ proc ::ImageAndMovie::DrawSnack {wtop fileName optListVar args} {
 # Results:
 #       an error string which is empty if things went ok.
 
-proc ::ImageAndMovie::DrawXanim {wtop fileName optListVar args} {
+proc ::ImageAndMovie::DrawXanim {w fileName optListVar args} {
     upvar $optListVar optList
-    upvar ::${wtop}::wapp wapp
     
     ::Debug 2 "::ImageAndMovie::DrawXanim args='$args'"
     
     array set optArr $optList
     array set argsArr $args
-    set w $wapp(can)
     set errMsg ""
     
     # Extract coordinates and tags which must be there. error checking?
-    foreach {x y} $optArr(coords:) { break }
+    foreach {x y} $optArr(coords:) break
     set useTag $optArr(tags:)    
     
     set uniqueName [::CanvasUtils::UniqueImageName]		
@@ -633,6 +624,7 @@ proc ::ImageAndMovie::DrawXanim {wtop fileName optListVar args} {
 proc ::ImageAndMovie::HttpGet {wtop url importPackage optList args} {
     global  this prefs
     variable locals
+    upvar ::${wtop}::wapp wapp
     
     ::Debug 2 "::ImageAndMovie::HttpGet wtop=$wtop, url=$url, importPackage=$importPackage"
 
@@ -656,6 +648,7 @@ proc ::ImageAndMovie::HttpGet {wtop url importPackage optList args} {
     
     # Store stuff in gettoken array.
     set getstate(wtop) $wtop
+    set getstate(wcan) $wapp(can)
     set getstate(url) $url
     set getstate(importPackage) $importPackage
     set getstate(optList) $optList
@@ -734,6 +727,7 @@ proc ::ImageAndMovie::HttpFinished {gettoken token} {
     upvar #0 $gettoken getstate          
     
     set wtop $getstate(wtop)
+    set wcan $getstate(wcan)
     set dstPath $getstate(dstPath)
     set optList $getstate(optList)
     set tail [file tail $getstate(dstPath)]
@@ -766,21 +760,21 @@ proc ::ImageAndMovie::HttpFinished {gettoken token} {
 	
 	switch -- $getstate(importPackage) {
 	    image {
-		eval {::ImageAndMovie::DrawImage $wtop $dstPath optList} \
+		eval {::ImageAndMovie::DrawImage $wcan $dstPath optList} \
 		  $getstate(args)
 	    }
 	    QuickTimeTcl {
 		
 		# This transport method is different from the QT streaming http.
-		eval {::ImageAndMovie::DrawQuickTimeTcl $wtop $dstPath optList} \
+		eval {::ImageAndMovie::DrawQuickTimeTcl $wcan $dstPath optList} \
 		  $getstate(args)
 	    }
 	    snack {
-		eval {::ImageAndMovie::DrawSnack $wtop $dstPath optList} \
+		eval {::ImageAndMovie::DrawSnack $wcan $dstPath optList} \
 		  $getstate(args)
 	    }
 	    xanim {
-		eval {::ImageAndMovie::DrawXanim $wtop $dstPath optList} \
+		eval {::ImageAndMovie::DrawXanim $wcan $dstPath optList} \
 		  $getstate(args)
 	    }
 	    default {
@@ -788,7 +782,7 @@ proc ::ImageAndMovie::HttpFinished {gettoken token} {
 		    set importProc [::Plugins::GetImportProcForPlugin  \
 		      $getstate(importPackage)]
 		}]} {
-		    eval {$importProc $wtop $dstPath optList} $getstate(args)
+		    eval {$importProc $wcan $dstPath optList} $getstate(args)
 		}
 	    }
 	}
@@ -960,7 +954,7 @@ proc ::ImageAndMovie::DrawQuickTimeTclFromHttp {gettoken} {
     array set optArr $getstate(optList)
     
     # Extract coordinates and tags which must be there. error checking?
-    foreach {x y} $optArr(coords:) { break }
+    foreach {x y} $optArr(coords:) break
     set useTag $optArr(tags:)    
     
     $w create window $x $y -anchor nw -window $wfr \
@@ -1078,6 +1072,7 @@ proc ::ImageAndMovie::XanimReadOutput {w xpipe} {
 #       Typically used when reading canvas file version 2.
 #
 # Arguments:
+#       w:          the canvas widget path.
 #       line:       this is typically an "import" command similar to items but
 #                   for images and movies that need to be transported.
 #                   It shall contain either a -file or -url option, but not both.
@@ -1372,7 +1367,7 @@ proc ::ImageAndMovie::ResizeImage {wtop zoomFactor which newTag {where all}} {
     }
 }
 
-# GetAutoFitSize --
+# ImageAndMovie::GetAutoFitSize --
 #
 #       Gives a new smaller size of 'theMovie' if it is too large for canvas 'w'.
 #       It is rescaled by factors of two.
@@ -1381,7 +1376,7 @@ proc ::ImageAndMovie::ResizeImage {wtop zoomFactor which newTag {where all}} {
 #
 # Results:
 
-proc GetAutoFitSize {w theMovie} {
+proc ::ImageAndMovie::GetAutoFitSize {w theMovie} {
 
     set factor 2.0
     set canw [winfo width $w]

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.17 2003-07-05 13:37:54 matben Exp $
+# $Id: Jabber.tcl,v 1.18 2003-07-26 13:54:23 matben Exp $
 #
 #  The $address is an ip name or number.
 #
@@ -230,9 +230,14 @@ namespace eval ::Jabber:: {
       separator      {}        {}
       mLastLogin/Activity user {::Jabber::GetLast &jid}
       mvCard         user      {::VCard::Fetch .jvcard other &jid}
-      mAddNewUser    any       {::Jabber::Roster::NewOrEditItem $wDlgs(jrostnewedit) new}
-      mEditUser      user      {::Jabber::Roster::NewOrEditItem $wDlgs(jrostnewedit) \
-	edit -jid &jid}
+      mAddNewUser    any       {
+	  ::Jabber::Roster::NewOrEditItem $wDlgs(jrostnewedit) new
+      }
+      mEditUser      user      {
+	  ::Jabber::Roster::NewOrEditItem $wDlgs(jrostnewedit) edit -jid &jid
+      }
+      mVersion       user      {::Jabber::GetVersion &jid3}
+      mChatHistory   user      {::Jabber::Chat::BuildHistory &jid}
       mRemoveUser    user      {::Jabber::Roster::SendRemove &jid}
       separator      {}        {}
       mStatus        any       @::Jabber::Roster::BuildPresenceMenu
@@ -250,8 +255,9 @@ namespace eval ::Jabber:: {
       mMessage       user      {::Jabber::NewMsg::Build $wDlgs(jsendmsg) -to &jid}
       mChat          user      {::Jabber::Chat::StartThread &jid}
       mWhiteboard    wb        {::Jabber::WB::NewWhiteboard &jid}
-      mEnterRoom     room      {::Jabber::GroupChat::EnterOrCreate  \
-	enter -roomjid &jid -autoget 1}
+      mEnterRoom     room      {
+	  ::Jabber::GroupChat::EnterOrCreate enter -roomjid &jid -autoget 1
+      }
       mCreateRoom    conference {::Jabber::GroupChat::EnterOrCreate create}
       separator      {}        {}
       mLastLogin/Activity jid  {::Jabber::GetLast &jid}
@@ -259,10 +265,12 @@ namespace eval ::Jabber:: {
       mvCard         jid       {::VCard::Fetch .jvcard other &jid}
       mVersion       jid       {::Jabber::GetVersion &jid}
       separator      {}        {}
-      mSearch        search    {::Jabber::Search::Build  \
-	.jsearch -server &jid -autoget 1}
-      mRegister      register  {::Jabber::GenRegister::BuildRegister .jreg  \
-	-server &jid -autoget 1}
+      mSearch        search    {
+	  ::Jabber::Search::Build .jsearch -server &jid -autoget 1
+      }
+      mRegister      register  {
+	  ::Jabber::GenRegister::BuildRegister .jreg -server &jid -autoget 1
+      }
       mUnregister    register  {::Jabber::Register::Remove &jid}
       separator      {}        {}
       mRefresh       jid       {::Jabber::Browse::Refresh &jid}
@@ -278,9 +286,12 @@ namespace eval ::Jabber:: {
     
     # The agents stuff:
     set jstate(popup,agents,def) {
-      mSearch        search    {::Jabber::Search::Build .jsearch -server &jid -autoget 1}
-      mRegister      register  {::Jabber::GenRegister::BuildRegister  \
-	.jreg -server &jid -autoget 1}
+      mSearch        search    {
+	  ::Jabber::Search::Build .jsearch -server &jid -autoget 1
+      }
+      mRegister      register  {
+	  ::Jabber::GenRegister::BuildRegister .jreg -server &jid -autoget 1
+      }
       mUnregister    register  {::Jabber::Register::Remove &jid}
       separator      {}        {}
       mEnterRoom     groupchat {::Jabber::GroupChat::EnterOrCreate enter}
@@ -352,10 +363,7 @@ proc ::Jabber::FactoryDefaults { } {
     # Abondened!!!!!!!
     set jprefs(autoupdateCheck) 0
     set jprefs(autoupdateShow,$prefs(fullVers)) 1
-    
-    # Our registered serial number at update.jabber.org
-    set jprefs(serialno) 123456789
-    
+        
     # Sounds.
     set jprefs(snd,online) 1
     set jprefs(snd,offline) 1
@@ -480,8 +488,9 @@ proc ::Jabber::Init { } {
       -presencecommand ::Jabber::PresenceCallback
 
     # Make an instance of jabberlib and fill in our roster object.
-    set jstate(jlib) [eval {::jlib::new $jstate(roster) $jstate(browse) \
-      ::Jabber::ClientProc} $opts]
+    set jstate(jlib) [eval {
+	::jlib::new $jstate(roster) ::Jabber::ClientProc  \
+	  -browsename $jstate(browse)} $opts]
     
     # Set the priority order of groupchat protocols.
     $jstate(jlib) setgroupchatpriority [list $jprefs(prefgchatproto) "gc-1.0"]
@@ -496,6 +505,9 @@ proc ::Jabber::Init { } {
 	    wm withdraw $wDlgs(jrostbro)
 	}
     }
+    
+    # Take care of things like translating any old version mailbox etc.
+    ::Jabber::MailBox::Init
 }
 
 # ::Jabber::IqCallback --
@@ -612,7 +624,7 @@ proc ::Jabber::MessageCallback {jlibName type args} {
 	    foreach xlist $attrArr(-x) {
 		
 		# Take each <x> element in turn.
-		foreach {xtag xattrlist xempty xchdata xsub} $xlist { break }
+		foreach {xtag xattrlist xempty xchdata xsub} $xlist break
 		array set xattrArr $xattrlist
 		if {![info exists xattrArr(xmlns)]} {
 		    continue
@@ -625,12 +637,6 @@ proc ::Jabber::MessageCallback {jlibName type args} {
 				lappend rawElemList [lindex $xsubtag 3]
 			    }
 			}
-		    }
-		    "jabber:x:autoupdate" {
-			
-			# CHDATA shall contain the jid
-			$jstate(jlib) send_autoupdate $xchdata  \
-			  [namespace current]::GetAutoupdate
 		    }
 		    "jabber:x:conference" {
 			
@@ -650,7 +656,7 @@ proc ::Jabber::MessageCallback {jlibName type args} {
 	    if {[string equal $type "groupchat"]} {
 		if {[regexp {^(.+@[^/]+)(/(.*))?} $attrArr(-from) match roomJid x]} {
 		    foreach {meHash nick}  \
-		      [$jstate(jlib) service hashandnick $roomJid] { break }
+		      [$jstate(jlib) service hashandnick $roomJid] break
 		    if {[string equal $meHash $attrArr(-from)]} {
 			set doShow 0
 		    }
@@ -891,7 +897,7 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 	    }
 	}
 	error {
-	    foreach {errcode errmsg} $attrArr(-error) { break }		
+	    foreach {errcode errmsg} $attrArr(-error) break		
 	    set msg [::msgcat::mc jamesserrpres $errcode $errmsg]
 	    if {$prefs(talkative)} {
 		tk_messageBox -icon error -type ok  \
@@ -1074,7 +1080,7 @@ proc ::Jabber::ErrorLogDlg {w} {
         
     $wtext configure -state normal
     foreach line $jerror {
-	foreach {tm jid msg} $line { break }
+	foreach {tm jid msg} $line break
 	$wtext insert end "<$tm>:  " timetag
 	$wtext insert end "$jid   " jidtag
 	$wtext insert end $msg msgtag
@@ -1110,7 +1116,7 @@ proc ::Jabber::IqSetGetCallback {method jlibName type theQuery} {
 	  theQuery='$theQuery'"
 	
     if {[string equal $type "error"]} {
-	foreach {errcode errmsg} $theQuery { break }
+	foreach {errcode errmsg} $theQuery break
 	switch -- $method {
 	    default {
 		set msg "Found an error for $method with code $errcode,\
@@ -1424,9 +1430,8 @@ proc ::Jabber::EndSession { } {
 	$jstate(jlib) disconnect
     }
     
-    if {$jprefs(inboxSave)} {
-	::Jabber::MailBox::SaveMailbox
-    }
+    # Either save inbox or delete.
+    ::Jabber::MailBox::Exit
 }
 
 # Jabber::BuildJabberEntry --
@@ -1821,7 +1826,7 @@ proc ::Jabber::PutFileAndSchedule {wtop fileName optList} {
 	    
 	    # Exclude ourselves.
 	    foreach {meRoomJid nick} [$jstate(jlib) service hashandnick $tojid] \
-	      { break }
+	      break
 	    set ind [lsearch $allJid3 $meRoomJid]
 	    if {$ind >= 0} {
 		set allJid3 [lreplace $allJid3 $ind $ind]
@@ -2136,32 +2141,31 @@ proc ::Jabber::GetAllPanePos { } {
     return $paneList
 }
 
-# Jabber::FormatAnyDelayElem --
+# Jabber::GetAnyDelayElem --
 #
-#       Takes a list of x-elements, finds any 'jabber:x:delay' x-element,
-#       and formats a human readable text string. If no such element,
-#       returns empty.
+#       Takes a list of x-elements, finds any 'jabber:x:delay' x-element.
+#       If no such element it returns empty.
 #       
 # Arguments:
 #       xlist       Must be an hierarchical xml list of <x> elements.  
 #       
 # Results:
-#       Pretty formatted date string or empty.
+#       jabber:x:delay stamp attribute or empty.
 
-proc ::Jabber::FormatAnyDelayElem {xlist} {
+proc ::Jabber::GetAnyDelayElem {xlist} {
     
     set ans ""
     foreach xelem $xlist {
-	foreach {tag attrlist empty chdata sub} $xelem { break }
+	foreach {tag attrlist empty chdata sub} $xelem break
 	catch {unset attrArr}
 	array set attrArr $attrlist
 	if {[info exists attrArr(xmlns)] &&  \
 	  [string equal $attrArr(xmlns) "jabber:x:delay"]} {
 	    
-	    # This is ISO 8601 and 'clock scan' shall work here!
+	    # This is ISO 8601.
 	    if {[info exists attrArr(stamp)]} {
-		set secs [clock scan $attrArr(stamp)]
-		set ans [SmartClockFormat $secs]
+		set ans $attrArr(stamp)
+		break
 	    }
 	}
     }
@@ -2292,6 +2296,12 @@ proc ::Jabber::GetTimeResult {from silent jlibname type subiq} {
     }
 }
 
+namespace eval ::Jabber:: {
+    
+    # Running uid for dialog window path.
+    variable uidvers 0
+}
+
 # Jabber::GetVersion --
 #
 #       args    ?-silent 0/1? (D=0)
@@ -2313,6 +2323,7 @@ proc ::Jabber::GetVersionResult {from silent jlibname type subiq} {
     global  sysFont prefs this
     
     variable jerror
+    variable uidvers
     
     if {[string equal $type "error"]} {
 	if {$silent} {
@@ -2324,11 +2335,10 @@ proc ::Jabber::GetVersionResult {from silent jlibname type subiq} {
 	      [::msgcat::mc jamesserrvers $from [lindex $subiq 1]]]
 	}
     } else {
-	set w .jvers
-	catch {delete $w}
+	set w .jvers[incr uidvers]
 	toplevel $w -background $prefs(bgColGeneral)
 	if {[string match "mac*" $this(platform)]} {
-	    eval $::macWindowStyle $w movableDBoxProc
+	    eval $::macWindowStyle $w documentProc
 	} else {
 
 	}
@@ -2339,8 +2349,8 @@ proc ::Jabber::GetVersionResult {from silent jlibname type subiq} {
 	pack [frame $w.fr] -padx 10 -pady 4 -side top 
 	set i 0
 	foreach child [lindex $subiq 4] {
-	    label $w.fr.l$i -text "[lindex $child 0]:"
-	    label $w.fr.lr$i -text "[lindex $child 3]:"
+	    label $w.fr.l$i -font $sysFont(sb) -text "[lindex $child 0]:"
+	    label $w.fr.lr$i -text [lindex $child 3]
 	    grid $w.fr.l$i -column 0 -row $i -sticky e
 	    grid $w.fr.lr$i -column 1 -row $i -sticky w
 	    incr i
@@ -2349,103 +2359,7 @@ proc ::Jabber::GetVersionResult {from silent jlibname type subiq} {
 	  -command "destroy $w"] -side right -padx 10 -pady 8
 	wm resizable $w 0 0
 	bind $w <Return> "$w.ok invoke"
-	tkwait window $w
     }
-}
-
-# Jabber::GetAutoupdate --
-#
-#       Respond to an incoming 'jabber:iq:autoupdate' result.
-
-proc ::Jabber::GetAutoupdate {from jlibname type subiq} {
-    global  sysFont prefs this
-    
-    variable jprefs
-    
-    if {[string equal $type "error"]} {
-	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
-	  -message [FormatTextForMessageBox \
-	  [::msgcat::mc jamesserrautoupdate $from [lindex $subiq 1]]]
-	return
-    } 
-    set w .jautoud
-    catch {delete $w}
-    toplevel $w -background $prefs(bgColGeneral)
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-    } else {
-
-    }
-    wm title $w [::msgcat::mc {Software Update}]
-    
-    # Global frame.
-    set wfr $w.frall
-    pack [frame $wfr -borderwidth 1 -relief raised]   \
-      -fill both -expand 1 -ipadx 12 -ipady 4
-    message $wfr.msg -width 260 -font $sysFont(sb) -text  \
-      [::msgcat::mc jaupdatemsg]
-    pack $wfr.msg -side top -fill both -expand 1
-    label $wfr.ver -text \
-      [::msgcat::mc jaupdatevers $prefs(fullVers)]
-    pack $wfr.ver -side top -anchor w -padx 16
-    
-    # Map tag to descriptive name.
-    array set tagDesc {
-	release {New release}
-	beta {Beta version}
-	dev {Developers only}
-    }
-    
-    # Loop through all children of <query> element.
-    set frmid [frame $w.frall.frmid -borderwidth 0]
-    pack $frmid -fill both -expand 1 -side top
-    set i 0
-    foreach child [wrapper::getchildren $subiq] {	
-	foreach {tag attrlist empty chdata sub} $child { break }
-	catch {unset attrArr}
-	array set attrArr $attrlist
-	if {[info exists tagDesc($tag)]} {
-	    set txt $tagDesc($tag)
-	} else {
-	    set txt $tag
-	}
-	set fr [LabeledFrame2 $frmid.f$i $txt]
-	pack $frmid.f$i -side top -fill x -padx 0 -pady 0
-	if {[info exists attrArr(priority)]} {
-	    label $fr.pri -text [::msgcat::mc jaupdatepri $attrArr(priority)]
-	    pack $fr.pri -side top -padx 12 -pady 4 -anchor w
-	}
-	foreach item [wrapper::getchildren $child] {
-	    foreach {stag sattrlist sempty schdata ssub} $item { break }
-	    switch -- $stag {
-		desc {
-		    message $fr.desc -width 220 -font $sysFont(s) -text $schdata
-		    pack $fr.desc -side top -padx 12 -anchor w
-		}
-		version {
-		    label $fr.version -text [::msgcat::mc jaupdatenewver $schdata]
-		    pack $fr.version -side top -padx 12 -anchor w
-		}
-		url {
-		    ::Text::URLLabel $fr.url $schdata -font $sysFont(s)   \
-		      -bg $prefs(bgColGeneral) 
-		    pack $fr.url -side top -padx 12 -anchor w
-		}
-	    }
-	}
-	incr i
-    }
-    
-    pack [checkbutton $wfr.show -onvalue 0 -offvalue 1 \
-      -variable jprefs(autoupdateShow,$prefs(fullVers)) \
-      -text "  [::msgcat::mc jaupdateremind]"]   \
-      -side top -anchor w -padx 12
-    pack [frame $wfr.bot] -side bottom -fill both -expand 1
-    pack [button $wfr.bot.ok -text [::msgcat::mc OK] -default active -width 8 \
-      -command "destroy $w"] -side right -padx 10 -pady 8
-    wm resizable $w 0 0
-    bind $w <Return> "$wfr.bot.ok invoke"
-    tkwait window $w
 }
 
 # Jabber::CacheGroupchatType --
@@ -2494,7 +2408,7 @@ proc ::Jabber::CacheGroupchatType {confjid jlibname type subiq} {
 #       Respond to an incoming 'jabber:iq:version' get query.
 
 proc ::Jabber::ParseGetVersion {args} {
-    global  prefs
+    global  prefs tcl_platform
     variable jstate
     
     ::Jabber::Debug 2 "Jabber::ParseGetVersion args='$args'"
@@ -2506,12 +2420,15 @@ proc ::Jabber::ParseGetVersion {args} {
     if {[info exists argsArr(-id)]} {
 	set opts [list -id $argsArr(-id)]
     }
-    
+    set os $tcl_platform(os)
+    if {[info exists tcl_platform(osVersion)]} {
+	append os " $tcl_platform(osVersion)"
+    }
     set subtags [list  \
-      [wrapper::createtag name -chdata {Coccinella}]  \
+      [wrapper::createtag name -chdata "Coccinella"]  \
       [wrapper::createtag version  \
       -chdata $prefs(majorVers).$prefs(minorVers).$prefs(releaseVers)]  \
-      [wrapper::createtag os -chdata $::tcl_platform(os)] ]
+      [wrapper::createtag os -chdata $os] ]
     set xmllist [wrapper::createtag query -subtags $subtags  \
       -attrlist {xmlns jabber:iq:version}]
     if {[info exists argsArr(-from)]} {
@@ -2904,8 +2821,13 @@ proc ::Jabber::UI::Build {w} {
     ::UI::InitShortcutButtonPad $w $frtop 50
     ::UI::NewButton $w connect Connect $icons(btconnect) $icons(btconnectdis)  \
       [list ::Jabber::Login::Login $wDlgs(jlogin)]
-    ::UI::NewButton $w inbox Inbox $icons(btinbox) $icons(btinboxdis)  \
-      [list ::Jabber::MailBox::Show $wDlgs(jinbox) -visible 1]
+    if {[::Jabber::MailBox::HaveMailBox]} {
+	::UI::NewButton $w inbox Inbox $icons(btinboxLett) $icons(btinboxLettdis)  \
+	  [list ::Jabber::MailBox::Show $wDlgs(jinbox) -visible 1]
+    } else {
+	::UI::NewButton $w inbox Inbox $icons(btinbox) $icons(btinboxdis)  \
+	  [list ::Jabber::MailBox::Show $wDlgs(jinbox) -visible 1]
+    }
     ::UI::NewButton $w newuser "New User" $icons(btnewuser) $icons(btnewuserdis)  \
       [list ::Jabber::Roster::NewOrEditItem $wDlgs(jrostnewedit) new] \
       -state disabled
@@ -3155,7 +3077,9 @@ proc ::Jabber::UI::Popup {what w v x y} {
 	    # The last element of atree item if user is a 3-tier jid for
 	    # online users and a 2-tier jid else.
 	    set jid [lindex $v end]
+	    set jid3 $jid
 	    set status [string tolower [lindex $v 0]]
+	    
 	    switch -- [llength $v] {
 		1 {
 		    set typeClicked head
@@ -3261,11 +3185,22 @@ proc ::Jabber::UI::Popup {what w v x y} {
 	    $m add separator
 	    continue
 	} else {
+	    
+	    # Really bad solution here!
+	    regsub -all &jid3 $cmd [list $jid3] cmd
 	    regsub -all &jid $cmd [list $jid] cmd
 	    set cmd [subst -nocommands $cmd]
 	    set locname [::msgcat::mc $item]
 	    $m add command -label $locname -command "after 40 $cmd" -state disabled
 	}
+	
+	# Special BAD BAD!!! ------
+	if {$what == "roster" && $typeClicked == "user" && \
+	  [string match -nocase "*chat history*" $item]} {
+	    $m entryconfigure $locname -state normal
+	}
+	#--------
+	
 	if {![::Jabber::IsConnected]} {
 	    continue
 	}
@@ -3277,17 +3212,21 @@ proc ::Jabber::UI::Popup {what w v x y} {
 	# State of menu entry. We use the 'type' and 'typeClicked' to sort
 	# out which capabilities to offer for the clicked item.
 	set state disabled
+	
 	switch -- $what {
 	    roster {
+		
 		switch -- $type {
 		    user {
 			if {[string equal $typeClicked "user"] || \
 			  [string equal $typeClicked "wb"]} {
 			    set state normal
 			}
-			if {($status == "offline") &&  \
-			  ([string match -nocase "*chat*" $item])} {
-			    set state disabled
+			if {[string equal $status "offline"]} {
+			    if {[string match -nocase "*chat*" $item] || \
+			      [string match -nocase "*version*" $item]} {
+				set state disabled
+			    }
 			}
 		    }
 		    users {
@@ -3360,6 +3299,7 @@ proc ::Jabber::UI::Popup {what w v x y} {
 		}
 	    }
 	}
+
 	if {[string equal $state "normal"]} {
 	    $m entryconfigure $locname -state normal
 	}
@@ -3455,6 +3395,42 @@ proc ::Jabber::UI::FixUIWhen {what} {
 	    ::UI::MenuMethod $wmj entryconfigure mSetupAssistant -state normal
 	}
     }
+}
+
+proc ::Jabber::UI::SmileyMenuButton {w wtext} {
+    global  prefs this
+    upvar ::UI::smiley smiley
+    
+    # Workaround for missing -image option on my macmenubutton.
+    if {[string equal $this(platform) "macintosh"] && \
+      [string length [info command menubuttonOrig]]} {
+	set menubuttonImage menubuttonOrig
+    } else {
+	set menubuttonImage menubutton
+    }
+    set wmenu ${w}.m
+    $menubuttonImage $w -menu $wmenu -image $smiley(:\))
+    set m [menu $wmenu -tearoff 0]
+ 
+    if {$prefs(haveMenuImage)} {
+	foreach name [array names smiley] {
+	    $m add command -image $smiley($name) \
+	      -command [list ::Jabber::UI::SmileyInsert $wtext $smiley($name)]
+	}
+    } else {
+	foreach name [array names smiley] {
+	    $m add command -label $name \
+	      -command [list ::Jabber::UI::SmileyInsert $wtext $smiley($name)]
+	}
+    }
+    return $w
+}
+
+proc ::Jabber::UI::SmileyInsert {wtext imname} {
+ 
+    $wtext insert insert " "
+    $wtext image create insert -image $imname
+    $wtext insert insert " "
 }
 
 # The ::Jabber::Register:: namespace -------------------------------------------
@@ -3765,7 +3741,7 @@ proc ::Jabber::Register::Remove {{jid {}}} {
 proc ::Jabber::Register::RemoveCallback {jid jlibName type theQuery} {
     
     if {[string equal $type "error"]} {
-	foreach {errcode errmsg} $theQuery { break }
+	foreach {errcode errmsg} $theQuery break
 	tk_messageBox -icon error -title [::msgcat::mc Unregister] -type ok  \
 	  -message [FormatTextForMessageBox \
 	  [::msgcat::mc jamesserrunreg $jid $errcode $errmsg]]
@@ -4419,7 +4395,7 @@ proc ::Jabber::Login::Login {w} {
 	  tmpJServArr($name,server)     \
 	  tmpJServArr($name,username)   \
 	  tmpJServArr($name,password)   \
-	  tmpJServArr($name,resource)] $spec { break }
+	  tmpJServArr($name,resource)] $spec break
     }
     set server $tmpJServArr($menuVar,server)
     set username $tmpJServArr($menuVar,username)
@@ -4830,12 +4806,7 @@ proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
 	::Jabber::Agents::GetAll
     }
     
-    # Check for autoupdates? ABONDENED!!!!
-    if {0 && $jprefs(autoupdateCheck) && $jprefs(autoupdateShow,$prefs(fullVers))} {
-	$jstate(jlib) send_presence -to  \
-	  $jprefs(serialno)@update.jabber.org/$prefs(fullVers)
-    }
-    
+
     # Any noise.
     ::Sounds::Play "connected"
 }
@@ -6177,7 +6148,7 @@ proc ::Jabber::Search::ResultCallback {server type subiq} {
     }
     $wsearrows stop
     if {[string equal $type "error"]} {
-	foreach {ecode emsg} [lrange $subiq 0 1] { break }
+	foreach {ecode emsg} [lrange $subiq 0 1] break
 	if {$ecode == "406"} {
 	    set msg "There was an invalid field. Please correct it: $emsg"
 	} else {

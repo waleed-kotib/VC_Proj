@@ -11,7 +11,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: wrapper.tcl,v 1.1.1.1 2002-12-08 11:01:53 matben Exp $
+# $Id: wrapper.tcl,v 1.2 2003-07-26 13:54:23 matben Exp $
 # 
 # ########################### INTERNALS ########################################
 # 
@@ -99,7 +99,6 @@ namespace eval wrapper {
 #       A unique wrapper id.
 
 proc wrapper::new {streamstartcmd streamendcmd parsecmd errorcmd} {
-    
     variable wrapper
     variable debug
     
@@ -169,7 +168,6 @@ proc wrapper::new {streamstartcmd streamendcmd parsecmd errorcmd} {
 #       none.
 
 proc wrapper::parse {id xml} {
-    
     variable wrapper
 
     # This is not as innocent as it looks; the 'tcl' parser proc is created in
@@ -192,7 +190,6 @@ namespace eval wrapper {
 }
 
 proc wrapper::parsereentrant {p xml} {
-    
     variable refcount
     variable stack
     incr refcount
@@ -230,7 +227,6 @@ proc wrapper::parsereentrant {p xml} {
 #       none.
 
 proc wrapper::elementstart {id tagname attrlist args} {
-    
     variable wrapper
     variable debug
     
@@ -288,7 +284,6 @@ proc wrapper::elementstart {id tagname attrlist args} {
 #       none.
 
 proc wrapper::elementend {id tagname args} {
-    
     variable wrapper
     variable debug
     
@@ -345,7 +340,6 @@ proc wrapper::elementend {id tagname args} {
 #       none.
 
 proc wrapper::append_child {id level childtree} {
-    
     variable wrapper
     variable debug
 
@@ -375,8 +369,7 @@ proc wrapper::append_child {id level childtree} {
 # Results:
 #       none.
 
-proc wrapper::chdata {id chardata} {
-    
+proc wrapper::chdata {id chardata} {   
     variable wrapper
     variable debug
 
@@ -411,8 +404,7 @@ proc wrapper::chdata {id chardata} {
 # Results:
 #       none.
 
-proc wrapper::reset {id} {
-    
+proc wrapper::reset {id} {   
     variable wrapper
     variable debug
 
@@ -476,7 +468,6 @@ proc wrapper::reset {id} {
 #       none.
 
 proc wrapper::xmlerror {id args} {
-    
     variable wrapper
     variable debug
 
@@ -508,7 +499,7 @@ proc wrapper::xmlerror {id args} {
 proc wrapper::createxml {xmllist} {
         
     # Extract the XML data items.
-    foreach {tag attrlist isempty chdata childlist} $xmllist { break }
+    foreach {tag attrlist isempty chdata childlist} $xmllist break
     set rawxml "<$tag"
     foreach {attr value} $attrlist {
 	append rawxml " ${attr}='${value}'"
@@ -618,6 +609,34 @@ proc wrapper::setattr {attrlist attrname value} {
 proc wrapper::getchildren {xmllist} {
 
     return [lindex $xmllist 4]
+}
+
+proc wrapper::getchildswithtag {xmllist tag} {
+    
+    set clist {}
+    for celem [lindex $xmllist 4] {
+	if {[string equal [lindex $celem 0] $tag]} {
+	    lappend clist $celem
+	}
+    }
+    return $clist
+}
+
+proc wrapper::getchildwithtaginnamespace {xmllist tag ns} {
+    
+    set clist {}
+    for celem [lindex $xmllist 4] {
+	if {[string equal [lindex $celem 0] $tag]} {
+	    catch {unset attrArr}
+	    array set attrArr [lindex $celem 1]
+	    if {[info exists attrArr(xmlns)] &&  \
+	      [string equal $attrArr(xmlns) $ns]} {
+		lappend clist $celem
+		break
+	    }
+	}
+    }
+    return $clist
 }
 
 # wrapper::xmlcrypt --

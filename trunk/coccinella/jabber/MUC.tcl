@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.4 2003-06-01 10:26:57 matben Exp $
+# $Id: MUC.tcl,v 1.5 2003-07-26 13:54:23 matben Exp $
 
 package provide MUC 1.0
 
@@ -822,7 +822,7 @@ proc ::Jabber::MUC::GrantRevoke {roomjid which type} {
 	return
     }
     set row [$wtbl get $item]
-    foreach {nick role aff} $row { break }
+    foreach {nick role aff} $row break
     regexp {^([^@]+)@.+} $roomjid match roomName
     
     set ans [eval {
@@ -856,7 +856,7 @@ proc ::Jabber::MUC::Kick {roomjid} {
 	return
     }
     set row [$wtbl get $item]
-    foreach {nick role aff} $row { break }
+    foreach {nick role aff} $row break
     regexp {^([^@]+)@.+} $roomjid match roomName
     
     set ans [::UI::MegaDlgMsgAndEntry  \
@@ -891,7 +891,7 @@ proc ::Jabber::MUC::Ban {roomjid} {
 	return
     }
     set row [$wtbl get $item]
-    foreach {nick role aff} $row { break }
+    foreach {nick role aff} $row break
     regexp {^([^@]+)@.+} $roomjid match roomName
     
     set ans [::UI::MegaDlgMsgAndEntry  \
@@ -1667,7 +1667,7 @@ proc ::Jabber::MUC::PresCallback {roomjid jlibname type args} {
     	set errcode ???
     	set errmsg ""
     	if {[info exists argsArr(-error)]} {
-	    foreach {errcode errmsg} $argsArr(-error) { break }
+	    foreach {errcode errmsg} $argsArr(-error) break
 	}	
     	regexp {^([^@]+)@.*} $roomjid match roomName
     	set msg "We received an error when interaction with the room\

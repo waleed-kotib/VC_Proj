@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: MacintoshUtils.tcl,v 1.2 2003-02-24 17:52:11 matben Exp $
+# $Id: MacintoshUtils.tcl,v 1.3 2003-07-26 13:54:23 matben Exp $
 
 namespace eval ::Mac:: {
 
@@ -20,6 +20,20 @@ namespace eval ::Mac::Printer:: {
 proc ::Mac::Printer::PageSetup { } {
         
 
+}
+
+proc ::Mac::OpenUrl {url} {
+    global  prefs
+    
+    if {$prefs(Tclapplescript)} {
+	set script {
+	    tell application "Netscape Communicatorª"
+	    open(file "%s")
+	    Activate -1
+	    end tell
+	}
+	AppleScript execute [format $script $url]
+    }
 }
 
 # Synthetic Speech .............................................................

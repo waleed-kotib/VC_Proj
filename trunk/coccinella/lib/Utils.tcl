@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.5 2003-06-07 12:46:36 matben Exp $
+# $Id: Utils.tcl,v 1.6 2003-07-26 13:54:23 matben Exp $
 
 # InvertArray ---
 #
@@ -82,9 +82,9 @@ if {[info tclversion] < 8.4} {
 	    return -code error $usage
 	}
 	if {$len == 2} {
-	    foreach {ind1 value} $args { break }
+	    foreach {ind1 value} $args break
 	} else {
-	    foreach {ind1 ind2 value} $args { break }
+	    foreach {ind1 ind2 value} $args break
 	}
 	
 	upvar $listName listValue
@@ -347,15 +347,20 @@ proc SmartClockFormat {secs} {
     
     # 'days': 0=today, -1=yesterday etc.
     set days [expr ($secs - [clock scan "today 00:00"])/(60*60*24)]
-    switch -- $days {
-	1 {
+    
+    switch -regexp -- $days {
+	^1$ {
 	    set date "tomorrow"
 	}
-	0 {
+	^0$ {
 	    set date "today"
 	}
-	-1 {
+	^-1$ {
 	    set date "yesterday"
+	}
+	^-[2-5]$ {
+	    set date [string tolower  \
+	      [clock format [clock scan "today + $days days"] -format "%A"]]
 	}
 	default {
 	    set date [clock format [clock seconds] -format "%y-%m-%d"]
@@ -367,7 +372,7 @@ proc SmartClockFormat {secs} {
 }
 
 proc OpenHtmlInBrowser {url} {
-    global  this prefs
+    global  this
     
     switch $this(platform) {
 	unix {
@@ -380,15 +385,10 @@ proc OpenHtmlInBrowser {url} {
 	    ::Windows::OpenUrl $url
 	}
 	macintosh {    
-	    if {$prefs(applescript)} {
-		set script {
-		    tell application "Netscape Communicatorª"
-		    open(file "%s")
-		    Activate -1
-		    end tell
-		}
-		AppleScript execute [format $script $url]
-	    }
+	    ::Mac::OpenUrl $url
+	}
+	macosx {
+	    exec open $url
 	}
     }
 }
@@ -579,8 +579,7 @@ proc ::Text::ButtonPressOnLink {w x y linkactive} {
 #
 #       Insert a link where the text string and url may differ.
 
-proc ::Text::InsertURL {w str url tag} {
-    
+proc ::Text::InsertURL {w str url tag} {    
     variable idurl
     variable idToUrlArr
 
@@ -600,11 +599,11 @@ proc ::Text::InsertURL {w str url tag} {
     incr idurl
 }
 
-proc ::Text::ButtonPressOnURL {w idurl} {
-    
+proc ::Text::ButtonPressOnURL {w idurl} {    
     variable idToUrlArr
 
     set url $idToUrlArr($idurl)
+    ::Debug 2 "::Text::ButtonPressOnURL url=$url"
     
     # Add "http://" if not there.
     if {![regexp {^http://.+} $url]} {
@@ -638,7 +637,7 @@ proc ::Text::ParseSmileysForTextWidget {str} {
     #regsub -all {\\|&} $str {\\\0} str
     
     foreach smile [array names smiley] {
-	set sub "\} \{image create end -image $smiley($smile)\} \{"
+	set sub "\} \{image create end -image $smiley($smile) -name $smile\} \{"
 	regsub  {[)(|]} $smile {\\\0} smileExp
 	regsub -all $smileExp $str $sub str
     }
@@ -663,7 +662,7 @@ proc ::Text::ParseSmileysForTextWidget {str} {
     if {[llength $candidates]} {
 	regsub -all {\\|&} $str {\\\0} str
 	foreach smile $candidates {
-	    set sub "\} \{image create end -image $smileyLongIm($smile)\} \{"
+	    set sub "\} \{image create end -image $smileyLongIm($smile) -name $smile\} \{"
 	    regsub -all $smile $str $sub str
 	}
     }
@@ -688,12 +687,8 @@ proc ::Text::ParseAllForTextWidget {str tag linktag} {
     regsub -all {([][$\\{}"])} $str {\\\1} str
 
     set strSmile [ParseSmileysForTextWidget $str]
-    #puts "strSmile=\t'$strSmile'"
     foreach {txt icmd} $strSmile {
-	#puts "txt=\t\t'$txt'"
-	#puts "icmd=\t\t'$icmd'"
 	set httpCmd [ParseHttpLinksForTextWidget $txt $tag $linktag]
-	#puts "httpCmd=\t'$httpCmd'"
 	if {$icmd == ""} {
 	    eval lappend res $httpCmd
 	} else {
@@ -703,23 +698,21 @@ proc ::Text::ParseAllForTextWidget {str tag linktag} {
     return $res
 }
 
-proc ::Text::TransformToPureText {w args} {
-    
+proc ::Text::TransformToPureText {w args} {    
     variable puretext
     
     if {[winfo class $w] != "Text"} {
 	error {TransformToPureText needs a text widget here}
     }
     catch {unset puretext($w)}
-    set puretext($w) {}
+    set puretext($w) ""
     foreach {key value index} [$w dump 1.0 end $w] {
 	::Text::TransformToPureTextCallback $w $key $value $index
     }
     return $puretext($w)
 }
 
-proc ::Text::TransformToPureTextCallback {w key value index} {
-    
+proc ::Text::TransformToPureTextCallback {w key value index} {    
     variable puretext
 
     switch -- $key {
@@ -733,12 +726,20 @@ proc ::Text::TransformToPureTextCallback {w key value index} {
 	    append puretext($w) $value
 	}
 	image {
-	    append puretext($w) {[Image:}
-	    set filePath [$value cget -file]
-	    if {[string length $filePath]} {
-		append puretext($w) " [file tail $filePath]"
+	    
+	    # Treat smileys specially.
+	    set name [$w image cget $index -name]
+	    if {[string length $name] > 0} {
+		append puretext($w) $name
+	    } else {
+		set imname [$w image cget $index -image]	    
+		append puretext($w) {[Image:}
+		set tail [file tail [$imname cget -file]]
+		if {[string length $tail]} {
+		    append puretext($w) " [file tail $tail]"
+		}
+		append puretext($w) {]}
 	    }
-	    append puretext($w) {]}
 	}
     }
 }

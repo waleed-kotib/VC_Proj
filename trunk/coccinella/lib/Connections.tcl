@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Connections.tcl,v 1.3 2003-07-05 13:37:54 matben Exp $
+# $Id: Connections.tcl,v 1.4 2003-07-26 13:54:23 matben Exp $
 
 package provide Connections 1.0
 
@@ -142,7 +142,7 @@ proc ::OpenConnection::OpenConnection {w} {
 }
 
 proc ::OpenConnection::PushBtConnect { } {
-    global  internalIPnum internalIPname this prefs
+    global  this prefs
     
     variable txtvarEntIPnameOrNum
     variable connIPnum
@@ -150,11 +150,11 @@ proc ::OpenConnection::PushBtConnect { } {
     variable finished
     variable wtoplevel
 
-    # Always allow connections to 'internalIPname'.
+    # Always allow connections to 'this(internalIPname)'.
     # This is because 'IsConnectedToQ' always answers this question with true.
     
-    if {[string equal $txtvarEntIPnameOrNum $internalIPnum] ||  \
-      [string equal $txtvarEntIPnameOrNum $internalIPname]} {
+    if {[string equal $txtvarEntIPnameOrNum $this(internalIPnum)] ||  \
+      [string equal $txtvarEntIPnameOrNum $this(internalIPname)]} {
 	set connIPnum [::OpenConnection::DoConnect $txtvarEntIPnameOrNum $compPort 1]
 	set finished 1
 	destroy $wtoplevel
@@ -212,7 +212,7 @@ proc ::OpenConnection::TraceOpenConnect {name junk1 junk2} {
 #       (weird things happen).
 
 proc ::OpenConnection::DoConnect {toNameOrNum toPort {propagateSizeToClients 1}} {
-    global  internalIPnum prefs internalIPname errorCode
+    global  this prefs errorCode
     
     set nameOrIP $toNameOrNum
     set remoteServPort $toPort
@@ -224,13 +224,13 @@ proc ::OpenConnection::DoConnect {toNameOrNum toPort {propagateSizeToClients 1}}
     
     # Handle the TCP/IP channel; if internal pick internalIPnum
     
-    if {($nameOrIP == $internalIPnum) || ($nameOrIP == $internalIPname)} {
+    if {($nameOrIP == $this(internalIPnum)) || ($nameOrIP == $this(internalIPname))} {
 	if {$prefs(asyncOpen)} {
-	    set res [catch {socket -async -myaddr $internalIPnum  \
-	      $internalIPnum $remoteServPort} server]
+	    set res [catch {socket -async -myaddr $this(internalIPnum)  \
+	      $this(internalIPnum) $remoteServPort} server]
 	} else {
-	    set res [catch {socket -myaddr $internalIPnum  \
-	      $internalIPnum $remoteServPort} server]
+	    set res [catch {socket -myaddr $this(internalIPnum)  \
+	      $this(internalIPnum) $remoteServPort} server]
 	}
     } else {
 	if {$prefs(asyncOpen)} {
@@ -289,8 +289,7 @@ proc ::OpenConnection::DoConnect {toNameOrNum toPort {propagateSizeToClients 1}}
 
 proc ::OpenConnection::WhenSocketOpensInits {nameOrIP server remoteServPort \
   {propagateSizeToClients 1}} {	
-    global  ipName2Num ipNumTo this \
-      internalIPnum allIPnumsTo prefs
+    global  ipName2Num ipNumTo this allIPnumsTo prefs
     
     variable killerId
     
@@ -396,7 +395,7 @@ proc ::OpenConnection::WhenSocketOpensInits {nameOrIP server remoteServPort \
 #       Boolean.
 
 proc ::OpenConnection::SetIpArrays {nameOrIP sock remoteServPort} {
-    global  ipName2Num ipNumTo this internalIPnum state
+    global  ipName2Num ipNumTo this state
     
     # Need to be economical here since '-peername' takes 5 secs on 
     # the Windows box on my intranet.
@@ -446,10 +445,7 @@ proc ::OpenConnection::SetIpArrays {nameOrIP sock remoteServPort} {
     set ipNumTo(servPort,$ipNum) $remoteServPort
     
     # Sometimes the DoStartServer just gives this(ipnum)=0.0.0.0 ; fix this here.
-    if {!$state(connectedOnce) &&  \
-      ([string equal $this(ipnum) "0.0.0.0"] ||  \
-      [string equal $this(ipnum) $internalIPnum] ||  \
-      [string match "192.168.*" $this(ipnum)])} {
+    if {!$state(connectedOnce)} {
 	if {[catch {fconfigure $sock -sockname} sockname]} {
 	    tk_messageBox -icon error -type ok -message \
 	      [FormatTextForMessageBox "Something went wrong: $sockname"]
@@ -506,12 +502,12 @@ proc ::OpenConnection::Kill {sock} {
 #
 
 proc ::OpenConnection::IsConnectedToQ {ipNameOrNum} {
-    global  ipName2Num allIPnumsTo this internalIPnum
+    global  ipName2Num allIPnumsTo this
 
     Debug 2 "IsConnectedToQ:: ipNameOrNum=$ipNameOrNum, this(ipnum)=$this(ipnum)"
     
     # Always allow local connections to ourselves (127.0.0.1 and localhost).
-    if {[string equal $ipNameOrNum $internalIPnum] ||  \
+    if {[string equal $ipNameOrNum $this(internalIPnum)] ||  \
       [string equal $ipNameOrNum "localhost"]} {
 	return 0
     }
@@ -810,7 +806,7 @@ proc ::OpenMulticast::TraceSelMulticastName {name junk1 junk2} {
 #       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
 
 proc ::OpenMulticast::OpenMulticastQTStream {wtop wentry} {
-    global  chunkSize this prefs
+    global  this prefs
     
     variable finished
     upvar ::${wtop}::wapp wapp

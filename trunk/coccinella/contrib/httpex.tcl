@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson only for the new and rewritten parts.
 #
-# $Id: httpex.tcl,v 1.2 2003-05-18 13:20:19 matben Exp $
+# $Id: httpex.tcl,v 1.3 2003-07-26 13:54:23 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -965,7 +965,7 @@ proc httpex::WriteResponse {token} {
 	set errmsg $resp
     }
     Debug 1 "   resp=$resp"
-    foreach {code state(-headers)} $resp { break }
+    foreach {code state(-headers)} $resp break
     if {![info exists codeToText($code)]} {
 	set ok 0
 	set errmsg "No text for code \"$code\""
