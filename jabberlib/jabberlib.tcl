@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.40 2004-04-20 13:57:28 matben Exp $
+# $Id: jabberlib.tcl,v 1.41 2004-04-30 12:58:46 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -93,8 +93,8 @@
 #      jlibName getagent jid
 #      jlibName getrecipientjid jid
 #      jlibName haveagent jid
-#      jlibName iq_get xmlns to ?args?
-#      jlibName iq_set xmlns to ?args?
+#      jlibName iq_get xmlns ?-to, -command, -sublists?
+#      jlibName iq_set xmlns ?-to, -command, -sublists?
 #      jlibName iq_register type xmlns cmd
 #      jlibName message_register xmlns cmd
 #      jlibName myjid
@@ -1608,14 +1608,18 @@ proc jlib::send_iq {jlibname type xmldata args} {
 # Arguments:
 #       jlibname:   the instance of this jlib.
 #       xmlns:
-#       to:         recepient jid
+#       args:     -to recepient jid
+#                 -command procName
+#                 -sublists
+#                 else as attributes
 #       
 # Results:
 #       none.
 
-proc jlib::iq_get {jlibname xmlns to args} {
+proc jlib::iq_get {jlibname xmlns args} {
 
     set opts {}
+    set sublists {}
     set attrlist [list xmlns $xmlns]
     foreach {key value} $args {
 	
@@ -1624,19 +1628,26 @@ proc jlib::iq_get {jlibname xmlns to args} {
 		lappend opts -command  \
 		  [list [namespace current]::parse_iq_response $jlibname $value]
 	    }
+	    -to {
+		lappend opts -to $value
+	    }
+	    -sublists {
+		set sublists $value
+	    }
 	    default {
 		lappend attrlist [string trimleft $key "-"] $value
 	    }
 	}
     }
-    set xmllist [wrapper::createtag "query" -attrlist $attrlist]
-    eval {send_iq $jlibname "get" $xmllist -to $to} $opts
+    set xmllist [wrapper::createtag "query" -attrlist $attrlist \
+      -subtags $sublists]
+    eval {send_iq $jlibname "get" $xmllist} $opts
 }
 
-proc jlib::iq_set {jlibname xmlns to args} {
+proc jlib::iq_set {jlibname xmlns args} {
 
     set opts {}
-    set subelements {}
+    set sublists {}
     foreach {key value} $args {
 	
 	switch -- $key {
@@ -1644,19 +1655,21 @@ proc jlib::iq_set {jlibname xmlns to args} {
 		lappend opts -command  \
 		  [list [namespace current]::parse_iq_response $jlibname $value]
 	    }
+	    -to {
+		lappend opts -to $value
+	    }
+	    -sublists {
+		set sublists $value
+	    }
 	    default {
-		lappend subelements [wrapper::createtag  \
-		  [string trimleft $key -] -chdata $value]		
+		#lappend subelements [wrapper::createtag  \
+		#  [string trimleft $key -] -chdata $value]		
 	    }
 	}
     }
-    if {[llength $subelements]} {
-	set xmllist [wrapper::createtag "query" -attrlist [list xmlns $xmlns] \
-	  -subtags $subelements]
-    } else {
-	set xmllist [wrapper::createtag "query" -attrlist [list xmlns $xmlns]]
-    }
-    eval {send_iq $jlibname "set" $xmllist -to $to} $opts
+    set xmllist [wrapper::createtag "query" -attrlist [list xmlns $xmlns] \
+      -subtags $sublists]
+    eval {send_iq $jlibname "set" $xmllist} $opts
 }
 
 # jlib::send_auth --

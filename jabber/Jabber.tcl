@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.81 2004-04-25 15:35:25 matben Exp $
+# $Id: Jabber.tcl,v 1.82 2004-04-30 12:58:45 matben Exp $
 
 package provide Jabber 1.0
 
@@ -44,7 +44,7 @@ package require Search
 package require JForms
 package require Profiles
 package require JPrefs
-package require Filter
+package require Privacy
 package require Emoticons
 
 
@@ -571,27 +571,7 @@ proc ::Jabber::MessageCallback {jlibName type args} {
     array set attrArr $args
     
     set from $attrArr(-from)
-    
-    # THINK THIS IS OUTDATED BY jabber:iq:filter !!!!!!!!!!!!!!!
-    # Check if any blockers.
-    if {$jprefs(block,notinrost) && ($type == "normal")} {
-	
-	# Reject if not in roster.
-	set allUsers [$jstate(roster) getusers]
-	if {[lsearch -exact $allUsers $from] < 0} {
-	    puts "Rejected message from: $from"
-	    return
-	}
-    }
-    if {[llength $jprefs(block,list)] > 0} {
-	foreach blkjid $jprefs(block,list) {
-	    if {[string match $blkjid $from]} {
-		puts "Rejected message from: $from"
-		return
-	    }
-	}
-    }
-    
+        
     switch -- $type {
 	error {
 	    
@@ -642,7 +622,6 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
     
     variable jstate
     variable jprefs
-    variable jerror
     
     ::Debug 2 "::Jabber::PresenceCallback type=$type, args='$args'"
     
@@ -789,8 +768,8 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 		  -title [::msgcat::mc {Presence Error}] \
 		  -message [FormatTextForMessageBox $msg]	
 	    } else {
-		lappend jerror [list [clock format [clock seconds] -format "%H:%M:%S"]  \
-		  $from $msg]
+		::Jabber::AddErrorLog [clock format [clock seconds] -format "%H:%M:%S"]  \
+		  $from $msg
 	    }
 	}
     }
@@ -897,6 +876,12 @@ proc ::Jabber::DebugCmd { } {
 	}
 	jlib::setdebug 0
     }
+}
+
+proc ::Jabber::AddErrorLog {tm jid msg} {    
+    variable jerror
+    
+    lappend jerror [list $tm $jid $msg]
 }
 
 # Jabber::ErrorLogDlg
@@ -1543,13 +1528,12 @@ proc ::Jabber::GetLast {to args} {
 #       Callback for '::Jabber::GetLast'.
 
 proc ::Jabber::GetLastResult {from silent jlibname type subiq} {    
-    variable jerror
 
     if {[string equal $type "error"]} {
 	set msg [::msgcat::mc jamesserrlastactive $from [lindex $subiq 1]]
 	if {$silent} {
-	    lappend jerror [list [clock format [clock seconds] -format "%H:%M:%S"]  \
-	      $from $msg]	    
+	    ::Jabber::AddErrorLog [clock format [clock seconds] -format "%H:%M:%S"]  \
+	      $from $msg	    
 	} else {
 	    tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
 	      -message [FormatTextForMessageBox $msg]
@@ -1608,13 +1592,12 @@ proc ::Jabber::GetTime {to args} {
 }
 
 proc ::Jabber::GetTimeResult {from silent jlibname type subiq} {
-    variable jerror
 
     if {[string equal $type "error"]} {
 	if {$silent} {
-	    lappend jerror [list [clock format [clock seconds] -format "%H:%M:%S"]  \
+	    ::Jabber::AddErrorLog [clock format [clock seconds] -format "%H:%M:%S"]  \
 	      $from "We received an error when quering its time info.\
-	      The error was: [lindex $subiq 1]"]	    
+	      The error was: [lindex $subiq 1]"	    
 	} else {
 	    tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
 	      -message [FormatTextForMessageBox \
@@ -1667,15 +1650,14 @@ proc ::Jabber::GetVersion {to args} {
 proc ::Jabber::GetVersionResult {from silent jlibname type subiq} {
     global  prefs this
     
-    variable jerror
     variable uidvers
     
     set fontSB [option get . fontSmallBold {}]
     
     if {[string equal $type "error"]} {
 	if {$silent} {
-	    lappend jerror [list [clock format [clock seconds] -format "%H:%M:%S"]  \
-	      $from [::msgcat::mc jamesserrvers $from [lindex $subiq 1]]]
+	    ::Jabber::AddErrorLog [clock format [clock seconds] -format "%H:%M:%S"]  \
+	      $from [::msgcat::mc jamesserrvers $from [lindex $subiq 1]]
 	} else {
 	    tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
 	      -message [FormatTextForMessageBox \

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Privacy.tcl,v 1.1 2004-04-30 12:11:52 matben Exp $
+# $Id: Privacy.tcl,v 1.2 2004-04-30 12:58:46 matben Exp $
 
 package provide Privacy 1.0
 
@@ -599,7 +599,7 @@ proc ::Privacy::List::Build { } {
     pack  $w.frall -fill both -expand 1 -ipadx 4
 
     message $w.frall.msg -width 300 -text "Each list contains one or many rules,\
-      each rule specify..."
+      each rule specify the type of events it acts on, "
     pack    $w.frall.msg -side top -anchor w
     
     set wfr $w.frall.fr
@@ -752,10 +752,6 @@ proc ::Privacy::List::FillItem {token itemi xmllist} {
     if {![winfo exists $state(w)]} {
 	return
     }
-    #<item type='jid'
-    #		value='tybalt@example.com'
-    #		action='deny'
-    #		order='1'/> 
     array set attrArr [wrapper::getattrlist $xmllist]
     foreach {key value} [array get attrArr] {
 	

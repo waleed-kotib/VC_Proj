@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.11 2004-04-25 15:35:25 matben Exp $
+# $Id: Disco.tcl,v 1.12 2004-04-30 12:58:45 matben Exp $
 
 package provide Disco 1.0
 
@@ -163,19 +163,27 @@ proc ::Jabber::Disco::Command {disconame discotype from subiq args} {
 proc ::Jabber::Disco::ItemsCB {disconame type from subiq args} {
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jstate jstate
+    upvar ::Jabber::jprefs jprefs
     
     ::Debug 2 "::Jabber::Disco::ItemsCB type=$type, from=$from"
  
     switch -- $type {
 	error {
 	    
-	    # As a fallback we use the browse method instead.
+	    # As a fallback we use the agents/browse method instead.
 	    if {[string equal $from $jserver(this)]} {
 		
-		# This is a bit ugly! Should have a better mechanism!!!
-		# Should have another way of invoking alternatives.
-		::Jabber::Browse::GetAll
+		switch -- $jprefs(serviceMethod) {
+		    disco {
+			::Jabber::Browse::GetAll
+		    }
+		    browse {
+			::Jabber::Agents::GetAll
+		    }
+		}
 	    }
+	    ::Jabber::AddErrorLog [clock format [clock seconds] -format "%H:%M:%S"] \
+	      $from "Failed disco $from"
 	}
 	ok - result {
 
@@ -639,7 +647,7 @@ proc ::Jabber::Disco::ControlArrows {step} {
 
 # Jabber::Disco::PresenceHook --
 # 
-#       Check if there is a romm participant that changes its presence.
+#       Check if there is a room participant that changes its presence.
 
 proc ::Jabber::Disco::PresenceHook {jid presence args} {
     variable wtree    
@@ -652,14 +660,15 @@ proc ::Jabber::Disco::PresenceHook {jid presence args} {
     
     ::Debug 4 "::Jabber::Disco::PresenceHook $jid, $presence, $args"
     
+    array set argsArr $args
+    set res ""
+    if {[info exists argsArr(-resource)]} {
+	set res $argsArr(-resource)
+    }
+    set jid3 $jid2/$res
+    set presList [$jstate(roster) getpresence $jid2 -resource $res]
+
     if {[$jstate(jlib) service isroom $jid2]} {
-	array set argsArr $args
-	set res ""
-	if {[info exists argsArr(-resource)]} {
-	    set res $argsArr(-resource)
-	}
-	set jid3 $jid2/$res
-	set presList [$jstate(roster) getpresence $jid2 -resource $res]
 	array set presArr $presList
 	set icon [eval {
 	    ::Jabber::Roster::GetPresenceIcon $jid3 $presArr(-type)
@@ -671,8 +680,8 @@ proc ::Jabber::Disco::PresenceHook {jid presence args} {
     } else {
 	
 	# As a method to identify Coccinellas, way may disco users.
-	if {[string equal $type "available"] && \
-	  ![$jstate(disco) isdiscoed $jid3]} {
+	if {[string equal $presence "available"] && \
+	  ![$jstate(disco) isdiscoed items $jid3]} {
 	    #eval {::Jabber::Disco::AutoDisco $jid3 $presence} $args
 	}	
 

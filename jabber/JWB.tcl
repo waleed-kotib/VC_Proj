@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.10 2004-04-25 15:35:25 matben Exp $
+# $Id: JWB.tcl,v 1.11 2004-04-30 12:58:45 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -1270,7 +1270,7 @@ proc ::Jabber::WB::GetCoccinellaServers {jid3 {cmd {}}} {
     upvar ::Jabber::privatexmlns privatexmlns
     
     set ipCache(req,$jid3) 1
-    $jstate(jlib) iq_get $privatexmlns(servers) $jid3  \
+    $jstate(jlib) iq_get $privatexmlns(servers) -to $jid3  \
       -command [list ::Jabber::WB::GetCoccinellaServersCallback $jid3 $cmd]
 }
 
