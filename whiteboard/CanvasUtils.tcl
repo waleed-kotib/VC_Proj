@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.13 2004-08-11 13:47:18 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.14 2004-08-13 15:27:26 matben Exp $
 
 package require sha1pure
 
@@ -1033,10 +1033,9 @@ proc ::CanvasUtils::SVGForeignObjectHandler {wtop xmllist paropts transformList 
 		}
 	    }
 	    if {$haveXlink} {
-		# not sure about -where ???
-		::Import::HandleImportCmd $w $cmd -where local  \
-		  -progess [list ::Import::ImportProgress $cmd]  \
-		  -command [list ::Import::ImportCommand $cmd]
+		eval {::Import::HandleImportCmd $w $cmd  \
+		  -progress [list ::Import::ImportProgress $cmd]  \
+		  -command  [list ::Import::ImportCommand $cmd]} $args
 	    }
 	}
     }

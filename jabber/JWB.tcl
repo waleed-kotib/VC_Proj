@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.27 2004-08-11 13:47:17 matben Exp $
+# $Id: JWB.tcl,v 1.28 2004-08-13 15:27:26 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -1078,12 +1078,23 @@ proc ::Jabber::WB::GetSVGWBMessageList {wtop xlist} {
 	if {[string equal $attrArr(xmlns) $xmlnsSVGWB]} {
 	    set cmdList [svgwb2can::parsesvgdocument $xelem -canvas $wcan \
 	      -foreignobjecthandler \
-	      [list ::CanvasUtils::SVGForeignObjectHandler $wtop] \
+	      [list [namespace current]::SVGForeignObjectHandler $wtop] \
 	      -httphandler [list [namespace current]::SVGHttpHandler $wtop]]
-	    #puts "---cmdList=$cmdList"
 	}
     }
     return $cmdList
+}
+
+# Jabber::WB::SVGForeignObjectHandler --
+# 
+#       The only excuse for this is to add '-where local'.
+
+proc ::Jabber::WB::SVGForeignObjectHandler {wtop xmllist paropts transformList args} {
+    
+    array set argsArr $args
+    set argsArr(-where) local
+    eval {::CanvasUtils::SVGForeignObjectHandler $wtop $xmllist $paropts \
+      $transformList} [array get argsArr]
 }
 
 # Jabber::WB::SVGHttpHandler --
@@ -1095,9 +1106,7 @@ proc ::Jabber::WB::GetSVGWBMessageList {wtop xlist} {
 proc ::Jabber::WB::SVGHttpHandler {wtop cmd} {
     variable jwbstate
     upvar ::Jabber::jstate jstate
-    
-    #puts "::Jabber::WB::SVGHttpHandler cmd=$cmd"
-    
+        
     # Design the import line.
     # import 226.0 104.0 -http ... -below */117748804 -tags */117748801
     set line [concat import [lrange $cmd 2 end]]
@@ -1118,7 +1127,7 @@ proc ::Jabber::WB::SVGHttpHandler {wtop cmd} {
     set errMsg [eval {
 	 ::Import::HandleImportCmd $wcan $line -where local \
 	   -progress [list ::Import::ImportProgress $line] \
-	   -command [list ::Import::ImportCommand $line] \
+	   -command  [list ::Import::ImportCommand $line] \
 	   -tryimport $tryimport
      }]
 

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasFile.tcl,v 1.9 2004-08-02 14:06:21 matben Exp $
+# $Id: CanvasFile.tcl,v 1.10 2004-08-13 15:27:26 matben Exp $
  
 package require can2svg
 package require svg2can
@@ -407,8 +407,8 @@ proc ::CanvasFile::FileToCanvasVer2 {w fd absPath args} {
 		set errMsg [eval {
 		    ::Import::HandleImportCmd $w $line  \
 		      -addundo 0 -basepath $dirPath  \
-		      -progess [list ::Import::ImportProgress $line]  \
-		      -command [list ::Import::ImportCommand $line]
+		      -progress [list ::Import::ImportProgress $line]  \
+		      -command  [list ::Import::ImportCommand $line]
 		} [array get argsArr]]
 		incr nimports
 	    }
@@ -605,7 +605,9 @@ proc ::CanvasFile::SaveCanvasFileDlg {wtop} {
     
     switch -- $ext {
 	".svg" {
-	    ::can2svg::canvas2file $wCan $fileName -uritype file -usetags 0 \
+	    
+	    # Not completely sure about -usetags.
+	    ::can2svg::canvas2file $wCan $fileName -uritype file -usetags all \
 	      -windowitemhandler ::CanvasUtils::GetSVGForeignFromWindowItem
 	}
 	default {

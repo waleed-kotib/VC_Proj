@@ -4,7 +4,7 @@
 #
 #  Code idee from Harrison & McLennan
 #  
-# $Id: balloonhelp.tcl,v 1.10 2004-05-31 06:25:13 matben Exp $
+# $Id: balloonhelp.tcl,v 1.11 2004-08-13 15:27:26 matben Exp $
 
 package provide balloonhelp 1.0
 
@@ -208,7 +208,7 @@ proc ::balloonhelp::Cancel {win} {
 	wm withdraw .balloonhelp
     }
     if {[info exists locals(focus)] && ($locals(focus) != ".balloonhelp")} {
-	catch {focus $locals(focus)}
+	# catch {focus $locals(focus)}
     }
 }
 

@@ -25,7 +25,7 @@
 # 
 # Copyright (C) 2002-2004 Mats Bengtsson
 # 
-# $Id: tree.tcl,v 1.31 2004-07-30 12:55:53 matben Exp $
+# $Id: tree.tcl,v 1.32 2004-08-13 15:27:26 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -1631,6 +1631,7 @@ proc ::tree::BuildLayer {w v in} {
     set ystart $y
     set yline  $priv(yline)
     set yoff   [expr $yline/2]
+    set ycent  [expr $y + $yoff]
     set scrollwidth $options(-scrollwidth)
     set fg          $options(-foreground)
     set stripecols  $options(-stripecolors)
