@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Import.tcl,v 1.8 2004-08-11 13:47:19 matben Exp $
+# $Id: Import.tcl,v 1.9 2004-08-13 15:27:26 matben Exp $
 
 package require http
 package require httpex
@@ -815,7 +815,7 @@ proc ::Import::HttpGet {wtop url importPackage opts args} {
 # Import::HttpProgress --
 # 
 #       Progress callback for the http package.
-#       Any -progess command gets only called at an prefs(progUpdateMillis) 
+#       Any -progress command gets only called at an prefs(progUpdateMillis) 
 #       interval unless there is an error.
 
 
@@ -1844,7 +1844,7 @@ proc ::Import::QuickTimeMCCallback {utag w msg {par {}}} {
 	play {
 	    set time [$w time]
 	    set rate $par
-	    puts "msg=$msg, par (rate)=$par, time=$time"
+	    #puts "MCCallback time=$time, par (rate)=$rate"
 	    
 	    # If any of them are different from cached state then send.
 	    set timetrig 1
@@ -1857,9 +1857,9 @@ proc ::Import::QuickTimeMCCallback {utag w msg {par {}}} {
 	      ($moviestate($utag,rate) == $rate)} {
 		set ratetrig 0		
 	    }
-	    puts "\t timetrig=$timetrig, ratetrig=$ratetrig"
+	    #puts "\t timetrig=$timetrig, ratetrig=$ratetrig"
 	    if {$timetrig || $ratetrig} {
-		set str "QUICKTIME: play $utag $time $par"
+		set str "QUICKTIME: play $utag $time $rate"
 		::CanvasUtils::GenCommand $wtop $str remote
 	    }
 	}
@@ -1894,25 +1894,31 @@ proc ::Import::QuickTimeHandler {wcan type cmd args} {
     
     switch -- $instr {
 	play {
-	    set time [lindex $cmd 3]
-	    set rate [lindex $cmd 4]
+	    set dsttime [lindex $cmd 3]
+	    set dstrate [lindex $cmd 4]
+	    array set timeArr [$wmov gettime]
+	    # $timeArr(-movieduration)
+	    if {$dsttime == $timeArr(-movieduration)} {
+		set dstrate 0.0
+	    }
 	    
 	    # Cache target state which must not be resent via callback!
-	    set moviestate($utag,time) $time
-	    set moviestate($utag,rate) $rate
-	    puts "\t movie rate=[$wmov rate], time=[$wmov time]"
-	    if {$rate == 0.0} {
-		if {[$wmov rate] != $rate} {
-		    $wmov stop
+	    set moviestate($utag,time) $dsttime
+	    set moviestate($utag,rate) $dstrate
+	    #puts "\t dsttime=$dsttime, dstrate=$dstrate"
+	    #puts "\t time=[$wmov time], rate=[$wmov rate]"
+	    if {$dstrate == 0.0} {
+		if {[$wmov rate] != $dstrate} {
+		    $wmov rate 0.0
 		}
-		if {[$wmov time] != $time} {
-		    $wmov time $time
+		if {[$wmov time] != $dsttime} {
+		    $wmov time $dsttime
 		}
 	    } else {
-		if {[$wmov time] != $time} {
-		    $wmov time $time
+		if {[$wmov time] != $dsttime} {
+		    $wmov time $dsttime
 		}
-		if {[$wmov rate] != $rate} {
+		if {[$wmov rate] != $dstrate} {
 		    $wmov play
 		}
 	    }
@@ -1948,8 +1954,8 @@ proc ::Import::ReloadImage {wtop id} {
     
     set errMsg [eval {
 	::Import::HandleImportCmd $wcan $line -where local   \
-	  -progess [list [namespace current]::ImportProgress $line] \
-	  -command [list [namespace current]::ImportCommand $line]
+	  -progress [list [namespace current]::ImportProgress $line] \
+	  -command  [list [namespace current]::ImportCommand $line]
     }]
     if {$errMsg != ""} {
 

@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Plugins.tcl,v 1.10 2004-08-06 07:46:55 matben Exp $
+# $Id: Plugins.tcl,v 1.11 2004-08-13 15:27:26 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -1132,8 +1132,11 @@ proc ::Plugins::DeRegister {name} {
 
 # Plugins::RegisterCanvasClassBinds --
 # 
-#       Register canvas bindings directly.
-#       These are applied to all whiteboards.
+#       Register canvas bindings directly. These are applied to all whiteboards.
+#       
+#       bindList: {{move    {bindDef     tclProc}} {...} ...}
+#       We do %W -> canvas substitution on bindDef, and $wcan substitution
+#       on the tclProc. % substitution is done as usal in tclProc.
 
 proc ::Plugins::RegisterCanvasClassBinds {name bindList} {
     variable plugin
@@ -1220,6 +1223,7 @@ proc ::Plugins::SetCanvasBinds {wcan oldTool newTool} {
 	    foreach {bindDef cmd} $binds {
 		regsub -all {\\|&} $bindDef {\\\0} bindDef
 		regsub -all {%W} $bindDef $wcan bindDef
+		set cmd [subst -nocommands -nobackslashes $cmd]
 		eval $bindDef [list $cmd]
 	    }
 	}
@@ -1254,6 +1258,7 @@ proc ::Plugins::SetCanvasBinds {wcan oldTool newTool} {
 	    foreach {bindDef cmd} $binds {
 		regsub -all {\\|&} $bindDef {\\\0} bindDef
 		regsub -all {%W} $bindDef $wcan bindDef
+		set cmd [subst -nocommands -nobackslashes $cmd]
 		catch {eval $bindDef [list $cmd]}
 	    }
 	}
