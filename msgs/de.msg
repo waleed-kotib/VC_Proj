@@ -8,7 +8,6 @@
 #     (hj dot beckers at onlinehome dot de)
 
 ::msgcat::mcset de Accept	Akzeptieren
-::msgcat::mcset de Action 	Aktion
 ::msgcat::mcset de Active 	aktiv
 ::msgcat::mcset de Add		Hinzufügen
 ::msgcat::mcset de Address	Adresse
@@ -33,7 +32,7 @@
 ::msgcat::mcset de Choose	Auswahl
 ::msgcat::mcset de City		Stadt
 ::msgcat::mcset de Clear	Löschen
-#::msgcat::mcset de Client
+::msgcat::mcset de Client	Anwendung
 ::msgcat::mcset de Close	Schließen
 ::msgcat::mcset de Conference	Konferenz
 ::msgcat::mcset de Connect	Verbinden
@@ -92,7 +91,7 @@
 ::msgcat::mcset de No		Nein
 ::msgcat::mcset de no		nein
 ::msgcat::mcset de None		Kein
-#::msgcat::mcset de Notes
+::msgcat::mcset de Notes	Notizen
 ::msgcat::mcset de Occupation	Beruf
 ::msgcat::mcset de Offline	Abgemeldet
 ::msgcat::mcset de OK		OK
@@ -150,7 +149,7 @@
 ::msgcat::mcset de Title	Titel
 ::msgcat::mcset de To		An	
 ::msgcat::mcset de Topic	Thema
-#::msgcat::mcset de Transports
+::msgcat::mcset de Transports   Transportarten
 ::msgcat::mcset de Trash	Müll
 ::msgcat::mcset de Type  	Typ
 ::msgcat::mcset de Unregister	Abmelden
@@ -300,19 +299,19 @@
 ::msgcat::mcset de mSetupAssistant	{Einrichtungs-Assistent...}
 ::msgcat::mcset de mImageLarger		{Bild größer}
 ::msgcat::mcset de mImageSmaller	{Bild kleiner}
-::msgcat::mcset de mExportImage		{Bild exportieren...}
-::msgcat::mcset de mExportMovie		{Film exportieren...}
+::msgcat::mcset de mExportImage		{Bild exportieren ...}
+::msgcat::mcset de mExportMovie		{Film exportieren ...}
 ::msgcat::mcset de mSyncPlayback	{Synchrones Abspielen}
-::msgcat::mcset de mColor		{Farbe...}
+::msgcat::mcset de mColor		{Farbe ...}
 ::msgcat::mcset de mAddSpeechBubble	{Sprechblase hinzufügen}
 ::msgcat::mcset de mUpdateCheck  	{Aktualisierungsprüfung}
 ::msgcat::mcset de mReloadImage  	{Bild neu laden}
-::msgcat::mcset de mCoccinellaHome  	 {Coccinella im Web...}
-::msgcat::mcset de mComponents 	 	{Komponenten...}
-::msgcat::mcset de mBugReport  	 {Fehler melden...}
-#::msgcat::mcset de mTakeSnapShot        {Take Snapshot}
-#::msgcat::mcset de mTimeCode            {Timecode}
-#::msgcat::mcset de mUserInfo            {User Info...}
+::msgcat::mcset de mCoccinellaHome  	 {Coccinella im Web ...}
+::msgcat::mcset de mComponents 	 	{Komponenten ...}
+::msgcat::mcset de mBugReport  	 	{Fehler melden ...}
+::msgcat::mcset de mTakeSnapShot        {Schnappschuss erstellen}
+::msgcat::mcset de mTimeCode            {Zeitstempel ein-/ausblenden}
+::msgcat::mcset de mUserInfo            {Benutzerinformation ...}
 
 
 # Popups
@@ -680,10 +679,8 @@
 ::msgcat::mcset de jamessoobgetfail	{Fehler beim Abruf der Url "%s": %s}
 ::msgcat::mcset de jamessoobtimeout	{Zeitüberschreitung beim Abruf der Datei über http}
 
-# translate!!!!
-::msgcat::mcset de jamessooberr406      {The user %s rejected to accept the file %s.}
-::msgcat::mcset de jamessooberr404      {Got an error when trying to send the file %s to %s. The code was %s, and error message: %s}
-# translate!!!!
+::msgcat::mcset de jamessooberr406      {Benutzer %s verweigerte die Annahme der Datei %s.}
+::msgcat::mcset de jamessooberr404      {Fehler beim Versuch, die Datei %s an %s zu senden. Fehlercode war %s, Fehlernachricht: %s}
 
 ::msgcat::mcset de jamessnogchat	{Wir konnten keinen Server finden, der groupchat bietet.}
 ::msgcat::mcset de jamesserrinboxopen	{Fehler beim Öffnen der Postdatei %s zur Sicherhung.}
@@ -712,8 +709,7 @@ bei der entsprechenden Transportkomponente registriert haben. Wollen Sie das jet
 ::msgcat::mcset de jamessstarttls-nofeature     {Der Server "%s" bietet keine Unterstützung für TLS.}
 ::msgcat::mcset de jamessstarttls-failure        {TLS-Aushandlung mit Server "%s" fehlerhaft.}
 
-# translate!!!!
-::msgcat::mcset de jamessgcinvite               {You have been invited to the groupchat room %s by %s. Do you want to join?}
+::msgcat::mcset de jamessgcinvite               {Sie wurden zum Gruppen-Chat in Raum %s von %s eingeladen. Möchten Sie teilnehmen?}
 
 
 
@@ -783,9 +779,8 @@ bei der entsprechenden Transportkomponente registriert haben. Wollen Sie das jet
 ::msgcat::mcset de prefrochat    {Bei Doppelklick Chat starten, sonst normale Nachricht}
 ::msgcat::mcset de prefrosysicons {Benutze System-Icons anderer IMs}
 
-# translate
-::msgcat::mcset de prefrohideoff {Do not show offline users}
-::msgcat::mcset de prefrohidetrpt {Do not show transports}
+::msgcat::mcset de prefrohideoff {Abgemeldete Benutzer nciht anzeigen}
+::msgcat::mcset de prefrohidetrpt {Transportarten nicht zeigen}
 
 ::msgcat::mcset de prefblonly    {Nur Nachrichten von Personen meiner Kontaktliste akzeptieren}
 ::msgcat::mcset de prefblbl      {Folgende JIDs blockieren (*-Regeln möglich):}
@@ -802,8 +797,7 @@ bei der entsprechenden Transportkomponente registriert haben. Wollen Sie das jet
 ::msgcat::mcset de prefcuagent   {Immer Agenten-Methode benutzen}
 ::msgcat::mcset de prefcuupdate  {Automatisch auf neue Coccinella-Version prüfen}
 
-# translate
-::msgcat::mcset de prefcuremdlgs {Remember open dialogs between sessions}
+::msgcat::mcset de prefcuremdlgs {Offene Dialoge zwischen Sitzungen speichern}
 
 ::msgcat::mcset de preffmhelp    {Hilfsprogramme für Dateityp/en}
 ::msgcat::mcset de preffmsave    {Einfach im Eingangsverzeichnis speichern}
@@ -900,8 +894,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset de jadisaddserv {Suchen Sie einen weiteren Server für Gruppenräume und andere Dienste. Sie können einen Server permanent hinzufügen, der dann automatisch erkannt wird. Der Anmelde-Server wird immer erkannt.}
 ::msgcat::mcset de jadisrmall {Alle Server entfernen, die automatisch und permanent erkannt wurden.}
 
-# translate
-::msgcat::mcset de jauserinnote {Add your personal notes about this user}
+::msgcat::mcset de jauserinnote {Ihre persönlichen Notizen über diesen Benutzer hinzufügen}
 
 
 # Setup assistant:
