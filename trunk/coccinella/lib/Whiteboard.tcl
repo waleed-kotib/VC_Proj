@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.11 2004-01-13 14:50:21 matben Exp $
+# $Id: Whiteboard.tcl,v 1.12 2004-01-14 14:27:30 matben Exp $
 
 package require entrycomp
 package require CanvasDraw
@@ -750,14 +750,14 @@ proc ::WB::BuildWhiteboard {wtop args} {
 	
 	pack $f -fill both -expand true -side right
 	canvas $wapp(can) -height $dims(hCanOri) -width $dims(wCanOri)  \
-	  -relief raised -bd 0 -highlightthickness 0 -background $state(bgColCan)  \
+	  -relief raised -bd 0 -background $state(bgColCan)  \
 	  -scrollregion [list 0 0 $prefs(canScrollWidth) $prefs(canScrollHeight)]  \
 	  -xscrollcommand [list $wxsc set]  \
 	  -yscrollcommand [list $wysc set]	
 	scrollbar $wxsc -orient horizontal -command [list $wapp(can) xview]
 	scrollbar $wysc -orient vertical -command [list $wapp(can) yview]
 	
-	grid $wapp(can) -row 0 -column 0 -sticky news -padx 1 -pady 1
+	grid $wapp(can) -row 0 -column 0 -sticky news -padx 0 -pady 0
 	grid $wysc -row 0 -column 1 -sticky ns
 	grid $wxsc -row 1 -column 0 -sticky ew
 	grid columnconfigure $f 0 -weight 1
@@ -781,6 +781,7 @@ proc ::WB::BuildWhiteboard {wtop args} {
     ::WB::GetFocus $wtop $w
     bind $w <FocusIn>  \
       [list [namespace current]::GetFocus $wtop %W]
+    bind $wapp(can) <Button-1> [list focus $wapp(can)]
     
     # Create the undo/redo object.
     set state(undotoken) [undo::new -command [list ::UI::UndoConfig $wtop]]

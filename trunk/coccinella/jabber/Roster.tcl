@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.35 2004-01-13 14:50:21 matben Exp $
+# $Id: Roster.tcl,v 1.36 2004-01-14 14:27:30 matben Exp $
 
 package provide Roster 1.0
 
@@ -310,17 +310,15 @@ proc ::Jabber::Roster::SetBackgroundImage {useBgImage bgImagePath} {
 }
 
 proc ::Jabber::Roster::CloseDlg {w} {    
-    upvar ::Jabber::jstate jstate
 
     catch {wm withdraw $w}
     set jstate(rosterVis) 0
 }
 
 proc ::Jabber::Roster::Refresh { } {
-    upvar ::Jabber::jstate jstate
 
     # Get my roster.
-    $jstate(jlib) roster_get [namespace current]::PushProc
+    ::Jabber::InvokeJlibCmd roster_get [namespace current]::PushProc
 }
 
 # Jabber::Roster::SendRemove --
@@ -344,7 +342,7 @@ proc ::Jabber::Roster::SendRemove {jidrm} {
       [FormatTextForMessageBox [::msgcat::mc jamesswarnremove]]  \
       -icon warning -type yesno]
     if {[string equal $ans "yes"]} {
-	$jstate(jlib) roster_remove $jid [namespace current]::PushProc
+	::Jabber::InvokeJlibCmd roster_remove $jid [namespace current]::PushProc
     }
 }
 
@@ -448,7 +446,7 @@ proc ::Jabber::Roster::PushProc {rostName what {jid {}} args} {
 		set jid3 ${jid}/$attrArr(-resource)
 	    }
 	    
-	    if {![$jstate(jlib) service isroom $jid]} {
+	    if {![::Jabber::InvokeJlibCmd service isroom $jid]} {
 		eval {::Jabber::Roster::Presence $jid3 $type} $args
 	    }
 	    
@@ -706,11 +704,11 @@ proc ::Jabber::Roster::AutoBrowse {jid presence args} {
 	
 	# Browse only potential Coccinella (all jabber) clients.
 	regexp {^(.+@)?([^@/]+)(/.*)?} $jid match pre host
-	set type [$jstate(jlib) service gettype $host]
+	set type [::Jabber::InvokeJlibCmd service gettype $host]
 	
 	# We may not yet have browsed this (empty).
 	if {($type == "") || ($type == "service/jabber")} {
-	    $jstate(jlib) browse_get $jid  \
+	    ::Jabber::InvokeJlibCmd browse_get $jid  \
 	      -errorcommand [list ::Jabber::Browse::ErrorProc 1]  \
 	      -command [list [namespace current]::AutoBrowseCallback]
 	}
@@ -946,7 +944,7 @@ proc ::Jabber::Roster::NewOrEditItem {which args} {
     if {[info exists argsArr(-jid)]} {
 	set jid $argsArr(-jid)
 	if {[regexp {^([^@]+)$} $jid match host]} {
-	    set jabbers [$jstate(jlib) service gettransportjids jabber]
+	    set jabbers [::Jabber::InvokeJlibCmd service gettransportjids jabber]
 	    if {[lsearch $jabbers $host] == -1} {
 		
 		# This is not a jabber host. Get true roster item.
@@ -955,7 +953,7 @@ proc ::Jabber::Roster::NewOrEditItem {which args} {
 		set users [$jstate(roster) getusers]
 		set jid [lsearch -inline -glob $users ${host}*]
 		set subscription [$jstate(roster) getsubscription $jid]
-		set typesubtype [$jstate(jlib) service gettype $host]
+		set typesubtype [::Jabber::InvokeJlibCmd service gettype $host]
 		regexp {^[^/]+/(.+)$} $typesubtype match subtype
 	    }
 	}
@@ -1223,7 +1221,7 @@ proc ::Jabber::Roster::BuildTrptMenu {token} {
     # We must be indenpendent of method; agent, browse, disco
     set trpts {}
     foreach subtype $allTransports {
-	set jids [$jstate(jlib) service gettransportjids $subtype]
+	set jids [::Jabber::InvokeJlibCmd service gettransportjids $subtype]
 	if {[llength $jids]} {
 	    lappend trpts $subtype
 	    set dlgstate(servicejid,$subtype) [lindex $jids 0]
@@ -1374,7 +1372,7 @@ proc ::Jabber::Roster::EditSet {token} {
 	if {[regexp {([^@]+)$} $jid match host]} {
 
 	    # Exclude jabber services.
-	    set jabbers [$jstate(jlib) service gettransportjids jabber]
+	    set jabbers [::Jabber::InvokeJlibCmd service gettransportjids jabber]
 	    if {[lsearch $jabbers $host] < 0} {	    
 	    
 		# If this requires a transport component we must be registered.
@@ -1410,27 +1408,27 @@ proc ::Jabber::Roster::EditSet {token} {
 	lappend opts -groups [list $usersGroup]
     }
     if {[string equal $which "new"]} {
-	eval {$jstate(jlib) roster_set $jid   \
+	eval {::Jabber::InvokeJlibCmd roster_set $jid   \
 	  [list [namespace current]::EditSetCommand $jid]} $opts
     } else {
-	eval {$jstate(jlib) roster_set $jid   \
+	eval {::Jabber::InvokeJlibCmd roster_set $jid   \
 	  [list [namespace current]::EditSetCommand $jid]} $opts
     }
     if {[string equal $which "new"]} {
 	
 	# Send subscribe request.
 	if {$subscribe} {
-	    $jstate(jlib) send_presence -type "subscribe" -to $jid \
+	    ::Jabber::InvokeJlibCmd send_presence -type "subscribe" -to $jid \
 	      -command [namespace current]::PresError
 	}
     } else {
 	
 	# Send (un)subscribe request.
 	if {$subscribe} {
-	    $jstate(jlib) send_presence -type "subscribe" -to $jid \
+	    ::Jabber::InvokeJlibCmd send_presence -type "subscribe" -to $jid \
 	      -command [namespace current]::PresError
 	} elseif {$unsubscribe} {
-	    $jstate(jlib) send_presence -type "unsubscribe" -to $jid \
+	    ::Jabber::InvokeJlibCmd send_presence -type "unsubscribe" -to $jid \
 	      -command [namespace current]::PresError
 	}
     }
@@ -1479,7 +1477,7 @@ proc ::Jabber::Roster::PresError {jlibName type args} {
 	  The error is: $errmsg ($errcode).\
 	  Do you want to remove it from your roster?"]
 	if {$ans == "yes"} {
-	    $jstate(jlib) roster_remove $argsArr(-from) [namespace current]::PushProc
+	    ::Jabber::InvokeJlibCmd roster_remove $argsArr(-from) [namespace current]::PushProc
 	}
     }
 }
@@ -1555,7 +1553,7 @@ proc ::Jabber::Roster::GetPresenceIcon {jid presence args} {
     set haveForeignIM 0
     if {$jprefs(haveIMsysIcons)} {
 	if {[regexp {^(.+@)?([^@/]+)(/.*)?} $jid match pre host]} {
-	    set typesubtype [$jstate(jlib) service gettype $host]
+	    set typesubtype [::Jabber::InvokeJlibCmd service gettype $host]
 	
 	    # If empty we have likely not yet browsed etc.
 	    if {[string length $typesubtype] > 0} {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.34 2004-01-13 14:50:21 matben Exp $
+# $Id: MailBox.tcl,v 1.35 2004-01-14 14:27:30 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -831,7 +831,7 @@ proc ::Jabber::MailBox::ReplyTo { } {
     # We shall have the original, unparsed, text here.
     set allText [lindex $mailbox($id) 5]
     foreach {subject to time} [lrange $mailbox($id) 0 2] break
-    set to [$jstate(jlib) getrecipientjid $to]
+    set to [::Jabber::InvokeJlibCmd getrecipientjid $to]
     if {![regexp -nocase {^ *re:} $subject]} {
 	set subject "Re: $subject"
     }

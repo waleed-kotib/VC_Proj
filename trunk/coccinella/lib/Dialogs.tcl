@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.29 2004-01-13 14:50:21 matben Exp $
+# $Id: Dialogs.tcl,v 1.30 2004-01-14 14:27:30 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -66,6 +66,7 @@ array set wDlgs {
     jmuccfg         .jmuccfg
     jmucdestroy     .jmucdestroy
     jchist          .jchist
+    jprofiles       .jprofiles
 }
 
 # Dialogs::GetCanvas --

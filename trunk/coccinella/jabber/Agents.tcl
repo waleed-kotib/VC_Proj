@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Agents.tcl,v 1.9 2004-01-13 14:50:20 matben Exp $
+# $Id: Agents.tcl,v 1.10 2004-01-14 14:27:30 matben Exp $
 
 package provide Agents 1.0
 
@@ -145,7 +145,7 @@ proc ::Jabber::Agents::AgentsCallback {jid jlibName what subiq} {
 	    # version number to know which protocol to use.
 	    foreach elem $subAgent {
 		if {[string equal [wrapper::gettag $elem] "groupchat"]} {
-		    $jstate(jlib) get_version $jidAgent   \
+		    ::Jabber::InvokeJlibCmd get_version $jidAgent   \
 		      [list ::Jabber::CacheGroupchatType $jidAgent]
 		    
 		    # The old groupchat protocol is used as a fallback.

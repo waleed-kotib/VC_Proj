@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.22 2004-01-13 14:50:20 matben Exp $
+# $Id: Browse.tcl,v 1.23 2004-01-14 14:27:30 matben Exp $
 
 package require chasearrows
 
@@ -97,7 +97,6 @@ proc ::Jabber::Browse::GetAll { } {
 #       callback scheduled.
 
 proc ::Jabber::Browse::Get {jid args} {    
-    upvar ::Jabber::jstate jstate
     
     array set opts {
 	-silent 0
@@ -105,8 +104,8 @@ proc ::Jabber::Browse::Get {jid args} {
     array set opts $args
     
     # Browse services available.
-    $jstate(jlib) browse_get $jid -errorcommand  \
-      [list ::Jabber::Browse::ErrorProc $opts(-silent)]
+    ::Jabber::InvokeJlibCmd browse_get $jid -errorcommand  \
+      [list [namespace current]::ErrorProc $opts(-silent)]
 }
 
 # Jabber::Browse::HaveBrowseTree --
@@ -245,7 +244,7 @@ proc ::Jabber::Browse::Callback {browseName type jid subiq} {
 			if {!$haveNS && [info exists cattrArr(type)] &&  \
 			  ($cattrArr(type) == "public" ||  \
 			  $cattrArr(type) == "private")} {
-			    $jstate(jlib) get_version $confjid   \
+			    ::Jabber::InvokeJlibCmd get_version $confjid   \
 			      [list ::Jabber::CacheGroupchatType $confjid]
 			}
 
@@ -608,7 +607,7 @@ proc ::Jabber::Browse::PresenceCallback {jid type args} {
 	set jid3 ${jid}/$argsArr(-resource)
     }
 
-    if {[$jstate(jlib) service isroom $jid]} {
+    if {[::Jabber::InvokeJlibCmd service isroom $jid]} {
 	if {[::Jabber::Browse::HaveBrowseTree $jid]} {
 	    
 	    if {![winfo exists $wtree]} {
@@ -868,7 +867,6 @@ proc ::Jabber::Browse::SetUIWhen {what} {
 }
 
 proc ::Jabber::Browse::GetInfo {jid args} {    
-    upvar ::Jabber::jstate jstate
     
     array set opts {
 	-silent 0
@@ -876,9 +874,9 @@ proc ::Jabber::Browse::GetInfo {jid args} {
     array set opts $args
     
     # Browse services available.
-    $jstate(jlib) browse_get $jid  \
-      -command [list ::Jabber::Browse::InfoCB] \
-      -errorcommand [list ::Jabber::Browse::ErrorProc $opts(-silent)]
+    ::Jabber::InvokeJlibCmd browse_get $jid  \
+      -command [list [namespace current]::InfoCB] \
+      -errorcommand [list [namespace current]::ErrorProc $opts(-silent)]
 }
 
 proc ::Jabber::Browse::InfoCB {browseName type jid subiq} {

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.52 2004-01-13 14:50:20 matben Exp $
+# $Id: Jabber.tcl,v 1.53 2004-01-14 14:27:30 matben Exp $
 
 package provide Jabber 1.0
 
@@ -162,6 +162,12 @@ namespace eval ::Jabber:: {
       http://jabber.org/protocol/muc   {Multi user chat}
       http://jabber.org/protocol/disco {Feature discovery}
     }    
+    
+    # Xml namespaces defined here.
+    variable xmlns
+    array set xmlns {
+	servers         http://coccinella.sourceforge.net/protocols/servers
+    }
   
     # Short error names.
     variable errorCodeToShort
@@ -586,14 +592,9 @@ proc ::Jabber::GetMyJid {{roomjid {}}} {
 }
 
 proc ::Jabber::InvokeJlibCmd {args} {
-    variable jserver
     variable jstate
     
-    if {[string length $jserver(this)]} {
-	eval {$jstate(jlib)} $args
-    } else {
-	return -code error "Not connected"
-    }
+    eval {$jstate(jlib)} $args
 }
 
 proc ::Jabber::IsConnected { } {
@@ -649,6 +650,7 @@ proc ::Jabber::Init { } {
     
     variable jstate
     variable jprefs
+    variable xmlns
     
     # Make the roster object.
     set jstate(roster) [::roster::roster ::Jabber::Roster::PushProc]
@@ -678,6 +680,7 @@ proc ::Jabber::Init { } {
     # Register handlers for various iq elements.
     $jstate(jlib) iq_register get jabber:iq:version ::Jabber::ParseGetVersion
     $jstate(jlib) iq_register get jabber:iq:browse  ::Jabber::ParseGetBrowse
+    $jstate(jlib) iq_register get $xmlns(servers)   ::Jabber::ParseGetServers
     $jstate(jlib) iq_register set jabber:iq:oob     ::Jabber::OOB::ParseSet
     
     # Set the priority order of groupchat protocols.
@@ -881,6 +884,8 @@ proc ::Jabber::DispatchNormalMessage {body iswb args} {
     
     # We need to split up whiteboard commands (messages) that must be
     # handled immediately and those destined for drawing etc. 
+    # 
+    # This should be removed when it runs through <iq> query!
     if {$iswb} {
 	array set argsArr $args
 	set restCmds {}
@@ -1707,8 +1712,12 @@ proc ::Jabber::SetStatus {type args} {
     array set argsArr $args
     
     set presArgs {}
-    if {[info exists argsArr(-to)]} {
-	lappend presArgs -to $argsArr(-to)
+    foreach {key value} $args {
+	switch -- $key {
+	    -to - -priority {
+		lappend presArgs $key $value
+	    }
+	}
     }
     if {!$argsArr(-notype)} {	
 	switch -- $type {
@@ -1933,6 +1942,17 @@ proc ::Jabber::GetIPCallback {fromjid id ip} {
     }
 }
 
+# Jabber::GetCoccinellaServers --
+# 
+#       Get Coccinella server ports and ip via <iq>.
+
+proc ::Jabber::GetCoccinellaServers {jid3 cmd} {
+    variable jstate
+    variable xmlns
+     
+    $jstate(jlib) iq_get $xmlns(servers) $jid3 -command xxx
+}
+
 proc ::Jabber::PutIPnumber {jid id} {
     variable jstate
     
@@ -2060,6 +2080,10 @@ proc ::Jabber::PutFileAndSchedule {wtop fileName opts} {
 		# PutFile as a callback when receiving this ip.
 		::Jabber::GetIPnumber $jid3 \
 		  [list ::Jabber::PutFile $wtop $fileName $mime $optjidList]
+		
+		# New through <iq> element.
+		#::Jabber::GetCoccinellaServers $jid3  \
+		#  [list ::Jabber::PutFile $wtop $fileName $mime $optjidList]
 	    }
 	} else {
 	    
@@ -2542,6 +2566,7 @@ proc ::Jabber::ParseGetVersion {jlibname from subiq args} {
 proc ::Jabber::ParseGetBrowse {jlibname from subiq args} {
     global  prefs    
     variable jstate
+    variable xmlns
 
     ::Jabber::Debug 2 "::Jabber::ParseGetBrowse: args='$args'"
     
@@ -2556,7 +2581,7 @@ proc ::Jabber::ParseGetBrowse {jlibname from subiq args} {
 	set opts [list -id $argsArr(-id)]
     }
 
-    # List everything this client supports.
+    # List everything this client supports. Starting with public namespaces.
     set subtags [list  \
       [wrapper::createtag "ns" -chdata "jabber:client"]         \
       [wrapper::createtag "ns" -chdata "jabber:iq:browse"]      \
@@ -2570,12 +2595,59 @@ proc ::Jabber::ParseGetBrowse {jlibname from subiq args} {
       [wrapper::createtag "ns" -chdata "coccinella:public"]     \
       [wrapper::createtag "ns" -chdata "coccinella:wb"]]
     
+    # Adding private namespaces.
+    foreach {key ns} [array get xmlns] {
+	lappend subtags [wrapper::createtag "ns" -chdata $ns]
+    }
+    
     set attr [list xmlns jabber:iq:browse jid $jstate(mejidres)  \
       type client category user]
     set xmllist [wrapper::createtag "item" -subtags $subtags -attrlist $attr]
     eval {$jstate(jlib) send_iq "result" $xmllist -to $argsArr(-from)} $opts
     
     # Tell jlib's iq-handler that we handled the event.
+    return 1
+}
+
+# Jabber::ParseGetServers --
+# 
+#       Sends something like:
+#       <iq type='result' id='1012' to='matben@jabber.dk/coccinella'>
+#           <query xmlns='http://coccinella.sourceforge.net/protocols/servers'>
+#                <ip protocol='putget' port='8235'>212.214.113.57</ip>
+#                <ip protocol='http' port='8077'>212.214.113.57</ip>
+#            </query>
+#       </iq>
+#       
+
+proc ::Jabber::ParseGetServers  {jlibname from subiq args} {
+    global  prefs
+    
+    variable jstate
+    variable xmlns
+    
+    # Build tag and attributes lists to 'private_set'.
+    set ip [::Network::GetThisOutsideIPAddress]
+    
+    array set argsArr $args
+    
+    # Return any id!
+    set opts {}
+    if {[info exists argsArr(-id)]} {
+	set opts [list -id $argsArr(-id)]
+    }
+    lappend opts -to $from
+    
+    set attrputget [list protocol putget port $prefs(thisServPort)]
+    set attrhttpd  [list protocol http port $prefs(httpdPort)]
+    set subtags [list  \
+      [wrapper::createtag ip -chdata $ip -attrlist $attrputget]  \
+      [wrapper::createtag ip -chdata $ip -attrlist $attrhttpd]]
+    set xmllist [wrapper::createtag query -subtags $subtags  \
+      -attrlist [list xmlns $xmlns(servers)]]
+     eval {$jstate(jlib) send_iq "result" $xmllist} $opts
+    
+     # Tell jlib's iq-handler that we handled the event.
     return 1
 }
 

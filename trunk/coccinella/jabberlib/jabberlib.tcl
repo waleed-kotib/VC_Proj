@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.30 2004-01-13 14:50:21 matben Exp $
+# $Id: jabberlib.tcl,v 1.31 2004-01-14 14:27:30 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -875,9 +875,10 @@ proc jlib::iq_handler {jlibname xmldata} {
     }
     
     # (2) Handle all preregistered callbacks via id attributes.
+    #     Must be type 'result' or 'error'.
 
     switch -- $type {
-	result - get - set {
+	result {
 
 	    # A request for the entire roster is coming this way, 
 	    # and calls 'parse_roster_set'.
