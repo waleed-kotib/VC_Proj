@@ -28,7 +28,9 @@
 ::msgcat::mcset sv Close 		{Stäng}
 ::msgcat::mcset sv Conference           {Konferans}
 ::msgcat::mcset sv Connect              {Anslut}
+::msgcat::mcset sv Connection           {Uppkoppling}
 ::msgcat::mcset sv Contact              {Kontakt}
+::msgcat::mcset sv Contacts             {Kontakter}
 ::msgcat::mcset sv Country		{Land}
 ::msgcat::mcset sv Create               {Skapa}
 ::msgcat::mcset sv Customization        {Anpassningar}
@@ -48,6 +50,7 @@
 ::msgcat::mcset sv File			{Fil}
 ::msgcat::mcset sv Finish               {Färdigställ}
 ::msgcat::mcset sv Finished		{Klar}
+::msgcat::mcset sv First                {Första}
 ::msgcat::mcset sv Friends              {Kompisar}
 ::msgcat::mcset sv Forward              {Vidare}
 ::msgcat::mcset sv From 		{Från}
@@ -62,9 +65,11 @@
 ::msgcat::mcset sv Inbox                {Inkorg}
 ::msgcat::mcset sv Info 		{Info}
 ::msgcat::mcset sv Invite               {Bjud in}
+::msgcat::mcset sv Last                 {Sista}
 ::msgcat::mcset sv Less                 {Färre}
 ::msgcat::mcset sv Login 		{Logga in}
 ::msgcat::mcset sv Logout               {Logga ut}
+::msgcat::mcset sv Message              {Meddelande}
 ::msgcat::mcset sv Middle		{Mittinitial}
 ::msgcat::mcset sv More                 {Mer}
 ::msgcat::mcset sv Never		{Aldrig}
@@ -84,6 +89,7 @@
 ::msgcat::mcset sv Phone                {Telefon}
 ::msgcat::mcset sv Play                 {Spela upp}
 ::msgcat::mcset sv Plugins              {Pluginner}
+::msgcat::mcset sv Port                 {Nätverksport}
 ::msgcat::mcset sv Preferences          {Inställningar}
 ::msgcat::mcset sv Previous             {Förra}
 ::msgcat::mcset sv Print 		{Utskrift}
@@ -290,6 +296,7 @@
 ::msgcat::mcset sv mChatHistory     	{Chatt historik}
 ::msgcat::mcset sv mLoginTrpt     	{Logga på transport}
 ::msgcat::mcset sv mLogoutTrpt     	{Logga ut transport}
+::msgcat::mcset sv mRemoveContact  	{Tag bort kontakt...}
 
 
 
@@ -323,7 +330,9 @@
 ::msgcat::mcset sv {Chat With}             {Chatta med}
 ::msgcat::mcset sv {Clear Disk Cache Now}  {Töm diskminnet nu}
 ::msgcat::mcset sv {Company Name}	   {Företag}
+::msgcat::mcset sv {Component Info}        {Komponentinfo}
 ::msgcat::mcset sv {Conference server}	   {Konferanstjänst}
+::msgcat::mcset sv {Contact Type}          {Kontakttyp}
 ::msgcat::mcset sv {Create Room}	   {Skapa rum}
 ::msgcat::mcset sv {Default group}         {Standard grupp}
 ::msgcat::mcset sv {Default Logout Status} {Standard utloggningsstatus}
@@ -353,6 +362,7 @@
 ::msgcat::mcset sv {First name}            {Förnamn}
 ::msgcat::mcset sv {Font size}             {Typsnittsstorlek}
 ::msgcat::mcset sv {Font weight}           {Typsnittsstil}
+::msgcat::mcset sv {Format mm/dd/yyyy}     {Format mm/dd/år}
 ::msgcat::mcset sv {Get File}		   {Hämta fil}
 ::msgcat::mcset sv {Get File Error}        {Hämta fil fel}
 ::msgcat::mcset sv {Get vCard}             {Hämta vCard}
@@ -380,6 +390,7 @@
 ::msgcat::mcset sv {Last name}             {Efternamn}
 ::msgcat::mcset sv {Launch time}           {Programmuppstart}
 ::msgcat::mcset sv {Local Time}		   {Lokaltid}
+::msgcat::mcset sv {Logout With Message}   {Logga ut med meddelande}
 ::msgcat::mcset sv {Logged out}            {Utloggad}
 ::msgcat::mcset sv {Login as invisible}    {Anslut som osynlig}
 ::msgcat::mcset sv {Mailbox Error}	   {Inkorgsfel}
@@ -398,6 +409,7 @@
 ::msgcat::mcset sv {New shortcut}          {Ny genväg}
 ::msgcat::mcset sv {New Topic}             {Nytt ämne}
 ::msgcat::mcset sv {New User}              {Ny kontakt}
+::msgcat::mcset sv {New Version}           {Ny version}
 ::msgcat::mcset sv {My vCard}		   {Mitt vCard}
 ::msgcat::mcset sv {NAT Address}	   {NAT adress}
 ::msgcat::mcset sv {Nick name}             {Kortnamn}
@@ -462,6 +474,8 @@
 ::msgcat::mcset sv {Set Status}            {Sätt status}
 ::msgcat::mcset sv {Settings Panels}       {Inställningspaneler}
 ::msgcat::mcset sv {Setup Assistant}	   {Inställningsassistent}
+::msgcat::mcset sv {Slide Show}            {Bildvisning}
+::msgcat::mcset sv {Slide Show Folder}     {Bildvisnings mapp}
 ::msgcat::mcset sv {Software Update}	   {Uppdaterad mjukvara}
 ::msgcat::mcset sv {Sounds & Speech}       {Ljud & Tal}
 ::msgcat::mcset sv {Start Chat}            {Börja chatt}
@@ -539,6 +553,7 @@
 ::msgcat::mcset sv messsuassclose	{Är du säker på att du vill stänga inställningsassistenten? Du kan starta den när som helst från menyn.}
 ::msgcat::mcset sv messprotocolch	{Du har ändrat nätverks uppställiningen. Detta kräver att programmet startas om. Vill du verkligen fortsätta?}
 ::msgcat::mcset sv messpasswddifferent  {De två lösenorden matchar ej. Försök igen.}
+::msgcat::mcset sv messaupdatelatest    {Du har redan den senast tillgängliga versionen (%s)}
 
 
 
@@ -648,6 +663,7 @@ Det är nödvändigt att den finns i din roster. Du har prenumeration för %s: %s.}
 ::msgcat::mcset sv openquicktimeurlmsg		{Öppna en URL som består av en SDP fil med .mov ändelse för att ta emot en levande QuickTime ström.\
 Den kan bestå av ljud (radio) eller video (TV). Som alternativ använd en webbläsare för att hitta en SDP fil, ladda ner den till din disk och öppna den som en vanlig film.}
 ::msgcat::mcset sv jabrowseaddserver		{Skriv in JID:n för servern du önskar lägga till till listan av tjänster, till exempel "jabber.org".}
+::msgcat::mcset sv printunixcmd                 {Kommando för utskrift; redigera om nödvändigt}
 
 
 

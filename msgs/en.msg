@@ -29,7 +29,9 @@
 ::msgcat::mcset en Close
 ::msgcat::mcset en Conference
 ::msgcat::mcset en Connect
+::msgcat::mcset en Connection
 ::msgcat::mcset en Contact
+::msgcat::mcset en Contacts
 ::msgcat::mcset en Country
 ::msgcat::mcset en Create
 ::msgcat::mcset en Customization
@@ -49,6 +51,7 @@
 ::msgcat::mcset en File
 ::msgcat::mcset en Finish
 ::msgcat::mcset en Finished
+::msgcat::mcset en First
 ::msgcat::mcset en Friends
 ::msgcat::mcset en Forward
 ::msgcat::mcset en From
@@ -63,9 +66,11 @@
 ::msgcat::mcset en Inbox
 ::msgcat::mcset en Info
 ::msgcat::mcset en Invite
+::msgcat::mcset en Last
 ::msgcat::mcset en Less
 ::msgcat::mcset en Login
 ::msgcat::mcset en Logout
+::msgcat::mcset en Message
 ::msgcat::mcset en Middle
 ::msgcat::mcset en More
 ::msgcat::mcset en Never
@@ -85,6 +90,7 @@
 ::msgcat::mcset en Phone
 ::msgcat::mcset en Play
 ::msgcat::mcset en Plugins
+::msgcat::mcset en Port
 ::msgcat::mcset en Preferences
 ::msgcat::mcset en Previous
 ::msgcat::mcset en Print
@@ -291,6 +297,7 @@
 ::msgcat::mcset en mChatHistory     	{Chat History}
 ::msgcat::mcset en mLoginTrpt     	{Login To Transport}
 ::msgcat::mcset en mLogoutTrpt     	{Logout From Transport}
+::msgcat::mcset en mRemoveContact  	{Remove Contact...}
 
 
 
@@ -324,7 +331,9 @@
 ::msgcat::mcset en {Chat With}
 ::msgcat::mcset en {Clear Disk Cache Now}
 ::msgcat::mcset en {Company Name}
+::msgcat::mcset en {Component Info}
 ::msgcat::mcset en {Conference server}
+::msgcat::mcset en {Contact Type}
 ::msgcat::mcset en {Create Room}
 ::msgcat::mcset en {Default group}
 ::msgcat::mcset en {Default Logout Status}
@@ -354,6 +363,7 @@
 ::msgcat::mcset en {First name}
 ::msgcat::mcset en {Font size}
 ::msgcat::mcset en {Font weight}
+::msgcat::mcset en {Format mm/dd/yyyy}
 ::msgcat::mcset en {Get File}
 ::msgcat::mcset en {Get File Error}
 ::msgcat::mcset en {Get vCard}
@@ -381,6 +391,7 @@
 ::msgcat::mcset en {Last name}
 ::msgcat::mcset en {Launch time}
 ::msgcat::mcset en {Local Time}
+::msgcat::mcset en {Logout With Message}
 ::msgcat::mcset en {Logged out}
 ::msgcat::mcset en {Login as invisible}
 ::msgcat::mcset en {Mailbox Error}
@@ -399,6 +410,7 @@
 ::msgcat::mcset en {New Topic}
 ::msgcat::mcset en {New shortcut}
 ::msgcat::mcset en {New User}
+::msgcat::mcset en {New Version}
 ::msgcat::mcset en {My vCard}
 ::msgcat::mcset en {NAT Address}
 ::msgcat::mcset en {Nick name}
@@ -463,6 +475,8 @@
 ::msgcat::mcset en {Set Status}
 ::msgcat::mcset en {Settings Panels}
 ::msgcat::mcset en {Setup Assistant}
+::msgcat::mcset en {Slide Show}
+::msgcat::mcset en {Slide Show Folder}
 ::msgcat::mcset en {Software Update}
 ::msgcat::mcset en {Sounds & Speech}
 ::msgcat::mcset en {Start Chat}
@@ -560,9 +574,8 @@ setup assistant? You may start it any time later from the menu.}
 ::msgcat::mcset en messprotocolch	{You have changed the network setup.\
 This requires that you relaunch the application to take effect.\
 Do you actually want to continue?}
-::msgcat::mcset en messpasswddifferent  {The two passwords do not match.\
-Please try again.}
-
+::msgcat::mcset en messpasswddifferent  {The two passwords do not match. Please try again.}
+::msgcat::mcset en messaupdatelatest    {You already have the latest version available (%s)}
 
 
 
@@ -751,7 +764,7 @@ file with extension .mov for a QuickTime realtime live streaming sending.\
 Can be audio (radio) or video (TV). Alternatively, use your web browser to find\
 the SDP file for a live transmission, download it on disk and\
 open it is an ordinary movie.}
-
+::msgcat::mcset en printunixcmd                 {Shell print command, edit if desired}
 
 
 ::msgcat::mcset en uastatpointmac 	{Point tool, click to mark, double click to inspect, press to popup}
@@ -823,8 +836,7 @@ Server stored info is searchable by any user.}
 ::msgcat::mcset en prefrosysicons {Use foreign IM system icons}
 ::msgcat::mcset en prefblonly    {Only accept messages from people in my roster}
 ::msgcat::mcset en prefblbl      {Block the following JID's (* wildcards possible):}
-::msgcat::mcset en prefblmsg     {Write the complete JID for the user you\
-want to block. A JID must be of the form "joewest@jabber.org"}
+::msgcat::mcset en prefblmsg     {Write the complete JID for the user you want to block. A JID must be of the form "joewest@jabber.org"}
 ::msgcat::mcset en prefcufont    {Select font for chat window:}
 ::msgcat::mcset en prefcushow    {Show incoming messages in new window}
 ::msgcat::mcset en prefcusave    {Save message inbox between sessions}
@@ -849,8 +861,7 @@ this font installed on their system.}
 you are only able to edit your own canvas items. Items created\
 by others are not possible to edit.}
 ::msgcat::mcset en prefshortip   {Complete ip number or name}
-::msgcat::mcset en prefshortwa   {Warning: you have edited the shortcuts.\
-Don't you want to save them?}
+::msgcat::mcset en prefshortwa   {Warning: you have edited the shortcuts. Don't you want to save them?}
 
 ::msgcat::mcset en preffilecache {The cache is used to keep local copies of files from\
 other users which reduces time for network transport. The size of the local disk cache\

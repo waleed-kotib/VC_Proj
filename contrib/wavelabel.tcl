@@ -6,7 +6,7 @@
 #  Copyright (c) 2004  Mats Bengtsson
 #  This source file is distributed under the BSD licens.
 #
-# $Id: wavelabel.tcl,v 1.1 2004-10-08 12:21:05 matben Exp $
+# $Id: wavelabel.tcl,v 1.2 2004-10-09 13:21:55 matben Exp $
 #
 # ########################### USAGE ############################################
 #
@@ -442,25 +442,47 @@ proc ::wavelabel::StartStep {w} {
     upvar ::wavelabel::${w}::widgets widgets
     upvar ::wavelabel::${w}::priv    priv
 
+    puts "::wavelabel::StartStep"
+    
     set h  [winfo height $w]
     set yu 3
     set yl [expr $h-3]
     set xw [expr ($yl-$yu)/2]
     set dx [expr 2*$xw]
+    set n  10
     set c $widgets(canvas)
     foreach {fr fg fb} [winfo rgb . black] break
     foreach {br bg bb} [winfo rgb . white] break
-    set priv(x)   0
+    set priv(x)    0
+    set priv(dx)   $dx
+    set priv(xtot) [expr $n * $dx]
+    set priv(dir)  1
     
-    for {set i 0} {$i < 10} {incr i} {
+    # Right moving part.
+    for {set i 0} {$i < $n} {incr i} {
 	set x [expr -$i*$dx]
-	set r [expr  ($fr + (($br - $fr) * $i)/10) >> 8]
-	set g [expr  ($fg + (($bg - $fg) * $i)/10) >> 8]
-	set b [expr  ($fb + (($bb - $fb) * $i)/10) >> 8]
+	set r [expr  ($fr + (($br - $fr) * $i)/$n) >> 8]
+	set g [expr  ($fg + (($bg - $fg) * $i)/$n) >> 8]
+	set b [expr  ($fb + (($bb - $fb) * $i)/$n) >> 8]
 	set col [format "#%02x%02x%02x" $r $g $b]
 	$c create rect $x $yu [expr $x-$xw] $yl -outline "" -fill $col \
-	  -tags [list tstep t$i]
+	  -tags tstepright
     }
+    
+    # Left moving part.
+    for {set i 0} {$i < $n} {incr i} {
+	set x [expr -$i*$dx]
+	set r [expr  ($fr + (($br - $fr) * $i)/$n) >> 8]
+	set g [expr  ($fg + (($bg - $fg) * $i)/$n) >> 8]
+	set b [expr  ($fb + (($bb - $fb) * $i)/$n) >> 8]
+	set col [format "#%02x%02x%02x" $r $g $b]
+	$c create rect $x $yu [expr $x-$xw] $yl -outline "" -fill $col \
+	  -tags tstepleft
+    }
+    
+    # Keep both of them beyond the left edge of the widget.
+    $c scale tstepleft 0 0 -1 1
+    $c move tstepleft -$priv(xtot) 0
     set priv(killid) [after $stat(wait) [list ::wavelabel::AnimateStep $w]]
 }
 
@@ -487,7 +509,27 @@ proc ::wavelabel::AnimateStep {w} {
     upvar ::wavelabel::${w}::widgets widgets
     upvar ::wavelabel::${w}::priv    priv
 
+    set deltax [expr $priv(dir) * $stat(pix)]
+    incr priv(x) $deltax
+    set c $widgets(canvas)
     
+    puts "priv(x)=$priv(x)"
+    # Treat the left and right moving independently but let them trigger
+    # each other.
+    if {$priv(x) > [winfo width $w]} {
+	
+    }
+    if {$priv(x) > [expr [winfo width $w] + $priv(xtot)]} {
+	set priv(dir) -1
+	$c move tstepleft [expr [winfo width $w] + $priv(xtot)] 0
+    } elseif {$priv(x) <= 0} {
+	set priv(dir) 1
+    }
+    if {$priv(dir) == 1} {
+	$c move tstepright $deltax 0
+    } else {
+	$c move tstepleft $deltax 0
+    }
     set priv(killid) [after $stat(wait) [list ::wavelabel::AnimateStep $w]]
 }
 
@@ -514,7 +556,17 @@ proc ::wavelabel::Stop {w} {
 	catch {after cancel $priv(killid)}
 	unset priv(killid)
     }
-    catch {$widgets(canvas) delete twave}
+    switch -- $options(-type) {
+	image {
+	    catch {$widgets(canvas) delete twave}
+	}
+	step {
+	    catch {
+		$widgets(canvas) delete tstepright
+		$widgets(canvas) delete tstepleft
+	    }
+	}
+    }
     return {}
 }
 

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.87 2004-10-08 12:22:21 matben Exp $
+# $Id: Roster.tcl,v 1.88 2004-10-09 13:21:57 matben Exp $
 
 package provide Roster 1.0
 
@@ -140,7 +140,7 @@ namespace eval ::Jabber::Roster:: {
 	mEditUser      user      {::Jabber::User::EditDlg $jid}
 	mVersion       user      {::Jabber::GetVersion $jid3}
 	mChatHistory   user      {::Jabber::Chat::BuildHistoryForJid $jid}
-	mRemoveUser    user      {::Jabber::Roster::SendRemove $jid}
+	mRemoveContact user      {::Jabber::Roster::SendRemove $jid}
 	separator      {}        {}
 	mDirStatus     user      {::Jabber::Roster::DirectedPresenceDlg $jid}
 	mRefreshRoster any       {::Jabber::Roster::Refresh}
@@ -443,7 +443,7 @@ proc ::Jabber::Roster::SendRemove {jidrm} {
     }
     set ans [tk_messageBox -title [mc {Remove Item}] -message  \
       [FormatTextForMessageBox [mc jamesswarnremove]]  \
-      -icon warning -type yesno]
+      -icon warning -type yesno -default no]
     if {[string equal $ans "yes"]} {
 	$jstate(jlib) roster_remove $jid [namespace current]::PushProc
     }
@@ -1769,11 +1769,11 @@ namespace eval ::Jabber::Roster:: {
     # name description ...
     # Excluding smtp since it works differently.
     variable trptToAddressName {
-	jabber      {Jabber address}
+	jabber      {Jabber Id}
 	icq         {ICQ (number)}
 	aim         {AIM}
-	msn         {MSN Messenger}
-	yahoo       {Yahoo Messenger}
+	msn         {MSN}
+	yahoo       {Yahoo}
 	irc         {IRC}
 	x-gadugadu  {Gadu-Gadu}
     }
@@ -1781,8 +1781,8 @@ namespace eval ::Jabber::Roster:: {
 	jabber      {Jabber}
 	icq         {ICQ}
 	aim         {AIM}
-	msn         {MSN Messenger}
-	yahoo       {Yahoo Messenger}
+	msn         {MSN}
+	yahoo       {Yahoo}
 	irc         {IRC}
 	x-gadugadu  {Gadu-Gadu}
     }
@@ -1790,8 +1790,8 @@ namespace eval ::Jabber::Roster:: {
 	{Jabber}           jabber
 	{ICQ}              icq
 	{AIM}              aim
-	{MSN Messenger}    msn
-	{Yahoo Messenger}  yahoo
+	{MSN}              msn
+	{Yahoo}            yahoo
 	{IRC}              irc
 	{Gadu-Gadu}        x-gadugadu
     }

@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Conference.tcl,v 1.30 2004-08-23 12:44:36 matben Exp $
+# $Id: Conference.tcl,v 1.31 2004-10-09 13:21:55 matben Exp $
 
 package provide Conference 1.0
 
@@ -556,9 +556,11 @@ proc ::Jabber::Conference::CancelCreate {token} {
     upvar 0 $token state
     upvar ::Jabber::jstate jstate
     
-    set roomJid [jlib::jidmap $state(roomname)@$state(server)]
-    if {$state(usemuc) && ($roomJid != "")} {
-	catch {$jstate(muc) setroom $roomJid cancel}
+    # No jidmap since may not be valid.
+    # Is this according to MUC?
+    set roomjid $state(roomname)@$state(server)
+    if {$state(usemuc) && ($roomjid != "")} {
+	catch {$jstate(muc) setroom $roomjid cancel}
     }
     set state(finished) 0
     catch {destroy $state(w)}
