@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.38 2004-09-18 14:43:29 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.39 2004-10-09 13:21:57 matben Exp $
 
 
 set noErr 0
@@ -121,8 +121,14 @@ set prefs(userPath) $this(appPath)
 set prefs(firstLaunch) 1
 
 # Shell print command in unix.
-if {[info exists env(PRINTER)]} {
-    set prefs(unixPrintCmd) "lpr -P$env(PRINTER)"
+if {[string equal $this(platform) "unix"]} {
+    if {![catch {exec which kprinter}]} {
+	set prefs(unixPrintCmd) "kprinter"
+    } elseif {[info exists env(PRINTER)]} {
+	set prefs(unixPrintCmd) "lpr -P$env(PRINTER)"
+    } else {
+	set prefs(unixPrintCmd) "lpr"
+    }
 } else {
     set prefs(unixPrintCmd) "lpr"
 }

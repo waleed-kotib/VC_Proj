@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: VCard.tcl,v 1.24 2004-10-06 17:40:41 matben Exp $
+# $Id: VCard.tcl,v 1.25 2004-10-09 13:21:57 matben Exp $
 
 package provide VCard 1.0
 
@@ -213,7 +213,7 @@ proc ::VCard::Build {nstoken} {
     # Other part.
     label $pbi.nick   -text "[mc {Nick name}]:"
     label $pbi.email  -text "[mc {Email address}]:"
-    label $pbi.jid    -text "[mc {Jabber address}]:"
+    label $pbi.jid    -text "[mc {Jabber Id}]:"
     entry $pbi.enick  -textvariable ${nstoken}::elem(nickname)
     entry $pbi.eemail -textvariable ${nstoken}::elem(email_internet_pref)
     entry $pbi.ejid   -textvariable ${nstoken}::priv(vcardjid) -state disabled
@@ -259,7 +259,7 @@ proc ::VCard::Build {nstoken} {
           -textvariable ${nstoken}::elem($tag)
         grid $pbp.l$tag $pbp.e$tag -sticky e
     }
-    label $pbp.frmt -text {Format mm/dd/yyyy}
+    label $pbp.frmt -text [mc {Format mm/dd/yyyy}]
     grid $pbp.frmt -column 1 -sticky w
 
     label $pbp.email -text "[mc {Email addresses}]:"

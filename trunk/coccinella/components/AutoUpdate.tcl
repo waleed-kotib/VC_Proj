@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: AutoUpdate.tcl,v 1.3 2004-09-28 13:50:17 matben Exp $
+# $Id: AutoUpdate.tcl,v 1.4 2004-10-09 13:21:54 matben Exp $
 
 package require tinydom
 package require http 2.3
@@ -123,7 +123,7 @@ proc ::AutoUpdate::Command {token} {
 	    ::AutoUpdate::Dialog $releaseAttr $message $changesList
 	} elseif {!$opts(-silent)} {
 	    tk_messageBox -icon info -type ok -message \
-	      "You already have the latest version available ($prefs(fullVers))"
+	      [mc messaupdatelatest $prefs(fullVers)]
 	}
 	tinydom::cleanup $token
     }
@@ -141,7 +141,7 @@ proc ::AutoUpdate::Dialog {releaseAttr message changesList} {
 	return
     }
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
-    wm title $w "New Version"
+    wm title $w [mc {New Version}]
     set fontSB [option get . fontSmallBold {}]
     
     # Global frame.

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.109 2004-10-01 12:44:11 matben Exp $
+# $Id: Jabber.tcl,v 1.110 2004-10-09 13:21:55 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -1959,7 +1959,7 @@ proc ::Jabber::Logout::WithStatus { } {
     
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document closeBox}
-    wm title $w {Logout With Message}
+    wm title $w [mc {Logout With Message}]
     
     set fontSB [option get . fontSmallBold {}]
     
@@ -1967,14 +1967,14 @@ proc ::Jabber::Logout::WithStatus { } {
     frame $w.frall -borderwidth 1 -relief raised
     pack  $w.frall -fill both -expand 1 -ipadx 12 -ipady 4
     
-    ::headlabel::headlabel $w.frall.head -text {Logout}
+    ::headlabel::headlabel $w.frall.head -text [mc Logout]
     pack $w.frall.head -side top -fill both -expand 1
     
     # Entries etc.
     set frmid [frame $w.frall.frmid -borderwidth 0]
-    pack $frmid -side top -fill both -expand 1
+    pack $frmid -side top -fill both -expand 1 -pady 6
     
-    label $frmid.lstat -text "Status:" -font $fontSB -anchor e
+    label $frmid.lstat -text "[mc Message]:" -font $fontSB -anchor e
     entry $frmid.estat -width 36  \
       -textvariable [namespace current]::status
     grid $frmid.lstat -column 0 -row 1 -sticky e

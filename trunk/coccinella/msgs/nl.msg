@@ -32,7 +32,9 @@
 ::msgcat::mcset nl Close		{Sluiten}
 ::msgcat::mcset nl Conference		{Groepsgesprek}
 ::msgcat::mcset nl Connect		{Aanmelden}
+#::msgcat::mcset nl Connection
 #::msgcat::mcset nl Contact
+#::msgcat::mcset nl Contacts
 ::msgcat::mcset nl Country		{Land}
 ::msgcat::mcset nl Create		{Aanmaken}
 ::msgcat::mcset nl Customization	{Aanpassing}
@@ -52,6 +54,7 @@
 ::msgcat::mcset nl File			{Bestand}
 ::msgcat::mcset nl Finish		{Beëindigen}
 ::msgcat::mcset nl Finished		{Beëindigd}
+#::msgcat::mcset nl First
 #::msgcat::mcset nl Friends
 ::msgcat::mcset nl Forward		{Doorsturen}
 ::msgcat::mcset nl From			{Van}
@@ -66,9 +69,11 @@
 ::msgcat::mcset nl Inbox		{Postvak in}
 ::msgcat::mcset nl Info			{Info}
 ::msgcat::mcset nl Invite		{Uitnodigen}
+#::msgcat::mcset nl Last
 ::msgcat::mcset nl Less			{Minder}
 ::msgcat::mcset nl Login		{Aanmelden}
 ::msgcat::mcset nl Logout		{Afmelden}
+#::msgcat::mcset nl Message
 ::msgcat::mcset nl Middle		{Tussennaam}
 ::msgcat::mcset nl More			{Meer}
 ::msgcat::mcset nl Never		{Nooit}
@@ -88,6 +93,7 @@
 ::msgcat::mcset nl Phone		{Telefoon}
 ::msgcat::mcset nl Play			{Afspelen}
 ::msgcat::mcset nl Plugins		{Plugins}
+#::msgcat::mcset nl Port
 ::msgcat::mcset nl Preferences		{Voorkeuren}
 ::msgcat::mcset nl Previous		{Vorige}
 ::msgcat::mcset nl Print		{Afdrukken}
@@ -294,6 +300,7 @@
 ::msgcat::mcset nl mChatHistory     	{Berichtengeschiedenis}
 #::msgcat::mcset nl mLoginTrpt     	{Login To Transport}
 #::msgcat::mcset nl mLogoutTrpt     	{Logout From Transport}
+#::msgcat::mcset en mRemoveContact  	{Remove Contact...}
 
 
 
@@ -327,7 +334,9 @@
 ::msgcat::mcset nl {Chat With}			{Chat met}
 ::msgcat::mcset nl {Clear Disk Cache Now}	{Wis schijfcache nu}
 ::msgcat::mcset nl {Company Name}		{Bedrijfsnaam}
+#::msgcat::mcset nl {Component Info}
 ::msgcat::mcset nl {Conference server}		{Conferentieserver}
+#::msgcat::mcset nl {Contact Type}
 ::msgcat::mcset nl {Create Room}		{Kamer aanmaken}
 ::msgcat::mcset nl {Default group}		{Standaard groep}
 ::msgcat::mcset nl {Default Logout Status}	{Standaard afmeldstatus}
@@ -357,6 +366,7 @@
 ::msgcat::mcset nl {First name}			{Voornaam}
 ::msgcat::mcset nl {Font size}			{Lettergrootte}
 ::msgcat::mcset nl {Font weight}		{Schrijfwijze lettertype}
+#::msgcat::mcset nl {Format mm/dd/yyyy}
 ::msgcat::mcset nl {Get File}			{Bestand ophalen}
 ::msgcat::mcset nl {Get File Error}		{Bestandsfout ophalen}
 ::msgcat::mcset nl {Get vCard}			{vCard ophalen}
@@ -384,6 +394,7 @@
 ::msgcat::mcset nl {Last name}			{Achternaam}
 ::msgcat::mcset nl {Launch time}		{Opstarttijd}
 ::msgcat::mcset nl {Local Time}			{Lokale tijd}
+::msgcat::mcset nl {Logout With Message}        {Met &bericht afmelden}
 ::msgcat::mcset nl {Logged out}           	{Afgemeld}
 ::msgcat::mcset nl {Login as invisible}		{Als onzichtbaar aanmelden}
 ::msgcat::mcset nl {Mailbox Error}		{Mailbox fout}
@@ -402,6 +413,7 @@
 ::msgcat::mcset nl {New Topic}			{Nieuw onderwerp}
 ::msgcat::mcset nl {New shortcut}		{Nieuwe snelkoppeling}
 ::msgcat::mcset nl {New User}			{Nieuwe gebruiker}
+#::msgcat::mcset nl {New Version}
 ::msgcat::mcset nl {My vCard}			{Mijn vCard}
 ::msgcat::mcset nl {NAT Address}		{NAT adres}
 ::msgcat::mcset nl {Nick name}			{Bijnaam}
@@ -466,6 +478,8 @@
 ::msgcat::mcset nl {Set Status}			{Status instellen}
 ::msgcat::mcset nl {Settings Panels}		{Instellingen}
 ::msgcat::mcset nl {Setup Assistant}		{Setup assistent}
+#::msgcat::mcset nl {Slide Show}
+#::msgcat::mcset nl {Slide Show Folder}
 ::msgcat::mcset nl {Software Update}		{Software update}
 ::msgcat::mcset nl {Sounds & Speech}		{Geluiden & spraak}
 ::msgcat::mcset nl {Start Chat}			{Chat starten}
@@ -564,6 +578,7 @@ Dit vereist dat u Coccinella herstart voordat de wijzigingen worden doorgevoerd.
 Wilt u werkelijk verder gaan?}
 ::msgcat::mcset nl messpasswddifferent  {De wachtwoorden komen niet overeen.\
 Probeer alstublieft opnieuw.}
+#::msgcat::mcset nl messaupdatelatest    {You already have the latest version available (%s)}
 
 
 
@@ -754,6 +769,7 @@ met extensie .mov voor een QuickTime realtime live streaming verzending.\
 Dit kan zowel geluid (radio) als video (TV) zijn. Als alternatief kan u uw webbrowser gebruiken om het\
 SDP bestand te vinden voor een live transmissie, download het op de harde schijf en\
 open het als een normaal filmbestand.}
+#::msgcat::mcset nl printunixcmd                 {Shell print command, edit if desired}
 
 
 

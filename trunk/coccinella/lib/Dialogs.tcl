@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.47 2004-10-03 13:38:22 matben Exp $
+# $Id: Dialogs.tcl,v 1.48 2004-10-09 13:21:57 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -391,8 +391,7 @@ proc ::Dialogs::UnixPrintPS {w wtoprint} {
     set frtot [frame $w1.frin]
     pack $frtot -padx 10 -pady 10
     
-    message $frtot.msg -borderwidth 0 -aspect 1000 \
-      -text "Shell print command, edit if desired."
+    message $frtot.msg -borderwidth 0 -aspect 1000 -text [mc printunixcmd]
     entry $frtot.entcmd -width 20   \
       -textvariable [namespace current]::psCmd
     grid $frtot.msg -column 0 -row 0 -padx 4 -pady 2 -sticky news

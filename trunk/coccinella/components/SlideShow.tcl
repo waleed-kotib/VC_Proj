@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-#       $Id: SlideShow.tcl,v 1.9 2004-09-28 13:50:17 matben Exp $
+#       $Id: SlideShow.tcl,v 1.10 2004-10-09 13:21:54 matben Exp $
 
 namespace eval ::SlideShow:: {
     
@@ -17,7 +17,7 @@ proc ::SlideShow::Load { } {
     
     set menuspec \
       {cascade     {Slide Show}     {}                              normal   {} {} {
-	{command   {Pick Folder...} {::SlideShow::PickFolder $wtop} normal   {} {}}
+	{command   {Pick Directory} {::SlideShow::PickFolder $wtop} normal   {} {}}
 	{separator}
 	{command   {Previous}       {::SlideShow::Previous $wtop}   disabled {} {}}
 	{command   {Next}           {::SlideShow::Next $wtop}       disabled {} {}}
@@ -203,7 +203,7 @@ proc ::SlideShow::PickFolder {wtop} {
 	lappend opts -initialdir $prefs(slideShow,dir)
     }
     set ans [eval {
-	tk_chooseDirectory -mustexist 1 -title "Slide Show Folder"} $opts]
+	tk_chooseDirectory -mustexist 1 -title [mc {Slide Show Folder}]} $opts]
     if {$ans != ""} {
 	
 	# Check first if any useful content?
