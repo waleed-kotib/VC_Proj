@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: VCard.tcl,v 1.3 2003-04-28 13:32:29 matben Exp $
+# $Id: VCard.tcl,v 1.4 2003-09-08 12:46:36 matben Exp $
 
 package provide VCard 1.0
 
@@ -371,7 +371,7 @@ proc ::VCard::PushBtSetVCard { }  {
     set elem(email_internet) \
       [regsub -all "(\[^ \n\t]+)(\[ \n\t]*)" [$wemails get 1.0 end] {\1 } tmp]
     set elem(email_internet) [string trim $tmp]
-    set elem(desc) [$wdesctxt 1.0 end]
+    set elem(desc) [$wdesctxt get 1.0 end]
     
     # Collect all non empty entries, and send a vCard set.
     set argList {}
