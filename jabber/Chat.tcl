@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.72 2004-09-18 14:43:28 matben Exp $
+# $Id: Chat.tcl,v 1.73 2004-09-26 13:52:01 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -735,7 +735,7 @@ proc ::Jabber::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set frtop [frame $wthread.frtop -borderwidth 0]
     pack $frtop -side top -anchor w -fill x
     
-    set icon [::Jabber::Roster::GetPresenceIconEx $jid]
+    set icon [::Jabber::Roster::GetPresenceIconFromJid $jid]
 
     frame $frtop.fsub
     label $frtop.fsub.l -text "[mc Subject]:"
@@ -1456,7 +1456,7 @@ proc ::Jabber::Chat::PresenceHook {jid type args} {
     } else {
 	::Jabber::Chat::SetState $chattoken disabled
     }
-    set icon [::Jabber::Roster::GetPresenceIconEx $from]
+    set icon [::Jabber::Roster::GetPresenceIconFromJid $from]
     if {$icon != ""} {
 	$chatstate(wpresimage) configure -image $icon
     }

@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.65 2004-09-24 12:14:15 matben Exp $
+# $Id: jabberlib.tcl,v 1.66 2004-09-26 13:52:02 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -78,6 +78,8 @@
 #      jlibName config ?args?
 #      jlibName openstream server ?args?
 #      jlibName closestream
+#      jlibName element_deregister tag func
+#      jlibName element_register tag func ?seq?
 #      jlibName get_last to cmd
 #      jlibName get_time to cmd
 #      jlibName get_version to cmd
@@ -1862,6 +1864,27 @@ proc jlib::element_register {jlibname tag func {seq 50}} {
     lappend elementhook($tag) [list $func $seq]
     set elementhook($tag)  \
       [lsort -integer -index 1 [lsort -unique $elementhook($tag)]]
+}
+
+proc jlib::element_deregister {jlibname tag func} {
+    
+    upvar ${jlibname}::elementhook elementhook
+    
+    if {![info exists elementhook($tag)]} {
+	return ""
+    }
+    set ind -1
+    set found 0
+    foreach spec $elementhook($tag) {
+	incr ind
+	if {[string equal $func [lindex $spec 0]]} {
+	    set found 1
+	    break
+	}
+    }
+    if {$found} {
+	set elementhook($tag) [lreplace $elementhook($tag) $ind $ind]
+    }
 }
 
 proc jlib::element_run_hook {jlibname tag xmldata} {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JUser.tcl,v 1.2 2004-09-24 12:14:13 matben Exp $
+# $Id: JUser.tcl,v 1.3 2004-09-26 13:52:01 matben Exp $
 
 package provide JUser 1.0
 
@@ -296,9 +296,38 @@ proc ::Jabber::User::CloseCmd {wclose} {
 
 # Jabber::User::EditDlg --
 # 
-#       Edit user dialog.
+#       Dispatcher for edit dialog.
 
 proc ::Jabber::User::EditDlg {jid} {
+
+    if {[::Jabber::Roster::IsTransport $jid]} {
+	EditTransportDlg $jid
+    } else {
+	EditUserDlg $jid
+    }
+}
+
+proc ::Jabber::User::EditTransportDlg {jid} {
+    upvar ::Jabber::jstate jstate
+    
+    # We get jid2 here. For transports we need the full jid!
+    set res [$jstate(roster) getresources $jid]
+    set jid3 $jid/$res
+    set subscription [$jstate(roster) getsubscription $jid3]
+    jlib::splitjidex $jid node host x
+    set trpttype [$jstate(jlib) service gettype $host]
+    set subtype [lindex [split $trpttype /] 1]
+    set msg [mc jamessowntrpt $subtype $jid3 $subscription]
+
+    tk_messageBox -title [mc {Transport Info}] -type ok -message $msg \
+      -icon info
+}
+
+# Jabber::User::EditUserDlg --
+# 
+#       Edit user dialog.
+
+proc ::Jabber::User::EditUserDlg {jid} {
     global  this prefs wDlgs
 
     variable uid
