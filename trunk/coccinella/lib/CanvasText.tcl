@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasText.tcl,v 1.7 2003-12-12 13:46:44 matben Exp $
+# $Id: CanvasText.tcl,v 1.8 2003-12-18 14:19:35 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 
@@ -182,7 +182,7 @@ proc ::CanvasText::CanvasFocus {w x y {forceNew 0}} {
 	  [list [list $cmdlocal "local"] [list $cmdremote "remote"]]]
 	set undo [list ::CanvasUtils::Command $wtop $undocmd]
 	eval $redo
-	undo::add [::UI::GetUndoToken $wtop] $undo $redo
+	undo::add [::WB::GetUndoToken $wtop] $undo $redo
 
 	$w focus $utag
 	$w select clear
@@ -247,7 +247,7 @@ proc ::CanvasText::TextInsert {w char} {
     set redo [list ::CanvasUtils::Command $wtop $cmd]
     set undo [list ::CanvasUtils::Command $wtop $undocmd]    
     eval {$w} $cmd
-    undo::add [::UI::GetUndoToken $wtop] $undo $redo
+    undo::add [::WB::GetUndoToken $wtop] $undo $redo
         
     Debug 9 "TextInsert:: utag = $utag, ind = $ind, char: $char"
     
@@ -600,7 +600,7 @@ proc ::CanvasText::NewLine {w} {
       [list [list $cmdlocal "local"] [list $cmdremote "remote"]]]
     set undo [list ::CanvasUtils::Command $wtop $undocmd]
     eval $redo
-    undo::add [::UI::GetUndoToken $wtop] $undo $redo
+    undo::add [::WB::GetUndoToken $wtop] $undo $redo
 }
 
 # CanvasText::Delete --
@@ -653,7 +653,7 @@ proc ::CanvasText::Delete {w {offset 0}} {
 	set redo [list ::CanvasUtils::Command $wtop $cmd]
 	set undo [list ::CanvasUtils::Command $wtop $undocmd]    
 	eval $redo
-	undo::add [::UI::GetUndoToken $wtop] $undo $redo
+	undo::add [::WB::GetUndoToken $wtop] $undo $redo
     }
 }
 

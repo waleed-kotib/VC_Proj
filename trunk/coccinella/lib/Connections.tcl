@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Connections.tcl,v 1.13 2003-12-16 15:03:53 matben Exp $
+# $Id: Connections.tcl,v 1.14 2003-12-18 14:19:35 matben Exp $
 
 package provide Connections 1.0
 
@@ -219,8 +219,8 @@ proc ::OpenConnection::DoConnect {toNameOrNum toPort {propagateSizeToClients 1}}
     
     Debug 2 "DoConnect:: nameOrIP: $nameOrIP, remoteServPort: $remoteServPort"
 
-    ::UI::SetStatusMessage $wDlgs(mainwb) "Contacted $nameOrIP. Waiting for response..."
-    ::UI::StartStopAnimatedWaveOnMain 1
+    ::WB::SetStatusMessage $wDlgs(mainwb) "Contacted $nameOrIP. Waiting for response..."
+    ::WB::StartStopAnimatedWaveOnMain 1
     
     # Handle the TCP/IP channel; if internal pick internalIPnum
     
@@ -244,8 +244,8 @@ proc ::OpenConnection::DoConnect {toNameOrNum toPort {propagateSizeToClients 1}}
     if {$res} {
 	tk_messageBox -icon error -type ok -parent $wDlgs(mainwb) -message  \
 	  [FormatTextForMessageBox [::msgcat::mc messfailedsock $errorCode]]
-	::UI::SetStatusMessage $wDlgs(mainwb) {}
-	::UI::StartStopAnimatedWaveOnMain 0
+	::WB::SetStatusMessage $wDlgs(mainwb) {}
+	::WB::StartStopAnimatedWaveOnMain 0
 	update idletasks
 	return {}
     }
@@ -304,9 +304,9 @@ proc ::OpenConnection::WhenSocketOpensInits {nameOrIP server remoteServPort \
 	catch {unset killerId($server)}
     }
     
-    ::UI::StartStopAnimatedWaveOnMain 0
+    ::WB::StartStopAnimatedWaveOnMain 0
     if {[eof $server]} {
-	::UI::SetStatusMessage $wDlgs(mainwb) [::msgcat::mc messeofconnect]
+	::WB::SetStatusMessage $wDlgs(mainwb) [::msgcat::mc messeofconnect]
 	tk_messageBox -icon error -type ok -parent $wDlgs(mainwb) -message  \
 	  [FormatTextForMessageBox [::msgcat::mc messeofconnect]]	  
 	return
@@ -316,13 +316,13 @@ proc ::OpenConnection::WhenSocketOpensInits {nameOrIP server remoteServPort \
     if {[catch {fconfigure $server -sockname} sockname]} {
 	tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
 	  "Something went wrong (-sockname). $sockname"]	  
-	::UI::SetStatusMessage $wDlgs(mainwb) {}
+	::WB::SetStatusMessage $wDlgs(mainwb) {}
 	return {}
     }
     
     # Save ip number, names, socks etc. in arrays.
     if {![::OpenConnection::SetIpArrays $nameOrIP $server $remoteServPort]} {
-	::UI::SetStatusMessage $wDlgs(mainwb) {}
+	::WB::SetStatusMessage $wDlgs(mainwb) {}
 	return
     }
     if {[::Utils::IsIPNumber $nameOrIP]} {
@@ -333,7 +333,7 @@ proc ::OpenConnection::WhenSocketOpensInits {nameOrIP server remoteServPort \
 	set ipNum $ipName2Num($ipName)
     }
 
-    ::UI::SetStatusMessage $wDlgs(mainwb) "Client $ipName responded."
+    ::WB::SetStatusMessage $wDlgs(mainwb) "Client $ipName responded."
     
     # If a central server, then the single socket must be used full duplex.
     # This is only valid only for the clients.
@@ -472,8 +472,8 @@ proc ::OpenConnection::Kill {sock} {
 
     catch {close $sock}
     set statMess [::msgcat::mc messtimeout]
-    ::UI::SetStatusMessage $wDlgs(mainwb) $statMess
-    ::UI::StartStopAnimatedWaveOnMain 0
+    ::WB::SetStatusMessage $wDlgs(mainwb) $statMess
+    ::WB::StartStopAnimatedWaveOnMain 0
     if {[info exists killerId($sock)]} {
 	after cancel $killerId($sock)
 	catch {unset killerId($sock)}
@@ -542,8 +542,8 @@ proc ::OpenConnection::OpenCancelAllPending { } {
 
     Debug 2 "+OpenCancelAllPending::"
 
-    ::UI::SetStatusMessage $wDlgs(mainwb) {}
-    ::UI::StartStopAnimatedWaveOnMain 0
+    ::WB::SetStatusMessage $wDlgs(mainwb) {}
+    ::WB::StartStopAnimatedWaveOnMain 0
         
     # Pending Open connection:
     if {[info exists killerId]} {
@@ -835,7 +835,7 @@ proc ::OpenMulticast::OpenMulticastQTStream {wtop wentry} {
     }
     
     # This is opened as an ordinary movie.
-    set anchor [::CanvasUtils::NewImportAnchor]
+    set anchor [::CanvasUtils::NewImportAnchor $wCan]
     ::Import::DoImport $wCan $anchor -url $url
 }
 
@@ -849,7 +849,7 @@ proc ::OpenMulticast::CleanupMulticastQTStream {wtop fid fullName token} {
     #parray state
     
     # Waiting is over.
-    ::UI::StartStopAnimatedWaveOnMain 0
+    ::WB::StartStopAnimatedWaveOnMain 0
     
     # Access state as a Tcl array.
     # Check errors. 
@@ -882,11 +882,11 @@ proc ::OpenMulticast::CleanupMulticastQTStream {wtop fid fullName token} {
     }
     
     # This is opened as an ordinary movie.
-    set anchor [::CanvasUtils::NewImportAnchor]
+    set anchor [::CanvasUtils::NewImportAnchor $wCan]
     ::Import::DoImport $wCan "$anchor" -file $fullName  \
       -where "local"
     set fileTail [file tail $fullName]
-    ::UI::SetStatusMessage $wtop "Opened streaming live multicast: $fileTail."
+    ::WB::SetStatusMessage $wtop "Opened streaming live multicast: $fileTail."
     update idletasks
 }
 
@@ -901,7 +901,7 @@ proc ::OpenMulticast::ProgressMulticastQTStream {wtop fileTail token totalBytes 
     } else {
 	set txtLeft ""
     }
-    ::UI::SetStatusMessage $wtop "Getting $fileTail$txtLeft"
+    ::WB::SetStatusMessage $wtop "Getting $fileTail$txtLeft"
     update idletasks
 }
 

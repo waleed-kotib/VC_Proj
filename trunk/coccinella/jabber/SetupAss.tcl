@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: SetupAss.tcl,v 1.14 2003-12-15 08:20:53 matben Exp $
+# $Id: SetupAss.tcl,v 1.15 2003-12-18 14:19:35 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -113,7 +113,7 @@ proc ::Jabber::SetupAss::SetupAss {w} {
     pack [frame $p5.fr] -padx 10 -pady 8 -side top -anchor w
     message $p5.fr.msg1 -width 260 -text   \
       [::msgcat::mc sufinmsg]
-    label $p5.fr.piga -image [::UI::GetIcon igelpiga]
+    label $p5.fr.piga -image [::Theme::GetImage ladybug]
     grid $p5.fr.msg1 -sticky n
     grid $p5.fr.piga -sticky w
     

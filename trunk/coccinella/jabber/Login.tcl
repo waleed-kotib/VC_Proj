@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.12 2003-12-15 08:20:53 matben Exp $
+# $Id: Login.tcl,v 1.13 2003-12-18 14:19:34 matben Exp $
 
 package provide Login 1.0
 
@@ -512,7 +512,7 @@ proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
     
     # Set communication entry in UI.
     if {$prefs(jabberCommFrame)} {
-	::UI::ConfigureAllJabberEntries $ipNum -netstate "connect"	
+	::WB::ConfigureAllJabberEntries $ipNum -netstate "connect"	
     } else {
 	::UI::SetCommEntry $wDlgs(mainwb) $ipNum 1 -1 -jidvariable ::Jabber::jstate(.,tojid)  \
 	  -dosendvariable ::Jabber::jstate(.,doSend)
@@ -524,7 +524,7 @@ proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
     ::Jabber::Browse::SetUIWhen "connect"
 
     # Multiinstance whiteboard UI stuff.
-    foreach w [::UI::GetAllWhiteboards] {
+    foreach w [::WB::GetAllWhiteboards] {
 	set wtop [::UI::GetToplevelNS $w]
 	set ::Jabber::jstate($wtop,tojid) "@${server}"
 

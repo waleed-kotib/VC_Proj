@@ -7,10 +7,12 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.16 2003-12-12 13:46:44 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.17 2003-12-18 14:19:35 matben Exp $
+
+package require sha1pure
 
 package provide CanvasUtils 1.0
-package require sha1pure
+
 
 namespace eval ::CanvasUtils:: {
     
@@ -651,7 +653,7 @@ proc ::CanvasUtils::ItemConfigure {w id args} {
     set undo [list ::CanvasUtils::CommandExList $wtop  \
       [list [list $undocmd "local"] [list $undocmdremote "remote"]]]
     eval $redo
-    undo::add [::UI::GetUndoToken $wtop] $undo $redo
+    undo::add [::WB::GetUndoToken $wtop] $undo $redo
     
     # If selected, redo the selection to fit.
     set idsMarker [$w find withtag id$id]
@@ -689,7 +691,7 @@ proc ::CanvasUtils::ItemCoords {w id coords} {
     set redo [list ::CanvasUtils::Command $wtop $cmd]
     set undo [list ::CanvasUtils::Command $wtop $undocmd]
     eval $redo
-    undo::add [::UI::GetUndoToken $wtop] $undo $redo
+    undo::add [::WB::GetUndoToken $wtop] $undo $redo
     
     # If selected, redo the selection to fit.
     set idsMarker [$w find withtag id$id]
@@ -799,7 +801,7 @@ proc ::CanvasUtils::DoItemPopup {w x y} {
     if {![winfo exists $m]} {	
 	::UI::NewMenu $wtop $m {} $menuDefs(pop,$type) normal -id $id -w $w
 	if {[string equal $type "text"]} {
-	    ::UI::BuildCanvasPopupFontMenu $w ${m}.mfont $id $prefs(canvasFonts)
+	    ::WB::BuildCanvasPopupFontMenu $w ${m}.mfont $id $prefs(canvasFonts)
 	}
 	
 	# This one is needed on the mac so the menu is built before
@@ -977,11 +979,10 @@ proc ::CanvasUtils::SetTextItemFontWeight {w id fontweight} {
 # Results:
 #       list of x and y.
 
-proc ::CanvasUtils::NewImportAnchor { } {
+proc ::CanvasUtils::NewImportAnchor {wcan} {
     global  prefs
     
     variable importAnchor
-    upvar ::UI::dims dims
     
     set x $importAnchor(x)
     set y $importAnchor(y)
@@ -989,8 +990,10 @@ proc ::CanvasUtils::NewImportAnchor { } {
     # Update 'importAnchor'.
     incr importAnchor(x) $prefs(offsetCopy)
     incr importAnchor(y) $prefs(offsetCopy)
-    if {($importAnchor(x) > [expr $dims(wCanvas) - 60]) ||   \
-      ($importAnchor(y) > [expr $dims(hCanvas) - 60])} {
+    foreach {x0 y0 width height} [$wcan cget -scrollregion] break
+    
+    if {($importAnchor(x) > [expr $width - 60]) ||   \
+      ($importAnchor(y) > [expr $height - 60])} {
 	set importAnchor(x) $prefs(offsetCopy)
 	set importAnchor(y) $prefs(offsetCopy)
     }
@@ -1316,7 +1319,7 @@ proc ::CanvasUtils::HandleCanvasDraw {wtop instr} {
     if {$prefs(privacy) == 0} {
 	set redo [list ::CanvasUtils::Command $wtop $instr]
 	set undo [::CanvasUtils::GetUndoCommand $wtop $instr]
-	undo::add [::UI::GetUndoToken $wtop] $undo $redo
+	undo::add [::WB::GetUndoToken $wtop] $undo $redo
     }
     
     # The 'import' command is an exception case (for the future). 

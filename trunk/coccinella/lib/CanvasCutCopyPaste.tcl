@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasCutCopyPaste.tcl,v 1.6 2003-12-12 13:46:44 matben Exp $
+# $Id: CanvasCutCopyPaste.tcl,v 1.7 2003-12-18 14:19:35 matben Exp $
 
 package provide CanvasCutCopyPaste 1.0
 
@@ -213,7 +213,7 @@ proc ::CanvasCCP::PasteFromClipboardToCanvas {w} {
 	
 	# Find out if there is a current focus on a text item.
 	if {[$w focus] == ""} {
-	    eval ::CanvasText::CanvasFocus $w [::CanvasUtils::NewImportAnchor] 1
+	    eval ::CanvasText::CanvasFocus $w [::CanvasUtils::NewImportAnchor $w] 1
 	}
 	::CanvasText::TextInsert $w $cmds
 	
@@ -285,7 +285,7 @@ proc ::CanvasCCP::PasteSingleFromClipboardToCanvas {w cmd} {
       [list [list $newcmd "local"] [list $cmdremote "remote"]]]
     set undo [list ::CanvasUtils::Command $wtop $undocmd]
     eval $redo
-    undo::add [::UI::GetUndoToken $wtop] $undo $redo
+    undo::add [::WB::GetUndoToken $wtop] $undo $redo
     
     # Create new bbox and select item.
     ::CanvasDraw::MarkBbox $w 1 $utag

@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: PutFileIface.tcl,v 1.12 2003-12-12 13:46:44 matben Exp $
+# $Id: PutFileIface.tcl,v 1.13 2003-12-18 14:19:35 matben Exp $
 
 package require putfile
 package require uriencode
@@ -196,7 +196,7 @@ proc ::PutFileIface::PutCommand {puttoken token what msg} {
 	    # The 'msg' is typically a low level error msg.
 	    switch -- $ncode {
 		320 - 321 - 323 {
-		    ::UI::SetStatusMessage $wtop $msg
+		    ::WB::SetStatusMessage $wtop $msg
 		} 
 		default {
 		    set errmsg "Failed while putting file \"$putstate(tail)\""
@@ -204,13 +204,13 @@ proc ::PutFileIface::PutCommand {puttoken token what msg} {
 			tk_messageBox -title [::msgcat::mc {Put File Error}] \
 			  -type ok -message $errmsg
 		    }
-		    ::UI::SetStatusMessage $wtop $errmsg
+		    ::WB::SetStatusMessage $wtop $errmsg
 		}		
 	    }
 	}
 	unset putstate
     } elseif {[string equal $what "ok"]} {
-	::UI::SetStatusMessage $wtop $msg
+	::WB::SetStatusMessage $wtop $msg
 	if {[::putfile::status $token] == "ok"} {
 	    ::putfile::cleanup $token
 	    unset putstate

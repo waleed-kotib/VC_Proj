@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Import.tcl,v 1.7 2003-12-12 13:46:44 matben Exp $
+# $Id: Import.tcl,v 1.8 2003-12-18 14:19:35 matben Exp $
 
 package require http
 package require httpex
@@ -58,7 +58,7 @@ proc ::Import::ImportImageOrMovieDlg {wtop} {
     # this MIME type.
     set mime [::Types::GetMimeTypeForFileName $fileName]
     if {[::Plugins::HaveImporterForMime $mime]} {
-	set opts [list -coords [::CanvasUtils::NewImportAnchor]]	
+	set opts [list -coords [::CanvasUtils::NewImportAnchor $wCan]]	
 	set errMsg [::Import::DoImport $wCan $opts -file $fileName]
 	if {$errMsg != ""} {
 	    tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
@@ -343,7 +343,7 @@ proc ::Import::DoImport {w opts args} {
 	set redo [concat [list ::Import::DoImport $w $opts -addundo 0] \
 	  $args]
 	set undo [list ::CanvasUtils::Command $wtopNS [list delete $useTag]]
-	undo::add [::UI::GetUndoToken $wtopNS] $undo $redo
+	undo::add [::WB::GetUndoToken $wtopNS] $undo $redo
     }
     return $errMsg
 }
@@ -849,7 +849,7 @@ proc ::Import::HttpProgress {gettoken token total current} {
 		  [list $status $gettoken $token $total $current]	
 	    } else {
 		set wtop $getstate(wtop)
-		::UI::SetStatusMessage $wtop \
+		::WB::SetStatusMessage $wtop \
 		  "Getting file \"$getstate(tail)\", $current out of $total"
 	    }	    
 	}
@@ -915,15 +915,15 @@ proc ::Import::HttpCommand {gettoken token} {
 	switch -- $status {
 	    timeout {
 		set msg "Timeout waiting for file \"$tail\""
-		::UI::SetStatusMessage $wtop $msg
+		::WB::SetStatusMessage $wtop $msg
 		tk_messageBox -title [::msgcat::mc Timeout] -icon info \
 		  -type ok -message $msg
 	    }
 	    ok {
-		::UI::SetStatusMessage $wtop "Finished getting file \"$tail\""
+		::WB::SetStatusMessage $wtop "Finished getting file \"$tail\""
 	    }
 	    error {
-		::UI::SetStatusMessage $wtop $errMsg
+		::WB::SetStatusMessage $wtop $errMsg
 	    }
 	    default {
 		# ???
@@ -959,7 +959,7 @@ proc ::Import::HttpCommand {gettoken token} {
 	if {$haveCommand} {
 	    uplevel #0 $argsArr(-command) [list $stateStatus $gettoken $token]	
 	} elseif {$errMsg != ""} {
-	    ::UI::SetStatusMessage $wtop "Failed importing \"$tail\" $errMsg"
+	    ::WB::SetStatusMessage $wtop "Failed importing \"$tail\" $errMsg"
 	}
 	
 	# Cleanup:
@@ -991,11 +991,11 @@ proc ::Import::ImportProgress {line status gettoken httptoken total current} {
 	} else {
 	    set errmsg "File transfer error for \"$getstate(url)\""
 	}
-	::UI::SetStatusMessage $wtop "Failed getting url: $errmsg"
+	::WB::SetStatusMessage $wtop "Failed getting url: $errmsg"
     } else {
 	set wcan $getstate(wcan)
 	set msg "Getting \"$getstate(tail)\", [::Timing::FormMessage $getstate(timingkey) $total]"
-	::UI::SetStatusMessage $wtop $msg
+	::WB::SetStatusMessage $wtop $msg
     }
 }
 
@@ -1021,14 +1021,14 @@ proc ::Import::ImportCommand {line stateStatus gettoken httptoken} {
 
     switch -- $stateStatus {
 	timeout {
-	    ::UI::SetStatusMessage $wtop "Timeout waiting for file \"$tail\""
+	    ::WB::SetStatusMessage $wtop "Timeout waiting for file \"$tail\""
 	}
 	connect {
 	    set domain [::Utils::GetDomainNameFromUrl $getstate(url)]
-	    ::UI::SetStatusMessage $wtop "Contacting $domain..."
+	    ::WB::SetStatusMessage $wtop "Contacting $domain..."
 	}
 	ok {
-	    ::UI::SetStatusMessage $wtop "Finished getting file \"$tail\""
+	    ::WB::SetStatusMessage $wtop "Finished getting file \"$tail\""
 	}
 	error {
 	    if {$getstate(ncode) != "200"} {
@@ -1040,10 +1040,10 @@ proc ::Import::ImportCommand {line stateStatus gettoken httptoken} {
 		append msg [httpex::error $httptoken]
 		append msg $getstate(error)
 	    }
-	    ::UI::SetStatusMessage $wtop $msg
+	    ::WB::SetStatusMessage $wtop $msg
 	}
 	eof {
-	    ::UI::SetStatusMessage $wtop "Error getting file \"$tail\""
+	    ::WB::SetStatusMessage $wtop "Error getting file \"$tail\""
 	}
     }
 
@@ -1144,7 +1144,7 @@ proc ::Import::HttpGetQuickTimeTcl {wtop url opts args} {
 	catch {destroy $wfr}
 	return
     }
-    ::UI::SetStatusMessage $wtop "Opening $url"    
+    ::WB::SetStatusMessage $wtop "Opening $url"    
 }
 
 # Import::QuickTimeTclCallback --
@@ -1167,22 +1167,22 @@ proc ::Import::QuickTimeTclCallback {gettoken w msg {err {}}} {
 	    if {[string length $err]} {
 		append msg " $err"
 	    }
-	    ::UI::SetStatusMessage $wtop ""
+	    ::WB::SetStatusMessage $wtop ""
 	    tk_messageBox -icon error -type ok \
 	      -message [FormatTextForMessageBox $msg]
 	    catch {destroy $getstate(wfr)}
 	    return
 	}
 	loading {	    
-	    ::UI::SetStatusMessage $wtop "Loading: \"$getstate(tail)\""
+	    ::WB::SetStatusMessage $wtop "Loading: \"$getstate(tail)\""
 	}
 	playable {
 	    set canmap 1
-	    ::UI::SetStatusMessage $wtop "Now playable: \"$getstate(tail)\""
+	    ::WB::SetStatusMessage $wtop "Now playable: \"$getstate(tail)\""
 	}
 	complete {
 	    set canmap 1	    
-	    ::UI::SetStatusMessage $wtop "Completed: \"$getstate(tail)\""
+	    ::WB::SetStatusMessage $wtop "Completed: \"$getstate(tail)\""
 	}
     }
     
@@ -1722,7 +1722,7 @@ proc ::Import::ResizeImage {wtop zoomFactor which newTag {where all}} {
 	set redo [list ::CanvasUtils::GenCommandExList $wtop $cmdExList]
 	set undo [list ::CanvasUtils::GenCommandExList $wtop $undocmdExList]
 	eval $redo
-	undo::add [::UI::GetUndoToken $wtop] $undo $redo
+	undo::add [::WB::GetUndoToken $wtop] $undo $redo
     }
     ::UserActions::DeselectAll $wtop
     

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UserActions.tcl,v 1.23 2003-12-16 15:03:53 matben Exp $
+# $Id: UserActions.tcl,v 1.24 2003-12-18 14:19:35 matben Exp $
 
 namespace eval ::UserActions:: {
     
@@ -32,8 +32,8 @@ proc ::UserActions::CancelAllPutGetAndPendingOpen {wtop} {
     ::Import::HttpResetAll $wtop
     if {[string equal $prefs(protocol) "jabber"]} {
 	::Network::KillAll
-	::UI::SetStatusMessage $wtop {}
-	::UI::StartStopAnimatedWaveInWB $wtop 0
+	::WB::SetStatusMessage $wtop {}
+	::WB::StartStopAnimatedWave $wtop 0
     } else {
 	::OpenConnection::OpenCancelAllPending
     }
@@ -110,7 +110,7 @@ proc ::UserActions::RaiseOrLowerItems {wtop {what raise}} {
     set redo [list ::CanvasUtils::CommandList $wtop $cmdList]
     set undo [list ::CanvasUtils::CommandList $wtop $undoList]
     eval $redo
-    undo::add [::UI::GetUndoToken $wtop] $undo $redo
+    undo::add [::WB::GetUndoToken $wtop] $undo $redo
 }
 
 # UserActions::SetCanvasBgColor --
@@ -138,7 +138,7 @@ proc ::UserActions::SetCanvasBgColor {wtop} {
 	set redo [list ::CanvasUtils::Command $wtop $cmd]
 	set undo [list ::CanvasUtils::Command $wtop $undocmd]
 	eval $redo
-	undo::add [::UI::GetUndoToken $wtop] $undo $redo
+	undo::add [::WB::GetUndoToken $wtop] $undo $redo
     }
 }
 
@@ -409,7 +409,7 @@ proc ::UserActions::ResizeItem {wtop factor} {
     set redo [list ::CanvasUtils::CommandList $wtop $cmdList]
     set undo [list ::CanvasUtils::CommandList $wtop $undoList]
     eval $redo
-    undo::add [::UI::GetUndoToken $wtop] $undo $redo
+    undo::add [::WB::GetUndoToken $wtop] $undo $redo
     
     # New markers.
     foreach id $ids {
@@ -455,7 +455,7 @@ proc ::UserActions::FlipItem {wtop direction} {
     set redo [list ::CanvasUtils::Command $wtop $cmd]
     set undo [list ::CanvasUtils::Command $wtop $undocmd]
     eval $redo
-    undo::add [::UI::GetUndoToken $wtop] $undo $redo
+    undo::add [::WB::GetUndoToken $wtop] $undo $redo
 	
     # New markers.
     $w delete id$id
@@ -472,7 +472,7 @@ proc ::UserActions::Undo {wtop} {
     ::CanvasText::DoSendBufferedText $wtop
     
     # The actual undo command.
-    undo::undo [::UI::GetUndoToken $wtop]
+    undo::undo [::WB::GetUndoToken $wtop]
     
     ::CanvasDraw::SyncMarks $wtop
 }
@@ -483,7 +483,7 @@ proc ::UserActions::Undo {wtop} {
 
 proc ::UserActions::Redo {wtop} {
     
-    undo::redo [::UI::GetUndoToken $wtop]
+    undo::redo [::WB::GetUndoToken $wtop]
 }
 
 # UserActions::DoEraseAll --
@@ -717,7 +717,7 @@ proc ::UserActions::DoCloseWindow {{wevent {}}} {
     
     switch -- $w \
       $wDlgs(mainwb) {
-	::UI::CloseWhiteboard $wtop
+	::WB::CloseWhiteboard $wtop
 	return
     } \
       $wDlgs(jrostbro) {
@@ -731,7 +731,7 @@ proc ::UserActions::DoCloseWindow {{wevent {}}} {
 	
 	    # NOT ALWAYS CORRECT!!!!!!!
 	    # Whiteboard window.
-	    ::UI::CloseWhiteboard $wtop
+	    ::WB::CloseWhiteboard $wtop
 	}
 	Preferences {
 	    ::Preferences::CancelPushBt
@@ -783,14 +783,14 @@ proc ::UserActions::DoQuit {args} {
     catch ::tinyhttpd::stop
 
     # Before quitting, save whiteboard preferences and geom state. 
-    set wbList [::UI::GetAllWhiteboards]
+    set wbList [::WB::GetAllWhiteboards]
     if {[llength $wbList] > 0} {
 	set wtop [::UI::GetToplevelNS [lindex $wbList 0]]
-	::UI::SaveWhiteboardState $wtop
+	::WB::SaveWhiteboardState $wtop
 	
 	# P2p needs to be saved without extra entries.
 	if {![string equal $prefs(protocol) "jabber"]} {
-	    ::UI::SaveCleanWhiteboardDims $wtop
+	    ::WB::SaveCleanWhiteboardDims $wtop
 	}
     }
         

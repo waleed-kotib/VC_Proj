@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ItemInspector.tcl,v 1.13 2003-12-16 15:03:53 matben Exp $
+# $Id: ItemInspector.tcl,v 1.14 2003-12-18 14:19:35 matben Exp $
 
 namespace eval ::ItemInspector::  {
     
@@ -104,7 +104,7 @@ proc ::ItemInspector::ItemInspector {wtop which args} {
     }
     
     # Query the whiteboard's state.
-    array set opts [::UI::ConfigureMain $wtop]
+    array set opts [::WB::ConfigureMain $wtop]
     array set opts $args
     foreach id $idlist {
 	set tags [$wCan gettags $id]

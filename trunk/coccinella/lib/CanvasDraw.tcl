@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasDraw.tcl,v 1.17 2003-11-30 11:46:47 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.18 2003-12-18 14:19:35 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 #  
@@ -791,7 +791,7 @@ proc ::CanvasDraw::FinalizeMove {w x y {what item}} {
     }
     eval $redo "remote"
     if {[info exists undo]} {
-	undo::add [::UI::GetUndoToken $wtop] $undo $redo
+	undo::add [::WB::GetUndoToken $wtop] $undo $redo
     }    
     catch {unset xDrag}
 }
@@ -835,7 +835,7 @@ proc ::CanvasDraw::FinMoveFrame {wcan wframe  x y} {
     }
     eval $redo "remote"
     if {[info exists undo]} {
-	undo::add [::UI::GetUndoToken $wtop] $undo $redo
+	undo::add [::WB::GetUndoToken $wtop] $undo $redo
     }    
     catch {unset xDragFrame}
 }
@@ -875,7 +875,7 @@ proc ::CanvasDraw::FinMoveWindow {wcan win x y} {
     }
     eval $redo "remote"
     if {[info exists undo]} {
-	undo::add [::UI::GetUndoToken $wtop] $undo $redo
+	undo::add [::WB::GetUndoToken $wtop] $undo $redo
     }    
     catch {unset xDragWin}
 }
@@ -1150,7 +1150,7 @@ proc ::CanvasDraw::FinalizeBox {w x y shift type {mark 0}} {
 	set redo [list ::CanvasUtils::Command $wtop $cmd]
 	set undo [list ::CanvasUtils::Command $wtop $undocmd]
 	eval $redo
-	undo::add [::UI::GetUndoToken $wtop] $undo $redo
+	undo::add [::WB::GetUndoToken $wtop] $undo $redo
     }
     catch {unset theBox}
 }
@@ -1254,7 +1254,7 @@ proc ::CanvasDraw::InitArc {w x y {shift 0}} {
 	bind $w <KeyPress-space> {
 	    ::CanvasDraw::ArcCancel %W
 	}
-	::UI::SetStatusMessage $wtop [::msgcat::mc uastatarc2]
+	::WB::SetStatusMessage $wtop [::msgcat::mc uastatarc2]
 	
     } else {
 	
@@ -1362,7 +1362,7 @@ proc ::CanvasDraw::FinalizeArc {w x y} {
 
     Debug 2 "FinalizeArc:: w=$w"
 
-    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatarc]
+    ::WB::SetStatusMessage $wtop [::msgcat::mc uastatarc]
     bind $w <B1-Motion> {}
     bind $w <ButtonRelease-1> {}
     bind $w <KeyPress-space> {}
@@ -1395,7 +1395,7 @@ proc ::CanvasDraw::FinalizeArc {w x y} {
     set redo [list ::CanvasUtils::Command $wtop $cmd]
     set undo [list ::CanvasUtils::Command $wtop $undocmd]
     eval $redo
-    undo::add [::UI::GetUndoToken $wtop] $undo $redo
+    undo::add [::WB::GetUndoToken $wtop] $undo $redo
     catch {unset arcBox}
 }
 
@@ -1414,7 +1414,7 @@ proc ::CanvasDraw::ArcCancel {w} {
     variable arcBox
     set wtop [::UI::GetToplevelNS $w]
 
-    ::UI::SetStatusMessage $wtop [::msgcat::mc uastatarc]
+    ::WB::SetStatusMessage $wtop [::msgcat::mc uastatarc]
     catch {$w delete tcent}
     catch {unset arcBox}
 }
@@ -1597,7 +1597,7 @@ proc ::CanvasDraw::FinalizePoly {w x y} {
     set redo [list ::CanvasUtils::Command $wtop $cmd]
     set undo [list ::CanvasUtils::Command $wtop $undocmd]
     eval $redo
-    undo::add [::UI::GetUndoToken $wtop] $undo $redo
+    undo::add [::WB::GetUndoToken $wtop] $undo $redo
     catch {unset thePoly}
 }
 
@@ -1728,7 +1728,7 @@ proc ::CanvasDraw::FinalizeLine {w x y shift {opt 0}} {
     set redo [list ::CanvasUtils::Command $wtop $cmd]
     set undo [list ::CanvasUtils::Command $wtop $undocmd]
     eval $redo
-    undo::add [::UI::GetUndoToken $wtop] $undo $redo
+    undo::add [::WB::GetUndoToken $wtop] $undo $redo
     catch {unset theLine}
 }
 
@@ -1854,7 +1854,7 @@ proc ::CanvasDraw::FinalizeStroke {w x y {brush 0}} {
     set redo [list ::CanvasUtils::Command $wtop $cmd]
     set undo [list ::CanvasUtils::Command $wtop $undocmd]
     eval $redo
-    undo::add [::UI::GetUndoToken $wtop] $undo $redo
+    undo::add [::WB::GetUndoToken $wtop] $undo $redo
     catch {unset stroke}
 }
 
@@ -2020,7 +2020,7 @@ proc ::CanvasDraw::DoPaint {w x y {shift 0}} {
 		set redo [list ::CanvasUtils::Command $wtop $cmd]
 		set undo [list ::CanvasUtils::Command $wtop $undocmd]
 		eval $redo
-		undo::add [::UI::GetUndoToken $wtop] $undo $redo	    
+		undo::add [::WB::GetUndoToken $wtop] $undo $redo	    
 	    }
 	}
     }
@@ -2199,7 +2199,7 @@ proc ::CanvasDraw::FinalizeRotate {w x y} {
     set redo [list ::CanvasUtils::Command $wtop $cmd]
     set undo [list ::CanvasUtils::Command $wtop $undocmd]
     ::CanvasUtils::Command $wtop $cmd "remote"
-    undo::add [::UI::GetUndoToken $wtop] $undo $redo	    
+    undo::add [::WB::GetUndoToken $wtop] $undo $redo	    
     catch {unset rotDrag}
 }
 
@@ -2303,7 +2303,7 @@ proc ::CanvasDraw::DeleteItem {w x y {id current} {where all}} {
     set undo [list ::CanvasDraw::EvalCommandList $undoCmdList]
 
     eval $redo
-    undo::add [::UI::GetUndoToken $wtop] $undo $redo
+    undo::add [::WB::GetUndoToken $wtop] $undo $redo
     
     # Remove select marks.
     if {$needDeselect} {
@@ -2357,7 +2357,7 @@ proc ::CanvasDraw::DeleteFrame {wcan wframe x y {where all}} {
     # We need to reconstruct how it was imported.
     set undo [::CanvasUtils::GetUndoCommand $wtop [list delete $utag]]
     eval $redo
-    undo::add [::UI::GetUndoToken $wtop] $undo $redo
+    undo::add [::WB::GetUndoToken $wtop] $undo $redo
 }
 
 # CanvasDraw::DeleteWindow --
@@ -2404,7 +2404,7 @@ proc ::CanvasDraw::DeleteWindow {wcan win x y {where all}} {
     # We need to reconstruct how it was imported.
     set undo [::CanvasUtils::GetUndoCommand $wtop [list delete $utag]]
     eval $redo
-    undo::add [::UI::GetUndoToken $wtop] $undo $redo
+    undo::add [::WB::GetUndoToken $wtop] $undo $redo
 }
 
 # CanvasDraw::MarkBbox --
@@ -2654,7 +2654,7 @@ proc ::CanvasDraw::MakeSpeechBubble {w id} {
     set redo [list ::CanvasUtils::CommandList $wtop [list $redocmd $cmdLower]]
     set undo [list ::CanvasUtils::Command $wtop $undocmd]
     eval $redo
-    undo::add [::UI::GetUndoToken $wtop] $undo $redo
+    undo::add [::WB::GetUndoToken $wtop] $undo $redo
 }
 
 proc ::CanvasDraw::SpeechBubbleCmd {w bbox args} {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.11 2003-12-16 15:03:53 matben Exp $
+# $Id: JUI.tcl,v 1.12 2003-12-18 14:19:34 matben Exp $
 
 package provide JUI 1.0
 
@@ -13,6 +13,7 @@ package provide JUI 1.0
 namespace eval ::Jabber::UI:: {
 
     # Use option database for customization.
+    # Shortcut buttons.
     option add *JMain.connectImage                connect         widgetDefault
     option add *JMain.connectDisImage             connectDis      widgetDefault
     option add *JMain.inboxImage                  inbox           widgetDefault
@@ -23,6 +24,12 @@ namespace eval ::Jabber::UI:: {
     option add *JMain.newuserDisImage             newuserDis      widgetDefault
     option add *JMain.stopImage                   stop            widgetDefault
     option add *JMain.stopDisImage                stopDis         widgetDefault
+
+    # Other icons.
+    option add *JMain.contactOffImage             contactOff      widgetDefault
+    option add *JMain.contactOnImage              contactOn       widgetDefault
+    option add *JMain.waveImage                   wave            widgetDefault
+    option add *JMain.resizeHandleImage           resizehandle    widgetDefault
 
     option add *JMain*Tree.background             #dedede         widgetDefault
     option add *JMain*Tree.backgroundImage        {}              widgetDefault
@@ -152,6 +159,10 @@ proc ::Jabber::UI::Build {w} {
     set iconStop        [::Theme::GetImage [option get $fall stopImage {}]]
     set iconStopDis     [::Theme::GetImage [option get $fall stopDisImage {}]]
 
+    # Other icons.
+    set iconContactOff [::Theme::GetImage [option get $fall contactOffImage {}]]
+    set iconResize     [::Theme::GetImage [option get $fall resizeHandleImage {}]]
+
     set fontS [option get . fontSmall {}]
     
     set wtray ${fall}.top
@@ -182,8 +193,6 @@ proc ::Jabber::UI::Build {w} {
     set jwapp(mystatus) ${wbot}.stat
     set jwapp(myjid) ${wbot}.e
     set jwapp(mypresmenu) ${wbot}.stat.mt
-    set iconResize     [::UI::GetIcon resizehandle]
-    set iconContactOff [::UI::GetIcon contact_off]
     
     pack [frame $wbot -relief raised -borderwidth 1]  \
       -side bottom -fill x -pady 0
@@ -324,8 +333,9 @@ proc ::Jabber::UI::LogoutClear { } {
 
 proc ::Jabber::UI::StartStopAnimatedWave {start} {
     variable jwapp
-    
-    ::UI::StartStopAnimatedWave $jwapp(statmess) $start
+
+    set waveImage [::Theme::GetImage [option get $jwapp(fall) waveImage {}]]  
+    ::UI::StartStopAnimatedWave $jwapp(statmess) $waveImage $start
 }
 
 proc ::Jabber::UI::SetStatusMessage {msg} {
@@ -768,12 +778,16 @@ proc ::Jabber::UI::Popup {what w v x y} {
 proc ::Jabber::UI::FixUIWhen {what} {
     variable jwapp
         
-    set w $jwapp(wtopRost)
-    set wtop ${w}.
+    set w     $jwapp(wtopRost)
+    set wtop  ${w}.
+    set wall  $jwapp(fall)
     set wmenu $jwapp(wmenu)
-    set wmj ${wmenu}.jabber
+    set wmj   ${wmenu}.jabber
     set wtray $jwapp(wtray)
-    
+
+    set contactOffImage [::Theme::GetImage [option get $wall contactOffImage {}]]
+    set contactOnImage  [::Theme::GetImage [option get $wall contactOnImage {}]]
+
     switch -exact -- $what {
 	connectinit {
 	    $wtray buttonconfigure connect -state disabled
@@ -786,7 +800,7 @@ proc ::Jabber::UI::FixUIWhen {what} {
 	    $wtray buttonconfigure connect -state disabled
 	    $wtray buttonconfigure newuser -state normal
 	    $wtray buttonconfigure stop -state disabled
-	    $jwapp(elplug) configure -image [::UI::GetIcon contact_on]
+	    $jwapp(elplug) configure -image $contactOnImage
 	    ::UI::MenuMethod $wmj entryconfigure mNewAccount -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mLogin  \
 	      -label [::msgcat::mc Logout] -state normal -command \
@@ -810,7 +824,7 @@ proc ::Jabber::UI::FixUIWhen {what} {
 	    $wtray buttonconfigure connect -state normal
 	    $wtray buttonconfigure newuser -state disabled
 	    $wtray buttonconfigure stop -state disabled
-	    $jwapp(elplug) configure -image [::UI::GetIcon contact_off]
+	    $jwapp(elplug) configure -image $contactOffImage
 	    ::UI::MenuMethod $wmj entryconfigure mNewAccount -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mLogin  \
 	      -label "[::msgcat::mc Login]..." -state normal \
