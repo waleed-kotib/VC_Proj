@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: tinyfileutils.tcl,v 1.2 2003-01-11 16:16:08 matben Exp $
+# $Id: tinyfileutils.tcl,v 1.3 2004-11-30 15:11:10 matben Exp $
 
 package provide tinyfileutils 1.0
 
@@ -223,6 +223,86 @@ proc addabsolutepathwithrelative {absPath relPath} {
         set finalAbsPath "/[join $completePath "/"]"
     }
     return $finalAbsPath
+}
+
+# fileappend --
+#
+#       Adds the second, relative path, to the first, absolute path.
+#           
+# Arguments:
+#       dstFile     the destination file name
+#       args        the files to append
+#       
+# Results:
+#       none
+
+proc fileappend {dstFile args} {
+    
+    set dst [open $dstFile {WRONLY APPEND}]
+    fconfigure $dst -translation binary
+    foreach f $args {
+	set src [open $f RDONLY]
+	fconfigure $src -translation binary
+	fcopy $src $dst
+	close $src
+    }
+    close $dst
+}
+
+# tempfile --
+#
+#   generate a temporary file name suitable for writing to
+#   the file name will be unique, writable and will be in the 
+#   appropriate system specific temp directory
+#   Code taken from http://mini.net/tcl/772 attributed to
+#    Igor Volobouev and anon.
+#
+# Arguments:
+#   prefix     - a prefix for the filename, p
+# Results:
+#   returns a file name
+#
+
+proc tempfile {tmpdir prefix} {
+
+    set chars "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    set nrand_chars 10
+    set maxtries 10
+    set access [list RDWR CREAT EXCL TRUNC]
+    set permission 0600
+    set channel ""
+    set checked_dir_writable 0
+    set mypid [pid]
+    for {set i 0} {$i < $maxtries} {incr i} {
+	set newname $prefix
+	for {set j 0} {$j < $nrand_chars} {incr j} {
+	    append newname [string index $chars \
+	      [expr {([clock clicks] ^ $mypid) % 62}]]
+	}
+	set newname [file join $tmpdir $newname]
+	if {[file exists $newname]} {
+	    after 1
+	} else {
+	    if {[catch {open $newname $access $permission} channel]} {
+		if {!$checked_dir_writable} {
+		    set dirname [file dirname $newname]
+		    if {![file writable $dirname]} {
+			return -code error "Directory $dirname is not writable"
+		    }
+		    set checked_dir_writable 1
+		}
+	    } else {
+		# Success
+		close $channel
+		return $newname
+	    }
+	}
+    }
+    if {[string compare $channel ""]} {
+	return -code error "Failed to open a temporary file: $channel"
+    } else {
+	return -code error "Failed to find an unused temporary file name"
+    }
 }
 
 #------------------------------------------------------------------------------

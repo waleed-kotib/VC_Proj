@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.42 2004-11-27 14:52:53 matben Exp $
+# $Id: JWB.tcl,v 1.43 2004-11-30 15:11:10 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -1649,7 +1649,7 @@ proc ::Jabber::WB::PutFileOrScheduleHook {wtop fileName opts} {
 	    # possibly as an OOB http transfer.
 	    array set optArr $opts
 	    if {[info exists optArr(-url)]} {
-		$jstate(jlib) oob_set $jid3 ::Jabber::OOB::SetCallback  \
+		$jstate(jlib) oob_set $jid3 ::OOB::SetCallback  \
 		  $optArr(-url)  \
 		  -desc {This file is part of a whiteboard conversation.\
 		  You were not online when I opened this file}

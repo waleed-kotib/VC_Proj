@@ -5,25 +5,25 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Subscribe.tcl,v 1.23 2004-10-04 09:22:19 matben Exp $
+# $Id: Subscribe.tcl,v 1.24 2004-11-30 15:11:12 matben Exp $
 
 package provide Subscribe 1.0
 
-namespace eval ::Jabber::Subscribe:: {
+namespace eval ::Subscribe:: {
 
     # Define all hooks for preference settings.
-    ::hooks::register prefsInitHook          ::Jabber::Subscribe::InitPrefsHook
-    ::hooks::register prefsBuildHook         ::Jabber::Subscribe::BuildPrefsHook
-    ::hooks::register prefsSaveHook          ::Jabber::Subscribe::SavePrefsHook
-    ::hooks::register prefsCancelHook        ::Jabber::Subscribe::CancelPrefsHook
-    ::hooks::register prefsUserDefaultsHook  ::Jabber::Subscribe::UserDefaultsHook
+    ::hooks::register prefsInitHook          ::Subscribe::InitPrefsHook
+    ::hooks::register prefsBuildHook         ::Subscribe::BuildPrefsHook
+    ::hooks::register prefsSaveHook          ::Subscribe::SavePrefsHook
+    ::hooks::register prefsCancelHook        ::Subscribe::CancelPrefsHook
+    ::hooks::register prefsUserDefaultsHook  ::Subscribe::UserDefaultsHook
 
     # Store everything in 'locals($uid, ... )'.
     variable locals   
     variable uid 0
 }
 
-# Jabber::Subscribe::NewDlg --
+# Subscribe::NewDlg --
 #
 #       Ask for user response on a subscribe presence element.
 #
@@ -34,14 +34,14 @@ namespace eval ::Jabber::Subscribe:: {
 # Results:
 #       none
 
-proc ::Jabber::Subscribe::NewDlg {jid args} {
+proc ::Subscribe::NewDlg {jid args} {
     global  this prefs wDlgs
 
     variable uid
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
-    ::Debug 2 "::Jabber::Subscribe::NewDlg jid=$jid"
+    ::Debug 2 "::Subscribe::NewDlg jid=$jid"
     
     # Initialize the state variable, an array.    
     set token [namespace current]::dlg[incr uid]
@@ -137,11 +137,11 @@ proc ::Jabber::Subscribe::NewDlg {jid args} {
     return ""
 }
 
-# Jabber::Subscribe::Deny --
+# Subscribe::Deny --
 # 
 #       Deny the subscription request.
 
-proc ::Jabber::Subscribe::Deny {token} {
+proc ::Subscribe::Deny {token} {
     global  wDlgs
     variable $token
     upvar 0 $token state
@@ -156,11 +156,11 @@ proc ::Jabber::Subscribe::Deny {token} {
     unset state
 }
 
-# Jabber::Subscribe::Accept --
+# Subscribe::Accept --
 # 
 #       Accept the subscription request.
 
-proc ::Jabber::Subscribe::Accept {token} {
+proc ::Subscribe::Accept {token} {
     global  wDlgs
     variable $token
     upvar 0 $token state
@@ -199,7 +199,7 @@ proc ::Jabber::Subscribe::Accept {token} {
     unset state
 }
 
-proc ::Jabber::Subscribe::CloseCmd {token w} {
+proc ::Subscribe::CloseCmd {token w} {
     global  wDlgs
     variable $token
     upvar 0 $token state
@@ -211,24 +211,24 @@ proc ::Jabber::Subscribe::CloseCmd {token w} {
     unset state
 }
 
-# Jabber::Subscribe::ResProc --
+# Subscribe::ResProc --
 #
 #       This is our callback proc when setting the roster item from the
 #       subscription dialog. Catch any errors here.
 
-proc ::Jabber::Subscribe::ResProc {jlibName what} {
+proc ::Subscribe::ResProc {jlibName what} {
         
-    ::Debug 2 "::Jabber::Subscribe::ResProc: jlibName=$jlibName, what=$what"
+    ::Debug 2 "::Subscribe::ResProc: jlibName=$jlibName, what=$what"
 
     if {[string equal $what "error"]} {
 	tk_messageBox -type ok -message "We got an error from the\
-	  Jabber::Subscribe::ResProc callback"
+	  Subscribe::ResProc callback"
     }   
 }
 
 # Prefs page ...................................................................
 
-proc ::Jabber::Subscribe::InitPrefsHook { } {
+proc ::Subscribe::InitPrefsHook { } {
     upvar ::Jabber::jprefs jprefs
     
     # Defaults...
@@ -246,16 +246,16 @@ proc ::Jabber::Subscribe::InitPrefsHook { } {
     
 }
 
-proc ::Jabber::Subscribe::BuildPrefsHook {wtree nbframe} {
+proc ::Subscribe::BuildPrefsHook {wtree nbframe} {
     
     $wtree newitem {Jabber Subscriptions} -text [mc Subscriptions]
     
     # Subscriptions page ---------------------------------------------------
     set wpage [$nbframe page {Subscriptions}]
-    ::Jabber::Subscribe::BuildPageSubscriptions $wpage    
+    ::Subscribe::BuildPageSubscriptions $wpage    
 }
 
-proc ::Jabber::Subscribe::BuildPageSubscriptions {page} {
+proc ::Subscribe::BuildPageSubscriptions {page} {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
 
@@ -298,7 +298,7 @@ proc ::Jabber::Subscribe::BuildPageSubscriptions {page} {
     pack $frauto.autola $frauto.autoent -side left -pady $ypad -padx 4
 }
 
-proc ::Jabber::Subscribe::SavePrefsHook { } {
+proc ::Subscribe::SavePrefsHook { } {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
     
@@ -306,7 +306,7 @@ proc ::Jabber::Subscribe::SavePrefsHook { } {
     unset tmpJPrefs
 }
 
-proc ::Jabber::Subscribe::CancelPrefsHook { } {
+proc ::Subscribe::CancelPrefsHook { } {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
 	
@@ -318,7 +318,7 @@ proc ::Jabber::Subscribe::CancelPrefsHook { } {
     }
 }
 
-proc ::Jabber::Subscribe::UserDefaultsHook { } {
+proc ::Subscribe::UserDefaultsHook { } {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
 	

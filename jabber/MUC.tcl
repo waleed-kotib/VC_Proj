@@ -7,17 +7,17 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.51 2004-10-30 14:44:52 matben Exp $
+# $Id: MUC.tcl,v 1.52 2004-11-30 15:11:12 matben Exp $
 
 package require entrycomp
 package require muc
 
 package provide MUC 1.0
 
-namespace eval ::Jabber::MUC:: {
+namespace eval ::MUC:: {
       
-    ::hooks::register jabberInitHook     ::Jabber::MUC::Init
-    ::hooks::register closeWindowHook    ::Jabber::MUC::EnterCloseHook
+    ::hooks::register jabberInitHook     ::MUC::Init
+    ::hooks::register closeWindowHook    ::MUC::EnterCloseHook
     
     # Local stuff
     variable dlguid 0
@@ -80,18 +80,18 @@ namespace eval ::Jabber::MUC:: {
 }
 
 
-proc ::Jabber::MUC::Init {jlibName} {
+proc ::MUC::Init {jlibName} {
     upvar ::Jabber::jstate jstate
    
     set jstate(muc) [jlib::muc::new $jlibName]
 
     $jstate(jlib) message_register * "http://jabber.org/protocol/muc#user" \
-      ::Jabber::MUC::MUCMessage
+      ::MUC::MUCMessage
     
     ::Jabber::AddClientXmlns [list "http://jabber.org/protocol/muc"]
 }
 
-# Jabber::MUC::BuildEnter --
+# MUC::BuildEnter --
 #
 #       Initiates the process of entering a MUC room. Multi instance.
 #       
@@ -102,7 +102,7 @@ proc ::Jabber::MUC::Init {jlibName} {
 # Results:
 #       "cancel" or "enter".
 
-proc ::Jabber::MUC::BuildEnter {args} {
+proc ::MUC::BuildEnter {args} {
     global  this wDlgs
 
     variable enteruid
@@ -126,7 +126,7 @@ proc ::Jabber::MUC::BuildEnter {args} {
 	}
     }
 
-    ::Debug 2 "::Jabber::MUC::BuildEnter confServers='$confServers'; allConfServ=$allConfServ"
+    ::Debug 2 "::MUC::BuildEnter confServers='$confServers'; allConfServ=$allConfServ"
 
     if {[llength $confServers] == 0} {
 	tk_messageBox -type ok -icon error -title "No Conference"  \
@@ -310,7 +310,7 @@ proc ::Jabber::MUC::BuildEnter {args} {
     return [expr {($finished <= 0) ? "cancel" : "enter"}]
 }
 
-proc ::Jabber::MUC::CancelEnter {token} {
+proc ::MUC::CancelEnter {token} {
     variable $token
     upvar 0 $token enter
 
@@ -319,7 +319,7 @@ proc ::Jabber::MUC::CancelEnter {token} {
     catch {destroy $enter(w)}
 }
 
-proc ::Jabber::MUC::EnterCloseHook {wclose} {
+proc ::MUC::EnterCloseHook {wclose} {
     global  wDlgs
 
     if {[string match $wDlgs(jmucenter)* $wclose]} {
@@ -327,7 +327,7 @@ proc ::Jabber::MUC::EnterCloseHook {wclose} {
     }
 }
 
-proc ::Jabber::MUC::Browse {token} {
+proc ::MUC::Browse {token} {
     variable $token
     upvar 0 $token enter
     upvar ::Jabber::jstate jstate
@@ -337,17 +337,17 @@ proc ::Jabber::MUC::Browse {token} {
       [list [namespace current]::GetRoomsCB $token]
 }
 
-# Jabber::MUC::ConfigRoomList --
+# MUC::ConfigRoomList --
 # 
 #       When a conference server is picked in the server combobox, the 
 #       room combobox must get the available rooms for this particular server.
 
-proc ::Jabber::MUC::ConfigRoomList {token name junk1 junk2} {    
+proc ::MUC::ConfigRoomList {token name junk1 junk2} {    
     variable $token
     upvar 0 $token enter
     upvar ::Jabber::jstate jstate
     
-    ::Debug 4 "::Jabber::MUC::ConfigRoomList"
+    ::Debug 4 "::MUC::ConfigRoomList"
 
     # Fill in room list if exist else get.    
     if {[$jstate(jlib) service isinvestigated $enter(server)]} {
@@ -362,12 +362,12 @@ proc ::Jabber::MUC::ConfigRoomList {token name junk1 junk2} {
     }
 }
 
-proc ::Jabber::MUC::FillRoomList {token} {
+proc ::MUC::FillRoomList {token} {
     variable $token
     upvar 0 $token enter
     upvar ::Jabber::jstate jstate
     
-    ::Debug 4 "::Jabber::MUC::FillRoomList"
+    ::Debug 4 "::MUC::FillRoomList"
     
     set roomList {}
     if {[string length $enter(server)] > 0} {
@@ -389,7 +389,7 @@ proc ::Jabber::MUC::FillRoomList {token} {
     set enter(roomname) [lindex $roomList 0]
 }
 
-proc ::Jabber::MUC::BusyEnterDlgIncr {token {num 1}} {
+proc ::MUC::BusyEnterDlgIncr {token {num 1}} {
     variable $token
     upvar 0 $token enter
     
@@ -415,9 +415,9 @@ proc ::Jabber::MUC::BusyEnterDlgIncr {token {num 1}} {
     }
 }
 
-proc ::Jabber::MUC::GetRoomsCB {token browsename type jid subiq args} {
+proc ::MUC::GetRoomsCB {token browsename type jid subiq args} {
     
-    ::Debug 4 "::Jabber::MUC::GetRoomsCB type=$type, jid=$jid"
+    ::Debug 4 "::MUC::GetRoomsCB type=$type, jid=$jid"
     
     # Make sure the dialog still exists.
     if {![info exists $token]} {
@@ -435,7 +435,7 @@ proc ::Jabber::MUC::GetRoomsCB {token browsename type jid subiq args} {
     BusyEnterDlgIncr $token -1
 }
 
-proc ::Jabber::MUC::DoEnter {token} {
+proc ::MUC::DoEnter {token} {
     variable $token
     upvar 0 $token enter
     upvar ::Jabber::jstate jstate
@@ -462,7 +462,7 @@ proc ::Jabber::MUC::DoEnter {token} {
     catch {destroy $enter(w)}
 }
 
-# Jabber::MUC::EnterCallback --
+# MUC::EnterCallback --
 #
 #       Presence callabck from the 'muc enter' command.
 #       Just to catch errors and check if any additional info (password)
@@ -476,11 +476,11 @@ proc ::Jabber::MUC::DoEnter {token} {
 # Results:
 #       None.
 
-proc ::Jabber::MUC::EnterCallback {token mucname type args} {
+proc ::MUC::EnterCallback {token mucname type args} {
     variable $token
     upvar 0 $token enter
     
-    Debug 3 "::Jabber::MUC::EnterCallback type=$type, args='$args'"
+    Debug 3 "::MUC::EnterCallback type=$type, args='$args'"
 
     array set argsArr $args
     jlib::splitjid $argsArr(-from) roomjid res
@@ -526,11 +526,11 @@ proc ::Jabber::MUC::EnterCallback {token mucname type args} {
     unset -nocomplain enter
 }
 
-# Jabber::MUC::EnterRoom --
+# MUC::EnterRoom --
 # 
 #       Programmatic way to enter a room.
 
-proc ::Jabber::MUC::EnterRoom {roomjid nick args} {
+proc ::MUC::EnterRoom {roomjid nick args} {
     variable enteruid
     upvar ::Jabber::jstate jstate
     
@@ -558,18 +558,18 @@ proc ::Jabber::MUC::EnterRoom {roomjid nick args} {
       [list [namespace current]::EnterCallback $token]} $opts
 }
 
-namespace eval ::Jabber::MUC:: {
+namespace eval ::MUC:: {
     
     variable inviteuid 0
 
-    ::hooks::register closeWindowHook    ::Jabber::MUC::InviteCloseHook
+    ::hooks::register closeWindowHook    ::MUC::InviteCloseHook
 }
 
-# Jabber::MUC::Invite --
+# MUC::Invite --
 # 
 #       Make an invitation to a room.
 
-proc ::Jabber::MUC::Invite {roomjid} {
+proc ::MUC::Invite {roomjid} {
     global this wDlgs
     
     variable inviteuid
@@ -646,7 +646,7 @@ proc ::Jabber::MUC::Invite {roomjid} {
     return [expr {($finished <= 0) ? "cancel" : "ok"}]
 }
 
-proc ::Jabber::MUC::CancelInvite {token} {
+proc ::MUC::CancelInvite {token} {
     variable $token
     upvar 0 $token invite
 
@@ -655,7 +655,7 @@ proc ::Jabber::MUC::CancelInvite {token} {
     catch {destroy $invite(w)}
 }
 
-proc ::Jabber::MUC::DoInvite {token} {
+proc ::MUC::DoInvite {token} {
     variable $token
     upvar 0 $token invite
     upvar ::Jabber::jstate jstate
@@ -679,7 +679,7 @@ proc ::Jabber::MUC::DoInvite {token} {
     catch {destroy $invite(w)}
 }
 
-proc ::Jabber::MUC::InviteCloseHook {wclose} {
+proc ::MUC::InviteCloseHook {wclose} {
     global  wDlgs
         
     if {[string match $wDlgs(jmucinvite)* $wclose]} {
@@ -687,12 +687,12 @@ proc ::Jabber::MUC::InviteCloseHook {wclose} {
     }   
 }
 
-# Jabber::MUC::MUCMessage --
+# MUC::MUCMessage --
 # 
 #       Handle incoming message tagged with muc namespaced x-element.
 #       Invitation?
 
-proc ::Jabber::MUC::MUCMessage {jlibname xmlns args} {
+proc ::MUC::MUCMessage {jlibname xmlns args} {
    
     # This seems handled by the muc component by sending a message.
     return
@@ -742,16 +742,16 @@ proc ::Jabber::MUC::MUCMessage {jlibname xmlns args} {
 
 #--- The Info Dialog -----------------------------------------------------------
 
-namespace eval ::Jabber::MUC:: {
+namespace eval ::MUC:: {
     
-    ::hooks::register closeWindowHook    ::Jabber::MUC::InfoCloseHook
+    ::hooks::register closeWindowHook    ::MUC::InfoCloseHook
 }
 
-# Jabber::MUC::BuildInfo --
+# MUC::BuildInfo --
 # 
 #       Displays an info dialog for MUC room configuration.
 
-proc ::Jabber::MUC::BuildInfo {roomjid} {
+proc ::MUC::BuildInfo {roomjid} {
     global this wDlgs
     
     variable dlguid
@@ -921,7 +921,7 @@ proc ::Jabber::MUC::BuildInfo {roomjid} {
     return ""
 }
 
-proc ::Jabber::MUC::FillTable {roomjid} {
+proc ::MUC::FillTable {roomjid} {
     upvar [namespace current]::${roomjid}::locals locals
     upvar ::Jabber::jstate jstate
     
@@ -961,18 +961,18 @@ proc ::Jabber::MUC::FillTable {roomjid} {
     }
 }
 
-proc ::Jabber::MUC::Refresh {roomjid} {
+proc ::MUC::Refresh {roomjid} {
 
     FillTable $roomjid
 }
 
-proc ::Jabber::MUC::DoubleClickPart {roomjid} {
+proc ::MUC::DoubleClickPart {roomjid} {
     upvar [namespace current]::${roomjid}::locals locals
 
     
 }
 
-proc ::Jabber::MUC::SelectPart {roomjid} {
+proc ::MUC::SelectPart {roomjid} {
     upvar ::Jabber::jstate jstate
     upvar [namespace current]::${roomjid}::locals locals
 
@@ -987,7 +987,7 @@ proc ::Jabber::MUC::SelectPart {roomjid} {
     }  
 }
 
-proc ::Jabber::MUC::SetButtonsState {roomjid role affiliation} {
+proc ::MUC::SetButtonsState {roomjid role affiliation} {
     variable enabledBtAffList 
     variable enabledBtRoleList
     upvar [namespace current]::${roomjid}::locals locals
@@ -1010,7 +1010,7 @@ proc ::Jabber::MUC::SetButtonsState {roomjid role affiliation} {
     }
 }
 
-proc ::Jabber::MUC::DisableAll {roomjid} {
+proc ::MUC::DisableAll {roomjid} {
     variable mapAction2Bt
     upvar [namespace current]::${roomjid}::locals locals
 
@@ -1025,7 +1025,7 @@ proc ::Jabber::MUC::DisableAll {roomjid} {
     }
 }
 
-proc ::Jabber::MUC::GrantRevoke {roomjid which type} {
+proc ::MUC::GrantRevoke {roomjid which type} {
     upvar [namespace current]::${roomjid}::locals locals
     upvar ::Jabber::jstate jstate
     
@@ -1122,7 +1122,7 @@ proc ::Jabber::MUC::GrantRevoke {roomjid which type} {
     }
 }
 
-proc ::Jabber::MUC::Kick {roomjid} {
+proc ::MUC::Kick {roomjid} {
     upvar [namespace current]::${roomjid}::locals locals
     upvar ::Jabber::jstate jstate
     
@@ -1157,7 +1157,7 @@ proc ::Jabber::MUC::Kick {roomjid} {
     }
 }
 
-proc ::Jabber::MUC::Ban {roomjid} {
+proc ::MUC::Ban {roomjid} {
     upvar [namespace current]::${roomjid}::locals locals
     upvar ::Jabber::jstate jstate
 
@@ -1192,12 +1192,12 @@ proc ::Jabber::MUC::Ban {roomjid} {
     }
 }
 
-namespace eval ::Jabber::MUC:: {
+namespace eval ::MUC:: {
     
-    ::hooks::register closeWindowHook    ::Jabber::MUC::EditListCloseHook
+    ::hooks::register closeWindowHook    ::MUC::EditListCloseHook
 }
 
-# Jabber::MUC::EditListBuild --
+# MUC::EditListBuild --
 #
 #       Shows and handles a dialog for edit various lists of room content.
 #       
@@ -1208,7 +1208,7 @@ namespace eval ::Jabber::MUC:: {
 # Results:
 #       "cancel" or "result".
 
-proc ::Jabber::MUC::EditListBuild {roomjid type} {
+proc ::MUC::EditListBuild {roomjid type} {
     global this wDlgs
     
     upvar [namespace current]::${roomjid}::editlocals editlocals
@@ -1428,7 +1428,7 @@ proc ::Jabber::MUC::EditListBuild {roomjid type} {
     return [expr {($fineditlist <= 0) ? "cancel" : "ok"}]
 }
 
-proc ::Jabber::MUC::EditListCloseHook {wclose} {
+proc ::MUC::EditListCloseHook {wclose} {
     global  wDlgs
     variable fineditlist
 	
@@ -1437,7 +1437,7 @@ proc ::Jabber::MUC::EditListCloseHook {wclose} {
     }   
 }
 
-proc ::Jabber::MUC::EditListGetCB {roomjid callid mucname type subiq} {
+proc ::MUC::EditListGetCB {roomjid callid mucname type subiq} {
 
     upvar [namespace current]::${roomjid}::editlocals editlocals
     upvar ::Jabber::jstate jstate
@@ -1494,7 +1494,7 @@ proc ::Jabber::MUC::EditListGetCB {roomjid callid mucname type subiq} {
     }
 }
 
-proc ::Jabber::MUC::FillEditList {roomjid} {
+proc ::MUC::FillEditList {roomjid} {
     upvar [namespace current]::${roomjid}::editlocals editlocals
 
     variable setListDefs
@@ -1528,7 +1528,7 @@ proc ::Jabber::MUC::FillEditList {roomjid} {
     set editlocals(listvar) $tmplist
 }
 
-proc ::Jabber::MUC::VerifyEditEntry {roomjid wtbl row col text} {
+proc ::MUC::VerifyEditEntry {roomjid wtbl row col text} {
     upvar [namespace current]::${roomjid}::editlocals editlocals
     variable setListDefs
 
@@ -1548,14 +1548,14 @@ proc ::Jabber::MUC::VerifyEditEntry {roomjid wtbl row col text} {
     }
 }
 
-proc ::Jabber::MUC::EditListSelect {roomjid} {
+proc ::MUC::EditListSelect {roomjid} {
     upvar [namespace current]::${roomjid}::editlocals editlocals
     
     set wtbl $editlocals(wtbl)
     
 }
 
-proc ::Jabber::MUC::EditListDoAdd {roomjid} {
+proc ::MUC::EditListDoAdd {roomjid} {
     upvar [namespace current]::${roomjid}::editlocals editlocals
     variable setListDefs
 
@@ -1581,7 +1581,7 @@ proc ::Jabber::MUC::EditListDoAdd {roomjid} {
     focus [$wtbl entrypath]
 }
 
-proc ::Jabber::MUC::EditListDoEdit {roomjid} {
+proc ::MUC::EditListDoEdit {roomjid} {
     upvar [namespace current]::${roomjid}::editlocals editlocals
 
     set wtbl $editlocals(wtbl)
@@ -1594,7 +1594,7 @@ proc ::Jabber::MUC::EditListDoEdit {roomjid} {
     }
 }
 
-proc ::Jabber::MUC::EditListDoRemove {roomjid} {
+proc ::MUC::EditListDoRemove {roomjid} {
     upvar [namespace current]::${roomjid}::editlocals editlocals
     variable setListDefs
 
@@ -1629,17 +1629,17 @@ proc ::Jabber::MUC::EditListDoRemove {roomjid} {
     }
 }
 
-proc ::Jabber::MUC::EditListReset {roomjid} {
+proc ::MUC::EditListReset {roomjid} {
     upvar [namespace current]::${roomjid}::editlocals editlocals
 
     set editlocals(listvar) $editlocals(origlistvar)
 }
 
-# Jabber::MUC::EditListSet --
+# MUC::EditListSet --
 # 
 #       Set (send) the dited list to the muc service.
 
-proc ::Jabber::MUC::EditListSet {roomjid} {
+proc ::MUC::EditListSet {roomjid} {
     upvar [namespace current]::${roomjid}::editlocals editlocals
     variable setListDefs
     upvar ::Jabber::jstate jstate
@@ -1695,12 +1695,12 @@ proc ::Jabber::MUC::EditListSet {roomjid} {
 
 # Unfinished...
 
-namespace eval ::Jabber::MUC:: {
+namespace eval ::MUC:: {
     
-    ::hooks::register closeWindowHook    ::Jabber::MUC::RoomConfigCloseHook
+    ::hooks::register closeWindowHook    ::MUC::RoomConfigCloseHook
 }
 
-proc ::Jabber::MUC::RoomConfig {roomjid} {
+proc ::MUC::RoomConfig {roomjid} {
     global  this wDlgs
     
     variable wbox
@@ -1761,7 +1761,7 @@ proc ::Jabber::MUC::RoomConfig {roomjid} {
     return
 }
 
-proc ::Jabber::MUC::RoomConfigCloseHook {wclose} {
+proc ::MUC::RoomConfigCloseHook {wclose} {
     global  wDlgs
 
     #wm protocol $w WM_DELETE_WINDOW  \
@@ -1773,7 +1773,7 @@ proc ::Jabber::MUC::RoomConfigCloseHook {wclose} {
     }   
 }
 
-proc ::Jabber::MUC::CancelConfig {roomjid w} {
+proc ::MUC::CancelConfig {roomjid w} {
     upvar [namespace current]::${roomjid}::locals locals
     upvar ::Jabber::jstate jstate
 
@@ -1781,7 +1781,7 @@ proc ::Jabber::MUC::CancelConfig {roomjid w} {
     destroy $w
 }
 
-proc ::Jabber::MUC::ConfigGetCB {roomjid mucname type subiq} {
+proc ::MUC::ConfigGetCB {roomjid mucname type subiq} {
     variable wbox
     variable wsearrows
     variable wbtok
@@ -1794,7 +1794,7 @@ proc ::Jabber::MUC::ConfigGetCB {roomjid mucname type subiq} {
     $wbtok configure -state normal -default active
 }
 
-proc ::Jabber::MUC::DoRoomConfig {roomjid w} {
+proc ::MUC::DoRoomConfig {roomjid w} {
     variable wbox
     upvar [namespace current]::${roomjid}::locals locals
     upvar ::Jabber::jstate jstate
@@ -1812,7 +1812,7 @@ proc ::Jabber::MUC::DoRoomConfig {roomjid w} {
     destroy $w
 }
 
-proc ::Jabber::MUC::RoomConfigResult {roomjid mucname type subiq} {
+proc ::MUC::RoomConfigResult {roomjid mucname type subiq} {
 
     if {$type == "error"} {
 	regexp {^([^@]+)@.*} $roomjid match roomName
@@ -1822,11 +1822,11 @@ proc ::Jabber::MUC::RoomConfigResult {roomjid mucname type subiq} {
     }
 }
 
-# Jabber::MUC::SetNick --
+# MUC::SetNick --
 # 
 # 
 
-proc ::Jabber::MUC::SetNick {roomjid} {
+proc ::MUC::SetNick {roomjid} {
     variable locals
     upvar ::Jabber::jstate jstate
     
@@ -1851,12 +1851,12 @@ proc ::Jabber::MUC::SetNick {roomjid} {
     return $ans
 }
 
-namespace eval ::Jabber::MUC:: {
+namespace eval ::MUC:: {
     
-    ::hooks::register closeWindowHook    ::Jabber::MUC::DestroyCloseHook
+    ::hooks::register closeWindowHook    ::MUC::DestroyCloseHook
 }
 
-proc ::Jabber::MUC::Destroy {roomjid} {
+proc ::MUC::Destroy {roomjid} {
     global this wDlgs
     
     upvar ::Jabber::jstate jstate
@@ -1947,7 +1947,7 @@ proc ::Jabber::MUC::Destroy {roomjid} {
     return [expr {($findestroy <= 0) ? "cancel" : "ok"}]
 }
 
-proc ::Jabber::MUC::DestroyCloseHook {wclose} {
+proc ::MUC::DestroyCloseHook {wclose} {
     global  wDlgs
     variable findestroy
 	
@@ -1956,11 +1956,11 @@ proc ::Jabber::MUC::DestroyCloseHook {wclose} {
     }   
 }
 
-# Jabber::MUC::IQCallback, PresCallback --
+# MUC::IQCallback, PresCallback --
 # 
 #       Generic callbacks when setting things via <iq/> or <presence/>
 
-proc ::Jabber::MUC::IQCallback {roomjid mucname type subiq} {
+proc ::MUC::IQCallback {roomjid mucname type subiq} {
     
     if {$type == "error"} {
     	regexp {^([^@]+)@.*} $roomjid match roomName
@@ -1971,7 +1971,7 @@ proc ::Jabber::MUC::IQCallback {roomjid mucname type subiq} {
 }
 
 
-proc ::Jabber::MUC::PresCallback {roomjid mucname type args} {
+proc ::MUC::PresCallback {roomjid mucname type args} {
     
     if {$type == "error"} {
     	set errcode ???
@@ -1986,7 +1986,7 @@ proc ::Jabber::MUC::PresCallback {roomjid mucname type args} {
     }
 }
 
-proc ::Jabber::MUC::InfoCloseHook {wclose} {
+proc ::MUC::InfoCloseHook {wclose} {
     global  wDlgs
 	
     if {[string match $wDlgs(jmucinfo)* $wclose]} {
@@ -2001,7 +2001,7 @@ proc ::Jabber::MUC::InfoCloseHook {wclose} {
     }   
 }
 
-proc ::Jabber::MUC::Close {roomjid} {
+proc ::MUC::Close {roomjid} {
     upvar [namespace current]::${roomjid}::locals locals
 
     catch {destroy $locals($roomjid,w)}

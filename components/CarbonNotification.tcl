@@ -8,10 +8,9 @@ namespace eval ::CarbonNotification:: {
 }
 
 proc ::CarbonNotification::Init { } {
-    global  tcl_platform
+    global  this
     
-    if {!([string equal $tcl_platform(platform) "unix"] && \
-      [string equal [tk windowingsystem] "aqua"])} {
+    if {![string equal $this(platform) "macosx"]} {
 	return
     }
     if {[catch {package require tclCarbonNotification}]} {

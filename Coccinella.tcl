@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.99 2004-11-27 08:41:19 matben Exp $
+# $Id: Coccinella.tcl,v 1.100 2004-11-30 15:11:09 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -132,6 +132,11 @@ if {[string equal $this(platform) "unix"]} {
     set thisScript [info script]
 }
 set thisPath [file dirname $thisScript]
+if {[info exists ::env(HOME)]} {
+    cd $::env(HOME)
+} else {
+    catch {cd ~}
+}
 
 # Level of detail for printouts. >= 2 for my outputs.
 set debugLevel 0
@@ -364,28 +369,6 @@ if {[string equal $this(platform) "windows"]} {
     wm iconbitmap . -default [file join $this(imagePath) coccinella.ico]
 }
 wm protocol . WM_DELETE_WINDOW {::UI::DoCloseWindow .}
-
-# Just experimenting with the 'tile' extension...
-if {0} {
-    package require tile
-    set widgets {button radiobutton checkbutton menubutton scrollbar \
-      frame label labelframe}
-    set widgets {frame}
-    foreach name $widgets {
-	rename $name ""
-	rename t${name} $name
-    }
-    switch -- $this(platform) {
-	macosx {
-	    set theme aqua
-	}
-	default {
-	    set theme clam
-	    package require tile::theme::$theme
-	}
-    }
-    style theme use $theme
-}
 
 # At this point we should be finished with the launch and delete the splash 
 # screen.

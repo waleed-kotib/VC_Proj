@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.94 2004-11-27 14:52:53 matben Exp $
+# $Id: Chat.tcl,v 1.95 2004-11-30 15:11:10 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -1529,7 +1529,7 @@ proc ::Chat::SendFile {dlgtoken} {
     upvar 0 $chattoken chatstate
 
     jlib::splitjid $chatstate(fromjid) jid2 res
-    ::Jabber::OOB::BuildSet $jid2
+    ::OOB::BuildSet $jid2
 }
 
 proc ::Chat::Settings {dlgtoken} {

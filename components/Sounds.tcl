@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Sounds.tcl,v 1.5 2004-10-31 14:32:57 matben Exp $
+# $Id: Sounds.tcl,v 1.6 2004-11-30 15:11:10 matben Exp $
 
 namespace eval ::Sounds:: {
         
@@ -177,7 +177,8 @@ proc ::Sounds::Create {name path} {
     
     # QuickTime doesn't understand vfs; need to copy out to tmp dir.
     if {$priv(QuickTimeTcl) && [namespace exists ::vfs]} {
-	set tmp [file join $this(tmpPath) [file tail $path]]
+	#set tmp [file join $this(tmpPath) [file tail $path]]
+	set tmp [tempfile $this(tmpPath) [file tail $path]]
 	file copy -force $path $tmp
 	set path $tmp
     }
@@ -232,7 +233,8 @@ proc ::Sounds::PlaySoundTmp {path} {
     
     if {$priv(QuickTimeTcl)} {
 	if {[namespace exists ::vfs]} {
-	    set tmp [file join $this(tmpPath) [file tail $path]]
+	    #set tmp [file join $this(tmpPath) [file tail $path]]
+	    set tmp [tempfile $this(tmpPath) [file tail $path]]
 	    file copy -force $path $tmp
 	    set path $tmp
 	}
@@ -452,7 +454,8 @@ proc ::Sounds::PlayTmpPrefSound {name} {
 
     if {$priv(QuickTimeTcl)} {
 	if {[namespace exists ::vfs]} {
-	    set tmp [file join $this(tmpPath) [file tail $f]]
+	    #set tmp [file join $this(tmpPath) [file tail $f]]
+	    set tmp [tempfile $this(tmpPath) [file tail $f]]
 	    file copy -force $f $tmp
 	    set f $tmp
 	}

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Rosticons.tcl,v 1.6 2004-11-23 08:55:23 matben Exp $
+# $Id: Rosticons.tcl,v 1.7 2004-11-30 15:11:12 matben Exp $
 
 package provide Rosticons 1.0
 
@@ -346,7 +346,8 @@ proc ::Rosticons::ParseIcon {name dir xmllist} {
 		# If we rely on QuickTimeTcl here we cannot be in vfs.
 		set f [file join $dir $object]
 		if {$priv(needtmp)} {
-		    set tmp [file join $this(tmpPath) $object]
+		    #set tmp [file join $this(tmpPath) $object]
+		    set tmp [tempfile $this(tmpPath) $object]
 		    file copy -force $f $tmp
 		    set f $tmp
 		}

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Agents.tcl,v 1.31 2004-11-27 14:52:53 matben Exp $
+# $Id: Agents.tcl,v 1.32 2004-11-30 15:11:10 matben Exp $
 
 package provide Agents 1.0
 
@@ -24,9 +24,9 @@ namespace eval ::Agents:: {
 	    ::Search::Build -server $jid -autoget 1
 	}
 	mRegister      register  {
-	    ::Jabber::GenRegister::NewDlg -server $jid -autoget 1
+	    ::GenRegister::NewDlg -server $jid -autoget 1
 	}
-	mUnregister    register  {::Jabber::Register::Remove $jid}
+	mUnregister    register  {::Register::Remove $jid}
 	separator      {}        {}
 	mEnterRoom     groupchat {::GroupChat::EnterOrCreate enter}
 	mLastLogin/Activity jid  {::Jabber::GetLast $jid}

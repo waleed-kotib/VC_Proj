@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.41 2004-11-27 14:52:53 matben Exp $
+# $Id: Disco.tcl,v 1.42 2004-11-30 15:11:10 matben Exp $
 
 package provide Disco 1.0
 
@@ -80,9 +80,9 @@ namespace eval ::Disco:: {
 	    ::Search::Build -server $jid -autoget 1
 	}
 	mRegister      register  {
-	    ::Jabber::GenRegister::NewDlg -server $jid -autoget 1
+	    ::GenRegister::NewDlg -server $jid -autoget 1
 	}
-	mUnregister    register  {::Jabber::Register::Remove $jid}
+	mUnregister    register  {::Register::Remove $jid}
 	separator      {}        {}
 	mRefresh       jid       {::Disco::Refresh $jid}
     }

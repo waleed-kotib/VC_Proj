@@ -5,14 +5,16 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.39 2004-10-27 14:42:36 matben Exp $
+# $Id: OOB.tcl,v 1.40 2004-11-30 15:11:12 matben Exp $
+
+package require uriencode
 
 package provide OOB 1.0
 
-namespace eval ::Jabber::OOB:: {
+namespace eval ::OOB:: {
 
-    ::hooks::register initHook            ::Jabber::OOB::InitHook    
-    ::hooks::register jabberInitHook      ::Jabber::OOB::InitJabberHook
+    ::hooks::register initHook            ::OOB::InitHook    
+    ::hooks::register jabberInitHook      ::OOB::InitJabberHook
 
     variable locals
     set locals(initialLocalDir) [pwd]
@@ -22,10 +24,10 @@ namespace eval ::Jabber::OOB:: {
     variable uid 0
 }
 
-proc ::Jabber::OOB::InitHook { } {
+proc ::OOB::InitHook { } {
     variable locals
     
-    ::Debug 2 "::Jabber::OOB::InitHook"
+    ::Debug 2 "::OOB::InitHook"
     
     # Drag and Drop support...
     set locals(haveTkDnD) 0
@@ -34,21 +36,21 @@ proc ::Jabber::OOB::InitHook { } {
     }       
 }
 
-proc ::Jabber::OOB::InitJabberHook {jlibname} {
+proc ::OOB::InitJabberHook {jlibname} {
     upvar ::Jabber::jstate jstate
     
     # Be sure to handle incoming requestes (iq set elements).
-    $jstate(jlib) iq_register set jabber:iq:oob     ::Jabber::OOB::ParseSet
+    $jstate(jlib) iq_register set jabber:iq:oob     ::OOB::ParseSet
 }
 
-# Jabber::OOB::BuildSet --
+# OOB::BuildSet --
 #
 #       Dialog for sending a 'jabber:iq:oob' 'set' element.
 #       
 # Arguments:
 #       jid         a full 3-tier jid
 
-proc ::Jabber::OOB::BuildSet {jid} {
+proc ::OOB::BuildSet {jid} {
     global  this wDlgs
     
     variable finished
@@ -108,10 +110,10 @@ proc ::Jabber::OOB::BuildSet {jid} {
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
     
     wm resizable $w 0 0
-    bind $w <Return> ::Jabber::OOB::DoSend
+    bind $w <Return> ::OOB::DoSend
     if {$locals(haveTkDnD)} {
 	update
-	::Jabber::OOB::InitDnD $frmid.efile
+	::OOB::InitDnD $frmid.efile
     }
     
     # Grab and focus.
@@ -125,7 +127,7 @@ proc ::Jabber::OOB::BuildSet {jid} {
     catch {destroy $w}    
 }
 
-proc ::Jabber::OOB::InitDnD {win} {
+proc ::OOB::InitDnD {win} {
     
     dnd bindtarget $win text/uri-list <Drop>      \
       [list [namespace current]::DnDDrop %W %D %T]   
@@ -135,11 +137,11 @@ proc ::Jabber::OOB::InitDnD {win} {
       [list [namespace current]::DnDLeave %W %D %T]       
 }
 
-proc ::Jabber::OOB::DnDDrop {w data type} {
+proc ::OOB::DnDDrop {w data type} {
     global  prefs
     
     variable localpath
-    ::Debug 2 "::Jabber::OOB::DnDDrop data=$data, type=$type"
+    ::Debug 2 "::OOB::DnDDrop data=$data, type=$type"
 
     # Take only first file.
     set f [lindex $data 0]
@@ -150,21 +152,21 @@ proc ::Jabber::OOB::DnDDrop {w data type} {
     set localpath $f
 }
 
-proc ::Jabber::OOB::DnDEnter {w action data type} {
+proc ::OOB::DnDEnter {w action data type} {
     
-    ::Debug 2 "::Jabber::OOB::DnDEnter action=$action, data=$data, type=$type"
+    ::Debug 2 "::OOB::DnDEnter action=$action, data=$data, type=$type"
 
     focus $w
     set act "none"
     return $act
 }
 
-proc ::Jabber::OOB::DnDLeave {w data type} {
+proc ::OOB::DnDLeave {w data type} {
     
     focus [winfo toplevel $w] 
 }
 
-proc ::Jabber::OOB::FileOpenCmd { } {
+proc ::OOB::FileOpenCmd { } {
     
     variable localpath
     
@@ -174,7 +176,7 @@ proc ::Jabber::OOB::FileOpenCmd { } {
     }
 }
 
-proc ::Jabber::OOB::FileOpen { } {
+proc ::OOB::FileOpen { } {
     
     variable locals
 
@@ -189,7 +191,7 @@ proc ::Jabber::OOB::FileOpen { } {
     return $ans
 }
 
-proc ::Jabber::OOB::DoSend { } {
+proc ::OOB::DoSend { } {
     global  prefs wDlgs this
     
     variable finished
@@ -236,7 +238,7 @@ proc ::Jabber::OOB::DoSend { } {
       [list [namespace current]::SetCallback $token] $url} $opts
 }
 
-# Jabber::OOB::SetCallback --
+# OOB::SetCallback --
 #
 #       Callback for oob_set.
 #
@@ -246,12 +248,12 @@ proc ::Jabber::OOB::DoSend { } {
 #       thequery:   if type="error", this is a list {errcode errmsg},
 #                   else it is the query element as a xml list structure.
 
-proc ::Jabber::OOB::SetCallback {token jlibName type theQuery} {
+proc ::OOB::SetCallback {token jlibName type theQuery} {
     variable $token
     upvar 0 $token state
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::Jabber::OOB::SetCallback, type=$type,theQuery='$theQuery'"
+    ::Debug 2 "::OOB::SetCallback, type=$type,theQuery='$theQuery'"
     
     if {$type == "error"} {
 	foreach {errcode errmsg} $theQuery break
@@ -266,12 +268,12 @@ proc ::Jabber::OOB::SetCallback {token jlibName type theQuery} {
     unset state
 }
 
-# Jabber::OOB::ParseSet --
+# OOB::ParseSet --
 #
 #       Gets called when we get a 'jabber:iq:oob' 'set' element, that is,
 #       another user sends us an url to fetch a file from.
 
-proc ::Jabber::OOB::ParseSet {jlibname from subiq args} {
+proc ::OOB::ParseSet {jlibname from subiq args} {
     global  prefs
     variable locals
     
@@ -322,20 +324,21 @@ proc ::Jabber::OOB::ParseSet {jlibname from subiq args} {
 	return $ishandled
     }
     set userDir [::Utils::GetDirIfExist $prefs(userPath)]
+    set decodedTail [uriencode::decodefile $tail]
     set localPath [tk_getSaveFile -title [mc {Save File}] \
-      -initialfile $tail -initialdir $userDir]
-    if {[string length $localPath] == 0} {
+      -initialfile $decodedTail -initialdir $userDir]
+    if {$localPath == ""} {
 	return $ishandled
     }
     set prefs(userPath) [file dirname $localPath]
 
     # And get it.
-    ::Jabber::OOB::Get $from $url $localPath $id
+    Get $from $url $localPath $id
     set ishandled 1
     return $ishandled
 }
 
-proc ::Jabber::OOB::Get {jid url file id} {
+proc ::OOB::Get {jid url file id} {
     global  this prefs
     
     variable locals
@@ -366,7 +369,7 @@ proc ::Jabber::OOB::Get {jid url file id} {
       -cancelcmd [list [namespace current]::Cancel $out $token]
 }
 
-proc ::Jabber::OOB::Progress {out token total current} {
+proc ::OOB::Progress {out token total current} {
     global  tcl_platform
     variable locals
     upvar #0 $token state
@@ -386,11 +389,11 @@ proc ::Jabber::OOB::Progress {out token total current} {
     }
 }
 
-# Jabber::OOB::HttpCmd --
+# OOB::HttpCmd --
 # 
 #       Callback for the httpex package.
 
-proc ::Jabber::OOB::HttpCmd {jid out id token} {
+proc ::OOB::HttpCmd {jid out id token} {
     
     upvar #0 $token state
     set httpstate [::httpex::state $token]
@@ -453,7 +456,7 @@ proc ::Jabber::OOB::HttpCmd {jid out id token} {
     }
 }
 
-proc ::Jabber::OOB::Cancel {out token} {
+proc ::OOB::Cancel {out token} {
     
     variable locals
     
@@ -462,7 +465,7 @@ proc ::Jabber::OOB::Cancel {out token} {
     catch {file delete $locals($out,local)}
 }
 
-# Jabber::OOB::BuildText --
+# OOB::BuildText --
 #
 #       Make a clickable text widget from a <x xmlns='jabber:x:oob'> element.
 #
@@ -474,7 +477,7 @@ proc ::Jabber::OOB::Cancel {out token} {
 # Results:
 #       w
 
-proc ::Jabber::OOB::BuildText {w xml args} {
+proc ::OOB::BuildText {w xml args} {
     global  prefs
 
     if {[wrapper::gettag $xml] != "x"} {

@@ -8,7 +8,7 @@
 #  Copyright (c) 2002-2004  Mats Bengtsson only for the new and rewritten parts.
 #  This source file is distributed under the BSD license.
 #
-# $Id: httpex.tcl,v 1.17 2004-11-02 15:34:51 matben Exp $
+# $Id: httpex.tcl,v 1.18 2004-11-30 15:11:10 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -29,7 +29,7 @@
 #	-channel name
 #       -command callback
 #	-handler callback
-#       -headers list 
+#       -headers {key value ?key value ...?} 
 #       -httpvers 1.0|1.1
 #       -persistent boolean     If socket shall be kept open when finished
 #       -progress callback

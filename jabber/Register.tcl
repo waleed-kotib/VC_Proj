@@ -5,18 +5,18 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.29 2004-11-27 14:52:54 matben Exp $
+# $Id: Register.tcl,v 1.30 2004-11-30 15:11:12 matben Exp $
 
 package provide Register 1.0
 
-namespace eval ::Jabber::Register:: {
+namespace eval ::Register:: {
 
     variable server
     variable username
     variable password
 }
 
-# Jabber::Register::NewDlg --
+# Register::NewDlg --
 #
 #       Registers new user with a server.
 #
@@ -26,7 +26,7 @@ namespace eval ::Jabber::Register:: {
 # Results:
 #       "cancel" or "new".
 
-proc ::Jabber::Register::NewDlg {args} {
+proc ::Register::NewDlg {args} {
     global  this wDlgs
     
     upvar ::Jabber::jprefs jprefs
@@ -36,6 +36,7 @@ proc ::Jabber::Register::NewDlg {args} {
     variable password  ""
     variable password2 ""
     variable ssl       0
+    variable port      $jprefs(port)
     
     set w $wDlgs(jreg)
     if {[winfo exists $w]} {
@@ -92,7 +93,13 @@ proc ::Jabber::Register::NewDlg {args} {
       -textvariable [namespace current]::password2 -validate key  \
       -validatecommand {::Jabber::ValidatePasswdChars %S} -show {*}
     checkbutton $frmid.cssl -text "  [mc {Use SSL for security}]"  \
-      -variable [namespace current]::ssl
+      -variable [namespace current]::ssl \
+      -command [namespace current]::SSLCmd
+    label $frmid.lport -text "[mc {Port number}]:" -font $fontSB  \
+      -anchor e
+    entry $frmid.eport -width 6   \
+      -textvariable [namespace current]::port -validate key  \
+      -validatecommand {::Register::ValidatePortNumber %S}
     
     grid $frmid.lserv  -column 0 -row 0 -sticky e
     grid $frmid.eserv  -column 1 -row 0 -sticky w
@@ -103,6 +110,8 @@ proc ::Jabber::Register::NewDlg {args} {
     grid $frmid.lpass2 -column 0 -row 3 -sticky e
     grid $frmid.epass2 -column 1 -row 3 -sticky w
     grid $frmid.cssl   -column 1 -row 4 -sticky w
+    grid $frmid.lport  -column 0 -row 5 -sticky e
+    grid $frmid.eport  -column 1 -row 5 -sticky w
 
     pack $frmid -side top -fill both -expand 1
 
@@ -132,14 +141,36 @@ proc ::Jabber::Register::NewDlg {args} {
     return [expr {($finished <= 0) ? "cancel" : "new"}]
 }
 
-proc ::Jabber::Register::Cancel {w} {
+proc ::Register::ValidatePortNumber {str} {
+    
+    if {[string is integer $str]} {
+	return 1
+    } else {
+	bell
+	return 0
+    }
+}
+
+proc ::Register::SSLCmd { } {
+    variable ssl
+    variable port
+    upvar ::Jabber::jprefs jprefs
+    
+    if {$ssl} {
+	set port $jprefs(sslport)
+    } else {
+	set port $jprefs(port)
+    }
+}
+
+proc ::Register::Cancel {w} {
     variable finished
 
     set finished 0
     destroy $w
 }
 
-proc ::Jabber::Register::OK {w} {
+proc ::Register::OK {w} {
     variable password
     variable password2
     
@@ -153,7 +184,7 @@ proc ::Jabber::Register::OK {w} {
     }
 }
 
-# Jabber::Register::DoRegister --
+# Register::DoRegister --
 #
 #       Initiates a register operation.
 # Arguments:
@@ -162,7 +193,7 @@ proc ::Jabber::Register::OK {w} {
 # Results:
 #       None, dialog closed.
 
-proc ::Jabber::Register::DoRegister {w} {
+proc ::Register::DoRegister {w} {
     global  errorCode prefs
 
     variable finished
@@ -173,7 +204,7 @@ proc ::Jabber::Register::DoRegister {w} {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::Jabber::Register::DoRegister"
+    ::Debug 2 "::Register::DoRegister"
     
     # Kill any pending open states.
     ::Network::KillAll
@@ -212,10 +243,10 @@ proc ::Jabber::Register::DoRegister {w} {
     ::Login::Connect $server [namespace current]::ConnectCB -ssl $ssl
 }
 
-proc ::Jabber::Register::ConnectCB {status msg} {
+proc ::Register::ConnectCB {status msg} {
     variable server
 
-    ::Debug 2 "::Jabber::Register::ConnectCB status=$status"
+    ::Debug 2 "::Register::ConnectCB status=$status"
     
     switch $status {
 	error {
@@ -239,13 +270,13 @@ proc ::Jabber::Register::ConnectCB {status msg} {
     }
 }
 
-proc ::Jabber::Register::SendRegister {args} {
+proc ::Register::SendRegister {args} {
     variable username
     variable password
     variable streamid
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::Jabber::Register::SendRegister args=$args"
+    ::Debug 2 "::Register::SendRegister args=$args"
     
     array set argsArr $args
     if {![info exists argsArr(id)]} {
@@ -261,7 +292,7 @@ proc ::Jabber::Register::SendRegister {args} {
     }
 }
 
-proc ::Jabber::Register::SendRegisterCB {jlibName type theQuery} {    
+proc ::Register::SendRegisterCB {jlibName type theQuery} {    
     variable finished
     variable server
     variable username
@@ -271,7 +302,7 @@ proc ::Jabber::Register::SendRegisterCB {jlibName type theQuery} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
-    ::Debug 2 "::Jabber::Register::SendRegisterCB jlibName=$jlibName,\
+    ::Debug 2 "::Register::SendRegisterCB jlibName=$jlibName,\
       type=$type, theQuery=$theQuery"
     
     if {[string equal $type "error"]} {
@@ -307,12 +338,12 @@ proc ::Jabber::Register::SendRegisterCB {jlibName type theQuery} {
     set finished 1
 }
 
-proc ::Jabber::Register::AuthorizeCB {type msg} {
+proc ::Register::AuthorizeCB {type msg} {
     variable server
     variable username
     variable resource
     
-    ::Debug 2 "::Jabber::Register::AuthorizeCB type=$type"
+    ::Debug 2 "::Register::AuthorizeCB type=$type"
     
     if {[string equal $type "error"]} {
 	tk_messageBox -icon error -type ok -title [mc Error]  \
@@ -327,7 +358,7 @@ proc ::Jabber::Register::AuthorizeCB {type msg} {
     }
 }
 
-# Jabber::Register::Remove --
+# Register::Remove --
 #
 #       Removes an existing user account from your login server.
 #
@@ -337,12 +368,12 @@ proc ::Jabber::Register::AuthorizeCB {type msg} {
 # Results:
 #       Remote callback from server scheduled.
 
-proc ::Jabber::Register::Remove {{jid {}}} {
+proc ::Register::Remove {{jid {}}} {
     
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
 
-    ::Debug 2 "::Jabber::Register::Remove jid=$jid"
+    ::Debug 2 "::Register::Remove jid=$jid"
     
     set ans "yes"
     if {$jid == ""} {
@@ -355,7 +386,7 @@ proc ::Jabber::Register::Remove {{jid {}}} {
 	
 	# Do we need to obtain a key for this???
 	$jstate(jlib) register_remove $jid  \
-	  [list ::Jabber::Register::RemoveCallback $jid]
+	  [list ::Register::RemoveCallback $jid]
 	
 	# Remove also from our profile if our login account.
 	if {$jid == $jserver(this)} {
@@ -367,7 +398,7 @@ proc ::Jabber::Register::Remove {{jid {}}} {
     }
 }
 
-proc ::Jabber::Register::RemoveCallback {jid jlibName type theQuery} {
+proc ::Register::RemoveCallback {jid jlibName type theQuery} {
     
     if {[string equal $type "error"]} {
 	foreach {errcode errmsg} $theQuery break
@@ -381,15 +412,15 @@ proc ::Jabber::Register::RemoveCallback {jid jlibName type theQuery} {
     }
 }
 
-# The ::Jabber::GenRegister:: namespace -----------------------------------------
+# The ::GenRegister:: namespace -----------------------------------------
 
-namespace eval ::Jabber::GenRegister:: {
+namespace eval ::GenRegister:: {
 
     variable uid 0
     variable UItype 2
 }
 
-# Jabber::GenRegister::NewDlg --
+# GenRegister::NewDlg --
 #
 #       Initiates the process of registering with a service. 
 #       Uses iq get-set method.
@@ -400,14 +431,14 @@ namespace eval ::Jabber::GenRegister:: {
 # Results:
 #       "cancel" or "register".
      
-proc ::Jabber::GenRegister::NewDlg {args} {
+proc ::GenRegister::NewDlg {args} {
     global  this wDlgs
 
     variable uid
     variable UItype
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::Jabber::GenRegister::NewDlg args=$args"
+    ::Debug 2 "::GenRegister::NewDlg args=$args"
     
     # Initialize the state variable, an array.    
     set token [namespace current]::dlg[incr uid]
@@ -531,7 +562,7 @@ proc ::Jabber::GenRegister::NewDlg {args} {
     return ""
 }
 
-proc ::Jabber::GenRegister::Get {token} {    
+proc ::GenRegister::Get {token} {    
     variable $token
     upvar 0 $token state
     upvar ::Jabber::jstate jstate
@@ -547,18 +578,18 @@ proc ::Jabber::GenRegister::Get {token} {
     set state(stattxt) [mc jawaitserver]
     
     # Send get register.
-    $jstate(jlib) register_get [list ::Jabber::GenRegister::GetCB $token] \
+    $jstate(jlib) register_get [list ::GenRegister::GetCB $token] \
       -to $state(server)
     $state(wsearrows) start
 }
 
-proc ::Jabber::GenRegister::GetCB {token jlibName type subiq} {    
+proc ::GenRegister::GetCB {token jlibName type subiq} {    
     variable $token
     upvar 0 $token state
     variable UItype
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::Jabber::GenRegister::GetCB type=$type"
+    ::Debug 2 "::GenRegister::GetCB type=$type"
 
     if {!([info exists state(w)] && [winfo exists $state(w)])} {
 	return
@@ -587,7 +618,7 @@ proc ::Jabber::GenRegister::GetCB {token jlibName type subiq} {
     $state(wbtget)      configure -state normal -default disabled    
 }
 
-proc ::Jabber::GenRegister::DoRegister {token} {   
+proc ::GenRegister::DoRegister {token} {   
     variable $token
     upvar 0 $token state
     variable UItype
@@ -615,15 +646,15 @@ proc ::Jabber::GenRegister::DoRegister {token} {
     destroy $state(w)
 }
 
-# Jabber::GenRegister::ResultCallback --
+# GenRegister::ResultCallback --
 #
 #       This is our callback procedure from 'jabber:iq:register' stuffs.
 
-proc ::Jabber::GenRegister::ResultCallback {token type subiq args} {
+proc ::GenRegister::ResultCallback {token type subiq args} {
     variable $token
     upvar 0 $token state
 
-    ::Debug 2 "::Jabber::GenRegister::ResultCallback type=$type, subiq='$subiq'"
+    ::Debug 2 "::GenRegister::ResultCallback type=$type, subiq='$subiq'"
 
     if {[string equal $type "error"]} {
 	tk_messageBox -type ok -icon error  \
@@ -638,7 +669,7 @@ proc ::Jabber::GenRegister::ResultCallback {token type subiq args} {
     unset state
 }
 
-proc ::Jabber::GenRegister::Cancel {token} {
+proc ::GenRegister::Cancel {token} {
     global  wDlgs
     variable $token
     upvar 0 $token state
@@ -649,7 +680,7 @@ proc ::Jabber::GenRegister::Cancel {token} {
     unset state
 }
 
-proc ::Jabber::GenRegister::CloseCmd {token wclose} {
+proc ::GenRegister::CloseCmd {token wclose} {
     global  wDlgs
     variable $token
     upvar 0 $token state
@@ -660,7 +691,7 @@ proc ::Jabber::GenRegister::CloseCmd {token wclose} {
 
 #--- Simple --------------------------------------------------------------------
 
-# Jabber::GenRegister::Simple --
+# GenRegister::Simple --
 #
 #       Initiates the process of registering with a service. 
 #       Uses straight iq set method with fixed fields (username and password).
@@ -672,7 +703,7 @@ proc ::Jabber::GenRegister::CloseCmd {token wclose} {
 # Results:
 #       "cancel" or "register".
      
-proc ::Jabber::GenRegister::Simple {w args} {
+proc ::GenRegister::Simple {w args} {
     global  this
 
     variable wtop
@@ -681,7 +712,7 @@ proc ::Jabber::GenRegister::Simple {w args} {
     variable finished -1
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::Jabber::GenRegister::Simple"
+    ::Debug 2 "::GenRegister::Simple"
     if {[winfo exists $w]} {
 	return
     }
@@ -763,14 +794,14 @@ proc ::Jabber::GenRegister::Simple {w args} {
     return [expr {($finished <= 0) ? "cancel" : "register"}]
 }
 
-proc ::Jabber::GenRegister::CancelSimple {w} {
+proc ::GenRegister::CancelSimple {w} {
     variable finished
     
     set finished 0
     destroy $w
 }
 
-proc ::Jabber::GenRegister::DoSimple { } {    
+proc ::GenRegister::DoSimple { } {    
     variable wtop
     variable server
     variable username
@@ -784,9 +815,9 @@ proc ::Jabber::GenRegister::DoSimple { } {
     destroy $wtop
 }
 
-proc ::Jabber::GenRegister::SimpleCallback {server jlibName type subiq} {
+proc ::GenRegister::SimpleCallback {server jlibName type subiq} {
 
-    ::Debug 2 "::Jabber::GenRegister::ResultCallback server=$server, type=$type, subiq='$subiq'"
+    ::Debug 2 "::GenRegister::ResultCallback server=$server, type=$type, subiq='$subiq'"
 
     if {[string equal $type "error"]} {
 	tk_messageBox -type ok -icon error  \

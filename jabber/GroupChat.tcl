@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.86 2004-11-27 14:52:53 matben Exp $
+# $Id: GroupChat.tcl,v 1.87 2004-11-30 15:11:10 matben Exp $
 
 package require History
 
@@ -123,7 +123,7 @@ namespace eval ::GroupChat:: {
     set popMenuDefs(groupchat,def) {
 	mMessage       user      {::NewMsg::Build -to $jid}
 	mChat          user      {::Chat::StartThread $jid}
-	mSendFile      user      {::Jabber::OOB::BuildSet $jid}
+	mSendFile      user      {::OOB::BuildSet $jid}
 	mWhiteboard    wb        {::Jabber::WB::NewWhiteboardTo $jid}
     }    
     
@@ -304,16 +304,16 @@ proc ::GroupChat::EnterOrCreate {what args} {
 	    set ans [eval {BuildEnter} $args]
 	}
 	enter,conference {
-	    set ans [eval {::Jabber::Conference::BuildEnter} $args]
+	    set ans [eval {::Conference::BuildEnter} $args]
 	}
 	create,conference {
-	    set ans [eval {::Jabber::Conference::BuildCreate} $args]
+	    set ans [eval {::Conference::BuildCreate} $args]
 	}
 	enter,muc {
-	    set ans [eval {::Jabber::MUC::BuildEnter} $args]
+	    set ans [eval {::MUC::BuildEnter} $args]
 	}
 	create,muc {
-	    set ans [eval {::Jabber::Conference::BuildCreate} $args]
+	    set ans [eval {::Conference::BuildCreate} $args]
 	}
 	default {
 	    # error
@@ -694,10 +694,10 @@ proc ::GroupChat::Build {roomjid args} {
       -command [list [namespace current]::BuildHistory $token]
     $wtray newbutton invite -text [mc Invite] \
       -image $iconInvite -disabledimage $iconInviteDis  \
-      -command [list ::Jabber::MUC::Invite $roomjid]
+      -command [list ::MUC::Invite $roomjid]
     $wtray newbutton info -text [mc Info] \
       -image $iconInfo -disabledimage $iconInfoDis    \
-      -command [list ::Jabber::MUC::BuildInfo $roomjid]
+      -command [list ::MUC::BuildInfo $roomjid]
     $wtray newbutton print -text [mc Print] \
       -image $iconPrint -disabledimage $iconPrintDis   \
       -command [list [namespace current]::Print $token]
@@ -744,7 +744,7 @@ proc ::GroupChat::Build {roomjid args} {
     entry $frtop.etp -textvariable $token\(subject) -state disabled
     set wbtnick $frtop.bni
     button $wbtnick -text "[mc {Nick name}]..."  \
-      -font $fontS -command [list ::Jabber::MUC::SetNick $roomjid]
+      -font $fontS -command [list ::MUC::SetNick $roomjid]
     
     grid $frtop.btp -column 0 -row 0 -sticky w -padx 6 -pady 1
     grid $frtop.etp -column 1 -row 0 -sticky ew -padx 4 -pady 1
