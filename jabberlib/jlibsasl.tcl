@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: jlibsasl.tcl,v 1.1 2004-09-08 13:11:18 matben Exp $
+# $Id: jlibsasl.tcl,v 1.2 2004-09-11 14:21:51 matben Exp $
 
 package require sasl 1.0
 
@@ -37,11 +37,12 @@ proc jlib::auth_sasl {jlibname username resource password cmd} {
     set locals(myjid)    ${username}@$locals(server)/${resource}
     set locals(sasl,cmd) $cmd
 
-    if {[info exists locals(mechanisms)]} {
+    if {[info exists locals(features,mechanisms)]} {
 	auth_sasl_continue $jlibname
     } else {
+	
 	# Must be careful so this is not triggered by a reset or something...
-	trace add variable ${jlibname}::locals(mechanisms) write \
+	trace add variable ${jlibname}::locals(features,mechanisms) write \
 	  [list [namespace current]::auth_sasl_mechanisms_write $jlibname]
     }
 }
@@ -49,7 +50,7 @@ proc jlib::auth_sasl {jlibname username resource password cmd} {
 proc jlib::auth_sasl_mechanisms_write {jlibname name1 name2 op} {
     
     puts "jlib::auth_sasl_mechanisms_write"
-    trace remove variable ${jlibname}::locals(mechanisms) write \
+    trace remove variable ${jlibname}::locals(features,mechanisms) write \
       [list [namespace current]::auth_sasl_mechanisms_write $jlibname]
     auth_sasl_continue $jlibname
 }
@@ -79,11 +80,12 @@ proc jlib::auth_sasl_continue {jlibname} {
     puts "\t sasl::info sec_flags=[sasl::info sec_flags]"
     puts "\t sasl::mechanisms=[sasl::mechanisms]"
     
+    # Returns a serialized array if succesful.
     set code [catch {
-	$sasltoken -operation start -mechanisms $locals(mechanisms) \
+	$sasltoken -operation start -mechanisms $locals(features,mechanisms) \
 	  -interact [list [namespace current]::sasl_interact $jlibname]
     } ans]
-    puts "\t -operation start: code=$code"
+    puts "\t -operation start: code=$code, ans=$ans"
     
     switch -- $code {
 	0 {	    
@@ -163,33 +165,31 @@ proc jlib::sasl_step {jlibname serverin64} {
     set serverin [sasl::decode64 $serverin64]
     puts "\t serverin=$serverin"
     
+    # Note that 'step' returns the output if succesful, not a serialized array!
     set code [catch {
 	$lib(sasl,token) -operation step -input $serverin \
 	  -interact [list [namespace current]::sasl_interact $jlibname]
-    } ans]
+    } output]
     puts "\t code=$code"
+    puts "\t output=$output"
     
     switch -- $code {
 	0 {	    
 	    # ok
-	    array set ansArr $ans
-	    if {![info exists ansArr(output)]} {
-		set ansArr(output) ""
-	    }
 	    set xmllist [wrapper::createtag response \
 	      -attrlist [list xmlns $xmppns(sasl)] \
-	      -chdata [sasl::encode64 $ansArr(output)]]
+	      -chdata [sasl::encode64 $output]]
 	    send $jlibname $xmllist
 	}
 	4 {	    
 	    # continue
-	    array set ansArr $ans
 	    set xmllist [wrapper::createtag response \
 	      -attrlist [list xmlns $xmppns(sasl)] \
-	      -chdata [sasl::encode64 $ansArr(output)]]
+	      -chdata [sasl::encode64 $output]]
 	    send $jlibname $xmllist
 	}
 	default {
+	    puts "\t errdetail: [$lib(sasl,token) -operation errdetail]"
 	    uplevel #0 $locals(sasl,cmd) $jlibname [list error [list unknown $::errorCode]]
 	}
     }
@@ -229,8 +229,13 @@ proc jlib::sasl_success {jlibname tag xmllist} {
     # necessary to send a closing </stream> tag first...
     
     wrapper::reset $lib(wrap)
-
-    set xml "<?xml version='1.0' encoding='UTF-8'?><stream:stream\
+    
+    # We must clear out any server info we've received so far.
+    # Seems the only info is from the <features/> element.
+    # UGLY.
+    array unset locals features*
+    
+    set xml "<stream:stream\
       xmlns='$opts(-streamnamespace)' xmlns:stream='$xmppns(stream)'\
       to='$locals(server)' xml:lang='[getlang]' version='1.0'>"
 
@@ -252,43 +257,49 @@ proc jlib::auth_sasl_features_write {jlibname name1 name2 op} {
       [list [namespace current]::auth_sasl_features_write $jlibname]
 
     bind_resource $jlibname $locals(resource) \
-      [namespace current]::sasl_resource_bind_cb
+      [namespace current]::resource_bind_cb
 }
 
-proc jlib::sasl_resource_bind_cb {jlibname type subiq} {
+proc jlib::resource_bind_cb {jlibname type subiq} {
     
     upvar ${jlibname}::locals locals
     variable xmppns
 
-    puts "jlib::sasl_resource_bind_cb type=$type"
+    puts "jlib::resource_bind_cb type=$type"
     
     switch -- $type {
 	error {
-	    uplevel #0 $locals(sasl,cmd) $jlibname [list error [list unknown $::errorCode]]
+	    uplevel #0 $locals(sasl,cmd) [list $jlibname error $subiq]
 	}
 	default {
 	    
-	    # We should be finished with authorization and resource binding here.
-	    uplevel #0 $locals(sasl,cmd) [list $jlibname $type $subiq]
-	    
-	    # From tkabber ???
-	    if {0} {
-		set xmllist [wrapper::createtag session \
-		  -attrlist [list xmlns $xmppns(session)]]
-		send_iq $jlibname set $xmllist -command \
-		  [list [namespace current]::parse_send_auth $jlibname]
-	    }
+	    # Establish the session.
+	    set xmllist [wrapper::createtag session \
+	      -attrlist [list xmlns $xmppns(session)]]
+	    send_iq $jlibname set $xmllist -command \
+	      [list [namespace current]::send_session_cb $jlibname]
 	}
     }
 }
 
-proc jlib::parse_send_auth {jlibname type subiq args} {
+proc jlib::send_session_cb {jlibname type subiq args} {
 
     upvar ${jlibname}::locals locals
 
-    puts "jlib::parse_send_auth type=$type"
+    puts "jlib::send_session_cb type=$type"
     
-    uplevel #0 $locals(sasl,cmd) [list $jlibname $type $subiq]
+    switch -- $type {
+	error {
+	    uplevel #0 $locals(sasl,cmd) [list $jlibname error $subiq]
+	}
+	default {
+
+	    # We should be finished with authorization, resource binding and
+	    # session establishment here. 
+	    # Now we are free to send any stanzas.
+	    uplevel #0 $locals(sasl,cmd) [list $jlibname $type $subiq]
+	}
+    }
 }
 
 proc jlib::sasl_log {args} {
@@ -300,9 +311,9 @@ proc jlib::sasl_reset {jlibname} {
     
     upvar ${jlibname}::locals locals
 
-    foreach tspec [trace info variable ${jlibname}::locals(mechanisms)] {
+    foreach tspec [trace info variable ${jlibname}::locals(features,mechanisms)] {
 	foreach {op cmd} $tspec {break}
-	trace remove variable ${jlibname}::locals(mechanisms) $op $cmd
+	trace remove variable ${jlibname}::locals(features,mechanisms) $op $cmd
     }
     foreach tspec [trace info variable ${jlibname}::locals(features)] {
 	foreach {op cmd} $tspec {break}

@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.36 2004-09-03 07:47:07 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.37 2004-09-11 14:21:51 matben Exp $
 
 
 set noErr 0
@@ -59,10 +59,9 @@ set prefs(trptMethod) putget
 set prefs(setNATip) 0
 set prefs(NATip) ""
 
-# EAS: Privaria only starts server after tunnel is established,
 # so no server delay is needed
 set prefs(afterStartServer) 0   
-# EAS: Need to give server a chance to start, as occasionally
+
 # it isn't done when client connects
 set prefs(afterConnect) 1000
 

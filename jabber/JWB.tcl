@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.32 2004-09-01 08:48:02 matben Exp $
+# $Id: JWB.tcl,v 1.33 2004-09-11 14:21:50 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -374,53 +374,43 @@ proc ::Jabber::WB::BuildEntryHook {wtop wclass wcomm} {
       [option get $wclass contactOnImage {}]]
     set iconResize      [::Theme::GetImage \
       [option get $wclass resizeHandleImage {}]]
-    
-    frame $wcomm.f -relief raised -borderwidth 1
-    pack  $wcomm.f -side bottom -fill x
 
-    set   frja $wcomm.f.ja
-    frame $frja
-    pack  $frja -side left
-     
-    # The header.
-    label $frja.comm -anchor w -text [mc {Jabber Server}]
-    label $frja.user -anchor w -text [mc {Jabber Id}]
-    if {[::Jabber::IsConnected]} {
-	label $frja.icon -image $contactOnImage
-    } else {
-	label $frja.icon -image $contactOffImage
-    }
-    grid $frja.comm $frja.user -sticky w -padx 8 -pady 0
-    grid $frja.icon -row 0 -column 2 -sticky w -pady 0
-    
-    # The entries.
     set jidlist [$jstate(roster) getusers]
-    entry $frja.ad -width 14 -relief sunken -state disabled \
-      -textvariable ::Jabber::jserver(this)
-    ::entrycomp::entrycomp $frja.us $jidlist -width 24 -relief sunken \
+
+    set wframe $wcomm.f
+    frame $wframe -relief raised -borderwidth 1
+    pack  $wframe -side bottom -fill x
+
+    label $wframe.ljid -text "  [mc {Jabber Id}]:"
+    ::entrycomp::entrycomp $wframe.ejid $jidlist -relief sunken \
       -textvariable [namespace current]::jwbstate($wtop,jid)
-    checkbutton $frja.to -highlightthickness 0 -state disabled \
+    checkbutton $wframe.to -highlightthickness 0 -state disabled \
       -text [mc {Send Live}] \
       -variable [namespace current]::jwbstate($wtop,send)
-    
-    grid $frja.ad -row 1 -column 0 -sticky ew -padx 4
-    grid $frja.us -row 1 -column 1 -sticky ew -padx 4
-    grid $frja.to -row 1 -column 2 -padx 6
-    grid columnconfigure $frja 1 -weight 1
+    if {[::Jabber::IsConnected]} {
+	label $wframe.icon -image $contactOnImage
+    } else {
+	label $wframe.icon -image $contactOffImage
+    }
 
     # Resize handle.
-    frame $wcomm.f.pad
-    pack  $wcomm.f.pad -side right -fill both -expand true
-    label $wcomm.f.pad.hand -relief flat -borderwidth 0 -image $iconResize
-    pack  $wcomm.f.pad.hand -side right -anchor sw
-
+    frame $wframe.pad
+    label $wframe.pad.hand -relief flat -borderwidth 0 -image $iconResize
+    pack  $wframe.pad.hand -side right -anchor sw
+    
+    pack $wframe.ljid -side left
+    pack $wframe.pad  -side right -fill both
+    pack $wframe.icon -side right
+    pack $wframe.to   -side right -padx 6
+    pack $wframe.ejid -side right -fill x -expand true
+     
     # Cache widgets paths.
     set jwbstate($wtop,wclass)    $wclass
-    set jwbstate($wtop,wframe)    $wcomm.f
-    set jwbstate($wtop,wfrja)     $frja
-    set jwbstate($wtop,wjid)      $frja.us
-    set jwbstate($wtop,wsend)     $frja.to
-    set jwbstate($wtop,wcontact)  $frja.icon
+    set jwbstate($wtop,wframe)    $wframe
+    set jwbstate($wtop,wfrja)     $wframe
+    set jwbstate($wtop,wjid)      $wframe.ejid
+    set jwbstate($wtop,wsend)     $wframe.to
+    set jwbstate($wtop,wcontact)  $wframe.icon
     
     # Fix widget states.
     set netstate logout
@@ -429,15 +419,6 @@ proc ::Jabber::WB::BuildEntryHook {wtop wclass wcomm} {
     }
     ::Jabber::WB::SetStateFromType $wtop
     ::Jabber::WB::SetNetworkState  $wtop $netstate
-}
-
-proc ::Jabber::WB::Configure {wtop args} {
-    variable jwbstate
-    
-    foreach {key value} $args {
-	set akey [string trimleft $key -]
-	set jwbstate($wtop,$akey) $value
-    }
 }
 
 # Jabber::WB::SetStateFromType --
