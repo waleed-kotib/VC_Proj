@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Speech.tcl,v 1.8 2004-04-09 10:32:26 matben Exp $
+# $Id: Speech.tcl,v 1.9 2004-06-06 15:42:49 matben Exp $
 
 package provide Speech 1.0
 
@@ -24,6 +24,17 @@ namespace eval ::Speech:: {
     ::hooks::add prefsUserDefaultsHook  ::Speech::UserDefaultsPrefsHook
     
     ::hooks::add initHook               ::Speech::Verify
+}
+
+
+proc ::Speech::ComponentInit { } {
+    
+    
+}
+
+proc ::Speech::Init { } {
+    
+    
 }
 
 # Speech::Verify --
@@ -123,6 +134,7 @@ proc ::Speech::SpeakWBText {who str} {
         
     set punct {[.,;?!]}
     set voice ""    
+
     switch -- $who {
 	me {
 	    set voice $sprefs(voiceUs)

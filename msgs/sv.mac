@@ -229,6 +229,7 @@
 ::msgcat::mcset sv mSendMessage		{Skicka meddelande...}
 ::msgcat::mcset sv mChat		{Chatta}
 ::msgcat::mcset sv mStatus		{Status}
+::msgcat::mcset sv mDirStatus           {Riktad status}
 ::msgcat::mcset sv mAvailable		{Tillgänglig}
 ::msgcat::mcset sv mAway		{Borta}
 ::msgcat::mcset sv mDoNotDisturb	{Stör ej}
@@ -444,6 +445,7 @@
 ::msgcat::mcset sv {Send Live}             {Skicka lajv}
 ::msgcat::mcset sv {Server Info}           {Server info}
 ::msgcat::mcset sv {Service server}	   {Tjänst server}
+::msgcat::mcset sv {Set Directed Presence} {Riktad närvaro}
 ::msgcat::mcset sv {Set New Topic}         {Sätt nytt ämne}
 ::msgcat::mcset sv {Set Status}            {Sätt status}
 ::msgcat::mcset sv {Settings Panels}       {Inställningspaneler}
@@ -947,6 +949,7 @@ för nerladdning.}
 	::msgcat::mcset sv jaupdatenewver {Den ny versionen är: %s}
 	::msgcat::mcset sv jaupdateremind {Påminn mig inte om detta fler gånger}
 	::msgcat::mcset sv jasettopic   {Sätt nytt ämne för detta gruppsamtal.}
+	::msgcat::mcset sv jadirpresmsg {Skicka riktad närvaro till "%s".}
 
 
 

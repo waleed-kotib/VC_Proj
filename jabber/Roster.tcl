@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.62 2004-06-06 07:02:21 matben Exp $
+# $Id: Roster.tcl,v 1.63 2004-06-06 15:42:49 matben Exp $
 
 package provide Roster 1.0
 
@@ -117,7 +117,7 @@ namespace eval ::Jabber::Roster:: {
 	mChatHistory   user      {::Jabber::Chat::BuildHistory $jid}
 	mRemoveUser    user      {::Jabber::Roster::SendRemove $jid}
 	separator      {}        {}
-	mStatus        user      {::Jabber::Roster::DirectedPresenceDlg $jid}
+	mDirStatus     user      {::Jabber::Roster::DirectedPresenceDlg $jid}
 	mRefreshRoster any       {::Jabber::Roster::Refresh}
     }  
     
@@ -1789,35 +1789,54 @@ proc ::Jabber::Roster::GetMyPresenceIcon { } {
 proc ::Jabber::Roster::DirectedPresenceDlg {jid} {
     global  this wDlgs
     
-    variable finishedDirPres -1
+    variable uid
+    
+    # Initialize the state variable, an array, that keeps is the storage.
+    
+    set token [namespace current]::dirpres[incr uid]
+    variable $token
+    upvar 0 $token state
 
-    set w $wDlgs(jdirpres)
-    if {[winfo exists $w]} {
-	raise $w
-	return
-    }
+    set w $wDlgs(jdirpres)$uid
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document closeBox}
     wm title $w [::msgcat::mc {Set Directed Presence}]
+    set state(finished) -1
+    set state(w)        $w
+    set state(jid)      $jid
+    set state(status) available
+    bind $w <Destroy> [list [namespace current]::DirectedPresenceFree $token %W]
     
     # Global frame.
     frame $w.frall -borderwidth 1 -relief raised
     pack  $w.frall -fill both -expand 1
 
-    label $w.frall.lmsg -wraplength 200 -justify left -text \
-      "Send directed presence to the user \"$jid\"."
-    
+    label $w.frall.lmsg -wraplength 200 -justify left -text  \
+      [::msgcat::mc jadirpresmsg $jid]
     pack  $w.frall.lmsg -side top -anchor w -padx 4 -pady 1
-   
     
+    set fr $w.frall.fstat
+    pack [frame $fr -bd 0] -side top -fill x
+    pack [label $fr.l -text "[::msgcat::mc Status]:"] -side left -padx 8
+    set wmb $fr.mb
+    ::Jabber::Roster::BuildPresenceMenuButton2 $wmb $token\(status)
+    pack $wmb -side left -padx 2 -pady 2
+    
+    # Any status message.   
+    pack [label $w.frall.lstat -text "[::msgcat::mc {Status message}]:"]  \
+      -side top -anchor w -padx 8 -pady 2
+    set wtext $w.frall.txt
+    text $wtext -width 40 -height 2 -wrap word
+    pack $wtext -side top -padx 8 -pady 2
+    set state(wtext) $wtext
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
     pack [button $frbot.btok -text [::msgcat::mc Set] -default active \
-      -command [list [namespace current]::SetDirectedPresence $w]]  \
+      -command [list [namespace current]::SetDirectedPresence $token]]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
-      -command [list set [namespace current]::finishedDirPres 0]] \
+      -command [list destroy $w]] \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
     
@@ -1825,24 +1844,84 @@ proc ::Jabber::Roster::DirectedPresenceDlg {jid} {
     bind $w <Return> {}
 	
     # Trick to resize the labels wraplength.
-    if {0} {
-	set script [format {
-	    update idletasks
-	    %s.lmsg configure -wraplength [expr [winfo reqwidth %s] - 20]
-	} $fpage $fpage]    
-	after idle $script
+    set script [format {
+	update idletasks
+	%s configure -wraplength [expr [winfo reqwidth %s] - 20]
+    } $w.frall.lmsg $w]    
+    after idle $script
+}
+
+proc ::Jabber::Roster::SetDirectedPresence {token} {
+    variable $token
+    upvar 0 $token state
+    
+    set opts {}
+    set allText [string trim [$state(wtext) get 1.0 end] " \n"]
+    if {[string length $allText]} {
+	set opts [list -status $allText]
+    }  
+    eval {::Jabber::SetStatus $state(status) -to $state(jid)} $opts
+    destroy $state(w)
+}
+
+proc ::Jabber::Roster::DirectedPresenceFree {token w} {
+    variable $token
+    upvar 0 $token state
+    
+    if {[string equal [winfo toplevel $w] $w]} {
+	unset state
     }
-    # Grab and focus.
-    set oldFocus [focus]
-    focus $w
-    catch {grab $w}
+}
+
+# Jabber::Roster::BuildPresenceMenuButton2 --
+# 
+#       Makes a menubutton for status that does no action. It only sets
+#       the varName.
+
+proc ::Jabber::Roster::BuildPresenceMenuButton2 {w varName} {
+
+    menubutton $w -indicatoron 1 -menu $w.menu \
+      -relief raised -bd 2 -highlightthickness 2 -anchor c -direction flush
+    menu $w.menu -tearoff 0
+    ::Jabber::Roster::BuildPresenceMenu2 $w $varName
+    return $w
+}
+
+proc ::Jabber::Roster::BuildPresenceMenu2 {w varName} {
+    global  prefs
+    variable presenceIcon
+    upvar ::Jabber::mapShowTextToElem mapShowTextToElem
+
+    set mt $w.menu
+    if {$prefs(haveMenuImage)} {
+	foreach name {available away chat dnd xa invisible unavailable} {
+	    set str $mapShowTextToElem($name)
+	    $mt add radio -label $str -compound left  \
+	      -image $presenceIcon($name)  \
+	      -command [list [namespace current]::PresenceMenu2Cmd  \
+	      $w $str $name $varName]
+	}
+    } else {
+	foreach name {available away chat dnd xa invisible unavailable} {
+	    set str $mapShowTextToElem($name)
+	    $mt add radio -label $str  \
+	      -command [list [namespace current]::PresenceMenu2Cmd  \
+	      $w $str $name $varName]
+	}
+    }
     
-    # Wait here for a button press and window to be destroyed.
-    tkwait window $w
+    # Init menubutton label.
+    upvar #0 $varName var
+    set str $mapShowTextToElem($var)
+    PresenceMenu2Cmd $w $str $var $varName
+}
+
+proc ::Jabber::Roster::PresenceMenu2Cmd {w str name varName} {
     
-    catch {grab release $w}
-    catch {focus $oldFocus}
-    return [expr {($finishedDirPres <= 0) ? "cancel" : "set"}]
+    #puts "::Jabber::Roster::PresenceMenu2Cmd str=$str, name=$name, varName=$varName"
+    
+    $w configure -text $str
+    uplevel #0 [list set $varName $name]
 }
 
 # Jabber::Roster::BuildStatusMenuButton --

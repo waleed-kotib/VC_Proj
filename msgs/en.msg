@@ -230,6 +230,7 @@
 ::msgcat::mcset en mSendMessage		{Send Message...}
 ::msgcat::mcset en mChat		{Chat}
 ::msgcat::mcset en mStatus		{Status}
+::msgcat::mcset en mDirStatus           {Directed Status}
 ::msgcat::mcset en mAvailable		{Available}
 ::msgcat::mcset en mAway		{Away}
 ::msgcat::mcset en mDoNotDisturb	{Do Not Disturb}
@@ -445,6 +446,7 @@
 ::msgcat::mcset en {Send Live}
 ::msgcat::mcset en {Server Info}
 ::msgcat::mcset en {Service server}
+::msgcat::mcset en {Set Directed Presence}
 ::msgcat::mcset en {Set New Topic}
 ::msgcat::mcset en {Set Status}
 ::msgcat::mcset en {Settings Panels}
@@ -715,7 +717,6 @@ You have a subscription for %s: %s.}
 be lost when closing this chat whiteboard. Do you actually want to end this chat?}
 ::msgcat::mcset en jamesschatoffline            {This user is not online anymore\
 and the message is therfore not sent.}
-    
 
 }
 
@@ -912,6 +913,7 @@ want to add to the list of services, for instance, "jabber.org".}
 	::msgcat::mcset en jaupdatenewver {The new version is: %s}
 	::msgcat::mcset en jaupdateremind {Don't remind me about this anymore}
 	::msgcat::mcset en jasettopic   {Set new topic for this groupchat.}
+	::msgcat::mcset en jadirpresmsg {Send directed presence to the user \"%s\".}
 
 
 }

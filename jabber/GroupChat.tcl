@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.62 2004-06-06 07:02:20 matben Exp $
+# $Id: GroupChat.tcl,v 1.63 2004-06-06 15:42:49 matben Exp $
 
 package require History
 
@@ -856,6 +856,7 @@ proc ::Jabber::GroupChat::ConfigStatusMenuButton {token w type} {
 }
 
 proc ::Jabber::GroupChat::PostMenu {w x y} {
+    
     tk_popup $w [expr int($x)] [expr int($y)]
 }
 

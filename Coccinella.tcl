@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.58 2004-06-06 07:02:20 matben Exp $
+# $Id: Coccinella.tcl,v 1.59 2004-06-06 15:42:49 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -466,7 +466,6 @@ set listOfPackages {
     Plugins
     Pane
     ProgressWindow
-    Speech
     Whiteboard
 }
 foreach packName $listOfPackages {
@@ -513,7 +512,13 @@ if {!$prefs(stripJabber)} {
 # Define MIME types etc.
 ::Types::Init
 
+# Components.
+::Debug 2 "component::load"
+component::lappend_auto_path $this(pluginsPath)
+component::load
+
 # Components that need to add their own preferences need to be registered here.
+::Debug 2 "prefsInitHook"
 ::hooks::run prefsInitHook
 
 # Parse any command line options.
@@ -537,10 +542,6 @@ switch -- $prefs(protocol) {
 # Goes through all the logic of verifying that the actual packages are 
 # available on our system. Speech special.
 ::Plugins::VerifyPackagesForMimeTypes
-
-# Components.
-component::lappend_auto_path $this(pluginsPath)
-component::load
 
 # Various initializations for canvas stuff and UI.
 ::UI::Init

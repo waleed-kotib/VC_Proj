@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.44 2004-05-27 13:59:10 matben Exp $
+# $Id: jabberlib.tcl,v 1.45 2004-06-06 15:42:49 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -885,10 +885,14 @@ proc jlib::iq_handler {jlibname xmldata} {
 	    # type='result', and add an <error> element.
 	    set attrArr(to) $attrArr(from)
 	    unset attrArr(from)
-	    set attrArr(type) "result"
+	    set attrArr(type) "error"
 	    set xmldata [wrapper::setattrlist $xmldata [array get attrArr]]
-	    set errtag [wrapper::createtag "error" -chdata "Not Implemented"  \
-	      -attrlist {code 501}]
+	    
+	    set errstanza [wrapper::createtag "feature-not-implemented" \
+	      -attrlist [list xmlns urn:ietf:params:xml:ns:xmpp-stanzas]]
+	    set errtag [wrapper::createtag "error" -subtags [list $errstanza] \
+	      -attrlist {code 501 type cancel}]
+
 	    lappend childlist $errtag
 	    set xmldata [wrapper::setchildlist $xmldata $childlist]
 	    

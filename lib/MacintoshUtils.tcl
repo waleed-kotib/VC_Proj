@@ -7,10 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: MacintoshUtils.tcl,v 1.8 2004-03-13 15:21:41 matben Exp $
-
-#package require TclSpeech 2.0
-#package require Tclapplescript
+# $Id: MacintoshUtils.tcl,v 1.9 2004-06-06 15:42:49 matben Exp $
 
 namespace eval ::Mac:: {
 
