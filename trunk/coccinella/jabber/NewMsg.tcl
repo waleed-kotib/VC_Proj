@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.34 2004-04-25 15:35:25 matben Exp $
+# $Id: NewMsg.tcl,v 1.35 2004-05-21 06:58:08 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -234,7 +234,8 @@ proc ::Jabber::NewMsg::Build {args} {
     set   frsub $w.frall.frsub
     frame $frsub -borderwidth 0
     pack  $frsub -side top -fill x -padx 6 -pady 0
-    label $frsub.lsub -text "[::msgcat::mc Subject]:" -font $fontSB -anchor e
+    label $frsub.lsub -text "[::msgcat::mc Subject]:" -font $fontSB -anchor e \
+      -takefocus 0
     set   wsubject $frsub.esub
     entry $wsubject -textvariable [namespace current]::locals($w,subject)
     pack  $frsub.lsub -side left -padx 2
