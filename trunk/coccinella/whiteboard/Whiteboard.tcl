@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.22 2004-09-13 09:05:19 matben Exp $
+# $Id: Whiteboard.tcl,v 1.23 2004-09-28 13:50:21 matben Exp $
 
 package require entrycomp
 package require moviecontroller
@@ -33,15 +33,15 @@ namespace eval ::WB:: {
     global  wDlgs
         
     # Add all event hooks.
-    ::hooks::add quitAppHook         \
+    ::hooks::register quitAppHook         \
       [list ::UI::SaveWinPrefixGeom $wDlgs(wb) whiteboard]
-    ::hooks::add quitAppHook         ::WB::SaveAnyState
-    ::hooks::add closeWindowHook     ::WB::CloseHook
-    ::hooks::add whiteboardCloseHook ::WB::CloseWhiteboard
-    ::hooks::add loginHook           ::WB::LoginHook
-    ::hooks::add logoutHook          ::WB::LogoutHook
-    ::hooks::add earlyInitHook       ::WB::EarlyInitHook
-    ::hooks::add prefsInitHook       ::WB::InitPrefsHook
+    ::hooks::register quitAppHook         ::WB::SaveAnyState
+    ::hooks::register closeWindowHook     ::WB::CloseHook
+    ::hooks::register whiteboardCloseHook ::WB::CloseWhiteboard
+    ::hooks::register loginHook           ::WB::LoginHook
+    ::hooks::register logoutHook          ::WB::LogoutHook
+    ::hooks::register earlyInitHook       ::WB::EarlyInitHook
+    ::hooks::register prefsInitHook       ::WB::InitPrefsHook
 
     # Tool button mappings.
     variable btNo2Name 

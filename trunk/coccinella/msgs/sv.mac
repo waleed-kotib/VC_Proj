@@ -77,6 +77,7 @@
 ::msgcat::mcset sv OK	 		{OK}
 ::msgcat::mcset sv Online               {Tillgänglig}
 ::msgcat::mcset sv Open                 {Öppna}
+::msgcat::mcset sv Options              {Valmöjligheter}
 ::msgcat::mcset sv Password 		{Lösenord}
 ::msgcat::mcset sv Pick 		{Välj}
 ::msgcat::mcset sv Phone                {Telefon}
@@ -465,6 +466,7 @@
 ::msgcat::mcset sv {Start Chat}            {Börja chatt}
 ::msgcat::mcset sv {Status message}        {Statusmeddelande}
 ::msgcat::mcset sv {Status when logging out} {Utloggnings meddelande}
+::msgcat::mcset sv {Subscription Failed}   {Prenumerationen misslyckades}
 ::msgcat::mcset sv {Subscription Pending}  {Vilande prenumerationer}
 ::msgcat::mcset sv {Synthetic speech}      {Syntetiskt tal}
 ::msgcat::mcset sv {System fonts}          {Systemtypsnitt}
@@ -505,248 +507,135 @@
 ::msgcat::mcset sv splashlook 		{Letar efter}
 
 # Messages for tk_messageBox:
-::msgcat::mcset sv messinfoscript	{På grund av 'info script' buggen på\
-Macintosh så måste du peka ut 'Whiteboard-%s' mappen i följande dialog.}
-::msgcat::mcset sv messfailedhttp	{Misslyckades med att starta den interna\
-http servern: %s}
-::msgcat::mcset sv messfailedsock	{Misslyckades med att skapa en\
-nätverksansluting till servern. Kanske är nätverket ur funktion eller så\
-är servern nere. Felkoden är: %s}
-::msgcat::mcset sv messeofconnect	{Någonting gick fel med förbindelsen.\
-Fick eof.}	
-::msgcat::mcset sv messfailconnect	{Någonting gick fel med förbindelsen\
-till %s}
-::msgcat::mcset sv messtimeout		{Fick timeout när väntade på att\
-förbindelsen ska öppna.}
-::msgcat::mcset sv messnoplugs		{Det finns inga pluginner eller\
-hjälpprogram identifierade på det här systemet.}
+::msgcat::mcset sv messinfoscript	{På grund av 'info script' buggen på Macintosh så måste du peka ut 'Whiteboard-%s' mappen i följande dialog.}
+::msgcat::mcset sv messfailedhttp	{Misslyckades med att starta den interna http servern: %s}
+::msgcat::mcset sv messfailedsock	{Misslyckades med att skapa en nätverksansluting till servern. Kanske är nätverket ur funktion eller så är servern nere. Felkoden är: %s}
+::msgcat::mcset sv messeofconnect	{Någonting gick fel med förbindelsen. Fick eof.}	
+::msgcat::mcset sv messfailconnect	{Någonting gick fel med förbindelsen till %s}
+::msgcat::mcset sv messtimeout		{Fick timeout när väntade på att förbindelsen ska öppna.}
+::msgcat::mcset sv messnoplugs		{Det finns inga pluginner eller hjälpprogram identifierade på det här systemet.}
 ::msgcat::mcset sv messfailopread	{Misslyckades öppna %s för läsning: %s}
 ::msgcat::mcset sv messfailopwrite	{Misslyckades öppna %s för att skriva: %s}
-::msgcat::mcset sv messcanerasewarn	{Om du öppnar en canvasfil så raderas\
-allt i nuvarande canvasen!}
-::msgcat::mcset sv messaskreceive	{Det finns en inkommande fil %s.\
-Vill du ta emot den?}
-::msgcat::mcset sv messfailmimeimp 	{Misslyckades med att hitta en\
-importerare för MIME typen %s}
-::msgcat::mcset sv messfailnomime 	{Misslyckades med att hitta MIME\
-typen för filen %s}
+::msgcat::mcset sv messcanerasewarn	{Om du öppnar en canvasfil så raderas allt i nuvarande canvasen!}
+::msgcat::mcset sv messaskreceive	{Det finns en inkommande fil %s. Vill du ta emot den?}
+::msgcat::mcset sv messfailmimeimp 	{Misslyckades med att hitta en importerare för MIME typen %s}
+::msgcat::mcset sv messfailnomime 	{Misslyckades med att hitta MIME typen för filen %s}
 ::msgcat::mcset sv messfailsend		{Misslyckades med att skicka till %s}
-::msgcat::mcset sv messfactorydefaults	{Du håller på att ersätta många av dina\
-personliga inställningar. Vill du verkligen fortsätta?}
-::msgcat::mcset sv messremoveprofile	{Vill du verkligen ersätta den här\
-användarprofilen? Ditt användarkonto tas inte bort med denna operationen.}
-::msgcat::mcset sv messfillserveruser	{Du måste fylla i åtminstone\
-servernamnet och användarnamnet.}
-::msgcat::mcset sv messprofinuse	{Den här användarprofilen används redan.\
-Vill du ersätta den?}
-::msgcat::mcset sv messblockbadjid	{Användar JID:n "%s" är inte av rätt typ.\
-Vill du lägga till den ändå?}
-::msgcat::mcset sv messfieldsmissing	{Ett eller flera fält fattas.\
-Försök igen eller avbryt.}
-::msgcat::mcset sv messrmstandardfonts	{Standard typsnitten Times, Helvetica\
-eller Courier får ej tas bort.}
-::msgcat::mcset sv messprefschanged	{Inställningarna har ändrats.\
-Vill du avbryta ändå?}
+::msgcat::mcset sv messfactorydefaults	{Du håller på att ersätta många av dina personliga inställningar. Vill du verkligen fortsätta?}
+::msgcat::mcset sv messremoveprofile	{Vill du verkligen ersätta den här användarprofilen? Ditt användarkonto tas inte bort med denna operationen.}
+::msgcat::mcset sv messfillserveruser	{Du måste fylla i åtminstone servernamnet och användarnamnet.}
+::msgcat::mcset sv messprofinuse	{Den här användarprofilen används redan. Vill du ersätta den?}
+::msgcat::mcset sv messblockbadjid	{Användar JID:n "%s" är inte av rätt typ. Vill du lägga till den ändå?}
+::msgcat::mcset sv messfieldsmissing	{Ett eller flera fält fattas. Försök igen eller avbryt.}
+::msgcat::mcset sv messrmstandardfonts	{Standard typsnitten Times, Helvetica eller Courier får ej tas bort.}
+::msgcat::mcset sv messprefschanged	{Inställningarna har ändrats. Vill du avbryta ändå?}
 ::msgcat::mcset sv messerrpreffile	{Misslyckades med att öppna filen %s.}
-::msgcat::mcset sv messfailserver	{Misslyckades med att starta servern.\
-Kanske är du inte nätverksansluten.}
-::msgcat::mcset sv messopenhelpfile	{Du håller på att öppna en hjälpfil\
-i canvasen som kommer att radera nuvarande innehåll. Vill du att detta ska ske?}
-::msgcat::mcset sv messprintnoextension	{Inget tillgängligt tcl paket som\
-hjälper oss med det här :-(}
+::msgcat::mcset sv messfailserver	{Misslyckades med att starta servern. Kanske är du inte nätverksansluten.}
+::msgcat::mcset sv messopenhelpfile	{Du håller på att öppna en hjälpfil i canvasen som kommer att radera nuvarande innehåll. Vill du att detta ska ske?}
+::msgcat::mcset sv messprintnoextension	{Inget tillgängligt tcl paket som hjälper oss med det här :-(}
 ::msgcat::mcset sv messdoquit?		{Vill du verkligen avsluta?}
-::msgcat::mcset sv messsuassfillin	{Försäkra dig om att samtliga fält\
-är ifyllda innan du fortsätter}
-::msgcat::mcset sv messsuassclose	{Är du säker på att du vill stänga\
-inställningsassistenten? Du kan starta den när som helst från menyn.}
-::msgcat::mcset sv messprotocolch	{Du har ändrat nätverks uppställiningen.\
-Detta kräver att programmet startas om. Vill du verkligen fortsätta?}
-::msgcat::mcset sv messpasswddifferent  {De två lösenorden matchar ej.\
-Försök igen.}
+::msgcat::mcset sv messsuassfillin	{Försäkra dig om att samtliga fält är ifyllda innan du fortsätter}
+::msgcat::mcset sv messsuassclose	{Är du säker på att du vill stänga inställningsassistenten? Du kan starta den när som helst från menyn.}
+::msgcat::mcset sv messprotocolch	{Du har ändrat nätverks uppställiningen. Detta kräver att programmet startas om. Vill du verkligen fortsätta?}
+::msgcat::mcset sv messpasswddifferent  {De två lösenorden matchar ej. Försök igen.}
 
 
 
 # Messages for tk_messageBox in Jabber namespace etc.:
 namespace eval ::Jabber:: {
-	::msgcat::mcset sv jamesserrsend	{Vi fick ett fel när skickade meddelande\
-till "%s". Felkoden är %s och felmeddelandet: %s}
-	::msgcat::mcset sv jamessallowsub	{Användaren %s tillät dig att prenumerera\
-på sin närvaro.}
-	::msgcat::mcset sv jamessunsub		{Användaren %s har upphört med sin\
-prenumeration på din närvaro och tas bort från din roster.}
-	::msgcat::mcset sv jamessunsubpres	{Användaren %s har upphört med sin\
-prenumeration på din närvaro.}
-	::msgcat::mcset sv jamessunsubask	{Användaren %s har upphört med sin\
-prenumeration på din närvaro. Vill du ta bort %s från din roster?}
-	::msgcat::mcset sv jamessunsubscribed	{Du har tagit bort din prenumeration\
-på %s närvaro.}
-	::msgcat::mcset sv jamesserrpres	{Vi mottog ett "presence" fel.\
-Felkoden är %s och felmeddelandet: %s}
-	::msgcat::mcset sv jamessautoaccepted	{Du har just automatiskt\
-accepterat en prenumeration från %s.}
-	::msgcat::mcset sv jamessautoreject	{Du har just automatiskt\
-nekat en prenumeration från %s.}
-	::msgcat::mcset sv jamessautosubs	{Du har just automatiskt\
-prenumererat på %s närvaro.}
-
-
+	::msgcat::mcset sv jamesserrsend	{Vi fick ett fel när skickade meddelande till "%s". Felkoden är %s och felmeddelandet: %s}
+	::msgcat::mcset sv jamessallowsub	{Användaren %s tillät dig att prenumerera på sin närvaro.}
+	::msgcat::mcset sv jamessunsub		{Användaren %s har upphört med sin prenumeration på din närvaro och tas bort från din roster.}
+	::msgcat::mcset sv jamessunsubpres	{Användaren %s har upphört med sin prenumeration på din närvaro.}
+	::msgcat::mcset sv jamessunsubask	{Användaren %s har upphört med sin prenumeration på din närvaro. Vill du ta bort %s från din roster?}
+	::msgcat::mcset sv jamessunsubscribed	{Du har tagit bort din prenumeration på %s närvaro.}
+	::msgcat::mcset sv jamesserrpres	{Vi mottog ett "presence" fel. Felkoden är %s och felmeddelandet: %s}
+	::msgcat::mcset sv jamessautoaccepted	{Du har just automatiskt accepterat en prenumeration från %s.}
+	::msgcat::mcset sv jamessautoreject	{Du har just automatiskt nekat en prenumeration från %s.}
+	::msgcat::mcset sv jamessautosubs	{Du har just automatiskt prenumererat på %s närvaro.}
 	::msgcat::mcset sv jamessconnbroken	{Förbindelsen bröts oväntat.}
-	::msgcat::mcset sv jamessautoawayset 	{Auto frånvarande har satts %s.\
-Vill du bli tillgänglig igen?}
-	::msgcat::mcset sv jamesserrgetpublic	{Mottog ett felmeddelande när\
-hämtade "public data" från %s. Felkoden är %s och felmeddelandet: %s}
-	::msgcat::mcset sv jamesserrlastactive	{Mottog ett felmeddelande när\
-frågade %s om dess senaste aktivitet. Felet var: %s}
-	::msgcat::mcset sv jamesserrnotimeinfo	{Klienten eller tjänsten %s\
-returnerade inte någon tids info.}
-	::msgcat::mcset sv jamesstimeused	{Tid sedan klienten "%s"\
-var aktiv: }
-	::msgcat::mcset sv jamesstimeconn	{Tid sedan användaren "%s" var\
-uppkopplad: }
+	::msgcat::mcset sv jamessautoawayset 	{Auto frånvarande har satts %s. Vill du bli tillgänglig igen?}
+	::msgcat::mcset sv jamesserrgetpublic	{Mottog ett felmeddelande när hämtade "public data" från %s. Felkoden är %s och felmeddelandet: %s}
+	::msgcat::mcset sv jamesserrlastactive	{Mottog ett felmeddelande när frågade %s om dess senaste aktivitet. Felet var: %s}
+	::msgcat::mcset sv jamesserrnotimeinfo	{Klienten eller tjänsten %s returnerade inte någon tids info.}
+	::msgcat::mcset sv jamesstimeused	{Tid sedan klienten "%s" var aktiv: }
+	::msgcat::mcset sv jamesstimeconn	{Tid sedan användaren "%s" var uppkopplad: }
 	::msgcat::mcset sv jamesstimeservstart	{Tid sedan servern "%s" startades: }
-	::msgcat::mcset sv jamessuptime		{Upptiden för tjänsten eller\
-dess senaste aktivetet är: }
-	::msgcat::mcset sv jamesserrtime	{Vi mottog ett felmeddelande\
-när frågade %s om dess tids info. Felet var: %s}
+	::msgcat::mcset sv jamessuptime		{Upptiden för tjänsten eller dess senaste aktivetet är: }
+	::msgcat::mcset sv jamesserrtime	{Vi mottog ett felmeddelande när frågade %s om dess tids info. Felet var: %s}
 	::msgcat::mcset sv jamesslocaltime	{Lokaltid för %s är: %s}
-	::msgcat::mcset sv jamesserrvers	{Vi mottog ett felmeddelande\
-när frågade %s om dess versionsnummer. Felet var: %s}
-	::msgcat::mcset sv jamesserrautoupdate 	{Vi mottog ett felmeddelande\
-när frågade %s om ny version. Felet var: %s}
+	::msgcat::mcset sv jamesserrvers	{Vi mottog ett felmeddelande när frågade %s om dess versionsnummer. Felet var: %s}
+	::msgcat::mcset sv jamesserrautoupdate 	{Vi mottog ett felmeddelande när frågade %s om ny version. Felet var: %s}
 	::msgcat::mcset sv jamesswarberasewb	{Vill du radera skrivtavlan först?}
-	::msgcat::mcset sv jamesswarnremove	{Att ta bort en användare från\
-din roster kan inte göras ogjort. Du måste göra en ny prenumeration av denna\
-användare om du önskar en förnyad prenumeration. Vill du fortsätta ändå?}
-	::msgcat::mcset sv jamessillegalchar	{Ogiltigt tecken i %s: "%s"!}
-	::msgcat::mcset sv jamessbadjid		{JID:n "%s" har ej korrekt form.\
+	::msgcat::mcset sv jamesswarnremove	{Att ta bort en användare från din roster kan inte göras ogjort. Du måste göra en ny prenumeration av denna användare om du önskar en förnyad prenumeration.\
 Vill du fortsätta ändå?}
-	::msgcat::mcset sv jamessalreadyinrost	{JID:n "%s" existerar redan i din\
-roster. Vill du fortsätta ändå?}
-	::msgcat::mcset sv jamessfailsetnick	{Det blev ett fel när satte\
-kortnamn eller grupp för användaren "%s". Felkoden är %s och felmeddelandet: %s}
+	::msgcat::mcset sv jamessillegalchar	{Ogiltigt tecken i %s: "%s"!}
+	::msgcat::mcset sv jamessbadjid		{JID:n "%s" har ej korrekt form. Vill du fortsätta ändå?}
+	::msgcat::mcset sv jamessalreadyinrost	{JID:n "%s" existerar redan i din roster. Vill du fortsätta ändå?}
+	::msgcat::mcset sv jamessfailsetnick	{Det blev ett fel när satte kortnamn eller grupp för användaren "%s". Felkoden är %s och felmeddelandet: %s}
 	::msgcat::mcset sv jamessnamemissing	{Fältet %s fattas eller är för kort!}
-	::msgcat::mcset sv jamessnosocket	{Misslyckades med att upprätta\
-en förbindelse med servern "%s". Kanske nätverket eller servern är ur funktion.\
-Meddelandet är : %s}
-	::msgcat::mcset sv jamesstimeoutserver	{Timeout när väntade på att servern\
-"%s" skulle svara.}
-	::msgcat::mcset sv jamessregisterok	{Registreringen hos servern "%s"\
-lyckades. Nu måste du bara logga på med samma namn och lösenord.}
-	::msgcat::mcset sv jamessremoveaccount	{Du är på gång att ta bort ditt\
-konto på denna servern. Det här kan inte göras ogjort. Vill du verkligen\
-fortsätta?}
-	::msgcat::mcset sv jamesserrunreg	{Vi mottog ett felmeddelande\
-när försökte avregistrera "%s". Felkoden %s och felmeddelandet: %s}
+	::msgcat::mcset sv jamessnosocket	{Misslyckades med att upprätta en förbindelse med servern "%s". Kanske nätverket eller servern är ur funktion. Meddelandet är : %s}
+	::msgcat::mcset sv jamesstimeoutserver	{Timeout när väntade på att servern "%s" skulle svara.}
+	::msgcat::mcset sv jamessregisterok	{Registreringen hos servern "%s" lyckades. Nu måste du bara logga på med samma namn och lösenord.}
+	::msgcat::mcset sv jamessremoveaccount	{Du är på gång att ta bort ditt konto på denna servern. Det här kan inte göras ogjort. Vill du verkligen fortsätta?}
+	::msgcat::mcset sv jamesserrunreg	{Vi mottog ett felmeddelande när försökte avregistrera "%s". Felkoden %s och felmeddelandet: %s}
 	::msgcat::mcset sv jamessokunreg	{Du är nu avregistrerad från "%s"}
-	::msgcat::mcset sv jamesspasswddiff	{Lösenorden överensstämmer ej.\
-Kontrollera en gång till.}
-	::msgcat::mcset sv jamesspasswderr	{Bytet av lösenord misslyckades med\
-felkod %s och felmeddelande "%s"}
+	::msgcat::mcset sv jamesspasswddiff	{Lösenorden överensstämmer ej. Kontrollera en gång till.}
+	::msgcat::mcset sv jamesspasswderr	{Bytet av lösenord misslyckades med felkod %s och felmeddelande "%s"}
 	::msgcat::mcset sv jamesspasswdok	{Att sätta nytt lösenord fungerade.}
 	::msgcat::mcset sv jamessregnoserver	{Vi kräver att serverns namn fylls i.}
-	::msgcat::mcset sv jamesserrregget	{Misslyckades med att få\
-registrerings info. Felkoden %s med felmeddelande: %s}
-	::msgcat::mcset sv jamesserrregset	{Misslyckades med att registrera\
-tjänsten "%s". Felkoden %s med felmeddelande: %s}
-	::msgcat::mcset sv jamessokreg		{Registreringen av tjänsten "%s"\
-lyckades.}
-	::msgcat::mcset sv jamessinvalidjid	{JID adressen har inte rätt form.\
-Kontrollera att fältet i nederkanten av skrivtavlan innehåller en riktig\
-adress innan du handlar. Den ska vara av typen 'username@jabber.org'.}
-	::msgcat::mcset sv jamessnotconnected	{Kan ej skicka något när ej\
-ansluten till servern.}
-	::msgcat::mcset sv jamessaddrmiss	{Du måste fylla i åtminstone\
-en giltig adress.}
-	::msgcat::mcset sv jamesschatclose	{Om du stänger det här chat\
-fönstret så förlorar du också hela konversationen. Vill du verkligen stänga?}
-	::msgcat::mcset sv jamessnogroupchat	{Vi lyckades ej identifiera\
-någon tjänst för gruppsamtal.}
-	::msgcat::mcset sv jamessinroommiss	{Alla fält måste fyllas i innan\
-du kan stiga in i rummet.}
-	::msgcat::mcset sv jamesswarnexitroom	{Vill du verkligen lämna rummet\
-"%s" ?}
-	::msgcat::mcset sv jamesserrbrowse	{Vi fick ett fel när "browsade"\
-"%s": %s}
-	::msgcat::mcset sv jamessenterroomempty	{Både fälten för servern och\
-rums namnet måste vara giltiga.}
-	::msgcat::mcset sv jamesserrconfget	{Misslyckades med att få info\
-för att komma in i rummet. Felkoden %s och felmeddelande: %s}
-	::msgcat::mcset sv jamesserrconfgetcre	{Misslyckades med att få info\
-för att skapa rummet. Felkoden %s och felmeddelande: %s}
-	::msgcat::mcset sv jamessinroomerasewb 	{Vill du radera skrivtavlan\
-innan du går in i rummet?}
-	::msgcat::mcset sv jamessconffailed	{Misslyckades med att stiga\
-in i eller skapa rummet "%s". Felkoden %s och felmeddelande: %s}
-	::msgcat::mcset sv jamessconfservempty	{Fältet för serverns namn måste\
-fyllas i med ett giltigt namn.}
-	::msgcat::mcset sv jamesserragentget	{Vi mottog ett felmeddelande\
-när försökte få tag i "agents": %s}
-	::msgcat::mcset sv jamesserrsearch	{Misslyckades med att få tag\
-i en sökspecifikation. Felkoden %s och felmeddelande: %s}
+	::msgcat::mcset sv jamesserrregget	{Misslyckades med att få registrerings info. Felkoden %s med felmeddelande: %s}
+	::msgcat::mcset sv jamesserrregset	{Misslyckades med att registrera tjänsten "%s". Felkoden %s med felmeddelande: %s}
+	::msgcat::mcset sv jamessokreg		{Registreringen av tjänsten "%s" lyckades.}
+	::msgcat::mcset sv jamessinvalidjid	{JID adressen har inte rätt form. Kontrollera att fältet i nederkanten av skrivtavlan innehåller en riktig adress innan du handlar.\
+Den ska vara av typen 'username@jabber.org'.}
+	::msgcat::mcset sv jamessnotconnected	{Kan ej skicka något när ej ansluten till servern.}
+	::msgcat::mcset sv jamessaddrmiss	{Du måste fylla i åtminstone en giltig adress.}
+	::msgcat::mcset sv jamesschatclose	{Om du stänger det här chat fönstret så förlorar du också hela konversationen. Vill du verkligen stänga?}
+	::msgcat::mcset sv jamessnogroupchat	{Vi lyckades ej identifiera någon tjänst för gruppsamtal.}
+	::msgcat::mcset sv jamessinroommiss	{Alla fält måste fyllas i innan du kan stiga in i rummet.}
+	::msgcat::mcset sv jamesswarnexitroom	{Vill du verkligen lämna rummet "%s" ?}
+	::msgcat::mcset sv jamesserrbrowse	{Vi fick ett fel när "browsade" "%s": %s}
+	::msgcat::mcset sv jamessenterroomempty	{Både fälten för servern och rums namnet måste vara giltiga.}
+	::msgcat::mcset sv jamesserrconfget	{Misslyckades med att få info för att komma in i rummet. Felkoden %s och felmeddelande: %s}
+	::msgcat::mcset sv jamesserrconfgetcre	{Misslyckades med att få info för att skapa rummet. Felkoden %s och felmeddelande: %s}
+	::msgcat::mcset sv jamessinroomerasewb 	{Vill du radera skrivtavlan innan du går in i rummet?}
+	::msgcat::mcset sv jamessconffailed	{Misslyckades med att stiga in i eller skapa rummet "%s". Felkoden %s och felmeddelande: %s}
+	::msgcat::mcset sv jamessconfservempty	{Fältet för serverns namn måste fyllas i med ett giltigt namn.}
+	::msgcat::mcset sv jamesserragentget	{Vi mottog ett felmeddelande när försökte få tag i "agents": %s}
+	::msgcat::mcset sv jamesserrsearch	{Misslyckades med att få tag i en sökspecifikation. Felkoden %s och felmeddelande: %s}
 	::msgcat::mcset sv jamessoobok		{Filöverföringen lyckad!}
-	::msgcat::mcset sv jamessoobok2         {Filöverföringen av %s till\
-"%s" lyckad!}
-	::msgcat::mcset sv jamessoobnourl	{När användaren "%s" gjorde en\
-fil tillgänglig så saknades url:en.}
-	::msgcat::mcset sv jamessoobask		{Användaren "%s" gör filen\
-%s tillgänglig för dig. Beskrivning: %s. Vill du ha den?}
-	::msgcat::mcset sv jamessoobbad		{Url:en som vi fick från "%s"\
-har ej korrekt form. Url: "%s"}
-	::msgcat::mcset sv jamessoonnohttp	{Url:en som vi fick från "%s"\
-använder inte HTTP protokollet men istället %s som ej stöds.}
-	::msgcat::mcset sv jamessoobfailopen	{Misslyckades med att öppna\
-filen %s}
-	::msgcat::mcset sv jamessoobgetfail	{Misslyckades med att skaffa\
-url:en "%s": %s}
-	::msgcat::mcset sv jamessoobtimeout	{Vi fick timeout när skaffade\
-fil över HTTP.}
-	::msgcat::mcset sv jamessnogchat	{Vi hittade ingen tjänst som\
-stöder gruppsamtal}
-	::msgcat::mcset sv jamesserrinboxopen	{Misslyckades med att öppna\
-filen %s för inkorgen.}
-	::msgcat::mcset sv jamesserrinboxread	{Fick ett fel när försökte\
-att läsa Jabber inkorgs filen "%s": %s}
-	::msgcat::mcset sv jamesschatclose	{Om du stänger det här fönstret\
-så förlorar du också hela konversationen. Vill du verkligen stänga fönstret?}
-	::msgcat::mcset sv jamessgchatfields	{Vi kräver att samtliga fält\
-är ifyllda innan går in i rum.}
-	::msgcat::mcset sv jamessconfmsg	{Välj en konferanstjänst och\
-ett rumsnamn. Tryck sedan på "Hämta" för att få specifikationen för att gå\
-in i det önskade rummet eftersom varje rum och tjänst kan ha speciella\
-villkor.}
-	::msgcat::mcset sv jamesssavemsg	{Vill du spara det här\
-meddelandet innan fönstret stängs?}
-	::msgcat::mcset sv jamessskipsendq	{Adressen \"%s\" är inte\
-riktigt formad. Vill du hoppa över denna och skicka till resterande?}
-	::msgcat::mcset sv jamessillformresend	{Adressen \"%s\" är inte\
-riktigt formad. Korrigera och skicka igen.}
-	::msgcat::mcset sv jamesslogin409	{Påloggningen misslyckades\
-med felkod %s beroende av att användarnamnet används. Om det är ditt eget
-namn prova att logga på istället.}
-	::msgcat::mcset sv jamessloginerr	{Påloggningen misslyckades\
-med felkod %s  och felmeddelande: %s}
-        ::msgcat::mcset sv jamessaddforeign     {Att lägga till en användare\
-från ett icke Jabber system kräver att du redan har ett konto på detta\
-system och att du har använt detta konto för att registrera dig hos\
-serverns transport komponent %s. Vill du göra detta nu?}
-        ::msgcat::mcset sv jamessowntrpt	{Detta är ditt eget konto\
-hos %s som fungerar som en server service vilken transporterar meddelanden\
-till motsvarande IM system. Det är nödvändigt att den finns i din\
-roster. Du har prenumeration för %s: %s.}
-::msgcat::mcset sv jamesswbchatlost	        {Du förlorar hela chatt\
-konversationen när du stänger whiteboarden. Vill du verkligen avsluta denna chatt?}
-::msgcat::mcset sv jamesschatoffline            {Användaren är inte längre\
-tillgänglig och meddelandet skickas därför ej.}
-::msgcat::mcset sv jamessregloginok             {Du är nu registrerad\
-och automatiskt påloggad som "%s"}
-::msgcat::mcset sv jamessregerrinuse            {Registreringen misslyckades\
-därför att användarnamnet redan används. Om du redan har registrerat detta namn\
-logga på istället. Felmeddelande: %s}
-::msgcat::mcset sv jamessregerr                 {Registreringen misslyckades\
-med felmeddelande: %s}
-::msgcat::mcset sv jamesstrptsubsc              {Ditt registrerade konto\
-hos %s kommer att placeras i din kompislista för att fungera som transport\
-till denna tjänsten.}
+	::msgcat::mcset sv jamessoobok2         {Filöverföringen av %s till "%s" lyckad!}
+	::msgcat::mcset sv jamessoobnourl	{När användaren "%s" gjorde en fil tillgänglig så saknades url:en.}
+	::msgcat::mcset sv jamessoobask		{Användaren "%s" gör filen %s tillgänglig för dig. Beskrivning: %s. Vill du ha den?}
+	::msgcat::mcset sv jamessoobbad		{Url:en som vi fick från "%s" har ej korrekt form. Url: "%s"}
+	::msgcat::mcset sv jamessoonnohttp	{Url:en som vi fick från "%s" använder inte HTTP protokollet men istället %s som ej stöds.}
+	::msgcat::mcset sv jamessoobfailopen	{Misslyckades med att öppna filen %s}
+	::msgcat::mcset sv jamessoobgetfail	{Misslyckades med att skaffa url:en "%s": %s}
+	::msgcat::mcset sv jamessoobtimeout	{Vi fick timeout när skaffade fil över HTTP.}
+	::msgcat::mcset sv jamessnogchat	{Vi hittade ingen tjänst som stöder gruppsamtal}
+	::msgcat::mcset sv jamesserrinboxopen	{Misslyckades med att öppna filen %s för inkorgen.}
+	::msgcat::mcset sv jamesserrinboxread	{Fick ett fel när försökte att läsa Jabber inkorgs filen "%s": %s}
+	::msgcat::mcset sv jamesschatclose	{Om du stänger det här fönstret så förlorar du också hela konversationen. Vill du verkligen stänga fönstret?}
+	::msgcat::mcset sv jamessgchatfields	{Vi kräver att samtliga fält är ifyllda innan går in i rum.}
+	::msgcat::mcset sv jamessconfmsg	{Välj en konferanstjänst och ett rumsnamn. Tryck sedan på "Hämta" för att få specifikationen för att gå\
+in i det önskade rummet eftersom varje rum och tjänst kan ha speciella villkor.}
+	::msgcat::mcset sv jamesssavemsg	{Vill du spara det här meddelandet innan fönstret stängs?}
+	::msgcat::mcset sv jamessskipsendq	{Adressen "%s" är inte riktigt formad. Vill du hoppa över denna och skicka till resterande?}
+	::msgcat::mcset sv jamessillformresend	{Adressen "%s" är inte riktigt formad. Korrigera och skicka igen.}
+	::msgcat::mcset sv jamesslogin409	{Påloggningen misslyckades med felkod %s beroende av att användarnamnet används. Om det är ditt eget namn prova att logga på istället.}
+	::msgcat::mcset sv jamessloginerr	{Påloggningen misslyckades med felkod %s  och felmeddelande: %s}
+        ::msgcat::mcset sv jamessaddforeign     {Att lägga till en användare från ett icke Jabber system kräver att du redan har ett konto på detta system och att du har använt detta konto för\
+att registrera dig hos serverns transport komponent %s. Vill du göra detta nu?}
+        ::msgcat::mcset sv jamessowntrpt	{Detta är ditt eget konto hos %s som fungerar som en server service vilken transporterar meddelanden till motsvarande IM system.\
+Det är nödvändigt att den finns i din roster. Du har prenumeration för %s: %s.}
+::msgcat::mcset sv jamesswbchatlost	        {Du förlorar hela chatt konversationen när du stänger whiteboarden. Vill du verkligen avsluta denna chatt?}
+::msgcat::mcset sv jamesschatoffline            {Användaren är inte längre tillgänglig och meddelandet skickas därför ej.}
+::msgcat::mcset sv jamessregloginok             {Du är nu registrerad och automatiskt påloggad som "%s"}
+::msgcat::mcset sv jamessregerrinuse            {Registreringen misslyckades därför att användarnamnet redan används. Om du redan har registrerat detta namn logga på istället. Felmeddelande: %s}
+::msgcat::mcset sv jamessregerr                 {Registreringen misslyckades med felmeddelande: %s}
+::msgcat::mcset sv jamesstrptsubsc              {Ditt registrerade konto hos %s kommer att placeras i din kompislista för att fungera som transport till denna tjänsten.}
+::msgcat::mcset sv jamessfailedsubsc            {Misslyckades med prenumerationen till %s. Användaren nekade.}
 
 
 
@@ -755,20 +644,14 @@ till denna tjänsten.}
 
 ::msgcat::mcset sv openquicktime		{Öppna en QuickTime ström}
 ::msgcat::mcset sv writeurl			{Skriv in en URL eller välj kortnamn:}
-::msgcat::mcset sv openquicktimeurlmsg		{Öppna en URL som består av en\
-SDP fil med .mov ändelse för att ta emot en levande QuickTime ström.\
-Den kan bestå av ljud (radio) eller video (TV). Som alternativ använd en\
-webbläsare för att hitta en SDP fil, ladda ner den till din disk och öppna\
-den som en vanlig film.}
-::msgcat::mcset sv jabrowseaddserver		{Skriv in JID:n för servern\
-du önskar lägga till till listan av tjänster, till exempel "jabber.org".}
+::msgcat::mcset sv openquicktimeurlmsg		{Öppna en URL som består av en SDP fil med .mov ändelse för att ta emot en levande QuickTime ström.\
+Den kan bestå av ljud (radio) eller video (TV). Som alternativ använd en webbläsare för att hitta en SDP fil, ladda ner den till din disk och öppna den som en vanlig film.}
+::msgcat::mcset sv jabrowseaddserver		{Skriv in JID:n för servern du önskar lägga till till listan av tjänster, till exempel "jabber.org".}
 
 
 
-::msgcat::mcset sv uastatpointmac 	{Klicka för att markera,\
-dubbelklicka för inspektion, pressa musknappen för popup}
-::msgcat::mcset sv uastatpoint		{Klicka för att markera,\
-dubbelklicka för inspektion, högerklicka för popup}
+::msgcat::mcset sv uastatpointmac 	{Klicka för att markera, dubbelklicka för inspektion, pressa musknappen för popup}
+::msgcat::mcset sv uastatpoint		{Klicka för att markera, dubbelklicka för inspektion, högerklicka för popup}
 ::msgcat::mcset sv uastatmove		{Flyttverktyg}
 ::msgcat::mcset sv uastatline		{Linje}
 ::msgcat::mcset sv uastatarrow		{Pil}
@@ -787,61 +670,37 @@ dubbelklicka för inspektion, högerklicka för popup}
 
 # Preferences:
 ::msgcat::mcset sv prefnetconf  {Nätverks och server konfiguration}
-::msgcat::mcset sv prefnethead  {Vi kan antingen öppna förbindelse\
-med en Jabber server, eller direkt till en annan klient. Utseendet på\
-programmet beror på vilket du väljer.}
-::msgcat::mcset sv prefnetauto  {Om en klient kopplar upp sig mot\
-vår server, så sker en uppkoppling till denna klient automatiskt.}
-::msgcat::mcset sv prefnetjabb  {Jabber server systemet.\
-Omfattande användar administration via "Jabber" menyn. Använder ett XML\
-baserat protokoll.}
-::msgcat::mcset sv prefnetmulti {Automatisk förbindelse till alla\
-klienter i detta nätverket när uppkoppling mot någon.}
-::msgcat::mcset sv prefnetadv   {En klient kör normalt två olika\
-servrar, den inbyggda som alltid existerar för peer-to-peer,\
-samt en http server. Jabber servern hänvisar typiskt till en extern
-server vars portnummer normalt är 5222.\
-Portnummerna nedan verkställs normalt endast när programmet startas om.}
-::msgcat::mcset sv prefsounsynwb {Använd syntetiskt tal för\
-text i skrivtavlan}
-::msgcat::mcset sv prefsounsynno {Använd syntetiskt tal för normala\
-meddelanden}
+::msgcat::mcset sv prefnethead  {Vi kan antingen öppna förbindelse med en Jabber server, eller direkt till en annan klient. Utseendet på programmet beror på vilket du väljer.}
+::msgcat::mcset sv prefnetauto  {Om en klient kopplar upp sig mot vår server, så sker en uppkoppling till denna klient automatiskt.}
+::msgcat::mcset sv prefnetjabb  {Jabber server systemet. Omfattande användar administration via "Jabber" menyn. Använder ett XML baserat protokoll.}
+::msgcat::mcset sv prefnetmulti {Automatisk förbindelse till alla klienter i detta nätverket när uppkoppling mot någon.}
+::msgcat::mcset sv prefnetadv   {En klient kör normalt två olika servrar, den inbyggda som alltid existerar för peer-to-peer, samt en http server.\
+Jabber servern hänvisar typiskt till en extern server vars portnummer normalt är 5222. Portnummerna nedan verkställs normalt endast när programmet startas om.}
+::msgcat::mcset sv prefsounsynwb {Använd syntetiskt tal för text i skrivtavlan}
+::msgcat::mcset sv prefsounsynno {Använd syntetiskt tal för normala meddelanden}
 ::msgcat::mcset sv prefsounsynch {Använd syntetiskt tal när chattar}
 ::msgcat::mcset sv prefsounvoin  {Välj röst för inkommande text:}
 ::msgcat::mcset sv prefsounvoou  {Välj röst för egen text:}
-::msgcat::mcset sv prefsounpick  {Välj pling & plong ljud för\
-händelserna nedan:}
-::msgcat::mcset sv prefshortcut  {Här lägger du till eller redigerar\
-genvägar för "peer-to-peer" anslutningar. Dessa används ej av Jabber systemet.}
-::msgcat::mcset sv prefprof      {Här sätter du upp en profil med\
-nödvändig information för ett Jabber konto. Servern som sätts här blir också\
-standard kontot när du loggar på.}
-::msgcat::mcset sv prefpers      {Dina personuppgifter sparas i den\
-inställningsfil men kan också sparas på serverns "Jabber User Directory".\
+::msgcat::mcset sv prefsounpick  {Välj pling & plong ljud för händelserna nedan:}
+::msgcat::mcset sv prefshortcut  {Här lägger du till eller redigerar genvägar för "peer-to-peer" anslutningar. Dessa används ej av Jabber systemet.}
+::msgcat::mcset sv prefprof      {Här sätter du upp en profil med nödvändig information för ett Jabber konto. Servern som sätts här blir också standard kontot när du loggar på.}
+::msgcat::mcset sv prefpers      {Dina personuppgifter sparas i den inställningsfil men kan också sparas på serverns "Jabber User Directory".\
 Uppgifter som är serverlagrade är sökbara för samtliga användare.}
 ::msgcat::mcset sv prefaaset     {Sätt automatisk frånvarande status:}
 ::msgcat::mcset sv prefminaw     {Minuter innan automatisk frånvarande status:}
 ::msgcat::mcset sv prefminea     {Minuter innan automatisk extra frånvarande status:}
-::msgcat::mcset sv prefsuif      {Om någon vill prenumerera på min\
-närvaro och...}
+::msgcat::mcset sv prefsuif      {Om någon vill prenumerera på min närvaro och...}
 ::msgcat::mcset sv prefsuis      {...redan finns i min roster:}
 ::msgcat::mcset sv prefsuisnot   {...ej finns i min roster:}
-::msgcat::mcset sv prefsuauto    {Prenumerera automatiskt på de som\
-prenumererar på mig}
-::msgcat::mcset sv prefrorm      {Ta bort användare om prenumerationen\
-upphör}	
+::msgcat::mcset sv prefsuauto    {Prenumerera automatiskt på de som prenumererar på mig}
+::msgcat::mcset sv prefrorm      {Ta bort användare om prenumerationen upphör}	
 ::msgcat::mcset sv prefroallow   {Tillåt användare utan prenumeration}
 ::msgcat::mcset sv prefroclr     {Radera rostern när loggar ut}
-::msgcat::mcset sv prefrochat    {Chatta när dubbelklickar användare,\
-annars normalt meddelande}
-::msgcat::mcset sv prefrosysicons {Använd anpassade ikoner för\
-främmande IM system}
-::msgcat::mcset sv prefblonly    {Acceptera endast meddelanden från\
-användare i min roster}
-::msgcat::mcset sv prefblbl      {Blockera följande JID:er (* jokertecken\
-tillåtna):}
-::msgcat::mcset sv prefblmsg     {Skriv in den kompletta JID:n för\
-användaren du vill blockera. En JID ska ha formen "joewest@jabber.org"}
+::msgcat::mcset sv prefrochat    {Chatta när dubbelklickar användare, annars normalt meddelande}
+::msgcat::mcset sv prefrosysicons {Använd anpassade ikoner för främmande IM system}
+::msgcat::mcset sv prefblonly    {Acceptera endast meddelanden från användare i min roster}
+::msgcat::mcset sv prefblbl      {Blockera följande JID:er (* jokertecken tillåtna):}
+::msgcat::mcset sv prefblmsg     {Skriv in den kompletta JID:n för användaren du vill blockera. En JID ska ha formen "joewest@jabber.org"}
 ::msgcat::mcset sv prefcufont    {Välj typsnitt för chatt fönster:}
 ::msgcat::mcset sv prefcushow    {Visa inkommande meddelande i nytt fönster}
 ::msgcat::mcset sv prefcusave    {Spara inkorgen mellan sessionerna}
@@ -851,41 +710,27 @@ användaren du vill blockera. En JID ska ha formen "joewest@jabber.org"}
 ::msgcat::mcset sv prefcudisc    {Önskad service metod:}
 ::msgcat::mcset sv prefcubrowse  {Browse service om möjligt}
 ::msgcat::mcset sv prefcuagent   {Använd alltid Agent metod}
-::msgcat::mcset sv prefcuupdate  {Kontrollera automatiskt om ny\
-Coccinella version finns}
+::msgcat::mcset sv prefcuupdate  {Kontrollera automatiskt om ny Coccinella version finns}
 ::msgcat::mcset sv preffmhelp    {Hjälpplugg för filtyp}
 ::msgcat::mcset sv preffmsave    {Spara på disk i inmappen}
-::msgcat::mcset sv preffontmsg   {Varning: om importerar ett annat\
-typsnitt än de tre standard (Times, Helvetica or Courier) så måste du vara\
-säker på att alla andra klienter också har detta typsnitt installerat på\
-sina system.}
-::msgcat::mcset sv prefcahow     {Hur ska filer hanteras som redan har\
-mottagits:}
+::msgcat::mcset sv preffontmsg   {Varning: om importerar ett annat typsnitt än de tre standard (Times, Helvetica or Courier) så måste du vara säker på att alla andra klienter också har\
+detta typsnitt installerat på sina system.}
+::msgcat::mcset sv prefcahow     {Hur ska filer hanteras som redan har mottagits:}
 ::msgcat::mcset sv prefcahow     {Hur hantera redan mottagen fil:}
-::msgcat::mcset sv prefcanev     {Acceptera aldrig en sparad fil, ladda\
-alltid en ny}
-::msgcat::mcset sv prefcaalw     {Acceptera alltid en sparad fil, ladda\
-aldrig en ny}
-::msgcat::mcset sv prefcaor      {..eller acceptera sparad fil om inte\
-äldre än:}
-::msgcat::mcset sv prefpriv      {Om integritets knappen förkryssad\
-så kan du endast redigera canvas objekt som du skapat själv.\
-Objekt skapade av andra är inte möjliga att redigera.}
+::msgcat::mcset sv prefcanev     {Acceptera aldrig en sparad fil, ladda alltid en ny}
+::msgcat::mcset sv prefcaalw     {Acceptera alltid en sparad fil, ladda aldrig en ny}
+::msgcat::mcset sv prefcaor      {..eller acceptera sparad fil om inte äldre än:}
+::msgcat::mcset sv prefpriv      {Om integritets knappen förkryssad så kan du endast redigera canvas objekt som du skapat själv. Objekt skapade av andra är inte möjliga att redigera.}
 ::msgcat::mcset sv prefshortip   {Fullständigt ipnummer eller namn}
-::msgcat::mcset sv prefshortwa   {Varning: du har redigerat genvägarna.\
-Vill du inte spara dom?}
+::msgcat::mcset sv prefshortwa   {Varning: du har redigerat genvägarna. Vill du inte spara dom?}
 
-::msgcat::mcset sv preffilecache {Filminnet sparar lokala kopior av\
-filer från andra användare vilket minskar transporttiden. Storleken\
-på filminnet begränsas av användarinställningarna nedan.}
+::msgcat::mcset sv preffilecache {Filminnet sparar lokala kopior av filer från andra användare vilket minskar transporttiden. Storleken på filminnet begränsas av användarinställningarna nedan.}
 ::msgcat::mcset sv prefcachecmp  {Jämför filminnet med transporterad}
 ::msgcat::mcset sv prefnatip     {Använd följande ip adress att visa för andra}
 ::msgcat::mcset sv prefmucconf   {Multi-User-Chat med Conference som reserv}
 ::msgcat::mcset sv prefrostbgim  {Använd bakgrundsbild i rostern}
 ::msgcat::mcset sv preftheme     {Välj tema, kräver uppstart}
-::msgcat::mcset sv prefplugctrl  {Du kan välja bort följande paket om\
-de inte ska användas. Programmet måste startas om för att detta ska vara\
-verksamt.}
+::msgcat::mcset sv prefplugctrl  {Du kan välja bort följande paket om de inte ska användas. Programmet måste startas om för att detta ska vara verksamt.}
 ::msgcat::mcset sv prefchactret  {Använd alltid aktiv <Return> i chatt dialog}
 ::msgcat::mcset sv prefchnormal  {Behandla normala meddelanden som chatt meddelanden}
 ::msgcat::mcset sv prefprofname  {Skriv in önskat namn på användarprofilen}
@@ -898,8 +743,7 @@ verksamt.}
 # EditShortcuts namespace:
 namespace eval ::EditShortcuts:: {
 	::msgcat::mcset sv shortip       {Fullständigt ipnummer eller namn}
-	::msgcat::mcset sv shortwarn     {Varning: du har redigerat genvägarna.\
-Vill du inte spara dom?}
+	::msgcat::mcset sv shortwarn     {Varning: du har redigerat genvägarna. Vill du inte spara dom?}
 
 
 
@@ -907,53 +751,34 @@ Vill du inte spara dom?}
 
 # Jabber namespace:
 namespace eval ::Jabber:: {
-	::msgcat::mcset sv jalogin 	{Fyll i Jabber serverns namn eller ip\
-nummer eller välj från popup menyn. Du måste ha ett konto på servern sedan\
-tidigare.}
-	::msgcat::mcset sv janewaccount {Fyll i Jabber serverns namn eller ip\
-nummer. Välj användarnamn och lösenord.}
+	::msgcat::mcset sv jalogin 	{Fyll i Jabber serverns namn eller ip nummer eller välj från popup menyn. Du måste ha ett konto på servern sedan tidigare.}
+	::msgcat::mcset sv janewaccount {Fyll i Jabber serverns namn eller ip nummer. Välj användarnamn och lösenord.}
 	::msgcat::mcset sv janewpass    {Sätt nytt lösenord för:}
-	::msgcat::mcset sv jasubwant    {Användaren "%s" önskar prenumerera\
-på din närvaro. Välj från möjligheterna nedan. Kortnamn och grupp är inte\
-obligatoriskt utan enbart för din personliga användning.}
+	::msgcat::mcset sv jasubwant    {Användaren "%s" önskar prenumerera på din närvaro. Välj från möjligheterna nedan. Kortnamn och grupp är inte obligatoriskt utan enbart för din personliga användning.}
 	::msgcat::mcset sv jasubgetvcard {Hämta den här personens vCard}
-	::msgcat::mcset sv jasubsndmsg  {Skicka ett meddelande till den här\
-personen:}
+	::msgcat::mcset sv jasubsndmsg  {Skicka ett meddelande till den här personen:}
 	::msgcat::mcset sv jasuballow   {Tillåt "%s" att se min närvaro}
 	::msgcat::mcset sv jasubadd     {Lägg till "%s" till min roster}
-	::msgcat::mcset sv jarostadd	{Lägg till en jabber användare\
-till min roster. Kortnamn och grupp kan ändras när som helst senare.\
-För att lägga till en användare från ett annat IM system så måste du ha\
-ett konto för det systemet sedan tidigare och att du använder detta konto\
-när du registrerar dig hos Jabber serverns transport komponent.}
-	::msgcat::mcset sv jarostset	{Sätt kortnamn och grupp för "%s"\
-till självvalt namn. De kan ändras när som helst senare.}
+	::msgcat::mcset sv jarostadd	{Lägg till en jabber användare till min roster. Kortnamn och grupp kan ändras när som helst senare.\
+För att lägga till en användare från ett annat IM system så måste du ha ett konto för det systemet sedan tidigare och att du använder detta konto när du registrerar dig hos Jabber serverns\
+transport komponent.}
+	::msgcat::mcset sv jarostset	{Sätt kortnamn och grupp för "%s" till självvalt namn. De kan ändras när som helst senare.}
 	::msgcat::mcset sv jarostsub	{Prenumerera på den här användaren}
 	::msgcat::mcset sv jarostunsub	{Sluta prenumerera på den här användaren}
-	::msgcat::mcset sv jasearch	{Sök efter användare med den valda\
-tjänsten. Tryck på Hämta knappen om du önskar nytt formulär.}
-	::msgcat::mcset sv jasearchwait	{Väntar på att Hämta knappen ska\
-tryckas på}
+	::msgcat::mcset sv jasearch	{Sök efter användare med den valda tjänsten. Tryck på Hämta knappen om du önskar nytt formulär.}
+	::msgcat::mcset sv jasearchwait	{Väntar på att Hämta knappen ska tryckas på}
 	::msgcat::mcset sv jaservclosed	{Serverförbindelsen stängdes.}
 	::msgcat::mcset sv jarostupdate {Rostern är uppdaterad}
 	::msgcat::mcset sv jawaitresp 	{Kontaktat %s. Väntar på reaktion...}
-	::msgcat::mcset sv jawaitxml 	{Förbindelse med "%s".\
-Initierar XML ström...}
-	::msgcat::mcset sv jasendauth	{Servern "%s" svarade.\
-Skickar auktorisationsinfo.}
+	::msgcat::mcset sv jawaitxml 	{Förbindelse med "%s". Initierar XML ström...}
+	::msgcat::mcset sv jasendauth	{Servern "%s" svarade. Skickar auktorisationsinfo.}
 	::msgcat::mcset sv jaerrlogin	{Påloggningen till %s misslyckades: %s}
-	::msgcat::mcset sv jaauthok	{Auktorisationen med "%s" lyckades.\
-Hämtar rostern...}
-	::msgcat::mcset sv jagchatmsg	{Välj gruppsamtals server,\
-rumsnamn och eget kortnamn}
-	::msgcat::mcset sv jacreateroom	{Välj en konferanstjänst och om du\
-önskar också ett rumsnamn. Tryck sedan på "Hämta" för att få en\
-specifikation för att skapa ett rum eftersom varje tjänst kan ha speciella\
-krav.}
+	::msgcat::mcset sv jaauthok	{Auktorisationen med "%s" lyckades. Hämtar rostern...}
+	::msgcat::mcset sv jagchatmsg	{Välj gruppsamtals server, rumsnamn och eget kortnamn}
+	::msgcat::mcset sv jacreateroom	{Välj en konferanstjänst och om du önskar också ett rumsnamn. Tryck sedan på "Hämta" för att få en specifikation för att skapa ett rum eftersom varje tjänst\
+kan ha speciella krav.}
 	::msgcat::mcset sv jawaitserver	{Väntar på serverns svar...}
-	::msgcat::mcset sv jaregmsg	{Registrera hos en speciell tjänst\
-vid denna server. Om du redan är registrerad så kan du ändra din info med\
-denna dialog.}
+	::msgcat::mcset sv jaregmsg	{Registrera hos en speciell tjänst vid denna server. Om du redan är registrerad så kan du ändra din info med denna dialog.}
 	::msgcat::mcset sv jastatavailable {Närvarande}
 	::msgcat::mcset sv jastatchat	{Chatt: närvarande för omedelbar dialog}
 	::msgcat::mcset sv jastataway	{Borta: påloggad men tillfälligt borta}
@@ -961,10 +786,8 @@ denna dialog.}
 	::msgcat::mcset sv jastatdnd	{DND: stör ej}
 	::msgcat::mcset sv jastatinvisible {Osynlig}
 	::msgcat::mcset sv javersinfo	{Versions information för %s}
-	::msgcat::mcset sv jabrowseaddserver	{Skriv in JID:n för servern\
-du önskar lägga till till listan av tjänster, till exempel "jabber.org".}
-	::msgcat::mcset sv jaupdatemsg	{Det finns en ny version av Coccinella\
-för nerladdning.}
+	::msgcat::mcset sv jabrowseaddserver	{Skriv in JID:n för servern du önskar lägga till till listan av tjänster, till exempel "jabber.org".}
+	::msgcat::mcset sv jaupdatemsg	{Det finns en ny version av Coccinella för nerladdning.}
 	::msgcat::mcset sv jaupdatevers	{Den nuvarande versionen är: %s}
 	::msgcat::mcset sv jaupdatepri	{Den här uppdateringen är %s}
 	::msgcat::mcset sv jaupdatenewver {Den ny versionen är: %s}
@@ -977,30 +800,17 @@ för nerladdning.}
 }
 
 namespace eval ::Jabber::SetupAss:: {
-	::msgcat::mcset sv suintro1 	{Det här är en inställningsassistent\
-som hjälper dig att fylla i nödvändiga uppgifter för ett nytt eller\
-existerande konto på en Jabber server.}
-	::msgcat::mcset sv suintro2 	{Om du kommer att köra i "peer-to-peer"\
-mod så anger du detta i Inställnings dialogen och startar om Coccinella.}
-	::msgcat::mcset sv suintro3 	{När som helst kan du trycka på\
-Föregående knappen för att gå tillbaks. Följ instruktionerna på varje sida\
-och tryck på Nästa knappen till sista sidan.}
-::msgcat::mcset sv sulang       {Välj språkkatalog.\
-Om du ändrar språkkatalogen kommer detta endast att få effekt på textelement\
-som skapas efter denna ändring.}
-	::msgcat::mcset sv suservmsg	{Fyll i namnet på Jabber servern\
-som du önskar ha ditt konto på. Om du redan har ett konto på en Jabber\
-server så fyll i det namnet. Ett typiskt namn är "jabber.org".}
-	::msgcat::mcset sv suusermsg	{Fyll i ditt användarnamn och\
-lösenord. Användarnamnet får ej finnas tidigare på angiven server\
-om du nu inte redan har ditt konto där. Om användarnamnet är upptaget\
-så får du ett meddelande om detta när du registrerar kontot.}
-	::msgcat::mcset sv suregmsg	{Vill du registrera ditt konto\
-omedelbart om det är ett nytt konto? Du måste vara nätverksansluten\
-(utan brandvägg) för att kunna registrera dig.}
-	::msgcat::mcset sv sufinmsg	{Det var det hela. Om registreringen\
-lyckades så behöver du nu endast trycka på Anslut knappen eller välja\
-Jabber/Anslut menyn. En sak till, var snäll mot nyckelpigan ;-)}
+	::msgcat::mcset sv suintro1 	{Det här är en inställningsassistent som hjälper dig att fylla i nödvändiga uppgifter för ett nytt eller existerande konto på en Jabber server.}
+	::msgcat::mcset sv suintro2 	{Om du kommer att köra i "peer-to-peer" mod så anger du detta i Inställnings dialogen och startar om Coccinella.}
+	::msgcat::mcset sv suintro3 	{När som helst kan du trycka på Föregående knappen för att gå tillbaks. Följ instruktionerna på varje sida och tryck på Nästa knappen till sista sidan.}
+::msgcat::mcset sv sulang       {Välj språkkatalog. Om du ändrar språkkatalogen kommer detta endast att få effekt på textelement som skapas efter denna ändring.}
+	::msgcat::mcset sv suservmsg	{Fyll i namnet på Jabber servern som du önskar ha ditt konto på. Om du redan har ett konto på en Jabber server så fyll i det namnet.\
+Ett typiskt namn är "jabber.org".}
+	::msgcat::mcset sv suusermsg	{Fyll i ditt användarnamn och lösenord. Användarnamnet får ej finnas tidigare på angiven server om du nu inte redan har ditt konto där.\
+Om användarnamnet är upptaget så får du ett meddelande om detta när du registrerar kontot.}
+	::msgcat::mcset sv suregmsg	{Vill du registrera ditt konto omedelbart om det är ett nytt konto? Du måste vara nätverksansluten (utan brandvägg) för att kunna registrera dig.}
+	::msgcat::mcset sv sufinmsg	{Det var det hela. Om registreringen lyckades så behöver du nu endast trycka på Anslut knappen eller välja Jabber/Anslut menyn.\
+En sak till, var snäll mot nyckelpigan ;-)}
 	::msgcat::mcset sv suheadtxt	{Coccinella inställningsassistent}
 
 
@@ -1009,8 +819,7 @@ Jabber/Anslut menyn. En sak till, var snäll mot nyckelpigan ;-)}
 }
 
 namespace eval ::VCard:: {
-	::msgcat::mcset sv vcardget	{Hämtar vCard från %s.\
-Väntar på serversvar...}
+	::msgcat::mcset sv vcardget	{Hämtar vCard från %s. Väntar på serversvar...}
 	::msgcat::mcset sv vcarderrget	{Misslyckades hämta vCard. Resultat: %s}
 	::msgcat::mcset sv vcardrec	{vCard data mottaget.}
 
@@ -1020,8 +829,7 @@ Väntar på serversvar...}
 
 
 ::msgcat::mcset sv autoupdatenot        {Leta ej automatiskt efter uppdatering}
-::msgcat::mcset sv oobmsg               {Låt användaren %s ladda ner en fil från\
-din inbyggda server. Beskrivningen är ej nödvändig.}
+::msgcat::mcset sv oobmsg               {Låt användaren %s ladda ner en fil från din inbyggda server. Beskrivningen är ej nödvändig.}
 ::msgcat::mcset sv chatcompreply        {%s skriver på ett svar}
 
 # Get file

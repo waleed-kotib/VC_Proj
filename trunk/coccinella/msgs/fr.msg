@@ -79,6 +79,7 @@
 ::msgcat::mcset fr OK			{OK}
 ::msgcat::mcset fr Online		{Connecté}
 ::msgcat::mcset fr Open			{Ouvrir}
+#::msgcat::mcset en Options
 ::msgcat::mcset fr Password		{Mot de passe}
 ::msgcat::mcset fr Pick			{Choisir}
 ::msgcat::mcset fr Phone		{Téléphone}
@@ -288,8 +289,8 @@
 ::msgcat::mcset fr mLocalTime     	{Heure locale...}
 ::msgcat::mcset fr mSendFile     	{Envoyer un message...}
 ::msgcat::mcset fr mChatHistory     	{Historique de la discussion}
-::msgcat::mcset en mLoginTrpt     	{Login To Transport}
-::msgcat::mcset en mLogoutTrpt     	{Logout From Transport}
+#::msgcat::mcset en mLoginTrpt     	{Login To Transport}
+#::msgcat::mcset en mLogoutTrpt     	{Logout From Transport}
 
 
 
@@ -467,6 +468,7 @@
 ::msgcat::mcset fr {Start Chat}			{Lancer la discussion}
 ::msgcat::mcset fr {Status message}		{Message du statut}
 ::msgcat::mcset fr {Status when logging out}	{Statut lors de la déconnexion}
+#::msgcat::mcset en {Subscription Failed}
 ::msgcat::mcset fr {Subscription Pending}	{Enregistrement imminent}
 ::msgcat::mcset fr {Synthetic speech}		{Langage de synthèse}
 ::msgcat::mcset fr {System fonts}		{Polices système}
@@ -694,9 +696,9 @@ avant d'entrer dans le salon.}
 et un nom de salon. Cliquez ensuite sur "Recevoir" pour obtenir les spécifications d'entrée\
 dans le salon désiré (chaque salon peut avoir ses propres spécifications).}
 	::msgcat::mcset fr jamesssavemsg	{Voulez-vous enregistrer le message ?}
-	::msgcat::mcset fr jamessskipsendq	{L'adresse \"%s\" est incorrecte.\
+	::msgcat::mcset fr jamessskipsendq	{L'adresse "%s" est incorrecte.\
 Voulez-vous envoyer aux autres ?}
-	::msgcat::mcset fr jamessillformresend	{L'adresse \"%s\" est incorrecte.\
+	::msgcat::mcset fr jamessillformresend	{L'adresse "%s" est incorrecte.\
 Modifiez-la pour envoyer à nouveau.}
 	::msgcat::mcset fr jamesslogin409	{La connexion a échoué avec\
 le code d'erreur %s (Ce nom d'utilisateur est déjà utilisé).\
@@ -722,8 +724,9 @@ parce que ce nom est déjà employé par un autre utilisateur. Si vous êtes cet
 essayez plutôt de vous connecter. Code de l'erreur : %s}
 ::msgcat::mcset fr jamessregerr                 {L'inscription a échoué\
 avec le message d'erreur "%s"}
-::msgcat::mcset en jamesstrptsubsc              {Your registered account with the %s\
-service will be put in your roster to work as a transport with this service.}
+#::msgcat::mcset en jamesstrptsubsc              {Your registered account with the %s\
+#service will be put in your roster to work as a transport with this service.}
+#::msgcat::mcset en jamessfailedsubsc            {Failed to make a subscription to %s. The user denied the subscription.}
 
     
 
@@ -846,10 +849,10 @@ est limitée par l'utilisateur grâce aux paramètres ci-dessous : }
 ::msgcat::mcset fr prefplugctrl  {Vous pouvez dé-sélectionner ces paquetages\
 pour ne pas avoir à les charger. Coccinella doit être redémarré pour que les changements soient pris en compte.}
 ::msgcat::mcset fr prefchactret  {Toujours activer <Entrée> dans la boîte de discussion}
-::msgcat::mcset en prefchnormal  {Treat normal messages as chat messages}
+#::msgcat::mcset en prefchnormal  {Treat normal messages as chat messages}
 ::msgcat::mcset fr prefprofname  {Entrez le nom du profil d'utilisateur}
 ::msgcat::mcset fr prefstabui    {Utiliser l'interface du bloc-notes avec les onglets}
-::msgcat::mcset en prefsusesasl  {Use SASL authentization method}
+#::msgcat::mcset en prefsusesasl  {Use SASL authentization method}
 
 
 
@@ -920,7 +923,7 @@ que vous voulez ajouter à la liste des services (de la forme jabber.org).}
 	::msgcat::mcset fr jaupdatenewver {La nouvelle version est : %s}
 	::msgcat::mcset fr jaupdateremind {Ne plus me rappeler cela}
 	::msgcat::mcset fr jasettopic   {Mettre un nouveau thème pour ce groupe de discussion}
- 	::msgcat::mcset fr jadirpresmsg {Envoyer le statut désiré à l'utilisateur \"%s\".}
+ 	::msgcat::mcset fr jadirpresmsg {Envoyer le statut désiré à l'utilisateur "%s".}
 
 
 }

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.56 2004-09-28 07:05:49 matben Exp $
+# $Id: Browse.tcl,v 1.57 2004-09-28 13:50:17 matben Exp $
 
 package require chasearrows
 
@@ -13,10 +13,10 @@ package provide Browse 1.0
 
 namespace eval ::Jabber::Browse:: {
 
-    ::hooks::add jabberInitHook     ::Jabber::Browse::NewJlibHook
-    ::hooks::add loginHook          ::Jabber::Browse::LoginCmd
-    ::hooks::add logoutHook         ::Jabber::Browse::LogoutHook
-    ::hooks::add presenceHook       ::Jabber::Browse::PresenceHook
+    ::hooks::register jabberInitHook     ::Jabber::Browse::NewJlibHook
+    ::hooks::register loginHook          ::Jabber::Browse::LoginCmd
+    ::hooks::register logoutHook         ::Jabber::Browse::LogoutHook
+    ::hooks::register presenceHook       ::Jabber::Browse::PresenceHook
 
     # Use option database for customization. 
     # Use priority 30 just to override the widgetDefault values!

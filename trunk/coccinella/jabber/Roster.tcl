@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.79 2004-09-28 07:05:49 matben Exp $
+# $Id: Roster.tcl,v 1.80 2004-09-28 13:50:18 matben Exp $
 
 package provide Roster 1.0
 
@@ -13,17 +13,17 @@ namespace eval ::Jabber::Roster:: {
     global  this
     
     # Add all event hooks we need.
-    ::hooks::add loginHook              ::Jabber::Roster::LoginCmd
-    ::hooks::add logoutHook             ::Jabber::Roster::LogoutHook
-    ::hooks::add browseSetHook          ::Jabber::Roster::BrowseSetHook
-    ::hooks::add discoInfoHook          ::Jabber::Roster::DiscoInfoHook
+    ::hooks::register loginHook              ::Jabber::Roster::LoginCmd
+    ::hooks::register logoutHook             ::Jabber::Roster::LogoutHook
+    ::hooks::register browseSetHook          ::Jabber::Roster::BrowseSetHook
+    ::hooks::register discoInfoHook          ::Jabber::Roster::DiscoInfoHook
     
     # Define all hooks for preference settings.
-    ::hooks::add prefsInitHook          ::Jabber::Roster::InitPrefsHook
-    ::hooks::add prefsBuildHook         ::Jabber::Roster::BuildPrefsHook
-    ::hooks::add prefsSaveHook          ::Jabber::Roster::SavePrefsHook
-    ::hooks::add prefsCancelHook        ::Jabber::Roster::CancelPrefsHook
-    ::hooks::add prefsUserDefaultsHook  ::Jabber::Roster::UserDefaultsHook
+    ::hooks::register prefsInitHook          ::Jabber::Roster::InitPrefsHook
+    ::hooks::register prefsBuildHook         ::Jabber::Roster::BuildPrefsHook
+    ::hooks::register prefsSaveHook          ::Jabber::Roster::SavePrefsHook
+    ::hooks::register prefsCancelHook        ::Jabber::Roster::CancelPrefsHook
+    ::hooks::register prefsUserDefaultsHook  ::Jabber::Roster::UserDefaultsHook
 
     # Use option database for customization. 
     # Use priority 30 just to override the widgetDefault values!

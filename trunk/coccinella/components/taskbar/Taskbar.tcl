@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Taskbar.tcl,v 1.4 2004-09-22 13:14:38 matben Exp $
+# $Id: Taskbar.tcl,v 1.5 2004-09-28 13:50:17 matben Exp $
 
 namespace eval ::Taskbar:: {
     
@@ -59,11 +59,11 @@ proc ::Taskbar::Load { } {
       "Makes the taskbar icon on Windows which is handy as a shortcut"
     
     # Add all event hooks.
-    ::hooks::add quitAppHook        ::Taskbar::QuitAppHook
-    ::hooks::add setPresenceHook    ::Taskbar::SetPresenceHook
-    ::hooks::add loginHook          ::Taskbar::LoginHook
-    ::hooks::add logoutHook         ::Taskbar::LogoutHook
-    ::hooks::add closeWindowHook    ::Taskbar::CloseHook        20
+    ::hooks::register quitAppHook        ::Taskbar::QuitAppHook
+    ::hooks::register setPresenceHook    ::Taskbar::SetPresenceHook
+    ::hooks::register loginHook          ::Taskbar::LoginHook
+    ::hooks::register logoutHook         ::Taskbar::LogoutHook
+    ::hooks::register closeWindowHook    ::Taskbar::CloseHook        20
     
     bind . <Map> [list [namespace current]::Update %W]
     

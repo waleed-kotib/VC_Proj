@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.69 2004-09-24 12:14:13 matben Exp $
+# $Id: GroupChat.tcl,v 1.70 2004-09-28 13:50:17 matben Exp $
 
 package require History
 
@@ -19,21 +19,21 @@ namespace eval ::Jabber::GroupChat:: {
     global  wDlgs
 
     # Add all event hooks.
-    ::hooks::add quitAppHook             [list ::UI::SaveWinPrefixGeom $wDlgs(jgc)]
-    ::hooks::add quitAppHook             ::Jabber::GroupChat::GetFirstPanePos
-    ::hooks::add newGroupChatMessageHook ::Jabber::GroupChat::GotMsg
-    ::hooks::add closeWindowHook         ::Jabber::GroupChat::CloseHook
-    ::hooks::add loginHook               ::Jabber::GroupChat::LoginHook
-    ::hooks::add logoutHook              ::Jabber::GroupChat::LogoutHook
-    ::hooks::add presenceHook            ::Jabber::GroupChat::PresenceHook
-    ::hooks::add groupchatEnterRoomHook  ::Jabber::GroupChat::EnterHook
+    ::hooks::register quitAppHook             [list ::UI::SaveWinPrefixGeom $wDlgs(jgc)]
+    ::hooks::register quitAppHook             ::Jabber::GroupChat::GetFirstPanePos
+    ::hooks::register newGroupChatMessageHook ::Jabber::GroupChat::GotMsg
+    ::hooks::register closeWindowHook         ::Jabber::GroupChat::CloseHook
+    ::hooks::register loginHook               ::Jabber::GroupChat::LoginHook
+    ::hooks::register logoutHook              ::Jabber::GroupChat::LogoutHook
+    ::hooks::register presenceHook            ::Jabber::GroupChat::PresenceHook
+    ::hooks::register groupchatEnterRoomHook  ::Jabber::GroupChat::EnterHook
     
     # Define all hooks for preference settings.
-    ::hooks::add prefsInitHook           ::Jabber::GroupChat::InitPrefsHook
-    ::hooks::add prefsBuildHook          ::Jabber::GroupChat::BuildPrefsHook
-    ::hooks::add prefsSaveHook           ::Jabber::GroupChat::SavePrefsHook
-    ::hooks::add prefsCancelHook         ::Jabber::GroupChat::CancelPrefsHook
-    ::hooks::add prefsUserDefaultsHook   ::Jabber::GroupChat::UserDefaultsHook
+    ::hooks::register prefsInitHook           ::Jabber::GroupChat::InitPrefsHook
+    ::hooks::register prefsBuildHook          ::Jabber::GroupChat::BuildPrefsHook
+    ::hooks::register prefsSaveHook           ::Jabber::GroupChat::SavePrefsHook
+    ::hooks::register prefsCancelHook         ::Jabber::GroupChat::CancelPrefsHook
+    ::hooks::register prefsUserDefaultsHook   ::Jabber::GroupChat::UserDefaultsHook
 
     # Icons
     option add *GroupChat*sendImage            send             widgetDefault

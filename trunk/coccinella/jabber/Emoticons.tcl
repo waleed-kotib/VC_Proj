@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.16 2004-08-25 10:07:38 matben Exp $
+# $Id: Emoticons.tcl,v 1.17 2004-09-28 13:50:17 matben Exp $
 
 
 package provide Emoticons 1.0
@@ -14,13 +14,13 @@ package provide Emoticons 1.0
 namespace eval ::Emoticons:: {
 
     # Define all hooks for preference settings.
-    ::hooks::add prefsInitHook          ::Emoticons::InitPrefsHook
-    ::hooks::add prefsBuildHook         ::Emoticons::BuildPrefsHook
-    ::hooks::add prefsSaveHook          ::Emoticons::SavePrefsHook
-    ::hooks::add prefsCancelHook        ::Emoticons::CancelPrefsHook
-    ::hooks::add prefsUserDefaultsHook  ::Emoticons::UserDefaultsHook
+    ::hooks::register prefsInitHook          ::Emoticons::InitPrefsHook
+    ::hooks::register prefsBuildHook         ::Emoticons::BuildPrefsHook
+    ::hooks::register prefsSaveHook          ::Emoticons::SavePrefsHook
+    ::hooks::register prefsCancelHook        ::Emoticons::CancelPrefsHook
+    ::hooks::register prefsUserDefaultsHook  ::Emoticons::UserDefaultsHook
 
-    ::hooks::add initHook               ::Emoticons::Init
+    ::hooks::register initHook               ::Emoticons::Init
 
     variable priv
     set priv(defaultSet) "default"

@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Plugins.tcl,v 1.11 2004-08-13 15:27:26 matben Exp $
+# $Id: Plugins.tcl,v 1.12 2004-09-28 13:50:21 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -81,12 +81,12 @@ namespace eval ::Plugins:: {
     global tcl_platform
     
     # Define all hooks for preference settings. Be early!
-    ::hooks::add prefsInitHook          ::Plugins::InitPrefsHook     10
-    ::hooks::add prefsBuildHook         ::Plugins::BuildPrefsHook
-    ::hooks::add prefsUserDefaultsHook  ::Plugins::UserDefaultsHook
-    ::hooks::add prefsSaveHook          ::Plugins::SaveHook
-    ::hooks::add prefsCancelHook        ::Plugins::CancelHook
-    ::hooks::add initHook               ::Plugins::InitHook
+    ::hooks::register prefsInitHook          ::Plugins::InitPrefsHook     10
+    ::hooks::register prefsBuildHook         ::Plugins::BuildPrefsHook
+    ::hooks::register prefsUserDefaultsHook  ::Plugins::UserDefaultsHook
+    ::hooks::register prefsSaveHook          ::Plugins::SaveHook
+    ::hooks::register prefsCancelHook        ::Plugins::CancelHook
+    ::hooks::register initHook               ::Plugins::InitHook
 
     variable inited 0
     variable packages2Platform

@@ -5,18 +5,18 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: WBPrefs.tcl,v 1.2 2004-07-09 06:26:07 matben Exp $
+# $Id: WBPrefs.tcl,v 1.3 2004-09-28 13:50:21 matben Exp $
 
 package provide WBPrefs 1.0
 
 namespace eval ::WBPrefs:: {
 
     # Define all hooks for preference settings.
-    ::hooks::add prefsInitHook          ::WBPrefs::InitPrefsHook
-    ::hooks::add prefsBuildHook         ::WBPrefs::BuildPrefsHook
-    ::hooks::add prefsSaveHook          ::WBPrefs::SavePrefsHook
-    ::hooks::add prefsCancelHook        ::WBPrefs::CancelPrefsHook
-    ::hooks::add prefsUserDefaultsHook  ::WBPrefs::UserDefaultsPrefsHook
+    ::hooks::register prefsInitHook          ::WBPrefs::InitPrefsHook
+    ::hooks::register prefsBuildHook         ::WBPrefs::BuildPrefsHook
+    ::hooks::register prefsSaveHook          ::WBPrefs::SavePrefsHook
+    ::hooks::register prefsCancelHook        ::WBPrefs::CancelPrefsHook
+    ::hooks::register prefsUserDefaultsHook  ::WBPrefs::UserDefaultsPrefsHook
 }
 
 

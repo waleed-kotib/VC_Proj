@@ -7,14 +7,14 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.44 2004-09-22 13:14:38 matben Exp $
+# $Id: Dialogs.tcl,v 1.45 2004-09-28 13:50:19 matben Exp $
    
 package provide Dialogs 1.0
 
 namespace eval ::Dialogs:: {
     
     # Add all event hooks.
-    ::hooks::add quitAppHook ::Dialogs::Free 10
+    ::hooks::register quitAppHook ::Dialogs::Free 10
 }
 
 # Define the toplevel windows here so they don't collide.

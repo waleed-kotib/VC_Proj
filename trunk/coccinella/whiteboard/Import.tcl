@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Import.tcl,v 1.10 2004-08-30 07:46:08 matben Exp $
+# $Id: Import.tcl,v 1.11 2004-09-28 13:50:21 matben Exp $
 
 package require http
 package require httpex
@@ -17,7 +17,7 @@ package provide Import 1.0
 namespace eval ::Import:: {
     
     #
-    ::hooks::add whiteboardPostCanvasDraw   ::Import::TrptCachePostDrawHook
+    ::hooks::register whiteboardPostCanvasDraw   ::Import::TrptCachePostDrawHook
     
     # Specials for 'xanim'
     variable xanimPipe2Frame 

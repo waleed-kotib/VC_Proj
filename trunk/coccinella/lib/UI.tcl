@@ -7,14 +7,14 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.71 2004-09-22 13:14:39 matben Exp $
+# $Id: UI.tcl,v 1.72 2004-09-28 13:50:19 matben Exp $
 
 package require entrycomp
 package require alertbox
 
 namespace eval ::UI:: {
 
-    #::hooks::add initHook               ::UI::InitHook
+    #::hooks::register initHook               ::UI::InitHook
 
     # Icons
     option add *buttonOKImage            buttonok       widgetDefault

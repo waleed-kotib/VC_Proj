@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: P2P.tcl,v 1.13 2004-08-06 07:46:53 matben Exp $
+# $Id: P2P.tcl,v 1.14 2004-09-28 13:50:19 matben Exp $
 
 package provide P2P 1.0
 
@@ -13,7 +13,7 @@ package provide P2P 1.0
 namespace eval ::P2P:: {
 
     # Be sure to run this after the WB init hook!
-    ::hooks::add initHook            ::P2P::InitHook        80
+    ::hooks::register initHook            ::P2P::InitHook        80
 
     variable initted 0
         
@@ -44,27 +44,27 @@ proc ::P2P::Init {} {
     ::Debug 2 "::P2P::Init"
     
     # Register canvas draw event handler.
-    ::hooks::add whiteboardBuildEntryHook       ::P2P::BuildEntryHook
-    ::hooks::add whiteboardSetMinsizeHook       ::P2P::SetMinsizeHook    
-    ::hooks::add whiteboardFixMenusWhenHook     ::P2P::FixMenusWhenHook
-    ::hooks::add whiteboardSendMessageHook      ::P2P::SendMessageListHook
-    ::hooks::add whiteboardSendGenMessageHook   ::P2P::SendGenMessageListHook
-    ::hooks::add whiteboardPutFileHook          ::P2P::PutFileHook
-    ::hooks::add whiteboardBuildButtonTrayHook  ::P2P::BuildButtonsHook
-    ::hooks::add postInitHook                   ::P2P::PostInitHook
-    ::hooks::add serverGetRequestHook           ::P2P::HandleGetRequest
-    ::hooks::add serverPutRequestHook           ::P2P::HandlePutRequest
-    ::hooks::add serverCmdHook                  ::P2P::HandleServerCmd
+    ::hooks::register whiteboardBuildEntryHook       ::P2P::BuildEntryHook
+    ::hooks::register whiteboardSetMinsizeHook       ::P2P::SetMinsizeHook    
+    ::hooks::register whiteboardFixMenusWhenHook     ::P2P::FixMenusWhenHook
+    ::hooks::register whiteboardSendMessageHook      ::P2P::SendMessageListHook
+    ::hooks::register whiteboardSendGenMessageHook   ::P2P::SendGenMessageListHook
+    ::hooks::register whiteboardPutFileHook          ::P2P::PutFileHook
+    ::hooks::register whiteboardBuildButtonTrayHook  ::P2P::BuildButtonsHook
+    ::hooks::register postInitHook                   ::P2P::PostInitHook
+    ::hooks::register serverGetRequestHook           ::P2P::HandleGetRequest
+    ::hooks::register serverPutRequestHook           ::P2P::HandlePutRequest
+    ::hooks::register serverCmdHook                  ::P2P::HandleServerCmd
 
-    ::hooks::add closeWindowHook                ::P2P::CloseHook
-    ::hooks::add quitAppHook                    ::P2P::QuitHook
+    ::hooks::register closeWindowHook                ::P2P::CloseHook
+    ::hooks::register quitAppHook                    ::P2P::QuitHook
 
     # Define all hooks for preference settings.
-    ::hooks::add prefsInitHook                  ::P2P::Prefs::InitPrefsHook
-    ::hooks::add prefsBuildHook                 ::P2P::Prefs::BuildPrefsHook
-    ::hooks::add prefsSaveHook                  ::P2P::Prefs::SavePrefsHook
-    ::hooks::add prefsCancelHook                ::P2P::Prefs::CancelPrefsHook
-    ::hooks::add prefsUserDefaultsHook          ::P2P::Prefs::UserDefaultsHook
+    ::hooks::register prefsInitHook                  ::P2P::Prefs::InitPrefsHook
+    ::hooks::register prefsBuildHook                 ::P2P::Prefs::BuildPrefsHook
+    ::hooks::register prefsSaveHook                  ::P2P::Prefs::SavePrefsHook
+    ::hooks::register prefsCancelHook                ::P2P::Prefs::CancelPrefsHook
+    ::hooks::register prefsUserDefaultsHook          ::P2P::Prefs::UserDefaultsHook
 
     set buttonTrayDefs(symmetric) {
 	connect    {::P2PNet::OpenConnection $wDlgs(openConn)}
@@ -802,7 +802,7 @@ proc ::P2P::GetRegisteredHandlers { } {
     variable handler
     
     array set handler [::WB::GetRegisteredHandlers]
-    ::hooks::add whiteboardRegisterHandlerHook  ::P2P::RegisterHandlerHook
+    ::hooks::register whiteboardRegisterHandlerHook  ::P2P::RegisterHandlerHook
 }
 
 proc ::P2P::RegisterHandlerHook {prefix cmd} {

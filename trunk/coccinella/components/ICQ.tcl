@@ -2,7 +2,7 @@
 # 
 #       Provides some specific ICQ handling elements.
 #       
-# $Id: ICQ.tcl,v 1.3 2004-09-27 12:57:37 matben Exp $
+# $Id: ICQ.tcl,v 1.4 2004-09-28 13:50:17 matben Exp $
 
 namespace eval ::ICQ:: {
     
@@ -14,9 +14,9 @@ proc ::ICQ::Init { } {
     ::Debug 2 "::ICQ::Init"
     
     # Add all hooks we need.
-    ::hooks::add browseSetHook          ::ICQ::BrowseSetHook
-    ::hooks::add discoInfoHook          ::ICQ::DiscoInfoHook
-    ::hooks::add logoutHook             ::ICQ::LogoutHook
+    ::hooks::register browseSetHook          ::ICQ::BrowseSetHook
+    ::hooks::register discoInfoHook          ::ICQ::DiscoInfoHook
+    ::hooks::register logoutHook             ::ICQ::LogoutHook
     
     component::register ICQ  \
       "The roster name is automatically set to the ICQ user's vCard nickname."

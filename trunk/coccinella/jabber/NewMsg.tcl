@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.40 2004-07-09 06:26:06 matben Exp $
+# $Id: NewMsg.tcl,v 1.41 2004-09-28 13:50:18 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -14,7 +14,7 @@ package provide NewMsg 1.0
 namespace eval ::Jabber::NewMsg:: {
     global  wDlgs
 
-    ::hooks::add closeWindowHook    ::Jabber::NewMsg::CloseHook
+    ::hooks::register closeWindowHook    ::Jabber::NewMsg::CloseHook
 
     # Use option database for customization.
     option add *NewMsg.sendImage            send            widgetDefault
@@ -27,7 +27,7 @@ namespace eval ::Jabber::NewMsg:: {
     option add *NewMsg.printDisImage        printDis        widgetDefault
 
     # Add all event hooks.
-    ::hooks::add quitAppHook [list ::UI::SaveWinPrefixGeom $wDlgs(jsendmsg)]
+    ::hooks::register quitAppHook [list ::UI::SaveWinPrefixGeom $wDlgs(jsendmsg)]
 
     variable locals
     

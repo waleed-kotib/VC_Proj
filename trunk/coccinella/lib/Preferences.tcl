@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.62 2004-09-26 13:52:02 matben Exp $
+# $Id: Preferences.tcl,v 1.63 2004-09-28 13:50:19 matben Exp $
  
 package require notebook
 package require tree
@@ -26,8 +26,8 @@ namespace eval ::Preferences:: {
     variable lastPage {}
 
     # Add all event hooks.
-    ::hooks::add quitAppHook     [list ::UI::SaveWinGeom $wDlgs(prefs)]
-    ::hooks::add closeWindowHook ::Preferences::CloseHook
+    ::hooks::register quitAppHook     [list ::UI::SaveWinGeom $wDlgs(prefs)]
+    ::hooks::register closeWindowHook ::Preferences::CloseHook
 
     variable xpadbt
     variable ypad 
@@ -551,11 +551,11 @@ proc ::Preferences::NetSetup::AdvSetupSave {  } {
 
 namespace eval ::Preferences::Proxies:: {
     
-    ::hooks::add prefsInitHook          ::Preferences::Proxies::InitPrefsHook
-    ::hooks::add prefsBuildHook         ::Preferences::Proxies::BuildPrefsHook
-    ::hooks::add prefsSaveHook          ::Preferences::Proxies::SavePrefsHook
-    ::hooks::add prefsCancelHook        ::Preferences::Proxies::CancelPrefsHook
-    ::hooks::add prefsUserDefaultsHook  ::Preferences::Proxies::UserDefaultsHook
+    ::hooks::register prefsInitHook          ::Preferences::Proxies::InitPrefsHook
+    ::hooks::register prefsBuildHook         ::Preferences::Proxies::BuildPrefsHook
+    ::hooks::register prefsSaveHook          ::Preferences::Proxies::SavePrefsHook
+    ::hooks::register prefsCancelHook        ::Preferences::Proxies::CancelPrefsHook
+    ::hooks::register prefsUserDefaultsHook  ::Preferences::Proxies::UserDefaultsHook
 }
 
 proc ::Preferences::Proxies::InitPrefsHook { } {

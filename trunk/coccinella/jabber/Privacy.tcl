@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Privacy.tcl,v 1.8 2004-07-30 12:55:54 matben Exp $
+# $Id: Privacy.tcl,v 1.9 2004-09-28 13:50:18 matben Exp $
 
 package provide Privacy 1.0
 
@@ -13,12 +13,12 @@ namespace eval ::Privacy:: {
     global  tcl_platform
     
     # Define all hooks for preference settings.
-    ::hooks::add prefsInitHook          ::Privacy::InitPrefsHook
-    ::hooks::add prefsBuildHook         ::Privacy::BuildPrefsHook
-    ::hooks::add prefsSaveHook          ::Privacy::SavePrefsHook
-    ::hooks::add prefsCancelHook        ::Privacy::CancelPrefsHook
-    ::hooks::add prefsUserDefaultsHook  ::Privacy::UserDefaultsHook
-    ::hooks::add closeWindowHook        ::Privacy::List::CloseHook
+    ::hooks::register prefsInitHook          ::Privacy::InitPrefsHook
+    ::hooks::register prefsBuildHook         ::Privacy::BuildPrefsHook
+    ::hooks::register prefsSaveHook          ::Privacy::SavePrefsHook
+    ::hooks::register prefsCancelHook        ::Privacy::CancelPrefsHook
+    ::hooks::register prefsUserDefaultsHook  ::Privacy::UserDefaultsHook
+    ::hooks::register closeWindowHook        ::Privacy::List::CloseHook
 
     # User database options.
     option add *FilterDlg*Radiobutton.background  white

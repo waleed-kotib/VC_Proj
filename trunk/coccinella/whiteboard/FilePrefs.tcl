@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: FilePrefs.tcl,v 1.3 2004-07-30 12:55:56 matben Exp $
+# $Id: FilePrefs.tcl,v 1.4 2004-09-28 13:50:21 matben Exp $
 
 package provide FilePrefs 1.0
 
@@ -13,11 +13,11 @@ package provide FilePrefs 1.0
 namespace eval ::FilePrefs:: {
 
     # Define all hooks for preference settings.
-    ::hooks::add prefsInitHook          ::FilePrefs::InitPrefsHook
-    ::hooks::add prefsBuildHook         ::FilePrefs::BuildPrefsHook
-    ::hooks::add prefsSaveHook          ::FilePrefs::SavePrefsHook
-    ::hooks::add prefsCancelHook        ::FilePrefs::CancelPrefsHook
-    ::hooks::add prefsUserDefaultsHook  ::FilePrefs::UserDefaultsHook
+    ::hooks::register prefsInitHook          ::FilePrefs::InitPrefsHook
+    ::hooks::register prefsBuildHook         ::FilePrefs::BuildPrefsHook
+    ::hooks::register prefsSaveHook          ::FilePrefs::SavePrefsHook
+    ::hooks::register prefsCancelHook        ::FilePrefs::CancelPrefsHook
+    ::hooks::register prefsUserDefaultsHook  ::FilePrefs::UserDefaultsHook
     
     # Wait for this variable to be set in the "Inspect Associations" dialog.
     variable finishedInspect

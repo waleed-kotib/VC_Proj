@@ -15,7 +15,7 @@ proc ::ComponentExample::Init { } {
       command {More Junk...} [namespace current]::Cmd normal {} {} {}]
     set popMenuSpec [list "Plugin Junk" user [namespace current]::Cmd]
     
-    ::hooks::add whiteboardFixMenusWhenHook [namespace current]::FixMenu
+    ::hooks::register whiteboardFixMenusWhenHook [namespace current]::FixMenu
     
     ::UI::Public::RegisterNewMenu junk "Mats Junk" $menuspec
     ::UI::Public::RegisterMenuEntry file $menuspec

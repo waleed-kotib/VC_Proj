@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: AutoUpdate.tcl,v 1.2 2004-09-03 07:47:06 matben Exp $
+# $Id: AutoUpdate.tcl,v 1.3 2004-09-28 13:50:17 matben Exp $
 
 package require tinydom
 package require http 2.3
@@ -21,8 +21,8 @@ proc ::AutoUpdate::Init { } {
 
     ::Debug 2 "::AutoUpdate::Init"
         
-    ::hooks::add prefsInitHook   ::AutoUpdate::InitPrefsHook
-    ::hooks::add launchFinalHook ::AutoUpdate::LaunchHook
+    ::hooks::register prefsInitHook   ::AutoUpdate::InitPrefsHook
+    ::hooks::register launchFinalHook ::AutoUpdate::LaunchHook
 
     set menuspec  \
       {command   mUpdateCheck     {::AutoUpdate::Get -silent 0} normal   {}}

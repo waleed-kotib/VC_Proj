@@ -78,6 +78,7 @@
 ::msgcat::mcset en OK
 ::msgcat::mcset en Online
 ::msgcat::mcset en Open
+::msgcat::mcset en Options
 ::msgcat::mcset en Password
 ::msgcat::mcset en Pick
 ::msgcat::mcset en Phone
@@ -466,6 +467,7 @@
 ::msgcat::mcset en {Start Chat}
 ::msgcat::mcset en {Status message}
 ::msgcat::mcset en {Status when logging out}
+::msgcat::mcset en {Subscription Failed}
 ::msgcat::mcset en {Subscription Pending}
 ::msgcat::mcset en {Synthetic speech}
 ::msgcat::mcset en {System fonts}
@@ -706,9 +708,9 @@ a room name. Then push "Get" to obtain the specification for entering the\
 desired room since each room & server may have different requirements.}
 	::msgcat::mcset en jamesssavemsg	{Do you want to save this message\
 before closing?}
-	::msgcat::mcset en jamessskipsendq	{The address \"%s\" is not well\
+	::msgcat::mcset en jamessskipsendq	{The address "%s" is not well\
 formed. Do you want to skip it and send to the rest?}
-	::msgcat::mcset en jamessillformresend	{The address \"%s\" is not well\
+	::msgcat::mcset en jamessillformresend	{The address "%s" is not well\
 formed. Please modify it and resend.}
 	::msgcat::mcset en jamesslogin409	{The login failed with the error\
 code %s because this username is already in use by another user.\
@@ -736,7 +738,7 @@ try to login instead. Error message: %s}
 with error message: %s}
 ::msgcat::mcset en jamesstrptsubsc              {Your registered account with the %s\
 service will be put in your roster to work as a transport with this service.}
-
+::msgcat::mcset en jamessfailedsubsc            {Failed to make a subscription to %s. The user denied the subscription.}
 
 }
 
@@ -936,7 +938,7 @@ want to add to the list of services, for instance, "jabber.org".}
 	::msgcat::mcset en jaupdatenewver {The new version is: %s}
 	::msgcat::mcset en jaupdateremind {Don't remind me about this anymore}
 	::msgcat::mcset en jasettopic   {Set new topic for this groupchat.}
-	::msgcat::mcset en jadirpresmsg {Send directed presence to the user \"%s\".}
+	::msgcat::mcset en jadirpresmsg {Send directed presence to the user "%s".}
 
 
 }

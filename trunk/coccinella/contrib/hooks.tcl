@@ -3,23 +3,23 @@
 #       Provides a systematic way for code sections to register themselfes
 #       for callbacks when certain events happen.
 #       
-#       Code idea from Alexey Shchepin, Many Thanks!
+#       Code idea from Alexey Shchepin, (and Vince Darley) Many Thanks!
 #       
-# $Id: hooks.tcl,v 1.3 2004-08-06 07:46:53 matben Exp $
+# $Id: hooks.tcl,v 1.4 2004-09-28 13:50:17 matben Exp $
 
 package provide hooks 1.0
 
 
 namespace eval hooks { }
 
-proc hooks::add {hook func {seq 50}} {
+proc hooks::register {hook func {seq 50}} {
     variable $hook
 
     lappend $hook [list $func $seq]
     set $hook [lsort -integer -index 1 [lsort -unique [set $hook]]]
 }
 
-proc hooks::remove {hook func} {
+proc hooks::deregister {hook func} {
     variable $hook
 
     if {![info exists $hook]} {
