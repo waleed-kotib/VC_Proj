@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.47 2004-03-28 14:50:51 matben Exp $
+# $Id: Preferences.tcl,v 1.48 2004-04-08 09:57:43 matben Exp $
  
 package require notebook
 package require tree
@@ -89,7 +89,8 @@ proc ::Preferences::Build { } {
     ::UI::Toplevel $w -class Preferences -usemacmainmenu 1  \
       -macstyle documentProc -macclass {document closeBox}
     wm title $w [::msgcat::mc Preferences]
-
+    wm withdraw $w
+    
     set finished 0
     set wtoplevel $w
         
@@ -176,7 +177,7 @@ proc ::Preferences::Build { } {
       -command ::Preferences::ResetToUserDefaults]  \
       -side left -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
-    
+
     ::UI::SetWindowPosition $w
     wm resizable $w 0 0
     bind $w <Return> {}
@@ -184,7 +185,8 @@ proc ::Preferences::Build { } {
     # Which page to be in front?
     if {[llength $lastPage]} {
 	$wtree setselection $lastPage
-    }
+    }    
+    wm deiconify $w
     
     # Grab and focus.
     focus $w

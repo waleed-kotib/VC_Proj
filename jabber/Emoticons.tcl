@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.3 2004-04-04 13:37:26 matben Exp $
+# $Id: Emoticons.tcl,v 1.4 2004-04-08 09:57:43 matben Exp $
 
 
 package provide Emoticons 1.0
@@ -13,26 +13,31 @@ package provide Emoticons 1.0
 
 namespace eval ::Emoticons:: {
 
+    # Define all hooks for preference settings.
+    ::hooks::add prefsInitHook          ::Emoticons::InitPrefsHook
+    ::hooks::add prefsBuildHook         ::Emoticons::BuildPrefsHook
+    ::hooks::add prefsSaveHook          ::Emoticons::SavePrefsHook
+    ::hooks::add prefsCancelHook        ::Emoticons::CancelPrefsHook
+
     ::hooks::add initHook ::Emoticons::Init
 
-
+    variable priv
+    set priv(defaultSet) "default"
 }
 
 proc ::Emoticons::Init { } {
     global  this
     
     variable priv
-    variable smiley
-    variable smileyExp
-    variable smileyLongNames
+    upvar ::Jabber::jprefs jprefs
 
-    # 'iconsets(name,key)' map from a text string (key) and iconset name
+    # 'tmpicons(name,key)' map from a text string (key) and iconset name
     # to an image name.
-    variable iconsets
+    variable tmpicons
     
-    # 'iconsetsInv(name,image)' map from an image and named iconset to a
+    # 'tmpiconsInv(name,image)' map from an image and named iconset to a
     # list of keys, which is the inverse of the above.
-    variable iconsetsInv
+    variable tmpiconsInv
 
     ::Debug 2 "::Emoticons::Init"
     
@@ -52,7 +57,24 @@ proc ::Emoticons::Init { } {
 	set priv(needtmp)   1
 	set priv(pngformat) {}
     }
-    #parray priv
+    ::Debug 2 "sets=[::Emoticons::GetAllSets]"
+    ::Debug 2 "\t [::Emoticons::GetPrefSetPathExists]"
+    
+    # Load set.
+    ::Emoticons::LoadTmpIconSet [::Emoticons::GetPrefSetPathExists]
+    ::Emoticons::SetPermanentSet $jprefs(emoticonSet)
+}
+
+# OUTDATED!
+
+proc ::Emoticons::MakeDarkProjectSet { } {
+    global  this
+    
+    variable smiley
+    variable smileyExp
+    variable smileyLongNames
+
+    ::Debug 2 "::Emoticons::MakeDarkProjectSet"
     
     # Smiley icons. The "short" types.
     foreach {key name} {
@@ -80,6 +102,8 @@ proc ::Emoticons::Init { } {
 	";)"           wink} {
 	    set smiley($key) $imSmile($name)
     }
+    
+    # Seems unused...
     set smileyExp {(}
     foreach key [array names smiley] {
 	append smileyExp "$key|"
@@ -157,106 +181,148 @@ proc ::Emoticons::Parse {str} {
     global  this
     
     variable smiley
-    variable smileyExp
     variable smileyLongNames
-	
+    
     # Protect Tcl special characters, quotes included.
     regsub -all {([][$\\{}"])} $str {\\\1} str
     
     # Since there are about 60 smileys we need to be economical here.    
     # Check first if there are any short smileys.
-	
+    
     # Protect all  *regexp*  special characters. Regexp hell!!!
     # Carefully embrace $smile since may contain ; etc.
+    # Reqire one space on each side, replaced with -padx 6.
     
     foreach smile [array names smiley] {
-	set sub "\} \{image create end -image $smiley($smile) -name \{$smile\}\} \{"
-	regsub -all {[);(|]} $smile {\\\0} smileExp
-	regsub -all $smileExp $str $sub str
-    }
-	
-    # Now check for any "long" names, such as :angry: :cool: etc.
-    set candidateList {}
-    set ndx 0
-    
-    while {[regexp -start $ndx -indices -- {:[a-zA-Z]+:} $str ind]} {
-	set ndx [lindex $ind 1]
-	set candidate [string range $str [lindex $ind 0] [lindex $ind 1]]
-	if {[lsearch $smileyLongNames $candidate] >= 0} {
-	    lappend candidateList $candidate
+	set sub "\} \{image create end -image $smiley($smile) -padx 6 -name \{$smile\}\} \{"
 	    
-	    # Load image if not done that.
-	    if {![info exists smileyLongIm($candidate)]} {
-		set fileName "smiley-[string trim $candidate :].gif"
-		set smileyLongIm($candidate) [image create photo -format gif  \
-		  -file [file join $this(imagePath) smileys $fileName]]	    
+	# Protect all regexp special characters!
+	regsub -all {[][$^);(\|\?\*\\]} $smile {\\\0} smileExp
+	if {[catch {
+	    regsub -all " $smileExp " $str $sub str
+	}]} {
+	    puts "--->smile=$smile, smileExp=$smileExp"
+	}
+    }
+    
+    # Now check for any "long" names, such as :angry: :cool: etc.
+    # OUTDATED!
+    if {[info exists smileyLongNames]} {
+	set candidateList {}
+	set ndx 0
+	
+	while {[regexp -start $ndx -indices -- {:[a-zA-Z]+:} $str ind]} {
+	    set ndx [lindex $ind 1]
+	    set candidate [string range $str [lindex $ind 0] [lindex $ind 1]]
+	    if {[lsearch $smileyLongNames $candidate] >= 0} {
+		lappend candidateList $candidate
+		
+		# Load image if not done that.
+		if {![info exists smileyLongIm($candidate)]} {
+		    set fileName "smiley-[string trim $candidate :].gif"
+		    set smileyLongIm($candidate) [image create photo -format gif  \
+		      -file [file join $this(imagePath) smileys $fileName]]	    
+		}
+	    }
+	}
+	if {[llength $candidateList]} {
+	    regsub -all {\\|&} $str {\\\0} str
+	    foreach smile $candidateList {
+		set sub "\} \{image create end -image $smileyLongIm($smile) -name $smile\} \{"
+		regsub -all $smile $str $sub str
 	    }
 	}
     }
-    if {[llength $candidateList]} {
-	regsub -all {\\|&} $str {\\\0} str
-	foreach smile $candidateList {
-	    set sub "\} \{image create end -image $smileyLongIm($smile) -name $smile\} \{"
-	    regsub -all $smile $str $sub str
-	}
-    }
-    
     return "\{$str\}"
 }
 
-
-proc ::Emoticons::Load {path} {
+proc ::Emoticons::GetAllSets { } {
+    global  this
+    variable priv
+    variable state
     
+    set setList {}
+    foreach path [list $this(emoticonsPath) $this(altEmoticonsPath)] {
+	foreach f [glob -nocomplain -directory $path *] {
+	    set name [file tail $f]
+	    set name [file rootname $name]
+	    if {[string equal [file extension $f] ".jisp"] && $priv(havezip)} {
+		lappend setList $name
+		set state($name,path) $f
+	    } elseif {[file isdirectory $f]} {
+		lappend setList $name	    
+		set state($name,path) $f
+	    }
+	}
+    }
+    return $setList
+}
+
+# Emoticons::GetPrefSetPathExists --
+# 
+#       Gets the full path to our emoticons file/folder.
+#       Verfies that it exists.
+
+proc ::Emoticons::GetPrefSetPathExists { } {
+    global  this
+    variable priv
+    upvar ::Jabber::jprefs jprefs
+
+    set path [file join $this(emoticonsPath) $priv(defaultSet)]
+    foreach dir [list $this(emoticonsPath) $this(altEmoticonsPath)] {
+	set f [file join $dir $jprefs(emoticonSet)]
+	set fjisp ${f}.jisp
+	if {[file exists $f]} {
+	    set path $f
+	    break
+	} elseif {[file exists $fjisp]} {
+	    set path $fjisp
+	    break
+	}
+    }
+    set jprefs(emoticonSet) [file rootname [file tail $path]]
+    return $path
+}
+    
+proc ::Emoticons::LoadTmpIconSet {path} {
+    
+    variable state
     variable priv
     
     # The dir variable points to the (virtual) directory containing it all.
     set dir $path
     set name [file rootname [file tail $path]]
-    cd [file dirname $path]
-    puts "1: [pwd]: [glob *]"
     
     if {[file extension $path] == ".jisp"} {
 	if {$priv(havezip)} {
-	    set name [file rootname [file tail $path]]
+	    set mountpath [file join [file dirname $path] $name]
 	    if {[catch {
-		set fd [vfs::zip::Mount $path $name]
-		puts "mounts $path"
-		puts "2: [pwd]: [glob *]"
+		set fdzip [vfs::zip::Mount $path $mountpath]
 	    } err]} {
 		return -code error $err
 	    }
-	    set dir1 [file join [file dirname $path] $name]
-	    puts "dir1=$dir1"
-	    cd $dir1
-	    puts "name=$name"
-	    puts "3: [pwd]: [glob *]"
-	    set dir [file join [file dirname $path] $name $name]
+	    set dir [file join $mountpath $name]
 	} else {
 	    return -code error "cannot read jisp archive without vfs::zip"
 	}
     }
-    puts "path=$path"
-    puts "dir =$dir"
     set icondefPath [file join $dir icondef.xml]
-    puts "icondefPath=$icondefPath"
-    cd $dir
-    puts "4: [pwd]: [glob *]"
     if {![file isfile $icondefPath]} {
 	return -code error "missing icondef.xml file in archive"
     }
-    set f [open $icondefPath]
-    set xmldata [read $f]
-    close $f
+    set fd [open $icondefPath]
+    set xmldata [read $fd]
+    close $fd
     
-    FreeSet $name
+    #FreeTmpSet $name
     
     # Parse data.
     ParseIconDef $name $dir $xmldata
     
-    cd $::this(path)
-    if {[info exists name]} {
-	#vfs::zip::Unmount $fd $name
+    if {[info exists mountpath]} {
+	vfs::zip::Unmount $fdzip $mountpath
     }
+    set state($name,loaded) 1
 }
 
 proc ::Emoticons::ParseIconDef {name dir xmldata} {
@@ -285,16 +351,18 @@ proc ::Emoticons::ParseMeta {name dir xmllist} {
 	set tag [tinydom::tagname $elem]
 	lappend meta($name,$tag) [tinydom::chdata $elem]
     }
-    parray meta
 }
 
 proc ::Emoticons::ParseIcon {name dir xmllist} {
     global  this
     
-    variable iconsets
-    variable iconsetsInv
+    variable tmpicons
+    variable tmpiconsInv
     variable priv
 
+    set keyList {}
+    set mime ""
+    
     foreach elem [tinydom::children $xmllist] {
 	set tag [tinydom::tagname $elem]
 	
@@ -302,7 +370,8 @@ proc ::Emoticons::ParseIcon {name dir xmllist} {
 	    text {
 		lappend keyList [tinydom::chdata $elem]
 	    }
-	    object {
+	    object - graphic {
+		# graphic does not comply with JEP-0038!
 		set object [tinydom::chdata $elem]
 		array set attrArr [tinydom::attrlist $elem]
 		set mime $attrArr(mime)
@@ -315,12 +384,11 @@ proc ::Emoticons::ParseIcon {name dir xmllist} {
 	    set im [image create photo -format gif  \
 	      -file [file join $dir $object]]
 	    foreach key $keyList {
-		set iconsets($name,$key) $im
+		set tmpicons($name,$key) $im
 	    }
 	}
 	image/png {
 	    # If we rely on QuickTimeTcl here we cannot be in vfs.
-	    puts "object=$object,\t keyList=$keyList"
 	    set f [file join $dir $object]
 	    if {$priv(needtmp)} {
 		set tmp [file join $this(tmpPath) $object]
@@ -329,23 +397,90 @@ proc ::Emoticons::ParseIcon {name dir xmllist} {
 	    }
 	    set im [eval {image create photo -file $f} $priv(pngformat)]
 	    foreach key $keyList {
-		set iconsets($name,$key) $im
+		set tmpicons($name,$key) $im
 	    }
 	}
     }
     if {[info exists im]} {
-	set iconsetsInv($name,$im) $keyList
+	set tmpiconsInv($name,$im) $keyList
     }
 }
 
-proc ::Emoticons::FreeSet {name} {
-    variable meta
-    variable iconsets
-    variable iconsetsInv
+# Emoticons::SetPermanentSet --
+# 
+#       Takes an iconset and makes it the permanent iconset.
+#       Must be careful to free all unused images and arrays etc.
+
+proc ::Emoticons::SetPermanentSet {selected} {
+    variable state
+    variable smiley
+
+    #puts "::Emoticons::SetPermanentSet selected=$selected"
+    set setsLoaded {}
+    foreach ind [array names state *,loaded] {
+	set name [string map [list ",loaded" ""] $ind]
+	lappend setsLoaded $name
+    }
+    #puts "\t setsLoaded=$setsLoaded"
+    if {[info exists smiley]} {
+	FreeSmileyArr
+    }
+    foreach name $setsLoaded {
+	if {[string equal $selected $name]} {
+	    SetSmileyArr $name
+	} else {
+	    FreeTmpSet $name   
+	}
+    }
+    catch {unset state}
+}
+
+proc ::Emoticons::SetSmileyArr {name} {
+    variable tmpicons
+    variable tmpiconsInv
+    variable smiley
+    variable smileyInv
     
+    #puts "::Emoticons::SetSmileyArr name=$name"
+    foreach ind [array names tmpiconsInv $name,*] {
+	set im [string map [list "$name," ""] $ind]
+	foreach key $tmpiconsInv($ind) {
+	    set smiley($key) $im
+	}
+	set smileyInv($im) $tmpiconsInv($ind)
+    }
+}
+
+proc ::Emoticons::FreeSmileyArr { } {
+    variable smiley
+    variable smileyInv
+    
+    #puts "::Emoticons::FreeSmileyArr"
+    
+    # This could create empty images for any open dialogs. BAD?
+    # MEMLEAK!
+    #eval {image delete} [array names smileyInv]
+    catch {unset smiley smileyInv}
+}
+
+proc ::Emoticons::FreeTmpSet {name} {
+    variable meta
+    variable state
+    variable tmpicons
+    variable tmpiconsInv
+    
+    #puts "::Emoticons::FreeTmpSet name=$name"
+    set ims {}
+    foreach ind [array names tmpiconsInv $name,*] {
+	lappend ims [string map [list "$name," ""] $ind]
+    }
+    # This could create empty images for any open dialogs. BAD?
+    # MEMLEAK!
+    #eval {image delete} $ims
     array unset meta $name,*
-    array unset iconsets $name,*
-    array unset iconsetsInv $name,*
+    array unset tmpicons $name,*
+    array unset tmpiconsInv $name,*
+    array unset state $name,*
 }
 
 # Emoticons::MenuButton --
@@ -353,8 +488,7 @@ proc ::Emoticons::FreeSet {name} {
 #       A kind of general menubutton for inserting smileys into a text widget.
 
 proc ::Emoticons::MenuButton {w wtext} {
-    global  prefs this
-    
+    global  prefs this    
     variable smiley
 
     # If we have -compound left -image ... -label ... working.
@@ -362,6 +496,11 @@ proc ::Emoticons::MenuButton {w wtext} {
     if {([package vcompare [info tclversion] 8.4] >= 0) &&  \
       ![string equal $this(platform) "macosx"]} {
 	set prefs(haveMenuImage) 1
+    }
+    if {[string match "mac*" $this(platform)]} {
+	set btbd 2
+    } else {
+	set btbd 1
     }
 
     # Workaround for missing -image option on my macmenubutton.
@@ -372,9 +511,23 @@ proc ::Emoticons::MenuButton {w wtext} {
 	#set menubuttonImage menubutton
 	set menubuttonImage button
     }
+    
+    # Button image.
+    set btim ""
+    set size 16
+    foreach key {:) :-) ;) ;-) :( :-(} {
+	if {[info exists smiley($key)]} {
+	    set btim $smiley($key)
+	    set size [image width $btim]
+	    if {$size < 16} {
+		set size 16
+	    }
+	    break
+	}
+    }
     set wmenu ${w}.m
     #$menubuttonImage $w -menu $wmenu -image $smiley(:\))
-    $menubuttonImage $w -image $smiley(:\)) -bd 2 -width 16 -height 16
+    $menubuttonImage $w -image $btim -bd $btbd -width $size -height $size
     
     ::Emoticons::BuildMenu $wmenu $wtext
 
@@ -385,46 +538,20 @@ proc ::Emoticons::MenuButton {w wtext} {
 proc ::Emoticons::BuildMenu {wmenu wtext} {
     global  prefs
     variable smiley
+    variable smileyInv
     
     set m [menu $wmenu -tearoff 0]
-
-    if {$prefs(haveMenuImage)} {
-	set names [array names smiley]
-	set i 0
-	foreach name $names {
-	    set cmd [list Emoticons::InsertSmiley $wtext $smiley($name) $name]
-	    set opts {-hidemargin 1}
-	    if {$i && ([expr $i % 4] == 0)} {
-		lappend opts -columnbreak 1
-	    }
-	    eval {$m add command -image $smiley($name) -command $cmd} $opts
-	    incr i
-	}
-    } else {
-	foreach name [array names smiley] {
-	    set cmd [list Emoticons::InsertSmiley $wtext $smiley($name) $name]
-	    $m add command -label $name -command $cmd
-	}
-    }
-}
-
-proc ::Emoticons::BuildMenuNEW {name wmenu wtext} {
-    global  prefs
-    variable iconsets
-    variable iconsetsInv
-    
-    set m [menu $wmenu -tearoff 0]
-    set ims [array names iconsetsInv]
+    set ims [lsort -dictionary [array names smileyInv]]
 
     if {$prefs(haveMenuImage)} {
 	
 	# Figure out a reasonable width and height.
 	set len [llength $ims]
 	set nheight [expr int(sqrt($len/1.4)) + 1]
-	
+
 	set i 0
 	foreach im $ims {
-	    set key [lindex $iconsetsInv($name,$im)]
+	    set key [lindex $smileyInv($im) 0]
 	    set cmd [list Emoticons::InsertSmiley $wtext $im $key]
 	    set opts {-hidemargin 1}
 	    if {$i && ([expr $i % $nheight] == 0)} {
@@ -435,11 +562,16 @@ proc ::Emoticons::BuildMenuNEW {name wmenu wtext} {
 	}
     } else {
 	foreach im $ims {
-	    set key [lindex $iconsetsInv($name,$im)]
+	    set key [lindex $smileyInv($im) 0]
 	    set cmd [list Emoticons::InsertSmiley $wtext $im $key]
-	    $m add command -label $iconsetsInv($name,$im) -command $cmd
+	    $m add command -label $key -command $cmd
 	}
     }
+}
+
+proc ::Emoticons::SortLength {str1 str2} {
+    
+    return [expr {[string length $str1] < [string length $str2]} ? -1 : 1]
 }
 
 proc ::Emoticons::PostMenu {m x y} {
@@ -454,39 +586,143 @@ proc ::Emoticons::InsertSmiley {wtext imname name} {
     $wtext insert insert " "
 }
 
-proc ::Emoticons::TextLegend {w name args} {
+proc ::Emoticons::InsertTextLegend {w name args} {
     variable meta
-    variable iconsetsInv
+    variable tmpiconsInv
     
     array set argsArr {-tabs {20 60} -spacing1 2 -wrap word}
     array set argsArr $args
-    eval {text $w} [array get argsArr]
+    eval {$w configure} [array get argsArr]
+    $w configure -state normal
     $w tag configure tmeta -spacing1 1 -spacing3 1 -lmargin1 10 -lmargin2 20 \
       -tabs [expr [font measure [$w cget -font] Description] + 30]
+    $w delete 1.0 end
     
     # Meta data:
     foreach ind [array names meta $name,*] {
 	set key [string map [list "$name," ""] $ind]
 	$w insert insert "[string totitle $key]:\t" tmeta
 	foreach val $meta($ind) {
-	    $w insert insert $val tmeta
+	    $w insert insert "$val, " tmeta
 	}
+	$w delete "end - 3 chars" end
 	$w insert insert "\n"
     }
     
     $w insert insert "\tImage\tText\n"
     
-    foreach ind [array names iconsetsInv $name,*] {
+    # Smileys:
+    foreach ind [lsort -dictionary [array names tmpiconsInv $name,*]] {
 	set im [string map [list "$name," ""] $ind]
 	$w insert insert \t
 	$w image create insert -image $im
 	$w insert insert \t
-	foreach key $iconsetsInv($ind) {
+	foreach key $tmpiconsInv($ind) {
 	    $w insert insert "$key   "
 	}
 	$w insert insert "\n"
     }
-    return $w
+    $w delete "end - 1 chars" end
+    $w configure -state disabled
+}
+
+# Preference page --------------------------------------------------------------
+
+proc  ::Emoticons::InitPrefsHook { } {
+    variable priv
+    upvar ::Jabber::jprefs jprefs
+
+    set jprefs(emoticonSet) $priv(defaultSet)
+    
+    # Do NOT store the complete path!
+    ::PreferencesUtils::Add [list  \
+      [list ::Jabber::jprefs(emoticonSet) jprefs_emoticonSet $jprefs(emoticonSet)]]
+}
+
+proc ::Emoticons::BuildPrefsHook {wtree nbframe} {
+
+    $wtree newitem {Jabber Emoticons} -text [::msgcat::mc {Emoticons}]
+    
+    set wpage [$nbframe page {Emoticons}]    
+    ::Emoticons::BuildPrefsPage $wpage
+}
+
+proc ::Emoticons::BuildPrefsPage {wpage} {
+    variable wpreftext 
+    variable tmpSet
+    variable priv
+    upvar ::Jabber::jprefs jprefs
+    
+    set fontS  [option get . fontSmall {}]    
+    set fontSB [option get . fontSmallBold {}]    
+
+    set wpop $wpage.pop
+    set wfr $wpage.fr
+    set wpreftext $wfr.t
+    set wysc $wfr.ysc
+    set allSets [::Emoticons::GetAllSets]
+    label $wpage.l -text "The iconset selected will take action when you save"
+    pack $wpage.l -side top -anchor w -padx 8 -pady 4
+    eval {tk_optionMenu $wpop [namespace current]::tmpSet} $allSets
+    labelframe $wfr -labelwidget $wpop -padx 6 -pady 4
+    pack $wfr -side top -anchor w -padx 8 -pady 4 -fill both -expand 1
+    
+    scrollbar $wysc -orient vertical -command [list $wpreftext yview]
+    text $wpreftext -yscrollcommand [list $wysc set] -width 20 -height 10
+    grid $wpreftext -row 0 -column 0 -sticky news
+    grid $wysc -row 0 -column 1 -sticky ns
+    grid columnconfigure $wfr 0 -weight 1
+    grid rowconfigure    $wfr 0 -weight 1
+
+    trace add variable [namespace current]::tmpSet write  \
+      [namespace current]::PopCmd
+
+    if {[lsearch $allSets $jprefs(emoticonSet)] < 0} {
+	set tmpSet $priv(defaultSet)
+    } else {
+	set tmpSet $jprefs(emoticonSet)
+    }
+}
+
+proc ::Emoticons::PopCmd {name1 name2 op} {
+    variable wpreftext 
+    variable state
+    upvar $name1 var
+
+    if {![info exists state($var,loaded)]} {
+	::Emoticons::LoadTmpIconSet $state($var,path)
+    }
+    ::Emoticons::InsertTextLegend $wpreftext $var
+}
+
+proc ::Emoticons::FreePrefsPage { } {
+    
+    trace remove variable [namespace current]::tmpSet write  \
+      [namespace current]::PopCmd
+}
+
+proc ::Emoticons::SavePrefsHook { } {
+    variable tmpSet
+    upvar ::Jabber::jprefs jprefs
+
+    if {![string equal $jprefs(emoticonSet) $tmpSet]} {
+	::Emoticons::SetPermanentSet $tmpSet
+
+    }
+    ::Emoticons::FreePrefsPage
+    set jprefs(emoticonSet) $tmpSet
+}
+
+proc ::Emoticons::CancelPrefsHook { } {
+    variable tmpSet
+    upvar ::Jabber::jprefs jprefs
+
+    # Since the menubutton is used both for viewing and setting,
+    # I think we skip this warning.
+    if {![string equal $jprefs(emoticonSet) $tmpSet]} {
+	#::Preferences::HasChanged
+    }
+    ::Emoticons::FreePrefsPage
 }
 
 #-------------------------------------------------------------------------------

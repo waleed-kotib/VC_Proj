@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.49 2004-04-04 13:37:26 matben Exp $
+# $Id: GroupChat.tcl,v 1.50 2004-04-08 09:57:43 matben Exp $
 
 package require History
 
@@ -998,6 +998,11 @@ proc ::Jabber::GroupChat::Send {token} {
     # Clear send.
     $wtextsnd delete 1.0 end
     set state(hot1stmsg) 1
+}
+
+proc ::Jabber::GroupChat::ReturnCmd {token} {
+
+    ::Jabber::GroupChat::Send $token
     
     # Stop the actual return to be inserted.
     return -code break
@@ -1012,7 +1017,7 @@ proc ::Jabber::GroupChat::ActiveCmd {token} {
     
     set wtextsnd $state(wtextsnd)
     if {$state(active)} {
-	bind $wtextsnd <Return> [list [namespace current]::Send $token]
+	bind $wtextsnd <Return> [list [namespace current]::ReturnCmd $token]
     } else {
 	bind $wtextsnd <Return> {}
     }
