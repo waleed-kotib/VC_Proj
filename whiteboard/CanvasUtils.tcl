@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.10 2004-08-06 07:46:55 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.11 2004-08-06 12:52:25 matben Exp $
 
 package require sha1pure
 
@@ -1337,7 +1337,7 @@ proc ::CanvasUtils::DoQuickTimePopup {w x y} {
     catch {destroy $m}
     ::UI::BuildMenu $wtop $m {} $menuDefs(pop,qt) normal -winfr $w
 
-    set wmov ${w}.m
+    set wmov [lindex [winfo children $w] 0]
     set cmd [$wmov cget -mccommand]
     if {$cmd == {}} {
 	set popupVars(-syncplay) 0

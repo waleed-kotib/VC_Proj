@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Import.tcl,v 1.5 2004-08-06 07:46:55 matben Exp $
+# $Id: Import.tcl,v 1.6 2004-08-06 12:52:25 matben Exp $
 
 package require http
 package require httpex
@@ -1813,30 +1813,31 @@ proc ::Import::SyncPlay {wtop winfr} {
     set wmov ${winfr}.m
     set cmd [$wmov cget -mccommand]
     if {$cmd == {}} {
-	$wmov configure -mccommand ::Import::QuickTimeMCCallback
+	
+	# We need to get the corresponding utag.
+	set utag [::CanvasUtils::GetUtagFromWindow $winfr]
+	if {$utag == ""} {
+	    return
+	}
+	$wmov configure -mccommand [list ::Import::QuickTimeMCCallback $utag]
     } else {
 	$wmov configure -mccommand {}
     }
 }
 
-proc ::Import::QuickTimeMCCallback {w msg {par {}}} {
+proc ::Import::QuickTimeMCCallback {utag w msg {par {}}} {
 
     set wtop [::UI::GetToplevelNS $w]
-    
-    # We need to get the corresponding utag.
-    set wfr [winfo parent $w]
-    set utag [::CanvasUtils::GetUtagFromWindow $wfr]
-    if {$utag == ""} {
-	return
-    }
-    
+        
     switch -- $msg {
 	play {
 	    set time [$w time]
 	    set str "QUICKTIME: play $utag $time $par"
 	    ::CanvasUtils::GenCommand $wtop $str remote
 	}
-	goToTime {
+	xxx-goToTime {
+	    # We can't use this since it fills our karma!
+	    # Seems not necessary anyway.
 	    set str "QUICKTIME: goToTime $utag $par"
 	    ::CanvasUtils::GenCommand $wtop $str remote
 	}
@@ -1853,28 +1854,30 @@ proc ::Import::QuickTimeHandler {wcan type cmd args} {
 	return
     }
     set w [$wcan itemcget $utag -window]
-    if {![string equal [winfo type $w] "QTFrame"]} {
+    if {![string equal [winfo class $w] "QTFrame"]} {
 	return
     }
     if {![winfo exists $w]} {
 	return
     }
+    set wmov [lindex [winfo children $w] 0]
     
     switch -- $instr {
 	play {
 	    set time [lindex $cmd 3]
 	    set rate [lindex $cmd 4]
 	    if {$rate == 0.0} {
-		$w time $time
-		$w stop
+		$wmov time $time
+		$wmov stop
 	    } else {
-		$w time $time
-		$w play
+		$wmov time $time
+		$wmov play
 	    }
 	}
 	goToTime {
+	    # Unused.
 	    foreach {hiTime loTime timeScale} [lrange $cmd 3 5] {break}
-	    $w time $loTime
+	    $wmov time $loTime
 	}
     }
 }
