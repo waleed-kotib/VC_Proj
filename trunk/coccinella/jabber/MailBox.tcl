@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.16 2003-10-23 06:28:00 matben Exp $
+# $Id: MailBox.tcl,v 1.17 2003-11-04 09:44:27 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -118,7 +118,6 @@ proc ::Jabber::MailBox::Build {w args} {
     variable mailbox
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
-    upvar ::UI::icons icons
     
     ::Jabber::Debug 2 "::Jabber::MailBox::Build args='$args'"
 
@@ -151,20 +150,33 @@ proc ::Jabber::MailBox::Build {w args} {
       -fill both -expand 1 -ipadx 4
     
     # Button part.
+    set iconNew         [::UI::GetIcon btnew]
+    set iconNewDis      [::UI::GetIcon btnewdis]
+    set iconReply       [::UI::GetIcon btreply]
+    set iconReplyDis    [::UI::GetIcon btreplydis]
+    set iconForward     [::UI::GetIcon btforward]
+    set iconForwardDis  [::UI::GetIcon btforwarddis]
+    set iconSave        [::UI::GetIcon btsave]
+    set iconSaveDis     [::UI::GetIcon btsavedis]
+    set iconPrint       [::UI::GetIcon btprint]
+    set iconPrintDis    [::UI::GetIcon btprintdis]
+    set iconTrash       [::UI::GetIcon bttrash]
+    set iconTrashDis    [::UI::GetIcon bttrashdis]
+    
     set frtop [frame $w.frall.frtop -borderwidth 0]
     pack $frtop -side top -fill x -padx 4 -pady 2
     ::UI::InitShortcutButtonPad $w $frtop 50
-    ::UI::NewButton $w new New $icons(btnew) $icons(btnewdis)  \
+    ::UI::NewButton $w new New $iconNew $iconNewDis  \
       [list ::Jabber::NewMsg::Build $wDlgs(jsendmsg)]
-    ::UI::NewButton $w reply Reply $icons(btreply) $icons(btreplydis)  \
+    ::UI::NewButton $w reply Reply $iconReply $iconReplyDis  \
       [list ::Jabber::MailBox::ReplyTo] -state disabled
-    ::UI::NewButton $w forward Forward $icons(btforward) $icons(btforwarddis)  \
+    ::UI::NewButton $w forward Forward $iconForward $iconForwardDis  \
       [list ::Jabber::MailBox::ForwardTo] -state disabled
-    ::UI::NewButton $w save Save $icons(btsave) $icons(btsavedis)  \
+    ::UI::NewButton $w save Save $iconSave $iconSaveDis  \
       [list ::Jabber::MailBox::SaveMsg] -state disabled
-    ::UI::NewButton $w print Print $icons(btprint) $icons(btprintdis)  \
+    ::UI::NewButton $w print Print $iconPrint $iconPrintDis  \
       [list ::Jabber::MailBox::DoPrint] -state disabled
-    ::UI::NewButton $w trash Trash $icons(bttrash) $icons(bttrashdis)  \
+    ::UI::NewButton $w trash Trash $iconTrash $iconTrashDis  \
       ::Jabber::MailBox::TrashMsg -state disabled
     
     pack [frame $w.frall.divt -bd 2 -relief sunken -height 2] -fill x -side top
@@ -184,6 +196,8 @@ proc ::Jabber::MailBox::Build {w args} {
       -side top -fill both -expand 1 -padx 4 -pady 4
     
     # The actual mailbox list as a tablelist.
+    set iconWb [::UI::GetIcon wbicon]
+
     set wfrmbox $frmid.frmbox
     set locals(wfrmbox) $wfrmbox
     frame $wfrmbox
@@ -199,7 +213,7 @@ proc ::Jabber::MailBox::Build {w args} {
       -labelcommand [namespace current]::LabelCommand  \
       -stretch all -width 60 -selectmode extended
     # Pressed -labelbackground #8c8c8c
-    $wtbl columnconfigure $colindex(iswb) -labelimage $icons(wbicon)  \
+    $wtbl columnconfigure $colindex(iswb) -labelimage $iconWb  \
       -resizable 0 -align center -showarrow 0
     $wtbl columnconfigure $colindex(date) -sortmode command  \
       -sortcommand [namespace current]::SortTimeColumn
@@ -276,12 +290,8 @@ proc ::Jabber::MailBox::InsertRow {wtbl row i} {
     global  sysFont
     
     variable colindex
-    upvar ::UI::icons icons
 
     set jid [lindex $row 1]
-    #if {![regexp {^([^@]+@[^/]+)(/(.*))?} $jid match jid2 x res]} {
-#	set jid2 $jid
-    #}
     foreach {jid2 res} [jlib::splitjid $jid] break
 
     # We keep any /res part.
@@ -302,17 +312,20 @@ proc ::Jabber::MailBox::InsertRow {wtbl row i} {
     lset row 2 $smartDate
     set row "{} $row"
 
+    set iconWboard  [::UI::GetIcon wboard]
+    set iconUnread  [::UI::GetIcon unreadMsg]
+    set iconRead    [::UI::GetIcon readMsg]
     $wtbl insert end [lrange $row 0 5]
     if {$haswb} {
-	$wtbl cellconfigure "${i},$colindex(iswb)" -image $icons(wboard)
+	$wtbl cellconfigure "${i},$colindex(iswb)" -image $iconWboard
     }
     set colsub $colindex(subject)
     if {[lindex $row $colindex(isread)] == 0} {
 	$wtbl rowconfigure $i -font $sysFont(sb)
-	$wtbl cellconfigure "${i},${colsub}" -image $icons(unreadMsg)
+	$wtbl cellconfigure "${i},${colsub}" -image $iconUnread
     } else {
 	$wtbl rowconfigure $i -font $sysFont(s)
-	$wtbl cellconfigure "${i},${colsub}" -image $icons(readMsg)
+	$wtbl cellconfigure "${i},${colsub}" -image $iconRead
     }
 }
 
@@ -428,7 +441,6 @@ proc ::Jabber::MailBox::GotMsg {bodytxt args} {
     variable uidmsg
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
-    upvar ::UI::icons icons
     
     ::Jabber::Debug 2 "::Jabber::MailBox::GotMsg args='$args'"
 
@@ -612,7 +624,6 @@ proc ::Jabber::MailBox::SelectMsg { } {
     variable mailbox
     variable colindex
     upvar ::Jabber::jstate jstate
-    upvar ::UI::icons icons
     
     set wtextmsg $locals(wtextmsg)
     set wtbl $locals(wtbl)
@@ -640,9 +651,10 @@ proc ::Jabber::MailBox::SelectMsg { } {
     set jid3 [lindex $mailbox($id) 1]
 
     # Mark as read.
+    set iconRead    [::UI::GetIcon readMsg]
     set colsub $colindex(subject)
     $wtbl rowconfigure $item -font $sysFont(s)
-    $wtbl cellconfigure "${item},${colsub}" -image $icons(readMsg)
+    $wtbl cellconfigure "${item},${colsub}" -image $iconRead
     ::Jabber::MailBox::MarkMsgAsRead $id
     ::Jabber::MailBox::DisplayMsg $id
     

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.4 2003-11-03 14:35:51 matben Exp $
+# $Id: Login.tcl,v 1.5 2003-11-04 09:44:27 matben Exp $
 
 package provide Login 1.0
 
@@ -329,9 +329,11 @@ proc ::Jabber::Login::Doit { } {
 	set port $jprefs(port)
     }
     if {$ip == ""} {
-	set ip $server
+	set host $server
+    } else {
+	set host $ip
     }
-    ::Network::OpenConnection $ip $port [namespace current]::SocketIsOpen  \
+    ::Network::OpenConnection $host $port [namespace current]::SocketIsOpen  \
       -timeout $prefs(timeoutSecs) -tls $ssl
 }
 
