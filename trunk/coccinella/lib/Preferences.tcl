@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.14 2003-10-12 13:12:55 matben Exp $
+# $Id: Preferences.tcl,v 1.15 2003-11-06 15:17:51 matben Exp $
  
 package require notebook
 package require tree
@@ -1960,11 +1960,11 @@ proc ::Preferences::NetSetup::Advanced {  } {
     # The actual options.
     set fropt [frame $fr.fropt]
 
-    label $fropt.lserv -text [::msgcat::mc {Built in server port:}]  \
+    label $fropt.lserv -text "[::msgcat::mc {Built in server port}]:"  \
       -font $sysFont(sb)
-    label $fropt.lhttp -text [::msgcat::mc {HTTP port:}]  \
+    label $fropt.lhttp -text "[::msgcat::mc {HTTP port}]:" \
       -font $sysFont(sb)
-    label $fropt.ljab -text [::msgcat::mc {Jabber server port:}]  \
+    label $fropt.ljab -text "[::msgcat::mc {Jabber server port}]:"  \
       -font $sysFont(sb)
     entry $fropt.eserv -width 6 -textvariable  \
       ::Preferences::tmpPrefs(thisServPort)

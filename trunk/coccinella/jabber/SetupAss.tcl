@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: SetupAss.tcl,v 1.10 2003-11-04 09:44:27 matben Exp $
+# $Id: SetupAss.tcl,v 1.11 2003-11-06 15:17:51 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -258,7 +258,7 @@ proc ::Jabber::SetupAss::ServersDlg {w} {
 	destroy $w
 	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok  \
 	  -message "Failed to obtain list of open Jabber servers from\
-	  \"$url\": $::errorInfo $token"
+	  \"$url\": $token"
 	return
     } else {
 	set servStatVar "Getting server list from $url"

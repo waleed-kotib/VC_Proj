@@ -15,7 +15,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.10 2003-10-23 06:27:59 matben Exp $
+# $Id: Coccinella.tcl,v 1.11 2003-11-06 15:17:51 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -499,7 +499,8 @@ set listOfPackages {
     tablelist
     balloonhelp
     undo
-    can2svg            
+    can2svg       
+    buttontray
 }
 foreach packName $listOfPackages {
     package require $packName

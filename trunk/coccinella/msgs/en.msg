@@ -51,9 +51,11 @@
 ::msgcat::mcset en Inbox
 ::msgcat::mcset en Info
 ::msgcat::mcset en Invite
+::msgcat::mcset en Less
 ::msgcat::mcset en Login
 ::msgcat::mcset en Logout
 ::msgcat::mcset en Middle
+::msgcat::mcset en More
 ::msgcat::mcset en New
 ::msgcat::mcset en Next
 ::msgcat::mcset en No
@@ -277,8 +279,9 @@
 ::msgcat::mcset en {Auto-reject}
 ::msgcat::mcset en {Away status}
 ::msgcat::mcset en {Basic Info}
-::msgcat::mcset en {Built in server port:}
+::msgcat::mcset en {Built in server port}
 ::msgcat::mcset en {Block JID}
+::msgcat::mcset en {Chat With}
 ::msgcat::mcset en {Company Name}
 ::msgcat::mcset en {Conference server}
 ::msgcat::mcset en {Create Room}
@@ -312,18 +315,19 @@
 ::msgcat::mcset en {Group chat in room}
 ::msgcat::mcset en {Handled By}
 ::msgcat::mcset en {Host name}
-::msgcat::mcset en {HTTP port:}
+::msgcat::mcset en {HTTP port}
 ::msgcat::mcset en {Import using}
 ::msgcat::mcset en {Import/Remove fonts}
 ::msgcat::mcset en {Incoming Message}
 ::msgcat::mcset en {Inspect Associations}
+::msgcat::mcset en {IP address}
 ::msgcat::mcset en {Is connected}
 ::msgcat::mcset en {Is safe}
 ::msgcat::mcset en {Is server up}
 ::msgcat::mcset en {Jabber address}
 ::msgcat::mcset en {Jabber Client}
 ::msgcat::mcset en {Jabber Server}
-::msgcat::mcset en {Jabber server port:}
+::msgcat::mcset en {Jabber server port}
 ::msgcat::mcset en {Jabber user id}
 ::msgcat::mcset en {Jabber Id}
 ::msgcat::mcset en {JID to block}
@@ -406,6 +410,7 @@
 ::msgcat::mcset en {Setup Assistant}
 ::msgcat::mcset en {Software Update}
 ::msgcat::mcset en {Sounds & Speech}
+::msgcat::mcset en {Start Chat}
 ::msgcat::mcset en {Status message}
 ::msgcat::mcset en {Subscription Pending}
 ::msgcat::mcset en {Synthetic speech}
@@ -793,7 +798,9 @@ optional, and for your personal use only.}
 	::msgcat::mcset en jasubadd     {Add "%s" to my roster}
 	::msgcat::mcset en jarostadd	{Add a jabber user to my roster.\
 Users are normally added with subscriptions, but may be added without any\
-subscription. Nick name and group may be set or changed at any time.}
+subscription. Nick name and group may be set or changed at any time.\
+Adding a user of a foreign IM system requires that you are registered with\
+the Jabber servers transport or gateway.}
 	::msgcat::mcset en jarostset	{Set nick name and group of user "%s"\
 to what you want. They may be set or changed at any time later.}
 	::msgcat::mcset en jarostsub	{Subscribe to this user}

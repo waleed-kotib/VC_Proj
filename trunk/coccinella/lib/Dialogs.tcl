@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.13 2003-10-12 13:12:55 matben Exp $
+# $Id: Dialogs.tcl,v 1.14 2003-11-06 15:17:51 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -311,7 +311,7 @@ proc ::Dialogs::UnixPrintPS {w wtoprint} {
     
     message $frtot.msg -borderwidth 0 -font $sysFont(s) -aspect 1000 \
       -text "Shell print command, edit if desired."
-    entry $frtot.entcmd -width 20 -font $sysFont(m)   \
+    entry $frtot.entcmd -width 20   \
       -textvariable [namespace current]::psCmd
     grid $frtot.msg -column 0 -row 0 -padx 4 -pady 2 -sticky news
     grid $frtot.entcmd -column 0 -row 1 -padx 4 -pady 2 -sticky news
@@ -827,6 +827,7 @@ namespace eval ::SplashScreen:: {
     # Name of variable for message displat.
     variable startMsg ""
     variable topwin ""
+    variable splashCount 0
 }
 
 # SplashScreen::SplashScreen --
@@ -892,16 +893,23 @@ proc ::SplashScreen::SplashScreen {w} {
 }
 
 proc ::SplashScreen::SetMsg {msg} {
+    global this
     variable topwin
     variable canwin
     variable startMsg
+    variable splashCount
     
     set startMsg $msg
+    incr splashCount
     
     # Update needed to force display (bad?).
     if {[winfo exists $topwin]} {
 	$canwin itemconfigure tsplash -text $startMsg
-	update idletasks
+	if {[string equal $this(platform) "macosx"]} {
+	    update
+	} else {
+	    update idletasks
+	}
     }
 }
 

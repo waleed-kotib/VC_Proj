@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.23 2003-11-03 11:54:58 matben Exp $
+# $Id: UI.tcl,v 1.24 2003-11-06 15:17:51 matben Exp $
 
 # LabeledFrame --
 #
@@ -897,7 +897,7 @@ proc ::UI::BuildWhiteboard {wtop args} {
     set wapp(tool)      ${wtop}fmain.frleft.frbt
     set wapp(comm)      ${wtop}fcomm.ent
     set wapp(statmess)  ${wtop}fcomm.stat.lbl
-    set wapp(topfr)     ${wtop}frtop.on.fr
+    set wapp(tray)     ${wtop}frtop.on.fr
     set wapp(servCan)   $wapp(can)
     set wapp(topchilds) [list ${wtop}menu ${wtop}frtop ${wtop}fmain ${wtop}fcomm]
     
@@ -932,7 +932,7 @@ proc ::UI::BuildWhiteboard {wtop args} {
     
     # Special configuration of shortcut buttons.
     if {[info exists opts(-type)] && [string equal $opts(-type) "normal"]} {
-	::UI::ButtonConfigure $wtop stop -command  \
+	$wtray buttonconfigure stop -command  \
 	  [list ::Import::HttpResetAll $wtop]
     }
 
@@ -2249,8 +2249,8 @@ proc ::UI::ConfigShortcutButtonPad {wtop what {subSpec {}}} {
 	pack [frame ${wtop}frtop.on -borderwidth 0] -fill x -side left -expand 1
 	pack [label $wonbar -image $icons(barvert) -bd 1 -relief raised] \
 	  -padx 0 -pady 0 -side left
-	pack [frame $wapp(topfr) -relief raised -borderwidth 1]  \
-	  -side left -fill both -expand 1
+	#pack [frame $wapp(tray) -relief raised -borderwidth 1]  \
+	#  -side left -fill both -expand 1
 	label $woffbar -image $icons(barhoriz) -relief raised -borderwidth 1
 	bind $wonbar <Button-1> [list $wonbar configure -relief sunken]
 	bind $wonbar <ButtonRelease-1>  \
@@ -2258,6 +2258,7 @@ proc ::UI::ConfigShortcutButtonPad {wtop what {subSpec {}}} {
 	
 	# Build the actual shortcut button pad.
 	::UI::BuildShortcutButtonPad $wtop
+	pack $wapp(tray) -side left -fill both -expand 1
 	if {$opts(-state) == "disabled"} {
 	    ::UI::DisableShortcutButtonPad $wtop
 	}
@@ -2323,19 +2324,20 @@ proc ::UI::BuildShortcutButtonPad {wtop} {
     
     set wCan $wapp(can)
     set h [image height $icons(barvert)]
-    set inframe $wapp(topfr)
-    ::UI::InitShortcutButtonPad $wtop $inframe $h
-    
+    set wtray $wapp(tray)
+
+    buttontray::buttontray $wtray $h -relief raised -borderwidth 1
+
     # We need to substitute $wCan, $wtop etc specific for this wb instance.
     foreach {name cmd} $btShortDefs(this) {
 	set cmd [subst -nocommands -nobackslashes $cmd]
 	set txt [string toupper [string index $name 0]][string range $name 1 end]
-	::UI::NewButton $wtop $name $txt bt$name bt${name}dis $cmd
+	$wtray newbutton $name $txt bt$name bt${name}dis $cmd
     }
     if {[string equal $prefs(protocol) "server"]} {
-	::UI::ButtonConfigure $wtop connect -state disabled
+	$wtray buttonconfigure connect -state disabled
     }
-    ::UI::ButtonConfigure $wtop send -state disabled
+    $wtray buttonconfigure send -state disabled
 }
 
 # UI::DisableShortcutButtonPad --
@@ -2345,23 +2347,25 @@ proc ::UI::BuildShortcutButtonPad {wtop} {
 proc ::UI::DisableShortcutButtonPad {wtop} {
     variable btShortDefs
 
+    set wtray $wapp(tray)
     foreach {name cmd} $btShortDefs(this) {
+
 	switch -- $name {
 	    save - print - stop {
 		continue
 	    }
 	    default {
-		::UI::ButtonConfigure $wtop $name -state disabled
+		$wtray buttonconfigure $name -state disabled
 	    }
 	}
     }
 }
 
-# UI::InitShortcutButtonPad --
+# UI::NewButtonTray --
 #
 #       Init a shortcut button pad.
 
-proc ::UI::InitShortcutButtonPad {wtop inframe height} {
+proc ::UI::NewButtonTray {wtop inframe height args} {
     global  prefs sysFont
     
     namespace eval ::UI::$wtop {
@@ -2370,8 +2374,13 @@ proc ::UI::InitShortcutButtonPad {wtop inframe height} {
 
     # Set simpler variable names.
     upvar ::UI::${wtop}::locals locals
-    
-    set locals(inframe) $inframe
+    array set argsArr {
+	-bd     0 
+	-relief flat
+    }
+    array set argsArr $args
+    set locals(frame) [eval {frame $inframe -class ButtonTray} \
+      [array get argsArr]]
     
     # Standard minimum button width.
     set locals(minbtwidth) 46
@@ -2388,6 +2397,8 @@ proc ::UI::InitShortcutButtonPad {wtop inframe height} {
     pack [canvas $locals(can) -highlightthickness 0 -height $height  \
       -bg $prefs(bgColGeneral)] \
       -fill both -expand 1
+
+    return $inframe
 }
 
 # UI::NewButton --
@@ -2412,11 +2423,19 @@ proc ::UI::NewButton {wtop name txt image imageDis cmd args} {
     
     upvar ::UI::${wtop}::locals locals
     
-    set inframe $locals(inframe)
+    if {$wtop == "."} {
+	set w .
+    } else {
+	set w [string trimright $wtop .]
+    }
+    set inframe $locals(frame)
+    
+    set font $sysFont(s)
+    set foreground blue
         
     set can $locals(can)
     set loctxt [::msgcat::mc $txt]
-    set txtwidth [expr [font measure $sysFont(s) $loctxt] + 6]
+    set txtwidth [expr [font measure $font $loctxt] + 6]
     set btwidth [expr $txtwidth > $locals(minbtwidth) ? $txtwidth : $locals(minbtwidth)]
 
     # Round to nearest higher even value.    
@@ -2429,7 +2448,7 @@ proc ::UI::NewButton {wtop name txt image imageDis cmd args} {
     set idlab [$can create window $xpos $locals(yoffset) \
       -anchor n -window $wlab]
     set idtxt [$can create text $xpos $locals(ytxt) -text $loctxt  \
-      -font $sysFont(s) -anchor n -fill blue]
+      -font $font -anchor n -fill $foreground]
     
     set locals($name,idlab) $idlab
     set locals($name,idtxt) $idtxt
@@ -4099,6 +4118,7 @@ proc ::UI::FixMenusWhen {wtop what} {
     variable fixMenusCallback
     
     set mfile ${wtop}menu.file 
+    set wtray $wapp(tray)
     
     switch -exact -- $what {
 	connect {
@@ -4106,10 +4126,9 @@ proc ::UI::FixMenusWhen {wtop what} {
 	    # If client only, allow only one connection, limited.
 	    switch -- $prefs(protocol) {
 		jabber {
-		    #::UI::ButtonConfigure $wtop connect -state disabled
 		    if {[string equal $opts(-state) "normal"] &&  \
 		      [string equal $opts(-sendbuttonstate) "normal"]} {
-			::UI::ButtonConfigure $wtop send -state normal
+			$wtray buttonconfigure send -state normal
 		    }
 		}
 		symmetric {
@@ -4118,7 +4137,7 @@ proc ::UI::FixMenusWhen {wtop what} {
 		    ::UI::MenuMethod $mfile entryconfigure mGetCanvas -state normal
 		}
 		client {
-		    ::UI::ButtonConfigure $wtop connect -state disabled
+		    $wtray buttonconfigure connect -state disabled
 		    ::UI::MenuMethod $mfile entryconfigure mOpenConnection -state disabled
 		    ::UI::MenuMethod $mfile entryconfigure mPutFile -state normal
 		    ::UI::MenuMethod $mfile entryconfigure mPutCanvas -state normal
@@ -4131,7 +4150,7 @@ proc ::UI::FixMenusWhen {wtop what} {
 		}
 		default {
 		    ::UI::MenuMethod $mfile entryconfigure mOpenConnection -state disabled
-		    ::UI::ButtonConfigure $wtop connect -state disabled
+		    $wtray buttonconfigure connect -state disabled
 		}
 	    }	    
 	}
@@ -4139,11 +4158,10 @@ proc ::UI::FixMenusWhen {wtop what} {
 	    
 	    switch -- $prefs(protocol) {
 		jabber {
-		    #::UI::ButtonConfigure $wtop connect -state normal
-		    ::UI::ButtonConfigure $wtop send -state disabled
+		    $wtray buttonconfigure send -state disabled
 		}
 		client {
-		    ::UI::ButtonConfigure $wtop connect -state normal
+		    $wtray buttonconfigure connect -state normal
 		    ::UI::MenuMethod $mfile entryconfigure mOpenConnection -state normal
 		}
 	    }

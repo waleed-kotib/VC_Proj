@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.5 2003-11-04 09:44:27 matben Exp $
+# $Id: Login.tcl,v 1.6 2003-11-06 15:17:51 matben Exp $
 
 package provide Login 1.0
 
@@ -68,7 +68,7 @@ proc ::Jabber::Login::Login {w} {
       -fill both -expand 1 -ipadx 12 -ipady 4
     
     label $w.frall.head -text [::msgcat::mc Login] -font $sysFont(l)  \
-      -anchor w -padx 10 -pady 4
+      -anchor w -padx 10 -pady 4 -bg #cecece
     pack $w.frall.head -side top -fill both -expand 1
     message $w.frall.msg -width 260 -font $sysFont(s) -text [::msgcat::mc jalogin]
     pack $w.frall.msg -side top -fill both -expand 1
@@ -139,7 +139,7 @@ proc ::Jabber::Login::Login {w} {
     set wtri $frtri.tri
     set wtrilab $frtri.l
     label $wtri -image [::UI::GetIcon mactriangleclosed]
-    label $wtrilab -text "More..."
+    label $wtrilab -text "[::msgcat::mc More]..."
     pack $wtri $wtrilab -side left -padx 2
     bind $wtri <Button-1> [list [namespace current]::MoreOpts $w]
     
@@ -153,7 +153,7 @@ proc ::Jabber::Login::Login {w} {
       -text "  [::msgcat::mc {Login as invisible}]"  \
       -variable [namespace current]::invisible
     frame $wfrmore.fr
-    pack [label $wfrmore.fr.l -text "Use ip address:"] -side left
+    pack [label $wfrmore.fr.l -text "[::msgcat::mc {IP address}]:"] -side left
     pack [entry $wfrmore.fr.e -textvariable [namespace current]::ip] -side left
 
     grid $wfrmore.cdig -sticky w -pady 2
@@ -211,7 +211,7 @@ proc ::Jabber::Login::MoreOpts {w} {
       
     pack $wfrmore -side left -fill x -padx 16
     $wtri configure -image [::UI::GetIcon mactriangleopen]
-    $wtrilab configure -text "Less..."
+    $wtrilab configure -text "[::msgcat::mc Less]..."
     bind $wtri <Button-1> [list [namespace current]::LessOpts $w]
 }
 
@@ -222,7 +222,7 @@ proc ::Jabber::Login::LessOpts {w} {
     
     pack forget $wfrmore
     $wtri configure -image [::UI::GetIcon mactriangleclosed]
-    $wtrilab configure -text "More..."
+    $wtrilab configure -text "[::msgcat::mc More]..."
     bind $wtri <Button-1> [list [namespace current]::MoreOpts $w]
 }
 

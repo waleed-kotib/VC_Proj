@@ -33,3 +33,4 @@ package ifneeded tinyfileutils 1.0 [list source [file join $dir tinyfileutils.tc
 package ifneeded undo 0.1 [list source [file join $dir undo.tcl]]
 package ifneeded entrycomp 0.2 [list source [file join $dir entrycomp.tcl]]
 package ifneeded tinyhttpd 1.0 [list source [file join $dir tinyhttpd.tcl]]
+package ifneeded buttontray 1.0 [list source [file join $dir buttontray.tcl]]

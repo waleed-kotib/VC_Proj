@@ -50,9 +50,11 @@
 ::msgcat::mcset sv Inbox                {Inkorg}
 ::msgcat::mcset sv Info 		{Info}
 ::msgcat::mcset sv Invite               {Bjud in}
+::msgcat::mcset sv Less                 {Färre}
 ::msgcat::mcset sv Login 		{Logga in}
 ::msgcat::mcset sv Logout               {Logga ut}
 ::msgcat::mcset sv Middle		{Mittinitial}
+::msgcat::mcset sv More                 {Mer}
 ::msgcat::mcset sv New 			{Nytt}
 ::msgcat::mcset sv Next 		{Nästa}
 ::msgcat::mcset sv No 			{Nej}
@@ -277,7 +279,8 @@
 ::msgcat::mcset sv {Away status}           {Frånvarande status}
 ::msgcat::mcset sv {Basic Info}		   {Basinfo}
 ::msgcat::mcset sv {Block JID}             {Blockera JID}
-::msgcat::mcset sv {Built in server port:} {Inbyggd server port:}
+::msgcat::mcset sv {Built in server port}  {Inbyggd server port}
+::msgcat::mcset sv {Chat With}             {Chatta med}
 ::msgcat::mcset sv {Company Name}	   {Företag}
 ::msgcat::mcset sv {Conference server}	   {Konferanstjänst}
 ::msgcat::mcset sv {Create Room}	   {Skapa rum}
@@ -311,18 +314,19 @@
 ::msgcat::mcset sv {Group chat in room}    {Gruppsamtal i rum}
 ::msgcat::mcset sv {Handled By}            {Hanteras av}
 ::msgcat::mcset sv {Host name}		   {Värdnamn}
-::msgcat::mcset sv {HTTP port:}            {HTTP port:}
+::msgcat::mcset sv {HTTP port}             {HTTP port}
 ::msgcat::mcset sv {Import using}          {Importera med}
 ::msgcat::mcset sv {Import/Remove fonts}   {Importera/Tag bort typsnitt}
 ::msgcat::mcset sv {Incoming Message}	   {Inkommande meddelande}
 ::msgcat::mcset sv {Inspect Associations}  {Inspektera association}
+::msgcat::mcset sv {IP address}            {IP adress}
 ::msgcat::mcset sv {Is connected}          {Är uppkopplad}
 ::msgcat::mcset sv {Is safe}		   {Är säker}
 ::msgcat::mcset sv {Is server up}	   {Är servern igång}
 ::msgcat::mcset sv {Jabber address}	   {Jabber adress}
 ::msgcat::mcset sv {Jabber Client}         {Jabberklient}
 ::msgcat::mcset sv {Jabber Server}         {Jabberserver}
-::msgcat::mcset sv {Jabber server port:}   {Jabber server port:}
+::msgcat::mcset sv {Jabber server port}    {Jabber server port}
 ::msgcat::mcset sv {Jabber user id}	   {Jabber användar id}
 ::msgcat::mcset sv {Jabber Id}             {Jabber Id}
 ::msgcat::mcset sv {JID to block}          {Blockera JID}
@@ -405,6 +409,7 @@
 ::msgcat::mcset sv {Setup Assistant}	   {Inställningsassistent}
 ::msgcat::mcset sv {Software Update}	   {Uppdaterad mjukvara}
 ::msgcat::mcset sv {Sounds & Speech}       {Ljud & Tal}
+::msgcat::mcset sv {Start Chat}            {Börja chatt}
 ::msgcat::mcset sv {Status message}        {Statusmeddelande}
 ::msgcat::mcset sv {Subscription Pending}  {Vilande prenumerationer}
 ::msgcat::mcset sv {Synthetic speech}      {Syntetiskt tal}
@@ -816,7 +821,8 @@ personen:}
 	::msgcat::mcset sv jarostadd	{Lägg till en jabber användare\
 till min roster. Användare läggs normalt till inklusive prenumeration\
 men kan också läggas till utan prenumeration. Kortnamn och grupp kan ändras\
-när som helst senare.}
+när som helst senare. Att lägga till en användare från ett främmande system\
+kräver att du har registrerat dig hos Jabber serverns transport komponent.}
 	::msgcat::mcset sv jarostset	{Sätt kortnamn och grupp för "%s"\
 till självvalt namn. De kan ändras när som helst senare.}
 	::msgcat::mcset sv jarostsub	{Prenumerera på den här användaren}

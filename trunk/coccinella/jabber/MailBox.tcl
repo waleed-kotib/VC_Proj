@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.17 2003-11-04 09:44:27 matben Exp $
+# $Id: MailBox.tcl,v 1.18 2003-11-06 15:17:51 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -163,20 +163,22 @@ proc ::Jabber::MailBox::Build {w args} {
     set iconTrash       [::UI::GetIcon bttrash]
     set iconTrashDis    [::UI::GetIcon bttrashdis]
     
-    set frtop [frame $w.frall.frtop -borderwidth 0]
-    pack $frtop -side top -fill x -padx 4 -pady 2
-    ::UI::InitShortcutButtonPad $w $frtop 50
-    ::UI::NewButton $w new New $iconNew $iconNewDis  \
+    set wtray $w.frall.frtop
+    buttontray::buttontray $wtray 50
+    pack $wtray -side top -fill x -padx 4 -pady 2
+    set locals(wtray) $wtray
+
+    $wtray newbutton new New $iconNew $iconNewDis  \
       [list ::Jabber::NewMsg::Build $wDlgs(jsendmsg)]
-    ::UI::NewButton $w reply Reply $iconReply $iconReplyDis  \
+    $wtray newbutton reply Reply $iconReply $iconReplyDis  \
       [list ::Jabber::MailBox::ReplyTo] -state disabled
-    ::UI::NewButton $w forward Forward $iconForward $iconForwardDis  \
+    $wtray newbutton forward Forward $iconForward $iconForwardDis  \
       [list ::Jabber::MailBox::ForwardTo] -state disabled
-    ::UI::NewButton $w save Save $iconSave $iconSaveDis  \
+    $wtray newbutton save Save $iconSave $iconSaveDis  \
       [list ::Jabber::MailBox::SaveMsg] -state disabled
-    ::UI::NewButton $w print Print $iconPrint $iconPrintDis  \
+    $wtray newbutton print Print $iconPrint $iconPrintDis  \
       [list ::Jabber::MailBox::DoPrint] -state disabled
-    ::UI::NewButton $w trash Trash $iconTrash $iconTrashDis  \
+    $wtray newbutton trash Trash $iconTrash $iconTrashDis  \
       ::Jabber::MailBox::TrashMsg -state disabled
     
     pack [frame $w.frall.divt -bd 2 -relief sunken -height 2] -fill x -side top
@@ -578,6 +580,7 @@ proc ::Jabber::MailBox::TrashMsg { } {
     set wtbl $locals(wtbl)
     set items [$wtbl curselection]
     set wtop $locals(wtop)
+    set wtray $locals(wtray)
     set lastitem [lindex $items end]
     if {[llength $items] == 0} {
 	return
@@ -607,11 +610,11 @@ proc ::Jabber::MailBox::TrashMsg { } {
 	$wtbl selection set $sel
 	::Jabber::MailBox::SelectMsg 
     } else {
-	::UI::ButtonConfigure $wtop reply -state disabled
-	::UI::ButtonConfigure $wtop forward -state disabled
-	::UI::ButtonConfigure $wtop save -state disabled
-	::UI::ButtonConfigure $wtop print -state disabled
-	::UI::ButtonConfigure $wtop trash -state disabled
+	$wtray buttonconfigure reply -state disabled
+	$wtray buttonconfigure forward -state disabled
+	$wtray buttonconfigure save -state disabled
+	$wtray buttonconfigure print -state disabled
+	$wtray buttonconfigure trash -state disabled
 	::Jabber::MailBox::MsgDisplayClear
 	::Jabber::UI::MailBoxState empty
     }
@@ -628,16 +631,17 @@ proc ::Jabber::MailBox::SelectMsg { } {
     set wtextmsg $locals(wtextmsg)
     set wtbl $locals(wtbl)
     set wtop $locals(wtop)
+    set wtray $locals(wtray)
     set item [$wtbl curselection]
     if {[llength $item] == 0} {
 	return
     } elseif {[llength $item] > 1} {
 	
 	# If multiple selected items.
-	::UI::ButtonConfigure $wtop reply -state disabled
-	::UI::ButtonConfigure $wtop forward -state disabled
-	::UI::ButtonConfigure $wtop save -state disabled
-	::UI::ButtonConfigure $wtop print -state disabled
+	$wtray buttonconfigure reply -state disabled
+	$wtray buttonconfigure forward -state disabled
+	$wtray buttonconfigure save -state disabled
+	$wtray buttonconfigure print -state disabled
 	::Jabber::MailBox::MsgDisplayClear
 	return
     }
@@ -659,11 +663,11 @@ proc ::Jabber::MailBox::SelectMsg { } {
     ::Jabber::MailBox::DisplayMsg $id
     
     # Configure buttons.
-    ::UI::ButtonConfigure $wtop reply -state normal
-    ::UI::ButtonConfigure $wtop forward -state normal
-    ::UI::ButtonConfigure $wtop save -state normal
-    ::UI::ButtonConfigure $wtop print -state normal
-    ::UI::ButtonConfigure $wtop trash -state normal
+    $wtray buttonconfigure reply -state normal
+    $wtray buttonconfigure forward -state normal
+    $wtray buttonconfigure save -state normal
+    $wtray buttonconfigure print -state normal
+    $wtray buttonconfigure trash -state normal
     
     # If any whiteboard stuff in message...
     set uid [::Jabber::MailBox::GetCanvasHexUID $id]
