@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.82 2004-11-14 16:40:53 matben Exp $
+# $Id: GroupChat.tcl,v 1.83 2004-11-20 08:13:51 matben Exp $
 
 package require History
 
@@ -699,9 +699,9 @@ proc ::Jabber::GroupChat::Build {roomjid args} {
     
     set state(wbstatus) $wbtstatus
 
-    ::Jabber::Roster::BuildStatusButton $wbtstatus \
+    ::Jabber::Status::Button $wbtstatus \
       $token\(status) -command [list [namespace current]::StatusCmd $token] 
-    ::Jabber::Roster::ConfigStatusButton $wbtstatus available
+    ::Jabber::Status::ConfigButton $wbtstatus available
     
     pack $wbtstatus -side right -padx 6
 

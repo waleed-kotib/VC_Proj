@@ -6,7 +6,7 @@
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: buttontray.tcl,v 1.16 2004-11-19 13:10:14 matben Exp $
+# $Id: buttontray.tcl,v 1.17 2004-11-20 08:13:51 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -364,33 +364,7 @@ proc ::buttontray::SetGeometries {w} {
 	    set locals(xleft) 2
 	}
 	plain {
-	    if {$options(-height) > 0} {
-		set height [expr $options(-height) - 2 * $options(-pady) \
-		  - 2 * $options(-borderwidth)]
-	    } else {
-		set linespace [font metrics $options(-font) -linespace]
-		set height [expr {$linespace + 2}]
-		
-		if {$options(-image) != ""} {
-		    set imheight [image height $options(-image)]
-		    
-		    switch -- $options(-compound) {
-			left - right {
-			    if {$imheight > $height} {
-				set height $imheight
-			    }
-			}
-			bottom - top {
-			    incr height $imheight
-			}
-		    }
-		}
-		incr height [expr {2 * $options(-labelpady)}]
-		incr height 2
-	    }
-	    #$widgets(canvas) configure -height $height
-	    set locals(minbtwidth) 46
-	    set locals(xleft) 2
+	    set locals(minwidth) 0
 	}
     }
 }
@@ -758,6 +732,8 @@ proc ::buttontray::MinWidth {w} {
     switch -- $options(-style) {
 	fancy {
 	    set width $locals(xleft)
+	    incr width [$w cget -padx]
+	    incr width 2
 	}
 	plain {
 	    set width [winfo reqwidth $w]

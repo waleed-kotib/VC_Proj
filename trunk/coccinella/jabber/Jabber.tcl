@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.116 2004-11-14 16:40:53 matben Exp $
+# $Id: Jabber.tcl,v 1.117 2004-11-20 08:13:51 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -47,6 +47,7 @@ package require Register
 package require Roster
 package require Rosticons
 package require Search
+package require Status
 package require Subscribe
 package require VCard
 

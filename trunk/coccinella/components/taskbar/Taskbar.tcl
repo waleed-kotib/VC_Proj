@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Taskbar.tcl,v 1.7 2004-11-18 07:34:01 matben Exp $
+# $Id: Taskbar.tcl,v 1.8 2004-11-20 08:13:51 matben Exp $
 
 namespace eval ::Taskbar:: {
     
@@ -89,7 +89,7 @@ proc ::Taskbar::InitHook { } {
     set menuDef {
 	mAboutCoccinella     {::SplashScreen::SplashScreen}
 	separator            {}
-	mStatus              @::Jabber::Roster::BuildPresenceMenu
+	mStatus              @::Jabber::Status::BuildMenu
 	mLogin               ::Jabber::Login::Dlg
 	mLogout              ::Jabber::DoCloseClientConnection
 	mLogoutWith          ::Jabber::Logout::WithStatus
