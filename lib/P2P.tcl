@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: P2P.tcl,v 1.4 2004-03-18 14:11:18 matben Exp $
+# $Id: P2P.tcl,v 1.5 2004-03-24 14:43:11 matben Exp $
 
 package provide P2P 1.0
 
@@ -426,13 +426,8 @@ proc ::P2P::RemoveCommEntry {wtop ipNum} {
     
     # Size administration is very tricky; blood, sweat and tears...
     # Fix the canvas size to relax wm geometry. - 2 ???
-    if {$prefs(haveScrollbars)} {
-	$wCan configure -height [winfo height $wCan]  \
-	  -width [winfo width $wCan]
-    } else {
-	$wCan configure -height [expr [winfo height $wCan] - 2]  \
-	  -width [expr [winfo width $wCan] - 2]
-    }
+    $wCan configure -height [winfo height $wCan]  \
+      -width [winfo width $wCan]
     
     # Switch off the geometry constraint to let resize automatically.
     wm geometry $wtopReal {}

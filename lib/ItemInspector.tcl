@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ItemInspector.tcl,v 1.21 2004-03-18 14:11:18 matben Exp $
+# $Id: ItemInspector.tcl,v 1.22 2004-03-24 14:43:11 matben Exp $
 
 namespace eval ::ItemInspector::  {
     
@@ -121,7 +121,7 @@ proc ::ItemInspector::ItemInspector {wtop which args} {
 #       Builds one inspector window for the specified item.
 
 proc ::ItemInspector::Build {wtop itemId args} {
-    global  prefs fontSize2Points fontPoints2Size  \
+    global  prefs fontPoints2Size  \
       dashShort2Full this
     
     Debug 2 "::ItemInspector::Build wtop=$wtop, itemId=$itemId"

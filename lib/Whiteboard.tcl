@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.24 2004-03-18 14:11:18 matben Exp $
+# $Id: Whiteboard.tcl,v 1.25 2004-03-24 14:43:11 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -522,7 +522,7 @@ proc ::WB::BuildWhiteboard {wtop args} {
     upvar ::WB::${wtop}::wapp wapp
     upvar ::WB::${wtop}::state state
     upvar ::WB::${wtop}::opts opts
-    upvar ::WB::${wtop}::tmpImages tmpImages
+    upvar ::WB::${wtop}::canvasImages canvasImages
     
     if {[string equal $wtop "."]} {
 	set wbTitle "Coccinella (Main)"
@@ -554,22 +554,28 @@ proc ::WB::BuildWhiteboard {wtop args} {
     set wapp(frall)     $wall
     set wapp(frtop)     ${wall}.frtop
     set wapp(tray)      $wapp(frtop).on.fr
-    if {$prefs(haveScrollbars)} {
-	set wapp(can)       ${wall}.fmain.fc.can
-	set wapp(xsc)       ${wall}.fmain.fc.xsc
-	set wapp(ysc)       ${wall}.fmain.fc.ysc
-    } else {
-	set wapp(can)       ${wall}.fmain.can
-    }
-    set wapp(servCan)   $wapp(can)
     set wapp(tool)      ${wall}.fmain.frleft.frbt
     set wapp(buglabel)  ${wall}.fmain.frleft.pad.bug
     set wcomm           ${wall}.fcomm
     set wapp(statmess)  ${wcomm}.stat.lbl
     set wapp(frstat)    ${wcomm}.st
+    set wapp(frcan)     ${wall}.fmain.fc
     set wapp(topchilds) [list ${wall}.menu ${wall}.frtop ${wall}.fmain ${wall}.fcomm]
     
-    set tmpImages {}
+    # temporary...
+    set wapp(can)       ${wall}.fmain.fc.can
+    set wapp(xsc)       ${wall}.fmain.fc.xsc
+    set wapp(ysc)       ${wall}.fmain.fc.ysc
+    set wapp(can,)      $wapp(can)
+    
+    # Having the frame with canvas + scrollbars as a sibling makes it possible
+    # to pack it in a different place.
+    set wapp(ccon)      ${wall}.fmain.cc
+    
+    # Notebook widget path to be packed into wapp(ccon).
+    set wapp(nb)        ${wall}.fmain.nb
+    
+    set canvasImages {}
     
     # Init some of the state variables.
     # Inherit from the factory + preferences state.
@@ -627,15 +633,17 @@ proc ::WB::BuildWhiteboard {wtop args} {
     # may have mode specific parts, p2p, jabber...
     ::hooks::run whiteboardBuildEntryHook $wtop $wall $wcomm
     
-    # Make the tool button pad.
+    # Make frame for toolbar + canvas.
     frame ${wall}.fmain -borderwidth 0 -relief flat
     frame ${wall}.fmain.frleft
     frame $wapp(tool)
     frame ${wall}.fmain.frleft.pad -relief raised -borderwidth 1
+    frame $wapp(ccon) -bd 1 -relief raised
     pack  ${wall}.fmain -side top -fill both -expand true
     pack  ${wall}.fmain.frleft -side left -fill y
     pack  $wapp(tool) -side top
     pack  ${wall}.fmain.frleft.pad -fill both -expand true
+    pack  $wapp(ccon) -fill both -expand true -side right
     
     # The 'Coccinella'.
     set   wapp(bugImage) [::Theme::GetImage ladybug]
@@ -646,45 +654,22 @@ proc ::WB::BuildWhiteboard {wtop args} {
     ::WB::CreateAllButtons $wtop
     
     # ...and the drawing canvas.
-    if {$prefs(haveScrollbars)} {
-	set   f ${wall}.fmain.fc
-	frame $f -bd 1 -relief raised
-	pack  $f -fill both -expand true -side right
-	set wxsc ${f}.xsc
-	set wysc ${f}.ysc
-	
-	canvas $wapp(can) -height $dims(hCanOri) -width $dims(wCanOri)  \
-	  -relief raised -bd 0 -background $state(bgColCan)  \
-	  -scrollregion [list 0 0 $prefs(canScrollWidth) $prefs(canScrollHeight)]  \
-	  -xscrollcommand [list $wxsc set]  \
-	  -yscrollcommand [list $wysc set]	
-	scrollbar $wxsc -orient horizontal -command [list $wapp(can) xview]
-	scrollbar $wysc -orient vertical -command [list $wapp(can) yview]
-	
-	grid $wapp(can) -row 0 -column 0 -sticky news -padx 0 -pady 0
-	grid $wysc      -row 0 -column 1 -sticky ns
-	grid $wxsc      -row 1 -column 0 -sticky ew
-	grid columnconfigure $f 0 -weight 1
-	grid rowconfigure    $f 0 -weight 1    	
-    } else {
-	canvas $wapp(can) -height $dims(hCanOri) -width $dims(wCanOri)  \
-	  -relief raised -bd 1 -highlightthickness 0 -background $state(bgColCan)
-	pack $wapp(can) -fill both -expand true -side right
-    }
+    ::WB::NewCanvas $wapp(frcan) -background $state(bgColCan)
+    set wapp(servCan) $wapp(can)
+    pack $wapp(frcan) -in $wapp(ccon) -fill both -expand true -side right
     
     # Invoke tool button.
     ::WB::SetToolButton $wtop [::WB::ToolBtNumToName $state(btState)]
 
     # Add things that are defined in the prefs file and not updated else.
     ::CanvasCmd::DoCanvasGrid $wtop
-    ::CanvasText::Init $wapp(can)
     
     # Create the undo/redo object.
     set state(undotoken) [undo::new -command [list ::UI::UndoConfig $wtop]]
 
     # Set up paste menu if something on the clipboard.
     ::WB::GetFocus $wtop $w
-    bind $w <FocusIn>          [list [namespace current]::GetFocus $wtop %W]
+    bind $w         <FocusIn>  [list [namespace current]::GetFocus $wtop %W]
     bind $wapp(can) <Button-1> [list focus $wapp(can)]
     
     # Cut, copy, paste commands for the canvas.
@@ -719,6 +704,95 @@ proc ::WB::BuildWhiteboard {wtop args} {
     Debug 3 "::WB::BuildWhiteboard wtop=$wtop EXIT EXIT EXIT....."
 }
 
+# WB::NewCanvas --
+# 
+#       Makes canvas with scrollbars in own frame.
+
+proc ::WB::NewCanvas {w args} {
+    global  prefs
+    variable dims
+    
+    array set argsArr {
+	-background white
+    }
+    array set argsArr $args
+    
+    frame $w -class WBCanvas
+    set wcan ${w}.can
+    set wxsc ${w}.xsc
+    set wysc ${w}.ysc
+    
+    canvas $wcan -height $dims(hCanOri) -width $dims(wCanOri)  \
+      -relief raised -bd 0 -background $argsArr(-background)   \
+      -scrollregion [list 0 0 $prefs(canScrollWidth) $prefs(canScrollHeight)]  \
+      -xscrollcommand [list $wxsc set] -yscrollcommand [list $wysc set]	
+    scrollbar $wxsc -command [list $wcan xview] -orient horizontal
+    scrollbar $wysc -command [list $wcan yview] -orient vertical
+    
+    grid $wcan -row 0 -column 0 -sticky news -padx 0 -pady 0
+    grid $wysc -row 0 -column 1 -sticky ns
+    grid $wxsc -row 1 -column 0 -sticky ew
+    grid columnconfigure $w 0 -weight 1
+    grid rowconfigure    $w 0 -weight 1
+
+    ::CanvasText::Init $wcan
+    
+    return $wcan
+}
+
+# Testing Pages...
+
+proc ::WB::NewCanvasPage {wtop name} {
+    upvar ::WB::${wtop}::wapp wapp
+    upvar ::WB::${wtop}::state state
+    
+    if {[string equal [winfo class [pack slaves $wapp(ccon)]] "WBCanvas"]} {
+	
+	# Repack the WBCanvas in notebook page.
+	::WB::MoveCanvasToPage $wtop $name
+    } else {
+	set wpage [$wapp(nb) newpage $name]
+	set frcan $wpage.fc
+	::WB::NewCanvas $frcan -background $state(bgColCan)
+	pack $frcan -fill both -expand true -side right
+	set wapp(can,$name) $frcan.can
+    }
+}
+
+proc ::WB::MoveCanvasToPage {wtop name} {
+    upvar ::WB::${wtop}::wapp wapp
+    
+    # Repack the WBCanvas in notebook page.
+    pack forget $wapp(frcan)
+    ::mactabnotebook::mactabnotebook $wapp(nb)  \
+      -selectcommand [namespace current]::SelectPageCmd
+    pack $wapp(nb) -in $wapp(ccon) -fill both -expand true -side right
+    set wpage [$wapp(nb) newpage $name]	
+    pack $wapp(frcan) -in $wpage -fill both -expand true -side right
+    raise $wapp(frcan)
+    set wapp(can,$name) $wapp(can,)
+}
+
+proc ::WB::DeleteCanvasPage {wtop name} {
+    upvar ::WB::${wtop}::wapp wapp
+    
+    $wapp(nb) deletepage $name
+}
+
+proc ::WB::SelectPageCmd {w name} {
+    
+    set wtop [winfo toplevel $w].
+    upvar ::WB::${wtop}::wapp wapp
+    upvar ::WB::${wtop}::state state
+
+    Debug 3 "::WB::SelectPageCmd name=$name"
+    
+    set wapp(can) $wapp(can,$name)
+    
+    # Invoke tool button.
+    ::WB::SetToolButton $wtop [::WB::ToolBtNumToName $state(btState)]
+    ::hooks::run whiteboardSelectPage $wtop $name
+}
 
 proc ::WB::CloseHook {wclose} {
     global  wDlgs
@@ -760,7 +834,7 @@ proc ::WB::DestroyMain {wtop} {
     
     upvar ::WB::${wtop}::wapp wapp
     upvar ::WB::${wtop}::opts opts
-    upvar ::WB::${wtop}::tmpImages tmpImages
+    upvar ::WB::${wtop}::canvasImages canvasImages
     
     Debug 3 "::WB::DestroyMain wtop=$wtop"
 
@@ -785,7 +859,7 @@ proc ::WB::DestroyMain {wtop} {
     }
     
     # We could do some cleanup here.
-    eval {image delete} $tmpImages
+    eval {image delete} $canvasImages
     ::CanvasUtils::ItemFree $wtop
     ::UI::FreeMenu $wtop
 }
@@ -888,9 +962,7 @@ proc ::WB::SaveCleanWhiteboardDims {wtop} {
     foreach {dims(wRoot) hRoot dims(x) dims(y)} [::UI::ParseWMGeometry .] break
     set dims(hRoot) [expr $dims(hCanvas) + $dims(hStatus) +  \
       $dims(hCommClean) + $dims(hTop) + $dims(hFakeMenu)]
-    if {$prefs(haveScrollbars)} {
-	incr dims(hRoot) [expr [winfo height $wapp(xsc)] + 4]
-    }   
+    incr dims(hRoot) [expr [winfo height $wapp(xsc)] + 4]
 }
 
 # WB::ConfigureMain --
@@ -1290,7 +1362,7 @@ proc ::WB::RemoveAllBindings {w} {
     $w bind all <Any-Key> {}
     $w bind all <Double-Button-1> {}
     $w bind all <Button-3> {}
-    
+
     # These shouldn't be necessary but they are...
     $w bind text <Button-1> {}
     $w bind text <B1-Motion> {}
@@ -1300,6 +1372,9 @@ proc ::WB::RemoveAllBindings {w} {
     $w bind tbbox <Button-1> {}
     $w bind tbbox <B1-Motion> {}
     $w bind tbbox <ButtonRelease-1> {}
+
+    # Seems necessary for the arc item... More?
+    bind $w <Shift-B1-Motion> {}
 	
     bind QTFrame <Button-1> {}
     bind QTFrame <B1-Motion> {}
@@ -1943,11 +2018,9 @@ proc ::WB::FindWBGeometry {wtop} {
     set wMinRoot [max [expr $dims(wMinCanvas) + 56] $wMinCommFrame]
     set hMinRoot [expr $dims(hMinCanvas) + $hStatus + $hComm + $hTop + \
       $hFakeMenu]
-    if {$prefs(haveScrollbars)} {
-	# 2 for padding
-	incr wMinRoot [expr [winfo reqwidth $wapp(ysc)] + 2]
-	incr hMinRoot [expr [winfo reqheight $wapp(xsc)] + 2]
-    }
+    # 2 for padding
+    incr wMinRoot [expr [winfo reqwidth $wapp(ysc)] + 2]
+    incr hMinRoot [expr [winfo reqheight $wapp(xsc)] + 2]
     set wMinTot $wMinRoot
     set hMinTot [expr $hMinRoot + $hMenu]
 	
@@ -1986,10 +2059,9 @@ proc ::WB::SetCanvasSize {cw ch} {
     # Compute new root size from the desired canvas size.
     set wRootFinal [expr $cw + 56]
     set hRootFinal [expr $ch + $dims(hStatus) + $dims(hComm) + $dims(hTop)]
-    if {$prefs(haveScrollbars)} {
-	incr wRootFinal [expr [winfo reqwidth $wapp(ysc)] + 2]
-	incr hRootFinal [expr [winfo reqheight $wapp(xsc)] + 2]
-    }
+    incr wRootFinal [expr [winfo reqwidth $wapp(ysc)] + 2]
+    incr hRootFinal [expr [winfo reqheight $wapp(xsc)] + 2]
+
     wm geometry . ${wRootFinal}x${hRootFinal}
 
     Debug 3 "::WB::SetCanvasSize:: cw=$cw, ch=$ch, hRootFinal=$hRootFinal, \
@@ -2259,6 +2331,35 @@ proc ::WB::StartStopAnimatedWaveOnMain {start} {
     
     set waveImage [::Theme::GetImage [option get $wapp(frall) waveImage {}]]  
     ::UI::StartStopAnimatedWave $wapp(statmess) $waveImage $start
+}
+
+# WB::CreateBrokenImage --
+# 
+#       Creates an actual image with the broken symbol that matches
+#       up the width and height. The image is garbage collected.
+
+proc ::WB::CreateBrokenImage {wtop width height} {
+    variable icons    
+    upvar ::WB::${wtop}::canvasImages canvasImages
+    
+    if {($width == 0) || ($height == 0)} {
+	set name $icons(brokenImage)
+    } else {
+	set zoomx [expr $width/[image width $icons(brokenImage)]]
+	set zoomy [expr $height/[image height $icons(brokenImage)]]
+	if {($zoomx < 1) && ($zoomy < 1)} {
+	    set name $icons(brokenImage)
+	} else {
+	    set zoomx [expr $zoomx < 1 ? 1 : $zoomx]
+	    set zoomy [expr $zoomy < 1 ? 1 : $zoomy]
+	    set name [image create photo -width $width -height $height]
+	    $name blank
+	    $name copy $icons(brokenImage) -to 0 0 $width $height  \
+	      -zoom $zoomx $zoomy -compositingrule overlay
+	    lappend canvasImages $name
+	}
+    }
+    return $name
 }
 
 proc ::WB::InitDnD {wcan} {

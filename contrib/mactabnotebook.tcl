@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  
-# $Id: mactabnotebook.tcl,v 1.11 2004-01-26 07:34:49 matben Exp $
+# $Id: mactabnotebook.tcl,v 1.12 2004-03-24 14:43:11 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -18,15 +18,20 @@
 #      mactabnotebook pathName ?options?
 #      
 #   OPTIONS
-#       Notebook class:
+#       Frame class:
 #	-borderwidth, borderWidth, BorderWidth
 #	-relief, relief, Relief
-#	-takefocus, takeFocus, TakeFocus
+#   
+#       Notebook class:
+#	-nbborderwidth, borderWidth, BorderWidth
+#	-nbrelief, relief, Relief
+#	-nbtakefocus, takeFocus, TakeFocus
 #	
 #	MacTabnotebook class:
 #	-activetabcolor, activeTabColor, ActiveTabColor
 #	-margin, margin, Margin
 #	-orient, orient, Orient
+#	-selectcommand, selectCommand, SelectCommand
 #	-style, style, Style
 #	-tabbackground, tabBackground, TabBackground
 #	-tabcolor, tabColor, TabColor
@@ -86,6 +91,7 @@ proc ::mactabnotebook::Init { } {
     variable widgetCommands
     variable widgetGlobals
     variable widgetOptions
+    variable frameOptions
     variable notebookOptions
     variable tabOptions
     variable tabDefs
@@ -127,8 +133,11 @@ proc ::mactabnotebook::Init { } {
 	-ipady               {ipadY                PadY                }  \
 	-margin1             {margin1              Margin              }  \
 	-margin2             {margin2              Margin              }  \
+	-nbborderwidth       {borderWidth          BorderWidth         }  \
+	-nbrelief            {relief               Relief              }  \
 	-orient              {orient               Orient              }  \
 	-relief              {relief               Relief              }  \
+	-selectcommand       {selectCommand        SelectCommand       }  \
 	-style               {style                Style               }  \
 	-tabbackground       {tabBackground        TabBackground       }  \
 	-tabcolor            {tabColor             TabColor            }  \
@@ -138,11 +147,12 @@ proc ::mactabnotebook::Init { } {
 	-takefocus           {takeFocus            TakeFocus           }  \
 	-ymargin1            {yMargin1             YMargin1            }  \
     }
-    set notebookOptions {-borderwidth -relief}
+    set frameOptions    {-borderwidth -relief}
+    set notebookOptions {-nbborderwidth -nbrelief}
     set tabOptions(nostyle) {
 	-background -foreground
 	-font -ipadx -ipady 
-	-orient -style -takefocus
+	-orient -selectcommand -style -takefocus
     }
     set tabOptions(styled) {
 	-accent1 -accent2
@@ -162,6 +172,7 @@ proc ::mactabnotebook::Init { } {
     option add *MacTabnotebook.ipadY                   1            widgetDefault
     option add *MacTabnotebook.orient                  normal       widgetDefault
     option add *MacTabnotebook.style                   winxp        widgetDefault
+    option add *MacTabnotebook.selectCommand           ""           widgetDefault
     option add *Notebook.takeFocus                     0            widgetDefault
 
     # Styled options for Mac Classic:
@@ -334,6 +345,7 @@ proc ::mactabnotebook::mactabnotebook {w args} {
     variable widgetGlobals
     variable widgetOptions
     variable tabOptions
+    variable frameOptions
     variable notebookOptions
 
     if {$widgetGlobals(debug) > 1} {
@@ -377,8 +389,8 @@ proc ::mactabnotebook::mactabnotebook {w args} {
     # Parse options for the tabs. First get widget defaults.
     # Non styled.
     foreach name $tabOptions(nostyle) {
-	set optName [lindex $widgetOptions($name) 0]
-	set optClass [lindex $widgetOptions($name) 1]
+	set optName        [lindex $widgetOptions($name) 0]
+	set optClass       [lindex $widgetOptions($name) 1]
 	set options($name) [option get $w $optName $optClass]
     }
     
@@ -389,9 +401,9 @@ proc ::mactabnotebook::mactabnotebook {w args} {
     # Styled.
     set styleName [string totitle $options(-style)]
     foreach name $tabOptions(styled) {
-	set optName [lindex $widgetOptions($name) 0]
-	append optName $styleName
-	set optClass [lindex $widgetOptions($name) 1]
+	set optName        [lindex $widgetOptions($name) 0]
+	append optName     $styleName
+	set optClass       [lindex $widgetOptions($name) 1]
 	set options($name) [option get $w $optName $optClass]
     }
     array set options $args    
@@ -412,7 +424,16 @@ proc ::mactabnotebook::mactabnotebook {w args} {
 	    lappend notebookArgs $name $argsarr($name)
 	}
     }
-    
+    set frameArgs {}
+    foreach name $frameOptions {
+	if {[info exists argsarr($name)]} {
+	    lappend frameArgs $name $argsarr($name)
+	}
+    }
+    if {[llength $frameArgs] > 0} {
+	eval {$widgets(frame) configure} $frameArgs
+    }
+
     # Creating the notebook widget also makes all the database initializations.
     eval {::notebook::notebook $widgets(nbframe)} $notebookArgs
     pack $widgets(nbframe) -expand yes -fill both
@@ -553,6 +574,7 @@ proc ::mactabnotebook::Configure {w args} {
     array set argsarr $args
     set redraw 0
     set notebookArgs {}
+    set frameArgs {}
 
     # Process the configuration options given to us.
     foreach opt [array names argsarr] {
@@ -560,11 +582,14 @@ proc ::mactabnotebook::Configure {w args} {
 	set oldValue $options($opt)
 	
 	switch -- $opt {
-	    -activetabcolor - -margin1 - -margin2 - -orient - -tabbackground -   \
+	    -activetabcolor - -margin1 - -margin2 - -orient - -tabbackground - \
 	      -tabcolor - -font {		
 		set redraw 1
 	    }
 	    -borderwidth - -relief {
+		lappend frameArgs $opt $newValue
+	    }
+	    -nbborderwidth - -nbrelief {
 		lappend notebookArgs $opt $newValue
 	    }
 	    -style {
@@ -577,10 +602,12 @@ proc ::mactabnotebook::Configure {w args} {
     # Overwrites defaults when option set in command.
     if {[llength $args] > 0}  {
 	array set options $args
-    }
-    
+    }    
     if {[llength $notebookArgs] > 0} {
 	eval {$widgets(nbframe) configure} $notebookArgs
+    }
+    if {[llength $frameArgs] > 0} {
+	eval {$widgets(frame) configure} $frameArgs
     }
     
     # Redraw if needed.
@@ -968,6 +995,7 @@ proc ::mactabnotebook::BuildWinxp {w} {
 	set xright [expr $xtext + $wd + $ipadx + 2]
 	set xlplus [expr $xleft+1]
 	set xrminus [expr $xright-1]
+	set xrminus $xright
 	
 	# Draw tabs.
 	foreach {coords ptags} $toDrawPolyWinXP {
@@ -1039,6 +1067,7 @@ proc ::mactabnotebook::Display {w name {opt {}}} {
     variable widgetGlobals
     upvar ::mactabnotebook::${w}::tnInfo tnInfo
     upvar ::mactabnotebook::${w}::widgets widgets
+    upvar ::mactabnotebook::${w}::options options
     
     if {$widgetGlobals(debug) > 1} {
 	puts "::mactabnotebook::Display w=$w, name=$name"
@@ -1051,6 +1080,9 @@ proc ::mactabnotebook::Display {w name {opt {}}} {
     }
     set tnInfo(current) $name
     ConfigTabs $w
+    if {[llength $options(-selectcommand)] > 0} {
+	uplevel #0 $options(-selectcommand) [list $w $name]
+    }
 }
 
 proc ::mactabnotebook::ConfigTabs {w} {

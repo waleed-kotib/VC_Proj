@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.29 2004-03-16 15:09:08 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.30 2004-03-24 14:43:11 matben Exp $
 
 # SetWhiteboardFactoryState --
 # 
@@ -134,7 +134,6 @@ set prefs(batchTextms) 2000
 set prefs(autoFitMovies) 1
 
 set prefs(canvasFonts) [list Times Helvetica Courier]
-set prefs(haveScrollbars) 1
 set prefs(canScrollWidth) 1800
 set prefs(canScrollHeight) 1200
 

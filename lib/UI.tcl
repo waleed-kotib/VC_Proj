@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.50 2004-03-13 15:21:42 matben Exp $
+# $Id: UI.tcl,v 1.51 2004-03-24 14:43:11 matben Exp $
 
 package require entrycomp
 
@@ -1506,35 +1506,6 @@ proc ::UI::AnimateWave {w} {
     $w move $animateWave($w,id) $deltax 0
     set animateWave($w,killId)   \
       [after $animateWave(wait) [list ::UI::AnimateWave $w]]
-}
-
-# UI::CreateBrokenImage --
-# 
-#       Creates an actual image with the broken symbol that matches
-#       up the width and height. The image is garbage collected.
-
-proc ::UI::CreateBrokenImage {wtop width height} {
-    variable icons    
-    upvar ::WB::${wtop}::tmpImages tmpImages
-    
-    if {($width == 0) || ($height == 0)} {
-	set name $icons(brokenImage)
-    } else {
-	set zoomx [expr $width/[image width $icons(brokenImage)]]
-	set zoomy [expr $height/[image height $icons(brokenImage)]]
-	if {($zoomx < 1) && ($zoomy < 1)} {
-	    set name $icons(brokenImage)
-	} else {
-	    set zoomx [expr $zoomx < 1 ? 1 : $zoomx]
-	    set zoomy [expr $zoomy < 1 ? 1 : $zoomy]
-	    set name [image create photo -width $width -height $height]
-	    $name blank
-	    $name copy $icons(brokenImage) -to 0 0 $width $height  \
-	      -zoom $zoomx $zoomy -compositingrule overlay
-	    lappend tmpImages $name
-	}
-    }
-    return $name
 }
 
 #-------------------------------------------------------------------------------

@@ -707,7 +707,8 @@ system. It is necessary for it to be in your roster.\
 You have a subscription for %s: %s.}
 ::msgcat::mcset en jamesswbchatlost	        {The complete conversation will\
 be lost when closing this chat whiteboard. Do you actually want to end this chat?}
-    
+::msgcat::mcset en jamesschatoffline            {This user is not online anymore\
+and the message is therfore not sent.}
     
 
 }

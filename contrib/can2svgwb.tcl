@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #
-# $Id: can2svgwb.tcl,v 1.2 2004-03-18 14:11:18 matben Exp $
+# $Id: can2svgwb.tcl,v 1.3 2004-03-24 14:43:11 matben Exp $
 
 package require can2svg
 
@@ -15,13 +15,18 @@ namespace eval can2svgwb {
 
 }
 
+# Due to the very unfortunate mix up of -fill & -outline in Tk which are used
+# differently for different items we need to supply the widget path if
+# doing the configure command.
+
 # can2svgwb::svgasxmllist --
 #
 #       Make a list of xmllists out of a canvas command, widgetPath removed.
 #       
 # Arguments:
 #       cmd         canvas command without prepending widget path.
-#       args    -httpbasedir  path
+#       args    -canvas     widgetPath
+#               -httpbasedir  path
 #               -uritype    file|http
 #               -usetags    0|all|first|last
 #               -usestyleattribute 0|1
@@ -38,7 +43,7 @@ proc can2svgwb::svgasxmllist {cmd args} {
 	create {
 	    set xmllist [eval {can2svg::svgasxmllist $cmd} $args]
 	}
-	lower - move - raise {
+	delete - lower - move - raise {
 	    set xmllist [list [parse${instr} $cmd]]
 	}
 	scale {
@@ -48,10 +53,10 @@ proc can2svgwb::svgasxmllist {cmd args} {
 	    set xmllist [list [parse${instr} $cmd]]
 	}
 	itemconfigure {
-	    set xmllist [list [parseconfigure $cmd]]
+	    set xmllist [list [eval {parseconfigure $cmd} $args]]
 	}
 	coords {
-	    # ?
+	    set xmllist [list [eval {parsecoords $cmd} $args]]
 	}
 	import {
 	    # Assume image for the moment...
@@ -61,13 +66,63 @@ proc can2svgwb::svgasxmllist {cmd args} {
     return $xmllist
 }
 
-proc can2svgwb::parseconfigure {cmd} {
+proc can2svgwb::parseconfigure {cmd args} {
     
+    array set argsArr $args
+    set id [lindex $cmd 1]
     set opts [lrange $cmd 2 end]
     # How on earth to get the item type???????????????????????????
-    set attrlist [can2svg::MakeStyleList line $opts]
-    lappend attrlist id [lindex $cmd 1]
+    if {[info exists argsArr(-canvas)]} {
+	set type [$argsArr(-canvas) type $id]
+    } else {
+	# Fallback.
+	set type polygon
+    }
+    set attrlist [can2svg::MakeStyleList $type $opts -setdefaults 0]
+    lappend attrlist id $id
     return [wrapper::createtag configure -attrlist $attrlist]
+}
+
+proc can2svgwb::parsecoords {cmd args} {
+    
+    array set argsArr $args
+    set id [lindex $cmd 1]
+    # How on earth to get the item type???????????????????????????
+    if {[info exists argsArr(-canvas)]} {
+	set type [$argsArr(-canvas) type $id]
+    } else {
+	return {}
+    }
+    set coo [lrange $cmd 2 end]
+    if {[llength $coo] < 2} {
+	set coo [lindex $coo 0]
+    }
+    
+    switch -- $type {
+	image {
+	    set attrlist [list x [lindex $coo 0] y [lindex $coo 1]]
+	}
+	default {
+    
+	    # Need opts of item.
+	    set opts [GetOptsList $argsArr(-canvas) $id]
+	    set attrlist [can2svg::CoordsToAttr $type $coo $opts svgElement]
+	}
+    }
+    lappend attrlist id $id
+    return [wrapper::createtag configure -attrlist $attrlist]
+}
+
+proc can2svgwb::GetOptsList {w id} {
+    
+    set opts {}
+    foreach spec [$w itemconfigure $id] {
+	foreach {name x y def val} $spec break
+	if {0 && $def != $val} {
+	    lappend opts $name $val
+	}
+    }
+    return $opts
 }
 
 proc can2svgwb::parseimage {cmd args} {
@@ -84,6 +139,11 @@ proc can2svgwb::parsedchars {cmd} {
 	lappend attrlist last [lindex $cmd 3]
     }
     return [wrapper::createtag dchars -attrlist $attrlist]
+}
+
+proc can2svgwb::parsedelete {cmd} {
+
+    return [wrapper::createtag delete -attrlist [list id [lindex $cmd 1]]]
 }
 
 proc can2svgwb::parseinsert {cmd} {

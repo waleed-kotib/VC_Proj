@@ -14,7 +14,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Plugins.tcl,v 1.15 2004-03-16 15:09:08 matben Exp $
+# $Id: Plugins.tcl,v 1.16 2004-03-24 14:43:11 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -79,6 +79,7 @@ package provide Plugins 1.0
 package require Types
 
 namespace eval ::Plugins:: {
+    global tcl_platform
     
     variable inited 0
     variable packages2Platform
@@ -121,6 +122,13 @@ namespace eval ::Plugins:: {
 	Img                {windows     unix}
     }
     array set helpers2Platform {xanim unix} 
+    
+    # Snack buggy on NT4.
+    if {($tcl_platform(os) == "Windows NT") &&  \
+      ($tcl_platform(osVersion) == 4.0)} {
+	set packages2Platform(snack)  \
+	  [lsearch -inline -not -all $packages2Platform(snack) "windows"]
+    }
     
     array set plugType2DescArr {
 	internal    "Internal Plugin"

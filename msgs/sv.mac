@@ -717,6 +717,8 @@ till motsvarande IM system. Det är nödvändigt att den finns i din\
 roster. Du har prenumeration för %s: %s.}
 ::msgcat::mcset sv jamesswbchatlost	        {Du förlorar hela chatt\
 konversationen när du stänger whiteboarden. Vill du verkligen avsluta denna chatt?}
+::msgcat::mcset sv jamesschatoffline            {Användaren är inte längre\
+tillgänglig och meddelandet skickas därför ej.}
 
 
 

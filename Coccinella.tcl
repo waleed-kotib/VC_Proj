@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.46 2004-03-16 15:09:08 matben Exp $
+# $Id: Coccinella.tcl,v 1.47 2004-03-24 14:43:10 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -641,13 +641,8 @@ set prefs(firstLaunch) 0
 if {$prefs(makeSafeServ)} {
     set canvasSafeInterp [interp create -safe]
     
-    # This is the drawing procedure that is necessary for the alias command.
-    proc CanvasDraw {w args} {
-	eval $w $args
-    }
-    
     # Make an alias in the safe interpreter to enable drawing in the canvas.
-    $canvasSafeInterp alias SafeCanvasDraw CanvasDraw
+    $canvasSafeInterp alias SafeCanvasDraw ::CanvasUtils::CanvasDrawSafe
 }
     
 # Start the server. It was necessary to have an 'update idletasks' command here
