@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.110 2005-02-14 13:48:36 matben Exp $
+# $Id: Coccinella.tcl,v 1.111 2005-03-07 07:22:35 matben Exp $
 	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
@@ -175,6 +175,9 @@ package require Splash
 ::SplashScreen::SplashScreen
 ::SplashScreen::SetMsg [mc splashsource]
 update
+
+package require UTile
+::UTile::Init
 
 # These are auxilary procedures that we need to source, rest is found in packages.
 set allLibSourceFiles {

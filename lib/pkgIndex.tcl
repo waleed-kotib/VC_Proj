@@ -25,6 +25,7 @@ package ifneeded TheServer 1.0 [list source [file join $dir TheServer.tcl]]
 package ifneeded Types 1.0 [list source [file join $dir Types.tcl]]
 package ifneeded UI 1.0 [list source [file join $dir UI.tcl]]
 package ifneeded UserActions 1.0 [list source [file join $dir UserActions.tcl]]
+package ifneeded UTile 0.1 [list source [file join $dir UTile.tcl]]
 package ifneeded Utils 1.0 [list source [file join $dir Utils.tcl]]
 
 if {[string equal $::tcl_platform(platform) "windows"]} {

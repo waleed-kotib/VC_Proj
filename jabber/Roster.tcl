@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.126 2005-03-05 09:00:31 matben Exp $
+# $Id: Roster.tcl,v 1.127 2005-03-07 07:22:35 matben Exp $
 
 package provide Roster 1.0
 
@@ -69,6 +69,7 @@ namespace eval ::Roster:: {
     variable mapShowTextToElem
     variable mapShowElemToText
     
+    # Cache messages for efficiency.
     array set mapShowTextToElem [list \
       [mc mAvailable]       available  \
       [mc mAway]            away       \
@@ -285,8 +286,6 @@ proc ::Roster::Build {w} {
     variable wwave
     upvar ::Jabber::jprefs jprefs
         
-    set fontS [option get . fontSmall {}]
-
     # The frame of class Roster. D = -bd 0 -relief flat
     frame $w -class Roster
     
@@ -444,7 +443,7 @@ proc ::Roster::SetBackgroundImage {useBgImage bgImagePath} {
 	    } else {
 		set bgImage ""
 	    }
-	    $wtree configure -backgroundimage $bgImage
+	    TreeConfigBgImage $bgImage
 	}
     }
 }
@@ -517,36 +516,6 @@ proc ::Roster::SelectCmd {w v} {
 	$btremove configure -state disabled
     }
 }
-
-# Roster::DoubleClickCmd --
-#
-#       Callback when double clicking roster item in tree.
-#
-# Arguments:
-#       w           tree widget
-#       v           tree item path
-#       
-# Results:
-#       button states set set.
-
-proc ::Roster::DoubleClickCmd {w v} {
-    upvar ::Jabber::jprefs jprefs
-
-    if {[llength $v] && ([$w itemconfigure $v -dir] == 0)} {
-	
-	# According to XMPP def sect. 4.1, we should use user@domain when
-	# initiating a new chat or sending a new message that is not a reply.
-	set jid [lindex $v end]
-	jlib::splitjid $jid jid2 res
-	if {[string equal $jprefs(rost,dblClk) "normal"]} {
-	    ::NewMsg::Build -to $jid2
-	} else {
-	    
-	    # We let Chat handle this internally.
-	    ::Chat::StartThread $jid
-	}
-    }    
-}
     
 # Roster::RegisterPopupEntry --
 # 
@@ -577,7 +546,7 @@ proc ::Roster::RegisterPopupEntry {menuSpec} {
     set regPopMenuSpec [concat $regPopMenuSpec $menuSpec]
 }
 
-# Roster::DePopup --
+# Roster::DoPopup --
 #
 #       Handle popup menu in roster.
 #       
@@ -585,6 +554,7 @@ proc ::Roster::RegisterPopupEntry {menuSpec} {
 #       jid3        this is a list of actual jid's, can be any form
 #       clicked
 #       status      'available', 'unavailable', 'transports', or 'pending'
+#       group       name of group if any
 #       
 # Results:
 #       popup menu displayed
@@ -678,27 +648,6 @@ proc ::Roster::DoPopup {jid3 clicked status group x y} {
 	catch {destroy $m}
 	update
     }
-}
-
-proc ::Roster::GetAllUsersInItem {w v} {
-    
-    set jid3 {}
-    foreach u [$w children $v] {
-	set ipath [concat $v [list $u]]
-	set cList [$w children $ipath]
-	foreach c $cList {
-	    set iipath [concat $ipath [list $c]]
-	    if {[lsearch [$w itemconfigure $iipath -tags] user] >= 0} {
-		lappend jid3 $c
-	    }
-	} 
-	if {$cList == {}} {
-	    if {[lsearch [$w itemconfigure $ipath -tags] user] >= 0} {
-		lappend jid3 $u
-	    }
-	}
-    }
-    return $jid3
 }
 
 # Roster::PushProc --
@@ -986,9 +935,7 @@ proc ::Roster::SetCoccinella {jid} {
     
     set mjid [jlib::jidmap $jid]
     set icon [GetPresenceIconFromJid $jid]
-    foreach v [$wtree find withtag $mjid] {
-	$wtree itemconfigure $v -image $icon
-    }
+    TreeSetImageForJid $mjid $icon
 }
 
 # Roster::IsCoccinella --
@@ -1338,7 +1285,7 @@ proc ::Roster::TreeNew {w wtree wxsc wysc} {
 	  -yscrollcommand [list ::UI::ScrollSet $wysc \
 	  [list grid $wysc -row 0 -column 1 -sticky ns]]  \
 	  -selectcommand [namespace current]::SelectCmd   \
-	  -doubleclickcommand [namespace current]::DoubleClickCmd  \
+	  -doubleclickcommand [namespace current]::TreeDoubleClickCmd  \
 	  -eventlist [list [list <<ButtonPopup>> [namespace current]::TreePopup]]
     } $opts
     
@@ -1593,6 +1540,15 @@ proc ::Roster::TreeDeleteItem {jid} {
     }
 }
 
+
+proc ::Roster::TreeSetImageForJid {mjid icon} {
+    variable wtree    
+    
+    foreach v [$wtree find withtag $mjid] {
+	$wtree itemconfigure $v -image $icon
+    }
+}
+
 # Roster::TreePostProcess --
 # 
 #       This is necessary to get icons for foreign IM systems set correctly.
@@ -1703,11 +1659,11 @@ proc ::Roster::TreePopup {w v x y} {
 	    # empty
 	} else {
 	    lappend clicked head
-	    set jid3 [GetAllUsersInItem $w $v]
+	    set jid3 [TreeGetAllUsersInItem $w $v]
 	}
     } elseif {[lsearch $tags group] >= 0} {
 	lappend clicked group
-	set jid3 [GetAllUsersInItem $w $v]
+	set jid3 [TreeGetAllUsersInItem $w $v]
 	set group $item
     } elseif {[lsearch $tags trpt] >= 0} {
 	lappend clicked trpt
@@ -1721,6 +1677,57 @@ proc ::Roster::TreePopup {w v x y} {
     }
 
     DoPopup $jid3 $clicked $status $group $x $y
+}
+
+proc ::Roster::TreeGetAllUsersInItem {w v} {
+    
+    set jid3 {}
+    foreach u [$w children $v] {
+	set ipath [concat $v [list $u]]
+	set cList [$w children $ipath]
+	foreach c $cList {
+	    set iipath [concat $ipath [list $c]]
+	    if {[lsearch [$w itemconfigure $iipath -tags] user] >= 0} {
+		lappend jid3 $c
+	    }
+	} 
+	if {$cList == {}} {
+	    if {[lsearch [$w itemconfigure $ipath -tags] user] >= 0} {
+		lappend jid3 $u
+	    }
+	}
+    }
+    return $jid3
+}
+
+# Roster::TreeDoubleClickCmd --
+#
+#       Callback when double clicking roster item in tree.
+#
+# Arguments:
+#       w           tree widget
+#       v           tree item path
+#       
+# Results:
+#       button states set set.
+
+proc ::Roster::TreeDoubleClickCmd {w v} {
+    upvar ::Jabber::jprefs jprefs
+
+    if {[llength $v] && ([$w itemconfigure $v -dir] == 0)} {
+	
+	# According to XMPP def sect. 4.1, we should use user@domain when
+	# initiating a new chat or sending a new message that is not a reply.
+	set jid [lindex $v end]
+	jlib::splitjid $jid jid2 res
+	if {[string equal $jprefs(rost,dblClk) "normal"]} {
+	    ::NewMsg::Build -to $jid2
+	} else {
+	    
+	    # We let Chat handle this internally.
+	    ::Chat::StartThread $jid
+	}
+    }    
 }
 
 # Roster::TreeRemoveEmpty --
@@ -1755,6 +1762,12 @@ proc ::Roster::TreeGetClosedItems { } {
 	}
     }
     set jprefs(rost,closedItems) $vlist
+}
+
+proc ::Roster::TreeConfigBgImage {bgImage} {
+    variable wtree
+    
+    $wtree configure -backgroundimage $bgImage
 }
 
 # Roster::TreeClear --

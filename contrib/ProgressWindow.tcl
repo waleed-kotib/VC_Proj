@@ -10,7 +10,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ProgressWindow.tcl,v 1.24 2005-01-31 14:06:53 matben Exp $
+# $Id: ProgressWindow.tcl,v 1.25 2005-03-07 07:22:35 matben Exp $
 # 
 #-------------------------------------------------------------------------------
 #
@@ -52,23 +52,14 @@ namespace eval ::ProgressWindow:: {
     variable widgetOptions
     variable widgetCommands
     variable this
-    variable buttoncmd button
-    variable framecmd  frame
-    variable labelcmd  label
     
     if {[catch {package require progressbar}]} {
 	set this(haveprogressbar) 0
     } else {
 	set this(haveprogressbar) 1
     }
-    if {1 || [catch {package require tile 0.6}]} {
-	set this(havetile) 0
-    } else {
-	set this(havetile) 1
-	set buttoncmd tbutton
-	set framecmd  tframe
-	set labelcmd  tlabel
-    }
+    set this(tile) 0
+    #set this(tile) [::UTile::Use]
     
     # We use a variable 'this(platform)' that is more convenient for MacOS X.
     switch -- $tcl_platform(platform) {
@@ -83,9 +74,6 @@ namespace eval ::ProgressWindow:: {
 	windows - macintosh {
 	    set this(platform) $tcl_platform(platform)
 	}
-    }
-    if {[string equal $this(platform) "unix"]} {
-	set this(havetile) 0
     }
     
     # List all allowed options with their database names and class names.
@@ -151,6 +139,7 @@ namespace eval ::ProgressWindow:: {
 # Arguments:
 #       w       the widget path (toplevel).
 #       args    (optional) list of key value pairs for the widget options.
+#       
 # Results:
 #       The widget path or an error.
 
@@ -290,9 +279,6 @@ proc ::ProgressWindow::Build {w} {
     variable this
     variable dims
     variable debugLevel
-    variable buttoncmd
-    variable framecmd
-    variable labelcmd
     upvar ::ProgressWindow::${w}::options options
     upvar ::ProgressWindow::${w}::widgets widgets
     
@@ -300,8 +286,8 @@ proc ::ProgressWindow::Build {w} {
 	puts "::ProgressWindow::Build:: w=$w"
     }
     set wall $widgets(frame)
-    if {$this(havetile)} {
-	tframe $wall -padding {16 6}
+    if {$this(tile)} {
+	frame $wall -padding {16 6}
 	pack $wall
     } else {
 	frame $wall
@@ -320,17 +306,24 @@ proc ::ProgressWindow::Build {w} {
     
     set wpause $widgets(labelp)
     
-    $labelcmd $widgets(label) -font $options(-font1) -text $options(-text) \
+    label $widgets(label) -font $options(-font1) -text $options(-text) \
       -justify left
     pack $widgets(label)  -side top -anchor w -pady 4
     
     # Frame with progress bar and Cancel button.
-    $framecmd $wmid
+    frame $wmid
     pack  $wmid -side top -fill x
-    if {$this(havetile)} {
-	tprogress $widgets(pbar) -from 0 -to 100 -length $dims(width) \
-	  -variable ::ProgressWindow::${w}::percent
-	$widgets(pbar) set $options(-percent)
+    if {$this(tile)} {
+	if {0} {
+	    # OLD
+	    tprogress $widgets(pbar) -from 0 -to 100 -length $dims(width) \
+	      -variable ::ProgressWindow::${w}::percent
+	    $widgets(pbar) set $options(-percent)
+	} else {
+	    ttk::progressbar $widgets(pbar) -orient horizontal -maximum 100 \
+	      -length $dims(width) -variable ::ProgressWindow::${w}::percent
+   
+	}
 	pack $widgets(pbar) -side left -fill x -expand 1
     } elseif {$this(haveprogressbar)} {
 	::progressbar::progressbar $widgets(pbar)  \
@@ -355,15 +348,15 @@ proc ::ProgressWindow::Build {w} {
 	}
 	pack $wcan -side left -fill x -expand 1
     }
-    $buttoncmd $widgets(cancel) -text [::msgcat::mc Cancel]  \
+    button $widgets(cancel) -text [::msgcat::mc Cancel]  \
       -command [list [namespace current]::CancelBt $w $options(-cancelcmd)]
     pack $widgets(cancel) -side right -padx 8
 
     # Frame for texts etc.
-    $framecmd $wbot
+    frame $wbot
     pack  $wbot -side top -fill x
     if {$options(-pausecmd) != ""} {
-	$labelcmd $wpause -text [::msgcat::mc Pause] -fg blue
+	label $wpause -text [::msgcat::mc Pause] -fg blue
 	array set fontArr [font actual [$widgets(labelp) cget -font]]
 	set fontArr(-underline) 1
 	$wpause configure -font [array get fontArr]
@@ -374,9 +367,9 @@ proc ::ProgressWindow::Build {w} {
     }
     
     # Small text below progress bar.
-    $labelcmd $widgets(label2) -font $options(-font2) -text $options(-text2)
+    label $widgets(label2) -font $options(-font2) -text $options(-text2)
     pack $widgets(label2) -side top -anchor w
-    $labelcmd $widgets(label3) -font $options(-font2) -text $options(-text3)
+    label $widgets(label3) -font $options(-font2) -text $options(-text3)
     pack $widgets(label3) -side top -anchor w
     
     ::ProgressWindow::ConfigurePercent $w $options(-percent)
@@ -420,8 +413,12 @@ proc ::ProgressWindow::ConfigurePercent {w percent} {
     }
 
     # Update progress bar.
-    if {$this(havetile)} {
-	$widgets(pbar) set [expr int($percent)]
+    if {$this(tile)} {
+	if {0} {
+	    $widgets(pbar) set [expr int($percent)]
+	} else {
+	    set ::ProgressWindow::${w}::percent [expr int($percent)]
+	}
     } elseif {$this(haveprogressbar)} {
 	set ::ProgressWindow::${w}::percent [expr int($percent)]
     } else {
@@ -577,7 +574,7 @@ proc ::ProgressWindow::PBFocusIn {w} {
     
     upvar ::ProgressWindow::${w}::widgets widgets
 
-    if {$this(havetile)} {
+    if {$this(tile)} {
 	# empty
     } elseif {$this(haveprogressbar)} {
 	$widgets(pbar) configure -shape 3d -color @blue0
@@ -595,7 +592,7 @@ proc ::ProgressWindow::PBFocusOut {w} {
     
     upvar ::ProgressWindow::${w}::widgets widgets
 
-    if {$this(havetile)} {
+    if {$this(tile)} {
 	# empty
     } elseif {$this(haveprogressbar)} {
 	$widgets(pbar) configure -shape flat -color #9C9CFF
