@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.59 2004-06-07 13:43:56 matben Exp $
+# $Id: Chat.tcl,v 1.60 2004-06-08 14:03:32 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -42,7 +42,7 @@ namespace eval ::Jabber::Chat:: {
     option add *Chat*sendImage            send                  widgetDefault
     option add *Chat*sendDisImage         sendDis               widgetDefault
     option add *Chat*sendFileImage        sendfile              widgetDefault
-    option add *Chat*sendFileDisImage     sendfile              widgetDefault
+    option add *Chat*sendFileDisImage     sendfileDis           widgetDefault
     option add *Chat*saveImage            save                  widgetDefault
     option add *Chat*saveDisImage         saveDis               widgetDefault
     option add *Chat*historyImage         history               widgetDefault
@@ -872,11 +872,9 @@ proc ::Jabber::Chat::CloseThread {chattoken} {
     set dlgtoken $chatstate(dlgtoken)
     ::Jabber::Chat::DeletePage $chattoken
      set newchattoken [::Jabber::Chat::GetActiveChatToken $dlgtoken]
-    variable $newchattoken
-    upvar 0 $newchattoken newchatstate
 
     # Set state of new page.
-    ::Jabber::Chat::SetPageState $dlgtoken $newchatstate(pagename)
+    ::Jabber::Chat::SetThreadState $dlgtoken $newchattoken
 }
 
 proc ::Jabber::Chat::DeletePage {chattoken} {
@@ -934,18 +932,19 @@ proc ::Jabber::Chat::SelectPageCmd {dlgtoken w name} {
     
     Debug 3 "::Jabber::Chat::SelectPageCmd name=$name"
         
-    ::Jabber::Chat::SetPageState $dlgtoken $name
+    set chattoken $dlgstate(name2token,$name)
+    ::Jabber::Chat::SetThreadState $dlgtoken $chattoken
 }
 
-proc ::Jabber::Chat::SetPageState {dlgtoken name} {
+proc ::Jabber::Chat::SetThreadState {dlgtoken chattoken} {
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
 
-    set chattoken $dlgstate(name2token,$name)
     variable $chattoken
     upvar 0 $chattoken chatstate
     upvar ::Jabber::jstate jstate
 
+    Debug 3 "::Jabber::Chat::SetThreadState chattoken=$chattoken"
     jlib::splitjid $chatstate(jid) user res
     if {[$jstate(roster) isavailable $user]} {
 	::Jabber::Chat::SetState $chattoken normal
@@ -957,6 +956,35 @@ proc ::Jabber::Chat::SetPageState {dlgtoken name} {
     }
     wm title $dlgstate(w) "[::msgcat::mc Chat] ($chatstate(fromjid))"
 }
+
+# Jabber::Chat::SetState --
+# 
+#       Set state of complete dialog to normal or disabled.
+  
+proc ::Jabber::Chat::SetState {chattoken state} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    Debug 4 "::Jabber::Chat::SetState chattoken=$chattoken, state=$state"
+    if {[string equal $state $chatstate(state)]} {
+	#return
+    }
+    set dlgtoken $chatstate(dlgtoken)
+    variable $dlgtoken
+    upvar 0 $dlgtoken dlgstate    
+    
+    foreach name {send sendfile} {
+	$dlgstate(wtray) buttonconfigure $name -state $state 
+    }
+    $dlgstate(wbtsend)   configure -state $state
+    $chatstate(wtextsnd) configure -state $state
+    $chatstate(wsubject) configure -state $state
+    set chatstate(state) $state
+}
+
+# Jabber::Chat::GetActiveChatToken --
+# 
+#       Returns the chattoken corresponding to the frontmost thread.
 
 proc ::Jabber::Chat::GetActiveChatToken {dlgtoken} {
     variable $dlgtoken
@@ -999,6 +1027,10 @@ proc ::Jabber::Chat::SmileyCmd {dlgtoken im key} {
     Emoticons::InsertSmiley $chatstate(wtextsnd) $im $key
 }
 
+# Jabber::Chat::CloseHook, ... --
+# 
+#       Various hooks.
+
 proc ::Jabber::Chat::CloseHook {wclose} {
     global  wDlgs
     
@@ -1014,15 +1046,8 @@ proc ::Jabber::Chat::CloseHook {wclose} {
 proc ::Jabber::Chat::LoginHook { } {
 
     foreach dlgtoken [::Jabber::Chat::GetTokenList dlg] {
-	variable $dlgtoken
-	upvar 0 $dlgtoken dlgstate
-
-	foreach chattoken $dlgstate(chattokens) {
-	    variable $chattoken
-	    upvar 0 $chattoken chatstate
-
-	    #::Jabber::Chat::SetPageState $dlgtoken $chatstate(pagename)
-	}
+	set chattoken [::Jabber::Chat::GetActiveChatToken $dlgtoken]
+	::Jabber::Chat::SetThreadState $dlgtoken $chattoken
     }
     return ""
 }
@@ -1051,6 +1076,7 @@ proc ::Jabber::Chat::QuitHook { } {
     foreach dlgtoken [::Jabber::Chat::GetTokenList dlg] {
 	::Jabber::Chat::Close $dlgtoken
     }    
+    return ""
 }
 
 proc ::Jabber::Chat::ConfigureTextTags {w wtext} {
@@ -1417,31 +1443,6 @@ proc ::Jabber::Chat::GetTokenList {type} {
       [info vars ${nskey}\[0-9\]\[0-9\]\[0-9\]] \
       [info vars ${nskey}\[0-9\]\[0-9\]\[0-9\]\[0-9\]] \
       [info vars ${nskey}\[0-9\]\[0-9\]\[0-9\]\[0-9\]\[0-9\]]]
-}
-
-# Jabber::Chat::SetState --
-# 
-#       Set state of complete dialog to normal or disabled.
-  
-proc ::Jabber::Chat::SetState {chattoken state} {
-    variable $chattoken
-    upvar 0 $chattoken chatstate
-    
-    Debug 4 "::Jabber::Chat::SetState chattoken=$chattoken, state=$state"
-    if {[string equal $state $chatstate(state)]} {
-	#return
-    }
-    set dlgtoken $chatstate(dlgtoken)
-    variable $dlgtoken
-    upvar 0 $dlgtoken dlgstate    
-    
-    foreach name {send sendfile} {
-	$dlgstate(wtray) buttonconfigure $name -state $state 
-    }
-    $dlgstate(wbtsend)   configure -state $state
-    $chatstate(wtextsnd) configure -state $state
-    $chatstate(wsubject) configure -state $state
-    set chatstate(state) $state
 }
 
 # Jabber::Chat::Close --
@@ -1851,19 +1852,14 @@ proc ::Jabber::Chat::SaveHistory {jid wtext} {
 proc ::Jabber::Chat::InitPrefsHook { } {
     upvar ::Jabber::jprefs jprefs
     	
-    # Empty here means use option database.
-    set jprefs(chatFont) ""
     set jprefs(chatActiveRet) 0
-    set jprefs(chat,tabbedui) 1
-
-    ::PreferencesUtils::Add [list  \
-      [list ::Jabber::jprefs(chat,tabbedui) jprefs_chat_tabbedui $jprefs(chat,tabbedui)]  \
-      [list ::Jabber::jprefs(chatFont)      jprefs_chatFont      $jprefs(chatFont)]  \
-      [list ::Jabber::jprefs(chatActiveRet) jprefs_chatActiveRet $jprefs(chatActiveRet)]]    
+    set jprefs(showMsgNewWin) 1
+    set jprefs(inbox2click)   "newwin"
     
-    if {$jprefs(chatFont) != ""} {
-	set jprefs(chatFont) [::Utils::GetFontListFromName $jprefs(chatFont)]
-    }
+    ::PreferencesUtils::Add [list  \
+      [list ::Jabber::jprefs(showMsgNewWin) jprefs_showMsgNewWin $jprefs(showMsgNewWin)]  \
+      [list ::Jabber::jprefs(inbox2click)   jprefs_inbox2click   $jprefs(inbox2click)]  \
+      [list ::Jabber::jprefs(chatActiveRet) jprefs_chatActiveRet $jprefs(chatActiveRet)]]    
 }
 
 proc ::Jabber::Chat::BuildPrefsHook {wtree nbframe} {
@@ -1892,6 +1888,8 @@ proc ::Jabber::Chat::BuildPrefsPage {wpage} {
     set fr $labfr.fr
     pack [frame $fr] -side top -anchor w -padx 10 -pady 2
  
+    checkbutton $fr.active -text " [::msgcat::mc prefchactret]"  \
+      -variable [namespace current]::tmpJPrefs(chatActiveRet)
     checkbutton $fr.newwin -text " [::msgcat::mc prefcushow]" \
       -variable [namespace current]::tmpJPrefs(showMsgNewWin)
     label $fr.lmb2 -text [::msgcat::mc prefcu2clk]
@@ -1900,8 +1898,6 @@ proc ::Jabber::Chat::BuildPrefsPage {wpage} {
     radiobutton $fr.rb2re   \
       -text " [::msgcat::mc prefcureply]" -value reply \
       -variable [namespace current]::tmpJPrefs(inbox2click)
-    checkbutton $fr.active -text "  [::msgcat::mc prefchactret]"  \
-      -variable [namespace current]::tmpJPrefs(chatActiveRet)
 
     grid $fr.active -sticky w
     grid $fr.newwin -sticky w

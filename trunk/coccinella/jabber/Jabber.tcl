@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.88 2004-06-06 15:42:49 matben Exp $
+# $Id: Jabber.tcl,v 1.89 2004-06-08 14:03:32 matben Exp $
 
 package provide Jabber 1.0
 
@@ -46,6 +46,7 @@ package require Profiles
 package require JPrefs
 package require Privacy
 package require Emoticons
+package require VCard
 
 
 namespace eval ::Jabber:: {

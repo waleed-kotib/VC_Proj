@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.5 2004-06-07 13:43:56 matben Exp $
+# $Id: JPrefs.tcl,v 1.6 2004-06-08 14:03:32 matben Exp $
 
 package provide JPrefs 1.0
 
@@ -33,11 +33,8 @@ proc ::Jabber::JPrefs::InitPrefsHook { } {
     set jprefs(xawaymsg)     "User has been inactive for a while"
     set jprefs(logoutStatus) ""
         
-    set jprefs(showMsgNewWin) 1
-    
     # Save inbox when quit?
     set jprefs(inboxSave) 0
-    set jprefs(inbox2click) "newwin"
     
     # Service discovery method: "disco", "agents" or "browse"
     set jprefs(serviceMethod) "browse"
@@ -45,6 +42,10 @@ proc ::Jabber::JPrefs::InitPrefsHook { } {
     # The rosters background image is partly controlled by option database.
     set jprefs(rost,useBgImage)     1
     set jprefs(rost,bgImagePath)    ""
+
+    # Empty here means use option database.
+    set jprefs(chatFont) ""
+    set jprefs(chat,tabbedui) 1
 
     ::PreferencesUtils::Add [list  \
       [list ::Jabber::jprefs(autoaway)         jprefs_autoaway          $jprefs(autoaway)]  \
@@ -76,13 +77,17 @@ proc ::Jabber::JPrefs::InitPrefsHook { } {
     ::PreferencesUtils::Add $jprefsRegList
 
     ::PreferencesUtils::Add [list  \
-      [list ::Jabber::jprefs(showMsgNewWin)    jprefs_showMsgNewWin     $jprefs(showMsgNewWin)]  \
+      [list ::Jabber::jprefs(chatFont)         jprefs_chatFont          $jprefs(chatFont)]  \
+      [list ::Jabber::jprefs(chat,tabbedui)    jprefs_chat_tabbedui     $jprefs(chat,tabbedui)]  \
       [list ::Jabber::jprefs(inboxSave)        jprefs_inboxSave         $jprefs(inboxSave)]  \
-      [list ::Jabber::jprefs(inbox2click)      jprefs_inbox2click       $jprefs(inbox2click)]  \
       [list ::Jabber::jprefs(rost,useBgImage)  jprefs_rost_useBgImage   $jprefs(rost,useBgImage)]  \
       [list ::Jabber::jprefs(rost,bgImagePath) jprefs_rost_bgImagePath  $jprefs(rost,bgImagePath)]  \
-      [list ::Jabber::jprefs(serviceMethod)   jprefs_serviceMethod    $jprefs(serviceMethod)]  \
+      [list ::Jabber::jprefs(serviceMethod)    jprefs_serviceMethod     $jprefs(serviceMethod)]  \
       ]
+    
+    if {$jprefs(chatFont) != ""} {
+	set jprefs(chatFont) [::Utils::GetFontListFromName $jprefs(chatFont)]
+    }
 }
 
 proc ::Jabber::JPrefs::BuildPrefsHook {wtree nbframe} {
@@ -257,21 +262,21 @@ proc ::Jabber::JPrefs::BuildCustomPage {page} {
 
     set labfrpbl $page.fr
     labelframe $labfrpbl -text [::msgcat::mc Customization]
-    pack $labfrpbl -side top -anchor w -padx 8 -pady 4
+    pack $labfrpbl -side top -anchor w -padx 8 -pady 2
     set pbl [frame $labfrpbl.frin]
     pack $pbl -padx 10 -pady 6 -side left
      
     label $pbl.lfont -text [::msgcat::mc prefcufont]
     button $pbl.btfont -text "[::msgcat::mc Pick]..." -font $fontS \
       -command [namespace current]::PickFont
-    checkbutton $pbl.tabbed -text "  Use tabbed notebook interface"  \
+    checkbutton $pbl.tabbed -text " Use tabbed notebook interface"  \
       -variable [namespace current]::tmpJPrefs(chat,tabbedui)
     checkbutton $pbl.savein -text " [::msgcat::mc prefcusave]" \
       -variable [namespace current]::tmpJPrefs(inboxSave)
     
     set frrost $pbl.robg
     frame $frrost
-    pack [checkbutton $frrost.cb -text "  [::msgcat::mc prefrostbgim]" \
+    pack [checkbutton $frrost.cb -text " [::msgcat::mc prefrostbgim]" \
       -variable [namespace current]::tmpJPrefs(rost,useBgImage)] -side left
     pack [button $frrost.btpick -text "[::msgcat::mc {Pick}]..."  \
       -command [list [namespace current]::PickBgImage rost] -font $fontS] \
