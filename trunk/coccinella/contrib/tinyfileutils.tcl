@@ -4,82 +4,14 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: tinyfileutils.tcl,v 1.3 2004-11-30 15:11:10 matben Exp $
+# $Id: tinyfileutils.tcl,v 1.4 2004-12-02 15:22:07 matben Exp $
 
 package provide tinyfileutils 1.0
 
 
-# filenormalize --
-#
-#	Takes an absolute path containing any "../" and returns the
-#	normalized path without any "../". Same with "::" on the mac.
-#
-# Arguments:
-#       path        typically [file join abspath relativepath]
-#       
-# Results:
-#       The normalized absolute path, always returns native paths.
+namespace eval ::tfileutils:: {}
 
-proc filenormalize {path} {
-    global  tcl_platform
-    
-    if {![string equal [file pathtype $path] "absolute"]} {
-	return -code error "The path \"$path\" is not of type absolute"
-    }
-    
-    # Mac needs special treatment.
-    if {[string equal $tcl_platform(platform) "macintosh"]} {
-	return [filenormalizemac $path]
-    } else {
-	set up_ {..}
-	set tmp {}
-	foreach part [file split $path] {
-	    if {[string equal $part $up_]} {
-		set tmp [lreplace $tmp end end]
-	    } else {
-		lappend tmp $part
-	    }
-	}
-	return [eval {file join} $tmp]
-    }
-}
-
-# filenormalizemac --
-#
-#       Takes an absolute path containing any "::" (or :::) and returns the
-#	normalized path without any "::". Mac only!
-#	 
-# Arguments:
-#       path        an absolute path mac style
-#       
-# Results:
-#       The normalized absolute path, always returns native paths.
-
-proc filenormalizemac {path} {
-    
-    if {![string equal [file pathtype $path] "absolute"]} {
-	return -code error "The path \"$path\" is not of type absolute"
-    }
-    
-    # Example: 'file split aaa:bbb:ccc::xxx' -> 'aaa: bbb ccc :: xxx'
-    set splitList [file split $path]
-    
-    # Make proper list element in case of spaces!
-    set tmp [list [lindex $splitList 0]]
-    set splitList [lrange $splitList 1 end]
-    foreach part $splitList {
-	set nup [expr [regsub -all : $part "" x] - 1]
-	if {$nup > 0} {
-	    incr nup -1
-	    set tmp [lreplace $tmp end-${nup} end]
-	} else {
-	    lappend tmp $part
-	}
-    }
-    return [eval {file join} $tmp]
-}
-
-# filerelative --
+# tfileutils::relative --
 #
 #       Constructs the relative file path from one absolute path to
 #       another absolute path.
@@ -91,14 +23,14 @@ proc filenormalizemac {path} {
 # Results:
 #       The relative (unix-style) path from 'srcpath' to 'dstpath'.
 
-proc filerelative {srcpath dstpath} {
+proc ::tfileutils::relative {srcpath dstpath} {
     global  tcl_platform
 
     if {![string equal [file pathtype $srcpath] "absolute"]} {
-	return -code error "filerelative: the path \"$srcpath\" is not of type absolute"
+	return -code error "::tfileutils::relative: the path \"$srcpath\" is not of type absolute"
     }
     if {![string equal [file pathtype $dstpath] "absolute"]} {
-	return -code error "filerelative: the path \"$dstpath\" is not of type absolute"
+	return -code error "::tfileutils::relative: the path \"$dstpath\" is not of type absolute"
     }
 
     # Need real path without any file for the source path.
@@ -133,7 +65,7 @@ proc filerelative {srcpath dstpath} {
     return "${tmp}[join [lrange $dstlist $n end] /]"
 }
 
-# unixpathtype --
+# tfileutils::unixpath --
 #
 #       Translatates a native path type to a unix style.
 #
@@ -143,7 +75,7 @@ proc filerelative {srcpath dstpath} {
 # Results:
 #       The unix-style path of path.
 
-proc unixpathtype {path} {
+proc ::tfileutils::unixpath {path} {
     global  tcl_platform
     
     set isabs [string equal [file pathtype $path] "absolute"]
@@ -160,6 +92,8 @@ proc unixpathtype {path} {
     }
     return $upath
 }
+
+# Perhaps this could be replaced by [file normalize [file join ...]] ???
 
 # addabsolutepathwithrelative ---
 #
@@ -225,7 +159,7 @@ proc addabsolutepathwithrelative {absPath relPath} {
     return $finalAbsPath
 }
 
-# fileappend --
+# tfileutils::appendfile --
 #
 #       Adds the second, relative path, to the first, absolute path.
 #           
@@ -236,7 +170,7 @@ proc addabsolutepathwithrelative {absPath relPath} {
 # Results:
 #       none
 
-proc fileappend {dstFile args} {
+proc ::tfileutils::appendfile {dstFile args} {
     
     set dst [open $dstFile {WRONLY APPEND}]
     fconfigure $dst -translation binary
@@ -249,7 +183,7 @@ proc fileappend {dstFile args} {
     close $dst
 }
 
-# tempfile --
+# tfileutils::tempfile --
 #
 #   generate a temporary file name suitable for writing to
 #   the file name will be unique, writable and will be in the 
@@ -263,7 +197,7 @@ proc fileappend {dstFile args} {
 #   returns a file name
 #
 
-proc tempfile {tmpdir prefix} {
+proc ::tfileutils::tempfile {tmpdir prefix} {
 
     set chars "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
     set nrand_chars 10

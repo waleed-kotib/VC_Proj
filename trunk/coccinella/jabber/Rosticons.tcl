@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Rosticons.tcl,v 1.8 2004-12-01 15:15:42 matben Exp $
+# $Id: Rosticons.tcl,v 1.9 2004-12-02 15:22:07 matben Exp $
 
 package provide Rosticons 1.0
 
@@ -349,7 +349,7 @@ proc ::Rosticons::ParseIcon {name dir xmllist} {
 		set f [file join $dir $object]
 		if {$priv(needtmp)} {
 		    #set tmp [file join $this(tmpPath) $object]
-		    set tmp [tempfile $this(tmpPath) [file rootname $object]]
+		    set tmp [::tfileutils::tempfile $this(tmpPath) [file rootname $object]]
 		    file copy -force $f $tmp
 		    set f $tmp
 		}

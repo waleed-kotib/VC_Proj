@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasFile.tcl,v 1.16 2004-12-02 08:22:35 matben Exp $
+# $Id: CanvasFile.tcl,v 1.17 2004-12-02 15:22:08 matben Exp $
  
 package require can2svg
 package require svg2can
@@ -752,7 +752,7 @@ proc ::CanvasFile::ImagePathTranslation {optList absFilePath} {
 	if {$absImPath != ""} {
 	    set newOptList [lreplace $optList   \
 	      [expr $ind + 1] [expr $ind + 1]   \
-	      [filerelative $absFilePath $absImPath]]
+	      [::tfileutils::relative $absFilePath $absImPath]]
 	} else {
 	    set newOptList $optList
 	}

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: P2P.tcl,v 1.19 2004-12-02 08:22:34 matben Exp $
+# $Id: P2P.tcl,v 1.20 2004-12-02 15:22:07 matben Exp $
 
 package provide P2P 1.0
 
@@ -725,7 +725,7 @@ proc ::P2P::PutFileHook {wtop fileName opts args} {
     
 	    # Translate tcl type '-key value' list to 'Key: value' option list.
 	    set optList [::Import::GetTransportSyntaxOptsFromTcl $opts]
-	    set relFilePath [filerelative $this(path) $fileName]
+	    set relFilePath [::tfileutils::relative $this(path) $fileName]
 	    set relFilePath [uriencode::quotepath $relFilePath]
 	    set putCmd "PUT NEW: [list $relFilePath] $optList"
 	    if {$where == "remote" || $where == "all"} {

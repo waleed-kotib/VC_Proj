@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.35 2004-12-02 08:22:35 matben Exp $
+# $Id: Utils.tcl,v 1.36 2004-12-02 15:22:08 matben Exp $
 
 namespace eval ::Utils:: {
 
@@ -408,7 +408,7 @@ proc ::Utils::GetFontListFromName {fontSpec} {
 proc ::Utils::GetHttpFromFile {filePath} {
     global  prefs this
     
-    set relPath [filerelative $this(httpdRootPath) $filePath]
+    set relPath [::tfileutils::relative $this(httpdRootPath) $filePath]
     set relPath [uriencode::quotepath $relPath]
     set ip [::Network::GetThisPublicIPAddress]
     return "http://${ip}:$prefs(httpdPort)/$relPath"
