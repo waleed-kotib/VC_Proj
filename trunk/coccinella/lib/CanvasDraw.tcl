@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasDraw.tcl,v 1.23 2004-03-13 15:21:41 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.24 2004-03-24 14:43:11 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 #  
@@ -1327,9 +1327,9 @@ proc ::CanvasDraw::ArcDrag {w x y {shift 0}} {
     set arcBox($w,extent) $extentAng
     catch {$w delete $arcBox($w,last)}
     if {$state(fill) == 0} {
-	set theFill "-fill {}"
+	set theFill [list -fill {}]
     } else {
-	set theFill "-fill $state(fgCol)"
+	set theFill [list -fill $state(fgCol)]
     }
     if {$prefs(haveDash)} {
 	set extras [list -dash $state(dash)]

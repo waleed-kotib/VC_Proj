@@ -25,7 +25,7 @@
 # 
 # Copyright (C) 2002-2003 Mats Bengtsson
 # 
-# $Id: tree.tcl,v 1.21 2004-02-10 13:11:52 matben Exp $
+# $Id: tree.tcl,v 1.22 2004-03-24 14:43:11 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -1243,6 +1243,11 @@ proc ::tree::DelItem {w v args} {
 	
 	# Then remove the actual element.
 	if {$opts(-childsonly) == 0} {
+	    if {$v == $treestate(selection)} {
+		set treestate(selection) {}
+		set treestate(oldselection) {}
+		set treestate(selidx) {}
+	    }
 	    unset treestate($uid:open)
 	    unset treestate($uid:children)
 	    unset treestate($uid:icon)

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Import.tcl,v 1.14 2004-03-13 15:21:41 matben Exp $
+# $Id: Import.tcl,v 1.15 2004-03-24 14:43:11 matben Exp $
 
 package require http
 package require httpex
@@ -1894,7 +1894,7 @@ proc ::Import::NewBrokenImage {w coords args} {
     }
     set wtop [::UI::GetToplevelNS $w]
 
-    set name [::UI::CreateBrokenImage $wtop $argsArr(-width) $argsArr(-height)]
+    set name [::WB::CreateBrokenImage $wtop $argsArr(-width) $argsArr(-height)]
 
     set id [eval {$w create image} $coords {-image $name -anchor nw  \
       -tags $argsArr(-tags)}]

@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #
-# $Id: can2svg.tcl,v 1.6 2004-03-18 14:11:18 matben Exp $
+# $Id: can2svg.tcl,v 1.7 2004-03-24 14:43:11 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -48,7 +48,11 @@ namespace eval can2svg {
     
     variable confopts
     array set confopts {
+	-allownewlines        0
+	-filtertags           ""
 	-httpaddr             localhost
+	-ovalasellipse        0
+	-reusedefs            1
 	-uritype              file
 	-usetags              all
 	-usestyleattribute    1
@@ -68,7 +72,8 @@ namespace eval can2svg {
     # This shouldn't be hardcoded!
     variable defaultFont {Helvetica 12}
 
-    variable anglesToRadians [expr 3.14159265359/180.0]
+    variable pi 3.14159265359
+    variable anglesToRadians [expr $pi/180.0]
     variable grayStipples {gray75 gray50 gray25 gray12}
         
     # Make 4x4 squares. Perhaps could be improved.
@@ -122,8 +127,10 @@ proc can2svg::config {args} {
 #       Make xml out of a canvas command, widgetPath removed.
 #       
 # Arguments:
-#       cmd         canvas command without prepending widget path.
+#       cmd         canvas create commands without prepending widget path.
 #       args    -httpbasedir  path
+#               -ovalasellipse 0|1
+#               -reusedefs     0|1
 #               -uritype    file|http
 #               -usestyleattribute 0|1
 #               -usetags    0|all|first|last
@@ -145,7 +152,7 @@ proc can2svg::can2svg {cmd args} {
 #       Make a list of xmllists out of a canvas command, widgetPath removed.
 #       
 # Arguments:
-#       cmd         canvas command without prepending widget path.
+#       cmd         canvas create command without prepending widget path.
 #       args    -httpbasedir  path
 #               -uritype    file|http
 #               -usestyleattribute 0|1
@@ -155,11 +162,10 @@ proc can2svg::can2svg {cmd args} {
 #       a list of xmllist = {tag attrlist isempty cdata {child1 child2 ...}}
 
 proc can2svg::svgasxmllist {cmd args} {
-
+    
     variable confopts
     variable defsArrowMarkerArr
     variable defsStipplePatternArr
-    variable anglesToRadians
     variable defaultFont
     variable grayStipples
     
@@ -170,278 +176,405 @@ proc can2svg::svgasxmllist {cmd args} {
     array set argsArr [array get confopts]
     array set argsArr $args
     set args [array get argsArr]
-        
-    switch -- [lindex $cmd 0] {
+    
+    if {![string equal [lindex $cmd 0] "create"]} {
+	return {}
+    }
+    
+    set type [lindex $cmd 1]
+    set rest [lrange $cmd 2 end]
+    
+    # Separate coords from options.
+    set indopt [lsearch -regexp $rest "-${nonum_}"]
+    if {$indopt < 0} {
+	set ind end
+	set opts {}
+    } else {
+	set ind [expr $indopt - 1]
+	set opts [lrange $rest $indopt end]
+    }
+    
+    # Flatten coordinate list!
+    set coo [lrange $rest 0 $ind]
+    if {[llength $coo] == 1} {
+	set coo [lindex $coo 0]
+    }
+    array set optArr $opts
+    
+    # Figure out if we've got a spline.
+    set haveSpline 0
+    if {[info exists optArr(-smooth)] && ($optArr(-smooth) != "0") &&  \
+      [info exists optArr(-splinesteps)] && ($optArr(-splinesteps) > 2)} {
+	set haveSpline 1
+    }
+    if {[info exists optArr(-fill)]} {
+	set fillValue $optArr(-fill)
+	if {![regexp {#[0-9]+} $fillValue]} {
+	    set fillValue [FormatColorName $fillValue]
+	}
+    } else {
+	set fillValue black
+    }
+    if {[string length $argsArr(-filtertags)] && [info exists optArr(-tags)]} {
+	set tag [uplevel #0 $argsArr(-filtertags) [list $optArr(-tags)]]
+	set idAttr [list id $tag]
+    } elseif {($argsArr(-usetags) != "0") && [info exists optArr(-tags)]} {
 	
-	create {
-	    set type [lindex $cmd 1]
-	    set rest [lrange $cmd 2 end]
+	# Remove any 'current' tag.
+	set optArr(-tags) \
+	  [lsearch -all -not -inline $optArr(-tags) current]
+	
+	switch -- $argsArr(-usetags) {
+	    all {			
+		set idAttr [list id $optArr(-tags)]
+	    }
+	    first {
+		set idAttr [list id [lindex $optArr(-tags) 0]]
+	    }
+	    last {
+		set idAttr [list id [lindex $optArr(-tags) end]]
+	    }
+	}
+    } else {
+	set idAttr ""
+    }
+    
+    # If we need a marker (arrow head) need to make that first.
+    if {[info exists optArr(-arrow)] && ![string equal $optArr(-arrow) "none"]} {
+	if {[info exists optArr(-arrowshape)]} {
 	    
-	    # Separate coords from options.
-	    set indopt [lsearch -regexp $rest "-${nonum_}"]
-	    if {$indopt < 0} {
-		set ind end
-		set opts {}
+	    # Make a key of the arrowshape list into the array.
+	    regsub -all -- $wsp_ $optArr(-arrowshape) _ shapeKey
+	    set arrowKey ${fillValue}_${shapeKey}
+	    set arrowShape $optArr(-arrowshape)
+	} else {
+	    set arrowKey ${fillValue}
+	    set arrowShape {8 10 3}
+	}
+	if {!$argsArr(-reusedefs) || \
+	  ![info exists defsArrowMarkerArr($arrowKey)]} {
+	    set defsArrowMarkerArr($arrowKey)  \
+	      [eval {MakeArrowMarker} $arrowShape {$fillValue}]
+	    set xmlListList \
+	      [concat $xmlListList $defsArrowMarkerArr($arrowKey)]
+	}
+    }
+    
+    # If we need a stipple bitmap, need to make that first. Limited!!!
+    # Only: gray12, gray25, gray50, gray75
+    foreach key {-stipple -outlinestipple} {
+	if {[info exists optArr($key)] &&  \
+	  ([lsearch $grayStipples $optArr($key)] >= 0)} {
+	    set stipple $optArr($key)
+	    if {![info exists defsStipplePatternArr($stipple)]} {
+		set defsStipplePatternArr($stipple)  \
+		  [MakeGrayStippleDef $stipple]
+	    }
+	    lappend xmlListList $defsStipplePatternArr($stipple)
+	}
+    }
+    
+    switch -- $type {
+	
+	arc {
+	    
+	    # Had to do it the hard way! (?)
+	    # "Wrong" coordinate system :-(
+	    set attr [CoordsToAttr $type $coo $opts elem]	    
+	    if {[string length $idAttr] > 0} {
+		set attr [concat $attr $idAttr]
+	    }
+	    set attr [concat $attr [MakeAttrList \
+	      $type $opts $argsArr(-usestyleattribute)]]
+	    lappend xmlListList [MakeXMLList $elem -attrlist $attr]
+	}
+	bitmap - image {
+	    set elem "image"
+	    set attr [eval {MakeImageAttr $coo $opts} $args]
+	    if {[string length $idAttr] > 0} {
+		set attr [concat $attr $idAttr]
+	    }
+	    lappend xmlListList [MakeXMLList $elem -attrlist $attr]
+	}
+	line {
+	    set attr [CoordsToAttr $type $coo $opts elem]	    
+	    if {[string length $idAttr] > 0} {
+		set attr [concat $attr $idAttr]
+	    }		    
+	    set attr [concat $attr [MakeAttrList \
+	      $type $opts $argsArr(-usestyleattribute)]]
+	    lappend xmlListList [MakeXMLList $elem -attrlist $attr]
+	}
+	oval {
+	    set attr [CoordsToAttr $type $coo $opts elem]	    
+	    foreach {x y w h} [NormalizeRectCoords $coo] break
+	    if {[expr $w == $h] && !$argsArr(-ovalasellipse)} {
+		set elem "circle"
 	    } else {
-		set ind [expr $indopt - 1]
-		set opts [lrange $rest $indopt end]
+		set elem "ellipse"
 	    }
-	    
-	    # Flatten coordinate list!
-	    set coo [lrange $rest 0 $ind]
-	    if {[llength $coo] == 1} {
-		set coo [lindex $coo 0]
+	    if {[string length $idAttr] > 0} {
+		set attr [concat $attr $idAttr]
 	    }
-	    array set optArr $opts
-	    
-	    # Figure out if we've got a spline.
-	    set haveSpline 0
-	    if {[info exists optArr(-smooth)] && ($optArr(-smooth) != "0") &&  \
-	      [info exists optArr(-splinesteps)] && ($optArr(-splinesteps) > 2)} {
-		set haveSpline 1
+	    set attr [concat $attr [MakeAttrList \
+	      $type $opts $argsArr(-usestyleattribute)]]
+	    lappend xmlListList [MakeXMLList $elem -attrlist $attr]
+	}
+	polygon {
+	    set attr [CoordsToAttr $type $coo $opts elem]	    
+	    if {[string length $idAttr] > 0} {
+		set attr [concat $attr $idAttr]
 	    }
-	    if {[info exists optArr(-fill)]} {
-		set fillValue $optArr(-fill)
-		if {![regexp {#[0-9]+} $fillValue]} {
-		    set fillValue [FormatColorName $fillValue]
+	    set attr [concat $attr [MakeAttrList \
+	      $type $opts $argsArr(-usestyleattribute)]]
+	    lappend xmlListList [MakeXMLList $elem -attrlist $attr]
+	}
+	rectangle {
+	    set attr [CoordsToAttr $type $coo $opts elem]	    
+	    if {[string length $idAttr] > 0} {
+		set attr [concat $attr $idAttr]
+	    }
+	    set attr [concat $attr [MakeAttrList \
+	      $type $opts $argsArr(-usestyleattribute)]]
+	    lappend xmlListList [MakeXMLList $elem -attrlist $attr]
+	}
+	text {
+	    set elem "text"
+	    set nlines 1
+	    if {[info exists optArr(-text)]} {
+		set chdata $optArr(-text)
+		if {$argsArr(-allownewlines)} {
+		    set nlines [expr [regexp -all "\n" $chdata] + 1]
 		}
 	    } else {
-		set fillValue black
-	    }
-	    if {($argsArr(-usetags) != "0") && [info exists optArr(-tags)]} {
-		
-		# Remove any 'current' tag.
-		set optArr(-tags) \
-		  [lsearch -all -not -inline $optArr(-tags) current]
-		
-		switch -- $argsArr(-usetags) {
-		    all {			
-			set idAttr [list "id" $optArr(-tags)]
-		    }
-		    first {
-			set idAttr [list "id" [lindex $optArr(-tags) 0]]
-		    }
-		    last {
-			set idAttr [list "id" [lindex $optArr(-tags) end]]
-		    }
-		}
-	    } else {
-		set idAttr ""
-	    }
-		
-	    # If we need a marker (arrow head) need to make that first.
-	    if {[info exists optArr(-arrow)]} {
-		if {[info exists optArr(-arrowshape)]} {
-		    
-		    # Make a key of the arrowshape list into the array.
-		    regsub -all -- $wsp_ $optArr(-arrowshape) _ shapeKey
-		    set arrowKey ${fillValue}_${shapeKey}
-		    set arrowShape $optArr(-arrowshape)
-		} else {
-		    set arrowKey ${fillValue}
-		    set arrowShape {8 10 3}
-		}
-		if {![info exists defsArrowMarkerArr($arrowKey)]} {
-		    set defsArrowMarkerArr($arrowKey)  \
-		      [eval {MakeArrowMarker} $arrowShape {$fillValue}]
-		    set xmlListList \
-		      [concat $xmlListList $defsArrowMarkerArr($arrowKey)]
-		}
+		set chdata ""
 	    }
 	    
-	    # If we need a stipple bitmap, need to make that first. Limited!!!
-	    # Only: gray12, gray25, gray50, gray75
-	    foreach key {-stipple -outlinestipple} {
-		if {[info exists optArr($key)] &&  \
-		  ([lsearch $grayStipples $optArr($key)] >= 0)} {
-		    set stipple $optArr($key)
-		    if {![info exists defsStipplePatternArr($stipple)]} {
-			set defsStipplePatternArr($stipple)  \
-			  [MakeGrayStippleDef $stipple]
-		    }
-		    lappend xmlListList $defsStipplePatternArr($stipple)
-		}
+	    # Figure out the coords of the first baseline.
+	    set anchor center
+	    if {[info exists optArr(-anchor)]} {
+		set anchor $optArr(-anchor)
+	    }		    		    
+	    if {[info exists optArr(-font)]} {
+		set theFont $optArr(-font)
+	    } else {
+		set theFont $defaultFont
 	    }
-	    	    
-	    switch -- $type {
+	    set ascent [font metrics $theFont -ascent]
+	    set lineSpace [font metrics $theFont -linespace]
+	    
+	    foreach {xbase ybase}  \
+	      [GetTextSVGCoords $coo $anchor $chdata $theFont $nlines] {}
+	    
+	    set attr [list "x" $xbase "y" $ybase]
+	    if {[string length $idAttr] > 0} {
+		set attr [concat $attr $idAttr]
+	    }
+	    set attr [concat $attr [MakeAttrList \
+	      $type $opts $argsArr(-usestyleattribute)]]
+	    set dy 0
+	    if {$nlines > 1} {
 		
-		arc {
-		    
-		    # Had to do it the hard way! (?)
-		    # "Wrong" coordinate system :-(
-		    set elem "path"
-		    foreach {x1 y1 x2 y2} $coo break
-		    set cx [expr ($x1 + $x2)/2.0]
-		    set cy [expr ($y1 + $y2)/2.0]
-		    set rx [expr abs($x1 - $x2)/2.0]
-		    set ry [expr abs($y1 - $y2)/2.0]
-		    set rmin [expr $rx > $ry ? $ry : $rx]
-		    
-		    # This approximation gives a maximum half pixel error.
-		    set deltaPhi [expr 2.0/sqrt($rmin)]
-		    set extent [expr $anglesToRadians * $optArr(-extent)]
-		    set start [expr $anglesToRadians * $optArr(-start)]
-		    set nsteps [expr int(abs($extent)/$deltaPhi) + 2]
-		    set delta [expr $extent/$nsteps]
-		    set data [format "M %.1f %.1f L"  \
-		      [expr $cx + $rx*cos($start)] [expr $cy - $ry*sin($start)]]
-		    for {set i 0} {$i <= $nsteps} {incr i} {
-			set phi [expr $start + $i * $delta]
-			append data [format " %.1f %.1f"  \
-			  [expr $cx + $rx*cos($phi)] [expr $cy - $ry*sin($phi)]]
-		    }
-		    if {[info exists optArr(-style)]} {
-			
-			switch -- $optArr(-style) {
-			    chord {
-				append data " Z"
-			    }
-			    pieslice {
-				append data [format " %.1f %.1f Z" $cx $cy]
-			    }
-			}
-		    } else {
-			
-			# Pieslice is the default.
-			append data [format " %.1f %.1f Z" $cx $cy]
-		    }
-		    set attr [list "d" $data]
-		    if {[string length $idAttr] > 0} {
-			set attr [concat $attr $idAttr]
-		    }
-		    set attr [concat $attr [MakeAttrList \
-		      $type $opts $argsArr(-usestyleattribute)]]
-		    lappend xmlListList [MakeXMLList $elem -attrlist $attr]
+		# Use the 'tspan' trick here.
+		set subList {}
+		foreach line [split $chdata "\n"] {
+		    lappend subList [MakeXMLList "tspan"  \
+		      -attrlist [list "x" $xbase "dy" $dy] -chdata $line]
+		    set dy $lineSpace
 		}
-		image - bitmap {
-		    set elem "image"
-		    set attr [eval {MakeImageAttr $coo $opts} $args]
-		    if {[string length $idAttr] > 0} {
-			set attr [concat $attr $idAttr]
-		    }
-		    lappend xmlListList [MakeXMLList $elem -attrlist $attr]
-		}
-		line {
-		    if {$haveSpline} {
-			set elem "path"
-			set data [ParseSplineToPath $type $coo]
-			set attr [list "d" $data]
-		    } else {
-			set elem "polyline"
-			set attr [list "points" $coo]
-		    }
-		    if {[string length $idAttr] > 0} {
-			set attr [concat $attr $idAttr]
-		    }		    
-		    set attr [concat $attr [MakeAttrList \
-		      $type $opts $argsArr(-usestyleattribute)]]
-		    lappend xmlListList [MakeXMLList $elem -attrlist $attr]
-		}
-		oval {
-		    foreach {x y w h} [NormalizeRectCoords $coo] {}
-		    if {[expr $w == $h]} {
-			set elem "circle"
-			set attr [list  \
-			  "cx" [expr $x + $w/2.0]  \
-			  "cy" [expr $y + $h/2.0]  \
-			  "r"  [expr $w/2.0]]
-		    } else {
-			set elem "ellipse"
-			set attr [list  \
-			  "cx" [expr $x + $w/2.0]  \
-			  "cy" [expr $y + $h/2.0]  \
-			  "rx" [expr $w/2.0]       \
-			  "ry" [expr $h/2.0]]
-		    }
-		    if {[string length $idAttr] > 0} {
-			set attr [concat $attr $idAttr]
-		    }
-		    set attr [concat $attr [MakeAttrList \
-		      $type $opts $argsArr(-usestyleattribute)]]
-		    lappend xmlListList [MakeXMLList $elem -attrlist $attr]
-		}
-		polygon {
-		    if {$haveSpline} {
-			set elem "path"
-			set data [ParseSplineToPath $type $coo]
-			set attr [list "d" $data]
-		    } else {
-			set elem "polygon"
-			set attr [list "points" $coo]
-		    }
-		    if {[string length $idAttr] > 0} {
-			set attr [concat $attr $idAttr]
-		    }
-		    set attr [concat $attr [MakeAttrList \
-		      $type $opts $argsArr(-usestyleattribute)]]
-		    lappend xmlListList [MakeXMLList $elem -attrlist $attr]
-		}
-		rectangle {
-		    set elem "rect"
-
-		    # width and height must be non-negative!
-		    foreach {x y w h} [NormalizeRectCoords $coo] {}
-		    set attr [list "x" $x "y" $y "width" $w "height" $h]
-		    if {[string length $idAttr] > 0} {
-			set attr [concat $attr $idAttr]
-		    }
-		    set attr [concat $attr [MakeAttrList \
-		      $type $opts $argsArr(-usestyleattribute)]]
-		    lappend xmlListList [MakeXMLList $elem -attrlist $attr]
-		}
-		text {
-		    set elem "text"
-		    set nlines 1
-		    if {[info exists optArr(-text)]} {
-			set chdata $optArr(-text)
-			set nlines [expr [regexp -all "\n" $chdata] + 1]
-		    } else {
-			set chdata ""
-		    }
-		    
-		    # Figure out the coords of the first baseline.
-		    set anchor center
-		    if {[info exists optArr(-anchor)]} {
-			set anchor $optArr(-anchor)
-		    }		    		    
-		    if {[info exists optArr(-font)]} {
-			set theFont $optArr(-font)
-		    } else {
-			set theFont $defaultFont
-		    }
-		    set ascent [font metrics $theFont -ascent]
-		    set lineSpace [font metrics $theFont -linespace]
-
-		    foreach {xbase ybase}  \
-		      [GetTextSVGCoords $coo $anchor $chdata $theFont $nlines] {}
-		    		    
-		    set attr [list "x" $xbase "y" $ybase]
-		    if {[string length $idAttr] > 0} {
-			set attr [concat $attr $idAttr]
-		    }
-		    set attr [concat $attr [MakeAttrList \
-		      $type $opts $argsArr(-usestyleattribute)]]
-		    set dy 0
-		    if {$nlines > 1} {
-			
-			# Use the 'tspan' trick here.
-			set subList {}
-			foreach line [split $chdata "\n"] {
-			    lappend subList [MakeXMLList "tspan"  \
-			      -attrlist [list "x" $xbase "dy" $dy] -chdata $line]
-			    set dy $lineSpace
-			}
-			lappend xmlListList [MakeXMLList $elem -attrlist $attr \
-			  -subtags $subList]
-		    } else {
-			lappend xmlListList [MakeXMLList $elem -attrlist $attr \
-			  -chdata $chdata]
-		    }
-		}
+		lappend xmlListList [MakeXMLList $elem -attrlist $attr \
+		  -subtags $subList]
+	    } else {
+		lappend xmlListList [MakeXMLList $elem -attrlist $attr \
+		  -chdata $chdata]
 	    }
 	}
     }
     return $xmlListList
+}
+
+# can2svg::CoordsToAttr --
+#
+#       Makes a list of attrbutes corresponding to type and coords.
+#       
+# Arguments:
+#
+#       
+# Results:
+#       a list of attributes.
+
+proc can2svg::CoordsToAttr {type coo opts svgElementVar} {
+    upvar $svgElementVar elem 
+
+    array set optArr $opts
+    
+    # Figure out if we've got a spline.
+    set haveSpline 0
+    if {[info exists optArr(-smooth)] && ($optArr(-smooth) != "0") &&  \
+      [info exists optArr(-splinesteps)] && ($optArr(-splinesteps) > 2)} {
+	set haveSpline 1
+    }
+    set attr {}
+
+    switch -- $type {
+	arc {
+	    set elem "path"
+	    set data [MakeArcPath $coo $opts]
+	    set attr [list "d" $data]
+	}
+	bitmap - image {
+	    set elem "image"
+	    set attr [ImageCoordsToAttr $coo $opts]
+	}
+	line {
+	    if {$haveSpline} {
+		set elem "path"
+		set data [ParseSplineToPath $type $coo]
+		set attr [list "d" $data]
+	    } else {
+		set elem "polyline"
+		set attr [list "points" $coo]
+	    }   
+	}
+	oval {
+	    
+	    # Assume SVG ellipse.
+	    set elem "ellipse"
+	    foreach {x y w h} [NormalizeRectCoords $coo] break
+	    set attr [list  \
+	      "cx" [expr $x + $w/2.0] "cy" [expr $y + $h/2.0]  \
+	      "rx" [expr $w/2.0]      "ry" [expr $h/2.0]]
+	}
+	polygon {
+	    if {$haveSpline} {
+		set elem "path"
+		set data [ParseSplineToPath $type $coo]
+		set attr [list "d" $data]
+	    } else {
+		set elem "polygon"
+		set attr [list "points" $coo]
+	    }
+	}
+	rectangle {
+	    set elem "rect"
+	    foreach {x y w h} [NormalizeRectCoords $coo] break
+	    set attr [list "x" $x "y" $y "width" $w "height" $h]
+	}
+	text {
+	    set elem "text"
+	    # ?
+	}
+    }
+    return $attr
+}
+
+# can2svg::MakeArcPath --
+# 
+#       Makes a path using A commands from an arc.
+#       Conversion from center to endpoint parameterization.
+#       From: http://www.w3.org/TR/2003/REC-SVG11-20030114
+
+proc can2svg::MakeArcPath {coo opts} {
+    
+    variable anglesToRadians
+    variable pi
+
+    array set optArr {-style pieslice}
+    array set optArr $opts
+
+    # Extract center and radius from bounding box.
+    foreach {x1 y1 x2 y2} $coo break
+    set cx [expr ($x1 + $x2)/2.0]
+    set cy [expr ($y1 + $y2)/2.0]
+    set rx [expr abs($x1 - $x2)/2.0]
+    set ry [expr abs($y1 - $y2)/2.0]
+
+    set start  [expr $anglesToRadians * $optArr(-start)]
+    set extent [expr $anglesToRadians * $optArr(-extent)]
+
+    # NOTE: direction of angles are opposite for Tk and SVG!    
+    set theta1 [expr -1*$start]
+    set delta  [expr -1*$extent]
+    set theta2 [expr $theta1 + $delta]
+    set phi 0.0
+
+    # F.6.4 Conversion from center to endpoint parameterization.
+    set x1 [expr $cx + $rx * cos($theta1) * cos($phi) -  \
+      $ry * sin($theta1) * sin($phi)]
+    set y1 [expr $cy + $rx * cos($theta1) * sin($phi) +  \
+      $ry * sin($theta1) * cos($phi)]
+    set x2 [expr $cx + $rx * cos($theta2) * cos($phi) -  \
+      $ry * sin($theta2) * sin($phi)]
+    set y2 [expr $cy + $rx * cos($theta2) * sin($phi) +  \
+      $ry * sin($theta2) * cos($phi)]
+    
+    set fa [expr {abs($delta) > $pi} ? 1 : 0]
+    set fs [expr {$delta > 0.0} ? 1 : 0]
+    
+    set data [format "M %.1f %.1f A" $x1 $y1]
+    append data [format " %.1f %.1f %.1f %1d %1d %.1f %.1f"  \
+      $rx $ry $phi $fa $fs $x2 $y2]
+    
+    switch -- $optArr(-style) {
+	arc {
+	    # empty.
+	}
+	chord {
+	    append data " Z"
+	}
+	pieslice {
+	    append data [format " L %.1f %.1f Z" $cx $cy]
+	}
+    }
+    return $data
+}
+
+# can2svg::MakeArcPathNonA --
+# 
+#       Makes a path without any A commands from an arc.
+
+proc can2svg::MakeArcPathNonA {coo opts} {
+
+    variable anglesToRadians
+
+    array set optArr $opts
+    
+    foreach {x1 y1 x2 y2} $coo break
+    set cx [expr ($x1 + $x2)/2.0]
+    set cy [expr ($y1 + $y2)/2.0]
+    set rx [expr abs($x1 - $x2)/2.0]
+    set ry [expr abs($y1 - $y2)/2.0]
+    set rmin [expr $rx > $ry ? $ry : $rx]
+    
+    # This approximation gives a maximum half pixel error.
+    set deltaPhi [expr 2.0/sqrt($rmin)]
+    set extent   [expr $anglesToRadians * $optArr(-extent)]
+    set start    [expr $anglesToRadians * $optArr(-start)]
+    set nsteps   [expr int(abs($extent)/$deltaPhi) + 2]
+    set delta    [expr $extent/$nsteps]
+    set data [format "M %.1f %.1f L"  \
+      [expr $cx + $rx*cos($start)] [expr $cy - $ry*sin($start)]]
+    for {set i 0} {$i <= $nsteps} {incr i} {
+	set phi [expr $start + $i * $delta]
+	append data [format " %.1f %.1f"  \
+	  [expr $cx + $rx*cos($phi)] [expr $cy - $ry*sin($phi)]]
+    }
+    if {[info exists optArr(-style)]} {
+	
+	switch -- $optArr(-style) {
+	    chord {
+		append data " Z"
+	    }
+	    pieslice {
+		append data [format " %.1f %.1f Z" $cx $cy]
+	    }
+	}
+    } else {
+	
+	# Pieslice is the default.
+	append data [format " %.1f %.1f Z" $cx $cy]
+    }
+    return $data
 }
 
 # can2svg::MakeAttrList --
@@ -478,10 +611,15 @@ proc can2svg::MakeStyleAttr {type opts} {
     return [string trim $style]
 }
 
-proc can2svg::MakeStyleList {type opts} {
+proc can2svg::MakeStyleList {type opts args} {
+    
+    array set argsArr {
+	-setdefaults 1 
+    }
+    array set argsArr $args
     
     # Defaults for everything except text.
-    if {![string equal $type "text"]} {
+    if {$argsArr(-setdefaults) && ![string equal $type "text"]} {
 	array set styleArr {fill none stroke black}
     }
     set fillCol black
@@ -570,11 +708,12 @@ proc can2svg::MakeStyleList {type opts} {
     # If any arrow specify its marker def url key.
     if {[info exists arrowValue]} {
 	if {[info exists arrowShape]} {	
-	    foreach {a b c} $arrowShape {}
+	    foreach {a b c} $arrowShape break
 	    set arrowIdKey "arrowMarkerDef_${fillCol}_${a}_${b}_${c}"
 	    set arrowIdKeyLast "arrowMarkerLastDef_${fillCol}_${a}_${b}_${c}"
 	} else {
 	    set arrowIdKey "arrowMarkerDef_${fillCol}"
+	    set arrowIdKeyLast $arrowIdKey
 	}
 	
 	switch -- $arrowValue {
@@ -679,18 +818,29 @@ proc can2svg::MakeImageAttr {coo opts args} {
     array set optArr {-anchor nw}
     array set optArr $opts
     array set argsArr $args
-    set theImage $optArr(-image)
-    set w [image width $theImage]
-    set h [image height $theImage]
     
     # We should make this an URI.
+    set theImage $optArr(-image)
     set theFile [$theImage cget -file]
     if {[string equal $argsArr(-uritype) "file"]} {
 	set uri [FileUriFromLocalFile $theFile]
     } elseif {[string equal $argsArr(-uritype) "http"]} {
 	set uri [HttpFromLocalFile $theFile]
     }
-    foreach {x0 y0} $coo {}
+    set attrList [ImageCoordsToAttr $coo $opts]
+    lappend attrList "xlink:href" $uri
+    
+    return $attrList
+}
+
+proc can2svg::ImageCoordsToAttr {coo opts} {
+    
+    array set optArr {-anchor nw}
+    array set optArr $opts
+    set theImage $optArr(-image)
+    set w [image width $theImage]
+    set h [image height $theImage]
+    foreach {x0 y0} $coo break
     
     switch -- $optArr(-anchor) {
 	nw {
@@ -730,8 +880,7 @@ proc can2svg::MakeImageAttr {coo opts args} {
 	    set y [expr $y0 - $h/2.0]
 	}
     }
-    set attrList [list "x" $x "y" $y "width" $w "height" $h  \
-      "xlink:href" $uri]
+    set attrList [list "x" $x "y" $y "width" $w "height" $h]
     return $attrList
 }
 
@@ -750,7 +899,7 @@ proc can2svg::MakeImageAttr {coo opts args} {
 
 proc can2svg::GetTextSVGCoords {coo anchor chdata theFont nlines} {
     
-    foreach {x y} $coo {}
+    foreach {x y} $coo break
     set ascent [font metrics $theFont -ascent]
     set lineSpace [font metrics $theFont -linespace]
 

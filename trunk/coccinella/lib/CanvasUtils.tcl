@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.29 2004-03-16 15:09:08 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.30 2004-03-24 14:43:11 matben Exp $
 
 package require sha1pure
 
@@ -814,8 +814,9 @@ proc ::CanvasUtils::ItemConfigure {w id args} {
     # Be sure to get the real id (number).
     set id [$w find withtag $id]
     set utag [::CanvasUtils::GetUtag $w $id]
-    set cmd "itemconfigure $utag $args"
-    set undocmd "itemconfigure $utag [::CanvasUtils::GetItemOpts $w $utag $args]"
+    set cmd [concat itemconfigure $utag $args]
+    set undocmd [concat itemconfigure $utag \
+      [::CanvasUtils::GetItemOpts $w $utag $args]]
     
     # Handle font points -> size for the network command.
     set cmdremote [::CanvasUtils::FontHtmlToPointSize $cmd -1]
@@ -1371,29 +1372,62 @@ proc ::CanvasUtils::FontHtmlToPointSize {canCmd {inverse 0}} {
     if {$ind < 0} {
 	return $canCmd
     }
-    set valInd [expr $ind + 1]
-    set fontSpec [lindex $canCmd $valInd]
+    set fontSpec [lindex $canCmd [incr ind]]
     set fontSize [lindex $fontSpec 1]
+    
+    # If we already have the size in pixels (-36) do nothing.
+    if {$fontSize < 0} {
+	return $canCmd
+    }
     
     if {!$inverse} {
 	
 	# This is the default  html->points.
 	# Check that it is between 1 and 6.
 	if {$fontSize >= 1 && $fontSize <= 6} {
-	    set newFontSpec   \
-	      [lreplace $fontSpec 1 1 $fontSize2Points($fontSize)]
+	    lset fontSpec 1 $fontSize2Points($fontSize)
 	    
 	    # Replace font specification in drawing command.
-	    set canCmd [lreplace $canCmd $valInd $valInd $newFontSpec]
+	    set canCmd [lreplace $canCmd $ind $ind $fontSpec]
 	}
     } else {
 	
 	# This is points->html.
-	set newFontSpec   \
-	  [lreplace $fontSpec 1 1 $fontPoints2Size($fontSize)]
+	lset fontSpec 1 $fontPoints2Size($fontSize)
 	
 	# Replace font specification in drawing command.
-	set canCmd [lreplace $canCmd $valInd $valInd $newFontSpec]
+	set canCmd [lreplace $canCmd $ind $ind $fontSpec]
+    }
+    return $canCmd
+}
+
+proc ::CanvasUtils::FontHtmlToPixelSize {canCmd {inverse 0}} {
+    global  fontSize2Pixels fontPixels2Size
+    
+    set ind [lsearch -exact $canCmd "-font"]
+    if {$ind < 0} {
+	return $canCmd
+    }
+    set fontSpec [lindex $canCmd [incr ind]]
+    set fontSize [expr abs([lindex $fontSpec 1])]
+    
+    if {!$inverse} {
+	
+	# This is the default  html->pixels.
+	# Check that it is between 1 and 6.
+	if {$fontSize >= 1 && $fontSize <= 6} {
+	    lset fontSpec 1 -$fontSize2Pixels($fontSize)
+	    set canCmd [lreplace $canCmd $ind $ind $fontSpec]
+	}
+    } else {
+	# Test leaving the minus sign there.
+	if {0} {
+	    # This is pixels->html.
+	    lset fontSpec 1 $fontPoints2Size($fontSize)
+	    
+	    # Replace font specification in drawing command.
+	    set canCmd [lreplace $canCmd $ind $ind $fontSpec]
+	}
     }
     return $canCmd
 }
@@ -1408,7 +1442,7 @@ proc ::CanvasUtils::FontHtmlToPointSize {canCmd {inverse 0}} {
 #       is put in the global variables 'fontSize2Points' and 'fontPoints2Size'.
 
 proc ::CanvasUtils::CreateFontSizeMapping { } {
-    global  fontSize2Points fontPoints2Size this
+    global  fontSize2Points fontPoints2Size fontSize2Pixels fontPixels2Size this
     
     # The reference is chosen to get point sizes on Mac as: 10, 12, 14, 18, 
     # 24, 36. Found via 'font measure {Times 10} {Mats Bengtsson}'.
@@ -1421,20 +1455,28 @@ proc ::CanvasUtils::CreateFontSizeMapping { } {
     
     set p0 10
     set p1 36
+    
+    # Points.
     set y0 [font measure "Times $p0" $refStr]
     set y1 [font measure "Times $p1" $refStr]
     set k [expr ($y1 - $y0)/double($p1 - $p0)]
     set m [expr $y1 - $k*$p1]
+    
+    # Pixels.
+    #set y0 [font measure "Times -10" $refStr]
+    #set y1 [font measure "Times -36" $refStr]
+    #set kpix [expr ($y1 - $y0)/double($p1 - $p0)]
+    #set mpix [expr $y1 - $kpix*$p1]
     
     # For what x (font size in points) do we get 'refHtmlSizeToLength(1)', etc.
     # x = (y - m)/k
     # Mac and Windows are hardcoded for optimal view.
     
     switch -- $this(platform) {
-	"macintosh" - "macosx" {
+	macintosh - macosx {
 	    array set fontSize2Points {1 10 2 12 3 14 4 18 5 24 6 36}
 	}
-	"windows" {
+	windows {
 	    array set fontSize2Points {1 7 2 9 3 11 4 14 5 18 6 28}
 	}
 	default {
@@ -1445,10 +1487,15 @@ proc ::CanvasUtils::CreateFontSizeMapping { } {
 	}
     }
     
-    # We also need the inverse mapping.
+    # Same for all.
+    array set fontSize2Pixels {1 10 2 12 3 14 4 18 5 24 6 36}
     
+    # We also need the inverse mapping.    
     foreach pt [array names fontSize2Points] {
 	set fontPoints2Size($fontSize2Points($pt)) $pt
+    }
+    foreach pix [array names fontSize2Pixels] {
+	set fontPixels2Size($fontSize2Points($pix)) $pix
     }
 }
 
@@ -1515,7 +1562,7 @@ proc ::CanvasUtils::HandleCanvasDraw {wtop instr} {
     if {[string equal $cmd "import"]} {
 	::Import::HandleImportCmd $wServCan $bsinstr -where local
     } else {
-	
+		
 	# Make the actual canvas command, either straight or in the 
 	# safe interpreter.
 	if {$prefs(makeSafeServ)} {
@@ -1568,6 +1615,14 @@ proc ::CanvasUtils::HandleCanvasDraw {wtop instr} {
 	}
     }
 }
+
+# CanvasUtils::CanvasDrawSafe --
+# 
+#       This is the drawing procedure that is necessary for the alias command.
+
+proc ::CanvasUtils::CanvasDrawSafe {w args} {
+    eval $w $args
+}    
 
 # CanvasUtils::DefineWhiteboardBindtags --
 # 

@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #
-# $Id: svg2can.tcl,v 1.14 2004-03-18 14:11:18 matben Exp $
+# $Id: svg2can.tcl,v 1.15 2004-03-24 14:43:11 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -317,7 +317,6 @@ proc svg2can::parseimage {xmllist transformList args} {
     }
     lappend opts -tags $tags -anchor nw
     set opts [MergePresentationAttr image $opts $presentationAttr]
-    set cmd [concat create image $x $y $opts]
     
     # Handle the xlink:href attribute.
     if {[info exists xlinkhref]} {
@@ -326,10 +325,11 @@ proc svg2can::parseimage {xmllist transformList args} {
 	    file:/* {			
 		set path [uriencode::decodefile $xlinkhref]
 		set path [string map {file:/// /} $path]
-		lappend cmd -file $path
-		if {[string length $confopts(-imagehandler)]} {
-		    uplevel #0 $confopts(-imagehandler) $cmd
-		    return ""
+		if {[string length $confopts(-imagehandler)]} {		    
+		    set cmd [concat create image $x $y $opts]
+		    lappend cmd -file $path
+		    set photo [uplevel #0 $confopts(-imagehandler) $cmd]
+		    lappend opts -image $photo
 		} else {			
 		    if {[string tolower [file extension $path]] == ".gif"} {
 			set photo [image create photo -file $path -format gif]
@@ -351,6 +351,7 @@ proc svg2can::parseimage {xmllist transformList args} {
 	    }
 	}	
     }
+    set cmd [concat create image $x $y $opts]
     set cmdList [list $cmd]
 
     return [AddAnyTransformCmds $cmdList $transformList]
@@ -506,8 +507,25 @@ proc svg2can::parsepath {xmllist transformList args} {
 			foreach {cx cy rx ry theta delta phi} $arcpars break
 			set box [list [expr $cx-$rx] [expr $cy-$ry] \
 			  [expr $cx+$rx] [expr $cy+$ry]]
-			set itemopts [list -style arc -start $theta \
-			  -extent $delta]
+			set itemopts [list -start $theta -extent $delta]
+			
+			# Try to interpret any subsequent data as a
+			# -style chord | pieslice.
+			# Z: chord; float float Z: pieslice.
+			set ia [expr $i + 7]
+			set ib [expr $i + 10]
+			
+			if {[regexp -nocase {z} [lrange $path $ia $ia]]} {
+			    lappend itemopts -style chord
+			    incr i 1
+			} elseif {[regexp -nocase {l +([-0-9\.]+) +([-0-9\.]+) +z} \
+			  [lrange $path $ia $ib] m mx my] &&  \
+			  [expr hypot($mx-$cx, $my-$cy)] < 4.0} {
+			    lappend itemopts -style pieslice
+			    incr i 4
+			} else {
+			    lappend itemopts -style arc
+			}
 			set opts [concat $polygonopts $itemopts]
 			lappend cmdList [concat create arc $box $opts]
 			set co {}
@@ -966,9 +984,9 @@ proc svg2can::ParseTspan {xmllist transformList xVar yVar xAttrVar yAttrVar opts
 	
 	# Need to adjust the text position so that the baseline matches y.
 	# nw to baseline
-	set descent [font metrics $theFont -descent]
+	set ascent [font metrics $theFont -ascent]
 	set cmdList [list [concat create text  \
-	  $xAttr [expr $yAttr + $descent + $baselineShift] $opts]]	
+	  $xAttr [expr $yAttr - $ascent + $baselineShift] $opts]]	
 	set cmdList [AddAnyTransformCmds $cmdList $transformList]
 	
 	# Each text insert moves both the running coordinate sets.
@@ -992,7 +1010,9 @@ proc svg2can::ParseTextAttr {xmllist xVar yVar baselineShiftVar} {
     upvar $baselineShiftVar baselineShift
 
     # svg defaults to start with y being the baseline while tk default is c.
-    set opts {-anchor sw}
+    #set opts {-anchor sw}
+    # Anchor nw is simplest when newlines.
+    set opts {-anchor nw}
     set presentationAttr {}
     set baselineShift 0
     
@@ -1032,6 +1052,72 @@ proc svg2can::ParseTextAttr {xmllist xVar yVar baselineShiftVar} {
 	set baselineShift [BaselineShiftToDy $baselineShiftSet $theFont]
     }
     return [MergePresentationAttr text $opts $presentationAttr]
+}
+
+# svg2can::AttrToCoords --
+# 
+#       Returns coords from SVG attributes.
+#       
+# Arguments:
+#       type        SVG type
+#       attr        list of geometry attributes
+#       
+# Results:
+#       list of coordinates
+
+proc svg2can::AttrToCoords {type attrlist} {
+    
+    # Defaults.
+    array set attr {
+	cx      0
+	cy      0
+	height  0
+	r       0
+	rx      0
+	ry      0
+	width   0
+	x       0
+	x1      0
+	x2      0
+	y       0
+	y1      0
+	y2      0
+    }
+    array set attr $attrlist
+    
+    switch -- $type {
+	circle {
+	    set coords [list [expr $attr(cx) - $attr(r)] [expr $attr(cy) - $attr(r)] \
+	      [expr $attr(cx) + $attr(r)] [expr $attr(cy) + $attr(r)]]	
+	}
+	ellipse {
+	    set coords [list [expr $attr(cx) - $rx] [expr $cy - $ry] \
+	      [expr $attr(cx) + $attr(rx)] [expr $attr(cy) + $attr(ry)]]
+	}
+	image {
+	    set coords [list $attr(x) $attr(y)]
+	}
+	line {
+	    set coords [list $attr(x1) $attr(y1) $attr(x2) $attr(y2)]
+	}
+	path {
+	    # empty
+	}
+	polygon {
+	    set coords [PointsToList $attr(points)] 
+	}
+	polyline {
+	    set coords [PointsToList $attr(points)] 
+	}
+	rect {
+	    set coords [list $attr(x) $attr(y) \
+	      [expr $attr(x) + $attr(width)] [expr $attr(y) + $attr(height)]]
+	}
+	text {
+	    set coords [list $attr(x) $attr(y)]
+	}
+    }
+    return $coords
 }
 
 # svg2can::parseColor --
@@ -1077,20 +1163,29 @@ proc svg2can::parseColor {color} {
 # Results:
 #       list of canvas options
 
-proc svg2can::StyleToOpts {type styleList} {
+proc svg2can::StyleToOpts {type styleList args} {
     
     variable textAnchorMap
     
+    array set argsArr {
+	-setdefaults 1 
+	-origfont    {Helvetica 12}
+    }
+    array set argsArr $args
+
     # SVG and canvas have different defaults.
-    switch -- $type {
-	oval - polygon - rectangle {
-	    array set optsArr {-fill black -outline ""}
-	}
-	line {
-	    array set optsArr {-fill black}
+    if {$argsArr(-setdefaults)} {
+	switch -- $type {
+	    oval - polygon - rectangle {
+		array set optsArr {-fill black -outline ""}
+	    }
+	    line {
+		array set optsArr {-fill black}
+	    }
 	}
     }
-    set fontSpec {Helvetica 12}
+    
+    set fontSpec $argsArr(-origfont)
     set haveFont 0
     
     foreach {key value} $styleList {
@@ -1211,6 +1306,8 @@ proc svg2can::StyleToOpts {type styleList} {
 
 proc svg2can::EllipticArcParameters {x1 y1 rx ry phi fa fs x2 y2} {
     variable pi
+
+    # NOTE: direction of angles are opposite for Tk and SVG!
     
     # F.6.2 Out-of-range parameters 
     if {($x1 == $x2) && ($y1 == $y2)} {
@@ -1286,6 +1383,10 @@ proc svg2can::EllipticArcParameters {x1 y1 rx ry phi fa fs x2 y2} {
     } elseif {($fs ==1) && ($delta < 0)} {
 	set delta [expr $delta + 360]
     }
+
+    # NOTE: direction of angles are opposite for Tk and SVG!
+    set theta [expr -1*$theta]
+    set delta [expr -1*$delta]
     
     return [list $cx $cy $rx $ry $theta $delta $phi]
 }
