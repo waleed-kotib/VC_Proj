@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: GetFileIface.tcl,v 1.5 2003-09-21 13:02:12 matben Exp $
+# $Id: GetFileIface.tcl,v 1.6 2003-09-28 06:29:08 matben Exp $
 
 package require getfile
 package require uriencode
@@ -452,7 +452,7 @@ proc ::GetFileIface::DoImport {mime opts args} {
 	if {[::Plugins::HaveImporterForMime $mime]} {
 	    set servCan [::UI::GetServerCanvasFromWtop .]
 	    set errMsg [eval {
-		::ImageAndMovie::DoImport $servCan $opts
+		::Import::DoImport $servCan $opts
 	    } $args]
 	} else {
 	    set errMsg "No importer for mime \"$mime\""
@@ -484,7 +484,7 @@ proc ::GetFileIface::NewBrokenImage {code gettoken} {
 	return
     }
 
-    eval {::ImageAndMovie::NewBrokenImage $getstate(can) $optArr(-coords)} $opts
+    eval {::Import::NewBrokenImage $getstate(can) $optArr(-coords)} $opts
 }
 
 # GetFileIface::CancelCmd, CancelAll, CancelAllWtop --

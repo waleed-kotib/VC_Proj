@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.7 2003-09-13 06:39:25 matben Exp $
+# $Id: Roster.tcl,v 1.8 2003-09-28 06:29:08 matben Exp $
 
 package provide Roster 1.0
 
@@ -13,7 +13,7 @@ namespace eval ::Jabber::Roster:: {
     
     variable wtree    
     variable servtxt
-
+    
     # Mapping from presence/show to icon. 
     # Specials for whiteboard clients and foreign IM systems.
     variable presenceIcon
@@ -172,13 +172,17 @@ proc ::Jabber::Roster::Build {w} {
     set wtree $wbox.tree
     set wxsc $wbox.xsc
     set wysc $wbox.ysc
-    set wtree [::tree::tree $wtree -width 180 -height 300 -silent 1  \
+    set opts {}
+    if {$jprefs(rost,useBgImage)} {
+	lappend opts -backgroundimage $jprefs(rost,bgImage)
+    }
+    set wtree [eval {::tree::tree $wtree -width 180 -height 300 -silent 1  \
       -openicons triangle -treecolor {} -scrollwidth 400  \
       -xscrollcommand [list $wxsc set]       \
       -yscrollcommand [list $wysc set]       \
       -selectcommand ::Jabber::Roster::SelectCmd   \
       -doubleclickcommand ::Jabber::Roster::DoubleClickCmd   \
-      -highlightcolor #6363CE -highlightbackground gray87]
+      -highlightcolor #6363CE -highlightbackground $prefs(bgColGeneral)} $opts]
     set wtreecanvas [$wtree getcanvas]
     if {[string match "mac*" $this(platform)]} {
 	$wtree configure -buttonpresscommand  \
@@ -203,6 +207,31 @@ proc ::Jabber::Roster::Build {w} {
 	$wtree itemconfigure [list $gpres] -open 0
     }
     return $w
+}
+
+proc ::Jabber::Roster::SetBackgroundImage {useBgImage bgImagePath} {
+    upvar ::Jabber::jprefs jprefs
+    variable wtree    
+    
+    if {[winfo exists $wtree]} {
+	
+	# Change only if needed.
+	if {($jprefs(rost,useBgImage) != $useBgImage) || \
+	  ($jprefs(rost,bgImagePath) != $bgImagePath)} {
+	    
+	    # Cleanup old.
+	    if {$jprefs(rost,bgImage) != ""} {
+		image delete $jprefs(rost,bgImage)
+	    }
+	    if {$jprefs(rost,useBgImage)} {
+		set jprefs(rost,bgImage)  \
+		  [image create photo -file $jprefs(rost,bgImagePath)]
+	    } else {
+		set jprefs(rost,bgImage) {}
+	    }
+	    $wtree configure -backgroundimage $jprefs(rost,bgImage)
+	}
+    }
 }
 
 proc ::Jabber::Roster::CloseDlg {w} {    
@@ -1225,11 +1254,11 @@ proc ::Jabber::Roster::PresenceSounds {jid presence args} {
     
     # Alert sounds.
     if {[info exists argsArr(-show)] && [string equal $argsArr(-show) "chat"]} {
-	::Sounds::Play statchange
+	::Sounds::PlayWhenIdle statchange
     } elseif {[string equal $presence "available"]} {
-	::Sounds::Play online
+	::Sounds::PlayWhenIdle online
     } elseif {[string equal $presence "unavailable"]} {
-	::Sounds::Play offline
+	::Sounds::PlayWhenIdle offline
     }    
 }
 

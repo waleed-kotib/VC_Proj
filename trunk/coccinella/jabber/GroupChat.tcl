@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.10 2003-09-13 06:39:25 matben Exp $
+# $Id: GroupChat.tcl,v 1.11 2003-09-28 06:29:08 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -954,7 +954,7 @@ proc ::Jabber::GroupChat::SetUser {roomJid jid3 presence args} {
     }
     
     # Noise.
-    ::Sounds::Play online
+    ::Sounds::PlayWhenIdle online
 }
     
 proc ::Jabber::GroupChat::PopupTimer {w jid3 x y} {
@@ -998,7 +998,7 @@ proc ::Jabber::GroupChat::RemoveUser {roomJid jid3} {
     $wusers configure -state disabled
     
     # Noise.
-    ::Sounds::Play offline
+    ::Sounds::PlayWhenIdle offline
 }
 
 # Jabber::GroupChat::ConfigWBStatusMenu --

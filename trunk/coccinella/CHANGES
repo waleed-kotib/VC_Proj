@@ -9,6 +9,8 @@ Coccinella-0.94.6 (03????): 	Short summary --
 	- internal http server in its own thread if available
 	- better redo/undo functionality
 	- fixed stacking inconsistencies when sharing images
+	- background image in tree widget (roster)
+	- better handling of event sounds
 
 
 Coccinella-0.94.5 (0309??): 	Short summary --

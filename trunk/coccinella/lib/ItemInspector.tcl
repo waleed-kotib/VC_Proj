@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ItemInspector.tcl,v 1.7 2003-09-21 13:02:12 matben Exp $
+# $Id: ItemInspector.tcl,v 1.8 2003-09-28 06:29:08 matben Exp $
 
 namespace eval ::ItemInspector::  {
     
@@ -159,7 +159,7 @@ proc ::ItemInspector::Build {wtop itemId args} {
     }
     
     # Movies may not be selected this way; temporary solution?
-    if {[lsearch [$wCan gettags $itPrefNo] "movie"] >= 0}  {
+    if {[lsearch [$wCan gettags $itPrefNo] "frame"] >= 0}  {
 	#return
     }	
     toplevel $w

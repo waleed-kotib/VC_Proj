@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: PluginTextPlain.tcl,v 1.3 2003-09-21 13:02:12 matben Exp $
+# $Id: PluginTextPlain.tcl,v 1.4 2003-09-28 06:29:08 matben Exp $
 
 
 namespace eval ::TextImporter:: {
@@ -79,11 +79,11 @@ YWMKCRwoU6p8E+RHDypYtHDp8iWMmDFm0rSBA8SHjkAAOw==
     # Only few of these are relevant for plugins.
     
     set bindList {\
-      move    {{bind TextDocFrame <Button-1>}         {::CanvasDraw::InitMoveFrame $wcan %W %x %y}} \
-      move    {{bind TextDocFrame <B1-Motion>}        {::CanvasDraw::DoMoveFrame $wcan %W %x %y}} \
-      move    {{bind TextDocFrame <ButtonRelease-1>}  {::CanvasDraw::FinMoveFrame $wcan %W %x %y}} \
-      move    {{bind TextDocFrame <Shift-B1-Motion>}  {::CanvasDraw::FinMoveFrame $wcan %W %x %y}} \
-      del     {{bind TextDocFrame <Button-1>}         {::CanvasDraw::DeleteFrame $wcan %W %x %y}} \
+      move    {{bind TextDocFrame <Button-1>}         {::CanvasDraw::InitMoveWindow $wcan %W %x %y}} \
+      move    {{bind TextDocFrame <B1-Motion>}        {::CanvasDraw::DoMoveWindow $wcan %W %x %y}}   \
+      move    {{bind TextDocFrame <ButtonRelease-1>}  {::CanvasDraw::FinMoveWindow $wcan %W %x %y}}  \
+      move    {{bind TextDocFrame <Shift-B1-Motion>}  {::CanvasDraw::FinMoveWindow $wcan %W %x %y}}  \
+      del     {{bind TextDocFrame <Button-1>}         {::CanvasDraw::DeleteWindow $wcan %W %x %y}}   \
     }
   
     set locals(icon) [image create photo -data {
@@ -122,6 +122,7 @@ proc ::TextImporter::Import {wcan fileName optListVar args} {
     array set argsArr $args
     array set optArr $optList
     set wtop [::UI::GetToplevelNS $wcan]
+    set errMsg ""
     
     # Extract coordinates and tags which must be there. error checking?
     foreach {x y} $optArr(-coords) break
@@ -139,7 +140,7 @@ proc ::TextImporter::Import {wcan fileName optListVar args} {
     pack $wfr.icon -padx 3 -pady 3
     
     set id [$wcan create window $x $y -anchor nw -window $wfr -tags  \
-      [list tframe $useTag]]
+      [list frame $useTag]]
     set locals(id2file,$id) $fileName
     
     # Need explicit permanent storage for import options.
@@ -154,7 +155,7 @@ proc ::TextImporter::Import {wcan fileName optListVar args} {
     ::balloonhelp::balloonforwindow $wfr.icon $msg
     
     # Success.
-    return ""
+    return $errMsg
 }
 
 # ::TextImporter::Save --
@@ -189,7 +190,7 @@ proc ::TextImporter::Clicked {id} {
     global sysFont
     variable locals
 
-    set win .ty7532[incr locals(wuid)]
+    set win .ty7588[incr locals(wuid)]
     toplevel $win
     wm title $win "Plain Text Browser"
     pack [frame ${win}.f -borderwidth 1 -relief raised]   \
@@ -219,6 +220,7 @@ proc ::TextImporter::Clicked {id} {
     if {![catch {open $locals(id2file,$id) r} fd]} {
 	set data [read $fd]
 	$wtext insert 1.0 $data
+	unset data
 	close $fd
     }
 }

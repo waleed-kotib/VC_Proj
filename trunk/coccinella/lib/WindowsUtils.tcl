@@ -7,11 +7,12 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: WindowsUtils.tcl,v 1.2 2003-09-21 13:02:12 matben Exp $
+# $Id: WindowsUtils.tcl,v 1.3 2003-09-28 06:29:08 matben Exp $
 
 #package require gdi
 #package require printer
 package require registry
+package provide WindowsUtils
 
 namespace eval ::Windows:: {
 
@@ -31,17 +32,22 @@ proc ::Windows::OpenUrl {url} {
     if {[catch {registry get \
       $root\\$appKey\\shell\\opennew\\command ""} appCmd]} {
 	
-	# Try a different key.
-	set appCmd [registry get \
-	  $root\\$appKey\\shell\\open\\command ""]
+	if {[catch {
+	    
+	    # Try a different key.
+	    set appCmd [registry get \
+	      $root\\$appKey\\shell\\open\\command ""]
+	} msg]} {
+	    return -code error $msg
+	}
     }
-    
-    # Substitute the url name into the command for %1
-    # Perhaps need to protect special chars???
-    #regsub {%1} $appCmd $url appCmd
     
     # Double up the backslashes for eval (below)
     regsub -all {\\} $appCmd  {\\\\} appCmd
+    
+    # Substitute the url name into the command for %1
+    # Not always needed (opennew).
+    regsub {%1} $appCmd $url appCmd
     
     # Invoke the command
     eval exec $appCmd $url &
@@ -62,21 +68,21 @@ proc ::Windows::OpenFileFromSuffix {path} {
     set appKey [registry get $root\\$suff ""]
     
     # Get the command for opening $suff files
-    if {[catch {registry get \
-      $root\\$appKey\\shell\\opennew\\command ""} appCmd]} {
-	
-	# Try a different key.
+    if {[catch {
 	set appCmd [registry get \
 	  $root\\$appKey\\shell\\open\\command ""]
+    } msg]} {
+	return -code error $msg
     }
         
     # Double up the backslashes for eval (below)
     regsub -all {\\} $appCmd  {\\\\} appCmd
+    regsub {%1} $appCmd $path appCmd
     
     # Invoke the command
     eval exec $appCmd $path &
 }
-  
+
 proc ::Windows::CanOpenFileWithSuffix {path} {
 
     # Look for the application under HKEY_CLASSES_ROOT
@@ -88,7 +94,13 @@ proc ::Windows::CanOpenFileWithSuffix {path} {
 	return 0
     } 
     
-    
+    # Perhaps there can be other commands than 'open'.
+    if {[catch {
+	set appCmd [registry get \
+	  $root\\$appKey\\shell\\open\\command ""]
+    } msg]} {
+	return 0
+    }
     return 1
 }
 

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.12 2003-08-23 07:19:16 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.13 2003-09-28 06:29:08 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -364,11 +364,10 @@ proc ::PreferencesUtils::SetWidgetDefaultOptions { } {
 #
 #       Set defaults in the option database for widget classes.
 #       First, on all platforms...
-
-# Set the user preferences from the preferences file if they are there,
-# else take the hardcoded defaults.
-# 'thePrefs': a list of lists where each sublist defines an item in the
-# following way:  {theVarName itsResourceName itsHardCodedDefaultValue
+#       Set the user preferences from the preferences file if they are there,
+#       else take the hardcoded defaults.
+#       'thePrefs': a list of lists where each sublist defines an item in the
+#       following way:  {theVarName itsResourceName itsHardCodedDefaultValue
 #                 {thePriority 20}}.
 # Note: it may prove useful to have the versions numbers as the first elements!
 
@@ -430,62 +429,7 @@ proc ::PreferencesUtils::SetUserPreferences { } {
       [list ::Types::mimeIsText    mimeTypeIsText_array    [::Types::GetIsMimeTextArr]]  \
       [list ::Types::mime2SuffList mime2SuffixList_array   [::Types::GetSuffixListArr]]  \
       [list ::Plugins::mimeTypeDoWhat mimeTypeDoWhat_array [::Plugins::GetDoWhatForMimeArr]] ]
-    
-    # And continue with the jabber preferences... 
-    
-    set ver $prefs(fullVers)
-    if {!$prefs(stripJabber)} {
-	::PreferencesUtils::Add [list  \
-	  [list ::Jabber::jprefs(port)             jprefs_port              $::Jabber::jprefs(port)]  \
-	  [list ::Jabber::jprefs(sslport)          jprefs_sslport           $::Jabber::jprefs(sslport)]  \
-	  [list ::Jabber::jprefs(rost,clrLogout)   jprefs_rost_clrRostWhenOut $::Jabber::jprefs(rost,clrLogout)]  \
-	  [list ::Jabber::jprefs(rost,dblClk)      jprefs_rost_dblClk       $::Jabber::jprefs(rost,dblClk)]  \
-	  [list ::Jabber::jprefs(rost,rmIfUnsub)   jprefs_rost_rmIfUnsub    $::Jabber::jprefs(rost,rmIfUnsub)]  \
-	  [list ::Jabber::jprefs(rost,allowSubNone) jprefs_rost_allowSubNone $::Jabber::jprefs(rost,allowSubNone)]  \
-	  [list ::Jabber::jprefs(subsc,inrost)     jprefs_subsc_inrost      $::Jabber::jprefs(subsc,inrost)]  \
-	  [list ::Jabber::jprefs(subsc,notinrost)  jprefs_subsc_notinrost   $::Jabber::jprefs(subsc,notinrost)]  \
-	  [list ::Jabber::jprefs(subsc,auto)       jprefs_subsc_auto        $::Jabber::jprefs(subsc,auto)]  \
-	  [list ::Jabber::jprefs(subsc,group)      jprefs_subsc_group       $::Jabber::jprefs(subsc,group)]  \
-	  [list ::Jabber::jprefs(block,notinrost)  jprefs_block_notinrost   $::Jabber::jprefs(block,notinrost)]  \
-	  [list ::Jabber::jprefs(block,list)       jprefs_block_list        $::Jabber::jprefs(block,list)    userDefault] \
-	  [list ::Jabber::jprefs(speakMsg)         jprefs_speakMsg          $::Jabber::jprefs(speakMsg)]  \
-	  [list ::Jabber::jprefs(speakChat)        jprefs_speakChat         $::Jabber::jprefs(speakChat)]  \
-	  [list ::Jabber::jprefs(snd,online)       jprefs_snd_online        $::Jabber::jprefs(snd,online)]  \
-	  [list ::Jabber::jprefs(snd,offline)      jprefs_snd_offline       $::Jabber::jprefs(snd,offline)]  \
-	  [list ::Jabber::jprefs(snd,statchange)   jprefs_snd_statchange    $::Jabber::jprefs(snd,statchange)]  \
-	  [list ::Jabber::jprefs(snd,newmsg)       jprefs_snd_newmsg        $::Jabber::jprefs(snd,newmsg)]  \
-	  [list ::Jabber::jprefs(snd,connected)    jprefs_snd_connected     $::Jabber::jprefs(snd,connected)]  \
-	  [list ::Jabber::jprefs(agentsOrBrowse)   jprefs_agentsOrBrowse    $::Jabber::jprefs(agentsOrBrowse)]  \
-	  [list ::Jabber::jprefs(agentsServers)    jprefs_agentsServers     $::Jabber::jprefs(agentsServers)]  \
-	  [list ::Jabber::jprefs(browseServers)    jprefs_browseServers     $::Jabber::jprefs(browseServers)]  \
-	  [list ::Jabber::jprefs(showMsgNewWin)    jprefs_showMsgNewWin     $::Jabber::jprefs(showMsgNewWin)]  \
-	  [list ::Jabber::jprefs(inbox2click)      jprefs_inbox2click       $::Jabber::jprefs(inbox2click)]  \
-	  [list ::Jabber::jprefs(inboxSave)        jprefs_inboxSave         $::Jabber::jprefs(inboxSave)]  \
-	  [list ::Jabber::jprefs(prefgchatproto)   jprefs_prefgchatproto    $::Jabber::jprefs(prefgchatproto)]  \
-	  [list ::Jabber::jprefs(autoaway)         jprefs_autoaway          $::Jabber::jprefs(autoaway)]  \
-	  [list ::Jabber::jprefs(xautoaway)        jprefs_xautoaway         $::Jabber::jprefs(xautoaway)]  \
-	  [list ::Jabber::jprefs(awaymin)          jprefs_awaymin           $::Jabber::jprefs(awaymin)]  \
-	  [list ::Jabber::jprefs(xawaymin)         jprefs_xawaymin          $::Jabber::jprefs(xawaymin)]  \
-	  [list ::Jabber::jprefs(awaymsg)          jprefs_awaymsg           $::Jabber::jprefs(awaymsg)]  \
-	  [list ::Jabber::jprefs(xawaymsg)         jprefs_xawaymsg          $::Jabber::jprefs(xawaymsg)]  \
-	  [list ::Jabber::jprefs(logoutStatus)     jprefs_logoutStatus      $::Jabber::jprefs(logoutStatus)]  \
-	  [list ::Jabber::jprefs(chatFont)         jprefs_chatFont          $::Jabber::jprefs(chatFont)]  \
-	  [list ::Jabber::jprefs(haveIMsysIcons)   jprefs_haveIMsysIcons    $::Jabber::jprefs(haveIMsysIcons)]  \
-	  [list ::Jabber::jserver(profile)         jserver_profile          $::Jabber::jserver(profile)      userDefault] \
-	  [list ::Jabber::jserver(profile,selected) jserver_profile_selected $::Jabber::jserver(profile,selected) userDefault] \
-	  ]
-	
-	# Personal info corresponding to the iq:register namespace.
-	
-	set jprefsRegList {}
-	foreach key $::Jabber::jprefs(iqRegisterElem) {
-	    lappend jprefsRegList [list  \
-	      ::Jabber::jprefs(iq:register,$key) jprefs_iq_register_$key   \
-	      $::Jabber::jprefs(iq:register,$key) userDefault]
-	}
-	::PreferencesUtils::Add $jprefsRegList
-    }
-    
+            
     # Map list of win geoms into an array.
     foreach {win geom} $prefs(winGeom) {
 	set prefs(winGeom,$win) $geom
@@ -507,7 +451,7 @@ proc ::PreferencesUtils::SetUserPreferences { } {
 
 # PreferencesUtils::ParseCommandLineOptions --
 #
-#       Process command line options. Some systems (MacOSX) add their own
+#       Process command line options. Some systems (Mac OS X) add their own
 #       things in the beginning. Skip these.
 
 proc ::PreferencesUtils::ParseCommandLineOptions {cargc cargv} {

@@ -25,7 +25,7 @@
 # 
 # Copyright (C) 2002-2003 Mats Bengtsson
 # 
-# $Id: tree.tcl,v 1.4 2003-07-05 13:37:54 matben Exp $
+# $Id: tree.tcl,v 1.5 2003-09-28 06:29:08 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -37,6 +37,7 @@
 #      
 #   OPTIONS
 #	-background, background, Background 
+#	-backgroundimage, backgroundImage, BackgroundImage
 #	-buttonpresscommand, buttonPressCommand, ButtonPressCommand  tclProc?
 #	-buttonpressmillisec, buttonPressMillisec, ButtonPressMillisec
 #	-doubleclickcommand, doubleClickCommand, DoubleClickCommand  tclProc?
@@ -100,6 +101,7 @@
 # ########################### CHANGES ##########################################
 #
 #       1.0         first release by Mats Bengtsson    
+#       030921      -backgroundimage option
 
 package provide tree 1.0
 
@@ -154,12 +156,14 @@ namespace eval tree {
 	
     # The mac look-alike triangles, folder, and generic file icons.
     set widgetGlobals(openbmmac) [image create photo -data {
-	R0lGODdhCwAKAKIAAP///97e3s7O/729vZyc/4yMjGNjzgAAACwAAAAACwAKAAADHRi63P7t
-	yElPOCJrcoo6REgY3bCAYxmRhemokKskADs=
+	R0lGODlhCwALAPMAAP///97e3s7O/729vZyc/4yMjGNjzgAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAEALAAAAAALAAsAAAQgMMhJq7316M1P
+	OEIoEkchHURKGOUwoWubsYVryZiNVREAOw==
     }]
     set widgetGlobals(closedbmmac) [image create photo -data {
-	R0lGODdhCgALAKIAAP///97e3s7O/729vZyc/4yMjGNjzgAAACwAAAAACgALAAADHRh62n7M
-	tSOipMROQfLlhKFhYjFs5Tll5nW0F6wkADs=
+	R0lGODlhCwALAPMAAP///97e3s7O/729vZyc/4yMjGNjzgAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAEALAAAAAALAAsAAAQiMMgjqw2H3nqE
+	3h3xWaEICgRhjBi6FgMpvDEpwuCBg3sVAQA7
     }]
     set widgetGlobals(folderim) [image create photo -data {
 	R0lGODdhEAAQANUAAP///+fn/97e/97e3s7O/87Ozs7G/8bG/73G/729/729zr29vbW9/7W1
@@ -244,6 +248,7 @@ proc ::tree::Init { } {
     
     array set widgetOptions {
 	-background          {background           Background          }
+	-backgroundimage     {backgroundImage      BackgroundImage     }
 	-buttonpresscommand  {buttonPressCommand   ButtonPressCommand  }
 	-buttonpressmillisec {buttonPressMillisec  ButtonPressMillisec }
 	-doubleclickcommand  {doubleClickCommand   DoubleClickCommand  }
@@ -284,6 +289,7 @@ proc ::tree::Init { } {
 
     # Options for this widget
     option add *Tree.background            #dedede         widgetDefault
+    option add *Tree.backgroundImage       {}              widgetDefault
     option add *Tree.buttonPressCommand    {}              widgetDefault
     option add *Tree.buttonPressMillisec   1000            widgetDefault
     option add *Tree.highlightBackground   white           widgetDefault
@@ -440,7 +446,7 @@ proc ::tree::tree {w args} {
     
     # The frame takes care of the focus stuff since any focus ring in
     # the canvas is drawn inside it!
-    eval canvas $widgets(canvas) $canOpts -highlightthickness 0
+    eval {canvas $widgets(canvas) -highlightthickness 0} $canOpts
     pack $widgets(canvas) -fill both -expand 1
     
     # Find the frame options.
@@ -466,6 +472,7 @@ proc ::tree::tree {w args} {
     bind $widgets(canvas) <Key-Up> [list ::tree::SelectNext $w -1]
     bind $widgets(canvas) <Key-Down> [list ::tree::SelectNext $w +1]
     bind $widgets(canvas) <ButtonRelease-1> [list ::tree::ButtonRelease $w]
+    bind $widgets(canvas) <Configure> [list ::tree::ConfigureCallback $w]
     
     if {[llength $options(-rightclickcommand)]} {
 	bind $widgets(canvas) <Button-3>   \
@@ -524,7 +531,7 @@ proc ::tree::ButtonClickCmd {w x y} {
 		    uplevel #0 "$options(-opencommand) [list $w $lbl]"
 		}
 	    }
-	    Build $w
+	    BuildWhenIdle $w
 	}
     } else {
 	RemoveSelection $w
@@ -577,6 +584,16 @@ proc ::tree::ButtonRelease {w} {
 
     if {[info exists treestate(afterid)]} {
 	catch {after cancel $treestate(afterid)}
+    }
+}
+
+proc ::tree::ConfigureCallback {w} {
+    
+    upvar ::tree::${w}::widgets widgets
+    upvar ::tree::${w}::options options
+
+    if {[string length $options(-backgroundimage)] > 0} {
+	::tree::DrawBackgroundImage $w
     }
 }
 
@@ -751,7 +768,7 @@ proc ::tree::Configure {w args} {
     }
     
     # Error checking.
-    if {[expr {[llength $args]%2}] == 1} {
+    if {[expr {[llength $args] % 2}] == 1} {
 	return -code error "value for \"[lindex $args end]\" missing"
     }    
 
@@ -831,7 +848,7 @@ proc ::tree::Configure {w args} {
 	BuildWhenIdle $w
     }
 
-    return {}
+    return ""
 }
 
 # Initialize a element of the tree.
@@ -958,7 +975,7 @@ proc ::tree::ConfigureItem {w v args} {
 	    set treestate($v:text) [FileTree tail $v]
 	}
 	BuildWhenIdle $w
-	return {}
+	return ""
     }
 }
 
@@ -1260,15 +1277,59 @@ proc ::tree::Build {w} {
 	return -code error "unrecognized value \"$options(-openicons)\" for -openicons"
     }
     $can delete all
+    
+    if {[string length $options(-backgroundimage)] > 0} {
+	DrawBackgroundImage $w
+    } else {
+	
+	# Just a dummy tag for the display list.
+	$can create line 0 0 1 0 -fill $options(-background) -tags tbgim
+    }
     catch {unset treestate(pending)}
+    
+    # Keeps track of y coords to draw.
     set treestate(y) 10
     BuildLayer $w {} 12
+    
+    # At this stage the display list is almost completely mixed up. Reorder!
+    $can lower ttreev ttreeh
+    $can lower tpyj ttreev
+    $can lower tbg ttreev
+
     set h [lindex [$can bbox all] 3]
     if {($h == "") || ($h < $options(-height))} {
 	set h $options(-height)
     }
     $can configure -scrollregion [concat 0 0 $options(-scrollwidth) $h]
     DrawSelection $w
+}
+
+# ::tree::DrawBackgroundImage --
+#
+#       Tile any background image over the scroll region.
+
+proc ::tree::DrawBackgroundImage {w} {
+    upvar ::tree::${w}::options options
+    upvar ::tree::${w}::widgets widgets
+
+    set can $widgets(canvas)    
+    set imwidth [image width $options(-backgroundimage)]
+    set imheight [image height $options(-backgroundimage)]
+    set wwidth [winfo width $can]
+    set wheight [winfo height $can]
+    set cwidth $options(-scrollwidth)
+    set cheight $options(-height)
+    set cwidth [expr {$wwidth > $cwidth} ? $wwidth : $cwidth]
+    set cheight [expr {$wheight > $cheight} ? $wheight : $cheight]
+    #puts "imwidth=$imwidth, imheight=$imheight, cwidth=$cwidth, cheight=$cheight"
+    for {set x 0} {$x < $cwidth} {incr x $imwidth} {
+	for {set y 0} {$y < $cheight} {incr y $imheight} {
+	    #puts "x=$x, y=$y"
+	    $can create image $x $y -anchor nw  \
+	      -image $options(-backgroundimage) -tags tbgim
+	}
+    }
+    $can lower tbgim
 }
 
 # ::tree::BuildLayer --
@@ -1323,19 +1384,25 @@ proc ::tree::BuildLayer {w v in} {
 	    set isDir 1
 	}
 	set y $treestate(y)
+	
+	# Any background color?
 	if {[string length $treestate($vxc:bg)]} {
 	    $can create rectangle 0 [expr $y - 7] $options(-scrollwidth)  \
-	      [expr $y + 7] -outline {} -fill $treestate($vxc:bg) -tags bg
+	      [expr $y + 7] -outline {} -fill $treestate($vxc:bg) -tags tbg
 	}
 	
 	# This is the "row height".
 	incr treestate(y) 17
+	
+	# Any pyjamas lines?
 	if {[llength $options(-pyjamascolor)] > 0} {
-	    $can create line 0 [expr $y + 8] $options(-scrollwidth)   \
-	      [expr $y + 8] -fill $options(-pyjamascolor) -tags pyj	    
+	    $can create line 0 [expr $y + 8] 4000  \
+	      [expr $y + 8] -fill $options(-pyjamascolor) -tags tpyj	    
 	}
+	
+	# Tree lines?
 	if {$hasTree} {
-	    $can create line $in $y [expr $in + 10] $y -fill $treeCol 
+	    $can create line $in $y [expr $in + 10] $y -fill $treeCol -tags ttreeh
 	}
 	set icon $treestate($vxc:icon)
 	set text $treestate($vxc:text)
@@ -1381,12 +1448,9 @@ proc ::tree::BuildLayer {w v in} {
 	}
     }
     if {$hasTree} {
-	eval {set id [$can create line $in $start $in [expr $y + $yTreeOff]   \
-	  -fill $treeCol]}
-	$can lower $id
+	$can create line $in $start $in [expr $y + $yTreeOff]  \
+	  -fill $treeCol -tags ttreev
     }
-    $can lower pyj
-    $can lower bg
 }
 
 # ::tree::OpenTree --
@@ -1414,7 +1478,7 @@ proc ::tree::OpenTree {w v} {
       [info exists treestate($v:children)] &&   \
       ([string length $treestate($v:children)] > 0)} {
 	set treestate($v:open) 1
-	Build $w
+	BuildWhenIdle $w
 	
 	# Evaluate any open command callback.
 	if {[llength $options(-opencommand)]} {
@@ -1440,7 +1504,7 @@ proc ::tree::CloseTree {w v} {
     
     if {[info exists treestate($v:open)] && ($treestate($v:open) == 1)} {
 	set treestate($v:open) 0
-	Build $w
+	BuildWhenIdle $w
     }
 }
 
@@ -1478,10 +1542,10 @@ proc ::tree::DrawSelection {w} {
     }
     set v $treestate(selection)
     if {[string length $v] == 0} {
-	return
+	return ""
     }
     if {![info exists treestate($v:tag)]} {
-	return
+	return ""
     }
     
     # Select.
@@ -1490,7 +1554,7 @@ proc ::tree::DrawSelection {w} {
 	set id [eval $can create rectangle $bbox -fill $options(-selectbackground) \
 	  {-outline {}}]
 	set treestate(selidx) $id
-	$can lower $id
+	$can raise $id tbgim
 	if {[llength [$can find withtag bg]] > 0} {
 	    $can raise $id bg
 	}
@@ -1500,7 +1564,7 @@ proc ::tree::DrawSelection {w} {
     } else {
 	set treestate(selidx) {}
     }
-    return {}
+    return ""
 }
 
 # Internal use only
@@ -1518,7 +1582,7 @@ proc ::tree::BuildWhenIdle {w} {
 	set treestate(pending) 1
 	after idle [list ::tree::Build $w]
     }
-    return {}
+    return ""
 }
 
 # ::tree::LabelAt --
@@ -1547,7 +1611,7 @@ proc ::tree::LabelAt {w x y} {
 	    return $treestate(tag:$id)
 	}
     }
-    return {}
+    return ""
 }
 
 # ::tree::NextLabel --
@@ -1583,7 +1647,7 @@ proc ::tree::NextLabel {w direction} {
 	    }
 	}
     }
-    return {}
+    return ""
 }
 
 proc ::tree::FileTree {cmd arg} {

@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: PutFileIface.tcl,v 1.8 2003-09-21 13:02:12 matben Exp $
+# $Id: PutFileIface.tcl,v 1.9 2003-09-28 06:29:08 matben Exp $
 
 package require putfile
 package require uriencode
@@ -80,7 +80,7 @@ proc ::PutFileIface::PutFile {wtop fileName where {opts {}}} {
 	server {
     
 	    # Translate tcl type '-key value' list to 'Key: value' option list.
-	    set optList [::ImageAndMovie::GetTransportSyntaxOptsFromTcl $opts]
+	    set optList [::Import::GetTransportSyntaxOptsFromTcl $opts]
 	    set relFilePath [filerelative $this(path) $fileName]
 	    set relFilePath [uriencode::quotepath $relFilePath]
 	    set putCmd "PUT NEW: [list $relFilePath] $optList"
@@ -114,7 +114,7 @@ proc ::PutFileIface::PutFile {wtop fileName where {opts {}}} {
 	    set dstFile [::Types::GetFileTailAddSuffix $fileName]
     
 	    # Translate tcl type '-key value' list to 'Key: value' option list.
-	    set optList [::ImageAndMovie::GetTransportSyntaxOptsFromTcl $opts]
+	    set optList [::Import::GetTransportSyntaxOptsFromTcl $opts]
 	    
 	    # Loop over all connected servers or only the specified one.
 	    foreach ip $allPutIP {
@@ -217,7 +217,7 @@ proc ::PutFileIface::PutFileToClient {wtop s ip relativeFilePath opts} {
     set mime [::Types::GetMimeTypeForFileName $filePath]
     
     # Translate tcl type '-key value' list to 'Key: value' option list.
-    set optList [::ImageAndMovie::GetTransportSyntaxOptsFromTcl $opts]
+    set optList [::Import::GetTransportSyntaxOptsFromTcl $opts]
     
     # And finally...    
     if {[catch {

@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Connections.tcl,v 1.6 2003-09-13 06:39:25 matben Exp $
+# $Id: Connections.tcl,v 1.7 2003-09-28 06:29:08 matben Exp $
 
 package provide Connections 1.0
 
@@ -847,7 +847,7 @@ proc ::OpenMulticast::OpenMulticastQTStream {wtop wentry} {
     
     # This is opened as an ordinary movie.
     set anchor [::CanvasUtils::NewImportAnchor]
-    ::ImageAndMovie::DoImport $wCan $anchor -url $url
+    ::Import::DoImport $wCan $anchor -url $url
 }
 
 proc ::OpenMulticast::CleanupMulticastQTStream {wtop fid fullName token} { 
@@ -894,7 +894,7 @@ proc ::OpenMulticast::CleanupMulticastQTStream {wtop fid fullName token} {
     
     # This is opened as an ordinary movie.
     set anchor [::CanvasUtils::NewImportAnchor]
-    ::ImageAndMovie::DoImport $wCan "$anchor" -file $fullName  \
+    ::Import::DoImport $wCan "$anchor" -file $fullName  \
       -where "local"
     set fileTail [file tail $fullName]
     ::UI::SetStatusMessage $wtop "Opened streaming live multicast: $fileTail."
