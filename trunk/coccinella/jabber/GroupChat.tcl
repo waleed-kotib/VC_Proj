@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.37 2004-01-23 08:54:59 matben Exp $
+# $Id: GroupChat.tcl,v 1.38 2004-01-23 14:26:19 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -15,6 +15,15 @@ package provide GroupChat 1.0
 
 namespace eval ::Jabber::GroupChat:: {
     global  wDlgs
+
+    # Add all event hooks.
+    ::hooks::add quitAppHook             [list ::UI::SaveWinPrefixGeom $wDlgs(jgc)]
+    ::hooks::add quitAppHook             ::Jabber::GroupChat::GetFirstPanePos
+    ::hooks::add newGroupChatMessageHook ::Jabber::GroupChat::GotMsg
+    ::hooks::add closeWindowHook         ::Jabber::GroupChat::CloseHook
+    ::hooks::add loginHook               ::Jabber::GroupChat::LoginHook
+    ::hooks::add logoutHook              ::Jabber::GroupChat::LogoutHook
+    ::hooks::add presenceHook            ::Jabber::GroupChat::PresenceCallback
 
     # Use option database for customization. Not used yet...
     set fontS [option get . fontSmall {}]
@@ -57,14 +66,6 @@ namespace eval ::Jabber::GroupChat:: {
 	{syspre      -foreground          sysPreForeground      Foreground}
 	{sys         -foreground          sysForeground         Foreground}
     }
-
-    # Add all event hooks.
-    hooks::add quitAppHook             [list ::UI::SaveWinPrefixGeom $wDlgs(jgc)]
-    hooks::add quitAppHook             ::Jabber::GroupChat::GetFirstPanePos
-    hooks::add newGroupChatMessageHook ::Jabber::GroupChat::GotMsg
-    hooks::add closeWindowHook         ::Jabber::GroupChat::CloseHook
-    hooks::add logoutHook              ::Jabber::GroupChat::Logout
-    hooks::add presenceHook            ::Jabber::GroupChat::PresenceCallback
     
     # Local stuff
     variable locals
@@ -1207,11 +1208,11 @@ proc ::Jabber::GroupChat::Close {roomJid} {
     }
 }
 
-# Jabber::GroupChat::Logout --
+# Jabber::GroupChat::LogoutHook --
 #
 #       Sets logged out status on all groupchats, that is, disable all buttons.
 
-proc ::Jabber::GroupChat::Logout { } {
+proc ::Jabber::GroupChat::LogoutHook { } {
     
     variable locals
     upvar ::Jabber::jstate jstate
@@ -1223,6 +1224,22 @@ proc ::Jabber::GroupChat::Logout { } {
 	if {[winfo exists $w]} {
 	    foreach wbt $locals($room,allBts) {
 		$wbt configure -state disabled
+	    }
+	}
+    }
+}
+
+proc ::Jabber::GroupChat::LoginHook { } {
+    
+    variable locals
+    upvar ::Jabber::jstate jstate
+
+    set allRooms [::Jabber::InvokeJlibCmd service allroomsin]
+    foreach room $allRooms {
+	set w $locals($room,wtop)
+	if {[winfo exists $w]} {
+	    foreach wbt $locals($room,allBts) {
+		$wbt configure -state normal
 	    }
 	}
     }
