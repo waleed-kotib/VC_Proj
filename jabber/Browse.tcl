@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.63 2004-10-12 13:48:56 matben Exp $
+# $Id: Browse.tcl,v 1.64 2004-11-08 15:52:51 matben Exp $
 
 package provide Browse 1.0
 
@@ -18,7 +18,6 @@ namespace eval ::Jabber::Browse:: {
 
     # Use option database for customization. 
     # Use priority 30 just to override the widgetDefault values!
-    #option add *Browse*Tree.background    green            30
     option add *Browse.waveImage            wave           widgetDefault
 
     variable wtop  ""
@@ -1172,7 +1171,7 @@ proc ::Jabber::Browse::AddServer { } {
     pack  $w.frall -fill both -expand 1 -ipadx 12 -ipady 4
     message $w.frall.msg -width 220 -text [mc jabrowseaddserver]
     entry $w.frall.ent -width 24   \
-      -textvariable "[namespace current]::addserver"
+      -textvariable [namespace current]::addserver
     pack $w.frall.msg $w.frall.ent -side top -fill x -anchor w -padx 10  \
       -pady 4
 
@@ -1211,21 +1210,23 @@ proc ::Jabber::Browse::CancelAdd {w} {
 proc ::Jabber::Browse::DoAddServer {w} {   
     variable addserver
     variable finishedAdd
+    variable wtree
     upvar ::Jabber::jprefs jprefs
     
     set finishedAdd 1
     destroy $w
-    if {[llength $addserver] == 0} {
+    if {$addserver == ""} {
 	return
     }
     
     # Verify that we doesn't have it already.
-    if {[lsearch $jprefs(browseServers) $addserver] >= 0} {
+    if {[$wtree isitem $addserver]} {
 	tk_messageBox -type ok -icon info  \
 	  -message {We have this server already on our list}
 	return
     }
     lappend jprefs(browseServers) $addserver
+    set jprefs(browseServers) [lsort -unique $jprefs(browseServers)]
     
     # Browse services for this server, schedules update tree.
     Get $addserver

@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasCmd.tcl,v 1.5 2004-08-02 14:06:21 matben Exp $
+# $Id: CanvasCmd.tcl,v 1.6 2004-11-08 15:52:52 matben Exp $
 
 package provide CanvasCmd 1.0
 
@@ -166,49 +166,6 @@ proc ::CanvasCmd::DoCanvasGrid {wtop} {
 	}
     }
     $wCan lower grid
-}
-    
-# CanvasCmd::SavePostscript --
-#
-#       Save canvas to a postscript file.
-#       Save canvas to a XML/SVG file.
-#       
-# Arguments:
-#       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
-#       
-# Results:
-#       file save dialog shown, file written.
-
-proc ::CanvasCmd::SavePostscript {wtop} {
-    global  prefs this
-    
-    set w [::WB::GetCanvasFromWtop $wtop]
-    if {![winfo exists $w]} {
-	return
-    }
-    set typelist {
-	{"Postscript File"    {.ps}}
-	{"XML/SVG"            {.svg}}
-    }
-    set userDir [::Utils::GetDirIfExist $prefs(userPath)]
-    set opts [list -initialdir $userDir]
-    if {$prefs(haveSaveFiletypes)} {
-	lappend opts -filetypes $typelist
-    }
-    set ans [eval {tk_getSaveFile -title [mc {Save As}]  \
-      -filetypes $typelist -defaultextension ".ps"  \
-      -initialfile "canvas.ps"} $opts]
-    if {[string length $ans] > 0} {
-	set prefs(userPath) [file dirname $ans]
-	if {[file extension $ans] == ".svg"} {
-	    ::can2svg::canvas2file $w $ans -uritype file -usetags 0
-	} else {
-	    eval {$w postscript} $prefs(postscriptOpts) {-file $ans}
-	    if {[string equal $this(platform) "macintosh"]} {
-		file attributes $ans -type TEXT -creator vgrd
-	    }
-	}
-    }
 }
 
 # CanvasCmd::ResizeItem --

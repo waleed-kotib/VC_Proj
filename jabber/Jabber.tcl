@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.113 2004-10-27 14:42:34 matben Exp $
+# $Id: Jabber.tcl,v 1.114 2004-11-08 15:52:51 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -363,7 +363,6 @@ proc ::Jabber::SetUserPreferences { } {
       [list ::Jabber::jprefs(port)             jprefs_port              $jprefs(port)]  \
       [list ::Jabber::jprefs(sslport)          jprefs_sslport           $jprefs(sslport)]  \
       [list ::Jabber::jprefs(agentsServers)    jprefs_agentsServers     $jprefs(agentsServers)]  \
-      [list ::Jabber::jprefs(browseServers)    jprefs_browseServers     $jprefs(browseServers)]  \
       [list ::Jabber::jserver(profile)         jserver_profile          $jserver(profile)      userDefault] \
       [list ::Jabber::jserver(profile,selected) jserver_profile_selected $jserver(profile,selected) userDefault] \
       ]

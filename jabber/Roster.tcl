@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.93 2004-11-07 14:22:58 matben Exp $
+# $Id: Roster.tcl,v 1.94 2004-11-08 15:52:52 matben Exp $
 
 package provide Roster 1.0
 
@@ -29,16 +29,27 @@ namespace eval ::Jabber::Roster:: {
     # Use priority 30 just to override the widgetDefault values!
     set fontS  [option get . fontSmall {}]
     set fontSB [option get . fontSmallBold {}]
-
-    option add *Roster.backgroundImage      sky            widgetDefault
-    option add *Roster*Tree*dirImage        ""             widgetDefault
-    option add *Roster*Tree*onlineImage     lightbulbon    widgetDefault
-    option add *Roster*Tree*offlineImage    lightbulboff   widgetDefault
-    option add *Roster*Tree*groupImage      ""             widgetDefault
-    option add *Roster*rootBackground       ""             widgetDefault
-    option add *Roster*rootBackgroundBd     0              widgetDefault
-    option add *Roster*rootForeground       ""             widgetDefault
-    option add *Roster.waveImage            wave           widgetDefault
+    
+    # Standard widgets and standard options.
+    option add *Roster.borderWidth          1               widgetDefault
+    option add *Roster.relief               raised          widgetDefault
+    option add *Roster.box.borderWidth      1               widgetDefault
+    option add *Roster.box.padX             4               widgetDefault
+    option add *Roster.box.padY             4               widgetDefault
+    option add *Roster.box.relief           sunken          widgetDefault
+    option add *Roster.pad.fstat.padX       8               widgetDefault
+    option add *Roster.pad.fstat.padY       2               widgetDefault
+    
+    # Specials.
+    option add *Roster.backgroundImage      sky             widgetDefault
+    option add *Roster*Tree*dirImage        ""              widgetDefault
+    option add *Roster*Tree*onlineImage     lightbulbon     widgetDefault
+    option add *Roster*Tree*offlineImage    lightbulboff    widgetDefault
+    option add *Roster*Tree*groupImage      ""              widgetDefault
+    option add *Roster*rootBackground       ""              widgetDefault
+    option add *Roster*rootBackgroundBd     0               widgetDefault
+    option add *Roster*rootForeground       ""              widgetDefault
+    option add *Roster.waveImage            wave            widgetDefault
 
     variable wtree    
     variable servtxt
@@ -264,8 +275,8 @@ proc ::Jabber::Roster::Build {w} {
         
     set fontS [option get . fontSmall {}]
 
-    # The frame of class Roster.
-    frame $w -borderwidth 0 -relief flat -class Roster
+    # The frame of class Roster. D = -bd 0 -relief flat
+    frame $w -class Roster
 
     # Tree frame with scrollbars.
     set wroster $w
@@ -273,15 +284,20 @@ proc ::Jabber::Roster::Build {w} {
     set wxsc    $wbox.xsc
     set wysc    $wbox.ysc
     set wtree   $wbox.tree
-    pack [frame $wbox -border 1 -relief sunken]   \
-      -side top -fill both -expand 1 -padx 4 -pady 4
     
-    frame $w.fstat
-    pack  $w.fstat -side bottom -fill x
-    set wwave $w.fstat.wa
+    # D = -border 1 -relief sunken -padx 4 -pady 4
+    frame $wbox
+    pack  $wbox -side top -fill both -expand 1
+    
+    # D = -padx 0 -pady 0
+    frame $w.pad
+    frame $w.pad.fstat
+    pack  $w.pad -side bottom -fill x
+    pack  $w.pad.fstat -side bottom -fill x
+    set wwave $w.pad.fstat.wa
     set waveImage [::Theme::GetImage [option get $w waveImage {}]]  
     ::wavelabel::wavelabel $wwave -bd 2 -type image -image $waveImage
-    pack $wwave -side bottom -fill x -padx 8 -pady 2
+    pack $wwave -side bottom -fill x
     
     set opts {}
     if {$jprefs(rost,useBgImage)} {
