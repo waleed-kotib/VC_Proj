@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.12 2004-08-06 07:46:55 matben Exp $
+# $Id: Whiteboard.tcl,v 1.13 2004-08-07 13:34:22 matben Exp $
 
 package require entrycomp
 package require moviecontroller
@@ -984,6 +984,13 @@ proc ::WB::CloseWhiteboard {wtop} {
     
     Debug 3 "::WB::CloseWhiteboard wtop=$wtop"
     
+    # Verify that window still exists.
+    if {$wtop != "."} {
+	if {![winfo exists [string trimright $wtop .]]} {
+	    return
+	}
+    }
+    
     # Reset and cancel all put/get file operations related to this window!
     # I think we let put operations go on.
     #::PutFileIface::CancelAllWtop $wtop
@@ -1004,8 +1011,6 @@ proc ::WB::DestroyMain {wtop} {
     upvar ::WB::${wtop}::canvasImages canvasImages
     
     Debug 3 "::WB::DestroyMain wtop=$wtop"
-
-    set wcan [::WB::GetCanvasFromWtop $wtop]
     
     # Save instance specific 'state' array into generic 'state'.
     if {$opts(-usewingeom)} {

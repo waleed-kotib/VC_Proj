@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.24 2004-08-06 15:19:20 matben Exp $
+# $Id: JWB.tcl,v 1.25 2004-08-07 13:34:22 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -577,7 +577,7 @@ proc ::Jabber::WB::ExitRoomHook {roomJid} {
     
     set wtop [::Jabber::WB::GetWtopFromMessage groupchat $roomJid]
     if {[string length $wtop]} {
-	::WB::DestroyMain $wtop
+	::WB::CloseWhiteboard $wtop
 	::Jabber::WB::Free $wtop
     }
 }

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.65 2004-08-06 15:19:20 matben Exp $
+# $Id: GroupChat.tcl,v 1.66 2004-08-07 13:34:22 matben Exp $
 
 package require History
 
@@ -1552,7 +1552,7 @@ proc ::Jabber::GroupChat::Exit {token} {
 	  -message [mc jamesswarnexitroom $roomjid]} $opts]
 	if {$ans == "yes"} {
 	    ::Jabber::GroupChat::Close $token
-	    ::Jabber::JlibCmd service exitroom $roomjid
+	    $jstate(jlib) service exitroom $roomjid
 	    ::hooks::run groupchatExitRoomHook $roomjid
 	}
     } else {
@@ -1588,7 +1588,7 @@ proc ::Jabber::GroupChat::Close {token} {
     }
     
     # Make sure any associated whiteboard is closed as well.
-    ::hooks::run groupchatExitRoomHook $roomjid
+    # ::hooks::run groupchatExitRoomHook $roomjid
 }
 
 # Jabber::GroupChat::LogoutHook --
