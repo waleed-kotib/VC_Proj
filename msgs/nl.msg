@@ -103,6 +103,7 @@
 ::msgcat::mcset nl Roster		{Roster}
 ::msgcat::mcset nl Save			{Opslaan}
 ::msgcat::mcset nl Search		{Zoeken}
+::msgcat::mcset nl Select               {Selecteer}
 ::msgcat::mcset nl Send			{Zenden}
 ::msgcat::mcset nl Server		{Server}
 ::msgcat::mcset nl Servers		{Servers}
@@ -222,6 +223,8 @@
 ::msgcat::mcset nl mLogin		{&Aanmelden...}
 ::msgcat::mcset nl mLogout		{Afmelden}
 ::msgcat::mcset nl mLogoutWith          {Afmelden met &boodschap...}
+::msgcat::mcset nl mHideMain            {Verberg hoofdvenster}
+::msgcat::mcset nl mShowMain            {Toon hoofdvenster}
 ::msgcat::mcset nl mPassword		{&Wachtwoord...}
 ::msgcat::mcset nl mRoster/Services	{Roster/Services}
 ::msgcat::mcset nl mMessageInbox	{Postvak in}
@@ -315,6 +318,7 @@
 ::msgcat::mcset nl {Default group}		{Standaard groep}
 ::msgcat::mcset nl {Default Logout Status}	{Standaard afmeldstatus}
 ::msgcat::mcset nl {Disk Cache}			{Schijfcache}
+::msgcat::mcset nl {Different Passwords}        {Verschillende wachtwoorden}
 ::msgcat::mcset nl {Do Not Disturb}		{Niet storen}
 ::msgcat::mcset nl {Edit Fonts}			{Lettertypes bewerken}
 ::msgcat::mcset nl {Edit Item}			{Item bewerken}
@@ -541,6 +545,8 @@ sluiten? U kan hem later op elk moment starten vanaf het menu.}
 ::msgcat::mcset nl messprotocolch	{U hebt de netwerk setup gewijzigd.\
 Dit vereist dat u Coccinella herstart voordat de wijzigingen worden doorgevoerd.\
 Wilt u werkelijk verder gaan?}
+::msgcat::mcset nl messpasswddifferent  {De wachtwoorden komen niet overeen.\
+Probeer alstublieft opnieuw.}
 
 
 
@@ -659,6 +665,7 @@ van de agents: %s}
 	::msgcat::mcset nl jamesserrsearch	{Ophalen van zoekspecificatie\
 mislukt. Foutcode %s met als foutmelding: %s}
 	::msgcat::mcset nl jamessoobok		{Bestandsoverdracht voltooid}
+	::msgcat::mcset nl jamessoobok2         {Bestandsoverdracht van %s naar "%s" is voltooid}
 	::msgcat::mcset nl jamessoobnourl	{Wanneer gebruiker "%s" ons een\
 bestand wilde laten downloaden, ontvingen we geen URL waar we het van konden downloaden.}
 	::msgcat::mcset nl jamessoobask		{Gebruiker "%s" stelt het bestand\
@@ -702,6 +709,11 @@ u deze account gebruikt hebt om te registreren met het overeenkomstige transport
 die ageert als een server service die berichten naar dat IM netwerk transporteert.\
 Het is vereist dat deze in uw roster aanwezig is.\
 U hebt een authorizatie voor %s: %s.}
+::msgcat::mcset nl jamesswbchatlost	        {De volledige conversatie zal verloren\
+gaan wanneer u dit whiteboard sluit. Wilt u werkelijk deze conversatie\
+beëindigen?}
+::msgcat::mcset nl jamesschatoffline            {Deze gebruiker is niet meer online\
+waardoor het bericht niet is verzonden.}
     
     
 
@@ -825,6 +837,7 @@ wordt gelimiteerd door de instellingen hieronder.}
 ::msgcat::mcset nl preftheme     {Kies een thema. Dit vereist het herstarten van Coccinella.}
 ::msgcat::mcset nl prefplugctrl  {U kan elk pakket deselecteren waarvan u\
 het laden wilt verhinderen. U moet Coccinella herstarten voordat de wijzigingen worden doorgevoerd.}
+::msgcat::mcset nl prefchactret  {Gebruik altijd actieve <Return> in chatvenster}
 
 
 
