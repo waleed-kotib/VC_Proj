@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasText.tcl,v 1.1 2004-06-06 06:41:31 matben Exp $
+# $Id: CanvasText.tcl,v 1.2 2004-07-22 15:11:28 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 
@@ -190,7 +190,7 @@ proc ::CanvasText::CanvasFocus {w x y {forceNew 0}} {
 	set undocmd [list delete $utag]
 
 	set redo [list ::CanvasUtils::CommandExList $wtop  \
-	  [list [list $cmdlocal "local"] [list $cmdremote "remote"]]]
+	  [list [list $cmdlocal local] [list $cmdremote remote]]]
 	set undo [list ::CanvasUtils::Command $wtop $undocmd]
 	eval $redo
 	undo::add [::WB::GetUndoToken $wtop] $undo $redo
@@ -588,7 +588,7 @@ proc ::CanvasText::NewLine {w} {
     set cmdremote [list insert $utag $ind $nl_]
     set undocmd [list dchars $utag $ind]
     set redo [list ::CanvasUtils::CommandExList $wtop  \
-      [list [list $cmdlocal "local"] [list $cmdremote "remote"]]]
+      [list [list $cmdlocal local] [list $cmdremote remote]]]
     set undo [list ::CanvasUtils::Command $wtop $undocmd]
     eval $redo
     undo::add [::WB::GetUndoToken $wtop] $undo $redo

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.4 2004-07-09 06:26:07 matben Exp $
+# $Id: Whiteboard.tcl,v 1.5 2004-07-22 15:11:28 matben Exp $
 
 package require entrycomp
 package require moviecontroller
@@ -40,7 +40,7 @@ namespace eval ::WB:: {
     ::hooks::add whiteboardCloseHook ::WB::CloseWhiteboard
     ::hooks::add loginHook           ::WB::LoginHook
     ::hooks::add logoutHook          ::WB::LogoutHook
-    ::hooks::add initHook            ::WB::InitHook
+    ::hooks::add earlyInitHook       ::WB::EarlyInitHook
     ::hooks::add prefsInitHook       ::WB::InitPrefsHook
 
     # Tool button mappings.
@@ -129,6 +129,51 @@ namespace eval ::WB:: {
     set menuSpecPublic(wpaths) {}
     
     variable iconsInitted 0
+    
+    # Prefs:
+    # Side of selecting box .
+    set prefs(aBBox) 2
+
+    # Should text inserts be batched?
+    set prefs(batchText) 1
+
+    # Delay time in ms for batched text.
+    set prefs(batchTextms) 2000
+
+    # Want to fit all movies within canvas?
+    set prefs(autoFitMovies) 1
+
+    set prefs(canScrollWidth) 1800
+    set prefs(canScrollHeight) 1200
+
+    # Html sizes or point sizes when transferring text items?
+    set prefs(useHtmlSizes) 1
+
+    # Offset when duplicating canvas items and when opening images and movies.
+    # Needed in ::CanvasUtils::NewImportAnchor
+    set prefs(offsetCopy) 16
+
+    # Grid spacing.
+    set prefs(gridDist) 40                 
+    
+    # Mark bounding box (1) or each coords (0).
+    set prefs(bboxOrCoords) 0
+    
+    # Scale factor used when scaling canvas items.
+    set prefs(scaleFactor) 1.2
+    set prefs(invScaleFac) [expr 1.0/$prefs(scaleFactor)]
+
+    # Use common CG when scaling more than one item?
+    set prefs(scaleCommonCG) 0
+
+    # Fraction of points to strip when straighten.
+    set prefs(straightenFrac) 0.3
+    
+    # Are there a working canvas dash option?
+    set prefs(haveDash) 0
+    if {![string match "mac*" $this(platform)]} {
+	set prefs(haveDash) 1
+    }
 }
 
 # WB::InitPrefsHook --
@@ -180,49 +225,10 @@ proc ::WB::InitPrefsHook { } {
     set state(fontSize) 2
     set state(font) Helvetica
     set state(fontWeight) normal
-    
-    # Prefs:
-    # Side of selecting box .
-    set prefs(aBBox) 2
-
-    # Should text inserts be batched?
-    set prefs(batchText) 1
-
-    # Delay time in ms for batched text.
-    set prefs(batchTextms) 2000
-
-    # Want to fit all movies within canvas?
-    set prefs(autoFitMovies) 1
-
-    set prefs(canScrollWidth) 1800
-    set prefs(canScrollHeight) 1200
-
-    # Html sizes or point sizes when transferring text items?
-    set prefs(useHtmlSizes) 1
-
-    # Offset when duplicating canvas items and when opening images and movies.
-    # Needed in ::CanvasUtils::NewImportAnchor
-    set prefs(offsetCopy) 16
-
-    # Grid spacing.
-    set prefs(gridDist) 40                 
-    
-    # Mark bounding box (1) or each coords (0).
-    set prefs(bboxOrCoords) 0
-    
-    # Scale factor used when scaling canvas items.
-    set prefs(scaleFactor) 1.2
-    set prefs(invScaleFac) [expr 1.0/$prefs(scaleFactor)]
-
-    # Use common CG when scaling more than one item?
-    set prefs(scaleCommonCG) 0
-    
+            
     # Constrain movements to 45 degrees, else 90 degree intervals.
     set prefs(45) 1
 
-    # Fraction of points to strip when straighten.
-    set prefs(straightenFrac) 0.3
-    
     #----   url's for streaming live movies ----------------------------------------
     set prefs(shortsMulticastQT) {{   \
       {user specified}   \
@@ -235,12 +241,6 @@ proc ::WB::InitPrefsHook { } {
       www.apple.com/quicktime/showcase/radio/hardradio/hardradio.mov  \
       www.apple.com/quicktime/showcase/radio/npr/npr.mov  \
       www.apple.com/quicktime/favorites/bbc_world1/bbc_world1.mov}}
-    
-    # Are there a working canvas dash option?
-    set prefs(haveDash) 0
-    if {![string match "mac*" $this(platform)]} {
-	set prefs(haveDash) 1
-    }
 
     # States and prefs to be stored in prefs file.
     ::PreferencesUtils::Add [list  \
@@ -262,7 +262,7 @@ proc ::WB::InitPrefsHook { } {
       [list state(visToolbar)      state_visToolbar      $state(visToolbar)]  ]    
 }
 
-proc ::WB::InitHook { } {
+proc ::WB::EarlyInitHook { } {
 
     ::WB::Init
     ::WB::InitMenuDefs   
@@ -606,6 +606,15 @@ proc ::WB::InitMenuDefs { } {
 	{command   mCopy             {::UI::CutCopyPasteCmd copy}          disabled C}
 	{command   mPaste            {::UI::CutCopyPasteCmd paste}         disabled V}
     }
+    
+    set menuDefs(main,items) [::WB::MakeItemMenuDef $this(itemPath)]
+    
+    # When registering new menu entries they shall be added at:
+    variable menuDefsInsertInd
+    set menuDefsInsertInd(main,file)   [expr [llength $menuDefs(main,file)]-2]
+    set menuDefsInsertInd(main,edit)   [expr [llength $menuDefs(main,edit)]]
+    set menuDefsInsertInd(main,prefs)  [expr [llength $menuDefs(main,prefs)]]
+    set menuDefsInsertInd(main,info)   [expr [llength $menuDefs(main,info)]-2]
 }
 
 # WB::NewWhiteboard --
@@ -953,6 +962,8 @@ proc ::WB::CloseHook {wclose} {
 	} else {
 	    set wtop ${wclose}.
 	}
+	set wcan [::WB::GetCanvasFromWtop $wtop]
+	::Plugins::DeregisterCanvasInstBinds $wcan
 	::hooks::run whiteboardCloseHook $wtop
     }   
 }
@@ -1290,6 +1301,18 @@ proc ::WB::GetAllWhiteboards { } {
       [lsearch -all -inline -glob [winfo children .] $wDlgs(wb)*]]
 }
 
+
+namespace eval ::WB:: {
+    
+    # Bindings directly to the canvas widget are dealt with using bindtags.
+    # In the future we shall never bind to 'all' items since this also binds
+    # to imported stuff. The item tag 'std', introduced in 0.94.6 shall be used
+    # instead.
+    
+    set stdTag std
+    #set stdTag all   
+}
+
 # WB::SetToolButton --
 #
 #       Uhhh...  When a tool button is clicked. Mainly sets all button specific
@@ -1305,6 +1328,7 @@ proc ::WB::GetAllWhiteboards { } {
 proc ::WB::SetToolButton {wtop btName} {
     global  prefs wapp this
     
+    variable stdTag
     variable wbicons
     upvar ::WB::${wtop}::wapp wapp
     upvar ::WB::${wtop}::state state
@@ -1342,18 +1366,15 @@ proc ::WB::SetToolButton {wtop btName} {
     $wCan config -cursor {}
     
     # Bindings directly to the canvas widget are dealt with using bindtags.
-    # In the future we shall never bind to 'all' items since this also binds
-    # to imported stuff. The item tag 'std', introduced in 0.94.6 shall be used
-    # instead.
-    #set stdTag std
-    set stdTag all
+    
+    set stdTag std
     
     switch -- $btName {
 	point {
 	    bindtags $wCan  \
 	      [list $wCan WhiteboardPoint WhiteboardNonText $wtoplevel all]
 
-	    $wCan bind $stdTag <Double-Button-1>  \
+	    $wCan bind std <Double-Button-1>  \
 	      [list ::ItemInspector::ItemInspector $wtop current]
 
 	    switch -- $this(platform) {
@@ -1365,6 +1386,19 @@ proc ::WB::SetToolButton {wtop btName} {
 		    }
 		    $wCan bind $stdTag <ButtonRelease-1> {
 			::CanvasUtils::StopTimerToItemPopup
+		    }
+		    $wCan bind $stdTag <Control-Button-1> {
+			::CanvasUtils::DoItemPopup %W %X %Y 
+		    }
+		    
+		    # This one is needed to cancel selection since we compete
+		    # with Button-1 binding to canvas.
+		    $wCan bind $stdTag <Control-ButtonRelease-1> {
+			::CanvasDraw::CancelBox %W
+		    }
+
+		    $wCan bind $stdTag <Button-2> {
+			::CanvasUtils::DoItemPopup %W %X %Y 
 		    }
 		    bind QTFrame <Button-1> {
 			::CanvasUtils::StartTimerToWindowPopup %W %X %Y 
@@ -1404,20 +1438,58 @@ proc ::WB::SetToolButton {wtop btName} {
 	    # items as well.
 	    # With shift constrained move.
 	    bindtags $wCan  \
-	      [list $wCan WhiteboardMove WhiteboardNonText $wtoplevel all]
+	      [list $wCan WhiteboardMove WhiteboardNonText $wtoplevel all]	    
+
+	    $wCan bind std <Button-1> {
+		::CanvasDraw::InitMoveCurrent %W [%W canvasx %x] [%W canvasy %y]
+	    }
+	    $wCan bind std <B1-Motion> {
+		::CanvasDraw::DragMoveCurrent %W [%W canvasx %x] [%W canvasy %y]
+	    }
+	    $wCan bind std <ButtonRelease-1> {
+		::CanvasDraw::FinalMoveCurrent %W [%W canvasx %x] [%W canvasy %y]
+	    }
+	    $wCan bind std <Shift-B1-Motion> {
+		::CanvasDraw::DragMoveCurrent %W [%W canvasx %x] [%W canvasy %y] shift
+	    }
 	    
-	    # Moving single coordinates.
-	    $wCan bind tbbox <Button-1> {
-		::CanvasDraw::InitMove %W [%W canvasx %x] [%W canvasy %y] point
+	    $wCan bind tbbox&&(oval||rectangle) <Button-1> {
+		::CanvasDraw::InitMoveRectPoint %W [%W canvasx %x] [%W canvasy %y]
 	    }
-	    $wCan bind tbbox <B1-Motion> {
-		::CanvasDraw::DoMove %W [%W canvasx %x] [%W canvasy %y] point
+	    $wCan bind tbbox&&(oval||rectangle) <B1-Motion> {
+		::CanvasDraw::DragMoveRectPoint %W [%W canvasx %x] [%W canvasy %y]
 	    }
-	    $wCan bind tbbox <ButtonRelease-1> {
-		::CanvasDraw::FinalizeMove %W [%W canvasx %x] [%W canvasy %y] point
+	    $wCan bind tbbox&&(oval||rectangle) <ButtonRelease-1> {
+		::CanvasDraw::FinalMoveRectPoint %W [%W canvasx %x] [%W canvasy %y]
 	    }
-	    $wCan bind tbbox <Shift-B1-Motion> {
-		::CanvasDraw::DoMove %W [%W canvasx %x] [%W canvasy %y] point 1
+	    $wCan bind tbbox&&(oval||rectangle) <Shift-B1-Motion> {
+		::CanvasDraw::DragMoveRectPoint %W [%W canvasx %x] [%W canvasy %y] shift
+	    }
+	    
+	    $wCan bind tbbox&&(line||polygon) <Button-1> {
+		::CanvasDraw::InitMovePolyLinePoint %W [%W canvasx %x] [%W canvasy %y]
+	    }
+	    $wCan bind tbbox&&(line||polygon) <B1-Motion> {
+		::CanvasDraw::DragMovePolyLinePoint %W [%W canvasx %x] [%W canvasy %y]
+	    }
+	    $wCan bind tbbox&&(line||polygon) <ButtonRelease-1> {
+		::CanvasDraw::FinalMovePolyLinePoint %W [%W canvasx %x] [%W canvasy %y]
+	    }
+	    $wCan bind tbbox&&(line||polygon) <Shift-B1-Motion> {
+		::CanvasDraw::DragMovePolyLinePoint %W [%W canvasx %x] [%W canvasy %y] shift
+	    }
+	    
+	    $wCan bind tbbox&&arc <Button-1> {
+		::CanvasDraw::InitMoveArcPoint %W [%W canvasx %x] [%W canvasy %y]
+	    }
+	    $wCan bind tbbox&&arc <B1-Motion> {
+		::CanvasDraw::DragMoveArcPoint %W [%W canvasx %x] [%W canvasy %y]
+	    }
+	    $wCan bind tbbox&&arc <ButtonRelease-1> {
+		::CanvasDraw::FinalMoveArcPoint %W [%W canvasx %x] [%W canvasy %y]
+	    }
+	    $wCan bind tbbox&&arc <Shift-B1-Motion> {
+		::CanvasDraw::DragMoveArcPoint %W [%W canvasx %x] [%W canvasy %y] shift
 	    }
 		
 	    # Need to substitute $wCan.
@@ -1472,6 +1544,9 @@ proc ::WB::SetToolButton {wtop btName} {
 	del {
 	    bindtags $wCan  \
 	      [list $wCan WhiteboardDel WhiteboardNonText $wtoplevel all]
+	    $wCan bind std <Button-1> {
+		::CanvasDraw::DeleteCurrent %W [%W canvasx %x] [%W canvasy %y]
+	    }
 	    bind QTFrame <Button-1>  \
 	      [subst {::CanvasDraw::DeleteFrame $wCan %W %x %y}]
 	    bind SnackFrame <Button-1>  \
@@ -1544,24 +1619,18 @@ proc ::WB::GenericNonTextBindings {wtop} {
 
 proc ::WB::RemoveAllBindings {w} {
     
+    variable stdTag
+
     Debug 3 "::WB::RemoveAllBindings w=$w"
-
-    $w bind all <Button-1> {}
-    $w bind all <B1-Motion> {}
-    $w bind all <Any-Key> {}
-    $w bind all <Double-Button-1> {}
-    $w bind all <Button-3> {}
-
-    # These shouldn't be necessary but they are...
-    $w bind text <Button-1> {}
-    $w bind text <B1-Motion> {}
-    $w bind text <Double-Button-1> {}	
-
-    # Remove bindings on markers on selected items.
-    $w bind tbbox <Button-1> {}
-    $w bind tbbox <B1-Motion> {}
-    $w bind tbbox <ButtonRelease-1> {}
-
+    
+    # List all tags that we may bind to.
+    set btags {all std text tbbox&&arc tbbox&&(oval||rectangle)}
+    foreach btag $btags {
+	foreach seq [$w bind $btag] {
+	    $w bind $btag $seq {}
+	}
+    }
+    
     # Seems necessary for the arc item... More?
     bind $w <Shift-B1-Motion> {}
 	
@@ -1574,6 +1643,46 @@ proc ::WB::RemoveAllBindings {w} {
     
     # Remove any text insertion...
     $w focus {}
+}
+
+# RegisterCanvasClassBinds, RegisterCanvasInstBinds --
+# 
+#       Wrapper for plugins custom canvas bindings.
+#       *Class* binds to all whiteboards, 
+#       *Inst* binds only to the specified instance (w).
+
+proc ::WB::RegisterCanvasClassBinds {name canvasBindList} {
+    
+    # Register the actual bindings.
+    ::Plugins::RegisterCanvasClassBinds $name $canvasBindList
+    
+    # Must set the bindings for each instance.
+    foreach w [::WB::GetAllWhiteboards] {
+	set wtop $w
+	if {$w != "."} {
+	    set wtop ${wtop}.
+	}
+	upvar ::WB::${wtop}::state state
+	upvar ::WB::${wtop}::wapp wapp
+	
+	set btName    [::WB::ToolBtNumToName $state(btState)]
+	set oldBtName [::WB::ToolBtNumToName $state(btStateOld)]
+	::Plugins::SetCanvasBinds $wapp(can) $oldBtName $btName
+    }
+}
+
+proc ::WB::RegisterCanvasInstBinds {w name canvasBindList} {
+
+    set wtop [::UI::GetToplevelNS $w]
+    upvar ::WB::${wtop}::state state
+
+    # Register the actual bindings.
+    ::Plugins::RegisterCanvasInstBinds $w $name $canvasBindList
+    
+    # Must set the bindings for this instance.
+    set btName    [::WB::ToolBtNumToName $state(btState)]
+    set oldBtName [::WB::ToolBtNumToName $state(btStateOld)]
+    ::Plugins::SetCanvasBinds $w $oldBtName $btName
 }
 
 # WB::BuildWhiteboardMenus --
@@ -1593,6 +1702,8 @@ proc ::WB::BuildWhiteboardMenus {wtop} {
     upvar ::WB::${wtop}::wapp wapp
     upvar ::WB::${wtop}::state state
     upvar ::WB::${wtop}::opts opts
+    
+    ::Debug 2 "::WB::BuildWhiteboardMenus"
 	
     set topwindow $wapp(toplevel)
     set wCan      $wapp(can)
@@ -1614,9 +1725,7 @@ proc ::WB::BuildWhiteboardMenus {wtop} {
     ::UI::NewMenu $wtop ${wmenu}.file   mFile        $menuDefs(main,file)  $opts(-state)
     ::UI::NewMenu $wtop ${wmenu}.edit   mEdit        $menuDefs(main,edit)  $opts(-state)
     ::UI::NewMenu $wtop ${wmenu}.prefs  mPreferences $menuDefs(main,prefs) $opts(-state)
-	
-    # Item menu (temporary placement).
-    ::WB::BuildItemMenu $wtop ${wmenu}.items $this(itemPath)
+    ::UI::NewMenu $wtop ${wmenu}.items  mLibrary     $menuDefs(main,items) $opts(-state)
     
     # Plugin menus if any.
     ::UI::BuildPublicMenus $wtop $wmenu
@@ -1651,7 +1760,7 @@ proc ::WB::DisableWhiteboardMenus {wmenu} {
     }
     ::UI::MenuDisableAllBut ${wmenu}.edit {mAll}
     $wmenu entryconfigure [mc mPreferences] -state disabled
-    $wmenu entryconfigure [mc mItems] -state disabled
+    $wmenu entryconfigure [mc mLibrary] -state disabled
     $wmenu entryconfigure [mc mInfo] -state disabled
 	
     # Handle all 'plugins'.
@@ -2322,84 +2431,34 @@ proc ::WB::FixMenusWhenCopy {w} {
     ::hooks::run whiteboardFixMenusWhenHook $wtop copy
 }
 
-# WB::BuildItemMenu --
-#
-#       Creates an item menu from all files in the specified directory.
-#    
-# Arguments:
-#       wmenu       the menus widget path name (".menu.items").
-#       itemDir     The directory to search the item files in.
-#       
-# Results:
-#       item menu with submenus built.
+# WB::MakeItemMenuDef --
+# 
+#       Makes a menuDefs list recursively for canvas files.
 
-proc ::WB::BuildItemMenu {wtop wmenu itemDir} {
-    global  prefs
+proc ::WB::MakeItemMenuDef {dir} {
     
-    upvar ::WB::${wtop}::wapp wapp
-    
-    set wCan $wapp(can)
-    set m [menu $wmenu -tearoff 0]
-    set wparent [winfo parent $wmenu]
-    
-    # Use grand parents class to identify cascade.
-    set wgrandparent [winfo parent $wparent]
-    if {[string equal [winfo class $wgrandparent] "Menu"]} {
-	set txt [file tail $itemDir]
-    } else {
-	set txt [mc mItems]
-    }
-    
-    # A trick to make this work for popup menus, which do not have a Menu parent.
-    if {[string equal [winfo class $wparent] "Menu"]} {
-	$wparent add cascade -label $txt -menu $m -underline 0
-    }
-    
-    # If we don't have a menubar, for instance, if embedded toplevel.
-    # Only for the toplevel menubar.
-    if {[string equal $wparent ".menu"] &&  \
-      [string equal [winfo class $wparent] "Frame"]} {
-	label ${wmenu}la -text $txt
-	pack ${wmenu}la -side left -padx 4
-	bind ${wmenu}la <Button-1>  \
-	  [list [namespace current]::DoTopMenuPopup %W $wtop $m]
-    }
-    
-    # Save old dir, and cd to the wanted one; glob works in present directory.
-    set oldDir [pwd]
-    cd $itemDir
-    set allItemFiles [glob -nocomplain *]
-    foreach itemFile $allItemFiles {
-	set itemFile [string trim $itemFile :]
+    set mdef {}
+    foreach f [glob -nocomplain -directory $dir *] {
 	
-	# Keep only .can files and dirs.
-	if {[string equal [file extension $itemFile] ".can"]} {
-	    $m add command -label [file rootname $itemFile]  \
-	      -command [list ::CanvasFile::DrawCanvasItemFromFile $wtop  \
-	      [file join $itemDir $itemFile]]
-	} elseif {[file isdirectory $itemFile]} {
-	    
-	    # Sort out directories we shouldn't search.
-	    if {([string index $itemFile 0] == ".") ||  \
-	      [string equal [string tolower $itemFile] "resource.frk"] || \
-	      [string equal [string tolower $itemFile] "cvs"]} {
+	# Sort out directories we shouldn't search.
+	switch -- [string tolower [file tail $f]] {
+	    . - resource.frk - cvs {
 		continue
 	    }
-	    
-	    # Skip if no *.can file.
-	    if {[llength [glob -nocomplain -directory  \
-	      [file join $itemDir $itemFile] *.can]] == 0} {
-		continue
+	}
+	if {[file isdirectory $f]} {
+	    set submdef [MakeItemMenuDef $f]
+	    set name [file tail $f]
+	    if {[llength $submdef]} {
+		lappend mdef [list cascade $name {} normal {} {} $submdef]
 	    }
-	    
-	    # Build menus recursively. Consider: 1) large chars, 2) multi words,
-	    # 3) dots.
-	    regsub -all -- " " [string tolower $itemFile] "_" mt
-	    regsub -all -- {\.} $mt "_" mt
-	    BuildItemMenu $wtop ${wmenu}.${mt} [file join $itemDir $itemFile]
+	} elseif {[string equal [file extension $f] ".can"]} {
+	    set name [file rootname [file tail $f]]
+	    set cmd [format {::CanvasFile::DrawCanvasItemFromFile $wtop %s} $f]
+	    lappend mdef [list command $name $cmd normal {}]
 	}
     }
-    cd $oldDir
+    return $mdef
 }
 
 # WB::BuildFontMenu ---

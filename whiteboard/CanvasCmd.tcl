@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasCmd.tcl,v 1.2 2004-07-09 06:26:06 matben Exp $
+# $Id: CanvasCmd.tcl,v 1.3 2004-07-22 15:11:28 matben Exp $
 
 package provide CanvasCmd 1.0
 
@@ -391,7 +391,7 @@ proc ::CanvasCmd::DoPutCanvasDlg {wtop} {
     }
     
     # Erase all other client canvases.
-    DoEraseAll $wtop "remote"
+    DoEraseAll $wtop remote
 
     # Put this canvas to all others.
     ::CanvasCmd::DoPutCanvas $wCan all
@@ -467,7 +467,7 @@ proc ::CanvasCmd::DoGetCanvas {wtop} {
     }    
     
     # Erase everything in own canvas.
-    DoEraseAll $wtop "local"
+    DoEraseAll $wtop local
     
     # GET CANVAS.
     ::WB::SendGenMessageList $wtop [list "GET CANVAS:"] -ips $getCanIPNum

@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasCutCopyPaste.tcl,v 1.1 2004-06-06 06:41:31 matben Exp $
+# $Id: CanvasCutCopyPaste.tcl,v 1.2 2004-07-22 15:11:28 matben Exp $
 
 package provide CanvasCutCopyPaste 1.0
 
@@ -315,7 +315,7 @@ proc ::CanvasCCP::PasteSingleFromClipboardToCanvas {w cmd} {
     # Write to all other clients; need to make a one liner first.
     regsub -all "\n" $cmdremote $nl_ cmdremote
     set redo [list ::CanvasUtils::CommandExList $wtop  \
-      [list [list $newcmd "local"] [list $cmdremote "remote"]]]
+      [list [list $newcmd local] [list $cmdremote remote]]]
     set undo [list ::CanvasUtils::Command $wtop $undocmd]
     eval $redo
     undo::add [::WB::GetUndoToken $wtop] $undo $redo

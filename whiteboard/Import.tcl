@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Import.tcl,v 1.2 2004-07-09 06:26:06 matben Exp $
+# $Id: Import.tcl,v 1.3 2004-07-22 15:11:28 matben Exp $
 
 package require http
 package require httpex
@@ -1697,14 +1697,14 @@ proc ::Import::ResizeImage {wtop zoomFactor which newTag {where all}} {
 	    set isAbove [$w find above $id]
 	    set cmdlocal "create image $coords -image $newImName -anchor nw  \
 	      -tags {std image $useTag}"
-	    set cmdExList [list [list $cmdlocal "local"]]
+	    set cmdExList [list [list $cmdlocal local]]
 	    if {$isAbove != ""} {
-		lappend cmdExList [list [list lower $useTag $isAbove] "local"]
+		lappend cmdExList [list [list lower $useTag $isAbove] local]
 	    }
 	    set undocmd  \
 	      "create image $coords [::CanvasUtils::GetItemOpts $w $id all]"
-	    set undocmdExList [list [list $undocmd "local"]  \
-	      [list [list delete $useTag] "local"]]
+	    set undocmdExList [list [list $undocmd local]  \
+	      [list [list delete $useTag] local]]
 	    
 	    # Collect tags of selected originals.
 	    if {[lsearch [$w itemcget $id -tags] "selected"] >= 0} {
@@ -1719,8 +1719,8 @@ proc ::Import::ResizeImage {wtop zoomFactor which newTag {where all}} {
 	    set cmdremote "RESIZE IMAGE: $utagOrig $useTag $zoomFactor"
 	    set undocmdremote "RESIZE IMAGE: $useTag $utagOrig [expr -$zoomFactor]"
 	    if {$where == "remote" || $where == "all"} {
-		lappend cmdExList [list $cmdremote "remote"]
-		lappend undocmdExList [list $undocmdremote "remote"]
+		lappend cmdExList [list $cmdremote remote]
+		lappend undocmdExList [list $undocmdremote remote]
 	    } else {
 		lappend cmdExList [list $cmdremote $where]
 		lappend undocmdExList [list $undocmdremote $where]
@@ -1728,7 +1728,7 @@ proc ::Import::ResizeImage {wtop zoomFactor which newTag {where all}} {
 	}
 	
 	# Remove old.
-	lappend cmdExList [list [list delete $utagOrig] "local"]
+	lappend cmdExList [list [list delete $utagOrig] local]
 	set redo [list ::CanvasUtils::GenCommandExList $wtop $cmdExList]
 	set undo [list ::CanvasUtils::GenCommandExList $wtop $undocmdExList]
 	eval $redo
@@ -1830,7 +1830,7 @@ proc ::Import::ReloadImage {wtop id} {
 
     # Unselect and delete. Any new failure will make a new broken image.
     # Only locally and not tracked by undo/redo.
-    ::CanvasDraw::DeselectItem $wtop $id
+    ::CanvasDraw::DeselectItem $wcan $id
     catch {$wcan delete $id}
     set line [concat import $coords $opts]
     
@@ -1864,7 +1864,7 @@ proc ::Import::NewBrokenImage {w coords args} {
     array set argsArr {
 	-width      0
 	-height     0
-	-tags       ""
+	-tags       std
     }
     array set argsArr $args
 
@@ -1882,7 +1882,7 @@ proc ::Import::NewBrokenImage {w coords args} {
     
     # Special 'broken' tag to make it distinct from ordinary images.
     if {[lsearch $argsArr(-tags) broken] < 0} {
-	set argsArr(-tags) [list broken $utag]
+	set argsArr(-tags) [list std broken $utag]
     }
     set wtop [::UI::GetToplevelNS $w]
 

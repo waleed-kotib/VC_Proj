@@ -3,11 +3,11 @@
 #      This file is part of The Coccinella application. It implements some
 #      miscellaneous utilities for canvas operations.
 #      
-#  Copyright (c) 2000-2003  Mats Bengtsson
+#  Copyright (c) 2000-2004  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.3 2004-07-09 06:26:06 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.4 2004-07-22 15:11:28 matben Exp $
 
 package require sha1pure
 
@@ -972,6 +972,24 @@ proc ::CanvasUtils::SVGForeignObjectHandler {wtop xmllist paropts transformList 
     }
 }
 
+
+proc ::CanvasUtils::CreateItem {w args} {
+    
+    Debug 2 "::CanvasUtils::CreateItem args=$args"
+    
+    set wtop [::UI::GetToplevelNS $w]
+
+    set utag [::CanvasUtils::GetUtagFromCmd $args]
+    set cmd [concat create $args]
+    set undocmd [list delete $utag]
+    
+    set redo [list ::CanvasUtils::CommandList $wtop [list $cmd]]
+    set undo [list ::CanvasUtils::CommandList $wtop [list $undocmd]]
+    
+    eval $redo
+    undo::add [::WB::GetUndoToken $wtop] $undo $redo
+}
+
 # CanvasUtils::ItemConfigure --
 #
 #       Makes an canvas itemconfigure that propagates to all clients.
@@ -986,7 +1004,6 @@ proc ::CanvasUtils::SVGForeignObjectHandler {wtop xmllist paropts transformList 
 #       item configured, here and there.
 
 proc ::CanvasUtils::ItemConfigure {w id args} {
-    global  prefs
     
     Debug 2 "::CanvasUtils::ItemConfigure id=$id, args=$args"
 
@@ -1004,9 +1021,9 @@ proc ::CanvasUtils::ItemConfigure {w id args} {
     set undocmdremote [::CanvasUtils::FontHtmlToPointSize $undocmd -1]
     
     set redo [list ::CanvasUtils::CommandExList $wtop  \
-      [list [list $cmd "local"] [list $cmdremote "remote"]]]
+      [list [list $cmd local] [list $cmdremote remote]]]
     set undo [list ::CanvasUtils::CommandExList $wtop  \
-      [list [list $undocmd "local"] [list $undocmdremote "remote"]]]
+      [list [list $undocmd local] [list $undocmdremote remote]]]
     eval $redo
     undo::add [::WB::GetUndoToken $wtop] $undo $redo
     
@@ -1032,7 +1049,6 @@ proc ::CanvasUtils::ItemConfigure {w id args} {
 #       item coords set, here and there.
 
 proc ::CanvasUtils::ItemCoords {w id coords} {
-    global  prefs
     
     Debug 2 "::CanvasUtils::ItemCoords id=$id"
 
@@ -1276,6 +1292,7 @@ proc ::CanvasUtils::ItemStraighten {w id} {
     set coords [$w coords $id]
     set len [expr [llength $coords]/2]
     set type [$w type $id]
+    
     switch -- $type {
 	line {
 	    if {$len <= 2} {
@@ -1292,6 +1309,11 @@ proc ::CanvasUtils::ItemStraighten {w id} {
     set dlimit [lindex $dsorted [expr int($len * $frac + 1)]]
     set coords [::CanvasDraw::StripClosePoints $coords $dlimit]
     ::CanvasUtils::ItemCoords $w $id $coords
+    
+    if {[::CanvasDraw::IsSelected $w $id]} {
+	::CanvasDraw::DeselectItem $w $id
+	::CanvasDraw::SelectItem $w $id
+    }
 }
 
 proc ::CanvasUtils::SetItemColorDialog {w id opt} {
@@ -1813,18 +1835,18 @@ proc ::CanvasUtils::CanvasDrawSafe {w args} {
 # 
 #       Defines a number of binding tags for the whiteboard canvas.
 #       This is helpful when switching bindings depending on which tool is 
-#       selected. It defines only widget bindtags, not item binding.
+#       selected. It defines only widget bindtags, not item bindings!
 
 proc ::CanvasUtils::DefineWhiteboardBindtags { } {
     global  this
     
     # WhiteboardPoint
     bind WhiteboardPoint <Button-1> {
-	::CanvasDraw::MarkBbox %W 0
+	::CanvasDraw::PointButton %W [%W canvasx %x] [%W canvasy %y]
 	::CanvasDraw::InitBox %W [%W canvasx %x] [%W canvasy %y] rectangle
     }
     bind WhiteboardPoint <Shift-Button-1> {
-	::CanvasDraw::MarkBbox %W 1
+	::CanvasDraw::PointButton %W [%W canvasx %x] [%W canvasy %y] shift
 	::CanvasDraw::InitBox %W [%W canvasx %x] [%W canvasy %y] rectangle
     }
     bind WhiteboardPoint <B1-Motion> {
@@ -1842,20 +1864,16 @@ proc ::CanvasUtils::DefineWhiteboardBindtags { } {
     # as well.
     # With shift constrained move.
     bind WhiteboardMove <Button-1> {
-	::CanvasDraw::InitMove %W [%W canvasx %x] [%W canvasy %y]
+	::CanvasDraw::InitMoveSelected %W [%W canvasx %x] [%W canvasy %y]
     }
     bind WhiteboardMove <B1-Motion> {
-	::CanvasDraw::DoMove %W [%W canvasx %x] [%W canvasy %y] item
+	::CanvasDraw::DragMoveSelected %W [%W canvasx %x] [%W canvasy %y]
     }
     bind WhiteboardMove <ButtonRelease-1> {
-	::CanvasDraw::FinalizeMove %W [%W canvasx %x] [%W canvasy %y]
-	
-	# for testing
-	#::CanvasDraw::FinGridMove %W [%W canvasx %x] [%W canvasy %y] \
-	#  {{100 40 5} {100 40 5}}
+	::CanvasDraw::FinalMoveSelected %W [%W canvasx %x] [%W canvasy %y]
     }
     bind WhiteboardMove <Shift-B1-Motion> {
-	::CanvasDraw::DoMove %W [%W canvasx %x] [%W canvasy %y] item 1
+	::CanvasDraw::DragMoveSelected %W [%W canvasx %x] [%W canvasy %y] shift
     }    
     
     # WhiteboardLine
@@ -1938,7 +1956,7 @@ proc ::CanvasUtils::DefineWhiteboardBindtags { } {
 
     # WhiteboardDel
     bind WhiteboardDel <Button-1> {
-	::CanvasDraw::DeleteItem %W [%W canvasx %x] [%W canvasy %y]
+	# empty
     }
     
     # WhiteboardPen

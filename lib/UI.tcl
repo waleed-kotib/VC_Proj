@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.62 2004-07-09 06:26:06 matben Exp $
+# $Id: UI.tcl,v 1.63 2004-07-22 15:11:27 matben Exp $
 
 package require entrycomp
 package require alertbox
@@ -711,7 +711,7 @@ namespace eval ::UI::Public:: {
     # 'plugins' and 'components'.
 }
 
-# UI::Public::RegisterMenuEntry --
+# UI::Public::RegisterNewMenu --
 #
 #       
 # Arguments:
@@ -722,27 +722,51 @@ namespace eval ::UI::Public:: {
 # Results:
 #       menu entries added when whiteboard built.
 
-proc ::UI::Public::RegisterMenuEntry {wpath name menuSpec} {    
+proc ::UI::Public::RegisterNewMenu {mtail name menuSpec} {    
     upvar ::UI::menuSpecPublic menuSpecPublic 
-    upvar ::UI::menuDefs menuDefs 
+	
+    # Make a new menu
+    if {[lsearch $menuSpecPublic(wpaths) $mtail] < 0} {
+	lappend menuSpecPublic(wpaths) $mtail
+    }
+    set menuSpecPublic($mtail,name) $name
+    set menuSpecPublic($mtail,specs) [list $menuSpec]
+}
 
-    switch -- $wpath {
-	edit {
-	    
-	    # Entries should go in specific positions...
-	    # lappend menuDefs(main,edit)
-	    
-	}
-	prefs - items {
-	    
-	}
-	default {
-	    if {[lsearch $menuSpecPublic(wpaths) $wpath] < 0} {
-		lappend menuSpecPublic(wpaths) $wpath
-	    }
-	    set menuSpecPublic($wpath,name) $name
-	    set menuSpecPublic($wpath,specs) [list $menuSpec]
-	}
+# UI::Public::RegisterMenuEntry --
+# 
+#       Lets plugins/components register their own menu entry.
+
+proc ::UI::Public::RegisterMenuEntry {mtail menuSpec} {
+    upvar ::WB::menuDefs menuDefs 
+    upvar ::WB::menuDefsInsertInd menuDefsInsertInd 
+    
+    # Keeps track of all registered menu entries.
+    variable mainMenuSpec
+    
+    # Add these entries in a section above the bottom section.
+    # Add separator to section component entries.
+    
+    if {![info exists mainMenuSpec($mtail)]} {
+
+	# Add separator if this is the first addon entry.
+	set menuDefs(main,$mtail) [linsert $menuDefs(main,$mtail)  \
+	  $menuDefsInsertInd(main,$mtail) {separator}]
+	incr menuDefsInsertInd(main,$mtail)
+	set mainMenuSpec($mtail) {}
+    }
+    set menuDefs(main,$mtail) [linsert $menuDefs(main,$mtail)  \
+      $menuDefsInsertInd(main,$mtail) $menuSpec]
+    set mainMenuSpec($mtail) [concat $mainMenuSpec($mtail) $menuSpec]
+}
+
+proc ::UI::Public::GetRegisteredMenuDefs {mtail} {
+    variable mainMenuSpec
+    
+    if {[info exists mainMenuSpec($mtail)]} {
+	return $mainMenuSpec($mtail)
+    } else {
+	return {}
     }
 }
 
@@ -751,10 +775,10 @@ proc ::UI::Public::RegisterMenuEntry {wpath name menuSpec} {
 proc ::UI::BuildPublicMenus {wtop wmenu} {
     variable menuSpecPublic
     
-    foreach wpath $menuSpecPublic(wpaths) {	
-	set m [menu ${wmenu}.${wpath} -tearoff 0]
-	$wmenu add cascade -label $menuSpecPublic($wpath,name) -menu $m
-	foreach menuSpec $menuSpecPublic($wpath,specs) {
+    foreach mtail $menuSpecPublic(wpaths) {	
+	set m [menu ${wmenu}.${mtail} -tearoff 0]
+	$wmenu add cascade -label $menuSpecPublic($mtail,name) -menu $m
+	foreach menuSpec $menuSpecPublic($mtail,specs) {
 	    ::UI::BuildMenuEntryFromSpec $wtop $m $menuSpec
 	}
     }

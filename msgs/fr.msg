@@ -151,6 +151,7 @@
 ::msgcat::mcset fr mPreferences		{Préférences}
 ::msgcat::mcset fr mJabber		{Jabber}
 ::msgcat::mcset fr mItems		{Outils}
+::msgcat::mcset fr mLibrary		{Library}
 ::msgcat::mcset fr mInfo		{Infos}
 ::msgcat::mcset fr mAddons		{Add-ons}
 ::msgcat::mcset fr mPlugins		{Plugins}

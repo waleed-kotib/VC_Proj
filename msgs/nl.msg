@@ -152,6 +152,7 @@
 ::msgcat::mcset nl mPreferences		{Voorkeuren}
 ::msgcat::mcset nl mJabber		{Jabber}
 ::msgcat::mcset nl mItems		{Items}
+::msgcat::mcset nl mLibrary		{Library}
 ::msgcat::mcset nl mInfo		{Info}
 ::msgcat::mcset nl mAddons		{Uitbreidingen}
 ::msgcat::mcset nl mPlugins		{Plugins}
