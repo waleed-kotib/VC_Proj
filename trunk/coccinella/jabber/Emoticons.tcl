@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.20 2004-11-14 13:53:26 matben Exp $
+# $Id: Emoticons.tcl,v 1.21 2004-11-30 15:11:10 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -262,7 +262,8 @@ proc ::Emoticons::ParseIcon {name dir xmllist} {
 	    # If we rely on QuickTimeTcl here we cannot be in vfs.
 	    set f [file join $dir $object]
 	    if {$priv(needtmp)} {
-		set tmp [file join $this(tmpPath) $object]
+		#set tmp [file join $this(tmpPath) $object]
+		set tmp [tempfile $this(tmpPath) $object]
 		file copy -force $f $tmp
 		set f $tmp
 	    }

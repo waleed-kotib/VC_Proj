@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JUser.tcl,v 1.8 2004-11-27 14:52:53 matben Exp $
+# $Id: JUser.tcl,v 1.9 2004-11-30 15:11:10 matben Exp $
 
 package provide JUser 1.0
 
@@ -183,7 +183,7 @@ proc ::Jabber::User::DoAdd {token} {
 		set ans [tk_messageBox -type yesno -icon error \
 		  -parent $state(w) -message [mc jamessaddforeign $host]]
 		if {$ans == "yes"} {
-		    ::Jabber::GenRegister::NewDlg -server $host -autoget 1
+		    ::GenRegister::NewDlg -server $host -autoget 1
 		    return
 		} else {
 		    return

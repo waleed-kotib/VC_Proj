@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.73 2004-11-27 14:52:53 matben Exp $
+# $Id: JUI.tcl,v 1.74 2004-11-30 15:11:10 matben Exp $
 
 package provide JUI 1.0
 
@@ -121,7 +121,7 @@ proc ::Jabber::UI::Init { } {
 	}
     }
     set menuDefs(rost,jabber) {    
-	{command     mNewAccount    {::Jabber::Register::NewDlg}      normal   {}}
+	{command     mNewAccount    {::Register::NewDlg}      normal   {}}
 	{command     mLogin         {::Jabber::LoginLogout}           normal   L}
 	{command     mLogoutWith    {::Jabber::Logout::WithStatus}    disabled {}}
 	{command     mPassword      {::Jabber::Passwd::Build}         disabled {}}
@@ -142,7 +142,7 @@ proc ::Jabber::UI::Init { } {
 	{separator}
 	{command     mvCard         {::VCard::Fetch own}              disabled {}}
 	{separator}
-	{command     mRemoveAccount {::Jabber::Register::Remove}      disabled {}}	
+	{command     mRemoveAccount {::Register::Remove}      disabled {}}	
     }
     if {[string match "mac*" $this(platform)]} {
 	set menuDefs(rost,info) {    

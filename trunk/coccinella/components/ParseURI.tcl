@@ -7,7 +7,7 @@
 #       Most recent reference at the time of writing:
 #       http://www.ietf.org/internet-drafts/draft-saintandre-xmpp-uri-06.txt
 # 
-# $Id: ParseURI.tcl,v 1.18 2004-11-27 14:52:52 matben Exp $
+# $Id: ParseURI.tcl,v 1.19 2004-11-30 15:11:10 matben Exp $
 
 package require uriencode
 
@@ -278,7 +278,7 @@ proc ::ParseURI::HandleGroupchat {token} {
     if {[info exists state(query,password)]} {
 	lappend opts -password $state(query,password)
     }
-    eval {::Jabber::MUC::EnterRoom $state(jid2) $nick \
+    eval {::MUC::EnterRoom $state(jid2) $nick \
       -command [list [namespace current]::EnterRoomCB $token]} $opts
 }
 

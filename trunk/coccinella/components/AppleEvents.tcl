@@ -3,12 +3,12 @@
 #       Experimental!
 #       Some code from Alpha.
 # 
-# $Id: AppleEvents.tcl,v 1.4 2004-10-26 12:46:51 matben Exp $
+# $Id: AppleEvents.tcl,v 1.5 2004-11-30 15:11:10 matben Exp $
 
 namespace eval ::AppleEvents:: { }
 
 proc ::AppleEvents::Init { } {
-    global  tcl_platform this
+    global  this
 
     if {![string equal $this(platform) "macosx"]} {
 	return

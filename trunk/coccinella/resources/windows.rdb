@@ -49,3 +49,13 @@
 *Tablelist.background:               white
 *Tablelist.Font:                     {MS Sans Serif} 8
 
+! specific megawidgets
+!
+*Agent*Scrollbar.width:              16
+*Browse*Scrollbar.width:             16
+*Chat*Scrollbar.width:               16
+*Disco*Scrollbar.width:              16
+*GroupChat*Scrollbar.width:          16
+*NewMsg*Scrollbar.width:             16
+*Roster*Scrollbar.width:             16
+

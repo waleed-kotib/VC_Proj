@@ -10,7 +10,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ProgressWindow.tcl,v 1.17 2004-10-12 13:48:56 matben Exp $
+# $Id: ProgressWindow.tcl,v 1.18 2004-11-30 15:11:10 matben Exp $
 # 
 #-------------------------------------------------------------------------------
 #
@@ -51,11 +51,22 @@ namespace eval ::ProgressWindow:: {
     variable widgetOptions
     variable widgetCommands
     variable this
+    variable buttoncmd button
+    variable framecmd  frame
+    variable labelcmd  label
     
     if {[catch {package require progressbar}]} {
 	set this(haveprogressbar) 0
     } else {
 	set this(haveprogressbar) 1
+    }
+    if {1 || [catch {package require tile}]} {
+	set this(havetile) 0
+    } else {
+	set this(havetile) 1
+	set buttoncmd tbutton
+	set framecmd  tframe
+	set labelcmd  tlabel
     }
     
     # We use a variable 'this(platform)' that is more convenient for MacOS X.
@@ -71,6 +82,9 @@ namespace eval ::ProgressWindow:: {
 	windows - macintosh {
 	    set this(platform) $tcl_platform(platform)
 	}
+    }
+    if {[string equal $this(platform) "unix"]} {
+	set this(havetile) 0
     }
     
     # List all allowed options with their database names and class names.
@@ -171,7 +185,6 @@ proc ::ProgressWindow::ProgressWindow {w args} {
     if {[string equal $this(platform) "macintosh"]} {
 	::tk::unsupported::MacWindowStyle style $w documentProc
     } elseif {[string equal $this(platform) "macosx"]} {
-	#::tk::unsupported::MacWindowStyle style $w floating collapseBox
 	::tk::unsupported::MacWindowStyle style $w document \
 	  {collapseBox verticalZoom}
     }
@@ -271,13 +284,16 @@ proc ::ProgressWindow::Build {w} {
     variable this
     variable dims
     variable debugLevel
+    variable buttoncmd
+    variable framecmd
+    variable labelcmd
     upvar ::ProgressWindow::${w}::options options
     upvar ::ProgressWindow::${w}::widgets widgets
     
     if {$debugLevel >= 3} {
 	puts "::ProgressWindow::Build:: w=$w"
     }
-    pack [frame $widgets(frame)] -padx 16 -pady 6
+    pack [$framecmd $widgets(frame)] -padx 16 -pady 6
     
     set widgets(label)  $widgets(frame).la
     set widgets(label2) $widgets(frame).la2
@@ -287,13 +303,18 @@ proc ::ProgressWindow::Build {w} {
     set widgets(canvas) ${frmid}.pb
     set widgets(cancel) ${frmid}.btcancel
     
-    label $widgets(label) -font $options(-font1) -text $options(-text) \
+    $labelcmd $widgets(label) -font $options(-font1) -text $options(-text) \
       -justify left
     pack $widgets(label)  -side top -anchor w -pady 4
     
     # Frame with progress bar and Cancel button.
     pack [frame $frmid] -side top -fill x
-    if {$this(haveprogressbar)} {
+    if {$this(havetile)} {
+	tprogress $widgets(pbar) -from 0 -to 100 -length $dims(width) \
+	  -variable ::ProgressWindow::${w}::percent
+	$widgets(pbar) set $options(-percent)
+	pack $widgets(pbar) -side left -fill x -expand 1
+    } elseif {$this(haveprogressbar)} {
 	::progressbar::progressbar $widgets(pbar)  \
 	  -variable ::ProgressWindow::${w}::percent \
 	  -width $dims(width) -percent $options(-percent)
@@ -315,14 +336,14 @@ proc ::ProgressWindow::Build {w} {
 	}
 	pack $widgets(canvas) -side left -fill x -expand 1
     }
-    button $widgets(cancel) -text [::msgcat::mc Cancel]  \
+    $buttoncmd $widgets(cancel) -text [::msgcat::mc Cancel]  \
       -command [list [namespace current]::CancelBt $w $options(-cancelcmd)]
     pack $widgets(cancel) -side right -padx 8
 
     # Small text below progress bar.
-    pack [label $widgets(label2) -font $options(-font2) -text $options(-text2)] \
+    pack [$labelcmd $widgets(label2) -font $options(-font2) -text $options(-text2)] \
       -side top -anchor w
-    pack [label $widgets(label3) -font $options(-font2) -text $options(-text3)] \
+    pack [$labelcmd $widgets(label3) -font $options(-font2) -text $options(-text3)] \
       -side top -anchor w
     
     ::ProgressWindow::ConfigurePercent $w $options(-percent)
@@ -499,7 +520,9 @@ proc ::ProgressWindow::PBFocusIn {w} {
     
     upvar ::ProgressWindow::${w}::widgets widgets
 
-    if {$this(haveprogressbar)} {
+    if {$this(havetile)} {
+	# empty
+    } elseif {$this(haveprogressbar)} {
 	$widgets(pbar) configure -shape 3d -color @blue0
     } else {
 	$widgets(canvas) itemconfigure progbar -fill #424242
@@ -515,7 +538,9 @@ proc ::ProgressWindow::PBFocusOut {w} {
     
     upvar ::ProgressWindow::${w}::widgets widgets
 
-    if {$this(haveprogressbar)} {
+    if {$this(havetile)} {
+	# empty
+    } elseif {$this(haveprogressbar)} {
 	$widgets(pbar) configure -shape flat -color #9C9CFF
     } else {
 	$widgets(canvas) itemconfigure progbar -fill #9C9CFF

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.4 2004-11-25 15:02:46 matben Exp $
+# $Id: Init.tcl,v 1.5 2004-11-30 15:11:12 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -90,26 +90,8 @@ proc ::Init::SetThis {thisScript} {
     set this(ipnum) $this(internalIPnum) 
     
     # Need a tmp directory, typically in a StarKit when QuickTime movies are opened.
-    if {[info exists ::env(TMP)] && [file exists $::env(TMP)]} {
-	set this(tmpPath) [file join $::env(TMP) tmpcoccinella]
-    } elseif {[info exists ::env(TEMP)] && [file exists $::env(TEMP)]} {
-	set this(tmpPath) [file join $::env(TEMP) tmpcoccinella]
-    } else {
-	switch -- $this(platform) {
-	    unix {
-		set this(tmpPath) [file join /tmp tmpcoccinella]
-	    }
-	    macintosh {
-		set this(tmpPath) [file join [lindex [file volumes] 0] tmpcoccinella]
-	    }
-	    macosx {
-		set this(tmpPath) [file join /tmp tmpcoccinella]
-	    }
-	    windows {
-		set this(tmpPath) [file join C:/ tmpcoccinella]
-	    }
-	}
-    }
+    set tail "coccinella[pid][format %x [clock clicks]]"
+    set this(tmpPath) [file join [TempDir] $tail]
     if {![file isdirectory $this(tmpPath)]} {
 	file mkdir $this(tmpPath)
     }
@@ -209,6 +191,72 @@ proc ::Init::Msgcat { } {
 	uplevel #0 [list ::msgcat::mcload $this(msgcatPostPath)]
     }
     uplevel #0 namespace import ::msgcat::mc
+}
+
+# From tcllib (fileutil) + modifications:
+
+# ::Init::TempDir --
+#
+#	Return the correct directory to use for temporary files.
+#	Python attempts this sequence, which seems logical:
+#
+#       1. The directory named by the `TMPDIR' environment variable.
+#
+#       2. The directory named by the `TEMP' environment variable.
+#
+#       3. The directory named by the `TMP' environment variable.
+#
+#       4. A platform-specific location:
+#            * On Macintosh, the `Temporary Items' folder.
+#
+#            * On Windows, the directories `C:\\TEMP', `C:\\TMP',
+#              `\\TEMP', and `\\TMP', in that order.
+#
+#            * On all other platforms, the directories `/tmp',
+#              `/var/tmp', and `/usr/tmp', in that order.
+#
+#        5. As a last resort, the current working directory.
+#
+# Arguments:
+#	None.
+#
+# Side Effects:
+#	None.
+#
+# Results:
+#	The directory for temporary files.
+
+proc ::Init::TempDir {} {
+    global tcl_platform env
+    set attempdirs [list]
+
+    foreach tmp {TMPDIR TEMP TMP} {
+	if {[info exists env($tmp)]} {
+	    lappend attempdirs $env($tmp)
+	}
+    }
+
+    switch $tcl_platform(platform) {
+	windows {
+	    lappend attempdirs "C:\\TEMP" "C:\\TMP" "\\TEMP" "\\TMP"
+	}
+	macintosh {
+	    set tmpdir $env(TRASH_FOLDER)  ;# a better place?
+	}
+	default {
+	    lappend attempdirs [file join / tmp] \
+		[file join / var tmp] [file join / usr tmp]
+	}
+    }
+
+    foreach tmp $attempdirs {
+	if {[file isdirectory $tmp] && [file writable $tmp]} {
+	    return [file normalize $tmp]
+	}
+    }
+
+    # If nothing else worked...
+    return [file normalize [pwd]]
 }
 
 #-------------------------------------------------------------------------------

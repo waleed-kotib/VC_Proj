@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.76 2004-11-27 08:41:21 matben Exp $
+# $Id: UI.tcl,v 1.77 2004-11-30 15:11:12 matben Exp $
 
 package require entrycomp
 package require alertbox
@@ -195,11 +195,15 @@ proc ::UI::GetScreenSize { } {
     return [list [winfo vrootwidth .] [winfo vrootheight .]]
 }
 
+# Administrative code to handle toplevels:
+#       create, close, hide, show
+
 namespace eval ::UI:: {
 
     variable topcache
-    set topcache(state) show
-    set topcache(all)   {}
+    set topcache(state)       show
+    set topcache(.,w)         .
+    set topcache(.,prevstate) "normal"
 }
 
 # UI::Toplevel --
@@ -239,6 +243,8 @@ proc ::UI::Toplevel {w args} {
     if {[info exists argsArr(-closecommand)]} {
 	set topcache($w,-closecommand) $argsArr(-closecommand)
     }
+    set topcache($w,prevstate) "normal"
+    set topcache($w,w) $w
     eval {toplevel $w} $topopts
         
     # We direct all close events through DoCloseWindow so things can
@@ -267,12 +273,11 @@ proc ::UI::Toplevel {w args} {
 	    ::tk::unsupported::MacWindowStyle style $w $argsArr(-macstyle)
 	}
 	if {$argsArr(-usemacmainmenu)} {
-	    ::UI::MacUseMainMenu $w
+	    MacUseMainMenu $w
 	}
     } else {
 	bind $w <$osprefs(mod)-Key-w> [list ::UI::DoCloseWindow $w]
     }
-    lappend topcache(all) $w
     return $w
 }
 
@@ -306,7 +311,6 @@ proc ::UI::DoCloseWindow {{wevent {}}} {
 	set result [::hooks::run closeWindowHook $w]    
 	if {![string equal $result "stop"]} {
 	    destroy $w
-	    set topcache(all) [lsearch -all -inline -not $topcache(all) $w]
 	    array unset topcache $w,*
 	}
     }
@@ -319,32 +323,44 @@ proc ::UI::DoCloseWindow {{wevent {}}} {
 proc ::UI::GetAllToplevels { } {
     variable topcache
 
-    set tmp {.}
-    foreach w $topcache(all) {
+    foreach {key w} [array get topcache *,w] {
 	if {[winfo exists $w]} {
 	    lappend tmp $w
 	}
     }
-    set topcache(all) $tmp
-    return $topcache(all)
+    return $tmp
 }
 
 proc ::UI::WithdrawAllToplevels { } {
     variable topcache
     
-    foreach w [::UI::GetAllToplevels] {
-	wm withdraw $w
+    if {[string equal $topcache(state) "show"]} {
+	foreach w [GetAllToplevels] {
+	    set topcache($w,prevstate) [wm state $w]
+	    wm withdraw $w
+	}
+	set topcache(state) hide
     }
-    set topcache(state) hide
 }
 
 proc ::UI::ShowAllToplevels { } {
     variable topcache
     
-    foreach w [::UI::GetAllToplevels] {
-	wm deiconify $w
+    if {[string equal $topcache(state) "hide"]} {
+	foreach w [GetAllToplevels] {
+	    if {[string equal $topcache($w,prevstate) "normal"]} {
+		set topcache($w,prevstate) [wm state $w]
+		wm deiconify $w
+	    }
+	}
+	set topcache(state) show
     }
-    set topcache(state) show
+}
+
+proc ::UI::GetToplevelState { } {
+    variable topcache
+    
+    return $topcache(state)
 }
 
 # UI::GetToplevelNS --

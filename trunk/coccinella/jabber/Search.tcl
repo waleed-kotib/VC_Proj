@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Search.tcl,v 1.17 2004-11-27 14:52:55 matben Exp $
+# $Id: Search.tcl,v 1.18 2004-11-30 15:11:12 matben Exp $
 
 package provide Search 1.0
 
@@ -241,7 +241,7 @@ proc ::Search::GetCB {jlibName type subiq} {
     ::Jabber::Forms::Build $wbox $subiqChildList -template "search" -width 160
     pack $wbox -side left -padx 2 -pady 10
     if {$hasOOBForm} {
-	set woobtxt [::Jabber::OOB::BuildText ${woob}.oob $xmlOOBElem]
+	set woobtxt [::OOB::BuildText ${woob}.oob $xmlOOBElem]
 	pack $woobtxt -side top -fill x
     }
     $wbtsearch configure -state normal -default active

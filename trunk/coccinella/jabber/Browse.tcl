@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.65 2004-11-27 14:52:53 matben Exp $
+# $Id: Browse.tcl,v 1.66 2004-11-30 15:11:10 matben Exp $
 
 package provide Browse 1.0
 
@@ -59,9 +59,9 @@ namespace eval ::Browse:: {
 	    ::Search::Build -server $jid -autoget 1
 	}
 	mRegister      register  {
-	    ::Jabber::GenRegister::NewDlg -server $jid -autoget 1
+	    ::GenRegister::NewDlg -server $jid -autoget 1
 	}
-	mUnregister    register  {::Jabber::Register::Remove $jid}
+	mUnregister    register  {::Register::Remove $jid}
 	separator      {}        {}
 	mRefresh       jid       {::Browse::Refresh $jid}
 	mAddServer     any       {::Browse::AddServer}

@@ -1,0 +1,6 @@
+
+README-post
+
+Files in this folder are used to override the message catalogs in the
+parent directory. This is useful only when doing custom builds.
+

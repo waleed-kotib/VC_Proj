@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.104 2004-11-27 14:52:55 matben Exp $
+# $Id: Roster.tcl,v 1.105 2004-11-30 15:11:12 matben Exp $
 
 package provide Roster 1.0
 
@@ -106,7 +106,7 @@ namespace eval ::Roster:: {
 	mMessage       users     {::NewMsg::Build -to $jid}
 	mChat          user      {::Chat::StartThread $jid3}
 	mWhiteboard    wb        {::Jabber::WB::NewWhiteboardTo $jid3}
-	mSendFile      user      {::Jabber::OOB::BuildSet $jid3}
+	mSendFile      user      {::OOB::BuildSet $jid3}
 	separator      {}        {}
 	mLastLogin/Activity user {::Jabber::GetLast $jid}
 	mvCard         user      {::VCard::Fetch other $jid}

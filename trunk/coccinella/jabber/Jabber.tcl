@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.118 2004-11-27 14:52:53 matben Exp $
+# $Id: Jabber.tcl,v 1.119 2004-11-30 15:11:11 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -620,7 +620,7 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 	    
 	    if {[regexp {^(service|gateway)/.*} $jidtype]} {
 		$jstate(jlib) send_presence -to $from -type "subscribed"
-		$jstate(jlib) roster_set $from ::Jabber::Subscribe::ResProc
+		$jstate(jlib) roster_set $from ::Subscribe::ResProc
 		
 		set subtype [lindex [split $jidtype /] 1]
 		set typename [::Roster::GetNameFromTrpt $subtype]
@@ -661,7 +661,7 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 			set msg [mc jamessautoreject $from]
 		    }
 		    ask {
-			eval {::Jabber::Subscribe::NewDlg $from} $args
+			eval {::Subscribe::NewDlg $from} $args
 		    }
 		}
 		if {$msg != ""} {
@@ -674,7 +674,7 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 		    
 		    # Explicitly set the users group.
 		    if {[string length $jprefs(subsc,group)]} {
-			$jstate(jlib) roster_set $from ::Jabber::Subscribe::ResProc \
+			$jstate(jlib) roster_set $from ::Subscribe::ResProc \
 			  -groups [list $jprefs(subsc,group)]
 		    }
 		    $jstate(jlib) send_presence -to $from -type "subscribe"

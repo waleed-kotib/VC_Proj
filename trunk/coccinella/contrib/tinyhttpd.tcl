@@ -3,12 +3,12 @@
 #       This file is part of The Coccinella application. It implements a tiny
 #       http server.
 #      
-#  Copyright (c) 2002-2003  Mats Bengtsson
+#  Copyright (c) 2002-2004  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: tinyhttpd.tcl,v 1.21 2004-11-27 14:52:53 matben Exp $
+# $Id: tinyhttpd.tcl,v 1.22 2004-11-30 15:11:10 matben Exp $
 
 # ########################### USAGE ############################################
 #
@@ -27,6 +27,9 @@
 #      ::tinyhttpd::mount absPath name
 #      ::tinyhttpd::unmount name
 #      ::tinyhttpd::allmounted
+#      ::tinyhttpd::registercgicommand path command
+#      ::tinyhttpd::unregistercgicommand path
+#      ::tinyhttpd::allcgibins
 #      
 # ##############################################################################
 
@@ -46,30 +49,56 @@ namespace eval ::tinyhttpd:: {
     variable this
     variable timing
     variable mounts
+    variable cgibin
     variable uid 0
         
-    switch -- $::tcl_platform(platform) {
-	macintosh {
-	    set this(sep) :
-	}
-	windows {
-	    set this(sep) {\\}
-	}
-	unix {
-	    set this(sep) /
-	}
-	default {
-	    set this(sep) /
-	}
-    }
-    set this(path) [file dirname [info script]]
-    set this(httpvers) 1.0
+    set this(path)          [file dirname [info script]]
+    set this(httpvers)      1.1
+    set this(accept-ranges) 1
 
-    set priv(debug) 4
+    set this(debug) 0
     
     array set httpMsg {
-      200 OK
-      404 "File not found on server."
+	100 "Continue"
+	101 "Switching Protocols"
+	200 "OK"
+	201 "Created"
+	202 "Accepted"
+	203 "Non-Authoritative Information"
+	204 "No Content"
+	205 "Reset Content"
+	206 "Partial Content"
+	300 "Multiple Choices"
+	301 "Moved Permanently"
+	302 "Found"
+	303 "See Other"
+	304 "Not Modified"
+	305 "Use Proxy"
+	307 "Temporary Redirect"
+	400 "Bad Request"
+	401 "Unauthorized"
+	402 "Payment Required"
+	403 "Forbidden"
+	404 "Not Found"
+	405 "Method Not Allowed"
+	406 "Not Acceptable"
+	407 "Proxy Authentication Required"
+	408 "Request Time-out"
+	409 "Conflict"
+	410 "Gone"
+	411 "Length Required"
+	412 "Precondition Failed"
+	413 "Request Entity Too Large"
+	414 "Request-URI Too Large"
+	415 "Unsupported Media Type"
+	416 "Requested range not satisfiable"
+	417 "Expectation Failed"
+	500 "Internal Server Error"
+	501 "Not Implemented"
+	502 "Bad Gateway"
+	503 "Service Unavailable"
+	504 "Gateway Time-out"
+	505 "HTTP Version not supported"
     }
 
     # Use variables to store typical html return messages instead of files.
@@ -86,34 +115,50 @@ namespace eval ::tinyhttpd:: {
     }
     
     # Some standard responses. Use with 'format'. Careful with spaces!
-    set http(headdirlist) \
-"HTTP/$this(httpvers) 200 OK
+    set http(responseheader) \
+"HTTP/$this(httpvers) 200 $httpMsg(200)
 Server: tinyhttpd/1.0
 Last-Modified: %s
 Content-Type: text/html"
 
-set http(200) \
-"HTTP/$this(httpvers) 200 OK
+    set http(200) \
+"HTTP/$this(httpvers) 200 $httpMsg(200)
 Server: tinyhttpd/1.0
 Last-Modified: %s
 Content-Type: %s
-Content-Length: %s\n"
+Content-Length: %s"
 
-set http(404) \
-"HTTP/$this(httpvers) 404 Not Found
+    set http(404) \
+"HTTP/$this(httpvers) 404 $httpMsg(404)
 Server: tinyhttpd/1.0
 Last-Modified: %s
 Content-Type: %s
-Content-Length: %s\n"
+Content-Length: %s"
 
     set http(404,plain) \
 "HTTP/$this(httpvers) 404 $httpMsg(404)
-Content-Type: text/html\n"
+Content-Type: text/html"
 
     set http(404GET,plain) \
 "HTTP/$this(httpvers) 404 $httpMsg(404)
 Content-Type: text/html
 Content-Length: [string length $html(404)]\n\n$html(404)"
+
+    set http(header) \
+"HTTP/$this(httpvers) %s %s
+Server: tinyhttpd/1.0
+Last-Modified: %s
+Content-Type: %s
+Content-Length: %s"
+
+    set http(headerNoContent) \
+"HTTP/$this(httpvers) %s %s
+Server: tinyhttpd/1.0"
+
+    if {$this(accept-ranges)} {
+	append http(responseheader) "\nAccept-Ranges: bytes"
+	append http(200) "\nAccept-Ranges: bytes"
+    }
     
     # These shall be used with 'format' to make html dir listings.
     set html(head,plain) {
@@ -127,12 +172,12 @@ Content-Length: [string length $html(404)]\n\n$html(404)"
 	<table nowrap border=0 cellpadding="2">
 	    <tr>
 	        <td align=center nowrap height=19> %s objects </td>
-		<td align=left nowrap><b> Name </b></td>
-		<td align=right nowrap> Size </td>
+		<td align=left nowrap><b>Name</b></td>
+		<td align=right nowrap>Size</td>
 		<td align=left nowrap></td>
-		<td align=left nowrap> Type </td>
+		<td align=left nowrap>Type</td>
 		<td align=left nowrap></td>
-		<td align=left nowrap> Date </td>
+		<td align=left nowrap>Date</td>
 	    </tr>
 	    <tr>
 	        <td colspan=7 height=10><hr></td>
@@ -295,6 +340,7 @@ Content-Length: [string length $html(404)]\n\n$html(404)"
 #
 # Arguments:
 #       args:
+#           -cgibinrelativepath   httpd/cgibin
 #           -chunk                8192
 #           -defaultindexfile     index.html
 #	    -directorylisting     0
@@ -317,6 +363,7 @@ proc ::tinyhttpd::start {args} {
         
     # Any configuration options. Start with defaults, overwrite with args.
     array set options {
+	-cgibinrelativepath   httpd/cgibin
 	-chunk                8192
 	-defaultindexfile     index.html
 	-directorylisting     0
@@ -341,10 +388,10 @@ proc ::tinyhttpd::start {args} {
     }
     if {[catch {
 	eval {socket -server [namespace current]::NewChannel} $servopts \
-	  $options(-port)} msg]} {
-	return -code error "Couldn't start server socket: $msg."
+	  $options(-port)} sock]} {
+	return -code error "Couldn't start server socket: $sock."
     }	
-    set priv(sock) $msg
+    set priv(sock)  $sock
 
     # Log file
     if {$options(-log)} {
@@ -360,11 +407,13 @@ proc ::tinyhttpd::start {args} {
     set priv(rpath,httpd) [unixpath $options(-httpdrelativepath)]
     set priv(rpath,imgs)  [unixpath $options(-imagesrelativepath)]
     set priv(rpath,mnt)   [unixpath $options(-mountrelativepath)]
+    set priv(rpath,cgi)   [unixpath $options(-cgibinrelativepath)]
     
     # Native relative paths.
     set priv(npath,httpd) [file nativename $options(-httpdrelativepath)]
     set priv(npath,imgs)  [file nativename $options(-imagesrelativepath)]
     set priv(npath,mnt)   [file nativename $options(-mountrelativepath)]
+    set priv(npath,cgi)   [file nativename $options(-cgibinrelativepath)]
     
     # Cache various paths: apath (absolute), rpath (relative).
     # Keep absolute paths native [file join ...].
@@ -372,6 +421,7 @@ proc ::tinyhttpd::start {args} {
     set priv(apath,httpd) [file join $options(-rootdirectory) $priv(npath,httpd)]
     set priv(apath,imgs)  [file join $options(-rootdirectory) $priv(npath,imgs)]
     set priv(apath,mnt)   [file join $options(-rootdirectory) $priv(npath,mnt)]
+    set priv(apath,cgi)   [file join $options(-rootdirectory) $priv(npath,cgi)]
 
     set priv(rpath,imgs,folder) $priv(rpath,imgs)/folder.gif
     set priv(rpath,imgs,file)   $priv(rpath,imgs)/file.gif
@@ -487,7 +537,7 @@ proc ::tinyhttpd::HandleRequest {token} {
 
 	    # The unix style, uri encoded path relative -rootdirectory,
 	    # starting with a "/".
-	    set state(path) $path
+	    set state(path)    $path
 	    set state(reqvers) $reqvers
 
 	    # Make local absolute path.
@@ -497,6 +547,9 @@ proc ::tinyhttpd::HandleRequest {token} {
 	    set state(rpath) $relpath
 	    set state(apath) [file nativename [file normalize $apath]]
 	    set state(targetabspath) $state(apath)
+	    
+	    set state(chunk)     $options(-chunk)
+	    set state(haverange) 0
 	    
 	    # Set fileevent to read the sequence of 'key: value' lines.
 	    fileevent $s readable [list [namespace current]::Event $token]
@@ -555,16 +608,38 @@ proc ::tinyhttpd::Event {token} {
 	}
 	if {[regexp -nocase {^content-type:(.+)$} $line x type]} {
 	    set state(content-type) [string trim $type]
-	} elseif {[regexp -nocase {^content-range:(.+)$} $line x range]} {
-	    set state(content-range) [string trim $range]
+	} elseif {[regexp -nocase {^range:(.+)$} $line x range]} {
+	    set range [string trim $range]
+	    set rangelist [ParseRange $range]
+	    set state(range)       $range
+	    set state(rangelist)   $rangelist
+	    set state(haverange) 1
 	}
-	
     } elseif {$nbytes == 0} {
 	
-	# First empty line, set up file transfer.
+	# First empty line, respond.
 	fileevent $s readable {}
 	Respond $token
     }
+}
+
+proc ::tinyhttpd::ParseRange {range} {
+    
+    set rlist {}
+    foreach r [split $range ,] {
+	if {[regexp {([0-9]*)-([0-9]*)} $r match n1 n2]} {
+	    if {$n2 == ""} {
+		set n2 end
+	    } elseif {$n1 == ""} {
+		set n1 end-$n2
+		set n2 end
+	    }
+	    lappend rlist [list $n1 $n2]
+	} else {
+	    # illegal range request
+	}
+    }
+    return $rlist
 }
 
 # tinyhttpd::Respond --
@@ -582,29 +657,44 @@ proc ::tinyhttpd::Respond {token} {
     variable $token
     upvar 0 $token state    
     variable options
-    variable suffToMimeType
-    variable httpMsg
-    variable http
-    variable timing
     variable priv
     variable mounts
+    variable cgibin
     
     Debug 2 "Respond:: $token"
             
-    set s       $state(s)
     set cmd     $state(cmd)
     set relpath $state(rpath)    
     set abspath $state(apath)
 
+    set state(state) responding
+
     Debug 2 "\t relpath=$relpath"
     Debug 2 "\t abspath=$abspath"
     
-    set returncode 200
+    set httpcode 200
     set ismounted  0
     
-    # See first if this is a "mounted" directory.
-    if {[regexp ^$priv(rpath,mnt)/(.*)$ $relpath match subpath]} {
-		
+    if {$state(haverange)} {
+	# not correct!!!!!!
+	if {[llength $state(rangelist)] != 1} {
+	    PutIfError $token 416
+	    return
+	}	
+    } elseif {[regexp ^$priv(rpath,cgi)/(.*)$ $relpath match subpath]} {	
+
+	# See if cgi-bin. Handle over control.
+	if {[info exists cgibin($subpath)]} {
+	    
+	    # Leave over the complete control to this script.
+	    uplevel #0 $cgibin($subpath) $token
+	} else {
+	    Put404 $token
+	}
+	return
+    } elseif {[regexp ^$priv(rpath,mnt)/(.*)$ $relpath match subpath]} {		
+	
+	# See first if this is a "mounted" directory.
 	# Find name of mounted from subpath.
 	set sublist [file split $subpath]
 	set mname [lindex $sublist 0]
@@ -615,14 +705,10 @@ proc ::tinyhttpd::Respond {token} {
 	    set abspath [file normalize $abspath]
 	    set state(targetabspath) $abspath
 	} else {
-	    if {[info exists priv(apath,html,404)]} {
-		set abspath $priv(apath,html,404)
-		set returncode 404
-	    } else {
-		PutPlain404 $token
-		return
-	    }
+	    Put404 $token
+	    return
 	}
+	Debug 2 "\t abspath=$abspath"
     }
     
     if {[file isdirectory $abspath]} {
@@ -639,77 +725,132 @@ proc ::tinyhttpd::Respond {token} {
 	    PutHtmlDirList $token $abspath
 	    return
 	} else {
-	    if {[info exists priv(apath,html,404)]} {
-		set abspath $priv(apath,html,404)
-		set returncode 404
-	    } else {	
-		PutPlain404 $token
-		return
-	    }
+	    Put404 $token
+	    return
 	}
     }
+
+    # Go ahead and do the response.
+    PutResponse $token $httpcode $abspath
+}
+
+# tinyhttpd::PutResponse --
+# 
+# 
+# Arguments:
+#	token	    The token for the internal state array.
+#       httpcode
+#       abspath
+#       
+# Results:
+#       initiates a file copy if requested
+
+proc ::tinyhttpd::PutResponse {token httpcode abspath} {
+    variable $token
+    upvar 0 $token state    
+    variable suffToMimeType
+    variable httpMsg
+    variable http
+    variable timing
+    variable priv
+    
+    Debug 2 "::tinyhttpd::PutResponse httpcode=$httpcode, abspath=$abspath"
+    
+    set s   $state(s)
+    set cmd $state(cmd)
+
     set fext [string tolower [file extension $abspath]]
     if {[info exists suffToMimeType($fext)]} {
 	set mime $suffToMimeType($fext)
     } else {
 	set mime "application/octet-stream"
     }
-    Debug 2 "\t mime=$mime"
     
     # Check that the file is there and opens correctly.
-    if {[catch {open $abspath r} fd]} {
+    if {![file exists $abspath] || [catch {open $abspath r} fd]} {
 	if {[info exists priv(apath,html,404)]} {
 	    set abspath $priv(apath,html,404)
 	    if {[catch {open $abspath r} fd]} {
-		Finish $token $fd
+		PutPlain404 $token
 		return
 	    }
-	    set returncode 404
+	    set httpcode 404
 	} else {	
 	    PutPlain404 $token
 	    return
 	}
     }
-	
+    
     # Put stuff.
-    set state(fd) $fd
     set size [file size $abspath]
-    set state(size) $size
+    set state(fd)         $fd
+    set state(size)       $size
+    set state(contentlen) $size
+    set state(endbyte)    [expr {$size - 1}]
+    set extraheader ""
+    
+    # Ignore ranges if not sending requested file.
+    if {$state(haverange) && [string equal $httpcode "200"]} {
+	set n1 [lindex $state(rangelist) 0 0]
+	set n2 [lindex $state(rangelist) 0 1]
+	if {[regexp {end-([0-9]+)} $n1 match n]} {
+	    set n1 [expr {$size - $n}]
+	}
+	if {$n2 > $state(endbyte)} {
+	    set n2 $state(endbyte)
+	}
+	
+	# Range validation.
+	if {$n1 > $n2} {
+	    set httpcode 416
+	} else {
+	    set state(range,begin) $n1
+	    set state(range,end)   $n2
+	    set state(contentlen) [expr {$n2 - $n1 + 1}]
+	    seek $fd $n1
+	    set httpcode 206
+	    set extraheader "\nContent-Range: bytes $n1-$n2/$size"
+	}
+    }
+
+    # Prepare the header.
     set modTime [clock format [file mtime $abspath]  \
       -format "%a, %d %b %Y %H:%M:%S GMT" -gmt 1]
-    set data [format $http($returncode) $modTime $mime $size]
+    set msg $httpMsg($httpcode)
+    set header [format $http(header) $httpcode $msg $modTime $mime \
+      $state(contentlen)]
+
     if {[catch {
-	puts $s $data
+	puts $s ${header}${extraheader}
+	puts $s ""
 	flush $s
     } err]} {
 	Finish $token $err
 	return
     }
-    Debug 3 "\t data='$data'"
+    Debug 3 "\t header=...\n'$header'"
 
     if {[string equal $cmd "HEAD"]}  {
-	Finish $token ok
-	return
-    }
-    
-    # If binary data.
-    if {![string match "text/*" $mime]} {
+	Finish $token
+    } else {
+
+	# Do this always since line end translations may screw up the byte counts.
 	fconfigure $fd -translation binary
-	fconfigure $s -translation binary
+	fconfigure $s  -translation binary
+	flush $s
+	
+	# Seems necessary (?) to avoid blocking the UI. BAD!!!
+	#update
+	
+	# Background copy. Be sure to switch off all fileevents on channel.
+	fileevent  $s readable {}
+	fileevent  $s writable {}
+	fconfigure $s -buffering full
+	set timing($token) [list [clock clicks -milliseconds] 0]
+	
+	# Initialize the stream copy.
+	CopyStart $s $token
     }
-    flush $s
-    
-    # Seems necessary (?) to avoid blocking the UI. BAD!!!
-    #update
-    
-    # Background copy. Be sure to switch off all fileevents on channel.
-    fileevent  $s readable {}
-    fileevent  $s writable {}
-    fconfigure $s -buffering full
-    set timing($token) [list [clock clicks -milliseconds] 0]
-    
-    # Initialize the stream copy.
-    CopyStart $s $token
 }
 
 # tinyhttpd::CopyStart --
@@ -729,12 +870,17 @@ proc ::tinyhttpd::Respond {token} {
 proc ::tinyhttpd::CopyStart {s token} {    
     variable $token
     upvar 0 $token state    
-    variable options
+    variable priv
     
-    Debug 4 "CopyStart::"
-
+    Debug 6 "CopyStart::"
+    if {$state(haverange) && [string is integer $state(range,end)]} {
+	set offset [tell $state(fd)]
+	if {[expr {$offset + $state(chunk)}] > $state(range,end)} {
+	    set state(chunk) [expr {$state(range,end) - $offset + 1}]
+	}
+    }
     if {[catch {
-	fcopy $state(fd) $s -size $options(-chunk) -command  \
+	fcopy $state(fd) $s -size $state(chunk) -command  \
 	  [list [namespace current]::CopyDone $token]
     } err]} {
 	Finish $token $err
@@ -757,13 +903,13 @@ proc ::tinyhttpd::CopyDone {token bytes {error {}}} {
     variable timing
     upvar 0 $token state
 
-    Debug 4 "CopyDone::"
+    Debug 6 "CopyDone::"
 
-    set s $state(s)
+    set s  $state(s)
     set fd $state(fd)
     incr state(currentsize) $bytes
     lappend timing($token) [clock clicks -milliseconds] $state(currentsize)
-
+    
     # At this point the token may have been reset
     if {[string length $error] > 0} {
 	Finish $token $error
@@ -771,10 +917,24 @@ proc ::tinyhttpd::CopyDone {token bytes {error {}}} {
 	Finish $token eof
     } elseif {[catch {eof $fd} iseof] || $iseof} {
 	Finish $token
+    } elseif {$state(haverange) && \
+      ([tell $state(fd)] >= [expr $state(range,end) + 1])} {
+	Finish $token
     } else {
 	CopyStart $s $token
     }
 }
+
+# tinyhttpd::Finish
+#
+#	Ends a request/response transaction.
+#
+# Arguments
+#	token	The token for the internal state array.
+#	errmsg  Nonempty if any error.
+#
+# Side Effects
+#	Frees memory, closes sockets and files.
 
 proc ::tinyhttpd::Finish {token {errmsg ""}} {
     variable $token
@@ -817,15 +977,15 @@ proc ::tinyhttpd::PutHtmlDirList {token abspath} {
     set modTime [clock format [file mtime $abspath]  \
       -format "%a, %d %b %Y %H:%M:%S GMT" -gmt 1]
     if {[catch {
-	puts $s [format $http(headdirlist) $modTime]
+	puts $s [format $http(responseheader) $modTime]
 	
 	if {[string equal $cmd "GET"]} {
 	    set html [BuildHtmlForDir $token]
 	    puts $s "Content-Length: [string length $html]"
-	    puts $s "\n"
+	    puts $s ""
 	    puts $s $html
 	} else {
-	    puts $s "\n"
+	    puts $s ""
 	}
     } err]} {
 	Finish $token $err
@@ -898,14 +1058,16 @@ proc ::tinyhttpd::BuildHtmlForDir {token} {
 	# The link in html must be the encoded unix path.
 	set name [file tail $f]
 	set encodedname [uriencode::quotepath $name]
-	if {0} {
+	if {1} {
 	    if {$relpath == ""} {
 		set link "/$encodedname"
 	    } else {
 		set link "/$relpath/$encodedname"
 	    }
+	} else {
+	    set link $encodedname
 	}
-	set link $encodedname
+	#puts "\t link=$link"
 
 	# Is file or directory?
 	if {[file isdirectory $f]} {
@@ -936,7 +1098,70 @@ proc ::tinyhttpd::BuildHtmlForDir {token} {
     append htmlStuff $html(dirbottom,$style)
     
     return $htmlStuff
-}    
+}
+
+# tinyhttpd::PutIfError --
+# 
+
+proc ::tinyhttpd::PutIfError {token httpcode} {
+    variable $token
+    upvar 0 $token state    
+    variable http
+    variable httpMsg
+    
+    # Prepare the header.
+    set modTime [clock format [file mtime $abspath]  \
+      -format "%a, %d %b %Y %H:%M:%S GMT" -gmt 1]
+    set msg $httpMsg($httpcode)
+    set header [format $http(headerNoContent) $httpcode $msg]
+
+    if {[catch {
+	puts $s $header
+	puts $s ""
+	flush $s
+    } err]} {
+	Finish $token $err
+	return
+    }
+    Finish $token
+}
+
+# tinyhttpd::Put404 --
+# 
+
+proc ::tinyhttpd::Put404 {token} {
+    variable priv
+
+    if {[info exists priv(apath,html,404)]} {
+	PutResponse $token 404 $priv(apath,html,404)
+    } else {	
+	PutPlain404 $token
+    }
+}
+
+# tinyhttpd::PutPlain404 --
+# 
+
+proc ::tinyhttpd::PutPlain404 {token} {
+    variable $token
+    upvar 0 $token state
+    variable http
+    
+    set s   $state(s)
+    set cmd $state(cmd)
+    if {[catch {
+	if {[string equal $cmd "GET"]} {
+	    puts $s $http(404GET,plain)
+	} else {
+	    puts $s $http(404,plain)
+	    puts $s "\n"
+	}
+    } err]} {
+	Finish $token $err
+	return
+    }
+    Finish $token ok
+}
 
 # tinyhttpd::stop --
 # 
@@ -1028,26 +1253,6 @@ proc ::tinyhttpd::cleanup { } {
     foreach token [getTokenList] {
 	Finish $token reset
     }
-}
-
-proc ::tinyhttpd::PutPlain404 {token} {
-    variable $token
-    upvar 0 $token state
-    variable http
-    
-    set s   $state(s)
-    set cmd $state(cmd)
-    if {[catch {
-	if {[string equal $cmd "GET"]} {
-	    puts $s $http(404GET,plain)
-	} else {
-	    puts $s $http(404,plain)
-	}
-    } err]} {
-	Finish $token $err
-	return
-    }
-    Finish $token ok
 }
 
 # tinyhttpd::setmimemappings --
@@ -1153,10 +1358,34 @@ proc ::tinyhttpd::allmounted { } {
     return [array names mounts]
 }
 
-proc ::tinyhttpd::Debug {num str} {
-    variable priv
+proc ::tinyhttpd::registercgicommand {path cmd} {
+    variable cgibin
     
-    if {$num <= $priv(debug)} {
+    if {![string equal [file pathtype $path] "relative"]} {
+	return -code error "the path must be a relative path"
+    }
+    if {[info exists cgibin($path)]} {
+	return -code error "the cgibin \"$path\" already exists"
+    }
+    set cgibin($path) $cmd
+}
+
+proc ::tinyhttpd::unregistercgicommand {path} {
+    variable cgibin
+    
+    unset -nocomplain cgibin($name)
+}
+
+proc ::tinyhttpd::allcgibins { } {
+    variable cgibin
+    
+    return [array names cgibin]
+}
+
+proc ::tinyhttpd::Debug {num str} {
+    variable this
+    
+    if {$num <= $this(debug)} {
 	puts $str
     }
 }
