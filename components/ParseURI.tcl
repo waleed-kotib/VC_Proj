@@ -7,7 +7,7 @@
 #       Most recent reference at the time of writing:
 #       http://www.ietf.org/internet-drafts/draft-saintandre-xmpp-uri-06.txt
 # 
-# $Id: ParseURI.tcl,v 1.17 2004-11-16 15:10:26 matben Exp $
+# $Id: ParseURI.tcl,v 1.18 2004-11-27 14:52:52 matben Exp $
 
 package require uriencode
 
@@ -119,7 +119,7 @@ proc ::ParseURI::Parse {args} {
 	    }
 	    
 	    # Use a "high-level" login application api for this.
-	    eval {::Jabber::Login::HighLogin $state(domain) $node $res $password \
+	    eval {::Login::HighLogin $state(domain) $node $res $password \
 	      [list [namespace current]::LoginCB $token]} [array get optsArr]
 	} else {
 	    Free $token
@@ -132,7 +132,7 @@ proc ::ParseURI::Parse {args} {
 
 proc ::ParseURI::LoginCB {token logtoken status {errmsg ""}} {
     
-    ::Jabber::Login::ShowAnyMessageBox $logtoken $status $errmsg
+    ::Login::ShowAnyMessageBox $logtoken $status $errmsg
     if {$status == "ok"} {
 	ProcessURI $token
     }
@@ -188,9 +188,9 @@ proc ::ParseURI::DoMessage {token} {
     
     # Chat or normal message?
     if {[info exists thread]} {
-	eval {::Jabber::Chat::StartThread $state(jid) -thread $thread} $opts
+	eval {::Chat::StartThread $state(jid) -thread $thread} $opts
     } else {
-	eval {::Jabber::NewMsg::Build -to $state(jid)} $opts
+	eval {::NewMsg::Build -to $state(jid)} $opts
     }
     Free $token
 }

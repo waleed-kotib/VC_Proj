@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.72 2004-11-27 08:41:20 matben Exp $
+# $Id: JUI.tcl,v 1.73 2004-11-27 14:52:53 matben Exp $
 
 package provide JUI 1.0
 
@@ -126,19 +126,19 @@ proc ::Jabber::UI::Init { } {
 	{command     mLogoutWith    {::Jabber::Logout::WithStatus}    disabled {}}
 	{command     mPassword      {::Jabber::Passwd::Build}         disabled {}}
 	{separator}
-	{checkbutton mMessageInbox  {::Jabber::MailBox::ShowHide}     normal   I \
+	{checkbutton mMessageInbox  {::MailBox::ShowHide}     normal   I \
 	  {-variable ::Jabber::jstate(inboxVis)}}
 	{separator}
-	{command     mSearch        {::Jabber::Search::Build}         disabled {}}
+	{command     mSearch        {::Search::Build}         disabled {}}
 	{command     mAddNewUser    {::Jabber::User::NewDlg}       disabled {}}
 	{separator}
-	{command     mSendMessage   {::Jabber::NewMsg::Build}         disabled M}
-	{command     mChat          {::Jabber::Chat::StartThreadDlg}  disabled T}
+	{command     mSendMessage   {::NewMsg::Build}         disabled M}
+	{command     mChat          {::Chat::StartThreadDlg}  disabled T}
 	{cascade     mStatus        {}                                disabled {} {} {}}
 	{separator}
-	{command     mEnterRoom     {::Jabber::GroupChat::EnterOrCreate enter} disabled R}
+	{command     mEnterRoom     {::GroupChat::EnterOrCreate enter} disabled R}
 	{cascade     mExitRoom      {}                                disabled {} {} {}}
-	{command     mCreateRoom    {::Jabber::GroupChat::EnterOrCreate create} disabled {}}
+	{command     mCreateRoom    {::GroupChat::EnterOrCreate create} disabled {}}
 	{separator}
 	{command     mvCard         {::VCard::Fetch own}              disabled {}}
 	{separator}
@@ -325,15 +325,15 @@ proc ::Jabber::UI::Build {w} {
     
     $wtray newbutton connect -text [mc Connect] \
       -image $iconConnect -disabledimage $iconConnectDis \
-      -command ::Jabber::Login::Dlg
-    if {[::Jabber::MailBox::HaveMailBox]} {
+      -command ::Login::Dlg
+    if {[::MailBox::HaveMailBox]} {
 	$wtray newbutton inbox -text [mc Inbox] \
 	  -image $iconInboxLett -disabledimage $iconInboxLettDis  \
-	  -command [list ::Jabber::MailBox::ShowHide -visible 1]
+	  -command [list ::MailBox::ShowHide -visible 1]
     } else {
 	$wtray newbutton inbox -text [mc Inbox] \
 	  -image $iconInbox -disabledimage $iconInboxDis  \
-	  -command [list ::Jabber::MailBox::ShowHide -visible 1]
+	  -command [list ::MailBox::ShowHide -visible 1]
     }
     $wtray newbutton newuser -text [mc Contact] \
       -image $iconNewUser -disabledimage $iconNewUserDis  \
@@ -393,7 +393,7 @@ proc ::Jabber::UI::Build {w} {
     # Make the notebook pages.
     # Start with the Roster page -----------------------------------------------
     set ro [$nbframe newpage {Roster} -text [mc Contacts] -image $iconRoster]
-    pack [::Jabber::Roster::Build $ro.ro] -fill both -expand 1
+    pack [::Roster::Build $ro.ro] -fill both -expand 1
 
     # Build only Browser and/or Agents page when needed.
     set minWidth [expr $shortBtWidth > 200 ? $shortBtWidth : 200]
@@ -496,7 +496,7 @@ proc ::Jabber::UI::NewPage {name} {
 	    # Agents page
 	    if {[lsearch $pages Agents] < 0} {
 		set ag [$nbframe newpage {Agents} -text [msgcat::mc Agents]]    
-		pack [::Jabber::Agents::Build $ag.ag] -fill both -expand 1
+		pack [::Agents::Build $ag.ag] -fill both -expand 1
 	    }
 	}
 	Browser {
@@ -507,7 +507,7 @@ proc ::Jabber::UI::NewPage {name} {
 	    if {[lsearch $pages Browser] < 0} {
 		set br [$nbframe newpage {Browser} -text [msgcat::mc Browser] \
 		  -image $iconBrowser]    
-		pack [::Jabber::Browse::Build $br.br] -fill both -expand 1
+		pack [::Browse::Build $br.br] -fill both -expand 1
 	    }
 	}
 	Disco {
@@ -516,7 +516,7 @@ proc ::Jabber::UI::NewPage {name} {
 	    if {[lsearch $pages Disco] < 0} {
 		set di [$nbframe newpage {Disco} -text [msgcat::mc Disco] \
 		  -image $iconBrowser]    
-		pack [::Jabber::Disco::Build $di.di] -fill both -expand 1
+		pack [::Disco::Build $di.di] -fill both -expand 1
 	    }
 	}
 	default {
@@ -556,7 +556,7 @@ proc ::Jabber::UI::LogoutClear { } {
 proc ::Jabber::UI::StartStopAnimatedWave {start} {
     variable jwapp
 
-    ::Jabber::Roster::Animate $start
+    ::Roster::Animate $start
     
     #set waveImage [::Theme::GetImage [option get $jwapp(fall) waveImage {}]]  
     #::UI::StartStopAnimatedWave $jwapp(statmess) $waveImage $start
@@ -565,7 +565,7 @@ proc ::Jabber::UI::StartStopAnimatedWave {start} {
 proc ::Jabber::UI::SetStatusMessage {msg} {
     variable jwapp
 
-    ::Jabber::Roster::Message $msg
+    ::Roster::Message $msg
     #$jwapp(statmess) itemconfigure stattxt -text $msg
 }
 
@@ -642,7 +642,7 @@ proc ::Jabber::UI::GroupChat {what roomJid} {
     switch $what {
 	enter {
 	    $wmjexit add command -label $roomJid  \
-	      -command [list ::Jabber::GroupChat::ExitRoom $roomJid]	    
+	      -command [list ::GroupChat::ExitRoom $roomJid]	    
 	}
 	exit {
 	    catch {$wmjexit delete $roomJid}	    
@@ -658,16 +658,16 @@ proc ::Jabber::UI::RegisterPopupEntry {which menuSpec} {
     
     switch -- $which {
 	agents {
-	    ::Jabber::Agents::RegisterPopupEntry $menuSpec
+	    ::Agents::RegisterPopupEntry $menuSpec
 	}
 	browse {
-	    ::Jabber::Browse::RegisterPopupEntry $menuSpec	    
+	    ::Browse::RegisterPopupEntry $menuSpec	    
 	}
 	groupchat {
-	    ::Jabber::GroupChat::RegisterPopupEntry $menuSpec	    
+	    ::GroupChat::RegisterPopupEntry $menuSpec	    
 	}
 	roster {
-	    ::Jabber::Roster::RegisterPopupEntry $menuSpec	    
+	    ::Roster::RegisterPopupEntry $menuSpec	    
 	}
     }
 }

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JUser.tcl,v 1.7 2004-11-27 08:41:20 matben Exp $
+# $Id: JUser.tcl,v 1.8 2004-11-27 14:52:53 matben Exp $
 
 package provide JUser 1.0
 
@@ -50,7 +50,7 @@ proc ::Jabber::User::NewDlg { } {
     
     # Find all our groups for any jid.
     set allGroups [$jstate(roster) getgroups]
-    set allTypes  [::Jabber::Roster::GetTransportNames $token]
+    set allTypes  [::Roster::GetTransportNames $token]
     
     # Global frame.
     set wall $w.fr
@@ -173,7 +173,7 @@ proc ::Jabber::User::DoAdd {token} {
     if {![catch {jlib::splitjidex $jid node host res}]} {
 
 	# Exclude jabber services.
-	if {[lsearch [::Jabber::Roster::GetAllTransportJids] $host] >= 0} {	    
+	if {[lsearch [::Roster::GetAllTransportJids] $host] >= 0} {	    
 	
 	    # If this requires a transport component we must be registered.
 	    set transport [lsearch -inline -regexp $allUsers "^${host}.*"]
@@ -266,7 +266,7 @@ proc ::Jabber::User::TypeCmd {token name1 name2 op} {
         
     set wjid $state(wjid)
     set type $state(type)
-    set trpt [::Jabber::Roster::GetTrptFromName $type]
+    set trpt [::Roster::GetTrptFromName $type]
 
     # Seems to be necessary to achive any selection.
     focus $wjid
@@ -305,7 +305,7 @@ proc ::Jabber::User::CloseCmd {wclose} {
 
 proc ::Jabber::User::EditDlg {jid} {
 
-    if {[::Jabber::Roster::IsTransport $jid]} {
+    if {[::Roster::IsTransport $jid]} {
 	EditTransportDlg $jid
     } else {
 	EditUserDlg $jid
@@ -322,7 +322,7 @@ proc ::Jabber::User::EditTransportDlg {jid} {
     jlib::splitjidex $jid node host x
     set trpttype [$jstate(jlib) service gettype $host]
     set subtype [lindex [split $trpttype /] 1]
-    set typename [::Jabber::Roster::GetNameFromTrpt $subtype]
+    set typename [::Roster::GetNameFromTrpt $subtype]
     set msg [mc jamessowntrpt $typename $jid3 $subscription]
 
     tk_messageBox -title [mc {Transport Info}] -type ok -message $msg \
@@ -349,7 +349,7 @@ proc ::Jabber::User::EditUserDlg {jid} {
     set state(w) $w
     set state(finished) -1
     
-    set istransport [::Jabber::Roster::IsTransport $jid]
+    set istransport [::Roster::IsTransport $jid]
     if {$istransport} {
 	set title [mc {Transport Info}]
     } else {

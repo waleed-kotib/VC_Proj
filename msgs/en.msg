@@ -562,93 +562,90 @@
 ::msgcat::mcset en messaupdatelatest    {You already have the latest version available (%s)}
 
 
-
-# Messages for tk_messageBox in Jabber namespace etc.:
-namespace eval ::Jabber:: {
-	::msgcat::mcset en jamesserrsend	{We received an error when sending a message to "%s". The error code is %s, and the error message: %s}
-	::msgcat::mcset en jamessallowsub	{User %s allowed you to subscribe to its presence.}
-	::msgcat::mcset en jamessunsub		{User %s has unsubscribed your presence and is removed from your roster.}
-	::msgcat::mcset en jamessunsubpres	{User %s has unsubscribed your presence.}
-	::msgcat::mcset en jamessunsubask	{User %s has unsubscribed from your presence. Do you want to remove %s from your roster?}
-	::msgcat::mcset en jamessunsubscribed	{You are unsubscribed from %s's presence.}
-	::msgcat::mcset en jamesserrpres	{We received a presence error. The error code is %s and message: %s}
-	::msgcat::mcset en jamessautoaccepted	{You have just automatically accepted a subscription request from %s.}
-	::msgcat::mcset en jamessautoreject	{You have just automatically rejected a subscription request from %s.}
-	::msgcat::mcset en jamessautosubs	{You have just automatically subscribed to %s presence.}
+# Messages for tk_messageBox:
+::msgcat::mcset en jamesserrsend	{We received an error when sending a message to "%s". The error code is %s, and the error message: %s}
+::msgcat::mcset en jamessallowsub	{User %s allowed you to subscribe to its presence.}
+::msgcat::mcset en jamessunsub		{User %s has unsubscribed your presence and is removed from your roster.}
+::msgcat::mcset en jamessunsubpres	{User %s has unsubscribed your presence.}
+::msgcat::mcset en jamessunsubask	{User %s has unsubscribed from your presence. Do you want to remove %s from your roster?}
+::msgcat::mcset en jamessunsubscribed	{You are unsubscribed from %s's presence.}
+::msgcat::mcset en jamesserrpres	{We received a presence error. The error code is %s and message: %s}
+::msgcat::mcset en jamessautoaccepted	{You have just automatically accepted a subscription request from %s.}
+::msgcat::mcset en jamessautoreject	{You have just automatically rejected a subscription request from %s.}
+::msgcat::mcset en jamessautosubs	{You have just automatically subscribed to %s presence.}
 
 
-	::msgcat::mcset en jamessconnbroken	{The connection was unexpectedly broken.}
-	::msgcat::mcset en jamessautoawayset 	{Automatic away has been set at %s. Do you want to become available again?}
-	::msgcat::mcset en jamesserrgetpublic	{Received an error when getting the public data from %s. The error code is %s with error message: %s}
-	::msgcat::mcset en jamesserrlastactive	{We received an error when quering %s for last activity. The error was: %s}
-	::msgcat::mcset en jamesserrnotimeinfo	{Client or service %s didn't return a time info.}
-	::msgcat::mcset en jamesstimeused	{Time since client "%s" was last actively used: }
-	::msgcat::mcset en jamesstimeconn	{Time since user "%s" was last connected: }
-	::msgcat::mcset en jamesstimeservstart	{Time since server "%s" was started: }
-	::msgcat::mcset en jamessuptime		{The uptime (for services), or last activity of user is: }
-	::msgcat::mcset en jamesserrtime	{We received an error when quering %s for its time. The error was: %s}
-	::msgcat::mcset en jamesslocaltime	{The local time for %s is: %s}
-	::msgcat::mcset en jamesserrvers	{We received an error when quering %s for its version. The error was: %s}
-	::msgcat::mcset en jamesserrautoupdate 	{We received an error when quering %s for updated client software. The error was: %s}
-	::msgcat::mcset en jamesswarberasewb	{Do you want to erase the whiteboard first?}
-	::msgcat::mcset en jamesswarnremove	{Removing an item in your roster is not an undoable process. You need to subscribe once more to this user if you want to add it back.\
-Do you want to continue anyway?}
-	::msgcat::mcset en jamessillegalchar	{Illegal character(s) in %s: "%s"!}
-	::msgcat::mcset en jamessbadjid		{The jid "%s" is not well formed. Do you want to continue anyway?}
-	::msgcat::mcset en jamessalreadyinrost	{The jid "%s" is already in your roster. Do you want to continue anyway?}
-	::msgcat::mcset en jamessfailsetnick	{There was a failure when setting the nick name or group of user "%s". The error code is %s with the message: %s}
-	::msgcat::mcset en jamessnamemissing	{The %s is missing or is too short!}
-	::msgcat::mcset en jamessnosocket	{Couldn't create socket to server "%s". Maybe networking is not functioning or server is down. Message: %s}
-	::msgcat::mcset en jamesstimeoutserver	{Timeout when waiting for server "%s" to respond.}
-	::msgcat::mcset en jamessregisterok	{The registration to server "%s" was succesful. Now you just need to Login using the same username and password.}
-	::msgcat::mcset en jamessremoveaccount	{You are about to remove your account from this server. This process cannot be undone. Do you really want to continue?}
-	::msgcat::mcset en jamesserrunreg	{We received an error when trying to unregister from "%s". Code %s, and message %s}
-	::msgcat::mcset en jamessokunreg	{You are now unregistered from "%s"}
-	::msgcat::mcset en jamesspasswddiff	{The passwords do not agree. Please check once again.}
-	::msgcat::mcset en jamesspasswderr	{Setting new password failed with the error code %s and message: "%s"}
-	::msgcat::mcset en jamesspasswdok	{Setting new password was succesful}
-	::msgcat::mcset en jamessregnoserver	{We require the server to be set.}
-	::msgcat::mcset en jamesserrregget	{Failed obtaining registration info. Error code %s with message: %s}
-	::msgcat::mcset en jamesserrregset	{Failed registering with service "%s". Error code %s with message: %s}
-	::msgcat::mcset en jamessokreg		{Registration with service "%s" was succesful.}
-	::msgcat::mcset en jamessinvalidjid	{The JID address is not well formed. Please be sure that the entry at the bottom of the whiteboard contains a valid address before you act.\
-It should look something like 'username@jabber.org'.}
-	::msgcat::mcset en jamessnotconnected	{Can't send when not connected to server}
-	::msgcat::mcset en jamessaddrmiss	{You need to fill in at least one valid address}
-	::msgcat::mcset en jamesschatclose	{If you close this chat window you also loose the complete conversation. Do you actually like to close?}
-	::msgcat::mcset en jamessnogroupchat	{We could not recognize any service that provides groupchat}
-	::msgcat::mcset en jamessinroommiss	{We require that all fields are nonempty before entering room}
-	::msgcat::mcset en jamesswarnexitroom	{Do you actually like to exit the room "%s" ?}
-	::msgcat::mcset en jamesserrbrowse	{We got an error when browsing "%s": %s}
-	::msgcat::mcset en jamessenterroomempty	{We require both the server and room name entries to be filled with valid names.}
-	::msgcat::mcset en jamesserrconfget	{Failed obtaining info entering room. Error code %s with message: %s}
-	::msgcat::mcset en jamesserrconfgetcre	{Failed obtaining info creating room. Error code %s with message: %s}
-	::msgcat::mcset en jamessinroomerasewb 	{Do you want to erase the whiteboard before entering a new room?}
-	::msgcat::mcset en jamessconffailed	{Failed enter/create room "%s". Error code %s with message: %s}
-	::msgcat::mcset en jamessconfservempty	{We require the server to be filled with a valid name.}
-	::msgcat::mcset en jamesserragentget	{We got an error when obtaining agents: %s}
-	::msgcat::mcset en jamesserrsearch	{Failed obtaining search specification. Error code %s with message: %s}
-	::msgcat::mcset en jamessoobok		{File transfer succesful}
-	::msgcat::mcset en jamessoobok2         {File transfer of %s to "%s" went ok}
-	::msgcat::mcset en jamessoobnourl	{When user "%s" wanted us to fetch a file, we did not receive an url to get it from.}
-	::msgcat::mcset en jamessoobask		{The user "%s" makes the file at %s available for you. Description: %s. Do you want it?}
-	::msgcat::mcset en jamessoobbad		{The url we got from "%s" was not wellformed. url: "%s"}
-	::msgcat::mcset en jamessoonnohttp	{The url we got from "%s" did not use the http protocol, but instead %s which is unsupported.}
-	::msgcat::mcset en jamessoobfailopen	{Failed opening file %s}
-	::msgcat::mcset en jamessoobgetfail	{Failed getting url "%s": %s}
-	::msgcat::mcset en jamessoobtimeout	{We got a timeout when getting file over http}
-	::msgcat::mcset en jamessnogchat	{We could not recognize any service that provides groupchat}
-	::msgcat::mcset en jamesserrinboxopen	{Failed open the inbox file %s when trying to save it.}
-	::msgcat::mcset en jamesserrinboxread	{Got an error when trying to read the Jabber message box file "%s": %s}
-	::msgcat::mcset en jamesschatclose	{If you close this chat window you also loose the complete conversation. Do you actually like to close?}
-	::msgcat::mcset en jamessgchatfields	{We require that all fields are nonempty before entering room.}
-	::msgcat::mcset en jamessconfmsg	{Select a conference service and a room name. Then push "Get" to obtain the specification for entering the desired room since each room & server\
-may have different requirements.}
-	::msgcat::mcset en jamesssavemsg	{Do you want to save this message before closing?}
-	::msgcat::mcset en jamessskipsendq	{The address "%s" is not well formed. Do you want to skip it and send to the rest?}
-	::msgcat::mcset en jamessillformresend	{The address "%s" is not well formed. Please modify it and resend.}
-	::msgcat::mcset en jamesslogin409	{The login failed with the error code %s because this username is already in use by another user. If this user is you, try to login instead.}
-	::msgcat::mcset en jamessloginerr	{The login failed with the error code %s and message: %s}
+::msgcat::mcset en jamessconnbroken	{The connection was unexpectedly broken.}
+::msgcat::mcset en jamessautoawayset 	{Automatic away has been set at %s. Do you want to become available again?}
+::msgcat::mcset en jamesserrgetpublic	{Received an error when getting the public data from %s. The error code is %s with error message: %s}
+::msgcat::mcset en jamesserrlastactive	{We received an error when quering %s for last activity. The error was: %s}
+::msgcat::mcset en jamesserrnotimeinfo	{Client or service %s didn't return a time info.}
+::msgcat::mcset en jamesstimeused	{Time since client "%s" was last actively used: }
+::msgcat::mcset en jamesstimeconn	{Time since user "%s" was last connected: }
+::msgcat::mcset en jamesstimeservstart	{Time since server "%s" was started: }
+::msgcat::mcset en jamessuptime		{The uptime (for services), or last activity of user is: }
+::msgcat::mcset en jamesserrtime	{We received an error when quering %s for its time. The error was: %s}
+::msgcat::mcset en jamesslocaltime	{The local time for %s is: %s}
+::msgcat::mcset en jamesserrvers	{We received an error when quering %s for its version. The error was: %s}
+::msgcat::mcset en jamesserrautoupdate 	{We received an error when quering %s for updated client software. The error was: %s}
+::msgcat::mcset en jamesswarberasewb	{Do you want to erase the whiteboard first?}
+::msgcat::mcset en jamesswarnremove	{Removing an item in your roster is not an undoable process. You need to subscribe once more to this user if you want to add it back. Do you want to continue anyway?}
+::msgcat::mcset en jamessillegalchar	{Illegal character(s) in %s: "%s"!}
+::msgcat::mcset en jamessbadjid		{The jid "%s" is not well formed. Do you want to continue anyway?}
+::msgcat::mcset en jamessalreadyinrost	{The jid "%s" is already in your roster. Do you want to continue anyway?}
+::msgcat::mcset en jamessfailsetnick	{There was a failure when setting the nick name or group of user "%s". The error code is %s with the message: %s}
+::msgcat::mcset en jamessnamemissing	{The %s is missing or is too short!}
+::msgcat::mcset en jamessnosocket	{Couldn't create socket to server "%s". Maybe networking is not functioning or server is down. Message: %s}
+::msgcat::mcset en jamesstimeoutserver	{Timeout when waiting for server "%s" to respond.}
+::msgcat::mcset en jamessregisterok	{The registration to server "%s" was succesful. Now you just need to Login using the same username and password.}
+::msgcat::mcset en jamessremoveaccount	{You are about to remove your account from this server. This process cannot be undone. Do you really want to continue?}
+::msgcat::mcset en jamesserrunreg	{We received an error when trying to unregister from "%s". Code %s, and message %s}
+::msgcat::mcset en jamessokunreg	{You are now unregistered from "%s"}
+::msgcat::mcset en jamesspasswddiff	{The passwords do not agree. Please check once again.}
+::msgcat::mcset en jamesspasswderr	{Setting new password failed with the error code %s and message: "%s"}
+::msgcat::mcset en jamesspasswdok	{Setting new password was succesful}
+::msgcat::mcset en jamessregnoserver	{We require the server to be set.}
+::msgcat::mcset en jamesserrregget	{Failed obtaining registration info. Error code %s with message: %s}
+::msgcat::mcset en jamesserrregset	{Failed registering with service "%s". Error code %s with message: %s}
+::msgcat::mcset en jamessokreg		{Registration with service "%s" was succesful.}
+::msgcat::mcset en jamessinvalidjid	{The JID address is not well formed. Please be sure that the entry at the bottom of the whiteboard contains a valid address before you act.\
+  It should look something like 'username@jabber.org'.}
+::msgcat::mcset en jamessnotconnected	{Can't send when not connected to server}
+::msgcat::mcset en jamessaddrmiss	{You need to fill in at least one valid address}
+::msgcat::mcset en jamesschatclose	{If you close this chat window you also loose the complete conversation. Do you actually like to close?}
+::msgcat::mcset en jamessnogroupchat	{We could not recognize any service that provides groupchat}
+::msgcat::mcset en jamessinroommiss	{We require that all fields are nonempty before entering room}
+::msgcat::mcset en jamesswarnexitroom	{Do you actually like to exit the room "%s" ?}
+::msgcat::mcset en jamesserrbrowse	{We got an error when browsing "%s": %s}
+::msgcat::mcset en jamessenterroomempty	{We require both the server and room name entries to be filled with valid names.}
+::msgcat::mcset en jamesserrconfget	{Failed obtaining info entering room. Error code %s with message: %s}
+::msgcat::mcset en jamesserrconfgetcre	{Failed obtaining info creating room. Error code %s with message: %s}
+::msgcat::mcset en jamessinroomerasewb 	{Do you want to erase the whiteboard before entering a new room?}
+::msgcat::mcset en jamessconffailed	{Failed enter/create room "%s". Error code %s with message: %s}
+::msgcat::mcset en jamessconfservempty	{We require the server to be filled with a valid name.}
+::msgcat::mcset en jamesserragentget	{We got an error when obtaining agents: %s}
+::msgcat::mcset en jamesserrsearch	{Failed obtaining search specification. Error code %s with message: %s}
+::msgcat::mcset en jamessoobok		{File transfer succesful}
+::msgcat::mcset en jamessoobok2         {File transfer of %s to "%s" went ok}
+::msgcat::mcset en jamessoobnourl	{When user "%s" wanted us to fetch a file, we did not receive an url to get it from.}
+::msgcat::mcset en jamessoobask		{The user "%s" makes the file at %s available for you. Description: %s. Do you want it?}
+::msgcat::mcset en jamessoobbad		{The url we got from "%s" was not wellformed. url: "%s"}
+::msgcat::mcset en jamessoonnohttp	{The url we got from "%s" did not use the http protocol, but instead %s which is unsupported.}
+::msgcat::mcset en jamessoobfailopen	{Failed opening file %s}
+::msgcat::mcset en jamessoobgetfail	{Failed getting url "%s": %s}
+::msgcat::mcset en jamessoobtimeout	{We got a timeout when getting file over http}
+::msgcat::mcset en jamessnogchat	{We could not recognize any service that provides groupchat}
+::msgcat::mcset en jamesserrinboxopen	{Failed open the inbox file %s when trying to save it.}
+::msgcat::mcset en jamesserrinboxread	{Got an error when trying to read the Jabber message box file "%s": %s}
+::msgcat::mcset en jamesschatclose	{If you close this chat window you also loose the complete conversation. Do you actually like to close?}
+::msgcat::mcset en jamessgchatfields	{We require that all fields are nonempty before entering room.}
+::msgcat::mcset en jamessconfmsg	{Select a conference service and a room name. Then push "Get" to obtain the specification for entering the desired room since each room & server\
+  may have different requirements.}
+::msgcat::mcset en jamesssavemsg	{Do you want to save this message before closing?}
+::msgcat::mcset en jamessskipsendq	{The address "%s" is not well formed. Do you want to skip it and send to the rest?}
+::msgcat::mcset en jamessillformresend	{The address "%s" is not well formed. Please modify it and resend.}
+::msgcat::mcset en jamesslogin409	{The login failed with the error code %s because this username is already in use by another user. If this user is you, try to login instead.}
+::msgcat::mcset en jamessloginerr	{The login failed with the error code %s and message: %s}
 ::msgcat::mcset en jamessaddforeign	        {Adding a user from a non Jabber IM system requires that you already have an account on this system, and that you have used this account to register\
 with the corresponding server transport component %s. Do you wish to do that now?}
 ::msgcat::mcset en jamessowntrpt	        {This is your own account at %s that acts as a server service that transports messages to that IM system. It is necessary for it to be in your roster.\
@@ -663,9 +660,6 @@ You have a subscription for %s: %s.}
 ::msgcat::mcset en jamessstarttls-nofeature     {The server "%s" has no support for TLS.}
 ::msgcat::mcset en jamessstartls-failure        {TLS negotiating with server "%s" failed.}
 
-
-
-}
 
 
 ::msgcat::mcset en openquicktime		{Open QuickTime live stream}
@@ -774,71 +768,68 @@ namespace eval ::EditShortcuts:: {
 
 }
 
-# Jabber namespace:
-namespace eval ::Jabber:: {
-	::msgcat::mcset en jalogin 	{Write Jabber server ip number or name, or choose from the popup menu. You should already have an account with this server.}
-	::msgcat::mcset en janewaccount {Write jabber server ip number or name. Pick your username and password.}
-	::msgcat::mcset en janewpass    {Set new password for:}
-	::msgcat::mcset en jasubwant    {The user "%s" wants to subscibe to your presence.}
-        ::msgcat::mcset en jasubopts    {Choose from the options below. Picking a nick name and group is optional, and for your personal use only.}
-	::msgcat::mcset en jasubgetvcard {Get this persons vCard}
-	::msgcat::mcset en jasubsndmsg  {Send a message to this person:}
-	::msgcat::mcset en jasuballow   {Allow "%s" to see my presence}
-	::msgcat::mcset en jasubadd     {Add "%s" to my roster}
-	::msgcat::mcset en jarostadd	{Add a jabber user to my roster. Nick name and group may be set or changed at any time. To add a user from a foreign IM system you must have an account already\
-on that system, and that you use it when registering with the Jabber servers transport or gateway.}
-	::msgcat::mcset en jarostset	{Set nick name and group of user "%s" to what you want. They may be set or changed at any time later.}
-	::msgcat::mcset en jarostsub	{Subscribe to this user}
-	::msgcat::mcset en jarostunsub	{Unsubscribe to this user}
-	::msgcat::mcset en jasearch	{Search user with the specified service. Press the Get button if you want a new form to fill in.}
-	::msgcat::mcset en jasearchwait	{Waiting for Get to be pressed}
-	::msgcat::mcset en jaservclosed	{Server connection closed down.}
-	::msgcat::mcset en jarostupdate {The roster is up to date}
-	::msgcat::mcset en jawaitresp 	{Contacted %s. Waiting for response...}
-	::msgcat::mcset en jawaitxml 	{Connected to "%s". Initializing the XML stream...}
-	::msgcat::mcset en jasendauth	{Server "%s" responded. Sending authorization information.}
-	::msgcat::mcset en jaerrlogin	{Login to %s failed: %s}
-	::msgcat::mcset en jaauthok	{Authorization to server "%s" was succesful. Getting the roster...}
-	::msgcat::mcset en jagchatmsg	{Pick groupchat server and select a room name and your own nick}
-	::msgcat::mcset en jacreateroom	{Select a conference service and optionally a room name. Then push "Get" to obtain the specification for creating the desired room since each server may have\
-specific requirements.}
-	::msgcat::mcset en jawaitserver	{Waiting for server response...}
-	::msgcat::mcset en jaregmsg	{Registration for a specific service with this server. If already registered you may alter your personal info with this dialog.}
-	::msgcat::mcset en jastatavailable {Available}
-	::msgcat::mcset en jastatchat	{Chat: available for immediate contact}
-	::msgcat::mcset en jastataway	{Away: online, but momentarily away}
-	::msgcat::mcset en jastatxa	{Extended away: online, but inactive a while}
-	::msgcat::mcset en jastatdnd	{DND: do not disturb}
-	::msgcat::mcset en jastatinvisible {Invisible}
-	::msgcat::mcset en javersinfo	{Version information for %s}
-	::msgcat::mcset en jabrowseaddserver	{Enter the JID of the server you want to add to the list of services, for instance, "jabber.org".}
-	::msgcat::mcset en jaupdatemsg	{There is a new version of Coccinella available.}
-	::msgcat::mcset en jaupdatevers	{The present version is: %s}
-	::msgcat::mcset en jaupdatepri	{This update is %s}
-	::msgcat::mcset en jaupdatenewver {The new version is: %s}
-	::msgcat::mcset en jaupdateremind {Don't remind me about this anymore}
-	::msgcat::mcset en jasettopic   {Set new topic for this groupchat.}
-	::msgcat::mcset en jadirpresmsg {Send directed presence to the user "%s".}
-	::msgcat::mcset en jatlsnegot   {Negotiating TLS security...}
+
+::msgcat::mcset en jalogin 	{Write Jabber server ip number or name, or choose from the popup menu. You should already have an account with this server.}
+::msgcat::mcset en janewaccount {Write jabber server ip number or name. Pick your username and password.}
+::msgcat::mcset en janewpass    {Set new password for:}
+::msgcat::mcset en jasubwant    {The user "%s" wants to subscibe to your presence.}
+::msgcat::mcset en jasubopts    {Choose from the options below. Picking a nick name and group is optional, and for your personal use only.}
+::msgcat::mcset en jasubgetvcard {Get this persons vCard}
+::msgcat::mcset en jasubsndmsg  {Send a message to this person:}
+::msgcat::mcset en jasuballow   {Allow "%s" to see my presence}
+::msgcat::mcset en jasubadd     {Add "%s" to my roster}
+::msgcat::mcset en jarostadd	{Add a jabber user to my roster. Nick name and group may be set or changed at any time. To add a user from a foreign IM system you must have an account already\
+  on that system, and that you use it when registering with the Jabber servers transport or gateway.}
+::msgcat::mcset en jarostset	{Set nick name and group of user "%s" to what you want. They may be set or changed at any time later.}
+::msgcat::mcset en jarostsub	{Subscribe to this user}
+::msgcat::mcset en jarostunsub	{Unsubscribe to this user}
+::msgcat::mcset en jasearch	{Search user with the specified service. Press the Get button if you want a new form to fill in.}
+::msgcat::mcset en jasearchwait	{Waiting for Get to be pressed}
+::msgcat::mcset en jaservclosed	{Server connection closed down.}
+::msgcat::mcset en jarostupdate {The roster is up to date}
+::msgcat::mcset en jawaitresp 	{Contacted %s. Waiting for response...}
+::msgcat::mcset en jawaitxml 	{Connected to "%s". Initializing the XML stream...}
+::msgcat::mcset en jasendauth	{Server "%s" responded. Sending authorization information.}
+::msgcat::mcset en jaerrlogin	{Login to %s failed: %s}
+::msgcat::mcset en jaauthok	{Authorization to server "%s" was succesful. Getting the roster...}
+::msgcat::mcset en jagchatmsg	{Pick groupchat server and select a room name and your own nick}
+::msgcat::mcset en jacreateroom	{Select a conference service and optionally a room name. Then push "Get" to obtain the specification for creating the desired room since each server may have\
+  specific requirements.}
+::msgcat::mcset en jawaitserver	{Waiting for server response...}
+::msgcat::mcset en jaregmsg	{Registration for a specific service with this server. If already registered you may alter your personal info with this dialog.}
+::msgcat::mcset en jastatavailable {Available}
+::msgcat::mcset en jastatchat	{Chat: available for immediate contact}
+::msgcat::mcset en jastataway	{Away: online, but momentarily away}
+::msgcat::mcset en jastatxa	{Extended away: online, but inactive a while}
+::msgcat::mcset en jastatdnd	{DND: do not disturb}
+::msgcat::mcset en jastatinvisible {Invisible}
+::msgcat::mcset en javersinfo	{Version information for %s}
+::msgcat::mcset en jabrowseaddserver	{Enter the JID of the server you want to add to the list of services, for instance, "jabber.org".}
+::msgcat::mcset en jaupdatemsg	{There is a new version of Coccinella available.}
+::msgcat::mcset en jaupdatevers	{The present version is: %s}
+::msgcat::mcset en jaupdatepri	{This update is %s}
+::msgcat::mcset en jaupdatenewver {The new version is: %s}
+::msgcat::mcset en jaupdateremind {Don't remind me about this anymore}
+::msgcat::mcset en jasettopic   {Set new topic for this groupchat.}
+::msgcat::mcset en jadirpresmsg {Send directed presence to the user "%s".}
+::msgcat::mcset en jatlsnegot   {Negotiating TLS security...}
 
 
-}
 
-namespace eval ::Jabber::SetupAss:: {
-	::msgcat::mcset en suintro1 	{This is a setup assistant to help you fill in the necessary things that is needed for a new or an existing account on a Jabber server.}
-	::msgcat::mcset en suintro2 	{If you are going to run in peer-to-peer mode, you just set this in the Preferences panel, and relaunch the Coccinella.}
-	::msgcat::mcset en suintro3 	{Any time you may press the Previous button to go back. Follow the instructions on each page, and press the Next button until finished.}
-        ::msgcat::mcset en sulang       {Pick a language catalog. If you change the language catalog this will only affect interface elements created after it has been set.}
-	::msgcat::mcset en suservmsg	{Fill in the name of the Jabber server you wish to have your account on. If you already have an existing account on a Jabber server, fill in the name of that server.\
-A typical name is "jabber.org".}
-	::msgcat::mcset en suusermsg	{Fill in your username and password. The username must not exist at the specified server, unless you are already registered.\
-If the username is already in use by another, you will receive a note about this when trying to register.}
-	::msgcat::mcset en suregmsg	{Do you want to register your account now if it is a new one? You must already be connected to a network (without firewall) to register.}
-	::msgcat::mcset en sufinmsg	{That's all. If the registration was succesful, you only have to press the Connect button, or select the Jabber/Login menu. Also, be nice to the bug ;-)}
-	::msgcat::mcset en suheadtxt	{Coccinella Setup Assistant}
+# Setup assistant:
+::msgcat::mcset en suintro1 	{This is a setup assistant to help you fill in the necessary things that is needed for a new or an existing account on a Jabber server.}
+::msgcat::mcset en suintro2 	{If you are going to run in peer-to-peer mode, you just set this in the Preferences panel, and relaunch the Coccinella.}
+::msgcat::mcset en suintro3 	{Any time you may press the Previous button to go back. Follow the instructions on each page, and press the Next button until finished.}
+::msgcat::mcset en sulang       {Pick a language catalog. If you change the language catalog this will only affect interface elements created after it has been set.}
+::msgcat::mcset en suservmsg	{Fill in the name of the Jabber server you wish to have your account on. If you already have an existing account on a Jabber server, fill in the name of that server.\
+  A typical name is "jabber.org".}
+::msgcat::mcset en suusermsg	{Fill in your username and password. The username must not exist at the specified server, unless you are already registered.\
+  If the username is already in use by another, you will receive a note about this when trying to register.}
+::msgcat::mcset en suregmsg	{Do you want to register your account now if it is a new one? You must already be connected to a network (without firewall) to register.}
+::msgcat::mcset en sufinmsg	{That's all. If the registration was succesful, you only have to press the Connect button, or select the Jabber/Login menu. Also, be nice to the bug ;-)}
+::msgcat::mcset en suheadtxt	{Coccinella Setup Assistant}
 
 
-}
 
 namespace eval ::VCard:: {
 	::msgcat::mcset en vcardget	{Getting vCard from user %s. Waiting for server response...}

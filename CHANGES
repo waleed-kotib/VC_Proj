@@ -13,6 +13,7 @@ Coccinella-0.95.2 (04????): 	Short summary --
 	- improved smiley/url text parsing which is 20 times faster
 	- reworked layoyt of tree widget
 	- muc chatrooms now show users role
+	- httpd can mount directories; using css for 404 and dir listings
 
 
 Coccinella-0.95.1 (040930): 	Short summary --

@@ -5,17 +5,17 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.40 2004-11-23 08:55:22 matben Exp $
+# $Id: Disco.tcl,v 1.41 2004-11-27 14:52:53 matben Exp $
 
 package provide Disco 1.0
 
-namespace eval ::Jabber::Disco:: {
+namespace eval ::Disco:: {
 
-    ::hooks::register initHook           ::Jabber::Disco::InitHook
-    ::hooks::register jabberInitHook     ::Jabber::Disco::NewJlibHook
-    ::hooks::register loginHook          ::Jabber::Disco::LoginHook
-    ::hooks::register logoutHook         ::Jabber::Disco::LogoutHook
-    ::hooks::register presenceHook       ::Jabber::Disco::PresenceHook
+    ::hooks::register initHook           ::Disco::InitHook
+    ::hooks::register jabberInitHook     ::Disco::NewJlibHook
+    ::hooks::register loginHook          ::Disco::LoginHook
+    ::hooks::register logoutHook         ::Disco::LogoutHook
+    ::hooks::register presenceHook       ::Disco::PresenceHook
 
     # Standard widgets and standard options.
     option add *Disco.borderWidth           0               50
@@ -61,30 +61,30 @@ namespace eval ::Jabber::Disco:: {
     variable popMenuDefs
 
     set popMenuDefs(disco,def) {
-	mMessage       user      {::Jabber::NewMsg::Build -to $jid}
-	mChat          user      {::Jabber::Chat::StartThread $jid}
+	mMessage       user      {::NewMsg::Build -to $jid}
+	mChat          user      {::Chat::StartThread $jid}
 	mWhiteboard    wb        {::Jabber::WB::NewWhiteboardTo $jid}
 	mEnterRoom     room      {
-	    ::Jabber::GroupChat::EnterOrCreate enter -roomjid $jid -autoget 1
+	    ::GroupChat::EnterOrCreate enter -roomjid $jid -autoget 1
 	}
-	mCreateRoom    conference {::Jabber::GroupChat::EnterOrCreate create \
+	mCreateRoom    conference {::GroupChat::EnterOrCreate create \
 	  -server $jid}
 	separator      {}        {}
-	mInfo          jid       {::Jabber::Disco::InfoCmd $jid}
+	mInfo          jid       {::Disco::InfoCmd $jid}
 	mLastLogin/Activity jid  {::Jabber::GetLast $jid}
 	mLocalTime     jid       {::Jabber::GetTime $jid}
 	mvCard         jid       {::VCard::Fetch other $jid}
 	mVersion       jid       {::Jabber::GetVersion $jid}
 	separator      {}        {}
 	mSearch        search    {
-	    ::Jabber::Search::Build -server $jid -autoget 1
+	    ::Search::Build -server $jid -autoget 1
 	}
 	mRegister      register  {
 	    ::Jabber::GenRegister::NewDlg -server $jid -autoget 1
 	}
 	mUnregister    register  {::Jabber::Register::Remove $jid}
 	separator      {}        {}
-	mRefresh       jid       {::Jabber::Disco::Refresh $jid}
+	mRefresh       jid       {::Disco::Refresh $jid}
     }
 
     variable dlguid 0
@@ -95,7 +95,7 @@ namespace eval ::Jabber::Disco:: {
     variable treeuid 0
 }
 
-proc ::Jabber::Disco::InitHook { } {
+proc ::Disco::InitHook { } {
     
     
     # We could add more icons for other categories here!
@@ -109,17 +109,17 @@ proc ::Jabber::Disco::InitHook { } {
 	]
 }
 
-proc ::Jabber::Disco::NewJlibHook {jlibName} {
+proc ::Disco::NewJlibHook {jlibName} {
     variable xmlns
     upvar ::Jabber::jstate jstate
 	    
     set jstate(disco) [disco::new $jlibName -command  \
-      ::Jabber::Disco::Command]
+      ::Disco::Command]
 
     ::Jabber::AddClientXmlns [list $xmlns(disco)]
 }
 
-proc ::Jabber::Disco::LoginHook { } {
+proc ::Disco::LoginHook { } {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jserver jserver
     
@@ -133,7 +133,7 @@ proc ::Jabber::Disco::LoginHook { } {
     }
 }
 
-proc ::Jabber::Disco::LogoutHook { } {
+proc ::Disco::LogoutHook { } {
     
     if {[lsearch [::Jabber::UI::Pages] "Disco"] >= 0} {
 	#SetUIWhen "disconnect"
@@ -141,7 +141,7 @@ proc ::Jabber::Disco::LogoutHook { } {
     Clear
 }
 
-proc ::Jabber::Disco::HaveTree { } {    
+proc ::Disco::HaveTree { } {    
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jstate jstate
     
@@ -153,7 +153,7 @@ proc ::Jabber::Disco::HaveTree { } {
     return 0
 }
 
-# Jabber::Disco::GetInfo, GetItems --
+# Disco::GetInfo, GetItems --
 #
 #       Discover the services available for the $jid.
 #
@@ -164,7 +164,7 @@ proc ::Jabber::Disco::HaveTree { } {
 # Results:
 #       callback scheduled.
 
-proc ::Jabber::Disco::GetInfo {jid args} {    
+proc ::Disco::GetInfo {jid args} {    
     upvar ::Jabber::jstate jstate
     
     array set opts {
@@ -176,7 +176,7 @@ proc ::Jabber::Disco::GetInfo {jid args} {
     $jstate(disco) send_get info  $jid [namespace current]::InfoCB
 }
 
-proc ::Jabber::Disco::GetItems {jid args} {    
+proc ::Disco::GetItems {jid args} {    
     upvar ::Jabber::jstate jstate
     
     array set opts {
@@ -189,10 +189,10 @@ proc ::Jabber::Disco::GetItems {jid args} {
 }
 
 
-proc ::Jabber::Disco::Command {disconame discotype from subiq args} {
+proc ::Disco::Command {disconame discotype from subiq args} {
     upvar ::Jabber::jstate jstate
 
-    ::Debug 2 "::Jabber::Disco::Command discotype=$discotype, from=$from"
+    ::Debug 2 "::Disco::Command discotype=$discotype, from=$from"
 
     if {[string equal $discotype "info"]} {
 	eval {ParseGetInfo $from $subiq} $args
@@ -204,14 +204,14 @@ proc ::Jabber::Disco::Command {disconame discotype from subiq args} {
     return 1
 }
 
-proc ::Jabber::Disco::ItemsCB {disconame type from subiq args} {
+proc ::Disco::ItemsCB {disconame type from subiq args} {
     variable tstate
     variable wwave
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
-    ::Debug 2 "::Jabber::Disco::ItemsCB type=$type, from=$from"
+    ::Debug 2 "::Disco::ItemsCB type=$type, from=$from"
     set from [jlib::jidmap $from]
     
     switch -- $type {
@@ -222,10 +222,10 @@ proc ::Jabber::Disco::ItemsCB {disconame type from subiq args} {
 		
 		switch -- $jprefs(serviceMethod) {
 		    disco {
-			::Jabber::Browse::GetAll
+			::Browse::GetAll
 		    }
 		    browse {
-			::Jabber::Agents::GetAll
+			::Agents::GetAll
 		    }
 		}
 	    }
@@ -263,12 +263,12 @@ proc ::Jabber::Disco::ItemsCB {disconame type from subiq args} {
     eval {::hooks::run discoItemsHook $type $from $subiq} $args
 }
 
-proc ::Jabber::Disco::InfoCB {disconame type from subiq args} {
+proc ::Disco::InfoCB {disconame type from subiq args} {
     variable wtree
     variable typeIcon
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::Jabber::Disco::InfoCB type=$type, from=$from"
+    ::Debug 2 "::Disco::InfoCB type=$type, from=$from"
     if {$type == "error"} {
 	::Jabber::AddErrorLog $from $subiq
 	return
@@ -311,7 +311,7 @@ proc ::Jabber::Disco::InfoCB {disconame type from subiq args} {
     eval {::hooks::run discoInfoHook $type $from $subiq} $args
 }
 
-proc ::Jabber::Disco::SetDirItemUsingCategory {jid} {
+proc ::Disco::SetDirItemUsingCategory {jid} {
     variable wtree
     
     if {[IsBranchCategory $jid]} {
@@ -321,7 +321,7 @@ proc ::Jabber::Disco::SetDirItemUsingCategory {jid} {
     }
 }
 
-proc ::Jabber::Disco::IsBranchCategory {jid} {
+proc ::Disco::IsBranchCategory {jid} {
     variable isBranchCategory
     upvar ::Jabber::jstate jstate
     
@@ -350,20 +350,20 @@ proc ::Jabber::Disco::IsBranchCategory {jid} {
     return $isdir
 }
 	    
-# Jabber::Disco::ParseGetInfo --
+# Disco::ParseGetInfo --
 #
 #       Respond to an incoming discovery get query.
 #       
 # Results:
 #       none
 
-proc ::Jabber::Disco::ParseGetInfo {from subiq args} {
+proc ::Disco::ParseGetInfo {from subiq args} {
     global  prefs
     variable xmlns
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::coccixmlns coccixmlns
 
-    ::Debug 2 "::Jabber::Disco::ParseGetInfo: args='$args'"
+    ::Debug 2 "::Disco::ParseGetInfo: args='$args'"
     
     array set argsArr $args
     
@@ -404,7 +404,7 @@ proc ::Jabber::Disco::ParseGetInfo {from subiq args} {
     eval {$jstate(jlib) send_iq "result" $xmllist -to $from} $opts
 }
 
-proc ::Jabber::Disco::ParseGetItems {from subiq args} {
+proc ::Disco::ParseGetItems {from subiq args} {
     variable xmlns
     upvar ::Jabber::jstate jstate    
     
@@ -422,7 +422,7 @@ proc ::Jabber::Disco::ParseGetItems {from subiq args} {
 
 # UI parts .....................................................................
     
-# Jabber::Disco::Build --
+# Disco::Build --
 #
 #       Makes mega widget to show the services available for the $server.
 #
@@ -432,7 +432,7 @@ proc ::Jabber::Disco::ParseGetItems {from subiq args} {
 # Results:
 #       w
 
-proc ::Jabber::Disco::Build {w} {
+proc ::Disco::Build {w} {
     global  this prefs
     
     variable wtree
@@ -443,7 +443,7 @@ proc ::Jabber::Disco::Build {w} {
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jprefs jprefs
     
-    ::Debug 2 "::Jabber::Disco::Build"
+    ::Debug 2 "::Disco::Build"
     
     set fontS [option get . fontSmall {}]
 
@@ -508,11 +508,11 @@ proc ::Jabber::Disco::Build {w} {
     return $w
 }
     
-# Jabber::Disco::RegisterPopupEntry --
+# Disco::RegisterPopupEntry --
 # 
 #       Components or plugins can add their own menu entries here.
 
-proc ::Jabber::Disco::RegisterPopupEntry {menuSpec} {
+proc ::Disco::RegisterPopupEntry {menuSpec} {
     variable popMenuDefs
     
     # Keeps track of all registered menu entries.
@@ -537,7 +537,7 @@ proc ::Jabber::Disco::RegisterPopupEntry {menuSpec} {
     set regPopMenuSpec [concat $regPopMenuSpec $menuSpec]
 }
 
-# Jabber::Disco::Popup --
+# Disco::Popup --
 #
 #       Handle popup menu in disco dialog.
 #       
@@ -549,13 +549,13 @@ proc ::Jabber::Disco::RegisterPopupEntry {menuSpec} {
 # Results:
 #       popup menu displayed
 
-proc ::Jabber::Disco::Popup {w v x y} {
+proc ::Disco::Popup {w v x y} {
     global  wDlgs this
     
     variable popMenuDefs
     upvar ::Jabber::jstate jstate
 
-    ::Debug 2 "::Jabber::Disco::Popup w=$w, v='$v', x=$x, y=$y"
+    ::Debug 2 "::Disco::Popup w=$w, v='$v', x=$x, y=$y"
 
     set typeClicked ""
     
@@ -683,11 +683,11 @@ proc ::Jabber::Disco::Popup {w v x y} {
     }
 }
 
-proc ::Jabber::Disco::SelectCmd {w v} {
+proc ::Disco::SelectCmd {w v} {
     
 }
 
-# Jabber::Disco::OpenTreeCmd --
+# Disco::OpenTreeCmd --
 #
 #       Callback when open service item in tree.
 #       It disco a subelement of the server jid, typically
@@ -700,13 +700,13 @@ proc ::Jabber::Disco::SelectCmd {w v} {
 # Results:
 #       none.
 
-proc ::Jabber::Disco::OpenTreeCmd {w v} {   
+proc ::Disco::OpenTreeCmd {w v} {   
     variable wtree
     variable wwave
     variable tstate
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::Jabber::Disco::OpenTreeCmd v=$v"
+    ::Debug 2 "::Disco::OpenTreeCmd v=$v"
 
     if {[llength $v]} {
 	set item [lindex $v end]
@@ -734,11 +734,11 @@ proc ::Jabber::Disco::OpenTreeCmd {w v} {
     }    
 }
 
-proc ::Jabber::Disco::CloseTreeCmd {w v} {
+proc ::Disco::CloseTreeCmd {w v} {
     variable wwave
     variable tstate
     
-    ::Debug 2 "::Jabber::Disco::CloseTreeCmd v=$v"
+    ::Debug 2 "::Disco::CloseTreeCmd v=$v"
     set jid [lindex $v end]
     if {[info exists tstate(run,$jid)]} {
 	unset tstate(run,$jid)
@@ -746,20 +746,20 @@ proc ::Jabber::Disco::CloseTreeCmd {w v} {
     }
 }
 
-# Jabber::Disco::AddToTree --
+# Disco::AddToTree --
 #
 #       Fills tree with content. Calls itself recursively.
 #
 # Arguments:
 #       v:
 
-proc ::Jabber::Disco::AddToTree {v} {    
+proc ::Disco::AddToTree {v} {    
     variable wtree    
     variable treeuid
     upvar ::Jabber::jstate jstate
  
     # We disco servers jid 'items+info', and disco its childrens 'info'.    
-    ::Debug 4 "::Jabber::Disco::AddToTree v='$v'"
+    ::Debug 4 "::Disco::AddToTree v='$v'"
 
     set item [lindex $v end]
     set jid  [lindex $item 0]
@@ -779,7 +779,7 @@ proc ::Jabber::Disco::AddToTree {v} {
     if {[$jstate(disco) isroom $jid2] && [string length $res]} {
 	set name [$jstate(jlib) service nick $jid]
 	set isdir 0
-	set icon [::Jabber::Roster::GetPresenceIconFromJid $jid]
+	set icon [::Roster::GetPresenceIconFromJid $jid]
     } else {
 	set name [$jstate(disco) name $item]
 	if {$name == ""} {
@@ -819,7 +819,7 @@ proc ::Jabber::Disco::AddToTree {v} {
      }	    
 }
 
-proc ::Jabber::Disco::MakeBalloonHelp {item treectag} {
+proc ::Disco::MakeBalloonHelp {item treectag} {
     variable wtree    
     upvar ::Jabber::jstate jstate
     
@@ -838,13 +838,13 @@ proc ::Jabber::Disco::MakeBalloonHelp {item treectag} {
     ::balloonhelp::balloonfortree $wtree $treectag $msg
 }
 
-proc ::Jabber::Disco::Refresh {jid} {    
+proc ::Disco::Refresh {jid} {    
     variable wtree
     variable wwave
     variable tstate
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::Jabber::Disco::Refresh jid=$jid"
+    ::Debug 2 "::Disco::Refresh jid=$jid"
 	
     # Clear internal state of the disco object for this jid.
     $jstate(disco) reset $jid
@@ -861,21 +861,21 @@ proc ::Jabber::Disco::Refresh {jid} {
     GetItems $jid
 }
 
-proc ::Jabber::Disco::Clear { } {    
+proc ::Disco::Clear { } {    
     upvar ::Jabber::jstate jstate
     
     $jstate(disco) reset
 }
 
-# Jabber::Disco::PresenceHook --
+# Disco::PresenceHook --
 # 
 #       Check if there is a room participant that changes its presence.
 
-proc ::Jabber::Disco::PresenceHook {jid presence args} {
+proc ::Disco::PresenceHook {jid presence args} {
     variable wtree    
     upvar ::Jabber::jstate jstate
     
-    ::Debug 4 "::Jabber::Disco::PresenceHook $jid, $presence"
+    ::Debug 4 "::Disco::PresenceHook $jid, $presence"
      
     jlib::splitjid $jid jid2 res
     array set argsArr $args
@@ -893,7 +893,7 @@ proc ::Jabber::Disco::PresenceHook {jid presence args} {
 	set presList [$jstate(roster) getpresence $jid2 -resource $res]
 	array set presArr $presList
 	set icon [eval {
-	    ::Jabber::Roster::GetPresenceIcon $jid3 $presArr(-type)
+	    ::Roster::GetPresenceIcon $jid3 $presArr(-type)
 	} $presList]
 	set v [concat [$jstate(disco) parents $jid3] $jid3]
 	if {[$wtree isitem $v]} {
@@ -902,7 +902,7 @@ proc ::Jabber::Disco::PresenceHook {jid presence args} {
     }
 }
 
-proc ::Jabber::Disco::TryIdentifyCoccinella {jid3 presence args} {
+proc ::Disco::TryIdentifyCoccinella {jid3 presence args} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::coccixmlns coccixmlns
     
@@ -911,7 +911,7 @@ proc ::Jabber::Disco::TryIdentifyCoccinella {jid3 presence args} {
 	set coccielem  \
 	  [$jstate(roster) getextras $jid3 $coccixmlns(servers)]
 	if {$coccielem == {}} {
-	    if {![::Jabber::Roster::IsTransportHeuristics $jid3]} {
+	    if {![::Roster::IsTransportHeuristics $jid3]} {
 		if {![$jstate(disco) isdiscoed items $jid3] && \
 		  ![$jstate(roster) wasavailable $jid3]} {
 		    eval {AutoDisco $jid3 $presence} $args
@@ -921,14 +921,14 @@ proc ::Jabber::Disco::TryIdentifyCoccinella {jid3 presence args} {
     }	
 }
 
-proc ::Jabber::Disco::AutoDisco {jid presence args} {
+proc ::Disco::AutoDisco {jid presence args} {
     upvar ::Jabber::jstate jstate
     
     # Disco only potential Coccinella (all jabber) clients.
     jlib::splitjidex $jid node host x
     set type [lindex [$jstate(disco) types $host] 0]
     
-    ::Debug 4 "::Jabber::Disco::AutoDisco jid=$jid, type=$type"
+    ::Debug 4 "::Disco::AutoDisco jid=$jid, type=$type"
 
     # We may not yet have discoed this (empty).
     if {($type == "") || ($type == "service/jabber")} {		
@@ -936,11 +936,11 @@ proc ::Jabber::Disco::AutoDisco {jid presence args} {
     }
 }
 
-proc ::Jabber::Disco::AutoDiscoCmd {disconame type from subiq args} {
+proc ::Disco::AutoDiscoCmd {disconame type from subiq args} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::coccixmlns coccixmlns    
     
-    ::Debug 4 "::Jabber::Disco::AutoDiscoCmd type=$type, from=$from"
+    ::Debug 4 "::Disco::AutoDiscoCmd type=$type, from=$from"
     
     switch -- $type {
 	error {
@@ -949,16 +949,16 @@ proc ::Jabber::Disco::AutoDiscoCmd {disconame type from subiq args} {
 	result - ok {
 	    if {[$jstate(disco) hasfeature $coccixmlns(whiteboard) $from] || \
 	      [$jstate(disco) hasfeature $coccixmlns(coccinella) $from]} {
-		::Jabber::Roster::SetCoccinella $from
+		::Roster::SetCoccinella $from
 	    }
 	}
     }
 }
 
-proc ::Jabber::Disco::InfoCmd {jid} {
+proc ::Disco::InfoCmd {jid} {
     upvar ::Jabber::jstate jstate
 
-    ::Debug 4 "::Jabber::Disco::InfoCmd jid=$jid"
+    ::Debug 4 "::Disco::InfoCmd jid=$jid"
     
     if {![$jstate(disco) isdiscoed info $jid]} {
 	set xmllist [$jstate(disco) get info $jid xml]
@@ -968,9 +968,9 @@ proc ::Jabber::Disco::InfoCmd {jid} {
     }
 }
 
-proc ::Jabber::Disco::InfoCmdCB {disconame type jid subiq args} {
+proc ::Disco::InfoCmdCB {disconame type jid subiq args} {
     
-    ::Debug 4 "::Jabber::Disco::InfoCmdCB type=$type, jid=$jid"
+    ::Debug 4 "::Disco::InfoCmdCB type=$type, jid=$jid"
     
     switch -- $type {
 	error {
@@ -982,7 +982,7 @@ proc ::Jabber::Disco::InfoCmdCB {disconame type jid subiq args} {
     }
 }
 
-proc ::Jabber::Disco::InfoResultCB {type jid subiq args} {
+proc ::Disco::InfoResultCB {type jid subiq args} {
     global  this
     
     variable dlguid

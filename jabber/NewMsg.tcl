@@ -5,18 +5,18 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.52 2004-11-27 08:41:20 matben Exp $
+# $Id: NewMsg.tcl,v 1.53 2004-11-27 14:52:54 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
 
 
-namespace eval ::Jabber::NewMsg:: {
+namespace eval ::NewMsg:: {
     global this
 
     # Add all event hooks.
-    ::hooks::register closeWindowHook    ::Jabber::NewMsg::CloseHook
-    ::hooks::register quitAppHook        ::Jabber::NewMsg::QuitAppHook
+    ::hooks::register closeWindowHook    ::NewMsg::CloseHook
+    ::hooks::register quitAppHook        ::NewMsg::QuitAppHook
 
     # Use option database for customization.
     option add *NewMsg.buttonRowSide        left            widgetDefault
@@ -37,6 +37,7 @@ namespace eval ::Jabber::NewMsg:: {
     option add *NewMsg.frall.borderWidth    1               50
     option add *NewMsg.frall.relief         raised          50
     option add *NewMsg*divt.borderWidth     2               50
+    option add *NewMsg*divt.height          2               50
     option add *NewMsg*divt.relief          sunken          50
     option add *NewMsg*addpad.padX          6               50
     option add *NewMsg*addpad.padY          4               50
@@ -91,11 +92,11 @@ namespace eval ::Jabber::NewMsg:: {
     }
 }
 
-# Jabber::NewMsg::Init --
+# NewMsg::Init --
 # 
 #       Initialization that is needed once.
 
-proc ::Jabber::NewMsg::Init {} {
+proc ::NewMsg::Init {} {
     
     variable locals
     
@@ -104,20 +105,20 @@ proc ::Jabber::NewMsg::Init {} {
     
 }
 
-# Jabber::NewMsg::InitEach --
+# NewMsg::InitEach --
 # 
 #       Initializations that are needed each time a send dialog is created.
 #       This is because the services from transports must be determined
 #       dynamically.
 
-proc ::Jabber::NewMsg::InitEach { } {
+proc ::NewMsg::InitEach { } {
     
     variable locals
     variable transportDefs
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
     
-    ::Debug 2 "Jabber::NewMsg::InitEach"
+    ::Debug 2 "NewMsg::InitEach"
     
     # We must be indenpendent of method; agent, browse, disco.
     set trpts {}
@@ -142,7 +143,7 @@ proc ::Jabber::NewMsg::InitEach { } {
     }
 }
 
-proc ::Jabber::NewMsg::InitMultiAddress {wmulti} {
+proc ::NewMsg::InitMultiAddress {wmulti} {
     
     variable locals
     
@@ -153,7 +154,7 @@ proc ::Jabber::NewMsg::InitMultiAddress {wmulti} {
     set locals(initedaddr) 1
 }
 
-# Jabber::NewMsg::Build --
+# NewMsg::Build --
 #
 #       The standard send message dialog.
 #
@@ -164,20 +165,20 @@ proc ::Jabber::NewMsg::InitMultiAddress {wmulti} {
 # Results:
 #       shows window.
 
-proc ::Jabber::NewMsg::Build {args} {
+proc ::NewMsg::Build {args} {
     global  this prefs wDlgs osprefs
     
     variable locals  
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
-    ::Debug 2 "::Jabber::NewMsg::Build args='$args'"
+    ::Debug 2 "::NewMsg::Build args='$args'"
 
     # One shot initialization (static) and dynamic initialization.
     if {!$locals(inited)} {
-	Jabber::NewMsg::Init
+	NewMsg::Init
     }
-    Jabber::NewMsg::InitEach
+    NewMsg::InitEach
    
     set w $wDlgs(jsendmsg)[incr locals(dlguid)]
     set locals($w,num) $locals(dlguid)
@@ -279,17 +280,17 @@ proc ::Jabber::NewMsg::Build {args} {
 
     $wtray newbutton send  -text [mc Send]  \
       -image $iconSend -disabledimage $iconSendDis  \
-      -command [list ::Jabber::NewMsg::DoSend $w]
+      -command [list ::NewMsg::DoSend $w]
     $wtray newbutton quote -text [mc Quote]  \
       -image $iconQuote -disabledimage $iconQuoteDis  \
-      -command [list ::Jabber::NewMsg::DoQuote $w $opts(-quotemessage) $opts(-to) $opts(-time)] \
+      -command [list ::NewMsg::DoQuote $w $opts(-quotemessage) $opts(-to) $opts(-time)] \
       -state $quotestate
     $wtray newbutton save  -text [mc Save]  \
       -image $iconSave -disabledimage $iconSaveDis  \
-      -command [list ::Jabber::NewMsg::SaveMsg $w]
+      -command [list ::NewMsg::SaveMsg $w]
     $wtray newbutton print -text [mc Print]  \
       -image $iconPrint -disabledimage $iconPrintDis  \
-      -command [list ::Jabber::NewMsg::DoPrint $w]
+      -command [list ::NewMsg::DoPrint $w]
     
     ::hooks::run buildNewMsgButtonTrayHook $wtray
 
@@ -426,19 +427,19 @@ $opts(-forwardmessage)"
     focus $waddr.addr1
 }
 
-proc ::Jabber::NewMsg::NewAddrLine {w wfr n} {
+proc ::NewMsg::NewAddrLine {w wfr n} {
     global  wDlgs
     variable locals
     upvar ::Jabber::jstate jstate
     
     set fontSB [option get . fontSmallBold {}]
     
-    set bg1 [option get $wfr entry1Background {}]
-    set fg1 [option get $wfr entry1Foreground {}]
-    set bg2 [option get $wfr entry2Background {}]
-    set fg2 [option get $wfr entry2Foreground {}]
-    set bg3 [option get $wfr entry3Background {}]
-    set bg4 [option get $wfr entry4Background {}]
+    set bg1   [option get $wfr entry1Background {}]
+    set fg1   [option get $wfr entry1Foreground {}]
+    set bg2   [option get $wfr entry2Background {}]
+    set fg2   [option get $wfr entry2Foreground {}]
+    set bg3   [option get $wfr entry3Background {}]
+    set bg4   [option get $wfr entry4Background {}]
     set bgpop [option get $wfr popupBackground {}]
     
     set locals(wpopupbase) ._[string range $wDlgs(jsendmsg) 1 end]_trpt
@@ -462,15 +463,15 @@ proc ::Jabber::NewMsg::NewAddrLine {w wfr n} {
     foreach {name desc} $locals(menuDefs) {
 	$m add radiobutton -label $name -value $desc  \
 	  -variable [namespace current]::locals($w,poptrpt$n)  \
-	  -command [list ::Jabber::NewMsg::PopupCmd $w $n]
+	  -command [list ::NewMsg::PopupCmd $w $n]
     }
     
-    bind $wentry <Button-1> [list ::Jabber::NewMsg::ButtonInAddr $w $wfr $n]
-    bind $wentry <Tab>      [list ::Jabber::NewMsg::TabInAddr $w $wfr $n]
-    bind $wentry <BackSpace> "+ ::Jabber::NewMsg::BackSpaceInAddr $w $wfr $n"
-    bind $wentry <Return>   [list ::Jabber::NewMsg::ReturnInAddr $w $wfr $n]
-    bind $wentry <Key-Up>   [list ::Jabber::NewMsg::KeyUpDown -1 $w $wfr $n]
-    bind $wentry <Key-Down> [list ::Jabber::NewMsg::KeyUpDown 1 $w $wfr $n]
+    bind $wentry <Button-1> [list ::NewMsg::ButtonInAddr $w $wfr $n]
+    bind $wentry <Tab>      [list ::NewMsg::TabInAddr $w $wfr $n]
+    bind $wentry <BackSpace> "+ ::NewMsg::BackSpaceInAddr $w $wfr $n"
+    bind $wentry <Return>   [list ::NewMsg::ReturnInAddr $w $wfr $n]
+    bind $wentry <Key-Up>   [list ::NewMsg::KeyUpDown -1 $w $wfr $n]
+    bind $wentry <Key-Down> [list ::NewMsg::KeyUpDown 1 $w $wfr $n]
     
     grid $wfr.f${n} -padx 1 -pady 1 -column 0 -row $n -sticky news
     grid $wentry    -padx 1 -pady 1 -column 1 -row $n -sticky news
@@ -479,7 +480,7 @@ proc ::Jabber::NewMsg::NewAddrLine {w wfr n} {
     set locals($w,addrline) $n
 }
 
-proc ::Jabber::NewMsg::FillAddrLine {w wfr n} {
+proc ::NewMsg::FillAddrLine {w wfr n} {
     
     variable locals
     variable transportDefs
@@ -491,13 +492,13 @@ proc ::Jabber::NewMsg::FillAddrLine {w wfr n} {
     $wfr.f${n}.la configure -image $locals(popupbt)
     $wfr.addr${n} configure -state normal
     
-    bind $wfr.f${n}.la <Button-1> [list ::Jabber::NewMsg::TrptPopup $w $n %X %Y]
-    bind $wfr.f${n}.la <ButtonRelease-1> [list ::Jabber::NewMsg::TrptPopupRelease $w $n]
+    bind $wfr.f${n}.la <Button-1> [list ::NewMsg::TrptPopup $w $n %X %Y]
+    bind $wfr.f${n}.la <ButtonRelease-1> [list ::NewMsg::TrptPopupRelease $w $n]
     set locals($w,fillline) $n
     set locals($w,poptrpt$n) [lindex $transportDefs(jabber) 1]
 }
 
-proc ::Jabber::NewMsg::ButtonInAddr {w wfr n} {
+proc ::NewMsg::ButtonInAddr {w wfr n} {
     
     variable locals
     
@@ -508,7 +509,7 @@ proc ::Jabber::NewMsg::ButtonInAddr {w wfr n} {
     }
 }
 
-proc ::Jabber::NewMsg::TabInAddr {w wfr n} {
+proc ::NewMsg::TabInAddr {w wfr n} {
     
     variable locals
  
@@ -532,7 +533,7 @@ proc ::Jabber::NewMsg::TabInAddr {w wfr n} {
 #       If last line, fill a new one, else set focus to the one below.
 #       Crete new line if not there.
 
-proc ::Jabber::NewMsg::ReturnInAddr {w wfr n} {
+proc ::NewMsg::ReturnInAddr {w wfr n} {
     
     variable locals
     
@@ -553,7 +554,7 @@ proc ::Jabber::NewMsg::ReturnInAddr {w wfr n} {
 
 #       Remove this line if empty and shift all lines below up.
 
-proc ::Jabber::NewMsg::BackSpaceInAddr {w wfr n} {
+proc ::NewMsg::BackSpaceInAddr {w wfr n} {
     
     variable locals
     
@@ -578,12 +579,12 @@ proc ::Jabber::NewMsg::BackSpaceInAddr {w wfr n} {
 	EmptyAddrLine $w $wfr $last
 	if {$last > 4} {
 	    # Can't make it work :-(
-	    #after idle ::Jabber::NewMsg::DeleteLastAddrLine $w $wfr
+	    #after idle ::NewMsg::DeleteLastAddrLine $w $wfr
 	}
     }
 }
 
-proc ::Jabber::NewMsg::EmptyAddrLine {w wfr n} {
+proc ::NewMsg::EmptyAddrLine {w wfr n} {
     
     variable locals
     
@@ -599,7 +600,7 @@ proc ::Jabber::NewMsg::EmptyAddrLine {w wfr n} {
     bind $wfr.f${n}.la <ButtonRelease-1> {}    
 }
 
-proc ::Jabber::NewMsg::DeleteLastAddrLine {w wfr} {
+proc ::NewMsg::DeleteLastAddrLine {w wfr} {
     
     variable locals
     
@@ -613,7 +614,7 @@ proc ::Jabber::NewMsg::DeleteLastAddrLine {w wfr} {
     destroy $locals(wpopupbase)${num}_${n}
 }
 
-proc ::Jabber::NewMsg::SeeLine {w n} {
+proc ::NewMsg::SeeLine {w n} {
     
     variable locals
 
@@ -629,7 +630,7 @@ proc ::Jabber::NewMsg::SeeLine {w n} {
     }
 }
 
-proc ::Jabber::NewMsg::KeyUpDown {updown w wfr n} {
+proc ::NewMsg::KeyUpDown {updown w wfr n} {
     
     variable locals
 
@@ -643,7 +644,7 @@ proc ::Jabber::NewMsg::KeyUpDown {updown w wfr n} {
     SeeLine $w $newfocus
 }
 
-proc ::Jabber::NewMsg::PopupCmd {w n} {
+proc ::NewMsg::PopupCmd {w n} {
     
     variable locals
     upvar ::Jabber::jserver jserver
@@ -688,7 +689,7 @@ proc ::Jabber::NewMsg::PopupCmd {w n} {
 
 #       Callback for the Configure scrollable canvas.
 
-proc ::Jabber::NewMsg::ResizeCan {w} {
+proc ::NewMsg::ResizeCan {w} {
     
     variable locals
  
@@ -702,7 +703,7 @@ proc ::Jabber::NewMsg::ResizeCan {w} {
 
 #       Callback for the Configure address frame.
 
-proc ::Jabber::NewMsg::AddrResize {w} {
+proc ::NewMsg::AddrResize {w} {
     
     variable locals
  
@@ -715,7 +716,7 @@ proc ::Jabber::NewMsg::AddrResize {w} {
 
 # Post popup menu.
 
-proc ::Jabber::NewMsg::TrptPopup {w n x y} {
+proc ::NewMsg::TrptPopup {w n x y} {
     global  this
     
     variable locals
@@ -737,7 +738,7 @@ proc ::Jabber::NewMsg::TrptPopup {w n x y} {
     tk_popup $locals(wpopupbase)${num}_${n} [expr int($x)] [expr int($y)]
 }
 
-proc ::Jabber::NewMsg::TrptPopupRelease {w n} {
+proc ::NewMsg::TrptPopupRelease {w n} {
     
     variable locals
 
@@ -745,16 +746,16 @@ proc ::Jabber::NewMsg::TrptPopupRelease {w n} {
     $wfr.f${n}.la configure -image $locals(popupbt)
 }
 
-proc ::Jabber::NewMsg::CommandReturnKeyPress {w} {
+proc ::NewMsg::CommandReturnKeyPress {w} {
     
     DoSend $w
 }
 
-# Jabber::NewMsg::DoSend --
+# NewMsg::DoSend --
 #
 #       Send the message. Validate addresses in address list.
 
-proc ::Jabber::NewMsg::DoSend {w} {
+proc ::NewMsg::DoSend {w} {
     global  prefs wDlgs
     
     variable locals
@@ -822,7 +823,7 @@ proc ::Jabber::NewMsg::DoSend {w} {
     destroy $w
 }
 
-proc ::Jabber::NewMsg::DoQuote {w message to time} {
+proc ::NewMsg::DoQuote {w message to time} {
     
     variable locals
     upvar ::Jabber::jstate jstate
@@ -837,7 +838,7 @@ proc ::Jabber::NewMsg::DoQuote {w message to time} {
     $locals($w,wtray) buttonconfigure quote -state disabled
 }
 
-proc ::Jabber::NewMsg::SaveMsg {w} {
+proc ::NewMsg::SaveMsg {w} {
     global this
     
     variable locals
@@ -864,7 +865,7 @@ proc ::Jabber::NewMsg::SaveMsg {w} {
     }
 }
 
-proc ::Jabber::NewMsg::DoPrint {w} {
+proc ::NewMsg::DoPrint {w} {
     
     variable locals
     upvar ::Jabber::jstate jstate
@@ -876,7 +877,7 @@ proc ::Jabber::NewMsg::DoPrint {w} {
       -data $allText -font $fontS    
 }
 
-proc ::Jabber::NewMsg::CloseHook {wclose} {
+proc ::NewMsg::CloseHook {wclose} {
     global  wDlgs
     variable locals
 	
@@ -885,13 +886,13 @@ proc ::Jabber::NewMsg::CloseHook {wclose} {
     }   
 }
 
-proc ::Jabber::NewMsg::QuitAppHook { } {
+proc ::NewMsg::QuitAppHook { } {
     global  wDlgs
     
     ::UI::SaveWinPrefixGeom $wDlgs(jsendmsg)
 }
 
-proc ::Jabber::NewMsg::CloseDlg {w} {
+proc ::NewMsg::CloseDlg {w} {
     global  wDlgs
     variable locals
     
@@ -922,7 +923,7 @@ proc ::Jabber::NewMsg::CloseDlg {w} {
     }
 }
 
-proc ::Jabber::NewMsg::GetAllCCP { } {
+proc ::NewMsg::GetAllCCP { } {
     
     variable locals
     
@@ -935,7 +936,7 @@ proc ::Jabber::NewMsg::GetAllCCP { } {
     return $res
 }
 
-proc ::Jabber::NewMsg::GetCCP {w} {
+proc ::NewMsg::GetCCP {w} {
     
     variable locals
     

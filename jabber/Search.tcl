@@ -5,18 +5,18 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Search.tcl,v 1.16 2004-07-09 06:26:06 matben Exp $
+# $Id: Search.tcl,v 1.17 2004-11-27 14:52:55 matben Exp $
 
 package provide Search 1.0
 
 
-namespace eval ::Jabber::Search:: {
+namespace eval ::Search:: {
 
     # Wait for this variable to be set.
     variable finished  
 }
 
-# Jabber::Search::Build --
+# Search::Build --
 #
 #       Initiates the process of searching a service.
 #       
@@ -26,7 +26,7 @@ namespace eval ::Jabber::Search:: {
 # Results:
 #       .
      
-proc ::Jabber::Search::Build {args} {
+proc ::Search::Build {args} {
     global  this prefs wDlgs
 
     variable wtop
@@ -113,7 +113,7 @@ proc ::Jabber::Search::Build {args} {
     # Get button.
     set wbtget $frtop.btget
     button $wbtget -text [mc Get] -width 6 -default active \
-      -command [list ::Jabber::Search::Get]
+      -command [list ::Search::Get]
 
     grid $frtop.lserv -sticky w
     grid $wcomboserver -row 1 -column 0 -sticky ew
@@ -156,11 +156,11 @@ proc ::Jabber::Search::Build {args} {
     # If only a single search service, or if specified as argument.
     if {([llength $searchServ] == 1) ||  \
       [info exists argsArr(-autoget)] && $argsArr(-autoget)} {
-	::Jabber::Search::Get
+	::Search::Get
     }
 }
 
-proc ::Jabber::Search::Get { } {    
+proc ::Search::Get { } {    
     variable server
     variable wsearrows
     variable wcomboserver
@@ -180,20 +180,20 @@ proc ::Jabber::Search::Get { } {
     set stattxt "-- [mc jawaitserver] --"
     
     # Send get register.
-    ::Jabber::JlibCmd search_get $server ::Jabber::Search::GetCB    
+    ::Jabber::JlibCmd search_get $server ::Search::GetCB    
     $wsearrows start
     
     $wtb configure -columns [list 60 [mc {Search results}]]
     $wtb delete 0 end
 }
 
-# Jabber::Search::GetCB --
+# Search::GetCB --
 #
 #       This is the 'get' iq callback.
 #       It should be possible to receive multiple callbacks for a single
 #       search, but this is untested.
 
-proc ::Jabber::Search::GetCB {jlibName type subiq} {
+proc ::Search::GetCB {jlibName type subiq} {
     
     variable wtop
     variable wbox
@@ -207,7 +207,7 @@ proc ::Jabber::Search::GetCB {jlibName type subiq} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
-    ::Debug 2 "::Jabber::Search::GetCB type=$type, subiq='$subiq'"
+    ::Debug 2 "::Search::GetCB type=$type, subiq='$subiq'"
     
     if {![winfo exists $wtop]} {
 	return
@@ -248,7 +248,7 @@ proc ::Jabber::Search::GetCB {jlibName type subiq} {
     $wbtget configure -state normal -default disabled   
 }
 
-proc ::Jabber::Search::DoSearch { } {    
+proc ::Search::DoSearch { } {    
     variable server
     variable wsearrows
     variable wbox
@@ -265,7 +265,7 @@ proc ::Jabber::Search::DoSearch { } {
       [list [namespace current]::ResultCallback $server] -subtags $subelements
 }
 
-# Jabber::Search::ResultCallback --
+# Search::ResultCallback --
 #
 #       This is the 'result' and 'set' iq callback We may get a number of server
 #       pushing 'set' elements, finilized by the 'result' element.
@@ -277,7 +277,7 @@ proc ::Jabber::Search::DoSearch { } {
 #       type:       "result", "error", or "set"
 #       subiq:
 
-proc ::Jabber::Search::ResultCallback {server type subiq} {   
+proc ::Search::ResultCallback {server type subiq} {   
     variable wtop
     variable wtb
     variable wbox
@@ -285,7 +285,7 @@ proc ::Jabber::Search::ResultCallback {server type subiq} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
-    ::Debug 2 "::Jabber::Search::ResultCallback server=$server, type=$type, \
+    ::Debug 2 "::Search::ResultCallback server=$server, type=$type, \
       subiq='$subiq'"
     
     if {![winfo exists $wtop]} {

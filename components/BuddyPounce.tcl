@@ -4,7 +4,7 @@
 #       This is just a first sketch.
 #       TODO: all message translations.
 #       
-# $Id: BuddyPounce.tcl,v 1.6 2004-10-21 07:38:30 matben Exp $
+# $Id: BuddyPounce.tcl,v 1.7 2004-11-27 14:52:52 matben Exp $
 
 # Key phrases are: 
 #     event:    something happens, presence change, incoming message etc.
@@ -561,11 +561,11 @@ proc ::BuddyPounce::Event {from eventkey args} {
 	    }
 	    chat {			
 		# If already have chat.
-		set w [::Jabber::Chat::HaveChat $jid]
+		set w [::Chat::HaveChat $jid]
 		if {$w != ""} {
 		    raise $w
 		} else {
-		    ::Jabber::Chat::StartThread $from
+		    ::Chat::StartThread $from
 		}
 	    }
 	    msg {
@@ -584,7 +584,7 @@ proc ::BuddyPounce::Event {from eventkey args} {
 		if {[info exists argsArr(-body)]} {
 		    lappend opts -quotemessage $argsArr(-body)
 		}
-		eval {::Jabber::NewMsg::Build -to $from  \
+		eval {::NewMsg::Build -to $from  \
 		  -subject $subject -message $body} $opts
 	    }
 	}

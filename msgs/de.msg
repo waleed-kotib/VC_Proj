@@ -528,256 +528,150 @@
 
 # Messages for tk_messageBox:
 ::msgcat::mcset de messfailedhttp	{Konnte internen http-Server nicht starten: %s}
-::msgcat::mcset de messinfoscript	{Wegen des 'info script'-Bugs beim Mac müssen\
-Sie im folgenden Dialog den 'Whiteboard-%s'-Ordner explizit wählen.}
-::msgcat::mcset de messfailedsock	{Konnte Socket-Verbindung zum Server nicht erstellen.\
-Netzwerk gestört oder Server gestoppt. Der Fehlercode ist: %s}
-::msgcat::mcset de messeofconnect	{Fehler bei Verbindungsaufbau.\
-EOF erhalten.}	
-::msgcat::mcset de messfailconnect	{Fehler bei Verbindungsaufbau\
-zu %s}
+::msgcat::mcset de messinfoscript	{Wegen des 'info script'-Bugs beim Mac müssen Sie im folgenden Dialog den 'Whiteboard-%s'-Ordner explizit wählen.}
+::msgcat::mcset de messfailedsock	{Konnte Socket-Verbindung zum Server nicht erstellen. Netzwerk gestört oder Server gestoppt. Der Fehlercode ist: %s}
+::msgcat::mcset de messeofconnect	{Fehler bei Verbindungsaufbau. EOF erhalten.}	
+::msgcat::mcset de messfailconnect	{Fehler bei Verbindungsaufbau zu %s}
 ::msgcat::mcset de messtimeout		{Zeitablauf bei Verbindungsaufbau.}
-::msgcat::mcset de messnoplugs		{Auf diesem System sind keine Erweiterungen\
-oder Hilfsanwendungen bekannt.}
+::msgcat::mcset de messnoplugs		{Auf diesem System sind keine Erweiterungen oder Hilfsanwendungen bekannt.}
 ::msgcat::mcset de messfailopread	{Kann %s nicht zum Lesen öffnen: %s}
 ::msgcat::mcset de messfailopwrite	{Kann %s nicht zum Schreiben öffnen: %s}
-::msgcat::mcset de messcanerasewarn	{Öffnen einer Zeichnungsdatei löscht alles\
-in der aktuellen Zeichenfläche!}
-::msgcat::mcset de messaskreceive	{Die Datei %s soll empfangen werden.\
-Wollen Sie das?}
+::msgcat::mcset de messcanerasewarn	{Öffnen einer Zeichnungsdatei löscht alles in der aktuellen Zeichenfläche!}
+::msgcat::mcset de messaskreceive	{Die Datei %s soll empfangen werden. Wollen Sie das?}
 ::msgcat::mcset de messfailmimeimp 	{Konnte kein Importprogramm für MIME-Typ %s finden}
 ::msgcat::mcset de messfailnomime 	{Konnte keinen MIME-Typ für die Datei %s finden}
 ::msgcat::mcset de messfailsend		{Fehler beim Senden von %s}
-::msgcat::mcset de messfactorydefaults	{Sie sind dabei, viele Ihrer Anpassungen \
-zu entfernen. Wollen Sie wirklich weitermachen ?}
-::msgcat::mcset de messremoveprofile     {Wollen Sie dieses Profil wirklich entfernen ?\
-Es wird nichts unternommen, um Ihr Konto während dieser Operation zu entfernen.}
-::msgcat::mcset de messfillserveruser	{Sie müssen zumindest den Server- und\
-Benutzernamen eingeben.}
-::msgcat::mcset de messprofinuse	{Dieses Profil wird bereits benutzt.\
-Möchten Sie es ersetzen ?}
-::msgcat::mcset de messblockbadjid	{JID "%s" ist fehlerhaft.\
-Soll es trotzdem hinzugefügt werden ?}
-::msgcat::mcset de messfieldsmissing	{Ein oder mehrere Felder fehlen.\
-Erneute Eingabe oder Abbruch.}
-::msgcat::mcset de messrmstandardfonts	{Die Standardschriften \
-Times, Helvetica und Courier können nicht entfernt werden.}
-::msgcat::mcset de messprefschanged	{Die Einstellungen wurden geändert.\
-Möchten Sie trotzdem abbrechen?}
+::msgcat::mcset de messfactorydefaults	{Sie sind dabei, viele Ihrer Anpassungen zu entfernen. Wollen Sie wirklich weitermachen?}
+::msgcat::mcset de messremoveprofile     {Wollen Sie dieses Profil wirklich entfernen? Es wird nichts unternommen, um Ihr Konto während dieser Operation zu entfernen.}
+::msgcat::mcset de messfillserveruser	{Sie müssen zumindest den Server- und Benutzernamen eingeben.}
+::msgcat::mcset de messprofinuse	{Dieses Profil wird bereits benutzt. Möchten Sie es ersetzen ?}
+::msgcat::mcset de messblockbadjid	{JID "%s" ist fehlerhaft. Soll es trotzdem hinzugefügt werden ?}
+::msgcat::mcset de messfieldsmissing	{Ein oder mehrere Felder fehlen. Erneute Eingabe oder Abbruch.}
+::msgcat::mcset de messrmstandardfonts	{Die Standardschriften Times, Helvetica und Courier können nicht entfernt werden.}
+::msgcat::mcset de messprefschanged	{Die Einstellungen wurden geändert. Möchten Sie trotzdem abbrechen?}
 ::msgcat::mcset de messerrpreffile	{Fehler bei Dateiöffnung: %s.}
-::msgcat::mcset de messfailserver	{Konnte Serversocket nicht starten.\
-Vielleicht besteht keine Verbindung.}
-::msgcat::mcset de messopenhelpfile	{Sie wollen eine Hilfedatei in der Zeichenfläche\
-öffnen; dabei wird der aktuelle Inhalt gelöscht. Wollen Sie das ?}
+::msgcat::mcset de messfailserver	{Konnte Serversocket nicht starten. Vielleicht besteht keine Verbindung.}
+::msgcat::mcset de messopenhelpfile	{Sie wollen eine Hilfedatei in der Zeichenfläche öffnen; dabei wird der aktuelle Inhalt gelöscht. Wollen Sie das ?}
 ::msgcat::mcset de messprintnoextension	{Es gibt keine TCL-Erweiterung, die hier helfen könnte :-(}
 ::msgcat::mcset de messdoquit?		{Wollen Sie wirklich beenden ?}
 ::msgcat::mcset de messsuassfillin	{Füllen Sie bitte alle Einträge aus, bevor Sie weitermachen}
-::msgcat::mcset de messsuassclose	{Wollen Sie den Einrichtungsassistenten\
-wirklich beenden? Sie können ihn später über das Menü starten.}
-::msgcat::mcset de messprotocolch	{Sie haben die Netzwerkeinstellungen geändert.\
-Dies erfordert einen Neustart der Anwendung.\
-Wollen Sie wirklich weitermachen ?}
-::msgcat::mcset de messpasswddifferent {Die beiden Passwörter stimmen nicht\
-überein. Bitte versuchen Sie es erneut.}
+::msgcat::mcset de messsuassclose	{Wollen Sie den Einrichtungsassistenten wirklich beenden? Sie können ihn später über das Menü starten.}
+::msgcat::mcset de messprotocolch	{Sie haben die Netzwerkeinstellungen geändert. Dies erfordert einen Neustart der Anwendung. Wollen Sie wirklich weitermachen ?}
+::msgcat::mcset de messpasswddifferent {Die beiden Passwörter stimmen nicht überein. Bitte versuchen Sie es erneut.}
 ::msgcat::mcset de messaupdatelatest    {Sie verfügen bereits über die letzte Version von (%s)}
 
 
+# Messages for tk_messageBox:
+
+::msgcat::mcset de jamesserrsend	{Beim Senden einer Nachricht an %s trat ein Fehler auf. Fehlercode: %s, Fehlernachricht: %s}
+::msgcat::mcset de jamessallowsub	{Benutzer %s hat Ihre Subskription zugelassen.}
+::msgcat::mcset de jamessunsub		{Benutzer %s sich von Ihnen abgemeldet und wurde aus Ihrer Kontaktliste entfernt.}
+::msgcat::mcset de jamessunsubpres	{Benutzer %s hat sich aus Ihrer Liste ausgetragen.}
+::msgcat::mcset de jamessunsubask	{Benutzer %s hat sich von Ihnen abgemeldet. Möchten Sie %s aus Ihrer Kontaktliste entfernen ?}
+::msgcat::mcset de jamessunsubscribed	{Sie wurden aus der Anwesenheitsinformation von %s ausgetragen.}
+::msgcat::mcset de jamesserrpres	{Wir erhielten einen Statusfehler. Fehlercode ist %s und die Nachricht: %s}
+::msgcat::mcset de jamessautoaccepted	{Sie haben soeben automatisch eine Zulassungs-Anforderung von %s akzeptiert.}
+::msgcat::mcset de jamessautoreject	{Sie haben soeben automatisch eine Zulassungs-Anforderung von %s verweigert.}
+::msgcat::mcset de jamessautosubs	{Sie haben sich soeben automatisch für den Status von %s eingetragen.}
 
 
-# Messages for tk_messageBox in Jabber namespace etc.:
-namespace eval ::Jabber:: {
-	::msgcat::mcset de jamesserrsend	{Beim Senden einer Nachricht an %s trat ein\
-Fehler auf. Fehlercode: %s, Fehlernachricht: %s}
-	::msgcat::mcset de jamessallowsub	{Benutzer %s hat Ihre Subskription zugelassen.}
-	::msgcat::mcset de jamessunsub		{Benutzer %s sich von Ihnen abgemeldet\
-und wurde aus Ihrer Kontaktliste entfernt.}
-	::msgcat::mcset de jamessunsubpres	{Benutzer %s hat sich aus Ihrer Liste ausgetragen.}
-	::msgcat::mcset de jamessunsubask	{Benutzer %s hat sich von Ihnen abgemeldet.\
-Möchten Sie %s aus Ihrer Kontaktliste entfernen ?}
-	::msgcat::mcset de jamessunsubscribed	{Sie wurden aus der Anwesenheitsinformation von %s ausgetragen.}
-	::msgcat::mcset de jamesserrpres	{Wir erhielten einen Statusfehler.\
-Fehlercode ist %s und die Nachricht: %s}
-	::msgcat::mcset de jamessautoaccepted	{Sie haben soeben automatisch eine Zulassungs-\
-Anforderung von %s akzeptiert.}
-	::msgcat::mcset de jamessautoreject	{Sie haben soeben automatisch eine Zulassungs-\
-Anforderung von %s verweigert.}
-	::msgcat::mcset de jamessautosubs	{Sie haben sich soeben automatisch für den\
-Status von %s eingetragen.}
-
-
-	::msgcat::mcset de jamessconnbroken	{Die Verbindung brach unerwartet ab.}
-	::msgcat::mcset de jamessautoawayset 	{Automatische Abwesenheit wurde gesetzt um %s.\
-Möchten Sie wieder anwesend sein ?}
-	::msgcat::mcset de jamesserrgetpublic	{Fehler beim Abruf öffentlicher Daten\
-Von %s. Fehlercode %s mit Fehlernachricht: %s}
-	::msgcat::mcset de jamesserrlastactive	{Fehler beim Abfragen der letzten\
-Aktivität für %s. Der Fehler war: %s}
-	::msgcat::mcset de jamesserrnotimeinfo	{Client oder Dienst %s gab keine\
-Zeitinformation zurück.}
-	::msgcat::mcset de jamesstimeused	{Zeit, seit Client "%s"\
-zuletzt aktiv genutzt wurde: }
-	::msgcat::mcset de jamesstimeconn	{Zeit, seit Benutzer "%s" zuletzt\
-verbunden war: }
-	::msgcat::mcset de jamesstimeservstart	{Zeit seit Start des Servers "%s": }
-	::msgcat::mcset de jamessuptime		{Die Laufzeit (für Dienste)\
-oder letzte Aktivität des Benutzers: }
-	::msgcat::mcset de jamesserrtime	{Fehler bei Abfrage der Zeit von\
-%s. Der Fehler war: %s}
-	::msgcat::mcset de jamesslocaltime	{Lokale Zeit für %s ist: %s}
-	::msgcat::mcset de jamesserrvers	{Fehler bei Abfrage der Version von\
-%s. Der Fehler war: %s}
-	::msgcat::mcset de jamesserrautoupdate 	{Fehler bei der Abfrage von %s\
-nach neuer Version. Fehler war: %s}
-	::msgcat::mcset de jamesswarberasewb	{Soll die Zeichenfläche zuerst gelöscht\
-werden ?}
-	::msgcat::mcset de jamesswarnremove	{Entfernung eines Eintrages In Ihrer Liste kann nicht\
- rückgängig gemacht werden. Sie müssen sich erneut für diesen Benutzer anmelden.\
- Wollen Sie trotzdem weitermachen ?}
-	::msgcat::mcset de jamessillegalchar	{Ungültige Zeichen in %s: "%s"!}
-	::msgcat::mcset de jamessbadjid		{JID "%s" ist nicht korrekt.\
-Wollen Sie trotzdem weitermachen?}
-	::msgcat::mcset de jamessalreadyinrost	{JID "%s" ist bereits in Ihrer Kontaktliste.\
-Wollen Sie trotzdem weitermachen?}
-	::msgcat::mcset de jamessfailsetnick	{Fehler beim Eintragen des\
-Spitznamens oder der Gruppe für Benutzer "%s". Fehlercode ist %s mit der\
-Nachricht: %s}
-	::msgcat::mcset de jamessnamemissing	{%s fehlt oder ist zu kurz!}
-	::msgcat::mcset de jamessnosocket	{Konnte Socketverbindung zu Server "%s" nicht\
-aufbauen. Netzwerkfehler oder Server nicht aktiv. Nachricht: %s}
-	::msgcat::mcset de jamesstimeoutserver	{Zeitablauf bei Warten auf Antwort\
-von Server "%s".}
-	::msgcat::mcset de jamessregisterok	{Die Registrierung beim Server\
-"%s" war erfolgreich. Sie können sich jetzt mit dem gleichen Benutzernamen/Passwort anmelden.}	
-	::msgcat::mcset de jamessremoveaccount	{Sie sind dabei, Ihr Konto auf diesem\
-Server zu löschen. Das kann nicht rückgängig gemacht werden. Wollen Sie\
-wirklich weitermachen?}
-	::msgcat::mcset de jamesserrunreg	{Fehler bei der Deregistrierung\
-von "%s". Fehlercode %s und Nachricht %s}
-	::msgcat::mcset de jamessokunreg	{Sie sind nun von "%s" abgemeldet}
-	::msgcat::mcset de jamesspasswddiff	{Keine Passwort-Übereinstimmung.\
-Versuchen Sie es erneut.}
-	::msgcat::mcset de jamesspasswderr	{Fehler beim Setzen des neuen Passwortes.\
-Fehlercode %s und Nachricht: "%s"}
-	::msgcat::mcset de jamesspasswdok	{Eintrag des neuen Passwortes war erfolgreich.}
-	::msgcat::mcset de jamessregnoserver	{Der Server muss eingetragen sein.}
-	::msgcat::mcset de jamesserrregget	{Fehler beim Abruf der Registrierungs-\
-Information. Fehlercode %s mit Nachricht: %s}
-	::msgcat::mcset de jamesserrregset	{Fehler bei Dienstregistrierung\
-"%s". Fehlercode %s mit Nachricht: %s}
-	::msgcat::mcset de jamessokreg		{Registrierung bei Dienst "%s" war
-erfolgreich.}
-	::msgcat::mcset de jamessinvalidjid	{Die JID-Adresse ist nicht korrekt.\
-Stellen Sie sicher, das der Eintrag am unteren Rand eine gültige Adresse\
-enthält. Sie sollte aussehen wie 'username@jabber.org'.}
-	::msgcat::mcset de jamessnotconnected	{Ohne Serververbindung kein Senden möglich}
-	::msgcat::mcset de jamessaddrmiss	{Sie müssen mindestens eine\
-gültige Adresse eintragen}
-	::msgcat::mcset de jamesschatclose	{Wenn Sie dieses Chat-Fenster schliessen,\
-verlieren Sie die vollständige Konversation. Wirklich schliessen?}
-	::msgcat::mcset de jamessnogroupchat	{Es konnte kein Dienst gefunden\
-werden, der Gruppen-Chat ermöglicht}
-	::msgcat::mcset de jamessinroommiss	{Vor dem Betreten eines Raumes\
-müssen alle Felder ausgefüllt sein}
-	::msgcat::mcset de jamesswarnexitroom	{Wollen Sie wirklich den Raum\
-"%s" verlassen?}
-	::msgcat::mcset de jamesserrbrowse	{Fehler beim Durchsuchen von\
-"%s": %s}
-	::msgcat::mcset de jamessenterroomempty	{Die Einträge für Server und\
-Raumname müssen gültige Werte enthalten.}
-	::msgcat::mcset de jamesserrconfget	{Konnte beim Eintritt in den Raum\
-keine Informationen abrufen. Fehlercode %s Nachricht: %s}
-	::msgcat::mcset de jamesserrconfgetcre	{Konnte beim Anlegen des Raums\
-keine Informationen abrufen. Fehlercode %s Nachricht: %s}
-	::msgcat::mcset de jamessinroomerasewb 	{Soll die Zeichenfläche vor dem\
-Eintritt in einen neuen Raum gelöscht werden?}
-	::msgcat::mcset de jamessconffailed	{Konnte Raum "%s" nicht erstellen/betreten.\
-Fehlercode %s Nachricht: %s}
-	::msgcat::mcset de jamessconfservempty	{Das Serverfeld muss mit einem\
-gültigen Namen gefüllt sein.}
-	::msgcat::mcset de jamesserragentget	{Fehler beim Abruf der\
-Agenten: %s}
-	::msgcat::mcset de jamesserrsearch	{Konnte Suchspezifikation nicht\
-abrufen. Fehlercode %s Nachricht: %s}
-	::msgcat::mcset de jamessoobok		{Dateiübertragung erfolgreich}
-	::msgcat::mcset de jamessoobok2         {Dateiübertragung von %s nach "%s" war erfolgreich}
-	::msgcat::mcset de jamessoobnourl	{Als von Benutzer "%s" eine Datei abgerufen\
-werden sollte, konnten wir dafür keine Url bekommen.}
-	::msgcat::mcset de jamessoobask		{Benutzer "%s" stellt Ihnen die Datei\
-%s zur Verfügung. Beschreibung: %s. Abrufen?}
-	::msgcat::mcset de jamessoobbad		{Die von "%s" erhaltene Url war\
-fehlerhaft. Url: "%s"}
-	::msgcat::mcset de jamessoonnohttp	{Die von "%s" erhaltene Url benutzt\
-nicht das http-Protokoll, sondern %s, was nicht unterstützt wird.}
-	::msgcat::mcset de jamessoobfailopen	{Fehler beim Öffnen der Datei %s}
-	::msgcat::mcset de jamessoobgetfail	{Fehler beim Abruf der Url "%s": %s}
-	::msgcat::mcset de jamessoobtimeout	{Zeitüberschreitung beim Abruf der\
-Datei über http}
-	::msgcat::mcset de jamessnogchat	{Wir konnten keinen Server finden,\
-der groupchat bietet.}
-	::msgcat::mcset de jamesserrinboxopen	{Fehler beim Öffnen der Postdatei %s\
-zur Sicherhung.}
-	::msgcat::mcset de jamesserrinboxread	{Fehler beim Versuch, die Jabber-Postdatei\
-zu lesen "%s": %s}
-	::msgcat::mcset de jamesschatclose	{Wenn Sie dieses Chatfenster schliessen, verlieren\
-Sie die gesamte Konversation. Wollen Sie wirklich schliessen?}
-	::msgcat::mcset de jamessgchatfields	{Alle Felder müssen ausgefüllt sein\
-bevor der Raum betreten wird.}
-	::msgcat::mcset de jamessconfmsg	{Wählen Sie einen Konferenzdienst und einen\
-Raumnamen. Dann wählen Sie "Abruf" für die Einzelheiten zum Betreten des\
-Raums, da jeder Raum und Server verschiedene Erfordernisse haben kann.}
-	::msgcat::mcset de jamesssavemsg	{Soll diese Nachricht vor\
-dem Schliessen gespeichert werden?}
-	::msgcat::mcset de jamessskipsendq	{Die Adresse "%s" ist ungültig.\
-Überspringen und den Rest senden?}
-	::msgcat::mcset de jamessillformresend	{Die Adresse "%s" ist ungültig.\
-Bitte korrigieren und erneut senden.}
-	::msgcat::mcset de jamesslogin409	{Abbruch der Anmeldung mit dem Fehlercode\
-%s, weil dieser Benutzername bereits von einen anderen Benutzer verwendet wird.\
-Wenn Sie dieser Benutzer sind, sollten Sie sich erneut anmelden.}
-	::msgcat::mcset de jamessloginerr	{Anmeldung abgebrochen mit Fehlercode\
-%s und Nachricht: %s}
-::msgcat::mcset de jamessaddforeign	        {Hinzufügen eines Nicht-Jabber-Benutzers setzt voraus,\ 
-das Sie bereits ein Konto auf diesem System haben und Sie sich mit diesem Konto\
-bei der entsprechenden Transportkomponente registriert haben.\
-Wollen Sie das jetzt tun?}
-::msgcat::mcset de jamessowntrpt	        {Dies ist Ihr eigenes Konto bei %s\
-der als Server fungiert und die Nachrichten zu dem IM-System überträgt.\
-Es muss in Ihrer Liste enthalten sein.\
-Sie haben eine Anmeldung für %s: %s.}
-::msgcat::mcset de jamesswbchatlost	        {Die gesamte Konversation geht verloren\
-sobald diese ZeichenflÃ¤che geschlossen wird. Wollen Sie wirklich den Chat beenden?}
-::msgcat::mcset de jamesschatoffline            {Diese Person ist nicht mehr angemeldet.\
-Deshalb wird diese Nachricht nicht gesendet.}
-::msgcat::mcset de jamessregloginok             {Sie sind nun registriert und\
-automatisch als "%s" angemeldet}
-::msgcat::mcset de jamessregerrinuse            {Fehler bei Registrierung\
-weil dieser Benutzername bereits von jemand benutzt wird. Wenn Sie dieser Benutzer sind,\
-melden Sie sich an. Fehlernachricht: %s}
-::msgcat::mcset de jamessregerr                 {Fehler bei Registrierung\
-mit Fehlernachricht: %s}
-::msgcat::mcset de jamesstrptsubsc              {Ihr registriertes Konto beim Dienst %s\
-wird in Ihrer Liste als Transport für diesen Dienst eingetragen.}
+::msgcat::mcset de jamessconnbroken	{Die Verbindung brach unerwartet ab.}
+::msgcat::mcset de jamessautoawayset 	{Automatische Abwesenheit wurde gesetzt um %s. Möchten Sie wieder anwesend sein ?}
+::msgcat::mcset de jamesserrgetpublic	{Fehler beim Abruf öffentlicher Daten Von %s. Fehlercode %s mit Fehlernachricht: %s}
+::msgcat::mcset de jamesserrlastactive	{Fehler beim Abfragen der letzten Aktivität für %s. Der Fehler war: %s}
+::msgcat::mcset de jamesserrnotimeinfo	{Client oder Dienst %s gab keine Zeitinformation zurück.}
+::msgcat::mcset de jamesstimeused	{Zeit, seit Client "%s" zuletzt aktiv genutzt wurde: }
+::msgcat::mcset de jamesstimeconn	{Zeit, seit Benutzer "%s" zuletzt verbunden war: }
+::msgcat::mcset de jamesstimeservstart	{Zeit seit Start des Servers "%s": }
+::msgcat::mcset de jamessuptime		{Die Laufzeit (für Dienste) oder letzte Aktivität des Benutzers: }
+::msgcat::mcset de jamesserrtime	{Fehler bei Abfrage der Zeit von %s. Der Fehler war: %s}
+::msgcat::mcset de jamesslocaltime	{Lokale Zeit für %s ist: %s}
+::msgcat::mcset de jamesserrvers	{Fehler bei Abfrage der Version von %s. Der Fehler war: %s}
+::msgcat::mcset de jamesserrautoupdate 	{Fehler bei der Abfrage von %s nach neuer Version. Fehler war: %s}
+::msgcat::mcset de jamesswarberasewb	{Soll die Zeichenfläche zuerst gelöscht werden ?}
+::msgcat::mcset de jamesswarnremove	{Entfernung eines Eintrages In Ihrer Liste kann nicht  rückgängig gemacht werden. Sie müssen sich erneut für diesen Benutzer anmelden.\
+  Wollen Sie trotzdem weitermachen ?}
+::msgcat::mcset de jamessillegalchar	{Ungültige Zeichen in %s: "%s"!}
+::msgcat::mcset de jamessbadjid		{JID "%s" ist nicht korrekt. Wollen Sie trotzdem weitermachen?}
+::msgcat::mcset de jamessalreadyinrost	{JID "%s" ist bereits in Ihrer Kontaktliste. Wollen Sie trotzdem weitermachen?}
+::msgcat::mcset de jamessfailsetnick	{Fehler beim Eintragen des Spitznamens oder der Gruppe für Benutzer "%s". Fehlercode ist %s mit der Nachricht: %s}
+::msgcat::mcset de jamessnamemissing	{%s fehlt oder ist zu kurz!}
+::msgcat::mcset de jamessnosocket	{Konnte Socketverbindung zu Server "%s" nicht aufbauen. Netzwerkfehler oder Server nicht aktiv. Nachricht: %s}
+::msgcat::mcset de jamesstimeoutserver	{Zeitablauf bei Warten auf Antwort von Server "%s".}
+::msgcat::mcset de jamessregisterok	{Die Registrierung beim Server "%s" war erfolgreich. Sie können sich jetzt mit dem gleichen Benutzernamen/Passwort anmelden.}	
+::msgcat::mcset de jamessremoveaccount	{Sie sind dabei, Ihr Konto auf diesem Server zu löschen. Das kann nicht rückgängig gemacht werden. Wollen Sie wirklich weitermachen?}
+::msgcat::mcset de jamesserrunreg	{Fehler bei der Deregistrierung von "%s". Fehlercode %s und Nachricht %s}
+::msgcat::mcset de jamessokunreg	{Sie sind nun von "%s" abgemeldet}
+::msgcat::mcset de jamesspasswddiff	{Keine Passwort-Übereinstimmung. Versuchen Sie es erneut.}
+::msgcat::mcset de jamesspasswderr	{Fehler beim Setzen des neuen Passwortes. Fehlercode %s und Nachricht: "%s"}
+::msgcat::mcset de jamesspasswdok	{Eintrag des neuen Passwortes war erfolgreich.}
+::msgcat::mcset de jamessregnoserver	{Der Server muss eingetragen sein.}
+::msgcat::mcset de jamesserrregget	{Fehler beim Abruf der Registrierungs-Information. Fehlercode %s mit Nachricht: %s}
+::msgcat::mcset de jamesserrregset	{Fehler bei Dienstregistrierung "%s". Fehlercode %s mit Nachricht: %s}
+::msgcat::mcset de jamessokreg		{Registrierung bei Dienst "%s" war erfolgreich.}
+::msgcat::mcset de jamessinvalidjid	{Die JID-Adresse ist nicht korrekt. Stellen Sie sicher, das der Eintrag am unteren Rand eine gültige Adresse enthält. Sie sollte aussehen wie 'username@jabber.org'.}
+::msgcat::mcset de jamessnotconnected	{Ohne Serververbindung kein Senden möglich}
+::msgcat::mcset de jamessaddrmiss	{Sie müssen mindestens eine gültige Adresse eintragen}
+::msgcat::mcset de jamesschatclose	{Wenn Sie dieses Chat-Fenster schliessen, verlieren Sie die vollständige Konversation. Wirklich schliessen?}
+::msgcat::mcset de jamessnogroupchat	{Es konnte kein Dienst gefunden werden, der Gruppen-Chat ermöglicht}
+::msgcat::mcset de jamessinroommiss	{Vor dem Betreten eines Raumes müssen alle Felder ausgefüllt sein}
+::msgcat::mcset de jamesswarnexitroom	{Wollen Sie wirklich den Raum "%s" verlassen?}
+::msgcat::mcset de jamesserrbrowse	{Fehler beim Durchsuchen von "%s": %s}
+::msgcat::mcset de jamessenterroomempty	{Die Einträge für Server und Raumname müssen gültige Werte enthalten.}
+::msgcat::mcset de jamesserrconfget	{Konnte beim Eintritt in den Raum keine Informationen abrufen. Fehlercode %s Nachricht: %s}
+::msgcat::mcset de jamesserrconfgetcre	{Konnte beim Anlegen des Raums keine Informationen abrufen. Fehlercode %s Nachricht: %s}
+::msgcat::mcset de jamessinroomerasewb 	{Soll die Zeichenfläche vor dem Eintritt in einen neuen Raum gelöscht werden?}
+::msgcat::mcset de jamessconffailed	{Konnte Raum "%s" nicht erstellen/betreten. Fehlercode %s Nachricht: %s}
+::msgcat::mcset de jamessconfservempty	{Das Serverfeld muss mit einem gültigen Namen gefüllt sein.}
+::msgcat::mcset de jamesserragentget	{Fehler beim Abruf der Agenten: %s}
+::msgcat::mcset de jamesserrsearch	{Konnte Suchspezifikation nicht abrufen. Fehlercode %s Nachricht: %s}
+::msgcat::mcset de jamessoobok		{Dateiübertragung erfolgreich}
+::msgcat::mcset de jamessoobok2         {Dateiübertragung von %s nach "%s" war erfolgreich}
+::msgcat::mcset de jamessoobnourl	{Als von Benutzer "%s" eine Datei abgerufen werden sollte, konnten wir dafür keine Url bekommen.}
+::msgcat::mcset de jamessoobask		{Benutzer "%s" stellt Ihnen die Datei %s zur Verfügung. Beschreibung: %s. Abrufen?}
+::msgcat::mcset de jamessoobbad		{Die von "%s" erhaltene Url war fehlerhaft. Url: "%s"}
+::msgcat::mcset de jamessoonnohttp	{Die von "%s" erhaltene Url benutzt nicht das http-Protokoll, sondern %s, was nicht unterstützt wird.}
+::msgcat::mcset de jamessoobfailopen	{Fehler beim Öffnen der Datei %s}
+::msgcat::mcset de jamessoobgetfail	{Fehler beim Abruf der Url "%s": %s}
+::msgcat::mcset de jamessoobtimeout	{Zeitüberschreitung beim Abruf der Datei über http}
+::msgcat::mcset de jamessnogchat	{Wir konnten keinen Server finden, der groupchat bietet.}
+::msgcat::mcset de jamesserrinboxopen	{Fehler beim Öffnen der Postdatei %s zur Sicherhung.}
+::msgcat::mcset de jamesserrinboxread	{Fehler beim Versuch, die Jabber-Postdatei zu lesen "%s": %s}
+::msgcat::mcset de jamesschatclose	{Wenn Sie dieses Chatfenster schliessen, verlieren Sie die gesamte Konversation. Wollen Sie wirklich schliessen?}
+::msgcat::mcset de jamessgchatfields	{Alle Felder müssen ausgefüllt sein bevor der Raum betreten wird.}
+::msgcat::mcset de jamessconfmsg	{Wählen Sie einen Konferenzdienst und einen Raumnamen. Dann wählen Sie "Abruf" für die Einzelheiten zum Betreten des\
+  Raums, da jeder Raum und Server verschiedene Erfordernisse haben kann.}
+::msgcat::mcset de jamesssavemsg	{Soll diese Nachricht vor dem Schliessen gespeichert werden?}
+::msgcat::mcset de jamessskipsendq	{Die Adresse "%s" ist ungültig. Überspringen und den Rest senden?}
+::msgcat::mcset de jamessillformresend	{Die Adresse "%s" ist ungültig. Bitte korrigieren und erneut senden.}
+::msgcat::mcset de jamesslogin409	{Abbruch der Anmeldung mit dem Fehlercode %s, weil dieser Benutzername bereits von einen anderen Benutzer verwendet wird.\
+  Wenn Sie dieser Benutzer sind, sollten Sie sich erneut anmelden.}
+::msgcat::mcset de jamessloginerr	{Anmeldung abgebrochen mit Fehlercode %s und Nachricht: %s}
+::msgcat::mcset de jamessaddforeign	{Hinzufügen eines Nicht-Jabber-Benutzers setzt voraus, das Sie bereits ein Konto auf diesem System haben und Sie sich mit diesem Konto\
+bei der entsprechenden Transportkomponente registriert haben. Wollen Sie das jetzt tun?}
+::msgcat::mcset de jamessowntrpt	        {Dies ist Ihr eigenes Konto bei %s der als Server fungiert und die Nachrichten zu dem IM-System überträgt. Es muss in Ihrer Liste enthalten sein.\
+  Sie haben eine Anmeldung für %s: %s.}
+::msgcat::mcset de jamesswbchatlost	        {Die gesamte Konversation geht verloren sobald diese ZeichenflÃ¤che geschlossen wird. Wollen Sie wirklich den Chat beenden?}
+::msgcat::mcset de jamesschatoffline            {Diese Person ist nicht mehr angemeldet. Deshalb wird diese Nachricht nicht gesendet.}
+::msgcat::mcset de jamessregloginok             {Sie sind nun registriert und automatisch als "%s" angemeldet}
+::msgcat::mcset de jamessregerrinuse            {Fehler bei Registrierung weil dieser Benutzername bereits von jemand benutzt wird. Wenn Sie dieser Benutzer sind, melden Sie sich an. Fehlernachricht: %s}
+::msgcat::mcset de jamessregerr                 {Fehler bei Registrierung mit Fehlernachricht: %s}
+::msgcat::mcset de jamesstrptsubsc              {Ihr registriertes Konto beim Dienst %s wird in Ihrer Liste als Transport für diesen Dienst eingetragen.}
 ::msgcat::mcset de jamessfailedsubsc            {Anmeldung bei %s nicht möglich. Der Benutzer verweigerte die Anmeldung.}
 
 
 
-}
-
 
 ::msgcat::mcset de openquicktime		{Öffne QuickTime live stream}
 ::msgcat::mcset de writeurl			{Url eingeben oder aus Abkürzung wählen:}
-::msgcat::mcset de openquicktimeurlmsg		{Öffnet eine URL mit einer SDP-Datei\
-mit Erweiterung .mov zum Senden eines QuickTime-Echtzeit-Datenstroms.\
-Es kann sich um Audio (Radio) oder Video (TV) handeln. Alternativ können Sie\
-über Ihren Webbrowser die SDP-Datei auf Platte speichern und\
-sie dann als gewöhnliche Filmdatei öffnen.}
+::msgcat::mcset de openquicktimeurlmsg		{Öffnet eine URL mit einer SDP-Datei mit Erweiterung .mov zum Senden eines QuickTime-Echtzeit-Datenstroms.\
+  Es kann sich um Audio (Radio) oder Video (TV) handeln. Alternativ können Sie über Ihren Webbrowser die SDP-Datei auf Platte speichern und sie dann als gewöhnliche Filmdatei öffnen.}
 ::msgcat::mcset de printunixcmd                 {Druckbefehl, wenn nötig anpassen}
 
 
 
 ::msgcat::mcset de uastatpointmac 	{Zeiger, Klick für Markierung, Doppelklick zur Anzeige, Drücken für Popup}
-::msgcat::mcset de uastatpoint		{Zeiger, Klick für Markierung,\
-Doppelklick zur Anzeige, Rechtsklick für Popup}
+::msgcat::mcset de uastatpoint		{Zeiger, Klick für Markierung, Doppelklick zur Anzeige, Rechtsklick für Popup}
 ::msgcat::mcset de uastatmove		{Verschieben}
 ::msgcat::mcset de uastatline		{Linien}
 ::msgcat::mcset de uastatarrow		{Pfeile}
@@ -789,47 +683,31 @@ Doppelklick zur Anzeige, Rechtsklick für Popup}
 ::msgcat::mcset de uastatbrush		{Pinsel}
 ::msgcat::mcset de uastatpaint		{Malen, Shift-Klick für transparency}
 ::msgcat::mcset de uastatpoly		{Polygone, Leertaste zum Abbruch}
-::msgcat::mcset de uastatarc		{Bögen, Klick = Mittelpunkt,\
-Leertaste zum Abbruch}
+::msgcat::mcset de uastatarc		{Bögen, Klick = Mittelpunkt, Leertaste zum Abbruch}
 ::msgcat::mcset de uastatarc2		{Bögen, Klicken und Ziehen}
 ::msgcat::mcset de uastatrot		{Rotieren, zuerst Eintrag wählen}
 
 
 # Preferences:
 ::msgcat::mcset de prefnetconf  {Netzwerk- und Server-Konfiguration}
-::msgcat::mcset de prefnethead  {Wir können uns mit einem Jabber-Server\
-oder direkt mit einem anderen Client verbinden. Viele Elemente hängen davon ab,\
-welche Konfiguration Sie wählen.}
-::msgcat::mcset de prefnetauto  {Wenn sich ein Client mit diesem Server verbindet,\
-wird automatisch eine Verbindung zum Server dieses Clients aufgebaut.}
-::msgcat::mcset de prefnetjabb  {Das Jabber Server-System.\
-Extensive Benutzerverwaltung über Dialoge im "Jabber"-Menu.\
-Benutzt ein XMLbbasiertes Protokoll.}
-::msgcat::mcset de prefnetmulti {Automatisch mit allen Clients in diesem\
-Netzwerk verbinden, wenn mit einem Verbindung aufgenommen wird.}
-::msgcat::mcset de prefnetadv   {Ein Client startet gewöhnlich 2 verschiedene\
-Server, den eingebauten für Peer-to-Peer-Verbindungen, und einen http-Server.\
-Der Jabber-Server meint normalerweise einen entfernten Server\
-dessen Port gewöhnlicherweise 5222 ist.\
-Die unten gesetzten Portnummern werden erst nach einem Neustart wirksam.}
-::msgcat::mcset de prefsounsynwb {Sprachausgabe für Text aus der\
-Zeichenfläche}
+::msgcat::mcset de prefnethead  {Wir können uns mit einem Jabber-Server oder direkt mit einem anderen Client verbinden. Viele Elemente hängen davon ab, welche Konfiguration Sie wählen.}
+::msgcat::mcset de prefnetauto  {Wenn sich ein Client mit diesem Server verbindet, wird automatisch eine Verbindung zum Server dieses Clients aufgebaut.}
+::msgcat::mcset de prefnetjabb  {Das Jabber Server-System. Extensive Benutzerverwaltung über Dialoge im "Jabber"-Menu. Benutzt ein XMLbbasiertes Protokoll.}
+::msgcat::mcset de prefnetmulti {Automatisch mit allen Clients in diesem Netzwerk verbinden, wenn mit einem Verbindung aufgenommen wird.}
+::msgcat::mcset de prefnetadv   {Ein Client startet gewöhnlich 2 verschiedene Server, den eingebauten für Peer-to-Peer-Verbindungen, und einen http-Server.\
+  Der Jabber-Server meint normalerweise einen entfernten Server dessen Port gewöhnlicherweise 5222 ist. Die unten gesetzten Portnummern werden erst nach einem Neustart wirksam.}
+::msgcat::mcset de prefsounsynwb {Sprachausgabe für Text aus der Zeichenfläche}
 ::msgcat::mcset de prefsounsynno {Sprachausgabe für normale Nachrichten}
 ::msgcat::mcset de prefsounsynch {Sprachausgabe für Chat}
 ::msgcat::mcset de prefsounvoin  {Stimme für eingehenden Text wählen:}
 ::msgcat::mcset de prefsounvoou  {Stimme für von Ihnen geschriebenen Text wählen:}
-::msgcat::mcset de prefsounpick  {Alarmtöne für die untenstehenden\
-Ereignisse wählen:}
-::msgcat::mcset de prefshortcut  {Hier können Sie Abkürzungen eintragen,\
-die nur für "Peer-to-Peer"-Verbindungen gültig sind und nicht vom Jabber-System\
-benutzt werden. Wenn Sie in der "Netzwerk-Konfiguration" nicht ausdrücklich die\
-Option "Peer-to-Peer" gewählt haben, gelten diese Abkürzungen nicht.}
-::msgcat::mcset de prefprof      {Hier tragen Sie die erforderlichen Daten ein, die\
-für ein Konto auf einem Jabber-Server nötig sind. Der hier gewählte Server ist\
-auch der Server, bei dem Sie sich anmelden.}
-::msgcat::mcset de prefpers      {Ihre persönlichen Daten werden in Ihrer\
-Konfigurationsdatei gespeichert, können aber auch im Jabber Benutzerverzeichnis\
-gespeichert werden. Servergespeicherte Daten können von jedem Benutzer durchsucht werden.}
+::msgcat::mcset de prefsounpick  {Alarmtöne für die untenstehenden Ereignisse wählen:}
+::msgcat::mcset de prefshortcut  {Hier können Sie Abkürzungen eintragen, die nur für "Peer-to-Peer"-Verbindungen gültig sind und nicht vom Jabber-System\
+  benutzt werden. Wenn Sie in der "Netzwerk-Konfiguration" nicht ausdrücklich die Option "Peer-to-Peer" gewählt haben, gelten diese Abkürzungen nicht.}
+::msgcat::mcset de prefprof      {Hier tragen Sie die erforderlichen Daten ein, die für ein Konto auf einem Jabber-Server nötig sind. Der hier gewählte Server ist\
+  auch der Server, bei dem Sie sich anmelden.}
+::msgcat::mcset de prefpers      {Ihre persönlichen Daten werden in Ihrer Konfigurationsdatei gespeichert, können aber auch im Jabber Benutzerverzeichnis gespeichert werden.\
+  Servergespeicherte Daten können von jedem Benutzer durchsucht werden.}
 ::msgcat::mcset de prefaaset     {Automatisch abwesend-Status setzen:}
 ::msgcat::mcset de prefminaw     {Minuten vor Status abwesend:}
 ::msgcat::mcset de prefminea     {Minutes vor Status erweiterte Abwesenheit:}
@@ -844,8 +722,7 @@ gespeichert werden. Servergespeicherte Daten können von jedem Benutzer durchsuch
 ::msgcat::mcset de prefrosysicons {Benutze System-Icons anderer IMs}
 ::msgcat::mcset de prefblonly    {Nur Nachrichten von Personen meiner Kontaktliste akzeptieren}
 ::msgcat::mcset de prefblbl      {Folgende JIDs blockieren (*-Regeln möglich):}
-::msgcat::mcset de prefblmsg     {Geben Sie die vollständige JID des Benutzers ein,\
-Sie blockieren möchten. Eine JID hat die Form "Name@Server.org"}
+::msgcat::mcset de prefblmsg     {Geben Sie die vollständige JID des Benutzers ein, Sie blockieren möchten. Eine JID hat die Form "Name@Server.org"}
 ::msgcat::mcset de prefcufont    {Schrift für Chat-Fenster wählen:}
 ::msgcat::mcset de prefcushow    {Eingehende Nachrichten in neuem Fenster zeigen}
 ::msgcat::mcset de prefcusave    {Nachrichten-Eingangsfach zwischen Sitzungen speichern}
@@ -858,31 +735,23 @@ Sie blockieren möchten. Eine JID hat die Form "Name@Server.org"}
 ::msgcat::mcset de prefcuupdate  {Automatisch auf neue Coccinella-Version prüfen}
 ::msgcat::mcset de preffmhelp    {Hilfsprogramme für Dateityp/en}
 ::msgcat::mcset de preffmsave    {Einfach im Eingangsverzeichnis speichern}
-::msgcat::mcset de preffontmsg   {Warnung: Vor dem Import anderer Schriften\
-als den drei Standardschriften (Times, Helvetica oder Courier),\
-sollten Sie sicher sein, das alle entfernten Clients auch\
-diese Schrift auf ihrem System installiert haben.}
+::msgcat::mcset de preffontmsg   {Warnung: Vor dem Import anderer Schriften als den drei Standardschriften (Times, Helvetica oder Courier), sollten Sie sicher sein, das alle entfernten Clients auch\
+  diese Schrift auf ihrem System installiert haben.}
 ::msgcat::mcset de prefcahow     {Umgang mit bereits erhaltenen Dateien:}
 ::msgcat::mcset de prefcanev     {Keine zwischengespeicherte Datei akzeptieren, immer neu laden}
 ::msgcat::mcset de prefcaalw     {Zwischengespeicherte Datei immer akzeptieren, niemals neu laden} 
 ::msgcat::mcset de prefcaor      {..oder gespeicherte Datei akzeptieren, falls nicht älter als:}
-::msgcat::mcset de prefpriv      {Nach Anwahl der Schaltfläche Privatsphäre\
-können Sie nur Ihre eigenen Einträge editieren. Von anderen\
-erstellte Einträge können nicht editiert werden.}
+::msgcat::mcset de prefpriv      {Nach Anwahl der Schaltfläche Privatsphäre können Sie nur Ihre eigenen Einträge editieren. Von anderen erstellte Einträge können nicht editiert werden.}
 ::msgcat::mcset de prefshortip   {Vollständige IP-Nummer oder Name}
-::msgcat::mcset de prefshortwa   {Warnung: Sie haben die Abkürzungen geändert.\
-Sollen sie nicht gesichert werden?}
+::msgcat::mcset de prefshortwa   {Warnung: Sie haben die Abkürzungen geändert. Sollen sie nicht gesichert werden?}
 
-::msgcat::mcset de preffilecache {Der Cache speichert lokale Kopien von Dateien\
-anderer Benutzer, um die Transportzeiten zu reduzieren. Die Größe des Caches\
-wird über die Benutzereinstellungen begrenzt.}
+::msgcat::mcset de preffilecache {Der Cache speichert lokale Kopien von Dateien anderer Benutzer, um die Transportzeiten zu reduzieren. Die Größe des Caches wird über die Benutzereinstellungen begrenzt.}
 ::msgcat::mcset de prefcachecmp  {Gespeicherte Datei mit entfernter verglichen}
 ::msgcat::mcset de prefnatip     {Folgende offizielle Adresse benutzen}
 ::msgcat::mcset de prefmucconf   {Multi-User-Chat mit Conference als Ausfall-Sicherung}
 ::msgcat::mcset de prefrostbgim  {Hintergrundbild (gif) in Kontaktliste nutzen}
 ::msgcat::mcset de preftheme     {Thema wählen, Neustart erforderlich}
-::msgcat::mcset de prefplugctrl  {Sie können jedes dieser Pakete deselektieren,\
-wenn es nicht geladen werden soll. Es ist ein Neustart erforderlich.}
+::msgcat::mcset de prefplugctrl  {Sie können jedes dieser Pakete deselektieren, wenn es nicht geladen werden soll. Es ist ein Neustart erforderlich.}
 ::msgcat::mcset de prefchactret  {<Return> im Chat-Dialog immer aktiv}
 ::msgcat::mcset de prefchnormal  {Normale Nachrichten als Chat-Nachrichten behandeln}
 ::msgcat::mcset de prefprofname  {Namen des gewünschten Profils eingeben}
@@ -894,111 +763,75 @@ wenn es nicht geladen werden soll. Es ist ein Neustart erforderlich.}
 # EditShortcuts namespace:
 namespace eval ::EditShortcuts:: {
 	::msgcat::mcset de shortip       {Vollständige IP-Nummer oder Name}
-	::msgcat::mcset de shortwarn     {Warnung: Sie haben die Abkürzungen geändert.\
-Sollen sie nicht gesichert werden?}
+	::msgcat::mcset de shortwarn     {Warnung: Sie haben die Abkürzungen geändert. Sollen sie nicht gesichert werden?}
 
 
 }
 
-# Jabber namespace:
-namespace eval ::Jabber:: {
-	::msgcat::mcset de jalogin 	{IP-Nummer oder Name des Jabber-Servers,\
-oder Auswahl aus dem Popup-Menü. Sie müssen bereits ein Konto auf diesem Server haben.}
-	::msgcat::mcset de janewaccount {IP-Nummer oder Name des Jabber-Servers.\
-Wählen Sie Benutzername und Passwort.}
-	::msgcat::mcset de janewpass    {Setze neues Passwort für:}
-	::msgcat::mcset de jasubwant    {Benutzer "%s" möchte sich bei Ihnen anmelden.}
-        ::msgcat::mcset de jasubopts    {Wahl eines Spitznamens und Gruppe ist\
-optional und nur für Ihren persönlichen Gebrauch.}
-	::msgcat::mcset de jasubgetvcard {vCard dieser Person abrufen}
-	::msgcat::mcset de jasubsndmsg  {Dieser Person eine Nachricht senden:}
-	::msgcat::mcset de jasuballow   {Erlaube "%s", meine Anwesenheit zu sehen}
-	::msgcat::mcset de jasubadd     {Füge "%s" zu meiner Kontaktliste hinzu}
-	::msgcat::mcset de jarostadd	{Füge einen Jabber-Benutzer zu meiner Liste hinzu.\
-Spitzname/Gruppe können zu jeder Zeit geändert werden.\
-Um einen Benutzer eines anderen IM-Systems hinzuzufügen, müssen Sie bereits\
-über ein Konto auf dem System verfügen und es bei der Registrierung für\
-den Jabber-Transportdienst nutzen.}
-	::msgcat::mcset de jarostset	{Setzen Sie Spitzname/Gruppe für Benutzer "%s"\
-nach Ihrem Geschmack. Sie können jederzeit geändert werden.}
-	::msgcat::mcset de jarostsub	{Zu diesem Benutzer anmelden}
-	::msgcat::mcset de jarostunsub	{Von diesem Benutzer abmelden}
-	::msgcat::mcset de jasearch	{Benutzer mit dem angegebenen Dienst suchen.\
-Drücken Sie den Abruf-Knopf für eine neues Formular.}
-	::msgcat::mcset de jasearchwait	{Warte auf Drücken der Abruf-Schaltfläche.}
-	::msgcat::mcset de jaservclosed	{Server-Verbindung geschlossen.}
-	::msgcat::mcset de jarostupdate {Die Kontaktliste ist aktuell}
-	::msgcat::mcset de jawaitresp 	{%s kontaktiert. Warte auf Antwort...}
-	::msgcat::mcset de jawaitxml 	{Verbunden mit "%s".\
-Initialisierung des XML-Datenstroms...}
-	::msgcat::mcset de jasendauth	{Server "%s" hat geantwortet.\
-Sende Autorisierungs-Information.}
-	::msgcat::mcset de jaerrlogin	{Login zu %s nicht erfolgreich: %s}
-	::msgcat::mcset de jaauthok	{Autorisierung zu Server "%s" war erfolgreich.\
-Rufe Kontaktliste ab...}
-	::msgcat::mcset de jagchatmsg	{Groupchat-Server, Raumnamen und\
-eigenen Spitznamen wählen}
-	::msgcat::mcset de jacreateroom	{Konferenzdienst und optional einen Raumnamen\
-wählen. Dann "Abruf" drücken, um die Spezifikation zum Erstellen des gewünschten\
-Raums zu bekommen, da jeder Server besondere Anforderungen haben kann.}
-	::msgcat::mcset de jawaitserver	{Warte auf Server-Antwort...}
-	::msgcat::mcset de jaregmsg	{Registrierung für einen besonderen Dienst\
-mit diesem Server. Falls bereits registriert, können Sie Ihre persönlichen\
-Informationen mit diesem Dialog ändern.}
-	::msgcat::mcset de jastatavailable {Verfügbar}
-	::msgcat::mcset de jastatchat	{Chat: verfügbar für sofortigen Kontakt}
-	::msgcat::mcset de jastataway	{Abwesend: online, aber kurz abwesend}
-	::msgcat::mcset de jastatxa	{Erweiterte Abwesenheit: online, aber länger inaktiv}
-	::msgcat::mcset de jastatdnd	{DND: bitte nicht stören}
-	::msgcat::mcset de jastatinvisible {Unsichtbar}
-	::msgcat::mcset de javersinfo	{Versions-Information für %s}
-	::msgcat::mcset de jabrowseaddserver	{Geben Sie die JID des Servers an,\
-den Sie zur Dienste-Liste hinzufügen möchten, z. B. "jabber.org".}
-	::msgcat::mcset de jaupdatemsg	{Es ist eine neue Version von Coccinella 
-verfügbar.}
-	::msgcat::mcset de jaupdatevers	{Die aktuelle Version ist: %s}
-	::msgcat::mcset de jaupdatepri	{Die Aktualisierung ist %s}
-	::msgcat::mcset de jaupdatenewver {Die neue Version ist: %s}
-	::msgcat::mcset de jaupdateremind {Bitte nicht mehr daran erinnern}
-	::msgcat::mcset de jasettopic   {Neues Thema für diesen Gruppen-Chat setzen.}
-	::msgcat::mcset de jadirpresmsg {Spezielle Anwesenheit an Benutzer "%s" senden.}
+::msgcat::mcset de jalogin 	{IP-Nummer oder Name des Jabber-Servers, oder Auswahl aus dem Popup-Menü. Sie müssen bereits ein Konto auf diesem Server haben.}
+::msgcat::mcset de janewaccount {IP-Nummer oder Name des Jabber-Servers.   Wählen Sie Benutzername und Passwort.}
+::msgcat::mcset de janewpass    {Setze neues Passwort für:}
+::msgcat::mcset de jasubwant    {Benutzer "%s" möchte sich bei Ihnen anmelden.}
+::msgcat::mcset de jasubopts    {Wahl eines Spitznamens und Gruppe ist optional und nur für Ihren persönlichen Gebrauch.}
+::msgcat::mcset de jasubgetvcard {vCard dieser Person abrufen}
+::msgcat::mcset de jasubsndmsg  {Dieser Person eine Nachricht senden:}
+::msgcat::mcset de jasuballow   {Erlaube "%s", meine Anwesenheit zu sehen}
+::msgcat::mcset de jasubadd     {Füge "%s" zu meiner Kontaktliste hinzu}
+::msgcat::mcset de jarostadd	{Füge einen Jabber-Benutzer zu meiner Liste hinzu. Spitzname/Gruppe können zu jeder Zeit geändert werden.\
+  Um einen Benutzer eines anderen IM-Systems hinzuzufügen, müssen Sie bereits über ein Konto auf dem System verfügen und es bei der Registrierung für  den Jabber-Transportdienst nutzen.}
+::msgcat::mcset de jarostset	{Setzen Sie Spitzname/Gruppe für Benutzer "%s"  nach Ihrem Geschmack. Sie können jederzeit geändert werden.}
+::msgcat::mcset de jarostsub	{Zu diesem Benutzer anmelden}
+::msgcat::mcset de jarostunsub	{Von diesem Benutzer abmelden}
+::msgcat::mcset de jasearch	{Benutzer mit dem angegebenen Dienst suchen. Drücken Sie den Abruf-Knopf für eine neues Formular.}
+::msgcat::mcset de jasearchwait	{Warte auf Drücken der Abruf-Schaltfläche.}
+::msgcat::mcset de jaservclosed	{Server-Verbindung geschlossen.}
+::msgcat::mcset de jarostupdate {Die Kontaktliste ist aktuell}
+::msgcat::mcset de jawaitresp 	{%s kontaktiert. Warte auf Antwort...}
+::msgcat::mcset de jawaitxml 	{Verbunden mit "%s". Initialisierung des XML-Datenstroms...}
+::msgcat::mcset de jasendauth	{Server "%s" hat geantwortet. Sende Autorisierungs-Information.}
+::msgcat::mcset de jaerrlogin	{Login zu %s nicht erfolgreich: %s}
+::msgcat::mcset de jaauthok	{Autorisierung zu Server "%s" war erfolgreich. Rufe Kontaktliste ab...}
+::msgcat::mcset de jagchatmsg	{Groupchat-Server, Raumnamen und eigenen Spitznamen wählen}
+::msgcat::mcset de jacreateroom	{Konferenzdienst und optional einen Raumnamen wählen. Dann "Abruf" drücken, um die Spezifikation zum Erstellen des gewünschten\
+  Raums zu bekommen, da jeder Server besondere Anforderungen haben kann.}
+::msgcat::mcset de jawaitserver	{Warte auf Server-Antwort...}
+::msgcat::mcset de jaregmsg	{Registrierung für einen besonderen Dienst mit diesem Server. Falls bereits registriert, können Sie Ihre persönlichen Informationen mit diesem Dialog ändern.}
+::msgcat::mcset de jastatavailable {Verfügbar}
+::msgcat::mcset de jastatchat	{Chat: verfügbar für sofortigen Kontakt}
+::msgcat::mcset de jastataway	{Abwesend: online, aber kurz abwesend}
+::msgcat::mcset de jastatxa	{Erweiterte Abwesenheit: online, aber länger inaktiv}
+::msgcat::mcset de jastatdnd	{DND: bitte nicht stören}
+::msgcat::mcset de jastatinvisible {Unsichtbar}
+::msgcat::mcset de javersinfo	{Versions-Information für %s}
+::msgcat::mcset de jabrowseaddserver	{Geben Sie die JID des Servers an, den Sie zur Dienste-Liste hinzufügen möchten, z. B. "jabber.org".}
+::msgcat::mcset de jaupdatemsg	{Es ist eine neue Version von Coccinella verfügbar.}
+::msgcat::mcset de jaupdatevers	{Die aktuelle Version ist: %s}
+::msgcat::mcset de jaupdatepri	{Die Aktualisierung ist %s}
+::msgcat::mcset de jaupdatenewver {Die neue Version ist: %s}
+::msgcat::mcset de jaupdateremind {Bitte nicht mehr daran erinnern}
+::msgcat::mcset de jasettopic   {Neues Thema für diesen Gruppen-Chat setzen.}
+::msgcat::mcset de jadirpresmsg {Spezielle Anwesenheit an Benutzer "%s" senden.}
 
 
-}
 
-namespace eval ::Jabber::SetupAss:: {
-	::msgcat::mcset de suintro1 	{Dies ist ein Assistent, der Ihnen beim\
-Eingeben der Daten hilft, die für ein neues oder bestehendes Konto auf\
-einem Jabber-Server erforderlich sind.}
-	::msgcat::mcset de suintro2 	{Wenn Sie im "Peer-to-Peer"-Modus arbeiten\
-wollen, geben Sie das einfach im Einstellungsdialog an und starten Coccinella erneut.}
-	::msgcat::mcset de suintro3 	{Sie können jederzeit den "zurück"-Knopf\
-zum Zurücksprung nutzen. Folgen Sie den Anweisungen auf jeder Seite\
-und drücken Sie "Weiter", bis alles fertig ist.}
-        ::msgcat::mcset de sulang       {Wählen Sie einen Sprachkatalog.\
-Wenn Sie den Sprachkatalog ändern, betrifft dies\
-nur Oberflächenelemente, die nach der Änderung erstellt wurden.}
-	::msgcat::mcset de suservmsg	{Geben Sie den Namen des Jabber-Servers ein,\
-auf dem Sie ein Konto einrichten möchten. Bei einem bestehenden Konto auf einem\
-Jabber-Server geben Sie dessen Namen an. Ein typischer Name ist "jabber.org".}
-	::msgcat::mcset de suusermsg	{Geben Sie Benutzername und Passwort ein.\
-Wenn Sie noch nicht registriert sind, darf der Benutzername noch nicht existieren.\
-Wenn der Name bereits von jemand benutzt wird, erhalten Sie bei der Registrierung\
-einen Hinweis darüber.}
-	::msgcat::mcset de suregmsg	{Möchten Sie Ihr Konto nun registrieren,\
-wenn es ein Neueintrag ist? Sie müssen dazu (ohne Firewall) bereits\
-mit einem Netzwerk verbunden sein.}
-	::msgcat::mcset de sufinmsg	{Das ist alles. Wenn die Registrierung erfolgreich\
-wahr, müssen Sie nur die Schaltfläche "Verbinden" drücken oder das Jabber/Anmelden-\
-Menü wählen. Seien Sie nett zu Coccinella ;-)}
-	::msgcat::mcset de suheadtxt	{Coccinella Einrichtungs-Assistent}
+# Setup assistant:
+::msgcat::mcset de suintro1 	{Dies ist ein Assistent, der Ihnen beim Eingeben der Daten hilft, die für ein neues oder bestehendes Konto auf einem Jabber-Server erforderlich sind.}
+::msgcat::mcset de suintro2 	{Wenn Sie im "Peer-to-Peer"-Modus arbeiten wollen, geben Sie das einfach im Einstellungsdialog an und starten Coccinella erneut.}
+::msgcat::mcset de suintro3 	{Sie können jederzeit den "zurück"-Knopf zum Zurücksprung nutzen. Folgen Sie den Anweisungen auf jeder Seite und drücken Sie "Weiter", bis alles fertig ist.}
+::msgcat::mcset de sulang       {Wählen Sie einen Sprachkatalog. Wenn Sie den Sprachkatalog ändern, betrifft dies nur Oberflächenelemente, die nach der Änderung erstellt wurden.}
+::msgcat::mcset de suservmsg	{Geben Sie den Namen des Jabber-Servers ein, auf dem Sie ein Konto einrichten möchten. Bei einem bestehenden Konto auf einem Jabber-Server geben Sie dessen Namen an.\
+  Ein typischer Name ist "jabber.org".}
+::msgcat::mcset de suusermsg	{Geben Sie Benutzername und Passwort ein. Wenn Sie noch nicht registriert sind, darf der Benutzername noch nicht existieren.\
+  Wenn der Name bereits von jemand benutzt wird, erhalten Sie bei der Registrierung einen Hinweis darüber.}
+::msgcat::mcset de suregmsg	{Möchten Sie Ihr Konto nun registrieren, wenn es ein Neueintrag ist? Sie müssen dazu (ohne Firewall) bereits mit einem Netzwerk verbunden sein.}
+::msgcat::mcset de sufinmsg	{Das ist alles. Wenn die Registrierung erfolgreich wahr, müssen Sie nur die Schaltfläche "Verbinden" drücken oder das Jabber/Anmelden-Menü wählen.\
+  Seien Sie nett zu Coccinella ;-)}
+::msgcat::mcset de suheadtxt	{Coccinella Einrichtungs-Assistent}
 
 
-}
 
 namespace eval ::VCard:: {
-	::msgcat::mcset de vcardget	{vCard für Benutzer %s wird abgerufen.\
-Warte auf Server-Antwort...}
+	::msgcat::mcset de vcardget	{vCard für Benutzer %s wird abgerufen. Warte auf Server-Antwort...}
 	::msgcat::mcset de vcarderrget	{Fehler beim vCard-Abruf. Ergebnis war: %s}
 	::msgcat::mcset de vcardrec	{vCard-Daten erhalten.}
 
@@ -1006,8 +839,7 @@ Warte auf Server-Antwort...}
 
 
 ::msgcat::mcset de autoupdatenot        {Nicht automatisch auf Aktualisierungen testen.}
-::msgcat::mcset de oobmsg               {Erlaubt Benutzer %s den Abruf einer Datei über Ihren\
-eingebauten Server. Die Beschreibung ist optional.}
+::msgcat::mcset de oobmsg               {Erlaubt Benutzer %s den Abruf einer Datei über Ihren eingebauten Server. Die Beschreibung ist optional.}
 ::msgcat::mcset de chatcompreply        {%s erstellt eine Antwort}
 
 # Get file

@@ -5,14 +5,14 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Agents.tcl,v 1.30 2004-10-12 13:48:56 matben Exp $
+# $Id: Agents.tcl,v 1.31 2004-11-27 14:52:53 matben Exp $
 
 package provide Agents 1.0
 
-namespace eval ::Jabber::Agents:: {
+namespace eval ::Agents:: {
 
-    ::hooks::register loginHook      ::Jabber::Agents::LoginCmd
-    ::hooks::register logoutHook     ::Jabber::Agents::LogoutHook
+    ::hooks::register loginHook      ::Agents::LoginCmd
+    ::hooks::register logoutHook     ::Agents::LogoutHook
 
     option add *Agent.waveImage            wave           widgetDefault
     
@@ -21,21 +21,21 @@ namespace eval ::Jabber::Agents:: {
     
     set popMenuDefs(agents,def) {
 	mSearch        search    {
-	    ::Jabber::Search::Build -server $jid -autoget 1
+	    ::Search::Build -server $jid -autoget 1
 	}
 	mRegister      register  {
 	    ::Jabber::GenRegister::NewDlg -server $jid -autoget 1
 	}
 	mUnregister    register  {::Jabber::Register::Remove $jid}
 	separator      {}        {}
-	mEnterRoom     groupchat {::Jabber::GroupChat::EnterOrCreate enter}
+	mEnterRoom     groupchat {::GroupChat::EnterOrCreate enter}
 	mLastLogin/Activity jid  {::Jabber::GetLast $jid}
 	mLocalTime     jid       {::Jabber::GetTime $jid}
 	mVersion       jid       {::Jabber::GetVersion $jid}
     }    
 }
 
-proc ::Jabber::Agents::LoginCmd { } {
+proc ::Agents::LoginCmd { } {
     upvar ::Jabber::jprefs jprefs
 
     # Get the services for all our servers on the list. Depends on our settings:
@@ -45,12 +45,12 @@ proc ::Jabber::Agents::LoginCmd { } {
     }
 }
 
-proc ::Jabber::Agents::LogoutHook { } {
+proc ::Agents::LogoutHook { } {
     
     
 }
 
-# Jabber::Agents::GetAll --
+# Agents::GetAll --
 #
 #       Queries the services available for all the servers
 #       that are in 'jprefs(agentsServers)' plus the login server.
@@ -60,7 +60,7 @@ proc ::Jabber::Agents::LogoutHook { } {
 # Results:
 #       none.
 
-proc ::Jabber::Agents::GetAll { } {
+proc ::Agents::GetAll { } {
 
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jserver jserver
@@ -72,7 +72,7 @@ proc ::Jabber::Agents::GetAll { } {
     }
 }
 
-# Jabber::Agents::Get --
+# Agents::Get --
 #
 #       Calls get jabber:iq:agents to investigate the services of server jid.
 #
@@ -82,30 +82,30 @@ proc ::Jabber::Agents::GetAll { } {
 # Results:
 #       callback scheduled.
 
-proc ::Jabber::Agents::Get {jid} {
+proc ::Agents::Get {jid} {
     
     ::Jabber::JlibCmd agents_get $jid  \
-      [list ::Jabber::Agents::AgentsCallback $jid]
+      [list ::Agents::AgentsCallback $jid]
 }
 
-# Jabber::Agents::GetAgent --
+# Agents::GetAgent --
 #
 #       args    ?-silent 0/1? (D=0)
 #       
 # Results:
 #       callback scheduled.
 
-proc ::Jabber::Agents::GetAgent {parentJid jid args} {
+proc ::Agents::GetAgent {parentJid jid args} {
     
     array set opts {
 	-silent 0
     }
     array set opts $args        
     ::Jabber::JlibCmd agent_get $jid  \
-      [list ::Jabber::Agents::GetAgentCallback $parentJid $jid $opts(-silent)]
+      [list ::Agents::GetAgentCallback $parentJid $jid $opts(-silent)]
 }
 
-# Jabber::Agents::AgentsCallback --
+# Agents::AgentsCallback --
 #
 #       Fills in agent tree with the info from this response via calls
 #       to 'AddAgentToTree'.
@@ -118,7 +118,7 @@ proc ::Jabber::Agents::GetAgent {parentJid jid args} {
 # Results:
 #       none.
 
-proc ::Jabber::Agents::AgentsCallback {jid jlibName type subiq} {
+proc ::Agents::AgentsCallback {jid jlibName type subiq} {
 
     variable wagents
     variable wtree
@@ -126,7 +126,7 @@ proc ::Jabber::Agents::AgentsCallback {jid jlibName type subiq} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
     
-    ::Debug 2 "::Jabber::Agents::AgentsCallback jid=$jid, \
+    ::Debug 2 "::Agents::AgentsCallback jid=$jid, \
       type=$type\n\tsubiq=$subiq"
     
     switch -- $type {
@@ -179,7 +179,7 @@ proc ::Jabber::Agents::AgentsCallback {jid jlibName type subiq} {
     }
 }
     
-# Jabber::Agents::GetAgentCallback --
+# Agents::GetAgentCallback --
 #
 #       It receives reports from iq result elements with the
 #       jabber:iq:agent namespace.
@@ -191,7 +191,7 @@ proc ::Jabber::Agents::AgentsCallback {jid jlibName type subiq} {
 # Results:
 #       none. UI maybe updated
 
-proc ::Jabber::Agents::GetAgentCallback {parentJid jid silent jlibName type subiq} {
+proc ::Agents::GetAgentCallback {parentJid jid silent jlibName type subiq} {
     
     variable wagents
     variable wtree
@@ -201,7 +201,7 @@ proc ::Jabber::Agents::GetAgentCallback {parentJid jid silent jlibName type subi
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jprefs jprefs
     
-    ::Debug 2 "::Jabber::Agents::GetAgentCallback parentJid=$parentJid,\
+    ::Debug 2 "::Agents::GetAgentCallback parentJid=$parentJid,\
       jid=$jid, type=$type"
     
     if {[winfo exists $wagents]} {
@@ -225,11 +225,11 @@ proc ::Jabber::Agents::GetAgentCallback {parentJid jid silent jlibName type subi
     }
 }
 
-# Jabber::Agents::AddAgentToTree --
+# Agents::AddAgentToTree --
 #
 #
 
-proc ::Jabber::Agents::AddAgentToTree {parentJid jid subAgent} {
+proc ::Agents::AddAgentToTree {parentJid jid subAgent} {
     
     variable wtree
     variable wtreecanvas
@@ -237,7 +237,7 @@ proc ::Jabber::Agents::AddAgentToTree {parentJid jid subAgent} {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     
-    ::Debug 4 "::Jabber::Agents::AddAgentToTree parentJid=$parentJid,\
+    ::Debug 4 "::Agents::AddAgentToTree parentJid=$parentJid,\
       jid=$jid, subAgent='$subAgent'"
     	
     # Loop through the subelement to see what we've got.
@@ -295,7 +295,7 @@ proc ::Jabber::Agents::AddAgentToTree {parentJid jid subAgent} {
     }
 }
 
-# Jabber::Agents::Build --
+# Agents::Build --
 #
 #       This is supposed to create a frame which is pretty object like,
 #       and handles most stuff internally without intervention.
@@ -307,7 +307,7 @@ proc ::Jabber::Agents::AddAgentToTree {parentJid jid subAgent} {
 # Results:
 #       w
 
-proc ::Jabber::Agents::Build {w args} {
+proc ::Agents::Build {w args} {
     global  prefs this
 
     variable wagents
@@ -318,7 +318,7 @@ proc ::Jabber::Agents::Build {w args} {
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jprefs jprefs
     
-    ::Debug 2 "::Jabber::Agents::Build w=$w"
+    ::Debug 2 "::Agents::Build w=$w"
         
     set fontS [option get . fontSmall {}]
 
@@ -347,8 +347,8 @@ proc ::Jabber::Agents::Build {w args} {
       [list grid $wxsc -row 1 -column 0 -sticky ew]]  \
       -yscrollcommand [list ::UI::ScrollSet $wysc \
       [list grid $wysc -row 0 -column 1 -sticky ns]]  \
-      -selectcommand ::Jabber::Agents::SelectCmd   \
-      -opencommand ::Jabber::Agents::OpenTreeCmd
+      -selectcommand ::Agents::SelectCmd   \
+      -opencommand ::Agents::OpenTreeCmd
     set wtreecanvas [$wtree getcanvas]
     if {[string match "mac*" $this(platform)]} {
 	$wtree configure -buttonpresscommand [namespace current]::Popup \
@@ -366,7 +366,7 @@ proc ::Jabber::Agents::Build {w args} {
     return $w
 }
 
-# Jabber::Agents::SelectCmd --
+# Agents::SelectCmd --
 #
 #
 # Arguments:
@@ -376,12 +376,12 @@ proc ::Jabber::Agents::Build {w args} {
 # Results:
 #       .
 
-proc ::Jabber::Agents::SelectCmd {w v} {
+proc ::Agents::SelectCmd {w v} {
     
     
 }
 
-# Jabber::Agents::OpenTreeCmd --
+# Agents::OpenTreeCmd --
 #
 #       Callback when open service item in tree.
 #       It calls jabber:iq:agent of the server jid, typically
@@ -394,19 +394,19 @@ proc ::Jabber::Agents::SelectCmd {w v} {
 # Results:
 #       .
 
-proc ::Jabber::Agents::OpenTreeCmd {w v} {
+proc ::Agents::OpenTreeCmd {w v} {
     
     
     
 }
     
-proc ::Jabber::Agents::RegisterPopupEntry {menuSpec} {
+proc ::Agents::RegisterPopupEntry {menuSpec} {
     variable popMenuDefs
     
     set popMenuDefs(agents,def) [concat $popMenuDefs(agents,def) $menuSpec]
 }
 
-# Jabber::Agents::Popup --
+# Agents::Popup --
 #
 #       Handle popup menus in agent, typically from right-clicking.
 #       
@@ -418,13 +418,13 @@ proc ::Jabber::Agents::RegisterPopupEntry {menuSpec} {
 # Results:
 #       popup menu displayed
 
-proc ::Jabber::Agents::Popup {w v x y} {
+proc ::Agents::Popup {w v x y} {
     global  wDlgs this
     variable popMenuDefs
     
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::Jabber::Agents::Popup w=$w, v='$v', x=$x, y=$y"
+    ::Debug 2 "::Agents::Popup w=$w, v='$v', x=$x, y=$y"
     
     # The last element of $v is either a jid, (a namespace,) 
     # a header in roster, a group, or an agents xml tag.
