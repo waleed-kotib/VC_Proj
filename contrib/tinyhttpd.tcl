@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: tinyhttpd.tcl,v 1.11 2004-03-15 11:24:46 matben Exp $
+# $Id: tinyhttpd.tcl,v 1.12 2004-03-27 15:20:37 matben Exp $
 
 # ########################### USAGE ############################################
 #
@@ -322,7 +322,11 @@ proc ::tinyhttpd::HandleRequest {token} {
         
     # If end-of-file or because of insufficient data in nonblocking mode,
     # then gets returns -1.
-    set nbytes [gets $s line]
+    if {[catch {
+	set nbytes [gets $s line]
+    }]} {
+	Finish $token eof
+    }
     
     # Ignore any leading empty lines (RFC 2616, 4.1).
     if {$nbytes == 0} {

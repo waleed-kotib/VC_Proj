@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #
-# $Id: can2svgwb.tcl,v 1.3 2004-03-24 14:43:11 matben Exp $
+# $Id: can2svgwb.tcl,v 1.4 2004-03-27 15:20:37 matben Exp $
 
 package require can2svg
 
@@ -43,30 +43,26 @@ proc can2svgwb::svgasxmllist {cmd args} {
 	create {
 	    set xmllist [eval {can2svg::svgasxmllist $cmd} $args]
 	}
-	delete - lower - move - raise {
-	    set xmllist [list [parse${instr} $cmd]]
+	delete - lower - move - raise - dchars - insert {
+	    set xmllist [list [Parse${instr} $cmd]]
 	}
 	scale {
-	    set xmllist [parsescale $cmd]
-	}
-	insert - dchars {
-	    set xmllist [list [parse${instr} $cmd]]
+	    set xmllist [Parsescale $cmd]
 	}
 	itemconfigure {
-	    set xmllist [list [eval {parseconfigure $cmd} $args]]
+	    set xmllist [list [eval {Parseconfigure $cmd} $args]]
 	}
 	coords {
-	    set xmllist [list [eval {parsecoords $cmd} $args]]
+	    set xmllist [list [eval {Parsecoords $cmd} $args]]
 	}
 	import {
-	    # Assume image for the moment...
-	    set xmllist [list [eval {parseimage $cmd} $args]]
+	    set xmllist [list [eval {Parseimport $cmd} $args]]
 	}
     }
     return $xmllist
 }
 
-proc can2svgwb::parseconfigure {cmd args} {
+proc can2svgwb::Parseconfigure {cmd args} {
     
     array set argsArr $args
     set id [lindex $cmd 1]
@@ -83,7 +79,7 @@ proc can2svgwb::parseconfigure {cmd args} {
     return [wrapper::createtag configure -attrlist $attrlist]
 }
 
-proc can2svgwb::parsecoords {cmd args} {
+proc can2svgwb::Parsecoords {cmd args} {
     
     array set argsArr $args
     set id [lindex $cmd 1]
@@ -125,14 +121,45 @@ proc can2svgwb::GetOptsList {w id} {
     return $opts
 }
 
-proc can2svgwb::parseimage {cmd args} {
+# can2svgwb::Parseimport --
+# 
+#       Takes an import command, which is not a canvas command, 
+#       and translates it.
+#       
+#       
+#       import 112.0 112.0 -tags xyz/132542970 -url http://.../aMSN_128.png 
+#           -width 128 -height 128
 
-    set imcmd [concat [list create image] [lrange $cmd 1 end]]
-    set xmllist [eval {can2svg::svgasxmllist $imcmd} $args]
 
+proc can2svgwb::Parseimport {cmd args} {
+
+    # Assume image for the moment...
+    # We don't have the -image option here.
+
+    return [ParseImportImage $cmd]
 }
 
-proc can2svgwb::parsedchars {cmd} {
+proc can2svgwb::ParseImportImage {cmd} {
+    
+    set attrlist [list x [lindex $cmd 1] y [lindex $cmd 2]]
+    foreach {key value} [lrange $cmd 3 end] {
+	
+	switch -- $key {
+	    -height - -width {
+		lappend attrlist [string trimleft $key -] $value
+	    }
+	    -tags {
+		lappend attrlist id $value
+	    }
+	    -url {
+		lappend attrlist "xlink:href" $value
+	    }
+	}	
+    }
+    return [wrapper::createtag image -attrlist $attrlist]
+}
+
+proc can2svgwb::Parsedchars {cmd} {
 
     set attrlist [list id [lindex $cmd 1] first [lindex $cmd 2]]
     if {[llength $cmd] == 4} {
@@ -141,19 +168,19 @@ proc can2svgwb::parsedchars {cmd} {
     return [wrapper::createtag dchars -attrlist $attrlist]
 }
 
-proc can2svgwb::parsedelete {cmd} {
+proc can2svgwb::Parsedelete {cmd} {
 
     return [wrapper::createtag delete -attrlist [list id [lindex $cmd 1]]]
 }
 
-proc can2svgwb::parseinsert {cmd} {
+proc can2svgwb::Parseinsert {cmd} {
 
     foreach {id ind str} [lrange $cmd 1 3] break
     return [wrapper::createtag insert -attrlist \
       [list id $id before $ind] -chdata $str]
 }
 
-proc can2svgwb::parselower {cmd} {
+proc can2svgwb::Parselower {cmd} {
     
     set attrlist [list id [lindex $cmd 1]]
     if {[llength $cmd] == 2} {
@@ -162,14 +189,14 @@ proc can2svgwb::parselower {cmd} {
     return [wrapper::createtag lower -attrlist $attrlist]
 }
 
-proc can2svgwb::parsemove {cmd} {
+proc can2svgwb::Parsemove {cmd} {
     
     return [wrapper::createtag transform -attrlist \
       [list id [lindex $cmd 1] \
       transform translate([lindex $cmd 2],[lindex $cmd 3])]]
 }
 
-proc can2svgwb::parseraise {cmd} {
+proc can2svgwb::Parseraise {cmd} {
     
     set attrlist [list id [lindex $cmd 1]]
     if {[llength $cmd] == 2} {
@@ -178,7 +205,7 @@ proc can2svgwb::parseraise {cmd} {
     return [wrapper::createtag raise -attrlist $attrlist]
 }
 
-proc can2svgwb::parsescale {cmd} {
+proc can2svgwb::Parsescale {cmd} {
 
     set id [lindex $cmd 1]
     set attrlist [list id $id]

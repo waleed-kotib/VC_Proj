@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.33 2004-03-13 15:21:40 matben Exp $
+# $Id: Browse.tcl,v 1.34 2004-03-27 15:20:37 matben Exp $
 
 package require chasearrows
 
@@ -16,7 +16,7 @@ namespace eval ::Jabber::Browse:: {
     ::hooks::add loginHook          ::Jabber::Browse::LoginCmd
     ::hooks::add closeWindowHook    ::Jabber::Browse::CloseHook
     ::hooks::add logoutHook         ::Jabber::Browse::LogoutHook
-    ::hooks::add presenceHook       ::Jabber::Browse::PresenceCallback
+    ::hooks::add presenceHook       ::Jabber::Browse::PresenceHook
 
     # Use option database for customization. 
     # Use priority 30 just to override the widgetDefault values!
@@ -587,7 +587,7 @@ proc ::Jabber::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
     }
 }
 
-# Jabber::Browse::PresenceCallback --
+# Jabber::Browse::PresenceHook --
 #
 #       Sets the presence of the (<user>) jid in our browse tree.
 #
@@ -599,12 +599,12 @@ proc ::Jabber::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
 # Results:
 #       browse tree icon updated.
 
-proc ::Jabber::Browse::PresenceCallback {jid type args} {    
+proc ::Jabber::Browse::PresenceHook {jid type args} {    
     variable wtree
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
 
-    ::Jabber::Debug 2 "::Jabber::Browse::PresenceCallback jid=$jid, type=$type, args='$args'"
+    ::Jabber::Debug 2 "::Jabber::Browse::PresenceHook jid=$jid, type=$type, args='$args'"
 
     array set argsArr $args
     set jid3 $jid
@@ -637,8 +637,7 @@ proc ::Jabber::Browse::PresenceCallback {jid type args} {
     } else {
     
 	# If users shall be automatically browsed to.
-	if {$jprefs(autoBrowseUsers) &&  \
-	  [string equal $type "available"] &&  \
+	if {$jprefs(autoBrowseUsers) && [string equal $type "available"] && \
 	  ![$jstate(browse) isbrowsed $jid3]} {
 	    eval {::Jabber::Roster::AutoBrowse $jid3 $type} $args
 	}	

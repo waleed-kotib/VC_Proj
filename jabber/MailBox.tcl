@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.39 2004-03-18 14:11:18 matben Exp $
+# $Id: MailBox.tcl,v 1.40 2004-03-27 15:20:37 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -44,6 +44,7 @@ namespace eval ::Jabber::MailBox:: {
     ::hooks::add newMessageHook  ::Jabber::MailBox::GotMsg
     ::hooks::add closeWindowHook ::Jabber::MailBox::CloseHook
     ::hooks::add jabberInitHook  ::Jabber::MailBox::InitHandler
+    ::hooks::add quitAppHook     ::Jabber::MailBox::Exit
 
     variable locals
     upvar ::Jabber::jstate jstate
@@ -104,34 +105,10 @@ proc ::Jabber::MailBox::InitHandler { } {
 #       Toggles the display of the inbox. With -visible 1 it forces it
 #       to be displayed.
 
-proc ::Jabber::MailBox::ShowHideBU {args} {
-    global wDlgs
-    upvar ::Jabber::jstate jstate
-
-    puts "jstate(inboxVis)=$jstate(inboxVis) $args"
-    array set argsArr $args
-    set w $wDlgs(jinbox)
-    
-    if {[info exists argsArr(-visible)]} {
-	set jstate(inboxVis) $argsArr(-visible)
-    }
-    if {$jstate(inboxVis)} {
-	if {[winfo exists $w]} {
-	    catch {wm deiconify $w}
-	    raise $w
-	} else {
-	    ::Jabber::MailBox::Build $w
-	}
-    } else {
-	catch {wm withdraw $w}
-    }
-}
-
 proc ::Jabber::MailBox::ShowHide {args} {
     global wDlgs
     upvar ::Jabber::jstate jstate
 
-    #puts "1: jstate(inboxVis)=$jstate(inboxVis) $args"
     array set argsArr $args
     set w $wDlgs(jinbox)
     
@@ -161,7 +138,6 @@ proc ::Jabber::MailBox::ShowHide {args} {
 	    catch {wm withdraw $w}
 	}
 	set jstate(inboxVis) $targetstate
-	#puts "2: jstate(inboxVis)=$jstate(inboxVis), ismapped=$ismapped, targetstate=$targetstate"
     }
 }
 
@@ -369,6 +345,8 @@ proc ::Jabber::MailBox::InsertRow {wtbl row i} {
 	array set rowOpts [lrange $row 6 end]
 	if {[info exists rowOpts(-canvasuid)]} {
 	    set haswb 1
+	} elseif {[llength [::Jabber::MailBox::GetAnySVGElements $row]]} {
+	    set haswb 1
 	}
     }
 
@@ -475,7 +453,7 @@ proc ::Jabber::MailBox::MarkMsgAsRead {id} {
     #$wtbl rowconfigure $item
     #$wtbl cellconfigure "$item,0" -image $icons(readMsg)
     if {[lindex $mailbox($id) 3] == 0} {
-	set mailbox($id) [lreplace $mailbox($id) 3 3 1]
+	lset mailbox($id) 3 1
 	set locals(haveEdits) 1
     }
 }
@@ -548,9 +526,9 @@ proc ::Jabber::MailBox::HandleRawWBMessage {jlibname xmlns args} {
 	::Jabber::MailBox::ReadMailbox
     }
     set messageList [eval {::Jabber::MailBox::MakeMessageList ""} $args]
-    set rawList [::Jabber::WB::GetRawCanvasMessageList $argsArr(-x) $xmlns]
-    set canvasuid [::Utils::GenerateHexUID]
-    set filePath [file join $prefs(inboxCanvasPath) ${canvasuid}.can]
+    set rawList     [::Jabber::WB::GetRawCanvasMessageList $argsArr(-x) $xmlns]
+    set canvasuid   [::Utils::GenerateHexUID]
+    set filePath    [file join $prefs(inboxCanvasPath) ${canvasuid}.can]
     ::CanvasFile::DataToFile $filePath $rawList
     lappend messageList -canvasuid $canvasuid
     set mailbox($uidmsg) $messageList
@@ -570,10 +548,39 @@ proc ::Jabber::MailBox::HandleRawWBMessage {jlibname xmlns args} {
     return 1
 }
 
+# Jabber::MailBox::HandleSVGWBMessage --
+# 
+#       As above but for SVG whiteboard messages.
+
 proc ::Jabber::MailBox::HandleSVGWBMessage {jlibname xmlns args} {
+    global  prefs
+
+    variable mailbox
+    variable uidmsg
+    variable locals
     
-    ::Jabber::Debug 2 "::Jabber::MailBox::HandleSVGWBMessage"
-    
+    ::Jabber::Debug 2 "::Jabber::MailBox::HandleSVGWBMessage args='$args'"
+    array set argsArr $args
+	
+    # The inbox should only be read once to be economical.
+    if {!$locals(mailboxRead)} {
+	::Jabber::MailBox::ReadMailbox
+    }
+    set messageList [eval {::Jabber::MailBox::MakeMessageList ""} $args]
+
+    # Store svg in x element.
+    lappend messageList -x $argsArr(-x)
+
+    set mailbox($uidmsg) $messageList
+    ::Jabber::MailBox::PutMessageInInbox $messageList
+
+    # Show in mailbox.
+    set w [::Jabber::MailBox::GetToplevel]
+    if {$w != ""} {
+	::Jabber::MailBox::InsertRow $locals(wtbl) $mailbox($uidmsg) end
+	$locals(wtbl) see end
+    }
+    ::Jabber::UI::MailBoxState nonempty
     
     eval {::hooks::run newWBMessageHook} $args
 
@@ -675,9 +682,9 @@ proc ::Jabber::MailBox::TrashMsg { } {
     set locals(haveEdits) 1
 
     # Need selected line here.
-    set wtbl $locals(wtbl)
+    set wtbl  $locals(wtbl)
     set items [$wtbl curselection]
-    set wtop $locals(wtop)
+    set wtop  $locals(wtop)
     set wtray $locals(wtray)
     set lastitem [lindex $items end]
     if {[llength $items] == 0} {
@@ -722,6 +729,8 @@ proc ::Jabber::MailBox::TrashMsg { } {
 # 
 #       Executed when selecting a message in the inbox.
 #       Handles display of message, whiteboard, etc.
+#       
+#    mailbox(uid) = {subject from date isread uid message ?-key value ...?}
 
 proc ::Jabber::MailBox::SelectMsg { } {
     global  prefs wDlgs
@@ -732,10 +741,10 @@ proc ::Jabber::MailBox::SelectMsg { } {
     upvar ::Jabber::jstate jstate
     
     set wtextmsg $locals(wtextmsg)
-    set wtbl $locals(wtbl)
-    set wtop $locals(wtop)
-    set wtray $locals(wtray)
-    set item [$wtbl curselection]
+    set wtbl     $locals(wtbl)
+    set wtop     $locals(wtop)
+    set wtray    $locals(wtray)
+    set item     [$wtbl curselection]
     if {[llength $item] == 0} {
 	return
     } elseif {[llength $item] > 1} {
@@ -752,10 +761,11 @@ proc ::Jabber::MailBox::SelectMsg { } {
     set id [lindex $row $colindex(uidmsg)]
     
     # 2-tier jid.
-    set jid2 [lindex $row $colindex(from)]
+    #set jid2 [lindex $row $colindex(from)]
         
     # 3-tier jid.
     set jid3 [lindex $mailbox($id) 1]
+    jlib::splitjid $jid3 jid2 res
 
     # Mark as read.
     set iconRead    [::UI::GetIcon readMsg]
@@ -776,46 +786,117 @@ proc ::Jabber::MailBox::SelectMsg { } {
     
     # If any whiteboard stuff in message...
     set uid [::Jabber::MailBox::GetCanvasHexUID $id]
-    ::Jabber::Debug 2 "::Jabber::MailBox::SelectMsg  uid=$uid"
+    set svgElem [::Jabber::MailBox::GetAnySVGElements $mailbox($id)]
+    ::Jabber::Debug 2 "::Jabber::MailBox::SelectMsg  uid=$uid, svgElem='$svgElem'"
+     
+    # The "raw" protocol stores the canvas in a separate file indicated by
+    # the -canvasuid key in the message list.
+    # The SVG protocol stores the complete x element in the mailbox 
+    # -x listOfElements
     
+    # The "raw" protocol.
     if {[string length $uid] > 0} {	
-	set wwb  $wDlgs(jwbinbox)
-	set wtop ${wwb}.
-	set title "Inbox: $jid2"
-	if {[winfo exists $wwb]} {
-	    ::Import::HttpResetAll  $wtop
-	    ::CanvasCmd::EraseAll   $wtop
-	    ::WB::ConfigureMain     $wtop -title $title	    
-	    ::WB::SetStatusMessage  $wtop ""
-	    ::Jabber::WB::Configure $wtop -jid $jid2
-	    undo::reset [::WB::GetUndoToken $wtop]
-	} else {
-	    ::Jabber::WB::NewWhiteboard -wtop $wtop -state disabled \
-	      -title $title -jid $jid2 -usewingeom 1
-	}
-	
-	# Only if user available shall we try to import.
-	set tryimport 0
-	if {[$jstate(roster) isavailable $jid3] || \
-	  [string equal $jid3 $jstate(mejidres)]} {
-	    set tryimport 1
-	}
-		
-	set fileName ${uid}.can
-	set filePath [file join $prefs(inboxCanvasPath) $fileName]
-	set numImports [::CanvasFile::DrawCanvasItemFromFile $wtop \
-	  $filePath -where local -tryimport $tryimport]
-	if {!$tryimport && $numImports > 0} {
-	    
-	    # Perhaps we shall inform the user that no binary entities
-	    # could be obtained.
-	    tk_messageBox -type ok -title {Missing Entities}  \
-	      -icon info -message \
-	      [FormatTextForMessageBox "There were $numImports images or\
-	      similar entities that could not be obtained because the user\
-	      is not online."]
-	}
+	::Jabber::MailBox::DisplayRawMessage $jid3 $uid
+    } elseif {[llength $svgElem]} {
+	::Jabber::MailBox::DisplayXElementSVG $jid3 $svgElem
     }
+}
+
+proc ::Jabber::MailBox::GetAnySVGElements {row} {
+    
+    set svgElem {}
+    set idx [lsearch $row -x]
+    if {$idx > 0} {
+	set xlist [lindex $row [expr $idx+1]]
+	set svgElem [wrapper::getnamespacefromchilds $xlist x \
+	  "http://jabber.org/protocol/svgwb"]
+    }
+    return $svgElem
+}
+
+# Jabber::MailBox::DisplayRawMessage --
+# 
+#       Displays a raw whiteboard message when selected in inbox.
+
+proc ::Jabber::MailBox::DisplayRawMessage {jid3 uid} {
+    global  prefs wDlgs
+
+    variable mailbox
+    upvar ::Jabber::jstate jstate
+    
+    jlib::splitjid $jid3 jid2 res
+    set wtop [::Jabber::MailBox::MakeWhiteboard $jid2]
+    
+    # Only if user available shall we try to import.
+    set tryimport 0
+    if {[$jstate(roster) isavailable $jid3] || \
+      [string equal $jid3 $jstate(mejidres)]} {
+	set tryimport 1
+    }
+	    
+    set fileName ${uid}.can
+    set filePath [file join $prefs(inboxCanvasPath) $fileName]
+    set numImports [::CanvasFile::DrawCanvasItemFromFile $wtop \
+      $filePath -where local -tryimport $tryimport]
+    if {!$tryimport && $numImports > 0} {
+	
+	# Perhaps we shall inform the user that no binary entities
+	# could be obtained.
+	tk_messageBox -type ok -title {Missing Entities}  \
+	  -icon info -message \
+	  [FormatTextForMessageBox "There were $numImports images or\
+	  similar entities that could not be obtained because the user\
+	  is not online."]
+    }
+}
+
+proc ::Jabber::MailBox::DisplayXElementSVG {jid3 xlist} {
+    global  prefs wDlgs
+
+    variable mailbox
+    upvar ::Jabber::jstate jstate
+    ::Jabber::Debug 2 "::Jabber::MailBox::DisplayXElementSVG jid3=$jid3"
+    
+    jlib::splitjid $jid3 jid2 res
+    
+    set wtop [::Jabber::MailBox::MakeWhiteboard $jid2]
+    
+    # Only if user available shall we try to import.
+    set tryimport 0
+    if {[$jstate(roster) isavailable $jid3] || \
+      [string equal $jid3 $jstate(mejidres)]} {
+	set tryimport 1
+    }
+
+    set cmdList [::Jabber::WB::GetSVGWBMessageList $wtop $xlist]
+    foreach line $cmdList {
+	::CanvasUtils::HandleCanvasDraw $wtop $line -tryimport $tryimport
+    }         
+}
+
+# Jabber::MailBox::MakeWhiteboard --
+# 
+#       Creates or configures the inbox whiteboard window.
+
+proc ::Jabber::MailBox::MakeWhiteboard {jid2} {
+    global  prefs wDlgs
+    
+    set wwb  $wDlgs(jwbinbox)
+    set wtop ${wwb}.
+    set title "Inbox: $jid2"
+    
+    if {[winfo exists $wwb]} {
+	::Import::HttpResetAll  $wtop
+	::CanvasCmd::EraseAll   $wtop
+	::WB::ConfigureMain     $wtop -title $title	    
+	::WB::SetStatusMessage  $wtop ""
+	::Jabber::WB::Configure $wtop -jid $jid2
+	undo::reset [::WB::GetUndoToken $wtop]
+    } else {
+	::Jabber::WB::NewWhiteboard -wtop $wtop -state disabled \
+	  -title $title -jid $jid2 -usewingeom 1
+    }
+    return $wtop
 }
 
 proc ::Jabber::MailBox::DoubleClickMsg { } {
@@ -1181,7 +1262,7 @@ proc ::Jabber::MailBox::ReadMailboxVer2 { } {
 	
 	# Keep the uidmsg in sync for each list in mailbox.
 	foreach id [lsort -integer [array names mailbox]] {
-	    set mailbox($id) [lreplace $mailbox($id) 4 4 $id]
+	    lset mailbox($id) 4 $id
 	    
 	    # Consistency check.
 	    if {[expr [llength $mailbox($id)] % 2] == 1} {

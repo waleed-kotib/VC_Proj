@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #
-# $Id: svg2can.tcl,v 1.15 2004-03-24 14:43:11 matben Exp $
+# $Id: svg2can.tcl,v 1.16 2004-03-27 15:20:37 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -125,32 +125,64 @@ proc svg2can::config {args} {
 # 
 # Arguments:
 #       xmllist     the parsed document as a xml list
-#       args        
+#       args        configuration options
+#          -httphandler
+#    	   -imagehandler            
 #       
 # Results:
 #       a list of canvas commands without the widgetPath
 
 proc svg2can::parsesvgdocument {xmllist args} {
+    variable confopts
+
+    array set argsArr [array get confopts]
+    array set argsArr $args
+    set paropts [array get argsArr]
         
     set ans {}
     foreach c [getchildren $xmllist] {
-	set ans [concat $ans [parseelement $c {}]]
+	set ans [concat $ans [ParseElemRecursive $c $paropts {}]]
     }
     return $ans
 }
 
 # svg2can::parseelement --
 # 
+#       External interface for parsing a single element.
 # 
 # Arguments:
 #       xmllist     the elements xml list
+#       args        configuration options
+#          -httphandler
+#    	   -imagehandler            
+#       
+# Results:
+#       a list of canvas commands without the widgetPath
+
+proc svg2can::parseelement {xmllist args} {
+    variable confopts
+
+    array set argsArr [array get confopts]
+    array set argsArr $args
+    set paropts [array get argsArr]
+    
+    return [ParseElemRecursive $xmllist $paropts {}]
+}
+
+# svg2can::ParseElemRecursive --
+# 
+#       Parses element for internal usage.
+#       
+# Arguments:
+#       xmllist     the elements xml list
+#       paropts     parse options
 #       transformList
 #       args        list of attributes from any enclosing element (g).
 #       
 # Results:
 #       a list of canvas commands without the widgetPath
 
-proc svg2can::parseelement {xmllist transformList args} {
+proc svg2can::ParseElemRecursive {xmllist paropts transformList args} {
 
     set cmdList {}
     set tag [gettag $xmllist]
@@ -161,8 +193,9 @@ proc svg2can::parseelement {xmllist transformList args} {
 
     switch -- $tag {
 	circle - ellipse - image - line - polyline - polygon - rect - path - text {
+	    set func [string totitle $tag]
 	    set cmdList [concat $cmdList \
-	      [eval {parse${tag} $xmllist $transformList} $args]]
+	      [eval {Parse${func} $xmllist $paropts $transformList} $args]]
 	}
 	a - g {
 	    # Need to collect the attributes for the g element since
@@ -170,8 +203,9 @@ proc svg2can::parseelement {xmllist transformList args} {
 	    array set attrArr $args
 	    array set attrArr [getattr $xmllist]
 	    foreach c [getchildren $xmllist] {
-		set cmdList [concat $cmdList \
-		  [eval {parseelement $c $transformList} [array get attrArr]]]
+		set cmdList [concat $cmdList [eval {
+		    ParseElemRecursive $c $paropts $transformList
+		} [array get attrArr]]]
 	    }	    
 	}
 	use - defs - marker - symbol {
@@ -181,20 +215,22 @@ proc svg2can::parseelement {xmllist transformList args} {
     return $cmdList
 }
 
-# svg2can::parsecircle, parseellipse, parseline, parserect, parsepath, 
-#   parsepolyline, parsepolygon, parseimage --
+# svg2can::ParseCircle, ParseEllipse, ParseLine, ParseRect, ParsePath, 
+#   ParsePolyline, ParsePolygon, ParseImage --
 # 
 #       Makes the necessary canvas commands needed to reproduce the
 #       svg element.
 #       
 # Arguments:
 #       xmllist
+#       paropts     parse options
+#       transformList
 #       args        list of attributes from any enclosing element (g).
 #       
 # Results:
 #       list of canvas create command without the widgetPath.
 
-proc svg2can::parsecircle {xmllist transformList args} {
+proc svg2can::ParseCircle {xmllist paropts transformList args} {
     variable tmptag
     
     set opts {}
@@ -238,7 +274,7 @@ proc svg2can::parsecircle {xmllist transformList args} {
     return [AddAnyTransformCmds $cmdList $transformList]
 }
 
-proc svg2can::parseellipse {xmllist transformList args} {
+proc svg2can::ParseEllipse {xmllist paropts transformList args} {
     variable tmptag
     
     set opts {}
@@ -280,9 +316,8 @@ proc svg2can::parseellipse {xmllist transformList args} {
     return [AddAnyTransformCmds $cmdList $transformList]
 }
 
-proc svg2can::parseimage {xmllist transformList args} {
+proc svg2can::ParseImage {xmllist paropts transformList args} {
     variable tmptag
-    variable confopts
     
     set x 0
     set y 0    
@@ -290,6 +325,7 @@ proc svg2can::parseimage {xmllist transformList args} {
     set photo {}
     array set attrArr $args
     array set attrArr [getattr $xmllist]
+    array set parOptsArr $paropts
     set tags {}
     if {[llength $transformList]} {
 	lappend tags $tmptag
@@ -304,7 +340,9 @@ proc svg2can::parseimage {xmllist transformList args} {
 	    style {
 		set opts [StyleToOpts image [StyleAttrToList $value]]
 	    }
-	    x - y {
+	    x - y - height - width {
+		# The canvas image item does not have width and height.
+		# These are REQUIRED in SVG.
 		set $key $value
 	    }
 	    xlink:href {
@@ -325,10 +363,10 @@ proc svg2can::parseimage {xmllist transformList args} {
 	    file:/* {			
 		set path [uriencode::decodefile $xlinkhref]
 		set path [string map {file:/// /} $path]
-		if {[string length $confopts(-imagehandler)]} {		    
+		if {[string length $parOptsArr(-imagehandler)]} {		    
 		    set cmd [concat create image $x $y $opts]
-		    lappend cmd -file $path
-		    set photo [uplevel #0 $confopts(-imagehandler) $cmd]
+		    lappend cmd -file $path -height $height -width $width
+		    set photo [uplevel #0 $parOptsArr(-imagehandler) [list $cmd]]
 		    lappend opts -image $photo
 		} else {			
 		    if {[string tolower [file extension $path]] == ".gif"} {
@@ -340,11 +378,12 @@ proc svg2can::parseimage {xmllist transformList args} {
 		}
 	    }
 	    http:/* {
-		if {[string length $confopts(-httphandler)]} {
-		    lappend cmd -url $xlinkhref
-		    uplevel #0 $confopts(-httphandler) $cmd
-		    return ""
+		if {[string length $parOptsArr(-httphandler)]} {
+		    set cmd [concat create image $x $y $opts]
+		    lappend cmd -url $xlinkhref  -height $height -width $width
+		    uplevel #0 $parOptsArr(-httphandler) [list $cmd]
 		}
+		return ""
 	    }
 	    default {
 		return ""
@@ -357,7 +396,7 @@ proc svg2can::parseimage {xmllist transformList args} {
     return [AddAnyTransformCmds $cmdList $transformList]
 }
 
-proc svg2can::parseline {xmllist transformList args} {
+proc svg2can::ParseLine {xmllist paropts transformList args} {
     variable tmptag
     
     set opts {}
@@ -403,7 +442,7 @@ proc svg2can::parseline {xmllist transformList args} {
     return [AddAnyTransformCmds $cmdList $transformList]
 }
 
-proc svg2can::parsepath {xmllist transformList args} {
+proc svg2can::ParsePath {xmllist paropts transformList args} {
     variable tmptag
     
     set cmdList {}
@@ -776,7 +815,7 @@ proc svg2can::parsepath {xmllist transformList args} {
     return [AddAnyTransformCmds $cmdList $transformList]
 }
 
-proc svg2can::parsepolyline {xmllist transformList args} {
+proc svg2can::ParsePolyline {xmllist paropts transformList args} {
     variable tmptag
     
     set coords {}
@@ -813,7 +852,7 @@ proc svg2can::parsepolyline {xmllist transformList args} {
     return [AddAnyTransformCmds $cmdList $transformList]
 }
 
-proc svg2can::parsepolygon {xmllist transformList args} {
+proc svg2can::ParsePolygon {xmllist paropts transformList args} {
     variable tmptag
     
     set coords {}
@@ -850,7 +889,7 @@ proc svg2can::parsepolygon {xmllist transformList args} {
     return [AddAnyTransformCmds $cmdList $transformList]
 }
 
-proc svg2can::parserect {xmllist transformList args} {
+proc svg2can::ParseRect {xmllist paropts transformList args} {
     variable tmptag
     
     set opts {}
@@ -902,13 +941,13 @@ proc svg2can::parserect {xmllist transformList args} {
     return [AddAnyTransformCmds $cmdList $transformList]
 }
 
-# svg2can::parsetext --
+# svg2can::ParseText --
 # 
 #       Takes a text element and returns a list of canvas create text commands.
 #       Assuming that chdata is not mixed with elements, we should now have
 #       either chdata OR more elements (tspan).
 
-proc svg2can::parsetext {xmllist transformList args} {
+proc svg2can::ParseText {xmllist paropts transformList args} {
     
     set x 0
     set y 0
@@ -1087,11 +1126,13 @@ proc svg2can::AttrToCoords {type attrlist} {
     
     switch -- $type {
 	circle {
-	    set coords [list [expr $attr(cx) - $attr(r)] [expr $attr(cy) - $attr(r)] \
+	    set coords [list  \
+	      [expr $attr(cx) - $attr(r)] [expr $attr(cy) - $attr(r)] \
 	      [expr $attr(cx) + $attr(r)] [expr $attr(cy) + $attr(r)]]	
 	}
 	ellipse {
-	    set coords [list [expr $attr(cx) - $rx] [expr $cy - $ry] \
+	    set coords [list  \
+	      [expr $attr(cx) - $attr(rx)] [expr $attr(cy) - $attr(ry)] \
 	      [expr $attr(cx) + $attr(rx)] [expr $attr(cy) + $attr(ry)]]
 	}
 	image {
@@ -1666,7 +1707,7 @@ if {0} {
     
     foreach i [lsort -integer [array names xml]] {
 	set xmllist [tinydom::documentElement [tinydom::parse $xml($i)]]
-	set cmdList [svg2can::parseelement $xmllist {}]
+	set cmdList [svg2can::parseelement $xmllist]
 	foreach c $cmdList {
 	    puts $c
 	    eval .t.c $c

@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #
-# $Id: svgwb2can.tcl,v 1.3 2004-03-24 14:43:11 matben Exp $
+# $Id: svgwb2can.tcl,v 1.4 2004-03-27 15:20:37 matben Exp $
 
 package require svg2can
 
@@ -27,6 +27,7 @@ namespace eval svgwb2can {
 # Arguments:
 #       xmllist     a list of {tag attrlist isempty cdata {child1 child2 ...}}
 #       args    -canvas     widgetPath
+#               or any other option valid for svg2can.
 #       
 # Results:
 #       list of canvas commands without prepending widget path.
@@ -56,7 +57,7 @@ proc svgwb2can::parseelement {xmllist args} {
 	    set cmdList [parsetransform $xmllist]
 	}
 	default {
-	    set cmdList [svg2can::parseelement $xmllist {}]
+	    set cmdList [eval {svg2can::parseelement $xmllist} $args]
 	}
     }
     return $cmdList
@@ -137,12 +138,17 @@ proc svgwb2can::parseconfigure {xmllist args} {
     } elseif {$type == "image"} {
 	lappend cmdList [concat coords $id $x $y]
     } elseif {[llength $cooAttr]} {
+	
+	# Original coords.
 	set coo [$argsArr(-canvas) coords $id]
+	#puts "coo=$coo"
 	set opts [GetOptsList $argsArr(-canvas) $id]
 	array set attrArr [can2svg::CoordsToAttr $type $coo $opts svgElement]
+	#puts "[array get attrArr]"
 	
 	# Overwrite using new attributes.
 	array set attrArr $cooAttr
+	#puts "[array get attrArr]"
 
 	# And then back to Tk again...
 	set coo [svg2can::AttrToCoords $svgElement [array get attrArr]]

@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #
-# $Id: can2svg.tcl,v 1.7 2004-03-24 14:43:11 matben Exp $
+# $Id: can2svg.tcl,v 1.8 2004-03-27 15:20:37 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -837,9 +837,13 @@ proc can2svg::ImageCoordsToAttr {coo opts} {
     
     array set optArr {-anchor nw}
     array set optArr $opts
-    set theImage $optArr(-image)
-    set w [image width $theImage]
-    set h [image height $theImage]
+    if {[info exists optArr(-image)]} {
+	set theImage $optArr(-image)
+	set w [image width $theImage]
+	set h [image height $theImage]
+    } else {
+	return -code error "Missing -image option; can't parse that"
+    }
     foreach {x0 y0} $coo break
     
     switch -- $optArr(-anchor) {

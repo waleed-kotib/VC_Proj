@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.25 2004-03-24 14:43:11 matben Exp $
+# $Id: Whiteboard.tcl,v 1.26 2004-03-27 15:20:37 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -190,11 +190,17 @@ proc ::WB::Init {} {
 #       preloaded icons as fallback.
 
 proc ::WB::InitIcons {w} {
+    global  this
     
+    variable icons
     variable iconsInitted 1
     variable btNo2Name 
     variable wbicons
-    
+    	
+    # Get icons.
+    set icons(brokenImage) [image create photo -format gif  \
+      -file [file join $this(imagePath) brokenImage.gif]]	
+
     # Make all standard icons.
     package require WBIcons
     
@@ -862,6 +868,41 @@ proc ::WB::DestroyMain {wtop} {
     eval {image delete} $canvasImages
     ::CanvasUtils::ItemFree $wtop
     ::UI::FreeMenu $wtop
+}
+
+# WB::CreateImageForWtop --
+# 
+#       Create an image that gets garbage collected when window closed.
+#       
+#       name     desired image name; can be empty
+#       args     -file
+#                -data
+
+proc ::WB::CreateImageForWtop {wtop name args} {
+    
+    upvar ::WB::${wtop}::canvasImages canvasImages
+
+    array set argsArr $args
+    set photoOpts {}
+    if {[info exists argsArr(-file)]} {
+	lappend photoOpts -file $argsArr(-file)
+	if {[string tolower [file extension $argsArr(-file)]] == ".gif"} {
+	    lappend photoOpts -format gif
+	}
+    } else {
+	lappend photoOpts -data $argsArr(-data)
+    }
+
+    set photo [eval {image create photo} $name $photoOpts]
+    lappend canvasImages $photo
+    return $photo
+}
+
+proc ::WB::AddImageToGarbageCollector {wtop name} {
+    
+    upvar ::WB::${wtop}::canvasImages canvasImages
+
+    lappend canvasImages $name
 }
 
 # WB::SaveWhiteboardState
