@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.99 2004-12-09 15:20:27 matben Exp $
+# $Id: Chat.tcl,v 1.100 2004-12-10 10:01:42 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -964,8 +964,6 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set chatstate(wsmile)   $wsmile
     set chatstate(wpresimage) $wpresimage
  
-    after idle [list raise $w]
-    
     return $chattoken
 }
 

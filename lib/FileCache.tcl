@@ -6,7 +6,7 @@
 #
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #
-# $Id: FileCache.tcl,v 1.18 2004-12-09 16:32:48 matben Exp $
+# $Id: FileCache.tcl,v 1.19 2004-12-10 10:01:43 matben Exp $
 # 
 #       The input key can be: 
 #               1) a full url, must be uri encoded 
@@ -84,7 +84,7 @@ namespace eval ::FileCache:: {
     # Cache directory.
     variable cachedir ""
     variable readcache 0
-    variable indexFileTail cacheIndex.tcl
+    variable indexFileTail cacheIndex
     
 }
 

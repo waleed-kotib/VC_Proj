@@ -4,7 +4,7 @@
 #       background.
 #       This is just a first sketch.
 #       
-# $Id: Notifier.tcl,v 1.1 2004-12-01 15:15:41 matben Exp $
+# $Id: Notifier.tcl,v 1.2 2004-12-10 10:01:42 matben Exp $
 
 namespace eval ::Notifier:: {
     
@@ -13,7 +13,8 @@ namespace eval ::Notifier:: {
 proc ::Notifier::Init { } {
     global  this
     
-    if {[string match mac* $this(platform)]} {
+    # Use this on windows only.
+    if {![string equal $this(platform) "windows"]} {
 	return
     }
     if {[catch {package require notebox}]} {
@@ -23,10 +24,20 @@ proc ::Notifier::Init { } {
       "Provides a small event notifier window."
 
     # Add event hooks.
+    ::hooks::register prefsInitHook         [namespace current]::InitPrefsHook
     ::hooks::register newMessageHook        [namespace current]::MessageHook
     #::hooks::register newChatMessageHook    [namespace current]::ChatHook
     ::hooks::register newChatThreadHook     [namespace current]::ThreadHook
     ::hooks::register oobSetRequestHook     [namespace current]::OOBSetHook
+}
+
+proc ::Notifier::InitPrefsHook { } {
+    upvar ::Jabber::jprefs jprefs
+
+    set jprefs(notifier,state) 0
+    
+    ::PreferencesUtils::Add [list  \
+      [list ::Jabber::jprefs(notifier,state)  jprefs_notifier_state  $jprefs(notifier,state)]]   
 }
 
 proc ::Notifier::MessageHook {body args} {
@@ -56,8 +67,9 @@ proc ::Notifier::OOBSetHook {from subiq args} {
 }
 
 proc ::Notifier::DisplayMsg {str} {
+    upvar ::Jabber::jprefs jprefs
     
-    if {![::UI::IsAppInFront]} {
+    if {$jprefs(notifier,state) && ![::UI::IsAppInFront]} {
 	::notebox::addmsg $str
     }
 }
