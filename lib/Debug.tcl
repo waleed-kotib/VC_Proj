@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Debug.tcl,v 1.1 2004-11-24 08:22:53 matben Exp $
+# $Id: Debug.tcl,v 1.2 2005-03-02 13:49:41 matben Exp $
 
 # If no debug printouts, no console.
 if {$debugLevel == 0} {
@@ -47,4 +47,6 @@ if {0} {
     }
     namespace eval ::WB:: {}
     trace add variable ::WB::menuDefs(main,file) write TraceVar
+
+    trace add variable ::Login::pending write TraceVar
 }

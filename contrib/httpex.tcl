@@ -8,7 +8,7 @@
 #  Copyright (c) 2002-2005  Mats Bengtsson only for the new and rewritten parts.
 #  This source file is distributed under the BSD license.
 #
-# $Id: httpex.tcl,v 1.19 2005-01-31 14:06:53 matben Exp $
+# $Id: httpex.tcl,v 1.20 2005-03-02 13:49:40 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -219,7 +219,7 @@ namespace eval httpex {
     }
 
     # Client side options.
-    set locals(opts,get) {-binary -blocksize -channel -command -headers \
+    set locals(opts,get) {-binary -blocksize -channel -command -handler -headers \
       -httpvers -persistent -progress -socket -timeout -type}
     set locals(opts,head) {-binary -command -headers -httpvers -persistent \
       -socket -timeout -type}
@@ -1514,9 +1514,7 @@ proc httpex::cleanup {token} {
 
     Debug 1 "httpex::cleanup"
     
-    if {[info exist state]} {
-	unset state
-    }
+    unset -nocomplain state
 }
 
 # httpex::Finish --
@@ -1545,6 +1543,10 @@ proc httpex::Finish {token {errormsg ""} {skipCB 0}} {
 
     Debug 1 "httpex::Finish errormsg=$errormsg, skipCB=$skipCB"
     
+    # A -handler could have done cleanup on us.
+    if {![info exists state]} {
+	return
+    }
     set s $state(-socket)
     set doClose 0
     if {[string length $errormsg] != 0} {
@@ -1604,9 +1606,9 @@ proc httpex::Finish {token {errormsg ""} {skipCB 0}} {
 		set state(status) error
 	    }
 	}
-	if {$doClose && [info exist state(-command)]} {
+	if {$doClose} {
 	    # Command callback may already have unset our state
-	    unset state(-command)
+	    unset -nocomplain state(-command)
 	}
     }
 }

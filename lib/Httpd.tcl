@@ -5,16 +5,16 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Httpd.tcl,v 1.2 2004-12-02 08:22:34 matben Exp $
+# $Id: Httpd.tcl,v 1.3 2005-03-02 13:49:41 matben Exp $
     
 package provide Httpd 1.0
 
 namespace eval ::Httpd:: { 
 
-    ::hooks::register launchFinalHook       ::Httpd::LaunchHook
+    ::hooks::register initHook  ::Httpd::InitHook
 }
 
-proc ::Httpd::LaunchHook { } {
+proc ::Httpd::InitHook { } {
     global  prefs this auto_path
     
     # Start httpd thread. It enters its event loop if created without a sript.

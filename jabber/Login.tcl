@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.60 2005-02-24 13:58:08 matben Exp $
+# $Id: Login.tcl,v 1.61 2005-03-02 13:49:41 matben Exp $
 
 package provide Login 1.0
 
@@ -15,8 +15,10 @@ namespace eval ::Login:: {
     variable username
     variable password
     variable uid
+    variable pending
 
     set uid 0
+    set pending 0
     
     # Add all event hooks.
     ::hooks::register quitAppHook     ::Login::QuitAppHook
@@ -70,9 +72,9 @@ proc ::Login::Dlg { } {
     pack  $w.frall -fill both -expand 1
                                  
     ::headlabel::headlabel $w.frall.head -text [mc Login]    
-    pack $w.frall.head -side top -fill both -expand 1
+    pack  $w.frall.head -side top -fill both -expand 1
     label $w.frall.msg -wraplength 280 -justify left -text [mc jalogin]
-    pack $w.frall.msg -side top -fill both -expand 1 -padx 10
+    pack  $w.frall.msg -side top -fill both -expand 1 -padx 10
     
     # Entries etc.
     set frmid [frame $w.frall.frmid -borderwidth 0]
@@ -112,8 +114,8 @@ proc ::Login::Dlg { } {
     grid $frmid.euser -column 1 -row 2 -sticky w
     grid $frmid.lpass -column 0 -row 3 -sticky e
     grid $frmid.epass -column 1 -row 3 -sticky w
-    grid $frmid.lres -column 0 -row 4 -sticky e
-    grid $frmid.eres -column 1 -row 4 -sticky w
+    grid $frmid.lres  -column 0 -row 4 -sticky e
+    grid $frmid.eres  -column 1 -row 4 -sticky w
     
     # Triangle switch for more options.
     set frtri [frame $w.frall.tri -borderwidth 0]
@@ -287,6 +289,22 @@ proc ::Login::Close {w} {
     catch {destroy $w}    
 }
 
+proc ::Login::IsPending { } {
+    variable pending
+
+    return $pending
+}
+
+proc ::Login::Kill { } {
+    variable pending
+
+    set pending 0
+    ::Network::KillAll
+    ::Jabber::UI::SetStatusMessage ""
+    ::Jabber::UI::StartStopAnimatedWave 0
+    ::Jabber::UI::FixUIWhen "disconnect"
+}
+
 # Login::DoLogin --
 # 
 #       Starts the login process.
@@ -307,9 +325,7 @@ proc ::Login::DoLogin {} {
     ::Debug 2 "::Login::DoLogin"
     
     # Kill any pending open states.
-    ::Network::KillAll
-    ::Jabber::UI::SetStatusMessage ""
-    ::Jabber::UI::StartStopAnimatedWave 0
+    Kill
     
     # Check 'server', 'username' and 'password' if acceptable.
     foreach name {server username password} {
@@ -520,7 +536,7 @@ proc ::Login::HighLogin {server username resource password cmd args} {
 	set resource "coccinella"
     }
 
-    # Initialize the state variable, an array, that keeps is the storage.
+    # Initialize the state variable, an array, that keeps the storage.
     
     set token [namespace current]::high[incr uid]
     variable $token
@@ -733,7 +749,7 @@ proc ::Login::HighFinish {token {err ""} {msg ""}} {
 
 proc ::Login::Connect {server cmd args} {
     global  prefs
-
+    variable pending
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     
@@ -747,11 +763,11 @@ proc ::Login::Connect {server cmd args} {
     array set argsArr $args
     
     # Kill any pending open states.
-    ::Network::KillAll
-        
+    Kill
     ::Jabber::UI::SetStatusMessage [mc jawaitresp $server]
     ::Jabber::UI::StartStopAnimatedWave 1
     ::Jabber::UI::FixUIWhen "connectinit"
+    set pending 1
     update idletasks
 
     # Async socket open with callback.
@@ -835,9 +851,7 @@ proc ::Login::ConnectCB {cmd sock ip port status {msg {}}} {
     
     switch $status {
 	error - timeout {
-	    ::Jabber::UI::SetStatusMessage ""
-	    ::Jabber::UI::StartStopAnimatedWave 0
-	    ::Jabber::UI::FixUIWhen "disconnect"
+	    Kill
 	}
 	default {
 	    set jstate(sock) $sock
@@ -860,6 +874,7 @@ proc ::Login::ConnectCB {cmd sock ip port status {msg {}}} {
 #       Callback initiated.
 
 proc ::Login::InitStream {server cmd args} {
+    variable pending
     upvar ::Jabber::jstate jstate
     
     ::Jabber::UI::SetStatusMessage [mc jawaitxml $server]
@@ -877,9 +892,7 @@ proc ::Login::InitStream {server cmd args} {
 	eval {$jstate(jlib) openstream $server  \
 	  -cmd [list [namespace current]::InitStreamCB $cmd]} $opts
     } err]} {
-	::Jabber::UI::SetStatusMessage ""
-	::Jabber::UI::StartStopAnimatedWave 0
-	::Jabber::UI::FixUIWhen "disconnect"
+	Kill
 	return -code error $err
     }
 }
@@ -902,10 +915,11 @@ proc ::Login::StartTls {cmd} {
 }
 
 proc ::Login::StartTlsCB {cmd jlibName type args} {
+    variable pending
     upvar ::Jabber::jstate jstate
 
-    if {[string equal $type "error"]} {	
-	::Jabber::UI::FixUIWhen "disconnect"
+    if {[string equal $type "error"]} {
+	Kill
 	after idle $jstate(jlib) closestream
     }    
     uplevel #0 $cmd $type $args
@@ -976,7 +990,7 @@ proc ::Login::Authorize {server username resource password cmd args} {
 
 proc ::Login::AuthorizeCB {token jlibName type theQuery} {
     global  this
-
+    variable pending
     variable $token
     upvar 0 $token state
     upvar ::Jabber::jstate jstate
@@ -990,6 +1004,7 @@ proc ::Login::AuthorizeCB {token jlibName type theQuery} {
     set password $state(password)
     set cmd      $state(cmd)
     set msg      ""
+    set pending  0
 
     ::Jabber::UI::StartStopAnimatedWave 0
     

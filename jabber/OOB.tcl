@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.48 2005-02-21 08:48:43 matben Exp $
+# $Id: OOB.tcl,v 1.49 2005-03-02 13:49:41 matben Exp $
 
 package require uriencode
 
@@ -391,7 +391,7 @@ proc ::OOB::ReturnError {jid id subiq ncode} {
     set subElem [wrapper::createtag $tag -attrlist \
       [list xmlns "urn:ietf:params:xml:ns:xmpp-stanzas"]]
     set errElem [wrapper::createtag "error" -attrlist \
-      [list code $ncode type modify] -subtags [list $subElem]]
+      [list code $ncode type $type] -subtags [list $subElem]]
     
     ::Jabber::JlibCmd send_iq "error" [list $subiq $errElem] -to $jid -id $id
 }

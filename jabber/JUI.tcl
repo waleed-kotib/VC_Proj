@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.79 2005-02-08 08:57:14 matben Exp $
+# $Id: JUI.tcl,v 1.80 2005-03-02 13:49:40 matben Exp $
 
 package provide JUI 1.0
 
@@ -241,7 +241,7 @@ proc ::Jabber::UI::Build {w} {
     ::Debug 2 "::Jabber::UI::Build w=$w"
     
     if {!$inited} {
-	::Jabber::UI::Init
+	Init
     }
     if {$w != "."} {
 	::UI::Toplevel $w -macstyle documentProc
@@ -250,7 +250,7 @@ proc ::Jabber::UI::Build {w} {
 	set wtop .
     }
     if {[string match "mac*" $this(platform)]} {
-	bind $w <FocusIn> "+ ::UI::MacFocusFixEditMenu $w $wtop %W"
+	bind $w <FocusIn>  "+ ::UI::MacFocusFixEditMenu $w $wtop %W"
 	bind $w <FocusOut> "+ ::UI::MacFocusFixEditMenu $w $wtop %W"
     }    
     set jwapp(wtopRost) $w
@@ -531,11 +531,7 @@ proc ::Jabber::UI::NewPage {name} {
 proc ::Jabber::UI::StopConnect { } {
     
     ::Jabber::DoCloseClientConnection
-    
-    ::Network::KillAll
-    ::Jabber::UI::SetStatusMessage ""
-    ::Jabber::UI::StartStopAnimatedWave 0
-    ::Jabber::UI::FixUIWhen disconnect
+    ::Login::Kill
 }    
 
 proc ::Jabber::UI::Pages { } {
@@ -556,19 +552,13 @@ proc ::Jabber::UI::LogoutClear { } {
 }
 
 proc ::Jabber::UI::StartStopAnimatedWave {start} {
-    variable jwapp
 
     ::Roster::Animate $start
-    
-    #set waveImage [::Theme::GetImage [option get $jwapp(fall) waveImage {}]]  
-    #::UI::StartStopAnimatedWave $jwapp(statmess) $waveImage $start
 }
 
 proc ::Jabber::UI::SetStatusMessage {msg} {
-    variable jwapp
 
     ::Roster::TimedMessage $msg
-    #$jwapp(statmess) itemconfigure stattxt -text $msg
 }
 
 # Jabber::UI::MailBoxState --
@@ -733,6 +723,10 @@ proc ::Jabber::UI::FixUIWhen {what} {
 	    ::UI::MenuMethod $wmj entryconfigure mLogin -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mNewAccount -state disabled
 	    ::UI::MenuMethod $wmi entryconfigure mSetupAssistant -state disabled
+
+	    # test... Logout kills login process.
+	    ::UI::MenuMethod $wmj entryconfigure mLogin  \
+	      -label [mc mLogout] -state normal
 	}
 	connectfin - connect {
 	    $wtray buttonconfigure connect -state disabled
