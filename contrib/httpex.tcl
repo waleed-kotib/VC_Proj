@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson only for the new and rewritten parts.
 #
-# $Id: httpex.tcl,v 1.9 2003-11-30 11:46:46 matben Exp $
+# $Id: httpex.tcl,v 1.10 2004-01-10 14:53:39 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -552,6 +552,7 @@ proc httpex::Request {method url args} {
 #	Proceeds with the httpex protocol,
 
 proc httpex::Connect {token} {    
+    global  tcl_platform
     variable $token
     variable opts
     variable locals
@@ -561,8 +562,9 @@ proc httpex::Connect {token} {
     
     set s $state(-socket)
     fileevent $s writable {}
+    catch {after cancel $state(after)}
     
-    if {[string equal $::tcl_platform(platform) "macintosh"]} {
+    if {[string equal $tcl_platform(platform) "macintosh"]} {
 	if {[catch {eof $s} iseof] || $iseof} {
 	    Eof $token $iseof
 	    return

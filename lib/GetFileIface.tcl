@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: GetFileIface.tcl,v 1.11 2003-12-18 14:19:35 matben Exp $
+# $Id: GetFileIface.tcl,v 1.12 2004-01-10 14:53:39 matben Exp $
 
 package require getfile
 package require uriencode
@@ -427,22 +427,22 @@ proc ::GetFileIface::Command {gettoken token what msg} {
 proc ::GetFileIface::UpdateProgress {gettoken total current} {
     upvar #0 $gettoken getstate          
     
-    set msg "From: $getstate(fromname)\n"
-    append msg "Rate: [::Timing::FormMessage $getstate(timingkey) $total]"
+    set msg2 "From: $getstate(fromname)"
+    append msg3 "Rate: [::Timing::FormMessage $getstate(timingkey) $total]"
     
     if {[winfo exists $getstate(wprog)]} {
 
 	# Update the progress window.
 	set percent [expr 100.0 * $current/($total + 1.0)]
 	$getstate(wprog) configure -percent $percent   \
-	  -text2 $msg
+	  -text2 $msg2 -text3 $msg3
     } else {
 	
 	# Create the progress window.
 	::Debug 2 "::GetFileIface::UpdateProgress  create ProgWin"
 
-	::ProgressWindow::ProgressWindow $getstate(wprog) -name {Get File} \
-	  -filename $getstate(filetail) -text2 $msg \
+	::ProgressWindow::ProgressWindow $getstate(wprog)  \
+	  -filename $getstate(filetail) -text2 $msg2 -text3 $msg3 \
 	  -cancelcmd [list [namespace current]::CancelCmd $gettoken]
     }
 }
