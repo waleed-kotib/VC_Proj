@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: ibb.tcl,v 1.2 2004-07-02 14:08:02 matben Exp $
+# $Id: ibb.tcl,v 1.3 2004-07-03 12:54:37 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -65,9 +65,12 @@ proc jlib::ibb::new {jlibname cmd args} {
     set priv(cmd)      $cmd
     set jlib2ibbname($jlibname) $ibbname
     
+    # Each base64 byte takes 6 bits; need to translate to binary bytes.
+    set priv(binblock) [expr (6 * $opts(-block-size))/8]
+    set priv(binblock) [expr 6 * ($priv(binblock)/6)]    
+    
     # Register some standard iq handlers that is handled internally.
-    $jlibname iq_register set $ibbxmlns    \
-      [namespace current]::handle_set
+    $jlibname iq_register set $ibbxmlns [namespace current]::handle_set
 
     # Create the actual instance procedure.
     proc $ibbname {cmd args}   \
@@ -115,8 +118,9 @@ proc jlib::ibb::cmdproc {ibbname cmd args} {
 # Arguments:
 #       to
 #       cmd
-#       args:   -data
-#               -file
+#       args:   -data   binary data
+#               -file   file path
+#               -base64 
 #       
 # Results:
 #       sid (Session IDentifier).
@@ -130,8 +134,9 @@ proc jlib::ibb::send {ibbname to cmd args} {
 
     array set argsArr $opts
     array set argsArr $args
-    if {![info exists argsArr(-data)] && ![info exists argsArr(-file)]} {
-	return -code error "ibb must have any of -data or -file"
+    if {![info exists argsArr(-data)] && ![info exists argsArr(-file)] \\
+      && ![info exists argsArr(-base64)]} {
+	return -code error "ibb must have any of -data, -file, or -base64"
     }
     set sid [incr usid]
     set openElem [wrapper::createtag "open" -attrlist \
@@ -145,9 +150,70 @@ proc jlib::ibb::send {ibbname to cmd args} {
     set priv(sid,$sid,cmd) $cmd
 
     $priv(jlibname) send_iq set $openElem -to $to  \
-      -command [namespace current]::OpenCB
+      -command [list [namespace current]::OpenCB $ibbname]
 
     return $sid
+}
+
+proc jlib::ibb::OpenCB {ibbname } {
+    
+    upvar ${ibbname}::priv priv
+    upvar ${ibbname}::opts opts
+
+    
+    set priv(sid,$sid,offset) 0
+    
+}
+
+proc jlib::ibb::SendDataChunk {iibname } {
+    
+    upvar ${ibbname}::priv priv
+    upvar ${ibbname}::opts opts
+
+    set bindata [string range $opts(-data) $offset \
+      [expr $offset + $priv(binblock) -1]]
+    if {[string length $bindata] == $priv(binblock)]} {
+	set bindata [string trimright $bindata =]
+    }
+    incr offset $priv(binblock)
+    set data [::base64::encode $bindata]
+    SendData $ibbname $sid $data
+}
+
+proc jlib::ibb::InitFile {ibbname sid} {
+    
+    upvar ${ibbname}::priv priv
+    upvar ${ibbname}::opts opts
+
+    if {[catch {open $opts(-file) r} fd]} {
+	return -code error $fd
+    }
+    set priv(sid,$sid,fd) $fd
+    fconfigure $fd -translation binary
+    
+    
+}
+
+proc jlib::ibb::SendFileChunk {iibname } {
+    
+    upvar ${ibbname}::priv priv
+    
+    set fd $priv(sid,$sid,fd)
+    set bindata [read $fd $priv(binblock)]
+    if {![eof $fd]} {
+	set bindata [string trimright $bindata =]
+    }
+    incr offset $priv(binblock)
+    set data [::base64::encode $bindata]
+    SendData $ibbname $sid $data
+}
+
+proc jlib::ibb::SendData {ibbname sid data} {
+    
+    upvar ${ibbname}::priv priv
+    
+    
+    $priv(jlibname) send_message   
 }
 
 proc jlib::ibb::handle_set {jlibname from subiq args} {

@@ -16,6 +16,7 @@ Coccinella-0.95.0 (04????): 	Short summary --
 	- now automatically login after registration
 	- buddy pouncing as a component
 	- reworked incoming message dialog
+	- extra options for profiles now in tabbed notebook
 
 
 Coccinella-0.94.11 (040601): 	Short summary --
