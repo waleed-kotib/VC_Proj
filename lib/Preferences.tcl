@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.24 2003-12-22 15:04:58 matben Exp $
+# $Id: Preferences.tcl,v 1.25 2003-12-27 12:07:34 matben Exp $
  
 package require notebook
 package require tree
@@ -1174,15 +1174,26 @@ proc ::Preferences::Customization::PickFont { } {
     set fontS [option get . fontSmall {}]
     array set fontArr [font actual $fontS]
 
-    set opts [list -defaultfont $fontArr(-family)  \
-      -defaultsize $fontArr(-size)  \
-      -defaultweight $fontArr(-weight)  \
-      -initialfont [lindex $tmpJPrefs(chatFont) 0]  \
-      -initialsize [lindex $tmpJPrefs(chatFont) 1]  \
-      -initialweight [lindex $tmpJPrefs(chatFont) 2]]
+    if {[string length $tmpJPrefs(chatFont)]} {
+	set opts [list  \
+	  -defaultfont    "" \
+	  -defaultsize    "" \
+	  -defaultweight  "" \
+	  -initialfont [lindex $tmpJPrefs(chatFont) 0]  \
+	  -initialsize [lindex $tmpJPrefs(chatFont) 1]  \
+	  -initialweight [lindex $tmpJPrefs(chatFont) 2]]
+    } else {
+	set opts {-defaultfont "" -defaultsize "" -defaultweight  ""}
+    }
+    
+    # Default font is here {{} {} {}} which shall match an empty chatFont.
     set theFont [eval {::fontselection::fontselection .mnb} $opts]
     if {[llength $theFont]} {
-	set tmpJPrefs(chatFont) $theFont
+	if {[lindex $theFont 0] == ""} {
+	    set tmpJPrefs(chatFont) ""
+	} else {
+	    set tmpJPrefs(chatFont) $theFont
+	}
     }
 }
 

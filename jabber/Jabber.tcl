@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.44 2003-12-22 15:04:57 matben Exp $
+# $Id: Jabber.tcl,v 1.45 2003-12-27 12:07:33 matben Exp $
 #
 #  The $address is an ip name or number.
 #
@@ -336,8 +336,8 @@ proc ::Jabber::FactoryDefaults { } {
     
     set jprefs(logoutStatus) ""
     
-    #set jprefs(chatFont) [::Utils::GetFontListFromName $sysFont(s)]
-    set jprefs(chatFont) [option get . fontSmall {}]
+    # Empty here means use option database.
+    set jprefs(chatFont) ""
     set jprefs(useXDataSearch) 1
     
     # Service discovery method: "agents" or "browse"
@@ -588,7 +588,9 @@ proc ::Jabber::SetUserPreferences { } {
 	      $jprefs(iq:register,$key) userDefault]
 	}
 	::PreferencesUtils::Add $jprefsRegList
-	set jprefs(chatFont) [::Utils::GetFontListFromName $jprefs(chatFont)]
+	if {$jprefs(chatFont) != ""} {
+	    set jprefs(chatFont) [::Utils::GetFontListFromName $jprefs(chatFont)]
+	}
 }
 
 # Jabber::GetjprefsArray, GetjserverArray, ... --
