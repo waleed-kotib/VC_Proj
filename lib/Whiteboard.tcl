@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.14 2004-01-26 07:34:49 matben Exp $
+# $Id: Whiteboard.tcl,v 1.15 2004-01-29 08:09:39 matben Exp $
 
 package require entrycomp
 package require CanvasDraw
@@ -285,20 +285,20 @@ proc ::WB::InitMenuDefs { } {
     }
     set menuDefsMainFileP2P {
 	{command   mOpenConnection     {::UserActions::DoConnect}                 normal   O}
-	{command   mCloseWindow        {::UI::DoCloseWindow}             normal   W}
+	{command   mCloseWindow        {::UI::DoCloseWindow}                      normal   W}
 	{separator}
-	{command   mOpenImage/Movie    {::Import::ImportImageOrMovieDlg $wtop} normal  I}
+	{command   mOpenImage/Movie    {::Import::ImportImageOrMovieDlg $wtop}    normal  I}
 	{command   mOpenURLStream      {::OpenMulticast::OpenMulticast $wtop}     normal   {}}
 	{separator}
-	{command   mPutCanvas          {::CanvasCmd::DoPutCanvasDlg $wtop}      disabled {}}
-	{command   mGetCanvas          {::CanvasCmd::DoGetCanvas $wtop}         disabled {}}
+	{command   mPutCanvas          {::CanvasCmd::DoPutCanvasDlg $wtop}        disabled {}}
+	{command   mGetCanvas          {::CanvasCmd::DoGetCanvas $wtop}           disabled {}}
 	{command   mPutFile            {::PutFileIface::PutFileDlg $wtop}         disabled {}}
 	{command   mStopPut/Get/Open   {::CanvasCmd::CancelAllPutGetAndPendingOpen $wtop} normal {}}
 	{separator}
 	{command   mOpenCanvas         {::CanvasFile::DoOpenCanvasFile $wtop}     normal   {}}
 	{command   mSaveCanvas         {::CanvasFile::DoSaveCanvasFile $wtop}     normal   S}
 	{separator}
-	{command   mSaveAs             {::CanvasCmd::SavePostscript $wtop}      normal   {}}
+	{command   mSaveAs             {::CanvasCmd::SavePostscript $wtop}        normal   {}}
 	{command   mPageSetup          {::UserActions::PageSetup $wtop}           normal   {}}
 	{command   mPrintCanvas        {::UserActions::DoPrintCanvas $wtop}       normal   P}
 	{separator}
@@ -322,9 +322,9 @@ proc ::WB::InitMenuDefs { } {
 	{command     mUndo             {::CanvasCmd::Undo $wtop}             normal   Z}
 	{command     mRedo             {::CanvasCmd::Redo $wtop}             normal   {}}
 	{separator}
-	{command     mCut              {::UI::CutCopyPasteCmd cut}             disabled X}
-	{command     mCopy             {::UI::CutCopyPasteCmd copy}            disabled C}
-	{command     mPaste            {::UI::CutCopyPasteCmd paste}           disabled V}
+	{command     mCut              {::UI::CutCopyPasteCmd cut}           disabled X}
+	{command     mCopy             {::UI::CutCopyPasteCmd copy}          disabled C}
+	{command     mPaste            {::UI::CutCopyPasteCmd paste}         disabled V}
 	{command     mAll              {::CanvasCmd::SelectAll $wtop}        normal   A}
 	{command     mEraseAll         {::CanvasCmd::DoEraseAll $wtop}       normal   {}}
 	{separator}
@@ -783,6 +783,11 @@ proc ::WB::BuildWhiteboard {wtop args} {
     bind $w <FocusIn>  \
       [list [namespace current]::GetFocus $wtop %W]
     bind $wapp(can) <Button-1> [list focus $wapp(can)]
+    
+    # Cut, copy, paste commands for the canvas.
+    bind $wapp(can) <<Cut>>   [list ::CanvasCCP::CutCopyPasteCmd cut]
+    bind $wapp(can) <<Copy>>  [list ::CanvasCCP::CutCopyPasteCmd copy]
+    bind $wapp(can) <<Paste>> [list ::CanvasCCP::CutCopyPasteCmd paste]
     
     # Create the undo/redo object.
     set state(undotoken) [undo::new -command [list ::UI::UndoConfig $wtop]]
