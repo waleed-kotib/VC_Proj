@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasCutCopyPaste.tcl,v 1.4 2004-08-02 14:06:21 matben Exp $
+# $Id: CanvasCutCopyPaste.tcl,v 1.5 2004-08-10 13:03:51 matben Exp $
 
 package provide CanvasCutCopyPaste 1.0
 
@@ -105,6 +105,10 @@ proc ::CanvasCCP::CopySelectedToClipboard {w doWhat} {
 	clipboard append "}"
 	set clipToken "item"
     }
+    
+    # This was an attempt to do image garbage collection...
+    #selection handle -selection CLIPBOARD $w \
+    #  [list [namespace current]::SelectionHandle $w]
     #selection own -selection CLIPBOARD \
     #  -command [list [namespace current]::SelectionLost $w] $w
     ::WB::FixMenusWhenCopy $w
@@ -118,6 +122,17 @@ proc ::CanvasCCP::SelectionLost {w} {
     
     puts "_______::CanvasCCP::SelectionLost w=$w"
     
+}
+
+proc ::CanvasCCP::SelectionHandle {w offset maxbytes} {
+    puts "::CanvasCCP::SelectionHandle w=$w, offset=$offset, maxbytes=$maxbytes"
+    
+    if {[catch {selection get -sel CLIPBOARD} str]} {
+	puts "\t catch"
+	return "ERROR: $str"
+    }
+    puts "\t str=$str"
+    return [string range $str $offset [expr $offset + $maxbytes]]
 }
 
 # CanvasCCP::CopySingleItemToClipboard --
@@ -163,7 +178,6 @@ proc ::CanvasCCP::CopySingleItemToClipboard {w doWhat id} {
     if {0} {
 	set cmd [::CanvasUtils::GetOneLinerForAny $w $id -usehtmlsize 0 \
 	  -encodenewlines 0]
-	puts "\t  cmd=$cmd"
     }
     
     # Copy the canvas object to the clipboard.
@@ -175,7 +189,6 @@ proc ::CanvasCCP::CopySingleItemToClipboard {w doWhat id} {
 	    
 	    # There is currently a memory leak when images are cut!
 	    ::CanvasDraw::DeselectItem $w $id
-	    # ::CanvasDraw::DeleteItemOLD $w $id
 	    ::CanvasDraw::DeleteIds $w $id all -trashunusedimages 0
 	}
 	copy {
@@ -286,48 +299,69 @@ proc ::CanvasCCP::PasteFromClipboardToCanvas {w} {
 
 proc ::CanvasCCP::PasteSingleFromClipboardToCanvas {w cmd} {
     global  prefs
-
+    
     Debug 4 "PasteSingleFromClipboardToCanvas:: cmd=$cmd"
-
+    
     set wtop [::UI::GetToplevelNS $w]
     
-    # add new tags
-    set itemType [lindex $cmd 1]
-    set utag [::CanvasUtils::NewUtag]
-    set tags [list std $itemType $utag]
-    lappend cmd -tags $tags
-    
-    #set cmd [CanvasUtils::ReplaceUtag $cmd $utag]
-    
-    # make coordinate offset, first get coords
-    set ind1 [lsearch $cmd \[0-9.\]*]
-    set ind2 [expr [lsearch $cmd -*\[a-z\]*] - 1]
-    set theCoords [lrange $cmd $ind1 $ind2]
-    set cooOffset {}
-    foreach coo $theCoords {
-	lappend cooOffset [expr $coo + $prefs(offsetCopy)]
+    switch -- [lindex $cmd 0] {
+	import {
+	    set utag [::CanvasUtils::NewUtag]
+	    set cmd [CanvasUtils::ReplaceUtag $cmd $utag]
+	    set x [expr [lindex $cmd 1] + $prefs(offsetCopy)]
+	    set y [expr [lindex $cmd 2] + $prefs(offsetCopy)]
+	    set cmd [lreplace $cmd 1 2 $x $y]
+	    set cmd [::CanvasUtils::SkipStackingOptions $cmd]
+	    ::Import::HandleImportCmd $w $cmd
+	}
+	create {
+	    
+	    # add new tags
+	    set itemType [lindex $cmd 1]
+	    set utag [::CanvasUtils::NewUtag]
+	    set tags [list std $itemType $utag]
+	    lappend cmd -tags $tags
+	    
+	    # Take precaution if -image does not exist anymore.
+	    set ind [lsearch -exact $cmd -image]
+	    if {$ind >= 0} {
+		if {[catch {image inuse [lindex $cmd [incr ind]]}]} {
+		    return
+		}
+	    }
+	    #set cmd [CanvasUtils::ReplaceUtag $cmd $utag]
+	    
+	    # make coordinate offset, first get coords
+	    set ind1 [lsearch $cmd \[0-9.\]*]
+	    set ind2 [expr [lsearch $cmd -*\[a-z\]*] - 1]
+	    set theCoords [lrange $cmd $ind1 $ind2]
+	    set cooOffset {}
+	    foreach coo $theCoords {
+		lappend cooOffset [expr $coo + $prefs(offsetCopy)]
+	    }
+	    
+	    # paste back coordinates in cmd
+	    set newcmd [concat [lrange $cmd 0 [expr $ind1 - 1]] $cooOffset  \
+	      [lrange $cmd [expr $ind2 + 1] end]]
+	    set undocmd [list delete $utag]
+	    
+	    # Change font size from points to html size when sending it to clients.
+	    if {[string equal $itemType "text"]} {
+		set cmdremote [::CanvasUtils::FontHtmlToPointSize $newcmd 1]
+	    } else {
+		set cmdremote $newcmd
+	    }
+	    
+	    # Write to all other clients; need to make a one liner first.
+	    set nl_ {\\n}
+	    regsub -all "\n" $cmdremote $nl_ cmdremote
+	    set redo [list ::CanvasUtils::CommandExList $wtop  \
+	      [list [list $newcmd local] [list $cmdremote remote]]]
+	    set undo [list ::CanvasUtils::Command $wtop $undocmd]
+	    eval $redo
+	    undo::add [::WB::GetUndoToken $wtop] $undo $redo
+	}
     }
-    
-    # paste back coordinates in cmd
-    set newcmd [concat [lrange $cmd 0 [expr $ind1 - 1]] $cooOffset  \
-      [lrange $cmd [expr $ind2 + 1] end]]
-    set undocmd [list delete $utag]
-    
-    # Change font size from points to html size when sending it to clients.
-    if {[string equal $itemType "text"]} {
-	set cmdremote [::CanvasUtils::FontHtmlToPointSize $newcmd 1]
-    } else {
-	set cmdremote $newcmd
-    }
-    
-    # Write to all other clients; need to make a one liner first.
-    set nl_ {\\n}
-    regsub -all "\n" $cmdremote $nl_ cmdremote
-    set redo [list ::CanvasUtils::CommandExList $wtop  \
-      [list [list $newcmd local] [list $cmdremote remote]]]
-    set undo [list ::CanvasUtils::Command $wtop $undocmd]
-    eval $redo
-    undo::add [::WB::GetUndoToken $wtop] $undo $redo
     
     # Create new bbox and select item.
     ::CanvasDraw::MarkBbox $w 1 $utag

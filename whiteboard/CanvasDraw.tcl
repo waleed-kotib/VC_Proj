@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasDraw.tcl,v 1.7 2004-08-02 14:06:21 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.8 2004-08-10 13:03:51 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 #  
@@ -2399,99 +2399,6 @@ proc ::CanvasDraw::AddGarbageImages {name args} {
     variable itemImagesDeleted
 
     eval {lappend itemImagesDeleted $name} $args
-}
-
-# CanvasDraw::DeleteItemOLD --
-#
-#       Delete item in canvas. Notifies all other clients.
-#   
-# Arguments:
-#       w      the canvas widget.
-#       id     can be "current", "selected", or just an id number.
-#       where    "all": erase this canvas and all others.
-#                "remote": erase only client canvases.
-#                "local": erase only own canvas.
-#       
-# Results:
-#       none
-
-proc ::CanvasDraw::DeleteItemOLD {w {id current} {where all}} {
-
-    ::Debug 6 "DeleteItemOLD:: w=$w, id=$id, where=$where"
-
-    set wtop [::UI::GetToplevelNS $w]
-    
-    # List of canvas commands without widget path.
-    set cmdList {}
-    
-    # List of complete commands.
-    set redoCmdList {}
-    set undoCmdList {}
-    
-    set utagList {}
-    set needDeselect 0
-    
-    # Get item's utag in a list.
-    switch -- $id {
-	current {
-	    set utag [::CanvasUtils::GetUtag $w current]
-	    if {[string length $utag] > 0} {
-		lappend utagList $utag
-	    }
-	}
-	selected {
-	
-	    # First, get canvas objects with tag 'selected'.	
-	    foreach id [$w find withtag selected] {
-		set utag [::CanvasUtils::GetUtag $w $id]
-		if {[string length $utag] > 0} {
-		    lappend utagList $utag
-		}
-	    }
-	    set needDeselect 1
-	}
-	window {	    
-	    # Here we may have code to call custom handlers?	    
-	}
-	default {
-	
-	    # 'id' is an actual item number.
-	    set utag [::CanvasUtils::GetUtag $w $id]
-	    if {[string length $utag] > 0} {
-		lappend utagList $utag
-	    }
-	}
-    }
-    if {[llength $utagList] == 0} {
-	return
-    }
-    
-    foreach utag $utagList {
-	lappend cmdList [list delete $utag]
-	if {[string equal [$w type $utag] "window"]} {
-	    set win [$w itemcget $utag -window]
-	    lappend redoCmdList [list destroy $win]		
-	}
-	lappend undoCmdList [::CanvasUtils::GetUndoCommand $wtop  \
-	  [list delete $utag]]
-    }
-    if {[llength $cmdList] == 0} {
-	return
-    }
-    
-    # Manufacture complete commands.
-    set canRedo [list ::CanvasUtils::CommandList $wtop $cmdList $where]
-    set redo [list ::CanvasDraw::EvalCommandList  \
-      [concat [list $canRedo] $redoCmdList]]
-    set undo [list ::CanvasDraw::EvalCommandList $undoCmdList]
-
-    eval $redo
-    undo::add [::WB::GetUndoToken $wtop] $undo $redo
-    
-    # Remove select marks.
-    if {$needDeselect} {
-	::CanvasCmd::DeselectAll $wtop
-    }
 }
 
 # CanvasDraw::DeleteFrame --

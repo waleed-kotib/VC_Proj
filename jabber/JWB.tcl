@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.25 2004-08-07 13:34:22 matben Exp $
+# $Id: JWB.tcl,v 1.26 2004-08-10 13:03:51 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -55,8 +55,8 @@ proc ::Jabber::WB::Init {jlibName} {
     # Must be reconfigured when we know our address after connecting???
     set ip [::Network::GetThisPublicIPAddress]
     can2svg::config -uritype http -httpaddr ${ip}:$prefs(httpdPort) \
-      -httpbasedir $this(httpdRootPath) -ovalasellipse 1 -reusedefs 0 \
-      -filtertags [namespace current]::FilterTags
+      -httpbasedir $this(httpdRootPath) -ovalasellipse 1 -reusedefs 0
+    #  -filtertags [namespace current]::FilterTags
     
     # Register for the messages we want. Duplicate protocols.
     $jstate(jlib) message_register normal coccinella:wb  \

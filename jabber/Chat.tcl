@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.69 2004-07-30 12:55:53 matben Exp $
+# $Id: Chat.tcl,v 1.70 2004-08-10 13:03:51 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -740,7 +740,7 @@ proc ::Jabber::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
 	pack [button $wclose -text [mc {Close Thread}] \
 	  -command [list [namespace current]::CloseThread $chattoken] \
 	  -font $fontS] \
-	  -pady 0 -padx 2 -side right
+	  -pady 2 -padx 0 -side right
     }
     if {[llength $dlgstate(chattokens)] == 1} {
 	pack forget $wclose

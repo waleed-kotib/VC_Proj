@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.11 2004-08-06 12:52:25 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.12 2004-08-10 13:03:51 matben Exp $
 
 package require sha1pure
 
@@ -692,9 +692,14 @@ proc ::CanvasUtils::GetOneLinerForItem {w id args} {
 		    set val 1
 		}
 	    }
-	}
-	if {($op == "-font") && $argsArr(-usehtmlsize) && $prefs(useHtmlSizes)} {
-	    set val [lreplace $val 1 1 $fontPoints2Size([lindex $val 1])]
+	    -font {
+		if {$argsArr(-usehtmlsize) && $prefs(useHtmlSizes)} {
+		    set fsize [lindex $val 1]
+		    if {$fsize > 0} {
+			set val [lreplace $val 1 1 $fontPoints2Size($fsize)]
+		    }
+		}
+	    }
 	}
 	lappend opcmd $op $val
     }
@@ -1612,6 +1617,16 @@ proc ::CanvasUtils::GetStackingCmd {w utag} {
     return $cmd
 }
 
+proc ::CanvasUtils::SkipStackingOptions {cmd} {
+
+    foreach name {-above -below} {
+	if {[set ind [lsearch -exact $cmd $name]] != -1} {
+	    set cmd [lreplace $cmd $ind [expr $ind + 1]]
+	}
+    }
+    return $cmd
+}
+
 # CanvasUtils::UniqueImageName --
 #
 #       Uses the ip number to create a unique image name.
@@ -1674,7 +1689,7 @@ proc ::CanvasUtils::FindTypeFromOverlapping {c x y type} {
 proc ::CanvasUtils::FontHtmlToPointSize {canCmd {inverse 0}} {
     global  fontSize2Points fontPoints2Size
     
-    set ind [lsearch -exact $canCmd {-font}]
+    set ind [lsearch -exact $canCmd -font]
     if {$ind < 0} {
 	return $canCmd
     }
@@ -1852,10 +1867,18 @@ proc ::CanvasUtils::HandleCanvasDraw {wtop instr args} {
     # *before* it is deleted! See below for other commands.
     
     set cmd [lindex $instr 0]
-    if {[string equal $cmd "delete"]} {
-	set utag [lindex $instr 1]
-	set id [$wServCan find withtag $utag]
-	$wServCan delete id$id
+    
+    switch -- $cmd {
+	delete {
+	    set utag [lindex $instr 1]
+	    set id [$wServCan find withtag $utag]
+	    $wServCan delete id$id
+	    set type [$wServCan type $id]
+	    if {[string equal $type "window"]} {
+		set win [$wServCan itemcget -window]
+		catch {destroy $win}
+	    }
+	}
     }
     
     # Find and register the undo command (and redo), and push
