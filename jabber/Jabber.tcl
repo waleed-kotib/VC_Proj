@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.107 2004-09-27 12:57:37 matben Exp $
+# $Id: Jabber.tcl,v 1.108 2004-09-28 13:50:17 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -56,7 +56,7 @@ namespace eval ::Jabber:: {
     global  this prefs
     
     # Add all event hooks.
-    ::hooks::add quitAppHook        ::Jabber::EndSession
+    ::hooks::register quitAppHook        ::Jabber::EndSession
 
     # Jabber internal storage.
     variable jstate
@@ -692,7 +692,7 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 			set msg [mc jamessautoreject $from]
 		    }
 		    ask {
-			eval {::Jabber::Subscribe::Subscribe $from} $args
+			eval {::Jabber::Subscribe::NewDlg $from} $args
 		    }
 		}
 		if {$msg != ""} {
@@ -755,11 +755,11 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 	    # have sunscription='none'
 	    set sub [$jstate(roster) getsubscription $from]
 	    if {$sub == "none"} {
-		set msg "Failed making a subscription to $from."
+		set msg [mc jamessfailedsubsc $from]
 		if {[info exists attrArr(-status)]} {
 		    append msg " Status message: $attrArr(-status)"
 		}
-		tk_messageBox -title "Subscription Failed"  \
+		tk_messageBox -title [mc {Subscription Failed}]  \
 		  -icon info -type ok  \
 		  -message [FormatTextForMessageBox $msg]
 		if {$jprefs(rost,rmIfUnsub)} {

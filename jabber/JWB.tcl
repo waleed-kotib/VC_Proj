@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.35 2004-09-28 07:05:49 matben Exp $
+# $Id: JWB.tcl,v 1.36 2004-09-28 13:50:17 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -16,7 +16,7 @@ package provide JWB 1.0
 
 namespace eval ::Jabber::WB:: {
        
-    ::hooks::add jabberInitHook               ::Jabber::WB::Init
+    ::hooks::register jabberInitHook               ::Jabber::WB::Init
     
     # Internal storage for jabber specific parts of whiteboard.
     variable jwbstate
@@ -37,24 +37,24 @@ proc ::Jabber::WB::Init {jlibName} {
     
     ::Debug 4 "::Jabber::WB::Init"
     
-    ::hooks::add whiteboardNewHook            ::Jabber::WB::NewHook
-    ::hooks::add whiteboardBuildEntryHook     ::Jabber::WB::BuildEntryHook
-    ::hooks::add whiteboardSetMinsizeHook     ::Jabber::WB::SetMinsizeHook    
-    ::hooks::add whiteboardCloseHook          ::Jabber::WB::CloseHook        20
-    ::hooks::add whiteboardSendMessageHook    ::Jabber::WB::SendMessageListHook
-    ::hooks::add whiteboardSendGenMessageHook ::Jabber::WB::SendGenMessageListHook
-    ::hooks::add whiteboardPutFileHook        ::Jabber::WB::PutFileOrScheduleHook
-    ::hooks::add whiteboardConfigureHook      ::Jabber::WB::Configure
-    ::hooks::add serverPutRequestHook         ::Jabber::WB::HandlePutRequest
-    ::hooks::add presenceHook                 ::Jabber::WB::PresenceHook
+    ::hooks::register whiteboardNewHook            ::Jabber::WB::NewHook
+    ::hooks::register whiteboardBuildEntryHook     ::Jabber::WB::BuildEntryHook
+    ::hooks::register whiteboardSetMinsizeHook     ::Jabber::WB::SetMinsizeHook    
+    ::hooks::register whiteboardCloseHook          ::Jabber::WB::CloseHook        20
+    ::hooks::register whiteboardSendMessageHook    ::Jabber::WB::SendMessageListHook
+    ::hooks::register whiteboardSendGenMessageHook ::Jabber::WB::SendGenMessageListHook
+    ::hooks::register whiteboardPutFileHook        ::Jabber::WB::PutFileOrScheduleHook
+    ::hooks::register whiteboardConfigureHook      ::Jabber::WB::Configure
+    ::hooks::register serverPutRequestHook         ::Jabber::WB::HandlePutRequest
+    ::hooks::register presenceHook                 ::Jabber::WB::PresenceHook
 
     #       OUTDATED!!!
-    ::hooks::add autobrowsedCoccinellaHook    ::Jabber::WB::AutoBrowseHook
+    ::hooks::register autobrowsedCoccinellaHook    ::Jabber::WB::AutoBrowseHook
     
-    ::hooks::add loginHook                    ::Jabber::WB::LoginHook
-    ::hooks::add logoutHook                   ::Jabber::WB::LogoutHook
-    ::hooks::add groupchatEnterRoomHook       ::Jabber::WB::EnterRoomHook
-    ::hooks::add groupchatExitRoomHook        ::Jabber::WB::ExitRoomHook
+    ::hooks::register loginHook                    ::Jabber::WB::LoginHook
+    ::hooks::register logoutHook                   ::Jabber::WB::LogoutHook
+    ::hooks::register groupchatEnterRoomHook       ::Jabber::WB::EnterRoomHook
+    ::hooks::register groupchatExitRoomHook        ::Jabber::WB::ExitRoomHook
 
     # Configure the Tk->SVG translation to use http.
     # Must be reconfigured when we know our address after connecting???
@@ -1233,7 +1233,7 @@ proc ::Jabber::WB::GetRegisteredHandlers { } {
     variable handler
     
     array set handler [::WB::GetRegisteredHandlers]
-    ::hooks::add whiteboardRegisterHandlerHook  ::Jabber::WB::RegisterHandlerHook
+    ::hooks::register whiteboardRegisterHandlerHook  ::Jabber::WB::RegisterHandlerHook
 }
 
 proc ::Jabber::WB::RegisterHandlerHook {prefix cmd} {

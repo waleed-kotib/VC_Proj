@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.52 2004-09-18 14:43:28 matben Exp $
+# $Id: MailBox.tcl,v 1.53 2004-09-28 13:50:18 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -45,11 +45,11 @@ namespace eval ::Jabber::MailBox:: {
     option add *MailBox*wbIcon13Image         wbIcon13         widgetDefault
 
     # Add some hooks...
-    ::hooks::add initHook        ::Jabber::MailBox::Init
-    ::hooks::add newMessageHook  ::Jabber::MailBox::GotMsg
-    ::hooks::add closeWindowHook ::Jabber::MailBox::CloseHook
-    ::hooks::add jabberInitHook  ::Jabber::MailBox::InitHandler
-    ::hooks::add quitAppHook     ::Jabber::MailBox::Exit
+    ::hooks::register initHook        ::Jabber::MailBox::Init
+    ::hooks::register newMessageHook  ::Jabber::MailBox::GotMsg
+    ::hooks::register closeWindowHook ::Jabber::MailBox::CloseHook
+    ::hooks::register jabberInitHook  ::Jabber::MailBox::InitHandler
+    ::hooks::register quitAppHook     ::Jabber::MailBox::Exit
 
     variable locals
     
@@ -332,8 +332,8 @@ proc ::Jabber::MailBox::Build {args} {
     # Add all event hooks.
     if {!$locals(hooksInited)} {
 	set locals(hooksInited) 1
-	::hooks::add quitAppHook [list ::UI::SaveWinGeom $w]
-	::hooks::add quitAppHook [list ::UI::SavePanePos $w $locals(wfrmbox)]
+	::hooks::register quitAppHook [list ::UI::SaveWinGeom $w]
+	::hooks::register quitAppHook [list ::UI::SavePanePos $w $locals(wfrmbox)]
     }
     
     # Grab and focus.

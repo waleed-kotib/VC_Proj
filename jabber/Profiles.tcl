@@ -4,22 +4,22 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.30 2004-09-22 13:14:38 matben Exp $
+# $Id: Profiles.tcl,v 1.31 2004-09-28 13:50:18 matben Exp $
 
 package provide Profiles 1.0
 
 namespace eval ::Profiles:: {
     
     # Define all hooks that are needed.
-    ::hooks::add prefsInitHook          ::Profiles::InitHook
-    ::hooks::add prefsBuildHook         ::Profiles::BuildHook         20
-    ::hooks::add prefsUserDefaultsHook  ::Profiles::UserDefaultsHook
-    ::hooks::add prefsSaveHook          ::Profiles::SaveHook
-    ::hooks::add prefsCancelHook        ::Profiles::CancelHook
-    ::hooks::add prefsUserDefaultsHook  ::Profiles::UserDefaultsHook
+    ::hooks::register prefsInitHook          ::Profiles::InitHook
+    ::hooks::register prefsBuildHook         ::Profiles::BuildHook         20
+    ::hooks::register prefsUserDefaultsHook  ::Profiles::UserDefaultsHook
+    ::hooks::register prefsSaveHook          ::Profiles::SaveHook
+    ::hooks::register prefsCancelHook        ::Profiles::CancelHook
+    ::hooks::register prefsUserDefaultsHook  ::Profiles::UserDefaultsHook
     
-    ::hooks::add initHook               ::Profiles::ImportIfNecessary
-    ::hooks::add closeWindowHook        ::Profiles::CloseDlgHook
+    ::hooks::register initHook               ::Profiles::ImportIfNecessary
+    ::hooks::register closeWindowHook        ::Profiles::CloseDlgHook
     
     # Internal storage:
     #   {name1 {server1 username1 password1 ?-key value ...?} \

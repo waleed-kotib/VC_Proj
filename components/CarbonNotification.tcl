@@ -21,9 +21,9 @@ proc ::CarbonNotification::Init { } {
       "Provides the bouncing dock icon on Mac OS X."
 
     # Add event hooks.
-    ::hooks::add newMessageHook          [list [namespace current]::EventHook]
-    ::hooks::add newChatMessageHook      [list [namespace current]::EventHook]
-    ::hooks::add newChatThreadHook       [list [namespace current]::EventHook]
+    ::hooks::register newMessageHook          [list [namespace current]::EventHook]
+    ::hooks::register newChatMessageHook      [list [namespace current]::EventHook]
+    ::hooks::register newChatThreadHook       [list [namespace current]::EventHook]
 }
 
 proc ::CarbonNotification::EventHook {args} {    

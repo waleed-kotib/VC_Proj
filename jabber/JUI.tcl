@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.52 2004-09-22 13:14:38 matben Exp $
+# $Id: JUI.tcl,v 1.53 2004-09-28 13:50:17 matben Exp $
 
 package provide JUI 1.0
 
@@ -62,13 +62,13 @@ namespace eval ::Jabber::UI:: {
       activeTabOutline background style tabBackground tabColor tabOutline}
     
     # Add all event hooks.
-    ::hooks::add quitAppHook            ::Jabber::UI::QuitHook
-    ::hooks::add loginHook              ::Jabber::UI::LoginCmd
-    ::hooks::add closeWindowHook        ::Jabber::UI::CloseHook
-    ::hooks::add logoutHook             ::Jabber::UI::LogoutHook
-    ::hooks::add setPresenceHook        ::Jabber::UI::SetPresenceHook
-    ::hooks::add groupchatEnterRoomHook ::Jabber::UI::EnterRoomHook
-    ::hooks::add groupchatExitRoomHook  ::Jabber::UI::ExitRoomHook
+    ::hooks::register quitAppHook            ::Jabber::UI::QuitHook
+    ::hooks::register loginHook              ::Jabber::UI::LoginCmd
+    ::hooks::register closeWindowHook        ::Jabber::UI::CloseHook
+    ::hooks::register logoutHook             ::Jabber::UI::LogoutHook
+    ::hooks::register setPresenceHook        ::Jabber::UI::SetPresenceHook
+    ::hooks::register groupchatEnterRoomHook ::Jabber::UI::EnterRoomHook
+    ::hooks::register groupchatExitRoomHook  ::Jabber::UI::ExitRoomHook
 
     # Collection of useful and common widget paths.
     variable jwapp

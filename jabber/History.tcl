@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: History.tcl,v 1.3 2004-07-09 06:26:05 matben Exp $
+# $Id: History.tcl,v 1.4 2004-09-28 13:50:17 matben Exp $
 
 package require uriencode
 
@@ -14,7 +14,7 @@ package provide History 1.0
 namespace eval ::History:: {
     
     # Add all event hooks.
-    ::hooks::add closeWindowHook    ::History::CloseHook
+    ::hooks::register closeWindowHook    ::History::CloseHook
 
     variable uiddlg 1000
 }

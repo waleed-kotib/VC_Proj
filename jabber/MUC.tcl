@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.48 2004-09-24 12:14:14 matben Exp $
+# $Id: MUC.tcl,v 1.49 2004-09-28 13:50:18 matben Exp $
 
 package require entrycomp
 package require muc
@@ -16,8 +16,8 @@ package provide MUC 1.0
 
 namespace eval ::Jabber::MUC:: {
       
-    ::hooks::add jabberInitHook     ::Jabber::MUC::Init
-    ::hooks::add closeWindowHook    ::Jabber::MUC::EnterCloseHook
+    ::hooks::register jabberInitHook     ::Jabber::MUC::Init
+    ::hooks::register closeWindowHook    ::Jabber::MUC::EnterCloseHook
     
     # Local stuff
     variable dlguid 0
@@ -574,7 +574,7 @@ namespace eval ::Jabber::MUC:: {
     
     variable inviteuid 0
 
-    ::hooks::add closeWindowHook    ::Jabber::MUC::InviteCloseHook
+    ::hooks::register closeWindowHook    ::Jabber::MUC::InviteCloseHook
 }
 
 # Jabber::MUC::Invite --
@@ -756,7 +756,7 @@ proc ::Jabber::MUC::MUCMessage {jlibname xmlns args} {
 
 namespace eval ::Jabber::MUC:: {
     
-    ::hooks::add closeWindowHook    ::Jabber::MUC::InfoCloseHook
+    ::hooks::register closeWindowHook    ::Jabber::MUC::InfoCloseHook
 }
 
 # Jabber::MUC::BuildInfo --
@@ -1206,7 +1206,7 @@ proc ::Jabber::MUC::Ban {roomjid} {
 
 namespace eval ::Jabber::MUC:: {
     
-    ::hooks::add closeWindowHook    ::Jabber::MUC::EditListCloseHook
+    ::hooks::register closeWindowHook    ::Jabber::MUC::EditListCloseHook
 }
 
 # Jabber::MUC::EditListBuild --
@@ -1708,7 +1708,7 @@ proc ::Jabber::MUC::EditListSet {roomjid} {
 
 namespace eval ::Jabber::MUC:: {
     
-    ::hooks::add closeWindowHook    ::Jabber::MUC::RoomConfigCloseHook
+    ::hooks::register closeWindowHook    ::Jabber::MUC::RoomConfigCloseHook
 }
 
 proc ::Jabber::MUC::RoomConfig {roomjid} {
@@ -1864,7 +1864,7 @@ proc ::Jabber::MUC::SetNick {roomjid} {
 
 namespace eval ::Jabber::MUC:: {
     
-    ::hooks::add closeWindowHook    ::Jabber::MUC::DestroyCloseHook
+    ::hooks::register closeWindowHook    ::Jabber::MUC::DestroyCloseHook
 }
 
 proc ::Jabber::MUC::Destroy {roomjid} {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.45 2004-09-24 12:14:14 matben Exp $
+# $Id: Login.tcl,v 1.46 2004-09-28 13:50:18 matben Exp $
 
 package provide Login 1.0
 
@@ -20,8 +20,8 @@ namespace eval ::Jabber::Login:: {
     set uid 0
     
     # Add all event hooks.
-    ::hooks::add quitAppHook     [list ::UI::SaveWinGeom $wDlgs(jlogin)]
-    ::hooks::add closeWindowHook ::Jabber::Login::CloseHook
+    ::hooks::register quitAppHook     [list ::UI::SaveWinGeom $wDlgs(jlogin)]
+    ::hooks::register closeWindowHook ::Jabber::Login::CloseHook
 }
 
 # Jabber::Login::Dlg --

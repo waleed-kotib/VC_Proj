@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-#       $Id: SlideShow.tcl,v 1.8 2004-08-30 07:46:08 matben Exp $
+#       $Id: SlideShow.tcl,v 1.9 2004-09-28 13:50:17 matben Exp $
 
 namespace eval ::SlideShow:: {
     
@@ -27,15 +27,15 @@ proc ::SlideShow::Load { } {
     }
 
     # Define all hooks needed here.
-    ::hooks::add prefsInitHook                  ::SlideShow::InitPrefsHook
-    ::hooks::add prefsBuildHook                 ::SlideShow::BuildPrefsHook
-    ::hooks::add prefsSaveHook                  ::SlideShow::SavePrefsHook
-    ::hooks::add prefsCancelHook                ::SlideShow::CancelPrefsHook
-    ::hooks::add prefsUserDefaultsHook          ::SlideShow::UserDefaultsHook
+    ::hooks::register prefsInitHook                  ::SlideShow::InitPrefsHook
+    ::hooks::register prefsBuildHook                 ::SlideShow::BuildPrefsHook
+    ::hooks::register prefsSaveHook                  ::SlideShow::SavePrefsHook
+    ::hooks::register prefsCancelHook                ::SlideShow::CancelPrefsHook
+    ::hooks::register prefsUserDefaultsHook          ::SlideShow::UserDefaultsHook
 
-    ::hooks::add initHook                       ::SlideShow::InitHook
-    ::hooks::add whiteboardBuildButtonTrayHook  ::SlideShow::BuildButtonsHook
-    ::hooks::add whiteboardCloseHook            ::SlideShow::CloseHook
+    ::hooks::register initHook                       ::SlideShow::InitHook
+    ::hooks::register whiteboardBuildButtonTrayHook  ::SlideShow::BuildButtonsHook
+    ::hooks::register whiteboardCloseHook            ::SlideShow::CloseHook
 
     ::UI::Public::RegisterMenuEntry file $menuspec
     

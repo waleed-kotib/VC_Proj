@@ -5,18 +5,18 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.13 2004-08-18 12:08:58 matben Exp $
+# $Id: JPrefs.tcl,v 1.14 2004-09-28 13:50:17 matben Exp $
 
 package provide JPrefs 1.0
 
 namespace eval ::Jabber::JPrefs:: {
     
     # Define all hooks for preference settings.
-    ::hooks::add prefsInitHook          ::Jabber::JPrefs::InitPrefsHook
-    ::hooks::add prefsBuildHook         ::Jabber::JPrefs::BuildPrefsHook
-    ::hooks::add prefsSaveHook          ::Jabber::JPrefs::SavePrefsHook
-    ::hooks::add prefsCancelHook        ::Jabber::JPrefs::CancelPrefsHook
-    ::hooks::add prefsUserDefaultsHook  ::Jabber::JPrefs::UserDefaultsHook
+    ::hooks::register prefsInitHook          ::Jabber::JPrefs::InitPrefsHook
+    ::hooks::register prefsBuildHook         ::Jabber::JPrefs::BuildPrefsHook
+    ::hooks::register prefsSaveHook          ::Jabber::JPrefs::SavePrefsHook
+    ::hooks::register prefsCancelHook        ::Jabber::JPrefs::CancelPrefsHook
+    ::hooks::register prefsUserDefaultsHook  ::Jabber::JPrefs::UserDefaultsHook
 }
 
 

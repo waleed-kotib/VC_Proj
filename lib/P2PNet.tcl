@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: P2PNet.tcl,v 1.3 2004-07-30 12:55:55 matben Exp $
+# $Id: P2PNet.tcl,v 1.4 2004-09-28 13:50:19 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -66,8 +66,8 @@ proc ::P2PNet::Init { } {
     ::Debug 2 "::P2PNet::Init"
     
     # Register the hooks we want.
-    ::hooks::add serverNewConnectionHook        ::P2PNet::NewConnectHook
-    ::hooks::add serverEofHook                  ::P2PNet::EofHook
+    ::hooks::register serverNewConnectionHook        ::P2PNet::NewConnectHook
+    ::hooks::register serverEofHook                  ::P2PNet::EofHook
    
 }
 

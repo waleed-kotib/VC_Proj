@@ -5,16 +5,16 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.29 2004-09-28 07:05:49 matben Exp $
+# $Id: Disco.tcl,v 1.30 2004-09-28 13:50:17 matben Exp $
 
 package provide Disco 1.0
 
 namespace eval ::Jabber::Disco:: {
 
-    ::hooks::add jabberInitHook     ::Jabber::Disco::NewJlibHook
-    ::hooks::add loginHook          ::Jabber::Disco::LoginHook
-    ::hooks::add logoutHook         ::Jabber::Disco::LogoutHook
-    ::hooks::add presenceHook       ::Jabber::Disco::PresenceHook
+    ::hooks::register jabberInitHook     ::Jabber::Disco::NewJlibHook
+    ::hooks::register loginHook          ::Jabber::Disco::LoginHook
+    ::hooks::register logoutHook         ::Jabber::Disco::LogoutHook
+    ::hooks::register presenceHook       ::Jabber::Disco::PresenceHook
 
     # Common xml namespaces.
     variable xmlns

@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Speech.tcl,v 1.3 2004-09-02 13:59:38 matben Exp $
+# $Id: Speech.tcl,v 1.4 2004-09-28 13:50:17 matben Exp $
 
 namespace eval ::Speech:: { }
 
@@ -57,17 +57,17 @@ proc ::Speech::Init { } {
     ::Debug 2 "::Speech::Init"
 
     # Hooks to run when message displayed to user.
-    ::hooks::add displayMessageHook          [list ::Speech::SpeakMessage normal]
-    ::hooks::add displayChatMessageHook      [list ::Speech::SpeakMessage chat]
-    ::hooks::add displayGroupChatMessageHook [list ::Speech::SpeakMessage groupchat]
-    ::hooks::add whiteboardTextInsertHook    ::Speech::SpeakWBText
+    ::hooks::register displayMessageHook          [list ::Speech::SpeakMessage normal]
+    ::hooks::register displayChatMessageHook      [list ::Speech::SpeakMessage chat]
+    ::hooks::register displayGroupChatMessageHook [list ::Speech::SpeakMessage groupchat]
+    ::hooks::register whiteboardTextInsertHook    ::Speech::SpeakWBText
 
     # Define all hooks for preference settings.
-    ::hooks::add prefsInitHook          ::Speech::InitPrefsHook
-    ::hooks::add prefsBuildHook         ::Speech::BuildPrefsHook
-    ::hooks::add prefsSaveHook          ::Speech::SavePrefsHook
-    ::hooks::add prefsCancelHook        ::Speech::CancelPrefsHook
-    ::hooks::add prefsUserDefaultsHook  ::Speech::UserDefaultsPrefsHook
+    ::hooks::register prefsInitHook          ::Speech::InitPrefsHook
+    ::hooks::register prefsBuildHook         ::Speech::BuildPrefsHook
+    ::hooks::register prefsSaveHook          ::Speech::SavePrefsHook
+    ::hooks::register prefsCancelHook        ::Speech::CancelPrefsHook
+    ::hooks::register prefsUserDefaultsHook  ::Speech::UserDefaultsPrefsHook
 }
 
 # Speech::Verify --

@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.84 2004-09-22 13:14:38 matben Exp $
+# $Id: Coccinella.tcl,v 1.85 2004-09-28 13:50:16 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -706,7 +706,7 @@ if {($prefs(protocol) != "client") && $prefs(haveHttpd)} {
     } else {
 	
 	# Stop before quitting.
-	::hooks::add quitAppHook ::tinyhttpd::stop
+	::hooks::register quitAppHook ::tinyhttpd::stop
     }
 }
 

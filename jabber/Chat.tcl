@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.75 2004-09-28 07:05:49 matben Exp $
+# $Id: Chat.tcl,v 1.76 2004-09-28 13:50:17 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -17,21 +17,21 @@ namespace eval ::Jabber::Chat:: {
     global  wDlgs
     
     # Add all event hooks.
-    ::hooks::add quitAppHook                ::Jabber::Chat::QuitHook
-    ::hooks::add newChatMessageHook         ::Jabber::Chat::GotMsg
-    ::hooks::add newMessageHook             ::Jabber::Chat::GotNormalMsg
-    ::hooks::add presenceHook               ::Jabber::Chat::PresenceHook
-    ::hooks::add closeWindowHook            ::Jabber::Chat::CloseHook
-    ::hooks::add closeWindowHook            ::Jabber::Chat::CloseHistoryHook
-    ::hooks::add loginHook                  ::Jabber::Chat::LoginHook
-    ::hooks::add logoutHook                 ::Jabber::Chat::LogoutHook
+    ::hooks::register quitAppHook                ::Jabber::Chat::QuitHook
+    ::hooks::register newChatMessageHook         ::Jabber::Chat::GotMsg
+    ::hooks::register newMessageHook             ::Jabber::Chat::GotNormalMsg
+    ::hooks::register presenceHook               ::Jabber::Chat::PresenceHook
+    ::hooks::register closeWindowHook            ::Jabber::Chat::CloseHook
+    ::hooks::register closeWindowHook            ::Jabber::Chat::CloseHistoryHook
+    ::hooks::register loginHook                  ::Jabber::Chat::LoginHook
+    ::hooks::register logoutHook                 ::Jabber::Chat::LogoutHook
 
     # Define all hooks for preference settings.
-    ::hooks::add prefsInitHook          ::Jabber::Chat::InitPrefsHook
-    ::hooks::add prefsBuildHook         ::Jabber::Chat::BuildPrefsHook
-    ::hooks::add prefsSaveHook          ::Jabber::Chat::SavePrefsHook
-    ::hooks::add prefsCancelHook        ::Jabber::Chat::CancelPrefsHook
-    ::hooks::add prefsUserDefaultsHook  ::Jabber::Chat::UserDefaultsHook
+    ::hooks::register prefsInitHook          ::Jabber::Chat::InitPrefsHook
+    ::hooks::register prefsBuildHook         ::Jabber::Chat::BuildPrefsHook
+    ::hooks::register prefsSaveHook          ::Jabber::Chat::SavePrefsHook
+    ::hooks::register prefsCancelHook        ::Jabber::Chat::CancelPrefsHook
+    ::hooks::register prefsUserDefaultsHook  ::Jabber::Chat::UserDefaultsHook
 
     # Use option database for customization. 
     # These are nonstandard option valaues and we may therefore keep priority

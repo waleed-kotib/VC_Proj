@@ -5,14 +5,14 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.36 2004-09-24 12:14:14 matben Exp $
+# $Id: OOB.tcl,v 1.37 2004-09-28 13:50:18 matben Exp $
 
 package provide OOB 1.0
 
 namespace eval ::Jabber::OOB:: {
 
-    ::hooks::add initHook            ::Jabber::OOB::InitHook    
-    ::hooks::add jabberInitHook      ::Jabber::OOB::InitJabberHook
+    ::hooks::register initHook            ::Jabber::OOB::InitHook    
+    ::hooks::register jabberInitHook      ::Jabber::OOB::InitJabberHook
 
     variable locals
     set locals(initialLocalDir) [pwd]

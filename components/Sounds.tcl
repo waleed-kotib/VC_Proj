@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Sounds.tcl,v 1.2 2004-07-30 12:55:53 matben Exp $
+# $Id: Sounds.tcl,v 1.3 2004-09-28 13:50:17 matben Exp $
 
 namespace eval ::Sounds:: {
         
@@ -79,22 +79,22 @@ proc ::Sounds::Load { } {
 proc ::Sounds::InitEventHooks { } {
     
     # Add all event hooks.
-    ::hooks::add quitAppHook             ::Sounds::Free 80
-    ::hooks::add newMessageHook          [list ::Sounds::Msg normal newmsg]
-    ::hooks::add newChatMessageHook      [list ::Sounds::Msg chat newchatmsg]
-    ::hooks::add newGroupChatMessageHook [list ::Sounds::Msg groupchat newmsg]
-    ::hooks::add newChatThreadHook       [list ::Sounds::Event newchatthread]
-    ::hooks::add loginHook               [list ::Sounds::Event connected]
-    ::hooks::add presenceHook            ::Sounds::Presence
+    ::hooks::register quitAppHook             ::Sounds::Free 80
+    ::hooks::register newMessageHook          [list ::Sounds::Msg normal newmsg]
+    ::hooks::register newChatMessageHook      [list ::Sounds::Msg chat newchatmsg]
+    ::hooks::register newGroupChatMessageHook [list ::Sounds::Msg groupchat newmsg]
+    ::hooks::register newChatThreadHook       [list ::Sounds::Event newchatthread]
+    ::hooks::register loginHook               [list ::Sounds::Event connected]
+    ::hooks::register presenceHook            ::Sounds::Presence
 
     # Define all hooks for preference settings.
-    ::hooks::add prefsInitHook          ::Sounds::InitPrefsHook
-    ::hooks::add prefsBuildHook         ::Sounds::BuildPrefsHook
-    ::hooks::add prefsSaveHook          ::Sounds::SavePrefsHook
-    ::hooks::add prefsCancelHook        ::Sounds::CancelPrefsHook
-    ::hooks::add prefsUserDefaultsHook  ::Sounds::UserDefaultsHook
+    ::hooks::register prefsInitHook          ::Sounds::InitPrefsHook
+    ::hooks::register prefsBuildHook         ::Sounds::BuildPrefsHook
+    ::hooks::register prefsSaveHook          ::Sounds::SavePrefsHook
+    ::hooks::register prefsCancelHook        ::Sounds::CancelPrefsHook
+    ::hooks::register prefsUserDefaultsHook  ::Sounds::UserDefaultsHook
 
-    ::hooks::add launchFinalHook        ::Sounds::InitHook
+    ::hooks::register launchFinalHook        ::Sounds::InitHook
 }
 
 proc ::Sounds::InitHook { } {

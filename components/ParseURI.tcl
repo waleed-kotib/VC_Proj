@@ -4,7 +4,7 @@
 #       typically from an anchor element <a href='xmpp:jid[?query]'/>
 #       in a html page.
 # 
-# $Id: ParseURI.tcl,v 1.9 2004-08-28 07:00:07 matben Exp $
+# $Id: ParseURI.tcl,v 1.10 2004-09-28 13:50:17 matben Exp $
 
 package require uriencode
 
@@ -17,8 +17,8 @@ proc ::ParseURI::Init { } {
 
     ::Debug 2 "::ParseURI::Init"
     
-    ::hooks::add launchFinalHook ::ParseURI::Parse
-    ::hooks::add relaunchHook    ::ParseURI::RelaunchHook
+    ::hooks::register launchFinalHook ::ParseURI::Parse
+    ::hooks::register relaunchHook    ::ParseURI::RelaunchHook
     
     component::register ParseURI  \
       {Any command line -uri xmpp:jid[?query] is parsed and processed.}
@@ -246,8 +246,8 @@ proc ::ParseURI::DoGroupchat {token} {
     } else {    
 	
 	# These must be one shot hooks.
-	::hooks::add browseSetHook  $state(browsecmd)
-	::hooks::add discoInfoHook  $state(discocmd)
+	::hooks::register browseSetHook  $state(browsecmd)
+	::hooks::register discoInfoHook  $state(discocmd)
     }
 }
 
@@ -276,8 +276,8 @@ proc ::ParseURI::HandleGroupchat {token} {
     variable $token
     upvar 0 $token state
     
-    ::hooks::remove  browseSetHook  $state(browsecmd)
-    ::hooks::remove  discoInfoHook  $state(discocmd)
+    ::hooks::deregister  browseSetHook  $state(browsecmd)
+    ::hooks::deregister  discoInfoHook  $state(discocmd)
     
     # We brutaly assumes muc room here.
     ::Jabber::MUC::EnterRoom $state(jid) $state(query,nick) \

@@ -80,6 +80,7 @@
 ::msgcat::mcset de OK		OK
 ::msgcat::mcset de Online	Angemeldet
 ::msgcat::mcset de Open		Öffnen
+#::msgcat::mcset en Options
 ::msgcat::mcset de Password	Passwort
 ::msgcat::mcset de Pick		Auswählen
 ::msgcat::mcset de Phone	Telefon
@@ -289,8 +290,8 @@
 ::msgcat::mcset de mLocalTime     	{Lokale Zeit...}
 ::msgcat::mcset de mSendFile     	{Datei senden...}
 ::msgcat::mcset de mChatHistory     	{Chat-Verlauf}
-::msgcat::mcset en mLoginTrpt     	{Login To Transport}
-::msgcat::mcset en mLogoutTrpt     	{Logout From Transport}
+#::msgcat::mcset en mLoginTrpt     	{Login To Transport}
+#::msgcat::mcset en mLogoutTrpt     	{Logout From Transport}
 
 
 
@@ -468,6 +469,7 @@
 ::msgcat::mcset de {Start Chat}           {Start Chat}
 ::msgcat::mcset de {Status message}       {Status-Nachricht}
 ::msgcat::mcset de {Status when logging out}  {Status bei Abmeldung}
+#::msgcat::mcset en {Subscription Failed}
 ::msgcat::mcset de {Subscription Pending} {Zulassung anhängig}
 ::msgcat::mcset de {Synthetic speech}     {Künstliche Sprache}
 ::msgcat::mcset de {System fonts}         {System-Schriften}
@@ -708,9 +710,9 @@ Raumnamen. Dann wählen Sie "Abruf" für die Einzelheiten zum Betreten des\
 Raums, da jeder Raum und Server verschiedene Erfordernisse haben kann.}
 	::msgcat::mcset de jamesssavemsg	{Soll diese Nachricht vor\
 dem Schliessen gespeichert werden?}
-	::msgcat::mcset de jamessskipsendq	{Die Adresse \"%s\" ist ungültig.\
+	::msgcat::mcset de jamessskipsendq	{Die Adresse "%s" ist ungültig.\
 Überspringen und den Rest senden?}
-	::msgcat::mcset de jamessillformresend	{Die Adresse \"%s\" ist ungültig.\
+	::msgcat::mcset de jamessillformresend	{Die Adresse "%s" ist ungültig.\
 Bitte korrigieren und erneut senden.}
 	::msgcat::mcset de jamesslogin409	{Abbruch der Anmeldung mit dem Fehlercode\
 %s, weil dieser Benutzername bereits von einen anderen Benutzer verwendet wird.\
@@ -736,8 +738,9 @@ weil dieser Benutzername bereits von jemand benutzt wird. Wenn Sie dieser Benutz
 melden Sie sich an. Fehlernachricht: %s}
 ::msgcat::mcset de jamessregerr                 {Fehler bei Registrierung\
 mit Fehlernachricht: %s}
-::msgcat::mcset en jamesstrptsubsc              {Your registered account with the %s\
-service will be put in your roster to work as a transport with this service.}
+#::msgcat::mcset en jamesstrptsubsc              {Your registered account with the %s\
+#service will be put in your roster to work as a transport with this service.}
+#::msgcat::mcset en jamessfailedsubsc            {Failed to make a subscription to %s. The user denied the subscription.}
 
 
 
@@ -863,10 +866,10 @@ wird über die Benutzereinstellungen begrenzt.}
 ::msgcat::mcset de prefplugctrl  {Sie können jedes dieser Pakete deselektieren,\
 wenn es nicht geladen werden soll. Es ist ein Neustart erforderlich.}
 ::msgcat::mcset de prefchactret  {<Return> im Chat-Dialog immer aktiv}
-::msgcat::mcset en prefchnormal  {Treat normal messages as chat messages}
+#::msgcat::mcset en prefchnormal  {Treat normal messages as chat messages}
 ::msgcat::mcset de prefprofname  {Namen des gewünschten Profils eingeben}
 ::msgcat::mcset de prefstabui    {Tab-Oberfläche benutzen}
-::msgcat::mcset en prefsusesasl  {Use SASL authentization method}
+#::msgcat::mcset en prefsusesasl  {Use SASL authentization method}
 
 
 
@@ -940,7 +943,7 @@ verfügbar.}
 	::msgcat::mcset de jaupdatenewver {Die neue Version ist: %s}
 	::msgcat::mcset de jaupdateremind {Bitte nicht mehr daran erinnern}
 	::msgcat::mcset de jasettopic   {Neues Thema für diesen Gruppen-Chat setzen.}
-	::msgcat::mcset de jadirpresmsg {Spezielle Anwesenheit an Benutzer \"%s\" senden.}
+	::msgcat::mcset de jadirpresmsg {Spezielle Anwesenheit an Benutzer "%s" senden.}
 
 
 }

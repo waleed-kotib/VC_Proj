@@ -80,6 +80,7 @@
 ::msgcat::mcset nl OK			{OK}
 ::msgcat::mcset nl Online		{Online}
 ::msgcat::mcset nl Open			{Openen}
+#::msgcat::mcset en Options
 ::msgcat::mcset nl Password		{Wachtwoord}
 ::msgcat::mcset nl Pick			{Kies}
 ::msgcat::mcset nl Phone		{Telefoon}
@@ -289,8 +290,8 @@
 ::msgcat::mcset nl mLocalTime     	{Lokale tijd...}
 ::msgcat::mcset nl mSendFile     	{Bestand verzenden...}
 ::msgcat::mcset nl mChatHistory     	{Berichtengeschiedenis}
-::msgcat::mcset en mLoginTrpt     	{Login To Transport}
-::msgcat::mcset en mLogoutTrpt     	{Logout From Transport}
+#::msgcat::mcset en mLoginTrpt     	{Login To Transport}
+#::msgcat::mcset en mLogoutTrpt     	{Logout From Transport}
 
 
 
@@ -468,6 +469,7 @@
 ::msgcat::mcset nl {Start Chat}			{Chat starten}
 ::msgcat::mcset nl {Status message}		{Statusbericht}
 ::msgcat::mcset nl {Status when logging out}	{Status bij afmelden}
+#::msgcat::mcset en {Subscription Failed}
 ::msgcat::mcset nl {Subscription Pending}	{Wachtend op authorizatie}
 ::msgcat::mcset nl {Synthetic speech}		{Synthetische spraak}
 ::msgcat::mcset nl {System fonts}		{Systeemlettertypes}
@@ -705,9 +707,9 @@ voordat u een kamer betreedt.}
 een kamernaam. Druk daarna op "Downloaden" om de toegangsspecificatie af te halen van\
 de gewenste kamer (elke kamer & server kan verschillende benodigdheden hebben).}
 	::msgcat::mcset nl jamesssavemsg	{Wilt u dit bericht opslaan?}
-	::msgcat::mcset nl jamessskipsendq	{Adres \"%s\" is niet correct.\
+	::msgcat::mcset nl jamessskipsendq	{Adres "%s" is niet correct.\
 Wilt u het overslaan en verzenden naar de anderen?}
-	::msgcat::mcset nl jamessillformresend	{Adres \"%s\" is niet correct.\
+	::msgcat::mcset nl jamessillformresend	{Adres "%s" is niet correct.\
 Corrigeer het en verzend het daarna opnieuw.}
 	::msgcat::mcset nl jamesslogin409	{Aanmelden mislukte met foutcode\
 %s omdat deze gebruikersnaam reeds in gebruik is door iemand anders.\
@@ -734,8 +736,9 @@ omdat deze gebruikersnaam reeds in gebruik is door een andere gebruiker. Als u d
 probeer dan opnieuw aan te melden. Foutmelding: %s}
 ::msgcat::mcset nl jamessregerr                 {De registratie mislukte\
 met foutmelding: %s}
-::msgcat::mcset en jamesstrptsubsc              {Your registered account with the %s\
-service will be put in your roster to work as a transport with this service.}
+#::msgcat::mcset en jamesstrptsubsc              {Your registered account with the %s\
+#service will be put in your roster to work as a transport with this service.}
+#::msgcat::mcset en jamessfailedsubsc            {Failed to make a subscription to %s. The user denied the subscription.}
 
     
 
@@ -860,10 +863,10 @@ wordt gelimiteerd door de instellingen hieronder.}
 ::msgcat::mcset nl prefplugctrl  {U kan elk pakket deselecteren waarvan u\
 het laden wilt verhinderen. U moet Coccinella herstarten voordat de wijzigingen worden doorgevoerd.}
 ::msgcat::mcset nl prefchactret  {Altijd actieve <enter> in chatvenster gebruiken}
-::msgcat::mcset en prefchnormal  {Treat normal messages as chat messages}
+#::msgcat::mcset en prefchnormal  {Treat normal messages as chat messages}
 ::msgcat::mcset nl prefprofname  {Voer de gewenste naam voor het gebruikersprofiel in}
 ::msgcat::mcset nl prefstabui    {Laptopinterface met tabbladen aanzetten}
-::msgcat::mcset en prefsusesasl  {Use SASL authentization method}
+#::msgcat::mcset en prefsusesasl  {Use SASL authentization method}
 
 
 
@@ -936,7 +939,7 @@ wilt toevoegen aan de lijst met services (bv: "jabber.org").}
 	::msgcat::mcset nl jaupdatenewver {De nieuwe versie is: %s}
 	::msgcat::mcset nl jaupdateremind {Deze boodschap niet meer tonen}
 	::msgcat::mcset nl jasettopic   {Nieuw onderwerp instellen voor deze kamer.}
-	::msgcat::mcset nl jadirpresmsg {Voorgeschreven status verzenden naar gebruiker \"%s\".}
+	::msgcat::mcset nl jadirpresmsg {Voorgeschreven status verzenden naar gebruiker "%s".}
 
 
 }

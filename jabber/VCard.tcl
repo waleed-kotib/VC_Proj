@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: VCard.tcl,v 1.22 2004-07-09 06:26:06 matben Exp $
+# $Id: VCard.tcl,v 1.23 2004-09-28 13:50:19 matben Exp $
 
 package provide VCard 1.0
 
@@ -15,7 +15,7 @@ package require mactabnotebook
 namespace eval ::VCard::  {
         
     # Add all event hooks.
-    ::hooks::add closeWindowHook    ::VCard::CloseHook
+    ::hooks::register closeWindowHook    ::VCard::CloseHook
 
     variable uid 0
 }
@@ -55,6 +55,8 @@ proc ::VCard::Fetch {type {jid {}}} {
 #       This is our callback from the 'vcard_get' procedure.
 
 proc ::VCard::FetchCallback {nstoken jlibName result theQuery} {
+    
+    ::Debug 4 "::VCard::FetchCallback"
     
     if {$result == "error"} {
 	set errmsg "([lindex $theQuery 0]) [lindex $theQuery 1]"
@@ -151,6 +153,8 @@ proc ::VCard::Build {nstoken} {
     
     upvar ${nstoken}::elem elem
     upvar ${nstoken}::priv priv
+    
+    ::Debug 4 "::VCard::Build"
 
     set anyChange 0
     set w    $priv(w)

@@ -4,7 +4,7 @@
 #       This is just a first sketch.
 #       TODO: all message translations.
 #       
-# $Id: BuddyPounce.tcl,v 1.2 2004-09-22 13:14:38 matben Exp $
+# $Id: BuddyPounce.tcl,v 1.3 2004-09-28 13:50:17 matben Exp $
 
 namespace eval ::BuddyPounce:: {
     
@@ -19,13 +19,13 @@ proc ::BuddyPounce::Init { } {
       [list {Buddy Pouncing} user {::BuddyPounce::Build $jid}]
     
     # Add all hooks we need.
-    ::hooks::add quitAppHook              ::BuddyPounce::QuitHook
-    ::hooks::add newMessageHook           ::BuddyPounce::NewMsgHook
-    ::hooks::add newChatMessageHook       ::BuddyPounce::NewChatMsgHook
-    ::hooks::add presenceUnavailableHook  ::BuddyPounce::PresenceUnavailableHook    
-    ::hooks::add presenceDelayHook        ::BuddyPounce::PresenceHook    
-    ::hooks::add prefsInitHook            ::BuddyPounce::InitPrefsHook
-    ::hooks::add closeWindowHook          ::BuddyPounce::CloseHook
+    ::hooks::register quitAppHook              ::BuddyPounce::QuitHook
+    ::hooks::register newMessageHook           ::BuddyPounce::NewMsgHook
+    ::hooks::register newChatMessageHook       ::BuddyPounce::NewChatMsgHook
+    ::hooks::register presenceUnavailableHook  ::BuddyPounce::PresenceUnavailableHook    
+    ::hooks::register presenceDelayHook        ::BuddyPounce::PresenceHook    
+    ::hooks::register prefsInitHook            ::BuddyPounce::InitPrefsHook
+    ::hooks::register closeWindowHook          ::BuddyPounce::CloseHook
     
     # Register popmenu entry.
     ::Jabber::UI::RegisterPopupEntry roster $popMenuSpec
