@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.64 2004-06-22 14:21:17 matben Exp $
+# $Id: Chat.tcl,v 1.65 2004-06-23 07:53:38 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -19,8 +19,7 @@ namespace eval ::Jabber::Chat:: {
     # Add all event hooks.
     ::hooks::add quitAppHook                ::Jabber::Chat::QuitHook
     ::hooks::add newChatMessageHook         ::Jabber::Chat::GotMsg
-    ::hooks::add presenceDelayHook          ::Jabber::Chat::PresenceHook
-    ::hooks::add presenceUnavailableHook    ::Jabber::Chat::PresenceHook
+    ::hooks::add presenceHook               ::Jabber::Chat::PresenceHook
     ::hooks::add closeWindowHook            ::Jabber::Chat::CloseHook
     ::hooks::add closeWindowHook            ::Jabber::Chat::CloseHistoryHook
     ::hooks::add loginHook                  ::Jabber::Chat::LoginHook
@@ -246,11 +245,6 @@ proc ::Jabber::Chat::GotMsg {body args} {
     set jid $argsArr(-from)
     jlib::splitjidex $jid node domain res
     set jid2 [jlib::joinjid $node $domain ""]
-    if {$node == ""} {
-	set username $domain
-    } else {
-	set username $node
-    }
     set mjid  [jlib::jidmap $jid]
     set mjid2 [jlib::jidmap $jid2]
     
@@ -309,6 +303,14 @@ proc ::Jabber::Chat::GotMsg {body args} {
     }
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
+
+    if {$chatstate(rosterName) != ""} {
+	set username $chatstate(rosterName)
+    } elseif {$node == ""} {
+	set username $domain
+    } else {
+	set username $node
+    }
 
     # We may have reset its jid to a 2-tier jid if it has been offline.
     set chatstate(jid)      $mjid
@@ -582,7 +584,7 @@ proc ::Jabber::Chat::Build {threadID args} {
     if {$nwin == 1} {
 	::UI::SetWindowGeometry $w $wDlgs(jchat)
     }
-    wm title $w "[::msgcat::mc Chat]: $chatstate(fromjid)"
+    ::Jabber::Chat::SetTitle $w $chatstate(rosterName) $chatstate(fromjid)
     wm minsize $w [expr {$shortBtWidth < 220} ? 220 : $shortBtWidth] 320
     wm maxsize $w 800 2000
     
@@ -634,12 +636,15 @@ proc ::Jabber::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     }
     set mjid [jlib::jidmap $jid]
     jlib::splitjidex $jid node domain res
-    if {$node == ""} {
+    jlib::splitjid   $mjid jid2 x
+    set rosterName [$jstate(roster) getname $jid2]
+    if {$rosterName != ""} {
+	set username $rosterName
+    } elseif {$node == ""} {
 	set username $domain
     } else {
 	set username $node
     }
-    jlib::splitjid $mjid jid2 x
     set chatstate(username) $username
     set chatstate(fromjid)  $jid
     set chatstate(jid)      $mjid
@@ -649,19 +654,28 @@ proc ::Jabber::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     }
     set chatstate(dlgtoken)     $dlgtoken
     set chatstate(threadid)     $threadID
-    set chatstate(state)        normal
+    set chatstate(rosterName)   $rosterName
+    set chatstate(state)        normal    
     set chatstate(subject)          ""
     set chatstate(lastsubject)      ""
     set chatstate(notifier)         ""
     set chatstate(xevent,status)    ""
     set chatstate(xevent,msgidlist) ""
-
+    
+    # We need to kep track of current presence/status since we may get
+    # duplicate presence (delay).
+    array set presArr [$jstate(roster) getpresence $jid2 -resource $res]
+    set chatstate(presence) $presArr(-type)
+    if {[info exists presArr(-show)]} {
+	set chatstate(presence) $presArr(-show)
+    }
+    
     # Use an extra frame that contains everything thread specific.
     frame $wthread -class ChatThread
     set w [winfo toplevel $wthread]
     set chatstate(w) $w
 
-    wm title $w "[::msgcat::mc Chat] ($chatstate(fromjid))"
+    ::Jabber::Chat::SetTitle $w $rosterName $chatstate(fromjid)
 
     set wfrmid      $wthread.frmid
     set wtxt        $wfrmid.frtxt
@@ -775,6 +789,15 @@ proc ::Jabber::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set chatstate(wpresimage) $wpresimage
  
     return $chattoken
+}
+
+proc ::Jabber::Chat::SetTitle {w rosterName fromjid} {
+    
+    if {$rosterName == ""} {
+	wm title $w "[::msgcat::mc Chat]: $fromjid"
+    } else {
+	wm title $w "[::msgcat::mc Chat]: $rosterName ($fromjid)"
+    }
 }
 
 # ::Jabber::Chat::NewPage, ... --
@@ -960,7 +983,8 @@ proc ::Jabber::Chat::SetThreadState {dlgtoken chattoken} {
     if {[winfo exists $dlgstate(wnb)]} {
 	$dlgstate(wnb) pageconfigure $chatstate(pagename) -image ""
     }
-    wm title $dlgstate(w) "[::msgcat::mc Chat] ($chatstate(fromjid))"
+    ::Jabber::Chat::SetTitle $dlgstate(w) $chatstate(rosterName) \
+      $chatstate(fromjid)
 }
 
 # Jabber::Chat::SetState --
@@ -1214,7 +1238,7 @@ proc ::Jabber::Chat::Send {dlgtoken} {
     
     # According to XMPP we should send to 3-tier jid if still online,
     # else to 2-tier.
-    set chatstate(fromjid) [::Jabber::JlibCmd getrecipientjid $chatstate(fromjid)]
+    set chatstate(fromjid) [$jstate(jlib) getrecipientjid $chatstate(fromjid)]
     set jid [jlib::jidmap $chatstate(fromjid)]
     jlib::splitjid $jid jid2 res
     set chatstate(jid) $jid
@@ -1344,9 +1368,10 @@ proc ::Jabber::Chat::Save {dlgtoken} {
 
 proc ::Jabber::Chat::PresenceHook {jid type args} {
     
+    upvar ::Jabber::jstate jstate
     upvar ::Jabber::mapShowTextToElem mapShowTextToElem
 
-    Debug 4 "::Jabber::Chat::PresenceHook jid=$jid, type=$type"
+    Debug 4 "::Jabber::Chat::PresenceHook jid=$jid, type=$type, args=$args"
 
     # ::Jabber::Chat::PresenceHook: args=marilu@jabber.dk unavailable 
     #-resource Psi -type unavailable -type unavailable -from marilu@jabber.dk/Psi
@@ -1370,6 +1395,11 @@ proc ::Jabber::Chat::PresenceHook {jid type args} {
     if {[info exists argsArr(-show)]} {
 	set show $argsArr(-show)
     }
+    
+    # Skip if duplicate presence.
+    if {[string equal $chatstate(presence) $show]} {
+	return
+    }
     set status ""
     if {[info exists argsArr(-status)]} {
 	set status "$argsArr(-status)\n"
@@ -1382,9 +1412,16 @@ proc ::Jabber::Chat::PresenceHook {jid type args} {
     } else {
 	::Jabber::Chat::SetState $chattoken disabled
     }
-    set icon [::Jabber::Roster::GetPresenceIconEx $jid]
+    set icon [::Jabber::Roster::GetPresenceIconEx $from]
     if {$icon != ""} {
 	$chatstate(wpresimage) configure -image $icon
+    }
+
+    jlib::splitjid $from jid2 res
+    array set presArr [$jstate(roster) getpresence $jid2 -resource $res]
+    set chatstate(presence) $presArr(-type)
+    if {[info exists presArr(-show)]} {
+	set chatstate(presence) $presArr(-show)
     }
 }
 

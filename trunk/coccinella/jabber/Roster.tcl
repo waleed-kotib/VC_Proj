@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.68 2004-06-22 14:21:19 matben Exp $
+# $Id: Roster.tcl,v 1.69 2004-06-23 07:53:38 matben Exp $
 
 package provide Roster 1.0
 
@@ -99,6 +99,13 @@ namespace eval ::Jabber::Roster:: {
       {away,yahoo}        [::UI::GetIcon yahoo_away]     \
       {xa,yahoo}          [::UI::GetIcon yahoo_xa]       \
       {online,yahoo}      [::UI::GetIcon yahoo_online]   \
+      {available,gadugadu}   [::UI::GetIcon gadugadu_online]   \
+      {unavailable,gadugadu} [::UI::GetIcon gadugadu_offline]  \
+      {chat,gadugadu}        [::UI::GetIcon gadugadu_online]   \
+      {dnd,gadugadu}         [::UI::GetIcon gadugadu_away]     \
+      {away,gadugadu}        [::UI::GetIcon gadugadu_away]     \
+      {xa,gadugadu}          [::UI::GetIcon gadugadu_away]     \
+      {online,gadugadu}      [::UI::GetIcon gadugadu_away]     \
       ]
     
     # Template for the roster popup menu.
@@ -2143,14 +2150,40 @@ proc ::Jabber::Roster::BrowseSetHook {from subiq} {
 }
 
 proc ::Jabber::Roster::DiscoInfoHook {type from subiq args} {
+    variable wtree    
     upvar ::Jabber::jprefs jprefs
+    upvar ::Jabber::jstate jstate
     
-    puts "!!!!!!!!!!!!! type=$type, from=$from"
+    if {$type == "error"} {
+	return
+    }
     if {!$jprefs(rost,haveIMsysIcons)} {
 	return
     }
+    set cattype [lindex [$jstate(disco) types $from] 0]
 
-    
+    foreach v [$wtree find withtag all] {
+	set tags [$wtree itemconfigure $v -tags]
+	
+	switch -- $tags {
+	    "" - head - group {
+		# skip
+	    } 
+	    default {
+		set jid [lindex $v end]
+		set mjid [jlib::jidmap $jid]
+		jlib::splitjidex $mjid username host res
+		
+		# Check only those with same host.
+		if {[string equal $from $host]} {
+		    set icon [::Jabber::Roster::GetPresenceIconEx $jid]
+		    if {[string length $icon]} {
+			$wtree itemconfigure $v -image $icon
+		    }
+		}
+	    }
+	}
+    }
 }
 
 # Jabber::Roster::PostProcessIcons --
