@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JUser.tcl,v 1.5 2004-09-28 13:50:17 matben Exp $
+# $Id: JUser.tcl,v 1.6 2004-09-30 12:43:06 matben Exp $
 
 package provide JUser 1.0
 
@@ -102,6 +102,7 @@ proc ::Jabber::User::NewDlg { } {
 	::UI::SetWindowPosition $w $wDlgs(jrostadduser)
     }
     wm resizable $w 0 0
+    bind $w <Return> [list $frbot.btok invoke]
     
     # Trick to resize the labels wraplength.
     set script [format {
@@ -177,8 +178,7 @@ proc ::Jabber::User::DoAdd {token} {
 		set ans [tk_messageBox -type yesno -icon error \
 		  -parent $state(w) -message [mc jamessaddforeign $host]]
 		if {$ans == "yes"} {
-		    set didRegister [::Jabber::GenRegister::BuildRegister  \
-		      -server $host -autoget 1]
+		    ::Jabber::GenRegister::NewDlg -server $host -autoget 1
 		    return
 		} else {
 		    return

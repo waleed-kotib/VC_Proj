@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Agents.tcl,v 1.25 2004-09-28 13:50:17 matben Exp $
+# $Id: Agents.tcl,v 1.26 2004-09-30 12:43:06 matben Exp $
 
 package provide Agents 1.0
 
@@ -27,7 +27,7 @@ namespace eval ::Jabber::Agents:: {
 	    ::Jabber::Search::Build -server $jid -autoget 1
 	}
 	mRegister      register  {
-	    ::Jabber::GenRegister::BuildRegister -server $jid -autoget 1
+	    ::Jabber::GenRegister::NewDlg -server $jid -autoget 1
 	}
 	mUnregister    register  {::Jabber::Register::Remove $jid}
 	separator      {}        {}

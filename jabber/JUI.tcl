@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.53 2004-09-28 13:50:17 matben Exp $
+# $Id: JUI.tcl,v 1.54 2004-09-30 12:43:06 matben Exp $
 
 package provide JUI 1.0
 
@@ -90,7 +90,7 @@ proc ::Jabber::UI::Init { } {
 	{command   mQuit               {::UserActions::DoQuit}        normal   Q}
     }
     set menuDefs(rost,jabber) {    
-	{command     mNewAccount    {::Jabber::Register::Register}    normal   {}}
+	{command     mNewAccount    {::Jabber::Register::NewDlg}      normal   {}}
 	{command     mLogin         {::Jabber::LoginLogout}           normal   L}
 	{command     mLogoutWith    {::Jabber::Logout::WithStatus}    disabled {}}
 	{command     mPassword      {::Jabber::Passwd::Build}         disabled {}}

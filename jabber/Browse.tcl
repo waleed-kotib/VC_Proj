@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.57 2004-09-28 13:50:17 matben Exp $
+# $Id: Browse.tcl,v 1.58 2004-09-30 12:43:06 matben Exp $
 
 package require chasearrows
 
@@ -67,7 +67,7 @@ namespace eval ::Jabber::Browse:: {
 	    ::Jabber::Search::Build -server $jid -autoget 1
 	}
 	mRegister      register  {
-	    ::Jabber::GenRegister::BuildRegister -server $jid -autoget 1
+	    ::Jabber::GenRegister::NewDlg -server $jid -autoget 1
 	}
 	mUnregister    register  {::Jabber::Register::Remove $jid}
 	separator      {}        {}

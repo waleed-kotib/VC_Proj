@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Subscribe.tcl,v 1.21 2004-09-28 13:50:19 matben Exp $
+# $Id: Subscribe.tcl,v 1.22 2004-09-30 12:43:07 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -32,7 +32,7 @@ namespace eval ::Jabber::Subscribe:: {
 #       args   ?-key value ...? look for any '-status' only.
 #       
 # Results:
-#       "deny" or "accept".
+#       none
 
 proc ::Jabber::Subscribe::NewDlg {jid args} {
     global  this prefs wDlgs
@@ -64,6 +64,14 @@ proc ::Jabber::Subscribe::NewDlg {jid args} {
     # Find all our groups for any jid.
     set allGroups [$jstate(roster) getgroups]
 
+    set subscription [$jstate(roster) getsubscription $jid]
+    
+    switch -- $subscription none - from {
+	set havesubsc 0
+    } default {
+	set havesubsc 1
+    }
+
     # Global frame.
     set wall $w.fr
     frame $wall -borderwidth 1 -relief raised
@@ -76,20 +84,24 @@ proc ::Jabber::Subscribe::NewDlg {jid args} {
       -text [mc jasubwant $jid]
     pack $wall.msg -padx 10 -side top -fill both -expand 1
 
-    set wbox $wall.opt
-    labelframe $wbox -text [mc {Options}]
-    pack $wbox -side top -fill both -padx 20 -pady 6
-
-    label $wbox.lnick -text "[mc {Nick name}]:" -anchor e
-    entry $wbox.enick -width 24 -textvariable $token\(name)
-    label $wbox.lgroup -text "[mc Group]:" -anchor e
-    ::combobox::combobox $wbox.egroup -width 12  \
-      -textvariable $token\(group)
-    eval {$wbox.egroup list insert end} "None $allGroups"
-
-    grid $wbox.lnick  $wbox.enick  -sticky e
-    grid $wbox.lgroup $wbox.egroup -sticky e
-    grid $wbox.enick  $wbox.egroup -sticky ew
+    # If we already have a subscription we've already got the opportunity
+    # to select nickname and group. Do not repeat that.
+    if {!$havesubsc} {
+	set wbox $wall.opt
+	labelframe $wbox -text [mc {Options}]
+	pack $wbox -side top -fill both -padx 20 -pady 6
+	
+	label $wbox.lnick -text "[mc {Nick name}]:" -anchor e
+	entry $wbox.enick -width 24 -textvariable $token\(name)
+	label $wbox.lgroup -text "[mc Group]:" -anchor e
+	::combobox::combobox $wbox.egroup -width 12  \
+	  -textvariable $token\(group)
+	eval {$wbox.egroup list insert end} "None $allGroups"
+	
+	grid $wbox.lnick  $wbox.enick  -sticky e
+	grid $wbox.lgroup $wbox.egroup -sticky e
+	grid $wbox.enick  $wbox.egroup -sticky ew
+    }
     
     # Button part.
     set frbot [frame $wall.frbot -borderwidth 0]
@@ -118,12 +130,7 @@ proc ::Jabber::Subscribe::NewDlg {jid args} {
     } $wall.msg $w]    
     after idle $script
 
-    # Wait here for a button press and window to be destroyed.
-    tkwait window $w
-
-    set ans [expr {($state(finished) <= 0) ? "deny" : "accept"}]
-    unset state
-    return $ans
+    return ""
 }
 
 # Jabber::Subscribe::Deny --
@@ -142,6 +149,7 @@ proc ::Jabber::Subscribe::Deny {token} {
     ::UI::SaveWinPrefixGeom $wDlgs(jsubsc)
     set state(finished) 0
     destroy $state(w)
+    unset state
 }
 
 # Jabber::Subscribe::Accept --
@@ -159,8 +167,10 @@ proc ::Jabber::Subscribe::Accept {token} {
     
     switch -- $subscription none - from {
 	set sendsubsc 1
+	set havesubsc 0
     } default {
 	set sendsubsc 0
+	set havesubsc 1
     }
 
     # Accept (allow) subscription.
@@ -182,6 +192,7 @@ proc ::Jabber::Subscribe::Accept {token} {
     ::UI::SaveWinPrefixGeom $wDlgs(jsubsc)
     set state(finished) 0
     destroy $state(w)
+    unset state
 }
 
 proc ::Jabber::Subscribe::CloseCmd {token w} {
@@ -193,6 +204,7 @@ proc ::Jabber::Subscribe::CloseCmd {token w} {
     # Deny presence to this user.
     $jstate(jlib) send_presence -to $state(jid) -type "unsubscribed"
     ::UI::SaveWinPrefixGeom $wDlgs(jsubsc)
+    unset state
 }
 
 # Jabber::Subscribe::ResProc --

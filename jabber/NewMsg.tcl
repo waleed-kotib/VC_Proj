@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.41 2004-09-28 13:50:18 matben Exp $
+# $Id: NewMsg.tcl,v 1.42 2004-09-30 12:43:06 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -191,6 +191,9 @@ proc ::Jabber::NewMsg::Build {args} {
     ::hooks::run buildNewMsgButtonTrayHook $wtray
 
     pack [frame $w.frall.divt -bd 2 -relief sunken -height 2] -fill x -side top
+    if {[string match "mac*" $this(platform)]} {
+	pack [frame $w.frall.pad -height 12] -side bottom
+    }
     
     # Address list.    
     set fradd [frame $w.frall.fradd -borderwidth 1 -relief sunken]
@@ -253,9 +256,7 @@ proc ::Jabber::NewMsg::Build {args} {
     grid $wysc -column 1 -row 0 -sticky ns
     grid columnconfigure $wtxt 0 -weight 1
     grid rowconfigure $wtxt 0 -weight 1
-    if {[string match "mac*" $this(platform)]} {
-	pack [frame $w.frall.pad -height 14] -side bottom
-    }
+
     set locals($w,w)        $w
     set locals($w,wtext)    $wtext
     set locals($w,waddcan)  $waddcan
