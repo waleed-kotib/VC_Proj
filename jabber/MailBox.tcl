@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.10 2003-07-29 16:18:09 matben Exp $
+# $Id: MailBox.tcl,v 1.11 2003-08-23 07:08:53 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -192,7 +192,7 @@ proc ::Jabber::MailBox::Build {w args} {
       -font $sysFont(sb) -labelfont $sysFont(s) -background white  \
       -yscrollcommand [list $wysctbl set]  \
       -labelbackground #cecece -stripebackground #dedeff  \
-      -labelcommand "[namespace current]::LabelCommand"  \
+      -labelcommand [namespace current]::LabelCommand  \
       -stretch all -width 60 -selectmode extended
     # Pressed -labelbackground #8c8c8c
     $wtbl columnconfigure $colindex(iswb) -labelimage $icons(wbicon)  \
@@ -720,15 +720,15 @@ proc ::Jabber::MailBox::DoubleClickMsg { } {
 }
 
 proc ::Jabber::MailBox::LabelCommand {w column} {
-
     variable locals    
+    
     tablelist::sortByColumn $w $column
 }
 
 proc ::Jabber::MailBox::SortTimeColumn {elem1 elem2} {
-
     variable locals
     
+    #puts "elem1=$elem1, elem2=$elem2"
     # 'clock scan' shall take care of formats like 'today' etc.
     set long1 [clock scan $elem1]
     set long2 [clock scan $elem2]
@@ -741,9 +741,9 @@ proc ::Jabber::MailBox::SortTimeColumn {elem1 elem2} {
     }
 }
 
-proc ::Jabber::MailBox::MsgDisplayClear { } {
-    
+proc ::Jabber::MailBox::MsgDisplayClear { } {    
     variable locals
+    
     set wtextmsg $locals(wtextmsg)    
     $wtextmsg delete 1.0 end
 }
