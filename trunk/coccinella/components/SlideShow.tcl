@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-#       $Id: SlideShow.tcl,v 1.5 2004-08-18 12:08:58 matben Exp $
+#       $Id: SlideShow.tcl,v 1.6 2004-08-18 13:46:41 matben Exp $
 
 namespace eval ::SlideShow:: {
     
@@ -276,10 +276,14 @@ proc ::SlideShow::OpenFile {wtop fileName} {
 	}
     }
     if {$prefs(slideShow,autosize)} {
-	foreach {width height} [::WB::GetCanvasSize $wtop] {break}
+	foreach {cwidth cheight} [::WB::GetCanvasSize $wtop] {break}
 	foreach {bx by bw bh} [$wcan bbox all] {break}
-	if {($width < $bw) || ($height < $bh)} {
+	if {($cwidth < $bw) && ($cheight < $bh)} {
 	    ::WB::SetCanvasSize $wtop $bw $bh
+	} elseif {$cwidth < $bw} {
+	    ::WB::SetCanvasSize $wtop $bw $cheight
+	} elseif {$cheight < $bh} {
+	    ::WB::SetCanvasSize $wtop $cwidth $bh
 	}
     }
 }
