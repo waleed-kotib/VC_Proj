@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.8 2004-07-30 12:55:56 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.9 2004-08-02 14:06:21 matben Exp $
 
 package require sha1pure
 
@@ -442,11 +442,13 @@ proc ::CanvasUtils::GetUndoCommand {wtop cmd} {
 	coords {
 	    set utag [lindex $cmd 1]
 	    set canUndo [concat [list coords $utag] [$w coords $utag]]
+	    set undo [list ::CanvasUtils::Command $wtop $canUndo]	
 	}
 	create {
 	    set utag [::CanvasUtils::GetUtagFromCmd $cmd]
 	    if {$utag != ""} {
 		set canUndo [list delete $utag]
+		set undo [list ::CanvasUtils::Command $wtop $canUndo]	
 	    }
 	}
 	dchars {
@@ -456,33 +458,23 @@ proc ::CanvasUtils::GetUndoCommand {wtop cmd} {
 	    set thetext [$w itemcget $utag -text]
 	    set str [string range $thetext $ind $ilast]
 	    set canUndo [list insert $utag $ind $str]
+	    set undo [list ::CanvasUtils::Command $wtop $canUndo]	
 	}
 	delete {
 	    set utag [lindex $cmd 1]
 	    set type [$w type $utag]
 	    
 	    switch -- $type {
-		window {
-		    
-		    # This is something that is embedded. QuickTime?
-		    # We need to reconstruct how it was imported.
-		    set win [$w itemcget $utag -window]
-		    if {$win != ""} {
-			set winClass [winfo class $win]
-
-			switch -- $winClass {
-			    QTFrame {
-				set undo [::Import::QTImportCmd $w $utag]
-			    }
-			    SnackFrame {
-				set undo [::Import::SnackImportCmd $w $utag]
-			    }
-			    default {
-
-				# Typically a plugin.
-				set undo [::Import::FrameImportCmd $w $utag]
-			    }
-			}
+		image - window {
+		    set line [::CanvasUtils::GetOneLinerForAny $w $utag \
+		      -usehtmlsize 0 -encodenewlines 0]
+		    if {[string equal [lindex $line 0] "import"]} {
+			set undo [list ::Import::HandleImportCmd $w $line \
+			  -addundo 0]
+		    } else {
+			set stackCmd [::CanvasUtils::GetStackingCmd $w $utag]
+			set canUndoList [list $line $stackCmd]
+			set undo [list ::CanvasUtils::CommandList $wtop $canUndoList]	
 		    }
 		}
 		default {
@@ -491,37 +483,27 @@ proc ::CanvasUtils::GetUndoCommand {wtop cmd} {
 		    set createCmd [concat [list create $type] $co $opts]
 		    set stackCmd [::CanvasUtils::GetStackingCmd $w $utag]
 		    set canUndoList [list $createCmd $stackCmd]
+		    set undo [list ::CanvasUtils::CommandList $wtop $canUndoList]	
 		}
 	    }
 	}
 	insert {
 	    foreach {dum utag ind str} $cmd break
 	    set canUndo [list dchars $utag $ind [expr $ind + [string length $str]]]
+	    set undo [list ::CanvasUtils::Command $wtop $canUndo]	
 	}
 	move {
 	    foreach {dum utag dx dy} $cmd break
 	    set canUndo [list move $utag [expr -$dx] [expr -$dy]]
+	    set undo [list ::CanvasUtils::Command $wtop $canUndo]	
 	}
 	lower - raise {
 	    set utag [lindex $cmd 1]
 	    set canUndo [GetStackingCmd $w $utag]
+	    set undo [list ::CanvasUtils::Command $wtop $canUndo]	
 	}
     }
-    
-    # If we've got a canvas command, make a complete command.
-    if {[info exists canUndo]} {
-	set undo [list ::CanvasUtils::Command $wtop $canUndo]	
-    } elseif {[info exists canUndoList]} {
-	set undo [list ::CanvasUtils::CommandList $wtop $canUndoList]	
-    }
     return $undo
-}
-
-
-proc ::CanvasUtils::RegisterUndoRedoCmd {cmd} {
-    
-    
-
 }
 
 # CanvasUtils::GetOneLinerForAny --
@@ -535,10 +517,11 @@ proc ::CanvasUtils::RegisterUndoRedoCmd {cmd} {
 #           -basepath absolutePath    translate image -file to a relative path.
 #           -uritype ( file | http )
 #           -keeputag 0|1
+#           -usehtmlsize 0|1
+#           -encodenewlines 0|1
 #       
 # Results:
 #       a single command line.
-
 
 proc ::CanvasUtils::GetOneLinerForAny {w id args} {
     global  prefs
@@ -576,7 +559,7 @@ proc ::CanvasUtils::GetOneLinerForAny {w id args} {
 	    if {($type == "text") && ([$w itemcget $id -text] == "")} {
 		# empty
 	    } else {
-		set line [::CanvasUtils::GetOneLinerForItem $w $id]
+		set line [eval {::CanvasUtils::GetOneLinerForItem $w $id} $args]
 		if {!$keeputag} {
 		    set line [::CanvasUtils::ReplaceUtagPrefix $line *]
 		}
@@ -636,8 +619,14 @@ proc ::CanvasUtils::GetOneLinerForWindow {w id args} {
 #       sending on network. Not for images or windows!
 #       Doesn't add values equal to defaults.
 
-proc ::CanvasUtils::GetOneLinerForItem {w id} {
+proc ::CanvasUtils::GetOneLinerForItem {w id args} {
     global  prefs fontPoints2Size
+    
+    array set argsArr {
+	-encodenewlines 1
+	-usehtmlsize    1
+    }
+    array set argsArr $args
     
     set opts [$w itemconfigure $id]
     set type [$w type $id]
@@ -657,11 +646,13 @@ proc ::CanvasUtils::GetOneLinerForItem {w id} {
 	
 	switch -- $op {
 	    -text {
-	    
-		# If multine text, encode as one line with explicit "\n".
-		regsub -all "\n" $val $nl_ oneliner
-		regsub -all "\r" $oneliner $nl_ oneliner
-		set val $oneliner
+		if {$argsArr(-encodenewlines)} {
+		    
+		    # If multine text, encode as one line with explicit "\n".
+		    regsub -all "\n" $val $nl_ oneliner
+		    regsub -all "\r" $oneliner $nl_ oneliner
+		    set val $oneliner
+		}
 	    }
 	    -tags {
 	    
@@ -683,7 +674,7 @@ proc ::CanvasUtils::GetOneLinerForItem {w id} {
 		}
 	    }
 	}
-	if {$prefs(useHtmlSizes) && [string equal $op "-font"]} {
+	if {($op == "-font") && $argsArr(-usehtmlsize) && $prefs(useHtmlSizes)} {
 	    set val [lreplace $val 1 1 $fontPoints2Size([lindex $val 1])]
 	}
 	lappend opcmd $op $val
@@ -748,9 +739,9 @@ proc ::CanvasUtils::GetOnelinerForImage {w id args} {
     }
     
     # -above & -below??? Be sure to overwrite any cached options.
-    #array set impArr [::CanvasUtils::GetStackingOption $w $id]
+    array set impArr [::CanvasUtils::GetStackingOption $w $id]
     set impArr(-tags) [::CanvasUtils::GetUtag $w $id 1]
-    
+
     return [concat import [$w coords $id] [array get impArr]]
 }
 
@@ -2072,10 +2063,10 @@ proc ::CanvasUtils::DefineWhiteboardBindtags { } {
     
     # Generic nontext bindings.
     bind WhiteboardNonText <BackSpace> {
-	::CanvasDraw::DeleteItem %W %x %y selected
+	::CanvasDraw::DeleteSelected %W
     }
     bind WhiteboardNonText <Control-d> {
-	::CanvasDraw::DeleteItem %W %x %y selected
+	::CanvasDraw::DeleteSelected %W
     }
 }
 

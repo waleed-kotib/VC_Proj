@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasCmd.tcl,v 1.4 2004-07-26 08:37:16 matben Exp $
+# $Id: CanvasCmd.tcl,v 1.5 2004-08-02 14:06:21 matben Exp $
 
 package provide CanvasCmd 1.0
 
@@ -75,7 +75,14 @@ proc ::CanvasCmd::RaiseOrLowerItems {wtop {what raise}} {
 
     set cmdList {}
     set undoList {}
-    foreach id [$w find withtag selected] {
+    
+    # The items are returned in stacking order, with the lowest item first.
+    # If lower we must start with the topmost, and then go downwards!
+    set selected [$w find withtag selected]
+    if {[string equal $what "lower"]} {
+	set selected [lrevert $selected]
+    }
+    foreach id $selected {
 	set utag [::CanvasUtils::GetUtag $w $id]
 	lappend cmdList [list $what $utag all]
 	lappend undoList [::CanvasUtils::GetStackingCmd $w $utag]
@@ -351,15 +358,7 @@ proc ::CanvasCmd::DoEraseAll {wtop {where all}} {
 	
     set wCan [::WB::GetCanvasFromWtop $wtop]
     ::CanvasCmd::DeselectAll $wtop
-    foreach id [$wCan find all] {
-	
-	# Do not erase grid.
-	set theTags [$wCan gettags $id]
-	if {[lsearch $theTags grid] >= 0} {
-	    continue
-	}
-	::CanvasDraw::DeleteItem $wCan 0 0 $id $where
-    }
+    ::CanvasDraw::DeleteIds $wCan [$wCan find all] $where
 }
 
 proc ::CanvasCmd::EraseAll {wtop} {

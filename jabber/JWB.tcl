@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.20 2004-07-30 12:55:54 matben Exp $
+# $Id: JWB.tcl,v 1.21 2004-08-02 14:06:21 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -481,7 +481,7 @@ proc ::Jabber::WB::SetMinsize {wtop} {
     foreach {wMin hMin} [::WB::GetBasicWhiteboardMinsize $wtop] break
     set wMinEntry [winfo reqwidth $jwbstate($wtop,wfrja)]
     set hMinEntry [winfo reqheight $jwbstate($wtop,wframe)]
-    set wMin [min $wMin $wMinEntry]
+    set wMin [max $wMin $wMinEntry]
     set hMin [expr $hMin + $hMinEntry]
     wm minsize $w $wMin $hMin
 }
@@ -1216,8 +1216,10 @@ proc ::Jabber::WB::GroupChatMsg {cmdList args} {
 proc ::Jabber::WB::Free {wtop} {
     variable jwbstate
     
-    unset -nocomplain jwbstate($jwbstate($wtop,thread),wtop) \
-      jwbstate($jwbstate($wtop,jid),wtop)
+    catch {
+	unset -nocomplain jwbstate($jwbstate($wtop,thread),wtop) \
+	  jwbstate($jwbstate($wtop,jid),wtop)
+    }
     array unset jwbstate "$wtop,*"    
 }
 

@@ -9,7 +9,7 @@
 #       To be safe the code should run in a safe interpreter with all
 #       methods and variables in this base class aliased.
 # 
-# $Id: BaseWBCanvas.itcl,v 1.1 2004-07-22 15:08:50 matben Exp $
+# $Id: BaseWBCanvas.itcl,v 1.2 2004-08-02 14:06:21 matben Exp $
 
 class BaseWBCanvas {
 	
@@ -42,8 +42,8 @@ class BaseWBCanvas {
 	method FinalMoveCurrent {x y}
 	method FinalMoveCurrentGrid {x y grid}
 	method AddUndo {undo redo}
-	method DeleteCurrent {x y}
-	method DeleteCurrentWithUndo {x y {undoCmdList {}}}
+	method DeleteCurrent {}
+	method AddGarbageImages {name args}
 	method Command {cmd {where all}}
 	method CommandList {cmdList {where all}}
     }
@@ -141,12 +141,12 @@ body BaseWBCanvas::AddUndo {undo redo} {
     undo::add [::WB::GetUndoToken $wtop] $undo $redo
 }
 
-body BaseWBCanvas::DeleteCurrent {x y} {
-    ::CanvasDraw::DeleteCurrent $tkCanvas $x $y
+body BaseWBCanvas::DeleteCurrent {} {
+    ::CanvasDraw::DeleteCurrent $tkCanvas
 }
 
-body BaseWBCanvas::DeleteCurrentWithUndo {x y {undoCmdList {}}} {
-    ::CanvasDraw::DeleteCurrentWithUndo $tkCanvas $x $y $undoCmdList
+body BaseWBCanvas::AddGarbageImages {name args} {
+    eval {::CanvasDraw::AddGarbageImages $name} $args
 }
 
 body BaseWBCanvas::Command {cmd {where all}} {

@@ -3,7 +3,7 @@
 #       Creates a card game in a whiteboard canvas. 
 # 
 # 
-# $Id: CardGame.itcl,v 1.4 2004-07-30 09:33:15 matben Exp $
+# $Id: CardGame.itcl,v 1.5 2004-08-02 14:06:21 matben Exp $
 
 namespace eval CardGame {
     
@@ -61,8 +61,8 @@ if {[itcl::find classes CardGame] == ""} {
 	    method MoveInitCard {x y} {}
 	    method MoveMotionCard {x y} {}
 	    method MoveReleaseCard {x y} {}
-	    method DeleteStack {x y} {}
-	    method DeleteCard {x y} {}
+	    method DeleteStack {} {}
+	    method DeleteCard {} {}
 	    method StackPopup {x y} {}
 	    method CardPopup {x y} {}
 	    method NewCard {}
@@ -104,7 +104,7 @@ if {[itcl::find classes CardGame] == ""} {
 
     body CardGame::constructor {w x y args} {
 	
-	::Debug 4 "CardGame::constructor ns=[namespace current]"
+	::Debug 4 "CardGame::constructor args='$args'"
 	
 	MakeMenus
 	
@@ -151,12 +151,12 @@ if {[itcl::find classes CardGame] == ""} {
 	  move    [list $b1Card         [code $this MoveInitCard %x %y]] \
 	  move    [list $b1MotionCard   [code $this MoveMotionCard %x %y]] \
 	  move    [list $b1ReleaseCard  [code $this MoveReleaseCard %x %y]] \
-	  del     [list $b1Card         [code $this DeleteCard %x %y]] ]
+	  del     [list $b1Card         [code $this DeleteCard]] ]
 	set instBindList [list \
 	  point   [list $b1StackInst        [code $this PointPress %x %y]] \
 	  point   [list $b1MotionStackInst  [code $this PointMotion %x %y]] \
 	  point   [list $b1ReleaseStackInst [code $this PointRelease %x %y]] \
-	  del     [list $b1StackInst        [code $this DeleteStack %x %y]] ]
+	  del     [list $b1StackInst        [code $this DeleteStack]] ]
 
 	set emptyPointStackBinds [list \
 	  point   [list $b1StackInst        {}] \
@@ -206,8 +206,13 @@ if {[itcl::find classes CardGame] == ""} {
     
     body CardGame::DrawCardStack {x y args} {
 	
+	array set argsArr $args
+	if {[info exists argsArr(-tags)]} {
+	    set utag $argsArr(-tags)
+	} else {
+	    set utag [NewUtag]
+	}
 	set im [$csObj Image cardpile]
-	set utag [NewUtag]	
 	set idstack [$tkCanvas create image $x $y -image $im -anchor nw  \
 	  -tags [list image cardstack object:${this} $utag]]
 
@@ -299,17 +304,17 @@ if {[itcl::find classes CardGame] == ""} {
 
     body CardGame::PointRelease {x y} {
 	
-	puts "CardGame::PointRelease currentCard=$currentCard"
 	$tkCanvas delete $move(idshadow)
 	set x [$tkCanvas canvasx $x]
 	set y [$tkCanvas canvasy $y]
 	if {[expr hypot($x - $move(x0), $y - $move(y0))] < $stickyDistance} {
 	    $tkCanvas delete $idcard
 	} else {
-	    set im [$csObj HalfImage $currentCard]
-	    $tkCanvas itemconfigure $idcard -image $im
+	    set imhalf [$csObj HalfImage $currentCard]
+	    $tkCanvas itemconfigure $idcard -image $imhalf
+	    set imback [$csObj Image back]
 	    set cmd [list create image [$tkCanvas coords $idcard] \
-	      -image $im -anchor nw -tags [$tkCanvas gettags $idcard]]
+	      -image $imback -anchor nw -tags [$tkCanvas gettags $idcard]]
 	    Command $cmd remote
 	}
 	if {[$csObj NumberOfCards] == 0} {
@@ -347,7 +352,7 @@ if {[itcl::find classes CardGame] == ""} {
 	Command [list raise $utag]
     }
     
-    body CardGame::DeleteStack {x y} {
+    body CardGame::DeleteStack {} {
 	
 	set utag [GetUtag current]
 	set cmdList [list [list delete $utag]]
@@ -360,8 +365,8 @@ if {[itcl::find classes CardGame] == ""} {
 	CommandList $cmdList
     }
     
-    body CardGame::DeleteCard {x y} {
-	DeleteCurrent $x $y
+    body CardGame::DeleteCard {} {
+	DeleteCurrent
     }
     
     body CardGame::StackPopup {x y} {
@@ -375,7 +380,6 @@ if {[itcl::find classes CardGame] == ""} {
 	set idpopup [$tkCanvas find withtag current]
 	set im [$tkCanvas itemcget $idpopup -image]
 	set state [$csObj CardSideFromImage $im]
-	puts "state=$state"
 	set cardStatePopup $state
 	tk_popup $cardMenu [expr int($x) - 10] [expr int($y) - 10]   
     }
@@ -502,7 +506,16 @@ if {[itcl::find classes CardGame] == ""} {
 
 
     body CardGame::Delete {id} {
-
+	
+	switch -- $id {
+	    $idstack {
+		DeleteStack
+	    }
+	    default {
+		set utag [GetUtag $id]
+		return [list [list delete $utag] {}]
+	    }
+	}
     }
 }
 

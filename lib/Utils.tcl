@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.26 2004-07-30 12:55:55 matben Exp $
+# $Id: Utils.tcl,v 1.27 2004-08-02 14:06:21 matben Exp $
 
 namespace eval ::Utils:: {
 
@@ -52,6 +52,19 @@ proc lprune {listName elem} {
 	uplevel set $listName [list [lreplace $listValue $idx $idx]]
     }
     return ""
+}
+
+# lrevert --
+# 
+#       Revert the order of the list elements.
+
+proc lrevert {args} {
+    set tmp {}
+    set args [lindex $args 0]
+    for {set i [expr [llength $args] - 1]} {$i >= 0} {incr i -1} {
+	lappend tmp [lindex $args $i]
+    }
+    return $tmp
 }
     
 # getdirname ---

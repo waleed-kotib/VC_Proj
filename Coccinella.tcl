@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.72 2004-07-30 09:33:15 matben Exp $
+# $Id: Coccinella.tcl,v 1.73 2004-08-02 14:06:21 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -684,7 +684,7 @@ if {$prefs(firstLaunch)} {
 }
 set prefs(firstLaunch) 0
 
-::Debug 5 "auto_path:\n[join $auto_path \n]"
+::Debug 7 "auto_path:\n[join $auto_path \n]"
 
 ### The server part ############################################################
 

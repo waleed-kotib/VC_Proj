@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: canvasex.tcl,v 1.2 2003-10-28 13:52:33 matben Exp $
+# $Id: canvasex.tcl,v 1.3 2004-08-02 14:06:21 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -194,7 +194,7 @@ proc ::canvasex::GetGroups {w args} {
 
     set wcan $priv(canvas)
     set all {}
-    foreach id [$wcan find withtag all] {
+    foreach id [$wcan find all] {
 	set gid [lsearch -inline -regexp [$w gettags $id] {^group(#[0-9]+)+$}]
 	if {$gid != ""} {
 	    lappend all $gid
