@@ -4,18 +4,15 @@
       
 #  Coccinella.tcl ---
 #  
-#      This file is the main of the whiteboard application. It depends on
-#      a number of other files. The 'lib' directory contains the other tcl
-#      code that gets sourced here. The 'images' directory contains icons
-#      and other images needed by this script. The 'items' directory
-#      contains a library of canvas items that are accesable directly from
-#      a menu.
+#       This file is the main of the jabber/whiteboard application. 
+#       It controls the startup sequence and therefore needs a number
+#       of code files/images to be succesful.
 #      
 #  Copyright (c) 1999-2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.26 2003-12-23 14:41:01 matben Exp $
+# $Id: Coccinella.tcl,v 1.27 2003-12-27 12:07:33 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0

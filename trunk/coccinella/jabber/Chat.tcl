@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.24 2003-12-23 14:41:01 matben Exp $
+# $Id: Chat.tcl,v 1.25 2003-12-27 12:07:33 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -469,16 +469,34 @@ proc ::Jabber::Chat::Build {threadID args} {
 
 proc ::Jabber::Chat::ConfigureTextTags {w wtext} {
     variable chatOptions
+    upvar ::Jabber::jprefs jprefs
+    
+    ::Jabber::Debug 2 "::Jabber::Chat::ConfigureTextTags"
     
     set space 2
     set alltags {me metext you youtext}
         
+    if {[string length $jprefs(chatFont)]} {
+	set chatFont $jprefs(chatFont)
+	set boldChatFont [lreplace $jprefs(chatFont) 2 2 bold]
+    }
     foreach tag $alltags {
 	set opts($tag) [list -spacing1 $space]
     }
     foreach spec $chatOptions {
 	foreach {tag optName resName resClass} $spec break
 	set value [option get $w $resName $resClass]
+	if {[string length $jprefs(chatFont)] && [string equal $optName "-font"]} {
+	    
+	    switch $resName {
+		meFont - youFont {
+		    set value $boldChatFont
+		}
+		meTextFont - youTextFont {
+		    set value $chatFont
+		}
+	    }
+	}
 	if {[string length $value]} {
 	    lappend opts($tag) $optName $value
 	}   
@@ -492,23 +510,19 @@ proc ::Jabber::Chat::ConfigureTextTags {w wtext} {
     ::Text::ConfigureLinkTagForTextWidget $wtext linktag tact
 }
 
-proc ::Jabber::Chat::SetFont {theFont} {
-    
+proc ::Jabber::Chat::SetFont {theFont} {    
     variable locals
+    upvar ::Jabber::jprefs jprefs
 
-    foreach key [array names locals "*,wtext"] {
-	set wtext $locals($key)
-	if {[winfo exists $wtext]} {
-	    set boldChatFont [lreplace $theFont 2 2 bold]
-	    $wtext configure -font $theFont
-	    $wtext tag configure me -font $boldChatFont
-	    $wtext tag configure you -font $boldChatFont
-	}
-    }
-    foreach key [array names locals "*,wtextsnd"] {
-	set wtextsnd $locals($key)
-	if {[winfo exists $wtextsnd]} {
-	    $wtextsnd configure -font $theFont
+    ::Jabber::Debug 2 "::Jabber::Chat::SetFont theFont=$theFont"
+    set jprefs(chatFont) $theFont
+        
+    foreach key [array names locals "*,threadid"] {
+	set threadID $locals($key)
+	set w  $locals($threadID,wtop)
+	if {[winfo exists $w]} {
+	    set wtext $locals($threadID,wtext)
+	    ::Jabber::Chat::ConfigureTextTags $w $wtext
 	}
     }
 }
@@ -759,7 +773,7 @@ proc ::Jabber::Chat::BuildHistory {jid} {
     # Text.
     set wchatframe $w.frall.fr
     pack [frame $wchatframe -class Chat] -fill both -expand 1
-    text $wtext -height 20 -width 72 -font $jprefs(chatFont) -cursor {} \
+    text $wtext -height 20 -width 72 -cursor {} \
       -borderwidth 1 -relief sunken -yscrollcommand [list $wysc set] -wrap word
     scrollbar $wysc -orient vertical -command [list $wtext yview]
     grid $wtext -column 0 -row 0 -sticky news
