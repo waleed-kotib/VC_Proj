@@ -4,7 +4,7 @@
 #       This is just a first sketch.
 #       TODO: all message translations.
 #       
-# $Id: BuddyPounce.tcl,v 1.4 2004-06-17 13:24:18 matben Exp $
+# $Id: BuddyPounce.tcl,v 1.5 2004-06-17 13:32:55 matben Exp $
 
 namespace eval ::BuddyPounce:: {
     
@@ -334,8 +334,10 @@ proc ::BuddyPounce::OK {token} {
     variable $token
     upvar 0 $token state
     variable budprefs
+    variable wdlg
     
     ::BuddyPounce::StateToPrefs $token
+    ::UI::SaveWinGeom $wdlg $state(w)
     destroy $state(w)
     unset state
 }
@@ -344,7 +346,9 @@ proc ::BuddyPounce::OK {token} {
 proc ::BuddyPounce::Cancel {token} {
     variable $token
     upvar 0 $token state
+    variable wdlg
 
+    ::UI::SaveWinGeom $wdlg $state(w)
     destroy $state(w)
     unset state
 }
