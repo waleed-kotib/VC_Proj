@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.7 2003-10-05 13:36:17 matben Exp $
+# $Id: Browse.tcl,v 1.8 2003-10-25 07:22:26 matben Exp $
 
 package provide Browse 1.0
 
@@ -26,6 +26,7 @@ namespace eval ::Jabber::Browse:: {
     
     # Just a dummy widget name for the running arrows until it's built.
     variable wsearrows .xx
+    variable dlguid 0
 }
 
 # Jabber::Browse::GetAll --
@@ -39,7 +40,6 @@ namespace eval ::Jabber::Browse:: {
 #       none.
 
 proc ::Jabber::Browse::GetAll { } {
-
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jserver jserver
     
@@ -60,8 +60,7 @@ proc ::Jabber::Browse::GetAll { } {
 # Results:
 #       callback scheduled.
 
-proc ::Jabber::Browse::Get {jid args} {
-    
+proc ::Jabber::Browse::Get {jid args} {    
     upvar ::Jabber::jstate jstate
     
     array set opts {
@@ -79,8 +78,7 @@ proc ::Jabber::Browse::Get {jid args} {
 #       Does the jid belong to a browse tree? This only if we actually
 #       have browsed the server the jid belongs to.
 
-proc ::Jabber::Browse::HaveBrowseTree {jid} {
-    
+proc ::Jabber::Browse::HaveBrowseTree {jid} {    
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jstate jstate
@@ -113,8 +111,7 @@ proc ::Jabber::Browse::HaveBrowseTree {jid} {
 # Results:
 #       none. UI maybe updated, jids may be auto browsed.
 
-proc ::Jabber::Browse::Callback {browseName type jid subiq} {
-    
+proc ::Jabber::Browse::Callback {browseName type jid subiq} {    
     variable wtop
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
@@ -233,7 +230,6 @@ proc ::Jabber::Browse::Callback {browseName type jid subiq} {
 #       Find any <user> element and send to groupchat.
 
 proc ::Jabber::Browse::DispatchUsers {jid subiq} {
-
     upvar ::Jabber::jstate jstate
     
     ::Jabber::Debug 2 "::Jabber::Browse::DispatchUsers jid=$jid,\
@@ -258,7 +254,6 @@ proc ::Jabber::Browse::DispatchUsers {jid subiq} {
 #
 
 proc ::Jabber::Browse::ErrorProc {silent browseName type jid errlist} {
-
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
@@ -294,8 +289,7 @@ proc ::Jabber::Browse::ErrorProc {silent browseName type jid errlist} {
 }
 
 
-proc ::Jabber::Browse::Show {w} {
-    
+proc ::Jabber::Browse::Show {w} {    
     upvar ::Jabber::jstate jstate
 
     if {$jstate(browseVis)} {
@@ -429,8 +423,7 @@ proc ::Jabber::Browse::Build {w} {
 #                   if empty then get it from the attributes instead.
 #       xmllist:    xml list starting after the <iq> tag.
 
-proc ::Jabber::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
-    
+proc ::Jabber::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {    
     variable wtree
     variable wtreecanvas
     variable options
@@ -553,8 +546,7 @@ proc ::Jabber::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
 # Results:
 #       browse tree icon updated.
 
-proc ::Jabber::Browse::Presence {jid presence args} {
-    
+proc ::Jabber::Browse::Presence {jid presence args} {    
     variable wtree
     upvar ::Jabber::jstate jstate
 
@@ -608,8 +600,7 @@ proc ::Jabber::Browse::SelectCmd {w v} {
 # Results:
 #       .
 
-proc ::Jabber::Browse::OpenTreeCmd {w v} {
-    
+proc ::Jabber::Browse::OpenTreeCmd {w v} {   
     variable wsearrows
     upvar ::Jabber::jstate jstate
     
@@ -628,8 +619,7 @@ proc ::Jabber::Browse::OpenTreeCmd {w v} {
     }    
 }
 
-proc ::Jabber::Browse::Refresh {jid} {
-    
+proc ::Jabber::Browse::Refresh {jid} {    
     variable wtree    
     upvar ::Jabber::jstate jstate
     
@@ -648,8 +638,7 @@ proc ::Jabber::Browse::Refresh {jid} {
     ::Jabber::Browse::Get $jid
 }
 
-proc ::Jabber::Browse::ControlArrows {step} {
-    
+proc ::Jabber::Browse::ControlArrows {step} {    
     variable wsearrows
     variable arrowRefCount
     
@@ -677,8 +666,7 @@ proc ::Jabber::Browse::ControlArrows {step} {
 #
 #       Removes all users from room, typically on exit. Not sure of this one...
 
-proc ::Jabber::Browse::ClearRoom {roomJid} {
-    
+proc ::Jabber::Browse::ClearRoom {roomJid} {    
     variable wtree    
     upvar ::Jabber::jstate jstate
 
@@ -689,8 +677,7 @@ proc ::Jabber::Browse::ClearRoom {roomJid} {
     }
 }
 
-proc ::Jabber::Browse::Clear { } {
-    
+proc ::Jabber::Browse::Clear { } {    
     variable wtree    
     upvar ::Jabber::jstate jstate
 
@@ -703,8 +690,7 @@ proc ::Jabber::Browse::Clear { } {
     $jstate(browse) clear
 }
 
-proc ::Jabber::Browse::CloseDlg {w} {
-    
+proc ::Jabber::Browse::CloseDlg {w} {    
     upvar ::Jabber::jstate jstate
 
     wm withdraw $w
@@ -773,8 +759,7 @@ proc ::Jabber::Browse::DoAddServer {w} {
     destroy $w
 }
 
-proc ::Jabber::Browse::DoAddServer {w} {
-    
+proc ::Jabber::Browse::DoAddServer {w} {   
     variable addserver
     variable finishedAdd
     upvar ::Jabber::jprefs jprefs
@@ -806,8 +791,7 @@ proc ::Jabber::Browse::DoAddServer {w} {
 #       what        any of "connect", "disconnect"
 #
 
-proc ::Jabber::Browse::SetUIWhen {what} {
-    
+proc ::Jabber::Browse::SetUIWhen {what} {    
     variable btaddserv
 
     # unused!
@@ -821,6 +805,78 @@ proc ::Jabber::Browse::SetUIWhen {what} {
 	    $btaddserv configure -state disabled
 	}
     }
+}
+
+proc ::Jabber::Browse::GetInfo {jid args} {    
+    upvar ::Jabber::jstate jstate
+    
+    array set opts {
+	-silent 0
+    }
+    array set opts $args
+    
+    # Browse services available.
+    $jstate(jlib) browse_get $jid  \
+      -command [list ::Jabber::Browse::InfoCB] \
+      -errorcommand [list ::Jabber::Browse::ErrorProc $opts(-silent)]
+}
+
+proc ::Jabber::Browse::InfoCB {browseName type jid subiq} {
+    global  sysFont this
+    
+    variable dlguid
+    upvar ::Jabber::nsToText nsToText
+
+    set w .brres[incr dlguid]
+    toplevel $w
+    if {[string match "mac*" $this(platform)]} {
+	eval $::macWindowStyle $w documentProc
+	::UI::MacUseMainMenu $w
+    } else {
+
+    }
+    wm title $w "Browse Info: $jid"
+    
+    # Global frame.
+    pack [frame $w.frall -borderwidth 1 -relief raised]   \
+      -fill both -expand 1 -ipadx 12 -ipady 4
+    set wtext $w.frall.t
+    label $w.frall.l -text "Description of services provided by $jid" \
+      -justify left
+    text $wtext -font $sysFont(s) -wrap word -width 60 -bg gray80 \
+      -tabs {180} -spacing1 3 -spacing3 2 -bd 0
+
+    pack $w.frall.l $wtext -side top -fill x -anchor w -padx 10  \
+      -pady 4
+    
+    $wtext tag configure head -background gray70
+    $wtext insert end "XML namespace\tDescription\n" head
+    set n 1
+    foreach c [wrapper::getchildren $subiq] {
+	if {[wrapper::gettag $c] == "ns"} {
+	    incr n
+	    set ns [wrapper::getcdata $c]
+	    $wtext insert end $ns
+	    if {[info exists nsToText($ns)]} {
+		$wtext insert end "\t$nsToText($ns)"
+	    }
+	    $wtext insert end \n
+	}
+    }
+    if {$n == 1} {
+	$wtext insert end "The component did not return any services"
+	incr n
+    }
+    $wtext configure -height $n
+
+    # Button part.
+    set frbot [frame $w.frall.frbot -borderwidth 0]
+    pack [button $frbot.btadd -text [::msgcat::mc Close] -width 8 \
+      -command [list destroy $w]]  \
+      -side right -padx 5 -pady 5
+    pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
+	
+    wm resizable $w 0 0	
 }
 
 #-------------------------------------------------------------------------------

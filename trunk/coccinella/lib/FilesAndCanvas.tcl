@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: FilesAndCanvas.tcl,v 1.11 2003-10-12 13:12:55 matben Exp $
+# $Id: FilesAndCanvas.tcl,v 1.12 2003-10-25 07:22:27 matben Exp $
  
 package require can2svg
 package require undo
@@ -433,7 +433,7 @@ proc ::CanvasFile::CanvasToFile {w fd absPath} {
 	
 	# Do not save grid or markers.
 	set tags [$w gettags $id]
-	if {([lsearch $tags grid] >= 0) || ([lsearch $tags tbbox] >= 0)} {
+	if {([lsearch $tags notactive] >= 0) || ([lsearch $tags tbbox] >= 0)} {
 	    continue
 	}
 	set type [$w type $id]

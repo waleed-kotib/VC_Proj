@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.14 2003-10-12 13:12:55 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.15 2003-10-25 07:22:27 matben Exp $
 
 package provide CanvasUtils 1.0
 package require sha1pure
@@ -199,6 +199,7 @@ proc ::CanvasUtils::GetUtag {c fromWhat {force 0}} {
     set pre_ {[^/ ]+}
     set digits_ {[0-9]+}
     set wild_ {[xX]+}
+    set wild_ {[xX\*]+}
     set utagpre_ ${wild_}|${utagpref}|${utagpref2}
     
     if {[string equal $fromWhat "current"]} {
@@ -215,17 +216,19 @@ proc ::CanvasUtils::GetUtag {c fromWhat {force 0}} {
 	
 	# Need to be compatible with both 'utagpref' and 'utagpref2'!
 	# Introduced with 0.94.4
-        if {[regexp "((${utagpre_})/${digits_})" $tags utag]} {
-	    return $utag
-        } else {
-	    return ""
-	}
+	return [lsearch -inline -regexp $tags "${utagpre_}/${digits_}"]
+        #if {[regexp "((${utagpre_})/${digits_})" $tags utag]} {
+	#    return $utag
+        #} else {
+	#    return ""
+	#}
     } else {
-        if {[regexp "(^| )(${pre_}/${digits_})" $tags m junk utag]} {
-	    return $utag
-        } else {
-	    return ""
-	}
+	return [lsearch -inline -regexp $tags "${pre_}/${digits_}"]
+        #if {[regexp "(^| )(${pre_}/${digits_})" $tags m junk utag]} {
+	#    return $utag
+        #} else {
+	#    return ""
+	#}
     }
 }
 
@@ -245,19 +248,18 @@ proc ::CanvasUtils::GetUtagPrefix { } {
 
 proc ::CanvasUtils::GetUtagFromCmd {str} {
     
-    set utag ""
     set ind [lsearch -exact $str "-tags"]
     if {$ind >= 0} {
-        regexp {[^/ ]+/[0-9]+} [lindex $str [incr ind]] utag
-    }    
-    return $utag
+	return [lsearch -inline -regexp [lindex $str [incr ind]]  \
+	  {^[^/ ]+/[0-9]+$}]
+    } else {  
+	return ""
+    }
 }
 
 proc ::CanvasUtils::GetUtagFromTagList {tags} {
     
-    set utag ""
-    regexp {[^/ ]+/[0-9]+} $tags utag
-    return $utag
+    return [lsearch -inline -regexp $tags {^[^/ ]+/[0-9]+$}]
 }
 
 # CanvasUtils::ReplaceUtag --
@@ -271,7 +273,6 @@ proc ::CanvasUtils::ReplaceUtag {str newUtag} {
         incr ind
         set tags [lindex $str $ind]
         if {[regsub {[^/ ]+/[0-9]+} $tags $newUtag tags]} {
-            #set str [lreplace $str $ind $ind $tags]
             lset str $ind $tags
 	}
     }    
@@ -300,12 +301,9 @@ proc ::CanvasUtils::GetUndoCommand {wtop cmd} {
 	    set canUndo [concat [list coords $utag] [$w coords $utag]]
 	}
 	create {
-	    set ind [lsearch -exact $cmd "-tags"]
-	    if {$ind > 0} {
-		set tags [lindex $cmd [expr $ind + 1]]
-		if {[regexp {([^ ]+/[0-9]+)} $tags match utag]} {
-		    set canUndo [list delete $utag]
-		}
+	    set utag [::CanvasUtils::GetUtagFromCmd $cmd]
+	    if {$utag != ""} {
+		set canUndo [list delete $utag]
 	    }
 	}
 	dchars {
@@ -1427,6 +1425,10 @@ proc ::CanvasUtils::DefineWhiteboardBindtags { } {
     }
     bind WhiteboardMove <ButtonRelease-1> {
 	::CanvasDraw::FinalizeMove %W [%W canvasx %x] [%W canvasy %y]
+	
+	# for testing
+	#::CanvasDraw::FinGridMove %W [%W canvasx %x] [%W canvasy %y] \
+	#  {{100 40 5} {100 40 5}}
     }
     bind WhiteboardMove <Shift-B1-Motion> {
 	::CanvasDraw::DoMove %W [%W canvasx %x] [%W canvasy %y] item 1

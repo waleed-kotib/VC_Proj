@@ -4,7 +4,7 @@
 #
 #  Code idee from Harrison & McLennan
 #  
-# $Id: balloonhelp.tcl,v 1.4 2003-10-23 06:27:59 matben Exp $
+# $Id: balloonhelp.tcl,v 1.5 2003-10-25 07:22:26 matben Exp $
 
 package provide balloonhelp 1.0
 
@@ -187,11 +187,14 @@ proc ::balloonhelp::Show {win type} {
 	    canvas {
 		
 		# Be sure to take any scrolling into account.
-		foreach {sx sy swidth sheight} [$win cget -scrollregion] \
-		  break
-		set xoff [expr int($swidth * [lindex [$win xview] 0])]
-		set yoff [expr int($sheight * [lindex [$win yview] 0])]
-		
+		set xoff 0
+		set yoff 0
+		set scrollregion [$win cget -scrollregion]
+		if {[llength $scrollregion] > 0} {
+		    foreach {sx sy swidth sheight} $scrollregion break
+		    set xoff [expr int($swidth * [lindex [$win xview] 0])]
+		    set yoff [expr int($sheight * [lindex [$win yview] 0])]
+		}
 		set itemid $locals($win,itemid)
 		set msg $locals($win,$itemid) 
 		foreach {x0 y0 x1 y1} [$win bbox $itemid] break

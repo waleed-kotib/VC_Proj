@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasDraw.tcl,v 1.14 2003-10-24 07:09:07 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.15 2003-10-25 07:22:26 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 #  
@@ -101,7 +101,7 @@ proc ::CanvasDraw::InitMove {w x y {what item}} {
 	    return
 	}
 	set xDrag(origCoords,$id) [$w coords $id]
-	set xDrag(undocmd) "coords $it [$w coords $id]"
+	set xDrag(undocmd) [concat coords $it [$w coords $id]]
 	$w addtag selectedmovie withtag $id
 	set bbox [$w bbox $id]
 	set x1 [expr [lindex $bbox 0] - 1]
@@ -136,7 +136,7 @@ proc ::CanvasDraw::InitMove {w x y {what item}} {
 	set x2 [expr [lindex $bbox 2] + 1]
 	set y2 [expr [lindex $bbox 3] + 1]
 	$w create rectangle $x1 $y1 $x2 $y2 -outline black -width 1 \
-	  -tags "lightBbox id$theItemId" -fill white
+	  -tags [list lightBbox id$theItemId] -fill white
 	
 	# Get the index of the coordinates that was 'hit'. Then update only
 	# this coordinate when moving.
@@ -197,15 +197,15 @@ proc ::CanvasDraw::InitMove {w x y {what item}} {
 	    } else {
 		set xDrag(arcHit) "extent"
 	    }
-	    set xDrag(undocmd)  \
-	      "itemconfigure $theItemId -start $startAng -extent $extentAng"
+	    set xDrag(undocmd) [concat itemconfigure $theItemId \
+	      -start $startAng -extent $extentAng]
 	    
 	} else {
 	    
 	    # Deal with other item points.
 	    # Find the one closest to the hit marker.
 	    
-	    set xDrag(undocmd) "coords $theItemId [$w coords $theItemId]"
+	    set xDrag(undocmd) [concat coords $theItemId [$w coords $theItemId]]
 	    set n [llength $fullListCoords]
 	    set minDist 1000
 	    for {set i 0} {$i < $n} {incr i 2} {
@@ -363,7 +363,7 @@ proc ::CanvasDraw::InitMoveWindow {wcan win x y} {
 	return
     }
     set xDragWin(winbg) [$win cget -bg]
-    set xDragWin(undocmd) "coords $it [$wcan coords $id]"
+    set xDragWin(undocmd) [concat coords $it [$wcan coords $id]]
     $win configure -bg gray20
     $wcan addtag selectedwindow withtag $id
 }
@@ -702,7 +702,7 @@ proc ::CanvasDraw::FinalizeMove {w x y {what item}} {
 		set opcmd [concat $opcmd "-fill {}"]
 		
 		# Update the new item id.
-		set cmd2 "$w create polygon $polyCoords $opcmd"
+		set cmd2 [concat $w create polygon $polyCoords $opcmd]
 		set theItemId [eval {$w create polygon} $polyCoords $opcmd]
 	    }
 	}
@@ -710,12 +710,12 @@ proc ::CanvasDraw::FinalizeMove {w x y {what item}} {
 	    if {[string equal $xDrag(type) "arc"]} {
 		
 		# The arc item: update both angles.
-		set cmd "itemconfigure $utagList -start $xDrag(arcStart)   \
-		  -extent $xDrag(arcExtent)"
+		set cmd [concat itemconfigure $utagList -start $xDrag(arcStart)   \
+		  -extent $xDrag(arcExtent)]
 	    } else {
 		
 		# Not arc, and not closed line item.
-		set cmd "coords $utagList [$w coords $utagList]"
+		set cmd [concat coords $utagList [$w coords $utagList]]
 	    }
 	}
 	
@@ -824,7 +824,7 @@ proc ::CanvasDraw::FinMoveFrame {wcan wframe  x y} {
     $wcan move selectedframe [expr $x - $xDragFrame(anchorX)]  \
       [expr $y - $xDragFrame(anchorY)]
     $wcan dtag selectedframe selectedframe
-    set cmd "coords $utag [$wcan coords $utag]"
+    set cmd [concat coords $utag [$wcan coords $utag]]
     
     # Delete the ghost rect or highlighted marker if any. Remove temporary tags.
     $wcan delete ghostrect
@@ -866,7 +866,7 @@ proc ::CanvasDraw::FinMoveWindow {wcan win x y} {
 	return
     }
     $wcan dtag selectedwindow selectedwindow
-    set cmd "coords $utag [$wcan coords $utag]"
+    set cmd [concat coords $utag [$wcan coords $utag]]
     $win configure -bg $xDragWin(winbg)
         
     # Do send to all connected.
@@ -893,6 +893,8 @@ proc ::CanvasDraw::FinGridMove {wcan x y grid args} {
     if {![info exists xDrag]} {
 	return
     }
+    
+    # What if more than one moved. Defenitely do not grid it.
     set id [$wcan find withtag ismoved]
     if {$id == ""} {
 	return
@@ -907,16 +909,21 @@ proc ::CanvasDraw::FinGridMove {wcan x y grid args} {
     array set argsArr $args
     set wtop [::UI::GetToplevelNS $wcan]
 
+    # Extract grid specifiers.
     foreach {xmin dx nx} [lindex $grid 0] break
     foreach {ymin dy ny} [lindex $grid 1] break
+    
+    # Position of item.
     foreach {x0 y0 x1 y1} [$wcan bbox $id] break
     set xc [expr int(($x0 + $x1)/2)]
     set yc [expr int(($y0 + $y1)/2)]
     set width2 [expr int(($x1 - $x0)/2)]
     set height2 [expr int(($y1 - $y0)/2)]
-    set ix [expr int(($xc - $xmin)/$dx + 0.5)]
-    set iy [expr int(($yc - $ymin)/$dy + 0.5)]
-    if {($ix >= 0) && ($ix < $nx) && ($iy >= 0) && ($iy < $ny)} {
+    set ix [expr round(double($xc - $xmin)/$dx)]
+    set iy [expr round(double($yc - $ymin)/$dy)]
+    
+    # Figure out if in the domain of the grid.
+    if {($ix >= 0) && ($ix <= $nx) && ($iy >= 0) && ($iy <= $ny)} {
 	set doGrid 1
 	set newx [expr $xmin + $ix * $dx]
 	set newy [expr $ymin + $iy * $dy]
@@ -925,7 +932,7 @@ proc ::CanvasDraw::FinGridMove {wcan x y grid args} {
 	set newx [expr int($x)]
 	set newy [expr int($y)]
     }
-    puts "ix=$ix, iy=$iy, xc=$xc, yc=$yc, newx=$newx, newy=$newy"
+    #puts "ix=$ix, iy=$iy, xc=$xc, yc=$yc, newx=$newx, newy=$newy"
 
     $wcan dtag ismoved
     if {[string equal $xDrag(type) "image"]} {
@@ -947,17 +954,40 @@ proc ::CanvasDraw::FinGridMove {wcan x y grid args} {
 	    incr newy $offy
 	}
 	set cmd [list coords $utag $newx $newy]
+	if {$doGrid} {
+	    set redo [list ::CanvasUtils::Command $wtop $cmd]
+	} else {
+	    set redo [list ::CanvasUtils::Command $wtop $cmd "remote"]
+	}
     } else {
-	set anchor c
 	
+	# Non image items. 
+	# If grid then compute distances to be moved:
+	#    local item need only move to closest grid,
+	#    remote item needs to be moved all the way.
+	if {$doGrid} {
+	    set anchor c
+	    set cmdlocal [list move $utag [expr $newx - $xc] [expr $newy - $yc]]
+	    set deltax [expr $newx - $xDrag(anchorX)]
+	    set deltay [expr $newy - $xDrag(anchorY)]
+	    set cmdremote [list move $utag $deltax $deltay]
+	    set redo [list ::CanvasUtils::CommandExList $wtop  \
+	      [list [list $cmdlocal "local"] [list $cmdremote "remote"]]]
+	} else {
+	    set deltax [expr $x - $xDrag(anchorX)]
+	    set deltay [expr $y - $xDrag(anchorY)]
+	    set cmd [list move $utag $deltax $deltay]
+	    set redo [list ::CanvasUtils::Command $wtop $cmd "remote"]
+	}
     }
 	
     # Do send to all connected.
-    set redo [list ::CanvasUtils::Command $wtop $cmd]
-    if {[info exists xDragWin(undocmd)]} {
-	set undo [list ::CanvasUtils::Command $wtop $xDragWin(undocmd)]
+    if {[info exists xDrag(undocmd)]} {
+	set undo [list ::CanvasUtils::Command $wtop $xDrag(undocmd)]
+	#puts "undo=$undo"
     }
     eval $redo
+
     catch {unset xDrag}
 }
 
