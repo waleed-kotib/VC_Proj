@@ -38,7 +38,7 @@ proc ::Speech::Verify { } {
     # Make sure these are consistent as well.
     # Speech:
     if {![::Plugins::HavePackage TclSpeech] && ![::Plugins::HavePackage MSSpeech]} {
-	set sprefs(SpeechOn) 0
+	set sprefs(haveSpeech) 0
     }   
     
     # Voices consistency check.
@@ -119,9 +119,7 @@ proc ::Speech::SpeakMessage {type body args} {
 
 proc ::Speech::SpeakWBText {who str} {
     variable sprefs
-    
-    #puts "::Speech::SpeakWBText: who=$who, str=$str"
-    
+        
     set punct {[.,;?!]}
     set voice ""    
     switch -- $who {
@@ -177,9 +175,11 @@ proc ::Speech::InitPrefsHook { } {
     variable allprefskeys {speakWBText speakMsg speakChat voiceUs voiceOther}
     
     
-    # If we have got a Speech package the default is to have it enabled.
-    set sprefs(SpeechOn) 1
-
+    set sprefs(haveSpeech) 0
+    if {[::Plugins::HavePackage TclSpeech] || [::Plugins::HavePackage MSSpeech]} {
+	set sprefs(haveSpeech) 1
+    }
+    
     # Default in/out voices. They will be set to actual values in 
     # ::Plugins::VerifySpeech  
     set sprefs(voiceUs)    ""
@@ -198,8 +198,9 @@ proc ::Speech::InitPrefsHook { } {
 }
 
 proc ::Speech::BuildPrefsHook {wtree nbframe} {
+    variable sprefs
     
-    if {[::Plugins::HavePackage TclSpeech] || [::Plugins::HavePackage MSSpeech]} {
+    if {$sprefs(haveSpeech)} {
 	$wtree newitem {General {Speech}}  \
 	  -text [::msgcat::mc {Speech}]
 
@@ -213,10 +214,12 @@ proc ::Speech::SavePrefsHook { } {
     variable tmpPrefs
     variable allprefskeys
 
-    foreach key $allprefskeys {
-	set sprefs($key) $tmpPrefs($key)
+    if {$sprefs(haveSpeech)} {
+	foreach key $allprefskeys {
+	    set sprefs($key) $tmpPrefs($key)
+	}
+	catch {unset tmpPrefs}
     }
-    catch {unset tmpPrefs}
 }
 
 proc ::Speech::CancelPrefsHook { } {
@@ -224,14 +227,17 @@ proc ::Speech::CancelPrefsHook { } {
     variable tmpPrefs
     variable allprefskeys
     
-    # Detect any changes.
-    foreach key $allprefskeys {
-	if {![string equal $sprefs($key) $tmpPrefs($key)]} {
-	    ::Preferences::HasChanged
-	    return
+    if {$sprefs(haveSpeech)} {
+
+	# Detect any changes.
+	foreach key $allprefskeys {
+	    if {![string equal $sprefs($key) $tmpPrefs($key)]} {
+		::Preferences::HasChanged
+		return
+	    }
 	}
+	catch {unset tmpPrefs}
     }
-    catch {unset tmpPrefs}
 }
 
 proc ::Speech::BuildPrefsPage {page} {
