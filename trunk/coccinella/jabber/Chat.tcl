@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.33 2004-01-13 14:50:20 matben Exp $
+# $Id: Chat.tcl,v 1.34 2004-01-14 07:53:33 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -36,6 +36,8 @@ namespace eval ::Jabber::Chat:: {
     option add *Chat*sendDisImage         sendDis               widgetDefault
     option add *Chat*saveImage            save                  widgetDefault
     option add *Chat*saveDisImage         saveDis               widgetDefault
+    option add *Chat*historyImage         history               widgetDefault
+    option add *Chat*historyDisImage      historyDis            widgetDefault
     option add *Chat*printImage           print                 widgetDefault
     option add *Chat*printDisImage        printDis              widgetDefault
 
@@ -400,7 +402,7 @@ proc ::Jabber::Chat::Build {threadID args} {
     # Try to keep any /resource part unless not possible.
     
     if {[info exists argsArr(-from)]} {
-	set state(jid) [$jstate(jlib) getrecipientjid $argsArr(-from)]
+	set state(jid) [::Jabber::InvokeJlibCmd getrecipientjid $argsArr(-from)]
     } else {
 	set state(jid) ""
     }
@@ -428,24 +430,26 @@ proc ::Jabber::Chat::Build {threadID args} {
     set wtray    $w.frall.tray
         
     # Shortcut button part.
-    set iconSend      [::Theme::GetImage [option get $w sendImage {}]]
-    set iconSendDis   [::Theme::GetImage [option get $w sendDisImage {}]]
-    set iconSave      [::Theme::GetImage [option get $w saveImage {}]]
-    set iconSaveDis   [::Theme::GetImage [option get $w saveDisImage {}]]
-    set iconPrint     [::Theme::GetImage [option get $w printImage {}]]
-    set iconPrintDis  [::Theme::GetImage [option get $w printDisImage {}]]
+    set iconSend       [::Theme::GetImage [option get $w sendImage {}]]
+    set iconSendDis    [::Theme::GetImage [option get $w sendDisImage {}]]
+    set iconSave       [::Theme::GetImage [option get $w saveImage {}]]
+    set iconSaveDis    [::Theme::GetImage [option get $w saveDisImage {}]]
+    set iconHistory    [::Theme::GetImage [option get $w historyImage {}]]
+    set iconHistoryDis [::Theme::GetImage [option get $w historyDisImage {}]]
+    set iconPrint      [::Theme::GetImage [option get $w printImage {}]]
+    set iconPrintDis   [::Theme::GetImage [option get $w printDisImage {}]]
 
     ::buttontray::buttontray $wtray 50
     pack $wtray -side top -fill x -padx 4 -pady 2
 
-    $wtray newbutton send    Send    $iconSend  $iconSendDis  \
+    $wtray newbutton send    Send    $iconSend    $iconSendDis    \
       [list [namespace current]::Send $token]
-     $wtray newbutton save   Save    $iconSave  $iconSaveDis  \
+     $wtray newbutton save   Save    $iconSave    $iconSaveDis    \
        [list [namespace current]::Save $token]
-    $wtray newbutton print   Print   $iconPrint $iconPrintDis  \
-      [list [namespace current]::Print $token]
-    $wtray newbutton history History $iconPrint $iconPrintDis  \
+    $wtray newbutton history History $iconHistory $iconHistoryDis \
       [list [namespace current]::BuildHistory $jid2]
+    $wtray newbutton print   Print   $iconPrint   $iconPrintDis   \
+      [list [namespace current]::Print $token]
     
     hooks::run buildChatButtonTrayHook $wtray $state(jid)
     
@@ -673,7 +677,7 @@ proc ::Jabber::Chat::Send {token} {
     
     # According to XMPP we should send to 3-tier jid if still online,
     # else to 2-tier.
-    set jid [$jstate(jlib) getrecipientjid $state(jid)]
+    set jid [::Jabber::InvokeJlibCmd getrecipientjid $state(jid)]
     set state(jid) $jid
     jlib::splitjid $jid jid2 res
 
@@ -713,7 +717,7 @@ proc ::Jabber::Chat::Send {token} {
     set state(lastsubject) $state(subject)
     
     if {[catch {
-	eval {$jstate(jlib) send_message $jid  \
+	eval {::Jabber::InvokeJlibCmd send_message $jid  \
 	  -thread $threadID -type chat -body $allText} $opts
     } err]} {
 	tk_messageBox -type ok -icon error -title "Network Error" \
