@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.44 2004-01-23 08:59:23 matben Exp $
+# $Id: UI.tcl,v 1.45 2004-01-26 07:33:43 matben Exp $
 
 package require entrycomp
 
@@ -17,9 +17,9 @@ namespace eval ::UI:: {
     # Icons
     option add *buttonOKImage            buttonok       widgetDefault
     option add *buttonCancelImage        buttoncancel   widgetDefault
-
-    variable accelBindsToMain {}
     
+    variable wThatUseMainMenu {}
+
     # Addon stuff.
     variable fixMenusCallback {}
     variable menuSpecPublic
@@ -456,7 +456,7 @@ proc ::UI::NewMenu {wtop wmenu label menuSpec state args} {
         
     # Need to cache the complete menuSpec's since needed in MenuMethod.
     set cachedMenuSpec($wtop,$wmenu) $menuSpec
-    set mapWmenuToWtop($wmenu) $wtop
+    set mapWmenuToWtop($wmenu)       $wtop
 
     eval {::UI::BuildMenu $wtop $wmenu $label $menuSpec $state} $args
 }
@@ -482,7 +482,6 @@ proc ::UI::BuildMenu {wtop wmenu label menuDef state args} {
     global  this wDlgs prefs dashFull2Short osprefs
     
     variable menuKeyToIndex
-    variable accelBindsToMain
     
     if {$wtop == "."} {
 	set topw .
@@ -510,7 +509,7 @@ proc ::UI::BuildMenu {wtop wmenu label menuDef state args} {
 	pack ${wmenu}la -side left -padx 4
 	bind ${wmenu}la <Button-1> [list ::UI::DoTopMenuPopup %W $wtop $wmenu]
     }
-
+    
     set mod $osprefs(mod)
     set i 0
     foreach line $menuDef {
@@ -531,7 +530,8 @@ proc ::UI::BuildMenu {wtop wmenu label menuDef state args} {
 		# Make cascade menu recursively.
 		regsub -all -- " " [string tolower $name] "" mt
 		regsub -all -- {\.} $mt "" mt
-		eval {::UI::BuildMenu $wtop ${wmenu}.${mt} $name $subdef $state} $args
+		eval {::UI::BuildMenu $wtop ${wmenu}.${mt} $name $subdef $state} \
+		  $args
 		
 		# Explicitly set any disabled state of cascade.
 		::UI::MenuMethod $m entryconfigure $name -state $mstate
@@ -543,25 +543,22 @@ proc ::UI::BuildMenu {wtop wmenu label menuDef state args} {
 		if {[string length $accel] > 0} {
 		    lappend mopts -accelerator ${mod}+${accel}
 		    if {![string equal $this(platform) "macintosh"]} {
-			set key [string map {< less > greater} [string tolower $accel]]
+			set key [string map {< less > greater}  \
+			  [string tolower $accel]]
 			
 			if {[string equal $state "normal"]} {
 			    if {[string equal $mstate "normal"]} {
 				bind $topw <${mod}-Key-${key}> $cmd
-				
-				# Cache bindings for use in dialogs that inherit
-				# main menu.
-				if {$wtop == "."} {
-				    lappend accelBindsToMain  \
-				      [list <${mod}-Key-${key}> $cmd]
-				}
+				#bind $topw <${mod}-Key-${key}> \
+				#  [list $wmenu invoke $i]
 			    }
 			} else {
 			    bind $topw <${mod}-Key-${key}> {}
 			}			
 		    }
 		}
-		eval {$m add $type -label $locname -command $cmd -state $mstate} $mopts 
+		eval {$m add $type -label $locname -command $cmd -state $mstate} \
+		  $mopts 
 	    }
 	}
 	incr i
@@ -584,12 +581,13 @@ proc ::UI::FreeMenu {wtop} {
 
 # UI::MenuMethod --
 #  
-#       Utility to use instead of 'menuPath cmd index args'.
+#       Utility to use instead of 'menuPath cmd index args' since it
+#       handles menu accelerators as well.
 #
 # Arguments:
 #       wmenu       menu's widget path
 #       cmd         valid menu command
-#       key         key to menus index
+#       key         key to menus index (mOpen etc.)
 #       args
 #       
 # Results:
@@ -601,41 +599,129 @@ proc ::UI::MenuMethod {wmenu cmd key args} {
     variable menuKeyToIndex
     variable mapWmenuToWtop
     variable cachedMenuSpec
+    variable wThatUseMainMenu
         
     # Need to cache the complete menuSpec's since needed in MenuMethod.
-    set wtop $mapWmenuToWtop($wmenu)
+    set wtop     $mapWmenuToWtop($wmenu)
     set menuSpec $cachedMenuSpec($wtop,$wmenu)
-    set mind $menuKeyToIndex($wmenu,$key)
+    set mind     $menuKeyToIndex($wmenu,$key)
     
-    # This would be enough unless we need working accelerator keys.
+    # This would be enough unless we needed to work with accelerator keys.
     eval {$wmenu $cmd $mind} $args
     
     # Handle any menu accelerators as well. 
     # Make sure the necessary variables for the command exist here!
-    if {![string equal $this(platform) "macintosh"]} {
-	set ind [lsearch $args "-state"]
-	if {$ind >= 0} {
-	    set mstate [lindex $args [incr ind]]
-	    if {$wtop == "."} {
-		set topw .
-	    } else {
-		set topw [string trimright $wtop "."]
+    if {[string equal $this(platform) "macintosh"]} {
+	return
+    }
+    if {$wtop == "."} {
+	set topw .
+	
+	# Handle Macs that use the main menu.
+	if {[string equal $this(platform) "macosx"]} {
+	    set wtmp $wThatUseMainMenu
+	    set wThatUseMainMenu {}
+	    foreach wmac $wtmp {
+		if {[winfo exists $wmac]} {
+		    lappend wThatUseMainMenu $wmac
+		}
 	    }
-	    set mcmd [lindex [lindex $menuSpec $mind] 2]
-	    set mcmd [subst -nocommands $mcmd]
-	    set acc [lindex [lindex $menuSpec $mind] 4]
-	    if {[string length $acc]} {
-		set acckey [string map {< less > greater} [string tolower $acc]]
-		if {[string equal $mstate "normal"]} {
-		    bind $topw <$osprefs(mod)-Key-${acckey}> $mcmd
-		} else {
-		    bind $topw <$osprefs(mod)-Key-${acckey}> {}
-		}			
+	    set topw [concat . $wThatUseMainMenu]
+	}	
+    } else {
+	set topw [string trimright $wtop "."]
+    }
+	    
+    foreach {key val} $args {
+	    
+	switch -- $key {
+	    -state {
+		set mcmd [lindex [lindex $menuSpec $mind] 2]
+		set mcmd [subst -nocommands $mcmd]
+		set acc [lindex [lindex $menuSpec $mind] 4]
+		if {[string length $acc]} {
+		    set acckey [string map {< less > greater}  \
+		      [string tolower $acc]]
+		    foreach w $topw {
+			if {[string equal $val "normal"]} {
+			    bind $w <$osprefs(mod)-Key-${acckey}> $mcmd
+			    #bind $w <$osprefs(mod)-Key-${acckey}> \
+			     # [list $wmenu invoke $mind]
+			} else {
+			    bind $w <$osprefs(mod)-Key-${acckey}> {}
+			}
+		    }
+		}
 	    }
 	}
     }
 }
 
+# UI::MacUseMainMenu --
+# 
+#       Used on MacOSX to set accelerator keys for a toplevel that inherits
+#       the menu from ".".
+#       
+# Arguments:
+#       w           toplevel widget that uses the "." menu.
+#       
+# Results:
+#       none
+
+proc ::UI::MacUseMainMenu {w} {
+    global  this osprefs
+    variable mapWmenuToWtop
+    variable cachedMenuSpec
+    variable menuKeyToIndex
+    variable wThatUseMainMenu
+    
+    if {![string match "mac*" $this(platform)]} {
+	return
+    }
+    ::Debug 3 "::UI::MacUseMainMenu w=$w"
+	
+    # Set up menu accelerators from ".".
+    if {![string equal $w "."] && [string equal $this(platform) "macosx"]} {
+	lappend wThatUseMainMenu $w
+	
+	set wmenuList {}
+	foreach {wmenu wtop} [array get mapWmenuToWtop] {
+	    if {[string equal $wtop "."]} {
+		lappend wmenuList $wmenu
+	    }
+	}
+	
+	# Need to loop through all menuDefs to look for accelerators.
+	foreach wmenu $wmenuList {
+	    foreach line $cachedMenuSpec(.,$wmenu) {
+		
+		# {type name cmd mstate accel mopts subdef} $line
+		set accel [lindex $line 4]
+		if {[string length $accel]} {
+
+		    # Must check the actual state of menu!
+		    set name [lindex $line 1]
+		    set mind $menuKeyToIndex($wmenu,$name)
+		    set state [$wmenu entrycget $mind -state]
+		    if {[string equal $state "normal"]} {
+			set acckey [string map {< less > greater}  \
+			  [string tolower $accel]]
+			bind $w <$osprefs(mod)-Key-${acckey}> [lindex $line 2]
+			#bind $w <$osprefs(mod)-Key-${acckey}> \
+			 # [list $wmenu invoke $mind]
+		    }
+		}
+	    }
+	}
+    }
+    
+    # This sets up the edit menu that we inherit from ".".
+    bind $w <FocusIn> "+ ::UI::MacFocusFixEditMenu $w . %W"
+    
+    # If we hand over to a 3rd party toplevel window, it by default inherits
+    # the "." menu bar, so we need to take precautions.
+    bind $w <FocusOut> "+ ::UI::MacFocusFixEditMenu $w . %W"
+}
 
 proc ::UI::BuildAppleMenu {wtop wmenuapple state} {
     global  this wDlgs
@@ -832,7 +918,7 @@ proc ::UI::MegaDlgMsgAndEntry {title msg label varName btcancel btok} {
     pack [button $frbot.btok -text $btok  \
       -default active -command [list set [namespace current]::finmega 1]] \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text $btcancel -width 8  \
+    pack [button $frbot.btcancel -text $btcancel  \
       -command [list set [namespace current]::finmega 0]]  \
       -side right -padx 5 -pady 5  
     
@@ -1355,55 +1441,17 @@ proc ::UI::FixMenusWhenCopy {w} {
     set wtop [::UI::GetToplevelNS $w]
     upvar ::${wtop}::opts opts
 
+    set medit ${wtop}menu.edit
     if {$opts(-state) == "normal"} {
-	::UI::MenuMethod ${wtop}menu.edit entryconfigure mPaste -state normal
+	::UI::MenuMethod $medit entryconfigure mPaste -state normal
     } else {
-	::UI::MenuMethod ${wtop}menu.edit entryconfigure mPaste -state disabled
+	::UI::MenuMethod $medit entryconfigure mPaste -state disabled
     }
     
     # Invoke any callbacks from 'addons'.
     foreach cmd $fixMenusCallback {
 	eval {$cmd} ${wtop}menu "copy"
     }
-}
-
-# UI::MacUseMainMenu --
-# 
-#       Used on MacOSX to set accelerator keys for a toplevel that inherits
-#       the menu from ".".
-#       Used on all Macs to set state on edit menus.
-#       
-# Arguments:
-#       w           toplevel widget that uses the "." menu.
-#       
-# Results:
-#       none
-
-proc ::UI::MacUseMainMenu {w} {
-    global  this
-    variable accelBindsToMain
-    
-    if {![string match "mac*" $this(platform)]} {
-	return
-    }
-    ::Debug 3 "::UI::MacUseMainMenu w=$w"
-        
-    # Set up menu accelerators from ".".
-    # Cached accelerators to ".".
-    if {($w != ".") && [string equal $this(platform) "macosx"]} {
-	foreach mentry $accelBindsToMain {
-	    foreach {sequence cmd} $mentry {
-		bind $w $sequence $cmd
-	    }
-	}
-    }
-    
-    # This sets up the edit menu that we inherit from ".".
-    bind $w <FocusIn> "+ ::UI::MacFocusFixEditMenu $w . %W"
-    
-    # If we hand over to a 3rd party toplevel window, it by default inherits
-    # the "." menu bar, so we need to take precautions.
-    bind $w <FocusOut> "+ ::UI::MacFocusFixEditMenu $w . %W"
 }
 
 # UI::MacFocusFixEditMenu --
@@ -1450,10 +1498,6 @@ proc ::UI::CenterWindow {win} {
 	set x [expr ($sw - [winfo reqwidth $win])/2]
 	set y [expr ($sh - [winfo reqheight $win])/2]
 	wm geometry $win "+$x+$y"
-	if {0} {
-	    puts "sw=$sw, sh=$sh, x=$x, y=$y, reqwidth=[winfo reqwidth $win],\
-	      reqheight=[winfo reqheight $win]"
-	}
     } $win]
 }
 
