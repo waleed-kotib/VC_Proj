@@ -8,7 +8,7 @@
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: mactabnotebook.tcl,v 1.29 2005-02-27 14:11:04 matben Exp $
+# $Id: mactabnotebook.tcl,v 1.30 2005-03-04 14:21:35 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -247,7 +247,7 @@ proc ::mactabnotebook::Init { } {
     # Platform specifics...
     switch -- $this(platform) {
 	unix {
-	    option add *MacTabnotebook.font    {Helvetica -12}   widgetDefault
+	    option add *MacTabnotebook.font    {Helvetica -11}   widgetDefault
 	}
 	windows {
 	    option add *MacTabnotebook.font    {system}   widgetDefault
