@@ -7,7 +7,7 @@
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: notebook.tcl,v 1.9 2004-10-12 13:48:56 matben Exp $
+# $Id: notebook.tcl,v 1.10 2004-10-31 14:32:58 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -385,7 +385,7 @@ proc ::notebook::DeletePage {w name} {
     if {[string equal $page $nbInfo(current)]} {
 	
 	# Set next page to current.
-	set newInd [expr $ind + 1]
+	set newInd [expr {$ind + 1}]
 	set newCurrentPage [lindex $nbInfo(pages) $newInd]
 	if {$newInd >= [llength $nbInfo(pages)]} {
 	    
@@ -509,8 +509,8 @@ proc ::notebook::FixSize {win} {
     }
     if {($maxw > [winfo reqwidth $win]) || ($maxh > [winfo reqheight $win])} {
 	set bd [$win cget -borderwidth]
-	set maxw [expr $maxw + 2 * $bd]
-	set maxh [expr $maxh + 2 * $bd]
+	set maxw [expr {$maxw + 2 * $bd}]
+	set maxh [expr {$maxh + 2 * $bd}]
 	if {$widgetGlobals(debug) > 2} {
 	    puts "\t configure -width $maxw -height $maxh"
 	}

@@ -8,7 +8,7 @@
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: mactabnotebook.tcl,v 1.21 2004-10-22 15:05:33 matben Exp $
+# $Id: mactabnotebook.tcl,v 1.22 2004-10-31 14:32:57 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -261,13 +261,13 @@ proc ::mactabnotebook::Init { } {
     
     set toDrawPoly {
 	{0 0 $x 0 \
-	  [expr $xplm - 2] [expr $ymim + 5] \
-	  [expr $xplm] [expr $ymim + 1] \
-	  [expr $xplm + 2] $ymim \
-	  [expr $xplm + $wd - 2] $ymim \
-	  [expr $xplm + $wd] [expr $ymim + 1] \
-	  [expr $xplm + $wd + 2] [expr $ymim + 5] \
-	  [expr $x + $wd + 2 * $margin2] 0  \
+	  [expr {$xplm - 2}] [expr {$ymim + 5}] \
+	  [expr $xplm] [expr {$ymim + 1}] \
+	  [expr {$xplm + 2}] $ymim \
+	  [expr {$xplm + $wd - 2}] $ymim \
+	  [expr {$xplm + $wd}] [expr {$ymim + 1}] \
+	  [expr {$xplm + $wd + 2}] [expr {$ymim + 5}] \
+	  [expr {$x + $wd + 2 * $margin2}] 0  \
 	  2000 0 2000 9 0 9}  \
 	  black $color {[list $tname tab tab-$tname]}}
 	
@@ -351,8 +351,8 @@ proc ::mactabnotebook::Init { } {
 	{[list 3d-dark $tname 3d-dark-$tname]}  $3dlight
     }
     set toDrawPolyWinXP {
-	{-2 0 -2 $yl $xleft $yl $xleft [expr $yu+2] [expr $xleft+2] $yu \
-	  [expr $xright-2] $yu $xright [expr $yu+2] $xright $yl \
+	{-2 0 -2 $yl $xleft $yl $xleft [expr {$yu+2}] [expr {$xleft+2}] $yu \
+	  [expr {$xright-2}] $yu $xright [expr {$yu+2}] $xright $yl \
 	  2000 $yl 2000 0}
 	{[list poly $tname poly-$tname]}
     }
@@ -735,7 +735,7 @@ proc ::mactabnotebook::NextPage {w} {
 
     set ind [lsearch -exact $tnInfo(tabs) $tnInfo(current)]
     if {$ind >= 0} {
-	if {$ind == [expr [llength $tnInfo(tabs)]-1]} {
+	if {$ind == [expr {[llength $tnInfo(tabs)]-1}]} {
 	    set ind 0
 	}
 	Display $w [lindex $tnInfo(tabs) $ind]
@@ -784,7 +784,7 @@ proc ::mactabnotebook::DeletePage {w name} {
     if {[string equal $tnInfo(current) $name]} {
 	
 	# Set next page to current.
-	set newInd [expr $ind + 1]
+	set newInd [expr {$ind + 1}]
 	set newCurrent [lindex $tnInfo(tabs) $newInd]
 	if {$newInd >= [llength $tnInfo(tabs)]} {
 	    
@@ -892,20 +892,20 @@ proc ::mactabnotebook::BuildMac {w} {
 	    set str $name
 	}
 	set id [$w.tabs create text \
-	  [expr $x + $margin2 + 2] [expr -0.5 * $margin2]  \
+	  [expr {$x + $margin2 + 2}] [expr {-0.5 * $margin2}]  \
 	  -anchor sw -text $str -font $font -tags [list ttxt $tname]]
 	
 	set bbox [$w.tabs bbox $id]
-	set wd [expr [lindex $bbox 2] - [lindex $bbox 0]]
-	set ht [expr [lindex $bbox 3] - [lindex $bbox 1]]
+	set wd [expr {[lindex $bbox 2] - [lindex $bbox 0]}]
+	set ht [expr {[lindex $bbox 3] - [lindex $bbox 1]}]
 	if {$ht > $maxh} {
 	    set maxh $ht
 	}
 	
 	# The actual drawing of the tab here.
 	
-	set xplm [expr $x + $margin2]
-	set ymim [expr -$ht - $margin2]
+	set xplm [expr {$x + $margin2}]
+	set ymim [expr {-$ht - $margin2}]
 	foreach {coords col fill tags} $toDrawPoly {
 	    eval $w.tabs create polygon $coords -outline $col -fill $fill \
 	      -tags $tags
@@ -916,11 +916,11 @@ proc ::mactabnotebook::BuildMac {w} {
 	$w.tabs raise $id	
 	$w.tabs bind $tname <ButtonPress-1>  \
 	  [list ::mactabnotebook::ButtonPressTab $w $name]
-	incr x [expr $wd + 2 * $margin2 + 3]
+	incr x [expr {$wd + 2 * $margin2 + 3}]
     }
-    set height [expr $maxh + 2 * $margin2]
+    set height [expr {$maxh + 2 * $margin2}]
     $w.tabs move all 0 $height
-    $w.tabs configure -width $x -height [expr $height + 10]
+    $w.tabs configure -width $x -height [expr {$height + 10}]
 
     set tnInfo(pending) {}
 }
@@ -975,9 +975,9 @@ proc ::mactabnotebook::BuildAqua {w} {
     set x $margin1
     set yl -$options(-ymargin1)
     set contenth [expr {$fontHeight > $maxh} ? $fontHeight : $maxh]
-    set yu [expr $yl - $contenth - 2 - 2*$ipady]
-    set ym [expr ($yl + $yu)/2]
-    set height [expr abs($yu - 6)]
+    set yu [expr {$yl - $contenth - 2 - 2*$ipady}]
+    set ym [expr {($yl + $yu)/2}]
+    set height [expr {abs($yu - 6)}]
     
     foreach name $tnInfo(tabs) {
 	set tname $name2uid($name)
@@ -988,21 +988,21 @@ proc ::mactabnotebook::BuildAqua {w} {
 	}
 	if {[info exists tnInfo($name,-image)]} {
 	    set im $tnInfo($name,-image)
-	    set xim [expr $x + 2 + $ipadx]
+	    set xim [expr {$x + 2 + $ipadx}]
 	    $w.tabs create image $xim $ym -anchor w -image $im  \
 	      -tags [list tim $tname]
-	    set xtext [expr $xim + [image width $im] + $ipadx]
+	    set xtext [expr {$xim + [image width $im] + $ipadx}]
 	} else {
-	    set xtext [expr int($x + 2 + $ipadx)]
+	    set xtext [expr {int($x + 2 + $ipadx)}]
 	}
 	set id [$w.tabs create text $xtext $ym -fill $foreground \
 	  -anchor w -text $str -font $font -tags [list ttxt $tname]]
 	
 	set bbox [$w.tabs bbox $id]
-	set wd [expr [lindex $bbox 2] - [lindex $bbox 0]]
-	set ht [expr [lindex $bbox 3] - [lindex $bbox 1]]
+	set wd [expr {[lindex $bbox 2] - [lindex $bbox 0]}]
+	set ht [expr {[lindex $bbox 3] - [lindex $bbox 1]}]
 	set xleft $x
-	set xright [expr $xtext + $wd + $ipadx + 2]
+	set xright [expr {$xtext + $wd + $ipadx + 2}]
 	
 	# Draw tabs.
 	foreach {coords ptags} $toDrawPolyAqua {
@@ -1021,7 +1021,7 @@ proc ::mactabnotebook::BuildAqua {w} {
 	#  $fill talu
 	
 	# New x for next tab.
-	set x [expr $xright + $margin2]
+	set x [expr {$xright + $margin2}]
 
 	$w.tabs bind $tname <ButtonPress-1>  \
 	  [list ::mactabnotebook::ButtonPressTab $w $name]
@@ -1083,19 +1083,19 @@ proc ::mactabnotebook::BuildWinxp {w} {
     set x $margin1
     set yl -$options(-ymargin1)
     set contenth [expr {$fontHeight > $maxh} ? $fontHeight : $maxh]
-    set yu [expr $yl - $contenth - 2 - 2*$ipady]
-    set ym [expr ($yl + $yu + 2)/2]
-    set height [expr abs($yu) + 6]
+    set yu [expr {$yl - $contenth - 2 - 2*$ipady}]
+    set ym [expr {($yl + $yu + 2)/2}]
+    set height [expr {abs($yu) + 6}]
 
     foreach {r1 g1 b1} [winfo rgb . $options(-tabgradient1)] break
     foreach {r2 g2 b2} [winfo rgb . $options(-tabgradient2)] break
     foreach col {r g b} {
-	set k($col) [expr double([set ${col}1]-[set ${col}2])/($yu-$yl)]
+	set k($col) [expr {double([set ${col}1]-[set ${col}2])/($yu-$yl)}]
 	set m($col) [expr [set ${col}1]-$k($col)*$yu]
     }
     for {set y $yu} {$y <= $yl} {incr y} {
-	set gcol($y) [format "#%02x%02x%02x" [expr int($k(r)*$y+$m(r))/256]  \
-	  [expr int($k(g)*$y+$m(g))/256] [expr int($k(b)*$y+$m(b))/256]]
+	set gcol($y) [format "#%02x%02x%02x" [expr {int($k(r)*$y+$m(r))/256}]  \
+	  [expr {int($k(g)*$y+$m(g))/256}] [expr {int($k(b)*$y+$m(b))/256}]]
     }
     
     foreach name $tnInfo(tabs) {
@@ -1107,23 +1107,23 @@ proc ::mactabnotebook::BuildWinxp {w} {
 	}
 	if {[info exists tnInfo($name,-image)]} {
 	    set im $tnInfo($name,-image)
-	    set xim [expr $x + 2 + $ipadx]
+	    set xim [expr {$x + 2 + $ipadx}]
 	    $w.tabs create image $xim $ym -anchor w -image $im  \
 	      -tags [list tim $tname]
-	    set xtext [expr $xim + [image width $im] + $ipadx]
+	    set xtext [expr {$xim + [image width $im] + $ipadx}]
 	} else {
-	    set xtext [expr int($x + 2 + $ipadx)]
+	    set xtext [expr {int($x + 2 + $ipadx)}]
 	}
 	set id [$w.tabs create text $xtext $ym -fill $foreground \
 	  -anchor w -text $str -font $font -tags [list ttxt $tname]]
 	
 	set bbox [$w.tabs bbox $id]
-	set wd [expr [lindex $bbox 2] - [lindex $bbox 0]]
-	set ht [expr [lindex $bbox 3] - [lindex $bbox 1]]
+	set wd [expr {[lindex $bbox 2] - [lindex $bbox 0]}]
+	set ht [expr {[lindex $bbox 3] - [lindex $bbox 1]}]
 	set xleft $x
-	set xright [expr $xtext + $wd + $ipadx + 2]
-	set xlplus [expr $xleft+1]
-	set xrminus [expr $xright-$xoff]
+	set xright [expr {$xtext + $wd + $ipadx + 2}]
+	set xlplus [expr {$xleft+1}]
+	set xrminus [expr {$xright-$xoff}]
 	
 	# Draw tabs.
 	foreach {coords ptags} $toDrawPolyWinXP {
@@ -1132,21 +1132,22 @@ proc ::mactabnotebook::BuildWinxp {w} {
 	}
 	
 	# Gradient.
-	for {set y [expr $yu+2]} {$y < $yl} {incr y} { 
+	for {set y [expr {$yu+2}]} {$y < $yl} {incr y} { 
 	    $w.tabs create line $xlplus $y $xrminus $y -fill $gcol($y) \
 	      -tags [list tgrad $tname]
 	}
 	
 	# Accent lines.
-	$w.tabs create line [expr $xleft+2] $yu [expr $xright-2] $yu  \
+	$w.tabs create line [expr {$xleft+2}] $yu [expr {$xright-2}] $yu  \
 	  -fill $accent1 -tags [list tacc $tname]
-	$w.tabs create line [expr $xleft+1] [expr $yu+1] \
-	  [expr $xright-1] [expr $yu+1] -fill $accent2  -tags [list tacc $tname]
-	$w.tabs create line $xleft [expr $yu+2] $xright [expr $yu+2]  \
+	$w.tabs create line [expr {$xleft+1}] [expr {$yu+1}] \
+	  [expr {$xright-1}] [expr {$yu+1}] \
+	  -fill $accent2  -tags [list tacc $tname]
+	$w.tabs create line $xleft [expr {$yu+2}] $xright [expr {$yu+2}]  \
 	  -fill $accent2 -tags [list tacc $tname]
 	
 	# New x for next tab.
-	set x [expr $xright + $margin2]
+	set x [expr {$xright + $margin2}]
 
 	$w.tabs bind $tname <ButtonPress-1>  \
 	  [list ::mactabnotebook::ButtonPressTab $w $name]
@@ -1359,36 +1360,54 @@ proc ::mactabnotebook::ConfigWinxpTabs {w} {
     }        
 }
 
+proc ::mactabnotebook::DrawCloseButton {w name} {
+    
+    upvar ::mactabnotebook::${w}::name2uid name2uid
+
+    set tname $name2uid($name)
+    set r 8
+    set a [expr {int($r/1.4)}]
+    
+    $w.tabs create oval -$r -$r $r $r -outline {} -fill gray40
+    $w.tabs create arc -$r -$r $r $r -start 30 -extent 120 -fill {} \
+      -outline black -tags [list $tname bt] -style arc
+    $w.tabs create arc -$r -$r $r $r -start -30 -extent -120 -fill {} \
+      -outline white -tags [list $tname bt] -style arc
+    $w.tabs create line -$a -$a $a $a -fill red
+    $w.tabs create line -$a $a $a -$a -fill red
+    
+}
+
 proc ::mactabnotebook::DrawAluRect {wcan x0 y0 x1 y1 col tag} {
         
     foreach {r g b} [winfo rgb . $col] break
     
-    set dcol [expr 10*256]
+    set dcol [expr {10*256}]
     set lenmin 10
     set lenmax 40
-    set nstrokes [expr 2.0 * ($x1-$x0)/$lenmax]
-    set xleft  [expr $x0-$lenmin]
-    set xright [expr $x1+$lenmin]
-    set xlen   [expr $xright-$xleft]
+    set nstrokes [expr {2.0 * ($x1-$x0)/$lenmax}]
+    set xleft  [expr {$x0-$lenmin}]
+    set xright [expr {$x1+$lenmin}]
+    set xlen   [expr {$xright-$xleft}]
     
     # If x is the probability to draw a stroke with given conditions,
     # then <n> = (1-x) sum n x^(n-1), where n is the number of strokes 
     # until failure (included). Then nstrokes = n-1.
     # We get: <n> = 1/(1-x)  ->  x = nstrokes/(1+nstrokes).
     
-    set pstroke [expr $nstrokes/(1+$nstrokes)]
+    set pstroke [expr {$nstrokes/(1+$nstrokes)}]
     puts "nstrokes=$nstrokes, pstroke=$pstroke"
     
     for {set y $y0} {$y < $y1} {incr y} { 
     
-	while {[expr rand() < $pstroke]} {
-	    set rmid [expr $xleft+rand()*$xlen]
-	    set rlen [expr $lenmin+rand()*($lenmax-$lenmin)]
-	    set xl [expr $rmid-$rlen]
-	    set xr [expr $rmid+$rlen]
+	while {[expr {rand() < $pstroke}]} {
+	    set rmid [expr {$xleft+rand()*$xlen}]
+	    set rlen [expr {$lenmin+rand()*($lenmax-$lenmin)}]
+	    set xl [expr {$rmid-$rlen}]
+	    set xr [expr {$rmid+$rlen}]
 	    set xl [expr {$xl < $x0} ? $x0 : $xl]
 	    set xr [expr {$xr > $x1} ? $x1 : $xr]
-	    set gray [expr int($r+2.0*(rand()-0.5)*$dcol)]
+	    set gray [expr {int($r+2.0*(rand()-0.5)*$dcol)}]
 	    set c [eval format "#%04x%04x%04x" $gray $gray $gray]
 	    $wcan create line $xl $y $xr $y -fill $c -tags $tag
 	}

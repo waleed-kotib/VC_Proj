@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.86 2004-10-30 14:44:52 matben Exp $
+# $Id: Chat.tcl,v 1.87 2004-10-31 14:32:58 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -1120,6 +1120,7 @@ proc ::Jabber::Chat::SetState {chattoken state} {
     upvar 0 $chattoken chatstate
     
     Debug 4 "::Jabber::Chat::SetState chattoken=$chattoken, state=$state"
+    
     if {[string equal $state $chatstate(state)]} {
 	#return
     }
@@ -1197,6 +1198,9 @@ proc ::Jabber::Chat::CloseHook {wclose} {
 
 proc ::Jabber::Chat::LoginHook { } {
 
+    # handled by presence hook instead
+    return ""
+    
     foreach dlgtoken [GetTokenList dlg] {
 	set chattoken [GetActiveChatToken $dlgtoken]
 	SetThreadState $dlgtoken $chattoken
@@ -1210,8 +1214,14 @@ proc ::Jabber::Chat::LogoutHook { } {
 	variable $dlgtoken
 	upvar 0 $dlgtoken dlgstate
 
-	foreach ctoken $dlgstate(chattokens) {
-	    SetState $ctoken disabled
+	foreach chattoken $dlgstate(chattokens) {
+	    SetState $chattoken disabled
+	    
+	    # Necessary to "zero" all presence.
+	    variable $chattoken
+	    upvar 0 $chattoken chatstate
+	    
+	    set chatstate(presence) unavailable
 	}
     }
     return ""

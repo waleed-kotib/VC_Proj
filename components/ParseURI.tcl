@@ -4,7 +4,7 @@
 #       typically from an anchor element <a href='xmpp:jid[?query]'/>
 #       in a html page.
 # 
-# $Id: ParseURI.tcl,v 1.11 2004-10-16 13:32:50 matben Exp $
+# $Id: ParseURI.tcl,v 1.12 2004-10-31 14:32:57 matben Exp $
 
 package require uriencode
 
@@ -31,6 +31,7 @@ proc ::ParseURI::Init { } {
 proc ::ParseURI::Parse {args} {
     global  argv
     variable uid
+    upvar ::Jabber::jprefs jprefs
     
     if {$args == {}} {
 	set args $argv
@@ -73,6 +74,10 @@ proc ::ParseURI::Parse {args} {
     
     if {[::Jabber::IsConnected]} {
 	ProcessURI $token
+    } elseif {$jprefs(autoLogin)} {
+	
+	# Wait until logged in.
+	::hooks::register loginHook   [list ::ParseURI::LoginHook $token]
     } else {
 	set profname $state(profname)
 	set password [::Profiles::Get $profname password]
@@ -110,6 +115,12 @@ proc ::ParseURI::LoginCB {token logtoken status {errmsg ""}} {
     if {$status == "ok"} {
 	ProcessURI $token
     }
+}
+
+proc ::ParseURI::LoginHook {token} {
+    
+    ::hooks::deregister loginHook   ::ParseURI::LoginHook
+    ProcessURI $token
 }
 
 proc ::ParseURI::RelaunchHook {args} {
