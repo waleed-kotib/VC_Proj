@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.85 2005-02-14 14:16:31 matben Exp $
+# $Id: jabberlib.tcl,v 1.86 2005-02-15 09:07:32 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -66,10 +66,8 @@
 #	-presencecommand      callback for <presence> elements
 #	-streamnamespace      initialization namespace (D = "jabber:client")
 #	-keepalivesecs        send a newline character with this interval
-#	-autoaway             boolean 0/1 if to send away message after inactivity
-#	-xautoaway            boolean 0/1 if to send xaway message after inactivity
-#	-awaymin              if -away send away message after this many minutes
-#	-xawaymin             if -xaway send xaway message after this many minutes
+#	-autoawaymins         if > 0 send away message after this many minutes
+#	-xautoawaymins        if > 0 send xaway message after this many minutes
 #	-awaymsg              the away message 
 #	-xawaymsg             the xaway message
 #	
@@ -195,6 +193,7 @@
 #                
 #       050201  all network errors handled via client command (clientcmd)
 #               individual commands shall never throw network errors!
+#       050215  reworked autoaway; api changes!
 
 package require wrapper
 package require roster
@@ -254,10 +253,8 @@ namespace eval jlib::conference { }
 #	-presencecommand      
 #	-streamnamespace      
 #	-keepalivesecs        
-#	-autoaway             
-#	-xautoaway            
-#	-awaymin              
-#	-xawaymin             
+#	-autoawaymins              
+#	-xautoawaymins             
 #	-awaymsg              
 #	-xawaymsg             
 #       
@@ -301,11 +298,9 @@ proc jlib::new {rostername clientcmd args} {
 	-messagecommand       ""
 	-presencecommand      ""
 	-streamnamespace      "jabber:client"
-	-keepalivesecs        30
-	-autoaway             0
-	-xautoaway            0
-	-awaymin              0
-	-xawaymin             0
+	-keepalivesecs        60
+	-autoawaymins         0
+	-xautoawaymins        0
 	-awaymsg              ""
 	-xawaymsg             ""
     }
@@ -324,7 +319,7 @@ proc jlib::new {rostername clientcmd args} {
       [list [namespace current]::dispatcher $jlibname]    \
       [list [namespace current]::xmlerror $jlibname]]
     
-    set iqcmd(uid) 1001
+    set iqcmd(uid)   1001
     set prescmd(uid) 1001
     set lib(rostername)   $rostername
     set lib(clientcmd)    $clientcmd
@@ -343,7 +338,7 @@ proc jlib::new {rostername clientcmd args} {
         
     # Any of {available away dnd invisible unavailable}
     set locals(status) "unavailable"
-    set locals(myjid) ""
+    set locals(myjid)  ""
     
     # Init conference and groupchat state.
     set conf(allroomsin) {}
@@ -485,11 +480,13 @@ proc jlib::config {jlibname args} {
 	}
     }
     
-    # Reschedule auto away if changed.
-    if {[info exists argsArr(-autoaway)] || \
-      [info exists argsArr(-xautoaway)] || \
-      [info exists argsArr(-awaymin)] || \
-      [info exists argsArr(-xawaymin)]} {
+    # Reschedule auto away only if changed.
+    if {[info exists argsArr(-autoawaymins)] &&  \
+      ($argsArr(-autoawaymins) != $opts(-autoawaymins))} {
+	schedule_auto_away $jlibname
+    }
+    if {[info exists argsArr(-xautoawaymins)] &&  \
+      ($argsArr(-xautoawaymins) != $opts(-xautoawaymins))} {
 	schedule_auto_away $jlibname
     }
     return ""
@@ -1565,7 +1562,7 @@ proc jlib::geterrspecfromerror {errelem kind} {
     }
     set cchdata [wrapper::getcdata $errelem]
     set errcode [wrapper::getattribute $errelem code]
-    if {($errcode != "") && [string is integer $errcode]} {
+    if {[string is integer -strict $errcode]} {
 	if {[info exists errCodeToText($errcode)]} {
 	    set errmsg $errCodeToText($errcode)
 	} else {
@@ -2438,9 +2435,6 @@ proc jlib::send_message {jlibname to args} {
     }
     set xmllist [wrapper::createtag "message" -attrlist $attrlist  \
       -subtags $children]
-	
-    # For the auto away function.
-    schedule_auto_away $jlibname
     
     send $jlibname $xmllist
 }
@@ -2504,8 +2498,6 @@ proc jlib::send_presence {jlibname args} {
 		}
 	    }
 	    command {
-		
-		# Use iq things for this; needs to be renamed.
 		lappend attrlist "id" $prescmd(uid)
 		set prescmd($prescmd(uid)) $value
 		incr prescmd(uid)
@@ -2517,16 +2509,6 @@ proc jlib::send_presence {jlibname args} {
     }
     set xmllist [wrapper::createtag "presence" -attrlist $attrlist  \
       -subtags $children]
-    
-    # Be sure to cancel auto away scheduling if necessary.
-    if {[string equal $type "available"]} {
-	if {[info exists argsArr(-show)] && \
-	  ![string equal $argsArr(-show) "chat"]} {
-	    cancel_auto_away $jlibname
-	}
-    } else {
-	cancel_auto_away $jlibname
-    }
     
     # Any of {available away dnd invisible unavailable}
     # Must be destined to login server (by default).
@@ -2548,6 +2530,9 @@ proc jlib::send_presence {jlibname args} {
 proc jlib::send {jlibname xmllist} {
     
     upvar ${jlibname}::lib lib
+	
+    # For the auto away function.
+    schedule_auto_away $jlibname
 
     set xml [wrapper::createxml $xmllist]
         
@@ -2555,7 +2540,6 @@ proc jlib::send {jlibname xmllist} {
     # The first failure reports the network error, closes the stream,
     # which stops multiple errors to be reported to client.
     if {$lib(isinstream) && [catch {eval $lib(transportsend) {$xml}} err]} {
-	#closestream $jlibname
 	kill $jlibname
 	uplevel #0 $lib(clientcmd) [list $jlibname networkerror]
     }
@@ -3108,15 +3092,18 @@ proc jlib::roster_remove {jlibname jid cmd args} {
 
     Debug 3 "jlib::roster_remove jid=$jid, cmd=$cmd, args=$args"
     
-    array set argsArr $args  
     set xmllist [wrapper::createtag "query"   \
       -attrlist {xmlns jabber:iq:roster}      \
       -subtags [list  \
-      [wrapper::createtag "item"   \
+      [wrapper::createtag "item"  \
       -attrlist [list jid $jid subscription remove]]]]
     send_iq $jlibname "set" [list $xmllist] -command   \
       [list [namespace current]::parse_roster_remove $jlibname $jid $cmd]
 }
+
+# jlib::schedule_keepalive --
+# 
+#       Supposed to detect network failures but seems not to work like that.
 
 proc jlib::schedule_keepalive {jlibname} {   
 
@@ -3150,12 +3137,12 @@ proc jlib::schedule_auto_away {jlibname} {
     upvar ${jlibname}::opts opts
     
     cancel_auto_away $jlibname
-    if {$opts(-autoaway) && $opts(-awaymin) > 0} {
-	set locals(afterawayid) [after [expr 60000 * $opts(-awaymin)] \
+    if {$opts(-autoawaymins) > 0} {
+	set locals(afterawayid) [after [expr 60000 * $opts(-autoawaymins)] \
 	  [list [namespace current]::auto_away_cmd $jlibname away]]
     }
-    if {$opts(-xautoaway) && $opts(-xawaymin) > 0} {
-	set locals(afterxawayid) [after [expr 60000 * $opts(-xawaymin)] \
+    if {$opts(-xautoawaymins) > 0} {
+	set locals(afterxawayid) [after [expr 60000 * $opts(-xautoawaymins)] \
 	  [list [namespace current]::auto_away_cmd $jlibname xaway]]
     }    
 }
@@ -3189,11 +3176,21 @@ proc jlib::auto_away_cmd {jlibname what} {
     switch -- $what {
 	away {
 	    send_presence $jlibname -show "away" -status $opts(-awaymsg)
+
+	    # Since this has itself triggered a schedule of auto away need to kill it.
+	    if {[info exists locals(afterawayid)]} {
+		after cancel $locals(afterawayid)
+		unset locals(afterawayid)
+	    }
 	}
 	xaway {
 	    send_presence $jlibname -show "xa" -status $opts(-xawaymsg)
+	    if {[info exists locals(afterxawayid)]} {
+		after cancel $locals(afterxawayid)
+		unset locals(afterxawayid)
+	    }
 	}
-    }        
+    }
     uplevel #0 $lib(clientcmd) [list $jlibname $what]
 }
 

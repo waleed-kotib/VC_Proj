@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.127 2005-02-14 13:48:38 matben Exp $
+# $Id: Jabber.tcl,v 1.128 2005-02-15 09:07:30 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -489,10 +489,11 @@ proc ::Jabber::Init { } {
     
     # Check if we need to set any auto away options.
     set opts {}
-    if {$jprefs(autoaway) || $jprefs(xautoaway)} {
-	foreach name {autoaway xautoaway awaymin xawaymin awaymsg xawaymsg} {
-	    lappend opts -$name $jprefs($name)
-	}
+    if {$jprefs(autoaway) && ($jprefs(awaymin) > 0)} {
+	lappend opts -autoawaymins $jprefs(awaymin) -awaymsg $jprefs(awaymsg)
+    }
+    if {$jprefs(xautoaway) && ($jprefs(xawaymin) > 0)} {
+	lappend opts -xautoawaymins $jprefs(xawaymin) -xawaymsg $jprefs(xawaymsg)
     }
     
     # Add the three element callbacks.
@@ -503,7 +504,7 @@ proc ::Jabber::Init { } {
 
     # Make an instance of jabberlib and fill in our roster object.
     set jstate(jlib) [eval {
-	::jlib::new $jstate(roster) ::Jabber::ClientProc -keepalivesecs 60
+	::jlib::new $jstate(roster) ::Jabber::ClientProc
     } $opts]
 
     # Register handlers for various iq elements.
@@ -818,13 +819,16 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	    ::UI::MessageBox -icon error -type ok -message [mc jamessconnbroken]
 	}
 	away - xaway {
+	    set jstate(status) $what
+	    ::hooks::run setPresenceHook $what
 	    after idle ::Jabber::AutoAway
 	}
 	streamerror {
 	    DoCloseClientConnection
 	    if {[info exists argsArr(-errormsg)]} {
-		set msg "Receieved a fatal error:\
-		  $argsArr(-errormsg). The connection is closed."
+		set msg "Receieved a fatal error: "
+		append msg "[lindex $argsArr(-errormsg) 1]\n"
+		append msg "The connection is closed."
 	    } else {
 		set msg "Receieved a fatal error. The connection is closed."
 	    }
@@ -859,6 +863,7 @@ proc ::Jabber::ClientProc {jlibName what args} {
 
 proc ::Jabber::AutoAway {} {
     
+    # This is a naive try to avoid that the modal dialog blocks. BAD!!!
     set tm [clock format [clock seconds] -format "%H:%M:%S"]
     set ans [::UI::MessageBox -icon info -type yesno -default yes \
       -message [mc jamessautoawayset $tm]]
