@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.3 2004-11-24 08:23:43 matben Exp $
+# $Id: Init.tcl,v 1.4 2004-11-25 15:02:46 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -201,12 +201,12 @@ proc ::Init::Msgcat { } {
 
     # Test here if you want a particular message catalog (en, nl, de, fr, sv,...).
     #::msgcat::mclocale en
-    uplevel #0 ::msgcat::mcload $this(msgcatPath)
+    uplevel #0 [list ::msgcat::mcload $this(msgcatPath)]
 
     # This is a method to override default messages with custom ones for each
     # language.
     if {[file isdirectory $this(msgcatPostPath)]} {
-	uplevel #0 ::msgcat::mcload $this(msgcatPostPath)
+	uplevel #0 [list ::msgcat::mcload $this(msgcatPostPath)]
     }
     uplevel #0 namespace import ::msgcat::mc
 }
