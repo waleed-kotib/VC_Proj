@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.43 2003-12-20 14:27:16 matben Exp $
+# $Id: Jabber.tcl,v 1.44 2003-12-22 15:04:57 matben Exp $
 #
 #  The $address is an ip name or number.
 #
@@ -276,7 +276,6 @@ proc ::Jabber::FactoryDefaults { } {
     set jprefs(subsc,notinrost) ask
     set jprefs(subsc,auto) 0
     set jprefs(subsc,group) {}
-    set jprefs(chat,showtime) 1
     set jprefs(block,notinrost) 0
     set jprefs(block,list) {}
     set jprefs(speakMsg) 0
@@ -891,6 +890,7 @@ proc ::Jabber::MessageDispatcher {type body args} {
 		eval {::Jabber::WB::ChatMsg} $args
 	    } else {
 		eval {::Jabber::Chat::GotMsg $body} $args
+		eval {hooks::run newChatMessageHook $body} $args
 	    }	    
 	}
 	groupchat {
@@ -898,6 +898,7 @@ proc ::Jabber::MessageDispatcher {type body args} {
 		eval {::Jabber::WB::GroupChatMsg} $args
 	    } else {
 		eval {::Jabber::GroupChat::GotMsg $body} $args
+		eval {hooks::run newGroupChatMessageHook $body} $args
 	    }	    
 	}
 	default {
@@ -951,6 +952,7 @@ proc ::Jabber::DispatchNormalMessage {body iswb args} {
 	}
     } else {
 	eval {::Jabber::MailBox::GotMsg $body} $args
+	eval {hooks::run newMessageHook $body} $args
     }
 }
 
@@ -1621,6 +1623,9 @@ proc ::Jabber::DoCloseClientConnection {args} {
     }
     ::Jabber::UI::LogoutClear
     set jstate(ipNum) ""
+    
+    # Run all logout hooks.
+    hooks::run logoutHook
 }
 
 # Jabber::EndSession --
@@ -3331,10 +3336,7 @@ proc ::Jabber::Logout::WithStatus { } {
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
     
-    if {[info exists prefs(winGeom,$w)]} {
-	regexp {^[^+-]+((\+|-).+$)} $prefs(winGeom,$w) match pos
-	wm geometry $w $pos
-    }
+    ::UI::SetWindowPosition $w
     wm resizable $w 0 0
     bind $w <Return> "$frbot.btout invoke"
     

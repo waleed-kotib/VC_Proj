@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.23 2003-12-19 15:47:39 matben Exp $
+# $Id: Preferences.tcl,v 1.24 2003-12-22 15:04:58 matben Exp $
  
 package require notebook
 package require tree
@@ -245,12 +245,7 @@ proc ::Preferences::Build { } {
       -side left -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
     
-    # Don't set width and height since not resizable (font change ex).
-    # .prefs 597x385+177+69
-    if {[info exists prefs(winGeom,$w)]} {
-	regexp {^[^+-]+((\+|-).+$)} $prefs(winGeom,$w) match pos
-	wm geometry $w $pos
-    }
+    ::UI::SetWindowPosition $w
     wm resizable $w 0 0
     bind $w <Return> {}
     
@@ -1614,9 +1609,7 @@ proc ::Preferences::FileMap::Inspect {w doWhat wlist {indSel {}}} {
       -command "set [namespace current]::finishedInspect 0"
     pack $w.ok $w.cancel -in $w.frbot -side right -padx 5 -pady 5
     
-    if {[info exists prefs(winGeom,$w)]} {
-	wm geometry $w $prefs(winGeom,$w)
-    }
+    ::UI::SetWindowPosition $w
     wm resizable $w 0 0
     bind $w <Return> "$w.ok invoke"
     

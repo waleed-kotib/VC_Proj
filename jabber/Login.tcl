@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.14 2003-12-19 15:47:39 matben Exp $
+# $Id: Login.tcl,v 1.15 2003-12-22 15:04:58 matben Exp $
 
 package provide Login 1.0
 
@@ -184,10 +184,7 @@ proc ::Jabber::Login::Login { } {
     trace variable [namespace current]::menuVar w  \
       [namespace current]::TraceMenuVar
 	
-    if {[info exists prefs(winGeom,$w)]} {
-	regexp {^[^+-]+((\+|-).+$)} $prefs(winGeom,$w) match pos
-	wm geometry $w $pos
-    }
+    ::UI::SetWindowPosition $w
     wm resizable $w 0 0
     bind $w <Return> ::Jabber::Login::Doit
     bind $w <Escape> [list ::Jabber::Login::DoCancel $w]
@@ -562,7 +559,9 @@ proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
 	::Jabber::Agents::GetAll
     }
     
-
+    # Run all login hooks.
+    hooks::run loginHook
+    
     # Any noise.
     ::Sounds::PlayWhenIdle "connected"
 }

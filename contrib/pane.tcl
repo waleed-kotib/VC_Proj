@@ -5,7 +5,7 @@
 ##
 ## Large rewrite by Mats Bengtsson 2001-2002
 ##
-# $Id: pane.tcl,v 1.2 2003-12-15 08:20:53 matben Exp $
+# $Id: pane.tcl,v 1.3 2003-12-22 15:04:57 matben Exp $
 
 package provide Pane 1.0
 
@@ -68,7 +68,7 @@ package provide Pane 1.0
 namespace eval ::pane:: {
     namespace export pane
     
-    option add *Pane.background          white             widgetDefault
+    option add *Pane.sashBackground      white             widgetDefault
     option add *Pane.imageHorizontal     pane::imh         widgetDefault
     option add *Pane.imageVertical       pane::imv         widgetDefault
 
@@ -153,7 +153,7 @@ proc ::pane::pane {opt args} {
 		}
 	    }
 	    return -code error \
-		    "no master found. perhaps $args is not a pane slave?"
+	      "no master found. perhaps $args is not a pane slave?"
 	}
 	default { eval pane_config [list $opt] $args }
     }
@@ -234,7 +234,25 @@ proc ::pane::pane {opt args} {
     if {![info exists hndconf(-$wh)]} {
 	set hndconf(-$wh) [image $wh $PANE(impane$ohv)]	
     }
-    set off [expr $hndconf(-$wh) + 2]
+    
+    # Uses the parent to get options which must have -class Pane.
+    set bg  [option get $p sashBackground Background]
+    set imh [option get $p imageHorizontal {}]
+    set imv [option get $p imageVertical {}]
+    #puts "imv=$imv, imh=$imh"
+    if {[set im${ohv}] == ""} {
+	set widget frame
+	lappend widopts -$wh 8
+	set off $hndconf(-$wh)
+    } else {
+	set widget label
+	lappend widopts -anchor nw -image [set im${ohv}]
+	set off [expr $hndconf(-$wh) + 2]
+    }
+    if {$bg != ""} {
+	lappend widopts -background $bg
+    }
+
     set pos 0.0
     set i 0
     foreach w $PANE($p,w) {
@@ -251,9 +269,8 @@ proc ::pane::pane {opt args} {
     
     while {[incr ll -1]} {
 	set frac [expr $frac - [lindex $fracl $ll]]
-	set h [eval label [list $p.__h$ll] -bd 1 -relief raised \
-	  -cursor sb_${hv}_double_arrow -image $PANE(impane$ohv)  \
-	  -anchor nw [array get hndconf]]
+	set h [eval $widget [list $p.__h$ll] -bd 1 -relief raised  \
+	  -cursor sb_${hv}_double_arrow $widopts [array get hndconf]]
 	eval place [list $h] -rel$owh 1 -rel$xy $frac \
 	  -$xy -$off -anchor nw $opt(hpl)
 	raise $h

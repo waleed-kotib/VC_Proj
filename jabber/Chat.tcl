@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.21 2003-12-20 16:25:20 matben Exp $
+# $Id: Chat.tcl,v 1.22 2003-12-22 15:04:57 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -24,28 +24,32 @@ namespace eval ::Jabber::Chat:: {
 
     option add *Chat*meForeground         red                   widgetDefault
     option add *Chat*meBackground         #cecece               widgetDefault
+    option add *Chat*meFont               $fontSB               widgetDefault                                     
     option add *Chat*meTextForeground     black                 widgetDefault
     option add *Chat*meTextBackground     #cecece               widgetDefault
-    option add *Chat*meFont               $fontSB               widgetDefault                                     
+    option add *Chat*meTextFont           $fontS                widgetDefault                                     
     option add *Chat*youForeground        blue                  widgetDefault
     option add *Chat*youBackground        white                 widgetDefault
+    option add *Chat*youFont              $fontSB               widgetDefault
     option add *Chat*youTextForeground    black                 widgetDefault
     option add *Chat*youTextBackground    white                 widgetDefault
-    option add *Chat*youFont              $fontSB               widgetDefault
+    option add *Chat*youTextFont          $fontS                widgetDefault
     option add *Chat*clockFormat          "%H:%M"               widgetDefault
 
+    # List of: {tagName optionName resourceName resourceClass}
     variable chatOptions {
-	meForeground          Foreground
-	meBackground          Background
-	meTextForeground      Foreground
-	meTextBackground      Background
-	meFont                Font
-	youForeground         Foreground
-	youBackground         Background
-	youTextForeground     Foreground
-	youTextBackground     Background
-	youFont               Font
-	clockFormat           ClockFormat
+	{me          -foreground          meForeground          Foreground}
+	{me          -background          meBackground          Background}
+	{me          -font                meFont                Font}
+	{metext      -foreground          meTextForeground      Foreground}
+	{metext      -background          meTextBackground      Background}
+	{metext      -font                meTextFont            Font}
+	{you         -foreground          youForeground         Foreground}
+	{you         -background          youBackground         Background}
+	{you         -font                youFont               Font}
+	{youtext     -foreground          youTextForeground     Foreground}
+	{youtext     -background          youTextBackground     Background}
+	{youtext     -font                youTextFont           Font}
     }
 
     # Add all event hooks.
@@ -120,10 +124,7 @@ proc ::Jabber::Chat::StartThreadDlg {args} {
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
     
-    if {[info exists prefs(winGeom,$w)]} {
-	regexp {^[^+-]+((\+|-).+$)} $prefs(winGeom,$w) match pos
-	wm geometry $w $pos
-    }
+    ::UI::SetWindowPosition $w
     wm resizable $w 0 0
     bind $w <Return> [list $frbot.btok invoke]
     
@@ -232,6 +233,7 @@ proc ::Jabber::Chat::GotMsg {body args} {
 
 	# If we haven't a window for this thread, make one!
 	eval {::Jabber::Chat::Build $threadID} $args
+	eval {hooks::run newChatThreadHook $boby} $args
     }   
     set w $locals($threadID,wtop)
     if {[info exists argsArr(-subject)]} {
@@ -248,10 +250,10 @@ proc ::Jabber::Chat::GotMsg {body args} {
     }
     
     $wtext configure -state normal
-    $wtext insert end $txt youtag
-    $wtext insert end "   " youtxttag
+    $wtext insert end $txt you
+    $wtext insert end "   " youtext
 
-    ::Text::ParseAndInsert $wtext $body youtxttag linktag
+    ::Text::ParseAndInsert $wtext $body youtext linktag
 
     $wtext configure -state disabled
     $wtext see end
@@ -296,7 +298,6 @@ proc ::Jabber::Chat::StartThread {jid} {
 proc ::Jabber::Chat::Build {threadID args} {
     global  this prefs wDlgs
     
-    variable chatOptions
     variable locals
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
@@ -349,13 +350,13 @@ proc ::Jabber::Chat::Build {threadID args} {
       -fill both -expand 1 -ipadx 4
     
     # Widget paths.
-    set frmid $w.frall.frmid
-    set wtxt $frmid.frtxt
-    set wtext $wtxt.text
-    set wysc $wtxt.ysc
-    set wtxtsnd $frmid.frtxtsnd        
+    set frmid    $w.frall.frmid
+    set wtxt     $frmid.frtxt
+    set wtext    $wtxt.text
+    set wysc     $wtxt.ysc
+    set wtxtsnd  $frmid.frtxtsnd        
     set wtextsnd $wtxtsnd.text
-    set wyscsnd $wtxtsnd.ysc
+    set wyscsnd  $wtxtsnd.ysc
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
@@ -404,7 +405,7 @@ proc ::Jabber::Chat::Build {threadID args} {
     set locals($threadID,wtojid) $frtop.eto
 
     # Text chat.
-    pack [frame $frmid -height 250 -width 300 -relief sunken -bd 1]  \
+    pack [frame $frmid -height 250 -width 300 -relief sunken -bd 1 -class Pane] \
       -side top -fill both -expand 1 -padx 4 -pady 4
     set locals($threadID,wtxt) $wtxt
     frame $wtxt
@@ -440,15 +441,15 @@ proc ::Jabber::Chat::Build {threadID args} {
     }
     ::pane::pane $wtxt $wtxtsnd -orient vertical -limit 0.0 -relative $relpos
     
-    set locals($threadID,wtext) $wtext
+    set locals($threadID,wtext)    $wtext
     set locals($threadID,wtextsnd) $wtextsnd
 
     # We need the window title to reflect the receiving jid.
     trace variable [namespace current]::locals($threadID,jid) w  \
       [list [namespace current]::TraceJid $threadID]
 
-    if {($nwin == 1) && [info exists prefs(winGeom,$wDlgs(jchat))]} {
-	wm geometry $w $prefs(winGeom,$wDlgs(jchat))
+    if {$nwin == 1} {
+	::UI::SetWindowGeometry $w $wDlgs(jchat)
     }
     wm minsize $w 220 320
     wm maxsize $w 800 2000
@@ -457,30 +458,26 @@ proc ::Jabber::Chat::Build {threadID args} {
 }
 
 proc ::Jabber::Chat::ConfigureTextTags {w wtext} {
-    upvar ::Jabber::jprefs jprefs
     variable chatOptions
     
     set space 2
-    
-    foreach {optName optClass} $chatOptions {
-	set $optName [option get $w $optName $optClass]
+    set alltags {me metext you youtext}
+        
+    foreach tag $alltags {
+	set opts($tag) [list -spacing1 $space]
     }
-    
-    # BAD!
-    set boldChatFont [lreplace $jprefs(chatFont) 2 2 bold]
-    
-    $wtext tag configure metag  \
-      -foreground $meForeground -background $meBackground  \
-      -spacing1 $space -font $meFont
-    $wtext tag configure metxttag  \
-      -foreground $meTextForeground -background $meTextBackground  \
-      -spacing1 $space -spacing3 $space -lmargin1 20 -lmargin2 20
-    $wtext tag configure youtag  \
-      -foreground $youForeground -background $youBackground \
-      -spacing1 $space -font $youFont
-    $wtext tag configure youtxttag  \
-      -foreground $youTextForeground -background $youTextBackground \
-      -spacing1 $space -spacing3 $space -lmargin1 20 -lmargin2 20
+    foreach spec $chatOptions {
+	foreach {tag optName resName resClass} $spec break
+	set value [option get $w $resName $resClass]
+	if {[string length $value]} {
+	    lappend opts($tag) $optName $value
+	}   
+    }
+    lappend opts(metext)  -spacing3 $space -lmargin1 20 -lmargin2 20
+    lappend opts(youtext) -spacing3 $space -lmargin1 20 -lmargin2 20
+    foreach tag $alltags {
+	eval {$wtext tag configure $tag} $opts($tag)
+    }
     
     ::Text::ConfigureLinkTagForTextWidget $wtext linktag tact
 }
@@ -494,8 +491,8 @@ proc ::Jabber::Chat::SetFont {theFont} {
 	if {[winfo exists $wtext]} {
 	    set boldChatFont [lreplace $theFont 2 2 bold]
 	    $wtext configure -font $theFont
-	    $wtext tag configure metag -font $boldChatFont
-	    $wtext tag configure youtag -font $boldChatFont
+	    $wtext tag configure me -font $boldChatFont
+	    $wtext tag configure you -font $boldChatFont
 	}
     }
     foreach key [array names locals "*,wtextsnd"] {
@@ -547,7 +544,8 @@ proc ::Jabber::Chat::Send {threadID} {
 	    return
 	}
     }
-    set wtext $locals($threadID,wtext)
+    set w        $locals($threadID,wtop)
+    set wtext    $locals($threadID,wtext)
     set wtextsnd $locals($threadID,wtextsnd)
 
     # Get text to send. Strip off any ending newlines from Return.
@@ -581,25 +579,25 @@ proc ::Jabber::Chat::Send {threadID} {
     if {![regexp {(.+)@([^/]+)(/(.+))?} $jstate(mejid) match username host junk res]} {
 	set username $jstate(mejid)
     }
-    if {$jprefs(chat,showtime)} {
-	set theTime [clock format [clock seconds] -format "%H:%M"]
+
+    set clockFormat [option get $w clockFormat {}]
+    if {$clockFormat != ""} {
+	set theTime [clock format [clock seconds] -format $clockFormat]
 	set txt "$theTime <$username>"
     } else {
 	set txt <$username>
     }
-    set bg [option get . backgroundGeneral {}]
     
     $wtext configure -state normal
-    $wtext insert end $txt metag
+    $wtext insert end $txt me
     
-    ::Text::ParseAndInsert $wtext "   $allText" metxttag linktag
+    ::Text::ParseAndInsert $wtext "   $allText" metext linktag
 
     $wtext configure -state disabled
     $wtextsnd delete 1.0 end
     $wtext see end
     if {$locals($threadID,got1stMsg) == 0} {
-	$locals($threadID,wtojid) configure -state disabled  \
-	  -bg $bg
+	$locals($threadID,wtojid) configure -state disabled
 	set locals($threadID,got1stMsg) 1
     }
     
@@ -666,11 +664,11 @@ proc ::Jabber::Chat::Close {args} {
 
 proc ::Jabber::Chat::GetFirstPanePos { } {
     global  wDlgs
+    variable locals
     
     set win [::UI::GetFirstPrefixedToplevel $wDlgs(jchat)]
     if {$win != ""} {
 	set threadID $locals($win,threadid)
-
 	::UI::SavePanePos $wDlgs(jchat) $locals($threadID,wtxt)
     }
 }
@@ -761,13 +759,13 @@ proc ::Jabber::Chat::BuildHistory {jid} {
     set space 2
     $wtext tag configure headtag -foreground black -background #cecece  \
       -spacing1 4 -spacing3 4 -font $boldChatFont -lmargin1 20
-    $wtext tag configure metag -foreground red  \
+    $wtext tag configure me -foreground red  \
       -spacing1 $space -font $boldChatFont
-    $wtext tag configure metxttag -foreground black \
+    $wtext tag configure metext -foreground black \
       -spacing1 $space -spacing3 $space -lmargin1 20 -lmargin2 20
-    $wtext tag configure youtag -foreground blue -spacing1 $space  \
+    $wtext tag configure you -foreground blue -spacing1 $space  \
        -font $boldChatFont
-    $wtext tag configure youtxttag -foreground black -spacing1 $space  \
+    $wtext tag configure youtext -foreground black -spacing1 $space  \
       -spacing3 $space -lmargin1 20 -lmargin2 20
     ::Text::ConfigureLinkTagForTextWidget $wtext linktag tact
     
@@ -804,11 +802,11 @@ proc ::Jabber::Chat::BuildHistory {jid} {
 		set syssecs [clock scan $time]
 		set cwhen [clock format $syssecs -format "%H:%M:%S"]
 		if {[string equal $cjid $jid]} {
-		    set ptag youtag
-		    set ptxttag youtxttag
+		    set ptag you
+		    set ptxttag youtext
 		} else {
-		    set ptag metag
-		    set ptxttag metxttag
+		    set ptag me
+		    set ptxttag metext
 		}
 		$wtext insert end "$cwhen <$cjid>" $ptag
 		$wtext insert end "   " $ptxttag

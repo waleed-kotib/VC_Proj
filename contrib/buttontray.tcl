@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: buttontray.tcl,v 1.4 2003-12-16 15:03:53 matben Exp $
+# $Id: buttontray.tcl,v 1.5 2003-12-22 15:04:57 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -458,6 +458,7 @@ proc ::buttontray::ButtonConfigure {w name args} {
 		} else {
 		    $wlab configure -image $locals($name,imageDis) -relief flat
 		    $can itemconfigure $idtxt -fill $options(-disabledforeground)
+		    $can delete activebg
 		    bind $wlab <Enter> {}
 		    bind $wlab <Leave> {}
 		    bind $wlab <Button-1> {}

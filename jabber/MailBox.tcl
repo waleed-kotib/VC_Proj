@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.26 2003-12-20 14:27:16 matben Exp $
+# $Id: MailBox.tcl,v 1.27 2003-12-22 15:04:58 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -205,7 +205,7 @@ proc ::Jabber::MailBox::Build {args} {
     
     # Frame to serve as container for the pane geometry manager.
     set frmid $w.frall.frmid
-    pack [frame $frmid -height 250 -width 380 -relief sunken -bd 1]  \
+    pack [frame $frmid -height 250 -width 380 -relief sunken -bd 1 -class Pane] \
       -side top -fill both -expand 1 -padx 4 -pady 4
     
     # The actual mailbox list as a tablelist.
@@ -270,9 +270,7 @@ proc ::Jabber::MailBox::Build {args} {
     set locals(wtbl) $wtbl
     set locals(wtextmsg) $wtextmsg
         
-    if {[info exists prefs(winGeom,$w)]} {
-	wm geometry $w $prefs(winGeom,$w)
-    }
+    ::UI::SetWindowGeometry $w
     wm minsize $w 300 260
     wm maxsize $w 1200 1000
     
