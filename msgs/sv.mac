@@ -292,6 +292,8 @@
 ::msgcat::mcset sv mCoccinellaHome  	{Coccinella hem...}
 ::msgcat::mcset sv mComponents 	        {Komponenter...}
 ::msgcat::mcset sv mBugReport  	        {Rapportera bug...}
+::msgcat::mcset sv mTakeSnapShot        {Tag bild}
+::msgcat::mcset sv mTimeCode            {Tidskod}
 
 
 # Popups

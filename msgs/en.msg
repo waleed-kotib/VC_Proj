@@ -293,6 +293,8 @@
 ::msgcat::mcset en mCoccinellaHome  	{Coccinella Home...}
 ::msgcat::mcset en mComponents 	        {Components...}
 ::msgcat::mcset en mBugReport  	        {Report Bug...}
+::msgcat::mcset en mTakeSnapShot        {Take Snapshot}
+::msgcat::mcset en mTimeCode            {Timecode}
 
 
 # Popups
