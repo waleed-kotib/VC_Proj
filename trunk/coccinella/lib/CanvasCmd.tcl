@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasCmd.tcl,v 1.8 2004-03-16 15:09:08 matben Exp $
+# $Id: CanvasCmd.tcl,v 1.9 2004-03-18 14:11:18 matben Exp $
 
 package provide CanvasCmd 1.0
 
@@ -194,7 +194,7 @@ proc ::CanvasCmd::SavePostscript {wtop} {
     if {[string length $ans] > 0} {
 	set prefs(userPath) [file dirname $ans]
 	if {[file extension $ans] == ".svg"} {
-	    ::can2svg::canvas2file $w $ans
+	    ::can2svg::canvas2file $w $ans -uritype file
 	} else {
 	    eval {$w postscript} $prefs(postscriptOpts) {-file $ans}
 	    if {[string equal $this(platform) "macintosh"]} {

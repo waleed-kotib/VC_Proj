@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.45 2004-03-16 15:09:08 matben Exp $
+# $Id: Preferences.tcl,v 1.46 2004-03-18 14:11:18 matben Exp $
  
 package require notebook
 package require tree
@@ -851,15 +851,14 @@ proc ::Preferences::FileMap::BuildPage {page} {
     # Add, Change, and Remove buttons.
     set frbt [frame $fr1.frbot]
     grid $frbt -row 1 -column 0 -columnspan 2 -sticky nsew -padx 0 -pady 0
-    set btwidth [expr [::Utils::GetMaxMsgcatWidth Delete Edit New] + 2]
-    button $frbt.rem -text [::msgcat::mc Delete] -width $btwidth \
+    button $frbt.rem -text [::msgcat::mc Delete]  \
       -state disabled -padx $xpadbt -font $fontS \
       -command "::Preferences::FileMap::DeleteAssociation $wmclist  \
       \[$wmclist curselection]"
-    button $frbt.change -text "[::msgcat::mc Edit]..." -width $btwidth  \
+    button $frbt.change -text "[::msgcat::mc Edit]..."  \
       -state disabled -padx $xpadbt -font $fontS -command  \
       "${ns}::Inspect $wDlgs(fileAssoc) edit $wmclist \[$wmclist curselection]"
-    button $frbt.add -text "[::msgcat::mc New]..." -width $btwidth \
+    button $frbt.add -text "[::msgcat::mc New]..."  \
       -padx $xpadbt -font $fontS \
       -command [list ${ns}::Inspect .setass new $wmclist -1]
     pack $frbt.rem $frbt.change $frbt.add -side right -padx 5 -pady 5

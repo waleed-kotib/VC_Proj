@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: FilesAndCanvas.tcl,v 1.21 2004-03-16 15:09:08 matben Exp $
+# $Id: FilesAndCanvas.tcl,v 1.22 2004-03-18 14:11:18 matben Exp $
  
 package require can2svg
 package require svg2can
@@ -509,7 +509,7 @@ proc ::CanvasFile::DataToFile {filePath canvasList} {
     }
     puts $fd "# Version: 2"
 
-    # Be sure to strip off the "CANVAS:" prefix.
+    # Be sure to strip off the "CANVAS:" prefix. ???
     foreach line $canvasList {
 	if {[string equal [lindex $line 0] "CANVAS:"]} {
 	    puts $fd [lrange $line 1 end]
@@ -624,7 +624,7 @@ proc ::CanvasFile::DoSaveCanvasFile {wtop} {
     set ext [file extension $fileName]
     switch -- $ext {
 	".svg" {
-	    ::can2svg::canvas2file $wCan $fileName	    
+	    ::can2svg::canvas2file $wCan $fileName -uritype file 
 	}
 	default {
 	    

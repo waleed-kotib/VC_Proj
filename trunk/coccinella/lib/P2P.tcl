@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: P2P.tcl,v 1.3 2004-03-16 15:09:08 matben Exp $
+# $Id: P2P.tcl,v 1.4 2004-03-18 14:11:18 matben Exp $
 
 package provide P2P 1.0
 
@@ -87,6 +87,8 @@ proc ::P2P::Init {} {
     }
     if {![::Plugins::HavePackage QuickTimeTcl]} {
 	lset menuDefsFile 4 3 disabled
+    } else {
+	package require Multicast
     }
     ::WB::SetMenuDefs file $menuDefsFile
     
