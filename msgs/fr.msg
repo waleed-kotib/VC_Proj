@@ -17,7 +17,7 @@
 ::msgcat::mcset fr Appearance           {Apparence}
 ::msgcat::mcset fr Apply		{Appliquer}
 ::msgcat::mcset fr Available		{Disponible}
-::msgcat::mcset fr Away			{Parti}
+::msgcat::mcset fr Away			{Absent}
 ::msgcat::mcset fr Binary		{Binaire}
 ::msgcat::mcset fr Birthday		{Anniversaire}
 ::msgcat::mcset fr Block		{Bloquer}
@@ -32,7 +32,7 @@
 ::msgcat::mcset fr Choose		{Choisir}
 ::msgcat::mcset fr City			{Ville}
 ::msgcat::mcset fr Clear		{Nettoyer}
-#::msgcat::mcset fr Client
+::msgcat::mcset fr Client		{Client}
 ::msgcat::mcset fr Close		{Fermer}
 ::msgcat::mcset fr Conference		{Conférence}
 ::msgcat::mcset fr Connect		{Se connecter}
@@ -91,7 +91,7 @@
 ::msgcat::mcset fr No			{Non}
 ::msgcat::mcset fr no			{non}
 ::msgcat::mcset fr None			{Aucun}
-#::msgcat::mcset fr Notes
+::msgcat::mcset fr Notes		{Notes}
 ::msgcat::mcset fr Occupation		{Occupé}
 ::msgcat::mcset fr Offline		{Déconnecté}
 ::msgcat::mcset fr OK			{OK}
@@ -149,7 +149,7 @@
 ::msgcat::mcset fr Title		{Titre}
 ::msgcat::mcset fr To			{À}
 ::msgcat::mcset fr Topic		{Thème}
-#::msgcat::mcset fr Transports
+::msgcat::mcset fr Transports		{Transports}
 ::msgcat::mcset fr Trash		{Corbeille}
 ::msgcat::mcset fr Type			{Type}
 ::msgcat::mcset fr Unregister		{Se désinscrire}
@@ -174,10 +174,10 @@
 
 # Status messages.
 ::msgcat::mcset fr available		{disponible}
-::msgcat::mcset fr away		        {parti}
+::msgcat::mcset fr away		        {absent}
 ::msgcat::mcset fr {do not disturb}	{ne pas déranger}
 ::msgcat::mcset fr {not available}	{indisponible}
-::msgcat::mcset fr {extended away}      {parti pour longtemps}
+::msgcat::mcset fr {extended away}      {absent pour longtemps}
 ::msgcat::mcset fr invisible            {invisible}
 ::msgcat::mcset fr chat                 {discussion}
 ::msgcat::mcset fr subscribed           {inscrit}
@@ -275,10 +275,10 @@
 ::msgcat::mcset fr mStatus		{Statut}
 ::msgcat::mcset fr mDirStatus           {Statut désiré}
 ::msgcat::mcset fr mAvailable		{Disponible}
-::msgcat::mcset fr mAway		{Parti}
+::msgcat::mcset fr mAway		{Absent}
 ::msgcat::mcset fr mDoNotDisturb	{Ne pas déranger}
 ::msgcat::mcset fr mNotAvailable	{Indisponible}
-::msgcat::mcset fr mExtendedAway        {Parti pour longtemps}
+::msgcat::mcset fr mExtendedAway        {Absent pour longtemps}
 ::msgcat::mcset fr mInvisible           {Invisible}
 ::msgcat::mcset fr mAttachMessage	{Message joint...}
 ::msgcat::mcset fr mEnterRoom		{Entrer dans le salon...}
@@ -309,9 +309,9 @@
 ::msgcat::mcset fr mCoccinellaHome  	{Dossier de Coccinella...}
 ::msgcat::mcset fr mComponents          {Composants...}
 ::msgcat::mcset fr mBugReport           {Signaler un bug...}
-#::msgcat::mcset fr mTakeSnapShot        {Take Snapshot}
-#::msgcat::mcset fr mTimeCode            {Timecode}
-#::msgcat::mcset fr mUserInfo            {User Info...}
+::msgcat::mcset fr mTakeSnapShot        {Faire une capture d'écran}
+::msgcat::mcset fr mTimeCode            {}
+::msgcat::mcset fr mUserInfo            {Infos utilisateur...}
 
 
 # Popups.
@@ -357,7 +357,7 @@
 ::msgcat::mcset fr {Auto Connect}		{Connexion automatique}
 ::msgcat::mcset fr {Auto-accept}		{Accepter automatiquement}
 ::msgcat::mcset fr {Auto-reject}		{Rejeter automatiquement}
-::msgcat::mcset fr {Away status}		{Statut "Parti"}
+::msgcat::mcset fr {Away status}		{Statut "Absent"}
 ::msgcat::mcset fr {Basic Info}			{Informations de bases}
 ::msgcat::mcset fr {Block JID}			{Bloquage JID}
 ::msgcat::mcset fr {Built in server port}	{Port du serveur interne}
@@ -388,12 +388,12 @@
 ::msgcat::mcset fr {Enter/Create Room}		{Entrer/Créer un salon}
 ::msgcat::mcset fr {Enter Room}			{Entrer dans un salon}
 ::msgcat::mcset fr {Every time}			{Chaque fois}
-::msgcat::mcset fr {Extended Away status}	{Statut "Parti pour longtemps"}
+::msgcat::mcset fr {Extended Away status}	{Statut "Absent pour longtemps"}
 ::msgcat::mcset fr {Factory Settings}		{Propriétés par défaut}
 ::msgcat::mcset fr {Fatal Error}		{Erreur fatale}
 ::msgcat::mcset fr {File Cache}			{Cache}
 ::msgcat::mcset fr {File coding}		{Encodage des fichiers}
-::msgcat::mcset fr {File Mappings}		{Mapping des fichiers}
+::msgcat::mcset fr {File Mappings}		{Gestion des extensions}
 ::msgcat::mcset fr {File suffixes}		{Extension des fichiers}
 ::msgcat::mcset fr {File Transfer}		{Transfert de fichiers}
 ::msgcat::mcset fr {File Transfer Error}	{Erreur dans le transfert}
@@ -685,12 +685,8 @@
 ::msgcat::mcset fr jamessoobfailopen	{L'ouverture de "%s" a échoué.}
 ::msgcat::mcset fr jamessoobgetfail	{L'URL "%s" n'est pas accessible (%s).}
 ::msgcat::mcset fr jamessoobtimeout	{Temps écoulé lors de l'accession au fichier via HTTP}
-
-# translate!!!!
-::msgcat::mcset fr jamessooberr406      {The user %s rejected to accept the file %s.}
-::msgcat::mcset fr jamessooberr404      {Got an error when trying to send the file %s to %s. The code was %s, and error message: %s}
-# translate!!!!
-
+::msgcat::mcset fr jamessooberr406      {L'utilisateur %s a refusé le fichier %s.}
+::msgcat::mcset fr jamessooberr404      {Erreur lors de l'envoi du fichier %s à %s. Le code était %s, et le message d'erreur "%s"}
 ::msgcat::mcset fr jamessnogchat	{Aucun service proposé par le salon n'est reconnu.}
 ::msgcat::mcset fr jamesserrinboxopen	{Erreur de l'ouverture du courrier entrant %s lors de la sauvegarde.}
 ::msgcat::mcset fr jamesserrinboxread	{Erreur lors de la lecture du message dans la boîte Jabber "%s" : %s}
@@ -718,9 +714,7 @@
 ::msgcat::mcset fr jamessfailedsubsc            {Échec de l'inscription à %s. L'utilisateur a refusé l'inscription.}
 ::msgcat::mcset fr jamessstarttls-nofeature     {Le serveur "%s" ne supporte pas le TLS.}
 ::msgcat::mcset fr jamessstarttls-failure       {Erreur lors de la sécurisation TLS avec le serveur "%s".}
-
-# translate!!!!
-::msgcat::mcset fr jamessgcinvite               {You have been invited to the groupchat room %s by %s. Do you want to join?}
+::msgcat::mcset fr jamessgcinvite               {Vous avez été invité dans le salon %s par %s. Voulez-vous y aller ?}
 
 
 
@@ -779,8 +773,8 @@
 ::msgcat::mcset fr prefpers      {Vos informations personnelles sont enregistrées dans le fichier de vos préférences, mais peuvent également l'être dans le dossier utilisateur Jabber.\
   Les informations enregistrées par le serveur sont accessibles par n'importe quel utilisateur.}
 ::msgcat::mcset fr prefaaset     {Mettre le statut "Départ automatique" : }
-::msgcat::mcset fr prefminaw     {Minutes avant le statut "Parti" : }
-::msgcat::mcset fr prefminea     {Minutes avant le statut "Parti pour longtemps" : }
+::msgcat::mcset fr prefminaw     {Minutes avant le statut "Absent" : }
+::msgcat::mcset fr prefminea     {Minutes avant le statut "Absent pour longtemps" : }
 ::msgcat::mcset fr prefsuif      {Si quelqu'un veut m'ajouter à ses contacts et...}
 ::msgcat::mcset fr prefsuis      {...est déjà dans mes contacts : }
 ::msgcat::mcset fr prefsuisnot   {...ne fait pas partie de mes contacts : }
@@ -790,11 +784,8 @@
 ::msgcat::mcset fr prefroclr     {Nettoyer la liste de contacts à la déconnexion}
 ::msgcat::mcset fr prefrochat    {Double-clic : discuter, clic : message normal}
 ::msgcat::mcset fr prefrosysicons {Utiliser les icônes système du protocole de messagerie étranger}
-
-# translate
-::msgcat::mcset fr prefrohideoff {Do not show offline users}
-::msgcat::mcset fr prefrohidetrpt {Do not show transports}
-
+::msgcat::mcset fr prefrohideoff {Ne pas montrer les utilisateurs déconnectés}
+::msgcat::mcset fr prefrohidetrpt {Ne pas montrer les transports}
 ::msgcat::mcset fr prefblonly    {N'accepter que les messages de mes contacts}
 ::msgcat::mcset fr prefblbl      {Bloquer les JIDs suivants (* étoile pour "tous") : }
 ::msgcat::mcset fr prefblmsg     {Écrire la JID complète pour les utilisateurs que vous voulez bloquer (les JID sont de la forme "utilisateur@jabber.org)}
@@ -809,10 +800,7 @@
 ::msgcat::mcset fr prefcubrowse  {Naviguer dans les services si la méthode est disponible}
 ::msgcat::mcset fr prefcuagent   {Toujours utiliser la méthode des agents}
 ::msgcat::mcset fr prefcuupdate  {Chercher automatiquement les mises-à-jour de Coccinella}
-
-# translate
-::msgcat::mcset fr prefcuremdlgs {Remember open dialogs between sessions}
-
+::msgcat::mcset fr prefcuremdlgs {Se rappeler les fenêtres ouvertes pour les prochaines sessions}
 ::msgcat::mcset fr preffmhelp    {Plugins d'aide pour les types de fichiers}
 ::msgcat::mcset fr preffmsave    {Juste "sauver sur le disque" dans le dossier entrant}
 ::msgcat::mcset fr preffontmsg   {Attention : en important d'autres polices\
@@ -833,7 +821,7 @@ que les polices standard (Times, Helvetica ou Courier), vous devez vous assurer 
 ::msgcat::mcset fr prefmucconf   {Utiliser les discussions multi-utilisateur avec le retour "conférence"}
 ::msgcat::mcset fr prefrostbgim  {Utiliser l'image de fond (gif) dans la liste de contacts}
 ::msgcat::mcset fr preftheme     {Choisir un thème (Coccinella doit être redémarré)}
-::msgcat::mcset fr prefplugctrl  {Vous pouvez dé-sélectionner ces paquetages pour ne pas avoir à les charger. Coccinella doit être redémarré pour que les changements soient pris en compte.}
+::msgcat::mcset fr prefplugctrl  {Vous pouvez désélectionner ces paquetages pour ne pas avoir à les charger. Coccinella doit être redémarré pour que les changements soient pris en compte.}
 ::msgcat::mcset fr prefchactret  {Toujours activer <Entrée> dans la boîte de discussion}
 ::msgcat::mcset fr prefchnormal  {Traiter les messages normaux comme des messages de discussion}
 ::msgcat::mcset fr prefprofname  {Entrez le nom du profil d'utilisateur}
@@ -892,8 +880,8 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset fr jaregmsg	{Enregistrement pour un service spécifique pour ce serveur. Si vous êtes déjà enregistré, vous pouvez perdre des informations personnelles.}
 ::msgcat::mcset fr jastatavailable {Disponible}
 ::msgcat::mcset fr jastatchat	{Discussion : disponible pour un contact immédiat}
-::msgcat::mcset fr jastataway	{Parti : en ligne, mais parti pour un petit moment}
-::msgcat::mcset fr jastatxa	{Parti pour longtemps : en ligne, mais inactif depuis un long moment}
+::msgcat::mcset fr jastataway	{Absent : en ligne, mais inactif depuis un petit moment}
+::msgcat::mcset fr jastatxa	{Absent pour longtemps : en ligne, mais inactif depuis un long moment}
 ::msgcat::mcset fr jastatdnd	{Ne pas déranger}
 ::msgcat::mcset fr jastatinvisible {Invisible}
 ::msgcat::mcset fr javersinfo	{Informations de la version de %s}
@@ -908,11 +896,9 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset fr jatlsnegot   {Sécurisation TLS...}
 ::msgcat::mcset fr jamucentermsg {Tapez votre pseudo et appuyez sur Entrée pour entrer dans le salon. Vous pouvez Parcourir pour trouver la liste des salons chaque service. Les salons privés peuvent vous demander un mot de passe.}
 ::msgcat::mcset fr jainmsgshow {Montrer les messages entrants dans cette fenêtre}
-::msgcat::mcset fr jadisaddserv {Découvrez un autre serveur pour les salons de discussions et autres services. Vous pouvez ajouter un serveur définitivement quand il est découvert automatiquement. Le serveur de connexion est automatiquement découvert.}
+::msgcat::mcset fr jadisaddserv {Découvrir un autre serveur pour les salons de discussions et autres services. Vous pouvez ajouter un serveur définitivement quand il est découvert automatiquement. Le serveur de connexion est automatiquement découvert.}
 ::msgcat::mcset fr jadisrmall {Enlever les serveurs qui étaient automatiquement et définitivement découverts.}
-
-# translate
-::msgcat::mcset fr jauserinnote {Add your personal notes about this user}
+::msgcat::mcset fr jauserinnote {Ajouter vos notes personnelles sur cet utilisateur}
 
 
 
