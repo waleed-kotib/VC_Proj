@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.32 2004-05-26 07:36:36 matben Exp $
+# $Id: Login.tcl,v 1.33 2004-05-28 12:42:24 matben Exp $
 
 package provide Login 1.0
 
@@ -493,7 +493,7 @@ proc ::Jabber::Login::ConnectProc {jlibName args} {
 #       .
 
 proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
-    global  prefs wDlgs
+    global  prefs wDlgs this
     
     variable profile
     variable server
@@ -531,6 +531,9 @@ proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
     
     foreach {ip addr port} [fconfigure $jstate(sock) -sockname] break
     set jstate(ipNum) $ip
+    if {$ip != "0.0.0.0"} {
+	set this(ipnum) $ip
+    }
     
     # Ourself. Do jidprep? So far only on the domain name.
     set server               [jlib::jidmap $server]
