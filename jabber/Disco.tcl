@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.57 2005-02-24 13:58:07 matben Exp $
+# $Id: Disco.tcl,v 1.58 2005-03-04 08:45:07 matben Exp $
 
 package provide Disco 1.0
 
@@ -125,6 +125,7 @@ proc ::Disco::InitHook { } {
 	gateway/msn           [::Rosticons::Get msn/online]     \
 	gateway/yahoo         [::Rosticons::Get yahoo/online]   \
 	gateway/x-gadugadu    [::Rosticons::Get gadugadu/online]\
+	gateway/smtp          [::Rosticons::Get smtp/online]\
 	]
 }
 

@@ -4,9 +4,9 @@
 #      It is a wrapper for httpex, timing, and ProgressWindow to isolate
 #      the application from the details.
 #      
-#  Copyright (c) 2004  Mats Bengtsson
+#  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: HttpTrpt.tcl,v 1.3 2004-12-08 08:21:20 matben Exp $
+# $Id: HttpTrpt.tcl,v 1.4 2005-03-04 08:45:07 matben Exp $
 
 package require httpex
 package require timing

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Import.tcl,v 1.18 2005-01-30 15:12:29 matben Exp $
+# $Id: Import.tcl,v 1.19 2005-03-04 08:45:07 matben Exp $
 
 package require http
 package require httpex
@@ -217,9 +217,6 @@ proc ::Import::DoImport {w opts args} {
 			DrawImage $w putOpts
 		    } [array get argsArr]]
 		} else {
-		    #set errMsg [eval {
-		#	HttpGet $wtopNS $argsArr(-url) $importer $putOpts
-		    #} [array get argsArr]]
 		    HttpGet2 $wtopNS $argsArr(-url) $putOpts
 		}
 	    }
@@ -247,8 +244,6 @@ proc ::Import::DoImport {w opts args} {
 		    # Perhaps there shall be an option to get QT stuff via
 		    # http without streaming it?
 		    if {0} {
-			#eval {HttpGet $wtopNS $argsArr(-url) \
-			#  $importer $putOpts} [array get argsArr]
 			HttpGet2 $wtopNS $argsArr(-url) $putOpts
 		    }
 		}
@@ -270,9 +265,6 @@ proc ::Import::DoImport {w opts args} {
 			DrawSnack $w putOpts
 		    } [array get argsArr]]
 		} else {
-		    #set errMsg [eval {
-		#	HttpGet $wtopNS $argsArr(-url) $importer $putOpts
-		    #} [array get argsArr]]
 		    HttpGet2 $wtopNS $argsArr(-url) $putOpts
 		}    
 	    }
@@ -293,9 +285,6 @@ proc ::Import::DoImport {w opts args} {
 			DrawXanim $w putOpts
 		    } [array get argsArr]]
 		} else {
-		    #set errMsg [eval {
-		#	HttpGet $wtopNS $argsArr(-url) $importer $putOpts
-		    #} [array get argsArr]]
 		    HttpGet2 $wtopNS $argsArr(-url) $putOpts
 		}
 	    }
@@ -320,9 +309,6 @@ proc ::Import::DoImport {w opts args} {
 			    $impHTTPProc $wtopNS $argsArr(-url) $putOpts
 			} [array get argsArr]]
 		    } else {			
-			#set errMsg [eval {
-			#    HttpGet $wtopNS $argsArr(-url) $importer $putOpts
-			#} [array get argsArr]]
 			HttpGet2 $wtopNS $argsArr(-url) $putOpts
 		    }
 		}    
@@ -736,7 +722,18 @@ proc ::Import::DrawXanim {w optsVar args} {
 
 # Import::HttpGet2 --
 # 
-# 
+#       Imports a remote file using the HttpTrpt package that handles all
+#       ui stuff during transport, such as progress etc.
+#       
+# Arguments:
+#       wtop
+#       url
+#       opts      a list of '-key value' pairs, where most keys correspond 
+#                 to a valid "canvas create" option, and everything is on 
+#                 a single line.
+#
+# Results:
+#       none
 
 proc ::Import::HttpGet2 {wtop url opts} {
     global  this prefs
@@ -774,6 +771,10 @@ proc ::Import::HttpGet2 {wtop url opts} {
     }
     return ""
 }
+
+# Import::HttpCmd2, HttpProgress2 --
+# 
+#       Callbacks for HttpGet2.
 
 proc ::Import::HttpCmd2 {gettoken httptoken status {msg ""}} {
     variable $gettoken
@@ -816,7 +817,9 @@ proc ::Import::HttpProgress2 {gettoken str} {
     ::WB::SetStatusMessage $getstate(wtop) $str
 }
 
-# Import::HttpGet --
+#  OUTDATED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#  
+# Import::HttpGet --  
 # 
 #       Imports the specified file using http to file.
 #       The actual work done via callbacks to the http package.
@@ -899,6 +902,8 @@ proc ::Import::HttpGet {wtop url importPackage opts args} {
     return ""
 }
 
+#  OUTDATED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#  
 # Import::HttpProgress --
 # 
 #       Progress callback for the http package.
@@ -960,6 +965,8 @@ proc ::Import::HttpProgress {gettoken token total current} {
     }
 }
 
+#  OUTDATED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#  
 # Import::HttpCommand --
 # 
 #       Callback for httpex package.

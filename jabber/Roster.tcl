@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.123 2005-03-02 13:49:41 matben Exp $
+# $Id: Roster.tcl,v 1.124 2005-03-04 08:45:07 matben Exp $
 
 package provide Roster 1.0
 
@@ -46,6 +46,7 @@ namespace eval ::Roster:: {
     option add *Roster*Tree*dirImage        ""              widgetDefault
     option add *Roster*Tree*onlineImage     lightbulbon     widgetDefault
     option add *Roster*Tree*offlineImage    lightbulboff    widgetDefault
+    option add *Roster*Tree*trptImage       block           widgetDefault
     option add *Roster*Tree*groupImage      ""              widgetDefault
     option add *Roster*rootBackground       ""              widgetDefault
     option add *Roster*rootBackgroundBd     0               widgetDefault
@@ -1534,8 +1535,9 @@ proc ::Roster::TreeNewItem {jid presence args} {
 	
 	# Transports are treated specially.
 	if {![$wtree isitem [list transports]]} {
+	    set im [::Theme::GetImage [option get $wtree trptImage {}]]
 	    set vdir [list transports]
-	    $wtree newitem $vdir -tags {head trpt} -dir 1 \
+	    $wtree newitem $vdir -tags {head trpt} -dir 1 -image $im \
 	      -text $mcHead(transports)
 	}
 	set tags [list trpt $jid3]
