@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.111 2005-03-07 07:22:35 matben Exp $
+# $Id: Coccinella.tcl,v 1.112 2005-04-02 13:58:36 matben Exp $
 	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
@@ -66,6 +66,11 @@ switch -- $this(platform) {
 	}
 	dde servername coccinella
     }
+    macosx {
+	
+	# CoreGraphics can't produce 1 pixel lines :-(
+	set tk::mac::useCGDrawing 0
+    }
 }
 
 # Find program real pathname, resolve all links in between. Unix only.
@@ -118,7 +123,7 @@ proc resolve_cmd_realpath {infile} {
 # default file, never read.
 set prefs(majorVers)    0
 set prefs(minorVers)   95
-set prefs(releaseVers)  5
+set prefs(releaseVers)  6
 set prefs(fullVers) $prefs(majorVers).$prefs(minorVers).$prefs(releaseVers)
 set prefs(appName)    "Coccinella"
 set prefs(theAppName) "The Coccinella"
