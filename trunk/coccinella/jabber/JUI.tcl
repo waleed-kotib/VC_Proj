@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.62 2004-10-29 13:17:15 matben Exp $
+# $Id: JUI.tcl,v 1.63 2004-11-07 14:22:58 matben Exp $
 
 package provide JUI 1.0
 
@@ -306,11 +306,11 @@ proc ::Jabber::UI::Build {w} {
 
     # Build bottom and up to handle clipping when resizing.
     # Jid entry with electric plug indicator.
-    set wbot              ${fall}.jid
+    set wbot              ${fall}.bot
     set jwapp(elplug)     ${wbot}.icon
     set jwapp(mystatus)   ${wbot}.stat
-    set jwapp(myjid)      ${wbot}.e
-    
+    set jwapp(myjid)      ${wbot}.jid
+
     frame $wbot -relief raised -borderwidth 1
     pack  $wbot -side bottom -fill x -pady 0
     ::Jabber::Roster::BuildStatusMenuButton $jwapp(mystatus)
@@ -323,21 +323,6 @@ proc ::Jabber::UI::Build {w} {
       -textvariable ::Jabber::jstate(mejid)
     pack  $jwapp(myjid) -side left -fill x -expand 1 -pady 0 -padx 0
         
-    # Build status feedback elements.
-    if {0} {
-	set wstat ${fall}.st
-	set jwapp(statmess) ${wstat}.g.c
-	
-	pack [frame $wstat -relief raised -borderwidth 1]  \
-	  -side bottom -fill x -pady 0
-	pack [frame ${wstat}.g -relief groove -bd 2]  \
-	  -side top -fill x -padx 8 -pady 2
-	pack [canvas $jwapp(statmess) -bd 0 -highlightthickness 0 -height 14]  \
-	  -side left -pady 1 -padx 6 -fill x -expand true
-	$jwapp(statmess) create text 0 0 -anchor nw -text {} -font $fontS \
-	  -tags stattxt
-    }
-
     # Notebook frame.
     set frtbook ${fall}.fnb
     pack [frame $frtbook -bd 1 -relief raised] -fill both -expand 1    
@@ -347,8 +332,7 @@ proc ::Jabber::UI::Build {w} {
     
     # Make the notebook pages.
     # Start with the Roster page -----------------------------------------------
-    set ro [$nbframe newpage {Roster} -text [mc Contacts]  \
-      -image $iconRoster]    
+    set ro [$nbframe newpage {Roster} -text [mc Contacts] -image $iconRoster]
     pack [::Jabber::Roster::Build $ro.ro] -fill both -expand 1
 
     # Build only Browser and/or Agents page when needed.
@@ -357,6 +341,7 @@ proc ::Jabber::UI::Build {w} {
     ::UI::SetWindowGeometry $w
     wm minsize $w $minWidth 320
     wm maxsize $w 420 2000
+    
     return $w
 }
 

@@ -6,7 +6,7 @@
 #  Copyright (c) 2004  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #
-# $Id: wavelabel.tcl,v 1.6 2004-11-02 15:34:51 matben Exp $
+# $Id: wavelabel.tcl,v 1.7 2004-11-07 14:22:58 matben Exp $
 #
 # ########################### USAGE ############################################
 #
@@ -112,11 +112,11 @@ proc ::wavelabel::Init { } {
     
     # Options for this widget
     option add *WaveLabel.background    white        widgetDefault
-    option add *WaveLabel.borderWidth   0            widgetDefault
+    option add *WaveLabel.borderWidth   2            widgetDefault
     option add *WaveLabel.foreground    black        widgetDefault
     option add *WaveLabel.height        0            widgetDefault
     option add *WaveLabel.image         ""           widgetDefault
-    option add *WaveLabel.relief        flat         widgetDefault
+    option add *WaveLabel.relief        groove       widgetDefault
     option add *WaveLabel.takeFocus     0            widgetDefault
     option add *WaveLabel.textVariable  ""           widgetDefault
     option add *WaveLabel.type          image        widgetDefault
