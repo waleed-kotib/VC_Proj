@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.3 2003-02-06 17:23:33 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.4 2003-02-24 17:52:12 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -391,6 +391,8 @@ proc ::PreferencesUtils::SetUserPreferences { } {
       [list prefs(multiConnect)    prefs_multiConnect    $prefs(multiConnect)]   \
       [list prefs(thisServPort)    prefs_thisServPort    $prefs(thisServPort)]   \
       [list prefs(remotePort)      prefs_remotePort      $prefs(remotePort)]     \
+      [list prefs(setNATip)        prefs_setNATip        $prefs(setNATip)]       \
+      [list prefs(NATip)           prefs_NATip           $prefs(NATip)]          \
       [list prefs(shortcuts)       prefs_shortcuts       $prefs(shortcuts)       userDefault] \
       [list prefs(shortsMulticastQT) prefs_shortsMulticastQT $prefs(shortsMulticastQT) userDefault] \
       [list prefs(postscriptOpts)  prefs_postscriptOpts  $prefs(postscriptOpts)] \
@@ -467,7 +469,6 @@ proc ::PreferencesUtils::SetUserPreferences { } {
 	  [list ::Jabber::jprefs(xawaymsg)         jprefs_xawaymsg          $::Jabber::jprefs(xawaymsg)]  \
 	  [list ::Jabber::jprefs(logoutStatus)     jprefs_logoutStatus      $::Jabber::jprefs(logoutStatus)]  \
 	  [list ::Jabber::jprefs(chatFont)         jprefs_chatFont          $::Jabber::jprefs(chatFont)]  \
-	  [list ::Jabber::jprefs(autoupdateCheck)  jprefs_autoupdateCheck   $::Jabber::jprefs(autoupdateCheck)]  \
 	  [list ::Jabber::jprefs(autoupdateShow,$ver) jprefs_autoupdateShow_ver $::Jabber::jprefs(autoupdateShow,$ver)]  \
 	  [list ::Jabber::jstate(rostBrowseVis)    jstate_rostBrowseVis     $::Jabber::jstate(rostBrowseVis) userDefault] \
 	  [list ::Jabber::jserver(profile)         jserver_profile          $::Jabber::jserver(profile)      userDefault] \

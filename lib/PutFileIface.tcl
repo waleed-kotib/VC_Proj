@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: PutFileIface.tcl,v 1.2 2003-01-11 16:16:09 matben Exp $
+# $Id: PutFileIface.tcl,v 1.3 2003-02-24 17:52:12 matben Exp $
 
 package require putfile
 package require uriencode
@@ -16,7 +16,7 @@ package require uriencode
 namespace eval ::PutFileIface:: {
     
     # Internal vars only.
-    variable putTokenList {}
+    variable putSessionArr
 }
 
 # PutFileIface::PutFileDlg --
@@ -35,7 +35,8 @@ proc ::PutFileIface::PutFileDlg {wtop} {
     # the standard text files.
     
     set typelist [concat $typelistText $typelistImageMovie]
-    set ans [tk_getOpenFile -title [::msgcat::mc {Put Image/Movie}] -filetypes $typelist]
+    set ans [tk_getOpenFile -title [::msgcat::mc {Put Image/Movie}] \
+      -filetypes $typelist]
     if {$ans == ""} {
 	return
     }
@@ -63,8 +64,6 @@ proc ::PutFileIface::PutFileDlg {wtop} {
 proc ::PutFileIface::PutFile {wtop fileName where {optList {}}} {
     global  allIPnumsToSend prefs this
     
-    variable putTokenList
-    
     Debug 2 "+PutFile:: fileName=$fileName, optList=$optList"
     
     if {[llength $allIPnumsToSend] == 0} {
@@ -74,8 +73,9 @@ proc ::PutFileIface::PutFile {wtop fileName where {optList {}}} {
     # Add an alternative way of getting this file via an URL.
     set relPath [filerelative $prefs(httpdBaseDir) $fileName]
     set relPath [uriencode::quotepath $relPath]
+    set ip [::Network::GetThisOutsideIPAddress]
     lappend optList  \
-      "Get-Url:" "http://$this(ipnum):$prefs(httpdPort)/$relPath"
+      "Get-Url:" "http://${ip}:$prefs(httpdPort)/$relPath"
         
     # If we are a server in a client-server we need to ask the client
     # to get the file by sending a PUT NEW instruction to it on our
@@ -115,15 +115,17 @@ proc ::PutFileIface::PutFile {wtop fileName where {optList {}}} {
 	    
 	    # Loop over all connected servers or only the specified one.
 	    foreach ip $allPutIP {
-		if {[catch {::putfile::put $fileName $ip $prefs(remotePort)  \
-		  -mimetype $mime -timeout [expr 1000 * $prefs(timeout)]  \
-		  -optlist $optList -filetail $dstFile  \
-		  -progress ::PutFileIface::PutProgress  \
-		  -command ::PutFileIface::PutCommand} tok]} {
+		if {[catch {
+		    ::putfile::put $fileName $ip $prefs(remotePort)  \
+		      -mimetype $mime -timeout [expr 1000 * $prefs(timeout)] \
+		      -optlist $optList -filetail $dstFile  \
+		      -progress ::PutFileIface::PutProgress  \
+		      -command [list ::PutFileIface::PutCommand $wtop]
+		} tok]} {
 		    tk_messageBox -title [::msgcat::mc {File Transfer Error}]  \
 		      -type ok -message $tok
 		} else {
-		    lappend putTokenList $tok
+		    ::PutFileIface::RegisterPutSession $tok $wtop
 		}
 	    }
 	}
@@ -135,16 +137,17 @@ proc ::PutFileIface::PutFile {wtop fileName where {optList {}}} {
 #	Callbacks for the putfile command.
 
 proc ::PutFileIface::PutProgress {token total current} {
+    global  tcl_platform
  
     # Be silent... except for a necessary update command to not block.
-    if {[string equal $::tcl_platform(platform) "windows"]} {
+    if {[string equal $tcl_platform(platform) "windows"]} {
 	update
     } else {
 	update idletasks
     }
 }
 
-proc ::PutFileIface::PutCommand {token what msg} {
+proc ::PutFileIface::PutCommand {wtop token what msg} {
     global  prefs
     
     Debug 2 "+      PutCommand:: token=$token, what=$what msg=$msg"
@@ -158,23 +161,26 @@ proc ::PutFileIface::PutCommand {token what msg} {
 	    tk_messageBox -title [::msgcat::mc {Put File Error}]  \
 	      -type ok -message "$msg. $codetxt"
 	} else {
-	    ::UI::SetStatusMessage . "$msg $codetxt"
+	    ::UI::SetStatusMessage $wtop "$msg $codetxt"
 	    switch -- $ncode {
 		320 - 323 {
 		    # empty
 		} 
 		default {
-		    tk_messageBox -title [::msgcat::mc {Put File Error}] \
-		      -type ok -message "$msg. $codetxt"
+		    if {$prefs(talkative) >= 1} {
+			tk_messageBox -title [::msgcat::mc {Put File Error}] \
+			  -type ok -message "$msg. $codetxt"
+		    }
 		}		
 	    }
 	}
     } elseif {[string equal $what "ok"]} {
-	::UI::SetStatusMessage . $msg
+	::UI::SetStatusMessage $wtop $msg
 	if {[::putfile::status $token] == "ok"} {
 	    ::putfile::cleanup $token
 	}
     }
+    ::PutFileIface::DeRegisterPutSession $token
     update
 }
 
@@ -191,10 +197,8 @@ proc ::PutFileIface::PutCommand {token what msg} {
 # Results:
 #    none.
 
-proc ::PutFileIface::PutFileToClient {s ip relativeFilePath optList} {
+proc ::PutFileIface::PutFileToClient {wtop s ip relativeFilePath optList} {
     global  tclwbProtMsg this chunkSize mimeTypeIsText
-    
-    variable putTokenList
     
     Debug 2 "+      PutFileToClient:: s=$s, ip=$ip,\
       relativeFilePath=$relativeFilePath"
@@ -207,30 +211,70 @@ proc ::PutFileIface::PutFileToClient {s ip relativeFilePath optList} {
     set mime [GetMimeTypeFromFileName $filePath]
     
     # And finally...    
-    if {[catch {::putfile::puttoclient $s $filePath  \
-      -mimetype $mime -optlist $optList  \
-      -progress ::PutFileIface::PutProgress  \
-      -command ::PutFileIface::PutCommand} tok]} {
+    if {[catch {
+	::putfile::puttoclient $s $filePath        \
+	  -mimetype $mime -optlist $optList        \
+	  -progress ::PutFileIface::PutProgress    \
+	  -command [list ::PutFileIface::PutCommand $wtop]
+    } tok]} {
 	tk_messageBox -title [::msgcat::mc {File Transfer Error}] \
 	  -type ok -message $tok
     } else {
-	lappend putTokenList $tok
+	::PutFileIface::RegisterPutSession $tok $wtop
     }
 }
 
-#   CancelAll ---
+# PutFileIface::RegisterPutSession, DeRegisterPutSession --
+# 
+#       Keeps track of ongoing put sessions.
+
+proc ::PutFileIface::RegisterPutSession {token wtop} {
+    variable putSessionArr
+    
+    set putSessionArr($wtop,token) $token
+    set putSessionArr($token,wtop) $wtop
+}
+
+proc ::PutFileIface::DeRegisterPutSession {token} {
+    variable putSessionArr
+    
+    catch {
+	set wtop $putSessionArr($token,wtop)
+	unset putSessionArr($wtop,token)
+	unset putSessionArr($token,wtop)
+    }
+}
+
+# CancelAll --
 #
 #   It is supposed to stop every put operation taking place.
 #   This may happen when the user presses a stop button or something.
 #   
 
 proc ::PutFileIface::CancelAll { } {
-    variable putTokenList
+    variable putSessionArr
 
     Debug 2 "+::PutFileIface::CancelAll"
     
     # Close and clean up.
+    foreach {key tok} [array get putSessionArr "*,token"] {
+	putfile::reset $tok
+	putfile::cleanup $tok
+	::PutFileIface::DeRegisterPutSession $tok
+    }
+}
 
+proc ::PutFileIface::CancelAllWtop {wtop} {
+    variable putSessionArr
+
+    Debug 2 "+::PutFileIface::CancelAllWtop wtop=$wtop"
+    
+    # Close and clean up.
+    foreach {key tok} [array get putSessionArr "${wtop},token"] {
+	putfile::reset $tok
+	putfile::cleanup $tok
+	::PutFileIface::DeRegisterPutSession $tok
+    }
 }
 
 #-------------------------------------------------------------------------------

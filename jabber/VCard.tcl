@@ -2,11 +2,11 @@
 #  
 #      This file is part of the whiteboard application. 
 #      
-#  Copyright (c) 2001-2002  Mats Bengtsson
+#  Copyright (c) 2001-2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: VCard.tcl,v 1.1.1.1 2002-12-08 11:01:04 matben Exp $
+# $Id: VCard.tcl,v 1.2 2003-02-24 17:52:05 matben Exp $
 
 package provide VCard 1.0
 
@@ -32,11 +32,11 @@ proc ::VCard::Fetch {w type {jid {}}} {
     upvar ::Jabber::jstate jstate
 
     if {$type == "own"} {
-	set jid $jstate(mejid)
+        set jid $jstate(mejid)
     }
     set wtoplevel ${w}${uid}
     incr uid
-	
+        
     # We should query the server for this and then fill in.
     ::UI::SetStatusMessage . [::msgcat::mc vcardget $jid]
     $jstate(jlib) vcard_get $jid  \
@@ -51,20 +51,19 @@ proc ::VCard::FetchCallback {w type jid jlibName result theQuery} {
     
     variable elem
 
-    #puts "::VCard::FetchCallback type=$type, result=$result, theQuery='$theQuery'"
     if {$result == "error"} {
-	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
-	  -message [FormatTextForMessageBox  \
-	  [::msgcat::mc vcarderrget $theQuery]]
-	::UI::SetStatusMessage . {}
-	return
+        tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
+          -message [FormatTextForMessageBox  \
+          [::msgcat::mc vcarderrget $theQuery]]
+        ::UI::SetStatusMessage . {}
+        return
     }
     ::UI::SetStatusMessage . [::msgcat::mc vcardrec]
     
     # The 'theQuery' now contains all the vCard data in a xml list.
     catch {unset elem}
     if {[llength $theQuery]} {
-	::VCard::ParseXmlList $theQuery [namespace current]::elem
+        ::VCard::ParseXmlList $theQuery [namespace current]::elem
     }
     Build $w $type $jid
 }
@@ -78,57 +77,57 @@ proc ::VCard::ParseXmlList {subiq arrName} {
     upvar #0 $arrName arr
     
     foreach c [wrapper::getchildren $subiq] {
-	set tag [string tolower [lindex $c 0]]
-	switch -- $tag {
-	    fn - nickname - bday - url - title - role {
-		set arr($tag) [lindex $c 3]	
-	    }
-	    n - org {
-		foreach sub [wrapper::getchildren $c] {
-		    set subt [string tolower [lindex $sub 0]]
-		    set arr(${tag}_${subt}) [lindex $sub 3]
-		}
-	    }
-	    tel {
-		set key "tel"
-		set telno [lindex $c 3]
-		foreach sub [wrapper::getchildren $c] {
-		    set subt [string tolower [lindex $sub 0]]
-		    append key "_$subt"
-		}
-		set arr($key) $telno
-	    }
-	    adr {
-		
-		# First child must be "home" or "work"
-		set where [string tolower \
-		  [lindex [lindex [wrapper::getchildren $c] 0] 0]]
-		foreach sub [wrapper::getchildren $c] {
-		    if {[lindex $sub 2]} {
-			continue
-		    }
-		    set subt [string tolower [lindex $sub 0]]
-		    set arr(adr_${where}_${subt}) [lindex $sub 3]
-		}
-	    }
-	    email {
-		set key "email"
-		set mailaddr [lindex $c 3]
-		
-		# Label with all (empty) subtags.
-		foreach sub [wrapper::getchildren $c] {
-		    set subt [string tolower [lindex $sub 0]]
-		    append key "_$subt"
-		}
-		
-		# Allow many of theses.
-		if {[string equal $key "email_internet"]} {
-		    lappend arr($key) $mailaddr
-		} else {
-		    set arr($key) $mailaddr
-		}
-	    }
-	}
+        set tag [string tolower [lindex $c 0]]
+        switch -- $tag {
+            fn - nickname - bday - url - title - role - desc {
+                set arr($tag) [lindex $c 3]     
+            }
+            n - org {
+                foreach sub [wrapper::getchildren $c] {
+                    set subt [string tolower [lindex $sub 0]]
+                    set arr(${tag}_${subt}) [lindex $sub 3]
+                }
+            }
+            tel {
+                set key "tel"
+                set telno [lindex $c 3]
+                foreach sub [wrapper::getchildren $c] {
+                    set subt [string tolower [lindex $sub 0]]
+                    append key "_$subt"
+                }
+                set arr($key) $telno
+            }
+            adr {
+                
+                # First child must be "home" or "work"
+                set where [string tolower \
+                  [lindex [lindex [wrapper::getchildren $c] 0] 0]]
+                foreach sub [wrapper::getchildren $c] {
+                    if {[lindex $sub 2]} {
+                        continue
+                    }
+                    set subt [string tolower [lindex $sub 0]]
+                    set arr(adr_${where}_${subt}) [lindex $sub 3]
+                }
+            }
+            email {
+                set key "email"
+                set mailaddr [lindex $c 3]
+                
+                # Label with all (empty) subtags.
+                foreach sub [wrapper::getchildren $c] {
+                    set subt [string tolower [lindex $sub 0]]
+                    append key "_$subt"
+                }
+                
+                # Allow many of theses.
+                if {[string equal $key "email_internet"]} {
+                    lappend arr($key) $mailaddr
+                } else {
+                    set arr($key) $mailaddr
+                }
+            }
+        }
     }
 }
 
@@ -150,19 +149,20 @@ proc ::VCard::Build {w type jid} {
     variable elem
     variable wemails
     variable vcardjid
+    variable wdesctxt
     upvar ::Jabber::jstate jstate
     
     set finished 0
     set anyChange 0
     
     if {[winfo exists $w]} {
-	return
+        return
     }
     toplevel $w -background $prefs(bgColGeneral)
     if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
+        eval $::macWindowStyle $w documentProc
     } else {
-	wm transient $w .
+        wm transient $w .
     }    
     wm title $w [::msgcat::mc {vCard Info}]
     set vcardjid $jid
@@ -178,9 +178,9 @@ proc ::VCard::Build {w type jid} {
     # Start with the Basic Info -------------------------------------------------
     
     if {$type == "own"} {
-	set ltxt [::msgcat::mc {My vCard}]
+        set ltxt [::msgcat::mc {My vCard}]
     } else {
-	set ltxt {What is this}
+        set ltxt {What is this}
     }
     set frbi [$nbframe newpage {Basic Info} -text [::msgcat::mc {Basic Info}]]    
     set labfrbi [LabeledFrame2 $frbi.fr $ltxt]
@@ -199,7 +199,7 @@ proc ::VCard::Build {w type jid} {
     entry $pbi.efam -width 18  \
       -textvariable [namespace current]::elem(n_family)
     grid $pbi.first $pbi.middle $pbi.fam -sticky w
-    grid $pbi.efirst $pbi.emiddle $pbi.efam
+    grid $pbi.efirst $pbi.emiddle $pbi.efam -sticky ew
     
     # Other part.
     label $pbi.nick -text "[::msgcat::mc {Nick name}]:"
@@ -217,6 +217,23 @@ proc ::VCard::Build {w type jid} {
     grid $pbi.jid -column 0 -row 4 -sticky e
     grid $pbi.ejid -column 1 -row 4 -sticky news -columnspan 2
     
+    # Description part.
+    label $pbi.ldes -text "[::msgcat::mc Description]:"    
+    frame $pbi.fdes
+    set wdesctxt $pbi.fdes.t
+    set wdysc $pbi.fdes.ysc
+    text $wdesctxt -height 4 -yscrollcommand [list $wdysc set] -wrap word \
+      -borderwidth 1 -relief sunken -font $sysFont(s) -width 38
+    scrollbar $wdysc -orient vertical -command [list $wdesctxt yview]
+    grid $wdesctxt -column 0 -row 0 -sticky news
+    grid $wdysc -column 1 -row 0 -sticky ns
+    grid columnconfigure $wdesctxt 0 -weight 1
+    grid rowconfigure $wdesctxt 0 -weight 1
+    grid $pbi.ldes -column 0 -row 5 -sticky w -padx 2 -pady 2
+    grid $pbi.fdes -column 0 -row 6 -sticky w -columnspan 3 -padx 2
+    if {[info exists elem(desc)]} {
+        $wdesctxt insert end $elem(desc)
+    }
     
     # Personal Info page -------------------------------------------------------
     set frppers [$nbframe newpage {Personal Info}  \
@@ -225,14 +242,14 @@ proc ::VCard::Build {w type jid} {
     pack $pbp -padx 10 -pady 6 -side left -anchor n
 
     foreach {name tag} {
-	{Personal URL}    url
-	Occupation        role
-	Birthday          bday
+        {Personal URL}    url
+        Occupation        role
+        Birthday          bday
     } {
-	label $pbp.l$tag -text "[::msgcat::mc $name]:"
-	entry $pbp.e$tag -width 28  \
-	  -textvariable [namespace current]::elem($tag)
-	grid $pbp.l$tag $pbp.e$tag -sticky e
+        label $pbp.l$tag -text "[::msgcat::mc $name]:"
+        entry $pbp.e$tag -width 28  \
+          -textvariable [namespace current]::elem($tag)
+        grid $pbp.l$tag $pbp.e$tag -sticky e
     }
     label $pbp.frmt -text {Format mm/dd/yyyy}
     grid $pbp.frmt -column 1 -sticky w
@@ -244,9 +261,9 @@ proc ::VCard::Build {w type jid} {
       -font $sysFont(s) -width 32 -height 8
     grid $pbp.emails -columnspan 2 -sticky w
     if {[info exists elem(email_internet)]} {
-	foreach email $elem(email_internet) {
-	    $wemails insert end "$email\n"
-	}
+        foreach email $elem(email_internet) {
+            $wemails insert end "$email\n"
+        }
     }
     
     # Home page --------------------------------------------------------------
@@ -255,19 +272,19 @@ proc ::VCard::Build {w type jid} {
     pack $pbh -padx 10 -pady 6 -side left -anchor n
     
     foreach {name tag} {
-	{Address 1}       adr_home_street
-	{Address 2}       adr_home_extadd
-	City              adr_home_locality
-	State/Region      adr_home_region
-	{Postal Code}     adr_home_pcode
-	Country           adr_home_country
-	{Tel (voice)}     tel_voice_home
-	{Tel (fax)}       tel_fax_home
+        {Address 1}       adr_home_street
+        {Address 2}       adr_home_extadd
+        City              adr_home_locality
+        State/Region      adr_home_region
+        {Postal Code}     adr_home_pcode
+        Country           adr_home_country
+        {Tel (voice)}     tel_voice_home
+        {Tel (fax)}       tel_fax_home
     } {
-	label $pbh.l$tag -text "[::msgcat::mc $name]:"
-	entry $pbh.e$tag -width 28  \
-	  -textvariable [namespace current]::elem($tag)
-	grid $pbh.l$tag $pbh.e$tag -sticky e
+        label $pbh.l$tag -text "[::msgcat::mc $name]:"
+        entry $pbh.e$tag -width 28  \
+          -textvariable [namespace current]::elem($tag)
+        grid $pbh.l$tag $pbh.e$tag -sticky e
     }
     
     # Work page ----------------------------------------------------------
@@ -276,49 +293,50 @@ proc ::VCard::Build {w type jid} {
     pack $pbw -padx 10 -pady 6 -side left -anchor n
     
     foreach {name tag} {
-	{Company Name}    org_orgname 
-	Department        org_orgunit
-	Title             title
-	{Address 1}       adr_work_street
-	{Address 2}       adr_work_extadd
-	City              adr_work_locality
-	State/Region      adr_work_region
-	{Postal Code}     adr_work_pcode
-	Country           adr_work_country
-	{Tel (voice)}     tel_voice_work
-	{Tel (fax)}       tel_fax_work
+        {Company Name}    org_orgname 
+        Department        org_orgunit
+        Title             title
+        {Address 1}       adr_work_street
+        {Address 2}       adr_work_extadd
+        City              adr_work_locality
+        State/Region      adr_work_region
+        {Postal Code}     adr_work_pcode
+        Country           adr_work_country
+        {Tel (voice)}     tel_voice_work
+        {Tel (fax)}       tel_fax_work
     } {
-	label $pbw.l$tag -text "[::msgcat::mc $name]:"
-	entry $pbw.e$tag -width 28  \
-	  -textvariable [namespace current]::elem($tag)
-	grid $pbw.l$tag $pbw.e$tag -sticky e
+        label $pbw.l$tag -text "[::msgcat::mc $name]:"
+        entry $pbw.e$tag -width 28  \
+          -textvariable [namespace current]::elem($tag)
+        grid $pbw.l$tag $pbw.e$tag -sticky e
     }
 
     # If not our card, disable all entries.
     if {$type == "other"} {
-	foreach wpar [list $pbi $pbp $pbh $pbw] {
-	    foreach win [winfo children $wpar] {
-		if {[winfo class $win] == "Entry"} {
-		    $win configure -state disabled
-		}
-	    }
-	}
-	$wemails configure -state disabled
+        foreach wpar [list $pbi $pbp $pbh $pbw] {
+            foreach win [winfo children $wpar] {
+                if {[winfo class $win] == "Entry"} {
+                    $win configure -state disabled
+                }
+            }
+        }
+        $wemails configure -state disabled
+        $wdesctxt configure -state disabled
     }
-	
+        
     # Button part.
     frame $w.frbot -borderwidth 0
     if {$type == "own"} {
-	pack [button $w.btsave -text [::msgcat::mc Save] -width 8  \
-	  -default active -command [namespace current]::PushBtSetVCard] \
-	  -in $w.frbot -side right -padx 5 -pady 5
-	pack [button $w.btcancel -text [::msgcat::mc Cancel] -width 8   \
-	  -command "set [namespace current]::finished 0"]  \
-	  -in $w.frbot -side right -padx 5 -pady 5
+        pack [button $w.btsave -text [::msgcat::mc Save] -width 8  \
+          -default active -command [namespace current]::PushBtSetVCard] \
+          -in $w.frbot -side right -padx 5 -pady 5
+        pack [button $w.btcancel -text [::msgcat::mc Cancel] -width 8   \
+          -command "set [namespace current]::finished 0"]  \
+          -in $w.frbot -side right -padx 5 -pady 5
     } else {
-	pack [button $w.btcancel -text [::msgcat::mc Close] -width 8 \
-	  -command "set [namespace current]::finished 0"]  \
-	  -in $w.frbot -side right -padx 5 -pady 5
+        pack [button $w.btcancel -text [::msgcat::mc Close] -width 8 \
+          -command "set [namespace current]::finished 0"]  \
+          -in $w.frbot -side right -padx 5 -pady 5
     }
     pack $w.frbot -side top -fill both -expand 1 -in $frall -padx 8 -pady 6
 
@@ -339,20 +357,21 @@ proc ::VCard::PushBtSetVCard { }  {
     variable finished
     variable elem
     variable wemails
-    # BAD!!!
+    variable wdesctxt
     upvar ::Jabber::jstate jstate
     
     if {($elem(n_given) != "") && ($elem(n_family) != "")} {
-	set elem(fn) "$elem(n_given) $elem(n_family)"
+        set elem(fn) "$elem(n_given) $elem(n_family)"
     }
     set elem(email_internet) \
       [regsub -all "(\[^ \n\t]+)(\[ \n\t]*)" [$wemails get 1.0 end] {\1 } tmp]
     set elem(email_internet) [string trim $tmp]
+    set elem(desc) [$wdesctxt 1.0 end]
     
     # Collect all non empty entries, and send a vCard set.
     set argList {}
     foreach key [array names elem] {
-	if {[string length $elem($key)]} {
+	if {$elem($key) != ""} {
 	    lappend argList -$key $elem($key)
 	}
     }

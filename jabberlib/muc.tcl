@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: muc.tcl,v 1.1 2003-01-30 17:22:37 matben Exp $
+# $Id: muc.tcl,v 1.2 2003-02-24 17:52:09 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -20,19 +20,19 @@
 #	see below for instance command options
 #	
 #   INSTANCE COMMANDS
+#      jlibName muc allroomsin
+#      jlibName muc create roomjid nick callback
 #      jlibName muc enter roomjid nick ?-command?
 #      jlibName muc exit roomjid nick
+#      jlibName muc getaffilation roomjid affilation callback
+#      jlibName muc getrole roomjid role callback
+#      jlibName muc getroom roomjid callback
 #      jlibName muc setnick roomjid nick ?-command?
 #      jlibName muc invite roomjid jid ?-reason?
+#      jlibName muc mynick roomjid
 #      jlibName muc setrole roomjid nick role ?-command, -reason?
 #      jlibName muc setaffilation roomjid nick affilation ?-command, -reason?
-#      jlibName muc getrole roomjid role callback
-#      jlibName muc getaffilation roomjid affilation callback
-#      jlibName muc create roomjid nick callback
 #      jlibName muc setroom roomjid type ?-command, -form?
-#      jlibName muc getroom roomjid callback
-#      jlibName muc mynick roomjid
-#      jlibName muc allroomsin
 #      
 ############################# CHANGES ##########################################
 #
@@ -103,7 +103,7 @@ proc jlib::muc::enter {jlibName roomjid nick args} {
 	    }
 	}
     }
-    set jid "${roomjid}/${nick}"
+    set jid ${roomjid}/${nick}
     set xelem [wrapper::createtag "x"  \
       -attrlist {xmlns "http://jabber.org/protocol/muc"}]
     eval {[namespace parent]::send_presence $jlibName -to $jid  \
@@ -116,10 +116,11 @@ proc jlib::muc::enter {jlibName roomjid nick args} {
 # 
 
 proc jlib::muc::exit {jlibName roomjid nick} {
+    upvar [namespace current]::${jlibName}::cache cache    
     
-    set jid "${roomjid}/${nick}"
+    set jid ${roomjid}/${nick}
     [namespace parent]::send_presence $jlibName -to $jid -type "unavailable"
-    catch {unset muc($roomjid,mynick)}
+    catch {unset cache($roomjid,mynick)}
 }
 
 # jlib::muc::setnick --
@@ -127,6 +128,7 @@ proc jlib::muc::exit {jlibName roomjid nick} {
 # 
 
 proc jlib::muc::setnick {jlibName roomjid nick args} {
+    upvar [namespace current]::${jlibName}::cache cache    
     
     set opts {}
     foreach {name value} $args {
@@ -139,8 +141,9 @@ proc jlib::muc::setnick {jlibName roomjid nick args} {
 	    }
 	}
     }
-    set jid "${roomjid}/${nick}"
+    set jid ${roomjid}/${nick}
     eval {[namespace parent]::send_presence $jlibName -to $jid} $opts
+    set cache($roomjid,mynick) $nick
 }
 
 # jlib::muc::invite --
@@ -285,12 +288,14 @@ proc jlib::muc::getaffilation {jlibName roomjid affilation callback} {
 # 
 
 proc jlib::muc::create {jlibName roomjid nick callback} {
+    upvar [namespace current]::${jlibName}::cache cache    
 
-    set jid "${roomjid}/${nick}"
+    set jid ${roomjid}/${nick}
     set xelem [wrapper::createtag "x"  \
       -attrlist {xmlns "http://jabber.org/protocol/muc"}]
     [namespace parent]::send_presence $jlibName -to $jid  \
       -xlist [list $xelem] -command $callback
+    set cache($roomjid,mynick) $nick
 }
 
 # jlib::muc::setroom --

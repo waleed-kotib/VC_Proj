@@ -15,7 +15,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Whiteboard.tcl,v 1.5 2003-02-06 17:23:31 matben Exp $
+# $Id: Whiteboard.tcl,v 1.6 2003-02-24 17:52:04 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -48,8 +48,14 @@ if {[catch {package require Tk}]} {
     error {We need Tk here. Run Wish!}
 }
 
-### Determine whether we are part of Ed Suominen's PRIVARIA distribution
-set privariaFlag [regexp -nocase privaria [info script]]
+### Command-line option "-privaria" indicates whether we're
+### part of Ed Suominen's PRIVARIA distribution
+set privariaFlag 0
+if { [set k [lsearch $argv -privaria]] >= 0 } {
+    set privariaFlag 1
+    set argv [concat [lrange $argv 0 [expr {$k-1}]] [lrange $argv [expr {$k+1}] end]]
+    incr argc -1
+}
 
 if {[package vcompare [info tclversion] 8.3] == -1} {
     tk_messageBox -message  \
@@ -197,10 +203,25 @@ if {[string equal $this(platform) "macintosh"] && [string equal $thisPath ":"]} 
 set this(path) $thisPath
 set this(script) $thisScript
 
-# Shall we strip out all jabber stuff.
-set prefs(stripJabber) 0
+# Privaria-specific stuff
 if {$privariaFlag} {
     set prefs(stripJabber) 1
+    switch $this(platform) {
+        unix { 
+        	set x [file join privaria lib] 
+        }
+        windows { 
+        	set x opt.privaria.lib 
+        }
+    }
+    if {[file isdirectory [set x [file join [file dirname $this(path)] $x]]]} {
+        # Append Privaria library directory to auto_path because some packages
+        # are there instead of being duplicated in Coccinella distro
+        lappend auto_path $x
+    }
+
+} else {
+    set prefs(stripJabber) 0
 }
 
 # Add our lib directory to our search path.
@@ -388,7 +409,7 @@ set prefs(tls) 0
 set prefs(optcl) 0
 set prefs(tcom) 0
 switch -- $this(platform) {
-    macintosh {
+    macintosh - macosx {
 	if {[catch {source [file join $this(path) lib MacintoshUtils.tcl]} msg]} {
 	    after idle {tk_messageBox -message "Error sourcing MacintoshUtils.tcl  $msg"  \
 	      -icon error -type ok; exit}
@@ -602,7 +623,12 @@ VerifyPackagesForMimeTypes
 ::CanvasUtils::CreateFontSizeMapping
 
 # Make the actual whiteboard with canvas, tool buttons etc...
-::UI::BuildMain . -serverentrystate disabled
+if {$prefs(protocol) == "jabber"} {
+    ::UI::BuildMain . -serverentrystate disabled -sendcheckstate disabled
+} else {    
+    ::UI::BuildMain . -serverentrystate disabled
+}
+
 if {$prefs(firstLaunch) && !$prefs(stripJabber)} {
     wm withdraw .
     set displaySetup 1

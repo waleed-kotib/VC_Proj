@@ -1,171 +1,196 @@
 
-              The Coccinella : Whiteboard application in Tcl
-              ----------------------------------------------
+	  The Coccinella : Whiteboard application in Tcl
+	  ----------------------------------------------
 
-                    version 0.94.2, ??th ??????, 2002
+		version 0.94.3, ??th ??????, 2003
 
-                           by: Mats Bengtsson
+		       by: Mats Bengtsson
 
 
 
-    What is this?
+What is this?
 
-	This is a whiteboard application that runs on the Internet.  It consists
-	of a simple drawing and writing program where you share a canvas with 
-	any other whiteboard.  This way you can share information between 
-	friends.  Besides drawing and writing, it is possible to share files as
-	well, such as images, movies, mp3's etc.
+    This is a whiteboard application that runs on the Internet. It consists
+    of a simple drawing  and writing program  where you share a canvas with 
+    any other  whiteboard.  This way  you can  share  information  between 
+    friends.  Besides drawing and writing, it is possible to share files as
+    well, such as images, movies, mp3's etc.
 
-    The Jabber system:
+    	Perhaps it is  better to describe it  using the  desktop  metaphor.
+    Just like your computer has a desktop with files, symbols  and windows,
+    this whiteboard is  similar, but  instead of using  files  and folders,
+    it actually  shows the  contents of these files.  That is, for an image
+    file we show the actual image, an mp3 is shown as a minimal player etc.
+    This should work in a modular way using a plugin architecture; a plugin
+    is responsible for a set of MIME types, how they should be displayed in
+    the whiteboard, user interactions, any playback or whatever is relevant.
+    And most importantly, these items are shared with other users in a form
+    that  depends on the  type,  such as single  message (like an email), 
+    one-to-one chat, or groupchat.
 
-        The whiteboard can be configured into two main modes.  The services
-        supported by these two modes are very different.  You switch between 
-	these two modes using the Preferences/Preferences...  menu, and the
-        "General/Network Setup" panel.
+The Jabber system:
+
+    The whiteboard can be configured into two main modes.  The services
+    supported by these two modes are very different.  You switch between 
+    these two modes using the Preferences/Preferences...  menu, and the
+    "General/Network Setup" panel.
+
+    * Jabber Server: The Jabber Instant Messaging system is an XML based 
+      system that works similar to ICQ, AIM etc.  It delivers messages 
+      seamlessly between many instant messaging system and Jabber clients.  
+      This application is a Jabber client, but it is not a normal Jabber 
+      client since it delivers much more than just text messages.  Visit 
+      "www.jabber.org" for more information, and to obtain your own server.
+
+      To get started with a Jabber server, register an account (if you 
+      haven't already) using the Jabber/New Account...  menu, and fill in 
+      the fields.  When you later log on, you do it from the Jabber/Login...
+      menu, and pick the server you have an account at.
+
+    * Peer-to-peer: This is the "raw" configuration, where users connect 
+      directly to each other, and not via an external server.  This mode 
+      does not deliver the kind of user administration that is supplied by 
+      the Jabber system, such as contact lists, online/offline, offline 
+      delivery etc. 
+
+Installation:
+
+    * Obtain Tcl/Tk for your specific platform from "tcl.activestate.com".
+      This is for Windows and Unix/Linux.  Mac OS Classic get it from:
+      "http://prdownloads.sourceforge.net/tcl/MacTclTk_8.4.1_RuntimeInstl.bin?download"
+      Or if you want to try Mac OS X, look at: 
+      "http://prdownloads.sourceforge.net/tcl/TclTkAquaStandalone-8.4.1.dmg?download"
+
+    * Obtain this whiteboard (if not already done that since you are reading
+      this) from http://hem.fyristorg.com/matben.  Its main directory may be
+      placed wherever you like on your disk.  
+
+    It is necessary to have access to a unique server port on remote 
+    machines, so it can be problematic if you are behind a firewall.  
+    Firewalls are not dealt with at all at this stage.
+
+Running:
+
+    Unix/Linux -- just write ./Whiteboard.tcl at the command line in the 
+	    same directory as 'Whiteboard.tcl'.  
+
+    Windows -- either doubleclick Whiteboard.tcl or launch the wish 
+	    application and choose File/Source and pick "Whiteboard.tcl".  
+
+    Mac -- launch the wish application and choose File/Source and pick
+	   Whiteboard.tcl. You may need to select the Whiteboard* folder
+	   as well due to a bug in Tcl/Tk (8.3 only).
+
+Testing:
+
+    It is to be considered as a developer release, so beware.  *It is far 
+    from being bug free*.  It has been developed and tested on MacOS 
+    8.1-9.2, Mac OS X 10.2, LinuxPPC R4, Red Hat Linux, Windows 98, 
+    and Windows 2000. It requires a Tcl version 8.3 or later.
+
+    I would judge this as an alpha quality application, not beta, which is 
+    reflected in the version number ( < 1.0). No instabilities are known, 
+    however.
+
+Additional Notes:
     
-	* Jabber Server: The Jabber Instant Messaging system is an XML based 
-	  system that works similar to ICQ, AIM etc.  It delivers messages 
-	  seamlessly between many instant messaging system and Jabber clients.  
-	  This application is a Jabber client, but it is not a normal Jabber 
-	  client since it delivers much more than just text messages.  Visit 
-	  "www.jabber.org" for more information, and to obtain your own server.
+    * Macintosh: Use Tcl/Tk 8.4.1 or later. On Classic be sure to increase
+      the Wish applications memory partition to 20M or more.
 
-	  To get started with a Jabber server, register an account (if you 
-	  haven't already) using the Jabber/New Account...  menu, and fill in 
-	  the fields.  When you later log on, you do it from the Jabber/Login...
-	  menu, and pick the server you have an account at.
+    * Jabber: if you run this as a Jabber client, then be sure that the
+      servers's "karma", which controls maximal throughput, is set high.  
+      This client delivers more data than an ordinary Jabber client, and 
+      data may "get stuck" in the server if karma is too low.
 
-	* Peer-to-peer: This is the "raw" configuration, where users connect 
-	  directly to each other, and not via an external server.  This mode 
-	  does not deliver the kind of user administration that is supplied by 
-	  the Jabber system, such as contact lists, online/offline, offline 
-	  delivery etc. 
+    * Its name, Whiteboard, is generic and likely to change in the future,
+      possibly to "The Coccinella" (latin for ladybug).
 
-    Installation:
+Documentation:
 
-        * Obtain Tcl/Tk for your specific platform from "tcl.activestate.com".
-	  This is for Windows and Unix/Linux.  Mac OS Classic get it from:
-	  "http://prdownloads.sourceforge.net/tcl/MacTclTk_8.4.1_RuntimeInstl.bin?download"
-	  Or if you want to try Mac OS X, look at: 
-	  "http://prdownloads.sourceforge.net/tcl/TclTkAquaStandalone-8.4.1.dmg?download"
+    The source code is the only documentation. At least so far ;-)
+    See also the Info/Help menu.
 
-	* Obtain this whiteboard (if not already done that since you are reading
-	  this) from http://hem.fyristorg.com/matben.  Its main directory may be
-	  placed wherever you like on your disk.  
+Packages (extra batteries):
 
-	It is necessary to have access to a unique server port on remote 
-	machines, so it can be problematic if you are behind a firewall.  
-	Firewalls are not dealt with at all at this stage.
+    There are a number of binary, platform specific, packages for Mac,
+    Windows, and Linux-x86. See the bin directory for a closer look of
+    what's included. See also the Info/On Plugins... menu for more info.
 
-    Running:
+Non-latin character sets:
 
-	Unix/Linux -- just write ./Whiteboard.tcl at the command line in the 
-		same directory as 'Whiteboard.tcl'.  
+    On Macintosh with a "Chinese Language Kit" it is possible to write 
+    chinese, at least does it look as chinese to me.  But you need to import
+    the correct font from the Preference menu.  Be sure that all connected 
+    remote clients also have this font on their system; I don't think it 
+    needs to be imported. Probably any "Language Kit" should work.
 
-	Windows -- either doubleclick Whiteboard.tcl or launch the wish 
-		application and choose File/Source and pick "Whiteboard.tcl".  
+Known Bugs:
 
-	Mac -- launch the wish application and choose File/Source and pick
-	       Whiteboard.tcl. You may need to select the Whiteboard* folder
-	       as well due to a bug in Tcl/Tk.
+    * Althogh the server is using a safe interpreter for the critical parts
+      of canvas drawings which uses the dangerous eval, it probably does not 
+      cover all possible attacks from an evil client.
 
-    Testing:
+    * If large items are transported between clients, such as images, or
+      movies, operations on these items before they have been completely 
+      received by remote clients are lost.
 
-	It is to be considered as a developer release, so beware.  *It is far 
-	from being bug free*.  It has been developed and tested on MacOS 
-	8.1-9.2, LinuxPPC R4, Red Hat Linux, Windows 98, and Windows 2000. 
-	It requires a Tcl version 8.3 or later.
+    * The stacking order of images is not always respected on remote clients.
 
-	I would judge this as an alpha quality application, not beta, which is 
-	reflected in the version number ( < 1.0). No instabilities are known, 
-	however.
+    * It may sometimes happen that the internal settings become confused 
+      which results in a corrupt preference file. If you suspect this then
+      delete this file. Unix "whiteboard", windows: "WBPREFS.TXT", 
+      Mac: "Whiteboard Prefs".
 
-    Additional Notes:
-        
-	* Macintosh: Use Tcl/Tk 8.3.4 or later.
+    * Printer support is still in its infacy. You may export the canvas to
+      XML/SVG format which can be imported into a web browser using the free
+      plugin from www.adobe.com, and print from inside your browser.
 
-	* Jabber: if you run this as a Jabber client, then be sure that the
-	  servers's "karma", which controls maximal throughput, is set high.  
-	  This client delivers more data than an ordinary Jabber client, and 
-	  data may "get stuck" in the server if karma is too low.
+    * There are numerous "details" that need to be fixed. After all, it is an 
+      alpha quality software!
 
-	* Its name, Whiteboard, is generic and likely to change in the future,
-	  possibly to "The Coccinella" (latin for ladybug).
+    As always, the code needs cleaning and restructuring.  If you want to see
+    what is happening "inside" you may set the various debug variables equal to
+    2 or larger.  There are two in Whiteboard.tcl, one in Jabber.tcl,
+    jabberlib.tcl, and wrapper.tcl respectively. They may also be specified
+    at the command line as:
 
-    Documentation:
+    set argv "-debugLevel 3 -debugServerLevel 3 -jstate_debug 2"
+    set argc 6
 
-	The source code is the only documentation. At least so far ;-)
-	See also the Info/Help menu.
+    and launch it.
 
-    Packages (extra batteries):
+Distribution:
 
-	There are a number of binary, platform specific, packages for Mac,
-	Windows, and Linux-x86. See the bin directory for a closer look of
-	what's included. See also the Info/On Plugins... menu for more info.
+    It is distributed under the standard GPL.
+    (c) Copyright by Mats Bengtsson (1999-2003).
+    Buttons are stolen from Gimp and slightly changed (Thank You!).
 
-    Non-latin character sets:
+Home:
 
-	On Macintosh with a "Chinese Language Kit" it is possible to write 
-	chinese, at least does it look as chinese to me.  But you need to import
-	the correct font from the Preference menu.  Be sure that all connected 
-	remote clients also have this font on their system; I don't think it 
-	needs to be imported. Probably any "Language Kit" should work.
+    The present home of the Coccinella is at
+    "http://hem.fyristorg.com/matben", where links to the extensions also 
+    can be found. Starting with release 0.94.3 the code is put on 
+    SourceForge's cvs, where you may get snapshots of developer code.
+    Look at "http://coccinella.sourceforge.net" which is the official
+    developer home.
 
-    Known Bugs:
+The Beetle:
 
-        * Althogh the server is using a safe interpreter for the critical parts
-	  of canvas drawings which uses the dangerous eval, it probably does not 
-	  cover all possible attacks from an evil client.
+    Don't be afraid for the 'Coccinella' (ladybug), it's tame!
 
-	* If large items are transported between clients, such as images, or
-	  movies, operations on these items before they have been completely 
-	  received by remote clients are lost.
+Special Contributions:
 
-        * Printer support is still in its infacy. You may export the canvas to
-          XML/SVG format which can be imported into a web browser using the free
-          plugin from www.adobe.com, and print from inside your browser.
+    * Raymond Tang: resolving links, adding ImageMagick support, local
+      incoming dir...
 
-        * There are numerous "details" that need to be fixed. After all, it is an 
-          alpha quality software!
+Who:
 
-        As always, the code needs cleaning and restructuring.  If you want to see
-        what is happening "inside" you may set the various debug variables equal to
-        2 or larger.  There are two in Whiteboard.tcl, one in Jabber.tcl,
-        jabberlib.tcl, and wrapper.tcl respectively. They may also be specified
-        at the command line as:
-        set argv "-debugLevel 3 -debugServerLevel 3 -jstate_debug 2"
-        set argc 6
-        and launch it.
+    It has been developed by:
 
-    Distribution:
-
-        It is distributed under the standard GPL.
-        (c) Copyright by Mats Bengtsson (1999-2002).
-        Buttons are stolen from Gimp and slightly changed (Thank You!).
-
-    Home:
-
-        The present home of the Coccinella is at
-        "http://hem.fyristorg.com/matben", where links to the extensions also 
-        can be found.
-
-    The Beetle:
-
-	Don't be afraid for the 'Coccinella' (ladybug), it's tame!
-
-    Special Contributions:
-
-	* Raymond Tang: resolving links, adding ImageMagick support, local
-	  incoming dir...
-
-    Who:
-
-	It has been developed by:
-
-	Mats Bengtsson
-	Hamngatan 21
-	SE-58226, Linkoping Sweden
-	matben@privat.utfors.se
-	phone: +46 13 136114
+    Mats Bengtsson
+    Hamngatan 21
+    SE-58226, Linkoping Sweden
+    matben@privat.utfors.se
+    phone: +46 13 136114
 
 #-------------------------------------------------------------------------------

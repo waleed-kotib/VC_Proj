@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.2 2003-01-11 16:16:09 matben Exp $
+# $Id: OOB.tcl,v 1.3 2003-02-24 17:52:05 matben Exp $
 
 package provide OOB 1.0
 
@@ -105,7 +105,7 @@ proc ::Jabber::OOB::FileOpen { } {
 }
 
 proc ::Jabber::OOB::DoSend { } {
-    global  this prefs
+    global  prefs
     
     variable finished
     variable localpath
@@ -118,7 +118,8 @@ proc ::Jabber::OOB::DoSend { } {
     # For now we build a relative path for the url. uri encode it!
     #set relpath [GetRelativePath $prefs(httpdBaseDir) $localpath]
     set relpath [filerelative $prefs(httpdBaseDir) $localpath]
-    set url "http://$this(ipnum):$prefs(httpdPort)/$relpath"
+    set ip [::Network::GetThisOutsideIPAddress]
+    set url "http://${ip}:$prefs(httpdPort)/$relpath"
     set url [uriencode::quoteurl $url]
     
     # If 'jid' is without a resource, we MUST add it!

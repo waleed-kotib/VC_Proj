@@ -3,11 +3,11 @@
 #      This file is part of the whiteboard application. 
 #      It implements some network utilities.
 #      
-#  Copyright (c) 2002  Mats Bengtsson
+#  Copyright (c) 2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Network.tcl,v 1.1.1.1 2002-12-08 11:03:38 matben Exp $
+# $Id: Network.tcl,v 1.2 2003-02-24 17:52:11 matben Exp $
 
 namespace eval ::Network:: {
     
@@ -98,14 +98,14 @@ proc ::Network::WhenSocketOpensInits {sock nameOrIP port cmd tls} {
 	puts "::Network::WhenSocketOpensInits, nameOrIP=$nameOrIP, port=$port"
     }
     
+    # No more event handlers here. See also below...
+    fileevent $sock writable {}
+    
     #  Cancel timeout killer.
     if {[info exists killerId($sock)]} {
 	after cancel $killerId($sock)
 	catch {unset killerId($sock)}
     }
-    
-    # No more event handlers here. See also below...
-    fileevent $sock writable {}
 
     if {[eof $sock]} {
 	catch {close $sock}
@@ -191,6 +191,20 @@ proc ::Network::OpenConnectionKillAll { } {
 	after cancel $killerId($sock)
     }
     catch {unset killerId}
+}
+
+# Network::GetThisOutsideIPAddress --
+#
+#       Returns our own ip number unless set own NAT address.
+
+proc ::Network::GetThisOutsideIPAddress { } {
+    global  this prefs
+    
+    if {$prefs(setNATip) && ($prefs(NATip) != "")} {
+	return $prefs(NATip)
+    } else {
+	return $this(ipnum)
+    }
 }
 
 # These one need another home???

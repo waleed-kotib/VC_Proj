@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.5 2003-02-06 17:23:34 matben Exp $
+# $Id: UI.tcl,v 1.6 2003-02-24 17:52:12 matben Exp $
 
 # LabeledFrame --
 #
@@ -162,7 +162,7 @@ proc ::UI::Init {} {
     if {($prefs(protocol) == "symmetric") || ($prefs(protocol) == "client")} {
 	set btShortDefs [lreplace $btShortDefs 1 1  \
 	  {::OpenConnection::OpenConnection $wDlgs(openConn)}]
-	set btShortDefs [lreplace $btShortDefs 8 8  \
+	set btShortDefs [lreplace $btShortDefs 9 9  \
 	  {::UserActions::DoSendCanvas $wtop}]
     }
     if {[string equal $this(platform) "unix"]} {
@@ -340,7 +340,7 @@ proc ::UI::InitMenuDefs { } {
       $menuDefs(main,info,aboutquicktimetcl)]
     
     set menuDefs(main,file) {
-	{command   mNew                {::UI::NewMain -sendcheckstate disabled}   normal   N}
+	{command   mNew                {::UI::NewMain}                            normal   N}
 	{command   mOpenConnection     {::UserActions::DoConnect}                 normal   O}
 	{command   mCloseWindow        {::UserActions::DoCloseWindow}             normal   W}
 	{command   mStartServer        {DoStartServer $prefs(thisServPort)}       normal   {}}
@@ -505,7 +505,7 @@ proc ::UI::InitMenuDefs { } {
 	{command     mLogoutWith    {::Jabber::Logout::WithStatus .joutst}  disabled {}}
 	{command     mPassword      {::Jabber::Passwd::Build .jpasswd}      disabled {}}
 	{separator}
-	{checkbutton mRoster/Services  {::Jabber::::RostServ::Show $wDlgs(jrostbro)}  normal   {} \
+	{checkbutton mRoster/Services  {::Jabber::RostServ::Show $wDlgs(jrostbro)}  normal   {} \
 	  {-variable ::Jabber::jstate(rostBrowseVis)}}
 	{checkbutton mMessageInbox  {::Jabber::MailBox::Show $wDlgs(jinbox)} normal   {} \
 	  {-variable ::Jabber::jstate(inboxVis)}}
@@ -529,9 +529,9 @@ proc ::UI::InitMenuDefs { } {
 	{checkbutton mDebug         {::Jabber::DebugCmd}                  normal   {} \
 	  {-variable ::Jabber::jstate(debugCmd)}}
     }    
-    if {!$prefs(stripJabber)} {
-	lset menuDefs(main,jabber) 13 6 [::Jabber::BuildStatusMenuDef]
-    }
+    
+    # The status menu is built dynamically due to the -image options on 8.4.
+    lset menuDefs(main,jabber) 13 6 [::Jabber::BuildStatusMenuDef]
 
     set menuDefs(main,cam) {    
 	{command     {Camera Action}     {DisplaySequenceGrabber $wtop}        normal   {}}	
@@ -582,7 +582,9 @@ proc ::UI::InitMenuDefs { } {
     if {$haveAppleMenu && !$prefs(QuickTimeTcl)} {
 	lset menuDefs(main,apple) 1 3 disabled
     }
-    if {![string equal $prefs(protocol) "jabber"]} {
+    if {[string equal $prefs(protocol) "jabber"]} {
+	lset menuDefs(main,file) 0 2 {::UI::NewMain -sendcheckstate disabled}
+    } else {
 	lset menuDefs(main,file) 0 3 disabled
     }
     if {[string equal $prefs(protocol) "client"] ||   \
@@ -869,7 +871,10 @@ proc ::UI::BuildMain {wtop args} {
 	wm withdraw $wtopReal
     }
     lappend allWhiteboards $wtopReal
-    wm title $wtopReal $opts(-title)    
+    wm title $wtopReal $opts(-title)
+    
+    # Note that the order of calls can be criticl as any 'update' may trigger
+    # network events to attempt drawing etc. Beware!!!
      
     # Start with menus.
     if {$wtop == "."} {
@@ -999,10 +1004,6 @@ proc ::UI::BuildMain {wtop args} {
 		tclAE::installEventHandler aevt quit ::UI::AEQuitHandler
 	    }
 	}
-	
-	# A trick to let the window manager be finished before getting the geometry.
-	# An 'update idletasks' needed anyway in 'FindWidgetGeometryAtLaunch'.
-	after idle ::UI::FindWidgetGeometryAtLaunch .
     } else {
 	    
 	# The minsize when no connected clients. Is updated when connect/disconnect.
@@ -1012,12 +1013,6 @@ proc ::UI::BuildMain {wtop args} {
 
     # Add things that are defined in the prefs file and not updated else.
     ::UserActions::DoCanvasGrid $wtop
-
-    # Set up paste menu if something on the clipboard.
-    ::UI::AppGetFocus $wtop $wtopReal
-    bind $wtopReal <FocusIn> [list ::UI::AppGetFocus $wtop %W]
-
-    catch {wm deiconify $wtopReal}
 
     # Update size info when application is resized.
     if {1 || !$prefs(haveScrollbars)} {
@@ -1031,6 +1026,18 @@ proc ::UI::BuildMain {wtop args} {
     
     # Manage the undo/redo object.
     set statelocal(undotoken) [undo::new -command [list ::UI::UndoConfig $wtop]]
+
+    # Set up paste menu if something on the clipboard.
+    ::UI::AppGetFocus $wtop $wtopReal
+    bind $wtopReal <FocusIn> [list ::UI::AppGetFocus $wtop %W]
+
+    catch {wm deiconify $wtopReal}
+
+    # A trick to let the window manager be finished before getting the geometry.
+    # An 'update idletasks' needed anyway in 'FindWidgetGeometryAtLaunch'.
+    if {$wtop == "."} {
+	after idle ::UI::FindWidgetGeometryAtLaunch .
+    }
 }
 
 # UI::CloseMain --
@@ -1044,6 +1051,7 @@ proc ::UI::CloseMain {wtop} {
     
     set topw $wapp(toplevel)
     set jtype [::UI::GetJabberType $wtop]
+    
     switch -- $jtype {
 	chat {
 	    set ans [tk_messageBox -icon info -parent $topw -type yesno \
@@ -1058,12 +1066,19 @@ proc ::UI::CloseMain {wtop} {
 	groupchat {
 	    
 	    # Everything handled from Jabber::GroupChat
-	    ::Jabber::GroupChat::Exit $opts(-jid)
+	    set ans [::Jabber::GroupChat::Exit $opts(-jid)]
+	    if {$ans != "yes"} {
+		return
+	    }
 	}
 	default {
 	    ::UI::DestroyMain $wtop
 	}
     }
+    
+    # Reset and cancel all put/get file operations related to this window!
+    ::PutFileIface::CancelAllWtop $wtop
+    ::GetFile::CancelAllWtop $wtop
 }
 
 # UI::DestroyMain --
@@ -1072,6 +1087,7 @@ proc ::UI::CloseMain {wtop} {
 
 proc ::UI::DestroyMain {wtop} {
     
+    variable menuKeyToIndex
     upvar ::${wtop}::wapp wapp
     upvar ::${wtop}::opts opts
 
@@ -1080,6 +1096,7 @@ proc ::UI::DestroyMain {wtop} {
     catch {destroy $topw}    
     unset opts
     unset wapp
+    array unset menuKeyToIndex "${wtop}*"
 }
 
 # UI::AEQuitHandler --
@@ -1316,7 +1333,7 @@ proc ::UI::ClickToolButton {wtop btName} {
 	$wapp(tool).bt$irow$icol configure -image im_off$irow$icol
     }
     set state(btStateOld) $state(btState)
-    RemoveAllBindings $wCan
+    ::UI::RemoveAllBindings $wCan
     
     # Deselect text items.
     if {$btName != "text"} {
@@ -1630,7 +1647,7 @@ proc ::UI::ClickToolButton {wtop btName} {
     }
 
     # This is a hook for plugins to register their own bindings.
-    # Call any registered bindings for the plugin.
+    # Call any registered bindings for the plugin. ???
     foreach key [array names plugin "*,bindProc"] {
 	$plugin($key) $btName
     }
@@ -1658,7 +1675,7 @@ proc ::UI::GenericNonTextBindings {wtop} {
 
 proc ::UI::RemoveAllBindings {w} {
     
-    Debug 3 "RemoveAllBindings::"
+    Debug 3 "::UI::RemoveAllBindings w=$w"
 
     $w bind all <Button-1> {}
     $w bind all <B1-Motion> {}
@@ -1695,7 +1712,6 @@ proc ::UI::RemoveAllBindings {w} {
     bind SnackFrame <Button-1> {}
     bind SnackFrame <B1-Motion> {}
     bind SnackFrame <ButtonRelease-1> {}
-    focus .
     
     # Remove any text insertion...
     $w focus {}
@@ -3390,6 +3406,7 @@ proc ::UI::ConfigureJabberEntry {wtop ipNum args} {
     global  allIPnumsToSend allIPnums allIPnumsTo
     
     upvar ::${wtop}::wapp wapp
+    upvar ::${wtop}::opts opts
     
     Debug 2 "::UI::ConfigureJabberEntry args='$args'"
 
@@ -3404,7 +3421,9 @@ proc ::UI::ConfigureJabberEntry {wtop ipNum args} {
 			    set allIPnumsTo $ipNum
 			    set allIPnumsToSend $ipNum
 			    set allIPnums $ipNum
+			    if {$opts(-sendcheckstate) == "normal"} {
 			    ${wcomm}.to${n} configure -state normal
+			    }
 			    
 			    # Update "electric plug" icon.
 			    after 400 [list ${wcomm}.icon configure -image contact_on]

@@ -7,11 +7,11 @@
 #      global scope. The 'typlist' option for the File Open dialogs are 
 #      designed as well.
 #      
-#  Copyright (c) 1999-2002  Mats Bengtsson
+#  Copyright (c) 1999-2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: MimeTypesAndPlugins.tcl,v 1.3 2003-01-30 17:34:00 matben Exp $
+# $Id: MimeTypesAndPlugins.tcl,v 1.4 2003-02-24 17:52:11 matben Exp $
 
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -267,25 +267,21 @@ array set macType2Suff {
 InvertArray macType2Suff suff2MacType
 
 # Search for a set of packages and define their characteristics.
-# List all wanted plugins and short names for on which platforms they work.
-# m: macintosh, u: unix, w: windows.
+# List all wanted plugins and give list of platforms where they may live.
 
 if {1} {
     array set packages2Platform {
-	QuickTimeTcl       mw 
-	TclSpeech          m 
-	MSSpeech           w
-	snack              muw 
-	Img                uw
+	QuickTimeTcl       {macintosh             windows} 
+	TclSpeech          {macintosh   macosx}
+	MSSpeech           {windows}
+	snack              {macintosh   macosx    windows   unix}
+	Img                {windows                         unix}
     }
 } else {
     array set packages2Platform {QuickTimeTcl x TclSpeech x snack x Img x}
     puts "WARNING: no extensions loaded"
 }
-array set helpers2Platform {xanim u}
-#set plugin(allPacks) [array names packages2Platform]
-#set plugin(allHelper) [array names helpers2Platform]
-#set plugin(all) [concat $plugin(allPacks) $plugin(allHelper)]
+array set helpers2Platform {xanim unix}
 
 # The descriptions of the plugins:
 #--- Define the reject, save to disk etc. options ------------------------------
@@ -301,8 +297,8 @@ set plugin(save,type) {}
 set plugin(save,desc) {Save to disk}
 set plugin(ask,full) {Prompt user}
 set plugin(ask,type) {}
-set plugin(ask,desc) {Is assumed to be an unknown MIME type therefore prompt\
-  the user}
+set plugin(ask,desc)  \
+	{Is assumed to be an unknown MIME type therefore prompt the user}
 set plugin(tk,full) "tk"
 set plugin(tk,type) {}
 set plugin(tk,desc) {Supported by the core}
@@ -313,10 +309,11 @@ set plugin(tk,icon,12) [image create photo -format gif -file \
 #--- QuickTime -----------------------------------------------------------------
 
 set plugin(QuickTimeTcl,full) "QuickTimeTcl"
+set plugin(QuickTimeTcl,pack) {QuickTimeTcl 3.0}
 set plugin(QuickTimeTcl,type) "Tcl plugin"
-set plugin(QuickTimeTcl,desc) "Displays multimedia content such as\
-  video, sound, mp3 etc. It also supports a large number of\
-  still image formats."
+set plugin(QuickTimeTcl,desc) \
+{Displays multimedia content such as video, sound, mp3 etc.\
+It also supports a large number of still image formats.}
 set plugin(QuickTimeTcl,platform) $packages2Platform(QuickTimeTcl)
 set plugin(QuickTimeTcl,importProc) ::ImageAndMovie::DoImport
 
@@ -350,6 +347,7 @@ set supportedMimeTypes(QuickTimeTcl) {\
 #--- TclSpeech via PlainTalk if available --------------------------------------
   
 set plugin(TclSpeech,full) "PlainTalk"
+set plugin(TclSpeech,pack) {TclSpeech 2.0}
 set plugin(TclSpeech,type) "Tcl plugin"
 set plugin(TclSpeech,desc) "When enabled, a synthetic voice speaks out\
   text that is written in the canvas as well as text received\
@@ -362,6 +360,7 @@ set supSuff(TclSpeech) {}
 #--- Microsoft Speech via tcom if available --------------------------------------
   
 set plugin(MSSpeech,full) "Microsoft Speech"
+set plugin(MSSpeech,pack) {MSSpeech}
 set plugin(MSSpeech,type) "Tcl plugin"
 set plugin(MSSpeech,desc) "When enabled, a synthetic voice speaks out\
   text that is written in the canvas as well as text received\
@@ -376,6 +375,7 @@ set supSuff(MSSpeech) {}
 # Only the "sound" part of the extension is actually needed.
 
 set plugin(snack,full) "snack"
+set plugin(snack,pack) {snack}
 set plugin(snack,type) "Tcl plugin"
 set plugin(snack,desc) "The Snack Sound extension adds audio capabilities\
   to the application. Presently supported formats include wav, au, aiff and mp3."
@@ -392,6 +392,7 @@ set supportedMimeTypes(snack) {\
 # image formats than the standard core one (gif)..
 
 set plugin(Img,full) "Img"
+set plugin(Img,pack) {Img}
 set plugin(Img,type) "Tcl plugin"
 set plugin(Img,desc) "Adds more image formats than the standard one (gif)."
 set plugin(Img,platform) $packages2Platform(Img)
@@ -423,9 +424,11 @@ set supportedMimeTypes(xanim) {\
 # Hook for adding other packages or plugins
 #
 #  plugin(packageName,full)        Exact name.
+#  plugin(packageName,pack)        Thing to use for 'package require' 
+#                                  including possibly version number.
 #  plugin(packageName,type)        "Tcl plugin" or "Helper application".
 #  plugin(packageName,desc)        A longer description of the package.
-#  plugin(packageName,platform)    m: macintosh, u: unix, w: windows.
+#  plugin(packageName,platform)    list if platforms
 #  plugin(packageName,trpt,MIME)   (optional) the transport method used,
 #                                  which defaults to the built in PUT/GET,
 #                                  but can be "http" for certain Mime types
@@ -467,17 +470,17 @@ foreach packAndPlat [array names plugin "*,platform"] {
 
 # Search for the wanted packages in a systematic way. --------------------------
 
-set platformShort [string tolower [string index $tcl_platform(platform) 0]]
 foreach packName $plugin(allPacks) {
     
     # Check first if this package can live on this platform.
-    if {[string match "*${platformShort}*" $plugin($packName,platform)]} {
+    if {[lsearch $plugin($packName,platform) $this(platform)] >= 0} {
 
 	# Search for it! Be silent.
 	if {[info exists ::SplashScreen::startMsg]}  {
 	    set ::SplashScreen::startMsg "[::msgcat::mc splashlook] $packName..."
 	}
-	if {![catch {package require $packName} msg]}  {
+	set packVersion $plugin($packName,pack)
+	if {![catch {eval {package require} $packVersion} msg]}  {
 	    set prefs($packName) 1
 	    set plugin($packName,ver) $msg
 	} else {
@@ -805,7 +808,7 @@ proc NativeToNetworkFileName {fileName} {
 #       updates the 'mimeTypeDoWhat' and 'prefMimeType2Package' arrays.
 
 proc VerifyPackagesForMimeTypes { } {
-    global  prefMimeType2Package mimeTypeDoWhat mimeType2Packages
+    global  prefMimeType2Package mimeTypeDoWhat mimeType2Packages prefs
     
     foreach mime [array names mimeTypeDoWhat] {
 	switch -- $mimeTypeDoWhat($mime) {
@@ -846,6 +849,13 @@ proc VerifyPackagesForMimeTypes { } {
 	    }
 	}
     }
+    
+    # Not all packages are associated with a mime type.
+    # Make sure these are consistent as well.
+    # Speech:
+    if {!$prefs(TclSpeech) && !$prefs(MSSpeech)} {
+	set prefs(SpeechOn) 0
+    }   
 }
 
 # GetPreferredPackage --

@@ -3,11 +3,11 @@
 #       This file is part of the whiteboard application. It implements the
 #       preferences dialog window.
 #      
-#  Copyright (c) 1999-2002  Mats Bengtsson
+#  Copyright (c) 1999-2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.3 2003-02-06 17:23:33 matben Exp $
+# $Id: Preferences.tcl,v 1.4 2003-02-24 17:52:11 matben Exp $
  
 package require notebook
 package require tree
@@ -561,8 +561,11 @@ proc ::Preferences::Profiles::MakeTmpServArr { } {
     set tmpJServArr(all) {}
     foreach {name spec} $tmpJServer(profile) {
 	lappend tmpJServArr(all) $name
-	foreach [list tmpJServArr($name,server) tmpJServArr($name,username) \
-	  tmpJServArr($name,password) tmpJServArr($name,resource)] $spec { break }
+	foreach [list \
+	  tmpJServArr($name,server)   \
+	  tmpJServArr($name,username) \
+	  tmpJServArr($name,password) \
+	  tmpJServArr($name,resource)] $spec { break }
     }
 }
 
@@ -1143,10 +1146,13 @@ proc ::Preferences::Customization::BuildPage {page} {
     grid $pdisc.browse -padx 2 -pady $ypad -sticky w
     grid $pdisc.agents -padx 2 -pady $ypad -sticky w
     
-    checkbutton $page.update  \
-      -text " [::msgcat::mc prefcuupdate]" \
-      -variable ::Preferences::tmpJPrefs(autoupdateCheck)
-    pack $page.update -side top -anchor w -padx 10
+    # Seems to have been abondened.
+    if {0} {
+	checkbutton $page.update  \
+	  -text " [::msgcat::mc prefcuupdate]" \
+	  -variable ::Preferences::tmpJPrefs(autoupdateCheck)
+	pack $page.update -side top -anchor w -padx 10
+    }
 }
 
 proc ::Preferences::Customization::PickFont { } {
@@ -1218,6 +1224,7 @@ proc ::Preferences::FileMap::BuildPage {page} {
     # Keep an invisible index column with index as a tag.
     set colDef [list 0 [::msgcat::mc Description] 0 [::msgcat::mc {Handled By}] 0 ""]
     set wmclist $fr1.mclist
+    
     tablelist::tablelist $wmclist  \
       -columns $colDef -font $sysFont(s) -labelfont $sysFont(s)  \
       -background white -yscrollcommand [list $fr1.vsb set]  \
@@ -1225,6 +1232,7 @@ proc ::Preferences::FileMap::BuildPage {page} {
       -labelcommand "tablelist::sortByColumn"  \
       -stretch all -width 42 -height 12
     $wmclist columnconfigure 2 -hide 1
+
     scrollbar $fr1.vsb -orient vertical -command [list $wmclist yview]
     
     grid $wmclist -column 0 -row 0 -sticky news
@@ -2381,10 +2389,20 @@ namespace eval ::Preferences::Proxies:: {
 proc ::Preferences::Proxies::BuildPage {page} {
     global  sysFont
     
-    variable ypad
+    upvar ::Preferences::ypad ypad
+    
+    set pcnat [LabeledFrame2 $page.nat {NAT Address}]
+    pack $page.nat -side top -anchor w -ipadx 10 -ipady 6
+    checkbutton $pcnat.cb \
+      -text {  Use the following ip address as seen from the outside} \
+      -variable [namespace current]::tmpPrefs(setNATip)
+    entry $pcnat.eip -textvariable [namespace current]::tmpPrefs(NATip) \
+      -width 32
+    grid $pcnat.cb -sticky w -pady $ypad
+    grid $pcnat.eip -sticky ew -pady $ypad
     
     set pca [LabeledFrame2 $page.fr {Proxies}]
-    pack $page.fr -side left -anchor n -ipadx 10 -ipady 6
+    pack $page.fr -side top -anchor w -ipadx 10 -ipady 6
     label $pca.la -text {No firewall support... yet}
     grid $pca.la -sticky w
 }

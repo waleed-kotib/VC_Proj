@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.3 2003-01-30 17:33:54 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.4 2003-02-24 17:52:10 matben Exp $
 
 package provide CanvasUtils 1.0
 package require sha1pure
@@ -38,22 +38,22 @@ proc ::CanvasUtils::Init { } {
     # Need to make sure we don't get: "integer value too large to represent"
     
     if {[catch {
-	set utaguid [format %i 0x[string range [sha1pure::sha1 [clock clicks]$this(hostname)] 0 6]]
+        set utaguid [format %i 0x[string range [sha1pure::sha1 [clock clicks]$this(hostname)] 0 6]]
     }]} {
-	set utaguid [string trimleft [string range [expr rand()] 2 10] 0]
+        set utaguid [string trimleft [string range [expr rand()] 2 10] 0]
     }
     
     # Unique tag prefix for items created by this client.
     set utagPref $this(hostname)
     if {$utagPref == ""} {
-	set utagPref $internalIPname
+        set utagPref $internalIPname
     }
     
     # On multiuser platforms (unix) prepend the user name; no spaces allowed.
     if {[string equal $this(platform) "unix"] && [info exists env(USER)]} {
-	set user $this(username)
-	regsub -all " " $user "" user
-	set utagPref ${user}@${utagPref}
+        set user $this(username)
+        regsub -all " " $user "" user
+        set utagPref ${user}@${utagPref}
     }
 }
 
@@ -77,14 +77,14 @@ proc ::CanvasUtils::Command {wtop cmd {where all}} {
     
     set w $wapp(can)
     if {[string equal $where "all"] || [string equal $where "local"]} {
-	eval {$w} $cmd
+        eval {$w} $cmd
     }
     if {[string equal $where "all"] || [string equal $where "remote"]} {
-	if {[llength $allIPnumsToSend]} {
-	    SendClientCommand $wtop "CANVAS: $cmd"
-	}    
+        if {[llength $allIPnumsToSend]} {
+            SendClientCommand $wtop "CANVAS: $cmd"
+        }    
     } elseif {![string equal $where "local"]} {
-	SendClientCommand $wtop "CANVAS: $cmd"	
+        SendClientCommand $wtop "CANVAS: $cmd"  
     }
 }
 
@@ -95,7 +95,7 @@ proc ::CanvasUtils::Command {wtop cmd {where all}} {
 proc ::CanvasUtils::CommandList {wtop cmdList {where all}} {
     
     foreach cmd $cmdList {
-	::CanvasUtils::Command $wtop $cmd $where
+        ::CanvasUtils::Command $wtop $cmd $where
     }
 }
 
@@ -106,9 +106,9 @@ proc ::CanvasUtils::CommandList {wtop cmdList {where all}} {
 proc ::CanvasUtils::CommandExList {wtop cmdExList} {
     
     foreach cmdList $cmdExList {
-	foreach {cmd where} $cmdList {
-	    ::CanvasUtils::Command $wtop $cmd $where
-	}
+        foreach {cmd where} $cmdList {
+            ::CanvasUtils::Command $wtop $cmd $where
+        }
     }
 }
 
@@ -122,30 +122,30 @@ proc ::CanvasUtils::GenCommand {wtop cmd {where all}} {
     
     set w $wapp(can)
     if {[string equal $where "all"] || [string equal $where "local"]} {
-	eval {$w} $cmd
+        eval {$w} $cmd
     }
     if {[string equal $where "all"] || [string equal $where "remote"]} {
-	if {[llength $allIPnumsToSend]} {
-	    SendClientCommand $wtop $cmd
-	}    
+        if {[llength $allIPnumsToSend]} {
+            SendClientCommand $wtop $cmd
+        }    
     } elseif {![string equal $where "local"]} {
-	SendClientCommand $wtop $cmd
+        SendClientCommand $wtop $cmd
     }
 }
 
 proc ::CanvasUtils::GenCommandList {wtop cmdList {where all}} {
     
     foreach cmd $cmdList {
-	::CanvasUtils::GenCommand $wtop $cmd $where
+        ::CanvasUtils::GenCommand $wtop $cmd $where
     }
 }
 
 proc ::CanvasUtils::GenCommandExList {wtop cmdExList} {
     
     foreach cmdList $cmdExList {
-	foreach {cmd where} $cmdList {
-	    ::CanvasUtils::GenCommand $wtop $cmd $where
-	}
+        foreach {cmd where} $cmdList {
+            ::CanvasUtils::GenCommand $wtop $cmd $where
+        }
     }
 }
 
@@ -158,7 +158,7 @@ proc ::CanvasUtils::NewUtag {{doincr 1}} {
     variable utagPref
     
     if {$doincr} {
-	incr utaguid
+        incr utaguid
     }
     return ${utagPref}/${utaguid}
 }
@@ -188,23 +188,23 @@ proc ::CanvasUtils::GetUtag {c fromWhat {force 0}} {
     set digit_ {[0-9]}
     set wild_ {[xX]+}
     if {[string equal $fromWhat "current"]} {
-	set tcurr [$c gettags current]
+        set tcurr [$c gettags current]
     } elseif {[string equal $fromWhat "focus"]} {
-	set tcurr [$c gettags [$c focus]]
+        set tcurr [$c gettags [$c focus]]
     } else {
-	set tcurr [$c gettags $fromWhat]
+        set tcurr [$c gettags $fromWhat]
     }
     if {$tcurr == ""} {
-	return {}
+        return {}
     }
     if {$prefs(privacy) && !$force} {
-	if {[regexp "(($wild_|$utagPref)/$digit_+)" "$tcurr" utag] == 0} {
-	    return {}
-	}
+        if {[regexp "(($wild_|$utagPref)/$digit_+)" "$tcurr" utag] == 0} {
+            return {}
+        }
     } else {
-	if {[regexp "(^| )($pre_/$digit_+)" "$tcurr" junk junk2 utag] == 0} {
-	    return {}
-	}
+        if {[regexp "(^| )($pre_/$digit_+)" "$tcurr" junk junk2 utag] == 0} {
+            return {}
+        }
     }
     return $utag
 }
@@ -227,11 +227,7 @@ proc ::CanvasUtils::GetUtagFromCmd {str} {
     set utag ""
     set ind [lsearch -exact $str "-tags"]
     if {$ind >= 0} {
-	set ind [expr $ind + 1]
-	set tags [lindex $str $ind]
-	if {[regexp {[^/ ]+/[0-9]+} $tags match]} {
-	    set utag $match
-	}
+        regexp {[^/ ]+/[0-9]+} [lindex $str [incr ind]] utag
     }    
     return $utag
 }
@@ -244,10 +240,11 @@ proc ::CanvasUtils::ReplaceUtag {str newUtag} {
     
     set ind [lsearch -exact $str "-tags"]
     if {$ind >= 0} {
-	set ind [expr $ind + 1]
-	set tags [lindex $str $ind]
-	if {[regsub {[^/ ]+/[0-9]+} $tags $newUtag tags]} {
-	    set str [lreplace $str $ind $ind $tags]
+        incr ind
+        set tags [lindex $str $ind]
+        if {[regsub {[^/ ]+/[0-9]+} $tags $newUtag tags]} {
+            #set str [lreplace $str $ind $ind $tags]
+            lset str $ind $tags
 	}
     }    
     return $str
@@ -400,13 +397,13 @@ proc ::CanvasUtils::GetOnelinerForItem {w id} {
     return [concat "create" $type [$w coords $id] $opcmd]
 }
 
-# CanvasUtils::GetOnelinerForImage --
+# CanvasUtils::GetOnelinerForImage, ... --
 #
 #       Makes a line that is suitable for file storage. Shall be understood
 #       by '::ImageAndMovie::HandleImportCmd'.
 #
 # Arguments:
-#       w
+#       w           the canvas widget
 #       id
 #       args:
 #           -basepath absolutePath    translate image -file to a relative path.
@@ -468,13 +465,30 @@ proc ::CanvasUtils::GetOnelinerForQTMovie {w id args} {
     set movFile [$movieName cget -file]
     set movUrl [$movieName cget -url]
     set impArgs {}
-    if {$movFile != ""} {
-	if {[info exists argsArr(-basepath)]} {
-	    set movFile [filerelative $argsArr(-basepath) $movFile]	    
-	} 
-	lappend impArgs -file $movFile
-    } elseif {$movUrl != ""} {
-	lappend impArgs -url $movUrl
+    
+    switch -- $argsArr(-uritype) {
+	file {
+	    if {$movFile != ""} {
+		if {[info exists argsArr(-basepath)]} {
+		    set movFile [filerelative $argsArr(-basepath) $movFile]	    
+		} 
+		lappend impArgs -file $movFile
+	    } elseif {$movUrl != ""} {
+		
+		# In this case we don't have access to QT's internal cache.
+		lappend impArgs -url $movUrl
+	    }
+	}
+	http {
+	    if {$movFile != ""} {
+		lappend impArgs -url [::CanvasUtils::GetHttpFromFile $movFile]
+	    } elseif {$movUrl != ""} {
+		lappend impArgs -url $movUrl
+	    }	    
+	}
+	default {
+	    return -code error "Unknown -uritype \"$argsArr(-uritype)\""
+	}
     }
     lappend impArgs -tags [::CanvasUtils::GetUtag $w $id 1]
     return "import [$w coords $id] $impArgs"		    
@@ -491,10 +505,22 @@ proc ::CanvasUtils::GetOnelinerForSnack {w id args} {
     set movieName ${windowName}.m
     set soundObject [$movieName cget -snacksound]
     set soundFile [$soundObject cget -file]
-    if {[info exists argsArr(-basepath)]} {
-	set soundFile [filerelative $argsArr(-basepath) $soundFile]
+    set impArgs {}
+    
+    switch -- $argsArr(-uritype) {
+	file {
+	    if {[info exists argsArr(-basepath)]} {
+		set soundFile [filerelative $argsArr(-basepath) $soundFile]
+	    }
+	    lappend impArgs -file $soundFile
+	}
+	http {
+	    lappend impArgs -url [::CanvasUtils::GetHttpFromFile $soundFile]
+	}
+	default {
+	    return -code error "Unknown -uritype \"$argsArr(-uritype)\""
+	}
     }
-    set impArgs [list -file $soundFile]
     lappend impArgs -tags [::CanvasUtils::GetUtag $w $id 1]
     return "import [$w coords $id] $impArgs"		    
 }
@@ -509,7 +535,8 @@ proc ::CanvasUtils::GetHttpFromFile {filePath} {
     
     set relPath [filerelative $prefs(httpdBaseDir) $filePath]
     set relPath [uriencode::quotepath $relPath]
-    return "http://$this(ipnum):$prefs(httpdPort)/$relPath"
+    set ip [::Network::GetThisOutsideIPAddress]
+    return "http://${ip}:$prefs(httpdPort)/$relPath"
 }
 
 # CanvasUtils::ItemConfigure --

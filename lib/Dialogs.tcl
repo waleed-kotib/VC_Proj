@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.3 2003-01-30 17:33:54 matben Exp $
+# $Id: Dialogs.tcl,v 1.4 2003-02-24 17:52:10 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -363,14 +363,14 @@ proc ::NetworkSetup::StopServer { {wbt {}} } {
     
     # Stop the reflector servers background process. Mac not working!
     switch -- $this(platform) {
-	"windows" {
+	windows {
 	    
 	    # Need to find the right DOS command here.
 	    set s [socket $this(ipnum) $prefs(reflectPort)]
 	    puts $s "KILL:"
 	    catch {close $s}
 	}
-	"unix" - "macosx" {
+	unix - macosx {
 	    if {[catch {exec kill $state(reflectPid)} res]} {
 		tk_messageBox -message  \
 		  "Failed stopping the Reflector Server: $res"  \
@@ -978,8 +978,8 @@ namespace eval ::SplashScreen:: {
 # Results:
 #       none
 
-proc ::SplashScreen::SplashScreen { w } {
-    global  sysFont this
+proc ::SplashScreen::SplashScreen {w} {
+    global  sysFont this prefs
     
     variable startMsg
     if [catch {toplevel $w}] {
@@ -1014,6 +1014,13 @@ proc ::SplashScreen::SplashScreen { w } {
     $w.can create image 0 0 -anchor nw -image mysplash
     $w.can create text 50 [expr $imHeight - 20] -anchor nw -tags tsplash  \
       -font $sysFont(s) -text $startMsg -fill $textcol
+    
+    # Print patch level for dev versions.
+    if {$prefs(releaseVers) != ""} {
+	$w.can create text 420 [expr $imHeight - 40] -anchor nw  \
+	  -font {Helvetica 18} -text $prefs(releaseVers) -fill #ef2910
+    }
+    
     pack $w.can
     bind $w <Return> "destroy $w"
     bind $w <Button-1> "destroy $w"

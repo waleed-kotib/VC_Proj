@@ -3,6 +3,17 @@ Whiteboard CHANGES
 ------------------
 
 
+Whiteboard-0.94.3 (03????): 	Short summary --
+
+	- whiteboards now multiinstance for jabber; send single whiteboard
+	  messages, each chat and groupchat in separate whiteboards
+	- uses full 3-tier jid in roster now
+	- auto browse users to detect if coccinellas, set icon in roster
+	- updated balloon info in roster
+	- many rewrites
+	- really many bugfixes...
+
+
 Whiteboard-0.94.2 (02????): 	Short summary --
 
 	- undo/redo method of canvas

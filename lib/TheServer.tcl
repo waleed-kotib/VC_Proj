@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: TheServer.tcl,v 1.2 2003-01-11 16:16:09 matben Exp $
+# $Id: TheServer.tcl,v 1.3 2003-02-24 17:52:12 matben Exp $
     
 # DoStartServer ---
 #
@@ -121,7 +121,7 @@ proc SetupChannel {channel ip port} {
     set sockname [fconfigure $channel -sockname] 
 
     # Sometimes the DoStartServer just gives this(ipnum)=0.0.0.0 ; fix this here.
-    if {[string compare $this(ipnum) {0.0.0.0}] == 0} {
+    if {[string equal $this(ipnum) "0.0.0.0"]} {
 	set thisIPnum [lindex $sockname 0]
 	set this(ipnum) [lindex $sockname 0]
     }
@@ -339,13 +339,14 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 		  [string equal $cmd "coords"] || \
 		  [string equal $cmd "scale"] ||  \
 		  [string equal $cmd "itemconfigure"]} {
-		    set theItno [lindex $instr 1]
-		    set id [$wServCan find withtag $theItno]
+		    set utag [lindex $instr 1]
+		    set id [$wServCan find withtag $utag]
 		    set idsMarker [$wServCan find withtag id$id]
 		    
 		    # If we have selected the item in question.
 		    if {[string length $idsMarker] > 0} {
 			$wServCan delete id$id
+			$wServCan dtag $id "selected"
 			::CanvasDraw::MarkBbox $wServCan 1 $id
 		    }
 		} 
@@ -356,15 +357,15 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 		    if {[string equal $cmd "create"] ||  \
 		      [string equal $cmd "insert"]} {
 			if {[string equal $cmd "create"]} {
-			    set theItno $idnew
+			    set utag $idnew
 			} else {
-			    set theItno [lindex $instr 1]
+			    set utag [lindex $instr 1]
 			}
-			set type [$wServCan type $theItno]
+			set type [$wServCan type $utag]
 			if {[string equal $type "text"]} {
 			    
 			    # Extract the actual text. TclSpeech not foolproof!
-			    set theText [$wServCan itemcget $theItno -text]
+			    set theText [$wServCan itemcget $utag -text]
 			    if {[string match *${punct}* $theText]} {
 				catch {::UserActions::Speak $theText $prefs(voiceOther)}
 			    }
@@ -522,7 +523,7 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 		    
 		    # Be sure to strip off any path. (this(path))??? Mac bug for /file?
 		    set fileName [file tail $fileName]
-		    ::GetFile::GetFileFromClient $ip $channel $fileName \
+		    ::GetFile::GetFileFromClient $wtop $ip $channel $fileName \
 		      ::GetFile::DefaultCallbackProc $optList
 		} elseif {$cmd == "GET"} {
 		    
@@ -534,7 +535,8 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 			puts "=HandleClientRequest:: GET: cmd=$cmd, channel=$channel"
 			puts "    fileName=$fileName, optList=$optList"
 		    }
-		    ::PutFileIface::PutFileToClient $channel $ip $fileName $optList
+		    ::PutFileIface::PutFileToClient $wtop $channel $ip \
+		      $fileName $optList
 		}
 	    }		
 	}
@@ -551,7 +553,7 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 		if {$debugServerLevel >= 2} {
 		    puts "--->PUT NEW: relFilePath='$relFilePath', optList='$optList'"
 		}
-		::GetFile::GetFileFromServer $ip $ipNumTo(servPort,$ip) $relFilePath  \
+		::GetFile::GetFileFromServer $wtop $ip $ipNumTo(servPort,$ip) $relFilePath  \
 		  ::GetFile::DefaultCallbackProc $optList
 	    }		
 	}

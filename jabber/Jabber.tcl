@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.5 2003-02-06 17:23:31 matben Exp $
+# $Id: Jabber.tcl,v 1.6 2003-02-24 17:52:05 matben Exp $
 #
 #  The $address is an ip name or number.
 #
@@ -360,7 +360,8 @@ proc ::Jabber::FactoryDefaults { } {
     set prefs(paneGeom,groupchatDlgHori) {0.8 0.2}
     
     # Autoupdate; be sure to use version key since a new version must not inherit.
-    set jprefs(autoupdateCheck) 1
+    # Abondened!!!!!!!
+    set jprefs(autoupdateCheck) 0
     set jprefs(autoupdateShow,$prefs(fullVers)) 1
     
     # Our registered serial number at update.jabber.org
@@ -487,7 +488,7 @@ proc ::Jabber::Init { } {
       -presencecommand ::Jabber::PresenceCallback
 
     # Make an instance of jabberlib and fill in our roster object.
-    set jstate(jlib) [eval {::jlib::new jlib0 $jstate(roster) $jstate(browse)  \
+    set jstate(jlib) [eval {::jlib::new jlib0 $jstate(roster) $jstate(browse) \
       ::Jabber::ClientProc} $opts]
     
     if {[string equal $prefs(protocol) "jabber"]} {
@@ -822,7 +823,7 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 		# Explicitly set the users group.
 		if {[string length $jprefs(subsc,group)]} {
 		    $jstate(jlib) roster_set $from ::Jabber::Subscribe::ResProc \
-		      -groups $jprefs(subsc,group)
+		      -groups [list $jprefs(subsc,group)]
 		}
 		$jstate(jlib) send_presence -to $from -type "subscribe"
 		set msg [::msgcat::mc jamessautosubs $from]
@@ -839,7 +840,8 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 		
 		# Remove completely from our roster.
 		$jstate(jlib) roster_remove $from ::Jabber::Roster::PushProc
-		tk_messageBox -title [::msgcat::mc Unsubscribe] -icon info -type ok  \
+		tk_messageBox -title [::msgcat::mc Unsubscribe] \
+		  -icon info -type ok  \
 		  -message [FormatTextForMessageBox [::msgcat::mc jamessunsub $from]]
 	    } else {
 		
@@ -857,15 +859,31 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 		      -message [FormatTextForMessageBox  \
 		      [::msgcat::mc jamessunsubask $from $from]]]
 		    if {$ans == "yes"} {
-			$jstate(jlib) roster_remove $from ::Jabber::Roster::PushProc
+			$jstate(jlib) roster_remove $from \
+			  ::Jabber::Roster::PushProc
 		    }
 		}
 	    }
 	}
 	unsubscribed {
-	    tk_messageBox -title [::msgcat::mc Unsubscribed] -icon info -type ok  \
-	      -message [FormatTextForMessageBox  \
-	      [::msgcat::mc jamessunsubscribed $from]]
+	    
+	    # If we fail to subscribe someone due to a technical reason we
+	    # have sunscription='none'
+	    set sub [$jstate(roster) getsubscription $from]
+	    if {$sub == "none"} {
+		set msg "Failed making a subscription to $from."
+		if {[info exists attrArr(-status)]} {
+		    append msg " Status message: $attrArr(-status)"
+		}
+		tk_messageBox -title "Subscription Failed"  \
+		  -icon info -type ok  \
+		  -message [FormatTextForMessageBox $msg]
+	    } else {		
+		tk_messageBox -title [::msgcat::mc Unsubscribed]  \
+		  -icon info -type ok  \
+		  -message [FormatTextForMessageBox  \
+		  [::msgcat::mc jamessunsubscribed $from]]
+	    }
 	}
 	error {
 	    foreach {errcode errmsg} $attrArr(-error) { break }		
@@ -1704,12 +1722,12 @@ proc ::Jabber::GetIPnumber {jid {cmd {}}} {
 }
 
 proc ::Jabber::PutIPnumber {jid id} {
-    global  this
-    
     variable jstate
     
     ::Jabber::Debug 2 "::Jabber::PutIPnumber:: jid=$jid, id=$id"
-    ::Jabber::SendMessage $jid "PUT IP: $id $this(ipnum)"
+    
+    set ip [::Network::GetThisOutsideIPAddress]
+    ::Jabber::SendMessage $jid "PUT IP: $id $ip"
 }
 
 # Jabber::GetIPCallback --
@@ -1910,16 +1928,25 @@ proc ::Jabber::PutFile {wtop fileName mime optList jid} {
 	return
     }
     
+    # Check first that the user has not closed the window.
+    if {![winfo exists [string trimright $wtop "."]]} {
+	return
+    }
+    
     # Get the remote (network) file name (no path, no uri encoding).
     set dstFile [NativeToNetworkFileName $fileName]
 
-    if {[catch {::putfile::put $fileName $jidToIP($jid) $prefs(remotePort) \
-      -mimetype $mime -timeout [expr 1000 * $prefs(timeout)]  \
-      -optlist $optList -filetail $dstFile  \
-      -progress ::PutFileIface::PutProgress  \
-      -command ::PutFileIface::PutCommand} tok]} {
+    if {[catch {
+	::putfile::put $fileName $jidToIP($jid) $prefs(remotePort)   \
+	  -mimetype $mime -timeout [expr 1000 * $prefs(timeout)]     \
+	  -optlist $optList -filetail $dstFile                       \
+	  -progress ::PutFileIface::PutProgress                      \
+	  -command [list ::PutFileIface::PutCommand $wtop]
+    } tok]} {
 	tk_messageBox -title [::msgcat::mc {File Transfer Error}]  \
 	  -type ok -message $tok
+    } else {
+	::PutFileIface::RegisterPutSession $tok $wtop
     }
 }
 
@@ -1934,16 +1961,17 @@ proc ::Jabber::PutFile {wtop fileName mime optList jid} {
 #       none.
 
 proc ::Jabber::SetPrivateData { } {
-    global  prefs this
+    global  prefs
     
     variable jstate
     
     # Build tag and attributes lists to 'private_set'.
+    set ip [::Network::GetThisOutsideIPAddress]
     $jstate(jlib) private_set "coccinella:public"     \
       [list ::Jabber::SetPrivateDataCallback private_set]   \
-      -server [list $this(ipnum) [list resource $jstate(meres)  \
+      -server [list $ip [list resource $jstate(meres)  \
       port $prefs(thisServPort)]]       \
-      -httpd [list $this(ipnum) [list resource $jstate(meres)   \
+      -httpd [list $ip [list resource $jstate(meres)   \
       port $prefs(httpdPort)]]
 }
 
@@ -2371,7 +2399,8 @@ proc ::Jabber::Popup {what w v x y} {
 		    }
 		    users {
 			if {($typeClicked == "user") ||  \
-			  ($typeClicked == "group")} {
+			  ($typeClicked == "group") ||  \
+			  ($typeClicked == "wb")} {
 			    set state normal
 			}
 		    }
@@ -2503,8 +2532,8 @@ proc ::Jabber::BuildStatusMenuDef { } {
 	      [list -variable ::Jabber::jstate(status) -value $name  \
 	      -compound left -image $gShowIcon($name)]]
 	}
-	lappend statMenuDef {separator} \
-	  {command mAttachMessage       \
+	lappend statMenuDef {separator}   \
+	  {command mAttachMessage         \
 	  {::Jabber::SetStatusWithMessage $wDlgs(jpresmsg)}  normal {}}
     } else {
 	foreach mName {mAvailable mAway mDoNotDisturb  \
@@ -2514,8 +2543,8 @@ proc ::Jabber::BuildStatusMenuDef { } {
 	      [list ::Jabber::SetStatus $name] normal {} \
 	      [list -variable ::Jabber::jstate(status) -value $name]]
 	}
-	lappend statMenuDef {separator} \
-	  {command mAttachMessage  \
+	lappend statMenuDef {separator}   \
+	  {command mAttachMessage         \
 	  {::Jabber::SetStatusWithMessage $wDlgs(jpresmsg)}  normal {}}
     }
     return $statMenuDef
@@ -3091,6 +3120,7 @@ proc ::Jabber::WB::NewWhiteboard {jid args} {
 # 
 #       Handles incoming chat/groupchat message aimed for a whiteboard.
 #       It may not exist, for instance, if we receive a new chat thread.
+#       Then create a specific whiteboard for this chat/groupchat.
 #       
 # Arguments:
 #       args        -from, -thread,...
@@ -3649,7 +3679,15 @@ proc ::Jabber::Roster::PushProc {rostName what {jid {}} args} {
 	    eval {::Jabber::PresenceSounds $jid $attrArr(-type)} $args	    
 	}
 	remove {
-	    ::Jabber::Roster::Remove $jid
+	    
+	    # Must remove all resources, and jid2 if no resources.
+    	    set resList [$jstate(roster) getresources $jid]
+	    foreach res $resList {
+	        ::Jabber::Roster::Remove ${jid}/${res}
+	    }
+	    if {$resList == ""} {
+	        ::Jabber::Roster::Remove $jid
+	    }
 	}
 	set {
 	    eval {::Jabber::Roster::SetItem $jid} $args
@@ -3684,11 +3722,6 @@ proc ::Jabber::Roster::Clear { } {
 
     foreach gpres $jprefs(treedirs) {
 	$wtree delitem $gpres -childsonly 1
-	
-	#set children [$wtree children [list $gpres]]
-	#foreach child $children {
-	#    $wtree delitem [list $gpres $child]
-	#}
     }
 }
 
@@ -3698,74 +3731,6 @@ proc ::Jabber::ExitRoster { } {
     
     # Should perhaps fix the directories of the tree widget, such as
     # appending (#items) for each headline.
-    
-    
-}
-
-# Jabber::Roster::Remove --
-#
-#       Removes a jid item from all groups in the tree.
-#
-# Arguments:
-#       jid         can be 2-tier or 3-tier jid!
-#       
-# Results:
-#       updates tree.
-
-proc ::Jabber::Roster::Remove {jid} {
-    
-    variable wtree    
-    upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::jstate jstate
-    
-    ::Jabber::Debug 2 "::Jabber::Roster::Remove, jid=$jid"
-    
-    # All presence have a 3-tier jid as 'from' attribute.
-    # If have 3-tier jid:
-    #    presence = 'available'   => remove jid2 + jid3
-    #    presence = 'unavailable' => remove jid2 + jid3
-    # Else if 2-tier jid:  => remove jid2
-    
-    if {[regexp {^([^@]+@[^/]+)/.+$} $jid match jid2]} {
-	
-	# Must be 3-tier jid.
-	set jid3 $jid
-    } else {
-	set jid2 $jid
-    }
-
-    # New tree widget command 'find withtag'
-    foreach v [$wtree find withtag $jid2] {
-	$wtree delitem $v
-    }
-    if {[info exists jid3]} {
-	foreach v [$wtree find withtag $jid3] {
-	    $wtree delitem $v
-	}
-    }
-    
-    if {0} {
-	foreach gpres $jprefs(treedirs) {
-	    
-	    set children [$wtree children [list $gpres]]
-	    if {[lsearch -exact $children $jid] >= 0} {
-		$wtree delitem [list $gpres $jid]
-	    }
-	    
-	    # Search all groups.
-	    foreach child $children {
-		set subchilds [$wtree children [list $gpres $child]]
-		if {[lsearch -exact $subchilds $jid] >= 0} {
-		    $wtree delitem [list $gpres $child $jid]
-		    
-		    # If we are the last, remove group item as well.
-		    if {[llength $subchilds] == 1} {
-			$wtree delitem [list $gpres $child]
-		    }
-		}
-	    }
-	}
-    }
 }
 
 # Jabber::Roster::SetItem --
@@ -3790,11 +3755,19 @@ proc ::Jabber::Roster::SetItem {jid args} {
 
     ::Jabber::Debug 2 "::Jabber::Roster::SetItem jid=$jid, args='$args'"
     
-    # Perhaps we should first remove this item?
-    # If we 'get' the roster, the roster is cleared, so we can be
-    # sure that we don't have any "old" item???
+    # Remove any old items first:
+    # 1) If we 'get' the roster, the roster is cleared, so we can be
+    #    sure that we don't have any "old" item???
+    # 2) Must remove all resources for this jid first, and then add back.
+    #    Remove also jid2.
     if {!$jstate(inroster)} {
-	::Jabber::Roster::Remove $jid
+    	set resList [$jstate(roster) getresources $jid]
+	foreach res $resList {
+	    ::Jabber::Roster::Remove ${jid}/${res}
+	}
+	if {$resList == ""} {
+	    ::Jabber::Roster::Remove $jid
+	}
     }
     
     set doAdd 1
@@ -3802,7 +3775,7 @@ proc ::Jabber::Roster::SetItem {jid args} {
 	
 	# Do not add items with subscription='none'.
 	set ind [lsearch $args "-subscription"]
-	if {($ind >= 0) && [string equal [lindex $args [expr $ind + 1]] "none"]} {
+	if {($ind >= 0) && [string equal [lindex $args [expr $ind+1]] "none"]} {
 	    set doAdd 0
 	}
     }
@@ -3878,6 +3851,61 @@ proc ::Jabber::Roster::Presence {jid presence args} {
 	
 	# Need to remove our cached ip number for this jid.
 	catch {unset jidToIP($jid)}
+    }
+}
+
+# Jabber::Roster::Remove --
+#
+#       Removes a jid item from all groups in the tree.
+#
+# Arguments:
+#       jid         can be 2-tier or 3-tier jid!
+#       
+# Results:
+#       updates tree.
+
+proc ::Jabber::Roster::Remove {jid} {
+    
+    variable wtree    
+    upvar ::Jabber::jprefs jprefs
+    upvar ::Jabber::jstate jstate
+    
+    ::Jabber::Debug 2 "::Jabber::Roster::Remove, jid=$jid"
+    
+    # All presence have a 3-tier jid as 'from' attribute.
+    # If have 3-tier jid:
+    #    presence = 'available'   => remove jid2 + jid3
+    #    presence = 'unavailable' => remove jid2 + jid3
+    # Else if 2-tier jid:  => remove jid2
+    
+    if {[regexp {^([^@]+@[^/]+)/.+$} $jid match jid2]} {
+	
+	# Must be 3-tier jid.
+	set jid3 $jid
+    } else {
+	set jid2 $jid
+    }
+
+    # New tree widget command 'find withtag'. 
+    foreach v [$wtree find withtag $jid2] {
+	$wtree delitem $v
+	
+	# Remove dirs if empty?
+	if {[llength $v] == 3} {
+	    if {[llength [$wtree children [lrange $v 0 1]]] == 0} {
+		$wtree delitem [lrange $v 0 1]
+	    }
+	}
+    }
+    if {[info exists jid3]} {
+	foreach v [$wtree find withtag $jid3] {
+	    $wtree delitem $v
+	    if {[llength $v] == 3} {
+		if {[llength [$wtree children [lrange $v 0 1]]] == 0} {
+		    $wtree delitem [lrange $v 0 1]
+		}
+	    }
+	}
     }
 }
 
@@ -4001,7 +4029,7 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
     # since a user may be logged in from more than one resource.
     
     set jidx $jid
-    if {[info exists argsArr(-name)] && [string length $argsArr(-name)]} {
+    if {[info exists argsArr(-name)] && ($argsArr(-name) != "")} {
 	set itemTxt $argsArr(-name)
     } elseif {[regexp "^(\[^@\]+)@$jserver(this)" $jid match user]} {
 	set itemTxt $user
@@ -4009,8 +4037,7 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
 	set itemTxt $jid
     }
     if {[string equal $presence "available"]} {
-	if {[info exists argsArr(-resource)] &&  \
-	  [string length $argsArr(-resource)]} {
+	if {[info exists argsArr(-resource)] && ($argsArr(-resource) != "")} {
 	    append itemTxt " ($argsArr(-resource))"
 	    set jidx ${jid}/$argsArr(-resource)
 	}
@@ -4022,9 +4049,9 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
     # If we have an ask attribute, put in Pending tree dir.
     if {[info exists argsArr(-ask)] &&  \
       [string equal $argsArr(-ask) "subscribe"]} {
-	eval {$wtree newitem [list {Subscription Pending} $jid]} $itemOpts
-    } elseif {[info exists argsArr(-groups)] &&  \
-      [string length $argsArr(-groups)]} {
+	eval {$wtree newitem [list {Subscription Pending} $jid] -tags $jidx} \
+	  $itemOpts
+    } elseif {[info exists argsArr(-groups)] && ($argsArr(-groups) != "")} {
 	set groups $argsArr(-groups)
 	
 	# Add jid for each group.
@@ -4097,8 +4124,8 @@ proc ::Jabber::Roster::NewOrEditItem {w which args} {
     variable jid
     variable name
     variable oldName
-    variable groups
-    variable oldGroups
+    variable usersGroup
+    variable oldUsersGroup
     variable subscribe
     variable unsubscribe
     variable subscription
@@ -4121,8 +4148,8 @@ proc ::Jabber::Roster::NewOrEditItem {w which args} {
     }
 
     # Clear any old variable values.
-    set name {}
-    set groups {}
+    set name ""
+    set usersGroup ""
     if {[string equal $which "new"]} {
 	wm title $w [::msgcat::mc {Add New User}]
 	set jid "@$jserver(this)"
@@ -4136,21 +4163,28 @@ proc ::Jabber::Roster::NewOrEditItem {w which args} {
 	}
 	set subscribe 0
 	set unsubscribe 0
-	set subscription {none}
+	set subscription "none"
 	
 	# We should query our roster object for the present values.
+	# Note PLURAL!
 	set groups [$jstate(roster) getgroups $jid]
 	set theItemOpts [$jstate(roster) getrosteritem $jid]
 	foreach {key value} $theItemOpts {
-	    set keym [string trimleft $key {-}]
+	    set keym [string trimleft $key "-"]
 	    set $keym $value
+	}
+	if {[llength $groups] > 0} {
+		set usersGroup [lindex $groups 0]
 	}
 	
 	# Collect the old subscription so we know if to send a new presence.
 	set oldSubscription $subscription
     }
+    if {$usersGroup == ""} {
+    	set usersGroup "None"
+    }
     set oldName $name
-    set oldGroups $groups
+    set oldUsersGroup $usersGroup
     
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised]   \
@@ -4169,7 +4203,7 @@ proc ::Jabber::Roster::NewOrEditItem {w which args} {
     label $frmid.ljid -text "[::msgcat::mc {Jabber user id}]:"  \
       -font $sysFont(sb) -anchor e
     entry $frmid.ejid -width 24    \
-      -textvariable "[namespace current]::jid"
+      -textvariable [namespace current]::jid
     label $frmid.lnick -text "[::msgcat::mc {Nick name}]:" -font $sysFont(sb) \
       -anchor e
     entry $frmid.enick -width 24   \
@@ -4177,12 +4211,12 @@ proc ::Jabber::Roster::NewOrEditItem {w which args} {
     label $frmid.lgroups -text "[::msgcat::mc Group]:" -font $sysFont(sb) -anchor e
     
     ::combobox::combobox $frmid.egroups -font $sysFont(s) -width 18  \
-      -textvariable [namespace current]::groups
-    eval {$frmid.egroups list insert end} "{None} $allGroups"
+      -textvariable [namespace current]::usersGroup
+    eval {$frmid.egroups list insert end} "None $allGroups"
         
     if {[string equal $which "new"]} {
 	checkbutton $frmid.csubs -text "  [::msgcat::mc jarostsub]"  \
-	  -variable "[namespace current]::subscribe"
+	  -variable [namespace current]::subscribe
     } else {
 	
 	# Give user an opportunity to subscribe/unsubscribe other jid.
@@ -4258,7 +4292,7 @@ proc ::Jabber::Roster::NewOrEditItem {w which args} {
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
     
     wm resizable $w 0 0
-    bind $w <Return> [list ::Jabber::Roster::EditSet $which]
+    bind $w <Return> [list ::Jabber::Roster::EditSet $w $which]
     
     # Grab and focus.
     set oldFocus [focus]
@@ -4300,8 +4334,8 @@ proc ::Jabber::Roster::EditSet {w which} {
     variable jid
     variable name
     variable oldName
-    variable groups
-    variable oldGroups
+    variable usersGroup
+    variable oldUsersGroup
     variable subscribe
     variable unsubscribe
     variable subscription
@@ -4310,7 +4344,7 @@ proc ::Jabber::Roster::EditSet {w which} {
     upvar ::Jabber::jstate jstate
     
     # General checks.
-    foreach key {jid name groups} {
+    foreach key {jid name usersGroup} {
 	set what $key
 	if {[regexp $jprefs(invalsExp) $what match junk]} {
 	    tk_messageBox -message [FormatTextForMessageBox  \
@@ -4352,16 +4386,19 @@ proc ::Jabber::Roster::EditSet {w which} {
     if {[string length $name]} {
 	lappend opts -name $name
     }
-    if {[string length $groups]} {
-	lappend opts -groups $groups
+    if {$usersGroup != $oldUsersGroup} {
+    	if {$usersGroup == "None"} {
+    		set usersGroup ""
+    	}
+	lappend opts -groups [list $usersGroup]
     }
+    puts "usersGroup=$usersGroup, opts='$opts'"
     if {[string equal $which "new"]} {
 	eval {$jstate(jlib) roster_set $jid   \
 	  [list ::Jabber::Roster::EditSetCommand $jid]} $opts
-    } elseif {($name != $oldName) || ($groups != $oldGroups)} {
-	$jstate(jlib) roster_set $jid   \
-	  [list ::Jabber::Roster::EditSetCommand $jid]  \
-	  -name $name -groups $groups
+    } else {
+	eval {$jstate(jlib) roster_set $jid   \
+	  [list ::Jabber::Roster::EditSetCommand $jid]} $opts
     }
     if {[string equal $which "new"]} {
 	
@@ -4699,7 +4736,7 @@ proc ::Jabber::Register::ResponseProc {jlibName type theQuery} {
 	  [::msgcat::mc jamessregisterok $server]]
     
 	# Save to our jserver variable. Create a new profile.
-	::Jabber::SetUserProfile {} $server $username $password home
+	::Jabber::SetUserProfile {} $server $username $password
     }
     
     # Disconnect. This should reset both wrapper and XML parser!
@@ -4903,8 +4940,11 @@ proc ::Jabber::Passwd::ResponseProc {jlibName type theQuery} {
 	set ind [lsearch $jserver(profile) $jserver(profile,selected)]
 	if {$ind >= 0} {
 	    set userSpec [lindex $jserver(profile) [expr $ind + 1]]
-	    set userSpec [lreplace $userSpec 2 2 $password]
-	    eval {::Jabber::SetUserProfile $jserver(this)} $userSpec
+	    #set userSpec [lreplace $userSpec 2 2 $password]
+	    lset userSpec 2 $password
+	   
+	    # Save to our jserver variable. Create a new profile.
+	    eval {::Jabber::SetUserProfile {}} $userSpec
 	}
 	
 	tk_messageBox -title [::msgcat::mc {New Password}] -icon info -type ok \
@@ -5344,7 +5384,7 @@ proc ::Jabber::Login::Login {w} {
 	lappend jserver(all) $name
     }
     
-    # Option menu for the servers.
+    # Option menu for selecting user profile.
     label $frmid.lpop -text "[::msgcat::mc Profile]:" -font $sysFont(sb) -anchor e
     set wpopup $frmid.popup
     eval {tk_optionMenu $wpopup [namespace current]::menuVar} $jserver(all)
@@ -5362,10 +5402,11 @@ proc ::Jabber::Login::Login {w} {
     
     # Make temp array for servers. Handy fo filling in the entries.
     foreach {name spec} $jserver(profile) {
-	foreach [list tmpJServArr($name,server)  \
-	  tmpJServArr($name,username)  \
-	  tmpJServArr($name,password) \
-	  tmpJServArr($name,resource)] $spec {}
+	foreach [list  \
+	  tmpJServArr($name,server)     \
+	  tmpJServArr($name,username)   \
+	  tmpJServArr($name,password)   \
+	  tmpJServArr($name,resource)] $spec { break }
     }
     set server $tmpJServArr($menuVar,server)
     set username $tmpJServArr($menuVar,username)
@@ -5691,8 +5732,8 @@ proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
 	} else {
 	    set msg [::msgcat::mc jamessloginerr $errcode $errmsg]
 	}
-	tk_messageBox -title [::msgcat::mc Error] -message [FormatTextForMessageBox $msg] \
-	  -icon error -type ok
+	tk_messageBox -icon error -type ok -title [::msgcat::mc Error]  \
+	  -message [FormatTextForMessageBox $msg]
 
 	#       There is a potential problem if called from within a xml parser 
 	#       callback which makes the subsequent parsing to fail. (after idle?)
@@ -5701,7 +5742,7 @@ proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
     } 
     
     # Collect ip num name etc. in arrays.
-    if {![::OpenConnection::SetIpArrays $server $jstate(sock)   \
+    if {![::OpenConnection::SetIpArrays $server $jstate(sock)  \
       $jstate(servPort)]} {
 	::UI::SetStatusMessage . ""
 	return
@@ -5764,7 +5805,7 @@ proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
 	::Jabber::Agents::GetAll
     }
     
-    # Check for autoupdates?
+    # Check for autoupdates? ABONDENED!!!!
     if {$jprefs(autoupdateCheck) && $jprefs(autoupdateShow,$prefs(fullVers))} {
 	$jlibName send_presence -to  \
 	  $jprefs(serialno)@update.jabber.org/$prefs(fullVers)
@@ -5946,10 +5987,15 @@ proc ::Jabber::Subscribe::Subscribe {wbase jid args} {
     set allGroups [$jstate(roster) getgroups]
         
     # This gets a list '-name ... -groups ...' etc. from our roster.
+    # Note! -groups PLURAL!
     array set itemAttrArr {-name {} -groups {} -subscription none}
     array set itemAttrArr [$jstate(roster) getrosteritem $jid]
+    
+    # Textvariables for entry and combobox.
     set locals($uid,name) $itemAttrArr(-name)
-    set locals($uid,group) $itemAttrArr(-groups)
+    if {[llength $itemAttrArr(-groups)] > 0} {
+	set locals($uid,group) [lindex $itemAttrArr(-groups) 0]
+    }
     
     # Figure out if we shall send a 'subscribe' presence to this user.
     set maySendSubscribe 1
@@ -5995,7 +6041,6 @@ proc ::Jabber::Subscribe::Subscribe {wbase jid args} {
     # The option part.
     set locals($uid,allow) 1
     set locals($uid,add) $jprefs(defSubscribe)
-    set locals($uid,name) {}
     set fropt $w.frall.fropt
     set frcont [LabeledFrame2 $fropt {Options}]
     pack $fropt -side top -fill both -ipadx 10 -ipady 6
@@ -6015,7 +6060,7 @@ proc ::Jabber::Subscribe::Subscribe {wbase jid args} {
     
     ::combobox::combobox $frsub.egroup -font $sysFont(s) -width 18  \
       -textvariable [namespace current]::locals($uid,group)
-    eval {$frsub.egroup list insert end} "{} $allGroups"
+    eval {$frsub.egroup list insert end} "None $allGroups"
     
     grid $frsub.lnick -column 0 -row 0 -sticky e
     grid $frsub.enick -column 1 -row 0 -sticky ew
@@ -6087,8 +6132,8 @@ proc ::Jabber::Subscribe::Doit {uid} {
 	if {[string length $locals($uid,name)]} {
 	    lappend arglist -name $locals($uid,name)
 	}
-	if {[string length $locals($uid,group)]} {
-	    lappend arglist -groups $locals($uid,group)
+	if {($locals($uid,group) != "") && ($locals($uid,group) != "None")} {
+	    lappend arglist -groups [list $locals($uid,group)]
 	}
 	eval {$jstate(jlib) roster_set $jid ::Jabber::Subscribe::ResProc} \
 	  $arglist
@@ -6422,7 +6467,7 @@ proc ::Jabber::GroupChat::GotMsg {body args} {
     if {[info exists argsArr(-from)]} {
 	set fromJid $argsArr(-from)
     } else {
-	error {Missing -from attribute in group message!}
+	return -code error {Missing -from attribute in group message!}
     }
     
     # Figure out if from the room or from user.
@@ -6475,7 +6520,11 @@ proc ::Jabber::GroupChat::GotMsg {body args} {
     }
     
     if {$jprefs(speakChat)} {
-	catch {speak -voice $prefs(voiceOther) $body}
+	if {$meyou == "me"} {
+	    ::UserActions::Speak $body $prefs(voiceUs)
+	} else {
+	    ::UserActions::Speak $body $prefs(voiceOther)
+	}
     }
 }
 
@@ -6685,9 +6734,15 @@ proc ::Jabber::GroupChat::Send {roomJid} {
 
     # Get text to send.
     set allText [$wtextsnd get 1.0 "end - 1 char"]
-    if {[string length $allText]} {	
-	$jstate(jlib) send_message $roomJid  \
-	  -type groupchat -body $allText 
+    if {$allText != ""} {	
+	if {[catch {
+	    $jstate(jlib) send_message $roomJid -type groupchat \
+	      -body $allText
+	} err]} {
+	    tk_messageBox -type ok -icon error -title "Network Error" \
+	      -message "Network error ocurred: $err"
+	    return
+	}
     }
     
     # Clear send.
@@ -6970,6 +7025,12 @@ proc ::Jabber::GroupChat::Print {roomJid} {
 # Jabber::GroupChat::Exit --
 #
 #       Ask if wants to exit room. If then calls GroupChat::Close to do it.
+#       
+# Arguments:
+#       roomJid
+#       
+# Results:
+#       yes/no if actually exited or not.
 
 proc ::Jabber::GroupChat::Exit {roomJid} {
     
@@ -7562,7 +7623,6 @@ proc ::Jabber::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
 	    if {[info exists attrArr(type)] && [string equal $attrArr(type) "remove"]} {
 		
 		# Remove this jid from tree widget.
-		#$wtree delitem $jidList
 		foreach v [$wtree find withtag $jid] {
 		    $wtree delitem $v
 		}
