@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.12 2003-12-18 14:19:34 matben Exp $
+# $Id: JUI.tcl,v 1.13 2003-12-19 15:47:39 matben Exp $
 
 package provide JUI 1.0
 
@@ -120,6 +120,9 @@ proc ::Jabber::UI::Build {w} {
     set jwapp(wtopRost) $w
     wm title $w "The Coccinella"
     wm protocol $w WM_DELETE_WINDOW [list ::Jabber::UI::CloseRoster $w]
+
+    # Add all event hooks.
+    hooks::add quitAppHook [list ::UI::SaveWinGeom $w]
 
     # Build minimal menu for Jabber stuff.
     set wmenu ${wtop}menu

@@ -4,6 +4,11 @@ Whiteboard CHANGES
 
 Not to mention all bugfixes and rewrites.
 
+Coccinella-0.94.7 (04????): 	Short summary --
+
+	- separating actual whiteboard code from rest.
+	- uses resource database for everything, also images
+
 Coccinella-0.94.6 (03????): 	Short summary --
 
 	- internal http server in its own thread if available

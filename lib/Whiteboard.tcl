@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.2 2003-12-18 14:19:35 matben Exp $
+# $Id: Whiteboard.tcl,v 1.3 2003-12-19 15:47:40 matben Exp $
 
 package require entrycomp
 package require CanvasDraw
@@ -18,7 +18,8 @@ package require CanvasCutCopyPaste
 package provide Whiteboard 1.0
 
 namespace eval ::WB:: {
-
+    global  wDlgs
+    
     # Tool button mappings.
     variable btNo2Name 
     variable btName2No
@@ -74,6 +75,9 @@ namespace eval ::WB:: {
     option add *Whiteboard.bwrectImage          bwrect          widgetDefault
     option add *Whiteboard.imcolorImage         imcolor         widgetDefault
     
+    # Add all event hooks.
+    hooks::add quitAppHook [list ::UI::SaveWinPrefixGeom $wDlgs(wb) whiteboard]
+    hooks::add quitAppHook ::WB::SaveAnyState
     
     # Keeps various geometry info.
     variable dims
@@ -98,9 +102,7 @@ namespace eval ::WB:: {
 
     # Unique id for main toplevels
     variable uidmain 0
-    
-    variable accelBindsToMain {}
-    
+        
     # Addon stuff.
     variable fixMenusCallback {}
     variable menuSpecPublic
@@ -140,8 +142,6 @@ proc ::WB::Init {} {
     # Defines canvas binding tags suitable for each tool.
     ::CanvasUtils::DefineWhiteboardBindtags
     
-    variable allWhiteboards {}
-
     variable dashFull2Short
     variable dashShort2Full
     array set dashFull2Short {
@@ -630,12 +630,13 @@ proc ::WB::InitMenuDefs { } {
 # Results:
 #       toplevel window. (.) If not "." then ".top."; extra dot!
 
-proc ::WB::NewWhiteboard {args} {    
+proc ::WB::NewWhiteboard {args} { 
+    global wDlgs
     variable uidmain
     
     # Need to reuse ".". Outdated!
     if {[wm state .] == "normal"} {
-	set wtop .wb[incr uidmain].
+	set wtop $wDlgs(wb)[incr uidmain].
     } else {
 	set wtop .
     }
@@ -657,7 +658,6 @@ proc ::WB::NewWhiteboard {args} {
 proc ::WB::BuildWhiteboard {wtop args} {
     global  this prefs privariaFlag
     
-    variable allWhiteboards
     variable dims
     variable wbicons
     variable threadToWtop
@@ -702,15 +702,15 @@ proc ::WB::BuildWhiteboard {wtop args} {
     }
     
     if {[string equal $wtop "."]} {
-	set wtopReal .
+	set w .
     } else {
-	set wtopReal [string trimright $wtop .]
+	set w [string trimright $wtop .]
     }
     
     # Common widget paths.
-    set wapp(toplevel)  $wtopReal
-    set wall            ${wtopReal}.f
-    set wapp(menu)      ${wtopReal}.menu
+    set wapp(toplevel)  $w
+    set wall            ${w}.f
+    set wapp(menu)      ${w}.menu
     set wapp(frall)     $wall
     set wapp(frtop)     ${wall}.frtop
     if {$prefs(haveScrollbars)} {
@@ -737,12 +737,12 @@ proc ::WB::BuildWhiteboard {wtop args} {
 	set state(btState) 00
     }
     
-    if {![winfo exists $wtopReal] && ($wtop != ".")} {
-	toplevel $wtopReal -class Whiteboard
-	wm withdraw $wtopReal
+    if {![winfo exists $w] && ($wtop != ".")} {
+	toplevel $w -class Whiteboard
+	wm withdraw $w
     }
-    wm title $wtopReal $opts(-title)
-    wm protocol $wtopReal WM_DELETE_WINDOW [list ::WB::CloseWhiteboard $wtop]
+    wm title $w $opts(-title)
+    wm protocol $w WM_DELETE_WINDOW [list ::WB::CloseWhiteboard $wtop]
     
     # Have an overall frame here of class Whiteboard. Needed for option db.
     frame $wapp(frall) -class Whiteboard
@@ -856,36 +856,23 @@ proc ::WB::BuildWhiteboard {wtop args} {
     }
 
     # Set up paste menu if something on the clipboard.
-    ::WB::WhiteboardGetFocus $wtop $wtopReal
-    bind $wtopReal <FocusIn>  \
-      [list [namespace current]::WhiteboardGetFocus $wtop %W]
+    ::WB::GetFocus $wtop $w
+    bind $w <FocusIn>  \
+      [list [namespace current]::GetFocus $wtop %W]
     
     # Create the undo/redo object.
     set state(undotoken) [undo::new -command [list ::UI::UndoConfig $wtop]]
     
     # Set window position only for the first whiteboard on screen.
     # Subsequent whiteboards are placed by the window manager.
-    if {[llength [::WB::GetAllWhiteboards]] == 0} {
-	
-	# Setting the window position never hurts. Check that it fits to screen.
-	if {$dims(x) > [expr [winfo vrootwidth .] - 30]} {
-	    set dims(x) 30
-	}
-	if {$dims(y) > [expr [winfo vrootheight .] - 30]} {
-	    set dims(y) 30
-	}
-
-	# Setting total (root) size should only be done if set in pref file!
-	# Some window managers are tricky with the 'wm geometry' command.
-	if {($dims(wRoot) > 1) && ($dims(hRoot) > 1)} {
-	    wm geometry $wtopReal $dims(wRoot)x$dims(hRoot)+$dims(x)+$dims(y)
-	    #update
+    if {[llength [::WB::GetAllWhiteboards]] == 1} {	
+	if {[info exists prefs(winGeom,whiteboard)]} {
+	    wm geometry $w $prefs(winGeom,whiteboard)
 	}
     }
-    catch {wm deiconify $wtopReal}
-    #raise $wtopReal     This makes the window flashing when showed (linux)
-    lappend allWhiteboards $wtopReal
-
+    catch {wm deiconify $w}
+    #raise $w     This makes the window flashing when showed (linux)
+    
     # A trick to let the window manager be finished before getting the geometry.
     # An 'update idletasks' needed anyway in 'FindWBGeometry'.
     after idle [namespace current]::FindWBGeometry $wtop
@@ -907,7 +894,7 @@ proc ::WB::CloseWhiteboard {wtop} {
     set jtype [::WB::GetJabberType $wtop]
 
     Debug 3 "::WB::CloseWhiteboard wtop=$wtop, jtype=$jtype"
-
+    
     switch -- $jtype {
 	chat {
 	    set ans [tk_messageBox -icon info -parent $topw -type yesno \
@@ -947,19 +934,15 @@ proc ::WB::CloseWhiteboard {wtop} {
 proc ::WB::DestroyMain {wtop} {
     global  prefs
     
-    variable menuKeyToIndex
     upvar ::${wtop}::wapp wapp
     upvar ::${wtop}::opts opts
     upvar ::${wtop}::tmpImages tmpImages
 
     set wcan [::WB::GetCanvasFromWtop $wtop]
     
-    # The last whiteboard that is destroyed sets preference state & dims.
-    if {[llength [::WB::GetAllWhiteboards]] == 1} {
-	
-	# Save instance specific 'state' array into generic 'state'.
-	::WB::SaveWhiteboardState $wtop
-    }
+    # Save instance specific 'state' array into generic 'state'.
+    ::WB::SaveWhiteboardState $wtop
+    ::UI::SaveWinGeom whiteboard $wapp(toplevel)
     
     if {$wtop == "."} {
 	if {[string equal $prefs(protocol) "jabber"]} {
@@ -979,7 +962,6 @@ proc ::WB::DestroyMain {wtop} {
 	catch {destroy $topw}    
 	unset opts
 	unset wapp
-	array unset menuKeyToIndex "${wtop}*"
     }
     
     # We could do some cleanup here.
@@ -993,16 +975,37 @@ proc ::WB::DestroyMain {wtop} {
 # 
 
 proc ::WB::SaveWhiteboardState {wtop} {
-    global  prefs
 
-    upvar ::WB::dims dims
     upvar ::${wtop}::wapp wapp
       
     # Read back instance specific 'state' into generic 'state'.
     array set ::state [array get ::${wtop}::state]
 
     # Widget geometries:
-    ::WB::SaveWhiteboardDims $wtop
+    #::WB::SaveWhiteboardDims $wtop
+    #::UI::SaveWinGeom whiteboard $wapp(toplevel)
+}
+
+proc ::WB::SaveAnyState { } {
+    
+    set win ""
+    set wbs [::WB::GetAllWhiteboards]
+    if {[llength $wbs]} {
+	set wfocus [focus]
+	if {$wfocus != ""} {
+	    set win [winfo toplevel $wfocus]
+	}
+	set win [lsearch -inline $wbs $wfocus]
+	if {$win == ""} {
+	    set win [lindex $wbs 0]
+	}
+	if {$win != ""} {
+	    if {$win != "."} {
+		set win ${win}.
+	    }
+	    ::WB::SaveWhiteboardState $win
+	}	
+    }
 }
 
 # WB::SaveWhiteboardDims --
@@ -1017,7 +1020,7 @@ proc ::WB::SaveWhiteboardDims {wtop} {
     
     set w $wapp(toplevel)
     set wCan $wapp(can)
-	    
+        	    
     # Update actual size values. 'Root' no menu, 'Tot' with menu.
     set dims(wStatMess) [winfo width $wapp(statmess)]
     set dims(wRoot) [winfo width $w]
@@ -1079,9 +1082,9 @@ proc ::WB::ConfigureMain {wtop args} {
     upvar ::${wtop}::opts opts
     
     if {[string equal $wtop "."]} {
-	set wtopReal .
+	set w .
     } else {
-	set wtopReal [string trimright $wtop .]
+	set w [string trimright $wtop .]
     }
     if {[llength $args] == 0} {
 	return [array get opts]
@@ -1091,7 +1094,7 @@ proc ::WB::ConfigureMain {wtop args} {
 	    
 	    switch -- $name {
 		-title {
-		    wm title $wtopReal $value    
+		    wm title $w $value    
 		}
 		-state {
 		    #
@@ -1258,21 +1261,13 @@ proc ::WB::GetUndoToken {wtop} {
 # WB::GetAllWhiteboards --
 # 
 #       Return all whiteboard's wtop as a list. 
-#       Note: 'allWhiteboards' have real toplevel path.
 
 proc ::WB::GetAllWhiteboards { } {    
-    variable allWhiteboards    
-    
-    set allTops {}
-    foreach w $allWhiteboards {
-	if {[winfo exists $w] && ([wm state $w] == "normal")} {
-	    lappend allTops $w
-	}
-    }
-    set allWhiteboards [lsort -dictionary $allTops]
-    return $allWhiteboards
-}
+    global  wDlgs
 
+    return [lsort -dictionary \
+      [lsearch -all -inline -glob [winfo children .] $wDlgs(wb)*]]
+}
 
 # WB::SetToolButton --
 #
@@ -2214,14 +2209,14 @@ proc ::WB::SetNewWMMinsize {wtop} {
       dims(hTop)=$dims(hTop)"
 }	    
 
-# WB::WhiteboardGetFocus --
+# WB::GetFocus --
 #
 #       Check clipboard and activate corresponding menus.    
 #       
 # Results:
 #       updates state of menus.
 
-proc ::WB::WhiteboardGetFocus {wtop w} {
+proc ::WB::GetFocus {wtop w} {
     
     upvar ::${wtop}::opts opts
     upvar ::${wtop}::wapp wapp
@@ -2234,7 +2229,7 @@ proc ::WB::WhiteboardGetFocus {wtop w} {
     if {$wtopReal != $w} {
 	return
     }
-    Debug 3 "WhiteboardGetFocus:: wtop=$wtop, w=$w"
+    Debug 3 "GetFocus:: wtop=$wtop, w=$w"
     
     # Can't see why this should happen?
     set medit ${wtop}menu.edit

@@ -5,13 +5,17 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.13 2003-12-16 15:03:53 matben Exp $
+# $Id: GotMsg.tcl,v 1.14 2003-12-19 15:47:39 matben Exp $
 
 package provide GotMsg 1.0
 
 namespace eval ::Jabber::GotMsg:: {
     global  wDlgs
 
+    # Add all event hooks.
+    hooks::add quitAppHook [list ::UI::SaveWinGeom $wDlgs(jgotmsg)]
+    
+    
     # Wait for this variable to be set.
     variable finished  
     variable w $wDlgs(jgotmsg)

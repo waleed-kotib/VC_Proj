@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.13 2003-12-18 14:19:34 matben Exp $
+# $Id: Login.tcl,v 1.14 2003-12-19 15:47:39 matben Exp $
 
 package provide Login 1.0
 
@@ -14,6 +14,9 @@ namespace eval ::Jabber::Login:: {
     variable server
     variable username
     variable password
+
+    # Add all event hooks.
+    hooks::add quitAppHook [list ::UI::SaveWinGeom $::wDlgs(jlogin)]
 }
 
 # Jabber::Login::Login --
@@ -188,6 +191,7 @@ proc ::Jabber::Login::Login { } {
     wm resizable $w 0 0
     bind $w <Return> ::Jabber::Login::Doit
     bind $w <Escape> [list ::Jabber::Login::DoCancel $w]
+    bind $w <Destroy> [list ::Jabber::Login::DoCancel $w]
     
     # Grab and focus.
     set oldFocus [focus]

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.18 2003-12-15 08:20:53 matben Exp $
+# $Id: Chat.tcl,v 1.19 2003-12-19 15:47:39 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -14,6 +14,7 @@ package provide Chat 1.0
 
 
 namespace eval ::Jabber::Chat:: {
+    global  wDlgs
     
     # Use option database for customization. 
     # These are nonstandard option valaues and we may therefore keep priority
@@ -45,7 +46,12 @@ namespace eval ::Jabber::Chat:: {
 	youTextBackground     Background
 	youFont               Font
 	clockFormat           ClockFormat
-  }
+    }
+
+    # Add all event hooks.
+    hooks::add quitAppHook [list ::UI::SaveWinPrefixGeom $wDlgs(jchat)]
+    hooks::add quitAppHook [list ::UI::SaveWinGeom $wDlgs(jstartchat)]
+    
     
     variable locals
 }
@@ -69,7 +75,7 @@ proc ::Jabber::Chat::StartThreadDlg {args} {
 
     ::Jabber::Debug 2 "::Jabber::Chat::StartThreadDlg args='$args'"
 
-    set w $wDlgs(jchat)
+    set w $wDlgs(jstartchat)
     if {[winfo exists $w]} {
 	return
     }
@@ -89,7 +95,7 @@ proc ::Jabber::Chat::StartThreadDlg {args} {
     pack [frame $w.frall -borderwidth 1 -relief raised]  \
       -fill both -expand 1 -ipadx 12 -ipady 4
     
-    ::headlabel::headlabel -text [::msgcat::mc {Chat with}]
+    ::headlabel::headlabel $w.frall.head -text [::msgcat::mc {Chat with}]
     pack $w.frall.head -side top -fill both -expand 1
     
     # Entries etc.
@@ -138,6 +144,7 @@ proc ::Jabber::Chat::StartThreadDlg {args} {
 proc ::Jabber::Chat::DoCancel {w} {
     variable finished
     
+    ::UI::SaveWinGeom $w
     set finished 0
     destroy $w
 }
@@ -158,6 +165,7 @@ proc ::Jabber::Chat::DoStart {w} {
 	  Do you want to chat anyway?"]]
     }
     
+    ::UI::SaveWinGeom $w
     set finished 1
     destroy $w
     if {$ans == "yes"} {
@@ -294,7 +302,7 @@ proc ::Jabber::Chat::Build {threadID args} {
     
     ::Jabber::Debug 2 "::Jabber::Chat::Build threadID=$threadID, args='$args'"
 
-    set w "$wDlgs(jchat)[string range $threadID 0 8]"
+    set w $wDlgs(jchat)[string range $threadID 0 8]
     set locals($threadID,wtop) $w
     set locals($w,threadid) $threadID
     set locals($threadID,active) 0

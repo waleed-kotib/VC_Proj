@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.33 2003-12-18 14:19:35 matben Exp $
+# $Id: UI.tcl,v 1.34 2003-12-19 15:47:39 matben Exp $
 
 package require entrycomp
 
@@ -28,7 +28,11 @@ namespace eval ::UI:: {
 
 proc ::UI::Init {} {
     global  this prefs
+
     variable icons
+    variable smiley
+    variable smileyExp
+    variable smileyLongNames
     
     ::Debug 2 "::UI::Init"    
         
@@ -238,39 +242,66 @@ proc ::UI::GetCanvasFromWtop {wtop} {
 
 # UI::SaveWinGeom --
 #
-#       Call this when closing window to store its geometry. Window must exist!
+#       Call this when closing window to store its geometry if exists.
 #
 # Arguments:
-#       w           toplevel window and entry in storage array.
-#       wreal       (D="") if set then $w is only entry in array, while $wreal
+#       key         toplevel or entry in storage array.
+#       w           (D="") if set then 'key' is only entry in array, while 'w'
 #                   is the actual toplevel window.
 # 
 
-proc ::UI::SaveWinGeom {w {wreal {}}} {
+proc ::UI::SaveWinGeom {key {w {}}} {
     global  prefs
     
-    if {$wreal == ""} {
-	set wreal $w
+    if {$w == ""} {
+	set w $key
     }
-    set prefs(winGeom,$w) [wm geometry $wreal]
+    if {[winfo exists $w] && [winfo ismapped $w]} {
+	set prefs(winGeom,$key) [wm geometry $w]
+    }
+}
+
+proc ::UI::SaveWinPrefixGeom {wprefix {key ""}} {
+    global  prefs
+    
+    if {$key == ""} {
+	set key $wprefix
+    }
+    
+    set wins [lsearch -all -inline -glob [winfo children .] ${wprefix}*]
+    if {[llength $wins]} {
+	set wfocus [focus]
+	if {$wfocus != ""} {
+	    set win [winfo toplevel $wfocus]
+	}
+	set win [lsearch -inline $wins $wfocus]
+	if {$win == ""} {
+	    set win [lindex $wins 0]
+	}
+	if {$win != ""} {
+	    ::UI::SaveWinGeom $key $win
+	}	
+    }
 }
 
 # UI::SavePanePos --
 #
 #       Same for pane positions.
 
-proc ::UI::SavePanePos {wtoplevel wpaned {orient horizontal}} {
+proc ::UI::SavePanePos {w wpaned {orient horizontal}} {
     global  prefs
     
-    array set infoArr [::pane::pane info $wpaned]
-    if {[string equal $orient "horizontal"]} {
-	set prefs(paneGeom,$wtoplevel)   \
-	  [list $infoArr(-relwidth) [expr 1.0 - $infoArr(-relwidth)]]
-    } else {
-	
-	# Vertical
-	set prefs(paneGeom,$wtoplevel)   \
-	  [list $infoArr(-relheight) [expr 1.0 - $infoArr(-relheight)]]
+    if {[winfo exists $w] && [winfo ismapped $w]} {
+	array set infoArr [::pane::pane info $wpaned]
+	if {[string equal $orient "horizontal"]} {
+	    set prefs(paneGeom,$w)   \
+	      [list $infoArr(-relwidth) [expr 1.0 - $infoArr(-relwidth)]]
+	} else {
+	    
+	    # Vertical
+	    set prefs(paneGeom,$w)   \
+	      [list $infoArr(-relheight) [expr 1.0 - $infoArr(-relheight)]]
+	}
     }
 }
 
