@@ -5,8 +5,9 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.6 2003-06-07 12:46:36 matben Exp $
+# $Id: NewMsg.tcl,v 1.7 2003-07-05 13:37:54 matben Exp $
 
+package require entrycomp
 package provide NewMsg 1.0
 
 namespace eval ::Jabber::NewMsg:: {
@@ -282,14 +283,16 @@ proc ::Jabber::NewMsg::NewAddrLine {w wfr n} {
     global  sysFont
     
     variable locals
+    upvar ::Jabber::jstate jstate
     
+    set jidlist [$jstate(roster) getusers]
     set num $locals($w,num)
     frame $wfr.f${n} -bd 0
     entry $wfr.f${n}.trpt -width 18 -font $sysFont(sb) -bd 0 -highlightthickness 0 \
       -state disabled -textvariable [namespace current]::locals($w,poptrpt$n)
     label $wfr.f${n}.la -image $locals(whiterect) -bd 0 -bg white
     pack $wfr.f${n}.trpt $wfr.f${n}.la -side left -fill y
-    entry $wfr.addr${n} -bd 0 -highlightthickness 0  \
+    ::entrycomp::entrycomp $wfr.addr${n} $jidlist -bd 0 -highlightthickness 0 \
       -textvariable [namespace current]::locals($w,addr$n) -state disabled
     
     set m [menu $locals(wpopupbase)${num}_${n} -tearoff 0]

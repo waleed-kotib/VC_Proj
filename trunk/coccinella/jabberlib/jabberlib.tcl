@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.12 2003-06-15 12:40:13 matben Exp $
+# $Id: jabberlib.tcl,v 1.13 2003-07-05 13:37:54 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -71,7 +71,7 @@
 #      jabberlib - an interface between Jabber clients and the wrapper
 #      
 #   SYNOPSIS
-#      jlib::new jlibName rosterName clientCmd ?-opt value ...?
+#      jlib::new rosterName clientCmd ?-opt value ...?
 #      
 #   OPTIONS
 #	-iqcommand            callback for <iq> elements not handled explicitly
@@ -210,6 +210,7 @@
 #                dispatching.
 #       030523   added 'getagent' and 'haveagent' commands.
 #       030611   added 'setroomprotocol' command and modified service dispatching
+#       030705   jlib::new generates self token
 
 package require wrapper
 package require roster
@@ -232,6 +233,11 @@ namespace eval jlib {
     # Maintain a priority list of groupchat protocols in decreasing priority.
     # Entries must match: ( gc-1.0 | conference | muc )
     set statics(groupchatTypeExp) {(gc-1.0|conference|muc)}
+    
+    variable lib
+    
+    # Running number.
+    variable uid 0
 }
 
 namespace eval jlib::service {
@@ -261,21 +267,19 @@ proc jlib::muc {jlibname args} {
 #       This creates a new instance jlib interpreter.
 #       
 # Arguments:
-#       jlibname:   the name of this jlib instance
 #       rostername: the name of the roster object
 #       browsename: the name of the browse object
 #       clientcmd:  callback procedure for the client
 #       
 # Results:
-#       jlibname
+#       jlibname which is the namespaced instance command
   
-proc jlib::new {jlibname rostername browsename clientcmd args} {    
+proc jlib::new {rostername browsename clientcmd args} {    
     variable objectmap
-    
-    # Check that we may have a command [jlibname].
-    if {[llength [info commands $jlibname]] > 0} {
-	return -code error "\"$jlibname\" command is already in use"
-    }
+    variable uid
+          
+    # Generate unique command token for this roster instance.
+    set jlibname jabberlib[incr uid]
       
     # Instance specific namespace.
     namespace eval [namespace current]::${jlibname} {
@@ -328,6 +332,7 @@ proc jlib::new {jlibname rostername browsename clientcmd args} {
     }    
 
     set iq(uid) 1001
+    set lib(fulljlibname) [namespace current]::${jlibname}
     set lib(rostername) $rostername
     set lib(browsename) $browsename
     set lib(clientcmd) $clientcmd
@@ -356,13 +361,11 @@ proc jlib::new {jlibname rostername browsename clientcmd args} {
     set conf(allroomsin) {}    
     set gchat(allroomsin) {}
 
-    # Create the actual jlib instance procedure. 'jlibname' is interpreted in
-    # the global namespace.
-    # Perhaps need to check if 'jlibname' is already a fully qualified name?
-    proc ::${jlibname} {cmd args}  \
+    # Create the actual jlib instance procedure.
+    proc [namespace current]::${jlibname} {cmd args}   \
       "eval jlib::cmdproc {$jlibname} \$cmd \$args"
     
-    return $jlibname
+    return [namespace current]::${jlibname}
 }
 
 # jlib::cmdproc --
@@ -579,8 +582,8 @@ proc jlib::recvsocket {jlibname} {
     # Read what we've got.
     if {[catch {read $lib(sock)} temp]} {
 	disconnect $jlibname
-	uplevel #0 "$lib(clientcmd) $jlibname {networkerror} -body \
-	  {Network error when reading from network}"
+	uplevel #0 $lib(clientcmd) $jlibname "networkerror" -body \
+	  "Network error when reading from network"
 	return
     }
     Debug 2 "RECV: $temp"
@@ -899,7 +902,7 @@ proc jlib::iq_handler {jlibname xmldata} {
 	    set xml [wrapper::createxml $xmldata]
 	    if {[catch {eval $opts(-transportsend) {$xml}} err]} {
 		disconnect $jlibname
-		uplevel #0 $lib(clientcmd) $jlibname {networkerror} -body \
+		uplevel #0 $lib(clientcmd) $jlibname "networkerror" -body \
 		  {Network error when responding}
 	    }
 	}
@@ -1126,7 +1129,7 @@ proc jlib::xmlerror {jlibname args} {
     Debug 3 "jlib::xmlerror jlibname=$jlibname, args='$args'"
     
     eval $opts(-transportreset)
-    uplevel #0 $lib(clientcmd) [list $jlibname {xmlerror} -errormsg $args]
+    uplevel #0 $lib(clientcmd) [list $jlibname xmlerror -errormsg $args]
     reset $jlibname
 }
 
@@ -1309,7 +1312,7 @@ proc jlib::parse_roster_set {jlibname jid cmd groups name type thequery} {
     if {[string equal $type "error"]} {
 	
 	# We've got an error reply.
-	uplevel #0 "$cmd [list $jlibname {error}]"
+	uplevel #0 $cmd [list $jlibname error]
 	return
     }
 }
@@ -1333,7 +1336,7 @@ proc jlib::parse_roster_remove {jlibname jid cmd type thequery} {
     Debug 3 "jlib::parse_roster_remove jid=$jid, cmd=$cmd, type=$type,"
     Debug 3 "   thequery=$thequery"
     if {[string equal $type "error"]} {
-	uplevel #0 "$cmd [list $jlibname error]"
+	uplevel #0 $cmd [list $jlibname error]
     }
 }
 
@@ -2012,7 +2015,7 @@ proc jlib::parse_agent_get {jlibname jid cmd type subiq} {
     Debug 3 "jlib::parse_agent_get jid=$jid, cmd=$cmd, type=$type, subiq=$subiq"
 
     if {[string equal $type "error"]} {
-	uplevel #0 "$cmd [list $jlibname error $subiq]"
+	uplevel #0 $cmd [list $jlibname error $subiq]
 	return
     } 
      
@@ -2027,7 +2030,7 @@ proc jlib::parse_agent_get {jlibname jid cmd type subiq} {
 	    [namespace current]::registergcprotocol $jlibname $jid "gc-1.0"
 	}
     }    
-    uplevel #0 "$cmd [list $jlibname ok $subiq]"
+    uplevel #0 $cmd [list $jlibname ok $subiq]
 }
 
 proc jlib::parse_agents_get {jlibname jid cmd type subiq} {
@@ -2038,7 +2041,7 @@ proc jlib::parse_agents_get {jlibname jid cmd type subiq} {
     Debug 3 "jlib::parse_agents_get jid=$jid, cmd=$cmd, type=$type, subiq=$subiq"
 
     if {[string equal $type "error"]} {
-	uplevel #0 "$cmd [list $jlibname error $subiq]"
+	uplevel #0 $cmd [list $jlibname error $subiq]
 	return
     } 
 
@@ -2071,7 +2074,7 @@ proc jlib::parse_agents_get {jlibname jid cmd type subiq} {
 	set agent($jidAgent,parent) $jid
 	lappend agent($jid,childs) $jidAgent	
     }
-    uplevel #0 "$cmd [list $jlibname ok $subiq]"
+    uplevel #0 $cmd [list $jlibname ok $subiq]
 }
 
 # jlib::getagent --
@@ -2484,8 +2487,8 @@ proc jlib::schedule_keepalive {jlibname} {
     if {$opts(-keepalivesecs) && $lib(isinstream)} {
 	if {[catch {puts $lib(sock) "\n"} err]} {
 	    disconnect $jlibname
-	    uplevel #0 "$lib(clientcmd) $jlibname networkerror -body \
-	      {Network was disconnected}"
+	    uplevel #0 $lib(clientcmd) $jlibname networkerror -body \
+	      "Network was disconnected"
 	    return
 	}
 	set locals(aliveid) [after [expr 1000 * $opts(-keepalivesecs)] \
@@ -2532,15 +2535,15 @@ proc jlib::auto_away_cmd {jlibname what} {
     
     switch -- $what {
 	away {
-	    send_presence $jlibname -type "available" -show {away}  \
+	    send_presence $jlibname -type "available" -show "away"  \
 	      -status $opts(-awaymsg)
 	}
 	xaway {
-	    send_presence $jlibname -type "available" -show {xa}  \
+	    send_presence $jlibname -type "available" -show "xa"  \
 	      -status $opts(-xawaymsg)
 	}
     }        
-    uplevel #0 "$lib(clientcmd) [list $jlibname $what]"
+    uplevel #0 $lib(clientcmd) [list $jlibname $what]
 }
 
 proc jlib::setdebug {args} {

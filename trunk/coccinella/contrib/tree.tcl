@@ -25,7 +25,7 @@
 # 
 # Copyright (C) 2002-2003 Mats Bengtsson
 # 
-# $Id: tree.tcl,v 1.3 2003-05-18 13:20:20 matben Exp $
+# $Id: tree.tcl,v 1.4 2003-07-05 13:37:54 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -1085,7 +1085,8 @@ proc ::tree::DelItem {w v args} {
 	::tree::DfltConfig $w {}
     } else {
 	foreach c $treestate($v:children) {
-	    catch {DelItem $w [eval "list $v \$c"]}
+	    #catch {DelItem $w [eval "list $v \$c"]}
+	    catch {DelItem $w [concat $v [list $c]]}
 	}
 	if {$opts(-childsonly) == 0} {
 	    unset treestate($v:open)

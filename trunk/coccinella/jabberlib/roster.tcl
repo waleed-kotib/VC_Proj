@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.8 2003-06-07 12:46:36 matben Exp $
+# $Id: roster.tcl,v 1.9 2003-07-05 13:37:54 matben Exp $
 # 
 # Note that every jid in the rosterArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -51,7 +51,7 @@
 #      roster - an object for roster and presence information.
 #      
 #   SYNOPSIS
-#      roster::roster rostName clientCommand
+#      roster::roster clientCommand
 #      
 #   OPTIONS
 #      none
@@ -68,7 +68,7 @@
 #      rostName gethighestresource jid
 #      rostName getrosteritem jid
 #      rostName getsubscription jid
-#      rostName getusers
+#      rostName getusers ?-type available|unavailable?
 #      rostName getx jid xmlns
 #      rostName isavailable jid
 #      rostName removeitem jid
@@ -106,6 +106,8 @@
 #                changed setpresence arguments
 #       1.0b2    changed storage of x elements, added getx command.
 #       030602   added clearpresence command.
+#       030702   added -type option to getusers command.
+#       030703   removed rostName from roster::roster
 
 package provide roster 1.0
 
@@ -115,6 +117,7 @@ namespace eval roster {
     
     # Globals same for all instances of this roster.
     set rostGlobals(debug) 0
+    set rostGlobals(uid) 0
     
     # List of all rosterArr element sub entries. First the actual roster,
     # with 'rosterArr($jid,...)'
@@ -130,21 +133,18 @@ namespace eval roster {
 #       This creates a new instance of a roster.
 #       
 # Arguments:
-#       rostName:   the name of this roster instance
 #       clientCmd:  callback procedure when internals of roster or
 #                   presence changes.
 #       args:            
 #       
 # Results:
-#       rostName
+#       rostName which is the command for this instance of the roster
   
-proc roster::roster {rostName clientCmd args} {
-    
-    # Check that we may have a command [rostName].
-    if {[llength [info commands $rostName]] > 0} {
-	error {Command is already in use}   \
-	  "\"$rostName\" command is already in use"
-    }
+proc roster::roster {clientCmd args} {
+    variable rostGlobals
+
+    # Generate unique command token for this roster instance.
+    set rostName rost[incr rostGlobals(uid)]
       
     # Instance specific namespace.
     namespace eval [namespace current]::${rostName} {
@@ -161,13 +161,11 @@ proc roster::roster {rostName clientCmd args} {
     set rosterArr(groups) {}
     set options(cmd) $clientCmd
     
-    # Create the actual roster instance procedure. 'rostName' is interpreted in
-    # the global namespace.
-    # Perhaps need to check if 'rostName' is already a fully qualified name?
-    proc ::${rostName} {cmd args}   \
+    # Create the actual roster instance procedure.
+    proc [namespace current]::${rostName} {cmd args}   \
       "eval roster::CommandProc {$rostName} \$cmd \$args"
-    
-    return $rostName
+
+    return [namespace current]::${rostName}
 }
 
 # roster::CommandProc --
@@ -505,14 +503,51 @@ proc roster::getrosteritem {rostName jid} {
 #
 # Arguments:
 #       rostName:   the instance of this roster.
+#       args:       -type available|unavailable
 #       
 # Results:
-#       list of all jid's.
+#       list of all 2-tier jid's in roster
 
-proc roster::getusers {rostName} {
+proc roster::getusers {rostName args} {
     upvar [namespace current]::${rostName}::rosterArr rosterArr
+    upvar [namespace current]::${rostName}::presArr presArr
         
-    return $rosterArr(users)
+    set answer $rosterArr(users)
+    foreach {key value} $args {
+	switch -- $key {
+	    -type {
+		
+		# Loop through all jid2 in roster and see if any available
+		set answer {}
+		foreach jid2 $rosterArr(users) {
+		    set isavailable 0
+		    if {[info exists presArr($jid2,res)]} {
+			foreach res $presArr($jid2,res) {
+			    set jid3 $jid2/$res
+			    if {[info exists presArr($jid3,type)] && \
+			      [string equal $presArr($jid3,type) "available"]} {
+				set isavailable 1
+				break
+			    }
+			}
+		    }
+		    switch -- $value {
+			available {
+			    if {$isavailable} {
+				lappend answer $jid2
+			    }
+			}
+			unavailable {
+			    if {!$isavailable} {
+				lappend answer $jid2
+			    }
+			}
+		    }
+		}
+	    }
+	}
+    }
+    return $answer
 }
 
 # roster::getpresence --

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.12 2003-06-07 12:46:36 matben Exp $
+# $Id: UI.tcl,v 1.13 2003-07-05 13:37:54 matben Exp $
 
 # LabeledFrame --
 #
@@ -22,6 +22,8 @@
 #       
 # Results:
 #       frame container created
+
+package require entrycomp
 
 proc LabeledFrame {wpath txt args} {
     global  sysFont
@@ -174,7 +176,7 @@ proc ::UI::Init {} {
       -file [file join $this(path) images igelpiga.gif]]
     set icons(brokenImage) [image create photo -format gif  \
       -file [file join $this(path) images brokenImage.gif]]
-    foreach name {connect save open import send print stop} {
+    foreach name {connect save open import send print stop inbox inboxLett} {
 	set icons(bt$name) [image create photo bt$name -format gif  \
 	  -file [file join $this(path) images ${name}.gif]]
 	set icons(bt${name}dis) [image create photo bt${name}dis -format gif \
@@ -572,7 +574,7 @@ proc ::UI::InitMenuDefs { } {
 	{separator}
 	{command     mSetupAssistant {
 	    package require SetupAss
-	    ::SetupAss::SetupAss .setupass}                               normal {}}
+	    ::Jabber::SetupAss::SetupAss .setupass}                       normal {}}
 	{command     mRemoveAccount {::Jabber::Register::Remove}          disabled {}}	
 	{separator}
 	{command     mErrorLog      {::Jabber::ErrorLogDlg .jerrdlg}      normal   {}}
@@ -2391,6 +2393,7 @@ proc ::UI::NewButton {wtop name txt image imageDis cmd args} {
     set locals($name,image) $image
     set locals($name,imageDis) $imageDis
     set locals($name,cmd) $cmd
+    set locals($name,state) normal
 
     ::UI::SetShortButtonBinds $wtop $name
     if {[llength $args]} {
@@ -2440,7 +2443,7 @@ proc ::UI::ButtonConfigure {wtop name args} {
 		::UI::SetShortButtonBinds $wtop $name
 	    }
 	    -state {
-		if {[string equal $value normal]} {
+		if {[string equal $value "normal"]} {
 		    $wlab configure -image $locals($name,image)
 		    $can itemconfigure $idtxt -fill blue
 		    ::UI::SetShortButtonBinds $wtop $name
@@ -2454,6 +2457,19 @@ proc ::UI::ButtonConfigure {wtop name args} {
 		    $can bind $idtxt <Enter> {}
 		    $can bind $idtxt <Leave> {}
 		    $can bind $idtxt <Button-1> {}
+		}
+		set locals($name,state) $value
+	    }
+	    -image {
+		set locals($name,image) $value
+		if {[string equal $locals($name,state) "normal"]} {
+		    $wlab configure -image $value
+		}
+	    }
+	    -imagedis {
+		set locals($name,imageDis) $value
+		if {[string equal $locals($name,state) "disabled"]} {
+		    $wlab configure -image $value
 		}
 	    }
 	}
@@ -3520,6 +3536,7 @@ proc ::UI::BuildCommHead {wtop type args} {
 proc ::UI::BuildJabberEntry {wtop args} {
     global  prefs sysFont
     
+    upvar ::Jabber::jstate jstate
     upvar ::${wtop}::wapp wapp
     
     Debug 2 "::UI::BuildJabberEntry args='$args'"
@@ -3536,8 +3553,9 @@ proc ::UI::BuildJabberEntry {wtop args} {
     set wtopReal $wapp(toplevel)
     
     set n 1
+    set jidlist [$jstate(roster) getusers]
     entry $wcomm.ad$n -width 16 -relief sunken -bg $prefs(bgColGeneral)
-    entry $wcomm.us$n -width 22 -relief sunken -bg white
+    ::entrycomp::entrycomp $wcomm.us$n $jidlist -width 22 -relief sunken -bg white
     if {[info exists argsArr(-servervariable)]} {
 	$wcomm.ad$n configure -textvariable $argsArr(-servervariable)
     }

@@ -1,6 +1,6 @@
 #  Copyright (c) 2002  Mats Bengtsson
 #
-# $Id: fontselection.tcl,v 1.1.1.1 2002-12-08 10:55:14 matben Exp $
+# $Id: fontselection.tcl,v 1.2 2003-07-05 13:37:54 matben Exp $
 
 package require combobox
 
@@ -34,13 +34,12 @@ proc ::fontselection::fontselection {w args} {
     variable weight
     variable allFonts
     
-    #puts "::fontselection::fontselection args='$args'"
     if {[winfo exists $w]} {
 	return
     }
     toplevel $w
-    if {[string equal $tcl_platform(platform) {macintosh}]} {
-	unsupported1 style $w documentProc
+    if {[string equal $tcl_platform(platform) "macintosh"]} {
+	eval $::macWindowStyle $w documentProc
     }
     
     wm title $w {Select Font}
@@ -146,14 +145,13 @@ proc ::fontselection::fontselection {w args} {
     }
 }
 
-proc ::fontselection::TraceSize {varName key op} {
-    
+proc ::fontselection::TraceSize {varName key op} {   
     variable wlb
+    
     Select $wlb size
 }
 
 proc ::fontselection::Select {w what} {
-
     variable wcan
     variable wlb
     variable font
@@ -172,7 +170,6 @@ proc ::fontselection::Select {w what} {
 }
 		
 proc ::fontselection::SetDefault { } {
-
     variable wlb
     variable opts
     variable font

@@ -7,7 +7,7 @@ package require jlib
 proc MyRosterCallbackProc {rostName what {jid {}} args} {
     puts "--roster-> what=$what, jid=$jid, args='$args'"
 }
-set myRoster [roster::roster rost0 MyRosterCallbackProc]
+set myRoster [roster::roster MyRosterCallbackProc]
 
 # Browse stuff...
 proc MyBrowseCallbackProc {browseName what jid xmllist} {
@@ -16,7 +16,7 @@ proc MyBrowseCallbackProc {browseName what jid xmllist} {
 proc MyBrowseErrorProc {browseName what jid errlist} {
     puts "--browse-(error)-> what=$what, jid=$jid, errlist='$errlist'"
 }
-set myBrowser [browse::browse browse0 MyBrowseCallbackProc]
+set myBrowser [browse::browse MyBrowseCallbackProc]
 
 # The jabberlib stuff...
 proc MyClientProc {jlibName cmd args} {
@@ -60,7 +60,7 @@ proc GenericIQProc {jlibName type theQuery} {
 }
 
 # Make an instance of jabberlib and fill in our roster object.
-set theJlib [jlib::new jlib0 $myRoster $myBrowser MyClientProc  \
+set theJlib [jlib::new $myRoster $myBrowser MyClientProc  \
   -iqcommand          MyIqCB  \
   -messagecommand     MyMsgCB \
   -presencecommand    MyPresCB]

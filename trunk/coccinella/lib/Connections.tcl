@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Connections.tcl,v 1.2 2003-05-18 13:20:21 matben Exp $
+# $Id: Connections.tcl,v 1.3 2003-07-05 13:37:54 matben Exp $
 
 package provide Connections 1.0
 
@@ -447,15 +447,17 @@ proc ::OpenConnection::SetIpArrays {nameOrIP sock remoteServPort} {
     
     # Sometimes the DoStartServer just gives this(ipnum)=0.0.0.0 ; fix this here.
     if {!$state(connectedOnce) &&  \
-      (($this(ipnum) == "0.0.0.0") || ($this(ipnum) == $internalIPnum))} {
+      ([string equal $this(ipnum) "0.0.0.0"] ||  \
+      [string equal $this(ipnum) $internalIPnum] ||  \
+      [string match "192.168.*" $this(ipnum)])} {
 	if {[catch {fconfigure $sock -sockname} sockname]} {
 	    tk_messageBox -icon error -type ok -message \
 	      [FormatTextForMessageBox "Something went wrong: $sockname"]
 	    return 0
 	}
 	if {[lindex $sockname 0] != "0.0.0.0"} {
-	    set thisIPnum [lindex $sockname 0]
 	    set this(ipnum) [lindex $sockname 0]
+	    Debug 2 "\tSetting this(ipnum) = $this(ipnum), sockname=$sockname"
 	}
 	set state(connectedOnce) 1
     }

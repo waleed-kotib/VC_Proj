@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.16 2003-06-15 12:40:13 matben Exp $
+# $Id: Jabber.tcl,v 1.17 2003-07-05 13:37:54 matben Exp $
 #
 #  The $address is an ip name or number.
 #
@@ -402,6 +402,9 @@ proc ::Jabber::FactoryDefaults { } {
     # The User Info of servers.    
     set jserver(this) ""
     
+    #
+    set jprefs(urlServersList) "http://www.jabber.org/servers.php"
+    
     # New... Profiles
     set jserver(profile)  \
       {jabber.org {jabber.org myUsername myPassword home}}
@@ -458,10 +461,10 @@ proc ::Jabber::Init { } {
     variable jprefs
     
     # Make the roster object.
-    set jstate(roster) [::roster::roster rost0 ::Jabber::Roster::PushProc]
+    set jstate(roster) [::roster::roster ::Jabber::Roster::PushProc]
     
     # Make the browse object.
-    set jstate(browse) [::browse::browse browse0 ::Jabber::Browse::Callback]
+    set jstate(browse) [::browse::browse ::Jabber::Browse::Callback]
     
     # Check if we need to set any auto away options.
     set opts {}
@@ -477,7 +480,7 @@ proc ::Jabber::Init { } {
       -presencecommand ::Jabber::PresenceCallback
 
     # Make an instance of jabberlib and fill in our roster object.
-    set jstate(jlib) [eval {::jlib::new jlib0 $jstate(roster) $jstate(browse) \
+    set jstate(jlib) [eval {::jlib::new $jstate(roster) $jstate(browse) \
       ::Jabber::ClientProc} $opts]
     
     # Set the priority order of groupchat protocols.
@@ -986,6 +989,22 @@ proc ::Jabber::ClientProc {jlibName what args} {
 proc ::Jabber::IsConnected { } {
     variable jserver
     return [expr [string length $jserver(this)] == 0 ? 0 : 1]
+}
+
+# Jabber::InvokeRosterCmd, InvokeBrowseCmd --
+# 
+#       Access functions for invoking these commands from the outside.
+
+proc ::Jabber::InvokeRosterCmd {args}  {
+    variable jstate
+    
+    eval {$jstate(roster)} $args
+}
+
+proc ::Jabber::InvokeBrowseCmd {args}  {
+    variable jstate
+    
+    eval {$jstate(browse)} $args
 }
 
 # Jabber::DebugCmd --
@@ -2885,6 +2904,8 @@ proc ::Jabber::UI::Build {w} {
     ::UI::InitShortcutButtonPad $w $frtop 50
     ::UI::NewButton $w connect Connect $icons(btconnect) $icons(btconnectdis)  \
       [list ::Jabber::Login::Login $wDlgs(jlogin)]
+    ::UI::NewButton $w inbox Inbox $icons(btinbox) $icons(btinboxdis)  \
+      [list ::Jabber::MailBox::Show $wDlgs(jinbox) -visible 1]
     ::UI::NewButton $w newuser "New User" $icons(btnewuser) $icons(btnewuserdis)  \
       [list ::Jabber::Roster::NewOrEditItem $wDlgs(jrostnewedit) new] \
       -state disabled
@@ -3032,6 +3053,26 @@ proc ::Jabber::UI::SetStatusMessage {msg} {
     variable jwapp
 
     $jwapp(statmess) itemconfigure stattxt -text $msg
+}
+
+# Jabber::UI::MailBoxState --
+# 
+#       Sets icon to display empty|nonempty inbox state.
+
+proc ::Jabber::UI::MailBoxState {mailboxstate} {
+    variable jwapp    
+    upvar ::UI::icons icons
+    
+    set w $jwapp(wtopRost)
+    
+    switch -- $mailboxstate {
+	empty {
+	    ::UI::ButtonConfigure $w inbox -image $icons(btinbox)
+	}
+	nonempty {
+	    ::UI::ButtonConfigure $w inbox -image $icons(btinboxLett)
+	}
+    }
 }
 
 # Jabber::UI::WhenSetStatus --
@@ -3686,7 +3727,7 @@ proc ::Jabber::Register::ResponseProc {jlibName type theQuery} {
     # Disconnect. This should reset both wrapper and XML parser!
     # Beware: we are in the middle of a callback from the xml parser,
     # and need to be sure to exit from it before resetting!
-    after idle $jlibName disconnect
+    after idle $jstate(jlib) disconnect
     set finished 1
     destroy $topw
 }
@@ -4769,7 +4810,7 @@ proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
     ::Jabber::UI::FixUIWhen "connectfin"
     
     # Login was succesful. Get my roster, and set presence.
-    $jlibName roster_get ::Jabber::Roster::PushProc
+    $jstate(jlib) roster_get ::Jabber::Roster::PushProc
     if {$invisible} {
 	set jstate(status) "invisible"
 	::Jabber::SetStatus invisible
@@ -4791,7 +4832,7 @@ proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
     
     # Check for autoupdates? ABONDENED!!!!
     if {0 && $jprefs(autoupdateCheck) && $jprefs(autoupdateShow,$prefs(fullVers))} {
-	$jlibName send_presence -to  \
+	$jstate(jlib) send_presence -to  \
 	  $jprefs(serialno)@update.jabber.org/$prefs(fullVers)
     }
     

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.9 2003-06-07 12:46:36 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.10 2003-07-05 13:37:54 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -449,10 +449,11 @@ proc ::PreferencesUtils::SetUserPreferences { } {
 	  [list ::Jabber::jprefs(block,list)       jprefs_block_list        $::Jabber::jprefs(block,list)    userDefault] \
 	  [list ::Jabber::jprefs(speakMsg)         jprefs_speakMsg          $::Jabber::jprefs(speakMsg)]  \
 	  [list ::Jabber::jprefs(speakChat)        jprefs_speakChat         $::Jabber::jprefs(speakChat)]  \
-	  [list ::Jabber::jprefs(snd,newmsg)       jprefs_snd_newmsg        $::Jabber::jprefs(snd,newmsg)]  \
 	  [list ::Jabber::jprefs(snd,online)       jprefs_snd_online        $::Jabber::jprefs(snd,online)]  \
 	  [list ::Jabber::jprefs(snd,offline)      jprefs_snd_offline       $::Jabber::jprefs(snd,offline)]  \
 	  [list ::Jabber::jprefs(snd,statchange)   jprefs_snd_statchange    $::Jabber::jprefs(snd,statchange)]  \
+	  [list ::Jabber::jprefs(snd,newmsg)       jprefs_snd_newmsg        $::Jabber::jprefs(snd,newmsg)]  \
+	  [list ::Jabber::jprefs(snd,connected)    jprefs_snd_connected     $::Jabber::jprefs(snd,connected)]  \
 	  [list ::Jabber::jprefs(agentsOrBrowse)   jprefs_agentsOrBrowse    $::Jabber::jprefs(agentsOrBrowse)]  \
 	  [list ::Jabber::jprefs(agentsServers)    jprefs_agentsServers     $::Jabber::jprefs(agentsServers)]  \
 	  [list ::Jabber::jprefs(browseServers)    jprefs_browseServers     $::Jabber::jprefs(browseServers)]  \

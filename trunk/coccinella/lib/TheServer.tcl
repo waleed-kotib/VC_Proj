@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: TheServer.tcl,v 1.6 2003-05-18 13:20:22 matben Exp $
+# $Id: TheServer.tcl,v 1.7 2003-07-05 13:37:54 matben Exp $
     
 # DoStartServer ---
 #
@@ -18,7 +18,7 @@
 #       Therefore 'after idle'.(?)
 
 proc DoStartServer {thisServPort} {
-    global  prefs state listenServSocket this thisIPnum
+    global  prefs state listenServSocket this
     
     set res "ok"
     
@@ -40,7 +40,6 @@ proc DoStartServer {thisServPort} {
 	    # Sometimes this gives 0.0.0.0, why I don't know.
 	    set sockname [fconfigure $sock -sockname]
 	    if {[lindex $sockname 0] != "0.0.0.0"} {
-		set thisIPnum [lindex $sockname 0]
 		set this(ipnum) [lindex $sockname 0]
 	    }
 	}
@@ -78,7 +77,7 @@ proc DoStopServer { } {
 #       socket event handler set up.
 
 proc SetupChannel {channel ip port} {
-    global  ipNumTo ipName2Num this thisIPnum prefs
+    global  ipNumTo ipName2Num this prefs
     
     # This is the important code that sets up the server event handler.
     fileevent $channel readable [list HandleClientRequest $channel $ip $port]
@@ -119,7 +118,6 @@ proc SetupChannel {channel ip port} {
 
     # Sometimes the DoStartServer just gives this(ipnum)=0.0.0.0 ; fix this here.
     if {[string equal $this(ipnum) "0.0.0.0"]} {
-	set thisIPnum [lindex $sockname 0]
 	set this(ipnum) [lindex $sockname 0]
     }
     

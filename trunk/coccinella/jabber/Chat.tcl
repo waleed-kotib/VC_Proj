@@ -3,10 +3,11 @@
 #      This file is part of the whiteboard application. 
 #      It implements chat type of UI for jabber.
 #      
-#  Copyright (c) 2001-2002  Mats Bengtsson
+#  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.7 2003-06-01 10:26:57 matben Exp $
+# $Id: Chat.tcl,v 1.8 2003-07-05 13:37:54 matben Exp $
 
+package require entrycomp
 package provide Chat 1.0
 
 namespace eval ::Jabber::Chat:: {
@@ -58,8 +59,9 @@ proc ::Jabber::Chat::StartThreadDlg {w args} {
     set frmid [frame $w.frall.frmid -borderwidth 0]
     pack $frmid -side top -fill both -expand 1
     
+    set jidlist [$jstate(roster) getusers -type available]
     label $frmid.luser -text "Jabber user:" -font $sysFont(sb) -anchor e
-    entry $frmid.euser -width 26    \
+    ::entrycomp::entrycomp $frmid.euser $jidlist -width 26    \
       -textvariable [namespace current]::user
     grid $frmid.luser -column 0 -row 1 -sticky e
     grid $frmid.euser -column 1 -row 1 -sticky w
@@ -159,7 +161,7 @@ proc ::Jabber::Chat::GotMsg {body args} {
     } else {
 	
 	# Try to find a reasonable fallback for clients that fail here (Psi).
-	# Find if we have registerd any chat for this jid.
+	# Find if we have registered any chat for this jid.
 	foreach {key val} [array get locals "*,jid"] {
 	    if {$val == $jid2} {
 		if {[regexp {^([^,]+),jid$} $key match threadID]} {

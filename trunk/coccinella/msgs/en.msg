@@ -832,7 +832,7 @@ want to add to the list of services, for instance, "jabber.org".}
 
 }
 
-namespace eval ::SetupAss:: {
+namespace eval ::Jabber::SetupAss:: {
 	::msgcat::mcset en suintro1 	{This is a setup assistant to help you\
 fill in the necessary things that is needed for a new or an existing account on\
 a Jabber server.}

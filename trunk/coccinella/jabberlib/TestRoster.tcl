@@ -23,7 +23,7 @@ proc MyRosterCallbackProc {rostName what {jid {}} args} {
     }
 }
 
-set myRoster [roster::roster matsRost MyRosterCallbackProc]
+set myRoster [roster::roster MyRosterCallbackProc]
 
 # All the "sets". To be made from jabberlib.
 $myRoster setrosteritem matsbe@localhost -name {Mats Bengtsson} -group {hard}

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.8 2003-06-01 10:26:58 matben Exp $
+# $Id: Preferences.tcl,v 1.9 2003-07-05 13:37:54 matben Exp $
  
 package require notebook
 package require tree
@@ -1179,6 +1179,8 @@ proc ::Preferences::Customization::PickFont { } {
     global  sysFont
     
     upvar ::Preferences::tmpJPrefs tmpJPrefs
+    
+    set actual [font actual $sysFont(s)]
 
     set opts [list -defaultfont [lindex $sysFont(s) 0]  \
       -defaultsize [lindex $sysFont(s) 1]  \
