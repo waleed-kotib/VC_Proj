@@ -15,7 +15,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.16 2003-12-12 13:46:44 matben Exp $
+# $Id: Coccinella.tcl,v 1.17 2003-12-12 16:18:40 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -229,6 +229,8 @@ if {[info exists env(TMP)] && [file exists $env(TMP)]} {
 if {![file isdirectory $this(tmpDir)]} {
     file mkdir $this(tmpDir)
 }
+set this(imagePath) [file join $this(path) images]
+set this(resourcedbPath) [file join $this(path) resources]
 
 # Privaria-specific stuff
 if {$privariaFlag} {
@@ -368,6 +370,13 @@ if {1} {
 } else {
     
     # Fill in nonlatin character sets here appropriate for your system.
+}
+
+# Read resource database files in a hierarchical order.
+option readfile [file join $this(resourcedbPath) default.rdb] startupFile
+set f [file join $this(resourcedbPath) $this(platform).rdb]
+if {[file exists $f]} {
+    option readfile $f startupFile
 }
 
 # The message catalog for language customization.
@@ -594,9 +603,6 @@ if {[catch {source [file join $this(path) lib SetFactoryDefaults.tcl]} msg]} {
 }
 
 ::SplashScreen::SetMsg [::msgcat::mc splashprefs]
-
-# Set defaults in the option database for widget classes.
-::PreferencesUtils::SetWidgetDefaultOptions
 
 # Overrule widget option if we have got a resource database file.
 ::PreferencesUtils::ReadOptionDatabase

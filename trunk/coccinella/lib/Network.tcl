@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Network.tcl,v 1.7 2003-12-12 13:46:44 matben Exp $
+# $Id: Network.tcl,v 1.8 2003-12-12 16:18:40 matben Exp $
 
 namespace eval ::Network:: {
     
@@ -52,7 +52,7 @@ proc ::Network::OpenConnection {nameOrIP port cmd args} {
     
     # Try opening socket async.
     if {[catch {eval $socketCmd {-async $nameOrIP $port}} sock]} {
-	uplevel #0 "$cmd [list {} $nameOrIP $port error $sock]"
+	uplevel #0 $cmd [list {} $nameOrIP $port error $sock]
 	return ""
     }
     
