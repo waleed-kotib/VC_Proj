@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: mactabnotebook.tcl,v 1.5 2003-11-06 15:17:51 matben Exp $
+# $Id: mactabnotebook.tcl,v 1.6 2003-11-08 08:52:14 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -80,6 +80,7 @@ proc ::mactabnotebook::Init { } {
 
     variable toDrawPoly
     variable toDrawLine
+    variable toDrawPolyAqua
     variable widgetCommands
     variable widgetGlobals
     variable widgetOptions
@@ -110,30 +111,40 @@ proc ::mactabnotebook::Init { } {
     # List all allowed options with their database names and class names.
     
     array set widgetOptions {
+	-activeforeground    {activeForeground     ActiveForeground    }  \
 	-activetabcolor      {activeTabColor       ActiveTabColor      }  \
+	-activetaboutline    {activeTabOutline     ActiveTabOutline    }  \
+	-background          {background           Background          }  \
 	-borderwidth         {borderWidth          BorderWidth         }  \
+	-foreground          {foreground           Foreground          }  \
 	-margin              {margin               Margin              }  \
 	-relief              {relief               Relief              }  \
 	-style               {style                Style               }  \
 	-tabbackground       {tabBackground        TabBackground       }  \
 	-tabcolor            {tabColor             TabColor            }  \
 	-tabfont             {tabFont              TabFont             }  \
+	-taboutline          {tabOutline           TabOutline          }  \
 	-takefocus           {takeFocus            TakeFocus           }  \
     }
     set notebookOptions {-borderwidth -relief}
-    set tabOptions {-activetabcolor -margin -style \
-      -tabbackground -tabcolor -tabfont -takefocus}
+    set tabOptions {-activeforeground -activetabcolor -activetaboutline \
+      -background -foreground -margin -style \
+      -tabbackground -tabcolor -tabfont -taboutline -takefocus}
   
     # The legal widget commands. These are actually the Notebook commands.
     set widgetCommands {cget configure deletepage displaypage newpage pages}
 
+    option add *MacTabnotebook.activeForeground    black        widgetDefault
     option add *MacTabnotebook.activeTabColor      #efefef      widgetDefault
+    option add *MacTabnotebook.activeTabOutline    black        widgetDefault
+    option add *MacTabnotebook.background          white        widgetDefault
     option add *MacTabnotebook.margin              6            widgetDefault
     option add *MacTabnotebook.style               classic      widgetDefault
     option add *MacTabnotebook.tabBackground       #dedede      widgetDefault
     option add *MacTabnotebook.tabColor            #cecece      widgetDefault
+    option add *MacTabnotebook.tabOutline          gray20       widgetDefault
     option add *Notebook.takeFocus                 0            widgetDefault
-    
+
     # Platform specifics...
     switch -- $this(platform) {
 	unix {
@@ -227,9 +238,10 @@ proc ::mactabnotebook::Init { } {
     #
     # polyogon: {coords col fill tags}
     set toDrawPolyAqua {
-	{0 $yl }
+	{-2 0 -2 $yl $xleft $yl $xleft $yu $xright $yu $xright $yl \
+	  2000 $yl 2000 0}
+	$outline $fill $tags
     }
-    
     
     # This allows us to clean up some things when we go away.
     bind MacTabnotebook <Destroy> [list ::mactabnotebook::DestroyHandler %W]
@@ -689,9 +701,20 @@ proc ::mactabnotebook::BuildAqua {w} {
     $w.tabs delete all
 
     set font $options(-tabfont)
-    set margin $options(-margin)
-    set maxh 0
-    set x 2
+    set outline $options(-taboutline)
+    set fill $options(-tabbackground)
+    array set metricsArr [font metrics $font]
+    set fontHeight $metricsArr(-linespace)
+
+    set x 8
+    set xtext [expr int($x + $fontHeight)]
+    set yl -6
+    set yltext [expr $yl - 2]
+    set yu [expr $yltext - $fontHeight - 2]
+    set height [expr abs($yu - 6)]
+        
+    #{0 0 0 $yl $xleft $yl $xleft $yu $xright $yu $xright $yl 2000 $yl 2000 0}
+    #$outline $fill $tags
 
     foreach name $tnInfo(tabs) {
 	if {[info exists tnInfo($name,-text)]} {
@@ -699,22 +722,28 @@ proc ::mactabnotebook::BuildAqua {w} {
 	} else {
 	    set str $name
 	}
-	set id [$w.tabs create text \
-	  [expr $x + $margin + 2] [expr -0.5 * $margin]  \
+	set id [$w.tabs create text $xtext $yltext  \
 	  -anchor sw -text $str -font $font -tags [list ttxt $name]]
 	
 	set bbox [$w.tabs bbox $id]
 	set wd [expr [lindex $bbox 2] - [lindex $bbox 0]]
 	set ht [expr [lindex $bbox 3] - [lindex $bbox 1]]
-	if {$ht > $maxh} {
-	    set maxh $ht
+	set xleft $x
+	set xright [expr $xtext + $wd + $fontHeight + 4]
+	
+	# Draw tabs.
+	foreach {coords poutline pfill tags} $toDrawPolyAqua {
+	    eval $w.tabs create polygon $coords  \
+	      -fill $pfill -outline $poutline -tags $tags
 	}
-    
-	incr x [expr $wd + 2 * $margin + 3]    
+	
+	
+	set x $xright    
+	set xtext [expr int($x + $fontHeight)]
     }
-    set height [expr $maxh + 2 * $margin]
     $w.tabs move all 0 $height
-    $w.tabs configure -width $x -height [expr $height + 10]
+    $w.tabs raise ttxt
+    $w.tabs configure -width $x -height $height
     
 }
 
