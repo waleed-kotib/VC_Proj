@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.62 2004-09-11 14:21:51 matben Exp $
+# $Id: jabberlib.tcl,v 1.63 2004-09-18 14:43:29 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -377,8 +377,7 @@ proc jlib::init {} {
 	set statics(sasl) 0
     } else {
 	set statics(sasl) 1
-	sasl::client_init -callbacks \
-	  [list [list log [namespace current]::sasl_log]]
+	sasl_init
     }
     set statics(inited) 1
 }

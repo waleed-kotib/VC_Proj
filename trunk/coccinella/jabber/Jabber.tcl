@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.102 2004-09-11 14:21:50 matben Exp $
+# $Id: Jabber.tcl,v 1.103 2004-09-18 14:43:28 matben Exp $
 
 package provide Jabber 1.0
 
@@ -553,7 +553,7 @@ proc ::Jabber::IqCallback {jlibName type args} {
 #
 #       Registered callback proc for <message> elements.
 #       Not all messages may be delivered here; some may be intersected by
-#       the register_message hook, some whiteboard messages for instance.
+#       the 'register_message hook', some whiteboard messages for instance.
 #       
 # Arguments:
 #       type        normal|chat|groupchat
@@ -1175,11 +1175,16 @@ proc ::Jabber::SetStatus {type args} {
     }
     if {!$argsArr(-notype)} {	
 	switch -- $type {
-	    available - invisible - unavailable {
+	    available {
+		# empty
+	    }
+	    invisible - unavailable {
 		lappend presArgs -type $type
 	    }
 	    away - dnd - xa - chat {
-		lappend presArgs -type "available" -show $type
+		# Seems Psi gets confused by this.
+		#lappend presArgs -type "available" -show $type
+		lappend presArgs  -show $type
 	    }
 	}	
     }

@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 1999-2002  Mats Bengtsson
 #  
-# $Id: Splash.tcl,v 1.7 2004-07-09 06:26:06 matben Exp $
+# $Id: Splash.tcl,v 1.8 2004-09-18 14:43:29 matben Exp $
    
 package provide Splash 1.0
 
@@ -57,7 +57,7 @@ proc ::SplashScreen::SplashScreen { } {
     } else {
 	wm transient $w
     }
-    wm title $w [mc {About Coccinella}]
+    wm title $w [mc {About %s} $prefs(theAppName)]
     wm resizable $w 0 0
     set screenW [winfo vrootwidth .]
     set screenH [winfo vrootheight .]

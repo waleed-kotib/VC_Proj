@@ -297,6 +297,7 @@
 ::msgcat::mcset de {About Coccinella}     {Über Coccinella}
 ::msgcat::mcset de {About Whiteboard}     {Über Whiteboard}
 ::msgcat::mcset de {About QuickTimeTcl}   {Über QuickTimeTcl}
+::msgcat::mcset de {About %s}             {Über %s}
 ::msgcat::mcset de {Active <Return>}      {Aktiv <Return>}
 ::msgcat::mcset de {Add New User}         {Neue Person hinzufügen}
 ::msgcat::mcset de {Add Server}           {Server hinzufügen}
@@ -858,8 +859,10 @@ wird über die Benutzereinstellungen begrenzt.}
 ::msgcat::mcset de prefplugctrl  {Sie können jedes dieser Pakete deselektieren,\
 wenn es nicht geladen werden soll. Es ist ein Neustart erforderlich.}
 ::msgcat::mcset de prefchactret  {<Return> im Chat-Dialog immer aktiv}
+::msgcat::mcset en prefchnormal  {Treat normal messages as chat messages}
 ::msgcat::mcset de prefprofname  {Namen des gewünschten Profils eingeben}
 ::msgcat::mcset de prefstabui    {Tab-Oberfläche benutzen}
+::msgcat::mcset en prefsusesasl  {Use SASL authentization method}
 
 
 

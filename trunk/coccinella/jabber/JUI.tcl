@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.50 2004-09-13 09:05:19 matben Exp $
+# $Id: JUI.tcl,v 1.51 2004-09-18 14:43:28 matben Exp $
 
 package provide JUI 1.0
 
@@ -304,7 +304,7 @@ proc ::Jabber::UI::Build {w} {
     
     # Make the notebook pages.
     # Start with the Roster page -----------------------------------------------
-    set ro [$nbframe newpage {Roster} -text [mc Roster]  \
+    set ro [$nbframe newpage {Roster} -text [mc Friends]  \
       -image $iconRoster]    
     pack [::Jabber::Roster::Build $ro.ro] -fill both -expand 1
 

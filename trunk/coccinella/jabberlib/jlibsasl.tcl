@@ -5,15 +5,65 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: jlibsasl.tcl,v 1.3 2004-09-13 09:05:19 matben Exp $
+# $Id: jlibsasl.tcl,v 1.4 2004-09-18 14:43:29 matben Exp $
 
-package require sasl 1.0
+# We need to be flexible here since can have cyrus based sasl or our 
+# own special pure tcl saslmd5.
+
+if {![catch {package require sasl 1.0}]} {
+    set ::_saslpack cyrussasl
+} elseif {![catch {package require saslclient 1.1}]} {
+    set ::_saslpack cyrussasl
+} elseif {![catch {package require saslmd5}]} {
+    set ::_saslpack saslmd5
+} else {
+    return -code error "no sasl package found"
+}
 
 package provide jlibsasl 1.0
 
 
-namespace eval jlib {}
+namespace eval jlib {
 
+    variable cyrussasl 
+    if {$::_saslpack == "cyrussasl"} {
+	set cyrussasl 1
+    } else {
+	set cyrussasl 0
+    }
+    unset ::_saslpack
+}
+
+proc jlib::sasl_init {} {
+    variable cyrussasl 
+    
+    if {$cyrussasl} {
+	sasl::client_init -callbacks \
+	  [list [list log [namespace current]::sasl_log]]
+    } else {
+	# empty
+    }
+}
+
+proc jlib::decode64 {str} {
+    variable cyrussasl 
+
+    if {$cyrussasl} {
+	return [sasl::decode64 $str]
+    } else {
+	return [saslmd5::decode64 $str]
+    }
+}
+
+proc jlib::encode64 {str} {
+    variable cyrussasl 
+
+    if {$cyrussasl} {
+	return [sasl::encode64 $str]
+    } else {
+	return [saslmd5::encode64 $str]
+    }
+}
 
 proc jlib::sasl_new {jlibname} {
     
@@ -60,53 +110,75 @@ proc jlib::auth_sasl_continue {jlibname} {
     upvar ${jlibname}::lib lib
     upvar ${jlibname}::locals locals
     variable xmppns
+    variable cyrussasl 
 
     puts "jlib::auth_sasl_continue"
     
-    foreach id {authname pass getrealm cnonce} {
+    foreach id {authname user pass getrealm} {
 	lappend callbacks [list $id [list [namespace current]::sasl_callback \
 	  $jlibname]]
     }
     
-    set sasltoken [sasl::client_new \
-      -service xmpp -serverFQDN $locals(server) -callbacks $callbacks \
-      -flags success_data]
+    if {$cyrussasl} {
+	set sasltoken [sasl::client_new \
+	  -service xmpp -serverFQDN $locals(server) -callbacks $callbacks \
+	  -flags success_data]
+    } else {
+	set sasltoken [saslmd5::client_new \
+	  -service xmpp -serverFQDN $locals(server) -callbacks $callbacks \
+	  -flags success_data]
+    }
     set lib(sasl,token) $sasltoken
     puts "\t sasl::client_new"
     
-    $sasltoken -operation setprop -property sec_props \
-      -value {min_ssf 0 max_ssf 0 flags noplaintext}
-    puts "\t -operation setprop"
-    puts "\t sasl::info sec_flags=[sasl::info sec_flags]"
-    puts "\t sasl::mechanisms=[sasl::mechanisms]"
+    if {$cyrussasl} {
+	$sasltoken -operation setprop -property sec_props \
+	  -value {min_ssf 0 max_ssf 0 flags {noplaintext}}
+	puts "\t -operation setprop"
+	puts "\t sasl::info sec_flags=[sasl::info sec_flags]"
+	puts "\t sasl::mechanisms=[sasl::mechanisms]"
+    } else {
+	$sasltoken setprop sec_props {min_ssf 0 max_ssf 0 flags {noplaintext}}
+	puts "\t saslmd5::mechanisms=[saslmd5::mechanisms]"
+    }
     
     # Returns a serialized array if succesful.
-    set code [catch {
-	$sasltoken -operation start -mechanisms $locals(features,mechanisms) \
-	  -interact [list [namespace current]::sasl_interact $jlibname]
-    } ans]
-    puts "\t -operation start: code=$code, ans=$ans"
+    if {$cyrussasl} {
+	set code [catch {
+	    $sasltoken -operation start -mechanisms $locals(features,mechanisms) \
+	      -interact [list [namespace current]::sasl_interact $jlibname]
+	} out]
+    } else {
+	set ans [$sasltoken start -mechanisms $locals(features,mechanisms)]
+	set code [lindex $ans 0]
+	set out  [lindex $ans 1]
+    }
+    puts "\t -operation start: code=$code, out=$out"
+    puts $::errorInfo
     
     switch -- $code {
 	0 {	    
 	    # ok
-	    array set ansArr $ans
+	    array set outArr $out
 	    set xmllist [wrapper::createtag auth \
-	      -attrlist [list xmlns $xmppns(sasl) mechanism $ansArr(mechanism)] \
-	      -chdata [sasl::encode64 $ansArr(output)]]
+	      -attrlist [list xmlns $xmppns(sasl) mechanism $outArr(mechanism)] \
+	      -chdata [encode64 $outArr(output)]]
 	    send $jlibname $xmllist
 	}
 	4 {	    
 	    # continue
-	    array set ansArr $ans
+	    array set outArr $out
 	    set xmllist [wrapper::createtag auth \
-	      -attrlist [list xmlns $xmppns(sasl) mechanism $ansArr(mechanism)] \
-	      -chdata [sasl::encode64 $ansArr(output)]]
+	      -attrlist [list xmlns $xmppns(sasl) mechanism $outArr(mechanism)] \
+	      -chdata [encode64 $outArr(output)]]
 	    send $jlibname $xmllist
 	}
 	default {
 	    # This is an error
-	    puts "\t errdetail: [$sasltoken -operation errdetail]"
+	    #puts "\t errdetail: [$sasltoken -operation errdetail]"
+	    
+	    # We should perhaps send an abort element here.
+
 	    uplevel #0 $locals(sasl,cmd) $jlibname [list error [list unknown $::errorCode]]
 	}
     }
@@ -126,22 +198,23 @@ proc jlib::sasl_callback {jlibname data} {
     array set arr $data
     
     switch -- $arr(id) {
-	authname {
+	authname - authzid {
 	    set value [encoding convertto utf-8 $locals(username)]
 	}
-	user {
+	user - username {
 	    set value [encoding convertto utf-8 $locals(myjid2)]
 	}
 	pass {
 	    set value [encoding convertto utf-8 $locals(password)]
 	}
-	getrealm {
+	getrealm - realm {
 	    set value [encoding convertto utf-8 $locals(server)]
 	}
 	default {
 	    set value ""
 	}
     }
+    puts "\t value=$value"
     return $value
 }
 
@@ -160,16 +233,21 @@ proc jlib::sasl_step {jlibname serverin64} {
     upvar ${jlibname}::lib lib
     upvar ${jlibname}::locals locals
     variable xmppns
+    variable cyrussasl
 
     puts "jlib::sasl_step"
-    set serverin [sasl::decode64 $serverin64]
+    set serverin [decode64 $serverin64]
     puts "\t serverin=$serverin"
     
     # Note that 'step' returns the output if succesful, not a serialized array!
-    set code [catch {
-	$lib(sasl,token) -operation step -input $serverin \
-	  -interact [list [namespace current]::sasl_interact $jlibname]
-    } output]
+    if {$cyrussasl} {
+	set code [catch {
+	    $lib(sasl,token) -operation step -input $serverin \
+	      -interact [list [namespace current]::sasl_interact $jlibname]
+	} output]
+    } else {
+	foreach {code output} [$lib(sasl,token) step -input $serverin] {break}
+    }
     puts "\t code=$code"
     puts "\t output=$output"
     
@@ -178,18 +256,18 @@ proc jlib::sasl_step {jlibname serverin64} {
 	    # ok
 	    set xmllist [wrapper::createtag response \
 	      -attrlist [list xmlns $xmppns(sasl)] \
-	      -chdata [sasl::encode64 $output]]
+	      -chdata [encode64 $output]]
 	    send $jlibname $xmllist
 	}
 	4 {	    
 	    # continue
 	    set xmllist [wrapper::createtag response \
 	      -attrlist [list xmlns $xmppns(sasl)] \
-	      -chdata [sasl::encode64 $output]]
+	      -chdata [encode64 $output]]
 	    send $jlibname $xmllist
 	}
 	default {
-	    puts "\t errdetail: [$lib(sasl,token) -operation errdetail]"
+	    #puts "\t errdetail: [$lib(sasl,token) -operation errdetail]"
 	    uplevel #0 $locals(sasl,cmd) $jlibname [list error [list unknown $::errorCode]]
 	}
     }
@@ -198,6 +276,7 @@ proc jlib::sasl_step {jlibname serverin64} {
 proc jlib::sasl_failure {jlibname tag xmllist} {
     
     upvar ${jlibname}::locals locals
+    variable xmppns
 
     puts "jlib::sasl_failure"
     if {[wrapper::getattribute $xmllist xmlns] == $xmppns(sasl)} {
@@ -359,7 +438,7 @@ proc jlib::sasl_getmsg {condition} {
     if {[info exists saslmsg($condition)]} {
 	return $saslmsg($condition)
     } else {
-	return ""
+	return $condition
     }
 }
 

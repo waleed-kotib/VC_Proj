@@ -48,6 +48,7 @@
 ::msgcat::mcset en File
 ::msgcat::mcset en Finish
 ::msgcat::mcset en Finished
+::msgcat::mcset en Friends
 ::msgcat::mcset en Forward
 ::msgcat::mcset en From
 ::msgcat::mcset en General
@@ -294,6 +295,7 @@
 ::msgcat::mcset en {About Coccinella}
 ::msgcat::mcset en {About Whiteboard}
 ::msgcat::mcset en {About QuickTimeTcl}
+::msgcat::mcset en {About %s}
 ::msgcat::mcset en {Active <Return>}
 ::msgcat::mcset en {Add New User}
 ::msgcat::mcset en {Add Server}
@@ -853,8 +855,10 @@ is limited by user's settings below.}
 ::msgcat::mcset en prefplugctrl  {You may unselect any of these packages if\
 you don't want them loaded. You must relaunch for this to take effect.}
 ::msgcat::mcset en prefchactret  {Always use active <Return> in chat dialog}
+::msgcat::mcset en prefchnormal  {Treat normal messages as chat messages}
 ::msgcat::mcset en prefprofname  {Enter desired name of user profile}
 ::msgcat::mcset en prefstabui    {Use tabbed notebook interface}
+::msgcat::mcset en prefsusesasl  {Use SASL authentization method}
 
 
 

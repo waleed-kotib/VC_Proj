@@ -297,6 +297,7 @@
 ::msgcat::mcset nl {About Coccinella}		{Over Coccinella}
 ::msgcat::mcset nl {About Whiteboard}		{Over whiteboard}
 ::msgcat::mcset nl {About QuickTimeTcl}		{Over QuickTimeTcl}
+::msgcat::mcset nl {About %s}                   {Over %s}
 ::msgcat::mcset nl {Active <Return>}		{Actieve <enter>}
 ::msgcat::mcset nl {Add New User}		{Nieuwe gebruiker toevoegen}
 ::msgcat::mcset nl {Add Server}			{Server toevoegen}
@@ -855,8 +856,10 @@ wordt gelimiteerd door de instellingen hieronder.}
 ::msgcat::mcset nl prefplugctrl  {U kan elk pakket deselecteren waarvan u\
 het laden wilt verhinderen. U moet Coccinella herstarten voordat de wijzigingen worden doorgevoerd.}
 ::msgcat::mcset nl prefchactret  {Altijd actieve <enter> in chatvenster gebruiken}
+::msgcat::mcset en prefchnormal  {Treat normal messages as chat messages}
 ::msgcat::mcset nl prefprofname  {Voer de gewenste naam voor het gebruikersprofiel in}
 ::msgcat::mcset nl prefstabui    {Laptopinterface met tabbladen aanzetten}
+::msgcat::mcset en prefsusesasl  {Use SASL authentization method}
 
 
 

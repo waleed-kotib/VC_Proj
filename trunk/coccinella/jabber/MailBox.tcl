@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.51 2004-09-13 09:05:19 matben Exp $
+# $Id: MailBox.tcl,v 1.52 2004-09-18 14:43:28 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -518,6 +518,11 @@ proc ::Jabber::MailBox::GotMsg {bodytxt args} {
     upvar ::Jabber::jprefs jprefs
     
     ::Debug 2 "::Jabber::MailBox::GotMsg args='$args'"
+    
+    # Non whiteboard 'normal' messages treated as chat messages.
+    if {$jprefs(chat,normalAsChat)} {
+	return
+    }
     
     # The inbox should only be read once to be economical.
     if {!$locals(mailboxRead)} {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: streamerror.tcl,v 1.1 2004-09-11 14:18:48 matben Exp $
+# $Id: streamerror.tcl,v 1.2 2004-09-18 14:43:29 matben Exp $
 # 
 
 # The syntax for stream errors is as follows:
@@ -23,7 +23,7 @@ package provide streamerror 1.0
 namespace eval streamerror {
     
     # This maps Defined Conditions to clear text messages.
-    # draft-iietf-xmpp-core23; 4.7.3 Defined Conditions
+    # draft-ietf-xmpp-core23; 4.7.3 Defined Conditions
     
     variable msg
     array set msg {

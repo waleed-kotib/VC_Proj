@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.71 2004-09-02 13:59:38 matben Exp $
+# $Id: Chat.tcl,v 1.72 2004-09-18 14:43:28 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -19,6 +19,7 @@ namespace eval ::Jabber::Chat:: {
     # Add all event hooks.
     ::hooks::add quitAppHook                ::Jabber::Chat::QuitHook
     ::hooks::add newChatMessageHook         ::Jabber::Chat::GotMsg
+    ::hooks::add newMessageHook             ::Jabber::Chat::GotNormalMsg
     ::hooks::add presenceHook               ::Jabber::Chat::PresenceHook
     ::hooks::add closeWindowHook            ::Jabber::Chat::CloseHook
     ::hooks::add closeWindowHook            ::Jabber::Chat::CloseHistoryHook
@@ -244,7 +245,7 @@ proc ::Jabber::Chat::GotMsg {body args} {
     # -from is a 3-tier jid /resource included.
     set jid $argsArr(-from)
     jlib::splitjidex $jid node domain res
-    set jid2 [jlib::joinjid $node $domain ""]
+    set jid2  [jlib::joinjid $node $domain ""]
     set mjid  [jlib::jidmap $jid]
     set mjid2 [jlib::jidmap $jid2]
     
@@ -351,6 +352,22 @@ proc ::Jabber::Chat::GotMsg {body args} {
     eval {::hooks::run displayChatMessageHook $body} $args
 }
 
+# Jabber::Chat::GotNormalMsg --
+# 
+#       Treats a 'normal' message as a chat message.
+
+proc ::Jabber::Chat::GotNormalMsg {body args} {
+    global  prefs
+    upvar ::Jabber::jprefs jprefs
+        
+    # Whiteboard messages are handled elsewhere. A guard:
+    if {$jprefs(chat,normalAsChat) && ($body != "")} {
+	
+	::Debug 2 "::Jabber::Chat::GotNormalMsg args='$args'"
+	eval {::Jabber::Chat::GotMsg $body} $args
+    }
+}
+
 # Jabber::Chat::InsertMessage --
 # 
 #       Puts message in text chat window.
@@ -359,9 +376,9 @@ proc ::Jabber::Chat::InsertMessage {chattoken whom body} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     
-    set w        $chatstate(w)
-    set wtext    $chatstate(wtext)
-    set jid      $chatstate(jid)
+    set w     $chatstate(w)
+    set wtext $chatstate(wtext)
+    set jid   $chatstate(jid)
     set secs  [clock seconds]
     set clockFormat [option get $w clockFormat {}]
     
@@ -1790,7 +1807,8 @@ proc ::Jabber::Chat::BuildHistory {dlgtoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     
-    ::Jabber::Chat::BuildHistoryForJid $chatstate(jid)
+    jlib::splitjid $chatstate(jid) jid2 res
+    ::Jabber::Chat::BuildHistoryForJid $jid2
 }
 
 # Jabber::Chat::BuildHistoryForJid --
@@ -1952,10 +1970,12 @@ proc ::Jabber::Chat::InitPrefsHook { } {
     set jprefs(chatActiveRet) 0
     set jprefs(showMsgNewWin) 1
     set jprefs(inbox2click)   "newwin"
+    set jprefs(chat,normalAsChat) 0
     
     ::PreferencesUtils::Add [list  \
       [list ::Jabber::jprefs(showMsgNewWin) jprefs_showMsgNewWin $jprefs(showMsgNewWin)]  \
       [list ::Jabber::jprefs(inbox2click)   jprefs_inbox2click   $jprefs(inbox2click)]  \
+      [list ::Jabber::jprefs(chat,normalAsChat)   jprefs_chatnormalAsChat   $jprefs(chat,normalAsChat)]  \
       [list ::Jabber::jprefs(chatActiveRet) jprefs_chatActiveRet $jprefs(chatActiveRet)]]    
 }
 
@@ -1974,7 +1994,7 @@ proc ::Jabber::Chat::BuildPrefsPage {wpage} {
     set fontS  [option get . fontSmall {}]    
     set fontSB [option get . fontSmallBold {}]
 
-    foreach key {chatActiveRet showMsgNewWin inbox2click} {
+    foreach key {chatActiveRet showMsgNewWin inbox2click chat,normalAsChat} {
 	set tmpJPrefs($key) $jprefs($key)
     }
     
@@ -1989,6 +2009,8 @@ proc ::Jabber::Chat::BuildPrefsPage {wpage} {
       -variable [namespace current]::tmpJPrefs(chatActiveRet)
     checkbutton $fr.newwin -text " [mc prefcushow]" \
       -variable [namespace current]::tmpJPrefs(showMsgNewWin)
+    checkbutton $fr.normal -text " [mc prefchnormal]"  \
+      -variable [namespace current]::tmpJPrefs(chat,normalAsChat)
     label $fr.lmb2 -text [mc prefcu2clk]
     radiobutton $fr.rb2new -text " [mc prefcuopen]" \
       -value newwin -variable [namespace current]::tmpJPrefs(inbox2click)
@@ -1998,6 +2020,7 @@ proc ::Jabber::Chat::BuildPrefsPage {wpage} {
 
     grid $fr.active -sticky w
     grid $fr.newwin -sticky w
+    grid $fr.normal -sticky w
     grid $fr.lmb2   -sticky w
     grid $fr.rb2new -sticky w
     grid $fr.rb2re  -sticky w

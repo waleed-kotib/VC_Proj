@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.28 2004-09-13 09:05:19 matben Exp $
+# $Id: Profiles.tcl,v 1.29 2004-09-18 14:43:28 matben Exp $
 
 package provide Profiles 1.0
 
@@ -467,7 +467,7 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     if {!$prefs(tls)} {
 	$pageconn.cssl configure -state disabled
     }
-    checkbutton $pageconn.csasl -text " [mc {Use SASL authentization method}]" \
+    checkbutton $pageconn.csasl -text " [mc prefsusesasl]" \
       -variable $token\(sasl)   
     if {![jlib::havesasl]} {
 	$pageconn.csasl configure -state disabled
