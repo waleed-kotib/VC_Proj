@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.16 2004-08-18 12:08:59 matben Exp $
+# $Id: Whiteboard.tcl,v 1.17 2004-08-18 13:46:41 matben Exp $
 
 package require entrycomp
 package require moviecontroller
@@ -2293,7 +2293,8 @@ proc ::WB::GetBasicWhiteboardMinsize {wtop} {
 # Results:
 #       None.
 
-proc ::WB::SetCanvasSize {wtop cw ch} {	
+proc ::WB::SetCanvasSize {wtop cw ch} {
+    global  this
     upvar ::WB::${wtop}::wapp wapp
 
     set w $wtop
@@ -2301,7 +2302,7 @@ proc ::WB::SetCanvasSize {wtop cw ch} {
 	set w [string trimright $wtop "."]
     }
 
-    # Compute new root size from the desired canvas size. Menu???
+    # Compute new root size from the desired canvas size.
     set thick [expr int([$wapp(can) cget -highlightthickness])]
     set widthtot  [expr $cw + [winfo reqwidth $wapp(tool)]]
     set heighttot [expr $ch + \
@@ -2309,6 +2310,17 @@ proc ::WB::SetCanvasSize {wtop cw ch} {
       [winfo reqheight $wapp(frtop)]]
     incr widthtot  [expr [winfo reqwidth $wapp(ysc)] + 4 + $thick]
     incr heighttot [expr [winfo reqheight $wapp(xsc)] + 4 + $thick]
+    
+    # Menu is a bit tricky. Not needed since wm geometry doesn't count it!
+    if {0} {
+	if {![string match "mac*" $this(platform)]} {
+	    # ad hoc !
+	    set wmenu "${w}.#[winfo name $w]#menu"
+	    if {[winfo exists $wmenu]} {
+		incr heighttot [winfo height $wmenu]
+	    }
+	}
+    }
     
     # Make sure not bigger than the screen.
     set wscreen [winfo screenwidth $w]

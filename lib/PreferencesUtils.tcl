@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.35 2004-07-26 12:50:38 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.36 2004-08-18 13:46:41 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -331,10 +331,13 @@ proc ::PreferencesUtils::ParseCommandLineOptions {cargc cargv} {
     }
     
     # Skip anything that does not start with "-". Skip also -psn_...
-    regexp {(-[a-z].+$)} $cargv match optList
+    if {![regexp {(-[a-z].+$)} $cargv match optList]} {
+	return
+    }
     set optList [lsearch -all -not -inline -regexp $optList {-psn_\d*}]
     
     foreach {key value} $optList {
+	
 	switch -glob -- $key {
 	    -debugLevel {
 		set name [string trimleft $key -]
