@@ -1,6 +1,12 @@
 README-plugins
 
+There are two types of registration mechanisms for external code:
+plugins and components.
+
 A plugin imports documents, or some representation of it like an
 icon, with specific mime type into a whiteboard.
 This is where plugins should go. Only experimental so far.
 See Example.tcl for an example.
+
+A component is a general code fragment that can supply any functionality
+to the application. Examples are synthetic speech, screenshots etc.
