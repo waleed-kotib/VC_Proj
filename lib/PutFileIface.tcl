@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: PutFileIface.tcl,v 1.18 2004-03-15 13:26:11 matben Exp $
+# $Id: PutFileIface.tcl,v 1.19 2004-05-08 14:58:46 matben Exp $
 
 package require putfile
 package require uriencode
@@ -26,6 +26,8 @@ namespace eval ::PutFileIface:: {
 proc ::PutFileIface::PutFile {wtop fileName ip optList} {
     global  prefs
     variable uid
+    
+    ::Debug 2 "::PutFileIface::PutFile fileName=$fileName, optList='$optList'"
     
     # This must never fail (application/octet-stream as fallback).
     set mime [::Types::GetMimeTypeForFileName $fileName]
@@ -45,7 +47,12 @@ proc ::PutFileIface::PutFile {wtop fileName ip optList} {
     set putstate(mime)     $mime
     set putstate(ip)       $ip
     set putstate(optlist)  $optList
-    puts "optList=$optList"
+    array set optArr $optList
+    if {[info exists optArr(from:)]} {	
+	set putstate(fromname) $optArr(from:)
+    } else {
+	set putstate(fromname) $ip
+    }
     
     if {[catch {
 	::putfile::put $fileName $ip $prefs(remotePort)  \
@@ -59,12 +66,6 @@ proc ::PutFileIface::PutFile {wtop fileName ip optList} {
 	unset putstate
     } else {
 	set putstate(token) $tok
-	array set optArr $optList
-	if {[info exists optArr(from:)]} {	
-	    set putstate(fromname) $optArr(from:)
-	} else {
-	    set putstate(fromname) $ip
-	}
     }
 }
 
