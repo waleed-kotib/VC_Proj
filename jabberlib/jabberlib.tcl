@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.15 2003-09-13 06:39:25 matben Exp $
+# $Id: jabberlib.tcl,v 1.16 2003-10-22 05:55:14 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -225,7 +225,7 @@ namespace eval jlib {
     # Globals same for all instances of this jlib.
     #    > 1 prints raw xml I/O
     #    > 2 prints a lot more
-    variable debug 0
+    variable debug 2
     
     variable statics
     set statics(presenceTypeExp)  \
@@ -2571,6 +2571,21 @@ proc jlib::auto_away_cmd {jlibname what} {
 	}
     }        
     uplevel #0 $lib(clientcmd) [list $jlibname $what]
+}
+
+# jlib::splitjid --
+# 
+#       Splits a general jid into a list {jid-2-tier resource}
+
+proc jlib::splitjid {jid} {
+    
+    set ind [string last / $jid]
+    if {$ind == -1} {
+	return [list $jid {}]
+    } else {
+	return [list [string range $jid 0 [expr $ind - 1]] \
+	  [string range $jid [expr $ind + 1] end]]
+    }
 }
 
 proc jlib::setdebug {args} {
