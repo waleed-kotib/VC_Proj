@@ -25,7 +25,7 @@
 # 
 # Copyright (C) 2002-2003 Mats Bengtsson
 # 
-# $Id: tree.tcl,v 1.20 2004-02-03 10:16:30 matben Exp $
+# $Id: tree.tcl,v 1.21 2004-02-10 13:11:52 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -56,11 +56,14 @@
 #	-scrollwidth, scrollWidth, ScrollWidth
 #	-selectbackground, selectBackground, SelectBackground
 #	-selectcommand, selectCommand, SelectCommand          tclSelectProc?
+#	-selectdash, selectDash, SelectDash
 #	-selectforeground, selectForeground, SelectForeground
 #	-selectmode, selectMode, SelectMode                   (0|1)
+#	-selectoutline, selectOutline, SelectOutline
 #	-silent, silent, Silent                               (0|1)
 #	-sortorder, sortOrder, SortOrder                      (decreasing|increasing)?
 #	-treecolor, treeColor, TreeColor                      color?
+#	-treedash, treeDash, TreeDash                         dash
 #	-width, width, Width
 #	-xscrollcommand, xScrollCommand, ScrollCommand
 #	-yscrollcommand, yScrollCommand, ScrollCommand
@@ -109,6 +112,7 @@
 #                   use NormList to handle things like {dir [junk]}
 #       031106      added -canvastags and -indention options
 #       031110      added 'find withtag all' 
+#       040210      added -treedash, -selectoutline, -selectdash
 
 package require Tcl 8.4
 
@@ -152,15 +156,18 @@ namespace eval tree {
     set widgetGlobals(closedbmplusmin)   \
       [image create bitmap -data $data -maskdata $maskdata \
       -foreground black -background white]
-    set widgetGlobals(idir) [image create photo -data {
-	R0lGODdhEAAQAPIAAAAAAHh4eLi4uPj4APj4+P///wAAAAAAACwAAAAAEAAQAAADPVi63P4w
-	LkKCtTTnUsXwQqBtAfh910UU4ugGAEucpgnLNY3Gop7folwNOBOeiEYQ0acDpp6pGAFArVqt
-	hQQAO///
+    
+    set widgetGlobals(idir) [image create photo ::tree::idir -data {
+	R0lGODlhEAAQAPMAMf////oG+Pj4+Pj4ALi4uHh4eAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAEALAAAAAAQABAAAAQ+MMhJq70418K5
+	LsQQEgUGiijZeUEhvHD8FkYrpHhI22Mu7i5fDyjoGX+14HGYLAqRtqcuuaqu
+	agGDdsvlBiIAOw==
     }]
-    set widgetGlobals(ifile) [image create photo -data {
-	R0lGODdhEAAQAPIAAAAAAHh4eLi4uPj4+P///wAAAAAAAAAAACwAAAAAEAAQAAADPkixzPOD
-	yADrWE8qC8WN0+BZAmBq1GMOqwigXFXCrGk/cxjjr27fLtout6n9eMIYMTXsFZsogXRKJf6u
-	P0kCADv/
+    set widgetGlobals(ifile) [image create photo ::tree::ifile -data {
+	R0lGODlhEAAQAPMAMf////oG+Pj4+Li4uHh4eAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAEALAAAAAAQABAAAARAMJBJabhYis33
+	zFrHDQKREQIpDkWLoVsryGnxiqt9wW1fbKwbbqQL+WjB3ZAoPP5qwmUyJC3C
+	qq+BdsudOr+XCAA7
     }]
 	
     # The mac look-alike triangles, folder, and generic file icons.
@@ -174,29 +181,13 @@ namespace eval tree {
 	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAEALAAAAAALAAsAAAQiMMgjqw2H3nqE
 	3h3xWaEICgRhjBi6FgMpvDEpwuCBg3sVAQA7
     }]
-    set widgetGlobals(folderim) [image create photo -data {
-	R0lGODdhEAAQANUAAP///+fn/97e/97e3s7O/87Ozs7G/8bG/73G/729/729zr29vbW9/7W1
-	/7W1xrW1vbW1ta21/62t/62t96Wt96Wl96WlpZyc/5SU/5SU94yM74SEhHt753t73nNzc2tr
-	xmtra2NjzmNjxmNjY1patVparVpapVpaWlpSpVJSpVJSnEpKnEpKlEpKjEJChDk5ezk5czEx
-	azExYykxYykpWikpUiEhSiEhQgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACwAAAAAEAAQAAAG
-	n8DBIJVyCI9IYQmmuYiKw5ciaSKQYBxnSqIRSY8oQuBCenEwaO7rmCIQDAKyGXPhwI4qwmGP
-	iJc5H3dCKnsHCAmIDR0xJDFHLHyICQ2KMSuOQpCSk5SLKzKPkgyUDRKeM0ctHRejDRESE540
-	CwUDDzEuq68TsZY0Hha1trgfGRQVnjUnHhBIty4fHZ42IxvCzrghljYeC0nOMjc3IN4DQQA7
-    }]
-    set widgetGlobals(fileim) [image create photo -data {
-	R0lGODdhEAAQAKIAAP///+/v797e3s7OzgAAAAAAAAAAAAAAACwAAAAAEAAQAAADNCi03PKQ
-	hEnngk9WSgbB2hY4mbh9pclF1igtFqvGaePSyoxrcL/rI9kMldMRQ6pjY8l4JAAAOw==
-    }]
-    
-    # Some icons remade with transparency and 16 pixels width.
-    # May be display problems with 8.3.
-    set widgetGlobals(folderim) [image create photo -data {
+    set widgetGlobals(fileim) [image create photo ::tree::fileimmac -data {
 	R0lGODlhEAARAPMAAP///+/v797e3s7OzgAAAAAAAAAAAAAAAAAAAAAAAAAA
 	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAIALAAAAAAQABEAAAQ6UMhJqyQ4a0uC
 	/x5WdeBHDARFlsF2sWX6wuZEdlh723Q9a7oQr9ca5o7CWU8mWNGYThiUWLxo
 	rhlJBAA7
     }]
-    set widgetGlobals(folderim) [image create photo -data {
+    set widgetGlobals(folderim) [image create photo ::tree::folderimmac -data {
 	R0lGODlhEAAQAPcAAP///+fn/97e/97e3s7O/87Ozs7G/8bG/73G/729/729
 	zr29vbW9/7W1/7W1xrW1vbW1ta21/62t/62t96Wt96Wl96WlpZyc/5SU/5SU
 	94yM74SEhHt753t73nNzc2trxmtra2NjzmNjxmNjY1patVparVpapVpaWlpS
@@ -274,11 +265,14 @@ proc ::tree::Init { } {
 	-scrollwidth         {scrollWidth          ScrollWidth         }
 	-selectbackground    {selectBackground     SelectBackground    }
 	-selectcommand       {selectCommand        SelectCommand       }
+	-selectdash          {selectDash           SelectDash          }
 	-selectforeground    {selectForeground     SelectForeground    }
 	-selectmode          {selectMode           SelectMode          }
+	-selectoutline       {selectOutline        SelectOutline       }
 	-silent              {silent               Silent              }
 	-sortorder           {sortOrder            SortOrder           }
 	-treecolor           {treeColor            TreeColor           }
+	-treedash            {treeDash             TreeDash            }
 	-width               {width                Width               }
 	-xscrollcommand      {xScrollCommand       ScrollCommand       }
 	-yscrollcommand      {yScrollCommand       ScrollCommand       }
@@ -312,12 +306,14 @@ proc ::tree::Init { } {
     option add *Tree.pyjamasColor          white           widgetDefault
     option add *Tree.rightClickCommand     {}              widgetDefault
     option add *Tree.scrollWidth           200             widgetDefault
-    option add *Tree.selectBackground      black           widgetDefault
-    option add *Tree.selectForeground      white           widgetDefault
+    #option add *Tree.selectBackground      #9dc9ff           widgetDefault
+    option add *Tree.selectDash            {}              widgetDefault
     option add *Tree.selectMode            1               widgetDefault
+    option add *Tree.selectOutline         {}              widgetDefault
     option add *Tree.silent                0               widgetDefault
     option add *Tree.sortOrder             {}              widgetDefault
     option add *Tree.treeColor             gray50          widgetDefault
+    option add *Tree.treeDash              {}              widgetDefault
     option add *Tree.width                 100             widgetDefault
     option add *Tree.xScrollCommand        {}              widgetDefault
     option add *Tree.yScrollCommand        {}              widgetDefault
@@ -326,21 +322,29 @@ proc ::tree::Init { } {
     switch $tcl_platform(platform) {
 	unix {
 	    if {[tk windowingsystem] == "aqua"} {
+		option add *Tree.selectBackground systemHighlight     widgetDefault
+		option add *Tree.selectForeground systemHighlightText widgetDefault
 		set widgetGlobals(font)             {{Lucida Grande} 11 normal}
 		set widgetGlobals(fontbold)         {{Lucida Grande} 11 bold}
 		set widgetGlobals(fontitalic)       {{Lucida Grande} 11 italic}
 	    } else {
+		option add *Tree.selectBackground black widgetDefault
+		option add *Tree.selectForeground white widgetDefault
 		set widgetGlobals(font)             {Helvetica 10 normal}
 		set widgetGlobals(fontbold)         {Helvetica 10 bold}
 		set widgetGlobals(fontitalic)       {Helvetica 10 italic}
 	    }
 	}
 	windows {
+	    option add *Tree.selectBackground systemHighlight     widgetDefault
+	    option add *Tree.selectForeground systemHighlightText widgetDefault
 	    set widgetGlobals(font)             {Arial 8 normal}
 	    set widgetGlobals(fontbold)         {Arial 8 bold}
 	    set widgetGlobals(fontitalic)       {Arial 8 italic}
 	}
 	macintosh {
+	    option add *Tree.selectBackground systemHighlight     widgetDefault
+	    option add *Tree.selectForeground systemHighlightText widgetDefault
 	    set widgetGlobals(font)             {Geneva 9 normal}
 	    set widgetGlobals(fontbold)         {Geneva 9 bold}
 	    set widgetGlobals(fontitalic)       {Geneva 9 italic}
@@ -1521,6 +1525,7 @@ proc ::tree::BuildLayer {w v in} {
     set start [expr $treestate(y) - 10]
     set y $treestate(y)
     set yline $priv(yline)
+    set yoff [expr $yline/2]
 
     Debug 3 "\tuid=$uid"
     
@@ -1539,11 +1544,12 @@ proc ::tree::BuildLayer {w v in} {
 	    set isDir 1
 	}
 	set y $treestate(y)
+	set treestate($uidc:y) $y
 	
 	# Any background color?
 	if {[string length $treestate($uidc:bg)]} {
-	    $can create rectangle 0 [expr $y - 7] $options(-scrollwidth)  \
-	      [expr $y + 7] -outline {} -fill $treestate($uidc:bg) -tags tbg
+	    $can create rectangle 0 [expr $y - $yoff + 1] $options(-scrollwidth)  \
+	      [expr $y + $yoff] -outline {} -fill $treestate($uidc:bg) -tags tbg
 	}
 	
 	# This is the "row height".
@@ -1551,13 +1557,14 @@ proc ::tree::BuildLayer {w v in} {
 	
 	# Any pyjamas lines?
 	if {[llength $options(-pyjamascolor)] > 0} {
-	    $can create line 0 [expr $y + 8] 4000  \
-	      [expr $y + 8] -fill $options(-pyjamascolor) -tags tpyj	    
+	    $can create line 0 [expr $y + $yoff] 4000  \
+	      [expr $y + $yoff] -fill $options(-pyjamascolor) -tags tpyj	    
 	}
 	
 	# Tree lines?
 	if {$hasTree} {
-	    $can create line $in $y [expr $in + $indention - 4] $y -fill $treeCol -tags ttreeh
+	    $can create line $in $y [expr $in + $indention - 4] $y -fill $treeCol \
+	      -tags ttreeh -dash $options(-treedash)
 	}
 	set icon $treestate($uidc:icon)
 	set text $treestate($uidc:text)
@@ -1616,7 +1623,7 @@ proc ::tree::BuildLayer {w v in} {
     }
     if {$hasTree} {
 	$can create line $in $start $in [expr $y + $yTreeOff]  \
-	  -fill $treeCol -tags ttreev
+	  -fill $treeCol -tags ttreev -dash $options(-treedash)
     }
 }
 
@@ -1699,6 +1706,7 @@ proc ::tree::DrawSelection {w} {
     upvar ::tree::${w}::options options
     upvar ::tree::${w}::treestate treestate
     upvar ::tree::${w}::v2uid v2uid
+    upvar ::tree::${w}::priv priv
     
     Debug 1 "::tree::DrawSelection w=$w"
     
@@ -1734,8 +1742,15 @@ proc ::tree::DrawSelection {w} {
     # Select.
     set bbox [$can bbox $treestate($uid:tag)]
     if {[llength $bbox] == 4} {
-	set id [eval $can create rectangle $bbox -fill $options(-selectbackground) \
-	  {-outline {}}]
+	set yoff [expr $priv(yline)/2]
+	set bbox [list \
+	  [expr [lindex $bbox 0] - 2]  \
+	  [expr $treestate($uid:y) - $yoff]  \
+	  [expr [lindex $bbox 2] + 2]  \
+	  [expr $treestate($uid:y) + $yoff - 1]]
+	
+	set id [eval {$can create rectangle} $bbox {-fill $options(-selectbackground) \
+	  -outline $options(-selectoutline) -dash $options(-selectdash)}]
 	set treestate(selidx) $id
 	$can raise $id tbgim
 	if {[llength [$can find withtag bg]] > 0} {
