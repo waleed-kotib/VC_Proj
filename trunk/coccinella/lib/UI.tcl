@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.67 2004-08-06 07:46:54 matben Exp $
+# $Id: UI.tcl,v 1.68 2004-08-15 06:56:53 matben Exp $
 
 package require entrycomp
 package require alertbox
@@ -98,15 +98,6 @@ proc ::UI::GetIcon {name} {
     } else {
 	return -code error "icon named \"$name\" does not exist"
     }
-}
-
-# UI::AEQuitHandler --
-#
-#       Mac OS X only: callback for the quit Apple Event.
-
-proc ::UI::AEQuitHandler {theAEDesc theReplyAE} {
-    
-    ::UserActions::DoQuit
 }
 
 proc ::UI::GetScreenSize { } {

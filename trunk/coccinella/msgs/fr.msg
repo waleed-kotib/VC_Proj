@@ -11,6 +11,7 @@
 ::msgcat::mcset fr Address		{Adresse}
 ::msgcat::mcset fr Advanced		{Avancé}
 ::msgcat::mcset fr Agents		{Agents}
+#::msgcat::mcset fr Appearence   Appearence
 ::msgcat::mcset fr Apply		{Appliquer}
 ::msgcat::mcset fr Available		{Disponible}
 ::msgcat::mcset fr Away			{Parti}
@@ -151,7 +152,7 @@
 ::msgcat::mcset fr mPreferences		{Préférences}
 ::msgcat::mcset fr mJabber		{Jabber}
 ::msgcat::mcset fr mItems		{Outils}
-::msgcat::mcset fr mLibrary		{Library}
+#::msgcat::mcset fr mLibrary		{Library}
 ::msgcat::mcset fr mInfo		{Infos}
 ::msgcat::mcset fr mAddons		{Add-ons}
 ::msgcat::mcset fr mPlugins		{Plugins}
@@ -174,6 +175,7 @@
 ::msgcat::mcset fr mOpenCanvas		{Ouvrir un dessin}
 ::msgcat::mcset fr mSaveCanvas		{Enregistrer le dessin}
 ::msgcat::mcset fr mSaveAs		{E&nregistrer sous...}
+#::msgcat::mcset fr mSaveAsItem          {Save As Item...}
 ::msgcat::mcset fr mSaveImageAs         {Enregistrer l'&image sous...}
 ::msgcat::mcset fr mPageSetup		{&Propriétés de la page...}
 ::msgcat::mcset fr mPrintCanvas		{Imprimer le dessin}
@@ -233,6 +235,7 @@
 ::msgcat::mcset fr mSendMessage		{Envo&yer un message...}
 ::msgcat::mcset fr mChat		{Discussion}
 ::msgcat::mcset fr mStatus		{Statut}
+#::msgcat::mcset fr mDirStatus           {Directed Status}
 ::msgcat::mcset fr mAvailable		{Disponible}
 ::msgcat::mcset fr mAway		{Parti}
 ::msgcat::mcset fr mDoNotDisturb	{Ne pas déranger}
@@ -260,10 +263,14 @@
 ::msgcat::mcset fr mImageSmaller	{Rétrécir l'image}
 ::msgcat::mcset fr mExportImage		{Exporter l'image...}
 ::msgcat::mcset fr mExportMovie		{Exporter la vidéo...}
+#::msgcat::mcset fr mSyncPlayback	{Sync Playback}
 ::msgcat::mcset fr mColor		{Couleur...}
 ::msgcat::mcset fr mAddSpeechBubble	{Ajouter une bulle}
 ::msgcat::mcset fr mUpdateCheck  	{Voir les mises-à-jour}
 ::msgcat::mcset fr mReloadImage  	{Recharger l'image}
+#::msgcat::mcset fr mCoccinellaHome  	 {Coccinella Home...}
+#::msgcat::mcset fr mComponents 	 {Components...}
+#::msgcat::mcset fr mBugReport  	 {Report Bug...}
 
 
 # Popups
@@ -370,6 +377,7 @@
 ::msgcat::mcset fr {Last name}			{Nom}
 ::msgcat::mcset fr {Launch time}		{Heure de lancement}
 ::msgcat::mcset fr {Local Time}			{Heure locale}
+#::msgcat::mcset fr {Logged out}           {Logged out}
 ::msgcat::mcset fr {Login as invisible}		{Se connecter avec le statut "Invisible"}
 ::msgcat::mcset fr {Mailbox Error}		{Erreur de boîte aux lettres}
 ::msgcat::mcset fr {MIME type}			{Type MIME}
@@ -417,6 +425,7 @@
 ::msgcat::mcset fr {Postal Code}		{Code postal}
 ::msgcat::mcset fr {Preferred Protocol}		{Protocol préféré}
 ::msgcat::mcset fr {Presence Error}		{Erreur de statut}
+#::msgcat::mcset fr {Profile Name}         {Profile Name}
 ::msgcat::mcset fr {Proxy Setup}		{Configuration du proxy}
 ::msgcat::mcset fr {Put File Error}		{Erreur lors de l'insertion du fichier}
 ::msgcat::mcset fr {Put Image/Movie}		{Insérer image/vidéo}
@@ -445,6 +454,7 @@
 ::msgcat::mcset fr {Send Live}			{Envoyer live}
 ::msgcat::mcset fr {Server Info}		{Infos sur le serveur}
 ::msgcat::mcset fr {Service server}		{Service du serveur}
+#::msgcat::mcset fr {Set Directed Presence} {Set Directed Presence}
 ::msgcat::mcset fr {Set New Topic}		{Choisir nouveau sujet}
 ::msgcat::mcset fr {Set Status}			{Choisir statut}
 ::msgcat::mcset fr {Settings Panels}		{Panneau de configuration}
@@ -702,6 +712,13 @@ Vous êtes enregistré auprès de %s : %s.}
 si vous fermez le tableau. Voulez-vous terminer la conversation ?}
 ::msgcat::mcset fr jamesschatoffline            {Cet utilisateur n'est plus en ligne,\
 le message n'est donc pas envoyé.}
+#::msgcat::mcset fr jamessregloginok             {You are now registered and\
+#automatically logged on as "%s"}
+#::msgcat::mcset fr jamessregerrinuse            {The registration failed\
+#because this username is already in use by another user. If this user is you,\
+#try to login instead. Error message: %s}
+#::msgcat::mcset fr jamessregerr                 {The registration failed\
+#with error message: %s}
     
     
 
@@ -824,6 +841,8 @@ est limitée par l'utilisateur grâce aux paramètres ci-dessous : }
 ::msgcat::mcset fr prefplugctrl  {Vous pouvez dé-sélectionner ces paquetages\
 pour ne pas avoir à les charger. Coccinella doit être redémarré pour que les changements soient pris en compte.}
 ::msgcat::mcset fr prefchactret  {Toujours activer <Entrée> dans la boîte de discussion}
+#::msgcat::mcset fr prefprofname  {Enter desired name of user profile}
+#::msgcat::mcset fr prefstabui    {Use tabbed notebook interface}
 
 
 
@@ -895,6 +914,7 @@ que vous voulez ajouter à la liste des services (de la forme jabber.org).}
 	::msgcat::mcset fr jaupdatenewver {La nouvelle version est : %s}
 	::msgcat::mcset fr jaupdateremind {Ne plus me rappeler cela}
 	::msgcat::mcset fr jasettopic   {Mettre un nouveau thème pour ce groupe de discussion}
+#	::msgcat::mcset fr jadirpresmsg {Send directed presence to the user \"%s\".}
 
 
 }

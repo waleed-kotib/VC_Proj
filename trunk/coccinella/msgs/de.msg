@@ -12,6 +12,7 @@
 ::msgcat::mcset de Address	Adresse
 ::msgcat::mcset de Advanced	Erweitert
 ::msgcat::mcset de Agents	Agenten
+#::msgcat::mcset de Appearence   Appearence
 ::msgcat::mcset de Apply	Anwenden
 ::msgcat::mcset de Available	Verfügbar
 ::msgcat::mcset de Away		Weg
@@ -152,7 +153,7 @@
 ::msgcat::mcset de mPreferences		{Einstellungen}
 ::msgcat::mcset de mJabber		{Jabber}
 ::msgcat::mcset de mItems		{Elemente}
-::msgcat::mcset de mLibrary		{Library}
+#::msgcat::mcset de mLibrary		{Library}
 ::msgcat::mcset de mInfo		{Information}
 ::msgcat::mcset de mAddons		{Zusätze}
 ::msgcat::mcset de mPlugins		{Erweiterungen}
@@ -175,6 +176,7 @@
 ::msgcat::mcset de mOpenCanvas		{Zeichenfläche öffnen...}
 ::msgcat::mcset de mSaveCanvas		{Zeichenfläche speichern...}
 ::msgcat::mcset de mSaveAs		{Speichern als...}
+#::msgcat::mcset de mSaveAsItem          {Save As Item...}
 ::msgcat::mcset de mSaveImageAs         {Bild speichern als...}
 ::msgcat::mcset de mPageSetup		{Seiteneinrichtung...}
 ::msgcat::mcset de mPrintCanvas		{Zeichenfläche drucken...}
@@ -234,6 +236,7 @@
 ::msgcat::mcset de mSendMessage		{Nachricht senden...}
 ::msgcat::mcset de mChat		{Chat...}
 ::msgcat::mcset de mStatus		{Status}
+#::msgcat::mcset de mDirStatus           {Directed Status}
 ::msgcat::mcset de mAvailable		{Verfügbar}
 ::msgcat::mcset de mAway		{Weg}
 ::msgcat::mcset de mDoNotDisturb	{Bitte nicht stören}
@@ -261,10 +264,14 @@
 ::msgcat::mcset de mImageSmaller	{Bild kleiner}
 ::msgcat::mcset de mExportImage		{Bild exportieren...}
 ::msgcat::mcset de mExportMovie		{Film exportieren...}
+#::msgcat::mcset de mSyncPlayback	{Sync Playback}
 ::msgcat::mcset de mColor		{Farbe...}
 ::msgcat::mcset de mAddSpeechBubble	{Sprechblase hinzufügen}
 ::msgcat::mcset de mUpdateCheck  	{Aktualisierungsprüfung}
 ::msgcat::mcset de mReloadImage  	{Bild neu laden}
+#::msgcat::mcset de mCoccinellaHome  	 {Coccinella Home...}
+#::msgcat::mcset de mComponents 	 {Components...}
+#::msgcat::mcset de mBugReport  	 {Report Bug...}
 
 
 # Popups
@@ -371,6 +378,7 @@
 ::msgcat::mcset de {Last name}            {Nachname}
 ::msgcat::mcset de {Launch time}          {Startzeit}
 ::msgcat::mcset de {Local Time}           {Lokale Zeit}
+#::msgcat::mcset de {Logged out}           {Logged out}
 ::msgcat::mcset de {Login as invisible}   {als nicht sichtbar anmelden}
 ::msgcat::mcset de {Mailbox Error}        {Postfach-Fehler}
 ::msgcat::mcset de {MIME type}            {MIME-Typ}
@@ -418,6 +426,7 @@
 ::msgcat::mcset de {Postal Code}          {Postleitzahl}
 ::msgcat::mcset de {Preferred Protocol}   {Bevorzugtes Protokoll}
 ::msgcat::mcset de {Presence Error}       {Fehler bei Anwesenheit}
+#::msgcat::mcset de {Profile Name}         {Profile Name}
 ::msgcat::mcset de {Proxy Setup}          {Proxy-Einrichtung}
 ::msgcat::mcset de {Put File Error}       {Fehler bei Datei-Senden}
 ::msgcat::mcset de {Put Image/Movie}      {Bild/Film senden}
@@ -446,6 +455,7 @@
 ::msgcat::mcset de {Send Live}            {direkt senden}
 ::msgcat::mcset de {Server Info}          {Server-Info}
 ::msgcat::mcset de {Service server}       {Service-Server}
+#::msgcat::mcset de {Set Directed Presence} {Set Directed Presence}
 ::msgcat::mcset de {Set New Topic}        {Neues Thema setzen}
 ::msgcat::mcset de {Set Status}           {Status setzen}
 ::msgcat::mcset de {Settings Panels}      {Einrichtungs-Dialog}
@@ -716,6 +726,13 @@ Sie haben eine Anmeldung für %s: %s.}
 sobald diese ZeichenflÃ¤che geschlossen wird. Wollen Sie wirklich den Chat beenden?}
 ::msgcat::mcset de jamesschatoffline            {Diese Person ist nicht mehr angemeldet.\
 Deshalb wird diese Nachricht nicht gesendet.}
+#::msgcat::mcset de jamessregloginok             {You are now registered and\
+#automatically logged on as "%s"}
+#::msgcat::mcset de jamessregerrinuse            {The registration failed\
+#because this username is already in use by another user. If this user is you,\
+#try to login instead. Error message: %s}
+#::msgcat::mcset de jamessregerr                 {The registration failed\
+#with error message: %s}
 
 
 
@@ -830,7 +847,6 @@ erstellte Einträge können nicht editiert werden.}
 ::msgcat::mcset de prefshortwa   {Warnung: Sie haben die Abkürzungen geändert.\
 Sollen sie nicht gesichert werden?}
 
-####    }                       
 ::msgcat::mcset de preffilecache {Der Cache speichert lokale Kopien von Dateien\
 anderer Benutzer, um die Transportzeiten zu reduzieren. Die Größe des Caches\
 wird über die Benutzereinstellungen begrenzt.}
@@ -842,6 +858,8 @@ wird über die Benutzereinstellungen begrenzt.}
 ::msgcat::mcset de prefplugctrl  {Sie können jedes dieser Pakete deselektieren,\
 wenn es nicht geladen werden soll. Es ist ein Neustart erforderlich.}
 ::msgcat::mcset de prefchactret  {<Return> im Chat-Dialog immer aktiv}
+#::msgcat::mcset de prefprofname  {Enter desired name of user profile}
+#::msgcat::mcset de prefstabui    {Use tabbed notebook interface}
 
 
 
@@ -916,6 +934,7 @@ verfügbar.}
 	::msgcat::mcset de jaupdatenewver {Die neue Version ist: %s}
 	::msgcat::mcset de jaupdateremind {Bitte nicht mehr daran erinnern}
 	::msgcat::mcset de jasettopic   {Neues Thema für diesen Gruppen-Chat setzen.}
+#	::msgcat::mcset de jadirpresmsg {Send directed presence to the user \"%s\".}
 
 
 }

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.14 2004-08-13 15:27:26 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.15 2004-08-15 06:56:53 matben Exp $
 
 package require sha1pure
 
@@ -56,11 +56,11 @@ proc ::CanvasUtils::Init { } {
     
     # Incompatible change!!!
     if {$this(ipver) == 4} {
-	set utagpref2 "u[eval {format %02x%02x%02x%02x} [split $this(ipnum) .]]"
+	set utagpref2 "utag:[eval {format %02x%02x%02x%02x} [split $this(ipnum) .]]"
     } else {
 	
 	# Needs to be investigated!
-	set utagpref2 "u[join [split $this(ipnum) :] ""]"
+	set utagpref2 "utag:[join [split $this(ipnum) :] ""]"
     }
     
     # On multiuser platforms (unix) prepend the user name; no spaces allowed.
@@ -342,10 +342,10 @@ proc ::CanvasUtils::GetUtag {c fromWhat {force 0}} {
     variable utagpref2
     
     # Find the 'utag'.
-    set pre_ {[^/ ]+}
+    set pre_ {^[^/: ]+}
     set digits_ {[0-9]+}
     set wild_ {[xX\*]+}
-    set utagpre_ ${wild_}|${utagpref}|${utagpref2}
+    set utagpre_ ^(${wild_}|${utagpref}|${utagpref2})
     
     if {[string equal $fromWhat "current"]} {
         set tags [$c gettags current]
@@ -386,7 +386,7 @@ proc ::CanvasUtils::GetUtagFromCmd {str} {
     set ind [lsearch -exact $str "-tags"]
     if {$ind >= 0} {
 	return [lsearch -inline -regexp [lindex $str [incr ind]]  \
-	  {^[^/ ]+/[0-9]+$}]
+	  {^[^/: ]+/[0-9]+$}]
     } else {  
 	return ""
     }
@@ -394,7 +394,7 @@ proc ::CanvasUtils::GetUtagFromCmd {str} {
 
 proc ::CanvasUtils::GetUtagFromTagList {tags} {
     
-    return [lsearch -inline -regexp $tags {^[^/ ]+/[0-9]+$}]
+    return [lsearch -inline -regexp $tags {^[^/: ]+/[0-9]+$}]
 }
 
 proc ::CanvasUtils::GetUtagFromWindow {win} {
