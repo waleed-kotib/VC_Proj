@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.84 2004-11-23 08:55:22 matben Exp $
+# $Id: GroupChat.tcl,v 1.85 2004-11-27 08:41:20 matben Exp $
 
 package require History
 
@@ -16,10 +16,9 @@ package provide GroupChat 1.0
 
 
 namespace eval ::Jabber::GroupChat:: {
-    global  wDlgs
 
     # Add all event hooks.
-    ::hooks::register quitAppHook             [list ::UI::SaveWinPrefixGeom $wDlgs(jgc)]
+    ::hooks::register quitAppHook             ::Jabber::GroupChat::QuitAppHook
     ::hooks::register quitAppHook             ::Jabber::GroupChat::GetFirstPanePos
     ::hooks::register newGroupChatMessageHook ::Jabber::GroupChat::GotMsg
     ::hooks::register closeWindowHook         ::Jabber::GroupChat::CloseHook
@@ -132,6 +131,12 @@ namespace eval ::Jabber::GroupChat:: {
     set userRoleToStr(none)        [mc None]
     set userRoleToStr(participant) [mc Participants]
     set userRoleToStr(visitor)     [mc Vistors]
+}
+
+proc ::Jabber::GroupChat::QuitAppHook { } {
+    global  wDlgs
+    
+    ::UI::SaveWinPrefixGeom $wDlgs(jgc)
 }
 
 # Jabber::GroupChat::AllConference --

@@ -5,18 +5,18 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.51 2004-11-19 13:10:14 matben Exp $
+# $Id: NewMsg.tcl,v 1.52 2004-11-27 08:41:20 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
 
 
 namespace eval ::Jabber::NewMsg:: {
-    global  wDlgs this
+    global this
 
     # Add all event hooks.
     ::hooks::register closeWindowHook    ::Jabber::NewMsg::CloseHook
-    ::hooks::register quitAppHook [list ::UI::SaveWinPrefixGeom $wDlgs(jsendmsg)]
+    ::hooks::register quitAppHook        ::Jabber::NewMsg::QuitAppHook
 
     # Use option database for customization.
     option add *NewMsg.buttonRowSide        left            widgetDefault
@@ -76,7 +76,6 @@ namespace eval ::Jabber::NewMsg:: {
     set locals(dlguid) 0
     set locals(inited) 0
     set locals(initedaddr) 0
-    set locals(wpopupbase) ._[string range $wDlgs(jsendmsg) 1 end]_trpt
     
     # {subtype popupText entryText}
     variable transportDefs
@@ -428,7 +427,7 @@ $opts(-forwardmessage)"
 }
 
 proc ::Jabber::NewMsg::NewAddrLine {w wfr n} {
-    
+    global  wDlgs
     variable locals
     upvar ::Jabber::jstate jstate
     
@@ -441,6 +440,8 @@ proc ::Jabber::NewMsg::NewAddrLine {w wfr n} {
     set bg3 [option get $wfr entry3Background {}]
     set bg4 [option get $wfr entry4Background {}]
     set bgpop [option get $wfr popupBackground {}]
+    
+    set locals(wpopupbase) ._[string range $wDlgs(jsendmsg) 1 end]_trpt
     
     set jidlist [$jstate(roster) getusers]
     set num $locals($w,num)
@@ -882,6 +883,12 @@ proc ::Jabber::NewMsg::CloseHook {wclose} {
     if {[string match $wDlgs(jsendmsg)* $wclose]} {
 	CloseDlg $wclose
     }   
+}
+
+proc ::Jabber::NewMsg::QuitAppHook { } {
+    global  wDlgs
+    
+    ::UI::SaveWinPrefixGeom $wDlgs(jsendmsg)
 }
 
 proc ::Jabber::NewMsg::CloseDlg {w} {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: P2P.tcl,v 1.17 2004-11-23 12:57:05 matben Exp $
+# $Id: P2P.tcl,v 1.18 2004-11-27 08:41:20 matben Exp $
 
 package provide P2P 1.0
 
@@ -316,7 +316,7 @@ proc ::P2P::BuildCommEntry {wtop ipNum args} {
 	set w [string trimright $wtop .]
     }
 	
-    set size [::UI::ParseWMGeometry $w]
+    set size [::UI::ParseWMGeometry [wm geometry $w]]
     set n $nEnt($wtop)
     set wcomm $wp2p($wtop,wgrid)
     set waddr ${wcomm}.ad${n}
@@ -474,7 +474,7 @@ proc ::P2P::RemoveCommEntry {wtop ipNum} {
     
     # Decrease the toplevels height by the entry lines height.
     array set infoArr [grid info $waddr]
-    foreach {width height x y} [::UI::ParseWMGeometry $w] break
+    foreach {width height x y} [::UI::ParseWMGeometry [wm geometry $w]] break
     foreach {xoff yoff ewidth eheight}  \
       [grid bbox $wp2p($wtop,wgrid) $infoArr(-column) $infoArr(-row)] break
     #puts "height=$height, eheight=$eheight"
@@ -523,7 +523,7 @@ proc ::P2P::CloseHook {wclose} {
     if {$wclose == "."} {
 	
 	# Must save "clean" size without any user entries.
-	foreach {w h x y} [::UI::ParseWMGeometry .] break
+	foreach {w h x y} [::UI::ParseWMGeometry [wm geometry .]] break
 	foreach {xoff yoff width height} [grid bbox $wp2p(.,wgrid) 0 1 0 9] break
 	::UI::SaveWinGeomUseSize . ${w}x[expr $h-$height]+${x}+${y}
     }      

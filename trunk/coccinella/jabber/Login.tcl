@@ -5,12 +5,11 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.53 2004-11-15 08:51:13 matben Exp $
+# $Id: Login.tcl,v 1.54 2004-11-27 08:41:20 matben Exp $
 
 package provide Login 1.0
 
 namespace eval ::Jabber::Login:: {
-    global  wDlgs
     
     variable server
     variable username
@@ -20,7 +19,7 @@ namespace eval ::Jabber::Login:: {
     set uid 0
     
     # Add all event hooks.
-    ::hooks::register quitAppHook     [list ::UI::SaveWinGeom $wDlgs(jlogin)]
+    ::hooks::register quitAppHook     ::Jabber::Login::QuitAppHook
     ::hooks::register closeWindowHook ::Jabber::Login::CloseHook
     ::hooks::register launchFinalHook ::Jabber::Login::LaunchHook
 }
@@ -452,6 +451,12 @@ proc ::Jabber::Login::LaunchHook { } {
 	eval {::Jabber::Login::HighLogin $domain $node $res $password \
 	  [namespace current]::AutoLoginCB} $opts
     }
+}
+
+proc ::Jabber::Login::QuitAppHook { } {
+    global  wDlgs
+    
+    ::UI::SaveWinGeom $wDlgs(jlogin)    
 }
 
 proc ::Jabber::Login::AutoLoginCB {logtoken status {errmsg ""}} {

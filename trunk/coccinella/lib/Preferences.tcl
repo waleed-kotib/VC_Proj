@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.67 2004-11-06 08:15:25 matben Exp $
+# $Id: Preferences.tcl,v 1.68 2004-11-27 08:41:20 matben Exp $
  
 package require notebook
 package require tree
@@ -17,7 +17,7 @@ package require combobox
 package provide Preferences 1.0
 
 namespace eval ::Preferences:: {
-    global  wDlgs this
+    global  this
     
     # Variable to be used in tkwait.
     variable finished
@@ -26,7 +26,7 @@ namespace eval ::Preferences:: {
     variable lastPage {}
 
     # Add all event hooks.
-    ::hooks::register quitAppHook     [list ::UI::SaveWinGeom $wDlgs(prefs)]
+    ::hooks::register quitAppHook     ::Preferences::QuitAppHook
     ::hooks::register closeWindowHook ::Preferences::CloseHook
 
     variable xpadbt
@@ -67,6 +67,12 @@ namespace eval ::Preferences:: {
     option add *Preferences.yPadTiny            $ypadtiny     widgetDefault
     option add *Preferences.yPad                $ypad         widgetDefault
     option add *Preferences.yPadBig             $ypadbig      widgetDefault
+}
+
+proc ::Preferences::QuitAppHook { } {
+    global  wDlgs
+
+    ::UI::SaveWinGeom $wDlgs(prefs)
 }
 
 proc ::Preferences::Build {args} {

@@ -5,21 +5,19 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.36 2004-11-14 16:40:53 matben Exp $
+# $Id: GotMsg.tcl,v 1.37 2004-11-27 08:41:20 matben Exp $
 
 package provide GotMsg 1.0
 
 namespace eval ::Jabber::GotMsg:: {
-    global  wDlgs
 
     # Add all event hooks.
-    ::hooks::register quitAppHook        [list ::UI::SaveWinGeom $wDlgs(jgotmsg)]
+    ::hooks::register quitAppHook        ::Jabber::GotMsg::QuitAppHook
     ::hooks::register closeWindowHook    ::Jabber::GotMsg::CloseHook
     ::hooks::register presenceHook       ::Jabber::GotMsg::PresenceHook    
     
     # Wait for this variable to be set.
     variable finished  
-    variable w $wDlgs(jgotmsg)
         
     # msgId for the one in the dialog.
     variable msgIdDisplay 0
@@ -27,6 +25,12 @@ namespace eval ::Jabber::GotMsg:: {
     variable locals
     set locals(updateDateid)  ""
     set locals(updateDatems)  [expr 1000*60]
+}
+
+proc ::Jabber::GotMsg::QuitAppHook { } {
+    global  wDlgs
+    
+    ::UI::SaveWinGeom $wDlgs(jgotmsg)
 }
 
 # Jabber::GotMsg::GotMsg --
@@ -41,6 +45,7 @@ namespace eval ::Jabber::GotMsg:: {
 #       may show message window.
 
 proc ::Jabber::GotMsg::GotMsg {id} {
+    global  wDlgs
     
     variable w
     variable wbtnext
@@ -48,6 +53,7 @@ proc ::Jabber::GotMsg::GotMsg {id} {
     upvar ::Jabber::jstate jstate
     
     ::Debug 2 "Jabber::GotMsg::GotMsg id=$id"
+    set w $wDlgs(jgotmsg)
     
     # Queue up this message or show right away?
     if {[winfo exists $w]} {
@@ -166,8 +172,9 @@ proc ::Jabber::GotMsg::Build { } {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
-    ::Debug 2 "::Jabber::GotMsg::Build w=$w"
+    ::Debug 2 "::Jabber::GotMsg::Build"
 
+    set w $wDlgs(jgotmsg)
     if {[winfo exists $w]} {
 	return
     }

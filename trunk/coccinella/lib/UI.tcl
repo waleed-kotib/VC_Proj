@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.75 2004-11-23 08:55:23 matben Exp $
+# $Id: UI.tcl,v 1.76 2004-11-27 08:41:21 matben Exp $
 
 package require entrycomp
 package require alertbox
@@ -50,6 +50,94 @@ proc ::UI::Init {} {
     ::Theme::GetImage [option get . buttonOKImage {}] -keepname 1
     ::Theme::GetImage [option get . buttonCancelImage {}] -keepname 1    
     ::Theme::GetImage [option get . buttonTrayImage {}] -keepname 1    
+}
+
+proc ::UI::InitCommonBinds { } {
+    global  this
+    
+    # A mechanism to set -state of cut/copy/paste. Not robust!!!
+    # All selections are not detected (shift <- -> etc).
+    # Entry copy/paste.
+    bind Entry <FocusIn>         "+ ::UI::FixMenusWhenSelection %W"
+    bind Entry <ButtonRelease-1> "+ ::UI::FixMenusWhenSelection %W"
+    bind Entry <<Cut>>           "+ ::UI::FixMenusWhenSelection %W"
+    bind Entry <<Copy>>          "+ ::UI::FixMenusWhenSelection %W"
+	
+    # Text copy/paste.
+    bind Text <FocusIn>         "+ ::UI::FixMenusWhenSelection %W"
+    bind Text <ButtonRelease-1> "+ ::UI::FixMenusWhenSelection %W"
+    bind Text <<Cut>>           "+ ::UI::FixMenusWhenSelection %W"
+    bind Text <<Copy>>          "+ ::UI::FixMenusWhenSelection %W"
+
+    # Linux has a strange binding by default. Handled by <<Paste>>.
+    if {[string equal $this(platform) "unix"]} {
+	bind Text <Control-Key-v> {}
+    }
+}
+
+proc ::UI::InitDlgs { } {
+    global  wDlgs
+    
+    # Define the toplevel windows here so they don't collide.
+    # Toplevel dialogs.
+    array set wDlgs {
+	comp            .comp
+	editFonts       .edfnt
+	editShorts      .tshcts
+	fileAssoc       .fass
+	infoClient      .infocli
+	infoServ        .infoserv
+	netSetup        .netsetup
+	openConn        .opc
+	openMulti       .opqtmulti
+	prefs           .prefs
+	print           .prt
+	prog            .prog
+	plugs           .plugs
+	setupass        .setupass
+	wb              .wb
+    }
+
+    # Toplevel dialogs for the jabber part.
+    array set wDlgs {
+	jreg            .jreg
+	jlogin          .jlogin
+	jrost           .jrost
+	jrostnewedit    .jrostnewedit
+	jrostadduser    .jrostadduser
+	jrostedituser   .jrostedituser
+	jsubsc          .jsubsc
+	jsendmsg        .jsendmsg
+	jgotmsg         .jgotmsg
+	jstartchat      .jstartchat
+	jchat           .jchat
+	jbrowse         .jbrowse
+	jrostbro        .jrostbro
+	jenterroom      .jenterroom
+	jcreateroom     .jcreateroom
+	jinbox          .jinbox
+	jpresmsg        .jpresmsg
+	joutst          .joutst
+	jpasswd         .jpasswd
+	jsearch         .jsearch
+	jvcard          .jvcard
+	jgcenter        .jgcenter
+	jgc             .jgc
+	jmucenter       .jmucenter
+	jmucinvite      .jmucinvite
+	jmucinfo        .jmucinfo
+	jmucedit        .jmucedit
+	jmuccfg         .jmuccfg
+	jmucdestroy     .jmucdestroy
+	jchist          .jchist
+	jhist           .jhist
+	jprofiles       .jprofiles
+	joobs           .joobs
+	jerrdlg         .jerrdlg
+	jwbinbox        .jwbinbox
+	jprivacy        .jprivacy
+	jdirpres        .jdirpres
+    }
 }
 
 # UI::InitMenuDefs --
@@ -369,30 +457,60 @@ proc ::UI::SavePanePos {key wpaned {orient horizontal}} {
 proc ::UI::SetWindowPosition {w {key ""}} {
     global  prefs
     
-    #wm withdraw $w
-    #update idletasks
     if {$key == ""} {
 	set key $w
     }
     if {[info exists prefs(winGeom,$key)]} {
-	regexp {^[^+-]+((\+|-).+$)} $prefs(winGeom,$key) match pos
-	wm geometry $w $pos
+
+	# We shall verify that the window is not put offscreen.
+	foreach {width height x y} [ParseWMGeometry $prefs(winGeom,$key)] {break}
+	KeepOnScreen $w x y $width $height
+	wm geometry $w +${x}+${y}
     }
-    #wm deiconify $w
 }
 
 proc ::UI::SetWindowGeometry {w {key ""}} {
     global  prefs
     
-    #wm withdraw $w
-    #update idletasks
     if {$key == ""} {
 	set key $w
     }
     if {[info exists prefs(winGeom,$key)]} {
-	wm geometry $w $prefs(winGeom,$key)
+
+	# We shall verify that the window is not put offscreen.
+	foreach {width height x y} [ParseWMGeometry $prefs(winGeom,$key)] {break}
+	KeepOnScreen $w x y $width $height
+	wm geometry $w ${width}x${height}+${x}+${y}
     }
-    #wm deiconify $w
+}
+
+proc ::UI::KeepOnScreen {w xVar yVar width height} {
+    global  this
+    upvar $xVar x
+    upvar $yVar y
+    
+    set margin 10
+    set topmargin 0
+    set botmargin 40
+    if {[string match mac* $this(platform)]} {
+	set topmargin 20
+    }
+    set screenwidth  [winfo vrootwidth $w]
+    set screenheight [winfo vrootheight $w]
+    set x2 [expr {$x + $width}]
+    set y2 [expr {$y + $height}]
+    if {$x < 0} {
+	set x $margin
+    }
+    if {$x > [expr {$screenwidth - $margin}]} {
+	set x [expr {$screenwidth - $width - $margin}]
+    }
+    if {$y < $topmargin} {
+	set y $topmargin
+    }
+    if {$y > [expr {$screenheight - $botmargin}]} {
+	set y [expr {$screenheight - $height - $botmargin}]
+    }
 }
 
 proc ::UI::GetFirstPrefixedToplevel {wprefix} {
@@ -1351,14 +1469,14 @@ proc ::UI::NewPrint {w cmd} {
 #       Parses 'wm geometry' result into a list.
 #       
 # Arguments:
-#       win         the (real) toplevel widget path
+#       wmgeom      output from 'wm geometry'
+#       
 # Results:
 #       list {width height x y}
 
-proc ::UI::ParseWMGeometry {win} {
+proc ::UI::ParseWMGeometry {wmgeom} {
     
-    regexp {([0-9]+)x([0-9]+)\+(\-?[0-9]+)\+(\-?[0-9]+)}  \
-      [wm geometry $win] m w h x y
+    regexp {([0-9]+)x([0-9]+)\+(\-?[0-9]+)\+(\-?[0-9]+)} $wmgeom m w h x y
     return [list $w $h $x $y]
 }
 
