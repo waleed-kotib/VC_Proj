@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Rosticons.tcl,v 1.4 2004-11-19 13:10:14 matben Exp $
+# $Id: Rosticons.tcl,v 1.5 2004-11-20 08:13:52 matben Exp $
 
 package provide Rosticons 1.0
 
@@ -28,7 +28,7 @@ proc ::Rosticons::InitPrefsHook { } {
     upvar ::Jabber::jprefs jprefs
 
     set jprefs(rost,iconSet) "default"
-    set jprefs(rost,iconWbFallback) 1
+    set jprefs(rost,haveWBicons) 1
     
     # Do NOT store the complete path!
     ::PreferencesUtils::Add [list  \
@@ -127,13 +127,13 @@ proc ::Rosticons::Get {statuskey} {
     
     # Do we want foreign IM icons?
     if {!$jprefs(rost,haveIMsysIcons)} {
-	
-	# $jprefs(rost,iconWbFallback)
-	
 	if {![string equal $type "status"] && \
 	  ![string equal $type "whiteboard"]} {
 	    set type "status"
 	}
+    }
+    if {!$jprefs(rost,haveWBicons)} {
+	set type [string map {whiteboard status} $type]
     }
     set key $type/$sub
     if {[info exists rosticons($key)]} {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.69 2004-11-16 15:10:27 matben Exp $
+# $Id: JUI.tcl,v 1.70 2004-11-20 08:13:51 matben Exp $
 
 package provide JUI 1.0
 
@@ -169,7 +169,7 @@ proc ::Jabber::UI::Init { } {
     }
 
     # The status menu is built dynamically due to the -image options on 8.4.
-    lset menuDefs(rost,jabber) 12 6 [::Jabber::Roster::BuildStatusMenuDef]
+    lset menuDefs(rost,jabber) 12 6 [::Jabber::Status::BuildStatusMenuDef]
 
     set menuDefs(rost,edit) {    
 	{command   mCut              {::UI::CutCopyPasteCmd cut}      disabled X}
@@ -359,7 +359,7 @@ proc ::Jabber::UI::Build {w} {
     frame $wbot
     pack  $wbot -side bottom -fill x
         
-    ::Jabber::Roster::BuildStatusButton $jwapp(mystatus) \
+    ::Jabber::Status::Button $jwapp(mystatus) \
       ::Jabber::jstate(status) -command ::Jabber::SetStatus 
     
     pack  $jwapp(mystatus) -side left -pady 2 -padx 6
@@ -597,7 +597,7 @@ proc ::Jabber::UI::MailBoxState {mailboxstate} {
 proc ::Jabber::UI::WhenSetStatus {type} {
     variable jwapp
 	
-    ::Jabber::Roster::ConfigStatusButton $jwapp(mystatus) $type
+    ::Jabber::Status::ConfigButton $jwapp(mystatus) $type
 }
 
 proc ::Jabber::UI::EnterRoomHook {roomJid protocol} {

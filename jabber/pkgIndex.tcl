@@ -35,6 +35,7 @@ package ifneeded Roster 1.0 [list source [file join $dir Roster.tcl]]
 package ifneeded Rosticons 1.0 [list source [file join $dir Rosticons.tcl]]
 package ifneeded Search 1.0 [list source [file join $dir Search.tcl]]
 package ifneeded SetupAss 1.0 [list source [file join $dir SetupAss.tcl]]
+package ifneeded Status 1.0 [list source [file join $dir Status.tcl]]
 package ifneeded Subscribe 1.0 [list source [file join $dir Subscribe.tcl]]
 package ifneeded VCard 1.0 [list source [file join $dir VCard.tcl]]
 
