@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.34 2004-04-15 05:55:17 matben Exp $
+# $Id: JUI.tcl,v 1.35 2004-04-16 13:59:29 matben Exp $
 
 package provide JUI 1.0
 
@@ -397,6 +397,15 @@ proc ::Jabber::UI::NewPage {name} {
 		set br [$nbframe newpage {Browser} -text [msgcat::mc Browser] \
 		  -image $iconBrowser]    
 		pack [::Jabber::Browse::Build $br.br] -fill both -expand 1
+	    }
+	}
+	Disco {
+	    set iconBrowser [::Theme::GetImage \
+	      [option get $jwapp(fall) browser16Image {}]]
+	    if {[lsearch $pages Disco] < 0} {
+		set di [$nbframe newpage {Disco} -text [msgcat::mc Disco] \
+		  -image $iconBrowser]    
+		pack [::Jabber::Disco::Build $di.di] -fill both -expand 1
 	    }
 	}
 	default {

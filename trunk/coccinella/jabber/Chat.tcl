@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.53 2004-04-09 10:32:25 matben Exp $
+# $Id: Chat.tcl,v 1.54 2004-04-16 13:59:29 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -1325,12 +1325,18 @@ proc ::Jabber::Chat::PrintHistory {wtext} {
 
 proc ::Jabber::Chat::InitPrefsHook { } {
     upvar ::Jabber::jprefs jprefs
-    
+    	
+    # Empty here means use option database.
+    set jprefs(chatFont) ""
     set jprefs(chatActiveRet) 0
 
     ::PreferencesUtils::Add [list  \
       [list ::Jabber::jprefs(chatFont)      jprefs_chatFont      $jprefs(chatFont)]  \
       [list ::Jabber::jprefs(chatActiveRet) jprefs_chatActiveRet $jprefs(chatActiveRet)]]    
+    
+    if {$jprefs(chatFont) != ""} {
+	set jprefs(chatFont) [::Utils::GetFontListFromName $jprefs(chatFont)]
+    }
 }
 
 proc ::Jabber::Chat::BuildPrefsHook {wtree nbframe} {

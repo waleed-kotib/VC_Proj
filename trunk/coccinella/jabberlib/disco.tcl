@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.4 2004-04-15 05:55:19 matben Exp $
+# $Id: disco.tcl,v 1.5 2004-04-16 13:59:29 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -19,9 +19,12 @@
 #	
 #   INSTANCE COMMANDS
 #      discoName send_get discotype jid callbackProc ?-opt value ...?
-#      discoName isdiscoed discotype jid
-#      discoName get jid key
+#      discoName isdiscoed discotype jid ?node?
+#      discoName get jid key ?node?
+#      discoName name jid ?node?
 #      discoName reset ?jid?
+#      
+#      where discotype = (items|info)
 #      
 ############################# CHANGES ##########################################
 #
@@ -149,21 +152,43 @@ proc disco::send_get {disconame type jid cmd args} {
     variable xmlns
     variable disco2jlib
     
-    $disco2jlib($disconame) iq_get $xmlns($type) $jid  \
-      -command [list [namespace current]::parse_get $disconame $type $jid $cmd]
+    array set argsArr $args
+    set opts {}
+    if {[info exists argsArr(-node)]} {
+	lappend opts -node $argsArr(-node)
+    }
+    
+    eval {$disco2jlib($disconame) iq_get $xmlns($type) $jid  \
+      -command [list [namespace current]::parse_get $disconame $type $jid $cmd]} \
+      $opts
 }
 
-proc disco::parse_get {disconame discotype jid cmd jlibname type subiq} {
+# disco::parse_get --
+# 
+#       Fills in the internal state arrays, and invokes any callback.
+
+proc disco::parse_get {disconame discotype from cmd jlibname type subiq args} {
     
     upvar ${disconame}::items items
     upvar ${disconame}::info  info
 
+    # We need to use both jid and any node for addressing since
+    # each item may have identical jid's but different node's.
+
+    # Parents node if any.
+    array set pattr [wrapper::getattrlist $subiq]
+    set pnode ""
+    if {[info exists pattr(node)]} {
+	set pnode $pattr(node)
+    }
+    
     if {[string equal $type "error"]} {
+
 	# Empty.
     } else {
 	if {[string equal $discotype "items"]} {
-	    set items($jid,xml) $subiq
-	    catch {unset items($jid,children)}
+	    set items($from,$pnode,xml) $subiq
+	    catch {unset items($from,$pnode,children) items($from,$pnode,nodes)}
 	    
 	    foreach c [wrapper::getchildren $subiq] {
 		if {![string equal [wrapper::gettag $c] "item"]} {
@@ -171,26 +196,52 @@ proc disco::parse_get {disconame discotype jid cmd jlibname type subiq} {
 		}
 		catch {unset attr}
 		array set attr [wrapper::getattrlist $c]
-		set cjid $attr($jid)
-		lappend items($jid,children) $cjid
-		set items($cjid,parent) $jid
+
+		# jid is a required attribute!
+		set jid $attr(jid)
+		set node ""
+		if {[info exists attr(node)]} {
+		    set node $attr(node)
+		    lappend items($from,$pnode,nodes) $node
+		}
+		lappend items($from,$node,children) $jid
+		set items($jid,$node,parent) $from
+		if {[info exists items($from,$pnode,parent)]} {
+		    set items($jid,$pnode,parents)  \
+		      [concat $items($from,$pnode,parents) $from]
+		}
 		
+		foreach {key value} [array get attr] { 
+		    if {![string equal $key jid]} {
+			set items($jid,$node,$key) $value
+		    }
+		}
 	    }	
 	} elseif {[string equal $discotype "info"]} {
-	    set info($jid,xml) $subiq
-	    catch {unset info($jid,features)}
+	    array unset info "$from,$pnode,*"
+	    set info($from,$pnode,xml) $subiq
+	    
 	    foreach c [wrapper::getchildren $subiq] {
 		catch {unset attr}
 		array set attr [wrapper::getattrlist $c]
 		
+		# There can be one or many of each 'identity' and 'feature'.
 		switch -- [wrapper::gettag $c] {
 		    identity {
-			foreach {key value} [array get attr] {
-			    set info($jid,identity,$key) $value
+			
+			# Each <identity/> element MUST possess 'category' and 
+			# 'type' attributes. (category/type)
+			# Each identity element SHOULD have the same name value.
+			set category $attr(category)
+			set type     $attr(type)
+			set name     ""
+			if {[info exists attr(name)]} {
+			    set name $attr(name)
 			}
+			set info($from,$pnode,identity,$category,$type,name) $name
 		    }
 		    feature {
-			lappend info($jid,features) $attr(var)
+			lappend info($from,$pnode,features) $attr(var)
 		    }
 		}
 	    }
@@ -198,28 +249,79 @@ proc disco::parse_get {disconame discotype jid cmd jlibname type subiq} {
     }
     
     # Invoke callback for this get.
-    $cmd $type $subiq
+    uplevel #0 $cmd [list $type $from $subiq] $args
 }
 
-proc disco::isdiscoed {disconame jid discotype} {
+proc disco::isdiscoed {disconame discotype jid {node ""}} {
     
     upvar ${disconame}::items items
     upvar ${disconame}::info  info
     
-    return [info exists $discotype($jid,xml)]
+    switch -- $discotype {
+	items {
+	    return [info exists items($jid,$node,xml)]
+	}
+	info {
+	    return [info exists info($jid,$node,xml)]
+	}
+    }
 }
 
-proc disco::get {disconame jid key} {
+proc disco::get {disconame jid key {node ""}} {
     
     upvar ${disconame}::items items
     upvar ${disconame}::info  info
     
-    if {[info exists items($jid,$key)]} {
-	return $items($jid,$key)
-    } elseif {[info exists info($jid,$key)]} {
-	return $info($jid,$key)
+    if {[info exists items($jid,$node,$key)]} {
+	return $items($jid,$node,$key)
+    } elseif {[info exists info($jid,$node,$key)]} {
+	return $info($jid,$node,$key)
     } else {
 	return ""
+    }
+}
+
+proc disco::name {disconame jid {node ""}} {
+    
+    upvar ${disconame}::info  info
+    
+    # Each identity element SHOULD have the same name value.
+    foreach {key value} [array get info "$from,$node,identity,*,name"] {
+	return $value
+    }
+    return ""
+}
+
+proc disco::children {disconame jid {node ""}} {
+    
+    upvar ${disconame}::items items
+
+    if {[info exists items($jid,$node,children)]} {
+	return $items($jid,$node,children)
+    } else {
+	return {}
+    }
+}
+
+proc disco::parent {disconame jid {node ""}} {
+    
+    upvar ${disconame}::items items
+
+    if {[info exists items($jid,$node,parent)]} {
+	return $items($jid,$node,parent)
+    } else {
+	return {}
+    }
+}
+
+proc disco::parents {disconame jid {node ""}} {
+    
+    upvar ${disconame}::items items
+
+    if {[info exists items($jid,$node,parents)]} {
+	return $items($jid,$node,parents)
+    } else {
+	return {}
     }
 }
 
@@ -240,11 +342,10 @@ proc disco::reset {disconame {jid ""}} {
     upvar ${disconame}::info  info
 
     if {$jid == ""} {
-	catch {unset items($jid)}
-	catch {unset info($jid)}
+	catch {unset items info}
     } else {
-	catch {unset items}
-	catch {unset info}
+	array unset items $jid,*
+	array unset info $jid,*
     }
 }
 

@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 1999-2002  Mats Bengtsson
 #  
-# $Id: Splash.tcl,v 1.3 2004-03-29 13:56:27 matben Exp $
+# $Id: Splash.tcl,v 1.4 2004-04-16 13:59:29 matben Exp $
    
 package provide Splash 1.0
 
@@ -94,10 +94,10 @@ proc ::SplashScreen::SplashScreen { } {
     # Print patch level for dev versions.
     if {$showMinor && ($prefs(releaseVers) != "")} {
 	$w.can create text 420 [expr $imHeight - 40] -anchor nw  \
-	  -font {Helvetica 18} -text $prefs(releaseVers) -fill #ef2910
+	  -font {Helvetica -18} -text $prefs(releaseVers) -fill #ef2910
     }
     if {$showCopyright} {
-	set copyright "Written by Mats Bengtsson (C) 1999-2003"
+	set copyright "Written by Mats Bengtsson (C) 1999-2004"
 	set license "Distributed under the Gnu General Public License"
 	$w.can create text $copyrightX $copyrightY -anchor nw \
 	  -font $fontS -text $copyright -fill $textcol

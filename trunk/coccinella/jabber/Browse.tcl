@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.36 2004-04-15 05:55:17 matben Exp $
+# $Id: Browse.tcl,v 1.37 2004-04-16 13:59:29 matben Exp $
 
 package require chasearrows
 
@@ -84,7 +84,7 @@ proc ::Jabber::Browse::LoginCmd { } {
 
     # Get the services for all our servers on the list. Depends on our settings:
     # If browsing fails must use "agents" as a fallback.
-    if {[string equal $jprefs(agentsOrBrowse) "browse"]} {
+    if {[string equal $jprefs(serviceMethod) "browse"]} {
 	::Jabber::Browse::GetAll
     }
 }
@@ -129,6 +129,8 @@ proc ::Jabber::Browse::NewJlibHook {jlibName} {
     
     set jstate(browse) [browse::new $jlibName  \
       -command ::Jabber::Browse::Command]
+    
+    ::Jabber::AddClientXmlns [list "jabber:iq:browse"]
 }
     
 # Jabber::Browse::GetAll --
@@ -213,6 +215,7 @@ proc ::Jabber::Browse::Command {browseName type from subiq args} {
 
 	}
     }
+    return 1
 }
 
 # Jabber::Browse::Callback --
@@ -1231,24 +1234,10 @@ proc ::Jabber::Browse::ParseGet {jlibname from subiq args} {
     if {[info exists argsArr(-id)]} {
 	set opts [list -id $argsArr(-id)]
     }
-
-    # List everything this client supports. Starting with public namespaces.
-    set subtags [list  \
-      [wrapper::createtag "ns" -chdata "jabber:client"]         \
-      [wrapper::createtag "ns" -chdata "jabber:iq:browse"]      \
-      [wrapper::createtag "ns" -chdata "jabber:iq:conference"]  \
-      [wrapper::createtag "ns" -chdata "jabber:iq:last"]        \
-      [wrapper::createtag "ns" -chdata "jabber:iq:oob"]         \
-      [wrapper::createtag "ns" -chdata "jabber:iq:roster"]      \
-      [wrapper::createtag "ns" -chdata "jabber:iq:time"]        \
-      [wrapper::createtag "ns" -chdata "jabber:iq:version"]     \
-      [wrapper::createtag "ns" -chdata "jabber:x:data"]         \
-      [wrapper::createtag "ns" -chdata "jabber:x:event"]        \
-      [wrapper::createtag "ns" -chdata "http://jabber.org/protocol/muc"] \
-      [wrapper::createtag "ns" -chdata "coccinella:wb"]]
     
-    # Adding private namespaces.
-    foreach {key ns} [array get privatexmlns] {
+    # Adding all xml namespaces.
+    set subtags {}
+    foreach ns [::Jabber::GetClientXmlnsList] {
 	lappend subtags [wrapper::createtag "ns" -chdata $ns]
     }
     

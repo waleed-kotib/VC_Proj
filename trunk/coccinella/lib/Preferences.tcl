@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.48 2004-04-08 09:57:43 matben Exp $
+# $Id: Preferences.tcl,v 1.49 2004-04-16 13:59:29 matben Exp $
  
 package require notebook
 package require tree
@@ -132,9 +132,6 @@ proc ::Preferences::Build { } {
     $wtree newitem {General {Proxy Setup}} -text [::msgcat::mc {Proxy Setup}]
     if {!$prefs(stripJabber)} {
 	$wtree newitem {Jabber}
-	
-	# This one needs a better home...
-	$wtree newitem {Jabber Customization} -text [::msgcat::mc Customization]
     }
     $wtree newitem {Whiteboard} -text [::msgcat::mc Whiteboard]
     
@@ -151,13 +148,6 @@ proc ::Preferences::Build { } {
     # Proxies Setup page -------------------------------------------------------
     set frpoxy [$nbframe page {Proxy Setup}]
     ::Preferences::Proxies::BuildPage $frpoxy
-            
-    if {!$prefs(stripJabber)} {
-	
-	# Customization page -------------------------------------------------------
-	set frcus [$nbframe page {Customization}]    
-	::Preferences::Customization::BuildPage $frcus
-    }
     
     # Each code component makes its own page.
     ::hooks::run prefsBuildHook $wtree $nbframe
@@ -260,115 +250,9 @@ proc ::Preferences::ResetToUserDefaults { } {
     array set tmpPrefs [array get prefs]
     array set tmpJPrefs [::Jabber::GetjprefsArray]
 
-
+    # Run hook for the components.
     ::hooks::run prefsUserDefaultsHook
 }
-
-#-------------------------------------------------------------------------------
-
-namespace eval ::Preferences::Customization:: {
-    
-}
-
-proc ::Preferences::Customization::BuildPage {page} {
-    global  this
-    
-    variable wlbblock
-    variable btrem
-    variable wlbblock
-    upvar ::Preferences::xpadbt xpadbt
-    upvar ::Preferences::ypad ypad
-    
-    set fontS  [option get . fontSmall {}]    
-    set fontSB [option get . fontSmallBold {}]
-
-    set labfrpbl $page.fr
-    labelframe $labfrpbl -text [::msgcat::mc Customization]
-    pack $labfrpbl -side top -anchor w -padx 8 -pady 4
-    set pbl [frame $labfrpbl.frin]
-    pack $pbl -padx 10 -pady 6 -side left
-    
-    checkbutton $pbl.newwin -text " [::msgcat::mc prefcushow]" \
-      -variable ::Preferences::tmpJPrefs(showMsgNewWin)
-    checkbutton $pbl.savein -text " [::msgcat::mc prefcusave]" \
-      -variable ::Preferences::tmpJPrefs(inboxSave)
-    label $pbl.lmb2 -text [::msgcat::mc prefcu2clk]
-    radiobutton $pbl.rb2new -text " [::msgcat::mc prefcuopen]" \
-      -value "newwin" -variable ::Preferences::tmpJPrefs(inbox2click)
-    radiobutton $pbl.rb2re   \
-      -text " [::msgcat::mc prefcureply]" -value "reply" \
-      -variable ::Preferences::tmpJPrefs(inbox2click)
-    
-    set frrost $pbl.robg
-    frame $frrost
-    pack [checkbutton $frrost.cb -text "  [::msgcat::mc prefrostbgim]" \
-      -variable ::Preferences::tmpJPrefs(rost,useBgImage)] -side left
-    pack [button $frrost.btpick -text "[::msgcat::mc {Pick}]..."  \
-      -command [list [namespace current]::PickBgImage rost] -font $fontS] \
-      -side left -padx 4
-    pack [button $frrost.btdefk -text "[::msgcat::mc {Default}]"  \
-      -command [list [namespace current]::DefaultBgImage rost] -font $fontS]  \
-      -side left -padx 4
-    
-    set frtheme $pbl.ftheme
-    frame $frtheme
-    set wpoptheme $frtheme.pop
-
-    set allrsrc [::Theme::GetAllAvailable]
-
-    set wpopupmenuin [eval {tk_optionMenu $wpoptheme   \
-      [namespace parent]::tmpPrefs(themeName)} $allrsrc]
-    pack [label $frtheme.l -text "[::msgcat::mc preftheme]:"] -side left
-    pack $wpoptheme -side left
-    
-    grid $pbl.newwin -padx 2 -pady $ypad -sticky w -columnspan 2
-    grid $pbl.savein -padx 2 -pady $ypad -sticky w -columnspan 2
-    grid $pbl.lmb2 -padx 2 -pady $ypad -sticky w -columnspan 2
-    grid $pbl.rb2new -padx 2 -pady $ypad -sticky w -columnspan 2
-    grid $pbl.rb2re -padx 2 -pady $ypad -sticky w -columnspan 2
-    grid $frrost -padx 2 -pady $ypad -sticky w -columnspan 2
-    grid $frtheme -padx 2 -pady $ypad -sticky w -columnspan 2
-    
-    # Agents or Browse.
-    set frdisc $page.ag 
-    labelframe $frdisc -text {Agents or Browse}
-    pack $frdisc -side top -anchor w -padx 8 -pady 4
-    set pdisc [frame $frdisc.frin]
-    pack $pdisc -padx 10 -pady 6 -side left
-    label $pdisc.la -text [::msgcat::mc prefcudisc]
-    radiobutton $pdisc.browse   \
-      -text " [::msgcat::mc prefcubrowse]"  \
-      -variable ::Preferences::tmpJPrefs(agentsOrBrowse) -value "browse"
-    radiobutton $pdisc.agents  \
-      -text " [::msgcat::mc prefcuagent]" -value "agents" \
-      -variable ::Preferences::tmpJPrefs(agentsOrBrowse)
-    grid $pdisc.la -padx 2 -pady $ypad -sticky w
-    grid $pdisc.browse -padx 2 -pady $ypad -sticky w
-    grid $pdisc.agents -padx 2 -pady $ypad -sticky w
-    
-
-}
-
-proc ::Preferences::Customization::PickBgImage {where} {
-    upvar ::Preferences::tmpJPrefs tmpJPrefs
-
-    set types {
-	{{GIF Files}        {.gif}        }
-	{{GIF Files}        {}        GIFF}
-    }
-    set ans [tk_getOpenFile -title {Open GIF Image} \
-      -filetypes $types -defaultextension ".gif"]
-    if {$ans != ""} {
-	set tmpJPrefs($where,bgImagePath) $ans
-    }
-}
-
-proc ::Preferences::Customization::DefaultBgImage {where} {
-    upvar ::Preferences::tmpJPrefs tmpJPrefs
-
-    set tmpJPrefs($where,bgImagePath) ""
-}
-
 
 # namespace  ::Preferences::NetSetup:: -----------------------------------------
 

@@ -10,7 +10,9 @@ Coccinella-0.94.9 (04????): 	Short summary --
 	- major internal code reorganizations to separate whiteboard code
           from rest and be independent of protocols
 	- reworked the groupchat dialog from scratch
-	- 
+	- major restructure of all browse code
+	- added support for emoticon sets
+
 
 Coccinella-0.94.8 (040305): 	Short summary --
 

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.15 2004-03-16 15:09:08 matben Exp $
+# $Id: Register.tcl,v 1.16 2004-04-16 13:59:29 matben Exp $
 
 package provide Register 1.0
 
@@ -33,6 +33,7 @@ proc ::Jabber::Register::Register {args} {
     variable server    ""
     variable username  ""
     variable password  ""
+    variable password2 ""
     
     set w $wDlgs(jreg)
     if {[winfo exists $w]} {
@@ -290,7 +291,7 @@ proc ::Jabber::Register::ResponseProc {jlibName type theQuery} {
 	      message: \"$errmsg\""
 	}
 	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
-	  -message [FormatTextForMessageBox $msg] \	  
+	  -message [FormatTextForMessageBox $msg]
     } else {
 	tk_messageBox -icon info -type ok -message [FormatTextForMessageBox \
 	  [::msgcat::mc jamessregisterok $server]]

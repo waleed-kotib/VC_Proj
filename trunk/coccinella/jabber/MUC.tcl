@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.28 2004-04-15 05:55:18 matben Exp $
+# $Id: MUC.tcl,v 1.29 2004-04-16 13:59:29 matben Exp $
 
 package require entrycomp
 
@@ -84,6 +84,7 @@ proc ::Jabber::MUC::Init {jlibName} {
     $jstate(jlib) message_register * "http://jabber.org/protocol/muc#user" \
       ::Jabber::MUC::MUCMessage
     
+    ::Jabber::AddClientXmlns [list "http://jabber.org/protocol/muc"]
 }
 
 # Jabber::MUC::BuildEnter --

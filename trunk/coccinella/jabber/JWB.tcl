@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.7 2004-04-15 05:55:17 matben Exp $
+# $Id: JWB.tcl,v 1.8 2004-04-16 13:59:29 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -77,7 +77,8 @@ proc ::Jabber::WB::Init {jlibName} {
     $jstate(jlib) message_register groupchat $xmlnsSVGWB \
       [namespace current]::HandleSVGWBGroupchatMessage
 
-  }
+    ::Jabber::AddClientXmlns [list "coccinella:wb"]
+}
 
 proc ::Jabber::WB::InitUI { } {
     global  prefs
