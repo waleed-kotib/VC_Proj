@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.74 2004-08-06 07:46:53 matben Exp $
+# $Id: Coccinella.tcl,v 1.75 2004-08-15 08:00:34 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -420,16 +420,6 @@ foreach sourceName $allLibSourceFiles {
 }
 
 # On the mac we have some extras.
-if {[string equal $this(platform) "macintosh"]} {
-    if {![catch {package require MacMenuButton} msg]} {
-	rename menubutton menubuttonOrig
-	rename macmenubutton menubutton
-    }
-    if {![catch {package require MovableAlerts} msg]} {
-	rename tk_messageBox ""
-	rename tk_newMessageBox tk_messageBox
-    }
-}
 if {[string equal $this(platform) "macosx"]} {
     if {![catch {package require MovableAlerts} msg]} {
 	rename tk_messageBox ""

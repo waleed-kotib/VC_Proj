@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.15 2004-08-15 06:56:53 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.16 2004-08-15 08:00:34 matben Exp $
 
 package require sha1pure
 
@@ -57,6 +57,7 @@ proc ::CanvasUtils::Init { } {
     # Incompatible change!!!
     if {$this(ipver) == 4} {
 	set utagpref2 "utag:[eval {format %02x%02x%02x%02x} [split $this(ipnum) .]]"
+	set utagpref2 "utag:$utagpref"
     } else {
 	
 	# Needs to be investigated!
