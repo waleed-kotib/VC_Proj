@@ -50,6 +50,7 @@
 ::msgcat::mcset en Import
 ::msgcat::mcset en Inbox
 ::msgcat::mcset en Info
+::msgcat::mcset en Invite
 ::msgcat::mcset en Login
 ::msgcat::mcset en Logout
 ::msgcat::mcset en Middle

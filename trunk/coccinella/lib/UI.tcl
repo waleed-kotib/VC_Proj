@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.9 2003-05-18 13:20:22 matben Exp $
+# $Id: UI.tcl,v 1.10 2003-05-25 15:03:27 matben Exp $
 
 # LabeledFrame --
 #
@@ -2482,6 +2482,75 @@ proc ::UI::ShortButtonPadMinWidth {wtop} {
     upvar ::UI::${wtop}::locals locals
     
     return $locals(xleft)
+}
+
+namespace eval ::UI:: {
+    
+    variable megauid 0
+}
+
+# UI::MegaDlgMsgAndEntry --
+# 
+#       A mega widget dialog with a message and a single entry.
+
+proc ::UI::MegaDlgMsgAndEntry {title msg label varName btcancel btok} {
+    global this sysFont
+    
+    variable finmega
+    variable megauid
+    upvar $varName entryVar
+    
+    set w .mega[incr megauid]
+    toplevel $w
+    if {[string match "mac*" $this(platform)]} {
+	eval $::macWindowStyle $w documentProc
+    } else {
+	
+    }
+    wm title $w $title
+    set finmega -1
+    wm protocol $w WM_DELETE_WINDOW "set [namespace current]::finmega 0"
+    
+    # Global frame.
+    pack [frame $w.frall -borderwidth 1 -relief raised] \
+      -fill both -expand 1 -ipadx 4
+    pack [message $w.frall.msg -width 220 -font $sysFont(s) -text $msg] \
+      -side top -fill both -padx 4 -pady 2
+    
+    set wmid $w.frall.fr
+    pack [frame $wmid] -side top -fill x -expand 1 -padx 6
+    label $wmid.la -font $sysFont(sb) -text $label
+    entry $wmid.en
+    grid $wmid.la -column 0 -row 0 -sticky e -padx 2 
+    grid $wmid.en -column 1 -row 0 -sticky ew -padx 2 
+    
+    # Button part.
+    set frbot [frame $w.frall.frbot -borderwidth 0]
+    pack $frbot  -side bottom -fill x -padx 10 -pady 8
+    pack [button $frbot.btok -text $btok -width 8  \
+      -default active -command "set [namespace current]::finmega 1"] \
+      -side right -padx 5 -pady 5
+    pack [button $frbot.btcan -text $btcancel -width 8  \
+      -command "set [namespace current]::finmega 0"]  \
+      -side right -padx 5 -pady 5  
+    
+    wm resizable $w 0 0
+    bind $w <Return> [list $frbot.btok invoke]
+    bind $w <Escape> [list $frbot.btcan invoke]
+    
+    # Grab and focus.
+    set oldFocus [focus]
+    focus $wmid.en
+    catch {grab $w}
+    
+    # Wait here for a button press.
+    tkwait variable [namespace current]::finmega
+    
+    set entryVar [$wmid.en get]
+    catch {grab release $w}
+    destroy $w
+    focus $oldFocus
+    return [expr {($finmega <= 0) ? "cancel" : "ok"}]
 }
 
 #--- Cut, Copy, & Paste stuff --------------------------------------------------

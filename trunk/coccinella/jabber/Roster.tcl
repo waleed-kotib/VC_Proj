@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.3 2003-05-20 16:22:30 matben Exp $
+# $Id: Roster.tcl,v 1.4 2003-05-25 15:03:27 matben Exp $
 
 package provide Roster 1.0
 
@@ -468,6 +468,7 @@ proc ::Jabber::Roster::SetItem {jid args} {
 	# Add all resources for this jid?
 	set presenceList [$jstate(roster) getpresence $jid]
 	::Jabber::Debug 2 "      presenceList=$presenceList"
+	
 	foreach pres $presenceList {
 	    catch {unset presArr}
 	    array set presArr $pres
@@ -632,7 +633,7 @@ proc ::Jabber::Roster::AutoBrowseCallback {browseName type jid subiq} {
     if {[$jstate(browse) havenamespace $jid "coccinella:wb"]} {
 	if {[regexp {^(.+@[^/]+)/(.+)$} $jid match jid2 res]} {
 	    set presArr(-show) "normal"
-	    array set presArr [$jstate(roster) getpresence $jid2 $res]
+	    array set presArr [$jstate(roster) getpresence $jid2 -resource $res]
 	    
 	    # If available and show = ( normal | empty | chat ) display icon.
 	    if {![string equal $presArr(-type) "available"]} {
@@ -1170,17 +1171,22 @@ proc ::Jabber::Roster::GetPresenceIcon {jid presence args} {
     }
     #puts "key=$key"
     
-    if {$jprefs(haveIMsysIcons) &&  \
-      [$jstate(browse) isbrowsed $jserver(this)]} {
+    if {$jprefs(haveIMsysIcons)} {
 	
-	# Use the host part of the jid to investigate the type of IM system.
-	if {[regexp {^[^@]+@([^/]+)(/.*)?} $jid match host]} {
-	    set typesubtype [$jstate(browse) gettype $host]
-	    if {[regexp {[^/]+/([^/]+)} $typesubtype match subtype]} {
-		if {[regexp {(aim|icq|msn|yahoo)} $subtype match]} {
-		    append key ",$subtype"
+	# If browsed...
+	if {[$jstate(browse) isbrowsed $jserver(this)]} {
+	    
+	    # Use the host part of the jid to investigate the type of IM system.
+	    if {[regexp {^[^@]+@([^/]+)(/.*)?} $jid match host]} {
+		set typesubtype [$jstate(browse) gettype $host]
+		if {[regexp {[^/]+/([^/]+)} $typesubtype match subtype]} {
+		    if {[regexp {(aim|icq|msn|yahoo)} $subtype match]} {
+			append key ",$subtype"
+		    }
 		}
 	    }
+	} elseif {[$jstate(jlib) have_agent $jserver(this)]} {
+	    
 	}
     }   
     

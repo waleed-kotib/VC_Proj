@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: muc.tcl,v 1.4 2003-05-20 16:22:30 matben Exp $
+# $Id: muc.tcl,v 1.5 2003-05-25 15:03:27 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -25,12 +25,12 @@
 #      jlibName muc destroy roomjid ?-command, -reason, alternativejid?
 #      jlibName muc enter roomjid nick ?-command?
 #      jlibName muc exit roomjid nick
-#      jlibName muc getaffilation roomjid affilation callback
+#      jlibName muc getaffiliation roomjid affiliation callback
 #      jlibName muc getrole roomjid role callback
 #      jlibName muc getroom roomjid callback
 #      jlibName muc invite roomjid jid ?-reason?
 #      jlibName muc mynick roomjid
-#      jlibName muc setaffilation roomjid nick affilation ?-command, -reason?
+#      jlibName muc setaffiliation roomjid nick affiliation ?-command, -reason?
 #      jlibName muc setnick roomjid nick ?-command?
 #      jlibName muc setrole roomjid nick role ?-command, -reason?
 #      jlibName muc setroom roomjid type ?-command, -form?
@@ -44,12 +44,10 @@ package provide muc 0.1
 namespace eval jlib::muc {
     
     # Globals same for all instances of this jlib.
-    #    > 1 prints raw xml I/O
-    #    > 2 prints a lot more
-    variable debug 0
+    variable debug 3
     
     variable muc
-    set muc(affilationExp) {(owner|admin|member|outcast|none)}
+    set muc(affiliationExp) {(owner|admin|member|outcast|none)}
     set muc(roleExp) {(moderator|participant|visitor|none)}
 }
   
@@ -146,6 +144,7 @@ proc jlib::muc::setnick {jlibname roomjid nick args} {
 
 proc jlib::muc::invite {jlibname roomjid jid args} {
     
+    set opts {}
     set children {}
     foreach {name value} $args {
 	switch -- $name {
@@ -204,15 +203,15 @@ proc jlib::muc::setrole {jlibname roomjid nick role args} {
       $opts
 }
 
-# jlib::muc::setaffilation --
+# jlib::muc::setaffiliation --
 # 
 # 
 
-proc jlib::muc::setaffilation {jlibname roomjid nick affilation args} {
+proc jlib::muc::setaffiliation {jlibname roomjid nick affiliation args} {
     variable muc
     
-    if {![regexp $muc(affilationExp) $affilation]} {
-	return -code error "Unrecognized affilation \"$affilation\""
+    if {![regexp $muc(affiliationExp) $affiliation]} {
+	return -code error "Unrecognized affiliation \"$affiliation\""
     }
     set opts {}
     set subitem {}
@@ -232,7 +231,7 @@ proc jlib::muc::setaffilation {jlibname roomjid nick affilation args} {
     }
     
     set subelements [list [wrapper::createtag "item" -subtags $subitem \
-      -attrlist [list nick $nick affilation $affilation]]]
+      -attrlist [list nick $nick affiliation $affiliation]]]
     
     set xmllist [wrapper::createtag "query" \
       -attrlist {xmlns "http://jabber.org/protocol/muc#admin"} \
@@ -260,18 +259,18 @@ proc jlib::muc::getrole {jlibname roomjid role callback} {
       -command [list [namespace parent]::parse_iq_response $jlibname $callback]
 }
 
-# jlib::muc::getaffilation --
+# jlib::muc::getaffiliation --
 # 
 # 
 
-proc jlib::muc::getaffilation {jlibname roomjid affilation callback} {
+proc jlib::muc::getaffiliation {jlibname roomjid affiliation callback} {
     variable muc
     
-    if {![regexp $muc(affilationExp) $affilation]} {
-	return -code error "Unrecognized role \"$affilation\""
+    if {![regexp $muc(affiliationExp) $affiliation]} {
+	return -code error "Unrecognized role \"$affiliation\""
     }
     set subelements [list [wrapper::createtag "item" \
-      -attrlist [list affilation $affilation]]]
+      -attrlist [list affiliation $affiliation]]]
     
     set xmllist [wrapper::createtag "query" -subtags $subelements \
       -attrlist {xmlns "http://jabber.org/protocol/muc#admin"}]
@@ -355,23 +354,40 @@ proc jlib::muc::destroy {jlibname roomjid args} {
 		  [list [namespace parent]::parse_iq_response $jlibname $value]
 	    }
 	    -reason {
-		lappend subelements [list [wrapper::createtag "reason" \
-		  -chdata $value]]
+		lappend subelements [wrapper::createtag "reason" \
+		  -chdata $value]
 	    }
 	    -alternativejid {
-		lappend subelements [list [wrapper::createtag "alt" \
-		  -attrlist [list jid $value]]]
+		lappend subelements [wrapper::createtag "alt" \
+		  -attrlist [list jid $value]]
 	    }
 	    default {
 		return -code error "Unrecognized option \"$name\""
 	    }
 	}
     }
-    set xmllist [wrapper::createtag "query" -subtags $subelements \
+      
+    set destroyelem [wrapper::createtag "destroy" -subtags $subelements \
+      -attrlist [list jid $roomjid]]
+
+    set xmllist [wrapper::createtag "query" -subtags $destroyelem \
       -attrlist {xmlns "http://jabber.org/protocol/muc#owner"}]
     eval {[namespace parent]::send_iq $jlibname "set" $xmllist -to $roomjid} \
       $opts
 }
+
+#<iq
+#    type='set'
+#    from='crone1@shakespeare.lit/desktop'
+#    to='heath@macbeth.shakespeare.lit'
+#    id='begone'>
+#  <query xmlns='http://jabber.org/protocol/muc#owner'>
+#    <destroy jid='darkcave@macbeth.shakespeare.lit'>
+#      <reason>Macbeth doth come.</reason>
+#    </destroy>
+#  </query>
+#</iq>
+
 
 # jlib::muc::getroom --
 # 

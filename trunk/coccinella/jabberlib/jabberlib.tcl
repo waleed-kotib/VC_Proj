@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.8 2003-05-20 16:22:30 matben Exp $
+# $Id: jabberlib.tcl,v 1.9 2003-05-25 15:03:27 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -96,6 +96,8 @@
 #      jlibName get_last to cmd
 #      jlibName get_time to cmd
 #      jlibName get_version to cmd
+#      jlibName getagent jid
+#      jlibName haveagent jid
 #      jlibName myjid
 #      jlibName mystatus
 #      jlibName oob_set to cmd url ?args?
@@ -205,9 +207,7 @@
 #                added 'mystatus' command, added 'setgroupchatpriority',
 #                'setgroupchatprotocol' and reworked all groupchat protocol
 #                dispatching.
-
-# Notes:  1) there can be problems if using any uppercase character in names
-#            while they are returned all lower case, such as room names etc.
+#       030523   added 'getagent' and 'haveagent' commands.
 
 package require wrapper
 package require roster
@@ -855,10 +855,14 @@ proc jlib::iq_handler {jlibname xmldata} {
 	error {
 	    
 	    # We should have a single error element here.
+	    # There is an open question here if <error/> elements can sit
+	    # in other branches of the xml tree.
 	    set errcode {}
 	    set errmsg {}
 	    foreach errorchild $childlist {
 		if {[string equal [lindex $errorchild 0] "error"]} {
+		    
+		    # Found it!
 		    foreach {ctag cattrlist cisempty cchdata cchildlist} \
 		      $errorchild { break }
 		    set errcode [wrapper::getattr $cattrlist "code"]
@@ -2032,14 +2036,14 @@ proc jlib::parse_agent_get {jlibname jid cmd type subiq} {
     upvar [namespace current]::service::services services
 
     Debug 3 "jlib::parse_agent_get jid=$jid, cmd=$cmd, type=$type, subiq=$subiq"
+
     if {[string equal $type "error"]} {
 	uplevel #0 "$cmd [list $jlibname error $subiq]"
 	return
     } 
-    set agentElem [wrapper::getchildren $subiq]
      
     # Loop through the subelement to see what we've got.
-    foreach elem $agentElem {
+    foreach elem [wrapper::getchildren $subiq] {
 	set tag [lindex $elem 0]
 	set agent($jid,$tag) [lindex $elem 3]
 	if {[lsearch $services $tag] >= 0} {
@@ -2059,6 +2063,7 @@ proc jlib::parse_agents_get {jlibname jid cmd type subiq} {
     upvar [namespace current]::service::services services
 
     Debug 3 "jlib::parse_agents_get jid=$jid, cmd=$cmd, type=$type, subiq=$subiq"
+
     if {[string equal $type "error"]} {
 	uplevel #0 "$cmd [list $jlibname error $subiq]"
 	return
@@ -2094,6 +2099,30 @@ proc jlib::parse_agents_get {jlibname jid cmd type subiq} {
 	lappend agent($jid,childs) $jidAgent	
     }
     uplevel #0 "$cmd [list $jlibname ok $subiq]"
+}
+
+# jlib::getagent --
+# 
+#       Accessor function for the agent stuff.
+
+proc jlib::getagent {jlibname jid} {
+    upvar [namespace current]::${jlibname}::agent agent
+
+    if {[info exists agent($jid,parent)]} {
+	return [array get agent "$jid,*"]
+    } else {
+	return ""
+    }
+}
+
+proc jlib::have_agent {jlibname jid} {
+    upvar [namespace current]::${jlibname}::agent agent
+
+    if {[info exists agent($jid,parent)]} {
+	return 1
+    } else {
+	return 0
+    }
 }
 
 # jlib::vcard_get --

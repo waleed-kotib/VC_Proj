@@ -72,20 +72,10 @@ set theJud jud.$theServer
 set theConference conference.$theServer
 set theRoomJid myroom@$theConference
 if {1} {
-    set myUsername matben
-    set myPassword 1amason
+	set myUsername mrduck
+	set myPassword xyz123
     set myRealname {Mats Bengtsson}
     set yourUsername mari
-} elseif {0} {
-    set myUsername oskar
-    set myPassword 1amason
-    set myRealname {Oskar Bengtsson}
-    set yourUsername mari
-} elseif {0} {
-    set myUsername mari
-    set myPassword 1amason
-    set myRealname {Mari Lundberg}
-    set yourUsername matben
 }
 set myJid ${myUsername}@$theServer
 set yourJid ${yourUsername}@$theServer

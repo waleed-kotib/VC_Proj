@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.3 2003-05-20 16:22:24 matben Exp $
+# $Id: GroupChat.tcl,v 1.4 2003-05-25 15:03:27 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -348,14 +348,14 @@ proc ::Jabber::GroupChat::EnterCallback {jlibName type args} {
 
 proc ::Jabber::GroupChat::GotMsg {body args} {
     global  prefs
-
+    
     variable locals
     upvar ::Jabber::mapShowElemToText mapShowElemToText
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
-
+    
     ::Jabber::Debug 2 "::Jabber::GroupChat::GotMsg args='$args'"
-
+    
     array set argsArr $args
     
     # We must follow the roomJid...
@@ -374,7 +374,7 @@ proc ::Jabber::GroupChat::GotMsg {body args} {
     } else {
 	return -code error "The jid we got \"$fromJid\"was not well-formed!"
     }
-
+    
     # If we haven't a window for this thread, make one!
     if {[info exists locals($roomJid,wtop)] &&  \
       [winfo exists $locals($roomJid,wtop)]} {
@@ -384,44 +384,46 @@ proc ::Jabber::GroupChat::GotMsg {body args} {
     if {[info exists argsArr(-subject)]} {
 	set locals($roomJid,topic) $argsArr(-subject)
     }
-    
-    # This can be room name or nick name.
-    foreach {meRoomJid mynick} [$jstate(jlib) service hashandnick $roomJid] { break }
-
-    # Old-style groupchat and browser compatibility layer.
-    set nick [$jstate(jlib) service nick $fromJid]
-    
-    set wtext $locals($roomJid,wtext)
-    if {$jprefs(chat,showtime)} {
-	set theTime [clock format [clock seconds] -format "%H:%M"]
-	set txt "$theTime <$nick>"
-    } else {
-	set txt <$nick>
-    }
-    $wtext configure -state normal
-    if {[string equal $meRoomJid $fromJid]} {
-	set meyou me
-    } else {
-	set meyou you
-    }
-    $wtext insert end $txt ${meyou}tag
-    set textCmds [::Text::ParseAllForTextWidget "  $body" ${meyou}txttag linktag]
-    foreach cmd $textCmds {
-	eval $wtext $cmd
-    }
-    $wtext insert end "\n"
-    
-    $wtext configure -state disabled
-    $wtext see end
-    if {$locals($roomJid,got1stMsg) == 0} {
-	set locals($roomJid,got1stMsg) 1
-    }
-    
-    if {$jprefs(speakChat)} {
-	if {$meyou == "me"} {
-	    ::UserActions::Speak $body $prefs(voiceUs)
+    if {[string length $body] > 0} {
+	
+	# This can be room name or nick name.
+	foreach {meRoomJid mynick} [$jstate(jlib) service hashandnick $roomJid] { break }
+	
+	# Old-style groupchat and browser compatibility layer.
+	set nick [$jstate(jlib) service nick $fromJid]
+	
+	set wtext $locals($roomJid,wtext)
+	if {$jprefs(chat,showtime)} {
+	    set theTime [clock format [clock seconds] -format "%H:%M"]
+	    set txt "$theTime <$nick>"
 	} else {
-	    ::UserActions::Speak $body $prefs(voiceOther)
+	    set txt <$nick>
+	}
+	$wtext configure -state normal
+	if {[string equal $meRoomJid $fromJid]} {
+	    set meyou me
+	} else {
+	    set meyou you
+	}
+	$wtext insert end $txt ${meyou}tag
+	set textCmds [::Text::ParseAllForTextWidget "  $body" ${meyou}txttag linktag]
+	foreach cmd $textCmds {
+	    eval $wtext $cmd
+	}
+	$wtext insert end "\n"
+	
+	$wtext configure -state disabled
+	$wtext see end
+	if {$locals($roomJid,got1stMsg) == 0} {
+	    set locals($roomJid,got1stMsg) 1
+	}
+	
+	if {$jprefs(speakChat)} {
+	    if {$meyou == "me"} {
+		::UserActions::Speak $body $prefs(voiceUs)
+	    } else {
+		::UserActions::Speak $body $prefs(voiceOther)
+	    }
 	}
     }
 }
@@ -518,12 +520,16 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     pack [button $w.frall.fccp.nick -text "[::msgcat::mc {Nick name}]..."  \
       -font $sysFont(s) -command [list ::Jabber::MUC::SetNick $roomJid]] \
       -side right -padx 4
+    pack [button $w.frall.fccp.inv -text "[::msgcat::mc Invite]..."  \
+      -font $sysFont(s) -command [list ::Jabber::MUC::Invite $roomJid]] \
+      -side right -padx 4
     
     pack [frame $w.frall.div2 -bd 2 -relief sunken -height 2] -fill x -side top
     if {[info exists locals($roomJid,protocol)] &&  \
       ($locals($roomJid,protocol) != "muc")} {
 	$w.frall.fccp.info configure -state disabled
 	$w.frall.fccp.nick configure -state disabled
+	$w.frall.fccp.inv configure -state disabled
     }
 
     # Popup for setting status to this room.
@@ -552,7 +558,7 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     entry $frtop.etp -bg $prefs(bgColGeneral)  \
       -textvariable [namespace current]::locals($roomJid,topic)
     button $frtop.btp -text "[::msgcat::mc Change]..." -font $sysFont(s)  \
-      -command [list [namespace current]::SetTopic ${w}tp $roomJid]
+      -command [list [namespace current]::SetTopic $roomJid]
     
     grid $frtop.la -column 0 -row 0 -sticky e -padx 4 -pady 1
     grid $frtop.en -column 1 -row 0 -sticky ew -padx 4 -pady 1 -columnspan 2
@@ -644,76 +650,28 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     focus $w
 }
 
-proc ::Jabber::GroupChat::SetTopic {w roomJid} {
-    global  prefs this sysFont
-    
+proc ::Jabber::GroupChat::SetTopic {roomJid} {
     variable locals
-    variable fintopic
     upvar ::Jabber::jstate jstate
     
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-    } else {
-	
-    }
-    wm title $w [::msgcat::mc {Set New Topic}]
-    set fintopic -1
-    set locals($roomJid,newtopic) $locals($roomJid,topic)
-    
-    # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised]   \
-      -fill both -expand 1 -ipadx 4
-    pack [message $w.frall.msg -width 220 -font $sysFont(s)  \
-      -text [::msgcat::mc jasettopic]] -side top -fill both -padx 4 -pady 2
-    
-    set wmid $w.frall.fr
-    pack [frame $wmid] -side top -fill x -expand 1 -padx 6
-    label $wmid.la -font $sysFont(sb) -text "[::msgcat::mc {New Topic}]:"
-    entry $wmid.en -textvariable [namespace current]::locals($roomJid,newtopic)
-    grid $wmid.la -column 0 -row 0 -sticky e -padx 2 
-    grid $wmid.en -column 1 -row 0 -sticky ew -padx 2 
-    
-    # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack $frbot  -side bottom -fill x -padx 10 -pady 8
-    pack [button $frbot.btok -text [::msgcat::mc OK] -width 8  \
-      -default active -command [list [namespace current]::DoSetTopic $roomJid]] \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btcan -text [::msgcat::mc Cancel] -width 8  \
-      -command "set [namespace current]::fintopic 0"]  \
-      -side right -padx 5 -pady 5  
-    
-    wm resizable $w 0 0
-    bind $w <Return> [list $frbot.btok invoke]
-    
-    # Grab and focus.
-    set oldFocus [focus]
-    focus $w
-    catch {grab $w}
-    
-    # Wait here for a button press.
-    tkwait variable [namespace current]::fintopic
-    
-    catch {grab release $w}
-    destroy $w
-    focus $oldFocus
-    return $fintopic
-}
+    set topic $locals($roomJid,topic)
+    set ans [::UI::MegaDlgMsgAndEntry  \
+      [::msgcat::mc {Set New Topic}]  \
+      [::msgcat::mc jasettopic]  \
+      "[::msgcat::mc {New Topic}]:"  \
+      topic [::msgcat::mc Cancel] [::msgcat::mc OK]]
 
-proc ::Jabber::GroupChat::DoSetTopic {roomJid} {
-    variable locals
-    variable fintopic
-
-    if {[catch {
-	$jstate(jlib) send_message $roomJid -type groupchat \
-	  -subject $locals($roomJid,newtopic)
-    } err]} {
-	tk_messageBox -type ok -icon error -title "Network Error" \
-	  -message "Network error ocurred: $err"
-	return
+    if {($ans == "ok") && ($topic != "")} {
+	if {[catch {
+	    $jstate(jlib) send_message $roomJid -type groupchat \
+	      -subject $topic
+	} err]} {
+	    tk_messageBox -type ok -icon error -title "Network Error" \
+	      -message "Network error ocurred: $err"
+	    return
+	}
     }
-    set fintopic 1
+    return $ans
 }
 
 proc ::Jabber::GroupChat::Send {roomJid} {

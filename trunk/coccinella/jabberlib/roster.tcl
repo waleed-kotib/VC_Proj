@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.5 2003-02-24 17:52:09 matben Exp $
+# $Id: roster.tcl,v 1.6 2003-05-25 15:03:27 matben Exp $
 # 
 # Note that every jid in the rosterArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -58,11 +58,11 @@
 #      
 #   INSTANCE COMMANDS
 #      rostName enterroster
-#      rostName enterroster
+#      rostName exitroster
 #      rostName getgroups ?jid?
 #      rostName getask jid
 #      rostName getname jid
-#      rostName getpresence jid
+#      rostName getpresence jid ?-resource, -type?
 #      rostName getresources jid
 #      rostName gethighestresource jid
 #      rostName getrosteritem jid
@@ -123,13 +123,6 @@ namespace eval roster {
     # ...and the presence arrays: 'presArr($jid/$resource,...)'
     # The list of resources is treated separately (presArr($jid,res))
     set rostGlobals(presTags) {type status priority show x} 
-}
-
-proc roster::Debug {num str} {
-    variable rostGlobals
-    if {$num <= $rostGlobals(debug)} {
-	puts $str
-    }
 }
 
 # roster::roster --
@@ -425,11 +418,8 @@ proc roster::setpresence {rostName jid type args} {
 	# if we haven't got our roster before this?
 	
 	# Add to list of resources.
-	if {![info exists presArr($jid2,res)]} {
-	    set presArr($jid2,res) $resource
-	} elseif {[lsearch -exact $presArr($jid2,res) $resource] < 0} {
-	    lappend presArr($jid2,res) $resource
-	}
+	set presArr($jid2,res) [lsort -unique [lappend presArr($jid2,res) \
+	  $resource]]
 	
 	set presArr($jid,type) $type
 	foreach {name value} $args {
@@ -517,8 +507,11 @@ proc roster::getusers {rostName} {
 # Arguments:
 #       rostName:   the instance of this roster.
 #       jid:        username@server, without /resource.
-#       resource:   (optional) if given, return presence for this alone,
-#                   else a list for each resource.
+#       args        ?-resource, -type?
+#                   -resource: return presence for this alone,
+#                       else a list for each resource.
+#                       Allow empty resources!!??
+#                   -type: return presence for (un)available only.
 #       
 # Results:
 #       a list of '-key value' pairs where key is any of: 
@@ -526,28 +519,34 @@ proc roster::getusers {rostName} {
 #       If the 'resource' in argument is not given,
 #       the result contains a sublist for each resource. IMPORTANT! Bad?
 
-proc roster::getpresence {rostName jid {resource {}}} {
+proc roster::getpresence {rostName jid args} {
     
     variable rostGlobals
     upvar [namespace current]::${rostName}::rosterArr rosterArr
     upvar [namespace current]::${rostName}::presArr presArr
     upvar [namespace current]::${rostName}::options options
     
-    Debug 2 "roster::getpresence rostName=$rostName, jid='$jid'"
+    Debug 2 "roster::getpresence rostName=$rostName, jid=$jid, args='$args'"
+    array set argsArr $args
+    set haveRes 0
+    if {[info exists argsArr(-resource)]} {
+	set haveRes 1
+	set resource $argsArr(-resource)
+    }
     
     # It may happen that there is no roster item for this jid.
     # Can anyway have presence???
     if {![info exists presArr($jid,res)] ||   \
       ([string length $presArr($jid,res)] == 0)} {
-    	if {[string length $resource]} {
-		return [list -resource $resource -type unavailable]
+    	if {$haveRes} {
+	    return [list -resource $resource -type unavailable]
 	} else {      
-		return [list [list -resource $resource -type unavailable]]
+	    return [list [list -resource "" -type unavailable]]
 	}
     }
     
     set result {}
-    if {[string length $resource]} {
+    if {$haveRes} {
 
 	# Return presence only from the specified resource.
 	if {[lsearch -exact $presArr($jid,res) $resource] < 0} {
@@ -555,9 +554,13 @@ proc roster::getpresence {rostName jid {resource {}}} {
 	}
 	set result [list -resource $resource]
 	set jid3 $jid/$resource
+	if {[info exists argsArr(-type)] &&  \
+	  ![string equal $argsArr(-type) $presArr($jid3,type)]} {
+	    return {}
+	}
 	foreach key $rostGlobals(presTags) {
 	    if {[info exists presArr($jid3,$key)]} {
-		lappend result -$key $presArr($jid3,$key)
+		lappend result $key $presArr($jid3,$key)
 	    }
 	}
     } else {
@@ -566,12 +569,17 @@ proc roster::getpresence {rostName jid {resource {}}} {
 	foreach res $presArr($jid,res) {
 	    set thisRes [list -resource $res]
 	    set jid3 $jid/$res
-	    foreach key $rostGlobals(presTags) {
-		if {[info exists presArr($jid3,$key)]} {
-		    lappend thisRes -$key $presArr($jid3,$key)
+	    if {[info exists argsArr(-type)] &&  \
+	      ![string equal $argsArr(-type) $presArr($jid3,type)]} {
+		# Empty.
+	    } else {
+		foreach key $rostGlobals(presTags) {
+		    if {[info exists presArr($jid3,$key)]} {
+			lappend thisRes -$key $presArr($jid3,$key)
+		    }
 		}
+		lappend result $thisRes
 	    }
-	    lappend result $thisRes
 	}
     }
     return $result
@@ -682,18 +690,35 @@ proc roster::getask {rostName jid} {
 #
 # Arguments:
 #       rostName:   the instance of this roster.
-#       jid:        a jid without any resource.
+#       jid:        a jid without any resource (jid2).
+#       args        ?-type?
+#                   -type: return presence for (un)available only.
 #       
 # Results:
 #       a list of all resources for this jid or empty.
 
-proc roster::getresources {rostName jid} {
+proc roster::getresources {rostName jid args} {
     upvar [namespace current]::${rostName}::presArr presArr
    
     Debug 2 "roster::getresources rostName=$rostName, jid='$jid'"
+    array set argsArr $args
     
     if {[info exists presArr($jid,res)]} {
-	return $presArr($jid,res)
+	if {[info exists argsArr(-type)]} {
+	    
+	    # Need to loop through all resources for this jid.
+	    set resList {}
+	    set type $argsArr(-type)
+	    foreach res $presArr($jid,res) {
+		set jid3 $jid/$res
+		if {[string equal $argsArr(-type) $presArr($jid3,type)]} {
+		    lappend resList $res
+		}
+	    }
+	    return $resList
+	} else {
+	    return $presArr($jid,res)
+	}
     } else {
 	return {}
     }
@@ -705,7 +730,7 @@ proc roster::getresources {rostName jid} {
 #
 # Arguments:
 #       rostName:   the instance of this roster.
-#       jid:        a jid without any resource.
+#       jid:        a jid without any resource (jid2).
 #       
 # Results:
 #       a resource for this jid or empty.
@@ -806,6 +831,13 @@ proc roster::getx {rostName jid xmlns} {
 	return $presArr($jid,x,$xmlns)
     } else {
 	return ""
+    }
+}
+
+proc roster::Debug {num str} {
+    variable rostGlobals
+    if {$num <= $rostGlobals(debug)} {
+	puts $str
     }
 }
 
