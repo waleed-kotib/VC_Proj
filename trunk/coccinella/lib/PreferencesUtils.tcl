@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.1.1.1 2002-12-08 11:04:10 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.2 2003-01-30 17:34:03 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -120,13 +120,11 @@ proc ::PreferencesUtils::PreferencesAdd {thePrefs} {
 	} else {
 	    set value $defaultValue
 	}
-	#puts "varName=$varName, varPriority=$varPriority, defaultValue=$defaultValue"
 	
 	# Don't read in version 0.92 preference file.
 	if {[string equal $resourceName "prefs_minorVers"]} {
 	    set majorOnFile [option get . prefs_majorVers {}]
 	    set minorOnFile [option get . prefs_minorVers {}]
-	    #puts "version: ${majorOnFile}.${minorOnFile}"
 	    if {[string equal ${majorOnFile}.${minorOnFile} "0.92"]} {
 		
 		# Empty the database just read. Clears also the widget options!
@@ -142,7 +140,6 @@ proc ::PreferencesUtils::PreferencesAdd {thePrefs} {
 	if {[string equal $resourceName "jserver_list"]} {
 	    set majorOnFile [option get . prefs_majorVers {}]
 	    set minorOnFile [option get . prefs_minorVers {}]
-	    #puts "version2: ${majorOnFile}.${minorOnFile}"
 	    if {[string equal ${majorOnFile}.${minorOnFile} "0.93"]} {
 		set $varName $defaultValue
 		continue
@@ -256,9 +253,6 @@ proc ::PreferencesUtils::PreferencesResetToFactoryDefaults {maxPriority} {
     
     variable priNameToNum
 
-    Debug 2 "::PreferencesUtils::PreferencesResetToFactoryDefaults \
-      maxPriority=$maxPriority"
-
     set maxPriorityNum $priNameToNum($maxPriority)
     foreach item $prefs(master) {
 	set varName [lindex $item 0]
@@ -290,8 +284,6 @@ proc ::PreferencesUtils::PreferencesResetToFactoryDefaults {maxPriority} {
 
 proc ::PreferencesUtils::PreferencesResetToUserDefaults { } {
     global  prefs
-    
-    Debug 2 "::PreferencesUtils::PreferencesResetToUserDefaults"
 	
     # Need to make a temporary storage in order not to duplicate items.
     set thePrefs $prefs(master)
@@ -322,6 +314,7 @@ proc ::PreferencesUtils::SetWidgetDefaultOptions { } {
     option add *Entry.Font $sysFont(s)
     option add *Entry.HighlightColor #6363CE
     option add *Entry.HighlightBackground $prefs(bgColGeneral)
+    option add *Entry.DisableBackground $prefs(bgColGeneral)
     option add *Listbox.HighlightColor #6363CE
     option add *Listbox.HighlightBackground $prefs(bgColGeneral)
     option add *Radiobutton.Font $sysFont(s)
@@ -339,7 +332,6 @@ proc ::PreferencesUtils::SetWidgetDefaultOptions { } {
 	    option add *Radiobutton.Background $prefs(bgColGeneral)
 	    option add *Button.HighlightBackground $prefs(bgColGeneral)
 	    option add *Checkbutton.Background $prefs(bgColGeneral)
-	    #option add *Entry.Font $sysFont(m)
 	    option add *Entry.HighlightThickness 3
 	    option add *Listbox.Font $sysFont(m)
 	    option add *Listbox.HighlightThickness 3
@@ -472,6 +464,7 @@ proc ::PreferencesUtils::SetUserPreferences { } {
 	  [list ::Jabber::jprefs(xawaymin)         jprefs_xawaymin          $::Jabber::jprefs(xawaymin)]  \
 	  [list ::Jabber::jprefs(awaymsg)          jprefs_awaymsg           $::Jabber::jprefs(awaymsg)]  \
 	  [list ::Jabber::jprefs(xawaymsg)         jprefs_xawaymsg          $::Jabber::jprefs(xawaymsg)]  \
+	  [list ::Jabber::jprefs(logoutStatus)     jprefs_logoutStatus      $::Jabber::jprefs(logoutStatus)]  \
 	  [list ::Jabber::jprefs(chatFont)         jprefs_chatFont          $::Jabber::jprefs(chatFont)]  \
 	  [list ::Jabber::jprefs(autoupdateCheck)  jprefs_autoupdateCheck   $::Jabber::jprefs(autoupdateCheck)]  \
 	  [list ::Jabber::jprefs(autoupdateShow,$ver) jprefs_autoupdateShow_ver $::Jabber::jprefs(autoupdateShow,$ver)]  \
@@ -502,6 +495,11 @@ proc ::PreferencesUtils::SetUserPreferences { } {
     # The prefs(stripJabber) option always overrides overrides prefs(protocol)!
     if {$prefs(stripJabber)} {
 	set prefs(protocol) "symmetric"
+    }
+    
+    # Moved 30days -> month
+    if {$prefs(checkCache) == "30days"} {
+	set prefs(checkCache) "month"
     }
 }
 

@@ -11,7 +11,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: MimeTypesAndPlugins.tcl,v 1.2 2003-01-11 16:16:09 matben Exp $
+# $Id: MimeTypesAndPlugins.tcl,v 1.3 2003-01-30 17:34:00 matben Exp $
 
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -182,7 +182,7 @@ foreach theMime [array names mime2SuffixList] {
 	set mimeTypeIsText($theMime) 0
     }
     set prefMimeType2Package($theMime) {}
-    set mimeTypeDoWhat($theMime) {unavailable}
+    set mimeTypeDoWhat($theMime) "unavailable"
 }
 
 # Mapping from MIME type to a list of Mac types.
@@ -290,10 +290,10 @@ array set helpers2Platform {xanim u}
 # The descriptions of the plugins:
 #--- Define the reject, save to disk etc. options ------------------------------
 
-set plugin(reject,full) {Reject}
+set plugin(reject,full) "Reject"
 set plugin(reject,type) {}
 set plugin(reject,desc) {Reject reception}
-set plugin(unavailable,full) {Reject}
+set plugin(unavailable,full) "Reject"
 set plugin(unavailable,type) {}
 set plugin(unavailable,desc) {Reject reception}
 set plugin(save,full) {Save to disk}
@@ -303,7 +303,7 @@ set plugin(ask,full) {Prompt user}
 set plugin(ask,type) {}
 set plugin(ask,desc) {Is assumed to be an unknown MIME type therefore prompt\
   the user}
-set plugin(tk,full) {tk}
+set plugin(tk,full) "tk"
 set plugin(tk,type) {}
 set plugin(tk,desc) {Supported by the core}
 set plugin(tk,importProc) ::ImageAndMovie::DoImport

@@ -3,11 +3,11 @@
 #      This file is part of the whiteboard application. It implements some
 #      miscellaneous utilities for canvas operations.
 #      
-#  Copyright (c) 2000-2002  Mats Bengtsson
+#  Copyright (c) 2000-2003  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.2 2003-01-11 16:16:09 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.3 2003-01-30 17:33:54 matben Exp $
 
 package provide CanvasUtils 1.0
 package require sha1pure
@@ -290,7 +290,7 @@ proc ::CanvasUtils::GetUndoCommand {wtop cmd} {
 	    set ilast [lindex $cmd end]
 	    set thetext [$w itemcget $utag -text]
 	    set str [string range $thetext $ind $ilast]
-	    set undo [insert $utag $ind $str]
+	    set undo [list insert $utag $ind $str]
 	}
 	delete {
 	    set utag [lindex $cmd 1]

@@ -23,9 +23,9 @@
 #
 # Complete rewrite by Mats Bengtsson   (matben@privat.utfors.se)
 # 
-# Copyright (C) 2002 Mats Bengtsson
+# Copyright (C) 2002-2003 Mats Bengtsson
 # 
-# $Id: tree.tcl,v 1.1.1.1 2002-12-08 10:56:46 matben Exp $
+# $Id: tree.tcl,v 1.2 2003-01-30 17:33:40 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -68,6 +68,7 @@
 #      pathName closetree itemPath
 #      pathName configure ?option? ?value option value ...?
 #      pathName delitem itemPath ?-childsonly (0|1)?
+#      pathName find withtag aTag
 #      pathName getselection
 #      pathName getcanvas
 #      pathName isitem itemPath
@@ -212,23 +213,194 @@ namespace eval tree {
     set widgetGlobals(questmark) [image create photo -data {
 	R0lGODdhCAANAKIAAP////9jY97e3q0AAFIAAAAAAAAAAAAAACwAAAAACAANAAADHCgSMaPL
 	yfiEdNA6kgfxUMOFIDlCZXdmrNK0aQIAOw==
+    }]    
+    set widgetGlobals(macheadwb) [image create photo -data {
+	R0lGODlhEAAOAPMAAP//////zv/OnN7e3s6cY29vbwAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAMALAAAAAAQAA4AAARCcJhJ57hYhs2D
+	MNlleEJZEmA4mp+AhhpruEZh3ytLAzxf5CxUzwcsUYaAH6n1QSaLR6RSJ5RK
+	KhNnMlTQ+ri38C0CADs=
+    }]
+    set widgetGlobals(macheadtalkwb) [image create photo -data {
+	R0lGODlhEAAOAPMAAP//////zv/OnN7e3s6cY29vbwAAYwAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAMALAAAAAAQAA4AAARKcJxJ57hYhs2D
+	ONl1eEJZEmA4mp+Ahhp7uEdh3ytLAwbgFzkWytcDAEmyQ694NFWIPGPw4Ksu
+	pcjPBNpr6qhXo6Sytf5Ct5shHQEAOw==
+    }]
+    set widgetGlobals(macheadinv) [image create photo -data {
+	R0lGODlhCgAMAPEAAP///wsb6QAAAAAAACH5BAEAAAEALAAAAAAKAAwAAAIY
+	jI5nwc3qGpRPRGtwzLvu5GCWVo2dmEAFADs=
     }]
     
-    # Let them be accesible from the outside. 
-    set ::tree::idir $widgetGlobals(idir)
-    set ::tree::ifile $widgetGlobals(ifile)
-    set ::tree::folderimmac $widgetGlobals(folderim)
-    set ::tree::fileimmac $widgetGlobals(fileim)
-    set ::tree::machead $widgetGlobals(machead)
-    set ::tree::macheadaway $widgetGlobals(macheadaway)    
-    set ::tree::macheadtalk $widgetGlobals(macheadtalk)
+    # Some icons remade with transparency and 16 pixels width.
+    # May be display problems with 8.3.
+    set widgetGlobals(folderim) [image create photo -data {
+	R0lGODlhEAARAPMAAP///+/v797e3s7OzgAAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAIALAAAAAAQABEAAAQ6UMhJqyQ4a0uC
+	/x5WdeBHDARFlsF2sWX6wuZEdlh723Q9a7oQr9ca5o7CWU8mWNGYThiUWLxo
+	rhlJBAA7
+    }]
+    set widgetGlobals(folderim) [image create photo -data {
+	R0lGODlhEAAQAPcAAP///+fn/97e/97e3s7O/87Ozs7G/8bG/73G/729/729
+	zr29vbW9/7W1/7W1xrW1vbW1ta21/62t/62t96Wt96Wl96WlpZyc/5SU/5SU
+	94yM74SEhHt753t73nNzc2trxmtra2NjzmNjxmNjY1patVparVpapVpaWlpS
+	pVJSpVJSnEpKnEpKlEpKjEJChDk5ezk5czExazExYykxYykpWikpUiEhSiEh
+	QgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAMALAAAAAAQABAAAAi8AAcMSJHCgcCD
+	CAWWgKHhgoiCA18oSGiCAAkYHBymkKBBhMSDKAgEuEDiBQcMKDm+OJiCAAED
+	AkiaxHCBA4yDKggc2IkgZkkOH24KVLHzAIIESBt0iEEixkEWPJEmaKA0xgqn
+	AqFKnUp16QoZT6UyoNpAgtcZB1t0uDC2QQQJE7zSWFBgwIMYLta+nRDXKg0P
+	FuraxfshA4UKXmuc8AAB4V0XHzp4tTFig2DHeENYteFhQULHMm7cAOF5QEAA
+	Ow==
+    }] 
+    set widgetGlobals(machead) [image create photo -data {
+	R0lGODlhEAAMAPMAAP//////zv/OnN7e3s6cYwAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAMALAAAAAAQAAwAAAQxcJRJ57hYhs2D
+	KNlVeEJZEmA4mp+AhhpbuGm2sjR8s69KmhTdb/aBxYAWIa6nqyRhEQA7
+    }]
+    set widgetGlobals(macheadaway) [image create photo -data {
+	R0lGODlhEAAOAPMAAP//////zv/OnN7e3s7O/86cY2NjzjExYwAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAMALAAAAAAQAA4AAARHcMgpkb2IUhS6
+	F5k2cEJZFqFGloiATtgKumkdmGcWYyYvECYgqAUauQyugqGAGuqOTCWT+GpJ
+	mUvUpQLFTlWuQ1T8Uu0soggAOw==
+    }]
+    set widgetGlobals(macheadgray) [image create photo -data {
+	R0lGODlhEAAMAPMAAP///97e3sbGxoSEhAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAEALAAAAAAQAAwAAAQxMJBJZ7hYgs2B
+	INlFeEJZDmA4miYaauYkuCrJ0tnKzmlul5SXjtXzxYLCH+8lqliYEQA7
+    }]
+    set widgetGlobals(macheadinv) [image create photo -data {
+	R0lGODlhEAAMAPEAAP///97e3gAAAAAAACH5BAEAAAEALAAAAAAQAAwAAAIl
+	jI4XywYPn2hLxDipxZI6DmTNdoUeeYkMKikaqK6p+5bxmtBUAQA7
+    }]
+    set widgetGlobals(macheadsleep) [image create photo -data {
+	R0lGODlhEAAPAPMAAP//////zv/OnN7e3s6cYwAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAMALAAAAAAQAA8AAAQ+cEhZapk4U03r
+	vNzWeZoVnoOlllbgBoIAUkFRxzgxpzcuCzqMreD7BT+wYuxIUy53NicQGiBY
+	r9ddSsXFRAAAOw==
+    }]
+    set widgetGlobals(macheadtalk) [image create photo -data {
+	R0lGODlhEAAOAPMAAP//////zv/OnN7e3s6cYwAAYwAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAMALAAAAAAQAA4AAAQ/cJhJ57hYhs2D
+	MNlleEJZEmA4mp+AhhpruGm2svRQ2CT76pibzLDbiXqVS/FoqimBsaYFaBQ2
+	qbbK9AnrGi8RADs=
+    }]
+    set widgetGlobals(macheadunav) [image create photo -data {
+	R0lGODlhEAANAPMAAP//////zv/Ozv/OnP9jY/8xAN7e3t4AAM6cY70AAK0A
+	AIwAAHMAAFJSUlIAAAAAACH5BAEAAAYALAAAAAAQAA0AAARV0Jgjq6R2msc7
+	Z9YhPMQSnImgPGC1LooyHIXSPNkGK/Sz4pnHLsZCAC2PwCGmYAyMuUeixlRA
+	g4QYg8jJHITNgW+lCBGEzoGY07QwHg61/JN7e+iWCAA7
+    }]
+    set widgetGlobals(questmark) [image create photo -data {
+	R0lGODlhEAANAPMAAP////9jY97e3q0AAFIAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAIALAAAAAAQAA0AAAQmUIgQxpA4y2qt
+	zpzUfeKFeeRAZCoptBvsxutM22eNv/ruxz+ZKwIAOw==
+    }]
     
-    set ::tree::macheadunav $widgetGlobals(macheadunav)
-    set ::tree::macheadsleep $widgetGlobals(macheadsleep)
-    set ::tree::macheadgray $widgetGlobals(macheadgray)
-    set ::tree::dndim $widgetGlobals(dndim)
-    set ::tree::naim $widgetGlobals(naim)
-    set ::tree::questmark $widgetGlobals(questmark)
+    # With whiteboard icon.
+    set widgetGlobals(macheadwb) [image create photo -data {
+	R0lGODlhEAAOAPMAAP//////zv/OnN7e3s6cY29vbwAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAMALAAAAAAQAA4AAARCcJhJ57hYhs2D
+	MNlleEJZEmA4mp+AhhpruEZh3ytLAzxf5CxUzwcsUYaAH6n1QSaLR6RSJ5RK
+	KhNnMlTQ+ri38C0CADs=
+    }]
+    set widgetGlobals(macheadtalkwb) [image create photo -data {
+	R0lGODlhEAAOAPMAAP//////zv/OnN7e3s6cY29vbwAAYwAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAMALAAAAAAQAA4AAARKcJxJ57hYhs2D
+	ONl1eEJZEmA4mp+Ahhp7uEdh3ytLAwbgFzkWytcDAEmyQ694NFWIPGPw4Ksu
+	pcjPBNpr6qhXo6Sytf5Ct5shHQEAOw==
+    }]
+    set widgetGlobals(macheadawaywb) [image create photo -data {
+	R0lGODlhEAAOAPMAAP//////zv/OnN7e3s7O/86cY29vb2NjzjExYwAAAAAA
+	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAMALAAAAAAQAA4AAARNcMgpk72J0hS6
+	F5k2cEJZFqFGlomATtgKumkdmGcWYyYvECYgqAUytAoHF7KAGiaMrgNz2aRB
+	qVQM4CpldhOA8PaImJZR4u1oZzG43xEAOw==
+    }]
+    set widgetGlobals(macheadinvwb) [image create photo -data {
+	R0lGODlhEAAOAPMAAP////7+/vr6+vb29t7e3nV1dW9vbwAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAQALAAAAAAQAA4AAAQ7kJxJJ7lYgs33
+	ydfRdR8okh6oocBhvPA5tkNnyOMR2Lg3jQXcSTe65X7FnmdmkFQmAibIMOM0
+	M7BsNgIAOw==
+    }]
+    set widgetGlobals(macheadunavwb) [image create photo -data {
+	R0lGODlhEAAOAPcAAP//////zv/Ozv/OnP9jY/8xAN7e3t4AAM6cY70AAK0A
+	AIwAAHMAAG9vb1JSUlIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAYALAAAAAAQAA4AAAiJAA0YOCCwoECC
+	BgcagMCwIUMGBg8IgEBgQYCLCQQogACx4MYFChQMOFBAgQMICReCVEASwkYI
+	DWI2EAhhZUiOCCAA2DlzYYADIRUwGJBzJ4CeEBKUDKqgKE+aBEIyuMnQ6MwD
+	NYUOcLlRgdUDBGoOHbCVodCnDCA8IMv2oVWBaR26fZtSpt2YAQEAOw==
+    }]
+    set widgetGlobals(macheadsleepwb) [image create photo -data {
+	R0lGODlhEAAPAPMAAP//////zv/OnN7e3s6cY29vbwAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAMALAAAAAAQAA8AAAREcEhpqpk4U03r
+	vNzWeZoVnoOlFmwxGkEcCIIBAC6s0zxh46mAgUcb+m45IbEmOAJhy94vGaU5
+	qdVrkMDtdqcvVaVViAAAOw==
+    }]
+    set widgetGlobals(questmarkwb) [image create photo -data {
+	R0lGODlhEAAOAPMAAP////9jY97e3q0AAG9vb1IAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAIALAAAAAAQAA4AAAQ9UIgQxpA4y2qt
+	zpzUfeKFeeRQYIRKvPCrYlUB3DhAgGqe75ueDwcUuIbEU4GAvBUlzGaxEkUW
+	j1JNbPuKAAA7
+    }]
+    set widgetGlobals(macheadgraywb) [image create photo -data {
+	R0lGODlhEAAOAPMAAP///97e3sbGxoSEhG9vbwAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAEALAAAAAAQAA4AAAQ/MJRJZ7hYgs2B
+	KNlVeEJZDmA4miYaauYkoERtr+w8dgTOoh1AjxSbBIe5T1DoqyyRvx1PUjE+
+	Q4Qlh4C1eW0RADs=
+    }]
+
+    
+    # Let them be accesible from the outside. 
+    set ::tree::idir            $widgetGlobals(idir)
+    set ::tree::ifile           $widgetGlobals(ifile)
+    set ::tree::folderimmac     $widgetGlobals(folderim)
+    set ::tree::fileimmac       $widgetGlobals(fileim)
+    set ::tree::machead         $widgetGlobals(machead)
+    set ::tree::macheadaway     $widgetGlobals(macheadaway)    
+    set ::tree::macheadtalk     $widgetGlobals(macheadtalk)
+    
+    set ::tree::macheadunav     $widgetGlobals(macheadunav)
+    set ::tree::macheadsleep    $widgetGlobals(macheadsleep)
+    set ::tree::macheadgray     $widgetGlobals(macheadgray)
+    set ::tree::dndim           $widgetGlobals(dndim)
+    set ::tree::naim            $widgetGlobals(naim)
+    set ::tree::questmark       $widgetGlobals(questmark)
+    set ::tree::macheadinv      $widgetGlobals(macheadinv)
+    
+    set ::tree::macheadwb       $widgetGlobals(macheadwb)
+    set ::tree::macheadtalkwb   $widgetGlobals(macheadtalkwb)    
+    set ::tree::macheadawaywb   $widgetGlobals(macheadawaywb)    
+    set ::tree::macheadinvwb    $widgetGlobals(macheadinvwb)    
+    set ::tree::macheadunavwb   $widgetGlobals(macheadunavwb)     
+    set ::tree::macheadsleepwb  $widgetGlobals(macheadsleepwb)    
+    set ::tree::questmarkwb     $widgetGlobals(questmarkwb)    
+    set ::tree::macheadgraywb   $widgetGlobals(macheadgraywb)    
 }
 
 # ::tree::Init --
@@ -650,6 +822,24 @@ proc ::tree::WidgetProc {w command args} {
 	}
 	delitem {
 	    set result [eval DelItem $w $args]
+	}
+	find {
+	    if {[string equal [lindex $args 0] "withtag"]} {
+		
+		# Search '$treestate($vxc:tags)' for matches.
+		# Is there a smarter way?
+		set ftag [lindex $args 1]
+		set vlist {}
+		foreach {key val} [array get treestate "*:tags"] {
+		    if {[string equal $val $ftag]} {
+			set ind [expr [string last ":tags" $key] - 1]
+			lappend vlist [string range $key 0 $ind]
+		    }
+		}
+		return $vlist
+	    } else {
+		return -code error "unrecognized subcommand. Must be \"find withtag\""
+	    }
 	}
 	getselection {
 	    set result [eval GetSelection $w]
@@ -1335,12 +1525,14 @@ proc ::tree::BuildLayer {w v in} {
 	}
 	set icon $treestate($vxc:icon)
 	set text $treestate($vxc:text)
+	
+	# The 'x' means selectable!
 	set taglist [list x $treestate($vxc:tags)]
 	set x [expr $in + 14]
 	if {[string length $icon] > 0} {
 	    set id [$can create image $x $y -image $icon -anchor w -tags $taglist]
 	    set treestate(tag:$id) $vxc
-	    incr x 20
+	    incr x [expr [image width $icon] + 6]
 	}
 	if {[info exists treestate($vxc:style)]} {
 	    set style $treestate($vxc:style)
@@ -1488,7 +1680,7 @@ proc ::tree::DrawSelection {w} {
 	if {[llength [$can find withtag bg]] > 0} {
 	    $can raise $id bg
 	}
-	if {[string compare [$can type $treestate($v:tag)] {text}] == 0} {
+	if {[string equal [$can type $treestate($v:tag)] "text"]} {
 	    $can itemconfigure $treestate($v:tag) -fill $options(-selectforeground)
 	}
     } else {

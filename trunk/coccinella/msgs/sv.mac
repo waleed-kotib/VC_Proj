@@ -186,6 +186,8 @@
 ::msgcat::mcset sv mPreferences...	{Inställningar...}
 ::msgcat::mcset sv mNewAccount		{Nytt konto...}
 ::msgcat::mcset sv mLogin		{Anslut...}
+::msgcat::mcset sv mLogout		{Logga ut}
+::msgcat::mcset sv mLogoutWith          {Logga ut meddelande...}
 ::msgcat::mcset sv mPassword		{Lösenord...}
 ::msgcat::mcset sv mRoster/Services	{Roster/Services}
 ::msgcat::mcset sv mMessageInbox	{Inkorg}
@@ -197,6 +199,8 @@
 ::msgcat::mcset sv mAvailable		{Tillgänlig}
 ::msgcat::mcset sv mAway		{Borta}
 ::msgcat::mcset sv mDoNotDisturb	{Stör ej}
+::msgcat::mcset sv mExtendedAway        {Borta länge}
+::msgcat::mcset sv mInvisible           {Osynlig}
 ::msgcat::mcset sv mNotAvailable	{Ej tillgänlig}
 ::msgcat::mcset sv mAttachMessage	{Bifoga meddelande...}
 ::msgcat::mcset sv mEnterRoom		{Gå in i rum...}
@@ -306,11 +310,13 @@
 ::msgcat::mcset sv {Jabber Server}         {Jabberserver}
 ::msgcat::mcset sv {Jabber server port:}   {Jabber server port:}
 ::msgcat::mcset sv {Jabber user id}	   {Jabber användar id}
+::msgcat::mcset sv {Jabber Id}             {Jabber Id}
 ::msgcat::mcset sv {JID to block}          {Blockera JID}
 ::msgcat::mcset sv {Last Activity}	   {Senaste aktivitet}
 ::msgcat::mcset sv {Last name}             {Efternamn}
 ::msgcat::mcset sv {Launch time}           {Programmuppstart}
 ::msgcat::mcset sv {Local Time}		   {Lokaltid}
+::msgcat::mcset sv {Login as invisible}    {Anslut som osynlig}
 ::msgcat::mcset sv {Mailbox Error}	   {Inkorgsfel}
 ::msgcat::mcset sv {MIME type}             {MIME typ}
 ::msgcat::mcset sv {Multi Connect}         {Multipelanslut}
@@ -817,10 +823,12 @@ krav.}
 	::msgcat::mcset sv jaregmsg	{Registrera hos en speciell tjänst\
 vid denna server. Om du redan är registrerad så kan du ändra din info med\
 denna dialog.}
-	::msgcat::mcset sv jastatchat	{Chat: närvarande för omedelbar dialog}
+	::msgcat::mcset sv jastatavailable {Närvarande}
+	::msgcat::mcset sv jastatchat	{Chatt: närvarande för omedelbar dialog}
 	::msgcat::mcset sv jastataway	{Borta: påloggad men tillfälligt borta}
-	::msgcat::mcset sv jastatxa	{xa: påloggad men inaktiv ett tag}
+	::msgcat::mcset sv jastatxa	{Extended away: påloggad men inaktiv ett tag}
 	::msgcat::mcset sv jastatdnd	{DND: stör ej}
+	::msgcat::mcset sv jastatinvisible {Osynlig}
 	::msgcat::mcset sv javersinfo	{Versions information för %s}
 	::msgcat::mcset sv jabrowseaddserver	{Skriv in JID:n för servern\
 du önskar lägga till till listan av tjänster, till exempel "jabber.org".}

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: FilesAndCanvas.tcl,v 1.2 2003-01-11 16:16:09 matben Exp $
+# $Id: FilesAndCanvas.tcl,v 1.3 2003-01-30 17:33:57 matben Exp $
  
 package require can2svg
 package require undo
@@ -27,7 +27,7 @@ namespace eval ::CanvasFile:: {}
 # Results:
 #       none
 
-proc ::CanvasFile::DrawCanvasItemFromFile {wtop filePath {where all}} {
+proc ::CanvasFile::DrawCanvasItemFromFile {wtop filePath args} {
     upvar ::${wtop}::wapp wapp
     
     set wCan $wapp(can)
@@ -38,7 +38,7 @@ proc ::CanvasFile::DrawCanvasItemFromFile {wtop filePath {where all}} {
 	tk_messageBox -icon error -type ok -parent $wCan -message  \
 	  [FormatTextForMessageBox [::msgcat::mc messfailopread $tail $fd]]	  
     }
-    FileToCanvas $wCan $fd $filePath $where
+    eval {FileToCanvas $wCan $fd $filePath} $args
     close $fd
 }
 	  
@@ -50,7 +50,7 @@ proc ::CanvasFile::DrawCanvasItemFromFile {wtop filePath {where all}} {
 #       w      the canvas widget.
 #       fd    the file identifier.
 #       absPath    the file with canvas data.
-#       where = "all":     write to this canvas and all others.
+#       -where = "all":     write to this canvas and all others.
 #               "remote":  write only to remote client canvases.
 #               "local":   write only to this canvas and not to any other.
 #               ip number: write only to this remote client canvas and not to own.
@@ -58,7 +58,7 @@ proc ::CanvasFile::DrawCanvasItemFromFile {wtop filePath {where all}} {
 # Results:
 #       none
 
-proc ::CanvasFile::FileToCanvas {w fd absPath {where all}} {
+proc ::CanvasFile::FileToCanvas {w fd absPath args} {
     
     # Dispatch to the actual file reader depending on file format version.
     if {[gets $fd line] >= 0} { 
@@ -66,18 +66,20 @@ proc ::CanvasFile::FileToCanvas {w fd absPath {where all}} {
 	    set version 1
 	}
     }
+    set ans {}
     seek $fd 0 start
     switch -- $version {
 	1 {
-	    ::CanvasFile::FileToCanvasVer1 $w $fd $absPath $where
+	    set ans [eval {::CanvasFile::FileToCanvasVer1 $w $fd $absPath} $args]
 	}
 	2 {
-	    ::CanvasFile::FileToCanvasVer2 $w $fd $absPath $where
+	    set ans [eval {::CanvasFile::FileToCanvasVer2 $w $fd $absPath} $args]
 	}
 	default {
 	    return -code error "Unrecognized file version: $version"
 	}
     }
+    return $ans
 }
 
 # CanvasFile::FileToCanvasVer1 --
@@ -88,10 +90,16 @@ proc ::CanvasFile::FileToCanvas {w fd absPath {where all}} {
 #       Lines can also contain 'image create ...' commands.
 #       The file must be opened and file id given as 'fd'.
 
-proc ::CanvasFile::FileToCanvasVer1 {w fd absPath {where all}} {
+proc ::CanvasFile::FileToCanvasVer1 {w fd absPath args} {
     global  prefs
     
     Debug 2 "FileToCanvasVer1 absPath=$absPath"
+    
+    array set argsArr {
+	-where    all
+    }
+    array set argsArr $args
+    set where $argsArr(-where)
 
     # Should file names in file be translated to native path?
     set fileNameToNative 1
@@ -257,16 +265,26 @@ proc ::CanvasFile::FileToCanvasVer1 {w fd absPath {where all}} {
 	}
 	set previousUtag $oldUtag
     }
+    return 0
 }
 
 # CanvasFile::FileToCanvasVer2 --
 #
 #
 
-proc ::CanvasFile::FileToCanvasVer2 {w fd absPath {where all}} {
+proc ::CanvasFile::FileToCanvasVer2 {w fd absPath args} {
     global  prefs
+    upvar ::UI::icons icons
     
     Debug 2 "FileToCanvasVer2 absPath=$absPath"
+    
+    array set argsArr {
+	-showbroken   1
+	-tryimport    1
+	-where        all
+    }
+    array set argsArr $args
+    set where $argsArr(-where)
     
     # Should file names in file be translated to native path?
     set fileNameToNative 1
@@ -282,6 +300,7 @@ proc ::CanvasFile::FileToCanvasVer2 {w fd absPath {where all}} {
     
     # This is not completely correct!!!
     set stackCmd [list -below all]
+    set numImports 0
     
     # Read line by line; each line contains an almost complete canvas command.
     # Item prefix and item numbers need to be taken care of.
@@ -344,19 +363,32 @@ proc ::CanvasFile::FileToCanvasVer2 {w fd absPath {where all}} {
 		}
 	    }
 	    import {
+		set didImport 0
+		if {$argsArr(-tryimport)} {
+		    
+		    # This is typically an image or movie (QT or Snack).
+		    set didImport [eval {
+			::ImageAndMovie::HandleImportCmd $w $line \
+		      -where $where -basepath $dirPath} $stackCmd]
+		}
 		
-		# This is typically an image or movie (QT or Snack).
-		eval {::ImageAndMovie::HandleImportCmd $w $line \
-		  -where $where -basepath $dirPath} $stackCmd
+		if {!$didImport && $argsArr(-showbroken)} {
+		    
+		    # Display a broken image to indicate for the user.
+		    eval {$w create image} [lrange $line 1 2] \
+		      {-image $icons(brokenImage) -anchor nw}
+		}
+		incr numImports
 	    }
 	    default {
 
 		# Here we should provide some hooks for plugins to handle
 		# their own stuff. ???
-	    
+		# Or handled elsewhere???
 	    }
 	}
     }
+    return $numImports
 }
 
 # CanvasFile::CanvasToFile --
@@ -497,8 +529,8 @@ proc ::CanvasFile::DoOpenCanvasFile {wtop {filePath {}}} {
     set wCan $wapp(can)
     if {[string length $filePath] == 0} {
 	set typelist {
-	    {"Canvas" {".can"}}
-	    {"Text" {".txt"}}
+	    {"Canvas"     {.can}}
+	    {"Text"       {.txt}}
 	}
 	set ans [tk_messageBox -icon warning -type okcancel -default ok \
 	  -parent $w -message [::msgcat::mc messcanerasewarn]]
@@ -543,20 +575,23 @@ proc ::CanvasFile::DoOpenCanvasFile {wtop {filePath {}}} {
 #       none
 
 proc ::CanvasFile::DoSaveCanvasFile {wtop} {
-    global  prefs
+    global  prefs this
     
     upvar ::${wtop}::wapp wapp
     
     set wCan $wapp(can)
     set typelist {
-	{"Canvas" {".can"}}
-	{"Adobe XML/SVG" {".svg"}}
-	{"Text" {".txt"}}
+	{"Canvas"            {.can}}
+	{"Adobe XML/SVG"     {.svg}}
+	{"Text"              {.txt}}
     }
     set userDir [::Utils::GetDirIfExist $prefs(userDir)]
     set opts [list -initialdir $userDir]
-    if {$prefs(hasSaveFiletypes)} {
+    if {$prefs(haveSaveFiletypes)} {
 	lappend opts -filetypes $typelist
+    }
+    if {[string match "mac*" $this(platform)]} {
+	lappend opts -message "Kilroy was here!"
     }
     set ans [eval {tk_getSaveFile -title [::msgcat::mc {Save Canvas}] \
       -defaultextension ".can"} $opts]
@@ -565,17 +600,23 @@ proc ::CanvasFile::DoSaveCanvasFile {wtop} {
     }
     set prefs(userDir) [file dirname $ans]
     set fileName $ans
-    switch -- [file extension $fileName] {
+    set ext [file extension $fileName]
+    switch -- $ext {
 	".svg" {
 	    ::can2svg::canvas2file $wCan $fileName	    
 	}
 	default {
 	    
+	    # If not .txt make sure it's .can extension.
+	    if {$ext != ".txt"} {
+		set fileName "[file rootname $fileName].can"
+	    }
+	    
 	    # Opens the data file.
 	    if {[catch {open $fileName w} fd]} {
 		set tail [file tail $fileName]
-		tk_messageBox -message [::msgcat::mc messfailopwrite $tail $fd] \
-		  -icon error -type ok
+		tk_messageBox -icon error -type ok \
+		  -message [::msgcat::mc messfailopwrite $tail $fd]
 		return
 	    }	    
 	    CanvasToFile $wCan $fd $fileName

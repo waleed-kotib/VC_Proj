@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: GetFile.tcl,v 1.2 2003-01-11 16:16:09 matben Exp $
+# $Id: GetFile.tcl,v 1.3 2003-01-30 17:33:57 matben Exp $
 # 
 #### LEGEND ####################################################################
 #
@@ -163,7 +163,7 @@ proc ::GetFile::SocketOpen {s} {
     # Using the 'ReflectorServer', this is the way to reject a file transfer.
     # Check receiving status, if OK returns file descriptor.
     
-    set stat [Prepare $s]
+    set stat [::GetFile::Prepare $s]
     if {$stat != $noErr} {
 	puts  $s "GET: $filePathRemote Error-Code: $stat $optList"
  	ShutDown $s
@@ -403,8 +403,8 @@ proc ::GetFile::GetFileFromClient {ip s fileTail cmd optList} {
 	set locals($s,mime) "application/octet-stream"
     }    
     
-    # Check receiving status, if OK returns file descriptor.
-    set stat [Prepare $s]
+    # Check how/if to be received.
+    set stat [::GetFile::Prepare $s]
     Debug 2 ">  GetFileFromClient:: Prepare=$stat"
 
     if {$stat != $noErr} {
@@ -521,15 +521,11 @@ proc ::GetFile::Prepare {s} {
     
     if {[info exists optArr(Get-Url:)] && \
       [::FileCache::IsCached $optArr(Get-Url:)]} {
-	
 	set cachedFile [::FileCache::Get $optArr(Get-Url:)]
-	if {[::FileUtils::AcceptCached $cachedFile]} {
-
-	    # Get the correct import procedure for this MIME type.
-	    ::GetFile::DoImport $mime $optList -file $cachedFile \
-	      -where "local"
-	    return 320
-	}
+	
+	# Get the correct import procedure for this MIME type.
+	::GetFile::DoImport $mime $optList -file $cachedFile -where "local"
+	return 320
     }
 
     # Get the correct import procedure for this MIME type. Empty if nothing.

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.3 2003-01-11 16:16:09 matben Exp $
+# $Id: UI.tcl,v 1.4 2003-01-30 17:34:05 matben Exp $
 
 # LabeledFrame --
 #
@@ -87,6 +87,10 @@ namespace eval ::UI:: {
     # Unique id for main toplevels
     variable idmain 2
 }
+
+# UI::Init --
+# 
+#       Various initializations for the UI stuff.
 
 proc ::UI::Init {} {
     global  this prefs
@@ -169,6 +173,8 @@ proc ::UI::Init {} {
     # Get icons.
     set icons(igelpiga) [image create photo igelpiga -format gif  \
       -file [file join $this(path) images igelpiga.gif]]
+    set icons(brokenImage) [image create photo -format gif  \
+      -file [file join $this(path) images brokenImage.gif]]
     foreach {name cmd} $btShortDefs {
 	set icons(bt$name) [image create photo bt$name -format gif  \
 	  -file [file join $this(path) images ${name}.gif]]
@@ -307,21 +313,34 @@ QJ2GO/YCGGi0MDqtKnccohG5stgtiLx+z+8jIgA7}
     }
 }
 
-# The menu organization.
+# UI::InitMenuDefs --
+# 
+#       The menu organization.
 
-namespace eval ::UI:: {
-    
+proc ::UI::InitMenuDefs { } {
+    global  prefs this
     variable menuDefs
+
+    if {[string match "mac*" $this(platform)] && $prefs(haveMenus)} {
+	set haveAppleMenu 1
+    } else {
+	set haveAppleMenu 0
+    }
     
     # All menu definitions for the main (whiteboard) windows as:
     #      {{type name cmd state accelerator opts} {{...} {...} ...}}
+
+    set menuDefs(main,info,aboutwhiteboard)  \
+      {command   mAboutWhiteboard    {::SplashScreen::SplashScreen $wDlgs(splash)} normal   {}}
+    set menuDefs(main,info,aboutquicktimetcl)  \
+      {command   mAboutQuickTimeTcl  {AboutQuickTimeTcl}                           normal   {}}
+
     # Mac only.
-    set menuDefs(main,apple) {
-	{command   mAboutWhiteboard    {::SplashScreen::SplashScreen $wDlgs(splash)} normal   {}}
-	{command   mAboutQuickTimeTcl  {AboutQuickTimeTcl}                           normal   {}}
-    }	
+    set menuDefs(main,apple) [list $menuDefs(main,info,aboutwhiteboard)  \
+      $menuDefs(main,info,aboutquicktimetcl)]
+    
     set menuDefs(main,file) {
-	{command   mNew                {::UI::NewMain}                               disabled N}
+	{command   mNew                {::UI::NewMain -sendcheckstate disabled}      normal N}
 	{command   mOpenConnection     {::UserActions::DoConnect}                    normal   O}
 	{command   mCloseWindow        {::UserActions::DoCloseWindow}                normal   W}
 	{command   mStartServer        {DoStartServer $prefs(thisServPort)}          normal   {}}
@@ -339,7 +358,7 @@ namespace eval ::UI:: {
 	{separator}
 	{command   mSaveAs             {::UserActions::SavePostscript $wtop}         normal   {}}
 	{command   mPageSetup          {::UserActions::PageSetup}                    normal   {}}
-	{command   mPrintCanvas        {::UserActions::DoPrintCanvas $wtop}          normal   {}}
+	{command   mPrintCanvas        {::UserActions::DoPrintCanvas $wtop}          normal   P}
 	{command   mQuit               {::UserActions::DoQuit}                       normal   Q}
     }	    
     set menuDefs(main,edit) {    
@@ -480,49 +499,39 @@ namespace eval ::UI:: {
     }
 
     set menuDefs(main,jabber) {    
-	{command     mNewAccount       {::Jabber::Register::Register $wDlgs(jreg)} normal   {}}
-	{command     mLogin            {::Jabber::Login::Login $wDlgs(jlogin)} normal   {}}
-	{command     mPassword         {::Jabber::Passwd::Build .jpasswd}      disabled {}}
+	{command     mNewAccount    {::Jabber::Register::Register $wDlgs(jreg)} normal   {}}
+	{command     mLogin         {::Jabber::Login::Login $wDlgs(jlogin)} normal   {}}
+	{command     mLogoutWith    {::Jabber::Logout::WithStatus .joutst}  disabled {}}
+	{command     mPassword      {::Jabber::Passwd::Build .jpasswd}      disabled {}}
 	{separator}
 	{checkbutton mRoster/Services  {::Jabber::::RostServ::Show $wDlgs(jrostbro)}  normal   {} \
 	  {-variable ::Jabber::jstate(rostBrowseVis)}}
-	{checkbutton mMessageInbox     {::Jabber::MailBox::Show $wDlgs(jinbox)} normal   {} \
+	{checkbutton mMessageInbox  {::Jabber::MailBox::Show $wDlgs(jinbox)} normal   {} \
 	  {-variable ::Jabber::jstate(inboxVis)}}
 	{separator}
-	{command     mSearch           {::Jabber::Search::Build .jsearch}      disabled {}}
-	{command     mAddNewUser       {::Jabber::Roster::NewOrEditItem $wDlgs(jrostnewedit) new} disabled {}}
+	{command     mSearch        {::Jabber::Search::Build .jsearch}      disabled {}}
+	{command     mAddNewUser    {::Jabber::Roster::NewOrEditItem $wDlgs(jrostnewedit) new} disabled {}}
 	{separator}
-	{command     mSendMessage      {::Jabber::NewMsg::Build $wDlgs(jsendmsg)} disabled {}}
-	{command     mChat             {::Jabber::Chat::StartThread}           disabled {}}
-	{cascade     mStatus           {}                                      disabled {} {} {
-	    {radio   mAvailable        {::Jabber::SetStatus available}         normal   {} \
-	      {-variable ::Jabber::jstate(status) -value available}}
-	    {radio   mAway             {::Jabber::SetStatus away}              normal   {} \
-	      {-variable ::Jabber::jstate(status) -value away}}
-	    {radio   mDoNotDisturb     {::Jabber::SetStatus dnd}               normal   {} \
-	      {-variable ::Jabber::jstate(status) -value dnd}}
-	    {radio   mNotAvailable     {::Jabber::SetStatus unavailable}       normal   {} \
-	      {-variable ::Jabber::jstate(status) -value unavailable}}                     \
-	    {separator}                                                                    \
-	    {command mAttachMessage    {::Jabber::SetStatusWithMessage $wDlgs(jpresmsg)} normal {}}}
-	}
+	{command     mSendMessage   {::Jabber::NewMsg::Build $wDlgs(jsendmsg)} disabled {}}
+	{command     mChat          {::Jabber::Chat::StartThreadDlg .jchat} disabled {}}
+	{cascade     mStatus        {}                                      disabled {} {} {}}
 	{separator}
-	{command     mEnterRoom          {::Jabber::GroupChat::EnterRoom $wDlgs(jenterroom)} disabled {}}
-	{cascade     mExitRoom           {}                                    disabled {} {} {}}
-	{command     mCreateRoom         {::Jabber::GroupChat::CreateRoom $wDlgs(jcreateroom)} disabled {}}
+	{command     mEnterRoom     {::Jabber::GroupChat::EnterRoom $wDlgs(jenterroom)} disabled {}}
+	{cascade     mExitRoom      {}                                    disabled {} {} {}}
+	{command     mCreateRoom    {::Jabber::GroupChat::CreateRoom $wDlgs(jcreateroom)} disabled {}}
 	{separator}
-	{command     mvCard              {::VCard::Fetch .jvcard own}          disabled {}}
+	{command     mvCard         {::VCard::Fetch .jvcard own}          disabled {}}
 	{separator}
-	{command     mRemoveAccount      {::Jabber::Register::Remove}          disabled {}}	
+	{command     mRemoveAccount {::Jabber::Register::Remove}          disabled {}}	
 	{separator}
-	{command     mErrorLog           {::Jabber::ErrorLogDlg .jerrdlg}      normal   {}}
-	{checkbutton mDebug              {::Jabber::DebugCmd}                  normal   {} \
+	{command     mErrorLog      {::Jabber::ErrorLogDlg .jerrdlg}      normal   {}}
+	{checkbutton mDebug         {::Jabber::DebugCmd}                  normal   {} \
 	  {-variable ::Jabber::jstate(debugCmd)}}
+    }    
+    if {!$prefs(stripJabber)} {
+	lset menuDefs(main,jabber) 13 6 [::Jabber::BuildStatusMenuDef]
     }
-    
-    # 8.4
-    # .menu.jabber add command -compound left -image $::tree::machead -label Junk
-    
+
     set menuDefs(main,cam) {    
 	{command     {Camera Action}     {DisplaySequenceGrabber $wtop}        normal   {}}	
 	{checkbutton {Pause}             {SetVideoConfig $wtop pause}          normal   {}}	
@@ -566,6 +575,35 @@ namespace eval ::UI:: {
 	{command     mSetupAssistant {
 	    package require SetupAss
 	    ::SetupAss::SetupAss .setupass}                normal {}}
+    }
+    
+    # Make platform specific things and special menus etc. Indices!!! BAD!
+    if {$haveAppleMenu && !$prefs(QuickTimeTcl)} {
+	lset menuDefs(main,apple) 1 3 disabled
+    }
+    if {![string equal $prefs(protocol) "jabber"]} {
+	lset menuDefs(main,file) 0 3 disabled
+    }
+    if {[string equal $prefs(protocol) "client"] ||   \
+      [string equal $prefs(protocol) "central"]} {
+	lset menuDefs(main,file) 3 3 disabled
+    }
+    if {!$prefs(QuickTimeTcl)} {
+	lset menuDefs(main,file) 6 3 disabled
+    }
+    if {!$prefs(haveDash)} {
+	lset menuDefs(main,prefs) 7 3 disabled
+    }
+    if {!$haveAppleMenu} {
+	lappend menuDefs(main,info) $menuDefs(main,info,aboutwhiteboard)
+    }
+    if {!$haveAppleMenu && $prefs(QuickTimeTcl)} {
+	lappend menuDefs(main,info) $menuDefs(main,info,aboutquicktimetcl)
+    }
+	    
+    # If embedded the embedding app should close us down.
+    if {$prefs(embedded)} {
+	lset menuDefs(main,file) end 3 disabled
     }
     
     # Menu definitions for a minimal setup. Used on mac only.
@@ -837,7 +875,6 @@ proc ::UI::BuildMain {wtop args} {
 	set ::SplashScreen::startMsg [::msgcat::mc splashbuildmenu]
     }
     ::UI::BuildWhiteboardMenus $wtop
-    ::UI::ConfigureMenuAccelerators $wtop -state $opts(-state)
         
     # Shortcut buttons at top? Do we want the toolbar to be visible.
     if {$wtop == "."} {
@@ -1132,7 +1169,7 @@ proc ::UI::GetJabberChatThread {wtop} {
 #       
 # Arguments:
 #       type        chat, groupchat, normal
-#       jid
+#       jid         2-tier jid with no /resource
 #       thread      (optional)
 #       
 # Results:
@@ -1710,10 +1747,13 @@ proc ::UI::SavePanePos {wtoplevel wpaned {orient horizontal}} {
 #       $wmenu
 
 proc ::UI::MakeMenu {wtop wmenu label menuDef args} {
-    global  this wDlgs state prefs dashFull2Short osprefs
+    global  this wDlgs prefs dashFull2Short osprefs
     
     variable menuKeyToIndex
-
+    upvar ::${wtop}::wapp wapp
+    upvar ::${wtop}::opts opts
+    
+    set topw $wapp(toplevel)
     set m [menu $wmenu -tearoff 0]
     set wparent [winfo parent $wmenu]
     
@@ -1735,18 +1775,19 @@ proc ::UI::MakeMenu {wtop wmenu label menuDef args} {
 	pack ${wmenu}la -side left -padx 4
 	bind ${wmenu}la <Button-1> [list ::UI::DoTopMenuPopup %W $wtop $wmenu]
     }
-    
+
+    set mod $osprefs(mod)
     set i 0
     foreach line $menuDef {
-	foreach {type name cmd st accel opts subdef} $line {
+	foreach {type name cmd mstate accel mopts subdef} $line {
 	    
 	    # Localized menu label.
 	    set locname [::msgcat::mc $name]
 	    set menuKeyToIndex($wmenu,$name) $i
 	    set ampersand [string first & $locname]
-	    if {$ampersand != -1} then {
+	    if {$ampersand != -1} {
 		regsub -all & $locname "" locname
-		lappend opts -underline $ampersand
+		lappend mopts -underline $ampersand
 	    }
 	    if {[string match "sep*" $type]} {
 		$m add separator
@@ -1758,16 +1799,26 @@ proc ::UI::MakeMenu {wtop wmenu label menuDef args} {
 		eval {::UI::MakeMenu $wtop ${wmenu}.${mt} $name $subdef} $args
 		
 		# Explicitly set any disabled state of cascade.
-		::UI::MenuMethod $m entryconfigure $name -state $st
+		::UI::MenuMethod $m entryconfigure $name -state $mstate
 	    } else {
 		
 		# All variables (and commands) in menuDef's cmd shall be 
 		# substituted! Be sure they are all in here.
-		set cmd [subst $cmd]
+		set cmd [subst -nocommands $cmd]
 		if {[string length $accel] > 0} {
-		    lappend opts -accelerator $osprefs(mod)+$accel
+		    lappend mopts -accelerator ${mod}+${accel}
+		    if {![string equal $this(platform) "macintosh"]} {
+			set key [string map {< less > greater} [string tolower $accel]]
+			if {[string equal $opts(-state) "normal"]} {
+			    if {[string equal $mstate "normal"]} {
+				bind $topw <${mod}-Key-${key}> $cmd
+			    }
+			} else {
+			    bind $topw <${mod}-Key-${key}> {}
+			}			
+		    }
 		}
-		eval {$m add $type -label $locname -command $cmd -state $st} $opts 
+		eval {$m add $type -label $locname -command $cmd -state $mstate} $mopts 
 	    }
 	}
 	incr i
@@ -1780,9 +1831,40 @@ proc ::UI::MakeMenu {wtop wmenu label menuDef args} {
 #       Utility to use instead of 'menuPath cmd index args'.
 
 proc ::UI::MenuMethod {wmenu cmd key args} {
+    global  this prefs wDlgs osprefs
     variable menuKeyToIndex
-
-    eval {$wmenu $cmd $menuKeyToIndex($wmenu,$key)} $args
+    variable menuDefs
+    variable mapWmenuToMenuDefKey
+    variable mapWmenuToWtop
+            
+    set mind $menuKeyToIndex($wmenu,$key)
+    eval {$wmenu $cmd $mind} $args
+    
+    # Handle any menu accelerators as well. 
+    # Make sure the necessary variables for the command exist here!
+    if {![string equal $this(platform) "macintosh"] && \
+      [info exists mapWmenuToMenuDefKey($wmenu)]} {
+	set ind [lsearch $args "-state"]
+	if {$ind >= 0} {
+	    set mstate [lindex $args [incr ind]]
+	    set menuDefKey $mapWmenuToMenuDefKey($wmenu)
+	    set wtop $mapWmenuToWtop($wmenu)
+    	    upvar ::${wtop}::wapp wapp
+    	    
+    	    set topw $wapp(toplevel)
+	    set mcmd [lindex [lindex $menuDefs($menuDefKey) $mind] 2]
+	    set mcmd [subst -nocommands $mcmd]
+	    set acc [lindex [lindex $menuDefs($menuDefKey) $mind] 4]
+	    if {[string length $acc]} {
+		set key [string map {< less > greater} [string tolower $acc]]
+		if {[string equal $mstate "normal"]} {
+		    bind $topw <$osprefs(mod)-Key-${key}> $mcmd
+		} else {
+		    bind $topw <$osprefs(mod)-Key-${key}> {}
+		}			
+	    }
+	}
+    }
 }
 
 # UI::BuildWhiteboardMenus --
@@ -1800,6 +1882,8 @@ proc ::UI::BuildWhiteboardMenus {wtop} {
     
     variable addonMenus
     variable menuDefs
+    variable mapWmenuToMenuDefKey
+    variable mapWmenuToWtop
     upvar ::${wtop}::wapp wapp
     upvar ::${wtop}::state state
     upvar ::${wtop}::opts opts
@@ -1817,14 +1901,30 @@ proc ::UI::BuildWhiteboardMenus {wtop} {
     } else {
 	set haveAppleMenu 0
     }
+    
+    # Various mappings needed for the MenuMethod.
+    set mapWmenuToMenuDefKey(${wmenu}.apple) "main,apple"
+    set mapWmenuToMenuDefKey(${wmenu}.file) "main,file"
+    set mapWmenuToMenuDefKey(${wmenu}.edit) "main,edit"
+    set mapWmenuToMenuDefKey(${wmenu}.prefs) "main,prefs"
+    set mapWmenuToMenuDefKey(${wmenu}.jabber) "main,jabber"
+    set mapWmenuToMenuDefKey(${wmenu}.info) "main,info"
+    set mapWmenuToWtop(${wmenu}.apple) $wtop
+    set mapWmenuToWtop(${wmenu}.file) $wtop
+    set mapWmenuToWtop(${wmenu}.edit) $wtop
+    set mapWmenuToWtop(${wmenu}.prefs) $wtop
+    set mapWmenuToWtop(${wmenu}.jabber) $wtop
+    set mapWmenuToWtop(${wmenu}.info) $wtop
+
     if {$haveAppleMenu} {
-	::UI::MakeMenu $wtop ${wmenu}.apple {} $menuDefs(main,apple)
+	::UI::MakeMenu $wtop ${wmenu}.apple {}         $menuDefs(main,apple)
     }
     ::UI::MakeMenu $wtop ${wmenu}.file    mFile        $menuDefs(main,file)
     ::UI::MakeMenu $wtop ${wmenu}.edit    mEdit        $menuDefs(main,edit)
     ::UI::MakeMenu $wtop ${wmenu}.prefs   mPreferences $menuDefs(main,prefs)
+    
     if {!$prefs(stripJabber)} {
-	::UI::MakeMenu $wtop ${wmenu}.jabber   mJabber $menuDefs(main,jabber)
+	::UI::MakeMenu $wtop ${wmenu}.jabber mJabber   $menuDefs(main,jabber)
 	
 	# The jabber stuff needs to know the "Exit Room" menu. WRONG!!!!! multinstance
 	if {$wtop == "."} {
@@ -1849,7 +1949,7 @@ proc ::UI::BuildWhiteboardMenus {wtop} {
     # Addon menu.
     if {[llength $addonMenus]} {
 	set m [menu ${wmenu}.addon -tearoff 0]
-	${wmenu} add cascade -label [::msgcat::mc mAddons] -menu $m
+	$wmenu add cascade -label [::msgcat::mc mAddons] -menu $m
 	foreach menuSpec $addonMenus {
 	    ::UI::BuildAddonMenuEntry $m $menuSpec
 	}
@@ -1859,54 +1959,13 @@ proc ::UI::BuildWhiteboardMenus {wtop} {
     if {$opts(-state) == "disabled"} {
 	::UI::DisableWhiteboardMenus $wmenu
     }
-	
-    # Make platform specific things and special menus etc.
-    if {$haveAppleMenu && !$prefs(QuickTimeTcl)} {
-	::UI::MenuMethod ${wmenu}.apple entryconfigure mAboutQuickTimeTcl  \
-	  -state disabled
-    }
-    if {![string equal $prefs(protocol) "jabber"]} {
-	::UI::MenuMethod ${wmenu}.file entryconfigure mNew -state disabled
-    }
-    if {[string equal $prefs(protocol) "client"] ||   \
-      [string equal $prefs(protocol) "central"]} {
-	::UI::MenuMethod ${wmenu}.file entryconfigure mStartServer -state disabled
-    }
-    if {!$prefs(QuickTimeTcl)} {
-	::UI::MenuMethod ${wmenu}.file entryconfigure mOpenURLStream \
-	   -state disabled
-    }
-    if {[string match "mac*" $this(platform)]} {
-	::UI::MenuMethod ${wmenu}.file entryconfigure mSaveAs   \
-	  -accelerator $osprefs(mod)+P
-    } else {
-	::UI::MenuMethod ${wmenu}.file entryconfigure mPrintCanvas  \
-	  -accelerator $osprefs(mod)+P
-    }
-    if {!$prefs(hasDash)} {
-	::UI::MenuMethod ${wmenu}.prefs entryconfigure mDash -state disabled
-    }
-    
-    # If embedded the embedding app should close us down.
-    if {$prefs(embedded)} {
-	::UI::MenuMethod ${wmenu}.file entryconfigure mQuit -state disabled
-    }
     
     # Use a function for this to dynamically build this menu if needed.
     ::UI::BuildFontMenu $wtop $prefs(canvasFonts)    
     if {!$prefs(stripJabber) && ![string equal $prefs(protocol) "jabber"]} {
-	${wmenu} entryconfigure *Jabber* -state disabled
+	$wmenu entryconfigure *Jabber* -state disabled
     }
-    
-    if {!$haveAppleMenu && $prefs(QuickTimeTcl)} {
-	${wmenu}.info add command -label [::msgcat::mc mAboutQuickTimeTcl]   \
-	  -command AboutQuickTimeTcl
-    }
-    if {!$haveAppleMenu} {
-	${wmenu}.info add command -label [::msgcat::mc mAboutWhiteboard]   \
-	  -command [list ::SplashScreen::SplashScreen $wDlgs(splash)] -underline 6
-    }
-    
+        
     # End menus; place the menubar.
     if {$prefs(haveMenus)} {
 	$topwindow configure -menu $wmenu
@@ -1943,62 +2002,6 @@ proc ::UI::MenuDisableAllBut {mw normalList} {
     }
     foreach name $normalList {
 	::UI::MenuMethod $mw entryconfigure $name -state normal
-    }
-}
-
-# UI::ConfigureMenuAccelerators --
-#
-#       Makes keyboard accelerators bindings by binding to toplevel.
-#       Needed on all platforms except Mac Classic.
-#       
-# Arguments:
-#       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
-#       args        -state normal|disabled
-#       
-# Results:
-#       keyboard bindings set
-
-proc ::UI::ConfigureMenuAccelerators {wtop args} {
-    global  this prefs wDlgs osprefs
-    
-    variable menuDefs
-    upvar ::${wtop}::wapp wapp
-    
-    set topw $wapp(toplevel)
-    array set opts {
-	-state    normal
-    }
-    array set opts $args
-    
-    # Add accelerators keys "by hand". On the Mac Classic this works 
-    # automatically via the menu accelerators, but not on MacOSX.
-    if {![string equal "macintosh" $this(platform)]} {
-	    
-	#      {{type name cmd state accelerator opts} {{...} {...} ...}}
-	foreach mName {file edit} {
-	    foreach mDef $menuDefs(main,$mName) {
-		foreach {type name cmd state acc mopts} $mDef {
-		    if {[llength $acc] > 0} {
-			set key [string map {< less > greater} [string tolower $acc]]
-			if {[string equal $opts(-state) "normal"]} {
-			    if {[string equal $state "normal"]} {
-				bind $topw <$osprefs(mod)-Key-${key}>  \
-				  [subst -nocommands $cmd]
-			    }
-			} else {
-			    bind $topw <$osprefs(mod)-Key-${key}> {}
-			}
-		    }
-		}
-	    }
-	}
-    } else {
-	
-	# Some specials for the Mac. Seems not to be effective.
-	bind $topw <Command-Key-greater>  \
-	  [list ::UserActions::ResizeItem $wtop $prefs(scaleFactor)]
-	bind $topw <Command-Key-less>  \
-	  [list ::UserActions::ResizeItem $wtop $prefs(invScaleFac)]
     }
 }
 
@@ -2509,7 +2512,8 @@ proc ::UI::CutCopyPasteCmd {cmd} {
     
     set wfocus [focus]
     
-    #puts "::UI::CutCopyPasteCmd cmd=$cmd, wfocus=$wfocus"
+    ::Debug 2 "::UI::CutCopyPasteCmd cmd=$cmd, wfocus=$wfocus"
+    
     if {$wfocus == ""} {
 	return
     }
@@ -2746,7 +2750,7 @@ proc ::UI::BuildToolPopups {wtop} {
 	    lappend mDef($name) $menuDefs(main,prefs,$key)
 	}
 	::UI::MakeMenu $wtop ${wtool}.pop${name} {} $mDef($name)
-	if {!$prefs(hasDash) && ([lsearch $menuArr($name) dash] >= 0)} {
+	if {!$prefs(haveDash) && ([lsearch $menuArr($name) dash] >= 0)} {
 	    ::UI::MenuMethod ${wtool}.pop${name} entryconfigure mDash -state disabled
 	}
     }
@@ -3152,7 +3156,7 @@ proc ::UI::AppGetFocus {wtop w} {
     if {$wtopReal != $w} {
 	return
     }
-    Debug 3 "AppGetFocus:: wtop=$wtop, w=$w"
+    Debug 8 "AppGetFocus:: wtop=$wtop, w=$w"
     
     # Check the clipboard or selection.
     if {[catch {selection get -selection CLIPBOARD} sel]} {
@@ -3224,7 +3228,7 @@ proc ::UI::BuildCommHead {wtop type args} {
 	jabber {
 	    label $wcomm.comm -text "  [::msgcat::mc {Jabber Server}]:"  \
 	      -width 18 -anchor w -font $sysFont(sb)
-	    label $wcomm.user -text "  [::msgcat::mc {To Jabber id}]:"  \
+	    label $wcomm.user -text "  [::msgcat::mc {Jabber Id}]:"  \
 	      -width 18 -anchor w -font $sysFont(sb)
 	    if {$argsArr(-connected)} {
 	    	label $wcomm.icon -image contact_on
@@ -3319,11 +3323,7 @@ proc ::UI::BuildJabberEntry {wtop args} {
     array set argsArr $args
     set ns [namespace current]
     set wcomm $wapp(comm)
-    if {[string equal $wtop "."]} {
-	set wtopReal .
-    } else {
-	set wtopReal [string trimright $wtop .]
-    }
+    set wtopReal $wapp(toplevel)
     
     set n 1
     entry $wcomm.ad$n -width 16 -relief sunken -bg $prefs(bgColGeneral)
@@ -3809,79 +3809,90 @@ proc ::UI::FixMenusWhen {wtop what} {
     
     upvar ::${wtop}::wapp wapp
     upvar ::${wtop}::opts opts
-
+    
     switch -exact -- $what {
 	connect {
-    
+	    
 	    # If client only, allow only one connection, limited.
-	    if {[string equal $prefs(protocol) "jabber"]} {
-		::UI::ButtonConfigure $wtop connect -state disabled
-		if {[string equal $opts(-state) "normal"] &&  \
-		  [string equal $opts(-sendbuttonstate) "normal"]} {
-		    ::UI::ButtonConfigure $wtop send -state normal
+	    switch -- $prefs(protocol) {
+		jabber {
+		    ::UI::ButtonConfigure $wtop connect -state disabled
+		    if {[string equal $opts(-state) "normal"] &&  \
+		      [string equal $opts(-sendbuttonstate) "normal"]} {
+			::UI::ButtonConfigure $wtop send -state normal
+		    }
+		    ::UI::MenuMethod ${wtop}menu.file entryconfigure mOpenConnection -state disabled
+		    ::UI::MenuMethod ${wtop}menu.jabber entryconfigure mNewAccount -state disabled
+		    ::UI::MenuMethod ${wtop}menu.jabber entryconfigure mLogin  \
+		      -label [::msgcat::mc Logout] -command \
+		      [list ::Jabber::DoCloseClientConnection $allIPnumsToSend]
+		    ::UI::MenuMethod ${wtop}menu.jabber entryconfigure mLogoutWith -state normal
+		    ::UI::MenuMethod ${wtop}menu.jabber entryconfigure mPassword -state normal
+		    ::UI::MenuMethod ${wtop}menu.jabber entryconfigure mSearch -state normal
+		    ::UI::MenuMethod ${wtop}menu.jabber entryconfigure mAddNewUser -state normal
+		    ::UI::MenuMethod ${wtop}menu.jabber entryconfigure mSendMessage -state normal
+		    ::UI::MenuMethod ${wtop}menu.jabber entryconfigure mChat -state normal
+		    ::UI::MenuMethod ${wtop}menu.jabber entryconfigure mStatus -state normal
+		    ::UI::MenuMethod ${wtop}menu.jabber entryconfigure mvCard -state normal
+		    ::UI::MenuMethod ${wtop}menu.jabber entryconfigure mEnterRoom -state normal
+		    ::UI::MenuMethod ${wtop}menu.jabber entryconfigure mExitRoom -state normal
+		    ::UI::MenuMethod ${wtop}menu.jabber entryconfigure mCreateRoom -state normal
+		    ::UI::MenuMethod ${wtop}menu.jabber entryconfigure mPassword -state normal
+		    ::UI::MenuMethod ${wtop}menu.jabber entryconfigure mRemoveAccount -state normal
 		}
-		::UI::MenuMethod ${wtop}menu.file entryconfigure mOpenConnection -state disabled
-		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mNewAccount -state disabled
-		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mLogin  \
-		  -label [::msgcat::mc Logout] -command \
-		  [list ::Jabber::DoCloseClientConnection $allIPnumsToSend]
-		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mPassword -state normal
-		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mSearch -state normal
-		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mAddNewUser -state normal
-		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mSendMessage -state normal
-		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mChat -state normal
-		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mStatus -state normal
-		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mvCard -state normal
-		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mEnterRoom -state normal
-		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mExitRoom -state normal
-		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mCreateRoom -state normal
-		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mPassword -state normal
-		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mRemoveAccount -state normal
-	    } elseif {[string equal $prefs(protocol) "symmetric"]} {
-		::UI::MenuMethod ${wtop}menu.file entryconfigure mPutFile -state normal
-		::UI::MenuMethod ${wtop}menu.file entryconfigure mPutCanvas -state normal
-		::UI::MenuMethod ${wtop}menu.file entryconfigure mGetCanvas -state normal
-	    } elseif {[string equal $prefs(protocol) "client"]} {
-		::UI::ButtonConfigure $wtop connect -state disabled
-		::UI::MenuMethod ${wtop}menu.file entryconfigure mOpenConnection -state disabled
-		::UI::MenuMethod ${wtop}menu.file entryconfigure mPutFile -state normal
-		::UI::MenuMethod ${wtop}menu.file entryconfigure mPutCanvas -state normal
-		::UI::MenuMethod ${wtop}menu.file entryconfigure mGetCanvas -state normal
-	    } elseif {[string equal $prefs(protocol) "server"]} {
-		::UI::MenuMethod ${wtop}menu.file entryconfigure mPutFile -state normal
-		::UI::MenuMethod ${wtop}menu.file entryconfigure mPutCanvas -state normal
-		::UI::MenuMethod ${wtop}menu.file entryconfigure mGetCanvas -state normal
-	    } else { 
-		::UI::MenuMethod ${wtop}menu.file entryconfigure mOpenConnection -state disabled
-		::UI::ButtonConfigure $wtop connect -state disabled
-	    }
+		symmetric {
+		    ::UI::MenuMethod ${wtop}menu.file entryconfigure mPutFile -state normal
+		    ::UI::MenuMethod ${wtop}menu.file entryconfigure mPutCanvas -state normal
+		    ::UI::MenuMethod ${wtop}menu.file entryconfigure mGetCanvas -state normal
+		}
+		client {
+		    ::UI::ButtonConfigure $wtop connect -state disabled
+		    ::UI::MenuMethod ${wtop}menu.file entryconfigure mOpenConnection -state disabled
+		    ::UI::MenuMethod ${wtop}menu.file entryconfigure mPutFile -state normal
+		    ::UI::MenuMethod ${wtop}menu.file entryconfigure mPutCanvas -state normal
+		    ::UI::MenuMethod ${wtop}menu.file entryconfigure mGetCanvas -state normal
+		}
+		server {
+		    ::UI::MenuMethod ${wtop}menu.file entryconfigure mPutFile -state normal
+		    ::UI::MenuMethod ${wtop}menu.file entryconfigure mPutCanvas -state normal
+		    ::UI::MenuMethod ${wtop}menu.file entryconfigure mGetCanvas -state normal
+		}
+		default {
+		    ::UI::MenuMethod ${wtop}menu.file entryconfigure mOpenConnection -state disabled
+		    ::UI::ButtonConfigure $wtop connect -state disabled
+		}
+	    }	    
 	    ::UI::MenuMethod ${wtop}menu.info entryconfigure mHelpOn -state disabled
 	}
 	disconnect {
-
-	    if {[string equal $prefs(protocol) "jabber"]} {
-		::UI::ButtonConfigure $wtop connect -state normal
-		::UI::ButtonConfigure $wtop send -state disabled
-		::UI::MenuMethod ${wtop}menu.file entryconfigure mOpenConnection -state normal
-		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mNewAccount -state normal
-		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mLogin  \
-		  -label "[::msgcat::mc Login]..." \
-		  -command [list ::Jabber::Login::Login $wDlgs(jlogin)]
-		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mPassword -state disabled
-		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mSearch -state disabled
-		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mAddNewUser -state disabled
-		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mSendMessage -state disabled
-		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mChat -state disabled
-		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mStatus -state disabled
-		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mvCard -state disabled
-		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mEnterRoom -state disabled
-		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mExitRoom -state disabled
-		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mCreateRoom -state disabled
-		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mPassword -state disabled
-		::UI::MenuMethod ${wtop}menu.jabber entryconfigure mRemoveAccount -state disabled
-	    } elseif {[string equal $prefs(protocol) "client"]} {
-		::UI::ButtonConfigure $wtop connect -state normal
-		::UI::MenuMethod ${wtop}menu.file entryconfigure mOpenConnection -state normal
+	    
+	    switch -- $prefs(protocol) {
+		jabber {
+		    ::UI::ButtonConfigure $wtop connect -state normal
+		    ::UI::ButtonConfigure $wtop send -state disabled
+		    ::UI::MenuMethod ${wtop}menu.file entryconfigure mOpenConnection -state normal
+		    ::UI::MenuMethod ${wtop}menu.jabber entryconfigure mNewAccount -state normal
+		    ::UI::MenuMethod ${wtop}menu.jabber entryconfigure mLogin  \
+		      -label "[::msgcat::mc Login]..." \
+		      -command [list ::Jabber::Login::Login $wDlgs(jlogin)]
+		    ::UI::MenuMethod ${wtop}menu.jabber entryconfigure mLogoutWith -state disabled
+		    ::UI::MenuMethod ${wtop}menu.jabber entryconfigure mPassword -state disabled
+		    ::UI::MenuMethod ${wtop}menu.jabber entryconfigure mSearch -state disabled
+		    ::UI::MenuMethod ${wtop}menu.jabber entryconfigure mAddNewUser -state disabled
+		    ::UI::MenuMethod ${wtop}menu.jabber entryconfigure mSendMessage -state disabled
+		    ::UI::MenuMethod ${wtop}menu.jabber entryconfigure mChat -state disabled
+		    ::UI::MenuMethod ${wtop}menu.jabber entryconfigure mStatus -state disabled
+		    ::UI::MenuMethod ${wtop}menu.jabber entryconfigure mvCard -state disabled
+		    ::UI::MenuMethod ${wtop}menu.jabber entryconfigure mEnterRoom -state disabled
+		    ::UI::MenuMethod ${wtop}menu.jabber entryconfigure mExitRoom -state disabled
+		    ::UI::MenuMethod ${wtop}menu.jabber entryconfigure mCreateRoom -state disabled
+		    ::UI::MenuMethod ${wtop}menu.jabber entryconfigure mPassword -state disabled
+		    ::UI::MenuMethod ${wtop}menu.jabber entryconfigure mRemoveAccount -state disabled
+		}
+		client {
+		    ::UI::ButtonConfigure $wtop connect -state normal
+		    ::UI::MenuMethod ${wtop}menu.file entryconfigure mOpenConnection -state normal
+		}
 	    }
 	    ::UI::MenuMethod ${wtop}menu.info entryconfigure mHelpOn -state normal
 	    
@@ -3900,7 +3911,7 @@ proc ::UI::FixMenusWhen {wtop what} {
 	    }
 	}
 	disconnectserver {
-
+	    
 	    # If no more connections left, make menus consistent.
 	    if {[llength $allIPnumsToSend] == 0} {
 		::UI::MenuMethod ${wtop}menu.file entryconfigure mPutFile -state disabled
@@ -3929,7 +3940,7 @@ proc ::UI::FixMenusWhenSelection {w} {
     set wToplevel [winfo toplevel $w]
     set wToplevelClass [winfo class $wToplevel]
     
-    Debug 4 "::UI::FixMenusWhenSelection w=$w,\n\twtop=$wtop, wClass=$wClass,\
+    Debug 8 "::UI::FixMenusWhenSelection w=$w,\n\twtop=$wtop, wClass=$wClass,\
       wToplevelClass=$wToplevelClass"
     
     # Do different things dependent on the type of widget.

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: FileUtils.tcl,v 1.1.1.1 2002-12-08 11:03:03 matben Exp $
+# $Id: FileUtils.tcl,v 1.2 2003-01-30 17:33:56 matben Exp $
 
 namespace eval ::FileUtils:: {
     
@@ -115,6 +115,8 @@ proc ::FileUtils::GetKnownPathFromTail {fileTail} {
 	}
     }
 }
+
+# NOT USED............................
 
 # FileUtils::AcceptCached --
 #
