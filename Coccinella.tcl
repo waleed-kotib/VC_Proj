@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.52 2004-04-25 15:35:24 matben Exp $
+# $Id: Coccinella.tcl,v 1.53 2004-04-26 10:21:15 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -604,6 +604,7 @@ if {[string equal $this(platform) "unix"]} {
 if {[string equal $this(platform) "windows"]} {
     wm iconbitmap . -default [file join $this(imagePath) coccinella.ico]
 }
+wm protocol . WM_DELETE_WINDOW {::UI::DoCloseWindow .}
 
 # At this point we should be finished with the launch and delete the splash 
 # screen.
