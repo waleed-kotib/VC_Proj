@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.9 2004-07-26 08:37:16 matben Exp $
+# $Id: Whiteboard.tcl,v 1.10 2004-07-27 08:08:13 matben Exp $
 
 package require entrycomp
 package require moviecontroller
@@ -2501,7 +2501,8 @@ proc ::WB::MakeItemMenuDef {dir} {
 	    }
 	} elseif {[string equal [file extension $f] ".can"]} {
 	    set name [file rootname [file tail $f]]
-	    set cmd [format {::CanvasFile::DrawCanvasItemFromFile $wtop %s} $f]
+	    set cmd {::CanvasFile::DrawCanvasItemFromFile $wtop}
+	    lappend cmd $f
 	    lappend mdef [list command $name $cmd normal {}]
 	}
     }
