@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.28 2004-08-03 14:04:44 matben Exp $
+# $Id: Utils.tcl,v 1.29 2004-08-26 12:05:17 matben Exp $
 
 namespace eval ::Utils:: {
 
@@ -817,7 +817,7 @@ proc ::Text::TransformToPureText {w args} {
     }
     unset -nocomplain puretext($w)
     set puretext($w) ""
-    foreach {key value index} [$w dump 1.0 end $w] {
+    foreach {key value index} [$w dump 1.0 end] {
 	::Text::TransformToPureTextCallback $w $key $value $index
     }
     return $puretext($w)

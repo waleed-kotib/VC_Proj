@@ -2,7 +2,7 @@
 	  The Coccinella : Jabber application with Whiteboard
 	  ---------------------------------------------------
 
-		version 0.94.11, May, 2004
+		version 0.95.0, August, 2004
 
 		       by Mats Bengtsson
 
@@ -79,10 +79,9 @@ Testing:
 
 Additional Notes:
     
-    * Jabber: if you run this as a Jabber client, then be sure that the
-      servers's "karma", which controls maximal throughput, is set high.  
-      This client delivers more data than an ordinary Jabber client, and 
-      data may "get stuck" in the server if karma is too low.
+    * This client delivers more data than an ordinary Jabber client, and 
+      data may "get stuck" in the server if karma is too low. This only
+      happend if you does a lot of drawings in a short period of time.
 
 Documentation:
 
@@ -114,6 +113,7 @@ Bug Reports:
 
     Either send them to me directly: matben@users.sourceforge.net , or report them
     at Source Forge: http://sourceforge.net/tracker/?group_id=68334&atid=520863
+    This address can be reached via the Info/Report Bug menu.
 
 Known Bugs:
 
@@ -129,6 +129,9 @@ Known Bugs:
       exactly simultanously. This applies only to some operations, and is 
       not very likely to happen, but must anyway be considered.
 
+      Similar synchronization problems exist in some other areas, applets
+      for instance.
+
     * It may sometimes happen that the internal settings become confused 
       which results in a corrupt preference file. If you suspect this then
       delete this file:
@@ -140,8 +143,6 @@ Known Bugs:
     * Printer support is still in its infacy. You may export the canvas to
       XML/SVG format which can be imported into a web browser using the free
       plugin from www.adobe.com, and print from inside your browser.
-
-    * If you use upper case characters in jids it may become confused.
 
     * There are numerous "details" that need to be fixed. After all, it is an 
       alpha quality software!
@@ -166,12 +167,13 @@ Web interaction (uri bindings):
     This works presently only on Windows, and you need to launch Coccinella
     at least once with administrator privilegies to make it work.
 
-    You can launch The Coccinella using the switch -uri:
+    You can also launch The Coccinella using the switch -uri:
     set argv "-uri xmpp:marilu@l4l.be?..." Note that the jid you supply here
     is the target address for any action specified. The login uses the
     active profile in the application, not the jid in the uri!
 
-    Some examples of supported uri's:
+    Some examples of supported uri's (The official specification for this
+    is currently floating; changes are likely to appear in the future.):
 
     xmpp:matben@athlon.se
     xmpp:marilu@l4l.be?message&subject=hi&body=Hello%20World
@@ -191,7 +193,7 @@ XML/SVG:
 
 Distribution:
 
-    It is distributed under the standard GPL.
+    It is distributed under the standard GPL license.
     (c) Copyright by Mats Bengtsson (1999-2004).
     Buttons are stolen from Gimp and slightly changed (Thank You!).
 
@@ -199,8 +201,7 @@ Home:
 
     The present home of the Coccinella is at
     "http://hem.fyristorg.com/matben", where links to the extensions also 
-    can be found. Starting with release 0.94.3 the code is put on 
-    SourceForge's cvs, where you may get snapshots of developer code.
+    can be found.
     Look at "http://coccinella.sourceforge.net" which is the official
     developer home.
 
@@ -223,5 +224,7 @@ Who:
    
     matben@users.sourceforge.net
     phone: +46 13 136114
+
+    MADE IN SWEDEN
 
 #-------------------------------------------------------------------------------
