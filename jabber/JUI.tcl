@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.23 2004-01-20 14:21:35 matben Exp $
+# $Id: JUI.tcl,v 1.24 2004-01-23 14:25:03 matben Exp $
 
 package provide JUI 1.0
 
@@ -25,6 +25,7 @@ namespace eval ::Jabber::UI:: {
     option add *JMain.stopImage                   stop            widgetDefault
     option add *JMain.stopDisImage                stopDis         widgetDefault
     option add *JMain.roster16Image               roster16        widgetDefault
+    option add *JMain.browser16Image              browser16       widgetDefault
 
     # Other icons.
     option add *JMain.contactOffImage             contactOff      widgetDefault
@@ -380,8 +381,11 @@ proc ::Jabber::UI::NewPage {name} {
 	Browser {
     
 	    # Browser page
+	    set iconBrowser [::Theme::GetImage \
+	      [option get $jwapp(fall) browser16Image {}]]
 	    if {[lsearch $pages Browser] < 0} {
-		set br [$nbframe newpage {Browser} -text [msgcat::mc Browser]]    
+		set br [$nbframe newpage {Browser} -text [msgcat::mc Browser] \
+		  -image $iconBrowser]    
 		pack [::Jabber::Browse::Build $br.br] -fill both -expand 1
 	    }
 	}
@@ -579,6 +583,7 @@ proc ::Jabber::UI::RegisterMenuEntry {wpath name menuSpec} {
 proc ::Jabber::UI::Popup {what w v x y} {
     global  wDlgs this
     
+    upvar ::Jabber::privatexmlns privatexmlns
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::popMenuDefs popMenuDefs
     
@@ -631,7 +636,8 @@ proc ::Jabber::UI::Popup {what w v x y} {
 		    # Must let 'jid' refer to 2-tier jid for commands to work!
 		    set jid3 $jid
 		    set jid $jid2
-		    if {[$jstate(browse) havenamespace $jid3 "coccinella:wb"]} {
+		    if {[$jstate(browse) havenamespace $jid3 "coccinella:wb"] || \
+		      [$jstate(browse) havenamespace $jid3 $privatexmlns(whiteboard)]} {
 			set typeClicked wb
 		    } else {
 			set typeClicked user
