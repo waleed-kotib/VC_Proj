@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: HtmlImport.tcl,v 1.3 2003-11-08 13:26:05 matben Exp $
+# $Id: HtmlImport.tcl,v 1.4 2003-11-30 11:46:47 matben Exp $
 
 
 namespace eval ::HtmlImport:: {
@@ -243,6 +243,34 @@ proc ::HtmlImport::Clicked {id} {
     variable locals
     
     ::Utils::OpenHtmlInBrowser $locals(id2file,$id)
+}
+
+# ::HtmlImport::Save --
+# 
+#       Template proc for saving an 'import' command to file.
+#       Return empty if failure.
+
+proc ::HtmlImport::Save {wCan id args} {
+    variable locals
+    
+    ::Debug 2 "::HtmlImport::Save wCan=$wCan, id=$id, args=$args"
+    array set argsArr {
+	-uritype file
+    }
+    array set argsArr $args
+
+    if {[info exists locals(id2file,$id)]} {
+	set fileName $locals(id2file,$id)
+	if {$argsArr(-uritype) == "http"} {
+	    lappend impArgs -url [::CanvasUtils::GetHttpFromFile $fileName]
+	} else {
+	    lappend impArgs -file $fileName
+	}
+	lappend impArgs -tags [::CanvasUtils::GetUtag $wCan $id 1]
+	return "import [$wCan coords $id] $impArgs"
+    } else {
+	return ""
+    }
 }
 
 proc ::HtmlImport::SaveAs {id} {

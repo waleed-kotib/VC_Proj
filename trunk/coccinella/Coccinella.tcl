@@ -15,7 +15,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.13 2003-11-12 08:20:49 matben Exp $
+# $Id: Coccinella.tcl,v 1.14 2003-11-30 11:46:46 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -725,6 +725,16 @@ if {![string match "mac*" $this(platform)]} {
 if {[string equal $this(platform) "macosx"]} {
     if {![catch {package require tclAE}]} {
 	tclAE::installEventHandler aevt quit ::UI::AEQuitHandler
+    }
+    proc ::tk::mac::OpenDocument {args} {
+	foreach f $args {
+	    
+	    switch -- [file extension $f] {
+		.can {
+		    ::UI::NewWhiteboard -file $f
+		}
+	    }
+	}
     }
 }
 

@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: VCard.tcl,v 1.5 2003-10-05 13:36:20 matben Exp $
+# $Id: VCard.tcl,v 1.6 2003-11-30 11:46:47 matben Exp $
 
 package provide VCard 1.0
 
@@ -391,7 +391,6 @@ proc ::VCard::PushBtSetVCard { }  {
 
 proc ::VCard::SetVCardCallback {jlibName type theQuery} {
 
-    #puts "::VCard::SetVCardCallback:  type=$type, theQuery='$theQuery'"
     if {$type == "error"} {
 	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
 	  -message [FormatTextForMessageBox \

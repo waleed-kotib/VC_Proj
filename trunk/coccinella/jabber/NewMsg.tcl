@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.16 2003-11-12 08:20:49 matben Exp $
+# $Id: NewMsg.tcl,v 1.17 2003-11-30 11:46:46 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -376,7 +376,6 @@ proc ::Jabber::NewMsg::TabInAddr {w wfr n} {
 	focus "$wfr.addr[expr $n + 1]"
 	::Jabber::NewMsg::SeeLine $w [expr $n + 1]
     } else {
-	#puts "focus wsubject=$wsubject"
 	focus $wsubject
     }
 }
@@ -409,8 +408,6 @@ proc ::Jabber::NewMsg::BackSpaceInAddr {w wfr n} {
     
     variable locals
     
-    #puts "BackSpaceInAddr: n=$n"
-    
     # Don't do anything if first line.
     if {$n == 1} {
 	return
@@ -441,7 +438,6 @@ proc ::Jabber::NewMsg::EmptyAddrLine {w wfr n} {
     
     variable locals
     
-    #puts "EmptyAddrLine: n=$n"
     $wfr.f${n}.la configure -image $locals(whiterect) -bg white
     $wfr.addr${n} configure -state disabled
     set locals($w,poptrpt$n) {}
@@ -473,7 +469,7 @@ proc ::Jabber::NewMsg::SeeLine {w n} {
     set can $locals($w,waddcan)
     set top [expr [lindex [$can yview] 0] * $totlines + 1]
     set bot [expr $top + 3]
-    #puts "yview=[$can yview], n=$n, top=$top, bot=$bot"
+
     if {$n > $bot} {
 	$can yview moveto [expr ($n - 4.0)/$totlines]
     } elseif {$n < $top} {
@@ -503,7 +499,6 @@ proc ::Jabber::NewMsg::PopupCmd {w n} {
     set num $locals($w,num)
     set wfrport $locals($w,wfrport)
     set pick $locals($w,poptrpt$n)
-    #puts "::Jabber::NewMsg::PopupCmd n=$n, pick=$pick"
 
     # Seems to be necessary to achive any selection.
     set wentry $wfrport.addr${n}

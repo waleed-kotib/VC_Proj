@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: AutoUpdate.tcl,v 1.3 2003-10-05 13:36:20 matben Exp $
+# $Id: AutoUpdate.tcl,v 1.4 2003-11-30 11:46:47 matben Exp $
 
 package require tinydom
 package require http 2.3
@@ -115,7 +115,7 @@ proc ::AutoUpdate::Dialog {releaseAttr message changesList} {
     # Text.
     set wtext $w.frall.text
     text $wtext -width 60 -height 16 -font $sysFont(s) -wrap word \
-      -borderwidth 1 -relief sunken -background $prefs(bgColGeneral)
+      -borderwidth 1 -relief sunken -background white
     pack $wtext
     
     $wtext tag configure msgtag -lmargin1 10 -spacing1 4 -spacing3 4 \
@@ -131,8 +131,10 @@ proc ::AutoUpdate::Dialog {releaseAttr message changesList} {
     $wtext configure -state normal
     $wtext insert end $message msgtag
     $wtext insert end "\n"
+    
     foreach {name value} $releaseAttr {
 	$wtext insert end "\t[string totitle $name]:" attrtag
+	
 	switch -- $name {
 	    url {
 		$wtext insert end "\t$value" urltag
@@ -155,16 +157,15 @@ proc ::AutoUpdate::Dialog {releaseAttr message changesList} {
     $wtext configure -state disabled
     
     # Configure text widget height to fit all.
-    update
-    foreach {x y width height} [$wtext bbox "insert -1 char"] break
-    set linespace [font metrics $sysFont(s) -linespace]
-    $wtext configure -height [expr int(($y + $height)/$linespace + 1)]
+    tkwait visibility $wtext
+    foreach {ystart yfrac} [$wtext yview] break
+    $wtext configure -height [expr int([$wtext cget -height]/$yfrac) + 0]
     
     set noautocheck 0
     if {[package vcompare $prefs(fullVers) $prefs(lastAutoUpdateVersion)] <= 0} {
     	set noautocheck 1
     }
-    checkbutton $w.frall.ch -text " Do not automatically check for updates" \
+    checkbutton $w.frall.ch -text " [::msgcat::mc autoupdatenot]" \
       -variable [namespace current]::noautocheck
     pack $w.frall.ch -side top -anchor w -padx 10 -pady 4
     

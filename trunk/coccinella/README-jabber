@@ -24,7 +24,6 @@ This brief text describes the jabber features supported:
     namespace declarations describing its services:
 
       o jabber:client
-      o jabber:iq:autoupdate
       o jabber:iq:browse
       o jabber:iq:conference
       o jabber:iq:last
@@ -32,7 +31,6 @@ This brief text describes the jabber features supported:
       o jabber:iq:roster
       o jabber:iq:time
       o jabber:iq:version
-      o jabber:x:autoupdate
       o jabber:x:data
       o coccinella:public
       o coccinella:wb

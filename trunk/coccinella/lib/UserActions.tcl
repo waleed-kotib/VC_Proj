@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UserActions.tcl,v 1.19 2003-11-14 10:00:30 matben Exp $
+# $Id: UserActions.tcl,v 1.20 2003-11-30 11:46:47 matben Exp $
 
 namespace eval ::UserActions:: {
     
@@ -688,7 +688,6 @@ proc ::UserActions::DoSendCanvas {wtop} {
 	    }
 	}
     }
-    puts $cmdList
     
     # Be sure to send jabber stuff in a single batch. 
     # Jabber: override doSend checkbutton!
