@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.73 2004-10-16 13:32:51 matben Exp $
+# $Id: UI.tcl,v 1.74 2004-10-21 07:43:56 matben Exp $
 
 package require entrycomp
 package require alertbox
@@ -109,6 +109,7 @@ namespace eval ::UI:: {
 
     variable topcache
     set topcache(state) show
+    set topcache(all)   {}
 }
 
 # UI::Toplevel --
