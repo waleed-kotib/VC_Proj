@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.17 2003-10-23 06:28:00 matben Exp $
+# $Id: jabberlib.tcl,v 1.18 2003-10-25 07:22:26 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -98,6 +98,8 @@
 #      jlibName get_version to cmd
 #      jlibName getagent jid
 #      jlibName haveagent jid
+#      jlibName iq_get xmlns to ?args?
+#      jlibName iq_set xmlns to ?args?
 #      jlibName myjid
 #      jlibName mystatus
 #      jlibName oob_set to cmd url ?args?
@@ -212,6 +214,7 @@
 #       030611   added 'setroomprotocol' command and modified service dispatching
 #       030705   jlib::new generates self token
 #       030726   made browse object optional, jlib::new api changed!
+#       031022   added iq_get and iq_set methods
 
 package require wrapper
 package require roster
@@ -1507,6 +1510,46 @@ proc jlib::send_iq {jlibname type xmldata args} {
     }
 }
 
+proc jlib::iq_get {jlibname xmlns to args} {
+
+    set opts {}
+    foreach {key value} $args {
+	switch -- $key {
+	    -command {
+		lappend opts -command  \
+		  [list [namespace current]::parse_iq_response $jlibname $value]
+	    }
+	}
+    }
+    set xmllist [wrapper::createtag "query" -attrlist [list xmlns $xmlns]]
+    eval {send_iq $jlibname "get" $xmllist -to $to} $opts
+}
+
+proc jlib::iq_set {jlibname xmlns to args} {
+
+    set opts {}
+    set subelements {}
+    foreach {key value} $args {
+	switch -- $key {
+	    -command {
+		lappend opts -command  \
+		  [list [namespace current]::parse_iq_response $jlibname $value]
+	    }
+	    default {
+		lappend subelements [wrapper::createtag  \
+		  [string trimleft $key -] -chdata $value]		
+	    }
+	}
+    }
+    if {[llength $subelements]} {
+	set xmllist [wrapper::createtag "query" -attrlist [list xmlns $xmlns] \
+	  -subtags $subelements]
+    } else {
+	set xmllist [wrapper::createtag "query" -attrlist [list xmlns $xmlns]]
+    }
+    eval {send_iq $jlibname "set" $xmllist -to $to} $opts
+}
+
 # jlib::send_auth --
 #
 #       Send simple client authentication.
@@ -1532,18 +1575,16 @@ proc jlib::send_auth {jlibname username resource cmd args} {
     set subelements [list  \
       [wrapper::createtag "username" -chdata $username]  \
       [wrapper::createtag "resource" -chdata $resource]]
-    array set argsArr $args
     set toopt ""
 
-    foreach argsswitch [array names argsArr] {
-	set par [string trimleft $argsswitch "-"]
-	switch -- $par {
-	    password - digest {
-		lappend subelements [wrapper::createtag $par  \
-		  -chdata $argsArr($argsswitch)]
+    foreach {key value} $args {
+	switch -- $key {
+	    -password - -digest {
+		lappend subelements [wrapper::createtag  \
+		  [string trimleft $key -] -chdata $value]
 	    }
-	    to {
-		set toopt [list -to $argsArr($argsswitch)]
+	    -to {
+		set toopt [list -to $value]
 	    }
 	}
     }
@@ -1576,7 +1617,7 @@ proc jlib::register_get {jlibname cmd args} {
     array set argsArr $args
     set xmllist [wrapper::createtag "query" -attrlist {xmlns jabber:iq:register}]
     if {[info exists argsArr(-to)]} {
-	set toopt "-to $argsArr(-to)"
+	set toopt [list -to $argsArr(-to)]
     } else {
 	set toopt ""
     }
@@ -1633,7 +1674,7 @@ proc jlib::register_set {jlibname username password cmd args} {
       -subtags $subelements]
     
     if {[info exists argsArr(-to)]} {
-	set toopt "-to $argsArr(-to)"
+	set toopt [list -to $argsArr(-to)]
     } else {
 	set toopt ""
     }

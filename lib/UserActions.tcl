@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UserActions.tcl,v 1.16 2003-10-12 13:12:55 matben Exp $
+# $Id: UserActions.tcl,v 1.17 2003-10-25 07:22:27 matben Exp $
 
 namespace eval ::UserActions:: {
     
@@ -166,20 +166,20 @@ proc ::UserActions::DoCanvasGrid {wtop} {
     if {$this(platform) == "windows"} {
 	for {set x $gridDist} {$x <= $length} {set x [expr $x + $gridDist]} {
 	    $wCan create line $x 0 $x $length  \
-	      -width 1 -fill gray50 -tags grid
+	      -width 1 -fill gray50 -tags {notactive grid}
 	}
 	for {set y $gridDist} {$y <= $length} {set y [expr $y + $gridDist]} {
 	    $wCan create line 0 $y $length $y  \
-	      -width 1 -fill gray50 -tags grid
+	      -width 1 -fill gray50 -tags {notactive grid}
 	}
     } else {
 	for {set x $gridDist} {$x <= $length} {set x [expr $x + $gridDist]} {
 	    $wCan create line $x 0 $x $length  \
-	      -width 1 -fill gray50 -tags grid -stipple gray50
+	      -width 1 -fill gray50 -tags {notactive grid} -stipple gray50
 	}
 	for {set y $gridDist} {$y <= $length} {set y [expr $y + $gridDist]} {
 	    $wCan create line 0 $y $length $y  \
-	      -width 1 -fill gray50 -tags grid -stipple gray50
+	      -width 1 -fill gray50 -tags {notactive grid} -stipple gray50
 	}
     }
     $wCan lower grid

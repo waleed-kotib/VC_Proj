@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: entrycomp.tcl,v 1.2 2003-08-30 09:40:59 matben Exp $
+# $Id: entrycomp.tcl,v 1.3 2003-10-25 07:22:26 matben Exp $
 #
 # ########################### USAGE ############################################
 #
@@ -141,11 +141,12 @@ proc ::entrycomp::Insert {w s} {
 	$w selection range $insert end
 	$w icursor $insert
     } else {
-	$w delete $insert end
+	#$w delete $insert end
     }    
     ::tk::EntrySeeInsert $w
     
     # Stop Entry class handler from executing, else we get double characters.
+    # Problem: this also stops handlers bound to the toplevel bindtag!!!!!
     return -code break
 }
 

@@ -25,7 +25,7 @@
 # 
 # Copyright (C) 2002-2003 Mats Bengtsson
 # 
-# $Id: tree.tcl,v 1.8 2003-10-24 09:33:40 matben Exp $
+# $Id: tree.tcl,v 1.9 2003-10-25 07:22:26 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -647,13 +647,12 @@ proc ::tree::WidgetProc {w command args} {
 	    }
 	    set v [lindex $args 0]
 	    set v [NormList $v]
-	    set uid $v2uid($v)
-	    if {[info exists treestate($uid:children)]} {
-		set result $treestate($uid:children)
-	    } else {
-		#return -code error "parent \"$v\" does not exist"
-		# Silent?
-		set result {}
+	    set result {}
+	    if {[info exists v2uid($v)]} {
+		set uid $v2uid($v)
+		if {[info exists treestate($uid:children)]} {
+		    set result $treestate($uid:children)
+		}
 	    }
 	}
 	closetree {
@@ -910,8 +909,11 @@ proc ::tree::ConfigureItem {w v args} {
     set dir [lrange $v 0 end-1]
     set tail [lindex $v end]
 
-    set dir [FileTree dirname $v]
-    set tail [FileTree tail $v]
+    #set dir [FileTree dirname $v]
+    #set tail [FileTree tail $v]
+    if {![info exists v2uid($v)]} {
+	return -code error "item \"$v\" doesn't exist"
+    }
     set uid $v2uid($v)
     set uidDir $v2uid($dir)
     
@@ -1010,7 +1012,8 @@ proc ::tree::IsItem {w v} {
     upvar ::tree::${w}::v2uid v2uid
 
     set v [NormList $v]
-    if {[info exists treestate($v2uid($v):children)]} {
+    if {[info exists v2uid($v)] &&  \
+      [info exists treestate($v2uid($v):children)]} {
 	return 1
     } else {
 	return 0
@@ -1043,8 +1046,11 @@ proc ::tree::NewItem {w v args} {
     
     #set dir [FileTree dirname $v]
     #set tail [FileTree tail $v]
-    set uidDir $v2uid($dir)
     
+    if {![info exists v2uid($dir)]} {
+	return -code error "parent item \"$dir\" is missing"
+    }
+    set uidDir $v2uid($dir)
     if {![info exists treestate($uidDir:open)]} {
 	return -code error "parent item \"$dir\" is missing"
     }
@@ -1131,6 +1137,9 @@ proc ::tree::DelItem {w v args} {
     Debug 1 "::tree::DelItem w=$w, v='$v'"
     
     set v [NormList $v]
+    if {![info exists v2uid($v)]} {
+	return
+    }
     set uid $v2uid($v)
     if {![info exists treestate($uid:open)]} {
 	return
@@ -1424,8 +1433,6 @@ proc ::tree::BuildLayer {w v in} {
     
     # Loop through all childrens.
     foreach c $treestate($uid:children) {
-	
-	# We may get vxc={a b c {[junk]}} here if special chars. Cure!
 	set vxc [concat $vx [list $c]]
 	set uidc $v2uid($vxc)
 	

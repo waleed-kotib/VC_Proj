@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: browse.tcl,v 1.13 2003-09-13 06:39:25 matben Exp $
+# $Id: browse.tcl,v 1.14 2003-10-25 07:22:26 matben Exp $
 # 
 #  locals($jid,parent):       the parent of $jid.
 #  locals($jid,parents):      list of all parent jid's,
@@ -394,13 +394,12 @@ proc browse::gettype {browseName jid} {
 proc browse::getalljidfortypes {browseName typepattern} {
     upvar [namespace current]::${browseName}::locals locals
     
-    set allkeys [array names locals "$typepattern,typelist"]
+    set allkeys [array names locals "${typepattern},typelist"]
     set jidlist {}
     
-    # Need eval here to flatten the jidlist.
     foreach key $allkeys {
 	set locals($key) [lsort -unique $locals($key)]
-	eval {lappend jidlist} $locals($key)
+	set jidlist [concat $jidlist $locals($key)]
     }
     return $jidlist
 }    

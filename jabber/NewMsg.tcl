@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.10 2003-10-05 13:36:20 matben Exp $
+# $Id: NewMsg.tcl,v 1.11 2003-10-25 07:22:26 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -20,13 +20,14 @@ namespace eval ::Jabber::NewMsg:: {
     set locals(wpopupbase) .jsndtrpt
     set locals(transports) {jabber icq aim msn yahoo irc smtp}
     
+    # {subtype popupText entryText}
     variable popupDefs
     array set popupDefs {
 	jabber    {Jabber    {Jabber (address):}}
 	icq       {ICQ       {ICQ (number):}}
 	aim       {AIM       {AIM:}}
-	msn       {MSN       {Messenger:}}
-	yahoo     {Yahoo     {Yahoo (screen name):}}
+	msn       {MSN       {MSN Messenger:}}
+	yahoo     {Yahoo     {Yahoo Messenger:}}
 	irc       {IRC       {IRC:}}
 	smtp      {Email     {Mail address:}}
     }
@@ -70,8 +71,11 @@ proc Jabber::NewMsg::Init { } {
     set trpts {}
     foreach subtype $locals(transports) {	
 	set ind [lsearch -exact $alltypes "service/$subtype"]
+	set locals(servicejid,$subtype) {}
 	if {$ind >= 0} {
 	    lappend trpts $subtype
+	    set locals(servicejid,$subtype) [lindex \
+	      [$jstate(browse) getalljidfortypes "service/$subtype"] 0]
 	}
     }
     set locals(ourtransports) $trpts
@@ -486,20 +490,32 @@ proc ::Jabber::NewMsg::PopupCmd {w n} {
     set num $locals($w,num)
     set wfrport $locals($w,wfrport)
     set pick $locals($w,poptrpt$n)
-    #puts "::Jabber::NewMsg::PopupCmd pick=$pick"
-    
+    #puts "::Jabber::NewMsg::PopupCmd n=$n, pick=$pick"
+
+    # Seems to be necessary to achive any selection.
+    set wentry $wfrport.addr${n}
+    focus $wentry
+
     switch -glob -- $pick {
 	*Jabber* {
-	    #set locals($w,addr$n) "UsersName@$jserver(this)"
-	    #set locals($w,addr$n) "UsersName@athlon.se"
-	    #$wfrport.addr${n} selection from 0
-	    #$wfrport.addr${n} selection to 9
+	    set locals($w,addr$n) "userName@$locals(servicejid,jabber)"
+	    $wentry selection range 0 8
 	}
 	*AIM* {
+	    set locals($w,addr$n) "usersName@$locals(servicejid,aim)"
 	    
 	}
 	*Yahoo* {
+	    set locals($w,addr$n) "usersName@$locals(servicejid,yahoo)"
 	    
+	}
+	*ICQ* {
+	    set locals($w,addr$n) "screeNumber@$locals(servicejid,icq)"
+	    $wentry selection range 0 11
+	}
+	*MSN* {
+	    set locals($w,addr$n) "userName%hotmail.com@$locals(servicejid,msn)"
+	    $wentry selection range 0 8
 	}
     }
 }
@@ -513,7 +529,6 @@ proc ::Jabber::NewMsg::ResizeCan {w } {
     set can $locals($w,waddcan)
     set wspacer $locals($w,wspacer)
     set canwidth [winfo width $can]
-    #puts "::Jabber::NewMsg::ResizeCan canwidth=$canwidth"
     $wspacer configure -width [expr $canwidth - 2]
 }
 
