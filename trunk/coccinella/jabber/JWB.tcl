@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.13 2004-05-26 07:36:35 matben Exp $
+# $Id: JWB.tcl,v 1.14 2004-07-02 14:08:01 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -78,6 +78,16 @@ proc ::Jabber::WB::Init {jlibName} {
       [namespace current]::HandleSVGWBGroupchatMessage
 
     ::Jabber::AddClientXmlns [list "coccinella:wb"]
+    
+    # Add Advanced Message Processing elements. <amp/>
+    # Deliver only to specified resource, and do not store offline.
+    variable ampElem
+    set rule1 [wrapper::createtag "rule"  \
+      -attrlist {condition deliver-at value stored action error}]
+    set rule2 [wrapper::createtag "rule"  \
+      -attrlist {condition match-resource value exact action error}]
+    set ampElem [wrapper::createtag "amp" -attrlist \
+      {xmlns http://jabber.org/protocol/amp} -subtags [list $rule1 $rule2]]
 }
 
 proc ::Jabber::WB::InitUI { } {
@@ -775,6 +785,7 @@ proc ::Jabber::WB::SendRawMessageList {jid msgList args} {
 
 proc ::Jabber::WB::CanvasCmdListToMessageXElement {wtop cmdList} {
     variable xmlnsSVGWB
+    variable ampElem
     upvar ::Jabber::jprefs jprefs
     
     if {$jprefs(useSVGT)} {
@@ -800,6 +811,10 @@ proc ::Jabber::WB::CanvasCmdListToMessageXElement {wtop cmdList} {
 	set xlist [list [wrapper::createtag x -attrlist  \
 	  {xmlns coccinella:wb} -subtags $subx]]
     }
+    
+    # amp element for message processing directives.
+    # Perhaps we should conserve bandwidth by skipping it?
+    lappend xlist $ampElem
     return $xlist
 }
 

@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.20 2004-06-30 08:52:39 matben Exp $
+# $Id: Profiles.tcl,v 1.21 2004-07-02 14:08:02 matben Exp $
 
 package provide Profiles 1.0
 
@@ -447,7 +447,7 @@ proc ::Profiles::OptionsTabNotebook {w token} {
     set pageproxy $wpage.f
     pack [frame $pageproxy] -side top -anchor w -padx 6 -pady 4
     checkbutton $pageproxy.http -text " [::msgcat::mc {Connect using Http proxy}]" \
-      -variable $token\(proxyhttp)
+      -variable $token\(httpproxy)
     label $pageproxy.lpoll -text [::msgcat::mc {Poll interval (secs)}]
     spinbox $pageproxy.spoll -textvariable $token\(pollsecs) \
       -width 4 -state readonly -increment 1 -from 1 -to 120
@@ -479,7 +479,7 @@ proc ::Profiles::InitDefaultOptions { } {
 	ip          ""
 	pollsecs    5
 	priority    0
-	proxyhttp   0
+	httpproxy   0
     }
     set defaultOptionsArr(port) $jprefs(port)
     set defaultOptionsArr(ssl)  $jprefs(usessl)
@@ -624,7 +624,7 @@ proc ::Profiles::SaveStateToTmpProfArr {profName} {
 		set tmpProfArr($profName,-$key) $moreOpts($key)
 	    }
 	}
-	parray tmpProfArr $profName,-*
+	#parray tmpProfArr $profName,-*
 	set tmpSelected $profName  
     }
 }
@@ -800,7 +800,9 @@ proc ::Profiles::GetTmpProfiles { } {
 	    set optname [string map [list $name,- ""] $key]
 	    switch -- $optname {
 		resource {
-		    lappend plist -resource $value 
+		    if {$value != ""} {
+			lappend plist -resource $value 
+		    }
 		}
 		default {
 		    lappend plist -$optname $value

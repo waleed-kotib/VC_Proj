@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.22 2004-06-16 14:17:31 matben Exp $
+# $Id: Register.tcl,v 1.23 2004-07-02 14:08:02 matben Exp $
 
 package provide Register 1.0
 
@@ -48,7 +48,7 @@ proc ::Jabber::Register::Register {args} {
 	    set $name $argsArr(-$name)
 	}
     }
-    if {![info exists password2] && [info exists password]} {
+    if {[info exists password]} {
 	set password2 $password
     }
     set ssl $jprefs(usessl)
@@ -302,7 +302,7 @@ proc ::Jabber::Register::SendRegisterCB {jlibName type theQuery} {
 	# Disconnect. This should reset both wrapper and XML parser!
 	# Beware: we are in the middle of a callback from the xml parser,
 	# and need to be sure to exit from it before resetting!
-	after idle $jstate(jlib) disconnect
+	after idle $jstate(jlib) closestream
     }
     set finished 1
 }

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.53 2004-06-30 08:52:40 matben Exp $
+# $Id: Preferences.tcl,v 1.54 2004-07-02 14:08:02 matben Exp $
  
 package require notebook
 package require tree
@@ -561,9 +561,26 @@ proc ::Preferences::NetSetup::AdvSetupSave {  } {
 # namespace  ::Preferences::Proxies:: ----------------------------------------
 # 
 #       This is supposed to provide proxy support etc. 
+#       Perhaps it is possible to make it a separate component.
 
 namespace eval ::Preferences::Proxies:: {
     
+    ::hooks::add prefsInitHook          ::Preferences::Proxies::InitPrefsHook
+}
+
+proc ::Preferences::Proxies::InitPrefsHook { } {
+    global  prefs
+    
+    foreach key {httpproxyserver httpproxyport httpproxyusername \
+      httpproxypassword} {
+	set prefs($key) ""
+    }
+    
+    ::PreferencesUtils::Add [list  \
+      [list prefs(httpproxyserver)    prefs_httpproxyserver    $prefs(httpproxyserver)]  \
+      [list prefs(httpproxyport)      prefs_httpproxyport      $prefs(httpproxyport)]  \
+      [list prefs(httpproxyusername)  prefs_httpproxyusername  $prefs(httpproxyusername)]  \
+      [list prefs(httpproxypassword)  prefs_httpproxypassword  $prefs(httpproxypassword)]]
 }
 
 proc ::Preferences::Proxies::BuildPage {page} {

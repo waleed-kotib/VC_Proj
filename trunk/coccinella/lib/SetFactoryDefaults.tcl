@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.32 2004-04-23 07:13:23 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.33 2004-07-02 14:08:03 matben Exp $
 
 
 set noErr 0
@@ -330,7 +330,15 @@ if {![file isdirectory $prefs(inboxCanvasPath)]} {
 if {![file isdirectory $prefs(historyPath)]} {
     file mkdir $prefs(historyPath)
 }
-    
+
+# Privacy!
+switch -- $tcl_platform(platform) {
+    unix {
+	# Make sure other have absolutely no access to our prefs.
+	file attributes $this(prefsPath) -permissions o-rwx
+    }
+}
+
 # Find out how many clicks or milliseconds there are on each second.
 set timingClicksToSecs 1000
 set timingClicksToMilliSecs 1.0

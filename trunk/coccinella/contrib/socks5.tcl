@@ -7,7 +7,7 @@
 #  (C) 2000 Kerem 'Waster_' HADIMLI (minor parts)
 #  (c) 2003  Mats Bengtsson
 #  
-# $Id: socks5.tcl,v 1.6 2003-12-10 15:21:43 matben Exp $
+# $Id: socks5.tcl,v 1.7 2004-07-02 14:08:00 matben Exp $
 # 
 # TODO:  GSSAPI authetication which is a MUST is missing.
 #        Only CMD CONNECT implemented.
@@ -212,8 +212,7 @@ proc socks5::response_method {token} {
 	} else {
 	    
 	    # We should not return from this proc until finished!
-	    fileevent $sock readable  \
-	      [list [namespace current]::readable $token]
+	    fileevent $sock readable [list [namespace current]::readable $token]
 	    vwait $token\(trigger)
 	    return [response_auth $token]
 	}

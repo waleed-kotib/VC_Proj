@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #
-# $Id: jabberhttptransport.tcl,v 1.3 2004-06-30 08:52:40 matben Exp $
+# $Id: jabberhttptransport.tcl,v 1.4 2004-07-02 14:08:02 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -12,7 +12,7 @@
 #	url 	A valid url for the POST method of HTTP.
 #	
 #	-command callback	a tcl procedure of the form 'callback {status message}
-#       -keylength              if > 0 use key sequence of this length
+#       -keylength              sets the length of the key sequence
 #	-maxpollms ms	        max interval in ms for post requests
 #	-minpollms ms	        min interval in ms for post requests
 #       -proxyhost domain	name of proxu host if any
@@ -21,6 +21,7 @@
 #	-proxypasswd secret	and your password
 #	-resendinterval ms	if sending fails, try again after this interval
 #	-timeout ms		timeout for connecting the server
+#	-usekeys 0|1            if keys should be used
 #
 # Callbacks for the JabberLib:
 #	jlib::http::transportinit, jlib::http::transportreset, jlib::http::send
@@ -61,7 +62,7 @@ proc jlib::http::new {jlibname url args} {
     Debug 2 "jlib::http::new url=$url, args=$args"
 
     array set opts {
-	-keylength               0
+	-keylength             255
 	-maxpollms           10000
 	-minpollms            4000
 	-proxyhost              ""
@@ -70,6 +71,7 @@ proc jlib::http::new {jlibname url args} {
 	-proxypasswd            ""
 	-resendinterval      20000
 	-timeout                 0
+	-usekeys                 0
 	header                  ""
 	proxyheader             ""
 	url                     ""
@@ -98,6 +100,9 @@ proc jlib::http::new {jlibname url args} {
     
     # Initialize.
     transportreset
+    
+    $jlibname registertransport [namespace current]::transportinit \
+      [namespace current]::send [namespace current]::transportreset
 }
 
 # jlib::http::BuildProxyHeader --
@@ -124,7 +129,11 @@ proc jlib::http::NewKeySequence {seed len} {
     set prevkey $seed
     
     for {set i 1} {$i < $len} {incr i} {
-	set key [::base64::encode [::sha1pure::sha1 $prevkey]]
+	
+	# It seems that it is expected to have sha1 in binary format;
+	# get from hex
+	set hex [::sha1pure::sha1 $prevkey]
+	set key [::base64::encode [binary format H* $hex]]
 	lappend keys $key
 	set prevkey $key
     }
@@ -137,11 +146,20 @@ proc jlib::http::NewKeySequence {seed len} {
 
 proc jlib::http::transportinit { } {
 
+    variable priv
+    variable opts
+
     set priv(afteridpost) ""
     set priv(afteridpoll) ""
     set priv(xml)         ""
     set priv(id)          0
     set priv(lastsecs)    [clock scan "1 hour ago"]
+    if {$opts(-usekeys)} {
+	
+	# Use keys from the end.
+	set priv(keys) [NewKeySequence [NewSeed] $opts(-keylength)]
+	set priv(keyind) [expr [llength $priv(keys)] - 1]
+    }
     transportreset
 }
 
@@ -161,6 +179,9 @@ proc jlib::http::transportreset { } {
     if {[string length $priv(afteridpoll)]} {
 	catch {after cancel $priv(afteridpoll)}
     }
+    
+    # Cleanup the keys.
+    
 }
 
 # jlib::http::send --
@@ -184,7 +205,7 @@ proc jlib::http::send {xml} {
     # If we don't have a scheduled post,
     # and time to previous post is larger than minumum, do post now.
     if {($priv(afteridpost) == "") && \
-      [expr [clock seconds] - $priv(lastsecs) > 1000 * $opts(-minpollms)]} {
+      [expr [clock seconds] - $priv(lastsecs) > $opts(-minpollms)/1000.0]} {
 	PostScheduled
     }
 }
@@ -213,19 +234,34 @@ proc jlib::http::Post {xml} {
     variable opts
     variable priv
 
-    Debug 2 "jlib::http::Post"
+    if {$opts(-usekeys)} {
+	
+	# Administrate the keys.
+	set key [lindex $priv(keys) $priv(keyind)]
+	incr priv(keyind) -1
 
-    set qry "$priv(id),$xml"
+	# Need new key sequence?
+	if {$priv(keyind) <= 1} {
+	    set priv(keys) [NewKeySequence [NewSeed] $opts(-keylength)]
+	    set priv(keyind) [expr [llength $priv(keys)] - 1]
+	    set newkey [lindex $priv(keys) end]
+	    set qry "$priv(id);$key;$newkey,$xml"
+	} else {
+	    set qry "$priv(id);$key,$xml"
+	}
+    } else {
+	set qry "$priv(id),$xml"
+    }
+    Debug 2 "POST: $qry"
     
     # -query forces a POST request.
     # Make sure we send it as text dispite the application/* type.???
     if {[catch {
 	set token [::http::geturl $opts(url)  \
-	  -timeout $opts(-timeout)  \
-	  -query $qry \
-	  -headers $opts(header) \
+	  -timeout $opts(-timeout) -query $qry -headers $opts(header) \
 	  -command [namespace current]::HttpResponse]
     } msg]} {
+	Debug 2 "\t post failed: $msg"
 	#set priv(resendid) [after $opts(-resendinterval) \
 	#  [namespace current]::send $xml]]
     } else {
@@ -233,7 +269,7 @@ proc jlib::http::Post {xml} {
 	
 	# Reschedule next poll.
 	set priv(afteridpoll) [after $opts(-maxpollms) \
-	  [namespace current]::Poll
+	  [namespace current]::Poll]
     }
 }
 
@@ -273,11 +309,6 @@ proc jlib::http::HttpResponse {token} {
     Debug 2 "jlib::http::HttpResponse status=$status"
     
     switch -- $status {
-	error - timeout - reset {
-	    if {[info exists opts(-command)]} {
-		uplevel #0 $opts(-command) {$status [httpex::error $token]}
-	    }
-	}
 	ok {
 	    
 	    if {[::http::ncode $token] != 200} {
@@ -285,8 +316,6 @@ proc jlib::http::HttpResponse {token} {
 		
 		return
 	    }
-	    
-	    # Extract the 'id' from the Set-Cookie key.
 	    array set metaArr $state(meta)
 	    set errmsg ""
 	    if {![info exists metaArr(Set-Cookie)]} {
@@ -294,18 +323,21 @@ proc jlib::http::HttpResponse {token} {
 		append errmsg " Missing Set-Cookie in HTTP header."
 	    }
 	    
-	    # Parse the cookie.
-	    array set cookieArr [split $metaArr(Set-Cookie) ;=]
-	    if {![info exists cookieArr(ID)]} {
+	    # Extract the 'id' from the Set-Cookie key.
+	    set haveID 0
+	    foreach {name value} $state(meta) {
+		if {[regexp -nocase ^set-cookie$ $name]} {
+		    if {[regexp -nocase {ID=([0-9a-zA-Z:\-]+);} $value m id]} {
+			set haveID 1
+		    } else {
+			set errmsg "Set-Cookie in HTTP header \"$value\""
+			append errmsg " is not ok"
+		    }
+		}
+	    }
+	    if {!$haveID} {
 		append errmsg " Missing ID in Set-Cookie"
 	    }
-	    if {![regexp -nocase {ID=([0-9a-zA-Z:\-]+).*}  \
-	      $metaArr(Set-Cookie) match id]} {
-		# This is an invalid response.
-		set errmsg "Set-Cookie in HTTP header \"$metaArr(Set-Cookie)\""
-		append errmsg " is not ok"
-	    }
-	    set id  [string trim $id]
 	    set id2 [lindex [split $id :] end]
 	    if {[string equal $id2 "0"]} {
 		# Server error
@@ -333,6 +365,7 @@ proc jlib::http::HttpResponse {token} {
 		set priv(id) $id
 		
 		set body [::http::data $token]
+		Debug 2 "POLL: $body"
 		
 		# Send away to jabberlib for parsing and processing.
 		if {[string length $body]} {
@@ -340,7 +373,15 @@ proc jlib::http::HttpResponse {token} {
 		}
 	    }
 	}
+	default {
+	    if {[info exists opts(-command)]} {
+		uplevel #0 $opts(-command) [list $status [httpex::error $token]]
+	    }
+	}
     }
+    parray $token
+    
+    # And cleanup after each post.
     ::http::cleanup $token
 }
 

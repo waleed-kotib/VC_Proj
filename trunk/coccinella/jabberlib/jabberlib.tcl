@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.53 2004-06-30 08:52:40 matben Exp $
+# $Id: jabberlib.tcl,v 1.54 2004-07-02 14:08:02 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -76,8 +76,8 @@
 #      jlibName agent_get to cmd
 #      jlibName agents_get to cmd
 #      jlibName config ?args?
-#      jlibName connect server ?args?
-#      jlibName disconnect
+#      jlibName openstream server ?args?
+#      jlibName closestream
 #      jlibName get_last to cmd
 #      jlibName get_time to cmd
 #      jlibName get_version to cmd
@@ -191,9 +191,10 @@
 #       031107   added 'getrecipientjid' command
 #       040111   new iq callback mechanism 'iq_register'
 #       
-#       040412   started with 2.0 version; 
+#       04*      started with 2.0 version; 
 #                removed all browse stuff, added presence_register, muc as a
 #                standalone component, jlibname now always fully qualified,
+#                connect -> openstream, disconnect -> closestream
 
 package require wrapper
 package require roster
@@ -350,7 +351,7 @@ proc jlib::new {rostername clientcmd args} {
 #
 # Arguments:
 #       jlibname:   the instance of this jlib.
-#       cmd:        connect - disconnect - send_iq - send_message ... etc.
+#       cmd:        openstream - closestream - send_iq - send_message ... etc.
 #       args:       all args to the cmd procedure.
 #       
 # Results:
@@ -586,7 +587,7 @@ proc jlib::recvsocket {jlibname} {
     
     # Read what we've got.
     if {[catch {read $lib(sock)} temp]} {
-	disconnect $jlibname
+	closestream $jlibname
 	uplevel #0 $lib(clientcmd) $jlibname "networkerror" -body \
 	  "Network error when reading from network"
 	return
@@ -612,7 +613,7 @@ proc jlib::recv {jlibname xml} {
     wrapper::parse $lib(wrap) $xml
 }
 
-# jlib::connect --
+# jlib::openstream --
 #
 #       Initializes a stream to a jabber server. The socket must already 
 #       be opened. Sets up fileevent on incoming xml stream.
@@ -628,7 +629,7 @@ proc jlib::recv {jlibname xml} {
 # Results:
 #       none.
 
-proc jlib::connect {jlibname server args} {    
+proc jlib::openstream {jlibname server args} {    
 
     upvar ${jlibname}::lib lib
     upvar ${jlibname}::locals locals
@@ -658,22 +659,23 @@ proc jlib::connect {jlibname server args} {
 	eval $lib(transportinit)
         
     	# Network errors if failed to open connection properly are likely to show here.
-	set xml "<?xml version='1.0' encoding='UTF-8' ?><stream:stream\
+	set xml "<?xml version='1.0' encoding='UTF-8'?><stream:stream\
 	  xmlns='$opts(-streamnamespace)'\
 	  xmlns:stream='http://etherx.jabber.org/streams'\
 	  to='$server'$optattr>"
-   	eval $lib(transportsend) {$xml}
+
+	eval $lib(transportsend) {$xml}
     } err]} {
 	
 	# The socket probably was never connected,
 	# or the connection dropped later.
-	disconnect $jlibname
+	closestream $jlibname
 	return -code error "The connection failed or dropped later: $err"
     }
     return ""
 }
 
-# jlib::disconnect --
+# jlib::closestream --
 #
 #       Closes the stream down, closes socket, and resets internal variables.
 #       There is a potential problem if called from within a xml parser 
@@ -685,11 +687,11 @@ proc jlib::connect {jlibname server args} {
 # Results:
 #       none.
 
-proc jlib::disconnect {jlibname} {    
+proc jlib::closestream {jlibname} {    
 
     upvar ${jlibname}::lib lib
 
-    Debug 3 "jlib::disconnect"
+    Debug 3 "jlib::closestream"
     set xml "</stream:stream>"
     catch {eval $lib(transportsend) {$xml}}
     eval $lib(transportreset)
@@ -828,7 +830,7 @@ proc jlib::iq_handler {jlibname xmldata} {
 		#uplevel #0 $iqcmd($id) [list result $subiq] $arglist
 		
 		# We need a catch here since the callback my in turn 
-		# call 'disconnect' which unsets all iq before returning.
+		# call 'closestream' which unsets all iq before returning.
 		catch {unset iqcmd($id)}
 		set ishandled 1
 	    }
@@ -895,7 +897,7 @@ proc jlib::iq_handler {jlibname xmldata} {
 		# Be careful to trap network errors and report.
 		set xml [wrapper::createxml $xmldata]
 		if {[catch {eval $lib(transportsend) {$xml}} err]} {
-		    disconnect $jlibname
+		    closestream $jlibname
 		    uplevel #0 $lib(clientcmd) $jlibname "networkerror" -body \
 		      {Network error when responding}
 		}
@@ -1661,7 +1663,7 @@ proc jlib::send_iq {jlibname type xmldata args} {
     
     # Trap network errors here.
     if {[catch {eval $lib(transportsend) {$iqxml}} err]} {
-	disconnect $jlibname
+	closestream $jlibname
 	return -code error "Network connection dropped: $err"
     }
 }
@@ -2024,7 +2026,7 @@ proc jlib::send_message {jlibname to args} {
     # Trap network errors.
     set xml [wrapper::createxml $xmllist]
     if {[catch {eval $lib(transportsend) {$xml}} err]} {
-	disconnect $jlibname
+	closestream $jlibname
 	return -code error {Network error when sending message}
     }
 }
@@ -2126,7 +2128,7 @@ proc jlib::send_presence {jlibname args} {
     # Trap network errors.
     set xml [wrapper::createxml $xmllist]
     if {[catch {eval $lib(transportsend) {$xml}} err]} {
-	disconnect $jlibname
+	closestream $jlibname
 	return -code error $err	
     }
 }
@@ -2753,7 +2755,7 @@ proc jlib::schedule_keepalive {jlibname} {
 
     if {$opts(-keepalivesecs) && $lib(isinstream)} {
 	if {[catch {puts $lib(sock) "\n"} err]} {
-	    disconnect $jlibname
+	    closestream $jlibname
 	    uplevel #0 $lib(clientcmd) $jlibname networkerror -body \
 	      "Network was disconnected"
 	    return

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.94 2004-06-30 08:52:39 matben Exp $
+# $Id: Jabber.tcl,v 1.95 2004-07-02 14:08:01 matben Exp $
 
 package provide Jabber 1.0
 
@@ -490,6 +490,8 @@ proc ::Jabber::Init { } {
     variable jprefs
     variable privatexmlns
     
+    ::Debug 2 "::Jabber::Init"
+    
     # Make the roster object.
     set jstate(roster) [::roster::roster ::Jabber::Roster::PushProc]
     
@@ -513,9 +515,8 @@ proc ::Jabber::Init { } {
     } $opts]
 
     # Register handlers for various iq elements.
-    $jstate(jlib) iq_register get jabber:iq:version ::Jabber::ParseGetVersion
+    $jstate(jlib) iq_register get jabber:iq:version      ::Jabber::ParseGetVersion
     $jstate(jlib) iq_register get $privatexmlns(servers) ::Jabber::ParseGetServers
-    $jstate(jlib) iq_register set jabber:iq:oob     ::Jabber::OOB::ParseSet
     
     # Set the priority order of groupchat protocols.
     $jstate(jlib) service setgroupchatpriority  \
@@ -1019,7 +1020,7 @@ proc ::Jabber::DoCloseClientConnection {args} {
     # Do the actual closing.
     #       There is a potential problem if called from within a xml parser 
     #       callback which makes the subsequent parsing to fail. (after idle?)
-    after idle $jstate(jlib) disconnect
+    after idle $jstate(jlib) closestream
     
     set jstate(ipNum) ""
     
@@ -1051,7 +1052,7 @@ proc ::Jabber::EndSession { } {
 	# Do the actual closing.
 	#       There is a potential problem if called from within a xml parser 
 	#       callback which makes the subsequent parsing to fail. (after idle?)
-	$jstate(jlib) disconnect
+	$jstate(jlib) closestream
     }
 }
 

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.43 2004-06-16 14:17:30 matben Exp $
+# $Id: JUI.tcl,v 1.44 2004-07-02 14:08:00 matben Exp $
 
 package provide JUI 1.0
 
@@ -105,21 +105,20 @@ namespace eval ::Jabber::UI:: {
 	{separator}
 	{command     mvCard         {::VCard::Fetch own}              disabled {}}
 	{separator}
-	{command     mSetupAssistant {
-	    package require SetupAss
-	    ::Jabber::SetupAss::SetupAss}                             normal {}}
 	{command     mRemoveAccount {::Jabber::Register::Remove}      disabled {}}	
     }
     set menuDefs(rost,info) {    
-	{command   mUpdateCheck        {
-	    ::AutoUpdate::Get $prefs(urlAutoUpdate) -silent 0}        normal   {}}
-	    {command     mComponents    {::Dialogs::InfoComponents}   normal   {}}
-	    {command     mErrorLog      {::Jabber::ErrorLogDlg}       normal   {}}
-	    {checkbutton mDebug         {::Jabber::DebugCmd}          normal   {} \
-	      {-variable ::Jabber::jstate(debugCmd)}}
-	    {separator}
-	    {command     mCoccinellaHome {::Jabber::UI::OpenCoccinellaURL} normal {}}
-	    {command     mBugReport     {::Jabber::UI::OpenBugURL}   normal {}}
+	{command     mSetupAssistant {
+	    package require SetupAss
+	    ::Jabber::SetupAss::SetupAss}                             normal {}}
+	{command   mUpdateCheck        {::AutoUpdate::Get $prefs(urlAutoUpdate) -silent 0}        normal   {}}
+	{command     mComponents    {::Dialogs::InfoComponents}   normal   {}}
+	{command     mErrorLog      {::Jabber::ErrorLogDlg}       normal   {}}
+	{checkbutton mDebug         {::Jabber::DebugCmd}          normal   {} \
+	  {-variable ::Jabber::jstate(debugCmd)}}
+	{separator}
+	{command     mCoccinellaHome {::Jabber::UI::OpenCoccinellaURL} normal {}}
+	{command     mBugReport     {::Jabber::UI::OpenBugURL}   normal {}}
     }
 
     # The status menu is built dynamically due to the -image options on 8.4.
@@ -630,6 +629,7 @@ proc ::Jabber::UI::FixUIWhen {what} {
     set wall  $jwapp(fall)
     set wmenu $jwapp(wmenu)
     set wmj   ${wmenu}.jabber
+    set wmi   ${wmenu}.info
     set wtray $jwapp(wtray)
 
     set contactOffImage [::Theme::GetImage [option get $wall contactOffImage {}]]
@@ -641,7 +641,7 @@ proc ::Jabber::UI::FixUIWhen {what} {
 	    $wtray buttonconfigure stop -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mLogin -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mNewAccount -state disabled
-	    ::UI::MenuMethod $wmj entryconfigure mSetupAssistant -state disabled
+	    ::UI::MenuMethod $wmi entryconfigure mSetupAssistant -state disabled
 	}
 	connectfin - connect {
 	    $wtray buttonconfigure connect -state disabled
@@ -664,7 +664,7 @@ proc ::Jabber::UI::FixUIWhen {what} {
 	    ::UI::MenuMethod $wmj entryconfigure mCreateRoom -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mPassword -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mRemoveAccount -state normal
-	    ::UI::MenuMethod $wmj entryconfigure mSetupAssistant -state disabled
+	    ::UI::MenuMethod $wmi entryconfigure mSetupAssistant -state disabled
 	}
 	disconnect {
 	    $wtray buttonconfigure connect -state normal
@@ -687,7 +687,7 @@ proc ::Jabber::UI::FixUIWhen {what} {
 	    ::UI::MenuMethod $wmj entryconfigure mCreateRoom -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mPassword -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mRemoveAccount -state disabled
-	    ::UI::MenuMethod $wmj entryconfigure mSetupAssistant -state normal
+	    ::UI::MenuMethod $wmi entryconfigure mSetupAssistant -state normal
 	}
     }
 }

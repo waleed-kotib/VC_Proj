@@ -5,13 +5,14 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.32 2004-06-30 14:25:56 matben Exp $
+# $Id: OOB.tcl,v 1.33 2004-07-02 14:08:02 matben Exp $
 
 package provide OOB 1.0
 
 namespace eval ::Jabber::OOB:: {
 
-    ::hooks::add initHook            ::Jabber::OOB::InitHook
+    ::hooks::add initHook            ::Jabber::OOB::InitHook    
+    ::hooks::add jabberInitHook      ::Jabber::OOB::InitJabberHook
 
     variable locals
     set locals(initialLocalDir) [pwd]
@@ -24,11 +25,20 @@ namespace eval ::Jabber::OOB:: {
 proc ::Jabber::OOB::InitHook { } {
     variable locals
     
+    ::Debug 2 "::Jabber::OOB::InitHook"
+    
     # Drag and Drop support...
     set locals(haveTkDnD) 0
     if {![catch {package require tkdnd}]} {
 	set locals(haveTkDnD) 1
     }       
+}
+
+proc ::Jabber::OOB::InitJabberHook {jlibname} {
+    upvar ::Jabber::jstate jstate
+    
+    # Be sure to handle incoming requestes (iq set elements).
+    $jstate(jlib) iq_register set jabber:iq:oob     ::Jabber::OOB::ParseSet
 }
 
 # Jabber::OOB::BuildSet --

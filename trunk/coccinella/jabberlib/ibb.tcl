@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: ibb.tcl,v 1.1 2004-06-29 13:58:20 matben Exp $
+# $Id: ibb.tcl,v 1.2 2004-07-02 14:08:02 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -35,14 +35,23 @@ namespace eval jlib::ibb {
     variable uid  0
     variable usid 0
     variable ibbxmlns "http://jabber.org/protocol/ibb"
+    variable inited 0
 }
 
+# jlib::ibb::new --
+# 
+#       Sets up jabberlib handlers and makes a new instance if an ibb object.
+  
 proc jlib::ibb::new {jlibname cmd args} {
 
     variable uid
     variable ibbxmlns
     variable jlib2ibbname
-    
+    variable inited
+        
+    if {!$inited} {
+	Init
+    }
     set ibbname [namespace current]::ibb[incr uid]
     
     upvar ${ibbname}::priv priv
@@ -67,6 +76,20 @@ proc jlib::ibb::new {jlibname cmd args} {
     return $ibbname
 }
 
+proc jlib::ibb::Init { } {
+    
+    variable ampElem
+    variable inited
+    
+    set rule1 [wrapper::createtag "rule"  \
+      -attrlist {condition deliver-at value stored action error}]
+    set rule2 [wrapper::createtag "rule"  \
+      -attrlist {condition match-resource value exact action error}]
+    set ampElem [wrapper::createtag "amp" -attrlist \
+      {xmlns http://jabber.org/protocol/amp} -subtags [list $rule1 $rule2]]
+    set inited 1
+}
+
 # jlib::ibb::cmdproc --
 #
 #       Just dispatches the command to the right procedure.
@@ -84,6 +107,19 @@ proc jlib::ibb::cmdproc {ibbname cmd args} {
     # Which command? Just dispatch the command to the right procedure.
     return [eval {$cmd $ibbname} $args]
 }
+
+# jlib::ibb::send --
+# 
+#       Initiates a transport
+#
+# Arguments:
+#       to
+#       cmd
+#       args:   -data
+#               -file
+#       
+# Results:
+#       sid (Session IDentifier).
 
 proc jlib::ibb::send {ibbname to cmd args} {
 
@@ -129,5 +165,12 @@ proc jlib::ibb::handle_set {jlibname from subiq args} {
 }
 
 
+proc jlib::ibb::receive {jlibname subiq args} {
+
+    
+    
+    
+    return $sid
+}
 
 #-------------------------------------------------------------------------------
