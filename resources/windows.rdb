@@ -1,0 +1,7 @@
+! Resource database entries for Windows
+!
+
+*Checkbutton.Font:                   {Arial 8}
+*Entry.Font:                         {Arial 8}
+*Label.Font:                         {Arial 8}
+*Radiobutton.Font:                   {Arial 8}
