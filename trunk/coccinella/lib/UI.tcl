@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.85 2005-02-02 15:21:20 matben Exp $
+# $Id: UI.tcl,v 1.86 2005-02-04 07:05:33 matben Exp $
 
 package require entrycomp
 package require alertbox
@@ -85,6 +85,9 @@ proc ::UI::InitVirtualEvents { } {
     event add <<CloseWindow>> <$this(modkey)-Key-w>
 
     switch -- $this(platform) {
+	macintosh {
+	    event add <<ButtonPopup>> <Button-2> <Control-Button-1>
+	}
 	macosx {
 	    event add <<ButtonPopup>> <Button-2> <Control-Button-1>
 	}

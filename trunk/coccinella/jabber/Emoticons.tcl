@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.26 2004-12-20 15:16:45 matben Exp $
+# $Id: Emoticons.tcl,v 1.27 2005-02-04 07:05:31 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -490,7 +490,7 @@ proc ::Emoticons::SortLength {str1 str2} {
 
 proc ::Emoticons::PostMenu {w m x y} {
 
-    if {[string equal [$w cget -state] "normal"]} {
+    if {![string equal [$w cget -state] "disabled"]} {
 	tk_popup $m [expr int($x)] [expr int($y)]
     }
 }

@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements handling and parsing of roster icons.
 #      
-#  Copyright (c) 2004  Mats Bengtsson
+#  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: Rosticons.tcl,v 1.9 2004-12-02 15:22:07 matben Exp $
+# $Id: Rosticons.tcl,v 1.10 2005-02-04 07:05:32 matben Exp $
 
 package provide Rosticons 1.0
 

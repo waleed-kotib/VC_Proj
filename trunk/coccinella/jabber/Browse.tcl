@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.70 2005-02-02 09:02:17 matben Exp $
+# $Id: Browse.tcl,v 1.71 2005-02-04 07:05:30 matben Exp $
 
 package provide Browse 1.0
 
@@ -546,14 +546,11 @@ proc ::Browse::Build {w} {
       [list grid $wysc -row 0 -column 1 -sticky ns]]  \
       -selectcommand [namespace current]::SelectCmd   \
       -closecommand [namespace current]::CloseTreeCmd  \
-      -opencommand [namespace current]::OpenTreeCmd
-    
+      -opencommand [namespace current]::OpenTreeCmd  \
+      -eventlist [list [list <<ButtonPopup>> [namespace current]::Popup]]
+
     if {[string match "mac*" $this(platform)]} {
-	$wtree configure -buttonpresscommand [namespace current]::Popup \
-	  -eventlist [list [list <Control-Button-1> [namespace current]::Popup] \
-	  [list <Button-2> [namespace current]::Popup]]
-    } else {
-	$wtree configure -rightclickcommand [namespace current]::Popup
+	$wtree configure -buttonpresscommand [namespace current]::Popup
     }
     grid $wtree -row 0 -column 0 -sticky news
     grid $wysc -row 0 -column 1 -sticky ns

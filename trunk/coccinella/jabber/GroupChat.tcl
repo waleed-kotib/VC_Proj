@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.96 2005-02-03 07:38:14 matben Exp $
+# $Id: GroupChat.tcl,v 1.97 2005-02-04 07:05:31 matben Exp $
 
 package require History
 
@@ -766,20 +766,17 @@ proc ::GroupChat::Build {roomjid args} {
     ::tree::tree $wusers -width 120 -height 100 -silent 1 -scrollwidth 400 \
       -treecolor "" -styleicons "" -indention 0 -pyjamascolor "" -xmargin 2 \
       -yscrollcommand [list ::UI::ScrollSet $wyscusers \
-      [list grid $wyscusers -row 0 -column 1 -sticky ns]]
+      [list grid $wyscusers -row 0 -column 1 -sticky ns]] \
+      -eventlist [list [list <<ButtonPopup>> [namespace current]::Popup]]
+
+    if {[string match "mac*" $this(platform)]} {
+	$wusers configure -buttonpresscommand [namespace current]::Popup
+    }
 
     grid $wusers    -column 0 -row 0 -sticky news
     grid $wyscusers -column 1 -row 0 -sticky ns -padx 2
     grid columnconfigure $wfrusers 0 -weight 1
     grid rowconfigure    $wfrusers 0 -weight 1
-    
-    if {[string match "mac*" $this(platform)]} {
-	$wusers configure -buttonpresscommand [namespace current]::Popup \
-	  -eventlist [list [list <Control-Button-1> [namespace current]::Popup] \
-	  [list <Button-2> [namespace current]::Popup]]
-    } else {
-	$wusers configure -rightclickcommand [namespace current]::Popup
-    }
     
     set imageVertical   [::Theme::GetImage [option get $frmid imageVertical {}]]
     set imageHorizontal [::Theme::GetImage [option get $frmid imageHorizontal {}]]

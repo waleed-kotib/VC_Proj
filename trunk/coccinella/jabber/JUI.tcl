@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.77 2005-01-31 14:06:56 matben Exp $
+# $Id: JUI.tcl,v 1.78 2005-02-04 07:05:32 matben Exp $
 
 package provide JUI 1.0
 
@@ -565,7 +565,7 @@ proc ::Jabber::UI::StartStopAnimatedWave {start} {
 proc ::Jabber::UI::SetStatusMessage {msg} {
     variable jwapp
 
-    ::Roster::Message $msg
+    ::Roster::TimedMessage $msg
     #$jwapp(statmess) itemconfigure stattxt -text $msg
 }
 

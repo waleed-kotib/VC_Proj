@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Agents.tcl,v 1.34 2004-12-06 15:26:56 matben Exp $
+# $Id: Agents.tcl,v 1.35 2005-02-04 07:05:30 matben Exp $
 
 package provide Agents 1.0
 
@@ -350,18 +350,15 @@ proc ::Agents::Build {w args} {
       -yscrollcommand [list ::UI::ScrollSet $wysc \
       [list grid $wysc -row 0 -column 1 -sticky ns]]  \
       -selectcommand ::Agents::SelectCmd   \
-      -opencommand ::Agents::OpenTreeCmd
+      -opencommand ::Agents::OpenTreeCmd  \
+      -eventlist [list [list <<ButtonPopup>> [namespace current]::Popup]]
     set wtreecanvas [$wtree getcanvas]
     if {[string match "mac*" $this(platform)]} {
-	$wtree configure -buttonpresscommand [namespace current]::Popup \
-	  -eventlist [list [list <Control-Button-1> [namespace current]::Popup] \
-	  [list <Button-2> [namespace current]::Popup]]
-    } else {
-	$wtree configure -rightclickcommand [namespace current]::Popup
+	$wtree configure -buttonpresscommand [namespace current]::Popup
     }
     grid $wtree -row 0 -column 0 -sticky news
-    grid $wysc -row 0 -column 1 -sticky ns
-    grid $wxsc -row 1 -column 0 -sticky ew
+    grid $wysc  -row 0 -column 1 -sticky ns
+    grid $wxsc  -row 1 -column 0 -sticky ew
     grid columnconfigure $wbox 0 -weight 1
     grid rowconfigure $wbox 0 -weight 1
     

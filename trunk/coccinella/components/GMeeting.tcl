@@ -2,7 +2,7 @@
 # 
 #       Interface for launching Gnome Meeting.
 #
-# $Id: GMeeting.tcl,v 1.5 2004-12-14 14:08:45 matben Exp $
+# $Id: GMeeting.tcl,v 1.6 2005-02-04 07:05:30 matben Exp $
 
 namespace eval ::GMeeting:: {
     
@@ -23,7 +23,7 @@ proc ::GMeeting::Init { } {
     
     set menuspec [list  \
       command {Gnome Meeting...} [namespace current]::MenuCmd normal {} {} {}]
-    set popMenuSpec [list "Gnome Meeting..." user {::GMeeting::RosterCmd $jid}]
+    set popMenuSpec [list "Gnome Meeting..." user {::GMeeting::RosterCmd $jid3}]
         
     #::Jabber::UI::RegisterMenuEntry jabber $menuspec
     ::Jabber::UI::RegisterPopupEntry roster $popMenuSpec
@@ -46,7 +46,7 @@ proc ::GMeeting::MenuCmd {args} {
 
 proc ::GMeeting::RosterCmd {jid} {
 
-    puts "::GMeeting::RosterCmd jid=$jid"
+    ::Debug 2 "::GMeeting::RosterCmd jid=$jid"
     
     if {![HasSupport $jid]} {
 	tk_messageBox -type ok -icon error -title Error \
