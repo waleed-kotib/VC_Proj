@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.11 2003-11-08 08:54:44 matben Exp $
+# $Id: Browse.tcl,v 1.12 2003-11-12 08:20:49 matben Exp $
 
 package provide Browse 1.0
 
@@ -48,7 +48,8 @@ proc ::Jabber::Browse::GetAll { } {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jserver jserver
     
-    set allServers [lsort -unique [concat $jserver(this) $jprefs(browseServers)]]
+    #set allServers [lsort -unique [concat $jserver(this) $jprefs(browseServers)]]
+    set allServers $jserver(this)
     foreach server $allServers {
 	::Jabber::Browse::Get $server
     }
@@ -225,6 +226,12 @@ proc ::Jabber::Browse::Callback {browseName type jid subiq} {
 			}
 		    }
 		}
+		# Ende: foreach child
+	    }
+	    
+	    # Fix icons of foreign IM systems.
+	    if {[string equal $jid $jserver(this)]} {
+		::Jabber::Roster::PostProcessIcons
 	    }
 	}
     }

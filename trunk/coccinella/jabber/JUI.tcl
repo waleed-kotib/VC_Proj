@@ -5,9 +5,33 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.5 2003-11-09 15:07:32 matben Exp $
+# $Id: JUI.tcl,v 1.6 2003-11-12 08:20:49 matben Exp $
 
 package provide JUI 1.0
+
+# Use option database for customization. Not used yet...
+option add *RostServ*Tree.background            #dedede         widgetDefault
+option add *RostServ*Tree.backgroundImage       {}              widgetDefault
+option add *RostServ*Tree.highlightBackground   white           widgetDefault
+option add *RostServ*Tree.highlightColor        black           widgetDefault
+option add *RostServ*Tree.indention             14              widgetDefault
+option add *RostServ*Tree.openIcons             plusminus       widgetDefault
+option add *RostServ*Tree.pyjamasColor          white           widgetDefault
+option add *RostServ*Tree.selectBackground      black           widgetDefault
+option add *RostServ*Tree.selectForeground      white           widgetDefault
+option add *RostServ*Tree.selectMode            1               widgetDefault
+option add *RostServ*Tree.treeColor             gray50          widgetDefault
+
+option add *RostServ*MacTabnotebook.activeForeground    black        widgetDefault
+option add *RostServ*MacTabnotebook.activeTabColor      #efefef      widgetDefault
+option add *RostServ*MacTabnotebook.activeTabBackground #cdcdcd      widgetDefault
+option add *RostServ*MacTabnotebook.activeTabOutline    black        widgetDefault
+option add *RostServ*MacTabnotebook.background          white        widgetDefault
+option add *RostServ*MacTabnotebook.style               classic      widgetDefault
+option add *RostServ*MacTabnotebook.tabBackground       #dedede      widgetDefault
+option add *RostServ*MacTabnotebook.tabColor            #cecece      widgetDefault
+option add *RostServ*MacTabnotebook.tabOutline          gray20       widgetDefault
+
 
 namespace eval ::Jabber::UI:: {
     
