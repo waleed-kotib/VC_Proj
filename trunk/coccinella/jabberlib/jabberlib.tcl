@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.61 2004-09-08 13:13:14 matben Exp $
+# $Id: jabberlib.tcl,v 1.62 2004-09-11 14:21:51 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -201,6 +201,7 @@ package require wrapper
 package require roster
 package require service
 package require stanzaerror
+package require streamerror
 
 package provide jlib 2.0
 
@@ -909,7 +910,7 @@ proc jlib::iq_handler {jlibname xmldata} {
 	    }
 	}
 	error {
-	    set errspec [geterrorspec $xmldata]
+	    set errspec [getstanzaerrorspec $xmldata]
 	    if {[info exists id] && [info exists iqcmd($id)]} {
 		uplevel #0 $iqcmd($id) [list error $errspec]
 		
@@ -967,14 +968,7 @@ proc jlib::iq_handler {jlibname xmldata} {
 		lappend childlist $errtag
 		set xmldata [wrapper::setchildlist $xmldata $childlist]
 		
-		# Be careful to trap network errors and report.
-		set xml [wrapper::createxml $xmldata]
-		if {[catch {eval $lib(transportsend) {$xml}} err]} {
-		    closestream $jlibname
-		    set errmsg "Network error when responding"
-		    uplevel #0 $lib(clientcmd) [list $jlibname networkerror \
-		      -body $errmsg]
-		}
+		send $jlibname $xmldata
 	    }
 	}
     }
@@ -1013,7 +1007,7 @@ proc jlib::message_handler {jlibname xmldata} {
     
     switch -- $type {
 	error {
-	    set errspec [geterrorspec $xmldata]
+	    set errspec [getstanzaerrorspec $xmldata]
 	    lappend arglist -error $errspec
 	}
     }
@@ -1098,7 +1092,7 @@ proc jlib::presence_handler {jlibname xmldata} {
     
     # Check first if this is an error element (from conferencing?).
     if {[string equal $type "error"]} {
-	set errspec [geterrorspec $xmldata]
+	set errspec [getstanzaerrorspec $xmldata]
 	lappend arglist -error $errspec
     } else {
 	
@@ -1194,20 +1188,20 @@ proc jlib::features_handler {jlibname xmllist} {
 		    }
 
 		    # Variable that may trigger a trace event.
-		    set locals(mechanisms) $mechanisms
+		    set locals(features,mechanisms) $mechanisms
 		}
 	    }
 	    starttls {
 		if {[wrapper::getattr $attr xmlns] == $xmppns(tls)} {
-		    set locals(starttls) 1
+		    set locals(features,starttls) 1
 		    set childs [wrapper::getchildswithtag $xmllist required]
 		    if {$childs != ""} {
-			set locals(starttls,required) 1
+			set locals(features,starttls,required) 1
 		    }
 		}
 	    }
 	    default {
-		# empty
+		set locals(features,$tag) 1
 	    }
 	}
     }
@@ -1234,7 +1228,7 @@ proc jlib::error_handler {jlibname xmllist} {
     # Be sure to reset the wrapper, which implicitly resets the XML parser.
     wrapper::reset $lib(wrap)
     if {[llength [wrapper::getchildren $xmllist]]} {
-	set errspec [geterrorspec $xmllist]
+	set errspec [getstreamerrorspec $xmllist]
     } else {
 	set errspec [list unknown [wrapper::getcdata $xmllist]]
     }
@@ -1355,7 +1349,7 @@ proc jlib::reset {jlibname} {
     set lib(isinstream) 0
 }
 
-# jlib::geterrorspec --
+# jlib::getstanzaerrorspec --
 # 
 #       Extracts the error code and an error message from an type='error'
 #       element. We must handle both the original Jabber protocol and the
@@ -1382,15 +1376,15 @@ proc jlib::reset {jlibname} {
 #     </query>
 #   </iq>
 
-proc jlib::geterrorspec {iqelem} {
+proc jlib::getstanzaerrorspec {stanza} {
     
     variable xmppns
 
-    set errcode {}
-    set errmsg  {}
-    
-    # First search children of <iq> element (XMPP).
-    foreach subiq [wrapper::getchildren $iqelem] {
+    set errcode ""
+    set errmsg  ""
+        
+    # First search children of stanza (<iq> element) for error element.
+    foreach subiq [wrapper::getchildren $stanza] {
 	set tag [wrapper::gettag $subiq]
 	if {[string equal $tag "error"]} {
 	    set errelem $subiq
@@ -1410,29 +1404,90 @@ proc jlib::geterrorspec {iqelem} {
 	
     # Found it! XMPP contains an error stanza and not pure text.
     if {[info exists errelem]} {
+	foreach {errcode errmsg} [geterrspecfromerror $errelem stanzas] {break}
+    }
+    return [list $errcode $errmsg]
+}
+
+# jlib::getstreamerrorspec --
+# 
+#       Extracts the error code and an error message from a stream:error
+#       element. We must handle both the original Jabber protocol and the
+#       XMPP protocol:
+#
+#   The syntax for stream errors is as follows:
+#
+#   <stream:error>
+#      <defined-condition xmlns='urn:ietf:params:xml:ns:xmpp-streams'/>
+#      <text xmlns='urn:ietf:params:xml:ns:xmpp-streams'>
+#        OPTIONAL descriptive text
+#      </text>
+#      [OPTIONAL application-specific condition element]
+#   </stream:error>
+#
+#   Jabber:
+#   
+
+proc jlib::getstreamerrorspec {errelem} {
+    
+    return [geterrspecfromerror $errelem streams]
+}
+
+# jlib::geterrspecfromerror --
+# 
+#       Get an error specification from an stanza error element.
+#       
+# Arguments:
+#       errelem:    the <error/> element
+#       kind.       'stanzas' or 'streams'
+#       
+# Results:
+#       none.
+
+proc jlib::geterrspecfromerror {errelem kind} {
+       
+    variable xmppns
+
+    set errcode ""
+    set errmsg  ""
+    set cchdata [wrapper::getcdata $errelem]
+    array set msgproc {
+	stanzas  stanzaerror::getmsg
+	streams  streamerror::getmsg
+    }
+    if {[string length $cchdata] > 0} {
 	
-	# The 'code' attribute is optional in XMPP!
+	# Old jabber way.
 	set errcode [wrapper::getattribute $errelem code]
-	set cchdata [wrapper::getcdata $errelem]
-	if {[string length $cchdata] > 0} {		
-	    set errmsg $cchdata
-	} else {
-	    foreach c [wrapper::getchildren $errelem] {
-		set tag [wrapper::gettag $c]
-		if {[string equal $tag "text"]} {
+	set errmsg $cchdata
+    } else {
+	
+	# xmpp way.
+	foreach c [wrapper::getchildren $errelem] {
+	    set tag [wrapper::gettag $c]
+	    
+	    switch -- $tag {
+		text {
+		    
+		    # Use only as a complement iff our language.
 		    set xmlns [wrapper::getattribute $c xmlns]
-		    if {[string equal $xmlns $xmppns(stanzas)]} {
-			set errmsg [wrapper::getcdata $c]
-			break
+		    set lang  [wrapper::getattribute $c xml:lang]
+		    if {[string equal $xmlns $xmppns($kind)] && \
+		      [string equal $lang [getlang]]} {
+			set errstr [wrapper::getcdata $c]
 		    }
-		} else {
+		} 
+		default {
 		    set xmlns [wrapper::getattribute $c xmlns]
-		    if {[string equal $xmlns $xmppns(stanzas)]} {
-			set errmsg [stanzaerror::getmsg $tag]
-			break
-		    }		    
+		    if {[string equal $xmlns $xmppns($kind)]} {
+			set errcode $tag
+			set errmsg [$msgproc($kind) $tag]
+		    }
 		}
 	    }
+	}
+	if {[info exists errstr]} {
+	    append $errmsg " $errstr"
 	}
     }
     return [list $errcode $errmsg]
@@ -1446,7 +1501,8 @@ proc jlib::bind_resource {jlibname resource cmd} {
     
     variable xmppns
 
-    set xmllist [wrapper::createtag bind -attrlist [list xmlns $xmppns(bind)] \
+    set xmllist [wrapper::createtag bind \
+      -attrlist [list xmlns $xmppns(bind)] \
       -subtags [list [wrapper::createtag resource -chdata $resource]]]
     send_iq $jlibname set $xmllist -command \
       [list [namespace current]::parse_bind_resource $jlibname $cmd]
@@ -1891,15 +1947,8 @@ proc jlib::send_iq {jlibname type xmldata args} {
     } else {
 	set xmllist [wrapper::createtag "iq" -attrlist $attrlist]
     }
-	
-    # Build raw xml data from list.
-    set iqxml [wrapper::createxml $xmllist]
     
-    # Trap network errors here.
-    if {[catch {eval $lib(transportsend) {$iqxml}} err]} {
-	closestream $jlibname
-	return -code error "Network connection dropped: $err"
-    }
+    send $jlibname $xmllist
 }
 
 # jlib::iq_get, iq_set --
@@ -2221,7 +2270,6 @@ proc jlib::search_set {jlibname to cmd args} {
 
 proc jlib::send_message {jlibname to args} {
 
-    upvar ${jlibname}::lib lib
     upvar ${jlibname}::locals locals
 
     Debug 3 "jlib::send_message to=$to, args=$args"
@@ -2259,12 +2307,7 @@ proc jlib::send_message {jlibname to args} {
     # For the auto away function.
     schedule_auto_away $jlibname
     
-    # Trap network errors.
-    set xml [wrapper::createxml $xmllist]
-    if {[catch {eval $lib(transportsend) {$xml}} err]} {
-	closestream $jlibname
-	return -code error {Network error when sending message}
-    }
+    send $jlibname $xmllist
 }
 
 # jlib::send_presence --
@@ -2292,7 +2335,6 @@ proc jlib::send_message {jlibname to args} {
 proc jlib::send_presence {jlibname args} {
 
     variable statics
-    upvar ${jlibname}::lib lib
     upvar ${jlibname}::locals locals
     upvar ${jlibname}::opts opts
     upvar ${jlibname}::prescmd prescmd
@@ -2361,12 +2403,7 @@ proc jlib::send_presence {jlibname args} {
 	}
     }
     
-    # Trap network errors.
-    set xml [wrapper::createxml $xmllist]
-    if {[catch {eval $lib(transportsend) {$xml}} err]} {
-	closestream $jlibname
-	return -code error $err	
-    }
+    send $jlibname $xmllist
 }
 
 # jlib::send --
@@ -2374,12 +2411,18 @@ proc jlib::send_presence {jlibname args} {
 #       Sends general xml using a xmllist.
 
 proc jlib::send {jlibname xmllist} {
+    
     upvar ${jlibname}::lib lib
     
     set xml [wrapper::createxml $xmllist]
-    if {[catch {eval $lib(transportsend) {$xml}} err]} {
+    
+    # We fail only if already in stream.
+    # The first failure reports the network error, closes the stream,
+    # which stops multiple errors to be reported to client.
+    if {$lib(isinstream) && [catch {eval $lib(transportsend) {$xml}} err]} {
 	closestream $jlibname
-	return -code error $err	
+	set errmsg "Network error when sending"
+	uplevel #0 $lib(clientcmd) [list $jlibname networkerror -body $errmsg]
     }
 }
 

@@ -11,7 +11,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: wrapper.tcl,v 1.9 2004-09-08 13:13:14 matben Exp $
+# $Id: wrapper.tcl,v 1.10 2004-09-11 14:21:51 matben Exp $
 # 
 # ########################### INTERNALS ########################################
 # 
@@ -93,6 +93,8 @@ namespace eval wrapper {
     
     # Keep all 'id's in this list.
     set wrapper(list) {}
+    
+    variable xmldefaults {-isempty 1 -attrlist {} -chdata {} -subtags {}}
 }
 
 # wrapper::new --
@@ -200,9 +202,23 @@ namespace eval wrapper {
     variable stack ""
 }
 
+# wrapper::parsereentrant --
+# 
+#       Forces parsing to be serialized in an event driven environment.
+#       If we read xml from socket and happen to trigger a read (and parse)
+#       event right from an element callback, everyhting will be out of sync.
+#       
+# Arguments:
+#       p:           the parser.
+#       xml:         raw xml data to be parsed.
+#       
+# Results:
+#       none.
+
 proc wrapper::parsereentrant {p xml} {
     variable refcount
     variable stack
+    
     incr refcount
     if {$refcount == 1} {
 	
@@ -259,18 +275,13 @@ proc wrapper::elementstart {id tagname attrlist args} {
     
     if {$wrapper($id,level) == 0} {
 	
-	# Check for any <stream:error> tag.
-	if {$tagname == "error"} {
-	    return
-	}
-	
 	# We got a root tag, such as <stream:stream>
 	set wrapper($id,level) 1
 	set wrapper($id,levelonetag) $tagname 
 	set wrapper($id,tree,1) [list $tagname $attrlist $isempty {} {}]
 	
 	# Do the registered callback at the global level.
-	uplevel #0 "$wrapper($id,streamstartcmd) $attrlist"
+	uplevel #0 $wrapper($id,streamstartcmd) $attrlist
 	
     } else {
 	
@@ -398,7 +409,7 @@ proc wrapper::chdata {id chardata} {
     set chdata [lindex $wrapper($id,tree,$level) 3]
     
     # Make standard entity replacements.
-    append chdata [wrapper::xmldecrypt $chardata]
+    append chdata [xmldecrypt $chardata]
     set wrapper($id,tree,$level)    \
       [lreplace $wrapper($id,tree,$level) 3 3 "$chdata"]
 }
@@ -510,7 +521,7 @@ proc wrapper::xmlerror {id args} {
 proc wrapper::createxml {xmllist} {
         
     # Extract the XML data items.
-    foreach {tag attrlist isempty chdata childlist} $xmllist break
+    foreach {tag attrlist isempty chdata childlist} $xmllist {break}
     set rawxml "<$tag"
     foreach {attr value} $attrlist {
 	append rawxml " ${attr}='${value}'"
@@ -528,7 +539,7 @@ proc wrapper::createxml {xmllist} {
 	
 	# Make standard entity replacements.
 	if {[string length $chdata]} {
-	    append rawxml [wrapper::xmlcrypt $chdata]
+	    append rawxml [xmlcrypt $chdata]
 	}
 	append rawxml "</$tag>"
     }
@@ -556,9 +567,10 @@ proc wrapper::createxml {xmllist} {
 #       a list suitable for wrapper::createxml.
 
 proc wrapper::createtag {tagname args} {
+    variable xmldefaults
     
     # Fill in the defaults.
-    array set xmlarr {-isempty 1 -attrlist {} -chdata {} -subtags {}}
+    array set xmlarr $xmldefaults
     
     # Override the defults with actual values.
     if {[llength $args] > 0} {

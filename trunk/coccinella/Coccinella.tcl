@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.80 2004-09-08 13:13:13 matben Exp $
+# $Id: Coccinella.tcl,v 1.81 2004-09-11 14:21:50 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -30,14 +30,6 @@ set state(launchSecs) [clock seconds]
 
 # MacOSX adds a -psn_* switch.
 set argv [lsearch -all -not -inline -regexp $argv {-psn_\d*}]
-
-### Command-line option "-privaria" indicates whether we're
-### part of Ed Suominen's PRIVARIA distribution
-set privariaFlag 0
-if {[lsearch $argv -privaria] >= 0 } {
-    set privariaFlag 1
-    set argv [lsearch -all -not -inline $argv -privaria]
-}
 set argc [llength $argv]
 
 # We use a variable 'this(platform)' that is more convenient for MacOS X.
@@ -142,7 +134,7 @@ if {[string match "mac*" $this(platform)] && $debugLevel == 0} {
 }
 
 # For debug purposes.
-if {0 && $debugLevel} {
+if {$debugLevel >= 6} {
     set fdLog [open [file join [file dirname [info script]] debug.log] w]
 }
 proc Debug {num str} {
@@ -287,27 +279,7 @@ if {[info exists env(TMP)] && [file exists $env(TMP)]} {
 if {![file isdirectory $this(tmpPath)]} {
     file mkdir $this(tmpPath)
 }
-
-# Privaria-specific stuff
-if {$privariaFlag} {
-    set prefs(stripJabber) 1
-    switch $this(platform) {
-        unix { 
-	    set x [file join privaria lib] 
-	}
-	windows { 
-	    set x opt.privaria.lib 
-        }
-    }
-    if {[file isdirectory [set x [file join [file dirname $this(path)] $x]]]} {
-        # Append Privaria library directory to auto_path because some packages
-        # are there instead of being duplicated in Coccinella distro
-        lappend auto_path $x
-    }
-
-} else {
-    set prefs(stripJabber) 0
-}
+set prefs(stripJabber) 0
 
 # Add our lib and whiteboard directory to our search path.
 lappend auto_path [file join $this(path) lib]
@@ -315,11 +287,6 @@ lappend auto_path [file join $this(path) whiteboard]
 
 # Add the contrib directory which has things like widgets etc. 
 lappend auto_path [file join $this(path) contrib]
-
-# If part of Ed Suominen's PRIVARIA distribution, add its lib directory
-if {$privariaFlag} {
-    lappend auto_path [file join [file dirname $this(path)] lib tcl8.4]
-}
 
 if {!$prefs(stripJabber)} {
     

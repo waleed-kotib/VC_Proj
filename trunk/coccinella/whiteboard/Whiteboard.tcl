@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.20 2004-08-28 07:00:08 matben Exp $
+# $Id: Whiteboard.tcl,v 1.21 2004-09-11 14:21:51 matben Exp $
 
 package require entrycomp
 package require moviecontroller
@@ -665,7 +665,7 @@ proc ::WB::GetNewToplevelPath { } {
 #       new instance toplevel created.
 
 proc ::WB::BuildWhiteboard {wtop args} {
-    global  this prefs privariaFlag
+    global  this prefs
     
     variable dims
     variable wbicons
@@ -688,10 +688,7 @@ proc ::WB::BuildWhiteboard {wtop args} {
     } else {
 	set wbTitle "Coccinella"
     }
-    set titleString [expr {
-	$privariaFlag ?
-	{PRIVARIA Whiteboard -- The Coccinella} : $wbTitle
-    }]
+    set titleString $wbTitle
     array set opts [list -state normal -title $titleString -usewingeom 0]
     array set opts $args
     

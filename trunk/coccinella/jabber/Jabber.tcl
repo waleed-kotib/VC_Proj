@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.101 2004-09-08 13:13:14 matben Exp $
+# $Id: Jabber.tcl,v 1.102 2004-09-11 14:21:50 matben Exp $
 
 package provide Jabber 1.0
 
@@ -55,7 +55,7 @@ namespace eval ::Jabber:: {
     global  this prefs
     
     # Add all event hooks.
-    ::hooks::add loginHook          ::Jabber::SetPrivateData
+    #::hooks::add loginHook          ::Jabber::SetPrivateData
     ::hooks::add quitAppHook        ::Jabber::EndSession
 
     # Jabber internal storage.
