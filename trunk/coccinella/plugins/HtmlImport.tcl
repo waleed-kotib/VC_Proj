@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: HtmlImport.tcl,v 1.2 2003-10-12 13:12:56 matben Exp $
+# $Id: HtmlImport.tcl,v 1.3 2003-11-08 13:26:05 matben Exp $
 
 
 namespace eval ::HtmlImport:: {
@@ -27,8 +27,23 @@ proc ::HtmlImport::Init { } {
     global  tcl_platform
     variable locals
     
-    # Verify that we have web browser.
+    # We use a variable 'locals(platform)' that is more convenient for Mac OS X.
     switch -- $tcl_platform(platform) {
+	unix {
+	    set locals(platform) $tcl_platform(platform)
+	    if {[package vcompare [info tclversion] 8.3] == 1} {	
+		if {[string equal [tk windowingsystem] "aqua"]} {
+		    set locals(platform) "macosx"
+		}
+	    }
+	}
+	windows - macintosh {
+	    set locals(platform) $tcl_platform(platform)
+	}
+    }
+    
+    # Verify that we have web browser.
+    switch -- $locals(platform) {
 	unix {
 	    if {[string length [::Utils::UnixGetWebBrowser]] == 0} {
 		return
