@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.68 2004-11-14 16:40:53 matben Exp $
+# $Id: JUI.tcl,v 1.69 2004-11-16 15:10:27 matben Exp $
 
 package provide JUI 1.0
 
@@ -29,8 +29,8 @@ namespace eval ::Jabber::UI:: {
 
     # Top header image if any.
     option add *JMain.headImage                   ""              widgetDefault
-    option add *JMain.head.borderWidth            0               startupFile 
-    option add *JMain.head.relief                 flat            startupFile
+    option add *JMain.head.borderWidth            0               50 
+    option add *JMain.head.relief                 flat            50
 
     # Other icons.
     option add *JMain.contactOffImage             contactOff      widgetDefault
@@ -39,39 +39,37 @@ namespace eval ::Jabber::UI:: {
     option add *JMain.resizeHandleImage           resizehandle    widgetDefault
 
     # Standard widgets.
-    option add *JMain.fnb.borderWidth             1               startupFile
-    option add *JMain.fnb.relief                  raised          startupFile
-    option add *JMain.bot.borderWidth             1               startupFile
-    option add *JMain.bot.padX                    0               startupFile
-    option add *JMain.bot.padY                    0               startupFile
-    option add *JMain.bot.relief                  raised          startupFile
-    option add *JMain.bpad.height                 0               startupFile
+    option add *JMain.fnb.borderWidth             1               50
+    option add *JMain.fnb.relief                  raised          50
+    option add *JMain.bot.borderWidth             1               50
+    option add *JMain.bot.padX                    0               50
+    option add *JMain.bot.padY                    0               50
+    option add *JMain.bot.relief                  raised          50
+    option add *JMain.bpad.height                 0               50
  
-    option add *JMain.ButtonTray.borderWidth      1               startupFile
-    option add *JMain.ButtonTray.relief           raised          startupFile
+    option add *JMain.ButtonTray.borderWidth      1               50
+    option add *JMain.ButtonTray.relief           raised          50
 
     # Generic tree options.
-    option add *JMain*Tree.background             #dedede         startupFile
-    option add *JMain*Tree.backgroundImage        {}              startupFile
-    option add *JMain*Tree.highlightBackground    white           startupFile
-    option add *JMain*Tree.highlightColor         black           startupFile
-    option add *JMain*Tree.styleIcons             plusminus       startupFile
-    option add *JMain*Tree.pyjamasColor           white           startupFile
-    option add *JMain*Tree.selectBackground       black           startupFile
-    option add *JMain*Tree.selectForeground       white           startupFile
-    option add *JMain*Tree.selectMode             1               startupFile
-    option add *JMain*Tree.treeColor              gray50          startupFile
+    option add *JMain*Tree.background             #dedede         50
+    option add *JMain*Tree.backgroundImage        {}              50
+    option add *JMain*Tree.highlightBackground    white           50
+    option add *JMain*Tree.highlightColor         black           50
+    option add *JMain*Tree.styleIcons             plusminus       50
+    option add *JMain*Tree.pyjamasColor           white           50
+    option add *JMain*Tree.selectBackground       black           50
+    option add *JMain*Tree.selectForeground       white           50
+    option add *JMain*Tree.selectMode             1               50
+    option add *JMain*Tree.treeColor              gray50          50
 
     # The tab notebook options.
-    option add *JMain*MacTabnotebook.activeForeground    black        startupFile
-    option add *JMain*MacTabnotebook.activeTabColor      #efefef      startupFile
-    option add *JMain*MacTabnotebook.activeTabBackground #cdcdcd      startupFile
-    option add *JMain*MacTabnotebook.activeTabOutline    black        startupFile
-    option add *JMain*MacTabnotebook.background          white        startupFile
-    #option add *JMain*MacTabnotebook.style               mac          startupFile
-    option add *JMain*MacTabnotebook.tabBackground       #dedede      startupFile
-    option add *JMain*MacTabnotebook.tabColor            #cecece      startupFile
-    option add *JMain*MacTabnotebook.tabOutline          gray20       startupFile
+    option add *JMain*MacTabnotebook.activeForeground    black        50
+    option add *JMain*MacTabnotebook.activeTabColor      #efefef      50
+    option add *JMain*MacTabnotebook.activeTabBackground #cdcdcd      50
+    option add *JMain*MacTabnotebook.activeTabOutline    black        50
+    option add *JMain*MacTabnotebook.tabBackground       #dedede      50
+    option add *JMain*MacTabnotebook.tabColor            #cecece      50
+    option add *JMain*MacTabnotebook.tabOutline          gray20       50
 
     variable treeOpts {background backgroundImage highlightBackground \
       highlightColor indention styleIcons pyjamasColor selectBackground \
@@ -254,6 +252,7 @@ proc ::Jabber::UI::Build {w} {
     wm title $w $prefs(theAppName)
 
     # Build minimal menu for Jabber stuff.
+    MergeMenuDefs
     set wmenu ${wtop}menu
     set jwapp(wmenu) $wmenu
     menu $wmenu -tearoff 0
@@ -668,12 +667,28 @@ proc ::Jabber::UI::RegisterPopupEntry {which menuSpec} {
 #       Lets plugins/components register their own menu entry.
 
 proc ::Jabber::UI::RegisterMenuEntry {mtail menuSpec} {
+    
+    # Keeps track of all registered menu entries.
+    variable extraMenuDefs
+    
+    # Add these entries in a section above the bottom section.
+    # Add separator to section component entries.
+    
+    if {![info exists extraMenuDefs(rost,$mtail)]} {
+
+	# Add separator if this is the first addon entry.
+	set extraMenuDefs(rost,$mtail) {separator}
+    }
+    lappend extraMenuDefs(rost,$mtail) $menuSpec
+}
+
+proc ::Jabber::UI::RegisterMenuEntryBU {mtail menuSpec} {
     variable menuDefs
     variable menuDefsInsertInd
     variable inited
     
     # Keeps track of all registered menu entries.
-    variable rostMenuSpec
+    variable extraMenuDefs
     
     if {!$inited} {
 	::Jabber::UI::Init
@@ -682,16 +697,30 @@ proc ::Jabber::UI::RegisterMenuEntry {mtail menuSpec} {
     # Add these entries in a section above the bottom section.
     # Add separator to section component entries.
     
-    if {![info exists rostMenuSpec($mtail)]} {
+    if {![info exists extraMenuDefs(rost,$mtail)]} {
 
 	# Add separator if this is the first addon entry.
+	set extraMenuDefs(rost,$mtail) {separator}
+	
+	
 	set menuDefs(rost,$mtail) [linsert $menuDefs(rost,$mtail)  \
 	  $menuDefsInsertInd(rost,$mtail) {separator}]
 	incr menuDefsInsertInd(rost,$mtail)
     }
     set menuDefs(rost,$mtail) [linsert $menuDefs(rost,$mtail)  \
       $menuDefsInsertInd(rost,$mtail) $menuSpec]
-    lappend rostMenuSpec($mtail) [list $menuSpec]
+    lappend extraMenuDefs(rost,$mtail) [list $menuSpec]
+}
+
+proc ::Jabber::UI::MergeMenuDefs { } {
+    variable menuDefs
+    variable menuDefsInsertInd
+    variable extraMenuDefs
+    
+    foreach key [array names extraMenuDefs] {
+	set menuDefs($key) [eval {linsert $menuDefs($key)  \
+	  $menuDefsInsertInd($key)} $extraMenuDefs($key)]
+    }
 }
 
 # Jabber::UI::FixUIWhen --

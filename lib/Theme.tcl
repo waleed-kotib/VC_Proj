@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: Theme.tcl,v 1.15 2004-11-10 10:08:44 matben Exp $
+# $Id: Theme.tcl,v 1.16 2004-11-16 15:10:28 matben Exp $
 
 package provide Theme 1.0
 
@@ -28,16 +28,21 @@ proc ::Theme::Init { } {
     variable allImageSuffixes
     
     ::Theme::ReadPrefsFile
+    
+    # Priorities.
+    # widgetDefault: 20
+    # startupFile:   40
+    # userDefault:   60
 
     # Read resource database files in a hierarchical order.
     # 1) always read the default rdb file.
     # 2) read rdb file for this specific platform, if exists.
     # 3) read rdb file for any theme we have chosen. Search first
     #    inside the sources and then in the alternative user directory.
-    option readfile [file join $this(resourcedbPath) default.rdb] userDefault
+    option readfile [file join $this(resourcedbPath) default.rdb] startupFile
     set f [file join $this(resourcedbPath) $this(platform).rdb]
     if {[file exists $f]} {
-	option readfile $f userDefault
+	option readfile $f startupFile
     }
     set f [file join $this(resourcedbPath) $prefs(themeName).rdb]
     if {[file exists $f]} {

@@ -6,7 +6,7 @@
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: buttontray.tcl,v 1.14 2004-11-11 15:38:29 matben Exp $
+# $Id: buttontray.tcl,v 1.15 2004-11-16 15:10:27 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -341,8 +341,6 @@ proc ::buttontray::SetGeometries {w} {
 	    if {$options(-height) > 0} {
 		set height [expr $options(-height) - 2 * $options(-pady) \
 		  - 2 * $options(-borderwidth)]
-		puts "height=$height"
-		parray options
 	    } else {
 		# Assume icons 32x32.
 		set height [expr {32 + 2}]
@@ -351,7 +349,6 @@ proc ::buttontray::SetGeometries {w} {
 		set linespace [font metrics $options(-font) -linespace]
 		incr height $linespace
 		incr height 2
-		puts "linespace=$linespace, height=$height"
 	    }
 	    $widgets(canvas) configure -height $height
 	    set locals(ytxt) 35
