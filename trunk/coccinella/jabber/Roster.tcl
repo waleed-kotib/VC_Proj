@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.60 2004-05-26 07:36:37 matben Exp $
+# $Id: Roster.tcl,v 1.61 2004-05-27 13:59:10 matben Exp $
 
 package provide Roster 1.0
 
@@ -380,7 +380,7 @@ proc ::Jabber::Roster::SendRemove {jidrm} {
       [FormatTextForMessageBox [::msgcat::mc jamesswarnremove]]  \
       -icon warning -type yesno]
     if {[string equal $ans "yes"]} {
-	::Jabber::JlibCmd roster_remove $jid [namespace current]::PushProc
+	$jstate(jlib) roster_remove $jid [namespace current]::PushProc
     }
 }
 
@@ -658,7 +658,7 @@ proc ::Jabber::Roster::PushProc {rostName what {jid {}} args} {
 	    
 	    # We may get presence 'available' with empty resource (ICQ)!
 	    if {![info exists attrArr(-type)]} {
-		puts "   Error: no type attribute"
+		puts "\t Error: no type attribute"
 		return
 	    }
 	    set type $attrArr(-type)
@@ -666,12 +666,10 @@ proc ::Jabber::Roster::PushProc {rostName what {jid {}} args} {
 	    if {[info exists attrArr(-resource)] &&  \
 	      [string length $attrArr(-resource)]} {
 		set jid3 ${jid}/$attrArr(-resource)
-	    }
-	    
+	    }	    
 	    if {![$jstate(jlib) service isroom $jid]} {
 		eval {::Jabber::Roster::Presence $jid3 $type} $args
 	    }
-	    
 	    eval {::hooks::run presenceHook $jid $type} $args
 	}
 	remove {
@@ -820,7 +818,7 @@ proc ::Jabber::Roster::Presence {jid presence args} {
     # Or 3-tier (icq) with presence = 'unavailable' !
     
     jlib::splitjid $jid jid2 res
-    
+        
     # This gets a list '-name ... -groups ...' etc. from our roster.
     set itemAttr [$jstate(roster) getrosteritem $jid2]
     if {$itemAttr == ""} {
@@ -846,6 +844,13 @@ proc ::Jabber::Roster::Presence {jid presence args} {
 	}
     } elseif {[string equal $presence "unavailable"]} {
 	set treePres $presence
+	
+	# XMPP specifies that an 'unavailable' element is sent *after* 
+	# we've got an subscription='remove' element. Skip it!
+	set mjid2 [jlib::jidmap $jid2]
+	if {[lsearch [$jstate(roster) getusers] $mjid2] < 0} {
+	    return
+	}
 	
 	# Add only if no other jid2/* available.
 	set jid2Available [$jstate(roster) getpresence $jid2 -type available]
@@ -880,9 +885,9 @@ proc ::Jabber::Roster::Remove {jid} {
     # Else if 2-tier jid:  => remove jid2
     
     jlib::splitjid $jid jid2 res
-    set jid2map [jlib::jidmap $jid2]
+    set mjid2 [jlib::jidmap $jid2]
 
-    foreach v [$wtree find withtag $jid2map] {
+    foreach v [$wtree find withtag $mjid2] {
 	$wtree delitem $v
 	
 	# Remove dirs if empty?
@@ -897,8 +902,8 @@ proc ::Jabber::Roster::Remove {jid} {
 	
 	# We've got a 3-tier jid.
 	set jid3 $jid
-	set jid3map [jlib::jidmap $jid]
-	foreach v [$wtree find withtag $jid3map] {
+	set mjid3 [jlib::jidmap $jid]
+	foreach v [$wtree find withtag $mjid3] {
 	    $wtree delitem $v
 	    set vparent [lrange $v 0 end-1]
 	    if {[llength $v] == 3} {
@@ -941,8 +946,8 @@ proc ::Jabber::Roster::SetCoccinella {jid} {
 	    set icon $presenceIcon(available,wb)
 	}
     }
-    set jidmap [jlib::jidmap $jid]
-    foreach v [$wtree find withtag $jidmap] {
+    set mjid [jlib::jidmap $jid]
+    foreach v [$wtree find withtag $mjid] {
 	$wtree itemconfigure $v -image $icon
     }
 }
@@ -1001,7 +1006,7 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
 	    set jidx ${jid2}/$argsArr(-resource)
 	}
     }
-    set jidmap [jlib::jidmap $jidx]
+    set mjid [jlib::jidmap $jidx]
     ::Debug 5 "\t jidx=$jidx"
     
     set treectag item[incr treeuid]    
@@ -1013,7 +1018,7 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
     if {[info exists argsArr(-ask)] &&  \
       [string equal $argsArr(-ask) "subscribe"]} {
 	eval {$wtree newitem [list {Subscription Pending} $jid]  \
-	  -image $icon -tags $jidmap} $itemOpts
+	  -image $icon -tags $mjid} $itemOpts
     } elseif {[info exists argsArr(-groups)] && ($argsArr(-groups) != "")} {
 	set groups $argsArr(-groups)
 	
@@ -1027,13 +1032,13 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
 		  -tags group -image $groupImage
 	    }
 	    eval {$wtree newitem [list $gpresarr($presence) $grp $jidx] \
-	      -image $icon -tags $jidmap} $itemOpts
+	      -image $icon -tags $mjid} $itemOpts
 	}
     } else {
 	
 	# No groups associated with this item.
 	eval {$wtree newitem [list $gpresarr($presence) $jidx] \
-	  -image $icon -tags $jidmap} $itemOpts
+	  -image $icon -tags $mjid} $itemOpts
     }
     
     # Design the balloon help window message.
@@ -1082,6 +1087,7 @@ namespace eval ::Jabber::Roster:: {
 	yahoo     {Yahoo Messenger}
 	irc       {IRC}
 	smtp      {Email address}
+	x-gadugadu  {Gadu-Gadu}
     }
     set allTransports {}
     foreach {name spec} $menuDefTrpt {
@@ -1415,17 +1421,23 @@ proc ::Jabber::Roster::BuildTrptMenu {token} {
     variable menuDefTrpt
     variable allTransports
     upvar ::Jabber::jstate jstate
+    upvar ::Jabber::jserver jserver
     
     # We must be indenpendent of method; agent, browse, disco
     set trpts {}
     foreach subtype $allTransports {
-	set jids [::Jabber::JlibCmd service gettransportjids $subtype]
+	set jids [$jstate(jlib) service gettransportjids $subtype]
 	if {[llength $jids]} {
 	    lappend trpts $subtype
 	    set dlgstate(servicejid,$subtype) [lindex $jids 0]
 	}
     }    
-    
+
+    # Disco doesn't return jabber. Make sure it's first.
+    set trpts [lsearch -all -not -inline $trpts jabber]
+    set trpts [concat jabber $trpts]
+    set dlgstate(servicejid,jabber) $jserver(this)
+
     # Build popup menu.
     set m [menu $dlgstate(wtrptmenu) -tearoff 0]
     array set menuDefTrptDesc $menuDefTrpt
@@ -1468,26 +1480,22 @@ proc ::Jabber::Roster::TrptPopupCmd {token} {
     focus $wjid
 
     switch -- $popuptrpt {
-	jabber {
-	    set dlgstate(jid) "userName@$dlgstate(servicejid,jabber)"
-	    $wjid selection range 0 8
-	}
-	aim {
-	    set dlgstate(jid) "userName@$dlgstate(servicejid,aim)"
-	    $wjid selection range 0 8
-	}
-	yahoo {
-	    set dlgstate(jid) "userName@$dlgstate(servicejid,yahoo)"
-	    $wjid selection range 0 8
+	jabber - aim - yahoo {
+	    set dlgstate(jid) "userName@$dlgstate(servicejid,$popuptrpt)"
 	}
 	icq {
 	    set dlgstate(jid) "screeNumber@$dlgstate(servicejid,icq)"
-	    $wjid selection range 0 11
 	}
 	msn {
 	    set dlgstate(jid) "userName%hotmail.com@$dlgstate(servicejid,msn)"
-	    $wjid selection range 0 8
 	}
+	default {
+	    set dlgstate(jid) "userName@$dlgstate(servicejid,$popuptrpt)"
+	}
+    }
+    set ind [string first @ $dlgstate(jid)]
+    if {$ind > 0} {
+	$wjid selection range 0 $ind
     }
 }
 
@@ -1943,11 +1951,11 @@ proc ::Jabber::Roster::PostProcessIcons { } {
 	    } 
 	    default {
 		set jid [lindex $v end]
-		set jidmap [jlib::jidmap $jid]
+		set mjid [jlib::jidmap $jid]
 		set server [jlib::jidmap $jserver(this)]
 		
 		# Exclude jid's that belong to our login jabber server.
- 		if {![string match "*@${server}*" $jidmap]} {
+ 		if {![string match "*@${server}*" $mjid]} {
 		    jlib::splitjid $jid jid2 res
 		    set pres [$jstate(roster) getpresence $jid2 -resource $res]
 		    array set presArr $pres

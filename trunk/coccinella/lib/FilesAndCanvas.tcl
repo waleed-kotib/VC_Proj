@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: FilesAndCanvas.tcl,v 1.25 2004-05-19 12:39:02 matben Exp $
+# $Id: FilesAndCanvas.tcl,v 1.26 2004-05-27 13:59:10 matben Exp $
  
 package require can2svg
 package require svg2can
@@ -622,6 +622,7 @@ proc ::CanvasFile::DoSaveCanvasFile {wtop} {
     set prefs(userPath) [file dirname $ans]
     set fileName $ans
     set ext [file extension $fileName]
+    
     switch -- $ext {
 	".svg" {
 	    ::can2svg::canvas2file $wCan $fileName -uritype file -usetags 0
