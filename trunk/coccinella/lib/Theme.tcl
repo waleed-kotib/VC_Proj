@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: Theme.tcl,v 1.7 2004-01-02 14:41:58 matben Exp $
+# $Id: Theme.tcl,v 1.8 2004-02-09 08:26:07 matben Exp $
 
 package provide Theme 1.0
 
@@ -32,7 +32,8 @@ proc ::Theme::Init { } {
     # Read resource database files in a hierarchical order.
     # 1) always read the default rdb file.
     # 2) read rdb file for this specific platform, if exists.
-    # 3) read rdb file for any theme we have chosen.
+    # 3) read rdb file for any theme we have chosen. Search first
+    #    inside the sources and then in the alternative user directory.
     option readfile [file join $this(resourcedbPath) default.rdb] startupFile
     set f [file join $this(resourcedbPath) $this(platform).rdb]
     if {[file exists $f]} {
@@ -42,15 +43,27 @@ proc ::Theme::Init { } {
     if {[file exists $f]} {
 	option readfile $f startupFile
     }
+    set f [file join $this(altResourcedbPath) $prefs(themeName).rdb]
+    if {[file exists $f]} {
+	option readfile $f startupFile
+    }
 
     # Search for image files in this order:
-    # 1) imagePath/themeImageDir
-    # 2) imagePath/platformName
-    # 3) imagePath
+    # 1) altImagePath/themeImageDir
+    # 2) imagePath/themeImageDir
+    # 3) imagePath/platformName
+    # 4) imagePath
     set this(imagePathList) {}
     set themeDir [option get . themeImageDir {}]
     if {$themeDir != ""} {
-	lappend this(imagePathList) [file join $this(imagePath) $themeDir]
+	set dir [file join $this(altImagePath) $themeDir]
+	if {[file isdirectory $dir]} {
+	    lappend this(imagePathList) $dir
+	}
+	set dir [file join $this(imagePath) $themeDir]
+	if {[file isdirectory $dir]} {
+	    lappend this(imagePathList) $dir
+	}
     }
     lappend this(imagePathList)  \
       [file join $this(imagePath) $this(platform)] $this(imagePath)
@@ -129,6 +142,12 @@ proc ::Theme::GetAllAvailable { } {
     
     set allrsrc {}
     foreach f [glob -nocomplain -tails -directory $this(resourcedbPath) *.rdb] {
+	set themeName [file rootname $f]
+	if {[::Theme::CanLoadTheme $themeName]} {
+	    lappend allrsrc $themeName
+	}
+    }  
+    foreach f [glob -nocomplain -tails -directory $this(altResourcedbPath) *.rdb] {
 	set themeName [file rootname $f]
 	if {[::Theme::CanLoadTheme $themeName]} {
 	    lappend allrsrc $themeName

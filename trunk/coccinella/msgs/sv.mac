@@ -701,8 +701,8 @@ från ett icke Jabber system kräver att du redan har ett konto på detta\
 system och att du har använt detta konto för att registrera dig hos\
 serverns transport komponent %s. Vill du göra detta nu?}
         ::msgcat::mcset sv jamessowntrpt	{Detta är ditt eget konto\
-hos %s som fungerar som en server serice vilken transporterar meddelanden\
-till motsvarande IM system. Det är nödvändigt att att den finns i din\
+hos %s som fungerar som en server service vilken transporterar meddelanden\
+till motsvarande IM system. Det är nödvändigt att den finns i din\
 roster. Du har prenumeration för %s: %s.}
 
 

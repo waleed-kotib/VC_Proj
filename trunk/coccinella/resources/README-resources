@@ -3,11 +3,17 @@ README-resources
 
 Most of the apperance of widgets, such as colors and fonts, is set
 via the built in option database for resources.
+These instructions assume you have the sources available, or that
+you run Mac OS X and has "opened" the application by control clicking it.
 
 The default.rdb file always sets some reasonable values.
 After that the platform specific rdb file is read.
 If the theme is set in the prefs file, the themeName.rdb
-file is read.
+file is read. This is first searched for inside the sources and then 
+in the alternative user directory. You find this directory
+by using the Jabber/Debug menu command, and write
+puts $this(altResourcedbPath)
+Typically you'll have a path .../Coccinella/resources/
 
 There are several levels of options that can be set.
 
@@ -34,6 +40,12 @@ in their own directory inside the images/ directory of the
 sources. Give this directory a name that associates to the 
 theme name. Specify this directory in your themes rdb file as:
 *themeImageDir:                     galileolinux
+
+As an alternative you may create your image directory inside your
+preferences directory, which you find by using the Jabber/Debug 
+menu command, and write 
+puts $this(altImagePath)
+Typically you'll have a path .../Coccinella/images/MyTheme/
 
 6) Each image has a resource name associated with it. If you keep
 the filename the same as in the original distro, the image

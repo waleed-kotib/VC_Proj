@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.40 2004-02-05 14:00:21 matben Exp $
+# $Id: Coccinella.tcl,v 1.41 2004-02-09 08:26:07 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -161,14 +161,50 @@ if {[string equal $this(platform) "macintosh"] && [string equal $thisPath ":"]} 
     set thisPath [pwd]
 }
 
+# Path where preferences etc are stored.
+switch -- $this(platform) {
+    macintosh {
+	if {[info exists env(PREF_FOLDER)]} {
+	    set this(prefsPath) [file join $env(PREF_FOLDER) Coccinella]
+	} else {
+	    set this(prefsPath) $this(path)
+	}
+    }
+    macosx {
+	set this(prefsPath)  \
+	  [file join [file nativename ~/Library/Preferences] Coccinella]
+    }    
+    unix {
+	set this(prefsPath) [file nativename ~/.coccinella]
+    }
+    windows {
+	if {[info exists env(USERPROFILE)]} {
+	    set winPrefsDir $env(USERPROFILE)
+	} elseif {[info exists env(HOME)]} {
+	    set winPrefsDir $env(HOME)
+	} elseif {[lsearch -glob [file volumes] "c:*"]} {
+	    set winPrefsDir c:/
+	} elseif {[lsearch -glob [file volumes] "C:*"]} {
+	    set winPrefsDir C:/
+	} else {
+	    set winPrefsDir $this(path)
+	}
+	set this(prefsPath) [file join $winPrefsDir Coccinella]
+    }
+}
+
 # Collect paths in this array.
-set this(path)            $thisPath
-set this(script)          $thisScript
-set this(imagePath)       [file join $this(path) images]
-set this(resourcedbPath)  [file join $this(path) resources]
-set this(soundsPath)      [file join $this(path) sounds]
-set this(internalIPnum)   127.0.0.1
-set this(internalIPname)  "localhost"
+set this(path)              $thisPath
+set this(script)            $thisScript
+set this(imagePath)         [file join $this(path) images]
+set this(altImagePath)      [file join $this(prefsPath) images]
+set this(resourcedbPath)    [file join $this(path) resources]
+set this(altResourcedbPath) [file join $this(prefsPath) resources]
+set this(soundsPath)        [file join $this(path) sounds]
+set this(altSoundsPath)     [file join $this(prefsPath) sounds]
+set this(themePrefsPath)    [file join $this(prefsPath) theme]
+set this(internalIPnum)     127.0.0.1
+set this(internalIPname)    "localhost"
 
 # Set our IP number temporarily.
 set this(ipnum) $this(internalIPnum) 
@@ -271,39 +307,6 @@ if {[file exists $this(binPath)]} {
 } else {
     set this(binPath) {}
 }
-
-# Path where preferences etc are stored.
-switch -- $this(platform) {
-    macintosh {
-	if {[info exists env(PREF_FOLDER)]} {
-	    set this(prefsPath) [file join $env(PREF_FOLDER) Coccinella]
-	} else {
-	    set this(prefsPath) $this(path)
-	}
-    }
-    macosx {
-	set this(prefsPath)  \
-	  [file join [file nativename ~/Library/Preferences] Coccinella]
-    }    
-    unix {
-	set this(prefsPath) [file nativename ~/.coccinella]
-    }
-    windows {
-	if {[info exists env(USERPROFILE)]} {
-	    set winPrefsDir $env(USERPROFILE)
-	} elseif {[info exists env(HOME)]} {
-	    set winPrefsDir $env(HOME)
-	} elseif {[lsearch -glob [file volumes] "c:*"]} {
-	    set winPrefsDir c:/
-	} elseif {[lsearch -glob [file volumes] "C:*"]} {
-	    set winPrefsDir C:/
-	} else {
-	    set winPrefsDir $this(path)
-	}
-	set this(prefsPath) [file join $winPrefsDir Coccinella]
-    }
-}
-set this(themePrefsPath) [file join $this(prefsPath) theme]
 
 # Read our theme prefs file, if any, containing the theme name.
 package require Theme
