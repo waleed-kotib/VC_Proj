@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.120 2004-12-02 08:22:34 matben Exp $
+# $Id: Jabber.tcl,v 1.121 2004-12-09 15:20:28 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -151,6 +151,8 @@ namespace eval ::Jabber:: {
 	public          http://coccinella.sourceforge.net/protocol/private
 	caps            http://coccinella.sourceforge.net/protocol/caps
     }
+    variable capsExtList
+    set capsExtList {ftrans}
     
     # Standard xmlns supported. Components add their own.
     variable clientxmlns
@@ -1248,14 +1250,21 @@ proc ::Jabber::CreateCoccinellaPresElement { } {
 proc ::Jabber::CreateCapsPresElement { } {
     global  prefs
     variable coccixmlns
+    variable capsExtList
 
     set capsxmlns "http://jabber.org/protocol/caps"
     set node $coccixmlns(caps)
-    set ext "ftrans"
-    set xmllist [wrapper::createtag c \
-      -attrlist [list xmlns $capsxmlns node $node ver $prefs(fullVers) ext $ext]]
+    set xmllist [wrapper::createtag c -attrlist \
+      [list xmlns $capsxmlns node $node ver $prefs(fullVers) ext $capsExtList]]
 
     return $xmllist
+}
+
+proc ::Jabber::RegisterCapsExtKey {key} {    
+    variable capsExtList
+    
+    lappend capsExtList $key
+    set capsExtList [lsort -unique $capsExtList]
 }
 
 # Jabber::SetStatusWithMessage --

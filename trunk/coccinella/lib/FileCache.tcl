@@ -6,7 +6,7 @@
 #
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #
-# $Id: FileCache.tcl,v 1.16 2004-12-04 15:01:06 matben Exp $
+# $Id: FileCache.tcl,v 1.17 2004-12-09 15:20:29 matben Exp $
 # 
 #       The input key can be: 
 #               1) a full url, must be uri encoded 
@@ -26,20 +26,24 @@
 #	This way files are uniquely identified.
 #	Note: all relative paths are relative the installation dir (basedir), 
 #	and therefore a path without any ../ is always local.
+#	
+#	The value is one of two things:
+#	        1) a local absolute file path
+#	        2) a file tail which then refers to a file in cache directory
 #
 # USAGE ########################################################################
 # 
 # ::FileCache::
 # 
-# SetBaseDir dir
-# SetCacheDir dir
-# Set key ?locabspath?
-# Get key
-# GetNameFromCache fileName
-# IsCached key
-# SetDirFiles dir ?pattern?
-# MakeCacheFileName fileName
-# Dump
+#       SetBaseDir dir
+#       SetCacheDir dir
+#       Set key ?locabspath?
+#       Get key
+#       GetNameFromCache fileName
+#       IsCached key
+#       SetDirFiles dir ?pattern?
+#       MakeCacheFileName fileName
+#       Dump
 
 package require tinyfileutils
 package require uriencode
@@ -62,6 +66,7 @@ namespace eval ::FileCache:: {
     variable cache
     variable basedir [pwd]
     variable launchtime [clock seconds]
+    array set cache {}
     
     # Time stamps for directories.
     variable bestbeforedir
@@ -75,6 +80,12 @@ namespace eval ::FileCache:: {
     
     # Keep a time ordered list of keys.
     variable keylist {}
+    
+    # Cache directory.
+    variable cachedir ""
+    variable readcache 0
+    variable indexFileTail cacheIndex.tcl
+    
 }
 
 proc ::FileCache::InitHook { } {
@@ -94,6 +105,7 @@ proc ::FileCache::QuitHook { } {
 	catch {file delete -force -- $prefs(incomingPath)}
 	file mkdir $prefs(incomingPath)
     }
+    WriteTable
 }
 
 proc ::FileCache::SetBaseDir {dir} {
@@ -105,57 +117,106 @@ proc ::FileCache::SetBaseDir {dir} {
     set basedir $dir
 }
 
-proc ::FileCache::Init { } {    
-    variable basedir
-    variable totbytes 0
-    
-    if {[file isdirectory $basedir]} {
-	foreach f [glob -nocomplain -directory $basedir *] {
-	    set totbytes [expr $totbytes + double([file size $f])]
-	}
-    }
-}
-
 # FileCache::Set --
 #
-#       Sets an entry in the file data base. If no 'locabspath' then the key
-#       is assumed to be a local absolute file path.
+#       Sets an entry in the file data base. 
+#       If 'fileName' is missing we use the 'key' instead.
+#       Else it is one of two things:
+#	        1) a local absolute file path
+#	        2) a file tail which then refers to a file in cache directory
 
-proc ::FileCache::Set {key {locabspath {}}} { 
+proc ::FileCache::Set {key {fileName ""}} { 
     variable totbytes
     variable maxbytes
     variable keylist
     variable cache
+    variable cachedir
+    variable readcache
     
-    if {[string length $locabspath] == 0} {
-	set locabspath $key
+    if {!$readcache} {
+	ReadTable
     }
-    if {![string equal [file pathtype $locabspath] "absolute"]} {
-	return -code error "The path \"$locabspath\" is not of type absolute"
+    if {$fileName == ""} {
+	set absFileName $key
+    } else {
+	if {[string equal [file dirname $fileName] "."]} {
+	    set absFileName [file join $cachedir $fileName]
+	} else {
+	    set absFileName $fileName
+	}
     }
     set nkey [Normalize $key]
     lappend keylist $nkey
-    set totbytes [expr $totbytes + double([file size $locabspath])]
+    set totbytes [expr $totbytes + double([file size $absFileName])]
     set rmkey [lindex $keylist 0]
+    
     while {[expr $totbytes > $maxbytes] && ([llength $keylist] > 2)} {	
 	Remove $rmkey
 	set rmkey [lindex $keylist 0]
     }
-    return [set cache($nkey) $locabspath]
+    
+    # If 'locabspath' is in the cache dir strip off dirname.
+    if {[IsFileCachePath $absFileName]} {
+	set cacheName [file tail $absFileName]
+    } else {
+	set cacheName $absFileName
+    }
+    return [set cache($nkey) $cacheName]
 }
+
+# FileCache::Get --
+# 
+#       Get the stored absolute file path if any.
 
 proc ::FileCache::Get {key} {
     variable cache
+    variable cachedir
+    variable readcache
     
+    if {!$readcache} {
+	ReadTable
+    }    
     set nkey [Normalize $key]
     if {[info exists cache($nkey)]} {
-	set ans $cache($nkey)
+	set name $cache($nkey)
     } elseif {[IsLocal $key]} {
-	set ans $cache($nkey)
+	set name $cache($nkey)
     } else {
-    	return -code error "The cache does not contain an entry with key \"$key\""
+    	return -code error "the cache does not contain an entry with key \"$key\""
     }
-    return $ans
+    if {[string equal [file dirname $name] "."]} {
+	set name [file join $cachedir $name]
+    }
+    return $name
+}
+
+# FileCache::IsCached --
+# 
+#       Checks if this key is stored in cache and acceptable.
+
+proc ::FileCache::IsCached {key} {    
+    variable cache
+    variable usecache
+    variable readcache
+    
+    if {!$readcache} {
+	ReadTable
+    }    
+    if {[string equal $usecache "never"]} {
+	set iscached 0
+    } else {
+	set iscached 0
+	set nkey [Normalize $key]
+	if {[info exists cache($nkey)]} {
+	    set iscached 1
+	} elseif {[IsLocal $key]} {
+	    set iscached 1
+	}
+	if {$iscached} {
+	    set iscached [Accept $cache($nkey)]
+	}
+    }
+    return $iscached
 }
 
 # FileCache::Remove --
@@ -176,33 +237,8 @@ proc ::FileCache::Remove {key} {
 	set keylist [lreplace $keylist $ind $ind]
 	catch {file delete $f}
 	unset cache($nkey)
-	unset -nocomplain cacheToName([file tail $nkey])
+	#unset -nocomplain cacheToName(??)
     }    
-}
-
-# FileCache::IsCached --
-# 
-#       Checks if this key is stored in cache and acceptable.
-
-proc ::FileCache::IsCached {key} {    
-    variable cache
-    variable usecache
-
-    if {[string equal $usecache "never"]} {
-	set iscached 0
-    } else {
-	set iscached 0
-	set nkey [Normalize $key]
-	if {[info exists cache($nkey)]} {
-	    set iscached 1
-	} elseif {[IsLocal $key]} {
-	    set iscached 1
-	}
-	if {$iscached} {
-	    set iscached [Accept $cache($nkey)]
-	}
-    }
-    return $iscached
 }
 
 # FileCache::SetDirFiles --
@@ -250,6 +286,22 @@ proc ::FileCache::Normalize {key} {
     return $nkey
 }
 
+proc ::FileCache::IsFileCachePath {fileName} {
+    variable cachedirnorm
+    
+    return [string equal [file normalize [file dirname $fileName]] $cachedirnorm]
+}
+
+proc ::FileCache::CompletePath {fileName} {
+    variable cachedir
+    
+    if {[string equal [file dirname $fileName] "."]} {
+	return [file join $cachedir $fileName]
+    } else {
+	return $fileName
+    }
+}
+
 # FileCache::IsLocal --
 #
 #       If key not an uri it is always local, then cache it.
@@ -283,11 +335,15 @@ proc ::FileCache::IsLocal {key} {
     return $islocal
 }
 
-# A few functions to handle a cache dir where files get unique names.
+# A few functions to handle a cache dir where files get unique names in
+# a special cache folder.
 # 
 
 proc ::FileCache::SetCacheDir {dir} {
     variable cachedir
+    variable cachedirnorm
+    variable indexFile
+    variable indexFileTail
     
     if {![string equal [file pathtype $dir] "absolute"]} {
 	return -code error "The path \"$dir\" is not of type absolute"
@@ -299,6 +355,8 @@ proc ::FileCache::SetCacheDir {dir} {
 	file mkdir $dir
     }
     set cachedir $dir
+    set cachedirnorm [file normalize $cachedir]
+    set indexFile [file join $cachedir $indexFileTail]
 }
 
 proc ::FileCache::MakeCacheFileName {uri} {
@@ -334,6 +392,62 @@ proc ::FileCache::HasCacheName {fileName} {
     } else {
 	return 0
     }
+}
+
+# FileCache::WriteTable --
+# 
+#       Writes the cache index file that maps url's to cache file names.
+
+# An alternative would be to store 'Set $key $value' and
+# then source the file when reading the table.
+
+proc ::FileCache::WriteTable { } {
+    variable indexFile
+    variable cache
+    
+    # Write only files in the cache directory.
+    set tmp ${indexFile}_tmp
+    if {![catch {open $tmp {WRONLY CREAT}} fd]} {
+	foreach {key value} [array get cache] {
+	    if {[string equal [file dirname $value] "."]} {
+		puts $fd [list $key $value]
+	    }
+	}
+	close $fd
+    }
+    catch {file rename -force $tmp $indexFile}
+}
+
+# FileCache::ReadTable --
+# 
+#       Reads the cache table and sets our internal state variables.
+
+proc ::FileCache::ReadTable { } {
+    variable indexFile
+    variable cache
+    variable readcache
+    variable totbytes
+    variable keylist
+        
+    set readcache 1
+
+    set oldcwd [pwd]
+    cd [file dirname $indexFile]
+
+    # Be sure to cache only existing files.
+    if {[file exists $indexFile] && ![catch {open $indexFile RDONLY} fd]} {
+	while {[gets $fd line] >= 0} { 
+	    set key [lindex $line 0]
+	    set f   [lindex $line 1]
+	    if {[file exists $f]} {
+		set cache($key) $f
+		lappend keylist $key
+		set totbytes [expr $totbytes + double([file size $f])]
+	    }
+	}	
+	close $fd
+    }
+    cd $oldcwd
 }
 
 # --- Some functions for handling "best before" things -------------------------
@@ -372,23 +486,27 @@ proc ::FileCache::SetBestBefore {timetoken {dir {}}} {
 # FileCache::Accept --
 # 
 #
-#       locabspath:   local native not uri encoded abslute path.
+#       fileName:   1) local native not uri encoded abslute path.
+#                   2) file tail if in cache directory.
 
-proc ::FileCache::Accept {locabspath} { 
+proc ::FileCache::Accept {fileName} { 
     variable launchtime
     variable bestbeforedir
+    variable cachedir
     
-    if {![string equal [file pathtype $locabspath] "absolute"]} {
-	return -code error "The path \"$locabspath\" is not of type absolute"
+    # We must get the absolute path.
+    set absFilePath [CompletePath $fileName]
+    if {![string equal [file pathtype $absFilePath] "absolute"]} {
+	return -code error "The path \"$absFilePath\" is not of type absolute"
     }
     
-    # Need to loop through all directorys with "best before date" and see if
+    # Need to loop through all directories with "best before date" and see if
     # any matches the file path in question.
     set accept 1
     foreach dir [array names bestbeforedir] {
-	if {[string match ${dir}* $locabspath]} {
+	if {[string match ${dir}* $absFilePath]} {
 	    set timetoken $bestbeforedir($dir)
-	    set filemtime [file mtime $locabspath]
+	    set filemtime [file mtime $absFilePath]
 	    
 	    switch -- $timetoken {
 		launch {
@@ -410,20 +528,26 @@ proc ::FileCache::Accept {locabspath} {
 proc ::FileCache::ClearCache { } {
     global  prefs
     variable cache
+    variable totbytes
+    variable keylist
     
-    foreach nkey [array names cache] {
-	catch {file delete $chache($nkey)}
+    set oldcwd [pwd]
+    cd $prefs(incomingPath)
+    foreach f [glob -nocomplain *] {
+	catch {file delete $f}
     }
     unset -nocomplain cache
+    array set cache {}
+    set keylist {}
+    set totbytes 0.0
 
-    catch {file delete -force -- $prefs(incomingPath)}
-    file mkdir $prefs(incomingPath)
+    cd $oldcwd
 }
 
 proc ::FileCache::Dump { } {
     variable cache
     
-    puts "::FileCache::Dump:\n"
+    puts "::FileCache::Dump:"
     if {[info exists cache]} {
 	parray cache
     }

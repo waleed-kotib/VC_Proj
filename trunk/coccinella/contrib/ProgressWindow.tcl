@@ -10,7 +10,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ProgressWindow.tcl,v 1.20 2004-12-08 08:21:18 matben Exp $
+# $Id: ProgressWindow.tcl,v 1.21 2004-12-09 15:20:27 matben Exp $
 # 
 #-------------------------------------------------------------------------------
 #
@@ -131,10 +131,13 @@ namespace eval ::ProgressWindow:: {
 	    option add *ProgressWindow.font1    {Arial 8 bold}        widgetDefault
 	    option add *ProgressWindow.font2    {Arial 8 normal}      widgetDefault
 	}
-	mac* {
-	    option add *ProgressWindow.font1    {Geneva 9 bold}       widgetDefault
+	macintosh {
 	    option add *ProgressWindow.font1    system                widgetDefault
 	    option add *ProgressWindow.font2    {Geneva 9 normal}     widgetDefault
+	}
+	macosx {
+	    option add *ProgressWindow.font1    system                widgetDefault
+	    option add *ProgressWindow.font2    {{Lucida Grande} 11}  widgetDefault
 	}
     }
     
@@ -296,23 +299,30 @@ proc ::ProgressWindow::Build {w} {
     if {$debugLevel >= 3} {
 	puts "::ProgressWindow::Build:: w=$w"
     }
-    $framecmd $widgets(frame)
-    pack $widgets(frame) -padx 16 -pady 6
+    set wall $widgets(frame)
+    $framecmd $wall
+    pack $wall -padx 16 -pady 6
 
-    set widgets(label)  $widgets(frame).la
-    set widgets(label2) $widgets(frame).la2
-    set widgets(label3) $widgets(frame).la3
-    set frmid           $widgets(frame).mid
-    set widgets(pbar)   ${frmid}.pb
-    set widgets(canvas) ${frmid}.pb
-    set widgets(cancel) ${frmid}.btcancel
+    set wmid            $wall.mid
+    set wbot            $wall.bot
+
+    set widgets(label)  $wall.la
+    set widgets(label2) $wbot.la2
+    set widgets(label3) $wbot.la3
+    set widgets(labelp) $wbot.lpause
+    set widgets(pbar)   $wmid.pb
+    set widgets(canvas) $wmid.pb
+    set widgets(cancel) $wmid.btcancel
+    
+    set wpause $widgets(labelp)
     
     $labelcmd $widgets(label) -font $options(-font1) -text $options(-text) \
       -justify left
     pack $widgets(label)  -side top -anchor w -pady 4
     
     # Frame with progress bar and Cancel button.
-    pack [frame $frmid] -side top -fill x
+    frame $wmid
+    pack  $wmid -side top -fill x
     if {$this(havetile)} {
 	tprogress $widgets(pbar) -from 0 -to 100 -length $dims(width) \
 	  -variable ::ProgressWindow::${w}::percent
@@ -326,24 +336,39 @@ proc ::ProgressWindow::Build {w} {
     } else {
 	set width  $dims(width)
 	set height $dims(height)
-	canvas $widgets(canvas) -width $width -height $height \
+	set wcan $widgets(canvas)
+	canvas $wcan -width $width -height $height \
 	  -borderwidth 0 -relief sunken -highlightthickness 0
-	$widgets(canvas) create rectangle 0 0 $width $height  \
+	$wcan create rectangle 0 0 $width $height  \
 	  -fill #ceceff -outline {}
-	$widgets(canvas) create rectangle 0 0 0 0  \
+	$wcan create rectangle 0 0 0 0  \
 	  -outline {} -fill #424242 -tag progbar
-	$widgets(canvas) create rectangle 0 0 $width $height  \
+	$wcan create rectangle 0 0 $width $height  \
 	  -fill {} -outline black
 	if {$options(-percent) > 0} {
-	    $widgets(canvas) coords progbar 0 0  \
+	    $wcan coords progbar 0 0  \
 	      [expr ($options(-percent) * $width)/100] $height
 	}
-	pack $widgets(canvas) -side left -fill x -expand 1
+	pack $wcan -side left -fill x -expand 1
     }
     $buttoncmd $widgets(cancel) -text [::msgcat::mc Cancel]  \
       -command [list [namespace current]::CancelBt $w $options(-cancelcmd)]
     pack $widgets(cancel) -side right -padx 8
 
+    # Frame for texts etc.
+    frame $wbot
+    pack  $wbot -side top -fill x
+    if {$options(-pausecmd) != ""} {
+	$labelcmd $wpause -text [::msgcat::mc Pause] -fg blue
+	array set fontArr [font actual [$widgets(labelp) cget -font]]
+	set fontArr(-underline) 1
+	$wpause configure -font [array get fontArr]
+	pack $wpause -side right
+	bind $wpause <Button-1> [list [namespace current]::Pause $w]
+	bind $wpause <Enter> [list $wpause configure -fg red]
+	bind $wpause <Leave> [list $wpause configure -fg blue]
+    }
+    
     # Small text below progress bar.
     $labelcmd $widgets(label2) -font $options(-font2) -text $options(-text2)
     pack $widgets(label2) -side top -anchor w
@@ -357,7 +382,7 @@ proc ::ProgressWindow::Build {w} {
     bind $w <FocusIn>  [list ::ProgressWindow::PBFocusIn $w]
 
     update idletasks
-    set wrapwidth [winfo reqwidth $frmid]
+    set wrapwidth [winfo reqwidth $wmid]
     $widgets(label) configure -wraplength $wrapwidth
     
     wm deiconify $w
@@ -512,6 +537,28 @@ proc ::ProgressWindow::CancelBt {w cancelCmd} {
 	eval $cancelCmd
     }
     catch {destroy $w}
+}
+
+proc ::ProgressWindow::Pause {w} {
+
+    upvar ::ProgressWindow::${w}::widgets widgets
+    upvar ::ProgressWindow::${w}::options options
+    
+    uplevel #0 $options(-pausecmd) pause
+    $widgets(labelp) configure -text [::msgcat::mc Restart]
+    bind $widgets(labelp) <Button-1> [list [namespace current]::Restart $w]
+
+}
+
+proc ::ProgressWindow::Restart {w} {
+
+    upvar ::ProgressWindow::${w}::widgets widgets
+    upvar ::ProgressWindow::${w}::options options
+    
+    uplevel #0 $options(-pausecmd) restart
+    $widgets(labelp) configure -text [::msgcat::mc Pause]
+    bind $widgets(labelp) <Button-1> [list [namespace current]::Pause $w]
+    
 }
 
 proc ::ProgressWindow::Cleanup {w} {
