@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.25 2004-01-15 14:13:00 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.26 2004-02-06 14:01:22 matben Exp $
 
 # SetWhiteboardFactoryState --
 # 
@@ -102,6 +102,10 @@ set prefs(reflectPort) 8144
 # The tinyhttpd server port number and base directory.
 set prefs(httpdPort) 8077
 set prefs(httpdRootDir) $this(path)
+
+# File transport method: put/get or http.
+set prefs(trptMethod) putget
+#set prefs(trptMethod) http
 
 # NAT stuff.
 set prefs(setNATip) 0

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Import.tcl,v 1.11 2004-02-05 14:00:23 matben Exp $
+# $Id: Import.tcl,v 1.12 2004-02-06 14:01:22 matben Exp $
 
 package require http
 package require httpex
@@ -330,8 +330,22 @@ proc ::Import::DoImport {w opts args} {
     # Put to remote peers but require we did not fail ourself.   
     if {$doPut && ($errMsg == "")} {	
 	if {$isLocal} {
-	    ::Import::PutFile $wtopNS $fileName $argsArr(-where) \
-	      $putOpts $useTag
+	    
+	    # Either we use the put/get method with a new connection,
+	    # or use standard http.
+	    if {[string equal $prefs(trptMethod) "putget"]} {
+		::Import::PutFile $wtopNS $fileName $argsArr(-where) \
+		  $putOpts $useTag
+	    } elseif {[string equal $prefs(trptMethod) "http"]} {
+		
+		# We need the real id here.
+		set id [$w find withtag $useTag]
+		set line [::CanvasUtils::GetOnelinerForAny $w $id  \
+		  -uritype http]
+		if {$line != ""} {
+		    SendClientCommand $wtopNS [concat "CANVAS:" $line]   
+		}
+	    }
 	} else {
 	    
 	    # This fails if we have -url. Need 'import here. TODO!
@@ -1337,7 +1351,13 @@ proc ::Import::XanimReadOutput {w wfr xpipe} {
 #       line:       this is typically an "import" command similar to items but
 #                   for images and movies that need to be transported.
 #                   It shall contain either a -file or -url option, but not both.
-#       args:   -where
+#       args: 
+#               -where     "all": write to this canvas and all others,
+#                          "remote": write only to remote client canvases,
+#                          "local": write only to this canvas and not to any 
+#                          other.
+#                          ip number: write only to this remote client canvas 
+#                          and not to own.
 #               -basepath
 #               -commmand  a callback command for errors that cannot be reported
 #                          right away, using -url http for instance.
@@ -1351,7 +1371,7 @@ proc ::Import::XanimReadOutput {w wfr xpipe} {
 
 proc ::Import::HandleImportCmd {w line args} {
     
-    Debug 2 "HandleImportCmd: line=$line, args=$args"
+    Debug 2 "::Import::HandleImportCmd line=$line, args=$args"
     
     if {![string equal [lindex $line 0] "import"]} {
 	return -code error "Line is not an \"import\" line"

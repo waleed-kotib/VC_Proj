@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasCmd.tcl,v 1.4 2004-01-29 08:24:39 matben Exp $
+# $Id: CanvasCmd.tcl,v 1.5 2004-02-06 14:01:22 matben Exp $
 
 package provide CanvasCmd 1.0
 
@@ -517,49 +517,9 @@ proc ::CanvasCmd::DoSendCanvas {wtop} {
 	if {([lsearch $tags grid] >= 0) || ([lsearch $tags tbbox] >= 0)} {
 	    continue
 	}
-	set type [$w type $id]
-
-	switch -- $type {
-	    image {
-		set line [::CanvasUtils::GetOnelinerForImage $w $id \
-		  -uritype http]
-		lappend cmdList [concat "CANVAS:" $line]
-	    }
-	    window {
-		
-		# A movie: for QT we have a complete widget; 
-		set windowName [$w itemcget $id -window]
-		set windowClass [winfo class $windowName]
-		
-		switch -- $windowClass {
-		    QTFrame {
-			set line [::CanvasUtils::GetOnelinerForQTMovie $w $id \
-			  -uritype http]
-		    }
-		    SnackFrame {			
-			set line [::CanvasUtils::GetOnelinerForSnack $w $id \
-			  -uritype http]
-		    }
-		    XanimFrame {
-			# ?
-			continue
-		    }
-		    default {
-			if {[::Plugins::HaveSaveProcForWinClass $windowClass]} {
-			    set procName \
-			      [::Plugins::GetSaveProcForWinClass $windowClass]
-			    set line [$procName $w $id -uritype http]
-			}
-		    }
-		}
-		if {$line != ""} {
-		    lappend cmdList [concat "CANVAS:" $line]
-		}
-	    }
-	    default {
-		set cmd [::CanvasUtils::GetOnelinerForItem $w $id]
-		lappend cmdList [concat "CANVAS:" $cmd]
-	    }
+	set line [::CanvasUtils::GetOnelinerForAny $w $id -uritype http]
+	if {$line != ""} {
+	    lappend cmdList [concat "CANVAS:" $line]
 	}
     }
     

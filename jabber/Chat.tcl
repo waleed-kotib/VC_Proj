@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.42 2004-02-03 10:16:31 matben Exp $
+# $Id: Chat.tcl,v 1.43 2004-02-06 14:01:21 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -530,7 +530,7 @@ proc ::Jabber::Chat::Build {threadID args} {
     grid $frtop.fjid.l $frtop.fjid.ljid -sticky w -padx 1
     
     frame $frtop.fsub
-    label $frtop.fsub.l -text "[::msgcat::mc Subject]:" -font $fontSB
+    label $frtop.fsub.l -text "[::msgcat::mc Subject]:"
     entry $frtop.fsub.e -textvariable $token\(subject)
     pack $frtop.fsub -side top -anchor w -padx 6 -fill x
     pack $frtop.fsub.l -side left -padx 2

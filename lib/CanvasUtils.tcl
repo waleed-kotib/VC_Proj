@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.22 2004-02-05 14:00:23 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.23 2004-02-06 14:01:22 matben Exp $
 
 package require sha1pure
 
@@ -519,6 +519,63 @@ proc ::CanvasUtils::RegisterUndoRedoCmd {cmd} {
     
     
 
+}
+
+# CanvasUtils::GetOnelinerForAny --
+#
+#       Dispatcher for the GetOneLiner procs.
+#       
+# Arguments:
+#       w           canvas
+#       id          item id or tag
+#       args:
+#           -basepath absolutePath    translate image -file to a relative path.
+#           -uritype ( file | http )
+#       
+# Results:
+#       a single command line.
+
+proc ::CanvasUtils::GetOnelinerForAny {w id args} {
+
+    set type [$w type $id]
+    set line ""
+    
+    switch -- $type {
+	image {
+	    set line [eval {::CanvasUtils::GetOnelinerForImage $w $id} $args]
+	}
+	window {
+	    
+	    # A movie: for QT we have a complete widget; 
+	    set windowName [$w itemcget $id -window]
+	    set windowClass [winfo class $windowName]
+	    
+	    switch -- $windowClass {
+		QTFrame {
+		    set line [eval {
+			::CanvasUtils::GetOnelinerForQTMovie $w $id} $args]
+		}
+		SnackFrame {			
+		    set line [eval {
+			::CanvasUtils::GetOnelinerForSnack $w $id} $args]
+		}
+		XanimFrame {
+		    # ?
+		}
+		default {
+		    if {[::Plugins::HaveSaveProcForWinClass $windowClass]} {
+			set procName \
+			  [::Plugins::GetSaveProcForWinClass $windowClass]
+			set line [eval {$procName $w $id} $args]
+		    }
+		}
+	    }
+	}
+	default {
+	    set line [::CanvasUtils::GetOnelinerForItem $w $id]
+	}
+    }
+    return $line
 }
 
 # CanvasUtils::GetOnelinerForItem --
@@ -1434,7 +1491,7 @@ proc ::CanvasUtils::HandleCanvasDraw {wtop instr} {
     set lb_ {\{}
     set rb_ {\}}
     set punct_ {[.,;?!]}
-
+    
     # Regular drawing commands in the canvas.
     set wServCan [::UI::GetServerCanvasFromWtop $wtop]
     
@@ -1476,7 +1533,7 @@ proc ::CanvasUtils::HandleCanvasDraw {wtop instr} {
     
     # The 'import' command is an exception case (for the future). 
     if {[string equal $cmd "import"]} {
-	::Import::HandleImportCmd $wServCan $bsinstr
+	::Import::HandleImportCmd $wServCan $bsinstr -where local
     } else {
 	
 	# Make the actual canvas command, either straight or in the 
@@ -1494,7 +1551,7 @@ proc ::CanvasUtils::HandleCanvasDraw {wtop instr} {
 	    }
 	}
     }
-    
+	
     # Intercept the canvas command in certain cases:
     # If moving a selected item, be sure to move the markers with it.
     # The item can either be selected by remote client or here.
