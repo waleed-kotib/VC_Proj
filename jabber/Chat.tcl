@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.98 2004-12-08 08:21:19 matben Exp $
+# $Id: Chat.tcl,v 1.99 2004-12-09 15:20:27 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -259,6 +259,73 @@ proc ::Chat::DoStart {w} {
     if {$ans == "yes"} {
 	StartThread $user
     }
+}
+
+# Chat::StartThread --
+# 
+#       According to XMPP def sect. 4.1, we should use user@domain when
+#       initiating a new chat or sending a new message that is not a reply.
+# 
+# Arguments:
+#       jid
+#       args        -message, -thread
+
+proc ::Chat::StartThread {jid args} {
+
+    upvar ::Jabber::jstate jstate
+    upvar ::Jabber::jprefs jprefs
+    
+    ::Debug 2 "::Chat::StartThread jid=$jid, args=$args"
+    
+    array set argsArr $args
+    set havedlg 0
+
+    # Make unique thread id.
+    if {[info exists argsArr(-thread)]} {
+	set threadID $argsArr(-thread)
+	
+	# Do we already have a dialog with this thread?
+	set chattoken [GetTokenFrom chat threadid $threadID]
+	if {$chattoken != ""} {
+	    set havedlg 1
+	    upvar 0 $chattoken chatstate
+	}
+    } else {
+	set threadID [::sha1pure::sha1 "$jstate(mejid)[clock seconds]"]
+    }
+    
+    if {!$havedlg} {
+	if {$jprefs(chat,tabbedui)} {
+	    set dlgtoken [GetFirstDlgToken]
+	    if {$dlgtoken == ""} {
+		set dlgtoken [eval {Build $threadID -from $jid} $args]
+		set chattoken [GetTokenFrom chat threadid $threadID]
+
+		variable $chattoken
+		upvar 0 $chattoken chatstate
+	    } else {
+		set chattoken [NewPage $dlgtoken $threadID \
+		  -from $jid]
+		
+		# Make page frontmost.
+		variable $chattoken
+		upvar 0 $chattoken chatstate
+		
+		set dlgtoken $chatstate(dlgtoken)
+		variable $dlgtoken
+		upvar 0 $dlgtoken dlgstate
+		
+		$dlgstate(wnb) displaypage $chatstate(pagename)
+	    }
+	} else {
+	    eval {Build $threadID -from $jid} $args
+	}
+    }
+    
+    # Since we initated this thread need to set recipient to jid2.
+    jlib::splitjid $jid jid2 res
+    set chatstate(fromjid) $jid2
+    SetTitle $chattoken
 }
 
 # Chat::GotMsg --
@@ -542,73 +609,6 @@ proc ::Chat::InsertAnyThreadHistory {chattoken} {
 	    }
 	}
     }
-}
-
-# Chat::StartThread --
-# 
-#       According to XMPP def sect. 4.1, we should use user@domain when
-#       initiating a new chat or sending a new message that is not a reply.
-# 
-# Arguments:
-#       jid
-#       args        -message, -thread
-
-proc ::Chat::StartThread {jid args} {
-
-    upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jprefs jprefs
-    
-    ::Debug 2 "::Chat::StartThread jid=$jid, args=$args"
-    
-    array set argsArr $args
-    set havedlg 0
-
-    # Make unique thread id.
-    if {[info exists argsArr(-thread)]} {
-	set threadID $argsArr(-thread)
-	
-	# Do we already have a dialog with this thread?
-	set chattoken [GetTokenFrom chat threadid $threadID]
-	if {$chattoken != ""} {
-	    set havedlg 1
-	    upvar 0 $chattoken chatstate
-	}
-    } else {
-	set threadID [::sha1pure::sha1 "$jstate(mejid)[clock seconds]"]
-    }
-    
-    if {!$havedlg} {
-	if {$jprefs(chat,tabbedui)} {
-	    set dlgtoken [GetFirstDlgToken]
-	    if {$dlgtoken == ""} {
-		set dlgtoken [eval {Build $threadID -from $jid} $args]
-		set chattoken [GetTokenFrom chat threadid $threadID]
-
-		variable $chattoken
-		upvar 0 $chattoken chatstate
-	    } else {
-		set chattoken [NewPage $dlgtoken $threadID \
-		  -from $jid]
-		
-		# Make page frontmost.
-		variable $chattoken
-		upvar 0 $chattoken chatstate
-		
-		set dlgtoken $chatstate(dlgtoken)
-		variable $dlgtoken
-		upvar 0 $dlgtoken dlgstate
-		
-		$dlgstate(wnb) displaypage $chatstate(pagename)
-	    }
-	} else {
-	    eval {Build $threadID -from $jid} $args
-	}
-    }
-    
-    # Since we initated this thread need to set recipient to jid2.
-    jlib::splitjid $jid jid2 res
-    set chatstate(fromjid) $jid2
-    SetTitle $chattoken
 }
 
 # Chat::Build --
