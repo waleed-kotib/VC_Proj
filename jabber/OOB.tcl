@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.26 2004-03-18 14:11:18 matben Exp $
+# $Id: OOB.tcl,v 1.27 2004-04-25 15:35:26 matben Exp $
 
 package provide OOB 1.0
 
@@ -172,7 +172,7 @@ proc ::Jabber::OOB::SetCallback {token jlibName type theQuery} {
     upvar 0 $token state
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 2 "::Jabber::OOB::SetCallback, type=$type,theQuery='$theQuery'"
+    ::Debug 2 "::Jabber::OOB::SetCallback, type=$type,theQuery='$theQuery'"
     
     if {$type == "error"} {
 	foreach {errcode errmsg} $theQuery break

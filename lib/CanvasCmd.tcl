@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasCmd.tcl,v 1.10 2004-03-24 14:43:11 matben Exp $
+# $Id: CanvasCmd.tcl,v 1.11 2004-04-25 15:35:26 matben Exp $
 
 package provide CanvasCmd 1.0
 
@@ -487,65 +487,6 @@ proc ::CanvasCmd::DoSendCanvas {wtop} {
         
     # Just invoke the send message hook.
     ::WB::SendMessageList $wtop $cmdList -force 1
-}
-
-# UserActions::DoQuit ---
-#
-#       Is called just before quitting to be able to save various
-#       preferences etc.
-#       
-# Arguments:
-#       args        ?-warning boolean?
-#       
-# Results:
-#       boolean, qid quit or not
-
-proc ::UserActions::DoQuit {args} {
-    global  prefs this
-    
-    array set argsArr {
-	-warning      0
-    }
-    array set argsArr $args
-    if {$argsArr(-warning)} {
-	set ans [tk_messageBox -title [::msgcat::mc Quit?] -type yesno  \
-	  -default yes -message [::msgcat::mc messdoquit?]]
-	if {$ans == "no"} {
-	    return $ans
-	}
-    }
-    
-    # Run all quit hooks.
-    ::hooks::run quitAppHook    
-	    
-    # If we used 'Edit/Revert To/Application Defaults' be sure to reset...
-    set prefs(firstLaunch) 0
-	    
-    # Delete widgets with sounds.
-    ::Sounds::Free
-    ::Dialogs::Free
-    
-    # Get dialog window geometries.
-    set prefs(winGeom) {}
-    foreach {key value} [array get prefs winGeom,*] {
-	regexp {winGeom,(.*)$} $key match winkey
-	lappend prefs(winGeom) $winkey $value
-    }
-    
-    # Same for pane positions.
-    set prefs(paneGeom) {}
-    foreach {key value} [array get prefs paneGeom,*] {
-	regexp {paneGeom,(.*)$} $key match winkey
-	lappend prefs(paneGeom) $winkey $value
-    }
-	 
-    # Save to the preference file and quit...
-    ::PreferencesUtils::SaveToFile
-    ::Theme::SavePrefsFile
-    
-    # Cleanup. Beware, no windows with open movies must exist here!
-    file delete -force $this(tmpPath)
-    exit
 }
 
 #-------------------------------------------------------------------------------

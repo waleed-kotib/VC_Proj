@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.9 2004-04-20 13:57:27 matben Exp $
+# $Id: JWB.tcl,v 1.10 2004-04-25 15:35:25 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -200,7 +200,7 @@ proc ::Jabber::WB::NewWhiteboardTo {jid args} {
     variable jwbstate
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 2 "::Jabber::WB::NewWhiteboardTo jid=$jid, args='$args'"
+    ::Debug 2 "::Jabber::WB::NewWhiteboardTo jid=$jid, args='$args'"
     
     array set argsArr $args
     
@@ -229,7 +229,7 @@ proc ::Jabber::WB::NewWhiteboardTo {jid args} {
     }
     set isAvailable [$jstate(roster) isavailable $jid]
     
-    ::Jabber::Debug 2 "\tisRoom=$isRoom, isUserInRoom=$isUserInRoom, isAvailable=$isAvailable"
+    ::Debug 2 "\tisRoom=$isRoom, isUserInRoom=$isUserInRoom, isAvailable=$isAvailable"
  
     set wtop [::WB::GetNewToplevelPath]
 
@@ -237,7 +237,7 @@ proc ::Jabber::WB::NewWhiteboardTo {jid args} {
 	
 	# Must enter room in the usual way if not there already.
 	set allRooms [$jstate(jlib) service allroomsin]
-	::Jabber::Debug 3 "\tallRooms=$allRooms"
+	::Debug 3 "\tallRooms=$allRooms"
 	
 	if {[lsearch $allRooms $jid] < 0} {
 	    set ans [::Jabber::GroupChat::EnterOrCreate \
@@ -299,7 +299,7 @@ proc ::Jabber::WB::BuildEntryHook {wtop wclass wcomm} {
     variable jwbstate
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 2 "::Jabber::WB::BuildEntryHook wcomm=$wcomm"
+    ::Debug 2 "::Jabber::WB::BuildEntryHook wcomm=$wcomm"
 	
     set contactOffImage [::Theme::GetImage \
       [option get $wclass contactOffImage {}]]
@@ -511,7 +511,7 @@ proc ::Jabber::WB::LogoutHook { } {
 proc ::Jabber::WB::CloseHook {wtop} {
     variable jwbstate
     
-    ::Jabber::Debug 2 "::Jabber::WB::CloseHook wtop=$wtop"
+    ::Debug 2 "::Jabber::WB::CloseHook wtop=$wtop"
     
     if {$wtop == "."} {
 	set w .
@@ -570,7 +570,7 @@ proc ::Jabber::WB::ExitRoomHook {roomJid} {
 proc ::Jabber::WB::SendMessageHook {wtop msg args} {
     variable jwbstate
     
-    ::Jabber::Debug 2 "::Jabber::WB::SendMessageHook"
+    ::Debug 2 "::Jabber::WB::SendMessageHook"
     
     # Check that still connected to server.
     if {![::Jabber::IsConnected]} {
@@ -607,7 +607,7 @@ proc ::Jabber::WB::SendMessageHook {wtop msg args} {
 proc ::Jabber::WB::SendMessageListHook {wtop msgList args} {
     variable jwbstate
     
-    ::Jabber::Debug 2 "::Jabber::WB::SendMessageListHook msgList=$msgList; $args"
+    ::Debug 2 "::Jabber::WB::SendMessageListHook msgList=$msgList; $args"
     
     if {![::Jabber::IsConnected]} {
 	return
@@ -640,7 +640,7 @@ proc ::Jabber::WB::SendMessageListHook {wtop msgList args} {
 proc ::Jabber::WB::SendGenMessageListHook {wtop msgList args} {
     variable jwbstate
     
-    ::Jabber::Debug 2 "::Jabber::WB::SendGenMessageListHook"
+    ::Debug 2 "::Jabber::WB::SendGenMessageListHook"
     
     if {![::Jabber::IsConnected]} {
 	return
@@ -850,7 +850,7 @@ proc ::Jabber::WB::FilterTags {tags} {
 
 proc ::Jabber::WB::HandleSpecialMessage {jlibname xmlns args} {
         
-    ::Jabber::Debug 2 "::Jabber::WB::HandleSpecialMessage $xmlns, args=$args"
+    ::Debug 2 "::Jabber::WB::HandleSpecialMessage $xmlns, args=$args"
     array set argsArr $args
         
     set rawList [::Jabber::WB::GetRawMessageList $argsArr(-x) $xmlns]
@@ -892,7 +892,7 @@ proc ::Jabber::WB::HandleSpecialMessage {jlibname xmlns args} {
 
 proc ::Jabber::WB::HandleRawChatMessage {jlibname xmlns args} {
         
-    ::Jabber::Debug 2 "::Jabber::WB::HandleRawChatMessage args=$args"
+    ::Debug 2 "::Jabber::WB::HandleRawChatMessage args=$args"
     array set argsArr $args
         
     set cmdList [::Jabber::WB::GetRawMessageList $argsArr(-x) $xmlns]
@@ -912,7 +912,7 @@ proc ::Jabber::WB::HandleRawChatMessage {jlibname xmlns args} {
 
 proc ::Jabber::WB::HandleRawGroupchatMessage {jlibname xmlns args} {
 	
-    ::Jabber::Debug 2 "::Jabber::WB::HandleRawGroupchatMessage args=$args"	
+    ::Debug 2 "::Jabber::WB::HandleRawGroupchatMessage args=$args"	
     array set argsArr $args
     
     # Do not duplicate ourselves!
@@ -931,7 +931,7 @@ proc ::Jabber::WB::HandleRawGroupchatMessage {jlibname xmlns args} {
 
 proc ::Jabber::WB::HandleSVGWBChatMessage {jlibname xmlns args} {
     
-    ::Jabber::Debug 2 "::Jabber::WB::HandleSVGWBChatMessage"
+    ::Debug 2 "::Jabber::WB::HandleSVGWBChatMessage"
     array set argsArr $args
 	
     # Need to have the actual canvas before doing svg -> canvas translation.
@@ -954,7 +954,7 @@ proc ::Jabber::WB::HandleSVGWBChatMessage {jlibname xmlns args} {
 
 proc ::Jabber::WB::HandleSVGWBGroupchatMessage {jlibname xmlns args} {
     
-    ::Jabber::Debug 2 "::Jabber::WB::HandleSVGWBGroupchatMessage"
+    ::Debug 2 "::Jabber::WB::HandleSVGWBGroupchatMessage"
     array set argsArr $args
     
     # Need to have the actual canvas before doing svg -> canvas translation.
@@ -1098,7 +1098,7 @@ proc ::Jabber::WB::SVGHttpHandler {wtop cmd} {
 
 proc ::Jabber::WB::HandleAnyResizeImage {type cmdList args} {
     
-    ::Jabber::Debug 4 "::Jabber::WB::HandleAnyResizeImage type=$type"
+    ::Debug 4 "::Jabber::WB::HandleAnyResizeImage type=$type"
     
     set canCmdList {}
     foreach cmd $cmdList {
@@ -1151,7 +1151,7 @@ proc ::Jabber::WB::ChatMsg {cmdList args} {
     upvar ::Jabber::jstate jstate
 
     array set argsArr $args
-    ::Jabber::Debug 2 "::Jabber::WB::ChatMsg args='$args'"
+    ::Debug 2 "::Jabber::WB::ChatMsg args='$args'"
     
     # This one returns empty if not exists.
     set wtop [::Jabber::WB::GetWtopFromMessage "chat" $argsArr(-from)  \
@@ -1168,7 +1168,7 @@ proc ::Jabber::WB::GroupChatMsg {cmdList args} {
     upvar ::Jabber::jstate jstate
 
     array set argsArr $args
-    ::Jabber::Debug 2 "::Jabber::WB::GroupChatMsg args='$args'"
+    ::Debug 2 "::Jabber::WB::GroupChatMsg args='$args'"
     
     # The -from argument is either the room itself, or usually a user in
     # the room.
@@ -1208,7 +1208,7 @@ proc ::Jabber::WB::Free {wtop} {
 proc ::Jabber::WB::GetIPnumber {jid {cmd {}}} {    
     variable ipCache
 
-    ::Jabber::Debug 2 "::Jabber::WB::GetIPnumber:: jid=$jid, cmd='$cmd'"
+    ::Debug 2 "::Jabber::WB::GetIPnumber:: jid=$jid, cmd='$cmd'"
     
     set getid $ipCache(getid)
     if {$cmd != ""} {
@@ -1242,11 +1242,11 @@ proc ::Jabber::WB::GetIPCallback {fromjid id ip} {
     upvar ::Jabber::jstate jstate
     variable ipCache
 
-    ::Jabber::Debug 2 "::Jabber::WB::GetIPCallback: fromjid=$fromjid, id=$id, ip=$ip"
+    ::Debug 2 "::Jabber::WB::GetIPCallback: fromjid=$fromjid, id=$id, ip=$ip"
 
     set ipCache(ip,$fromjid) $ip
     if {[info exists ipCache(cmd,$id)]} {
-	::Jabber::Debug 2 "\tipCache(cmd,$id)=$ipCache(cmd,$id)"
+	::Debug 2 "\tipCache(cmd,$id)=$ipCache(cmd,$id)"
 	eval $ipCache(cmd,$id) $fromjid
 	catch {unset ipCache(cmd,$id) ipCache(req,$fromjid)}
     }
@@ -1254,7 +1254,7 @@ proc ::Jabber::WB::GetIPCallback {fromjid id ip} {
 
 proc ::Jabber::WB::PutIPnumber {jid id} {
     
-    ::Jabber::Debug 2 "::Jabber::WB::PutIPnumber:: jid=$jid, id=$id"
+    ::Debug 2 "::Jabber::WB::PutIPnumber:: jid=$jid, id=$id"
     
     set ip [::Network::GetThisOutsideIPAddress]
     ::Jabber::WB::SendRawMessageList $jid [list "PUT IP: $id $ip"]
@@ -1282,7 +1282,7 @@ proc ::Jabber::WB::GetCoccinellaServersCallback {jid3 cmd jlibname type subiq} {
     #     {ip {protocol putget port 8235} 0 212.214.113.57 {}} 
     #     {ip {protocol http port 8077} 0 212.214.113.57 {}}
     #  }}
-    ::Jabber::Debug 2 "::Jabber::WB::GetCoccinellaServersCallback"
+    ::Debug 2 "::Jabber::WB::GetCoccinellaServersCallback"
 
     if {$type == "error"} {
 	return
@@ -1299,7 +1299,7 @@ proc ::Jabber::WB::GetCoccinellaServersCallback {jid3 cmd jlibname type subiq} {
 proc ::Jabber::WB::PresenceHook {jid type args} {
     variable ipCache
     
-    ::Jabber::Debug 2 "::Jabber::WB::PresenceHook jid=$jid, type=$type, args=$args"
+    ::Debug 2 "::Jabber::WB::PresenceHook jid=$jid, type=$type, args=$args"
     array set argsArr $args
     if {[info exists argsArr(-resource)]} {
 	set jid $jid/$argsArr(-resource)
@@ -1326,7 +1326,7 @@ proc ::Jabber::WB::AutoBrowseHook {jid} {
     variable ipCache
     upvar ::Jabber::jprefs jprefs
 
-    ::Jabber::Debug 2 "::Jabber::WB::AutoBrowseHook jid=$jid"
+    ::Debug 2 "::Jabber::WB::AutoBrowseHook jid=$jid"
     
     # Shall we query for its ip address right away?
     # Get only if not yet requested.
@@ -1360,12 +1360,12 @@ proc ::Jabber::WB::PutFileOrScheduleHook {wtop fileName opts} {
     variable jwbstate
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 2 "::Jabber::WB::PutFileOrScheduleHook: \
+    ::Debug 2 "::Jabber::WB::PutFileOrScheduleHook: \
       wtop=$wtop, fileName=$fileName, opts='$opts'"
     
     # Before doing anything check that the Send checkbutton is on. ???
     if {!$jwbstate($wtop,send)} {
-	::Jabber::Debug 2 "    doSend=0 => return"
+	::Debug 2 "    doSend=0 => return"
 	return
     }
     
@@ -1424,7 +1424,7 @@ proc ::Jabber::WB::PutFileOrScheduleHook {wtop fileName opts} {
 	}
     }
     
-    ::Jabber::Debug 2 "   allJid3=$allJid3"
+    ::Debug 2 "   allJid3=$allJid3"
     
     # We shall put to all resources. Treat each in turn.
     foreach jid3 $allJid3 {
@@ -1439,7 +1439,7 @@ proc ::Jabber::WB::PutFileOrScheduleHook {wtop fileName opts} {
 	# Each jid must get its own -to attribute.
 	set optjidList [concat $opts -to $jid3]
 	
-	::Jabber::Debug 2 "   jid3=$jid3, avail=$avail"
+	::Debug 2 "   jid3=$jid3, avail=$avail"
 	
 	if {$avail} {
 	    if {[info exists ipCache(ip,$jid3)]} {
@@ -1505,7 +1505,7 @@ proc ::Jabber::WB::PutFile {wtop fileName mime opts jid} {
     variable ipCache
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 2 "::Jabber::WB::PutFile: fileName=$fileName, opts='$opts', jid=$jid"
+    ::Debug 2 "::Jabber::WB::PutFile: fileName=$fileName, opts='$opts', jid=$jid"
  
     if {![info exists ipCache(ip,$jid)]} {
 	puts "::Jabber::WB::PutFile: Houston, we have a problem. \
@@ -1536,7 +1536,7 @@ proc ::Jabber::WB::PutFile {wtop fileName mime opts jid} {
 
 proc ::Jabber::WB::HandlePutRequest {channel fileName opts} {
 	
-    ::Jabber::Debug 2 "::Jabber::WB::HandlePutRequest"
+    ::Debug 2 "::Jabber::WB::HandlePutRequest"
     
     # The whiteboard must exist!
     set wtop [::Jabber::WB::MakeWhiteboardExist $opts]
@@ -1557,7 +1557,7 @@ proc ::Jabber::WB::MakeWhiteboardExist {opts} {
 
     array set optArr $opts
     
-    ::Jabber::Debug 2 "::Jabber::WB::MakeWhiteboardExist"
+    ::Debug 2 "::Jabber::WB::MakeWhiteboardExist"
 
     switch -- $optArr(-type) {
 	chat {
@@ -1627,7 +1627,7 @@ proc ::Jabber::WB::GetWtopFromMessage {type jid {thread {}}} {
 	     set wtop ""
 	 }
      }
-     ::Jabber::Debug 2 "\twtop=$wtop"
+     ::Debug 2 "\twtop=$wtop"
      return $wtop
 }
 
@@ -1643,7 +1643,7 @@ proc ::Jabber::WB::GetWtopFromMessage {type jid {thread {}}} {
 
 proc ::Jabber::WB::DispatchToImporter {mime opts args} {
 	
-    ::Jabber::Debug 2 "::Jabber::WB::DispatchToImporter"
+    ::Debug 2 "::Jabber::WB::DispatchToImporter"
 
     array set optArr $opts
 

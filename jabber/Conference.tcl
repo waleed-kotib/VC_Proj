@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Conference.tcl,v 1.22 2004-04-21 13:20:47 matben Exp $
+# $Id: Conference.tcl,v 1.23 2004-04-25 15:35:24 matben Exp $
 
 package provide Conference 1.0
 
@@ -41,7 +41,7 @@ proc ::Jabber::Conference::BuildEnter {args} {
     variable canHeight 120
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 2 "::Jabber::Conference::BuildEnter args='$args'"
+    ::Debug 2 "::Jabber::Conference::BuildEnter args='$args'"
     
     array set argsArr $args
     
@@ -76,7 +76,7 @@ proc ::Jabber::Conference::BuildEnter {args} {
     
     set confServers [$jstate(jlib) service getconferences]
     
-    ::Jabber::Debug 2 "\t confServers='$confServers'"
+    ::Debug 2 "\t confServers='$confServers'"
 
     set wpopupserver $frtop.eserv
     set wpopuproom   $frtop.eroom
@@ -201,7 +201,7 @@ proc ::Jabber::Conference::BuildEnter {args} {
     # Wait here for a button press and window to be destroyed.
     tkwait window $w
 
-    ::Jabber::Debug 3 "\t after tkwait window"
+    ::Debug 3 "\t after tkwait window"
     catch {focus $oldFocus}
     trace vdelete $token\(server) w  \
       [list [namespace current]::ConfigRoomList $token]
@@ -215,7 +215,7 @@ proc ::Jabber::Conference::ConfigRoomList {token name junk1 junk2} {
     upvar 0 $token state
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 4 "::Jabber::Conference::ConfigRoomList"
+    ::Debug 4 "::Jabber::Conference::ConfigRoomList"
 
     # Fill in room list if exist else browse or disco.
     #if {[$jstate(browse) isbrowsed $state(server)]} {
@@ -240,7 +240,7 @@ proc ::Jabber::Conference::FillRoomList {token} {
     upvar 0 $token state
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 4 "::Jabber::Conference::FillRoomList"
+    ::Debug 4 "::Jabber::Conference::FillRoomList"
     
     set roomList {}
     if {[string length $state(server)] > 0} {
@@ -264,7 +264,7 @@ proc ::Jabber::Conference::BusyEnterDlgIncr {token {num 1}} {
     upvar 0 $token state
     
     incr state(statuscount) $num
-    ::Jabber::Debug 4 "::Jabber::Conference::BusyEnterDlgIncr num=$num, statuscount=$state(statuscount)"
+    ::Debug 4 "::Jabber::Conference::BusyEnterDlgIncr num=$num, statuscount=$state(statuscount)"
     
     if {$state(statuscount) > 0} {
 	set state(status) "Getting available rooms..." 
@@ -290,7 +290,7 @@ proc ::Jabber::Conference::BusyEnterDlgIncr {token {num 1}} {
 
 proc ::Jabber::Conference::GetRoomsCB {token browsename type jid subiq args} {
     
-    ::Jabber::Debug 4 "::Jabber::Conference::GetRoomsCB type=$type, jid=$jid"
+    ::Debug 4 "::Jabber::Conference::GetRoomsCB type=$type, jid=$jid"
     
     switch -- $type {
 	error {
@@ -338,7 +338,7 @@ proc ::Jabber::Conference::EnterGetCB {token jlibName type subiq} {
     upvar ::Jabber::jstate jstate
     variable UItype
     
-    ::Jabber::Debug 2 "::Jabber::Conference::EnterGetCB type=$type, subiq='$subiq'"
+    ::Debug 2 "::Jabber::Conference::EnterGetCB type=$type, subiq='$subiq'"
     
     if {![info exists state(w)]} {
 	return
@@ -395,7 +395,7 @@ proc ::Jabber::Conference::ResultCallback {roomJid jlibName type subiq} {
     variable locals
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 2 "::Jabber::Conference::ResultCallback roomJid=$roomJid, type=$type, subiq='$subiq'"
+    ::Debug 2 "::Jabber::Conference::ResultCallback roomJid=$roomJid, type=$type, subiq='$subiq'"
     
     if {$type == "error"} {
 	tk_messageBox -type ok -icon error  \
@@ -427,7 +427,7 @@ proc ::Jabber::Conference::BuildCreate {args} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
-    ::Jabber::Debug 2 "::Jabber::Conference::BuildCreate args='$args'"
+    ::Debug 2 "::Jabber::Conference::BuildCreate args='$args'"
     array set argsArr $args
     
     # State variable to collect instance specific variables.
@@ -601,7 +601,7 @@ proc ::Jabber::Conference::CreateGet {token} {
     set roomJid [string tolower $state(roomname)@$state(server)]
     set state(roomjid) $roomJid
 
-    ::Jabber::Debug 2 "::Jabber::Conference::CreateGet usemuc=$state(usemuc)"
+    ::Debug 2 "::Jabber::Conference::CreateGet usemuc=$state(usemuc)"
 
     if {$state(usemuc)} {
 	$jstate(jlib) muc create $roomJid $state(nickname) \
@@ -631,7 +631,7 @@ proc ::Jabber::Conference::CreateMUCCB {token jlibName type args} {
     upvar 0 $token state
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 2 "::Jabber::Conference::CreateMUCCB type=$type, args='$args'"
+    ::Debug 2 "::Jabber::Conference::CreateMUCCB type=$type, args='$args'"
     
     if {![info exists state(w)]} {
 	return
@@ -676,7 +676,7 @@ proc ::Jabber::Conference::CreateGetGetCB {token jlibName type subiq} {
     variable canHeight
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 2 "::Jabber::Conference::CreateGetGetCB type=$type"
+    ::Debug 2 "::Jabber::Conference::CreateGetGetCB type=$type"
     
     if {![info exists state(w)]} {
 	return
@@ -714,7 +714,7 @@ proc ::Jabber::Conference::DoCreate {token} {
     variable UItype
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 2 "::Jabber::Conference::DoCreate"
+    ::Debug 2 "::Jabber::Conference::DoCreate"
 
     $state(wsearrows) stop
     
@@ -743,7 +743,7 @@ proc ::Jabber::Conference::DoCreate {token} {
 proc ::Jabber::Conference::DoCreateCallback {usemuc roomJid jlibName type subiq} { 
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 2 "::Jabber::Conference::DoCreateCallback"
+    ::Debug 2 "::Jabber::Conference::DoCreateCallback"
     
     if {$type == "error"} {
 	tk_messageBox -type ok -icon error  \

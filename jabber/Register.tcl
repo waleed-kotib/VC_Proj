@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.16 2004-04-16 13:59:29 matben Exp $
+# $Id: Register.tcl,v 1.17 2004-04-25 15:35:26 matben Exp $
 
 package provide Register 1.0
 
@@ -166,7 +166,7 @@ proc ::Jabber::Register::Doit {w} {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 2 "::Jabber::Register::Doit"
+    ::Debug 2 "::Jabber::Register::Doit"
     
     # Kill any pending open states.
     ::Network::KillAll
@@ -228,7 +228,7 @@ proc ::Jabber::Register::SocketIsOpen {sock ip port status {msg {}}} {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 2 "::Jabber::Register::SocketIsOpen"
+    ::Debug 2 "::Jabber::Register::SocketIsOpen"
 
     ::Jabber::UI::SetStatusMessage ""
     ::Jabber::UI::StartStopAnimatedWave 0
@@ -275,7 +275,7 @@ proc ::Jabber::Register::ResponseProc {jlibName type theQuery} {
     variable password
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 2 "::Jabber::Register::ResponseProc jlibName=$jlibName,\
+    ::Debug 2 "::Jabber::Register::ResponseProc jlibName=$jlibName,\
       type=$type, theQuery=$theQuery"
     
     if {[string equal $type "error"]} {
@@ -322,7 +322,7 @@ proc ::Jabber::Register::Remove {{jid {}}} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
 
-    ::Jabber::Debug 2 "::Jabber::Register::Remove jid=$jid"
+    ::Debug 2 "::Jabber::Register::Remove jid=$jid"
     
     set ans "yes"
     if {$jid == ""} {
@@ -391,7 +391,7 @@ proc ::Jabber::GenRegister::BuildRegister {args} {
     variable finished -1
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 2 "::Jabber::GenRegister::BuildRegister"
+    ::Debug 2 "::Jabber::GenRegister::BuildRegister"
     set w $wDlgs(jreg)
     if {[winfo exists $w]} {
 	return
@@ -518,7 +518,7 @@ proc ::Jabber::GenRegister::Simple {w args} {
     variable finished -1
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 2 "::Jabber::GenRegister::Simple"
+    ::Debug 2 "::Jabber::GenRegister::Simple"
     if {[winfo exists $w]} {
 	return
     }
@@ -640,7 +640,7 @@ proc ::Jabber::GenRegister::GetCB {jlibName type subiq} {
     variable stattxt
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 2 "::Jabber::GenRegister::GetCB type=$type, subiq='$subiq'"
+    ::Debug 2 "::Jabber::GenRegister::GetCB type=$type, subiq='$subiq'"
 
     if {![winfo exists $wtop]} {
 	return
@@ -717,7 +717,7 @@ proc ::Jabber::GenRegister::DoSimple { } {
 
 proc ::Jabber::GenRegister::ResultCallback {server type subiq} {
 
-    ::Jabber::Debug 2 "::Jabber::GenRegister::ResultCallback server=$server, type=$type, subiq='$subiq'"
+    ::Debug 2 "::Jabber::GenRegister::ResultCallback server=$server, type=$type, subiq='$subiq'"
 
     if {[string equal $type "error"]} {
 	tk_messageBox -type ok -icon error  \
@@ -731,7 +731,7 @@ proc ::Jabber::GenRegister::ResultCallback {server type subiq} {
 
 proc ::Jabber::GenRegister::SimpleCallback {server jlibName type subiq} {
 
-    ::Jabber::Debug 2 "::Jabber::GenRegister::ResultCallback server=$server, type=$type, subiq='$subiq'"
+    ::Debug 2 "::Jabber::GenRegister::ResultCallback server=$server, type=$type, subiq='$subiq'"
 
     if {[string equal $type "error"]} {
 	tk_messageBox -type ok -icon error  \

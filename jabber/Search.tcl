@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Search.tcl,v 1.12 2004-03-29 13:56:27 matben Exp $
+# $Id: Search.tcl,v 1.13 2004-04-25 15:35:26 matben Exp $
 
 package provide Search 1.0
 
@@ -123,7 +123,7 @@ proc ::Jabber::Search::Build {args} {
     # May be different for each conference server.
     set wfr $wleft.frlab
     labelframe $wfr -text [::msgcat::mc {Search Specifications}]
-    pack $wfr -side top -fill both -padx 2 -pady 2
+    pack $wfr -side top -fill both -padx 6 -pady 4
 
     set wbox [frame $wfr.box]
     pack $wbox -side left -fill both -padx 4 -pady 4 -expand 1
@@ -207,7 +207,7 @@ proc ::Jabber::Search::GetCB {jlibName type subiq} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
-    ::Jabber::Debug 2 "::Jabber::Search::GetCB type=$type, subiq='$subiq'"
+    ::Debug 2 "::Jabber::Search::GetCB type=$type, subiq='$subiq'"
     
     if {![winfo exists $wtop]} {
 	return
@@ -285,7 +285,7 @@ proc ::Jabber::Search::ResultCallback {server type subiq} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
-    ::Jabber::Debug 2 "::Jabber::Search::ResultCallback server=$server, type=$type, \
+    ::Debug 2 "::Jabber::Search::ResultCallback server=$server, type=$type, \
       subiq='$subiq'"
     
     if {![winfo exists $wtop]} {

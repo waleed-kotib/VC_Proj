@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.55 2004-04-21 13:21:05 matben Exp $
+# $Id: GroupChat.tcl,v 1.56 2004-04-25 15:35:25 matben Exp $
 
 package require History
 
@@ -214,7 +214,7 @@ proc ::Jabber::GroupChat::HaveMUC {{roomjid ""}} {
 	    if {[$jstate(browse) isbrowsed $confserver]} {
 		set ans [$jstate(browse) hasnamespace $confserver  \
 		  "http://jabber.org/protocol/muc"]
-		::Jabber::Debug 4 "::Jabber::GroupChat::HaveMUC	confserver=$confserver, ans=$ans"
+		::Debug 4 "::Jabber::GroupChat::HaveMUC	confserver=$confserver, ans=$ans"
 	    }
 	}
 	if {[info exists jstate(disco)]} {
@@ -222,7 +222,7 @@ proc ::Jabber::GroupChat::HaveMUC {{roomjid ""}} {
 	    if {[$jstate(disco) isdiscoed info $confserver]} {
 		set ans [$jstate(disco) hasfeature   \
 		  "http://jabber.org/protocol/muc" $confserver]
-		::Jabber::Debug 4 "::Jabber::GroupChat::HaveMUC	confserver=$confserver, ans=$ans"
+		::Debug 4 "::Jabber::GroupChat::HaveMUC	confserver=$confserver, ans=$ans"
 	    }
 	}
     }
@@ -276,7 +276,7 @@ proc ::Jabber::GroupChat::EnterOrCreate {what args} {
 	    }
 	}
     }
-    ::Jabber::Debug 2 "::Jabber::GroupChat::EnterOrCreate\
+    ::Debug 2 "::Jabber::GroupChat::EnterOrCreate\
       gchatprotocol=$gchatprotocol, what=$what, args='$args'"
     
     switch -- $gchatprotocol {
@@ -304,7 +304,7 @@ proc ::Jabber::GroupChat::EnterOrCreate {what args} {
 
 proc ::Jabber::GroupChat::EnterHook {roomJid protocol} {
     
-    ::Jabber::Debug 2 "::Jabber::GroupChat::EnterHook roomJid=$roomJid"
+    ::Debug 2 "::Jabber::GroupChat::EnterHook roomJid=$roomJid"
     
     ::Jabber::GroupChat::SetProtocol $roomJid $protocol
     
@@ -360,8 +360,8 @@ proc ::Jabber::GroupChat::BuildEnter {args} {
     upvar ::Jabber::jstate jstate
 
     set chatservers [$jstate(jlib) service getjidsfor "groupchat"]
-    ::Jabber::Debug 2 "::Jabber::GroupChat::BuildEnter args='$args'"
-    ::Jabber::Debug 2 "    service getjidsfor groupchat: '$chatservers'"
+    ::Debug 2 "::Jabber::GroupChat::BuildEnter args='$args'"
+    ::Debug 2 "    service getjidsfor groupchat: '$chatservers'"
     
     if {[llength $chatservers] == 0} {
 	tk_messageBox -icon error -message [::msgcat::mc jamessnogchat]
@@ -519,7 +519,7 @@ proc ::Jabber::GroupChat::GotMsg {body args} {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 2 "::Jabber::GroupChat::GotMsg args='$args'"
+    ::Debug 2 "::Jabber::GroupChat::GotMsg args='$args'"
     
     array set argsArr $args
     
@@ -584,7 +584,7 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
-    ::Jabber::Debug 2 "::Jabber::GroupChat::Build roomJid=$roomJid, args='$args'"
+    ::Debug 2 "::Jabber::GroupChat::Build roomJid=$roomJid, args='$args'"
 
     # Initialize the state variable, an array, that keeps is the storage.
     
@@ -856,7 +856,7 @@ proc ::Jabber::GroupChat::StatusCmd {token} {
     upvar 0 $token state
 
     set status $state(status)
-    ::Jabber::Debug 2 "::Jabber::GroupChat::StatusCmd status=$state(status)"
+    ::Debug 2 "::Jabber::GroupChat::StatusCmd status=$state(status)"
 
     if {$status == "unavailable"} {
 	set ans [::Jabber::GroupChat::Exit $token]
@@ -959,7 +959,7 @@ proc ::Jabber::GroupChat::ConfigureTextTags {w wtext} {
     variable groupChatOptions
     upvar ::Jabber::jprefs jprefs
     
-    ::Jabber::Debug 2 "::Jabber::GroupChat::ConfigureTextTags"
+    ::Debug 2 "::Jabber::GroupChat::ConfigureTextTags"
     
     set space 2
     set alltags {mepre metext theypre theytext syspre systext histhead}
@@ -1066,7 +1066,7 @@ proc ::Jabber::GroupChat::ActiveCmd {token} {
     variable $token
     upvar 0 $token state
 
-    ::Jabber::Debug 2 "::Jabber::GroupChat::ActiveCmd token=$token"
+    ::Debug 2 "::Jabber::GroupChat::ActiveCmd token=$token"
     
     set wtextsnd $state(wtextsnd)
     if {$state(active)} {
@@ -1133,7 +1133,7 @@ proc ::Jabber::GroupChat::PresenceHook {jid presence args} {
     upvar ::Jabber::jstate jstate
     
     if {[$jstate(jlib) service isroom $jid]} {
-	::Jabber::Debug 2 "::Jabber::GroupChat::PresenceHook jid=$jid, presence=$presence, args='$args'"
+	::Debug 2 "::Jabber::GroupChat::PresenceHook jid=$jid, presence=$presence, args='$args'"
 	
 	array set attrArr $args
 	
@@ -1181,7 +1181,7 @@ proc ::Jabber::GroupChat::BrowseUser {userXmlList} {
     
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 2 "::Jabber::GroupChat::BrowseUser userXmlList='$userXmlList'"
+    ::Debug 2 "::Jabber::GroupChat::BrowseUser userXmlList='$userXmlList'"
 
     array set attrArr [lindex $userXmlList 1]
     
@@ -1220,7 +1220,7 @@ proc ::Jabber::GroupChat::SetUser {roomJid jid3 presence args} {
 
     upvar ::Jabber::jstate jstate
 
-    ::Jabber::Debug 2 "::Jabber::GroupChat::SetUser roomJid=$roomJid,\
+    ::Debug 2 "::Jabber::GroupChat::SetUser roomJid=$roomJid,\
       jid3=$jid3 presence=$presence"
 
     array set attrArr $args
@@ -1306,7 +1306,7 @@ proc ::Jabber::GroupChat::PopupTimer {token jid3 x y} {
     upvar 0 $token state
     upvar ::Jabber::jstate jstate
 
-    ::Jabber::Debug 2 "::Jabber::GroupChat::PopupTimer jid3=$jid3"
+    ::Debug 2 "::Jabber::GroupChat::PopupTimer jid3=$jid3"
 
     # Set timer for this callback.
     if {[info exists state(afterid)]} {
@@ -1343,7 +1343,7 @@ proc ::Jabber::GroupChat::Popup {w v x y} {
     upvar ::Jabber::privatexmlns privatexmlns
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 2 "::Jabber::GroupChat::Popup w=$w, v='$v', x=$x, y=$y"
+    ::Debug 2 "::Jabber::GroupChat::Popup w=$w, v='$v', x=$x, y=$y"
     
     # The last element of $v is either a jid, (a namespace,) 
     # a header in roster, a group, or an agents xml tag.
@@ -1363,7 +1363,7 @@ proc ::Jabber::GroupChat::Popup {w v x y} {
     set X [expr [winfo rootx $w] + $x]
     set Y [expr [winfo rooty $w] + $y]
     
-    ::Jabber::Debug 2 "    jid=$jid, typeClicked=$typeClicked"
+    ::Debug 2 "    jid=$jid, typeClicked=$typeClicked"
     
     # Mads Linden's workaround for menu post problem on mac:
     # all in menubutton commands i add "after 40 the_command"

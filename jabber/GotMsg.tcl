@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.25 2004-03-31 07:55:18 matben Exp $
+# $Id: GotMsg.tcl,v 1.26 2004-04-25 15:35:25 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -44,7 +44,7 @@ proc ::Jabber::GotMsg::GotMsg {id} {
     variable msgIdDisplay
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 2 "Jabber::GotMsg::GotMsg id=$id"
+    ::Debug 2 "Jabber::GotMsg::GotMsg id=$id"
     
     # Queue up this message or show right away?
     if {[winfo exists $w]} {
@@ -76,7 +76,7 @@ proc ::Jabber::GotMsg::Show {thisMsgId} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
-    ::Jabber::Debug 2 "::Jabber::GotMsg::Show thisMsgId=$thisMsgId"
+    ::Debug 2 "::Jabber::GotMsg::Show thisMsgId=$thisMsgId"
     
     # Build if not mapped.
     ::Jabber::GotMsg::Build
@@ -152,7 +152,7 @@ proc ::Jabber::GotMsg::Build { } {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
-    ::Jabber::Debug 2 "::Jabber::GotMsg::Build w=$w"
+    ::Debug 2 "::Jabber::GotMsg::Build w=$w"
 
     if {[winfo exists $w]} {
 	return

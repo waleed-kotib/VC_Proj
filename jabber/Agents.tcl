@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Agents.tcl,v 1.15 2004-04-16 13:59:29 matben Exp $
+# $Id: Agents.tcl,v 1.16 2004-04-25 15:35:24 matben Exp $
 
 package provide Agents 1.0
 
@@ -129,7 +129,7 @@ proc ::Jabber::Agents::AgentsCallback {jid jlibName type subiq} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
     
-    ::Jabber::Debug 2 "::Jabber::Agents::AgentsCallback jid=$jid, \
+    ::Debug 2 "::Jabber::Agents::AgentsCallback jid=$jid, \
       type=$type\n\tsubiq=$subiq"
     
     switch -- $type {
@@ -206,7 +206,7 @@ proc ::Jabber::Agents::GetAgentCallback {parentJid jid silent jlibName type subi
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jerror jerror
     
-    ::Jabber::Debug 2 "::Jabber::Agents::GetAgentCallback parentJid=$parentJid,\
+    ::Debug 2 "::Jabber::Agents::GetAgentCallback parentJid=$parentJid,\
       jid=$jid, type=$type"
     
     if {[winfo exists $wagents]} {
@@ -242,7 +242,7 @@ proc ::Jabber::Agents::AddAgentToTree {parentJid jid subAgent} {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 4 "::Jabber::Agents::AddAgentToTree parentJid=$parentJid,\
+    ::Debug 4 "::Jabber::Agents::AddAgentToTree parentJid=$parentJid,\
       jid=$jid, subAgent='$subAgent'"
     	
     # Loop through the subelement to see what we've got.
@@ -324,7 +324,7 @@ proc ::Jabber::Agents::Build {w args} {
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jprefs jprefs
     
-    ::Jabber::Debug 2 "::Jabber::Agents::Build w=$w"
+    ::Debug 2 "::Jabber::Agents::Build w=$w"
         
     # The frame.
     frame $w -borderwidth 0 -relief flat
@@ -428,7 +428,7 @@ proc ::Jabber::Agents::Popup {w v x y} {
     upvar ::Jabber::privatexmlns privatexmlns
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 2 "::Jabber::Agents::Popup w=$w, v='$v', x=$x, y=$y"
+    ::Debug 2 "::Jabber::Agents::Popup w=$w, v='$v', x=$x, y=$y"
     
     # The last element of $v is either a jid, (a namespace,) 
     # a header in roster, a group, or an agents xml tag.
@@ -458,7 +458,7 @@ proc ::Jabber::Agents::Popup {w v x y} {
     set X [expr [winfo rootx $w] + $x]
     set Y [expr [winfo rooty $w] + $y]
     
-    ::Jabber::Debug 2 "\t jid=$jid, typeClicked=$typeClicked"
+    ::Debug 2 "\t jid=$jid, typeClicked=$typeClicked"
     
     # Mads Linden's workaround for menu post problem on mac:
     # all in menubutton commands i add "after 40 the_command"

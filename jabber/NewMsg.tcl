@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.33 2004-04-02 12:26:38 matben Exp $
+# $Id: NewMsg.tcl,v 1.34 2004-04-25 15:35:25 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -77,7 +77,7 @@ proc ::Jabber::NewMsg::InitEach { } {
     variable popupDefs
     upvar ::Jabber::jstate jstate
     
-    ::Jabber::Debug 2 "Jabber::NewMsg::InitEach"
+    ::Debug 2 "Jabber::NewMsg::InitEach"
     
     # We must be indenpendent of method; agent, browse, disco
     set trpts {}
@@ -115,7 +115,7 @@ proc ::Jabber::NewMsg::Build {args} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
-    ::Jabber::Debug 2 "::Jabber::NewMsg::Build args='$args'"
+    ::Debug 2 "::Jabber::NewMsg::Build args='$args'"
 
     # One shot initialization (static) and dynamic initialization.
     if {!$locals(inited)} {

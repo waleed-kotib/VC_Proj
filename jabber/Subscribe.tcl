@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Subscribe.tcl,v 1.15 2004-04-19 13:58:48 matben Exp $
+# $Id: Subscribe.tcl,v 1.16 2004-04-25 15:35:26 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -42,7 +42,7 @@ proc ::Jabber::Subscribe::Subscribe {jid args} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
-    ::Jabber::Debug 2 "::Jabber::Subscribe::Subscribe jid=$jid"
+    ::Debug 2 "::Jabber::Subscribe::Subscribe jid=$jid"
 
     set w $wDlgs(jsubsc)[incr uid]
     set locals($uid,finished) -1
@@ -184,7 +184,7 @@ proc ::Jabber::Subscribe::Doit {uid} {
     variable locals   
     
     set jid $locals($uid,jid)
-    ::Jabber::Debug 2 "::Jabber::Subscribe::Doit jid=$jid, locals($uid,add)=$locals($uid,add), locals($uid,allow)=$locals($uid,allow)"
+    ::Debug 2 "::Jabber::Subscribe::Doit jid=$jid, locals($uid,add)=$locals($uid,add), locals($uid,allow)=$locals($uid,allow)"
     
     # Accept (allow) or deny subscription.
     if {$locals($uid,allow)} {
@@ -215,7 +215,7 @@ proc ::Jabber::Subscribe::Cancel {uid} {
     
     set jid $locals($uid,jid)
 
-    ::Jabber::Debug 2 "::Jabber::Subscribe::Cancel jid=$jid"
+    ::Debug 2 "::Jabber::Subscribe::Cancel jid=$jid"
     
     # Deny presence to this user.
     ::Jabber::InvokeJlibCmd send_presence -to $jid -type "unsubscribed"
@@ -231,7 +231,7 @@ proc ::Jabber::Subscribe::Cancel {uid} {
 
 proc ::Jabber::Subscribe::ResProc {jlibName what} {
         
-    ::Jabber::Debug 2 "::Jabber::Subscribe::ResProc: jlibName=$jlibName, what=$what"
+    ::Debug 2 "::Jabber::Subscribe::ResProc: jlibName=$jlibName, what=$what"
 
     if {[string equal $what "error"]} {
 	tk_messageBox -type ok -message "We got an error from the\
