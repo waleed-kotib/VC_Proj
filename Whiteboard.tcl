@@ -15,7 +15,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Whiteboard.tcl,v 1.12 2003-06-07 12:46:35 matben Exp $
+# $Id: Whiteboard.tcl,v 1.13 2003-07-05 13:37:54 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -124,7 +124,7 @@ proc resolve_cmd_realpath {infile} {
 # default file, never read.
 set prefs(majorVers) 0
 set prefs(minorVers) 94
-set prefs(releaseVers) 4
+set prefs(releaseVers) 5
 set prefs(fullVers) $prefs(majorVers).$prefs(minorVers).$prefs(releaseVers)
 
 # We may be embedded in another application, say an ActiveX component.
@@ -674,7 +674,7 @@ if {$displaySetup} {
 
     catch {destroy $wDlgs(splash)}
     update
-    ::SetupAss::SetupAss .setupass
+    ::Jabber::SetupAss::SetupAss .setupass
     ::UI::CenterWindow .setupass
     raise .setupass
     tkwait window .setupass

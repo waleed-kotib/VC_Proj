@@ -859,7 +859,7 @@ för nerladdning.}
 
 }
 
-namespace eval ::SetupAss:: {
+namespace eval ::Jabber::SetupAss:: {
 	::msgcat::mcset sv suintro1 	{Det här är en inställningsassistent\
 som hjälper dig att fylla i nödvändiga uppgifter för ett nytt eller\
 existerande konto på en Jabber server.}

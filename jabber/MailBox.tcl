@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.7 2003-06-07 12:46:36 matben Exp $
+# $Id: MailBox.tcl,v 1.8 2003-07-05 13:37:54 matben Exp $
 
 package provide MailBox 1.0
 
@@ -18,7 +18,7 @@ namespace eval ::Jabber::MailBox:: {
     set jstate(inboxVis) 0
     
     # Running id for incoming messages; never reused.
-    set locals(msgId) 1000
+    set locals(msguid) 1000
 
     # The actual mailbox content.
     # Content: {subject from date isread msgid message ?canvasid?}
@@ -44,23 +44,28 @@ proc ::Jabber::MailBox::Init { } {
     
     set locals(inited) 1
     
-    if {$jstate(debug) > 1} {
-	set mailbox([incr locals(msgId)])  \
-	  [list "Nasty" olle@athlon.se/ff "yesterday 19:10:01" 0 $locals(msgId) "Tja,\n\nwww.mats.se, Nytt?"]
-	set mailbox([incr locals(msgId)])  \
-	  [list "Re: Shit" kk@athlon.se/hh "today 08:33:02" 0 $locals(msgId) "Hej,\n\nKass?\nlink www.apple.com\nshit www.mats.se/home"]
-	set mailbox([incr locals(msgId)])  \
-	  [list "Re: Shit" kk@athlon.se/zzzzzzzzzzzzzzzzzzzzzzzzzzz "today 08:43:02" 0 $locals(msgId) "Hej,\n\nAny :cool: stuff? I'm :bored: and :cheeky:."]
-	set mailbox([incr locals(msgId)])  \
-	  [list "Re: special braces" brace@athlon.se/co "today 08:43:02" 0 $locals(msgId) "Testing unmatched braces:  if \{1\} \{"]
-	set mailbox([incr locals(msgId)])  \
-	  [list "Re: special amp" brace@athlon.se/co "today 08:43:02" 0 $locals(msgId) "Testing ampersand:  amp &"]
-	set mailbox([incr locals(msgId)])  \
-	  [list "Re: special brackets" bracket@athlon.se/co "today 08:43:02" 0 $locals(msgId) "Testing brackets  \[\["]
-	set mailbox([incr locals(msgId)])  \
-	  [list "Re: special quotes" quote@athlon.se/co "today 08:43:02" 0 $locals(msgId) "Testing \"quotes\" "]
+    if {1 && $jstate(debug) > 1} {
+	set mailbox([incr locals(msguid)])  \
+	  [list "Nasty" olle@athlon.se/ff "yesterday 19:10:01" 0 $locals(msguid) "Tja,\n\nwww.mats.se, Nytt?"]
+	set mailbox([incr locals(msguid)])  \
+	  [list "Re: Shit" kk@athlon.se/hh "today 08:33:02" 0 $locals(msguid) "Hej,\n\nKass?\nlink www.apple.com\nshit www.mats.se/home"]
+	set mailbox([incr locals(msguid)])  \
+	  [list "Re: Shit" kk@athlon.se/zzzzzzzzzzzzzzzzzzzzzzzzzzz "today 08:43:02" 0 $locals(msguid) "Hej,\n\nAny :cool: stuff? I'm :bored: and :cheeky:."]
+	set mailbox([incr locals(msguid)])  \
+	  [list "Re: special braces" brace@athlon.se/co "today 08:43:02" 0 $locals(msguid) "Testing unmatched braces:  if \{1\} \{"]
+	set mailbox([incr locals(msguid)])  \
+	  [list "Re: special amp" brace@athlon.se/co "today 08:43:02" 0 $locals(msguid) "Testing ampersand:  amp &"]
+	set mailbox([incr locals(msguid)])  \
+	  [list "Re: special brackets" bracket@athlon.se/co "today 08:43:02" 0 $locals(msguid) "Testing brackets  \[\["]
+	set mailbox([incr locals(msguid)])  \
+	  [list "Re: special quotes" quote@athlon.se/co "today 08:43:02" 0 $locals(msguid) "Testing \"quotes\" "]
     }
 }
+
+# Jabber::MailBox::Show --
+# 
+#       Toggles the display of the inbox. With -visible 1 it forces it
+#       to be displayed.
 
 proc ::Jabber::MailBox::Show {w args} {
 
@@ -73,6 +78,7 @@ proc ::Jabber::MailBox::Show {w args} {
     if {$jstate(inboxVis)} {
 	if {[winfo exists $w]} {
 	    catch {wm deiconify $w}
+	    raise $w
 	} else {
 	    ::Jabber::MailBox::Build $w
 	}
@@ -300,6 +306,20 @@ proc ::Jabber::MailBox::IsLastMessage {id} {
     return [expr ($id >= [lindex $sorted end]) ? 1 : 0]
 }
 
+proc ::Jabber::MailBox::AllRead { } {
+    variable mailbox
+    
+    # Find first that is not read.
+    set allRead 1
+    foreach msgid [array names mailbox] {
+	if {![lindex $mailbox($msgid) 3]} {
+	    set allRead 0
+	    break
+	}
+    }
+    return $allRead
+}
+
 proc ::Jabber::MailBox::GetNextMsgID {id} {
     variable mailbox
 
@@ -396,26 +416,27 @@ proc ::Jabber::MailBox::GotMsg {bodytxt args} {
     }
     
     # Collect this message.
-    incr locals(msgId)
-    set mailbox($locals(msgId)) [list $opts(-subject) $opts(-from)  \
-      $timeDate 0 $locals(msgId) $bodytxt $uid]
+    incr locals(msguid)
+    set mailbox($locals(msguid)) [list $opts(-subject) $opts(-from)  \
+      $timeDate 0 $locals(msguid) $bodytxt $uid]
     
     # Alert sound?
     ::Sounds::Play newmsg
 
     set readQ 0
     if {$jprefs(showMsgNewWin) && ([string length $bodytxt] > 0)} {
-	::Jabber::GotMsg::GotMsg $locals(msgId)
-	::Jabber::MailBox::MarkMsgAsRead $locals(msgId)
+	::Jabber::GotMsg::GotMsg $locals(msguid)
+	::Jabber::MailBox::MarkMsgAsRead $locals(msguid)
 	set readQ 1
     }
 
     # Show in mailbox. Sorting?
     set w [::Jabber::MailBox::GetToplevel]
     if {$w != ""} {
-	::Jabber::MailBox::InsertRow $locals(wtbl) $mailbox($locals(msgId)) end
+	::Jabber::MailBox::InsertRow $locals(wtbl) $mailbox($locals(msguid)) end
 	$locals(wtbl) see end
     }
+    ::Jabber::UI::MailBoxState nonempty
 }
 
 proc ::Jabber::MailBox::SaveMsg { } {
@@ -443,9 +464,10 @@ proc ::Jabber::MailBox::SaveMsg { } {
 	      -message "Failed opening file [file tail $ans]: $fd"
 	    return
 	}
-	puts $fd "From: $from"
-	puts $fd "Subject: $subject"
-	puts $fd "Time: $time"
+	set maxw 14
+	puts $fd [format "%-*s %s" $maxw "From:" $from]
+	puts $fd [format "%-*s %s" $maxw "Subject:" $subject]
+	puts $fd [format "%-*s %s" $maxw "Time:" $time]
 	puts $fd "\n"
 	puts $fd [::Text::TransformToPureText $wtextmsg]
 	close $fd
@@ -808,12 +830,12 @@ proc ::Jabber::MailBox::ReadMailbox { } {
 	
 	# The mailbox on file is just a hierarchical list that needs to be
 	# translated to an array. Be sure to update the msgId's!
-	set msgId $locals(msgId)
+	set msgId $locals(msguid)
 	foreach row $locals(mailbox) {
 	    set id [incr msgId]
 	    set mailbox($id) [lreplace $row 4 4 $id]
 	}
-	set locals(msgId) $msgId
+	set locals(msguid) $msgId
     }
 }
 

@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: browse.tcl,v 1.9 2003-06-07 12:46:36 matben Exp $
+# $Id: browse.tcl,v 1.10 2003-07-05 13:37:54 matben Exp $
 # 
 #  locals($jid,parent):       the parent of $jid.
 #  locals($jid,parents):      list of all parent jid's,
@@ -34,7 +34,7 @@
 #   NAME
 #      browse - an object for the ...
 #   SYNOPSIS
-#      browse::browse browseName clientCommand
+#      browse::browse clientCommand
 #   OPTIONS
 #      none
 #   INSTANCE COMMANDS
@@ -67,6 +67,7 @@
 #      
 ############################# CHANGES ##########################################
 #
+#       030703   removed browseName from browse::browse
 
 package require wrapper
 
@@ -76,7 +77,8 @@ namespace eval browse {
     
     # The internal storage.
     variable browseGlobals
-    
+    set browseGlobals(uid) 0
+   
     # Globals same for all instances of all rooms.
     set browseGlobals(debug) 0
     
@@ -93,20 +95,17 @@ namespace eval browse {
 #       This creates a new instance of a browse object.
 #       
 # Arguments:
-#       browseName:   the name of this browse instance
 #       clientCmd:  callback procedure when internals of browse changes.
 #       args:            
 #       
 # Results:
-#       browseName
+#       browseName which is the command for this instance of the browser
   
-proc browse::browse {browseName clientCmd args} {
+proc browse::browse {clientCmd args} {
+    variable browseGlobals
     
-    # Check that we may have a command [browseName].
-    if {[llength [info commands $browseName]] > 0} {
-	error commandinuse   \
-	  "\"$browseName\" command is already in use"
-    }
+    # Generate unique command token for this roster instance.
+    set browseName browse[incr browseGlobals(uid)]
       
     # Instance specific namespace.
     namespace eval [namespace current]::${browseName} {
@@ -115,18 +114,16 @@ proc browse::browse {browseName clientCmd args} {
     
     # Set simpler variable names.
     upvar [namespace current]::${browseName}::locals locals
-        
-    # Use the hashed jid as a key for user specific storage.
     set locals(cmd) $clientCmd
     set locals(confservers) {}
+    set locals(fullBrowseName) [namespace current]::${browseName}
     
     # Create the actual browser instance procedure. 'browseName' is interpreted 
     # in the global namespace.
-    # Perhaps need to check if 'browseName' is already a fully qualified name?
-    proc ::${browseName} {cmd args}   \
+    proc [namespace current]::${browseName} {cmd args}   \
       "eval browse::CommandProc {$browseName} \$cmd \$args"
     
-    return $browseName
+    return [namespace current]::${browseName}
 }
 
 # browse::CommandProc --
@@ -713,15 +710,15 @@ proc browse::setsinglejid {browseName parentJid jid xmllist {browsedjid 0}} {
 	    # section.
 	    switch -- $ns {
 		"http://jabber.org/protocol/muc" {
-		    jlib::invokefrombrowser $browseName \
+		    jlib::invokefrombrowser $locals(fullBrowseName) \
 		      [list registergcprotocol $jid "muc"]
 		}
 		"jabber:iq:conference" {
-		    jlib::invokefrombrowser $browseName \
+		    jlib::invokefrombrowser $locals(fullBrowseName) \
 		      [list registergcprotocol $jid "conference"]
 		}
 		"gc-1.0" {
-		    jlib::invokefrombrowser $browseName \
+		    jlib::invokefrombrowser $locals(fullBrowseName) \
 		      [list registergcprotocol $jid "gc-1.0"]
 		}
 	    }

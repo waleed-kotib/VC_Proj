@@ -12,13 +12,13 @@ package require jlib
 proc MyRosterCallbackProc {rostName what {jid {}} args} {
     puts "--roster-> what=$what, jid=$jid, args='$args'"
 }
-set myRoster [roster::roster xrost2 MyRosterCallbackProc]
+set myRoster [roster::roster MyRosterCallbackProc]
 
 # Browse stuff...
 proc MyBrowseCallbackProc {browseName what jid xmllist} {
     puts "--browse-> what=$what, jid=$jid, xmllist='$xmllist'"
 }
-set myBrowser [browse::browse xbrowse2 MyBrowseCallbackProc]
+set myBrowser [browse::browse MyBrowseCallbackProc]
 
 # The jabberlib stuff...
 proc MyClientProc {jlibName cmd args} {
@@ -38,7 +38,7 @@ proc MyConnectProc {jlibName args} {
 }
 
 # Make an instance of jabberlib and fill in our roster object.
-set theJlib [jlib::new xjlib2 $myRoster $myBrowser MyClientProc  \
+set theJlib [jlib::new $myRoster $myBrowser MyClientProc  \
   -iqcommand          MyIqCB  \
   -messagecommand     MyMsgCB \
   -presencecommand    MyPresCB]

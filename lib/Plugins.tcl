@@ -14,7 +14,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Plugins.tcl,v 1.2 2003-06-01 10:26:58 matben Exp $
+# $Id: Plugins.tcl,v 1.3 2003-07-05 13:37:54 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -212,7 +212,7 @@ proc ::Plugins::InitQuickTimeTcl { } {
     variable packages2Platform
     variable supSuff
     
-    set plugin(QuickTimeTcl,pack) "QuickTimeTcl 3.0"
+    set plugin(QuickTimeTcl,pack) "QuickTimeTcl 3.1"
     set plugin(QuickTimeTcl,type) "internal"
     set plugin(QuickTimeTcl,desc) \
       {Displays multimedia content such as video, sound, mp3 etc.\
@@ -527,8 +527,8 @@ proc ::Plugins::PostProcessInfo { } {
     }
     set prefMimeType2Package(image/gif) tk
 
-    # By default, no importing takes place, thus {}.
-    set prefMimeType2Package(text/plain) {}
+    # By default, no importing takes place, thus {}. WRONG!!!
+    #set prefMimeType2Package(text/plain) {}
 }
 
 # Plugins::GetAllPackages --
@@ -618,6 +618,11 @@ proc ::Plugins::MakeTypeListDialogOption { } {
 	    set typelist(application) [list  \
 	      [list Application $supSuff(application)]  \
 	      [list Application {} $supMacTypes(application)]]
+	}	
+	if {[llength $supSuff(text)] > 0}  {
+	    set typelist(text) [list  \
+	      [list Text $supSuff(text)]  \
+	      [list Text {} $supMacTypes(text)]]
 	}	
 	
 	# Use mime description as entries.
