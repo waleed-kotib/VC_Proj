@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.16 2003-12-10 15:21:43 matben Exp $
+# $Id: Dialogs.tcl,v 1.17 2003-12-12 13:46:44 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -61,14 +61,14 @@ array set wDlgs {
 #       canvas from.
 
 proc ::Dialogs::GetCanvas {w} {
-    global  allIPnumsToSend ipNumTo ipName2Num sysFont prefs this
+    global  ipNumTo ipName2Num sysFont prefs this
     
     variable finished -1
     variable getIPName
     
     # Build list of ip names.
     set ipNames {}
-    foreach ip $allIPnumsToSend {
+    foreach ip [::Network::GetIP to] {
 	if {[info exists ipNumTo(name,$ip)]} {
 	    lappend ipNames $ipNumTo(name,$ip)
 	}
@@ -611,14 +611,14 @@ proc ::PSPageSetup::PushBtSave {  } {
 #       It implements a dialog that shows client information.
 #       
 # Arguments:
-#       allIPnumsFrom   list of ip numbers of all connected clients.
 #       
 # Results:
 #       shows dialog.
 
-proc ::Dialogs::ShowInfoClients {allIPnumsFrom} {
+proc ::Dialogs::ShowInfoClients { } {
     global  sysFont ipNumTo this wDlgs
     
+    set allIPnumsFrom [::Network::GetIP from]
     if {[llength $allIPnumsFrom] <= 0} {
 	return
     }
@@ -702,7 +702,7 @@ proc ::Dialogs::ShowInfoClients {allIPnumsFrom} {
 
 # Dialogs::ShowInfoServer --
 #
-#       It shows server information. Uses one of the 'allIPnumsTo' to get a 
+#       It shows server information. Uses one of the connections to get a 
 #       channel which is used to obtain information. If not connected, then 
 #       give only the hostname if available.
 #       
@@ -713,7 +713,7 @@ proc ::Dialogs::ShowInfoClients {allIPnumsFrom} {
 #       none
 
 proc ::Dialogs::ShowInfoServer {thisIPnum} {
-    global  sysFont this ipNumTo allIPnumsFrom wDlgs  \
+    global  sysFont this ipNumTo wDlgs  \
       state listenServSocket this prefs
     
     set w $wDlgs(infoServ)
@@ -760,7 +760,7 @@ proc ::Dialogs::ShowInfoServer {thisIPnum} {
 	label $fr.f2 -text [::msgcat::mc {Not available}]
 	label $fr.g2 -text [::msgcat::mc {Not available}]
 	
-    } elseif {$state(isServerUp) && [llength $allIPnumsFrom] == 0} {
+    } elseif {$state(isServerUp) && [llength [::Network::GetIP from]] == 0} {
 
 	# Not yet connected but up.
 	set theHostname [info hostname]
@@ -776,10 +776,10 @@ proc ::Dialogs::ShowInfoServer {thisIPnum} {
 	label $fr.f2 -text [::msgcat::mc {Not available}]
 	label $fr.g2 -text "$boolToYesNo($prefs(makeSafeServ))"
 
-    } elseif {$state(isServerUp) && [llength $allIPnumsFrom] > 0} {
+    } elseif {$state(isServerUp) && [llength [::Network::GetIP from]] > 0} {
 	
 	# Take any ip and get server side channel.
-	set channel $ipNumTo(servSocket,[lindex $allIPnumsFrom 0])
+	set channel $ipNumTo(servSocket,[lindex [::Network::GetIP from] 0])
 	set peername [fconfigure $channel -peername]
 	set sockname [fconfigure $channel -sockname]
 	set buff [fconfigure $channel -buffering]

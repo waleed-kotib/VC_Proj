@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.36 2003-12-10 15:21:43 matben Exp $
+# $Id: Jabber.tcl,v 1.37 2003-12-12 13:46:44 matben Exp $
 #
 #  The $address is an ip name or number.
 #
@@ -1161,7 +1161,7 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	    # we never end up here.
 	    
 	    # Disconnect. This should reset both wrapper and XML parser!
-	    ::Jabber::DoCloseClientConnection $jstate(ipNum)
+	    ::Jabber::DoCloseClientConnection
 	    
 	    tk_messageBox -icon error -type ok  \
 	      -message [::msgcat::mc jamessconnbroken]
@@ -1180,7 +1180,7 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	    
 	    # XML parsing error.
 	    # Disconnect. This should reset both wrapper and XML parser!
-	    ::Jabber::DoCloseClientConnection $jstate(ipNum)
+	    ::Jabber::DoCloseClientConnection
 	    if {[info exists attrArr(-errormsg)]} {
 		set msg "Receieved a fatal XML parsing error:\
 		  $attrArr(-errormsg). The connection is closed down."
@@ -1194,7 +1194,7 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	networkerror {
 	    
 	    # Disconnect. This should reset both wrapper and XML parser!
-	    ::Jabber::DoCloseClientConnection $jstate(ipNum)
+	    ::Jabber::DoCloseClientConnection
 	    tk_messageBox -title [::msgcat::mc {Network Error}] \
 	      -message [FormatTextForMessageBox $attrArr(-body)] \
 	      -icon error -type ok	    
@@ -1431,7 +1431,7 @@ proc ::Jabber::SendMessage {jid msg args} {
     if {[catch {
 	eval {$jstate(jlib) send_message $jid -xlist $xlist} $args
     } err]} {
-	::Jabber::DoCloseClientConnection $jstate(ipNum)
+	::Jabber::DoCloseClientConnection
 	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
 	  -message [FormatTextForMessageBox $err]
     }
@@ -1455,7 +1455,7 @@ proc ::Jabber::SendMessageList {jid msgList args} {
     if {[catch {
 	eval {$jstate(jlib) send_message $jid -xlist $xlist} $args
     } err]} {
-	::Jabber::DoCloseClientConnection $jstate(ipNum)
+	::Jabber::DoCloseClientConnection
 	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
 	  -message [FormatTextForMessageBox $err]
     }
@@ -1542,20 +1542,19 @@ proc ::Jabber::UpdateAutoAwaySettings { } {
 #       Try to be silent if called as a response to a server shutdown.
 #       
 # Arguments:
-#       ipNum     the ip number.
 #       args      -status, 
 #       
 # Results:
 #       none
 
-proc ::Jabber::DoCloseClientConnection {ipNum args} {
+proc ::Jabber::DoCloseClientConnection {args} {
     global  prefs
         
     variable jstate
     variable jserver
     variable jprefs
     
-    ::Jabber::Debug 2 "::Jabber::DoCloseClientConnection ipNum=$ipNum"
+    ::Jabber::Debug 2 "::Jabber::DoCloseClientConnection"
     array set argsArr [list -status $jprefs(logoutStatus)]    
     array set argsArr $args
     
@@ -1585,7 +1584,7 @@ proc ::Jabber::DoCloseClientConnection {ipNum args} {
     
     # Update the communication frame; remove connection 'to'.
     if {$prefs(jabberCommFrame)} {
-	::UI::ConfigureAllJabberEntries $ipNum -netstate "disconnect"
+	::UI::ConfigureAllJabberEntries $jstate(ipNum) -netstate "disconnect"
     }
     ::Jabber::UI::SetStatusMessage "Logged out"
 
@@ -1597,7 +1596,7 @@ proc ::Jabber::DoCloseClientConnection {ipNum args} {
 	# If no more connections left, make menus consistent.
 	::UI::FixMenusWhen $wtop "disconnect"
     }
-    ::Network::RegisterIP $ipNum "none"
+    ::Network::DeRegisterIP $jstate(ipNum)
     ::Jabber::Roster::SetUIWhen "disconnect"
     ::Jabber::UI::FixUIWhen "disconnect"
     ::Jabber::UI::WhenSetStatus "unavailable"
@@ -1617,6 +1616,7 @@ proc ::Jabber::DoCloseClientConnection {ipNum args} {
 	::Jabber::Browse::Clear
     }
     ::Jabber::UI::LogoutClear
+    set jstate(ipNum) ""
 }
 
 # Jabber::EndSession --
@@ -1817,7 +1817,7 @@ proc ::Jabber::SetStatus {type args} {
     } err]} {
 	
 	# Close down?	
-	::Jabber::DoCloseClientConnection $jstate(ipNum)
+	::Jabber::DoCloseClientConnection
 	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
 	  -message [FormatTextForMessageBox $err]
     } else {
@@ -1834,7 +1834,7 @@ proc ::Jabber::SetStatus {type args} {
 	if {$toServer} {
 	    ::Jabber::UI::WhenSetStatus $type
 	    if {$type == "unavailable"} {
-		::Jabber::DoCloseClientConnection $jstate(ipNum)
+		::Jabber::DoCloseClientConnection
 	    }
 	}
     }
@@ -3394,7 +3394,7 @@ proc ::Jabber::Logout::DoLogout {w} {
     
     set finished 1
     destroy $w
-    ::Jabber::DoCloseClientConnection $jstate(ipNum) -status $status
+    ::Jabber::DoCloseClientConnection -status $status
 }
 
 

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Import.tcl,v 1.6 2003-11-30 11:46:47 matben Exp $
+# $Id: Import.tcl,v 1.7 2003-12-12 13:46:44 matben Exp $
 
 package require http
 package require httpex
@@ -104,7 +104,7 @@ proc ::Import::ImportImageOrMovieDlg {wtop} {
 #       an error string which is empty if things went ok so far.
 
 proc ::Import::DoImport {w opts args} {
-    global  prefs this allIPnumsToSend
+    global  prefs this
     
     ::Debug 2 "_  DoImport:: opts=$opts"
     ::Debug 2 " \targs='$args'"
@@ -197,7 +197,7 @@ proc ::Import::DoImport {w opts args} {
     } else {
 	set drawLocal 0
     }
-    if {($argsArr(-where) != "local") && ([llength $allIPnumsToSend] > 0)} {
+    if {($argsArr(-where) != "local") && ([llength [::Network::GetIP to]] > 0)} {
 	set doPut 1
     } else {
 	set doPut 0

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasText.tcl,v 1.6 2003-09-28 06:29:08 matben Exp $
+# $Id: CanvasText.tcl,v 1.7 2003-12-12 13:46:44 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 
@@ -203,7 +203,7 @@ proc ::CanvasText::CanvasFocus {w x y {forceNew 0}} {
 #       none
 
 proc ::CanvasText::TextInsert {w char} {
-    global  allIPnumsToSend this prefs
+    global  this prefs
         
     variable textBuffer
     variable indBuffer
@@ -253,7 +253,7 @@ proc ::CanvasText::TextInsert {w char} {
     
     # Need to treat the case with actual newlines in char string.
     # Write to all other clients; need to make a one liner first.
-    if {[llength $allIPnumsToSend]} {
+    if {[llength [::Network::GetIP to]]} {
 	regsub -all "\n" $char $nl_ oneliner
 	if {$prefs(batchText)} {
 	    
@@ -689,8 +689,6 @@ proc ::CanvasText::ScheduleTextInsert {wtop} {
 #       socket(s) written via 'SendClientCommand'.
 
 proc ::CanvasText::DoSendBufferedText {wtop} {
-    global  allIPnumsToSend
-    
     variable textAfterID
     variable textBuffer
     variable indBuffer
@@ -700,7 +698,7 @@ proc ::CanvasText::DoSendBufferedText {wtop} {
 	after cancel $textAfterID
 	unset textAfterID
     }
-    if {[llength $allIPnumsToSend] && [string length $textBuffer]} {
+    if {[llength [::Network::GetIP to]] && [string length $textBuffer]} {
 	SendClientCommand $wtop   \
 	  [list "CANVAS:" insert $itnoBuffer $indBuffer $textBuffer]
     }    

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.16 2003-12-10 15:21:43 matben Exp $
+# $Id: Preferences.tcl,v 1.17 2003-12-12 13:46:44 matben Exp $
  
 package require notebook
 package require tree
@@ -1759,7 +1759,7 @@ namespace eval ::Preferences::NetSetup:: {
 }
     
 proc ::Preferences::NetSetup::BuildPage {page} {
-    global  sysFont prefs this state allIPnumsTo
+    global  sysFont prefs this state
 
     variable wopt
 
@@ -1810,7 +1810,7 @@ proc ::Preferences::NetSetup::BuildPage {page} {
       [list ::Preferences::NetSetup::Advanced]
     
     # If already connected don't allow network topology to be changed.
-    if {[llength $allIPnumsTo] > 0} {
+    if {[llength [::Network::GetIP to]] > 0} {
 	$fropt.jabb configure -state disabled
 	$fropt.symm configure -state disabled
     }

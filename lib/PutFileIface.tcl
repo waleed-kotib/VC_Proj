@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: PutFileIface.tcl,v 1.11 2003-11-09 15:07:32 matben Exp $
+# $Id: PutFileIface.tcl,v 1.12 2003-12-12 13:46:44 matben Exp $
 
 package require putfile
 package require uriencode
@@ -25,9 +25,8 @@ namespace eval ::PutFileIface:: {
 #       the file to all other clients.
 
 proc ::PutFileIface::PutFileDlg {wtop} {
-    global  allIPnumsToSend
     
-    if {[llength $allIPnumsToSend] == 0} {
+    if {[llength [::Network::GetIP to]] == 0} {
 	return
     }
     set ans [tk_getOpenFile -title [::msgcat::mc {Put Image/Movie}] \
@@ -56,11 +55,11 @@ proc ::PutFileIface::PutFileDlg {wtop} {
 #                 a single line.
 
 proc ::PutFileIface::PutFileToAll {wtop fileName where {opts {}}} {
-    global  allIPnumsToSend prefs this
+    global  prefs this
     
     Debug 2 "+PutFile:: fileName=$fileName, opts=$opts"
     
-    if {[llength $allIPnumsToSend] == 0} {
+    if {[llength [::Network::GetIP to]] == 0} {
 	return
     }
     
@@ -100,7 +99,7 @@ proc ::PutFileIface::PutFileToAll {wtop fileName where {opts {}}} {
 	    # Make a list with all ip numbers to put file to.
 	    switch -- $where {
 		remote - all {
-		    set allPutIP $allIPnumsToSend
+		    set allPutIP [::Network::GetIP to]
 		}
 		default {
 		    set allPutIP $where

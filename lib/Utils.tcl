@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.11 2003-10-23 06:28:00 matben Exp $
+# $Id: Utils.tcl,v 1.12 2003-12-12 13:46:44 matben Exp $
 
 namespace eval ::Utils:: {
 
@@ -103,6 +103,20 @@ if {[info tclversion] < 8.4} {
     }
 }
 
+# lprune --
+# 
+#       Removes element from list, silently.
+
+proc lprune {listName elem} {
+    upvar $listName listValue
+    
+    set idx [lsearch $listValue $elem]
+    if {$idx >= 0} {
+	uplevel set $listName [list [lreplace $listValue $idx $idx]]
+    }
+    return ""
+}
+    
 # getdirname ---
 #
 #       Returns the path from 'filePath' thus stripping of any file name.

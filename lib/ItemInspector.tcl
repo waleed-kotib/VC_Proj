@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ItemInspector.tcl,v 1.10 2003-10-12 13:12:55 matben Exp $
+# $Id: ItemInspector.tcl,v 1.11 2003-12-12 13:46:44 matben Exp $
 
 namespace eval ::ItemInspector::  {
     
@@ -408,7 +408,7 @@ proc ::ItemInspector::Cancel {w} {
 #       dialog displayed.
 
 proc ::ItemInspector::CanvasConfigureItem {w wCan itemId listOfAllOptions} {
-    global  allIPnumsToSend fontPoints2Size fontSize2Points   \
+    global  fontPoints2Size fontSize2Points   \
       dashFull2Short
     
     variable disabledBackground
