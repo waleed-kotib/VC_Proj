@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.54 2004-01-15 14:13:00 matben Exp $
+# $Id: Jabber.tcl,v 1.55 2004-01-15 15:41:13 matben Exp $
 
 package provide Jabber 1.0
 
@@ -1938,17 +1938,6 @@ proc ::Jabber::GetIPCallback {fromjid id ip} {
     }
 }
 
-# Jabber::GetCoccinellaServers --
-# 
-#       Get Coccinella server ports and ip via <iq>.
-
-proc ::Jabber::GetCoccinellaServers {jid3 cmd} {
-    variable jstate
-    variable xmlns
-     
-    $jstate(jlib) iq_get $xmlns(servers) $jid3 -command xxx
-}
-
 proc ::Jabber::PutIPnumber {jid id} {
     variable jstate
     
@@ -1958,7 +1947,38 @@ proc ::Jabber::PutIPnumber {jid id} {
     ::Jabber::SendMessage $jid "PUT IP: $id $ip"
 }
 
-# Jabber::PutFileAndSchedule --
+# Jabber::GetCoccinellaServers --
+# 
+#       Get Coccinella server ports and ip via <iq>.
+
+proc ::Jabber::GetCoccinellaServers {jid3 cmd} {
+    variable jstate
+    variable iqxmlns
+    
+    $jstate(jlib) iq_get $iqxmlns(servers) $jid3  \
+      -command [list ::Jabber::GetCoccinellaServersCallback $jid3 $cmd]
+}
+
+proc ::Jabber::GetCoccinellaServersCallback {jid3 cmd jlibname type subiq} {
+    variable jidToIP
+    
+    # ::Jabber::GetCoccinellaServersCallback jabberlib1 ok 
+    #  {query {xmlns http://coccinella.sourceforge.net/protocols/servers} 0 {} {
+    #     {ip {protocol putget port 8235} 0 212.214.113.57 {}} 
+    #     {ip {protocol http port 8077} 0 212.214.113.57 {}}
+    #  }}
+    ::Jabber::Debug 2 "::Jabber::GetCoccinellaServersCallback"
+
+    if {$type == "error"} {
+	return
+    }
+    set ipElements [wrapper::getchildswithtag $subiq ip]
+    set ip [wrapper::getcdata [lindex $ipElements 0]]
+    set jidToIP($jid3) $ip
+    eval $cmd
+}
+
+# Jabber::PutFileOrSchedule --
 # 
 #       Handles everything needed to put a file to the jid's corresponding
 #       to the 'wtop'. Users that we haven't got ip number from are scheduled
@@ -1974,11 +1994,11 @@ proc ::Jabber::PutIPnumber {jid id} {
 # Results:
 #       none.
 
-proc ::Jabber::PutFileAndSchedule {wtop fileName opts} {    
+proc ::Jabber::PutFileOrSchedule {wtop fileName opts} {    
     variable jidToIP
     variable jstate
     
-    ::Jabber::Debug 2 "::Jabber::PutFileAndSchedule: \
+    ::Jabber::Debug 2 "::Jabber::PutFileOrSchedule: \
       wtop=$wtop, fileName=$fileName, opts='$opts'"
     
     # Before doing anything check that the Send checkbutton is on. ???
@@ -2074,12 +2094,17 @@ proc ::Jabber::PutFileAndSchedule {wtop fileName opts} {
 		# This jid is online but has not told us its ip number.
 		# We need to get this jid's ip number and register the
 		# PutFile as a callback when receiving this ip.
-		::Jabber::GetIPnumber $jid3 \
-		  [list ::Jabber::PutFile $wtop $fileName $mime $optjidList]
-		
-		# New through <iq> element.
-		#::Jabber::GetCoccinellaServers $jid3  \
-		#  [list ::Jabber::PutFile $wtop $fileName $mime $optjidList]
+		if {1} {
+		    ::Jabber::GetIPnumber $jid3 \
+		      [list ::Jabber::PutFile $wtop $fileName $mime $optjidList]
+		} else {
+		    
+		    # New through <iq> element.
+		    # Switch to this with version 0.94.8 or later!
+		    ::Jabber::GetCoccinellaServers $jid3  \
+		      [list ::Jabber::PutFile $wtop $fileName $mime  \
+		      $optjidList $jid3]
+		}
 	    }
 	} else {
 	    
@@ -2562,7 +2587,7 @@ proc ::Jabber::ParseGetVersion {jlibname from subiq args} {
 proc ::Jabber::ParseGetBrowse {jlibname from subiq args} {
     global  prefs    
     variable jstate
-    variable xmlns
+    variable iqxmlns
 
     ::Jabber::Debug 2 "::Jabber::ParseGetBrowse: args='$args'"
     
@@ -2592,7 +2617,7 @@ proc ::Jabber::ParseGetBrowse {jlibname from subiq args} {
       [wrapper::createtag "ns" -chdata "coccinella:wb"]]
     
     # Adding private namespaces.
-    foreach {key ns} [array get xmlns] {
+    foreach {key ns} [array get iqxmlns] {
 	lappend subtags [wrapper::createtag "ns" -chdata $ns]
     }
     
@@ -2620,7 +2645,7 @@ proc ::Jabber::ParseGetServers  {jlibname from subiq args} {
     global  prefs
     
     variable jstate
-    variable xmlns
+    variable iqxmlns
     
     # Build tag and attributes lists to 'private_set'.
     set ip [::Network::GetThisOutsideIPAddress]
@@ -2640,7 +2665,7 @@ proc ::Jabber::ParseGetServers  {jlibname from subiq args} {
       [wrapper::createtag ip -chdata $ip -attrlist $attrputget]  \
       [wrapper::createtag ip -chdata $ip -attrlist $attrhttpd]]
     set xmllist [wrapper::createtag query -subtags $subtags  \
-      -attrlist [list xmlns $xmlns(servers)]]
+      -attrlist [list xmlns $iqxmlns(servers)]]
      eval {$jstate(jlib) send_iq "result" $xmllist} $opts
     
      # Tell jlib's iq-handler that we handled the event.
