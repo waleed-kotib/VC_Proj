@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Types.tcl,v 1.6 2004-01-13 14:50:21 matben Exp $
+# $Id: Types.tcl,v 1.7 2004-03-15 13:26:11 matben Exp $
 
 package provide Types 1.0
 
@@ -67,6 +67,7 @@ namespace eval ::Types:: {
 	image/x-targa        {.tga}
 	image/tiff           {.tif  .tiff}
 	image/x-tiff         {.tif  .tiff}
+	image/x-portable-pixmap {.xpm}
 	text/plain           {.txt}
 	text/html            {.html .htm}
 	text/richtext        {.rtx}
@@ -128,6 +129,7 @@ namespace eval ::Types:: {
 	image/x-targa        {Targa Truevision Image}
 	image/tiff           {TIFF Image}
 	image/x-tiff         {TIFF Image}
+	image/x-portable-pixmap {Portable Pixmap}
 	text/plain           {Plain Text}
 	text/xml             {Extensible Markup Language}
 	text/richtext        {Rich Text Format}
@@ -141,6 +143,7 @@ namespace eval ::Types:: {
 	video/avi            {Microsoft Video}
 	video/flc            {FLC Animation}
     }
+    
     
     # Mapping from MIME type to a list of Mac types.
     variable mime2MacTypeList
@@ -188,6 +191,7 @@ namespace eval ::Types:: {
 	image/x-targa        {TPIC}
 	image/tiff           {TIFF}
 	image/x-tiff         {TIFF}
+	image/x-portable-pixmap {PPGM}
 	text/plain           {TEXT}
 	text/html            {TEXT}
 	text/xml             {TEXT}
@@ -222,7 +226,7 @@ namespace eval ::Types:: {
 	8BPS   .psd          qtif   .qtif         "SGI " .sgi
 	TPIC   .tga          3DMF   .3dmf         "FLI " .fli
 	"SWF " .swf          Midi   .mid          JPEG   .jpeg
-	"PDF " .pdf
+	"PDF " .pdf          PPGM   .ppm
     }
 }
 

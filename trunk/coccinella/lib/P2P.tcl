@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: P2P.tcl,v 1.1 2004-03-13 15:17:04 matben Exp $
+# $Id: P2P.tcl,v 1.2 2004-03-15 13:26:11 matben Exp $
 
 package provide P2P 1.0
 
@@ -41,7 +41,9 @@ proc ::P2P::Init {} {
     ::hooks::add whiteboardSendMessageHook    ::P2P::SendMessageListHook
     ::hooks::add whiteboardSendGenMessageHook ::P2P::SendGenMessageListHook
     ::hooks::add whiteboardPutFileHook        ::P2P::PutFileHook
+    ::hooks::add serverGetRequestHook         ::P2P::HandleGetRequest
     ::hooks::add serverPutRequestHook         ::P2P::HandlePutRequest
+    ::hooks::add serverCmdHook                ::P2P::HandleServerCmd
 
     set buttonTrayDefs(symmetric) {
 	connect    {::OpenConnection::OpenConnection $wDlgs(openConn)}
@@ -50,7 +52,7 @@ proc ::P2P::Init {} {
 	import     {::Import::ImportImageOrMovieDlg $wtop}
 	send       {::CanvasCmd::DoSendCanvas $wtop}
 	print      {::UserActions::DoPrintCanvas $wtop}
-	stop       {::CanvasCmd::CancelAllPutGetAndPendingOpen $wtop}
+	stop       {::P2P::CancelAllPutGetAndPendingOpen $wtop}
     }
     set buttonTrayDefs(client) $buttonTrayDefs(symmetric)
     set buttonTrayDefs(server) $buttonTrayDefs(symmetric)
@@ -63,7 +65,7 @@ proc ::P2P::Init {} {
 	{command   mPutCanvas          {::CanvasCmd::DoPutCanvasDlg $wtop}        disabled {}}
 	{command   mGetCanvas          {::CanvasCmd::DoGetCanvas $wtop}           disabled {}}
 	{command   mPutFile            {::P2P::PutFileDlg $wtop}         disabled {}}
-	{command   mStopPut/Get/Open   {::CanvasCmd::CancelAllPutGetAndPendingOpen $wtop} normal {}}
+	{command   mStopPut/Get/Open   {::P2P::CancelAllPutGetAndPendingOpen $wtop} normal {}}
 	{separator}
 	{command   mOpenImage/Movie    {::Import::ImportImageOrMovieDlg $wtop}    normal  I}
 	{command   mOpenURLStream      {::OpenMulticast::OpenMulticast $wtop}     normal   {}}
@@ -705,10 +707,236 @@ proc ::P2P::PutFileHook {wtop fileName opts args} {
     }
 }
 
+# P2P::CancelAllPutGetAndPendingOpen ---
+#
+#       It is supposed to stop every put and get operation taking place.
+#       This may happen when the user presses a stop button or something.
+#       
+# Arguments:
+#
+# Results:
+
+proc ::P2P::CancelAllPutGetAndPendingOpen {wtop} {
+    
+    ::GetFileIface::CancelAllWtop $wtop
+    ::Import::HttpResetAll $wtop
+    ::OpenConnection::OpenCancelAllPending
+    ::WB::SetStatusMessage $wtop {}
+    ::WB::StartStopAnimatedWave $wtop 0
+}
+
+proc ::P2P::HandleGetRequest {channel ip fileName opts} {
+
+    # A file is requested from this server. 'fileName' may be
+    # a relative path so beware. This should be taken care for in
+    # 'PutFileToClient'.		    
+    ::PutFileIface::PutFileToClient . $channel $ip $fileName $opts
+}
 
 proc ::P2P::HandlePutRequest {channel fileName opts} {
     
     ::GetFileIface::GetFile . $channel $fileName $opts
+}
+
+# ::P2P::HandleServerCmd --
+#
+#       Interpret the command we just read.
+#     
+# Arguments:
+#       channel
+#       ip
+#       port
+#       line       Typically a canvas command.
+#       args       a list of '-key value' pairs which is typically XML
+#                  attributes of our XML message element (jabber only).
+#
+# Returns:
+#       none.
+
+proc ::P2P::HandleServerCmd {channel ip port line args} {
+    global  tempChannel ipNumTo debugServerLevel   \
+      clientRecord prefs this canvasSafeInterp
+    
+    # regexp patterns. Defined globally to speedup???
+    set wrd_ {[^ ]+}
+    set optwrd_ {[^ ]*}
+    set optlist_ {.*}
+    set any_ {.+}
+    set nothing_ {}
+    
+    # Matches list with braces.  
+    # ($llist_|$wrd_)  :should match single item list or multi item list.
+    set llist_ {\{[^\}]+\}}
+    set pre_ {[^/ ]+}
+    set portwrd_ {[0-9]+}
+    set ipnum_ {[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+}
+    set int_ {[0-9]+}
+    set signint_ {[-0-9]+}
+    set punct {[.,;?!]}
+	
+    if {$debugServerLevel >= 2} {
+	puts "ExecuteClientRequest:: line='$line', args='$args'"
+    }
+    array set attrarr $args
+    if {![regexp {^([A-Z ]+): *(.*)$} $line x prefixCmd instr]} {
+	return
+    }
+    
+    # Branch into the right command prefix.
+    switch -exact -- $prefixCmd {
+	CANVAS {
+	    if {[string length $instr] > 0} {
+		::CanvasUtils::HandleCanvasDraw . $instr
+	    }		
+	}
+	IDENTITY {
+	    if {[regexp "^IDENTITY: +($portwrd_) +($pre_) +($llist_|$wrd_)$" \
+	      $line junk remPort id user]} {
+		
+		# A client tells which server port number it has, its item prefix
+		# and its user name.
+		
+		if {$debugServerLevel >= 2 } {
+		    puts "HandleClientRequest:: IDENTITY: remPort=$remPort, \
+		      id=$id, user=$user"
+		}
+		
+		# Save port and socket for the server side in array.
+		# This is done here so we are sure that it is not a temporary socket
+		# for file transfer etc.
+		
+		set ipNumTo(servSocket,$ip) $channel
+		set ipNumTo(servPort,$ip) $remPort
+		
+		# If user is a list remove braces.
+		set ipNumTo(user,$ip) [lindex $user 0]
+		set ipNumTo(connectTime,$ip) [clock seconds]
+		
+		# Add entry in the communication frame.
+		::P2P::SetCommEntry . $ip -1 1
+		::UI::MenuMethod .menu.info entryconfigure mOnClients  \
+		  -state normal
+		
+		# Check that not own ip and user.
+		if {$ip == $this(ipnum) &&   \
+		  [string equal [string tolower $user]  \
+		  [string tolower $this(username)]]} {
+		    tk_messageBox -message [FormatTextForMessageBox  \
+		      "A connecting client has chosen an ip number  \
+		      and user name identical to your own."] \
+		      -icon warning -type ok
+		}
+		
+		# If auto connect, then make a connection to the client as well.
+		if {[string equal $prefs(protocol) "symmetric"] &&  \
+		  $prefs(autoConnect) && [lsearch [::Network::GetIP to] $ip] == -1} {
+		    if {$debugServerLevel >= 2} {
+			puts "HandleClientRequest:: autoConnect:  \
+			  ip=$ip, name=$ipNumTo(name,$ip), remPort=$remPort"
+		    }
+		    
+		    # Handle the complete connection process.
+		    # Let propagateSizeToClients = false.
+		    ::OpenConnection::DoConnect $ip $ipNumTo(servPort,$ip) 0
+		} elseif {[string equal $prefs(protocol) "server"]} {
+		    ::hooks::run whiteboardFixMenusWhenHook . "connect"
+		}
+	    }		
+	}
+	"IPS CONNECTED" {
+	    if {[regexp "^IPS CONNECTED: +($any_|$nothing_)$" \
+	      $line junk remListIPandPort]} {
+		
+		# A client tells which other ips it is connected to.
+		# 'remListIPandPort' contains: ip1 port1 ip2 port2 ...
+		
+		if {$debugServerLevel >= 2 } {
+		    puts "HandleClientRequest:: IPS CONNECTED:  \
+		      remListIPandPort=$remListIPandPort"
+		}
+		
+		# If multi connect then connect to all other 'remAllIPnumsTo'.
+		if {[string equal $prefs(protocol) "symmetric"] &&  \
+		  $prefs(multiConnect)} {
+		    
+		    # Make temporary array that maps ip to port.
+		    array set arrayIP2Port $remListIPandPort
+		    foreach ipNum [array names arrayIP2Port] {
+			if {![::OpenConnection::IsConnectedToQ $ipNum]} {		
+			    
+			    # Handle the complete connection process.
+			    # Let propagateSizeToClients = false.
+			    ::OpenConnection::DoConnect $ipNum $arrayIP2Port($ipNum) 0
+			}
+		    }
+		}
+	    }		
+	}
+	CLIENT {
+	    if {[regexp "^CLIENT: *($optlist_)$" $line match clientList]} {
+		
+		# Primarily for the reflector server, when one client connects,
+		# the reflector srver has cached information of all other clients
+		# that is transfered this way. Also used when a new client connects
+		# to the reflector server.
+		# Each client identifies itself with a list of 'key: value' pairs.
+		
+		array set arrClient $clientList
+		set clientRecord($arrClient(ip:)) $clientList
+	    }		
+	}
+	DISCONNECTED {
+	    if {[regexp "^DISCONNECTED: *($ipnum_)$" $line match theIP]} {
+		
+		# Primarily for the reflector server, when one client disconnects.
+		
+		if {[info exists clientRecord($theIP)]} {
+		    unset clientRecord($theIP)
+		}
+	    }		
+	}
+	"PUT NEW" {
+	    if {[regexp "^PUT NEW: +($llist_|$wrd_) *($optlist_)$" \
+	      $line what relFilePath optList]} {
+		
+		# We should open a new socket and request a GET operation on that
+		# socket with the options given.
+		
+		# For some reason the outer {} must be stripped off.
+		set relFilePath [lindex $relFilePath 0]
+		::GetFileIface::GetFileFromServer . $ip $ipNumTo(servPort,$ip) \
+		  $relFilePath $optList
+	    }		
+	}
+	"GET CANVAS" {
+	    if {[regexp "^GET CANVAS:" $line]} {
+		
+		# The present client requests to put this canvas.	
+		if {$debugServerLevel >= 2} {
+		    puts "--->GET CANVAS:"
+		}
+		set wServCan [::WB::GetServerCanvasFromWtop .]
+		::CanvasCmd::DoPutCanvas $wServCan $ip
+	    }		
+	}
+	"RESIZE IMAGE" {
+	    if {[regexp "^RESIZE IMAGE: +($wrd_) +($wrd_) +($signint_)$"   \
+	      $line match itOrig itNew zoomFactor]} {
+		
+		# Image (photo) resizing.	
+		if {$debugServerLevel >= 2} {
+		    puts "--->RESIZE IMAGE: itOrig=$itOrig, itNew=$itNew, \
+		      zoomFactor=$zoomFactor"
+		}
+		::Import::ResizeImage . $zoomFactor $itOrig $itNew "local"
+	    }		
+	}
+	default {
+	    
+	    # We couldn't recognize this command as our own.
+	    
+	}
+    }
 }
 
 #-------------------------------------------------------------------------------

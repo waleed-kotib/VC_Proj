@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.27 2004-03-13 15:21:41 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.28 2004-03-15 13:26:11 matben Exp $
 
 package require sha1pure
 
@@ -339,7 +339,6 @@ proc ::CanvasUtils::GetUtag {c fromWhat {force 0}} {
     # Find the 'utag'.
     set pre_ {[^/ ]+}
     set digits_ {[0-9]+}
-    set wild_ {[xX]+}
     set wild_ {[xX\*]+}
     set utagpre_ ${wild_}|${utagpref}|${utagpref2}
     

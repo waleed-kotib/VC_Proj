@@ -990,5 +990,31 @@ Väntar på serversvar...}
 din inbyggda server. Beskrivningen är ej nödvändig.}
 ::msgcat::mcset sv chatcompreply        {%s skriver på ett svar}
 
+# Get file
+::msgcat::mcset sv getcontacting   {Kontaktat %s. Väntar på svar...}
+::msgcat::mcset sv geteoferr       {Uppkoppling mot %s misslyckades: mottog filslut.}
+::msgcat::mcset sv getconnerr	    {Uppkoppling mot %s misslyckades.}
+::msgcat::mcset sv getnegotiate    {Klient kontaktad: %s; förhandlar...}
+::msgcat::mcset sv getreaderr      {Läsfel när läste serversvar från %s.}
+::msgcat::mcset sv getunknownprot  {Servern %s svarade ej med korrekt protokoll.}
+::msgcat::mcset sv getnot200	    {Servern %s avarade med kod %s: "%s"}
+::msgcat::mcset sv getstarts	    {Klienten %s accepterade filen "%s". Startar överföring...}
+::msgcat::mcset sv getended	    {Överföring från %s slutade i förtid.}
+::msgcat::mcset sv getfinished	    {Överföring av fil "%s" från %s klar.}
+::msgcat::mcset sv getneterr	    {Nätverks fel mottog fil från %s.}
+
+# Put file
+::msgcat::mcset sv putcontacting   {Kontaktat %s. Väntar på svar...}
+::msgcat::mcset sv puteoferr       {Förbindelsen till %s misslyckades: Mottog eof.}
+::msgcat::mcset sv putconnerr	    {Förbindelsen till %s misslyckades.}
+::msgcat::mcset sv putnegotiate    {Klient kontaktad: %s; förhandlar...}
+::msgcat::mcset sv putreaderr      {Fel vid läsning av servern %s svar.}
+::msgcat::mcset sv putunknownprot  {Servern %s svarade ej med korrekt protokoll.}
+::msgcat::mcset sv putnot200	    {Servern %s svarade med kod %s: "%s"}
+::msgcat::mcset sv putstarts	    {Klienten %s accepterade filen %s. Startar överföringen...}
+::msgcat::mcset sv putended	    {Överföringen till %s slutade innan färdig.}
+::msgcat::mcset sv putfinished	    {Klar med överföringen av "%s" till %s.}
+::msgcat::mcset sv putneterr	    {Nätverksfel vid överföring till %s.}
+
 
 # END --------------------------------------------------------------------------

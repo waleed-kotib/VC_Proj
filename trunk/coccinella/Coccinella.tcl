@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.44 2004-03-13 15:21:40 matben Exp $
+# $Id: Coccinella.tcl,v 1.45 2004-03-15 13:25:56 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -208,8 +208,11 @@ set this(msgcatPath)        [file join $this(path) msgs]
 set this(internalIPnum)     127.0.0.1
 set this(internalIPname)    "localhost"
 set this(httpdRootPath)     $this(path)
-if {0 && [info exists starkit::topdir]} {
+if {[info exists starkit::topdir]} {
+    # Check these!!!!!!!
     set this(httpdRootPath)     $starkit::topdir
+    set this(httpdRelPath)      \
+      [file join $starkit::topdir lib app-Coccinella httpd]
 }
 
 # Set our IP number temporarily.
@@ -329,6 +332,7 @@ if {$prefs(messageLocale) == ""} {
     set locale $prefs(messageLocale)
     ::msgcat::mclocale $locale
 }
+set this(systemLocale) $locale
 set langs [glob -nocomplain -tails -directory $this(msgcatPath) *.msg]
 set havecat 0
 foreach f $langs {

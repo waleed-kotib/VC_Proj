@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: TheServer.tcl,v 1.19 2004-03-13 15:21:42 matben Exp $
+# $Id: TheServer.tcl,v 1.20 2004-03-15 13:26:11 matben Exp $
     
 # DoStartServer ---
 #
@@ -168,12 +168,6 @@ proc HandleClientRequest {channel ip port} {
 	}
 		
     } elseif {[gets $channel line] != -1} {
-
-	# Read one line at the time and find out what to do from the
-	# leading word.
-	if {$debugServerLevel >= 2} {
-	    puts "--->$ip:${port}:: $line"
-	}
 	
 	# Check that line does not contain any embedded command.
 	if {$prefs(checkSafety)} {
@@ -197,258 +191,36 @@ proc HandleClientRequest {channel ip port} {
     }
 }
 
-# ExecuteClientRequest --
-#
-#       Interpret the command we just read.
-#     
-# Arguments:
-#       channel
-#       ip
-#       port
-#       line       Typically a canvas command.
-#       args       a list of '-key value' pairs which is typically XML
-#                  attributes of our XML message element (jabber only).
-#
-# Returns:
-#       none.
-
 proc ExecuteClientRequest {channel ip port line args} {
-    global  tempChannel ipNumTo debugServerLevel   \
-      clientRecord prefs this  \
-      canvasSafeInterp
+    global  tempChannel
     
-    # regexp patterns. Defined globally to speedup???
-    set wrd_ {[^ ]+}
-    set optwrd_ {[^ ]*}
-    set optlist_ {.*}
-    set any_ {.+}
-    set nothing_ {}
-    
-    # Matches list with braces.  
-    # ($llist_|$wrd_)  :should match single item list or multi item list.
-    set llist_ {\{[^\}]+\}}
-    set pre_ {[^/ ]+}
-    set portwrd_ {[0-9]+}
-    set ipnum_ {[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+}
-    set int_ {[0-9]+}
-    set signint_ {[-0-9]+}
-    set punct {[.,;?!]}
-        
-    if {$debugServerLevel >= 2} {
-	puts "ExecuteClientRequest:: line='$line', args='$args'"
-    }
-    array set attrarr $args
-    if {![regexp {^([A-Z ]+): *(.*)$} $line x prefixCmd instr]} {
+    if {![regexp {^([A-Z ]+): *(.*)$} $line x cmd instr]} {
 	return
     }
     
-    # Branch into the right command prefix.
-    switch -exact -- $prefixCmd {
-	CANVAS {
-	    if {[string length $instr] > 0} {
-		::CanvasUtils::HandleCanvasDraw . $instr
-	    }		
-	}
-	IDENTITY {
-	    if {[regexp "^IDENTITY: +($portwrd_) +($pre_) +($llist_|$wrd_)$" \
-	      $line junk remPort id user]} {
-		
-		# A client tells which server port number it has, its item prefix
-		# and its user name.
-		
-		if {$debugServerLevel >= 2 } {
-		    puts "HandleClientRequest:: IDENTITY: remPort=$remPort, \
-		      id=$id, user=$user"
-		}
-		
-		# Save port and socket for the server side in array.
-		# This is done here so we are sure that it is not a temporary socket
-		# for file transfer etc.
-		
-		set ipNumTo(servSocket,$ip) $channel
-		set ipNumTo(servPort,$ip) $remPort
-		
-		# If user is a list remove braces.
-		set ipNumTo(user,$ip) [lindex $user 0]
-		set ipNumTo(connectTime,$ip) [clock seconds]
-		
-		# Add entry in the communication frame.
-		::P2P::SetCommEntry . $ip -1 1
-		::UI::MenuMethod .menu.info entryconfigure mOnClients  \
-		  -state normal
-		
-		# Check that not own ip and user.
-		if {$ip == $this(ipnum) &&   \
-		  [string equal [string tolower $user]  \
-		  [string tolower $this(username)]]} {
-		    tk_messageBox -message [FormatTextForMessageBox  \
-		      "A connecting client has chosen an ip number  \
-		      and user name identical to your own."] \
-		      -icon warning -type ok
-		}
-		
-		# If auto connect, then make a connection to the client as well.
-		if {[string equal $prefs(protocol) "symmetric"] &&  \
-		  $prefs(autoConnect) && [lsearch [::Network::GetIP to] $ip] == -1} {
-		    if {$debugServerLevel >= 2} {
-			puts "HandleClientRequest:: autoConnect:  \
-			  ip=$ip, name=$ipNumTo(name,$ip), remPort=$remPort"
-		    }
-		    
-		    # Handle the complete connection process.
-		    # Let propagateSizeToClients = false.
-		    ::OpenConnection::DoConnect $ip $ipNumTo(servPort,$ip) 0
-		} elseif {[string equal $prefs(protocol) "server"]} {
-		    ::hooks::run whiteboardFixMenusWhenHook . "connect"
-		}
-	    }		
-	}
-	"IPS CONNECTED" {
-	    if {[regexp "^IPS CONNECTED: +($any_|$nothing_)$" \
-	      $line junk remListIPandPort]} {
-		
-		# A client tells which other ips it is connected to.
-		# 'remListIPandPort' contains: ip1 port1 ip2 port2 ...
-		
-		if {$debugServerLevel >= 2 } {
-		    puts "HandleClientRequest:: IPS CONNECTED:  \
-		      remListIPandPort=$remListIPandPort"
-		}
-		
-		# If multi connect then connect to all other 'remAllIPnumsTo'.
-		if {[string equal $prefs(protocol) "symmetric"] &&  \
-		  $prefs(multiConnect)} {
-		    
-		    # Make temporary array that maps ip to port.
-		    array set arrayIP2Port $remListIPandPort
-		    foreach ipNum [array names arrayIP2Port] {
-			if {![::OpenConnection::IsConnectedToQ $ipNum]} {		
-			    
-			    # Handle the complete connection process.
-			    # Let propagateSizeToClients = false.
-			    ::OpenConnection::DoConnect $ipNum $arrayIP2Port($ipNum) 0
-			}
-		    }
-		}
-	    }		
-	}
-	CLIENT {
-	    if {[regexp "^CLIENT: *($optlist_)$" $line match clientList]} {
-		
-		# Primarily for the reflector server, when one client connects,
-		# the reflector srver has cached information of all other clients
-		# that is transfered this way. Also used when a new client connects
-		# to the reflector server.
-		# Each client identifies itself with a list of 'key: value' pairs.
-		
-		array set arrClient $clientList
-		set clientRecord($arrClient(ip:)) $clientList
-	    }		
-	}
-	DISCONNECTED {
-	    if {[regexp "^DISCONNECTED: *($ipnum_)$" $line match theIP]} {
-		
-		# Primarily for the reflector server, when one client disconnects.
-		
-		if {[info exists clientRecord($theIP)]} {
-		    unset clientRecord($theIP)
-		}
-	    }		
-	}
-	PUT - GET {
-		
-	    # Put file to receive file; handles via temporary socket.
-	    # The 'optList' is a list of 'key: value' pairs, resembling
-	    # the html protocol for getting files, but where most keys 
-	    # correspond to a valid "canvas create" option, and everything 
-	    # is on a single line.
-	    
+    switch -exact -- $cmd {
+	GET {
+
+	    # Do not interfer with put/get operations.
+	    fileevent $channel readable {}
 	    set fileName [lindex $instr 0]
 	    set optList [lrange $instr 1 end]
 	    set opts [::Import::GetTclSyntaxOptsFromTransport $optList]
 	    set tempChannel($channel) 1
-	    
-	    # Do not interfer with put/get operations.
+	    ::hooks::run serverGetRequestHook $channel $ip $fileName $opts
+	}
+	PUT {
 	    fileevent $channel readable {}
-	    
-	    switch -- $prefixCmd {
-		PUT {
-		    set fileName [file tail $fileName]
-		    ::hooks::run serverPutRequestHook $channel $fileName $opts
-		}
-		GET {
-		    
-		    # A file is requested from this server. 'fileName' may be
-		    # a relative path so beware. This should be taken care for in
-		    # 'PutFileToClient'.		    
-		    ::PutFileIface::PutFileToClient . $channel $ip \
-		      $fileName $opts
-		}
-	    }		
-	}
-	"PUT NEW" {
-	    if {[regexp "^PUT NEW: +($llist_|$wrd_) *($optlist_)$" \
-	      $line what relFilePath optList]} {
-		
-		# We should open a new socket and request a GET operation on that
-		# socket with the options given.
-		
-		# For some reason the outer {} must be stripped off.
-		set relFilePath [lindex $relFilePath 0]
-		::GetFileIface::GetFileFromServer . $ip $ipNumTo(servPort,$ip) \
-		  $relFilePath $optList
-	    }		
-	}
-	"GET CANVAS" {
-	    if {[regexp "^GET CANVAS:" $line]} {
-		
-		# The present client requests to put this canvas.	
-		if {$debugServerLevel >= 2} {
-		    puts "--->GET CANVAS:"
-		}
-		set wServCan [::WB::GetServerCanvasFromWtop .]
-		::CanvasCmd::DoPutCanvas $wServCan $ip
-	    }		
-	}
-	"RESIZE IMAGE" {
-	    if {[regexp "^RESIZE IMAGE: +($wrd_) +($wrd_) +($signint_)$"   \
-	      $line match itOrig itNew zoomFactor]} {
-		
-		# Image (photo) resizing.	
-		if {$debugServerLevel >= 2} {
-		    puts "--->RESIZE IMAGE: itOrig=$itOrig, itNew=$itNew, \
-		      zoomFactor=$zoomFactor"
-		}
-		::Import::ResizeImage . $zoomFactor $itOrig $itNew "local"
-	    }		
-	}
-	"GET IP" {
-	    # OBSOLETE!!!
-	    if {[regexp "^GET IP: +($wrd_)$" $line match getid]} {
-		
-		# Extract the unique request id number, and forward it.
-		if {[string equal $prefs(protocol) "jabber"]} {
-		    ::Jabber::WB::PutIPnumber $attrarr(-from) $getid
-		}
-	    }		
-	}
-	"PUT IP" {
-	    # OBSOLETE!!!
-	    if {[regexp "^PUT IP: +($wrd_) +($wrd_)$"   \
-	      $line match getid clientIP]} {
-		
-		# We have got the requested ip number from the client.
-		if {[string equal $prefs(protocol) "jabber"]} {
-		    ::Jabber::WB::GetIPCallback $attrarr(-from) $getid $clientIP
-		}
-	    }		
+	    set fileName [file tail [lindex $instr 0]]
+	    set optList [lrange $instr 1 end]
+	    set opts [::Import::GetTclSyntaxOptsFromTransport $optList]
+	    set tempChannel($channel) 1
+	    ::hooks::run serverPutRequestHook $channel $fileName $opts
 	}
 	default {
-	    
-	    # We couldn't recognize this command as our own.
-	    
+	    ::hooks::run serverCmdHook $channel $ip $port $line
 	}
-    }
+    }    
 }
 
 # IsServerCommandSafe --

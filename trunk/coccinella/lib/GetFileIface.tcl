@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: GetFileIface.tcl,v 1.16 2004-03-13 15:21:41 matben Exp $
+# $Id: GetFileIface.tcl,v 1.17 2004-03-15 13:26:11 matben Exp $
 
 package require getfile
 package require uriencode
@@ -108,19 +108,20 @@ proc ::GetFileIface::GetFile {wtop sock fileName opts} {
 	::getfile::get $sock $getstate(dstpath)  \
 	  -mimetype $mime -size $size -displayname $fileTail  \
 	  -progress [list [namespace current]::Progress $gettoken] \
-	  -command [list [namespace current]::Command $gettoken]
+	  -command  [list [namespace current]::Command $gettoken]
     } token]} {
 	::Debug 2 "\t ::getfile::get failed: $token"
+	set str [::GetFileIface::FormatMessage $gettoken $token]
 	tk_messageBox -title [::msgcat::mc {File Transfer Error}]  \
-	  -type ok -message $token
+	  -type ok -message $str
 	unset getstate
 	return
     }
-    set getstate(token) $token
-    set getstate(peername) [fconfigure $sock -peername]
+    set getstate(token)    $token
     if {[info exists optArr(-from)]} {	
 	set getstate(fromname) $optArr(-from)
     } else {
+	set getstate(peername) [fconfigure $sock -peername]
 	set getstate(fromname) [lindex $getstate(peername) 1]
     }
 }
@@ -212,6 +213,7 @@ proc ::GetFileIface::GetFileFromServer {wtop ip port path opts} {
 	  -progress [list [namespace current]::Progress $gettoken] \
 	  -command [list [namespace current]::Command $gettoken]
     } token]} {
+	set msg [::msgcat::mc {File Transfer Error}]
 	tk_messageBox -title [::msgcat::mc {File Transfer Error}]  \
 	  -type ok -message $token
 	unset getstate
@@ -377,8 +379,10 @@ proc ::GetFileIface::Command {gettoken token what msg} {
 
     set wtop $getstate(wtop)
     
+    set str [::GetFileIface::FormatMessage $gettoken $msg]
+    
     if {[string equal $what "error"]} {
-	::WB::SetStatusMessage $wtop $msg
+	::WB::SetStatusMessage $wtop $str
 	if {$prefs(talkative) >= 1} {
 	    tk_messageBox -title [::msgcat::mc {Get File Error}] \
 	      -type ok -message $msg
@@ -393,7 +397,7 @@ proc ::GetFileIface::Command {gettoken token what msg} {
 	unset getstate
 	getfile::cleanup $token
     } elseif {[string equal $what "ok"]} {
-	::WB::SetStatusMessage $wtop $msg
+	::WB::SetStatusMessage $wtop $str
 
 	::Debug 3 "+        status=[::getfile::status $token]"
 	if {[::getfile::status $token] == "ok"} {
@@ -412,6 +416,46 @@ proc ::GetFileIface::Command {gettoken token what msg} {
 	    getfile::cleanup $token
 	}
     }    
+}
+
+# GetFileIface::FormatMessage --
+# 
+#       Translate to readable message.
+
+proc ::GetFileIface::FormatMessage {gettoken msg} {
+    upvar #0 $gettoken getstate          
+    
+    set pars {}
+    set doformat 1
+    
+    # There are basically only two parameters to the strings: file and from.
+    # This makes total four possible combinations.
+    
+    switch -regexp -- $msg {
+	contacting - eoferr - negotiate - readerr - unknownprot - ended - \
+	  neterr - connerr {
+	    lappend pars $getstate(fromname)
+	}
+	finished {
+	    lappend pars $getstate(filetail) $getstate(fromname)
+	} starts {
+	    lappend pars $getstate(fromname) $getstate(filetail)
+	}
+	[0-9]* {
+	    set codetext [getfile::ncodetotext $msg]
+	    set msg [::msgcat::mc getnot200 $getstate(fromname) $msg $codetext]
+	    set doformat 0
+	}
+	default {
+	    set doformat 0
+	}
+    }    
+    if {$doformat} {
+	set str [eval {::msgcat::mc get${msg}} $pars]
+    } else {
+	set str $msg
+    }
+    return $str
 }
 
 # GetFileIface::UpdateProgress

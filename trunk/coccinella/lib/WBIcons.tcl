@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: WBIcons.tcl,v 1.2 2004-01-13 14:50:21 matben Exp $
+# $Id: WBIcons.tcl,v 1.3 2004-03-15 13:26:11 matben Exp $
 
 package provide WBIcons 1.0
 
@@ -240,6 +240,13 @@ set ::WB::iconsPreloaded(barvert) [image create photo -data {
     QNQEVppIsRK1XwMrWsRIkOLFgxsPilQFgGDJgukIphxZ8KRAlwNXCpTJ8qVJgzRp1oQJc6bK
     mjcH9lSVE6jQoD9jGrV5FGVSozxxPgUa1anSpVWn6mSZ9apPrEi9El1KMuzXs1TNjhU7MiAA
     Ow==
+}]
+
+set ::WB::iconsPreloaded(barvert) [image create photo -data {
+    R0lGODdhCwA2ALMAAP////e1ve+cre9zhOdae+dKY94xUtYAIdDQ0M7Ozpyc
+    nISEhFJSUgAAAAAAAAAAACwAAAAACwA2AAAEYjDJSauVQQzCSTGLdIzksShT
+    aaIUeV7rJScAVVcMlc/VLfmTnUTI+9ksRGIRCBzqisdJM5GESqPPoNV4xWWt
+    TOQXGvZqt+Wxkpc+O9FYN3VLi7/vZPtcvtRXEwiBgoOEhQgRADs=
 }]
 
 set ::WB::iconsPreloaded(barhoriz) [image create photo -data {

@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: PutFileIface.tcl,v 1.17 2004-03-13 15:21:41 matben Exp $
+# $Id: PutFileIface.tcl,v 1.18 2004-03-15 13:26:11 matben Exp $
 
 package require putfile
 package require uriencode
@@ -39,12 +39,13 @@ proc ::PutFileIface::PutFile {wtop fileName ip optList} {
     variable $puttoken
     upvar 0 $puttoken putstate
 
-    set putstate(wtop) $wtop
-    set putstate(file) $fileName
-    set putstate(tail) [file tail $fileName]
-    set putstate(mime) $mime
-    set putstate(ip) $ip
-    set putstate(optlist) $optList
+    set putstate(wtop)     $wtop
+    set putstate(file)     $fileName
+    set putstate(filetail) [file tail $fileName]
+    set putstate(mime)     $mime
+    set putstate(ip)       $ip
+    set putstate(optlist)  $optList
+    puts "optList=$optList"
     
     if {[catch {
 	::putfile::put $fileName $ip $prefs(remotePort)  \
@@ -58,6 +59,12 @@ proc ::PutFileIface::PutFile {wtop fileName ip optList} {
 	unset putstate
     } else {
 	set putstate(token) $tok
+	array set optArr $optList
+	if {[info exists optArr(from:)]} {	
+	    set putstate(fromname) $optArr(from:)
+	} else {
+	    set putstate(fromname) $ip
+	}
     }
 }
 
@@ -81,27 +88,28 @@ proc ::PutFileIface::PutCommand {puttoken token what msg} {
     global  prefs
     upvar #0 $puttoken putstate          
     
-    Debug 2 "+      PutCommand:: token=$token, what=$what msg=$msg"
+    Debug 2 "+\t\tPutCommand:: token=$token, what=$what msg=$msg"
 
     set wtop $putstate(wtop)
-
+    set str [::PutFileIface::FormatMessage $puttoken $msg]
+    
     if {[string equal $what "error"]} {
-	set ncode [::putfile::ncode $token]
+	set ncode   [::putfile::ncode $token]
 	set codetxt [::putfile::ncodetotext $ncode]
 	
 	# Depending on the flavour of the return code do different things.
 	if {$prefs(talkative) >= 1} {
 	    tk_messageBox -title [::msgcat::mc {Put File Error}]  \
-	      -type ok -message $msg
+	      -type ok -message $str
 	} else {
 	    
 	    # The 'msg' is typically a low level error msg.
 	    switch -- $ncode {
 		320 - 321 - 323 {
-		    ::WB::SetStatusMessage $wtop $msg
+		    ::WB::SetStatusMessage $wtop $str
 		} 
 		default {
-		    set errmsg "Failed while putting file \"$putstate(tail)\""
+		    set errmsg "Failed while putting file \"$putstate(filetail)\""
 		    if {$prefs(talkative) >= 1} {
 			tk_messageBox -title [::msgcat::mc {Put File Error}] \
 			  -type ok -message $errmsg
@@ -112,12 +120,53 @@ proc ::PutFileIface::PutCommand {puttoken token what msg} {
 	}
 	unset putstate
     } elseif {[string equal $what "ok"]} {
-	::WB::SetStatusMessage $wtop $msg
+	::WB::SetStatusMessage $wtop $str
 	if {[::putfile::status $token] == "ok"} {
 	    ::putfile::cleanup $token
 	    unset putstate
 	}
     }
+}
+
+# PutFileIface::FormatMessage --
+# 
+#       Translate to readable message.
+
+proc ::PutFileIface::FormatMessage {puttoken msg} {
+    upvar #0 $puttoken putstate          
+    
+    set pars {}
+    set doformat 1
+    
+    # There are basically only two parameters to the strings: file and from.
+    # This makes total four possible combinations.
+    
+    switch -regexp -- $msg {
+	contacting - eoferr - negotiate - readerr - unknownprot - ended - \
+	  neterr - connerr {
+	    lappend pars $putstate(fromname)
+	}
+	finished {
+	    lappend pars $putstate(filetail) $putstate(fromname)
+	}
+	starts {
+	    lappend pars $putstate(fromname) $putstate(filetail)
+	}
+	[0-9]* {
+	    set codetxt [::putfile::ncodetotext $msg]
+	    set msg [::msgcat::mc putnot200 $putstate(fromname) $msg $codetxt]
+	    set doformat 0
+	}
+	default {
+	    set doformat 0
+	}
+    }    
+    if {$doformat} {
+	set str [eval {::msgcat::mc put${msg}} $pars]
+    } else {
+	set str $msg
+    }
+    return $str
 }
 
 # PutFileIface::PutFileToClient --
@@ -159,12 +208,12 @@ proc ::PutFileIface::PutFileToClient {wtop s ip relativeFilePath opts} {
     variable $puttoken
     upvar 0 $puttoken putstate
 
-    set putstate(wtop) $wtop
-    set putstate(file) $fileName
-    set putstate(tail) [file tail $fileName]
-    set putstate(mime) $mime
-    set putstate(ip) $ip
-    set putstate(optlist) $optList
+    set putstate(wtop)     $wtop
+    set putstate(file)     $fileName
+    set putstate(filetail) [file tail $fileName]
+    set putstate(mime)     $mime
+    set putstate(ip)       $ip
+    set putstate(optlist)  $optList
     
     # And finally...
     if {[catch {
