@@ -25,7 +25,7 @@
 # 
 # Copyright (C) 2002-2003 Mats Bengtsson
 # 
-# $Id: tree.tcl,v 1.7 2003-10-23 06:27:59 matben Exp $
+# $Id: tree.tcl,v 1.8 2003-10-24 09:33:40 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -675,7 +675,9 @@ proc ::tree::WidgetProc {w command args} {
 		    if {[string equal $val $ftag]} {
 			set ind [expr [string last ":tags" $key] - 1]
 			set uid [string range $key 0 $ind]
-			lappend vlist $uid2v($uid)
+			if {[info exists uid2v($uid)]} {
+			    lappend vlist $uid2v($uid)
+			}
 		    }
 		}
 		return $vlist
@@ -861,9 +863,14 @@ proc ::tree::Configure {w args} {
     return ""
 }
 
-# Initialize a element of the tree.
-# Internal use only
+# Initialize a element of the tree. Internal use only
 #
+# Arguments:
+#       w       the widget path.
+#       v       the item as a list.
+#       
+# Results:
+#       none.
 
 proc ::tree::DfltConfig {w v} {
 
@@ -1030,17 +1037,12 @@ proc ::tree::NewItem {w v args} {
     upvar ::tree::${w}::v2uid v2uid
     upvar ::tree::${w}::uid2v uid2v
     
-    # Make fresh uid.
-    set uid [incr vuid]
-    set v [NormList $v]
-    set v2uid($v) $uid
-    set uid2v($uid) $v
-    
+    set v [NormList $v]   
     set dir [lrange $v 0 end-1]
     set tail [lindex $v end]
     
-    set dir [FileTree dirname $v]
-    set tail [FileTree tail $v]
+    #set dir [FileTree dirname $v]
+    #set tail [FileTree tail $v]
     set uidDir $v2uid($dir)
     
     if {![info exists treestate($uidDir:open)]} {
@@ -1062,6 +1064,11 @@ proc ::tree::NewItem {w v args} {
 	set treestate($uidDir:children)   \
 	  [lsort -$options(-sortorder) $treestate($uidDir:children)]
     }
+
+    # Make fresh uid now that we know it's ok to create it.
+    set uid [incr vuid]
+    set v2uid($v) $uid
+    set uid2v($uid) $v
     
     # Initialize a element of the tree.
     DfltConfig $w $v
@@ -1119,6 +1126,7 @@ proc ::tree::DelItem {w v args} {
     variable widgetGlobals
     upvar ::tree::${w}::treestate treestate
     upvar ::tree::${w}::v2uid v2uid
+    upvar ::tree::${w}::uid2v uid2v
     
     Debug 1 "::tree::DelItem w=$w, v='$v'"
     
@@ -1129,7 +1137,7 @@ proc ::tree::DelItem {w v args} {
     }
     array set opts {-childsonly 0}
     array set opts $args
-    if {[llength $v] == 0} {
+    if {$v == ""} {
 	
 	# Remove all content.
 	catch {unset treestate}
@@ -1146,6 +1154,9 @@ proc ::tree::DelItem {w v args} {
 	    unset treestate($uid:children)
 	    unset treestate($uid:icon)
 	    unset treestate($uid:text)
+	    unset treestate($uid:bg)
+	    unset treestate($uid:tags)
+	    catch {unset treestate($uid:tag)}
 	    set dir [lrange $v 0 end-1]
 	    set tail [lindex $v end]
 	    set uidDir $v2uid($dir)
@@ -1154,6 +1165,8 @@ proc ::tree::DelItem {w v args} {
 		set treestate($uidDir:children)   \
 		  [lreplace $treestate($uidDir:children) $i $i]
 	    }
+	    unset v2uid($v)
+	    unset uid2v($uid)
 	}
     }
     BuildWhenIdle $w
@@ -1406,6 +1419,8 @@ proc ::tree::BuildLayer {w v in} {
     set uid $v2uid($v)
     set start [expr $treestate(y) - 10]
     set y $treestate(y)
+
+    Debug 3 "\tuid=$uid"
     
     # Loop through all childrens.
     foreach c $treestate($uid:children) {
