@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Privacy.tcl,v 1.2 2004-04-30 12:58:46 matben Exp $
+# $Id: Privacy.tcl,v 1.3 2004-05-01 14:23:40 matben Exp $
 
 package provide Privacy 1.0
 
@@ -74,9 +74,11 @@ proc ::Privacy::BuildPrefsPage {page} {
     pack $fpage -side top -anchor w -padx 8 -pady 4
     
     label $fpage.lmsg -wraplength 360 -justify left -text \
-      "Each user may administrate zero or many lists. At least one list\
-      is the default list which is applied by the server. This can be replaced\
-      by the active list, selected from below."
+      "Each user may administrate zero or many lists.\
+      Only the active or default list affect message processing.\
+      Any active list affects only the session.\
+      The default list is processed if there is no active list."
+    
     pack  $fpage.lmsg -side top -anchor w -pady 1
     
     frame  $fpage.bottom
@@ -143,11 +145,11 @@ proc ::Privacy::BuildPrefsPage {page} {
     set wbts(edit) $wfrbt.edit
     set wbts(del)  $wfrbt.del    
     
-    button $wfrbt.new -text [::msgcat::mc New]  \
+    button $wfrbt.new -text [::msgcat::mc New] -state disabled \
       -command [namespace current]::NewList
-    button $wfrbt.edit -text [::msgcat::mc Edit]  \
+    button $wfrbt.edit -text [::msgcat::mc Edit] -state disabled \
       -command [namespace current]::EditList
-    button $wfrbt.del -text [::msgcat::mc Delete]  \
+    button $wfrbt.del -text [::msgcat::mc Delete] -state disabled \
       -command [namespace current]::DelList
     pack $wfrbt.new $wfrbt.edit $wfrbt.del -side top -padx 6 -pady 4 \
       -fill x
@@ -197,7 +199,6 @@ proc ::Privacy::TableDeleteLine {name} {
     set w $wtable
     $w configure -state normal
     foreach {start end} [$w tag ranges tname] {
-	#puts "name='$name' start=$start, end=$end, '[$w get $start $end]'"
 	if {[string equal $name [$w get $start $end]]} {
 	    $w delete "$start linestart" "$end lineend +1 char"
 	    break
@@ -215,7 +216,6 @@ proc ::Privacy::TableSelect {w x y} {
     
     $w tag remove select 1.0 end
     set ind [$w index @$x,$y]
-    #puts "x=$x, y=$y, ind=$ind"
     set prevselectediline $selectediline
     set textBackground [$w cget -background]
     
@@ -232,7 +232,6 @@ proc ::Privacy::TableSelect {w x y} {
 	# Find the name.
 	set range [::Privacy::TextGetRange $w tname "$ind lineend"]
 	set name [eval $w get $range]
-	#puts "name=$name"
 	set selected $name
 	::Privacy::Selected $name
 	set tiline [lsearch -glob -inline [$w tag names $ind] tiline:*]
@@ -300,7 +299,6 @@ proc ::Privacy::DefaultCmd { } {
     variable defaultVar
     variable prevDefaultVar
 
-    #puts "::Privacy::DefaultCmd defaultVar=$defaultVar, prevDefaultVar=$prevDefaultVar"
     if {$defaultVar == $prevDefaultVar} {
 	# Deselect all.
 	set defaultVar ""
@@ -336,19 +334,21 @@ proc ::Privacy::GetListsCB {jlibname type subiq args} {
     variable prevDefaultVar
     variable prevActiveVar
     variable warrows
+    variable wbts
 
     if {![winfo exists $warrows]} {
 	return
     }
     $warrows stop
     
-    puts "::Privacy::GetListsCB $type, $subiq, '$args'"
+    #puts "::Privacy::GetListsCB $type, $subiq, '$args'"
     
     switch -- $type {
 	error {
 	    set statmsg [::msgcat::mc {Filter options unavailable at this server}]
 	}
 	default {
+	    $wbts(new) configure -state normal
 	    set statmsg [::msgcat::mc {Filter lists obtained from server}]
 	    
 	    # Cache xml.
@@ -358,7 +358,6 @@ proc ::Privacy::GetListsCB {jlibname type subiq args} {
 	    set defaultVar ""
 	    set prevDefaultVar ""
 	    foreach wc [winfo children $wtable] {
-		puts "wc=$wc"
 		destroy $wc
 	    }
 	    
@@ -415,7 +414,7 @@ proc ::Privacy::Save { } {
     variable activeVar
     variable defaultVar
     
-    puts "::Privacy::Save"
+    #puts "::Privacy::Save"
         
     ::Privacy::SetActiveDefaultList active  $activeVar
     ::Privacy::SetActiveDefaultList default $defaultVar
@@ -446,10 +445,12 @@ proc ::Privacy::DelListCB {name jlibname type subiq args} {
     
     switch -- $type {
 	error {
-	    set statmsg "Error deleting list $name"
+	    set statmsg "Error deleting list \"$name\""
+	    ::Jabber::AddErrorLog [clock format [clock seconds] -format "%H:%M:%S"]  \
+	      "" $statmsg
 	}
 	default {
-	    set statmsg "List $name deleted"
+	    set statmsg "List \"$name\" deleted"
 	    ::Privacy::TableDeleteLine $name
 	}
     }
@@ -470,7 +471,7 @@ proc ::Privacy::SetActiveDefaultList {which name} {
 
 proc ::Privacy::SetListCB {jlibname type subiq args} {
 
-    puts "::Privacy::SetListCB type=$type"
+    #puts "::Privacy::SetListCB type=$type"
     
     if {$type == "error"} {
 	
@@ -529,7 +530,7 @@ proc ::Privacy::List::GetListCB {name jlibname type subiq args} {
     if {![winfo exists $warrows]} {
 	return
     }
-    puts "::Privacy::List::GetListCB name=$name, $type, $subiq, $args"
+    #puts "::Privacy::List::GetListCB name=$name, $type, $subiq, $args"
     $warrows stop
     
     switch -- $type {
@@ -546,8 +547,10 @@ proc ::Privacy::List::GetListCB {name jlibname type subiq args} {
 	    variable $token
 	    upvar 0 $token state
 	    
+	    # If we get a list from the server we shouldn't be able to change
+	    # its name.
 	    set state(name) $name
-	    # $state(wname) configure -state disabled
+	    $state(wname) configure -state disabled
 	    
 	    # jabberd2 seems to return the "full monty", not XMPP!
 	    foreach listElem [wrapper::getchildren $subiq] {
@@ -598,9 +601,12 @@ proc ::Privacy::List::Build { } {
     frame $w.frall -borderwidth 1 -relief raised
     pack  $w.frall -fill both -expand 1 -ipadx 4
 
-    message $w.frall.msg -width 300 -text "Each list contains one or many rules,\
-      each rule specify the type of events it acts on, "
-    pack    $w.frall.msg -side top -anchor w
+    label $w.frall.msg -wraplength 440 -justify left -text \
+      "Each list contains one or many rules,\
+      each rule specify the type of events it acts on,\
+      and the action it shall take.\
+      If you specify a group to block it must exist in your roster."
+    pack    $w.frall.msg -side top -anchor w -pady 2 -padx 10
     
     set wfr $w.frall.fr
     frame $wfr
@@ -649,7 +655,15 @@ proc ::Privacy::List::Build { } {
       -side left -padx 5 -pady 0
     pack $frbot -side bottom -fill both -expand 1 -padx 8 -pady 6
 
-
+    wm resizable $w 0 0
+    
+    # Trick to resize the labels wraplength.
+    set script [format {
+	update idletasks
+	%s.frall.msg configure -wraplength [expr [winfo reqwidth %s] - 30]
+    } $w $w]    
+    after idle $script
+    
     return $token
 }
 
@@ -677,12 +691,13 @@ proc ::Privacy::List::Set {token} {
 
 proc ::Privacy::List::SetListCB {name jlibname type subiq args} {    
     upvar ::Privacy::warrows warrows
+    upvar ::Privacy::wtable wtable
     upvar ::Privacy::statmsg statmsg
     
     if {![winfo exists $warrows]} {
 	return
     }
-    puts "::Privacy::List::SetListCB type=$type"
+    #puts "::Privacy::List::SetListCB type=$type"
     $warrows stop
     
     switch -- $type {
@@ -739,7 +754,7 @@ proc ::Privacy::List::BuildItem {token} {
     grid $wtype $wval $wblk $wact $wdel -sticky w
     
     set state(action${i}) Deny
-    set state(value${i})    ""
+    set state(value${i})  ""
     set state(block${i})  {Incoming Messages}
     return $state(i)
 }
@@ -748,7 +763,7 @@ proc ::Privacy::List::FillItem {token itemi xmllist} {
     variable $token
     upvar 0 $token state
     
-    puts "::Privacy::List::FillItem itemi=$itemi, xmllist=$xmllist"
+    #puts "::Privacy::List::FillItem itemi=$itemi, xmllist=$xmllist"
     if {![winfo exists $state(w)]} {
 	return
     }
@@ -770,7 +785,7 @@ proc ::Privacy::List::Delete {token i} {
     variable $token
     upvar 0 $token state
     
-    puts "::Privacy::List::Delete i=$i"
+    #puts "::Privacy::List::Delete i=$i"
     
     set wit $state(wit)
     foreach {wtype wval wblk wact wdel}  \

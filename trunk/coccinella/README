@@ -109,6 +109,11 @@ Translations:
     German:     Hermann J. Beckers
     Dutch:      Sander Devrieze
 
+Bug Reports:
+
+    Either send them to me directly: matben@privat.utfors.se , or report them
+    at Source Forge: http://sourceforge.net/tracker/?group_id=68334&atid=520863
+
 Known Bugs:
 
     * Althogh the server is using a safe interpreter for the critical parts
