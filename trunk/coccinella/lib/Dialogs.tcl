@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.35 2004-03-16 15:09:08 matben Exp $
+# $Id: Dialogs.tcl,v 1.36 2004-03-31 07:55:19 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -210,14 +210,14 @@ proc ::Dialogs::InfoOnPlugins { } {
     if {[::Plugins::IsHost QuickTimeTcl] &&  \
       ![::Plugins::HavePackage QuickTimeTcl]} {
 
-	::Text::ConfigureLinkTagForTextWidget $wtxt linktag linkactive
+	::Text::ConfigureLinkTagForTextWidget $wtxt urltag activeurltag
 	set ad {Get QuickTime for free from Apple at www.apple.com/quicktime.\
 	  It adds a lot of functionality to this application.}
 	$wtxt insert end "\n" tline
 	$wtxt insert end "QuickTimeTcl\n" ttitle
 	$wtxt insert end "\n" tline
 	$wtxt insert end "\tDownload:\t" tkey
-	set textCmds [::Text::ParseHttpLinks $ad ttxt linktag]
+	set textCmds [::Text::ParseHttpLinks $ad ttxt urltag]
 	foreach cmd $textCmds {
 	    eval $wtxt $cmd
 	}	
@@ -894,7 +894,7 @@ proc ::Dialogs::InitAboutQuickTimeTcl { } {
     variable initedAboutQuickTimeTcl
     variable fakeQTSampleFile
     
-    set origMovie [file join $this(path) images FakeSample.mov]
+    set origMovie [file join $this(imagePath) FakeSample.mov]
     set fakeQTSampleFile $origMovie
     
     # QuickTime doesn't understand vfs; need to copy out to tmp dir.

@@ -38,6 +38,6 @@
 *Tablelist.Font:                     {Lucida Grande} 11
 *Tablelist.highlightThickness:       3
 *Tablelist.BorderWidth:              1              
-*Tree.openIcons:                     triangle
+*Tree.styleIcons:                    triangle
 *Tree.treeColor:                     
 

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.41 2004-03-29 13:56:27 matben Exp $
+# $Id: MailBox.tcl,v 1.42 2004-03-31 07:55:19 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -292,7 +292,7 @@ proc ::Jabber::MailBox::Build {args} {
       -borderwidth 1 -relief sunken -yscrollcommand [list $wyscmsg set] \
       -state disabled
     $wtextmsg tag configure normal
-    ::Text::ConfigureLinkTagForTextWidget $wtextmsg linktag tact
+    ::Text::ConfigureLinkTagForTextWidget $wtextmsg urltag activeurltag
     scrollbar $wyscmsg -orient vertical -command [list $wtextmsg yview]
     grid $wtextmsg -column 0 -row 0 -sticky news
     grid $wyscmsg -column 1 -row 0 -sticky ns
@@ -1001,7 +1001,7 @@ proc ::Jabber::MailBox::DisplayMsg {id} {
     foreach {subject from time junk muid body} $mailbox($id) break
     $wtextmsg configure -state normal
     $wtextmsg delete 1.0 end
-    ::Text::ParseAndInsert $wtextmsg $body normal linktag
+    ::Jabber::ParseAndInsertText $wtextmsg $body normal urltag
     $wtextmsg configure -state disabled
     
     # Run this hook (speech).

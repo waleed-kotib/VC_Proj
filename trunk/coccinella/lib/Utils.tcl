@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.15 2004-03-28 14:50:51 matben Exp $
+# $Id: Utils.tcl,v 1.16 2004-03-31 07:55:19 matben Exp $
 
 namespace eval ::Utils:: {
 
@@ -551,100 +551,6 @@ proc ::Text::ButtonPressOnURL {w idurl} {
     if {[::Utils::IsWellformedUrl $url]} {
 	::Utils::OpenHtmlInBrowser $url
     }
-}
-
-# Text::ParseSmileys --
-# 
-#
-# Arguments:
-#       str         the text string, tcl special chars already protected
-#       
-# Results:
-#       A list {str textimage ?str textimage ...?}
-
-proc ::Text::ParseSmileys {str} {
-    global  this
-    
-    upvar ::UI::smiley smiley
-    upvar ::UI::smileyLongNames smileyLongNames
-    upvar ::UI::smileyLongIm smileyLongIm
-    
-    # Since there are about 60 smileys we need to be economical here.    
-    # Check first if there are any short smileys.
-	
-    # Protect all  *regexp*  special characters. Regexp hell!!!
-    # Carefully embrace $smile since may contain ; etc.
-    
-    foreach smile [array names smiley] {
-	set sub "\} \{image create end -image $smiley($smile) -name \{$smile\}\} \{"
-	regsub -all {[);(|]} $smile {\\\0} smileExp
-	regsub -all $smileExp $str $sub str
-    }
-	
-    # Now check for any "long" names, such as :angry: :cool: etc.
-    set candidates {}
-    set ndx 0
-    
-    while {[regexp -start $ndx -indices -- {:[a-zA-Z]+:} $str ind]} {
-        set ndx [lindex $ind 1]
-	set candidate [string range $str [lindex $ind 0] [lindex $ind 1]]
-	if {[lsearch $smileyLongNames $candidate] >= 0} {
-	    lappend candidates $candidate
-	    
-	    # Load image if not done that.
-	    if {![info exists smileyLongIm($candidate)]} {
-		set fileName "smiley-[string trim $candidate :].gif"
-		set smileyLongIm($candidate) [image create photo -format gif  \
-		  -file [file join $this(path) images smileys $fileName]]	    
-	    }
-	}
-    }
-    if {[llength $candidates]} {
-	regsub -all {\\|&} $str {\\\0} str
-	foreach smile $candidates {
-	    set sub "\} \{image create end -image $smileyLongIm($smile) -name $smile\} \{"
-	    regsub -all $smile $str $sub str
-	}
-    }
-    
-    return "\{$str\}"
-}
-
-# Text::ParseAll --
-# 
-#       Combines 'ParseSmileys' and 'ParseHttpLinks'.
-#
-# Arguments:
-#       str         the text string
-#       
-# Results:
-#       A list {textcmd textcmd ...} where textcmd is typically:
-#       "insert end {Some text} $tag"
-
-proc ::Text::ParseAll {str tag linktag} {
-        
-    # Protect Tcl special characters, quotes included.
-    regsub -all {([][$\\{}"])} $str {\\\1} str
-
-    set strSmile [::Text::ParseSmileys $str]
-    
-    foreach {txt icmd} $strSmile {
-	set httpCmd [::Text::ParseHttpLinks $txt $tag $linktag]
-	if {$icmd == ""} {
-	    eval lappend res $httpCmd
-	} else {
-	    eval lappend res $httpCmd [list $icmd]
-	}
-    }
-    return $res
-}
-
-proc ::Text::ParseAndInsert {w str tag linktag} {
-    
-    foreach cmd [::Text::ParseAll $str $tag $linktag] {
-	eval {$w} $cmd
-    }
-    $w insert end "\n"
 }
 
 proc ::Text::TransformToPureText {w args} {    

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.46 2004-03-29 13:56:27 matben Exp $
+# $Id: Roster.tcl,v 1.47 2004-03-31 07:55:19 matben Exp $
 
 package provide Roster 1.0
 
@@ -274,12 +274,12 @@ proc ::Jabber::Roster::Build {w} {
     grid columnconfigure $wbox 0 -weight 1
     grid rowconfigure $wbox 0 -weight 1    
     
-    set dirIcon [option get $wtree dirImage {}]
+    set dirImage [::Theme::GetImage [option get $wtree dirImage {}]]
     
     # Add main tree dirs.
     foreach gpres $jprefs(treedirs) {
 	$wtree newitem [list $gpres] -dir 1 -text [::msgcat::mc $gpres] \
-	  -tags head -image $dirIcon
+	  -tags head -image $dirImage
     }
     foreach gpres $jprefs(closedtreedirs) {
 	$wtree itemconfigure [list $gpres] -open 0
@@ -1060,8 +1060,8 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
     set treectag item[incr treeuid]    
     set itemOpts [list -text $itemTxt -canvastags $treectag]    
     set icon [eval {::Jabber::Roster::GetPresenceIcon $jidx $presence} $args]
-    set groupIcon [option get $wtree groupImage {}]
-	
+    set groupImage [::Theme::GetImage [option get $wtree groupImage {}]]
+
     # If we have an ask attribute, put in Pending tree dir.
     if {[info exists argsArr(-ask)] &&  \
       [string equal $argsArr(-ask) "subscribe"]} {
@@ -1077,7 +1077,7 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
 	    set childs [$wtree children [list $gpresarr($presence)]]
 	    if {[lsearch -exact $childs $grp] < 0} {
 		$wtree newitem [list $gpresarr($presence) $grp] -dir 1 \
-		  -tags group -image $groupIcon
+		  -tags group -image $groupImage
 	    }
 	    eval {$wtree newitem [list $gpresarr($presence) $grp $jidx] \
 	      -image $icon -tags $jidx} $itemOpts

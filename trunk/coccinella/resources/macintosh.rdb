@@ -35,5 +35,5 @@
 *MacTabnotebook.style:               mac
 *Tablelist.Font:                     Geneva 9
 *Tablelist.highlightThickness:       3
-*Tree.openIcons:                     triangle
+*Tree.styleIcons:                     triangle
 *Tree.treeColor:                     

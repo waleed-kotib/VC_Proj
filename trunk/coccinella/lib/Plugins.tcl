@@ -14,7 +14,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Plugins.tcl,v 1.16 2004-03-24 14:43:11 matben Exp $
+# $Id: Plugins.tcl,v 1.17 2004-03-31 07:55:19 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -200,7 +200,7 @@ proc ::Plugins::InitTk { } {
     set plugin(tk,ver) [info tclversion]
     set plugin(tk,importProc) ::Import::DrawImage
     set plugin(tk,icon,12) [image create photo -format gif -file \
-      [file join $this(path) images tklogo12.gif]]
+      [file join $this(imagePath) tklogo12.gif]]
     #set supSuff(tk) {.gif}
     set supportedMimeTypes(tk) {image/gif image/x-portable-pixmap}
     set plugin(tk,mimes) $supportedMimeTypes(tk)
@@ -227,9 +227,9 @@ proc ::Plugins::InitQuickTimeTcl { } {
     
     # Define any 16x16 icon to spice up the UI.
     set plugin(QuickTimeTcl,icon,16) [image create photo -format gif -file \
-      [file join $this(path) images qtlogo16.gif]]
+      [file join $this(imagePath) qtlogo16.gif]]
     set plugin(QuickTimeTcl,icon,12) [image create photo -format gif -file \
-      [file join $this(path) images qtlogo12.gif]]
+      [file join $this(imagePath) qtlogo12.gif]]
     
     # We must list supported MIME types for each package.
     # For QuickTime:

@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.47 2004-03-24 14:43:10 matben Exp $
+# $Id: Coccinella.tcl,v 1.48 2004-03-31 07:55:17 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -181,14 +181,17 @@ switch -- $this(platform) {
     windows {
 	if {[info exists env(USERPROFILE)]} {
 	    set winPrefsDir $env(USERPROFILE)
+	} elseif {[info exists env(APPDATA)]} {
+	    set winPrefsDir $env(APPDATA)
 	} elseif {[info exists env(HOME)]} {
 	    set winPrefsDir $env(HOME)
-	} elseif {[lsearch -glob [file volumes] "c:*"]} {
-	    set winPrefsDir c:/
-	} elseif {[lsearch -glob [file volumes] "C:*"]} {
-	    set winPrefsDir C:/
+	} elseif {[info exists env(HOMEDRIVE)]} {
+	    set winPrefsDir $env(HOMEDRIVE)
 	} else {
-	    set winPrefsDir $this(path)
+	    set vols [lsort [file volumes]]
+	    set vols [lsearch -all -inline -glob -not $vols A:*]
+	    set vols [lsearch -all -inline -glob -not $vols B:*]
+	    set winPrefsDir [lindex $vols 0]
 	}
 	set this(prefsPath) [file join $winPrefsDir Coccinella]
     }

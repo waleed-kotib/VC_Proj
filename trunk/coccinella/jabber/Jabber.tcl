@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.73 2004-03-29 13:56:27 matben Exp $
+# $Id: Jabber.tcl,v 1.74 2004-03-31 07:55:18 matben Exp $
 
 package provide Jabber 1.0
 
@@ -22,6 +22,7 @@ package require combobox
 package require tinyfileutils
 package require uriencode
 
+# We should have some component mechanism that lets packages load themselves.
 package require MailBox
 package require NewMsg
 package require GotMsg
@@ -44,6 +45,7 @@ package require JForms
 package require Profiles
 package require JPrefs
 package require Filter
+package require Emoticons
 
 
 namespace eval ::Jabber:: {
@@ -614,6 +616,7 @@ proc ::Jabber::MessageCallback {jlibName type args} {
 		  [::msgcat::mc jamesserrsend $attrArr(-from) $errcode $errmsg]]  \
 		  -icon error -type ok		
 	    }
+	    eval {::hooks::run newErrorMessageHook} $args
 	}
 	chat {
 	    eval {::hooks::run newChatMessageHook $attrArr(-body)} $args
@@ -1371,6 +1374,40 @@ proc ::Jabber::BtSetStatus {w} {
     
     set finishedStat 1
     destroy $w
+}
+
+# Jabber::ParseAndInsertText --
+#
+#       Parses for smileys and url's and insert into text widget.
+#       
+# Arguments:
+#       w           text widget
+#       str         raw text to process
+#       
+# Results:
+#       none.
+
+proc ::Jabber::ParseAndInsertText {w str tag linktag} {
+    
+    # Smileys.
+    set cmdList [::Emoticons::Parse $str]
+    
+    # Http links.
+    set textCmdList {}
+    foreach {txt icmd} $cmdList {
+	set httpCmd [::Text::ParseHttpLinks $txt $tag $linktag]
+	if {$icmd == ""} {
+	    eval lappend textCmdList $httpCmd
+	} else {
+	    eval lappend textCmdList $httpCmd [list $icmd]
+	}
+    }
+
+    # Insert into text widget.
+    foreach cmd $textCmdList {
+	eval {$w} $cmd
+    }
+    $w insert end "\n"
 }
 
 # Jabber::SetPrivateData --

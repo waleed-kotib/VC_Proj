@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.49 2004-03-28 14:50:50 matben Exp $
+# $Id: Chat.tcl,v 1.50 2004-03-31 07:55:18 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -286,6 +286,8 @@ proc ::Jabber::Chat::GotMsg {body args} {
     }
     
     # See if we've got a jabber:x:event (JEP-0022).
+    # 
+    #  Should we handle this with hooks????
     if {[info exists argsArr(-x)]} {
 	set xevent [lindex [wrapper::getnamespacefromchilds  \
 	  $argsArr(-x) x "jabber:x:event"] 0]
@@ -359,12 +361,12 @@ proc ::Jabber::Chat::InsertMessage {token whom body} {
 	me {
 	    $wtext insert end $prefix mepre
 	    $wtext insert end "   " metext
-	    ::Text::ParseAndInsert $wtext $body metext linktag
+	    ::Jabber::ParseAndInsertText $wtext $body metext urltag
 	}
 	you {
 	    $wtext insert end $prefix youpre
 	    $wtext insert end "   " youtext
-	    ::Text::ParseAndInsert $wtext $body youtext linktag
+	    ::Jabber::ParseAndInsertText $wtext $body youtext urltag
 	}
 	sys {
 	    $wtext insert end $prefix syspre
@@ -695,7 +697,7 @@ proc ::Jabber::Chat::ConfigureTextTags {w wtext} {
 	eval {$wtext tag configure $tag} $opts($tag)
     }
     
-    ::Text::ConfigureLinkTagForTextWidget $wtext linktag tact
+    ::Text::ConfigureLinkTagForTextWidget $wtext urltag activeurltag
 }
 
 proc ::Jabber::Chat::SetFont {theFont} {    
@@ -1283,7 +1285,7 @@ proc ::Jabber::Chat::BuildHistory {jid} {
 		$wtext insert end "\[$cwhen\] <$cjid>" $ptag
 		$wtext insert end "   " $ptxttag
 		
-		::Text::ParseAndInsert $wtext $body $ptxttag linktag
+		::Jabber::ParseAndInsertText $wtext $body $ptxttag urltag
 	    }
 	}
     } else {
