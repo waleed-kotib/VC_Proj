@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.37 2004-01-15 14:13:00 matben Exp $
+# $Id: Preferences.tcl,v 1.38 2004-01-16 15:01:10 matben Exp $
  
 package require notebook
 package require tree
@@ -114,7 +114,6 @@ proc ::Preferences::Build { } {
     $wtree newitem {General} -text [::msgcat::mc General]
     $wtree newitem {General {Network Setup}} -text [::msgcat::mc {Network Setup}]
     $wtree newitem {General {Proxy Setup}} -text [::msgcat::mc {Proxy Setup}]
-    $wtree newitem {General {Sounds & Speech}} -text [::msgcat::mc {Sounds & Speech}]
     $wtree newitem {General Shortcuts} -text [::msgcat::mc Shortcuts]
     if {!$prefs(stripJabber)} {
 	$wtree newitem {Jabber}
@@ -146,11 +145,7 @@ proc ::Preferences::Build { } {
     # Proxies Setup page -------------------------------------------------------
     set frpoxy [$nbframe page {Proxy Setup}]
     ::Preferences::Proxies::BuildPage $frpoxy
-    
-    # Sounds & Speech page -----------------------------------------------------
-    set frpss [$nbframe page {Sounds & Speech}]
-    ::Preferences::BuildPageSounds $frpss    
-    
+        
     # Shortcuts page -----------------------------------------------------------
     set frpshort [$nbframe page Shortcuts]
     ::Preferences::Shorts::BuildPage $frpshort    
@@ -310,33 +305,6 @@ proc ::Preferences::ResetToUserDefaults { } {
 
 
     ::hooks::run prefsUserDefaultsHook
-}
-
-proc ::Preferences::BuildPageSounds {page} {
-    global  prefs
-    
-    variable xpadbt
-    variable tmpJPrefs
-    variable tmpPrefs
-    variable ypad 
-    
-    set fontSB [option get . fontSmallBold {}]
-    
-    
-    set labpalrt [::mylabelframe::mylabelframe $page.alrt [::msgcat::mc {Alert sounds}]]
-    pack $page.alrt -side top -anchor w -ipadx 10 -fill x
-    label $labpalrt.lbl -text [::msgcat::mc prefsounpick]
-    pack $labpalrt.lbl -side top -anchor w -padx 6 -pady $ypad
-    foreach name {online offline newmsg statchange connected} txt {
-	{User is online} 
-	{User is offline}
-	{New incoming message} 
-	{User's status changed}
-	{Is connected}} {
-	    checkbutton $labpalrt.$name -text "  [::msgcat::mc $txt]"  \
-	      -variable "[namespace current]::tmpJPrefs(snd,$name)"
-	    pack $labpalrt.$name -side top -anchor w -pady $ypad -padx 10
-    }
 }
 
 #-------------------------------------------------------------------------------
