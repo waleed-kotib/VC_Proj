@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.2 2004-11-24 07:13:34 matben Exp $
+# $Id: Init.tcl,v 1.3 2004-11-24 08:23:43 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -170,7 +170,7 @@ proc ::Init::SetAutoPath { } {
     }
 }
 
-proc ::Init::InitMsgcat { } {
+proc ::Init::Msgcat { } {
     global  prefs this
     
     package require msgcat

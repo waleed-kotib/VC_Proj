@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.97 2004-11-24 07:13:34 matben Exp $
+# $Id: Coccinella.tcl,v 1.98 2004-11-24 08:23:43 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -125,49 +125,6 @@ if {[llength [namespace children :: "::browser*"]] > 0} {
     set prefs(embedded) 0
 }
 
-# Level of detail for printouts. >= 2 for my outputs.
-set debugLevel 0
-
-# If no debug printouts, no console.
-if {$debugLevel == 0} {
-    switch -- $this(platform) windows - macintosh - macosx {
-	catch {console hide}
-    }
-}
-	
-# For debug purposes. Writing to log file can be helpful to trace infinite loops.
-if {$debugLevel >= 6} {
-    set fdLog [open [file join [file dirname [info script]] debug.log] w]
-}
-proc Debug {num str} {
-    global  debugLevel fdLog
-    if {$num <= $debugLevel} {
-	if {[info exists fdLog]} {
-	    puts $fdLog $str
-	    flush $fdLog
-	}
-	puts $str
-    }
-}
-
-proc CallTrace {num} {
-    global  debugLevel
-    if {$num <= $debugLevel} {
-	puts "Tcl call trace:"
-	for {set i [expr [info level] - 1]} {$i > 0} {incr i -1} {
-	    puts "\t$i: [info level $i]"
-	}
-    }
-}
-if {0} {
-    proc TraceVar {name1 name2 op} {
-	puts "$name1 $name2 $op"
-	CallTrace 4
-    }
-    namespace eval ::WB:: {}
-    trace add variable ::WB::menuDefs(main,file) write TraceVar
-}
-
 # Identify our own position in the file system.
 if {[string equal $this(platform) "unix"]} {
     set thisScript [resolve_cmd_realpath [info script]]
@@ -175,6 +132,12 @@ if {[string equal $this(platform) "unix"]} {
     set thisScript [info script]
 }
 set thisPath [file dirname $thisScript]
+
+# Level of detail for printouts. >= 2 for my outputs.
+set debugLevel 0
+
+# Debug support.
+source [file join $thisPath lib Debug.tcl]
 
 ::Debug 2 "Installation rootdir:  [file dirname $thisScript]"
 
@@ -197,7 +160,7 @@ package require Theme
 ::Theme::Init
 
 # Find our language and load message catalog.
-::Init::InitMsgcat
+::Init::Msgcat
 
 # Show it! Need a full update here, at least on Windows.
 package require Splash
@@ -262,12 +225,6 @@ if {!($prefs(printer) && $prefs(gdi))} {
 # Not ready for this yet.
 set prefs(Thread) 0
 
-# Start httpd thread. It enters its event loop if created without a sript.
-if {$prefs(Thread)} {
-    set this(httpdthreadid) [thread::create]
-    thread::send $this(httpdthreadid) [list set auto_path $auto_path]
-}
-
 # As an alternative to sourcing tcl code directly, use the package mechanism.
 # We should make this a little different!
 # Separate packages into two levels, basic support and application specific.
@@ -297,13 +254,6 @@ foreach packName {
     Whiteboard
 } {
     package require $packName
-}
-
-# The 'tinyhttpd' package must be loaded in its threads interpreter if exists.
-if {$prefs(Thread)} {
-    thread::send $this(httpdthreadid) {package require tinyhttpd}
-} else {
-    package require tinyhttpd
 }
 
 # The Jabber stuff.
