@@ -31,7 +31,7 @@
 ! contributed widgets
 !
 *Combobox.Font:                      {Lucida Grande} 11
-*MacTabnotebook.style:               winxp
+*MacTabnotebook.style:               aqua
 *MyLabelFrame.Font:                  {Lucida Grande} 11 bold
 *Tablelist.Font:                     {Lucida Grande} 11
 *Tablelist.highlightThickness:       3

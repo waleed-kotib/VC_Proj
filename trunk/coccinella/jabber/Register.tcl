@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.11 2004-01-23 08:56:25 matben Exp $
+# $Id: Register.tcl,v 1.12 2004-01-27 08:48:05 matben Exp $
 
 package provide Register 1.0
 
@@ -45,7 +45,8 @@ proc ::Jabber::Register::Register {args} {
 	    set $name $argsArr(-$name)
 	}
     }
-    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
+      -macclass {document closeBox}
     wm title $w [::msgcat::mc {Register New Account}]
     
     set fontSB [option get . fontSmallBold {}]
@@ -495,7 +496,8 @@ proc ::Jabber::GenRegister::Simple {w args} {
     }
     array set argsArr $args
     
-    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
+      -macclass {document closeBox}
     wm title $w [::msgcat::mc {Register Service}]
     set wtop $w
     

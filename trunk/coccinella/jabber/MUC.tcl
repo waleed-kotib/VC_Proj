@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.19 2004-01-26 07:34:49 matben Exp $
+# $Id: MUC.tcl,v 1.20 2004-01-27 08:48:05 matben Exp $
 
 package require entrycomp
 
@@ -100,7 +100,7 @@ proc ::Jabber::MUC::BuildEnter {args} {
     upvar 0 $token enter
     
     set w $wDlgs(jmucenter)[incr dlguid]
-    ::UI::Toplevel $w -macstyle documentProc
+    ::UI::Toplevel $w -macstyle documentProc -macclass {document closeBox}
     wm title $w [::msgcat::mc {Enter Room}]
     set enter(w) $w
     array set enter {
@@ -346,7 +346,8 @@ proc ::Jabber::MUC::Invite {roomjid} {
     variable dlguid
     
     set w $wDlgs(jmucinvite)[incr dlguid]
-    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
+      -macclass {document closeBox}
     wm title $w {Invite User}
     
     set fontSB [option get . fontSmallBold {}]
@@ -504,7 +505,8 @@ proc ::Jabber::MUC::BuildInfo {roomjid} {
     }    
     set w $wDlgs(jmucinfo)[incr dlguid]
 
-    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
+      -macclass {document closeBox}
     set roomName [$jstate(browse) getname $roomjid]
     if {$roomName == ""} {
 	regexp {([^@]+)@.+} $roomjid match roomName
@@ -979,7 +981,8 @@ proc ::Jabber::MUC::EditListBuild {roomjid type} {
     set editlocals(listvar) {}
     
     set w $wDlgs(jmucedit)[incr dlguid]
-    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
+      -macclass {document closeBox}
     set roomName [$jstate(browse) getname $roomjid]
     if {$roomName == ""} {
 	regexp {([^@]+)@.+} $roomjid match roomName
@@ -1597,7 +1600,8 @@ proc ::Jabber::MUC::Destroy {roomjid} {
     variable dlguid
     
     set w $wDlgs(jmucdestroy)[incr dlguid]
-    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
+      -macclass {document closeBox}
     set roomName [$jstate(browse) getname $roomjid]
     if {$roomName == ""} {
 	regexp {([^@]+)@.+} $roomjid match roomName

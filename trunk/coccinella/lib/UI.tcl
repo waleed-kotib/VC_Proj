@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.45 2004-01-26 07:33:43 matben Exp $
+# $Id: UI.tcl,v 1.46 2004-01-27 08:48:06 matben Exp $
 
 package require entrycomp
 
@@ -220,17 +220,28 @@ proc ::UI::GetScreenSize { } {
 # 
 #       Wrapper for making a toplevel window.
 #       
-#       
+# Arguments:
+#       w
+#       args:
+#       -class  
 #       -macstyle:
-# documentProc, dBoxProc, plainDBox, altDBoxProc, movableDBoxProc, 
-# zoomDocProc, rDocProc, floatProc, floatZoomProc, floatSideProc, 
-# or floatSideZoomProc
+#           macintosh (classic) and macosx
+#           documentProc, dBoxProc, plainDBox, altDBoxProc, movableDBoxProc, 
+#           zoomDocProc, rDocProc, floatProc, floatZoomProc, floatSideProc, 
+#           or floatSideZoomProc
+#       -macclass
+#           macosx only; {class attributesList} 
+#           class = alert moveableAlert modal moveableModal floating document
+#           help toolbar
+#           attributes = closeBox noActivates horizontalZoom verticalZoom 
+#           collapseBox resizable sideTitlebar noUpdates noActivates
+#       -usemacmainmenu
 
 proc ::UI::Toplevel {w args} {
     global  this osprefs
     
     array set argsArr {
-	-usemacmainmenu     0
+	-usemacmainmenu   0
     }
     array set argsArr $args
     set topopts {}
@@ -243,9 +254,8 @@ proc ::UI::Toplevel {w args} {
     # be handled from there.
     wm protocol $w WM_DELETE_WINDOW [list ::UI::DoCloseWindow $w]
     
-    if {[string match "mac*" $this(platform)]} {
-	foreach {key value} $args {
-	    
+    if {[string equal $this(platform) "macintosh"]} {
+	foreach {key value} $args {	    
 	    switch -- $key {
 		-usemacmainmenu {
 		    if {$argsArr(-usemacmainmenu)} {
@@ -253,10 +263,20 @@ proc ::UI::Toplevel {w args} {
 		    }
 		}
 		-macstyle {
-		    ::tk::unsupported::MacWindowStyle style $w  \
+		    eval {::tk::unsupported::MacWindowStyle style $w}  \
 		      $argsArr(-macstyle)
 		}
 	    }
+	}
+    } elseif {[string equal $this(platform) "macosx"]} {
+	if {[info exists argsArr(-macclass)]} {
+	    eval {::tk::unsupported::MacWindowStyle style $w}  \
+	      $argsArr(-macclass)
+	} elseif {[info exists argsArr(-macstyle)]} {
+	    ::tk::unsupported::MacWindowStyle style $w $argsArr(-macstyle)
+	}
+	if {$argsArr(-usemacmainmenu)} {
+	    ::UI::MacUseMainMenu $w
 	}
     } else {
 	bind $w <$osprefs(mod)-Key-w> [list ::UI::DoCloseWindow $w]
@@ -891,7 +911,8 @@ proc ::UI::MegaDlgMsgAndEntry {title msg label varName btcancel btok} {
     upvar $varName entryVar
     
     set w .mega[incr megauid]
-    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
+      -macclass {document closeBox}
     wm title $w $title
     set finmega -1
     wm protocol $w WM_DELETE_WINDOW [list set [namespace current]::finmega 0]

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.19 2004-01-26 07:34:49 matben Exp $
+# $Id: OOB.tcl,v 1.20 2004-01-27 08:48:05 matben Exp $
 
 package provide OOB 1.0
 
@@ -19,6 +19,9 @@ namespace eval ::Jabber::OOB:: {
 # Jabber::OOB::BuildSet --
 #
 #       Dialog for sending a 'jabber:iq:oob' 'set' element.
+#       
+# Arguments:
+#       jid         a full 3-tier jid
 
 proc ::Jabber::OOB::BuildSet {jid} {
     global  this wDlgs
@@ -33,7 +36,8 @@ proc ::Jabber::OOB::BuildSet {jid} {
 	return
     }
     set finished -1
-    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
+      -macclass {document closeBox}
     wm title $w {Send File}
     set locals(jid) $jid
     set fontS [option get . fontSmall {}]
@@ -65,7 +69,7 @@ proc ::Jabber::OOB::BuildSet {jid} {
 
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btok -text [::msgcat::mc Send] -width 8 -default active \
+    pack [button $frbot.btok -text [::msgcat::mc Send] -default active \
       -command [namespace current]::DoSend]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \

@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: SetupAss.tcl,v 1.18 2004-01-23 08:56:48 matben Exp $
+# $Id: SetupAss.tcl,v 1.19 2004-01-27 08:48:06 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -36,7 +36,8 @@ proc ::Jabber::SetupAss::SetupAss { } {
     if {[winfo exists $w]} {
 	return
     }
-    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
+      -macclass {document closeBox}
     wm title $w [::msgcat::mc {Setup Assistant}]
     
     set fontSB [option get . fontSmallBold {}]

@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: VCard.tcl,v 1.13 2004-01-23 08:57:00 matben Exp $
+# $Id: VCard.tcl,v 1.14 2004-01-27 08:48:06 matben Exp $
 
 package provide VCard 1.0
 
@@ -156,7 +156,8 @@ proc ::VCard::Build {nstoken} {
     set jid  $priv(jid)
     set type $priv(type)
     
-    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
+      -macclass {document closeBox}
     if {$type == "own"} {
 	wm title $w [::msgcat::mc {vCard Info}]
     } else {

@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.8 2004-01-25 15:42:15 matben Exp $
+# $Id: Profiles.tcl,v 1.9 2004-01-27 08:48:05 matben Exp $
 
 package provide Profiles 1.0
 
@@ -607,7 +607,8 @@ proc ::Profiles::BuildDialog { } {
 	return
     }
     
-    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
+      -macclass {document closeBox}
     wm title $w [::msgcat::mc Profiles]
     
     # Global frame.

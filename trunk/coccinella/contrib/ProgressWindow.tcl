@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ProgressWindow.tcl,v 1.11 2004-01-26 07:34:49 matben Exp $
+# $Id: ProgressWindow.tcl,v 1.12 2004-01-27 08:48:02 matben Exp $
 # 
 #-------------------------------------------------------------------------------
 #
@@ -286,7 +286,7 @@ proc ::ProgressWindow::Build {w} {
     
     set str "$options(-text) $options(-filename)"
     pack [label $widgets(label) -font $options(-font1) -text $str -justify left] \
-      -side top -anchor w
+      -side top -anchor w -pady 4
     
     # Frame with progress bar and Cancel button.
     pack [frame $frmid] -side top -fill x

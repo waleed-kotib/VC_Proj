@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.32 2004-01-26 07:34:49 matben Exp $
+# $Id: Dialogs.tcl,v 1.33 2004-01-27 08:48:06 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -95,7 +95,8 @@ proc ::Dialogs::GetCanvas {w} {
     if {[winfo exists $w]} {
 	return
     }
-    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
+      -macclass {document closeBox}
     wm title $w {Get Canvas}
     
     # Global frame.
@@ -302,7 +303,8 @@ proc ::Dialogs::UnixPrintPS {w wtoprint} {
     set finishedPrint -1
     set psCmd $prefs(unixPrintCmd)
     
-    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
+      -macclass {document closeBox}
     wm title $w [::msgcat::mc Print]
     
     # Global frame.
@@ -436,7 +438,8 @@ proc ::PSPageSetup::PSPageSetup { w } {
     if {[winfo exists $w]} {
 	return
     }
-    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
+      -macclass {document closeBox}
     wm title $w "Page Setup"
     set fontSB [option get . fontSmallBold {}]
     
@@ -619,7 +622,8 @@ proc ::Dialogs::ShowInfoClients { } {
     if {[winfo exists $w]} {
 	return
     }
-    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
+      -macclass {document closeBox}
     wm title $w "Client Info"
     set fontSB [option get . fontSmallBold {}]
     
@@ -710,7 +714,8 @@ proc ::Dialogs::ShowInfoServer {thisIPnum} {
 	return
     }
     array set boolToYesNo [list 0 [::msgcat::mc no] 1 [::msgcat::mc yes]]
-    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
+      -macclass {document closeBox}
     wm title $w [::msgcat::mc {Server Info}]
     set fontSB [option get . fontSmallBold {}]
     
@@ -828,7 +833,8 @@ proc ::Dialogs::Canvas {filePath args} {
 	return
     }
     set w .spcan[incr uidcan]
-    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
+      -macclass {document closeBox}
     
     # Make the namespace exist.
     set wtop ${w}.
@@ -917,7 +923,7 @@ proc ::Dialogs::AboutQuickTimeTcl { } {
     if {[winfo exists $w]} {
 	return
     }
-    ::UI::Toplevel $w -macstyle documentProc
+    ::UI::Toplevel $w -macstyle documentProc -macclass {document closeBox}
     if {[string match "mac*" $this(platform)]} {
 	wm transient $w
     } else {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.39 2004-01-26 07:34:49 matben Exp $
+# $Id: Roster.tcl,v 1.40 2004-01-27 08:48:05 matben Exp $
 
 package provide Roster 1.0
 
@@ -1006,7 +1006,8 @@ proc ::Jabber::Roster::NewOrEditDlg {which args} {
     set dlgstate(w) $w
     set dlgstate(finishedNew) -1
 
-    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
+      -macclass {document closeBox}
 	
     # Find all our groups for any jid.
     set allGroups [$jstate(roster) getgroups]    

@@ -16,12 +16,17 @@
 
 ! tk standard widgets
 !
+*Button.padX:                        10
+*Button.padY:                        2
 *Checkbutton.Font:                   Arial 8
+*Entry.background:                   white
 *Entry.Font:                         Arial 8
 *Label.Font:                         Arial 8
+*Listbox.background:                 white
 *Listbox.Font:                       Arial 8
 *Message.Font:                       Arial 8
 *Radiobutton.Font:                   Arial 8
+*Text.background:                    white
 *Text.Font:                          Arial 8
 
 ! button icons for ok and cancel buttons
@@ -33,7 +38,9 @@
 
 ! contributed widgets
 !
+*Combobox.background:                white
 *Combobox.Font:                      Arial 8
 *MacTabnotebook.Font:                Arial 8
 *MyLabelFrame.Font:                  Arial 8 bold
+*Tablelist.background:               white
 *Tablelist.Font:                     Arial 8
