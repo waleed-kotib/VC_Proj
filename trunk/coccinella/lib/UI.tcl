@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.64 2004-07-25 15:06:42 matben Exp $
+# $Id: UI.tcl,v 1.65 2004-07-26 08:37:16 matben Exp $
 
 package require entrycomp
 package require alertbox
@@ -857,7 +857,7 @@ proc ::UI::OpenCanvasInfoFile {wtop theFile} {
       -title [mc {Open Helpfile}]  \
       -message [FormatTextForMessageBox [mc messopenhelpfile]]]
     if {$ans == "yes"} {
-	::CanvasFile::DoOpenCanvasFile $wtop [file join $this(path) docs $theFile]
+	::CanvasFile::OpenCanvasFileDlg $wtop [file join $this(path) docs $theFile]
     }
 }
 

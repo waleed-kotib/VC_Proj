@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasFile.tcl,v 1.6 2004-07-25 15:06:43 matben Exp $
+# $Id: CanvasFile.tcl,v 1.7 2004-07-26 08:37:16 matben Exp $
  
 package require can2svg
 package require svg2can
@@ -49,7 +49,7 @@ proc ::CanvasFile::DrawCanvasItemFromFile {wtop filePath args} {
 # 
 #       Just a wrapper for FileToCanvas.
 
-proc ::CanvasFile::OpenCanvas {w fileName} {
+proc ::CanvasFile::OpenCanvas {w fileName args} {
     
     set wtop [::UI::GetToplevelNS $w]
 
@@ -62,7 +62,7 @@ proc ::CanvasFile::OpenCanvas {w fileName} {
     }
     ::undo::reset [::WB::GetUndoToken $wtop]
     ::CanvasCmd::DoEraseAll $wtop     
-    FileToCanvas $w $fd $fileName
+    eval {FileToCanvas $w $fd $fileName} $args
     close $fd
 }
 	  
@@ -563,7 +563,7 @@ proc ::CanvasFile::DataToFile {filePath canvasList} {
     close $fd
 }
 
-# DoOpenCanvasFile --
+# OpenCanvasFileDlg --
 #
 #       Creates a standard file open dialog, opens the file, and draws to
 #       canvas via 'FileToCanvas'. If 'filePath' given, dont show file
@@ -576,7 +576,7 @@ proc ::CanvasFile::DataToFile {filePath canvasList} {
 # Results:
 #       none
 
-proc ::CanvasFile::DoOpenCanvasFile {wtop {filePath {}}} {
+proc ::CanvasFile::OpenCanvasFileDlg {wtop {filePath {}}} {
     global  prefs this
     
     set w [::UI::GetToplevel $wtop]
@@ -618,7 +618,7 @@ proc ::CanvasFile::DoOpenCanvasFile {wtop {filePath {}}} {
     }
 }
 
-# DoSaveCanvasFile --
+# SaveCanvasFileDlg --
 #
 #       Creates a standard file save dialog, opens the file, and calls
 #       'CanvasToFile' to write into it, closes it.
@@ -629,7 +629,7 @@ proc ::CanvasFile::DoOpenCanvasFile {wtop {filePath {}}} {
 # Results:
 #       none
 
-proc ::CanvasFile::DoSaveCanvasFile {wtop} {
+proc ::CanvasFile::SaveCanvasFileDlg {wtop} {
     global  prefs this
         
     set wCan [::WB::GetCanvasFromWtop $wtop]

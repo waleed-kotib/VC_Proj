@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: P2P.tcl,v 1.10 2004-07-23 07:21:15 matben Exp $
+# $Id: P2P.tcl,v 1.11 2004-07-26 08:37:16 matben Exp $
 
 package provide P2P 1.0
 
@@ -44,30 +44,31 @@ proc ::P2P::Init {} {
     ::Debug 2 "::P2P::Init"
     
     # Register canvas draw event handler.
-    ::hooks::add whiteboardBuildEntryHook     ::P2P::BuildEntryHook
-    ::hooks::add whiteboardSetMinsizeHook     ::P2P::SetMinsizeHook    
-    ::hooks::add whiteboardFixMenusWhenHook   ::P2P::FixMenusWhenHook
-    ::hooks::add whiteboardSendMessageHook    ::P2P::SendMessageListHook
-    ::hooks::add whiteboardSendGenMessageHook ::P2P::SendGenMessageListHook
-    ::hooks::add whiteboardPutFileHook        ::P2P::PutFileHook
-    ::hooks::add serverGetRequestHook         ::P2P::HandleGetRequest
-    ::hooks::add serverPutRequestHook         ::P2P::HandlePutRequest
-    ::hooks::add serverCmdHook                ::P2P::HandleServerCmd
+    ::hooks::add whiteboardBuildEntryHook       ::P2P::BuildEntryHook
+    ::hooks::add whiteboardSetMinsizeHook       ::P2P::SetMinsizeHook    
+    ::hooks::add whiteboardFixMenusWhenHook     ::P2P::FixMenusWhenHook
+    ::hooks::add whiteboardSendMessageHook      ::P2P::SendMessageListHook
+    ::hooks::add whiteboardSendGenMessageHook   ::P2P::SendGenMessageListHook
+    ::hooks::add whiteboardPutFileHook          ::P2P::PutFileHook
+    ::hooks::add whiteboardBuildButtonTrayHook  ::P2P::BuildButtonsHook
+    ::hooks::add serverGetRequestHook           ::P2P::HandleGetRequest
+    ::hooks::add serverPutRequestHook           ::P2P::HandlePutRequest
+    ::hooks::add serverCmdHook                  ::P2P::HandleServerCmd
 
-    ::hooks::add closeWindowHook              ::P2P::CloseHook
-    ::hooks::add quitAppHook                  ::P2P::QuitHook
+    ::hooks::add closeWindowHook                ::P2P::CloseHook
+    ::hooks::add quitAppHook                    ::P2P::QuitHook
 
     # Define all hooks for preference settings.
-    ::hooks::add prefsInitHook                ::P2P::Prefs::InitPrefsHook
-    ::hooks::add prefsBuildHook               ::P2P::Prefs::BuildPrefsHook
-    ::hooks::add prefsSaveHook                ::P2P::Prefs::SavePrefsHook
-    ::hooks::add prefsCancelHook              ::P2P::Prefs::CancelPrefsHook
-    ::hooks::add prefsUserDefaultsHook        ::P2P::Prefs::UserDefaultsHook
+    ::hooks::add prefsInitHook                  ::P2P::Prefs::InitPrefsHook
+    ::hooks::add prefsBuildHook                 ::P2P::Prefs::BuildPrefsHook
+    ::hooks::add prefsSaveHook                  ::P2P::Prefs::SavePrefsHook
+    ::hooks::add prefsCancelHook                ::P2P::Prefs::CancelPrefsHook
+    ::hooks::add prefsUserDefaultsHook          ::P2P::Prefs::UserDefaultsHook
 
     set buttonTrayDefs(symmetric) {
 	connect    {::P2PNet::OpenConnection $wDlgs(openConn)}
-	save       {::CanvasFile::DoSaveCanvasFile $wtop}
-	open       {::CanvasFile::DoOpenCanvasFile $wtop}
+	save       {::CanvasFile::SaveCanvasFileDlg $wtop}
+	open       {::CanvasFile::OpenCanvasFileDlg $wtop}
 	import     {::Import::ImportImageOrMovieDlg $wtop}
 	send       {::CanvasCmd::DoPutCanvasDlg $wtop}
 	print      {::UserActions::DoPrintCanvas $wtop}
@@ -89,8 +90,8 @@ proc ::P2P::Init {} {
 	{command   mOpenImage/Movie    {::Import::ImportImageOrMovieDlg $wtop}    normal  I}
 	{command   mOpenURLStream      {::Multicast::OpenMulticast $wtop}     normal   {}}
 	{separator}
-	{command   mOpenCanvas         {::CanvasFile::DoOpenCanvasFile $wtop}     normal   {}}
-	{command   mSaveCanvas         {::CanvasFile::DoSaveCanvasFile $wtop}     normal   S}
+	{command   mOpenCanvas         {::CanvasFile::OpenCanvasFileDlg $wtop}     normal   {}}
+	{command   mSaveCanvas         {::CanvasFile::SaveCanvasFileDlg $wtop}     normal   S}
 	{separator}
 	{command   mSaveAs             {::CanvasCmd::SavePostscript $wtop}        normal   {}}
 	{command   mSaveAsItem         {::CanvasCmd::DoSaveAsItem $wtop}       normal   {}}
@@ -116,6 +117,14 @@ proc ::P2P::Init {} {
     ::WB::SetMenuDefs file $menuDefsFile
     
     set initted 1
+}
+
+proc ::P2P::BuildButtonsHook {wtray} {
+    global  prefs
+
+    if {[string equal $prefs(protocol) "server"]} {
+	$wtray buttonconfigure connect -state disabled
+    }   
 }
 
 # P2P::BuildEntryHook --

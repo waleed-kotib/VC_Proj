@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.8 2004-07-25 15:06:43 matben Exp $
+# $Id: Whiteboard.tcl,v 1.9 2004-07-26 08:37:16 matben Exp $
 
 package require entrycomp
 package require moviecontroller
@@ -399,8 +399,8 @@ proc ::WB::InitMenuDefs { } {
 	{command   mOpenImage/Movie {::Import::ImportImageOrMovieDlg $wtop} normal  I}
 	{command   mOpenURLStream   {::Multicast::OpenMulticast $wtop}  normal   {}}
 	{separator}
-	{command   mOpenCanvas      {::CanvasFile::DoOpenCanvasFile $wtop}  normal   {}}
-	{command   mSaveCanvas      {::CanvasFile::DoSaveCanvasFile $wtop}  normal   S}
+	{command   mOpenCanvas      {::CanvasFile::OpenCanvasFileDlg $wtop}  normal   {}}
+	{command   mSaveCanvas      {::CanvasFile::SaveCanvasFileDlg $wtop}  normal   S}
 	{separator}
 	{command   mSaveAs          {::CanvasCmd::SavePostscript $wtop}     normal   {}}
 	{command   mSaveAsItem      {::CanvasCmd::DoSaveAsItem $wtop}       normal   {}}
@@ -1901,15 +1901,18 @@ proc ::WB::ConfigShortcutButtonPad {wtop what {subSpec {}}} {
     }
 }
 
+namespace eval ::WB:: {
+    variable extButtonDefs {}
+}
+
 # WB::BuildShortcutButtonPad --
 #
 #       Build the actual shortcut button pad.
 
 proc ::WB::BuildShortcutButtonPad {wtop} {
-    global  prefs wDlgs this
-    
     variable wbicons
     variable btShortDefs
+    variable extButtonDefs
     upvar ::WB::${wtop}::wapp wapp
     
     set wCan   $wapp(can)
@@ -1927,11 +1930,36 @@ proc ::WB::BuildShortcutButtonPad {wtop} {
 	set txt [string totitle $name]
 	$wtray newbutton $name $txt $icon $iconDis $cmd
     }
+    
+    # Extra buttons from components if any.
+    foreach btdef $extButtonDefs {
+	foreach {name icon iconDis cmd} $btdef {
+	    set cmd [subst -nocommands -nobackslashes $cmd]
+	    set txt [string totitle $name]
+	    $wtray newbutton $name $txt $icon $iconDis $cmd
+	}
+    }
 
+    # Anything special here.
     ::hooks::run whiteboardBuildButtonTrayHook $wtray
+}
 
-    if {[string equal $prefs(protocol) "server"]} {
-	$wtray buttonconfigure connect -state disabled
+proc ::WB::RegisterShortcutButtons {btdefs} {
+    variable extButtonDefs
+
+    set extButtonDefs [concat $extButtonDefs $btdefs]
+}
+
+proc ::WB::DeregisterShortcutButton {name} {
+    variable extButtonDefs
+
+    set ind 0
+    foreach btdef $extButtonDefs {
+	if {[string equal [lindex $btdef 0] $name]} {
+	    set extButtonDefs [lreplace $extButtonDefs $ind $ind]
+	    break
+	}
+	incr ind
     }
 }
 

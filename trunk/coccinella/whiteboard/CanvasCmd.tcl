@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasCmd.tcl,v 1.3 2004-07-22 15:11:28 matben Exp $
+# $Id: CanvasCmd.tcl,v 1.4 2004-07-26 08:37:16 matben Exp $
 
 package provide CanvasCmd 1.0
 
@@ -417,7 +417,7 @@ proc ::CanvasCmd::DoPutCanvas {w {toIPnum all}} {
     Debug 2 "::CanvasCmd::DoPutCanvas w=$w, toIPnum=$toIPnum"
 
     set tmpFile ".tmp[clock seconds].can"
-    set absFilePath [file join $this(path) $tmpFile]
+    set absFilePath [file join $this(tmpPath) $tmpFile]
 
     # Save canvas to temporary file.
     if {[catch [list open $absFilePath w] fileId]} {
