@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.26 2004-12-06 15:26:56 matben Exp $
+# $Id: roster.tcl,v 1.27 2004-12-08 08:21:19 matben Exp $
 # 
 # Note that every jid in the rostArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -66,7 +66,6 @@
 #      rostName exitroster
 #      rostName getgroups ?jid?
 #      rostName getask jid
-#      rostName getdisplayname jid
 #      rostName getname jid
 #      rostName getpresence jid ?-resource, -type?
 #      rostName getresources jid
@@ -685,6 +684,7 @@ proc roster::getusers {rostName args} {
 #       resource, type, status, priority, show, x.
 #       If the 'resource' in argument is not given,
 #       the result contains a sublist for each resource. IMPORTANT! Bad?
+#       BAD!!!!!!!!!!!!!!!!!!!!!!!!
 
 proc roster::getpresence {rostName jid args} {    
 
@@ -853,41 +853,25 @@ proc roster::getgroups {rostName {jid {}}} {
 
 # roster::getname --
 #
-#       Returns the nick name of this jid.
+#       Returns the roster name of this jid.
 #
 # Arguments:
 #       rostName:   the instance of this roster.
 #       jid:        
 #       
 # Results:
-#       the nick name or empty.
+#       the roster name or empty.
 
 proc roster::getname {rostName jid} {
 
     upvar ${rostName}::rostArr rostArr
-   
-    Debug 2 "roster::getname rostName=$rostName, jid='$jid'"
-    
+       
     set jid [jlib::jidmap $jid]
     if {[info exists rostArr($jid,name)]} {
 	return $rostArr($jid,name)
     } else {
 	return {}
     }
-}
-
-proc roster::getdisplayname {rostName jid} {
-    
-    set name [getname $rostName $jid]
-    if {$name == ""} {
-	jlib::splitjidex $jid node domain res
-	if {$node == ""} {
-	    set name $domain
-	} else {
-	    set name $node
-	}
-    }
-    return $name
 }
 
 # roster::getsubscription --
@@ -904,9 +888,7 @@ proc roster::getdisplayname {rostName jid} {
 proc roster::getsubscription {rostName jid} {
 
     upvar ${rostName}::rostArr rostArr
-   
-    Debug 2 "roster::getsubscription rostName=$rostName, jid='$jid'"
-    
+       
     set jid [jlib::jidmap $jid]
     if {[info exists rostArr($jid,subscription)]} {
 	return $rostArr($jid,subscription)

@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Plugins.tcl,v 1.14 2004-12-04 15:01:10 matben Exp $
+# $Id: Plugins.tcl,v 1.15 2004-12-08 08:21:20 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -86,6 +86,7 @@ namespace eval ::Plugins:: {
     ::hooks::register prefsUserDefaultsHook  ::Plugins::UserDefaultsHook
     ::hooks::register prefsSaveHook          ::Plugins::SaveHook
     ::hooks::register prefsCancelHook        ::Plugins::CancelHook
+    ::hooks::register prefsDestroyHook       ::Plugins::DestroyPrefsHook
     ::hooks::register initHook               ::Plugins::InitHook
 
     variable inited 0
@@ -1321,6 +1322,7 @@ proc ::Plugins::BuildPrefsPage {page} {
 	    grid ${pfr}.i${i} -row $i -column 0 -sticky w
 	}
 	set tmpPrefPlugins($plug) [::Plugins::IsLoaded $plug]
+	set prefplugins($plug) $tmpPrefPlugins($plug)
 	checkbutton ${pfr}.c${i} -anchor w -text " $plug"  \
 	  -variable [namespace current]::tmpPrefPlugins($plug)
 	grid ${pfr}.c${i} -row $i -column 1 -padx 2 -sticky ew
@@ -1348,7 +1350,6 @@ proc ::Plugins::SaveHook { } {
 	}
     }
     set prefs(pluginBanList) [lsort -unique $banList]
-    unset -nocomplain tmpPrefPlugins
 }
 
 proc ::Plugins::CancelHook { } {
@@ -1372,6 +1373,13 @@ proc ::Plugins::UserDefaultsHook { } {
 	set tmpPrefPlugins($plug) [::Plugins::IsLoaded $plug]
 	set prefplugins($plug) $tmpPrefPlugins($plug)
     }    
+}
+
+proc ::Plugins::DestroyPrefsHook { } {
+    variable prefplugins
+    variable tmpPrefPlugins
+    
+    unset -nocomplain tmpPrefPlugins
 }
 
 #-------------------------------------------------------------------------------

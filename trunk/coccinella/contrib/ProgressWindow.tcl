@@ -10,7 +10,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ProgressWindow.tcl,v 1.19 2004-12-01 15:15:41 matben Exp $
+# $Id: ProgressWindow.tcl,v 1.20 2004-12-08 08:21:18 matben Exp $
 # 
 #-------------------------------------------------------------------------------
 #
@@ -27,6 +27,7 @@
 #      -font1, font1, Font1
 #      -font2, font2, Font2
 #      -name, name, Name
+#      -pausecmd, pauseCmd, PauseCmd
 #      -percent, percent, Percent
 #      -text, text, Text
 #      -text2, text2, Text2
@@ -95,6 +96,7 @@ namespace eval ::ProgressWindow:: {
 	-font1               {font1                Font1               }  \
         -font2               {font2                Font2               }  \
         -name                {name                 Name                }  \
+	-pausecmd            {pauseCmd             PauseCmd            }  \
         -percent             {percent              Percent             }  \
         -text                {text                 Text                }  \
 	-text2               {text2                Text2               }  \
@@ -113,6 +115,7 @@ namespace eval ::ProgressWindow:: {
     option add *ProgressWindow.background    #dedede          widgetDefault
     option add *ProgressWindow.cancelCmd     {}               widgetDefault
     option add *ProgressWindow.name          [::msgcat::mc {Progress}] widgetDefault
+    option add *ProgressWindow.pauseCmd      {}               widgetDefault
     option add *ProgressWindow.percent       0                widgetDefault
     option add *ProgressWindow.text          "Writing file"   widgetDefault
     option add *ProgressWindow.text2         {}               widgetDefault
@@ -342,10 +345,10 @@ proc ::ProgressWindow::Build {w} {
     pack $widgets(cancel) -side right -padx 8
 
     # Small text below progress bar.
-    pack [$labelcmd $widgets(label2) -font $options(-font2) -text $options(-text2)] \
-      -side top -anchor w
-    pack [$labelcmd $widgets(label3) -font $options(-font2) -text $options(-text3)] \
-      -side top -anchor w
+    $labelcmd $widgets(label2) -font $options(-font2) -text $options(-text2)
+    pack $widgets(label2) -side top -anchor w
+    $labelcmd $widgets(label3) -font $options(-font2) -text $options(-text3)
+    pack $widgets(label3) -side top -anchor w
     
     ::ProgressWindow::ConfigurePercent $w $options(-percent)
     

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.97 2004-12-06 15:26:56 matben Exp $
+# $Id: Chat.tcl,v 1.98 2004-12-08 08:21:19 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -348,18 +348,10 @@ proc ::Chat::GotMsg {body args} {
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
 
-    if {$chatstate(rosterName) != ""} {
-	set username $chatstate(rosterName)
-    } elseif {$node == ""} {
-	set username $domain
-    } else {
-	set username $node
-    }
-
     # We may have reset its jid to a 2-tier jid if it has been offline.
-    set chatstate(jid)      $mjid
-    set chatstate(fromjid)  $jid
-    set chatstate(username) $username
+    set chatstate(jid)       $mjid
+    set chatstate(fromjid)   $jid
+    set chatstate(shortname) [::Roster::GetDisplayName $jid]
     
     # If new chat dialog check to see if we have got a thread history to insert.
     if {$newdlg} {
@@ -460,7 +452,7 @@ proc ::Chat::InsertMessage {chattoken whom body args} {
 	    if {[::Jabber::JlibCmd service isroom $jid2]} {
 		set name [::Jabber::JlibCmd service nick $jid]
 	    } else {
-		set name $chatstate(username)
+		set name $chatstate(shortname)
 	    }
 	}
     }
@@ -554,6 +546,9 @@ proc ::Chat::InsertAnyThreadHistory {chattoken} {
 
 # Chat::StartThread --
 # 
+#       According to XMPP def sect. 4.1, we should use user@domain when
+#       initiating a new chat or sending a new message that is not a reply.
+# 
 # Arguments:
 #       jid
 #       args        -message, -thread
@@ -564,6 +559,7 @@ proc ::Chat::StartThread {jid args} {
     upvar ::Jabber::jprefs jprefs
     
     ::Debug 2 "::Chat::StartThread jid=$jid, args=$args"
+    
     array set argsArr $args
     set havedlg 0
 
@@ -608,6 +604,11 @@ proc ::Chat::StartThread {jid args} {
 	    eval {Build $threadID -from $jid} $args
 	}
     }
+    
+    # Since we initated this thread need to set recipient to jid2.
+    jlib::splitjid $jid jid2 res
+    set chatstate(fromjid) $jid2
+    SetTitle $chattoken
 }
 
 # Chat::Build --
@@ -736,7 +737,7 @@ proc ::Chat::Build {threadID args} {
     if {$nwin == 1} {
 	::UI::SetWindowGeometry $w $wDlgs(jchat)
     }
-    SetTitle $w $chatstate(rosterName) $chatstate(fromjid)
+    SetTitle $chattoken
     SetThreadState $dlgtoken $chattoken
 
     wm minsize $w [expr {$shortBtWidth < 220} ? 220 : $shortBtWidth] 320
@@ -768,6 +769,7 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
+    ::Debug 2 "::Chat::BuildThreadWidget args=$args"
     array set argsArr $args
 
     # Initialize the state variable, an array, that keeps is the storage.
@@ -791,22 +793,13 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set mjid [jlib::jidmap $jid]
     jlib::splitjidex $jid node domain res
     jlib::splitjid   $mjid jid2 x
-    set rosterName [$jstate(roster) getname $jid2]
-    # [::Jabber::RosterCmd getdisplayname $jid2]
-    if {$rosterName != ""} {
-	set username $rosterName
-    } elseif {$node == ""} {
-	set username $domain
-    } else {
-	set username $node
-    }
-    set chatstate(username) $username
-    set chatstate(fromjid)  $jid
-    set chatstate(jid)      $mjid
-
+    
+    set chatstate(fromjid)          $jid
+    set chatstate(jid)              $mjid
+    set chatstate(shortname)        [::Roster::GetDisplayName $mjid]
     set chatstate(dlgtoken)         $dlgtoken
     set chatstate(threadid)         $threadID
-    set chatstate(rosterName)       $rosterName
+    set chatstate(nameorjid)        [::Roster::GetNameOrjid $jid2]
     set chatstate(state)            normal    
     set chatstate(subject)          ""
     set chatstate(lastsubject)      ""
@@ -835,7 +828,7 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set w [winfo toplevel $wthread]
     set chatstate(w) $w
 
-    SetTitle $w $rosterName $chatstate(fromjid)
+    SetTitle $chattoken
 
     set wbot        $wthread.bot
     set wnotifier   $wbot.lnot
@@ -848,7 +841,7 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     pack $frtop -side top -anchor w -fill x
     
     set icon [::Roster::GetPresenceIconFromJid $jid]
-
+    
     # D = -padx 6 -pady 2
     set   wsub $frtop.fsub
     frame $wsub
@@ -976,13 +969,12 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     return $chattoken
 }
 
-proc ::Chat::SetTitle {w rosterName fromjid} {
-    
-    if {$rosterName == ""} {
-	wm title $w "[mc Chat]: $fromjid"
-    } else {
-	wm title $w "[mc Chat]: $rosterName ($fromjid)"
-    }
+proc ::Chat::SetTitle {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+        
+    wm title $chatstate(w) \
+      "[mc Chat]: $chatstate(shortname) ($chatstate(fromjid))"
 }
 
 # ::Chat::NewPage, ... --
@@ -1002,7 +994,7 @@ proc ::Chat::NewPage {dlgtoken threadID args} {
 	variable $chattoken
 	upvar 0 $chattoken chatstate
 
-	set name $chatstate(username)
+	set name $chatstate(shortname)
 	set chatstate(pagename) $name
 	set dlgstate(name2token,$name) $chattoken
 	
@@ -1023,7 +1015,7 @@ proc ::Chat::MakeNewPage {dlgtoken threadID args} {
     array set argsArr $args
         
     # Make fresh page with chat widget.
-    set name [::Jabber::RosterCmd getdisplayname $argsArr(-from)]
+    set name [::Roster::GetDisplayName $argsArr(-from)]
     set wnb $dlgstate(wnb)
     set name [$wnb getuniquename $name]
     set wpage [$wnb newpage $name]
@@ -1120,6 +1112,8 @@ proc ::Chat::MoveThreadFromPage {dlgtoken chattoken} {
     pack forget $wthread
     destroy $wnb
     pack $wthread -in $wcont -fill both -expand true
+    
+    SetThreadState $dlgtoken $chattoken
 }
 
 proc ::Chat::ClosePageCmd {dlgtoken w name} {
@@ -1170,7 +1164,7 @@ proc ::Chat::SetThreadState {dlgtoken chattoken} {
     if {[winfo exists $dlgstate(wnb)]} {
 	$dlgstate(wnb) pageconfigure $chatstate(pagename) -image ""
     }
-    SetTitle $dlgstate(w) $chatstate(rosterName) $chatstate(fromjid)
+    SetTitle $chattoken
 }
 
 # Chat::SetState --
@@ -1597,7 +1591,7 @@ proc ::Chat::PresenceHook {jid type args} {
     jlib::splitjid $from jid2 res
     array set presArr [$jstate(roster) getpresence $jid2 -resource $res]
     set icon [::Roster::GetPresenceIconFromJid $from]
-
+    
     foreach chattoken [GetAllTokensFrom chat jid ${mjid}*] {
 	variable $chattoken
 	upvar 0 $chattoken chatstate
@@ -1847,7 +1841,7 @@ proc ::Chat::XEventRecv {chattoken xevent args} {
 		set name [::Jabber::JlibCmd service nick $chatstate(jid)]
 
 	    } else {
-		set name $chatstate(username)
+		set name $chatstate(shortname)
 	    }
 	}
 	set dlgtoken $chatstate(dlgtoken)

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Import.tcl,v 1.15 2004-12-06 15:27:01 matben Exp $
+# $Id: Import.tcl,v 1.16 2004-12-08 08:21:20 matben Exp $
 
 package require http
 package require httpex
@@ -335,7 +335,7 @@ proc ::Import::DoImport {w opts args} {
 	if {$isLocal} {
 	    set optArr(-url) [::Utils::GetHttpFromFile $fileName]
 	    set putOpts [array get optArr]
-	    set putOpts [::Import::GetStackOptions $w $putOpts $useTag]
+	    set putOpts [GetStackOptions $w $putOpts $useTag]
 	    	    
 	    # Either we use the put/get method with a new connection,
 	    # or use standard http.
@@ -758,15 +758,20 @@ proc ::Import::HttpGet2 {wtop url opts} {
     set getstate(wtop)          $wtop
     set getstate(url)           $url
     set getstate(dstPath)       $dstPath
+    set getstate(tail)          $fileTail
     set getstate(opts)          $opts
     set getstate(transport)     http
+    set getstate(utag)          [::CanvasUtils::GetUtagFromCreateCmd $opts]
     
     set httptoken [::HttpTrpt::Get $url $dstPath \
       -dialog 0 -silent 1   \
       -command          [list [namespace current]::HttpCmd2 $gettoken] \
       -progressmessage  [list [namespace current]::HttpProgress2 $gettoken]]
     
-    set getstate(httptoken) $httptoken
+    # We may have been freed here already!
+    if {[array exists getstate]} {
+	set getstate(httptoken) $httptoken
+    }
     return ""
 }
 
@@ -774,7 +779,7 @@ proc ::Import::HttpCmd2 {gettoken httptoken status {msg ""}} {
     variable $gettoken
     upvar 0 $gettoken getstate
 
-    ::Debug 2 "::Import::HttpCmd2 status=$status"
+    ::Debug 2 "::Import::HttpCmd2 status=$status, gettoken=$gettoken"
 
     set wtop $getstate(wtop)
     set wcan [::WB::GetCanvasFromWtop $wtop]
@@ -788,7 +793,6 @@ proc ::Import::HttpCmd2 {gettoken httptoken status {msg ""}} {
 	    
 	    # This should delegate the actual drawing to the correct proc.
 	    DoImport $wcan $getstate(opts) -file $getstate(dstPath) -where local
-	    TrptCachePostImport $gettoken
 	}
 	default {
 	    ::WB::SetStatusMessage $wtop $msg
@@ -797,6 +801,12 @@ proc ::Import::HttpCmd2 {gettoken httptoken status {msg ""}} {
 	      $getstate(opts)
 	}
     }
+    
+    # Evaluate any commands affecting this item.
+    TrptCachePostImport $gettoken
+    
+    # And cleanup.
+    unset getstate
 }
 
 proc ::Import::HttpProgress2 {gettoken str} {
@@ -1144,8 +1154,7 @@ proc ::Import::ImportCommand {line stateStatus gettoken httptoken} {
     # We should be final here!
     if {[string equal $thestate "final"]} {
 	if {$status != "ok"} {
-	    eval {::Import::NewBrokenImage $wcan [lrange $line 1 2]} \
-	      [lrange $line 3 end]
+	    eval {NewBrokenImage $wcan [lrange $line 1 2]} [lrange $line 3 end]
 	}
     }
 }
@@ -1221,7 +1230,7 @@ proc ::Import::GetTokenList { } {
 proc ::Import::TrptCachePostDrawHook {wtop cmd args} {
     
     set utag [::CanvasUtils::GetUtagFromCanvasCmd $cmd]
-    set gettoken [::Import::GetTokenFrom utag $utag]
+    set gettoken [GetTokenFrom utag $utag]
 
     if {$gettoken != ""} {
 	upvar #0 $gettoken getstate          
@@ -1232,7 +1241,7 @@ proc ::Import::TrptCachePostDrawHook {wtop cmd args} {
 		# Note order since reset triggers unsetting gettoken.
 		set msg "Cancelled transport of \"$getstate(tail)\"; was deleted"
 		::WB::SetStatusMessage $getstate(wtop) $msg
-		::Import::HttpReset $gettoken
+		HttpReset $gettoken
 	    }
 	    import {
 		# empty
@@ -1329,6 +1338,7 @@ proc ::Import::QuickTimeTclCallback {gettoken w msg {err {}}} {
 	    }
 	    ::WB::SetStatusMessage $wtop ""
 	    ::UI::MessageBox -icon error -type ok -message $msg
+	    unset getstate
 	    return
 	}
 	loading {	    
@@ -1411,31 +1421,6 @@ proc ::Import::GetStackOptions {w opts tag} {
 	 set aboveutag [::CanvasUtils::FindAboveUtag $w $tag]
 	 if {[string length $aboveutag]} {
 	     set optsArr(-below) $aboveutag
-	 }
-     }    
-    return [array get optsArr]
-}
-
-proc ::Import::GetStackOptionsBU {w opts tag} {
-    
-    array set optsArr $opts
-
-    if {![info exists optsArr(-above)]} {
-	 set idBelow [$w find below $tag]
-	 if {[string length $idBelow] > 0} {
-	     set utagBelow [::CanvasUtils::GetUtag $w $idBelow 1]
-	     if {[string length $utagBelow] > 0} {
-		 lappend opts -above $utagBelow
-	     }
-	 } 
-     }
-     if {![info exists optsArr(-below)]} {
-	 set idAbove [$w find above $tag]
-	 if {[string length $idAbove] > 0} {
-	     set utagAbove [::CanvasUtils::GetUtag $w $idAbove 1]
-	     if {[string length $utagAbove] > 0} {
-		 lappend opts -below $utagAbove
-	     }
 	 }
      }    
     return [array get optsArr]
@@ -2118,14 +2103,15 @@ proc ::Import::ReloadImage {wtop id} {
     set line [concat import $coords $opts]
     
     set errMsg [eval {
-	::Import::HandleImportCmd $wcan $line -where local   \
+	# -progress & -command outdated!!!
+	HandleImportCmd $wcan $line -where local   \
 	  -progress [list [namespace current]::ImportProgress $line] \
 	  -command  [list [namespace current]::ImportCommand $line]
     }]
     if {$errMsg != ""} {
 
 	# Display a broken image to indicate for the user.
-	eval {::Import::NewBrokenImage $wcan $coords} $opts
+	eval {NewBrokenImage $wcan $coords} $opts
 	::UI::MessageBox -icon error -type ok -message \
 	  "Failed loading \"$optsArr(-url)\": $errMsg"
     }

@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.75 2004-12-04 15:01:06 matben Exp $
+# $Id: jabberlib.tcl,v 1.76 2004-12-08 08:21:19 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -1324,6 +1324,21 @@ proc jlib::got_stream {jlibname args} {
     if {[info exists lib(streamcmd)] && [llength $lib(streamcmd)]} {
 	uplevel #0 $lib(streamcmd) $jlibname $args
 	unset lib(streamcmd)
+    }
+}
+
+# jlib::getthis --
+# 
+#       Access function for: server, username, myjid, myjid2...
+
+proc jlib::getthis {jlibname name} {
+    
+    upvar ${jlibname}::locals locals
+    
+    if {[info exists locals($name)]} {
+	return $locals($name)
+    } else {
+	return ""
     }
 }
 
@@ -3238,46 +3253,46 @@ namespace eval jlib {
     # get the 'code' attribute in an error element.
     variable errCodeToText
     array set errCodeToText {
-	100 Continue
-	101 {Switching Protocols}
-	200 OK
-	201 Created
-	202 Accepted
-	203 {Non-Authoritative Information}
-	204 {No Content}
-	205 {Reset Content}
-	206 {Partial Content}
-	300 {Multiple Choices}
-	301 {Moved Permanently}
-	302 Found
-	303 {See Other}
-	304 {Not Modified}
-	305 {Use Proxy}
-	307 {Temporary Redirect}
-	400 {Bad Request}
-	401 Unauthorized
-	402 {Payment Required}
-	403 Forbidden
-	404 {Not Found}
-	405 {Method Not Allowed}
-	406 {Not Acceptable}
-	407 {Proxy Authentication Required}
-	408 {Request Time-out}
-	409 Conflict
-	410 Gone
-	411 {Length Required}
-	412 {Precondition Failed}
-	413 {Request Entity Too Large}
-	414 {Request-URI Too Large}
-	415 {Unsupported Media Type}
-	416 {Requested Range Not Satisfiable}
-	417 {Expectation Failed}
-	500 {Internal Server Error}	
-	501 {Not Implemented}
-	502 {Bad Gateway}
-	503 {Service Unavailable}
-	504 {Gateway Time-out}
-	505 {HTTP Version not supported}
+	100 "Continue"
+	101 "Switching Protocols"
+	200 "OK"
+	201 "Created"
+	202 "Accepted"
+	203 "Non-Authoritative Information"
+	204 "No Content"
+	205 "Reset Content"
+	206 "Partial Content"
+	300 "Multiple Choices"
+	301 "Moved Permanently"
+	302 "Found"
+	303 "See Other"
+	304 "Not Modified"
+	305 "Use Proxy"
+	307 "Temporary Redirect"
+	400 "Bad Request"
+	401 "Unauthorized"
+	402 "Payment Required"
+	403 "Forbidden"
+	404 "Not Found"
+	405 "Method Not Allowed"
+	406 "Not Acceptable"
+	407 "Proxy Authentication Required"
+	408 "Request Time-out"
+	409 "Conflict"
+	410 "Gone"
+	411 "Length Required"
+	412 "Precondition Failed"
+	413 "Request Entity Too Large"
+	414 "Request-URI Too Large"
+	415 "Unsupported Media Type"
+	416 "Requested Range Not Satisfiable"
+	417 "Expectation Failed"
+	500 "Internal Server Error"	
+	501 "Not Implemented"
+	502 "Bad Gateway"
+	503 "Service Unavailable"
+	504 "Gateway Time-out"
+	505 "HTTP Version not supported"
     }
 }
 

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.106 2004-12-02 08:22:34 matben Exp $
+# $Id: Roster.tcl,v 1.107 2004-12-08 08:21:19 matben Exp $
 
 package provide Roster 1.0
 
@@ -137,6 +137,50 @@ namespace eval ::Roster:: {
     if {[string equal $this(platform) "macintosh"]} {
 	set popMenuDefs(roster,def) [lreplace $popMenuDefs(roster,def) 9 11]
     }
+}
+
+proc ::Roster::GetNameOrjid {jid} {
+    upvar ::Jabber::jstate jstate
+       
+    set name [$jstate(roster) getname $jid]
+    if {$name == ""} {
+	set name $jid
+    }
+    return $name
+}
+
+proc ::Roster::GetShortName {jid} {
+    upvar ::Jabber::jstate jstate
+    
+    set name [$jstate(roster) getname $jid]
+    if {$name == ""} {	
+	jlib::splitjidex $jid node domain res
+	if {$node == ""} {
+	    set name $domain
+	} else {
+	    if {[string equal [$jstate(jlib) getthis server] $domain]} {
+		set name $node
+	    } else {
+		set name $jid
+	    }
+	}
+    }
+    return $name
+}
+
+proc ::Roster::GetDisplayName {jid} {
+    upvar ::Jabber::jstate jstate
+    
+    set name [$jstate(roster) getname $jid]
+    if {$name == ""} {
+	jlib::splitjidex $jid node domain res
+	if {$node == ""} {
+	    set name $domain
+	} else {
+	    set name $node
+	}
+    }
+    return $name
 }
 
 proc ::Roster::MapShowToText {show} {
@@ -507,7 +551,9 @@ proc ::Roster::DoubleClickCmd {w v} {
 	if {[string equal $jprefs(rost,dblClk) "normal"]} {
 	    ::NewMsg::Build -to $jid2
 	} else {
-	    ::Chat::StartThread $jid2
+	    
+	    # We let Chat handle this internally.
+	    ::Chat::StartThread $jid
 	}
     }    
 }
@@ -1321,7 +1367,11 @@ proc ::Roster::GetPresenceIconFromJid {jid} {
     upvar ::Jabber::jstate jstate
     
     jlib::splitjid $jid jid2 res
-    set pres [$jstate(roster) getpresence $jid2 -resource $res]
+    if {$res == ""} {
+	set pres [lindex [$jstate(roster) getpresence $jid2] 0]
+    } else {
+	set pres [$jstate(roster) getpresence $jid2 -resource $res]
+    }
     array set presArr $pres
     
     return [eval {GetPresenceIcon $jid $presArr(-type)} $pres]
