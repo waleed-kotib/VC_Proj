@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Sounds.tcl,v 1.17 2004-01-30 15:33:51 matben Exp $
+# $Id: Sounds.tcl,v 1.18 2004-02-08 11:56:14 matben Exp $
 
 package provide Sounds 1.0
 
@@ -86,6 +86,11 @@ proc ::Sounds::Init { } {
     
     # Create all sounds from current sound set (which is "" as default).
     if {$priv(canPlay)} {
+	
+	# Verify that sound set exists.
+	if {[lsearch -exact [::Sounds::GetAllSets] $sprefs(soundSet)] < 0} {
+	    set sprefs(soundSet) ""
+	}
 	::Sounds::LoadSoundSet $sprefs(soundSet)
     }
 }
@@ -101,11 +106,25 @@ proc ::Sounds::LoadSoundSet {soundSet} {
         
     array set sound [array get soundIndex]
     
+    # Search for given sound set.
     if {$soundSet == ""} {
 	set path $this(soundsPath)
     } else {
 	set path [file join $this(soundsPath) $soundSet]
-	source [file join $path soundIndex.tcl]
+	set indFile [file join $path soundIndex.tcl]
+	if {[file exists $indFile]} {
+	    source $indFile
+	} else {
+	    set path [file join $this(altSoundsPath) $soundSet]
+	    set indFile [file join $path soundIndex.tcl]
+	    if {[file exists $indFile]} {
+		source $indFile
+	    } else {
+		
+		# Fallback.
+		set path $this(soundsPath)
+	    }
+	}
     }
     if {$priv(QuickTimeTcl)} {
 	frame .fake
@@ -345,10 +364,23 @@ proc ::Sounds::PlayTmpPrefSound {name} {
 	set path $this(soundsPath)
     } else {
 	set path [file join $this(soundsPath) $tmpPrefs(soundSet)]
-	source [file join $path soundIndex.tcl]
+	set indFile [file join $path soundIndex.tcl]
+	if {[file exists $indFile]} {
+	    source $indFile
+	} else {
+	    set path [file join $this(altSoundsPath) $tmpPrefs(soundSet)]
+	    set indFile [file join $path soundIndex.tcl]
+	    if {[file exists $indFile]} {
+		source $indFile
+	    } else {
+		
+		# Fallback.
+		set path $this(soundsPath)
+	    }
+	}
     }
     set f [file join $path $sound($name)]
-    
+
     if {$priv(QuickTimeTcl)} {
 	if {[namespace exists ::vfs]} {
 	    set tmp [file join $this(tmpPath) [file tail $f]]
@@ -415,6 +447,14 @@ proc ::Sounds::GetAllSets { } {
     
     set allsets {}
     foreach f [glob -nocomplain -directory $this(soundsPath) *] {
+	if {[file isdirectory $f]  \
+	  && [file exists [file join $f soundIndex.tcl]]} {
+	    lappend allsets [file tail $f]
+	}
+    }  
+    
+    # Alternative additional sounds directory.
+    foreach f [glob -nocomplain -directory $this(altSoundsPath) *] {
 	if {[file isdirectory $f]  \
 	  && [file exists [file join $f soundIndex.tcl]]} {
 	    lappend allsets [file tail $f]
