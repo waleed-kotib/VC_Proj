@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Connections.tcl,v 1.8 2003-10-05 13:36:20 matben Exp $
+# $Id: Connections.tcl,v 1.9 2003-10-12 13:12:55 matben Exp $
 
 package provide Connections 1.0
 
@@ -326,7 +326,7 @@ proc ::OpenConnection::WhenSocketOpensInits {nameOrIP server remoteServPort \
 	::UI::SetStatusMessage $wDlgs(mainwb) {}
 	return
     }
-    if {[IsIPNumber $nameOrIP]} {
+    if {[::Utils::IsIPNumber $nameOrIP]} {
 	set ipNum $nameOrIP
 	set ipName $ipNumTo(name,$ipNum)
     } else {
@@ -424,7 +424,7 @@ proc ::OpenConnection::SetIpArrays {nameOrIP sock remoteServPort} {
 	# Careful because sometimes (mac only?) we get '<unknown>' for ip name.
 	set ipNum [lindex $peername 0]
 	set ipName [lindex $peername 1]
-	if {![IsIPNumber $nameOrIP]} {
+	if {![::Utils::IsIPNumber $nameOrIP]} {
 	    set ipName $nameOrIP
 	}
 
@@ -432,7 +432,7 @@ proc ::OpenConnection::SetIpArrays {nameOrIP sock remoteServPort} {
 	set ipNumTo(name,$ipNum) $ipName
 	set ipName2Num($ipName) $ipNum
     } else {
-	if {[IsIPNumber $nameOrIP]} {
+	if {[::Utils::IsIPNumber $nameOrIP]} {
 	    set ipNum $nameOrIP
 	    set ipName $ipNumTo(name,$ipNum)
 	} else {

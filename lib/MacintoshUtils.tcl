@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: MacintoshUtils.tcl,v 1.4 2003-08-23 07:19:16 matben Exp $
+# $Id: MacintoshUtils.tcl,v 1.5 2003-10-12 13:12:55 matben Exp $
 
 #package require TclSpeech 2.0
 #package require Tclapplescript
@@ -20,9 +20,116 @@ namespace eval ::Mac::Printer:: {
 
 }
 
-proc ::Mac::Printer::PageSetup { } {
+proc ::Mac::Printer::PageSetup {wtop} {
+    global  prefs this
         
+    switch -- $this(platform) {
+	macintosh {
+	    ::Mac::MacPrint::PageSetup $wtop
+	}
+	macosx {
+	    ::Mac::MacCarbonPrint::PageSetup $wtop
+	}
+    }
+}
 
+proc ::Mac::Printer::Print {wtop} {
+    global  prefs this
+
+    switch -- $this(platform) {
+	macintosh {
+	    ::Mac::MacPrint::PrintCanvas $wtop
+	}
+	macosx {
+
+	}
+    }
+}
+
+#-- Mac Classic ----------------------------------------------------------------
+
+namespace eval ::Mac::MacPrint:: {
+    
+}
+
+proc ::Mac::MacPrint::PageSetup {wtop} {
+    global  prefs
+    variable cache
+    
+    if {$prefs(MacPrint)} {
+	set printObj [::macprint::pagesetup]
+	if {$printObj != ""} {
+	    set cache($wtop,printObj) $printObj
+	}
+    } else {
+	tk_messageBox -icon error -title [::msgcat::mc {No Printing}] \
+	  -message [::msgcat::mc messprintnoextension]
+    }	    
+}
+    
+proc ::Mac::MacPrint::PrintCanvas {wtop} {
+    global  prefs
+    variable cache
+    
+    set wCan [::UI::GetCanvasFromWtop $wtop]
+
+    if {$prefs(MacPrint)} {
+	set ans [macprint::print]
+	if {$ans != ""} {
+	    foreach {type printObject} $ans break
+	    set opts {}
+	    if {[info exists cache($wtop,printObj)]} {
+		lappend opts -printobject $cache($wtop,printObj)
+	    }
+	    eval {macprint::printcanvas $wCan $printObject} $opts
+	}
+    } else {
+	tk_messageBox -icon error -title [::msgcat::mc {No Printing}] \
+	  -message [::msgcat::mc messprintnoextension]
+    }	    
+}
+
+#-- Mac OS X -------------------------------------------------------------------
+
+namespace eval ::Mac::MacCarbonPrint:: {
+    
+}
+
+proc ::Mac::MacCarbonPrint::PageSetup {wtop} {
+    global  prefs
+    variable cache
+    
+    if {$prefs(MacCarbonPrint)} {
+	set pageFormat [maccarbonprint::pagesetup]
+	if {$pageFormat != ""} {
+	    set cache($wtop,pageFormat) $pageFormat
+	}
+    } else {
+	tk_messageBox -icon error -title [::msgcat::mc {No Printing}] \
+	  -message [::msgcat::mc messprintnoextension]
+    }
+}
+
+proc ::Mac::MacCarbonPrint::PrintCanvas {wtop} {
+    global  prefs
+    variable cache
+
+    set wCan [::UI::GetCanvasFromWtop $wtop]
+
+    if {$prefs(MacCarbonPrint)} {
+	set ans [maccarbonprint::print -parent [winfo toplevel $wCan]]
+	if {$ans != ""} {
+	    foreach {type printObject} $ans break
+	    set opts {}
+	    if {[info exists cache($wtop,pageFormat)]} {
+		lappend opts -pageformat $cache($wtop,pageFormat)
+	    }
+	    eval {maccarbonprint::printcanvas $wCan $printObject} $opts
+	}
+    } else {
+	tk_messageBox -icon error -title [::msgcat::mc {No Printing}] \
+	  -message [::msgcat::mc messprintnoextension]
+    }	    
 }
 
 proc ::Mac::OpenUrl {url} {
@@ -34,14 +141,6 @@ proc ::Mac::OpenUrl {url} {
 	    open(file "%s")
 	    Activate -1
 	    end tell
-	}
-	if {0} {
-	set script {
-	    tell application "Netscape Communicatorª"
-	    activate
-	    GetURL %s inside window 1
-	    end tell
-	}
 	}
 	AppleScript execute [format $script $url]
     }
@@ -72,5 +171,5 @@ proc ::Mac::Speech::GetVoices { } {
     return [speech::speakers]
 }
 
-
+#-------------------------------------------------------------------------------
 

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.12 2003-10-05 13:36:17 matben Exp $
+# $Id: GroupChat.tcl,v 1.13 2003-10-12 13:12:55 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -430,15 +430,11 @@ proc ::Jabber::GroupChat::GotMsg {body args} {
 	} else {
 	    set meyou you
 	}
-	$wtext insert end $txt ${meyou}tag
-	set textCmds [::Text::ParseAllForTextWidget "  $body" ${meyou}txttag linktag]
-	foreach cmd $textCmds {
-	    eval $wtext $cmd
-	}
-	$wtext insert end "\n"
-	
+	$wtext insert end $txt ${meyou}tag	
+	::Text::ParseAndInsert $wtext "  $body" ${meyou}txttag linktag	
 	$wtext configure -state disabled
 	$wtext see end
+
 	if {$locals($roomJid,got1stMsg) == 0} {
 	    set locals($roomJid,got1stMsg) 1
 	}

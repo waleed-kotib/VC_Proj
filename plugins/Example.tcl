@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Example.tcl,v 1.8 2003-10-05 13:36:21 matben Exp $
+# $Id: Example.tcl,v 1.9 2003-10-12 13:12:56 matben Exp $
 
 
 namespace eval ::Example:: {
@@ -88,6 +88,7 @@ proc ::Example::Import {wcan optListVar args} {
     }
     set fileName $argsArr(-file)
     set locals(file) $fileName    
+    set wtop [::UI::GetToplevelNS $wcan]
     set errMsg ""
     if {![catch {open $locals(file) r} fd]} {
 	set locals(body) [read $fd]
@@ -97,7 +98,7 @@ proc ::Example::Import {wcan optListVar args} {
     # Extract coordinates and tags which must be there. error checking?
     foreach {x y} $optArr(-coords) break
     if {[info exists optArr(-tags)]} {
-	set useTag $optArr(-tags)
+	set useTag [::CanvasUtils::GetUtagFromTagList $optArr(-tags)]
     } else {
 	set useTag [::CanvasUtils::NewUtag]
     }
@@ -113,6 +114,13 @@ proc ::Example::Import {wcan optListVar args} {
     set id [$wcan create window $x $y -anchor nw -window $wfr -tags  \
       [list frame $useTag]]
     set locals(id2file,$id) $fileName
+    
+    # Need explicit permanent storage for import options.
+    set configOpts [list -file $fileName]
+    if {[info exists optArr(-url)]} {
+	lappend configOpts -url $optArr(-url)
+    }
+    eval {::CanvasUtils::ItemSet $wtop $id} $configOpts
 
     # We may let remote clients know our size.
     lappend optList -width [winfo reqwidth $wbt] -height [winfo reqheight $wbt]

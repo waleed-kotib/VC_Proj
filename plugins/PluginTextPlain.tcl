@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: PluginTextPlain.tcl,v 1.5 2003-10-05 13:36:21 matben Exp $
+# $Id: PluginTextPlain.tcl,v 1.6 2003-10-12 13:12:56 matben Exp $
 
 
 namespace eval ::TextImporter:: {
@@ -134,7 +134,7 @@ proc ::TextImporter::Import {wcan optListVar args} {
     # Extract coordinates and tags which must be there. error checking?
     foreach {x y} $optArr(-coords) break
     if {[info exists optArr(-tags)]} {
-	set useTag $optArr(-tags)
+	set useTag [::CanvasUtils::GetUtagFromTagList $optArr(-tags)]
     } else {
 	set useTag [::CanvasUtils::NewUtag]
     }
@@ -151,14 +151,25 @@ proc ::TextImporter::Import {wcan optListVar args} {
     set locals(id2file,$id) $fileName
     
     # Need explicit permanent storage for import options.
-    ::CanvasUtils::ItemSet $wtop $useTag -file $fileName
+    set configOpts [list -file $fileName]
+    if {[info exists optArr(-url)]} {
+	lappend configOpts -url $optArr(-url)
+    }
+    eval {::CanvasUtils::ItemSet $wtop $id} $configOpts
     
     bind $wfr.icon <Double-Button-1> [list [namespace current]::Clicked $id]
 
     # We may let remote clients know our size.
     lappend optList -width [winfo reqwidth $wfr] -height [winfo reqheight $wfr]
 
-    set msg "Plain text: [file tail $fileName]"
+    if {[info exists optArr(-url)]} {
+	set name [::uriencode::decodefile  \
+	  [::Utils::GetFilePathFromUrl $optArr(-url)]]
+    } else {
+	set name [file tail $fileName]
+    }
+    set locals(name,$id) $name
+    set msg "Plain text: $name"
     ::balloonhelp::balloonforwindow $wfr.icon $msg
     
     # Success.
@@ -202,7 +213,7 @@ proc ::TextImporter::Clicked {id} {
     wm title $win "Plain Text Browser"
     pack [frame ${win}.f -borderwidth 1 -relief raised]   \
       -fill both -expand 1 -ipadx 12 -ipady 4
-    set txt "The content of the text file: [file tail $locals(id2file,$id)]"
+    set txt "The content of the text file: $locals(name,$id)"
     pack [label ${win}.f.la -text $txt -font $sysFont(sb)]  \
       -side top -anchor w -padx 12 -pady 6
     

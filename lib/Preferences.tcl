@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.13 2003-10-05 13:36:20 matben Exp $
+# $Id: Preferences.tcl,v 1.14 2003-10-12 13:12:55 matben Exp $
  
 package require notebook
 package require tree
@@ -83,6 +83,9 @@ proc ::Preferences::Build {w} {
 	    set xpadbt   2
 	}
     }    
+    
+    # Must sort 'jserver(profile)'.
+    ::Jabber::SortProfileList
     
     # Work only on a temporary copy in case we cancel.
     catch {unset tmpPrefs}
@@ -555,6 +558,27 @@ proc ::Preferences::Profiles::MakeTmpServArr { } {
 	  tmpJServArr($name,resource)] $spec break
     }
     set tmpJServArr(all) [lsort -dictionary $tmpJServArr(all)]
+}
+
+# ::Preferences::Profiles::UpdateTmpJServerProfile --
+#
+#       Make the 'tmpJServer(profile)' reflect 'tmpJServArr'.
+
+proc ::Preferences::Profiles::UpdateTmpJServerProfile { } {
+    
+    upvar ::Preferences::tmpJServer tmpJServer
+    upvar ::Preferences::tmpJServArr tmpJServArr
+    
+    # This is a bit of double counting with two temp storages...
+    # New... Profiles
+    set tmpJServer(profile) {}
+    foreach profile [lsort -dictionary $tmpJServArr(all)] {
+	lappend tmpJServer(profile) $profile   \
+	  [list $tmpJServArr($profile,server)  \
+	  $tmpJServArr($profile,username)      \
+	  $tmpJServArr($profile,password)      \
+	  $tmpJServArr($profile,resource)]
+    }
 }
 
 # Preferences::Profiles::Set --
@@ -2499,6 +2523,8 @@ proc ::Preferences::SavePushBt { } {
     variable tmpJPrefs
     variable tmpJServer
     
+    set protocolSet 0
+    
     # Was protocol changed?
     if {![string equal $prefs(protocol) $tmpPrefs(protocol)]} {
 	set ans [tk_messageBox -title Relaunch -icon info -type yesno \
@@ -2506,14 +2532,18 @@ proc ::Preferences::SavePushBt { } {
 	if {$ans == "no"} {
 	    set finished 1
 	    return
+	} else {
+	    set protocolSet 1
 	}
     }
         
     # Make all temporary prefs reflect the current settings of the panels.
     if {!$prefs(stripJabber)} {
-	::Preferences::UpdateTmpArrays
-	::Jabber::Roster::SetBackgroundImage $tmpJPrefs(rost,useBgImage) \
-	  $tmpJPrefs(rost,bgImagePath)
+	::Preferences::Profiles::UpdateTmpJServerProfile
+	if {!$protocolSet} {
+	    ::Jabber::Roster::SetBackgroundImage $tmpJPrefs(rost,useBgImage) \
+	      $tmpJPrefs(rost,bgImagePath)
+	}
     }
     
     # Copy the temporary copy to the real variables.
@@ -2561,26 +2591,30 @@ proc ::Preferences::CancelPushBt { } {
     
     # Make all temporary prefs reflect the current settings of the panels.
     if {!$prefs(stripJabber)} {
-	::Preferences::UpdateTmpArrays
+	::Preferences::Profiles::UpdateTmpJServerProfile
     }
     
     # Check if anything changed, if so then warn.
     set hasChanged 0
-    foreach {arrName tmpName}   \
-      {prefs tmpPrefs jserver tmpJServer jprefs tmpJPrefs} {
+    foreach {arrName tmpName} {
+	prefs      tmpPrefs 
+	jserver    tmpJServer 
+	jprefs     tmpJPrefs
+    } {
 	if {!$hasChanged} {
 	    foreach key [array names $arrName] {		
 		set locName ${arrName}($key)
 		upvar 0 $locName arrVal 
 		set locName ${tmpName}($key)
 		upvar 0 $locName tmpVal 
+		
 		if {![info exists $tmpName]} {
 		    ::Debug 3 "\tdiff: locName=$locName"
 		    set hasChanged 1
 		    break
 		}
-		if {$arrVal != $tmpVal} {
-		    ::Debug 3 "\tdiff: locName=$locName, tmpVal=$tmpVal"
+		if {![string equal $arrVal $tmpVal]} {
+		    ::Debug 3 "\tdiff: locName=$locName,\n\tarrVal=$arrVal,\n\ttmpVal=$tmpVal"
 		    set hasChanged 1
 		    break
 		}
@@ -2604,29 +2638,6 @@ proc ::Preferences::CancelPushBt { } {
     }
     if {$finished == 2} {
 	::UI::SaveWinGeom $wtoplevel
-    }
-}
-
-# ::Preferences::UpdateTmpArrays --
-#
-#       Make all temporary prefs reflect the current settings of the panels.
-
-proc ::Preferences::UpdateTmpArrays { } {
-    
-    variable tmpJPrefs
-    variable tmpJServer
-    variable tmpJServArr
-    
-    # This is a bit of double counting with two temp storages...
-    # New... Profiles
-    #set tmpJServer(all) $tmpJServArr(all)
-    set tmpJServer(profile) {}
-    foreach profile $tmpJServArr(all) {
-	lappend tmpJServer(profile) $profile   \
-	  [list $tmpJServArr($profile,server)  \
-	  $tmpJServArr($profile,username)      \
-	  $tmpJServArr($profile,password)      \
-	  $tmpJServArr($profile,resource)]
     }
 }
 

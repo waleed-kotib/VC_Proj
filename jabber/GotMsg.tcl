@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.6 2003-10-05 13:36:17 matben Exp $
+# $Id: GotMsg.tcl,v 1.7 2003-10-12 13:12:55 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -111,10 +111,7 @@ proc ::Jabber::GotMsg::Show {thisMsgId} {
     # Insert the actual body of the message.
     $wtext configure -state normal
     $wtext delete 1.0 end
-    set textCmds [::Text::ParseAllForTextWidget $theMsg normal linktag]
-    foreach cmd $textCmds {
-	eval $wtext $cmd
-    }
+    ::Text::ParseAndInsert $wtext $theMsg normal linktag
     $wtext configure -state disabled
     
     # If no more messages after this one...

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: HtmlImport.tcl,v 1.1 2003-10-05 13:42:29 matben Exp $
+# $Id: HtmlImport.tcl,v 1.2 2003-10-12 13:12:56 matben Exp $
 
 
 namespace eval ::HtmlImport:: {
@@ -26,26 +26,53 @@ namespace eval ::HtmlImport:: {
 proc ::HtmlImport::Init { } {
     global  tcl_platform
     variable locals
-            
+    
+    # Verify that we have web browser.
+    switch -- $tcl_platform(platform) {
+	unix {
+	    if {[string length [::Utils::UnixGetWebBrowser]] == 0} {
+		return
+	    }
+	}
+	windows {
+	    if {![::Windows::CanOpenFileWithSuffix .html]} {
+		return
+	    }
+	}
+    }
+    
     set locals(docim) [image create photo -data {
-R0lGODdhIAAgAOYAAP////395f395P394/394v394f383/383vz83fz83Pz8
-2/z82fz82Pz81/z81vz71fz71Pz70/z70vz70fz70Pz7z/z7zvv7zfv7zPv7
-y/v6y/v6yvv6yfv6yPv6x/v6xvv6xfv6xPv6w/v6wvv6wfv6wPv6v/v6vvv6
-vfv6vPv6u/v6uvv6ufv6uPv6t/v6tvv6tPv6s/v6svv6sfv6sPv6r/v6rvv6
-rPv6q/v6qvv6qfv6qPv6p/v6pvr5pfn4pPj3pPj3o/f2ovb1ofX0ofTzn/Hw
-nfDvnPDvm+7tmezrmOvql+rplunoldfW1sLCwkxMTAAAAAAAAAAAAAAAAAAA
+R0lGODdhIAAgAPcAAP////395f395P394/394v394f383/383vz83fz83Pz8
+2/z82fz82Pz81/z81vz71fz71Pz70/z70vz70fz70Pz7z/z7zvv7zfv7zPv6
+y/v6yvv6yfv6yPv6x/v6xvv6xfv6xPv6w/v6wfv6wPv6v/v6vfv6vPv6u/v6
+uPv6tvv6tPv6svv6sfv6sPv6r/v6rvv6rPv6q/v6qvv6qfv6qPv6p/v6pvr5
+pfn4pPj3pPj3o/f2ovb1ofX0ofTzn/Ly2/HwxvHwnfDwxPDvvvDvvfDvvPDv
+uvDvsvDvnPDvm+7tmezrmOvql+rplunolefn0uXlu+Xkt9zcyNrZsdrZr9rZ
+rNfW1tHRv9HRvs/OqM/Op8/Opc/Ons/Omc/OksXFs8XEpcTDosTDoMTDn8TD
+ncLCwrq6q7q5nrm4m7m4mLm4l7m4k7m4krm4iqSkmKOjiaOjg6OjfZycnJmZ
+iJmYgpmYgZmYf5eXl5KSko+PhY6Ogo6Oeo6Od42NjYiIiIODg4ODc4ODcoOD
+cYODbX5+fnh4cHh4a3h4anR0dG9vb21tZ21tY21tXmpqamVlZWJiW2JiWmJi
+WWBgYFtbW1dXVldXVVdXVFdXU1FRUUxMTAAAAAAAAAAAAAAAAAAAAAAAAAAA
 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACwAAAAAIAAg
-AAAH/4AAglGEhYaHiIdPToKDAo8BkZICBw8XHR4fmpubUYuNAFGSo5EDCREZ
-HZyrH56MjaKRULO0sxUctB9QuruarqCxpAIEChIYmKycv7CkAcMJEBccmcmd
-n8yyUAK1s7q8u72+14Ojzw8WG9TV1q/kkgQIDujq6+LtoZK1G7n8tezAkQQY
-YEAhXT1Wy8gJKLBgggZkBzeBSIivgAJaHrhp8tcNhAiKUeBFmxZRoogSIA/I
-M1jyA4gQJFSAbEBBA5SM3TiCozUCBQyQDiGW9HjihQ2Qx+gd9FiCBQ0dIEnm
-3NmvlgwcPEAqrfcyZgysPUC2dAkzBYwbO3qEHRdqk79vtXdG0EqrVuxQESZa
-1NChti7bKENDlFgxIwePvj7s8voGF0oKKDdo9fABRHG1lz2N0u3x4wcRy8k8
-mnCx97Baz0cUU4VLuFYPKEOMKAG9yqPPG6bVBimShAltiTBZ7O07WYjsJr81
-vTTxAjdxH0OQLEH+N5H1678CAQA7
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAACwAAAAAIAAgAAAI/wABCNREsKDBgwgPlrEicKCA
+hwEiShRw4MEFDh08aNy4UdPChgA0SbzyJOKTKwMSRIAyhaNLDx4ZNhQZcZIk
+OXIcZfojp4KhRDg9yBE6VGNMkDQDuMn0IwClTHokCMmU5SXHozMlSslkBksm
+RZUuhLFk9erHrBHlYMqDaBKhnY0CDcU516zMgRID5KlUaA6QTHsepSnb8Sxe
+iV8yZQKjAdCjTEMIGzUcUqKcO4o1yHm7iC5Rz5PvVg4gwACDM2gyDnmjRXJo
+pKQLLJiQASNHLVE0Rmmtm8oHrHgLKKDbgS7ORYZw6hSD01CdEMBDEkAA4cKG
+jC7fQPZgCbCHIZm2jP+IrumAAwsasLukkimNlkyLyI6xJOIE+QYUMsgpHtS4
+pUaILPLWH40IUoIK5NFmW1l7WGIIHeAFtkYKL5CHwYJliaGYGB4E8tgRLcxA
+3nVElWgcZpng9NYkK8RQA3nqSZZGGh+AYAQcXbhoA3mucVSjCCaoAAMNNuxI
+mSYb0eVHbnLg4QddeFRBF5FF8ugSchoFkgmHHxxiBwouzFBklUe+pF1k3e3x
+QRGZcMGCDDWMeYOVJfaRCSHvTYKJHH9cIgcMdNlwQw50cmTJHm8sokYmZPAx
+yAtU2oADDj0UulGDDxKRCR+RtDFDnEVSigSdc/GpGE+OQJLJHYHKwUMQS1g6
+qhF4mXwQAhuZMAJqkTr4oEQTsmqUhhogiHBEHF6MKegOsDoRrEY1kpACDLsK
+ykMSTDh7ZELcdntUQAA7
 }]
         
     set icon12 [image create photo -data {
@@ -156,7 +183,7 @@ proc ::HtmlImport::Import {wcan optListVar args} {
     # Extract coordinates and tags which must be there. error checking?
     foreach {x y} $optArr(-coords) break
     if {[info exists optArr(-tags)]} {
-	set useTag $optArr(-tags)
+	set useTag [::CanvasUtils::GetUtagFromTagList $optArr(-tags)]
     } else {
 	set useTag [::CanvasUtils::NewUtag]
     }
@@ -170,17 +197,27 @@ proc ::HtmlImport::Import {wcan optListVar args} {
     
     set id [$wcan create window $x $y -anchor nw -window $wfr -tags  \
       [list frame $useTag]]
-    set locals(id2file,$id) $fileName
+    set locals(id2file,$id) $fileName    
     
     # Need explicit permanent storage for import options.
-    ::CanvasUtils::ItemSet $wtop $useTag -file $fileName
+    set configOpts [list -file $fileName]
+    if {[info exists optArr(-url)]} {
+	lappend configOpts -url $optArr(-url)
+    }
+    eval {::CanvasUtils::ItemSet $wtop $id} $configOpts
     
     bind $wfr.icon <Double-Button-1> [list [namespace current]::Clicked $id]
 
     # We may let remote clients know our size.
     lappend optList -width [winfo reqwidth $wfr] -height [winfo reqheight $wfr]
 
-    set msg "Html document: [file tail $fileName]"
+    if {[info exists optArr(-url)]} {
+	set name [::uriencode::decodefile  \
+	  [::Utils::GetFilePathFromUrl $optArr(-url)]]
+    } else {
+	set name [file tail $fileName]
+    }
+    set msg "Html document: $name"
     ::balloonhelp::balloonforwindow ${wfr}.icon $msg
     
     # Success.
@@ -190,7 +227,7 @@ proc ::HtmlImport::Import {wcan optListVar args} {
 proc ::HtmlImport::Clicked {id} {
     variable locals
     
-    OpenHtmlInBrowser $locals(id2file,$id)
+    ::Utils::OpenHtmlInBrowser $locals(id2file,$id)
 }
 
 proc ::HtmlImport::SaveAs {id} {

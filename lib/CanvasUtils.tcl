@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.13 2003-10-05 13:36:20 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.14 2003-10-12 13:12:55 matben Exp $
 
 package provide CanvasUtils 1.0
 package require sha1pure
@@ -253,6 +253,13 @@ proc ::CanvasUtils::GetUtagFromCmd {str} {
     return $utag
 }
 
+proc ::CanvasUtils::GetUtagFromTagList {tags} {
+    
+    set utag ""
+    regexp {[^/ ]+/[0-9]+} $tags utag
+    return $utag
+}
+
 # CanvasUtils::ReplaceUtag --
 #
 #       Takes a canvas command and replaces the utag with new utag.
@@ -378,6 +385,7 @@ proc ::CanvasUtils::RegisterUndoRedoCmd {cmd} {
 #
 #       Returns an item as a single line suitable for storing on file or
 #       sending on network. Not for images or windows!
+#       Doesn't add values equal to defaults.
 
 proc ::CanvasUtils::GetOnelinerForItem {w id} {
     global  prefs fontPoints2Size
@@ -397,25 +405,33 @@ proc ::CanvasUtils::GetOnelinerForItem {w id} {
 	if {[string equal $defval $val]} {
 	    continue
 	}
-	if {[string equal $op "-text"]} {
+	
+	switch -- $op {
+	    -text {
 	    
-	    # If multine text, encode as one line with explicit "\n".
-	    regsub -all "\n" $val $nl_ oneliner
-	    regsub -all "\r" $oneliner $nl_ oneliner
-	    set val $oneliner
-	} elseif {[string equal $op "-tags"]} {
+		# If multine text, encode as one line with explicit "\n".
+		regsub -all "\n" $val $nl_ oneliner
+		regsub -all "\r" $oneliner $nl_ oneliner
+		set val $oneliner
+	    }
+	    -tags {
 	    
-	    # Any tags "current" or "selected" must be removed 
-	    # before save, else when writing them on canvas things 
-	    # become screwed up.		
-	    regsub -all "current" $val "" val
-	    regsub -all "selected" $val "" val
-	} elseif {[string equal $op "-smooth"]} {
+		# Any tags "current" or "selected" must be removed 
+		# before save, else when writing them on canvas things 
+		# become screwed up.		
+		regsub -all "current" $val "" val
+		regsub -all "selected" $val "" val
+		
+		# Verify that we have a correct taglist.
+		set val [lsort -unique [concat std $type $val]]
+	    }
+	    -smooth {
 	    
-	    # Seems to be a bug in tcl8.3; -smooth should be 0/1, 
-	    # not bezier.		
-	    if {$val == "bezier"} {
-		set val 1
+		# Seems to be a bug in tcl8.3; -smooth should be 0/1, 
+		# not bezier.		
+		if {$val == "bezier"} {
+		    set val 1
+		}
 	    }
 	}
 	if {$prefs(useHtmlSizes) && [string equal $op "-font"]} {
@@ -427,10 +443,12 @@ proc ::CanvasUtils::GetOnelinerForItem {w id} {
     return [concat "create" $type [$w coords $id] $opcmd]
 }
 
-# CanvasUtils::GetOnelinerForImage, ... --
+# CanvasUtils::GetOnelinerForImage, ..QTMovie, ..Snack --
 #
 #       Makes a line that is suitable for file storage. Shall be understood
 #       by '::Import::HandleImportCmd'.
+#       It takes an existing image in a canvas and returns an 'import ...' 
+#       command.
 #
 # Arguments:
 #       w           the canvas widget
@@ -449,13 +467,15 @@ proc ::CanvasUtils::GetOnelinerForImage {w id args} {
 	-uritype file
     }
     array set argsArr $args
-    set impArgs {}
     set wtop [::UI::GetToplevelNS $w]
     
     # The 'broken image' options are cached.
-    set cachedOpts [::CanvasUtils::ItemCGet $wtop $id]
-    
-    if {$cachedOpts == ""} {
+    # This can be anything imported, it is just represented as an image.
+    set isbroken [expr {[lsearch [$w itemcget $id -tags] broken] < 0} ? 0 : 1]
+    array set impArr [::CanvasUtils::ItemCGet $wtop $id]
+        
+    # Real images needs more processing.
+    if {!$isbroken} {
 	set imageName [$w itemcget $id -image]
    
 	# Find out if zoomed.		
@@ -464,36 +484,36 @@ proc ::CanvasUtils::GetOnelinerForImage {w id args} {
 	    
 	    # Find out the '-file' option from the original image.
 	    set imageFile [$origImName cget -file]
-	    lappend impArgs -zoom-factor ${sign}${factor}
+	    set impArr(-zoom-factor) ${sign}${factor}
 	} else {
 	    set imageFile [$imageName cget -file]		    
 	}
-	lappend impArgs -width [image width $imageName] \
-	  -height [image height $imageName]
+	set impArr(-width) [image width $imageName]
+	set impArr(-height) [image height $imageName]
 	
 	switch -- $argsArr(-uritype) {
 	    file {
 		if {[info exists argsArr(-basepath)]} {
 		    set imageFile [filerelative $argsArr(-basepath) $imageFile]
 		}
-		lappend impArgs -file $imageFile
+		set impArr(-file) $imageFile
+		catch {unset impArr(-url)}
 	    }
 	    http {
-		lappend impArgs -url [::CanvasUtils::GetHttpFromFile $imageFile]
+		set impArr(-url) [::CanvasUtils::GetHttpFromFile $imageFile]
+		catch {unset impArr(-file)}
 	    }
 	    default {
 		return -code error "Unknown -uritype \"$argsArr(-uritype)\""
 	    }
 	}
-    } else {
-	set impArgs $cachedOpts
     }
-    array set impArr $impArgs
     
     # -above & -below??? Be sure to overwrite any cached options.
     #array set impArr [::CanvasUtils::GetStackingOption $w $id]
-    array set impArr [list -tags [::CanvasUtils::GetUtag $w $id 1]]
-    return "import [$w coords $id] [array get impArr]"
+    set impArr(-tags) [::CanvasUtils::GetUtag $w $id 1]
+    
+    return [concat import [$w coords $id] [array get impArr]]
 }
 
 proc ::CanvasUtils::GetOnelinerForQTMovie {w id args} {
@@ -502,14 +522,17 @@ proc ::CanvasUtils::GetOnelinerForQTMovie {w id args} {
 	-uritype file
     }
     array set argsArr $args
+    set wtop [::UI::GetToplevelNS $w]
+    array set impArr [::CanvasUtils::ItemCGet $wtop $id]
+
+    # Ad hoc way of getting -file and -url BAD!
     set windowName [$w itemcget $id -window]
     set windowClass [winfo class $windowName]
     set movieName ${windowName}.m
     set movFile [$movieName cget -file]
     set movUrl [$movieName cget -url]
-    set impArgs {}
-    lappend impArgs -width [winfo width $windowName] \
-      -height [winfo height $windowName]
+    set impArr(-width) [winfo width $windowName]
+    set impArr(-height) [winfo height $windowName]
     
     switch -- $argsArr(-uritype) {
 	file {
@@ -517,26 +540,29 @@ proc ::CanvasUtils::GetOnelinerForQTMovie {w id args} {
 		if {[info exists argsArr(-basepath)]} {
 		    set movFile [filerelative $argsArr(-basepath) $movFile]	    
 		} 
-		lappend impArgs -file $movFile
+		set impArr(-file) $movFile
+		catch {unset impArr(-url)}
 	    } elseif {$movUrl != ""} {
 		
 		# In this case we don't have access to QT's internal cache.
-		lappend impArgs -url $movUrl
+		set impArr(-url) $movUrl
 	    }
 	}
 	http {
 	    if {$movFile != ""} {
-		lappend impArgs -url [::CanvasUtils::GetHttpFromFile $movFile]
+		set impArr(-url) [::CanvasUtils::GetHttpFromFile $movFile]
 	    } elseif {$movUrl != ""} {
-		lappend impArgs -url $movUrl
+		set impArr(-url) $movUrl
 	    }	    
+	    catch {unset impArr(-file)}
 	}
 	default {
 	    return -code error "Unknown -uritype \"$argsArr(-uritype)\""
 	}
     }
-    lappend impArgs -tags [::CanvasUtils::GetUtag $w $id 1]
-    return "import [$w coords $id] $impArgs"		    
+    set impArr(-tags) [::CanvasUtils::GetUtag $w $id 1]
+    
+    return [concat import [$w coords $id] [array get impArr]]
 }
 
 proc ::CanvasUtils::GetOnelinerForSnack {w id args} {
@@ -545,31 +571,39 @@ proc ::CanvasUtils::GetOnelinerForSnack {w id args} {
 	-uritype file
     }
     array set argsArr $args
+    set wtop [::UI::GetToplevelNS $w]
+    array set impArr [::CanvasUtils::ItemCGet $wtop $id]
+
+    # Ad hoc way of getting -file and -url BAD!
     set windowName [$w itemcget $id -window]
     set windowClass [winfo class $windowName]
     set movieName ${windowName}.m
     set soundObject [$movieName cget -snacksound]
     set soundFile [$soundObject cget -file]
-    set impArgs {}
-    lappend impArgs -width [winfo width $windowName] \
-      -height [winfo height $windowName]
+    set impArr(-width) [winfo width $windowName]
+    set impArr(-height) [winfo height $windowName]
+
+    set cachedOpts [::CanvasUtils::ItemCGet $wtop $id]
     
     switch -- $argsArr(-uritype) {
 	file {
 	    if {[info exists argsArr(-basepath)]} {
 		set soundFile [filerelative $argsArr(-basepath) $soundFile]
 	    }
-	    lappend impArgs -file $soundFile
+	    set impArr(-file) $soundFile
+	    catch {unset impArr(-url)}
 	}
 	http {
-	    lappend impArgs -url [::CanvasUtils::GetHttpFromFile $soundFile]
+	    set impArr(-url) [::CanvasUtils::GetHttpFromFile $soundFile]
+	    catch {unset impArr(-file)}
 	}
 	default {
 	    return -code error "Unknown -uritype \"$argsArr(-uritype)\""
 	}
     }
-    lappend impArgs -tags [::CanvasUtils::GetUtag $w $id 1]
-    return "import [$w coords $id] $impArgs"		    
+    set impArr(-tags) [::CanvasUtils::GetUtag $w $id 1]
+    
+    return [concat import [$w coords $id] [array get impArr]]
 }
 
 # CanvasUtils::GetHttpFromFile --

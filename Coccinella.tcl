@@ -15,7 +15,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.7 2003-10-05 13:36:16 matben Exp $
+# $Id: Coccinella.tcl,v 1.8 2003-10-12 13:12:54 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -447,16 +447,17 @@ if {![catch {package require http} msg]} {
 
 # Other utility packages that can be platform specific.
 # The 'Thread' package requires that the Tcl core has been built with support.
-foreach name {Tclapplescript printer gdi tls Thread optcl tcom} {
-    set prefs($name) 0
-}
 array set extraPacksArr {
-    macintosh   {Tclapplescript}
-    macosx      {Tclapplescript tls Thread}
+    macintosh   {Tclapplescript MacPrint}
+    macosx      {Tclapplescript tls Thread MacCarbonPrint}
     windows     {printer gdi tls Thread optcl tcom}
     unix        {tls Thread}
 }
-
+foreach {platform packList} [array get extraPacksArr] {
+    foreach name $packList {
+	set prefs($name) 0
+    }
+}
 foreach name $extraPacksArr($this(platform)) {
     if {![catch {package require $name} msg]} {
 	set prefs($name) 1
@@ -668,6 +669,7 @@ if {[string equal $prefs(protocol) "jabber"]} {
     set wDlgs(jrostbro) .
     set wDlgs(mainwb) .wb0
 } else {
+    set wDlgs(jrostbro) .jrostbro
     set wDlgs(mainwb) .
 }
 # Need to do this here after reading preferences.
@@ -677,7 +679,7 @@ if {[string equal $prefs(protocol) "jabber"]} {
 # Jabber has the roster window as "main" window.
 if {![string equal $prefs(protocol) "jabber"]} {
     ::SplashScreen::SetMsg [::msgcat::mc splashbuild]
-    ::UI::BuildMain $wDlgs(mainwb) -serverentrystate disabled
+    ::UI::BuildWhiteboard $wDlgs(mainwb) -serverentrystate disabled
 }
 if {$prefs(firstLaunch) && !$prefs(stripJabber)} {
     if {[winfo exists $wDlgs(mainwb)]} {
@@ -701,7 +703,15 @@ bind Text <FocusIn> "+ ::UI::FixMenusWhenSelection %W"
 bind Text <ButtonRelease-1> "+ ::UI::FixMenusWhenSelection %W"
 bind Text <<Cut>> "+ ::UI::FixMenusWhenSelection %W"
 bind Text <<Copy>> "+ ::UI::FixMenusWhenSelection %W"
-	
+
+# On non macs we need to explicitly bind certain commands.
+if {![string match "mac*" $this(platform)]} {
+    foreach wclass {Toplevel Preferences Chat GroupChat MailBox} {
+	bind $wclass <$osprefs(mod)-Key-w>  \
+	  [list ::UserActions::DoCloseWindow %W]
+    }
+}
+
 # Mac OS X have the Quit menu on the Apple menu instead. Catch it!
 if {[string equal $this(platform) "macosx"]} {
     if {![catch {package require tclAE}]} {

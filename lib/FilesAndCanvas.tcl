@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: FilesAndCanvas.tcl,v 1.10 2003-09-28 06:29:08 matben Exp $
+# $Id: FilesAndCanvas.tcl,v 1.11 2003-10-12 13:12:55 matben Exp $
  
 package require can2svg
 package require undo
@@ -216,7 +216,7 @@ proc ::CanvasFile::FileToCanvasVer1 {w fd absPath args} {
 	    set y [lindex $line 3]
 	    set opts [list -coords [list $x $y] -tags $ittag]
 	    if {$zoomOpts != ""} {
-		lappend opts -zoomfactor $zoomOpts
+		lappend opts -zoom-factor $zoomOpts
 	    }
 	    
 	    # Need to preserve the stacking order for images on remote clients.
@@ -283,6 +283,7 @@ proc ::CanvasFile::FileToCanvasVer2 {w fd absPath args} {
 	-showbroken   1
 	-tryimport    1
 	-where        all
+	-acceptcache  1
     }
     array set argsArr $args
     set where $argsArr(-where)
@@ -379,21 +380,13 @@ proc ::CanvasFile::FileToCanvasVer2 {w fd absPath args} {
 		set nextUtag [::CanvasUtils::NewUtag]
 		lappend line -below $nextUtag
 
-		if {$argsArr(-tryimport)} {
-		    
-		    # This is typically an image or movie (QT or Snack).
-		    set errMsg [::Import::HandleImportCmd $w $line \
-		      -where $where -basepath $dirPath \
-		      -progess [list ::Import::ImportProgress $line] \
-		      -command [list ::Import::ImportCommand $line]]
-		}
-		if {$argsArr(-showbroken) &&  \
-		  (($errMsg != "") || !$argsArr(-tryimport))} {
-
-		    # Display a broken image to indicate for the user.
-		    eval {::Import::NewBrokenImage $w [lrange $line 1 2]} \
-		      [lrange $line 3 end]
-		}
+		# This is typically an image or movie (QT or Snack).
+		set errMsg [eval {
+		    ::Import::HandleImportCmd $w $line  \
+		      -basepath $dirPath  \
+		      -progess [list ::Import::ImportProgress $line]  \
+		      -command [list ::Import::ImportCommand $line]
+		} [array get argsArr]]
 		incr numImports
 	    }
 	    default {
