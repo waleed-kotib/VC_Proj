@@ -33,6 +33,7 @@
 ::msgcat::mcset de Choose	Auswahl
 ::msgcat::mcset de City		Stadt
 ::msgcat::mcset de Clear	Löschen
+#::msgcat::mcset de Client
 ::msgcat::mcset de Close	Schließen
 ::msgcat::mcset de Conference	Konferenz
 ::msgcat::mcset de Connect	Verbinden
@@ -91,6 +92,7 @@
 ::msgcat::mcset de No		Nein
 ::msgcat::mcset de no		nein
 ::msgcat::mcset de None		Kein
+#::msgcat::mcset de Notes
 ::msgcat::mcset de Occupation	Beruf
 ::msgcat::mcset de Offline	Abgemeldet
 ::msgcat::mcset de OK		OK
@@ -308,6 +310,7 @@
 ::msgcat::mcset de mCoccinellaHome  	 {Coccinella im Web...}
 ::msgcat::mcset de mComponents 	 	{Komponenten...}
 ::msgcat::mcset de mBugReport  	 {Fehler melden...}
+#::msgcat::mcset de mUserInfo            {User Info...}
 
 
 # Popups
@@ -895,6 +898,8 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset de jadisaddserv {Suchen Sie einen weiteren Server für Gruppenräume und andere Dienste. Sie können einen Server permanent hinzufügen, der dann automatisch erkannt wird. Der Anmelde-Server wird immer erkannt.}
 ::msgcat::mcset de jadisrmall {Alle Server entfernen, die automatisch und permanent erkannt wurden.}
 
+# translate
+::msgcat::mcset de jauserinnote {Add your personal notes about this user}
 
 
 # Setup assistant:
@@ -913,12 +918,10 @@ namespace eval ::EditShortcuts:: {
 
 
 
-namespace eval ::VCard:: {
-	::msgcat::mcset de vcardget	{vCard für Benutzer %s wird abgerufen. Warte auf Server-Antwort...}
-	::msgcat::mcset de vcarderrget	{Fehler beim vCard-Abruf. Ergebnis war: %s}
-	::msgcat::mcset de vcardrec	{vCard-Daten erhalten.}
+::msgcat::mcset de vcardget	{vCard für Benutzer %s wird abgerufen. Warte auf Server-Antwort...}
+::msgcat::mcset de vcarderrget	{Fehler beim vCard-Abruf. Ergebnis war: %s}
+::msgcat::mcset de vcardrec	{vCard-Daten erhalten.}
 
-}
 
 
 ::msgcat::mcset de autoupdatenot        {Nicht automatisch auf Aktualisierungen testen.}

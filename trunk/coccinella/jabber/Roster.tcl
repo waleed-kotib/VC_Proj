@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.120 2005-02-25 14:08:58 matben Exp $
+# $Id: Roster.tcl,v 1.121 2005-02-27 14:11:06 matben Exp $
 
 package provide Roster 1.0
 
@@ -91,21 +91,22 @@ namespace eval ::Roster:: {
     # General.
     set popMenuDefs(roster,def) {
 	mMessage       {head group user}  {::NewMsg::Build -to $jid}
-	mChat          {user online}      {::Chat::StartThread $jid3}
-	mWhiteboard    {wb online}        {::Jabber::WB::NewWhiteboardTo $jid3}
+	mChat          {user available}   {::Chat::StartThread $jid3}
+	mWhiteboard    {wb available}     {::Jabber::WB::NewWhiteboardTo $jid3}
 	mSendFile      user               {::OOB::BuildSet $jid3}
 	separator      {}                 {}
-	mLastLogin/Activity user          {::Jabber::GetLast $jid}
-	mvCard         user               {::VCard::Fetch other $jid}
 	mAddNewUser    {}                 {::Jabber::User::NewDlg}
 	mEditUser      user               {::Jabber::User::EditDlg $jid}
-	mVersion       {user online}      {::Jabber::GetVersion $jid3}
+	mUserInfo      user               {::UserInfo::Get $jid3}
 	mChatHistory   {user always}      {::Chat::BuildHistoryForJid $jid}
 	mRemoveContact user               {::Roster::SendRemove $jid}
 	separator      {}                 {}
 	mDirStatus     user               {::Roster::DirectedPresenceDlg $jid}
 	mRefreshRoster {}                 {::Roster::Refresh}
     }  
+    # mLastLogin/Activity user          {::Jabber::GetLast $jid}
+    # mvCard         user               {::VCard::Fetch other $jid}
+    # mVersion       {user available}   {::Jabber::GetVersion $jid3}
 
     # Transports.
     set popMenuDefs(roster,trpt,def) {
@@ -114,8 +115,8 @@ namespace eval ::Roster:: {
 	mAddNewUser    {}                 {::Jabber::User::NewDlg}
 	mEditUser      user               {::Jabber::User::EditDlg $jid}
 	mVersion       user               {::Jabber::GetVersion $jid3}
-	mLoginTrpt     {trpt offline}     {::Roster::LoginTrpt $jid3}
-	mLogoutTrpt    {trpt online}      {::Roster::LogoutTrpt $jid3}
+	mLoginTrpt     {trpt unavailable} {::Roster::LoginTrpt $jid3}
+	mLogoutTrpt    {trpt available}   {::Roster::LogoutTrpt $jid3}
 	separator      {}                 {}
 	mRefreshRoster {}                 {::Roster::Refresh}
     }  
@@ -585,8 +586,8 @@ proc ::Roster::Popup {w v x y} {
     
     ::Debug 2 "::Roster::Popup w=$w, v='$v'"
     
-    # This is either online or offline.
-    set status [string tolower [lindex $v 0]]
+    # This is either 'available' or 'unavailable'.
+    set status [lindex $v 0]
 
     # The last element of 'v' can be a head, group, or a user (jid).
     set item [lindex $v end]
@@ -628,9 +629,9 @@ proc ::Roster::Popup {w v x y} {
 	set jid3 $item
 	# Transports in own directory.
 	if {[$jstate(roster) isavailable $jid3]} {
-	    set status online
+	    set status available
 	} else {
-	    set status offline
+	    set status unavailable
 	}
     }
         
@@ -688,13 +689,13 @@ proc ::Roster::Popup {w v x y} {
 	    set state disabled
 	}
 	
-	# If any online/offline these must also be fulfilled.
-	if {[lsearch $type online] >= 0} {
-	    if {$status != "online"} {
+	# If any available/unavailable these must also be fulfilled.
+	if {[lsearch $type available] >= 0} {
+	    if {$status != "available"} {
 		set state disabled
 	    }
-	} elseif {[lsearch $type offline] >= 0} {
-	    if {$status != "offline"} {
+	} elseif {[lsearch $type unavailable] >= 0} {
+	    if {$status != "unavailable"} {
 		set state disabled
 	    }
 	}

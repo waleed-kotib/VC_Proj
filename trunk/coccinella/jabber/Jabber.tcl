@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.131 2005-02-24 13:58:08 matben Exp $
+# $Id: Jabber.tcl,v 1.132 2005-02-27 14:11:05 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -49,6 +49,7 @@ package require Rosticons
 package require Search
 package require Status
 package require Subscribe
+package require UserInfo
 package require VCard
 
 package provide Jabber 1.0
@@ -315,19 +316,7 @@ proc ::Jabber::FactoryDefaults { } {
     
     #
     set jprefs(urlServersList) "http://www.jabber.org/servers.php"
-    
-    switch $this(platform) {
-	macintosh - macosx {
-	    set jprefs(inboxPath) [file join $this(prefsPath) Inbox.tcl]
-	}
-	windows {
-	    set jprefs(inboxPath) [file join $this(prefsPath) Inbox.tcl]
-	}
-	unix {
-	    set jprefs(inboxPath) [file join $this(prefsPath) inbox.tcl]
-	}
-    }
-    
+        
     # Menu definitions for the Roster/services window. Collects minimal Jabber
     # stuff.
     variable menuDefs

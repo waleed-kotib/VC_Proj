@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.9 2005-02-02 15:21:20 matben Exp $
+# $Id: Init.tcl,v 1.10 2005-02-27 14:11:07 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -76,6 +76,8 @@ proc ::Init::SetThis {thisScript} {
     set this(altEmoticonsPath)  [file join $this(prefsPath) iconsets emoticons]
     set this(rosticonsPath)     [file join $this(path) iconsets roster]
     set this(altRosticonsPath)  [file join $this(prefsPath) iconsets roster]
+    set this(inboxFile)         [file join $this(prefsPath) Inbox.tcl]
+    set this(notesFile)         [file join $this(prefsPath) Notes.tcl]
     set this(httpdRootPath)     $this(path)
     # Need to rework this...
     if {0 && [info exists starkit::topdir]} {
