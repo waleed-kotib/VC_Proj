@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: tinydom.tcl,v 1.4 2004-02-03 10:16:31 matben Exp $
+# $Id: tinydom.tcl,v 1.5 2004-02-18 14:14:28 matben Exp $
 
 package require xml
 
@@ -48,7 +48,7 @@ proc tinydom::XmlElementStart {tagname attrlist args} {
     variable xmlobj
     variable level
 
-    set xmlobj([incr level]) [list $tagname $attrlist {} {}]
+    set xmlobj([incr level]) [list $tagname $attrlist 0 {} {}]
 }
 
 proc tinydom::XmlElementEnd {tagname args} {
@@ -67,20 +67,20 @@ proc tinydom::XmlCHdata {chdata} {
     variable xmlobj
     variable level
 
-    set cdata [lindex $xmlobj($level) 2]
+    set cdata [lindex $xmlobj($level) 3]
     append cdata [xmldecrypt $chdata]
-    lset xmlobj($level) 2 $cdata
+    lset xmlobj($level) 3 $cdata
 }
 
 proc tinydom::XmlAppend {plevel childtree} {
     variable xmlobj
     
     # Get child list at parent level (level).
-    set childlist [lindex $xmlobj($plevel) 3]
+    set childlist [lindex $xmlobj($plevel) 4]
     lappend childlist $childtree
     
     # Build the new parent tree.
-    lset xmlobj($plevel) 3 $childlist
+    lset xmlobj($plevel) 4 $childlist
 }
 
 proc tinydom::xmldecrypt {chdata} {
@@ -110,12 +110,12 @@ proc tinydom::attrlist {xmllist} {
 
 proc tinydom::chdata {xmllist} {
     
-    return [lindex $xmllist 2]
+    return [lindex $xmllist 3]
 }
 
 proc tinydom::children {xmllist} {
     
-    return [lindex $xmllist 3]
+    return [lindex $xmllist 4]
 }
 
 proc tinydom::cleanup {token} {
