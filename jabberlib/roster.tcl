@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.27 2004-12-08 08:21:19 matben Exp $
+# $Id: roster.tcl,v 1.28 2004-12-12 14:55:20 matben Exp $
 # 
 # Note that every jid in the rostArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -135,7 +135,12 @@ namespace eval roster {
     
     # ...and the presence arrays: 'presArr($jid/$resource,...)'
     # The list of resources is treated separately (presArr($jid,res))
-    set rostGlobals(presTags) {type status priority show x} 
+    set rostGlobals(presTags) {type status priority show x}
+    
+    variable xmppxmlns
+    array set xmppxmlns {
+	caps    http://jabber.org/protocol/caps
+    }
 }
 
 # roster::roster --
@@ -1216,6 +1221,41 @@ proc roster::getextras {rostName jid xmlns} {
     } else {
 	return ""
     }
+}
+
+# roster::getcapsattr --
+# 
+#       Access function for the <c/> caps elements attributes:
+#       
+#       <presence>
+#           <c 
+#               xmlns='http://jabber.org/protocol/caps' 
+#               node='http://coccinella.sourceforge.net/protocol/caps'
+#               ver='0.95.2'
+#               ext='ftrans voip_h323 voip_sip'/>
+#       </presence>
+#       
+# Arguments:
+#       rostName:   the instance of this roster.
+#       jid:        any jid
+#       attrname:   
+#       
+# Results:
+#       the value of the attribute or empty
+
+proc roster::getcapsattr {rostName jid attrname} {
+    
+    variable xmppxmlns
+    upvar ${rostName}::presArr presArr
+
+    set attr ""
+    set jid [jlib::jidmap $jid]
+    set xmlnscaps $xmppxmlns(caps)
+    if {[info exists presArr($jid,extras,$xmlnscaps)]} {
+	set cElem $presArr($jid,extras,$xmlnscaps)
+	set attr [wrapper::getattribute $cElem $attrname]
+    }
+    return $attr
 }
 
 proc roster::Debug {num str} {
