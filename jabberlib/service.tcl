@@ -5,7 +5,7 @@
 #       
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: service.tcl,v 1.3 2004-04-22 13:48:43 matben Exp $
+# $Id: service.tcl,v 1.4 2004-05-01 14:23:40 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -248,12 +248,13 @@ proc jlib::service::isinvestigated {jlibname jid} {
     
     upvar [namespace parent]::${jlibname}::serv serv
 
+    set ans 0
     if {$serv(browse) && [$serv(browse,name) isbrowsed $jid]} {
-	return 1
+	set ans 1
     } elseif {$serv(disco) && [$serv(disco,name) isdiscoed items $jid]} {
-	return 1
+	set ans 1
     }
-    return 0
+    return $ans
 }
    
 proc jlib::service::parent {jlibname jid} {    
@@ -389,7 +390,7 @@ proc jlib::service::hasfeature {jlibname jid xmlns} {
 
     # Try to gather only positive results!
     set ans 0
-    if {$serv(browse)} {
+    if {$serv(browse) && [$serv(browse,name) isbrowsed $jid]} {
 	set ans [$serv(browse,name) hasnamespace $jid $xmlns]
     } elseif {!$ans && $serv(disco) && [$serv(disco,name) isdiscoed info $jid]} {
 	set ans [$serv(disco,name) hasfeature $xmlns $jid]
@@ -454,7 +455,7 @@ proc jlib::service::gettype {jlibname jid} {
     set type ""
     
     # Browse service if any. Returns 'service/icq' etc.
-    if {$serv(browse)} {
+    if {$serv(browse) && [$serv(browse,name) isbrowsed $jid]} {
 	set type [$serv(browse,name) gettype $jid]
     }
     if {$serv(disco) && [$serv(disco,name) isdiscoed info $jid]} {
@@ -477,7 +478,7 @@ proc jlib::service::name {jlibname jid} {
     
     # Check if domain name supports the 'groupchat' service.
     set name ""
-    if {$serv(browse)} {
+    if {$serv(browse) && [$serv(browse,name) isbrowsed $jid]} {
 	set name [$serv(browse,name) getname $jid]
     }
     if {$serv(disco) && [$serv(disco,name) isdiscoed info $jid]} {

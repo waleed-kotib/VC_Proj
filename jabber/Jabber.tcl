@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.82 2004-04-30 12:58:45 matben Exp $
+# $Id: Jabber.tcl,v 1.83 2004-05-01 14:23:40 matben Exp $
 
 package provide Jabber 1.0
 
@@ -767,10 +767,9 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 		tk_messageBox -icon error -type ok  \
 		  -title [::msgcat::mc {Presence Error}] \
 		  -message [FormatTextForMessageBox $msg]	
-	    } else {
-		::Jabber::AddErrorLog [clock format [clock seconds] -format "%H:%M:%S"]  \
-		  $from $msg
 	    }
+	    ::Jabber::AddErrorLog [clock format [clock seconds] -format "%H:%M:%S"]  \
+	      $from $msg
 	}
     }
 }
@@ -1417,6 +1416,8 @@ proc ::Jabber::SetPrivateDataCallback {jid jlibName what theQuery} {
 
     if {[string equal $what "error"]} {
 	set jidPublic(haveit) 0
+	::Jabber::AddErrorLog [clock format [clock seconds] -format "%H:%M:%S"]  \
+	  "" "Failed setting private data: $theQuery"	    
     } else {
 	set jidPublic(haveit) 1
     }
@@ -1531,10 +1532,9 @@ proc ::Jabber::GetLastResult {from silent jlibname type subiq} {
 
     if {[string equal $type "error"]} {
 	set msg [::msgcat::mc jamesserrlastactive $from [lindex $subiq 1]]
-	if {$silent} {
-	    ::Jabber::AddErrorLog [clock format [clock seconds] -format "%H:%M:%S"]  \
-	      $from $msg	    
-	} else {
+	::Jabber::AddErrorLog [clock format [clock seconds] -format "%H:%M:%S"]  \
+	  $from $msg	    
+	if {!$silent} {
 	    tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
 	      -message [FormatTextForMessageBox $msg]
 	}
@@ -1594,11 +1594,10 @@ proc ::Jabber::GetTime {to args} {
 proc ::Jabber::GetTimeResult {from silent jlibname type subiq} {
 
     if {[string equal $type "error"]} {
-	if {$silent} {
-	    ::Jabber::AddErrorLog [clock format [clock seconds] -format "%H:%M:%S"]  \
-	      $from "We received an error when quering its time info.\
-	      The error was: [lindex $subiq 1]"	    
-	} else {
+	::Jabber::AddErrorLog [clock format [clock seconds] -format "%H:%M:%S"]  \
+	  $from "We received an error when quering its time info.\
+	  The error was: [lindex $subiq 1]"	    
+	if {!$silent} {
 	    tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
 	      -message [FormatTextForMessageBox \
 	      [::msgcat::mc jamesserrtime $from [lindex $subiq 1]]]
@@ -1655,10 +1654,9 @@ proc ::Jabber::GetVersionResult {from silent jlibname type subiq} {
     set fontSB [option get . fontSmallBold {}]
     
     if {[string equal $type "error"]} {
-	if {$silent} {
-	    ::Jabber::AddErrorLog [clock format [clock seconds] -format "%H:%M:%S"]  \
-	      $from [::msgcat::mc jamesserrvers $from [lindex $subiq 1]]
-	} else {
+	::Jabber::AddErrorLog [clock format [clock seconds] -format "%H:%M:%S"]  \
+	  $from [::msgcat::mc jamesserrvers $from [lindex $subiq 1]]
+	if {!$silent} {
 	    tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
 	      -message [FormatTextForMessageBox \
 	      [::msgcat::mc jamesserrvers $from [lindex $subiq 1]]]
