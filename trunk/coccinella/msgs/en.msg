@@ -287,6 +287,8 @@
 ::msgcat::mcset en mLocalTime     	{Local Time...}
 ::msgcat::mcset en mSendFile     	{Send File...}
 ::msgcat::mcset en mChatHistory     	{Chat History}
+::msgcat::mcset en mLoginTrpt     	{Login To Transport}
+::msgcat::mcset en mLogoutTrpt     	{Logout From Transport}
 
 
 
@@ -732,6 +734,9 @@ because this username is already in use by another user. If this user is you,\
 try to login instead. Error message: %s}
 ::msgcat::mcset en jamessregerr                 {The registration failed\
 with error message: %s}
+::msgcat::mcset en jamesstrptsubsc              {Your registered account with the %s\
+service will be put in your roster to work as a transport with this service.}
+
 
 }
 

@@ -286,6 +286,8 @@
 ::msgcat::mcset sv mLocalTime     	{Lokal tid...}
 ::msgcat::mcset sv mSendFile     	{Skicka fil...}
 ::msgcat::mcset sv mChatHistory     	{Chatt historik}
+::msgcat::mcset sv mLoginTrpt     	{Logga på transport}
+::msgcat::mcset sv mLogoutTrpt     	{Logga ut transport}
 
 
 
@@ -742,6 +744,9 @@ därför att användarnamnet redan används. Om du redan har registrerat detta namn\
 logga på istället. Felmeddelande: %s}
 ::msgcat::mcset sv jamessregerr                 {Registreringen misslyckades\
 med felmeddelande: %s}
+::msgcat::mcset sv jamesstrptsubsc              {Ditt registrerade konto\
+hos %s kommer att placeras i din kompislista för att fungera som transport\
+till denna tjänsten.}
 
 
 

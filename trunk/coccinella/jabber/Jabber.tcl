@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.106 2004-09-26 13:52:01 matben Exp $
+# $Id: Jabber.tcl,v 1.107 2004-09-27 12:57:37 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -467,6 +467,12 @@ proc ::Jabber::BrowseCmd {args}  {
     eval {$jstate(browse)} $args
 }
 
+proc ::Jabber::DiscoCmd {args}  {
+    variable jstate
+    
+    eval {$jstate(disco)} $args
+}
+
 # Generic ::Jabber:: stuff -----------------------------------------------------
 
 # Jabber::Init --
@@ -640,13 +646,18 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 	    # The icq transports gives us subscribe from icq.host/registered
 	    
 	    set jidtype [$jstate(jlib) service gettype $jid2]
-	    if {[string match "service/*" $jidtype]} {
+	    
+	    ::Debug 4 "\t jidtype=$jidtype"
+	    
+	    if {[regexp {^(service|gateway)/.*} $jidtype]} {
 		$jstate(jlib) send_presence -to $from -type "subscribed"
+		$jstate(jlib) roster_set $from ::Jabber::Subscribe::ResProc
 		
-		# In the future we can collect the transports in another place.
-		$jstate(jlib) roster_set $from ::Jabber::Subscribe::ResProc \
-		  -groups {Transports}
-		
+		set subtype [lindex [split $jidtype /] 1]
+		set typename [::Jabber::Roster::GetNameFromTrpt $subtype]
+		tk_messageBox -title [mc {Transport Suscription}] \
+		  -icon info -type ok \
+		  -message [mc jamesstrptsubsc $typename]
 	    } else {
 		
 		# Another user request to subscribe to our presence.
@@ -669,6 +680,7 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 		# Accept, deny, or ask depending on preferences we've set.
 		set msg ""
 		set autoaccepted 0
+		
 		switch -- $jprefs(subsc,$key) {
 		    accept {
 			$jstate(jlib) send_presence -to $from -type "subscribed"

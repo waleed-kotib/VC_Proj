@@ -2,7 +2,7 @@
 # 
 #       Provides some specific ICQ handling elements.
 #       
-# $Id: ICQ.tcl,v 1.2 2004-07-30 12:55:53 matben Exp $
+# $Id: ICQ.tcl,v 1.3 2004-09-27 12:57:37 matben Exp $
 
 namespace eval ::ICQ:: {
     
@@ -15,6 +15,7 @@ proc ::ICQ::Init { } {
     
     # Add all hooks we need.
     ::hooks::add browseSetHook          ::ICQ::BrowseSetHook
+    ::hooks::add discoInfoHook          ::ICQ::DiscoInfoHook
     ::hooks::add logoutHook             ::ICQ::LogoutHook
     
     component::register ICQ  \
@@ -30,10 +31,19 @@ proc ::ICQ::BrowseSetHook {from subiq} {
     ::Debug 4 "::ICQ::BrowseSetHook from=$from"
 
     set server [::Jabber::GetServerJid]
-    if {![jlib::jidequal $from $server]} {
-	return
+    if {[jlib::jidequal $from $server]} {
+	::ICQ::InvestigateRoster
     }
-    ::ICQ::InvestigateRoster
+}
+
+proc ::ICQ::DiscoInfoHook {type from subiq args} {
+    
+    ::Debug 4 "::ICQ::DiscoInfoHook"
+    
+    set cattype [lindex [::Jabber::DiscoCmd types $from] 0]
+    if {$cattype == "gateway/icq"} {
+	::ICQ::InvestigateRoster
+    }
 }
 
 proc ::ICQ::InvestigateRoster { } {
@@ -56,10 +66,10 @@ proc ::ICQ::InvestigateRoster { } {
 	    default {
 		set jid [lindex $v end]
 		set mjid [jlib::jidmap $jid]
-		jlib::splitjidex $mjid username host res
+		jlib::splitjidex $mjid node host res
 		
 		# Not a user.
-		if {$username == ""} {
+		if {$node == ""} {
 		    continue
 		}
 		
@@ -73,10 +83,13 @@ proc ::ICQ::InvestigateRoster { } {
 		    continue
 		}
 		if {[lsearch -exact $icqHosts $host] >= 0} {
-
-		    # Get vCard
-		    ::Jabber::JlibCmd vcard_get $jid \
-		      [list [namespace current]::VCardGetCB $jid]
+		    set name [::Jabber::RosterCmd getname $mjid]
+		    if {$name == ""} {
+			
+			# Get vCard
+			::Jabber::JlibCmd vcard_get $jid \
+			  [list [namespace current]::VCardGetCB $jid]
+		    }
 		}
 	    }
 	}	

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JUser.tcl,v 1.3 2004-09-26 13:52:01 matben Exp $
+# $Id: JUser.tcl,v 1.4 2004-09-27 12:57:37 matben Exp $
 
 package provide JUser 1.0
 
@@ -317,7 +317,8 @@ proc ::Jabber::User::EditTransportDlg {jid} {
     jlib::splitjidex $jid node host x
     set trpttype [$jstate(jlib) service gettype $host]
     set subtype [lindex [split $trpttype /] 1]
-    set msg [mc jamessowntrpt $subtype $jid3 $subscription]
+    set typename [::Jabber::Roster::GetNameFromTrpt $subtype]
+    set msg [mc jamessowntrpt $typename $jid3 $subscription]
 
     tk_messageBox -title [mc {Transport Info}] -type ok -message $msg \
       -icon info

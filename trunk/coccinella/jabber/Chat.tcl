@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.73 2004-09-26 13:52:01 matben Exp $
+# $Id: Chat.tcl,v 1.74 2004-09-27 12:57:37 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -1825,11 +1825,19 @@ proc ::Jabber::Chat::BuildHistoryForJid {jid} {
     global  prefs this wDlgs
     variable uidhist
     variable historyOptions
+    upvar ::Jabber::jstate jstate
     
     set jid [jlib::jidmap $jid]
     set w $wDlgs(jchist)[incr uidhist]
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
-    wm title $w "[mc {Chat History}]: $jid"
+    
+    set rosterName [$jstate(roster) getname $jid]
+    if {$rosterName == ""} {
+	set title "[mc {Chat History}]: $jid"
+    } else {
+	set title "[mc {Chat History}]: $rosterName ($jid)"
+    }
+    wm title $w $title
     
     set wtxt  $w.frall.fr
     set wtext $wtxt.t

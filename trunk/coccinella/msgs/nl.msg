@@ -289,6 +289,8 @@
 ::msgcat::mcset nl mLocalTime     	{Lokale tijd...}
 ::msgcat::mcset nl mSendFile     	{Bestand verzenden...}
 ::msgcat::mcset nl mChatHistory     	{Berichtengeschiedenis}
+::msgcat::mcset en mLoginTrpt     	{Login To Transport}
+::msgcat::mcset en mLogoutTrpt     	{Logout From Transport}
 
 
 
@@ -732,6 +734,8 @@ omdat deze gebruikersnaam reeds in gebruik is door een andere gebruiker. Als u d
 probeer dan opnieuw aan te melden. Foutmelding: %s}
 ::msgcat::mcset nl jamessregerr                 {De registratie mislukte\
 met foutmelding: %s}
+::msgcat::mcset en jamesstrptsubsc              {Your registered account with the %s\
+service will be put in your roster to work as a transport with this service.}
 
     
 

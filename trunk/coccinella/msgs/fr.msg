@@ -288,6 +288,8 @@
 ::msgcat::mcset fr mLocalTime     	{Heure locale...}
 ::msgcat::mcset fr mSendFile     	{Envoyer un message...}
 ::msgcat::mcset fr mChatHistory     	{Historique de la discussion}
+::msgcat::mcset en mLoginTrpt     	{Login To Transport}
+::msgcat::mcset en mLogoutTrpt     	{Logout From Transport}
 
 
 
@@ -720,7 +722,9 @@ parce que ce nom est déjà employé par un autre utilisateur. Si vous êtes cet
 essayez plutôt de vous connecter. Code de l'erreur : %s}
 ::msgcat::mcset fr jamessregerr                 {L'inscription a échoué\
 avec le message d'erreur "%s"}
-    
+::msgcat::mcset en jamesstrptsubsc              {Your registered account with the %s\
+service will be put in your roster to work as a transport with this service.}
+
     
 
 }
