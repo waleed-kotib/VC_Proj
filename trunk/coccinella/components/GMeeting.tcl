@@ -2,7 +2,7 @@
 # 
 #       Interface for launching Gnome Meeting.
 #
-# $Id: GMeeting.tcl,v 1.2 2004-12-09 15:20:27 matben Exp $
+# $Id: GMeeting.tcl,v 1.3 2004-12-12 14:55:19 matben Exp $
 
 namespace eval ::GMeeting:: {
     
@@ -25,7 +25,7 @@ proc ::GMeeting::Init { } {
       command {Gnome Meeting...} [namespace current]::MenuCmd normal {} {} {}]
     set popMenuSpec [list "Gnome Meeting..." user {::GMeeting::RosterCmd $jid}]
         
-    ::Jabber::UI::RegisterMenuEntry jabber $menuspec
+    #::Jabber::UI::RegisterMenuEntry jabber $menuspec
     ::Jabber::UI::RegisterPopupEntry roster $popMenuSpec
     ::Jabber::RegisterCapsExtKey voip_h323
     ::Jabber::RegisterCapsExtKey voip_sip
@@ -49,27 +49,27 @@ proc ::GMeeting::RosterCmd {jid} {
 	return
     }
     set cmd [lindex [auto_execok gnomemeeting] 0]
-
-    if {[catch {exec $cmd}]} {
-
-	
+    set ip [::Disco::GetCoccinellaIP $jid]
+    if {$ip == ""} {
+	tk_messageBox -type ok -icon error -title Error \
+	  -message "We failed to identify any ip address for \"$jid\""
+	return
+    }
+    if {[catch {exec $cmd -c $ip &} err]} {
+	tk_messageBox -type ok -icon error -title Error \
+	  -message "We failed to launch Gnome Meeting: $err"
     }
 }
 
 proc ::GMeeting::HasSupport {jid} {
-    upvar ::Jabber::coccixmlns coccixmlns
     
-    set capsxmlns "http://jabber.org/protocol/caps"
     set ans 0
-    set cElem [::Jabber::RosterCmd getextras $jid $capsxmlns]
-    if {$cElem != {}} {
-	set extList [wrapper::getattribute $cElem ext]
-	if {$extList != {}} {
-	    if {[lsearch $extList voip_h323] >= 0} {
-		set ans 1
-	    } elseif {[lsearch $extList voip_sip] >= 0} {
-		set ans 1
-	    }
+    set extList [::Jabber::RosterCmd getcapsattr $jid ext]
+    if {$extList != {}} {
+	if {[lsearch $extList voip_h323] >= 0} {
+	    set ans 1
+	} elseif {[lsearch $extList voip_sip] >= 0} {
+	    set ans 1
 	}
     }
     return $ans

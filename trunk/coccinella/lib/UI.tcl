@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.80 2004-12-02 15:22:07 matben Exp $
+# $Id: UI.tcl,v 1.81 2004-12-12 14:55:20 matben Exp $
 
 package require entrycomp
 package require alertbox
@@ -53,7 +53,7 @@ proc ::UI::Init {} {
 }
 
 proc ::UI::InitCommonBinds { } {
-    global  this
+    global  this osprefs
     
     # A mechanism to set -state of cut/copy/paste. Not robust!!!
     # All selections are not detected (shift <- -> etc).
@@ -72,6 +72,27 @@ proc ::UI::InitCommonBinds { } {
     # Linux has a strange binding by default. Handled by <<Paste>>.
     if {[string equal $this(platform) "unix"]} {
 	bind Text <Control-Key-v> {}
+    }
+}
+
+proc ::UI::InitVirtualEvents { } {
+    global  this osprefs
+    
+    
+    # Virtual events.
+    event add <<CloseWindow>> <$osprefs(mod)-Key-w>
+
+    switch -- $this(platform) {
+	macosx {
+	    event add <<ButtonPopup>> <Button-2> <Control-Button-1>
+	}
+	unix {
+	    event add <<ButtonPopup>> <Button-3>
+	}
+	windows {
+	    event add <<CloseWindow>> <Key-F4>
+	    event add <<ButtonPopup>> <Button-3>
+	}
     }
 }
 
@@ -341,7 +362,8 @@ proc ::UI::Toplevel {w args} {
 	    MacUseMainMenu $w
 	}
     } else {
-	bind $w <$osprefs(mod)-Key-w> [list ::UI::DoCloseWindow $w]
+	#bind $w <$osprefs(mod)-Key-w> [list ::UI::DoCloseWindow $w]
+	bind $w <<CloseWindow>> [list ::UI::DoCloseWindow $w]
     }
     ::hooks::run newToplevelWindowHook $w
     

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.42 2004-11-30 15:11:10 matben Exp $
+# $Id: Disco.tcl,v 1.43 2004-12-12 14:55:20 matben Exp $
 
 package provide Disco 1.0
 
@@ -902,6 +902,9 @@ proc ::Disco::PresenceHook {jid presence args} {
     }
 }
 
+# We should do this using the 'node' attribute of the caps element instead.
+# This is made in ::Roster::IsCoccinella instead.
+
 proc ::Disco::TryIdentifyCoccinella {jid3 presence args} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::coccixmlns coccixmlns
@@ -919,6 +922,22 @@ proc ::Disco::TryIdentifyCoccinella {jid3 presence args} {
 	    }
 	}
     }	
+}
+
+# In the future we should use disco to get ip address instead of the
+# 'coccinella' element sent with presence. Therefore it is placed here.
+
+proc ::Disco::GetCoccinellaIP {jid3} {
+    upvar ::Jabber::jstate jstate
+    upvar ::Jabber::coccixmlns coccixmlns
+    
+    set ip ""
+    set cociElem [$jstate(roster) getextras $jid3 $coccixmlns(servers)]
+    if {$cociElem != {}} {
+	set ipElements [wrapper::getchildswithtag $cociElem ip]
+	set ip [wrapper::getcdata [lindex $ipElements 0]]
+    }
+    return $ip
 }
 
 proc ::Disco::AutoDisco {jid presence args} {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.101 2004-12-10 11:08:08 matben Exp $
+# $Id: Chat.tcl,v 1.102 2004-12-12 14:55:19 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -949,6 +949,8 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
       [list [namespace current]::ReturnKeyPress $chattoken]    
     bind $wtextsnd <$osprefs(mod)-Return> \
       [list [namespace current]::CommandReturnKeyPress $chattoken]
+    
+    focus $wtextsnd
    
     # jabber:x:event
     if {$cprefs(usexevents)} {

@@ -15,6 +15,7 @@ Coccinella-0.95.2 (04????): 	Short summary --
 	- muc chatrooms now show users role
 	- httpd can mount directories; using css for 404 and dir listings
 	- the cache should now remember files between launches
+	- bindings to Gnome Meeting on unix
 
 
 Coccinella-0.95.1 (040930): 	Short summary --

@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.102 2004-12-04 15:01:05 matben Exp $
+# $Id: Coccinella.tcl,v 1.103 2004-12-12 14:55:16 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -309,6 +309,7 @@ switch -- $prefs(protocol) {
 ::UI::Init
 ::UI::InitMenuDefs
 ::UI::InitCommonBinds
+::UI::InitVirtualEvents
 
 # All components that requires some kind of initialization should register here.
 # Beware, order may be important!
