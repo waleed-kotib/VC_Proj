@@ -25,7 +25,7 @@
 # 
 # Copyright (C) 2002-2004 Mats Bengtsson
 # 
-# $Id: tree.tcl,v 1.28 2004-06-17 13:24:17 matben Exp $
+# $Id: tree.tcl,v 1.29 2004-06-19 12:56:35 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -43,9 +43,11 @@
 #	-closecommand, closeCommand, CloseCommand
 #       -closeimage, closeImage, CloseImage
 #	-doubleclickcommand, doubleClickCommand, DoubleClickCommand  tclProc?
+#       -itembackgroundbd, itemBackgoundBd, ItemBackgroundBd
 #	-eventlist, eventList, EventList                      {{event tclProc} ..}
 #	-font, font, Font
 #	-fontdir, fontDir, FontDir
+#	-foreground, foreground, Foreground
 #	-highlightbackground, highlightBackground, HighlightBackground
 #	-highlightcolor, highlightColor, HighlightColor
 #	-highlightthickness, highlightThickness, HighlightThickness
@@ -63,7 +65,9 @@
 #	-selectmode, selectMode, SelectMode                   (0|1)
 #	-selectoutline, selectOutline, SelectOutline
 #	-silent, silent, Silent                               (0|1)
+#       -sortlevels, sortLevels, SortLevels
 #	-sortorder, sortOrder, SortOrder                      (decreasing|increasing)?
+#       -stripecolors, stripeColors, StripeColors
 #	-styleicons, styleIcons, StyleIcons                  (plusminus|triangle)
 #	-treecolor, treeColor, TreeColor                      color?
 #	-treedash, treeDash, TreeDash                         dash
@@ -113,15 +117,20 @@
 #
 #       1.0         first release by Mats Bengtsson    
 #       030921      -backgroundimage option
-#       031020      uses uid's instead of v's as key in treestate array
+#       031020      uses uid's instead of v's as key in state array
 #                   use NormList to handle things like {dir [junk]}
 #       031106      added -canvastags and -indention options
 #       031110      added 'find withtag all' 
 #       040210      added -treedash, -selectoutline, -selectdash
 #       040330      changed -closeicons to -styleicons, added -closeimage and
 #                   -openimage
+#       040617      added -foreground, -sortlevels, -itembackgroundbd,
+#                   -stripecolors; 
+#                   items: -foreground, -backgroundbd,
+#                   reworked internals
 
 package require Tcl 8.4
+package require colorutils
 
 package provide tree 1.0
 
@@ -259,9 +268,11 @@ proc ::tree::Init { } {
 	-closecommand        {closeCommand         CloseCommand        }
 	-closeimage          {closeImage           CloseImage          }
 	-doubleclickcommand  {doubleClickCommand   DoubleClickCommand  }
+	-itembackgroundbd    {itemBackgoundBd      ItemBackgroundBd    }
 	-eventlist           {eventList            EventList           }
 	-font                {font                 Font                }
 	-fontdir             {fontDir              FontDir             }
+	-foreground          {foreground           Foreground          }
 	-highlightbackground {highlightBackground  HighlightBackground }
 	-highlightcolor      {highlightColor       HighlightColor      }
 	-highlightthickness  {highlightThickness   HighlightThickness  }
@@ -279,7 +290,9 @@ proc ::tree::Init { } {
 	-selectmode          {selectMode           SelectMode          }
 	-selectoutline       {selectOutline        SelectOutline       }
 	-silent              {silent               Silent              }
+	-sortlevels          {sortLevels           SortLevels          }
 	-sortorder           {sortOrder            SortOrder           }
+	-stripecolors        {stripeColors         StripeColors        }
 	-styleicons          {styleIcons           StyleIcons          }
 	-treecolor           {treeColor            TreeColor           }
 	-treedash            {treeDash             TreeDash            }
@@ -308,11 +321,13 @@ proc ::tree::Init { } {
     option add *Tree.closeCommand          {}              widgetDefault
     option add *Tree.closeImage            ""              widgetDefault
     option add *Tree.eventList             {}              widgetDefault
+    option add *Tree.foreground            black           widgetDefault
     option add *Tree.highlightBackground   white           widgetDefault
     option add *Tree.highlightColor        black           widgetDefault
     option add *Tree.highlightThickness    3               widgetDefault
     option add *Tree.height                100             widgetDefault
     option add *Tree.indention             0               widgetDefault
+    option add *Tree.itemBackgoundBd       0               widgetDefault
     option add *Tree.openImage             ""              widgetDefault
     option add *Tree.openCommand           {}              widgetDefault
     option add *Tree.pyjamasColor          white           widgetDefault
@@ -322,7 +337,9 @@ proc ::tree::Init { } {
     option add *Tree.selectMode            1               widgetDefault
     option add *Tree.selectOutline         {}              widgetDefault
     option add *Tree.silent                0               widgetDefault
+    option add *Tree.sortLevels            {}              widgetDefault
     option add *Tree.sortOrder             {}              widgetDefault
+    option add *Tree.stripeColors          {}              widgetDefault
     option add *Tree.styleIcons            plusminus       widgetDefault
     option add *Tree.treeColor             gray50          widgetDefault
     option add *Tree.treeDash              {}              widgetDefault
@@ -424,7 +441,7 @@ proc ::tree::tree {w args} {
     namespace eval ::tree::${w} {
 	variable options
 	variable widgets
-	variable treestate
+	variable state
 	variable priv
 	variable vuid 0
 	variable v2uid
@@ -434,7 +451,7 @@ proc ::tree::tree {w args} {
     # Set simpler variable names.
     upvar ::tree::${w}::options options
     upvar ::tree::${w}::widgets widgets
-    upvar ::tree::${w}::treestate treestate
+    upvar ::tree::${w}::state state
     upvar ::tree::${w}::priv priv
     upvar ::tree::${w}::vuid vuid
     upvar ::tree::${w}::v2uid v2uid
@@ -456,8 +473,6 @@ proc ::tree::tree {w args} {
 	set optName [lindex $widgetOptions($name) 0]
 	set optClass [lindex $widgetOptions($name) 1]
 	set options($name) [option get $w $optName $optClass]
-
-	Debug 5 "\tname=$name, optName=$optName, optClass=$optClass"
     }
 
     # Need to translate '-scrollwidth' to '-scrollregion'.
@@ -505,10 +520,10 @@ proc ::tree::tree {w args} {
     # Some more inits.
     set v2uid() $vuid
     set uid2v($vuid) {}
-    ::tree::DfltConfig $w {}
-    set treestate(selection) {}
-    set treestate(oldselection) {}
-    set treestate(selidx) {}
+    ::tree::ItemInit $w {}
+    set state(selection) {}
+    set state(oldselection) {}
+    set state(selidx) {}
     
     # Font stuff.
     set priv(fontnormal) [eval {font create} [font actual $options(-font)]]
@@ -544,6 +559,8 @@ proc ::tree::tree {w args} {
 	  [list ::tree::ButtonUserEvent $w %x %y [lindex $eventSpec 1]]
     }
     
+    #eval {::tree::Configure} $w $args
+    
     # And finally... build.
     BuildWhenIdle $w
     
@@ -565,7 +582,7 @@ proc ::tree::tree {w args} {
 proc ::tree::ButtonClickCmd {w x y} {
     
     upvar ::tree::${w}::options options
-    upvar ::tree::${w}::treestate treestate
+    upvar ::tree::${w}::state state
     upvar ::tree::${w}::widgets widgets
     upvar ::tree::${w}::v2uid v2uid
     
@@ -581,20 +598,20 @@ proc ::tree::ButtonClickCmd {w x y} {
 	set y [$can canvasy $y]
 	set v {}
 	foreach id [$can find overlapping 0 $y 200 $y] {
-	    if {[info exists treestate(v:$id)]} {
-		set v $treestate(v:$id)
+	    if {[info exists state(v:$id)]} {
+		set v $state(v:$id)
 		break
 	    }
 	}
 	if {[string length $v]} {
 	    set uid $v2uid($v)
 	    if {[lsearch $thetags topen] >= 0} {
-		set treestate($uid:open) 0
+		set state($uid:open) 0
 		if {[llength $options(-closecommand)]} {
 		    uplevel #0 $options(-closecommand) [list $w $v]
 		}
 	    } else {
-		set treestate($uid:open) 1
+		set state($uid:open) 1
 	
 		# Evaluate any open command callback.
 		if {[llength $options(-opencommand)]} {
@@ -609,11 +626,11 @@ proc ::tree::ButtonClickCmd {w x y} {
     if {[llength $options(-buttonpresscommand)]} {
 	
 	# Set timer for this callback.
-	if {[info exists treestate(afterid)]} {
-	    catch {after cancel $treestate(afterid)}
+	if {[info exists state(afterid)]} {
+	    catch {after cancel $state(afterid)}
 	}
 	set v [LabelAt $w $x $y]
-	set treestate(afterid) [after $options(-buttonpressmillisec)  \
+	set state(afterid) [after $options(-buttonpressmillisec)  \
 	  [list ::tree::ButtonPress $w $v $x $y]]
     }
 }
@@ -658,10 +675,10 @@ proc ::tree::ButtonPress {w v x y} {
 
 proc ::tree::ButtonRelease {w} {
     
-    upvar ::tree::${w}::treestate treestate
+    upvar ::tree::${w}::state state
 
-    if {[info exists treestate(afterid)]} {
-	catch {after cancel $treestate(afterid)}
+    if {[info exists state(afterid)]} {
+	catch {after cancel $state(afterid)}
     }
 }
 
@@ -693,7 +710,7 @@ proc ::tree::WidgetProc {w command args} {
     variable widgetOptions
     variable widgetCommands
     upvar ::tree::${w}::options options
-    upvar ::tree::${w}::treestate treestate
+    upvar ::tree::${w}::state state
     upvar ::tree::${w}::widgets widgets
     upvar ::tree::${w}::uid2v uid2v
     upvar ::tree::${w}::v2uid v2uid
@@ -721,8 +738,8 @@ proc ::tree::WidgetProc {w command args} {
 	    set result {}
 	    if {[info exists v2uid($v)]} {
 		set uid $v2uid($v)
-		if {[info exists treestate($uid:children)]} {
-		    set result $treestate($uid:children)
+		if {[info exists state($uid:children)]} {
+		    set result $state($uid:children)
 		}
 	    }
 	}
@@ -748,7 +765,7 @@ proc ::tree::WidgetProc {w command args} {
 		    }
 		} else {
 		    set vlist {}
-		    foreach {key val} [array get treestate "*:tags"] {
+		    foreach {key val} [array get state "*:tags"] {
 			if {[string equal $val $ftag]} {
 			    set ind [expr [string last ":tags" $key] - 1]
 			    set uid [string range $key 0 $ind]
@@ -827,7 +844,8 @@ proc ::tree::Configure {w args} {
     variable frameOptions
     upvar ::tree::${w}::options options
     upvar ::tree::${w}::widgets widgets
-    upvar ::tree::${w}::treestate treestate
+    upvar ::tree::${w}::state state
+    upvar ::tree::${w}::priv priv
     
     Debug 1 "::tree::Configure w=$w, args='$args'"
     
@@ -875,6 +893,12 @@ proc ::tree::Configure {w args} {
 		foreach eventSpec $newValue {
 		    bind $widgets(canvas) [lindex $eventSpec 0]  \
 		      [list ::tree::ButtonUserEvent $w %x %y [lindex $eventSpec 1]]
+		}
+	    }
+	    -stripecolors {
+		foreach col $newValue {
+		    set priv($col:stripelight) [::colorutils::getlighter $col]
+		    set priv($col:stripedark)  [::colorutils::getdarker $col]
 		}
 	    }
 	    -rightclickcommand {
@@ -989,20 +1013,20 @@ proc ::tree::ConfigureIcons {w} {
 # Results:
 #       none.
 
-proc ::tree::DfltConfig {w v} {
+proc ::tree::ItemInit {w v} {
 
-    upvar ::tree::${w}::treestate treestate
+    upvar ::tree::${w}::state state
     upvar ::tree::${w}::v2uid v2uid
     
     set uid $v2uid($v)
-    set treestate($uid:children) {}
-    set treestate($uid:open) 1
-    set treestate($uid:icon) {}
-    set treestate($uid:tags) {}
-    set treestate($uid:text) [lindex $v end]
-    set treestate($uid:bg) {}
-    set treestate($uid:bd) 0
-    set treestate($uid:fg) black
+    set state($uid:children) {}
+    set state($uid:open) 1
+    set state($uid:icon) {}
+    set state($uid:tags) {}
+    set state($uid:text) [lindex $v end]
+    set state($uid:bg) {}
+    set state($uid:bd) 0
+    set state($uid:fg) {}
 }
 
 # ::tree::ConfigureItem --
@@ -1020,13 +1044,13 @@ proc ::tree::DfltConfig {w v} {
 proc ::tree::ConfigureItem {w v args} {
     
     variable widgetGlobals
-    upvar ::tree::${w}::treestate treestate
+    upvar ::tree::${w}::state state
     upvar ::tree::${w}::v2uid v2uid
     
     Debug 1 "::tree::ConfigureItem w=$w, v='$v', args='$args'"
 
     set v [NormList $v]
-    set dir [lrange $v 0 end-1]
+    set dir  [lrange $v 0 end-1]
     set tail [lindex $v end]
 
     if {![info exists v2uid($v)]} {
@@ -1035,7 +1059,7 @@ proc ::tree::ConfigureItem {w v args} {
     set uid $v2uid($v)
     set uidDir $v2uid($dir)
     
-    set i [lsearch -exact $treestate($uidDir:children) $tail]
+    set i [lsearch -exact $state($uidDir:children) $tail]
     if {$i == -1} {
 	return -code error "item \"$v\" doesn't exist"
     }
@@ -1049,56 +1073,56 @@ proc ::tree::ConfigureItem {w v args} {
 	
 	switch -exact -- $op {
 	    -background {
-		if {[info exists treestate($uid:bg)]} {
-		    set result $treestate($uid:bg)
+		if {[info exists state($uid:bg)]} {
+		    set result $state($uid:bg)
 		} else {
 		    set result {}
 		}
 	    }
 	    -backgroundbd {
-		if {[info exists treestate($uid:bd)]} {
-		    set result $treestate($uid:bd)
+		if {[info exists state($uid:bd)]} {
+		    set result $state($uid:bd)
 		} else {
 		    set result {}
 		}
 	    }
 	    -canvastags {
-		if {[info exists treestate($uid:ctags)]} {
-		    set result $treestate($uid:ctags)
+		if {[info exists state($uid:ctags)]} {
+		    set result $state($uid:ctags)
 		} else {
 		    set result {}
 		}
 	    }
 	    -dir {
-		if {[info exists treestate($uid:dir)]} {
-		    set result $treestate($uid:dir)
-		} elseif {[llength $treestate($uid:children)]} {
+		if {[info exists state($uid:dir)]} {
+		    set result $state($uid:dir)
+		} elseif {[llength $state($uid:children)]} {
 		    set result 1
 		} else {
 		    set result 0
 		}
 	    }
 	    -foreground {
-		if {[info exists treestate($uid:fg)]} {
-		    set result $treestate($uid:fg)
+		if {[info exists state($uid:fg)]} {
+		    set result $state($uid:fg)
 		} else {
 		    set result {}
 		}
 	    }
 	    -image {
-		set result $treestate($uid:icon)
+		set result $state($uid:icon)
 	    }
 	    -open {
-		set result $treestate($uid:open)
+		set result $state($uid:open)
 	    }
 	    -style {
-		set result $treestate($uid:style)
+		set result $state($uid:style)
 	    }
 	    -tags {
-		set result $treestate($uid:tags)
+		set result $state($uid:tags)
 	    }
 	    -text {
-		set result $treestate($uid:text)
+		set result $state($uid:text)
 	    }
 	    default {
 		return -code error "unknown option \"$op\" to itemconfigure"
@@ -1106,68 +1130,92 @@ proc ::tree::ConfigureItem {w v args} {
 	    return $result
 	} 
     } else {
-	foreach {op arg} $args {
-	    
-	    switch -exact -- $op {
-		-background {
-		    set treestate($uid:bg) $arg
-		    if {[string length $arg]} {
-			set treestate($uid:bglight) #87b3d0
-			set treestate($uid:bgdark)  #0c5280
-		    }
-		}
-		-backgroundbd {
-		    set treestate($uid:bd) $arg
-		}
-		-canvastags {
-		    set treestate($uid:ctags) $arg
-		}
-		-dir {
-		    set treestate($uid:dir) $arg
-		}
-		-foreground {
-		    set treestate($uid:fg) $arg
-		}
-		-image {
-		    set treestate($uid:icon) $arg
-		}
-		-open {
-		    set treestate($uid:open) $arg
-		}
-		-style {
-		    if {[regexp {(normal|bold|italic)} $arg]} {
-			set treestate($uid:style) $arg
-		    } else {
-			return -code error "Use -style normal|bold|italic"
-		    }
-		}
-		-tags {
-		    set treestate($uid:tags) $arg
-		}
-		-text {
-		    set treestate($uid:text) $arg
-		}
-		default {
-		    return -code error "unknown option \"$op\" to itemconfigure"
-		}
-	    } 
-	}
-	if {[string length $treestate($uid:text)] == 0} {
-	    set treestate($uid:text) [lindex $v end]
-	}
+	eval {::tree::SetItemOptions $w $v} $args
 	BuildWhenIdle $w
 	return ""
     }
 }
 
+# ::tree::SetItemOptions --
+#
+#       Doues the actual job of setting the items options
+#       
+# Arguments:
+#       w       the widget path.
+#       v       the item as a list.
+#       args    list of '-key value' pairs for the item.
+#       
+# Results:
+#       new tree is built.
+
+proc ::tree::SetItemOptions {w v args} {
+    variable widgetGlobals
+    upvar ::tree::${w}::state state    
+    upvar ::tree::${w}::v2uid v2uid
+    
+    set uid $v2uid($v)
+
+    foreach {op val} $args {
+	
+	switch -exact -- $op {
+	    -background {
+		set state($uid:bg) $val
+		if {[string length $val]} {
+		    set state($uid:bglight) [::colorutils::getlighter $val]
+		    set state($uid:bgdark)  [::colorutils::getdarker $val]
+		}
+	    }
+	    -backgroundbd {
+		set state($uid:bd) $val
+	    }
+	    -canvastags {
+		set state($uid:ctags) $val
+	    }
+	    -dir {
+		set state($uid:dir) $val
+	    }
+	    -foreground {
+		set state($uid:fg) $val
+	    }
+	    -image {
+		set state($uid:icon) $val
+	    }
+	    -open {
+		set state($uid:open) $val
+	    }
+	    -style {
+		if {[regexp {(normal|bold|italic)} $val]} {
+		    set state($uid:style) $val
+		} else {
+		    return -code error "Use -style normal|bold|italic"
+		}
+	    }
+	    -tags {
+		set state($uid:tags) $val
+	    }
+	    -text {
+		set state($uid:text) $val
+	    }
+	    -text2 {
+		set state($uid:text2) $val
+	    }
+	    default {
+		return -code error "unknown option \"$op\" to itemconfigure"
+	    }
+	} 
+    }
+    if {[string length $state($uid:text)] == 0} {
+	set state($uid:text) [lindex $v end]
+    }
+}
+
 proc ::tree::IsItem {w v} {
     
-    upvar ::tree::${w}::treestate treestate
+    upvar ::tree::${w}::state state
     upvar ::tree::${w}::v2uid v2uid
 
     set v [NormList $v]
-    if {[info exists v2uid($v)] &&  \
-      [info exists treestate($v2uid($v):children)]} {
+    if {[info exists v2uid($v)] && [info exists state($v2uid($v):children)]} {
 	return 1
     } else {
 	return 0
@@ -1189,7 +1237,7 @@ proc ::tree::IsItem {w v} {
 proc ::tree::NewItem {w v args} {
 
     upvar ::tree::${w}::options options
-    upvar ::tree::${w}::treestate treestate
+    upvar ::tree::${w}::state state
     upvar ::tree::${w}::vuid vuid
     upvar ::tree::${w}::v2uid v2uid
     upvar ::tree::${w}::uid2v uid2v
@@ -1202,24 +1250,33 @@ proc ::tree::NewItem {w v args} {
 	return -code error "parent item \"$dir\" is missing"
     }
     set uidDir $v2uid($dir)
-    if {![info exists treestate($uidDir:open)]} {
+    if {![info exists state($uidDir:open)]} {
 	return -code error "parent item \"$dir\" is missing"
     }
-    set i [lsearch -exact $treestate($uidDir:children) $tail]
+    set i [lsearch -exact $state($uidDir:children) $tail]
     if {$i >= 0} {
 	
 	# Should we be silent about this?
 	if {$options(-silent)} {
-	    lset treestate($uidDir:children) $i $tail
+	    lset state($uidDir:children) $i $tail
 	} else {
 	    return -code error "item \"$v\" already exists"
 	}
     } else {
-	lappend treestate($uidDir:children) $tail
+	lappend state($uidDir:children) $tail
     }
     if {[llength $options(-sortorder)]} {
-	set treestate($uidDir:children)   \
-	  [lsort -$options(-sortorder) $treestate($uidDir:children)]
+	set doSort 1
+	if {[llength $options(-sortlevels)]} {
+	    set sort [lindex $options(-sortlevels) [expr [llength $v] - 1]]
+	    if {[string equal $sort "0"]} {
+		set doSort 0
+	    }
+	}
+	if {$doSort} {
+	    set state($uidDir:children)   \
+	      [lsort -$options(-sortorder) $state($uidDir:children)]
+	}
     }
 
     # Make fresh uid now that we know it's ok to create it.
@@ -1228,46 +1285,11 @@ proc ::tree::NewItem {w v args} {
     set uid2v($uid) $v
     
     # Initialize a element of the tree.
-    DfltConfig $w $v
+    ItemInit $w $v
     
-    # We should use ConfigureItem here instead!!!!!!!!!!!!!
-    
-    foreach {op arg} $args {
-	
-	switch -exact -- $op {
-	    -canvastags {
-		set treestate($uid:ctags) $arg
-	    }
-	    -dir {
-		set treestate($uid:dir) $arg
-	    }
-	    -image {
-		set treestate($uid:icon) $arg
-	    }
-	    -open {
-		set treestate($uid:open) $arg
-	    }
-	    -style {
-		if {[regexp {(normal|bold|italic)} $arg]} {
-		    set treestate($uid:style) $arg
-		} else {
-		    return -code error "Use -style (normal|bold|italic)"
-		}
-	    }
-	    -tags {
-		set treestate($uid:tags) $arg
-	    }
-	    -text {
-		set treestate($uid:text) $arg
-	    }
-	    -text2 {
-		set treestate($uid:text2) $arg
-	    }
-	}
-    }
-    if {[string length $treestate($uid:text)] == 0} {
-	set treestate($uid:text) [lindex $v end]
-    }
+    # Set the actual item options.
+    eval {::tree::SetItemOptions $w $v} $args
+
     BuildWhenIdle $w
 }
 
@@ -1287,7 +1309,7 @@ proc ::tree::NewItem {w v args} {
 proc ::tree::DelItem {w v args} {
     
     variable widgetGlobals
-    upvar ::tree::${w}::treestate treestate
+    upvar ::tree::${w}::state state
     upvar ::tree::${w}::v2uid v2uid
     upvar ::tree::${w}::uid2v uid2v
     
@@ -1298,7 +1320,7 @@ proc ::tree::DelItem {w v args} {
 	return
     }
     set uid $v2uid($v)
-    if {![info exists treestate($uid:open)]} {
+    if {![info exists state($uid:open)]} {
 	return
     }
     array set opts {-childsonly 0}
@@ -1306,44 +1328,44 @@ proc ::tree::DelItem {w v args} {
     if {$v == ""} {
 	
 	# Remove all content.
-	catch {unset treestate}
-	set treestate(selection) {}
-	set treestate(oldselection) {}
-	set treestate(selidx) {}
-	::tree::DfltConfig $w {}
+	catch {unset state}
+	set state(selection) {}
+	set state(oldselection) {}
+	set state(selidx) {}
+	::tree::ItemInit $w {}
     } else {
 	
 	# Start by removing all child elements, recursively.
-	foreach c $treestate($uid:children) {
+	foreach c $state($uid:children) {
 	    #catch {DelItem $w [concat $v [list $c]]}
 	    DelItem $w [concat $v [list $c]]
 	}
 	
 	# Then remove the actual element.
 	if {$opts(-childsonly) == 0} {
-	    if {$v == $treestate(selection)} {
-		set treestate(selection) {}
-		set treestate(oldselection) {}
-		set treestate(selidx) {}
+	    if {$v == $state(selection)} {
+		set state(selection) {}
+		set state(oldselection) {}
+		set state(selidx) {}
 	    }
-	    unset treestate($uid:open)
-	    unset treestate($uid:children)
-	    unset treestate($uid:icon)
-	    unset treestate($uid:text)
-	    unset treestate($uid:bg)
-	    unset treestate($uid:tags)
-	    catch {unset treestate($uid:tag)}
-	    catch {unset treestate($uid:ctags)}
+	    unset state($uid:open)
+	    unset state($uid:children)
+	    unset state($uid:icon)
+	    unset state($uid:text)
+	    unset state($uid:bg)
+	    unset state($uid:tags)
+	    catch {unset state($uid:tag)}
+	    catch {unset state($uid:ctags)}
 	    set dir [lrange $v 0 end-1]
 	    set tail [lindex $v end]
 	    
 	    # Remove us from the list of childrens of the directory above.
 	    # Exists...????
 	    set uidDir $v2uid($dir)
-	    set i [lsearch -exact $treestate($uidDir:children) $tail]
+	    set i [lsearch -exact $state($uidDir:children) $tail]
 	    if {$i >= 0} {
-		set treestate($uidDir:children)   \
-		  [lreplace $treestate($uidDir:children) $i $i]
+		set state($uidDir:children)   \
+		  [lreplace $state($uidDir:children) $i $i]
 	    }
 	    unset v2uid($v)
 	    unset uid2v($uid)
@@ -1390,23 +1412,22 @@ proc ::tree::SetSelection {w v} {
 
     variable widgetGlobals
     upvar ::tree::${w}::options options
-    upvar ::tree::${w}::treestate treestate
+    upvar ::tree::${w}::state state
     upvar ::tree::${w}::widgets widgets
     
     Debug 1 "::tree::SetSelection w=$w, v=$v"
 
-    if {![string equal $v $treestate(selection)] && \
+    if {![string equal $v $state(selection)] && \
       ([llength $options(-selectcommand)] > 0)} {
 	uplevel #0 $options(-selectcommand) [list $w $v]
     }
-    set treestate(oldselection) $treestate(selection)
-    set treestate(selection) $v
+    set state(oldselection) $state(selection)
+    set state(selection) $v
     DrawSelection $w
     
     # Modify our view so selection is visible.
-    if {[string length $options(-yscrollcommand)] &&   \
-      [winfo ismapped $w]} {
-	set coords [$widgets(canvas) coords $treestate(selidx)]
+    if {[string length $options(-yscrollcommand)] && [winfo ismapped $w]} {
+	set coords [$widgets(canvas) coords $state(selidx)]
 	set midysel [expr ([lindex $coords 1] + [lindex $coords 3])/2]
 	set scrollregion [$widgets(canvas) cget -scrollregion]
 	set scrollheight [lindex $scrollregion 3]
@@ -1454,24 +1475,24 @@ proc ::tree::LostSelection {w} {
 
 proc ::tree::GetSelection {w} {
 
-    upvar ::tree::${w}::treestate treestate
+    upvar ::tree::${w}::state state
     
-    return $treestate(selection)
+    return $state(selection)
 }
 
 proc ::tree::RemoveSelection {w} {
 
     variable widgetGlobals
     upvar ::tree::${w}::options options
-    upvar ::tree::${w}::treestate treestate
+    upvar ::tree::${w}::state state
 
     Debug 1 "::tree::RemoveSelection w=$w"
 
     if {[llength $options(-selectcommand)] > 0} {
 	uplevel #0 $options(-selectcommand) [list $w {}]
     }
-    set treestate(oldselection) $treestate(selection)
-    set treestate(selection) {}
+    set state(oldselection) $state(selection)
+    set state(selection) {}
     DrawSelection $w
 }
     
@@ -1490,7 +1511,7 @@ proc ::tree::Build {w} {
     variable widgetGlobals
     upvar ::tree::${w}::widgets widgets
     upvar ::tree::${w}::options options
-    upvar ::tree::${w}::treestate treestate
+    upvar ::tree::${w}::state state
     upvar ::tree::${w}::priv priv
 
     Debug 1 "::tree::Build w=$w"
@@ -1499,6 +1520,11 @@ proc ::tree::Build {w} {
     
     # Standard indention from center line to text start.
     set priv(xindent) [expr [image width $priv(imopen)]/2 + 6]
+    foreach col $options(-stripecolors) {
+	set priv($col:stripelight) [::colorutils::getlighter $col]
+	set priv($col:stripedark)  [::colorutils::getdarker $col]
+    }
+
     $can delete all
     
     if {[string length $options(-backgroundimage)] > 0} {
@@ -1508,11 +1534,12 @@ proc ::tree::Build {w} {
 	# Just a dummy tag for the display list.
 	$can create line 0 0 1 0 -fill $options(-background) -tags tbgim
     }
-    catch {unset treestate(pending)}
-    catch {array unset treestate v:*}
+    catch {unset state(pending)}
+    catch {array unset state v:*}
     
-    # Keeps track of y coords to draw.
-    set treestate(y) 10
+    # Keeps track of top y coords to draw.
+    set state(y) 0
+    set state(i) 0
     BuildLayer $w {} [expr [image width $priv(imopen)]/2 + 4]
     
     # At this stage the display list is almost completely mixed up. Reorder!
@@ -1520,7 +1547,7 @@ proc ::tree::Build {w} {
     $can lower tpyj ttreev
     $can lower tbg ttreev
 
-    set hbbox [lindex [$can bbox (ttreev||tpyj)] 3]
+    set hbbox [expr [lindex [$can bbox (ttreev||tpyj||x)] 3] + 4]
     set wbbox [expr [lindex [$can bbox (ttreeh||x)] 2] + 10]
     if {($hbbox == "") || ($hbbox < $options(-height))} {
 	set hbbox $options(-height)
@@ -1542,13 +1569,13 @@ proc ::tree::DrawBackgroundImage {w} {
     upvar ::tree::${w}::widgets widgets
 
     set can $widgets(canvas)    
-    set imwidth [image width $options(-backgroundimage)]
+    set imwidth  [image width $options(-backgroundimage)]
     set imheight [image height $options(-backgroundimage)]
-    set wwidth [winfo width $can]
-    set wheight [winfo height $can]
+    set wwidth   [winfo width $can]
+    set wheight  [winfo height $can]
     set cwidth $options(-scrollwidth)
     set cheight $options(-height)
-    set cwidth [expr {$wwidth > $cwidth} ? $wwidth : $cwidth]
+    set cwidth  [expr {$wwidth > $cwidth} ? $wwidth : $cwidth]
     set cheight [expr {$wheight > $cheight} ? $wheight : $cheight]
 
     for {set x 0} {$x < $cwidth} {incr x $imwidth} {
@@ -1577,7 +1604,7 @@ proc ::tree::BuildLayer {w v in} {
     variable widgetGlobals
     upvar ::tree::${w}::widgets widgets
     upvar ::tree::${w}::options options
-    upvar ::tree::${w}::treestate treestate
+    upvar ::tree::${w}::state state
     upvar ::tree::${w}::priv priv
     upvar ::tree::${w}::v2uid v2uid
     
@@ -1600,80 +1627,106 @@ proc ::tree::BuildLayer {w v in} {
 	set vx $v
     }
     set uid $v2uid($v)
-    set start [expr $treestate(y) - 10]
-    set y $treestate(y)
-    set yline $priv(yline)
-    set yoff [expr $yline/2]
+    set y      $state(y)
+    set ystart $y
+    set yline  $priv(yline)
+    set yoff   [expr $yline/2]
     set scrollwidth $options(-scrollwidth)
+    set fg          $options(-foreground)
+    set stripecols  $options(-stripecolors)
+    set stripelen   [llength $stripecols]
+    set itembd      $options(-itembackgroundbd)
 
     Debug 3 "\tuid=$uid"
     
     # Loop through all childrens.
-    foreach c $treestate($uid:children) {
+    foreach c $state($uid:children) {
 	set vxc [concat $vx [list $c]]
 	set uidc $v2uid($vxc)
 	
 	set isDir 0
-	if {[info exists treestate($uidc:dir)] && ($treestate($uidc:dir) == 1)} {
+	if {[info exists state($uidc:dir)] && ($state($uidc:dir) == 1)} {
 	    set isDir 1
 	}
 	set hasChildren 0
-	if {[llength $treestate($uidc:children)]} {
+	if {[llength $state($uidc:children)]} {
 	    set hasChildren 1
 	    set isDir 1
 	}
-	set y $treestate(y)
-	set treestate($uidc:y) $y
+	set y     $state(y)
+	set ycent [expr $y + $yoff]
+	set ylow  [expr $y + $yline]
+	set ylow1 [expr $ylow - 1]
+	set state($uidc:y) $y
 	
 	# Any background color?
-	if {[string length $treestate($uidc:bg)]} {
-	    $can create rectangle 0 [expr $y - $yoff + 1] $scrollwidth  \
-	      [expr $y + $yoff] -outline {} -fill $treestate($uidc:bg) -tags tbg
-	    set bd $treestate($uidc:bd)
-	    if {$bd > 0} {
-		$can create line 0 [expr $y + $yoff] \
-		  0 [expr $y - $yoff + 1] $scrollwidth [expr $y - $yoff + 1] \
-		  -fill $treestate($uidc:bglight) -tags tbg -width $bd
-		$can create line 0 [expr $y + $yoff] \
-		  $scrollwidth [expr $y + $yoff] $scrollwidth [expr $y - $yoff + 1] \
-		  -fill $treestate($uidc:bgdark) -tags tbg -width $bd
+	set bgi ""
+	if {[string length $state($uidc:bg)]} {
+	    set bgi $state($uidc:bg)
+	    set bglight $state($uidc:bglight)
+	    set bgdark  $state($uidc:bgdark)
+	} elseif {[string length $stripecols]} {
+	    set bgi [lindex $stripecols [expr $state(i) % $stripelen]]
+	    set bglight $priv($bgi:stripelight)
+	    set bgdark  $priv($bgi:stripedark)
+	}
+	if {[string length $bgi]} {
+	    
+	    # Draw plain background.
+	    $can create rectangle 0 $y $scrollwidth $ylow \
+	      -outline {} -fill $bgi -tags tbg
+	    
+	    # Any borders.
+	    set bdi 0
+	    if {[string length $state($uidc:bd)]} {
+		set bdi $state($uidc:bd)
+	    } 
+	    if {($bdi == 0) && [string length $itembd]} {
+		set bdi $itembd
+	    }
+	    if {$bdi > 0} {
+		$can create line 0 $ylow1 0 $y $scrollwidth $y  \
+		  -fill $bglight -tags tbg -width $bdi
+		$can create line 0 $ylow1 $scrollwidth $ylow1 $scrollwidth $y \
+		  -fill $bgdark -tags tbg -width $bdi
 	    }
 	}
 	
 	# This is the "row height".
-	incr treestate(y) $yline
+	incr state(y) $yline
 	
 	# Any pyjamas lines?
 	if {[llength $options(-pyjamascolor)] > 0} {
-	    $can create line 0 [expr $y + $yoff] 4000  \
-	      [expr $y + $yoff] -fill $options(-pyjamascolor) -tags tpyj	    
+	    $can create line 0 $ylow 4000 $ylow  \
+	      -fill $options(-pyjamascolor) -tags tpyj	    
 	}
 	
 	# Tree lines?
 	if {$hasTree} {
-	    $can create line $in $y [expr $in + $indention - 4] $y -fill $treeCol \
-	      -tags ttreeh -dash $options(-treedash)
+	    $can create line $in $ycent [expr $in + $indention - 4] $ycent \
+	      -fill $treeCol -tags ttreeh -dash $options(-treedash)
 	}
-	set icon $treestate($uidc:icon)
-	set text $treestate($uidc:text)
+	set icon $state($uidc:icon)
+	set text $state($uidc:text)
 	
 	# The 'x' means selectable!
-	#set taglist [list x $treestate($uidc:tags)]
+	#set taglist [list x $state($uidc:tags)]
 	set taglist x
 	set ids {}
 	set x [expr $in + $indention]
-	if {[info exists treestate($uidc:ctags)]} {
-	    lappend taglist $treestate($uidc:ctags)
+	if {[info exists state($uidc:ctags)]} {
+	    lappend taglist $state($uidc:ctags)
 	}
 	
 	if {[string length $icon] > 0} {
-	    set id [$can create image $x $y -image $icon -anchor w -tags $taglist]
-	    set treestate(v:$id) $vxc
+	    set id [$can create image $x $ycent -image $icon -anchor w \
+	      -tags $taglist]
+	    set state(v:$id) $vxc
 	    lappend ids $id
 	    incr x [expr [image width $icon] + 6]
 	}
-	if {[info exists treestate($uidc:style)]} {
-	    set style $treestate($uidc:style)
+	if {[info exists state($uidc:style)]} {
+	    set style $state($uidc:style)
 	    set itemFont $priv(font${style}) 
 	} else {
 	    if {$isDir} {
@@ -1682,23 +1735,27 @@ proc ::tree::BuildLayer {w v in} {
 		set itemFont $options(-font)
 	    }
 	}
-	set fg $treestate($uidc:fg)
-	set id [$can create text $x $y -text $text -font $itemFont \
-	  -anchor w -tags $taglist -fill $fg]
+	set fgi $fg
+	if {[string length $state($uidc:fg)]} {
+	    set fgi $state($uidc:fg)
+	}
+	set id [$can create text $x $ycent -text $text -font $itemFont \
+	  -anchor w -tags $taglist -fill $fgi]
 	    lappend ids $id
-	if {[info exists treestate($uidc:text2)]} {
-	    set id2 [$can create text 140 $y -text $treestate($uidc:text2)  \
-	      -font $options(-font) -anchor w -fill $fg]
+	if {[info exists state($uidc:text2)]} {
+	    set id2 [$can create text 140 $ycent -text $state($uidc:text2)  \
+	      -font $options(-font) -anchor w -fill $fgi]
 	    lappend ids $id2
 	}
-	set treestate(v:$id) $vxc
-	set treestate($uidc:tag) $id
-	set treestate($uidc:ids) $ids
+	set state(v:$id) $vxc
+	set state($uidc:tag) $id
+	set state($uidc:ids) $ids
+	incr state(i)
 	
 	# Do we have a directory here?
 	if {$isDir} {
-	    if {$treestate($uidc:open)} {
-		set id [$can create image $in $y -image $imopen -tags topen]
+	    if {$state($uidc:open)} {
+		set id [$can create image $in $ycent -image $imopen -tags topen]
 		if {$hasChildren} {
 		
 		    # Call this recursively. 
@@ -1706,12 +1763,12 @@ proc ::tree::BuildLayer {w v in} {
 		    BuildLayer $w $vxc [expr $in + $indention]
 		}
 	    } else {
-		set id [$can create image $in $y -image $imclose -tags tclose]
+		set id [$can create image $in $ycent -image $imclose -tags tclose]
 	    }
 	}
     }
     if {$hasTree} {
-	$can create line $in $start $in [expr $y + $yTreeOff]  \
+	$can create line $in $ystart $in [expr $ycent + $yTreeOff]  \
 	  -fill $treeCol -tags ttreev -dash $options(-treedash)
     }
 }
@@ -1730,7 +1787,7 @@ proc ::tree::BuildLayer {w v in} {
 proc ::tree::OpenTree {w v} {
 
     variable widgetGlobals
-    upvar ::tree::${w}::treestate treestate
+    upvar ::tree::${w}::state state
     upvar ::tree::${w}::options options
     upvar ::tree::${w}::v2uid v2uid
     
@@ -1739,11 +1796,11 @@ proc ::tree::OpenTree {w v} {
     set v [NormList $v]
     set uid $v2uid($v)
     
-    if {[info exists treestate($uid:open)] &&     \
-      ($treestate($uid:open) == 0) &&             \
-      [info exists treestate($uid:children)] &&   \
-      [llength $treestate($uid:children)]} {
-	set treestate($uid:open) 1
+    if {[info exists state($uid:open)] &&     \
+      ($state($uid:open) == 0) &&             \
+      [info exists state($uid:children)] &&   \
+      [llength $state($uid:children)]} {
+	set state($uid:open) 1
 	BuildWhenIdle $w
 	
 	# Evaluate any open command callback.
@@ -1766,14 +1823,14 @@ proc ::tree::OpenTree {w v} {
 
 proc ::tree::CloseTree {w v} {
 
-    upvar ::tree::${w}::treestate treestate
+    upvar ::tree::${w}::state state
     upvar ::tree::${w}::v2uid v2uid
     
     set v [NormList $v]
     set uid $v2uid($v)
 
-    if {[info exists treestate($uid:open)] && ($treestate($uid:open) == 1)} {
-	set treestate($uid:open) 0
+    if {[info exists state($uid:open)] && ($state($uid:open) == 1)} {
+	set state($uid:open) 0
 	BuildWhenIdle $w
 	
 	# Evaluate any open command callback.
@@ -1798,7 +1855,7 @@ proc ::tree::DrawSelection {w} {
     variable widgetGlobals
     upvar ::tree::${w}::widgets widgets
     upvar ::tree::${w}::options options
-    upvar ::tree::${w}::treestate treestate
+    upvar ::tree::${w}::state state
     upvar ::tree::${w}::v2uid v2uid
     upvar ::tree::${w}::priv priv
     
@@ -1806,27 +1863,31 @@ proc ::tree::DrawSelection {w} {
     
     # Deselect.
     set can $widgets(canvas)
-    if {[string length $treestate(selidx)] > 0} {
-	$can delete $treestate(selidx)
-	if {$treestate(oldselection) != ""} {
-	    set vold $treestate(oldselection)
+    if {[string length $state(selidx)] > 0} {
+	$can delete $state(selidx)
+	if {$state(oldselection) != ""} {
+	    set vold $state(oldselection)
 	    if {[info exists v2uid($vold)]} {
 		set uidOld $v2uid($vold)
-		if {[info exists treestate($uidOld:tag)]} {
-		    $can itemconfigure $treestate($uidOld:tag) -fill black
+		if {[info exists state($uidOld:tag)]} {
+		    set fgi $options(-foreground)
+		    if {[string length $state($uidOld:fg)]} {
+			set fgi $state($uidOld:fg)
+		    }
+		    $can itemconfigure $state($uidOld:tag) -fill $fgi
 		}
 	    }
 	}
     }
     
     # This is the current selection. It may have been deleted.
-    set v $treestate(selection)
+    set v $state(selection)
     if {$v == ""} {
 	return ""
     }
     if {[info exists v2uid($v)]} {
 	set uid $v2uid($v)
-	if {![info exists treestate($uid:tag)]} {
+	if {![info exists state($uid:tag)]} {
 	    return ""
 	}
     } else {
@@ -1834,27 +1895,21 @@ proc ::tree::DrawSelection {w} {
     }
     
     # Select.
-    set bbox [$can bbox $treestate($uid:tag)]
+    set bbox [$can bbox $state($uid:tag)]
     if {[llength $bbox] == 4} {
-	set yoff [expr $priv(yline)/2]
 	set bbox [list \
-	  [expr [lindex $bbox 0] - 2]  \
-	  [expr $treestate($uid:y) - $yoff]  \
-	  [expr [lindex $bbox 2] + 2]  \
-	  [expr $treestate($uid:y) + $yoff - 1]]
+	  [expr [lindex $bbox 0] - 2] $state($uid:y)  \
+	  [expr [lindex $bbox 2] + 2] [expr $state($uid:y) + $priv(yline)]]
 	
 	set id [eval {$can create rectangle} $bbox {-fill $options(-selectbackground) \
 	  -outline $options(-selectoutline) -dash $options(-selectdash)}]
-	set treestate(selidx) $id
-	$can raise $id tbgim
-	if {[llength [$can find withtag bg]] > 0} {
-	    $can raise $id bg
-	}
-	if {[string equal [$can type $treestate($uid:tag)] "text"]} {
-	    $can itemconfigure $treestate($uid:tag) -fill $options(-selectforeground)
+	set state(selidx) $id
+	$can lower $id $state($uid:tag)
+	if {[string equal [$can type $state($uid:tag)] "text"]} {
+	    $can itemconfigure $state($uid:tag) -fill $options(-selectforeground)
 	}
     } else {
-	set treestate(selidx) {}
+	set state(selidx) {}
     }
     return ""
 }
@@ -1865,12 +1920,12 @@ proc ::tree::DrawSelection {w} {
 proc ::tree::BuildWhenIdle {w} {
 
     variable widgetGlobals
-    upvar ::tree::${w}::treestate treestate
+    upvar ::tree::${w}::state state
     
     Debug 2 "::tree::BuildWhenIdle w=$w"
 
-    if {![info exists treestate(pending)]} {
-	set treestate(pending) 1
+    if {![info exists state(pending)]} {
+	set state(pending) 1
 	after idle [list ::tree::Build $w]
     }
     return ""
@@ -1892,14 +1947,14 @@ proc ::tree::BuildWhenIdle {w} {
 proc ::tree::LabelAt {w x y} {
 
     upvar ::tree::${w}::widgets widgets
-    upvar ::tree::${w}::treestate treestate
+    upvar ::tree::${w}::state state
     
     set can $widgets(canvas)
     set x [$can canvasx $x]
     set y [$can canvasy $y]
     foreach id [$can find overlapping $x $y $x $y] {
-	if {[info exists treestate(v:$id)]} {
-	    return $treestate(v:$id)
+	if {[info exists state(v:$id)]} {
+	    return $state(v:$id)
 	}
     }
     return ""
@@ -1920,19 +1975,20 @@ proc ::tree::LabelAt {w x y} {
 proc ::tree::NextLabel {w direction} {
     
     variable widgetGlobals
-    upvar ::tree::${w}::treestate treestate
+    upvar ::tree::${w}::state state
     upvar ::tree::${w}::widgets widgets
+    upvar ::tree::${w}::priv priv
     
     Debug 1 "::tree::NextLabel w=$w, direction=$direction"
 
-    set selBbox [$widgets(canvas) bbox $treestate(selidx)]
+    set selBbox [$widgets(canvas) bbox $state(selidx)]
     if {[llength $selBbox] > 0} {
-	set yMid   \
-	  [expr $direction * 17 + ([lindex $selBbox 1] + [lindex $selBbox 3])/2.0]
+	set yMid [expr $direction * $priv(yline) + \
+	  ([lindex $selBbox 1] + [lindex $selBbox 3])/2.0]
 	foreach id [$widgets(canvas) find overlapping 10 $yMid 200 $yMid] {
 	    if {[$widgets(canvas) type $id] == "text"} {
-		if {[info exists treestate(v:$id)]} {
-		    return $treestate(v:$id)
+		if {[info exists state(v:$id)]} {
+		    return $state(v:$id)
 		}
 	    }
 	}
