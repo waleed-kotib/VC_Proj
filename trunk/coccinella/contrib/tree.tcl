@@ -6,7 +6,7 @@
 # Copyright (C) 2002-2004 Mats Bengtsson
 # This source file is distributed under the BSD license.
 # 
-# $Id: tree.tcl,v 1.38 2004-10-29 13:17:15 matben Exp $
+# $Id: tree.tcl,v 1.39 2004-10-31 14:32:58 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -551,7 +551,7 @@ proc ::tree::tree {w args} {
     array set metricsDirArr [font metrics $options(-fontdir)]
     set linespace [expr {$metricsArr(-linespace) > $metricsDirArr(-linespace)} ? \
       $metricsArr(-linespace) : $metricsDirArr(-linespace)]
-    set yline [expr $linespace + 5]
+    set yline [expr {$linespace + 5}]
     set priv(yline) [expr {$yline < 17} ? 17 : $yline]
     
     # Provide some default bindings.
@@ -781,7 +781,7 @@ proc ::tree::WidgetProc {w command args} {
 		    set vlist {}
 		    foreach {key val} [array get state "*:tags"] {
 			if {[string equal $val $ftag]} {
-			    set ind [expr [string last ":tags" $key] - 1]
+			    set ind [expr {[string last ":tags" $key] - 1}]
 			    set uid [string range $key 0 $ind]
 			    if {[info exists uid2v($uid)]} {
 				lappend vlist $uid2v($uid)
@@ -1316,7 +1316,7 @@ proc ::tree::NewItem {w v args} {
     if {[llength $options(-sortcommand)]} {
 	set doSort 1
 	if {[llength $options(-sortlevels)]} {
-	    set sort [lindex $options(-sortlevels) [expr [llength $v] - 1]]
+	    set sort [lindex $options(-sortlevels) [expr {[llength $v] - 1}]]
 	    if {[string equal $sort "0"]} {
 		set doSort 0
 	    }
@@ -1533,13 +1533,13 @@ proc ::tree::SetSelection {w v} {
     # Modify our view so selection is visible.
     if {[string length $options(-yscrollcommand)] && [winfo ismapped $w]} {
 	set coords [$widgets(canvas) coords $state(selidx)]
-	set midysel [expr ([lindex $coords 1] + [lindex $coords 3])/2]
+	set midysel [expr {([lindex $coords 1] + [lindex $coords 3])/2}]
 	set scrollregion [$widgets(canvas) cget -scrollregion]
 	set scrollheight [lindex $scrollregion 3]
 	set yview [$widgets(canvas) yview]
-	set ytop [expr [lindex $yview 0] * $scrollheight]
-	set ybot [expr [lindex $yview 1] * $scrollheight]
-	if {$midysel < [expr $ytop + 15]} {
+	set ytop [expr {[lindex $yview 0] * $scrollheight}]
+	set ybot [expr {[lindex $yview 1] * $scrollheight}]
+	if {$midysel < [expr {$ytop + 15}]} {
 	    
 	    # Be sure to never scroll past the top.
 	    if {$midysel < 40} {
@@ -1547,7 +1547,7 @@ proc ::tree::SetSelection {w v} {
 	    } else {
 		$widgets(canvas) yview scroll -1 pages
 	    }
-	} elseif {$midysel > [expr $ybot - 15]} {
+	} elseif {$midysel > [expr {$ybot - 15}]} {
 	    $widgets(canvas) yview scroll 1 pages
 	}
     }
@@ -1626,7 +1626,7 @@ proc ::tree::Build {w} {
     # Standard indention from center line to icon or text start.
     set priv(xindent) $options(-xmargin)
     if {$priv(imopen) != ""} {
-	incr priv(xindent) [expr [image width $priv(imopen)]/2]
+	incr priv(xindent) [expr {[image width $priv(imopen)]/2}]
     }
     foreach col $options(-stripecolors) {
 	set priv($col:stripelight) [::colorutils::getlighter $col]
@@ -1650,7 +1650,7 @@ proc ::tree::Build {w} {
     set state(i) 0
     set xin 4
     if {$priv(imopen) != ""} {
-	incr xin [expr [image width $priv(imopen)]/2]
+	incr xin [expr {[image width $priv(imopen)]/2}]
     }
     BuildLayer $w {} $xin
     
@@ -1743,13 +1743,15 @@ proc ::tree::BuildLayer {w v xin} {
     set y       $state(y)
     set ystart  $y
     set yline   $priv(yline)
-    set yoff    [expr $yline/2]
-    set ycent   [expr $y + $yoff]
+    set yoff    [expr {$yline/2}]
+    set ycent   [expr {$y + $yoff}]
     set scrollwidth $options(-scrollwidth)
     set fg          $options(-foreground)
     set stripecols  $options(-stripecolors)
     set stripelen   [llength $stripecols]
     set itembd      $options(-itembackgroundbd)
+    set treedash    $options(-treedash)
+    set pyjamascol  $options(-pyjamascolor)
     
     Debug 3 "\t uid=$uid"
     
@@ -1768,9 +1770,9 @@ proc ::tree::BuildLayer {w v xin} {
 	    set isDir 1
 	}
 	set y     $state(y)
-	set ycent [expr $y + $yoff]
-	set ylow  [expr $y + $yline]
-	set ylow1 [expr $ylow - 1]
+	set ycent [expr {$y + $yoff}]
+	set ylow  [expr {$y + $yline}]
+	set ylow1 [expr {$ylow - 1}]
 	set state($uidc:y) $y
 	
 	# Any background color?
@@ -1780,7 +1782,7 @@ proc ::tree::BuildLayer {w v xin} {
 	    set bglight $state($uidc:bglight)
 	    set bgdark  $state($uidc:bgdark)
 	} elseif {$stripecols != ""} {
-	    set bgi     [lindex $stripecols [expr $state(i) % $stripelen]]
+	    set bgi     [lindex $stripecols [expr {$state(i) % $stripelen}]]
 	    set bglight $priv($bgi:stripelight)
 	    set bgdark  $priv($bgi:stripedark)
 	}
@@ -1810,15 +1812,14 @@ proc ::tree::BuildLayer {w v xin} {
 	incr state(y) $yline
 	
 	# Any pyjamas lines?
-	if {[llength $options(-pyjamascolor)] > 0} {
-	    $can create line 0 $ylow 4000 $ylow -fill $options(-pyjamascolor) \
-	      -tags tpyj	    
+	if {$pyjamascol != ""} {
+	    $can create line 0 $ylow 4000 $ylow -fill $pyjamascol -tags tpyj	    
 	}
 	
 	# Tree lines?
 	if {$hasTree} {
-	    $can create line $xin $ycent [expr $xin + $xoff - 4] $ycent \
-	      -fill $treeCol -tags ttreeh -dash $options(-treedash)
+	    $can create line $xin $ycent [expr {$xin + $xoff - 4}] $ycent \
+	      -fill $treeCol -tags ttreeh -dash $treedash
 	}
 	
 	# The 'x' tag means selectable!
@@ -1828,7 +1829,7 @@ proc ::tree::BuildLayer {w v xin} {
 	    lappend taglist $state($uidc:ctags)
 	}
 	
-	set x [expr $xin + $xoff]
+	set x [expr {$xin + $xoff}]
 	set icon $state($uidc:icon)
 	set text $state($uidc:text)
 	
@@ -1837,7 +1838,7 @@ proc ::tree::BuildLayer {w v xin} {
 	      -tags $taglist]
 	    set state(v:$id) $vxc
 	    lappend ids $id
-	    incr x [expr [image width $icon] + 6]
+	    incr x [expr {[image width $icon] + 6}]
 	}
 	if {[info exists state($uidc:style)]} {
 	    set style $state($uidc:style)
@@ -1876,7 +1877,7 @@ proc ::tree::BuildLayer {w v xin} {
 		
 		    # Call this recursively. 
 		    # The number here is the directory offset in x.
-		    BuildLayer $w $vxc [expr $xin + $indention]
+		    BuildLayer $w $vxc [expr {$xin + $indention}]
 		}
 	    } else {
 		if {$imclose != ""} {
@@ -1887,7 +1888,8 @@ proc ::tree::BuildLayer {w v xin} {
 	}
     }
     if {$hasTree} {
-	$can create line $xin [expr $ystart - $yoff] $xin [expr $ycent + $yTreeOff]  \
+	$can create line $xin [expr {$ystart - $yoff}] \
+	  $xin [expr {$ycent + $yTreeOff}]  \
 	  -fill $treeCol -tags ttreev -dash $options(-treedash)
     }
 }
@@ -2017,8 +2019,8 @@ proc ::tree::DrawSelection {w} {
     set bbox [$can bbox $state($uid:tag)]
     if {[llength $bbox] == 4} {
 	set bbox [list \
-	  [expr [lindex $bbox 0] - 2] [expr $state($uid:y) + 1]  \
-	  [expr [lindex $bbox 2] + 2] [expr $state($uid:y) + $priv(yline)]]
+	  [expr {[lindex $bbox 0] - 2}] [expr {$state($uid:y) + 1}]  \
+	  [expr {[lindex $bbox 2] + 2}] [expr {$state($uid:y) + $priv(yline)}]]
 	
 	set id [eval {$can create rectangle} $bbox {-fill $options(-selectbackground) \
 	  -outline $options(-selectoutline) -dash $options(-selectdash)}]
@@ -2102,8 +2104,8 @@ proc ::tree::NextLabel {w direction} {
 
     set selBbox [$widgets(canvas) bbox $state(selidx)]
     if {[llength $selBbox] > 0} {
-	set yMid [expr $direction * $priv(yline) + \
-	  ([lindex $selBbox 1] + [lindex $selBbox 3])/2.0]
+	set yMid [expr {$direction * $priv(yline) + \
+	  ([lindex $selBbox 1] + [lindex $selBbox 3])/2.0}]
 	foreach id [$widgets(canvas) find overlapping 10 $yMid 200 $yMid] {
 	    if {[$widgets(canvas) type $id] == "text"} {
 		if {[info exists state(v:$id)]} {

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Sounds.tcl,v 1.4 2004-10-30 14:44:52 matben Exp $
+# $Id: Sounds.tcl,v 1.5 2004-10-31 14:32:57 matben Exp $
 
 namespace eval ::Sounds:: {
         
@@ -337,8 +337,11 @@ proc  ::Sounds::InitPrefsHook { } {
     variable allSounds
     
     set sprefs(soundSet) ""
+    set sprefs(volume)   100
     ::PreferencesUtils::Add [list  \
-      [list ::Sounds::sprefs(soundSet) sound_set $sprefs(soundSet)]]
+      [list ::Sounds::sprefs(soundSet) sound_set    $sprefs(soundSet)] \
+      [list ::Sounds::sprefs(volume)   sound_volume $sprefs(volume)] \
+      ]
     
     set optList {}
     foreach name $allSounds {
@@ -365,6 +368,7 @@ proc ::Sounds::BuildPrefsPage {wpage} {
     variable sprefs
     variable tmpPrefs
     variable allSounds
+    variable priv
     
     set fontS  [option get . fontSmall {}]    
     set fontSB [option get . fontSmallBold {}]    
@@ -377,6 +381,7 @@ proc ::Sounds::BuildPrefsPage {wpage} {
     } else {
 	set tmpPrefs(soundSet) $sprefs(soundSet)
     }
+    set tmpPrefs(volume) $sprefs(volume)
     
     set labpalrt $wpage.alrt
     labelframe $labpalrt -text [mc {Alert sounds}]
@@ -410,15 +415,9 @@ proc ::Sounds::BuildPrefsPage {wpage} {
 	grid $fr.b${name} -column 1 -row $row -sticky ew -padx 8
 	incr row
     }
-    scale $fr.vol -showvalue 1 -command [namespace current]::VolumeCmd \
+    scale $fr.vol -showvalue 1 -variable [namespace current]::tmpPrefs(volume) \
       -from 0 -to 100 -label [mc Volume] -orient horizontal -bd 1
-    grid $fr.vol
-    
-}
-
-proc ::Sounds::VolumeCmd {volume} {
-    
- 
+    grid $fr.vol -stick ew -padx 12 -pady 4
     
 }
 
@@ -459,7 +458,8 @@ proc ::Sounds::PlayTmpPrefSound {name} {
 	}
 	catch {destroy .fake._tmp}
 	catch {
-	    movie .fake._tmp -file $f -controller 0
+	    movie .fake._tmp -file $f -controller 0 \
+	      -volume [expr {int($tmpPrefs(volume) * 2.55)}]
 	    .fake._tmp play
 	}
     } elseif {$priv(snack)} {
@@ -485,8 +485,16 @@ proc ::Sounds::SavePrefsHook { } {
 	::Sounds::LoadSoundSet $tmpPrefs(soundSet)
     }
     set sprefs(soundSet) $tmpPrefs(soundSet)
+    set sprefs(volume)   $tmpPrefs(volume)
     foreach name $allSounds {
 	set sprefs($name) $tmpPrefs($name)
+    }
+    if {$priv(QuickTimeTcl)} {
+	foreach wmovie [winfo children .fake] {
+	    if {[winfo class $wmovie] == "Movie"} {
+		$wmovie configure -volume [expr {int($sprefs(volume) * 2.55)}]
+	    }
+	}
     }
 }
 
@@ -499,6 +507,11 @@ proc ::Sounds::CancelPrefsHook { } {
     if {!$priv(canPlay)} {
 	return
     }    
+    
+    # Reset volume.
+    if {$priv(snack)} {
+	snack::audio play_gain $sprefs(volume)
+    }
     foreach name $allSounds {
 	if {$sprefs($name) != $tmpPrefs($name)} {
 	    ::Preferences::HasChanged
@@ -508,6 +521,9 @@ proc ::Sounds::CancelPrefsHook { } {
 	set tmpPrefs(soundSet) ""
     }
     if {![string equal $sprefs(soundSet) $tmpPrefs(soundSet)]} {
+	::Preferences::HasChanged
+    }
+    if {![string equal $sprefs(volume) $tmpPrefs(volume)]} {
 	::Preferences::HasChanged
     }
 }
@@ -546,13 +562,6 @@ proc ::Sounds::GetAllSets { } {
 	}
     }  
     return $allsets
-}
-
-proc ::Sounds::SetVolume {volume} {
-    
-    
-    
-    
 }
 
 #-------------------------------------------------------------------------------

@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Speech.tcl,v 1.4 2004-09-28 13:50:17 matben Exp $
+# $Id: Speech.tcl,v 1.5 2004-10-31 14:32:57 matben Exp $
 
 namespace eval ::Speech:: { }
 
@@ -271,7 +271,7 @@ proc ::Speech::CancelPrefsHook { } {
 		return
 	    }
 	}
-	unset -nocomplain tmpPrefs
+	#unset -nocomplain tmpPrefs
     }
 }
 

@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.40 2004-10-30 14:44:52 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.41 2004-10-31 14:32:58 matben Exp $
 
 
 set noErr 0
@@ -124,8 +124,8 @@ set prefs(firstLaunch) 1
 if {[string equal $this(platform) "unix"]} {
     if {![catch {exec which kprinter}]} {
 	set prefs(unixPrintCmd) "kprinter"
-    } elseif {[info exists env(PRINTER)]} {
-	set prefs(unixPrintCmd) "lpr -P$env(PRINTER)"
+    } elseif {[info exists ::env(PRINTER)]} {
+	set prefs(unixPrintCmd) "lpr -P$::env(PRINTER)"
     } else {
 	set prefs(unixPrintCmd) "lpr"
     }
@@ -230,12 +230,12 @@ array set tclwbProtMsg {
 }
 
 # Find user name.
-if {[info exists env(USER)]} {
-    set this(username) $env(USER)
-} elseif {[info exists env(LOGIN)]} {
-    set this(username) $env(LOGIN)
-} elseif {[info exists env(USERNAME)]} {
-    set this(username) $env(USERNAME)
+if {[info exists ::env(USER)]} {
+    set this(username) $::env(USER)
+} elseif {[info exists ::env(LOGIN)]} {
+    set this(username) $::env(LOGIN)
+} elseif {[info exists ::env(USERNAME)]} {
+    set this(username) $::env(USERNAME)
 } elseif {[llength $this(hostname)]} {
     set this(username) $this(hostname)
 } else {
@@ -283,9 +283,9 @@ switch -- $this(platform) {
 	  [file nativename [file join $this(prefsPath) canvases]]
 	set prefs(historyPath)  \
 	  [file nativename [file join $this(prefsPath) history]]
-	if {[info exists env(BROWSER)]} {
-	    if {[llength [auto_execok $env(BROWSER)]] > 0} {
-		set prefs(webBrowser) $env(BROWSER)
+	if {[info exists ::env(BROWSER)]} {
+	    if {[llength [auto_execok $::env(BROWSER)]] > 0} {
+		set prefs(webBrowser) $::env(BROWSER)
 	    } else {	    
 		set prefs(webBrowser) ""
 	    }
@@ -297,7 +297,7 @@ switch -- $this(platform) {
 	set osprefs(mod) Command
 	set prefs(userPrefsFilePath)  \
 	  [file join $this(prefsPath) "Whiteboard Prefs"]
-	set prefs(oldPrefsFilePath) [file join $env(PREF_FOLDER) "Whiteboard Prefs"]
+	set prefs(oldPrefsFilePath) [file join $::env(PREF_FOLDER) "Whiteboard Prefs"]
 	set prefs(inboxCanvasPath) [file join $this(prefsPath) Canvases]
 	set prefs(historyPath) [file join $this(prefsPath) History]
 	set prefs(webBrowser) {Internet Explorer}
