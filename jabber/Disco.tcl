@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.50 2005-01-09 14:33:52 matben Exp $
+# $Id: Disco.tcl,v 1.51 2005-01-25 07:02:57 matben Exp $
 
 package provide Disco 1.0
 
@@ -54,6 +54,7 @@ namespace eval ::Disco:: {
 	proxy                 0
 	pubsub                1
 	server                1
+	services              1
 	store                 1
     }
     

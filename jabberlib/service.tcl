@@ -5,7 +5,7 @@
 #       
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: service.tcl,v 1.12 2004-09-08 13:13:14 matben Exp $
+# $Id: service.tcl,v 1.13 2005-01-25 07:02:58 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -714,7 +714,9 @@ proc jlib::service::exitroom {jlibname room} {
 
     set room [jlib::jidmap $room]
     if {![info exists serv(roomprot,$room)]} {
-	return -code error "Does not know which protocol to use in $room"
+	#return -code error "Does not know which protocol to use in $room"
+	# Not sure here???
+	set serv(roomprot,$room) "gc-1.0"
     }
 
     switch -- $serv(roomprot,$room) {

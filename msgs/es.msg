@@ -804,17 +804,20 @@ además de las fuentes estándar (Times, Helvetica o Courier), Aseguresé que ha
 ::msgcat::mcset es prefprofname  {Introducir el nombre del perfil de usuario}
 ::msgcat::mcset es prefstabui    {Usar la interfaz del bloc de notas con pestañas}
 ::msgcat::mcset es prefsusesasl  {Usar método de autentificación SASL}
-#::msgcat::mcset es prefprivmsg {Each user may administrate zero or many lists. Only the active or default list affect message processing. Any active list affects only the session. The default list is processed if there is no active list.}
-#::msgcat::mcset es prefprivunav {Filter options unavailable while not connected}
-#::msgcat::mcset es prefprivnotex {Filter options unavailable at this server}
-#::msgcat::mcset es prefprivobtained {Filter lists obtained from server}
-#::msgcat::mcset es prefprivgetlist {Getting filter list "%s"}
-#::msgcat::mcset es prefprivrules {Each list contains one or many rules, each rule specify the type of events it acts on, and the action it shall take. If you specify a group to block it must exist in your roster.}
-#::msgcat::mcset es prefuserinactive {User has been inactive for a while}
-#::msgcat::mcset es preficonsel {The selected iconset will take action when you save}
-#::msgcat::mcset es prefwbscroll {You may set a larger size than the default %sx%s}
-#::msgcat::mcset es prefssbts {Show next and previous buttons}
-#::msgcat::mcset es prefssresize {Resize canvas automatically to fit image}
+
+#--- Translate ---
+::msgcat::mcset es prefprivmsg {Each user may administrate zero or many lists. Only the active or default list affect message processing. Any active list affects only the session. The default list is processed if there is no active list.}
+::msgcat::mcset es prefprivunav {Filter options unavailable while not connected}
+::msgcat::mcset es prefprivnotex {Filter options unavailable at this server}
+::msgcat::mcset es prefprivobtained {Filter lists obtained from server}
+::msgcat::mcset es prefprivgetlist {Getting filter list "%s"}
+::msgcat::mcset es prefprivrules {Each list contains one or many rules, each rule specify the type of events it acts on, and the action it shall take. If you specify a group to block it must exist in your roster.}
+::msgcat::mcset es prefuserinactive {User has been inactive for a while}
+::msgcat::mcset es preficonsel {The selected iconset will take action when you save}
+::msgcat::mcset es prefwbscroll {You may set a larger size than the default %sx%s}
+::msgcat::mcset es prefssbts {Show next and previous buttons}
+::msgcat::mcset es prefssresize {Resize canvas automatically to fit image}
+#--- Translate ---
 
 
 
@@ -871,10 +874,13 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset es jasettopic   {Introduzca un nueva tema para este grupo de chat}
 ::msgcat::mcset es jadirpresmsg {Enviar el estado deseado al usuario "%s".}
 ::msgcat::mcset es jatlsnegot   {Seguridad TLS...}
-#::msgcat::mcset es jamucentermsg {Enter your nick name and press Enter to go into the room. You may Browse to get the available rooms for the specific service.	Members only room may require a password.}
-#::msgcat::mcset es jainmsgshow {Show incoming messages in this window}
-#::msgcat::mcset es jadisaddserv {Discover another server for groupchat rooms and other services. You may add a server permanently which is then automatically discovered. The login server is always discovered.}
-#::msgcat::mcset es jadisrmall {Remove all servers that are automatically and permanently discovered.}
+
+#--- Translate ---
+::msgcat::mcset es jamucentermsg {Enter your nick name and press Enter to go into the room. You may Browse to get the available rooms for the specific service.	Members only room may require a password.}
+::msgcat::mcset es jainmsgshow {Show incoming messages in this window}
+::msgcat::mcset es jadisaddserv {Discover another server for groupchat rooms and other services. You may add a server permanently which is then automatically discovered. The login server is always discovered.}
+::msgcat::mcset es jadisrmall {Remove all servers that are automatically and permanently discovered.}
+#--- Translate ---
 
 
 

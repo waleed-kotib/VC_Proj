@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.106 2005-01-23 08:36:34 matben Exp $
+# $Id: Chat.tcl,v 1.107 2005-01-25 07:02:57 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -460,6 +460,7 @@ proc ::Chat::GotMsg {body args} {
 	set dateISO [clock format $secs -format "%Y%m%dT%H:%M:%S"]
 	PutMessageInHistoryFile $jid2 [list $jid2 $threadID $dateISO $body]
 	eval {TabAlert $chattoken} $args
+	XEventCancel $chattoken
     }
     if {$dlgstate(got1stMsg) == 0} {
 	set dlgstate(got1stMsg) 1
