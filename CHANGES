@@ -5,6 +5,12 @@
 
 Not to mention all bugfixes and rewrites.
 
+Coccinella-0.95.6 (050????):
+
+	- added PLAIN sasl mechanism
+
+
+
 Coccinella-0.95.5 (050311):
 
         - added support for kprinter on unix

@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It provides the glue between jabber and the whiteboard.
 #      
-#  Copyright (c) 2004  Mats Bengtsson
+#  Copyright (c) 20042005  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.47 2005-02-08 08:57:14 matben Exp $
+# $Id: JWB.tcl,v 1.48 2005-04-04 09:14:49 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -243,14 +243,15 @@ proc ::Jabber::WB::NewWhiteboardTo {jid args} {
     unset argsArr(-force)
 
     # Make a fresh whiteboard window. Use any -type argument.
-    # Note that the jid can belong to a room but we may still have a p2p chat.
-    #    jid is room: groupchat live
-    #    jid is a user in a room: chat
-    #    jid is ordinary available user: chat
-    #    jid is ordinary but unavailable user: normal message
+    # Note that the jid can belong to a room but we may still have a 2p chat.
+    #    jid is room:  groupchat live
+    #    jid is a user in a room:  chat
+    #    jid is ordinary available user:  chat
+    #    jid is ordinary but unavailable user:  normal message
 
     set jid [jlib::jidmap $jid]
     jlib::splitjid $jid jid2 res
+    
     set isRoom 0
     if {[string equal $argsArr(-type) "groupchat"]} {
 	set isRoom 1
