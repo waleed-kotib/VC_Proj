@@ -6,7 +6,7 @@
 #  Copyright (c) 2004  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #
-# $Id: wavelabel.tcl,v 1.5 2004-10-13 14:08:38 matben Exp $
+# $Id: wavelabel.tcl,v 1.6 2004-11-02 15:34:51 matben Exp $
 #
 # ########################### USAGE ############################################
 #
@@ -47,8 +47,8 @@ namespace eval ::wavelabel:: {
     # Define speed and update frequency. Pix per sec and times per sec.
     set speed 150
     set freq  16
-    set stat(pix)   [expr int($speed/$freq)]
-    set stat(wait)  [expr int(1000.0/$freq)]
+    set stat(pix)   [expr {int($speed/$freq)}]
+    set stat(wait)  [expr {int(1000.0/$freq)}]
     set stat(swait) 200
 }
 
@@ -411,7 +411,7 @@ proc ::wavelabel::Configure {w args} {
     }
     if {$options(-height) == 0} {
 	set linespace [font metrics $options(-font) -linespace]
-	$widgets(canvas) configure -height [expr $linespace + 1]
+	$widgets(canvas) configure -height [expr {$linespace + 1}]
     }
     if {[string equal $options(-type) "image"] && ($options(-image) == "")} {
 	error "-image option missing"
@@ -528,7 +528,7 @@ proc ::wavelabel::StartStep {w} {
     
     set h  [winfo height $w]
     set yu 3
-    set yl [expr $h-3]
+    set yl [expr {$h-3}]
     set xw [expr ($yl-$yu)/2]
     set dx [expr 2*$xw]
     set n  10
@@ -682,6 +682,8 @@ proc ::wavelabel::Stop {w} {
 }
 
 proc ::wavelabel::X {t a k} {
+    
+    # x(t) = a/k | t - 2k int((t+k)/2k) |
     return [expr $a/$k * ($t - 2*$k*int(($t+$k)/(2*$k)))]
 }
 

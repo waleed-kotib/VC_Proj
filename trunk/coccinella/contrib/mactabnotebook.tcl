@@ -8,7 +8,7 @@
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: mactabnotebook.tcl,v 1.22 2004-10-31 14:32:57 matben Exp $
+# $Id: mactabnotebook.tcl,v 1.23 2004-11-02 15:34:51 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -32,6 +32,9 @@
 #	-accent1, accent1, Accent1
 #	-accent2, accent2, Accent2
 #	-activetabcolor, activeTabColor, ActiveTabColor
+#	-closebutton, closeButton, Button
+#       -closebuttonbg, closeButtonBg, Background
+#	-closecommand, closeCommand, Command
 #	-margin1, margin1, Margin
 #	-margin2, margin2, Margin
 #	-orient, orient, Orient
@@ -137,6 +140,9 @@ proc ::mactabnotebook::Init { } {
 	-activetaboutline    {activeTabOutline     ActiveTabOutline    }  \
 	-background          {background           Background          }  \
 	-borderwidth         {borderWidth          BorderWidth         }  \
+	-closebutton         {closeButton          Button              }  \
+	-closebuttonbg       {closeButtonBg        Background          }  \
+	-closecommand        {closeCommand         Command             }  \
 	-font                {font                 Font                }  \
 	-foreground          {foreground           Foreground          }  \
 	-ipadx               {ipadX                PadX                }  \
@@ -162,13 +168,14 @@ proc ::mactabnotebook::Init { } {
     set frameOptions    {-borderwidth -relief}
     set notebookOptions {-nbborderwidth -nbrelief}
     set tabOptions(nostyle) {
-	-background -foreground
+	-background -closebutton -closecommand -foreground
 	-font -ipadx -ipady 
 	-orient -selectcommand -style -takefocus
     }
     set tabOptions(styled) {
 	-accent1 -accent2
 	-activeforeground -activetabcolor -activetaboutline -activetabbackground
+	-closebuttonbg
 	-margin1 -margin2 
 	-tabgradient1 -tabgradient2 -tabbackground -tabcolor -taboutline
 	-tabborderwidth -tabrelief
@@ -181,6 +188,8 @@ proc ::mactabnotebook::Init { } {
 
     # Nonstyled options.
     option add *MacTabnotebook.background              white        widgetDefault
+    option add *MacTabnotebook.closeButton             0            widgetDefault
+    option add *MacTabnotebook.closeCommand            ""           widgetDefault
     option add *MacTabnotebook.foreground              black        widgetDefault
     option add *MacTabnotebook.ipadX                   6            widgetDefault
     option add *MacTabnotebook.ipadY                   1            widgetDefault
@@ -226,6 +235,7 @@ proc ::mactabnotebook::Init { } {
     option add *MacTabnotebook.accent2Winxp            #ffd04d      widgetDefault
     option add *MacTabnotebook.activeForegroundWinxp   black        widgetDefault
     option add *MacTabnotebook.activeTabBackgroundWinxp white       widgetDefault
+    option add *MacTabnotebook.closeButtonBgWinxp      #ca2208      widgetDefault
     option add *MacTabnotebook.margin1Winxp            0            widgetDefault
     option add *MacTabnotebook.margin2Winxp            2            widgetDefault
     option add *MacTabnotebook.tabBackgroundWinxp      white        widgetDefault    
@@ -930,6 +940,7 @@ proc ::mactabnotebook::BuildAqua {w} {
     variable toDrawPolyAqua
     variable toDraw3DAqua
     variable widgetGlobals
+    variable this
     upvar ::mactabnotebook::${w}::options options
     upvar ::mactabnotebook::${w}::tnInfo tnInfo
     upvar ::mactabnotebook::${w}::name2uid name2uid
@@ -950,6 +961,7 @@ proc ::mactabnotebook::BuildAqua {w} {
     set ipady       $options(-ipady)
     set margin1     $options(-margin1)
     set margin2     $options(-margin2)
+    set closebt     $options(-closebutton)
     array set metricsArr [font metrics $font]
     set fontHeight $metricsArr(-linespace)
     if {[string equal $relief "raised"] && ($bd > 0)} {
@@ -963,6 +975,12 @@ proc ::mactabnotebook::BuildAqua {w} {
 	set tnInfo(3dcol,acttabbg,dark)  [::colorutils::getdarker $activefill]
 	set tnInfo(3dcol,acttabbg,light) [::colorutils::getlighter $activefill]
     }
+    if {$closebt} {
+	set tnInfo(btcol,dark)    [::colorutils::getdarker $fill]
+	set tnInfo(btcol,darker)  [::colorutils::getdarker $tnInfo(btcol,dark)]
+	set tnInfo(btcol,light)   [::colorutils::getlighter $fill]
+	set tnInfo(btcol,lighter) [::colorutils::getlighter $tnInfo(btcol,light)]
+    }
     
     # Find max height of any image.
     set maxh 0
@@ -971,6 +989,11 @@ proc ::mactabnotebook::BuildAqua {w} {
 	if {$imh > $maxh} {
 	    set maxh $imh
 	}
+    }
+    if {[string match mac* $this(platform)]} {
+	set xoff 1
+    } else {
+	set xoff 0
     }
     set x $margin1
     set yl -$options(-ymargin1)
@@ -1003,6 +1026,9 @@ proc ::mactabnotebook::BuildAqua {w} {
 	set ht [expr {[lindex $bbox 3] - [lindex $bbox 1]}]
 	set xleft $x
 	set xright [expr {$xtext + $wd + $ipadx + 2}]
+	if {$closebt} {
+	    incr xright [expr {$contenth + 4}]
+	}
 	
 	# Draw tabs.
 	foreach {coords ptags} $toDrawPolyAqua {
@@ -1017,6 +1043,13 @@ proc ::mactabnotebook::BuildAqua {w} {
 		  -fill $fill -tags $ptags
 	    }
 	}
+	
+	# Any close button.
+	if {$closebt} {
+	    DrawReliefButton $w $name [expr {$contenth/2-1}]
+	    $w.tabs move $tname&&bt [expr {$xright-$contenth/2-4}] \
+	      [expr {$ym-1+$xoff}]
+	}	
 	#DrawAluRect $w.tabs [expr $xleft+1] [expr $yu+1] [expr $xright-1] $yl  \
 	#  $fill talu
 	
@@ -1063,6 +1096,7 @@ proc ::mactabnotebook::BuildWinxp {w} {
     set ipady       $options(-ipady)
     set margin1     $options(-margin1)
     set margin2     $options(-margin2)
+    set closebt     $options(-closebutton)
     array set metricsArr [font metrics $font]
     set fontHeight $metricsArr(-linespace)
     
@@ -1094,8 +1128,10 @@ proc ::mactabnotebook::BuildWinxp {w} {
 	set m($col) [expr [set ${col}1]-$k($col)*$yu]
     }
     for {set y $yu} {$y <= $yl} {incr y} {
-	set gcol($y) [format "#%02x%02x%02x" [expr {int($k(r)*$y+$m(r))/256}]  \
-	  [expr {int($k(g)*$y+$m(g))/256}] [expr {int($k(b)*$y+$m(b))/256}]]
+	set gcol($y) [format "#%02x%02x%02x" \
+	  [expr {int($k(r)*$y+$m(r))/256}]  \
+	  [expr {int($k(g)*$y+$m(g))/256}]  \
+	  [expr {int($k(b)*$y+$m(b))/256}]]
     }
     
     foreach name $tnInfo(tabs) {
@@ -1124,6 +1160,10 @@ proc ::mactabnotebook::BuildWinxp {w} {
 	set xright [expr {$xtext + $wd + $ipadx + 2}]
 	set xlplus [expr {$xleft+1}]
 	set xrminus [expr {$xright-$xoff}]
+	if {$closebt} {
+	    incr xright  [expr {$contenth + 4}]
+	    incr xrminus [expr {$contenth + 4}]
+	}
 	
 	# Draw tabs.
 	foreach {coords ptags} $toDrawPolyWinXP {
@@ -1146,6 +1186,13 @@ proc ::mactabnotebook::BuildWinxp {w} {
 	$w.tabs create line $xleft [expr {$yu+2}] $xright [expr {$yu+2}]  \
 	  -fill $accent2 -tags [list tacc $tname]
 	
+	# Any close button.
+	if {$closebt} {
+	    DrawWinxpButton $w $name [expr {$contenth/2-1}]
+	    $w.tabs move $tname&&bt [expr {$xright-$contenth/2-4}]  \
+	      [expr {$ym-1+$xoff}]
+	}	
+	
 	# New x for next tab.
 	set x [expr {$xright + $margin2}]
 
@@ -1157,6 +1204,7 @@ proc ::mactabnotebook::BuildWinxp {w} {
     $w.tabs raise tgrad
     $w.tabs raise ttxt
     $w.tabs raise tim
+    $w.tabs raise bt
     $w.tabs configure -width $x -height $height
     if {[string equal $options(-orient) "hang"]} {
 	$w.tabs scale all 0 0 1 -1
@@ -1177,8 +1225,26 @@ proc ::mactabnotebook::ButtonPressTab {w name} {
 	return
     }
     Display $w $name
+    
+    # This is important since it stops triggering accidental clicks on the
+    # close button if tab is not the current.
+    return -code break
 }
     
+proc ::mactabnotebook::CloseButton {w name} {
+    
+    upvar ::mactabnotebook::${w}::options options
+    upvar ::mactabnotebook::${w}::tnInfo tnInfo
+    
+    if {$options(-closecommand) != {}} {
+	set code [catch {uplevel #0 $options(-closecommand) [list $w $name]}]
+	if {$code != 0} {                         
+	    return
+	}
+    }
+    DeletePage $w $name
+}
+
 # mactabnotebook::Display --
 #
 #       Makes the name page the frontmost one.
@@ -1216,6 +1282,11 @@ proc ::mactabnotebook::Display {w name {opt {}}} {
 	set same 0
     }
     set tnInfo(current) $name
+    
+    # Force build if scheduled.
+    if {$tnInfo(pending) != ""} {
+	Build $w
+    }    
     ConfigTabs $w
     if {!$same && [llength $options(-selectcommand)] > 0} {
 	uplevel #0 $options(-selectcommand) [list $w $name]
@@ -1294,6 +1365,7 @@ proc ::mactabnotebook::ConfigClassicTabs {w} {
 
 proc ::mactabnotebook::ConfigAquaTabs {w} {
 
+    variable this
     upvar ::mactabnotebook::${w}::options options
     upvar ::mactabnotebook::${w}::tnInfo tnInfo
     upvar ::mactabnotebook::${w}::name2uid name2uid
@@ -1308,7 +1380,16 @@ proc ::mactabnotebook::ConfigAquaTabs {w} {
       ($options(-tabborderwidth) > 0)} {
 	set 3d 1
     }
-    
+    set bt 0
+    if {$options(-closebutton)} {
+	set bt 1
+    }
+    set mac 0
+    set border -outline
+    if {[string match mac* $this(platform)]} {
+	set mac 1
+	set border -fill
+    }
     foreach name $tnInfo(tabs) {
 	set tname $name2uid($name)
 	if {[string equal $current $name]} {
@@ -1319,6 +1400,10 @@ proc ::mactabnotebook::ConfigAquaTabs {w} {
 		$w.tabs itemconfigure 3d-light-$tname \
 		  -fill $tnInfo(3dcol,acttabbg,light)
 	    }
+	    if {$bt} {
+		$w.tabs itemconfigure bt&&light&&$tname \
+		  $border $tnInfo(btcol,lighter)
+	    }
 	} else {
 	    $w.tabs itemconfigure poly-$tname -fill $bg
 	    if {$3d} {
@@ -1326,6 +1411,10 @@ proc ::mactabnotebook::ConfigAquaTabs {w} {
 		  -fill $tnInfo(3dcol,tabbg,dark)
 		$w.tabs itemconfigure 3d-light-$tname \
 		  -fill $tnInfo(3dcol,tabbg,light)
+	    }
+	    if {$bt} {
+		$w.tabs itemconfigure bt&&light&&$tname \
+		  $border $tnInfo(btcol,light)
 	    }
 	}
     }        
@@ -1360,22 +1449,105 @@ proc ::mactabnotebook::ConfigWinxpTabs {w} {
     }        
 }
 
-proc ::mactabnotebook::DrawCloseButton {w name} {
+proc ::mactabnotebook::EnterReliefButton {w name} {
     
+    upvar ::mactabnotebook::${w}::tnInfo tnInfo
     upvar ::mactabnotebook::${w}::name2uid name2uid
 
     set tname $name2uid($name)
-    set r 8
-    set a [expr {int($r/1.4)}]
+    $w.tabs itemconfigure bt&&bg&&$tname -fill $tnInfo(btcol,darker)
+}
+
+proc ::mactabnotebook::LeaveReliefButton {w name} {
     
-    $w.tabs create oval -$r -$r $r $r -outline {} -fill gray40
-    $w.tabs create arc -$r -$r $r $r -start 30 -extent 120 -fill {} \
-      -outline black -tags [list $tname bt] -style arc
-    $w.tabs create arc -$r -$r $r $r -start -30 -extent -120 -fill {} \
-      -outline white -tags [list $tname bt] -style arc
-    $w.tabs create line -$a -$a $a $a -fill red
-    $w.tabs create line -$a $a $a -$a -fill red
+    upvar ::mactabnotebook::${w}::tnInfo tnInfo
+    upvar ::mactabnotebook::${w}::name2uid name2uid
+
+    set tname $name2uid($name)
+    $w.tabs itemconfigure bt&&bg&&$tname -fill $tnInfo(btcol,dark)
+}
+
+proc ::mactabnotebook::DrawReliefButton {w name r} {
     
+    variable this
+    upvar ::mactabnotebook::${w}::name2uid name2uid
+    upvar ::mactabnotebook::${w}::tnInfo tnInfo
+    upvar ::mactabnotebook::${w}::options options
+    
+    set tname $name2uid($name)
+    set rm [expr {$r-1}]
+    set rM [expr {$r-2}]
+    set rp [expr {$r+1}]
+    set rP [expr {$r+2}]
+    set a  [expr {int(($r-2)/1.4)}]
+    set am [expr {$a-1}]
+    set ap [expr {$a+1}]
+    
+    set bg      $options(-tabbackground)
+    set dark    $tnInfo(btcol,dark)
+    set darker  $tnInfo(btcol,darker)
+    set light   $tnInfo(btcol,light)
+    set lighter $tnInfo(btcol,lighter)
+    #puts "bg=$bg\t dark=$dark\t darker=$darker\t light=$light\t lighter=$lighter"
+
+    set tags      [list $tname bt]
+    set tagsbg    [list $tname bt bg]
+    set tagslight [list $tname bt light]
+    
+    # Be sure to offset ovals to put center pixel at (1,1).
+    if {[string match mac* $this(platform)]} {
+	set idw [$w.tabs create oval -$rm -$rm $r $r -tags $tagslight -outline {} -fill $light]
+	$w.tabs create oval -$rm -$rm  $r $r -tags $tagsbg -outline {} -fill $dark
+	$w.tabs move $idw 0  1
+	$w.tabs create line -$a -$a  $am  $am -tags $tags -fill $bg -width 2
+	$w.tabs create line -$a  $am $am -$a -tags $tags -fill $bg -width 2
+	$w.tabs create line -$a -$a  $a   $a -tags $tags -fill $lighter
+	$w.tabs create line -$a  $a  $a  -$a -tags $tags -fill $lighter
+    } else {
+	set idw [$w.tabs create oval -$rm -$rm $rm $rm -tags $tagslight \
+	  -outline $light -fill $light]
+	$w.tabs create oval -$rm -$rm  $rm $rm -tags $tagsbg \
+	  -outline $dark -fill $dark
+	$w.tabs move $idw 0  1
+	$w.tabs create line -$a -$a $a   $a  -tags $tags -fill $bg -width 2
+	$w.tabs create line -$a  $a $a  -$a  -tags $tags -fill $bg -width 2
+	$w.tabs create line -$a -$a $ap  $ap -tags $tags -fill $lighter
+	$w.tabs create line -$a  $a $ap -$ap -tags $tags -fill $lighter
+    }
+    $w.tabs bind bt&&$tname <ButtonPress-1>  \
+      [list ::mactabnotebook::CloseButton $w $name]
+    $w.tabs bind bt&&$tname <Enter>  \
+      [list ::mactabnotebook::EnterReliefButton $w $name]
+    $w.tabs bind bt&&$tname <Leave>  \
+      [list ::mactabnotebook::LeaveReliefButton $w $name]
+}
+
+proc ::mactabnotebook::DrawWinxpButton {w name r} {
+    
+    variable this
+    upvar ::mactabnotebook::${w}::name2uid name2uid
+    upvar ::mactabnotebook::${w}::options options
+
+    set tname $name2uid($name)
+    set rm [expr {$r-1}]
+    set a  [expr {int(($r-2)/1.4)}]
+    set ap [expr {$a+1}]
+
+    set red  $options(-closebuttonbg)
+    set tags [list $tname bt]
+    
+    # Be sure to offset ovals to put center pixel at (1,1).
+    if {[string match mac* $this(platform)]} {
+	$w.tabs create oval -$rm -$rm  $r $r -tags $tags -outline {} -fill $red
+	set id1 [$w.tabs create line -$a -$a $a  $a -tags $tags -fill white]
+	set id2 [$w.tabs create line -$a  $a $a -$a -tags $tags -fill white]
+    } else {
+	$w.tabs create oval -$rm -$rm $rm $rm -tags $tags -outline $red -fill $red
+	set id1 [$w.tabs create line -$a -$a $ap  $ap -tags $tags -fill white]
+	set id2 [$w.tabs create line -$a  $a $ap -$ap -tags $tags -fill white]
+    }
+    $w.tabs bind bt&&$tname <ButtonPress-1>  \
+      [list ::mactabnotebook::CloseButton $w $name]
 }
 
 proc ::mactabnotebook::DrawAluRect {wcan x0 y0 x1 y1 col tag} {

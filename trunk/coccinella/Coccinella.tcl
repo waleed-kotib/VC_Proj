@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.90 2004-10-16 13:32:50 matben Exp $
+# $Id: Coccinella.tcl,v 1.91 2004-11-02 15:34:51 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -31,6 +31,7 @@ set state(launchSecs) [clock seconds]
 # MacOSX adds a -psn_* switch.
 set argv [lsearch -all -not -inline -regexp $argv {-psn_\d*}]
 set argc [llength $argv]
+array set argvArr $argv
 
 # We use a variable 'this(platform)' that is more convenient for MacOSX.
 switch -- $tcl_platform(platform) {

@@ -8,7 +8,7 @@
 #  Copyright (c) 2002-2004  Mats Bengtsson only for the new and rewritten parts.
 #  This source file is distributed under the BSD license.
 #
-# $Id: httpex.tcl,v 1.16 2004-10-12 13:48:56 matben Exp $
+# $Id: httpex.tcl,v 1.17 2004-11-02 15:34:51 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -953,7 +953,7 @@ proc httpex::Event {token} {
 		if {[regexp -- {^([0-9]+)-([0-9]+)$} $byteSpec x lower upper]} {
 		    lappend ranges [list $lower $upper]
 		} elseif {[regexp -- {-([0-9]+)$} $byteSpec x endoff]} {
-		    lappend ranges [list [expr $state(totalsize) - $endoff] \
+		    lappend ranges [list [expr {$state(totalsize) - $endoff}] \
 		      $state(totalsize)]
 		} elseif {[regexp -- {^([0-9]+)-} $byteSpec x lower]} {
 		    lappend ranges [list $lower $state(totalsize)]
@@ -1174,8 +1174,8 @@ proc httpex::CopyStart {s token} {
     
     set blocksize $state(-blocksize)
     if {$state(-persistent) && $state(havecontentlength) &&  \
-      ([expr $state(currentsize) + $blocksize] >= $state(totalsize))} {
-	set blocksize [expr $state(totalsize) - $state(currentsize)]
+      ([expr {$state(currentsize) + $blocksize}] >= $state(totalsize))} {
+	set blocksize [expr {$state(totalsize) - $state(currentsize)}]
     }
     if {[catch {
 	fcopy $s $state(-channel) -size $blocksize -command \
@@ -1298,8 +1298,8 @@ proc httpex::Read {s token} {
     set done 0
     set blocksize $state(-blocksize)
     if {$state(-persistent) &&  \
-      ([expr $state(currentsize) + $blocksize] >= $state(totalsize))} {
-	set blocksize [expr $state(totalsize) - $state(currentsize)]
+      ([expr {$state(currentsize) + $blocksize}] >= $state(totalsize))} {
+	set blocksize [expr {$state(totalsize) - $state(currentsize)}]
     }
     
     if {[catch {
@@ -1858,13 +1858,13 @@ proc httpex::DeChunkBody {token} {
     set hex [lindex [split $prefix ";\n"] 0]
     set chunkSize 0
     scan $hex %x chunkSize
-    incr offset [expr $ind + 1]
+    incr offset [expr {$ind + 1}]
     
     while {$chunkSize > 0} {
 	
 	# Process chunk body.
-	append newbody [string range $body $offset [expr $offset + $chunkSize - 1]]
-	incr offset [expr $chunkSize + 1]
+	append newbody [string range $body $offset [expr {$offset + $chunkSize - 1}]]
+	incr offset [expr {$chunkSize + 1}]
 	incr len $chunkSize
 	
 	# Process next chunk prefix.
@@ -1873,7 +1873,7 @@ proc httpex::DeChunkBody {token} {
 	set hex [lindex [split $prefix ";\n"] 0]
 	set chunkSize 0
 	scan $hex %x chunkSize
-	set offset [expr $ind + 1]
+	set offset [expr {$ind + 1}]
     }
     
     # Read entity header if any.

@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: P2PNet.tcl,v 1.4 2004-09-28 13:50:19 matben Exp $
+# $Id: P2PNet.tcl,v 1.5 2004-11-02 15:34:55 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -642,7 +642,8 @@ proc ::P2PNet::DoAutoConnect { } {
 #       This may happen when the user presses a stop button or something.
 
 proc ::P2PNet::OpenCancelAllPending { } {
-    variable killerId wDlgs
+    global  wDlgs
+    variable killerId
 
     Debug 2 "+OpenCancelAllPending::"
 
