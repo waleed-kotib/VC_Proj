@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.54 2004-12-13 13:39:18 matben Exp $
+# $Id: MUC.tcl,v 1.55 2004-12-20 15:16:45 matben Exp $
 
 package require entrycomp
 package require muc
@@ -159,11 +159,8 @@ proc ::MUC::BuildEnter {args} {
     # Global frame.
     frame $w.frall -borderwidth 1 -relief raised
     pack  $w.frall -fill both -expand 1
-    label $w.frall.msg -wraplength 260 -justify left  \
-    	-text "Enter your nick name and press Enter to go into the room.\
-	You may Browse to get the available rooms for the specific service.\
-	Members only room may require a password."
-    pack $w.frall.msg -side top -fill x -anchor w -padx 8 -pady 4
+    label $w.frall.msg -wraplength 260 -justify left -text [mc jamucentermsg]
+    pack  $w.frall.msg -side top -fill x -anchor w -padx 8 -pady 4
 
     set frtop $w.frall.top
     pack [frame $frtop] -side top -anchor w -padx 12
@@ -229,7 +226,7 @@ proc ::MUC::BuildEnter {args} {
     grid $frtop.lpass   $frtop.epass  -  -sticky e
     grid $frtop.st      -             -  -sticky w
     grid $wpopupserver  $wpopuproom  $frtop.enick  $frtop.epass  -sticky ew
-    
+
     if {[info exists argsArr(-nickname)]} {
 	set enter(nickname) $argsArr(-nickname)
 	$frtop.enick configure -state disabled
@@ -1831,9 +1828,9 @@ proc ::MUC::SetNick {roomjid} {
     
     set topic ""
     set ans [::UI::MegaDlgMsgAndEntry  \
-      {Set New Nickname}  \
-      "Select a new nick name."  \
-      "New Nick:"  \
+      [mc "Set New Nickname"]  \
+      [mc "Select a new nickname"]  \
+      "[mc {New Nickname}]:"  \
       nickname [mc Cancel] [mc OK]]
     
     # Perhaps check that characters are valid?

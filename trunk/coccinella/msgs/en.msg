@@ -5,16 +5,20 @@
 # Defined in global namespace and may therefore be used in any namespace.
 
 ::msgcat::mcset en Accept
+::msgcat::mcset en Action
+::msgcat::mcset en Active
 ::msgcat::mcset en Add
 ::msgcat::mcset en Address
 ::msgcat::mcset en Advanced
 ::msgcat::mcset en Agents
+::msgcat::mcset en Allow
 ::msgcat::mcset en Appearance
 ::msgcat::mcset en Apply
 ::msgcat::mcset en Available
 ::msgcat::mcset en Away
 ::msgcat::mcset en Binary
 ::msgcat::mcset en Birthday
+::msgcat::mcset en Block
 ::msgcat::mcset en Blockers
 ::msgcat::mcset en Blocking
 ::msgcat::mcset en Browser
@@ -61,8 +65,10 @@
 ::msgcat::mcset en Group
 ::msgcat::mcset en Groupchat
 ::msgcat::mcset en Handling
+::msgcat::mcset en Height
 ::msgcat::mcset en History
 ::msgcat::mcset en Home
+::msgcat::mcset en Image
 ::msgcat::mcset en Import
 ::msgcat::mcset en Inbox
 ::msgcat::mcset en Info
@@ -75,6 +81,7 @@
 ::msgcat::mcset en Middle
 ::msgcat::mcset en Moderators
 ::msgcat::mcset en More
+::msgcat::mcset en Name
 ::msgcat::mcset en Never
 ::msgcat::mcset en New
 ::msgcat::mcset en Next
@@ -139,14 +146,17 @@
 ::msgcat::mcset en To
 ::msgcat::mcset en Topic
 ::msgcat::mcset en Trash
+::msgcat::mcset en Type
 ::msgcat::mcset en Unregister
 ::msgcat::mcset en Unsubscribe
 ::msgcat::mcset en Unsubscribed
 ::msgcat::mcset en Username
+::msgcat::mcset en Value
 ::msgcat::mcset en Visitors
 ::msgcat::mcset en Warning
 ::msgcat::mcset en Welcome
 ::msgcat::mcset en Whiteboard
+::msgcat::mcset en Width
 ::msgcat::mcset en Work
 ::msgcat::mcset en Yes
 ::msgcat::mcset en yes
@@ -331,6 +341,7 @@
 ::msgcat::mcset en {Block JID}
 ::msgcat::mcset en {Built in server port}
 ::msgcat::mcset en {Cache folder}
+::msgcat::mcset en {Canvas Size}
 ::msgcat::mcset en {Chat History}
 ::msgcat::mcset en {Chat With}
 ::msgcat::mcset en {Clear Disk Cache Now}
@@ -341,6 +352,7 @@
 ::msgcat::mcset en {Create Room}
 ::msgcat::mcset en {Default group}
 ::msgcat::mcset en {Default Logout Status}
+::msgcat::mcset en {Delete Rule}
 ::msgcat::mcset en {Disk Cache}
 ::msgcat::mcset en {Different Passwords}
 ::msgcat::mcset en {Do Not Disturb}
@@ -379,6 +391,8 @@
 ::msgcat::mcset en {Import using}
 ::msgcat::mcset en {Import/Remove fonts}
 ::msgcat::mcset en {Incoming Message}
+::msgcat::mcset en {Incoming Messages}
+::msgcat::mcset en {Incoming Presence}
 ::msgcat::mcset en {Inspect Associations}
 ::msgcat::mcset en {IP address}
 ::msgcat::mcset en {Is connected}
@@ -402,6 +416,7 @@
 ::msgcat::mcset en {MIME type}
 ::msgcat::mcset en {Multi Connect}
 ::msgcat::mcset en {My Status}
+::msgcat::mcset en {Name of list}
 ::msgcat::mcset en {Network Error}
 ::msgcat::mcset en {Network Setup}
 ::msgcat::mcset en {New Account}
@@ -410,7 +425,9 @@
 ::msgcat::mcset en {New Color}
 ::msgcat::mcset en {New incoming message}
 ::msgcat::mcset en {New Message}
+::msgcat::mcset en {New Nickname}
 ::msgcat::mcset en {New password}
+::msgcat::mcset en {New Rule}
 ::msgcat::mcset en {New Topic}
 ::msgcat::mcset en {New shortcut}
 ::msgcat::mcset en {New User}
@@ -433,6 +450,7 @@
 ::msgcat::mcset en {Open Helpfile}
 ::msgcat::mcset en {Open Image/Movie}
 ::msgcat::mcset en {Open Stream}
+::msgcat::mcset en {Outgoing Presence}
 ::msgcat::mcset en {Peer-to-Peer}
 ::msgcat::mcset en {Personal Info}
 ::msgcat::mcset en {Personal Information}
@@ -445,6 +463,7 @@
 ::msgcat::mcset en {Postal Code}
 ::msgcat::mcset en {Preferred Protocol}
 ::msgcat::mcset en {Presence Error}
+::msgcat::mcset en {Privacy List}
 ::msgcat::mcset en {Profile Name}
 ::msgcat::mcset en {Proxy Setup}
 ::msgcat::mcset en {Put File Error}
@@ -469,12 +488,14 @@
 ::msgcat::mcset en {Search results}
 ::msgcat::mcset en {Search Service}
 ::msgcat::mcset en {Search Specifications}
+::msgcat::mcset en {Select a new nickname}
 ::msgcat::mcset en {Select Font}
 ::msgcat::mcset en {Send File}
 ::msgcat::mcset en {Send Live}
 ::msgcat::mcset en {Server Info}
 ::msgcat::mcset en {Service server}
 ::msgcat::mcset en {Set Directed Presence}
+::msgcat::mcset en {Set New Nickname}
 ::msgcat::mcset en {Set New Topic}
 ::msgcat::mcset en {Set Status}
 ::msgcat::mcset en {Settings Panels}
@@ -763,6 +784,20 @@ this font installed on their system.}
 ::msgcat::mcset en prefprofname  {Enter desired name of user profile}
 ::msgcat::mcset en prefstabui    {Use tabbed notebook interface}
 ::msgcat::mcset en prefsusesasl  {Use SASL authentization method}
+::msgcat::mcset en prefprivmsg   {Each user may administrate zero or many lists. Only the active or default list affect message processing. Any active list affects only the session.\
+  The default list is processed if there is no active list.}
+::msgcat::mcset en prefprivunav  {Filter options unavailable while not connected}
+::msgcat::mcset en prefprivnotex {Filter options unavailable at this server}
+::msgcat::mcset en prefprivobtained {Filter lists obtained from server}
+::msgcat::mcset en prefprivgetlist {Getting filter list "%s"}
+::msgcat::mcset en prefprivrules {Each list contains one or many rules, each rule specify the type of events it acts on, and the action it shall take.\
+  If you specify a group to block it must exist in your roster.}
+::msgcat::mcset en prefuserinactive {User has been inactive for a while}  
+::msgcat::mcset en preficonsel   {The selected iconset will take action when you save}
+::msgcat::mcset en prefwbscroll  {You may set a larger size than the default %sx%s}
+::msgcat::mcset en prefssbts     {Show next and previous buttons}
+::msgcat::mcset en prefssresize  {Resize canvas automatically to fit image}
+
 
 
 
@@ -819,7 +854,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en jasettopic   {Set new topic for this groupchat.}
 ::msgcat::mcset en jadirpresmsg {Send directed presence to the user "%s".}
 ::msgcat::mcset en jatlsnegot   {Negotiating TLS security...}
-
+::msgcat::mcset en jamucentermsg {Enter your nick name and press Enter to go into the room. You may Browse to get the available rooms for the specific service.	Members only room may require a password.}
 
 
 # Setup assistant:

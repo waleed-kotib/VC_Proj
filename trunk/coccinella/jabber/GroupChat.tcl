@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.90 2004-12-14 14:08:45 matben Exp $
+# $Id: GroupChat.tcl,v 1.91 2004-12-20 15:16:45 matben Exp $
 
 package require History
 
@@ -432,13 +432,13 @@ proc ::GroupChat::BuildEnter {args} {
     entry $frmid.enick -width 24    \
       -textvariable $token\(nickname) -validate key  \
       -validatecommand {::Jabber::ValidateResourceStr %S}
-    grid $frmid.msg -column 0 -columnspan 2 -row 0 -sticky ew
-    grid $frmid.lserv -column 0 -row 1 -sticky e
-    grid $frmid.eserv -column 1 -row 1 -sticky ew 
-    grid $frmid.lroom -column 0 -row 2 -sticky e
-    grid $frmid.eroom -column 1 -row 2 -sticky ew
-    grid $frmid.lnick -column 0 -row 3 -sticky e
-    grid $frmid.enick -column 1 -row 3 -sticky ew
+    
+    grid $frmid.msg   -            -sticky ew
+    grid $frmid.lserv $frmid.eserv
+    grid $frmid.lroom $frmid.eroom
+    grid $frmid.lnick $frmid.enick
+    grid $frmid.lserv $frmid.lroom $frmid.lnick -sticky e
+    grid $frmid.eserv $frmid.eroom $frmid.enick -sticky ew
     
     if {[info exists argsArr(-roomjid)]} {
 	regexp {^([^@]+)@([^/]+)} $argsArr(-roomjid) match enter(roomname) \
