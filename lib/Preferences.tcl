@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.58 2004-08-18 12:08:58 matben Exp $
+# $Id: Preferences.tcl,v 1.59 2004-08-26 12:05:17 matben Exp $
  
 package require notebook
 package require tree
@@ -133,7 +133,6 @@ proc ::Preferences::Build {args} {
     # Fill tree.
     $wtree newitem {General} -text [mc General]
     $wtree newitem {General {Network Setup}} -text [mc {Network Setup}]
-    $wtree newitem {General {Proxy Setup}} -text [mc {Proxy Setup}]
     if {!$prefs(stripJabber)} {
 	$wtree newitem {Jabber}
     }
@@ -148,10 +147,6 @@ proc ::Preferences::Build {args} {
     # Network Setup page -------------------------------------------------------
     set frpnet [$nbframe page {Network Setup}]
     ::Preferences::NetSetup::BuildPage $frpnet
-    
-    # Proxies Setup page -------------------------------------------------------
-    set frpoxy [$nbframe page {Proxy Setup}]
-    ::Preferences::Proxies::BuildPage $frpoxy
     
     # Each code component makes its own page.
     ::hooks::run prefsBuildHook $wtree $nbframe
@@ -475,18 +470,12 @@ proc ::Preferences::NetSetup::Advanced {  } {
     # The actual options.
     set fropt [frame $fr.fropt]
 
-    label $fropt.lserv -text "[mc {Built in server port}]:"  \
-      -font $fontSB
-    label $fropt.lhttp -text "[mc {HTTP port}]:" \
-      -font $fontSB
-    label $fropt.ljab -text "[mc {Jabber server port}]:"  \
-      -font $fontSB
+    label $fropt.lserv -text "[mc {Built in server port}]:"
+    label $fropt.lhttp -text "[mc {HTTP port}]:"
     entry $fropt.eserv -width 6 -textvariable  \
       ::Preferences::tmpPrefs(thisServPort)
     entry $fropt.ehttp -width 6 -textvariable  \
       ::Preferences::tmpPrefs(httpdPort)
-    entry $fropt.ejab -width 6 -textvariable  \
-      ::Preferences::tmpJPrefs(port)
 
     if {!$prefs(haveHttpd)} {
 	$fropt.ehttp configure -state disabled
@@ -548,11 +537,9 @@ proc ::Preferences::NetSetup::AdvSetupSave {  } {
     variable finishedAdv
     upvar ::Preferences::tmpPrefs tmpPrefs
     upvar ::Preferences::tmpJPrefs tmpJPrefs
-    upvar ::Jabber::jprefs jprefs
 
     set prefs(thisServPort) $tmpPrefs(thisServPort)
     set prefs(httpdPort) $tmpPrefs(httpdPort)
-    set jprefs(port) $tmpJPrefs(port)
 
     set finishedAdv 1
 }
@@ -565,10 +552,17 @@ proc ::Preferences::NetSetup::AdvSetupSave {  } {
 namespace eval ::Preferences::Proxies:: {
     
     ::hooks::add prefsInitHook          ::Preferences::Proxies::InitPrefsHook
+    ::hooks::add prefsBuildHook         ::Preferences::Proxies::BuildPrefsHook
+    ::hooks::add prefsSaveHook          ::Preferences::Proxies::SavePrefsHook
+    ::hooks::add prefsCancelHook        ::Preferences::Proxies::CancelPrefsHook
+    ::hooks::add prefsUserDefaultsHook  ::Preferences::Proxies::UserDefaultsHook
 }
 
 proc ::Preferences::Proxies::InitPrefsHook { } {
     global  prefs
+    
+    set prefs(setNATip) 0
+    set prefs(NATip) ""
     
     foreach key {httpproxyserver httpproxyport httpproxyusername \
       httpproxypassword} {
@@ -661,9 +655,23 @@ proc ::Preferences::Proxies::Init { } {
     # ???
 }
 
-proc ::Preferences::Proxies::BuildPage {page} {
+proc ::Preferences::Proxies::BuildPrefsHook {wtree nbframe} {
     
+    $wtree newitem {General {Proxy Setup}} -text [mc {Proxy Setup}]
+    
+    set wpage [$nbframe page {Proxy Setup}]    
+    ::Preferences::Proxies::BuildPage $wpage
+}
+
+proc ::Preferences::Proxies::BuildPage {page} {
+    global  prefs
+    variable tmpPrefs
     upvar ::Preferences::ypad ypad
+    
+    foreach key {setNATip NATip \
+      httpproxyserver httpproxyport httpproxyusername httpproxypassword} {
+	set tmpPrefs($key) $prefs($key)
+    }
     
     set pcnat $page.nat
     labelframe $pcnat -text [mc {NAT Address}] -padx 4 -pady 2
@@ -702,6 +710,35 @@ proc ::Preferences::Proxies::BuildPage {page} {
     grid $pca.lpass $pca.epass
     grid $pca.lserv $pca.lport $pca.luser $pca.lpass -sticky e
     grid $pca.eserv $pca.eport $pca.euser $pca.epass -sticky ew
+}
+
+proc ::Preferences::Proxies::SavePrefsHook { } {
+    global  prefs
+    variable tmpPrefs
+    
+    array set prefs [array get tmpPrefs]
+    unset tmpPrefs
+}
+
+proc ::Preferences::Proxies::CancelPrefsHook { } {
+    global  prefs
+    variable tmpPrefs
+	
+    foreach key [array names tmpPrefs] {
+	if {![string equal $prefs($key) $tmpPrefs($key)]} {
+	    ::Preferences::HasChanged
+	    break
+	}
+    }
+}
+
+proc ::Preferences::Proxies::UserDefaultsHook { } {
+    global  prefs
+    variable tmpPrefs
+    
+    foreach key [array names tmpPrefs] {
+	set tmpPrefs($key) $prefs($key)
+    }
 }
 
 #-------------------------------------------------------------------------------

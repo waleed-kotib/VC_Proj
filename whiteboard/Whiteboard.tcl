@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.18 2004-08-24 07:08:55 matben Exp $
+# $Id: Whiteboard.tcl,v 1.19 2004-08-26 12:05:17 matben Exp $
 
 package require entrycomp
 package require moviecontroller
@@ -1967,8 +1967,10 @@ proc ::WB::RegisterShortcutButtons {btdefs} {
     }
     foreach spec $btdefs {
 	set name [lindex $spec 0]
-	lappend names $name
-	set tmpArr($name) $spec
+	if {![info exists tmpArr($name)]} {
+	    lappend names $name
+	    set tmpArr($name) $spec
+	}
     }
     set tmpDefs {}
     foreach name $names {
