@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.115 2005-02-08 08:57:15 matben Exp $
+# $Id: Roster.tcl,v 1.116 2005-02-08 13:45:51 matben Exp $
 
 package provide Roster 1.0
 
@@ -825,6 +825,9 @@ proc ::Roster::PushProc {rostName what {jid {}} args} {
 	    if {[info exists attrArr(-type)]} {
 		set type $attrArr(-type)
 	    }
+	    if {![regexp $type {(available|unavailable|unsubscribed)}]} {
+		return
+	    }
 	    
 	    # We may get presence 'available' with empty resource (ICQ)!
 	    set jid3 $jid
@@ -837,14 +840,6 @@ proc ::Roster::PushProc {rostName what {jid {}} args} {
 	    # conference (groupchat).
 	    if {![$jstate(jlib) service isroom $jid]} {
 		eval {Presence $jid3 $type} $args
-	    }
-	    #set isroom [$jstate(jlib) service isroom $jid]
-	    if {0} {
-		set allrooms [$jstate(jlib) service allroomsin]
-		puts "\t allrooms=$allrooms"
-		if {[lsearch $allrooms $jid] < 0} {
-		    eval {Presence $jid3 $type} $args
-		}
 	    }
 		
 	    # General type presence hooks.
@@ -1060,7 +1055,7 @@ proc ::Roster::Presence {jid presence args} {
 	if {!$isavailable} {
 	    eval {PutItemInTree $jid2 $treePres} $itemAttr $args
 	}
-    } else {
+    } elseif {[string equal $presence "available"]} {
 	set treePres $presence
 	eval {PutItemInTree $jid2 $treePres} $itemAttr $args
     }
