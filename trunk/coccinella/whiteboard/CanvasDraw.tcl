@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasDraw.tcl,v 1.6 2004-07-30 12:55:55 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.7 2004-08-02 14:06:21 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 #  
@@ -2253,38 +2253,160 @@ proc ::CanvasDraw::FinalizeRotate {w x y} {
 
 #--- End of rotate tool --------------------------------------------------------
 
+namespace eval ::CanvasDraw:: {
+    
+    variable itemImagesDeleted {}
+}
+
 # CanvasDraw::DeleteCurrent --
 # 
 #       Bindings to the 'std' tag.
 
-proc ::CanvasDraw::DeleteCurrent {w x y} {
+proc ::CanvasDraw::DeleteCurrent {w} {
 
-    ::CanvasDraw::DeleteItem $w $x $y
+    set utag [::CanvasUtils::GetUtag $w current]
+    if {[string length $utag] > 0} {
+	::CanvasDraw::DeleteIds $w $utag all
+    }
 }
 
-proc ::CanvasDraw::DeleteCurrentWithUndo {w x y {undoCmdList {}}} {
+proc ::CanvasDraw::DeleteSelected {w} {
     
-    set utag [::CanvasUtils::GetUtag $w current]
-    if {$utag == ""} {
+    set ids [$w find withtag selected]
+    
+    ::Debug 6 "::CanvasDraw::DeleteSelected, ids=$ids"
+    if {$ids == {}} {
 	return
     }
-    set selected [expr [lsearch [$w gettags current] "selected"] >= 0 ? 1 : 0]
-    set cmd [list delete $utag]
+    ::CanvasDraw::DeleteIds $w $ids all
     set wtop [::UI::GetToplevelNS $w]
-    set redo [list ::CanvasUtils::Command $wtop $cmd]
-    set undo [list ::CanvasUtils::CommandList $wtop $undoCmdList]
-    eval $redo
-    if {[llength $undoCmdList]} {
-	undo::add [::WB::GetUndoToken $wtop] $undo $redo
-    }
+    ::CanvasCmd::DeselectAll $wtop
 }
-# CanvasDraw::DeleteItem --
+
+# CanvasDraw::DeleteIds --
+# 
+# 
+
+proc ::CanvasDraw::DeleteIds {w ids where args} {
+    global  prefs
+    variable itemImagesDeleted
+
+    ::Debug 6 "::CanvasDraw::DeleteIds ids=$ids"
+    
+    array set argsArr {
+	-trashunusedimages 1
+    }
+    array set argsArr $args
+    set trashImages $argsArr(-trashunusedimages)
+    set wtop [::UI::GetToplevelNS $w]
+
+    # List of canvas commands without widget path.
+    set cmdList {}
+    
+    # List of complete commands.
+    set redoCmdList {}
+    set undoCmdList {}
+    
+    foreach id $ids {
+	set utag [::CanvasUtils::GetUtag $w $id]
+	if {[string length $utag] == 0} {
+	    continue
+	}
+	set tags [$w gettags $id]
+	set type [$w type $id]
+	set havestd [expr [lsearch -exact $tags std] < 0 ? 0 : 1]
+	
+	# We are only allowed to delete 'std' items.
+	switch -glob -- $type,$havestd {
+	    image,1 {
+		set cmd [list delete $utag]
+		lappend cmdList $cmd
+		lappend undoCmdList [::CanvasUtils::GetUndoCommand $wtop $cmd]
+		if {$trashImages} {
+		    lappend itemImagesDeleted [$w itemcget $id -image]
+		}
+	    } 
+	    window,* {
+		set cmd [list delete $utag]
+		lappend cmdList $cmd
+		set win [$w itemcget $utag -window]
+		lappend redoCmdList [list destroy $win]		
+		lappend undoCmdList [::CanvasUtils::GetUndoCommand $wtop $cmd]
+	    }
+	    *,1 {
+		set cmd [list delete $utag]
+		lappend cmdList $cmd
+		lappend undoCmdList [::CanvasUtils::GetUndoCommand $wtop $cmd]
+	    }
+	    default {
+		
+		# A non window item witout 'std' tag.
+		# Look for any Itcl object with a Delete method.
+		if {$prefs(haveItcl)} {
+		    if {[regexp {object:([^ ]+)} $tags match object]} {
+			if {![catch {
+			    set objdel [$object Delete $id]
+			}]} {
+			    if {[llength $objdel] == 2} {
+				foreach {del undo} $objdel {break}
+				if {$del != {}} {
+				    lappend cmdList $del
+				    if {$undo != {}} {
+					lappend undoCmdList $undo
+				    }
+				}
+			    }
+			}
+		    }
+		}
+	    }
+	}
+    }
+    
+    # Manufacture complete commands.
+    set canRedo [list ::CanvasUtils::CommandList $wtop $cmdList $where]
+    set redo [list ::CanvasDraw::EvalCommandList  \
+      [concat [list $canRedo] $redoCmdList]]
+    set undo [list ::CanvasDraw::EvalCommandList $undoCmdList]
+    
+    eval $redo
+    undo::add [::WB::GetUndoToken $wtop] $undo $redo
+
+    # Garbage collect unused images with 'std' tag.
+    ::CanvasDraw::GarbageUnusedImages
+}
+
+# CanvasDraw::GarbageUnusedImages --
+# 
+#       Handle image garbage collection for 'std' image items.
+#       Only for deleted ones. Else see Whiteboard.tcl
+
+proc ::CanvasDraw::GarbageUnusedImages { } {
+    variable itemImagesDeleted
+    
+    # Image garbage collection. TEST!
+    set ims {}
+    foreach name $itemImagesDeleted {
+	if {![image inuse $name]} {
+	    lappend ims $name
+	}
+    }
+    eval {image delete} $ims
+    set itemImagesDeleted {}
+}
+
+proc ::CanvasDraw::AddGarbageImages {name args} {
+    variable itemImagesDeleted
+
+    eval {lappend itemImagesDeleted $name} $args
+}
+
+# CanvasDraw::DeleteItemOLD --
 #
 #       Delete item in canvas. Notifies all other clients.
 #   
 # Arguments:
 #       w      the canvas widget.
-#       x,y    the mouse coordinates.
 #       id     can be "current", "selected", or just an id number.
 #       where    "all": erase this canvas and all others.
 #                "remote": erase only client canvases.
@@ -2293,9 +2415,9 @@ proc ::CanvasDraw::DeleteCurrentWithUndo {w x y {undoCmdList {}}} {
 # Results:
 #       none
 
-proc ::CanvasDraw::DeleteItem {w x y {id current} {where all}} {
+proc ::CanvasDraw::DeleteItemOLD {w {id current} {where all}} {
 
-    Debug 4 "DeleteItem:: w=$w, x=$x, y=$y, id=$id, where=$where"
+    ::Debug 6 "DeleteItemOLD:: w=$w, id=$id, where=$where"
 
     set wtop [::UI::GetToplevelNS $w]
     

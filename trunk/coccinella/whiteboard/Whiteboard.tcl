@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.10 2004-07-27 08:08:13 matben Exp $
+# $Id: Whiteboard.tcl,v 1.11 2004-08-02 14:06:21 matben Exp $
 
 package require entrycomp
 package require moviecontroller
@@ -860,7 +860,7 @@ proc ::WB::BuildWhiteboard {wtop args} {
     #raise $w     This makes the window flashing when showed (linux)
     
     # A trick to let the window manager be finished before getting the geometry.
-    # An 'update idletasks' needed anyway in 'FindWBGeometry'.
+    # An 'update idletasks' needed anyway.
     after idle ::hooks::run whiteboardSetMinsizeHook $wtop
 
     if {[info exists opts(-file)]} {
@@ -1026,7 +1026,7 @@ proc ::WB::DestroyMain {wtop} {
     }
     
     # We could do some cleanup here.
-    eval {image delete} $canvasImages
+    catch {eval {image delete} $canvasImages}
     ::CanvasUtils::ItemFree $wtop
     ::UI::FreeMenu $wtop
 }
@@ -1566,7 +1566,7 @@ proc ::WB::SetToolButton {wtop btName} {
 	    bindtags $wCan  \
 	      [list $wCan WhiteboardDel WhiteboardNonText $wtoplevel all]
 	    $wCan bind std <Button-1> {
-		::CanvasDraw::DeleteCurrent %W [%W canvasx %x] [%W canvasy %y]
+		::CanvasDraw::DeleteCurrent %W
 	    }
 	    bind QTFrame <Button-1>  \
 	      [subst {::CanvasDraw::DeleteFrame $wCan %W %x %y}]
@@ -1624,8 +1624,8 @@ proc ::WB::GenericNonTextBindings {wtop} {
     set wCan $wapp(can)
     
     # Various bindings.
-    bind $wCan <BackSpace> [list ::CanvasDraw::DeleteItem $wCan %x %y selected]
-    bind $wCan <Control-d> [list ::CanvasDraw::DeleteItem $wCan %x %y selected]
+    bind $wCan <BackSpace> [list ::CanvasDraw::DeleteSelected $wCan]
+    bind $wCan <Control-d> [list ::CanvasDraw::DeleteSelected $wCan]
 }
 
 # WB::RemoveAllBindings --
@@ -2250,140 +2250,11 @@ proc ::WB::GetBasicWhiteboardMinsize {wtop} {
     set wMin [expr $wBarVert + $wButtons]
     set hMin [expr $hMenu + $hTop + $hTool + $hBugImage + $hStatus]
 
-    Debug 3 "hTop=$hTop, hTool=$hTool, hBugImage=$hBugImage, hStatus=$hStatus"
-
+    Debug 6 "::WB::GetBasicWhiteboardMinsize: (wMin=$wMin, hMin=$hMin), \
+      hTop=$hTop, hTool=$hTool, hBugImage=$hBugImage, hStatus=$hStatus,\
+      wButtons=$wButtons, wBarVert=$wBarVert"
+    
     return [list $wMin $hMin]
-}
-
-# ALL THIS IS A MESS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-# WB::FindWBGeometry --
-#
-#       Just after launch, find and set various geometries of the application.
-#       'hRoot' excludes the menu height, 'hTot' includes it.
-#       Note: 
-#       [winfo height .#menu] gives the menu height when the menu is in the
-#       root window; 
-#       [wm geometry .] gives and sets dimensions *without* the menu;
-#       [wm minsize .] gives and sets dimensions *with* the menu included.
-#       EAS: TclKit w/ Tcl 8.4 returns an error "bad window path name ".#menu"
-#
-# dims array:
-#       wRoot, hRoot:      total size of the toplevel not including any menu.
-#       wTot, hTot:        total size of the toplevel including any menu.
-#       hTop:              height of the shortcut button frame at top.
-#       hMenu:             height of any menu if present in the toplevel window.
-#       hStatus:           height of the status frame.
-#       hComm:             height of the communication frame including all client
-#                          frames.
-#       hCommClean:        height of the communication frame excluding all client 
-#                          frames.
-#       wStatMess:         width of the status message frame.
-#       wCanvas, hCanvas:  size of the actual canvas.
-#       x, y:              position of the app window.
-
-proc ::WB::FindWBGeometry {wtop} {
-    global  this prefs
-    
-    variable dims
-    variable wbicons
-    upvar ::UI::icons icons
-    upvar ::WB::${wtop}::wapp wapp
-	
-    # Changed to reqwidth and reqheight instead of width and height.
-    # EAS: Begin
-    # update idletasks
-    update
-    # EAS: End
-    if {$wtop == "."} {
-	set w .
-    } else {
-	set w [string trimright $wtop "."]
-    }
-    
-    set wmenu   $wapp(menu)
-    set wCan    $wapp(can)
-    set wfrtop  $wapp(frtop)
-    set wfrstat $wapp(frstat)
-    
-    # The actual dimensions.
-    set wRoot [winfo reqwidth $w]
-    set hRoot [winfo reqheight $w]
-    set hTop 0
-    if {[winfo exists $wfrtop]} {
-	set hTop [winfo reqheight $wfrtop]
-    }
-    set hTopOn [winfo reqheight ${wfrtop}.on]
-    set hTopOff [winfo reqheight ${wfrtop}.barhoriz]
-    set hStatus [winfo reqheight $wfrstat]
-    set hComm [winfo reqheight $wapp(comm)]
-    set hCommClean $hComm
-    set wStatMess [winfo reqwidth $wapp(statmess)]    
-    
-    # If we have a custom made menubar using a frame with labels (embedded).
-    if {$prefs(haveMenus)} {
-	set hFakeMenu 0
-    } else {
-	set hFakeMenu [winfo reqheight $wmenu]
-    }
-    if {![string match "mac*" $this(platform)]} {
-	# MATS: seems to always give 1 Linux not...
-	### EAS BEGIN
-	set hMenu 1
-	if {[winfo exists ${wtop}#menu]} {
-	    set hMenu [winfo height ${wtop}#menu]
-	}
-	# In 8.4 it seems that .wb1.#wb1#menu is used.
-	set wmenu_ ${wtop}#[string trim $wtop .]#menu
-	if {[winfo exists $wmenu_]} {
-	    set hMenu [winfo height $wmenu_]
-	}
-	### EAS END
-    } else {
-	set hMenu 0
-    }
-    
-    set wCanvas [winfo width $wCan]
-    set hCanvas [winfo height $wCan]
-    set wTot $wRoot
-    set hTot [expr $hRoot + $hMenu]
-    
-    # The minimum dimensions. Check if 'wapp(comm)' is wider than wMinCanvas!
-    # Take care of the case where there is no To or From checkbutton.
-    
-    set wMinCommFrame [expr [winfo width $wapp(comm).comm] +  \
-      [winfo width $wapp(comm).user] + [image width $wbicons(resizehandle)] + 2]
-    if {[winfo exists $wapp(comm).to]} {
-	incr wMinCommFrame [winfo reqwidth $wapp(comm).to]
-    }
-    if {[winfo exists $wapp(comm).from]} {
-	incr wMinCommFrame [winfo reqwidth $wapp(comm).from]
-    }
-	
-    set wMinRoot [max [expr $dims(wMinCanvas) + 56] $wMinCommFrame]
-    set hMinRoot [expr $dims(hMinCanvas) + $hStatus + $hComm + $hTop + \
-      $hFakeMenu]
-    # 2 for padding
-    incr wMinRoot [expr [winfo reqwidth $wapp(ysc)] + 2]
-    incr hMinRoot [expr [winfo reqheight $wapp(xsc)] + 2]
-    set wMinTot $wMinRoot
-    set hMinTot [expr $hMinRoot + $hMenu]
-	
-    # Cache dims.
-    foreach key {
-	wRoot hRoot hTop hTopOn hTopOff hStatus hComm hCommClean wStatMess \
-	  hFakeMenu hMenu wCanvas hCanvas wTot hTot wMinRoot hMinRoot \
-	  wMinTot hMinTot
-    } {
-	set dims($key) [set $key]
-    }
-    
-    #::Debug 2 "::WB::FindWBGeometry"
-    #::Debug 2 "[parray dims]"
-    
-    # The minsize when no connected clients. 
-    # Is updated when connect/disconnect (Not jabber).
-    wm minsize $w $wMinTot $hMinTot
 }
 
 # ::WB::SetCanvasSize --

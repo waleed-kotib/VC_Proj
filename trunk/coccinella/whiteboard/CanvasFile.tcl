@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasFile.tcl,v 1.8 2004-07-30 09:33:15 matben Exp $
+# $Id: CanvasFile.tcl,v 1.9 2004-08-02 14:06:21 matben Exp $
  
 package require can2svg
 package require svg2can
@@ -60,8 +60,8 @@ proc ::CanvasFile::OpenCanvas {w fileName args} {
 	  -icon error -type ok
 	return
     }
-    ::undo::reset [::WB::GetUndoToken $wtop]
     ::CanvasCmd::DoEraseAll $wtop     
+    ::undo::reset [::WB::GetUndoToken $wtop]
     eval {FileToCanvas $w $fd $fileName} $args
     close $fd
 }
@@ -326,7 +326,8 @@ proc ::CanvasFile::FileToCanvasVer2 {w fd absPath args} {
     set dirPath [file dirname $absPath]
     set wtop [::UI::GetToplevelNS $w]
     
-    set numImports 0
+    set nimports 0
+    set undoCmdList {}
     
     # Read line by line; each line contains an almost complete canvas command.
     # Item prefix and item numbers need to be taken care of.
@@ -356,40 +357,36 @@ proc ::CanvasFile::FileToCanvasVer2 {w fd absPath args} {
 	    
 		# Draw ordinary item not image nor window (movie).
 		set type [lindex $line 1]
-	
-		# Make newline substitutions.
-		set cmdnl [subst -nocommands -novariables $line]
 		if {[string equal $where "all"] || \
 		  [string equal $where "local"]} {
+		    set cmdlocal $line
 		    
+		    # Make newline substitutions.
 		    # If html font sizes, then translate these to point sizes.
-		    if {$prefs(useHtmlSizes) && [string equal $type "text"]} {
-			set cmdlocal [::CanvasUtils::FontHtmlToPointSize $cmdnl]
-		    } else {
-			set cmdlocal $cmdnl
+		    if {[string equal $type "text"]} {
+			set cmdlocal [subst -nocommands -novariables $cmdlocal]
+			set cmdlocal [::CanvasUtils::FontHtmlToPointSize $cmdlocal]
 		    }
 		    eval {$w} $cmdlocal
 		}
 		
-		# Encode all newlines as \n .
-		regsub -all "\n" $line $nl_ cmdoneline
-		
 		# Write to other clients.
 		if {[string equal $where "all"] || \
 		  [string equal $where "remote"]} {
-		    ::CanvasUtils::Command $wtop $cmdoneline remote
+		    ::CanvasUtils::Command $wtop $line "remote"
 		} elseif {![string equal $where "local"]} {
 		    
 		    # Write only to specified client with ip number 'where'.
-		    ::CanvasUtils::Command $wtop $cmdoneline $where
+		    ::CanvasUtils::Command $wtop $line $where
 		}
 		
 		# Speak...
-		if {[string equal $where "all"] || \
-		  [string equal $where "local"]} {
-		    if {[string equal $type "text"]} {
-			::hooks::run whiteboardTextInsertHook me \
-			  [$w itemcget $utag -text]
+		switch -- $where {
+		    all - local {
+			if {[string equal $type "text"]} {
+			    ::hooks::run whiteboardTextInsertHook me \
+			      [$w itemcget $utag -text]
+			}
 		    }
 		}
 	    }
@@ -409,11 +406,11 @@ proc ::CanvasFile::FileToCanvasVer2 {w fd absPath args} {
 		# This is typically an image or movie (QT or Snack).
 		set errMsg [eval {
 		    ::Import::HandleImportCmd $w $line  \
-		      -basepath $dirPath  \
+		      -addundo 0 -basepath $dirPath  \
 		      -progess [list ::Import::ImportProgress $line]  \
 		      -command [list ::Import::ImportCommand $line]
 		} [array get argsArr]]
-		incr numImports
+		incr nimports
 	    }
 	    default {
 
@@ -424,7 +421,7 @@ proc ::CanvasFile::FileToCanvasVer2 {w fd absPath args} {
 	}
 	set previousUtag $utag
     }
-    return $numImports
+    return $nimports
 }
 
 # CanvasFile::SaveCanvas --

@@ -4,11 +4,11 @@
 #      This file is part of The Coccinella application. It implements the
 #      cut, copy, and paste commands to and from canvas, typically canvas items.
 #      
-#  Copyright (c) 2002  Mats Bengtsson
+#  Copyright (c) 2002-2004  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasCutCopyPaste.tcl,v 1.3 2004-07-22 15:56:45 matben Exp $
+# $Id: CanvasCutCopyPaste.tcl,v 1.4 2004-08-02 14:06:21 matben Exp $
 
 package provide CanvasCutCopyPaste 1.0
 
@@ -18,10 +18,9 @@ namespace eval ::CanvasCCP:: {
     # for imports from other apps.
     variable clipToken "string"
 
-    # Use a very unlikely combination for the separator of items in clipboard.
-    # Perhaps it is enough to use a nonprintable character; 
-    # what happens with binary data?    BAD!!!!!!!!!
-    variable clipItemSep " ANDqzU\06 "
+    # For canvas items we use the following format in the clipboard:
+    #   {$magicToken {{create line ...} {import ...} ...}}
+    variable magicToken b5e080568e2a3537dce97a88f411c365237703a5
 }
 
 # CanvasCCP::CutCopyPasteCmd ---
@@ -37,7 +36,7 @@ namespace eval ::CanvasCCP:: {
 proc ::CanvasCCP::CutCopyPasteCmd {cmd} {
     
     set wfocus [focus]
-    ::Debug 2 "::CanvasCCP::CutCopyPasteCmd cmd=$cmd, wfocus=$wfocus"
+    ::Debug 4 "::CanvasCCP::CutCopyPasteCmd cmd=$cmd, wfocus=$wfocus"
     
     if {$wfocus == ""} {
 	return
@@ -73,11 +72,11 @@ proc ::CanvasCCP::CutCopyPasteCmd {cmd} {
 #       none
  
 proc ::CanvasCCP::CopySelectedToClipboard {w doWhat} {
-    variable clipItemSep
     variable clipToken
+    variable magicToken
     
-    Debug 2 "CopySelectedToClipboard:: w=$w, doWhat=$doWhat"
-    Debug 2 "   focus=[focus], class=[winfo class $w]"
+    Debug 4 "CopySelectedToClipboard:: w=$w, doWhat=$doWhat"
+    Debug 4 "\t focus=[focus], class=[winfo class $w]"
 
     if {![string equal [winfo class $w] "Canvas"]} {
 	return
@@ -90,7 +89,7 @@ proc ::CanvasCCP::CopySelectedToClipboard {w doWhat} {
     set ids [$w find withtag selected]	
     
     # If selected text within text item.
-    if {[llength $ids] == 0} {
+    if {$ids == {}} {
 	CanvasTextCopy $w
 	if {[string equal $doWhat "cut"]} {
 	    ::CanvasText::Delete $w
@@ -98,16 +97,27 @@ proc ::CanvasCCP::CopySelectedToClipboard {w doWhat} {
 	set clipToken "string"
     } else {
 	
-	# Loop over all selected items, use 'clipItemSep' as separator.
+	# See format definition above.
+	clipboard append "$magicToken {"
 	foreach id $ids {
 	    CopySingleItemToClipboard $w $doWhat $id
-	    if {[lindex $ids end] != $id} {
-		clipboard append $clipItemSep
-	    }
 	}
+	clipboard append "}"
 	set clipToken "item"
     }
+    #selection own -selection CLIPBOARD \
+    #  -command [list [namespace current]::SelectionLost $w] $w
     ::WB::FixMenusWhenCopy $w
+}
+
+# CanvasCCP::SelectionLost --
+# 
+#       Shall do garabage collection of images.
+
+proc ::CanvasCCP::SelectionLost {w} {
+    
+    puts "_______::CanvasCCP::SelectionLost w=$w"
+    
 }
 
 # CanvasCCP::CopySingleItemToClipboard --
@@ -125,7 +135,7 @@ proc ::CanvasCCP::CopySelectedToClipboard {w doWhat} {
 
 proc ::CanvasCCP::CopySingleItemToClipboard {w doWhat id} {
     
-    Debug 2 "CopySingleItemToClipboard:: id=$id"
+    Debug 4 "CopySingleItemToClipboard:: id=$id"
 
     if {$id == ""} {
 	return
@@ -148,15 +158,29 @@ proc ::CanvasCCP::CopySingleItemToClipboard {w doWhat id} {
     set co [$w coords $id]
     set cmd [concat "create" $itemType $co $opcmd]
     
+    # If we use the 'import' command for images garbage collection would work,
+    # but this costs an extra network connection.
+    if {0} {
+	set cmd [::CanvasUtils::GetOneLinerForAny $w $id -usehtmlsize 0 \
+	  -encodenewlines 0]
+	puts "\t  cmd=$cmd"
+    }
+    
     # Copy the canvas object to the clipboard.
-    clipboard append $cmd
+    clipboard append " {$cmd}"
     
     # If cut then delete items.
-    if {$doWhat == "cut"} {
-	::CanvasDraw::DeleteItem $w 0 0 $id
-	$w delete withtag tbbox
-    } elseif {$doWhat == "copy"} {
-	
+    switch -- $doWhat {
+	cut {
+	    
+	    # There is currently a memory leak when images are cut!
+	    ::CanvasDraw::DeselectItem $w $id
+	    # ::CanvasDraw::DeleteItemOLD $w $id
+	    ::CanvasDraw::DeleteIds $w $id all -trashunusedimages 0
+	}
+	copy {
+	    # empty
+	}	
     }
     ::WB::FixMenusWhenCopy $w
 }
@@ -173,7 +197,7 @@ proc ::CanvasCCP::CopySingleItemToClipboard {w doWhat id} {
 proc ::CanvasCCP::PasteFromClipboardTo {w} {
     
     set wClass [winfo class $w]
-    Debug 2 "PasteFromClipboardTo:: w=$w, wClass=$wClass"
+    Debug 4 "PasteFromClipboardTo:: w=$w, wClass=$wClass"
 
     switch -glob -- $wClass {
 	Canvas {
@@ -206,56 +230,39 @@ proc ::CanvasCCP::PasteFromClipboardTo {w} {
 #       none
 
 proc ::CanvasCCP::PasteFromClipboardToCanvas {w} {
-    variable clipItemSep
     variable clipToken
+    variable magicToken
 
-    Debug 2 "PasteFromClipboardToCanvas:: w=$w"
-
-    $w delete withtag tbbox
-    $w dtag all selected
+    Debug 4 "PasteFromClipboardToCanvas:: w=$w"
     
-    # Pick apart the clipboard content with the 'clipItemSep' separator.
-    if {[catch {selection get -sel CLIPBOARD} cmds]} {
+    if {[catch {selection get -sel CLIPBOARD} str]} {
 	return
     }
-    Debug 2 "  PasteFromClipboardToCanvas:: clipToken=$clipToken, cmds=$cmds"
-    $w delete withtag tbbox
-    
-    # Try to figure out if put text string (clipToken="string") or complete
-    # canvas create item command (clipToken="item").
-    
-    set tmpCmds $cmds
-    
+    Debug 4 "\t str=$str"
+    ::CanvasCmd::DeselectAll [::UI::GetToplevelNS $w]
+        
     # Check first if it has the potential of a canvas command.
-    if {[regexp  "^create " $cmds]} {
-	set sep [string trim $clipItemSep]
-	set firstCmd [CmdToken tmpCmds $sep]
-	
-	# Then check if it really is a canvas command.
-	if {[info complete ".junk $firstCmd"]} {
-	    set clipToken "item"
-	} else {
-	    set clipToken "string"	    
-	} 
+    if {[string equal [lindex $str 0] $magicToken]} {
+	set clipToken "item"
     } else {
 	set clipToken "string"	    
     }
         
     # Depending on clipToken, either paste simple text string, or complete item(s).
-    if {$clipToken == "string"} {
+    switch -- $clipToken {
+	"string" {
 	
-	# Find out if there is a current focus on a text item.
-	if {[$w focus] == ""} {
-	    eval ::CanvasText::CanvasFocus $w [::CanvasUtils::NewImportAnchor $w] 1
-	}
-	::CanvasText::TextInsert $w $cmds
-	
-    } elseif {$clipToken == "item"} {
-	set sep [string trim $clipItemSep]
-	set firstCmd [CmdToken cmds $sep]
-	while {$firstCmd != -1} {
-	    PasteSingleFromClipboardToCanvas $w $firstCmd
-	    set firstCmd [CmdToken cmds $sep]
+	    # Find out if there is a current focus on a text item.
+	    if {[$w focus] == ""} {
+		eval ::CanvasText::CanvasFocus $w \
+		  [::CanvasUtils::NewImportAnchor $w] 1
+	    }
+	    ::CanvasText::TextInsert $w $str
+	} 
+	"item" {
+	    foreach cmd [lindex $str 1] {
+		PasteSingleFromClipboardToCanvas $w $cmd
+	    }
 	}
     }
     
@@ -280,8 +287,7 @@ proc ::CanvasCCP::PasteFromClipboardToCanvas {w} {
 proc ::CanvasCCP::PasteSingleFromClipboardToCanvas {w cmd} {
     global  prefs
 
-    set nl_ "\\n"
-    Debug 2 "PasteSingleFromClipboardToCanvas:: cmd=$cmd"
+    Debug 4 "PasteSingleFromClipboardToCanvas:: cmd=$cmd"
 
     set wtop [::UI::GetToplevelNS $w]
     
@@ -290,6 +296,8 @@ proc ::CanvasCCP::PasteSingleFromClipboardToCanvas {w cmd} {
     set utag [::CanvasUtils::NewUtag]
     set tags [list std $itemType $utag]
     lappend cmd -tags $tags
+    
+    #set cmd [CanvasUtils::ReplaceUtag $cmd $utag]
     
     # make coordinate offset, first get coords
     set ind1 [lsearch $cmd \[0-9.\]*]
@@ -303,7 +311,7 @@ proc ::CanvasCCP::PasteSingleFromClipboardToCanvas {w cmd} {
     # paste back coordinates in cmd
     set newcmd [concat [lrange $cmd 0 [expr $ind1 - 1]] $cooOffset  \
       [lrange $cmd [expr $ind2 + 1] end]]
-    set undocmd "delete $utag"
+    set undocmd [list delete $utag]
     
     # Change font size from points to html size when sending it to clients.
     if {[string equal $itemType "text"]} {
@@ -313,6 +321,7 @@ proc ::CanvasCCP::PasteSingleFromClipboardToCanvas {w cmd} {
     }
     
     # Write to all other clients; need to make a one liner first.
+    set nl_ {\\n}
     regsub -all "\n" $cmdremote $nl_ cmdremote
     set redo [list ::CanvasUtils::CommandExList $wtop  \
       [list [list $newcmd local] [list $cmdremote remote]]]
