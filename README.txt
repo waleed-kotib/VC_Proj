@@ -2,7 +2,7 @@
 	  The Coccinella : Jabber application with Whiteboard
 	  ---------------------------------------------------
 
-		version 0.95.2, December, 2004
+		version 0.95.3, January, 2005
 
 		       by Mats Bengtsson
 
@@ -108,6 +108,7 @@ Translations:
     German:     Hermann J. Beckers
     Dutch:      Sander Devrieze
     French:     Guillaume Ayoub
+    Spanish:    Nestor Diaz
 
 Bug Reports:
 
