@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.79 2004-12-02 08:22:34 matben Exp $
+# $Id: UI.tcl,v 1.80 2004-12-02 15:22:07 matben Exp $
 
 package require entrycomp
 package require alertbox
@@ -197,14 +197,20 @@ proc ::UI::GetScreenSize { } {
 
 proc ::UI::IsAppInFront { } {
     
+    # The 'wm stackorder' is not reliable in sorting windows!
+    # How about message boxes in front? We never get called since they block.
     set isfront 0
-    set w [lindex [wm stackorder .] 0]
-    if {[string equal [wm state $w] "normal"]} {
-	set wfocus [focus]
-	if {($wfocus != "") && [string equal [winfo toplevel $wfocus] $w]} {
-	    set isfront 1
+    set wfocus [focus]
+    foreach w [wm stackorder .] {
+	#puts "w=$w, state=[wm state $w], wfocus=$wfocus"
+	if {[string equal [wm state $w] "normal"]} {
+	    if {($wfocus != "") && [string equal [winfo toplevel $wfocus] $w]} {
+		set isfront 1
+		break
+	    }
 	}
     }
+    #puts "isfront=$isfront"
     return $isfront
 }
 

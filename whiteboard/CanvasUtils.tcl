@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.19 2004-11-06 08:15:26 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.20 2004-12-02 15:22:08 matben Exp $
 
 package require sha1pure
 
@@ -845,7 +845,7 @@ proc ::CanvasUtils::GetImportCmdForQTMovie {cmd args} {
 	file {
 	    if {$movFile != ""} {
 		if {[info exists argsArr(-basepath)]} {
-		    set movFile [filerelative $argsArr(-basepath) $movFile]	    
+		    set movFile [::tfileutils::relative $argsArr(-basepath) $movFile]	    
 		} 
 		set optsArr(-file) $movFile
 		unset -nocomplain impArr(-url)
@@ -909,7 +909,7 @@ proc ::CanvasUtils::GetImportOptsURI {uritype filePath args} {
     switch -- $uritype {
 	file {
 	    if {[info exists argsArr(-basepath)]} {
-		set opts [list -file [filerelative $argsArr(-basepath) $filePath]]
+		set opts [list -file [::tfileutils::relative $argsArr(-basepath) $filePath]]
 	    } else {
 		set opts [list -file $filePath]
 	    }

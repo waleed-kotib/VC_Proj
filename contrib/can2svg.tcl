@@ -6,7 +6,7 @@
 #  
 #  This particular package is BSD licensed. 
 #
-# $Id: can2svg.tcl,v 1.17 2004-10-20 10:15:20 matben Exp $
+# $Id: can2svg.tcl,v 1.18 2004-12-02 15:22:07 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -1520,7 +1520,7 @@ proc can2svg::FileUriFromLocalFile {path} {
 proc can2svg::HttpFromLocalFile {path} {
     variable confopts
     
-    set relPath [filerelative $confopts(-httpbasedir) $path]
+    set relPath [::tfileutils::relative $confopts(-httpbasedir) $path]
     set relPath [uriencode::quotepath $relPath]
     return "http://$confopts(-httpaddr)/$relPath"
 }

@@ -6,7 +6,7 @@
 #
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #
-# $Id: FileCache.tcl,v 1.14 2004-11-06 08:15:25 matben Exp $
+# $Id: FileCache.tcl,v 1.15 2004-12-02 15:22:07 matben Exp $
 # 
 #       The input key can be: 
 #               1) a full url, must be uri encoded 
@@ -233,7 +233,7 @@ proc ::FileCache::Normalize {key} {
     if {[regexp {[^:]*(://[^:/]+)(:[0-9]+)?(/.*$)} $key  \
       match host port path]} {
     } elseif {[string equal [file pathtype $key] "absolute"]} {
-	set path [filerelative $basedir $key]
+	set path [::tfileutils::relative $basedir $key]
 	set path [uriencode::quotepath $path]
     } elseif {[string equal [file pathtype $key] "relative"]} {
 	set path [uriencode::quotepath $key]
