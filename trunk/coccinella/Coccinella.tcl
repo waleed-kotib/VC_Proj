@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.76 2004-08-18 12:08:58 matben Exp $
+# $Id: Coccinella.tcl,v 1.77 2004-08-28 07:00:07 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -64,7 +64,7 @@ switch -- $this(platform) {
 	# If any services available for coccinella then provide the argv.
 	set services [dde services TclEval coccinella]
 	if {$services != {}} {
-	    dde execute TclEval coccinella [list SecondCoccinella $argv]
+	    dde execute TclEval coccinella [concat SecondCoccinella $argv]
 	    exit
 	}
 	dde servername coccinella

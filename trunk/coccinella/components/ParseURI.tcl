@@ -4,7 +4,7 @@
 #       typically from an anchor element <a href='xmpp:jid[?query]'/>
 #       in a html page.
 # 
-# $Id: ParseURI.tcl,v 1.8 2004-08-23 12:44:36 matben Exp $
+# $Id: ParseURI.tcl,v 1.9 2004-08-28 07:00:07 matben Exp $
 
 package require uriencode
 
@@ -18,6 +18,7 @@ proc ::ParseURI::Init { } {
     ::Debug 2 "::ParseURI::Init"
     
     ::hooks::add launchFinalHook ::ParseURI::Parse
+    ::hooks::add relaunchHook    ::ParseURI::RelaunchHook
     
     component::register ParseURI  \
       {Any command line -uri xmpp:jid[?query] is parsed and processed.}
@@ -27,15 +28,18 @@ proc ::ParseURI::Init { } {
 # 
 #       Uses any -uri in the command line and process it accordingly.
 
-proc ::ParseURI::Parse { } {
+proc ::ParseURI::Parse {args} {
     global  argv
     variable uid
     
-    set ind [lsearch $argv -uri]
+    if {$args == {}} {
+	set args $argv
+    }
+    set ind [lsearch $args -uri]
     if {$ind < 0} {
 	return
     }
-    set uri [lindex $argv [incr ind]]
+    set uri [lindex $args [incr ind]]
     set uri [uriencode::decodeurl $uri]
     ::Debug 2 "::ParseURI::Parse uri=$uri"
 
@@ -67,7 +71,16 @@ proc ::ParseURI::Parse { } {
     set state(profname) $name
     set state(domain)   $domain
     
-    ::Jabber::Login::Connect $domain [list [namespace current]::ConnectCB $token]
+    if {[::Jabber::IsConnected]} {
+	::ParseURI::ProcessURI $token
+    } else {
+	::Jabber::Login::Connect $domain [list [namespace current]::ConnectCB $token]
+    }
+}
+
+proc ::ParseURI::RelaunchHook {args} {
+    
+    eval {::ParseURI::Parse} $args
 }
 
 # All these procedures are better collected somewhere so they can be used
@@ -154,6 +167,12 @@ proc ::ParseURI::AuthorizeCB {token type msg} {
     } else {
 	::Jabber::Login::SetStatus
     }
+    ::ParseURI::ProcessURI $token
+}
+
+proc ::ParseURI::ProcessURI {token} {
+    variable $token
+    upvar 0 $token state
   
     switch -- $state(op) {
 	message {

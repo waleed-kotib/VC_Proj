@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.19 2004-08-26 12:05:17 matben Exp $
+# $Id: Whiteboard.tcl,v 1.20 2004-08-28 07:00:08 matben Exp $
 
 package require entrycomp
 package require moviecontroller
@@ -143,7 +143,7 @@ namespace eval ::WB:: {
     # Want to fit all movies within canvas?
     set prefs(autoFitMovies) 1
 
-    set prefs(canScrollWidth) 1800
+    set prefs(canScrollWidth)  1800
     set prefs(canScrollHeight) 1200
 
     # Html sizes or point sizes when transferring text items?
