@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.7 2003-05-18 13:20:21 matben Exp $
+# $Id: jabberlib.tcl,v 1.8 2003-05-20 16:22:30 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -1021,6 +1021,9 @@ proc jlib::presence_handler {jlibname xmldata} {
 		x {
 		    lappend x $child
 		}
+		default {
+		    lappend arglist -$ctag $cchdata
+		}
 	    }
 	}	    
 	if {[llength $x] > 0} {
@@ -1054,16 +1057,16 @@ proc jlib::presence_handler {jlibname xmldata} {
 	    }	
 	}
     }
-
-# Invoke any callback.
-if {[info exists id] && [info exists iq($id)]} {
-    uplevel #0 $iq($id) [list $jlibname $type] $arglist
-    catch {unset iq($id)}
-} elseif {[string length $opts(-presencecommand)]} {
-    uplevel #0 $opts(-presencecommand) [list $jlibname $type] $arglist
-} else {
-    uplevel #0 $lib(clientcmd) [list $jlibname presence] $arglist
-}	
+    
+    # Invoke any callback.
+    if {[info exists id] && [info exists iq($id)]} {
+	uplevel #0 $iq($id) [list $jlibname $type] $arglist
+	catch {unset iq($id)}
+    } elseif {[string length $opts(-presencecommand)]} {
+	#uplevel #0 $opts(-presencecommand) [list $jlibname $type] $arglist
+    } else {
+	#uplevel #0 $lib(clientcmd) [list $jlibname presence] $arglist
+    }	
 }
 
 # jlib::got_stream --

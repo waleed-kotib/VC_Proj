@@ -5,14 +5,14 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.1 2003-05-18 13:11:28 matben Exp $
+# $Id: MUC.tcl,v 1.2 2003-05-20 16:22:30 matben Exp $
 
 package provide MUC 1.0
 
 namespace eval ::Jabber::MUC:: {
       
     # Local stuff
-    variable locals
+    variable uid 0
     
     # Define the 'role' privileges.
     # The first array index is the action, the secons is the role.
@@ -102,6 +102,12 @@ namespace eval ::Jabber::MUC:: {
 proc ::Jabber::MUC::BuildEnter {w args} {
     global  this sysFont
 
+    variable server
+    variable roomname
+    variable wcomboroom
+    variable nickname
+    variable password
+    variable finishedEnter -1
     upvar ::Jabber::jstate jstate
     
     if {[winfo exists $w]} {
@@ -116,18 +122,22 @@ proc ::Jabber::MUC::BuildEnter {w args} {
 
     }
     wm title $w {Enter Room}
+    set server ""
+    set roomname ""
     
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
     message $w.frall.msg -width 260 -font $sysFont(s)  \
-    	-text "Enter the room and set your nick name"
+    	-text "Enter your nick name and press Enter to go into the room.\
+	Members only room may require a password."
     pack $w.frall.msg -side top -fill x -anchor w -padx 2 -pady 4
     set frtop $w.frall.top
-    pack [frame $frtop] -side top -fill x
+    pack [frame $frtop] -side top -fill x -padx 4
     label $frtop.lserv -text "[::msgcat::mc {Conference server}]:" \
       -font $sysFont(sb) 
 
-    set confServers [$jstate(browse) getconferenceservers]
+    set confServers [$jstate(browse) getservicesforns  \
+      "http://jabber.org/protocol/muc"]
     
     ::Jabber::Debug 2 "BuildEnterRoom: confServers='$confServers'"
 
@@ -155,7 +165,7 @@ proc ::Jabber::MUC::BuildEnter {w args} {
     }
     set wcomboroom $frtop.eroom
     ::combobox::combobox $wcomboroom -width 20 -font $sysFont(s)   \
-      -textvariable "[namespace current]::roomname" -editable 0
+      -textvariable [namespace current]::roomname -editable 0
     eval {$frtop.eroom list insert end} $roomList
 
     if {[info exists argsArr(-roomjid)]} {
@@ -167,18 +177,27 @@ proc ::Jabber::MUC::BuildEnter {w args} {
 	set server $argsArr(-server)
 	$wcomboserver configure -state disabled
     }
+    
+    label $frtop.lnick -text "[::msgcat::mc {Nick name}]:" -font $sysFont(sb)
+    entry $frtop.enick -textvariable [namespace current]::nickname
+    label $frtop.lpass -text "[::msgcat::mc Password]:" -font $sysFont(sb)
+    entry $frtop.epass -textvariable [namespace current]::password
+    
     grid $frtop.lserv -column 0 -row 0 -sticky e
     grid $frtop.eserv -column 1 -row 0 -sticky w
     grid $frtop.lroom -column 0 -row 1 -sticky e
     grid $frtop.eroom -column 1 -row 1 -sticky w
-    
-    
+    grid $frtop.lnick -column 0 -row 2 -sticky e
+    grid $frtop.enick -column 1 -row 2 -sticky w
+    grid $frtop.lpass -column 0 -row 3 -sticky e
+    grid $frtop.epass -column 1 -row 3 -sticky w
+       
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
     set wsearrows $frbot.arr
     set wbtenter $frbot.btenter
-    pack [button $wbtenter -text [::msgcat::mc Enter] -width 8 -state disabled \
-      -command [list [namespace current]::DoEnter $w]]  \
+    pack [button $wbtenter -text [::msgcat::mc Enter] -width 8 \
+      -default active -command [list [namespace current]::DoEnter $w]]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
       -command [list [namespace current]::CancelEnter $w]]  \
@@ -187,20 +206,122 @@ proc ::Jabber::MUC::BuildEnter {w args} {
       -side left -padx 5 -pady 5
     pack $frbot -side bottom -fill x -expand 0 -padx 8 -pady 6
 
+    wm resizable $w 0 0
 
+    bind $w <Return> [list $wbtenter invoke]
+    
+    # Grab and focus.
+    set oldFocus [focus]
+    catch {grab $w}
+    
+    # Wait here for a button press and window to be destroyed. BAD?
+    tkwait window $w
+    
+    catch {grab release $w}
+    focus $oldFocus
+    return [expr {($finishedEnter <= 0) ? "cancel" : "create"}]
 }
 
-proc ::Jabber::MUC::DoEnter {} {
-    
-    
-    
+proc ::Jabber::MUC::ConfigRoomList {wcombo pickedServ} {    
+    variable wcomboroom
+    upvar ::Jabber::jstate jstate
+
+    set allRooms [$jstate(browse) getchilds $pickedServ]
+    set roomList {}
+    foreach roomJid $allRooms {
+	regexp {([^@]+)@.+} $roomJid match room
+	lappend roomList $room
+    }
+    $wcomboroom list delete 0 end
+    eval {$wcomboroom list insert end} $roomList
 }
 
-proc ::Jabber::MUC::CancelEnter {} {
+proc ::Jabber::MUC::DoEnter {w} {
+    variable server
+    variable roomname
+    variable nickname
+    variable finishedEnter
+    upvar ::Jabber::jstate jstate
     
+    if {($roomname == "") || ($nickname == "")} {
+	tk_messageBox -type ok -icon error  \
+	  -message "We require that all fields are nonempty"
+	return
+    }
+    set roomJid ${roomname}@${server}
     
-    
+    $jstate(jlib) muc enter $roomJid $nickname -command \
+      [list [namespace current]::EnterCallback $w]
+    set finishedEnter 1
+    catch {destroy $w}
+   
+    # Cache groupchat protocol type (muc|conference|gc-1.0).
+    ::Jabber::GroupChat::SetProtocol $roomJid "muc"
 }
+
+proc ::Jabber::MUC::CancelEnter {w} {
+    variable finishedEnter
+    
+    set finishedEnter 0
+    catch {destroy $w}
+}
+
+# Jabber::MUC::EnterCallback --
+#
+#       Presence callabck from the 'muc enter' command.
+#       Just to catch errors and check if any additional info (password)
+#       is needed for entering room.
+#
+# Arguments:
+#       jlibName 
+#       type    presence typ attribute, 'available' etc.
+#       args    -from, -id, -to, -x ...
+#       
+# Results:
+#       None.
+
+proc ::Jabber::MUC::EnterCallback {w jlibName type args} {
+    
+    Debug 3 "::Jabber::MUC::EnterCallback type=$type, args='$args'"
+    array set argsArr $args
+    
+    if {$type == "error"} {
+    	set errcode ???
+    	set errmsg ""
+    	if {[info exists argsArr(-error)]} {
+    	    set errcode [lindex $argsArr(-error) 0]
+	    
+	    switch -- $errcode {
+		401 {
+		    
+		    # Password required.
+		    set roomName ""
+		    regexp {^([^@]+)@} $argsArr(-from) m roomName
+		    set msg "Error when entering room \"$roomName\":\
+		      [lindex $argsArr(-error) 1] Do you want to retry?"
+		    set ans [tk_messageBox -type yesno -icon error  \
+		      -message $msg]
+		    if {$ans == "yes"} {
+			::Jabber::MUC::BuildEnter $w -roomjid $argsArr(-from)
+		    }
+		}
+		default {
+		    set errmsg [lindex $argsArr(-error) 1]
+		    tk_messageBox -type ok -icon error  \
+		      -message [FormatTextForMessageBox \
+		      [::msgcat::mc jamesserrconfgetcre $errcode $errmsg]]
+		}
+	    }
+	}
+	return
+    }   
+}
+
+#--- The Info Dialog -----------------------------------------------------------
+
+# Jabber::MUC::BuildInfo --
+# 
+#       Displays an info dialog for MUC room configuration.
 
 proc ::Jabber::MUC::BuildInfo {w roomjid} {
     global this sysFont
@@ -218,16 +339,26 @@ proc ::Jabber::MUC::BuildInfo {w roomjid} {
 
     }
     wm title $w {Info Room}
+    wm protocol $w WM_DELETE_WINDOW  \
+      [list [namespace current]::Close $roomjid]
 
     # Instance specific namespace.
     namespace eval [namespace current]::${roomjid} {
 	variable locals
     }
     upvar [namespace current]::${roomjid}::locals locals
+    set locals($roomjid,w) $w
+    set locals($w,roomjid) $roomjid
     
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
     
+    # Button part.
+    set frbot [frame $w.frall.frbot -borderwidth 0]
+    pack [button $frbot.btsnd -text [::msgcat::mc Close] -width 8  \
+      -command [list [namespace current]::Close $roomjid]] \
+      -side right -padx 5 -pady 5
+    pack $frbot -side bottom -fill x -padx 10 -pady 8
     
     # Tablelist with scrollbar ---
     set frtab $w.frall.frtab    
@@ -324,16 +455,19 @@ proc ::Jabber::MUC::BuildInfo {w roomjid} {
 }
 
 proc ::Jabber::MUC::EditList {roomjid type} {
+    upvar [namespace current]::${roomjid}::locals locals
 
     
 }
 
-proc ::Jabber::MUC::DoubleClickPart {} {
+proc ::Jabber::MUC::DoubleClickPart {roomjid} {
+    upvar [namespace current]::${roomjid}::locals locals
 
     
 }
 
-proc ::Jabber::MUC::SelectPart {} {
+proc ::Jabber::MUC::SelectPart {roomjid} {
+    upvar [namespace current]::${roomjid}::locals locals
 
     
 }
@@ -373,39 +507,162 @@ proc ::Jabber::MUC::SetButtonsState {roomjid role affilation} {
 }
 
 proc ::Jabber::MUC::Kick {roomjid} {
+    upvar [namespace current]::${roomjid}::locals locals
+    upvar ::Jabber::jstate jstate
 
+    set wtbl $locals(wtbl)
     
+    # Need selected line here. $item = numerical index.
+    set item [$wtbl curselection]
+    if {[string length $item] == 0} {
+	return
+    }
+    set row [$wtbl get $item]
+    foreach {nick role aff} $row { break }
+    
+    
+    
+    
+    if {1} {
+	if {[catch {
+	    $jstate(jlib) muc setrole $roomjid $nick "none" \
+	      -command [list [namespace current]::IQCallback $roomjid]
+	} err]} {
+	    tk_messageBox -type ok -icon error -title "Network Error" \
+	      -message "Network error ocurred: $err"
+	}
+    }
 }
 
 proc ::Jabber::MUC::GrantVoice {roomjid} {
+    upvar [namespace current]::${roomjid}::locals locals
+    upvar ::Jabber::jstate jstate
 
     
 }
 
 proc ::Jabber::MUC::RevokeVoice {roomjid} {
+    upvar [namespace current]::${roomjid}::locals locals
+    upvar ::Jabber::jstate jstate
 
     
 }
 
 proc ::Jabber::MUC::Ban {roomjid} {
+    upvar [namespace current]::${roomjid}::locals locals
+    upvar ::Jabber::jstate jstate
 
     
 }
 
 proc ::Jabber::MUC::RoomDefinition {roomjid} {
+    upvar [namespace current]::${roomjid}::locals locals
+    upvar ::Jabber::jstate jstate
 
     
 }
 
 proc ::Jabber::MUC::RoomConfig {roomjid} {
+    upvar [namespace current]::${roomjid}::locals locals
+    upvar ::Jabber::jstate jstate
     
     
+}
+
+# Jabber::MUC::SetNick --
+# 
+# 
+
+proc ::Jabber::MUC::SetNick {roomjid} {
+    global  prefs this sysFont
+
+    variable finsetnick
+    variable uid
+    upvar ::Jabber::jstate jstate
+    set w .muc[incr uid]
+
+    toplevel $w
+    if {[string match "mac*" $this(platform)]} {
+	eval $::macWindowStyle $w documentProc
+    } else {
+	
+    }
+    wm title $w {Set New Nickname}
+    set finsetnick -1
+    
+    # Global frame.
+    pack [frame $w.frall -borderwidth 1 -relief raised]   \
+      -fill both -expand 1 -ipadx 4
+    pack [message $w.frall.msg -width 220 -font $sysFont(s)  \
+      -text "Select a new nick name."] -side top -fill both -padx 4 -pady 2
+    
+    set wmid $w.frall.fr
+    pack [frame $wmid] -side top -fill x -expand 1 -padx 6
+    label $wmid.la -font $sysFont(sb) -text "New Nick:"
+    entry $wmid.en -textvariable [namespace current]::locals($roomjid,nick) \
+       -validate key -validatecommand {::Jabber::ValidateJIDChars %S}
+    grid $wmid.la -column 0 -row 0 -sticky e -padx 2 
+    grid $wmid.en -column 1 -row 0 -sticky ew -padx 2 
+    
+    # Button part.
+    set frbot [frame $w.frall.frbot -borderwidth 0]
+    pack $frbot  -side bottom -fill x -padx 10 -pady 8
+    pack [button $frbot.btok -text [::msgcat::mc OK] -width 8  \
+      -default active -command "set [namespace current]::finsetnick 1"] \
+      -side right -padx 5 -pady 5
+    pack [button $frbot.btcan -text [::msgcat::mc Cancel] -width 8  \
+      -command "set [namespace current]::finsetnick 0"]  \
+      -side right -padx 5 -pady 5  
+    
+    wm resizable $w 0 0
+    bind $w <Return> [list $frbot.btok invoke]
+    
+    # Grab and focus.
+    set oldFocus [focus]
+    focus $w
+    catch {grab $w}
+    
+    # Wait here for a button press.
+    tkwait variable [namespace current]::finsetnick
+    
+    catch {grab release $w}
+    destroy $w
+    focus $oldFocus
+    
+    if {$finsetnick == 1} {
+	if {[catch {
+	    $jstate(jlib) muc setnick $roomjid $locals($roomjid,nick) \
+	      -command [list [namespace current]::IQCallback $roomjid]
+	} err]} {
+	    tk_messageBox -type ok -icon error -title "Network Error" \
+	      -message "Network error ocurred: $err"
+	}
+    }
+
+    return $finsetnick
 }
 
 proc ::Jabber::MUC::Destroy {roomjid} {
+    upvar ::Jabber::jstate jstate
 
     
 }
 
+proc ::Jabber::MUC::IQCallback {jlibname type subiq} {
+    
+    puts "::Jabber::MUC::IQCallback type=$type"
+    if {$type == "error"} {
+	
+	
+	
+    }
+}
+
+proc ::Jabber::MUC::Close {roomjid} {
+    upvar [namespace current]::${roomjid}::locals locals
+
+    catch {destroy $locals($roomjid,w)}
+    namespace delete [namespace current]::${roomjid}
+}
 
 #-------------------------------------------------------------------------------

@@ -723,6 +723,7 @@ Server stored info is searchable by any user.}
 	::msgcat::mcset en prefroallow   {Allow users without subscription}
 	::msgcat::mcset en prefroclr     {Clear roster when logout}
 	::msgcat::mcset en prefrochat    {Chat when double-click user, else normal message}
+	::msgcat::mcset en prefrosysicons {Use foreign IM system icons}
 	::msgcat::mcset en prefblonly    {Only accept messages from people in my roster}
 	::msgcat::mcset en prefblbl      {Block the following JID's (* wildcards possible):}
 	::msgcat::mcset en prefblmsg     {Write the complete JID for the user you\
@@ -824,8 +825,7 @@ want to add to the list of services, for instance, "jabber.org".}
 	::msgcat::mcset en jaupdatepri	{This update is %s}
 	::msgcat::mcset en jaupdatenewver {The new version is: %s}
 	::msgcat::mcset en jaupdateremind {Don't remind me about this anymore}
-	::msgcat::mcset en jasettopic   {Set new topic for this groupchat.\
-It is set with the first message you send.}
+	::msgcat::mcset en jasettopic   {Set new topic for this groupchat.}
 
 
 }

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.2 2003-05-18 13:20:20 matben Exp $
+# $Id: Roster.tcl,v 1.3 2003-05-20 16:22:30 matben Exp $
 
 package provide Roster 1.0
 
@@ -1170,7 +1170,7 @@ proc ::Jabber::Roster::GetPresenceIcon {jid presence args} {
     }
     #puts "key=$key"
     
-    if {$jprefs(customIMsystemsIcons) &&  \
+    if {$jprefs(haveIMsysIcons) &&  \
       [$jstate(browse) isbrowsed $jserver(this)]} {
 	
 	# Use the host part of the jid to investigate the type of IM system.
@@ -1299,13 +1299,13 @@ proc ::Jabber::Roster::BuildStatusMenuDef { } {
     return $statMenuDef
 }
 
-# Jabber::Roster::UpdateIcons --
+# Jabber::Roster::UpdateForeignIcons --
 
-proc ::Jabber::Roster::UpdateIcons { } {
+proc ::Jabber::Roster::UpdateForeignIcons { } {
     variable wtree    
     upvar ::Jabber::jprefs jprefs
 
-    if {!$jprefs(customIMsystemsIcons)} {
+    if {!$jprefs(haveIMsysIcons)} {
 	return
     }
     

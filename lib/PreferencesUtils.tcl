@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.6 2003-05-18 13:20:22 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.7 2003-05-20 16:22:31 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -310,6 +310,7 @@ proc ::PreferencesUtils::SetWidgetDefaultOptions { } {
     option add *Entry.HighlightColor #6363CE
     option add *Entry.HighlightBackground $prefs(bgColGeneral)
     option add *Entry.DisableBackground $prefs(bgColGeneral)
+    option add *Entry.DisableForeground gray20
     option add *Listbox.HighlightColor #6363CE
     option add *Listbox.HighlightBackground $prefs(bgColGeneral)
     option add *Radiobutton.Font $sysFont(s)
@@ -466,6 +467,7 @@ proc ::PreferencesUtils::SetUserPreferences { } {
 	  [list ::Jabber::jprefs(xawaymsg)         jprefs_xawaymsg          $::Jabber::jprefs(xawaymsg)]  \
 	  [list ::Jabber::jprefs(logoutStatus)     jprefs_logoutStatus      $::Jabber::jprefs(logoutStatus)]  \
 	  [list ::Jabber::jprefs(chatFont)         jprefs_chatFont          $::Jabber::jprefs(chatFont)]  \
+	  [list ::Jabber::jprefs(haveIMsysIcons)   jprefs_haveIMsysIcons    $::Jabber::jprefs(haveIMsysIcons)]  \
 	  [list ::Jabber::jprefs(autoupdateShow,$ver) jprefs_autoupdateShow_ver $::Jabber::jprefs(autoupdateShow,$ver)]  \
 	  [list ::Jabber::jserver(profile)         jserver_profile          $::Jabber::jserver(profile)      userDefault] \
 	  [list ::Jabber::jserver(profile,selected) jserver_profile_selected $::Jabber::jserver(profile,selected) userDefault] \
