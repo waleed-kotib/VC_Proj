@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Sounds.tcl,v 1.3 2004-07-09 06:26:06 matben Exp $
+# $Id: Sounds.tcl,v 1.4 2004-07-22 15:11:28 matben Exp $
 
 namespace eval ::Sounds:: {
         
@@ -94,14 +94,14 @@ proc ::Sounds::InitEventHooks { } {
     ::hooks::add prefsCancelHook        ::Sounds::CancelPrefsHook
     ::hooks::add prefsUserDefaultsHook  ::Sounds::UserDefaultsHook
 
-    ::hooks::add initHook               ::Sounds::InitHook
+    ::hooks::add launchFinalHook        ::Sounds::InitHook
 }
 
 proc ::Sounds::InitHook { } {
     
     ::Debug 2 "::Sounds::InitHook"
     
-    after 1200 ::Sounds::Init
+    after 200 ::Sounds::Init
 }
 
 # Sounds::Init --

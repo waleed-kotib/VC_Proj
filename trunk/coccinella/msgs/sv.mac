@@ -149,6 +149,7 @@
 ::msgcat::mcset sv mPreferences		{Inställningar}
 ::msgcat::mcset sv mJabber		{Jabber}
 ::msgcat::mcset sv mItems		{Objekt}
+::msgcat::mcset sv mLibrary		{Bibliotek}
 ::msgcat::mcset sv mInfo		{Info}
 ::msgcat::mcset sv mAddons		{Addons}
 ::msgcat::mcset sv mPlugins		{Plugginer}

@@ -9,15 +9,18 @@ namespace eval ::ComponentExample:: {
 
 proc ::ComponentExample::Init { } {
 
+    ::Debug 2 "::ComponentExample::Init"
+    
     set menuspec [list  \
       command {More Junk...} [namespace current]::Cmd normal {} {} {}]
     set popMenuSpec [list "Plugin Junk" user [namespace current]::Cmd]
     
     ::hooks::add whiteboardFixMenusWhenHook [namespace current]::FixMenu
     
-    ::UI::Public::RegisterMenuEntry junk "Mats Junk" $menuspec
-    ::Jabber::UI::RegisterMenuEntry jabber Jabber $menuspec
-    ::Jabber::UI::RegisterMenuEntry file File $menuspec
+    ::UI::Public::RegisterNewMenu junk "Mats Junk" $menuspec
+    ::UI::Public::RegisterMenuEntry file $menuspec
+    ::Jabber::UI::RegisterMenuEntry jabber $menuspec
+    ::Jabber::UI::RegisterMenuEntry file $menuspec
     ::Jabber::UI::RegisterPopupEntry roster $popMenuSpec
     
     component::register ComponentExample  \

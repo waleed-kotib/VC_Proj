@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.16 2004-07-09 06:26:05 matben Exp $
+# $Id: JWB.tcl,v 1.17 2004-07-22 15:11:27 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -93,6 +93,8 @@ proc ::Jabber::WB::Init {jlibName} {
 proc ::Jabber::WB::InitUI { } {
     global  prefs
     variable initted
+    
+    ::Debug 2 "::Jabber::WB::InitUI"
 
     set buttonTrayDefs {
 	save       {::CanvasFile::DoSaveCanvasFile $wtop}
@@ -129,6 +131,15 @@ proc ::Jabber::WB::InitUI { } {
     # If embedded the embedding app should close us down.
     if {$prefs(embedded)} {
 	lset menuDefsFile end 3 disabled
+    }
+    
+    # Get any registered menu entries.
+    # I don't like this solution!
+    set insertInd [expr [llength $menuDefsFile] - 1]
+    set mdef [::UI::Public::GetRegisteredMenuDefs file]
+    if {$mdef != ""} {
+	set menuDefsFile [linsert $menuDefsFile $insertInd {separator}]
+	set menuDefsFile [linsert $menuDefsFile $insertInd $mdef]
     }
     ::WB::SetMenuDefs file $menuDefsFile
 

@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.65 2004-07-09 06:26:05 matben Exp $
+# $Id: Coccinella.tcl,v 1.66 2004-07-22 15:11:27 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -138,12 +138,14 @@ proc CallTrace {num} {
 	}
     }
 }
-
-proc TraceVar {name1 name2 op} {
-
+if {0} {
+    proc TraceVar {name1 name2 op} {
+	puts "$name1 $name2 $op"
+	CallTrace 4
+    }
+    namespace eval ::WB:: {}
+    trace add variable ::WB::menuDefs(main,file) write TraceVar
 }
-#namespace eval ::Types:: {}
-#trace add variable ::Types::mime2SuffList write TraceVar
 
 #  Make sure that we are in the directory of the application itself.     
 if {[string equal $this(platform) "unix"]} {
@@ -216,6 +218,7 @@ set this(msgcatPath)        [file join $this(path) msgs]
 set this(docsPath)          [file join $this(path) docs]
 set this(itemPath)          [file join $this(path) items]
 set this(pluginsPath)       [file join $this(path) plugins]
+set this(appletsPath)       [file join $this(path) plugins applets]
 set this(emoticonsPath)     [file join $this(path) iconsets emoticons]
 set this(altEmoticonsPath)  [file join $this(prefsPath) iconsets emoticons]
 set this(httpdRootPath)     $this(path)
@@ -329,6 +332,13 @@ if {[file exists $this(binPath)]} {
     set auto_path [concat [list $this(binPath)] $auto_path]
 } else {
     set this(binPath) {}
+}
+
+# See if we have Itcl avialable already here; import namespace.
+set prefs(haveItcl) 0
+if {![catch {package require Itcl 3.3}]} {
+    namespace import ::itcl::*
+    set prefs(haveItcl) 1
 }
 
 # Read our theme prefs file, if any, containing the theme name and locale.
@@ -486,7 +496,6 @@ if {$prefs(Thread)} {
 if {!$prefs(stripJabber)} {
     ::SplashScreen::SetMsg [mc splashsourcejabb]
     package require Jabber
-    #package require Sounds
 }
 
 # Beware! [info hostname] can be very slow on Macs first time it is called.
@@ -513,6 +522,10 @@ if {!$prefs(stripJabber)} {
 
 # Define MIME types etc.
 ::Types::Init
+
+# To provide code to be run before loading componenets.
+::Debug 2 "earlyInitHook"
+::hooks::run earlyInitHook
 
 # Components.
 ::Debug 2 "component::load"
@@ -600,6 +613,7 @@ if {[string equal $this(platform) "windows"]} {
 }
 wm protocol . WM_DELETE_WINDOW {::UI::DoCloseWindow .}
 
+# Just experimenting with the 'tile' extension...
 if {0} {
     package require tile
     foreach name {button radiobutton checkbutton menubutton scrollbar \
@@ -712,5 +726,8 @@ if {!$prefs(doneAutoUpdate) &&  \
   ([package vcompare $prefs(fullVers) $prefs(lastAutoUpdateVersion)] > 0)} {
     after 10000 ::AutoUpdate::Get $prefs(urlAutoUpdate)  
 }
+
+update idletasks
+::hooks::run launchFinalHook
 
 #-------------------------------------------------------------------------------

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.45 2004-07-09 06:26:05 matben Exp $
+# $Id: JUI.tcl,v 1.46 2004-07-22 15:11:27 matben Exp $
 
 package provide JUI 1.0
 
@@ -76,6 +76,7 @@ namespace eval ::Jabber::UI:: {
     
     # Menu definitions for the Roster/services window.
     variable menuDefs
+    
     set menuDefs(rost,file) {
 	{command   mNewWhiteboard      {::Jabber::WB::NewWhiteboard}  normal   N}
 	{command   mCloseWindow        {::UI::DoCloseWindow}          normal   W}
@@ -126,11 +127,18 @@ namespace eval ::Jabber::UI:: {
 	lset menuDefs(rost,jabber) 12 6 [::Jabber::Roster::BuildStatusMenuDef]
     }
 
-    set menuDefs(min,edit) {    
+    set menuDefs(rost,edit) {    
 	{command   mCut              {::UI::CutCopyPasteCmd cut}      disabled X}
 	{command   mCopy             {::UI::CutCopyPasteCmd copy}     disabled C}
 	{command   mPaste            {::UI::CutCopyPasteCmd paste}    disabled V}
     }
+    
+    # When registering new menu entries they shall be added at:
+    variable menuDefsInsertInd
+    set menuDefsInsertInd(rost,file)   [expr [llength $menuDefs(rost,file)]-2]
+    set menuDefsInsertInd(rost,edit)   [expr [llength $menuDefs(rost,edit)]]
+    set menuDefsInsertInd(rost,jabber) [expr [llength $menuDefs(rost,jabber)]-2]
+    set menuDefsInsertInd(rost,info)   [expr [llength $menuDefs(rost,info)]-3]
 }
 
 proc ::Jabber::UI::Show {w args} {
@@ -199,7 +207,7 @@ proc ::Jabber::UI::Build {w} {
     }
     ::UI::NewMenu $wtop ${wmenu}.file    mFile     $menuDefs(rost,file)  normal
     if {[string match "mac*" $this(platform)]} {
-	::UI::NewMenu $wtop ${wmenu}.edit  mEdit   $menuDefs(min,edit)   normal
+	::UI::NewMenu $wtop ${wmenu}.edit  mEdit   $menuDefs(rost,edit)   normal
     }
     ::UI::NewMenu $wtop ${wmenu}.jabber  mJabber   $menuDefs(rost,jabber) normal
     ::UI::NewMenu $wtop ${wmenu}.info    mInfo     $menuDefs(rost,info)   normal
@@ -578,8 +586,9 @@ proc ::Jabber::UI::RegisterPopupEntry {which menuSpec} {
 # 
 #       Lets plugins/components register their own menu entry.
 
-proc ::Jabber::UI::RegisterMenuEntry {wpath name menuSpec} {
+proc ::Jabber::UI::RegisterMenuEntry {mtail menuSpec} {
     variable menuDefs
+    variable menuDefsInsertInd
     
     # Keeps track of all registered menu entries.
     variable rostMenuSpec
@@ -587,29 +596,16 @@ proc ::Jabber::UI::RegisterMenuEntry {wpath name menuSpec} {
     # Add these entries in a section above the bottom section.
     # Add separator to section component entries.
     
-    switch -- $wpath {
-	jabber {
-	    set ind [lindex [lsearch -all $menuDefs(rost,jabber) "separator"] end]
-	    if {![info exists rostMenuSpec(jabber)]} {
+    if {![info exists rostMenuSpec($mtail)]} {
 
-		# Add separator if this is the first addon entry.
-		set menuDefs(rost,jabber) [linsert $menuDefs(rost,jabber)  \
-		  $ind {separator}]
-		incr ind
-	    }
-	    set menuDefs(rost,jabber) [linsert $menuDefs(rost,jabber)  \
-	      $ind $menuSpec]
-	    lappend rostMenuSpec(jabber) [list $menuSpec]
-	}
-	file {	    
-	    if {![info exists rostMenuSpec(file)]} {
-		set menuDefs(rost,file) [linsert $menuDefs(rost,file) end-2 \
-		  {separator}]
-	    }
-	    set menuDefs(rost,file) [linsert $menuDefs(rost,file) end-2 $menuSpec]
-	    lappend rostMenuSpec(file) [list $menuSpec]
-	}
+	# Add separator if this is the first addon entry.
+	set menuDefs(rost,$mtail) [linsert $menuDefs(rost,$mtail)  \
+	  $menuDefsInsertInd(rost,$mtail) {separator}]
+	incr menuDefsInsertInd(rost,$mtail)
     }
+    set menuDefs(rost,$mtail) [linsert $menuDefs(rost,$mtail)  \
+      $menuDefsInsertInd(rost,$mtail) $menuSpec]
+    lappend rostMenuSpec($mtail) [list $menuSpec]
 }
 
 # Jabber::UI::FixUIWhen --

@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Plugins.tcl,v 1.5 2004-07-09 06:26:06 matben Exp $
+# $Id: Plugins.tcl,v 1.6 2004-07-22 15:11:28 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -1038,7 +1038,7 @@ proc ::Plugins::DeleteMimeType {mime} {
 # canvasBindList:
 #       {buttonName bindCommand ?buttonName bindCommand ...?}
 #       ex: { point {{bind MyFrame <Button-1>} {::My::Clicked %W %X %Y}} }
-
+#       ex: { point {{%W bind card <Button-1>} {::My::Clicked %W %X %Y}} }
 
 proc ::Plugins::LoadPluginDirectory {dir} {
     
@@ -1064,7 +1064,7 @@ proc ::Plugins::Load {fileName initProc} {
 
 proc ::Plugins::Register {name defList canvasBindList} {
     variable plugin
-    variable canvasbinds
+    variable canvasClassBinds
     
     ::Debug 2 "::Plugins::Register name=$name"
     
@@ -1088,13 +1088,14 @@ proc ::Plugins::Register {name defList canvasBindList} {
     if {[info exists plugin($name,winClass)]} {
 	set winClass $plugin($name,winClass)
 	set plugin($winClass,importProc) $plugin($name,importProc)
-	set plugin($winClass,saveProc) $plugin($name,saveProc)
+	set plugin($winClass,saveProc)   $plugin($name,saveProc)
     }
     
     # Cache canvas binds for each whiteboard tool.
     foreach {btname bindDef} $canvasBindList {
-	lappend canvasbinds($name,$btname) $bindDef
-    }   
+	lappend canvasClassBinds($name,$btname) $bindDef
+    }
+    set canvasClassBinds($name,name) $name
     set plugin($name,loaded) 1
 }
 
@@ -1104,18 +1105,66 @@ proc ::Plugins::Register {name defList canvasBindList} {
 
 proc ::Plugins::DeRegister {name} {
     variable plugin
-    variable canvasbinds
+    variable canvasClassBinds
     
-    set ind [lsearch $plugin(allExternalPacks) $name]
-    if {$ind >= 0} {
-	set plugin(allExternalPacks)  \
-	  [lreplace $plugin(allExternalPacks) $ind $ind]
-    }
+    set plugin(allExternalPacks) \
+      [lsearch -all -inline -not $plugin(allExternalPacks) $name]
     set plugin(allPacks)  \
       [concat $plugin(allInternalPacks) $plugin(allExternalPacks)]
     set plugin(all) [concat $plugin(allPacks) $plugin(allApps)]
     array unset plugin "${name},*"
-    array unset canvasbinds "${name},*"
+    array unset canvasClassBinds "${name},*"
+}
+
+# Plugins::RegisterCanvasClassBinds --
+# 
+#       Register canvas bindings directly.
+#       These are applied to all whiteboards.
+
+proc ::Plugins::RegisterCanvasClassBinds {name bindList} {
+    variable plugin
+    variable canvasClassBinds
+    
+    # Cache canvas binds for each whiteboard tool.
+    foreach {btname bindDef} $bindList {
+	lappend canvasClassBinds($name,$btname) $bindDef
+    }
+    set canvasClassBinds($name,name) $name
+}
+
+proc ::Plugins::DeregisterCanvasClassBinds {{name {}}} {
+    variable canvasClassBinds
+
+    if {$name == ""} {
+	array unset canvasClassBinds
+    } else {
+	array unset canvasClassBinds "${name},*"
+    }
+}
+
+# Plugins::RegisterCanvasInstBinds --
+# 
+#       Register canvas bindings directly for the specific canvas instance.
+
+proc ::Plugins::RegisterCanvasInstBinds {w name bindList} {
+    variable plugin
+    variable canvasInstBinds
+    
+    # Cache canvas binds for each whiteboard tool.
+    foreach {btname bindDef} $bindList {
+	lappend canvasInstBinds($w,$name,$btname) $bindDef
+    }
+    set canvasInstBinds($w,$name,name) $name
+}
+
+proc ::Plugins::DeregisterCanvasInstBinds {w {name {}}} {
+    variable canvasInstBinds
+
+    if {$name == ""} {
+	array unset canvasInstBinds "${w},*"
+    } else {
+	array unset canvasInstBinds "${w},${name},*"
+    }
 }
 
 # Plugins::SetCanvasBinds --
@@ -1125,28 +1174,65 @@ proc ::Plugins::DeRegister {name} {
 
 proc ::Plugins::SetCanvasBinds {wcan oldTool newTool} {
     variable plugin
-    variable canvasbinds
+    variable canvasClassBinds
+    variable canvasInstBinds
     
     ::Debug 3 "::Plugins::SetCanvasBinds oldTool=$oldTool, newTool=$newTool"
+
+    # Canvas class bindings.
+    foreach key [array names canvasClassBinds *,name] {
+	set name $canvasClassBinds($key)
     
-    foreach plugName $plugin(allExternalPacks) {
-	
 	# Remove any previous binds.
-	if {($oldTool != "") && [info exists canvasbinds($plugName,$oldTool)]} {
-	    foreach bindStuff $canvasbinds($plugName,$oldTool) {
+	if {($oldTool != "") && [info exists canvasClassBinds($name,$oldTool)]} {
+	    foreach bindStuff $canvasClassBinds($name,$oldTool) {
 		foreach {bindDef cmd} $bindStuff {
+		    #set bindDef [subst -nocommands -nobackslashes $bindDef]
+		    regsub -all {\\|&} $bindDef {\\\0} bindDef
+		    regsub -all {%W} $bindDef $wcan bindDef
 		    eval $bindDef {{}}
 		}
 	    }
 	}
 	
 	# Add registered binds.
-	if {($newTool != "") && [info exists canvasbinds($plugName,$newTool)]} {
-	    foreach bindStuff $canvasbinds($plugName,$newTool) {
+	if {($newTool != "") && [info exists canvasClassBinds($name,$newTool)]} {
+	    foreach bindStuff $canvasClassBinds($name,$newTool) {
 		foreach {bindDef cmd} $bindStuff {
-		    
-		    # $wcan substitution.
-		    set cmd [subst -nocommands -nobackslashes $cmd]
+		    #set bindDef [subst -nocommands -nobackslashes $bindDef]
+		    #set cmd     [subst -nocommands -nobackslashes $cmd]
+		    regsub -all {\\|&} $bindDef {\\\0} bindDef
+		    regsub -all {%W} $bindDef $wcan bindDef
+		    eval $bindDef [list $cmd]
+		}
+	    }
+	}
+    }
+    
+    # Instance specific bindings.
+    foreach key [array names canvasInstBinds $wcan,*,name] {
+	set name $canvasInstBinds($key)
+    
+	# Remove any previous binds.
+	if {($oldTool != "") && [info exists canvasInstBinds($wcan,$name,$oldTool)]} {
+	    foreach bindStuff $canvasInstBinds($wcan,$name,$oldTool) {
+		foreach {bindDef cmd} $bindStuff {
+		    #set bindDef [subst -nocommands -nobackslashes $bindDef]
+		    regsub -all {\\|&} $bindDef {\\\0} bindDef
+		    regsub -all {%W} $bindDef $wcan bindDef
+		    eval $bindDef {{}}
+		}
+	    }
+	}
+	
+	# Add registered binds.
+	if {($newTool != "") && [info exists canvasInstBinds($wcan,$name,$newTool)]} {
+	    foreach bindStuff $canvasInstBinds($wcan,$name,$newTool) {
+		foreach {bindDef cmd} $bindStuff {
+		    #set bindDef [subst -nocommands -nobackslashes $bindDef]
+		    #set cmd     [subst -nocommands -nobackslashes $cmd]
+		    regsub -all {\\|&} $bindDef {\\\0} bindDef
+		    regsub -all {%W} $bindDef $wcan bindDef
 		    eval $bindDef [list $cmd]
 		}
 	    }

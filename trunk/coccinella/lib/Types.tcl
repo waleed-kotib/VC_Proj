@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Types.tcl,v 1.9 2004-05-13 13:50:22 matben Exp $
+# $Id: Types.tcl,v 1.10 2004-07-22 15:11:27 matben Exp $
 
 package provide Types 1.0
 
@@ -25,6 +25,7 @@ namespace eval ::Types:: {
 	application/x-world  {.3dmf .3dm  .qd3d .qd3}
 	application/x-3dmf   {.3dmf .3dm  .qd3d .qd3}
 	application/x-tcl    {.tcl}
+	application/x-itcl   {.itcl}
 	application/sdp      {.sdp}
 	application/x-shockwave-flash  {.swf}
 	application/macbinary {.bin}
@@ -89,6 +90,7 @@ namespace eval ::Types:: {
 	application/x-world  {World Application}
 	application/x-3dmf   {3D Meta Format}
 	application/x-tcl    {Tcl Application}
+	application/x-itcl   {Itcl Application}
 	application/sdp      {Session Description Protocol}
 	application/x-shockwave-flash  {Shockwave Flash}
 	application/macbinary {Mac Binary}
@@ -150,6 +152,7 @@ namespace eval ::Types:: {
     array set mime2MacTypeList {
 	application/octet-stream {BINA}
 	application/x-tcl    {TEXT}
+	application/x-itcl   {TEXT}
 	application/x-world  {3DMF}
 	application/x-3dmf   {3DMF}
 	application/sdp      {TEXT}

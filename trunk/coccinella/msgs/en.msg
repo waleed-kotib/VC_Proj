@@ -150,6 +150,7 @@
 ::msgcat::mcset en mPreferences		{Preferences}
 ::msgcat::mcset en mJabber		{Jabber}
 ::msgcat::mcset en mItems		{Items}
+::msgcat::mcset en mLibrary		{Library}
 ::msgcat::mcset en mInfo		{Info}
 ::msgcat::mcset en mAddons		{Addons}
 ::msgcat::mcset en mPlugins		{Plugins}

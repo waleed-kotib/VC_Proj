@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasFile.tcl,v 1.3 2004-07-09 06:26:06 matben Exp $
+# $Id: CanvasFile.tcl,v 1.4 2004-07-22 15:11:28 matben Exp $
  
 package require can2svg
 package require svg2can
@@ -252,7 +252,7 @@ proc ::CanvasFile::FileToCanvasVer1 {w fd absPath args} {
 	    
 	    # Write to other clients.
 	    if {[string equal $where "all"] || [string equal $where "remote"]} {
-		::CanvasUtils::Command $wtop $cmdoneline "remote"
+		::CanvasUtils::Command $wtop $cmdoneline remote
 	    } elseif {![string equal $where "local"]} {
 		
 		# Write only to specified client with ip number 'where'.
@@ -356,7 +356,7 @@ proc ::CanvasFile::FileToCanvasVer2 {w fd absPath args} {
 		# Write to other clients.
 		if {[string equal $where "all"] || \
 		  [string equal $where "remote"]} {
-		    ::CanvasUtils::Command $wtop $cmdoneline "remote"
+		    ::CanvasUtils::Command $wtop $cmdoneline remote
 		} elseif {![string equal $where "local"]} {
 		    
 		    # Write only to specified client with ip number 'where'.
@@ -436,35 +436,47 @@ proc ::CanvasFile::CanvasToFile {w fd absPath} {
     
     foreach id [$w find all] {
 	
-	# Do not save grid or markers.
+	# Save only items here that have a 'std' in its taglist (not windows).
 	set tags [$w gettags $id]
-	if {([lsearch $tags notactive] >= 0) || ([lsearch $tags tbbox] >= 0)} {
-	    continue
-	}
 	set type [$w type $id]
-
-	switch -- $type {
-	    image {
+	set havestd [expr [lsearch -exact $tags std] < 0 ? 0 : 1]
+		   
+	switch -glob -- $type,$havestd {
+	    image,1 {
 		set line [::CanvasUtils::GetOnelinerForImage $w $id  \
 		  -basepath $absPath]
 		puts $fd $line
 	    } 
-	    window {
+	    window,* {
 		set line [::CanvasUtils::GetOneLinerForWindow $w $id \
 		  -basepath $absPath]
 		if {$line != {}} {
 		    puts $fd $line		    
 		}
 	    }
-	    default {
+	    *,1 {
 	
-		# A standard canvas item.	
+		# A standard canvas item with 'std' tag.	
 		# Skip text items without any text.	
 		if {($type == "text") && ([$w itemcget $id -text] == "")} {
 		    continue
 		}
 		set cmd [::CanvasUtils::GetOnelinerForItem $w $id]
 		puts $fd $cmd
+	    }
+	    default {
+		
+		# A non window item witout 'std' tag.
+		# Look for any Itcl object with a Save method.
+		if {$prefs(haveItcl)} {
+		    if {[regexp {object:([^ ]+)} $tags match object]} {
+			if {![catch {$object Save $id} line]} {
+			    if {$line != {}} {
+				puts $fd $line		    
+			    }
+			}
+		    }
+		}
 	    }
 	}
     }

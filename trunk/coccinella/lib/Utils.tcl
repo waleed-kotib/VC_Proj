@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.23 2004-07-09 06:26:06 matben Exp $
+# $Id: Utils.tcl,v 1.24 2004-07-22 15:11:27 matben Exp $
 
 namespace eval ::Utils:: {
 
@@ -484,6 +484,54 @@ proc ::Utils::ProgressFree {token} {
     catch {destroy $progress($token,w)}
     ::Timing::Reset $token
     array unset progress $token,*
+}
+
+#--- Animation -----------------------------------------------------------------
+
+namespace eval ::Utils:: {
+    variable anim
+    set anim(uid) 0
+}
+
+proc ::Utils::AnimateStart {delay vlist command} {
+    variable anim
+    
+    set uid [incr anim(uid)]
+    set anim($uid,delay) $delay
+    set anim($uid,vlist) $vlist
+    set anim($uid,command) $command
+    set anim($uid,pos) 0
+    set anim($uid,pending) [after $delay [namespace current]::AnimateHandle $uid]
+ 
+    return $uid
+}
+
+proc ::Utils::AnimateHandle {uid} {
+    variable anim
+
+    if {[info exists anim($uid,pending)]} {
+	set pos $anim($uid,pos)
+	set cmd $anim($uid,command)
+	set val [lindex $anim($uid,vlist) $pos]
+	regsub -all {\\|&} $val {\\\0} val
+	regsub -all {%v} $cmd $val cmd
+	uplevel #0 $cmd
+	if {[incr pos] >= [llength $anim($uid,vlist)]} {
+	    set pos 0
+	}
+	set anim($uid,pos) $pos
+	set anim($uid,pending) \
+	  [after $anim($uid,delay) [namespace current]::AnimateHandle $uid]
+    }
+}
+
+proc ::Utils::AnimateStop {uid} {
+    variable anim
+
+    if {[info exists anim($uid,pending)]} {
+	after cancel $anim($uid,pending)
+    }
+    array unset anim $uid,*
 }
 
 #--- Timing --------------------------------------------------------------------

@@ -152,6 +152,7 @@
 ::msgcat::mcset de mPreferences		{Einstellungen}
 ::msgcat::mcset de mJabber		{Jabber}
 ::msgcat::mcset de mItems		{Elemente}
+::msgcat::mcset de mLibrary		{Library}
 ::msgcat::mcset de mInfo		{Information}
 ::msgcat::mcset de mAddons		{Zusätze}
 ::msgcat::mcset de mPlugins		{Erweiterungen}
