@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.9 2003-11-04 09:44:27 matben Exp $
+# $Id: Browse.tcl,v 1.10 2003-11-06 08:40:29 matben Exp $
 
 package provide Browse 1.0
 
@@ -27,6 +27,11 @@ namespace eval ::Jabber::Browse:: {
     # Just a dummy widget name for the running arrows until it's built.
     variable wsearrows .xx
     variable dlguid 0
+    
+    # Use a unique canvas tag in the tree widget for each jid put there.
+    # This is needed for the balloons that need a real canvas tag, and that
+    # we can't use jid's for this since they may contain special chars (!)!
+    variable treeuid 0
 }
 
 # Jabber::Browse::GetAll --
@@ -359,7 +364,6 @@ proc ::Jabber::Browse::Build {w} {
     global  this sysFont prefs
     
     variable wtree
-    variable wtreecanvas
     variable wsearrows
     variable wtop
     variable btaddserv
@@ -394,7 +398,7 @@ proc ::Jabber::Browse::Build {w} {
       -selectcommand ::Jabber::Browse::SelectCmd   \
       -opencommand ::Jabber::Browse::OpenTreeCmd   \
       -highlightcolor #6363CE -highlightbackground $prefs(bgColGeneral)
-    set wtreecanvas [$wtree getcanvas]
+
     if {[string match "mac*" $this(platform)]} {
 	$wtree configure -buttonpresscommand  \
 	  [list ::Jabber::UI::Popup browse]
@@ -425,8 +429,8 @@ proc ::Jabber::Browse::Build {w} {
 
 proc ::Jabber::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {    
     variable wtree
-    variable wtreecanvas
     variable options
+    variable treeuid
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::nsToText nsToText
     
@@ -437,6 +441,7 @@ proc ::Jabber::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
     if {[string equal $category "item"] && [info exists attrArr(category)]} {
 	set category $attrArr(category)
     }
+    set treectag item[incr treeuid]
 
     if {$options(-setbrowsedjid)} {}
     
@@ -476,9 +481,11 @@ proc ::Jabber::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
 	    } elseif {$options(-setbrowsedjid) || !$browsedjid} {
 		
 		# Set this jid in tree widget.
-		set txt $jid
+		set txt $jid		
 		if {[info exists attrArr(name)]} {
 		    set txt $attrArr(name)
+		} elseif {[regexp {^([^@]+)@.*} $jid match user]} {
+		    set txt $user
 		}
 		
 		# If three-tier jid, then dead-end.
@@ -502,19 +509,21 @@ proc ::Jabber::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
 			set icon [::Jabber::Roster::GetPresenceIcon $jid \
 			  "available"]
 			
-			$wtree newitem $jidList -dir 0  \
-			  -text $txt -image $icon -tags $jid
+			$wtree newitem $jidList -dir 0 -text $txt \
+			  -image $icon -tags $jid -canvastags $treectag
 		    } else {
-			$wtree newitem $jidList -text $txt -tags $jid
+			$wtree newitem $jidList -text $txt -tags $jid \
+			  -canvastags $treectag
 		    }
 		} elseif {[string equal $category "service"]} {
-		    $wtree newitem $jidList -text $txt -tags $jid -style bold
+		    $wtree newitem $jidList -text $txt -tags $jid -style bold \
+		      -canvastags $treectag
 		} else {
 		    
 		    # This is a service, transport, room, etc.
 		    set isOpen [expr [llength $allChildren] ? 1 : 0]
 		    $wtree newitem $jidList -dir 1 -open $isOpen -text $txt \
-		      -tags $jid
+		      -tags $jid -canvastags $treectag
 		}
 		set typesubtype [$jstate(browse) gettype $jid]
 		set jidtxt $jid
@@ -522,7 +531,7 @@ proc ::Jabber::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
 		    set jidtxt "[string range $jid 0 28]..."
 		}
 		set msg "jid: $jidtxt\ntype: $typesubtype"
-		::balloonhelp::balloonforcanvas $wtreecanvas $jid $msg
+		::balloonhelp::balloonfortree $wtree $treectag $msg
 	    }
 	    
 	    # If any child elements, call ourself recursively.
