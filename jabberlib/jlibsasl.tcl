@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: jlibsasl.tcl,v 1.10 2004-10-20 13:35:59 matben Exp $
+# $Id: jlibsasl.tcl,v 1.11 2004-12-13 13:39:19 matben Exp $
 
 # We need to be flexible here since can have cyrus based sasl or our 
 # own special pure tcl saslmd5.
@@ -399,7 +399,7 @@ proc jlib::resource_bind_cb {jlibname type subiq} {
 	    # Establish the session.
 	    set xmllist [wrapper::createtag session \
 	      -attrlist [list xmlns $xmppns(session)]]
-	    send_iq $jlibname set $xmllist -command \
+	    send_iq $jlibname set [list $xmllist] -command \
 	      [list [namespace current]::send_session_cb $jlibname]
 	}
     }

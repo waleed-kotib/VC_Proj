@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.76 2004-12-08 08:21:19 matben Exp $
+# $Id: jabberlib.tcl,v 1.77 2004-12-13 13:39:19 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -1627,7 +1627,7 @@ proc jlib::bind_resource {jlibname resource cmd} {
     set xmllist [wrapper::createtag bind \
       -attrlist [list xmlns $xmppns(bind)] \
       -subtags [list [wrapper::createtag resource -chdata $resource]]]
-    send_iq $jlibname set $xmllist -command \
+    send_iq $jlibname set [list $xmllist] -command \
       [list [namespace current]::parse_bind_resource $jlibname $cmd]
 }
 
@@ -2036,10 +2036,7 @@ proc jlib::element_run_hook {jlibname tag xmldata} {
 #       jlibname:   the instance of this jlib.
 #       type:       can be "get", "set", "result", or "error".
 #                   "result" and "error" are used when replying an incoming iq.
-#       xmldata:    must be valid xml_data of the child-tag of <iq> packet. 
-#                   If $type is "get", "set", or "result", its tagname will be 
-#                   set to "query". If $type is "error", its tagname will be 
-#                   set to "error".
+#       xmldata:    list of elements as xmllists
 #       args:
 #                   -to $to       : Specify jid to send this packet to. If it 
 #		    isn't specified, this part is set to sender's user-id by 
@@ -2087,7 +2084,7 @@ proc jlib::send_iq {jlibname type xmldata args} {
     }
     if {[llength $xmldata]} {
 	set xmllist [wrapper::createtag "iq" -attrlist $attrlist \
-	  -subtags [list $xmldata]]
+	  -subtags $xmldata]
     } else {
 	set xmllist [wrapper::createtag "iq" -attrlist $attrlist]
     }
@@ -2135,7 +2132,7 @@ proc jlib::iq_get {jlibname xmlns args} {
     }
     set xmllist [wrapper::createtag "query" -attrlist $attrlist \
       -subtags $sublists]
-    eval {send_iq $jlibname "get" $xmllist} $opts
+    eval {send_iq $jlibname "get" [list $xmllist]} $opts
 }
 
 proc jlib::iq_set {jlibname xmlns args} {
@@ -2163,7 +2160,7 @@ proc jlib::iq_set {jlibname xmlns args} {
     }
     set xmllist [wrapper::createtag "query" -attrlist [list xmlns $xmlns] \
       -subtags $sublists]
-    eval {send_iq $jlibname "set" $xmllist} $opts
+    eval {send_iq $jlibname "set" [list $xmllist]} $opts
 }
 
 # jlib::send_auth --
@@ -2207,7 +2204,7 @@ proc jlib::send_auth {jlibname username resource cmd args} {
 
     set xmllist [wrapper::createtag "query" -attrlist {xmlns jabber:iq:auth} \
       -subtags $subelements]
-    eval {send_iq $jlibname "set" $xmllist -command        \
+    eval {send_iq $jlibname "set" [list $xmllist] -command  \
       [list [namespace current]::invoke_iq_callback $jlibname $cmd]} $toopt
     
     # Cache our login jid.
@@ -2240,7 +2237,7 @@ proc jlib::register_get {jlibname cmd args} {
     } else {
 	set toopt ""
     }
-    eval {send_iq $jlibname "get" $xmllist -command  \
+    eval {send_iq $jlibname "get" [list $xmllist] -command  \
       [list [namespace current]::invoke_iq_callback $jlibname $cmd]} $toopt
 }
 
@@ -2297,7 +2294,7 @@ proc jlib::register_set {jlibname username password cmd args} {
     } else {
 	set toopt ""
     }
-    eval {send_iq $jlibname "set" $xmllist -command  \
+    eval {send_iq $jlibname "set" [list $xmllist] -command  \
       [list [namespace current]::invoke_iq_callback $jlibname $cmd]} $toopt
 }
 
@@ -2324,7 +2321,7 @@ proc jlib::register_remove {jlibname to cmd args} {
     set xmllist [wrapper::createtag "query"  \
       -attrlist {xmlns jabber:iq:register} -subtags $subelements]
 
-    eval {send_iq $jlibname "set" $xmllist -command   \
+    eval {send_iq $jlibname "set" [list $xmllist] -command   \
       [list [namespace current]::invoke_iq_callback $jlibname $cmd]} -to $to
 }
 
@@ -2346,7 +2343,7 @@ proc jlib::register_remove {jlibname to cmd args} {
 proc jlib::search_get {jlibname to cmd} {
     
     set xmllist [wrapper::createtag "query" -attrlist {xmlns jabber:iq:search}]
-    send_iq $jlibname "get" $xmllist -to $to -command        \
+    send_iq $jlibname "get" [list $xmllist] -to $to -command        \
       [list [namespace current]::invoke_iq_callback $jlibname $cmd]
 }
 
@@ -2377,7 +2374,7 @@ proc jlib::search_set {jlibname to cmd args} {
 	set xmllist [wrapper::createtag "query"  \
 	  -attrlist {xmlns jabber:iq:search}]
     }
-    send_iq $jlibname "set" $xmllist -to $to -command  \
+    send_iq $jlibname "set" [list $xmllist] -to $to -command  \
       [list [namespace current]::parse_search_set $jlibname $cmd]
 }
 
@@ -2622,7 +2619,7 @@ proc jlib::oob_set {jlibname to cmd url args} {
     }
     set xmllist [wrapper::createtag query -attrlist $attrlist  \
       -subtags $children]
-    send_iq $jlibname set $xmllist -to $to -command  \
+    send_iq $jlibname set [list $xmllist] -to $to -command  \
       [list [namespace current]::invoke_iq_callback $jlibname $cmd]
 }
 
@@ -2641,14 +2638,14 @@ proc jlib::oob_set {jlibname to cmd url args} {
 proc jlib::agent_get {jlibname to cmd} {
 
     set xmllist [wrapper::createtag "query" -attrlist {xmlns jabber:iq:agent}]
-    send_iq $jlibname "get" $xmllist -to $to -command   \
+    send_iq $jlibname "get" [list $xmllist] -to $to -command   \
       [list [namespace current]::parse_agent_get $jlibname $to $cmd]
 }
 
 proc jlib::agents_get {jlibname to cmd} {
 
     set xmllist [wrapper::createtag "query" -attrlist {xmlns jabber:iq:agents}]
-    send_iq $jlibname "get" $xmllist -to $to -command   \
+    send_iq $jlibname "get" [list $xmllist] -to $to -command   \
       [list [namespace current]::parse_agents_get $jlibname $to $cmd]
 }
 
@@ -2787,7 +2784,7 @@ proc jlib::vcard_get {jlibname to cmd} {
 
     set attrlist [list xmlns vcard-temp]    
     set xmllist [wrapper::createtag "vCard" -attrlist $attrlist]
-    send_iq $jlibname "get" $xmllist -to $to -command   \
+    send_iq $jlibname "get" [list $xmllist] -to $to -command   \
       [list [namespace current]::invoke_iq_callback $jlibname $cmd]
 }
 
@@ -2884,7 +2881,7 @@ proc jlib::vcard_set {jlibname cmd args} {
 
     set xmllist [wrapper::createtag vCard -attrlist $attrlist \
       -subtags $subelem]
-    send_iq $jlibname "set" $xmllist -command \
+    send_iq $jlibname "set" [list $xmllist] -command \
       [list [namespace current]::invoke_iq_callback $jlibname $cmd]    
 }
 
@@ -2896,7 +2893,7 @@ proc jlib::get_last {jlibname to cmd} {
     
     set xmllist [wrapper::createtag "query"  \
       -attrlist {xmlns jabber:iq:last}]
-    send_iq $jlibname "get" $xmllist -to $to -command        \
+    send_iq $jlibname "get" [list $xmllist] -to $to -command   \
       [list [namespace current]::invoke_iq_callback $jlibname $cmd]
 }
 
@@ -2921,7 +2918,7 @@ proc jlib::handle_get_last {jlibname from subiq args} {
     if {[info exists argsarr(-id)]} {
 	lappend opts -id $argsarr(-id)
     }
-    eval {send_iq $jlibname "result" $xmllist} $opts
+    eval {send_iq $jlibname "result" [list $xmllist]} $opts
 
     # Tell jlib's iq-handler that we handled the event.
     return 1
@@ -2935,7 +2932,7 @@ proc jlib::get_time {jlibname to cmd} {
     
     set xmllist [wrapper::createtag "query"  \
       -attrlist {xmlns jabber:iq:time}]
-    send_iq $jlibname "get" $xmllist -to $to -command        \
+    send_iq $jlibname "get" [list $xmllist] -to $to -command        \
       [list [namespace current]::invoke_iq_callback $jlibname $cmd]
 }
 
@@ -2965,7 +2962,7 @@ proc jlib::handle_get_time {jlibname from subiq args} {
     if {[info exists argsarr(-id)]} {
 	lappend opts -id $argsarr(-id)
     }
-    eval {send_iq $jlibname "result" $xmllist} $opts
+    eval {send_iq $jlibname "result" [list $xmllist]} $opts
 
     # Tell jlib's iq-handler that we handled the event.
     return 1
@@ -2979,7 +2976,7 @@ proc jlib::get_version {jlibname to cmd} {
         
     set xmllist [wrapper::createtag "query"  \
       -attrlist {xmlns jabber:iq:version}]
-    send_iq $jlibname "get" $xmllist -to $to -command        \
+    send_iq $jlibname "get" [list $xmllist] -to $to -command   \
       [list [namespace current]::invoke_iq_callback $jlibname $cmd]
 }
 
@@ -3009,7 +3006,7 @@ proc jlib::handle_get_version {jlibname from subiq args} {
       [wrapper::createtag os      -chdata $os] ]
     set xmllist [wrapper::createtag query -subtags $subtags  \
       -attrlist {xmlns jabber:iq:version}]
-    eval {send_iq $jlibname "result" $xmllist} $opts
+    eval {send_iq $jlibname "result" [list $xmllist]} $opts
 
     # Tell jlib's iq-handler that we handled the event.
     return 1
@@ -3039,7 +3036,7 @@ proc jlib::roster_get {jlibname cmd args} {
     
     set xmllist [wrapper::createtag "query"  \
       -attrlist {xmlns jabber:iq:roster}]
-    send_iq $jlibname "get" $xmllist -command   \
+    send_iq $jlibname "get" [list $xmllist] -command   \
       [list [namespace current]::parse_roster_get $jlibname 0 $cmd]
 }
 
@@ -3096,7 +3093,7 @@ proc jlib::roster_set {jlibname jid cmd args} {
       -attrlist {xmlns jabber:iq:roster}      \
       -subtags [list [wrapper::createtag {item} -attrlist $attrlist  \
       -subtags $subdata]]]
-    send_iq $jlibname "set" $xmllist -command   \
+    send_iq $jlibname "set" [list $xmllist] -command   \
       [list [namespace current]::parse_roster_set $jlibname $jid $cmd  \
       $groups $name]
 }
@@ -3127,7 +3124,7 @@ proc jlib::roster_remove {jlibname jid cmd args} {
       -subtags [list  \
       [wrapper::createtag "item"   \
       -attrlist [list jid $jid subscription remove]]]]
-    send_iq $jlibname "set" $xmllist -command   \
+    send_iq $jlibname "set" [list $xmllist] -command   \
       [list [namespace current]::parse_roster_remove $jlibname $jid $cmd]
 }
 
@@ -3736,7 +3733,7 @@ proc jlib::conference::get_enter {jlibname room cmd} {
     
     set xmllist [wrapper::createtag "enter"  \
       -attrlist {xmlns jabber:iq:conference}]
-    [namespace parent]::send_iq $jlibname "get" $xmllist -to $room -command  \
+    [namespace parent]::send_iq $jlibname "get" [list $xmllist] -to $room -command  \
       [list [namespace parent]::invoke_iq_callback $jlibname $cmd]
     [namespace parent]::service::setroomprotocol $jlibname $room "conference"
     return ""
@@ -3746,8 +3743,8 @@ proc jlib::conference::set_enter {jlibname room subelements cmd} {
 
     [namespace parent]::send_presence $jlibname -to $room
     [namespace parent]::send_iq $jlibname "set"  \
-      [wrapper::createtag "enter" -attrlist {xmlns jabber:iq:conference} \
-      -subtags $subelements] -to $room -command  \
+      [list [wrapper::createtag "enter" -attrlist {xmlns jabber:iq:conference} \
+      -subtags $subelements]] -to $room -command  \
       [list [namespace current]::parse_set_enter $jlibname $room $cmd]
     return ""
 }
@@ -3815,7 +3812,7 @@ proc jlib::conference::get_create {jlibname to cmd} {
     [namespace parent]::send_presence $jlibname -to $to
     set xmllist [wrapper::createtag "create"   \
       -attrlist {xmlns jabber:iq:conference}]
-    [namespace parent]::send_iq $jlibname "get" $xmllist -to $to -command   \
+    [namespace parent]::send_iq $jlibname "get" [list $xmllist] -to $to -command   \
       [list [namespace parent]::invoke_iq_callback $jlibname $cmd]
 }
 
@@ -3824,8 +3821,8 @@ proc jlib::conference::set_create {jlibname room subelements cmd} {
     # We use the same callback as 'set_enter'.
     [namespace parent]::send_presence $jlibname -to $room
     [namespace parent]::send_iq $jlibname "set"  \
-      [wrapper::createtag "create" -attrlist {xmlns jabber:iq:conference} \
-      -subtags $subelements] -to $room -command  \
+      [list [wrapper::createtag "create" -attrlist {xmlns jabber:iq:conference} \
+      -subtags $subelements]] -to $room -command  \
       [list [namespace current]::parse_set_enter $jlibname $room $cmd]
     [namespace parent]::service::setroomprotocol $jlibname $room "conference"
     return ""
@@ -3847,7 +3844,7 @@ proc jlib::conference::delete {jlibname room cmd} {
 
     set xmllist [wrapper::createtag {delete}  \
       -attrlist {xmlns jabber:iq:conference}]
-    [namespace parent]::send_iq $jlibname "set" $xmllist -to $room -command  \
+    [namespace parent]::send_iq $jlibname "set" [list $xmllist] -to $room -command  \
       [list [namespace parent]::invoke_iq_callback $jlibname $cmd]
     return ""
 }
@@ -3888,7 +3885,7 @@ proc jlib::conference::set_user {jlibname room name jid cmd} {
       -attrlist [list name $name jid $jid]]
     set xmllist [wrapper::createtag "conference"  \
       -attrlist {xmlns jabber:iq:browse} -subtags $subelem]
-    [namespace parent]::send_iq $jlibname "set" $xmllist -to $room -command  \
+    [namespace parent]::send_iq $jlibname "set" [list $xmllist] -to $room -command  \
       [list [namespace parent]::invoke_iq_callback $jlibname $cmd]
 }
 

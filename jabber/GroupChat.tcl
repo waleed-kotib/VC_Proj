@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.88 2004-12-02 08:22:34 matben Exp $
+# $Id: GroupChat.tcl,v 1.89 2004-12-13 13:39:17 matben Exp $
 
 package require History
 
@@ -203,14 +203,14 @@ proc ::GroupChat::HaveOrigConference {{roomjid ""}} {
 proc ::GroupChat::HaveMUC {{roomjid ""}} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
+    upvar ::Jabber::xmppxmlns xmppxmlns
 
     set ans 0
     if {$roomjid == ""} {
 	if {1} {
 	    set allConfServ [$jstate(jlib) service getconferences]
 	    foreach serv $allConfServ {
-		if {[$jstate(jlib) service hasfeature $serv  \
-		  "http://jabber.org/protocol/muc"]} {
+		if {[$jstate(jlib) service hasfeature $serv $xmppxmlns(muc)]} {
 		    set ans 1
 		}
 	    }
@@ -221,15 +221,13 @@ proc ::GroupChat::HaveMUC {{roomjid ""}} {
 	    # 
 	    # PROBLEM: some clients browsed return muc xmlns!!!
 	    if {[info exists jstate(browse)]} {
-		set jids [$jstate(browse) getservicesforns  \
-		  "http://jabber.org/protocol/muc"]
+		set jids [$jstate(browse) getservicesforns $xmppxmlns(muc)]
 		if {[llength $jids] > 0} {
 		    set ans 1
 		}
 	    }
 	    if {[info exists jstate(disco)]} {
-		set jids [$jstate(disco) getjidsforfeature  \
-		  "http://jabber.org/protocol/muc"]
+		set jids [$jstate(disco) getjidsforfeature $xmppxmlns(muc)]
 		if {[llength $jids] > 0} {
 		    set ans 1
 		}
@@ -239,8 +237,7 @@ proc ::GroupChat::HaveMUC {{roomjid ""}} {
 	
 	# We must query the service, not the room, for browse to work.
 	if {[regexp {^[^@]+@(.+)$} $roomjid match service]} {
-	    if {[$jstate(jlib) service hasfeature $service  \
-	      "http://jabber.org/protocol/muc"]} {
+	    if {[$jstate(jlib) service hasfeature $service $xmppxmlns(muc)]} {
 		set ans 1
 	    }
 	}
@@ -1311,10 +1308,10 @@ proc ::GroupChat::SetUser {roomjid jid3 presence args} {
 }
 
 proc ::GroupChat::GetAnyRoleFromXElem {xelem} {
-    
+    upvar ::Jabber::xmppxmlns xmppxmlns
+
     set role ""
-    set clist [wrapper::getnamespacefromchilds $xelem x \
-      "http://jabber.org/protocol/muc#user"]
+    set clist [wrapper::getnamespacefromchilds $xelem x $xmppxmlns(muc,user)]
     set userElem [lindex $clist 0]
     if {[llength $userElem]} {
 	set ilist [wrapper::getchildswithtag $userElem "item"]

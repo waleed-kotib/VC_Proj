@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.31 2004-12-02 08:22:34 matben Exp $
+# $Id: Register.tcl,v 1.32 2004-12-13 13:39:18 matben Exp $
 
 package provide Register 1.0
 
@@ -632,8 +632,9 @@ proc ::GenRegister::DoRegister {token} {
     
     # We need to do it the crude way.
     $jstate(jlib) send_iq "set"  \
-      [wrapper::createtag "query" -attrlist {xmlns jabber:iq:register}   \
-      -subtags $subelements] -to $state(server)   \
+      [list [wrapper::createtag "query" -attrlist {xmlns jabber:iq:register}  \
+      -subtags $subelements]] \
+      -to $state(server) \
       -command [list [namespace current]::ResultCallback $token]
 
     # Keep state array until callback.

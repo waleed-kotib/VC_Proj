@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: ibb.tcl,v 1.3 2004-07-03 12:54:37 matben Exp $
+# $Id: ibb.tcl,v 1.4 2004-12-13 13:39:19 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -149,7 +149,7 @@ proc jlib::ibb::send {ibbname to cmd args} {
     set priv(sid,$sid,to)  $to
     set priv(sid,$sid,cmd) $cmd
 
-    $priv(jlibname) send_iq set $openElem -to $to  \
+    $priv(jlibname) send_iq set [list $openElem] -to $to  \
       -command [list [namespace current]::OpenCB $ibbname]
 
     return $sid

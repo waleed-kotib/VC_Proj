@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.107 2004-12-08 08:21:19 matben Exp $
+# $Id: Roster.tcl,v 1.108 2004-12-13 13:39:18 matben Exp $
 
 package provide Roster 1.0
 
@@ -1137,11 +1137,12 @@ proc ::Roster::SetCoccinella {jid} {
 proc ::Roster::IsCoccinella {jid3} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::coccixmlns coccixmlns
+    upvar ::Jabber::xmppxmlns xmppxmlns
     
     set ans 0
     if {![IsTransportHeuristics $jid3]} {
-	set coccielem [$jstate(roster) getextras $jid3 $coccixmlns(servers)]
-	if {$coccielem != {}} {
+	set node [$jstate(roster) getcapsattr $jid3 node]
+	if {[string equal $node $coccixmlns(caps)]} {
 	    set ans 1
 	} elseif {[$jstate(browse) hasnamespace $jid3 "coccinella:wb"] || \
 	  [$jstate(browse) hasnamespace $jid3 $coccixmlns(whiteboard)]} {

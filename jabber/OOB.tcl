@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.45 2004-12-06 15:26:56 matben Exp $
+# $Id: OOB.tcl,v 1.46 2004-12-13 13:39:18 matben Exp $
 
 package require uriencode
 
@@ -303,7 +303,8 @@ proc ::OOB::ParseSet {jlibname from subiq args} {
     set tailDec [uriencode::decodefile $tail]
     set ans [::UI::MessageBox -title [mc {Get File}] -icon info  \
       -type yesno -default yes -message [mc jamessoobask $from $tailDec $desc]]
-    if {$ans == "no"} {
+    if {$ans == "no"} {	
+	ReturnError $from $id $subiq 406
 	return $ishandled
     }
     
@@ -331,18 +332,20 @@ proc ::OOB::ParseSet {jlibname from subiq args} {
     set prefs(userPath) [file dirname $localPath]
 
     # And get it.
-    Get $from $url $localPath $id
+    Get $from $url $localPath $id $subiq
     set ishandled 1
     return $ishandled
 }
 
-proc ::OOB::Get {jid url file id} {
+proc ::OOB::Get {jid url file id subiq} {
     
-    set token [::HttpTrpt::Get $url $file \
-      -command [list ::OOB::HttpCmd $jid $id]]
+    set token [::HttpTrpt::Get $url $file -command \
+      [list ::OOB::HttpCmd $jid $id $subiq]]
 }
 
-proc ::OOB::HttpCmd {jid id token status {errmsg ""}} {
+proc ::OOB::HttpCmd {jid id subiq token status {errmsg ""}} {
+    variable $token
+    upvar 0 $token state
     
     ::Debug 2 "::OOB::HttpCmd status=$status, errmsg=$errmsg"
     
@@ -352,11 +355,37 @@ proc ::OOB::HttpCmd {jid id token status {errmsg ""}} {
     switch -- $status {
 	ok {
 	    ::Jabber::JlibCmd send_iq "result" {} -to $jid -id $id
-	} 
+	}
+	reset {
+	    ReturnError $jid $id $subiq 406
+	}
 	default {
-	    ::Jabber::JlibCmd send_iq "error" {} -to $jid -id $id
+	    set httptoken $state(httptoken)
+	    set ncode [::httpex::ncode $httptoken]
+	    ReturnError $jid $id $subiq $ncode
 	}
     }   
+}
+
+proc ::OOB::ReturnError {jid id subiq ncode} {
+    
+    switch -- $ncode {
+	406 {
+	    set type modify
+	    set tag  "not-acceptable"
+	}
+	default {
+	    set type cancel
+	    set tag  "not-found"
+	}
+    }
+    
+    set subElem [wrapper::createtag $tag -attrlist \
+      [list xmlns "urn:ietf:params:xml:ns:xmpp-stanzas"]]
+    set errElem [wrapper::createtag "error" -attrlist \
+      [list code $ncode type modify] -subtags [list $subElem]]
+    
+    ::Jabber::JlibCmd send_iq "error" [list $subiq $errElem] -to $jid -id $id
 }
 
 # OOB::BuildText --

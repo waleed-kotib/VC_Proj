@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.121 2004-12-09 15:20:28 matben Exp $
+# $Id: Jabber.tcl,v 1.122 2004-12-13 13:39:17 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -151,6 +151,22 @@ namespace eval ::Jabber:: {
 	public          http://coccinella.sourceforge.net/protocol/private
 	caps            http://coccinella.sourceforge.net/protocol/caps
     }
+    
+    # Standard jabber (xmpp + JEP) protocol namespaces.
+    variable xmppxmlns
+    array set xmppxmlns {
+	amp         "http://jabber.org/protocol/amp"
+	caps        "http://jabber.org/protocol/caps"
+	disco       "http://jabber.org/protocol/disco"
+	disco,info  "http://jabber.org/protocol/disco#info"
+	disco,items "http://jabber.org/protocol/disco#items"
+	ibb         "http://jabber.org/protocol/ibb"
+	muc         "http://jabber.org/protocol/muc"
+	muc,admin   "http://jabber.org/protocol/muc#admin"
+	muc,owner   "http://jabber.org/protocol/muc#owner"
+	muc,user    "http://jabber.org/protocol/muc#user"
+    }
+
     variable capsExtList
     set capsExtList {ftrans}
     
@@ -1251,11 +1267,11 @@ proc ::Jabber::CreateCapsPresElement { } {
     global  prefs
     variable coccixmlns
     variable capsExtList
+    variable xmppxmlns
 
-    set capsxmlns "http://jabber.org/protocol/caps"
     set node $coccixmlns(caps)
     set xmllist [wrapper::createtag c -attrlist \
-      [list xmlns $capsxmlns node $node ver $prefs(fullVers) ext $capsExtList]]
+      [list xmlns $xmppxmlns(caps) node $node ver $prefs(fullVers) ext $capsExtList]]
 
     return $xmllist
 }
@@ -1648,7 +1664,7 @@ proc ::Jabber::ParseGetVersion {jlibname from subiq args} {
       [wrapper::createtag os      -chdata $os]]
     set xmllist [wrapper::createtag query -subtags $subtags  \
       -attrlist {xmlns jabber:iq:version}]
-     eval {$jstate(jlib) send_iq "result" $xmllist} $opts
+     eval {$jstate(jlib) send_iq "result" [list $xmllist]} $opts
 
     # Tell jlib's iq-handler that we handled the event.
     return 1
@@ -1690,7 +1706,7 @@ proc ::Jabber::ParseGetServers  {jlibname from subiq args} {
       [wrapper::createtag ip -chdata $ip -attrlist $attrhttpd]]
     set xmllist [wrapper::createtag query -subtags $subtags  \
       -attrlist [list xmlns $coccixmlns(servers)]]
-     eval {$jstate(jlib) send_iq "result" $xmllist} $opts
+     eval {$jstate(jlib) send_iq "result" [list $xmllist]} $opts
     
      # Tell jlib's iq-handler that we handled the event.
     return 1

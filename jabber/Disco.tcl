@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.43 2004-12-12 14:55:20 matben Exp $
+# $Id: Disco.tcl,v 1.44 2004-12-13 13:39:17 matben Exp $
 
 package provide Disco 1.0
 
@@ -401,7 +401,7 @@ proc ::Disco::ParseGetInfo {from subiq args} {
     }
     set attr [list xmlns $xmlns(info)]
     set xmllist [wrapper::createtag "query" -subtags $subtags -attrlist $attr]
-    eval {$jstate(jlib) send_iq "result" $xmllist -to $from} $opts
+    eval {$jstate(jlib) send_iq "result" [list $xmllist] -to $from} $opts
 }
 
 proc ::Disco::ParseGetItems {from subiq args} {
@@ -417,7 +417,7 @@ proc ::Disco::ParseGetItems {from subiq args} {
     }
     set attr [list xmlns $xmlns(items)]
     set xmllist [wrapper::createtag "query" -attrlist $attr]
-    eval {$jstate(jlib) send_iq "result" $xmllist -to $from} $opts
+    eval {$jstate(jlib) send_iq "result" [list $xmllist] -to $from} $opts
 }
 
 # UI parts .....................................................................

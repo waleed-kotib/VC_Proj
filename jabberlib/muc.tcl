@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: muc.tcl,v 1.17 2004-09-24 12:14:15 matben Exp $
+# $Id: muc.tcl,v 1.18 2004-12-13 13:39:19 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -321,7 +321,7 @@ proc jlib::muc::setrole {mucname roomjid nick role args} {
     set xmllist [wrapper::createtag "query" \
       -attrlist {xmlns "http://jabber.org/protocol/muc#admin"} \
       -subtags $subelements]
-    eval {$jlibname send_iq "set" $xmllist -to $roomjid} $opts
+    eval {$jlibname send_iq "set" [list $xmllist] -to $roomjid} $opts
 }
 
 # jlib::muc::setaffiliation --
@@ -368,7 +368,7 @@ proc jlib::muc::setaffiliation {mucname roomjid nick affiliation args} {
     
     set xmllist [wrapper::createtag "query" \
       -attrlist [list xmlns $xmlns] -subtags $subelements]
-    eval {$jlibname send_iq "set" $xmllist -to $roomjid} $opts
+    eval {$jlibname send_iq "set" [list $xmllist] -to $roomjid} $opts
 }
 
 # jlib::muc::getrole --
@@ -389,7 +389,7 @@ proc jlib::muc::getrole {mucname roomjid role callback} {
     
     set xmllist [wrapper::createtag "query" -subtags $subelements \
       -attrlist {xmlns "http://jabber.org/protocol/muc#admin"}]
-    $jlibname send_iq "get" $xmllist -to $roomjid \
+    $jlibname send_iq "get" [list $xmllist] -to $roomjid \
       -command [list [namespace current]::invoke_callback $mucname $callback]
 }
 
@@ -420,7 +420,7 @@ proc jlib::muc::getaffiliation {mucname roomjid affiliation callback} {
     
     set xmllist [wrapper::createtag "query" -subtags $subelements \
       -attrlist [list xmlns $xmlns]]
-    $jlibname send_iq "get" $xmllist -to $roomjid \
+    $jlibname send_iq "get" [list $xmllist] -to $roomjid \
       -command [list [namespace current]::invoke_callback $mucname $callback]
 }
 
@@ -504,7 +504,7 @@ proc jlib::muc::setroom {mucname roomjid type args} {
     }
     set xmllist [wrapper::createtag "query" -subtags $xelem \
       -attrlist {xmlns "http://jabber.org/protocol/muc#owner"}]
-    eval {$jlibname send_iq "set" $xmllist -to $roomjid} $opts
+    eval {$jlibname send_iq "set" [list $xmllist] -to $roomjid} $opts
 }
 
 # jlib::muc::destroy --
@@ -550,7 +550,7 @@ proc jlib::muc::destroy {mucname roomjid args} {
 
     set xmllist [wrapper::createtag "query" -subtags [list $destroyelem] \
       -attrlist {xmlns "http://jabber.org/protocol/muc#owner"}]
-    eval {$jlibname send_iq "set" $xmllist -to $roomjid} $opts
+    eval {$jlibname send_iq "set" [list $xmllist] -to $roomjid} $opts
 }
 
 # jlib::muc::getroom --
@@ -564,7 +564,7 @@ proc jlib::muc::getroom {mucname roomjid callback} {
     set jlibname $muc2jlib($mucname)
     set xmllist [wrapper::createtag "query"  \
       -attrlist {xmlns "http://jabber.org/protocol/muc#owner"}]
-    $jlibname send_iq "get" $xmllist -to $roomjid  \
+    $jlibname send_iq "get" [list $xmllist] -to $roomjid  \
       -command [list [namespace current]::invoke_callback $mucname $callback]
 }
 
