@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UserActions.tcl,v 1.6 2003-05-18 13:20:22 matben Exp $
+# $Id: UserActions.tcl,v 1.7 2003-06-01 10:26:58 matben Exp $
 
 namespace eval ::UserActions:: {
     
@@ -735,7 +735,7 @@ proc ::UserActions::DoCloseWindow { } {
 		::UI::CloseMain $wtop
 	    }
 	}
-	Whiteboard {
+	Whiteboard* {
 	    if {0 && $w == "."} {
 		::UserActions::DoQuit -warning 1
 	    } else {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.4 2003-05-25 15:03:27 matben Exp $
+# $Id: GroupChat.tcl,v 1.5 2003-06-01 10:26:57 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -16,6 +16,8 @@ namespace eval ::Jabber::GroupChat:: {
       
     # Local stuff
     variable locals
+    variable enteruid 0
+    variable dlguid 0
 }
 
 # Jabber::GroupChat::AllConference --
@@ -109,14 +111,13 @@ proc ::Jabber::GroupChat::HaveMUC {{roomjid {}}} {
 #       jabber:iq:conference.
 #       
 # Arguments:
-#       w           toplevel widget
 #       what        'enter' or 'create'
 #       args        -server, -roomjid, -autoget
 #       
 # Results:
 #       "cancel" or "enter".
 
-proc ::Jabber::GroupChat::EnterOrCreate {w what args} {
+proc ::Jabber::GroupChat::EnterOrCreate {what args} {
     variable locals
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jprefs jprefs
@@ -128,21 +129,24 @@ proc ::Jabber::GroupChat::EnterOrCreate {w what args} {
 	set roomjid ""
     }
 
-    # Preferred groupchat protocol (gc-1.0|conference|muc).
+    # Preferred groupchat protocol (gc-1.0|muc).
     # Use 'gc-1.0' as fallback.
     set gchatprotocol "gc-1.0"
+    
+    # Consistency checking.
+    if {![regexp {(gc-1.0|muc)} $jprefs(prefgchatproto)]} {
+    	set jprefs(prefgchatproto) muc
+    }
+    
     switch -- $jprefs(prefgchatproto) {
 	gc-1.0 {
 	    # Empty
 	}
-	conference {
-	    if {[::Jabber::GroupChat::HaveOrigConference $roomjid]} {
-		set gchatprotocol "conference"
-	    }
-	}
 	muc {
 	    if {[::Jabber::GroupChat::HaveMUC $roomjid]} {
 		set gchatprotocol "muc"
+	    } elseif {[::Jabber::GroupChat::HaveOrigConference $roomjid]} {
+		set gchatprotocol "conference"
 	    }
 	}
     }
@@ -151,20 +155,20 @@ proc ::Jabber::GroupChat::EnterOrCreate {w what args} {
     
     switch -- $gchatprotocol {
 	gc-1.0 {
-	    set ans [eval {::Jabber::GroupChat::BuildEnter $w} $args]
+	    set ans [eval {::Jabber::GroupChat::BuildEnter} $args]
 	}
 	conference {
 	    if {$what == "enter"} {
-		set ans [eval {::Jabber::Conference::BuildEnter $w} $args]
+		set ans [eval {::Jabber::Conference::BuildEnter} $args]
 	    } elseif {$what == "create"} {
-		set ans [eval {::Jabber::Conference::BuildCreate $w} $args]
+		set ans [eval {::Jabber::Conference::BuildCreate} $args]
 	    }
 	}
 	muc {
 	    if {$what == "enter"} {
-		set ans [eval {::Jabber::MUC::BuildEnter $w} $args]
+		set ans [eval {::Jabber::MUC::BuildEnter} $args]
 	    } elseif {$what == "create"} {
-		set ans [eval {::Jabber::Conference::BuildCreate $w} $args]
+		set ans [eval {::Jabber::Conference::BuildCreate} $args]
 	    }
 	}
     }    
@@ -180,6 +184,14 @@ proc ::Jabber::GroupChat::SetProtocol {roomJid protocol} {
     variable locals
 
     set locals($roomJid,protocol) $protocol
+    
+    # If groupchat window already exists.
+    if {[info exists locals($roomJid,wtop)] && \
+    [winfo exists $locals($roomJid,wtop)]} {
+	$locals($roomJid,wbtinfo) configure -state normal
+	$locals($roomJid,wbtnick) configure -state normal
+	$locals($roomJid,wbtinvite) configure -state normal
+    }
 }
 
 # Jabber::GroupChat::BuildEnter --
@@ -188,19 +200,16 @@ proc ::Jabber::GroupChat::SetProtocol {roomJid protocol} {
 #       which shall be used when not server is being browsed.
 #       
 # Arguments:
-#       w           toplevel widget
 #       args        -server, -roomjid, -autoget
 #       
 # Results:
 #       "cancel" or "enter".
      
-proc ::Jabber::GroupChat::BuildEnter {w args} {
+proc ::Jabber::GroupChat::BuildEnter {args} {
     global  this sysFont
 
-    variable finishedEnter -1
-    variable gchatserver
-    variable gchatroom
-    variable gchatnick
+    variable enteruid
+    variable dlguid
     upvar ::Jabber::jstate jstate
 
     set chatservers [$jstate(jlib) service getjidsfor "groupchat"]
@@ -211,6 +220,13 @@ proc ::Jabber::GroupChat::BuildEnter {w args} {
 	tk_messageBox -icon error -message [::msgcat::mc jamessnogchat]
 	return
     }
+
+    # State variable to collect instance specific variables.
+    set token [namespace current]::enter[incr enteruid]
+    variable $token
+    upvar 0 $token enter
+    
+    set w .dlggc[incr dlguid]
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
@@ -218,32 +234,38 @@ proc ::Jabber::GroupChat::BuildEnter {w args} {
 
     }
     wm title $w [::msgcat::mc {Enter/Create Room}]
-    set gchatroom ""
-    set gchatnick ""
+    set enter(w) $w
+    array set enter {
+	finished    -1
+	server      ""
+	roomname    ""
+	nickname    ""
+    }
     array set argsArr $args
 
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised]   \
       -fill both -expand 1 -ipadx 4
         
-    set gchatserver [lindex $chatservers 0]
+    set enter(server) [lindex $chatservers 0]
     set frmid $w.frall.mid
     pack [frame $frmid] -side top -fill both -expand 1
     set msg [::msgcat::mc jagchatmsg]
     message $frmid.msg -width 260 -font $sysFont(s) -text $msg
     label $frmid.lserv -text "[::msgcat::mc Servers]:" -font $sysFont(sb) -anchor e
+
     set wcomboserver $frmid.eserv
     ::combobox::combobox $wcomboserver -font $sysFont(s) -width 18  \
-      -textvariable [namespace current]::gchatserver
+      -textvariable $token\(server)
     eval {$frmid.eserv list insert end} $chatservers
     label $frmid.lroom -text "[::msgcat::mc Room]:" -font $sysFont(sb) -anchor e
     entry $frmid.eroom -width 24    \
-      -textvariable [namespace current]::gchatroom -validate key  \
+      -textvariable $token\(roomname) -validate key  \
       -validatecommand {::Jabber::ValidateJIDChars %S}
     label $frmid.lnick -text "[::msgcat::mc {Nick name}]:" -font $sysFont(sb) \
       -anchor e
     entry $frmid.enick -width 24    \
-      -textvariable [namespace current]::gchatnick -validate key  \
+      -textvariable $token\(nickname) -validate key  \
       -validatecommand {::Jabber::ValidateJIDChars %S}
     grid $frmid.msg -column 0 -columnspan 2 -row 0 -sticky ew
     grid $frmid.lserv -column 0 -row 1 -sticky e
@@ -254,7 +276,8 @@ proc ::Jabber::GroupChat::BuildEnter {w args} {
     grid $frmid.enick -column 1 -row 3 -sticky ew
     
     if {[info exists argsArr(-roomjid)]} {
-	regexp {^([^@]+)@([^/]+)} $argsArr(-roomjid) match gchatroom server
+	regexp {^([^@]+)@([^/]+)} $argsArr(-roomjid) match enter(roomname) \
+	  server
 	$wcomboserver configure -state disabled
 	$frmid.eroom configure -state disabled
     }
@@ -266,55 +289,55 @@ proc ::Jabber::GroupChat::BuildEnter {w args} {
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
     pack [button $frbot.btconn -text [::msgcat::mc Enter] -width 8 -default active \
-      -command [list [namespace current]::DoEnter $w]]  \
+      -command [list [namespace current]::DoEnter $token]]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btexit -text [::msgcat::mc Cancel] -width 8   \
-      -command [list [namespace current]::Cancel $w]]  \
+      -command [list [namespace current]::Cancel $token]]  \
       -side right -padx 5 -pady 5  
     pack $frbot -side bottom -fill x
     
     # Grab and focus.
     set oldFocus [focus]
     focus $w
-    catch {grab $w}
-    bind $w <Return> "$frbot.btconn invoke"
+    bind $w <Return> [list $frbot.btconn invoke]
     
     # Wait here for a button press and window to be destroyed.
     tkwait window $w
     
-    catch {grab release $w}
-    focus $oldFocus
-    return [expr {($finishedEnter <= 0) ? "cancel" : "enter"}]
+    catch {focus $oldFocus}
+    set finished $enter(finished)
+    unset enter
+    return [expr {($finished <= 0) ? "cancel" : "enter"}]
 }
 
-proc ::Jabber::GroupChat::Cancel {w} {
-    variable finishedEnter
-    
-    set finishedEnter 0
-    destroy $w
+proc ::Jabber::GroupChat::Cancel {token} {
+    variable $token
+    upvar 0 $token enter
+
+    set enter(finished) 0
+    catch {destroy $enter(w)}
 }
 
-proc ::Jabber::GroupChat::DoEnter {w} {
+proc ::Jabber::GroupChat::DoEnter {token} {
+    variable $token
+    upvar 0 $token enter
 
-    variable finishedEnter
-    variable gchatserver
-    variable gchatroom
-    variable gchatnick
     upvar ::Jabber::jstate jstate
     
     # Verify the fields first.
-    if {([string length $gchatserver] == 0) ||  \
-      ([string length $gchatroom] == 0) ||  \
-      ([string length $gchatnick] == 0)} {
+    if {($enter(server) == "") || ($enter(roomname) == "") ||  \
+      ($enter(nickname) == "")} {
 	tk_messageBox -title [::msgcat::mc Warning] -type ok -message \
 	  [::msgcat::mc jamessgchatfields]
 	return
     }
-    set finishedEnter 1
-    destroy $w
 
-    $jstate(jlib) groupchat enter ${gchatroom}@${gchatserver} $gchatnick \
+    set roomJid [string tolower $enter(roomname)@$enter(server)]
+    $jstate(jlib) groupchat enter $roomJid $enter(nickname) \
       -command [namespace current]::EnterCallback
+
+    set enter(finished) 1
+    destroy $enter(w)
 }
 
 proc ::Jabber::GroupChat::EnterCallback {jlibName type args} {
@@ -387,7 +410,8 @@ proc ::Jabber::GroupChat::GotMsg {body args} {
     if {[string length $body] > 0} {
 	
 	# This can be room name or nick name.
-	foreach {meRoomJid mynick} [$jstate(jlib) service hashandnick $roomJid] { break }
+	foreach {meRoomJid mynick}  \
+	  [$jstate(jlib) service hashandnick $roomJid] { break }
 	
 	# Old-style groupchat and browser compatibility layer.
 	set nick [$jstate(jlib) service nick $fromJid]
@@ -514,22 +538,26 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
       -fill y -side left
     pack [::UI::NewPrint $w.frall.fccp.pr [list [namespace current]::Print $roomJid]] \
       -side left -padx 10
-    pack [button $w.frall.fccp.info -text "[::msgcat::mc Info]..."  \
-      -font $sysFont(s) -command [list ::Jabber::MUC::BuildInfo .mm $roomJid]] \
+    
+    set wbtinvite $w.frall.fccp.inv
+    set wbtnick $w.frall.fccp.nick
+    set wbtinfo $w.frall.fccp.info
+    pack [button $wbtinfo -text "[::msgcat::mc Info]..."  \
+      -font $sysFont(s) -command [list ::Jabber::MUC::BuildInfo $roomJid]] \
       -side right -padx 4
-    pack [button $w.frall.fccp.nick -text "[::msgcat::mc {Nick name}]..."  \
+    pack [button $wbtnick -text "[::msgcat::mc {Nick name}]..."  \
       -font $sysFont(s) -command [list ::Jabber::MUC::SetNick $roomJid]] \
       -side right -padx 4
-    pack [button $w.frall.fccp.inv -text "[::msgcat::mc Invite]..."  \
+    pack [button $wbtinvite -text "[::msgcat::mc Invite]..."  \
       -font $sysFont(s) -command [list ::Jabber::MUC::Invite $roomJid]] \
       -side right -padx 4
     
     pack [frame $w.frall.div2 -bd 2 -relief sunken -height 2] -fill x -side top
-    if {[info exists locals($roomJid,protocol)] &&  \
-      ($locals($roomJid,protocol) != "muc")} {
-	$w.frall.fccp.info configure -state disabled
-	$w.frall.fccp.nick configure -state disabled
-	$w.frall.fccp.inv configure -state disabled
+    if {!( [info exists locals($roomJid,protocol)] &&  \
+      ($locals($roomJid,protocol) == "muc") )} {
+	$wbtinfo configure -state disabled
+	$wbtnick configure -state disabled
+	$wbtinvite configure -state disabled
     }
 
     # Popup for setting status to this room.
@@ -633,6 +661,9 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     set locals($roomJid,wusers) $wusers
     set locals($roomJid,wtxt.0) $wtxt.0
     set locals($roomJid,wtxt) $wtxt
+    set locals($roomJid,wbtinvite) $wbtinvite
+    set locals($roomJid,wbtnick) $wbtnick
+    set locals($roomJid,wbtinfo) $wbtinfo
     
     # Add to exit menu.
     ::Jabber::UI::GroupChat "enter" $roomJid
@@ -770,6 +801,29 @@ proc ::Jabber::GroupChat::Presence {jid presence args} {
     } elseif {[string equal $presence "unavailable"]} {
 	::Jabber::GroupChat::RemoveUser $roomJid $jid3
     }
+    
+    # When kicked etc. from a MUC room...
+    # 
+    # 
+#  <x xmlns='http://jabber.org/protocol/muc#user'>
+#    <item affiliation='none' role='none'>
+#      <actor jid='fluellen@shakespeare.lit'/>
+#      <reason>Avaunt, you cullion!</reason>
+#    </item>
+#    <status code='307'/>
+#  </x>
+
+    if {[info exists attrArr(-x)]} {
+	foreach c $attrArr(-x) {
+	    set xmlns [wrapper::getattr [lindex $c 1] xmlns]
+	    
+	    switch -- $xmlns {
+		"http://jabber.org/protocol/muc#user" {
+			# Seems hard to figure out anything here...		    
+		}
+	    }
+	}
+    }
 }
 
 # Jabber::GroupChat::BrowseUser --
@@ -878,7 +932,7 @@ proc ::Jabber::GroupChat::SetUser {roomJid jid3 presence args} {
     $wusers image create $begin -image $icon -align bottom
     $wusers tag add $hexstr "$begin linestart" "$begin lineend"
 
-    # Use hex string (resource) as tag.
+    # Use hex string, nickname (resource) as tag.
     $wusers insert "$begin +1 char" " $nick\n" $hexstr
     $wusers configure -state disabled
     

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.7 2003-05-20 16:22:31 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.8 2003-06-01 10:26:58 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -297,29 +297,30 @@ proc ::PreferencesUtils::ResetToUserDefaults { } {
 proc ::PreferencesUtils::SetWidgetDefaultOptions { } {
     global  prefs sysFont this
     
-    option add *Canvas.Background $prefs(bgColGeneral)
-    option add *Checkbutton.Font $sysFont(s)
-    option add *Frame.Background $prefs(bgColGeneral)
-    option add *Label.Background $prefs(bgColGeneral)
-    option add *Label.Font $sysFont(s)
-    option add *Message.Background $prefs(bgColGeneral)
-    option add *Progressbar.Background $prefs(bgColGeneral)
-    option add *Entry.Background white
-    option add *Entry.BorderWidth 1
-    option add *Entry.Font $sysFont(s)
-    option add *Entry.HighlightColor #6363CE
-    option add *Entry.HighlightBackground $prefs(bgColGeneral)
-    option add *Entry.DisableBackground $prefs(bgColGeneral)
-    option add *Entry.DisableForeground gray20
-    option add *Listbox.HighlightColor #6363CE
-    option add *Listbox.HighlightBackground $prefs(bgColGeneral)
-    option add *Radiobutton.Font $sysFont(s)
-    option add *Text.Background white
-    option add *Text.HighlightColor #6363CE
-    option add *Text.HighlightBackground $prefs(bgColGeneral)
-    option add *Tablelist.HighlightThickness 3
-    option add *Tablelist.HighlightColor #6363CE
-    option add *Tablelist.HighlightBackground $prefs(bgColGeneral)
+    option add *Canvas.Background                   $prefs(bgColGeneral)
+    option add *Checkbutton.Font                    $sysFont(s)
+    option add *Frame.Background                    $prefs(bgColGeneral)
+    option add *Label.Background                    $prefs(bgColGeneral)
+    option add *Label.Font                          $sysFont(s)
+    option add *Message.Background                  $prefs(bgColGeneral)
+    option add *Progressbar.Background              $prefs(bgColGeneral)
+    option add *Entry.Background                    white
+    option add *Entry.BorderWidth                   1
+    option add *Entry.Font                          $sysFont(s)
+    option add *Entry.HighlightColor                #6363CE
+    option add *Entry.HighlightBackground           $prefs(bgColGeneral)
+    option add *Entry.DisableBackground             $prefs(bgColGeneral)
+    option add *Entry.DisableForeground             gray20
+    option add *Listbox.HighlightColor              #6363CE
+    option add *Listbox.HighlightBackground         $prefs(bgColGeneral)
+    option add *Radiobutton.Font                    $sysFont(s)
+    option add *Text.Background                     white
+    option add *Text.HighlightColor                 #6363CE
+    option add *Text.HighlightBackground            $prefs(bgColGeneral)
+    option add *Tablelist.HighlightThickness        3
+    option add *Tablelist.HighlightColor            #6363CE
+    option add *Tablelist.HighlightBackground       $prefs(bgColGeneral)
+    option add *Tablelist*Entry.background	    LightYellow
     
     # ...and then on specific platforms.
     

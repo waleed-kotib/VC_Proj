@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.9 2003-05-25 15:03:27 matben Exp $
+# $Id: jabberlib.tcl,v 1.10 2003-06-01 10:26:57 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -2232,8 +2232,6 @@ proc jlib::vcard_set {jlibname cmd args} {
 
     set xmllist [wrapper::createtag {vCard} -attrlist $attrlist \
       -subtags $subelem]
-    #puts [wrapper::createxml $xmllist]
-    #return
     send_iq $jlibname "set" $xmllist -command \
       [list [namespace current]::parse_iq_response $jlibname $cmd]    
 }
@@ -2861,14 +2859,18 @@ proc jlib::service::nick {jlibname jid} {
 	if {[regexp {^[^@]+@[^@/]+/(.+)$} $jid match nick]} {
 
 	    # Else we just use the username. (If room for instance)
-	} elseif {[regexp {^([^@]+)@[^@/]+$} $jid match nick]} {
-	} else {
+	} elseif {![regexp {^([^@]+)@[^@/]+$} $jid match nick]} {
 	    set nick $jid
 	}
     } elseif {[lsearch [[namespace parent]::muc::allroomsin $jlibname] $room] >= 0} {
 	
-	# The MUC conference method.
-	set nick [[namespace parent]::muc::mynick $jlibname $room]
+	# The MUC conference method: nick is always the resource part. 
+	# Rooms lack the */res.
+	if {![regexp {^[^@]+@[^@/]+/(.+)$} $jid match nick]} {
+	    if {![regexp {^([^@]+)@.+} $jid match nick]} {
+		set nick $jid
+	    }
+	}
     } elseif {[$lib(browsename) isbrowsed $lib(server)]} {
     
 	# Assume that if the login server is browsed we also should query

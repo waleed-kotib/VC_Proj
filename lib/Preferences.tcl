@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.7 2003-05-20 16:22:31 matben Exp $
+# $Id: Preferences.tcl,v 1.8 2003-06-01 10:26:58 matben Exp $
  
 package require notebook
 package require tree
@@ -747,8 +747,10 @@ proc ::Preferences::BuildPageConf {page} {
     set pbl [frame $labfr.frin]
     pack $pbl -padx 10 -pady 6 -side left
     
-    foreach val {gc-1.0 conference muc}   \
-      txt {{Groupchat-1.0 (fallback)} Conference {Multi user chat (MUC)}} {
+    foreach val {gc-1.0 muc}   \
+      txt {
+	{Groupchat-1.0 (fallback)} 
+	{Multi-User-Chat with Conference as fallback}} {
 	set wrad ${pbl}.[string map {. ""} $val]
 	radiobutton $wrad -text [::msgcat::mc $txt] -value $val  \
 	  -variable [namespace current]::tmpJPrefs(prefgchatproto)	      

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.10 2003-05-25 15:03:27 matben Exp $
+# $Id: UI.tcl,v 1.11 2003-06-01 10:26:58 matben Exp $
 
 # LabeledFrame --
 #
@@ -564,9 +564,9 @@ proc ::UI::InitMenuDefs { } {
 	{command     mChat          {::Jabber::Chat::StartThreadDlg .jchat} disabled {}}
 	{cascade     mStatus        {}                                      disabled {} {} {}}
 	{separator}
-	{command     mEnterRoom     {::Jabber::GroupChat::EnterOrCreate $wDlgs(jenterroom) enter} disabled {}}
+	{command     mEnterRoom     {::Jabber::GroupChat::EnterOrCreate enter} disabled {}}
 	{cascade     mExitRoom      {}                                    disabled {} {} {}}
-	{command     mCreateRoom    {::Jabber::GroupChat::EnterOrCreate $wDlgs(jcreateroom) create} disabled {}}
+	{command     mCreateRoom    {::Jabber::GroupChat::EnterOrCreate create} disabled {}}
 	{separator}
 	{command     mvCard         {::VCard::Fetch .jvcard own}          disabled {}}
 	{separator}
@@ -2548,8 +2548,8 @@ proc ::UI::MegaDlgMsgAndEntry {title msg label varName btcancel btok} {
     
     set entryVar [$wmid.en get]
     catch {grab release $w}
-    destroy $w
-    focus $oldFocus
+    catch {destroy $w}
+    catch {focus $oldFocus}
     return [expr {($finmega <= 0) ? "cancel" : "ok"}]
 }
 
