@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.4 2004-05-06 13:41:10 matben Exp $
+# $Id: JPrefs.tcl,v 1.5 2004-06-07 13:43:56 matben Exp $
 
 package provide JPrefs 1.0
 
@@ -249,8 +249,8 @@ proc ::Jabber::JPrefs::BuildCustomPage {page} {
     set xpadbt [option get [winfo toplevel $page] xPadBt {}]
     set ypad   [option get [winfo toplevel $page] yPad {}]
 
-    foreach key {showMsgNewWin inboxSave inbox2click \
-      rost,useBgImage rost,bgImagePath serviceMethod} {
+    foreach key {inboxSave rost,useBgImage rost,bgImagePath serviceMethod \
+      chat,tabbedui chatFont} {
 	set tmpJPrefs($key) $jprefs($key)
     }
     set tmpPrefs(themeName) $prefs(themeName)
@@ -260,17 +260,14 @@ proc ::Jabber::JPrefs::BuildCustomPage {page} {
     pack $labfrpbl -side top -anchor w -padx 8 -pady 4
     set pbl [frame $labfrpbl.frin]
     pack $pbl -padx 10 -pady 6 -side left
-    
-    checkbutton $pbl.newwin -text " [::msgcat::mc prefcushow]" \
-      -variable [namespace current]::tmpJPrefs(showMsgNewWin)
+     
+    label $pbl.lfont -text [::msgcat::mc prefcufont]
+    button $pbl.btfont -text "[::msgcat::mc Pick]..." -font $fontS \
+      -command [namespace current]::PickFont
+    checkbutton $pbl.tabbed -text "  Use tabbed notebook interface"  \
+      -variable [namespace current]::tmpJPrefs(chat,tabbedui)
     checkbutton $pbl.savein -text " [::msgcat::mc prefcusave]" \
       -variable [namespace current]::tmpJPrefs(inboxSave)
-    label $pbl.lmb2 -text [::msgcat::mc prefcu2clk]
-    radiobutton $pbl.rb2new -text " [::msgcat::mc prefcuopen]" \
-      -value newwin -variable [namespace current]::tmpJPrefs(inbox2click)
-    radiobutton $pbl.rb2re   \
-      -text " [::msgcat::mc prefcureply]" -value reply \
-      -variable [namespace current]::tmpJPrefs(inbox2click)
     
     set frrost $pbl.robg
     frame $frrost
@@ -294,11 +291,9 @@ proc ::Jabber::JPrefs::BuildCustomPage {page} {
     pack [label $frtheme.l -text "[::msgcat::mc preftheme]:"] -side left
     pack $wpoptheme -side left
     
-    grid $pbl.newwin -padx 2 -pady $ypad -sticky w -columnspan 2
+    grid $pbl.lfont $pbl.btfont -padx 2 -sticky w
+    grid $pbl.tabbed -padx 2 -pady $ypad -sticky w -columnspan 2
     grid $pbl.savein -padx 2 -pady $ypad -sticky w -columnspan 2
-    grid $pbl.lmb2   -padx 2 -pady $ypad -sticky w -columnspan 2
-    grid $pbl.rb2new -padx 2 -pady $ypad -sticky w -columnspan 2
-    grid $pbl.rb2re  -padx 2 -pady $ypad -sticky w -columnspan 2
     grid $frrost     -padx 2 -pady $ypad -sticky w -columnspan 2
     grid $frtheme    -padx 2 -pady $ypad -sticky w -columnspan 2
     
@@ -322,6 +317,29 @@ proc ::Jabber::JPrefs::BuildCustomPage {page} {
     grid $pdisc.agents -padx 2 -pady $ypad -sticky w
 }
 
+proc ::Jabber::JPrefs::PickFont { } {
+    variable tmpJPrefs
+    
+    set fontS [option get . fontSmall {}]
+
+    if {[string length $tmpJPrefs(chatFont)]} {
+	set opts [list -defaultfont $fontS -initialfont $tmpJPrefs(chatFont)]
+    } else {
+	set opts [list -defaultfont $fontS -initialfont $fontS]
+    }
+    
+    # Check if theFont is the default font.
+    # 'chatFont' empty means that default font should be used.
+    set theFont [eval {::fontselection::fontselection .mnb} $opts]
+    if {[llength $theFont]} {
+	if {[::Utils::FontEqual $theFont $fontS]} {
+	    set tmpJPrefs(chatFont) ""
+	} else {
+	    set tmpJPrefs(chatFont) $theFont
+	}
+    }
+}
+
 proc ::Jabber::JPrefs::PickBgImage {where} {
     variable tmpJPrefs
 
@@ -329,7 +347,7 @@ proc ::Jabber::JPrefs::PickBgImage {where} {
 	{{GIF Files}        {.gif}        }
 	{{GIF Files}        {}        GIFF}
     }
-    set ans [tk_getOpenFile -title {Open GIF Image} \
+    set ans [tk_getOpenFile -title [::msgcat::mc {Open GIF Image}] \
       -filetypes $types -defaultextension ".gif"]
     if {$ans != ""} {
 	set tmpJPrefs($where,bgImagePath) $ans
@@ -361,6 +379,8 @@ proc ::Jabber::JPrefs::SavePrefsHook { } {
     # Roster background image.
     ::Jabber::Roster::SetBackgroundImage $tmpJPrefs(rost,useBgImage) \
       $tmpJPrefs(rost,bgImagePath)
+    
+    ::Jabber::Chat::SetFont $jprefs(chatFont)
 
     unset tmpJPrefs
 }
