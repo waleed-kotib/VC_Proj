@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.27 2004-01-30 15:33:50 matben Exp $
+# $Id: Browse.tcl,v 1.28 2004-02-03 10:16:30 matben Exp $
 
 package require chasearrows
 
@@ -814,7 +814,7 @@ proc ::Jabber::Browse::AddServer { } {
     return [expr {($finishedAdd <= 0) ? "cancel" : "add"}]
 }
 
-proc ::Jabber::Browse::DoAddServer {w} {
+proc ::Jabber::Browse::CancelAdd {w} {
     variable finishedAdd
 
     set finishedAdd 0
@@ -934,6 +934,56 @@ proc ::Jabber::Browse::InfoCB {browseName type jid subiq} {
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
 	
     wm resizable $w 0 0	
+}
+	    
+# Jabber::Browse::ParseGet --
+#
+#       Respond to an incoming 'jabber:iq:browse' get query.
+#       
+# Results:
+#       boolean (0/1) telling if this was handled or not.
+
+proc ::Jabber::Browse::ParseGet {jlibname from subiq args} {
+    global  prefs    
+    upvar ::Jabber::jstate jstate
+    upvar ::Jabber::privatexmlns privatexmlns
+
+    ::Jabber::Debug 2 "::Jabber::Browse::ParseGet: args='$args'"
+    
+    array set argsArr $args
+    
+    # Return any id!
+    set opts {}
+    if {[info exists argsArr(-id)]} {
+	set opts [list -id $argsArr(-id)]
+    }
+
+    # List everything this client supports. Starting with public namespaces.
+    set subtags [list  \
+      [wrapper::createtag "ns" -chdata "jabber:client"]         \
+      [wrapper::createtag "ns" -chdata "jabber:iq:browse"]      \
+      [wrapper::createtag "ns" -chdata "jabber:iq:conference"]  \
+      [wrapper::createtag "ns" -chdata "jabber:iq:last"]        \
+      [wrapper::createtag "ns" -chdata "jabber:iq:oob"]         \
+      [wrapper::createtag "ns" -chdata "jabber:iq:roster"]      \
+      [wrapper::createtag "ns" -chdata "jabber:iq:time"]        \
+      [wrapper::createtag "ns" -chdata "jabber:iq:version"]     \
+      [wrapper::createtag "ns" -chdata "jabber:x:data"]         \
+      [wrapper::createtag "ns" -chdata "jabber:x:event"]        \
+      [wrapper::createtag "ns" -chdata "coccinella:wb"]]
+    
+    # Adding private namespaces.
+    foreach {key ns} [array get privatexmlns] {
+	lappend subtags [wrapper::createtag "ns" -chdata $ns]
+    }
+    
+    set attr [list xmlns jabber:iq:browse jid $jstate(mejidres)  \
+      type client category user]
+    set xmllist [wrapper::createtag "item" -subtags $subtags -attrlist $attr]
+    eval {$jstate(jlib) send_iq "result" $xmllist -to $from} $opts
+    
+    # Tell jlib's iq-handler that we handled the event.
+    return 1
 }
 
 #-------------------------------------------------------------------------------

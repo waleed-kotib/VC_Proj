@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Conference.tcl,v 1.11 2004-01-31 13:46:06 matben Exp $
+# $Id: Conference.tcl,v 1.12 2004-02-03 10:16:31 matben Exp $
 
 package provide Conference 1.0
 
@@ -691,10 +691,10 @@ proc ::Jabber::Conference::DoCreate {token} {
     # Ask jabberlib to create the room for us.
     if {$state(usemuc)} {
 	::Jabber::InvokeJlibCmd muc setroom $roomJid form -form $subelements \
-	  -command [list [namespace current]::ResultCallback $roomJid]
+	  -command [list [namespace current]::DoCreateCallback $roomJid]
     } else {
 	::Jabber::InvokeJlibCmd conference set_create $roomJid $subelements  \
-	  [list [namespace current]::ResultCallback $roomJid]
+	  [list [namespace current]::DoCreateCallback $roomJid]
     }
 	
     # Cache groupchat protocol type (muc|conference|gc-1.0).
@@ -707,6 +707,21 @@ proc ::Jabber::Conference::DoCreate {token} {
     # This triggers the tkwait, and destroys the create dialog.
     set state(finished) 1
     catch {destroy $state(w)}
+}
+
+proc ::Jabber::Conference::DoCreateCallback {roomJid jlibName type subiq} { 
+    
+    ::Jabber::Debug 2 "::Jabber::Conference::DoCreateCallback"
+    
+    if {$type == "error"} {
+	tk_messageBox -type ok -icon error  \
+	  -message [FormatTextForMessageBox \
+	  [::msgcat::mc jamessconffailed $roomJid [lindex $subiq 0] [lindex $subiq 1]]]
+    } elseif {[regexp {.+@([^@]+)$} $roomJid match service]} {
+	
+	# Browse the service to get the new room list.
+	::Jabber::InvokeJlibCmd browse_get $service
+    }
 }
 
 #-------------------------------------------------------------------------------

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: tinydom.tcl,v 1.3 2004-01-13 14:50:21 matben Exp $
+# $Id: tinydom.tcl,v 1.4 2004-02-03 10:16:31 matben Exp $
 
 package require xml
 
@@ -43,9 +43,6 @@ proc tinydom::parse {xml} {
     unset xmlobj
     return $token
 }
-
-# This is an attempt to make a minimal DOM thing to store xml data as
-# an hierarchical list which is better suited to Tcl.
 
 proc tinydom::XmlElementStart {tagname attrlist args} {
     variable xmlobj

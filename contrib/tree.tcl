@@ -25,7 +25,7 @@
 # 
 # Copyright (C) 2002-2003 Mats Bengtsson
 # 
-# $Id: tree.tcl,v 1.19 2004-01-09 14:08:21 matben Exp $
+# $Id: tree.tcl,v 1.20 2004-02-03 10:16:30 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -1349,7 +1349,8 @@ proc ::tree::SetSelection {w v} {
 
 proc ::tree::LostSelection {w} {
     
-    if {[winfo toplevel $w] == [winfo toplevel [selection own]]} {
+    set wown [selection own]
+    if {($wown != "") && ([winfo toplevel $w] == [winfo toplevel $wown])} {
 	RemoveSelection $w
     }    
 }

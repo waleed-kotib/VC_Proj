@@ -4,18 +4,24 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.1 2004-02-01 14:29:54 matben Exp $
+# $Id: disco.tcl,v 1.2 2004-02-03 10:16:31 matben Exp $
 # 
 ############################# USAGE ############################################
 #
 #   NAME
 #      disco - convenience command library for the disco part of XMPP.
 #      
+#   SYNOPSIS
+#      disco::new jlibName ?-opt value ...?
+#
 #   OPTIONS
-#	see below for instance command options
+#	-command tclProc
 #	
 #   INSTANCE COMMANDS
-#      discoName 
+#      discoName send_get discotype jid callbackProc ?-opt value ...?
+#      discoName isdiscoed discotype jid
+#      discoName get jid key
+#      discoName reset ?jid?
 #      
 ############################# CHANGES ##########################################
 #
@@ -90,9 +96,9 @@ proc disco::new {jlibname args} {
     
     # Register some standard iq handlers that is handled internally.
     $jlibname iq_register get $xmlns(items)  \
-      [list [namespace current]::handle_get items]
+      [list [namespace current]::handle_get $disconame items]
     $jlibname iq_register get $xmlns(info)   \
-      [list [namespace current]::handle_get info]
+      [list [namespace current]::handle_get $disconame info]
     
     # Create the actual disco instance procedure.
     proc ${disconame} {cmd args}  \
@@ -160,8 +166,9 @@ proc disco::parse_get {disconame discotype jid cmd jlibname type subiq} {
 		}
 		catch {unset attr}
 		array set attr [wrapper::getattrlist $c]
-		lappend items($jid,children) $attr($jid)
-		
+		set cjid $attr($jid)
+		lappend items($jid,children) $cjid
+		set items($cjid,parent) $jid
 		
 	    }	
 	} elseif {[string equal $discotype "info"]} {
@@ -211,19 +218,18 @@ proc disco::get {disconame jid key} {
     }
 }
 
-proc disco::handle_get {discotype jlibname from subiq args} {
+proc disco::handle_get {disconame discotype jlibname from subiq args} {
     
     upvar ${disconame}::priv priv
-    puts "disco::handle_get"
 
     set ishandled 0
     if {[info exists priv(cmd)]} {
-	set ishandled [uplevel #0 [list $priv(cmd) $discotype $from $subiq] $args]
+	set ishandled [uplevel #0 $priv(cmd) [list $discotype $from $subiq] $args]
     }
     return $ishandled
 }
 
-proc disco::clear {disconame {jid ""}} {
+proc disco::reset {disconame {jid ""}} {
     
     upvar ${disconame}::items items
     upvar ${disconame}::info  info
