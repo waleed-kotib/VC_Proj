@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.32 2004-01-01 16:27:48 matben Exp $
+# $Id: GroupChat.tcl,v 1.33 2004-01-02 11:41:16 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -744,7 +744,6 @@ proc ::Jabber::GroupChat::CloseHook {wclose} {
     set result ""
     if {[string match $wDlgs(jgc)* $wclose]} {
 	set w $wclose
-	puts "::Jabber::GroupChat::CloseHook: wclose=$wclose"
 	if {[info exists locals($w,room)]} {
 	    set roomJid $locals($w,room)
 	    set ans [::Jabber::GroupChat::Exit $roomJid]

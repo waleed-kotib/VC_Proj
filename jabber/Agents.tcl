@@ -5,13 +5,14 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Agents.tcl,v 1.7 2003-12-29 15:44:19 matben Exp $
+# $Id: Agents.tcl,v 1.8 2004-01-02 11:41:16 matben Exp $
 
 package provide Agents 1.0
 
 namespace eval ::Jabber::Agents:: {
 
-    hooks::add loginHook ::Jabber::Agents::LoginCmd
+    hooks::add loginHook      ::Jabber::Agents::LoginCmd
+    hooks::add logoutHook     ::Jabber::Agents::LogoutHook
 
     # We keep an reference count that gets increased by one for each request
     # sent, and decremented by one for each response.
@@ -27,6 +28,11 @@ proc ::Jabber::Agents::LoginCmd { } {
     if {[string equal $jprefs(agentsOrBrowse) "agents"]} {
 	::Jabber::Agents::GetAll
     }
+}
+
+proc ::Jabber::Agents::LogoutHook { } {
+    
+    
 }
 
 # Jabber::Agents::GetAll --
