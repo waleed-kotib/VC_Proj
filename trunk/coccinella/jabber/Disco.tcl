@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.7 2004-04-20 13:57:27 matben Exp $
+# $Id: Disco.tcl,v 1.8 2004-04-21 13:21:04 matben Exp $
 
 package provide Disco 1.0
 
@@ -14,6 +14,7 @@ namespace eval ::Jabber::Disco:: {
     ::hooks::add jabberInitHook     ::Jabber::Disco::NewJlibHook
     ::hooks::add loginHook          ::Jabber::Disco::LoginHook
     ::hooks::add logoutHook         ::Jabber::Disco::LogoutHook
+    ::hooks::add presenceHook       ::Jabber::Disco::PresenceHook
 
     # Common xml namespaces.
     variable xmlns
@@ -184,16 +185,14 @@ proc ::Jabber::Disco::ItemsCB {disconame type from subiq args} {
 	    }
 	    ::Jabber::Disco::ControlArrows -1
 	    
-	    # First add the discoed item.
+	    # Add to tree.
 	    set parents [$jstate(disco) parents $from]
 	    set v [concat $parents $from]
 	    ::Jabber::Disco::AddToTree $v
 
-	    # Then all its children.
+	    # Get info for the login servers children.
 	    set childs [$jstate(disco) children $from]
 	    foreach cjid $childs {
-		set cv [concat $v $cjid]
-		::Jabber::Disco::AddToTree $cv
 		
 		# We disco servers jid 'items+info', and disco its childrens 'info'.
 		# 
@@ -442,7 +441,7 @@ proc ::Jabber::Disco::Popup {w v x y} {
 		}
 	    } 
 	    search - register {
-		if {[$jstate(disco) havefeature "jabber:iq:${type}" $jid]} {
+		if {[$jstate(disco) hasfeature "jabber:iq:${type}" $jid]} {
 		    set state normal
 		}
 	    }
@@ -523,7 +522,7 @@ proc ::Jabber::Disco::OpenTreeCmd {w v} {
 
 # Jabber::Disco::AddToTree --
 #
-#       Fills tree with content. Calls itself recursively?
+#       Fills tree with content. Calls itself recursively.
 #
 # Arguments:
 #       v:
@@ -537,12 +536,23 @@ proc ::Jabber::Disco::AddToTree {v} {
     # We disco servers jid 'items+info', and disco its childrens 'info'.
     set treectag item[incr treeuid]
     
-    puts "::Jabber::Disco::AddToTree v='$v'"
+    ::Jabber::Debug 4 "::Jabber::Disco::AddToTree v='$v'"
 
-    set jid [lindex $v end]
-    set name [$jstate(disco) name $jid]
-    if {$name == ""} {
-	set name $jid
+    set jid   [lindex $v end]
+    set isdir 1
+    set icon  ""
+
+    # Display text string. Room participants with their nicknames.
+    jlib::splitjid $jid jid2 res
+    if {[$jstate(disco) isroom $jid2] && [string length $res]} {
+	set name [$jstate(jlib) service nick $jid]
+	set isdir 0
+	set icon [::Jabber::Roster::GetPresenceIcon $jid "available"]
+    } else {
+	set name [$jstate(disco) name $jid]
+	if {$name == ""} {
+	    set name $jid
+	}
     }
     
     # Make the first two levels, server and its children bold, rest normal style.
@@ -554,13 +564,22 @@ proc ::Jabber::Disco::AddToTree {v} {
     if {[llength $v] == 1} {
 	set isopen 1
     }
-    
+        
     # Do not create if exists which preserves -open.
     if {![$wtree isitem $v]} {
-	$wtree newitem $v -text $name -tags $jid -style $style -dir 1  \
-	  -open $isopen -canvastags $treectag
+	$wtree newitem $v -text $name -tags $jid -style $style -dir $isdir \
+	  -image $icon -open $isopen -canvastags $treectag
     }
     
+    # Balloon.
+    set jidtxt $jid
+    if {[string length $jid] > 30} {
+	set jidtxt "[string range $jid 0 28]..."
+    }
+    set types [$jstate(disco) types $jid]
+    set msg "jid: $jidtxt\ntype: $types"
+    ::balloonhelp::balloonfortree $wtree $treectag $msg
+
     # Add all child elements as well.
     set childs [$jstate(disco) children $jid]
     foreach cjid $childs {
@@ -585,8 +604,8 @@ proc ::Jabber::Disco::Refresh {jid} {
     
     # Disco once more, let callback manage rest.
     ::Jabber::Disco::ControlArrows 1
-    ::Jabber::Disco::GetItems $jid
     ::Jabber::Disco::GetInfo  $jid
+    ::Jabber::Disco::GetItems $jid
 }
 
 proc ::Jabber::Disco::ControlArrows {step} {    
@@ -611,6 +630,38 @@ proc ::Jabber::Disco::ControlArrows {step} {
 	set arrowRefCount 0
 	$wsearrows stop
     }
+}
+
+# Jabber::Disco::PresenceHook --
+# 
+#       Check if there is a romm participant that changes its presence.
+
+proc ::Jabber::Disco::PresenceHook {jid presence args} {
+    variable wtree    
+    upvar ::Jabber::jstate jstate
+    
+    if {![info exists wtree] || ![winfo exists $wtree]} {
+	return
+    }
+    jlib::splitjid $jid jid2 res
+    
+    ::Jabber::Debug 4 "::Jabber::Disco::PresenceHook $jid, $presence, $args"
+    
+    if {[$jstate(jlib) service isroom $jid2]} {
+	array set argsArr $args
+	set res ""
+	if {[info exists argsArr(-resource)]} {
+	    set res $argsArr(-resource)
+	}
+	set jid3 $jid2/$res
+	set presList [$jstate(roster) getpresence $jid2 -resource $res]
+	array set presArr $presList
+	set icon [eval {
+	    ::Jabber::Roster::GetPresenceIcon $jid3 $presArr(-type)
+	} $presList]
+	set v [concat [$jstate(disco) parents $jid3] $jid3]
+	$wtree itemconfigure $v -image $icon
+    }    
 }
 
 proc ::Jabber::Disco::InfoCmd {jid} {

@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.30 2004-04-20 13:57:27 matben Exp $
+# $Id: MUC.tcl,v 1.31 2004-04-21 13:21:12 matben Exp $
 
 package require entrycomp
 
@@ -141,9 +141,16 @@ proc ::Jabber::MUC::BuildEnter {args} {
     #set confServers [$jstate(browse) getservicesforns  \
     #  "http://jabber.org/protocol/muc"]
     # We should only get services that provides muc!
-    set confServers [$jstate(jlib) service getconferences]
+    set confServers {}
+    set allConfServ [$jstate(jlib) service getconferences]
+    foreach serv $allConfServ {
+	if {[$jstate(jlib) service hasfeature $serv  \
+	  "http://jabber.org/protocol/muc"]} {
+	    lappend confServers $serv
+	}
+    }
 
-    ::Jabber::Debug 2 "::Jabber::MUC::BuildEnter confServers='$confServers'"
+    ::Jabber::Debug 2 "::Jabber::MUC::BuildEnter confServers='$confServers'; allConfServ=$allConfServ"
 
     set wpopupserver $frtop.eserv
     set wpopuproom   $frtop.eroom

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.54 2004-04-20 13:57:27 matben Exp $
+# $Id: GroupChat.tcl,v 1.55 2004-04-21 13:21:05 matben Exp $
 
 package require History
 
@@ -180,7 +180,14 @@ proc ::Jabber::GroupChat::HaveMUC {{roomjid ""}} {
 
     set ans 0
     if {$roomjid == ""} {
-	
+	#set allConfServ [$jstate(jlib) service getconferences]
+	#foreach serv $allConfServ {
+	#    if {[$jstate(jlib) service hasfeature $serv  \
+	#      "http://jabber.org/protocol/muc"]} {
+	#	return 1
+	#    }
+	#}
+	 
 	# Require at least one service that supports muc.
 	if {[info exists jstate(browse)]} {
 	    set jids [$jstate(browse) getservicesforns  \
@@ -197,18 +204,23 @@ proc ::Jabber::GroupChat::HaveMUC {{roomjid ""}} {
 	    }
 	}
     } else {
+	#if {[$jstate(jlib) service hasfeature $serv  \
+	#  "http://jabber.org/protocol/muc"]} {
+	#    return 1
+	#}
+	
 	if {[info exists jstate(browse)]} {
 	    set confserver [$jstate(browse) getparentjid $roomjid]
 	    if {[$jstate(browse) isbrowsed $confserver]} {
-		set ans [$jstate(browse) havenamespace $confserver  \
+		set ans [$jstate(browse) hasnamespace $confserver  \
 		  "http://jabber.org/protocol/muc"]
 		::Jabber::Debug 4 "::Jabber::GroupChat::HaveMUC	confserver=$confserver, ans=$ans"
 	    }
 	}
 	if {[info exists jstate(disco)]} {
 	    set confserver [$jstate(disco) parent $roomjid]
-	    if {[$jstate(disco) isdiscoed $confserver]} {
-		set ans [$jstate(disco) havefeature   \
+	    if {[$jstate(disco) isdiscoed info $confserver]} {
+		set ans [$jstate(disco) hasfeature   \
 		  "http://jabber.org/protocol/muc" $confserver]
 		::Jabber::Debug 4 "::Jabber::GroupChat::HaveMUC	confserver=$confserver, ans=$ans"
 	    }
@@ -347,7 +359,7 @@ proc ::Jabber::GroupChat::BuildEnter {args} {
     variable dlguid
     upvar ::Jabber::jstate jstate
 
-    set chatservers [::Jabber::InvokeJlibCmd service getjidsfor "groupchat"]
+    set chatservers [$jstate(jlib) service getjidsfor "groupchat"]
     ::Jabber::Debug 2 "::Jabber::GroupChat::BuildEnter args='$args'"
     ::Jabber::Debug 2 "    service getjidsfor groupchat: '$chatservers'"
     
@@ -1120,7 +1132,7 @@ proc ::Jabber::GroupChat::PresenceHook {jid presence args} {
     
     upvar ::Jabber::jstate jstate
     
-    if {[::Jabber::InvokeJlibCmd service isroom $jid]} {
+    if {[$jstate(jlib) service isroom $jid]} {
 	::Jabber::Debug 2 "::Jabber::GroupChat::PresenceHook jid=$jid, presence=$presence, args='$args'"
 	
 	array set attrArr $args
