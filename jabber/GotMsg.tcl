@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.17 2003-12-29 09:02:29 matben Exp $
+# $Id: GotMsg.tcl,v 1.18 2003-12-30 15:30:58 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -15,6 +15,7 @@ namespace eval ::Jabber::GotMsg:: {
     # Add all event hooks.
     hooks::add quitAppHook        [list ::UI::SaveWinGeom $wDlgs(jgotmsg)]
     hooks::add displayMessageHook [list ::Speech::SpeakMessage normal]
+    hooks::add closeWindowHook    ::Jabber::GotMsg::CloseHook
     
     
     # Wait for this variable to be set.
@@ -162,20 +163,8 @@ proc ::Jabber::GotMsg::Build { } {
     set finished 0
     
     # Toplevel with class GotMsg.
-    toplevel $w -class GotMsg
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-
-    }
+    ::UI::Toplevel $w -class GotMsg -usemacmainmenu 1 -macstyle documentProc
     wm title $w [::msgcat::mc {Incoming Message}]
-    wm protocol $w WM_DELETE_WINDOW [list ::Jabber::GotMsg::Close $w]
-    
-    # Toplevel menu for mac only.
-    if {[string match "mac*" $this(platform)]} {
-	$w configure -menu [::Jabber::UI::GetRosterWmenu]
-    }
     
     set bg [option get . backgroundGeneral {}]
     
@@ -267,6 +256,15 @@ proc ::Jabber::GotMsg::Build { } {
     
     # Grab and focus.
     focus $w
+}
+
+
+proc ::Jabber::GotMsg::CloseHook {wclose} {
+    global  wDlgs
+    
+    if {[string equal $wDlgs(jgotmsg) $wclose]} {
+	::UI::SaveWinGeom $wclose
+    }   
 }
 
 proc ::Jabber::GotMsg::NextMsg { } {

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.47 2003-12-29 15:44:19 matben Exp $
+# $Id: Jabber.tcl,v 1.48 2003-12-30 15:30:58 matben Exp $
 #
 #  The $address is an ip name or number.
 #
@@ -1256,13 +1256,7 @@ proc ::Jabber::ErrorLogDlg {w} {
 	raise $w
 	return
     }
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-
-    }
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
     wm title $w {Error Log (noncriticals)}
     
     # Global frame.
@@ -1571,10 +1565,7 @@ proc ::Jabber::DoCloseClientConnection {args} {
     catch {
 	eval {$jstate(jlib) send_presence -type unavailable} $opts
     }
-    
-    # Disable all buttons in groupchat windows.
-    ::Jabber::GroupChat::Logout
-    
+        
     # Do the actual closing.
     #       There is a potential problem if called from within a xml parser 
     #       callback which makes the subsequent parsing to fail. (after idle?)
@@ -1582,36 +1573,9 @@ proc ::Jabber::DoCloseClientConnection {args} {
     
     # Update the communication frame; remove connection 'to'.
     ::WB::ConfigureAllJabberEntries $jstate(ipNum) -netstate "disconnect"
-    ::Jabber::UI::SetStatusMessage "Logged out"
 
-    # Multiinstance whiteboard UI stuff.
-    foreach w [::WB::GetAllWhiteboards] {
-	set wtop [::UI::GetToplevelNS $w]
-	#::WB::SetStatusMessage $wtop [::msgcat::mc jaservclosed]
-
-	# If no more connections left, make menus consistent.
-	::UI::FixMenusWhen $wtop "disconnect"
-    }
     ::Network::DeRegisterIP $jstate(ipNum)
-    ::Jabber::Roster::SetUIWhen "disconnect"
-    ::Jabber::UI::FixUIWhen "disconnect"
-    ::Jabber::UI::WhenSetStatus "unavailable"
-    if {[lsearch [::Jabber::UI::Pages] "Browser"] >= 0} {
-	::Jabber::Browse::SetUIWhen "disconnect"
-    }
     
-    # Be sure to kill the wave; could end up here when failing to connect.
-    ::Jabber::UI::StartStopAnimatedWave 0
-    
-    # Clear roster and browse windows.
-    $jstate(roster) reset
-    if {$jprefs(rost,clrLogout)} {
-	::Jabber::Roster::Clear
-    }
-    if {[lsearch [::Jabber::UI::Pages] "Browser"] >= 0} {
-	::Jabber::Browse::Clear
-    }
-    ::Jabber::UI::LogoutClear
     set jstate(ipNum) ""
     
     # Run all logout hooks.
@@ -1862,13 +1826,7 @@ proc ::Jabber::SetStatusWithMessage { } {
 	raise $w
 	return
     }
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-
-    }
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
     wm title $w [::msgcat::mc {Set Status}]
     set finishedStat -1
     
@@ -2649,13 +2607,7 @@ proc ::Jabber::GetVersionResult {from silent jlibname type subiq} {
 	}
     } else {
 	set w .jvers[incr uidvers]
-	toplevel $w
-	if {[string match "mac*" $this(platform)]} {
-	    eval $::macWindowStyle $w documentProc
-	    ::UI::MacUseMainMenu $w
-	} else {
-
-	}
+	::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
 	wm title $w [::msgcat::mc {Version Info}]
 	pack [label $w.icon -bitmap info] -side left -anchor n -padx 10 -pady 10
 	pack [label $w.msg -text [::msgcat::mc javersinfo $from] -font $fontSB] \
@@ -3108,13 +3060,7 @@ proc ::Jabber::Passwd::Build { } {
     if {[winfo exists $w]} {
 	return
     }
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-
-    }
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
     wm title $w [::msgcat::mc {New Password}]
     
     set fontSB [option get . fontSmallBold {}]
@@ -3289,12 +3235,7 @@ proc ::Jabber::Logout::WithStatus { } {
 	return
     }
     
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-    } else {
-
-    }
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
     wm title $w {Logout With Message}
     
     set fontSB [option get . fontSmallBold {}]

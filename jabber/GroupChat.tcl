@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.29 2003-12-29 15:44:19 matben Exp $
+# $Id: GroupChat.tcl,v 1.30 2003-12-30 15:30:58 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -55,9 +55,11 @@ namespace eval ::Jabber::GroupChat:: {
     }
 
     # Add all event hooks.
-    hooks::add quitAppHook [list ::UI::SaveWinPrefixGeom $wDlgs(jgc)]
-    hooks::add quitAppHook ::Jabber::GroupChat::GetFirstPanePos
+    hooks::add quitAppHook             [list ::UI::SaveWinPrefixGeom $wDlgs(jgc)]
+    hooks::add quitAppHook             ::Jabber::GroupChat::GetFirstPanePos
     hooks::add newGroupChatMessageHook ::Jabber::GroupChat::GotMsg
+    hooks::add closeWindowHook         ::Jabber::GroupChat::CloseHook
+    hooks::add logoutHook              ::Jabber::GroupChat::Logout
     
     # Local stuff
     variable locals
@@ -272,13 +274,7 @@ proc ::Jabber::GroupChat::BuildEnter {args} {
     upvar 0 $token enter
     
     set w $wDlgs(jgcenter)[incr dlguid]
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-
-    }
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
     wm title $w [::msgcat::mc {Enter/Create Room}]
     set enter(w) $w
     array set enter {
@@ -534,13 +530,7 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     set locals($roomJid,topic) ""
     
     # Toplevel of class GroupChat.
-    toplevel $w -class GroupChat
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-	
-    }
+    ::UI::Toplevel $w -class GroupChat -usemacmainmenu 1 -macstyle documentProc
     
     # Not sure how old-style groupchat works here???
     set roomName [$jstate(browse) getname $roomJid]
@@ -551,18 +541,10 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
 	set tittxt $roomJid
     }
     wm title $w $tittxt
-    wm protocol $w WM_DELETE_WINDOW  \
-      [list ::Jabber::GroupChat::Exit $roomJid]
-
-    # On non macs we need to explicitly bind certain commands.
-    if {![string equal $this(platform) "macintosh"]} {
-	bind $w <$osprefs(mod)-Key-w>  \
-	  [list ::Jabber::GroupChat::Exit $roomJid]
-    }
     
     # Toplevel menu for mac only.
     if {[string match "mac*" $this(platform)]} {
-	$w configure -menu [::Jabber::UI::GetRosterWmenu]
+	#$w configure -menu [::Jabber::UI::GetRosterWmenu]
     }
     set fontS [option get . fontSmall {}]
     set fontSB [option get . fontSmallBold {}]
@@ -752,6 +734,25 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     wm maxsize $w 800 2000
     
     focus $w
+}
+
+proc ::Jabber::GroupChat::CloseHook {wclose} {
+    global  wDlgs
+    variable locals
+    
+    set result ""
+    if {[string match $wDlgs(jgc)* $wclose]} {
+	set w $wclose
+	puts "::Jabber::GroupChat::CloseHook: wclose=$wclose"
+	if {[info exists locals($w,room)]} {
+	    set roomJid $locals($w,room)
+	    set ans [::Jabber::GroupChat::Exit $roomJid]
+	    if {$ans == "no"} {
+		set result stop
+	    }
+	}
+    }  
+    return $result
 }
 
 proc ::Jabber::GroupChat::ConfigureTextTags {w wtext} {

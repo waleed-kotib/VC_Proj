@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.28 2003-12-29 15:44:19 matben Exp $
+# $Id: Chat.tcl,v 1.29 2003-12-30 15:30:58 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -62,6 +62,8 @@ namespace eval ::Jabber::Chat:: {
     hooks::add quitAppHook        ::Jabber::Chat::GetFirstPanePos    
     hooks::add newChatMessageHook ::Jabber::Chat::GotMsg
     hooks::add presenceHook       ::Jabber::Chat::PresenceCallback
+    hooks::add closeWindowHook    ::Jabber::Chat::CloseHook
+    hooks::add closeWindowHook    ::Jabber::Chat::CloseHistoryHook
         
     # Running number for chat thread token.
     variable uid 0
@@ -91,13 +93,7 @@ proc ::Jabber::Chat::StartThreadDlg {args} {
 	return
     }
     
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-
-    }
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
     wm title $w [::msgcat::mc {Start Chat}]
     
     set fontSB [option get . fontSmallBold {}]
@@ -359,7 +355,7 @@ proc ::Jabber::Chat::StartThread {jid} {
 #       token; shows window.
 
 proc ::Jabber::Chat::Build {threadID args} {
-    global  this prefs wDlgs osprefs
+    global  this prefs wDlgs
     
     variable uid
     upvar ::Jabber::jstate jstate
@@ -384,14 +380,8 @@ proc ::Jabber::Chat::Build {threadID args} {
     set state(lastsubject) ""
     
     # Toplevel with class Chat.
-    toplevel $w -class Chat
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-
-    }
-
+    ::UI::Toplevel $w -class Chat -usemacmainmenu 1 -macstyle documentProc
+ 
     # -from is sometimes a 3-tier jid /resource included.
     # Try to keep any /resource part unless not possible.
     
@@ -407,19 +397,6 @@ proc ::Jabber::Chat::Build {threadID args} {
     }
 
     wm title $w "Chat ($state(jid))"
-    wm protocol $w WM_DELETE_WINDOW  \
-      [list [namespace current]::Close $token]
-
-    # On non macs we need to explicitly bind certain commands.
-    if {![string equal $this(platform) "macintosh"]} {
-	bind $w <$osprefs(mod)-Key-w>  \
-	  [list ::Jabber::Chat::Close $token]
-    }
-    
-    # Toplevel menu for mac only. Crashes in menudefs; BowelsOfTheMemoryMgr
-    if {[string match "mac*" $this(platform)]} {
-	$w configure -menu [::Jabber::UI::GetRosterWmenu]
-    }
     set fontSB [option get . fontSmallBold {}]
 
     # Global frame.
@@ -543,6 +520,17 @@ proc ::Jabber::Chat::Build {threadID args} {
     
     focus $w
     return $token
+}
+
+proc ::Jabber::Chat::CloseHook {wclose} {
+    global  wDlgs
+    
+    if {[string match $wDlgs(jchat)* $wclose]} {
+	set token [::Jabber::Chat::GetTokenFrom w $wclose]
+	if {$token != ""} {
+	    ::Jabber::Chat::Close $token
+	}
+    }   
 }
 
 proc ::Jabber::Chat::ConfigureTextTags {w wtext} {
@@ -879,15 +867,8 @@ proc ::Jabber::Chat::BuildHistory {jid} {
     upvar ::Jabber::jprefs jprefs
     
     set w $wDlgs(jchist)[incr uidhist]
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-	
-    }
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
     wm title $w "Chat History: $jid"
-    wm protocol $w WM_DELETE_WINDOW [list [namespace current]::CloseHistory]
     
     set wtxt  $w.frall.fr
     set wtext $wtxt.t
@@ -986,10 +967,12 @@ proc ::Jabber::Chat::ClearHistory {jid wtext} {
     }
 }
 
-proc ::Jabber::Chat::CloseHistory { } {
+proc ::Jabber::Chat::CloseHistoryHook {wclose} {
     global  wDlgs
     
-    ::UI::SaveWinPrefixGeom $wDlgs(jchist)
+    if {[string match $wDlgs(jchist)* $wclose]} {
+	::UI::SaveWinPrefixGeom $wDlgs(jchist)
+    }   
 }
 
 proc ::Jabber::Chat::PrintHistory {wtext} {

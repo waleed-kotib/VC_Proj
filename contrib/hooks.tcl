@@ -5,7 +5,7 @@
 #       
 #       Code idea from Alexey Shchepin, Many Thanks!
 #       
-# $Id: hooks.tcl,v 1.1 2003-12-19 13:20:48 matben Exp $
+# $Id: hooks.tcl,v 1.2 2003-12-30 15:30:58 matben Exp $
 
 package provide hooks 1.0
 
@@ -45,20 +45,22 @@ proc hooks::run {hook args} {
     variable $hook
 
     if {![info exists $hook]} {
-	return
+	return ""
     }
     set flags($hook) {}
+    set result ""
 
     foreach spec [set $hook] {
 	set func [lindex $spec 0]
 	set code [catch {eval $func $args} state]
 	if {$code} {
 	    bgerror "Hook $hook failed: $code\n$::errorInfo"
-	}
-	if {(!$code) && ([string equal $state stop])} {
+	} elseif {[string equal $state stop]} {
+	    set result stop
 	    break
 	}
     }
+    return $result
 }
 
 #-------------------------------------------------------------------------------

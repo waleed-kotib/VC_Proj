@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.12 2003-12-22 15:04:58 matben Exp $
+# $Id: MUC.tcl,v 1.13 2003-12-30 15:30:58 matben Exp $
 
 package require entrycomp
 
@@ -98,13 +98,7 @@ proc ::Jabber::MUC::BuildEnter {args} {
     upvar 0 $token enter
     
     set w $wDlgs(jmucenter)[incr dlguid]
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-	::UI::MacUseMainMenu $w
-    } else {
-
-    }
+    ::UI::Toplevel $w -macstyle documentProc
     wm title $w [::msgcat::mc {Enter Room}]
     set enter(w) $w
     array set enter {
