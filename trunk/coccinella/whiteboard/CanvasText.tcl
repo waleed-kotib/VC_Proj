@@ -3,11 +3,11 @@
 #      This file is part of The Coccinella application. It implements the
 #      text commands associated with the text tool.
 #      
-#  Copyright (c) 2000-2004  Mats Bengtsson
+#  Copyright (c) 2000-2005  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasText.tcl,v 1.5 2004-11-07 14:22:58 matben Exp $
+# $Id: CanvasText.tcl,v 1.6 2005-01-31 14:07:00 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 

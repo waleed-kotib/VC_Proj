@@ -5,11 +5,11 @@
 #       mime type <-> file suffix
 #       mac type <-> file suffix
 #      
-#  Copyright (c) 2003-2004  Mats Bengtsson
+#  Copyright (c) 2003-2005  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Types.tcl,v 1.11 2004-07-30 12:55:55 matben Exp $
+# $Id: Types.tcl,v 1.12 2005-01-31 14:06:59 matben Exp $
 
 package provide Types 1.0
 

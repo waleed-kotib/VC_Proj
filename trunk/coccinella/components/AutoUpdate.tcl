@@ -3,11 +3,11 @@
 #      This file is part of The Coccinella application. It implements 
 #      methods to query for new versions.
 #
-#  Copyright (c) 2003-2004  Mats Bengtsson
+#  Copyright (c) 2003-2005  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: AutoUpdate.tcl,v 1.10 2004-12-20 11:15:02 matben Exp $
+# $Id: AutoUpdate.tcl,v 1.11 2005-01-31 14:06:52 matben Exp $
 
 package require tinydom
 package require http 2.3

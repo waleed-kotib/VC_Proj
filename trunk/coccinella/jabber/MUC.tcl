@@ -5,9 +5,9 @@
 #      
 #      This code is not completed!!!!!!!
 #      
-#  Copyright (c) 2003-2004  Mats Bengtsson
+#  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.56 2004-12-22 07:08:21 matben Exp $
+# $Id: MUC.tcl,v 1.57 2005-01-31 14:06:57 matben Exp $
 
 package require entrycomp
 package require muc

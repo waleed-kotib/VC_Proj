@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements miscellaneous preference pages for jabber stuff.
 #      
-#  Copyright (c) 2001-2004  Mats Bengtsson
+#  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.21 2004-12-20 15:16:45 matben Exp $
+# $Id: JPrefs.tcl,v 1.22 2005-01-31 14:06:55 matben Exp $
 
 package provide JPrefs 1.0
 

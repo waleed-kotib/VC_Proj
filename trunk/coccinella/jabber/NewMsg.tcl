@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements the new message dialog fo the jabber part.
 #      
-#  Copyright (c) 2001-2004  Mats Bengtsson
+#  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.56 2004-12-21 15:14:43 matben Exp $
+# $Id: NewMsg.tcl,v 1.57 2005-01-31 14:06:57 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0

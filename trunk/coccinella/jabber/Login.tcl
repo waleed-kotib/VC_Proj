@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements functions for logging in at different application levels.
 #      
-#  Copyright (c) 2001-2004  Mats Bengtsson
+#  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.57 2004-12-14 14:08:45 matben Exp $
+# $Id: Login.tcl,v 1.58 2005-01-31 14:06:56 matben Exp $
 
 package provide Login 1.0
 

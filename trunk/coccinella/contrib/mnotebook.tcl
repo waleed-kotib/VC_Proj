@@ -4,10 +4,10 @@
 #      It implements a notebook interface.
 #      Code idee from Harrison & McLennan
 #      
-#  Copyright (c) 2003-2004  Mats Bengtsson
+#  Copyright (c) 2003-2005  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: mnotebook.tcl,v 1.1 2004-12-04 15:01:06 matben Exp $
+# $Id: mnotebook.tcl,v 1.2 2005-01-31 14:06:53 matben Exp $
 # 
 # ########################### USAGE ############################################
 #

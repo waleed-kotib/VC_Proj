@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements a mailbox for jabber messages.
 #      
-#  Copyright (c) 2002-2004  Mats Bengtsson
+#  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.64 2004-12-28 07:43:47 matben Exp $
+# $Id: MailBox.tcl,v 1.65 2005-01-31 14:06:57 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.

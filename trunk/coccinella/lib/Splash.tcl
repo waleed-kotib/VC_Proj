@@ -4,13 +4,13 @@
 #      
 #  Copyright (c) 1999-2002  Mats Bengtsson
 #  
-# $Id: Splash.tcl,v 1.9 2004-10-04 09:22:20 matben Exp $
+# $Id: Splash.tcl,v 1.10 2005-01-31 14:06:59 matben Exp $
    
 package provide Splash 1.0
 
 namespace eval ::SplashScreen:: {
     
-    set text1 "Written by Mats Bengtsson (C) 1999-2004"
+    set text1 "Written by Mats Bengtsson (C) 1999-2005"
     set text2 "Distributed under the Gnu General Public License"
 	
     # Use option database for customization.

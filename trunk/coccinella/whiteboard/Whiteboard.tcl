@@ -3,11 +3,11 @@
 #      This file is part of The Coccinella application. 
 #      It implements the actual whiteboard.
 #      
-#  Copyright (c) 2002-2004  Mats Bengtsson
+#  Copyright (c) 2002-2005  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.30 2004-12-02 08:22:35 matben Exp $
+# $Id: Whiteboard.tcl,v 1.31 2005-01-31 14:07:00 matben Exp $
 
 package require entrycomp
 package require moviecontroller

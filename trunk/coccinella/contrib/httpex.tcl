@@ -5,10 +5,10 @@
 #      side and server side.
 #      Modelled after the http package with modifications.
 #      
-#  Copyright (c) 2002-2004  Mats Bengtsson only for the new and rewritten parts.
+#  Copyright (c) 2002-2005  Mats Bengtsson only for the new and rewritten parts.
 #  This source file is distributed under the BSD license.
 #
-# $Id: httpex.tcl,v 1.18 2004-11-30 15:11:10 matben Exp $
+# $Id: httpex.tcl,v 1.19 2005-01-31 14:06:53 matben Exp $
 # 
 # USAGE ########################################################################
 #

@@ -4,11 +4,11 @@
 #       of procedures for performing a put operation over the network from
 #       a disk file.
 #      
-#  Copyright (c) 2002-2003  Mats Bengtsson
+#  Copyright (c) 2002-2005  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: PutFileIface.tcl,v 1.4 2004-12-02 08:22:35 matben Exp $
+# $Id: PutFileIface.tcl,v 1.5 2005-01-31 14:07:00 matben Exp $
 
 package require putfile
 package require uriencode

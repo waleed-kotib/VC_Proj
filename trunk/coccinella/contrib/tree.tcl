@@ -3,10 +3,10 @@
 #       This package was originally inspired by Richard Hipp's tree package.
 #       Complete rewrite by Mats Bengtsson   (matben@users.sourceforge.net)
 # 
-# Copyright (C) 2002-2004 Mats Bengtsson
+# Copyright (C) 2002-2005 Mats Bengtsson
 # This source file is distributed under the BSD license.
 # 
-# $Id: tree.tcl,v 1.41 2004-11-06 08:15:25 matben Exp $
+# $Id: tree.tcl,v 1.42 2005-01-31 14:06:53 matben Exp $
 # 
 # ########################### USAGE ############################################
 #

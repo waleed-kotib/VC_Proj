@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements the UI of the jabber:iq:oob part of the jabber.
 #      
-#  Copyright (c) 2001-2004  Mats Bengtsson
+#  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.46 2004-12-13 13:39:18 matben Exp $
+# $Id: OOB.tcl,v 1.47 2005-01-31 14:06:58 matben Exp $
 
 package require uriencode
 

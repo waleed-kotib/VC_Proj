@@ -3,11 +3,11 @@
 #      This file is part of The Coccinella application. It implements procedures
 #      for transfering the items of a canvas to and from files.
 #      
-#  Copyright (c) 2002-2004  Mats Bengtsson
+#  Copyright (c) 2002-2005  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasFile.tcl,v 1.18 2004-12-06 15:27:01 matben Exp $
+# $Id: CanvasFile.tcl,v 1.19 2005-01-31 14:06:59 matben Exp $
  
 package require can2svg
 package require svg2can

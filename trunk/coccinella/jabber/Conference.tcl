@@ -4,9 +4,9 @@
 #      It implements enter and create dialogs for groupchat using
 #      the 'jabber:iq:conference' and 'muc' protocols.
 #      
-#  Copyright (c) 2001-2004  Mats Bengtsson
+#  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Conference.tcl,v 1.34 2004-12-13 13:39:17 matben Exp $
+# $Id: Conference.tcl,v 1.35 2005-01-31 14:06:55 matben Exp $
 
 package provide Conference 1.0
 

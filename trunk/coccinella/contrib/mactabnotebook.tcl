@@ -5,10 +5,10 @@
 #      This widget is "derived" from the notebook widget.
 #      Code idee from Harrison & McLennan
 #      
-#  Copyright (c) 2002-2004  Mats Bengtsson
+#  Copyright (c) 2002-2005  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: mactabnotebook.tcl,v 1.27 2004-12-10 15:02:09 matben Exp $
+# $Id: mactabnotebook.tcl,v 1.28 2005-01-31 14:06:53 matben Exp $
 # 
 # ########################### USAGE ############################################
 #

@@ -4,11 +4,11 @@
 #       server part and contains procedures for creating new server side sockets,
 #       handling canvas operations and file transfer.
 #      
-#  Copyright (c) 1999-2004  Mats Bengtsson
+#  Copyright (c) 1999-2005  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: TheServer.tcl,v 1.27 2004-12-02 08:22:34 matben Exp $
+# $Id: TheServer.tcl,v 1.28 2005-01-31 14:06:59 matben Exp $
     
 package provide TheServer 1.0
 
