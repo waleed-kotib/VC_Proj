@@ -25,7 +25,7 @@
 # 
 # Copyright (C) 2002-2003 Mats Bengtsson
 # 
-# $Id: tree.tcl,v 1.14 2003-11-12 08:20:49 matben Exp $
+# $Id: tree.tcl,v 1.15 2003-11-14 10:00:25 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -399,6 +399,7 @@ proc ::tree::tree {w args} {
 	variable options
 	variable widgets
 	variable treestate
+	variable priv
 	variable vuid 0
 	variable v2uid
 	variable uid2v
@@ -408,6 +409,7 @@ proc ::tree::tree {w args} {
     upvar ::tree::${w}::options options
     upvar ::tree::${w}::widgets widgets
     upvar ::tree::${w}::treestate treestate
+    upvar ::tree::${w}::priv priv
     upvar ::tree::${w}::vuid vuid
     upvar ::tree::${w}::v2uid v2uid
     upvar ::tree::${w}::uid2v uid2v
@@ -478,6 +480,21 @@ proc ::tree::tree {w args} {
     set treestate(selection) {}
     set treestate(oldselection) {}
     set treestate(selidx) {}
+    
+    # Font stuff.
+    set priv(fontnormal) [eval {font create} [font actual $options(-font)]]
+    set priv(fontitalic) [eval {font create} [font actual $options(-font)]]
+    set priv(fontbold)   [eval {font create} [font actual $options(-font)]]
+    font configure $priv(fontitalic) -slant italic
+    font configure $priv(fontbold) -weight bold
+    
+    # Line spacing.
+    array set metricsArr [font metrics $options(-font)]
+    array set metricsDirArr [font metrics $options(-fontdir)]
+    set linespace [expr {$metricsArr(-linespace) > $metricsDirArr(-linespace)} ? \
+      $metricsArr(-linespace) : $metricsDirArr(-linespace)]
+    set yline [expr $linespace + 5]
+    set priv(yline) [expr {$yline < 17} ? 17 : $yline]
     
     # Provide some default bindings.
     bind $widgets(canvas) <Double-1>   \
@@ -1456,6 +1473,7 @@ proc ::tree::BuildLayer {w v in} {
     upvar ::tree::${w}::widgets widgets
     upvar ::tree::${w}::options options
     upvar ::tree::${w}::treestate treestate
+    upvar ::tree::${w}::priv priv
     upvar ::tree::${w}::v2uid v2uid
     
     Debug 2 "::tree::BuildLayer v=$v, in=$in"
@@ -1479,6 +1497,7 @@ proc ::tree::BuildLayer {w v in} {
     set uid $v2uid($v)
     set start [expr $treestate(y) - 10]
     set y $treestate(y)
+    set yline $priv(yline)
 
     Debug 3 "\tuid=$uid"
     
@@ -1505,7 +1524,7 @@ proc ::tree::BuildLayer {w v in} {
 	}
 	
 	# This is the "row height".
-	incr treestate(y) 17
+	incr treestate(y) $yline
 	
 	# Any pyjamas lines?
 	if {[llength $options(-pyjamascolor)] > 0} {
@@ -1537,7 +1556,7 @@ proc ::tree::BuildLayer {w v in} {
 	}
 	if {[info exists treestate($uidc:style)]} {
 	    set style $treestate($uidc:style)
-	    set itemFont $widgetGlobals(font${style}) 
+	    set itemFont $priv(font${style}) 
 	} else {
 	    if {$isDir} {
 		set itemFont $options(-fontdir)

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UserActions.tcl,v 1.18 2003-10-29 07:45:05 matben Exp $
+# $Id: UserActions.tcl,v 1.19 2003-11-14 10:00:30 matben Exp $
 
 namespace eval ::UserActions:: {
     
@@ -278,7 +278,7 @@ proc ::UserActions::DoPrintText {wtext args} {
 		tk_messageBox -icon error -title [::msgcat::mc {No Printing}] \
 		  -message [::msgcat::mc messprintnoextension]
 	    } else {
-		eval {::Windows::Printer::Print $wtext} $args
+		::Windows::Printer::DoPrintText $wtext
 	    }
 	}
 	unix {
