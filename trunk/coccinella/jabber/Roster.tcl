@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.65 2004-06-16 14:17:31 matben Exp $
+# $Id: Roster.tcl,v 1.66 2004-06-19 12:56:50 matben Exp $
 
 package provide Roster 1.0
 
@@ -31,6 +31,9 @@ namespace eval ::Jabber::Roster:: {
     option add *Roster.backgroundImage      sky            widgetDefault
     option add *Roster*Tree*dirImage        ""             widgetDefault
     option add *Roster*Tree*groupImage      ""             widgetDefault
+    option add *Roster*rootBackground       ""             widgetDefault
+    option add *Roster*rootBackgroundBd     0              widgetDefault
+    option add *Roster*rootForeground       ""             widgetDefault
 
     variable wtree    
     variable servtxt
@@ -252,8 +255,13 @@ proc ::Jabber::Roster::Build {w} {
 	    lappend opts -backgroundimage $bgImage
 	}
     }
-
+    set rootOpts [list  \
+      -background   [option get $w rootBackground {}] \
+      -backgroundbd [option get $w rootBackgroundBd {}] \
+      -foreground   [option get $w rootForeground {}]]
+    
     eval {::tree::tree $wtree -width 100 -height 100 -silent 1  \
+      -sortorder dictionary -sortlevels {0} \
       -scrollwidth 400  \
       -xscrollcommand [list ::UI::ScrollSet $wxsc \
       [list grid $wxsc -row 1 -column 0 -sticky ew]]  \
@@ -265,6 +273,7 @@ proc ::Jabber::Roster::Build {w} {
     if {[string match "mac*" $this(platform)]} {
 	$wtree configure -buttonpresscommand [namespace current]::Popup \
 	  -eventlist [list [list <Control-Button-1> [namespace current]::Popup]]
+	$wtree configure -rightclickcommand [namespace current]::Popup
     } else {
 	$wtree configure -rightclickcommand [namespace current]::Popup
     }
@@ -279,10 +288,10 @@ proc ::Jabber::Roster::Build {w} {
     
     set dirImage [::Theme::GetImage [option get $wtree dirImage {}]]
     
-    # Add main tree dirs.
+    # Add root tree dirs.
     foreach gpres $jprefs(treedirs) {
-	$wtree newitem [list $gpres] -dir 1 -text [::msgcat::mc $gpres] \
-	  -tags head -image $dirImage
+	eval {$wtree newitem [list $gpres] -dir 1 -text [::msgcat::mc $gpres] \
+	  -tags head -image $dirImage} $rootOpts
     }
     foreach gpres $jprefs(closedtreedirs) {
 	$wtree itemconfigure [list $gpres] -open 0

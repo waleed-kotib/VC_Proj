@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Agents.tcl,v 1.21 2004-06-16 14:17:30 matben Exp $
+# $Id: Agents.tcl,v 1.22 2004-06-19 12:56:35 matben Exp $
 
 package provide Agents 1.0
 
@@ -358,6 +358,7 @@ proc ::Jabber::Agents::Build {w args} {
     if {[string match "mac*" $this(platform)]} {
 	$wtree configure -buttonpresscommand [namespace current]::Popup \
 	  -eventlist [list [list <Control-Button-1> [namespace current]::Popup]]
+	$wtree configure -rightclickcommand [namespace current]::Popup
     } else {
 	$wtree configure -rightclickcommand [namespace current]::Popup
     }

@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  
-# $Id: mactabnotebook.tcl,v 1.14 2004-06-06 07:02:20 matben Exp $
+# $Id: mactabnotebook.tcl,v 1.15 2004-06-19 12:56:35 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -28,13 +28,18 @@
 #	-nbtakefocus, takeFocus, TakeFocus
 #	
 #	MacTabnotebook class:
+#	-accent1, accent1, Accent1
+#	-accent2, accent2, Accent2
 #	-activetabcolor, activeTabColor, ActiveTabColor
-#	-margin, margin, Margin
+#	-margin1, margin1, Margin
+#	-margin2, margin2, Margin
 #	-orient, orient, Orient
 #	-selectcommand, selectCommand, SelectCommand
 #	-style, style, Style
 #	-tabbackground, tabBackground, TabBackground
+#	-tabborderwidth, tabBorderWidth, TabBorderWidth
 #	-tabcolor, tabColor, TabColor
+#	-tabrelief, tabRelief, TabRelief
 #	-font, font, Font
 #	-takefocus, takeFocus, TakeFocus
 #	
@@ -54,6 +59,8 @@
 #       2.0     added large number of stuff, mainly styling things
 
 package require notebook
+package require colorutils
+
 package provide mactabnotebook 2.0
 
 namespace eval ::mactabnotebook::  {
@@ -89,6 +96,7 @@ proc ::mactabnotebook::Init { } {
     variable toDrawPoly
     variable toDrawLine
     variable toDrawPolyAqua
+    variable toDraw3DAqua
     variable toDrawPolyWinXP
     variable widgetCommands
     variable widgetGlobals
@@ -142,10 +150,12 @@ proc ::mactabnotebook::Init { } {
 	-selectcommand       {selectCommand        SelectCommand       }  \
 	-style               {style                Style               }  \
 	-tabbackground       {tabBackground        TabBackground       }  \
+	-tabborderwidth      {tabBorderWidth       TabBorderWidth      }  \
 	-tabcolor            {tabColor             TabColor            }  \
 	-tabgradient1        {tabGradient1         TabColor            }  \
 	-tabgradient2        {tabGradient2         TabColor            }  \
 	-taboutline          {tabOutline           TabOutline          }  \
+	-tabrelief           {tabRelief            TabRelief           }  \
 	-takefocus           {takeFocus            TakeFocus           }  \
 	-ymargin1            {yMargin1             YMargin1            }  \
     }
@@ -161,6 +171,7 @@ proc ::mactabnotebook::Init { } {
 	-activeforeground -activetabcolor -activetaboutline -activetabbackground
 	-margin1 -margin2 
 	-tabgradient1 -tabgradient2 -tabbackground -tabcolor -taboutline
+	-tabborderwidth -tabrelief
 	-ymargin1
     }
   
@@ -198,7 +209,9 @@ proc ::mactabnotebook::Init { } {
     option add *MacTabnotebook.margin1Aqua             2            widgetDefault
     option add *MacTabnotebook.margin2Aqua             0            widgetDefault
     option add *MacTabnotebook.tabBackgroundAqua       #8a8a8a      widgetDefault    
+    option add *MacTabnotebook.tabBorderWidthAqua      1            widgetDefault    
     option add *MacTabnotebook.tabOutlineAqua          #575757      widgetDefault    
+    option add *MacTabnotebook.tabReliefAqua           flat         widgetDefault    
     option add *MacTabnotebook.backgroundAqua          #bebebe      widgetDefault
     option add *MacTabnotebook.foregroundAqua          #3a3a3a      widgetDefault    
     option add *MacTabnotebook.yMargin1Aqua            6            widgetDefault
@@ -320,6 +333,21 @@ proc ::mactabnotebook::Init { } {
 	{-2 0 -2 $yl $xleft $yl $xleft $yu $xright $yu $xright $yl \
 	  2000 $yl 2000 0}
 	{[list poly $tname poly-$tname]}
+    }
+    # 3D lines: {coords tags fill} (depend on -orient)
+    set toDraw3DAqua(normal) {
+	{-2 0 -2 $yl $xleft $yl $xleft $yu $xright $yu $xright $yl \
+	  2000 $yl 2000 0}
+	{[list 3d-light $tname 3d-light-$tname]}  $3dlight
+	{$xright $yu $xright $yl}
+	{[list 3d-dark $tname 3d-dark-$tname]}  $3ddark
+    }
+    set toDraw3DAqua(hang) {
+	{-2 0 -2 $yl $xleft $yl $xleft $yu $xright $yu $xright $yl \
+	  2000 $yl 2000 0}
+	{[list 3d-light $tname 3d-light-$tname]}  $3ddark
+	{$xleft $yl $xleft $yu}
+	{[list 3d-dark $tname 3d-dark-$tname]}  $3dlight
     }
     set toDrawPolyWinXP {
 	{-2 0 -2 $yl $xleft $yl $xleft [expr $yu+2] [expr $xleft+2] $yu \
@@ -882,6 +910,7 @@ proc ::mactabnotebook::BuildMac {w} {
 proc ::mactabnotebook::BuildAqua {w} {
     
     variable toDrawPolyAqua
+    variable toDraw3DAqua
     variable widgetGlobals
     upvar ::mactabnotebook::${w}::options options
     upvar ::mactabnotebook::${w}::tnInfo tnInfo
@@ -891,10 +920,13 @@ proc ::mactabnotebook::BuildAqua {w} {
 	puts "::mactabnotebook::BuildAqua w=$w"
     }
     $w.tabs delete all
-
+  
     set font        $options(-font)
     set outline     $options(-taboutline)
+    set bd          $options(-tabborderwidth)
+    set relief      $options(-tabrelief)
     set fill        $options(-tabbackground)
+    set activefill  $options(-activetabbackground)
     set foreground  $options(-foreground)
     set ipadx       $options(-ipadx)
     set ipady       $options(-ipady)
@@ -902,6 +934,17 @@ proc ::mactabnotebook::BuildAqua {w} {
     set margin2     $options(-margin2)
     array set metricsArr [font metrics $font]
     set fontHeight $metricsArr(-linespace)
+    if {[string equal $relief "raised"] && ($bd > 0)} {
+	set 3ddark  [::colorutils::getdarker $fill]
+	set 3dlight [::colorutils::getlighter $fill]
+	set toDraw3D $toDraw3DAqua($options(-orient))
+	
+	# Cache colors since expensive to compute each time.
+	set tnInfo(3dcol,tabbg,dark)  $3ddark
+	set tnInfo(3dcol,tabbg,light) $3dlight
+	set tnInfo(3dcol,acttabbg,dark)  [::colorutils::getdarker $activefill]
+	set tnInfo(3dcol,acttabbg,light) [::colorutils::getlighter $activefill]
+    }
     
     # Find max height of any image.
     set maxh 0
@@ -934,8 +977,6 @@ proc ::mactabnotebook::BuildAqua {w} {
 	} else {
 	    set xtext [expr int($x + 2 + $ipadx)]
 	}
-	#set id [$w.tabs create text $xtext [expr $ym+1] \
-	#  -fill white -anchor w -text $str -font $font -tags [list ttxt tsdw $tname]]
 	set id [$w.tabs create text $xtext $ym -fill $foreground \
 	  -anchor w -text $str -font $font -tags [list ttxt $tname]]
 	
@@ -949,6 +990,14 @@ proc ::mactabnotebook::BuildAqua {w} {
 	foreach {coords ptags} $toDrawPolyAqua {
 	    eval {$w.tabs create polygon} $coords  \
 	      -fill $fill -outline $outline -tags $ptags
+	}
+	
+	# 3D border.
+	if {[string equal $relief "raised"] && ($bd > 0)} {
+	    foreach {coords ptags fill} $toDraw3D {
+		eval {$w.tabs create line} $coords  \
+		  -fill $fill -tags $ptags
+	    }
 	}
 	#DrawAluRect $w.tabs [expr $xleft+1] [expr $yu+1] [expr $xright-1] $yl  \
 	#  $fill talu
@@ -1224,16 +1273,35 @@ proc ::mactabnotebook::ConfigAquaTabs {w} {
     upvar ::mactabnotebook::${w}::tnInfo tnInfo
     upvar ::mactabnotebook::${w}::name2uid name2uid
     
-    set current $tnInfo(current)
+    set current  $tnInfo(current)
     set tcurrent $name2uid($current)
+    set activebg $options(-activetabbackground)
+    set bg       $options(-tabbackground)
     $w.tabs raise $tcurrent
+    set 3d 0
+    if {[string equal $options(-tabrelief) "raised"] && \
+      ($options(-tabborderwidth) > 0)} {
+	set 3d 1
+    }
     
     foreach name $tnInfo(tabs) {
 	set tname $name2uid($name)
 	if {[string equal $current $name]} {
-	    $w.tabs itemconfigure poly-$tname -fill $options(-activetabbackground)
+	    $w.tabs itemconfigure poly-$tname -fill $activebg
+	    if {$3d} {
+		$w.tabs itemconfigure 3d-dark-$tname \
+		  -fill $tnInfo(3dcol,acttabbg,dark)
+		$w.tabs itemconfigure 3d-light-$tname \
+		  -fill $tnInfo(3dcol,acttabbg,light)
+	    }
 	} else {
-	    $w.tabs itemconfigure poly-$tname -fill $options(-tabbackground)
+	    $w.tabs itemconfigure poly-$tname -fill $bg
+	    if {$3d} {
+		$w.tabs itemconfigure 3d-dark-$tname \
+		  -fill $tnInfo(3dcol,tabbg,dark)
+		$w.tabs itemconfigure 3d-light-$tname \
+		  -fill $tnInfo(3dcol,tabbg,light)
+	    }
 	}
     }        
 }

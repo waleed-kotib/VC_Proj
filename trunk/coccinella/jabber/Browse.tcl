@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.49 2004-06-16 14:17:30 matben Exp $
+# $Id: Browse.tcl,v 1.50 2004-06-19 12:56:50 matben Exp $
 
 package require chasearrows
 
@@ -554,6 +554,7 @@ proc ::Jabber::Browse::Build {w} {
     if {[string match "mac*" $this(platform)]} {
 	$wtree configure -buttonpresscommand [namespace current]::Popup \
 	  -eventlist [list [list <Control-Button-1> [namespace current]::Popup]]
+	$wtree configure -rightclickcommand [namespace current]::Popup
     } else {
 	$wtree configure -rightclickcommand [namespace current]::Popup
     }

@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 1999-2002  Mats Bengtsson
 #  
-# $Id: Splash.tcl,v 1.5 2004-06-06 07:02:22 matben Exp $
+# $Id: Splash.tcl,v 1.6 2004-06-19 12:56:50 matben Exp $
    
 package provide Splash 1.0
 
@@ -68,6 +68,7 @@ proc ::SplashScreen::SplashScreen { } {
     set showCopyright [option get $w showCopyright {}]
     set copyrightX    [option get $w copyrightX {}]
     set copyrightY    [option get $w copyrightY {}]
+    set fontS  [option get . fontSmall {}]
     
     # If image not already there, get it.
     set imsplash [::Theme::GetImage [option get $w image {}]]
