@@ -3,8 +3,6 @@
 #       This file is part of The Coccinella application.
 #       It registers the standard "built in" packages:
 #           QuickTimeTcl
-#           TclSpeech
-#           MSSpeech
 #           snack
 #           Img
 #           
@@ -14,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Plugins.tcl,v 1.1 2004-06-06 06:41:31 matben Exp $
+# $Id: Plugins.tcl,v 1.2 2004-06-06 15:42:50 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -123,8 +121,6 @@ namespace eval ::Plugins:: {
     # Search only for packages on platforms they can live on.
     array set packages2Platform {
 	QuickTimeTcl       {            macosx    windows} 
-	TclSpeech          {macintosh   macosx}
-	MSSpeech           {windows}
 	snack              {windows     unix}
 	Img                {windows     unix}
     }
@@ -173,8 +169,8 @@ proc ::Plugins::Init { } {
     # Init the "standard" (internal and application) plugins.
     ::Plugins::InitTk
     ::Plugins::InitQuickTimeTcl
-    ::Plugins::InitTclSpeech
-    ::Plugins::InitMSSpeech
+    #::Plugins::InitTclSpeech
+    #::Plugins::InitMSSpeech
     ::Plugins::InitSnack
     ::Plugins::InitImg
     ::Plugins::InitXanim

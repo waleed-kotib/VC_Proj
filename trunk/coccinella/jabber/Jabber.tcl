@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.87 2004-06-06 07:02:20 matben Exp $
+# $Id: Jabber.tcl,v 1.88 2004-06-06 15:42:49 matben Exp $
 
 package provide Jabber 1.0
 
@@ -798,6 +798,7 @@ proc ::Jabber::ClientProc {jlibName what args} {
     # For each 'what', split the argument list into the proper arguments,
     # and make the necessary calls.
     array set attrArr $args
+    set ishandled 0
     
     switch -- $what {
 	connect {
@@ -851,6 +852,7 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	      -icon error -type ok	    
 	}
     }
+    return $ishandled
 }
 
 # Jabber::DebugCmd --
@@ -1135,6 +1137,8 @@ proc ::Jabber::IsMyGroupchatJid {jid} {
 #       args
 #                -to      sets any to='jid' attribute.
 #                -notype  0|1 see XMPP 5.1
+#                -priority
+#                -status  text message
 #       
 # Results:
 #       None.
@@ -1151,7 +1155,7 @@ proc ::Jabber::SetStatus {type args} {
     set presArgs {}
     foreach {key value} $args {
 	switch -- $key {
-	    -to - -priority {
+	    -to - -priority - -status {
 		lappend presArgs $key $value
 	    }
 	}
@@ -1238,7 +1242,7 @@ proc ::Jabber::SetStatusWithMessage { } {
     set i 0
     foreach val {available chat away xa dnd invisible} {
 	label ${frtop}.l${val} -image [::Jabber::Roster::GetPresenceIconFromKey $val]
-	radiobutton ${fr}.${val} -text [::msgcat::mc jastat${val}]  \
+	radiobutton ${frtop}.${val} -text [::msgcat::mc jastat${val}]  \
 	  -variable [namespace current]::show -value $val
 	grid ${frtop}.l${val} -sticky e -column 0 -row $i -padx 4 -pady 3
 	grid ${frtop}.${val} -sticky w -column 1 -row $i -padx 8 -pady 3

@@ -2,7 +2,7 @@
 # 
 #       Provides a structure for code components.
 #       
-# $Id: component.tcl,v 1.3 2004-06-06 07:02:20 matben Exp $
+# $Id: component.tcl,v 1.4 2004-06-06 15:42:49 matben Exp $
 
 package provide component 1.0
 
@@ -27,10 +27,11 @@ proc component::attempt {name fileName initProc} {
     uplevel #0 $initProc
 }
 
-proc component::register {name} {
+proc component::register {name {str ""}} {
     variable priv
     
     set priv($name) 1
+    set priv($name,str) $str
 }
 
 # component::load --

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.39 2004-05-06 13:41:11 matben Exp $
+# $Id: Dialogs.tcl,v 1.40 2004-06-06 15:42:49 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -20,6 +20,7 @@ namespace eval ::Dialogs:: {
 # Define the toplevel windows here so they don't collide.
 # Toplevel dialogs.
 array set wDlgs {
+    comp            .comp
     editFonts       .edfnt
     editShorts      .tshcts
     fileAssoc       .fass
@@ -72,6 +73,7 @@ array set wDlgs {
     jerrdlg         .jerrdlg
     jwbinbox        .jwbinbox
     jprivacy        .jprivacy
+    jdirpres        .jdirpres
 }
 
 # Dialogs::GetCanvas --
@@ -276,6 +278,29 @@ proc ::Dialogs::InfoOnPlugins { } {
     
     tkwait window $w
     grab release $w
+}
+
+proc ::Dialogs::InfoComponents { } {
+    global  prefs this wDlgs
+    
+    # Check first of there are *any* components.
+    if {0} {
+	tk_messageBox -icon info -type ok -message   \
+	  [FormatTextForMessageBox [::msgcat::mc messnoplugs]]
+	return  
+    }
+    set w $wDlgs(comp)
+    if {[winfo exists $w]} {
+	return
+    }
+    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
+    wm title $w [::msgcat::mc {Component Info}]
+     
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1
+    
+    
+    
 }
 
 # Printing the canvas on Unix/Linux.
