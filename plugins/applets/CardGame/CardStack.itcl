@@ -1,0 +1,188 @@
+# CardStack.itcl 
+# 
+#       Supposed to handle cardstacks. It doesn't handle any display things,
+#       and not any user interaction or interface stuff.
+# 
+# $Id: CardStack.itcl,v 1.1 2004-07-23 10:15:37 matben Exp $
+
+class CardStack {
+        
+    # ------------------
+    # Class constructor.
+    # ------------------
+
+    protected {
+	constructor {args} {}
+	destructor {}
+    }
+    
+    # --------------
+    # Class methods.
+    # --------------
+
+    public {
+	method MixCards {}
+	method Pop {}
+	method PopAndMix {}
+	method Image {card}
+	method NumberOfCards {}
+	method TopCard {}
+	method MakeTopmost {card}
+    }
+
+    # ----------------------
+    # Private class methods.
+    # ----------------------
+
+    protected {
+	method CreateCardImages {}
+	method CreateEmptyPileImage {}
+    }
+
+    # --------------
+    # Static methods.
+    # --------------
+
+    private {
+	proc CreateAllCards {}
+	proc InitRand {}
+	proc UnifRand {x}
+    }
+    
+    # ----------------------
+    # Configuration options.
+    # ----------------------
+
+    public {
+	variable rule
+    }
+
+    # ---------------------------
+    # Private class data members.
+    # ---------------------------
+
+    private {
+	# BUG
+	variable height 100
+	variable width  100
+	variable cardSet
+	variable imgbase  ::img::card
+	variable currHand {}
+    }
+    
+    # ----------------------------
+    # Private static data members.
+    # ----------------------------
+
+    private {
+	common inited 0
+	common cardsSorted
+	common libDir      [file join [file dirname [info script]] cards]
+    }
+}
+
+body CardStack::constructor {args} {
+
+    if {!$inited} {
+	InitRand
+	CreateAllCards
+	CreateCardImages
+	CreateEmptyPileImage
+	set inited 1
+    }
+}
+
+body CardStack::destructor {} {
+
+    eval {image delete} [image names ${imgbase}::*]
+}
+
+body CardStack::CreateAllCards {} {
+    
+    set cardsSorted {}
+    #foreach value {k q j 0 9 8 7 6 5 4 3 2 a}
+    foreach value {k} {
+	foreach suit {d h s c} {
+	    lappend cardsSorted ${value}${suit}
+	}
+    }
+}
+
+body CardStack::CreateCardImages {} {
+    
+    set readCards 1
+    source [file join $libDir tewi.tcl]
+    set width  [image width ${imgbase}::back]
+    set height [image height ${imgbase}::back]
+}
+
+body CardStack::CreateEmptyPileImage {} {
+    
+    set im [image create photo ${imgbase}::emptypile \
+      -width $width -height $height]
+    $im put black -to 0 0 $width $height
+    return $im
+}
+
+body CardStack::MixCards {} {
+
+    set currHand {}
+    set cards $cardsSorted
+    set remaining [llength $cards]
+    while {$remaining > 0} {
+	set ind [UnifRand $remaining]
+	lappend currHand [lindex $cards $ind]
+	set cards [lreplace $cards $ind $ind]
+	incr remaining -1
+    }
+}
+
+body CardStack::Pop {} {
+
+    set card [lindex $currHand end]
+    set currHand [lreplace $currHand end end]
+    return $card
+}
+
+# CardStack::PopAndMix --
+# 
+#       Draws a random card from a possible ordered card stack.
+
+body CardStack::PopAndMix {} {
+
+    set remaining [llength $currHand]
+    set ind [UnifRand $remaining]
+    set card [lindex $currHand $ind]
+    set currHand [lreplace $currHand $ind $ind]
+    return $card
+}
+
+body CardStack::Image {card} {
+    return ${imgbase}::${card}
+}
+
+body CardStack::NumberOfCards {} {
+    return [llength $currHand]
+}
+
+body CardStack::TopCard {} {
+    return [lindex $currHand end]
+}
+
+body CardStack::MakeTopmost {card} {
+
+    set ind [lsearch $currHand $card]
+    if {$ind > 0} {
+	set currHand [lrange $currHand 0 $ind]
+    }
+}
+
+body CardStack::InitRand {} {    
+    set seed [expr {abs([pid]+[clock clicks]%100000)}]
+    expr {srand(int($seed))}
+}
+
+body CardStack::UnifRand {x} {    
+    return [expr {int($x*rand())}]
+}
+

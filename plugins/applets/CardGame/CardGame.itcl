@@ -1,0 +1,498 @@
+# CardGame.itcl 
+# 
+#       Creates a card game in a whiteboard canvas. 
+# 
+# 
+# $Id: CardGame.itcl,v 1.1 2004-07-23 10:15:37 matben Exp $
+
+namespace eval CardGame {
+    
+    variable infoScript [info script]
+}
+
+# This file may be sourced more than once; protect for this!
+# Is there a better way? Ugly!
+
+if {[itcl::find classes CardGame] == ""} {
+    
+    class CardGame {
+	
+	inherit CardStack BaseWBCanvas
+	    
+	# -----------------------
+	# Private static methods.
+	# -----------------------
+
+	private {
+	    proc Init {}
+	}
+
+	# ------------------
+	# Class constructor.
+	# ------------------
+	
+	protected {
+	    constructor {w x y args} {$this BaseWBCanvas::constructor $w} {}
+	    destructor {}
+	}
+	
+	# --------------
+	# Class methods.
+	# --------------
+
+	public {
+	    method Save {id}
+	}
+	
+	# ----------------------
+	# Private class methods.
+	# ----------------------
+	
+	protected {
+	    method DrawCardStack {x y args}
+	    method MakeMenus {}
+	    method PointPress {x y} {}
+	    method PointMotion {x y} {}
+	    method PointRelease {x y} {}
+	    method MoveInitStack {x y} {}
+	    method MoveMotionStack {x y} {}
+	    method MoveReleaseStack {x y} {}
+	    method MoveInitCard {x y} {}
+	    method MoveMotionCard {x y} {}
+	    method MoveReleaseCard {x y} {}
+	    method DeleteStack {x y} {}
+	    method DeleteCard {x y} {}
+	    method StackPopup {x y} {}
+	    method CardPopup {x y} {}
+	    method NewCard {}
+	    method NewCardAutoPlace {}
+	    method ShowMe {}
+	    method ShowAll {}
+	    method Hide {}
+	    method MixStack {}
+	}
+    
+	# ----------------------------
+	# Private static data members.
+	# ----------------------------
+
+	private common cardstackMenu
+	private common cardMenu
+	private common cardStatePopup
+	private common stickyDistance 20
+	private common autoPlaceOffset 6
+	private common idpopup
+	private common inited 0
+	private common sound 0
+	
+	# ---------------------------
+	# Private class data members.
+	# ---------------------------
+	
+	protected {
+	    variable idstack
+	    variable csObj
+	    variable move
+	    variable idcard
+	    variable played 0
+	    variable emptyInstBindList
+	}    
+    }
+
+    body CardGame::constructor {w x y args} {
+	
+	::Debug 4 "CardGame::constructor ns=[namespace current]"
+	
+	MakeMenus
+	
+	# CardStack object as a canvas item.
+	set csObj [CardStack #auto]
+	$csObj MixCards
+	
+	# Make actual canvas item(s).
+	eval {DrawCardStack $x $y} $args
+	
+	# All special bindings for the card stack.
+	# %W will be substituted by the canvas widget path.
+	# 
+	# IMPORTANT: we cannot access instance specific stuff,
+	# variables and such, when binding to tags shared by many objects!
+	set b1Stack        {%W bind cardstack <Button-1>}
+	set b1MotionStack  {%W bind cardstack <B1-Motion>}
+	set b1ReleaseStack {%W bind cardstack <ButtonRelease-1>}
+	set b1Card         {%W bind playcard <Button-1>}
+	set b1MotionCard   {%W bind playcard <B1-Motion>}
+	set b1ReleaseCard  {%W bind playcard <ButtonRelease-1>}
+	
+	set b1StackInst         [list %W bind $idstack <Button-1>]
+	set b1MotionStackInst   [list %W bind $idstack <B1-Motion>]
+	set b1ReleaseStackInst  [list %W bind $idstack <ButtonRelease-1>]
+	
+	switch -- [GetThis platform] {
+	    macintosh - macosx {
+		set b1PopupStack {%W bind cardstack <Control-Button-1>}
+		set b1PopupCard  {%W bind playcard <Control-Button-1>}
+		set b2PopupStack {%W bind cardstack <Button-2>}
+		set b2PopupCard  {%W bind playcard <Button-2>}
+	    }
+	    default {
+		set b3PopupStack {%W bind cardstack <Button-3>}
+		set b3PopupCard  {%W bind playcard <Button-3>}
+	    }
+	}
+	
+	set classBindList [list \
+	  move    [list $b1Stack        [code $this MoveInitStack %x %y]] \
+	  move    [list $b1MotionStack  [code $this MoveMotionStack %x %y]] \
+	  move    [list $b1ReleaseStack [code $this MoveReleaseStack %x %y]] \
+	  move    [list $b1Card         [code $this MoveInitCard %x %y]] \
+	  move    [list $b1MotionCard   [code $this MoveMotionCard %x %y]] \
+	  move    [list $b1ReleaseCard  [code $this MoveReleaseCard %x %y]] \
+	  del     [list $b1Card         [code $this DeleteCard %x %y]] ]
+	set instBindList [list \
+	  point   [list $b1StackInst        [code $this PointPress %x %y]] \
+	  point   [list $b1MotionStackInst  [code $this PointMotion %x %y]] \
+	  point   [list $b1ReleaseStackInst [code $this PointRelease %x %y]] \
+	  del     [list $b1StackInst        [code $this DeleteStack %x %y]] ]
+
+	set emptyInstBindList [list \
+	  point   [list $b1StackInst        {}] \
+	  point   [list $b1MotionStackInst  {}] \
+	  point   [list $b1ReleaseStackInst {}]]
+
+	switch -- [GetThis platform] {
+	    macintosh - macosx {
+		lappend classBindList \
+		  point   [list $b1PopupStack   [code $this StackPopup %X %Y]] \
+		  point   [list $b1PopupCard    [code $this CardPopup %X %Y]]  \
+		  point   [list $b2PopupStack   [code $this StackPopup %X %Y]] \
+		  point   [list $b2PopupCard    [code $this CardPopup %X %Y]]
+	    }
+	    default {
+		lappend classBindList \
+		  point   [list $b3PopupStack   [code $this StackPopup %X %Y]] \
+		  point   [list $b3PopupCard    [code $this CardPopup %X %Y]]
+	    }
+	}
+	
+	# The naming here is a bit confusing...
+	RegisterCanvasClassBinds CardGame $classBindList
+	RegisterCanvasInstBinds  CardGame $instBindList
+	
+	# Check if swash.wav sound available.
+	if {!$inited} {
+	    Init
+	}
+    }
+    
+    body CardGame::Init {} {
+	
+	# Check if swash.wav sound available.
+	# Eventually we need an application base class for things like this...
+	if {[component::exists Sounds]} {
+	    ::Sounds::Create swash [file join [GetThis soundsPath] swash.wav]
+	    set sound 1
+	}
+	set inited 1
+    }
+    
+    body CardGame::DrawCardStack {x y args} {
+	
+	set im [$csObj Image cardpile]
+	set utag [NewUtag]	
+	set idstack [$tkCanvas create image $x $y -image $im -anchor nw  \
+	  -tags [list image cardstack object:${this} $utag]]
+
+	foreach {key value} $args {    
+	    switch -- $key {
+		-topcard {
+		    $csObj MakeTopmost $value
+		}
+		-cards {
+		    foreach cmd $value {
+			set id [eval {$tkCanvas} $cmd]
+			$tkCanvas addtag object:${this} withtag $id 
+			$tkCanvas addtag [NewUtag] withtag $id 
+		    }
+		}
+	    }
+	}
+    }
+
+    body CardGame::MakeMenus {} {
+	
+	# Only a single set per canvas.
+	set cardstackMenu ${tkCanvas}.csmenu
+	if {![winfo exists $cardstackMenu]} {
+	    menu $cardstackMenu -tearoff 0
+	    if {0} {
+		$cardstackMenu add command -label [mc {Mix Stack}]  \
+		  -command [code $this MixStack]
+		$cardstackMenu add command -label [mc {New Card}]  \
+		  -command [code $this NewCardAutoPlace]
+	    }
+	    set cardMenu [menu ${tkCanvas}.camenu -tearoff 0]
+	    $cardMenu add radiobutton -label [mc {Show Me}]  \
+	      -command [code $this ShowMe] -variable [scope cardStatePopup] \
+	      -value me
+	    $cardMenu add radiobutton -label [mc {Show All}]  \
+	      -command [code $this ShowAll] -variable [scope cardStatePopup] \
+	      -value all
+	    $cardMenu add radiobutton -label [mc {Hide}]  \
+	      -command [code $this Hide] -variable [scope cardStatePopup] \
+	      -value hide
+	}
+    }
+
+    body CardGame::PointPress {x y} {
+	
+	puts "CardGame::PointPress"
+	NewCard
+	if {[$csObj NumberOfCards] == 0} {
+	    ItemConfigure $idstack -image [$csObj Image black]
+	}
+	set off 3
+	$tkCanvas move $idcard $off $off
+	set move(x) [$tkCanvas canvasx $x]
+	set move(y) [$tkCanvas canvasy $y]
+	set move(x0) $move(x)
+	set move(y0) $move(y)
+	set move(id) [$tkCanvas find withtag $idcard]
+	
+	# Shadow to highlight that a new card has been created.
+	foreach {x1 y1 x2 y2} [$tkCanvas bbox $idcard] {
+	    incr x1 $off
+	    incr y1 $off
+	    incr x2 $off
+	    incr y2 $off
+	}
+	set move(idshadow) [$tkCanvas create rectangle $x1 $y1 $x2 $y2  \
+	  -outline {} -fill gray60]
+	$tkCanvas lower $move(idshadow) $idcard
+    }
+
+    body CardGame::PointMotion {x y} {
+	
+	set x [$tkCanvas canvasx $x]
+	set y [$tkCanvas canvasy $y]
+	set dx [expr $x - $move(x)]
+	set dy [expr $y - $move(y)]
+	$tkCanvas move $move(id) $dx $dy
+	$tkCanvas move $move(idshadow) $dx $dy
+	set move(x) $x
+	set move(y) $y
+	
+	if {$sound && !$played && \
+	  [expr hypot($x - $move(x0), $y - $move(y0))] > $stickyDistance} {
+	    ::Sounds::Play swash
+	    set played 1
+	}
+	CancelBox
+    }
+
+    body CardGame::PointRelease {x y} {
+	
+	puts "CardGame::PointRelease"
+	$tkCanvas delete $move(idshadow)
+	set x [$tkCanvas canvasx $x]
+	set y [$tkCanvas canvasy $y]
+	if {[expr hypot($x - $move(x0), $y - $move(y0))] < $stickyDistance} {
+	    $tkCanvas delete $idcard
+	} else {
+	    set cmd [list create image [$tkCanvas coords $idcard] \
+	      -image [$tkCanvas itemcget $idcard -image] -anchor nw \
+	      -tags [$tkCanvas gettags $idcard]]
+	    Command $cmd remote
+	}
+	if {[$csObj NumberOfCards] == 0} {
+	    RegisterCanvasInstBinds  CardGame $emptyInstBindList
+	}
+	set played 0
+    }
+
+    body CardGame::MoveInitStack {x y} {  
+	InitMoveCurrent $x $y
+    }
+    
+    body CardGame::MoveMotionStack {x y} {
+	DragMoveCurrent $x $y
+    }
+    
+    body CardGame::MoveReleaseStack {x y} {
+	FinalMoveCurrent $x $y
+	set utag [GetUtag current]
+	Command [list raise $utag]
+    }
+    
+    body CardGame::MoveInitCard {x y} {
+	InitMoveCurrent $x $y
+    }
+    
+    body CardGame::MoveMotionCard {x y} {    
+	DragMoveCurrent $x $y
+    }
+    
+    body CardGame::MoveReleaseCard {x y} {
+	
+	FinalMoveCurrent $x $y
+	set utag [GetUtag current]
+	Command [list raise $utag]
+    }
+    
+    body CardGame::DeleteStack {x y} {
+	
+	set utag [GetUtag current]
+	set cmdList [list [list delete $utag]]
+	
+	# Delete all cards as well.
+	foreach id [$tkCanvas find withtag object:${this}] {
+	    lappend cmdList [list delete [GetUtag $id]]
+	}
+	CommandList $cmdList
+    }
+    
+    body CardGame::DeleteCard {x y} {
+	DeleteCurrent $x $y
+    }
+    
+    body CardGame::StackPopup {x y} {
+	
+	set idpopup [$tkCanvas find withtag current]
+	tk_popup $cardstackMenu [expr int($x) - 10] [expr int($y) - 10]   
+    }
+
+    body CardGame::CardPopup {x y} {
+	
+	set idpopup [$tkCanvas find withtag current]
+	set cardStatePopup hide
+	set tags [$tkCanvas gettags $idpopup]
+	if {[regexp {(state:([a-z]+))} $tags match stag state]} {
+	    set cardStatePopup $state
+	}
+	puts "CardGame::CardPopup this=$this"
+	tk_popup $cardMenu [expr int($x) - 10] [expr int($y) - 10]   
+    }
+    
+    body CardGame::NewCard {} {
+	
+	puts "CardGame::NewCard csObj=$csObj"
+	
+	set card [$csObj PopAndMix]
+	if {$card != ""} {
+	    puts "\t idstack=$idstack"
+	    foreach {x y} [$tkCanvas coords $idstack] break
+	    set im [$csObj Image back]
+	    set tags [list image playcard object:${this} card:${card} \
+	      state:hide [NewUtag]]
+	    set idcard [$tkCanvas create image $x $y -image $im -anchor nw \
+	      -tags $tags]
+	    puts "\t idcard=$idcard"
+	}
+    }
+
+    body CardGame::NewCardAutoPlace {} {
+	
+	# This one does not yet work properly!
+	puts "CardGame::NewCardAutoPlace csObj=$csObj"
+	
+	NewCard
+	if {$idcard != ""} {
+	    foreach {xstack ystack} [$tkCanvas coords $idstack] break
+	    set x [expr $xstack + $stickyDistance + 20]
+	    set y $ystack	    
+	    set cmd [list create image $x $y \
+	      -image [$tkCanvas itemcget $idcard -image] -anchor nw \
+	      -tags [$tkCanvas gettags $idcard]]
+	    Command $cmd
+	}
+    }
+    
+    body CardGame::MixStack {} {
+	# We do this when drawing cards
+	#$csObj MixCards
+    }
+    
+    body CardGame::ShowMe {} {
+	
+	set tags [$tkCanvas gettags $idpopup]
+	if {[regexp {card:([a-z0-9]{2})} $tags match card]} {
+	    $tkCanvas itemconfigure $idpopup -image [$csObj Image $card]
+	}
+	if {[regexp {(state:([a-z]+))} $tags match stag state]} {
+	    $tkCanvas dtag $idpopup $stag
+	    $tkCanvas addtag state:me withtag $idpopup 
+	}
+	set utag [GetUtag $idpopup]
+	Command [list raise $utag]
+    }
+    
+    body CardGame::ShowAll {} {
+	
+	set tags [$tkCanvas gettags $idpopup]
+	if {[regexp {card:([a-z0-9]{2})} $tags match card]} {
+	    ItemConfigure $idpopup -image [$csObj Image $card]
+	}
+	if {[regexp {(state:([a-z]+))} $tags match stag state]} {
+	    $tkCanvas dtag $idpopup $stag
+	    $tkCanvas addtag state:all withtag $idpopup 
+	}
+	set utag [GetUtag $idpopup]
+	Command [list raise $utag]
+    }
+    
+    body CardGame::Hide {} {
+	
+	set tags [$tkCanvas gettags $idpopup]
+	if {[regexp {card:([a-z0-9]{2})} $tags match card]} {
+	    ItemConfigure $idpopup -image [$csObj Image back]
+	}
+	if {[regexp {(state:([a-z]+))} $tags match stag state]} {
+	    $tkCanvas dtag $idpopup $stag
+	    $tkCanvas addtag state:hide withtag $idpopup 
+	}
+    }
+    
+    body CardGame::Save {id} {
+	
+	# Seemed to be the only way :-(
+	upvar [namespace current]::infoScript infoScript
+
+	set tags [$tkCanvas gettags $id]
+	if {[lsearch $tags cardstack] < 0} {
+	    return ""
+	}
+	set im [$csObj Image cardpile]
+	set impcmd [concat import [$tkCanvas coords $id] -file $infoScript]
+	lappend impcmd -mime application/x-itcl
+	lappend impcmd -width [image width $im] -height [image height $im]
+	
+	# Get topmost card.
+	lappend impcmd -topcard [$csObj TopCard]
+	set allcards {}
+	
+	# Find all cards.
+	foreach idc [$tkCanvas find withtag playcard&&object:${this}] {
+	    set ctags [$tkCanvas gettags $idc]
+	    set savetags {image playcard}
+	    if {[regexp {card:([a-z0-9]{2})} $ctags match card]} {
+		lappend savetags card:${card}
+	    }
+	    if {[regexp {(state:([a-z]+))} $ctags match stag state]} {
+		lappend savetags state:${state}
+	    }
+	    set im [$tkCanvas itemcget $idc -image]
+	    set cardspec [concat {create image} [$tkCanvas coords $idc] \
+	      -anchor nw -tags [list $savetags] -image $im]
+	    lappend allcards $cardspec
+	}
+	lappend impcmd -cards $allcards
+	return $impcmd
+    }
+}
+
+# We must instantiate ourself...
+
+eval {CardGame #auto $w $x $y} $args
+
+
+
