@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: GetFileIface.tcl,v 1.9 2003-11-01 13:57:27 matben Exp $
+# $Id: GetFileIface.tcl,v 1.10 2003-11-17 15:08:27 matben Exp $
 
 package require getfile
 package require uriencode
@@ -52,7 +52,6 @@ proc ::GetFileIface::GetFile {wtop sock fileName opts} {
     # Unquote the disallowed characters according to the RFC for URN scheme.
     # ref: RFC2141 sec2.2
     set fileTail [::uriencode::decodefile $fileName]
-    #set dstpath [file join $prefs(incomingPath) $fileTail]
 
     # We store file names with cached names to avoid name clashes.
     set dstpath [::Import::NewCacheFilePath $fileTail]
@@ -82,9 +81,11 @@ proc ::GetFileIface::GetFile {wtop sock fileName opts} {
     # Check if this file is cached already, http transported instead,
     # or if you user wants something different. May modify 'getstate(dstpath)'!
     set code [::GetFileIface::Prepare $gettoken $fileTail $mime $opts]
+    
     ::Debug 2 "     code=$code"
         
     if {$code != $noErr} {
+	
 	switch -- $code {
 	    320 - 323 {
 		# Empty; 320: cached; 323: via url
@@ -162,7 +163,6 @@ proc ::GetFileIface::GetFileFromServer {wtop ip port path opts} {
     # Unquote the disallowed characters according to the RFC for URN scheme.
     # ref: RFC2141 sec2.2
     set fileTail [::uriencode::decodefile [file tail $path]]
-    #set dstpath [file join $prefs(incomingPath) $fileTail]   
 
     # We store file names with cached names to avoid name clashes.
     set dstpath [::Import::NewCacheFilePath $fileTail]
@@ -339,7 +339,7 @@ proc ::GetFileIface::Progress {gettoken token total current} {
     
     upvar #0 $gettoken getstate          
 
-    ::Debug 4 "::GetFileIface::Progress total=$total, current=$current"
+    ::Debug 6 "::GetFileIface::Progress total=$total, current=$current"
 
     # Be silent... except for a necessary update command to not block.
     if {[string equal $tcl_platform(platform) "windows"]} {
