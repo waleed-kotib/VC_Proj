@@ -7,10 +7,8 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: WindowsUtils.tcl,v 1.8 2004-07-30 12:55:55 matben Exp $
+# $Id: WindowsUtils.tcl,v 1.9 2004-08-24 13:25:11 matben Exp $
 
-#package require gdi
-#package require printer
 package require registry
 package provide WindowsUtils
 
@@ -125,23 +123,35 @@ proc ::Windows::Printer::Print {w args} {
     eval {printer::print_widget $w -name "Coccinella"} $args
 }
 
-# Sketch...
-
 proc ::Windows::Printer::DoPrintText {w} {
     
     variable p
     
-    set hdc [printer dialog select]
+    set ans [printer dialog select]
+    if {[lindex $ans 1] != 1} {
+	return
+    }
+    set hdc [lindex $ans 0]
     
-    printer::page_attr p
-    printer job start
-    printer page start
+    # For the time being we use a crude method of printing text.
+    set str [::Text::TransformToPureText $w]
+    printer::print_page_data $str
     
-    ::Windows::Printer::PrintText $w $hdc p
+    if {0} {
+	printer::page_args p
+	printer job start
+	printer page start
     
-    printer page end
-    printer job end
+	::Windows::Printer::PrintText $w $hdc p
+	
+	printer page end
+	printer job end
+    }
 }
+
+# Sketch...
+# 
+# This should print images as well...
 
 proc ::Windows::Printer::PrintText {w hdc pName} {
     
@@ -160,7 +170,7 @@ proc ::Windows::Printer::PrintText {w hdc pName} {
     variable iLine 0
     upvar 1 $pName p
     
-    if {![winfo class $w] == "Text"} {
+    if {[winfo class $w] != "Text"} {
 	error "::Windows::Printer::PrintText for text widgets only"
     }
     
@@ -218,12 +228,13 @@ proc ::Windows::Printer::PrintText {w hdc pName} {
     }
     
     # Start position.
-    set dcx $rm
+    set dcx $tm
     set dcy $tm
     
     # And finally...
-    $w dump 1.0 end -command  \
-      [list ::Windows::Printer::TextDumpCallback $hdc]
+    foreach {key value index} [$w dump 1.0 end] {
+	::Windows::Printer::TextDumpCallback $hdc $key $value $index
+    }
     
     # Cleanup
     unset -nocomplain facx facy
@@ -231,6 +242,7 @@ proc ::Windows::Printer::PrintText {w hdc pName} {
 
 proc ::Windows::Printer::TextDumpCallback {hdc key value index} {
     
+    variable state
     variable iLine
     variable dcx
     variable dcy
@@ -243,6 +255,8 @@ proc ::Windows::Printer::TextDumpCallback {hdc key value index} {
     variable tagConfig
     variable pix2dcx
     variable pix2dcy
+    
+    puts "$hdc, key=$key, value=$value, index=$index"
     
     switch -- $key {
 	tagon {
