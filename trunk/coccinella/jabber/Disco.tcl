@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.47 2004-12-21 15:14:42 matben Exp $
+# $Id: Disco.tcl,v 1.48 2004-12-21 15:18:46 matben Exp $
 
 package provide Disco 1.0
 
@@ -1096,7 +1096,7 @@ proc ::Disco::AutoDiscoServers { } {
     upvar ::Jabber::jserver jserver
     
     foreach server $jprefs(disco,autoServers) {
-	if {![jlib::jidequal $server $jserver(this]} {
+	if {![jlib::jidequal $server $jserver(this)]} {
 	    DiscoServer $server
 	}
     }
