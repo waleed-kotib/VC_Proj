@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.99 2004-11-16 15:10:28 matben Exp $
+# $Id: Roster.tcl,v 1.100 2004-11-18 07:34:01 matben Exp $
 
 package provide Roster 1.0
 
@@ -162,6 +162,7 @@ namespace eval ::Jabber::Roster:: {
 }
 
 proc ::Jabber::Roster::MapShowToText {show} {
+    variable mapShowTextToElem
     
     return $mapShowTextToElem($show)
 }

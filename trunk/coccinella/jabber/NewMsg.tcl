@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.49 2004-11-16 15:10:27 matben Exp $
+# $Id: NewMsg.tcl,v 1.50 2004-11-18 07:34:01 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -19,6 +19,11 @@ namespace eval ::Jabber::NewMsg:: {
     ::hooks::register quitAppHook [list ::UI::SaveWinPrefixGeom $wDlgs(jsendmsg)]
 
     # Use option database for customization.
+    option add *NewMsg.buttonRowSide        left            widgetDefault
+    option add *NewMsg.buttonRowPosition    top             widgetDefault
+    option add *NewMsg.topBannerImage       ""              widgetDefault
+    option add *NewMsg.bottomBannerImage    ""              widgetDefault
+
     option add *NewMsg.sendImage            send            widgetDefault
     option add *NewMsg.sendDisImage         sendDis         widgetDefault
     option add *NewMsg.quoteImage           quote           widgetDefault
@@ -29,8 +34,16 @@ namespace eval ::Jabber::NewMsg:: {
     option add *NewMsg.printDisImage        printDis        widgetDefault
 
     # Standard widgets.
+    option add *NewMsg*divt.borderWidth     2               50
+    option add *NewMsg*divt.relief          sunken          50
     option add *NewMsg*fradd.borderWidth    1               50
-    option add *NewMsg*fradd.relief         raised          50
+    option add *NewMsg*fradd.relief         sunken          50
+    option add *NewMsg*frsub.padX           6               50
+    option add *NewMsg*frsub.padY           0               50
+    option add *NewMsg*frsub.sp1.width      8               50
+    option add *NewMsg*frsub.sp2.width      12              50
+    option add *NewMsg*frtxt.padX           6               50
+    option add *NewMsg*frtxt.padY           2               50
 
     option add *JMultiAddress.background    #999999         50
 
@@ -39,6 +52,11 @@ namespace eval ::Jabber::NewMsg:: {
     option add *JMultiAddress.entry1Foreground  #333333     50
     option add *JMultiAddress.entry2Background  white       50
     option add *JMultiAddress.entry2Foreground  black       50
+    option add *JMultiAddress.entry3Background  white       50
+    option add *JMultiAddress.entry4Background  white       50
+    option add *JMultiAddress.popupBackground   #adadad     50
+    option add *JMultiAddress.popupImage        reliefpopupbt  50
+    option add *JMultiAddress.popupImageDown    reliefpopupbtpush  50
     
     
     variable locals
@@ -46,6 +64,7 @@ namespace eval ::Jabber::NewMsg:: {
     # Running number for unique toplevels.
     set locals(dlguid) 0
     set locals(inited) 0
+    set locals(initedaddr) 0
     set locals(wpopupbase) ._[string range $wDlgs(jsendmsg) 1 end]_trpt
     
     # {subtype popupText entryText}
@@ -66,15 +85,13 @@ namespace eval ::Jabber::NewMsg:: {
 # 
 #       Initialization that is needed once.
 
-proc ::Jabber::NewMsg::Init { } {
+proc ::Jabber::NewMsg::Init {} {
     
     variable locals
     
     set locals(inited) 1
+    # empty...
     
-    # Icons.
-    set locals(popupbt)     [::UI::GetIcon popupbt]
-    set locals(popupbtpush) [::UI::GetIcon popupbtpush]
 }
 
 # Jabber::NewMsg::InitEach --
@@ -113,6 +130,17 @@ proc ::Jabber::NewMsg::InitEach { } {
     foreach trpt $trpts {
 	eval {lappend locals(menuDefs)} $transportDefs($trpt)
     }
+}
+
+proc ::Jabber::NewMsg::InitMultiAddress {wmulti} {
+    
+    variable locals
+    
+    # Icons.
+    set locals(popupbt)     [::Theme::GetImage [option get $wmulti popupImage {}]]
+    set locals(popupbtpush) [::Theme::GetImage [option get $wmulti popupImageDown {}]]
+    set locals(minheight) [image height $locals(popupbt)]
+    set locals(initedaddr) 1
 }
 
 # Jabber::NewMsg::Build --
@@ -174,7 +202,7 @@ proc ::Jabber::NewMsg::Build {args} {
     
     # Global frame.
     frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1 -ipadx 4
+    pack  $w.frall -fill both -expand 1
     
     # Button part.
     set iconSend      [::Theme::GetImage [option get $w sendImage {}]]
@@ -185,10 +213,59 @@ proc ::Jabber::NewMsg::Build {args} {
     set iconSaveDis   [::Theme::GetImage [option get $w saveDisImage {}]]
     set iconPrint     [::Theme::GetImage [option get $w printImage {}]]
     set iconPrintDis  [::Theme::GetImage [option get $w printDisImage {}]]
+
+    set buttonRowPosition [option get $w buttonRowPosition {}]
+    set buttonRowSide     [option get $w buttonRowSide {}]
+    set topBannerImage    [::Theme::GetImage [option get $w topBannerImage {}]]
+    set botBannerImage    [::Theme::GetImage [option get $w bottomBannerImage {}]]
     
-    set wtray $w.frall.frtop
-    ::buttontray::buttontray $wtray
-    pack $wtray -side top -fill x -padx 4 -pady 2
+    switch -- $buttonRowSide {
+	right {
+	    set buttonAnchor e
+	}
+	left {
+	    set buttonAnchor w
+	}
+	default {
+	    set buttonAnchor c
+	}
+    }
+    set wtop $w.frall.top
+    set wbot $w.frall.bot
+    frame $wtop
+    frame $wbot
+    pack  $wtop -side top -fill x
+    pack  $wbot -side bottom -fill x
+    
+    switch -- $buttonRowPosition {
+	top {
+	    set wtray $wtop.tray
+	    ::buttontray::buttontray $wtray
+	    pack $wtray -side $buttonRowSide
+	    if {[string match "mac*" $this(platform)]} {
+		$wbot configure -height 12
+	    }
+	    if {$topBannerImage == ""} {
+		pack $wtray -fill both -expand 1
+	    }
+	}
+	bottom {
+	    set wtray $wbot.tray
+	    ::buttontray::buttontray $wtray
+	    pack $wtray -side $buttonRowSide
+	    if {$botBannerImage == ""} {
+		pack $wtray -fill both -expand 1
+	    }
+	}
+    }
+    if {$topBannerImage != ""} {
+	label $wtop.banner -bd 0 -anchor $buttonAnchor -image $topBannerImage
+	pack  $wtop.banner -side $buttonRowSide -fill x -expand 1
+    }
+    if {$botBannerImage != ""} {
+	label $wbot.banner -bd 0 -anchor $buttonAnchor -image $botBannerImage
+	pack  $wbot.banner -side $buttonRowSide -fill x -expand 1
+    }
 
     $wtray newbutton send  -text [mc Send]  \
       -image $iconSend -disabledimage $iconSendDis  \
@@ -206,14 +283,12 @@ proc ::Jabber::NewMsg::Build {args} {
     
     ::hooks::run buildNewMsgButtonTrayHook $wtray
 
-    pack [frame $w.frall.divt -bd 2 -relief sunken -height 2] -fill x -side top
-    if {[string match "mac*" $this(platform)]} {
-	pack [frame $w.frall.pad -height 12] -side bottom
-    }
+    # D = -bd 2 -relief sunken
+    pack [frame $w.frall.divt] -fill x -side top
     
     # Address list. D = -borderwidth 1 -relief sunken
     set   fradd $w.frall.fradd
-    frame $fradd -borderwidth 1 -relief sunken
+    frame $fradd
     pack  $fradd -side top -fill x -padx 6 -pady 4
     scrollbar $fradd.ysc -command [list $fradd.can yview]
     pack $fradd.ysc -side right -fill y
@@ -223,15 +298,19 @@ proc ::Jabber::NewMsg::Build {args} {
     
     # Make new class since easier to set resources. 
     # D = -bg gray60
-    set frport $fradd.can.fr
-    frame $frport -class JMultiAddress
-    set wspacer [frame $frport.sp -height 1]
-    grid $wspacer -sticky ew -columnspan 2 
-    foreach n {1 2 3 4} {
-	NewAddrLine $w $frport $n
+    set waddr $fradd.can.fr
+    frame $waddr -class JMultiAddress
+    set bg [$waddr cget -bg]
+    set wspacer [frame $waddr.sp -height 1 -bg $bg]
+    grid $wspacer -sticky ew -columnspan 2
+    if {!$locals(initedaddr)} { 
+	InitMultiAddress $waddr
     }
-    FillAddrLine $w $frport 1
-    set id [$waddcan create window 0 0 -anchor nw -window $frport]
+    foreach n {1 2 3 4} {
+	NewAddrLine $w $waddr $n
+    }
+    FillAddrLine $w $waddr 1
+    set id [$waddcan create window 0 0 -anchor nw -window $waddr]
         
     # If -to option. This can have jid's with and without any resource.
     # Be careful to treat this according to the XMPP spec!
@@ -240,7 +319,7 @@ proc ::Jabber::NewMsg::Build {args} {
 	set n 1
 	foreach jid $opts(-to) {
 	    if {$n > 1} {
-		FillAddrLine $w $frport $n
+		FillAddrLine $w $waddr $n
 	    }	    
 	    set locals($w,addr$n) [$jstate(jlib) getrecipientjid $jid]
 	    incr n
@@ -254,20 +333,21 @@ proc ::Jabber::NewMsg::Build {args} {
     
     # Subject.
     set   frsub $w.frall.frsub
-    frame $frsub -borderwidth 0
-    pack  $frsub -side top -fill x -padx 6 -pady 0
-    label $frsub.lsub -text "[mc Subject]:" -font $fontSB -anchor e \
-      -takefocus 0
     set   wsubject $frsub.esub
+    # D = -padx 6 -pady 0
+    frame $frsub
+    pack  $frsub -side top -fill x
+    label $frsub.lsub -text "[mc Subject]:" -anchor e -takefocus 0
     entry $wsubject -textvariable [namespace current]::locals($w,subject)
-    pack  $frsub.lsub -side left -padx 2
-    pack  $frsub.esub -side left -padx 2 -fill x -expand 1
-    
-    pack [::Emoticons::MenuButton $frsub.smile -text $wtext]  \
-      -side right -padx 16 -pady 0
+    pack  $frsub.lsub -side left
+    pack  $frsub.esub -side left -fill x -expand 1
+    pack  [frame $frsub.sp1] -side left
+    pack  [frame $frsub.sp2] -side right
+    pack  [::Emoticons::MenuButton $frsub.smile -text $wtext] -side right
     
     # Text.
-    pack [frame $wtxt] -side top -fill both -expand 1 -padx 6 -pady 2
+    frame $wtxt
+    pack  $wtxt -side top -fill both -expand 1
     text $wtext -height 8 -width 48 -wrap word \
       -borderwidth 1 -relief sunken  \
       -yscrollcommand [list ::UI::ScrollSet $wysc \
@@ -282,7 +362,7 @@ proc ::Jabber::NewMsg::Build {args} {
     set locals($w,wtext)    $wtext
     set locals($w,waddcan)  $waddcan
     set locals($w,wfradd)   $fradd
-    set locals($w,wfrport)  $frport
+    set locals($w,wfrport)  $waddr
     set locals($w,wspacer)  $wspacer
     set locals($w,wsubject) $wsubject
     set locals($w,finished) 0
@@ -300,18 +380,20 @@ $opts(-forwardmessage)"
     # Fix geometry stuff after idle.
     set script [format {
 	update idletasks
-	set frport %s
+	set waddr %s
 	set waddcan %s
 	set wspacer %s
-	set width [winfo reqwidth $frport]
-	set height [winfo reqheight $frport]
+	#set width  [expr [winfo reqwidth $waddr] - [$waddr cget -padx]]
+	#set height [expr [winfo reqheight $waddr] - [$waddr cget -pady]]
+	set width  [winfo reqwidth $waddr]
+	set height [winfo reqheight $waddr]
 	set canwidth [winfo reqwidth $waddcan]
-	set bbox [grid bbox $frport 0 1] 
+	set bbox [grid bbox $waddr 0 1] 
 	set hline [expr [lindex $bbox 3] - [lindex $bbox 0]]
 	$waddcan configure -width $width -height $height -yscrollincrement $hline
-    } $frport $waddcan $wspacer]
+    } $waddr $waddcan $wspacer]
     after idle $script
-    bind $frport <Configure> [list [namespace current]::AddrResize $w]
+    bind $waddr   <Configure> [list [namespace current]::AddrResize $w]
     bind $waddcan <Configure> [list [namespace current]::ResizeCan $w]
     
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jsendmsg)]]
@@ -326,7 +408,7 @@ $opts(-forwardmessage)"
     #bind $w <Destroy> [list [namespace current]::CloseDlg $w]
     wm protocol $w WM_DELETE_WINDOW [list [namespace current]::CloseDlg $w]
     
-    focus $frport.addr1
+    focus $waddr.addr1
 }
 
 proc ::Jabber::NewMsg::NewAddrLine {w wfr n} {
@@ -340,21 +422,24 @@ proc ::Jabber::NewMsg::NewAddrLine {w wfr n} {
     set fg1 [option get $wfr entry1Foreground {}]
     set bg2 [option get $wfr entry2Background {}]
     set fg2 [option get $wfr entry2Foreground {}]
+    set bg3 [option get $wfr entry3Background {}]
+    set bg4 [option get $wfr entry4Background {}]
+    set bgpop [option get $wfr popupBackground {}]
     
     set jidlist [$jstate(roster) getusers]
     set num $locals($w,num)
     frame $wfr.f${n} -bd 0
-    entry $wfr.f${n}.trpt -width 18 -font $fontSB -bd 0 -highlightthickness 0 \
+    entry $wfr.f${n}.trpt -width 18 -bd 0 -highlightthickness 0 \
       -state disabled -textvariable [namespace current]::locals($w,poptrpt$n) \
-      -bg $bg1 -disabledforeground $fg1
-    label $wfr.f${n}.la -bd 0
-    pack $wfr.f${n}.trpt -side left -fill y -anchor w
-    pack $wfr.f${n}.la -side right -fill y
+      -disabledforeground $fg1 -disabledbackground $bg3
+    label $wfr.f${n}.la -bd 0 -bg $bgpop
+    pack  $wfr.f${n}.trpt -side left -fill y -anchor w
+    pack  $wfr.f${n}.la -side right -fill both -expand 1
     
     set wentry $wfr.addr${n}
     ::entrycomp::entrycomp $wentry $jidlist -bd 0 -highlightthickness 0 \
       -textvariable [namespace current]::locals($w,addr$n) -state disabled \
-      -bg $bg2 -fg $fg2
+      -bg $bg2 -fg $fg2 -disabledbackground $bg4
     
     set m [menu $locals(wpopupbase)${num}_${n} -tearoff 0]
     foreach {name desc} $locals(menuDefs) {
@@ -373,7 +458,7 @@ proc ::Jabber::NewMsg::NewAddrLine {w wfr n} {
     grid $wfr.f${n} -padx 1 -pady 1 -column 0 -row $n -sticky news
     grid $wentry    -padx 1 -pady 1 -column 1 -row $n -sticky news
     grid columnconfigure $wfr 1 -weight 1
-    grid rowconfigure $wfr $n -minsize 16
+    grid rowconfigure $wfr $n -minsize [expr $locals(minheight) + 2]
     set locals($w,addrline) $n
 }
 
@@ -382,8 +467,11 @@ proc ::Jabber::NewMsg::FillAddrLine {w wfr n} {
     variable locals
     variable transportDefs
     
+    set bg1   [option get $wfr entry1Background {}]
+
+    $wfr.f${n}.trpt configure -disabledbackground $bg1
     # D = -bg #adadad
-    $wfr.f${n}.la configure -image $locals(popupbt) -bg #adadad
+    $wfr.f${n}.la configure -image $locals(popupbt)
     $wfr.addr${n} configure -state normal
     
     bind $wfr.f${n}.la <Button-1> [list ::Jabber::NewMsg::TrptPopup $w $n %X %Y]
@@ -456,7 +544,7 @@ proc ::Jabber::NewMsg::BackSpaceInAddr {w wfr n} {
     if {$n == 1} {
 	return
     }
-    if {[string length $locals($w,addr$n)] == 0} {
+    if {$locals($w,addr$n) == ""} {
 	
 	# Shift all lines below this one up one step, empty last one,
 	# and if more than 4 lines, delete it completely.
@@ -482,7 +570,10 @@ proc ::Jabber::NewMsg::EmptyAddrLine {w wfr n} {
     
     variable locals
     
-    $wfr.f${n}.la configure -image {}
+    set bg3 [option get $wfr entry3Background {}]
+
+    $wfr.f${n}.trpt configure -disabledbackground $bg3
+    $wfr.f${n}.la configure -image ""
     $wfr.addr${n} configure -state disabled
     set locals($w,poptrpt$n) {}
     set locals($w,addr$n) {}
@@ -580,14 +671,16 @@ proc ::Jabber::NewMsg::PopupCmd {w n} {
 
 #       Callback for the Configure scrollable canvas.
 
-proc ::Jabber::NewMsg::ResizeCan {w } {
+proc ::Jabber::NewMsg::ResizeCan {w} {
     
     variable locals
  
-    set can $locals($w,waddcan)
+    set can     $locals($w,waddcan)
+    set waddr   $locals($w,wfrport)
     set wspacer $locals($w,wspacer)
-    set canwidth [winfo width $can]
-    $wspacer configure -width [expr $canwidth - 2]
+    set width [expr [winfo width $can] - 2*[$waddr cget -padx] - \
+      2*[$can cget -highlightthickness]]
+    $wspacer configure -width $width
 }
 
 #       Callback for the Configure address frame.
@@ -596,10 +689,10 @@ proc ::Jabber::NewMsg::AddrResize {w} {
     
     variable locals
  
-    set can $locals($w,waddcan)
-    set form $locals($w,wfrport)
+    set can   $locals($w,waddcan)
+    set waddr $locals($w,wfrport)
     set bbox [$can bbox all]
-    set width [winfo width $form]
+    set width [winfo width $waddr]
     $can configure -scrollregion $bbox
 }
 
@@ -801,8 +894,8 @@ proc ::Jabber::NewMsg::CloseDlg {w} {
     }
     if {$doDestroy} {
 	::UI::SaveWinGeom $wDlgs(jsendmsg) $w
-	array unset locals $w,*
 	destroy $w
+	array unset locals $w,*
     }
 }
 
