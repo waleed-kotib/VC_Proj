@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: groupchat.tcl,v 1.1 2005-02-09 14:30:32 matben Exp $
+# $Id: groupchat.tcl,v 1.2 2005-02-19 08:17:41 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -31,8 +31,7 @@ namespace eval jlib::groupchat { }
 proc jlib::groupchat {jlibname cmd args} {
     
     # Which command? Just dispatch the command to the right procedure.
-    set ans [eval {[namespace current]::groupchat::${cmd} $jlibname} $args]
-    return $ans
+    return [eval {[namespace current]::groupchat::${cmd} $jlibname} $args]
 }
 
 proc jlib::groupchat::init {jlibname} {

@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.89 2005-02-18 08:32:11 matben Exp $
+# $Id: jabberlib.tcl,v 1.90 2005-02-19 08:17:41 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -203,6 +203,7 @@ package require stanzaerror
 package require streamerror
 package require groupchat
 package require caps
+package require pubsub
 
 package provide jlib 2.0
 
@@ -250,6 +251,7 @@ namespace eval jlib {
 	muc,user        http://jabber.org/protocol/muc#user
 	muc,admin       http://jabber.org/protocol/muc#admin
 	muc,owner       http://jabber.org/protocol/muc#owner
+	pubsub          http://jabber.org/protocol/pubsub
     }
 }
 
@@ -1592,7 +1594,9 @@ proc jlib::geterrspecfromerror {errelem kind} {
     set cchdata [wrapper::getcdata $errelem]
     set errcode [wrapper::getattribute $errelem code]
     if {[string is integer -strict $errcode]} {
-	if {[info exists errCodeToText($errcode)]} {
+	if {$cchdata != ""} {
+	    set errmsg $cchdata
+	} elseif {[info exists errCodeToText($errcode)]} {
 	    set errmsg $errCodeToText($errcode)
 	} else {
 	    set errmsg "Unknown"
@@ -1603,7 +1607,7 @@ proc jlib::geterrspecfromerror {errelem kind} {
 	set errmsg $cchdata
     } else {
 	set errcode ""
-	set errmsg  ""
+	set errmsg  "Unknown"
 	
 	# xmpp way.
 	foreach c [wrapper::getchildren $errelem] {
@@ -2574,7 +2578,7 @@ proc jlib::send {jlibname xmllist} {
     schedule_auto_away $jlibname
 
     set xml [wrapper::createxml $xmllist]
-        
+
     # We fail only if already in stream.
     # The first failure reports the network error, closes the stream,
     # which stops multiple errors to be reported to client.
