@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.40 2004-01-27 08:48:05 matben Exp $
+# $Id: Roster.tcl,v 1.41 2004-01-28 08:37:52 matben Exp $
 
 package provide Roster 1.0
 
@@ -593,6 +593,7 @@ proc ::Jabber::Roster::Presence {jid presence args} {
     # All presence have a 3-tier jid as 'from' attribute:
     # presence = 'available'   => remove jid2 + jid3,  add jid3
     # presence = 'unavailable' => remove jid2 + jid3,  add jid2
+    #                                                  if no jid2/* available
     # Wrong! We may have 2-tier jids from transports:
     # <presence from='user%hotmail.com@msn.myserver' ...
     # Or 3-tier (icq) with presence = 'unavailable' !
@@ -621,6 +622,15 @@ proc ::Jabber::Roster::Presence {jid presence args} {
 	} else {
 	    eval {::Jabber::Roster::PutItemInTree $jid2 $treePres} \
 	      $itemAttr $args
+	}
+    } elseif {[string equal $presence "unavailable"]} {
+	set treePres $presence
+	
+	# Add only if no other jid2/* available.
+	set jid2Available [$jstate(roster) getpresence $jid2 -type available]
+	if {[llength $jid2Available] == 0} {
+	    eval {::Jabber::Roster::PutItemInTree $jid2 $treePres} $itemAttr \
+	      $args
 	}
     } else {
 	set treePres $presence
@@ -752,12 +762,10 @@ proc ::Jabber::Roster::AutoBrowseCallback {browseName type jid subiq} {
 	
 	if {[regexp {^(.+@[^/]+)/(.+)$} $jid match jid2 res]} {
 	    set presArr(-show) "normal"
-	    array set presArr [$jstate(roster) getpresence $jid2 -resource $res]
+	    array set presArr [$jstate(roster) getpresence $jid2  \
+	      -resource $res -type available]
 	    
 	    # If available and show = ( normal | empty | chat ) display icon.
-	    if {![string equal $presArr(-type) "available"]} {
-		return
-	    }
 	    switch -- $presArr(-show) {
 		normal {
 		    set icon $presenceIcon(available,wb)
