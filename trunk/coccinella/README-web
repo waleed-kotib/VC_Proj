@@ -1,0 +1,74 @@
+
+README --- Coccinella Web Integration
+
+
+You can put an url in a web page to launch The Coccinella. Use a link:
+<a href="xmpp:matben@athlon.se">The Coccinella</a>
+This works presently only on Windows, and you need to launch Coccinella
+at least once with administrator privilegies to make it work.
+
+You can also launch The Coccinella using the switch -uri:
+set argv "-uri xmpp:marilu@l4l.be?..." Note that the jid you supply here
+is the target address for any action specified. The login uses the
+active profile in the application, not the jid in the uri!
+
+Some examples of supported uri's (The official specification for this
+is currently floating; changes are likely to appear in the future.):
+
+xmpp:matben@athlon.se
+xmpp:marilu@l4l.be?message&subject=hi&body=Hello%20World
+xmpp:marilu@l4l.be?message&subject=hi&body=Hello%20World&thread=abc123
+xmpp:mats@conference.l4l.be?groupchat&nick=matsnick
+    enters the specified room using nick matsnick.
+
+xmpp:mats@conference.l4l.be?groupchat&nick=matsnick&xmlns=whiteboard
+    enters the specified room using the whiteboard
+
+
+An example of a web page with links below. Do not use these specifc addresses
+since they point to an arbitrary server and user which is mainly used when I
+debug code.
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1">
+<title>Example for XMPP URI</title>
+</head>
+<body>
+</center>Hello</center>
+
+<p>
+<a href="xmpp:marilu@l4l.be">xmpp:marilu@l4l.be</a>
+
+<p>
+<a href="xmpp:marilu@l4l.be?message&subject=hi&body=Hello%20World">
+xmpp:marilu@l4l.be?message&subject=hi&body=Hello%20World
+</a>
+
+<p>
+<a href="xmpp:marilu@l4l.be?message&subject=hi&body=Hello%20World&thread=abc123">
+xmpp:marilu@l4l.be?message&subject=hi&body=Hello%20World&thread=abc123
+</a>
+
+<p>
+<a href="xmpp:mats@conference.l4l.be?groupchat&nick=matsnick">
+xmpp:mats@conference.l4l.be?groupchat&nick=matsnick
+</a>
+
+<p>
+<a href="xmpp:mats@conference.l4l.be?groupchat&nick=matsnick&xmlns=whiteboard">
+xmpp:mats@conference.l4l.be?groupchat&nick=matsnick&xmlns=whiteboard
+</a>
+
+<p>
+<a href="xmpp:secret@conference.l4l.be?groupchat&nick=matsnick">
+xmpp:secret@conference.l4l.be?groupchat&nick=matsnick
+</a>
+
+<p>
+<a href="xmpp:secret@conference.l4l.be?groupchat&nick=matsnick&xmlns=whiteboard">
+xmpp:secret@conference.l4l.be?groupchat&nick=matsnick&xmlns=whiteboard
+</a>
+
+</body>
+</html>

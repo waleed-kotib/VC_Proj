@@ -6,7 +6,7 @@
 # Copyright (C) 2002-2004 Mats Bengtsson
 # This source file is distributed under the BSD license.
 # 
-# $Id: tree.tcl,v 1.39 2004-10-31 14:32:58 matben Exp $
+# $Id: tree.tcl,v 1.40 2004-11-03 10:28:55 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -50,7 +50,7 @@
 #       -sortlevels, sortLevels, SortLevels
 #       -stripecolors, stripeColors, StripeColors
 #	-styleicons, styleIcons, StyleIcons                  
-#	                            (plusminus|plusminusbw|triangle|crystal)
+#	                 (plusminus|plusminusbw|plusminusgray|triangle|crystal)
 #	-treecolor, treeColor, TreeColor                      color?
 #	-treedash, treeDash, TreeDash                         dash
 #	-width, width, Width
@@ -161,11 +161,25 @@ namespace eval tree {
     set widgetGlobals(openPM) [image create photo -data {
 	R0lGODdhCQAJAKIAAP//////wsLCwsLCibS0tFOJwgAAAAAAACwAAAAACQAJ
 	AAADHUi1XAowgiUjrYKavXOBQSh4YzkuAkEMrKI0C5EAADs=
-    }]
-    
+    }]    
     set widgetGlobals(closePM) [image create photo -data {
 	R0lGODdhCQAJAKIAAP//////wsLCwsLCibS0tFOJwgAAAAAAACwAAAAACQAJ
 	AAADIEi1XAowghVNpNACQY33XAEFRiCEp2Cki0AQQ6wozUIkADs=
+    }]
+
+    set widgetGlobals(openPMgray) [image create photo -data {
+	R0lGODdhCwALAMQAAP////39/fPz8+zs7OPj49vb29TU1CQkJCEhIRwcHBoa
+	GhQUFBMTEw4ODggICAQEBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAAAAAACwAAAAACwALAAAFOyAkjqRonEVBrIOJrsQw
+	PNArD4LgQGmcC4FAg0coBRkQFjAYVCR9zCAiiYsGDxDZMjqFPByNhQJxQCRC
+	ADs=
+    }]     
+    set widgetGlobals(closePMgray) [image create photo -data {
+	R0lGODdhCwALAMQAAP////7+/vn5+fX19fHx8e3t7enp6eTk5N3d3dTU1CEh
+	IRoaGhQUFA0NDQsLCwUFBQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAAAAAACwAAAAACwALAAAFQOCijEvJMM6jBGwbCILq
+	ssIwyG5NFNAyCztDzwUZFA4HCINWOyIQytdgd0AkEpCGzlC9Yh3AAtd6hTzO
+	kLQ6HQIAOw==
     }]
 
     set widgetGlobals(idir) [image create photo ::tree::idir -data {
@@ -1013,6 +1027,10 @@ proc ::tree::ConfigureIcons {w} {
 	plusminusbw {
 	    set priv(imclose) $widgetGlobals(closePMbw)	
 	    set priv(imopen)  $widgetGlobals(openPMbw)
+	}
+	plusminusgray {
+	    set priv(imclose) $widgetGlobals(closePMgray)	
+	    set priv(imopen)  $widgetGlobals(openPMgray)
 	}
 	triangle {
 	    set priv(imclose) $widgetGlobals(closeMac)	

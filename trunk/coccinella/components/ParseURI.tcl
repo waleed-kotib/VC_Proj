@@ -4,7 +4,7 @@
 #       typically from an anchor element <a href='xmpp:jid[?query]'/>
 #       in a html page.
 # 
-# $Id: ParseURI.tcl,v 1.12 2004-10-31 14:32:57 matben Exp $
+# $Id: ParseURI.tcl,v 1.13 2004-11-03 10:28:54 matben Exp $
 
 package require uriencode
 
@@ -67,7 +67,7 @@ proc ::ParseURI::Parse {args} {
     
     # Use our default profile account. 
     # Keep our own jid apart from jid in uri!
-    set name [::Profiles::GetSelectedName]
+    set name   [::Profiles::GetSelectedName]
     set domain [::Profiles::Get $name domain]
     set state(profname) $name
     set state(domain)   $domain
