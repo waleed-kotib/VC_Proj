@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.17 2003-12-15 15:39:09 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.18 2003-12-16 15:03:53 matben Exp $
 
 # SetWhiteboardFactoryState --
 # 
@@ -388,6 +388,46 @@ array set tclwbProtMsg {
     503 {Service Unavailable}
     504 {Gateway Time-out}
     505 {HTTP Version not supported}
+}
+
+# Find user name.
+if {[info exists env(USER)]} {
+    set this(username) $env(USER)
+} elseif {[info exists env(LOGIN)]} {
+    set this(username) $env(LOGIN)
+} elseif {[info exists env(USERNAME)]} {
+    set this(username) $env(USERNAME)
+} elseif {[llength $this(hostname)]} {
+    set this(username) $this(hostname)
+} else {
+    set this(username) "Unknown"
+}
+
+# Try to get own ip number from a temporary server socket.
+# This can be a bit complicated as different OS sometimes give 0.0.0.0 or
+# 127.0.0.1 instead of the real number.
+
+if {![catch {socket -server puts 0} s]} {
+    set this(ipnum) [lindex [fconfigure $s -sockname] 0]
+    catch {close $s}
+    Debug 2 "1st: this(ipnum)=$this(ipnum)"
+}
+
+# If localhost or zero, try once again with '-myaddr'. 
+# My Linux box is not helped by this either!!!
+# Multiple ip interfaces are not recognized!
+if {[string equal $this(ipnum) "0.0.0.0"] ||  \
+  [string equal $this(ipnum) "127.0.0.1"]} {
+    if {![catch {socket -server xxx -myaddr $this(hostname) 0} s]} {
+	set this(ipnum) [lindex [fconfigure $s -sockname] 0]
+	catch {close $s}
+	Debug 2 "2nd: this(ipnum)=$this(ipnum)"
+    }
+}
+if {[regexp {[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+} $this(ipnum)]} {
+    set this(ipver) 4
+} else {
+    set this(ipver) 6
 }
 
 # Modifier keys and meny height (guess); add canvas border as well.

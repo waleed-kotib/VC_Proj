@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: VCard.tcl,v 1.8 2003-12-13 17:54:41 matben Exp $
+# $Id: VCard.tcl,v 1.9 2003-12-16 15:03:53 matben Exp $
 
 package provide VCard 1.0
 
@@ -189,7 +189,7 @@ proc ::VCard::Build {w type jid} {
         set ltxt {What is this}
     }
     set frbi [$nbframe newpage {Basic Info} -text [::msgcat::mc {Basic Info}]]    
-    set labfrbi [LabeledFrame2 $frbi.fr $ltxt]
+    set labfrbi [::mylabelframe::mylabelframe $frbi.fr $ltxt]
     pack $frbi.fr -side left -anchor n
     set pbi [frame $labfrbi.frin]
     pack $pbi -padx 10 -pady 6 -side left

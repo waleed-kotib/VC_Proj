@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: Theme.tcl,v 1.1 2003-12-16 10:16:59 matben Exp $
+# $Id: Theme.tcl,v 1.2 2003-12-16 15:03:53 matben Exp $
 
 package provide Theme 1.0
 
@@ -50,7 +50,7 @@ proc ::Theme::SavePrefsFile { } {
 proc ::Theme::PreLoadImages { } {
     global  this
     
-    foreach name [option get . ] {
+    foreach name [option get . themePreloadImages {}] {
 	::Theme::GetImage $name
     }
 }
@@ -62,11 +62,13 @@ proc ::Theme::GetImage {name} {
 	foreach dir $this(imagePathList) {
 	    set f [file join $dir ${name}.gif]
 	    if {[file exists $f]} {
-		image create photo $name -file $f
+		image create photo $name -file $f -format gif
 		break
 	    }
 	}
     }
+    
+    # We could return a different name here. Problems when preloading...
     return $name
 }
 

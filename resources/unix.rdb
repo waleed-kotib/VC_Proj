@@ -25,4 +25,5 @@
 ! contributed widgets
 !
 *Combobox.Font:                      Helvetica -10
+*MyLabelFrame.Font:                  Helvetica -10 bold
 *Tablelist.Font:                     Helvetica -10

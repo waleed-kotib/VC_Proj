@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.19 2003-12-15 08:20:53 matben Exp $
+# $Id: Dialogs.tcl,v 1.20 2003-12-16 15:03:53 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -95,7 +95,7 @@ proc ::Dialogs::GetCanvas {w} {
     
     # Labelled frame.
     set wcfr $w.frall.fr
-    set wcont [LabeledFrame2 $wcfr {Get Canvas}]
+    set wcont [::mylabelframe::mylabelframe $wcfr {Get Canvas}]
     pack $wcfr -side top -fill both -ipadx 10 -ipady 6 -in $w.frall
     
     # Overall frame for whole container.
@@ -312,7 +312,7 @@ proc ::Dialogs::UnixPrintPS {w wtoprint} {
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
     set w1 $w.frall.fr1
-    set wcont1 [LabeledFrame2 $w1 [::msgcat::mc Print]]
+    set wcont1 [::mylabelframe::mylabelframe $w1 [::msgcat::mc Print]]
     
     # Overall frame for whole container.
     set frtot [frame $wcont1.frin]
@@ -453,7 +453,7 @@ proc ::PSPageSetup::PSPageSetup { w } {
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
     set w1 $w.frall.fr1
-    set wcont [LabeledFrame2 $w1 {Postscript Page Setup}]
+    set wcont [::mylabelframe::mylabelframe $w1 {Postscript Page Setup}]
     
     # Overall frame for whole container.
     set frtot [frame $wcont.frin]
@@ -651,7 +651,7 @@ proc ::Dialogs::ShowInfoClients { } {
 	set sockname [fconfigure $channel -sockname]
 	set buff [fconfigure $channel -buffering]
 	set block [fconfigure $channel -blocking]
-	set wcont [LabeledFrame2 $w.frtop$n [lindex $peername 1]]
+	set wcont [::mylabelframe::mylabelframe $w.frtop$n [lindex $peername 1]]
 	pack $w.frtop$n -in $w.frtop
 	
 	# Frame for everything inside the labeled container.
@@ -737,7 +737,7 @@ proc ::Dialogs::ShowInfoServer {thisIPnum} {
     set fontSB [option get . fontSmallBold {}]
     
     pack [frame $w.frall -borderwidth 1 -relief raised]
-    set wcont [LabeledFrame2 $w.frtop [::msgcat::mc {Server Info}]]
+    set wcont [::mylabelframe::mylabelframe $w.frtop [::msgcat::mc {Server Info}]]
     pack $w.frtop -in $w.frall    
     
     # Frame for everything inside the labeled container.
@@ -875,14 +875,10 @@ proc ::SplashScreen::SplashScreen {w} {
     set fontS [option get . fontSmall {}]
     
     # If image not already there, get it.
-    
-    if {[lsearch [image names] mysplash] == -1} {
-	image create photo mysplash -format gif -file   \
-	  [file join $this(path) images splash.gif]
-    }
-    set imHeight [image height mysplash]
-    set imWidth [image width mysplash]
-    foreach {r g b} [mysplash get 50 [expr $imHeight - 20]] break
+    set imsplash [::Theme::GetImage splash]
+    set imHeight [image height $imsplash]
+    set imWidth [image width $imsplash]
+    foreach {r g b} [splash get 50 [expr $imHeight - 20]] break
     if {[expr $r + $g + $b] > [expr 2*255]} {
 	set textcol black
     } else {
@@ -890,7 +886,7 @@ proc ::SplashScreen::SplashScreen {w} {
     }
     set canwin $w.can
     canvas $w.can -width $imWidth -height $imHeight -bd 0 -highlightthickness 0
-    $w.can create image 0 0 -anchor nw -image mysplash
+    $w.can create image 0 0 -anchor nw -image $imsplash
     $w.can create text 50 [expr $imHeight - 20] -anchor nw -tags tsplash  \
       -font $fontS -text $startMsg -fill $textcol
     

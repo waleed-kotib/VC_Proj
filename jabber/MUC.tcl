@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.10 2003-12-15 08:20:53 matben Exp $
+# $Id: MUC.tcl,v 1.11 2003-12-16 15:03:53 matben Exp $
 
 package require entrycomp
 
@@ -584,7 +584,7 @@ proc ::Jabber::MUC::BuildInfo {roomjid} {
         
     # Grant buttons ---
     set frgrant $frgrantrevoke.grant
-    set wgrant [LabeledFrame2 $frgrant "Grant:"]
+    set wgrant [::mylabelframe::mylabelframe $frgrant "Grant:"]
     pack $frgrant -side left
     foreach txt {Voice Member Moderator Admin Owner} {
 	set stxt [string tolower $txt]
@@ -595,7 +595,7 @@ proc ::Jabber::MUC::BuildInfo {roomjid} {
     
     # Revoke buttons ---
     set frrevoke $frgrantrevoke.rev
-    set wrevoke [LabeledFrame2 $frrevoke "Revoke:"]
+    set wrevoke [::mylabelframe::mylabelframe $frrevoke "Revoke:"]
     pack $frrevoke -side left
     foreach txt {Voice Member Moderator Admin Owner} {
 	set stxt [string tolower $txt]
@@ -626,7 +626,7 @@ proc ::Jabber::MUC::BuildInfo {roomjid} {
     
     # Edit lists ---
     set fredit $frmid.lists
-    set wlist [LabeledFrame2 $fredit "Edit Lists:"]
+    set wlist [::mylabelframe::mylabelframe $fredit "Edit Lists:"]
     pack $fredit -side top -padx 2 -pady 2
     foreach txt {Voice Ban Member Moderator Admin Owner} {
 	set stxt [string tolower $txt]	

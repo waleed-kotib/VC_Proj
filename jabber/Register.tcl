@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.5 2003-12-15 08:20:53 matben Exp $
+# $Id: Register.tcl,v 1.6 2003-12-16 15:03:53 matben Exp $
 
 package provide Register 1.0
 
@@ -443,7 +443,7 @@ proc ::Jabber::GenRegister::BuildRegister {args} {
 
     if {$UItype == 0} {
 	set wfr $w.frall.frlab
-	set wcont [LabeledFrame2 $wfr [::msgcat::mc Specifications]]
+	set wcont [::mylabelframe::mylabelframe $wfr [::msgcat::mc Specifications]]
 	pack $wfr -side top -fill both -padx 2 -pady 2
 	
 	set wbox $wcont.box

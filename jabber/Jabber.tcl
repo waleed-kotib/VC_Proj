@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.40 2003-12-15 15:39:08 matben Exp $
+# $Id: Jabber.tcl,v 1.41 2003-12-16 15:03:53 matben Exp $
 #
 #  The $address is an ip name or number.
 #
@@ -1881,7 +1881,7 @@ proc ::Jabber::SetStatusWithMessage { } {
     
     # Top frame.
     set frtop $w.frall.frtop
-    set fr [LabeledFrame2 $frtop [::msgcat::mc {My Status}]]
+    set fr [::mylabelframe::mylabelframe $frtop [::msgcat::mc {My Status}]]
     pack $frtop -side top -fill x -padx 4 -pady 4
     set i 0
     foreach val {available chat away xa dnd invisible} {

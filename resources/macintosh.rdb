@@ -30,6 +30,7 @@
 ! contributed widgets
 !
 *Combobox.Font:                      Geneva 9
+*MyLabelFrame.Font:                  Geneva 9 bold
 *Tablelist.Font:                     Geneva 9
 *Tablelist.highlightThickness:       3
 *Tree.openIcons:                     triangle

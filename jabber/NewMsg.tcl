@@ -5,13 +5,23 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.20 2003-12-15 15:39:09 matben Exp $
+# $Id: NewMsg.tcl,v 1.21 2003-12-16 15:03:53 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
 
 
 namespace eval ::Jabber::NewMsg:: {
+
+    # Use option database for customization.
+    option add *NewMsg.sendImage            send            widgetDefault
+    option add *NewMsg.sendDisImage         sendDis         widgetDefault
+    option add *NewMsg.quoteImage           quote           widgetDefault
+    option add *NewMsg.quoteDisImage        quoteDis        widgetDefault
+    option add *NewMsg.saveImage            save            widgetDefault
+    option add *NewMsg.saveDisImage         saveDis         widgetDefault
+    option add *NewMsg.printImage           print           widgetDefault
+    option add *NewMsg.printDisImage        printDis        widgetDefault
 
     variable locals
     
@@ -150,14 +160,14 @@ proc ::Jabber::NewMsg::Build {args} {
       -fill both -expand 1 -ipadx 4
     
     # Button part.
-    set iconSend      [::UI::GetIcon btsend]
-    set iconSendDis   [::UI::GetIcon btsenddis]
-    set iconQuote     [::UI::GetIcon btquote]
-    set iconQuoteDis  [::UI::GetIcon btquotedis]
-    set iconSave      [::UI::GetIcon btsave]
-    set iconSaveDis   [::UI::GetIcon btsavedis]
-    set iconPrint     [::UI::GetIcon btprint]
-    set iconPrintDis  [::UI::GetIcon btprintdis]
+    set iconSend      [::Theme::GetImage [option get $w sendImage {}]]
+    set iconSendDis   [::Theme::GetImage [option get $w sendDisImage {}]]
+    set iconQuote     [::Theme::GetImage [option get $w quoteImage {}]]
+    set iconQuoteDis  [::Theme::GetImage [option get $w quoteDisImage {}]]
+    set iconSave      [::Theme::GetImage [option get $w saveImage {}]]
+    set iconSaveDis   [::Theme::GetImage [option get $w saveDisImage {}]]
+    set iconPrint     [::Theme::GetImage [option get $w printImage {}]]
+    set iconPrintDis  [::Theme::GetImage [option get $w printDisImage {}]]
     
     set wtray $w.frall.frtop
     ::buttontray::buttontray $wtray 50

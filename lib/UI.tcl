@@ -7,104 +7,9 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.31 2003-12-15 15:39:09 matben Exp $
-
-# LabeledFrame --
-#
-#       A small utility that makes a nice frame with a label.
-#      'wpath' is the widget path of the parent (it should be a frame); 
-#      the return value is the widget path to the interior of the container.
-#       
-# Arguments:
-#       wpath     the widget path of the parent (it should be a frame).
-#       txt       the text
-#       args
-#       
-# Results:
-#       frame container created
+# $Id: UI.tcl,v 1.32 2003-12-16 15:03:53 matben Exp $
 
 package require entrycomp
-
-proc LabeledFrame {wpath txt args} {
-    
-    set fontSB [option get . fontSmallBold {}]
-    
-    pack [frame $wpath.st -borderwidth 0]  \
-      -side top -fill both -pady 2 -padx 2 -expand true
-    pack [frame $wpath.st.fr -relief groove -bd 2]  \
-      -side top -fill both -expand true -padx 10 -pady 10 -ipadx 0 -ipady 0  \
-      -in $wpath.st
-    place [label $wpath.st.lbl -text $txt -font $fontSB -bd 0 -padx 6]  \
-      -in $wpath.st -x 20 -y 14 -anchor sw
-    return $wpath.st.fr
-}
-
-proc LabeledFrame2 {wpath txt args} {
-
-    set fontSB [option get . fontSmallBold {}]
-    
-    frame $wpath -borderwidth 0
-    pack [frame $wpath.st -borderwidth 0]  \
-      -side top -fill both -pady 2 -padx 2 -expand true
-    pack [frame $wpath.st.fr -relief groove -bd 2]  \
-      -side top -fill both -expand true -padx 10 -pady 10 -ipadx 0 -ipady 0  \
-      -in $wpath.st
-    place [label $wpath.st.lbl -text $txt -font $fontSB -bd 0 -padx 6]  \
-      -in $wpath.st -x 20 -y 14 -anchor sw
-    return $wpath.st.fr
-}
-
-proc LabeledFrame3 {w txt args} {
-
-    set fontSB [option get . fontSmallBold {}]
-    
-    frame $w -borderwidth 0
-    pack [frame $w.pad] -side top
-    pack [frame $w.cont -relief groove -bd 2] -side top -fill both -expand 1
-    place [label $w.l -text $txt -font $fontSB -bd 0] -x 20 -y 0 -anchor nw
-    set h [winfo reqheight $w.l]
-    $w.pad configure -height [expr $h-4]
-    return $w.cont
-}
-
-# MessageText --
-#
-#       Used instead of 'message' widget to handle -fill x properly.
-#       
-# Arguments:
-#       w
-#       args
-#       
-# Results:
-#       w
-
-proc MessageText {w args} {
-    global  prefs
-    
-    #puts "w=$w"
-    
-    array set argsArr {-text ""}
-    array set argsArr $args
-    array set argsArr [list -borderwidth 0 -bd 0 -wrap word -width 20]
-    set theText $argsArr(-text)
-    unset argsArr(-text)
-    catch {unset argsArr(-aspect)}
-    eval {text $w} [array get argsArr]
-    $w insert 1.0 $theText
-    
-    # Figure out number of lines.
-    #set endInd [$w index end-1char]
-    foreach {x y w h} [$w bbox end-1char] break
-    #set dlineinfo [$w dlineinfo end-1char]
-    array set fontMetrics [font metrics [$w cget -font]]
-    set linespace $fontMetrics(-linespace)
-    #set base [lindex $dlineinfo 3]
-    #set height [expr ($y + $h)/$fontMetrics(-linespace)]
-    #puts "y=$y, h=$h, linespace=$fontMetrics(-linespace)"
-    set height 5
-    $w configure -height $height
-    return $w
-}
 
 
 namespace eval ::UI:: {
@@ -228,7 +133,7 @@ proc ::UI::Init {} {
       -file [file join $this(path) images igelpiga.gif]]
     set icons(brokenImage) [image create photo -format gif  \
       -file [file join $this(path) images brokenImage.gif]]
-    foreach name {connect save open import send print stop inbox inboxLett} {
+    foreach name {connect save open import send print stop inbox} {
 	set icons(bt$name) [image create photo bt$name -format gif  \
 	  -file [file join $this(path) images ${name}.gif]]
 	set icons(bt${name}dis) [image create photo bt${name}dis -format gif \
@@ -4481,21 +4386,6 @@ proc ::UI::CreateBrokenImage {wtop width height} {
 	    $name copy $icons(brokenImage) -to 0 0 $width $height  \
 	      -zoom $zoomx $zoomy -compositingrule overlay
 	    lappend tmpImages $name
-	}
-    }
-    return $name
-}
-
-
-
-proc ::UI::GetThemeImage {name} {
-    global  this
-        
-    foreach dir $this(imagePathList) {
-	set f [file join $dir ${name}.gif]
-	if {[file exists $f]} {
-	    image create photo $name -file $f
-	    break
 	}
     }
     return $name
