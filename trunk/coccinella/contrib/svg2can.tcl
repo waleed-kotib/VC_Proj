@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #
-# $Id: svg2can.tcl,v 1.3 2004-02-18 14:14:55 matben Exp $
+# $Id: svg2can.tcl,v 1.4 2004-02-19 15:09:12 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -42,8 +42,24 @@ namespace eval svg2can {
 	middle  c
 	end     e
     }
+    
+    variable fontWeightMap 
+    array set fontWeightMap {
+	normal    normal
+	bold      bold
+	bolder    bold
+	lighter   normal
+	100       normal
+	200       normal
+	300       normal
+	400       normal
+	500       normal
+	600       bold
+	700       bold
+	800       bold
+	900       bold
+    }
 }
-
 
 
 proc svg2can::parsesvgdocument {xmllist args} {
@@ -61,7 +77,7 @@ proc svg2can::parseelement {xmllist args} {
     set tag [gettag $xmllist]
     
     switch -- $tag {
-	circle - ellipse - image - line - polyline - polygon - rect - text {
+	circle - ellipse - image - line - path - polyline - polygon - rect - text {
 	    lappend cmd [parse${tag} $xmllist]
 	}
 	g {
@@ -74,7 +90,7 @@ proc svg2can::parseelement {xmllist args} {
     return $cmd
 }
 
-# svg2can::parseline, parsecircle, parseellipse, parserect, parsepolyline,
+# svg2can::parsecircle, parseellipse, parseline, parserect, parsepolyline,
 #   parsepolygon, parseimage --
 # 
 #       Makes the necessary canvas commands needed to reproduce the
@@ -85,42 +101,6 @@ proc svg2can::parseelement {xmllist args} {
 #       
 # Results:
 #       canvas create command without the widgetPath.
-
-proc svg2can::parseline {xmllist} {
-    
-    set opts {}
-    set coords {0 0 0 0}
-    set presentationAttr {}
-    
-    foreach {key value} [getattr $xmllist] {
-	
-	switch -- $key {
-	    id {
-		lappend opts -tags $value
-	    }
-	    style {
-		set opts [StyleToOpts line [StyleAttrToList $value]]
-	    }
-	    x1 {
-		lset coords 0 $value
-	    }
-	    y1 {
-		lset coords 1 $value
-	    }
-	    x2 {
-		lset coords 2 $value
-	    }
-	    y2 {
-		lset coords 3 $value
-	    }
-	    default {
-		lappend presentationAttr $key $value
-	    }
-	}
-    }
-    set opts [MergePresentationAttr line $opts $presentationAttr]    
-    return [concat create line $coords $opts]
-}
 
 proc svg2can::parsecircle {xmllist} {
     
@@ -187,10 +167,40 @@ proc svg2can::parseellipse {xmllist} {
     return [concat create oval $coords $opts]
 }
 
-proc svg2can::parserect {xmllist} {
+proc svg2can::parseimage {xmllist} {
     
-    # SVG and canvas have different defaults.
-    set opts {-outline "" -fill black}
+    set x 0
+    set y 0    
+    set presentationAttr {}
+
+    foreach {key value} [getattr $xmllist] {
+	
+	switch -- $key {
+	    id {
+		lappend opts -tags $value
+	    }
+	    style {
+		set opts [StyleToOpts polygon [StyleAttrToList $value]]
+	    }
+	    x - y {
+		set $key $value
+	    }
+	    xlink:href {
+		set uri $value
+	    }
+	    default {
+		lappend presentationAttr $key $value
+	    }
+	}
+    }
+    set opts [MergePresentationAttr polygon $opts $presentationAttr]
+    lappend opts -image \[image create photo -file $uri]
+    return [concat create image $x $y $opts]
+}
+
+proc svg2can::parseline {xmllist} {
+    
+    set opts {}
     set coords {0 0 0 0}
     set presentationAttr {}
     
@@ -200,34 +210,56 @@ proc svg2can::parserect {xmllist} {
 	    id {
 		lappend opts -tags $value
 	    }
-	    rx - ry {
-		# unsupported :-(
-	    }
 	    style {
-		set opts [StyleToOpts rect [StyleAttrToList $value]]
+		set opts [StyleToOpts line [StyleAttrToList $value]]
 	    }
-	    x - y - width - height {
-		set $key $value
+	    x1 {
+		lset coords 0 $value
+	    }
+	    y1 {
+		lset coords 1 $value
+	    }
+	    x2 {
+		lset coords 2 $value
+	    }
+	    y2 {
+		lset coords 3 $value
 	    }
 	    default {
 		lappend presentationAttr $key $value
 	    }
 	}
     }
-    if {[info exists x]} {
-	lset coords 0 $x
+    set opts [MergePresentationAttr line $opts $presentationAttr]    
+    return [concat create line $coords $opts]
+}
+
+proc svg2can::parsepath {xmllist} {
+    
+    set coords {}
+    set opts {}
+    set presentationAttr {}
+    set cantype line
+
+    foreach {key value} [getattr $xmllist] {
+	
+	switch -- $key {
+	    d {
+		set coords [ParseStraightPath $value]
+	    }
+	    id {
+		lappend opts -tags $value
+	    }
+	    style {
+		set opts [StyleToOpts path [StyleAttrToList $value]]
+	    }
+	    default {
+		lappend presentationAttr $key $value
+	    }
+	}
     }
-    if {[info exists y]} {
-	lset coords 1 $y
-    }
-    if {[info exists width]} {
-	lset coords 2 [expr [lindex $coords 0] + $width]
-    }
-    if {[info exists height]} {
-	lset coords 3 [expr [lindex $coords 1] + $height]
-    }
-    set opts [MergePresentationAttr rect $opts $presentationAttr]
-    return [concat create rectangle $coords $opts]
+    set opts [MergePresentationAttr path $opts $presentationAttr]
+    return [concat create $cantype $coords $opts]
 }
 
 proc svg2can::parsepolyline {xmllist} {
@@ -284,35 +316,47 @@ proc svg2can::parsepolygon {xmllist} {
     return [concat create polygon $coords $opts]
 }
 
-proc svg2can::parseimage {xmllist} {
+proc svg2can::parserect {xmllist} {
     
-    set x 0
-    set y 0    
+    # SVG and canvas have different defaults.
+    set opts {-outline "" -fill black}
+    set coords {0 0 0 0}
     set presentationAttr {}
-
+    
     foreach {key value} [getattr $xmllist] {
 	
 	switch -- $key {
 	    id {
 		lappend opts -tags $value
 	    }
+	    rx - ry {
+		# unsupported :-(
+	    }
 	    style {
-		set opts [StyleToOpts polygon [StyleAttrToList $value]]
+		set opts [StyleToOpts rect [StyleAttrToList $value]]
 	    }
-	    x - y {
+	    x - y - width - height {
 		set $key $value
-	    }
-	    xlink:href {
-		set uri $value
 	    }
 	    default {
 		lappend presentationAttr $key $value
 	    }
 	}
     }
-    set opts [MergePresentationAttr polygon $opts $presentationAttr]
-    lappend opts -image \[image create photo -file $uri]
-    return [concat create image $x $y $opts]
+    if {[info exists x]} {
+	lset coords 0 $x
+    }
+    if {[info exists y]} {
+	lset coords 1 $y
+    }
+    if {[info exists width]} {
+	lset coords 2 [expr [lindex $coords 0] + $width]
+    }
+    if {[info exists height]} {
+	lset coords 3 [expr [lindex $coords 1] + $height]
+    }
+    set opts [MergePresentationAttr rect $opts $presentationAttr]
+    return [concat create rectangle $coords $opts]
 }
 
 proc svg2can::parsetext {xmllist} {
@@ -320,6 +364,7 @@ proc svg2can::parsetext {xmllist} {
     set x 0
     set y 0    
     set presentationAttr {}
+    set cmdList {}
 
     foreach {key value} [getattr $xmllist] {
 	
@@ -328,7 +373,7 @@ proc svg2can::parsetext {xmllist} {
 		lappend opts -tags $value
 	    }
 	    style {
-		set opts [StyleToOpts polygon [StyleAttrToList $value]]
+		set opts [StyleToOpts text [StyleAttrToList $value]]
 	    }
 	    x - y {
 		set $key $value
@@ -339,7 +384,55 @@ proc svg2can::parsetext {xmllist} {
 	}
     }
     set opts [MergePresentationAttr text $opts $presentationAttr]
-    lappend opts -text [getcdata $xmllist]
+    
+    # Assuming that chdata is not mixed with elements, we should now have
+    # either chdata OR more elements (tspan).
+    set childList [getchildren $xmllist]
+    if {[llength $childList]} {
+	foreach c $childList {
+	    set tag [gettag $c]
+	    
+	    switch -- $tag {
+		textPath {
+		    # empty.
+		}
+		tspan {
+		    lappend cmdList [ParseTspan x y $opts]
+		}
+		tref {
+		    # empty.
+		}
+	    }
+	}
+    } else {
+	lappend opts -text [getcdata $xmllist]
+	lappend cmdList [concat create text $x $y $opts]
+    }
+    return $cmdList
+}
+
+proc svg2can::ParseTspan {xmllist xVar yVar opts} {
+    
+    upvar $xVar x
+    upvar $yVar y
+
+    set presentationAttr {}
+    
+    foreach {key value} [getattr $xmllist] {
+	
+	switch -- $key {
+	    style {
+		set opts [StyleToOpts text [StyleAttrToList $value]]
+	    }
+	    x - y {
+		set $key $value
+	    }
+	    default {
+		lappend presentationAttr $key $value
+	    }
+	}
+    }
+    set opts [MergePresentationAttr text $opts $presentationAttr]
     return [concat create text $x $y $opts]
 }
 
@@ -454,7 +547,9 @@ proc svg2can::StyleToOpts {type styleList} {
 		}
 	    }
 	    stroke-width {
-		lappend opts -width $value
+		if {![string equal $type "text"]} {
+		    lappend opts -width $value
+		}
 	    }
 	    text-anchor {
 		lappend opts -anchor $textAnchorMap($value)
@@ -487,6 +582,62 @@ proc svg2can::MergePresentationAttr {type opts presentationAttr} {
 proc svg2can::StyleAttrToList {style} {
     
     return [split [string trim [string map {" " ""} $style] \;] :\;]
+}
+
+proc svg2can::ParseStraightPath {path} {
+    
+    regsub -all -- {([a-zA-Z])([0-9])} $path {\1 \2} path
+    regsub -all -- {([0-9])([a-zA-Z])} $path {\1 \2} path
+    set path [string map {- " -"} $path]
+    set path [string map {, " "} $path]
+    
+    set cantype line
+    set i 0
+    set len [llength $path]
+
+    while {$i < $len} {
+	set elem [lindex $path $i]
+	
+	switch -glob -- $elem {
+	    M - m {
+		set co [list [lindex $path [incr i]] [lindex $path [incr i]]]
+		incr i
+	    }
+	    L - {[0-9]*} - {-[0-9]*} {
+		if {$elem != "L"} {incr i -1}
+		lappend co [lindex $path [incr i]] [lindex $path [incr i]]
+		incr i
+	    }
+	    l {
+		lappend co [expr [lindex $co end-1] + [lindex $path [incr i]]] \
+		  [expr [lindex $co end] + [lindex $path [incr i]]]
+		incr i
+	    }
+	    H {
+		lappend co [lindex $path [incr i]] [lindex $co end]
+		incr i
+	    }
+	    h {
+		lappend co [expr [lindex $co end-1] + [lindex $path [incr i]]] \
+		  [lindex $co end]
+		incr i
+	    }
+	    V {
+		lappend co [lindex $co end-1] [lindex $path [incr i]]
+		incr i
+	    }
+	    v {
+		lappend co [lindex $co end-1] \
+		  [expr [lindex $co end] + [lindex $path [incr i]]]
+		incr i
+	    }
+	    Z - z {
+		set cantype polygon
+		incr i
+	    }
+	}
+    }
+    return $co
 }
 
 proc svg2can::PointsToList {points} {
