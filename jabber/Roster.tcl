@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.67 2004-06-21 14:40:08 matben Exp $
+# $Id: Roster.tcl,v 1.68 2004-06-22 14:21:19 matben Exp $
 
 package provide Roster 1.0
 
@@ -15,6 +15,8 @@ namespace eval ::Jabber::Roster:: {
     # Add all event hooks we need.
     ::hooks::add loginHook              ::Jabber::Roster::LoginCmd
     ::hooks::add logoutHook             ::Jabber::Roster::LogoutHook
+    ::hooks::add browseSetHook          ::Jabber::Roster::BrowseSetHook
+    ::hooks::add discoInfoHook          ::Jabber::Roster::DiscoInfoHook
     
     # Define all hooks for preference settings.
     ::hooks::add prefsInitHook          ::Jabber::Roster::InitPrefsHook
@@ -297,6 +299,12 @@ proc ::Jabber::Roster::Build {w} {
 	$wtree itemconfigure [list $gpres] -open 0
     }
     return $w
+}
+
+proc ::Jabber::Roster::GetWtree { } {
+    variable wtree
+    
+    return $wtree
 }
 
 # Jabber::Roster::LoginCmd --
@@ -1095,7 +1103,7 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
     }
     
     # Design the balloon help window message.
-    if {[info exists argsArr(-name)] && [string length $argsArr(-name)]} {
+    if {0 && [info exists argsArr(-name)] && [string length $argsArr(-name)]} {
 	set msg "$argsArr(-name): $gpresarr($presence)"
     } else {
 	set msg "${jidx}: $gpresarr($presence)"
@@ -1781,7 +1789,6 @@ proc ::Jabber::Roster::GetPresenceIcon {jid presence args} {
     variable presenceIcon
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jserver jserver
     upvar ::Jabber::privatexmlns privatexmlns
     
     array set argsArr $args
@@ -1803,18 +1810,14 @@ proc ::Jabber::Roster::GetPresenceIcon {jid presence args} {
     # Foreign IM systems.
     set haveForeignIM 0
     if {$jprefs(rost,haveIMsysIcons)} {
-	if {[regexp {^(.+@)?([^@/]+)(/.*)?} $jid match pre host]} {
-	    set typesubtype [::Jabber::JlibCmd service gettype $host]
+	jlib::splitjidex $jid user host res
 	
-	    # If empty we have likely not yet browsed etc.
-	    if {[string length $typesubtype] > 0} {
-		if {[regexp {/(aim|icq|msn|yahoo)} $typesubtype match subtype]} {
-		    set haveForeignIM 1
-		    if {[info exists presenceIcon($key,$subtype)]} {
-			append key ",$subtype"
-		    }
-		}
-	    }
+	# If empty we have likely not yet browsed etc.
+	set cattype [$jstate(jlib) service gettype $host]
+	set subtype [lindex [split $cattype /] 1]
+	if {[info exists presenceIcon($key,$subtype)]} {
+	    append key ",$subtype"
+	    set haveForeignIM 1
 	}
     }   
     
@@ -1828,6 +1831,16 @@ proc ::Jabber::Roster::GetPresenceIcon {jid presence args} {
     }
     
     return $presenceIcon($key)
+}
+
+proc ::Jabber::Roster::GetPresenceIconEx {jid} {
+    upvar ::Jabber::jstate jstate
+    
+    jlib::splitjid $jid jid2 res
+    set pres [$jstate(roster) getpresence $jid2 -resource $res]
+    array set presArr $pres
+    set icon [eval {GetPresenceIcon $jid $presArr(-type)} $pres]
+    return $icon
 }
   
 proc ::Jabber::Roster::GetMyPresenceIcon { } {
@@ -2115,6 +2128,31 @@ proc ::Jabber::Roster::BuildStatusMenuDef { } {
     return $statMenuDef
 }
 
+proc ::Jabber::Roster::BrowseSetHook {from subiq} {
+    upvar ::Jabber::jprefs jprefs
+    upvar ::Jabber::jserver jserver
+    
+    if {!$jprefs(rost,haveIMsysIcons)} {
+	return
+    }
+
+    # Fix icons of foreign IM systems.
+    if {[jlib::jidequal $from $jserver(this)]} {
+	::Jabber::Roster::PostProcessIcons
+    }
+}
+
+proc ::Jabber::Roster::DiscoInfoHook {type from subiq args} {
+    upvar ::Jabber::jprefs jprefs
+    
+    puts "!!!!!!!!!!!!! type=$type, from=$from"
+    if {!$jprefs(rost,haveIMsysIcons)} {
+	return
+    }
+
+    
+}
+
 # Jabber::Roster::PostProcessIcons --
 # 
 #       This is necessary to get icons for foreign IM systems set correctly.
@@ -2124,13 +2162,10 @@ proc ::Jabber::Roster::BuildStatusMenuDef { } {
 
 proc ::Jabber::Roster::PostProcessIcons { } {
     variable wtree    
-    upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
 
-    if {!$jprefs(rost,haveIMsysIcons)} {
-	return
-    }
+    set server [jlib::jidmap $jserver(this)]
 
     foreach v [$wtree find withtag all] {
 	set tags [$wtree itemconfigure $v -tags]
@@ -2142,15 +2177,14 @@ proc ::Jabber::Roster::PostProcessIcons { } {
 	    default {
 		set jid [lindex $v end]
 		set mjid [jlib::jidmap $jid]
-		set server [jlib::jidmap $jserver(this)]
+		jlib::splitjidex $mjid username host res
 		
 		# Exclude jid's that belong to our login jabber server.
- 		if {![string match "*@${server}*" $mjid]} {
-		    jlib::splitjid $jid jid2 res
-		    set pres [$jstate(roster) getpresence $jid2 -resource $res]
-		    array set presArr $pres
-		    set icon [eval {GetPresenceIcon $jid $presArr(-type)} $pres]
-		    $wtree itemconfigure $v -image $icon
+ 		if {![string equal $server $host]} {
+		    set icon [::Jabber::Roster::GetPresenceIconEx $jid]
+		    if {[string length $icon]} {
+			$wtree itemconfigure $v -image $icon
+		    }
 		}
 	    }
 	}	

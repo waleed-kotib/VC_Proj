@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.92 2004-06-16 14:17:30 matben Exp $
+# $Id: Jabber.tcl,v 1.93 2004-06-22 14:21:18 matben Exp $
 
 package provide Jabber 1.0
 
@@ -453,17 +453,17 @@ proc ::Jabber::IsConnected { } {
     return [expr [string length $jserver(this)] == 0 ? 0 : 1]
 }
 
-# Jabber::InvokeRosterCmd, InvokeBrowseCmd --
+# Jabber::RosterCmd, BrowseCmd --
 # 
 #       Access functions for invoking these commands from the outside.
 
-proc ::Jabber::InvokeRosterCmd {args}  {
+proc ::Jabber::RosterCmd {args}  {
     variable jstate
     
     eval {$jstate(roster)} $args
 }
 
-proc ::Jabber::InvokeBrowseCmd {args}  {
+proc ::Jabber::BrowseCmd {args}  {
     variable jstate
     
     eval {$jstate(browse)} $args

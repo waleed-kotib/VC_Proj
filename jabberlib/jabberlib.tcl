@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.50 2004-06-21 14:40:08 matben Exp $
+# $Id: jabberlib.tcl,v 1.51 2004-06-22 14:21:19 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -37,15 +37,6 @@
 #
 #	iqcmd($id)                 : Callback command to run when iq result 
 #	                             packet of $id is received.
-#
-# serv:	                             
-#	serv(gcProtoPriority)      : The groupchat protocol priority list.                             
-#	                             
-#       serv(gcprot,$jid)          : Map a groupchat service jid to protocol:
-#       	                     (gc-1.0|conference|muc)
-#
-#       serv(prefgcprot,$jid)      : Stores preferred groupchat protocol that
-#                                    overrides the priority list.
 #	                               
 ############################# SCHEMA ###########################################
 #
@@ -139,7 +130,6 @@
 #      jlibName groupchat participants room
 #      jlibName groupchat allroomsin
 #      
-#  o the 'muc' command: see muc.tcl
 #      
 #   The callbacks given for any of the '-iqcommand', '-messagecommand', 
 #   or '-presencecommand' must have the following form:
@@ -2337,7 +2327,7 @@ proc jlib::have_agent {jlibname jid} {
 proc jlib::vcard_get {jlibname to cmd} {
 
     set attrlist [list xmlns vcard-temp]    
-    set xmllist [wrapper::createtag {vCard} -attrlist $attrlist]
+    set xmllist [wrapper::createtag "vCard" -attrlist $attrlist]
     send_iq $jlibname "get" $xmllist -to $to -command   \
       [list [namespace current]::invoke_iq_callback $jlibname $cmd]
 }
@@ -2373,15 +2363,15 @@ proc jlib::vcard_set {jlibname cmd args} {
     }
     if {[info exists arr(-email_internet_pref)]} {
 	set elem {}
-	lappend elem [wrapper::createtag internet]
-	lappend elem [wrapper::createtag pref]
+	lappend elem [wrapper::createtag "internet"]
+	lappend elem [wrapper::createtag "pref"]
 	lappend subelem [wrapper::createtag "email" \
 	  -chdata $arr(-email_internet_pref) -subtags $elem]
     }
     if {[info exists arr(-email_internet)]} {
 	foreach email $arr(-email_internet) {
 	    set elem {}
-	    lappend elem [wrapper::createtag internet]
+	    lappend elem [wrapper::createtag "internet"]
 	    lappend subelem [wrapper::createtag "email" \
 	      -chdata $email -subtags $elem]
 	}

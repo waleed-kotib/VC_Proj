@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.60 2004-06-08 14:03:32 matben Exp $
+# $Id: Coccinella.tcl,v 1.61 2004-06-22 14:21:17 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -24,6 +24,7 @@ if {[catch {package require Tk 8.4}]} {
 
 # Hide the main window during launch.
 wm withdraw .
+tk appname coccinella
 
 set state(launchSecs) [clock seconds]
 

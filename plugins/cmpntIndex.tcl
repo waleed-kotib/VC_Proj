@@ -5,6 +5,7 @@ component::attempt Speech       [file join $dir Speech.tcl]      ::Speech::Load
 component::attempt Sounds       [file join $dir Sounds.tcl]      ::Sounds::Load    
 component::attempt ImageMagic   [file join $dir ImageMagic.tcl]  ::ImageMagic::Init
 component::attempt BuddyPounce  [file join $dir BuddyPounce.tcl] ::BuddyPounce::Init
+component::attempt ICQ          [file join $dir ICQ.tcl]         ::ICQ::Init
 
 # Problem to determine if app hidden or not!
 if {[string equal $::tcl_platform(platform) "unix"] && [string equal [tk windowingsystem] "aqua"]} {
