@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.41 2004-04-25 15:35:24 matben Exp $
+# $Id: Browse.tcl,v 1.42 2004-04-30 12:58:45 matben Exp $
 
 package require chasearrows
 
@@ -398,7 +398,6 @@ proc ::Jabber::Browse::ErrorProc {silent browseName type jid errlist} {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
-    upvar ::Jabber::jerror jerror
     
     ::Debug 2 "::Jabber::Browse::ErrorProc type=$type, jid=$jid, errlist='$errlist'"
 
@@ -412,20 +411,29 @@ proc ::Jabber::Browse::ErrorProc {silent browseName type jid errlist} {
     
     # Silent...
     if {$silent} {
-	lappend jerror [list [clock format [clock seconds] -format "%H:%M:%S"] \
+	::Jabber::AddErrorLog [clock format [clock seconds] -format "%H:%M:%S"] \
 	  $jid  \
 	  "Failed browsing: Error code [lindex $errlist 0] and message:\
-	  [lindex $errlist 1]"]
+	  [lindex $errlist 1]"
     } else {
 	tk_messageBox -icon error -type ok -title [::msgcat::mc Error] \
 	  -message [FormatTextForMessageBox \
 	  [::msgcat::mc jamesserrbrowse $jid [lindex $errlist 1]]]
     }
     
-    # As a fallback we use the agents method instead if browsing the login
-    # server fails.
+    # As a fallback we use the disco or agents method instead if browsing 
+    # the login server fails.
     if {[string equal $jid $jserver(this)]} {
-	::Jabber::Agents::GetAll
+
+	switch -- $jprefs(serviceMethod) {
+	    disco {
+		::Jabber::Agents::GetAll
+	    }
+	    browse {
+		::Jabber::Disco::GetInfo  $jserver(this)
+		::Jabber::Disco::GetItems $jserver(this)
+	    }
+	}	
     }
 }
 

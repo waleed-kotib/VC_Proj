@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: browse.tcl,v 1.25 2004-04-22 13:48:43 matben Exp $
+# $Id: browse.tcl,v 1.26 2004-04-30 12:58:46 matben Exp $
 # 
 #  locals($jid,parent):       the parent of $jid.
 #  locals($jid,parents):      list of all parent jid's,
@@ -197,7 +197,7 @@ proc browse::send_get {browsename jid cmd} {
         
     Debug 2 "browse::send_get jid=$jid, cmd=$cmd"
     
-    $browse2jlib($browsename) iq_get "jabber:iq:browse" $jid  \
+    $browse2jlib($browsename) iq_get "jabber:iq:browse" -to $jid  \
       -command [list [namespace current]::parse_get $browsename $jid $cmd]
 }
 

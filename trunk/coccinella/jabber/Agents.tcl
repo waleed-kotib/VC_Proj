@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Agents.tcl,v 1.16 2004-04-25 15:35:24 matben Exp $
+# $Id: Agents.tcl,v 1.17 2004-04-30 12:58:45 matben Exp $
 
 package provide Agents 1.0
 
@@ -204,7 +204,6 @@ proc ::Jabber::Agents::GetAgentCallback {parentJid jid silent jlibName type subi
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::jerror jerror
     
     ::Debug 2 "::Jabber::Agents::GetAgentCallback parentJid=$parentJid,\
       jid=$jid, type=$type"
@@ -216,8 +215,8 @@ proc ::Jabber::Agents::GetAgentCallback {parentJid jid silent jlibName type subi
     switch -- $type {
 	error {
 	    if {$silent} {
-		lappend jerror [list [clock format [clock seconds] -format "%H:%M:%S"]  \
-		  $jid "Failed getting agent info. The error was: [lindex $subiq 1]"]	    
+		::Jabber::AddErrorLog [clock format [clock seconds] -format "%H:%M:%S"]  \
+		  $jid "Failed getting agent info. The error was: [lindex $subiq 1]"
 	    } else {
 	    }
 	}

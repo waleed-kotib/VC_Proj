@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: disco.tcl,v 1.9 2004-04-21 13:22:10 matben Exp $
+# $Id: disco.tcl,v 1.10 2004-04-30 12:58:46 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -171,7 +171,7 @@ proc disco::send_get {disconame type jid cmd args} {
 	lappend opts -node $argsArr(-node)
     }
     
-    eval {$disco2jlib($disconame) iq_get $xmlns($type) $jid  \
+    eval {$disco2jlib($disconame) iq_get $xmlns($type) -to $jid  \
       -command [list [namespace current]::parse_get $disconame $type $jid $cmd]} \
       $opts
 }
