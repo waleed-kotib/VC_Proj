@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.69 2004-10-13 14:08:38 matben Exp $
+# $Id: jabberlib.tcl,v 1.70 2004-10-14 10:22:11 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -343,7 +343,7 @@ proc jlib::new {rostername clientcmd args} {
     set lib(isinstream) 0
     set locals(server) ""
     
-    # Register some standard iq handlers that is handled internally.
+    # Register some standard iq handlers that are handled internally.
     iq_register $jlibname get jabber:iq:last    \
       [namespace current]::handle_get_last
     iq_register $jlibname get jabber:iq:time    \

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: jlibtls.tcl,v 1.2 2004-10-13 14:08:38 matben Exp $
+# $Id: jlibtls.tcl,v 1.3 2004-10-14 10:22:11 matben Exp $
 
 package require tls
 
@@ -47,10 +47,15 @@ proc jlib::tls_features_write {jlibname name1 name2 op} {
 
 proc jlib::tls_continue {jlibname} {
     
+    upvar ${jlibname}::locals locals
     variable xmppns
 
     Debug 2 "jlib::tls_continue"
     
+    # Must verify that the server provides a 'starttls' feature.
+    if {![info exists locals(features,starttls)]} {
+	tls_finish $jlibname starttls-nofeature
+    }
     set xmllist [wrapper::createtag starttls -attrlist [list xmlns $xmppns(tls)]]
     send $jlibname $xmllist
     
@@ -67,7 +72,8 @@ proc jlib::tls_proceed {jlibname tag xmllist} {
     Debug 2 "jlib::tls_proceed"
     
     if {[wrapper::getattribute $xmllist xmlns] != $xmppns(tls)} {
-	tls_finish $jlibname "received incorrectly namespaced proceed element"
+	tls_finish $jlibname starttls-protocolerror \
+	  "received incorrectly namespaced proceed element"
     }
 
     set sock $lib(sock)
@@ -81,7 +87,7 @@ proc jlib::tls_proceed {jlibname tag xmllist} {
 	if {$retry > 20} { 
 	    close $sock
 	    set err "too long retry to setup SSL connection"
-	    tls_finish $jlibname $err
+	    tls_finish $jlibname startls-failure $err
 	}
 	if {[catch {tls::handshake $sock} err]} {
 	    if {[string match "*resource temporarily unavailable*" $err]} {
@@ -89,7 +95,7 @@ proc jlib::tls_proceed {jlibname tag xmllist} {
 		incr retry
 	    } else {
 		close $sock
-		tls_finish $jlibname $err
+		tls_finish $jlibname startls-failure $err
 	    }
 	} else {
 	    break
@@ -132,24 +138,24 @@ proc jlib::tls_failure {jlibname tag xmllist} {
     Debug 2 "jlib::tls_failure"
     
     if {[wrapper::getattribute $xmllist xmlns] == $xmppns(tls)} {
-	tls_finish $jlibname "tls failed"
+	tls_finish $jlibname startls-failure "tls failed"
     } else {
-	tls_finish $jlibname "tls failed for an unknown reason"
+	tls_finish $jlibname startls-failure "tls failed for an unknown reason"
     }
     return {}
 }
 
-proc jlib::tls_finish {jlibname {errmsg ""}} {
+proc jlib::tls_finish {jlibname {errcode ""} {msg ""}} {
 
     upvar ${jlibname}::locals locals
     
-    Debug 2 "jlib::tls_finish errmsg=$errmsg"
+    Debug 2 "jlib::tls_finish errcode=$errcode, msg=$msg"
 
     element_deregister $jlibname failure [namespace current]::tls_failure
     element_deregister $jlibname proceed [namespace current]::tls_proceed
     
-    if {$errmsg != ""} {
-	uplevel #0 $locals(tls,cmd) $jlibname [list error [list "" $errmsg]]
+    if {$errcode != ""} {
+	uplevel #0 $locals(tls,cmd) $jlibname [list error [list $errcode $msg]]
     } else {
 	uplevel #0 $locals(tls,cmd) $jlibname [list result {}]
     }

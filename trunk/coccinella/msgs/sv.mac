@@ -652,6 +652,8 @@ Det är nödvändigt att den finns i din roster. Du har prenumeration för %s: %s.}
 ::msgcat::mcset sv jamessregerr                 {Registreringen misslyckades med felmeddelande: %s}
 ::msgcat::mcset sv jamesstrptsubsc              {Ditt registrerade konto hos %s kommer att placeras i din kompislista för att fungera som transport till denna tjänsten.}
 ::msgcat::mcset sv jamessfailedsubsc            {Misslyckades med prenumerationen till %s. Användaren nekade.}
+::msgcat::mcset sv jamessstarttls-nofeature     {Servern "%s" saknar stöd för TLS.}
+::msgcat::mcset sv jamessstartls-failure        {TLS förhandling med servern "%s" misslyckades.}
 
 
 
@@ -812,6 +814,7 @@ kan ha speciella krav.}
 	::msgcat::mcset sv jaupdateremind {Påminn mig inte om detta fler gånger}
 	::msgcat::mcset sv jasettopic   {Sätt nytt ämne för detta gruppsamtal.}
 	::msgcat::mcset sv jadirpresmsg {Skicka riktad närvaro till "%s".}
+	::msgcat::mcset sv jatlsnegot   {Förhandlar om TLS säkerhet...}
 
 
 
