@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: EditDialogs.tcl,v 1.12 2004-05-06 13:41:11 matben Exp $
+# $Id: EditDialogs.tcl,v 1.13 2004-07-09 06:26:06 matben Exp $
 
 
 #       ::EditShortcuts:: implements dialogs for editing shortcuts. 
@@ -61,13 +61,13 @@ proc ::EditShortcuts::EditShortcuts {w nameOfShortcutList} {
     }
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox}
-    wm title $w [::msgcat::mc {Edit Shortcuts}]
+    wm title $w [mc {Edit Shortcuts}]
     frame $w.frall -borderwidth 1 -relief raised
     pack  $w.frall
     
     # The top part.
     set wcont $w.frtop
-    labelframe $wcont -text [::msgcat::mc {Edit Shortcuts}]]
+    labelframe $wcont -text [mc {Edit Shortcuts}]]
     pack $wcont -in $w.frall
     
     # Overall frame for whole container.
@@ -89,14 +89,14 @@ proc ::EditShortcuts::EditShortcuts {w nameOfShortcutList} {
     pack $wsb -side left -fill both
     
     # Buttons at the right side.
-    button $frtot.btadd -text "[::msgcat::mc Add]..."   \
+    button $frtot.btadd -text "[mc Add]..."   \
       -command "[namespace current]::AddOrEditShortcuts add  \
       [namespace current]::shortCopy -1 $wlbox"
-    button $frtot.btrem -text [::msgcat::mc Remove] -state disabled  \
+    button $frtot.btrem -text [mc Remove] -state disabled  \
       -command "[namespace current]::RemoveShortcuts $wlbox"
     
     # Trick: postpone command substitution; only variable substitution.
-    button $frtot.btedit -text "[::msgcat::mc Edit]..." -state disabled  \
+    button $frtot.btedit -text "[mc Edit]..." -state disabled  \
       -command "[namespace current]::AddOrEditShortcuts edit   \
       [namespace current]::shortCopy \[$wlbox curselection] $wlbox"
     
@@ -111,11 +111,11 @@ proc ::EditShortcuts::EditShortcuts {w nameOfShortcutList} {
     # The bottom part.
     pack [frame $w.frbot -borderwidth 0] -in $w.frall -fill both   \
       -padx 8 -pady 6
-    pack [button $w.frbot.bt1 -text [::msgcat::mc Save] -default active  \
+    pack [button $w.frbot.bt1 -text [mc Save] -default active  \
       -command [list [namespace current]::DoSaveEditedShortcuts   \
       $nameOfShortcutList]]   \
       -side right -padx 5 -pady 5
-    pack [button $w.frbot.btcancel -text [::msgcat::mc Cancel]  \
+    pack [button $w.frbot.btcancel -text [mc Cancel]  \
       -command [list [namespace current]::DoCancel $nameOfShortcutList]]  \
       -side right -padx 5 -pady 5
     
@@ -175,7 +175,7 @@ proc ::EditShortcuts::DoCancel {nameOfShortcutList} {
     # Cancel, keep old shortcuts. If changed something then warn.
     if {$anyChange} {
 	set ans [tk_messageBox -icon error -type yesnocancel -message \
-	  [FormatTextForMessageBox [::msgcat::mc shortwarn]]]
+	  [FormatTextForMessageBox [mc shortwarn]]]
 	if {[string equal $ans "yes"]} {
 	    DoSaveEditedShortcuts $nameOfShortcutList
 	    return
@@ -226,15 +226,15 @@ proc ::EditShortcuts::AddOrEditShortcuts {what nameOfShortsCopy indShortcuts  \
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox}
     if {$what == "add"} {
-	set txt [::msgcat::mc {Add Shortcut}]
-	set txt1 "[::msgcat::mc {New shortcut}]:"
-	set txt2 "[::msgcat::mc shortip]:"
-	set txtbt [::msgcat::mc Add]
+	set txt [mc {Add Shortcut}]
+	set txt1 "[mc {New shortcut}]:"
+	set txt2 "[mc shortip]:"
+	set txtbt [mc Add]
     } elseif {$what == "edit"} {
-	set txt [::msgcat::mc {Edit Shortcut}]
-	set txt1 "[::msgcat::mc Shortcut]:"
-	set txt2 "[::msgcat::mc shortip]:"
-	set txtbt [::msgcat::mc Save]
+	set txt [mc {Edit Shortcut}]
+	set txt1 "[mc Shortcut]:"
+	set txt2 "[mc shortip]:"
+	set txtbt [mc Save]
     }
     wm title $w $txt
     set fontSB [option get . fontSmallBold {}]
@@ -278,7 +278,7 @@ proc ::EditShortcuts::AddOrEditShortcuts {what nameOfShortsCopy indShortcuts  \
       -command "[namespace current]::PushBtAddOrEditShortcut $what  \
       $nameOfShortsCopy $indShortcuts \[$frtot.ent1 get] \[$frtot.ent2 get] "
     pack $w.frbot.bt1 -side right -padx 5 -pady 5
-    pack [button $w.frbot.btcancel -text [::msgcat::mc Cancel]  \
+    pack [button $w.frbot.btcancel -text [mc Cancel]  \
       -command "set [namespace current]::finAdd 0"]  \
       -side right -padx 5 -pady 5
     

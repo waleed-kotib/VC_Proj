@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.33 2004-07-02 14:08:02 matben Exp $
+# $Id: OOB.tcl,v 1.34 2004-07-09 06:26:06 matben Exp $
 
 package provide OOB 1.0
 
@@ -72,17 +72,17 @@ proc ::Jabber::OOB::BuildSet {jid} {
     frame $w.frall -borderwidth 1 -relief raised
     pack  $w.frall -fill both -expand 1 -ipadx 12 -ipady 4
     
-    message $w.frall.msg -width 300 -text [::msgcat::mc oobmsg $jid]
+    message $w.frall.msg -width 300 -text [mc oobmsg $jid]
     pack $w.frall.msg -side top -fill both -expand 1
     
     # Entries etc.
     set frmid [frame $w.frall.frmid -borderwidth 0]
-    label $frmid.lfile -text "[::msgcat::mc {File}]:" -font $fontSB -anchor e
+    label $frmid.lfile -text "[mc {File}]:" -font $fontSB -anchor e
     entry $frmid.efile    \
       -textvariable [namespace current]::localpath
-    button $frmid.btfile -text "[::msgcat::mc {File}]..." -width 6 -font $fontS  \
+    button $frmid.btfile -text "[mc {File}]..." -width 6 -font $fontS  \
       -command [namespace current]::FileOpen
-    label $frmid.ldesc -text "[::msgcat::mc {Description}]:" -font $fontSB -anchor e
+    label $frmid.ldesc -text "[mc {Description}]:" -font $fontSB -anchor e
     entry $frmid.edesc -width 36    \
       -textvariable [namespace current]::desc
     grid $frmid.lfile -column 0 -row 0 -sticky e
@@ -94,10 +94,10 @@ proc ::Jabber::OOB::BuildSet {jid} {
 
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btok -text [::msgcat::mc Send] -default active \
+    pack [button $frbot.btok -text [mc Send] -default active \
       -command [namespace current]::DoSend]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
+    pack [button $frbot.btcancel -text [mc Cancel]  \
       -command "set [namespace current]::finished 2"]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
@@ -168,7 +168,7 @@ proc ::Jabber::OOB::FileOpen { } {
     if {[file isdirectory $locals(initialLocalDir)]} {
 	set opts [list -initialdir $locals(initialLocalDir)]
     }
-    set ans [eval {tk_getOpenFile -title [::msgcat::mc {Pick File}]} $opts]
+    set ans [eval {tk_getOpenFile -title [mc {Pick File}]} $opts]
     if {[string length $ans]} {
 	set localpath $ans
 	set locals(initialLocalDir) [file dirname $ans]
@@ -186,12 +186,12 @@ proc ::Jabber::OOB::DoSend { } {
     upvar ::Jabber::jstate jstate
     
     if {$localpath == ""} {
-	tk_messageBox -type ok -title [::msgcat::mc {Pick File}] -message \
+	tk_messageBox -type ok -title [mc {Pick File}] -message \
 	  "You must provide a file to send" -parent $wDlgs(joobs)
 	return
     }
     if {![file exists $localpath]} {
-	tk_messageBox -type ok -title [::msgcat::mc {Pick File}]  \
+	tk_messageBox -type ok -title [mc {Pick File}]  \
 	  -message "The picked file does not exist. Pick a new one." \
 	  -parent $wDlgs(joobs)
 	return
@@ -243,11 +243,11 @@ proc ::Jabber::OOB::SetCallback {token jlibName type theQuery} {
 	foreach {errcode errmsg} $theQuery break
 	set msg "Got an error when trying to send a file: code was $errcode,\
 	  and error message: $errmsg"
-	tk_messageBox -icon error -type ok -title [::msgcat::mc Error] \
+	tk_messageBox -icon error -type ok -title [mc Error] \
 	  -message [FormatTextForMessageBox $msg]
     } else {
-	tk_messageBox -icon info -type ok -title [::msgcat::mc {File Transfer}] \
-	  -message [::msgcat::mc jamessoobok2 $state(tail) $state(jid)]
+	tk_messageBox -icon info -type ok -title [mc {File Transfer}] \
+	  -message [mc jamessoobok2 $state(tail) $state(jid)]
     }
     unset state
 }
@@ -271,21 +271,21 @@ proc ::Jabber::OOB::ParseSet {jlibname from subiq args} {
 	set id $locals(id)
 	incr locals(id)
     }
-    set desc [::msgcat::mc None]
+    set desc [mc None]
     foreach child [wrapper::getchildren $subiq] {
 	set tag  [wrapper::gettag $child]
 	set $tag [wrapper::getcdata $child]
     }
     if {![info exists url]} {
-	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
+	tk_messageBox -title [mc Error] -icon error -type ok \
 	  -message [FormatTextForMessageBox \
-	  [::msgcat::mc jamessoobnourl $from]]
+	  [mc jamessoobnourl $from]]
 	return $ishandled
     }
     set tail [file tail [::Utils::GetFilePathFromUrl $url]]
-    set ans [tk_messageBox -title [::msgcat::mc {Get File}] -icon info  \
+    set ans [tk_messageBox -title [mc {Get File}] -icon info  \
       -type yesno -default yes -message [FormatTextForMessageBox \
-      [::msgcat::mc jamessoobask $from $tail $desc]]]
+      [mc jamessoobask $from $tail $desc]]]
     if {$ans == "no"} {
 	return $ishandled
     }
@@ -293,21 +293,21 @@ proc ::Jabber::OOB::ParseSet {jlibname from subiq args} {
     # Validate URL, determine the server host and port.
     if {![regexp -nocase {^(([^:]*)://)?([^/:]+)(:([0-9]+))?(/.*)?$} $url \
       x prefix proto host y port path]} {
-	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
+	tk_messageBox -title [mc Error] -icon error -type ok \
 	  -message [FormatTextForMessageBox \
-	  [::msgcat::mc jamessoobbad $from $url]]
+	  [mc jamessoobbad $from $url]]
 	return $ishandled
     }
     if {[string length $proto] == 0} {
 	set proto http
     }
     if {$proto != "http"} {
-	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
+	tk_messageBox -title [mc Error] -icon error -type ok \
 	  -message [FormatTextForMessageBox \
-	  [::msgcat::mc jamessoonnohttp $from $proto]]
+	  [mc jamessoonnohttp $from $proto]]
 	return $ishandled
     }
-    set localPath [tk_getSaveFile -title [::msgcat::mc {Save File}] \
+    set localPath [tk_getSaveFile -title [mc {Save File}] \
       -initialfile $tail]
     if {[string length $localPath] == 0} {
 	return $ishandled
@@ -325,8 +325,8 @@ proc ::Jabber::OOB::Get {jid url file id} {
     variable locals
 
     if {[catch {open $file w} out]} {
-	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok -message \
-	  [FormatTextForMessageBox [::msgcat::mc jamessoobfailopen $file]]
+	tk_messageBox -title [mc Error] -icon error -type ok -message \
+	  [FormatTextForMessageBox [mc jamessoobfailopen $file]]
 	return
     }
     set locals($out,local) $file
@@ -339,13 +339,13 @@ proc ::Jabber::OOB::Get {jid url file id} {
 	  -progress [list [namespace current]::Progress $out] \
 	  -command  [list [namespace current]::HttpCmd $jid $out $id]
     } $tmopts} token]} {
-	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok -message \
-	  [FormatTextForMessageBox [::msgcat::mc jamessoobgetfail $url $token]]
+	tk_messageBox -title [mc Error] -icon error -type ok -message \
+	  [FormatTextForMessageBox [mc jamessoobgetfail $url $token]]
 	return
     }
     upvar #0 $token state
 
-    set str "[::msgcat::mc {Writing file}]: [file tail $file]"
+    set str "[mc {Writing file}]: [file tail $file]"
     ::Utils::ProgressWindow $token 1000000 0 -text $str \
       -cancelcmd [list [namespace current]::Cancel $out $token]
 }
@@ -360,7 +360,7 @@ proc ::Jabber::OOB::Progress {out token total current} {
     
     if {[string equal $status "error"]} {
 	set errmsg "[httpex::error $token]"
-	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok -message \
+	tk_messageBox -title [mc Error] -icon error -type ok -message \
 	  [FormatTextForMessageBox "Failed getting url: $errmsg"]
 	::httpex::cleanup $token
 	catch {file delete $locals($out,local)}
@@ -387,8 +387,8 @@ proc ::Jabber::OOB::HttpCmd {jid out id token} {
 
     switch -- $status {
 	timeout {
-	    tk_messageBox -title [::msgcat::mc Timeout] -icon info -type ok \
-	      -message [::msgcat::mc jamessoobtimeout]
+	    tk_messageBox -title [mc Timeout] -icon info -type ok \
+	      -message [mc jamessoobtimeout]
 	}
 	error {
 	    tk_messageBox -title "File transport error" -icon error -type ok \

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UserActions.tcl,v 1.36 2004-05-13 13:50:22 matben Exp $
+# $Id: UserActions.tcl,v 1.37 2004-07-09 06:26:06 matben Exp $
 
 namespace eval ::UserActions:: {
     
@@ -28,8 +28,8 @@ proc ::UserActions::DoPrintCanvas {wtop} {
 	}
 	windows {
 	    if {!$prefs(printer)} {
-		tk_messageBox -icon error -title [::msgcat::mc {No Printing}] \
-		  -message [::msgcat::mc messprintnoextension]
+		tk_messageBox -icon error -title [mc {No Printing}] \
+		  -message [mc messprintnoextension]
 	    } else {
 		::Windows::Printer::Print $wCan
 	    }
@@ -52,16 +52,16 @@ proc ::UserActions::DoPrintText {wtext args} {
     }
     switch -- $this(platform) {
 	macintosh {
-	    tk_messageBox -icon error -title [::msgcat::mc {No Printing}] \
-	      -message [::msgcat::mc messprintnoextension]
+	    tk_messageBox -icon error -title [mc {No Printing}] \
+	      -message [mc messprintnoextension]
 	}
 	macosx {
 	    ::Mac::MacCarbonPrint::PrintText $wtext
 	}
 	windows {
 	    if {!$prefs(printer)} {
-		tk_messageBox -icon error -title [::msgcat::mc {No Printing}] \
-		  -message [::msgcat::mc messprintnoextension]
+		tk_messageBox -icon error -title [mc {No Printing}] \
+		  -message [mc messprintnoextension]
 	    } else {
 		::Windows::Printer::DoPrintText $wtext
 	    }
@@ -84,8 +84,8 @@ proc ::UserActions::PageSetup {wtop} {
 	}
 	windows {
 	    if {!$prefs(printer)} {
-		tk_messageBox -icon error -title [::msgcat::mc {No Printing}] \
-		  -message [::msgcat::mc messprintnoextension]
+		tk_messageBox -icon error -title [mc {No Printing}] \
+		  -message [mc messprintnoextension]
 	    } else {
 		::Windows::Printer::PageSetup
 	    }
@@ -129,8 +129,8 @@ proc ::UserActions::DoQuit {args} {
     }
     array set argsArr $args
     if {$argsArr(-warning)} {
-	set ans [tk_messageBox -title [::msgcat::mc Quit?] -type yesno  \
-	  -default yes -message [::msgcat::mc messdoquit?]]
+	set ans [tk_messageBox -title [mc Quit?] -type yesno  \
+	  -default yes -message [mc messdoquit?]]
 	if {$ans == "no"} {
 	    return $ans
 	}

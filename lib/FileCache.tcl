@@ -6,7 +6,7 @@
 #
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #
-# $Id: FileCache.tcl,v 1.10 2004-04-09 10:32:26 matben Exp $
+# $Id: FileCache.tcl,v 1.11 2004-07-09 06:26:06 matben Exp $
 # 
 #       The input key can be: 
 #               1) a full url, must be uri encoded 
@@ -397,7 +397,7 @@ proc ::FileCache::InitPrefsHook { } {
 
 proc ::FileCache::BuildPrefsHook {wtree nbframe} {
     
-    $wtree newitem {Whiteboard {File Cache}} -text [::msgcat::mc {File Cache}]
+    $wtree newitem {Whiteboard {File Cache}} -text [mc {File Cache}]
 
     set wpage [$nbframe page {File Cache}]    
     ::FileCache::BuildPage $wpage
@@ -414,38 +414,38 @@ proc ::FileCache::BuildPage {page} {
     set tmpPrefs(mbsize)     [expr wide($prefs(cacheSize)/1e6)]
     
     set pca $page.fr
-    labelframe $pca -text [::msgcat::mc {File Cache}]
+    labelframe $pca -text [mc {File Cache}]
     pack $pca -side top -anchor w -padx 8 -pady 4
-    message $pca.msg -width 300 -text [::msgcat::mc preffilecache]
+    message $pca.msg -width 300 -text [mc preffilecache]
     pack $pca.msg -side top -anchor w -pady 2
 
     set frca $pca.cas
     pack [frame $frca] -fill x -padx 10
-    pack [label $frca.dsk -text "[::msgcat::mc {Disk Cache}]:"] -side left
+    pack [label $frca.dsk -text "[mc {Disk Cache}]:"] -side left
     pack [entry $frca.emb -width 6  \
       -textvariable [namespace current]::tmpPrefs(mbsize)] -side left
-    pack [label $frca.mb -text [::msgcat::mc {MBytes}]] -side left
-    pack [button $frca.bt -padx 12 -text [::msgcat::mc {Clear Disk Cache Now}] \
+    pack [label $frca.mb -text [mc {MBytes}]] -side left
+    pack [button $frca.bt -padx 12 -text [mc {Clear Disk Cache Now}] \
       -command [namespace current]::ClearCache -font $fontS]  \
       -side right 
 
     set frfo $pca.fo
     pack [frame $frfo] -fill x -padx 10
-    pack [label $frfo.fo -text "[::msgcat::mc {Cache folder}]:"] -side left
-    pack [button $frfo.bt -padx 6 -text "[::msgcat::mc {Choose}]..." \
+    pack [label $frfo.fo -text "[mc {Cache folder}]:"] -side left
+    pack [button $frfo.bt -padx 6 -text "[mc {Choose}]..." \
       -command [namespace current]::SetCachePath -padx 12 -font $fontS]  \
       -side right 
     
     
     set pwhen $page.frw
-    labelframe $pwhen -text [::msgcat::mc prefcachecmp]
+    labelframe $pwhen -text [mc prefcachecmp]
     pack $pwhen -side top -anchor w -padx 8 -pady 4
     set frw $pwhen.cas
     pack [frame $frw] -side left -padx 16 -pady 2
     foreach  \
       val {always       launch             never}   \
       txt {{Every time} {Once per session} {Never}} {
-	radiobutton $frw.$val -text [::msgcat::mc $txt]   \
+	radiobutton $frw.$val -text [mc $txt]   \
 	  -variable [namespace current]::tmpPrefs(checkCache) -value $val
 	grid $frw.$val -sticky w
     }
@@ -454,7 +454,7 @@ proc ::FileCache::BuildPage {page} {
 proc ::FileCache::SetCachePath { } {
     global  this prefs
     
-    set dir [tk_chooseDirectory -title [::msgcat::mc {Pick Cache Folder}] \
+    set dir [tk_chooseDirectory -title [mc {Pick Cache Folder}] \
       -initialdir $prefs(incomingPath) -mustexist 1]
     if {$dir != ""} {
 	set prefs(incomingPath) $dir

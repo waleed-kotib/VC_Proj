@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasCmd.tcl,v 1.1 2004-06-06 06:41:31 matben Exp $
+# $Id: CanvasCmd.tcl,v 1.2 2004-07-09 06:26:06 matben Exp $
 
 package provide CanvasCmd 1.0
 
@@ -188,7 +188,7 @@ proc ::CanvasCmd::SavePostscript {wtop} {
     if {$prefs(haveSaveFiletypes)} {
 	lappend opts -filetypes $typelist
     }
-    set ans [eval {tk_getSaveFile -title [::msgcat::mc {Save As}]  \
+    set ans [eval {tk_getSaveFile -title [mc {Save As}]  \
       -filetypes $typelist -defaultextension ".ps"  \
       -initialfile "canvas.ps"} $opts]
     if {[string length $ans] > 0} {
@@ -422,7 +422,7 @@ proc ::CanvasCmd::DoPutCanvas {w {toIPnum all}} {
     # Save canvas to temporary file.
     if {[catch [list open $absFilePath w] fileId]} {
 	tk_messageBox -message [FormatTextForMessageBox  \
-	  [::msgcat::mc messfailopwrite $tmpFile $fileId]] \
+	  [mc messfailopwrite $tmpFile $fileId]] \
 	  -icon error -type ok
     }
     ::CanvasFile::CanvasToFile $w $fileId $absFilePath
@@ -430,7 +430,7 @@ proc ::CanvasCmd::DoPutCanvas {w {toIPnum all}} {
 
     if {[catch [list open $absFilePath r] fileId]} {
 	tk_messageBox -message [FormatTextForMessageBox  \
-	  [::msgcat::mcset en messfailopread $tmpFile $fileId]] \
+	  [mcset en messfailopread $tmpFile $fileId]] \
 	  -icon error -type ok
     }
     

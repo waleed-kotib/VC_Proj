@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.33 2004-05-13 13:50:22 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.34 2004-07-09 06:26:06 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -176,7 +176,7 @@ proc ::PreferencesUtils::SaveToFile { } {
     set tmpFile $prefs(userPrefsFilePath).tmp
     if {[catch {open $tmpFile w} fid]} {
 	tk_messageBox -icon error -type ok -message \
-	  [FormatTextForMessageBox [::msgcat::mc messerrpreffile $tmpFile]]
+	  [FormatTextForMessageBox [mc messerrpreffile $tmpFile]]
 	return
     }
     

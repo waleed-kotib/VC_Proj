@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: FilePrefs.tcl,v 1.1 2004-06-06 06:41:31 matben Exp $
+# $Id: FilePrefs.tcl,v 1.2 2004-07-09 06:26:06 matben Exp $
 
 package provide FilePrefs 1.0
 
@@ -50,7 +50,7 @@ proc ::FilePrefs::InitPrefsHook { } {
 
 proc ::FilePrefs::BuildPrefsHook {wtree nbframe} {
     
-    $wtree newitem {Whiteboard {File Mappings}} -text [::msgcat::mc {File Mappings}]
+    $wtree newitem {Whiteboard {File Mappings}} -text [mc {File Mappings}]
     
     # File Mappings ------------------------------------------------------------
     set wpage [$nbframe page {File Mappings}]    
@@ -82,7 +82,7 @@ proc ::FilePrefs::BuildPage {page} {
     
     # Frame for everything inside the labeled container.
     set wcont1 $page.frtop
-    labelframe $wcont1 -text [::msgcat::mc preffmhelp]
+    labelframe $wcont1 -text [mc preffmhelp]
     pack $wcont1 -side top -anchor w -padx 8 -pady 4
     set fr1 [frame $wcont1.fr]
     
@@ -90,7 +90,7 @@ proc ::FilePrefs::BuildPage {page} {
     
     # Make the multi column listbox. 
     # Keep an invisible index column with index as a tag.
-    set colDef [list 0 [::msgcat::mc Description] 0 [::msgcat::mc {Handled By}] 0 ""]
+    set colDef [list 0 [mc Description] 0 [mc {Handled By}] 0 ""]
     set wmclist $fr1.mclist
     
     tablelist::tablelist $wmclist  \
@@ -124,13 +124,13 @@ proc ::FilePrefs::BuildPage {page} {
     # Add, Change, and Remove buttons.
     set frbt [frame $fr1.frbot]
     grid $frbt -row 1 -column 0 -columnspan 2 -sticky nsew -padx 0 -pady 0
-    button $frbt.rem -text [::msgcat::mc Delete]  \
+    button $frbt.rem -text [mc Delete]  \
       -state disabled -padx $xpadbt -font $fontS  \
       -command [list [namespace current]::DeleteAssociation $wmclist]
-    button $frbt.change -text "[::msgcat::mc Edit]..."  \
+    button $frbt.change -text "[mc Edit]..."  \
       -state disabled -padx $xpadbt -font $fontS -command  \
       [list [namespace current]::Inspect $wDlgs(fileAssoc) edit $wmclist]
-    button $frbt.add -text "[::msgcat::mc New]..." -padx $xpadbt -font $fontS \
+    button $frbt.add -text "[mc New]..." -padx $xpadbt -font $fontS \
       -command [list [namespace current]::Inspect .setass new $wmclist -1]
     pack $frbt.rem $frbt.change $frbt.add -side right -padx 10 -pady 5 \
       -fill x -expand 1
@@ -250,7 +250,7 @@ proc ::FilePrefs::Inspect {w doWhat wlist {indSel {}}} {
     }
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox}
-    wm title $w [::msgcat::mc {Inspect Associations}]
+    wm title $w [mc {Inspect Associations}]
     set finishedInspect -1
     
     set fontSB [option get . fontSmallBold {}]
@@ -304,16 +304,16 @@ proc ::FilePrefs::Inspect {w doWhat wlist {indSel {}}} {
     
     # Frame for everything inside the labeled container: "Type of File".
     set wcont1 $w.frtop
-    labelframe $wcont1 -text [::msgcat::mc {Type of File}]
+    labelframe $wcont1 -text [mc {Type of File}]
     pack $wcont1 -in $w.frall -padx 8 -pady 4
     set fr1 [frame $wcont1.fr]
-    label $fr1.x1 -text "[::msgcat::mc Description]:"
+    label $fr1.x1 -text "[mc Description]:"
     entry $fr1.x2 -width 30   \
       -textvariable [namespace current]::textVarDesc
-    label $fr1.x3 -text "[::msgcat::mc {MIME type}]:"
+    label $fr1.x3 -text "[mc {MIME type}]:"
     entry $fr1.x4 -width 30   \
       -textvariable [namespace current]::textVarMime
-    label $fr1.x5 -text "[::msgcat::mc {File suffixes}]:"
+    label $fr1.x5 -text "[mc {File suffixes}]:"
     entry $fr1.x6 -width 30   \
       -textvariable [namespace current]::textVarSuffix
     
@@ -336,15 +336,15 @@ proc ::FilePrefs::Inspect {w doWhat wlist {indSel {}}} {
     
     # Frame for everything inside the labeled container: "Handling".
     set wcont2 $w.frmid
-    labelframe $wcont2 -text [::msgcat::mc Handling]
+    labelframe $wcont2 -text [mc Handling]
     pack $wcont2 -in $w.frall -padx 8 -pady 4
     set fr2 [frame $wcont2.fr]
-    radiobutton $fr2.x1 -text " [::msgcat::mc {Reject receive}]"  \
+    radiobutton $fr2.x1 -text " [mc {Reject receive}]"  \
       -variable [namespace current]::receiveVar -value reject
-    radiobutton $fr2.x2 -text " [::msgcat::mc preffmsave]"  \
+    radiobutton $fr2.x2 -text " [mc preffmsave]"  \
       -variable [namespace current]::receiveVar -value save
     frame $fr2.fr
-    radiobutton $fr2.x3 -text " [::msgcat::mc {Import using}]:  "  \
+    radiobutton $fr2.x3 -text " [mc {Import using}]:  "  \
       -variable [namespace current]::receiveVar -value import
     
     set wMenu [eval {
@@ -353,13 +353,13 @@ proc ::FilePrefs::Inspect {w doWhat wlist {indSel {}}} {
     $wMenu configure -font $fontSB 
     $fr2.opt configure -font $fontSB -highlightthickness 0
     
-    radiobutton $fr2.x8 -text " [::msgcat::mc {Unknown: Prompt user}]"  \
+    radiobutton $fr2.x8 -text " [mc {Unknown: Prompt user}]"  \
       -variable [namespace current]::receiveVar -value ask
     frame $fr2.frcode
-    label $fr2.x4 -text " [::msgcat::mc {File coding}]:"
-    radiobutton $fr2.x5 -text " [::msgcat::mc {As text}]" -anchor w  \
+    label $fr2.x4 -text " [mc {File coding}]:"
+    radiobutton $fr2.x5 -text " [mc {As text}]" -anchor w  \
       -variable [namespace current]::codingVar -value 1
-    radiobutton $fr2.x6 -text " [::msgcat::mc Binary]" -anchor w   \
+    radiobutton $fr2.x6 -text " [mc Binary]" -anchor w   \
       -variable [namespace current]::codingVar -value 0
     
     # If we dont have any registered packages for this MIME, disable this
@@ -385,9 +385,9 @@ proc ::FilePrefs::Inspect {w doWhat wlist {indSel {}}} {
     # Button part
     pack [frame $w.frbot -borderwidth 0] -in $w.frall -fill both  \
       -padx 8 -pady 6
-    button $w.btok -text [::msgcat::mc Save] -default active  \
+    button $w.btok -text [mc Save] -default active  \
       -command [list [namespace current]::SaveThisAss $wlist $indSel]
-    button $w.btcancel -text [::msgcat::mc Cancel]  \
+    button $w.btcancel -text [mc Cancel]  \
       -command "set [namespace current]::finishedInspect 0"
     pack $w.btok $w.btcancel -in $w.frbot -side right -padx 5 -pady 5
     
@@ -432,8 +432,8 @@ proc ::FilePrefs::SaveThisAss {wlist indSel} {
 
     # Check that no fields are empty.
     if {($textVarDesc == "") || ($textVarMime == "") || ($textVarSuffix == "")} {
-	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok  \
-	  -message [::msgcat::mc messfieldsmissing]
+	tk_messageBox -title [mc Error] -icon error -type ok  \
+	  -message [mc messfieldsmissing]
 	return
     }
     

@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: SetupAss.tcl,v 1.23 2004-05-23 13:18:08 matben Exp $
+# $Id: SetupAss.tcl,v 1.24 2004-07-09 06:26:06 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -53,17 +53,17 @@ proc ::Jabber::SetupAss::SetupAss { } {
     
     # Front page.
     set p1 [$su newpage "intro"   \
-      -headtext [::msgcat::mc suheadtxt]]
+      -headtext [mc suheadtxt]]
     pack [frame $p1.fr] -padx 10 -pady 8 -side top -anchor w
-    message $p1.fr.msg1 -width 260 -anchor w -text [::msgcat::mc suintro1]
-    message $p1.fr.msg2 -width 260 -anchor w -text [::msgcat::mc suintro2]
-    message $p1.fr.msg3 -width 260 -anchor w -text [::msgcat::mc suintro3]
+    message $p1.fr.msg1 -width 260 -anchor w -text [mc suintro1]
+    message $p1.fr.msg2 -width 260 -anchor w -text [mc suintro2]
+    message $p1.fr.msg3 -width 260 -anchor w -text [mc suintro3]
     pack $p1.fr.msg1 $p1.fr.msg2 $p1.fr.msg3 -side top -anchor w -fill x -pady 4
     
     # Language catalog.
-    set plang [$su newpage "language" -headtext [::msgcat::mc Language]]
+    set plang [$su newpage "language" -headtext [mc Language]]
     pack [frame $plang.fr] -padx 10 -pady 8 -side top -anchor w
-    message $plang.fr.msg1 -width 260 -text [::msgcat::mc sulang]
+    message $plang.fr.msg1 -width 260 -text [mc sulang]
 
     set langs {}
     foreach f [glob -nocomplain -tails -directory $this(msgcatPath) *.msg] {
@@ -75,7 +75,7 @@ proc ::Jabber::SetupAss::SetupAss { } {
     } else {
 	set locale $prefs(messageLocale)
     }
-    button $plang.fr.def -text [::msgcat::mc Default] -command \
+    button $plang.fr.def -text [mc Default] -command \
       [namespace current]::DefaultLang
     
     pack $plang.fr.msg1 -side top -anchor w -fill x -pady 4
@@ -83,15 +83,15 @@ proc ::Jabber::SetupAss::SetupAss { } {
     pack $plang.fr.def -side top -anchor w -pady 4
     
     # Server.
-    set p2 [$su newpage "server" -headtext [::msgcat::mc {Jabber Server}]]
+    set p2 [$su newpage "server" -headtext [mc {Jabber Server}]]
     pack [frame $p2.fr] -padx 10 -pady 8 -side top -anchor w
     message $p2.fr.msg1 -width 260 -text   \
-      [::msgcat::mc suservmsg]
-    button $p2.fr.bt -text [::msgcat::mc Get] \
+      [mc suservmsg]
+    button $p2.fr.bt -text [mc Get] \
       -command [list [namespace current]::ServersDlg .jsuserv]
     message $p2.fr.msg2 -width 200 -text   \
       "Get list of public and open Jabber servers"
-    label $p2.fr.la -font $fontSB -text "[::msgcat::mc Server]:"
+    label $p2.fr.la -font $fontSB -text "[mc Server]:"
     entry $p2.fr.serv -width 28 -textvariable ${ns}::server \
        -validate key -validatecommand {::Jabber::ValidateDomainStr %S}
     grid $p2.fr.msg1 -sticky n -columnspan 2 -row 0
@@ -101,13 +101,13 @@ proc ::Jabber::SetupAss::SetupAss { } {
     grid $p2.fr.serv -sticky w -column 1 -row 2 -pady 4
     
     # Username & Password.
-    set p3 [$su newpage "username" -headtext [::msgcat::mc {Username & Password}]]
+    set p3 [$su newpage "username" -headtext [mc {Username & Password}]]
     pack [frame $p3.fr] -padx 10 -pady 8 -side top -anchor w
     message $p3.fr.msg1 -width 260 -text   \
-      [::msgcat::mc suusermsg]
-    label $p3.fr.lan  -font $fontSB -text "[::msgcat::mc Username]:"
-    label $p3.fr.lap  -font $fontSB -text "[::msgcat::mc Password]:"
-    label $p3.fr.lap2 -font $fontSB -text "[::msgcat::mc {Retype password}]:"
+      [mc suusermsg]
+    label $p3.fr.lan  -font $fontSB -text "[mc Username]:"
+    label $p3.fr.lap  -font $fontSB -text "[mc Password]:"
+    label $p3.fr.lap2 -font $fontSB -text "[mc {Retype password}]:"
     entry $p3.fr.name -width 20 -textvariable ${ns}::username \
        -validate key -validatecommand {::Jabber::ValidateUsernameStr %S}
     entry $p3.fr.pass -width 20 -textvariable ${ns}::password -show {*} \
@@ -124,20 +124,20 @@ proc ::Jabber::SetupAss::SetupAss { } {
     grid $p3.fr.pass2 -sticky w -column 1 -row 3 -pady 2
 
     # Register?
-    set p4 [$su newpage "register" -headtext [::msgcat::mc Register]]
+    set p4 [$su newpage "register" -headtext [mc Register]]
     pack [frame $p4.fr] -padx 10 -pady 8 -side top -anchor w
     message $p4.fr.msg1 -width 260 -text   \
-      [::msgcat::mc suregmsg]
-    button $p4.fr.btreg -text "  [::msgcat::mc {Register Now}]... "  \
+      [mc suregmsg]
+    button $p4.fr.btreg -text "  [mc {Register Now}]... "  \
       -command [namespace current]::DoRegister
     grid $p4.fr.msg1 -sticky n
     grid $p4.fr.btreg -sticky e -pady 8
 
     # Finish.
-    set p5 [$su newpage "fin" -headtext [::msgcat::mc Finished]]
+    set p5 [$su newpage "fin" -headtext [mc Finished]]
     pack [frame $p5.fr] -padx 10 -pady 8 -side top -anchor w
     message $p5.fr.msg1 -width 260 -text   \
-      [::msgcat::mc sufinmsg]
+      [mc sufinmsg]
     label $p5.fr.piga -image [::Theme::GetImage ladybug]
     grid $p5.fr.msg1 -sticky n
     grid $p5.fr.piga -sticky w
@@ -154,12 +154,12 @@ proc ::Jabber::SetupAss::NextPage {w page} {
     switch -- $page {
 	username {
 	    if {($username == "") || ($password == "")} {
-		tk_messageBox -icon error -title [::msgcat::mc {Empty Fields}] \
-		  -message [::msgcat::mc messsuassfillin] -parent $w
+		tk_messageBox -icon error -title [mc {Empty Fields}] \
+		  -message [mc messsuassfillin] -parent $w
 		return -code 3
 	    } elseif {$password != $password2} {
-		tk_messageBox -icon error -title [::msgcat::mc {Different Passwords}] \
-		  -message [::msgcat::mc messpasswddifferent] -parent $w
+		tk_messageBox -icon error -title [mc {Different Passwords}] \
+		  -message [mc messpasswddifferent] -parent $w
 		set password ""
 		set password2 ""
 		return -code 3
@@ -182,7 +182,7 @@ proc ::Jabber::SetupAss::DefaultLang { } {
 proc ::Jabber::SetupAss::DoClose {w} {
     
     set ans [tk_messageBox -type yesno -parent $w -icon info \
-      -message [FormatTextForMessageBox [::msgcat::mc messsuassclose]]]
+      -message [FormatTextForMessageBox [mc messsuassclose]]]
     if {$ans == "yes"} {
 	destroy $w
     }
@@ -252,10 +252,10 @@ proc ::Jabber::SetupAss::ServersDlg {w} {
     # Button part.
     set wbservbt $w.frall.frbot.btok
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $wbservbt -text [::msgcat::mc Set] -default active \
+    pack [button $wbservbt -text [mc Set] -default active \
       -state disabled -command [list [namespace current]::ServSet $w]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
+    pack [button $frbot.btcancel -text [mc Cancel]  \
       -command [list [namespace current]::ServCancel $w]] \
       -side right -padx 5 -pady 5
     pack $frbot -side bottom -fill both -padx 8 -pady 6
@@ -306,7 +306,7 @@ proc ::Jabber::SetupAss::ServersDlg {w} {
 	  -command [list [namespace current]::ServCommand $w]
     } $tmopts} token]} {
 	destroy $w
-	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok  \
+	tk_messageBox -title [mc Error] -icon error -type ok  \
 	  -message "Failed to obtain list of open Jabber servers from\
 	  \"$url\": $token"
 	return
@@ -385,7 +385,7 @@ proc ::Jabber::SetupAss::ServCommand {w token} {
     
     switch -- $status {
 	timeout {
-	    tk_messageBox -title [::msgcat::mc Timeout] -icon info -type ok \
+	    tk_messageBox -title [mc Timeout] -icon info -type ok \
 	      -message "Timeout while waiting for response."
 	}
 	error {

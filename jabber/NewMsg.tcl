@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.39 2004-06-17 13:24:18 matben Exp $
+# $Id: NewMsg.tcl,v 1.40 2004-07-09 06:26:06 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -152,7 +152,7 @@ proc ::Jabber::NewMsg::Build {args} {
     
     # Toplevel of class NewMsg.
     ::UI::Toplevel $w -class NewMsg -usemacmainmenu 1 -macstyle documentProc
-    wm title $w [::msgcat::mc {New Message}]
+    wm title $w [mc {New Message}]
     
     # Toplevel menu for mac only.
     if {[string match "mac*" $this(platform)]} {
@@ -232,7 +232,7 @@ proc ::Jabber::NewMsg::Build {args} {
     set   frsub $w.frall.frsub
     frame $frsub -borderwidth 0
     pack  $frsub -side top -fill x -padx 6 -pady 0
-    label $frsub.lsub -text "[::msgcat::mc Subject]:" -font $fontSB -anchor e \
+    label $frsub.lsub -text "[mc Subject]:" -font $fontSB -anchor e \
       -takefocus 0
     set   wsubject $frsub.esub
     entry $wsubject -textvariable [namespace current]::locals($w,subject)
@@ -613,8 +613,8 @@ proc ::Jabber::NewMsg::DoSend {w} {
     # Check that still connected to server.
     if {![::Jabber::IsConnected]} {
 	tk_messageBox -type ok -icon error -parent $w \
-	  -title [::msgcat::mc {Not Connected}] \
-	  -message [::msgcat::mc jamessnotconnected]
+	  -title [mc {Not Connected}] \
+	  -message [mc jamessnotconnected]
 	return
     }
     
@@ -625,10 +625,10 @@ proc ::Jabber::NewMsg::DoSend {w} {
 	if {[string length $addr] > 0} {
 	    if {![jlib::jidvalidate $addr]} {
 		if {$locals($w,addrline) > 1} {
-		    set msg [::msgcat::mc jamessskipsendq $addr]
+		    set msg [mc jamessskipsendq $addr]
 		    set type yesnocancel
 		} else {
-		    set msg [::msgcat::mc jamessillformresend $addr]
+		    set msg [mc jamessillformresend $addr]
 		    set type ok
 		}
 		set ans [tk_messageBox -type $type -parent $w \
@@ -649,9 +649,9 @@ proc ::Jabber::NewMsg::DoSend {w} {
     
     # Be sure there are at least one jid.
     if {[llength $addrList] == 0} {
-	tk_messageBox -title [::msgcat::mc {No Address}]  \
+	tk_messageBox -title [mc {No Address}]  \
 	  -icon error -type ok -parent $w \
-	  -message [FormatTextForMessageBox [::msgcat::mc jamessaddrmiss]]
+	  -message [FormatTextForMessageBox [mc jamessaddrmiss]]
 	return
     }
     set wtext $locals($w,wtext)
@@ -693,7 +693,7 @@ proc ::Jabber::NewMsg::SaveMsg {w} {
     variable locals
     
     set wtext $locals($w,wtext)
-    set ans [tk_getSaveFile -title [::msgcat::mc {Save Message}] \
+    set ans [tk_getSaveFile -title [mc {Save Message}] \
       -initialfile Untitled.txt]
     if {[string length $ans]} {
 	set allText [::Text::TransformToPureText $wtext]
@@ -743,11 +743,11 @@ proc ::Jabber::NewMsg::CloseDlg {w} {
     set allText [$wtext get 1.0 "end - 1 char"]
     set doDestroy 0
     if {[string length $allText] > 0} {
-	set ans [tk_messageBox -title [::msgcat::mc {To Send or Not}]  \
+	set ans [tk_messageBox -title [mc {To Send or Not}]  \
 	  -icon warning -type yesnocancel -default "no" -parent $w \
-	  -message [::msgcat::mc jamesssavemsg]]
+	  -message [mc jamesssavemsg]]
 	if {$ans == "yes"} {
-	    set ansFile [tk_getSaveFile -title [::msgcat::mc {Save Message}] \
+	    set ansFile [tk_getSaveFile -title [mc {Save Message}] \
 		-initialfile Untitled.txt]
 	    if {[string length $ansFile] > 0} {
 		set doDestroy 1

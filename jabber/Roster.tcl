@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.71 2004-06-30 08:52:39 matben Exp $
+# $Id: Roster.tcl,v 1.72 2004-07-09 06:26:06 matben Exp $
 
 package provide Roster 1.0
 
@@ -299,7 +299,7 @@ proc ::Jabber::Roster::Build {w} {
     
     # Add root tree dirs.
     foreach gpres $jprefs(treedirs) {
-	eval {$wtree newitem [list $gpres] -dir 1 -text [::msgcat::mc $gpres] \
+	eval {$wtree newitem [list $gpres] -dir 1 -text [mc $gpres] \
 	  -tags head -image $dirImage} $rootOpts
     }
     foreach gpres $jprefs(closedtreedirs) {
@@ -402,8 +402,8 @@ proc ::Jabber::Roster::SendRemove {jidrm} {
     } else {
 	set jid [lindex $selItem end]
     }
-    set ans [tk_messageBox -title [::msgcat::mc {Remove Item}] -message  \
-      [FormatTextForMessageBox [::msgcat::mc jamesswarnremove]]  \
+    set ans [tk_messageBox -title [mc {Remove Item}] -message  \
+      [FormatTextForMessageBox [mc jamesswarnremove]]  \
       -icon warning -type yesno]
     if {[string equal $ans "yes"]} {
 	$jstate(jlib) roster_remove $jid [namespace current]::PushProc
@@ -597,7 +597,7 @@ proc ::Jabber::Roster::Popup {w v x y} {
     foreach {item type cmd} $popMenuDefs(roster,def) {
 	if {[string index $cmd 0] == "@"} {
 	    set mt [menu ${m}.sub${i} -tearoff 0]
-	    set locname [::msgcat::mc $item]
+	    set locname [mc $item]
 	    $m add cascade -label $locname -menu $mt -state disabled
 	    eval [string range $cmd 1 end] $mt
 	    incr i
@@ -608,7 +608,7 @@ proc ::Jabber::Roster::Popup {w v x y} {
 
 	    # Substitute the jid arguments.
 	    set cmd [subst -nocommands $cmd]
-	    set locname [::msgcat::mc $item]
+	    set locname [mc $item]
 	    $m add command -label $locname -command "after 40 $cmd"  \
 	      -state disabled
 	}
@@ -783,7 +783,7 @@ proc ::Jabber::Roster::Clear { } {
 
 proc ::Jabber::Roster::ExitRoster { } {
 
-    ::Jabber::UI::SetStatusMessage [::msgcat::mc jarostupdate]
+    ::Jabber::UI::SetStatusMessage [mc jarostupdate]
     
     # Should perhaps fix the directories of the tree widget, such as
     # appending (#items) for each headline.
@@ -1084,7 +1084,7 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
 	set pending "Subscription Pending"
 	if {![$wtree isitem [list $pending]]} {
 	    $wtree newitem [list $pending] -tags head -dir 1 \
-	      -text [::msgcat::mc $pending]
+	      -text [mc $pending]
 	}
 	eval {$wtree newitem [list $pending $jid]  \
 	  -image $icon -tags $mjid} $itemOpts
@@ -1225,7 +1225,7 @@ proc ::Jabber::Roster::NewOrEditItem {which args} {
     }
     if {$isTransport} {
 	tk_messageBox -icon info -title "Transport Info"  \
-	  -message [::msgcat::mc jamessowntrpt $subtype $jid $subscription]
+	  -message [mc jamessowntrpt $subtype $jid $subscription]
 	set ans cancel
     } else {
 	set ans [eval {::Jabber::Roster::NewOrEditDlg $which} $args]
@@ -1272,13 +1272,13 @@ proc ::Jabber::Roster::NewOrEditDlg {which args} {
     
     # Initialize dialog variables.
     if {[string equal $which "new"]} {
-	wm title $w [::msgcat::mc {Add New User}]
+	wm title $w [mc {Add New User}]
 	set jid "userName@$jserver(this)"
 	set subscribe 1
 	set unsubscribe 0
 	set subscription "none"
     } else {
-	wm title $w [::msgcat::mc {Edit User}]
+	wm title $w [mc {Edit User}]
 	if {[info exists argsArr(-jid)]} {
 	    set jid $argsArr(-jid)
 	} else {
@@ -1317,9 +1317,9 @@ proc ::Jabber::Roster::NewOrEditDlg {which args} {
     pack  $w.frall -fill both -expand 1 -ipadx 12 -ipady 4
     
     if {[string equal $which "new"]} {
-	set msg [::msgcat::mc jarostadd]
+	set msg [mc jarostadd]
     } elseif {[string equal $which "edit"]} {
-	set msg [::msgcat::mc jarostset $jid]
+	set msg [mc jarostset $jid]
     }
     label $w.frall.msg -wraplength 300 -justify left -text $msg
     pack  $w.frall.msg -side top -fill both -expand 1 -padx 10
@@ -1331,16 +1331,16 @@ proc ::Jabber::Roster::NewOrEditDlg {which args} {
     set wtrptmenu $wtrptpop.menu
     set wjid $frmid.ejid
     
-    label $frjid.ljid -text "[::msgcat::mc {Jabber user id}]:"  \
+    label $frjid.ljid -text "[mc {Jabber user id}]:"  \
       -font $fontSB -anchor e
     label $wtrptpop -bd 2 -relief raised -image [::UI::GetIcon popupbt]
     pack $frjid.ljid $wtrptpop -side left
     
     entry $wjid -width 24 -textvariable $token\(jid)
-    label $frmid.lnick -text "[::msgcat::mc {Nick name}]:" -font $fontSB \
+    label $frmid.lnick -text "[mc {Nick name}]:" -font $fontSB \
       -anchor e
     entry $frmid.enick -width 24 -textvariable $token\(name)
-    label $frmid.lgroups -text "[::msgcat::mc Group]:" -font $fontSB -anchor e
+    label $frmid.lgroups -text "[mc Group]:" -font $fontSB -anchor e
     
     ::combobox::combobox $frmid.egroups -width 12  \
       -textvariable $token\(usersGroup)
@@ -1354,29 +1354,29 @@ proc ::Jabber::Roster::NewOrEditDlg {which args} {
 	  [list [namespace current]::TrptPopupRelease %W]
     }    
     if {[string equal $which "new"]} {
-	checkbutton $frmid.csubs -text "  [::msgcat::mc jarostsub]"  \
+	checkbutton $frmid.csubs -text "  [mc jarostsub]"  \
 	  -variable $token\(subscribe)
     } else {
 	
 	# Give user an opportunity to subscribe/unsubscribe other jid.
 	switch -- $subscription {
 	    from - none {
-		checkbutton $frmid.csubs -text "  [::msgcat::mc jarostsub]"  \
+		checkbutton $frmid.csubs -text "  [mc jarostsub]"  \
 		  -variable $token\(subscribe)
 	    }
 	    both - to {
-		checkbutton $frmid.csubs -text "  [::msgcat::mc jarostunsub]" \
+		checkbutton $frmid.csubs -text "  [mc jarostunsub]" \
 		  -variable $token\(unsubscribe)
 	    }
 	}
 	
 	# Present subscription.
 	set frsub $frmid.frsub
-	label $frmid.lsub -text "[::msgcat::mc Subscription]:"  \
+	label $frmid.lsub -text "[mc Subscription]:"  \
 	  -font $fontSB -anchor e
 	frame $frsub
 	foreach val {none to from both} txt {None To From Both} {
-	    radiobutton ${frsub}.${val} -text [::msgcat::mc $txt]  \
+	    radiobutton ${frsub}.${val} -text [mc $txt]  \
 	      -state disabled  \
 	      -variable $token\(subscription) -value $val	      
 	    pack $frsub.$val -side left -padx 4
@@ -1385,9 +1385,9 @@ proc ::Jabber::Roster::NewOrEditDlg {which args} {
 	# vCard button.
 	set frvcard $frmid.vcard
 	frame $frvcard
-	pack [label $frvcard.lbl -text "[::msgcat::mc jasubgetvcard]:"  \
+	pack [label $frvcard.lbl -text "[mc jasubgetvcard]:"  \
 	  -font $fontSB] -side left -padx 2
-	pack [button $frvcard.bt -text " [::msgcat::mc {Get vCard}]..."  \
+	pack [button $frvcard.bt -text " [mc {Get vCard}]..."  \
 	  -font $fontS -command [list ::VCard::Fetch other $jid]] \
 	  -side right -padx 2
     }
@@ -1434,15 +1434,15 @@ proc ::Jabber::Roster::NewOrEditDlg {which args} {
     
     # Button part.
     if {[string equal $which "edit"]} {
-	set bttxt [::msgcat::mc Apply]
+	set bttxt [mc Apply]
     } else {
-	set bttxt [::msgcat::mc Add]
+	set bttxt [mc Add]
     }
     set frbot [frame $w.frall.frbot -borderwidth 0]
     pack [button $frbot.btok -text $bttxt -default active \
       -command [list [namespace current]::EditSet $token]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
+    pack [button $frbot.btcancel -text [mc Cancel]  \
       -command [list [namespace current]::Cancel $token]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
@@ -1614,7 +1614,7 @@ proc ::Jabber::Roster::EditSet {token} {
     # In any case the jid should be well formed.
     if {![jlib::jidvalidate $jid]} {
 	set ans [tk_messageBox -message [FormatTextForMessageBox  \
-	  [::msgcat::mc jamessbadjid $jid]] \
+	  [mc jamessbadjid $jid]] \
 	  -icon error -type yesno]
 	if {[string equal $ans "no"]} {
 	    return
@@ -1628,7 +1628,7 @@ proc ::Jabber::Roster::EditSet {token} {
 	set ind [lsearch -exact $allUsers $jid]
 	if {$ind >= 0} {
 	    set ans [tk_messageBox -message [FormatTextForMessageBox  \
-	      [::msgcat::mc jamessalreadyinrost $jid]] \
+	      [mc jamessalreadyinrost $jid]] \
 	      -icon error -type yesno]
 	    if {[string equal $ans "no"]} {
 		return
@@ -1647,7 +1647,7 @@ proc ::Jabber::Roster::EditSet {token} {
 		    
 		    # Seems we are not registered.
 		    set ans [tk_messageBox -type yesno -icon error  \
-		      -message [::msgcat::mc jamessaddforeign $host]]
+		      -message [mc jamessaddforeign $host]]
 		    if {$ans == "yes"} {
 			set didRegister [::Jabber::GenRegister::BuildRegister  \
 			  -server $host -autoget 1]
@@ -1716,7 +1716,7 @@ proc ::Jabber::Roster::EditSetCommand {jid type args} {
     if {[string equal $type "error"]} {
 	foreach {errcode errmsg} [lindex $args 0] break
 	tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
-	  [::msgcat::mc jamessfailsetnick $jid $errcode $errmsg]]
+	  [mc jamessfailsetnick $jid $errcode $errmsg]]
     }	
 }
 
@@ -1872,7 +1872,7 @@ proc ::Jabber::Roster::DirectedPresenceDlg {jid} {
     set w $wDlgs(jdirpres)$uid
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document closeBox}
-    wm title $w [::msgcat::mc {Set Directed Presence}]
+    wm title $w [mc {Set Directed Presence}]
     set state(finished) -1
     set state(w)        $w
     set state(jid)      $jid
@@ -1884,18 +1884,18 @@ proc ::Jabber::Roster::DirectedPresenceDlg {jid} {
     pack  $w.frall -fill both -expand 1
 
     label $w.frall.lmsg -wraplength 200 -justify left -text  \
-      [::msgcat::mc jadirpresmsg $jid]
+      [mc jadirpresmsg $jid]
     pack  $w.frall.lmsg -side top -anchor w -padx 4 -pady 1
     
     set fr $w.frall.fstat
     pack [frame $fr -bd 0] -side top -fill x
-    pack [label $fr.l -text "[::msgcat::mc Status]:"] -side left -padx 8
+    pack [label $fr.l -text "[mc Status]:"] -side left -padx 8
     set wmb $fr.mb
     ::Jabber::Roster::BuildPresenceMenuButton2 $wmb $token\(status)
     pack $wmb -side left -padx 2 -pady 2
     
     # Any status message.   
-    pack [label $w.frall.lstat -text "[::msgcat::mc {Status message}]:"]  \
+    pack [label $w.frall.lstat -text "[mc {Status message}]:"]  \
       -side top -anchor w -padx 8 -pady 2
     set wtext $w.frall.txt
     text $wtext -width 40 -height 2 -wrap word
@@ -1904,10 +1904,10 @@ proc ::Jabber::Roster::DirectedPresenceDlg {jid} {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btok -text [::msgcat::mc Set] -default active \
+    pack [button $frbot.btok -text [mc Set] -default active \
       -command [list [namespace current]::SetDirectedPresence $token]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
+    pack [button $frbot.btcancel -text [mc Cancel]  \
       -command [list destroy $w]] \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
@@ -2257,7 +2257,7 @@ proc ::Jabber::Roster::InitPrefsHook { } {
 
 proc ::Jabber::Roster::BuildPrefsHook {wtree nbframe} {
     
-    $wtree newitem {Jabber Roster} -text [::msgcat::mc Roster]
+    $wtree newitem {Jabber Roster} -text [mc Roster]
         
     # Roster page ----------------------------------------------------------
     set wpage [$nbframe page {Roster}]
@@ -2274,16 +2274,16 @@ proc ::Jabber::Roster::BuildPageRoster {page} {
 	set tmpJPrefs(rost,$key) $jprefs(rost,$key)
     }
 
-    checkbutton $page.rmifunsub -text " [::msgcat::mc prefrorm]"  \
+    checkbutton $page.rmifunsub -text " [mc prefrorm]"  \
       -variable [namespace current]::tmpJPrefs(rost,rmIfUnsub)
-    checkbutton $page.allsubno -text " [::msgcat::mc prefroallow]"  \
+    checkbutton $page.allsubno -text " [mc prefroallow]"  \
       -variable [namespace current]::tmpJPrefs(rost,allowSubNone)
-    checkbutton $page.clrout -text " [::msgcat::mc prefroclr]"  \
+    checkbutton $page.clrout -text " [mc prefroclr]"  \
       -variable [namespace current]::tmpJPrefs(rost,clrLogout)
-    checkbutton $page.dblclk -text " [::msgcat::mc prefrochat]" \
+    checkbutton $page.dblclk -text " [mc prefrochat]" \
       -variable [namespace current]::tmpJPrefs(rost,dblClk)  \
       -onvalue chat -offvalue normal
-    checkbutton $page.sysicons -text " [::msgcat::mc prefrosysicons]" \
+    checkbutton $page.sysicons -text " [mc prefrosysicons]" \
       -variable [namespace current]::tmpJPrefs(rost,haveIMsysIcons)
     
     pack $page.rmifunsub $page.allsubno $page.clrout $page.dblclk  \

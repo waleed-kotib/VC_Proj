@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: History.tcl,v 1.2 2004-04-30 12:58:45 matben Exp $
+# $Id: History.tcl,v 1.3 2004-07-09 06:26:05 matben Exp $
 
 package require uriencode
 
@@ -62,9 +62,9 @@ proc ::History::BuildHistory {jid args} {
     
     array set argsArr [list  \
       -class        History  \
-      -headtitle    "[::msgcat::mc Date]:" \
+      -headtitle    "[mc Date]:" \
       -tagscommand  ""       \
-      -title        "[::msgcat::mc History]: $jid"  \
+      -title        "[mc History]: $jid"  \
       ]
     array set argsArr $args
     
@@ -82,12 +82,12 @@ proc ::History::BuildHistory {jid args} {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btclose -text [::msgcat::mc Close] \
+    pack [button $frbot.btclose -text [mc Close] \
       -command [list destroy $w]] -side right -padx 5 -pady 5
-    pack [button $frbot.btclear -text [::msgcat::mc Clear]  \
+    pack [button $frbot.btclear -text [mc Clear]  \
       -command [list [namespace current]::ClearHistory $jid $wtext]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btprint -text [::msgcat::mc Print]  \
+    pack [button $frbot.btprint -text [mc Print]  \
       -command [list [namespace current]::PrintHistory $wtext]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side bottom -fill x -padx 8 -pady 6

@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: P2PNet.tcl,v 1.1 2004-05-06 13:37:51 matben Exp $
+# $Id: P2PNet.tcl,v 1.2 2004-07-09 06:26:06 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -203,7 +203,7 @@ proc ::P2PNet::OpenConnection {w} {
     pack [button $w.btconn -text "Connect" -default active  \
       -command [namespace current]::PushBtConnect]  \
       -in $w.frbot -side right -padx 5 -pady 5
-    pack [button $w.btcancel -text [::msgcat::mc Cancel]   \
+    pack [button $w.btcancel -text [mc Cancel]   \
       -command "destroy $w"]  \
       -in $w.frbot -side right -padx 5 -pady 5
     pack $w.frbot -side top -fill both -expand 1 -in $w.frall  \
@@ -342,7 +342,7 @@ proc ::P2PNet::DoConnect {toNameOrNum toPort {propagateSizeToClients 1}} {
 
     if {$res} {
 	tk_messageBox -icon error -type ok -parent $wDlgs(mainwb) -message  \
-	  [FormatTextForMessageBox [::msgcat::mc messfailedsock $errorCode]]
+	  [FormatTextForMessageBox [mc messfailedsock $errorCode]]
 	::WB::SetStatusMessage $wDlgs(mainwb) {}
 	::WB::StartStopAnimatedWaveOnMain 0
 	update idletasks
@@ -407,9 +407,9 @@ proc ::P2PNet::WhenSocketOpensInits {nameOrIP server remoteServPort \
     
     ::WB::StartStopAnimatedWaveOnMain 0
     if {[eof $server]} {
-	::WB::SetStatusMessage $wDlgs(mainwb) [::msgcat::mc messeofconnect]
+	::WB::SetStatusMessage $wDlgs(mainwb) [mc messeofconnect]
 	tk_messageBox -icon error -type ok -parent $wDlgs(mainwb) -message  \
-	  [FormatTextForMessageBox [::msgcat::mc messeofconnect]]	  
+	  [FormatTextForMessageBox [mc messeofconnect]]	  
 	return
     }
     
@@ -459,8 +459,8 @@ proc ::P2PNet::WhenSocketOpensInits {nameOrIP server remoteServPort \
 	puts $server [list "IDENTITY:" $prefs(thisServPort) $utagPref $this(username)]
 	puts $server "IPS CONNECTED: $listIPandPort"
     }]} {
-	tk_messageBox -type ok -title [::msgcat::mc {Network Error}] -icon error -message \
-	  [FormatTextForMessageBox [::msgcat::mc messfailconnect $nameOrIP]]
+	tk_messageBox -type ok -title [mc {Network Error}] -icon error -message \
+	  [FormatTextForMessageBox [mc messfailconnect $nameOrIP]]
 	return
     }
     
@@ -576,7 +576,7 @@ proc ::P2PNet::Kill {sock} {
     variable killerId    
 
     catch {close $sock}
-    set statMess [::msgcat::mc messtimeout]
+    set statMess [mc messtimeout]
     ::WB::SetStatusMessage $wDlgs(mainwb) $statMess
     ::WB::StartStopAnimatedWaveOnMain 0
     if {[info exists killerId($sock)]} {

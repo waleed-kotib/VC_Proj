@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.23 2004-07-02 14:08:02 matben Exp $
+# $Id: Register.tcl,v 1.24 2004-07-09 06:26:06 matben Exp $
 
 package provide Register 1.0
 
@@ -55,7 +55,7 @@ proc ::Jabber::Register::Register {args} {
 
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox}
-    wm title $w [::msgcat::mc {Register New Account}]
+    wm title $w [mc {Register New Account}]
     
     set fontSB [option get . fontSmallBold {}]
     
@@ -63,35 +63,35 @@ proc ::Jabber::Register::Register {args} {
     frame $w.frall -borderwidth 1 -relief raised
     pack  $w.frall -fill both -expand 1 -ipadx 12 -ipady 4
     
-    ::headlabel::headlabel $w.frall.head -text [::msgcat::mc {New Account}]
+    ::headlabel::headlabel $w.frall.head -text [mc {New Account}]
     pack $w.frall.head -side top -fill both -expand 1
     message $w.frall.msg -width 260  \
-      -text [::msgcat::mc janewaccount]
+      -text [mc janewaccount]
     pack $w.frall.msg -side top -fill both -expand 1
     
     # Entries etc.
     set frmid [frame $w.frall.frmid -borderwidth 0]
-    label $frmid.lserv -text "[::msgcat::mc {Jabber server}]:"  \
+    label $frmid.lserv -text "[mc {Jabber server}]:"  \
       -font $fontSB -anchor e
     entry $frmid.eserv -width 22    \
       -textvariable [namespace current]::server -validate key  \
       -validatecommand {::Jabber::ValidateDomainStr %S}
-    label $frmid.luser -text "[::msgcat::mc Username]:" -font $fontSB  \
+    label $frmid.luser -text "[mc Username]:" -font $fontSB  \
       -anchor e
     entry $frmid.euser -width 22   \
       -textvariable [namespace current]::username -validate key  \
       -validatecommand {::Jabber::ValidateUsernameStr %S}
-    label $frmid.lpass -text "[::msgcat::mc Password]:" -font $fontSB  \
+    label $frmid.lpass -text "[mc Password]:" -font $fontSB  \
       -anchor e
     entry $frmid.epass -width 22  -show {*}  \
       -textvariable [namespace current]::password -validate key  \
       -validatecommand {::Jabber::ValidatePasswdChars %S}
-    label $frmid.lpass2 -text "[::msgcat::mc {Retype password}]:" -font $fontSB  \
+    label $frmid.lpass2 -text "[mc {Retype password}]:" -font $fontSB  \
       -anchor e
     entry $frmid.epass2 -width 22   \
       -textvariable [namespace current]::password2 -validate key  \
       -validatecommand {::Jabber::ValidatePasswdChars %S} -show {*}
-    checkbutton $frmid.cssl -text "  [::msgcat::mc {Use SSL for security}]"  \
+    checkbutton $frmid.cssl -text "  [mc {Use SSL for security}]"  \
       -variable [namespace current]::ssl
     
     grid $frmid.lserv  -column 0 -row 0 -sticky e
@@ -108,10 +108,10 @@ proc ::Jabber::Register::Register {args} {
 
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btok -text [::msgcat::mc New] -default active \
+    pack [button $frbot.btok -text [mc New] -default active \
       -command [list [namespace current]::OK $w]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
+    pack [button $frbot.btcancel -text [mc Cancel]  \
       -command [list [namespace current]::Cancel $w]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
@@ -144,8 +144,8 @@ proc ::Jabber::Register::OK {w} {
     variable password2
     
     if {$password != $password2} {
-	tk_messageBox -icon error -title [::msgcat::mc {Different Passwords}] \
-	  -message [::msgcat::mc messpasswddifferent] -parent $w
+	tk_messageBox -icon error -title [mc {Different Passwords}] \
+	  -message [mc messpasswddifferent] -parent $w
 	set password  ""
 	set password2 ""
     } else {
@@ -186,7 +186,7 @@ proc ::Jabber::Register::DoRegister {w} {
 	if {[string length $what] <= 1} {
 	    tk_messageBox -icon error -type ok -parent [winfo toplevel $w] \
 	      -message [FormatTextForMessageBox \
-	      [::msgcat::mc jamessnamemissing $name]]
+	      [mc jamessnamemissing $name]]
 	    return
 	}
 	
@@ -202,7 +202,7 @@ proc ::Jabber::Register::DoRegister {w} {
 	    }
 	} err]} {
 	    tk_messageBox -icon error -type ok -message [FormatTextForMessageBox  \
-	      [::msgcat::mc jamessillegalchar $name $what]]
+	      [mc jamessillegalchar $name $what]]
 	    return
 	}
     }    
@@ -220,11 +220,11 @@ proc ::Jabber::Register::ConnectCB {status msg} {
     switch $status {
 	error {
 	    tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
-	      [::msgcat::mc jamessnosocket $ip $msg]]
+	      [mc jamessnosocket $ip $msg]]
 	}
 	timeout {
 	    tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
-	      [::msgcat::mc jamesstimeoutserver $server]]
+	      [mc jamesstimeoutserver $server]]
 	}
 	default {
 	    # Go ahead...
@@ -232,7 +232,7 @@ proc ::Jabber::Register::ConnectCB {status msg} {
 		::Jabber::Login::InitStream $server \
 		  [namespace current]::SendRegister
 	    } err]} {
-		tk_messageBox -icon error -title [::msgcat::mc {Open Failed}] \
+		tk_messageBox -icon error -title [mc {Open Failed}] \
 		  -type ok -message [FormatTextForMessageBox $err]
 	    }
 	}
@@ -278,11 +278,11 @@ proc ::Jabber::Register::SendRegisterCB {jlibName type theQuery} {
 	set errcode [lindex $theQuery 0]
 	set errmsg [lindex $theQuery 1]
 	if {$errcode == 409} {
-	    set msg [::msgcat::mc jamessregerrinuse $errmsg]
+	    set msg [mc jamessregerrinuse $errmsg]
 	} else {
-	    set msg [::msgcat::mc jamessregerr $errmsg]
+	    set msg [mc jamessregerr $errmsg]
 	}
-	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
+	tk_messageBox -title [mc Error] -icon error -type ok \
 	  -message [FormatTextForMessageBox $msg]
     } else {
 
@@ -297,7 +297,7 @@ proc ::Jabber::Register::SendRegisterCB {jlibName type theQuery} {
 	  [namespace current]::AuthorizeCB -streamid $streamid -digest 1
     } else {
 	tk_messageBox -icon info -type ok -message [FormatTextForMessageBox \
-	  [::msgcat::mc jamessregisterok $server]]
+	  [mc jamessregisterok $server]]
     
 	# Disconnect. This should reset both wrapper and XML parser!
 	# Beware: we are in the middle of a callback from the xml parser,
@@ -315,7 +315,7 @@ proc ::Jabber::Register::AuthorizeCB {type msg} {
     ::Debug 2 "::Jabber::Register::AuthorizeCB type=$type"
     
     if {[string equal $type "error"]} {
-	tk_messageBox -icon error -type ok -title [::msgcat::mc Error]  \
+	tk_messageBox -icon error -type ok -title [mc Error]  \
 	  -message [FormatTextForMessageBox $msg]
     } else {
 	
@@ -323,7 +323,7 @@ proc ::Jabber::Register::AuthorizeCB {type msg} {
 	::Jabber::Login::SetStatus
 	set jid [jlib::joinjid $username $server $resource]
 	tk_messageBox -icon info -type ok -message [FormatTextForMessageBox \
-	  [::msgcat::mc jamessregloginok $jid]]
+	  [mc jamessregloginok $jid]]
     }
 }
 
@@ -347,9 +347,9 @@ proc ::Jabber::Register::Remove {{jid {}}} {
     set ans "yes"
     if {$jid == ""} {
 	set jid $jserver(this)
-	set ans [tk_messageBox -icon warning -title [::msgcat::mc Unregister] \
+	set ans [tk_messageBox -icon warning -title [mc Unregister] \
 	  -type yesno -default no -message [FormatTextForMessageBox \
-	  [::msgcat::mc jamessremoveaccount]]]
+	  [mc jamessremoveaccount]]]
     }
     if {$ans == "yes"} {
 	
@@ -369,13 +369,13 @@ proc ::Jabber::Register::RemoveCallback {jid jlibName type theQuery} {
     
     if {[string equal $type "error"]} {
 	foreach {errcode errmsg} $theQuery break
-	tk_messageBox -icon error -title [::msgcat::mc Unregister] -type ok  \
+	tk_messageBox -icon error -title [mc Unregister] -type ok  \
 	  -message [FormatTextForMessageBox \
-	  [::msgcat::mc jamesserrunreg $jid $errcode $errmsg]]
+	  [mc jamesserrunreg $jid $errcode $errmsg]]
     } else {
-	tk_messageBox -icon info -title [::msgcat::mc Unregister] -type ok  \
+	tk_messageBox -icon info -title [mc Unregister] -type ok  \
 	  -message [FormatTextForMessageBox \
-	  [::msgcat::mc jamessokunreg $jid]]
+	  [mc jamessokunreg $jid]]
     }
 }
 
@@ -419,7 +419,7 @@ proc ::Jabber::GenRegister::BuildRegister {args} {
     array set argsArr $args
     
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
-    wm title $w [::msgcat::mc {Register Service}]
+    wm title $w [mc {Register Service}]
     set wtop $w
     
     set fontSB [option get . fontSmallBold {}]
@@ -428,11 +428,11 @@ proc ::Jabber::GenRegister::BuildRegister {args} {
     frame $w.frall -borderwidth 1 -relief raised
     pack  $w.frall -fill both -expand 1 -ipadx 12 -ipady 4
     message $w.frall.msg -width 280 -text  \
-      [::msgcat::mc jaregmsg] -anchor w -justify left
+      [mc jaregmsg] -anchor w -justify left
     pack $w.frall.msg -side top -fill x -anchor w -padx 4 -pady 4
     set frtop $w.frall.top
     pack [frame $frtop] -side top -expand 0 -anchor w -padx 10
-    label $frtop.lserv -text "[::msgcat::mc {Service server}]:" -font $fontSB
+    label $frtop.lserv -text "[mc {Service server}]:" -font $fontSB
     
     # Get all (browsed) services that support registration.
     set regServers [::Jabber::JlibCmd service getjidsfor "register"]
@@ -449,7 +449,7 @@ proc ::Jabber::GenRegister::BuildRegister {args} {
 	set server $argsArr(-server)
 	$wcomboserver configure -state disabled
     }
-    label $frtop.ldesc -text "[::msgcat::mc Specifications]:" -font $fontSB
+    label $frtop.ldesc -text "[mc Specifications]:" -font $fontSB
     label $frtop.lstat -textvariable [namespace current]::stattxt
 
     grid $frtop.lserv -column 0 -row 0 -sticky e
@@ -462,13 +462,13 @@ proc ::Jabber::GenRegister::BuildRegister {args} {
     set wsearrows $frbot.arr
     set wbtregister $frbot.btenter
     set wbtget $frbot.btget
-    pack [button $wbtget -text [::msgcat::mc Get] -default active \
+    pack [button $wbtget -text [mc Get] -default active \
       -command [namespace current]::Get]  \
       -side right -padx 5 -pady 5
-    pack [button $wbtregister -text [::msgcat::mc Register] -state disabled \
+    pack [button $wbtregister -text [mc Register] -state disabled \
       -command [namespace current]::DoRegister]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
+    pack [button $frbot.btcancel -text [mc Cancel]  \
       -command [list [namespace current]::Cancel $w]]  \
       -side right -padx 5 -pady 5
     pack [::chasearrows::chasearrows $wsearrows -size 16] \
@@ -480,7 +480,7 @@ proc ::Jabber::GenRegister::BuildRegister {args} {
 
     if {$UItype == 0} {
 	set wfr $w.frall.frlab
-	labelframe $wfr -text [::msgcat::mc Specifications]
+	labelframe $wfr -text [mc Specifications]
 	pack $wfr -side top -fill both -padx 2 -pady 2
 	
 	set wbox $wfr.box
@@ -498,7 +498,7 @@ proc ::Jabber::GenRegister::BuildRegister {args} {
 	pack $wbox -side top -fill both -expand 1 -padx 8 -pady 4
     }
     
-    set stattxt "-- [::msgcat::mc jasearchwait] --"
+    set stattxt "-- [mc jasearchwait] --"
     wm minsize $w 300 300
 	
     # Grab and focus.
@@ -546,7 +546,7 @@ proc ::Jabber::GenRegister::Simple {w args} {
     
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox}
-    wm title $w [::msgcat::mc {Register Service}]
+    wm title $w [mc {Register Service}]
     set wtop $w
     
     set fontSB [option get . fontSmallBold {}]
@@ -555,11 +555,11 @@ proc ::Jabber::GenRegister::Simple {w args} {
     frame $w.frall -borderwidth 1 -relief raised
     pack  $w.frall -fill both -expand 1 -ipadx 12 -ipady 4
     message $w.frall.msg -width 240 -text  \
-      [::msgcat::mc jaregmsg]
+      [mc jaregmsg]
     pack $w.frall.msg -side top -fill x -anchor w -padx 4 -pady 4
     set frtop $w.frall.top
     pack [frame $frtop] -side top -fill x
-    label $frtop.lserv -text "[::msgcat::mc {Service server}]:" -font $fontSB
+    label $frtop.lserv -text "[mc {Service server}]:" -font $fontSB
     
     # Get all (browsed) services that support registration.
     set regServers [::Jabber::JlibCmd service getjidsfor "register"]
@@ -579,12 +579,12 @@ proc ::Jabber::GenRegister::Simple {w args} {
     grid $frtop.lserv -column 0 -row 0 -sticky e
     grid $wcomboserver -column 1 -row 0 -sticky ew
     
-    label $frtop.luser -text "[::msgcat::mc Username]:" -font $fontSB \
+    label $frtop.luser -text "[mc Username]:" -font $fontSB \
       -anchor e
     entry $frtop.euser -width 26   \
       -textvariable [namespace current]::username -validate key  \
       -validatecommand {::Jabber::ValidateUsernameStr %S}
-    label $frtop.lpass -text "[::msgcat::mc Password]:" -font $fontSB \
+    label $frtop.lpass -text "[mc Password]:" -font $fontSB \
       -anchor e
     entry $frtop.epass -width 26   \
       -textvariable [namespace current]::password -validate key \
@@ -598,10 +598,10 @@ proc ::Jabber::GenRegister::Simple {w args} {
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
     set wbtregister $frbot.btenter
-    pack [button $wbtregister -text [::msgcat::mc Register] \
+    pack [button $wbtregister -text [mc Register] \
       -default active -command [namespace current]::DoSimple]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
+    pack [button $frbot.btcancel -text [mc Cancel]  \
       -command [list [namespace current]::Cancel $w]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
@@ -638,12 +638,12 @@ proc ::Jabber::GenRegister::Get { } {
     # Verify.
     if {[string length $server] == 0} {
 	tk_messageBox -type ok -icon error  \
-	  -message [::msgcat::mc jamessregnoserver]
+	  -message [mc jamessregnoserver]
 	return
     }	
     $wcomboserver configure -state disabled
     $wbtget configure -state disabled
-    set stattxt "-- [::msgcat::mc jawaitserver] --"
+    set stattxt "-- [mc jawaitserver] --"
     
     # Send get register.
     ::Jabber::JlibCmd register_get ::Jabber::GenRegister::GetCB -to $server    
@@ -670,7 +670,7 @@ proc ::Jabber::GenRegister::GetCB {jlibName type subiq} {
     if {[string equal $type "error"]} {
 	tk_messageBox -type ok -icon error  \
 	  -message [FormatTextForMessageBox \
-	  [::msgcat::mc jamesserrregget [lindex $subiq 0] [lindex $subiq 1]]]
+	  [mc jamesserrregget [lindex $subiq 0] [lindex $subiq 1]]]
 	return
     }
 
@@ -742,10 +742,10 @@ proc ::Jabber::GenRegister::ResultCallback {server type subiq} {
     if {[string equal $type "error"]} {
 	tk_messageBox -type ok -icon error  \
 	  -message [FormatTextForMessageBox \
-	  [::msgcat::mc jamesserrregset $server [lindex $subiq 0] [lindex $subiq 1]]]
+	  [mc jamesserrregset $server [lindex $subiq 0] [lindex $subiq 1]]]
     } else {
 	tk_messageBox -type ok -icon info -message [FormatTextForMessageBox \
-	  [::msgcat::mc jamessokreg $server]]
+	  [mc jamessokreg $server]]
     }
 }
 
@@ -756,10 +756,10 @@ proc ::Jabber::GenRegister::SimpleCallback {server jlibName type subiq} {
     if {[string equal $type "error"]} {
 	tk_messageBox -type ok -icon error  \
 	  -message [FormatTextForMessageBox \
-	  [::msgcat::mc jamesserrregset $server [lindex $subiq 0] [lindex $subiq 1]]]
+	  [mc jamesserrregset $server [lindex $subiq 0] [lindex $subiq 1]]]
     } else {
 	tk_messageBox -type ok -icon info -message [FormatTextForMessageBox \
-	  [::msgcat::mc jamessokreg $server]]
+	  [mc jamessokreg $server]]
     }
 }
 

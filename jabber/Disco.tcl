@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.22 2004-06-24 13:48:35 matben Exp $
+# $Id: Disco.tcl,v 1.23 2004-07-09 06:26:05 matben Exp $
 
 package provide Disco 1.0
 
@@ -535,7 +535,7 @@ proc ::Jabber::Disco::Popup {w v x y} {
     foreach {item type cmd} $popMenuDefs(disco,def) {
 	if {[string index $cmd 0] == "@"} {
 	    set mt [menu ${m}.sub${i} -tearoff 0]
-	    set locname [::msgcat::mc $item]
+	    set locname [mc $item]
 	    $m add cascade -label $locname -menu $mt -state disabled
 	    eval [string range $cmd 1 end] $mt
 	    incr i
@@ -546,7 +546,7 @@ proc ::Jabber::Disco::Popup {w v x y} {
 	    
 	    # Substitute the jid arguments.
 	    set cmd [subst -nocommands $cmd]
-	    set locname [::msgcat::mc $item]
+	    set locname [mc $item]
 	    $m add command -label $locname -command "after 40 $cmd"  \
 	      -state disabled
 	}
@@ -944,7 +944,7 @@ proc ::Jabber::Disco::InfoResultCB {type jid subiq args} {
 
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btadd -text [::msgcat::mc Close] \
+    pack [button $frbot.btadd -text [mc Close] \
       -command [list destroy $w]]  \
       -side right -padx 5 -pady 4
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 2

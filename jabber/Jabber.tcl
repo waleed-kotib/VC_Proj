@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.95 2004-07-02 14:08:01 matben Exp $
+# $Id: Jabber.tcl,v 1.96 2004-07-09 06:26:05 matben Exp $
 
 package provide Jabber 1.0
 
@@ -109,21 +109,21 @@ namespace eval ::Jabber:: {
     variable mapShowTextToElem
     
     array set mapShowElemToText [list \
-      [::msgcat::mc mAvailable]       available  \
-      [::msgcat::mc mAway]            away       \
-      [::msgcat::mc mChat]            chat       \
-      [::msgcat::mc mDoNotDisturb]    dnd        \
-      [::msgcat::mc mExtendedAway]    xa         \
-      [::msgcat::mc mInvisible]       invisible  \
-      [::msgcat::mc mNotAvailable]    unavailable]
+      [mc mAvailable]       available  \
+      [mc mAway]            away       \
+      [mc mChat]            chat       \
+      [mc mDoNotDisturb]    dnd        \
+      [mc mExtendedAway]    xa         \
+      [mc mInvisible]       invisible  \
+      [mc mNotAvailable]    unavailable]
     array set mapShowTextToElem [list \
-      available       [::msgcat::mc mAvailable]     \
-      away            [::msgcat::mc mAway]          \
-      chat            [::msgcat::mc mChat]          \
-      dnd             [::msgcat::mc mDoNotDisturb]  \
-      xa              [::msgcat::mc mExtendedAway]  \
-      invisible       [::msgcat::mc mInvisible]     \
-      unavailable     [::msgcat::mc mNotAvailable]]
+      available       [mc mAvailable]     \
+      away            [mc mAway]          \
+      chat            [mc mChat]          \
+      dnd             [mc mDoNotDisturb]  \
+      xa              [mc mExtendedAway]  \
+      invisible       [mc mInvisible]     \
+      unavailable     [mc mNotAvailable]]
         
     # Array that maps namespace (ns) to a descriptive name.
     variable nsToText
@@ -586,9 +586,9 @@ proc ::Jabber::MessageCallback {jlibName type args} {
 		set errcode [lindex $attrArr(-error) 0]
 		set errmsg [lindex $attrArr(-error) 1]
 		
-		tk_messageBox -title [::msgcat::mc Error] \
+		tk_messageBox -title [mc Error] \
 		  -message [FormatTextForMessageBox \
-		  [::msgcat::mc jamesserrsend $attrArr(-from) $errcode $errmsg]]  \
+		  [mc jamesserrsend $attrArr(-from) $errcode $errmsg]]  \
 		  -icon error -type ok		
 	    }
 	    eval {::hooks::run newErrorMessageHook} $args
@@ -676,18 +676,18 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 		    accept {
 			$jstate(jlib) send_presence -to $from -type "subscribed"
 			set autoaccepted 1
-			set msg [::msgcat::mc jamessautoaccepted $from]
+			set msg [mc jamessautoaccepted $from]
 		    }
 		    reject {
 			$jstate(jlib) send_presence -to $from -type "unsubscribed"
-			set msg [::msgcat::mc jamessautoreject $from]
+			set msg [mc jamessautoreject $from]
 		    }
 		    ask {
 			eval {::Jabber::Subscribe::Subscribe $from} $args
 		    }
 		}
 		if {$msg != ""} {
-		    tk_messageBox -title [::msgcat::mc Info] -icon info -type ok \
+		    tk_messageBox -title [mc Info] -icon info -type ok \
 		      -message [FormatTextForMessageBox $msg]			      
 		}
 		
@@ -700,39 +700,39 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 			  -groups [list $jprefs(subsc,group)]
 		    }
 		    $jstate(jlib) send_presence -to $from -type "subscribe"
-		    set msg [::msgcat::mc jamessautosubs $from]
-		    tk_messageBox -title [::msgcat::mc Info] -icon info -type ok \
+		    set msg [mc jamessautosubs $from]
+		    tk_messageBox -title [mc Info] -icon info -type ok \
 		      -message [FormatTextForMessageBox $msg]			  
 		}
 	    }
 	}
 	subscribed {
-	    tk_messageBox -title [::msgcat::mc Subscribed] -icon info -type ok  \
-	      -message [FormatTextForMessageBox [::msgcat::mc jamessallowsub $from]]
+	    tk_messageBox -title [mc Subscribed] -icon info -type ok  \
+	      -message [FormatTextForMessageBox [mc jamessallowsub $from]]
 	}
 	unsubscribe {	    
 	    if {$jprefs(rost,rmIfUnsub)} {
 		
 		# Remove completely from our roster.
 		$jstate(jlib) roster_remove $from ::Jabber::Roster::PushProc
-		tk_messageBox -title [::msgcat::mc Unsubscribe] \
+		tk_messageBox -title [mc Unsubscribe] \
 		  -icon info -type ok  \
-		  -message [FormatTextForMessageBox [::msgcat::mc jamessunsub $from]]
+		  -message [FormatTextForMessageBox [mc jamessunsub $from]]
 	    } else {
 		
 		$jstate(jlib) send_presence -to $from -type "unsubscribed"
-		tk_messageBox -title [::msgcat::mc Unsubscribe] -icon info -type ok  \
-		  -message [FormatTextForMessageBox [::msgcat::mc jamessunsubpres $from]]
+		tk_messageBox -title [mc Unsubscribe] -icon info -type ok  \
+		  -message [FormatTextForMessageBox [mc jamessunsubpres $from]]
 		
 		# If there is any subscription to this jid's presence.
 		set sub [$jstate(roster) getsubscription $from]
 		if {[string equal $sub "both"] ||  \
 		  [string equal $sub "to"]} {
 		    
-		    set ans [tk_messageBox -title [::msgcat::mc Unsubscribed]  \
+		    set ans [tk_messageBox -title [mc Unsubscribed]  \
 		      -icon question -type yesno -default yes \
 		      -message [FormatTextForMessageBox  \
-		      [::msgcat::mc jamessunsubask $from $from]]]
+		      [mc jamessunsubask $from $from]]]
 		    if {$ans == "yes"} {
 			$jstate(jlib) roster_remove $from \
 			  ::Jabber::Roster::PushProc
@@ -759,18 +759,18 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 		    $jstate(jlib) roster_remove $from ::Jabber::Roster::PushProc
 		}
 	    } else {		
-		tk_messageBox -title [::msgcat::mc Unsubscribed]  \
+		tk_messageBox -title [mc Unsubscribed]  \
 		  -icon info -type ok  \
 		  -message [FormatTextForMessageBox  \
-		  [::msgcat::mc jamessunsubscribed $from]]
+		  [mc jamessunsubscribed $from]]
 	    }
 	}
 	error {
 	    foreach {errcode errmsg} $attrArr(-error) break		
-	    set msg [::msgcat::mc jamesserrpres $errcode $errmsg]
+	    set msg [mc jamesserrpres $errcode $errmsg]
 	    if {$prefs(talkative)} {
 		tk_messageBox -icon error -type ok  \
-		  -title [::msgcat::mc {Presence Error}] \
+		  -title [mc {Presence Error}] \
 		  -message [FormatTextForMessageBox $msg]	
 	    }
 	    ::Jabber::AddErrorLog $from $msg
@@ -822,14 +822,14 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	    ::Jabber::DoCloseClientConnection
 	    
 	    tk_messageBox -icon error -type ok  \
-	      -message [::msgcat::mc jamessconnbroken]
+	      -message [mc jamessconnbroken]
 	}
 	away - xaway {
 	    
 	    set tm [clock format [clock seconds] -format "%H:%M:%S"]
 	    set ans [tk_messageBox -icon info -type yesno -default yes \
 	      -message [FormatTextForMessageBox \
-	      [::msgcat::mc jamessautoawayset $tm]]]
+	      [mc jamessautoawayset $tm]]]
 	    if {$ans == "yes"} {
 		::Jabber::SetStatus available
 	    }
@@ -846,14 +846,14 @@ proc ::Jabber::ClientProc {jlibName what args} {
 		set msg {Receieved a fatal XML parsing error.\
 		  The connection is closed down.}
 	    }
-	    tk_messageBox -title [::msgcat::mc {Fatal Error}] -icon error -type ok \
+	    tk_messageBox -title [mc {Fatal Error}] -icon error -type ok \
 	      -message [FormatTextForMessageBox $msg]
 	}
 	networkerror {
 	    
 	    # Disconnect. This should reset both wrapper and XML parser!
 	    ::Jabber::DoCloseClientConnection
-	    tk_messageBox -title [::msgcat::mc {Network Error}] \
+	    tk_messageBox -title [mc {Network Error}] \
 	      -message [FormatTextForMessageBox $attrArr(-body)] \
 	      -icon error -type ok	    
 	}
@@ -940,7 +940,7 @@ proc ::Jabber::ErrorLogDlg { } {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btset -text [::msgcat::mc Close]  \
+    pack [button $frbot.btset -text [mc Close]  \
       -command "destroy $w"] -side right -padx 5 -pady 5
     pack $frbot -side top -fill x -padx 8 -pady 6
 }
@@ -974,7 +974,7 @@ proc ::Jabber::IqSetGetCallback {method jlibName type theQuery} {
 		  and with message: $errmsg"
 	    }
 	}
-	tk_messageBox -icon error -type ok -title [::msgcat::mc Error] -message \
+	tk_messageBox -icon error -type ok -title [mc Error] -message \
 	  [FormatTextForMessageBox $msg]
     }
 }
@@ -1186,7 +1186,7 @@ proc ::Jabber::SetStatus {type args} {
 	
 	# Close down?	
 	::Jabber::DoCloseClientConnection
-	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
+	tk_messageBox -title [mc Error] -icon error -type ok \
 	  -message [FormatTextForMessageBox $err]
     } else {
 	
@@ -1232,7 +1232,7 @@ proc ::Jabber::SetStatusWithMessage { } {
     }
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document closeBox}
-    wm title $w [::msgcat::mc {Set Status}]
+    wm title $w [mc {Set Status}]
     set finishedStat -1
     
     set fontSB [option get . fontSmallBold {}]
@@ -1243,12 +1243,12 @@ proc ::Jabber::SetStatusWithMessage { } {
     
     # Top frame.
     set frtop $w.frall.frtop
-    labelframe $frtop -text [::msgcat::mc {My Status}]
+    labelframe $frtop -text [mc {My Status}]
     pack $frtop -side top -fill x -padx 4 -pady 4
     set i 0
     foreach val {available chat away xa dnd invisible} {
 	label ${frtop}.l${val} -image [::Jabber::Roster::GetPresenceIconFromKey $val]
-	radiobutton ${frtop}.${val} -text [::msgcat::mc jastat${val}]  \
+	radiobutton ${frtop}.${val} -text [mc jastat${val}]  \
 	  -variable [namespace current]::show -value $val
 	grid ${frtop}.l${val} -sticky e -column 0 -row $i -padx 4 -pady 3
 	grid ${frtop}.${val} -sticky w -column 1 -row $i -padx 8 -pady 3
@@ -1258,7 +1258,7 @@ proc ::Jabber::SetStatusWithMessage { } {
     # Set present status.
     set show $jstate(status)
     
-    pack [label $w.frall.lbl -text "[::msgcat::mc {Status message}]:" \
+    pack [label $w.frall.lbl -text "[mc {Status message}]:" \
       -font $fontSB]  \
       -side top -anchor w -padx 6 -pady 0
     set wtext $w.frall.txt
@@ -1268,10 +1268,10 @@ proc ::Jabber::SetStatusWithMessage { } {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btok -text [::msgcat::mc Set] -default active \
+    pack [button $frbot.btok -text [mc Set] -default active \
       -command [list [namespace current]::BtSetStatus $w]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
+    pack [button $frbot.btcancel -text [mc Cancel]  \
       -command [list [namespace current]::SetStatusCancel $w]] \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
@@ -1434,9 +1434,9 @@ proc ::Jabber::GetPrivateDataCallback {jid jlibName what theQuery} {
     
     if {[string equal $what "error"]} {
 	foreach {errcode errmsg} $theQuery {}
-	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
+	tk_messageBox -title [mc Error] -icon error -type ok \
 	  -message [FormatTextForMessageBox \
-	  [::msgcat::mc jamesserrgetpublic $jid $errcode $errmsg]]
+	  [mc jamesserrgetpublic $jid $errcode $errmsg]]
 	return
     }
     
@@ -1514,18 +1514,18 @@ proc ::Jabber::GetLast {to args} {
 proc ::Jabber::GetLastResult {from silent jlibname type subiq} {    
 
     if {[string equal $type "error"]} {
-	set msg [::msgcat::mc jamesserrlastactive $from [lindex $subiq 1]]
+	set msg [mc jamesserrlastactive $from [lindex $subiq 1]]
 	::Jabber::AddErrorLog $from $msg	    
 	if {!$silent} {
-	    tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
+	    tk_messageBox -title [mc Error] -icon error -type ok \
 	      -message [FormatTextForMessageBox $msg]
 	}
     } else {
 	array set attrArr [wrapper::getattrlist $subiq]
 	if {![info exists attrArr(seconds)]} {
-	    tk_messageBox -title [::msgcat::mc {Last Activity}] -icon info  \
+	    tk_messageBox -title [mc {Last Activity}] -icon info  \
 	      -type ok -message [FormatTextForMessageBox \
-	      [::msgcat::mc jamesserrnotimeinfo $from]]
+	      [mc jamesserrnotimeinfo $from]]
 	} else {
 	    set secs [expr [clock seconds] - $attrArr(seconds)]
 	    set uptime [clock format $secs -format "%a %b %d %H:%M:%S"]
@@ -1538,16 +1538,16 @@ proc ::Jabber::GetLastResult {from silent jlibname type subiq} {
 	    # Time interpreted differently for different jid types.
 	    if {$from != ""} {
 		if {[regexp {^[^@]+@[^/]+/.*$} $from match]} {
-		    set msg1 [::msgcat::mc jamesstimeused $from]
+		    set msg1 [mc jamesstimeused $from]
 		} elseif {[regexp {^.+@[^/]+$} $from match]} {
-		    set msg1 [::msgcat::mc jamesstimeconn $from]
+		    set msg1 [mc jamesstimeconn $from]
 		} else {
-		    set msg1 [::msgcat::mc jamesstimeservstart $from]
+		    set msg1 [mc jamesstimeservstart $from]
 		}
 	    } else {
-		set msg1 [::msgcat::mc jamessuptime]
+		set msg1 [mc jamessuptime]
 	    }
-	    tk_messageBox -title [::msgcat::mc {Last Activity}] -icon info  \
+	    tk_messageBox -title [mc {Last Activity}] -icon info  \
 	      -type ok -message [FormatTextForMessageBox "$msg1 $uptime. $msg"]
 	}
     }
@@ -1579,9 +1579,9 @@ proc ::Jabber::GetTimeResult {from silent jlibname type subiq} {
 	  "We received an error when quering its time info.\
 	  The error was: [lindex $subiq 1]"	    
 	if {!$silent} {
-	    tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
+	    tk_messageBox -title [mc Error] -icon error -type ok \
 	      -message [FormatTextForMessageBox \
-	      [::msgcat::mc jamesserrtime $from [lindex $subiq 1]]]
+	      [mc jamesserrtime $from [lindex $subiq 1]]]
 	}
     } else {
 	
@@ -1599,8 +1599,8 @@ proc ::Jabber::GetTimeResult {from silent jlibname type subiq} {
 	} else {
 	    set msg "unknown"
 	}
-	tk_messageBox -title [::msgcat::mc {Local Time}] -icon info -type ok -message \
-	  [FormatTextForMessageBox [::msgcat::mc jamesslocaltime $from $msg]]
+	tk_messageBox -title [mc {Local Time}] -icon info -type ok -message \
+	  [FormatTextForMessageBox [mc jamesslocaltime $from $msg]]
     }
 }
 
@@ -1636,20 +1636,20 @@ proc ::Jabber::GetVersionResult {from silent jlibname type subiq} {
     
     if {[string equal $type "error"]} {
 	::Jabber::AddErrorLog $from  \
-	  [::msgcat::mc jamesserrvers $from [lindex $subiq 1]]
+	  [mc jamesserrvers $from [lindex $subiq 1]]
 	if {!$silent} {
-	    tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
+	    tk_messageBox -title [mc Error] -icon error -type ok \
 	      -message [FormatTextForMessageBox \
-	      [::msgcat::mc jamesserrvers $from [lindex $subiq 1]]]
+	      [mc jamesserrvers $from [lindex $subiq 1]]]
 	}
     } else {
 	set w .jvers[incr uidvers]
 	::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
 	  -macclass {document closeBox}
-	wm title $w [::msgcat::mc {Version Info}]
+	wm title $w [mc {Version Info}]
 	set iconInfo [::Theme::GetImage info]
 	pack [label $w.icon -image $iconInfo] -side left -anchor n -padx 10 -pady 10
-	pack [label $w.msg -text [::msgcat::mc javersinfo $from] -font $fontSB] \
+	pack [label $w.msg -text [mc javersinfo $from] -font $fontSB] \
 	  -side top -padx 8 -pady 4
 	pack [frame $w.fr] -padx 10 -pady 4 -side top 
 	set i 0
@@ -1660,7 +1660,7 @@ proc ::Jabber::GetVersionResult {from silent jlibname type subiq} {
 	    grid $w.fr.lr$i -column 1 -row $i -sticky w
 	    incr i
 	}
-	pack [button $w.btok -text [::msgcat::mc OK] \
+	pack [button $w.btok -text [mc OK] \
 	  -command "destroy $w"] -side right -padx 10 -pady 8
 	wm resizable $w 0 0
 	bind $w <Return> "$w.btok invoke"
@@ -1828,7 +1828,7 @@ proc ::Jabber::Passwd::Build { } {
     }
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document closeBox}
-    wm title $w [::msgcat::mc {New Password}]
+    wm title $w [mc {New Password}]
     
     set fontSB [option get . fontSmallBold {}]
     
@@ -1840,13 +1840,13 @@ proc ::Jabber::Passwd::Build { } {
     
     # Entries etc.
     set frmid [frame $w.frall.frmid -borderwidth 0]
-    label $frmid.ll -font $fontSB -text [::msgcat::mc janewpass]
+    label $frmid.ll -font $fontSB -text [mc janewpass]
     label $frmid.le -font $fontSB -text $jstate(mejid)
-    label $frmid.lserv -text "[::msgcat::mc {New password}]:" -anchor e
+    label $frmid.lserv -text "[mc {New password}]:" -anchor e
     entry $frmid.eserv -width 18 -show *  \
       -textvariable [namespace current]::password -validate key  \
       -validatecommand {::Jabber::ValidatePasswdChars %S}
-    label $frmid.lvalid -text "[::msgcat::mc {Retype password}]:" -anchor e
+    label $frmid.lvalid -text "[mc {Retype password}]:" -anchor e
     entry $frmid.evalid -width 18 -show * \
       -textvariable [namespace current]::validate -validate key  \
       -validatecommand {::Jabber::ValidatePasswdChars %S}
@@ -1860,10 +1860,10 @@ proc ::Jabber::Passwd::Build { } {
 
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btok -text [::msgcat::mc Set] -default active \
+    pack [button $frbot.btok -text [mc Set] -default active \
       -command [list [namespace current]::Doit $w]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]   \
+    pack [button $frbot.btcancel -text [mc Cancel]   \
       -command [list [namespace current]::Cancel $w]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
@@ -1913,7 +1913,7 @@ proc ::Jabber::Passwd::Doit {w} {
 
     if {![string equal $validate $password]} {
 	tk_messageBox -type ok -icon error  \
-	  -message [FormatTextForMessageBox [::msgcat::mc jamesspasswddiff]]
+	  -message [FormatTextForMessageBox [mc jamesspasswddiff]]
 	return
     }
     set finished 1
@@ -1933,9 +1933,9 @@ proc ::Jabber::Passwd::ResponseProc {jlibName type theQuery} {
 	set errcode [lindex $theQuery 0]
 	set errmsg [lindex $theQuery 1]
 	set msg 
-	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
+	tk_messageBox -title [mc Error] -icon error -type ok \
 	  -message [FormatTextForMessageBox  \
-	  [::msgcat::mc jamesspasswderr $errcode $errmsg]] \
+	  [mc jamesspasswderr $errcode $errmsg]] \
     } else {
 		
 	# Make sure the new password is stored in our profiles.
@@ -1947,8 +1947,8 @@ proc ::Jabber::Passwd::ResponseProc {jlibName type theQuery} {
 		eval {::Profiles::Set {}} $spec
 	    }
 	}
-	tk_messageBox -title [::msgcat::mc {New Password}] -icon info -type ok \
-	  -message [FormatTextForMessageBox [::msgcat::mc jamesspasswdok]]
+	tk_messageBox -title [mc {New Password}] -icon info -type ok \
+	  -message [FormatTextForMessageBox [mc jamesspasswdok]]
     }
 }
 
@@ -2010,10 +2010,10 @@ proc ::Jabber::Logout::WithStatus { } {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btout -text [::msgcat::mc Logout]  \
+    pack [button $frbot.btout -text [mc Logout]  \
       -default active -command [list [namespace current]::DoLogout $w]] \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
+    pack [button $frbot.btcancel -text [mc Cancel]  \
       -command [list [namespace current]::DoCancel $w]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6

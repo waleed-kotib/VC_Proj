@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.61 2004-06-17 13:24:18 matben Exp $
+# $Id: UI.tcl,v 1.62 2004-07-09 06:26:06 matben Exp $
 
 package require entrycomp
 package require alertbox
@@ -416,14 +416,14 @@ proc ::UI::BuildMenu {wtop wmenu label menuDef state args} {
 
     # A trick to make this work for popup menus, which do not have a Menu parent.
     if {[string equal [winfo class $wparent] "Menu"]} {
-	$wparent add cascade -label [::msgcat::mc $label] -menu $m
+	$wparent add cascade -label [mc $label] -menu $m
     }
     
     # If we don't have a menubar, for instance, if embedded toplevel.
     # Only for the toplevel menubar.
     if {[string equal $wparent ".menu"] &&  \
       [string equal [winfo class $wparent] "Frame"]} {
-	label ${wmenu}la -text [::msgcat::mc $label]
+	label ${wmenu}la -text [mc $label]
 	pack ${wmenu}la -side left -padx 4
 	bind ${wmenu}la <Button-1> [list ::UI::DoTopMenuPopup %W $wtop $wmenu]
     }
@@ -434,7 +434,7 @@ proc ::UI::BuildMenu {wtop wmenu label menuDef state args} {
 	foreach {type name cmd mstate accel mopts subdef} $line {
 	    
 	    # Localized menu label.
-	    set locname [::msgcat::mc $name]
+	    set locname [mc $name]
 	    set menuKeyToIndex($wmenu,$name) $i
 	    set ampersand [string first & $locname]
 	    if {$ampersand != -1} {
@@ -814,8 +814,8 @@ proc ::UI::OpenCanvasInfoFile {wtop theFile} {
 	set w [string trimright $wtop .]
     }
     set ans [tk_messageBox -type yesno -icon warning -parent $w \
-      -title [::msgcat::mc {Open Helpfile}]  \
-      -message [FormatTextForMessageBox [::msgcat::mc messopenhelpfile]]]
+      -title [mc {Open Helpfile}]  \
+      -message [FormatTextForMessageBox [mc messopenhelpfile]]]
     if {$ans == "yes"} {
 	::CanvasFile::DoOpenCanvasFile $wtop [file join $this(path) docs $theFile]
     }

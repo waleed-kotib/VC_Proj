@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Privacy.tcl,v 1.6 2004-06-30 12:45:57 matben Exp $
+# $Id: Privacy.tcl,v 1.7 2004-07-09 06:26:06 matben Exp $
 
 package provide Privacy 1.0
 
@@ -46,7 +46,7 @@ proc ::Privacy::InitPrefsHook { } {
 
 proc ::Privacy::BuildPrefsHook {wtree nbframe} {
     
-    $wtree newitem {Jabber Filter} -text [::msgcat::mc Filter]
+    $wtree newitem {Jabber Filter} -text [mc Filter]
     
     # Blockers page --------------------------------------------------------
     set wpage [$nbframe page {Filter}]    
@@ -73,7 +73,7 @@ proc ::Privacy::BuildPrefsPage {page} {
     set xpadbt [option get [winfo toplevel $page] xPadBt {}]
     
     set fpage $page.f
-    labelframe $fpage -text [::msgcat::mc Filter] -padx 4 -pady 2
+    labelframe $fpage -text [mc Filter] -padx 4 -pady 2
     pack $fpage -side top -anchor w -padx 8 -pady 4
     
     label $fpage.lmsg -wraplength 300 -justify left -text \
@@ -119,9 +119,9 @@ proc ::Privacy::BuildPrefsPage {page} {
     bind $wtable <Button-1>        {::Privacy::TableSelect %W %x %y}
     bind $wtable <Double-Button-1> ::Privacy::EditList
     
-    label $wlabfr.l1 -bd 1 -relief raised -padx 4 -text [::msgcat::mc Default]
-    label $wlabfr.l2 -bd 1 -relief raised -padx 4 -text [::msgcat::mc Active]
-    label $wlabfr.l3 -bd 1 -relief raised -padx 4 -text [::msgcat::mc Name] \
+    label $wlabfr.l1 -bd 1 -relief raised -padx 4 -text [mc Default]
+    label $wlabfr.l2 -bd 1 -relief raised -padx 4 -text [mc Active]
+    label $wlabfr.l3 -bd 1 -relief raised -padx 4 -text [mc Name] \
       -anchor w
     pack  $wlabfr.l1 $wlabfr.l2 -side left
     pack  $wlabfr.l3 -side left -expand 1 -fill x -anchor w
@@ -148,20 +148,20 @@ proc ::Privacy::BuildPrefsPage {page} {
     set wbts(edit) $wfrbt.edit
     set wbts(del)  $wfrbt.del    
     
-    button $wfrbt.new -text [::msgcat::mc New] -state disabled \
+    button $wfrbt.new -text [mc New] -state disabled \
       -command [namespace current]::NewList
-    button $wfrbt.edit -text [::msgcat::mc Edit] -state disabled \
+    button $wfrbt.edit -text [mc Edit] -state disabled \
       -command [namespace current]::EditList
-    button $wfrbt.del -text [::msgcat::mc Delete] -state disabled \
+    button $wfrbt.del -text [mc Delete] -state disabled \
       -command [namespace current]::DelList
     pack $wfrbt.new $wfrbt.edit $wfrbt.del -side top -padx 6 -pady 4 \
       -fill x
     
     ::Privacy::Deselected
     if {![::Jabber::IsConnected]} {
-	set statmsg [::msgcat::mc {Filter options unavailable while not connected}]
+	set statmsg [mc {Filter options unavailable while not connected}]
     } else {
-	set statmsg [::msgcat::mc {Obtaining filter options}]
+	set statmsg [mc {Obtaining filter options}]
 	::Privacy::GetLists
     }
         
@@ -355,13 +355,13 @@ proc ::Privacy::GetListsCB {jlibname type subiq args} {
     
     switch -- $type {
 	error {
-	    set statmsg [::msgcat::mc {Filter options unavailable at this server}]
+	    set statmsg [mc {Filter options unavailable at this server}]
 	    set cache(haveprivacy) 0
 	}
 	default {
 	    set cache(haveprivacy) 1
 	    $wbts(new) configure -state normal
-	    set statmsg [::msgcat::mc {Filter lists obtained from server}]
+	    set statmsg [mc {Filter lists obtained from server}]
 	    
 	    # Cache xml.
 	    set cache(lists) $subiq
@@ -518,14 +518,14 @@ namespace eval ::Privacy::List:: {
     
     # Need to map from menu entry to actual tag or attribute.
     variable strToTag
-    set strToTag(type,[::msgcat::mc jid])          jid
-    set strToTag(type,[::msgcat::mc Group])        group
-    set strToTag(type,[::msgcat::mc Subscription]) subscription
-    set strToTag(block,[::msgcat::mc {Incoming Messages}]) message
-    set strToTag(block,[::msgcat::mc {Incoming Presence}]) presence-in
-    set strToTag(block,[::msgcat::mc {Outgoing Presence}]) presence-out
-    set strToTag(action,[::msgcat::mc Allow]) allow
-    set strToTag(action,[::msgcat::mc Deny])  deny
+    set strToTag(type,[mc jid])          jid
+    set strToTag(type,[mc Group])        group
+    set strToTag(type,[mc Subscription]) subscription
+    set strToTag(block,[mc {Incoming Messages}]) message
+    set strToTag(block,[mc {Incoming Presence}]) presence-in
+    set strToTag(block,[mc {Outgoing Presence}]) presence-out
+    set strToTag(action,[mc Allow]) allow
+    set strToTag(action,[mc Deny])  deny
     
     # Labels for the menubuttons.
     variable labels
@@ -535,7 +535,7 @@ namespace eval ::Privacy::List:: {
     foreach key {type block action} {
 	set labels($key) {}
 	foreach str [set ${key}List] {
-	    lappend labels($key) [::msgcat::mc $str]
+	    lappend labels($key) [mc $str]
 	}
 	set labels(max,$key) [eval {::Utils::GetMaxMsgcatString} [set ${key}List]]
     }
@@ -626,7 +626,7 @@ proc ::Privacy::List::Build { } {
     # Toplevel with class JPrivacy.
     ::UI::Toplevel $w -class JPrivacy -usemacmainmenu 1 -macstyle documentProc
 
-    wm title $w "[::msgcat::mc {Privacy List}]"
+    wm title $w "[mc {Privacy List}]"
     
     # Global frame.
     frame $w.frall -borderwidth 1 -relief raised
@@ -644,7 +644,7 @@ proc ::Privacy::List::Build { } {
     pack  $wfr -side top -anchor w
     
     set state(wname) $wfr.ename
-    label $wfr.lname -text [::msgcat::mc {Name of list}]:
+    label $wfr.lname -text [mc {Name of list}]:
     entry $wfr.ename -width 16 -textvariable $token\(name)
     pack $wfr.lname $wfr.ename -side left
     
@@ -657,11 +657,11 @@ proc ::Privacy::List::Build { } {
     set i 0    
     foreach {wtype wval wblk wact wdel}  \
       [list $wit.t${i} $wit.v${i} $wit.bl${i} $wit.a${i} $wit.bt${i}] break
-    label $wtype -text [::msgcat::mc {Type}]
-    label $wval  -text [::msgcat::mc {Value}]
-    label $wblk  -text [::msgcat::mc {Block}]    
-    label $wact  -text [::msgcat::mc {Action}]    
-    label $wdel  -text [::msgcat::mc {Delete Rule}]    
+    label $wtype -text [mc {Type}]
+    label $wval  -text [mc {Value}]
+    label $wblk  -text [mc {Block}]    
+    label $wact  -text [mc {Action}]    
+    label $wdel  -text [mc {Delete Rule}]    
     grid $wtype $wval $wblk $wact $wdel
     
     # Build a row of empty frames to hold the max size of menubuttons.
@@ -683,13 +683,13 @@ proc ::Privacy::List::Build { } {
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
     set warrows $frbot.arr
-    pack [button $frbot.btok -text [::msgcat::mc Set] \
+    pack [button $frbot.btok -text [mc Set] \
       -default active -command [list [namespace current]::Set $token]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
+    pack [button $frbot.btcancel -text [mc Cancel]  \
       -command [list [namespace current]::Cancel $token]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btprof -text [::msgcat::mc {New Rule}]  \
+    pack [button $frbot.btprof -text [mc {New Rule}]  \
       -command [list [namespace current]::New $token]]  \
       -side left -padx 5 -pady 5
     pack [::chasearrows::chasearrows $warrows -size 16] \
@@ -795,7 +795,7 @@ proc ::Privacy::List::BuildItem {token} {
     
     grid $wtype $wval $wblk $wact $wdel -sticky e
     
-    set state(action${i}) [::msgcat::mc Deny]
+    set state(action${i}) [mc Deny]
     set state(value${i})  ""
     set state(block${i})  {Incoming Messages}
     return $state(i)
@@ -849,7 +849,7 @@ proc ::Privacy::List::ExtractListElement {token} {
     set name $state(name)
 
     if {$name == ""} {
-	tk_messageBox -title [::msgcat::mc Error] -message \
+	tk_messageBox -title [mc Error] -message \
 	  {You must specify a nonempty list name!} -icon error
 	return ""
     }
@@ -865,7 +865,7 @@ proc ::Privacy::List::ExtractListElement {token} {
 	    
 	    # Do some error checking here.
 	    if {$value == ""} {
-		tk_messageBox -title [::msgcat::mc Error] -message \
+		tk_messageBox -title [mc Error] -message \
 		  "You must specify a nonempty value for $type!" -icon error
 		return ""
 	    }

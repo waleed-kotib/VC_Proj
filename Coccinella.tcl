@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.64 2004-07-03 12:54:37 matben Exp $
+# $Id: Coccinella.tcl,v 1.65 2004-07-09 06:26:05 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -363,11 +363,12 @@ if {!$havecat} {
 # Test here if you wabt a prticular message catalog.
 #::msgcat::mclocale fr
 ::msgcat::mcload $this(msgcatPath)
+namespace import ::msgcat::mc
 
 # Show it! Need a full update here, at least on Windows.
 package require Splash
 ::SplashScreen::SplashScreen
-::SplashScreen::SetMsg [::msgcat::mc splashsource]
+::SplashScreen::SetMsg [mc splashsource]
 update
 
 # These are auxilary procedures that we need to source, rest is found in packages.
@@ -446,7 +447,7 @@ if {$prefs(Thread)} {
 
 # As an alternative to sourcing tcl code directly, use the package mechanism.
 
-::SplashScreen::SetMsg [::msgcat::mc splashload]
+::SplashScreen::SetMsg [mc splashload]
 
 set listOfPackages {
     balloonhelp
@@ -483,22 +484,22 @@ if {$prefs(Thread)} {
 
 # The Jabber stuff.
 if {!$prefs(stripJabber)} {
-    ::SplashScreen::SetMsg [::msgcat::mc splashsourcejabb]
+    ::SplashScreen::SetMsg [mc splashsourcejabb]
     package require Jabber
     #package require Sounds
 }
 
 # Beware! [info hostname] can be very slow on Macs first time it is called.
-::SplashScreen::SetMsg [::msgcat::mc splashhost]
+::SplashScreen::SetMsg [mc splashhost]
 set this(hostname) [info hostname]
 
-::SplashScreen::SetMsg [::msgcat::mc splashinit]
+::SplashScreen::SetMsg [mc splashinit]
     
 # Standard (factory) preferences are set here.
 # These are the hardcoded, application default, values, and can be
 # overridden by the ones in user default file.
 source [file join $this(path) lib SetFactoryDefaults.tcl]
-::SplashScreen::SetMsg [::msgcat::mc splashprefs]
+::SplashScreen::SetMsg [mc splashprefs]
 
 # Manage the user preferences. Start by reading the preferences file.
 ::PreferencesUtils::Init
@@ -564,7 +565,7 @@ if {[string equal $prefs(protocol) "jabber"]} {
 # Make the actual whiteboard with canvas, tool buttons etc...
 # Jabber has the roster window as "main" window.
 if {![string equal $prefs(protocol) "jabber"]} {
-    ::SplashScreen::SetMsg [::msgcat::mc splashbuild]
+    ::SplashScreen::SetMsg [mc splashbuild]
     ::WB::BuildWhiteboard $wDlgs(mainwb) -usewingeom 1
 }
 if {$prefs(firstLaunch) && !$prefs(stripJabber)} {
@@ -643,7 +644,7 @@ if {$prefs(firstLaunch)} {
     } else {
 	set f [file join $this(docsPath) Welcome_en.can]
     }
-    ::Dialogs::Canvas $f -title [::msgcat::mc {Welcome}]
+    ::Dialogs::Canvas $f -title [mc {Welcome}]
 }
 set prefs(firstLaunch) 0
 
@@ -689,7 +690,7 @@ if {($prefs(protocol) != "client") && $prefs(haveHttpd)} {
 	}
     } msg]} {
 	tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
-	  [::msgcat::mc messfailedhttp $msg]]	  
+	  [mc messfailedhttp $msg]]	  
     } else {
 	
 	# Stop before quitting.

@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.41 2004-06-22 14:21:18 matben Exp $
+# $Id: MUC.tcl,v 1.42 2004-07-09 06:26:05 matben Exp $
 
 package require entrycomp
 package require muc
@@ -141,7 +141,7 @@ proc ::Jabber::MUC::BuildEnter {args} {
     set w $wDlgs(jmucenter)[incr dlguid]
     ::UI::Toplevel $w -macstyle documentProc -macclass {document closeBox} \
       -usemacmainmenu 1
-    wm title $w [::msgcat::mc {Enter Room}]
+    wm title $w [mc {Enter Room}]
     set enter(w) $w
     array set enter {
 	finished    -1
@@ -165,12 +165,12 @@ proc ::Jabber::MUC::BuildEnter {args} {
 
     set frtop $w.frall.top
     pack [frame $frtop] -side top -anchor w -padx 12
-    label $frtop.lserv -text "[::msgcat::mc {Conference server}]:" 
+    label $frtop.lserv -text "[mc {Conference server}]:" 
     
     # First menubutton: servers. (trace below)
     set wpopupserver $frtop.eserv
      eval {tk_optionMenu $wpopupserver $token\(server)} $confServers
-    label $frtop.lroom -text "[::msgcat::mc {Room name}]:"
+    label $frtop.lroom -text "[mc {Room name}]:"
     
     # Find the default conferencing server.
     if {[info exists argsArr(-server)]} {
@@ -188,7 +188,7 @@ proc ::Jabber::MUC::BuildEnter {args} {
     set enter(wbrowse) $frtop.browse
     
     ::combobox::combobox $wpopuproom -width 8 -textvariable $token\(roomname)
-    button $enter(wbrowse) -text [::msgcat::mc Browse] \
+    button $enter(wbrowse) -text [mc Browse] \
       -command [list [namespace current]::Browse $token]
     if {[info exists argsArr(-roomjid)]} {
 	jlib::splitjidex $argsArr(-roomjid) enter(roomname) enter(server) z
@@ -203,9 +203,9 @@ proc ::Jabber::MUC::BuildEnter {args} {
 	$wpopupserver configure -state disabled
     }
     
-    label $frtop.lnick -text "[::msgcat::mc {Nick name}]:"
+    label $frtop.lnick -text "[mc {Nick name}]:"
     entry $frtop.enick -textvariable $token\(nickname) -width 30
-    label $frtop.lpass -text "[::msgcat::mc Password]:"
+    label $frtop.lpass -text "[mc Password]:"
     entry $frtop.epass -textvariable $token\(password) -show {*} -validate key \
       -validatecommand {::Jabber::ValidatePasswdChars %S}
    
@@ -238,10 +238,10 @@ proc ::Jabber::MUC::BuildEnter {args} {
     set frbot [frame $w.frall.frbot -borderwidth 0]
     pack $frbot -side bottom -fill x -expand 0 -padx 8 -pady 0
     set wbtenter  $frbot.btok
-    pack [button $wbtenter -text [::msgcat::mc Enter] \
+    pack [button $wbtenter -text [mc Enter] \
       -default active -command [list [namespace current]::DoEnter $token]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
+    pack [button $frbot.btcancel -text [mc Cancel]  \
       -command [list [namespace current]::CancelEnter $token]]  \
       -side right -padx 5 -pady 5
     pack [frame $w.frall.pad -height 8 -width 1] -side bottom -pady 0
@@ -494,7 +494,7 @@ proc ::Jabber::MUC::EnterCallback {mucName type args} {
 		    set errmsg [lindex $argsArr(-error) 1]
 		    tk_messageBox -type ok -icon error  \
 		      -message [FormatTextForMessageBox \
-		      [::msgcat::mc jamesserrconfgetcre $errcode $errmsg]]
+		      [mc jamesserrconfgetcre $errcode $errmsg]]
 		}
 	    }
 	}
@@ -560,10 +560,10 @@ proc ::Jabber::MUC::Invite {roomjid} {
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
     pack $frbot  -side bottom -fill x -padx 10 -pady 8
-    pack [button $frbot.btok -text [::msgcat::mc OK]  \
+    pack [button $frbot.btok -text [mc OK]  \
       -default active -command [list [namespace current]::DoInvite $token]] \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
+    pack [button $frbot.btcancel -text [mc Cancel]  \
       -command [list [namespace current]::CancelInvite $token]]  \
       -side right -padx 5 -pady 5  
     
@@ -752,7 +752,7 @@ proc ::Jabber::MUC::BuildInfo {roomjid} {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btcancel -text [::msgcat::mc Close]  \
+    pack [button $frbot.btcancel -text [mc Close]  \
       -command [list [namespace current]::Close $roomjid]] \
       -side right -padx 5 -pady 5
     pack $frbot -side bottom -fill x -padx 10 -pady 8
@@ -1048,7 +1048,7 @@ proc ::Jabber::MUC::GrantRevoke {roomjid which type} {
     
     set ans [eval {
       ::UI::MegaDlgMsgAndEntry} [subst $dlgDefs($which,$type)] \
-      {"Reason:" reason [::msgcat::mc Cancel] [::msgcat::mc OK]}]
+      {"Reason:" reason [mc Cancel] [mc OK]}]
     set opts {}
     if {$reason != ""} {
 	set opts [list -reason $reason]
@@ -1084,7 +1084,7 @@ proc ::Jabber::MUC::Kick {roomjid} {
       {Kick Participant}  \
       "Kick the participant \"$nick\" from the room \"$roomName\""  \
       "Reason:"  \
-      reason [::msgcat::mc Cancel] [::msgcat::mc OK]]
+      reason [mc Cancel] [mc OK]]
     set opts {}
     if {$reason != ""} {
 	set opts [list -reason $reason]
@@ -1119,7 +1119,7 @@ proc ::Jabber::MUC::Ban {roomjid} {
       {Ban User}  \
       "Ban the user \"$nick\" from the room \"$roomName\""  \
       "Reason:"  \
-      reason [::msgcat::mc Cancel] [::msgcat::mc OK]]
+      reason [mc Cancel] [mc OK]]
     set opts {}
     if {$reason != ""} {
 	set opts [list -reason $reason]
@@ -1276,15 +1276,15 @@ proc ::Jabber::MUC::EditListBuild {roomjid type} {
     set wsearrows $frbot.arr
     set wbtok $frbot.btok
     pack $frbot  -side bottom -fill x -padx 10 -pady 8
-    pack [button $wbtok -text [::msgcat::mc OK] -state disabled \
+    pack [button $wbtok -text [mc OK] -state disabled \
       -default active -command "set [namespace current]::fineditlist 1"] \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
+    pack [button $frbot.btcancel -text [mc Cancel]  \
       -command "set [namespace current]::fineditlist 0"]  \
       -side right -padx 5 -pady 5  
     pack [::chasearrows::chasearrows $wsearrows -size 16] \
       -side left -padx 5 -pady 5
-    pack [button $frbot.btres -text [::msgcat::mc Reset]  \
+    pack [button $frbot.btres -text [mc Reset]  \
       -command [list [namespace current]::EditListReset $roomjid]]  \
       -side left -padx 5 -pady 5  
     
@@ -1666,11 +1666,11 @@ proc ::Jabber::MUC::RoomConfig {roomjid} {
     set wsearrows $frbot.arr
     set wbtok $frbot.btok
     set wbtcancel $frbot.btcancel
-    pack [button $wbtok -text [::msgcat::mc OK] -default active \
+    pack [button $wbtok -text [mc OK] -default active \
       -state disabled -command  \
         [list [namespace current]::DoRoomConfig $roomjid $w]]  \
       -side right -padx 5 -pady 5
-    pack [button $wbtcancel -text [::msgcat::mc Cancel]  \
+    pack [button $wbtcancel -text [mc Cancel]  \
       -command [list [namespace current]::CancelConfig $roomjid $w]]  \
       -side right -padx 5 -pady 5
     pack [::chasearrows::chasearrows $wsearrows -size 16] \
@@ -1778,7 +1778,7 @@ proc ::Jabber::MUC::SetNick {roomjid} {
       {Set New Nickname}  \
       "Select a new nick name."  \
       "New Nick:"  \
-      nickname [::msgcat::mc Cancel] [::msgcat::mc OK]]
+      nickname [mc Cancel] [mc OK]]
     
     # Perhaps check that characters are valid?
 
@@ -1843,10 +1843,10 @@ proc ::Jabber::MUC::Destroy {roomjid} {
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
     pack $frbot  -side bottom -fill x -padx 10 -pady 8
-    pack [button $frbot.btok -text [::msgcat::mc OK]  \
+    pack [button $frbot.btok -text [mc OK]  \
       -default active -command "set [namespace current]::findestroy 1"] \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
+    pack [button $frbot.btcancel -text [mc Cancel]  \
       -command "set [namespace current]::findestroy 0"]  \
       -side right -padx 5 -pady 5  
     

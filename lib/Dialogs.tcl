@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.41 2004-06-07 13:43:56 matben Exp $
+# $Id: Dialogs.tcl,v 1.42 2004-07-09 06:26:06 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -127,10 +127,10 @@ proc ::Dialogs::GetCanvas {w} {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btconn -text [::msgcat::mc Get] -default active \
+    pack [button $frbot.btconn -text [mc Get] -default active \
       -command "set [namespace current]::finished 1"]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel] \
+    pack [button $frbot.btcancel -text [mc Cancel] \
       -command "set [namespace current]::finished 2"]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
@@ -166,7 +166,7 @@ proc ::Dialogs::InfoOnPlugins { } {
     # Check first of there are *any* plugins.
     if {[llength [::Plugins::GetAllPackages loaded]] == 0} {
 	tk_messageBox -icon info -type ok -message   \
-	  [FormatTextForMessageBox [::msgcat::mc messnoplugs]]
+	  [FormatTextForMessageBox [mc messnoplugs]]
 	return  
     }
     set w $wDlgs(plugs)
@@ -174,7 +174,7 @@ proc ::Dialogs::InfoOnPlugins { } {
 	return
     }
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
-    wm title $w [::msgcat::mc {Plugin Info}]
+    wm title $w [mc {Plugin Info}]
     set fontS  [option get . fontSmall {}]
     set fontSB [option get . fontSmallBold {}]
     
@@ -184,7 +184,7 @@ proc ::Dialogs::InfoOnPlugins { } {
     # Button part.
     pack [frame $w.frall.frbot -borderwidth 0] -fill both -side bottom \
       -padx 8 -pady 6
-    pack [button $w.frall.frbot.btok -text [::msgcat::mc OK]  \
+    pack [button $w.frall.frbot.btok -text [mc OK]  \
       -command "destroy $w"] -side right -padx 5 -pady 5
 
     set fbox $w.frall.fbox
@@ -288,7 +288,7 @@ proc ::Dialogs::InfoComponents { } {
     set compList [component::getall]
     if {[llength $compList] == 0} {
 	tk_messageBox -icon info -type ok -message   \
-	  [FormatTextForMessageBox [::msgcat::mc messnoplugs]]
+	  [FormatTextForMessageBox [mc messnoplugs]]
 	return  
     }
     set w $wDlgs(comp)
@@ -296,7 +296,7 @@ proc ::Dialogs::InfoComponents { } {
 	return
     }
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
-    wm title $w [::msgcat::mc {Component Info}]
+    wm title $w [mc {Component Info}]
     set fontS  [option get . fontSmall {}]
     set fontSB [option get . fontSmallBold {}]
      
@@ -306,7 +306,7 @@ proc ::Dialogs::InfoComponents { } {
     # Button part.
     pack [frame $w.frall.frbot -borderwidth 0] -fill both -side bottom \
       -padx 8 -pady 6
-    pack [button $w.frall.frbot.btok -text [::msgcat::mc OK]  \
+    pack [button $w.frall.frbot.btok -text [mc OK]  \
       -command [list destroy $w]] -side right -padx 5 -pady 5
 
     set fbox $w.frall.fbox
@@ -370,13 +370,13 @@ proc ::Dialogs::UnixPrintPS {w wtoprint} {
     
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox}
-    wm title $w [::msgcat::mc Print]
+    wm title $w [mc Print]
     
     # Global frame.
     frame $w.frall -borderwidth 1 -relief raised
     pack  $w.frall -fill both -expand 1
     set w1 $w.frall.fr1
-    labelframe $w1 -text [::msgcat::mc Print]
+    labelframe $w1 -text [mc Print]
     
     # Overall frame for whole container.
     set frtot [frame $w1.frin]
@@ -392,10 +392,10 @@ proc ::Dialogs::UnixPrintPS {w wtoprint} {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btok -text [::msgcat::mc Print] -default active  \
+    pack [button $frbot.btok -text [mc Print] -default active  \
       -command "set [namespace current]::finishedPrint 1"]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
+    pack [button $frbot.btcancel -text [mc Cancel]  \
       -command "set [namespace current]::finishedPrint 0"]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -in $w.frall  \
@@ -592,10 +592,10 @@ proc ::PSPageSetup::PSPageSetup { w } {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btsave -text [::msgcat::mc Save] -default active  \
+    pack [button $frbot.btsave -text [mc Save] -default active  \
       -command [list [namespace current]::PushBtSave]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
+    pack [button $frbot.btcancel -text [mc Cancel]  \
       -command "set [namespace current]::finished 0"]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -in $w.frall  \
@@ -749,7 +749,7 @@ proc ::Dialogs::ShowInfoClients { } {
     # Button part.
     pack [frame $w.frbot -borderwidth 0] -in $w.frall -fill both  \
       -padx 8 -pady 6
-    pack [button $w.btok -text [::msgcat::mc OK] -default active  \
+    pack [button $w.btok -text [mc OK] -default active  \
       -command "destroy $w"] \
       -in $w.frbot -side right -padx 5 -pady 5
     wm resizable $w 0 0
@@ -779,36 +779,36 @@ proc ::Dialogs::ShowInfoServer { } {
     if {[winfo exists $w]} {
 	return
     }
-    array set boolToYesNo [list 0 [::msgcat::mc no] 1 [::msgcat::mc yes]]
+    array set boolToYesNo [list 0 [mc no] 1 [mc yes]]
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox}
-    wm title $w [::msgcat::mc {Server Info}]
+    wm title $w [mc {Server Info}]
     
     pack [frame $w.frall -borderwidth 1 -relief raised]
     set wcont $w.frtop
-    labelframe $wcont -text [::msgcat::mc {Server Info}]
+    labelframe $wcont -text [mc {Server Info}]
     pack $wcont -in $w.frall    
     
     # Frame for everything inside the labeled container.
     set fr [frame $wcont.fr]
-    label $fr.x1 -text "[::msgcat::mc {Is server up}]:"
+    label $fr.x1 -text "[mc {Is server up}]:"
     label $fr.x2 -text $boolToYesNo($state(isServerUp))
-    label $fr.a1 -text "[::msgcat::mc {This IP number}]:"
-    label $fr.b1 -text "[::msgcat::mc {Host name}]:"
-    label $fr.c1 -text "[::msgcat::mc Username]:"
-    label $fr.d1 -text "[::msgcat::mc {Port number}]:"
-    label $fr.e1 -text "[::msgcat::mc Buffering]:"
-    label $fr.f1 -text "[::msgcat::mc Blocking]:"
-    label $fr.g1 -text "[::msgcat::mc {Is safe}]:"
+    label $fr.a1 -text "[mc {This IP number}]:"
+    label $fr.b1 -text "[mc {Host name}]:"
+    label $fr.c1 -text "[mc Username]:"
+    label $fr.d1 -text "[mc {Port number}]:"
+    label $fr.e1 -text "[mc Buffering]:"
+    label $fr.f1 -text "[mc Blocking]:"
+    label $fr.g1 -text "[mc {Is safe}]:"
 
     if {!$state(isServerUp)} {
 	label $fr.a2 -text $this(ipnum)
 	label $fr.b2 -text $this(hostname)
 	label $fr.c2 -text $this(username)
-	label $fr.d2 -text [::msgcat::mc {Not available}]
-	label $fr.e2 -text [::msgcat::mc {Not available}]
-	label $fr.f2 -text [::msgcat::mc {Not available}]
-	label $fr.g2 -text [::msgcat::mc {Not available}]
+	label $fr.d2 -text [mc {Not available}]
+	label $fr.e2 -text [mc {Not available}]
+	label $fr.f2 -text [mc {Not available}]
+	label $fr.g2 -text [mc {Not available}]
 	
     } elseif {$state(isServerUp)} {
 	set sockname [fconfigure $state(serverSocket) -sockname]
@@ -816,8 +816,8 @@ proc ::Dialogs::ShowInfoServer { } {
 	label $fr.b2 -text $this(hostname)
 	label $fr.c2 -text $this(username)
 	label $fr.d2 -text $prefs(thisServPort)
-	label $fr.e2 -text [::msgcat::mc {Not available}]
-	label $fr.f2 -text [::msgcat::mc {Not available}]
+	label $fr.e2 -text [mc {Not available}]
+	label $fr.f2 -text [mc {Not available}]
 	label $fr.g2 -text "$boolToYesNo($prefs(makeSafeServ))"
 
     }
@@ -843,7 +843,7 @@ proc ::Dialogs::ShowInfoServer { } {
     # button part
     pack [frame $w.frbot -borderwidth 0] -in $w.frall -fill both  \
       -padx 8 -pady 6
-    pack [button $w.btok -text [::msgcat::mc OK]  \
+    pack [button $w.btok -text [mc OK]  \
       -command "destroy $w"]  \
       -in $w.frbot -side right -padx 5 -pady 5
     wm resizable $w 0 0
@@ -971,7 +971,7 @@ proc ::Dialogs::AboutQuickTimeTcl { } {
     } else {
 
     }
-    wm title $w [::msgcat::mc {About QuickTimeTcl}]
+    wm title $w [mc {About QuickTimeTcl}]
     
     pack [movie $w.m -file $fakeQTSampleFile]
     set theSize [$w.m size]

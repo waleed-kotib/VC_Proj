@@ -2,7 +2,7 @@
 #      
 #  Copyright (c) 1999-2003  Mats Bengtsson
 #  
-# $Id: Multicast.tcl,v 1.1 2004-06-06 06:41:31 matben Exp $
+# $Id: Multicast.tcl,v 1.2 2004-07-09 06:26:06 matben Exp $
 
 package provide Multicast 1.0
 
@@ -39,7 +39,7 @@ proc ::Multicast::OpenMulticast {wtop} {
     set w $wDlgs(openMulti)[incr uid]
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox}
-    wm title $w [::msgcat::mc {Open Stream}]
+    wm title $w [mc {Open Stream}]
     set fontSB [option get . fontSmallBold {}]
     
     # Global frame.
@@ -48,13 +48,13 @@ proc ::Multicast::OpenMulticast {wtop} {
     
     # Labelled frame.
     set wcfr $w.frall.fr
-    labelframe $wcfr -text [::msgcat::mc openquicktime]
+    labelframe $wcfr -text [mc openquicktime]
     pack $wcfr -side top -fill both -padx 8 -pady 4 -ipadx 10 -ipady 6 -in $w.frall
     
     # Overall frame for whole container.
     set frtot [frame $wcfr.frin]
     pack $frtot
-    label $frtot.lbltop -text [::msgcat::mc writeurl] -font $fontSB
+    label $frtot.lbltop -text [mc writeurl] -font $fontSB
     set shorts [lindex $prefs(shortsMulticastQT) 0]
     set optMenu [eval {tk_optionMenu $frtot.optm  \
       [namespace current]::selMulticastName} $shorts]
@@ -64,7 +64,7 @@ proc ::Multicast::OpenMulticast {wtop} {
     entry $frtot.entip -width 60   \
       -textvariable [namespace current]::txtvarEntMulticast
     message $frtot.msg -borderwidth 0 -aspect 500 \
-      -text [::msgcat::mc openquicktimeurlmsg]
+      -text [mc openquicktimeurlmsg]
     grid $frtot.lbltop -column 0 -row 0 -sticky sw -padx 0 -pady 2 -columnspan 2
     grid $frtot.optm -column 2 -row 0 -sticky e -padx 2 -pady 2
     grid $frtot.lblhttp -column 0 -row 1 -sticky e -padx 0 -pady 6
@@ -73,16 +73,16 @@ proc ::Multicast::OpenMulticast {wtop} {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]  
-    pack [button $frbot.btconn -text [::msgcat::mc Open] -default active  \
+    pack [button $frbot.btconn -text [mc Open] -default active  \
       -command [list Multicast::OpenMulticastQTStream $wtop $frtot.entip]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
+    pack [button $frbot.btcancel -text [mc Cancel]  \
       -command "set [namespace current]::finished 0"]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btedit -text "[::msgcat::mc Edit]..."   \
+    pack [button $frbot.btedit -text "[mc Edit]..."   \
       -command [list Multicast::DoAddOrEditQTMulticastShort edit $frtot.optm]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btadd -text "[::msgcat::mc Add]..."   \
+    pack [button $frbot.btadd -text "[mc Add]..."   \
       -command [list Multicast::DoAddOrEditQTMulticastShort add $frtot.optm]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -in $w.frall  \

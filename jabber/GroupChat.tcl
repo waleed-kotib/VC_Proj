@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.63 2004-06-06 15:42:49 matben Exp $
+# $Id: GroupChat.tcl,v 1.64 2004-07-09 06:26:05 matben Exp $
 
 package require History
 
@@ -380,7 +380,7 @@ proc ::Jabber::GroupChat::BuildEnter {args} {
     ::Debug 2 "    service getjidsfor groupchat: '$chatservers'"
     
     if {[llength $chatservers] == 0} {
-	tk_messageBox -icon error -message [::msgcat::mc jamessnogchat]
+	tk_messageBox -icon error -message [mc jamessnogchat]
 	return
     }
 
@@ -391,7 +391,7 @@ proc ::Jabber::GroupChat::BuildEnter {args} {
     
     set w $wDlgs(jgcenter)[incr dlguid]
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
-    wm title $w [::msgcat::mc {Enter/Create Room}]
+    wm title $w [mc {Enter/Create Room}]
     set enter(w) $w
     array set enter {
 	finished    -1
@@ -410,19 +410,19 @@ proc ::Jabber::GroupChat::BuildEnter {args} {
     set enter(server) [lindex $chatservers 0]
     set frmid $w.frall.mid
     pack [frame $frmid] -side top -fill both -expand 1
-    set msg [::msgcat::mc jagchatmsg]
+    set msg [mc jagchatmsg]
     message $frmid.msg -width 260 -text $msg
-    label $frmid.lserv -text "[::msgcat::mc Servers]:" -anchor e
+    label $frmid.lserv -text "[mc Servers]:" -anchor e
 
     set wcomboserver $frmid.eserv
     ::combobox::combobox $wcomboserver -width 18  \
       -textvariable $token\(server)
     eval {$frmid.eserv list insert end} $chatservers
-    label $frmid.lroom -text "[::msgcat::mc Room]:" -anchor e
+    label $frmid.lroom -text "[mc Room]:" -anchor e
     entry $frmid.eroom -width 24    \
       -textvariable $token\(roomname) -validate key  \
       -validatecommand {::Jabber::ValidateUsernameStr %S}
-    label $frmid.lnick -text "[::msgcat::mc {Nick name}]:" \
+    label $frmid.lnick -text "[mc {Nick name}]:" \
       -anchor e
     entry $frmid.enick -width 24    \
       -textvariable $token\(nickname) -validate key  \
@@ -448,10 +448,10 @@ proc ::Jabber::GroupChat::BuildEnter {args} {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btok -text [::msgcat::mc Enter] -default active \
+    pack [button $frbot.btok -text [mc Enter] -default active \
       -command [list [namespace current]::DoEnter $token]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]   \
+    pack [button $frbot.btcancel -text [mc Cancel]   \
       -command [list [namespace current]::Cancel $token]]  \
       -side right -padx 5 -pady 5  
     pack $frbot -side bottom -fill x
@@ -487,8 +487,8 @@ proc ::Jabber::GroupChat::DoEnter {token} {
     # Verify the fields first.
     if {($enter(server) == "") || ($enter(roomname) == "") ||  \
       ($enter(nickname) == "")} {
-	tk_messageBox -title [::msgcat::mc Warning] -type ok -message \
-	  [::msgcat::mc jamessgchatfields] -parent $enter(w)
+	tk_messageBox -title [mc Warning] -type ok -message \
+	  [mc jamessgchatfields] -parent $enter(w)
 	return
     }
 
@@ -628,7 +628,7 @@ proc ::Jabber::GroupChat::Build {roomjid args} {
     } else {
 	set tittxt $roomjid
     }
-    wm title $w "[::msgcat::mc Groupchat]: $tittxt"
+    wm title $w "[mc Groupchat]: $tittxt"
     
     set fontS  [option get . fontSmall {}]
     set fontSB [option get . fontSmallBold {}]
@@ -689,10 +689,10 @@ proc ::Jabber::GroupChat::Build {roomjid args} {
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
     pack $frbot -side bottom -fill x -padx 10 -pady 8
-    pack [button $frbot.btok -text [::msgcat::mc Send]  \
+    pack [button $frbot.btok -text [mc Send]  \
       -default active -command [list [namespace current]::Send $token]] \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Exit]  \
+    pack [button $frbot.btcancel -text [mc Exit]  \
       -command [list [namespace current]::Exit $token]]  \
       -side right -padx 5  
     pack [::Emoticons::MenuButton $frbot.smile -text $wtextsnd]  \
@@ -704,7 +704,7 @@ proc ::Jabber::GroupChat::Build {roomjid args} {
     pack $wbtstatus -side right -padx 6
     ::Jabber::GroupChat::ConfigStatusMenuButton $token $wbtstatus available
 
-    pack [checkbutton $frbot.active -text " [::msgcat::mc {Active <Return>}]" \
+    pack [checkbutton $frbot.active -text " [mc {Active <Return>}]" \
       -command [list [namespace current]::ActiveCmd $token] \
       -variable $token\(active)]  \
       -side left -padx 5
@@ -715,11 +715,11 @@ proc ::Jabber::GroupChat::Build {roomjid args} {
     set   frtop [frame $w.frall.frtop -borderwidth 0]
     pack  $frtop -side top -fill x
     set wbtsubject $frtop.btp
-    button $frtop.btp -text "[::msgcat::mc Topic]:" -font $fontS  \
+    button $frtop.btp -text "[mc Topic]:" -font $fontS  \
       -command [list [namespace current]::SetTopic $token]
     entry $frtop.etp -textvariable $token\(subject) -state disabled
     set wbtnick $frtop.bni
-    button $wbtnick -text "[::msgcat::mc {Nick name}]..."  \
+    button $wbtnick -text "[mc {Nick name}]..."  \
       -font $fontS -command [list ::Jabber::MUC::SetNick $roomjid]
     
     grid $frtop.btp -column 0 -row 0 -sticky w -padx 6 -pady 1
@@ -1009,10 +1009,10 @@ proc ::Jabber::GroupChat::SetTopic {token} {
     set topic   $state(subject)
     set roomjid $state(roomjid)
     set ans [::UI::MegaDlgMsgAndEntry  \
-      [::msgcat::mc {Set New Topic}]  \
-      [::msgcat::mc jasettopic]  \
-      "[::msgcat::mc {New Topic}]:"  \
-      topic [::msgcat::mc Cancel] [::msgcat::mc OK]]
+      [mc {Set New Topic}]  \
+      [mc jasettopic]  \
+      "[mc {New Topic}]:"  \
+      topic [mc Cancel] [mc OK]]
 
     if {($ans == "ok") && ($topic != "")} {
 	if {[catch {
@@ -1035,8 +1035,8 @@ proc ::Jabber::GroupChat::Send {token} {
     
     # Check that still connected to server.
     if {![::Jabber::IsConnected]} {
-	tk_messageBox -type ok -icon error -title [::msgcat::mc {Not Connected}] \
-	  -message [::msgcat::mc jamessnotconnected]
+	tk_messageBox -type ok -icon error -title [mc {Not Connected}] \
+	  -message [mc jamessnotconnected]
 	return
     }
     set wtextsnd $state(wtextsnd)
@@ -1396,7 +1396,7 @@ proc ::Jabber::GroupChat::Popup {w v x y} {
     foreach {item type cmd} $popMenuDefs(groupchat,def) {
 	if {[string index $cmd 0] == "@"} {
 	    set mt [menu ${m}.sub${i} -tearoff 0]
-	    set locname [::msgcat::mc $item]
+	    set locname [mc $item]
 	    $m add cascade -label $locname -menu $mt -state disabled
 	    eval [string range $cmd 1 end] $mt
 	    incr i
@@ -1407,7 +1407,7 @@ proc ::Jabber::GroupChat::Popup {w v x y} {
 	    
 	    # Substitute the jid arguments.
 	    set cmd [subst -nocommands $cmd]
-	    set locname [::msgcat::mc $item]
+	    set locname [mc $item]
 	    $m add command -label $locname -command "after 40 $cmd"  \
 	      -state disabled
 	}
@@ -1490,7 +1490,7 @@ proc ::Jabber::GroupChat::Save {token} {
     set wtext   $state(wtext)
     set roomjid $state(roomjid)
     
-    set ans [tk_getSaveFile -title [::msgcat::mc Save] \
+    set ans [tk_getSaveFile -title [mc Save] \
       -initialfile "Groupchat ${roomjid}.txt"]
     
     if {[string length $ans]} {
@@ -1551,7 +1551,7 @@ proc ::Jabber::GroupChat::Exit {token} {
     
     if {[::Jabber::IsConnected]} {
 	set ans [eval {tk_messageBox -icon warning -type yesno  \
-	  -message [::msgcat::mc jamesswarnexitroom $roomjid]} $opts]
+	  -message [mc jamesswarnexitroom $roomjid]} $opts]
 	if {$ans == "yes"} {
 	    ::Jabber::GroupChat::Close $token
 	    ::Jabber::JlibCmd service exitroom $roomjid
@@ -1653,7 +1653,7 @@ proc ::Jabber::GroupChat::InitPrefsHook { } {
 
 proc ::Jabber::GroupChat::BuildPrefsHook {wtree nbframe} {
     
-    $wtree newitem {Jabber Conference} -text [::msgcat::mc Conference]
+    $wtree newitem {Jabber Conference} -text [mc Conference]
     
     # Conference page ------------------------------------------------------
     set wpage [$nbframe page {Conference}]
@@ -1670,7 +1670,7 @@ proc ::Jabber::GroupChat::BuildPageConf {page} {
     
     # Conference (groupchat) stuff.
     set labfr $page.fr
-    labelframe $labfr -text [::msgcat::mc {Preferred Protocol}]
+    labelframe $labfr -text [mc {Preferred Protocol}]
     pack $labfr -side top -anchor w -padx 8 -pady 4
     set pbl [frame $labfr.frin]
     pack $pbl -padx 10 -pady 6 -side left
@@ -1679,7 +1679,7 @@ proc ::Jabber::GroupChat::BuildPageConf {page} {
       val {gc-1.0                     muc}   \
       txt {{Groupchat-1.0 (fallback)} prefmucconf} {
 	set wrad ${pbl}.[string map {. ""} $val]
-	radiobutton $wrad -text [::msgcat::mc $txt] -value $val  \
+	radiobutton $wrad -text [mc $txt] -value $val  \
 	  -variable [namespace current]::tmpJPrefs(prefgchatproto)	      
 	grid $wrad -sticky w -pady $ypad
     }

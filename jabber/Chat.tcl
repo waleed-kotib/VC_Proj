@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.65 2004-06-23 07:53:38 matben Exp $
+# $Id: Chat.tcl,v 1.66 2004-07-09 06:26:05 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -137,7 +137,7 @@ proc ::Jabber::Chat::StartThreadDlg {args} {
     
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document closeBox}
-    wm title $w [::msgcat::mc {Start Chat}]
+    wm title $w [mc {Start Chat}]
     
     set fontSB [option get . fontSmallBold {}]
     
@@ -145,7 +145,7 @@ proc ::Jabber::Chat::StartThreadDlg {args} {
     frame $w.frall -borderwidth 1 -relief raised
     pack  $w.frall -fill both -expand 1 -ipadx 12 -ipady 4
     
-    ::headlabel::headlabel $w.frall.head -text [::msgcat::mc {Chat with}]
+    ::headlabel::headlabel $w.frall.head -text [mc {Chat with}]
     pack $w.frall.head -side top -fill both -expand 1
     
     # Entries etc.
@@ -153,7 +153,7 @@ proc ::Jabber::Chat::StartThreadDlg {args} {
     pack $frmid -side top -fill both -expand 1
     
     set jidlist [::Jabber::RosterCmd getusers -type available]
-    label $frmid.luser -text "[::msgcat::mc {Jabber user id}]:"  \
+    label $frmid.luser -text "[mc {Jabber user id}]:"  \
       -font $fontSB -anchor e
     ::entrycomp::entrycomp $frmid.euser $jidlist -width 26    \
       -textvariable [namespace current]::user
@@ -162,10 +162,10 @@ proc ::Jabber::Chat::StartThreadDlg {args} {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btok -text [::msgcat::mc OK] \
+    pack [button $frbot.btok -text [mc OK] \
       -default active -command [list [namespace current]::DoStart $w]] \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
+    pack [button $frbot.btcancel -text [mc Cancel]  \
       -command [list [namespace current]::DoCancel $w]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
@@ -549,16 +549,16 @@ proc ::Jabber::Chat::Build {threadID args} {
     # Button part.
     pack [frame $w.frall.pady -height 8] -side bottom
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btok -text [::msgcat::mc Send] -default active \
+    pack [button $frbot.btok -text [mc Send] -default active \
       -command [list [namespace current]::Send $dlgtoken]]  \
       -side right -padx 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Close]  \
+    pack [button $frbot.btcancel -text [mc Close]  \
       -command [list [namespace current]::Close $dlgtoken]]  \
       -side right -padx 5
     set cmd [list [namespace current]::SmileyCmd $dlgtoken]
     pack [::Emoticons::MenuButton $frbot.smile -command $cmd]  \
       -side right -padx 5
-    pack [checkbutton $frbot.active -text " [::msgcat::mc {Active <Return>}]" \
+    pack [checkbutton $frbot.active -text " [mc {Active <Return>}]" \
       -command [list [namespace current]::ActiveCmd $dlgtoken] \
       -variable $dlgtoken\(active)]  \
       -side left -padx 5
@@ -696,7 +696,7 @@ proc ::Jabber::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set icon [::Jabber::Roster::GetPresenceIconEx $jid]
 
     frame $frtop.fsub
-    label $frtop.fsub.l -text "[::msgcat::mc Subject]:"
+    label $frtop.fsub.l -text "[mc Subject]:"
     entry $frtop.fsub.e -textvariable $chattoken\(subject)
     label $frtop.fsub.i -image $icon
     pack  $frtop.fsub -side top -anchor w -padx 6 -pady 2 -fill x
@@ -712,7 +712,7 @@ proc ::Jabber::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     pack [label $wnotifier -textvariable $chattoken\(notifier)  \
       -pady 0 -bd 0 -compound left] -side left -pady 0
     if {$jprefs(chat,tabbedui)} {
-	pack [button $wclose -text [::msgcat::mc {Close Thread}] \
+	pack [button $wclose -text [mc {Close Thread}] \
 	  -command [list [namespace current]::CloseThread $chattoken] \
 	  -font $fontS] \
 	  -pady 0 -padx 2 -side right
@@ -794,9 +794,9 @@ proc ::Jabber::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
 proc ::Jabber::Chat::SetTitle {w rosterName fromjid} {
     
     if {$rosterName == ""} {
-	wm title $w "[::msgcat::mc Chat]: $fromjid"
+	wm title $w "[mc Chat]: $fromjid"
     } else {
-	wm title $w "[::msgcat::mc Chat]: $rosterName ($fromjid)"
+	wm title $w "[mc Chat]: $rosterName ($fromjid)"
     }
 }
 
@@ -1224,8 +1224,8 @@ proc ::Jabber::Chat::Send {dlgtoken} {
     
     # Check that still connected to server.
     if {![::Jabber::IsConnected]} {
-	tk_messageBox -type ok -icon error -title [::msgcat::mc {Not Connected}] \
-	  -message [::msgcat::mc jamessnotconnected]
+	tk_messageBox -type ok -icon error -title [mc {Not Connected}] \
+	  -message [mc jamessnotconnected]
 	return
     }
     set chattoken [::Jabber::Chat::GetActiveChatToken $dlgtoken]
@@ -1245,7 +1245,7 @@ proc ::Jabber::Chat::Send {dlgtoken} {
     
     if {![jlib::jidvalidate $jid]} {
 	set ans [tk_messageBox -message [FormatTextForMessageBox  \
-	  [::msgcat::mc jamessbadjid $jid]] \
+	  [mc jamessbadjid $jid]] \
 	  -icon error -type yesno]
 	if {[string equal $ans "no"]} {
 	    return
@@ -1318,7 +1318,7 @@ proc ::Jabber::Chat::TraceJid {dlgtoken name junk1 junk2} {
     
     # Call by name.
     upvar $name locName    
-    wm title $dlgstate(w) "[::msgcat::mc Chat] ($chatstate(fromjid))"
+    wm title $dlgstate(w) "[mc Chat] ($chatstate(fromjid))"
 }
 
 proc ::Jabber::Chat::SendFile {dlgtoken} {
@@ -1349,7 +1349,7 @@ proc ::Jabber::Chat::Save {dlgtoken} {
 
     set wtext $chatstate(wtext)
     
-    set ans [tk_getSaveFile -title [::msgcat::mc Save] \
+    set ans [tk_getSaveFile -title [mc Save] \
       -initialfile "Chat $chatstate(fromjid).txt"]
     
     if {[string length $ans]} {
@@ -1529,7 +1529,7 @@ proc ::Jabber::Chat::Close {dlgtoken} {
     set ans "yes"
     if {0} {
 	set ans [tk_messageBox -icon info -parent $w -type yesno \
-	  -message [FormatTextForMessageBox [::msgcat::mc jamesschatclose]]]
+	  -message [FormatTextForMessageBox [mc jamesschatclose]]]
     }
     if {$ans == "yes"} {
 	set chattoken [::Jabber::Chat::GetActiveChatToken $dlgtoken]
@@ -1622,7 +1622,7 @@ proc ::Jabber::Chat::XEventRecv {chattoken xevent args} {
 	upvar 0 $dlgtoken dlgstate
 
 	$chatstate(wnotifier) configure -image $dlgstate(iconNotifier)
-	set chatstate(notifier) " [::msgcat::mc chatcompreply $name]"
+	set chatstate(notifier) " [mc chatcompreply $name]"
     } elseif {($composeElem == "") && ($idElem != "")} {
 	
 	# 3) Cancellations of message composing
@@ -1784,7 +1784,7 @@ proc ::Jabber::Chat::BuildHistoryForJid {jid} {
     set jid [jlib::jidmap $jid]
     set w $wDlgs(jchist)[incr uidhist]
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
-    wm title $w "[::msgcat::mc {Chat History}]: $jid"
+    wm title $w "[mc {Chat History}]: $jid"
     
     set wtxt  $w.frall.fr
     set wtext $wtxt.t
@@ -1796,15 +1796,15 @@ proc ::Jabber::Chat::BuildHistoryForJid {jid} {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btclose -text [::msgcat::mc Close] \
+    pack [button $frbot.btclose -text [mc Close] \
       -command "destroy $w"] -side right -padx 5 -pady 5
-    pack [button $frbot.btclear -text [::msgcat::mc Clear]  \
+    pack [button $frbot.btclear -text [mc Clear]  \
       -command [list [namespace current]::ClearHistory $jid $wtext]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btprint -text [::msgcat::mc Print]  \
+    pack [button $frbot.btprint -text [mc Print]  \
       -command [list [namespace current]::PrintHistory $wtext]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btsave -text [::msgcat::mc Save]  \
+    pack [button $frbot.btsave -text [mc Save]  \
       -command [list [namespace current]::SaveHistory $jid $wtext]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side bottom -fill x -padx 8 -pady 6
@@ -1845,7 +1845,7 @@ proc ::Jabber::Chat::BuildHistoryForJid {jid} {
 	foreach thread $allThreads {
 	    set when [clock format [clock scan $threadDate($thread)]  \
 	      -format "%A %e %B %Y"]
-	    $wtext insert end "[::msgcat::mc {Thread started}] $when\n" histhead
+	    $wtext insert end "[mc {Thread started}] $when\n" histhead
 	    
 	    for {set i $uidstart} {$i <= $uidstop} {incr i} {
 		foreach {cjid cthread time body} $message($i) break
@@ -1903,7 +1903,7 @@ proc ::Jabber::Chat::PrintHistory {wtext} {
 proc ::Jabber::Chat::SaveHistory {jid wtext} {
     global  this
 	
-    set ans [tk_getSaveFile -title [::msgcat::mc Save] \
+    set ans [tk_getSaveFile -title [mc Save] \
       -initialfile "Chat ${jid}.txt"]
 
     if {[string length $ans]} {
@@ -1934,7 +1934,7 @@ proc ::Jabber::Chat::InitPrefsHook { } {
 
 proc ::Jabber::Chat::BuildPrefsHook {wtree nbframe} {
     
-    $wtree newitem {Jabber Chat} -text [::msgcat::mc Chat]
+    $wtree newitem {Jabber Chat} -text [mc Chat]
     
     set wpage [$nbframe page {Chat}]    
     ::Jabber::Chat::BuildPrefsPage $wpage
@@ -1952,21 +1952,21 @@ proc ::Jabber::Chat::BuildPrefsPage {wpage} {
     }
     
     set labfr ${wpage}.alrt
-    labelframe $labfr -text [::msgcat::mc {Chat}]
+    labelframe $labfr -text [mc {Chat}]
     pack $labfr -side top -anchor w -padx 8 -pady 4
     
     set fr $labfr.fr
     pack [frame $fr] -side top -anchor w -padx 10 -pady 2
  
-    checkbutton $fr.active -text " [::msgcat::mc prefchactret]"  \
+    checkbutton $fr.active -text " [mc prefchactret]"  \
       -variable [namespace current]::tmpJPrefs(chatActiveRet)
-    checkbutton $fr.newwin -text " [::msgcat::mc prefcushow]" \
+    checkbutton $fr.newwin -text " [mc prefcushow]" \
       -variable [namespace current]::tmpJPrefs(showMsgNewWin)
-    label $fr.lmb2 -text [::msgcat::mc prefcu2clk]
-    radiobutton $fr.rb2new -text " [::msgcat::mc prefcuopen]" \
+    label $fr.lmb2 -text [mc prefcu2clk]
+    radiobutton $fr.rb2new -text " [mc prefcuopen]" \
       -value newwin -variable [namespace current]::tmpJPrefs(inbox2click)
     radiobutton $fr.rb2re   \
-      -text " [::msgcat::mc prefcureply]" -value reply \
+      -text " [mc prefcureply]" -value reply \
       -variable [namespace current]::tmpJPrefs(inbox2click)
 
     grid $fr.active -sticky w

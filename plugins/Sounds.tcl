@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Sounds.tcl,v 1.2 2004-06-17 13:24:19 matben Exp $
+# $Id: Sounds.tcl,v 1.3 2004-07-09 06:26:06 matben Exp $
 
 namespace eval ::Sounds:: {
         
@@ -353,7 +353,7 @@ proc ::Sounds::BuildPrefsHook {wtree nbframe} {
     
     if {$priv(canPlay)} {
 	$wtree newitem {General Sounds}  \
-	  -text [::msgcat::mc {Sounds}]
+	  -text [mc {Sounds}]
 
 	set wpage [$nbframe page {Sounds}]    
 	::Sounds::BuildPrefsPage $wpage
@@ -373,20 +373,20 @@ proc ::Sounds::BuildPrefsPage {wpage} {
 	set tmpPrefs($name) $sprefs($name)
     }
     if {[string equal $sprefs(soundSet) ""]} {
-	set tmpPrefs(soundSet) [::msgcat::mc Default]
+	set tmpPrefs(soundSet) [mc Default]
     } else {
 	set tmpPrefs(soundSet) $sprefs(soundSet)
     }
     
     set labpalrt $wpage.alrt
-    labelframe $labpalrt -text [::msgcat::mc {Alert sounds}]
+    labelframe $labpalrt -text [mc {Alert sounds}]
     pack $labpalrt -side top -anchor w -padx 8 -pady 4
     
     set frs $labpalrt.frs
     pack [frame $frs] -side top -anchor w -padx 8 -pady 2
     
-    set soundSets [concat [list [::msgcat::mc Default]] [::Sounds::GetAllSets]]
-    label $frs.lsets -text "[::msgcat::mc {Sound Set}]:"
+    set soundSets [concat [list [mc Default]] [::Sounds::GetAllSets]]
+    label $frs.lsets -text "[mc {Sound Set}]:"
     set wpopsets $frs.popsets
     set wpopupmenu [eval {tk_optionMenu $wpopsets   \
       [namespace current]::tmpPrefs(soundSet)} $soundSets]
@@ -395,15 +395,15 @@ proc ::Sounds::BuildPrefsPage {wpage} {
     
     set fr $labpalrt.fr
     pack [frame $fr] -side left
-    label $fr.lbl -text [::msgcat::mc prefsounpick]
+    label $fr.lbl -text [mc prefsounpick]
     grid $fr.lbl -columnspan 2 -sticky w -padx 10
 
     set row 1
     foreach name $allSounds {
 	set txt $nameToText($name)
-	checkbutton $fr.$name -text "  [::msgcat::mc $txt]"  \
+	checkbutton $fr.$name -text "  [mc $txt]"  \
 	  -variable [namespace current]::tmpPrefs($name)
-	button $fr.b${name} -text [::msgcat::mc Play] \
+	button $fr.b${name} -text [mc Play] \
 	  -font $fontS \
 	  -command [list [namespace current]::PlayTmpPrefSound $name]
 	grid $fr.$name    -column 0 -row $row -sticky w  -padx 8
@@ -420,7 +420,7 @@ proc ::Sounds::PlayTmpPrefSound {name} {
     
     array set sound [array get soundIndex]
     
-    if {[string equal $tmpPrefs(soundSet) [::msgcat::mc Default]]} {
+    if {[string equal $tmpPrefs(soundSet) [mc Default]]} {
 	set path $this(soundsPath)
     } else {
 	set path [file join $this(soundsPath) $tmpPrefs(soundSet)]
@@ -468,7 +468,7 @@ proc ::Sounds::SavePrefsHook { } {
     if {!$priv(canPlay)} {
 	return
     }
-    if {[string equal $tmpPrefs(soundSet) [::msgcat::mc Default]]} {
+    if {[string equal $tmpPrefs(soundSet) [mc Default]]} {
 	set tmpPrefs(soundSet) ""
     }
     if {![string equal $tmpPrefs(soundSet) $sprefs(soundSet)]} {
@@ -494,7 +494,7 @@ proc ::Sounds::CancelPrefsHook { } {
 	    ::Preferences::HasChanged
 	}
     }
-    if {[string equal $tmpPrefs(soundSet) [::msgcat::mc Default]]} {
+    if {[string equal $tmpPrefs(soundSet) [mc Default]]} {
 	set tmpPrefs(soundSet) ""
     }
     if {![string equal $sprefs(soundSet) $tmpPrefs(soundSet)]} {
@@ -511,7 +511,7 @@ proc ::Sounds::UserDefaultsHook { } {
 	set tmpPrefs($name) $sprefs($name)
     }
     if {[string equal $sprefs(soundSet) ""]} {
-	set tmpPrefs(soundSet) [::msgcat::mc Default]
+	set tmpPrefs(soundSet) [mc Default]
     } else {
 	set tmpPrefs(soundSet) $sprefs(soundSet)
     }

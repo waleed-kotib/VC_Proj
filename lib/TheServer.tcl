@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: TheServer.tcl,v 1.22 2004-05-06 13:41:11 matben Exp $
+# $Id: TheServer.tcl,v 1.23 2004-07-09 06:26:06 matben Exp $
     
 # DoStartServer ---
 #
@@ -22,7 +22,7 @@ proc DoStartServer {thisServPort} {
     
     if {[catch {socket -server SetupChannel $thisServPort} sock]} {
 	after 500 {tk_messageBox -message [FormatTextForMessageBox \
-	  [::msgcat::mc messfailserver]]  \
+	  [mc messfailserver]]  \
 	  -icon error -type ok}
     } else {
 	set state(serverSocket) $sock

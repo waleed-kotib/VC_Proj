@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.44 2004-07-02 14:08:00 matben Exp $
+# $Id: JUI.tcl,v 1.45 2004-07-09 06:26:05 matben Exp $
 
 package provide JUI 1.0
 
@@ -297,7 +297,7 @@ proc ::Jabber::UI::Build {w} {
     
     # Make the notebook pages.
     # Start with the Roster page -----------------------------------------------
-    set ro [$nbframe newpage {Roster} -text [::msgcat::mc Roster]  \
+    set ro [$nbframe newpage {Roster} -text [mc Roster]  \
       -image $iconRoster]    
     pack [::Jabber::Roster::Build $ro.ro] -fill both -expand 1
 
@@ -350,13 +350,13 @@ proc ::Jabber::UI::LoginCmd { } {
 
     # Update UI in Roster window.
     set server [::Jabber::GetServerJid]
-    ::Jabber::UI::SetStatusMessage [::msgcat::mc jaauthok $server]
+    ::Jabber::UI::SetStatusMessage [mc jaauthok $server]
     ::Jabber::UI::FixUIWhen "connectfin"
 }
 
 proc ::Jabber::UI::LogoutHook { } {
     
-    ::Jabber::UI::SetStatusMessage [::msgcat::mc {Logged out}]
+    ::Jabber::UI::SetStatusMessage [mc {Logged out}]
     ::Jabber::UI::FixUIWhen "disconnect"
     ::Jabber::UI::WhenSetStatus "unavailable"
     
@@ -650,7 +650,7 @@ proc ::Jabber::UI::FixUIWhen {what} {
 	    $jwapp(elplug) configure -image $contactOnImage
 	    ::UI::MenuMethod $wmj entryconfigure mNewAccount -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mLogin  \
-	      -label [::msgcat::mc mLogout] -state normal
+	      -label [mc mLogout] -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mLogoutWith -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mPassword -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mSearch -state normal
@@ -673,7 +673,7 @@ proc ::Jabber::UI::FixUIWhen {what} {
 	    $jwapp(elplug) configure -image $contactOffImage
 	    ::UI::MenuMethod $wmj entryconfigure mNewAccount -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mLogin  \
-	      -label [::msgcat::mc mLogin] -state normal
+	      -label [mc mLogin] -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mLogoutWith -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mPassword -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mSearch -state disabled

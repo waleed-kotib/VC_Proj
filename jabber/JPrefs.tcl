@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.10 2004-07-03 12:54:37 matben Exp $
+# $Id: JPrefs.tcl,v 1.11 2004-07-09 06:26:05 matben Exp $
 
 package provide JPrefs 1.0
 
@@ -92,10 +92,10 @@ proc ::Jabber::JPrefs::InitPrefsHook { } {
 
 proc ::Jabber::JPrefs::BuildPrefsHook {wtree nbframe} {
     
-    $wtree newitem {Jabber {Auto Away}} -text [::msgcat::mc {Auto Away}]
-    $wtree newitem {Jabber {Personal Info}} -text [::msgcat::mc {Personal Info}]
-    $wtree newitem {Jabber Appearence} -text [::msgcat::mc Appearence]
-    $wtree newitem {Jabber Customization} -text [::msgcat::mc Customization]
+    $wtree newitem {Jabber {Auto Away}} -text [mc {Auto Away}]
+    $wtree newitem {Jabber {Personal Info}} -text [mc {Personal Info}]
+    $wtree newitem {Jabber Appearence} -text [mc Appearence]
+    $wtree newitem {Jabber Customization} -text [mc Customization]
 
     # Auto Away page -------------------------------------------------------
     set wpage [$nbframe page {Auto Away}]
@@ -127,22 +127,22 @@ proc ::Jabber::JPrefs::BuildAutoAwayPage {page} {
     
     # Auto away stuff.
     set labfrpbl $page.fr
-    labelframe $labfrpbl -text [::msgcat::mc {Auto Away}]
+    labelframe $labfrpbl -text [mc {Auto Away}]
     pack $labfrpbl -side top -anchor w -padx 8 -pady 4
     set pbl [frame $labfrpbl.frin]
     pack $pbl -padx 10 -pady 6 -side left
-    pack [label $pbl.lab -text [::msgcat::mc prefaaset]] \
+    pack [label $pbl.lab -text [mc prefaaset]] \
       -side top -anchor w
     
     pack [frame $pbl.frma] -side top -anchor w
     checkbutton $pbl.frma.lminaw -anchor w \
-      -text "  [::msgcat::mc prefminaw]"  \
+      -text "  [mc prefminaw]"  \
       -variable [namespace current]::tmpJPrefs(autoaway)
     entry $pbl.frma.eminaw -width 3  \
       -validate key -validatecommand {::Utils::ValidMinutes %S} \
       -textvariable [namespace current]::tmpJPrefs(awaymin)
     checkbutton $pbl.frma.lminxa -anchor w \
-      -text "  [::msgcat::mc prefminea]"  \
+      -text "  [mc prefminea]"  \
       -variable [namespace current]::tmpJPrefs(xautoaway)
     entry $pbl.frma.eminxa -width 3  \
       -validate key -validatecommand {::Utils::ValidMinutes %S} \
@@ -153,10 +153,10 @@ proc ::Jabber::JPrefs::BuildAutoAwayPage {page} {
     grid $pbl.frma.eminxa -column 1 -row 1 -sticky w
 
     pack [frame $pbl.frmsg] -side top -fill x -anchor w
-    label $pbl.frmsg.lawmsg -text "[::msgcat::mc {Away status}]:"
+    label $pbl.frmsg.lawmsg -text "[mc {Away status}]:"
     entry $pbl.frmsg.eawmsg -width 32  \
       -textvariable [namespace current]::tmpJPrefs(awaymsg)
-    label $pbl.frmsg.lxa -text "[::msgcat::mc {Extended Away status}]:"
+    label $pbl.frmsg.lxa -text "[mc {Extended Away status}]:"
     entry $pbl.frmsg.examsg -width 32  \
       -textvariable [namespace current]::tmpJPrefs(xawaymsg)
     
@@ -167,12 +167,12 @@ proc ::Jabber::JPrefs::BuildAutoAwayPage {page} {
     
     # Default logout status.
     set labfrstat $page.frstat
-    labelframe $labfrstat -text [::msgcat::mc {Default Logout Status}]
+    labelframe $labfrstat -text [mc {Default Logout Status}]
     pack $labfrstat -side top -anchor w -padx 8 -pady 4
     set pstat [frame $labfrstat.frin]
     pack $pstat -padx 10 -pady 6 -side left
 
-    label $pstat.l -text "[::msgcat::mc {Status when logging out}]:"
+    label $pstat.l -text "[mc {Status when logging out}]:"
     entry $pstat.e -width 32  \
       -textvariable [namespace current]::tmpJPrefs(logoutStatus)
     grid $pstat.l -column 0 -row 0 -sticky e
@@ -184,21 +184,21 @@ proc ::Jabber::JPrefs::BuildPersInfoPage {wpage} {
     variable tmpJPrefs
     
     set ppers ${wpage}.fr
-    labelframe $ppers -text [::msgcat::mc {Personal Information}]
+    labelframe $ppers -text [mc {Personal Information}]
     pack $ppers -side top -anchor w -padx 8 -pady 4
 
-    message $ppers.msg -text [::msgcat::mc prefpers] -aspect 800
+    message $ppers.msg -text [mc prefpers] -aspect 800
     grid $ppers.msg -columnspan 2 -sticky w
     
-    label $ppers.first -text "[::msgcat::mc {First name}]:"
-    label $ppers.last -text "[::msgcat::mc {Last name}]:"
-    label $ppers.nick -text "[::msgcat::mc {Nick name}]:"
-    label $ppers.email -text "[::msgcat::mc {Email address}]:"
-    label $ppers.address -text "[::msgcat::mc {Address}]:"
-    label $ppers.city -text "[::msgcat::mc {City}]:"
-    label $ppers.state -text "[::msgcat::mc {State}]:"
-    label $ppers.phone -text "[::msgcat::mc {Phone}]:"
-    label $ppers.url -text "[::msgcat::mc {Url of homepage}]:"
+    label $ppers.first -text "[mc {First name}]:"
+    label $ppers.last -text "[mc {Last name}]:"
+    label $ppers.nick -text "[mc {Nick name}]:"
+    label $ppers.email -text "[mc {Email address}]:"
+    label $ppers.address -text "[mc {Address}]:"
+    label $ppers.city -text "[mc {City}]:"
+    label $ppers.state -text "[mc {State}]:"
+    label $ppers.phone -text "[mc {Phone}]:"
+    label $ppers.url -text "[mc {Url of homepage}]:"
     
     set row 1
     foreach name $jprefs(iqRegisterElem) {
@@ -264,40 +264,40 @@ proc ::Jabber::JPrefs::BuildAppearencePage {page} {
     # An empty themeName is the default value.
     set tmpPrefs(themeName) $prefs(themeName)
     if {$tmpPrefs(themeName) == ""} {
-	set tmpPrefs(themeName) [::msgcat::mc None]
+	set tmpPrefs(themeName) [mc None]
     }
 
     set labfrpbl $page.fr
-    labelframe $labfrpbl -text [::msgcat::mc Appearence]
+    labelframe $labfrpbl -text [mc Appearence]
     pack $labfrpbl -side top -anchor w -padx 8 -pady 2
     set pbl [frame $labfrpbl.frin]
     pack $pbl -padx 10 -pady 6 -side left
      
-    checkbutton $pbl.tabbed -text " [::msgcat::mc prefstabui]"  \
+    checkbutton $pbl.tabbed -text " [mc prefstabui]"  \
       -variable [namespace current]::tmpJPrefs(chat,tabbedui)
 
     # Roster bg image.
-    checkbutton $pbl.bgim -text " [::msgcat::mc prefrostbgim]" \
+    checkbutton $pbl.bgim -text " [mc prefrostbgim]" \
       -variable [namespace current]::tmpJPrefs(rost,useBgImage)
-    button $pbl.bgpick -text "[::msgcat::mc {Pick}]..."  \
+    button $pbl.bgpick -text "[mc {Pick}]..."  \
       -command [list [namespace current]::PickBgImage rost] -font $fontS
-    button $pbl.bgdefk -text "[::msgcat::mc {Default}]"  \
+    button $pbl.bgdefk -text "[mc {Default}]"  \
       -command [list [namespace current]::DefaultBgImage rost] -font $fontS
 	    
     # Chat font.
-    label  $pbl.lfont -text [::msgcat::mc prefcufont]
-    button $pbl.btfont -text "[::msgcat::mc Pick]..." -font $fontS \
+    label  $pbl.lfont -text [mc prefcufont]
+    button $pbl.btfont -text "[mc Pick]..." -font $fontS \
       -command [namespace current]::PickFont
-    button $pbl.dfont -text "[::msgcat::mc {Default}]"  \
+    button $pbl.dfont -text "[mc {Default}]"  \
       -command [list set [namespace current]::tmpJprefs(chatFont) ""] -font $fontS
 
     set frtheme $pbl.ftheme
     frame $frtheme
     set wpoptheme $frtheme.pop
-    set allrsrc [concat [::msgcat::mc None] [::Theme::GetAllAvailable]]
+    set allrsrc [concat [mc None] [::Theme::GetAllAvailable]]
     set wpopupmenuin [eval {tk_optionMenu $wpoptheme   \
       [namespace current]::tmpPrefs(themeName)} $allrsrc]
-    pack [label $frtheme.l -text "[::msgcat::mc preftheme]:"] -side left
+    pack [label $frtheme.l -text "[mc preftheme]:"] -side left
     pack $wpoptheme -side left
     
     grid $pbl.tabbed -          -           -padx 2 -pady $ypad -sticky w
@@ -326,23 +326,23 @@ proc ::Jabber::JPrefs::BuildCustomPage {page} {
     }
 
     set labfrpbl $page.fr
-    labelframe $labfrpbl -text [::msgcat::mc Customization]
+    labelframe $labfrpbl -text [mc Customization]
     pack $labfrpbl -side top -anchor w -padx 8 -pady 2
     set pbl [frame $labfrpbl.frin]
     pack $pbl -padx 10 -pady 6 -side left
      
-    checkbutton $pbl.savein -text " [::msgcat::mc prefcusave]" \
+    checkbutton $pbl.savein -text " [mc prefcusave]" \
       -variable [namespace current]::tmpJPrefs(inboxSave)
         
-    label $pbl.lserv -text [::msgcat::mc prefcudisc]
+    label $pbl.lserv -text [mc prefcudisc]
     radiobutton $pbl.disco   \
-      -text " [::msgcat::mc {Disco method}]"  \
+      -text " [mc {Disco method}]"  \
       -variable [namespace current]::tmpJPrefs(serviceMethod) -value "disco"
     radiobutton $pbl.browse   \
-      -text " [::msgcat::mc prefcubrowse]"  \
+      -text " [mc prefcubrowse]"  \
       -variable [namespace current]::tmpJPrefs(serviceMethod) -value "browse"
     radiobutton $pbl.agents  \
-      -text " [::msgcat::mc prefcuagent]" -value "agents" \
+      -text " [mc prefcuagent]" -value "agents" \
       -variable [namespace current]::tmpJPrefs(serviceMethod)
     
     grid $pbl.savein -padx 2 -pady $ypad -sticky w -columnspan 2
@@ -382,7 +382,7 @@ proc ::Jabber::JPrefs::PickBgImage {where} {
 	{{GIF Files}        {.gif}        }
 	{{GIF Files}        {}        GIFF}
     }
-    set ans [tk_getOpenFile -title [::msgcat::mc {Open GIF Image}] \
+    set ans [tk_getOpenFile -title [mc {Open GIF Image}] \
       -filetypes $types -defaultextension ".gif"]
     if {$ans != ""} {
 	set tmpJPrefs($where,bgImagePath) $ans
@@ -406,7 +406,7 @@ proc ::Jabber::JPrefs::SavePrefsHook { } {
 	return
     }
     array set jprefs [array get tmpJPrefs]
-    if {$tmpPrefs(themeName) == [::msgcat::mc None]} {
+    if {$tmpPrefs(themeName) == [mc None]} {
 	set prefs(themeName) ""
     } else {
 	set prefs(themeName) $tmpPrefs(themeName)

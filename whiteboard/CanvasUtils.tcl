@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.2 2004-07-07 13:07:14 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.3 2004-07-09 06:26:06 matben Exp $
 
 package require sha1pure
 
@@ -1301,7 +1301,7 @@ proc ::CanvasUtils::SetItemColorDialog {w id opt} {
 	set presentColor black
     }
     set color [tk_chooseColor -initialcolor $presentColor  \
-      -title [::msgcat::mc {New Color}]]
+      -title [mc {New Color}]]
     if {$color != ""} {
 	::CanvasUtils::ItemConfigure $w $id $opt $color
     }

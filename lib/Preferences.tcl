@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.55 2004-07-07 13:07:14 matben Exp $
+# $Id: Preferences.tcl,v 1.56 2004-07-09 06:26:06 matben Exp $
  
 package require notebook
 package require tree
@@ -90,7 +90,7 @@ proc ::Preferences::Build {args} {
     }
     ::UI::Toplevel $w -class Preferences -usemacmainmenu 1  \
       -macstyle documentProc -macclass {document closeBox}
-    wm title $w [::msgcat::mc Preferences]
+    wm title $w [mc Preferences]
     wm withdraw $w
     
     set finished 0
@@ -118,7 +118,7 @@ proc ::Preferences::Build {args} {
     pack [frame $frtree] -fill both -expand 1 -side left
     
     # Set a width in the label to act as a spacer when scrollbar is unpacked.
-    pack [label $frtree.la -text [::msgcat::mc {Settings Panels}]  \
+    pack [label $frtree.la -text [mc {Settings Panels}]  \
       -font $fontSB -relief raised -width 24 -bd 1 -bg #bdbdbd] -side top -fill x
     set wtree $frtree.t
     ::tree::tree $wtree -width 100 -height 300 \
@@ -132,13 +132,13 @@ proc ::Preferences::Build {args} {
     pack $frtree.sby -side right -fill y
     
     # Fill tree.
-    $wtree newitem {General} -text [::msgcat::mc General]
-    $wtree newitem {General {Network Setup}} -text [::msgcat::mc {Network Setup}]
-    $wtree newitem {General {Proxy Setup}} -text [::msgcat::mc {Proxy Setup}]
+    $wtree newitem {General} -text [mc General]
+    $wtree newitem {General {Network Setup}} -text [mc {Network Setup}]
+    $wtree newitem {General {Proxy Setup}} -text [mc {Proxy Setup}]
     if {!$prefs(stripJabber)} {
 	$wtree newitem {Jabber}
     }
-    $wtree newitem {Whiteboard} -text [::msgcat::mc Whiteboard]
+    $wtree newitem {Whiteboard} -text [mc Whiteboard]
     
     # The notebook and its pages.
     set nbframe [notebook::notebook $w.frall.fr.nb -borderwidth 1 -relief sunken]
@@ -159,16 +159,16 @@ proc ::Preferences::Build {args} {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btok -text [::msgcat::mc Save] -default active \
+    pack [button $frbot.btok -text [mc Save] -default active \
       -command ::Preferences::SavePushBt]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
+    pack [button $frbot.btcancel -text [mc Cancel]  \
       -command ::Preferences::CancelPushBt]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btfactory -text [::msgcat::mc {Factory Settings}]   \
+    pack [button $frbot.btfactory -text [mc {Factory Settings}]   \
       -command [list ::Preferences::ResetToFactoryDefaults "40"]]  \
       -side left -padx 5 -pady 5
-    pack [button $frbot.btrevert -text [::msgcat::mc {Revert Panel}]  \
+    pack [button $frbot.btrevert -text [mc {Revert Panel}]  \
       -command ::Preferences::ResetToUserDefaults]  \
       -side left -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
@@ -211,8 +211,8 @@ proc ::Preferences::ResetToFactoryDefaults {maxPriorityNum} {
     Debug 2 "::Preferences::ResetToFactoryDefaults maxPriorityNum=$maxPriorityNum"
     
     # Warn first.
-    set ans [tk_messageBox -title [::msgcat::mc Warning] -type yesno -icon warning \
-      -message [FormatTextForMessageBox [::msgcat::mc messfactorydefaults]] \
+    set ans [tk_messageBox -title [mc Warning] -type yesno -icon warning \
+      -message [FormatTextForMessageBox [mc messfactorydefaults]] \
       -default no]
     if {$ans == "no"} {
 	return
@@ -278,14 +278,14 @@ proc ::Preferences::NetSetup::BuildPage {page} {
     set fontSB [option get . fontSmallBold {}]
         
     set wcont $page.fr
-    labelframe $wcont -text [::msgcat::mc prefnetconf]
+    labelframe $wcont -text [mc prefnetconf]
     pack $wcont -side top -anchor w -padx 8 -pady 4
 
     # Frame for everything inside the labeled container.
     set fr [frame $wcont.fr]    
     pack $fr -side left -padx 2    
     label $fr.msg -wraplength 200 -justify left \
-      -text [::msgcat::mc prefnethead]
+      -text [mc prefnethead]
     pack $fr.msg -side top -padx 2 -anchor w -pady $ypadbig
     
     # The actual options.
@@ -293,28 +293,28 @@ proc ::Preferences::NetSetup::BuildPage {page} {
     set wopt $fropt
         
     # The Jabber server.
-    radiobutton $fropt.jabb -text [::msgcat::mc {Jabber Client}]  \
+    radiobutton $fropt.jabb -text [mc {Jabber Client}]  \
       -value jabber -variable ::Preferences::tmpPrefs(protocol)
     label $fropt.jabbmsg -wraplength 200 -justify left  \
-      -text [::msgcat::mc prefnetjabb]
+      -text [mc prefnetjabb]
     
     # For the symmetric network config.
-    radiobutton $fropt.symm -text [::msgcat::mc {Peer-to-Peer}]  \
+    radiobutton $fropt.symm -text [mc {Peer-to-Peer}]  \
       -variable ::Preferences::tmpPrefs(protocol) -value symmetric
-    checkbutton $fropt.auto -text "  [::msgcat::mc {Auto Connect}]"  \
+    checkbutton $fropt.auto -text "  [mc {Auto Connect}]"  \
       -variable ::Preferences::tmpPrefs(autoConnect)
     label $fropt.automsg -wraplength 200 -justify left  \
-      -text [::msgcat::mc prefnetauto]
-    checkbutton $fropt.multi -text "  [::msgcat::mc {Multi Connect}]"  \
+      -text [mc prefnetauto]
+    checkbutton $fropt.multi -text "  [mc {Multi Connect}]"  \
       -variable ::Preferences::tmpPrefs(multiConnect)
     label $fropt.multimsg -wraplength 200 -justify left  \
-      -text [::msgcat::mc prefnetmulti]
+      -text [mc prefnetmulti]
     if {![string equal $prefs(protocol) "symmetric"]} { 
 	$fropt.auto configure -state disabled
 	$fropt.multi configure -state disabled
     }    
     
-    button $fropt.adv -text "[::msgcat::mc Advanced]..." -command  \
+    button $fropt.adv -text "[mc Advanced]..." -command  \
       [list ::Preferences::NetSetup::Advanced]
     
     # If already connected don't allow network topology to be changed.
@@ -459,28 +459,28 @@ proc ::Preferences::NetSetup::Advanced {  } {
     set w .dlgAdvNet
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox}
-    wm title $w [::msgcat::mc {Advanced Setup}]
+    wm title $w [mc {Advanced Setup}]
     
     set fontSB [option get . fontSmallBold {}]
     
     frame $w.frall -borderwidth 1 -relief raised
     pack  $w.frall
     set wcont $w.frtop
-    labelframe $wcont -text [::msgcat::mc {Advanced Configuration}]
+    labelframe $wcont -text [mc {Advanced Configuration}]
     pack $wcont -in $w.frall -side top -padx 8 -pady 4
     
     # Frame for everything inside the labeled container.
     set fr [frame $wcont.fr]
-    message $fr.msg -width 260 -text [::msgcat::mc prefnetadv]
+    message $fr.msg -width 260 -text [mc prefnetadv]
     
     # The actual options.
     set fropt [frame $fr.fropt]
 
-    label $fropt.lserv -text "[::msgcat::mc {Built in server port}]:"  \
+    label $fropt.lserv -text "[mc {Built in server port}]:"  \
       -font $fontSB
-    label $fropt.lhttp -text "[::msgcat::mc {HTTP port}]:" \
+    label $fropt.lhttp -text "[mc {HTTP port}]:" \
       -font $fontSB
-    label $fropt.ljab -text "[::msgcat::mc {Jabber server port}]:"  \
+    label $fropt.ljab -text "[mc {Jabber server port}]:"  \
       -font $fontSB
     entry $fropt.eserv -width 6 -textvariable  \
       ::Preferences::tmpPrefs(thisServPort)
@@ -512,10 +512,10 @@ proc ::Preferences::NetSetup::Advanced {  } {
     # Button part.
     pack [frame $w.frbot -borderwidth 0] -in $w.frall -fill both  \
       -padx 8 -pady 6 -side bottom
-    pack [button $w.btok -text [::msgcat::mc Save] -default active \
+    pack [button $w.btok -text [mc Save] -default active \
       -command [namespace current]::AdvSetupSave]  \
       -in $w.frbot -side right -padx 5 -pady 5
-    pack [button $w.btcancel -text [::msgcat::mc Cancel]  \
+    pack [button $w.btcancel -text [mc Cancel]  \
       -command "set [namespace current]::finishedAdv 0"]  \
       -in $w.frbot -side right -padx 5 -pady 5
     wm resizable $w 0 0
@@ -666,9 +666,9 @@ proc ::Preferences::Proxies::BuildPage {page} {
     upvar ::Preferences::ypad ypad
     
     set pcnat $page.nat
-    labelframe $pcnat -text [::msgcat::mc {NAT Address}] -padx 4 -pady 2
+    labelframe $pcnat -text [mc {NAT Address}] -padx 4 -pady 2
     pack $pcnat -side top -anchor w -padx 12 -pady 4
-    checkbutton $pcnat.cb -text "  [::msgcat::mc prefnatip]" \
+    checkbutton $pcnat.cb -text "  [mc prefnatip]" \
       -variable [namespace current]::tmpPrefs(setNATip)
     entry $pcnat.eip -textvariable [namespace current]::tmpPrefs(NATip) \
       -width 32
@@ -683,15 +683,15 @@ proc ::Preferences::Proxies::BuildPage {page} {
       -text "Usage of the Http proxy is determined\
       by each profile settings. File transfers wont work if you use Http proxy!"
     
-    label $pca.lserv -text [::msgcat::mc {Proxy Server}]:
+    label $pca.lserv -text [mc {Proxy Server}]:
     entry $pca.eserv -textvariable [namespace current]::tmpPrefs(httpproxyserver)
-    label $pca.lport -text [::msgcat::mc {Proxy Port}]:
+    label $pca.lport -text [mc {Proxy Port}]:
     entry $pca.eport -textvariable [namespace current]::tmpPrefs(httpproxyport)
-    checkbutton $pca.auth -text " [::msgcat::mc {Use proxy authorization}]" \
+    checkbutton $pca.auth -text " [mc {Use proxy authorization}]" \
       -textvariable [namespace current]::tmpPrefs(httpproxyauth)
-    label $pca.luser -text [::msgcat::mc Username]:
+    label $pca.luser -text [mc Username]:
     entry $pca.euser -textvariable [namespace current]::tmpPrefs(httpproxyusername)
-    label $pca.lpass -text [::msgcat::mc Password]:
+    label $pca.lpass -text [mc Password]:
     entry $pca.epass -textvariable [namespace current]::tmpPrefs(httpproxypassword)
 
     grid $pca.msg   -          -sticky w
@@ -724,7 +724,7 @@ proc ::Preferences::SavePushBt { } {
     # Was protocol changed?
     if {![string equal $prefs(protocol) $tmpPrefs(protocol)]} {
 	set ans [tk_messageBox -title Relaunch -icon info -type yesno \
-	  -message [FormatTextForMessageBox [::msgcat::mc messprotocolch]]]
+	  -message [FormatTextForMessageBox [mc messprotocolch]]]
 	if {$ans == "no"} {
 	    set finished 1
 	    return
@@ -808,9 +808,9 @@ proc ::Preferences::CancelPushBt { } {
     ::hooks::run prefsCancelHook
     
     if {$hasChanged} {
-	set ans [tk_messageBox -title [::msgcat::mc Warning]  \
+	set ans [tk_messageBox -title [mc Warning]  \
 	  -type yesno -default no -parent $wDlgs(prefs) -icon warning \
-	  -message [FormatTextForMessageBox [::msgcat::mc messprefschanged]]]
+	  -message [FormatTextForMessageBox [mc messprefschanged]]]
 	if {$ans == "yes"} {
 	    set finished 2
 	}

@@ -4,7 +4,7 @@
 #       This is just a first sketch.
 #       TODO: all message translations.
 #       
-# $Id: BuddyPounce.tcl,v 1.6 2004-06-19 13:25:38 matben Exp $
+# $Id: BuddyPounce.tcl,v 1.7 2004-07-09 06:26:06 matben Exp $
 
 namespace eval ::BuddyPounce:: {
     
@@ -158,7 +158,7 @@ proc ::BuddyPounce::Build {jid} {
     frame $w.frall -borderwidth 1 -relief raised
     pack  $w.frall -fill both -expand 1 -ipadx 4
 
-    ::headlabel::headlabel $w.frall.head -text [::msgcat::mc {Buddy Pouncing}]
+    ::headlabel::headlabel $w.frall.head -text [mc {Buddy Pouncing}]
     pack $w.frall.head -side top -fill both -expand 1
     label $w.frall.msg -wraplength 300 -justify left -padx 10 -pady 2 \
       -text "Set a specific action when something happens with \"$jid\",\
@@ -182,16 +182,16 @@ proc ::BuddyPounce::Build {jid} {
     set i 0
     foreach eventStr $events(str) key $events(keys) {
 
-	set wpage [$wnb newpage $eventStr -text [::msgcat::mc $eventStr]]	
+	set wpage [$wnb newpage $eventStr -text [mc $eventStr]]	
 		
 	# Action
 	set wact $wpage.f${key}
 	frame $wact
 	pack  $wact -padx 6 -pady 2
-	checkbutton $wact.alrt -text " [::msgcat::mc {Show Popup}]" \
+	checkbutton $wact.alrt -text " [mc {Show Popup}]" \
 	  -variable $token\($key,msgbox)
 	
-	checkbutton $wact.lsound -text " [::msgcat::mc {Play Sound}]:" \
+	checkbutton $wact.lsound -text " [mc {Play Sound}]:" \
 	  -variable $token\($key,sound)
 	set wmenu [eval {
 	    tk_optionMenu $wact.msound $token\($key,soundfile)
@@ -201,9 +201,9 @@ proc ::BuddyPounce::Build {jid} {
 	set wpad $wact.pad[incr i]
 	frame $wpad -width [expr $soundMaxWidth + 40] -height 1
 
-	checkbutton $wact.chat -text " [::msgcat::mc {Start Chat}]" \
+	checkbutton $wact.chat -text " [mc {Start Chat}]" \
 	  -variable $token\($key,chat)
-	checkbutton $wact.msg -text " [::msgcat::mc {Send Message}]" \
+	checkbutton $wact.msg -text " [mc {Send Message}]" \
 	  -variable $token\($key,msg)
 	
 	grid x          x            $wpad
@@ -218,13 +218,13 @@ proc ::BuddyPounce::Build {jid} {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btok -text [::msgcat::mc OK] \
+    pack [button $frbot.btok -text [mc OK] \
       -default active -command [list [namespace current]::OK $token]] \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
+    pack [button $frbot.btcancel -text [mc Cancel]  \
       -command [list [namespace current]::Cancel $token]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btoff -text [::msgcat::mc {All Off}]  \
+    pack [button $frbot.btoff -text [mc {All Off}]  \
       -command [list [namespace current]::AllOff $token]]  \
       -side left -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
@@ -234,7 +234,7 @@ proc ::BuddyPounce::Build {jid} {
     if {$nwin == 1} {
 	::UI::SetWindowPosition $w $wdlg
     }
-    wm title $w "[::msgcat::mc {Buddy Pouncing}]: $jid"
+    wm title $w "[mc {Buddy Pouncing}]: $jid"
     wm resizable $w 0 0
     
     ::BuddyPounce::AllOff $token

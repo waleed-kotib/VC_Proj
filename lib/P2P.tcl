@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: P2P.tcl,v 1.8 2004-05-06 13:41:11 matben Exp $
+# $Id: P2P.tcl,v 1.9 2004-07-09 06:26:06 matben Exp $
 
 package provide P2P 1.0
 
@@ -143,20 +143,20 @@ proc ::P2P::BuildEntryHook {wtop wclass wcomm} {
 	symmetric {
 	    label $waddr -text {  Remote address:} -width 22 -anchor w
 	    label $wuser -text {  User:} -width 14 -anchor w
-	    label $wto   -text [::msgcat::mc To]
-	    label $wfrom -text [::msgcat::mc From]
+	    label $wto   -text [mc To]
+	    label $wfrom -text [mc From]
 	    grid  $waddr $wuser $wto $wfrom -sticky nws -pady 0
 	}
 	client {
 	    label $waddr -text {  Remote address:} -width 22 -anchor w
 	    label $wuser -text {  User:} -width 14 -anchor w
-	    label $wto   -text [::msgcat::mc To]
+	    label $wto   -text [mc To]
 	    grid  $waddr $wuser $wto -sticky nws -pady 0
 	}
 	server {
 	    label $waddr -text {  Remote address:} -width 22 -anchor w
 	    label $wuser -text {  User:} -width 14 -anchor w
-	    label $wfrom -text [::msgcat::mc From]
+	    label $wfrom -text [mc From]
 	    grid  $waddr $wuser $wfrom -sticky nws -pady 0
 	}
 	central {
@@ -165,7 +165,7 @@ proc ::P2P::BuildEntryHook {wtop wclass wcomm} {
 	    # connections.
 	    label $waddr -text {  Remote address:} -width 22 -anchor w
 	    label $wuser -text {  User:} -width 14 -anchor w
-	    label $wto   -text [::msgcat::mc To]
+	    label $wto   -text [mc To]
 	    label $fr.icon -image $contactOffImage
 	    grid  $waddr $wuser $wto $fr.icon -sticky nws -pady 0
 	}
@@ -542,9 +542,9 @@ proc ::P2P::SendMessageListHook {wtop msgList args} {
 		puts $::P2PNet::ipNumTo(socket,$ip) "CANVAS: $cmd"
 	    }
 	}]} {
-	    tk_messageBox -type ok -title [::msgcat::mc {Network Error}] \
+	    tk_messageBox -type ok -title [mc {Network Error}] \
 	      -icon error -message  \
-	      [FormatTextForMessageBox [::msgcat::mc messfailsend $ip]]
+	      [FormatTextForMessageBox [mc messfailsend $ip]]
 	}
     }
 }
@@ -565,9 +565,9 @@ proc ::P2P::SendGenMessageListHook {wtop msgList args} {
 		puts $::P2PNet::ipNumTo(socket,$ip) $cmd
 	    }
 	}]} {
-	    tk_messageBox -type ok -title [::msgcat::mc {Network Error}] \
+	    tk_messageBox -type ok -title [mc {Network Error}] \
 	      -icon error -message  \
-	      [FormatTextForMessageBox [::msgcat::mc messfailsend $ip]]
+	      [FormatTextForMessageBox [mc messfailsend $ip]]
 	}
     }
 }
@@ -659,7 +659,7 @@ proc ::P2P::PutFileDlg {wtop} {
     if {[llength [::P2PNet::GetIP to]] == 0} {
 	return
     }
-    set ans [tk_getOpenFile -title [::msgcat::mc {Put Image/Movie}] \
+    set ans [tk_getOpenFile -title [mc {Put Image/Movie}] \
       -filetypes [::Plugins::GetTypeListDialogOption]]
     if {$ans == ""} {
 	return
@@ -974,7 +974,7 @@ proc ::P2P::Prefs::InitPrefsHook { } {
 
 proc ::P2P::Prefs::BuildPrefsHook {wtree nbframe} {
     
-    $wtree newitem {General Shortcuts} -text [::msgcat::mc Shortcuts]
+    $wtree newitem {General Shortcuts} -text [mc Shortcuts]
     
     set wpage [$nbframe page {Shortcuts}]    
     ::P2P::Prefs::BuildPrefsPage $wpage
@@ -995,14 +995,14 @@ proc ::P2P::Prefs::BuildPrefsPage {wpage} {
     set fontS [option get . fontSmall {}]
     
     set wcont $wpage.frtop
-    labelframe $wcont -text [::msgcat::mc {Edit Shortcuts}]
+    labelframe $wcont -text [mc {Edit Shortcuts}]
     pack $wcont -side top -anchor w -padx 8 -pady 4
     
     # Overall frame for whole container.
     set frtot [frame $wcont.fr]
     pack $frtot -side left -padx 6 -pady 6    
     message $frtot.msg -borderwidth 0 -aspect 600 \
-      -text [::msgcat::mc prefshortcut]
+      -text [mc prefshortcut]
     pack $frtot.msg -side top -padx 4 -pady 6
     
     # Frame for listbox and scrollbar.
@@ -1027,11 +1027,11 @@ proc ::P2P::Prefs::BuildPrefsPage {wpage} {
     set btadd $frtot.btfr.btadd
     set btrem $frtot.btfr.btrem
     set btedit $frtot.btfr.btedit
-    button $btadd -text "[::msgcat::mc Add]..." -font $fontS  \
+    button $btadd -text "[mc Add]..." -font $fontS  \
       -command [list [namespace current]::AddOrEdit add]
-    button $btrem -text [::msgcat::mc Remove] -font $fontS -state disabled  \
+    button $btrem -text [mc Remove] -font $fontS -state disabled  \
       -command [namespace current]::Remove
-    button $btedit -text "[::msgcat::mc Edit]..." -state disabled -font $fontS \
+    button $btedit -text "[mc Edit]..." -state disabled -font $fontS \
       -command [list [namespace current]::AddOrEdit edit]
     pack $frtot.btfr -side top -anchor w
     pack $btadd $btrem $btedit -side top -fill x -padx 4 -pady 4
@@ -1109,17 +1109,17 @@ proc ::P2P::Prefs::AddOrEdit {what} {
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox}
     if {$what == "add"} {
-	set txt [::msgcat::mc {Add Shortcut}]
-	set txt1 "[::msgcat::mc {New shortcut}]:"
-	set txt2 "[::msgcat::mc prefshortip]:"
-	set txtbt [::msgcat::mc Add]
+	set txt [mc {Add Shortcut}]
+	set txt1 "[mc {New shortcut}]:"
+	set txt2 "[mc prefshortip]:"
+	set txtbt [mc Add]
 	set shortTextVar {}
 	set longTextVar {}
     } elseif {$what == "edit"} {
-	set txt [::msgcat::mc {Edit Shortcut}]
-	set txt1 "[::msgcat::mc Shortcut]:"
-	set txt2 "[::msgcat::mc prefshortip]:"
-	set txtbt [::msgcat::mc Save]
+	set txt [mc {Edit Shortcut}]
+	set txt1 "[mc Shortcut]:"
+	set txt2 "[mc prefshortip]:"
+	set txtbt [mc Save]
     }
     set finAdd 0
     wm title $w $txt
@@ -1163,7 +1163,7 @@ proc ::P2P::Prefs::AddOrEdit {what} {
     button $w.frbot.bt1 -text "$txtbt" -default active  \
       -command [list [namespace current]::PushBtAddOrEdit $what]
     pack $w.frbot.bt1 -side right -padx 5 -pady 5
-    pack [button $w.frbot.btcancel -text [::msgcat::mc Cancel]  \
+    pack [button $w.frbot.btcancel -text [mc Cancel]  \
       -command "set [namespace current]::finAdd 2"]  \
       -side right -padx 5 -pady 5
     

@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: Theme.tcl,v 1.12 2004-07-03 12:54:37 matben Exp $
+# $Id: Theme.tcl,v 1.13 2004-07-09 06:26:06 matben Exp $
 
 package provide Theme 1.0
 
@@ -109,7 +109,7 @@ proc ::Theme::SavePrefsFile { } {
     set tmpFile $this(themePrefsPath).tmp
     if {[catch {open $tmpFile w} fid]} {
 	tk_messageBox -icon error -type ok -message \
-	  [FormatTextForMessageBox [::msgcat::mc messerrpreffile $tmpFile]]
+	  [FormatTextForMessageBox [mc messerrpreffile $tmpFile]]
 	return
     }
     

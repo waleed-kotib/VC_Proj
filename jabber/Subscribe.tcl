@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Subscribe.tcl,v 1.18 2004-05-26 07:36:38 matben Exp $
+# $Id: Subscribe.tcl,v 1.19 2004-07-09 06:26:06 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -51,7 +51,7 @@ proc ::Jabber::Subscribe::Subscribe {jid args} {
     array set argsArr $args
     
     ::UI::Toplevel $w -macstyle documentProc -macclass {document closeBox}
-    wm title $w [::msgcat::mc Subscribe]
+    wm title $w [mc Subscribe]
     set fontSB [option get . fontSmallBold {}]
     
     # Find our present groups.
@@ -79,10 +79,10 @@ proc ::Jabber::Subscribe::Subscribe {jid args} {
     frame $w.frall -borderwidth 1 -relief raised
     pack  $w.frall -fill both -expand 1 -ipadx 4
     
-    ::headlabel::headlabel $w.frall.head -text [::msgcat::mc Subscribe]
+    ::headlabel::headlabel $w.frall.head -text [mc Subscribe]
     pack $w.frall.head -side top -fill both -expand 1
     label $w.frall.msg -wraplength 200 -justify left \
-      -text [::msgcat::mc jasubwant $jid]
+      -text [mc jasubwant $jid]
     pack $w.frall.msg -side top -fill both -expand 1
     
     # Any -status attribute?
@@ -94,13 +94,13 @@ proc ::Jabber::Subscribe::Subscribe {jid args} {
 	
     # Some action buttons.
     set frmid [frame $w.frall.frmid -borderwidth 0]
-    label $frmid.lvcard -text "[::msgcat::mc jasubgetvcard]:" -font $fontSB \
+    label $frmid.lvcard -text "[mc jasubgetvcard]:" -font $fontSB \
       -anchor e
-    button $frmid.bvcard -text "[::msgcat::mc {Get vCard}]..."   \
+    button $frmid.bvcard -text "[mc {Get vCard}]..."   \
       -command [list ::VCard::Fetch other $jid]
-    label $frmid.lmsg -text [::msgcat::mc jasubsndmsg]   \
+    label $frmid.lmsg -text [mc jasubsndmsg]   \
       -font $fontSB -anchor e
-    button $frmid.bmsg -text "[::msgcat::mc Send]..."    \
+    button $frmid.bmsg -text "[mc Send]..."    \
       -command [list ::Jabber::Subscribe::SendMsg $uid]
     grid $frmid.lvcard -column 0 -row 0 -sticky e -padx 6 -pady 2
     grid $frmid.bvcard -column 1 -row 0 -sticky ew -padx 6 -pady 2
@@ -114,19 +114,19 @@ proc ::Jabber::Subscribe::Subscribe {jid args} {
     set fropt $w.frall.fropt
     labelframe $fropt -text {Options}
     pack $fropt -side top -fill both -padx 10 -pady 6
-    checkbutton $fropt.pres -text "  [::msgcat::mc jasuballow $jid]" \
+    checkbutton $fropt.pres -text "  [mc jasuballow $jid]" \
       -variable [namespace current]::locals($uid,allow)
     
-    checkbutton $fropt.add -text "  [::msgcat::mc jasubadd $jid]" \
+    checkbutton $fropt.add -text "  [mc jasubadd $jid]" \
       -variable [namespace current]::locals($uid,add)
     pack $fropt.pres $fropt.add -side top -anchor w -padx 10 -pady 4
     set frsub [frame $fropt.frsub]
     pack $frsub -expand 1 -side top -anchor w -padx 10 -pady 2
-    label $frsub.lnick -text "[::msgcat::mc {Nick name}]:" -font $fontSB \
+    label $frsub.lnick -text "[mc {Nick name}]:" -font $fontSB \
       -anchor e
     entry $frsub.enick -width 18  \
       -textvariable [namespace current]::locals($uid,name)
-    label $frsub.lgroup -text "[::msgcat::mc Group]:" -font $fontSB -anchor e
+    label $frsub.lgroup -text "[mc Group]:" -font $fontSB -anchor e
     
     ::combobox::combobox $frsub.egroup -width 18  \
       -textvariable [namespace current]::locals($uid,group)
@@ -147,10 +147,10 @@ proc ::Jabber::Subscribe::Subscribe {jid args} {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btok -text [::msgcat::mc Accept] -default active \
+    pack [button $frbot.btok -text [mc Accept] -default active \
       -command [list [namespace current]::Doit $uid]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Deny]  \
+    pack [button $frbot.btcancel -text [mc Deny]  \
       -command [list [namespace current]::Cancel $uid]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
@@ -268,7 +268,7 @@ proc ::Jabber::Subscribe::InitPrefsHook { } {
 
 proc ::Jabber::Subscribe::BuildPrefsHook {wtree nbframe} {
     
-    $wtree newitem {Jabber Subscriptions} -text [::msgcat::mc Subscriptions]
+    $wtree newitem {Jabber Subscriptions} -text [mc Subscriptions]
     
     # Subscriptions page ---------------------------------------------------
     set wpage [$nbframe page {Subscriptions}]
@@ -286,14 +286,14 @@ proc ::Jabber::Subscribe::BuildPageSubscriptions {page} {
     }
     
     set labfrpsubs $page.fr
-    labelframe $labfrpsubs -text [::msgcat::mc Subscribe]
+    labelframe $labfrpsubs -text [mc Subscribe]
     pack $labfrpsubs -side top -anchor w -padx 8 -pady 4
     set psubs [frame $labfrpsubs.frin]
     pack $psubs -padx 10 -pady 6 -side left
 
-    label $psubs.la1 -text [::msgcat::mc prefsuif]
-    label $psubs.lin -text [::msgcat::mc prefsuis]
-    label $psubs.lnot -text [::msgcat::mc prefsuisnot]
+    label $psubs.la1 -text [mc prefsuif]
+    label $psubs.lin -text [mc prefsuis]
+    label $psubs.lnot -text [mc prefsuisnot]
     grid $psubs.la1 -columnspan 2 -sticky w -pady $ypad
     grid $psubs.lin $psubs.lnot -sticky w -pady $ypad
     foreach  \
@@ -301,7 +301,7 @@ proc ::Jabber::Subscribe::BuildPageSubscriptions {page} {
       txt {Auto-accept Auto-reject {Ask each time}} {
 	foreach val2 {inrost notinrost} {
 	    radiobutton ${psubs}.${val2}${val}  \
-	      -text [::msgcat::mc $txt] -value $val  \
+	      -text [mc $txt] -value $val  \
 	      -variable [namespace current]::tmpJPrefs(subsc,$val2)	      
 	}
 	grid $psubs.inrost${val} $psubs.notinrost${val} -sticky w -pady $ypad
@@ -309,9 +309,9 @@ proc ::Jabber::Subscribe::BuildPageSubscriptions {page} {
 
     set frauto [frame $page.auto]
     pack $frauto -side top -anchor w -padx 10 -pady $ypad
-    checkbutton $frauto.autosub -text "  [::msgcat::mc prefsuauto]"  \
+    checkbutton $frauto.autosub -text "  [mc prefsuauto]"  \
       -variable [namespace current]::tmpJPrefs(subsc,auto)
-    label $frauto.autola -text [::msgcat::mc {Default group}]:
+    label $frauto.autola -text [mc {Default group}]:
     entry $frauto.autoent -width 22   \
       -textvariable [namespace current]::tmpJPrefs(subsc,group)
     pack $frauto.autosub -side top -pady $ypad
