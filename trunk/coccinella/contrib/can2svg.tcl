@@ -6,7 +6,7 @@
 #  
 #  This particular package is BSD licensed. 
 #
-# $Id: can2svg.tcl,v 1.15 2004-09-24 07:30:25 matben Exp $
+# $Id: can2svg.tcl,v 1.16 2004-10-18 12:23:03 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -363,9 +363,31 @@ proc can2svg::svgasxmllist {cmd args} {
 	text {
 	    set elem "text"
 	    set nlines 1
+	    if {[info exists optArr(-font)]} {
+		set theFont $optArr(-font)
+	    } else {
+		set theFont $defaultFont
+	    }
+	    set ascent [font metrics $theFont -ascent]
+	    set lineSpace [font metrics $theFont -linespace]
 	    if {[info exists optArr(-text)]} {
 		set chdata $optArr(-text)
-		if {!$argsArr(-allownewlines)} {
+		
+		# MICK O'DONNELL: if the text is wrapped in the wgt, we need
+		# to simulate linebreaks
+		# 
+		# If the item has got -width != 0 then we must wrap it ourselves
+		# using newlines since the -text does not have extra newlines
+		# at these linebreaks.
+		set lines [split $chdata \n]
+		set newlines {}
+		foreach line $lines {
+		    set lines2 [SplitWrappedLines $line $theFont $optArr(-width)]
+		    set newlines [concat $newlines $lines2]
+		}
+		set chdata [join $newlines \n]
+		if {!$argsArr(-allownewlines) || \
+		  ([llength $newlines] > [llength $lines])} {
 		    set nlines [expr [regexp -all "\n" $chdata] + 1]
 		}
 	    } else {
@@ -377,13 +399,6 @@ proc can2svg::svgasxmllist {cmd args} {
 	    if {[info exists optArr(-anchor)]} {
 		set anchor $optArr(-anchor)
 	    }		    		    
-	    if {[info exists optArr(-font)]} {
-		set theFont $optArr(-font)
-	    } else {
-		set theFont $defaultFont
-	    }
-	    set ascent [font metrics $theFont -ascent]
-	    set lineSpace [font metrics $theFont -linespace]
 	    
 	    foreach {xbase ybase}  \
 	      [GetTextSVGCoords $coo $anchor $chdata $theFont $nlines] {}
@@ -898,6 +913,51 @@ proc can2svg::MakeFontStyleList {fontDesc} {
 	}		
     }
     return [array get styleArr]
+}
+
+# can2svg::SplitWrappedLines --
+# 
+# MICK O'DONNELL: added code to split wrapped lines
+# This is actally only needed for text items with -width != 0.
+# If -width = 0 then just return it.
+
+proc can2svg::SplitWrappedLines {line font wgtWidth} {
+
+     # If the text is shorter than the widget width, no need to wrap
+     # If the wgtWidth comes out as 0, don't wrap
+     if {$wgtWidth == 0 || [font measure $font $line] <= $wgtWidth} {
+	return [list $line]
+     }
+
+     # Wrap the line
+     set width 0
+     set endchar 0
+     while {$width < $wgtWidth} {
+	set substr [string range $line 0 [incr endchar]]
+	set width [font measure $font $substr]
+     }
+
+     # Go back till we find a nonwhite char
+     set char [string index $line $endchar]
+     set default [expr $endchar -1]
+     while {[BreakChar $char] == 0} {
+	if {$endchar == 0} {
+	    # we got to the front without breaking, so break midword
+	    set endchar $default
+	    break
+	}
+	set char [string index $line [incr endchar -1]]
+     }
+     set first [string range $line 0 [expr $endchar -1]]
+     set rest [string range $line $endchar end]
+     return [concat [list $first] [SplitWrappedLines $rest $font $wgtWidth]]
+}
+
+proc can2svg::BreakChar {char} {
+     if [string is space $char] {return 1}
+     if {$char == "-"} {return 1}
+     if {$char == ","} {return 1}
+     return 0
 }
 
 # can2svg::MakeImageAttr --
