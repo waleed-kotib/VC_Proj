@@ -103,7 +103,7 @@
 ::msgcat::mcset de Roster	Liste
 ::msgcat::mcset de Save		Speichern
 ::msgcat::mcset de Search	Suchen
-::msgcat::mcset de Select       Auswahl
+::msgcat::mcset de Select	Auswählen
 ::msgcat::mcset de Send		Senden
 ::msgcat::mcset de Server	Server
 ::msgcat::mcset de Servers	Server
@@ -223,8 +223,8 @@
 ::msgcat::mcset de mLogin		{Anmelden...}
 ::msgcat::mcset de mLogout		{Abmelden}
 ::msgcat::mcset de mLogoutWith          {Abmelden mit Nachricht...}
-::msgcat::mcset de mHideMain            {HauptmenÃ¼ verbergen}
-::msgcat::mcset de mShowMain            {HauptmenÃ¼ anzeigen}
+::msgcat::mcset de mHideMain            {Hauptfenster ausblenden}
+::msgcat::mcset de mShowMain            {Hauptfenster anzeigen}
 ::msgcat::mcset de mPassword		{Passwort...}
 ::msgcat::mcset de mRoster/Services	{Kontakte/Dienste}
 ::msgcat::mcset de mMessageInbox	{Nachrichten-Eingang}
@@ -666,7 +666,7 @@ Agenten: %s}
 	::msgcat::mcset de jamesserrsearch	{Konnte Suchspezifikation nicht\
 abrufen. Fehlercode %s Nachricht: %s}
 	::msgcat::mcset de jamessoobok		{Dateiübertragung erfolgreich}
-	::msgcat::mcset de jamessoobok2         {Transfer der Datei  %s an %s war erfolgreich}
+	::msgcat::mcset de jamessoobok2         {Dateiübertragung von %s nach "%s" war erfolgreich}
 	::msgcat::mcset de jamessoobnourl	{Als von Benutzer "%s" eine Datei abgerufen\
 werden sollte, konnten wir dafür keine Url bekommen.}
 	::msgcat::mcset de jamessoobask		{Benutzer "%s" stellt Ihnen die Datei\
@@ -713,8 +713,8 @@ Es muss in Ihrer Liste enthalten sein.\
 Sie haben eine Anmeldung für %s: %s.}
 ::msgcat::mcset de jamesswbchatlost	        {Die gesamte Konversation geht verloren\
 sobald diese ZeichenflÃ¤che geschlossen wird. Wollen Sie wirklich den Chat beenden?}
-::msgcat::mcset de jamesschatoffline            {Dieser User ist nicht mehr online.\
-Die Nachricht konnte deshalb nicht Ã¼bermittelt werden.}
+::msgcat::mcset de jamesschatoffline            {Diese Person ist nicht mehr angemeldet.\
+Deshalb wird diese Nachricht nicht gesendet.}
 
 
 
@@ -840,7 +840,7 @@ wird über die Benutzereinstellungen begrenzt.}
 ::msgcat::mcset de preftheme     {Thema wählen, Neustart erforderlich}
 ::msgcat::mcset de prefplugctrl  {Sie können jedes dieser Pakete deselektieren,\
 wenn es nicht geladen werden soll. Es ist ein Neustart erforderlich.}
-::msgcat::mcset de prefchactret  {Im Chat-Dialog immer aktiv <Eingabe> benutzen}
+::msgcat::mcset de prefchactret  {<Return> im Chat-Dialog immer aktiv}
 
 
 

@@ -2,7 +2,7 @@
 	  The Coccinella : Jabber application with Whiteboard
 	  ---------------------------------------------------
 
-		version 0.94.8, 5th March, 2004
+		version 0.94.9, May, 2004
 
 		       by Mats Bengtsson
 
@@ -139,6 +139,8 @@ Known Bugs:
     * Printer support is still in its infacy. You may export the canvas to
       XML/SVG format which can be imported into a web browser using the free
       plugin from www.adobe.com, and print from inside your browser.
+
+    * If you use upper case characters in jids it may become confused.
 
     * There are numerous "details" that need to be fixed. After all, it is an 
       alpha quality software!

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: FilesAndCanvas.tcl,v 1.24 2004-03-27 15:20:37 matben Exp $
+# $Id: FilesAndCanvas.tcl,v 1.25 2004-05-19 12:39:02 matben Exp $
  
 package require can2svg
 package require svg2can
@@ -603,7 +603,7 @@ proc ::CanvasFile::DoSaveCanvasFile {wtop} {
     set wCan [::WB::GetCanvasFromWtop $wtop]
     set typelist {
 	{"Canvas"            {.can}}
-	{"Adobe XML/SVG"     {.svg}}
+	{"XML/SVG"           {.svg}}
 	{"Text"              {.txt}}
     }
     set userDir [::Utils::GetDirIfExist $prefs(userPath)]
@@ -612,7 +612,7 @@ proc ::CanvasFile::DoSaveCanvasFile {wtop} {
 	lappend opts -filetypes $typelist
     }
     if {[string match "mac*" $this(platform)]} {
-	lappend opts -message "Pick .svg suffix for XML, .can as default"
+	lappend opts -message "Pick .svg suffix for SVG, .can as default"
     }
     set ans [eval {tk_getSaveFile -title [::msgcat::mc {Save Canvas}] \
       -defaultextension ".can"} $opts]
