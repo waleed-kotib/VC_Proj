@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.30 2004-01-01 16:27:48 matben Exp $
+# $Id: Preferences.tcl,v 1.31 2004-01-02 11:41:16 matben Exp $
  
 package require notebook
 package require tree
@@ -1207,7 +1207,7 @@ proc ::Preferences::Customization::PickBgImage {where} {
 proc ::Preferences::Customization::DefaultBgImage {where} {
     upvar ::Preferences::tmpJPrefs tmpJPrefs
 
-    set tmpJPrefs($where,bgImagePath) $tmpJPrefs($where,defBgImagePath)
+    set tmpJPrefs($where,bgImagePath) ""
 }
 
 # namespace  ::Preferences::Plugins:: ------------------------------------------

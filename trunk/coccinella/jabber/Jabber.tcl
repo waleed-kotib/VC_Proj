@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.48 2003-12-30 15:30:58 matben Exp $
+# $Id: Jabber.tcl,v 1.49 2004-01-02 11:41:16 matben Exp $
 #
 #  The $address is an ip name or number.
 #
@@ -261,34 +261,26 @@ proc ::Jabber::FactoryDefaults { } {
     set jprefs(usessl) 0
     
     # Other
-    set jprefs(defSubscribe) 1
-    set jprefs(rost,rmIfUnsub) 1
-    set jprefs(rost,allowSubNone) 1
-    set jprefs(rost,clrLogout) 1
-    set jprefs(rost,dblClk) normal
-    set jprefs(rost,useBgImage) 1
-    set jprefs(rost,defBgImagePath) [file join $this(path) images sky.gif]
-    set jprefs(rost,bgImagePath) $jprefs(rost,defBgImagePath)
-    set jprefs(subsc,inrost) ask
-    set jprefs(subsc,notinrost) ask
-    set jprefs(subsc,auto) 0
-    set jprefs(subsc,group) {}
-    set jprefs(block,notinrost) 0
-    set jprefs(block,list) {}
-    set jprefs(speakMsg) 0
-    set jprefs(speakChat) 0
+    set jprefs(defSubscribe)        1
+    set jprefs(rost,rmIfUnsub)      1
+    set jprefs(rost,allowSubNone)   1
+    set jprefs(rost,clrLogout)      1
+    set jprefs(rost,dblClk)         normal
+    
+    # The rosters background image is partly controlled by option database.
+    set jprefs(rost,useBgImage)     1
+    set jprefs(rost,bgImagePath)    ""
+    set jprefs(subsc,inrost)        ask
+    set jprefs(subsc,notinrost)     ask
+    set jprefs(subsc,auto)          0
+    set jprefs(subsc,group)         {}
+    set jprefs(block,notinrost)     0
+    set jprefs(block,list)          {}
+    set jprefs(speakMsg)            0
+    set jprefs(speakChat)           0
     
     # Shall we query ip number directly when verified Coccinella?
     set jprefs(preGetIP) 1
-    
-    # Create background images.
-    if {[catch {
-	set jprefs(rost,bgImage) [image create photo  \
-	  -file $jprefs(rost,bgImagePath)]
-    }]} {
-	set jprefs(rost,bgImage) [image create photo  \
-	  -file $jprefs(rost,defBgImagePath)]	
-    }
 	
     # Preferred groupchat protocol (gc-1.0|muc).
     # 'muc' uses 'conference' as fallback.

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.32 2003-12-30 15:30:58 matben Exp $
+# $Id: MailBox.tcl,v 1.33 2004-01-02 11:41:16 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -309,7 +309,6 @@ proc ::Jabber::MailBox::CloseHook {wclose} {
     
     set result ""
     if {[string equal $wclose $wDlgs(jinbox)]} {
-	puts ::Jabber::MailBox::CloseHook
 	::Jabber::MailBox::Show -visible 0
 	set result stop
     }

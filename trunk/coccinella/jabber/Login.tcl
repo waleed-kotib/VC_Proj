@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.18 2003-12-30 15:30:58 matben Exp $
+# $Id: Login.tcl,v 1.19 2004-01-02 11:41:16 matben Exp $
 
 package provide Login 1.0
 
@@ -517,8 +517,7 @@ proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
 
     ::Network::RegisterIP $ipNum "to"
     
-    # Login was succesful. Get my roster, and set presence.
-    $jstate(jlib) roster_get ::Jabber::Roster::PushProc
+    # Login was succesful, set presence.
     if {$invisible} {
 	set jstate(status) "invisible"
 	::Jabber::SetStatus invisible

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.33 2004-01-01 16:27:48 matben Exp $
+# $Id: Roster.tcl,v 1.34 2004-01-02 11:41:16 matben Exp $
 
 package provide Roster 1.0
 
@@ -17,9 +17,10 @@ namespace eval ::Jabber::Roster:: {
 
     # Use option database for customization. 
     # Use priority 30 just to override the widgetDefault values!
-    set fontS [option get . fontSmall {}]
+    set fontS  [option get . fontSmall {}]
     set fontSB [option get . fontSmallBold {}]
 
+    option add *Roster.backgroundImage      sky            widgetDefault
     #option add *Roster*Tree.font          $fontS           30
     #option add *Roster*Tree.fontDir       $fontSB          30
 
@@ -177,28 +178,48 @@ proc ::Jabber::Roster::Build {w} {
     variable btremove
     variable btrefresh
     variable selItem
+    variable wroster
     upvar ::Jabber::jprefs jprefs
         
     # The frame of class Roster.
     frame $w -borderwidth 0 -relief flat -class Roster
 
     # Tree frame with scrollbars.
-    set wbox $w.box
+    set wroster $w
+    set wbox    $w.box
+    set wxsc    $wbox.xsc
+    set wysc    $wbox.ysc
+    set wtree   $wbox.tree
     pack [frame $wbox -border 1 -relief sunken]   \
       -side top -fill both -expand 1 -padx 6 -pady 6
-    set wtree $wbox.tree
-    set wxsc $wbox.xsc
-    set wysc $wbox.ysc
+    
     set opts {}
     if {$jprefs(rost,useBgImage)} {
-	lappend opts -backgroundimage $jprefs(rost,bgImage)
+	
+	# Create background image if nonstandard.
+	set bgImage ""
+	if {[file exists $jprefs(rost,bgImagePath)]} {
+	    if {[catch {
+		set bgImage [image create photo -file $jprefs(rost,bgImagePath)]
+	    }]} {
+		set bgImage ""
+	    }
+	}
+	if {$bgImage == ""} {
+	    # Default and fallback..
+	    set bgImage [::Theme::GetImage [option get $w backgroundImage {}]]
+	}
+	if {$bgImage != ""} {
+	    lappend opts -backgroundimage $bgImage
+	}
     }
-    set wtree [eval {::tree::tree $wtree -width 180 -height 100 -silent 1  \
+
+    eval {::tree::tree $wtree -width 180 -height 100 -silent 1  \
       -scrollwidth 400  \
       -xscrollcommand [list $wxsc set]       \
       -yscrollcommand [list $wysc set]       \
       -selectcommand [namespace current]::SelectCmd   \
-      -doubleclickcommand [namespace current]::DoubleClickCmd} $opts]
+      -doubleclickcommand [namespace current]::DoubleClickCmd} $opts
     
     if {[string match "mac*" $this(platform)]} {
 	$wtree configure -buttonpresscommand [list ::Jabber::UI::Popup roster] \
@@ -233,6 +254,8 @@ proc ::Jabber::Roster::Build {w} {
 
 proc ::Jabber::Roster::LoginCmd { } {
     
+    ::Jabber::InvokeJlibCmd roster_get ::Jabber::Roster::PushProc
+
     set server [::Jabber::GetServerJid]
     set ::Jabber::Roster::servtxt $server
     ::Jabber::Roster::SetUIWhen "connect"
@@ -254,24 +277,34 @@ proc ::Jabber::Roster::LogoutHook { } {
 proc ::Jabber::Roster::SetBackgroundImage {useBgImage bgImagePath} {
     upvar ::Jabber::jprefs jprefs
     variable wtree    
+    variable wroster
     
+    #puts "::Jabber::Roster::SetBackgroundImage: useBgImage=$useBgImage, bgImagePath=$bgImagePath"
+    #puts "\tjprefs(rost,useBgImage)=$jprefs(rost,useBgImage)"
     if {[winfo exists $wtree]} {
 	
 	# Change only if needed.
 	if {($jprefs(rost,useBgImage) != $useBgImage) || \
 	  ($jprefs(rost,bgImagePath) != $bgImagePath)} {
 	    
-	    # Cleanup old.
-	    if {$jprefs(rost,bgImage) != ""} {
-		image delete $jprefs(rost,bgImage)
-	    }
-	    if {$jprefs(rost,useBgImage)} {
-		set jprefs(rost,bgImage)  \
-		  [image create photo -file $jprefs(rost,bgImagePath)]
+	    if {$useBgImage} {
+		set bgImage ""
+		if {[file exists $bgImagePath]} {
+		    if {[catch {
+			set bgImage [image create photo -file $bgImagePath]
+		    }]} {
+			set bgImage ""
+		    }
+		}
+		if {$bgImage == ""} {
+		    # Default and fallback..
+		    set bgImage [::Theme::GetImage [option get $wroster backgroundImage {}]]
+		}
 	    } else {
-		set jprefs(rost,bgImage) {}
+		set bgImage ""
 	    }
-	    $wtree configure -backgroundimage $jprefs(rost,bgImage)
+	    #puts "\tbgImage=$bgImage"
+	    $wtree configure -backgroundimage $bgImage
 	}
     }
 }
