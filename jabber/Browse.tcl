@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.61 2004-10-05 12:16:23 matben Exp $
+# $Id: Browse.tcl,v 1.62 2004-10-05 13:18:46 matben Exp $
 
 package require chasearrows
 
@@ -84,7 +84,7 @@ proc ::Jabber::Browse::NewJlibHook {jlibName} {
     upvar ::Jabber::jstate jstate
     
     set jstate(browse) [browse::new $jlibName  \
-      -command ::Jabber::Browse::Command]
+      -command [namespace current]::Command]
     
     ::Jabber::AddClientXmlns [list "jabber:iq:browse"]
 }
@@ -92,20 +92,20 @@ proc ::Jabber::Browse::NewJlibHook {jlibName} {
 proc ::Jabber::Browse::LoginCmd { } {
     upvar ::Jabber::jprefs jprefs
     
-    ::Jabber::Browse::SetUIWhen "connect"
+    SetUIWhen "connect"
 
     # Get the services for all our servers on the list. Depends on our settings:
     # If browsing fails must use "agents" as a fallback.
     if {[string equal $jprefs(serviceMethod) "browse"]} {
-	::Jabber::Browse::GetAll
+	GetAll
     }
 }
 
 proc ::Jabber::Browse::LogoutHook { } {
     
     if {[lsearch [::Jabber::UI::Pages] "Browser"] >= 0} {
-	::Jabber::Browse::SetUIWhen "disconnect"
-	::Jabber::Browse::Clear
+	SetUIWhen "disconnect"
+	Clear
     }
 }
 
@@ -148,7 +148,7 @@ proc ::Jabber::Browse::GetAll { } {
     
     set allServers $jserver(this)
     foreach server $allServers {
-	::Jabber::Browse::Get $server
+	Get $server
     }
 }
 
@@ -182,10 +182,10 @@ proc ::Jabber::Browse::GetCallback {silent browseName type from subiq args} {
     
     switch -- $type {
 	error {
-	    ::Jabber::Browse::ErrorProc $silent $browseName $type $from $subiq
+	    ErrorProc $silent $browseName $type $from $subiq
 	}
 	ok - result {
-	    ::Jabber::Browse::Callback $browseName set $from $subiq
+	    Callback $browseName set $from $subiq
 	}
     }
 }
@@ -202,17 +202,20 @@ proc ::Jabber::Browse::Command {browseName type from subiq args} {
 
     switch -- $type {
 	error {
-	    ::Jabber::Browse::ErrorProc $silent $browseName $type $from $subiq
+	    ErrorProc $silent $browseName $type $from $subiq
 	}
 	set {
-	    ::Jabber::Browse::Callback $browseName set $from $subiq
+	    Callback $browseName set $from $subiq
+	    
+	    # This is critical for the old jabber:iq:conference !
+	    set ishandled 1
 	}
 	ok - result {
 	    # BAD!!!
-	    ::Jabber::Browse::Callback $browseName set $from $subiq
+	    Callback $browseName set $from $subiq
 	}
 	get {
-	    eval {::Jabber::Browse::ParseGet $browseName $from $subiq} $args
+	    eval {ParseGet $browseName $from $subiq} $args
 	    set ishandled 1
 	}
     }
@@ -244,7 +247,7 @@ proc ::Jabber::Browse::Callback {browseName type from subiq} {
       from=$from, subiq='[string range $subiq 0 60] ...'"
 
     unset -nocomplain tstate(run,$from)
-    ::Jabber::Browse::ControlArrows -1
+    ControlArrows -1
     array set attrArr [wrapper::getattrlist $subiq]
 
     # Docs say that jid is required attribute but... 
@@ -283,10 +286,10 @@ proc ::Jabber::Browse::Callback {browseName type from subiq} {
 		  Contact the system administrator of $jserver(this)."
 		return
 	    }
-	    ::Jabber::Browse::AddToTree $parents $jid $subiq 1
+	    AddToTree $parents $jid $subiq 1
 	    
 	    # If we have a conference (groupchat) window.
-	    ::Jabber::Browse::DispatchUsers $jid $subiq
+	    DispatchUsers $jid $subiq
 	    
 	    # Browse all services for any public (jabber) conference servers.
 	    # Two things: 
@@ -352,7 +355,7 @@ proc ::Jabber::Browse::Callback {browseName type from subiq} {
 			if {$jprefs(autoBrowseConference) &&  \
 			  [info exists cattrArr(type)] &&   \
 			  ($cattrArr(type) == "public")} {
-			    ::Jabber::Browse::Get $confjid -silent 1
+			    Get $confjid -silent 1
 			}
 		    }
 		}
@@ -402,7 +405,7 @@ proc ::Jabber::Browse::ErrorProc {silent browseName type jid errlist} {
     ::Debug 2 "::Jabber::Browse::ErrorProc type=$type, jid=$jid, errlist='$errlist'"
 
     array unset tstate run,*
-    ::Jabber::Browse::ControlArrows 0
+    ControlArrows 0
     
     # If we got an error browsing an actual server, then remove from list.
     set ind [lsearch -exact $jprefs(browseServers) $jid]
@@ -449,7 +452,7 @@ proc ::Jabber::Browse::Show {w} {
 	if {[winfo exists $w]} {
 	    wm deiconify $w
 	} else {
-	    ::Jabber::Browse::BuildToplevel $w
+	    BuildToplevel $w
 	}
     } else {
 	wm withdraw $w
@@ -483,7 +486,7 @@ proc ::Jabber::Browse::BuildToplevel {w} {
     pack $w.frall.msg $w.frall.msg2 -side top -fill x -padx 4 -pady 2
 
     # And the real stuff.
-    pack [::Jabber::Browse::Build $w.frall.br] -side top -fill both -expand 1
+    pack [Build $w.frall.br] -side top -fill both -expand 1
     
     wm minsize $w 180 260
     wm maxsize $w 420 2000
@@ -882,7 +885,7 @@ proc ::Jabber::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
 	    
 	    # If any child elements, call ourself recursively.
 	    foreach child $allChildren {
-		::Jabber::Browse::AddToTree $jidList {} $child
+		AddToTree $jidList {} $child
 	    }
 	}
     }
@@ -1004,10 +1007,10 @@ proc ::Jabber::Browse::AutoBrowseCmd {browseName type jid subiq args} {
     
     switch -- $type {
 	error {
-	    ::Jabber::Browse::ErrorProc 1 $browseName $type $jid $subiq
+	    ErrorProc 1 $browseName $type $jid $subiq
 	}
 	result - ok {
-	    ::Jabber::Browse::AutoBrowseCallback $browseName $type $jid $subiq
+	    AutoBrowseCallback $browseName $type $jid $subiq
 	}
     }
 }
@@ -1077,14 +1080,14 @@ proc ::Jabber::Browse::OpenTreeCmd {w v} {
 	# We should have a method to tell if children have been added to tree!!!
 	if {![$jstate(browse) isbrowsed $jid]} {
 	    set tstate(run,$jid) 1
-	    ::Jabber::Browse::ControlArrows 1
+	    ControlArrows 1
 	    
 	    # Browse services available.
-	    ::Jabber::Browse::Get $jid
+	    Get $jid
 	} elseif {[llength [$wtree children $v]] == 0} {
 	    set xmllist [$jstate(browse) get $jid]
 	    foreach child [wrapper::getchildren $xmllist] {
-		::Jabber::Browse::AddToTree $v {} $child
+		AddToTree $v {} $child
 	    }
 	}
     }    
@@ -1097,7 +1100,7 @@ proc ::Jabber::Browse::CloseTreeCmd {w v} {
     set jid [lindex $v end]
     if {[info exists tstate(run,$jid)]} {
 	unset tstate(run,$jid)
-	::Jabber::Browse::ControlArrows -1
+	ControlArrows -1
     }
 }
 
@@ -1118,8 +1121,8 @@ proc ::Jabber::Browse::Refresh {jid} {
     
     # Browse once more, let callback manage rest.
     set tstate(run,$jid) 1
-    ::Jabber::Browse::ControlArrows 1
-    ::Jabber::Browse::Get $jid
+    ControlArrows 1
+    Get $jid
 }
 
 proc ::Jabber::Browse::ControlArrows {step} {    
@@ -1257,7 +1260,7 @@ proc ::Jabber::Browse::DoAddServer {w} {
     lappend jprefs(browseServers) $addserver
     
     # Browse services for this server, schedules update tree.
-    ::Jabber::Browse::Get $addserver
+    Get $addserver
     
 }
 
@@ -1303,10 +1306,10 @@ proc ::Jabber::Browse::InfoCB {browseName type jid subiq args} {
     
     switch -- $type {
 	error {
-	    ::Jabber::Browse::ErrorProc 0 $browseName error $jid $subiq
+	    ErrorProc 0 $browseName error $jid $subiq
 	}
 	result - ok {
-	    eval {::Jabber::Browse::InfoResultCB $browseName $type $jid $subiq} $args
+	    eval {InfoResultCB $browseName $type $jid $subiq} $args
 	}
     }
 }
