@@ -1,0 +1,206 @@
+
+	  The Coccinella : Jabber application with Whiteboard
+	  ---------------------------------------------------
+
+		version 0.95.2, December, 2004
+
+		       by Mats Bengtsson
+
+
+
+What is this?
+
+    This is a  Jabber  client which has a  complete system  for instant 
+    messages, chat, groupchat etc. But more importantly, it extends the
+    Jabber instant messages system to a kind of whiteboard system. Just
+    like ordinary text messages,  you may send complete  whiteboards to 
+    other users, share a whiteboard in a one-to-one chat, or groupchat.
+
+    	Perhaps it is  better to describe it  using the  desktop  metaphor.
+    Just like your computer has a desktop with files, symbols  and windows,
+    this whiteboard is  similar, but  instead of using  files  and folders,
+    it actually  shows the  contents of these files.  That is, for an image
+    file we show the actual image, an mp3 is shown as a minimal player etc.
+    This should work in a modular way using a plugin architecture; a plugin
+    is responsible for a set of MIME types, how they should be displayed in
+    the whiteboard, user interactions, any playback or whatever is relevant.
+    And most importantly, these items are shared with other users in a form
+    that  depends on the  type,  such as single  message (like an email), 
+    one-to-one chat, or groupchat.
+
+The Jabber system:
+
+    The Coccinella can be configured into two main modes.  The services
+    supported by these two modes are very different.  You switch between 
+    these two modes using the Preferences/Preferences...  menu, and the
+    "General/Network Setup" panel.
+    	The recommended way of running this application is the Jabber way.
+
+    * Jabber Server: The Jabber Instant Messaging system is an XML based 
+      system that works similar to ICQ, AIM etc.  It delivers messages 
+      seamlessly between many instant messaging system and Jabber clients.  
+      This application is a Jabber client, but it is not a normal Jabber 
+      client since it delivers much more than just text messages.  Visit 
+      "www.jabber.org" or "www.jabberstudio.org" for more information, 
+      and to obtain your own server.
+
+      To get started with a Jabber server, register an account (if you 
+      haven't already) using the Jabber/New Account...  menu, and fill in 
+      the fields.  When you later log on, you do it from the Jabber/Login...
+      menu, and pick the server you have an account at. Or just use the
+      Setup Assistant menu command.
+
+    * Peer-to-peer: This is the "raw" configuration, where users connect 
+      directly to each other, and not via an external server.  This mode 
+      does not deliver the kind of user administration that is supplied by 
+      the Jabber system, such as contact lists, online/offline, offline 
+      delivery etc. It is therefore NOT recommended to use.
+
+Installation:
+
+    * Starting with version 0.94.5, no installation whatsoever is needed.
+      Just unzip and double click.
+
+    It is necessary to have access to a unique server port on remote 
+    machines, so it can be problematic if you are behind a firewall.  
+    Firewalls are not dealt with at all at this stage.
+
+Testing:
+
+    It is to be considered as a developer release, so beware.  *It is far 
+    from being bug free*.  It has been tested on MacOS 9.2, Mac OS X 10.2, 
+    Red Hat Linux 8.0/9.0, and Windows 2000. It requires a Tcl version 8.4 or 
+    later. The Mac OS 8/9 version is no longer supported but will likely 
+    run anyway. Just increase the memory partition of Wish a lot (30MB).
+
+    I would judge this as an alpha quality application, not beta, which is 
+    reflected in the version number ( < 1.0). No instabilities are known, 
+    however.
+
+Additional Notes:
+    
+    * This client delivers more data than an ordinary Jabber client, and 
+      data may "get stuck" in the server if karma is too low. This only
+      happend if you does a lot of drawings in a short period of time.
+
+Documentation:
+
+    The source code is the only documentation. At least so far ;-)
+    See also the Info/Help menu.
+
+    There are a few additional README files, README-sounds, README-resources,
+    which may be helpful if you want to do customization.
+
+Non-latin character sets:
+
+    On Macintosh with a "Chinese Language Kit" it is possible to write 
+    chinese, at least does it look as chinese to me.  But you need to import
+    the correct font from the Preference menu.  Be sure that all connected 
+    remote clients also have this font on their system; I don't think it 
+    needs to be imported. Probably any "Language Kit" should work.
+
+Translations:
+
+    Many thanks to contributors. See coccinella/msgs/README_encodings if you
+    feel like contributing.
+
+    Swedish:    myself
+    German:     Hermann J. Beckers
+    Dutch:      Sander Devrieze
+    French:     Guillaume Ayoub
+
+Bug Reports:
+
+    Either send them to me directly: matben@users.sourceforge.net , or report them
+    at Source Forge: http://sourceforge.net/tracker/?group_id=68334&atid=520863
+    This address can be reached via the Info/Report Bug menu.
+
+Known Bugs:
+
+    * Althogh the server is using a safe interpreter for the critical parts
+      of canvas drawings which uses the dangerous eval, it probably does not 
+      cover all possible attacks from an evil client.
+
+    * If large items are transported between clients, such as images, or
+      movies, operations on these items before they have been completely 
+      received by remote clients are lost.
+
+    * There are synchronization issues if two users happen to edit an item
+      exactly simultanously. This applies only to some operations, and is 
+      not very likely to happen, but must anyway be considered.
+
+      Similar synchronization problems exist in some other areas, applets
+      for instance.
+
+    * It may sometimes happen that the internal settings become confused 
+      which results in a corrupt preference file. If you suspect this then
+      delete this file:
+          Unix/Linux       ~/.coccinella/whiteboard
+	  Windows          .../Coccinella/WBPREFS.TXT     (search for it)
+	  Mac OS 8/9       :Program Preferences:Coccinella:Whiteboard Prefs
+	  Mac OS X         ~/Library/Preferences/Coccinella/Whiteboard Prefs
+
+    * Printer support is still in its infacy. You may export the canvas to
+      XML/SVG format which can be imported into a web browser using the free
+      plugin from www.adobe.com, and print from inside your browser.
+
+    * There are numerous "details" that need to be fixed. After all, it is an 
+      alpha quality software!
+
+    As always, the code needs cleaning and restructuring.  If you want to see
+    what is happening "inside" you may set the debug level to a nonzero value.
+    You set this either in the source file Coccinella.tcl, or specified
+    at the command line as:
+
+    set argv "-debugLevel 3"
+
+    and launch it. You need to have the source distribution and a Tcl/Tk
+    installation to do this.
+    As an alternative on mac and windows, pick the Jabber/Debug menu, and do:
+
+    set debugLevel 3
+
+
+XML/SVG:
+
+    You may try using SVG for drawing. Start Coccinella with arguments:
+    "-jprefs_useSVGT 1 -jprefs_getIPraw 0 -prefs_trptMethod http"
+    Still in its infancy, though.
+
+Distribution:
+
+    It is distributed under the standard GPL license.
+    (c) Copyright by Mats Bengtsson (1999-2004).
+    Buttons are stolen from Gimp and slightly changed (Thank You!).
+
+Home:
+
+    The present home of the Coccinella is at
+    "http://hem.fyristorg.com/matben", where links to the extensions also 
+    can be found.
+    Look at "http://coccinella.sourceforge.net" which is the official
+    developer home.
+
+The Beetle:
+
+    Don't be afraid for the 'Coccinella' (ladybug), it's tame!
+
+Special Contributions:
+
+    * Raymond Tang: resolving links, adding ImageMagick support, local
+      incoming dir...
+
+Who:
+
+    It has been developed by:
+
+    Mats Bengtsson   
+    Hamngatan 21
+    SE-58226, Linkoping Sweden
+   
+    matben@users.sourceforge.net
+    phone: +46 13 136114
+
+    MADE IN SWEDEN
+
+#-------------------------------------------------------------------------------
