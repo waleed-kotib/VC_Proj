@@ -5,12 +5,12 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.8 2005-01-26 08:21:39 matben Exp $
+# $Id: Init.tcl,v 1.9 2005-02-02 15:21:20 matben Exp $
 
 namespace eval ::Init:: { }
 
 proc ::Init::SetThis {thisScript} {
-    global  this auto_path tcl_platform
+    global  this auto_path tcl_platform prefs
     
     # Path where preferences etc are stored.
     switch -- $this(platform) {
@@ -122,6 +122,86 @@ proc ::Init::SetThis {thisScript} {
 	set auto_path [concat [list $this(binPath)] $auto_path]
     } else {
 	set this(binPath) {}
+    }
+    
+    # Path to preference file and others found in this(prefsPath)
+    
+    switch -- $this(platform) {
+	unix {
+	    set this(modkey) Control
+	    
+	    # On a central installation need to have local dirs for write access.
+	    set this(userPrefsFilePath)  \
+	      [file nativename [file join $this(prefsPath) whiteboard]]
+	    set this(oldPrefsFilePath) [file nativename ~/.whiteboard]
+	    set this(inboxCanvasPath)  \
+	      [file nativename [file join $this(prefsPath) canvases]]
+	    set this(historyPath)  \
+	      [file nativename [file join $this(prefsPath) history]]
+	}
+	macintosh {
+	    set this(modkey) Command
+	    set this(userPrefsFilePath)  \
+	      [file join $this(prefsPath) "Whiteboard Prefs"]
+	    set this(oldPrefsFilePath) [file join $::env(PREF_FOLDER) "Whiteboard Prefs"]
+	    set this(inboxCanvasPath) [file join $this(prefsPath) Canvases]
+	    set this(historyPath) [file join $this(prefsPath) History]
+	}
+	macosx {
+	    set this(modkey) Command
+	    set this(userPrefsFilePath)  \
+	      [file join $this(prefsPath) "Whiteboard Prefs"]
+	    set this(oldPrefsFilePath) $this(userPrefsFilePath)
+	    set this(inboxCanvasPath) [file join $this(prefsPath) Canvases]
+	    set this(historyPath) [file join $this(prefsPath) History]
+	}
+	windows {
+	    set this(modkey) Control
+	    set this(userPrefsFilePath) [file join $this(prefsPath) "WBPREFS.TXT"]
+	    set this(oldPrefsFilePath) [file join C: "WBPREFS.TXT"]
+	    set this(inboxCanvasPath) [file join $this(prefsPath) Canvases]
+	    set this(historyPath) [file join $this(prefsPath) History]
+	}
+    }
+    
+    # Find user name.
+    if {[info exists ::env(USER)]} {
+	set this(username) $::env(USER)
+    } elseif {[info exists ::env(LOGIN)]} {
+	set this(username) $::env(LOGIN)
+    } elseif {[info exists ::env(USERNAME)]} {
+	set this(username) $::env(USERNAME)
+    } elseif {[llength $this(hostname)]} {
+	set this(username) $this(hostname)
+    } else {
+	set this(username) "Unknown"
+    }
+    
+    MakeDirs
+}
+
+proc ::Init::MakeDirs { } {
+    global  this tcl_platform
+    
+    if {![file isdirectory $this(prefsPath)]} {
+	file mkdir $this(prefsPath)
+    }
+    if {![file isdirectory $this(inboxCanvasPath)]} {
+	file mkdir $this(inboxCanvasPath)
+    }
+    if {![file isdirectory $this(historyPath)]} {
+	file mkdir $this(historyPath)
+    }
+    if {![file isdirectory $this(altItemPath)]} {
+	file mkdir $this(altItemPath)
+    }
+    
+    # Privacy!
+    switch -- $tcl_platform(platform) {
+	unix {
+	    # Make sure other have absolutely no access to our prefs.
+	    file attributes $this(prefsPath) -permissions o-rwx
+	}
     }
 }
 

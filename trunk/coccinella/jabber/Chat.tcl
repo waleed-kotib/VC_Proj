@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.109 2005-02-02 09:02:17 matben Exp $
+# $Id: Chat.tcl,v 1.110 2005-02-02 15:21:18 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -587,7 +587,7 @@ proc ::Chat::InsertMessage {chattoken whom body args} {
 }
 
 proc ::Chat::InsertAnyThreadHistory {chattoken} {
-    global  prefs
+    global  prefs this
     variable $chattoken
     upvar 0 $chattoken chatstate
     
@@ -595,7 +595,7 @@ proc ::Chat::InsertAnyThreadHistory {chattoken} {
     
     # First find any matching history file.
     jlib::splitjid $chatstate(jid) jid2 res
-    set path [file join $prefs(historyPath) [uriencode::quote $jid2]] 
+    set path [file join $this(historyPath) [uriencode::quote $jid2]] 
     if {[file exists $path]} {
 	
 	# Collect all matching threads.
@@ -2026,10 +2026,10 @@ namespace eval ::Chat:: {
 #       none.
 
 proc ::Chat::PutMessageInHistoryFile {jid msg} {
-    global  prefs
+    global  this
     
     set mjid [jlib::jidmap $jid]
-    set path [file join $prefs(historyPath) [uriencode::quote $jid]]    
+    set path [file join $this(historyPath) [uriencode::quote $jid]]    
     if {![catch {open $path a} fd]} {
 	puts $fd "set message(\[incr uid]) {$msg}"
 	close $fd
@@ -2112,7 +2112,7 @@ proc ::Chat::BuildHistoryForJid {jid} {
     # The tags.
     ConfigureTextTags $wchatframe $wtext    
     
-    set path [file join $prefs(historyPath) [uriencode::quote $jid]] 
+    set path [file join $this(historyPath) [uriencode::quote $jid]] 
     if {[file exists $path]} {
 	set uidstart 1000
 	set uid $uidstart
@@ -2166,12 +2166,12 @@ proc ::Chat::BuildHistoryForJid {jid} {
 }
 
 proc ::Chat::ClearHistory {jid wtext} {
-    global  prefs
+    global  this
     
     $wtext configure -state normal
     $wtext delete 1.0 end
     $wtext configure -state disabled
-    set path [file join $prefs(historyPath) [uriencode::quote $jid]] 
+    set path [file join $this(historyPath) [uriencode::quote $jid]] 
     if {[file exists $path]} {
 	file delete $path
     }

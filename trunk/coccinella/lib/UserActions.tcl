@@ -3,11 +3,13 @@
 #      This file is part of The Coccinella application. It implements typical
 #      user actions, such as callbacks from buttons and menus.
 #      
-#  Copyright (c) 2000-2003  Mats Bengtsson
+#  Copyright (c) 2000-2005  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UserActions.tcl,v 1.41 2004-12-02 08:22:35 matben Exp $
+# $Id: UserActions.tcl,v 1.42 2005-02-02 15:21:22 matben Exp $
+
+package provide UserActions 1.0
 
 namespace eval ::UserActions:: {
     
@@ -158,7 +160,6 @@ proc ::UserActions::DoQuit {args} {
          
     # Save to the preference file and quit...
     ::PreferencesUtils::SaveToFile
-    ::Theme::SavePrefsFile
         
     # Cleanup. Beware, no windows with open movies must exist here!
     catch {file delete -force $this(tmpPath)}

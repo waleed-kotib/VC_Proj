@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: History.tcl,v 1.6 2004-10-30 14:44:52 matben Exp $
+# $Id: History.tcl,v 1.7 2005-02-02 15:21:19 matben Exp $
 
 package require uriencode
 
@@ -31,9 +31,9 @@ namespace eval ::History:: {
 #       none.
 
 proc ::History::PutToFile {jid msg} {
-    global  prefs
+    global  this
     
-    set path [file join $prefs(historyPath) [uriencode::quote $jid]]    
+    set path [file join $this(historyPath) [uriencode::quote $jid]]    
     if {![catch {open $path a} fd]} {
 	puts $fd "set message(\[incr uid]) {$msg}"
 	close $fd
@@ -107,7 +107,7 @@ proc ::History::BuildHistory {jid args} {
     if {[string length $argsArr(-tagscommand)]} {
 	$argsArr(-tagscommand) $wchatframe $wtext    
     }
-    set path [file join $prefs(historyPath) [uriencode::quote $jid]] 
+    set path [file join $this(historyPath) [uriencode::quote $jid]] 
 
     set clockFormat         [option get $wchatframe clockFormat {}]
     set clockFormatNotToday [option get $wchatframe clockFormatNotToday {}]
@@ -160,12 +160,12 @@ proc ::History::BuildHistory {jid args} {
 }
 
 proc ::History::ClearHistory {jid wtext} {
-    global  prefs
+    global  this
     
     $wtext configure -state normal
     $wtext delete 1.0 end
     $wtext configure -state disabled
-    set path [file join $prefs(historyPath) [uriencode::quote $jid]] 
+    set path [file join $this(historyPath) [uriencode::quote $jid]] 
     if {[file exists $path]} {
 	file delete $path
     }

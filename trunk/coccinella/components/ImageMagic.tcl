@@ -6,7 +6,7 @@
 # 
 # Unix/Linux only.
 #
-# $Id: ImageMagic.tcl,v 1.3 2004-12-02 08:22:33 matben Exp $
+# $Id: ImageMagic.tcl,v 1.4 2005-02-02 15:21:17 matben Exp $
 
 namespace eval ::ImageMagic:: {
     
@@ -43,7 +43,7 @@ proc ::ImageMagic::Init { } {
 }
 
 proc ::ImageMagic::ImportWindowSnapShot {wtop} {
-    global  env thisHostname prefs
+    global  env thisHostname prefs this
     
     variable imageType
     variable tmpfiles
@@ -63,7 +63,7 @@ proc ::ImageMagic::ImportWindowSnapShot {wtop} {
     if {$ans == "1"} {
 	set pidname [format "%x" [format %d [pid]]]
 	set tmpname ${pidname}[format "%x" [clock clicks]]
-	set tmpfile [file join [glob $prefs(incomingPath)]  \
+	set tmpfile [file join [glob $this(incomingPath)]  \
 	  $tmpname.$imageType]
 	# puts "// Info - Snap shot window using $importcmd ..."
 	exec $importcmd $tmpfile

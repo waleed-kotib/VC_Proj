@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.44 2005-01-31 14:06:59 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.45 2005-02-02 15:21:20 matben Exp $
 
 
 set noErr 0
@@ -225,19 +225,6 @@ array set tclwbProtMsg {
     505 {HTTP Version not supported}
 }
 
-# Find user name.
-if {[info exists ::env(USER)]} {
-    set this(username) $::env(USER)
-} elseif {[info exists ::env(LOGIN)]} {
-    set this(username) $::env(LOGIN)
-} elseif {[info exists ::env(USERNAME)]} {
-    set this(username) $::env(USERNAME)
-} elseif {[llength $this(hostname)]} {
-    set this(username) $this(hostname)
-} else {
-    set this(username) "Unknown"
-}
-
 # Try to get own ip number from a temporary server socket.
 # This can be a bit complicated as different OS sometimes give 0.0.0.0 or
 # 127.0.0.1 instead of the real number.
@@ -265,20 +252,8 @@ if {[regexp {[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+} $this(ipnum)]} {
     set this(ipver) 6
 }
 
-# Modifier keys and meny height (guess); add canvas border as well.
-# System fonts used. Other system dependent stuff.
 switch -- $this(platform) {
     unix {
-	set this(modkey) Control
-	
-	# On a central installation need to have local dirs for write access.
-	set prefs(userPrefsFilePath)  \
-	  [file nativename [file join $this(prefsPath) whiteboard]]
-	set prefs(oldPrefsFilePath) [file nativename ~/.whiteboard]
-	set prefs(inboxCanvasPath)  \
-	  [file nativename [file join $this(prefsPath) canvases]]
-	set prefs(historyPath)  \
-	  [file nativename [file join $this(prefsPath) history]]
 	if {[info exists ::env(BROWSER)]} {
 	    if {[llength [auto_execok $::env(BROWSER)]] > 0} {
 		set prefs(webBrowser) $::env(BROWSER)
@@ -290,29 +265,12 @@ switch -- $this(platform) {
 	}
     }
     macintosh {
-	set this(modkey) Command
-	set prefs(userPrefsFilePath)  \
-	  [file join $this(prefsPath) "Whiteboard Prefs"]
-	set prefs(oldPrefsFilePath) [file join $::env(PREF_FOLDER) "Whiteboard Prefs"]
-	set prefs(inboxCanvasPath) [file join $this(prefsPath) Canvases]
-	set prefs(historyPath) [file join $this(prefsPath) History]
 	set prefs(webBrowser) {Internet Explorer}
     }
     macosx {
-	set this(modkey) Command
-	set prefs(userPrefsFilePath)  \
-	  [file join $this(prefsPath) "Whiteboard Prefs"]
-	set prefs(oldPrefsFilePath) $prefs(userPrefsFilePath)
-	set prefs(inboxCanvasPath) [file join $this(prefsPath) Canvases]
-	set prefs(historyPath) [file join $this(prefsPath) History]
 	set prefs(webBrowser) {Safari}
     }
     windows {
-	set this(modkey) Control
-	set prefs(userPrefsFilePath) [file join $this(prefsPath) "WBPREFS.TXT"]
-	set prefs(oldPrefsFilePath) [file join C: "WBPREFS.TXT"]
-	set prefs(inboxCanvasPath) [file join $this(prefsPath) Canvases]
-	set prefs(historyPath) [file join $this(prefsPath) History]
 	
 	# Not used anymore. Uses the registry instead.
 	set prefs(webBrowser) {C:/Program/Internet Explorer/IEXPLORE.EXE}
@@ -321,28 +279,8 @@ switch -- $this(platform) {
 set prefs(incomingPath) [file join $this(prefsPath) Incoming]
 
 # Make sure we've got the necessary directories.
-if {![file isdirectory $this(prefsPath)]} {
-    file mkdir $this(prefsPath)
-}
 if {![file isdirectory $prefs(incomingPath)]} {
     file mkdir $prefs(incomingPath)
-}
-if {![file isdirectory $prefs(inboxCanvasPath)]} {
-    file mkdir $prefs(inboxCanvasPath)
-}
-if {![file isdirectory $prefs(historyPath)]} {
-    file mkdir $prefs(historyPath)
-}
-if {![file isdirectory $this(altItemPath)]} {
-    file mkdir $this(altItemPath)
-}
-
-# Privacy!
-switch -- $tcl_platform(platform) {
-    unix {
-	# Make sure other have absolutely no access to our prefs.
-	file attributes $this(prefsPath) -permissions o-rwx
-    }
 }
 
 # Find out how many clicks or milliseconds there are on each second.

@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: Theme.tcl,v 1.20 2005-01-31 14:06:59 matben Exp $
+# $Id: Theme.tcl,v 1.21 2005-02-02 15:21:20 matben Exp $
 
 package provide Theme 1.0
 
@@ -26,8 +26,9 @@ namespace eval ::Theme:: {
 proc ::Theme::Init { } {
     global  this prefs
     variable allImageSuffixes
-    
-    ReadPrefsFile
+        
+    # Handle theme name and locale from prefs file.
+    NameAndLocalePrefs
     
     # Priorities.
     # widgetDefault: 20
@@ -93,16 +94,17 @@ proc ::Theme::Init { } {
 
 }
 
-proc ::Theme::ReadPrefsFile { } {
+proc ::Theme::NameAndLocalePrefs { } {
     global  this prefs
     
-    # Order of these two?
-    if {[file exists $this(themePrefsFile)]} {
-	option readfile $this(themePrefsFile)
-    }
-    if {[file exists $this(basThemePrefsFile)]} {
-	option readfile $this(basThemePrefsFile)
-    }
+    set prefs(themeName)     ""
+    set prefs(messageLocale) ""
+    
+    ::PreferencesUtils::Add [list  \
+      [list prefs(themeName)      prefs_themeName      $prefs(themeName)] \
+      [list prefs(messageLocale)  prefs_messageLocale  $prefs(messageLocale)] \
+      ]    
+
     set appName    [option get . appName {}]
     set theAppName [option get . theAppName {}]
     if {$appName != ""} {
@@ -111,44 +113,8 @@ proc ::Theme::ReadPrefsFile { } {
     if {$theAppName != ""} {
 	set prefs(theAppName) $theAppName
     }
-    set themeName [option get . themeName {}] 
-    if {[CanLoadTheme $themeName]} {
-	set prefs(themeName) $themeName
-    } else {
+    if {![CanLoadTheme $prefs(themeName)]} {
 	set prefs(themeName) ""
-    }
-    set prefs(messageLocale) [option get . messageLocale {}] 
-}
-
-proc ::Theme::SavePrefsFile { } {
-    global  this prefs
-    
-    # Work on a temporary file and switch later.
-    set tmpFile $this(themePrefsFile).tmp
-    if {[catch {open $tmpFile w} fid]} {
-	::UI::MessageBox -icon error -type ok \
-	  -message [mc messerrpreffile $tmpFile]
-	return
-    }
-    
-    # Use empty themName if match 'default' or 'this(platform)'.
-    if {[string equal $prefs(themeName) "default"] || \
-      [string equal $prefs(themeName) $this(platform)]} {
-	set prefs(themeName) ""
-    }
-    
-    # Header information.
-    puts $fid "!\n!   User preferences for the theme name and locale."
-    puts $fid "!   The data written at: [clock format [clock seconds]]\n!"
-    
-    puts $fid [format "%-24s\t%s" *themeName: $prefs(themeName)]
-    puts $fid [format "%-24s\t%s" *messageLocale: $prefs(messageLocale)]
-    
-    close $fid
-    if {[catch {file rename -force $tmpFile $this(themePrefsFile)} msg]} {
-	::UI::MessageBox -type ok -message {Error renaming preferences file.}  \
-	  -icon error
-	return
     }
 }
 

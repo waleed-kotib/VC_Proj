@@ -6,7 +6,7 @@
 #
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #
-# $Id: FileCache.tcl,v 1.20 2005-01-31 14:06:59 matben Exp $
+# $Id: FileCache.tcl,v 1.21 2005-02-02 15:21:19 matben Exp $
 # 
 #       The input key can be: 
 #               1) a full url, must be uri encoded 
@@ -98,7 +98,7 @@ proc ::FileCache::InitHook { } {
 }
 
 proc ::FileCache::QuitHook { } {
-    global  prefs
+    global  prefs this
     
     # Should we clean up our 'incoming' directory?
     if {$prefs(clearCacheOnQuit)} {

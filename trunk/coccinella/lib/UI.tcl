@@ -3,14 +3,16 @@
 #      This file is part of The Coccinella application. It implements user
 #      interface elements.
 #      
-#  Copyright (c) 2002-2003  Mats Bengtsson
+#  Copyright (c) 2002-2005  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.84 2004-12-21 15:14:43 matben Exp $
+# $Id: UI.tcl,v 1.85 2005-02-02 15:21:20 matben Exp $
 
 package require entrycomp
 package require alertbox
+
+package provide UI 1.0
 
 namespace eval ::UI:: {
 
