@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.35 2004-06-12 15:35:18 matben Exp $
+# $Id: Login.tcl,v 1.36 2004-06-30 08:52:39 matben Exp $
 
 package provide Login 1.0
 
@@ -44,11 +44,6 @@ proc ::Jabber::Login::Login { } {
     variable username
     variable password
     variable resource
-    variable digest
-    variable ssl 0
-    variable invisible 0
-    variable priority 0
-    variable ip ""
     variable wtri
     variable wtrilab
     variable wfrmore
@@ -66,10 +61,9 @@ proc ::Jabber::Login::Login { } {
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document closeBox}
     wm title $w [::msgcat::mc Login]
-    set digest 1
-    set ssl $jprefs(usessl)
     
-    set fontSB [option get . fontSmallBold {}]
+    set fontSB     [option get . fontSmallBold {}]
+    set contrastBg [option get . backgroundLightContrast {}]
     
     # Global frame.
     frame $w.frall -borderwidth 1 -relief raised
@@ -132,34 +126,19 @@ proc ::Jabber::Login::Login { } {
     bind $wtri <Button-1> [list [namespace current]::MoreOpts $w]
     
     # More options.
-    set wfrmore [frame $w.frall.frmore -borderwidth 0]    
-    checkbutton $wfrmore.cdig -text "  [::msgcat::mc {Scramble password}]"  \
-      -variable [namespace current]::digest
-    checkbutton $wfrmore.cssl -text "  [::msgcat::mc {Use SSL for security}]"  \
-      -variable [namespace current]::ssl
-    checkbutton $wfrmore.cinv  \
-      -text "  [::msgcat::mc {Login as invisible}]"  \
-      -variable [namespace current]::invisible
+    set wfrmore [frame $w.frall.frmore -borderwidth 0]
+    set wfrmfr  [frame $wfrmore.fr -bd 1 -relief flat -bg $contrastBg]
+    pack $wfrmfr -padx 4 -pady 6 -side bottom -fill x -expand 1
     
-    set fsub [frame $wfrmore.fsub]
-    label $fsub.lp -text "[::msgcat::mc {Priority}]:"
-    spinbox $fsub.sp -textvariable [namespace current]::priority \
-      -width 5 -state readonly -increment 1 -from -128 -to 127
-    label $fsub.lip -text "[::msgcat::mc {IP address}]:"
-    entry $fsub.eip -textvariable [namespace current]::ip
-    grid $fsub.lp  $fsub.sp  -sticky w
-    grid $fsub.lip $fsub.eip -sticky w
-
-    grid $wfrmore.cdig -sticky w -pady 2
-    grid $wfrmore.cssl -sticky w -pady 2
-    grid $wfrmore.cinv -sticky w -pady 2
-    grid $wfrmore.fsub -sticky w -pady 2
-
-    if {!$prefs(tls)} {
-	set ssl 0
-	$wfrmore.cssl configure -state disabled
-    }
-    
+    # Tabbed notebook for more options.
+    # Tabbed notebook for more options.
+    set token [namespace current]::moreOpts
+    variable $token
+    upvar 0 $token options
+    set wtabnb $wfrmfr.nb
+    ::Profiles::OptionsTabNotebook $wtabnb $token
+    pack $wtabnb -fill x -expand 1
+            
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
     pack [button $frbot.btok -text [::msgcat::mc Login] \
@@ -194,8 +173,6 @@ proc ::Jabber::Login::LoadProfiles { } {
     variable username
     variable password
     variable resource
-    variable ssl
-    variable sasl
     variable wpopupMenu
     
     if {![winfo exists $wDlgs(jlogin)]} {
@@ -210,13 +187,12 @@ proc ::Jabber::Login::LoadProfiles { } {
     set profile [::Profiles::GetSelectedName]
     
     # Make temp array for servers. Handy for filling in the entries.
+    array unset tmpProfArr
     foreach {name spec} [::Profiles::Get] {
 	set tmpProfArr($name,server)    [lindex $spec 0]
 	set tmpProfArr($name,username)  [lindex $spec 1]
 	set tmpProfArr($name,password)  [lindex $spec 2]
 	set tmpProfArr($name,-resource) ""
-	set tmpProfArr($name,-ssl)      0
-	set tmpProfArr($name,-sasl)     0
 	foreach {key value} [lrange $spec 3 end] {
 	    set tmpProfArr($name,$key) $value
 	}
@@ -232,20 +208,25 @@ proc ::Jabber::Login::TraceMenuVar {name key op} {
     variable username
     variable password
     variable resource
-    variable ssl
-    variable sasl
     variable menuVar
     variable tmpProfArr
+    variable moreOpts
+    
+    ::Profiles::DefaultOptionsTabNotebook [namespace current]::moreOpts
     
     set profile  [set $name]
     set server   $tmpProfArr($profile,server)
     set username $tmpProfArr($profile,username)
     set password $tmpProfArr($profile,password)
-    set resource $tmpProfArr($profile,-resource)
-    if {$prefs(tls)} {
-	set ssl  $tmpProfArr($profile,-ssl)
+    foreach {key value} [array get tmpProfArr $profile,-*] {
+	set optname [string map [list $profile,- ""] $key]
+	set moreOpts($optname) $value
+	#puts "optname=$optname, value=$value"
     }
-    set sasl     $tmpProfArr($profile,-sasl)
+    set resource $tmpProfArr($profile,-resource)
+    if {!$prefs(tls)} {
+	set moreOpts(ssl) 0
+    }
 }
 
 proc ::Jabber::Login::CloseHook {wclose} {
@@ -263,7 +244,7 @@ proc ::Jabber::Login::MoreOpts {w} {
     variable wtrilab
     variable wfrmore
       
-    pack $wfrmore -side left -fill x -padx 16
+    pack $wfrmore -side top -fill x -padx 10
     $wtri configure -image [::UI::GetIcon mactriangleopen]
     $wtrilab configure -text "[::msgcat::mc Less]..."
     bind $wtri <Button-1> [list [namespace current]::LessOpts $w]
@@ -317,8 +298,7 @@ proc ::Jabber::Login::DoLogin {} {
     variable username
     variable password
     variable resource
-    variable ssl
-    variable ip
+    variable moreOpts
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     
@@ -361,19 +341,19 @@ proc ::Jabber::Login::DoLogin {} {
     ::Jabber::Login::Close $wtoplevel
     
     ::Jabber::Login::Connect $server [namespace current]::DoLoginCB \
-      -ssl $ssl -ip $ip
+      -ssl $moreOpts(ssl) -ip $moreOpts(ip)
 }
 
 proc ::Jabber::Login::DoLoginCB {status msg} {
     variable server
-    variable ip
+    variable moreOpts
 
     ::Debug 2 "::Jabber::Login::DoLoginCB status=$status"
     
     switch $status {
 	error {
 	    tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
-	      [::msgcat::mc jamessnosocket $ip $msg]]
+	      [::msgcat::mc jamessnosocket $moreOpts(ip) $msg]]
 	}
 	timeout {
 	    tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
@@ -397,7 +377,7 @@ proc ::Jabber::Login::DoAuthorize {args} {
     variable username
     variable password
     variable resource
-    variable digest
+    variable moreOpts
     
     ::Debug 2 "::Jabber::Login::DoAuthorize args=$args"
     array set argsArr $args
@@ -409,14 +389,14 @@ proc ::Jabber::Login::DoAuthorize {args} {
 	    set resource "coccinella"
 	}
 	::Jabber::Login::Authorize $server $username $resource $password \
-	  [namespace current]::Finish -streamid $argsArr(id) -digest $digest
+	  [namespace current]::Finish -streamid $argsArr(id)  \
+	  -digest $moreOpts(digest)
     }
 }
 
 proc ::Jabber::Login::Finish {type msg} {
     variable profile
-    variable priority
-    variable invisible
+    variable moreOpts
     
     ::Debug 2 "::Jabber::Login::Finish type=$type, msg=$msg"
 
@@ -427,7 +407,8 @@ proc ::Jabber::Login::Finish {type msg} {
 	::Profiles::SetSelectedName $profile
 	
 	# Login was succesful, set presence.
-	::Jabber::Login::SetStatus -priority $priority -invisible $invisible
+	::Jabber::Login::SetStatus -priority $moreOpts(priority)  \
+	  -invisible $moreOpts(invisible)
     }
 }
 
@@ -558,9 +539,11 @@ proc ::Jabber::Login::InitStream {server cmd} {
     
     ::Jabber::UI::SetStatusMessage [::msgcat::mc jawaitxml $server]
     
+    $jstate(jlib) setsockettransport $jstate(sock)
+    
     # Initiate a new stream. We should wait for the server <stream>.
     if {[catch {
-	$jstate(jlib) connect $server -socket $jstate(sock)  \
+	$jstate(jlib) connect $server  \
 	  -cmd [list [namespace current]::InitStreamCB $cmd]
     } err]} {
 	::Jabber::UI::SetStatusMessage ""

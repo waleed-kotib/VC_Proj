@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.52 2004-06-24 13:48:36 matben Exp $
+# $Id: jabberlib.tcl,v 1.53 2004-06-30 08:52:40 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -94,6 +94,7 @@
 #      jlibName presence_register type cmd
 #      jlibName private_get to ns subtags cmd
 #      jlibName private_set ns cmd ?args?
+#      jlibName registertransport initProc sendProc resetProc
 #      jlibName register_set username password cmd ?args?
 #      jlibName register_get cmd ?args?
 #      jlibName register_remove to cmd ?args?
@@ -107,6 +108,7 @@
 #      jlibName send_message to ?args?
 #      jlibName send_presence ?args?
 #      jlibName send_auth username resource ?args?
+#      jlibName setsockettransport socket
 #      jlibName vcard_get to cmd
 #      jlibName vcard_set cmd ?args?
 #      
@@ -245,9 +247,6 @@ namespace eval jlib::groupchat { }
 #	-xawaymin             
 #	-awaymsg              
 #	-xawaymsg             
-#	-transportinit
-#	-transportsend
-#	-transportreset
 #       
 # Results:
 #       jlibname which is the namespaced instance command
@@ -299,11 +298,6 @@ proc jlib::new {rostername clientcmd args} {
 	-awaymsg              ""
 	-xawaymsg             ""
     }
-    
-    # Defaults for the raw socket transport layer.
-    set opts(-transportinit)  [list jlib::initsocket $jlibname]
-    set opts(-transportsend)  [list jlib::putssocket $jlibname]
-    set opts(-transportreset) [list jlib::resetsocket $jlibname]
     
     # Verify options.
     if {[catch {eval jlib::verify_options $jlibname $args} msg]} {
@@ -469,6 +463,34 @@ proc jlib::verify_options {jlibname args} {
     }
 }
 
+# jlib::registertransport --
+# 
+# 
+
+proc jlib::registertransport {jlibname initProc sendProc resetProc} {
+    
+    upvar ${jlibname}::lib lib
+
+    set lib(transportinit)  $initProc
+    set lib(transportsend)  $sendProc
+    set lib(transportreset) $resetProc
+}
+
+# jlib::setsockettransport --
+# 
+#       Sets the standard socket transport and the actual socket to use.
+
+proc jlib::setsockettransport {jlibname sock} {
+    
+    upvar ${jlibname}::lib lib
+    
+    # Settings for the raw socket transport layer.
+    set lib(sock) $sock
+    set lib(transportinit)  [list [namespace current]::initsocket $jlibname]
+    set lib(transportsend)  [list [namespace current]::putssocket $jlibname]
+    set lib(transportreset) [list [namespace current]::resetsocket $jlibname]
+}
+
 # The procedures for the standard socket transport layer -----------------------
 
 # jlib::initsocket
@@ -489,7 +511,7 @@ proc jlib::initsocket {jlibname} {
     if {[catch {
 	fconfigure $sock -blocking 0 -buffering none -encoding utf-8
     } err]} {
-	return -code error {The connection failed or dropped later}
+	return -code error "The connection failed or dropped later"
     }
      
     # Set up callback on incoming socket.
@@ -576,6 +598,8 @@ proc jlib::recvsocket {jlibname} {
     wrapper::parse $lib(wrap) $temp
 }
 
+# standard socket transport layer end ------------------------------------------
+
 # jlib::recv --
 #
 # 	Feed the XML parser. When the end of a command element tag is reached,
@@ -588,8 +612,6 @@ proc jlib::recv {jlibname xml} {
     wrapper::parse $lib(wrap) $xml
 }
 
-# standard socket transport layer end ------------------------------------------
-
 # jlib::connect --
 #
 #       Initializes a stream to a jabber server. The socket must already 
@@ -599,7 +621,6 @@ proc jlib::recv {jlibname xml} {
 #       jlibname:   the instance of this jlib.
 #       server:     the domain name or ip number of the server.
 #       args:
-#	    -socket an open socket; compulsory for socket transport!
 #           -cmd    callback when we receive the <stream> tag from the server.
 #           -to     the receipients jabber id.
 #           -id
@@ -616,9 +637,6 @@ proc jlib::connect {jlibname server args} {
     array set argsArr $args
     set lib(server) $server
     set locals(last) [clock seconds]
-    if {[info exists argsArr(-socket)]} {
-    	set lib(sock) $argsArr(-socket)
-    }	
 
     # Register a <stream> callback proc.
     if {[info exists argsArr(-cmd)] && [llength $argsArr(-cmd)]} {
@@ -637,14 +655,14 @@ proc jlib::connect {jlibname server args} {
 
 	# This call to the transport layer shall set up fileevent callbacks etc.
    	# to handle all incoming xml.
-	eval $opts(-transportinit)
+	eval $lib(transportinit)
         
     	# Network errors if failed to open connection properly are likely to show here.
 	set xml "<?xml version='1.0' encoding='UTF-8' ?><stream:stream\
 	  xmlns='$opts(-streamnamespace)'\
 	  xmlns:stream='http://etherx.jabber.org/streams'\
 	  to='$server'$optattr>"
-   	eval $opts(-transportsend) {$xml}
+   	eval $lib(transportsend) {$xml}
     } err]} {
 	
 	# The socket probably was never connected,
@@ -670,12 +688,11 @@ proc jlib::connect {jlibname server args} {
 proc jlib::disconnect {jlibname} {    
 
     upvar ${jlibname}::lib lib
-    upvar ${jlibname}::opts opts
 
     Debug 3 "jlib::disconnect"
     set xml "</stream:stream>"
-    catch {eval $opts(-transportsend) {$xml}}
-    eval $opts(-transportreset)
+    catch {eval $lib(transportsend) {$xml}}
+    eval $lib(transportreset)
     reset $jlibname
     
     # Be sure to reset the wrapper, which implicitly resets the XML parser.
@@ -854,31 +871,34 @@ proc jlib::iq_handler {jlibname xmldata} {
 	    set ishandled [uplevel #0 $lib(clientcmd) $clientcallback]
 	}
 
-	# (6) If type='get' and still unhandled, return an error element.
+	# (6) If type='get' or 'set', and still unhandled, return an error element.
 
-	if {[string equal $type "get"] && [string equal $ishandled "0"]} {
+	if {[string equal $ishandled "0"] && \
+	  ([string equal $type "get"] || [string equal $type "set"])} {
 	    
 	    # Return a "Not Implemented" to the sender. Just switch to/from,
 	    # type='result', and add an <error> element.
-	    set attrArr(to) $attrArr(from)
-	    unset attrArr(from)
-	    set attrArr(type) "error"
-	    set xmldata [wrapper::setattrlist $xmldata [array get attrArr]]
-	    
-	    set errstanza [wrapper::createtag "feature-not-implemented" \
-	      -attrlist [list xmlns urn:ietf:params:xml:ns:xmpp-stanzas]]
-	    set errtag [wrapper::createtag "error" -subtags [list $errstanza] \
-	      -attrlist {code 501 type cancel}]
-
-	    lappend childlist $errtag
-	    set xmldata [wrapper::setchildlist $xmldata $childlist]
-	    
-	    # Be careful to trap network errors and report.
-	    set xml [wrapper::createxml $xmldata]
-	    if {[catch {eval $opts(-transportsend) {$xml}} err]} {
-		disconnect $jlibname
-		uplevel #0 $lib(clientcmd) $jlibname "networkerror" -body \
-		  {Network error when responding}
+	    if {[info exists attrArr(from)]} {
+		set attrArr(to) $attrArr(from)
+		unset attrArr(from)
+		set attrArr(type) "error"
+		set xmldata [wrapper::setattrlist $xmldata [array get attrArr]]
+		
+		set errstanza [wrapper::createtag "feature-not-implemented" \
+		  -attrlist [list xmlns urn:ietf:params:xml:ns:xmpp-stanzas]]
+		set errtag [wrapper::createtag "error" -subtags [list $errstanza] \
+		  -attrlist {code 501 type cancel}]
+		
+		lappend childlist $errtag
+		set xmldata [wrapper::setchildlist $xmldata $childlist]
+		
+		# Be careful to trap network errors and report.
+		set xml [wrapper::createxml $xmldata]
+		if {[catch {eval $lib(transportsend) {$xml}} err]} {
+		    disconnect $jlibname
+		    uplevel #0 $lib(clientcmd) $jlibname "networkerror" -body \
+		      {Network error when responding}
+		}
 	    }
 	}
     }
@@ -1107,11 +1127,10 @@ proc jlib::got_stream {jlibname args} {
 proc jlib::end_of_parse {jlibname} {
 
     upvar ${jlibname}::lib lib
-    upvar ${jlibname}::opts opts
 
     Debug 3 "jlib::end_of_parse jlibname=$jlibname"
     
-    eval $opts(-transportreset)
+    eval $lib(transportreset)
     uplevel #0 $lib(clientcmd) [list $jlibname disconnect]
     reset $jlibname
 }
@@ -1129,11 +1148,10 @@ proc jlib::end_of_parse {jlibname} {
 proc jlib::xmlerror {jlibname args} {
 
     upvar ${jlibname}::lib lib
-    upvar ${jlibname}::opts opts
 
     Debug 3 "jlib::xmlerror jlibname=$jlibname, args='$args'"
     
-    eval $opts(-transportreset)
+    eval $lib(transportreset)
     uplevel #0 $lib(clientcmd) [list $jlibname xmlerror -errormsg $args]
     reset $jlibname
 }
@@ -1609,7 +1627,6 @@ proc jlib::send_iq {jlibname type xmldata args} {
     upvar ${jlibname}::lib lib
     upvar ${jlibname}::iqcmd iqcmd
     upvar ${jlibname}::locals locals
-    upvar ${jlibname}::opts opts
         
     Debug 3 "jlib::send_iq type='$type', xmldata='$xmldata', args='$args'"
     
@@ -1643,7 +1660,7 @@ proc jlib::send_iq {jlibname type xmldata args} {
     set iqxml [wrapper::createxml $xmllist]
     
     # Trap network errors here.
-    if {[catch {eval $opts(-transportsend) {$iqxml}} err]} {
+    if {[catch {eval $lib(transportsend) {$iqxml}} err]} {
 	disconnect $jlibname
 	return -code error "Network connection dropped: $err"
     }
@@ -1968,7 +1985,6 @@ proc jlib::send_message {jlibname to args} {
 
     upvar ${jlibname}::lib lib
     upvar ${jlibname}::locals locals
-    upvar ${jlibname}::opts opts
 
     Debug 3 "jlib::send_message to=$to, args=$args"
     
@@ -2007,7 +2023,7 @@ proc jlib::send_message {jlibname to args} {
     
     # Trap network errors.
     set xml [wrapper::createxml $xmllist]
-    if {[catch {eval $opts(-transportsend) {$xml}} err]} {
+    if {[catch {eval $lib(transportsend) {$xml}} err]} {
 	disconnect $jlibname
 	return -code error {Network error when sending message}
     }
@@ -2109,7 +2125,7 @@ proc jlib::send_presence {jlibname args} {
     
     # Trap network errors.
     set xml [wrapper::createxml $xmllist]
-    if {[catch {eval $opts(-transportsend) {$xml}} err]} {
+    if {[catch {eval $lib(transportsend) {$xml}} err]} {
 	disconnect $jlibname
 	return -code error $err	
     }

@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.19 2004-06-11 07:44:44 matben Exp $
+# $Id: Profiles.tcl,v 1.20 2004-06-30 08:52:39 matben Exp $
 
 package provide Profiles 1.0
 
@@ -28,6 +28,8 @@ namespace eval ::Profiles:: {
     
     # Profile name of selected profile.
     variable selected
+    
+    variable debug 0
 }
 
 proc ::Profiles::InitHook { } {
@@ -275,8 +277,6 @@ proc ::Profiles::BuildPage {page} {
     variable username
     variable password
     variable resource
-    variable ssl
-    variable sasl
     variable wuserinfofocus
     variable tmpProfArr
     variable tmpSelected
@@ -284,6 +284,7 @@ proc ::Profiles::BuildPage {page} {
     
     set fontS  [option get . fontSmall {}]
     set fontSB [option get . fontSmallBold {}]
+    set contrastBg [option get . backgroundLightContrast {}]
 
     set lfr $page.fr
     labelframe $lfr -text [::msgcat::mc {User Profiles}]
@@ -293,8 +294,8 @@ proc ::Profiles::BuildPage {page} {
     pack  $lfr.msg -side top -anchor w -fill x
     
     # Need to pack options here to get the complete bottom slice.
-    set  popt [frame $lfr.fropt]
-    pack $popt -padx 8 -pady 2 -side bottom -fill y
+    set  popt [frame $lfr.fropt -bd 1 -relief flat -bg $contrastBg]
+    pack $popt -padx 10 -pady 6 -side bottom -fill x -expand 1
 
     set pui $lfr.fr
     pack [frame $pui] -side left  
@@ -308,17 +309,22 @@ proc ::Profiles::BuildPage {page} {
     set server   $tmpProfArr($profile,server)
     set username $tmpProfArr($profile,username)
     set password $tmpProfArr($profile,password)
-    foreach key {resource ssl sasl} {
-	if {[info exists tmpProfArr($profile,-$key)]} {
-	    set $key $tmpProfArr($profile,-$key)
-	} else {
-	    switch -- $key {
-		resource {
-		    set $key ""
-		}
-		ssl - tasl {
-		    set $key 0
-		}
+    
+    # We use an array for "more" options.
+    set token [namespace current]::moreOpts
+    variable $token
+
+    ::Profiles::DefaultOptionsTabNotebook $token
+
+    foreach {key value} [array get tmpProfArr $profile,-*] {
+	set optname [string map [list $profile,- ""] $key]
+	
+	switch -- $optname {
+	    resource {
+		set resource $tmpProfArr($profile,-resource)
+	    }
+	    default {
+		set moreOpts($optname) $value
 	    }
 	}
     }
@@ -354,15 +360,13 @@ proc ::Profiles::BuildPage {page} {
       -validatecommand {::Jabber::ValidateResourceStr %S}
     set wuserinfofocus $pui.eserv
 
-    grid $pui.lserv  -column 0 -row 1 -sticky e
-    grid $pui.eserv  -column 1 -row 1 -sticky w
-    grid $pui.luser  -column 0 -row 2 -sticky e
-    grid $pui.euser  -column 1 -row 2 -sticky w
-    grid $pui.lpass  -column 0 -row 3 -sticky e
-    grid $pui.epass  -column 1 -row 3 -sticky w
-    grid $pui.lres   -column 0 -row 4 -sticky e
-    grid $pui.eres   -column 1 -row 4 -sticky w
-
+    grid $pui.lserv $pui.eserv
+    grid $pui.luser $pui.euser
+    grid $pui.lpass $pui.epass
+    grid $pui.lres  $pui.eres
+    grid $pui.lserv $pui.luser $pui.lpass $pui.lres -sticky e
+    grid $pui.eserv $pui.euser $pui.epass $pui.eres -sticky w
+    
     set  puibt [frame $lfr.frbt]
     pack $puibt -padx 8 -pady 6 -side right -fill y
     pack [button $puibt.new -font $fontS -text [::msgcat::mc New]  \
@@ -372,14 +376,10 @@ proc ::Profiles::BuildPage {page} {
       -command [namespace current]::DeleteCmd]   \
       -side top -fill x -pady 4
 
-    checkbutton $popt.cssl -text "  [::msgcat::mc {Use SSL for security}]"  \
-      -variable [namespace current]::ssl   
-    grid $popt.cssl
-
-    if {!$prefs(tls)} {
-	set ssl 0
-	$popt.cssl configure -state disabled
-    }
+    # Tabbed notebook for more options.
+    set wtabnb $popt.nb
+    ::Profiles::OptionsTabNotebook $wtabnb $token
+    pack $wtabnb -fill x
 
     # This allows us to clean up some things when we go away.
     bind $lfr <Destroy> [list [namespace current]::DestroyHandler]
@@ -392,6 +392,115 @@ proc ::Profiles::BuildPage {page} {
     after idle $script
 }
 
+# Profiles::OptionsTabNotebook --
+# 
+#       Megawidget tabbed notebook for all extras.
+#       Can be used elsewhere as well.
+
+proc ::Profiles::OptionsTabNotebook {w token} {
+    global  prefs
+    variable $token
+    
+    set fontS  [option get . fontSmall {}]
+
+    # Tabbed notebook for more options.
+    ::mactabnotebook::mactabnotebook $w
+
+    # Login options.
+    set wpage [$w newpage {Login} -text [::msgcat::mc {Login}]]
+    set pagelog $wpage.f
+    pack [frame $pagelog] -side top -anchor w -padx 6 -pady 4
+    checkbutton $pagelog.cdig -text " [::msgcat::mc {Scramble password}]"  \
+      -variable $token\(digest)
+    label $pagelog.lp -text "[::msgcat::mc {Priority}]:"
+    spinbox $pagelog.sp -textvariable $token\(priority) \
+      -width 5 -state readonly -increment 1 -from 0 -to 127
+    checkbutton $pagelog.cinv  \
+      -text " [::msgcat::mc {Login as invisible}]"  \
+      -variable $token\(invisible)
+    grid $pagelog.cdig   - -sticky w
+    grid $pagelog.cinv   - -sticky w
+    grid $pagelog.lp     $pagelog.sp
+    
+    # Connection page.
+    set wpage [$w newpage {Connection} -text [::msgcat::mc {Connection}]] 
+    set pageconn $wpage.f
+    pack [frame $pageconn] -side top -anchor w -padx 6 -pady 4
+    label $pageconn.lip   -text "[::msgcat::mc {IP address}]:"
+    entry $pageconn.eip   -textvariable $token\(ip)
+    label $pageconn.lport -text "[::msgcat::mc Port]:"
+    entry $pageconn.eport -textvariable $token\(port) -width 6
+    checkbutton $pageconn.cssl -text " [::msgcat::mc {Use SSL for security}]" \
+      -variable $token\(ssl)   
+    if {!$prefs(tls)} {
+	$pageconn.cssl configure -state disabled
+    }
+    grid $pageconn.lip   $pageconn.eip  
+    grid $pageconn.lport $pageconn.eport
+    grid x               $pageconn.cssl
+    grid $pageconn.lip $pageconn.lport -sticky e
+    grid $pageconn.eip $pageconn.eport -sticky w
+    grid $pageconn.cssl -sticky w
+
+    # HTTP proxy.
+    set wpage [$w newpage {Proxy} -text [::msgcat::mc {HTTP Proxy}]] 
+    set pageproxy $wpage.f
+    pack [frame $pageproxy] -side top -anchor w -padx 6 -pady 4
+    checkbutton $pageproxy.http -text " [::msgcat::mc {Connect using Http proxy}]" \
+      -variable $token\(proxyhttp)
+    label $pageproxy.lpoll -text [::msgcat::mc {Poll interval (secs)}]
+    spinbox $pageproxy.spoll -textvariable $token\(pollsecs) \
+      -width 4 -state readonly -increment 1 -from 1 -to 120
+    button $pageproxy.set -font $fontS -text [::msgcat::mc {Proxy Settings}] \
+      -command [list ::Preferences::Build -page {General {Proxy Setup}}]
+    grid $pageproxy.http  -   -sticky w
+    grid $pageproxy.lpoll $pageproxy.spoll -sticky e
+    grid $pageproxy.set   -   -sticky w
+
+    # Let components ad their own stuff here.
+    ::hooks::run profileBuildTabNotebook $w $token
+    return $w
+}
+
+namespace eval ::Profiles:: {
+    
+    variable initedDefaultOptions 0
+}
+
+proc ::Profiles::InitDefaultOptions { } {
+    global  prefs
+    variable initedDefaultOptions
+    variable defaultOptionsArr
+    upvar ::Jabber::jprefs jprefs
+ 
+    array set defaultOptionsArr {
+	digest      1
+	invisible   0
+	ip          ""
+	pollsecs    5
+	priority    0
+	proxyhttp   0
+    }
+    set defaultOptionsArr(port) $jprefs(port)
+    set defaultOptionsArr(ssl)  $jprefs(usessl)
+    if {!$prefs(tls)} {
+	set defaultOptionsArr(ssl) 0
+    }
+    set initedDefaultOptions 1
+}
+
+proc ::Profiles::DefaultOptionsTabNotebook {token} {
+    variable $token
+    upvar 0 $token state
+    variable defaultOptionsArr
+    variable initedDefaultOptions
+
+    if {!$initedDefaultOptions} {
+	::Profiles::InitDefaultOptions
+    }
+    array set state [array get defaultOptionsArr]
+}
+
 # Profiles::MakeTmpProfArr --
 #
 #       Make temp array for profiles.
@@ -400,6 +509,7 @@ proc ::Profiles::MakeTmpProfArr { } {
     
     variable profiles
     variable tmpProfArr
+    variable moreOpts
     
     # New... Profiles
     catch {unset tmpProfArr}
@@ -438,21 +548,20 @@ proc ::Profiles::SetCmd {profName} {
     variable username
     variable password
     variable resource
-    variable ssl
-    variable sasl
+    variable moreOpts
     
     # The 'profName' is here the new profile, and 'tmpSelected' the
     # previous one.
-    # puts "::Profiles::SetCmd profName=$profName, tmpSelected=$tmpSelected"
+    Debug 2 "::Profiles::SetCmd profName=$profName, tmpSelected=$tmpSelected"
 
     set previousExists [info exists tmpProfArr($tmpSelected,name)]
-    # puts "\t previousExists=$previousExists"
+    Debug 2 "\t previousExists=$previousExists"
     if {$previousExists} {
 	
 	# Check if there are any empty fields.
 	if {![::Profiles::VerifyNonEmpty]} {
 	    set profile $tmpSelected
-	    # puts "***::Profiles::VerifyNonEmpty: set profile $tmpSelected"
+	    Debug 2 "***::Profiles::VerifyNonEmpty: set profile $tmpSelected"
 	    return
 	}
 	
@@ -465,20 +574,16 @@ proc ::Profiles::SetCmd {profName} {
 	set server   $tmpProfArr($profName,server)
 	set username $tmpProfArr($profName,username)
 	set password $tmpProfArr($profName,password)
-	foreach key {resource ssl sasl} {
-	    if {[info exists tmpProfArr($profName,-$key)]} {
-		set $key $tmpProfArr($profName,-$key)
-	    } else {
-		switch -- $key {
-		    resource {
-			set $key ""
-		    }
-		    ssl - tasl {
-			set $key 0
-		    }
-		}
+	::Profiles::DefaultOptionsTabNotebook [namespace current]::moreOpts
+	
+	foreach {key value} [array get tmpProfArr $profName,-*] {
+	    set optname [string map [list $profName,- ""] $key]
+	    if {$optname == "resource"} {
+		continue
 	    }
+	    set moreOpts($optname) $value
 	}
+	set resource $tmpProfArr($profName,-resource)
 	set tmpSelected $profName  
     }
 }
@@ -491,34 +596,35 @@ proc ::Profiles::SaveStateToTmpProfArr {profName} {
     variable username
     variable password
     variable resource
-    variable ssl
-    variable sasl
+    variable moreOpts
+    variable defaultOptionsArr
     
-    # puts "::Profiles::SaveStateToTmpProfArr profName=$profName"
+    Debug 2 "::Profiles::SaveStateToTmpProfArr profName=$profName"
     
     # Store it in the temporary array. 
     # But only of the profile already exists since we may have just deleted it!
     if {[info exists tmpProfArr($profName,name)]} {
-	# puts "\t  exists tmpProfArr($profName,name)"
+	Debug 2 "\t exists tmpProfArr($profName,name)"
 	set tmpProfArr($profName,name)     $profName
 	set tmpProfArr($profName,server)   $server
 	set tmpProfArr($profName,username) $username
 	set tmpProfArr($profName,password) $password
+	
 	if {$resource != ""} {
 	    set tmpProfArr($profName,-resource) $resource
 	}
-	foreach key {resource ssl sasl} {
-	    switch -- $key {
-		resource {
-		    if {$resource != ""} {
-			set tmpProfArr($profName,-$key) [set $key]
-		    }
-		}
-		ssl - tasl {
-		    set tmpProfArr($profName,-$key) [set $key]
-		}
+	
+	# Set more options if different from defaults.
+	foreach key [array names moreOpts] {
+	    
+	    # Cleanup any old entries.
+	    catch {unset tmpProfArr($profName,-$key)}
+	    if {![string equal $moreOpts($key) $defaultOptionsArr($key)]} {
+		Debug 4 "\t key=$key"
+		set tmpProfArr($profName,-$key) $moreOpts($key)
 	    }
 	}
+	parray tmpProfArr $profName,-*
 	set tmpSelected $profName  
     }
 }
@@ -581,8 +687,7 @@ proc ::Profiles::NewCmd { } {
     variable username
     variable password
     variable resource
-    variable ssl
-    variable sasl
+    variable moreOpts
     variable wuserinfofocus
     variable wmenu
     
@@ -596,7 +701,7 @@ proc ::Profiles::NewCmd { } {
     if {$ans == "cancel"} {
 	return
     }
-    # puts "::Profiles::NewCmd tmpSelected=$tmpSelected, newProfile=$newProfile"
+    Debug 2 "::Profiles::NewCmd tmpSelected=$tmpSelected, newProfile=$newProfile"
 
     set uniqueName [::Profiles::MakeUniqueProfileName $newProfile]
     # puts "\t uniqueName=$uniqueName"
@@ -609,8 +714,7 @@ proc ::Profiles::NewCmd { } {
     set username  ""
     set password  ""
     set resource  ""
-    set ssl       0
-    set sasl      0
+    ::Profiles::DefaultOptionsTabNotebook [namespace current]::moreOpts
     
     # Must do this for it to be automatically saved.
     set tmpProfArr($profile,name) $profile
@@ -626,7 +730,7 @@ proc ::Profiles::DeleteCmd { } {
     variable wmenu
     variable wpage
     
-    # puts "::Profiles::DeleteCmd profile=$profile"
+    Debug 2 "::Profiles::DeleteCmd profile=$profile"
     set ans "yes"
     
     # The present state may be something that has not been stored yet.
@@ -661,6 +765,10 @@ proc ::Profiles::UserDefaultsHook { } {
         
 }
 
+# Profiles::SaveHook --
+# 
+#       Invoked from the Save button.
+
 proc ::Profiles::SaveHook { } {
     variable profiles
     variable selected
@@ -677,6 +785,8 @@ proc ::Profiles::GetTmpProfiles { } {
     variable tmpProfArr
     variable profile
     
+    Debug 2 "::Profiles::GetTmpProfiles"
+    
     # Get present dialog state into tmp array first.
     ::Profiles::SaveStateToTmpProfArr $profile
     
@@ -684,17 +794,16 @@ proc ::Profiles::GetTmpProfiles { } {
     foreach name [::Profiles::GetAllTmpNames] {
 	set plist [list $tmpProfArr($name,server) $tmpProfArr($name,username) \
 	  $tmpProfArr($name,password)]
-
-	foreach key {resource ssl sasl} {
-	    if {[info exists tmpProfArr($name,-$key)]} {
-		
-		switch -- $key {
-		    resource {
-			lappend plist -resource $tmpProfArr($name,-resource)
-		    }
-		    ssl - tasl {		    
-			lappend plist -$key $tmpProfArr($name,-$key)
-		    }
+	
+	# Set the optional options as "-key value ..."
+	foreach {key value} [array get tmpProfArr $name,-*] {
+	    set optname [string map [list $name,- ""] $key]
+	    switch -- $optname {
+		resource {
+		    lappend plist -resource $value 
+		}
+		default {
+		    lappend plist -$optname $value
 		}
 	    }
 	}
@@ -748,7 +857,7 @@ proc ::Profiles::BuildDialog { } {
     
     # Global frame.
     frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1 -ipadx 12 -ipady 4
+    pack  $w.frall -fill both -expand 1
 
     set wpage $w.frall.page
     pack [frame $wpage] -padx 4 -pady 4
@@ -787,6 +896,13 @@ proc ::Profiles::CancelDlg {w} {
     
     ::UI::SaveWinGeom $w
     destroy $w
+}
+
+proc ::Profiles::Debug {num str} {
+    variable debug
+    if {$num <= $debug} {
+	puts $str
+    }
 }
 
 #-------------------------------------------------------------------------------
