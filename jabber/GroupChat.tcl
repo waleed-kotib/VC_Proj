@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.16 2003-11-09 15:07:32 matben Exp $
+# $Id: GroupChat.tcl,v 1.17 2003-11-12 08:20:49 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -933,7 +933,7 @@ proc ::Jabber::GroupChat::SetUser {roomJid jid3 presence args} {
 	set showStatus $attrArr(-show)
     } elseif {[info exists attrArr(-subscription)] &&   \
       [string equal $attrArr(-subscription) "none"]} {
-	set showStatus {subnone}
+	set showStatus "subnone"
     }
     
     # Remove any "old" line first. Image takes one character's space.

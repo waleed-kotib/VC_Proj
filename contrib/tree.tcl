@@ -25,7 +25,7 @@
 # 
 # Copyright (C) 2002-2003 Mats Bengtsson
 # 
-# $Id: tree.tcl,v 1.13 2003-11-08 08:54:44 matben Exp $
+# $Id: tree.tcl,v 1.14 2003-11-12 08:20:49 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -108,6 +108,7 @@
 #       031020      uses uid's instead of v's as key in treestate array
 #                   use NormList to handle things like {dir [junk]}
 #       031106      added -canvastags and -indention options
+#       031110      added 'find withtag all' 
 
 package require Tcl 8.4
 
@@ -646,6 +647,7 @@ proc ::tree::WidgetProc {w command args} {
     upvar ::tree::${w}::treestate treestate
     upvar ::tree::${w}::widgets widgets
     upvar ::tree::${w}::uid2v uid2v
+    upvar ::tree::${w}::v2uid v2uid
     
     Debug 1 "::tree::WidgetProc w=$w, command=$command, args=$args"
 
@@ -689,13 +691,21 @@ proc ::tree::WidgetProc {w command args} {
 		
 		# Is there a smarter way?
 		set ftag [lindex $args 1]
-		set vlist {}
-		foreach {key val} [array get treestate "*:tags"] {
-		    if {[string equal $val $ftag]} {
-			set ind [expr [string last ":tags" $key] - 1]
-			set uid [string range $key 0 $ind]
-			if {[info exists uid2v($uid)]} {
-			    lappend vlist $uid2v($uid)
+		if {[string equal $ftag "all"]} {
+		    set vlist [array names v2uid]
+		    set ind [lsearch $vlist {}]
+		    if {$ind >= 0} {
+			set vlist [lreplace $vlist $ind $ind]
+		    }
+		} else {
+		    set vlist {}
+		    foreach {key val} [array get treestate "*:tags"] {
+			if {[string equal $val $ftag]} {
+			    set ind [expr [string last ":tags" $key] - 1]
+			    set uid [string range $key 0 $ind]
+			    if {[info exists uid2v($uid)]} {
+				lappend vlist $uid2v($uid)
+			    }
 			}
 		    }
 		}
@@ -936,8 +946,6 @@ proc ::tree::ConfigureItem {w v args} {
     set dir [lrange $v 0 end-1]
     set tail [lindex $v end]
 
-    #set dir [FileTree dirname $v]
-    #set tail [FileTree tail $v]
     if {![info exists v2uid($v)]} {
 	return -code error "item \"$v\" doesn't exist"
     }
@@ -1082,10 +1090,7 @@ proc ::tree::NewItem {w v args} {
     set v [NormList $v]   
     set dir [lrange $v 0 end-1]
     set tail [lindex $v end]
-    
-    #set dir [FileTree dirname $v]
-    #set tail [FileTree tail $v]
-    
+        
     if {![info exists v2uid($dir)]} {
 	return -code error "parent item \"$dir\" is missing"
     }

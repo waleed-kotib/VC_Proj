@@ -15,7 +15,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.12 2003-11-08 08:54:44 matben Exp $
+# $Id: Coccinella.tcl,v 1.13 2003-11-12 08:20:49 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -149,7 +149,7 @@ if {[llength [namespace children :: "::browser*"]] > 0} {
 # Level of detail for printouts. >= 2 for my outputs.
 set debugLevel 0
 # Level of detail for printouts for server. >= 2 for my outputs.
-set debugServerLevel 0
+set debugServerLevel $debugLevel
 # Macintosh only: if no debug printouts, no console. Also for windows?
 if {[string match "mac*" $this(platform)] &&   \
   $debugLevel == 0 && $debugServerLevel == 0} {

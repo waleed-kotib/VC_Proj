@@ -18,7 +18,7 @@
 ::msgcat::mcset sv Both   		{Båda}
 ::msgcat::mcset sv Buffering		{Buffring}
 ::msgcat::mcset sv Cancel		{Avbryt}
-::msgcat::mcset en Change               {Ändra}
+::msgcat::mcset sv Change               {Ändra}
 ::msgcat::mcset sv City                 {Stad}
 ::msgcat::mcset sv Clear 		{Radera}
 ::msgcat::mcset sv Close 		{Stäng}
@@ -661,10 +661,14 @@ med felkod %s beroende av att användarnamnet används. Om det är ditt eget
 namn prova att logga på istället.}
 	::msgcat::mcset sv jamessloginerr	{Påloggningen misslyckades\
 med felkod %s  och felmeddelande: %s}
-::msgcat::mcset sv jamessaddforeign	        {Att lägga til en användare\
+        ::msgcat::mcset sv jamessaddforeign     {Att lägga til en användare\
 från ett icke Jabber system kräver att du redan har ett konto på detta\
 system och att du har använt detta konto för att registrera dig hos\
 serverns transport komponent %s. Vill du göra detta nu?}
+        ::msgcat::mcset sv jamessowntrpt	{Detta är ditt eget konto\
+hos %s som fungerar som en server serice vilken transporterar meddelanden\
+till motsvarande IM system. Det är nödvändigt att att den finns i din\
+roster. Du har prenumeration för %s: %s.}
 
 
 

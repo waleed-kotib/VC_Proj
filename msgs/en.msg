@@ -659,6 +659,10 @@ code %s and message: %s}
 IM system requires that you already have an account on this system, and that\
 you have used this account to register with the corresponding server transport\
 component %s. Do you wish to do that now?}
+::msgcat::mcset en jamessowntrpt	        {This is your own account at %s\
+that acts as a server service that transports messages to that IM\
+system. It is necessary for it to be in your roster.\
+You have a subscription for %s: %s.}
     
     
 

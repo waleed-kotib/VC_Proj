@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.20 2003-11-09 15:07:32 matben Exp $
+# $Id: Roster.tcl,v 1.21 2003-11-12 08:20:49 matben Exp $
 
 package provide Roster 1.0
 
@@ -24,6 +24,7 @@ namespace eval ::Jabber::Roster:: {
     
     # Mapping from presence/show to icon. 
     # Specials for whiteboard clients and foreign IM systems.
+    # It is unclear if <show>online</show> is allowed.
     variable presenceIcon
     array set presenceIcon [list                         \
       {available}         [::UI::GetIcon machead]        \
@@ -32,6 +33,7 @@ namespace eval ::Jabber::Roster:: {
       {away}              [::UI::GetIcon macheadaway]    \
       {xa}                [::UI::GetIcon macheadunav]    \
       {dnd}               [::UI::GetIcon macheadsleep]   \
+      {online}            [::UI::GetIcon machead]        \
       {invisible}         [::UI::GetIcon macheadinv]     \
       {subnone}           [::UI::GetIcon questmark]      \
       {available,wb}      [::UI::GetIcon macheadwb]      \
@@ -40,28 +42,37 @@ namespace eval ::Jabber::Roster:: {
       {away,wb}           [::UI::GetIcon macheadawaywb]  \
       {xa,wb}             [::UI::GetIcon macheadunavwb]  \
       {dnd,wb}            [::UI::GetIcon macheadsleepwb] \
+      {online,wb}         [::UI::GetIcon macheadwb]      \
       {invisible,wb}      [::UI::GetIcon macheadinvwb]   \
       {subnone,wb}        [::UI::GetIcon questmarkwb]    \
       {available,aim}     [::UI::GetIcon aim_online]     \
       {unavailable,aim}   [::UI::GetIcon aim_offline]    \
+      {chat,aim}          [::UI::GetIcon aim_online]     \
       {dnd,aim}           [::UI::GetIcon aim_dnd]        \
       {away,aim}          [::UI::GetIcon aim_away]       \
       {xa,aim}            [::UI::GetIcon aim_xa]         \
+      {online,aim}        [::UI::GetIcon aim_online]     \
       {available,icq}     [::UI::GetIcon icq_online]     \
       {unavailable,icq}   [::UI::GetIcon icq_offline]    \
+      {chat,icq}          [::UI::GetIcon icq_online]     \
       {dnd,icq}           [::UI::GetIcon icq_dnd]        \
       {away,icq}          [::UI::GetIcon icq_away]       \
       {xa,icq}            [::UI::GetIcon icq_xa]         \
+      {online,icq}        [::UI::GetIcon icq_online]     \
       {available,msn}     [::UI::GetIcon msn_online]     \
       {unavailable,msn}   [::UI::GetIcon msn_offline]    \
+      {chat,msn}          [::UI::GetIcon msn_online]     \
       {dnd,msn}           [::UI::GetIcon msn_dnd]        \
       {away,msn}          [::UI::GetIcon msn_away]       \
       {xa,msn}            [::UI::GetIcon msn_xa]         \
+      {online,msn}        [::UI::GetIcon msn_online]     \
       {available,yahoo}   [::UI::GetIcon yahoo_online]   \
       {unavailable,yahoo} [::UI::GetIcon yahoo_offline]  \
+      {chat,yahoo}        [::UI::GetIcon yahoo_online]   \
       {dnd,yahoo}         [::UI::GetIcon yahoo_dnd]      \
       {away,yahoo}        [::UI::GetIcon yahoo_away]     \
       {xa,yahoo}          [::UI::GetIcon yahoo_xa]       \
+      {online,yahoo}      [::UI::GetIcon yahoo_online]   \
     ]
 }
 
@@ -330,11 +341,15 @@ proc ::Jabber::Roster::DoubleClickCmd {w v} {
     upvar ::Jabber::jprefs jprefs
 
     if {[llength $v] && ([$w itemconfigure $v -dir] == 0)} {
+	
+	# According to XMPP def sect. 4.1, we should use user@domain when
+	# initiating a new chat or sending a new message that is not a reply.
 	set jid [lindex $v end]
+	jlib::splitjid $jid jid2 res
 	if {[string equal $jprefs(rost,dblClk) "normal"]} {
-	    ::Jabber::NewMsg::Build $wDlgs(jsendmsg) -to $jid
+	    ::Jabber::NewMsg::Build $wDlgs(jsendmsg) -to $jid2
 	} else {
-	    ::Jabber::Chat::StartThread $jid
+	    ::Jabber::Chat::StartThread $jid2
 	}
     }    
 }
@@ -644,7 +659,7 @@ proc ::Jabber::Roster::Remove {jid} {
 #       If presence from user browse that user including its resource.
 #       
 # Arguments:
-#       jid:        3-tier jid
+#       jid:        
 #       presence    "available" or "unavailable"
 
 proc ::Jabber::Roster::AutoBrowse {jid presence args} {    
@@ -658,7 +673,7 @@ proc ::Jabber::Roster::AutoBrowse {jid presence args} {
 	$jstate(jlib) browse_get $jid  \
 	  -errorcommand [list ::Jabber::Browse::ErrorProc 1]  \
 	  -command [list [namespace current]::AutoBrowseCallback]
-    } elseif {[string equal $presence "unavailable"]} {    
+    } elseif {[string equal $presence "unavailable"]} {
 	$jstate(browse) clear $jid
     }
 }
@@ -669,7 +684,7 @@ proc ::Jabber::Roster::AutoBrowse {jid presence args} {
 #       supports to the UI. If coccinella, for instance.
 #       
 # Arguments:
-#       jid:        3-tier jid
+#       jid:        
 
 proc ::Jabber::Roster::AutoBrowseCallback {browseName type jid subiq} {    
     variable wtree    
@@ -731,7 +746,7 @@ proc ::Jabber::Roster::AutoBrowseCallback {browseName type jid subiq} {
 #       Offline and other are stored with 2-tier jid with no resource.
 #
 # Arguments:
-#       jid         2-tier jid
+#       jid         2-tier jid, or 3-tier for icq etc.
 #       presence    "available" or "unavailable"
 #       args        list of '-key value' pairs of presence and roster
 #                   attributes.
@@ -751,6 +766,8 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
     array set argsArr $args
     array set gpresarr {available Online unavailable Offline}
     
+    jlib::splitjid $jid jid2 res
+
     # Format item:
     #  - If 'name' attribute, use this, else
     #  - if user belongs to login server, use only prefix, else
@@ -761,22 +778,23 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
     # since a user may be logged in from more than one resource.
     # Note that some (icq) transports have 3-tier items that are unavailable!
     
-    set jidx $jid
     if {[info exists argsArr(-name)] && ($argsArr(-name) != "")} {
 	set itemTxt $argsArr(-name)
     } elseif {[regexp "^(\[^@\]+)@$jserver(this)" $jid match user]} {
 	set itemTxt $user
     } else {
-	set itemTxt $jid
+	set itemTxt $jid2
     }
+    set jidx $jid
     if {[string equal $presence "available"]} {
 	if {[info exists argsArr(-resource)] && ($argsArr(-resource) != "")} {
 	    append itemTxt " ($argsArr(-resource))"
-	    set jidx ${jid}/$argsArr(-resource)
+	    set jidx ${jid2}/$argsArr(-resource)
 	}
     }
-    set treectag item[incr treeuid]
+    ::Jabber::Debug 5 "\tjidx=$jidx"
     
+    set treectag item[incr treeuid]    
     set itemOpts [list -text $itemTxt -canvastags $treectag]    
     set icon [eval {::Jabber::Roster::GetPresenceIcon $jidx $presence} $args]
 	
@@ -811,7 +829,7 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
     if {[info exists argsArr(-name)] && [string length $argsArr(-name)]} {
 	set msg "$argsArr(-name): $gpresarr($presence)"
     } else {
-	set msg "${jid}: $gpresarr($presence)"
+	set msg "${jidx}: $gpresarr($presence)"
     }
     if {[string equal $presence "available"]} {
 	set delay [$jstate(roster) getx $jidx "jabber:x:delay"]
@@ -893,16 +911,13 @@ proc ::Jabber::Roster::NewOrEditItem {which args} {
 		set subscription [$jstate(roster) getsubscription $jid]
 		set typesubtype [$jstate(jlib) service gettype $host]
 		regexp {^[^/]+/(.+)$} $typesubtype match subtype
-		puts "jid=$jid, users=$users, host=$host"
+		#puts "jid=$jid, users=$users, host=$host"
 	    }
 	}
     }
     if {$isTransport} {
-	tk_messageBox -icon info -title "Transport Info" -message \
-	  "This is your own account at $subtype that acts as\
-	  a server service that transports messages to that IM\
-	  systems. It is necessary for it to be in your roster.\
-	  You have a subscription for \"$jid\": $subscription"
+	tk_messageBox -icon info -title "Transport Info"  \
+	  -message [::msgcat::mc jamessowntrpt $subtype $jid $subscription]
 	set ans cancel
     } else {
 	set ans [eval {::Jabber::Roster::NewOrEditDlg $which} $args]
@@ -1015,10 +1030,10 @@ proc ::Jabber::Roster::NewOrEditDlg {which args} {
     label $wtrptpop -bd 2 -relief raised -image [::UI::GetIcon popupbt]
     pack $frjid.ljid $wtrptpop -side left
     
-    entry $wjid -width 20 -textvariable $token\(jid)
+    entry $wjid -width 24 -textvariable $token\(jid)
     label $frmid.lnick -text "[::msgcat::mc {Nick name}]:" -font $sysFont(sb) \
       -anchor e
-    entry $frmid.enick -width 20 -textvariable $token\(name)
+    entry $frmid.enick -width 24 -textvariable $token\(name)
     label $frmid.lgroups -text "[::msgcat::mc Group]:" -font $sysFont(sb) -anchor e
     
     ::combobox::combobox $frmid.egroups -font $sysFont(s) -width 12  \
@@ -1477,7 +1492,6 @@ proc ::Jabber::Roster::GetPresenceIcon {jid presence args} {
     
     # This gives the basic icons.
     set key $presence
-    set keyBas $presence
     
     # Then see if any <show/> element
     if {[info exists argsArr(-show)] &&  \
@@ -1489,29 +1503,25 @@ proc ::Jabber::Roster::GetPresenceIcon {jid presence args} {
     }
     
     # Foreign IM systems.
+    set haveForeignIM 0
     if {$jprefs(haveIMsysIcons)} {
 	if {[regexp {^(.+@)?([^@/]+)(/.*)?} $jid match pre host]} {
 	    set typesubtype [$jstate(jlib) service gettype $host]
 	
 	    # If empty we have likely not yet browsed etc.
 	    if {[string length $typesubtype] > 0} {
-		if {[regexp {[^/]+/([^/]+)} $typesubtype match subtype]} {
-		    if {[regexp {(aim|icq|msn|yahoo)} $subtype match]} {
-			if {[info exists presenceIcon($key,$subtype)]} {
-			    append key ",$subtype"
-			}
+		if {[regexp {/(aim|icq|msn|yahoo)} $typesubtype match subtype]} {
+		    set haveForeignIM 1
+		    if {[info exists presenceIcon($key,$subtype)]} {
+			append key ",$subtype"
 		    }
 		}
-	    } else {
-		
-		# Add callback to be executed when (if) we get info. TODO!
-	
 	    }
 	}
     }   
     
     # If whiteboard:
-    if {[$jstate(browse) isbrowsed $jid]} {
+    if {!$haveForeignIM && [$jstate(browse) isbrowsed $jid]} {
 	if {[$jstate(browse) havenamespace $jid "coccinella:wb"]} {
 	    append key ",wb"
 	}
@@ -1625,31 +1635,43 @@ proc ::Jabber::Roster::BuildStatusMenuDef { } {
     return $statMenuDef
 }
 
-# Jabber::Roster::UpdateForeignIcons --
+# Jabber::Roster::PostProcessIcons --
+# 
+#       This is necessary to get icons for foreign IM systems set correctly.
+#       Usually we get the roster before we've got browse/agents/disco 
+#       info, so we cannot know if an item is an ICQ etc. when putting it
+#       into the roster.
 
-proc ::Jabber::Roster::UpdateForeignIcons { } {
+proc ::Jabber::Roster::PostProcessIcons { } {
     variable wtree    
     upvar ::Jabber::jprefs jprefs
+    upvar ::Jabber::jstate jstate
+    upvar ::Jabber::jserver jserver
 
     if {!$jprefs(haveIMsysIcons)} {
 	return
     }
     
-    # Loop through the complete roster tree for foreign IM jid's.
-    set level0 [$wtree children ""]
-    foreach item0 $level0 {
-	set level1 [$wtree children $item0]
-	foreach item1 $level1 {
-	    set v1 [list $item0 $item1]
-	    if {[$wtree itemconfigure $v1 -dir]} {
-		set level2 [$wtree children $v1]
-		foreach item2 $level2 {
+    foreach v [$wtree find withtag all] {
+	set tags [$wtree itemconfigure $v -tags]
+	
+	switch -- $tags {
+	    "" - head - group {
+		# skip
+	    } 
+	    default {
+		set jid [lindex $v end]
+		#puts "jid=$jid:"
 		
-		    
+		# Exclude jid's that belong to our login jabber server.
+ 		if {![string match "*@$jserver(this)*" $jid]} {
+		    jlib::splitjid $jid jid2 res
+		    set pres [$jstate(roster) getpresence $jid2 -resource $res]
+		    array set presArr $pres
+		    set icon [eval {GetPresenceIcon $jid $presArr(-type)} $pres]
+		    #puts "\t$pres, icon=$icon"
+		    $wtree itemconfigure $v -image $icon
 		}
-	    } else {
-		set jid $item1
-		#$wtree itemconfigure $v1 -image $icon
 	    }
 	}	
     }   
