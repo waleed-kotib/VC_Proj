@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.7 2004-01-23 08:56:22 matben Exp $
+# $Id: Profiles.tcl,v 1.8 2004-01-25 15:42:15 matben Exp $
 
 package provide Profiles 1.0
 
@@ -560,6 +560,8 @@ proc ::Profiles::SaveHook { } {
 
     set profiles [::Profiles::GetTmpProfiles]
     set selected $tmpSelected
+    
+    ::Jabber::Login::LoadProfiles
 }
 
 proc ::Profiles::GetTmpProfiles { } {

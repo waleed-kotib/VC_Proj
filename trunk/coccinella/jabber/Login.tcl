@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.23 2004-01-23 08:56:00 matben Exp $
+# $Id: Login.tcl,v 1.24 2004-01-25 15:42:15 matben Exp $
 
 package provide Login 1.0
 
@@ -49,6 +49,7 @@ proc ::Jabber::Login::Login { } {
     variable wtri
     variable wtrilab
     variable wfrmore
+    variable wpopupMenu
     variable tmpProfArr
     upvar ::Jabber::jprefs jprefs
     
@@ -83,30 +84,13 @@ proc ::Jabber::Login::Login { } {
     label $frmid.lpop -text "[::msgcat::mc Profile]:" -font $fontSB -anchor e
     set wpopup $frmid.popup
     
-    set profileList [::Profiles::GetAllNames]
-    eval {tk_optionMenu $wpopup [namespace current]::menuVar} $profileList
+    set wpopupMenu [tk_optionMenu $wpopup [namespace current]::menuVar {}]
     $wpopup configure -highlightthickness 0 -foreground black
     grid $frmid.lpop -column 0 -row 0 -sticky e
     grid $wpopup -column 1 -row 0 -sticky e
+    
+    ::Jabber::Login::LoadProfiles
 
-    set profile [::Profiles::GetSelectedName]
-    set menuVar $profile    
-    
-    # Make temp array for servers. Handy for filling in the entries.
-    foreach {name spec} [::Profiles::Get] {
-	set tmpProfArr($name,server)   [lindex $spec 0]
-	set tmpProfArr($name,username) [lindex $spec 1]
-	set tmpProfArr($name,password) [lindex $spec 2]
-	set tmpProfArr($name,-resource) ""
-	foreach {key value} [lrange $spec 3 end] {
-	    set tmpProfArr($name,$key) $value
-	}
-    }
-    set server   $tmpProfArr($menuVar,server)
-    set username $tmpProfArr($menuVar,username)
-    set password $tmpProfArr($menuVar,password)
-    set resource $tmpProfArr($menuVar,-resource)
-    
     label $frmid.lserv -text "[::msgcat::mc {Jabber server}]:" -font $fontSB -anchor e
     entry $frmid.eserv -width 22    \
       -textvariable [namespace current]::server -validate key  \
@@ -193,24 +177,71 @@ proc ::Jabber::Login::Login { } {
     bind $w <Return>  ::Jabber::Login::Doit
     bind $w <Escape>  [list ::Jabber::Login::DoCancel $w]
     bind $w <Destroy> [list ::Jabber::Login::DoCancel $w]
-    
-    if {0} {
-	# Grab and focus.
-	set oldFocus [focus]
-	focus $w
-	catch {grab $w}
-	
-	# Wait here for a button press and window to be destroyed.
-	tkwait window $w
-	
-	# Clean up.
-	catch {grab release $w}
-	::Jabber::Login::Close $w
-	catch {focus $oldFocus}
-	return [expr {($finished <= 0) ? "cancel" : "login"}]
-    }
 }
 
+proc ::Jabber::Login::LoadProfiles { } {
+    global  wDlgs
+    variable tmpProfArr
+    variable menuVar
+    variable profile
+    variable server
+    variable username
+    variable password
+    variable resource
+    variable wpopupMenu
+    
+    if {![winfo exists $wDlgs(jlogin)]} {
+	return
+    }
+    $wpopupMenu delete 0 end
+    set profileList [::Profiles::GetAllNames]
+    foreach name $profileList {
+	$wpopupMenu add command -label $name \
+	  -command [list set [namespace current]::menuVar $name]
+    }
+    set profile     [::Profiles::GetSelectedName]
+    set menuVar     $profile
+    
+    # Make temp array for servers. Handy for filling in the entries.
+    foreach {name spec} [::Profiles::Get] {
+	set tmpProfArr($name,server)   [lindex $spec 0]
+	set tmpProfArr($name,username) [lindex $spec 1]
+	set tmpProfArr($name,password) [lindex $spec 2]
+	set tmpProfArr($name,-resource) ""
+	foreach {key value} [lrange $spec 3 end] {
+	    set tmpProfArr($name,$key) $value
+	}
+    }
+    set server   $tmpProfArr($menuVar,server)
+    set username $tmpProfArr($menuVar,username)
+    set password $tmpProfArr($menuVar,password)
+    set resource $tmpProfArr($menuVar,-resource)
+}
+
+proc ::Jabber::Login::TraceMenuVar {name key op} {
+    
+    # Call by name.
+    upvar #0 $name locName
+
+    #puts "::Jabber::Login::TraceMenuVar name=$name"
+    variable profile
+    variable server
+    variable username
+    variable password
+    variable resource
+    variable menuVar
+    variable tmpProfArr
+    
+    #set profile  $locName
+    set profile  [set $name]
+    set server   $tmpProfArr($profile,server)
+    set username $tmpProfArr($profile,username)
+    set password $tmpProfArr($profile,password)
+    set resource $tmpProfArr($profile,-resource)
+    
+    #::Jabber::Debug 3 "TraceMenuVar: locName=$locName, menuVar=$menuVar"
+    #::Jabber::Debug 3 "\t[parray tmpProfArr $locName,*]"
+}
 
 proc ::Jabber::Login::CloseHook {wclose} {
     global  wDlgs
@@ -266,29 +297,6 @@ proc ::Jabber::Login::Close {w} {
       [namespace current]::TraceMenuVar
     catch {grab release $w}
     catch {destroy $w}    
-}
-
-proc ::Jabber::Login::TraceMenuVar {name key op} {
-    
-    # Call by name.
-    upvar #0 $name locName
-
-    variable profile
-    variable server
-    variable username
-    variable password
-    variable resource
-    variable menuVar
-    variable tmpProfArr
-    
-    set profile  $locName
-    set server   $tmpProfArr($locName,server)
-    set username $tmpProfArr($locName,username)
-    set password $tmpProfArr($locName,password)
-    set resource $tmpProfArr($locName,-resource)
-    
-    #::Jabber::Debug 3 "TraceMenuVar: locName=$locName, menuVar=$menuVar"
-    #::Jabber::Debug 3 "\t[parray tmpProfArr $locName,*]"
 }
 
 # Jabber::Login::Doit --
@@ -532,6 +540,7 @@ proc ::Jabber::Login::ResponseProc {jlibName type theQuery} {
     set jstate(meres) $resource
     set jstate(mejidres) "${username}@${server}/${resource}"
     set jserver(this) $server
+    
     ::Profiles::SetSelectedName $profile
 
     ::Network::RegisterIP $ipNum "to"
