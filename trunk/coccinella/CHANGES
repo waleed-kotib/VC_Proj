@@ -22,6 +22,7 @@ Coccinella-0.95.0 (04????): 	Short summary --
 	- card game applet as a first example
 	- slide show component
 	- xmpp uri parser
+	- restricted to single instance on Windows
 
 
 Coccinella-0.94.11 (040601): 	Short summary --

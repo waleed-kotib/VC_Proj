@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.24 2004-07-22 15:11:27 matben Exp $
+# $Id: Utils.tcl,v 1.25 2004-07-30 09:33:15 matben Exp $
 
 namespace eval ::Utils:: {
 
@@ -157,6 +157,19 @@ proc FormatTextForMessageBox {txt {width ""}} {
     } else {
 	return $txt
     }
+}
+
+# SecondCoccinella --
+# 
+#       This gets called if a second instance of this app is launched,
+#       before it kills itself
+
+proc SecondCoccinella {args} {
+    
+    wm deiconify .
+    raise .
+    
+    
 }
 
 #--- Utilities for general usage -----------------------------------------------

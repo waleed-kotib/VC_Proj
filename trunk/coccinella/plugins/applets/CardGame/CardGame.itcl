@@ -3,7 +3,7 @@
 #       Creates a card game in a whiteboard canvas. 
 # 
 # 
-# $Id: CardGame.itcl,v 1.3 2004-07-24 10:55:47 matben Exp $
+# $Id: CardGame.itcl,v 1.4 2004-07-30 09:33:15 matben Exp $
 
 namespace eval CardGame {
     
@@ -41,7 +41,8 @@ if {[itcl::find classes CardGame] == ""} {
 	# --------------
 
 	public {
-	    method Save {id}
+	    method Save {id args}
+	    method Delete {id}
 	}
 	
 	# ----------------------
@@ -96,7 +97,8 @@ if {[itcl::find classes CardGame] == ""} {
 	    variable idcard
 	    variable currentCard
 	    variable played 0
-	    variable emptyInstBindList
+	    variable emptyPointStackBinds
+	    variable emptyInstBinds
 	}    
     }
 
@@ -156,10 +158,15 @@ if {[itcl::find classes CardGame] == ""} {
 	  point   [list $b1ReleaseStackInst [code $this PointRelease %x %y]] \
 	  del     [list $b1StackInst        [code $this DeleteStack %x %y]] ]
 
-	set emptyInstBindList [list \
+	set emptyPointStackBinds [list \
 	  point   [list $b1StackInst        {}] \
 	  point   [list $b1MotionStackInst  {}] \
 	  point   [list $b1ReleaseStackInst {}]]
+	set emptyInstBinds [list \
+	  point   [list $b1StackInst        {}] \
+	  point   [list $b1MotionStackInst  {}] \
+	  point   [list $b1ReleaseStackInst {}] \
+	  del     [list $b1StackInst        {}]]
 
 	switch -- [GetThis platform] {
 	    macintosh - macosx {
@@ -178,7 +185,7 @@ if {[itcl::find classes CardGame] == ""} {
 	
 	# The naming here is a bit confusing...
 	RegisterCanvasClassBinds CardGame $classBindList
-	RegisterCanvasInstBinds  CardGame $instBindList
+	RegisterCanvasInstBinds  CardGame:$this $instBindList
 	
 	# Check if swash.wav sound available.
 	if {!$inited} {
@@ -306,7 +313,7 @@ if {[itcl::find classes CardGame] == ""} {
 	    Command $cmd remote
 	}
 	if {[$csObj NumberOfCards] == 0} {
-	    RegisterCanvasInstBinds CardGame $emptyInstBindList
+	    RegisterCanvasInstBinds CardGame $emptyPointStackBinds
 	}
 	set played 0
     }
@@ -344,6 +351,7 @@ if {[itcl::find classes CardGame] == ""} {
 	
 	set utag [GetUtag current]
 	set cmdList [list [list delete $utag]]
+	DeregisterCanvasInstBinds CardGame:$this
 	
 	# Delete all cards as well.
 	foreach id [$tkCanvas find withtag object:${this}] {
@@ -433,7 +441,21 @@ if {[itcl::find classes CardGame] == ""} {
 	}
     }
     
-    body CardGame::Save {id} {
+    # CardGame::Save --
+    #
+    #       Returns a oneline import command. Used from app.
+    #       
+    # Arguments:
+    #       id          item id or tag
+    #       args:
+    #           -basepath absolutePath    translate image -file to a relative path.
+    #           -uritype ( file | http )
+    #           -keeputag 0|1
+    #       
+    # Results:
+    #       a single command line.
+
+    body CardGame::Save {id args} {
 	
 	# Seemed to be the only way :-(
 	upvar [namespace current]::infoScript infoScript
@@ -442,8 +464,16 @@ if {[itcl::find classes CardGame] == ""} {
 	if {[lsearch $tags cardstack] < 0} {
 	    return ""
 	}
+	array set argsArr {
+	    -uritype file
+	}
+	array set argsArr $args
+	set uriopts [eval {
+	    ::CanvasUtils::GetImportOptsURI $argsArr(-uritype) $infoScript
+	} $args]
+
+	set impcmd [concat "import" [$tkCanvas coords $id] $uriopts]
 	set im [$csObj Image cardpile]
-	set impcmd [concat import [$tkCanvas coords $id] -file $infoScript]
 	lappend impcmd -mime application/x-itcl
 	lappend impcmd -width [image width $im] -height [image height $im]
 	
@@ -468,6 +498,11 @@ if {[itcl::find classes CardGame] == ""} {
 	}
 	lappend impcmd -cards $allcards
 	return $impcmd
+    }
+
+
+    body CardGame::Delete {id} {
+
     }
 }
 

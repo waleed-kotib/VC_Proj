@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Import.tcl,v 1.3 2004-07-22 15:11:28 matben Exp $
+# $Id: Import.tcl,v 1.4 2004-07-30 09:33:15 matben Exp $
 
 package require http
 package require httpex
@@ -349,7 +349,7 @@ proc ::Import::DoImport {w opts args} {
 		}
 		http {
 		    set id [$w find withtag $useTag]
-		    set line [::CanvasUtils::GetOnelinerForAny $w $id  \
+		    set line [::CanvasUtils::GetOneLinerForAny $w $id  \
 		      -uritype http]
 		    if {[llength $line]} {
 			::WB::SendMessageList $wtopNS [list $line]

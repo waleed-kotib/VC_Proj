@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.67 2004-07-28 15:13:57 matben Exp $
+# $Id: Chat.tcl,v 1.68 2004-07-30 09:33:15 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -424,39 +424,58 @@ proc ::Jabber::Chat::InsertMessage {chattoken whom body} {
 # 
 # Arguments:
 #       jid
+#       args        -message, -thread
 
 proc ::Jabber::Chat::StartThread {jid args} {
 
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
+    ::Debug 2 "::Jabber::Chat::StartThread jid=$jid, args=$args"
     array set argsArr $args
+    set havedlg 0
 
     # Make unique thread id.
     if {[info exists argsArr(-thread)]} {
 	set threadID $argsArr(-thread)
+	
+	# Do we already have a dialog with this thread?
+	set chattoken [::Jabber::Chat::GetTokenFrom chat threadid $threadID]
+	if {$chattoken != ""} {
+	    set havedlg 1
+	    upvar 0 $chattoken chatstate
+	}
     } else {
 	set threadID [::sha1pure::sha1 "$jstate(mejid)[clock seconds]"]
     }
-    if {$jprefs(chat,tabbedui)} {
-	set dlgtoken [::Jabber::Chat::GetFirstDlgToken]
-	if {$dlgtoken == ""} {
-	    set dlgtoken [::Jabber::Chat::Build $threadID -from $jid]
+    
+    if {!$havedlg} {
+	if {$jprefs(chat,tabbedui)} {
+	    set dlgtoken [::Jabber::Chat::GetFirstDlgToken]
+	    if {$dlgtoken == ""} {
+		set dlgtoken [eval {
+		    ::Jabber::Chat::Build $threadID -from $jid} $args]
+		set chattoken [::Jabber::Chat::GetTokenFrom chat threadid $threadID]
+
+		variable $chattoken
+		upvar 0 $chattoken chatstate
+	    } else {
+		set chattoken [::Jabber::Chat::NewPage $dlgtoken $threadID \
+		  -from $jid]
+		
+		# Make page frontmost.
+		variable $chattoken
+		upvar 0 $chattoken chatstate
+		
+		set dlgtoken $chatstate(dlgtoken)
+		variable $dlgtoken
+		upvar 0 $dlgtoken dlgstate
+		
+		$dlgstate(wnb) displaypage $chatstate(pagename)
+	    }
 	} else {
-	    set chattoken [::Jabber::Chat::NewPage $dlgtoken $threadID -from $jid]
-	    
-	    # Make page frontmost.
-	    variable $chattoken
-	    upvar 0 $chattoken chatstate
-
-	    set dlgtoken $chatstate(dlgtoken)
-	    variable $dlgtoken
-	    upvar 0 $dlgtoken dlgstate
-
-	    $dlgstate(wnb) displaypage $chatstate(pagename)
+	    eval {::Jabber::Chat::Build $threadID -from $jid} $args
 	}
-    } else {
-	::Jabber::Chat::Build $threadID -from $jid
     }
 }
 
@@ -466,7 +485,7 @@ proc ::Jabber::Chat::StartThread {jid args} {
 #
 # Arguments:
 #       threadID    unique thread id.
-#       args        ?-to jid -subject subject -from fromJid?
+#       args        ?-to jid -subject subject -from fromJid -message text?
 #       
 # Results:
 #       dlgtoken; shows window.
@@ -655,9 +674,6 @@ proc ::Jabber::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set chatstate(fromjid)  $jid
     set chatstate(jid)      $mjid
 
-    if {[info exists argsArr(-subject)]} {
-	set chatstate(subject) $argsArr(-subject)
-    }
     set chatstate(dlgtoken)     $dlgtoken
     set chatstate(threadid)     $threadID
     set chatstate(rosterName)   $rosterName
@@ -667,6 +683,9 @@ proc ::Jabber::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set chatstate(notifier)         ""
     set chatstate(xevent,status)    ""
     set chatstate(xevent,msgidlist) ""
+    if {[info exists argsArr(-subject)]} {
+	set chatstate(subject) $argsArr(-subject)
+    }
     
     # We need to kep track of current presence/status since we may get
     # duplicate presence (delay).
@@ -759,6 +778,9 @@ proc ::Jabber::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     
     if {$jprefs(chatFont) != ""} {
 	$wtextsnd configure -font $jprefs(chatFont)
+    }
+    if {[info exists argsArr(-message)]} {
+	$wtextsnd insert end $argsArr(-message)	
     }
     
     set imageHorizontal \

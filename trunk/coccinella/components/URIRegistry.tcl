@@ -2,7 +2,7 @@
 # 
 # <a href='xmpp:jid[?query]'/>
 # 
-# $Id: URIRegistry.tcl,v 1.3 2004-07-28 15:13:57 matben Exp $
+# $Id: URIRegistry.tcl,v 1.4 2004-07-30 09:33:15 matben Exp $
 
 namespace eval ::URIRegistry:: { }
 
@@ -20,13 +20,11 @@ proc ::URIRegistry::Init { } {
     # Find the exe we are running. Starkits?
     if {[info exists ::starkit::topdir]} {
 	set exe [file nativename [info nameofexecutable]]
-	#set cmd "\"$exe\" -uri \"%1\""
-	set cmd [format {"%s" -uri "%1"} $exe]
+	set cmd "\"$exe\" -uri \"%1\""
     } else {
 	set exe [file nativename [info nameofexecutable]]
 	set app [file nativename $this(script)]
-	#set cmd "\"$exe\" \"$app\" -uri \"%1\""
-	set cmd [format {"%s" "%s" -uri "%1"} $exe $app]
+	set cmd "\"$exe\" \"$app\" -uri \"%1\""
     }
     registry set HKEY_CLASSES_ROOT\\xmpp {} "URL:xmpp Protocol"
     registry set HKEY_CLASSES_ROOT\\xmpp "URL Protocol" {}
