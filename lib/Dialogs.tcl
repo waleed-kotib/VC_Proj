@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.55 2005-01-31 14:06:58 matben Exp $
+# $Id: Dialogs.tcl,v 1.56 2005-02-04 10:35:04 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -300,6 +300,51 @@ namespace eval ::Dialogs:: {
 #       shows dialog.
 
 proc ::Dialogs::UnixPrintPS {w wtoprint} {
+    
+    set kprinter [auto_execok kprinter]
+    if {[llength $kprinter]} {
+	set cmd [lindex $kprinter 0]
+	KPrinter $w $wtoprint $cmd
+    } else {
+	UnixPrintLpr $w $wtoprint
+    }
+}
+
+proc ::Dialogs::KPrinter {w wtoprint cmd} {
+    global  this prefs
+
+    # Save to temp file.
+    set tmpfile [::tfileutils::tempfile $this(tmpPath) prnt]
+    
+    switch -- [winfo class $wtoprint] {
+	Canvas {
+	    append tmpfile .ps
+	}
+	Text {
+	    append tmpfile .txt
+	}
+    }
+    
+    if {[catch {set fd [open $tmpfile {CREAT WRONLY}]} err]} {
+	::UI::MessageBox -message  \
+	  "Error when printing: $err" -icon error -type ok
+	return
+    }
+    fconfigure $fd -translation binary
+    
+    switch -- [winfo class $wtoprint] {
+	Canvas {
+	    puts $fd [eval {$wtoprint postscript} $prefs(postscriptOpts)]
+	}
+	Text {
+	    puts $fd [$wtoprint get 1.0 end]
+	}
+    }
+    close $fd
+    exec $cmd [list $tmpfile] &
+}
+
+proc ::Dialogs::UnixPrintLpr {w wtoprint} {
     global  prefs this
     
     variable psCmd
