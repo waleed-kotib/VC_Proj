@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.25 2003-12-22 15:04:57 matben Exp $
+# $Id: GroupChat.tcl,v 1.26 2003-12-23 08:54:52 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -665,7 +665,7 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     # Text chat and user list.
     pack [frame $frmid -height 250 -width 300 -relief sunken -bd 1 -class Pane] \
       -side top -fill both -expand 1 -padx 4 -pady 4
-    frame $wtxt -height 200 -class Pane
+    frame $wtxt -height 200
     frame $wtxt.0
     text $wtext -height 12 -width 1 -font $fontS -state disabled  \
       -borderwidth 1 -relief sunken -yscrollcommand [list $wysc set] -wrap word \
@@ -677,12 +677,23 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     pack $wtext -side left -fill both -expand 1
     pack $wysc -side right -fill y -padx 2
     
+    set imageVertical   [option get $frmid imageVertical {}]
+    set imageHorizontal [option get $frmid imageHorizontal {}]
+    set sashVBackground [option get $frmid sashVBackground {}]
+    set sashHBackground [option get $frmid sashHBackground {}]
+
+    set paneopts [list -orient horizontal -limit 0.0]
     if {[info exists prefs(paneGeom,groupchatDlgHori)]} {
-	set relpos $prefs(paneGeom,groupchatDlgHori)
+	lappend paneopts -relative $prefs(paneGeom,groupchatDlgHori)
     } else {
-	set relpos {0.8 0.2}
+	lappend paneopts -relative {0.8 0.2}
     }
-    ::pane::pane $wtxt.0 $wusers -limit 0.0 -relative $relpos -orient horizontal
+    if {$sashVBackground != ""} {
+	lappend paneopts -image "" -handlelook [list -background $sashVBackground]
+    } elseif {$imageVertical != ""} {
+	lappend paneopts -image $imageVertical
+    }    
+    eval {::pane::pane $wtxt.0 $wusers} $paneopts
     
     # The tags.
     ::Jabber::GroupChat::ConfigureTextTags $w $wtext
@@ -697,12 +708,18 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     grid columnconfigure $wtxtsnd 0 -weight 1
     grid rowconfigure $wtxtsnd 0 -weight 1
     
+    set paneopts [list -orient vertical -limit 0.0]
     if {[info exists prefs(paneGeom,groupchatDlgVert)]} {
-	set relpos $prefs(paneGeom,groupchatDlgVert)
+	lappend paneopts -relative $prefs(paneGeom,groupchatDlgVert)
     } else {
-	set relpos {0.8 0.2}
+	lappend paneopts -relative {0.8 0.2}
     }
-    ::pane::pane $wtxt $wtxtsnd -limit 0.0 -relative $relpos -orient vertical
+    if {$sashHBackground != ""} {
+	lappend paneopts -image "" -handlelook [list -background $sashHBackground]
+    } elseif {$imageHorizontal != ""} {
+	lappend paneopts -image $imageHorizontal
+    }    
+    eval {::pane::pane $wtxt $wtxtsnd} $paneopts
     
     set locals($roomJid,wtext)      $wtext
     set locals($roomJid,wtextsnd)   $wtextsnd

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.22 2003-12-22 15:04:57 matben Exp $
+# $Id: Chat.tcl,v 1.23 2003-12-23 08:54:52 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -433,13 +433,21 @@ proc ::Jabber::Chat::Build {threadID args} {
     grid columnconfigure $wtxtsnd 0 -weight 1
     grid rowconfigure $wtxtsnd 0 -weight 1
     
-    set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jchat)]]
-    if {($nwin == 1) && [info exists prefs(paneGeom,$wDlgs(jchat))]} {
-	set relpos $prefs(paneGeom,$wDlgs(jchat))
+    set imageHorizontal [option get $frmid imageHorizontal {}]
+    set sashHBackground [option get $frmid sashHBackground {}]
+
+    set paneopts [list -orient vertical -limit 0.0]
+    if {[info exists prefs(paneGeom,$wDlgs(jchat)]} {
+	lappend paneopts -relative $prefs(paneGeom,$wDlgs(jchat))
     } else {
-	set relpos {0.75 0.25}
+	lappend paneopts -relative {0.75 0.25}
     }
-    ::pane::pane $wtxt $wtxtsnd -orient vertical -limit 0.0 -relative $relpos
+    if {$sashHBackground != ""} {
+	lappend paneopts -image "" -handlelook [list -background $sashHBackground]
+    } elseif {$imageHorizontal != ""} {
+	lappend paneopts -image $imageHorizontal
+    }    
+    eval {::pane::pane $wtxt $wtxtsnd} $paneopts
     
     set locals($threadID,wtext)    $wtext
     set locals($threadID,wtextsnd) $wtextsnd
@@ -448,6 +456,7 @@ proc ::Jabber::Chat::Build {threadID args} {
     trace variable [namespace current]::locals($threadID,jid) w  \
       [list [namespace current]::TraceJid $threadID]
 
+    set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jchat)]]
     if {$nwin == 1} {
 	::UI::SetWindowGeometry $w $wDlgs(jchat)
     }
