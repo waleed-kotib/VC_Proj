@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.20 2003-12-13 17:54:40 matben Exp $
+# $Id: GroupChat.tcl,v 1.21 2003-12-15 08:20:53 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -19,27 +19,33 @@ namespace eval ::Jabber::GroupChat:: {
     set fontS [option get . fontSmall {}]
     set fontSB [option get . fontSmallBold {}]
 
-    option add *GroupChat*textBackground       white            widgetDefault
-    option add *GroupChat*textFont             $fontS           widgetDefault
-    option add *GroupChat*textSendBackground   white            widgetDefault
-    option add *GroupChat*textSendFont         $fontS           widgetDefault
     option add *GroupChat*meForeground         red              widgetDefault
     option add *GroupChat*meBackground         #cecece          widgetDefault
     option add *GroupChat*meTextForeground     black            widgetDefault
     option add *GroupChat*meTextBackground     #cecece          widgetDefault
     option add *GroupChat*meFont               $fontSB          widgetDefault                                     
-    option add *GroupChat*themForeground       blue             widgetDefault
-    option add *GroupChat*themBackground       white            widgetDefault
-    option add *GroupChat*themTextForeground   black            widgetDefault
-    option add *GroupChat*themTextBackground   white            widgetDefault
-    option add *GroupChat*themFont             $fontSB          widgetDefault
-    option add *GroupChat*usersForeground      blue             widgetDefault
-    option add *GroupChat*usersBackground      white            widgetDefault
-    option add *GroupChat*usersTextForeground  black            widgetDefault
-    option add *GroupChat*usersTextBackground  white            widgetDefault
-    option add *GroupChat*usersFont            $fontSB          widgetDefault
+    option add *GroupChat*theyForeground       blue             widgetDefault
+    option add *GroupChat*theyBackground       white            widgetDefault
+    option add *GroupChat*theyTextForeground   black            widgetDefault
+    option add *GroupChat*theyTextBackground   white            widgetDefault
+    option add *GroupChat*theyFont             $fontSB          widgetDefault
     option add *GroupChat*clockFormat         "%H:%M"           widgetDefault
       
+    variable groupChatOptions {
+	meForeground          Foreground
+	meBackground          Background
+	meTextForeground      Foreground
+	meTextBackground      Background
+	meFont                Font
+	theyForeground        Foreground
+	theyBackground        Background
+	theyTextForeground    Foreground
+	theyTextBackground    Background
+	theyFont              Font
+	clockFormat           ClockFormat
+    }
+
+    
     # Local stuff
     variable locals
     variable enteruid 0
@@ -232,7 +238,7 @@ proc ::Jabber::GroupChat::SetProtocol {roomJid protocol} {
 #       "cancel" or "enter".
      
 proc ::Jabber::GroupChat::BuildEnter {args} {
-    global  this
+    global  this wDlgs
 
     variable enteruid
     variable dlguid
@@ -252,7 +258,7 @@ proc ::Jabber::GroupChat::BuildEnter {args} {
     variable $token
     upvar 0 $token enter
     
-    set w .dlggc[incr dlguid]
+    set w $wDlgs(jgcenter)[incr dlguid]
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
@@ -436,6 +442,7 @@ proc ::Jabber::GroupChat::GotMsg {body args} {
 	set locals($roomJid,topic) $argsArr(-subject)
     }
     if {[string length $body] > 0} {
+	set w $locals($roomJid,wtop)
 	
 	# This can be room name or nick name.
 	foreach {meRoomJid mynick}  \
@@ -445,12 +452,15 @@ proc ::Jabber::GroupChat::GotMsg {body args} {
 	set nick [$jstate(jlib) service nick $fromJid]
 	
 	set wtext $locals($roomJid,wtext)
-	if {$jprefs(chat,showtime)} {
-	    set theTime [clock format [clock seconds] -format "%H:%M"]
+	
+	set clockFormat [option get $w clockFormat {}]
+	if {$clockFormat != ""} {
+	    set theTime [clock format [clock seconds] -format $clockFormat]
 	    set txt "$theTime <$nick>"
 	} else {
 	    set txt <$nick>
 	}
+
 	$wtext configure -state normal
 	if {[string equal $meRoomJid $fromJid]} {
 	    set meyou me
@@ -489,8 +499,9 @@ proc ::Jabber::GroupChat::GotMsg {body args} {
 #       shows window.
 
 proc ::Jabber::GroupChat::Build {roomJid args} {
-    global  this prefs
+    global  this prefs wDlgs
     
+    variable groupChatOptions
     variable locals
     variable dlguid
     upvar ::Jabber::mapShowElemToText mapShowElemToText
@@ -500,7 +511,7 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     ::Jabber::Debug 2 "::Jabber::GroupChat::Build roomJid=$roomJid, args='$args'"
     
     # Make unique toplevel name.
-    set w .dlggc[incr dlguid]
+    set w $wDlgs(jgc)[incr dlguid]
     
     set locals($roomJid,wtop) $w
     set locals($w,room) $roomJid
@@ -542,6 +553,10 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     set fontS [option get . fontSmall {}]
     set fontSB [option get . fontSmallBold {}]
     set bg [option get . backgroundGeneral {}]
+
+    foreach {optName optClass} $groupChatOptions {
+	set $optName [option get $w $optName $optClass]
+    }
     
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised]   \
@@ -608,8 +623,7 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     set wpopup $frbot.popup
     set wMenu [eval {tk_optionMenu $wpopup  \
       [namespace current]::locals($roomJid,status)} $allStatus]
-    $wpopup configure -highlightthickness 0 -width 14 \
-      -background $bg -foreground black
+    $wpopup configure -highlightthickness 0 -width 14 -foreground black
     pack $wpopup -side left -padx 5 -pady 5
     
     pack $frbot -side bottom -fill x -padx 10 -pady 8
@@ -643,12 +657,12 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     pack [frame $frmid -height 250 -width 300 -relief sunken -bd 1]  \
       -side top -fill both -expand 1 -padx 4 -pady 4
     frame $wtxt -height 200
-    frame $wtxt.0 -bg $bg
+    frame $wtxt.0
     text $wtext -height 12 -width 1 -font $fontS -state disabled  \
       -borderwidth 1 -relief sunken -yscrollcommand [list $wysc set] -wrap word \
       -cursor {}
-    text $wusers -height 12 -width 12 -font $fontS -state disabled  \
-      -borderwidth 1 -relief sunken -background $bg  \
+    text $wusers -height 12 -width 12 -state disabled  \
+      -borderwidth 1 -relief sunken  \
       -spacing1 1 -spacing3 1 -wrap none -cursor {}
     scrollbar $wysc -orient vertical -command [list $wtext yview]
     pack $wtext -side left -fill both -expand 1
@@ -663,14 +677,18 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     
     # The tags.
     set space 2
-    $wtext tag configure metag -foreground red -background #cecece  \
-      -spacing1 $space -font $fontSB
-    $wtext tag configure metxttag -foreground black -background #cecece  \
+    $wtext tag configure metag  \
+      -foreground $meForeground -background $meBackground  \
+      -spacing1 $space -font $meFont
+    $wtext tag configure metxttag  \
+      -foreground $meTextForeground -background $meTextBackground  \
       -spacing1 $space -spacing3 $space -lmargin1 20 -lmargin2 20
-    $wtext tag configure youtag -foreground blue -spacing1 $space  \
-      -font $fontSB
-    $wtext tag configure youtxttag -foreground black -spacing1 $space  \
-      -spacing3 $space -lmargin1 20 -lmargin2 20
+    $wtext tag configure theytag  \
+      -foreground $theyForeground -spacing1 $space -font $theyFont
+    $wtext tag configure theytxttag  \
+      -foreground $theyTextForeground -background $theyTextBackground \
+      -font $theyFont  \
+      -spacing1 $space -spacing3 $space -lmargin1 20 -lmargin2 20
     
     # Text send.
     frame $wtxtsnd -height 100 -width 300

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.21 2003-12-13 17:54:41 matben Exp $
+# $Id: MailBox.tcl,v 1.22 2003-12-15 08:20:53 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -212,7 +212,6 @@ proc ::Jabber::MailBox::Build {w args} {
     scrollbar $wysctbl -orient vertical -command [list $wtbl yview]
     tablelist::tablelist $wtbl -columns $columns  \
       -yscrollcommand [list $wysctbl set]  \
-      -labelbackground #cecece -stripebackground #dedeff  \
       -labelcommand [namespace current]::LabelCommand  \
       -stretch all -width 60 -selectmode extended
     # Pressed -labelbackground #8c8c8c

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Sounds.tcl,v 1.6 2003-09-28 06:29:08 matben Exp $
+# $Id: Sounds.tcl,v 1.7 2003-12-15 08:20:53 matben Exp $
 
 package provide Sounds 1.0
 
@@ -49,7 +49,7 @@ proc ::Sounds::Init { } {
     if {[namespace exists ::vfs]} {
 	set allSoundFiles {}
 	foreach s $allSounds {
-	    set tmp [file join $this(tmpDir) ${s}.${suff}]
+	    set tmp [file join $this(tmpPath) ${s}.${suff}]
 	    file copy -force $soundFileArr($s) $tmp
 	    lappend allSoundFiles $tmp
 	}	

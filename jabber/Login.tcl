@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.11 2003-12-13 17:54:41 matben Exp $
+# $Id: Login.tcl,v 1.12 2003-12-15 08:20:53 matben Exp $
 
 package provide Login 1.0
 
@@ -65,14 +65,12 @@ proc ::Jabber::Login::Login { } {
     set ssl $jprefs(usessl)
     
     set fontSB [option get . fontSmallBold {}]
-    set fontL [option get . fontLarge {}]
     
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised]   \
       -fill both -expand 1 -ipadx 12 -ipady 4
-    
-    label $w.frall.head -text [::msgcat::mc Login] -font $fontL  \
-      -anchor w -padx 10 -pady 4 -bg #cecece
+                                 
+    ::headlabel::headlabel $w.frall.head -text [::msgcat::mc Login]    
     pack $w.frall.head -side top -fill both -expand 1
     message $w.frall.msg -width 280 -text [::msgcat::mc jalogin]
     pack $w.frall.msg -side top -fill both -expand 1 -padx 2

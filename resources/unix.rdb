@@ -18,9 +18,9 @@
 *Message.Font:                       Helvetica -10
 *Radiobutton.Font:                   Helvetica -10
 *Text.Font:                          Helvetica -10
-*Scrollbar.BorderWidth               1
-*Scrollbar.Width                     12
-*Scrollbar*troughColor               #bdbdbd
+*Scrollbar.borderWidth               1
+*Scrollbar.width                     12
+*Scrollbar.troughColor               #bdbdbd
 
 ! contributed widgets
 !

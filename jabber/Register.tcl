@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.4 2003-12-13 17:54:41 matben Exp $
+# $Id: Register.tcl,v 1.5 2003-12-15 08:20:53 matben Exp $
 
 package provide Register 1.0
 
@@ -55,14 +55,12 @@ proc ::Jabber::Register::Register {args} {
     wm title $w [::msgcat::mc {Register New Account}]
     
     set fontSB [option get . fontSmallBold {}]
-    set fontL [option get . fontLarge {}]
     
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised]   \
       -fill both -expand 1 -ipadx 12 -ipady 4
     
-    label $w.frall.head -text [::msgcat::mc {New Account}] -font $fontL  \
-      -anchor w -padx 10 -pady 4 -bg #cecece
+    ::headlabel::headlabel $w.frall.head -text [::msgcat::mc {New Account}]
     pack $w.frall.head -side top -fill both -expand 1
     message $w.frall.msg -width 260  \
       -text [::msgcat::mc janewaccount]
@@ -436,7 +434,7 @@ proc ::Jabber::GenRegister::BuildRegister {args} {
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
       -command [list [namespace current]::Cancel $w]]  \
       -side right -padx 5 -pady 5
-    pack [::chasearrows::chasearrows $wsearrows -background gray87 -size 16] \
+    pack [::chasearrows::chasearrows $wsearrows -size 16] \
       -side left -padx 5 -pady 5
     pack $frbot -side bottom -fill both -expand 1 -padx 8 -pady 6
 

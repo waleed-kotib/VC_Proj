@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.9 2003-12-13 17:54:41 matben Exp $
+# $Id: MUC.tcl,v 1.10 2003-12-15 08:20:53 matben Exp $
 
 package require entrycomp
 
@@ -205,7 +205,7 @@ proc ::Jabber::MUC::BuildEnter {args} {
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel] -width 8  \
       -command [list [namespace current]::CancelEnter $token]]  \
       -side right -padx 5 -pady 5
-    pack [::chasearrows::chasearrows $wsearrows -background gray87 -size 16] \
+    pack [::chasearrows::chasearrows $wsearrows -size 16] \
       -side left -padx 5 -pady 5
     pack $frbot -side bottom -fill x -expand 0 -padx 8 -pady 6
 
@@ -558,9 +558,8 @@ proc ::Jabber::MUC::BuildInfo {roomjid} {
     set columns [list 0 Nickname 0 Role 0 Affiliation]
     
     tablelist::tablelist $wtbl  \
-      -columns $columns -stretch all -selectmode single -background white  \
-      -yscrollcommand [list $wysc set]  \
-      -labelbackground #cecece -stripebackground #dedeff -width 36 -height 8
+      -columns $columns -stretch all -selectmode single  \
+      -yscrollcommand [list $wysc set] -width 36 -height 8
     scrollbar $wysc -orient vertical -command [list $wtbl yview]
     button $frtab.ref -text Refresh -font $fontS -command  \
       [list [namespace current]::Refresh $roomjid]
@@ -1007,17 +1006,16 @@ proc ::Jabber::MUC::EditListBuild {roomjid type} {
     set wtbl $frtab.tb
     pack [frame $frtab] -padx 0 -pady 0 -side left
     tablelist::tablelist $wtbl -width $tblwidth -height 8 \
-      -columns $columns($type) -stretch all -selectmode single -background white  \
+      -columns $columns($type) -stretch all -selectmode single  \
       -yscrollcommand [list $wysc set]  \
-      -labelbackground #cecece -stripebackground #dedeff \
       -editendcommand [list [namespace current]::VerifyEditEntry $roomjid] \
       -listvariable [namespace current]::${roomjid}::editlocals(listvar)
     scrollbar $wysc -orient vertical -command [list $wtbl yview]
     grid $wtbl $wysc -sticky news
     grid columnconfigure $frtab 0 -weight 1
 
-    option add *$wtbl*selectBackground		navy
-    option add *$wtbl*selectForeground		white
+    option add *$wtbl*selectBackground		navy      widgetDefault
+    option add *$wtbl*selectForeground		white     widgetDefault
 
     $wtbl columnconfigure end -editable yes
 
@@ -1073,7 +1071,7 @@ proc ::Jabber::MUC::EditListBuild {roomjid type} {
     pack [button $frbot.btcan -text [::msgcat::mc Cancel] -width 8  \
       -command "set [namespace current]::fineditlist 0"]  \
       -side right -padx 5 -pady 5  
-    pack [::chasearrows::chasearrows $wsearrows -background gray87 -size 16] \
+    pack [::chasearrows::chasearrows $wsearrows -size 16] \
       -side left -padx 5 -pady 5
     pack [button $frbot.btres -text [::msgcat::mc Reset] -width 8  \
       -command [list [namespace current]::EditListReset $roomjid]]  \
@@ -1456,7 +1454,7 @@ proc ::Jabber::MUC::RoomConfig {roomjid} {
     pack [button $wbtcancel -text [::msgcat::mc Cancel] -width 8  \
       -command [list [namespace current]::CancelConfig $roomjid $w]]  \
       -side right -padx 5 -pady 5
-    pack [::chasearrows::chasearrows $wsearrows -background gray87 -size 16] \
+    pack [::chasearrows::chasearrows $wsearrows -size 16] \
       -side left -padx 5 -pady 5
     pack $frbot -side bottom -fill x -expand 0 -padx 8 -pady 6
     

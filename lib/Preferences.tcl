@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.18 2003-12-13 17:54:41 matben Exp $
+# $Id: Preferences.tcl,v 1.19 2003-12-15 08:20:53 matben Exp $
  
 package require notebook
 package require tree
@@ -1314,9 +1314,7 @@ proc ::Preferences::FileMap::BuildPage {page} {
     set ns [namespace current]
     
     tablelist::tablelist $wmclist  \
-      -columns $colDef  \
-      -background white -yscrollcommand [list $fr1.vsb set]  \
-      -labelbackground #cecece -stripebackground #dedeff  \
+      -columns $colDef -yscrollcommand [list $fr1.vsb set]  \
       -labelcommand "tablelist::sortByColumn"  \
       -stretch all -width 42 -height 12
     $wmclist columnconfigure 2 -hide 1

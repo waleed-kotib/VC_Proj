@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.17 2003-12-13 17:54:40 matben Exp $
+# $Id: Chat.tcl,v 1.18 2003-12-15 08:20:53 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -15,12 +15,12 @@ package provide Chat 1.0
 
 namespace eval ::Jabber::Chat:: {
     
-    # Use option database for customization. Only a first test...
+    # Use option database for customization. 
+    # These are nonstandard option valaues and we may therefore keep priority
+    # widgetDefault.
     set fontS [option get . fontSmall {}]
     set fontSB [option get . fontSmallBold {}]
 
-    option add *Chat*textBackground       white                 widgetDefault
-    option add *Chat*textFont             $fontS                widgetDefault
     option add *Chat*meForeground         red                   widgetDefault
     option add *Chat*meBackground         #cecece               widgetDefault
     option add *Chat*meTextForeground     black                 widgetDefault
@@ -33,6 +33,20 @@ namespace eval ::Jabber::Chat:: {
     option add *Chat*youFont              $fontSB               widgetDefault
     option add *Chat*clockFormat          "%H:%M"               widgetDefault
 
+    variable chatOptions {
+	meForeground          Foreground
+	meBackground          Background
+	meTextForeground      Foreground
+	meTextBackground      Background
+	meFont                Font
+	youForeground         Foreground
+	youBackground         Background
+	youTextForeground     Foreground
+	youTextBackground     Background
+	youFont               Font
+	clockFormat           ClockFormat
+  }
+    
     variable locals
 }
 
@@ -70,14 +84,12 @@ proc ::Jabber::Chat::StartThreadDlg {args} {
     wm title $w [::msgcat::mc {Start Chat}]
     
     set fontSB [option get . fontSmallBold {}]
-    set fontL [option get . fontLarge {}]
     
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised]  \
       -fill both -expand 1 -ipadx 12 -ipady 4
     
-    label $w.frall.head -text [::msgcat::mc {Chat with}] -font $fontL  \
-      -anchor w -padx 10 -pady 4 -bg #cecece
+    ::headlabel::headlabel -text [::msgcat::mc {Chat with}]
     pack $w.frall.head -side top -fill both -expand 1
     
     # Entries etc.
@@ -177,7 +189,8 @@ proc ::Jabber::Chat::GotMsg {body args} {
     array set argsArr $args
     
     # -from is a 3-tier jid /resource included.
-    jlib::splitjid $argsArr(-from) jid2 res
+    set jid $argsArr(-from)
+    jlib::splitjid $jid jid2 res
     set username $jid2
     regexp {^([^@]+)@} $jid2 match username
     
@@ -189,7 +202,7 @@ proc ::Jabber::Chat::GotMsg {body args} {
 	# Try to find a reasonable fallback for clients that fail here (Psi).
 	# Find if we have registered any chat for this jid.
 	foreach {key val} [array get locals "*,jid"] {
-	    if {$val == $jid2} {
+	    if {($val == $jid2) || ($val == $jid3)} {
 		if {[regexp {^([^,]+),jid$} $key match threadID]} {
 		    break
 		}
@@ -201,7 +214,7 @@ proc ::Jabber::Chat::GotMsg {body args} {
     }
     
     # We may have reset its jid to a 2-tier jid if it has been offline.
-    set locals($threadID,jid) $argsArr(-from)
+    set locals($threadID,jid) $jid
 
     if {[info exists locals($threadID,wtop)] &&  \
       [winfo exists $locals($threadID,wtop)]} {
@@ -211,29 +224,19 @@ proc ::Jabber::Chat::GotMsg {body args} {
 	# If we haven't a window for this thread, make one!
 	eval {::Jabber::Chat::Build $threadID} $args
     }   
+    set w $locals($threadID,wtop)
     if {[info exists argsArr(-subject)]} {
 	set locals($threadID,subject) $argsArr(-subject)
     }
     set wtext $locals($threadID,wtext)
     
-    # Alternative...
-    if {0} {
-	set clockFormat [option get $w clockFormat Chat]
-	if {$clockFormat == ""} {
-	    set theTime [clock format [clock seconds] -format "%H:%M"]
-	    set txt "$theTime <$username>"
-	} else {
-	    set txt <$username>
-	}
-    }
-    
-    if {$jprefs(chat,showtime)} {
-	set theTime [clock format [clock seconds] -format "%H:%M"]
+    set clockFormat [option get $w clockFormat {}]
+    if {$clockFormat != ""} {
+	set theTime [clock format [clock seconds] -format $clockFormat]
 	set txt "$theTime <$username>"
     } else {
 	set txt <$username>
     }
-    set bg [option get . backgroundGeneral {}]
     
     $wtext configure -state normal
     $wtext insert end $txt youtag
@@ -244,8 +247,7 @@ proc ::Jabber::Chat::GotMsg {body args} {
     $wtext configure -state disabled
     $wtext see end
     if {$locals($threadID,got1stMsg) == 0} {
-	$locals($threadID,wtojid) configure -state disabled   \
-	  -bg $bg
+	$locals($threadID,wtojid) configure -state disabled
 	set locals($threadID,got1stMsg) 1
     }
     set dateISO [clock format [clock seconds] -format "%Y%m%dT%H:%M:%S"]
@@ -285,6 +287,7 @@ proc ::Jabber::Chat::StartThread {jid} {
 proc ::Jabber::Chat::Build {threadID args} {
     global  this prefs wDlgs
     
+    variable chatOptions
     variable locals
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
@@ -398,11 +401,8 @@ proc ::Jabber::Chat::Build {threadID args} {
     frame $wtxt
     
     set locals($threadID,wtext) $wtext
-    set textBackground  [option get $w textBackground Chat]
-    set textFont        [option get $w textFont Chat]
     
-    text $wtext -height 12 -width 1 -font $textFont -background $textBackground \
-      -state disabled -cursor {} \
+    text $wtext -height 12 -width 1 -state disabled -cursor {} \
       -borderwidth 1 -relief sunken -yscrollcommand [list $wysc set] -wrap word
     scrollbar $wysc -orient vertical -command [list $wtext yview]
     grid $wtext -column 0 -row 0 -sticky news
@@ -415,8 +415,7 @@ proc ::Jabber::Chat::Build {threadID args} {
 
     # Text send.
     frame $wtxtsnd
-    text $wtextsnd -height 4 -width 1 -font $textFont  \
-      -background $textBackground -wrap word \
+    text $wtextsnd -height 4 -width 1 -wrap word \
       -borderwidth 1 -relief sunken -yscrollcommand [list $wyscsnd set]
     scrollbar $wyscsnd -orient vertical -command [list $wtextsnd yview]
     grid $wtextsnd -column 0 -row 0 -sticky news
@@ -449,20 +448,15 @@ proc ::Jabber::Chat::Build {threadID args} {
 
 proc ::Jabber::Chat::ConfigureTextTags {w wtext} {
     upvar ::Jabber::jprefs jprefs
-        
+    variable chatOptions
+    
     set space 2
     
-    set meForeground      [option get $w meForeground Chat]
-    set meBackground      [option get $w meBackground Chat]
-    set meTextForeground  [option get $w meTextForeground Chat]
-    set meTextBackground  [option get $w meTextBackground Chat]
-    set meFont            [option get $w meFont Chat]
-    set youForeground     [option get $w youForeground Chat]
-    set youBackground     [option get $w youBackground Chat]
-    set youTextForeground [option get $w youTextForeground Chat]
-    set youTextBackground [option get $w youTextBackground Chat]
-    set youFont           [option get $w youFont Chat]
+    foreach {optName optClass} $chatOptions {
+	set $optName [option get $w $optName $optClass]
+    }
     
+    # BAD!
     set boldChatFont [lreplace $jprefs(chatFont) 2 2 bold]
     
     $wtext tag configure metag  \

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.38 2003-12-13 17:54:41 matben Exp $
+# $Id: Jabber.tcl,v 1.39 2003-12-15 08:20:53 matben Exp $
 #
 #  The $address is an ip name or number.
 #
@@ -3339,14 +3339,12 @@ proc ::Jabber::Logout::WithStatus { } {
     wm title $w {Logout With Message}
     
     set fontSB [option get . fontSmallBold {}]
-    set fontL [option get . fontLarge {}]
     
     # Global frame.
     pack [frame $w.frall -borderwidth 1 -relief raised]  \
       -fill both -expand 1 -ipadx 12 -ipady 4
     
-    label $w.frall.head -text {Logout} -font $fontL  \
-      -anchor w -padx 10 -pady 4 -bg #cecece
+    ::headlabel::headlabel $w.frall.head -text {Logout}
     pack $w.frall.head -side top -fill both -expand 1
     
     # Entries etc.

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.13 2003-12-13 17:54:40 matben Exp $
+# $Id: Browse.tcl,v 1.14 2003-12-15 08:20:53 matben Exp $
 
 package provide Browse 1.0
 
@@ -97,11 +97,11 @@ proc ::Jabber::Browse::HaveBrowseTree {jid} {
 	
     # This is not foolproof!!!
     foreach server $allServers {
-	 if {[string match "*$server" $jid]} {
-	     if {[$jstate(browse) isbrowsed $server]} {
-		 return 1
-	     }
-	 }
+	if {[string match "*$server" $jid]} {
+	    if {[$jstate(browse) isbrowsed $server]} {
+		return 1
+	    }
+	}
     }    
     return 0
 }
@@ -392,7 +392,7 @@ proc ::Jabber::Browse::Build {w} {
     
     set frbot [frame $w.frbot -bd 0]
     set wsearrows $frbot.arr        
-    pack [::chasearrows::chasearrows $wsearrows -background gray87 -size 16] \
+    pack [::chasearrows::chasearrows $wsearrows -size 16] \
       -side left -padx 5 -pady 0
     pack $frbot -side bottom -fill x -padx 8 -pady 2
     
@@ -409,9 +409,8 @@ proc ::Jabber::Browse::Build {w} {
       -xscrollcommand [list $wxsc set]       \
       -yscrollcommand [list $wysc set]       \
       -selectcommand ::Jabber::Browse::SelectCmd   \
-      -opencommand ::Jabber::Browse::OpenTreeCmd   \
-      -highlightcolor #6363CE
-
+      -opencommand ::Jabber::Browse::OpenTreeCmd
+    
     if {[string match "mac*" $this(platform)]} {
 	$wtree configure -buttonpresscommand [list ::Jabber::UI::Popup browse] \
 	  -eventlist [list [list <Control-Button-1> [list ::Jabber::UI::Popup browse]]]

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Agents.tcl,v 1.4 2003-12-13 17:54:40 matben Exp $
+# $Id: Agents.tcl,v 1.5 2003-12-15 08:20:53 matben Exp $
 
 package provide Agents 1.0
 
@@ -293,7 +293,7 @@ proc ::Jabber::Agents::Build {w args} {
     # Start with running arrows and message.
     pack [frame $w.bot] -side bottom -fill x -anchor w -padx 8 -pady 6
     set warrows $w.bot.arr
-    pack [::chasearrows::chasearrows $warrows -background gray87 -size 16] \
+    pack [::chasearrows::chasearrows $warrows -size 16] \
       -side left -padx 5 -pady 5
     pack [label $w.bot.la   \
       -textvariable [namespace current]::arrMsg] -side left -padx 8 -pady 6

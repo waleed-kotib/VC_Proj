@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.11 2003-12-13 17:54:40 matben Exp $
+# $Id: GotMsg.tcl,v 1.12 2003-12-15 08:20:53 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -155,7 +155,8 @@ proc ::Jabber::GotMsg::Build { } {
     }
     set finished 0
     
-    toplevel $w
+    # Toplevel with class GotMsg.
+    toplevel $w -class GotMsg
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
 	::UI::MacUseMainMenu $w
@@ -245,7 +246,7 @@ proc ::Jabber::GotMsg::Build { } {
     set wysc $wtxtfr.ysc
     text $wtext -height 6 -width 48 -wrap word  \
       -borderwidth 1 -relief sunken -yscrollcommand [list $wysc set]
-    $wtext tag configure normal -foreground black
+    $wtext tag configure normal
     ::Text::ConfigureLinkTagForTextWidget $wtext linktag tact
     scrollbar $wysc -orient vertical -command [list $wtext yview]
     grid $wtext -column 0 -row 0 -sticky news
