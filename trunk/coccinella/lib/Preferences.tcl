@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.57 2004-07-30 12:55:55 matben Exp $
+# $Id: Preferences.tcl,v 1.58 2004-08-18 12:08:58 matben Exp $
  
 package require notebook
 package require tree
@@ -594,13 +594,14 @@ proc ::Preferences::Proxies::InitPrefsHook { } {
 
 # Preferences::Proxies::Init --
 # 
-#       Rewritten from the autoproxy package.
+#       Rewritten from the autoproxy package. Not currently used.
 
 proc ::Preferences::Proxies::Init { } {
     global  env tcl_platform prefs
     variable winregkey
     
-    set httpproxy ""
+    set no_proxy {} 
+    set httpproxy {}
     
     # Look for environment variables.
     if {[info exists env(http_proxy)]} {

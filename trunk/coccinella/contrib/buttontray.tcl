@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  
-# $Id: buttontray.tcl,v 1.9 2004-07-26 08:37:16 matben Exp $
+# $Id: buttontray.tcl,v 1.10 2004-08-18 12:08:58 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -21,9 +21,10 @@
 #	-takefocus, takeFocus, TakeFocus
 #	
 #   WIDGET COMMANDS
-#      pathName cget option
 #      pathName buttonconfigure name
+#      pathName cget option
 #      pathName configure ?option? ?value option value ...?
+#      pathName exists name
 #      pathName minwidth
 #      pathName newbutton name text image imageDis cmd args
 #
@@ -231,7 +232,6 @@ proc ::buttontray::WidgetProc {w command args} {
     upvar ::buttontray::${w}::widgets widgets
     upvar ::buttontray::${w}::locals locals
     
-    #puts "::buttontray::WidgetProc w=$w, command=$command, args=$args"
     set result {}
     
     # Which command?
@@ -247,6 +247,10 @@ proc ::buttontray::WidgetProc {w command args} {
 	}
 	configure {
 	    set result [eval {Configure $w} $args]
+	}
+	exists {
+	    set name [lindex $args 0]
+	    set result [info exists locals($name,idlab)]
 	}
 	minwidth {
 	    set result [MinWidth $w]
@@ -440,10 +444,13 @@ proc ::buttontray::ButtonConfigure {w name args} {
     upvar ::buttontray::${w}::options options
     upvar ::buttontray::${w}::widgets widgets
     upvar ::buttontray::${w}::locals locals
-
-    set wlab $locals($name,wlab)
+    
+    if {![info exists locals($name,wlab)]} {
+	return -code error "button \"$name\" does not exist in $w"
+    }
+    set wlab  $locals($name,wlab)
     set idtxt $locals($name,idtxt)
-    set can $widgets(canvas)
+    set can   $widgets(canvas)
     
     foreach {key value} $args {
 	

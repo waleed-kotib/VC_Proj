@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.15 2004-08-17 06:19:54 matben Exp $
+# $Id: Whiteboard.tcl,v 1.16 2004-08-18 12:08:59 matben Exp $
 
 package require entrycomp
 package require moviecontroller
@@ -297,21 +297,7 @@ proc ::WB::Init {} {
     
     # Create the mapping between Html sizes and font point sizes dynamically.
     ::CanvasUtils::CreateFontSizeMapping
-    
-    # Default Apple Event open handler.
-    if {[string equal $this(platform) "macosx"]} {
-	proc ::tk::mac::OpenDocument {args} {
-	    foreach f $args {
-		
-		switch -- [file extension $f] {
-		    .can {
-			::WB::NewWhiteboard -file $f
-		    }
-		}
-	    }
-	}
-    }
-    
+        
     # Drag and Drop support...
     set prefs(haveTkDnD) 0
     if {![catch {package require tkdnd}]} {
@@ -619,6 +605,18 @@ proc ::WB::InitMenuDefs { } {
     set menuDefsInsertInd(main,prefs)  [expr [llength $menuDefs(main,prefs)]]
     set menuDefsInsertInd(main,items)  [expr [llength $menuDefs(main,items)]]
     set menuDefsInsertInd(main,info)   [expr [llength $menuDefs(main,info)]-2]
+}
+
+# WB::New --
+# 
+#       Protocol independent way of creating a new whiteboard. Bad?
+#       Only one registered hook mest exists!
+#       
+#       Perhaps it would be better to have hooks called from BuildWhiteboard?      
+
+proc ::WB::New {args} {
+    
+    eval {::hooks::run whiteboardNewHook} $args
 }
 
 # WB::NewWhiteboard --
@@ -2295,22 +2293,42 @@ proc ::WB::GetBasicWhiteboardMinsize {wtop} {
 # Results:
 #       None.
 
-proc ::WB::SetCanvasSize {cw ch} {
-    global  prefs
-	
-    upvar ::WB::dims dims
-    upvar ::.::wapp wapp
+proc ::WB::SetCanvasSize {wtop cw ch} {	
+    upvar ::WB::${wtop}::wapp wapp
+
+    set w $wtop
+    if {![string equal $wtop "."]} {
+	set w [string trimright $wtop "."]
+    }
+
+    # Compute new root size from the desired canvas size. Menu???
+    set thick [expr int([$wapp(can) cget -highlightthickness])]
+    set widthtot  [expr $cw + [winfo reqwidth $wapp(tool)]]
+    set heighttot [expr $ch + \
+      [winfo reqheight $wapp(comm)] + \
+      [winfo reqheight $wapp(frtop)]]
+    incr widthtot  [expr [winfo reqwidth $wapp(ysc)] + 4 + $thick]
+    incr heighttot [expr [winfo reqheight $wapp(xsc)] + 4 + $thick]
     
-    # Compute new root size from the desired canvas size.
-    set wRootFinal [expr $cw + 56]
-    set hRootFinal [expr $ch + $dims(hStatus) + $dims(hComm) + $dims(hTop)]
-    incr wRootFinal [expr [winfo reqwidth $wapp(ysc)] + 2]
-    incr hRootFinal [expr [winfo reqheight $wapp(xsc)] + 2]
+    # Make sure not bigger than the screen.
+    set wscreen [winfo screenwidth $w]
+    set hscreen [winfo screenheight $w]
+    if {$widthtot > $wscreen} {
+	set widthtot $wscreen
+    }
+    if {$heighttot > $hscreen} {
+	set heighttot $hscreen
+    }
+    wm geometry $w ${widthtot}x${heighttot}
 
-    wm geometry . ${wRootFinal}x${hRootFinal}
+    Debug 4 "::WB::SetCanvasSize:: cw=$cw, ch=$ch, heighttot=$heighttot, \
+      heighttot=$heighttot"
+}
 
-    Debug 3 "::WB::SetCanvasSize:: cw=$cw, ch=$ch, hRootFinal=$hRootFinal, \
-      wRootFinal=$wRootFinal"
+proc ::WB::GetCanvasSize {wtop} {
+    upvar ::WB::${wtop}::wapp wapp
+
+    return [list [winfo width $wapp(can)] [winfo height $wapp(can)]]
 }
 
 # WB::GetFocus --

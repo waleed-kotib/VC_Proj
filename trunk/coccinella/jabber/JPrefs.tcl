@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.12 2004-08-17 06:19:53 matben Exp $
+# $Id: JPrefs.tcl,v 1.13 2004-08-18 12:08:58 matben Exp $
 
 package provide JPrefs 1.0
 
@@ -37,7 +37,8 @@ proc ::Jabber::JPrefs::InitPrefsHook { } {
     set jprefs(inboxSave) 0
     
     # Service discovery method: "disco", "agents" or "browse"
-    set jprefs(serviceMethod) "browse"
+    #set jprefs(serviceMethod) "browse"
+    set jprefs(serviceMethod) "disco"
     
     # The rosters background image is partly controlled by option database.
     set jprefs(rost,useBgImage)     1
@@ -75,6 +76,10 @@ proc ::Jabber::JPrefs::InitPrefsHook { } {
 	  $jprefs(iq:register,$key) userDefault]
     }
     ::PreferencesUtils::Add $jprefsRegList
+    
+    # We add 'serviceMethod' with a 'serviceMethod2' key so we ignore any 
+    # existing installations. This is our new default. 
+    # Change back in the future.
 
     ::PreferencesUtils::Add [list  \
       [list ::Jabber::jprefs(chatFont)         jprefs_chatFont          $jprefs(chatFont)]  \
@@ -82,7 +87,7 @@ proc ::Jabber::JPrefs::InitPrefsHook { } {
       [list ::Jabber::jprefs(inboxSave)        jprefs_inboxSave         $jprefs(inboxSave)]  \
       [list ::Jabber::jprefs(rost,useBgImage)  jprefs_rost_useBgImage   $jprefs(rost,useBgImage)]  \
       [list ::Jabber::jprefs(rost,bgImagePath) jprefs_rost_bgImagePath  $jprefs(rost,bgImagePath)]  \
-      [list ::Jabber::jprefs(serviceMethod)    jprefs_serviceMethod     $jprefs(serviceMethod)]  \
+      [list ::Jabber::jprefs(serviceMethod)    jprefs_serviceMethod2    $jprefs(serviceMethod)]  \
       ]
     
     if {$jprefs(chatFont) != ""} {
