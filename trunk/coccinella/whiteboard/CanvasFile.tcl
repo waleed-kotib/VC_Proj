@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasFile.tcl,v 1.4 2004-07-22 15:11:28 matben Exp $
+# $Id: CanvasFile.tcl,v 1.5 2004-07-23 07:21:17 matben Exp $
  
 package require can2svg
 package require svg2can
@@ -411,8 +411,6 @@ proc ::CanvasFile::FileToCanvasVer2 {w fd absPath args} {
 #       Writes line by line to file. Each line contains an almost complete 
 #       canvas command except for the widget path. 
 #       The file must be opened and file id given as 'fd'.
-#       If 'filePathsAbsolute' the -file option contains the full path name, 
-#       else relative path name to this script path.
 #
 # Arguments:
 #       w                canvas widget path.
@@ -422,7 +420,7 @@ proc ::CanvasFile::FileToCanvasVer2 {w fd absPath args} {
 # Results:
 #       none
 
-proc ::CanvasFile::CanvasToFile {w fd absPath} {
+proc ::CanvasFile::CanvasToFile {w fd absPath args} {
     global  this prefs
     
     Debug 2 "::CanvasFile::CanvasToFile absPath=$absPath"
@@ -431,7 +429,13 @@ proc ::CanvasFile::CanvasToFile {w fd absPath} {
     # It is perhaps best to choose a path relative the actual file path of the 
     # file?
     
-    set filePathsAbsolute 0    
+    array set argsArr {
+	-keeputag     1
+	-pathtype     relative
+    }
+    array set argsArr $args
+    set keepUtag $argsArr(-keeputag)
+    
     puts $fd "# Version: 2"
     
     foreach id [$w find all] {
@@ -445,12 +449,18 @@ proc ::CanvasFile::CanvasToFile {w fd absPath} {
 	    image,1 {
 		set line [::CanvasUtils::GetOnelinerForImage $w $id  \
 		  -basepath $absPath]
+		if {!$keepUtag} {
+		    set line [::CanvasUtils::ReplaceUtagPrefix $line *]
+		}
 		puts $fd $line
 	    } 
 	    window,* {
 		set line [::CanvasUtils::GetOneLinerForWindow $w $id \
 		  -basepath $absPath]
 		if {$line != {}} {
+		    if {!$keepUtag} {
+			set line [::CanvasUtils::ReplaceUtagPrefix $line *]
+		    }
 		    puts $fd $line		    
 		}
 	    }
@@ -461,8 +471,11 @@ proc ::CanvasFile::CanvasToFile {w fd absPath} {
 		if {($type == "text") && ([$w itemcget $id -text] == "")} {
 		    continue
 		}
-		set cmd [::CanvasUtils::GetOnelinerForItem $w $id]
-		puts $fd $cmd
+		set line [::CanvasUtils::GetOnelinerForItem $w $id]
+		if {!$keepUtag} {
+		    set line [::CanvasUtils::ReplaceUtagPrefix $line *]
+		}
+		puts $fd $line
 	    }
 	    default {
 		
@@ -633,6 +646,34 @@ proc ::CanvasFile::DoSaveCanvasFile {wtop} {
 	    close $fd
 	}
     }
+}
+
+# CanvasCmd::DoSaveAsItem --
+# 
+# 
+
+proc ::CanvasCmd::DoSaveAsItem {wtop} {
+    global  prefs this
+	
+    set wCan [::WB::GetCanvasFromWtop $wtop]
+    set typelist {
+	{"Canvas"            {.can}}
+    }
+    set ans [tk_getSaveFile -title [mc {Save Canvas Item}] \
+      -defaultextension ".can" -initialdir $this(altItemPath) \
+      -initialfile Untitled.can]
+    if {$ans == ""} {
+	return
+    }
+    set fileName $ans
+    if {[catch {open $fileName w} fd]} {
+	set tail [file tail $fileName]
+	tk_messageBox -icon error -type ok \
+	  -message [mc messfailopwrite $tail $fd]
+	return
+    }	    
+    ::CanvasFile::CanvasToFile $wCan $fd $fileName -keeputag 0
+    close $fd
 }
 
 # CanvasFile::ObjectConfigure --

@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.33 2004-07-02 14:08:03 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.34 2004-07-23 07:21:15 matben Exp $
 
 
 set noErr 0
@@ -329,6 +329,9 @@ if {![file isdirectory $prefs(inboxCanvasPath)]} {
 }
 if {![file isdirectory $prefs(historyPath)]} {
     file mkdir $prefs(historyPath)
+}
+if {![file isdirectory $this(altItemPath)]} {
+    file mkdir $this(altItemPath)
 }
 
 # Privacy!

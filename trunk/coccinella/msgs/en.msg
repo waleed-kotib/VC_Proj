@@ -173,6 +173,7 @@
 ::msgcat::mcset en mOpenCanvas		{Open Canvas...}
 ::msgcat::mcset en mSaveCanvas		{&Save Canvas...}
 ::msgcat::mcset en mSaveAs		{Save As...}
+::msgcat::mcset en mSaveAsItem          {Save As Item...}
 ::msgcat::mcset en mSaveImageAs         {Save Image As...}
 ::msgcat::mcset en mPageSetup		{Page Setup...}
 ::msgcat::mcset en mPrintCanvas		{Print Canvas...}

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.4 2004-07-22 15:11:28 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.5 2004-07-23 07:21:17 matben Exp $
 
 package require sha1pure
 
@@ -402,10 +402,21 @@ proc ::CanvasUtils::ReplaceUtag {str newUtag} {
     
     set ind [lsearch -exact $str "-tags"]
     if {$ind >= 0} {
-        incr ind
-        set tags [lindex $str $ind]
+        set tags [lindex $str [incr ind]]
         if {[regsub {[^/ ]+/[0-9]+} $tags $newUtag tags]} {
             lset str $ind $tags
+	}
+    }    
+    return $str
+}
+
+proc ::CanvasUtils::ReplaceUtagPrefix {str prefix} {
+    
+    set ind [lsearch -exact $str "-tags"]
+    if {$ind >= 0} {
+	set tags [lindex $str [incr ind]]
+	if {[regsub {[^/ ]+(/[0-9]+)} $tags $prefix\\1 tags]} {
+	    lset str $ind $tags
 	}
     }    
     return $str

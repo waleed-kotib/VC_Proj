@@ -172,6 +172,7 @@
 ::msgcat::mcset sv mOpenCanvas		{…ppna canvas...}
 ::msgcat::mcset sv mSaveCanvas		{Spara canvas...}
 ::msgcat::mcset sv mSaveAs		{Spara som...}
+::msgcat::mcset sv mSaveAsItem          {Spara som objekt...}
 ::msgcat::mcset sv mSaveImageAs         {Spara bild som...}
 ::msgcat::mcset sv mPageSetup		{Utskriftsformat...}
 ::msgcat::mcset sv mPrintCanvas		{Skriv ut canvas...}

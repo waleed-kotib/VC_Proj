@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: P2P.tcl,v 1.9 2004-07-09 06:26:06 matben Exp $
+# $Id: P2P.tcl,v 1.10 2004-07-23 07:21:15 matben Exp $
 
 package provide P2P 1.0
 
@@ -93,6 +93,7 @@ proc ::P2P::Init {} {
 	{command   mSaveCanvas         {::CanvasFile::DoSaveCanvasFile $wtop}     normal   S}
 	{separator}
 	{command   mSaveAs             {::CanvasCmd::SavePostscript $wtop}        normal   {}}
+	{command   mSaveAsItem         {::CanvasCmd::DoSaveAsItem $wtop}       normal   {}}
 	{command   mPageSetup          {::UserActions::PageSetup $wtop}           normal   {}}
 	{command   mPrintCanvas        {::UserActions::DoPrintCanvas $wtop}       normal   P}
 	{separator}
@@ -102,6 +103,15 @@ proc ::P2P::Init {} {
 	lset menuDefsFile 4 3 disabled
     } else {
 	package require Multicast
+    }
+
+    # Get any registered menu entries.
+    # I don't like this solution!
+    set insertInd [expr [llength $menuDefsFile] - 1]
+    set mdef [::UI::Public::GetRegisteredMenuDefs file]
+    if {$mdef != ""} {
+	set menuDefsFile [linsert $menuDefsFile $insertInd {separator}]
+	set menuDefsFile [linsert $menuDefsFile $insertInd $mdef]
     }
     ::WB::SetMenuDefs file $menuDefsFile
     

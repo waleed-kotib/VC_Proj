@@ -13,4 +13,4 @@ if {[string equal $::tcl_platform(platform) "unix"] && [string equal [tk windowi
 }
 
 # This is just an example plugin. Uncomment to test.
-component::attempt ComponentExample [file join $dir ComponentExample.tcl] ::ComponentExample::Init
+# component::attempt ComponentExample [file join $dir ComponentExample.tcl] ::ComponentExample::Init

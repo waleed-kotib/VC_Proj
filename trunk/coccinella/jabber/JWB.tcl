@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.17 2004-07-22 15:11:27 matben Exp $
+# $Id: JWB.tcl,v 1.18 2004-07-23 07:21:15 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -118,6 +118,7 @@ proc ::Jabber::WB::InitUI { } {
 	{command   mSaveCanvas         {::CanvasFile::DoSaveCanvasFile $wtop}     normal   S}
 	{separator}
 	{command   mSaveAs             {::CanvasCmd::SavePostscript $wtop}      normal   {}}
+	{command   mSaveAsItem         {::CanvasCmd::DoSaveAsItem $wtop}       normal   {}}
 	{command   mPageSetup          {::UserActions::PageSetup $wtop}           normal   {}}
 	{command   mPrintCanvas        {::UserActions::DoPrintCanvas $wtop}       normal   P}
 	{separator}
