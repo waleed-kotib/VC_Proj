@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.96 2004-07-09 06:26:05 matben Exp $
+# $Id: Jabber.tcl,v 1.97 2004-07-26 12:50:37 matben Exp $
 
 package provide Jabber 1.0
 
@@ -295,10 +295,6 @@ proc ::Jabber::FactoryDefaults { } {
     set prefs(paneGeom,groupchatDlgVert) {0.8 0.2}
     set prefs(paneGeom,groupchatDlgHori) {0.8 0.2}
     
-    # Autoupdate; be sure to use version key since a new version must not inherit.
-    # Abondened!!!!!!!
-    set jprefs(autoupdateCheck) 0
-    set jprefs(autoupdateShow,$prefs(fullVers)) 1
     set jprefs(useXDataSearch) 1
     
     set jstate(rosterVis) 1

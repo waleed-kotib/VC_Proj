@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.46 2004-07-22 15:11:27 matben Exp $
+# $Id: JUI.tcl,v 1.47 2004-07-26 12:50:37 matben Exp $
 
 package provide JUI 1.0
 
@@ -112,7 +112,6 @@ namespace eval ::Jabber::UI:: {
 	{command     mSetupAssistant {
 	    package require SetupAss
 	    ::Jabber::SetupAss::SetupAss}                             normal {}}
-	{command   mUpdateCheck        {::AutoUpdate::Get $prefs(urlAutoUpdate) -silent 0}        normal   {}}
 	{command     mComponents    {::Dialogs::InfoComponents}   normal   {}}
 	{command     mErrorLog      {::Jabber::ErrorLogDlg}       normal   {}}
 	{checkbutton mDebug         {::Jabber::DebugCmd}          normal   {} \

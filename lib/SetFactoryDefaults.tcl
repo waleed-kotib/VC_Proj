@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.34 2004-07-23 07:21:15 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.35 2004-07-26 12:50:38 matben Exp $
 
 
 set noErr 0
@@ -120,12 +120,6 @@ set prefs(userPath) $this(path)
 
 # If it is the first time the application is launched, then welcome.
 set prefs(firstLaunch) 1
-
-# Auto update mechanism: if lastAutoUpdateVersion < run version => autoupdate
-set prefs(lastAutoUpdateVersion) 0.0
-set prefs(doneAutoUpdate) 0
-set prefs(urlAutoUpdate) "http://coccinella.sourceforge.net/updates/update_en.xml"
-#set prefs(urlAutoUpdate) "http://coccinella.sourceforge.net/updates/update_test.xml"
 
 # Shell print command in unix.
 if {[info exists env(PRINTER)]} {

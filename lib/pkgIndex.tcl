@@ -8,7 +8,6 @@
 # script is sourced, the variable $dir must contain the
 # full path name of this file's directory.
 
-package ifneeded AutoUpdate 1.0 [list source [file join $dir AutoUpdate.tcl]]
 package ifneeded Dialogs 1.0 [list source [file join $dir Dialogs.tcl]]
 package ifneeded FileCache 1.0 [list source [file join $dir FileCache.tcl]]
 package ifneeded P2P 1.0 [list source [file join $dir P2P.tcl]]
