@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.27 2004-01-06 15:59:22 matben Exp $
+# $Id: jabberlib.tcl,v 1.28 2004-01-11 15:17:51 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -33,11 +33,11 @@
 #	lib(streamcmd)             : Callback command to run when the <stream>
 #	                             tag is received from the server.
 #
-# iq:	                             
-#	iq(uid)                    : Next iq id-number. Sent in 
+# iqcmd:	                             
+#	iqcmd(uid)                 : Next iq id-number. Sent in 
 #                                    "id" attributes of <iq> packets.
 #
-#	iq($id)                    : Callback command to run when result 
+#	iqcmd($id)                 : Callback command to run when result 
 #	                             packet of $id is received.
 #
 # locals:	                             
@@ -101,6 +101,7 @@
 #      jlibName haveagent jid
 #      jlibName iq_get xmlns to ?args?
 #      jlibName iq_set xmlns to ?args?
+#      jlibName iq_register type xmlns cmd
 #      jlibName myjid
 #      jlibName mystatus
 #      jlibName oob_set to cmd url ?args?
@@ -220,6 +221,7 @@
 #       031022   added iq_get and iq_set methods
 #       031101   added 'service gettransportjids' and 'gettype'
 #       031107   added 'getrecipientjid' command
+#       040111   new iq callback mechanism 'iq_register'
 
 package require wrapper
 package require roster
@@ -234,8 +236,8 @@ namespace eval jlib {
     #    > 1 prints raw xml I/O
     #    > 2 prints a lot more
     variable debug 0
-    if {($::debugLevel > 1) && ($debug == 0)} {
-	set debug $::debugLevel
+    if {[info exists ::debugLevel] && ($::debugLevel > 1) && ($debug == 0)} {
+	set debug 2
     }
     
     variable statics
@@ -313,7 +315,8 @@ proc jlib::new {rostername clientcmd args} {
     namespace eval [namespace current]::${jlibname} {
 	variable lib
 	variable locals
-	variable iq
+	variable iqcmd
+	variable iqhook
 	variable opts
 	variable agent
 	# Cache for the 'conference' subcommand.
@@ -329,7 +332,7 @@ proc jlib::new {rostername clientcmd args} {
         
     # Set simpler variable names.
     upvar [namespace current]::${jlibname}::lib lib
-    upvar [namespace current]::${jlibname}::iq iq
+    upvar [namespace current]::${jlibname}::iqcmd iqcmd
     upvar [namespace current]::${jlibname}::opts opts
     upvar [namespace current]::${jlibname}::conf conf
     upvar [namespace current]::${jlibname}::gchat gchat
@@ -360,20 +363,27 @@ proc jlib::new {rostername clientcmd args} {
 	return -code error $msg
     }    
 
-    set iq(uid) 1001
-    set lib(fulljlibname) [namespace current]::${jlibname}
-    set lib(rostername) $rostername
-    set lib(browsename) $opts(-browsename)
-    set lib(clientcmd) $clientcmd
-    set lib(wrap)   \
-      [wrapper::new [list [namespace current]::got_stream $jlibname]  \
-      [list [namespace current]::end_of_parse $jlibname]              \
-      [list [namespace current]::dispatcher $jlibname]                \
+    set wrapper [wrapper::new [list [namespace current]::got_stream $jlibname] \
+      [list [namespace current]::end_of_parse $jlibname]  \
+      [list [namespace current]::dispatcher $jlibname]    \
       [list [namespace current]::xmlerror $jlibname]]
+    
+    set iqcmd(uid) 1001
+    set lib(fulljlibname) [namespace current]::${jlibname}
+    set lib(rostername)   $rostername
+    set lib(browsename)   $opts(-browsename)
+    set lib(clientcmd)    $clientcmd
+    set lib(wrap)         $wrapper
     
     set lib(isinstream) 0
     set lib(server) ""
+    
+    # Register some standard iq handlers that is handled internally.
+    iq_register $jlibname get jabber:iq:last [namespace current]::parse_get_last
+    iq_register $jlibname get jabber:iq:time [namespace current]::parse_get_time
 
+    
+    
     # Mapper between objects.
     if {$opts(-browsename) != ""} {
 	set objectmap(browsename,$jlibname) $opts(-browsename)
@@ -774,7 +784,7 @@ proc jlib::dispatcher {jlibname xmldata} {
 # jlib::iq_handler --
 #
 #       Callback for incoming <iq> elements. Most client callbacks are handled
-#       with predetermined functions (via 'iq($id)'). See 'jlib::dispatcher'.
+#       with predetermined functions (via 'iqcmd($id)'). See 'jlib::dispatcher'.
 #       
 # Arguments:
 #       jlibname:   the instance of this jlib.
@@ -786,7 +796,7 @@ proc jlib::dispatcher {jlibname xmldata} {
 proc jlib::iq_handler {jlibname xmldata} {    
 
     upvar [namespace current]::${jlibname}::lib lib
-    upvar [namespace current]::${jlibname}::iq iq
+    upvar [namespace current]::${jlibname}::iqcmd iqcmd
     upvar [namespace current]::${jlibname}::opts opts    
     
     # Extract the command level XML data items.    
@@ -800,6 +810,11 @@ proc jlib::iq_handler {jlibname xmldata} {
     foreach attrkey [array names attrArr] {
 	set $attrkey $attrArr($attrkey)
 	lappend arglist -$attrkey $attrArr($attrkey)
+    }
+    if {![info exists from]} {
+	set afrom ""
+    } else {
+	set afrom $from
     }
     
     # The 'type' attribute must exist! Else we return silently.
@@ -823,7 +838,7 @@ proc jlib::iq_handler {jlibname xmldata} {
 	    set querychildlist [wrapper::getchildren $subiq]
 	    foreach qchild $querychildlist {
 		if {[string equal [wrapper::gettag $qchild] "key"]} {
-		    set iq(key,$xmlns) [wrapper::getcdata $qchild]
+		    set iqcmd(key,$xmlns) [wrapper::getcdata $qchild]
 		    break
 		}
 	    }
@@ -832,34 +847,21 @@ proc jlib::iq_handler {jlibname xmldata} {
 	    # what this is about.
 	    # A request for the entire roster is coming this way, 
 	    # and calls 'parse_roster_set'. Same for browsing etc.
-	    # $iq($id) contains the 'parse_...' call as 1st element.
-	    if {[info exists id] && [info exists iq($id)]} {
-		uplevel #0 $iq($id) [list ok $subiq]
+	    # $iqcmd($id) contains the 'parse_...' call as 1st element.
+	    if {[info exists id] && [info exists iqcmd($id)]} {
+		uplevel #0 $iqcmd($id) [list ok $subiq]
 		
 		# We need a catch here since the callback my in turn 
 		# call 'disconnect' which unsets all iq before returning.
-		catch {unset iq($id)}
-	    } else {
-		# We've got some error here?
+		catch {unset iqcmd($id)}
 	    }
 	}
 	get {
 	    
-	    # Treat internally if possible, else make client aware.
-	    switch -- $xmlns {
-		jabber:iq:last {
-		    eval {parse_get_last $jlibname} $arglist
-		}
-		jabber:iq:time {
-		    eval {parse_get_time $jlibname} $arglist
-		}
-		default {
-		    set iqcallback [concat  \
-		      [list $jlibname $type -query $subiq] $arglist]
-		    set clientcallback [concat  \
-		      [list $jlibname $xmlnsLast -query $subiq] $arglist]
-		}
-	    }
+	    set iqcallback [concat  \
+	      [list $jlibname $type -query $subiq] $arglist]
+	    set clientcallback [concat  \
+	      [list $jlibname $xmlnsLast -query $subiq] $arglist]
 	}	 
 	set {
 	    
@@ -890,13 +892,9 @@ proc jlib::iq_handler {jlibname xmldata} {
 		jabber:iq:search {
 		    
 		    # This is the same as the one we get from a 'search_set'.
-		    if {[info exists id] && [info exists iq($id)]} {
-			uplevel #0 $iq($id) [list set $subiq]
+		    if {[info exists id] && [info exists iqcmd($id)]} {
+			uplevel #0 $iqcmd($id) [list set $subiq]
 		    }
-		}
-		jabber:iq:disco {
-		    
-		    # To do
 		}
 		default {
 		    set iqcallback [concat  \
@@ -923,9 +921,9 @@ proc jlib::iq_handler {jlibname xmldata} {
 		    break
 		}
 	    }
-	    if {[info exists id] && [info exists iq($id)]} {
-		uplevel #0 $iq($id) [list error [list $errcode $errmsg]]
-		catch {unset iq($id)}
+	    if {[info exists id] && [info exists iqcmd($id)]} {
+		uplevel #0 $iqcmd($id) [list error [list $errcode $errmsg]]
+		catch {unset iqcmd($id)}
 	    } else {		
 		set iqcallback [concat  \
 		  [list $jlibname $type -query $subiq] $arglist]
@@ -938,8 +936,12 @@ proc jlib::iq_handler {jlibname xmldata} {
 	}
     }
     
+    # Invoke our iq hook specific for 'type' and 'xmlns' if any.
+    set stat [eval {iq_invoke_hook $jlibname $type $xmlns $afrom $subiq} \
+      $arglist]
+    
     # Invoke callback if any.
-    if {[string length $iqcallback]} {
+    if {!$stat && [string length $iqcallback]} {
 	if {[string length $opts(-iqcommand)]} {
 	    set stat [uplevel #0 $opts(-iqcommand) $iqcallback]
 	} else {
@@ -952,12 +954,10 @@ proc jlib::iq_handler {jlibname xmldata} {
 	    set attrArr(to) $attrArr(from)
 	    unset attrArr(from)
 	    set attrArr(type) "result"
-	    #set xmldata [lreplace $xmldata 1 1 [array get attrArr]]
 	    set xmldata [wrapper::setattrlist $xmldata [array get attrArr]]
 	    set errtag [wrapper::createtag "error" -chdata "Not Implemented"  \
 	      -attrlist {code 501}]
 	    lappend childlist $errtag
-	    #set xmldata [lreplace $xmldata 4 4 $childlist]
 	    set xmldata [wrapper::setchildlist $xmldata $childlist]
 	    
 	    # Be careful to trap network errors and report.
@@ -1048,7 +1048,7 @@ proc jlib::message_handler {jlibname xmldata} {
 proc jlib::presence_handler {jlibname xmldata} { 
 
     upvar [namespace current]::${jlibname}::lib lib
-    upvar [namespace current]::${jlibname}::iq iq
+    upvar [namespace current]::${jlibname}::iqcmd iqcmd
     upvar [namespace current]::${jlibname}::opts opts
     
     # Extract the command level XML data items.
@@ -1136,9 +1136,9 @@ proc jlib::presence_handler {jlibname xmldata} {
     }
     
     # Invoke any callback.
-    if {[info exists id] && [info exists iq($id)]} {
-	uplevel #0 $iq($id) [list $jlibname $type] $arglist
-	catch {unset iq($id)}
+    if {[info exists id] && [info exists iqcmd($id)]} {
+	uplevel #0 $iqcmd($id) [list $jlibname $type] $arglist
+	catch {unset iqcmd($id)}
     } elseif {[string length $opts(-presencecommand)]} {
 	#uplevel #0 $opts(-presencecommand) [list $jlibname $type] $arglist
     } else {
@@ -1220,7 +1220,7 @@ proc jlib::xmlerror {jlibname args} {
 
 # jlib::reset --
 #
-#       Unsets all iq($id) callback procedures.
+#       Unsets all iqcmd($id) callback procedures.
 #
 # Arguments:
 #       jlibname:   the instance of this jlib.
@@ -1231,7 +1231,7 @@ proc jlib::xmlerror {jlibname args} {
 proc jlib::reset {jlibname} {
 
     upvar [namespace current]::${jlibname}::lib lib
-    upvar [namespace current]::${jlibname}::iq iq
+    upvar [namespace current]::${jlibname}::iqcmd iqcmd
     upvar [namespace current]::${jlibname}::agent agent
     upvar [namespace current]::${jlibname}::locals locals
     
@@ -1239,9 +1239,9 @@ proc jlib::reset {jlibname} {
 
     # Be silent about this.
     catch {
-	set iqnum $iq(uid)
+	set iqnum $iqcmd(uid)
 	unset iq
-	set iq(uid) $iqnum
+	set iqcmd(uid) $iqnum
 	unset agent
     }
     cancel_auto_away $jlibname
@@ -1380,7 +1380,6 @@ proc jlib::parse_roster_get {jlibname ispush cmd type thequery} {
 # jlib::parse_roster_set --
 #
 #       Callback command from the 'roster_set' call.
-#       Is this superseeded by 'parse_roster_get'??????????
 #
 # Arguments:
 #       jlibname:   the instance of this jlib.
@@ -1489,6 +1488,34 @@ proc jlib::parse_search_set {jlibname cmd type subiq} {
     uplevel #0 $cmd [list $type $subiq]
 }
 
+
+proc jlib::iq_register {jlibname type xmlns func} {
+    
+    upvar [namespace current]::${jlibname}::iqhook iqhook
+    
+    set iqhook($type,$xmlns) $func
+}
+
+proc jlib::iq_invoke_hook {jlibname type xmlns from subiq args} {
+    
+    upvar [namespace current]::${jlibname}::iqhook iqhook
+    
+    set ishandled 0
+    
+    if {[info exists iqhook($type,$xmlns)]} {
+	set func $iqhook($type,$xmlns)
+	set code [catch {
+	    uplevel #0 $func [list $jlibname $from $subiq] $args} ans]
+	if {$code} {
+	    bgerror "iqhook $func failed: $code\n$::errorInfo"
+	}
+	if {[string equal $ans 1]} {
+	    set ishandled 1
+	}
+    }
+    return $ishandled
+}
+
 # jlib::send_iq --
 #
 #       To send an iq (info/query) packet.
@@ -1522,7 +1549,7 @@ proc jlib::parse_search_set {jlibname cmd type subiq} {
 proc jlib::send_iq {jlibname type xmldata args} {
 
     upvar [namespace current]::${jlibname}::lib lib
-    upvar [namespace current]::${jlibname}::iq iq
+    upvar [namespace current]::${jlibname}::iqcmd iqcmd
     upvar [namespace current]::${jlibname}::locals locals
     upvar [namespace current]::${jlibname}::opts opts
         
@@ -1534,13 +1561,13 @@ proc jlib::send_iq {jlibname type xmldata args} {
     
     # Need to generate a unique identifier (id) for this packet.
     if {[string equal $type "get"] || [string equal $type "set"]} {
-	lappend attrlist "id" $iq(uid)
+	lappend attrlist "id" $iqcmd(uid)
 	
 	# Record any callback procedure.
 	if {[info exists argsArr(-command)]} {
-	    set iq($iq(uid)) $argsArr(-command)
+	    set iqcmd($iqcmd(uid)) $argsArr(-command)
 	}
-	incr iq(uid)
+	incr iqcmd(uid)
     } elseif {[info exists argsArr(-id)]} {
 	lappend attrlist "id" $argsArr(-id)
     }
@@ -1916,7 +1943,7 @@ proc jlib::send_presence {jlibname args} {
     upvar [namespace current]::${jlibname}::lib lib
     upvar [namespace current]::${jlibname}::locals locals
     upvar [namespace current]::${jlibname}::opts opts
-    upvar [namespace current]::${jlibname}::iq iq
+    upvar [namespace current]::${jlibname}::iqcmd iqcmd
     
     Debug 3 "jlib::send_presence args='$args'"
     
@@ -1948,9 +1975,9 @@ proc jlib::send_presence {jlibname args} {
 	    command {
 		
 		# Use iq things for this; needs to be renamed.
-		lappend attrlist "id" $iq(uid)
-		set iq($iq(uid)) $value
-		incr iq(uid)
+		lappend attrlist "id" $iqcmd(uid)
+		set iqcmd($iqcmd(uid)) $value
+		incr iqcmd(uid)
 	    }
 	    default {
 		lappend children [wrapper::createtag $par -chdata $value]
@@ -2407,11 +2434,23 @@ proc jlib::private_set {jlibname ns cmd args} {
       [list [namespace current]::parse_iq_response $jlibname $cmd]    
 }
 
+# jlib::get_last --
+#
+#       Query the 'last' of 'to' using 'jabber:iq:last' get.
+
+proc jlib::get_last {jlibname to cmd} {
+    
+    set xmllist [wrapper::createtag "query"  \
+      -attrlist {xmlns jabber:iq:last}]
+    send_iq $jlibname "get" $xmllist -to $to -command        \
+      [list [namespace current]::parse_iq_response $jlibname $cmd]
+}
+
 # jlib::parse_get_last --
 #
 #       Seconds since last activity. Response to 'jabber:iq:last' get.
 
-proc jlib::parse_get_last {jlibname args} {    
+proc jlib::parse_get_last {jlibname from subiq args} {    
 
     upvar [namespace current]::${jlibname}::locals locals
     
@@ -2429,16 +2468,19 @@ proc jlib::parse_get_last {jlibname args} {
 	lappend opts -id $argsarr(-id)
     }
     eval {send_iq $jlibname "result" $xmllist} $opts
+
+    # Tell jlib's iq-handler that we handled the event.
+    return 1
 }
 
-# jlib::get_last --
+# jlib::get_time --
 #
-#       Query the 'last' of 'to' using 'jabber:iq:last' get.
+#       Query the 'time' of 'to' using 'jabber:iq:time' get.
 
-proc jlib::get_last {jlibname to cmd} {
+proc jlib::get_time {jlibname to cmd} {
     
     set xmllist [wrapper::createtag "query"  \
-      -attrlist {xmlns jabber:iq:last}]
+      -attrlist {xmlns jabber:iq:time}]
     send_iq $jlibname "get" $xmllist -to $to -command        \
       [list [namespace current]::parse_iq_response $jlibname $cmd]
 }
@@ -2447,13 +2489,12 @@ proc jlib::get_last {jlibname to cmd} {
 #
 #       Send our time. Response to 'jabber:iq:time' get.
 
-proc jlib::parse_get_time {jlibname args} {
+proc jlib::parse_get_time {jlibname from subiq args} {
     
     array set argsarr $args
     
     set secs [clock seconds]
     set utc [clock format $secs -format "%Y%m%dT%H:%M:%S" -gmt 1]
-    #set tz [clock format $secs -format "%Z"]
     set tz "GMT"
     set display [clock format $secs]
     set subtags [list  \
@@ -2471,18 +2512,9 @@ proc jlib::parse_get_time {jlibname args} {
 	lappend opts -id $argsarr(-id)
     }
     eval {send_iq $jlibname "result" $xmllist} $opts
-}
 
-# jlib::get_time --
-#
-#       Query the 'time' of 'to' using 'jabber:iq:time' get.
-
-proc jlib::get_time {jlibname to cmd} {
-    
-    set xmllist [wrapper::createtag "query"  \
-      -attrlist {xmlns jabber:iq:time}]
-    send_iq $jlibname "get" $xmllist -to $to -command        \
-      [list [namespace current]::parse_iq_response $jlibname $cmd]
+    # Tell jlib's iq-handler that we handled the event.
+    return 1
 }
     
 # jlib::get_version --

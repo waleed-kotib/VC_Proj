@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.50 2004-01-05 15:00:31 matben Exp $
+# $Id: Jabber.tcl,v 1.51 2004-01-11 15:17:51 matben Exp $
 
 package provide Jabber 1.0
 
@@ -665,14 +665,20 @@ proc ::Jabber::Init { } {
     }
     
     # Add the three element callbacks.
-    lappend opts -iqcommand ::Jabber::IqCallback  \
-      -messagecommand ::Jabber::MessageCallback   \
+    lappend opts  \
+      -iqcommand       ::Jabber::IqCallback       \
+      -messagecommand  ::Jabber::MessageCallback  \
       -presencecommand ::Jabber::PresenceCallback
 
     # Make an instance of jabberlib and fill in our roster object.
     set jstate(jlib) [eval {
 	::jlib::new $jstate(roster) ::Jabber::ClientProc  \
 	  -browsename $jstate(browse)} $opts]
+
+    # Register handlers for various iq elements.
+    $jstate(jlib) iq_register get jabber:iq:version ::Jabber::ParseGetVersion
+    $jstate(jlib) iq_register get jabber:iq:browse  ::Jabber::ParseGetBrowse
+    $jstate(jlib) iq_register set jabber:iq:oob     ::Jabber::OOB::ParseSet
     
     # Set the priority order of groupchat protocols.
     $jstate(jlib) setgroupchatpriority [list $jprefs(prefgchatproto) "gc-1.0"]
@@ -708,42 +714,8 @@ proc ::Jabber::IqCallback {jlibName type args} {
     
     array set attrArr $args
     set xmlns [wrapper::getattribute $attrArr(-query) xmlns]
-    set stat 1
+    set stat 0
     
-    switch -- $type {
-	result {
-	    # Unhandled result callback?
-	}
-	get {
-	    
-	    # jabber:iq:time and jabber:iq:last handled in jabberlib.
-	    switch -- $xmlns {
-		jabber:iq:version {
-		    set stat [eval {::Jabber::ParseGetVersion} $args]
-		}
-		jabber:iq:browse {
-		    set stat [eval {::Jabber::ParseGetBrowse} $args]
-		}
-		default {
-		    set stat 0
-		}
-	    }	    
-	}
-	set {
-	    switch -- $xmlns {
-		jabber:iq:oob {
-		    eval {::Jabber::OOB::ParseSet $attrArr(-from)  \
-		      $attrArr(-query)} $args
-		}
-		default {
-
-		}
-	    }	    
-	}
-	error {
-	    # Unhandled error callback?
-	}
-    }
     return $stat
 }
 
@@ -2531,7 +2503,7 @@ proc ::Jabber::CacheGroupchatType {confjid jlibname type subiq} {
 #
 #       Respond to an incoming 'jabber:iq:version' get query.
 
-proc ::Jabber::ParseGetVersion {args} {
+proc ::Jabber::ParseGetVersion {jlibname from subiq args} {
     global  prefs tcl_platform
     variable jstate
     
@@ -2563,42 +2535,7 @@ proc ::Jabber::ParseGetVersion {args} {
     # Tell jlib's iq-handler that we handled the event.
     return 1
 }
-    
-# Jabber::ParseGetTime --
-#
-#       Respond to an incoming 'jabber:iq:time' get query.
-
-proc ::Jabber::ParseGetTime {args} {
-    global  prefs
-    variable jstate
-    
-    ::Jabber::Debug 2 "::Jabber::ParseGetTime args='$args'"
-    
-    array set argsArr $args
-    
-    # Return any id!
-    set opts {}
-    if {[info exists argsArr(-id)]} {
-	set opts [list -id $argsArr(-id)]
-    }
-    set secs [clock seconds]
-    set gmt [clock format $secs -format "%Y%m%dT%H:%M:%S" -gmt 1]
-    set display [clock format $secs -gmt 1]
-    set subtags [list  \
-      [wrapper::createtag utc -chdata $gmt]  \
-      [wrapper::createtag display -chdata $display]  \
-      [wrapper::createtag tz -chdata GMT]]
-    set xmllist [wrapper::createtag query -subtags $subtags  \
-      -attrlist {xmlns jabber:iq:time}]
-    if {[info exists argsArr(-from)]} {
-	lappend opts -to $argsArr(-from)
-    }
-    eval {$jstate(jlib) send_iq "result" $xmllist} $opts
-
-    # Tell jlib's iq-handler that we handled the event.
-    return 1
-}
-        
+            
 # Jabber::ParseGetBrowse --
 #
 #       Respond to an incoming 'jabber:iq:browse' get query.
@@ -2606,7 +2543,7 @@ proc ::Jabber::ParseGetTime {args} {
 # Results:
 #       boolean (0/1) telling if this was handled or not.
 
-proc ::Jabber::ParseGetBrowse {args} {
+proc ::Jabber::ParseGetBrowse {jlibname from subiq args} {
     global  prefs    
     variable jstate
 

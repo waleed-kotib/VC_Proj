@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: tinyhttpd.tcl,v 1.6 2003-12-09 14:19:22 matben Exp $
+# $Id: tinyhttpd.tcl,v 1.7 2004-01-11 15:17:50 matben Exp $
 
 # ########################### USAGE ############################################
 #
@@ -378,9 +378,13 @@ proc ::tinyhttpd::Event {token} {
     
     # If end-of-file or because of insufficient data in nonblocking mode,
     # then gets returns -1.
-    set nbytes [gets $s line]
-    Debug 3 "Event:: nbytes=$nbytes, line=$line"
-    
+    if {[catch {
+	set nbytes [gets $s line]
+	Debug 3 "Event:: nbytes=$nbytes, line=$line"
+    }]} {
+	Finish $token eof
+	return
+    }
     if {$nbytes == -1} {
 	return
     } elseif {$nbytes > 0} {

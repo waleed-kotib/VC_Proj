@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.14 2004-01-10 14:53:39 matben Exp $
+# $Id: OOB.tcl,v 1.15 2004-01-11 15:17:51 matben Exp $
 
 package provide OOB 1.0
 
@@ -162,7 +162,7 @@ proc ::Jabber::OOB::SetCallback {jlibName type theQuery} {
 #       Gets called when we get a 'jabber:iq:oob' 'set' element, that is,
 #       another user sends us an url to fetch a file from.
 
-proc ::Jabber::OOB::ParseSet {from subiq args} {
+proc ::Jabber::OOB::ParseSet {jlibname from subiq args} {
     
     variable locals
     
