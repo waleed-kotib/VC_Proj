@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.30 2003-12-30 15:30:58 matben Exp $
+# $Id: Coccinella.tcl,v 1.31 2004-01-02 14:41:58 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -301,36 +301,7 @@ set this(themePrefsPath) [file join $this(prefsPath) theme]
 
 # Read our theme prefs file, if any, containing the theme name.
 package require Theme
-::Theme::ReadPrefsFile
-
-# Read resource database files in a hierarchical order.
-# 1) always read the default rdb file.
-# 2) read rdb file for this specific platform, if exists.
-# 3) read rdb file for any theme we have chosen.
-option readfile [file join $this(resourcedbPath) default.rdb] startupFile
-set f [file join $this(resourcedbPath) $this(platform).rdb]
-if {[file exists $f]} {
-    option readfile $f startupFile
-}
-set f [file join $this(resourcedbPath) $prefs(themeName).rdb]
-if {[file exists $f]} {
-    option readfile $f startupFile
-}
-
-# Search for image files in this order:
-# 1) imagePath/themeImageDir
-# 2) imagePath/platformName
-# 3) imagePath
-set this(imagePathList) {}
-set themeDir [option get . themeImageDir {}]
-if {$themeDir != ""} {
-    lappend this(imagePathList) [file join $this(imagePath) $themeDir]
-}
-lappend this(imagePathList)  \
-  [file join $this(imagePath) $this(platform)] $this(imagePath)
-
-# Make all images used for widgets that doesn't use the Theme package.
-::Theme::PreLoadImages
+::Theme::Init
 
 # The message catalog for language customization.
 if {![info exists env(LANG)]} {
@@ -340,13 +311,6 @@ package require msgcat
 ::msgcat::mclocale en
 #::msgcat::mclocale sv
 ::msgcat::mcload [file join $this(path) msgs]
-
-if {[string match "mac*" $this(platform)]} {
-    # documentProc, dBoxProc, plainDBox, altDBoxProc, movableDBoxProc, 
-    # zoomDocProc, rDocProc, floatProc, floatZoomProc, floatSideProc, 
-    # or floatSideZoomProc
-    set macWindowStyle "::tk::unsupported::MacWindowStyle style"
-}
 
 # Show it! Need a full update here, at least on Windows.
 package require Splash

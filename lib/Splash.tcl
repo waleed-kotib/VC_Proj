@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 1999-2002  Mats Bengtsson
 #  
-# $Id: Splash.tcl,v 1.1 2003-12-23 12:15:39 matben Exp $
+# $Id: Splash.tcl,v 1.2 2004-01-02 14:41:58 matben Exp $
    
 package provide Splash 1.0
 
@@ -52,7 +52,7 @@ proc ::SplashScreen::SplashScreen { } {
     }
     toplevel $w -class Splash
     if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w movableDBoxProc
+	::tk::unsupported::MacWindowStyle style $w movableDBoxProc
 	wm transient $w .
     } else {
 	wm transient $w

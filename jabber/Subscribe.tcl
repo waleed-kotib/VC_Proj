@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Subscribe.tcl,v 1.5 2003-12-16 15:03:53 matben Exp $
+# $Id: Subscribe.tcl,v 1.6 2004-01-02 14:41:58 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -43,12 +43,7 @@ proc ::Jabber::Subscribe::Subscribe {jid args} {
     set locals($uid,jid) $jid
     array set argsArr $args
     
-    toplevel $w
-    if {[string match "mac*" $this(platform)]} {
-	eval $::macWindowStyle $w documentProc
-    } else {
-
-    }
+    ::UI::Toplevel $w -macstyle documentProc
     wm title $w [::msgcat::mc Subscribe]
     set fontSB [option get . fontSmallBold {}]
     

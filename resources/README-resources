@@ -21,7 +21,7 @@ Examples:
 
 3) There are several application specific classes that can be
 used when specifying resources. They are:
-Whiteboard, JMain, MailBox, Chat, GroupChat, NewMsg, Splash.
+Whiteboard, JMain, MailBox, Chat, GroupChat, NewMsg, Splash...
 Use them as:
 *MailBox*Tablelist.labelBackground:        #dd1111
 
@@ -40,7 +40,7 @@ the filename the same as in the original distro, the image
 will be automatically used. You may also pick a different
 name, but then you must specify a new value for the resource
 that is also the file name. Examplevise:
-*JMain.connectImage       imageMyConnect
+*JMain.connectImage:       imageMyConnect
 where the 'imageMyConnect.gif' file is inside the themes image directory.
 
 7) Images are searched for in this order:
@@ -53,7 +53,13 @@ Some images have also been hardcoded into the sources, and they
 will be obtained from there if not found in the above directory
 hierarchy.
 
-8) Finally, if your theme have any requirements these should be put
+8) If you require anything that is not GIFs, say PNG, then you must
+specify all these extra file suffixes in the theme rdb file as:
+*themeImageSuffixes:       .png
+Be sure you coordinate this with the paragraph below since GIF is the
+only format supported by the core Tk.
+
+9) Finally, if your theme have any requirements these should be put
 in a file named ${themeName}CanLoad.tcl which must return 1 if the
 theme resources can be loaded on the system and 0 if not.
 
