@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson only for the new and rewritten parts.
 #
-# $Id: httpex.tcl,v 1.6 2003-10-18 14:45:05 matben Exp $
+# $Id: httpex.tcl,v 1.7 2003-10-19 11:14:12 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -111,6 +111,7 @@
 # TODO --------------------------------------------------------------------------
 #
 # o  Support for Transfer-Encoding: chunked
+# o  Support for Content-Range:
 
 package provide httpex 0.2
 
@@ -380,19 +381,20 @@ proc httpex::Request {method url args} {
 	-queryblocksize	8192
 	-timeout 	0
 	-type		application/x-www-form-urlencoded
-	state		connect
-	currentsize	0
-	totalsize	0
+	chunked         0
 	coding		{}
+	currentsize	0
 	havecontentlength 0
-	length	0
-	offset	0
-	meta		{}
-	type            text/html
-	status		""
 	headclose       0
 	http		""
 	httpvers	1.0
+	length	0
+	meta		{}
+	offset	0
+	state		connect
+	status		""
+	totalsize	0
+	type            text/html
     }
     set state(method) $method
     set state(charset) $defaultCharset
@@ -735,6 +737,7 @@ proc httpex::readrequest {s callback args} {
 	-blocksize 	8192
 	-headers 	{}
 	-persistent     0
+	chunked         0
 	coding		{}
 	currentsize	0
 	havecontentlength 0
@@ -923,6 +926,7 @@ proc httpex::Event {token} {
 	}
     } elseif {$n > 0} {
 	Debug 2 "\tline=$line"
+	
 	if {[regexp -nocase {^content-type:(.+)$} $line x type]} {
 	    set state(type) [string trim $type]
 	    
@@ -938,6 +942,9 @@ proc httpex::Event {token} {
 	}
 	if {[regexp -nocase {^connection: *close$} $line x]} {
 	    set state(headclose) 1
+	}
+	if {[regexp -nocase {^transfer-encoding: *chunked} $line x]} {
+	    set state(chunked) 1
 	}
 	if {[regexp -nocase {^([^:]+):(.+)$} $line x key value]} {
 	    lappend state(meta) $key [string trim $value]
@@ -1151,7 +1158,7 @@ proc httpex::CopyStart {s token} {
     Debug 3 "httpex::CopyStart"
     
     set blocksize $state(-blocksize)
-    if {$state(-persistent) &&  \
+    if {$state(havecontentlength) && $state(-persistent) &&  \
       ([expr $state(currentsize) + $blocksize] >= $state(totalsize))} {
 	set blocksize [expr $state(totalsize) - $state(currentsize)]
     }
@@ -1225,6 +1232,24 @@ proc httpex::Eof {token {iseof 0}} {
     } else {
 	set state(status) ok
     }
+    
+    # For chunked bodies we must dechunk it first.
+    if {$state(chunked)} {
+	if {[info exists state(-channel)]} {
+	    DeChunkFile $token
+	} else {
+	    DeChunkBody $token
+	}
+    }
+    
+    # We should also verify that we have the entire body.
+    if {$state(method) == "get"} {
+	if {($state(totalsize) > 0) && \
+	  ($state(totalsize) != $state(currentsize))} {
+	   # set state(status) eof
+	}
+    }
+    
     set state(state) final
     Finish $token
 }
@@ -1248,7 +1273,6 @@ proc httpex::Read {s token} {
     Debug 1 "httpex::Read"
     
     if {[catch {eof $s} iseof] || $iseof} {
-	#Eof $token $iseof
 	Eof $token
 	return
     }
@@ -1786,6 +1810,82 @@ proc httpex::ProxyRequired {host} {
 	}
 	return [list $opts(-proxyhost) $opts(-proxyport)]
     }
+}
+
+# httpex::DeChunkBody --
+# 
+#       Removes all hex chunks into an ordinary body.
+#       
+# Arguments:
+#	token	The token returned from httpex::get etc.
+#
+# Results:
+#       None
+
+proc httpex::DeChunkBody {token} {
+    variable $token
+    upvar 0 $token state
+    
+    Debug 1 "httpex::DeChunkBody"
+    
+    set body $state(body)
+    set newbody ""
+    set len 0
+    set offset 0
+    set ind [string first "\n" $body]
+    
+    # 'prefix' ends with "\n".
+    set prefix [string range $body 0 $ind]    
+    set hex [lindex [split $prefix ";\n"] 0]
+    set chunkSize 0
+    scan $hex %x chunkSize
+    incr offset [expr $ind + 1]
+    
+    while {$chunkSize > 0} {
+	
+	# Process chunk body.
+	append newbody [string range $body $offset [expr $offset + $chunkSize - 1]]
+	incr offset [expr $chunkSize + 1]
+	incr len $chunkSize
+	
+	# Process next chunk prefix.
+	set ind [string first "\n" $body $offset]
+	set prefix [string range $body $offset $ind]
+	set hex [lindex [split $prefix ";\n"] 0]
+	set chunkSize 0
+	scan $hex %x chunkSize
+	set offset [expr $ind + 1]
+    }
+    
+    # Read entity header if any.
+    
+    
+    # Set Content-Length and remove 'chunked'.
+    array set metaArr $state(meta)
+    set metaArr(Content-Length) $len
+    catch {unset metaArr(Transfer-Encoding)}
+    set state(meta) [array get metaArr]
+    set state(body) $newbody
+    set state(totalsize) $len
+}
+
+# httpex::DeChunkFile --
+# 
+#       Removes all hex chunks from the chunked body in file.
+#       Same as DeChunkBody but for files.
+#       
+# Arguments:
+#	token	The token returned from httpex::get etc.
+#
+# Results:
+#       None
+
+proc httpex::DeChunkFile {token} {
+    variable $token
+    upvar 0 $token state
+
+    # Not there yet.....
+    
 }
 
 proc httpex::Debug {num str} {
