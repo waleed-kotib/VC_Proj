@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.16 2004-04-25 15:35:26 matben Exp $
+# $Id: Profiles.tcl,v 1.17 2004-05-02 12:35:24 matben Exp $
 
 package provide Profiles 1.0
 
@@ -289,8 +289,8 @@ proc ::Profiles::BuildPage {page} {
     labelframe $lfr -text [::msgcat::mc {User Profiles}]
     pack $lfr -side top -anchor w -padx 8 -pady 4
     
-    message $lfr.msg -text [::msgcat::mc prefprof] -aspect 800
-    pack $lfr.msg -side top -anchor w -fill x
+    label $lfr.msg -text [::msgcat::mc prefprof] -wraplength 200 -justify left
+    pack  $lfr.msg -side top -anchor w -fill x
 
     set pui $lfr.fr
     pack [frame $pui] -side left  
@@ -298,12 +298,7 @@ proc ::Profiles::BuildPage {page} {
     # Make temp array for servers.
     ::Profiles::MakeTmpProfArr
     set tmpSelected $selected
-	
-    # Verify that the selected also in array.
-    #if {[lsearch -exact $tmpJServer(profile) $profile] < 0} {
-#	set profile [lindex $tmpJServer(profile) 0]
-    #}
-	
+		
     # Init textvariables.
     set profile  $tmpSelected
     set server   $tmpProfArr($profile,server)
@@ -362,6 +357,13 @@ proc ::Profiles::BuildPage {page} {
     pack [button $puibt.del -font $fontS -text [::msgcat::mc Delete]  \
       -command [namespace current]::DeleteCmd]   \
       -side top -fill x -pady 4
+    
+    # Trick to resize the labels wraplength.
+    set script [format {
+	update idletasks
+	%s.msg configure -wraplength [expr [winfo reqwidth %s] - 20]
+    } $lfr $lfr]    
+    after idle $script
 }
 
 # Profiles::MakeTmpProfArr --

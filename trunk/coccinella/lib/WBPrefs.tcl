@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: WBPrefs.tcl,v 1.3 2004-04-09 10:32:26 matben Exp $
+# $Id: WBPrefs.tcl,v 1.4 2004-05-02 12:35:24 matben Exp $
 
 package provide WBPrefs 1.0
 
@@ -125,17 +125,25 @@ proc ::WBPrefs::BuildFontsPage {page} {
     pack $wlbwb $frtot.fr3.sc -side left -fill y
     eval $wlbwb insert 0 $prefs(canvasFonts)
     
-    message $frtot.msg -text [::msgcat::mc preffontmsg] -aspect 600
+    label $frtot.msg -text [::msgcat::mc preffontmsg] -wraplength 300 \
+      -justify left
     set wsamp $frtot.samp
     canvas $wsamp -width 200 -height 48 -highlightthickness 0 -border 1 \
       -relief sunken
-    grid $frtot.msg -columnspan 3 -sticky news
+    grid $frtot.msg -columnspan 3 -sticky news -padx 4 -pady 2
     grid $frtot.samp -columnspan 3 -sticky news
     
     bind $wlbsys <Button-1> {+ focus %W}
     bind $wlbwb <Button-1> {+ focus %W}
     bind $wlbsys <<ListboxSelect>> [list [namespace current]::SelectFontCmd system]
     bind $wlbwb <<ListboxSelect>> [list [namespace current]::SelectFontCmd wb]
+	
+    # Trick to resize the labels wraplength.
+    set script [format {
+	update idletasks
+	%s.msg configure -wraplength [expr [winfo reqwidth %s] - 20]
+    } $frtot $frtot]    
+    after idle $script
 }
   
 proc ::WBPrefs::SelectFontCmd {which} {
@@ -251,10 +259,11 @@ proc ::WBPrefs::BuildPagePrivacy {page} {
     set labfrpbl $page.fr
     labelframe $labfrpbl -text [::msgcat::mc Privacy]
     pack $labfrpbl -side top -anchor w -padx 8 -pady 4
-    set pbl [frame $labfrpbl.frin]
-    pack $pbl -padx 10 -pady 6 -side left
+    set pbl $labfrpbl.frin
+    frame $pbl
+    pack  $pbl -padx 10 -pady 6 -side left -fill x
     
-    message $pbl.msg -text [::msgcat::mc prefpriv] -aspect 800
+    label $pbl.msg -text [::msgcat::mc prefpriv] -wraplength 340 -justify left
     checkbutton $pbl.only -anchor w -text "  [::msgcat::mc Privacy]"  \
       -variable [namespace current]::tmpPrefs(privacy)
     pack $pbl.msg $pbl.only -side top -fill x -anchor w

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Privacy.tcl,v 1.3 2004-05-01 14:23:40 matben Exp $
+# $Id: Privacy.tcl,v 1.4 2004-05-02 12:35:24 matben Exp $
 
 package provide Privacy 1.0
 
@@ -30,6 +30,9 @@ namespace eval ::Privacy:: {
 	option add *FilterDlg.selectBackground    systemHighlight widgetDefault
 	option add *FilterDlg.selectForeground    systemHighlightText widgetDefault
     }
+    
+    variable cache
+    set cache(haveprivacy) 0
 }
 
 # Prefs Page ...................................................................
@@ -73,13 +76,13 @@ proc ::Privacy::BuildPrefsPage {page} {
     labelframe $fpage -text [::msgcat::mc Filter] -padx 4 -pady 2
     pack $fpage -side top -anchor w -padx 8 -pady 4
     
-    label $fpage.lmsg -wraplength 360 -justify left -text \
+    label $fpage.lmsg -wraplength 300 -justify left -text \
       "Each user may administrate zero or many lists.\
       Only the active or default list affect message processing.\
       Any active list affects only the session.\
       The default list is processed if there is no active list."
     
-    pack  $fpage.lmsg -side top -anchor w -pady 1
+    pack  $fpage.lmsg -side top -anchor w -padx 4 -pady 1
     
     frame  $fpage.bottom
     pack   $fpage.bottom -side bottom -pady 1 -fill x
@@ -161,6 +164,13 @@ proc ::Privacy::BuildPrefsPage {page} {
 	set statmsg [::msgcat::mc {Obtaining filter options}]
 	::Privacy::GetLists
     }
+        
+    # Trick to resize the labels wraplength.
+    set script [format {
+	update idletasks
+	%s.lmsg configure -wraplength [expr [winfo reqwidth %s] - 20]
+    } $fpage $fpage]    
+    after idle $script
     
     #foreach a {mats cool junk} {
 #	::Privacy::TableInsertLine $a
@@ -346,8 +356,10 @@ proc ::Privacy::GetListsCB {jlibname type subiq args} {
     switch -- $type {
 	error {
 	    set statmsg [::msgcat::mc {Filter options unavailable at this server}]
+	    set cache(haveprivacy) 0
 	}
 	default {
+	    set cache(haveprivacy) 1
 	    $wbts(new) configure -state normal
 	    set statmsg [::msgcat::mc {Filter lists obtained from server}]
 	    
@@ -413,11 +425,13 @@ proc ::Privacy::EditList { } {
 proc ::Privacy::Save { } {
     variable activeVar
     variable defaultVar
+    variable cache
     
     #puts "::Privacy::Save"
-        
-    ::Privacy::SetActiveDefaultList active  $activeVar
-    ::Privacy::SetActiveDefaultList default $defaultVar
+    if {$cache(haveprivacy) && [::Jabber::IsConnected]} {
+	::Privacy::SetActiveDefaultList active  $activeVar
+	::Privacy::SetActiveDefaultList default $defaultVar
+    }
 }
 
 proc ::Privacy::DelList { } {
