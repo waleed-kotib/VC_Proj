@@ -10,6 +10,7 @@
 
 package ifneeded Dialogs 1.0 [list source [file join $dir Dialogs.tcl]]
 package ifneeded FileCache 1.0 [list source [file join $dir FileCache.tcl]]
+package ifneeded Httpd 1.0 [list source [file join $dir Httpd.tcl]]
 package ifneeded P2P 1.0 [list source [file join $dir P2P.tcl]]
 package ifneeded P2PNet 1.0 [list source [file join $dir P2PNet.tcl]]
 package ifneeded PreferencesUtils 1.0 [list source [file join $dir PreferencesUtils.tcl]]

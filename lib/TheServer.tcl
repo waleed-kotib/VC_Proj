@@ -8,14 +8,13 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: TheServer.tcl,v 1.25 2004-11-23 12:57:05 matben Exp $
+# $Id: TheServer.tcl,v 1.26 2004-11-24 07:07:29 matben Exp $
     
 package provide TheServer 1.0
 
 namespace eval ::TheServer:: { 
 
     ::hooks::register launchFinalHook       ::TheServer::LaunchHook
-
 }
 
 proc ::TheServer::LaunchHook { } {
