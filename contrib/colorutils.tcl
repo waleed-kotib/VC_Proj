@@ -4,9 +4,9 @@
 #       Algorithm from Tcl/Tk: tkUnix3d.c
 #       
 #  Copyright (c) 2004
-#  This source file is distributed under the BSD licens.
+#  This source file is distributed under the BSD license.
 #  
-#  $Id: colorutils.tcl,v 1.2 2004-09-13 09:05:18 matben Exp $
+#  $Id: colorutils.tcl,v 1.3 2004-10-12 13:48:56 matben Exp $
 
 package provide colorutils 1.0
 

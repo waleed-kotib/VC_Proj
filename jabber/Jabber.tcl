@@ -7,10 +7,11 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.110 2004-10-09 13:21:55 matben Exp $
+# $Id: Jabber.tcl,v 1.111 2004-10-12 13:48:56 matben Exp $
 
 package require balloonhelp
 package require browse
+package require chasearrows
 package require combobox
 package require disco
 package require http 2.3
@@ -20,6 +21,7 @@ package require sha1pure
 package require tinyfileutils
 package require tree
 package require uriencode
+package require wavelabel
 
 # We should have some component mechanism that lets packages load themselves.
 package require Agents
@@ -48,9 +50,7 @@ package require Search
 package require Subscribe
 package require VCard
 
-
 package provide Jabber 1.0
-
 
 namespace eval ::Jabber:: {
     global  this prefs

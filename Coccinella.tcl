@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.88 2004-10-08 12:22:20 matben Exp $
+# $Id: Coccinella.tcl,v 1.89 2004-10-12 13:48:56 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -114,7 +114,7 @@ proc resolve_cmd_realpath {infile} {
 # default file, never read.
 set prefs(majorVers) 0
 set prefs(minorVers) 95
-set prefs(releaseVers) 1
+set prefs(releaseVers) 2
 set prefs(fullVers) $prefs(majorVers).$prefs(minorVers).$prefs(releaseVers)
 
 # We may be embedded in another application, say an ActiveX component.
@@ -237,6 +237,7 @@ set this(altSoundsPath)     [file join $this(prefsPath) sounds]
 set this(basThemePrefsPath) [file join $this(resourcedbPath) theme.rdb]
 set this(themePrefsPath)    [file join $this(prefsPath) theme]
 set this(msgcatPath)        [file join $this(path) msgs]
+set this(msgcatPostPath)    [file join $this(path) msgs post]
 set this(docsPath)          [file join $this(path) docs]
 set this(itemPath)          [file join $this(path) items]
 set this(altItemPath)       [file join $this(prefsPath) items]
@@ -378,6 +379,9 @@ if {!$havecat} {
 # Test here if you want a prticular message catalog (en, nl, de, fr, sv,...).
 #::msgcat::mclocale en
 ::msgcat::mcload $this(msgcatPath)
+if {[file isdirectory $this(msgcatPostPath)]} {
+    ::msgcat::mcload $this(msgcatPostPath)
+}
 namespace import ::msgcat::mc
 
 # Show it! Need a full update here, at least on Windows.

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: jlibsasl.tcl,v 1.7 2004-10-01 12:44:12 matben Exp $
+# $Id: jlibsasl.tcl,v 1.8 2004-10-12 13:48:56 matben Exp $
 
 # We need to be flexible here since can have cyrus based sasl or our 
 # own special pure tcl saslmd5.
@@ -65,13 +65,9 @@ proc jlib::encode64 {str} {
     }
 }
 
-proc jlib::sasl_new {jlibname} {
-    
-    # Set up callbacks for elements that are of interest to us.
-    element_register $jlibname challenge [namespace current]::sasl_challenge
-    element_register $jlibname failure   [namespace current]::sasl_failure
-    element_register $jlibname success   [namespace current]::sasl_success
-}
+# jlib::auth_sasl --
+# 
+# 
 
 proc jlib::auth_sasl {jlibname username resource password cmd} {
     
@@ -88,9 +84,9 @@ proc jlib::auth_sasl {jlibname username resource password cmd} {
     set locals(sasl,cmd) $cmd
     
     # Set up callbacks for elements that are of interest to us.
-    #element_register $jlibname challenge [namespace current]::sasl_challenge
-    #element_register $jlibname failure   [namespace current]::sasl_failure
-    #element_register $jlibname success   [namespace current]::sasl_success
+    element_register $jlibname challenge [namespace current]::sasl_challenge
+    element_register $jlibname failure   [namespace current]::sasl_failure
+    element_register $jlibname success   [namespace current]::sasl_success
 
     if {[info exists locals(features,mechanisms)]} {
 	auth_sasl_continue $jlibname
@@ -422,10 +418,10 @@ proc jlib::sasl_final {jlibname type subiq} {
     
     Debug 2 "jlib::sasl_final"
 
-    # In future...
-    #element_deregister $jlibname challenge [namespace current]::sasl_challenge
-    #element_deregister $jlibname failure   [namespace current]::sasl_failure
-    #element_deregister $jlibname success   [namespace current]::sasl_success
+    # We are no longer interested in these.
+    element_deregister $jlibname challenge [namespace current]::sasl_challenge
+    element_deregister $jlibname failure   [namespace current]::sasl_failure
+    element_deregister $jlibname success   [namespace current]::sasl_success
 
     uplevel #0 $locals(sasl,cmd) [list $jlibname $type $subiq]
 }

@@ -4,11 +4,11 @@
 #      running arrows to show a wait state.
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
-#  This source file is distributed under the BSD licens.
+#  This source file is distributed under the BSD license.
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: chasearrows.tcl,v 1.5 2004-09-13 09:05:18 matben Exp $
+# $Id: chasearrows.tcl,v 1.6 2004-10-12 13:48:56 matben Exp $
 #
 # ########################### USAGE ############################################
 #

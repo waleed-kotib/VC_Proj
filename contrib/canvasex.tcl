@@ -3,9 +3,9 @@
 #      Extends the original canvas widget in a transparent way.
 #      
 #  Copyright (c) 2003  Mats Bengtsson
-#  This source file is distributed under the BSD licens.
+#  This source file is distributed under the BSD license.
 #  
-# $Id: canvasex.tcl,v 1.4 2004-09-13 09:05:18 matben Exp $
+# $Id: canvasex.tcl,v 1.5 2004-10-12 13:48:56 matben Exp $
 # 
 # ########################### USAGE ############################################
 #

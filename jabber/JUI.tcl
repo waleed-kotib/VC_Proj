@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.58 2004-10-09 13:21:55 matben Exp $
+# $Id: JUI.tcl,v 1.59 2004-10-12 13:48:56 matben Exp $
 
 package provide JUI 1.0
 
@@ -321,18 +321,20 @@ proc ::Jabber::UI::Build {w} {
       -side left -fill x -expand 1 -pady 0 -padx 0
         
     # Build status feedback elements.
-    set wstat ${fall}.st
-    set jwapp(statmess) ${wstat}.g.c
+    if {0} {
+	set wstat ${fall}.st
+	set jwapp(statmess) ${wstat}.g.c
+	
+	pack [frame $wstat -relief raised -borderwidth 1]  \
+	  -side bottom -fill x -pady 0
+	pack [frame ${wstat}.g -relief groove -bd 2]  \
+	  -side top -fill x -padx 8 -pady 2
+	pack [canvas $jwapp(statmess) -bd 0 -highlightthickness 0 -height 14]  \
+	  -side left -pady 1 -padx 6 -fill x -expand true
+	$jwapp(statmess) create text 0 0 -anchor nw -text {} -font $fontS \
+	  -tags stattxt
+    }
 
-    pack [frame $wstat -relief raised -borderwidth 1]  \
-      -side bottom -fill x -pady 0
-    pack [frame ${wstat}.g -relief groove -bd 2]  \
-      -side top -fill x -padx 8 -pady 2
-    pack [canvas $jwapp(statmess) -bd 0 -highlightthickness 0 -height 14]  \
-      -side left -pady 1 -padx 6 -fill x -expand true
-    $jwapp(statmess) create text 0 0 -anchor nw -text {} -font $fontS \
-      -tags stattxt
-        
     # Notebook frame.
     set frtbook ${fall}.fnb
     pack [frame $frtbook -bd 1 -relief raised] -fill both -expand 1    
@@ -506,14 +508,17 @@ proc ::Jabber::UI::LogoutClear { } {
 proc ::Jabber::UI::StartStopAnimatedWave {start} {
     variable jwapp
 
-    set waveImage [::Theme::GetImage [option get $jwapp(fall) waveImage {}]]  
-    ::UI::StartStopAnimatedWave $jwapp(statmess) $waveImage $start
+    ::Jabber::Roster::Animate $start
+    
+    #set waveImage [::Theme::GetImage [option get $jwapp(fall) waveImage {}]]  
+    #::UI::StartStopAnimatedWave $jwapp(statmess) $waveImage $start
 }
 
 proc ::Jabber::UI::SetStatusMessage {msg} {
     variable jwapp
 
-    $jwapp(statmess) itemconfigure stattxt -text $msg
+    ::Jabber::Roster::Message $msg
+    #$jwapp(statmess) itemconfigure stattxt -text $msg
 }
 
 # Jabber::UI::MailBoxState --

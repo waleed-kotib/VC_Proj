@@ -4,11 +4,11 @@
 #      glue to Microsoft Speech via tcom for connecting to COM.
 #      
 #  Copyright (c) 2002  Mats Bengtsson
-#  This source file is distributed under the BSD licens.
+#  This source file is distributed under the BSD license.
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: MSSpeech.tcl,v 1.3 2004-09-13 09:05:18 matben Exp $
+# $Id: MSSpeech.tcl,v 1.4 2004-10-12 13:48:56 matben Exp $
 
 namespace eval ::MSSpeech:: {
 

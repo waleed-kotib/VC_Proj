@@ -6,9 +6,9 @@
 #      Modelled after the http package with modifications.
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson only for the new and rewritten parts.
-#  This source file is distributed under the BSD licens.
+#  This source file is distributed under the BSD license.
 #
-# $Id: httpex.tcl,v 1.15 2004-09-13 09:05:18 matben Exp $
+# $Id: httpex.tcl,v 1.16 2004-10-12 13:48:56 matben Exp $
 # 
 # USAGE ########################################################################
 #

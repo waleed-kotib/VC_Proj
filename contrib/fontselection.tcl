@@ -1,7 +1,7 @@
 #  Copyright (c) 2002  Mats Bengtsson
-#  This source file is distributed under the BSD licens.
+#  This source file is distributed under the BSD license.
 #
-# $Id: fontselection.tcl,v 1.11 2004-09-22 13:14:38 matben Exp $
+# $Id: fontselection.tcl,v 1.12 2004-10-12 13:48:56 matben Exp $
 
 package require combobox
 
