@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.34 2003-12-19 15:47:39 matben Exp $
+# $Id: UI.tcl,v 1.35 2003-12-20 14:27:16 matben Exp $
 
 package require entrycomp
 
@@ -256,13 +256,12 @@ proc ::UI::SaveWinGeom {key {w {}}} {
     if {$w == ""} {
 	set w $key
     }
-    if {[winfo exists $w] && [winfo ismapped $w]} {
+    if {[winfo exists $w]} {
 	set prefs(winGeom,$key) [wm geometry $w]
     }
 }
 
 proc ::UI::SaveWinPrefixGeom {wprefix {key ""}} {
-    global  prefs
     
     if {$key == ""} {
 	set key $wprefix
@@ -270,12 +269,16 @@ proc ::UI::SaveWinPrefixGeom {wprefix {key ""}} {
     
     set wins [lsearch -all -inline -glob [winfo children .] ${wprefix}*]
     if {[llength $wins]} {
+	
+	# 1st priority, pick if on top.
 	set wfocus [focus]
 	if {$wfocus != ""} {
 	    set win [winfo toplevel $wfocus]
 	}
 	set win [lsearch -inline $wins $wfocus]
 	if {$win == ""} {
+	    
+	    # 2nd priority, just get first in list.
 	    set win [lindex $wins 0]
 	}
 	if {$win != ""} {
@@ -288,21 +291,55 @@ proc ::UI::SaveWinPrefixGeom {wprefix {key ""}} {
 #
 #       Same for pane positions.
 
-proc ::UI::SavePanePos {w wpaned {orient horizontal}} {
+proc ::UI::SavePanePos {key wpaned {orient horizontal}} {
     global  prefs
     
-    if {[winfo exists $w] && [winfo ismapped $w]} {
+    if {[winfo exists $wpaned]} {
 	array set infoArr [::pane::pane info $wpaned]
 	if {[string equal $orient "horizontal"]} {
-	    set prefs(paneGeom,$w)   \
-	      [list $infoArr(-relwidth) [expr 1.0 - $infoArr(-relwidth)]]
+	    set prefs(paneGeom,$key)   \
+	      [list $infoArr(-relheight) [expr 1.0 - $infoArr(-relheight)]]
 	} else {
 	    
 	    # Vertical
-	    set prefs(paneGeom,$w)   \
-	      [list $infoArr(-relheight) [expr 1.0 - $infoArr(-relheight)]]
+	    set prefs(paneGeom,$key)   \
+	      [list $infoArr(-relwidth) [expr 1.0 - $infoArr(-relwidth)]]
 	}
     }
+}
+
+proc ::UI::SavePrefixPanePos {wprefix wpaned {key ""} {orient horizontal}} {
+
+    XXX
+    
+    if {$key == ""} {
+	set key $wprefix
+    }
+
+    set wins [lsearch -all -inline -glob [winfo children .] ${wprefix}*]
+    if {[llength $wins]} {
+
+	# 1st priority, pick if on top.
+	set wfocus [focus]
+	if {$wfocus != ""} {
+	    set win [winfo toplevel $wfocus]
+	}
+	set win [lsearch -inline $wins $wfocus]
+	if {$win == ""} {
+	    
+	    # 2nd priority, just get first in list.
+	    set win [lindex $wins 0]
+	}
+	if {$win != ""} {
+	    ::UI::SavePanePos $key $win
+	}	
+    }
+}
+
+proc ::UI::GetPrefixedToplevels {wprefix} {
+    
+    return [lsort -dictionary \
+      [lsearch -all -inline -glob [winfo children .] ${wprefix}*]]
 }
 
 # UI::NewMenu --

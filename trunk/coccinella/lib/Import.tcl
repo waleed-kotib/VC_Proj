@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Import.tcl,v 1.8 2003-12-18 14:19:35 matben Exp $
+# $Id: Import.tcl,v 1.9 2003-12-20 14:27:16 matben Exp $
 
 package require http
 package require httpex
@@ -1724,7 +1724,7 @@ proc ::Import::ResizeImage {wtop zoomFactor which newTag {where all}} {
 	eval $redo
 	undo::add [::WB::GetUndoToken $wtop] $undo $redo
     }
-    ::UserActions::DeselectAll $wtop
+    ::CanvasCmd::DeselectAll $wtop
     
     # Mark the new ones if old ones selected.
     foreach id $idsNewSelected {

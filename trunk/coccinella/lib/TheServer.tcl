@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: TheServer.tcl,v 1.14 2003-12-12 13:46:44 matben Exp $
+# $Id: TheServer.tcl,v 1.15 2003-12-20 14:27:16 matben Exp $
     
 # DoStartServer ---
 #
@@ -413,7 +413,7 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 		    puts "--->GET CANVAS:"
 		}
 		set wServCan [::UI::GetServerCanvasFromWtop $wtop]
-		::UserActions::DoPutCanvas $wServCan $ip
+		::CanvasCmd::DoPutCanvas $wServCan $ip
 	    }		
 	}
 	"RESIZE IMAGE" {

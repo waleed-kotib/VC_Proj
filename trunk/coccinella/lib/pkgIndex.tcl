@@ -12,6 +12,7 @@ package ifneeded CanvasCutCopyPaste 1.0 [list source [file join $dir CanvasCutCo
 package ifneeded CanvasDraw 1.0 [list source [file join $dir CanvasDraw.tcl]]
 package ifneeded CanvasText 1.0 [list source [file join $dir CanvasText.tcl]]
 package ifneeded CanvasUtils 1.0 [list source [file join $dir CanvasUtils.tcl]]
+package ifneeded CanvasCmd 1.0 [list source [file join $dir CanvasCmd.tcl]]
 package ifneeded Connections 1.0 [list source [file join $dir Connections.tcl]]
 package ifneeded Dialogs 1.0 [list source [file join $dir Dialogs.tcl]]
 package ifneeded FilesAndCanvas 1.0 [list source [file join $dir FilesAndCanvas.tcl]]

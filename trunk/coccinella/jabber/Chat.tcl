@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.19 2003-12-19 15:47:39 matben Exp $
+# $Id: Chat.tcl,v 1.20 2003-12-20 14:27:16 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -19,7 +19,7 @@ namespace eval ::Jabber::Chat:: {
     # Use option database for customization. 
     # These are nonstandard option valaues and we may therefore keep priority
     # widgetDefault.
-    set fontS [option get . fontSmall {}]
+    set fontS  [option get . fontSmall {}]
     set fontSB [option get . fontSmallBold {}]
 
     option add *Chat*meForeground         red                   widgetDefault
@@ -431,7 +431,8 @@ proc ::Jabber::Chat::Build {threadID args} {
     grid columnconfigure $wtxtsnd 0 -weight 1
     grid rowconfigure $wtxtsnd 0 -weight 1
     
-    if {[info exists prefs(paneGeom,$wDlgs(jchat))]} {
+    set nwin [::UI::GetPrefixedToplevels $wDlgs(jchat)]
+    if {($nwin == 1) && [info exists prefs(paneGeom,$wDlgs(jchat))]} {
 	set relpos $prefs(paneGeom,$wDlgs(jchat))
     } else {
 	set relpos {0.75 0.25}
@@ -445,7 +446,7 @@ proc ::Jabber::Chat::Build {threadID args} {
     trace variable [namespace current]::locals($threadID,jid) w  \
       [list [namespace current]::TraceJid $threadID]
 
-    if {[info exists prefs(winGeom,$wDlgs(jchat))]} {
+    if {($nwin == 1) && [info exists prefs(winGeom,$wDlgs(jchat))]} {
 	wm geometry $w $prefs(winGeom,$wDlgs(jchat))
     }
     wm minsize $w 220 320
@@ -651,11 +652,6 @@ proc ::Jabber::Chat::Close {args} {
     if {$ans == "yes"} {
 	::UI::SaveWinGeom $wDlgs(jchat) $locals($threadID,wtop)
 	::UI::SavePanePos $wDlgs(jchat) $locals($threadID,wtxt)
-	array set infoArr [::pane::pane info $locals($threadID,wtxt)]
-	set paneList  \
-	  [list $infoArr(-relheight) [expr 1.0 - $infoArr(-relheight)]]
-	set prefs(paneGeom,$wDlgs(jchat)) $paneList
-	set locals(panePosList) [list $wDlgs(jchat) $paneList]
 	destroy $locals($threadID,wtop)
 	
 	# Remove trace on windows title.
@@ -665,35 +661,6 @@ proc ::Jabber::Chat::Close {args} {
 	# Array cleanup?
 	array unset locals "${threadID},*"
     }
-}
-
-# Jabber::Chat::GetPanePos --
-#
-#       Return typical pane position as list.
-
-proc ::Jabber::Chat::GetPanePos { } {
-    global  wDlgs
-    variable locals
-    
-    # Figure out if any chat windows on screen.
-    set found 0
-    foreach key [array names locals "*,wtxt"] {
-	set wtxt $locals($key)
-	if {[winfo exists $wtxt]} {
-	    set found 1
-	    break
-	}
-    }
-    if {$found} {
-	array set infoArr [::pane::pane info $wtxt]
-	set ans [list $wDlgs(jchat)   \
-	  [list $infoArr(-relheight) [expr 1.0 - $infoArr(-relheight)]]]
-    } elseif {[info exists locals(panePosList)]} {
-	set ans $locals(panePosList)
-    } else {
-	set ans {}
-    }
-    return $ans
 }
 
 # Various methods to handle chat history .......................................

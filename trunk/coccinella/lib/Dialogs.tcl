@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.22 2003-12-19 15:47:39 matben Exp $
+# $Id: Dialogs.tcl,v 1.23 2003-12-20 14:27:16 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -839,7 +839,11 @@ proc ::Dialogs::ShowInfoServer {thisIPnum} {
 namespace eval ::SplashScreen:: {
         
     # Use option database for customization.
-    option add *Splash.splashImage         splash           widgetDefault
+    option add *Splash.image               splash           widgetDefault
+    option add *Splash.showMinor           1                widgetDefault
+    option add *Splash.showCopyright       0                widgetDefault
+    option add *Splash.copyrightX          ""               widgetDefault
+    option add *Splash.copyrightY          ""               widgetDefault
 
     # Name of variable for message displat.
     variable startMsg ""
@@ -880,12 +884,22 @@ proc ::SplashScreen::SplashScreen { } {
     wm resizable $w 0 0
     foreach {screenW screenH} [GetScreenSize] break
     wm geometry $w +[expr ($screenW - 450)/2]+[expr ($screenH - 300)/2]
-    set fontS [option get . fontSmall {}]
+    set fontS         [option get . fontSmall {}]
+    set showMinor     [option get $w showMinor {}]
+    set showCopyright [option get $w showCopyright {}]
+    set copyrightX    [option get $w copyrightX {}]
+    set copyrightY    [option get $w copyrightY {}]
     
     # If image not already there, get it.
-    set imsplash [::Theme::GetImage [option get $w splashImage {}]]
+    set imsplash [::Theme::GetImage [option get $w image {}]]
     set imHeight [image height $imsplash]
     set imWidth [image width $imsplash]
+    if {$copyrightX == ""} {
+	set copyrightX 50
+    }
+    if {$copyrightY == ""} {
+	set copyrightY [expr $imHeight - 70]
+    }
     foreach {r g b} [$imsplash get 50 [expr $imHeight - 20]] break
     if {[expr $r + $g + $b] > [expr 2*255]} {
 	set textcol black
@@ -899,9 +913,17 @@ proc ::SplashScreen::SplashScreen { } {
       -font $fontS -text $startMsg -fill $textcol
     
     # Print patch level for dev versions.
-    if {$prefs(releaseVers) != ""} {
+    if {$showMinor && ($prefs(releaseVers) != "")} {
 	$w.can create text 420 [expr $imHeight - 40] -anchor nw  \
 	  -font {Helvetica 18} -text $prefs(releaseVers) -fill #ef2910
+    }
+    if {$showCopyright} {
+	set copyright "Written by Mats Bengtsson (C) 1999-2003"
+	set license "Distributed under the Gnu General Public License"
+	$w.can create text $copyrightX $copyrightY -anchor nw \
+	  -font $fontS -text $copyright -fill $textcol
+	$w.can create text $copyrightX [expr $copyrightY - 15] -anchor nw \
+	  -font $fontS -text $license -fill $textcol
     }
     
     pack $w.can
@@ -1066,24 +1088,8 @@ proc ::Dialogs::AboutQuickTimeTcl { } {
     $w.m play
 }
 
-# Procs to handle list of toplevels windows that we cache its geometries.
 
-namespace eval ::Dialogs:: {
- 
-    variable winGeomList {}
-}
-
-proc ::Dialogs::AddToplevelToGeomList {args} {
-    variable winGeomList
-    
-    set winGeomList [concat $winGeomList $args]
-}
-
-proc ::Dialogs::GetToplevelGeomList { } {
-    variable winGeomList
-    
-    return $winGeomList
-}
+namespace eval ::Dialogs:: { }
 
 # Dialogs::Free --
 # 

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.42 2003-12-18 14:19:34 matben Exp $
+# $Id: Jabber.tcl,v 1.43 2003-12-20 14:27:16 matben Exp $
 #
 #  The $address is an ip name or number.
 #
@@ -52,6 +52,9 @@ package require Search
 namespace eval ::Jabber:: {
     global  this prefs
     
+    # Add all event hooks.
+    hooks::add quitAppHook ::Jabber::EndSession
+
     # Jabber internal storage.
     variable jstate
     variable jprefs
@@ -1464,7 +1467,7 @@ proc ::Jabber::SendMessageList {jid msgList args} {
 
 # Jabber::DoSendCanvas --
 # 
-#       Wrapper for ::UserActions::DoSendCanvas.
+#       Wrapper for ::CanvasCmd::DoSendCanvas.
 
 proc ::Jabber::DoSendCanvas {wtop} {
     global  prefs
@@ -1501,7 +1504,7 @@ proc ::Jabber::DoSendCanvas {wtop} {
 		return
 	    }
 	}
-	::UserActions::DoSendCanvas $wtop
+	::CanvasCmd::DoSendCanvas $wtop
 	::WB::CloseWhiteboard $wtop
     } else {
 	tk_messageBox -icon warning -type ok -parent $wtoplevel -message \
@@ -2454,45 +2457,6 @@ proc ::Jabber::SortProfileList { } {
     set jserver(profile) $tmp
 }
     
-proc ::Jabber::GetAllWinGeom { } {
-    
-    set geomList {}
-    set geomList [concat $geomList [::Jabber::GroupChat::GetWinGeom]]
-    return $geomList
-}
-
-proc ::Jabber::GetAllPanePos { } {
-    global  prefs wDlgs
-            
-    # Each proc below return any stored pane position, but returns empty if
-    # dialog was never built.
-    set paneList {}
-    
-    # Chat:
-    set pos [::Jabber::Chat::GetPanePos]
-    if {$pos == ""} {
-	set pos [list $wDlgs(jchat) $prefs(paneGeom,$wDlgs(jchat))]
-    }
-    set paneList [concat $paneList $pos]
-    
-    # Mailbox:
-    set pos [::Jabber::MailBox::GetPanePos]
-    if {$pos == ""} {
-	set pos [list $wDlgs(jinbox) $prefs(paneGeom,$wDlgs(jinbox))]
-    }
-    set paneList [concat $paneList $pos]
-    
-    # Groupchat:
-    set pos [::Jabber::GroupChat::GetPanePos]
-    if {$pos == ""} {
-	set pos [list groupchatDlgVert $prefs(paneGeom,groupchatDlgVert) \
-	  groupchatDlgHori $prefs(paneGeom,groupchatDlgHori)]
-    }
-    set paneList [concat $paneList $pos]
-    
-    return $paneList
-}
-
 # Jabber::GetAnyDelayElem --
 #
 #       Takes a list of x-elements, finds any 'jabber:x:delay' x-element.

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.22 2003-12-18 14:19:34 matben Exp $
+# $Id: GroupChat.tcl,v 1.23 2003-12-20 14:27:16 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -14,6 +14,7 @@ package provide GroupChat 1.0
 
 
 namespace eval ::Jabber::GroupChat:: {
+    global  wDlgs
 
     # Use option database for customization. Not used yet...
     set fontS [option get . fontSmall {}]
@@ -44,6 +45,9 @@ namespace eval ::Jabber::GroupChat:: {
 	theyFont              Font
 	clockFormat           ClockFormat
     }
+
+    # Add all event hooks.
+    hooks::add quitAppHook [list ::UI::SaveWinPrefixGeom $wDlgs(jgc)]
 
     
     # Local stuff
@@ -723,8 +727,9 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     trace variable [namespace current]::locals($roomJid,status) w  \
       [list [namespace current]::TraceStatus $roomJid]
     
-    if {[info exists prefs(winGeom,groupchatDlg)]} {
-	wm geometry $w $prefs(winGeom,groupchatDlg)
+    set nwin [::UI::GetPrefixedToplevels $wDlgs(jgc)]
+    if {($nwin == 1) && [info exists prefs(winGeom,$wDlgs(jgc))]} {
+	wm geometry $w $prefs(winGeom,$wDlgs(jgc))
     }
     wm minsize $w 240 320
     wm maxsize $w 800 2000
@@ -1131,17 +1136,17 @@ proc ::Jabber::GroupChat::CloseToplevel {w} {
 #       Handles the closing of a groupchat. Both text and whiteboard dialogs.
 
 proc ::Jabber::GroupChat::Close {roomJid} {
+    global  wDlgs
     variable locals
     upvar ::Jabber::jstate jstate
     
     if {[info exists locals($roomJid,wtop)] &&  \
       [winfo exists $locals($roomJid,wtop)]} {
-    	set locals(winGeom) [list groupchatDlg  \
-	  [wm geometry $locals($roomJid,wtop)]]
+	::UI::SaveWinGeom $wDlgs(jgc) $locals($roomJid,wtop)
     	::UI::SavePanePos groupchatDlgVert $locals($roomJid,wtxt) vertical
     	::UI::SavePanePos groupchatDlgHori $locals($roomJid,wtxt.0)
-    	::Jabber::GroupChat::GetPanePos $roomJid
-    
+
+	
     	# after idle seems to be needed to avoid crashing the mac :-(
     	after idle destroy $locals($roomJid,wtop)
     	trace vdelete [namespace current]::locals($roomJid,status) w  \
@@ -1174,27 +1179,6 @@ proc ::Jabber::GroupChat::Logout { } {
 	    }
 	}
     }
-}
-
-proc ::Jabber::GroupChat::GetWinGeom { } {
-    
-    variable locals
-
-    set ans {}
-    set found 0
-    foreach key [array names locals "*,wtop"] {
-	if {[winfo exists $locals($key)]} {
-	    set wtop $locals($key)
-	    set found 1
-	    break
-	}
-    }
-    if {$found} {
-	set ans [list groupchatDlg [wm geometry $wtop]]
-    } elseif {[info exists locals(winGeom)]} {
-	set ans $locals(winGeom)
-    }
-    return $ans
 }
 
 # Jabber::GroupChat::GetPanePos --

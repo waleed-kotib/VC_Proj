@@ -15,7 +15,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.23 2003-12-19 15:47:39 matben Exp $
+# $Id: Coccinella.tcl,v 1.24 2003-12-20 14:27:16 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -623,8 +623,6 @@ if {[string equal $prefs(protocol) "jabber"]} {
     set wDlgs(jrostbro) .jrostbro
     set wDlgs(mainwb) .
 }
-# Need to do this here after reading preferences.
-::Dialogs::AddToplevelToGeomList $wDlgs(jrostbro)
 
 # Make the actual whiteboard with canvas, tool buttons etc...
 # Jabber has the roster window as "main" window.

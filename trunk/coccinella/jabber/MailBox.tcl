@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.25 2003-12-19 15:47:39 matben Exp $
+# $Id: MailBox.tcl,v 1.26 2003-12-20 14:27:16 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -23,6 +23,7 @@
 package provide MailBox 1.0
 
 namespace eval ::Jabber::MailBox:: {
+    global  wDlgs
 
     # Use option database for customization.
     option add *MailBox*newmsgImage           newmsg           widgetDefault
@@ -37,9 +38,6 @@ namespace eval ::Jabber::MailBox:: {
     option add *MailBox*printDisImage         printDis         widgetDefault
     option add *MailBox*trashImage            trash            widgetDefault
     option add *MailBox*trashDisImage         trashDis         widgetDefault
-
-    # Add all event hooks.
-    hooks::add quitAppHook [list ::UI::SaveWinGeom $::wDlgs(jinbox)]
     
     
     variable locals
@@ -48,6 +46,7 @@ namespace eval ::Jabber::MailBox:: {
     set locals(inited) 0
     set locals(mailboxRead) 0
     set locals(haveEdits) 0
+    set locals(hooksInited) 0
     set jstate(inboxVis) 0
     
     # Running id for incoming messages; never reused.
@@ -76,7 +75,7 @@ proc ::Jabber::MailBox::Init { } {
     upvar ::Jabber::jstate jstate
     
     set locals(inited) 1
-    
+   
     ::Jabber::MailBox::TranslateAnyVer1ToCurrentVer
     
     if {0 && $jstate(debug) > 1} {
@@ -121,15 +120,15 @@ proc ::Jabber::MailBox::Show {args} {
 	    catch {wm deiconify $w}
 	    raise $w
 	} else {
-	    ::Jabber::MailBox::Build $w
+	    ::Jabber::MailBox::Build
 	}
     } else {
 	catch {wm withdraw $w}
     }
 }
 
-proc ::Jabber::MailBox::Build {w args} {
-    global  this prefs
+proc ::Jabber::MailBox::Build {args} {
+    global  this prefs wDlgs
     
     variable locals  
     variable colindex
@@ -143,6 +142,7 @@ proc ::Jabber::MailBox::Build {w args} {
     if {!$locals(mailboxRead)} {
 	::Jabber::MailBox::ReadMailbox
     }
+    set w $wDlgs(jinbox)
     if {[winfo exists $w]} {
 	return
     }
@@ -156,7 +156,7 @@ proc ::Jabber::MailBox::Build {w args} {
 
     }
     wm title $w [::msgcat::mc Inbox]
-    wm protocol $w WM_DELETE_WINDOW [list [namespace current]::CloseDlg $w]
+    # wm protocol $w WM_DELETE_WINDOW [list [namespace current]::CloseDlg $w]
     
     # Toplevel menu for mac only.
     if {[string match "mac*" $this(platform)]} {
@@ -275,6 +275,13 @@ proc ::Jabber::MailBox::Build {w args} {
     }
     wm minsize $w 300 260
     wm maxsize $w 1200 1000
+    
+    # Add all event hooks.
+    if {!$locals(hooksInited)} {
+	set locals(hooksInited) 1
+	hooks::add quitAppHook [list ::UI::SaveWinGeom $w]
+	hooks::add quitAppHook [list ::UI::SavePanePos $w $locals(wfrmbox)]
+    }
     
     # Grab and focus.
     focus $w
@@ -678,7 +685,7 @@ proc ::Jabber::MailBox::SelectMsg { } {
 	set title "Inbox: $jid2"
 	if {[winfo exists $wbtoplevel]} {
 	    ::Import::HttpResetAll ${wbtoplevel}.
-	    ::UserActions::EraseAll ${wbtoplevel}.
+	    ::CanvasCmd::EraseAll ${wbtoplevel}.
 	    ::WB::ConfigureMain ${wbtoplevel}. -title $title -jid $jid2
 	    ::WB::SetStatusMessage ${wbtoplevel}. ""
 	    undo::reset [::WB::GetUndoToken ${wbtoplevel}.]
@@ -1122,35 +1129,15 @@ proc ::Jabber::MailBox::Exit { } {
 }
 
 proc ::Jabber::MailBox::CloseDlg {w} {
-    global  prefs
+    global  prefs wDlgs
 
     variable locals
     upvar ::Jabber::jstate jstate
 
     set jstate(inboxVis) 0
     ::UI::SaveWinGeom $w
-    array set infoArr [::pane::pane info $locals(wfrmbox)]
-    set paneGeomList  \
-      [list $infoArr(-relheight) [expr 1.0 - $infoArr(-relheight)]]
-    set prefs(paneGeom,$w) $paneGeomList
-    set locals(panePosList) [list $locals(wtop) $paneGeomList]
+    ::UI::SavePanePos $wDlgs(jinbox) $locals(wfrmbox)
     catch {destroy $w}
-}
-
-proc ::Jabber::MailBox::GetPanePos { } {
-
-    variable locals
-    
-    if {[info exists locals(wtop)] && [winfo exists $locals(wtop)]} {
-	array set infoArr [::pane::pane info $locals(wfrmbox)]
-	set ans [list $locals(wtop)   \
-	  [list $infoArr(-relheight) [expr 1.0 - $infoArr(-relheight)]]]
-    } elseif {[info exists locals(panePosList)]} {
-	set ans $locals(panePosList)
-    } else {
-	set ans {}
-    }
-    return $ans
 }
 
 #-------------------------------------------------------------------------------
