@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: tinyhttpd.tcl,v 1.10 2004-03-04 07:53:16 matben Exp $
+# $Id: tinyhttpd.tcl,v 1.11 2004-03-15 11:24:46 matben Exp $
 
 # ########################### USAGE ############################################
 #
@@ -184,6 +184,7 @@ Content-Length: %s\n"
 #           -chunk                8192
 #           -defaultindexfile     index.html
 #	    -directorylisting     0
+#	    -httpdrelativepath    httpd
 #	    -log                  0
 #	    -logfile              httpdlog.txt
 #	    -myaddr               ""
@@ -203,11 +204,11 @@ proc ::tinyhttpd::start {args} {
 	-chunk                8192
 	-defaultindexfile     index.html
 	-directorylisting     0
+	-httpdrelativepath    httpd
 	-log                  0
 	-logfile              httpdlog.txt
 	-myaddr               ""
 	-port                 80
-	httpddirectory        httpd
     }
     set opts(-rootdirectory) [info script]
     array set opts $args
@@ -236,10 +237,15 @@ proc ::tinyhttpd::start {args} {
     }
     
     # Icon unix style paths when returning directory listings.
-    set httpdRelPathList [split $opts(httpddirectory) $this(sep)]
+    set httpdRelPathList [split $opts(-httpdrelativepath) $this(sep)]
     set httpdRelPath [join $httpdRelPathList /]
     set gstate(folderIconRelPath) /$httpdRelPath/macfoldericon.gif
     set gstate(fileIconRelPath) /$httpdRelPath/textfileicon.gif
+    set absIconPath [file join $opts(-rootdirectory) $opts(-httpdrelativepath) \
+      macfoldericon.gif]
+    if {![file exists $absIconPath]} {
+	return -code error "Failed localizing macfoldericon.gif"
+    }
         
     LogMsg "Tiny Httpd started"
 
@@ -765,7 +771,7 @@ proc ::tinyhttpd::BuildHtmlDirectoryListing {inPath} {
     set nativePath [file nativename $localAbsPath]
     
     Debug 3 "localAbsPath=$localAbsPath\n\tnativePath=$nativePath"
-    set fileIcon $gstate(fileIconRelPath)
+    set fileIcon   $gstate(fileIconRelPath)
     set folderIcon $gstate(folderIconRelPath)
     
     # Start by finding the directory content. 
