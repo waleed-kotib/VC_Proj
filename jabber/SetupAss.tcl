@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: SetupAss.tcl,v 1.7 2003-10-18 07:43:56 matben Exp $
+# $Id: SetupAss.tcl,v 1.8 2003-10-18 14:45:05 matben Exp $
 
 package require setupassistant
 package require chasearrows
@@ -259,7 +259,7 @@ proc ::Jabber::SetupAss::ServersDlg {w} {
 	destroy $w
 	tk_messageBox -title [::msgcat::mc Error] -icon error -type ok  \
 	  -message "Failed to obtain list of open Jabber servers from\
-	  \"$url\".: $token"
+	  \"$url\": $::errorInfo $token"
 	return
     } else {
 	set servStatVar "Getting server list from $url"
@@ -374,6 +374,76 @@ proc ::Jabber::SetupAss::ServCommand {w token} {
 	}
     }
     ::httpex::cleanup $token
+    if {$status != "ok"} {
+	catch {destroy $w}
+    }
+}
+
+# This is for the standard http package.
+# 
+# ABONDENED !!!!!!!!!
+
+proc ::Jabber::SetupAss::ServCommandStdHttp {w token} {
+    upvar #0 $token state
+    upvar ::Jabber::jstate jstate
+    variable warrows
+    variable servStatVar
+    variable publicServerList
+    variable wtbl
+
+    ::Jabber::Debug 2 "::Jabber::SetupAss::ServCommand"
+    
+    if {![winfo exists $w]} {
+	return
+    }
+    set servStatVar ""
+    $warrows stop
+    
+    # Investigate 'state' for any exceptions.
+    set status [::http::status $token]
+    
+    ::Jabber::Debug 2 "\ttoken=$token status=$status"
+    
+    switch -- $status {
+	timeout {
+	    tk_messageBox -title [::msgcat::mc Timeout] -icon info -type ok \
+	      -message "Timeout while waiting for response."
+	}
+	error {
+	    tk_messageBox -title "File transport error" -icon error -type ok \
+	      -message "File transport error when getting server list:\
+	      [::httpex::error $token]"
+	}
+	eof {
+	    tk_messageBox -title "File transport error" -icon error -type ok \
+	      -message "The server closed the socket without replying."	   
+	}
+	reset {
+	    # Did this ourself?
+	}
+	ok {
+	    
+	    # Get and parse xml.
+	    set xml [::http::data $token]    
+	    set token [tinydom::parse $xml]
+	    set xmllist [tinydom::documentElement $token]
+	    set publicServerList {}
+	    
+	    foreach elem [tinydom::children $xmllist] {
+		switch -- [tinydom::tagname $elem] {
+		    item {
+			catch {unset attrArr}
+			array set attrArr [tinydom::attrlist $elem]
+			lappend publicServerList  \
+			  [list $attrArr(jid) $attrArr(name)]
+		    }
+		}
+	    }
+
+	    $wtbl insertlist end $publicServerList
+	}
+    }
+    ::http::cleanup $token
     if {$status != "ok"} {
 	catch {destroy $w}
     }
