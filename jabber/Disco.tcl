@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.6 2004-04-19 13:58:47 matben Exp $
+# $Id: Disco.tcl,v 1.7 2004-04-20 13:57:27 matben Exp $
 
 package provide Disco 1.0
 
@@ -144,7 +144,7 @@ proc ::Jabber::Disco::GetItems {jid args} {
 }
 
 
-proc ::Jabber::Disco::Command {discotype from subiq args} {
+proc ::Jabber::Disco::Command {disconame discotype from subiq args} {
     upvar ::Jabber::jstate jstate
 
     puts "::Jabber::Disco::Command"
@@ -159,7 +159,7 @@ proc ::Jabber::Disco::Command {discotype from subiq args} {
     return 1
 }
 
-proc ::Jabber::Disco::ItemsCB {type from subiq args} {
+proc ::Jabber::Disco::ItemsCB {disconame type from subiq args} {
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jstate jstate
     
@@ -206,7 +206,7 @@ proc ::Jabber::Disco::ItemsCB {type from subiq args} {
     }
 }
 
-proc ::Jabber::Disco::InfoCB {type from subiq args} {
+proc ::Jabber::Disco::InfoCB {disconame type from subiq args} {
     
     puts "::Jabber::Disco::InfoCB type=$type, from=$from"
     
@@ -366,8 +366,7 @@ proc ::Jabber::Disco::Popup {w v x y} {
 
     if {[regexp {^.+@[^/]+(/.*)?$} $jid match res]} {
 	set typeClicked user
-	# We should call disco directly here!!!!!!
-	if {[$jstate(jlib) service isroom $jid]} {
+	if {[$jstate(disco) isroom $jid]} {
 	    set typeClicked room
 	}
     } elseif {[string match -nocase "conference/*" $categoryType]} {
@@ -587,6 +586,7 @@ proc ::Jabber::Disco::Refresh {jid} {
     # Disco once more, let callback manage rest.
     ::Jabber::Disco::ControlArrows 1
     ::Jabber::Disco::GetItems $jid
+    ::Jabber::Disco::GetInfo  $jid
 }
 
 proc ::Jabber::Disco::ControlArrows {step} {    
@@ -620,11 +620,11 @@ proc ::Jabber::Disco::InfoCmd {jid} {
 	set xmllist [$jstate(disco) get info $jid xml]
 	::Jabber::Disco::InfoResultCB $jstate(disco) result $jid $xmllist
     } else {
-	$jstate(disco) send_get info  $jid [namespace current]::InfoCmdCB
+	$jstate(disco) send_get info $jid [namespace current]::InfoCmdCB
     }
 }
 
-proc ::Jabber::Disco::InfoCmdCB {type jid subiq args} {
+proc ::Jabber::Disco::InfoCmdCB {disconame type jid subiq args} {
     
     puts "::Jabber::Disco::InfoCmdCB type=$type, jid=$jid"
     

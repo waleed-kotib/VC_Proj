@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.29 2004-04-16 13:59:29 matben Exp $
+# $Id: MUC.tcl,v 1.30 2004-04-20 13:57:27 matben Exp $
 
 package require entrycomp
 
@@ -138,9 +138,11 @@ proc ::Jabber::MUC::BuildEnter {args} {
     pack [frame $frtop] -side top -anchor w -padx 12
     label $frtop.lserv -text "[::msgcat::mc {Conference server}]:" 
 
-    set confServers [$jstate(browse) getservicesforns  \
-      "http://jabber.org/protocol/muc"]
-    
+    #set confServers [$jstate(browse) getservicesforns  \
+    #  "http://jabber.org/protocol/muc"]
+    # We should only get services that provides muc!
+    set confServers [$jstate(jlib) service getconferences]
+
     ::Jabber::Debug 2 "::Jabber::MUC::BuildEnter confServers='$confServers'"
 
     set wpopupserver $frtop.eserv
@@ -229,14 +231,10 @@ proc ::Jabber::MUC::BuildEnter {args} {
 
 	# Fill in room list if exist else browse.
 	# Get a freash list each time.
-	if {0 && [$jstate(browse) isbrowsed $enter(server)]} {
-	    ::Jabber::MUC::FillRoomList $token
-	} else {
-	    ::Jabber::MUC::BusyEnterDlgIncr $token
-	    update idletasks
-	    $jstate(browse) send_get $enter(server)   \
-	      [list [namespace current]::BrowseServiceCB $token]
-	}
+	::Jabber::MUC::BusyEnterDlgIncr $token
+	update idletasks
+	$jstate(jlib) service send_getchildren $enter(server)  \
+	  [list [namespace current]::GetRoomsCB $token]
 	trace variable $token\(server) w  \
 	  [list [namespace current]::ConfigRoomList $token]
     }
@@ -276,16 +274,13 @@ proc ::Jabber::MUC::ConfigRoomList {token name junk1 junk2} {
     upvar 0 $token enter
     upvar ::Jabber::jstate jstate
 
-    # Fill in room list if exist else browse.
-    if {[$jstate(browse) isbrowsed $enter(server)]} {
+    # Fill in room list if exist else get.    
+    if {[$jstate(jlib) service isinvestigated $enter(server)]} {
 	::Jabber::MUC::FillRoomList $token
     } else {
 	::Jabber::MUC::BusyEnterDlgIncr $token
-	$jstate(browse) send_get $enter(server)  \
-	  [list [namespace current]::BrowseServiceCB $token]
-	
-	#::Jabber::InvokeJlibCmd browse_get $enter(server)  \
-	#  -command [list [namespace current]::BrowseServiceCB $token]
+	$jstate(jlib) service send_getchildren $enter(server)  \
+	  [list [namespace current]::GetRoomsCB $token]
     }
 }
 
@@ -296,7 +291,7 @@ proc ::Jabber::MUC::FillRoomList {token} {
     
     set roomList {}
     if {[string length $enter(server)] > 0} {
-	set allRooms [$jstate(browse) getchilds $enter(server)]
+	set allRooms [$jstate(jlib) service childs $enter(server)]
 	foreach roomJid $allRooms {
 	    regexp {([^@]+)@.+} $roomJid match room
 	    lappend roomList $room
@@ -337,13 +332,15 @@ proc ::Jabber::MUC::BusyEnterDlgIncr {token {num 1}} {
     }
 }
 
-proc ::Jabber::MUC::BrowseServiceCB {token browsename type jid subiq} {
+proc ::Jabber::MUC::GetRoomsCB {token browsename type jid subiq args} {
+    
+    ::Jabber::Debug 4 "::Jabber::MUC::GetRoomsCB type=$type, jid=$jid"
     
     switch -- $type {
 	error {
 	    # ???
 	}
-	result {
+	result - ok {
 	    ::Jabber::MUC::FillRoomList $token
 	}
     }
@@ -610,7 +607,7 @@ proc ::Jabber::MUC::BuildInfo {roomjid} {
 
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document closeBox}
-    set roomName [$jstate(browse) getname $roomjid]
+    set roomName [$jstate(jlib) service name $roomjid]
     if {$roomName == ""} {
 	regexp {([^@]+)@.+} $roomjid match roomName
     }
@@ -1087,7 +1084,7 @@ proc ::Jabber::MUC::EditListBuild {roomjid type} {
     set w $wDlgs(jmucedit)[incr dlguid]
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document closeBox}
-    set roomName [$jstate(browse) getname $roomjid]
+    set roomName [$jstate(jlib) service name $roomjid]
     if {$roomName == ""} {
 	regexp {([^@]+)@.+} $roomjid match roomName
     }
@@ -1702,7 +1699,7 @@ proc ::Jabber::MUC::Destroy {roomjid} {
     set w $wDlgs(jmucdestroy)[incr dlguid]
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document closeBox}
-    set roomName [$jstate(browse) getname $roomjid]
+    set roomName [$jstate(jlib) service name $roomjid]
     if {$roomName == ""} {
 	regexp {([^@]+)@.+} $roomjid match roomName
     }

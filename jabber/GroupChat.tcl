@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements the group chat GUI part.
 #      
-#  Copyright (c) 2001-2003  Mats Bengtsson
+#  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.53 2004-04-19 13:58:47 matben Exp $
+# $Id: GroupChat.tcl,v 1.54 2004-04-20 13:57:27 matben Exp $
 
 package require History
 
@@ -141,7 +141,7 @@ proc ::Jabber::GroupChat::AllConference { } {
 # Jabber::GroupChat::HaveOrigConference --
 #
 #       Ad hoc method for finding out if possible to use the original
-#       jabber:iq:conference method.
+#       jabber:iq:conference method. Requires jabber:iq:browse
 
 proc ::Jabber::GroupChat::HaveOrigConference {{roomjid ""}} {
     upvar ::Jabber::jstate jstate
@@ -172,7 +172,7 @@ proc ::Jabber::GroupChat::HaveOrigConference {{roomjid ""}} {
 
 # Jabber::GroupChat::HaveMUC --
 # 
-# 
+#       Should perhaps be in jlib service part.
 
 proc ::Jabber::GroupChat::HaveMUC {{roomjid ""}} {
     upvar ::Jabber::jstate jstate
@@ -223,6 +223,7 @@ proc ::Jabber::GroupChat::HaveMUC {{roomjid ""}} {
 #       'conference', or 'muc' methods depending on preferences.
 #       The 'conference' method requires jabber:iq:browse and 
 #       jabber:iq:conference.
+#       The 'muc' method uses either jabber:iq:browse or disco.
 #       
 # Arguments:
 #       what        'enter' or 'create'
@@ -253,7 +254,7 @@ proc ::Jabber::GroupChat::EnterOrCreate {what args} {
     
     switch -- $jprefs(prefgchatproto) {
 	gc-1.0 {
-	    # Empty
+	    set gchatprotocol "gc-1.0"
 	}
 	muc {
 	    if {[::Jabber::GroupChat::HaveMUC $roomjid]} {
@@ -599,7 +600,8 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     ::UI::Toplevel $w -class GroupChat -usemacmainmenu 1 -macstyle documentProc
     
     # Not sure how old-style groupchat works here???
-    set roomName [$jstate(browse) getname $roomJid]
+    #set roomName [$jstate(browse) getname $roomJid]
+    set roomName [$jstate(jlib) service name $roomJid]
     
     if {[llength $roomName]} {
 	set tittxt $roomName
@@ -1177,8 +1179,8 @@ proc ::Jabber::GroupChat::BrowseUser {userXmlList} {
     set parent [lindex $parentList end]
     
     # Do something only if joined that room.
-    if {[$jstate(browse) isroom $parent] &&  \
-      ([lsearch [::Jabber::InvokeJlibCmd conference allroomsin] $parent] >= 0)} {
+    if {[$jstate(jlib) service isroom $parent] &&  \
+      ([lsearch [$jstate(jlib) conference allroomsin] $parent] >= 0)} {
 	if {[info exists attrArr(type)] && [string equal $attrArr(type) "remove"]} {
 	    ::Jabber::GroupChat::RemoveUser $parent $jid
 	} else {
