@@ -1,46 +1,17 @@
-##############################################################################
-# Socks5 Client Library v1.1
-#     (C) 2000 Kerem 'Waster_' HADIMLI 
-#     (C) 2002 Mats Bengtsson, complete rewrite
+#  socks.tcl ---
+#  
+#      Package for using the SOCKS5 method for connecting TCP sockets.
+#      Some code plus idee from Kerem 'Waster_' HADIMLI.
 #
-# $Id: socks.tcl,v 1.1.1.1 2002-12-08 10:56:24 matben Exp $
-# 
-# How to use:
-#   1) Create your socket connected to the Socks server.
-#   2) Call socks:init procedure with these 6 parameters:
-#        1- Socket ID : The socket identifier that's connected to the socks5 server.
-#        2- Server hostname : The main (not socks) server you want to connect
-#        3- Server port : The port you want to connect on the main server
-#        4- Authentication : If you want username/password authenticaton enabled, set this to 1, otherwise 0.
-#        5- Username : Username to use on Socks Server if authenticaton is enabled. NULL if authentication is not enabled.
-#        6- Password : Password to use on Socks Server if authenticaton is enabled. NULL if authentication is not enabled.
-#
-# Notes:
-#   - This library enters vwait loop (see Tcl man pages), and returns only
-#     when SOCKS initialization is complete.
-#   - NEVER use file IDs instead of socket IDs!
-#   - NEVER bind the socket (fileevent) before calling socks:init procedure.
-#   - Be sure '-buffering none'
-##############################################################################
-#
-# Author contact information:
-#   E-mail :  waster@iname.com
-#   ICQ#   :  27216346
-#   Jabber :  waster@jabber.org   (New IM System - http://www.jabber.org)
-#   
-# Mats Bengtsson
-#   E-mail :  matben@privat.utfors.se
-#   Jabber :  matben@jabber.org
-#
-################################################################################
+#  (C) 2000 Kerem 'Waster_' HADIMLI (minor parts)
+#  (c) 2003  Mats Bengtsson
+#  
+# $Id: socks.tcl,v 1.2 2003-12-02 14:26:57 matben Exp $
 
-package provide socks 1.2
+package provide socks 2.0
 
 namespace eval socks {
-    
-    # vwait variable
-    variable trigger
-    
+
     # Constants:
     # ver:                Socks version
     # nomatchingmethod:   No matching methods
@@ -54,184 +25,401 @@ namespace eval socks {
 	nomatchingmethod    \xFF
 	cmd_connect         \x01
 	rsv                 \x00
-	atyp                \x03
+	atyp_ipv4           \x01
+	atyp_domainname     \x03
+	atyp_ipv6           \x04
 	authver             \x01
     }
+    variable ipv4_num_re {([0-9]{1,3}\.){3}[0-9]{1,3}}
+    variable ipv6_num_re {([0-9a-f]{4}:){7}[0-9]{1,3}[0-9a-f]{4}}
     
     variable msg
     array set msg {
-	1 {Socks server responded: General SOCKS server failure}
-	2 {Socks server responded: Connection not allowed by ruleset}
-	3 {Socks server responded: Network unreachable}
-	4 {Socks server responded: Host unreachable}
-	5 {Socks server responded: Connection refused}
-	6 {Socks server responded: TTL expired}
-	7 {Socks server responded: Command not supported}
-	8 {Socks server responded: Address type not supported}
+	1 "General SOCKS server failure"
+	2 "Connection not allowed by ruleset"
+	3 "Network unreachable"
+	4 "Host unreachable"
+	5 "Connection refused"
+	6 "TTL expired"
+	7 "Command not supported"
+	8 "Address type not supported"
     }
+    
+    variable uid 0
 }
 
 # socks::init --
 #
-#       Negotiates with a SOCKS server, and returns when complete.
-#       Any problems are returned as an error (catch it!).
+#       Negotiates with a SOCKS server.
 #
 # Arguments:
 #       sock:       an open socket token to the SOCKS server
 #       addr:       the peer address, not SOCKS server
 #       port:       the peer's port number
-#       args:   -user   username
-#               -pass   password
+#       args:   
+#               -command    tcl proc
+#               -username   username
+#               -password   password
+#               -timeout    millisecs
 #       
 # Results:
 #       none.
 
-proc socks::init {sock addr port args} {
-    
+proc socks::init {sock addr port args} {    
     variable msg
     variable const
-    variable trigger
+    variable uid
+
+    # Initialize the state variable, an array.  We'll return the
+    # name of this array as the token for the transaction.
     
-    array set opts {
-	-user ""
-	-pass ""
+    set token [namespace current]::[incr uid]
+    variable $token
+    upvar 0 $token state
+        
+    array set state {
+	-password         ""
+	-timeout          60000
+	-username         ""
+	async             0
+	auth              0
+	bnd_addr          ""
+	bnd_port          ""
+	state             ""
+	status            ""
+	trigger           0
     }
-    array set opts $args    
-    
-    set auth 0
-    if {[string length $opts(-user)] || [string length $opts(-pass)]} {
-	set auth 1
+    array set state [list     \
+      addr          $addr     \
+      port          $port     \
+      sock          $sock]
+    array set state $args
+         
+    if {[string length $state(-username)] ||  \
+      [string length $state(-password)]} {
+	set state(auth) 1
     }
-    if {$auth == 0} {
-	set method   \x00
-	set nmethods \x01
-    } elseif {$auth == 1} {
-	set method   \x00\x02
+    if {[info exists state(-command)] && [string length $state(-command)]} {
+	set state(async) 1
+    }
+    if {$state(auth)} {
+	set methods  \x00\x02
 	set nmethods \x02
     } else {
-	return -code error {syntax error}
+	set methods  \x00
+	set nmethods \x01
     }
         
-    # Domain length (binary 1 byte)
-    set dlen [binary format c [string length $addr]]
-    
-    # Network byte-ordered port (2 binary-bytes, short)    
-    set port [binary format S $port]
-        
-    fconfigure $sock -translation {binary binary} -blocking 0
-    fileevent $sock readable [list [namespace current]::readable $sock]
-    
-    puts -nonewline $sock "$const(ver)$nmethods$method"
-    flush $sock
-    
-    vwait [namespace current]::trigger($sock)
-    if {[catch {read $sock} a]} {
-	catch {close $sock}
-	return -code error {Connection closed with Socks Server!}
-    } elseif {[eof $sock]} {
-	catch {close $sock}
-	return -code error {Connection closed with Socks Server!}
+    fconfigure $sock -translation {binary binary} -blocking 0 -buffering none
+    fileevent $sock writable {}
+    if {[catch {
+	puts -nonewline $sock "$const(ver)$nmethods$methods"
+	flush $sock
+    } err]} {
+	return -code error $err
     }
+    if {$state(async)} {
+	fileevent $sock readable  \
+	  [list [namespace current]::response_method $token]
+	return $token
+    } else {
+	
+	# We should not return from this proc until finished!
+	fileevent $sock readable  \
+	  [list [namespace current]::readable $token]
+	vwait $token\(trigger)
+	return [response_method $token]
+    }
+}
+
+
+proc socks::response_method {token} {
+    variable $token
+    upvar 0 $token state    
     
+    set sock $state(sock)
+    
+    if {[catch {read $sock 2} reply] || [eof $sock]} {
+	Finish $token eof
+	return
+    }    
     set serv_ver ""
     set method $const(nomatchingmethod)
-    binary scan $a cc serv_ver smethod
+    binary scan $reply cc serv_ver smethod
     
     if {![string equal $serv_ver 5]} {
-	catch {close $sock}
-	return -code error {Socks Server isn't version 5!}
+	Finish $token "Socks server isn't version 5!"
+	return
     }
     
-    if {[string equal $smethod 0]} {
-	# Do nothin
+    if {[string equal $smethod 0]} {	
+	
+	# Now, request address and port.
+	request $token
     } elseif {[string equal $smethod 2]} {
 	
 	# User/Pass authorization required
-	if {$auth == 0} {
-	    catch {close $sock}
-	    return -code error {User/Pass authorization required by Socks Server!}
+	if {$state(auth) == 0} {
+	    Finish $token "User/Pass authorization required by Socks Server!"
+	    return
 	}
     
 	# Username & Password length (binary 1 byte)
-	set ulen [binary format c [string length $opts(-user)]]
-	set plen [binary format c [string length $opts(-pass)]]
+	set ulen [binary format c [string length $state(-username)]]
+	set plen [binary format c [string length $state(-password)]]
 	
-	puts -nonewline $sock "$const(authver)$ulen$opts(-user)$plen$opts(-pass)"
-	flush $sock
-	
-	vwait [namespace current]::trigger($sock)
-	if {[catch {read $sock} a]} {
-	    catch {close $sock}
-	    return -code error {Connection closed with Socks Server!}
-	} elseif {[eof $sock]} {
-	    catch {close $sock}
-	    return -code error {Connection closed with Socks Server!}
+	if {[catch {
+	    puts -nonewline $sock  \
+	      "$const(authver)$ulen$state(-username)$plen$state(-password)"
+	    flush $sock
+	} err]} {
+	    Finish $token $err
+	    return
 	}
-	
-	set auth_ver ""
-	set status \x00
-	binary scan $a cc auth_ver status
-	
-	if {![string equal $auth_ver 1]} {
-	    catch {close $sock}
-	    return -code error {Socks Server's authentication isn't supported!}
+
+	if {$state(async)} {
+	    fileevent $sock readable  \
+	      [list [namespace current]::response_auth $token]
+	    return
+	} else {
+	    
+	    # We should not return from this proc until finished!
+	    fileevent $sock readable  \
+	      [list [namespace current]::readable $token]
+	    vwait $token\(trigger)
+	    return [response_auth $token]
 	}
-	if {![string equal $status 0]} {
-	    catch {close $sock}
-	    return -code error {Wrong username or password!}
-	}	
     } else {
-	fileevent $sock readable {}
-	unset trigger($sock)
-	catch {close $sock}
-	return -code error {Method not supported by Socks Server!}
+	Finish $token "Method not supported by Socks Server!"
+	return
+    }
+}
+
+
+proc socks::response_auth {token} {
+    variable $token
+    upvar 0 $token state    
+    
+    set sock $state(sock)
+
+    if {[catch {read $sock 2} reply] || [eof $sock]} {
+	Finish $token eof
+	return
+    }    
+    set auth_ver ""
+    set status \x00
+    binary scan $reply cc auth_ver status
+    
+    if {![string equal $auth_ver 1]} {
+	Finish $token "Socks Server's authentication isn't supported!"
+	return
+    }
+    if {![string equal $status 0]} {
+	Finish $token "Wrong username or password!"
+	return
+    }	
+    
+    # Now, request address and port.
+    return [request $token]
+}
+
+
+proc socks::request {token} {
+    variable $token
+    variable const
+    variable ipv4_num_re
+    variable ipv6_num_re
+    upvar 0 $token state    
+    
+    set sock $state(sock)
+    
+    # Figure out type of address given to us.
+    if {[regexp $ipv4_num_re $state(addr)]} {
+	
+	# IPv4 numerical address. Translate to unsigned!
+	set atyp_addr_port $const(atyp_ipv4)
+    	foreach i [split $state(addr) .] {
+	    set csign [binary format c $i]
+	    append atyp_addr_port [expr ( $csign + 0x100 ) % 0x100]
+	}
+	append atyp_addr_port $state(port)
+    } else if {[regexp $ipv6_num_re $state(addr)]} {
+	# todo
+    } else {
+	
+	# Domain name.
+	# Domain length (binary 1 byte)
+	set dlen [binary format c [string length $state(addr)]]
+	set atyp_addr_port \
+	  "$const(atyp_domainname)$dlen$state(addr)$state(port)"
     }
     
-    # We send request4connect
-    set aconst "$const(ver)$const(cmd_connect)$const(rsv)$const(atyp)"
-    puts -nonewline $sock "$aconst$dlen$addr$port"
-    flush $sock
     
-    # Wait here for server to respond.
-    vwait [namespace current]::trigger($sock)   
-    if {[catch {read $sock} a]} {
-	catch {close $sock}
-	return -code error {Connection closed with Socks Server!}
-    } elseif {[eof $sock]} {
-	catch {close $sock}
-	return -code error {Connection closed with Socks Server!}
-    }    
-    fileevent $sock readable {}
-    unset trigger($sock)
+    # Network byte-ordered port (2 binary-bytes, short)    
+    set port [binary format S $state(port)]
+
+    # We send request for connect
+    set aconst "$const(ver)$const(cmd_connect)$const(rsv)"
+    if {[catch {
+	puts -nonewline $sock "$aconst$atyp_addr_port"
+	flush $sock
+    } err]} {
+	Finish $token $err
+	return
+    }
     
+    if {$state(async)} {
+	fileevent $sock readable  \
+	  [list [namespace current]::response $token]
+	return
+    } else {
+	
+	# We should not return from this proc until finished!
+	fileevent $sock readable  \
+	  [list [namespace current]::readable $token]
+	vwait $token\(trigger)
+	return [response $token]
+    }
+}
+
+
+proc socks::response {token} {
+    variable $token
+    variable msg
+    upvar 0 $token state    
+    
+    set sock $state(sock)
+    
+    # Start by reading ver+cmd+rsv.
+    if {[catch {read $sock 3} reply] || [eof $sock]} {
+	Finish $token eof
+	return
+    }        
     set serv_ver ""
     set rep ""
-    binary scan $a cc serv_ver rep
+    binary scan $reply cc serv_ver rep rsv
+    
     if {![string equal $serv_ver 5]} {
-	catch {close $sock}
-	return -code error {Socks server isn't version 5!}
+	Finish $token "Socks server isn't version 5!"
+	return
     }
+
     switch -- $rep {
 	0 {
 	    fconfigure $sock -translation {auto auto}
 	}
 	1 - 2 - 3 - 4 - 5 - 6 - 7 - 8 {
-	    catch {close $sock}
-	    return -code error $msg($rep)
+	    Finish $token $msg($rep)
+	    return
 	}
 	default {
-	    catch {close $sock}
-	    return -code error {Socks server responded: Unknown Error}
+	    Finish $token "Socks server responded: Unknown Error"
+	    return
 	}    
+    }
+
+    # Now parse the variable length atyp+addr+host.
+    if {[catch {parse_atyp_addr $token} err]} {
+	Finish $token $err
+	return
+    }
+
+    # And finally return result (bnd_add and bnd_port)
+    if {$state(async)} {
+	Finish $token
+    } else {
+	
+	# This should propagate to the socks::init proc.
+	return [list $state(bnd_addr) $state(bnd_port)]
     }
 }
 
-#
-# Change the variable value, so 'vwait' loop will end in socks::init procedure.
-#
-proc socks::readable {sock} {
-    variable trigger
-    incr trigger($sock)
+
+proc socks::parse_atyp_addr {token} {
+    variable $token
+    variable const
+    upvar 0 $token state    
+    
+    set sock $state(sock)
+
+    # Start by reading atyp.
+    if {[catch {read $sock 1} reply] || [eof $sock]} {
+	return -code error eof
+    }        
+    set atyp ""
+    binary scan $reply c atyp
+    
+    # Treat the three address types in order.
+    if {$atyp == $const(atyp_ipv4)} {
+	if {[catch {read $sock 6} reply] || [eof $sock]} {
+	    return -code error eof
+	}        
+	binary scan $reply ccccS i0 i1 i2 i3 port
+	set addrtxt ""
+	foreach n [list $i0 $i1 $i2 $i3] {
+	    # Translate to unsigned!
+	    append addrtxt [expr ( $n + 0x100 ) % 0x100]
+	    if {$n <= 2} {
+		append addrtxt .
+	    }
+	}
+    } elseif {$atyp == $const(atyp_domainname)} {
+	if {[catch {read $sock 1} reply] || [eof $sock]} {
+	    return -code error eof
+	}        
+	binary scan $reply c len
+	if {[catch {read $sock $len} reply] || [eof $sock]} {
+	    return -code error eof
+	}        
+	binary scan $reply c* addrtxt
+	if {[catch {read $sock 2} reply] || [eof $sock]} {
+	    return -code error eof
+	}        
+	binary scan $reply S port
+    } elseif {$atyp == $const(atyp_ipv6)} {
+	# todo
+    } else {
+	return -code error "Socks server responded with an unknown address type"
+    }
+    
+    # Store in our state array.
+    set state(bnd_addr) $addrtxt
+    set state(bnd_port) $port
+}
+
+# The server side.
+# 
+# The SOCKS5 code as above but for the server side.
+
+proc socks::serverinit {} {
+    
+    
+}
+
+proc socks::Finish {token {errormsg ""}} {
+    global errorInfo errorCode    
+    variable $token
+    upvar 0 $token state
+    
+    catch {close $state(sock)}
+    if {$state(async)} {
+	if {[string length $errormsg]} {
+	    uplevel #0 $state(-command) $token error $errormsg
+	} else {
+	    uplevel #0 $state(-command) $token ok \
+	      [list $state(bnd_addr) $state(bnd_port)]
+	}
+    }
+    unset state
+}
+
+#       Just a trigger for vwait.
+
+proc socks::readable {token} {
+    variable $token
+    upvar 0 $token state    
+
+    incr state(trigger)
 }
 
 #-------------------------------------------------------------------------------
