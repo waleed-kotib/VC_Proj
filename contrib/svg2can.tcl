@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #
-# $Id: svg2can.tcl,v 1.7 2004-02-22 15:03:18 matben Exp $
+# $Id: svg2can.tcl,v 1.8 2004-02-23 16:20:04 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -90,28 +90,31 @@ proc svg2can::parsesvgdocument {xmllist args} {
 
 proc svg2can::parseelement {xmllist args} {
 
-    set cmd {}
+    set cmdList {}
     set tag [gettag $xmllist]
     
     switch -- $tag {
-	circle - ellipse - image - line - path - polyline - polygon - rect {
-	    lappend cmd [parse${tag} $xmllist]
+	circle - ellipse - image - line - polyline - polygon - rect {
+	    lappend cmdList [parse${tag} $xmllist]
+	}
+	path {
+	    set cmdList [concat $cmdList [parsepath $xmllist]]
 	}
 	text {
-	    set cmd [parsetext $xmllist]
+	    set cmdList [parsetext $xmllist]
 	}
 	g {
 	    foreach c [getchildren $xmllist] {
 		set ctag [gettag $xmllist]
-		lappend cmd [parse${ctag} $xmllist]
+		lappend cmdList [parse${ctag} $xmllist]
 	    }	    
 	}
     }
-    return $cmd
+    return $cmdList
 }
 
-# svg2can::parsecircle, parseellipse, parseline, parserect, parsepolyline,
-#   parsepolygon, parseimage --
+# svg2can::parsecircle, parseellipse, parseline, parserect, parsepath, 
+#   parsepolyline, parsepolygon, parseimage --
 # 
 #       Makes the necessary canvas commands needed to reproduce the
 #       svg element.
@@ -124,8 +127,7 @@ proc svg2can::parseelement {xmllist args} {
 
 proc svg2can::parsecircle {xmllist} {
     
-    # SVG and canvas have different defaults.
-    set opts {-outline "" -fill black}
+    set opts {}
     set presentationAttr {}
     set cx 0
     set cy 0
@@ -141,7 +143,7 @@ proc svg2can::parsecircle {xmllist} {
 		lappend opts -tags $value
 	    }
 	    style {
-		set opts [StyleToOpts circle [StyleAttrToList $value]]
+		set opts [StyleToOpts oval [StyleAttrToList $value]]
 	    }
 	    default {
 		lappend presentationAttr $key $value
@@ -156,8 +158,7 @@ proc svg2can::parsecircle {xmllist} {
 
 proc svg2can::parseellipse {xmllist} {
     
-    # SVG and canvas have different defaults.
-    set opts {-outline "" -fill black}
+    set opts {}
     set presentationAttr {}
     set cx 0
     set cy 0
@@ -174,7 +175,7 @@ proc svg2can::parseellipse {xmllist} {
 		lappend opts -tags $value
 	    }
 	    style {
-		set opts [StyleToOpts ellipse [StyleAttrToList $value]]
+		set opts [StyleToOpts oval [StyleAttrToList $value]]
 	    }
 	    default {
 		lappend presentationAttr $key $value
@@ -200,7 +201,7 @@ proc svg2can::parseimage {xmllist} {
 		lappend opts -tags $value
 	    }
 	    style {
-		set opts [StyleToOpts polygon [StyleAttrToList $value]]
+		set opts [StyleToOpts image [StyleAttrToList $value]]
 	    }
 	    x - y {
 		set $key $value
@@ -213,7 +214,7 @@ proc svg2can::parseimage {xmllist} {
 	    }
 	}
     }
-    set opts [MergePresentationAttr polygon $opts $presentationAttr]
+    set opts [MergePresentationAttr image $opts $presentationAttr]
     set photo [format {[image create photo -file %s]} $uri]
     lappend opts -image $photo
     return [concat create image $x $y $opts]
@@ -257,22 +258,25 @@ proc svg2can::parseline {xmllist} {
 
 proc svg2can::parsepath {xmllist} {
     
-    set coords {}
+    set cmdList {}
     set opts {}
     set presentationAttr {}
-    set cantype line
-
+    set path {}
+    set styleList {}
+    
     foreach {key value} [getattr $xmllist] {
 	
 	switch -- $key {
 	    d {
-		set coords [ParseStraightPath $value]
+		set path $value
 	    }
 	    id {
 		lappend opts -tags $value
 	    }
 	    style {
-		set opts [StyleToOpts path [StyleAttrToList $value]]
+		# Need to parse separately for each canvas item since different
+		# default values.
+		set styleList [StyleAttrToList $value]
 	    }
 	    default {
 		lappend presentationAttr $key $value
@@ -280,7 +284,168 @@ proc svg2can::parsepath {xmllist} {
 	}
     }
     set opts [MergePresentationAttr path $opts $presentationAttr]
-    return [concat create $cantype $coords $opts]
+    
+    # Parse the actual path data.
+    set co {}
+    set cantype line
+    set itemopts {}
+    
+    regsub -all -- {([a-zA-Z])([0-9])} $path {\1 \2} path
+    regsub -all -- {([0-9])([a-zA-Z])} $path {\1 \2} path
+    set path [string map {- " -"} $path]
+    set path [string map {, " "} $path]
+    
+    set i 0
+    set len  [llength $path]
+    set len1 [expr $len - 1]
+    set len2 [expr $len - 2]
+    set len4 [expr $len - 4]
+    set len6 [expr $len - 6]
+    
+    while {$i < $len} {
+	set elem [lindex $path $i]
+	
+	switch -glob -- $elem {
+	    A - a {
+		# ?
+		incr i
+	    }
+	    C {
+		# We could have a sequence of pairs of points here...
+		# This is wrong! Must not be smooth.
+		# Approximate by quadratic bezier.
+		lappend co [lindex $path [incr i]] [lindex $path [incr i]]
+		lappend co [lindex $path [incr i]] [lindex $path [incr i]]
+		lappend co [lindex $path [incr i]] [lindex $path [incr i]]
+		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && \
+		  ($i < $len6)} {
+		    lappend co [lindex $path [incr i]] [lindex $path [incr i]]
+		    lappend co [lindex $path [incr i]] [lindex $path [incr i]]
+		    lappend co [lindex $path [incr i]] [lindex $path [incr i]]
+		}
+		incr i
+		lappend itemopts -smooth 1
+	    }
+	    c {
+		incr i
+	    }
+	    H {
+		lappend co [lindex $path [incr i]] [lindex $co end]
+		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && \
+		  ($i < $len1)} {
+		    lappend co [lindex $path [incr i]] [lindex $co end]
+		}
+		incr i
+	    }
+	    h {
+		lappend co [expr [lindex $co end-1] + [lindex $path [incr i]]] \
+		  [lindex $co end]
+		while {![regexp {[a-zA-Z]} [lindex $path $i]] && ($i < $len1)} {
+		    lappend co [expr [lindex $co end-1] + \
+		      [lindex $path [incr i]]] [lindex $co end]
+		}
+		incr i
+	    }
+	    L - {[0-9]+} - {-[0-9]+} {
+		puts "L: i=$i, path=$path"
+		lappend co [lindex $path [incr i]] [lindex $path [incr i]]
+		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && \
+		  ($i < $len2)} {
+		    puts "\ti=$i, [lindex $path $i]"
+		    lappend co [lindex $path [incr i]] [lindex $path [incr i]]
+		}
+		incr i
+	    }
+	    l {
+		lappend co [expr [lindex $co end-1] + [lindex $path [incr i]]] \
+		  [expr [lindex $co end] + [lindex $path [incr i]]]
+		incr i
+	    }
+	    M - m {
+		# Make a fresh canvas item and finalize any previous command.
+		if {[llength $co]} {
+		    set opts [StyleToOpts $cantype $styleList]
+		    lappend cmdList [concat create $cantype $co \
+		      [concat $opts $itemopts]]
+		}
+		set co [list [lindex $path [incr i]] [lindex $path [incr i]]]
+		set itemopts {}
+		incr i
+	    }
+	    Q {
+		# We could have a sequence of pairs of points here...
+		# This is wrong! Must not be smooth.
+		lappend co [lindex $path [incr i]] [lindex $path [incr i]]
+		lappend co [lindex $path [incr i]] [lindex $path [incr i]]
+		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && \
+		  ($i < $len4)} {
+		    lappend co [lindex $path [incr i]] [lindex $path [incr i]]
+		    lappend co [lindex $path [incr i]] [lindex $path [incr i]]
+		}
+		incr i
+		lappend itemopts -smooth 1
+	    }
+	    q {
+		# ?
+		incr i
+	    }
+	    T {
+		# Must annihilate last point added and use its mirror instead.
+		set xanch [expr 2 * [lindex $co end-1] - [lindex $co end-3]]
+		set yanch [expr 2 * [lindex $co end] - [lindex $co end-2]]
+		lset co end-1 $xanch
+		lset co end $yanch
+		# Not sure about this!!!!!!!
+		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && \
+		  ($i < $len2)} {
+		    set xanch [expr 2 * [lindex $co end-1] - [lindex $co end-3]]
+		    set yanch [expr 2 * [lindex $co end] - [lindex $co end-2]]
+		    lset co end-1 $xanch
+		    lset co end $yanch
+		}		
+		incr i
+		lappend itemopts -smooth 1
+	    }
+	    V {
+		lappend co [lindex $co end-1] [lindex $path [incr i]]
+		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && \
+		  ($i < $len1)} {
+		    lappend co [lindex $co end-1] [lindex $path [incr i]]
+		}
+		incr i
+	    }
+	    v {
+		lappend co [lindex $co end-1] \
+		  [expr [lindex $co end] + [lindex $path [incr i]]]
+		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && \
+		  ($i < $len1)} {
+		    lappend co [lindex $co end-1] \
+		      [expr [lindex $co end] + [lindex $path [incr i]]]
+		}
+		incr i
+	    }
+	    Z - z {
+		set cantype polygon
+		if {[llength $co]} {
+		    set opts [StyleToOpts $cantype $styleList]
+		    lappend cmdList [concat create $cantype $co \
+		      [concat $opts $itemopts]]
+		}
+		set itemopts {}
+		incr i
+		set co {}
+	    }
+	    default {
+		# ?
+		incr i
+	    }
+	}
+    }
+    
+    # Finalize the last element.
+    set opts [StyleToOpts $cantype $styleList]
+    lappend cmdList [concat create $cantype $co [concat $opts $itemopts]]
+    return $cmdList
 }
 
 proc svg2can::parsepolyline {xmllist} {
@@ -299,7 +464,7 @@ proc svg2can::parsepolyline {xmllist} {
 		lappend opts -tags $value
 	    }
 	    style {
-		set opts [StyleToOpts polyline [StyleAttrToList $value]]
+		set opts [StyleToOpts line [StyleAttrToList $value]]
 	    }
 	    default {
 		lappend presentationAttr $key $value
@@ -339,8 +504,7 @@ proc svg2can::parsepolygon {xmllist} {
 
 proc svg2can::parserect {xmllist} {
     
-    # SVG and canvas have different defaults.
-    set opts {-outline "" -fill black}
+    set opts {}
     set coords {0 0 0 0}
     set presentationAttr {}
     
@@ -354,7 +518,7 @@ proc svg2can::parserect {xmllist} {
 		# unsupported :-(
 	    }
 	    style {
-		set opts [StyleToOpts rect [StyleAttrToList $value]]
+		set opts [StyleToOpts rectangle [StyleAttrToList $value]]
 	    }
 	    x - y - width - height {
 		set $key $value
@@ -410,7 +574,8 @@ proc svg2can::ParseTspan {xmllist xVar yVar xAttrVar yAttrVar opts} {
 
     # Nested tspan elements do not inherit x, y, dx, or dy attributes set.
     # Sibling tspan elements do inherit x, y attributes.
-    # Keep two separate sets of x and y; (x,y) and (xAttr,yAttr).
+    # Keep two separate sets of x and y; (x,y) and (xAttr,yAttr):
+    # (x,y) 
     
     # Inherit opts.
     array set optsArr $opts
@@ -535,7 +700,7 @@ proc svg2can::parseColor {color} {
 	    append col [format %2x [expr round(2.55 * $c)]]
 	}
     } else {
-	set col $color
+	set col [MapNoneToEmpty $color]
     }
     return $col
 }
@@ -546,7 +711,7 @@ proc svg2can::parseColor {color} {
 #       resonable canvas drawing options.
 #       
 # Arguments:
-#       type        svg item type
+#       type        tk canvas item type
 #       styleList
 #       
 # Results:
@@ -556,13 +721,28 @@ proc svg2can::StyleToOpts {type styleList} {
     
     variable textAnchorMap
     
-    set opts {}
+    # SVG and canvas have different defaults.
+    switch -- $type {
+	oval - polygon - rectangle {
+	    array set optsArr {-fill black -outline ""}
+	}
+	line {
+	    array set optsArr {-fill black}
+	}
+    }
     set fontSpec {Helvetica 12}
     set haveFont 0
     
     foreach {key value} $styleList {
 	
 	switch -- $key {
+	    fill {
+		switch -- $type {
+		    oval - polygon - rectangle - text {
+			set optsArr(-fill) [parseColor $value]
+		    }
+		}
+	    }
 	    font-family {
 		lset fontSpec 0 $value
 		set haveFont 1
@@ -593,11 +773,11 @@ proc svg2can::StyleToOpts {type styleList} {
 	    }
 	    stroke {
 		switch -- $type {
-		    rect - circle - ellipse {
-			lappend opts -outline [parseColor $value]
+		    oval - polygon - rectangle {
+			set optsArr(-outline) [parseColor $value]
 		    }
-		    default {
-			lappend opts -fill [parseColor $value]
+		    line {
+			set optsArr(-fill) [parseColor $value]
 		    }
 		}
 	    }
@@ -611,14 +791,14 @@ proc svg2can::StyleToOpts {type styleList} {
 		# canvas: butt (D), projecting , round 
 		# svg:    butt (D), square, round
 		if {[string equal $value "square"]} {
-		    lappend opts -capstyle "projecting"
+		    set optsArr(-capstyle) "projecting"
 		}
 		if {![string equal $value "butt"]} {
-		    lappend opts -capstyle $value
+		    set optsArr(-capstyle) $value
 		}
 	    }
 	    stroke-linejoin {
-		lappend opts -joinstyle $value
+		set optsArr(-joinstyle) $value
 	    }
 	    stroke-miterlimit {
 		# empty
@@ -630,11 +810,11 @@ proc svg2can::StyleToOpts {type styleList} {
 	    }
 	    stroke-width {
 		if {![string equal $type "text"]} {
-		    lappend opts -width $value
+		    set optsArr(-width) $value
 		}
 	    }
 	    text-anchor {
-		lappend opts -anchor $textAnchorMap($value)
+		set optsArr(-anchor) $textAnchorMap($value)
 	    }
 	    text-decoration {
 		switch -- $value {
@@ -650,9 +830,9 @@ proc svg2can::StyleToOpts {type styleList} {
 	}
     }
     if {$haveFont} {
-	lappend opts -font $fontSpec
+	set optsArr(-font) $fontSpec
     }
-    return $opts
+    return [array get optsArr]
 }
 
 # svg2can::MergePresentationAttr --
@@ -672,142 +852,6 @@ proc svg2can::MergePresentationAttr {type opts presentationAttr} {
 proc svg2can::StyleAttrToList {style} {
     
     return [split [string trim [string map {" " ""} $style] \;] :\;]
-}
-
-proc svg2can::ParseStraightPath {path} {
-    
-    regsub -all -- {([a-zA-Z])([0-9])} $path {\1 \2} path
-    regsub -all -- {([0-9])([a-zA-Z])} $path {\1 \2} path
-    set path [string map {- " -"} $path]
-    set path [string map {, " "} $path]
-    
-    set cantype line
-    set i 0
-    set len [llength $path]
-    set len1 [expr $len - 1]
-    set len2 [expr $len - 2]
-    set len4 [expr $len - 4]
-    set len6 [expr $len - 6]
-
-    while {$i < $len} {
-	set elem [lindex $path $i]
-	
-	switch -- $elem {
-	    A - a {
-		# ?
-		incr i
-	    }
-	    C {
-		# We could have a sequence of pairs of points here...
-		# This is wrong! Must not be smooth.
-		# Approximate by quadratic bezier.
-		lappend co [lindex $path [incr i]] [lindex $path [incr i]]
-		lappend co [lindex $path [incr i]] [lindex $path [incr i]]
-		lappend co [lindex $path [incr i]] [lindex $path [incr i]]
-		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && ($i < $len6)} {
-		    lappend co [lindex $path [incr i]] [lindex $path [incr i]]
-		    lappend co [lindex $path [incr i]] [lindex $path [incr i]]
-		    lappend co [lindex $path [incr i]] [lindex $path [incr i]]
-		}
-		incr i
-		set smooth 1
-	    }
-	    c {
-		incr i
-	    }
-	    H {
-		lappend co [lindex $path [incr i]] [lindex $co end]
-		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && ($i < $len1)} {
-		    lappend co [lindex $path [incr i]] [lindex $co end]
-		}
-		incr i
-	    }
-	    h {
-		lappend co [expr [lindex $co end-1] + [lindex $path [incr i]]] \
-		  [lindex $co end]
-		while {![regexp {[a-zA-Z]} [lindex $path $i]] && ($i < $len1)} {
-		    lappend co [expr [lindex $co end-1] + \
-		      [lindex $path [incr i]]] [lindex $co end]
-		}
-		incr i
-	    }
-	    L {
-		puts "L: i=$i, path=$path"
-		lappend co [lindex $path [incr i]] [lindex $path [incr i]]
-		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && ($i < $len2)} {
-		    puts "\ti=$i, [lindex $path $i]"
-		    lappend co [lindex $path [incr i]] [lindex $path [incr i]]
-		}
-		incr i
-	    }
-	    l {
-		lappend co [expr [lindex $co end-1] + [lindex $path [incr i]]] \
-		  [expr [lindex $co end] + [lindex $path [incr i]]]
-		incr i
-	    }
-	    M - m {
-		set co [list [lindex $path [incr i]] [lindex $path [incr i]]]
-		incr i
-	    }
-	    Q {
-		# We could have a sequence of pairs of points here...
-		# This is wrong! Must not be smooth.
-		lappend co [lindex $path [incr i]] [lindex $path [incr i]]
-		lappend co [lindex $path [incr i]] [lindex $path [incr i]]
-		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && ($i < $len4)} {
-		    lappend co [lindex $path [incr i]] [lindex $path [incr i]]
-		    lappend co [lindex $path [incr i]] [lindex $path [incr i]]
-		}
-		incr i
-		set smooth 1
-	    }
-	    q {
-		# ?
-		incr i
-	    }
-	    T {
-		# Must annihilate last point added and use its mirror instead.
-		set xanch [expr 2 * [lindex $co end-1] - [lindex $co end-3]]
-		set yanch [expr 2 * [lindex $co end] - [lindex $co end-2]]
-		lset co end-1 $xanch
-		lset co end $yanch
-		# Not sure about this!!!!!!!
-		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && ($i < $len2)} {
-		    set xanch [expr 2 * [lindex $co end-1] - [lindex $co end-3]]
-		    set yanch [expr 2 * [lindex $co end] - [lindex $co end-2]]
-		    lset co end-1 $xanch
-		    lset co end $yanch
-		}		
-		incr i
-		set smooth 1
-	    }
-	    V {
-		lappend co [lindex $co end-1] [lindex $path [incr i]]
-		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && ($i < $len1)} {
-		    lappend co [lindex $co end-1] [lindex $path [incr i]]
-		}
-		incr i
-	    }
-	    v {
-		lappend co [lindex $co end-1] \
-		  [expr [lindex $co end] + [lindex $path [incr i]]]
-		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && ($i < $len1)} {
-		    lappend co [lindex $co end-1] \
-		      [expr [lindex $co end] + [lindex $path [incr i]]]
-		}
-		incr i
-	    }
-	    Z - z {
-		set cantype polygon
-		incr i
-	    }
-	    default {
-		# ?
-		incr i
-	    }
-	}
-    }
-    return $co
 }
 
 proc svg2can::BaselineShiftToDy {baselineshift fontSpec} {
@@ -891,9 +935,9 @@ proc svg2can::getchildren {xmllist} {
 
 # Tests...
 if {0} {
+    package require svg2can
     toplevel .t
     pack [canvas .t.c -width 500 -height 400]
-    package require svg2can
     
     set xml(0) {<polyline points='400 10 10 10 10 400' \
       style='stroke: #000000; stroke-width: 1.0; fill: none;'/>}
@@ -916,13 +960,14 @@ if {0} {
       <tspan dy='10'>Online (dy=10)</tspan>\
       <tspan><tspan>Nested</tspan></tspan><tspan>End</tspan></text>}
     
-    set xml(5) {<path d='M 100 100 L 200 100 200 200 100 200 Z' \
-      style='fill-rule: evenodd; stroke: black; stroke-width: 1.0;\
-      stroke-linejoin: round; fill: #fffda8;' id='std poly t005'/>}
+    set xml(5) {<path d='M 200 100 L 300 100 300 200 200 200 Z' \
+      style='fill-rule: evenodd; fill: none; stroke: black; stroke-width: 1.0;\
+      stroke-linejoin: round;' id='std poly t005'/>}
     set xml(6) {<path d='M 30 100 Q 80 30 100 100 130 65 200 80' \
-      style='fill-rule: evenodd; stroke: black; stroke-width: 1.0;\
-      stroke-linejoin: round; fill: #fffda8;' id='std poly t006'/>}
-    
+      style='fill-rule: evenodd; stroke: #af5da8; stroke-width: 2.0;\
+      stroke-linejoin: round;' id='std poly t006'/>}
+    set xml(7) {<polyline points='30 100,80 30,100 100,130 65,200 80' \
+      style='stroke: red;'/>}
     
     foreach i [lsort -integer [array names xml]] {
 	set xmllist [tinydom::documentElement [tinydom::parse $xml($i)]]
