@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Rosticons.tcl,v 1.7 2004-11-30 15:11:12 matben Exp $
+# $Id: Rosticons.tcl,v 1.8 2004-12-01 15:15:42 matben Exp $
 
 package provide Rosticons 1.0
 
@@ -35,6 +35,8 @@ proc ::Rosticons::InitPrefsHook { } {
       [list ::Jabber::jprefs(rost,haveWBicons) jprefs_rost_haveWBicons $jprefs(rost,haveWBicons)] \
       [list ::Jabber::jprefs(rost,iconSet) jprefs_rost_iconSet $jprefs(rost,iconSet)]]
 
+    set jprefs(rost,iconSet)     "default"
+    set jprefs(rost,haveWBicons) 1
 }
 
 proc ::Rosticons::Init { } {
@@ -347,7 +349,7 @@ proc ::Rosticons::ParseIcon {name dir xmllist} {
 		set f [file join $dir $object]
 		if {$priv(needtmp)} {
 		    #set tmp [file join $this(tmpPath) $object]
-		    set tmp [tempfile $this(tmpPath) $object]
+		    set tmp [tempfile $this(tmpPath) [file rootname $object]]
 		    file copy -force $f $tmp
 		    set f $tmp
 		}

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.40 2004-11-30 15:11:12 matben Exp $
+# $Id: OOB.tcl,v 1.41 2004-12-01 15:15:42 matben Exp $
 
 package require uriencode
 
@@ -276,6 +276,8 @@ proc ::OOB::SetCallback {token jlibName type theQuery} {
 proc ::OOB::ParseSet {jlibname from subiq args} {
     global  prefs
     variable locals
+    
+    eval {::hooks::run oobSetRequestHook $from $subiq} $args
     
     array set argsArr $args
     set ishandled 0

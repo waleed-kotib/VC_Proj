@@ -2,6 +2,8 @@
 # 
 #       Demo of some of the functionality for components.
 #       This is just a first sketch.
+#       
+# $Id: CarbonNotification.tcl,v 1.4 2004-12-01 15:15:40 matben Exp $
 
 namespace eval ::CarbonNotification:: {
     

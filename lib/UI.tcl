@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.77 2004-11-30 15:11:12 matben Exp $
+# $Id: UI.tcl,v 1.78 2004-12-01 15:15:42 matben Exp $
 
 package require entrycomp
 package require alertbox
@@ -195,6 +195,19 @@ proc ::UI::GetScreenSize { } {
     return [list [winfo vrootwidth .] [winfo vrootheight .]]
 }
 
+proc ::UI::IsAppInFront { } {
+    
+    set isfront 0
+    set w [lindex [wm stackorder .] 0]
+    if {[string equal [wm state $w] "normal"]} {
+	set wfocus [focus]
+	if {($wfocus != "") && [string equal [winfo toplevel $wfocus] $w]} {
+	    set isfront 1
+	}
+    }
+    return $isfront
+}
+
 # Administrative code to handle toplevels:
 #       create, close, hide, show
 
@@ -278,6 +291,8 @@ proc ::UI::Toplevel {w args} {
     } else {
 	bind $w <$osprefs(mod)-Key-w> [list ::UI::DoCloseWindow $w]
     }
+    ::hooks::run newToplevelWindowHook $w
+    
     return $w
 }
 

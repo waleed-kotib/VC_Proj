@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: tinyhttpd.tcl,v 1.22 2004-11-30 15:11:10 matben Exp $
+# $Id: tinyhttpd.tcl,v 1.23 2004-12-01 15:15:41 matben Exp $
 
 # ########################### USAGE ############################################
 #
@@ -758,13 +758,6 @@ proc ::tinyhttpd::PutResponse {token httpcode abspath} {
     
     set s   $state(s)
     set cmd $state(cmd)
-
-    set fext [string tolower [file extension $abspath]]
-    if {[info exists suffToMimeType($fext)]} {
-	set mime $suffToMimeType($fext)
-    } else {
-	set mime "application/octet-stream"
-    }
     
     # Check that the file is there and opens correctly.
     if {![file exists $abspath] || [catch {open $abspath r} fd]} {
@@ -779,6 +772,12 @@ proc ::tinyhttpd::PutResponse {token httpcode abspath} {
 	    PutPlain404 $token
 	    return
 	}
+    }
+    set fext [string tolower [file extension $abspath]]
+    if {[info exists suffToMimeType($fext)]} {
+	set mime $suffToMimeType($fext)
+    } else {
+	set mime "application/octet-stream"
     }
     
     # Put stuff.
