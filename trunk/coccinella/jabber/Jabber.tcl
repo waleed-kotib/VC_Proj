@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.66 2004-02-12 08:48:26 matben Exp $
+# $Id: Jabber.tcl,v 1.67 2004-03-01 07:57:40 matben Exp $
 
 package provide Jabber 1.0
 
@@ -1143,7 +1143,7 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	    set tm [clock format [clock seconds] -format "%H:%M:%S"]
 	    set ans [tk_messageBox -icon info -type yesno -default yes \
 	      -message [FormatTextForMessageBox \
-	      [::msgcat::mc jamessautoawayset $tm]]
+	      [::msgcat::mc jamessautoawayset $tm]]]
 	    if {$ans == "yes"} {
 		::Jabber::SetStatus available
 	    }
