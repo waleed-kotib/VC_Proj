@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.9 2003-11-08 08:54:44 matben Exp $
+# $Id: GotMsg.tcl,v 1.10 2003-12-10 15:21:43 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -271,8 +271,6 @@ proc ::Jabber::GotMsg::NextMsg { } {
 }
 
 proc ::Jabber::GotMsg::Reply { } {
-    global  wDlgs
-    
     variable jid
     variable subject
     variable theTime
@@ -284,7 +282,7 @@ proc ::Jabber::GotMsg::Reply { } {
     } else {
 	set resubject $subject
     }
-    ::Jabber::NewMsg::Build $wDlgs(jsendmsg) -to $jid -subject $resubject  \
+    ::Jabber::NewMsg::Build -to $jid -subject $resubject  \
       -quotemessage $theMsg -time "$theDate $theTime"
 }
 

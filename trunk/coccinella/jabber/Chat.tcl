@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.15 2003-11-08 08:54:44 matben Exp $
+# $Id: Chat.tcl,v 1.16 2003-12-10 15:21:43 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -38,14 +38,13 @@ namespace eval ::Jabber::Chat:: {
 #       Start a chat, ask for user in dialog.
 #       
 # Arguments:
-#       w
 #       args        ?-key value? pairs
 #       
 # Results:
 #       updates UI.
 
-proc ::Jabber::Chat::StartThreadDlg {w args} {
-    global  prefs this sysFont
+proc ::Jabber::Chat::StartThreadDlg {args} {
+    global  prefs this sysFont wDlgs
 
     variable finished -1
     upvar ::Jabber::jprefs jprefs
@@ -53,6 +52,7 @@ proc ::Jabber::Chat::StartThreadDlg {w args} {
 
     ::Jabber::Debug 2 "::Jabber::Chat::StartThreadDlg args='$args'"
 
+    set w $wDlgs(jchat)
     if {[winfo exists $w]} {
 	return
     }
@@ -518,10 +518,11 @@ proc ::Jabber::Chat::Send {threadID} {
 	return
     }
     
-    # According to  we should send to 3-tier jid if still online,
+    # According to XMPP we should send to 3-tier jid if still online,
     # else to 2-tier.
     set jid [$jstate(jlib) getrecipientjid $locals($threadID,jid)]
     set locals($threadID,jid) $jid
+    jlib::splitjid $jid jid2 res
 
     if {![::Jabber::IsWellFormedJID $jid]} {
 	set ans [tk_messageBox -message [FormatTextForMessageBox  \
@@ -542,8 +543,9 @@ proc ::Jabber::Chat::Send {threadID} {
 	return
     }
     
+    # Put in history file.
     set dateISO [clock format [clock seconds] -format "%Y%m%dT%H:%M:%S"]
-    ::Jabber::Chat::PutMessageInHistoryFile $jid \
+    ::Jabber::Chat::PutMessageInHistoryFile $jid2 \
       [list $jstate(mejid) $threadID $dateISO $allText]
     
     set opts {}
@@ -686,7 +688,16 @@ namespace eval ::Jabber::Chat:: {
     variable uidhist 1000
 }
 
+# Jabber::Chat::PutMessageInHistoryFile --
+#
+#       Writes chat event send/received to history file.
+#       
+# Arguments:
 #       jid       2-tier jid
+#       msg       {jid2 threadID dateISO body}
+#       
+# Results:
+#       none.
 
 proc ::Jabber::Chat::PutMessageInHistoryFile {jid msg} {
     global  prefs
@@ -698,7 +709,15 @@ proc ::Jabber::Chat::PutMessageInHistoryFile {jid msg} {
     }
 }
 
+# Jabber::Chat::PutMessageInHistoryFile --
+#
+#       Builds chat history dialog for jid.
+#       
+# Arguments:
 #       jid       2-tier jid
+#       
+# Results:
+#       dialog displayed.
 
 proc ::Jabber::Chat::BuildHistory {jid} {
     global  sysFont prefs this

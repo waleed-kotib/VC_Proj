@@ -206,7 +206,7 @@
 ::msgcat::mcset en mSearch		{Search...}
 ::msgcat::mcset en mAddNewUser		{Add New User...}
 ::msgcat::mcset en mSendMessage		{Send Message...}
-::msgcat::mcset en mChat		{Chat...}
+::msgcat::mcset en mChat		{Chat}
 ::msgcat::mcset en mStatus		{Status}
 ::msgcat::mcset en mAvailable		{Available}
 ::msgcat::mcset en mAway		{Away}

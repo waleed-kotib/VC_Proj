@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.35 2003-11-30 11:46:46 matben Exp $
+# $Id: Jabber.tcl,v 1.36 2003-12-10 15:21:43 matben Exp $
 #
 #  The $address is an ip name or number.
 #
@@ -59,7 +59,10 @@ namespace eval ::Jabber:: {
     variable jerror
         
     set jstate(debug) 0
-
+    if {($::debugLevel > 1) && ($jstate(debug) == 0)} {
+	set jstate(debug) $::debugLevel
+    }
+    
     # The trees 'directories' which should always be there.
     set jprefs(treedirs) {Online Offline {Subscription Pending}}
     set jprefs(closedtreedirs) {}
@@ -119,6 +122,7 @@ namespace eval ::Jabber:: {
     array set mapShowElemToText  \
       [list [::msgcat::mc mAvailable] available  \
       [::msgcat::mc mAway]            away       \
+      [::msgcat::mc mChat]            chat       \
       [::msgcat::mc mDoNotDisturb]    dnd        \
       [::msgcat::mc mExtendedAway]    xa         \
       [::msgcat::mc mInvisible]       invisible  \
@@ -126,6 +130,7 @@ namespace eval ::Jabber:: {
     array set mapShowTextToElem  \
       [list available [::msgcat::mc mAvailable]     \
       away            [::msgcat::mc mAway]          \
+      chat            [::msgcat::mc mChat]          \
       dnd             [::msgcat::mc mDoNotDisturb]  \
       xa              [::msgcat::mc mExtendedAway]  \
       invisible       [::msgcat::mc mInvisible]     \
@@ -379,35 +384,35 @@ proc ::Jabber::FactoryDefaults { } {
     variable menuDefs
 
     set menuDefs(rost,file) {
-	{command   mNewWhiteboard      {::UI::NewWhiteboard}                            normal   N}
-	{command   mCloseWindow        {::UserActions::DoCloseWindow}             normal   W}
-	{command   mPreferences...     {::Preferences::Build $wDlgs(prefs)}       normal   {}}
+	{command   mNewWhiteboard      {::UI::NewWhiteboard}                  normal   N}
+	{command   mCloseWindow        {::UserActions::DoCloseWindow}         normal   W}
+	{command   mPreferences...     {::Preferences::Build}                 normal   {}}
 	{command   mUpdateCheck        {
 	    ::AutoUpdate::Get $prefs(urlAutoUpdate) -silent 0}       normal   {}}
 	{separator}
 	{command   mQuit               {::UserActions::DoQuit}                    normal   Q}
     }
     set menuDefs(rost,jabber) {    
-	{command     mNewAccount    {::Jabber::Register::Register $wDlgs(jreg)} normal   {}}
-	{command     mLogin         {::Jabber::Login::Login $wDlgs(jlogin)} normal   {}}
-	{command     mLogoutWith    {::Jabber::Logout::WithStatus .joutst}  disabled {}}
-	{command     mPassword      {::Jabber::Passwd::Build .jpasswd}      disabled {}}
+	{command     mNewAccount    {::Jabber::Register::Register}          normal   {}}
+	{command     mLogin         {::Jabber::Login::Login}                normal   {}}
+	{command     mLogoutWith    {::Jabber::Logout::WithStatus}          disabled {}}
+	{command     mPassword      {::Jabber::Passwd::Build}               disabled {}}
 	{separator}
 	{checkbutton mMessageInbox  {::Jabber::MailBox::Show}               normal   {} \
 	  {-variable ::Jabber::jstate(inboxVis)}}
 	{separator}
-	{command     mSearch        {::Jabber::Search::Build .jsearch}      disabled {}}
+	{command     mSearch        {::Jabber::Search::Build}               disabled {}}
 	{command     mAddNewUser    {::Jabber::Roster::NewOrEditItem new}   disabled {}}
 	{separator}
-	{command     mSendMessage   {::Jabber::NewMsg::Build $wDlgs(jsendmsg)} disabled {}}
-	{command     mChat          {::Jabber::Chat::StartThreadDlg .jchat} disabled {}}
+	{command     mSendMessage   {::Jabber::NewMsg::Build}               disabled {}}
+	{command     mChat          {::Jabber::Chat::StartThreadDlg}        disabled {}}
 	{cascade     mStatus        {}                                      disabled {} {} {}}
 	{separator}
 	{command     mEnterRoom     {::Jabber::GroupChat::EnterOrCreate enter} disabled {}}
-	{cascade     mExitRoom      {}                                    disabled {} {} {}}
+	{cascade     mExitRoom      {}                                      disabled {} {} {}}
 	{command     mCreateRoom    {::Jabber::GroupChat::EnterOrCreate create} disabled {}}
 	{separator}
-	{command     mvCard         {::VCard::Fetch .jvcard own}          disabled {}}
+	{command     mvCard         {::VCard::Fetch own}                    disabled {}}
 	{separator}
 	{command     mSetupAssistant {
 	    package require SetupAss
@@ -435,12 +440,12 @@ proc ::Jabber::FactoryDefaults { } {
     variable popMenuDefs
 
     set popMenuDefs(roster,def) {
-      mMessage       users     {::Jabber::NewMsg::Build $wDlgs(jsendmsg) -to &jid}
+      mMessage       users     {::Jabber::NewMsg::Build -to &jid}
       mChat          user      {::Jabber::Chat::StartThread &jid3}
       mWhiteboard    wb        {::Jabber::WB::NewWhiteboard &jid3}
       separator      {}        {}
       mLastLogin/Activity user {::Jabber::GetLast &jid}
-      mvCard         user      {::VCard::Fetch .jvcard other &jid}
+      mvCard         user      {::VCard::Fetch other &jid}
       mAddNewUser    any       {
 	  ::Jabber::Roster::NewOrEditItem new
       }
@@ -463,7 +468,7 @@ proc ::Jabber::FactoryDefaults { } {
     
     # The browse:
     set popMenuDefs(browse,def) {
-      mMessage       user      {::Jabber::NewMsg::Build $wDlgs(jsendmsg) -to &jid}
+      mMessage       user      {::Jabber::NewMsg::Build -to &jid}
       mChat          user      {::Jabber::Chat::StartThread &jid}
       mWhiteboard    wb        {::Jabber::WB::NewWhiteboard &jid}
       mEnterRoom     room      {
@@ -474,14 +479,14 @@ proc ::Jabber::FactoryDefaults { } {
       mInfo          jid       {::Jabber::Browse::GetInfo &jid}
       mLastLogin/Activity jid  {::Jabber::GetLast &jid}
       mLocalTime     jid       {::Jabber::GetTime &jid}
-      mvCard         jid       {::VCard::Fetch .jvcard other &jid}
+      mvCard         jid       {::VCard::Fetch other &jid}
       mVersion       jid       {::Jabber::GetVersion &jid}
       separator      {}        {}
       mSearch        search    {
-	  ::Jabber::Search::Build .jsearch -server &jid -autoget 1
+	  ::Jabber::Search::Build -server &jid -autoget 1
       }
       mRegister      register  {
-	  ::Jabber::GenRegister::BuildRegister .jreg -server &jid -autoget 1
+	  ::Jabber::GenRegister::BuildRegister -server &jid -autoget 1
       }
       mUnregister    register  {::Jabber::Register::Remove &jid}
       separator      {}        {}
@@ -491,7 +496,7 @@ proc ::Jabber::FactoryDefaults { } {
     
     # The groupchat:
     set popMenuDefs(groupchat,def) {
-      mMessage       user      {::Jabber::NewMsg::Build $wDlgs(jsendmsg) -to &jid}
+      mMessage       user      {::Jabber::NewMsg::Build -to &jid}
       mChat          user      {::Jabber::Chat::StartThread &jid}
       mWhiteboard    wb        {::Jabber::WB::NewWhiteboard &jid}
     }    
@@ -499,10 +504,10 @@ proc ::Jabber::FactoryDefaults { } {
     # The agents stuff:
     set popMenuDefs(agents,def) {
       mSearch        search    {
-	  ::Jabber::Search::Build .jsearch -server &jid -autoget 1
+	  ::Jabber::Search::Build -server &jid -autoget 1
       }
       mRegister      register  {
-	  ::Jabber::GenRegister::BuildRegister .jreg -server &jid -autoget 1
+	  ::Jabber::GenRegister::BuildRegister -server &jid -autoget 1
       }
       mUnregister    register  {::Jabber::Register::Remove &jid}
       separator      {}        {}
@@ -1019,7 +1024,7 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 			set msg [::msgcat::mc jamessautoreject $from]
 		    }
 		    ask {
-			eval {::Jabber::Subscribe::Subscribe $wDlgs(jsubsc) $from} $args
+			eval {::Jabber::Subscribe::Subscribe $from} $args
 		    }
 		}
 		if {$msg != ""} {
@@ -1840,13 +1845,12 @@ proc ::Jabber::SetStatus {type args} {
 #       Dialog for setting user's status with message.
 #       
 # Arguments:
-#       w
 #       
 # Results:
 #       "cancel" or "set".
 
-proc ::Jabber::SetStatusWithMessage {w} {
-    global  this sysFont
+proc ::Jabber::SetStatusWithMessage { } {
+    global  this sysFont wDlgs
     
     variable finishedStat
     variable show
@@ -1854,6 +1858,11 @@ proc ::Jabber::SetStatusWithMessage {w} {
     variable jprefs
     variable jstate
 
+    set w $wDlgs(jpresmsg)
+    if {[winfo exists $w]} {
+	raise $w
+	return
+    }
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
@@ -3119,19 +3128,19 @@ namespace eval ::Jabber::Passwd:: {
 #       Sets new password.
 #
 # Arguments:
-#       w      the toplevel window.
 #       
 # Results:
 #       "cancel" or "set".
 
-proc ::Jabber::Passwd::Build {w} {
-    global  this sysFont
+proc ::Jabber::Passwd::Build { } {
+    global  this sysFont wDlgs
     
     variable finished -1
     variable password
     variable validate
     upvar ::Jabber::jstate jstate
     
+    set w $wDlgs(jpasswd)
     if {[winfo exists $w]} {
 	return
     }
@@ -3299,8 +3308,8 @@ proc ::Jabber::VerifyJIDWhiteboard {wtop} {
 
 namespace eval ::Jabber::Logout:: {}
 
-proc ::Jabber::Logout::WithStatus {w} {
-    global  prefs this sysFont
+proc ::Jabber::Logout::WithStatus { } {
+    global  prefs this sysFont wDlgs
 
     variable finished -1
     variable status ""
@@ -3309,6 +3318,7 @@ proc ::Jabber::Logout::WithStatus {w} {
 
     ::Jabber::Debug 2 "::Jabber::Logout::WithStatus"
 
+    set w $wDlgs(joutst)
     if {[winfo exists $w]} {
 	return
     }

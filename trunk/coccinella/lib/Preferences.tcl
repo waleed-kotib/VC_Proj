@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.15 2003-11-06 15:17:51 matben Exp $
+# $Id: Preferences.tcl,v 1.16 2003-12-10 15:21:43 matben Exp $
  
 package require notebook
 package require tree
@@ -20,6 +20,8 @@ namespace eval ::Preferences:: {
     
     # Variable to be used in tkwait.
     variable finished
+    
+    variable dlguid 0
     
     # Name of the page that was in front last time.
     variable lastPage {}
@@ -37,8 +39,8 @@ proc ::Preferences::Display {w} {
     }
 }
 
-proc ::Preferences::Build {w} {
-    global  sysFont this prefs
+proc ::Preferences::Build { } {
+    global  sysFont this prefs wDlgs
     
     variable tmpPrefs
     variable tmpJPrefs
@@ -52,7 +54,9 @@ proc ::Preferences::Build {w} {
     variable ypadtiny
     variable ypadbig
     variable lastPage
-        
+    variable dlguid
+
+    set w $wDlgs(prefs)[incr dlguid]
     toplevel $w -class Preferences
     wm title $w [::msgcat::mc Preferences]
     wm protocol $w WM_DELETE_WINDOW ::Preferences::CancelPushBt

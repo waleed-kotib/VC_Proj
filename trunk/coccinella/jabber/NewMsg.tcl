@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.17 2003-11-30 11:46:46 matben Exp $
+# $Id: NewMsg.tcl,v 1.18 2003-12-10 15:21:43 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -98,15 +98,14 @@ proc ::Jabber::NewMsg::InitEach { } {
 #       The standard send message dialog.
 #
 # Arguments:
-#       wbase  the base for the toplevel window.
 #       args   ?-to jidlist -subject theSubject -quotemessage msg -time time
 #              -forwardmessage msg?
 #       
 # Results:
 #       shows window.
 
-proc ::Jabber::NewMsg::Build {wbase args} {
-    global  this sysFont prefs
+proc ::Jabber::NewMsg::Build {args} {
+    global  this sysFont prefs wDlgs
     
     variable locals  
     upvar ::Jabber::jstate jstate
@@ -120,7 +119,7 @@ proc ::Jabber::NewMsg::Build {wbase args} {
     }
     Jabber::NewMsg::InitEach
    
-    set w "$wbase[incr locals(dlguid)]"
+    set w "$wDlgs(jsendmsg)[incr locals(dlguid)]"
     set locals($w,num) $locals(dlguid)
     if {[winfo exists $w]} {
 	return

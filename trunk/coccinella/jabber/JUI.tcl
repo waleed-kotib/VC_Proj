@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.6 2003-11-12 08:20:49 matben Exp $
+# $Id: JUI.tcl,v 1.7 2003-12-10 15:21:43 matben Exp $
 
 package provide JUI 1.0
 
@@ -69,7 +69,7 @@ proc ::Jabber::UI::Show {w args} {
 #       $w
 
 proc ::Jabber::UI::Build {w} {
-    global  this sysFont prefs wDlgs
+    global  this sysFont prefs
     
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
@@ -134,7 +134,7 @@ proc ::Jabber::UI::Build {w} {
     set jwapp(wtray) $wtray
     
     $wtray newbutton connect Connect $iconConnect $iconConnectDis  \
-      [list ::Jabber::Login::Login $wDlgs(jlogin)]
+      [list ::Jabber::Login::Login]
     if {[::Jabber::MailBox::HaveMailBox]} {
 	$wtray newbutton inbox Inbox $iconInboxLett $iconInboxLettDis  \
 	  [list ::Jabber::MailBox::Show -visible 1]
@@ -730,7 +730,7 @@ proc ::Jabber::UI::Popup {what w v x y} {
 # Results:
 
 proc ::Jabber::UI::FixUIWhen {what} {
-    global  allIPnumsToSend wDlgs
+    global  allIPnumsToSend
     variable jwapp
         
     set w $jwapp(wtopRost)
@@ -779,7 +779,7 @@ proc ::Jabber::UI::FixUIWhen {what} {
 	    ::UI::MenuMethod $wmj entryconfigure mNewAccount -state normal
 	    ::UI::MenuMethod $wmj entryconfigure mLogin  \
 	      -label "[::msgcat::mc Login]..." -state normal \
-	      -command [list ::Jabber::Login::Login $wDlgs(jlogin)]
+	      -command [list ::Jabber::Login::Login]
 	    ::UI::MenuMethod $wmj entryconfigure mLogoutWith -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mPassword -state disabled
 	    ::UI::MenuMethod $wmj entryconfigure mSearch -state disabled

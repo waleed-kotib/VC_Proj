@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Connections.tcl,v 1.9 2003-10-12 13:12:55 matben Exp $
+# $Id: Connections.tcl,v 1.10 2003-12-10 15:21:43 matben Exp $
 
 package provide Connections 1.0
 
@@ -650,6 +650,7 @@ namespace eval ::OpenMulticast:: {
     
     namespace export OpenMulticast
     
+    variable uid 0
     variable txtvarEntMulticast
     variable selMulticastName
     variable finished
@@ -666,17 +667,16 @@ namespace eval ::OpenMulticast:: {
 # Results:
 #       shows dialog.
 
-proc ::OpenMulticast::OpenMulticast {wtop w} {
-    global  sysFont prefs this
+proc ::OpenMulticast::OpenMulticast {wtop} {
+    global  sysFont prefs this wDlgs
     
+    variable uid
     variable txtvarEntMulticast
     variable selMulticastName
     variable finished
 
     set finished -1
-    if {[winfo exists $w]} {
-	return
-    }
+    set w $wDlgs(openMulti)[incr uid]
     toplevel $w
     if {[string match "mac*" $this(platform)]} {
 	eval $::macWindowStyle $w documentProc
@@ -807,7 +807,7 @@ proc ::OpenMulticast::TraceSelMulticastName {name junk1 junk2} {
 #       wtop        toplevel window. (.) If not "." then ".top."; extra dot!
 
 proc ::OpenMulticast::OpenMulticastQTStream {wtop wentry} {
-    global  this prefs    
+    global  this prefs
     variable finished
 
     set wCan [::UI::GetCanvasFromWtop $wtop]

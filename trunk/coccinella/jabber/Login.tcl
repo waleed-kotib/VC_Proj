@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.9 2003-11-30 11:46:46 matben Exp $
+# $Id: Login.tcl,v 1.10 2003-12-10 15:21:43 matben Exp $
 
 package provide Login 1.0
 
@@ -21,15 +21,14 @@ namespace eval ::Jabber::Login:: {
 #       Log in to a server with an existing user account.
 #
 # Arguments:
-#       w      the toplevel window.
 #       
 # Results:
 #       name of button pressed; "cancel" or "login".
 
-proc ::Jabber::Login::Login {w} {
-    global  this sysFont prefs
+proc ::Jabber::Login::Login { } {
+    global  this sysFont prefs wDlgs
     
-    variable wtoplevel $w
+    variable wtoplevel
     variable finished -1
     variable menuVar
     variable profile
@@ -48,9 +47,11 @@ proc ::Jabber::Login::Login {w} {
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jprefs jprefs
     
+    set w $wDlgs(jlogin)
     if {[winfo exists $w]} {
 	return
     }
+    set wtoplevel $w
     
     toplevel $w
     if {[string match "mac*" $this(platform)]} {

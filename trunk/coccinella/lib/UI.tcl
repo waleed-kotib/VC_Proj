@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.27 2003-11-30 11:46:47 matben Exp $
+# $Id: UI.tcl,v 1.28 2003-12-10 15:21:43 matben Exp $
 
 # LabeledFrame --
 #
@@ -393,7 +393,7 @@ proc ::UI::InitMenuDefs { } {
 	{command   mCloseWindow        {::UserActions::DoCloseWindow}             normal   W}
 	{separator}
 	{command   mOpenImage/Movie    {::Import::ImportImageOrMovieDlg $wtop}    normal   I}
-	{command   mOpenURLStream      {::OpenMulticast::OpenMulticast $wtop $wDlgs(openMulti)} normal {}}
+	{command   mOpenURLStream      {::OpenMulticast::OpenMulticast $wtop}     normal   {}}
 	{command   mStopPut/Get/Open   {::UserActions::CancelAllPutGetAndPendingOpen $wtop} normal {}}
 	{separator}
 	{command   mOpenCanvas         {::CanvasFile::DoOpenCanvasFile $wtop}     normal   {}}
@@ -413,7 +413,7 @@ proc ::UI::InitMenuDefs { } {
 	{command   mCloseWindow        {::UserActions::DoCloseWindow}             normal   W}
 	{separator}
 	{command   mOpenImage/Movie    {::Import::ImportImageOrMovieDlg $wtop} normal  I}
-	{command   mOpenURLStream      {::OpenMulticast::OpenMulticast $wtop $wDlgs(openMulti)} normal {}}
+	{command   mOpenURLStream      {::OpenMulticast::OpenMulticast $wtop}     normal   {}}
 	{separator}
 	{command   mPutCanvas          {::UserActions::DoPutCanvasDlg $wtop}      disabled {}}
 	{command   mGetCanvas          {::UserActions::DoGetCanvas $wtop}         disabled {}}
@@ -578,7 +578,7 @@ proc ::UI::InitMenuDefs { } {
 	  {-value italic -variable ::${wtop}::state(fontWeight)}}}
     }
     set menuDefs(main,prefs,prefs)  \
-      {command     mPreferences...   {::Preferences::Build $wDlgs(prefs)}  normal   {}}
+      {command     mPreferences...   {::Preferences::Build}                normal   {}}
     
     # Build hierarchical list.
     set menuDefs(main,prefs) {}
@@ -588,9 +588,9 @@ proc ::UI::InitMenuDefs { } {
     }
 
     set menuDefs(main,info) {    
-	{command     mOnServer       {::Dialogs::ShowInfoServer $wDlgs(infoServ) \$this(ipnum)} normal {}}	
-	{command     mOnClients      {::Dialogs::ShowInfoClients $wDlgs(infoClient) \$allIPnumsFrom} disabled {}}	
-	{command     mOnPlugins      {::Dialogs::InfoOnPlugins .plugs}         normal {}}	
+	{command     mOnServer       {::Dialogs::ShowInfoServer \$this(ipnum)} normal {}}	
+	{command     mOnClients      {::Dialogs::ShowInfoClients \$allIPnumsFrom} disabled {}}	
+	{command     mOnPlugins      {::Dialogs::InfoOnPlugins}         normal {}}	
 	{separator}
 	{cascade     mHelpOn             {}                                    normal   {} {} {}}
     }
@@ -616,55 +616,7 @@ proc ::UI::InitMenuDefs { } {
     if {!$haveAppleMenu && [::Plugins::HavePackage QuickTimeTcl]} {
 	lappend menuDefs(main,info) $menuDefs(main,info,aboutquicktimetcl)
     }
-    
-    # Menu definitions for the Roster/services window. Collects minimal Jabber
-    # stuff.
-    set menuDefs(rost,file) {
-	{command   mNewWhiteboard      {::UI::NewWhiteboard}                            normal   N}
-	{command   mCloseWindow        {::UserActions::DoCloseWindow}             normal   W}
-	{command   mPreferences...     {::Preferences::Build $wDlgs(prefs)}       normal   {}}
-	{command   mUpdateCheck        {
-	    ::AutoUpdate::Get $prefs(urlAutoUpdate) -silent 0}       normal   {}}
-	{separator}
-	{command   mQuit               {::UserActions::DoQuit}                    normal   Q}
-    }
-    set menuDefs(rost,jabber) {    
-	{command     mNewAccount    {::Jabber::Register::Register $wDlgs(jreg)} normal   {}}
-	{command     mLogin         {::Jabber::Login::Login $wDlgs(jlogin)} normal   {}}
-	{command     mLogoutWith    {::Jabber::Logout::WithStatus .joutst}  disabled {}}
-	{command     mPassword      {::Jabber::Passwd::Build .jpasswd}      disabled {}}
-	{separator}
-	{checkbutton mMessageInbox  {::Jabber::MailBox::Show}               normal   {} \
-	  {-variable ::Jabber::jstate(inboxVis)}}
-	{separator}
-	{command     mSearch        {::Jabber::Search::Build .jsearch}      disabled {}}
-	{command     mAddNewUser    {::Jabber::Roster::NewOrEditItem new}   disabled {}}
-	{separator}
-	{command     mSendMessage   {::Jabber::NewMsg::Build $wDlgs(jsendmsg)} disabled {}}
-	{command     mChat          {::Jabber::Chat::StartThreadDlg .jchat} disabled {}}
-	{cascade     mStatus        {}                                      disabled {} {} {}}
-	{separator}
-	{command     mEnterRoom     {::Jabber::GroupChat::EnterOrCreate enter} disabled {}}
-	{cascade     mExitRoom      {}                                    disabled {} {} {}}
-	{command     mCreateRoom    {::Jabber::GroupChat::EnterOrCreate create} disabled {}}
-	{separator}
-	{command     mvCard         {::VCard::Fetch .jvcard own}          disabled {}}
-	{separator}
-	{command     mSetupAssistant {
-	    package require SetupAss
-	    ::Jabber::SetupAss::SetupAss .setupass}                       normal {}}
-	{command     mRemoveAccount {::Jabber::Register::Remove}          disabled {}}	
-	{separator}
-	{command     mErrorLog      {::Jabber::ErrorLogDlg .jerrdlg}      normal   {}}
-	{checkbutton mDebug         {::Jabber::DebugCmd}                  normal   {} \
-	  {-variable ::Jabber::jstate(debugCmd)}}
-    }    
-
-    # The status menu is built dynamically due to the -image options on 8.4.
-    if {!$prefs(stripJabber)} {
-	lset menuDefs(rost,jabber) 12 6 [::Jabber::Roster::BuildStatusMenuDef]
-    }
-    
+        
     # Menu definitions for a minimal setup. Used on mac only.
     set menuDefs(min,file) {
 	{command   mNewWhiteboard    {::UI::NewWhiteboard}                       normal   N}
@@ -2098,7 +2050,7 @@ proc ::UI::BuildAppleMenu {wtop wmenuapple state} {
     
     if {[string equal $this(platform) "macosx"]} {
 	proc ::tk::mac::ShowPreferences { } {
-	    ::Preferences::Build $wDlgs(prefs)
+	    ::Preferences::Build
 	}
     }
 }

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.19 2003-11-08 08:54:44 matben Exp $
+# $Id: MailBox.tcl,v 1.20 2003-12-10 15:21:43 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -111,7 +111,7 @@ proc ::Jabber::MailBox::Show {args} {
 }
 
 proc ::Jabber::MailBox::Build {w args} {
-    global  this sysFont prefs wDlgs
+    global  this sysFont prefs
     
     variable locals  
     variable colindex
@@ -169,7 +169,7 @@ proc ::Jabber::MailBox::Build {w args} {
     set locals(wtray) $wtray
 
     $wtray newbutton new New $iconNew $iconNewDis  \
-      [list ::Jabber::NewMsg::Build $wDlgs(jsendmsg)]
+      [list ::Jabber::NewMsg::Build]
     $wtray newbutton reply Reply $iconReply $iconReplyDis  \
       [list ::Jabber::MailBox::ReplyTo] -state disabled
     $wtray newbutton forward Forward $iconForward $iconForwardDis  \
@@ -711,8 +711,6 @@ proc ::Jabber::MailBox::SelectMsg { } {
 }
 
 proc ::Jabber::MailBox::DoubleClickMsg { } {
-    global  wDlgs
-    
     variable locals
     variable mailbox
     variable colindex
@@ -736,7 +734,7 @@ proc ::Jabber::MailBox::DoubleClickMsg { } {
 	if {![regexp -nocase {^ *re:} $subject]} {
 	    set subject "Re: $subject"
 	}	
-	::Jabber::NewMsg::Build $wDlgs(jsendmsg) -to $to -subject $subject  \
+	::Jabber::NewMsg::Build -to $to -subject $subject  \
 	  -quotemessage $allText -time $time
     }
 }
@@ -790,8 +788,6 @@ proc ::Jabber::MailBox::DisplayMsg {id} {
 }
 
 proc ::Jabber::MailBox::ReplyTo { } {
-    global  wDlgs
-
     variable locals
     variable mailbox
     variable colindex
@@ -812,13 +808,11 @@ proc ::Jabber::MailBox::ReplyTo { } {
     if {![regexp -nocase {^ *re:} $subject]} {
 	set subject "Re: $subject"
     }
-    ::Jabber::NewMsg::Build $wDlgs(jsendmsg) -to $to -subject $subject  \
+    ::Jabber::NewMsg::Build -to $to -subject $subject  \
       -quotemessage $allText -time $time
 }
 
 proc ::Jabber::MailBox::ForwardTo { } {
-    global  wDlgs
-
     variable locals
     variable mailbox
     variable colindex
@@ -835,7 +829,7 @@ proc ::Jabber::MailBox::ForwardTo { } {
     set allText [lindex $mailbox($id) 5]
     foreach {subject to time} [lrange $mailbox($id) 0 2] break
     set subject "Forwarded: $subject"
-    ::Jabber::NewMsg::Build $wDlgs(jsendmsg) -subject $subject  \
+    ::Jabber::NewMsg::Build -subject $subject  \
       -forwardmessage $allText -time $time
 }
 

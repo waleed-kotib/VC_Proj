@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.18 2003-11-30 11:46:46 matben Exp $
+# $Id: GroupChat.tcl,v 1.19 2003-12-10 15:21:43 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -397,7 +397,6 @@ proc ::Jabber::GroupChat::GotMsg {body args} {
     global  prefs
     
     variable locals
-    upvar ::Jabber::mapShowElemToText mapShowElemToText
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     
