@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.77 2004-04-15 05:55:18 matben Exp $
+# $Id: Jabber.tcl,v 1.78 2004-04-16 13:59:29 matben Exp $
 
 package provide Jabber 1.0
 
@@ -91,6 +91,7 @@ namespace eval ::Jabber:: {
     set jprefs(valids) {[^\x00-\x20]|[^\r\n\t@:' <>&"]}
     
     # Popup menus.
+    set jstate(wpopup,disco)     .jpopupdi
     set jstate(wpopup,roster)    .jpopupro
     set jstate(wpopup,browse)    .jpopupbr
     set jstate(wpopup,groupchat) .jpopupgc
@@ -167,7 +168,21 @@ namespace eval ::Jabber:: {
 	whiteboard      http://coccinella.sourceforge.net/protocol/whiteboard
 	public          http://coccinella.sourceforge.net/protocol/private
     }
-  
+    
+    # Standard xmlns supported. Components add their own.
+    variable clientxmlns
+    set clientxmlns {
+	"jabber:client"
+	"jabber:iq:last"
+	"jabber:iq:oob"
+	"jabber:iq:time"
+	"jabber:iq:version"
+	"jabber:x:event"
+    }    
+    foreach {key xmlns} [array get privatexmlns] {
+	lappend clientxmlns $xmlns
+    }
+    
     # Short error names.
     variable errorCodeToShort
     array set errorCodeToShort {
@@ -265,10 +280,6 @@ proc ::Jabber::FactoryDefaults { } {
     # Other
     set jprefs(defSubscribe)        1
     
-    # The rosters background image is partly controlled by option database.
-    set jprefs(rost,useBgImage)     1
-    set jprefs(rost,bgImagePath)    ""
-    
     # Shall we query ip number directly when verified Coccinella?
     set jprefs(preGetIP) 1
     
@@ -292,19 +303,7 @@ proc ::Jabber::FactoryDefaults { } {
     # Abondened!!!!!!!
     set jprefs(autoupdateCheck) 0
     set jprefs(autoupdateShow,$prefs(fullVers)) 1
-    
-    set jprefs(showMsgNewWin) 1
-    set jprefs(inbox2click) "newwin"
-    
-    # Save inbox when quit?
-    set jprefs(inboxSave) 0
-    
-    # Empty here means use option database.
-    set jprefs(chatFont) ""
     set jprefs(useXDataSearch) 1
-    
-    # Service discovery method: "agents" or "browse"
-    set jprefs(agentsOrBrowse) "browse"
     
     set jstate(rosterVis) 1
     set jstate(browseVis) 0
@@ -370,21 +369,11 @@ proc ::Jabber::SetUserPreferences { } {
     ::PreferencesUtils::Add [list  \
       [list ::Jabber::jprefs(port)             jprefs_port              $jprefs(port)]  \
       [list ::Jabber::jprefs(sslport)          jprefs_sslport           $jprefs(sslport)]  \
-      [list ::Jabber::jprefs(rost,useBgImage)  jprefs_rost_useBgImage   $jprefs(rost,useBgImage)]  \
-      [list ::Jabber::jprefs(rost,bgImagePath) jprefs_rost_bgImagePath  $jprefs(rost,bgImagePath)]  \
-      [list ::Jabber::jprefs(agentsOrBrowse)   jprefs_agentsOrBrowse    $jprefs(agentsOrBrowse)]  \
       [list ::Jabber::jprefs(agentsServers)    jprefs_agentsServers     $jprefs(agentsServers)]  \
       [list ::Jabber::jprefs(browseServers)    jprefs_browseServers     $jprefs(browseServers)]  \
-      [list ::Jabber::jprefs(showMsgNewWin)    jprefs_showMsgNewWin     $jprefs(showMsgNewWin)]  \
-      [list ::Jabber::jprefs(inbox2click)      jprefs_inbox2click       $jprefs(inbox2click)]  \
-      [list ::Jabber::jprefs(inboxSave)        jprefs_inboxSave         $jprefs(inboxSave)]  \
       [list ::Jabber::jserver(profile)         jserver_profile          $jserver(profile)      userDefault] \
       [list ::Jabber::jserver(profile,selected) jserver_profile_selected $jserver(profile,selected) userDefault] \
       ]
-    
-    if {$jprefs(chatFont) != ""} {
-	set jprefs(chatFont) [::Utils::GetFontListFromName $jprefs(chatFont)]
-    }
 }
 
 # Jabber::GetjprefsArray, GetjserverArray, ... --
@@ -1827,6 +1816,18 @@ proc ::Jabber::ParseGetServers  {jlibname from subiq args} {
     
      # Tell jlib's iq-handler that we handled the event.
     return 1
+}
+
+proc ::Jabber::AddClientXmlns {xmlnsList} {
+    variable clientxmlns
+    
+    set clientxmlns [concat $clientxmlns $xmlnsList]
+}
+
+proc ::Jabber::GetClientXmlnsList { } {
+    variable clientxmlns
+    
+    return $clientxmlns
 }
 
 # The ::Jabber::Passwd:: namespace -------------------------------------------

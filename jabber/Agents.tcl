@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Agents.tcl,v 1.14 2004-04-15 05:55:17 matben Exp $
+# $Id: Agents.tcl,v 1.15 2004-04-16 13:59:29 matben Exp $
 
 package provide Agents 1.0
 
@@ -43,7 +43,7 @@ proc ::Jabber::Agents::LoginCmd { } {
 
     # Get the services for all our servers on the list. Depends on our settings:
     # If browsing fails must use "agents" as a fallback.
-    if {[string equal $jprefs(agentsOrBrowse) "agents"]} {
+    if {[string equal $jprefs(serviceMethod) "agents"]} {
 	::Jabber::Agents::GetAll
     }
 }

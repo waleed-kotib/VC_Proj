@@ -25,7 +25,7 @@
 # 
 # Copyright (C) 2002-2004 Mats Bengtsson
 # 
-# $Id: tree.tcl,v 1.23 2004-03-31 07:55:18 matben Exp $
+# $Id: tree.tcl,v 1.24 2004-04-16 13:59:29 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -1484,7 +1484,7 @@ proc ::tree::Build {w} {
     $can lower tpyj ttreev
     $can lower tbg ttreev
 
-    set h [lindex [$can bbox all] 3]
+    set h [lindex [$can bbox (ttreev||tpyj)] 3]
     if {($h == "") || ($h < $options(-height))} {
 	set h $options(-height)
     }

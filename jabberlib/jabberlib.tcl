@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.37 2004-04-15 05:55:19 matben Exp $
+# $Id: jabberlib.tcl,v 1.38 2004-04-16 13:59:29 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -1647,6 +1647,7 @@ proc jlib::iq_get {jlibname xmlns to args} {
     set opts {}
     set attrlist [list xmlns $xmlns]
     foreach {key value} $args {
+	
 	switch -- $key {
 	    -command {
 		lappend opts -command  \
@@ -1666,6 +1667,7 @@ proc jlib::iq_set {jlibname xmlns to args} {
     set opts {}
     set subelements {}
     foreach {key value} $args {
+	
 	switch -- $key {
 	    -command {
 		lappend opts -command  \

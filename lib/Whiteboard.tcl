@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.28 2004-03-29 13:56:27 matben Exp $
+# $Id: Whiteboard.tcl,v 1.29 2004-04-16 13:59:29 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -441,9 +441,6 @@ proc ::WB::InitMenuDefs { } {
     lset menuDefs(main,info) end end $infoDefs
     
     # Make platform specific things and special menus etc. Indices!!! BAD!
-    if {$haveAppleMenu && ![::Plugins::HavePackage QuickTimeTcl]} {
-	lset menuDefs(main,apple) 1 3 disabled
-    }
     if {!$prefs(haveDash)} {
 	lset menuDefs(main,prefs) 7 3 disabled
     }

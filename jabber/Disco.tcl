@@ -5,13 +5,15 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.3 2004-04-15 05:55:17 matben Exp $
+# $Id: Disco.tcl,v 1.4 2004-04-16 13:59:29 matben Exp $
 
 package provide Disco 1.0
 
 namespace eval ::Jabber::Disco:: {
 
     ::hooks::add jabberInitHook     ::Jabber::Disco::NewJlibHook
+    ::hooks::add loginHook          ::Jabber::Disco::LoginHook
+    ::hooks::add logoutHook         ::Jabber::Disco::LogoutHook
 
     # Common xml namespaces.
     variable xmlns
@@ -20,13 +22,58 @@ namespace eval ::Jabber::Disco:: {
 	items           http://jabber.org/protocol/disco#items 
 	info            http://jabber.org/protocol/disco#info
     }
+    
+    # Template for the browse popup menu.
+    variable popMenuDefs
+
+    set popMenuDefs(disco,def) {
+	mEnterRoom     room      {
+	    ::Jabber::GroupChat::EnterOrCreate enter -roomjid $jid -autoget 1
+	}
+	mCreateRoom    conference {::Jabber::GroupChat::EnterOrCreate create \
+	  -server $jid}
+	separator      {}        {}
+	mInfo          jid       {::Jabber::Disco::GetInfo $jid}
+	mLastLogin/Activity jid  {::Jabber::GetLast $jid}
+	mLocalTime     jid       {::Jabber::GetTime $jid}
+	mvCard         jid       {::VCard::Fetch other $jid}
+	mVersion       jid       {::Jabber::GetVersion $jid}
+	separator      {}        {}
+	mRefresh       jid       {::Jabber::Disco::Refresh $jid}
+    }
+
+    variable dlguid 0
+
+    # Use a unique canvas tag in the tree widget for each jid put there.
+    # This is needed for the balloons that need a real canvas tag, and that
+    # we can't use jid's for this since they may contain special chars (!)!
+    variable treeuid 0
 }
 
 proc ::Jabber::Disco::NewJlibHook {jlibName} {
+    variable xmlns
     upvar ::Jabber::jstate jstate
 	    
     set jstate(disco) [disco::new $jlibName -command  \
       ::Jabber::Disco::Command]
+
+    ::Jabber::AddClientXmlns [list $xmlns(disco)]
+}
+
+proc ::Jabber::Disco::LoginHook { } {
+    upvar ::Jabber::jprefs jprefs
+    upvar ::Jabber::jserver jserver
+    
+    # Get the services for all our servers on the list. Depends on our settings:
+    # If disco fails must use "browse" or "agents" as a fallback.
+    if {[string equal $jprefs(serviceMethod) "disco"]} {
+	::Jabber::Disco::Get $jserver(this)
+    }
+}
+
+proc ::Jabber::Disco::LogoutHook { } {
+    
+    
 }
 
 # Jabber::Disco::Get --
@@ -49,8 +96,8 @@ proc ::Jabber::Disco::Get {jid args} {
     array set opts $args
     
     # Discover services available.
-    $jstate(disco) send_get items $jid ::Jabber::Disco::ItemsCB
-    $jstate(disco) send_get info  $jid ::Jabber::Disco::InfoCB
+    $jstate(disco) send_get info  $jid [namespace current]::InfoCB
+    $jstate(disco) send_get items $jid [namespace current]::ItemsCB
 }
 
 
@@ -69,13 +116,27 @@ proc ::Jabber::Disco::Command {discotype from subiq args} {
     return 1
 }
 
-proc ::Jabber::Disco::ItemsCB {args} {
+proc ::Jabber::Disco::ItemsCB {type from subiq args} {
+    upvar ::Jabber::jserver jserver
+    upvar ::Jabber::jstate jstate
     
+    puts "::Jabber::Disco::ItemsCB type=$type, from=$from"
     
-    
+    # It is at this stage we are confident that a Disco page is needed.
+    if {[string equal $from $jserver(this)]} {
+	::Jabber::UI::NewPage "Disco"
+    }
+    set parents [$jstate(disco) parents $from]
+    set v [concat $parents $from]
+    ::Jabber::Disco::AddToTree $v $subiq
+	
+
 }
 
 proc ::Jabber::Disco::InfoCB {args} {
+    
+    puts "::Jabber::Disco::InfoCB args='$args'"
+    
     
     
 }
@@ -90,7 +151,6 @@ proc ::Jabber::Disco::InfoCB {args} {
 proc ::Jabber::Disco::ParseGetInfo {from subiq args} {
     variable xmlns
     upvar ::Jabber::jstate jstate
-    upvar ::Jabber::privatexmlns privatexmlns
 
     ::Jabber::Debug 2 "::Jabber::Disco::ParseGetInfo: args='$args'"
     
@@ -102,25 +162,9 @@ proc ::Jabber::Disco::ParseGetInfo {from subiq args} {
 	set opts [list -id $argsArr(-id)]
     }
 
-    # List everything this client supports. Starting with public namespaces.
-    set vars {
-	jabber:client
-	jabber:iq:browse
-	jabber:iq:conference
-	jabber:iq:last
-	jabber:iq:oob
-	jabber:iq:roster
-	jabber:iq:time
-	jabber:iq:version
-	jabber:x:data
-	jabber:x:event
-	http://jabber.org/protocol/muc 
-	coccinella:wb
-    }
-    lappend vars $xmlns(info) $xmlns(items)
-    
     # Adding private namespaces.
-    foreach {key ns} [array get privatexmlns] {
+    set vars {}
+    foreach ns [::Jabber::GetClientXmlnsList] {
 	lappend vars $ns
     }
     set subtags [list [wrapper::createtag "identity" -attrlist  \
@@ -148,6 +192,393 @@ proc ::Jabber::Disco::ParseGetItems {from subiq args} {
     set attr [list xmlns $xmlns(items)]
     set xmllist [wrapper::createtag "query" -attrlist $attr]
     eval {$jstate(jlib) send_iq "result" $xmllist -to $from} $opts
+}
+
+# UI parts .....................................................................
+    
+# Jabber::Disco::Build --
+#
+#       Makes mega widget to show the services available for the $server.
+#
+# Arguments:
+#       w           frame window with everything.
+#       
+# Results:
+#       w
+
+proc ::Jabber::Disco::Build {w} {
+    global  this prefs
+    
+    variable wtree
+    variable wsearrows
+    variable wtop
+    variable btaddserv
+    upvar ::Jabber::jstate jstate
+    upvar ::Jabber::jserver jserver
+    upvar ::Jabber::jprefs jprefs
+    
+    ::Jabber::Debug 2 "::Jabber::Disco::Build"
+    
+    # The frame of class Disco.
+    frame $w -borderwidth 0 -relief flat -class Disco
+    set wbrowser $w
+    
+    set frbot [frame $w.frbot -bd 0]
+    set wsearrows $frbot.arr        
+    pack [::chasearrows::chasearrows $wsearrows -size 16] \
+      -side left -padx 5 -pady 0
+    pack $frbot -side bottom -fill x -padx 8 -pady 2
+    
+    set wbox $w.box
+    pack [frame $wbox -border 1 -relief sunken]   \
+      -side top -fill both -expand 1 -padx 4 -pady 4
+    set wtree $wbox.tree
+    set wxsc $wbox.xsc
+    set wysc $wbox.ysc
+    scrollbar $wxsc -orient horizontal -command [list $wtree xview]
+    scrollbar $wysc -orient vertical -command [list $wtree yview]
+    ::tree::tree $wtree -width 180 -height 100 -silent 1 -scrollwidth 400 \
+      -xscrollcommand [list $wxsc set]       \
+      -yscrollcommand [list $wysc set]       \
+      -selectcommand [namespace current]::SelectCmd   \
+      -opencommand [namespace current]::OpenTreeCmd
+    
+    if {[string match "mac*" $this(platform)]} {
+	$wtree configure -buttonpresscommand [namespace current]::Popup \
+	  -eventlist [list [list <Control-Button-1> [namespace current]::Popup]]
+    } else {
+	$wtree configure -rightclickcommand [namespace current]::Popup
+    }
+    grid $wtree -row 0 -column 0 -sticky news
+    grid $wysc -row 0 -column 1 -sticky ns
+    grid $wxsc -row 1 -column 0 -sticky ew
+    grid columnconfigure $wbox 0 -weight 1
+    grid rowconfigure $wbox 0 -weight 1
+	
+    # All tree content is set from browse callback from the browse object.
+    
+    return $w
+}
+
+# Jabber::Disco::Popup --
+#
+#       Handle popup menu in disco dialog.
+#       
+# Arguments:
+#       w           widget that issued the command: tree or text
+#       v           for the tree widget it is the item path, 
+#                   for text the jidhash.
+#       
+# Results:
+#       popup menu displayed
+
+proc ::Jabber::Disco::Popup {w v x y} {
+    global  wDlgs this
+    
+    variable popMenuDefs
+    upvar ::Jabber::jstate jstate
+
+    ::Jabber::Debug 2 "::Jabber::Disco::Popup w=$w, v='$v', x=$x, y=$y"
+
+    set typeClicked ""
+    
+    set jid [lindex $v end]
+
+    set X [expr [winfo rootx $w] + $x]
+    set Y [expr [winfo rooty $w] + $y]
+
+    
+    # Make the appropriate menu.
+    set m $jstate(wpopup,disco)
+    set i 0
+    catch {destroy $m}
+    menu $m -tearoff 0
+    
+    foreach {item type cmd} $popMenuDefs(disco,def) {
+	if {[string index $cmd 0] == "@"} {
+	    set mt [menu ${m}.sub${i} -tearoff 0]
+	    set locname [::msgcat::mc $item]
+	    $m add cascade -label $locname -menu $mt -state disabled
+	    eval [string range $cmd 1 end] $mt
+	    incr i
+	} elseif {[string equal $item "separator"]} {
+	    $m add separator
+	    continue
+	} else {
+	    
+	    # Substitute the jid arguments.
+	    set cmd [subst -nocommands $cmd]
+	    set locname [::msgcat::mc $item]
+	    $m add command -label $locname -command "after 40 $cmd"  \
+	      -state disabled
+	}
+	
+	# If a menu should be enabled even if not connected do it here.
+	
+	if {![::Jabber::IsConnected]} {
+	    continue
+	}
+	if {[string equal $type "any"]} {
+	    $m entryconfigure $locname -state normal
+	    continue
+	}
+	
+	# State of menu entry. We use the 'type' and 'typeClicked' to sort
+	# out which capabilities to offer for the clicked item.
+	set state disabled
+	
+	switch -- $type {
+	    user {
+		if {[string equal $typeClicked "user"]} {
+		    set state normal
+		}
+	    }
+	    room {
+		if {[string equal $typeClicked "room"]} {
+		    set state normal
+		}
+	    }
+	    jid {
+		switch -- $typeClicked {
+		    jid - user - conference {
+			set state normal
+		    }
+		}
+	    } 
+	    search - register {
+		if {[$jstate(browse) havenamespace $jid "jabber:iq:${type}"]} {
+		    set state normal
+		}
+	    }
+	    conference {
+		switch -- $typeClicked {
+		    conference {
+			set state normal
+		    }
+		}
+	    }
+	    wb {
+		switch -- $typeClicked {
+		    room {
+			set state normal
+		    }
+		}
+	    }
+	}
+	if {[string equal $state "normal"]} {
+	    $m entryconfigure $locname -state normal
+	}
+    }   
+    
+    # This one is needed on the mac so the menu is built before it is posted.
+    update idletasks
+    
+    # Post popup menu.
+    tk_popup $m [expr int($X) - 10] [expr int($Y) - 10]   
+    
+    # Mac bug... (else can't post menu while already posted if toplevel...)
+    if {[string equal "macintosh" $this(platform)]} {
+	catch {destroy $m}
+	update
+    }
+}
+
+proc ::Jabber::Disco::SelectCmd {w v} {
+    
+}
+
+# Jabber::Disco::OpenTreeCmd --
+#
+#       Callback when open service item in tree.
+#       It disco a subelement of the server jid, typically
+#       jud.jabber.org, aim.jabber.org etc.
+#
+# Arguments:
+#       w           tree widget
+#       v           tree item path (jidList: {jabber.org jud.jabber.org} etc.)
+#       
+# Results:
+#       none.
+
+proc ::Jabber::Disco::OpenTreeCmd {w v} {   
+    variable wtree    
+    upvar ::Jabber::jstate jstate
+    
+    ::Jabber::Debug 2 "::Jabber::Disco::OpenTreeCmd v=$v"
+
+    if {[llength $v]} {
+	set jid [lindex $v end]
+	
+	# If we have not yet browsed this jid, do it now!
+	# We should have a method to tell if children have been added to tree!!!
+	if {![$jstate(disco) isdiscoed items $jid]} {
+	    ::Jabber::Disco::ControlArrows 1
+	    
+	    # Discover services available.
+	    ::Jabber::Disco::Get $jid
+	} elseif {[llength [$wtree children $v]] == 0} {
+	    set xmllist [$jstate(disco) get $jid xml]
+	    puts "\t xmllist=$xmllist"
+	    foreach child [wrapper::getchildren $xmllist] {
+		::Jabber::Disco::AddToTree $v $child
+	    }
+	}
+    }    
+}
+
+# Jabber::Disco::AddToTree --
+#
+#       Fills tree with content. Calls itself recursively?
+#
+# Arguments:
+#       v:
+#       xmllist:    xml list starting after the <iq> tag.
+
+proc ::Jabber::Disco::AddToTree {v xmllist} {    
+    variable wtree    
+    variable treeuid
+    upvar ::Jabber::jstate jstate
+    upvar ::Jabber::jserver jserver
+ 
+    set treectag item[incr treeuid]
+    
+    puts "::Jabber::Disco::AddToTree v='$v', xmllist='$xmllist'"
+
+    set jid [lindex $v end]
+    set name [$jstate(disco) name $jid]
+    if {$name == ""} {
+	set name $jid
+    }
+    
+    if {[string equal $jid $jserver(this)]} {
+	$wtree newitem $v -text $name -tags $jid -style bold -dir 1 -open 1 \
+	  -canvastags $treectag
+    } else {
+	$wtree newitem $v -text $name -tags $jid -style bold -open 0 \
+	  -canvastags $treectag
+    }
+    
+    # Add all child elements as well.
+    set childs [$jstate(disco) children $jid]
+    foreach cjid $childs {
+	set cv [concat $v $cjid]
+	::Jabber::Disco::AddToTree $cv {}
+     }	    
+}
+
+proc ::Jabber::Disco::Refresh {jid} {    
+    variable wtree    
+    upvar ::Jabber::jstate jstate
+    
+    ::Jabber::Debug 2 "::Jabber::Disco::Refresh jid=$jid"
+	
+    # Clear internal state of the disco object for this jid.
+    $jstate(disco) reset $jid
+    
+    # Remove all children of this jid from browse tree.
+    foreach v [$wtree find withtag $jid] {
+	$wtree delitem $v -childsonly 1
+    }
+    
+    # Browse once more, let callback manage rest.
+    ::Jabber::Disco::ControlArrows 1
+    ::Jabber::Disco::Get $jid
+}
+
+proc ::Jabber::Disco::ControlArrows {step} {    
+    variable wsearrows
+    variable arrowRefCount
+    
+    if {![winfo exists $wsearrows]} {
+	return
+    }
+    if {$step == 1} {
+	incr arrowRefCount
+	if {$arrowRefCount == 1} {
+	    $wsearrows start
+	}
+    } elseif {$step == -1} {
+	incr arrowRefCount -1
+	if {$arrowRefCount <= 0} {
+	    set arrowRefCount 0
+	    $wsearrows stop
+	}
+    } elseif {$step == 0} {
+	set arrowRefCount 0
+	$wsearrows stop
+    }
+}
+
+proc ::Jabber::Disco::GetInfo {jid} {
+    upvar ::Jabber::jstate jstate
+
+    $jstate(disco) send_get info  $jid [namespace current]::GetInfoCB
+}
+
+proc ::Jabber::Disco::GetInfoCB {discoName type jid subiq args} {
+    
+    switch -- $type {
+	error {
+
+	}
+	result - ok {
+	    eval {[namespace current]::InfoResultCB $discoName $type $jid $subiq} $args
+	}
+    }
+}
+
+proc ::Jabber::Disco::InfoResultCB {discoName type jid subiq args} {
+    global  this
+    
+    variable dlguid
+    upvar ::Jabber::nsToText nsToText
+
+    set w .jdinfo[incr dlguid]
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
+      -macclass {document closeBox}
+    wm title $w "Disco Info: $jid"
+    set fontS [option get . fontSmall {}]
+    
+    # Global frame.
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1 -ipadx 12 -ipady 4
+    set wtext $w.frall.t
+    set iconInfo [::Theme::GetImage info]
+    label $w.frall.l -text "Description of services provided by $jid" \
+      -justify left -image $iconInfo -compound left
+    text $wtext -wrap word -width 60 -bg gray80 \
+      -tabs {180} -spacing1 3 -spacing3 2 -bd 0
+
+    pack $w.frall.l $wtext -side top -anchor w -padx 10 -pady 1
+    
+    $wtext tag configure head -background gray70
+    $wtext insert end "XML namespace\tDescription\n" head
+    set n 1
+    foreach c [wrapper::getchildren $subiq] {
+	if {[wrapper::gettag $c] == "ns"} {
+	    incr n
+	    set ns [wrapper::getcdata $c]
+	    $wtext insert end $ns
+	    if {[info exists nsToText($ns)]} {
+		$wtext insert end "\t$nsToText($ns)"
+	    }
+	    $wtext insert end \n
+	}
+    }
+    if {$n == 1} {
+	$wtext insert end "The component did not return any services"
+	incr n
+    }
+    $wtext configure -height $n
+
+    # Button part.
+    set frbot [frame $w.frall.frbot -borderwidth 0]
+    pack [button $frbot.btadd -text [::msgcat::mc Close] \
+      -command [list destroy $w]]  \
+      -side right -padx 5 -pady 5
+    pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
+	
+    wm resizable $w 0 0	
 }
 
 if {0} {

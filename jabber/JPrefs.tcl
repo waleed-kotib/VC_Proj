@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.2 2004-04-09 10:32:25 matben Exp $
+# $Id: JPrefs.tcl,v 1.3 2004-04-16 13:59:29 matben Exp $
 
 
 package provide JPrefs 1.0
@@ -36,6 +36,19 @@ proc ::Jabber::JPrefs::InitPrefsHook { } {
     set jprefs(xawaymsg) {User has been inactive for a while}
     set jprefs(logoutStatus) ""
         
+    set jprefs(showMsgNewWin) 1
+    
+    # Save inbox when quit?
+    set jprefs(inboxSave) 0
+    set jprefs(inbox2click) "newwin"
+    
+    # Service discovery method: "disco", "agents" or "browse"
+    set jprefs(serviceMethod) "browse"
+    
+    # The rosters background image is partly controlled by option database.
+    set jprefs(rost,useBgImage)     1
+    set jprefs(rost,bgImagePath)    ""
+
     ::PreferencesUtils::Add [list  \
       [list ::Jabber::jprefs(autoaway)         jprefs_autoaway          $jprefs(autoaway)]  \
       [list ::Jabber::jprefs(xautoaway)        jprefs_xautoaway         $jprefs(xautoaway)]  \
@@ -64,13 +77,23 @@ proc ::Jabber::JPrefs::InitPrefsHook { } {
 	  $jprefs(iq:register,$key) userDefault]
     }
     ::PreferencesUtils::Add $jprefsRegList
+
+    ::PreferencesUtils::Add [list  \
+      [list ::Jabber::jprefs(showMsgNewWin)    jprefs_showMsgNewWin     $jprefs(showMsgNewWin)]  \
+      [list ::Jabber::jprefs(inboxSave)        jprefs_inboxSave         $jprefs(inboxSave)]  \
+      [list ::Jabber::jprefs(inbox2click)      jprefs_inbox2click       $jprefs(inbox2click)]  \
+      [list ::Jabber::jprefs(rost,useBgImage)  jprefs_rost_useBgImage   $jprefs(rost,useBgImage)]  \
+      [list ::Jabber::jprefs(rost,bgImagePath) jprefs_rost_bgImagePath  $jprefs(rost,bgImagePath)]  \
+      [list ::Jabber::jprefs(serviceMethod)   jprefs_serviceMethod    $jprefs(serviceMethod)]  \
+      ]
 }
 
 proc ::Jabber::JPrefs::BuildPrefsHook {wtree nbframe} {
     
     $wtree newitem {Jabber {Auto Away}} -text [::msgcat::mc {Auto Away}]
     $wtree newitem {Jabber {Personal Info}} -text [::msgcat::mc {Personal Info}]
-    
+    $wtree newitem {Jabber Customization} -text [::msgcat::mc Customization]
+
     # Auto Away page -------------------------------------------------------
     set wpage [$nbframe page {Auto Away}]
     ::Jabber::JPrefs::BuildAutoAwayPage $wpage
@@ -78,6 +101,10 @@ proc ::Jabber::JPrefs::BuildPrefsHook {wtree nbframe} {
     # Personal Info page ---------------------------------------------------
     set wpage [$nbframe page {Personal Info}]    
     ::Jabber::JPrefs::BuildPersInfoPage $wpage
+	    
+    # Customization page -------------------------------------------------------
+    set wpage [$nbframe page {Customization}]    
+    ::Jabber::JPrefs::BuildCustomPage $wpage
 }
 
 proc ::Jabber::JPrefs::BuildAutoAwayPage {page} {
@@ -205,13 +232,125 @@ proc ::Jabber::JPrefs::UpdateAutoAwaySettings { } {
     }
 }
 
+proc ::Jabber::JPrefs::BuildCustomPage {page} {
+    global  this prefs
+    
+    variable wlbblock
+    variable btrem
+    variable wlbblock
+    variable tmpJPrefs
+    variable tmpPrefs
+    upvar ::Jabber::jprefs jprefs
+    
+    set fontS  [option get . fontSmall {}]    
+    set fontSB [option get . fontSmallBold {}]
+    set xpadbt [option get [winfo toplevel $page] xPadBt {}]
+    set ypad   [option get [winfo toplevel $page] yPad {}]
+
+    foreach key {showMsgNewWin inboxSave inbox2click \
+      rost,useBgImage rost,bgImagePath serviceMethod} {
+	set tmpJPrefs($key) $jprefs($key)
+    }
+    set tmpPrefs(themeName) $prefs(themeName)
+
+    set labfrpbl $page.fr
+    labelframe $labfrpbl -text [::msgcat::mc Customization]
+    pack $labfrpbl -side top -anchor w -padx 8 -pady 4
+    set pbl [frame $labfrpbl.frin]
+    pack $pbl -padx 10 -pady 6 -side left
+    
+    checkbutton $pbl.newwin -text " [::msgcat::mc prefcushow]" \
+      -variable [namespace current]::tmpJPrefs(showMsgNewWin)
+    checkbutton $pbl.savein -text " [::msgcat::mc prefcusave]" \
+      -variable [namespace current]::tmpJPrefs(inboxSave)
+    label $pbl.lmb2 -text [::msgcat::mc prefcu2clk]
+    radiobutton $pbl.rb2new -text " [::msgcat::mc prefcuopen]" \
+      -value "newwin" -variable [namespace current]::tmpJPrefs(inbox2click)
+    radiobutton $pbl.rb2re   \
+      -text " [::msgcat::mc prefcureply]" -value "reply" \
+      -variable [namespace current]::tmpJPrefs(inbox2click)
+    
+    set frrost $pbl.robg
+    frame $frrost
+    pack [checkbutton $frrost.cb -text "  [::msgcat::mc prefrostbgim]" \
+      -variable [namespace current]::tmpJPrefs(rost,useBgImage)] -side left
+    pack [button $frrost.btpick -text "[::msgcat::mc {Pick}]..."  \
+      -command [list [namespace current]::PickBgImage rost] -font $fontS] \
+      -side left -padx 4
+    pack [button $frrost.btdefk -text "[::msgcat::mc {Default}]"  \
+      -command [list [namespace current]::DefaultBgImage rost] -font $fontS]  \
+      -side left -padx 4
+    
+    set frtheme $pbl.ftheme
+    frame $frtheme
+    set wpoptheme $frtheme.pop
+
+    set allrsrc [::Theme::GetAllAvailable]
+
+    set wpopupmenuin [eval {tk_optionMenu $wpoptheme   \
+      [namespace current]::tmpPrefs(themeName)} $allrsrc]
+    pack [label $frtheme.l -text "[::msgcat::mc preftheme]:"] -side left
+    pack $wpoptheme -side left
+    
+    grid $pbl.newwin -padx 2 -pady $ypad -sticky w -columnspan 2
+    grid $pbl.savein -padx 2 -pady $ypad -sticky w -columnspan 2
+    grid $pbl.lmb2   -padx 2 -pady $ypad -sticky w -columnspan 2
+    grid $pbl.rb2new -padx 2 -pady $ypad -sticky w -columnspan 2
+    grid $pbl.rb2re  -padx 2 -pady $ypad -sticky w -columnspan 2
+    grid $frrost     -padx 2 -pady $ypad -sticky w -columnspan 2
+    grid $frtheme    -padx 2 -pady $ypad -sticky w -columnspan 2
+    
+    # Disco, Agents or Browse.
+    set frdisc $page.ag 
+    labelframe $frdisc -text [::msgcat::mc prefcudisc]
+    pack $frdisc -side top -anchor w -padx 8 -pady 4
+    set pdisc [frame $frdisc.frin]
+    pack $pdisc -padx 10 -pady 6 -side left
+    radiobutton $pdisc.disco   \
+      -text " [::msgcat::mc {Disco method}]"  \
+      -variable [namespace current]::tmpJPrefs(serviceMethod) -value "disco"
+    radiobutton $pdisc.browse   \
+      -text " [::msgcat::mc prefcubrowse]"  \
+      -variable [namespace current]::tmpJPrefs(serviceMethod) -value "browse"
+    radiobutton $pdisc.agents  \
+      -text " [::msgcat::mc prefcuagent]" -value "agents" \
+      -variable [namespace current]::tmpJPrefs(serviceMethod)
+    grid $pdisc.disco  -padx 2 -pady $ypad -sticky w
+    grid $pdisc.browse -padx 2 -pady $ypad -sticky w
+    grid $pdisc.agents -padx 2 -pady $ypad -sticky w
+}
+
+proc ::Jabber::JPrefs::PickBgImage {where} {
+    variable tmpJPrefs
+
+    set types {
+	{{GIF Files}        {.gif}        }
+	{{GIF Files}        {}        GIFF}
+    }
+    set ans [tk_getOpenFile -title {Open GIF Image} \
+      -filetypes $types -defaultextension ".gif"]
+    if {$ans != ""} {
+	set tmpJPrefs($where,bgImagePath) $ans
+    }
+}
+
+proc ::Jabber::JPrefs::DefaultBgImage {where} {
+    variable tmpJPrefs
+
+    set tmpJPrefs($where,bgImagePath) ""
+}
+
 proc ::Jabber::JPrefs::SavePrefsHook { } {
+    global  prefs
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
+    variable tmpPrefs
     
     array set jprefs [array get tmpJPrefs]
     unset tmpJPrefs
     
+    set prefs(themeName) $tmpPrefs(themeName)
+
     # If changed present auto away settings, may need to reconfigure.
     ::Jabber::JPrefs::UpdateAutoAwaySettings    
 }
