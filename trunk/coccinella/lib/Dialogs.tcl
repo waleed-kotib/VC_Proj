@@ -7,12 +7,11 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.8 2003-08-23 07:19:16 matben Exp $
+# $Id: Dialogs.tcl,v 1.9 2003-08-30 09:41:00 matben Exp $
    
 package provide Dialogs 1.0
 
 namespace eval ::Dialogs:: {
-    
     
 }
 
@@ -1099,10 +1098,39 @@ proc ::Dialogs::Canvas {filePath args} {
     catch {close $fd}
 }
 
+namespace eval ::Dialogs:: {
+    
+    variable initedAboutQuickTimeTcl 0
+    variable wAboutQuickTimeTcl .aboutqt
+}
+
+proc ::Dialogs::InitAboutQuickTimeTcl { } {
+    global  this
+    variable initedAboutQuickTimeTcl
+    variable fakeQTSampleFile
+    
+    set origMovie [file join $this(path) images FakeSample.mov]
+    set fakeQTSampleFile $origMovie
+    
+    # QuickTime doesn't understand vfs; need to copy out to tmp dir.
+    if {[namespace exists ::vfs]} {
+	set tmp [file join $this(tmpDir) FakeSample.mov]
+	file copy -force $origMovie $tmp
+	set fakeQTSampleFile $tmp
+    }
+    set initedAboutQuickTimeTcl 1
+}
+
 proc ::Dialogs::AboutQuickTimeTcl { } {
     global  this
+    variable initedAboutQuickTimeTcl
+    variable fakeQTSampleFile
+    variable wAboutQuickTimeTcl
     
-    set w .abqt
+    if {!$initedAboutQuickTimeTcl} {
+	::Dialogs::InitAboutQuickTimeTcl
+    }
+    set w $wAboutQuickTimeTcl
     if {[winfo exists $w]} {
 	return
     }
@@ -1115,7 +1143,7 @@ proc ::Dialogs::AboutQuickTimeTcl { } {
     }
     wm title $w [::msgcat::mc {About QuickTimeTcl}]
     
-    pack [movie $w.m -file [file join $this(path) images FakeSample.mov]]
+    pack [movie $w.m -file $fakeQTSampleFile]
     set theSize [$w.m size]
     set mw [lindex $theSize 0]
     set mh [lindex $theSize 1]
@@ -1124,6 +1152,19 @@ proc ::Dialogs::AboutQuickTimeTcl { } {
     update
     wm resizable $w 0 0
     $w.m play
+}
+
+# Dialogs::Free --
+# 
+#       In case we want to cleanup tmp directory we must destroy window
+#       before deleting the movie file!
+
+proc ::Dialogs::Free { } {
+    variable wAboutQuickTimeTcl
+    
+    if {[winfo exists $wAboutQuickTimeTcl]} {
+	destroy $wAboutQuickTimeTcl
+    }
 }
 
 #-------------------------------------------------------------------------------

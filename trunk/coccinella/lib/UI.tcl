@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.15 2003-08-23 07:19:16 matben Exp $
+# $Id: UI.tcl,v 1.16 2003-08-30 09:41:00 matben Exp $
 
 # LabeledFrame --
 #
@@ -3614,7 +3614,8 @@ proc ::UI::BuildJabberEntry {wtop args} {
     set n 1
     set jidlist [$jstate(roster) getusers]
     entry $wcomm.ad$n -width 16 -relief sunken -bg $prefs(bgColGeneral)
-    ::entrycomp::entrycomp $wcomm.us$n $jidlist -width 22 -relief sunken -bg white
+    ::entrycomp::entrycomp $wcomm.us$n $jidlist -width 22 -relief sunken \
+      -bg white
     if {[info exists argsArr(-servervariable)]} {
 	$wcomm.ad$n configure -textvariable $argsArr(-servervariable)
     }
@@ -4377,6 +4378,7 @@ proc ::UI::BuildItemMenu {wtop wmenu itemDir} {
     cd $itemDir
     set allItemFiles [glob -nocomplain *]
     foreach itemFile $allItemFiles {
+	set itemFile [string trim $itemFile :]
 	
 	# Keep only .can files and dirs.
 	if {[string equal [file extension $itemFile] ".can"]} {

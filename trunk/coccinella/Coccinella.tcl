@@ -15,7 +15,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.2 2003-08-23 07:19:16 matben Exp $
+# $Id: Coccinella.tcl,v 1.3 2003-08-30 09:40:59 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -229,15 +229,41 @@ if {[string equal $this(platform) "macintosh"] && [string equal $thisPath ":"]} 
 set this(path) $thisPath
 set this(script) $thisScript
 
+
+# Need a tmp directory.
+if {[info exists env(TMP)] && [file exists $env(TMP)]} {
+    set this(tmpDir) [file join $env(TMP) tmpcoccinella]
+} elseif {[info exists env(TEMP)] && [file exists $env(TEMP)]} {
+    set this(tmpDir) [file join $env(TEMP) tmpcoccinella]
+} else {
+    switch -- $this(platform) {
+	unix {
+	    set this(tmpDir) [file join /tmp tmpcoccinella]
+	}
+	macintosh {
+	    set this(tmpDir) [file join [lindex [file volumes] 0] tmpcoccinella]
+	}
+	macosx {
+	    set this(tmpDir) [file join /tmp tmpcoccinella]
+	}
+	windows {
+	    set this(tmpDir) [file join C:/ tmpcoccinella]
+	}
+    }
+}
+if {![file isdirectory $this(tmpDir)]} {
+    file mkdir $this(tmpDir)
+}
+
 # Privaria-specific stuff
 if {$privariaFlag} {
     set prefs(stripJabber) 1
     switch $this(platform) {
         unix { 
-        	set x [file join privaria lib] 
-        }
-        windows { 
-        	set x opt.privaria.lib 
+	    set x [file join privaria lib] 
+	}
+	windows { 
+	    set x opt.privaria.lib 
         }
     }
     if {[file isdirectory [set x [file join [file dirname $this(path)] $x]]]} {
@@ -288,7 +314,16 @@ if {$this(platform) == "unix"} {
 
 # Make cvs happy.
 regsub -all " " $machineSpecPath "" machineSpecPath
-set prefs(binDir) [file join $this(path) bin $this(platform) $machineSpecPath]
+
+
+# TclKits on macintosh can't load sharedlibs. Placed side-by-side with tclkit.
+if {($this(platform) == "macintosh") &&  \
+  ([info exists tclkit::topdir] ||  \
+  [string match -nocase tclkit* [file tail [info nameofexecutable]]])} {
+    set prefs(binDir) [file dirname [info nameofexecutable]]
+} else {
+    set prefs(binDir) [file join $this(path) bin $this(platform) $machineSpecPath]
+}
 if {[file exists $prefs(binDir)]} {
     set auto_path [concat [list $prefs(binDir)] $auto_path]
 } else {

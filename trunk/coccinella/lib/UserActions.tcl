@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UserActions.tcl,v 1.11 2003-08-23 07:19:17 matben Exp $
+# $Id: UserActions.tcl,v 1.12 2003-08-30 09:41:00 matben Exp $
 
 namespace eval ::UserActions:: {
     
@@ -730,15 +730,17 @@ proc ::UserActions::DoCloseWindow { } {
     }
     Debug 2 "::UserActions::DoCloseWindow winfo class $w=[winfo class $w]"
     
+    if {$w == "."} {
+    	::UI::CloseMain $wtop
+    	return
+    }	    
+    
     # Do different things depending on type of toplevel.
     switch -glob -- [winfo class $w] {
-	Wish* - Whiteboard* - Coccinella* {
-	    # Main window.
-	    if {0 && $w == "."} {
-		::UserActions::DoQuit -warning 1
-	    } else {
-		::UI::CloseMain $wtop
-	    }
+	Wish* - Whiteboard* - Coccinella* - Tclkit* {
+	
+	    # Whiteboard window.
+	    ::UI::CloseMain $wtop
 	}
 	Preferences {
 	    ::Preferences::CancelPushBt
@@ -805,8 +807,10 @@ proc ::UserActions::DoQuit {args} {
 	::Jabber::EndSession
     }
     
-    # Should we clean up our 'incoming' directory?
-    
+    # Delete widgets with sounds.
+    ::Sounds::Free
+    ::Dialogs::Free
+ 
     # A workaround for the 'info script' bug on MacTk 8.3
     # Work on a temporary file and switch later.
     if {[string equal $this(platform) "macintosh"] && \
@@ -840,6 +844,11 @@ proc ::UserActions::DoQuit {args} {
     
     # Save to the preference file and quit...
     ::PreferencesUtils::SaveToFile
+    
+    # Should we clean up our 'incoming' directory?
+    
+    # Cleanup. Beware, no windows with open movies must exist here!
+    file delete -force $this(tmpDir)
     exit
 }
 
