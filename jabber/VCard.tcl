@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: VCard.tcl,v 1.19 2004-05-26 07:36:38 matben Exp $
+# $Id: VCard.tcl,v 1.20 2004-05-28 12:41:15 matben Exp $
 
 package provide VCard 1.0
 
@@ -354,6 +354,7 @@ proc ::VCard::Build {nstoken} {
 proc ::VCard::SetVCard {nstoken}  {
 
     upvar ${nstoken}::elem elem
+    upvar ${nstoken}::priv priv
     
     set wemails  $priv(wemails)
     set wdesctxt $priv(wdesctxt)
