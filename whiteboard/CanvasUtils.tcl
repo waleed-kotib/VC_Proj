@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.17 2004-08-30 07:46:08 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.18 2004-09-27 12:57:40 matben Exp $
 
 package require sha1pure
 
@@ -1119,10 +1119,9 @@ proc ::CanvasUtils::ItemConfigure {w id args} {
     undo::add [::WB::GetUndoToken $wtop] $undo $redo
     
     # If selected, redo the selection to fit.
-    set idsMarker [$w find withtag id$id]
-    if {[string length $idsMarker] > 0} {
-	$w delete id$id
-	::CanvasDraw::MarkBbox $w 1 $id
+    if {[::CanvasDraw::IsSelected $w $id]} {
+	::CanvasDraw::DeselectItem $w $id
+	::CanvasDraw::MarkBbox $w 0 $id
     }
 }
 

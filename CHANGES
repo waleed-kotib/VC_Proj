@@ -7,6 +7,8 @@ Not to mention all bugfixes and rewrites.
 Coccinella-0.95.1 (040930): 	Short summary --
 
 	- SASL authentication
+	- Reworked several dialogs (new user, edit user)
+	- Reworked how transports are displayed and handled
 
 
 Coccinella-0.95.0 (040904): 	Short summary --
