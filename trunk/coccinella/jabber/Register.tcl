@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.27 2004-09-30 12:43:06 matben Exp $
+# $Id: Register.tcl,v 1.28 2004-09-30 13:11:35 matben Exp $
 
 package provide Register 1.0
 
@@ -593,9 +593,11 @@ proc ::Jabber::GenRegister::DoRegister {token} {
     variable UItype
     upvar ::Jabber::jstate jstate
     
-    if {[info exists state(w)] && [winfo exists $state(w)]} {
-	$state(wsearrows) start
+    if {!([info exists state(w)] && [winfo exists $state(w)])} {
+	return
     }
+    $state(wsearrows) start
+    set wbox $state(wbox)
     if {$UItype != 2} {
 	set subelements [::Jabber::Forms::GetXML $wbox]
     } else {
@@ -605,7 +607,7 @@ proc ::Jabber::GenRegister::DoRegister {token} {
     # We need to do it the crude way.
     $jstate(jlib) send_iq "set"  \
       [wrapper::createtag "query" -attrlist {xmlns jabber:iq:register}   \
-      -subtags $subelements] -to $server   \
+      -subtags $subelements] -to $state(server)   \
       -command [list [namespace current]::ResultCallback $token]
 
     # Keep state array until callback.
@@ -621,7 +623,7 @@ proc ::Jabber::GenRegister::ResultCallback {token type subiq args} {
     variable $token
     upvar 0 $token state
 
-    ::Debug 2 "::Jabber::GenRegister::ResultCallback server=$server, type=$type, subiq='$subiq'"
+    ::Debug 2 "::Jabber::GenRegister::ResultCallback type=$type, subiq='$subiq'"
 
     if {[string equal $type "error"]} {
 	tk_messageBox -type ok -icon error  \
