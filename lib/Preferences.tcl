@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.26 2003-12-29 09:02:30 matben Exp $
+# $Id: Preferences.tcl,v 1.27 2003-12-29 15:44:19 matben Exp $
  
 package require notebook
 package require tree
@@ -54,7 +54,7 @@ proc ::Preferences::Build { } {
     wm protocol $w WM_DELETE_WINDOW ::Preferences::CancelPushBt
 
     # On non macs we need to explicitly bind certain commands.
-    if {![string match "mac*" $this(platform)]} {
+    if {![string equal $this(platform) "macintosh"]} {
 	bind $w <$osprefs(mod)-Key-w> ::Preferences::CancelPushBt
     }
 

@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.19 2003-12-20 14:27:16 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.20 2003-12-29 15:44:19 matben Exp $
 
 # SetWhiteboardFactoryState --
 # 
@@ -217,10 +217,6 @@ set prefs(progUpdateMillis) 1000
 # When and how old is a cached file allowed to be before downloading a new?
 # Options. "never", "always", "launch", "hour", "day", "week", "month"
 set prefs(checkCache) "launch"
-
-# Switch to make the jabber comm entry already at build.
-# 0 means that it is built first when connected.
-set prefs(jabberCommFrame) 1
 
 # If we have got TclSpeech the default is to have it enabled.
 set prefs(SpeechOn) 1

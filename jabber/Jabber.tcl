@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.46 2003-12-29 09:02:29 matben Exp $
+# $Id: Jabber.tcl,v 1.47 2003-12-29 15:44:19 matben Exp $
 #
 #  The $address is an ip name or number.
 #
@@ -584,6 +584,12 @@ proc ::Jabber::GetServerJid { } {
     return $jserver(this)
 }
 
+proc ::Jabber::GetServerIpNum { } {
+    variable jstate
+    
+    return $jstate(ipNum)
+}
+
 proc ::Jabber::GetMyJid {{roomjid {}}} {
     variable jstate
 
@@ -930,6 +936,7 @@ proc ::Jabber::DispatchNormalMessage {body iswb args} {
 	array set argsArr $args
 	set restCmds {}
 	foreach raw $argsArr(-whiteboard) {
+	    
 	    switch -glob -- $raw {
 		"GET IP:*" {
 		    if {[regexp {^GET IP: +([^ ]+)$} $raw m id]} {
@@ -955,8 +962,7 @@ proc ::Jabber::DispatchNormalMessage {body iswb args} {
 	}
 	if {[llength $restCmds] > 0} {
 	    set argsArr(-whiteboard) $restCmds
-	    eval {::Jabber::MailBox::GotMsg $body} [array get argsArr]
-	    eval {hooks::run newWBMessageHook $body} [array get argsArr]
+	    eval {hooks::run newMessageHook $body} [array get argsArr]
 	}
     } else {
 	eval {hooks::run newMessageHook $body} $args
@@ -1575,9 +1581,7 @@ proc ::Jabber::DoCloseClientConnection {args} {
     after idle $jstate(jlib) disconnect
     
     # Update the communication frame; remove connection 'to'.
-    if {$prefs(jabberCommFrame)} {
-	::WB::ConfigureAllJabberEntries $jstate(ipNum) -netstate "disconnect"
-    }
+    ::WB::ConfigureAllJabberEntries $jstate(ipNum) -netstate "disconnect"
     ::Jabber::UI::SetStatusMessage "Logged out"
 
     # Multiinstance whiteboard UI stuff.

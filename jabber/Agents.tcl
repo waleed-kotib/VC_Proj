@@ -5,16 +5,28 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Agents.tcl,v 1.6 2003-12-15 15:39:08 matben Exp $
+# $Id: Agents.tcl,v 1.7 2003-12-29 15:44:19 matben Exp $
 
 package provide Agents 1.0
 
 namespace eval ::Jabber::Agents:: {
 
+    hooks::add loginHook ::Jabber::Agents::LoginCmd
+
     # We keep an reference count that gets increased by one for each request
     # sent, and decremented by one for each response.
     variable arrowRefCount 0
     variable arrMsg ""
+}
+
+proc ::Jabber::Agents::LoginCmd { } {
+    upvar ::Jabber::jprefs jprefs
+
+    # Get the services for all our servers on the list. Depends on our settings:
+    # If browsing fails must use "agents" as a fallback.
+    if {[string equal $jprefs(agentsOrBrowse) "agents"]} {
+	::Jabber::Agents::GetAll
+    }
 }
 
 # Jabber::Agents::GetAll --

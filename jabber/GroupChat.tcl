@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.28 2003-12-29 09:02:29 matben Exp $
+# $Id: GroupChat.tcl,v 1.29 2003-12-29 15:44:19 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -20,34 +20,38 @@ namespace eval ::Jabber::GroupChat:: {
     set fontS [option get . fontSmall {}]
     set fontSB [option get . fontSmallBold {}]
 
-    option add *GroupChat*mePreForeground         red              widgetDefault
-    option add *GroupChat*mePreBackground         #cecece          widgetDefault
-    option add *GroupChat*mePreFont               $fontSB          widgetDefault                                     
-    option add *GroupChat*meTextForeground     black            widgetDefault
-    option add *GroupChat*meTextBackground     #cecece          widgetDefault
-    option add *GroupChat*meTextFont           $fontS           widgetDefault                                     
-    option add *GroupChat*theyForeground       blue             widgetDefault
-    option add *GroupChat*theyBackground       white            widgetDefault
-    option add *GroupChat*theyFont             $fontSB          widgetDefault
-    option add *GroupChat*theyTextForeground   black            widgetDefault
-    option add *GroupChat*theyTextBackground   white            widgetDefault
-    option add *GroupChat*theyTextFont         $fontS           widgetDefault
+    option add *GroupChat*mePreForeground      red              widgetDefault
+    option add *GroupChat*mePreBackground      ""               widgetDefault
+    option add *GroupChat*mePreFont            ""               widgetDefault                                     
+    option add *GroupChat*meTextForeground     ""               widgetDefault
+    option add *GroupChat*meTextBackground     ""               widgetDefault
+    option add *GroupChat*meTextFont           ""               widgetDefault                                     
+    option add *GroupChat*theyPreForeground    blue             widgetDefault
+    option add *GroupChat*theyPreBackground    ""               widgetDefault
+    option add *GroupChat*theyPreFont          ""               widgetDefault
+    option add *GroupChat*theyTextForeground   ""               widgetDefault
+    option add *GroupChat*theyTextBackground   ""               widgetDefault
+    option add *GroupChat*theyTextFont         ""               widgetDefault
+    option add *GroupChat*sysPreForeground     green            widgetDefault
+    option add *GroupChat*sysForeground        green            widgetDefault
     option add *GroupChat*clockFormat          "%H:%M"          widgetDefault
       
     # List of: {tagName optionName resourceName resourceClass}
     variable groupChatOptions {
-	{me          -foreground          mePreForeground          Foreground}
-	{me          -background          mePreBackground          Background}
-	{me          -font                mePreFont                Font}
+	{mepre       -foreground          mePreForeground       Foreground}
+	{mepre       -background          mePreBackground       Background}
+	{mepre       -font                mePreFont             Font}
 	{metext      -foreground          meTextForeground      Foreground}
 	{metext      -background          meTextBackground      Background}
 	{metext      -font                meTextFont            Font}
-	{they        -foreground          theyForeground        Foreground}
-	{they        -background          theyBackground        Background}
-	{they        -font                theyFont              Font}
+	{theypre     -foreground          theyPreForeground     Foreground}
+	{theypre     -background          theyPreBackground     Background}
+	{theypre     -font                theyPreFont           Font}
 	{theytext    -foreground          theyTextForeground    Foreground}
 	{theytext    -background          theyTextBackground    Background}
 	{theytext    -font                theyTextFont          Font}
+	{syspre      -foreground          sysPreForeground      Foreground}
+	{sys         -foreground          sysForeground         Foreground}
     }
 
     # Add all event hooks.
@@ -472,12 +476,12 @@ proc ::Jabber::GroupChat::GotMsg {body args} {
 
 	$wtext configure -state normal
 	if {[string equal $meRoomJid $fromJid]} {
-	    set meyou me
+	    set methey me
 	} else {
-	    set meyou you
+	    set methey they
 	}
-	$wtext insert end $txt $meyou
-	::Text::ParseAndInsert $wtext "  $body" ${meyou}text linktag	
+	$wtext insert end $txt ${methey}pre
+	::Text::ParseAndInsert $wtext "  $body" ${methey}text linktag	
 	$wtext configure -state disabled
 	$wtext see end
 
@@ -551,7 +555,7 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
       [list ::Jabber::GroupChat::Exit $roomJid]
 
     # On non macs we need to explicitly bind certain commands.
-    if {![string match "mac*" $this(platform)]} {
+    if {![string equal $this(platform) "macintosh"]} {
 	bind $w <$osprefs(mod)-Key-w>  \
 	  [list ::Jabber::GroupChat::Exit $roomJid]
     }
@@ -752,10 +756,17 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
 
 proc ::Jabber::GroupChat::ConfigureTextTags {w wtext} {
     variable groupChatOptions
+    upvar ::Jabber::jprefs jprefs
+    
+    ::Jabber::Debug 2 "::Jabber::GroupChat::ConfigureTextTags"
     
     set space 2
-    set alltags {me metext they theytext}
+    set alltags {mepre metext theypre theytext syspre sys}
 	
+    if {[string length $jprefs(chatFont)]} {
+	set chatFont $jprefs(chatFont)
+	set boldChatFont [lreplace $jprefs(chatFont) 2 2 bold]
+    }
     foreach tag $alltags {
 	set opts($tag) [list -spacing1 $space]
     }
@@ -766,8 +777,9 @@ proc ::Jabber::GroupChat::ConfigureTextTags {w wtext} {
 	    lappend opts($tag) $optName $value
 	}   
     }
-    lappend opts(metext)  -spacing3 $space -lmargin1 20 -lmargin2 20
+    lappend opts(metext)   -spacing3 $space -lmargin1 20 -lmargin2 20
     lappend opts(theytext) -spacing3 $space -lmargin1 20 -lmargin2 20
+    lappend opts(sys)      -spacing3 $space -lmargin1 20 -lmargin2 20
     foreach tag $alltags {
 	eval {$wtext tag configure $tag} $opts($tag)
     }

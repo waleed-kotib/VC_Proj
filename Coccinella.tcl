@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.28 2003-12-29 09:02:29 matben Exp $
+# $Id: Coccinella.tcl,v 1.29 2003-12-29 15:44:19 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -604,7 +604,7 @@ if {[string equal $this(platform) "unix"]} {
 }
 
 # On non macs we need to explicitly bind certain commands.
-if {![string match "mac*" $this(platform)]} {
+if {![string equal $this(platform) "macintosh"]} {
     foreach wclass {Toplevel} {
 	bind $wclass <$osprefs(mod)-Key-w>  \
 	  [list ::UserActions::DoCloseWindow %W]

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UserActions.tcl,v 1.29 2003-12-29 09:02:30 matben Exp $
+# $Id: UserActions.tcl,v 1.30 2003-12-29 15:44:19 matben Exp $
 
 namespace eval ::UserActions:: {
     
@@ -153,7 +153,7 @@ proc ::UserActions::DoCloseWindow {{wevent {}}} {
 	    ::UserActions::DoQuit -warning 1
 	}
 	default {
-	    destroy $w
+	    #destroy $w
 	}
     }
 }

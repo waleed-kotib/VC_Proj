@@ -5,12 +5,14 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.29 2003-12-29 09:02:29 matben Exp $
+# $Id: Roster.tcl,v 1.30 2003-12-29 15:44:19 matben Exp $
 
 package provide Roster 1.0
 
 namespace eval ::Jabber::Roster:: {
     
+    hooks::add loginHook   ::Jabber::Roster::LoginCmd
+
     # Use option database for customization. 
     # Use priority 30 just to override the widgetDefault values!
     set fontS [option get . fontSmall {}]
@@ -238,6 +240,17 @@ proc ::Jabber::Roster::Build {w} {
 	$wtree itemconfigure [list $gpres] -open 0
     }
     return $w
+}
+
+# Jabber::Roster::LoginCmd --
+# 
+#       The login hook command.
+
+proc ::Jabber::Roster::LoginCmd { } {
+    
+    set server [::Jabber::GetServerJid]
+    set ::Jabber::Roster::servtxt $server
+    ::Jabber::Roster::SetUIWhen "connect"
 }
 
 proc ::Jabber::Roster::SetBackgroundImage {useBgImage bgImagePath} {
