@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #
-# $Id: svg2can.tcl,v 1.4 2004-02-19 15:09:12 matben Exp $
+# $Id: svg2can.tcl,v 1.5 2004-02-20 15:10:29 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -32,7 +32,7 @@
 
 package require uriencode
 
-package provide svg2can 0.1
+package provide svg2can 1.0
 
 namespace eval svg2can {
 
@@ -58,6 +58,21 @@ namespace eval svg2can {
 	700       bold
 	800       bold
 	900       bold
+    }
+    
+    variable systemFont
+    switch -- $::tcl_platform(platform) {
+	unix {
+	    set systemFont {Helvetica 10}
+	    if {[package vcompare [info tclversion] 8.3] == 1} {	
+		if {[string equal [tk windowingsystem] "aqua"]} {
+		    set systemFont system
+		}
+	    }
+	}
+	windows - macintosh {
+	    set systemFont system
+	}
     }
 }
 
@@ -194,7 +209,8 @@ proc svg2can::parseimage {xmllist} {
 	}
     }
     set opts [MergePresentationAttr polygon $opts $presentationAttr]
-    lappend opts -image \[image create photo -file $uri]
+    set photo [format {[image create photo -file %s]} $uri]
+    lappend opts -image $photo
     return [concat create image $x $y $opts]
 }
 
@@ -359,16 +375,104 @@ proc svg2can::parserect {xmllist} {
     return [concat create rectangle $coords $opts]
 }
 
+# svg2can::parsetext --
+# 
+#       Takes a text element and returns a list of canvas create text commands.
+#       Assuming that chdata is not mixed with elements, we should now have
+#       either chdata OR more elements (tspan).
+
 proc svg2can::parsetext {xmllist} {
     
     set x 0
     set y 0    
-    set presentationAttr {}
-    set cmdList {}
+    set cmdList [ParseTspan $xmllist x y {}]
+    return $cmdList
+}
 
+# svg2can::ParseTspan --
+# 
+#       Takes a tspan element and returns a list of canvas
+#       create text commands.
+
+proc svg2can::ParseTspan {xmllist xVar yVar opts} { 
+    variable systemFont
+    upvar $xVar x
+    upvar $yVar y
+
+    # Nested tspan elements do not inherit x, y, dx, or dy attributes set.
+    # tspan elements in sequence do inherit these attributes.
+    # Keep two separate sets of x and y!
+    
+    # Inherit opts.
+    array set optsArr [ParseTextAttr $xmllist x y]
+    array set optsArr $opts
+    set opts [array get optsArr]
+
+    set childList [getchildren $xmllist]
+    set cmdList {}
+    puts "x=$x, y=$y"
+    
+    if {[llength $childList]} {
+	foreach c $childList {
+	    
+	    switch -- [gettag $c] {
+		tspan {
+		    lappend cmdList [ParseTspan $c x y $opts]
+		}
+		default {
+		    # empty
+		}
+	    }
+	}
+    } else {
+	
+	# Each text insert moves the running x coordinate.
+	set str [getcdata $xmllist]
+	lappend opts -text $str
+	set cmdList [concat create text $x $y $opts]
+	set theFont $systemFont
+	if {[info exists optsArr(-font)]} {
+	    set theFont $optsArr(-font)
+	}
+	# newlines???
+	set x [expr $x + [font measure $theFont $str]]
+    }
+    return $cmdList
+}
+
+# svg2can::ParseTextAttr --
+# 
+#       Parses the attributes in xmllist and returns the translated canvas
+#       option list.
+
+proc svg2can::ParseTextAttr {xmllist xVar yVar} {    
+    upvar $xVar x
+    upvar $yVar y
+
+    # svg defaults to start (w) while tk default is c.
+    set opts {-anchor w}
+    set presentationAttr {}
+    
     foreach {key value} [getattr $xmllist] {
 	
 	switch -- $key {
+	    baseline-shift {
+		
+		switch -- $value {
+		    sub {
+			
+		    }
+		    super {
+			
+		    }
+		}
+	    }
+	    dx {
+		set x [expr $x + $value]
+	    }
+	    dy {
+		set y [expr $y + $value]
+	    }
 	    id {
 		lappend opts -tags $value
 	    }
@@ -383,57 +487,7 @@ proc svg2can::parsetext {xmllist} {
 	    }
 	}
     }
-    set opts [MergePresentationAttr text $opts $presentationAttr]
-    
-    # Assuming that chdata is not mixed with elements, we should now have
-    # either chdata OR more elements (tspan).
-    set childList [getchildren $xmllist]
-    if {[llength $childList]} {
-	foreach c $childList {
-	    set tag [gettag $c]
-	    
-	    switch -- $tag {
-		textPath {
-		    # empty.
-		}
-		tspan {
-		    lappend cmdList [ParseTspan x y $opts]
-		}
-		tref {
-		    # empty.
-		}
-	    }
-	}
-    } else {
-	lappend opts -text [getcdata $xmllist]
-	lappend cmdList [concat create text $x $y $opts]
-    }
-    return $cmdList
-}
-
-proc svg2can::ParseTspan {xmllist xVar yVar opts} {
-    
-    upvar $xVar x
-    upvar $yVar y
-
-    set presentationAttr {}
-    
-    foreach {key value} [getattr $xmllist] {
-	
-	switch -- $key {
-	    style {
-		set opts [StyleToOpts text [StyleAttrToList $value]]
-	    }
-	    x - y {
-		set $key $value
-	    }
-	    default {
-		lappend presentationAttr $key $value
-	    }
-	}
-    }
-    set opts [MergePresentationAttr text $opts $presentationAttr]
-    return [concat create text $x $y $opts]
+    return [MergePresentationAttr text $opts $presentationAttr]
 }
 
 # svg2can::parseColor --
@@ -483,30 +537,38 @@ proc svg2can::StyleToOpts {type styleList} {
     variable textAnchorMap
     
     set opts {}
-    set font {Helvetica 12 normal}
+    set fontSpec {Helvetica 12}
     set haveFont 0
     
     foreach {key value} $styleList {
 	
 	switch -- $key {
 	    font-family {
-		lset font 0 $value
+		lset fontSpec 0 $value
 		set haveFont 1
 	    }
 	    font-size {
 		if {[regexp {([0-9]+)pt} $value match pts]} {
-		    lset font 1 $pts
+		    lset fontSpec 1 $pts
 		} else {
-		    lset font 1 $value
+		    lset fontSpec 1 $value
 		}
 		set haveFont 1
 	    }
 	    font-style {
-		
+		switch -- $value {
+		    italic {
+			lappend fontSpec italic
+		    }
+		}
 		set haveFont 1
 	    }
 	    font-weight {
-		
+		switch -- $value {
+		    bold {
+			lappend fontSpec bold
+		    }
+		}
 		set haveFont 1
 	    }
 	    stroke {
@@ -539,7 +601,7 @@ proc svg2can::StyleToOpts {type styleList} {
 		lappend opts -joinstyle $value
 	    }
 	    stroke-miterlimit {
-		
+		# empty
 	    }
 	    stroke-opacity {
 		if {[expr {$value == 0}]} {
@@ -555,12 +617,20 @@ proc svg2can::StyleToOpts {type styleList} {
 		lappend opts -anchor $textAnchorMap($value)
 	    }
 	    text-decoration {
-
+		switch -- $value {
+		    line-through {
+			lappend fontSpec overstrike
+		    }
+		    underline {
+			lappend fontSpec underline
+		    }
+		}
+		set haveFont 1
 	    }
 	}
     }
     if {$haveFont} {
-	lappend opts -font $font
+	lappend opts -font $fontSpec
     }
     return $opts
 }
@@ -599,8 +669,21 @@ proc svg2can::ParseStraightPath {path} {
 	set elem [lindex $path $i]
 	
 	switch -glob -- $elem {
-	    M - m {
-		set co [list [lindex $path [incr i]] [lindex $path [incr i]]]
+	    A - a {
+		# ?
+		incr i
+	    }
+	    C - c {
+		# ?
+		incr i
+	    }
+	    H {
+		lappend co [lindex $path [incr i]] [lindex $co end]
+		incr i
+	    }
+	    h {
+		lappend co [expr [lindex $co end-1] + [lindex $path [incr i]]] \
+		  [lindex $co end]
 		incr i
 	    }
 	    L - {[0-9]*} - {-[0-9]*} {
@@ -613,13 +696,12 @@ proc svg2can::ParseStraightPath {path} {
 		  [expr [lindex $co end] + [lindex $path [incr i]]]
 		incr i
 	    }
-	    H {
-		lappend co [lindex $path [incr i]] [lindex $co end]
+	    M - m {
+		set co [list [lindex $path [incr i]] [lindex $path [incr i]]]
 		incr i
 	    }
-	    h {
-		lappend co [expr [lindex $co end-1] + [lindex $path [incr i]]] \
-		  [lindex $co end]
+	    Q - q {
+		# ?
 		incr i
 	    }
 	    V {
@@ -654,6 +736,25 @@ proc svg2can::MapNoneToEmpty {val} {
     }
 }
 
+proc svg2can::FlattenList {hilist} {
+    
+    set flatlist {}
+    FlatListRecursive $hilist flatlist
+    return $flatlist
+}
+
+proc svg2can::FlatListRecursive {hilist flatlistVar} {
+    upvar $flatlistVar flatlist
+    
+    foreach c $hilist {
+	if {[string equal [lindex $c 0] "create"]} {
+	    lappend flatlist $c
+	} else {
+	    FlatListRecursive $c flatlist
+	}
+    }
+}
+
 # svg2can::gettag, getattr, getcdata, getchildren --
 # 
 #       Accesor functions to the specific things in a xmllist.
@@ -674,4 +775,21 @@ proc svg2can::getchildren {xmllist} {
     return [lindex $xmllist 4]
 }
 
+# Tests...
+if {0} {
+    toplevel .t
+    pack [canvas .t.c -width 500 -height 400]
+    package require svg2can
+    set textxml1 {<text x='34.0' y='20.0' \
+      style='stroke-width: 0; font-family: Helvetica; font-size: 12; \
+      fill: #000000;' id='std text foo113-57.visit.se/263174163'>\
+      <tspan>Start</tspan><tspan>Mid</tspan><tspan>End</tspan></text>}
+    
+    set xmllist [tinydom::documentElement [tinydom::parse $textxml1]]
+    set cmdList [svg2can::parsetext $xmllist]
+    set cmdList [svg2can::FlattenList $cmdList]
+    foreach c $cmdList {eval .t.c $c}
+    
+}
+    
 #-------------------------------------------------------------------------------
