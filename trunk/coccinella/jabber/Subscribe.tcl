@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Subscribe.tcl,v 1.19 2004-07-09 06:26:06 matben Exp $
+# $Id: Subscribe.tcl,v 1.20 2004-09-28 07:05:50 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -33,6 +33,88 @@ namespace eval ::Jabber::Subscribe:: {
 #       
 # Results:
 #       "deny" or "accept".
+
+proc ::Jabber::Subscribe::NewDlg {jid args} {
+    global  this prefs wDlgs
+
+    variable uid
+    upvar ::Jabber::jstate jstate
+    upvar ::Jabber::jprefs jprefs
+    
+    ::Debug 2 "::Jabber::Subscribe::NewDlg jid=$jid"
+    
+    # Initialize the state variable, an array.    
+    set token [namespace current]::dlg[incr uid]
+    variable $token
+    upvar 0 $token state
+    
+    set w $wDlgs(jsubsc)${uid}
+    set state(w) $w
+    set state(jid) $jid
+    set state(args) $args
+    set state(finished) -1
+
+    ::UI::Toplevel $w -macstyle documentProc -macclass {document closeBox} \
+      -closecommand [list [namespace current]::CloseCmd $token]
+    wm title $w [mc Subscribe]  
+    
+    # Find all our groups for any jid.
+    set allGroups [$jstate(roster) getgroups]
+
+    # Global frame.
+    set wall $w.fr
+    frame $wall -borderwidth 1 -relief raised
+    pack  $wall -fill both -expand 1 -ipadx 2 -ipady 4
+
+    ::headlabel::headlabel $wall.head -text [mc Subscribe]
+    pack $wall.head -side top -fill both -expand 1
+
+    label $wall.msg -wraplength 200 -justify left \
+      -text [mc jasubwant $jid]
+    pack $wall.msg -side top -fill both -expand 1
+
+    
+    
+
+    
+    
+    # Button part.
+    set frbot [frame $wall.frbot -borderwidth 0]
+    pack [button $frbot.btok -text [mc Accept] -default active \
+      -command [list [namespace current]::Doit $token]]  \
+      -side right -padx 5 -pady 5
+    pack [button $frbot.btcancel -text [mc Deny]  \
+      -command [list [namespace current]::Cancel $token]]  \
+      -side right -padx 5 -pady 5
+    pack [button $frbot.bvcard -text "[mc {Get vCard}]..."  \
+      -command [list ::VCard::Fetch other $jid]]  \
+      -side right -padx 5 -pady 5
+    pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
+
+    set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jsubsc)]]
+    if {$nwin == 1} {
+	::UI::SetWindowPosition $w $wDlgs(jsubsc)
+    }
+    wm resizable $w 0 0
+
+    # Trick to resize the labels wraplength.
+    set script [format {
+	update idletasks
+	%s configure -wraplength [expr [winfo reqwidth %s] - 10]
+    } $wall.msg $w]    
+    after idle $script
+
+    # Wait here for a button press and window to be destroyed.
+    tkwait window $w
+
+    
+}
+
+proc ::Jabber::Subscribe::CloseCmd {token} {
+    global  wDlgs
+    
+    ::UI::SaveWinPrefixGeom $wDlgs(jsubsc)
+}
 
 proc ::Jabber::Subscribe::Subscribe {jid args} {
     global  this prefs wDlgs

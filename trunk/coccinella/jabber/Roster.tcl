@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.78 2004-09-27 12:57:38 matben Exp $
+# $Id: Roster.tcl,v 1.79 2004-09-28 07:05:49 matben Exp $
 
 package provide Roster 1.0
 
@@ -897,6 +897,7 @@ proc ::Jabber::Roster::SetItem {jid args} {
 	      $args $pres
 	}
     }
+    RemoveEmptyRootDirs
 }
 
 # Jabber::Roster::Presence --
@@ -972,6 +973,7 @@ proc ::Jabber::Roster::Presence {jid presence args} {
 	set treePres $presence
 	eval {PutItemInTree $jid2 $treePres} $itemAttr $args
     }
+    RemoveEmptyRootDirs
 }
 
 # Jabber::Roster::Remove --
@@ -986,7 +988,6 @@ proc ::Jabber::Roster::Presence {jid presence args} {
 
 proc ::Jabber::Roster::Remove {jid} {    
     variable wtree    
-    variable dirNameArr
     
     ::Debug 2 "::Jabber::Roster::Remove, jid=$jid"
     
@@ -1024,9 +1025,23 @@ proc ::Jabber::Roster::Remove {jid} {
 	    }
 	}
     }
+}
+
+# Jabber::Roster::RemoveEmptyRootDirs --
+# 
+#       Cleanup empty pending and transports dirs.
+
+proc ::Jabber::Roster::RemoveEmptyRootDirs { } {
+    variable wtree    
+    variable dirNameArr
     
-    # Cleanup empty pending dir.
-    
+    foreach key {pending transports} {
+	set name $dirNameArr($key)
+	if {[$wtree isitem [list $name]] && \
+	  [llength [$wtree children [list $name]]] == 0} {
+	    $wtree delitem [list $name]
+	}
+    }
 }
 
 # Jabber::Roster::SetCoccinella --
@@ -1334,12 +1349,15 @@ proc ::Jabber::Roster::GetPresenceIcon {jid presence args} {
     set key $presence
     
     # Then see if any <show/> element
-    if {[info exists argsArr(-show)] &&  \
-      [info exists presenceIcon($argsArr(-show))]} {
-	set key $argsArr(-show)
-    } elseif {[info exists argsArr(-subscription)] &&   \
+    if {[info exists argsArr(-subscription)] &&   \
       [string equal $argsArr(-subscription) "none"]} {
 	set key "subnone"
+    } elseif {[info exists argsArr(-ask)] &&   \
+      [string equal $argsArr(-ask) "subscribe"]} {
+	set key "subnone"
+    } elseif {[info exists argsArr(-show)] &&  \
+      [info exists presenceIcon($argsArr(-show))]} {
+	set key $argsArr(-show)
     }
     
     # Foreign IM systems.
@@ -1357,17 +1375,8 @@ proc ::Jabber::Roster::GetPresenceIcon {jid presence args} {
     }   
     
     # If whiteboard:
-    if {!$haveForeignIM && ($presence == "available")} {
-	set coccielem [$jstate(roster) getextras $jid $privatexmlns(servers)]
-	if {$coccielem != {}} {
-	    append key ",wb"
-	} elseif {[$jstate(browse) isbrowsed $jid]} {
-	    if {[$jstate(browse) hasnamespace $jid "coccinella:wb"]} {
-		append key ",wb"
-	    } elseif {[$jstate(browse) hasnamespace $jid $privatexmlns(whiteboard)]} {
-		append key ",wb"
-	    }
-	}
+    if {!$haveForeignIM && ($presence == "available") && [IsCoccinella $jid]} {
+	append key ",wb"
     }
     
     return $presenceIcon($key)
