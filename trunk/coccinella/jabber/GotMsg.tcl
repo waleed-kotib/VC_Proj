@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.27 2004-05-26 07:36:35 matben Exp $
+# $Id: GotMsg.tcl,v 1.28 2004-06-23 14:19:38 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -16,6 +16,7 @@ namespace eval ::Jabber::GotMsg:: {
     ::hooks::add quitAppHook        [list ::UI::SaveWinGeom $wDlgs(jgotmsg)]
     ::hooks::add displayMessageHook [list ::Speech::SpeakMessage normal]
     ::hooks::add closeWindowHook    ::Jabber::GotMsg::CloseHook
+    ::hooks::add presenceHook       ::Jabber::GotMsg::PresenceHook
     
     
     # Wait for this variable to be set.
@@ -65,16 +66,17 @@ proc ::Jabber::GotMsg::Show {thisMsgId} {
     variable msgIdDisplay
     variable jid
     variable jidtxt
-    variable nick
+    variable username
     variable subject
     variable theTime
-    variable isOnline
+    variable prestext
     variable wtext
     variable wbtnext
-    variable wonline
+    variable wpresence
     variable theMsg
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
+    upvar ::Jabber::mapShowTextToElem mapShowTextToElem
     
     ::Debug 2 "::Jabber::GotMsg::Show thisMsgId=$thisMsgId"
     
@@ -96,18 +98,24 @@ proc ::Jabber::GotMsg::Show {thisMsgId} {
     jlib::splitjid $jid jid2 res
     
     # Use nick name.
-    set nick [$jstate(roster) getname $jid2]
-    if {[string length $nick]} {
-	set jidtxt "${nick} <${jid}>"
-    }
-    if {[$jstate(roster) isavailable $jid2] || \
-      [jlib::jidequal $jid $jstate(mejidres)]} {
-	set isOnline [::msgcat::mc Online]
-	$wonline configure -fg blue
+    set displayName [$jstate(roster) getname $jid2]
+    if {[string length $displayName]} {
+	set username "${username} <${jid}>"
     } else {
-	set isOnline [::msgcat::mc Offline]
-	$wonline configure -fg red
+	set username $jid
     }
+    if {[jlib::jidequal $jid $jstate(mejidres)]} {
+	set show $jstate(status)
+    } else {
+	array set presArr [$jstate(roster) getpresence $jid2 -resource $res]
+	set show $presArr(-type)
+	if {[info exists presArr(-show)]} {
+	    set show $presArr(-show)
+	}
+	set prestext $mapShowTextToElem($show)
+    }
+    set icon [::Jabber::Roster::GetPresenceIconEx $jid]
+    $wpresence configure -image $icon
     
     # Insert the actual body of the message.
     $wtext configure -state normal
@@ -142,14 +150,14 @@ proc ::Jabber::GotMsg::Build { } {
     variable msgStorage
     variable msgIdDisplay
     variable jid
-    variable nick
+    variable username
     variable jidtxt
     variable subject
     variable theTime
-    variable isOnline
+    variable prestext
     variable wtext
     variable wbtnext
-    variable wonline
+    variable wpresence
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
@@ -187,39 +195,22 @@ proc ::Jabber::GotMsg::Build { } {
     pack $frmid -side top -fill x -padx 0 -pady 0
     
     # From field.
-    set wfrom $frmid.from
+    set wfrom     $frmid.from
+    set wpresence $wfrom.icon
     labelframe $wfrom -text [::msgcat::mc From]
-    pack $wfrom -side top -fill both -padx 2 -pady 2
-    pack [entry $wfrom.nick -width 14 \
-      -textvariable [namespace current]::nick -state disabled \
-      -borderwidth 1 -relief sunken -background $bg] \
-      -side left 
-    pack [entry $wfrom.jid   \
-      -textvariable [namespace current]::jid -state disabled \
-      -borderwidth 1 -relief sunken -background $bg] \
-      -side left -fill x -expand 1
-    
-    # Time field.
-    set ftm $frmid.ftm
-    set wonline $ftm.eu
-    pack [frame $ftm -border 0] -side top -fill x -expand 1 -pady 0
-    pack [label $ftm.lt -text "[::msgcat::mc Time]:"] \
-      -side left -padx 2 -pady 0
-    pack [entry $ftm.et -width 16 \
-      -textvariable [namespace current]::theTime -state disabled  \
-      -borderwidth 1 -relief sunken -background $bg] \
-      -side left -padx 1 -pady 0
-    pack [frame $ftm.pad -relief raised -bd 1 -width 2]  \
-      -padx 6 -fill y -side left
-    pack [label $ftm.lu -text "[::msgcat::mc {User is}]:" \
-      -anchor e -padx 0] -side left -padx 0 -pady 0    
-    pack [entry $wonline -width 11 \
-      -textvariable [namespace current]::isOnline -state disabled  \
-      -borderwidth 1 -relief sunken -background $bg] \
-      -side left -padx 4 -pady 0
-    
+    pack $wfrom -side top -fill both -padx 10 -pady 4
+    entry $wfrom.username -width 10 \
+      -textvariable [namespace current]::username -state disabled \
+      -borderwidth 1 -relief sunken -background $bg
+    pack  $wfrom.username -side left -fill x -expand 1
+    label $wfrom.time -textvariable [namespace current]::theTime
+    pack  $wfrom.time -side left -padx 8 -pady 0
+    label $wpresence -compound left -image "" \
+      -textvariable [namespace current]::prestext
+    pack  $wpresence -side right -padx 4 -pady 0
+        
     # Subject field.
-    pack [frame $frmid.fsub -border 0] -side top -fill x -expand 1
+    pack [frame $frmid.fsub -border 0] -side top -fill x -expand 1 -padx 6
     pack [label $frmid.fsub.l -text "[::msgcat::mc Subject]:"  \
       -anchor e] -side left -padx 2 -pady 1
     pack [entry $frmid.fsub.e -width 10 \
@@ -258,6 +249,35 @@ proc ::Jabber::GotMsg::CloseHook {wclose} {
     if {[string equal $wDlgs(jgotmsg) $wclose]} {
 	::UI::SaveWinGeom $wclose
     }   
+}
+
+proc ::Jabber::GotMsg::PresenceHook {pjid2 type args} {
+    variable w
+    variable wpresence
+    variable prestext
+    variable jid
+    upvar ::Jabber::mapShowTextToElem mapShowTextToElem
+    
+    ::Debug 4 "::Jabber::GotMsg::PresenceHook pjid2=$pjid2, type=$type"
+
+    if {[winfo exists $w]} {
+	array set argsArr $args
+	set from $pjid2
+	if {[info exists argsArr(-from)]} {
+	    set from $argsArr(-from)
+	}
+	jlib::splitjid $jid jid2 res
+	puts "pjid2=$pjid2"
+	if {[jlib::jidequal $pjid2 $jid2]} {
+	    set show $type
+	    if {[info exists argsArr(-show)]} {
+		set show $argsArr(-show)
+	    }
+	    set prestext $mapShowTextToElem($show)
+	    set icon [::Jabber::Roster::GetPresenceIconEx $from]
+	    $wpresence configure -image $icon
+	}
+    }
 }
 
 proc ::Jabber::GotMsg::NextMsg { } {
