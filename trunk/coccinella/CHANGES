@@ -1,0 +1,100 @@
+
+Whiteboard CHANGES
+------------------
+
+
+Whiteboard-0.94.2 (02????): 	Short summary --
+
+	- undo/redo method of canvas
+	- localization (language adaption) introduced via message catalogs
+	- new directory structure for prefs and inbox
+	- changed GUI for jabber with persistant address fields
+	- changed canvas file format, reads old, writes new
+	- debug console for jabber I/O
+	- numerous rewrites and bugfixes
+
+
+Whiteboard-0.94.1 (02????): 	Short summary --
+
+	- complete rewrite of the put side of the peer-to-peer file transfer
+	- roster and browser (or agents) in tabbed window
+	- use agents as fallback if no browsing
+	- added old groupchat protocol in case
+	- auto speech bubble from popup
+	- smart tool button popups
+	- new file cache database
+	- modified image handling which makes image copy & paste incompatible
+	  with earlier versions
+	- now saves inbox between sessions
+	- SSL now works with jabber server
+	- fixed really nasty bug in the xml parser
+	- numerous rewrites and bugfixes
+
+
+Whiteboard-0.94 (02????): 	Short summary --
+
+	- new inbox and other dialogs for message handling
+	- printing support, expat parser, ssl, MS Speech on Windows
+	- reorganized code so that the whiteboard toplevel is more
+	  objectified to allow multiple instances
+	- large code rewrites for better organization
+	- parsing smileys and http links in jabber dialogs
+	- changed jabber xml namespace to coccinella:wb ,
+	  which makes it incompatible with 0.93!
+	- scrollbars for canvas in whiteboard, no synced window sizes
+	- QuickTime movies streamed via http if possible
+
+
+Whiteboard-0.93.1 (02????): 	Short summary --
+	
+	- minor bugfixes and error checks
+	- added prefs(stripJabber) option
+	- fixed return -code in TclXML's ElementClose
+	- fixed registration bug when resetting xml parser
+	- restricted sending to ill formed jid's (@jabber.org)
+
+
+Whiteboard-0.93 (020127): 	Short summary --
+
+	- adapting to the jabber XML IM server system
+	- preferences are now collected in one window
+	- code base more than doubled compared to 0.92...
+
+
+Whiteboard-0.92 (001128): 	Short summary --
+
+	- new tiny http server
+	- is now running on Windows (98)
+	- serves streaming media to QuickTime from the TinyHttpd server
+	- all nontransparent gifs now Mime encoded in the scripts
+	- much of the code now as packages instead of source'ed directly
+	- new centralized network via a reflector server
+	- flash free window updates
+	- handles new dashed options of canvas
+	- new supported extensions: Img, snack, tkprint
+	- working menu accelerators
+	- movie controller widget with bindings to snack sound objects
+	- many code rewrites, bug fixes, and enhancements
+
+
+Whiteboard-0.91 (000517): 	Short summary --
+
+	- new tools, arc item and rotate
+	- collapsable shortcut toolbar
+	- splash screen
+	- items menu for pre made items
+	- put/get operations rewritten with new protocol
+	- safety check in server
+	- support for the xanim application on unix/linux
+	- systematic use of mime types for handling multimedia imports
+	- systematic handling of extensions
+	- font import mechanism for using chinese and other multibyte fonts
+	- many code rewrites, bug fixes, and enhancements
+
+
+Whiteboard-0.90 (991201): 	First official release.
+
+
+
+
+

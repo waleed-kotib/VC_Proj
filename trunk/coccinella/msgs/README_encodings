@@ -1,0 +1,29 @@
+
+README for language encodings
+-----------------------------
+
+If you write your language specific message catalog saving it
+using the system encodings, which is likely unless you have an
+editor producing utf-8 text, you need to translate it using
+the utf-8 encoding. If you don't you'll se a number of '?'
+for your national characters.
+
+Use the following code to do this:
+
+........................................................................
+
+set src [tk_getOpenFile -title {Pick your language catalog}]
+set new "[file rootname [file tail $src]].msg"
+set fdsrc [open $src "r"]
+set txt [read $fdsrc];
+close $fdsrc
+set dst [tk_getSaveFile -title {Pick new catalog}  \
+	-initialdir [file dirname $src] -initialfile $new]
+set fddst [open $dst "w"]
+fconfigure $fddst -encoding utf-8
+puts $fddst $txt
+close $fddst
+if {$::tcl_platform(platform) == "macintosh"} {
+    set creator [file attributes $src -creator]
+    file attributes $dst -creator $creator
+}

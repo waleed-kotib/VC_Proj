@@ -1,0 +1,1 @@
+image create photo im_smiley-speechless.gif -data {} -format gif -file ../../images/smileys/smiley-speechless.gif -gamma 1.0 -height 0 -palette {} -width 0create image 128.0 128.0 -activeimage {} -anchor nw -disabledimage {} -image im_smiley-speechless.gif -state {} -tags {image xxx/138639668}
