@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2004
 #  
-#  $Id: alertbox.tcl,v 1.3 2004-06-17 13:24:17 matben Exp $
+#  $Id: alertbox.tcl,v 1.4 2004-06-24 13:48:35 matben Exp $
 
 package provide alertbox 1.0
 
@@ -54,7 +54,7 @@ namespace eval ::alertbox:: {
 	    option add *AlertBox.msg.font {Arial 9}	    
 	}
 	default {
-	    option add *AlertBox.msg.font {Helvetica 14 bold} 
+	    option add *AlertBox.msg.font {Helvetica 14} 
 	}
     }
     bind AlertBox <Return> {destroy %W}

@@ -5,7 +5,7 @@
 #       
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: service.tcl,v 1.9 2004-06-22 14:21:19 matben Exp $
+# $Id: service.tcl,v 1.10 2004-06-24 13:48:36 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -78,7 +78,7 @@ proc jlib::service {jlibname cmd args} {
 
 proc jlib::service::init {jlibname} {
     
-    upvar [namespace parent]::${jlibname}::serv serv
+    upvar ${jlibname}::serv serv
 
     # Init defaults.
     array set serv {
@@ -100,7 +100,7 @@ proc jlib::service::init {jlibname} {
 
 proc jlib::service::register {jlibname type name} {
     
-    upvar [namespace parent]::${jlibname}::serv serv
+    upvar ${jlibname}::serv serv
 
     set serv($type) 1
     set serv($type,name) $name
@@ -108,7 +108,7 @@ proc jlib::service::register {jlibname type name} {
 
 proc jlib::service::unregister {jlibname type} {
     
-    upvar [namespace parent]::${jlibname}::serv serv
+    upvar ${jlibname}::serv serv
 
     set serv($type) 0
     array unset serv $type,*
@@ -116,8 +116,8 @@ proc jlib::service::unregister {jlibname type} {
 
 proc jlib::service::send_getchildren {jlibname jid cmd} {
     
-    upvar [namespace parent]::${jlibname}::serv serv
-    upvar [namespace parent]::${jlibname}::lib lib
+    upvar ${jlibname}::serv serv
+    upvar ${jlibname}::lib lib
 
     # We must have a way to figure out which method to use!!!
     if {$serv(browse) && [$serv(browse,name) isbrowsed $lib(server)]} {
@@ -145,7 +145,7 @@ proc jlib::service::send_getchildren {jlibname jid cmd} {
 proc jlib::service::setgroupchatpriority {jlibname priorityList} {
 
     variable groupchatTypeExp
-    upvar [namespace parent]::${jlibname}::serv serv
+    upvar ${jlibname}::serv serv
 
     foreach prot $priorityList {
 	if {![regexp $groupchatTypeExp $prot]} {
@@ -170,8 +170,8 @@ proc jlib::service::setgroupchatpriority {jlibname priorityList} {
 proc jlib::service::setgroupchatprotocol {jlibname jid prot} {
 
     variable groupchatTypeExp
-    upvar [namespace parent]::${jlibname}::agent agent
-    upvar [namespace parent]::${jlibname}::serv serv
+    upvar ${jlibname}::agent agent
+    upvar ${jlibname}::serv serv
 
     set jid [jlib::jidmap $jid]
     if {![regexp $groupchatTypeExp $prot]} {
@@ -218,7 +218,7 @@ proc jlib::service::setgroupchatprotocol {jlibname jid prot} {
 
 proc jlib::service::registergcprotocol {jlibname jid gcprot} {
 
-    upvar [namespace parent]::${jlibname}::serv serv
+    upvar ${jlibname}::serv serv
     
     Debug 2 "jlib::registergcprotocol jid=$jid, gcprot=$gcprot"
     set jid [jlib::jidmap $jid]
@@ -252,7 +252,7 @@ proc jlib::service::registergcprotocol {jlibname jid gcprot} {
 proc jlib::service::setroomprotocol {jlibname roomjid protocol} {
 
     variable groupchatTypeExp
-    upvar [namespace parent]::${jlibname}::serv serv
+    upvar ${jlibname}::serv serv
     
     set roomjid [jlib::jidmap $roomjid]
     if {![regexp $groupchatTypeExp $protocol]} {
@@ -263,7 +263,7 @@ proc jlib::service::setroomprotocol {jlibname roomjid protocol} {
 
 proc jlib::service::isinvestigated {jlibname jid} {
     
-    upvar [namespace parent]::${jlibname}::serv serv
+    upvar ${jlibname}::serv serv
 
     # Try to gather only positive results!
     set ans 0
@@ -277,8 +277,8 @@ proc jlib::service::isinvestigated {jlibname jid} {
    
 proc jlib::service::parent {jlibname jid} {    
 
-    upvar [namespace parent]::${jlibname}::agent agent
-    upvar [namespace parent]::${jlibname}::serv serv
+    upvar ${jlibname}::agent agent
+    upvar ${jlibname}::serv serv
 
     # ???
     if {$serv(browse) && [$serv(browse,name) isbrowsed $jid]} {
@@ -297,8 +297,8 @@ proc jlib::service::parent {jlibname jid} {
 
 proc jlib::service::childs {jlibname jid} {    
 
-    upvar [namespace parent]::${jlibname}::agent agent
-    upvar [namespace parent]::${jlibname}::serv serv
+    upvar ${jlibname}::agent agent
+    upvar ${jlibname}::serv serv
 
     # ???
     if {$serv(browse) && [$serv(browse,name) isbrowsed $jid]} {
@@ -333,8 +333,8 @@ proc jlib::service::childs {jlibname jid} {
 proc jlib::service::getjidsfor {jlibname what} {
 
     variable services
-    upvar [namespace parent]::${jlibname}::agent agent
-    upvar [namespace parent]::${jlibname}::serv serv
+    upvar ${jlibname}::agent agent
+    upvar ${jlibname}::serv serv
     
     if {[lsearch $services $what] < 0} {
 	return -code error "\"$what\" is not a recognized service"
@@ -394,7 +394,7 @@ proc jlib::service::getjidsfor {jlibname what} {
 
 proc jlib::service::getconferences {jlibname} {
     
-    upvar [namespace parent]::${jlibname}::serv serv
+    upvar ${jlibname}::serv serv
 
     # Try to gather only positive results!
     set jids {}
@@ -409,7 +409,7 @@ proc jlib::service::getconferences {jlibname} {
 
 proc jlib::service::hasfeature {jlibname jid xmlns} {
 
-    upvar [namespace parent]::${jlibname}::serv serv
+    upvar ${jlibname}::serv serv
 
     # Try to gather only positive results!
     set ans 0
@@ -436,8 +436,8 @@ proc jlib::service::hasfeature {jlibname jid xmlns} {
 
 proc jlib::service::gettransportjids {jlibname what} {
 
-    upvar [namespace parent]::${jlibname}::agent agent
-    upvar [namespace parent]::${jlibname}::serv serv
+    upvar ${jlibname}::agent agent
+    upvar ${jlibname}::serv serv
 
     set jids {}
     
@@ -476,8 +476,8 @@ proc jlib::service::gettransportjids {jlibname what} {
 
 proc jlib::service::gettype {jlibname jid} {
 
-    upvar [namespace parent]::${jlibname}::agent agent
-    upvar [namespace parent]::${jlibname}::serv serv
+    upvar ${jlibname}::agent agent
+    upvar ${jlibname}::serv serv
 
     set type ""
     
@@ -502,8 +502,8 @@ proc jlib::service::gettype {jlibname jid} {
 
 proc jlib::service::name {jlibname jid} {    
 
-    upvar [namespace parent]::${jlibname}::serv serv
-    upvar [namespace parent]::${jlibname}::lib lib
+    upvar ${jlibname}::serv serv
+    upvar ${jlibname}::lib lib
     
     # Check if domain name supports the 'groupchat' service.
     set name ""
@@ -525,9 +525,9 @@ proc jlib::service::name {jlibname jid} {
 
 proc jlib::service::isroom {jlibname jid} {    
 
-    upvar [namespace parent]::${jlibname}::agent agent
-    upvar [namespace parent]::${jlibname}::serv serv
-    upvar [namespace parent]::${jlibname}::lib lib
+    upvar ${jlibname}::agent agent
+    upvar ${jlibname}::serv serv
+    upvar ${jlibname}::lib lib
     
     # Check if domain name supports the 'groupchat' service.
     set isroom 0
@@ -557,8 +557,8 @@ proc jlib::service::isroom {jlibname jid} {
 
 proc jlib::service::nick {jlibname jid} {   
 
-    upvar [namespace parent]::${jlibname}::lib lib
-    upvar [namespace parent]::${jlibname}::serv serv
+    upvar ${jlibname}::lib lib
+    upvar ${jlibname}::serv serv
 
     # All kind of conference components seem to support the old 'gc-1.0'
     # protocol, and we therefore must query our method for entering the room.
@@ -621,8 +621,8 @@ proc jlib::service::nick {jlibname jid} {
 
 proc jlib::service::hashandnick {jlibname room} {    
 
-    upvar [namespace parent]::${jlibname}::lib lib
-    upvar [namespace parent]::${jlibname}::serv serv
+    upvar ${jlibname}::lib lib
+    upvar ${jlibname}::serv serv
 
     set room [jlib::jidmap $room]
 
@@ -663,8 +663,8 @@ proc jlib::service::hashandnick {jlibname room} {
 
 proc jlib::service::allroomsin {jlibname} {    
 
-    upvar [namespace parent]::${jlibname}::lib lib
-    upvar [namespace parent]::${jlibname}::gchat gchat
+    upvar ${jlibname}::lib lib
+    upvar ${jlibname}::gchat gchat
 
     set roomList [concat $gchat(allroomsin) \
       [[namespace parent]::muc::allroomsin $jlibname] \
@@ -677,8 +677,8 @@ proc jlib::service::allroomsin {jlibname} {
 
 proc jlib::service::roomparticipants {jlibname room} {
 
-    upvar [namespace parent]::${jlibname}::lib lib
-    upvar [namespace parent]::${jlibname}::serv serv
+    upvar ${jlibname}::lib lib
+    upvar ${jlibname}::serv serv
     
     set room [jlib::jidmap $room]
     if {![info exists serv(roomprot,$room)]} {
@@ -708,8 +708,8 @@ proc jlib::service::roomparticipants {jlibname room} {
 
 proc jlib::service::exitroom {jlibname room} {    
 
-    upvar [namespace parent]::${jlibname}::lib lib
-    upvar [namespace parent]::${jlibname}::serv serv
+    upvar ${jlibname}::lib lib
+    upvar ${jlibname}::serv serv
 
     set room [jlib::jidmap $room]
     if {![info exists serv(roomprot,$room)]} {
