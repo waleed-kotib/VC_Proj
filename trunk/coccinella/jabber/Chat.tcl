@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.60 2004-06-08 14:03:32 matben Exp $
+# $Id: Chat.tcl,v 1.61 2004-06-09 14:26:17 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -952,7 +952,7 @@ proc ::Jabber::Chat::SetThreadState {dlgtoken chattoken} {
 	::Jabber::Chat::SetState $chattoken disabled
     }
     if {[winfo exists $dlgstate(wnb)]} {
-	$dlgstate(wnb) pageconfigure $name -image ""
+	$dlgstate(wnb) pageconfigure $chatstate(pagename) -image ""
     }
     wm title $dlgstate(w) "[::msgcat::mc Chat] ($chatstate(fromjid))"
 }

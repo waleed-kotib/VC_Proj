@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.6 2004-06-08 14:03:32 matben Exp $
+# $Id: JPrefs.tcl,v 1.7 2004-06-09 14:26:18 matben Exp $
 
 package provide JPrefs 1.0
 
@@ -94,6 +94,7 @@ proc ::Jabber::JPrefs::BuildPrefsHook {wtree nbframe} {
     
     $wtree newitem {Jabber {Auto Away}} -text [::msgcat::mc {Auto Away}]
     $wtree newitem {Jabber {Personal Info}} -text [::msgcat::mc {Personal Info}]
+    $wtree newitem {Jabber Appearence} -text [::msgcat::mc Appearence]
     $wtree newitem {Jabber Customization} -text [::msgcat::mc Customization]
 
     # Auto Away page -------------------------------------------------------
@@ -103,6 +104,10 @@ proc ::Jabber::JPrefs::BuildPrefsHook {wtree nbframe} {
     # Personal Info page ---------------------------------------------------
     set wpage [$nbframe page {Personal Info}]    
     ::Jabber::JPrefs::BuildPersInfoPage $wpage
+	    
+    # Appearence page -------------------------------------------------------
+    set wpage [$nbframe page {Appearence}]    
+    ::Jabber::JPrefs::BuildAppearencePage $wpage
 	    
     # Customization page -------------------------------------------------------
     set wpage [$nbframe page {Customization}]    
@@ -239,6 +244,64 @@ proc ::Jabber::JPrefs::UpdateAutoAwaySettings { } {
     }
 }
 
+proc ::Jabber::JPrefs::BuildAppearencePage {page} {
+    global  this prefs
+    
+    variable wlbblock
+    variable btrem
+    variable wlbblock
+    variable tmpJPrefs
+    variable tmpPrefs
+    upvar ::Jabber::jprefs jprefs
+    
+    set fontS  [option get . fontSmall {}]    
+    set ypad   [option get [winfo toplevel $page] yPad {}]
+
+    foreach key {rost,useBgImage rost,bgImagePath chat,tabbedui chatFont} {
+	set tmpJPrefs($key) $jprefs($key)
+    }
+    set tmpPrefs(themeName) $prefs(themeName)
+
+    set labfrpbl $page.fr
+    labelframe $labfrpbl -text [::msgcat::mc Appearence]
+    pack $labfrpbl -side top -anchor w -padx 8 -pady 2
+    set pbl [frame $labfrpbl.frin]
+    pack $pbl -padx 10 -pady 6 -side left
+     
+    checkbutton $pbl.tabbed -text " Use tabbed notebook interface"  \
+      -variable [namespace current]::tmpJPrefs(chat,tabbedui)
+
+    # Roster bg image.
+    checkbutton $pbl.bgim -text " [::msgcat::mc prefrostbgim]" \
+      -variable [namespace current]::tmpJPrefs(rost,useBgImage)
+    button $pbl.bgpick -text "[::msgcat::mc {Pick}]..."  \
+      -command [list [namespace current]::PickBgImage rost] -font $fontS
+    button $pbl.bgdefk -text "[::msgcat::mc {Default}]"  \
+      -command [list [namespace current]::DefaultBgImage rost] -font $fontS
+	    
+    # Chat font.
+    label  $pbl.lfont -text [::msgcat::mc prefcufont]
+    button $pbl.btfont -text "[::msgcat::mc Pick]..." -font $fontS \
+      -command [namespace current]::PickFont
+    button $pbl.dfont -text "[::msgcat::mc {Default}]"  \
+      -command [list set [namespace current]::tmpJprefs(chatFont) ""] -font $fontS
+
+    set frtheme $pbl.ftheme
+    frame $frtheme
+    set wpoptheme $frtheme.pop
+    set allrsrc [::Theme::GetAllAvailable]
+    set wpopupmenuin [eval {tk_optionMenu $wpoptheme   \
+      [namespace current]::tmpPrefs(themeName)} $allrsrc]
+    pack [label $frtheme.l -text "[::msgcat::mc preftheme]:"] -side left
+    pack $wpoptheme -side left
+    
+    grid $pbl.tabbed                        -padx 2 -pady $ypad -sticky w
+    grid $pbl.bgim  $pbl.bgpick $pbl.bgdefk -padx 2 -pady $ypad -sticky w
+    grid $pbl.lfont $pbl.btfont $pbl.dfont  -padx 2 -sticky w
+    grid $frtheme                           -padx 2 -pady $ypad -sticky w \
+      -columnspan 2
+}
+
 proc ::Jabber::JPrefs::BuildCustomPage {page} {
     global  this prefs
     
@@ -254,8 +317,7 @@ proc ::Jabber::JPrefs::BuildCustomPage {page} {
     set xpadbt [option get [winfo toplevel $page] xPadBt {}]
     set ypad   [option get [winfo toplevel $page] yPad {}]
 
-    foreach key {inboxSave rost,useBgImage rost,bgImagePath serviceMethod \
-      chat,tabbedui chatFont} {
+    foreach key {inboxSave rost,useBgImage rost,bgImagePath serviceMethod} {
 	set tmpJPrefs($key) $jprefs($key)
     }
     set tmpPrefs(themeName) $prefs(themeName)
@@ -266,60 +328,46 @@ proc ::Jabber::JPrefs::BuildCustomPage {page} {
     set pbl [frame $labfrpbl.frin]
     pack $pbl -padx 10 -pady 6 -side left
      
-    label $pbl.lfont -text [::msgcat::mc prefcufont]
-    button $pbl.btfont -text "[::msgcat::mc Pick]..." -font $fontS \
-      -command [namespace current]::PickFont
-    checkbutton $pbl.tabbed -text " Use tabbed notebook interface"  \
-      -variable [namespace current]::tmpJPrefs(chat,tabbedui)
     checkbutton $pbl.savein -text " [::msgcat::mc prefcusave]" \
       -variable [namespace current]::tmpJPrefs(inboxSave)
-    
-    set frrost $pbl.robg
-    frame $frrost
-    pack [checkbutton $frrost.cb -text " [::msgcat::mc prefrostbgim]" \
-      -variable [namespace current]::tmpJPrefs(rost,useBgImage)] -side left
-    pack [button $frrost.btpick -text "[::msgcat::mc {Pick}]..."  \
-      -command [list [namespace current]::PickBgImage rost] -font $fontS] \
-      -side left -padx 4
-    pack [button $frrost.btdefk -text "[::msgcat::mc {Default}]"  \
-      -command [list [namespace current]::DefaultBgImage rost] -font $fontS]  \
-      -side left -padx 4
-    
-    set frtheme $pbl.ftheme
-    frame $frtheme
-    set wpoptheme $frtheme.pop
-
-    set allrsrc [::Theme::GetAllAvailable]
-
-    set wpopupmenuin [eval {tk_optionMenu $wpoptheme   \
-      [namespace current]::tmpPrefs(themeName)} $allrsrc]
-    pack [label $frtheme.l -text "[::msgcat::mc preftheme]:"] -side left
-    pack $wpoptheme -side left
-    
-    grid $pbl.lfont $pbl.btfont -padx 2 -sticky w
-    grid $pbl.tabbed -padx 2 -pady $ypad -sticky w -columnspan 2
-    grid $pbl.savein -padx 2 -pady $ypad -sticky w -columnspan 2
-    grid $frrost     -padx 2 -pady $ypad -sticky w -columnspan 2
-    grid $frtheme    -padx 2 -pady $ypad -sticky w -columnspan 2
-    
-    # Disco, Agents or Browse.
-    set frdisc $page.ag 
-    labelframe $frdisc -text [::msgcat::mc prefcudisc]
-    pack $frdisc -side top -anchor w -padx 8 -pady 4
-    set pdisc [frame $frdisc.frin]
-    pack $pdisc -padx 10 -pady 6 -side left
-    radiobutton $pdisc.disco   \
+        
+    label $pbl.lserv -text [::msgcat::mc prefcudisc]
+    radiobutton $pbl.disco   \
       -text " [::msgcat::mc {Disco method}]"  \
       -variable [namespace current]::tmpJPrefs(serviceMethod) -value "disco"
-    radiobutton $pdisc.browse   \
+    radiobutton $pbl.browse   \
       -text " [::msgcat::mc prefcubrowse]"  \
       -variable [namespace current]::tmpJPrefs(serviceMethod) -value "browse"
-    radiobutton $pdisc.agents  \
+    radiobutton $pbl.agents  \
       -text " [::msgcat::mc prefcuagent]" -value "agents" \
       -variable [namespace current]::tmpJPrefs(serviceMethod)
-    grid $pdisc.disco  -padx 2 -pady $ypad -sticky w
-    grid $pdisc.browse -padx 2 -pady $ypad -sticky w
-    grid $pdisc.agents -padx 2 -pady $ypad -sticky w
+    
+    grid $pbl.savein -padx 2 -pady $ypad -sticky w -columnspan 2
+    grid $pbl.lserv  -padx 2 -pady $ypad -sticky w
+    grid $pbl.disco  -padx 2 -pady $ypad -sticky w
+    grid $pbl.browse -padx 2 -pady $ypad -sticky w
+    grid $pbl.agents -padx 2 -pady $ypad -sticky w
+    
+    if {0} {
+	# Disco, Agents or Browse.
+	set frdisc $page.ag 
+	labelframe $frdisc -text [::msgcat::mc prefcudisc]
+	pack $frdisc -side top -anchor w -padx 8 -pady 4
+	set pdisc [frame $frdisc.frin]
+	pack $pdisc -padx 10 -pady 6 -side left
+	radiobutton $pdisc.disco   \
+	  -text " [::msgcat::mc {Disco method}]"  \
+	  -variable [namespace current]::tmpJPrefs(serviceMethod) -value "disco"
+	radiobutton $pdisc.browse   \
+	  -text " [::msgcat::mc prefcubrowse]"  \
+	  -variable [namespace current]::tmpJPrefs(serviceMethod) -value "browse"
+	radiobutton $pdisc.agents  \
+	  -text " [::msgcat::mc prefcuagent]" -value "agents" \
+	  -variable [namespace current]::tmpJPrefs(serviceMethod)
+	grid $pdisc.disco  -padx 2 -pady $ypad -sticky w
+	grid $pdisc.browse -padx 2 -pady $ypad -sticky w
+	grid $pdisc.agents -padx 2 -pady $ypad -sticky w
+    }
 }
 
 proc ::Jabber::JPrefs::PickFont { } {

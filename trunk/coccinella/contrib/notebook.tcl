@@ -4,9 +4,9 @@
 #      It implements a notebook interface.
 #      Code idee from Harrison & McLennan
 #      
-#  Copyright (c) 2003  Mats Bengtsson
+#  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: notebook.tcl,v 1.4 2004-06-06 07:02:20 matben Exp $
+# $Id: notebook.tcl,v 1.5 2004-06-09 14:26:17 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -82,7 +82,7 @@ proc ::notebook::Init { } {
     set widgetCommands {cget configure deletepage displaypage page pages}
   
     # Having a background identical with pages background minimizes flashes.
-    option add *Notebook.background                gray87       widgetDefault
+    option add *Notebook.background                white        widgetDefault
     option add *Notebook.borderWidth               0            widgetDefault
     option add *Notebook.relief                    flat         widgetDefault
     option add *Notebook.takeFocus                 0            widgetDefault
@@ -170,8 +170,14 @@ proc ::notebook::notebook {w args} {
         
     set nbInfo(uid) 0
     set nbInfo(pages) {}
-    set nbInfo(current) {}
+    
+    # current is the widget path to the actually packed page.
+    set nbInfo(current) ""
+    
+    # display is the widget path to the page that we want as front page.
+    set nbInfo(display) ""
     set nbInfo(pending) ""
+    set nbInfo(fixSize) 0
     
     return $w
 }
@@ -194,6 +200,7 @@ proc ::notebook::WidgetProc {w command args} {
     variable widgetCommands
     upvar ::notebook::${w}::options options
     upvar ::notebook::${w}::widgets widgets
+    upvar ::notebook::${w}::nbInfo nbInfo
     
     if {$widgetGlobals(debug) > 2} {
 	puts "::notebook::WidgetProc w=$w, command=$command, args=$args"
@@ -218,8 +225,6 @@ proc ::notebook::WidgetProc {w command args} {
 	    if {[llength $args] != 1} {
 		return -code error "wrong # args: should be $w displaypage pageName"
 	    }
-	    #set result [eval {Display $w} $args 1]
-	    #update idletasks
 	    set result [eval {Display $w} $args]
 	}
 	page {
@@ -270,7 +275,6 @@ proc ::notebook::Configure {w args} {
 	    set optName [lindex $widgetOptions($opt) 0]
 	    set optClass [lindex $widgetOptions($opt) 1]
 	    set def [option get $w $optName $optClass]
-	    #puts "opt=$opt, optName=$optName, optClass=$optClass, def=$def"
 	    lappend results [list $opt $optName $optClass $def $options($opt)]
 	}
 	return $results
@@ -315,14 +319,22 @@ proc ::notebook::Page {w name} {
 	puts "::notebook::Page w=$w, name=$name"
     }
     set page "$w.page[incr nbInfo(uid)]"
-    lappend nbInfo(pages) $page
+    lappend nbInfo(pages)  $page
     set nbInfo(page-$name) $page
     set nbInfo(name-$page) $name
     
     # We should probably add configuration options here.
     frame $page
-    if {$nbInfo(uid) == 1} {
-	after idle [list ::notebook::Display $w $name 1]
+    
+    # If this is the only page, display it.
+    if {[llength $nbInfo(pages)] == 1} {
+	::notebook::Display $w $name
+    }
+    
+    # Need to rebuild since size may have changed.
+    set nbInfo(fixSize) 1
+    if {$nbInfo(pending) == ""} {
+	set nbInfo(pending) [after idle [list ::notebook::Build $w]]
     }
     return $page
 }
@@ -386,9 +398,8 @@ proc ::notebook::DeletePage {w name} {
     
     # There can be a change in geometry if removed a large page.
     catch {after cancel $nbInfo(pending)}
-    set nbInfo(pending)  \
-      [after idle [list ::notebook::Display $w $newCurrentName 1]]
-    after idle destroy $page
+    ::notebook::Display $w $newCurrentName
+    after idle [list catch destroy $page]
     return {}
 }
 
@@ -399,20 +410,19 @@ proc ::notebook::DeletePage {w name} {
 # Arguments:
 #       w      the "base" widget.
 #       name   bring up this page.
-#       force  forces an unconditional page display, and geometry calc.
 # Results:
 #       none.
 
-proc ::notebook::Display {w name {force 0}} {
+proc ::notebook::Display {w name} {
 
     variable widgetGlobals
     upvar ::notebook::${w}::nbInfo nbInfo
     upvar ::notebook::${w}::widgets widgets
 
     if {$widgetGlobals(debug) > 1} {
-	puts "::notebook::Display w=$w, name=$name, force=$force"
+	puts "::notebook::Display w=$w, name=$name, display=$nbInfo(display),\
+	  current=$nbInfo(current)"
     }
-    set page {}
     if {[info exists nbInfo(page-$name)]} {
 	set page $nbInfo(page-$name)
     } elseif {[winfo exists $w.page$name]} {
@@ -421,25 +431,44 @@ proc ::notebook::Display {w name {force 0}} {
     if {$page == ""} {
 	return -code error "bad notebook page \"$name\""
     }
+    set nbInfo(display) $page
     if {$widgetGlobals(debug) > 2} {
-	puts "\t +++++ page=$page, nbInfo(current)=$nbInfo(current)"
+	puts "\t +++++ page=$page, pending=$nbInfo(pending)"
     }
+    if {$nbInfo(pending) == ""} {
+	set nbInfo(pending) [after idle [list ::notebook::Build $w]]
+    }
+}
+
+# notebook::Build --
+# 
+#       Does the actual job of unpacking and packing pages.
+#       Shall only be called at idle. Calls FixSize to compute geometry
+#       depending on nbInfo(fixSize).
+
+proc ::notebook::Build {w} {
     
-    # This proc can also sometimes be used to find out the correct size of
-    # the page if it wasn't packed when first called.
-    if {!$force && [string equal $page $nbInfo(current)]} {
+    variable widgetGlobals
+    upvar ::notebook::${w}::nbInfo nbInfo
+    upvar ::notebook::${w}::widgets widgets
+
+    if {$widgetGlobals(debug) > 1} {
+	puts "::notebook::Build w=$w, current=$nbInfo(current),\
+	  display=$nbInfo(display), fixSize=$nbInfo(fixSize)"
+    }
+    set nbInfo(pending) ""
+    if {[string equal $nbInfo(display) $nbInfo(current)]} {
 	return
     }
     if {$nbInfo(current) != ""} {
 	pack forget $nbInfo(current)
     }
+    set page $nbInfo(display)
     pack $page -expand yes -fill both
+    
+    # current id the actual packed page.
     set nbInfo(current) $page
-
-    # We shouldn't need to do this each time we change page.
-    # The placement of FixSize is critical since its update can
-    # generate multiple entries to the Display proc!
-    if {$force} {
+    if {$nbInfo(fixSize)} {
 	FixSize $w
     }
 }
@@ -476,15 +505,18 @@ proc ::notebook::FixSize {win} {
 	    set maxh $h
 	}
     }
-    if {$widgetGlobals(debug) > 2} {
-	puts "   maxw=$maxw, maxh=$maxh"
+    if {($maxw > [winfo reqwidth $win]) || ($maxh > [winfo reqheight $win])} {
+	set bd [$win cget -borderwidth]
+	set maxw [expr $maxw + 2 * $bd]
+	set maxh [expr $maxh + 2 * $bd]
+	if {$widgetGlobals(debug) > 2} {
+	    puts "\t configure -width $maxw -height $maxh"
+	}
+	
+	# Be sure to configure the original frame widget.
+	$widgets(frame) configure -width $maxw -height $maxh
     }
-    set bd [$win cget -borderwidth]
-    set maxw [expr $maxw + 2 * $bd]
-    set maxh [expr $maxh + 2 * $bd]
-    
-    # Be sure to configure the original frame widget.
-    $widgets(frame) configure -width $maxw -height $maxh
+    set nbInfo(fixSize) 0
 }
 
 # notebook::DestroyHandler --
@@ -499,8 +531,12 @@ proc ::notebook::FixSize {win} {
 
 proc ::notebook::DestroyHandler {w} {
     
+    variable widgetGlobals
     upvar ::notebook::${w}::nbInfo nbInfo
 
+    if {$widgetGlobals(debug) > 2} {
+	puts "::notebook::DestroyHandler w=$w, pending=$nbInfo(pending)"
+    }
     if {$nbInfo(pending) != ""} {
 	catch {after cancel $nbInfo(pending)}
     }
