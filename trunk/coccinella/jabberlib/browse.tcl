@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: browse.tcl,v 1.24 2004-04-21 13:21:49 matben Exp $
+# $Id: browse.tcl,v 1.25 2004-04-22 13:48:43 matben Exp $
 # 
 #  locals($jid,parent):       the parent of $jid.
 #  locals($jid,parents):      list of all parent jid's,
@@ -883,6 +883,9 @@ proc browse::clear {browsename {jid {}}} {
     
     Debug 3 "browse::clear browse::clear $jid"
     if {[string length $jid]} {
+
+	# testing...
+	ClearJidIsbrowsed $browsename $jid
 	ClearJid $browsename $jid
     } else {
 	ClearAll $browsename
@@ -917,6 +920,18 @@ proc browse::ClearJid {browsename jid} {
     if {[info exists parents]} {
     	set locals($jid,parents) $parents
     }
+}
+
+proc browse::ClearJidIsbrowsed {browsename jid} {
+    
+    upvar ${browsename}::locals locals
+
+    if {[info exists locals($jid,childs)]} {
+	foreach child $locals($jid,childs) {
+	    ClearJidIsbrowsed $browsename $child
+	}
+    }
+    catch {unset locals($jid,isbrowsed)}
 }
     
 # browse::ClearAll --

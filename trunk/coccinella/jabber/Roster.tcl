@@ -3,9 +3,9 @@
 #      This file is part of The Coccinella application. 
 #      It implements the Roster GUI part.
 #      
-#  Copyright (c) 2001-2003  Mats Bengtsson
+#  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.53 2004-04-21 13:21:12 matben Exp $
+# $Id: Roster.tcl,v 1.54 2004-04-22 13:48:43 matben Exp $
 
 package provide Roster 1.0
 
@@ -912,111 +912,51 @@ proc ::Jabber::Roster::Remove {jid} {
     }
 }
 
-# Jabber::Roster::AutoBrowse --
+# Jabber::Roster::SetCoccinella --
 # 
-#       If presence from user browse that user including its resource.
-#       
-# Arguments:
-#       jid:        
-#       presence    "available" or "unavailable"
+#       Sets the roster icon of The Coccinella.
 
-proc ::Jabber::Roster::AutoBrowse {jid presence args} {    
-    upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::jstate jstate
-
-    ::Jabber::Debug 2 "::Jabber::Roster::AutoBrowse jid=$jid, presence=$presence, args='$args'"
-
-    array set argsArr $args
-    
-    if {[string equal $presence "available"]} {   
-	
-	# Browse only potential Coccinella (all jabber) clients.
-	regexp {^(.+@)?([^@/]+)(/.*)?} $jid match pre host
-	set type [::Jabber::InvokeJlibCmd service gettype $host]
-	
-	# We may not yet have browsed this (empty).
-	if {($type == "") || ($type == "service/jabber")} {
-	    
-	    $jstate(browse) send_get $jid [namespace current]::AutoBrowseCmd
-	    
-	    # ::Jabber::InvokeJlibCmd browse_get $jid  \
-	    #   -errorcommand [list ::Jabber::Browse::ErrorProc 1]  \
-	    #   -command [list [namespace current]::AutoBrowseCallback]
-	}
-    } elseif {[string equal $presence "unavailable"]} {
-	#$jstate(browse) clear $jid
-    }
-}
-
-proc ::Jabber::Roster::AutoBrowseCmd {browseName type jid subiq args} {
-    
-    ::Jabber::Debug 2 "::Jabber::Roster::AutoBrowseCmd type=$type"
-    
-    switch -- $type {
-	error {
-	    ::Jabber::Browse::ErrorProc 1 $browseName $type $jid $subiq
-	}
-	result - ok {
-	    ::Jabber::Roster::AutoBrowseCallback $browseName $type $jid $subiq
-	}
-    }
-}
-
-# Jabber::Roster::AutoBrowseCallback --
-# 
-#       The intention here is to signal which services a particular client
-#       supports to the UI. If coccinella, for instance.
-#       
-# Arguments:
-#       jid:        
-
-proc ::Jabber::Roster::AutoBrowseCallback {browseName type jid subiq} {    
+proc ::Jabber::Roster::SetCoccinella {jid} {
     variable wtree    
     variable presenceIcon
     upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::privatexmlns privatexmlns    
     
-    ::Jabber::Debug 2 "::Jabber::Roster::AutoBrowseCallback, jid=$jid,\
-      [string range "subiq='$subiq'" 0 40]..."
+    ::Jabber::Debug 4 "::Jabber::Roster::SetCoccinella jid=$jid"
     
-    if {[$jstate(browse) hasnamespace $jid "coccinella:wb"] || \
-      [$jstate(browse) hasnamespace $jid $privatexmlns(whiteboard)]} {
+    if {[regexp {^(.+@[^/]+)/(.+)$} $jid match jid2 res]} {
+	set presArr(-show) "normal"
+	array set presArr [$jstate(roster) getpresence $jid2  \
+	  -resource $res -type available]
 	
-	::hooks::run autobrowsedCoccinellaHook $jid
+	#        ::Jabber::Roster::GetPresenceIcon ???
 	
-	if {[regexp {^(.+@[^/]+)/(.+)$} $jid match jid2 res]} {
-	    set presArr(-show) "normal"
-	    array set presArr [$jstate(roster) getpresence $jid2  \
-	      -resource $res -type available]
-	    
-	    # If available and show = ( normal | empty | chat ) display icon.
-	    switch -- $presArr(-show) {
-		normal {
-		    set icon $presenceIcon(available,wb)
-		}
-		chat {
-		    set icon $presenceIcon(chat,wb)
-		}
-		default {
-		    return
-		}
+	# If available and show = ( normal | empty | chat ) display icon.
+	switch -- $presArr(-show) {
+	    normal {
+		set icon $presenceIcon(available,wb)
 	    }
+	    chat {
+		set icon $presenceIcon(chat,wb)
+	    }
+	    default {
+		# ???
+		set icon $presenceIcon(available,wb)
+	    }
+	}	
+	array set rostArr [$jstate(roster) getrosteritem $jid2]
+	puts "------>[$wtree find withtag $jid]"
+	
+	if {[info exists rostArr(-groups)] &&  \
+	  [string length $rostArr(-groups)]} {
+	    set groups $rostArr(-groups)
+	    foreach grp $groups {
+		$wtree itemconfigure [list Online $grp $jid] -image $icon
+	    }
+	} else {
 	    
-	    array set rostArr [$jstate(roster) getrosteritem $jid2]
-	    
-	    if {[info exists rostArr(-groups)] &&  \
-	      [string length $rostArr(-groups)]} {
-		set groups $rostArr(-groups)
-		foreach grp $groups {
-		    $wtree itemconfigure [list Online $grp $jid] -image $icon
-		}
-	    } else {
-		
-		# No groups associated with this item.
-		$wtree itemconfigure [list Online $jid] -image $icon
-	    }	    
-	}
+	    # No groups associated with this item.
+	    $wtree itemconfigure [list Online $jid] -image $icon
+	}	    
     }
 }
 

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.39 2004-04-21 13:20:45 matben Exp $
+# $Id: Browse.tcl,v 1.40 2004-04-22 13:48:42 matben Exp $
 
 package require chasearrows
 
@@ -770,7 +770,7 @@ proc ::Jabber::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
 	    set jidList [concat $parentsJidList $jid]
 	    set allChildren [wrapper::getchildren $xmllist]
 	    
-	    ::Jabber::Debug 6 "   jidList='$jidList'"
+	    ::Jabber::Debug 6 "\t jidList='$jidList'"
 	    
 	    if {[info exists attrArr(type)] && \
 	      [string equal $attrArr(type) "remove"]} {
@@ -789,6 +789,12 @@ proc ::Jabber::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
 		    set txt $user
 		}
 		set openParent 0
+		
+		# Make the first two levels, server and its children bold, rest normal style.
+		set style normal
+		if {[llength $jidList] <= 2} {
+		    set style bold
+		}
 		
 		# If three-tier jid, then dead-end.
 		# Note: it is very unclear how to determine if dead-end without
@@ -818,7 +824,7 @@ proc ::Jabber::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
 			  -canvastags $treectag
 		    }
 		} elseif {[string equal $category "service"]} {
-		    $wtree newitem $jidList -text $txt -tags $jid -style bold \
+		    $wtree newitem $jidList -text $txt -tags $jid -style $style \
 		      -canvastags $treectag
 		} else {
 		    
@@ -873,7 +879,7 @@ proc ::Jabber::Browse::PresenceHook {jid type args} {
 	set jid3 ${jid}/$argsArr(-resource)
     }
 
-    if {[::Jabber::InvokeJlibCmd service isroom $jid]} {
+    if {[$jstate(jlib) service isroom $jid]} {
 	if {[::Jabber::Browse::HaveBrowseTree $jid]} {
 	    
 	    if {![winfo exists $wtree]} {
@@ -899,8 +905,78 @@ proc ::Jabber::Browse::PresenceHook {jid type args} {
 	# If users shall be automatically browsed to.
 	if {$jprefs(autoBrowseUsers) && [string equal $type "available"] && \
 	  ![$jstate(browse) isbrowsed $jid3]} {
-	    eval {::Jabber::Roster::AutoBrowse $jid3 $type} $args
+	    eval {::Jabber::Browse::AutoBrowse $jid3 $type} $args
 	}	
+    }
+}
+
+# Jabber::Browse::AutoBrowse --
+# 
+#       If presence from user browse that user including its resource.
+#       
+# Arguments:
+#       jid:        
+#       presence    "available" or "unavailable"
+
+proc ::Jabber::Browse::AutoBrowse {jid presence args} {    
+    upvar ::Jabber::jprefs jprefs
+    upvar ::Jabber::jstate jstate
+
+    ::Jabber::Debug 2 "::Jabber::Browse::AutoBrowse jid=$jid, presence=$presence, args='$args'"
+
+    array set argsArr $args
+    
+    if {[string equal $presence "available"]} {   
+	
+	# Browse only potential Coccinella (all jabber) clients.
+	regexp {^(.+@)?([^@/]+)(/.*)?} $jid match pre host
+	set type [$jstate(browse) gettype $host]
+	::Jabber::Debug 4 "\t type=$type"
+	
+	# We may not yet have browsed this (empty).
+	if {($type == "") || ($type == "service/jabber")} {
+	    
+	    $jstate(browse) send_get $jid [namespace current]::AutoBrowseCmd
+	}
+    } elseif {[string equal $presence "unavailable"]} {
+	#$jstate(browse) clear $jid
+    }
+}
+
+proc ::Jabber::Browse::AutoBrowseCmd {browseName type jid subiq args} {
+    
+    ::Jabber::Debug 2 "::Jabber::Browse::AutoBrowseCmd type=$type"
+    
+    switch -- $type {
+	error {
+	    ::Jabber::Browse::ErrorProc 1 $browseName $type $jid $subiq
+	}
+	result - ok {
+	    ::Jabber::Browse::AutoBrowseCallback $browseName $type $jid $subiq
+	}
+    }
+}
+
+# Jabber::Browse::AutoBrowseCallback --
+# 
+#       The intention here is to signal which services a particular client
+#       supports to the UI. If coccinella, for instance.
+#       
+# Arguments:
+#       jid:        
+
+proc ::Jabber::Browse::AutoBrowseCallback {browseName type jid subiq} {    
+    upvar ::Jabber::jstate jstate
+    upvar ::Jabber::privatexmlns privatexmlns    
+    
+    ::Jabber::Debug 2 "::Jabber::Browse::AutoBrowseCallback, jid=$jid,\
+      [string range "subiq='$subiq'" 0 40]..."
+    
+    if {[$jstate(browse) hasnamespace $jid "coccinella:wb"] || \
+      [$jstate(browse) hasnamespace $jid $privatexmlns(whiteboard)]} {
+	
+	::hooks::run autobrowsedCoccinellaHook $jid
+	::Jabber::Roster::SetCoccinella $jid
     }
 }
 

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.8 2004-04-21 13:21:04 matben Exp $
+# $Id: Disco.tcl,v 1.9 2004-04-22 13:48:43 matben Exp $
 
 package provide Disco 1.0
 
@@ -148,8 +148,8 @@ proc ::Jabber::Disco::GetItems {jid args} {
 proc ::Jabber::Disco::Command {disconame discotype from subiq args} {
     upvar ::Jabber::jstate jstate
 
-    puts "::Jabber::Disco::Command"
-    
+    ::Jabber::Debug 2 "::Jabber::Disco::Command discotype=$discotype, from=$from"
+
     if {[string equal $discotype "info"]} {
 	eval {::Jabber::Disco::ParseGetInfo $from $subiq} $args
     } elseif {[string equal $discotype "items"]} {
@@ -164,8 +164,8 @@ proc ::Jabber::Disco::ItemsCB {disconame type from subiq args} {
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jstate jstate
     
-    puts "::Jabber::Disco::ItemsCB type=$type, from=$from"
-    
+    ::Jabber::Debug 2 "::Jabber::Disco::ItemsCB type=$type, from=$from"
+ 
     switch -- $type {
 	error {
 	    
@@ -207,7 +207,7 @@ proc ::Jabber::Disco::ItemsCB {disconame type from subiq args} {
 
 proc ::Jabber::Disco::InfoCB {disconame type from subiq args} {
     
-    puts "::Jabber::Disco::InfoCB type=$type, from=$from"
+    ::Jabber::Debug 2 "::Jabber::Disco::InfoCB type=$type, from=$from"
     
     # The info contains the name attribute (optional) which may
     # need to be set since we get items before name.
@@ -361,7 +361,7 @@ proc ::Jabber::Disco::Popup {w v x y} {
     set jid [lindex $v end]
     set categoryList [$jstate(disco) types $jid]
     set categoryType [lindex $categoryList 0]
-    puts "\t categoryType=$categoryType"
+    ::Jabber::Debug 4 "\t categoryType=$categoryType"
 
     if {[regexp {^.+@[^/]+(/.*)?$} $jid match res]} {
 	set typeClicked user
@@ -513,7 +513,12 @@ proc ::Jabber::Disco::OpenTreeCmd {w v} {
 	    ::Jabber::Disco::GetItems $jid
 	} elseif {[llength [$wtree children $v]] == 0} {
 	    
-	    # ???
+	    # An item may have discoed but not from here.
+	    set children [$jstate(disco) children $jid]
+	    foreach c $children {
+		::Jabber::Disco::AddToTree [concat $v $c]
+	    }
+
 	}
 	
 	# Else it's already in the tree; do nothin.
@@ -660,7 +665,9 @@ proc ::Jabber::Disco::PresenceHook {jid presence args} {
 	    ::Jabber::Roster::GetPresenceIcon $jid3 $presArr(-type)
 	} $presList]
 	set v [concat [$jstate(disco) parents $jid3] $jid3]
-	$wtree itemconfigure $v -image $icon
+	if {[$wtree isitem $v]} {
+	    $wtree itemconfigure $v -image $icon
+	}
     }    
 }
 
@@ -677,7 +684,7 @@ proc ::Jabber::Disco::InfoCmd {jid} {
 
 proc ::Jabber::Disco::InfoCmdCB {disconame type jid subiq args} {
     
-    puts "::Jabber::Disco::InfoCmdCB type=$type, jid=$jid"
+    ::Jabber::Debug 4 "::Jabber::Disco::InfoCmdCB type=$type, jid=$jid"
     
     switch -- $type {
 	error {

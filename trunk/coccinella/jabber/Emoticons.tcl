@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.8 2004-04-19 13:58:47 matben Exp $
+# $Id: Emoticons.tcl,v 1.9 2004-04-22 13:48:43 matben Exp $
 
 
 package provide Emoticons 1.0
@@ -186,6 +186,9 @@ proc ::Emoticons::Parse {str} {
     
     # Protect Tcl special characters, quotes included.
     regsub -all {([][$\\{}"])} $str {\\\1} str
+    
+    # Add extra spaces at beginning and end to be removed. ???
+    set str " $str "
     
     # Since there are about 60 smileys we need to be economical here.    
     # Check first if there are any short smileys.

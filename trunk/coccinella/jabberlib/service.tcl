@@ -5,7 +5,7 @@
 #       
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: service.tcl,v 1.2 2004-04-21 13:22:12 matben Exp $
+# $Id: service.tcl,v 1.3 2004-04-22 13:48:43 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -387,12 +387,14 @@ proc jlib::service::hasfeature {jlibname jid xmlns} {
 
     upvar [namespace parent]::${jlibname}::serv serv
 
-    if {$serv(browse) && [$serv(browse,name) isbrowsed $jid]} {
-	return [$serv(browse,name) hasnamespace $jid $xmlns]
-    } elseif {$serv(disco) && [$serv(disco,name) isdiscoed info $jid]} {
-	return [$serv(disco,name) hasfeature $xmlns $jid]
+    # Try to gather only positive results!
+    set ans 0
+    if {$serv(browse)} {
+	set ans [$serv(browse,name) hasnamespace $jid $xmlns]
+    } elseif {!$ans && $serv(disco) && [$serv(disco,name) isdiscoed info $jid]} {
+	set ans [$serv(disco,name) hasfeature $xmlns $jid]
     }
-    return 0
+    return $ans
 }
 
 # jlib::service::gettransportjids --
