@@ -280,7 +280,7 @@
 # Short texts only. Use english as database key.
 ::msgcat::mcset de {30 days}              {30 Tage}
 ::msgcat::mcset de {About Coccinella}     {Über Coccinella}
-::msgcat::mcset de {About Whiteboard}   {Über Whiteboard}
+::msgcat::mcset de {About Whiteboard}     {Über Whiteboard}
 ::msgcat::mcset de {About QuickTimeTcl}   {Über QuickTimeTcl}
 ::msgcat::mcset de {Active <Return>}      {Aktiv <Return>}
 ::msgcat::mcset de {Add New User}         {Neue Person hinzufügen}
@@ -311,6 +311,7 @@
 ::msgcat::mcset de {Default group}        {Standard-Gruppe}
 ::msgcat::mcset de {Default Logout Status}  {Standard-Abmeldestatus}
 ::msgcat::mcset de {Disk Cache}           {Zwischenspeicher}
+::msgcat::mcset de {Different Passwords}  {Passwörter unterschiedlich}
 ::msgcat::mcset de {Do Not Disturb}       {Bitte nicht stören}
 ::msgcat::mcset de {Edit Fonts}           {Schriften bearbeiten}
 ::msgcat::mcset de {Edit Item}            {Element bearbeiten}
@@ -537,6 +538,8 @@ wirklich beenden? Sie können ihn später über das Menü starten.}
 ::msgcat::mcset de messprotocolch	{Sie haben die Netzwerkeinstellungen geändert.\
 Dies erfordert einen Neustart der Anwendung.\
 Wollen Sie wirklich weitermachen ?}
+::msgcat::mcset de messpasswddifferent {Die beiden Passwörter stimmen nicht\
+überein. Bitte versuchen Sie es erneut.}
 
 
 
@@ -909,7 +912,7 @@ Eingeben der Daten hilft, die für ein neues oder bestehendes Konto auf\
 einem Jabber-Server erforderlich sind.}
 	::msgcat::mcset de suintro2 	{Wenn Sie im "Peer-to-Peer"-Modus arbeiten\
 wollen, geben Sie das einfach im Einstellungsdialog an und starten Coccinella erneut.}
-	::msgcat::mcset de suintro3 	{Sie können jederzeit den "zuück"-Knopf\
+	::msgcat::mcset de suintro3 	{Sie können jederzeit den "zurück"-Knopf\
 zum Zurücksprung nutzen. Folgen Sie den Anweisungen auf jeder Seite\
 und drücken Sie "Weiter", bis alles fertig ist.}
         ::msgcat::mcset de sulang       {Wählen Sie einen Sprachkatalog.\

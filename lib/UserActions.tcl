@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UserActions.tcl,v 1.33 2004-01-13 14:50:21 matben Exp $
+# $Id: UserActions.tcl,v 1.34 2004-03-13 15:21:42 matben Exp $
 
 namespace eval ::UserActions:: {
     
@@ -20,7 +20,7 @@ namespace eval ::UserActions:: {
 proc ::UserActions::DoPrintCanvas {wtop} {
     global  this prefs wDlgs
         
-    set wCan [::UI::GetCanvasFromWtop $wtop]
+    set wCan [::WB::GetCanvasFromWtop $wtop]
     
     switch -- $this(platform) {
 	macintosh - macosx {
@@ -137,7 +137,7 @@ proc ::UserActions::DoQuit {args} {
     }
     
     # Run all quit hooks.
-    hooks::run quitAppHook
+    ::hooks::run quitAppHook
     
     # If we used 'Edit/Revert To/Application Defaults' be sure to reset...
     set prefs(firstLaunch) 0

@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: SetupAss.tcl,v 1.20 2004-02-12 08:48:26 matben Exp $
+# $Id: SetupAss.tcl,v 1.21 2004-03-13 15:21:41 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -95,9 +95,9 @@ proc ::Jabber::SetupAss::SetupAss { } {
     entry $p2.fr.serv -width 28 -textvariable ${ns}::server \
        -validate key -validatecommand {::Jabber::ValidateJIDChars %S}
     grid $p2.fr.msg1 -sticky n -columnspan 2 -row 0
-    grid $p2.fr.bt -sticky ew -column 0 -row 1 -pady 4
-    grid $p2.fr.msg2 -sticky w -column 1 -row 1
-    grid $p2.fr.la -sticky e -column 0 -row 2
+    grid $p2.fr.bt   -sticky ew -column 0 -row 1
+    grid $p2.fr.msg2 -sticky w -column 1 -row 1 -pady 4
+    grid $p2.fr.la   -sticky e -column 0 -row 2
     grid $p2.fr.serv -sticky w -column 1 -row 2 -pady 4
     
     # Username & Password.
@@ -105,17 +105,23 @@ proc ::Jabber::SetupAss::SetupAss { } {
     pack [frame $p3.fr] -padx 10 -pady 8 -side top -anchor w
     message $p3.fr.msg1 -width 260 -text   \
       [::msgcat::mc suusermsg]
-    label $p3.fr.lan -font $fontSB -text "[::msgcat::mc Username]:"
-    label $p3.fr.lap -font $fontSB -text "[::msgcat::mc Password]:"
-    entry $p3.fr.name -width 28 -textvariable ${ns}::username \
+    label $p3.fr.lan  -font $fontSB -text "[::msgcat::mc Username]:"
+    label $p3.fr.lap  -font $fontSB -text "[::msgcat::mc Password]:"
+    label $p3.fr.lap2 -font $fontSB -text "[::msgcat::mc {Retype password}]:"
+    entry $p3.fr.name -width 20 -textvariable ${ns}::username \
        -validate key -validatecommand {::Jabber::ValidateJIDChars %S}
-    entry $p3.fr.pass -width 28 -textvariable ${ns}::password \
-       -validate key -validatecommand {::Jabber::ValidatePasswdChars %S}
-    grid $p3.fr.msg1 -sticky n -columnspan 2
-    grid $p3.fr.lan -sticky e -column 0 -row 1
-    grid $p3.fr.name -sticky w -column 1 -row 1 -pady 4
-    grid $p3.fr.lap -sticky e -column 0 -row 2
-    grid $p3.fr.pass -sticky w -column 1 -row 2 -pady 4
+    entry $p3.fr.pass -width 20 -textvariable ${ns}::password -show {*} \
+      -validate key -validatecommand {::Jabber::ValidatePasswdChars %S}
+    entry $p3.fr.pass2 -width 20 -textvariable ${ns}::password2 -show {*} \
+      -validate key -validatecommand {::Jabber::ValidatePasswdChars %S} 
+     
+    grid $p3.fr.msg1  -sticky n -columnspan 2
+    grid $p3.fr.lan   -sticky e -column 0 -row 1
+    grid $p3.fr.name  -sticky w -column 1 -row 1 -pady 2
+    grid $p3.fr.lap   -sticky e -column 0 -row 2
+    grid $p3.fr.pass  -sticky w -column 1 -row 2 -pady 2
+    grid $p3.fr.lap2  -sticky e -column 0 -row 3 
+    grid $p3.fr.pass2 -sticky w -column 1 -row 3 -pady 2
 
     # Register?
     set p4 [$su newpage "register" -headtext [::msgcat::mc Register]]
@@ -142,6 +148,7 @@ proc ::Jabber::SetupAss::SetupAss { } {
 proc ::Jabber::SetupAss::NextPage {w page} {
     variable username
     variable password
+    variable password2
     
     # Verify that it is ok before showing the next page.
     switch -- $page {
@@ -149,6 +156,12 @@ proc ::Jabber::SetupAss::NextPage {w page} {
 	    if {($username == "") || ($password == "")} {
 		tk_messageBox -icon error -title [::msgcat::mc {Empty Fields}] \
 		  -message [::msgcat::mc messsuassfillin] -parent $w
+		return -code 3
+	    } elseif {$password != $password2} {
+		tk_messageBox -icon error -title [::msgcat::mc {Different Passwords}] \
+		  -message [::msgcat::mc messpasswddifferent] -parent $w
+		set password ""
+		set password2 ""
 		return -code 3
 	    }
 	}
@@ -233,8 +246,9 @@ proc ::Jabber::SetupAss::ServersDlg {w} {
     set fontSB [option get . fontSmallBold {}]
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
-       
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1
+    
     # Button part.
     set wbservbt $w.frall.frbot.btok
     set frbot [frame $w.frall.frbot -borderwidth 0]

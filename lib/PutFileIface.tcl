@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: PutFileIface.tcl,v 1.16 2004-03-04 07:53:17 matben Exp $
+# $Id: PutFileIface.tcl,v 1.17 2004-03-13 15:21:41 matben Exp $
 
 package require putfile
 package require uriencode
@@ -17,104 +17,6 @@ namespace eval ::PutFileIface:: {
     
     # Internal vars only.
     variable uid 0
-}
-
-# PutFileIface::PutFileDlg --
-#
-#       Opens a file in a dialog and lets 'PutFile' do the job of transferring
-#       the file to all other clients.
-
-proc ::PutFileIface::PutFileDlg {wtop} {
-    
-    if {[llength [::Network::GetIP to]] == 0} {
-	return
-    }
-    set ans [tk_getOpenFile -title [::msgcat::mc {Put Image/Movie}] \
-      -filetypes [::Plugins::GetTypeListDialogOption]]
-    if {$ans == ""} {
-	return
-    }
-    set fileName $ans
-    
-    # Do the actual putting once the file is chosen. 
-    ::PutFileIface::PutFileToAll $wtop $fileName "all"
-}
-
-# PutFileIface::PutFileToAll --
-#   
-#       Transfers a file to all remote servers. It needs some negotiation to 
-#       work.
-#       
-# Arguments:
-#       wtop
-#       fileName   the local path to the file to be put.
-#       where = "remote" or "all": put only to remote clients.
-#       where = ip number: put only to this remote client.
-#       opts      a list of '-key value' pairs, where most keys correspond 
-#                 to a valid "canvas create" option, and everything is on 
-#                 a single line.
-
-proc ::PutFileIface::PutFileToAll {wtop fileName where {opts {}}} {
-    global  prefs this
-    
-    Debug 2 "+PutFile:: fileName=$fileName, opts=$opts"
-    
-    if {[llength [::Network::GetIP to]] == 0} {
-	return
-    }
-    
-    # Add an alternative way of getting this file via an URL.
-    set relPath [filerelative $this(httpdRootPath) $fileName]
-    set relPath [uriencode::quotepath $relPath]
-    set ip [::Network::GetThisOutsideIPAddress]
-    array set optArr $opts
-    array set optArr [list -url "http://${ip}:$prefs(httpdPort)/$relPath"]
-    set opts [array get optArr]
-        
-    # If we are a server in a client-server we need to ask the client
-    # to get the file by sending a PUT NEW instruction to it on our
-    # primary connection.
-    
-    switch -- $prefs(protocol) {
-	server {
-    
-	    # Translate tcl type '-key value' list to 'Key: value' option list.
-	    set optList [::Import::GetTransportSyntaxOptsFromTcl $opts]
-	    set relFilePath [filerelative $this(path) $fileName]
-	    set relFilePath [uriencode::quotepath $relFilePath]
-	    set putCmd "PUT NEW: [list $relFilePath] $optList"
-	    if {$where == "remote" || $where == "all"} {
-		SendClientCommand $wtop $putCmd
-	    } else {
-		SendClientCommand $wtop $putCmd -ips $where
-	    }
-	}
-	jabber {
-	    
-	    # Jabber is special and handled internally.
-	    ::Jabber::PutFileOrSchedule $wtop $fileName $opts
-	}
-	default {
-	    
-	    # Make a list with all ip numbers to put file to.
-	    switch -- $where {
-		remote - all {
-		    set allPutIP [::Network::GetIP to]
-		}
-		default {
-		    set allPutIP $where
-		}    
-	    }
-    
-	    # Translate tcl type '-key value' list to 'Key: value' option list.
-	    set optList [::Import::GetTransportSyntaxOptsFromTcl $opts]
-	    
-	    # Loop over all connected servers or only the specified one.
-	    foreach ip $allPutIP {
-		::PutFileIface::PutFile $wtop $fileName $ip $optList
-	    }
-	}
-    }
 }
 
 # PutFileIface::PutFile --

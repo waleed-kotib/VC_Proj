@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasCmd.tcl,v 1.5 2004-02-06 14:01:22 matben Exp $
+# $Id: CanvasCmd.tcl,v 1.6 2004-03-13 15:21:41 matben Exp $
 
 package provide CanvasCmd 1.0
 
@@ -53,7 +53,7 @@ proc ::CanvasCmd::CancelAllPutGetAndPendingOpen {wtop} {
 
 proc ::CanvasCmd::SelectAll {wtop} {
     
-    set wCan [::UI::GetCanvasFromWtop $wtop]
+    set wCan [::WB::GetCanvasFromWtop $wtop]
     $wCan delete tbbox
     set ids [$wCan find all]
     foreach id $ids {
@@ -74,7 +74,7 @@ proc ::CanvasCmd::SelectAll {wtop} {
 
 proc ::CanvasCmd::DeselectAll {wtop} {
 	
-    set wCan [::UI::GetCanvasFromWtop $wtop]
+    set wCan [::WB::GetCanvasFromWtop $wtop]
     $wCan delete withtag tbbox
     $wCan dtag all selected
     
@@ -95,9 +95,9 @@ proc ::CanvasCmd::DeselectAll {wtop} {
 
 proc ::CanvasCmd::RaiseOrLowerItems {wtop {what raise}} {
     
-    upvar ::${wtop}::state state
+    upvar ::WB::${wtop}::state state
     
-    set w [::UI::GetCanvasFromWtop $wtop]    
+    set w [::WB::GetCanvasFromWtop $wtop]    
 
     set cmdList {}
     set undoList {}
@@ -128,7 +128,7 @@ proc ::CanvasCmd::RaiseOrLowerItems {wtop {what raise}} {
 proc ::CanvasCmd::SetCanvasBgColor {wtop} {
     global  prefs state
 	
-    set w [::UI::GetCanvasFromWtop $wtop]
+    set w [::WB::GetCanvasFromWtop $wtop]
     set prevCol $state(bgColCan)
     set col [tk_chooseColor -initialcolor $state(bgColCan)]
     if {[string length $col] > 0} {
@@ -156,9 +156,9 @@ proc ::CanvasCmd::SetCanvasBgColor {wtop} {
 proc ::CanvasCmd::DoCanvasGrid {wtop} {
     global  prefs this
     
-    upvar ::${wtop}::state state
+    upvar ::WB::${wtop}::state state
 
-    set wCan [::UI::GetCanvasFromWtop $wtop]
+    set wCan [::WB::GetCanvasFromWtop $wtop]
     set length 2000
     set gridDist $prefs(gridDist)
     if {$state(canGridOn) == 0} {
@@ -201,7 +201,7 @@ proc ::CanvasCmd::DoCanvasGrid {wtop} {
 proc ::CanvasCmd::SavePostscript {wtop} {
     global  prefs this
     
-    set w [::UI::GetCanvasFromWtop $wtop]
+    set w [::WB::GetCanvasFromWtop $wtop]
     if {![winfo exists $w]} {
 	return
     }
@@ -245,7 +245,7 @@ proc ::CanvasCmd::SavePostscript {wtop} {
 proc ::CanvasCmd::ResizeItem {wtop factor} {
     global  prefs
 	
-    set w [::UI::GetCanvasFromWtop $wtop]
+    set w [::WB::GetCanvasFromWtop $wtop]
     set ids [$w find withtag selected]
     if {[string length $ids] == 0} {
 	return
@@ -298,7 +298,7 @@ proc ::CanvasCmd::ResizeItem {wtop factor} {
 
 proc ::CanvasCmd::FlipItem {wtop direction} {
 	
-    set w [::UI::GetCanvasFromWtop $wtop]
+    set w [::WB::GetCanvasFromWtop $wtop]
     set id [$w find withtag selected]
     if {[llength $id] != 1} {
 	return
@@ -342,7 +342,7 @@ proc ::CanvasCmd::FlipItem {wtop direction} {
 proc ::CanvasCmd::Undo {wtop} {
     
     # Make the text stuff in sync.
-    set wCan [::UI::GetCanvasFromWtop $wtop]
+    set wCan [::WB::GetCanvasFromWtop $wtop]
     ::CanvasText::EvalBufferedText $wCan
     
     # The actual undo command.
@@ -375,7 +375,7 @@ proc ::CanvasCmd::Redo {wtop} {
 
 proc ::CanvasCmd::DoEraseAll {wtop {where all}} {
 	
-    set wCan [::UI::GetCanvasFromWtop $wtop]
+    set wCan [::WB::GetCanvasFromWtop $wtop]
     ::CanvasCmd::DeselectAll $wtop
     foreach id [$wCan find all] {
 	
@@ -390,7 +390,7 @@ proc ::CanvasCmd::DoEraseAll {wtop {where all}} {
 
 proc ::CanvasCmd::EraseAll {wtop} {
 	
-    set wCan [::UI::GetCanvasFromWtop $wtop]
+    set wCan [::WB::GetCanvasFromWtop $wtop]
     foreach id [$wCan find all] {
 	$wCan delete $id
     }
@@ -408,7 +408,7 @@ proc ::CanvasCmd::EraseAll {wtop} {
 
 proc ::CanvasCmd::DoPutCanvasDlg {wtop} {
 	
-    set wCan [::UI::GetCanvasFromWtop $wtop]
+    set wCan [::WB::GetCanvasFromWtop $wtop]
     set ans [tk_messageBox -message [FormatTextForMessageBox \
       "Warning! Syncing this canvas first erases all client canvases."] \
       -icon warning -type okcancel -default ok]
@@ -496,8 +496,7 @@ proc ::CanvasCmd::DoGetCanvas {wtop} {
     DoEraseAll $wtop "local"
     
     # GET CANVAS.
-    # Jabber????
-    SendClientCommand $wtop "GET CANVAS:" -ips $getCanIPNum
+    ::WB::SendGenMessageList $wtop [list "GET CANVAS:"] -ips $getCanIPNum
 }
 
 # CanvasCmd::DoSendCanvas --
@@ -509,23 +508,11 @@ proc ::CanvasCmd::DoGetCanvas {wtop} {
 
 proc ::CanvasCmd::DoSendCanvas {wtop} {
     
-    set w [::UI::GetCanvasFromWtop $wtop]
-    set cmdList {}
-    
-    foreach id [$w find all] {
-	set tags [$w gettags $id]
-	if {([lsearch $tags grid] >= 0) || ([lsearch $tags tbbox] >= 0)} {
-	    continue
-	}
-	set line [::CanvasUtils::GetOnelinerForAny $w $id -uritype http]
-	if {$line != ""} {
-	    lappend cmdList [concat "CANVAS:" $line]
-	}
-    }
-    
-    # Be sure to send jabber stuff in a single batch. 
-    # Jabber: override doSend checkbutton!
-    SendClientCommandList $wtop $cmdList -force 1
+    set w [::WB::GetCanvasFromWtop $wtop]
+    set cmdList [::CanvasUtils::GetCompleteCanvas $w]
+        
+    # Just invoke the send message hook.
+    ::WB::SendMessageList $wtop $cmdList -force 1
 }
 
 # UserActions::DoQuit ---
@@ -555,8 +542,7 @@ proc ::UserActions::DoQuit {args} {
     }
     
     # Run all quit hooks.
-    hooks::run quitAppHook
-    
+    ::hooks::run quitAppHook    
 	    
     # If we used 'Edit/Revert To/Application Defaults' be sure to reset...
     set prefs(firstLaunch) 0

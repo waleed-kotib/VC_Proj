@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: PluginTextPlain.tcl,v 1.10 2004-01-23 09:00:06 matben Exp $
+# $Id: PluginTextPlain.tcl,v 1.11 2004-03-13 15:21:58 matben Exp $
 
 
 namespace eval ::TextImporter:: {
@@ -193,7 +193,7 @@ proc ::TextImporter::Save {wCan id args} {
     if {[info exists locals(id2file,$id)]} {
 	set fileName $locals(id2file,$id)
 	if {$argsArr(-uritype) == "http"} {
-	    lappend impArgs -url [::CanvasUtils::GetHttpFromFile $fileName]
+	    lappend impArgs -url [::Utils::GetHttpFromFile $fileName]
 	} else {
 	    lappend impArgs -file $fileName
 	}
@@ -221,7 +221,7 @@ proc ::TextImporter::Clicked {id} {
     
     # Button part.
     set frbot [frame ${win}.f.frbot -borderwidth 0]
-    pack [button $frbot.btset -text [::msgcat::mc {Save As}] -width 8 \
+    pack [button $frbot.btset -text [::msgcat::mc {Save As}] \
       -command [list [namespace current]::SaveAs $id]]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Close]  \

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2003  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.37 2004-01-26 07:34:49 matben Exp $
+# $Id: MailBox.tcl,v 1.38 2004-03-13 15:21:41 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -40,18 +40,19 @@ namespace eval ::Jabber::MailBox:: {
     option add *MailBox*trashDisImage         trashDis         widgetDefault
     
     # Add some hooks...
-    hooks::add initHook        ::Jabber::MailBox::Init
-    hooks::add newMessageHook  ::Jabber::MailBox::GotMsg
-    hooks::add closeWindowHook ::Jabber::MailBox::CloseHook
+    ::hooks::add initHook        ::Jabber::MailBox::Init
+    ::hooks::add newMessageHook  ::Jabber::MailBox::GotMsg
+    ::hooks::add closeWindowHook ::Jabber::MailBox::CloseHook
+    ::hooks::add jabberInitHook  ::Jabber::MailBox::InitHandler
 
     variable locals
     upvar ::Jabber::jstate jstate
     
-    set locals(inited) 0
+    set locals(inited)      0
     set locals(mailboxRead) 0
-    set locals(haveEdits) 0
+    set locals(haveEdits)   0
     set locals(hooksInited) 0
-    set jstate(inboxVis) 0
+    set jstate(inboxVis)    0
     
     # Running id for incoming messages; never reused.
     variable uidmsg 1000
@@ -82,6 +83,20 @@ proc ::Jabber::MailBox::Init { } {
     set locals(inited) 1
    
     ::Jabber::MailBox::TranslateAnyVer1ToCurrentVer
+}
+
+proc ::Jabber::MailBox::InitHandler { } {
+    upvar ::Jabber::jstate jstate
+    upvar ::Jabber::privatexmlns privatexmlns
+    
+    # Register for the whiteboard messages we want. Duplicate protocols.
+    $jstate(jlib) message_register normal coccinella:wb  \
+      [namespace current]::HandleRawWBMessage
+    $jstate(jlib) message_register normal $privatexmlns(whiteboard)  \
+      [namespace current]::HandleRawWBMessage
+    $jstate(jlib) message_register normal "http://jabber.org/protocol/svgwb" \
+      [namespace current]::HandleSVGWBMessage
+
 }
 
 # Jabber::MailBox::ShowHide --
@@ -178,22 +193,22 @@ proc ::Jabber::MailBox::Build {args} {
     set jstate(inboxVis) 1
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised]   \
-      -fill both -expand 1 -ipadx 4
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1 -ipadx 4
     
     # Button part.
-    set iconNew       [::Theme::GetImage [option get $w newmsgImage {}]]
-    set iconNewDis    [::Theme::GetImage [option get $w newmsgDisImage {}]]
-    set iconReply     [::Theme::GetImage [option get $w replyImage {}]]
-    set iconReplyDis  [::Theme::GetImage [option get $w replyDisImage {}]]
-    set iconForward   [::Theme::GetImage [option get $w forwardImage {}]]
+    set iconNew        [::Theme::GetImage [option get $w newmsgImage {}]]
+    set iconNewDis     [::Theme::GetImage [option get $w newmsgDisImage {}]]
+    set iconReply      [::Theme::GetImage [option get $w replyImage {}]]
+    set iconReplyDis   [::Theme::GetImage [option get $w replyDisImage {}]]
+    set iconForward    [::Theme::GetImage [option get $w forwardImage {}]]
     set iconForwardDis [::Theme::GetImage [option get $w forwardDisImage {}]]
-    set iconSave      [::Theme::GetImage [option get $w saveImage {}]]
-    set iconSaveDis   [::Theme::GetImage [option get $w saveDisImage {}]]
-    set iconPrint     [::Theme::GetImage [option get $w printImage {}]]
-    set iconPrintDis  [::Theme::GetImage [option get $w printDisImage {}]]
-    set iconTrash     [::Theme::GetImage [option get $w trashImage {}]]
-    set iconTrashDis  [::Theme::GetImage [option get $w trashDisImage {}]]
+    set iconSave       [::Theme::GetImage [option get $w saveImage {}]]
+    set iconSaveDis    [::Theme::GetImage [option get $w saveDisImage {}]]
+    set iconPrint      [::Theme::GetImage [option get $w printImage {}]]
+    set iconPrintDis   [::Theme::GetImage [option get $w printDisImage {}]]
+    set iconTrash      [::Theme::GetImage [option get $w trashImage {}]]
+    set iconTrashDis   [::Theme::GetImage [option get $w trashDisImage {}]]
 
     set wtray $w.frall.frtop
     ::buttontray::buttontray $wtray 50
@@ -213,7 +228,7 @@ proc ::Jabber::MailBox::Build {args} {
     $wtray newbutton trash Trash $iconTrash $iconTrashDis  \
       ::Jabber::MailBox::TrashMsg -state disabled
     
-    hooks::run buildMailBoxButtonTrayHook $wtray
+    ::hooks::run buildMailBoxButtonTrayHook $wtray
 
     pack [frame $w.frall.divt -bd 2 -relief sunken -height 2] -fill x -side top
     
@@ -244,7 +259,7 @@ proc ::Jabber::MailBox::Build {args} {
       -sortcommand [namespace current]::SortTimeColumn
     $wtbl columnconfigure $colindex(isread) -hide 1
     $wtbl columnconfigure $colindex(uidmsg) -hide 1
-    grid $wtbl -column 0 -row 0 -sticky news
+    grid $wtbl    -column 0 -row 0 -sticky news
     grid $wysctbl -column 1 -row 0 -sticky ns
     grid columnconfigure $wfrmbox 0 -weight 1
     grid rowconfigure $wfrmbox 0 -weight 1
@@ -301,8 +316,8 @@ proc ::Jabber::MailBox::Build {args} {
     # Add all event hooks.
     if {!$locals(hooksInited)} {
 	set locals(hooksInited) 1
-	hooks::add quitAppHook [list ::UI::SaveWinGeom $w]
-	hooks::add quitAppHook [list ::UI::SavePanePos $w $locals(wfrmbox)]
+	::hooks::add quitAppHook [list ::UI::SaveWinGeom $w]
+	::hooks::add quitAppHook [list ::UI::SavePanePos $w $locals(wfrmbox)]
     }
     
     # Grab and focus.
@@ -365,7 +380,7 @@ proc ::Jabber::MailBox::InsertRow {wtbl row i} {
     set iconWboard  [::UI::GetIcon wboard]
     set iconUnread  [::UI::GetIcon unreadMsg]
     set iconRead    [::UI::GetIcon readMsg]
-    set fontS [option get . fontSmall {}]
+    set fontS  [option get . fontSmall {}]
     set fontSB [option get . fontSmallBold {}]
 
     $wtbl insert end [lrange $row 0 5]
@@ -468,6 +483,7 @@ proc ::Jabber::MailBox::MarkMsgAsRead {id} {
 # Jabber::MailBox::GotMsg --
 #
 #       Called when we get an incoming message. Stores the message.
+#       Should never be called for whiteboard messages.
 #
 # Arguments:
 #       bodytxt     the body chdata
@@ -486,52 +502,20 @@ proc ::Jabber::MailBox::GotMsg {bodytxt args} {
     upvar ::Jabber::jprefs jprefs
     
     ::Jabber::Debug 2 "::Jabber::MailBox::GotMsg args='$args'"
-
-    array set argsArr {
-	-from unknown -subject {}
-    }
-    array set argsArr $args
     
     # The inbox should only be read once to be economical.
     if {!$locals(mailboxRead)} {
 	::Jabber::MailBox::ReadMailbox
     }
-    jlib::splitjid $argsArr(-from) jid2 res
-       
-    # Here we should probably check som 'jabber:x:delay' element...
-    # This is ISO 8601.
-    set timeStamp ""
-    if {[info exists argsArr(-x)]} {
-	set timeStamp [::Jabber::GetAnyDelayElem $argsArr(-x)]
-    }
-    if {$timeStamp == ""} {
-	set timeStamp [clock format [clock seconds] -format "%Y%m%dT%H:%M:%S"]
-    }
+    set messageList [eval {::Jabber::MailBox::MakeMessageList $bodytxt} $args]    
     
-    # List format for messages.
-    incr uidmsg
-    set messageList [list $argsArr(-subject) $argsArr(-from)  \
-      $timeStamp 0 $uidmsg $bodytxt]
-    
-    # If any whiteboard elements in this message (binary entities?).
-    # Generate unique hex id which is stored in mailbox and used in file name.
-    if {[info exists argsArr(-whiteboard)]} {
-	set canvasuid [::Utils::GenerateHexUID]
-	set filePath [file join $prefs(inboxCanvasPath) ${canvasuid}.can]
-	::CanvasFile::DataToFile $filePath $argsArr(-whiteboard)
-	lappend messageList -canvasuid $canvasuid
-	set isWhiteboard 1
-    } else {
-	set isWhiteboard 0
-    }
-
     # All messages cached in 'mailbox' array.
     set mailbox($uidmsg) $messageList
     
     # Always cache it in inbox.
     ::Jabber::MailBox::PutMessageInInbox $messageList
         
-    if {$jprefs(showMsgNewWin) && !$isWhiteboard} {
+    if {$jprefs(showMsgNewWin)} {
 	::Jabber::GotMsg::GotMsg $uidmsg
 	::Jabber::MailBox::MarkMsgAsRead $uidmsg
     }
@@ -543,6 +527,83 @@ proc ::Jabber::MailBox::GotMsg {bodytxt args} {
 	$locals(wtbl) see end
     }
     ::Jabber::UI::MailBoxState nonempty
+}
+
+# Jabber::MailBox::HandleRawWBMessage --
+# 
+#       Same as above, but for raw whiteboard messages.
+
+proc ::Jabber::MailBox::HandleRawWBMessage {jlibname xmlns args} {
+    global  prefs
+
+    variable mailbox
+    variable uidmsg
+    variable locals
+    
+    ::Jabber::Debug 2 "::Jabber::MailBox::HandleRawWBMessage args=$args"
+    array set argsArr $args
+	
+    # The inbox should only be read once to be economical.
+    if {!$locals(mailboxRead)} {
+	::Jabber::MailBox::ReadMailbox
+    }
+    set messageList [eval {::Jabber::MailBox::MakeMessageList ""} $args]
+    set rawList [::Jabber::WB::GetRawMessageList $argsArr(-x) $xmlns]
+    set canvasuid [::Utils::GenerateHexUID]
+    set filePath [file join $prefs(inboxCanvasPath) ${canvasuid}.can]
+    ::CanvasFile::DataToFile $filePath $rawList
+    lappend messageList -canvasuid $canvasuid
+    set mailbox($uidmsg) $messageList
+    ::Jabber::MailBox::PutMessageInInbox $messageList
+
+    # Show in mailbox.
+    set w [::Jabber::MailBox::GetToplevel]
+    if {$w != ""} {
+	::Jabber::MailBox::InsertRow $locals(wtbl) $mailbox($uidmsg) end
+	$locals(wtbl) see end
+    }
+    ::Jabber::UI::MailBoxState nonempty
+    
+    eval {::hooks::run newWBMessageHook} $args
+
+    # We have handled this message completely.
+    return 1
+}
+
+proc ::Jabber::MailBox::HandleSVGWBMessage {jlibname xmlns args} {
+    
+    ::Jabber::Debug 2 "::Jabber::MailBox::HandleSVGWBMessage"
+    
+    
+    eval {::hooks::run newWBMessageHook} $args
+
+    # We have handled this message completely.
+    return 1
+}
+
+proc ::Jabber::MailBox::MakeMessageList {body args} {
+    variable locals
+    variable uidmsg
+    
+    array set argsArr {
+	-from unknown -subject {}
+    }
+    array set argsArr $args
+
+    jlib::splitjid $argsArr(-from) jid2 res
+
+    # Here we should probably check som 'jabber:x:delay' element...
+    # This is ISO 8601.
+    set tm ""
+    if {[info exists argsArr(-x)]} {
+	set tm [::Jabber::GetAnyDelayElem $argsArr(-x)]
+    }
+    if {$tm == ""} {
+	set tm [clock format [clock seconds] -format "%Y%m%dT%H:%M:%S"]
+    }
+
+    # List format for messages.
+    return [list $argsArr(-subject) $argsArr(-from) $tm 0 [incr uidmsg] $body]
 }
 
 proc ::Jabber::MailBox::PutMessageInInbox {row} {
@@ -657,8 +718,13 @@ proc ::Jabber::MailBox::TrashMsg { } {
     }
 }
 
+# Jabber::MailBox::SelectMsg --
+# 
+#       Executed when selecting a message in the inbox.
+#       Handles display of message, whiteboard, etc.
+
 proc ::Jabber::MailBox::SelectMsg { } {
-    global  prefs
+    global  prefs wDlgs
 
     variable locals
     variable mailbox
@@ -695,46 +761,49 @@ proc ::Jabber::MailBox::SelectMsg { } {
     set iconRead    [::UI::GetIcon readMsg]
     set fontS [option get . fontSmall {}]
     set colsub $colindex(subject)
+    
     $wtbl rowconfigure $item -font $fontS
     $wtbl cellconfigure "${item},${colsub}" -image $iconRead
     ::Jabber::MailBox::MarkMsgAsRead $id
     ::Jabber::MailBox::DisplayMsg $id
     
     # Configure buttons.
-    $wtray buttonconfigure reply -state normal
+    $wtray buttonconfigure reply   -state normal
     $wtray buttonconfigure forward -state normal
-    $wtray buttonconfigure save -state normal
-    $wtray buttonconfigure print -state normal
-    $wtray buttonconfigure trash -state normal
+    $wtray buttonconfigure save    -state normal
+    $wtray buttonconfigure print   -state normal
+    $wtray buttonconfigure trash   -state normal
     
     # If any whiteboard stuff in message...
     set uid [::Jabber::MailBox::GetCanvasHexUID $id]
     ::Jabber::Debug 2 "::Jabber::MailBox::SelectMsg  uid=$uid"
     
-    if {[string length $uid] > 0} {
-	set wbtoplevel .maininbox
+    if {[string length $uid] > 0} {	
+	set wwb  $wDlgs(jwbinbox)
+	set wtop ${wwb}.
 	set title "Inbox: $jid2"
-	if {[winfo exists $wbtoplevel]} {
-	    ::Import::HttpResetAll ${wbtoplevel}.
-	    ::CanvasCmd::EraseAll ${wbtoplevel}.
-	    ::WB::ConfigureMain ${wbtoplevel}. -title $title -jid $jid2
-	    ::WB::SetStatusMessage ${wbtoplevel}. ""
-	    undo::reset [::WB::GetUndoToken ${wbtoplevel}.]
+	if {[winfo exists $wwb]} {
+	    ::Import::HttpResetAll  $wtop
+	    ::CanvasCmd::EraseAll   $wtop
+	    ::WB::ConfigureMain     $wtop -title $title	    
+	    ::WB::SetStatusMessage  $wtop ""
+	    ::Jabber::WB::Configure $wtop -jid $jid2
+	    undo::reset [::WB::GetUndoToken $wtop]
 	} else {
-	    ::WB::BuildWhiteboard ${wbtoplevel}. -state disabled -title $title \
-	      -jid $jid2 -type normal
+	    ::Jabber::WB::NewWhiteboard -wtop $wtop -state disabled \
+	      -title $title -jid $jid2 -usewingeom 1
 	}
 	
 	# Only if user available shall we try to import.
 	set tryimport 0
 	if {[$jstate(roster) isavailable $jid3] || \
-	  ($jid3 == $jstate(mejidres))} {
+	  [string equal $jid3 $jstate(mejidres)]} {
 	    set tryimport 1
 	}
 		
 	set fileName ${uid}.can
 	set filePath [file join $prefs(inboxCanvasPath) $fileName]
-	set numImports [::CanvasFile::DrawCanvasItemFromFile ${wbtoplevel}. \
+	set numImports [::CanvasFile::DrawCanvasItemFromFile $wtop \
 	  $filePath -where local -tryimport $tryimport]
 	if {!$tryimport && $numImports > 0} {
 	    

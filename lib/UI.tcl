@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.49 2004-02-12 08:48:26 matben Exp $
+# $Id: UI.tcl,v 1.50 2004-03-13 15:21:42 matben Exp $
 
 package require entrycomp
 
@@ -21,7 +21,6 @@ namespace eval ::UI:: {
     variable wThatUseMainMenu {}
 
     # Addon stuff.
-    variable fixMenusCallback {}
     variable menuSpecPublic
     set menuSpecPublic(wpaths) {}
 }
@@ -337,18 +336,6 @@ proc ::UI::GetToplevel {w} {
 	set w [string trimright $w "."]
 	return [winfo toplevel $w]
     }
-}
-
-proc ::UI::GetServerCanvasFromWtop {wtop} {    
-    upvar ::${wtop}::wapp wapp
-    
-    return $wapp(servCan)
-}
-
-proc ::UI::GetCanvasFromWtop {wtop} {    
-    upvar ::${wtop}::wapp wapp
-    
-    return $wapp(can)
 }
 
 # UI::SaveWinGeom --
@@ -814,12 +801,6 @@ proc ::UI::Public::RegisterMenuEntry {wpath name menuSpec} {
     }
 }
 
-proc ::UI::Public::RegisterCallbackFixMenus {procName} {    
-    upvar ::UI::fixMenusCallback fixMenusCallback
-    
-    lappend fixMenusCallback $procName
-}
-
 #--- There are actually more; sort out later -----------------------------------
 
 proc ::UI::BuildPublicMenus {wtop wmenu} {
@@ -922,8 +903,8 @@ proc ::UI::MegaDlgMsgAndEntry {title msg label varName btcancel btok} {
     set fontSB [option get . fontSmallBold {}]
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised] \
-      -fill both -expand 1 -ipadx 4
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1 -ipadx 4
     pack [message $w.frall.msg -width 220 -text $msg] \
       -side top -fill both -padx 4 -pady 2
     
@@ -1289,7 +1270,6 @@ proc ::UI::ParseWMGeometry {w} {
 
 proc ::UI::FixMenusWhenSelection {w} {
     global  this
-    variable fixMenusCallback
     
     set wtop [::UI::GetToplevelNS $w]
     set wClass [winfo class $w]
@@ -1304,7 +1284,7 @@ proc ::UI::FixMenusWhenSelection {w} {
     if {[winfo exists ${wtop}menu] && [string equal $wClass "Canvas"]} {
 	
 	# Respect any disabled whiteboard state.
-	upvar ::${wtop}::opts opts
+	upvar ::WB::${wtop}::opts opts
 	set isDisabled 0
 	if {[string equal $opts(-state) "disabled"]} {
 	    set isDisabled 1
@@ -1424,39 +1404,6 @@ proc ::UI::FixMenusWhenSelection {w} {
 	    ::UI::CutCopyPasteCheckState $w $setState $haveClipState
 	}
     } 
-    
-    # Invoke any callbacks from 'addons'.
-    foreach cmd $fixMenusCallback {
-	eval {$cmd} ${wtop}menu "select"
-    }
-}
-
-# UI::FixMenusWhenCopy --
-# 
-#       Sets the correct state for menus and buttons when copy something.
-#       
-# Arguments:
-#       w       the widget that contains something that is copied.
-#
-# Results:
-
-proc ::UI::FixMenusWhenCopy {w} {
-    variable fixMenusCallback
-
-    set wtop [::UI::GetToplevelNS $w]
-    upvar ::${wtop}::opts opts
-
-    set medit ${wtop}menu.edit
-    if {$opts(-state) == "normal"} {
-	::UI::MenuMethod $medit entryconfigure mPaste -state normal
-    } else {
-	::UI::MenuMethod $medit entryconfigure mPaste -state disabled
-    }
-    
-    # Invoke any callbacks from 'addons'.
-    foreach cmd $fixMenusCallback {
-	eval {$cmd} ${wtop}menu "copy"
-    }
 }
 
 # UI::MacFocusFixEditMenu --
@@ -1568,7 +1515,7 @@ proc ::UI::AnimateWave {w} {
 
 proc ::UI::CreateBrokenImage {wtop width height} {
     variable icons    
-    upvar ::${wtop}::tmpImages tmpImages
+    upvar ::WB::${wtop}::tmpImages tmpImages
     
     if {($width == 0) || ($height == 0)} {
 	set name $icons(brokenImage)

@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #
-# $Id: can2svg.tcl,v 1.4 2004-03-03 08:04:39 matben Exp $
+# $Id: can2svg.tcl,v 1.5 2004-03-13 15:21:40 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -141,7 +141,12 @@ proc can2svg::svgasxmllist {cmd args} {
 		set ind [expr $indopt - 1]
 		set opts [lrange $rest $indopt end]
 	    }
+	    
+	    # Flatten coordinate list!
 	    set coo [lrange $rest 0 $ind]
+	    if {[llength $coo] == 1} {
+		set coo [lindex $coo 0]
+	    }
 	    array set optArr $opts
 	    
 	    # Figure out if we've got a spline.

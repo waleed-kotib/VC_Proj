@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: EditDialogs.tcl,v 1.9 2004-01-27 08:48:06 matben Exp $
+# $Id: EditDialogs.tcl,v 1.10 2004-03-13 15:21:41 matben Exp $
 
 
 #       ::EditShortcuts:: implements dialogs for editing shortcuts. 
@@ -62,7 +62,8 @@ proc ::EditShortcuts::EditShortcuts {w nameOfShortcutList} {
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox}
     wm title $w [::msgcat::mc {Edit Shortcuts}]
-    pack [frame $w.frall -borderwidth 1 -relief raised]
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall
     
     # The top part.
     set wcont [::mylabelframe::mylabelframe $w.frtop [::msgcat::mc {Edit Shortcuts}]]
@@ -109,7 +110,7 @@ proc ::EditShortcuts::EditShortcuts {w nameOfShortcutList} {
     # The bottom part.
     pack [frame $w.frbot -borderwidth 0] -in $w.frall -fill both   \
       -padx 8 -pady 6
-    pack [button $w.frbot.bt1 -text [::msgcat::mc Save] -width 8 -default active  \
+    pack [button $w.frbot.bt1 -text [::msgcat::mc Save] -default active  \
       -command [list [namespace current]::DoSaveEditedShortcuts   \
       $nameOfShortcutList]]   \
       -side right -padx 5 -pady 5
@@ -237,7 +238,8 @@ proc ::EditShortcuts::AddOrEditShortcuts {what nameOfShortsCopy indShortcuts  \
     wm title $w $txt
     set fontSB [option get . fontSmallBold {}]
     
-    pack [frame $w.frall -borderwidth 1 -relief raised]
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall
     
     # The top part.
     set wcont [::mylabelframe::mylabelframe $w.frtop $txt]
@@ -270,7 +272,7 @@ proc ::EditShortcuts::AddOrEditShortcuts {what nameOfShortsCopy indShortcuts  \
     pack [frame $w.frbot -borderwidth 0] -in $w.frall -fill both  \
       -padx 8 -pady 6
     # Trick: postpone command substitution; only variable substitution.
-    button $w.frbot.bt1 -text "$txtbt" -width 8 -default active  \
+    button $w.frbot.bt1 -text "$txtbt" -default active  \
       -command "[namespace current]::PushBtAddOrEditShortcut $what  \
       $nameOfShortsCopy $indShortcuts \[$frtot.ent1 get] \[$frtot.ent2 get] "
     pack $w.frbot.bt1 -side right -padx 5 -pady 5

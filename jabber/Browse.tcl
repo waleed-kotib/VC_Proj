@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.32 2004-03-04 07:53:16 matben Exp $
+# $Id: Browse.tcl,v 1.33 2004-03-13 15:21:40 matben Exp $
 
 package require chasearrows
 
@@ -13,10 +13,10 @@ package provide Browse 1.0
 
 namespace eval ::Jabber::Browse:: {
 
-    hooks::add loginHook          ::Jabber::Browse::LoginCmd
-    hooks::add closeWindowHook    ::Jabber::Browse::CloseHook
-    hooks::add logoutHook         ::Jabber::Browse::LogoutHook
-    hooks::add presenceHook       ::Jabber::Browse::PresenceCallback
+    ::hooks::add loginHook          ::Jabber::Browse::LoginCmd
+    ::hooks::add closeWindowHook    ::Jabber::Browse::CloseHook
+    ::hooks::add logoutHook         ::Jabber::Browse::LogoutHook
+    ::hooks::add presenceHook       ::Jabber::Browse::PresenceCallback
 
     # Use option database for customization. 
     # Use priority 30 just to override the widgetDefault values!
@@ -363,8 +363,8 @@ proc ::Jabber::Browse::BuildToplevel {w} {
     set fontSB [option get . fontSmallBold {}]
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised]   \
-      -fill both -expand 1 -ipadx 12 -ipady 4
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1 -ipadx 12 -ipady 4
     
     message $w.frall.msg -width 220 -font $fontSB -anchor w -text \
       {Services that are available on each Jabber server listed.}
@@ -791,8 +791,8 @@ proc ::Jabber::Browse::AddServer { } {
     wm title $w [::msgcat::mc {Add Server}]
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised]   \
-      -fill both -expand 1 -ipadx 12 -ipady 4
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1 -ipadx 12 -ipady 4
     message $w.frall.msg -width 220 -text [::msgcat::mc jabrowseaddserver]
     entry $w.frall.ent -width 24   \
       -textvariable "[namespace current]::addserver"
@@ -801,7 +801,7 @@ proc ::Jabber::Browse::AddServer { } {
 
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btadd -text [::msgcat::mc Add] -width 8 -default active \
+    pack [button $frbot.btadd -text [::msgcat::mc Add] -default active \
       -command [list [namespace current]::DoAddServer $w]]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
@@ -905,8 +905,8 @@ proc ::Jabber::Browse::InfoCB {browseName type jid subiq} {
     set fontS [option get . fontSmall {}]
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised]   \
-      -fill both -expand 1 -ipadx 12 -ipady 4
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1 -ipadx 12 -ipady 4
     set wtext $w.frall.t
     set iconInfo [::Theme::GetImage info]
     label $w.frall.l -text "Description of services provided by $jid" \
@@ -938,7 +938,7 @@ proc ::Jabber::Browse::InfoCB {browseName type jid subiq} {
 
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btadd -text [::msgcat::mc Close] -width 8 \
+    pack [button $frbot.btadd -text [::msgcat::mc Close] \
       -command [list destroy $w]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6

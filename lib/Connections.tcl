@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Connections.tcl,v 1.22 2004-03-04 07:53:17 matben Exp $
+# $Id: Connections.tcl,v 1.23 2004-03-13 15:21:41 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -86,7 +86,8 @@ proc ::OpenConnection::OpenConnection {w} {
     wm title $w {Open Connection}
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1
     
     # Ip part.
     set wcont1 [::mylabelframe::mylabelframe $w.frip {Connect to}]
@@ -383,10 +384,11 @@ proc ::OpenConnection::WhenSocketOpensInits {nameOrIP server remoteServPort \
     }
     
     # Add line in the communication entry.
-    ::WB::SetCommEntry $wDlgs(mainwb) $ipNum 1 -1
+    ::P2P::SetCommEntry $wDlgs(mainwb) $ipNum 1 -1
     
     # Update menus. If client only, allow only one connection, limited.
-    ::WB::FixMenusWhen $wDlgs(mainwb) "connect"
+    ::hooks::run whiteboardFixMenusWhenHook $wDlgs(mainwb) "connect"
+    
     return $ipNum
 }
 
@@ -599,11 +601,11 @@ proc ::OpenConnection::DoCloseClientConnection {ipNum} {
     catch {close $ipNumTo(socket,$ipNum)}
 
     # Update the communication frame; remove connection 'to'.
-    ::WB::SetCommEntry $wDlgs(mainwb) $ipNum 0 -1
+    ::P2P::SetCommEntry $wDlgs(mainwb) $ipNum 0 -1
 
     # If no more connections left, make menus consistent.
     if {[llength [::Network::GetIP to]] == 0} {
-	::WB::FixMenusWhen $wDlgs(mainwb) {disconnect}
+	::hooks::run whiteboardFixMenusWhenHook $wDlgs(mainwb) "disconnect"
     }
 }
 
@@ -629,7 +631,7 @@ proc ::OpenConnection::DoCloseServerConnection {ipNum args} {
     array set opts $args
     
     # Switch off the comm 'from' button.
-    ::WB::SetCommEntry $wDlgs(mainwb) $ipNum -1 0
+    ::P2P::SetCommEntry $wDlgs(mainwb) $ipNum -1 0
     if {[string equal $prefs(protocol) "server"]} {
 	catch {close $ipNumTo(socket,$ipNum)}
 	catch {unset ipNumTo(socket,$ipNum)}
@@ -644,7 +646,7 @@ proc ::OpenConnection::DoCloseServerConnection {ipNum args} {
     }
     
     # If no more connections left, make menus consistent.
-    ::WB::FixMenusWhen $wDlgs(mainwb) "disconnectserver"
+    ::hooks::run whiteboardFixMenusWhenHook $wDlgs(mainwb) "disconnectserver"
 }
 
 #--- OpenMulticast stuff -------------------------------------------------------
@@ -686,7 +688,8 @@ proc ::OpenMulticast::OpenMulticast {wtop} {
     set fontSB [option get . fontSmallBold {}]
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1
     
     # Labelled frame.
     set wcfr $w.frall.fr
@@ -715,16 +718,16 @@ proc ::OpenMulticast::OpenMulticast {wtop} {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]  
-    pack [button $frbot.btconn -text [::msgcat::mc Open] -default active -width 8 \
+    pack [button $frbot.btconn -text [::msgcat::mc Open] -default active  \
       -command [list OpenMulticast::OpenMulticastQTStream $wtop $frtot.entip]]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
       -command "set [namespace current]::finished 0"]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btedit -text "[::msgcat::mc Edit]..." -width 8  \
+    pack [button $frbot.btedit -text "[::msgcat::mc Edit]..."   \
       -command [list OpenMulticast::DoAddOrEditQTMulticastShort edit $frtot.optm]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btadd -text "[::msgcat::mc Add]..." -width 8  \
+    pack [button $frbot.btadd -text "[::msgcat::mc Add]..."   \
       -command [list OpenMulticast::DoAddOrEditQTMulticastShort add $frtot.optm]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -in $w.frall  \
@@ -807,7 +810,7 @@ proc ::OpenMulticast::OpenMulticastQTStream {wtop wentry} {
     global  this prefs
     variable finished
 
-    set wCan [::UI::GetCanvasFromWtop $wtop]
+    set wCan [::WB::GetCanvasFromWtop $wtop]
 
     # Patterns.
     set proto_ {[^:]+}
@@ -853,7 +856,7 @@ proc ::OpenMulticast::CleanupMulticastQTStream {wtop fid fullName token} {
 
     upvar #0 $token state    
 
-    set wCan [::UI::GetCanvasFromWtop $wtop]
+    set wCan [::WB::GetCanvasFromWtop $wtop]
     set no_ {^2[0-9]+}
     catch {close $fid}
     

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.41 2004-02-12 08:48:23 matben Exp $
+# $Id: GroupChat.tcl,v 1.42 2004-03-13 15:21:40 matben Exp $
 
 package provide GroupChat 1.0
 
@@ -28,6 +28,16 @@ namespace eval ::Jabber::GroupChat:: {
     # Use option database for customization. Not used yet...
     set fontS [option get . fontSmall {}]
     set fontSB [option get . fontSmallBold {}]
+
+    # Icons
+    option add *GroupChat*sendImage            send             widgetDefault
+    option add *GroupChat*sendDisImage         sendDis          widgetDefault
+    option add *GroupChat*saveImage            save             widgetDefault
+    option add *GroupChat*saveDisImage         saveDis          widgetDefault
+    option add *GroupChat*historyImage         history          widgetDefault
+    option add *GroupChat*historyDisImage      historyDis       widgetDefault
+    option add *GroupChat*printImage           print            widgetDefault
+    option add *GroupChat*printDisImage        printDis         widgetDefault
 
     option add *GroupChat*mePreForeground      red              widgetDefault
     option add *GroupChat*mePreBackground      ""               widgetDefault
@@ -71,6 +81,9 @@ namespace eval ::Jabber::GroupChat:: {
     variable locals
     variable enteruid 0
     variable dlguid 0
+
+    # Running number for groupchat thread token.
+    variable uid 0
 }
 
 # Jabber::GroupChat::AllConference --
@@ -293,8 +306,8 @@ proc ::Jabber::GroupChat::BuildEnter {args} {
     set fontSB [option get . fontSmallBold {}]
 
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised]   \
-      -fill both -expand 1 -ipadx 4
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1 -ipadx 4
         
     set enter(server) [lindex $chatservers 0]
     set frmid $w.frall.mid
@@ -512,15 +525,21 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     
     variable groupChatOptions
     variable locals
-    variable dlguid
+    variable uid
     upvar ::Jabber::mapShowElemToText mapShowElemToText
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
     ::Jabber::Debug 2 "::Jabber::GroupChat::Build roomJid=$roomJid, args='$args'"
+
+    # Initialize the state variable, an array, that keeps is the storage.
     
+    set token [namespace current]::[incr uid]
+    variable $token
+    upvar 0 $token state
+
     # Make unique toplevel name.
-    set w $wDlgs(jgc)[incr dlguid]
+    set w $wDlgs(jgc)[incr uid]
     
     set locals($roomJid,wtop) $w
     set locals($w,room) $roomJid
@@ -532,7 +551,7 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
 	set locals($roomJid,jid) $argsArr(-from)
     }
     set locals($roomJid,got1stMsg) 0
-    set locals($roomJid,topic) ""
+    set locals($roomJid,topic)     ""
     
     # Toplevel of class GroupChat.
     ::UI::Toplevel $w -class GroupChat -usemacmainmenu 1 -macstyle documentProc
@@ -547,19 +566,19 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     }
     wm title $w $tittxt
     
-    set fontS [option get . fontSmall {}]
+    set fontS  [option get . fontSmall {}]
     set fontSB [option get . fontSmallBold {}]
-    set bg [option get . backgroundGeneral {}]
 
     foreach {optName optClass} $groupChatOptions {
 	set $optName [option get $w $optName $optClass]
     }
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised]   \
-      -fill both -expand 1 -ipadx 4
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1 -ipadx 4
     
     # Widget paths.
+    set wtray     $w.frall.tray
     set frmid     $w.frall.frmid
     set wtxt      $frmid.frtxt
     set wtext     $wtxt.0.text
@@ -569,6 +588,32 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     set wtextsnd  $wtxtsnd.text
     set wyscsnd   $wtxtsnd.ysc
     
+    # Shortcut button part.
+    set iconSend        [::Theme::GetImage [option get $w sendImage {}]]
+    set iconSendDis     [::Theme::GetImage [option get $w sendDisImage {}]]
+    set iconSave        [::Theme::GetImage [option get $w saveImage {}]]
+    set iconSaveDis     [::Theme::GetImage [option get $w saveDisImage {}]]
+    set iconHistory     [::Theme::GetImage [option get $w historyImage {}]]
+    set iconHistoryDis  [::Theme::GetImage [option get $w historyDisImage {}]]
+    set iconPrint       [::Theme::GetImage [option get $w printImage {}]]
+    set iconPrintDis    [::Theme::GetImage [option get $w printDisImage {}]]
+
+    ::buttontray::buttontray $wtray 50
+    pack $wtray -side top -fill x -padx 4 -pady 2
+
+    $wtray newbutton send    Send    $iconSend    $iconSendDis    \
+      [list [namespace current]::Send $token]
+     $wtray newbutton save   Save    $iconSave    $iconSaveDis    \
+       [list [namespace current]::Save $token]
+    $wtray newbutton history History $iconHistory $iconHistoryDis \
+      [list [namespace current]::BuildHistory]
+    $wtray newbutton print   Print   $iconPrint   $iconPrintDis   \
+      [list [namespace current]::Print $token]
+    
+    ::hooks::run buildGroupChatButtonTrayHook $wtray $roomJid
+    
+    set shortBtWidth [$wtray minwidth]
+
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
     pack [button $frbot.btok -text [::msgcat::mc Send]  \
@@ -632,9 +677,9 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     set frtop [frame $w.frall.frtop -borderwidth 0]
     pack $frtop -side top -fill x   
     label $frtop.la -text "[::msgcat::mc {Group chat in room}]:" -anchor e
-    entry $frtop.en -bg $bg
+    entry $frtop.en
     label $frtop.ltp -text "[::msgcat::mc Topic]:" -anchor e
-    entry $frtop.etp -bg $bg  \
+    entry $frtop.etp  \
       -textvariable [namespace current]::locals($roomJid,topic)
     button $frtop.btp -text "[::msgcat::mc Change]..." -font $fontS  \
       -command [list [namespace current]::SetTopic $roomJid]
@@ -1202,10 +1247,7 @@ proc ::Jabber::GroupChat::Close {roomJid} {
     }
     
     # Make sure any associated whiteboard is closed as well.
-    set wbwtop [::WB::GetWtopFromJabberType "groupchat" $roomJid]
-    if {[string length $wbwtop]} {
-	::WB::DestroyMain $wbwtop
-    }
+    ::hooks::run groupchatExitRoomHook $roomJid
 }
 
 # Jabber::GroupChat::LogoutHook --

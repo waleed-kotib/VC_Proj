@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: MacintoshUtils.tcl,v 1.7 2004-01-13 14:50:21 matben Exp $
+# $Id: MacintoshUtils.tcl,v 1.8 2004-03-13 15:21:41 matben Exp $
 
 #package require TclSpeech 2.0
 #package require Tclapplescript
@@ -71,7 +71,7 @@ proc ::Mac::MacPrint::PrintCanvas {wtop} {
     global  prefs
     variable cache
     
-    set wCan [::UI::GetCanvasFromWtop $wtop]
+    set wCan [::WB::GetCanvasFromWtop $wtop]
 
     if {$prefs(MacPrint)} {
 	set ans [macprint::print]
@@ -120,7 +120,7 @@ proc ::Mac::MacCarbonPrint::PrintCanvas {wtop} {
     global  prefs
     variable cache
 
-    set wCan [::UI::GetCanvasFromWtop $wtop]
+    set wCan [::WB::GetCanvasFromWtop $wtop]
 
     if {$prefs(MacCarbonPrint)} {
 	set opts [list -parent [winfo toplevel $wCan]]

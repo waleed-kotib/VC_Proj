@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.26 2004-03-04 07:53:16 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.27 2004-03-13 15:21:41 matben Exp $
 
 package require sha1pure
 
@@ -226,16 +226,16 @@ proc ::CanvasUtils::Init { } {
 
 proc ::CanvasUtils::Command {wtop cmd {where all}} {
     
-    set w [::UI::GetCanvasFromWtop $wtop]
+    set w [::WB::GetCanvasFromWtop $wtop]
     if {[string equal $where "all"] || [string equal $where "local"]} {
+	
+	# Make drawing in own canvas.
         eval {$w} $cmd
     }
-    if {[string equal $where "all"] || [string equal $where "remote"]} {
-        if {[llength [::Network::GetIP to]]} {
-            SendClientCommand $wtop "CANVAS: $cmd"
-        }    
-    } elseif {![string equal $where "local"]} {
-        SendClientCommand $wtop "CANVAS: $cmd"  
+    if {![string equal $where "local"]} {
+	
+	# This call just invokes any registered drawing hook.
+	::WB::SendMessageList $wtop [list $cmd]
     }
 }
 
@@ -252,7 +252,6 @@ proc ::CanvasUtils::CommandList {wtop cmdList {where all}} {
 
 # CanvasUtils::CommandExList --
 #
-#
 #       Makes it possible to have different commands local and remote.
 
 proc ::CanvasUtils::CommandExList {wtop cmdExList} {
@@ -264,21 +263,21 @@ proc ::CanvasUtils::CommandExList {wtop cmdExList} {
     }
 }
 
-# Identical to the procedures above but are not constrained to the
-# "CANVAS:" prefix. The prefix shall be included in 'cmd'.
+# CanvasUtils::GenCommand, ... --
+# 
+#       Identical to the procedures above but are not constrained to the
+#       "CANVAS:" prefix. The prefix shall be included in 'cmd'.
 
 proc ::CanvasUtils::GenCommand {wtop cmd {where all}} {
     
-    set w [::UI::GetCanvasFromWtop $wtop]
+    set w [::WB::GetCanvasFromWtop $wtop]
     if {[string equal $where "all"] || [string equal $where "local"]} {
         eval {$w} $cmd
     }
-    if {[string equal $where "all"] || [string equal $where "remote"]} {
-        if {[llength [::Network::GetIP to]]} {
-            SendClientCommand $wtop $cmd
-        }    
-    } elseif {![string equal $where "local"]} {
-        SendClientCommand $wtop $cmd
+    if {![string equal $where "local"]} {
+	
+	# This call just invokes any registered drawing hook.
+	::WB::SendGenMessageList $wtop [list $cmd]
     }
 }
 
@@ -424,7 +423,7 @@ proc ::CanvasUtils::ReplaceUtag {str newUtag} {
 
 proc ::CanvasUtils::GetUndoCommand {wtop cmd} {
     
-    set w [::UI::GetCanvasFromWtop $wtop]
+    set w [::WB::GetCanvasFromWtop $wtop]
     set undo {}
     
     switch -- [lindex $cmd 0] {
@@ -606,8 +605,8 @@ proc ::CanvasUtils::GetOnelinerForItem {w id} {
 		# Any tags "current" or "selected" must be removed 
 		# before save, else when writing them on canvas things 
 		# become screwed up.		
-		regsub -all "current" $val "" val
-		regsub -all "selected" $val "" val
+		set val [lsearch -all -not -inline $val current]
+		set val [lsearch -all -not -inline $val selected]
 		
 		# Verify that we have a correct taglist.
 		set val [lsort -unique [concat std $type $val]]
@@ -687,7 +686,7 @@ proc ::CanvasUtils::GetOnelinerForImage {w id args} {
 		catch {unset impArr(-url)}
 	    }
 	    http {
-		set impArr(-url) [::CanvasUtils::GetHttpFromFile $imageFile]
+		set impArr(-url) [::Utils::GetHttpFromFile $imageFile]
 		catch {unset impArr(-file)}
 	    }
 	    default {
@@ -737,7 +736,7 @@ proc ::CanvasUtils::GetOnelinerForQTMovie {w id args} {
 	}
 	http {
 	    if {$movFile != ""} {
-		set impArr(-url) [::CanvasUtils::GetHttpFromFile $movFile]
+		set impArr(-url) [::Utils::GetHttpFromFile $movFile]
 	    } elseif {$movUrl != ""} {
 		set impArr(-url) $movUrl
 	    }	    
@@ -781,7 +780,7 @@ proc ::CanvasUtils::GetOnelinerForSnack {w id args} {
 	    catch {unset impArr(-url)}
 	}
 	http {
-	    set impArr(-url) [::CanvasUtils::GetHttpFromFile $soundFile]
+	    set impArr(-url) [::Utils::GetHttpFromFile $soundFile]
 	    catch {unset impArr(-file)}
 	}
 	default {
@@ -791,20 +790,6 @@ proc ::CanvasUtils::GetOnelinerForSnack {w id args} {
     set impArr(-tags) [::CanvasUtils::GetUtag $w $id 1]
     
     return [concat import [$w coords $id] [array get impArr]]
-}
-
-# CanvasUtils::GetHttpFromFile --
-# 
-#       Translates an absolute file path to an uri encoded http address
-#       for our built in http server.
-
-proc ::CanvasUtils::GetHttpFromFile {filePath} {
-    global  prefs this
-    
-    set relPath [filerelative $this(httpdRootPath) $filePath]
-    set relPath [uriencode::quotepath $relPath]
-    set ip [::Network::GetThisOutsideIPAddress]
-    return "http://${ip}:$prefs(httpdPort)/$relPath"
 }
 
 # CanvasUtils::ItemConfigure --
@@ -1488,7 +1473,7 @@ proc ::CanvasUtils::HandleCanvasDraw {wtop instr} {
     set punct_ {[.,;?!]}
     
     # Regular drawing commands in the canvas.
-    set wServCan [::UI::GetServerCanvasFromWtop $wtop]
+    set wServCan [::WB::GetServerCanvasFromWtop $wtop]
     
     # If html sizes in text items, be sure to translate them into
     # platform specific point sizes.
@@ -1788,13 +1773,13 @@ proc ::CanvasUtils::DefineWhiteboardBindtags { } {
 #       Automatically garbage collected.
 
 proc ::CanvasUtils::ItemSet {wtop id args} {
-    upvar ::${wtop}::itemopts itemopts
+    upvar ::WB::${wtop}::itemopts itemopts
 
     set itemopts($id) $args
 }
 
 proc ::CanvasUtils::ItemCGet {wtop id} {
-    upvar ::${wtop}::itemopts itemopts
+    upvar ::WB::${wtop}::itemopts itemopts
     
     if {[info exists itemopts($id)]} {
 	return $itemopts($id)
@@ -1804,9 +1789,31 @@ proc ::CanvasUtils::ItemCGet {wtop id} {
 }
 
 proc ::CanvasUtils::ItemFree {wtop} {
-    upvar ::${wtop}::itemopts itemopts
+    upvar ::WB::${wtop}::itemopts itemopts
     
     catch {unset itemopts}
+}
+
+# CanvasUtils::GetCompleteCanvas --
+# 
+#       Gets a list of canvas commands without the widgetPath or "CANVAS:".
+#       May use 'import' command.
+
+proc ::CanvasUtils::GetCompleteCanvas {wcan} {
+    
+    set cmdList {}
+    
+    foreach id [$wcan find all] {
+	set tags [$wcan gettags $id]
+	if {([lsearch $tags grid] >= 0) || ([lsearch $tags tbbox] >= 0)} {
+	    continue
+	}
+	set line [::CanvasUtils::GetOnelinerForAny $wcan $id -uritype http]
+	if {$line != ""} {
+	    lappend cmdList $line
+	}
+    }
+    return $cmdList
 }
 
 #-------------------------------------------------------------------------------

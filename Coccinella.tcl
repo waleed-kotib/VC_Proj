@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.43 2004-03-04 07:53:16 matben Exp $
+# $Id: Coccinella.tcl,v 1.44 2004-03-13 15:21:40 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -101,7 +101,7 @@ proc resolve_cmd_realpath {infile} {
 # default file, never read.
 set prefs(majorVers) 0
 set prefs(minorVers) 94
-set prefs(releaseVers) 8
+set prefs(releaseVers) 9
 set prefs(fullVers) $prefs(majorVers).$prefs(minorVers).$prefs(releaseVers)
 
 # We may be embedded in another application, say an ActiveX component.
@@ -341,6 +341,7 @@ foreach f $langs {
 if {!$havecat} {
     ::msgcat::mclocale en
 }
+#::msgcat::mclocale nl
 ::msgcat::mcload $this(msgcatPath)
 
 # Show it! Need a full update here, at least on Windows.
@@ -513,6 +514,16 @@ if {$argc > 0} {
 #
 # Order important!
 
+switch -- $prefs(protocol) {
+    jabber {
+	
+    }
+    default {
+	package require P2P
+	::P2P::Init
+    }
+}
+
 # Define MIME types etc.
 ::Types::Init
 
@@ -551,7 +562,7 @@ if {[string equal $prefs(protocol) "jabber"]} {
 # Jabber has the roster window as "main" window.
 if {![string equal $prefs(protocol) "jabber"]} {
     ::SplashScreen::SetMsg [::msgcat::mc splashbuild]
-    ::WB::BuildWhiteboard $wDlgs(mainwb) -serverentrystate disabled
+    ::WB::BuildWhiteboard $wDlgs(mainwb)
 }
 if {$prefs(firstLaunch) && !$prefs(stripJabber)} {
     if {[winfo exists $wDlgs(mainwb)]} {
@@ -565,16 +576,16 @@ if {$prefs(firstLaunch) && !$prefs(stripJabber)} {
 # A mechanism to set -state of cut/copy/paste. Not robust!!!
 # All selections are not detected (shift <- -> etc).
 # Entry copy/paste.
-bind Entry <FocusIn> "+ ::UI::FixMenusWhenSelection %W"
+bind Entry <FocusIn>         "+ ::UI::FixMenusWhenSelection %W"
 bind Entry <ButtonRelease-1> "+ ::UI::FixMenusWhenSelection %W"
-bind Entry <<Cut>> "+ ::UI::FixMenusWhenSelection %W"
-bind Entry <<Copy>> "+ ::UI::FixMenusWhenSelection %W"
+bind Entry <<Cut>>           "+ ::UI::FixMenusWhenSelection %W"
+bind Entry <<Copy>>          "+ ::UI::FixMenusWhenSelection %W"
     
 # Text copy/paste.
-bind Text <FocusIn> "+ ::UI::FixMenusWhenSelection %W"
+bind Text <FocusIn>         "+ ::UI::FixMenusWhenSelection %W"
 bind Text <ButtonRelease-1> "+ ::UI::FixMenusWhenSelection %W"
-bind Text <<Cut>> "+ ::UI::FixMenusWhenSelection %W"
-bind Text <<Copy>> "+ ::UI::FixMenusWhenSelection %W"
+bind Text <<Cut>>           "+ ::UI::FixMenusWhenSelection %W"
+bind Text <<Copy>>          "+ ::UI::FixMenusWhenSelection %W"
 
 # Linux has a strange binding by default. Handled by <<Paste>>.
 if {[string equal $this(platform) "unix"]} {
@@ -662,7 +673,7 @@ if {($prefs(protocol) != "client") && $prefs(haveHttpd)} {
     } else {
 	
 	# Stop before quitting.
-	hooks::add quitAppHook ::tinyhttpd::stop
+	::hooks::add quitAppHook ::tinyhttpd::stop
     }
 }
 

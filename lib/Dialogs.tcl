@@ -7,14 +7,14 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.33 2004-01-27 08:48:06 matben Exp $
+# $Id: Dialogs.tcl,v 1.34 2004-03-13 15:21:41 matben Exp $
    
 package provide Dialogs 1.0
 
 namespace eval ::Dialogs:: {
     
     # Add all event hooks.
-    hooks::add quitAppHook ::Dialogs::Free 10
+    ::hooks::add quitAppHook ::Dialogs::Free 10
 }
 
 # Define the toplevel windows here so they don't collide.
@@ -69,6 +69,7 @@ array set wDlgs {
     jprofiles       .jprofiles
     joobs           .joobs
     jerrdlg         .jerrdlg
+    jwbinbox        .jwbinbox
 }
 
 # Dialogs::GetCanvas --
@@ -100,7 +101,8 @@ proc ::Dialogs::GetCanvas {w} {
     wm title $w {Get Canvas}
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1
     
     # Labelled frame.
     set wcfr $w.frall.fr
@@ -120,10 +122,10 @@ proc ::Dialogs::GetCanvas {w} {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btconn -text {    Get    } -width 8 -default active \
+    pack [button $frbot.btconn -text [::msgcat::mc Get] -default active \
       -command "set [namespace current]::finished 1"]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
+    pack [button $frbot.btcancel -text [::msgcat::mc Cancel] \
       -command "set [namespace current]::finished 2"]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
@@ -172,8 +174,9 @@ proc ::Dialogs::InfoOnPlugins { } {
     set fontS [option get . fontSmall {}]
     set fontSB [option get . fontSmallBold {}]
     
-    pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
-
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1
+    
     # Button part.
     pack [frame $w.frall.frbot -borderwidth 0] -fill both -side bottom \
       -padx 8 -pady 6
@@ -308,7 +311,8 @@ proc ::Dialogs::UnixPrintPS {w wtoprint} {
     wm title $w [::msgcat::mc Print]
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1
     set w1 $w.frall.fr1
     set wcont1 [::mylabelframe::mylabelframe $w1 [::msgcat::mc Print]]
     
@@ -326,7 +330,7 @@ proc ::Dialogs::UnixPrintPS {w wtoprint} {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btok -text [::msgcat::mc Print] -width 8 -default active  \
+    pack [button $frbot.btok -text [::msgcat::mc Print] -default active  \
       -command "set [namespace current]::finishedPrint 1"]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
@@ -444,7 +448,8 @@ proc ::PSPageSetup::PSPageSetup { w } {
     set fontSB [option get . fontSmallBold {}]
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1
     set w1 $w.frall.fr1
     set wcont [::mylabelframe::mylabelframe $w1 {Postscript Page Setup}]
     
@@ -525,7 +530,7 @@ proc ::PSPageSetup::PSPageSetup { w } {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btsave -text [::msgcat::mc Save] -width 8 -default active  \
+    pack [button $frbot.btsave -text [::msgcat::mc Save] -default active  \
       -command [list [namespace current]::PushBtSave]]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
@@ -750,7 +755,7 @@ proc ::Dialogs::ShowInfoServer {thisIPnum} {
 	label $fr.f2 -text [::msgcat::mc {Not available}]
 	label $fr.g2 -text [::msgcat::mc {Not available}]
 	
-    } elseif {$state(isServerUp) && [llength [::Network::GetIP from]] == 0} {
+    } elseif {$state(isServerUp)} {
 
 	# Not yet connected but up.
 	set theHostname [info hostname]

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.29 2004-03-01 07:25:12 matben Exp $
+# $Id: JUI.tcl,v 1.30 2004-03-13 15:21:40 matben Exp $
 
 package provide JUI 1.0
 
@@ -62,10 +62,10 @@ namespace eval ::Jabber::UI:: {
       activeTabOutline background style tabBackground tabColor tabOutline}
     
     # Add all event hooks.
-    hooks::add quitAppHook        ::Jabber::UI::QuitHook
-    hooks::add loginHook          ::Jabber::UI::LoginCmd
-    hooks::add closeWindowHook    ::Jabber::UI::CloseHook
-    hooks::add logoutHook         ::Jabber::UI::LogoutHook
+    ::hooks::add quitAppHook        ::Jabber::UI::QuitHook
+    ::hooks::add loginHook          ::Jabber::UI::LoginCmd
+    ::hooks::add closeWindowHook    ::Jabber::UI::CloseHook
+    ::hooks::add logoutHook         ::Jabber::UI::LogoutHook
 
     # Collection of useful and common widget paths.
     variable jwapp
@@ -74,7 +74,7 @@ namespace eval ::Jabber::UI:: {
     # Menu definitions for the Roster/services window.
     variable menuDefs
     set menuDefs(rost,file) {
-	{command   mNewWhiteboard      {::WB::NewWhiteboard}          normal   N}
+	{command   mNewWhiteboard      {::Jabber::WB::NewWhiteboard}  normal   N}
 	{command   mCloseWindow        {::UI::DoCloseWindow}          normal   W}
 	{command   mPreferences...     {::Preferences::Build}         normal   {}}
 	{command   mUpdateCheck        {
@@ -244,7 +244,7 @@ proc ::Jabber::UI::Build {w} {
     $wtray newbutton stop Stop $iconStop $iconStopDis  \
       [list ::Jabber::UI::StopConnect] -state disabled
 
-    hooks::run buildJMainButtonTrayHook $wtray
+    ::hooks::run buildJMainButtonTrayHook $wtray
 
     set shortBtWidth [$wtray minwidth]
 

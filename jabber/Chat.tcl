@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.45 2004-02-21 08:10:08 matben Exp $
+# $Id: Chat.tcl,v 1.46 2004-03-13 15:21:40 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -26,6 +26,12 @@ namespace eval ::Jabber::Chat:: {
     ::hooks::add closeWindowHook    ::Jabber::Chat::CloseHistoryHook
     ::hooks::add loginHook          ::Jabber::Chat::LoginHook
     ::hooks::add logoutHook         ::Jabber::Chat::LogoutHook
+
+    # Define all hooks for preference settings.
+    ::hooks::add prefsInitHook      ::Jabber::Chat::InitPrefsHook
+    ::hooks::add prefsBuildHook     ::Jabber::Chat::BuildPrefsHook
+    ::hooks::add prefsSaveHook      ::Jabber::Chat::SavePrefsHook
+    ::hooks::add prefsCancelHook    ::Jabber::Chat::CancelPrefsHook
 
     # Use option database for customization. 
     # These are nonstandard option valaues and we may therefore keep priority
@@ -92,6 +98,7 @@ namespace eval ::Jabber::Chat:: {
     set cprefs(usexevents)    1
     set cprefs(xeventsmillis) 10000
     set cprefs(xeventid)      0
+    set cprefs(lastActiveRet) 0
     
     # Running number for chat thread token.
     variable uid 0
@@ -129,8 +136,8 @@ proc ::Jabber::Chat::StartThreadDlg {args} {
     set fontSB [option get . fontSmallBold {}]
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised]  \
-      -fill both -expand 1 -ipadx 12 -ipady 4
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1 -ipadx 12 -ipady 4
     
     ::headlabel::headlabel $w.frall.head -text [::msgcat::mc {Chat with}]
     pack $w.frall.head -side top -fill both -expand 1
@@ -415,7 +422,7 @@ proc ::Jabber::Chat::Build {threadID args} {
 
     set state(w)                $w
     set state(threadid)         $threadID
-    set state(active)           0
+    set state(active)           $cprefs(lastActiveRet)
     set state(got1stMsg)        0
     set state(subject)          ""
     set state(lastsubject)      ""
@@ -423,6 +430,10 @@ proc ::Jabber::Chat::Build {threadID args} {
     set state(xevent,status)    ""
     set state(xevent,msgidlist) ""
     set state(dlgstate)         normal
+    
+    if {$jprefs(chatActiveRet)} {
+	set state(active) 1
+    }
     
     # Toplevel with class Chat.
     ::UI::Toplevel $w -class Chat -usemacmainmenu 1 -macstyle documentProc
@@ -443,10 +454,13 @@ proc ::Jabber::Chat::Build {threadID args} {
 
     wm title $w "[::msgcat::mc Chat] ($state(jid))"
     set fontSB [option get . fontSmallBold {}]
+    if {$state(active)} {
+	::Jabber::Chat::ActiveCmd $token
+    }
 
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised]   \
-      -fill both -expand 1 -ipadx 4
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall  -fill both -expand 1 -ipadx 4
     
     # Widget paths.
     set frmid    $w.frall.frmid
@@ -487,7 +501,7 @@ proc ::Jabber::Chat::Build {threadID args} {
     $wtray newbutton print   Print   $iconPrint   $iconPrintDis   \
       [list [namespace current]::Print $token]
     
-    hooks::run buildChatButtonTrayHook $wtray $state(jid)
+    ::hooks::run buildChatButtonTrayHook $wtray $state(jid)
     
     set shortBtWidth [$wtray minwidth]
 
@@ -705,6 +719,7 @@ proc ::Jabber::Chat::SetFont {theFont} {
 }
 
 proc ::Jabber::Chat::ActiveCmd {token} {
+    variable cprefs
     variable $token
     upvar 0 $token state
 
@@ -716,6 +731,9 @@ proc ::Jabber::Chat::ActiveCmd {token} {
     } else {
 	bind $w <Return> {}
     }
+    
+    # Remember last setting.
+    set cprefs(lastActiveRet) $state(active)
 }
 
 proc ::Jabber::Chat::Send {token} {
@@ -1195,16 +1213,17 @@ proc ::Jabber::Chat::BuildHistory {jid} {
     set wysc  $wtxt.ysc
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
-
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1
+    
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btclose -text [::msgcat::mc Close] -width 8 \
+    pack [button $frbot.btclose -text [::msgcat::mc Close] \
       -command "destroy $w"] -side right -padx 5 -pady 5
-    pack [button $frbot.btclear -text [::msgcat::mc Clear] -width 8  \
+    pack [button $frbot.btclear -text [::msgcat::mc Clear]  \
       -command [list [namespace current]::ClearHistory $jid $wtext]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btprint -text [::msgcat::mc Print] -width 8  \
+    pack [button $frbot.btprint -text [::msgcat::mc Print]  \
       -command [list [namespace current]::PrintHistory $wtext]]  \
       -side right -padx 5 -pady 5
     pack $frbot -side bottom -fill x -padx 8 -pady 6
@@ -1298,6 +1317,66 @@ proc ::Jabber::Chat::CloseHistoryHook {wclose} {
 proc ::Jabber::Chat::PrintHistory {wtext} {
         
     ::UserActions::DoPrintText $wtext
+}
+
+# Preference page --------------------------------------------------------------
+
+proc  ::Jabber::Chat::InitPrefsHook { } {
+    upvar ::Jabber::jprefs jprefs
+    
+    set jprefs(chatActiveRet) 0
+
+    ::PreferencesUtils::Add [list  \
+      [list ::Jabber::jprefs(chatActiveRet) jprefs_chatActiveRet $jprefs(chatActiveRet)]]    
+}
+
+proc ::Jabber::Chat::BuildPrefsHook {wtree nbframe} {
+    
+    $wtree newitem {Jabber Chat} -text [::msgcat::mc Chat]
+    
+    set wpage [$nbframe page {Chat}]    
+    ::Jabber::Chat::BuildPrefsPage $wpage
+}
+
+proc ::Jabber::Chat::BuildPrefsPage {wpage} {
+    upvar ::Jabber::jprefs jprefs
+    variable tmpJPrefs
+    
+    set fontS  [option get . fontSmall {}]    
+    set fontSB [option get . fontSmallBold {}]
+    
+    set tmpJPrefs(chatActiveRet) $jprefs(chatActiveRet)
+    
+    set labpalrt [::mylabelframe::mylabelframe ${wpage}.alrt \
+      [::msgcat::mc {Chat}]]
+    pack $wpage.alrt -side top -anchor w -ipadx 10 -fill x
+    
+    set fr $labpalrt.fr
+    pack [frame $fr] -side top -anchor w -padx 8 -pady 2
+ 
+    checkbutton $fr.active -text "  [::msgcat::mc prefchactret]"  \
+      -variable [namespace current]::tmpJPrefs(chatActiveRet)
+    grid $fr.active -sticky w
+}
+
+proc ::Jabber::Chat::SavePrefsHook { } {
+    upvar ::Jabber::jprefs jprefs
+    variable tmpJPrefs
+    
+    array set jprefs [array get tmpJPrefs]
+    unset tmpJPrefs
+}
+
+proc ::Jabber::Chat::CancelPrefsHook { } {
+    upvar ::Jabber::jprefs jprefs
+    variable tmpJPrefs
+        
+    foreach key [array names tmpJPrefs] {
+	if {![string equal $jprefs($key) $tmpJPrefs($key)]} {
+	    ::Preferences::HasChanged
+	    break
+	}
+    }
 }
 
 #-------------------------------------------------------------------------------

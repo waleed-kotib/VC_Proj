@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.10 2004-01-30 15:33:50 matben Exp $
+# $Id: Profiles.tcl,v 1.11 2004-03-13 15:21:41 matben Exp $
 
 package provide Profiles 1.0
 
@@ -331,7 +331,7 @@ proc ::Profiles::BuildPage {page} {
       -textvariable [namespace current]::username -validate key  \
       -validatecommand {::Jabber::ValidateJIDChars %S}
     label $pui.lpass -text "[::msgcat::mc Password]:" -font $fontSB -anchor e
-    entry $pui.epass -width 22  \
+    entry $pui.epass -width 22 -show {*}  \
       -textvariable [namespace current]::password -validate key  \
       -validatecommand {::Jabber::ValidateJIDChars %S}
     label $pui.lres -text "[::msgcat::mc Resource]:" -font $fontSB -anchor e
@@ -346,8 +346,8 @@ proc ::Profiles::BuildPage {page} {
     grid $pui.euser -column 1 -row 2 -sticky w
     grid $pui.lpass -column 0 -row 3 -sticky e
     grid $pui.epass -column 1 -row 3 -sticky w
-    grid $pui.lres -column 0 -row 4 -sticky e
-    grid $pui.eres -column 1 -row 4 -sticky w
+    grid $pui.lres  -column 0 -row 4 -sticky e
+    grid $pui.eres  -column 1 -row 4 -sticky w
 
     set puibt [frame $labpui.frbt]
     pack $puibt -padx 8 -pady 6 -side left -fill y
@@ -361,7 +361,7 @@ proc ::Profiles::BuildPage {page} {
       -command [namespace current]::DeleteCmd]   \
       -side top -fill x -pady 4
 }
-    
+
 # Profiles::MakeTmpProfArr --
 #
 #       Make temp array for profiles.
@@ -613,8 +613,8 @@ proc ::Profiles::BuildDialog { } {
     wm title $w [::msgcat::mc Profiles]
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised]   \
-      -fill both -expand 1 -ipadx 12 -ipady 4
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1 -ipadx 12 -ipady 4
 
     set wpage $w.frall.page
     pack [frame $wpage] -padx 4 -pady 4
@@ -622,7 +622,7 @@ proc ::Profiles::BuildDialog { } {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btconn -text [::msgcat::mc Save] -width 8 \
+    pack [button $frbot.btconn -text [::msgcat::mc Save]  \
       -default active -command [list [namespace current]::SaveDlg $w]]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \

@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: GetFileIface.tcl,v 1.15 2004-02-17 07:44:37 matben Exp $
+# $Id: GetFileIface.tcl,v 1.16 2004-03-13 15:21:41 matben Exp $
 
 package require getfile
 package require uriencode
@@ -62,18 +62,18 @@ proc ::GetFileIface::GetFile {wtop sock fileName opts} {
     variable $gettoken
     upvar 0 $gettoken getstate
     
-    set getstate(wtop) $wtop
-    set getstate(can) [::UI::GetCanvasFromWtop $wtop]
-    set getstate(sock) $sock
-    set getstate(filetail) $fileTail
-    set getstate(dstpath) $dstpath
-    set getstate(optlist) $opts
-    set getstate(mime) $mime
-    set getstate(file) $fileName
+    set getstate(wtop)        $wtop
+    set getstate(can)         [::WB::GetCanvasFromWtop $wtop]
+    set getstate(sock)        $sock
+    set getstate(filetail)    $fileTail
+    set getstate(dstpath)     $dstpath
+    set getstate(optlist)     $opts
+    set getstate(mime)        $mime
+    set getstate(file)        $fileName
     set getstate(firstmillis) [clock clicks -milliseconds]
-    set getstate(lastmillis) $getstate(firstmillis)
-    set getstate(wprog) $wDlgs(prog)${uid}
-    set getstate(timingkey) $gettoken
+    set getstate(lastmillis)  $getstate(firstmillis)
+    set getstate(wprog)       $wDlgs(prog)${uid}
+    set getstate(timingkey)   $gettoken
     if {[info exists optArr(-url)]} {
 	set getstate(url) $optArr(-url)
     }
@@ -174,17 +174,17 @@ proc ::GetFileIface::GetFileFromServer {wtop ip port path opts} {
     variable $gettoken
     upvar 0 $gettoken getstate
     
-    set getstate(wtop) $wtop
-    set getstate(can) [::UI::GetCanvasFromWtop $wtop]
-    set getstate(filetail) $fileTail
-    set getstate(dstpath) $dstpath
-    set getstate(optlist) $opts
-    set getstate(mime) $mime
-    set getstate(file) $path
+    set getstate(wtop)       $wtop
+    set getstate(can)        [::WB::GetCanvasFromWtop $wtop]
+    set getstate(filetail)   $fileTail
+    set getstate(dstpath)    $dstpath
+    set getstate(optlist)    $opts
+    set getstate(mime)       $mime
+    set getstate(file)       $path
     set getstate(firstmillis) [clock clicks -milliseconds]
     set getstate(lastmillis) $getstate(firstmillis)
-    set getstate(wprog) $wDlgs(prog)${uid}
-    set getstate(timingkey) $gettoken
+    set getstate(wprog)      $wDlgs(prog)${uid}
+    set getstate(timingkey)  $gettoken
     
     # Check if this file is cached already, http transported instead,
     # or if you user wants something different. May modify 'getstate(dstpath)'!
@@ -464,7 +464,7 @@ proc ::GetFileIface::DoImport {mime opts args} {
 	eval {::Jabber::WB::DispatchToImporter $mime $opts} $args
     } else {
 	if {[::Plugins::HaveImporterForMime $mime]} {
-	    set servCan [::UI::GetServerCanvasFromWtop .]
+	    set servCan [::WB::GetServerCanvasFromWtop .]
 	    set errMsg [eval {
 		::Import::DoImport $servCan $opts
 	    } $args]

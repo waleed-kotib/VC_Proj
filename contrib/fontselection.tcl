@@ -1,6 +1,6 @@
 #  Copyright (c) 2002  Mats Bengtsson
 #
-# $Id: fontselection.tcl,v 1.5 2004-01-23 08:54:23 matben Exp $
+# $Id: fontselection.tcl,v 1.6 2004-03-13 15:21:40 matben Exp $
 
 package require combobox
 
@@ -42,13 +42,14 @@ proc ::fontselection::fontselection {w args} {
 	::tk::unsupported::MacWindowStyle style $w documentProc
     }
     
-    wm title $w {Select Font}
+    wm title $w [::msgcat::mc {Select Font}]
     set finished 0
     array set opts $options
     array set opts $args    
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1
     
     # Top frame.
     set frtop $w.frall.frtop
@@ -103,13 +104,13 @@ proc ::fontselection::fontselection {w args} {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btset -text {Select} -default active -width 8 \
+    pack [button $frbot.btset -text [::msgcat::mc Select] -default active  \
       -command "set [namespace current]::finished 1"]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
       -command "set [namespace current]::finished 2"]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btdef -text {Default} -width 8   \
+    pack [button $frbot.btdef -text [::msgcat::mc Default]  \
       -command [namespace current]::SetDefault]  \
       -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6

@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: TheServer.tcl,v 1.18 2004-03-04 07:53:17 matben Exp $
+# $Id: TheServer.tcl,v 1.19 2004-03-13 15:21:42 matben Exp $
     
 # DoStartServer ---
 #
@@ -85,6 +85,8 @@ proc SetupChannel {channel ip port} {
 
     Debug 2 "---> Connection made to $ip:${port} on channel $channel."
     
+    ::hooks::run serverNewConnectionHook
+    
     # Save ip nums and names etc in arrays.
     # Depending on which happens first, this info is either collected here, or via
     # '::OpenConnection::SetIpArrays' when a client socket is opened.
@@ -136,7 +138,7 @@ proc HandleClientRequest {channel ip port} {
         
     # If client closes socket to this server.
     
-    if {[eof $channel]} {
+    if {[catch {eof $channel} iseof] || $iseof} {
 	if {$debugServerLevel >= 2} {
 	    puts "HandleClientRequest:: eof channel=$channel"
 	}
@@ -191,7 +193,7 @@ proc HandleClientRequest {channel ip port} {
 	
 	# Interpret the command we just read. 
 	# Non Jabber only supports a single whiteboard instance.
-	ExecuteClientRequest . $channel $ip $port $line
+	ExecuteClientRequest $channel $ip $port $line
     }
 }
 
@@ -200,7 +202,6 @@ proc HandleClientRequest {channel ip port} {
 #       Interpret the command we just read.
 #     
 # Arguments:
-#       wtop        toplevel window. ("." or ".main2." with extra dot!)
 #       channel
 #       ip
 #       port
@@ -211,7 +212,7 @@ proc HandleClientRequest {channel ip port} {
 # Returns:
 #       none.
 
-proc ExecuteClientRequest {wtop channel ip port line args} {
+proc ExecuteClientRequest {channel ip port line args} {
     global  tempChannel ipNumTo debugServerLevel   \
       clientRecord prefs this  \
       canvasSafeInterp
@@ -234,7 +235,7 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
     set punct {[.,;?!]}
         
     if {$debugServerLevel >= 2} {
-	puts "ExecuteClientRequest:: wtop=$wtop, line='$line', args='$args'"
+	puts "ExecuteClientRequest:: line='$line', args='$args'"
     }
     array set attrarr $args
     if {![regexp {^([A-Z ]+): *(.*)$} $line x prefixCmd instr]} {
@@ -245,7 +246,7 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
     switch -exact -- $prefixCmd {
 	CANVAS {
 	    if {[string length $instr] > 0} {
-		::CanvasUtils::HandleCanvasDraw $wtop $instr
+		::CanvasUtils::HandleCanvasDraw . $instr
 	    }		
 	}
 	IDENTITY {
@@ -272,7 +273,7 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 		set ipNumTo(connectTime,$ip) [clock seconds]
 		
 		# Add entry in the communication frame.
-		::WB::SetCommEntry . $ip -1 1
+		::P2P::SetCommEntry . $ip -1 1
 		::UI::MenuMethod .menu.info entryconfigure mOnClients  \
 		  -state normal
 		
@@ -298,7 +299,7 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 		    # Let propagateSizeToClients = false.
 		    ::OpenConnection::DoConnect $ip $ipNumTo(servPort,$ip) 0
 		} elseif {[string equal $prefs(protocol) "server"]} {
-		    ::WB::FixMenusWhen . "connect"
+		    ::hooks::run whiteboardFixMenusWhenHook . "connect"
 		}
 	    }		
 	}
@@ -370,26 +371,19 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 	    # Do not interfer with put/get operations.
 	    fileevent $channel readable {}
 	    
-	    if {$prefixCmd == "PUT"} {
-		
-		# The problem is that we get a direct connection with
-		# PUT/GET request outside the Jabber framework.
-		if {[string equal $prefs(protocol) "jabber"]} {
-		    ::Jabber::HandlePutRequest $channel $fileName $opts
-		} else {
-		    
-		    # Be sure to strip off any path. (this(path))??? Mac bug for /file?
+	    switch -- $prefixCmd {
+		PUT {
 		    set fileName [file tail $fileName]
-		    ::GetFileIface::GetFile $wtop $channel $fileName $opts
+		    ::hooks::run serverPutRequestHook $channel $fileName $opts
 		}
-	    } elseif {$prefixCmd == "GET"} {
-		
-		# A file is requested from this server. 'fileName' may be
-		# a relative path so beware. This should be taken care for in
-		# 'PutFileToClient'.
-		
-		::PutFileIface::PutFileToClient $wtop $channel $ip \
-		  $fileName $opts
+		GET {
+		    
+		    # A file is requested from this server. 'fileName' may be
+		    # a relative path so beware. This should be taken care for in
+		    # 'PutFileToClient'.		    
+		    ::PutFileIface::PutFileToClient . $channel $ip \
+		      $fileName $opts
+		}
 	    }		
 	}
 	"PUT NEW" {
@@ -401,7 +395,7 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 		
 		# For some reason the outer {} must be stripped off.
 		set relFilePath [lindex $relFilePath 0]
-		::GetFileIface::GetFileFromServer $wtop $ip $ipNumTo(servPort,$ip) \
+		::GetFileIface::GetFileFromServer . $ip $ipNumTo(servPort,$ip) \
 		  $relFilePath $optList
 	    }		
 	}
@@ -412,7 +406,7 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 		if {$debugServerLevel >= 2} {
 		    puts "--->GET CANVAS:"
 		}
-		set wServCan [::UI::GetServerCanvasFromWtop $wtop]
+		set wServCan [::WB::GetServerCanvasFromWtop .]
 		::CanvasCmd::DoPutCanvas $wServCan $ip
 	    }		
 	}
@@ -425,7 +419,7 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 		    puts "--->RESIZE IMAGE: itOrig=$itOrig, itNew=$itNew, \
 		      zoomFactor=$zoomFactor"
 		}
-		::Import::ResizeImage $wtop $zoomFactor $itOrig $itNew "local"
+		::Import::ResizeImage . $zoomFactor $itOrig $itNew "local"
 	    }		
 	}
 	"GET IP" {
@@ -434,7 +428,7 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 		
 		# Extract the unique request id number, and forward it.
 		if {[string equal $prefs(protocol) "jabber"]} {
-		    ::Jabber::PutIPnumber $attrarr(-from) $getid
+		    ::Jabber::WB::PutIPnumber $attrarr(-from) $getid
 		}
 	    }		
 	}
@@ -445,7 +439,7 @@ proc ExecuteClientRequest {wtop channel ip port line args} {
 		
 		# We have got the requested ip number from the client.
 		if {[string equal $prefs(protocol) "jabber"]} {
-		    ::Jabber::GetIPCallback $attrarr(-from) $getid $clientIP
+		    ::Jabber::WB::GetIPCallback $attrarr(-from) $getid $clientIP
 		}
 	    }		
 	}

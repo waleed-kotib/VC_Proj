@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.30 2004-01-14 14:27:30 matben Exp $
+# $Id: NewMsg.tcl,v 1.31 2004-03-13 15:21:41 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -14,7 +14,7 @@ package provide NewMsg 1.0
 namespace eval ::Jabber::NewMsg:: {
     global  wDlgs
 
-    hooks::add closeWindowHook    ::Jabber::NewMsg::CloseHook
+    ::hooks::add closeWindowHook    ::Jabber::NewMsg::CloseHook
 
     # Use option database for customization.
     option add *NewMsg.sendImage            send            widgetDefault
@@ -27,7 +27,7 @@ namespace eval ::Jabber::NewMsg:: {
     option add *NewMsg.printDisImage        printDis        widgetDefault
 
     # Add all event hooks.
-    hooks::add quitAppHook [list ::UI::SaveWinPrefixGeom $wDlgs(jsendmsg)]
+    ::hooks::add quitAppHook [list ::UI::SaveWinPrefixGeom $wDlgs(jsendmsg)]
 
     variable locals
     
@@ -154,8 +154,8 @@ proc ::Jabber::NewMsg::Build {args} {
     set fontSB [option get . fontSmallBold {}]
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised]   \
-      -fill both -expand 1 -ipadx 4
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1 -ipadx 4
     
     # Button part.
     set iconSend      [::Theme::GetImage [option get $w sendImage {}]]
@@ -181,7 +181,7 @@ proc ::Jabber::NewMsg::Build {args} {
     $wtray newbutton print Print $iconPrint $iconPrintDis  \
       [list ::Jabber::NewMsg::DoPrint $w]
     
-    hooks::run buildNewMsgButtonTrayHook $wtray
+    ::hooks::run buildNewMsgButtonTrayHook $wtray
 
     pack [frame $w.frall.divt -bd 2 -relief sunken -height 2] -fill x -side top
     if {0} {

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Example.tcl,v 1.11 2004-01-13 14:50:21 matben Exp $
+# $Id: Example.tcl,v 1.12 2004-03-13 15:21:58 matben Exp $
 
 
 namespace eval ::Example:: {
@@ -146,7 +146,7 @@ proc ::Example::Save {wCan id args} {
     if {[info exists locals(id2file,$id)]} {
 	set fileName $locals(id2file,$id)
 	if {$argsArr(-uritype) == "http"} {
-	    lappend impArgs -url [::CanvasUtils::GetHttpFromFile $fileName]
+	    lappend impArgs -url [::Utils::GetHttpFromFile $fileName]
 	} else {
 	    lappend impArgs -file $fileName
 	}

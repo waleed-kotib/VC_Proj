@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.24 2004-02-13 14:08:19 matben Exp $
+# $Id: MUC.tcl,v 1.25 2004-03-13 15:21:41 matben Exp $
 
 package require entrycomp
 
@@ -15,6 +15,8 @@ package provide MUC 1.0
 
 namespace eval ::Jabber::MUC:: {
       
+    ::hooks::add jabberInitHook     ::Jabber::MUC::Init
+    
     # Local stuff
     variable dlguid 0
     variable editcalluid 0
@@ -75,6 +77,15 @@ namespace eval ::Jabber::MUC:: {
     }
 }
 
+
+proc ::Jabber::MUC::Init { } {
+    upvar ::Jabber::jstate jstate
+   
+    $jstate(jlib) message_register * "http://jabber.org/protocol/muc#user" \
+      ::Jabber::MUC::MUCMessage
+    
+}
+
 # Jabber::MUC::BuildEnter --
 #
 #       Initiates the process of entering a MUC room. Multi instance.
@@ -116,7 +127,8 @@ proc ::Jabber::MUC::BuildEnter {args} {
     set fontSB [option get . fontSmallBold {}]
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1
     message $w.frall.msg -width 260  \
     	-text "Enter your nick name and press Enter to go into the room.\
 	Members only room may require a password."
@@ -408,7 +420,7 @@ proc ::Jabber::MUC::EnterCallback {jlibName type args} {
 
 namespace eval ::Jabber::MUC:: {
     
-    hooks::add closeWindowHook    ::Jabber::MUC::InviteCloseHook
+    ::hooks::add closeWindowHook    ::Jabber::MUC::InviteCloseHook
 }
 
 # Jabber::MUC::Invite --
@@ -430,8 +442,8 @@ proc ::Jabber::MUC::Invite {roomjid} {
     set fontSB [option get . fontSmallBold {}]
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised] \
-      -fill both -expand 1 -ipadx 4
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1 -ipadx 4
     regexp {^([^@]+)@.*} $roomjid match roomName
     set msg "Invite a user for groupchat in room $roomName"
     pack [message $w.frall.msg -width 220 -text $msg] \
@@ -508,11 +520,15 @@ proc ::Jabber::MUC::InviteCloseHook {wclose} {
 #       Handle incoming message tagged with muc namespaced x-element.
 #       Invitation?
 
-proc ::Jabber::MUC::MUCMessage {from xlist} {
+proc ::Jabber::MUC::MUCMessage {jlibname xmlns args} {
    
     # This seems handled by the muc component by sending a message.
     return
    
+    array set argsArr $args
+    set from $argsArr(-from)
+    set xlist $argsArr(-x)
+    
     set invite 0
     foreach c [wrapper::getchildren $xlist] {
 	switch -- [lindex $c 0] {
@@ -555,7 +571,7 @@ proc ::Jabber::MUC::MUCMessage {from xlist} {
 
 namespace eval ::Jabber::MUC:: {
     
-    hooks::add closeWindowHook    ::Jabber::MUC::InfoCloseHook
+    ::hooks::add closeWindowHook    ::Jabber::MUC::InfoCloseHook
 }
 
 # Jabber::MUC::BuildInfo --
@@ -606,7 +622,8 @@ proc ::Jabber::MUC::BuildInfo {roomjid} {
     set fontS [option get . fontSmall {}]
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1
     
     # 
     pack [message $w.frall.msg -width 400 -text \
@@ -1004,7 +1021,7 @@ proc ::Jabber::MUC::Ban {roomjid} {
 
 namespace eval ::Jabber::MUC:: {
     
-    hooks::add closeWindowHook    ::Jabber::MUC::EditListCloseHook
+    ::hooks::add closeWindowHook    ::Jabber::MUC::EditListCloseHook
 }
 
 # Jabber::MUC::EditListBuild --
@@ -1067,8 +1084,8 @@ proc ::Jabber::MUC::EditListBuild {roomjid type} {
     set fontS [option get . fontSmall {}]
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised] \
-      -fill both -expand 1 -ipadx 4
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1 -ipadx 4
     regexp {^([^@]+)@.*} $roomjid match roomName
     pack [message $w.frall.msg -width 300  \
       -text $editmsg($type)] -side top -anchor w -padx 4 -pady 2
@@ -1150,7 +1167,7 @@ proc ::Jabber::MUC::EditListBuild {roomjid type} {
       -side right -padx 5 -pady 5  
     pack [::chasearrows::chasearrows $wsearrows -size 16] \
       -side left -padx 5 -pady 5
-    pack [button $frbot.btres -text [::msgcat::mc Reset] -width 8  \
+    pack [button $frbot.btres -text [::msgcat::mc Reset]  \
       -command [list [namespace current]::EditListReset $roomjid]]  \
       -side left -padx 5 -pady 5  
     
@@ -1504,7 +1521,7 @@ proc ::Jabber::MUC::EditListSet {roomjid} {
 
 namespace eval ::Jabber::MUC:: {
     
-    hooks::add closeWindowHook    ::Jabber::MUC::RoomConfigCloseHook
+    ::hooks::add closeWindowHook    ::Jabber::MUC::RoomConfigCloseHook
 }
 
 proc ::Jabber::MUC::RoomConfig {roomjid} {
@@ -1522,8 +1539,8 @@ proc ::Jabber::MUC::RoomConfig {roomjid} {
     wm title $w "Configure Room"
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised]   \
-      -fill both -expand 1 -ipadx 4
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1 -ipadx 4
             
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
@@ -1660,7 +1677,7 @@ proc ::Jabber::MUC::SetNick {roomjid} {
 
 namespace eval ::Jabber::MUC:: {
     
-    hooks::add closeWindowHook    ::Jabber::MUC::DestroyCloseHook
+    ::hooks::add closeWindowHook    ::Jabber::MUC::DestroyCloseHook
 }
 
 proc ::Jabber::MUC::Destroy {roomjid} {
@@ -1683,8 +1700,8 @@ proc ::Jabber::MUC::Destroy {roomjid} {
     set fontSB [option get . fontSmallBold {}]
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised] \
-      -fill both -expand 1 -ipadx 4
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall  -fill both -expand 1 -ipadx 4
     regexp {^([^@]+)@.*} $roomjid match roomName
     set msg "You are about to destroy the room \"$roomName\".\
       Optionally you may give any present room particpants an\

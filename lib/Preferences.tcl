@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.43 2004-02-09 08:26:07 matben Exp $
+# $Id: Preferences.tcl,v 1.44 2004-03-13 15:21:41 matben Exp $
  
 package require notebook
 package require tree
@@ -26,8 +26,8 @@ namespace eval ::Preferences:: {
     variable lastPage {}
 
     # Add all event hooks.
-    hooks::add quitAppHook     [list ::UI::SaveWinGeom $wDlgs(prefs)]
-    hooks::add closeWindowHook ::Preferences::CloseHook
+    ::hooks::add quitAppHook     [list ::UI::SaveWinGeom $wDlgs(prefs)]
+    ::hooks::add closeWindowHook ::Preferences::CloseHook
 }
 
 proc ::Preferences::Build { } {
@@ -60,11 +60,18 @@ proc ::Preferences::Build { } {
     
     # Unfortunately it is necessary to do some platform specific things to
     # get the pages to look nice.
+
     switch -glob -- $this(platform) {
-	mac* {
+	macintosh {
 	    set ypadtiny 1
 	    set ypad     3
 	    set ypadbig  4
+	    set xpadbt   7
+	}
+	macosx {
+	    set ypadtiny 0
+	    set ypad     0
+	    set ypadbig  1
 	    set xpadbt   7
 	}
 	windows {
@@ -90,7 +97,8 @@ proc ::Preferences::Build { } {
     set fontSB [option get . fontSmallBold {}]
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1
     
     # Frame for everything except the buttons.
     pack [frame $w.frall.fr] -fill both -expand 1 -side top
@@ -572,7 +580,8 @@ proc ::Preferences::Block::Add {w} {
     wm title $w [::msgcat::mc {Block JID}]
     
     # Global frame.
-    pack [frame $w.frall -borderwidth 1 -relief raised] -fill both -expand 1
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1
     
     # Labelled frame.
     set wcfr $w.frall.fr
@@ -591,7 +600,7 @@ proc ::Preferences::Block::Add {w} {
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btconn -text [::msgcat::mc Add] -width 8 -default active \
+    pack [button $frbot.btconn -text [::msgcat::mc Add] -default active \
       -command [list ::Preferences::Block::DoAdd]]  \
       -side right -padx 5 -pady 5
     pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
@@ -676,7 +685,7 @@ proc ::Preferences::Customization::BuildPage {page} {
     pack $pbl -padx 10 -pady 6 -side left
     
     label $pbl.lfont -text [::msgcat::mc prefcufont]
-    button $pbl.btfont -text "[::msgcat::mc Pick]..." -width 8  \
+    button $pbl.btfont -text "[::msgcat::mc Pick]..."  \
       -command ::Preferences::Customization::PickFont
     checkbutton $pbl.newwin  \
       -text " [::msgcat::mc prefcushow]" \
@@ -876,13 +885,13 @@ proc ::Preferences::FileMap::BuildPage {page} {
     set frbt [frame $fr1.frbot]
     grid $frbt -row 1 -column 0 -columnspan 2 -sticky nsew -padx 0 -pady 0
     button $frbt.rem -text [::msgcat::mc Delete] -font $fontS  \
-      -state disabled -width 8 -padx $xpadbt  \
+      -state disabled -padx $xpadbt  \
       -command "::Preferences::FileMap::DeleteAssociation $wmclist  \
       \[$wmclist curselection]"
     button $frbt.change -text "[::msgcat::mc Edit]..." -font $fontS  \
-      -state disabled -width 8 -padx $xpadbt -command  \
+      -state disabled -padx $xpadbt -command  \
       "${ns}::Inspect $wDlgs(fileAssoc) edit $wmclist \[$wmclist curselection]"
-    button $frbt.add -text "[::msgcat::mc New]..." -font $fontS -width 8 -padx $xpadbt \
+    button $frbt.add -text "[::msgcat::mc New]..." -font $fontS -padx $xpadbt \
       -command [list ${ns}::Inspect .setass new $wmclist -1]
     pack $frbt.rem $frbt.change $frbt.add -side right -padx 5 -pady 5
     
@@ -1047,7 +1056,8 @@ proc ::Preferences::FileMap::Inspect {w doWhat wlist {indSel {}}} {
 	set packageVar None
 	set packageList None
     }
-    pack [frame $w.frall -borderwidth 1 -relief raised]
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall
     
     # Frame for everything inside the labeled container: "Type of File".
     set wcont1 [::mylabelframe::mylabelframe $w.frtop [::msgcat::mc {Type of File}]]
@@ -1440,16 +1450,7 @@ proc ::Preferences::NetSetup::UpdateUI { } {
     # Other UI updates needed.
     foreach w [::WB::GetAllWhiteboards] {
 	set wtop [::UI::GetToplevelNS $w]
-	::WB::SetCommHead $wtop $prefs(protocol)
-	
-	switch -- $prefs(protocol) {
-	    jabber {
-		::Jabber::BuildJabberEntry $wtop
-	    }
-	    default {
-		::WB::DeleteJabberEntry $wtop
-	    }
-	}
+
     }
 }
 
@@ -1474,7 +1475,8 @@ proc ::Preferences::NetSetup::Advanced {  } {
     
     set fontSB [option get . fontSmallBold {}]
     
-    pack [frame $w.frall -borderwidth 1 -relief raised]
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall
     set wcont [::mylabelframe::mylabelframe $w.frtop [::msgcat::mc {Advanced Configuration}]]
     pack $w.frtop -in $w.frall -side top -fill both
     
@@ -1718,7 +1720,8 @@ proc ::Preferences::Shorts::AddOrEdit {what} {
     
     set fontSB [option get . fontSmallBold {}]
     
-    pack [frame $w.frall -borderwidth 1 -relief raised]
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall
     
     # The top part.
     set wcont [::mylabelframe::mylabelframe $w.frtop $txt]
@@ -1750,7 +1753,7 @@ proc ::Preferences::Shorts::AddOrEdit {what} {
     # The bottom part.
     pack [frame $w.frbot -borderwidth 0] -in $w.frall -fill both  \
       -padx 8 -pady 6
-    button $w.frbot.bt1 -text "$txtbt" -width 8 -default active  \
+    button $w.frbot.bt1 -text "$txtbt" -default active  \
       -command [list [namespace current]::PushBtAddOrEdit $what]
     pack $w.frbot.bt1 -side right -padx 5 -pady 5
     pack [button $w.frbot.btcancel -text [::msgcat::mc Cancel]  \
@@ -2128,7 +2131,7 @@ proc ::Preferences::CancelPushBt { } {
     
     if {$hasChanged} {
 	set ans [tk_messageBox -title [::msgcat::mc Warning]  \
-	  -type yesno -default no -parent $wDlgs(prefs)  \
+	  -type yesno -default no -parent $wDlgs(prefs) -icon warning \
 	  -message [FormatTextForMessageBox [::msgcat::mc messprefschanged]]]
 	if {$ans == "yes"} {
 	    set finished 2
