@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ItemInspector.tcl,v 1.24 2004-05-06 13:41:11 matben Exp $
+# $Id: ItemInspector.tcl,v 1.25 2004-05-07 12:24:06 matben Exp $
 
 namespace eval ::ItemInspector::  {
     
@@ -436,7 +436,16 @@ proc ::ItemInspector::CanvasConfigureItem {w wCan itemId listOfAllOptions} {
 		if {[string equal $newOpt "transparent"]}  {
 		    set newVal {}
 		} else  {
+
+		    # On MacOSX this can return systemWindowBody which 
+		    # fails on other platforms.
 		    set newVal [$entWid cget $disabledBackground]
+		    set rgbx {}
+		    # winfo rgb . white -> 65535 65535 65535
+		    foreach rgb [winfo rgb . $newVal] {
+			lappend rgbx [expr $rgb >> 8]
+		    }
+		    set newVal [eval {format "#%02x%02x%02x"} $rgbx]
 		}
 		
 		# Pure menu options.

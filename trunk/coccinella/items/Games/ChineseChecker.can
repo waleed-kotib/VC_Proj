@@ -1,15 +1,15 @@
 # Version: 2
 import 16.0 16.0 -tags */89163284 -width 485 -file chineschecker.gif -height 485
-create oval 60.0 140.0 78.0 158.0 -disabledwidth 0 -fill systemWindowBody -tags {*/89163286 oval std}
-create oval 90.0 139.0 108.0 157.0 -disabledwidth 0 -fill systemWindowBody -tags {*/89163287 oval std}
-create oval 124.0 140.0 142.0 158.0 -disabledwidth 0 -fill systemWindowBody -tags {*/89163288 oval std}
-create oval 76.0 167.0 94.0 185.0 -disabledwidth 0 -fill systemWindowBody -tags {*/89163289 oval std}
-create oval 107.0 167.0 125.0 185.0 -disabledwidth 0 -fill systemWindowBody -tags {*/89163290 oval std}
-create oval 92.0 195.0 110.0 213.0 -disabledwidth 0 -fill systemWindowBody -tags {*/89163291 oval std}
-create oval 108.0 222.0 126.0 240.0 -disabledwidth 0 -fill systemWindowBody -tags {*/89163292 oval std}
-create oval 123.0 195.0 141.0 213.0 -disabledwidth 0 -fill systemWindowBody -tags {*/89163293 oval std}
-create oval 140.0 168.0 158.0 186.0 -disabledwidth 0 -fill systemWindowBody -tags {*/89163294 oval std}
-create oval 155.0 139.0 173.0 157.0 -disabledwidth 0 -fill systemWindowBody -tags {*/89163295 oval std}
+create oval 60.0 140.0 78.0 158.0 -disabledwidth 0 -fill #ffffff -tags {*/89163286 oval std}
+create oval 90.0 139.0 108.0 157.0 -disabledwidth 0 -fill #ffffff -tags {*/89163287 oval std}
+create oval 124.0 140.0 142.0 158.0 -disabledwidth 0 -fill #ffffff -tags {*/89163288 oval std}
+create oval 76.0 167.0 94.0 185.0 -disabledwidth 0 -fill #ffffff -tags {*/89163289 oval std}
+create oval 107.0 167.0 125.0 185.0 -disabledwidth 0 -fill #ffffff -tags {*/89163290 oval std}
+create oval 92.0 195.0 110.0 213.0 -disabledwidth 0 -fill #ffffff -tags {*/89163291 oval std}
+create oval 108.0 222.0 126.0 240.0 -disabledwidth 0 -fill #ffffff -tags {*/89163292 oval std}
+create oval 123.0 195.0 141.0 213.0 -disabledwidth 0 -fill #ffffff -tags {*/89163293 oval std}
+create oval 140.0 168.0 158.0 186.0 -disabledwidth 0 -fill #ffffff -tags {*/89163294 oval std}
+create oval 155.0 139.0 173.0 157.0 -disabledwidth 0 -fill #ffffff -tags {*/89163295 oval std}
 create oval 250.0 30.0 268.0 48.0 -disabledwidth 0 -fill #000000 -outline #ffffff -tags {*/89163296 oval std}
 create oval 346.0 139.0 364.0 157.0 -disabledwidth 0 -fill #2a4cff -tags {*/89163297 oval std}
 create oval 107.0 279.0 125.0 297.0 -disabledwidth 0 -fill #ff0f1b -tags {*/89163298 oval std}

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Agents.tcl,v 1.17 2004-04-30 12:58:45 matben Exp $
+# $Id: Agents.tcl,v 1.18 2004-05-07 12:24:05 matben Exp $
 
 package provide Agents 1.0
 
@@ -326,7 +326,7 @@ proc ::Jabber::Agents::Build {w args} {
     ::Debug 2 "::Jabber::Agents::Build w=$w"
         
     # The frame.
-    frame $w -borderwidth 0 -relief flat
+    frame $w -borderwidth 0 -relief flat -class Agent
     set wagents $w
 
     # Start with running arrows and message.

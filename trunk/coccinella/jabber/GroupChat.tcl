@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.56 2004-04-25 15:35:25 matben Exp $
+# $Id: GroupChat.tcl,v 1.57 2004-05-07 12:24:05 matben Exp $
 
 package require History
 
@@ -124,9 +124,9 @@ proc ::Jabber::GroupChat::AllConference { } {
     upvar ::Jabber::jstate jstate
 
     set anyNonConf 0
-    foreach confjid [$jstate(jlib) service getjidsfor "groupchat"] {
-	if {[info exists jstate(conference,$confjid)] &&  \
-	  ($jstate(conference,$confjid) == 0)} {
+    foreach jid [$jstate(jlib) service getjidsfor "groupchat"] {
+	if {[info exists jstate(conference,$jid)] &&  \
+	  ($jstate(conference,$jid) == 0)} {
 	    set anyNonConf 1
 	    break
 	}
@@ -180,49 +180,59 @@ proc ::Jabber::GroupChat::HaveMUC {{roomjid ""}} {
 
     set ans 0
     if {$roomjid == ""} {
-	#set allConfServ [$jstate(jlib) service getconferences]
-	#foreach serv $allConfServ {
-	#    if {[$jstate(jlib) service hasfeature $serv  \
-	#      "http://jabber.org/protocol/muc"]} {
-	#	return 1
-	#    }
-	#}
-	 
-	# Require at least one service that supports muc.
-	if {[info exists jstate(browse)]} {
-	    set jids [$jstate(browse) getservicesforns  \
-	      "http://jabber.org/protocol/muc"]
-	    if {[llength $jids] > 0} {
-		set ans 1
+	if {1} {
+	    set allConfServ [$jstate(jlib) service getconferences]
+	    foreach serv $allConfServ {
+		if {[$jstate(jlib) service hasfeature $serv  \
+		  "http://jabber.org/protocol/muc"]} {
+		    return 1
+		}
 	    }
 	}
-	if {[info exists jstate(disco)]} {
-	    set jids [$jstate(disco) getjidsforfeature  \
-	      "http://jabber.org/protocol/muc"]
-	    if {[llength $jids] > 0} {
-		set ans 1
+	
+	if {0} { 
+	    # Require at least one service that supports muc.
+	    # 
+	    # PROBLEM: some clients browsed return muc xmlns!!!
+	    if {[info exists jstate(browse)]} {
+		set jids [$jstate(browse) getservicesforns  \
+		  "http://jabber.org/protocol/muc"]
+		if {[llength $jids] > 0} {
+		    set ans 1
+		}
+	    }
+	    if {[info exists jstate(disco)]} {
+		set jids [$jstate(disco) getjidsforfeature  \
+		  "http://jabber.org/protocol/muc"]
+		if {[llength $jids] > 0} {
+		    set ans 1
+		}
 	    }
 	}
     } else {
-	#if {[$jstate(jlib) service hasfeature $serv  \
-	#  "http://jabber.org/protocol/muc"]} {
-	#    return 1
-	#}
-	
-	if {[info exists jstate(browse)]} {
-	    set confserver [$jstate(browse) getparentjid $roomjid]
-	    if {[$jstate(browse) isbrowsed $confserver]} {
-		set ans [$jstate(browse) hasnamespace $confserver  \
-		  "http://jabber.org/protocol/muc"]
-		::Debug 4 "::Jabber::GroupChat::HaveMUC	confserver=$confserver, ans=$ans"
+	if {1} {
+	    if {[$jstate(jlib) service hasfeature $serv  \
+	      "http://jabber.org/protocol/muc"]} {
+		return 1
 	    }
 	}
-	if {[info exists jstate(disco)]} {
-	    set confserver [$jstate(disco) parent $roomjid]
-	    if {[$jstate(disco) isdiscoed info $confserver]} {
-		set ans [$jstate(disco) hasfeature   \
-		  "http://jabber.org/protocol/muc" $confserver]
-		::Debug 4 "::Jabber::GroupChat::HaveMUC	confserver=$confserver, ans=$ans"
+	
+	if {0} {
+	    if {[info exists jstate(browse)]} {
+		set confserver [$jstate(browse) getparentjid $roomjid]
+		if {[$jstate(browse) isbrowsed $confserver]} {
+		    set ans [$jstate(browse) hasnamespace $confserver  \
+		      "http://jabber.org/protocol/muc"]
+		    ::Debug 4 "::Jabber::GroupChat::HaveMUC	confserver=$confserver, ans=$ans"
+		}
+	    }
+	    if {[info exists jstate(disco)]} {
+		set confserver [$jstate(disco) parent $roomjid]
+		if {[$jstate(disco) isdiscoed info $confserver]} {
+		    set ans [$jstate(disco) hasfeature   \
+		      "http://jabber.org/protocol/muc" $confserver]
+		    ::Debug 4 "::Jabber::GroupChat::HaveMUC	confserver=$confserver, ans=$ans"
+		}
 	    }
 	}
     }
