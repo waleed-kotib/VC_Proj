@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.73 2004-08-02 14:06:21 matben Exp $
+# $Id: Coccinella.tcl,v 1.74 2004-08-06 07:46:53 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -545,16 +545,16 @@ if {!$prefs(stripJabber)} {
 ::Types::Init
 
 # To provide code to be run before loading componenets.
-::Debug 2 "earlyInitHook"
+::Debug 2 "--> earlyInitHook"
 ::hooks::run earlyInitHook
 
 # Components.
-::Debug 2 "component::load"
+::Debug 2 "++> component::load"
 component::lappend_auto_path $this(componentPath)
 component::load
 
 # Components that need to add their own preferences need to be registered here.
-::Debug 2 "prefsInitHook"
+::Debug 2 "--> prefsInitHook"
 ::hooks::run prefsInitHook
 
 # Parse any command line options.
@@ -576,17 +576,19 @@ switch -- $prefs(protocol) {
 # Check that the mime type preference settings are consistent.
 ::Types::VerifyInternal
 
-# Goes through all the logic of verifying that the actual packages are 
-# available on our system. Speech special.
-::Plugins::VerifyPackagesForMimeTypes
-
 # Various initializations for canvas stuff and UI.
+# In initHook UI before hooks BAD!
 ::UI::Init
 ::UI::InitMenuDefs
 
 # All components that requires some kind of initialization should register here.
 # Beware, order may be important!
+::Debug 2 "--> initHook"
 ::hooks::run initHook
+
+# Code that requires stuff done in initHook registers for this one.
+::Debug 2 "--> postInitHook"
+::hooks::run postInitHook
 
 # Let main window "." be roster in jabber and whiteboard else.
 if {[string equal $prefs(protocol) "jabber"]} {
@@ -744,6 +746,7 @@ if {$argc > 0} {
 }
 
 update idletasks
+::Debug 2 "--> launchFinalHook"
 ::hooks::run launchFinalHook
 
 #-------------------------------------------------------------------------------

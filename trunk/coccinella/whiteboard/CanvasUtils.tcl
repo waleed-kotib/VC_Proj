@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.9 2004-08-02 14:06:21 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.10 2004-08-06 07:46:55 matben Exp $
 
 package require sha1pure
 
@@ -124,6 +124,9 @@ proc ::CanvasUtils::Init { } {
       {command   mExportImage  {::Import::ExportImageAsFile $w $id}  normal {}}
     set menuDefs(pop,exportmovie)  \
       {command   mExportMovie  {::Import::ExportMovie $wtop $winfr}  normal {}}
+    set menuDefs(pop,syncplay)  \
+      {checkbutton  mSyncPlayback {::Import::SyncPlay $wtop $winfr}  normal {} {} \
+	{-variable ::CanvasUtils::popupVars(-syncplay)}}
     set menuDefs(pop,inspectbroken)  \
       {command   mInspectItem  {::ItemInspector::Broken $wtop $id}          normal {}}
     set menuDefs(pop,reloadimage)  \
@@ -201,7 +204,7 @@ proc ::CanvasUtils::Init { } {
 	rectangle  {thickness fillcolor dash inspect}
 	text       {font fontsize fontweight color speechbubble inspect}
 	window     {}
-	qt         {inspectqt exportmovie}
+	qt         {inspectqt exportmovie syncplay}
 	snack      {}
 	broken     {inspectbroken reloadimage}
     }
@@ -392,6 +395,22 @@ proc ::CanvasUtils::GetUtagFromCmd {str} {
 proc ::CanvasUtils::GetUtagFromTagList {tags} {
     
     return [lsearch -inline -regexp $tags {^[^/ ]+/[0-9]+$}]
+}
+
+proc ::CanvasUtils::GetUtagFromWindow {win} {
+    
+    set utag ""
+    set wcan [winfo parent $win]
+    foreach id [$wcan find all] {
+	if {[string equal [$wcan type $id] "window"]} {
+	    set w [$wcan itemcget $id -window]
+	    if {$w == $win} {
+		set utag [::CanvasUtils::GetUtag $wcan $id]
+		break
+	    }
+	}   
+    }
+    return $utag
 }
 
 # CanvasUtils::ReplaceUtag --
@@ -1130,7 +1149,6 @@ proc ::CanvasUtils::ItemCoords {w id coords} {
 #       none
 
 proc ::CanvasUtils::StartTimerToItemPopup {w x y} {
-
     variable itemAfterId
     
     if {[info exists itemAfterId]} {
@@ -1150,7 +1168,6 @@ proc ::CanvasUtils::StopTimerToItemPopup { } {
 # Same as above but hardcoded to windows.
 
 proc ::CanvasUtils::StartTimerToWindowPopup {w x y} {
-
     variable winAfterId
     
     if {[info exists winAfterId]} {
@@ -1164,6 +1181,25 @@ proc ::CanvasUtils::StopTimerToWindowPopup { } {
     
     if {[info exists winAfterId]} {
 	catch {after cancel $winAfterId}
+    }
+}
+
+# Same as above but more flexible.
+
+proc ::CanvasUtils::StartTimerToPopupEx {w x y cmd} {
+    variable exAfterId
+    
+    if {[info exists exAfterId]} {
+	catch {after cancel $exAfterId}
+    }
+    set exAfterId [after 1000 [list uplevel #0 $cmd $w $x $y]]
+}
+
+proc ::CanvasUtils::StopTimerToPopupEx { } {
+    variable exAfterId
+    
+    if {[info exists exAfterId]} {
+	catch {after cancel $exAfterId}
     }
 }
 
@@ -1277,38 +1313,57 @@ proc ::CanvasUtils::DoWindowPopup {w x y} {
     variable menuDefs
     
     switch -- [winfo class $w] {
-	QTFrame {
-	    ::CanvasUtils::PostGeneralMenu $w $x $y .popupqt \
-	      $menuDefs(pop,qt)
-	}
 	SnackFrame {
 	    ::CanvasUtils::PostGeneralMenu $w $x $y .popupsnack \
 	      $menuDefs(pop,snack)
 	}
 	default {
 	    
-	    # Add a hook here for plugin support.
-	    
+	    # Add a hook here for plugin support.	    
 	}
     }
+}
+
+proc ::CanvasUtils::DoQuickTimePopup {w x y} {
+    variable menuDefs
+    variable popupVars
+    
+    set wtop [::UI::GetToplevelNS $w]
+    set m .popupqt
+    set xloc [expr $x - [winfo rootx $w]]
+    set yloc [expr $y - [winfo rooty $w]]
+    
+    # Build popup menu.
+    catch {destroy $m}
+    ::UI::BuildMenu $wtop $m {} $menuDefs(pop,qt) normal -winfr $w
+
+    set wmov ${w}.m
+    set cmd [$wmov cget -mccommand]
+    if {$cmd == {}} {
+	set popupVars(-syncplay) 0
+    } else {
+	set popupVars(-syncplay) 1
+    }
+    
+    # This one is needed on the mac so the menu is built before it is posted.
+    update idletasks
+    
+    # Post popup menu.
+    tk_popup $m [expr int($x) - 10] [expr int($y) - 10]
 }
 
 proc ::CanvasUtils::PostGeneralMenu {w x y m mDef} {
             
     set wtop [::UI::GetToplevelNS $w]    
-
     set xloc [expr $x - [winfo rootx $w]]
     set yloc [expr $y - [winfo rooty $w]]
         
     # Build popup menu.
     catch {destroy $m}
-    if {![winfo exists $m]} {
-	::UI::BuildMenu $wtop $m {} $mDef normal -winfr $w
-	
-	# This one is needed on the mac so the menu is built before
-	# it is posted.
-	update idletasks
-    }
+    ::UI::BuildMenu $wtop $m {} $mDef normal -winfr $w
+    
+    # This one is needed on the mac so the menu is built before it is posted.
+    update idletasks
     
     # Post popup menu.
     tk_popup $m [expr int($x) - 10] [expr int($y) - 10]

@@ -5,7 +5,7 @@
 #       
 #       Code idea from Alexey Shchepin, Many Thanks!
 #       
-# $Id: hooks.tcl,v 1.2 2003-12-30 15:30:58 matben Exp $
+# $Id: hooks.tcl,v 1.3 2004-08-06 07:46:53 matben Exp $
 
 package provide hooks 1.0
 
@@ -17,6 +17,26 @@ proc hooks::add {hook func {seq 50}} {
 
     lappend $hook [list $func $seq]
     set $hook [lsort -integer -index 1 [lsort -unique [set $hook]]]
+}
+
+proc hooks::remove {hook func} {
+    variable $hook
+
+    if {![info exists $hook]} {
+	return ""
+    }
+    set ind -1
+    set found 0
+    foreach spec [set $hook] {
+	incr ind
+	if {[string equal $func [lindex $spec 0]]} {
+	    set found 1
+	    break
+	}
+    }
+    if {$found} {
+	set $hook [lreplace [set $hook] $ind $ind]
+    }
 }
 
 proc hooks::setflag {hook flag} {

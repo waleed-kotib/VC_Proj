@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Plugins.tcl,v 1.9 2004-07-30 12:55:56 matben Exp $
+# $Id: Plugins.tcl,v 1.10 2004-08-06 07:46:55 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -86,6 +86,7 @@ namespace eval ::Plugins:: {
     ::hooks::add prefsUserDefaultsHook  ::Plugins::UserDefaultsHook
     ::hooks::add prefsSaveHook          ::Plugins::SaveHook
     ::hooks::add prefsCancelHook        ::Plugins::CancelHook
+    ::hooks::add initHook               ::Plugins::InitHook
 
     variable inited 0
     variable packages2Platform
@@ -639,6 +640,19 @@ proc ::Plugins::MakeTypeListDialogOption { } {
     
     # Complete -typelist option.
     set typelist(all) [concat $typelist(text) $typelist(binary)]
+}
+
+proc ::Plugins::InitHook { } {
+    
+    ::Plugins::VerifyPackagesForMimeTypes
+    if {[::Plugins::HavePackage QuickTimeTcl]} {
+	::Plugins::QuickTimeTclInitHook
+    }
+}
+
+proc ::Plugins::QuickTimeTclInitHook { } {
+    
+    ::WB::RegisterHandler QUICKTIME ::Import::QuickTimeHandler    
 }
 
 # Plugins::VerifyPackagesForMimeTypes --

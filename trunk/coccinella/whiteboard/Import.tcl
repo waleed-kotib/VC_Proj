@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Import.tcl,v 1.4 2004-07-30 09:33:15 matben Exp $
+# $Id: Import.tcl,v 1.5 2004-08-06 07:46:55 matben Exp $
 
 package require http
 package require httpex
@@ -1806,6 +1806,77 @@ proc ::Import::ExportMovie {wtop winfr} {
     
     set wmov ${winfr}.m
     $wmov export
+}
+
+proc ::Import::SyncPlay {wtop winfr} {
+    
+    set wmov ${winfr}.m
+    set cmd [$wmov cget -mccommand]
+    if {$cmd == {}} {
+	$wmov configure -mccommand ::Import::QuickTimeMCCallback
+    } else {
+	$wmov configure -mccommand {}
+    }
+}
+
+proc ::Import::QuickTimeMCCallback {w msg {par {}}} {
+
+    set wtop [::UI::GetToplevelNS $w]
+    
+    # We need to get the corresponding utag.
+    set wfr [winfo parent $w]
+    set utag [::CanvasUtils::GetUtagFromWindow $wfr]
+    if {$utag == ""} {
+	return
+    }
+    
+    switch -- $msg {
+	play {
+	    set time [$w time]
+	    set str "QUICKTIME: play $utag $time $par"
+	    ::CanvasUtils::GenCommand $wtop $str remote
+	}
+	goToTime {
+	    set str "QUICKTIME: goToTime $utag $par"
+	    ::CanvasUtils::GenCommand $wtop $str remote
+	}
+    }
+}
+
+proc ::Import::QuickTimeHandler {wcan type cmd args} {
+    
+    ::Debug 4 "::Import::QuickTimeHandler cmd=$cmd"
+    
+    set instr [lindex $cmd 1]
+    set utag  [lindex $cmd 2]
+    if {![string equal [$wcan type $utag] "window"]} {
+	return
+    }
+    set w [$wcan itemcget $utag -window]
+    if {![string equal [winfo type $w] "QTFrame"]} {
+	return
+    }
+    if {![winfo exists $w]} {
+	return
+    }
+    
+    switch -- $instr {
+	play {
+	    set time [lindex $cmd 3]
+	    set rate [lindex $cmd 4]
+	    if {$rate == 0.0} {
+		$w time $time
+		$w stop
+	    } else {
+		$w time $time
+		$w play
+	    }
+	}
+	goToTime {
+	    foreach {hiTime loTime timeScale} [lrange $cmd 3 5] {break}
+	    $w time $loTime
+	}
+    }
 }
 
 # Import::ReloadImage --

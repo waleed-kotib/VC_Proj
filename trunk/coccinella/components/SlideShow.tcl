@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-#       $Id: SlideShow.tcl,v 1.3 2004-07-26 12:50:37 matben Exp $
+#       $Id: SlideShow.tcl,v 1.4 2004-08-06 07:46:53 matben Exp $
 
 namespace eval ::SlideShow:: {
     
@@ -28,6 +28,11 @@ proc ::SlideShow::Load { } {
 
     # Define all hooks needed here.
     ::hooks::add prefsInitHook                  ::SlideShow::InitPrefsHook
+    ::hooks::add prefsBuildHook                 ::SlideShow::BuildPrefsHook
+    ::hooks::add prefsSaveHook                  ::SlideShow::SavePrefsHook
+    ::hooks::add prefsCancelHook                ::SlideShow::CancelPrefsHook
+    ::hooks::add prefsUserDefaultsHook          ::SlideShow::UserDefaultsHook
+
     ::hooks::add initHook                       ::SlideShow::InitHook
     ::hooks::add whiteboardBuildButtonTrayHook  ::SlideShow::BuildButtonsHook
     ::hooks::add whiteboardCloseHook            ::SlideShow::CloseWhiteboard
@@ -88,6 +93,7 @@ proc ::SlideShow::Load { } {
 }
 
 proc ::SlideShow::InitHook { } {
+    global  prefs
     variable priv
         
     set mimes {image/gif image/png image/jpeg}
@@ -103,18 +109,70 @@ proc ::SlideShow::InitHook { } {
 	  [::Types::GetSuffixListForMime $mime]]
     }
     
-    ::WB::RegisterShortcutButtons $priv(btdefs)
+    if {$prefs(slideShow,buttons)} {
+	::WB::RegisterShortcutButtons $priv(btdefs)
+    }
 }
 
 proc ::SlideShow::InitPrefsHook { } {
     global  prefs
     
     set prefs(slideShow,dir) ""
-    set prefs(slideShow,buttons) 1
+    set prefs(slideShow,buttons) 0
     
     ::PreferencesUtils::Add [list  \
       [list prefs(slideShow,buttons) prefs_slideShow_buttons $prefs(slideShow,buttons)] \
       [list prefs(slideShow,dir)     prefs_slideShow_dir     $prefs(slideShow,dir)]]
+}
+
+proc ::SlideShow::BuildPrefsHook {wtree nbframe} {
+    global  prefs
+    variable tmpPrefs
+
+    $wtree newitem {Whiteboard {SlideShow}} -text [mc {Slide Show}]
+    set wpage [$nbframe page {SlideShow}]    
+    
+    set lfr $wpage.fr
+    labelframe $lfr -text [mc {Slide Show}]
+    pack $lfr -side top -anchor w -padx 8 -pady 4
+
+    set tmpPrefs(slideShow,buttons) $prefs(slideShow,buttons)
+
+    checkbutton $lfr.ss -text " Show next and previous buttons"  \
+      -variable [namespace current]::tmpPrefs(slideShow,buttons)
+    pack $lfr.ss -side top -anchor w -padx 8 -pady 2
+}
+
+proc ::SlideShow::SavePrefsHook { } {
+    global  prefs
+    variable tmpPrefs
+    variable priv
+    
+    set prefs(slideShow,buttons) $tmpPrefs(slideShow,buttons)
+    
+    if {$prefs(slideShow,buttons)} {
+	::WB::RegisterShortcutButtons $priv(btdefs)
+    } else {
+	::WB::DeregisterShortcutButton previous
+	::WB::DeregisterShortcutButton next
+    }
+}
+
+proc ::SlideShow::CancelPrefsHook { } {
+    global  prefs
+    variable tmpPrefs
+
+    set key slideShow,buttons
+    if {![string equal $prefs($key) $tmpPrefs($key)]} {
+	::Preferences::HasChanged
+    }
+}
+
+proc ::SlideShow::UserDefaultsHook { } {
+    global  prefs
+    variable tmpPrefs
+
+    set tmpPrefs(slideShow,buttons) $prefs(slideShow,buttons)
 }
 
 proc ::SlideShow::BuildButtonsHook {wtray} {

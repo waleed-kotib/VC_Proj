@@ -3,7 +3,7 @@
 #       Creates a card game in a whiteboard canvas. 
 # 
 # 
-# $Id: CardGame.itcl,v 1.6 2004-08-03 14:04:44 matben Exp $
+# $Id: CardGame.itcl,v 1.7 2004-08-06 07:46:54 matben Exp $
 
 namespace eval CardGame {
     
@@ -67,7 +67,8 @@ if {[itcl::find classes CardGame] == ""} {
 	    method DeleteCard {} {}
 	    method StackPopup {x y} {}
 	    method CardPopup {x y} {}
-	    method NewCard {}
+	    method NewCard {x y}
+	    method NewBlankCard {}
 	    method NewCardAutoPlace {}
 	    method ShowMe {}
 	    method ShowAll {}
@@ -75,6 +76,7 @@ if {[itcl::find classes CardGame] == ""} {
 	    method MixStack {}
 	    method GetValue {name}
 	    method InvokeCardStack {args}
+	    method CheckIfEmptyStack {}
 	}
     
 	# ----------------------------
@@ -206,7 +208,7 @@ if {[itcl::find classes CardGame] == ""} {
 	    ::Sounds::Create swash [file join [GetThis soundsPath] swash.wav]
 	    set sound 1
 	}
-	::Jabber::WB::RegisterHandler CARDGAME [code Handler]
+	::WB::RegisterHandler CARDGAME [code Handler]
 	set inited 1
     }
     
@@ -218,10 +220,14 @@ if {[itcl::find classes CardGame] == ""} {
 	    picked {
 
 		# The remote cardstack has picked this card. Remove from stack!
-		foreach {utag card} [lrange $cmd 2 3] {break}
+		set utag [lindex $cmd 2]
+		set card [lindex $cmd 3]
+		
+		# Need to backtrace from utag to actual object.
 		set obj [GetThisFromStackUtag $utag]
 		if {$obj != ""} {
 		    $obj InvokeCardStack DrawCard $card
+		    $obj CheckIfEmptyStack
 		}
 	    }
 	}
@@ -281,6 +287,14 @@ if {[itcl::find classes CardGame] == ""} {
 	    }
 	}
     }
+    
+    body CardGame::CheckIfEmptyStack {} {
+
+	if {[$csObj NumberOfCards] == 0} {
+	    RegisterCanvasInstBinds CardGame $emptyPointStackBinds
+	    ItemConfigure $idstack -image [$csObj Image black]
+	}
+    }
 
     body CardGame::MakeMenus {} {
 	
@@ -309,10 +323,8 @@ if {[itcl::find classes CardGame] == ""} {
 
     body CardGame::PointPress {x y} {
 	
-	NewCard
-	if {[$csObj NumberOfCards] == 0} {
-	    ItemConfigure $idstack -image [$csObj Image black]
-	}
+	# New anonymous card. True card created on button release.
+	NewBlankCard
 	set off 3
 	$tkCanvas move $idcard $off $off
 	set move(x) [$tkCanvas canvasx $x]
@@ -357,10 +369,17 @@ if {[itcl::find classes CardGame] == ""} {
 	$tkCanvas delete $move(idshadow)
 	set x [$tkCanvas canvasx $x]
 	set y [$tkCanvas canvasy $y]
-	if {0 && [expr hypot($x - $move(x0), $y - $move(y0))] < $stickyDistance} {
-	    # We have already taken this card. Put back???
+	if {[expr hypot($x - $move(x0), $y - $move(y0))] < $stickyDistance} {
 	    $tkCanvas delete $idcard
 	} else {
+	    set coo [$tkCanvas coords $idcard]
+	    $tkCanvas delete $idcard
+	    
+	    # Pick a new card.
+	    eval {NewCard} $coo
+	    if {[$csObj NumberOfCards] == 0} {
+		ItemConfigure $idstack -image [$csObj Image black]
+	    }	    
 	    set imhalf [$csObj HalfImage $currentCard]
 	    $tkCanvas itemconfigure $idcard -image $imhalf
 	    set imback [$csObj Image back]
@@ -370,9 +389,7 @@ if {[itcl::find classes CardGame] == ""} {
 	    
 	    # We must tell the remote cardstack to remove this card from stack.
 	    GenCommand "CARDGAME: picked $utagstack $currentCard" remote
-	}
-	if {[$csObj NumberOfCards] == 0} {
-	    RegisterCanvasInstBinds CardGame $emptyPointStackBinds
+	    CheckIfEmptyStack
 	}
 	set played 0
     }
@@ -440,17 +457,23 @@ if {[itcl::find classes CardGame] == ""} {
 	tk_popup $cardMenu [expr int($x) - 10] [expr int($y) - 10]   
     }
     
-    body CardGame::NewCard {} {
+    body CardGame::NewCard {x y} {
 	
 	set card [$csObj PopAndMix]
 	set currentCard $card
 	if {$card != ""} {
-	    foreach {x y} [$tkCanvas coords $idstack] break
 	    set im [$csObj Image back]
 	    set tags [list image playcard object:${this} card:${card} [NewUtag]]
 	    set idcard [$tkCanvas create image $x $y -image $im -anchor nw \
 	      -tags $tags]
 	}
+    }
+    
+    body CardGame::NewBlankCard {} {
+	
+	foreach {x y} [$tkCanvas coords $idstack] break
+	set im [$csObj Image back]
+	set idcard [$tkCanvas create image $x $y -image $im -anchor nw]
     }
 
     body CardGame::NewCardAutoPlace {} {

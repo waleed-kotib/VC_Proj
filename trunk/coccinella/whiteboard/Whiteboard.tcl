@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.11 2004-08-02 14:06:21 matben Exp $
+# $Id: Whiteboard.tcl,v 1.12 2004-08-06 07:46:55 matben Exp $
 
 package require entrycomp
 package require moviecontroller
@@ -1376,13 +1376,19 @@ proc ::WB::SetToolButton {wtop btName} {
 	    $wCan bind std <Control-ButtonRelease-1> {
 		::CanvasDraw::CancelBox %W
 	    }
+	    bind QTFrame <Control-Button-1> {
+		::CanvasUtils::DoQuickTimePopup %W %X %Y 
+	    }
+	    bind QTFrame <Button-2> {
+		::CanvasUtils::DoQuickTimePopup %W %X %Y 
+	    }
 	}
 	default {
 	    $wCan bind std <Button-3> {
 		::CanvasUtils::DoItemPopup %W %X %Y 
 	    }
 	    bind QTFrame <Button-3> {
-		::CanvasUtils::DoWindowPopup %W %X %Y 
+		::CanvasUtils::DoQuickTimePopup %W %X %Y 
 	    }
 	    bind SnackFrame <Button-3> {
 		::CanvasUtils::DoWindowPopup %W %X %Y 
@@ -1422,10 +1428,11 @@ proc ::WB::SetToolButton {wtop btName} {
 			::CanvasUtils::DoItemPopup %W %X %Y 
 		    }
 		    bind QTFrame <Button-1> {
-			::CanvasUtils::StartTimerToWindowPopup %W %X %Y 
+			::CanvasUtils::StartTimerToPopupEx %W %X %Y \
+			  ::CanvasUtils::DoQuickTimePopup
 		    }
 		    bind QTFrame <ButtonRelease-1> {
-			::CanvasUtils::StopTimerToWindowPopup
+			::CanvasUtils::StopTimerToPopupEx
 		    }
 		    bind SnackFrame <Button-1> {
 			::CanvasUtils::StartTimerToWindowPopup %W %X %Y 
@@ -1442,7 +1449,7 @@ proc ::WB::SetToolButton {wtop btName} {
 			::CanvasUtils::DoItemPopup %W %X %Y 
 		    }
 		    bind QTFrame <Button-3> {
-			::CanvasUtils::DoWindowPopup %W %X %Y 
+			::CanvasUtils::DoQuickTimePopup %W %X %Y 
 		    }
 		    bind SnackFrame <Button-3> {
 			::CanvasUtils::DoWindowPopup %W %X %Y 
@@ -1947,7 +1954,23 @@ proc ::WB::BuildShortcutButtonPad {wtop} {
 proc ::WB::RegisterShortcutButtons {btdefs} {
     variable extButtonDefs
 
-    set extButtonDefs [concat $extButtonDefs $btdefs]
+    # Be sure to not have duplicates. Keep order!
+    set names {}
+    foreach spec $extButtonDefs {
+	set name [lindex $spec 0]
+	lappend names $name
+	set tmpArr($name) $spec
+    }
+    foreach spec $btdefs {
+	set name [lindex $spec 0]
+	lappend names $name
+	set tmpArr($name) $spec
+    }
+    set tmpDefs {}
+    foreach name $names {
+	lappend tmpDefs $tmpArr($name)
+    }
+    set extButtonDefs $tmpDefs
 }
 
 proc ::WB::DeregisterShortcutButton {name} {
@@ -2648,6 +2671,29 @@ proc ::WB::SendGenMessageList {wtop cmdList args} {
 proc ::WB::PutFile {wtop fileName opts args} {
     
     eval {::hooks::run whiteboardPutFileHook $wtop $fileName $opts} $args
+}
+
+# ::WB::RegisterHandler --
+# 
+#       Register handlers for additional command in the protocol.
+
+proc ::WB::RegisterHandler {prefix cmd} {
+    variable handler
+
+    set handler($prefix) $cmd
+    ::hooks::run whiteboardRegisterHandlerHook $prefix $cmd
+}
+
+# ::WB::GetRegisteredHandlers --
+# 
+#       Code that wants to get registered handlers must call this to get
+#       the present handlers, and to add the 'whiteboardRegisterHandlerHook'
+#       to get subsequent handlers.
+
+proc ::WB::GetRegisteredHandlers { } {
+    variable handler
+
+    return [array get handler]
 }
 
 #-------------------------------------------------------------------------------

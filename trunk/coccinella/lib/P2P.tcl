@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: P2P.tcl,v 1.12 2004-07-30 12:55:55 matben Exp $
+# $Id: P2P.tcl,v 1.13 2004-08-06 07:46:53 matben Exp $
 
 package provide P2P 1.0
 
@@ -51,6 +51,7 @@ proc ::P2P::Init {} {
     ::hooks::add whiteboardSendGenMessageHook   ::P2P::SendGenMessageListHook
     ::hooks::add whiteboardPutFileHook          ::P2P::PutFileHook
     ::hooks::add whiteboardBuildButtonTrayHook  ::P2P::BuildButtonsHook
+    ::hooks::add postInitHook                   ::P2P::PostInitHook
     ::hooks::add serverGetRequestHook           ::P2P::HandleGetRequest
     ::hooks::add serverPutRequestHook           ::P2P::HandlePutRequest
     ::hooks::add serverCmdHook                  ::P2P::HandleServerCmd
@@ -789,6 +790,27 @@ proc ::P2P::HandlePutRequest {channel fileName opts} {
     ::GetFileIface::GetFile . $channel $fileName $opts
 }
 
+proc ::P2P::PostInitHook { } {
+    
+    ::P2P::GetRegisteredHandlers
+}
+# ::P2P::GetRegisteredHandlers --
+# 
+#       Get protocol handlers, present and future.
+
+proc ::P2P::GetRegisteredHandlers { } {
+    variable handler
+    
+    array set handler [::WB::GetRegisteredHandlers]
+    ::hooks::add whiteboardRegisterHandlerHook  ::P2P::RegisterHandlerHook
+}
+
+proc ::P2P::RegisterHandlerHook {prefix cmd} {
+    variable handler
+    
+    set handler($prefix) $cmd
+}
+
 # ::P2P::HandleServerCmd --
 #
 #       Interpret the command we just read.
@@ -806,6 +828,8 @@ proc ::P2P::HandlePutRequest {channel fileName opts} {
 
 proc ::P2P::HandleServerCmd {channel ip port line args} {
     global  clientRecord prefs this canvasSafeInterp
+
+    variable handler
     
     # regexp patterns. Defined globally to speedup???
     set wrd_ {[^ ]+}
@@ -827,12 +851,12 @@ proc ::P2P::HandleServerCmd {channel ip port line args} {
     ::Debug 2 "ExecuteClientRequest:: line='$line', args='$args'"
 
     array set attrarr $args
-    if {![regexp {^([A-Z ]+): *(.*)$} $line x prefixCmd instr]} {
+    if {![regexp {^([A-Z ]+): *(.*)$} $line x prefix instr]} {
 	return
     }
     
     # Branch into the right command prefix.
-    switch -exact -- $prefixCmd {
+    switch -exact -- $prefix {
 	CANVAS {
 	    if {[string length $instr] > 0} {
 		::CanvasUtils::HandleCanvasDraw . $instr
@@ -969,9 +993,11 @@ proc ::P2P::HandleServerCmd {channel ip port line args} {
 	    }		
 	}
 	default {
-	    
-	    # We couldn't recognize this command as our own.
-	    
+	    if {[info exists handler($prefix)]} {
+		set code [catch {
+		    uplevel #0 $handler($prefix) [list $wServCan p2p $line] $args
+		} ans]
+	    }
 	}
     }
 }

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.99 2004-08-03 14:04:43 matben Exp $
+# $Id: Jabber.tcl,v 1.100 2004-08-06 07:46:53 matben Exp $
 
 package provide Jabber 1.0
 
@@ -524,6 +524,7 @@ proc ::Jabber::Init { } {
     }
     
     # Stuff that need an instance of jabberlib register here.
+    ::Debug 4 "--> jabberInitHook"
     ::hooks::run jabberInitHook $jstate(jlib)
 }
 

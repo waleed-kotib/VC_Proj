@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.24 2004-07-30 12:55:54 matben Exp $
+# $Id: Disco.tcl,v 1.25 2004-08-06 07:46:53 matben Exp $
 
 package provide Disco 1.0
 
@@ -214,7 +214,7 @@ proc ::Jabber::Disco::ItemsCB {disconame type from subiq args} {
 		}
 	    }
 	    ::Jabber::AddErrorLog $from "Failed disco $from"
-	    #::Jabber::Disco::ControlArrows -1
+	    catch {::Jabber::Disco::ControlArrows -1}
 	}
 	ok - result {
 
