@@ -76,6 +76,7 @@
 ::msgcat::mcset sv Password 		{Lösenord}
 ::msgcat::mcset sv Pick 		{Välj}
 ::msgcat::mcset sv Phone                {Telefon}
+::msgcat::mcset sv Play                 {Spela upp}
 ::msgcat::mcset sv Plugins              {Pluginner}
 ::msgcat::mcset sv Preferences          {Inställningar}
 ::msgcat::mcset sv Previous             {Förra}
@@ -103,6 +104,7 @@
 ::msgcat::mcset sv Shortcut             {Genväg}
 ::msgcat::mcset sv Shortcuts            {Genvägar}
 ::msgcat::mcset sv Specifications	{Specifikation}
+::msgcat::mcset sv Sounds               {Ljud}
 ::msgcat::mcset sv Speech               {Tal}
 ::msgcat::mcset sv State                {Län}
 ::msgcat::mcset sv State/Region		{Län/Region}
@@ -364,6 +366,8 @@
 ::msgcat::mcset sv {Network Error}         {Nätverksfel}
 ::msgcat::mcset sv {Network Setup}         {Nätverksinställning}
 ::msgcat::mcset sv {New Account}           {Nytt konto}
+::msgcat::mcset sv {New chat message}      {Nytt chatt meddelande}
+::msgcat::mcset sv {New chat thread}       {Ny chatt tråd}
 ::msgcat::mcset sv {New Color}             {Ny färg}
 ::msgcat::mcset sv {New incoming message}  {Nytt meddelande}
 ::msgcat::mcset sv {New Message}           {Nytt meddelande}
@@ -453,7 +457,7 @@
 ::msgcat::mcset sv {Url of homepage}       {Url till hemsidan}
 ::msgcat::mcset sv {Use SSL for security}  {Använd SSL för säkerhet}
 ::msgcat::mcset sv {User is}		   {Användare är}
-::msgcat::mcset sv {User is offline}       {Användare är borts}
+::msgcat::mcset sv {User is offline}       {Användare är borta}
 ::msgcat::mcset sv {User is online}        {Användare är tillgänglig}
 ::msgcat::mcset sv {User Profiles}         {Användarprofiler}
 ::msgcat::mcset sv {User's status changed} {Användares status ändrad}

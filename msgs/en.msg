@@ -77,6 +77,7 @@
 ::msgcat::mcset en Password
 ::msgcat::mcset en Pick
 ::msgcat::mcset en Phone
+::msgcat::mcset en Play
 ::msgcat::mcset en Plugins
 ::msgcat::mcset en Preferences
 ::msgcat::mcset en Previous
@@ -103,6 +104,7 @@
 ::msgcat::mcset en Set
 ::msgcat::mcset en Shortcut
 ::msgcat::mcset en Shortcuts
+::msgcat::mcset en Sounds
 ::msgcat::mcset en Specifications
 ::msgcat::mcset en Speech
 ::msgcat::mcset en State
@@ -365,6 +367,8 @@
 ::msgcat::mcset en {Network Error}
 ::msgcat::mcset en {Network Setup}
 ::msgcat::mcset en {New Account}
+::msgcat::mcset en {New chat message}
+::msgcat::mcset en {New chat thread}
 ::msgcat::mcset en {New Color}
 ::msgcat::mcset en {New incoming message}
 ::msgcat::mcset en {New Message}

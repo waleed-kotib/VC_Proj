@@ -190,11 +190,11 @@ proc ::Speech::InitPrefsHook { } {
     set sprefs(speakWBText)   0
 
     ::PreferencesUtils::Add [list  \
-      [list ::Speech::sprefs(speakMsg)    sprefs_speakMsg    $sprefs(speakMsg)]  \
-      [list ::Speech::sprefs(speakChat)   sprefs_speakChat   $sprefs(speakChat)] \
-      [list ::Speech::sprefs(speakWBText) sprefs_speakWBText $sprefs(speakWBText)] \
-      [list ::Speech::sprefs(voiceUs)     sprefs_voiceUs     $sprefs(voiceUs)] \
-      [list ::Speech::sprefs(voiceOther)  sprefs_voiceOther  $sprefs(voiceOther)]]
+      [list ::Speech::sprefs(speakMsg)    speakMsg        $sprefs(speakMsg)]    \
+      [list ::Speech::sprefs(speakChat)   speakChat       $sprefs(speakChat)]   \
+      [list ::Speech::sprefs(speakWBText) speakWBText     $sprefs(speakWBText)] \
+      [list ::Speech::sprefs(voiceUs)     speakVoiceUs    $sprefs(voiceUs)]     \
+      [list ::Speech::sprefs(voiceOther)  speakVoiceOther $sprefs(voiceOther)]]
 }
 
 proc ::Speech::BuildPrefsHook {wtree nbframe} {
@@ -251,7 +251,7 @@ proc ::Speech::BuildPrefsPage {page} {
       -variable [namespace current]::tmpPrefs(speakMsg)
     checkbutton $labpsp.speakchat -text "  [::msgcat::mc prefsounsynch]"  \
       -variable [namespace current]::tmpPrefs(speakChat)
-    pack $labpsp.speak -side top -anchor w -padx 10
+    pack $labpsp.speak     -side top -anchor w -padx 10
     pack $labpsp.speakmsg  -side top -anchor w -padx 10
     pack $labpsp.speakchat -side top -anchor w -padx 10
     
@@ -269,6 +269,7 @@ proc ::Speech::BuildPrefsPage {page} {
     pack [frame $labpsp.fr] -side top -anchor w -padx 26 -pady 2
     label $labpsp.fr.in  -text [::msgcat::mc prefsounvoin]
     label $labpsp.fr.out -text [::msgcat::mc prefsounvoou]
+    
     set wpopin $labpsp.fr.popin
     set wpopupmenuin [eval {tk_optionMenu $wpopin   \
       [namespace current]::tmpPrefs(voiceOther)} $voicelist]
