@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.102 2005-02-21 13:17:45 matben Exp $
+# $Id: GroupChat.tcl,v 1.103 2005-02-22 13:58:44 matben Exp $
 
 package require History
 
@@ -1188,11 +1188,10 @@ proc ::GroupChat::PresenceHook {jid presence args} {
     if {!$inroom && $isconf && ($presence == "available")} {
 	
 	# This seems to be a kind of invitation for a groupchat.
-	set ans [::UI::MessageBox -icon info -type yesno \
-	  -message "You have been invited to the groupchat room\
-	  ${node}@${service}. Do you want to join?"]
+	set str [mc jamessgcinvite ${node}@${service} $argsArr(-from)]
+	set ans [::UI::MessageBox -icon info -type yesno -message $str]
 	if {$ans == "yes"} {
-	    jlib::splitjidex $jstate(mejid) nd hst rs
+	    jlib::splitjidex $argsArr(-to) nd hst rs
 	    EnterOrCreate enter -roomjid $jid2 -nickname $nd -protocol gc-1.0
 	}
     } 

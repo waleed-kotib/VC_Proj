@@ -706,6 +706,8 @@ bei der entsprechenden Transportkomponente registriert haben. Wollen Sie das jet
 ::msgcat::mcset de jamessstarttls-nofeature     {Der Server "%s" bietet keine Unterstützung für TLS.}
 ::msgcat::mcset de jamessstarttls-failure        {TLS-Aushandlung mit Server "%s" fehlerhaft.}
 
+# translate!!!!
+::msgcat::mcset de jamessgcinvite               {You have been invited to the groupchat room %s by %s. Do you want to join?}
 
 
 

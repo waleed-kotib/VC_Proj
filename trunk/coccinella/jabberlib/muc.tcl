@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: muc.tcl,v 1.20 2005-02-09 14:30:33 matben Exp $
+# $Id: muc.tcl,v 1.21 2005-02-22 13:58:47 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -272,6 +272,9 @@ proc jlib::muc::invite {mucname roomjid jid args} {
     set children {}
     foreach {name value} $args {
 	switch -- $name {
+	    -command {
+		lappend opts $name $value
+	    }
 	    -reason {
 		lappend children [wrapper::createtag  \
 		  [string trimleft $name "-"] -chdata $value]
@@ -281,13 +284,12 @@ proc jlib::muc::invite {mucname roomjid jid args} {
 	    }
 	}
     }    
-    set invite [list \
-      [wrapper::createtag "invite" -attrlist [list to $jid] -subtags $children]]
+    set invite [list [wrapper::createtag "invite"  \
+      -attrlist [list to $jid] -subtags $children]]
     
     set xelem [wrapper::createtag "x" -subtags $invite  \
       -attrlist {xmlns "http://jabber.org/protocol/muc#user"}]
-    $jlibname send_message $roomjid  \
-      -xlist [list $xelem]
+    eval {$jlibname send_message $roomjid -xlist [list $xelem]} $opts
 }
 
 # jlib::muc::setrole --

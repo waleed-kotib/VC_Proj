@@ -705,8 +705,10 @@
 ::msgcat::mcset nl jamesstrptsubsc              {Uw geregistreerde account op de dienst %s zal in uw roster geplaatst worden om te dienen als transport voor die dienst.}
 ::msgcat::mcset nl jamessfailedsubsc            {Inschrijving op %s mislukte omdat de gebruiker weigerde.}
 ::msgcat::mcset nl jamessstarttls-nofeature     {Server "%s" heeft geen ondersteuning voor TLS.}
-::msgcat::mcset nl jamessstarttls-failure        {Het tot stand brengen van een verbinding via TLS met server "%s" is mislukt.}
+::msgcat::mcset nl jamessstarttls-failure       {Het tot stand brengen van een verbinding via TLS met server "%s" is mislukt.}
 
+# translate!!!!
+::msgcat::mcset nl jamessgcinvite               {You have been invited to the groupchat room %s by %s. Do you want to join?}
 
 
 ::msgcat::mcset nl openquicktime		{QuickTime live stream openen}

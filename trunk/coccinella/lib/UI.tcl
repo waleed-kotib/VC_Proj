@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.87 2005-02-21 07:59:08 matben Exp $
+# $Id: UI.tcl,v 1.88 2005-02-22 13:58:48 matben Exp $
 
 package require entrycomp
 package require alertbox
@@ -1111,7 +1111,6 @@ proc ::UI::Public::RegisterMenuEntry {mtail menuSpec} {
     # Add these entries in a section above the bottom section.
     # Add separator to section component entries.
     
-    #puts "....................RegisterMenuEntry mtail=$mtail, menuSpec=$menuSpec"
     if {![info exists mainMenuSpec($mtail)]} {
 
 	# Add separator if this is the first addon entry.

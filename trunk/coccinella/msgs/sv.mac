@@ -695,6 +695,7 @@ Det Šr nšdvŠndigt att den finns i din roster. Du har prenumeration fšr %s: %s.}
 ::msgcat::mcset sv jamessfailedsubsc            {Misslyckades med prenumerationen till %s. AnvŠndaren nekade.}
 ::msgcat::mcset sv jamessstarttls-nofeature     {Servern "%s" saknar stšd fšr TLS.}
 ::msgcat::mcset sv jamessstarttls-failure        {TLS fšrhandling med servern "%s" misslyckades.}
+::msgcat::mcset sv jamessgcinvite               {Du har blivit inbjuden till en gruppchatt %s av %s. Vill du delta?}
 
 
 
