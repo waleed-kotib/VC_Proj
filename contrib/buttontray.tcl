@@ -6,7 +6,7 @@
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: buttontray.tcl,v 1.15 2004-11-16 15:10:27 matben Exp $
+# $Id: buttontray.tcl,v 1.16 2004-11-19 13:10:14 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -35,15 +35,12 @@
 #
 #       1.0     Original version
 
-package require msgcat
-
 package provide buttontray 1.0
 
 namespace eval ::buttontray::  {
     
     namespace export buttontray
     
-    variable uid 0
 }
 
 # ::buttontray::Init --
@@ -65,6 +62,7 @@ proc ::buttontray::Init { } {
     variable widgetOptions
     variable frameOptions
     variable trayOptions
+    variable labelOptions
     
     # We use a variable 'this(platform)' that is more convenient for MacOS X.
     switch -- $tcl_platform(platform) {
@@ -93,17 +91,20 @@ proc ::buttontray::Init { } {
 	-foreground          {foreground           Foreground          }  \
 	-height              {height               Height              }  \
 	-image               {image                Image               }  \
+	-labelbackground     {labelBackground      Background          }  \
 	-labelpadx           {labelPadX            LabelPadX           }  \
 	-labelpady           {labelPadY            LabelPadY           }  \
+	-packpadx            {packPadX             PackPadX            }  \
+	-packpady            {packPadY             PackPadY            }  \
 	-padx                {padX                 PadX                }  \
 	-pady                {padY                 PadY                }  \
 	-relief              {relief               Relief              }  \
 	-style               {style                Style               }  \
     }
     set frameOptions {-background -borderwidth -padx -pady -relief}
-    foreach name [array names widgetOptions] {
-	lappend trayOptions $name
-    }
+    set labelOptions {-compound -disabledforeground -font -foreground \
+      -labelbackground -labelpadx -labelpady}
+    set trayOptions [array names widgetOptions]
   
     # The legal widget commands.
     set widgetCommands {buttonconfigure cget configure minwidth newbutton}
@@ -117,8 +118,11 @@ proc ::buttontray::Init { } {
     option add *ButtonTray.foreground         black             widgetDefault
     option add *ButtonTray.height             0                 widgetDefault
     option add *ButtonTray.image              ""                widgetDefault
-    option add *ButtonTray.labelPadX          1                 widgetDefault
-    option add *ButtonTray.labelPadY          1                 widgetDefault
+    option add *ButtonTray.labelBackground    white             widgetDefault
+    option add *ButtonTray.labelPadX          2                 widgetDefault
+    option add *ButtonTray.labelPadY          2                 widgetDefault
+    option add *ButtonTray.packPadX           2                 widgetDefault
+    option add *ButtonTray.packPadY           2                 widgetDefault
     option add *ButtonTray.padX               6                 widgetDefault
     option add *ButtonTray.padY               4                 widgetDefault
     option add *ButtonTray.relief             flat              widgetDefault
@@ -185,11 +189,10 @@ proc ::buttontray::buttontray {w args} {
 
     # We use a frame for this specific widget class.
     set widgets(this)   [frame $w -class ButtonTray]
-    set widgets(canvas) [canvas $w.c -highlightthickness 0]
     set widgets(frame) ::buttontray::${w}::${w}
-    pack $widgets(canvas) -fill both -expand 1
 
     # Parse options for the widget. First get widget defaults.
+    # foreach name [concat $trayOptions $frameOptions]
     foreach name $trayOptions {
 	set optName  [lindex $widgetOptions($name) 0]
 	set optClass [lindex $widgetOptions($name) 1]
@@ -208,10 +211,11 @@ proc ::buttontray::buttontray {w args} {
     if {[llength $frameOpts]} {
 	eval {$widgets(this) configure} $frameOpts
     }
-    $widgets(canvas) configure -bg $options(-background)
-    
-#    $widgets(this) configure -bg red
-    
+    if {[string equal $options(-style) "fancy"]} {
+	set widgets(canvas) [canvas $w.c -highlightthickness 0]
+	pack $widgets(canvas) -fill both -expand 1
+	$widgets(canvas) configure -bg $options(-background)
+    }
     SetGeometries $w
         
     # Necessary to remove the original frame procedure from the global
@@ -384,7 +388,7 @@ proc ::buttontray::SetGeometries {w} {
 		incr height [expr {2 * $options(-labelpady)}]
 		incr height 2
 	    }
-	    $widgets(canvas) configure -height $height
+	    #$widgets(canvas) configure -height $height
 	    set locals(minbtwidth) 46
 	    set locals(xleft) 2
 	}
@@ -407,7 +411,6 @@ proc ::buttontray::NewButton {w args} {
 
 proc ::buttontray::NewFancyButton {w name args} {
 
-    variable uid
     upvar ::buttontray::${w}::options options
     upvar ::buttontray::${w}::widgets widgets
     upvar ::buttontray::${w}::locals locals
@@ -434,7 +437,7 @@ proc ::buttontray::NewFancyButton {w name args} {
 
     # Mid position of this button.
     set xpos [expr $locals(xleft) + $btwidth/2]
-    set wlab [label $can.[incr uid] -bd 1 -relief flat -image $image]
+    set wlab [label $can.$name -bd 1 -relief flat -image $image]
     set idlab [$can create window $xpos 0 -anchor n -window $wlab]
     set idtxt [$can create text $xpos $locals(ytxt) -text $str  \
       -font $font -anchor n -fill $fg]
@@ -595,58 +598,48 @@ proc ::buttontray::FancyButtonConfigure {w name args} {
 
 proc ::buttontray::NewButtonPlain {w name args} {
     
-    variable uid
     upvar ::buttontray::${w}::options options
     upvar ::buttontray::${w}::widgets widgets
     upvar ::buttontray::${w}::locals locals
-    
-    set font     $options(-font)
-    set fg       $options(-foreground)
-    set bg       $options(-background)
-    set padx     $options(-labelpadx)
-    set pady     $options(-labelpady)    
-    set compound $options(-compound)
-    set image    $options(-image)
-    
-    set can $widgets(canvas)
-    set locals($name,-text)    $name
+        
+    set locals($name,-text)    ""
     set locals($name,-image)   ""
     set locals($name,-command) ""
     set locals($name,-state)   normal
     foreach {key value} $args {
 	set locals($name,$key) $value
     }
-
-    set wlab [label $can.[incr uid] -text $locals($name,-text) -bd 1 \
-      -relief flat -fg $fg -bg $bg -padx $padx -pady $pady \
-      -compound $compound -image $image]
+    set wlab [label $w.$name -text $locals($name,-text) -bd 1 -relief flat]
     set locals($name,wlab) $wlab
-
-    set btwidth [winfo reqwidth $wlab]
-    set btwidth [expr $btwidth > $locals(minbtwidth) ? $btwidth : $locals(minbtwidth)]
     
-    # Round to nearest higher even value.    
-    set btwidth [expr $btwidth + $btwidth % 2]
-
-    # Mid position of this button.
-    set xpos [expr $locals(xleft) + $btwidth/2]
-    set idlab [$can create window $xpos 0 -anchor n -window $wlab]
-
-    
-    SetPlainButtonBinds $w $name    
-    if {[llength $args]} {
-	eval {PlainButtonConfigure $w $name} $args
+    # Two optional frames for custom packing and padding. Only db.
+    set frame1 [option get $wlab frame1 {}]
+    set frame2 [option get $wlab frame2 {}]
+    if {$frame1 == "1"} {
+	set wfr1 $w.${name}frame1
+	frame $wfr1
+	pack $wfr1 -side left -fill y
+	if {$frame2 == "1"} {
+	    set wfr2 $w.${name}frame2
+	    frame $wfr2
+	    pack $wfr2 -side left -fill y -in $wfr1
+	    pack $wlab -side left -in $wfr2
+	} else {
+	    pack $wlab -side left -in $wfr1
+	}
+	raise $wlab
+    } else {
+	pack $wlab -side left -padx $options(-packpadx) -pady $options(-packpady)
     }
-    incr locals(xleft) $btwidth
+    SetPlainButtonBinds $w $name    
+    eval {PlainButtonConfigure $w $name} $args
 }
 
 proc ::buttontray::SetPlainButtonBinds {w name} {
     
     upvar ::buttontray::${w}::options options
-    upvar ::buttontray::${w}::widgets widgets
     upvar ::buttontray::${w}::locals locals
     
-    set can   $widgets(canvas)
     set wlab  $locals($name,wlab)
     set cmd   $locals($name,-command)
     
@@ -656,20 +649,38 @@ proc ::buttontray::SetPlainButtonBinds {w name} {
     bind $wlab <Leave> [list ::buttontray::LeavePlain $w $name]
     bind $wlab <Button-1> [list $wlab configure -relief sunken]
     bind $wlab <ButtonRelease> "[list $wlab configure -relief flat];\
-      $can configure -cursor arrow; $cmd"
+      $wlab configure -cursor arrow; $cmd"
 }
 
 proc ::buttontray::PlainButtonConfigure {w name args} {
     
+    variable labelOptions
     upvar ::buttontray::${w}::options options
-    upvar ::buttontray::${w}::widgets widgets
     upvar ::buttontray::${w}::locals locals
     
     if {![info exists locals($name,wlab)]} {
 	return -code error "button \"$name\" does not exist in $w"
     }
     set wlab  $locals($name,wlab)
-    set can   $widgets(canvas)
+    array set argsArr $args
+    
+    # Priorities:
+    #   1 'newbutton' arguments 
+    #   2 buttonLabel options from database
+    #   3 buttontray options
+
+    foreach optName $labelOptions {
+	set realName [string map {label ""} $optName]
+	set opts($realName) $options($optName)
+	set dbName "button[string totitle [string trimleft $realName -] 0 0]"
+	set value [option get $wlab $dbName {}]
+	if {[info exists argsArr($realName)]} {
+	    set opts($realName) $argsArr($realName)
+	} elseif {$value != ""} {
+	    set opts($realName) $value
+	}
+    }
+    eval {$wlab configure} [array get opts]
     
     foreach {key value} $args {
 	
@@ -692,10 +703,16 @@ proc ::buttontray::PlainButtonConfigure {w name args} {
 	    }
 	    -image {
 		set locals($name,-image) $value
+		if {[string equal $locals($name,-state) "normal"]} {
+		    #$wlab configure -image $value
+		}
 	    }
 	    -disabledimage {
 		set locals($name,-disabledimage) $value
-	    }	    
+		if {[string equal $locals($name,-state) "disabled"]} {
+		    #$wlab configure -image $value
+		}
+	    }
 	}
     }
 }
@@ -716,6 +733,19 @@ proc ::buttontray::LeavePlain {w name} {
     $wlab configure -relief flat
 }
 
+proc ::buttontray::OptsEqual {optName val1 val2} {
+    
+    if {[regexp {.*(background|color|foreground).*} $optName]} {
+	if {[string equal [winfo rgb . $val1] [winfo rgb . $val2]]} {
+	    return 1
+	} else {
+	    return 0
+	}
+    } else {
+	return [string equal $val1 $val2]
+    }
+}
+
 # buttontray::MinWidth --
 #
 #       Returns the width of all buttons created in the shortcut button pad.
@@ -723,8 +753,18 @@ proc ::buttontray::LeavePlain {w name} {
 proc ::buttontray::MinWidth {w} {
     
     upvar ::buttontray::${w}::locals locals
+    upvar ::buttontray::${w}::options options
     
-    return $locals(xleft)
+    switch -- $options(-style) {
+	fancy {
+	    set width $locals(xleft)
+	}
+	plain {
+	    set width [winfo reqwidth $w]
+	    set width 100
+	}
+    }
+    return $width
 }
 
 # buttontray::DestroyHandler --

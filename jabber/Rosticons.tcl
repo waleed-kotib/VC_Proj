@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Rosticons.tcl,v 1.3 2004-11-15 08:51:13 matben Exp $
+# $Id: Rosticons.tcl,v 1.4 2004-11-19 13:10:14 matben Exp $
 
 package provide Rosticons 1.0
 
@@ -27,13 +27,14 @@ proc ::Rosticons::InitPrefsHook { } {
     variable priv
     upvar ::Jabber::jprefs jprefs
 
-    set jprefs(rosticonSet) "default"
+    set jprefs(rost,iconSet) "default"
+    set jprefs(rost,iconWbFallback) 1
     
     # Do NOT store the complete path!
     ::PreferencesUtils::Add [list  \
-      [list ::Jabber::jprefs(rosticonSet) jprefs_rosticonSet $jprefs(rosticonSet)]]
+      [list ::Jabber::jprefs(rost,iconSet) jprefs_rost_iconSet $jprefs(rost,iconSet)]]
 
-    set jprefs(rosticonSet) "default"
+    set jprefs(rost,iconSet) "default"
 }
 
 proc ::Rosticons::Init { } {
@@ -84,9 +85,9 @@ proc ::Rosticons::Init { } {
     SetFromTmp default
 
     # Any other set.
-    if {![string equal $jprefs(rosticonSet) $priv(defaultSet)]} {
-	if {[lsearch -exact $allSets $jprefs(rosticonSet)] >= 0} {
-	    set name $jprefs(rosticonSet)  
+    if {![string equal $jprefs(rost,iconSet) $priv(defaultSet)]} {
+	if {[lsearch -exact $allSets $jprefs(rost,iconSet)] >= 0} {
+	    set name $jprefs(rost,iconSet)  
 	    LoadTmpIconSet $state($name,path)
 	    SetFromTmp $name
 	}
@@ -126,6 +127,9 @@ proc ::Rosticons::Get {statuskey} {
     
     # Do we want foreign IM icons?
     if {!$jprefs(rost,haveIMsysIcons)} {
+	
+	# $jprefs(rost,iconWbFallback)
+	
 	if {![string equal $type "status"] && \
 	  ![string equal $type "whiteboard"]} {
 	    set type "status"
@@ -208,7 +212,7 @@ proc ::Rosticons::GetPrefSetPathExists { } {
     set path [file join $this(rosticonsPath) $priv(defaultSet)]
     
     foreach dir [list $this(rosticonsPath) $this(altRosticonsPath)] {
-	set f [file join $dir $jprefs(rosticonSet)]
+	set f [file join $dir $jprefs(rost,iconSet)]
 	set fjisp ${f}.jisp
 	if {[file exists $f]} {
 	    set path $f
@@ -218,7 +222,7 @@ proc ::Rosticons::GetPrefSetPathExists { } {
 	    break
 	}
     }
-    set jprefs(rosticonSet) [file rootname [file tail $path]]
+    set jprefs(rost,iconSet) [file rootname [file tail $path]]
     return $path
 }
     
