@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.30 2004-03-28 14:50:51 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.31 2004-04-23 07:13:23 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -280,12 +280,13 @@ proc ::PreferencesUtils::ResetToUserDefaults { } {
 # Note: it may prove useful to have the versions numbers as the first elements!
 
 proc ::PreferencesUtils::SetUserPreferences { } {
-    global  prefs state
+    global  prefs
+    
+    ::Debug 2 "::PreferencesUtils::SetUserPreferences"
     
     ::PreferencesUtils::Add [list  \
       [list prefs(majorVers)       prefs_majorVers       $prefs(majorVers)       absolute] \
       [list prefs(minorVers)       prefs_minorVers       $prefs(minorVers)       absolute] \
-      [list prefs(45)              prefs_45              $prefs(45)]             \
       [list prefs(protocol)        prefs_protocol        $prefs(protocol)]       \
       [list prefs(autoConnect)     prefs_autoConnect     $prefs(autoConnect)]    \
       [list prefs(multiConnect)    prefs_multiConnect    $prefs(multiConnect)]   \
@@ -293,7 +294,6 @@ proc ::PreferencesUtils::SetUserPreferences { } {
       [list prefs(remotePort)      prefs_remotePort      $prefs(remotePort)]     \
       [list prefs(setNATip)        prefs_setNATip        $prefs(setNATip)]       \
       [list prefs(NATip)           prefs_NATip           $prefs(NATip)]          \
-      [list prefs(shortsMulticastQT) prefs_shortsMulticastQT $prefs(shortsMulticastQT) userDefault] \
       [list prefs(postscriptOpts)  prefs_postscriptOpts  $prefs(postscriptOpts)] \
       [list prefs(firstLaunch)     prefs_firstLaunch     $prefs(firstLaunch)     userDefault] \
       [list prefs(unixPrintCmd)    prefs_unixPrintCmd    $prefs(unixPrintCmd)]   \
@@ -302,21 +302,7 @@ proc ::PreferencesUtils::SetUserPreferences { } {
       [list prefs(winGeom)         prefs_winGeom         $prefs(winGeom)]        \
       [list prefs(paneGeom)        prefs_paneGeom        $prefs(paneGeom)]       \
       [list prefs(lastAutoUpdateVersion) prefs_lastAutoUpdateVersion $prefs(lastAutoUpdateVersion)] \
-      [list state(btState)         state_btState         $state(btState)]        \
-      [list state(bgColCan)        state_bgColCan        $state(bgColCan)]       \
-      [list state(fgCol)           state_fgCol           $state(fgCol)]          \
-      [list state(penThick)        state_penThick        $state(penThick)]       \
-      [list state(brushThick)      state_brushThick      $state(brushThick)]     \
-      [list state(fill)            state_fill            $state(fill)]           \
-      [list state(arcstyle)        state_arcstyle        $state(arcstyle)]       \
-      [list state(fontSize)        state_fontSize        $state(fontSize)]       \
-      [list state(font)            state_font            $state(font)]           \
-      [list state(fontWeight)      state_fontWeight      $state(fontWeight)]     \
-      [list state(smooth)          state_smooth          $state(smooth)]         \
-      [list state(dash)            state_dash            $state(dash)]           \
-      [list state(canGridOn)       state_canGridOn       $state(canGridOn)]      \
-      [list state(visToolbar)      state_visToolbar      $state(visToolbar)]  ]
-    
+      ]    
             
     # Map list of win geoms into an array.
     foreach {win geom} $prefs(winGeom) {

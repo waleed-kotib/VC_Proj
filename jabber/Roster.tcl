@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.54 2004-04-22 13:48:43 matben Exp $
+# $Id: Roster.tcl,v 1.55 2004-04-23 07:13:20 matben Exp $
 
 package provide Roster 1.0
 
@@ -942,21 +942,10 @@ proc ::Jabber::Roster::SetCoccinella {jid} {
 		# ???
 		set icon $presenceIcon(available,wb)
 	    }
-	}	
-	array set rostArr [$jstate(roster) getrosteritem $jid2]
-	puts "------>[$wtree find withtag $jid]"
-	
-	if {[info exists rostArr(-groups)] &&  \
-	  [string length $rostArr(-groups)]} {
-	    set groups $rostArr(-groups)
-	    foreach grp $groups {
-		$wtree itemconfigure [list Online $grp $jid] -image $icon
-	    }
-	} else {
-	    
-	    # No groups associated with this item.
-	    $wtree itemconfigure [list Online $jid] -image $icon
-	}	    
+	}
+	foreach v [$wtree find withtag $jid] {
+	    $wtree itemconfigure $v -image $icon
+	}
     }
 }
 

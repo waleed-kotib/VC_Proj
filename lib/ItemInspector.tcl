@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ItemInspector.tcl,v 1.22 2004-03-24 14:43:11 matben Exp $
+# $Id: ItemInspector.tcl,v 1.23 2004-04-23 07:13:22 matben Exp $
 
 namespace eval ::ItemInspector::  {
     
@@ -121,8 +121,8 @@ proc ::ItemInspector::ItemInspector {wtop which args} {
 #       Builds one inspector window for the specified item.
 
 proc ::ItemInspector::Build {wtop itemId args} {
-    global  prefs fontPoints2Size  \
-      dashShort2Full this
+    global  prefs fontPoints2Size this
+    upvar ::WB::dashShort2Full dashShort2Full
     
     Debug 2 "::ItemInspector::Build wtop=$wtop, itemId=$itemId"
     set w .itinsp${itemId}
@@ -403,10 +403,10 @@ proc ::ItemInspector::Cancel {w} {
 #       dialog displayed.
 
 proc ::ItemInspector::CanvasConfigureItem {w wCan itemId listOfAllOptions} {
-    global  fontPoints2Size fontSize2Points   \
-      dashFull2Short
+    global  fontPoints2Size fontSize2Points
     
     variable disabledBackground
+    upvar ::WB::dashFull2Short dashFull2Short
     upvar ::ItemInspector::${w}::menuBtVar menuBtVar
     upvar ::ItemInspector::${w}::finished finished
     

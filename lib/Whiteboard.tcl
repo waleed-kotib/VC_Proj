@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.29 2004-04-16 13:59:29 matben Exp $
+# $Id: Whiteboard.tcl,v 1.30 2004-04-23 07:13:25 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -35,6 +35,7 @@ namespace eval ::WB:: {
     ::hooks::add loginHook           ::WB::LoginHook
     ::hooks::add logoutHook          ::WB::LogoutHook
     ::hooks::add initHook            ::WB::InitHook
+    ::hooks::add prefsInitHook       ::WB::InitPrefsHook
 
     # Tool button mappings.
     variable btNo2Name 
@@ -124,6 +125,137 @@ namespace eval ::WB:: {
     variable iconsInitted 0
 }
 
+# WB::InitPrefsHook --
+# 
+#       There is a global 'state' array which contains a generic state
+#       that is inherited by instance specific 'state' array '::WB::${wtop}::state'
+
+proc ::WB::InitPrefsHook { } {
+    global  state prefs this
+    
+    ::Debug 2 "::WB::InitPrefsHook"
+    
+    # The tool buttons.
+    set state(btState) 00
+    set state(btStateOld) 00
+
+    # Is the toolbar visible?
+    set state(visToolbar) 1
+    
+    # Bg color for canvas.
+    set state(bgColCan) #dedede
+    
+    # fg and bg colors set in color selector; bgCol always white.
+    set state(fgCol) black
+    set state(bgCol) white
+    
+    # Grid on or off.
+    set state(canGridOn) 0                  
+    
+    # Line thickness.
+    set state(penThick) 1	
+    
+    # Brush thickness.
+    set state(brushThick) 8	
+    
+    # Fill color for circles, polygons etc.
+    set state(fill) 0
+    
+    # If polygons should be smoothed.
+    set state(smooth) 0
+    
+    # Arc styles.
+    set state(arcstyle) "arc"
+    
+    # Dash style.
+    set state(dash) { }
+    
+    # Font prefs set in menus. Sizes according to html.
+    set state(fontSize) 2
+    set state(font) Helvetica
+    set state(fontWeight) normal
+    
+    # Prefs:
+    # Side of selecting box .
+    set prefs(aBBox) 2
+
+    # Should text inserts be batched?
+    set prefs(batchText) 1
+
+    # Delay time in ms for batched text.
+    set prefs(batchTextms) 2000
+
+    # Want to fit all movies within canvas?
+    set prefs(autoFitMovies) 1
+
+    set prefs(canScrollWidth) 1800
+    set prefs(canScrollHeight) 1200
+
+    # Html sizes or point sizes when transferring text items?
+    set prefs(useHtmlSizes) 1
+
+    # Offset when duplicating canvas items and when opening images and movies.
+    # Needed in ::CanvasUtils::NewImportAnchor
+    set prefs(offsetCopy) 16
+
+    # Grid spacing.
+    set prefs(gridDist) 40                 
+    
+    # Mark bounding box (1) or each coords (0).
+    set prefs(bboxOrCoords) 0
+    
+    # Scale factor used when scaling canvas items.
+    set prefs(scaleFactor) 1.2
+    set prefs(invScaleFac) [expr 1.0/$prefs(scaleFactor)]
+
+    # Use common CG when scaling more than one item?
+    set prefs(scaleCommonCG) 0
+    
+    # Constrain movements to 45 degrees, else 90 degree intervals.
+    set prefs(45) 1
+
+    # Fraction of points to strip when straighten.
+    set prefs(straightenFrac) 0.3
+    
+    #----   url's for streaming live movies ----------------------------------------
+    set prefs(shortsMulticastQT) {{   \
+      {user specified}   \
+      {Bloomberg}          \
+      {Hard Radio}       \
+      {NPR}  \
+      {BBC World TV} } {  \
+      {}  \
+      www.apple.com/quicktime/showcase/radio/bloomberg/bloombergradio.mov  \
+      www.apple.com/quicktime/showcase/radio/hardradio/hardradio.mov  \
+      www.apple.com/quicktime/showcase/radio/npr/npr.mov  \
+      www.apple.com/quicktime/favorites/bbc_world1/bbc_world1.mov}}
+    
+    # Are there a working canvas dash option?
+    set prefs(haveDash) 0
+    if {![string match "mac*" $this(platform)]} {
+	set prefs(haveDash) 1
+    }
+
+    # States and prefs to be stored in prefs file.
+    ::PreferencesUtils::Add [list  \
+      [list prefs(45)              prefs_45              $prefs(45)]             \
+      [list prefs(shortsMulticastQT) prefs_shortsMulticastQT $prefs(shortsMulticastQT) userDefault] \
+      [list state(btState)         state_btState         $state(btState)]        \
+      [list state(bgColCan)        state_bgColCan        $state(bgColCan)]       \
+      [list state(fgCol)           state_fgCol           $state(fgCol)]          \
+      [list state(penThick)        state_penThick        $state(penThick)]       \
+      [list state(brushThick)      state_brushThick      $state(brushThick)]     \
+      [list state(fill)            state_fill            $state(fill)]           \
+      [list state(arcstyle)        state_arcstyle        $state(arcstyle)]       \
+      [list state(fontSize)        state_fontSize        $state(fontSize)]       \
+      [list state(font)            state_font            $state(font)]           \
+      [list state(fontWeight)      state_fontWeight      $state(fontWeight)]     \
+      [list state(smooth)          state_smooth          $state(smooth)]         \
+      [list state(dash)            state_dash            $state(dash)]           \
+      [list state(canGridOn)       state_canGridOn       $state(canGridOn)]      \
+      [list state(visToolbar)      state_visToolbar      $state(visToolbar)]  ]    
+}
+
 proc ::WB::InitHook { } {
     
     ::WB::Init
@@ -139,7 +271,21 @@ proc ::WB::Init {} {
     variable wbicons
     
     ::Debug 2 "::WB::Init"
-    
+        
+    # Dashed options. Used both for the Preference menu and ItemInspector.
+    # Need to be careful not to use empty string for menu value in -variable
+    # because this gives the 'value' value.
+    variable dashFull2Short
+    variable dashShort2Full
+
+    array set dashFull2Short {
+	none " " dotted . dash-dotted -. dashed -
+    }
+    array set dashShort2Full {
+	" " none . dotted -. dash-dotted - dashed
+    }
+    set dashShort2Full() none    
+
     # Init canvas utils.
     ::CanvasUtils::Init
     
@@ -173,17 +319,6 @@ proc ::WB::Init {} {
     
     # Defines canvas binding tags suitable for each tool.
     ::CanvasUtils::DefineWhiteboardBindtags
-    
-    variable dashFull2Short
-    variable dashShort2Full
-    array set dashFull2Short {
-	none " " dotted . dash-dotted -. dashed -
-    }
-    array set dashShort2Full {
-	" " none . dotted -. dash-dotted - dashed
-    }
-    set dashShort2Full() none
-    
 }
 
 # WB::InitIcons --
