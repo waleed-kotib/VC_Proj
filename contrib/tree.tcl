@@ -25,7 +25,7 @@
 # 
 # Copyright (C) 2002-2004 Mats Bengtsson
 # 
-# $Id: tree.tcl,v 1.24 2004-04-16 13:59:29 matben Exp $
+# $Id: tree.tcl,v 1.25 2004-05-23 13:18:08 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -40,6 +40,7 @@
 #	-backgroundimage, backgroundImage, BackgroundImage
 #	-buttonpresscommand, buttonPressCommand, ButtonPressCommand  tclProc?
 #	-buttonpressmillisec, buttonPressMillisec, ButtonPressMillisec
+#	-closecommand, closeCommand, CloseCommand
 #       -closeimage, closeImage, CloseImage
 #	-doubleclickcommand, doubleClickCommand, DoubleClickCommand  tclProc?
 #	-eventlist, eventList, EventList                      {{event tclProc} ..}
@@ -253,6 +254,7 @@ proc ::tree::Init { } {
 	-backgroundimage     {backgroundImage      BackgroundImage     }
 	-buttonpresscommand  {buttonPressCommand   ButtonPressCommand  }
 	-buttonpressmillisec {buttonPressMillisec  ButtonPressMillisec }
+	-closecommand        {closeCommand         CloseCommand        }
 	-closeimage          {closeImage           CloseImage          }
 	-doubleclickcommand  {doubleClickCommand   DoubleClickCommand  }
 	-eventlist           {eventList            EventList           }
@@ -301,6 +303,7 @@ proc ::tree::Init { } {
     option add *Tree.backgroundImage       {}              widgetDefault
     option add *Tree.buttonPressCommand    {}              widgetDefault
     option add *Tree.buttonPressMillisec   1000            widgetDefault
+    option add *Tree.closeCommand          {}              widgetDefault
     option add *Tree.closeImage            ""              widgetDefault
     option add *Tree.eventList             {}              widgetDefault
     option add *Tree.highlightBackground   white           widgetDefault
@@ -585,6 +588,9 @@ proc ::tree::ButtonClickCmd {w x y} {
 	    set uid $v2uid($v)
 	    if {[lsearch $thetags topen] >= 0} {
 		set treestate($uid:open) 0
+		if {[llength $options(-closecommand)]} {
+		    uplevel #0 $options(-closecommand) [list $w $v]
+		}
 	    } else {
 		set treestate($uid:open) 1
 	
@@ -1161,7 +1167,7 @@ proc ::tree::NewItem {w v args} {
     upvar ::tree::${w}::uid2v uid2v
     
     set v [NormList $v]   
-    set dir [lrange $v 0 end-1]
+    set dir  [lrange $v 0 end-1]
     set tail [lindex $v end]
         
     if {![info exists v2uid($dir)]} {
@@ -1190,7 +1196,7 @@ proc ::tree::NewItem {w v args} {
 
     # Make fresh uid now that we know it's ok to create it.
     set uid [incr vuid]
-    set v2uid($v) $uid
+    set v2uid($v)   $uid
     set uid2v($uid) $v
     
     # Initialize a element of the tree.
@@ -1724,6 +1730,11 @@ proc ::tree::CloseTree {w v} {
     if {[info exists treestate($uid:open)] && ($treestate($uid:open) == 1)} {
 	set treestate($uid:open) 0
 	BuildWhenIdle $w
+	
+	# Evaluate any open command callback.
+	if {[llength $options(-closecommand)]} {
+	    uplevel #0 $options(-closecommand) [list $w $v]
+	}
     }
 }
 

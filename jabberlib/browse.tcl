@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: browse.tcl,v 1.26 2004-04-30 12:58:46 matben Exp $
+# $Id: browse.tcl,v 1.27 2004-05-23 13:18:08 matben Exp $
 # 
 #  locals($jid,parent):       the parent of $jid.
 #  locals($jid,parents):      list of all parent jid's,
@@ -654,6 +654,9 @@ proc browse::setjid {browsename fromJid subiq args} {
     array set attrArr [wrapper::getattrlist $subiq]
     array set argsArr $args
     
+    # Seems that the browse component doesn't do STRINGPREP.
+    set fromJid [jlib::jidprep $fromJid]
+    
     # Root parent empty. A bit unclear what to do with it.
     if {![info exists locals($fromJid,parent)]} {
 	
@@ -691,7 +694,9 @@ proc browse::setjid {browsename fromJid subiq args} {
 	set jid $fromJid
 	set parentJid $locals($jid,parent)
     } else {
-	set jid $attrArr(jid)
+	
+	# Must do STRINGPREP when comparing two jids!
+	set jid [jlib::jidprep $attrArr(jid)]
 	if {$fromJid != $jid} {
 	    set parentJid $fromJid
 	} else {
@@ -703,15 +708,6 @@ proc browse::setjid {browsename fromJid subiq args} {
     
     # Handle the top jid, and follow recursively for any childs.
     setsinglejid $browsename $parentJid $jid $subiq 1
-    
-    # Evaluate the client callback. ??????????????? OUTDATED!!!!!!!!!!
-    #if {[info exists argsArr(-command)] && [string length $argsArr(-command)]} {
-#	uplevel #0 $argsArr(-command) $browsename set [list $jid $subiq]
-    #} else {
-#	if {[info exists locals(cmd)]} {
-#	    uplevel #0 $locals(cmd) $browsename set [list $jid $subiq]
-#	}
-    #}
 }
 
 # browse::setsinglejid --

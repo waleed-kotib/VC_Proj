@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.55 2004-04-25 15:35:24 matben Exp $
+# $Id: Chat.tcl,v 1.56 2004-05-23 13:18:08 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -764,7 +764,7 @@ proc ::Jabber::Chat::Send {token} {
     set state(jid) $jid
     jlib::splitjid $jid jid2 res
 
-    if {![::Jabber::IsWellFormedJID $jid]} {
+    if {![jlib::jidvalidate $jid]} {
 	set ans [tk_messageBox -message [FormatTextForMessageBox  \
 	  [::msgcat::mc jamessbadjid $jid]] \
 	  -icon error -type yesno]

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.11 2004-04-30 12:58:45 matben Exp $
+# $Id: JWB.tcl,v 1.12 2004-05-23 13:18:08 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -813,7 +813,7 @@ proc ::Jabber::WB::DoSendCanvas {wtop} {
     set wtoplevel [::UI::GetToplevel $wtop]
     set jid $jwbstate($wtop,jid)
 
-    if {[::Jabber::IsWellFormedJID $jid]} {
+    if {[jlib::jidvalidate $jid]} {
 		
 	# If user not online no files may be sent off.
 	if {![$jstate(roster) isavailable $jid]} {
@@ -1214,13 +1214,14 @@ proc ::Jabber::WB::GetIPnumber {jid {cmd {}}} {
     if {$cmd != ""} {
 	set ipCache(cmd,$getid) $cmd
     }
+    set prepjid [jlib::jidprep $jid]
     
     # What shall we do when we already have the IP number?
-    if {[info exists ipCache(ip,$jid)]} {
-	::Jabber::WB::GetIPCallback $jid $getid $ipCache(ip,$jid)
+    if {[info exists ipCache(ip,$prepjid)]} {
+	::Jabber::WB::GetIPCallback $jid $getid $ipCache(ip,$prepjid)
     } else {
 	::Jabber::WB::SendRawMessageList $jid [list "GET IP: $getid"]
-	set ipCache(req,$jid) 1
+	set ipCache(req,$prepjid) 1
     }
     incr ipCache(getid)
 }
@@ -1231,24 +1232,25 @@ proc ::Jabber::WB::GetIPnumber {jid {cmd {}}} {
 #       by our server.
 #
 # Arguments:
-#       fromjid     fully qualified  "username@host/resource"
+#       jid     fully qualified  "username@host/resource"
 #       id
 #       ip
 #       
 # Results:
 #       Any registered callback proc is eval'ed.
 
-proc ::Jabber::WB::GetIPCallback {fromjid id ip} {    
+proc ::Jabber::WB::GetIPCallback {jid id ip} {    
     upvar ::Jabber::jstate jstate
     variable ipCache
 
-    ::Debug 2 "::Jabber::WB::GetIPCallback: fromjid=$fromjid, id=$id, ip=$ip"
+    ::Debug 2 "::Jabber::WB::GetIPCallback: jid=$jid, id=$id, ip=$ip"
 
-    set ipCache(ip,$fromjid) $ip
+    set prepjid [jlib::jidprep $jid]
+    set ipCache(ip,$prepjid) $ip
     if {[info exists ipCache(cmd,$id)]} {
-	::Debug 2 "\tipCache(cmd,$id)=$ipCache(cmd,$id)"
-	eval $ipCache(cmd,$id) $fromjid
-	catch {unset ipCache(cmd,$id) ipCache(req,$fromjid)}
+	::Debug 2 "\t ipCache(cmd,$id)=$ipCache(cmd,$id)"
+	eval $ipCache(cmd,$id) $jid
+	catch {unset ipCache(cmd,$id) ipCache(req,$prepjid)}
     }
 }
 
@@ -1269,7 +1271,8 @@ proc ::Jabber::WB::GetCoccinellaServers {jid3 {cmd {}}} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::privatexmlns privatexmlns
     
-    set ipCache(req,$jid3) 1
+    set prepjid3 [jlib::jidprep $jid3]
+    set ipCache(req,$prepjid3) 1
     $jstate(jlib) iq_get $privatexmlns(servers) -to $jid3  \
       -command [list ::Jabber::WB::GetCoccinellaServersCallback $jid3 $cmd]
 }
@@ -1287,13 +1290,14 @@ proc ::Jabber::WB::GetCoccinellaServersCallback {jid3 cmd jlibname type subiq} {
     if {$type == "error"} {
 	return
     }
+    set prepjid3 [jlib::jidprep $jid3]
     set ipElements [wrapper::getchildswithtag $subiq ip]
     set ip [wrapper::getcdata [lindex $ipElements 0]]
-    set ipCache(ip,$jid3) $ip
+    set ipCache(ip,$prepjid3) $ip
     if {$cmd != ""} {
 	eval $cmd
     }
-    catch {unset ipCache(req,$jid3)}
+    catch {unset ipCache(req,$prepjid3)}
 }
 
 proc ::Jabber::WB::PresenceHook {jid type args} {
@@ -1301,15 +1305,16 @@ proc ::Jabber::WB::PresenceHook {jid type args} {
     
     ::Debug 2 "::Jabber::WB::PresenceHook jid=$jid, type=$type, args=$args"
     array set argsArr $args
-    if {[info exists argsArr(-resource)]} {
+    if {[info exists argsArr(-resource)] && [string length $argsArr(-resource)]} {
 	set jid $jid/$argsArr(-resource)
     }
+    set prepjid [jlib::jidprep $jid]
     
     switch -- $type {
 	unavailable {
 	    
 	    # Need to remove our cached ip number for this jid.
-	    catch {unset ipCache(ip,$jid) ipCache(req,$jid)}
+	    catch {unset ipCache(ip,$prepjid) ipCache(req,$prepjid)}
 	}
 	available {
 	    
@@ -1330,7 +1335,8 @@ proc ::Jabber::WB::AutoBrowseHook {jid} {
     
     # Shall we query for its ip address right away?
     # Get only if not yet requested.
-    if {$jprefs(preGetIP) && ![info exists ipCache(req,$jid)]} {
+    set prepjid [jlib::jidprep $jid]
+    if {$jprefs(preGetIP) && ![info exists ipCache(req,$prepjid)]} {
 	if {$jprefs(getIPraw)} {
 	    ::Jabber::WB::GetIPnumber $jid
 	} else {
@@ -1435,14 +1441,15 @@ proc ::Jabber::WB::PutFileOrScheduleHook {wtop fileName opts} {
 	} else {
 	    set avail [$jstate(roster) isavailable $jid3]
 	}
+	set prepjid3 [jlib::jidprep $jid3]
 	
 	# Each jid must get its own -to attribute.
 	set optjidList [concat $opts -to $jid3]
 	
-	::Debug 2 "   jid3=$jid3, avail=$avail"
+	::Debug 2 "\t jid3=$jid3, avail=$avail"
 	
 	if {$avail} {
-	    if {[info exists ipCache(ip,$jid3)]} {
+	    if {[info exists ipCache(ip,$prepjid3)]} {
 		
 		# This one had already told us its ip number, good!
 		::Jabber::WB::PutFile $wtop $fileName $mime $optjidList $jid3
@@ -1506,10 +1513,11 @@ proc ::Jabber::WB::PutFile {wtop fileName mime opts jid} {
     upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::Jabber::WB::PutFile: fileName=$fileName, opts='$opts', jid=$jid"
- 
-    if {![info exists ipCache(ip,$jid)]} {
+
+    set prepjid [jlib::jidprep $jid]
+    if {![info exists ipCache(ip,$prepjid)]} {
 	puts "::Jabber::WB::PutFile: Houston, we have a problem. \
-	  ipCache(ip,$jid) not there"
+	  ipCache(ip,$prepjid) not there"
 	return
     }
     
@@ -1527,7 +1535,7 @@ proc ::Jabber::WB::PutFile {wtop fileName mime opts jid} {
     # Translate tcl type '-key value' list to 'Key: value' option list.
     set optList [::Import::GetTransportSyntaxOptsFromTcl $opts]
 
-    ::PutFileIface::PutFile $wtop $fileName $ipCache(ip,$jid) $optList
+    ::PutFileIface::PutFile $wtop $fileName $ipCache(ip,$prepjid) $optList
 }
 
 # Jabber::WB::HandlePutRequest --
@@ -1695,7 +1703,7 @@ proc ::Jabber::WB::VerifyJIDWhiteboard {wtop} {
 	set w [string trimright $wtop .]
     }
     if {$jwbstate($wtop,send)} {
-	if {![::Jabber::IsWellFormedJID $jwbstate($wtop,jid)]} {
+	if {![jlib::jidvalidate $jwbstate($wtop,jid)]} {
 	    tk_messageBox -icon warning -type ok -parent $w -message  \
 	      [FormatTextForMessageBox [::msgcat::mc jamessinvalidjid]]
 	    return 0

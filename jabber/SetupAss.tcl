@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: SetupAss.tcl,v 1.22 2004-04-25 15:35:26 matben Exp $
+# $Id: SetupAss.tcl,v 1.23 2004-05-23 13:18:08 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -93,7 +93,7 @@ proc ::Jabber::SetupAss::SetupAss { } {
       "Get list of public and open Jabber servers"
     label $p2.fr.la -font $fontSB -text "[::msgcat::mc Server]:"
     entry $p2.fr.serv -width 28 -textvariable ${ns}::server \
-       -validate key -validatecommand {::Jabber::ValidateJIDChars %S}
+       -validate key -validatecommand {::Jabber::ValidateDomainStr %S}
     grid $p2.fr.msg1 -sticky n -columnspan 2 -row 0
     grid $p2.fr.bt   -sticky ew -column 0 -row 1
     grid $p2.fr.msg2 -sticky w -column 1 -row 1 -pady 4
@@ -109,7 +109,7 @@ proc ::Jabber::SetupAss::SetupAss { } {
     label $p3.fr.lap  -font $fontSB -text "[::msgcat::mc Password]:"
     label $p3.fr.lap2 -font $fontSB -text "[::msgcat::mc {Retype password}]:"
     entry $p3.fr.name -width 20 -textvariable ${ns}::username \
-       -validate key -validatecommand {::Jabber::ValidateJIDChars %S}
+       -validate key -validatecommand {::Jabber::ValidateUsernameStr %S}
     entry $p3.fr.pass -width 20 -textvariable ${ns}::password -show {*} \
       -validate key -validatecommand {::Jabber::ValidatePasswdChars %S}
     entry $p3.fr.pass2 -width 20 -textvariable ${ns}::password2 -show {*} \

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.59 2004-05-13 13:50:21 matben Exp $
+# $Id: GroupChat.tcl,v 1.60 2004-05-23 13:18:08 matben Exp $
 
 package require History
 
@@ -420,12 +420,12 @@ proc ::Jabber::GroupChat::BuildEnter {args} {
     label $frmid.lroom -text "[::msgcat::mc Room]:" -anchor e
     entry $frmid.eroom -width 24    \
       -textvariable $token\(roomname) -validate key  \
-      -validatecommand {::Jabber::ValidateJIDChars %S}
+      -validatecommand {::Jabber::ValidateUsernameStr %S}
     label $frmid.lnick -text "[::msgcat::mc {Nick name}]:" \
       -anchor e
     entry $frmid.enick -width 24    \
       -textvariable $token\(nickname) -validate key  \
-      -validatecommand {::Jabber::ValidateJIDChars %S}
+      -validatecommand {::Jabber::ValidateResourceStr %S}
     grid $frmid.msg -column 0 -columnspan 2 -row 0 -sticky ew
     grid $frmid.lserv -column 0 -row 1 -sticky e
     grid $frmid.eserv -column 1 -row 1 -sticky ew 

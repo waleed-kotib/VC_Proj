@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.84 2004-05-06 13:41:10 matben Exp $
+# $Id: Jabber.tcl,v 1.85 2004-05-23 13:18:08 matben Exp $
 
 package provide Jabber 1.0
 
@@ -82,10 +82,6 @@ namespace eval ::Jabber:: {
 
     # Login server.
     set jserver(this) ""
-
-    # Regexp pattern for username etc. Ascii no. 0-32 (deci) not allowed.
-    set jprefs(invalsExp) {.*([\x00-\x20]|[\r\n\t@:' <>&"/])+.*}
-    set jprefs(valids) {[^\x00-\x20]|[^\r\n\t@:' <>&"]}
     
     # Popup menus.
     set jstate(wpopup,disco)     .jpopupdi
@@ -1052,52 +1048,7 @@ proc ::Jabber::EndSession { } {
     }
 }
 
-# Jabber::IsWellFormedJID --
-#
-#       Is this a well formed Jabber ID?. What abot the resource (/home) part?
-#       
-# Arguments:
-#       jid     Jabber ID, such as 'matben@athlon.se', if well formed.
-#       
-# Results:
-#       boolean
-
-proc ::Jabber::IsWellFormedJID {jid args} {    
-    variable jprefs
-    
-    array set argsArr {
-	-type   user
-    }
-    array set argsArr $args
-    
-    switch -- $argsArr(-type) {
-	user {
-	    if {[regexp {^(.+)@([^/]+)(/(.*))?$} $jid match name host junk res]} {
-		if {[regexp $jprefs(invalsExp) $name match junk]} {
-		    return 0
-		} elseif {[regexp $jprefs(invalsExp) $host match junk]} {
-		    return 0
-		}
-		return 1
-	    } else {
-		return 0
-	    }
-	}
-	any {
-	    
-	    # Be sure to remove any separators @ and /.
-	    regsub -all / $jid "" jidStrip
-	    regsub -all @ $jidStrip "" jidStrip
-	    if {[regexp $jprefs(invalsExp) $jidStrip match]} {
-		return 0
-	    } else {
-		return 1
-	    }
-	}
-    }
-}
-
-# Jabber::ValidateJIDChars --
+# Jabber::Validate... --
 #
 #       Validate entry for username etc.
 #       
@@ -1107,10 +1058,29 @@ proc ::Jabber::IsWellFormedJID {jid args} {
 # Results:
 #       boolean: 0 if reject, 1 if accept
 
-proc ::Jabber::ValidateJIDChars {str} {    
-    variable jprefs
+proc ::Jabber::ValidateDomainStr {str} {
+    
+    if {[catch {jlib::nameprep $str} err]} {
+	bell
+	return 0
+    } else {
+	return 1
+    }
+}
 
-    if {[regexp $jprefs(invalsExp) $str match junk]} {
+proc ::Jabber::ValidateUsernameStr {str} {
+    
+    if {[catch {jlib::nodeprep $str} err]} {
+	bell
+	return 0
+    } else {
+	return 1
+    }
+}
+
+proc ::Jabber::ValidateResourceStr {str} {
+    
+    if {[catch {jlib::resourceprep $str} err]} {
 	bell
 	return 0
     } else {

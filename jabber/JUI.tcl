@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.38 2004-05-06 13:41:10 matben Exp $
+# $Id: JUI.tcl,v 1.39 2004-05-23 13:18:08 matben Exp $
 
 package provide JUI 1.0
 
@@ -416,6 +416,8 @@ proc ::Jabber::UI::NewPage {name} {
 }
 
 proc ::Jabber::UI::StopConnect { } {
+    
+    ::Jabber::DoCloseClientConnection
     
     ::Network::KillAll
     ::Jabber::UI::SetStatusMessage ""

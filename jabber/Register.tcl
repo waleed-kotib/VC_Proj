@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.17 2004-04-25 15:35:26 matben Exp $
+# $Id: Register.tcl,v 1.18 2004-05-23 13:18:08 matben Exp $
 
 package provide Register 1.0
 
@@ -72,12 +72,12 @@ proc ::Jabber::Register::Register {args} {
       -font $fontSB -anchor e
     entry $frmid.eserv -width 22    \
       -textvariable [namespace current]::server -validate key  \
-      -validatecommand {::Jabber::ValidateJIDChars %S}
+      -validatecommand {::Jabber::ValidateDomainStr %S}
     label $frmid.luser -text "[::msgcat::mc Username]:" -font $fontSB  \
       -anchor e
     entry $frmid.euser -width 22   \
       -textvariable [namespace current]::username -validate key  \
-      -validatecommand {::Jabber::ValidateJIDChars %S}
+      -validatecommand {::Jabber::ValidateUsernameStr %S}
     label $frmid.lpass -text "[::msgcat::mc Password]:" -font $fontSB  \
       -anchor e
     entry $frmid.epass -width 22  -show {*}  \
@@ -175,13 +175,22 @@ proc ::Jabber::Register::Doit {w} {
     
     # Check 'server', 'username' if acceptable.
     foreach name {server username} {
-	set what $name
+	upvar 0 $name what
 	if {[string length $what] <= 1} {
 	    tk_messageBox -icon error -type ok -message [FormatTextForMessageBox \
 	      [::msgcat::mc jamessnamemissing $name]]
 	    return
 	}
-	if {[regexp $jprefs(invalsExp) $what match junk]} {
+	if {[catch {
+	    switch -- $name {
+		server {
+		    jlib::nameprep $what
+		}
+		username {
+		    jlib::nodeprep $what
+		}
+	    }
+	} err]} {
 	    tk_messageBox -icon error -type ok -message [FormatTextForMessageBox  \
 	      [::msgcat::mc jamessillegalchar $name $what]]
 	    return
@@ -563,7 +572,7 @@ proc ::Jabber::GenRegister::Simple {w args} {
       -anchor e
     entry $frtop.euser -width 26   \
       -textvariable [namespace current]::username -validate key  \
-      -validatecommand {::Jabber::ValidateJIDChars %S}
+      -validatecommand {::Jabber::ValidateUsernameStr %S}
     label $frtop.lpass -text "[::msgcat::mc Password]:" -font $fontSB \
       -anchor e
     entry $frtop.epass -width 26   \

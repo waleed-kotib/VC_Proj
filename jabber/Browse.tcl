@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.44 2004-05-21 07:40:41 matben Exp $
+# $Id: Browse.tcl,v 1.45 2004-05-23 13:18:08 matben Exp $
 
 package require chasearrows
 
@@ -1319,7 +1319,7 @@ proc ::Jabber::Browse::ParseGet {jlibname from subiq args} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::privatexmlns privatexmlns
 
-    ::Debug 2 "::Jabber::Browse::ParseGet: args='$args'"
+    ::Debug 2 "::Jabber::Browse::ParseGet: from=$from, args='$args'"
     
     array set argsArr $args
     
