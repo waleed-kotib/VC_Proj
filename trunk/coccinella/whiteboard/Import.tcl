@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Import.tcl,v 1.13 2004-12-02 08:22:35 matben Exp $
+# $Id: Import.tcl,v 1.14 2004-12-04 15:01:10 matben Exp $
 
 package require http
 package require httpex
@@ -763,7 +763,7 @@ proc ::Import::HttpGet {wtop url importPackage opts args} {
     # We store file names with cached names to avoid name clashes.
     set fileTail [::uriencode::decodefile [file tail  \
       [::Utils::GetFilePathFromUrl $url]]]
-    set dstPath [::Import::NewCacheFilePath $fileTail]
+    set dstPath [::FileCache::MakeCacheFileName $fileTail]
     if {[catch {open $dstPath w} dst]} {
 	return $dst
     }
@@ -2105,18 +2105,6 @@ proc ::Import::NewBrokenImage {w coords args} {
 
     # Cache options.
     eval {::CanvasUtils::ItemSet $wtop $id} [array get argsArr]
-}
-
-# Import::NewCacheFilePath --
-# 
-#       Creates a unique file path to our incoming directory, keeping any
-#       file suffix intact.
-
-proc ::Import::NewCacheFilePath {fileName} {
-    global  prefs
-    
-    set tail "[::Utils::GenerateHexUID][file extension $fileName]"
-    return [file join $prefs(incomingPath) $tail]
 }
 
 #-------------------------------------------------------------------------------

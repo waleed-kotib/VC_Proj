@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JPrefs.tcl,v 1.17 2004-11-27 14:52:53 matben Exp $
+# $Id: JPrefs.tcl,v 1.18 2004-12-04 15:01:06 matben Exp $
 
 package provide JPrefs 1.0
 
@@ -418,10 +418,12 @@ proc ::Jabber::JPrefs::SavePrefsHook { } {
     }
     array set jprefs [array get tmpJPrefs]
     if {$tmpPrefs(themeName) == [mc None]} {
-	set prefs(themeName) ""
-    } else {
-	set prefs(themeName) $tmpPrefs(themeName)
+	set tmpPrefs(themeName) ""
     }
+    if {$prefs(themeName) != $tmpPrefs(themeName)} {
+	::Preferences::NeedRestart
+    }
+    set prefs(themeName) $tmpPrefs(themeName)
 
     # If changed present auto away settings, may need to reconfigure.
     ::Jabber::JPrefs::UpdateAutoAwaySettings    

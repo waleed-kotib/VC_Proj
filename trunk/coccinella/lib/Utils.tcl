@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.36 2004-12-02 15:22:08 matben Exp $
+# $Id: Utils.tcl,v 1.37 2004-12-04 15:01:06 matben Exp $
 
 namespace eval ::Utils:: {
 
@@ -358,6 +358,8 @@ proc ::Utils::ValidMinutes {str} {
 #
 #       Makes a unique hex string stamped by time.
 #       Can generate max 'maxuidpersec' (uniques) uid's per second.
+#       
+#       See also ::tfileutils::newuid !!!
 
 proc ::Utils::GenerateHexUID { } {
     variable uid

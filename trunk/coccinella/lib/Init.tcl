@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.5 2004-11-30 15:11:12 matben Exp $
+# $Id: Init.tcl,v 1.6 2004-12-04 15:01:06 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -257,6 +257,36 @@ proc ::Init::TempDir {} {
 
     # If nothing else worked...
     return [file normalize [pwd]]
+}
+
+proc ::Init::LoadPackages { } {
+    global  this prefs
+    
+    # Other utility packages that can be platform specific.
+    # The 'Thread' package requires that the Tcl core has been built with support.
+    array set extraPacksArr {
+	macintosh   {http Tclapplescript MacPrint}
+	macosx      {http Tclapplescript tls Thread MacCarbonPrint}
+	windows     {http printer gdi tls Thread optcl tcom}
+	unix        {http tls Thread}
+    }
+    foreach {platform packList} [array get extraPacksArr] {
+	foreach name $packList {
+	    set prefs($name) 0
+	}
+    }
+    foreach name $extraPacksArr($this(platform)) {
+	::SplashScreen::SetMsg "[mc splashlook] $name..."
+	if {![catch {package require $name} msg]} {
+	    set prefs($name) 1
+	}
+    }
+    if {!($prefs(printer) && $prefs(gdi))} {
+	set prefs(printer) 0
+    }
+
+    # Not ready for this yet.
+    set prefs(Thread) 0
 }
 
 #-------------------------------------------------------------------------------

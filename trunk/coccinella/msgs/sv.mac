@@ -670,6 +670,10 @@ Som alternativ använd en webbläsare för att hitta en SDP fil, ladda ner den till
 ::msgcat::mcset sv enterpassword                {Skriv in lösenordet for ditt konto "%s"}
 
 
+::msgcat::mcset sv httptrpterror                {Filöverföringsfel när hämtade filen %s från %s: %s}
+::msgcat::mcset sv httptrpteof                  {Servern hos %s stängde förbindelsen utan att svara.}
+::msgcat::mcset sv httptrptnon200               {Filöverföringsfel när hämtade filen %s från %s: kod %s; %s}
+
 
 ::msgcat::mcset sv uastatpointmac 	{Klicka för att markera, dubbelklicka för inspektion, pressa musknappen för popup}
 ::msgcat::mcset sv uastatpoint		{Klicka för att markera, dubbelklicka för inspektion, högerklicka för popup}

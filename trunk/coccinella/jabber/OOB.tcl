@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.43 2004-12-02 15:22:07 matben Exp $
+# $Id: OOB.tcl,v 1.44 2004-12-04 15:01:06 matben Exp $
 
 package require uriencode
 
@@ -337,130 +337,26 @@ proc ::OOB::ParseSet {jlibname from subiq args} {
 }
 
 proc ::OOB::Get {jid url file id} {
-    global  this prefs
     
-    variable locals
-
-    if {[catch {open $file w} out]} {
-	::UI::MessageBox -title [mc Error] -icon error -type ok \
-	  -message [mc jamessoobfailopen $file]
-	return
-    }
-    set locals($out,local) $file
-    
-    # Be sure to set translation correctly for this MIME type.
-    set tmopts [list -timeout $prefs(timeoutMillis)]
-    
-    if {[catch {eval {
-	::httpex::get $url -channel $out  \
-	  -progress [list [namespace current]::Progress $out] \
-	  -command  [list [namespace current]::HttpCmd $jid $out $id]
-    } $tmopts} token]} {
-	::UI::MessageBox -title [mc Error] -icon error -type ok \
-	  -message [mc jamessoobgetfail $url $token]
-	return
-    }
-    upvar #0 $token state
-
-    set str "[mc {Writing file}]: [file tail $file]"
-    ::Utils::ProgressWindow $token 1000000 0 -text $str \
-      -cancelcmd [list [namespace current]::Cancel $out $token]
+    set token [::HttpTrpt::Get $url $file $jid \
+      -command [list ::OOB::HttpCmd $jid $id]]
 }
 
-proc ::OOB::Progress {out token total current} {
-    global  tcl_platform
-    variable locals
-    upvar #0 $token state
+proc ::OOB::HttpCmd {jid id token status {errmsg ""}} {
     
-    # Investigate 'state' for any exceptions.
-    set status [::httpex::status $token]
-    
-    if {[string equal $status "error"]} {
-	set errmsg "[httpex::error $token]"
-	::UI::MessageBox -title [mc Error] -icon error -type ok \
-	  -message "Failed getting url: $errmsg"
-	::httpex::cleanup $token
-	catch {file delete $locals($out,local)}
-	::Utils::ProgressFree $token
-    } else {
-	::Utils::ProgressWindow $token $total $current
-    }
-}
-
-# OOB::HttpCmd --
-# 
-#       Callback for the httpex package.
-
-proc ::OOB::HttpCmd {jid out id token} {
-    
-    upvar #0 $token state
-    set httpstate [::httpex::state $token]
-
-    # Don't bother with intermediate callbacks.
-    if {![string equal $httpstate "final"]} {
-	return
-    } 
-    set status  [::httpex::status $token]
-    set ncode   [::httpex::ncode $token]
-    set httperr [::httpex::error $token]
-
-    switch -- $status {
-	timeout {
-	    set etitle [mc Timeout]
-	    set emsg [mc jamessoobtimeout]
-	    set eicon info
-	}
-	error {
-	    set etitle [mc "File transport error"]
-	    set emsg "File transport error when getting file from $jid: $httperr"
-	    set eicon error
-	}
-	eof {
-	    set etitle [mc "File transport error"]
-	    set emsg "The server with $jid closed the socket without replying."
-	    set eicon error
-	}
-	ok {
-	    if {$ncode != 200} {
-		set etitle [mc "File transport error"]
-		set emsg "File transport error when getting file from $jid: "
-		append emsg "code $ncode; [httpex::ncodetotext $ncode]"
-		set eicon error
-	    }
-	}
-	reset {
-	    # Did this ourself?
-	}
-    }
-    catch {close $out}
-    ::httpex::cleanup $token
-    ::Utils::ProgressFree $token
+    ::Debug 2 "::OOB::HttpCmd status=$status, errmsg=$errmsg"
     
     # We shall send an <iq result> element here using the same 'id' to notify
     # the sender we are done.
 
-    switch -- $status,$ncode {
-	ok,200 {
+    switch -- $status {
+	ok {
 	    ::Jabber::JlibCmd send_iq "result" {} -to $jid -id $id
 	} 
 	default {
 	    ::Jabber::JlibCmd send_iq "error" {} -to $jid -id $id
 	}
-    }
-    
-    # Any error?
-    if {[info exists emsg]} {
-	::UI::MessageBox -title $etitle -icon $eicon -type ok -message $emsg
-    }
-}
-
-proc ::OOB::Cancel {out token} {
-    
-    variable locals
-    
-    ::httpex::reset $token
-    ::Utils::ProgressFree $token
-    catch {file delete $locals($out,local)}
+    }   
 }
 
 # OOB::BuildText --

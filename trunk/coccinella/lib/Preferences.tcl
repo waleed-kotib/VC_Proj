@@ -7,9 +7,9 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.69 2004-12-02 08:22:34 matben Exp $
+# $Id: Preferences.tcl,v 1.70 2004-12-04 15:01:06 matben Exp $
  
-package require notebook
+package require mnotebook
 package require tree
 package require tablelist
 package require combobox
@@ -144,7 +144,7 @@ proc ::Preferences::Build {args} {
     }
     
     # The notebook and its pages.
-    set nbframe [notebook::notebook $w.frall.fr.nb -borderwidth 1 -relief sunken]
+    set nbframe [::mnotebook::mnotebook $w.frall.fr.nb -borderwidth 1 -relief sunken]
     pack $nbframe -expand 1 -fill both -padx 4 -pady 4
     
     # Make the notebook pages.
@@ -757,14 +757,16 @@ proc ::Preferences::Proxies::UserDefaultsHook { } {
 #       its preference file.
 
 proc ::Preferences::SavePushBt { } {
-    global  prefs
+    global  prefs wDlgs
     
     variable wtoplevel
     variable finished
     variable tmpPrefs
     variable tmpJPrefs
+    variable needRestart
     
     set protocolSet 0
+    set needRestart 0
     
     # Was protocol changed?
     if {![string equal $prefs(protocol) $tmpPrefs(protocol)]} {
@@ -784,7 +786,13 @@ proc ::Preferences::SavePushBt { } {
     
     # Let components store themselves.
     ::hooks::run prefsSaveHook
-	
+
+    if {$needRestart} {
+	set ans [::UI::MessageBox -title [mc Warning]  \
+	  -type ok -parent $wDlgs(prefs) -icon info \
+	  -message [mc messprefsrestart]]
+    }
+
     # Save the preference file.
     ::PreferencesUtils::SaveToFile
     ::Preferences::CleanUp
@@ -864,7 +872,7 @@ proc ::Preferences::CancelPushBt { } {
 	set finished 2
     }
     if {$finished == 2} {
-	::Preferences::CleanUp
+	CleanUp
 	destroy $wtoplevel
 	::hooks::run prefsDestroyHook
     }
@@ -896,7 +904,12 @@ proc ::Preferences::HasChanged { } {
     variable hasChanged
 
     set hasChanged 1
-    CallTrace 4
+}
+
+proc ::Preferences::NeedRestart { } {
+    variable needRestart
+
+    set needRestart 1
 }
 
 # Preferences::SelectCmd --

@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: GetFileIface.tcl,v 1.4 2004-12-02 08:22:35 matben Exp $
+# $Id: GetFileIface.tcl,v 1.5 2004-12-04 15:01:10 matben Exp $
 
 package require getfile
 package require uriencode
@@ -56,7 +56,7 @@ proc ::GetFileIface::GetFile {wtop sock fileName opts} {
     set fileTail [::uriencode::decodefile $fileName]
 
     # We store file names with cached names to avoid name clashes.
-    set dstpath [::Import::NewCacheFilePath $fileTail]
+    set dstpath [::FileCache::MakeCacheFileName $fileTail]
         
     # Make local state array for convenient storage. 
     # Use 'variable' for permanent storage.
@@ -169,7 +169,7 @@ proc ::GetFileIface::GetFileFromServer {wtop ip port path opts} {
     set fileTail [::uriencode::decodefile [file tail $path]]
 
     # We store file names with cached names to avoid name clashes.
-    set dstpath [::Import::NewCacheFilePath $fileTail]
+    set dstpath [::FileCache::MakeCacheFileName $fileTail]
 
     # Make local state array for convenient storage. 
     # Use 'variable' for permanent storage.
