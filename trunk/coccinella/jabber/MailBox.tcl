@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.49 2004-07-30 12:55:54 matben Exp $
+# $Id: MailBox.tcl,v 1.50 2004-09-02 13:59:38 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -1011,7 +1011,6 @@ proc ::Jabber::MailBox::DisplayMsg {id} {
     ::Jabber::ParseAndInsertText $wtextmsg $body normal urltag
     $wtextmsg configure -state disabled
     
-    # Run this hook (speech).
     set opts [list -subject $subject -from $from -time $time]
     eval {::hooks::run displayMessageHook $body} $opts
 }

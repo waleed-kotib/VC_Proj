@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Speech.tcl,v 1.2 2004-07-30 12:55:53 matben Exp $
+# $Id: Speech.tcl,v 1.3 2004-09-02 13:59:38 matben Exp $
 
 namespace eval ::Speech:: { }
 
@@ -33,13 +33,15 @@ proc ::Speech::Load { } {
 	    if {[catch {package require MSSpeech}]} {
 		return
 	    }
-	    set sprefs(package) MSSpeech
 	    set sprefs(haveSpeech) 1
+	    set sprefs(package) MSSpeech
 	}
 	default {
 	    return
 	}
-    }    
+    }
+    
+    # Set up all hooks.
     ::Speech::Init
     
     # We should register ourselves.

@@ -3,7 +3,7 @@
 #       Creates a card game in a whiteboard canvas. 
 # 
 # 
-# $Id: CardGame.itcl,v 1.9 2004-08-17 06:19:54 matben Exp $
+# $Id: CardGame.itcl,v 1.10 2004-09-02 13:59:38 matben Exp $
 
 namespace eval CardGame {
     
@@ -272,6 +272,9 @@ if {[itcl::find classes CardGame] == ""} {
 	}
 	set utagstack $utag
 	set im [$csObj Image cardpile]
+	
+	# Note that the object name $this is only defined locally!
+	# Use $utagstack for globally identfying the stack.
 	set idstack [$tkCanvas create image $x $y -image $im -anchor nw  \
 	  -tags [list image cardstack object:${this} $utag]]
 
@@ -283,7 +286,6 @@ if {[itcl::find classes CardGame] == ""} {
 		-cards {
 		    foreach cmd $value {
 			set id [eval {$tkCanvas} $cmd]
-			#$tkCanvas addtag object:${this} withtag $id 
 			$tkCanvas addtag cardstackutag:${utagstack} withtag $id 
 			$tkCanvas addtag [NewUtag] withtag $id 
 		    }
@@ -428,9 +430,8 @@ if {[itcl::find classes CardGame] == ""} {
     }
     
     body CardGame::DeleteStack {} {
-	
-	set utag [GetUtag current]
-	set cmdList [list [list delete $utag]]
+
+	set cmdList [list [list delete $utagstack]]
 	DeregisterCanvasInstBinds CardGame:$this
 	
 	# Delete all cards as well.
@@ -441,9 +442,11 @@ if {[itcl::find classes CardGame] == ""} {
     }
     
     body CardGame::DeleteCard {} {
-	
-	# This actually calls back to our Delete method.
-	DeleteCurrent
+
+	# We could try having an undo command as well...
+	set utag [GetUtag current]
+	Command [list delete $utag]
+
     }
     
     body CardGame::StackPopup {x y} {
@@ -471,6 +474,9 @@ if {[itcl::find classes CardGame] == ""} {
 	set currentCard $card
 	if {$card != ""} {
 	    set im [$csObj Image back]
+
+	    # We use cardstackutag:.. to indicate which stack
+	    # a card comes from.
 	    set tags [list image playcard cardstackutag:${utagstack} \
 	      card:${card} [NewUtag]]
 	    set idcard [$tkCanvas create image $x $y -image $im -anchor nw \
@@ -577,7 +583,6 @@ if {[itcl::find classes CardGame] == ""} {
 	set allcards {}
 	
 	# Find all cards.
-	#foreach idc [$tkCanvas find withtag playcard&&object:${this}]
 	set tagsearch playcard&&cardstackutag:${utagstack}
 	foreach idc [$tkCanvas find withtag $tagsearch] {
 	    set ctags [$tkCanvas gettags $idc]
@@ -599,15 +604,14 @@ if {[itcl::find classes CardGame] == ""} {
 
 
     body CardGame::Delete {id} {
-	
-	switch -- $id {
-	    $idstack {
-		DeleteStack
-	    }
-	    default {
-		set utag [GetUtag $id]
-		return [list [list delete $utag] {}]
-	    }
+		
+	switch -- $id $idstack { 
+	    DeleteStack
+	} default {
+	    
+	    # never used it seems...
+	    set utag [GetUtag $id]
+	    return [list [list delete $utag] {}]
 	}
     }
 }

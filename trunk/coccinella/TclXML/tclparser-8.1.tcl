@@ -30,15 +30,15 @@
 # liability for all claims, expenses, losses, damages and costs any user may
 # incur as a result of using, copying or modifying the Software.
 #
-# $Id: tclparser-8.1.tcl,v 1.2 2004-08-17 14:10:30 matben Exp $
+# $Id: tclparser-8.1.tcl,v 1.3 2004-09-02 13:59:38 matben Exp $
 
 package require Tcl 8.1
 
-package provide xml::tclparser 2.0
+package provide xml::tclparser 99.0
 
 package require xmldefs 2.0
 
-package require sgmlparser 1.0
+package require sgmlparser 99.0
 
 namespace eval xml::tclparser {
 

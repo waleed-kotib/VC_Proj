@@ -32,11 +32,11 @@
 # liability for all claims, expenses, losses, damages and costs any user may
 # incur as a result of using, copying or modifying the Software.
 #
-# $Id: sgmlparser.tcl,v 1.2 2004-08-17 14:10:30 matben Exp $
+# $Id: sgmlparser.tcl,v 1.3 2004-09-02 13:59:38 matben Exp $
 
 package require sgml 1.8
 
-package provide sgmlparser 1.0
+package provide sgmlparser 99.0
 
 namespace eval sgml {
     namespace export tokenise parseEvent

@@ -11,7 +11,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: wrapper.tcl,v 1.7 2004-07-30 12:55:55 matben Exp $
+# $Id: wrapper.tcl,v 1.8 2004-09-02 13:59:38 matben Exp $
 # 
 # ########################### INTERNALS ########################################
 # 
@@ -71,11 +71,13 @@
 
 package provide wrapper 1.0
     
-# We have a dummy version number 3.0 as a workaround for the buggy tclxml20.dll
-#package require xml 3.0
-if {[catch {package require expat}]} {
-    package require xml 3.0
-}
+# We have a dummy version number 99.0 as a workaround for the buggy tclxml20.dll
+package require xml 99.0
+
+# For experiments...
+#if {[catch {package require expat}]} {
+#    package require xml 99.0
+#}
 
 namespace eval wrapper {
 
