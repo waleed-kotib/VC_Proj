@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.31 2004-03-27 15:20:37 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.32 2004-04-23 07:13:22 matben Exp $
 
 package require sha1pure
 
@@ -26,6 +26,8 @@ proc ::CanvasUtils::Init { } {
     variable utagpref
     variable utagpref2
     variable importAnchor
+    
+    ::Debug 2 "::CanvasUtils::Init"
     
     # Present anchor coordinates when importing images and movies.
     # Gets translated with 'prefs(offsetCopy)' for each new imported item.

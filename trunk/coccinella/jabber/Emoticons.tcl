@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.9 2004-04-22 13:48:43 matben Exp $
+# $Id: Emoticons.tcl,v 1.10 2004-04-23 07:13:19 matben Exp $
 
 
 package provide Emoticons 1.0
@@ -184,12 +184,12 @@ proc ::Emoticons::Parse {str} {
     variable smiley
     variable smileyLongNames
     
+    set _begin {( |^)}
+    set _end {( |$)}
+    
     # Protect Tcl special characters, quotes included.
     regsub -all {([][$\\{}"])} $str {\\\1} str
-    
-    # Add extra spaces at beginning and end to be removed. ???
-    set str " $str "
-    
+        
     # Since there are about 60 smileys we need to be economical here.    
     # Check first if there are any short smileys.
     
@@ -203,7 +203,7 @@ proc ::Emoticons::Parse {str} {
 	# Protect all regexp special characters!
 	regsub -all {[][$^);(\|\?\*\\]} $smile {\\\0} smileExp
 	if {[catch {
-	    regsub -all " $smileExp " $str $sub str
+	    regsub -all ${_begin}${smileExp}${_end} $str $sub str
 	}]} {
 	    puts "--->smile=$smile, smileExp=$smileExp"
 	}

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.9 2004-04-22 13:48:43 matben Exp $
+# $Id: Disco.tcl,v 1.10 2004-04-23 07:13:19 matben Exp $
 
 package provide Disco 1.0
 
@@ -668,7 +668,15 @@ proc ::Jabber::Disco::PresenceHook {jid presence args} {
 	if {[$wtree isitem $v]} {
 	    $wtree itemconfigure $v -image $icon
 	}
-    }    
+    } else {
+	
+	# As a method to identify Coccinellas, way may disco users.
+	if {[string equal $type "available"] && \
+	  ![$jstate(disco) isdiscoed $jid3]} {
+	    #eval {::Jabber::Disco::AutoDisco $jid3 $presence} $args
+	}	
+
+    }
 }
 
 proc ::Jabber::Disco::InfoCmd {jid} {

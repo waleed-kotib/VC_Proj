@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.54 2004-03-31 07:55:19 matben Exp $
+# $Id: UI.tcl,v 1.55 2004-04-23 07:13:24 matben Exp $
 
 package require entrycomp
 
@@ -374,8 +374,8 @@ proc ::UI::NewMenu {wtop wmenu label menuSpec state args} {
 #       $wmenu
 
 proc ::UI::BuildMenu {wtop wmenu label menuDef state args} {
-    global  this wDlgs prefs dashFull2Short osprefs
-    
+    global  this wDlgs prefs osprefs
+
     variable menuKeyToIndex
     
     if {$wtop == "."} {
