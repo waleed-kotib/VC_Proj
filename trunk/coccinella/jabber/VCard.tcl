@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: VCard.tcl,v 1.16 2004-03-16 15:09:08 matben Exp $
+# $Id: VCard.tcl,v 1.17 2004-03-25 08:10:18 matben Exp $
 
 package provide VCard 1.0
 
@@ -166,11 +166,11 @@ proc ::VCard::Build {nstoken} {
     set priv(vcardjid) $jid
     
     # Global frame.
-    frame $w.frall -borderwidth 0 -relief raised
-    pack  $w.frall -fill both -expand 1
-    set frall $w.frall
+    set   frall $w.frall
+    frame $frall -borderwidth 0 -relief raised
+    pack  $frall -fill both -expand 1
     
-    set nbframe [::mactabnotebook::mactabnotebook $frall.tn]
+    set nbframe [::mactabnotebook::mactabnotebook ${frall}.tn]
     pack $nbframe
     
     # Make the notebook pages.
@@ -182,11 +182,14 @@ proc ::VCard::Build {nstoken} {
         set ltxt $jid
     }
     set frbi [$nbframe newpage {Basic Info} -text [::msgcat::mc {Basic Info}]] 
+
     set lfr $frbi.fr
     labelframe $lfr -text $ltxt
-    pack $lfr.fr -side left -anchor n
-    set pbi [frame $lfr.frin]
-    pack $pbi -padx 10 -pady 6 -side left
+    pack $lfr -side top -anchor w -padx 8 -pady 4
+
+    set   pbi $lfr.frin
+    frame $pbi
+    pack  $pbi -padx 10 -pady 6 -side left
     
     # Name part.
     label $pbi.first -text [::msgcat::mc {First name}]
@@ -195,6 +198,7 @@ proc ::VCard::Build {nstoken} {
     entry $pbi.efirst -width 16 -textvariable ${nstoken}::elem(n_given)
     entry $pbi.emiddle -width 4 -textvariable ${nstoken}::elem(n_middle)
     entry $pbi.efam -width 18   -textvariable ${nstoken}::elem(n_family)
+
     grid $pbi.first $pbi.middle $pbi.fam -sticky w
     grid $pbi.efirst $pbi.emiddle $pbi.efam -sticky ew
     
