@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.7 2003-03-01 09:51:27 matben Exp $
+# $Id: Jabber.tcl,v 1.8 2003-03-01 14:19:02 matben Exp $
 #
 #  The $address is an ip name or number.
 #
@@ -8133,6 +8133,7 @@ proc ::Jabber::Conference::CancelEnter {w} {
 
 proc ::Jabber::Conference::ConfigRoomList {wcombo pickedServ} {
     
+    variable wcomboroom
     upvar ::Jabber::jstate jstate
 
     set allRooms [$jstate(browse) getchilds $pickedServ]
@@ -8140,8 +8141,8 @@ proc ::Jabber::Conference::ConfigRoomList {wcombo pickedServ} {
 	regexp {([^@]+)@.+} $roomJid match room
 	lappend roomList $room
     }
-    $wcombo list delete 0 end
-    eval {$wcombo list insert end} $roomList
+    $wcomboroom list delete 0 end
+    eval {$wcomboroom list insert end} $roomList
 }
 
 proc ::Jabber::Conference::EnterGet { } {
