@@ -4,7 +4,7 @@
 #
 #  Code idee from Harrison & McLennan
 #  
-# $Id: balloonhelp.tcl,v 1.5 2003-10-25 07:22:26 matben Exp $
+# $Id: balloonhelp.tcl,v 1.6 2003-11-06 08:38:39 matben Exp $
 
 package provide balloonhelp 1.0
 
@@ -123,14 +123,25 @@ proc ::balloonhelp::balloonforwindow {win msg args} {
 
 proc ::balloonhelp::balloonforcanvas {win itemid msg args} {
 
-    variable locals    
+    variable locals  
+    
     Debug 2 "::balloonhelp::balloonforcanvas win=$win, itemid=$itemid"
     set locals($win,$itemid) $msg
     set locals($win,args) $args
+    regsub -all {%} $itemid {%%} subItemId
+
     $win bind $itemid <Enter>  \
-      [list ::balloonhelp::Pending %W "canvas" -x %X -y %Y -itemid $itemid]
+      [list ::balloonhelp::Pending %W "canvas" -x %X -y %Y -itemid $subItemId]
     $win bind $itemid <Leave> [list ::balloonhelp::Cancel %W]
     $win bind $itemid <Button-1> {+ ::balloonhelp::Cancel %W}
+}
+
+proc ::balloonhelp::balloonfortree {win itemid msg args} {
+
+    variable locals    
+
+    set wcanvas [$win getcanvas]
+    eval {balloonforcanvas $wcanvas $itemid $msg} $args
 }
 
 proc ::balloonhelp::balloonfortext {win tag msg args} {
@@ -139,8 +150,10 @@ proc ::balloonhelp::balloonfortext {win tag msg args} {
     Debug 2 "::balloonhelp::balloonfortext win=$win, tag=$tag"
     set locals($win,$tag) $msg
     set locals($win,args) $args
+    regsub -all {%} $tag {%%} subTag
+
     $win tag bind $tag <Enter>  \
-      [list ::balloonhelp::Pending %W "text" -x %X -y %Y -tag $tag]
+      [list ::balloonhelp::Pending %W "text" -x %X -y %Y -tag $subTag]
     $win tag bind $tag <Leave> [list ::balloonhelp::Cancel %W]
     $win tag bind $tag <Button-1> {+ ::balloonhelp::Cancel %W}
 }
