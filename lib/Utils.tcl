@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.29 2004-08-26 12:05:17 matben Exp $
+# $Id: Utils.tcl,v 1.30 2004-08-28 07:00:08 matben Exp $
 
 namespace eval ::Utils:: {
 
@@ -127,7 +127,8 @@ proc SecondCoccinella {args} {
     wm deiconify .
     raise .
     
-    
+    ::Debug 2 "--> relaunchHook $args"
+    eval {::hooks::run relaunchHook} $args
 }
 
 #--- Utilities for general usage -----------------------------------------------

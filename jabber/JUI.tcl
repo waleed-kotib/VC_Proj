@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.48 2004-07-27 14:25:19 matben Exp $
+# $Id: JUI.tcl,v 1.49 2004-08-28 07:00:07 matben Exp $
 
 package provide JUI 1.0
 
@@ -400,7 +400,7 @@ proc ::Jabber::UI::NewPage {name} {
 
     set nbframe $jwapp(nbframe)
     set pages [$nbframe pages]
-    ::Debug 2 "------::Jabber::UI::NewPage name=$name, pages=$pages"
+    ::Debug 2 "+++> ::Jabber::UI::NewPage name=$name, pages=$pages"
     
     switch -exact $name {
 	Agents {

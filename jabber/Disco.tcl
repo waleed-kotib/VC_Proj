@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.26 2004-08-06 15:19:20 matben Exp $
+# $Id: Disco.tcl,v 1.27 2004-08-28 07:00:07 matben Exp $
 
 package provide Disco 1.0
 
@@ -266,8 +266,8 @@ proc ::Jabber::Disco::InfoCB {disconame type from subiq args} {
     if {![info exists wtree] || ![winfo exists $wtree]} {
 	return
     }
-    set from    [jlib::jidmap $from]
-    set name    [$jstate(disco) name $from]
+    set from [jlib::jidmap $from]
+    set name [$jstate(disco) name $from]
     
     # Icon.
     set cattype [lindex [$jstate(disco) types $from] 0]
@@ -499,14 +499,15 @@ proc ::Jabber::Disco::Popup {w v x y} {
 
     set typeClicked ""
     
-    set jid [lindex $v end]
-    set categoryList [$jstate(disco) types $jid]
+    set item [lindex $v end]
+    set jid  [lindex $item 0]
+    set node [lindex $item 1]
+    set categoryList [$jstate(disco) types $item]
     set categoryType [lindex $categoryList 0]
     ::Debug 4 "\t categoryType=$categoryType"
 
     jlib::splitjidex $jid username host res
     
-    #if {[regexp {^.+@[^/]+(/.*)?$} $jid match res]}
     if {$username != ""} {
 	set typeClicked user
 	if {[$jstate(disco) isroom $jid]} {
@@ -647,11 +648,13 @@ proc ::Jabber::Disco::OpenTreeCmd {w v} {
     ::Debug 2 "::Jabber::Disco::OpenTreeCmd v=$v"
 
     if {[llength $v]} {
-	set jid [lindex $v end]
+	set item [lindex $v end]
+	set jid  [lindex $item 0]
+	set node [lindex $item 1]
 	
 	# If we have not yet discoed this jid, do it now!
 	# We should have a method to tell if children have been added to tree!!!
-	if {![$jstate(disco) isdiscoed items $jid]} {
+	if {![$jstate(disco) isdiscoed items $item]} {
 	    set tstate(run,$jid) 1
 	    ::Jabber::Disco::ControlArrows 1
 	    
@@ -659,12 +662,11 @@ proc ::Jabber::Disco::OpenTreeCmd {w v} {
 	    ::Jabber::Disco::GetItems $jid
 	} elseif {[llength [$wtree children $v]] == 0} {
 	    
-	    # An item may have discoed but not from here.
-	    set children [$jstate(disco) children $jid]
+	    # An item may have been discoed but not from here.
+	    set children [$jstate(disco) children $item]
 	    foreach c $children {
-		::Jabber::Disco::AddToTree [concat $v $c]
+		::Jabber::Disco::AddToTree [concat $v [list $c]]
 	    }
-
 	}
 	
 	# Else it's already in the tree; do nothin.
@@ -698,7 +700,9 @@ proc ::Jabber::Disco::AddToTree {v} {
     # We disco servers jid 'items+info', and disco its childrens 'info'.    
     ::Debug 4 "::Jabber::Disco::AddToTree v='$v'"
 
-    set jid [lindex $v end]
+    set item [lindex $v end]
+    set jid  [lindex $item 0]
+    set node [lindex $item 1]
     set icon ""
     
     # Ad-hoc way to figure out if dir or not. Use the category attribute.
@@ -716,7 +720,7 @@ proc ::Jabber::Disco::AddToTree {v} {
 	set isdir 0
 	set icon [::Jabber::Roster::GetPresenceIcon $jid "available"]
     } else {
-	set name [$jstate(disco) name $jid]
+	set name [$jstate(disco) name $item]
 	if {$name == ""} {
 	    set name $jid
 	}
@@ -735,31 +739,37 @@ proc ::Jabber::Disco::AddToTree {v} {
     # Do not create if exists which preserves -open.
     if {![$wtree isitem $v]} {
 	set treectag item[incr treeuid]
-	$wtree newitem $v -text $name -tags $jid -style $style -dir $isdir \
+	$wtree newitem $v -text $name -tags $item -style $style -dir $isdir \
 	  -image $icon -open $isopen -canvastags $treectag
 	
 	# Balloon.
-	::Jabber::Disco::MakeBalloonHelp $jid $treectag
+	::Jabber::Disco::MakeBalloonHelp $item $treectag
     }
 
     # Add all child elements as well.
-    set childs [$jstate(disco) children $jid]
-    foreach cjid $childs {
-	set cv [concat $v $cjid]
+    set childs [$jstate(disco) children $item]
+    foreach citem $childs {
+	set cv [concat $v [list $citem]]
 	::Jabber::Disco::AddToTree $cv
      }	    
 }
 
-proc ::Jabber::Disco::MakeBalloonHelp {jid treectag} {
+proc ::Jabber::Disco::MakeBalloonHelp {item treectag} {
     variable wtree    
     upvar ::Jabber::jstate jstate
     
+    set jid  [lindex $item 0]
+    set node [lindex $item 1]
     set jidtxt $jid
     if {[string length $jid] > 30} {
 	set jidtxt "[string range $jid 0 28]..."
     }
+    set msg "jid: $jidtxt"
+    if {$node != ""} {
+	append msg "\nnode: $node"
+    }
     set types [$jstate(disco) types $jid]
-    set msg "jid: $jidtxt\ntype: $types"
+    append msg "\ntype: $types"
     ::balloonhelp::balloonfortree $wtree $treectag $msg
 }
 
