@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.95 2004-11-23 14:47:55 matben Exp $
+# $Id: Coccinella.tcl,v 1.96 2004-11-24 07:07:28 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -179,9 +179,9 @@ set thisPath [file dirname $thisScript]
 ::Debug 2 "Installation rootdir:  [file dirname $thisScript]"
 
 # Set up 'this' array which contains admin stuff.
-source [file join $thisPath lib Boot.tcl]
-::Boot::SetThis $thisScript
-::Boot::SetAutoPath
+source [file join $thisPath lib Init.tcl]
+::Init::SetThis $thisScript
+::Init::SetAutoPath
 
 # See if we have Itcl avialable already here; import namespace.
 set prefs(haveItcl) 0
@@ -197,7 +197,8 @@ package require Theme
 ::Theme::Init
 
 # Find our language and load message catalog.
-::Boot::InitMsgcat
+::Init::InitMsgcat
+namespace import ::msgcat::mc
 
 # Show it! Need a full update here, at least on Windows.
 package require Splash
@@ -286,6 +287,7 @@ foreach packName {
     undo
     Dialogs
     FileCache
+    Httpd
     Preferences
     PreferencesUtils
     Types
@@ -492,6 +494,7 @@ set prefs(firstLaunch) 0
 
 ::Debug 7 "auto_path:\n[join $auto_path \n]"
 
+if {0} {
 ### The server part ############################################################
 
 # We should do this using hooks instead!
@@ -524,6 +527,7 @@ if {($prefs(protocol) != "client") && $prefs(haveHttpd)} {
 	# Stop before quitting.
 	::hooks::register quitAppHook ::tinyhttpd::stop
     }
+}
 }
 
 # Handle any actions we need to do (-connect) according to command line options.

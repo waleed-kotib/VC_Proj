@@ -1,15 +1,15 @@
-#  Boot.tcl ---
+#  Init.tcl ---
 #  
 #      This file is part of The Coccinella application. 
 #      It sets up the global 'this' array for useful things.
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Boot.tcl,v 1.1 2004-11-23 14:47:56 matben Exp $
+# $Id: Init.tcl,v 1.1 2004-11-24 07:07:29 matben Exp $
 
-namespace eval ::Boot:: { }
+namespace eval ::Init:: { }
 
-proc ::Boot::SetThis {thisScript} {
+proc ::Init::SetThis {thisScript} {
     global  this auto_path tcl_platform
     
     # Path where preferences etc are stored.
@@ -143,7 +143,7 @@ proc ::Boot::SetThis {thisScript} {
     }
 }
 
-proc ::Boot::SetAutoPath { } {
+proc ::Init::SetAutoPath { } {
     global  auto_path this prefs
     
     # Add our lib and whiteboard directory to our search path.
@@ -170,7 +170,7 @@ proc ::Boot::SetAutoPath { } {
     }
 }
 
-proc ::Boot::InitMsgcat { } {
+proc ::Init::InitMsgcat { } {
     global  prefs this
     
     package require msgcat
