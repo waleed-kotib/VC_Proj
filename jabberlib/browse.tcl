@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: browse.tcl,v 1.19 2004-01-31 13:46:07 matben Exp $
+# $Id: browse.tcl,v 1.20 2004-04-04 13:37:26 matben Exp $
 # 
 #  locals($jid,parent):       the parent of $jid.
 #  locals($jid,parents):      list of all parent jid's,
@@ -608,10 +608,12 @@ proc browse::setsinglejid {browseName parentJid jid xmllist {browsedjid 0}} {
 	if {[string equal $category "user"]} {
 	    
 	    # Be sure to update the room's list of participants.
-	    set ind [lsearch $locals($parentJid,allusers) $jid]
-	    if {$ind >= 0} {
-		set locals($parentJid,allusers)   \
-		  [lreplace $locals($parentJid,allusers) $ind $ind]
+	    if {[info exists locals($parentJid,allusers)]} {
+		set ind [lsearch $locals($parentJid,allusers) $jid]
+		if {$ind >= 0} {
+		    set locals($parentJid,allusers)   \
+		      [lreplace $locals($parentJid,allusers) $ind $ind]
+		}
 	    }
 	}
     } elseif {$options(-setbrowsedjid) || !$browsedjid} {

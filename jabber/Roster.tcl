@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.48 2004-04-02 12:26:38 matben Exp $
+# $Id: Roster.tcl,v 1.49 2004-04-04 13:37:26 matben Exp $
 
 package provide Roster 1.0
 
@@ -1865,8 +1865,9 @@ proc ::Jabber::Roster::ConfigStatusMenuButton {w type} {
     }
 }
 
-proc ::Jabber::Roster::PostMenu {w x y} {
-    tk_popup $w [expr int($x)] [expr int($y)]
+proc ::Jabber::Roster::PostMenu {wmenu x y} {
+    
+    tk_popup $wmenu [expr int($x)] [expr int($y)]
 }
 
 # Jabber::Roster::BuildPresenceMenu --
