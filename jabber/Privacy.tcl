@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Privacy.tcl,v 1.4 2004-05-02 12:35:24 matben Exp $
+# $Id: Privacy.tcl,v 1.5 2004-06-06 07:02:21 matben Exp $
 
 package provide Privacy 1.0
 
@@ -460,8 +460,7 @@ proc ::Privacy::DelListCB {name jlibname type subiq args} {
     switch -- $type {
 	error {
 	    set statmsg "Error deleting list \"$name\""
-	    ::Jabber::AddErrorLog [clock format [clock seconds] -format "%H:%M:%S"]  \
-	      "" $statmsg
+	    ::Jabber::AddErrorLog "" $statmsg
 	}
 	default {
 	    set statmsg "List \"$name\" deleted"

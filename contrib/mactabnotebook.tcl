@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  
-# $Id: mactabnotebook.tcl,v 1.13 2004-05-09 12:14:37 matben Exp $
+# $Id: mactabnotebook.tcl,v 1.14 2004-06-06 07:02:20 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -43,7 +43,9 @@
 #      pathName configure ?option? ?value option value ...?
 #      pathName deletepage pageName
 #      pathName displaypage ?pageName?
+#      pathName getuniquename pageName
 #      pathName newpage pageName ?-text value -image imageName?
+#      pathName pageconfigure pageName ?-text value -image imageName?
 #      pathName pages
 #
 # ########################### CHANGES ##########################################
@@ -358,7 +360,7 @@ proc ::mactabnotebook::mactabnotebook {w args} {
     }
     foreach {name value} $args {
 	if {![info exists widgetOptions($name)]} {
-	    error "unknown option \"$name\" for the mactabnotebook widget"
+	    return -code error "unknown option \"$name\" for the mactabnotebook widget"
 	}
     }
 
@@ -481,7 +483,7 @@ proc ::mactabnotebook::WidgetProc {w command args} {
     switch -- $command {
 	cget {
 	    if {[llength $args] != 1} {
-		error "wrong # args: should be $w cget option"
+		return -code error "wrong # args: should be $w cget option"
 	    }
 	    set result $options($args)
 	}
@@ -497,17 +499,23 @@ proc ::mactabnotebook::WidgetProc {w command args} {
 	    } elseif {[llength $args] == 1} {
 		set result [eval {Display $w} $args]
 	    } else {
-		error "wrong # args: should be $w displaypage ?pageName?"
+		return -code error "wrong # args: should be $w displaypage ?pageName?"
 	    }
+	}
+	getuniquename {
+	    set result [GetUniqueName $w [lindex $args 0]]
 	}
 	newpage {
 	    set result [eval {NewPage $w} $args]
+	}
+	pageconfigure {
+	    set result [eval {PageConfigure $w} $args]
 	}
 	pages {
 	    set result [Pages $w]
 	}
 	default {
-	    error "unknown command \"$command\" of the mactabnotebook widget.\
+	    return -code error "unknown command \"$command\" of the mactabnotebook widget.\
 	      Must be one of $widgetCommands"
 	}
     }
@@ -539,7 +547,7 @@ proc ::mactabnotebook::Configure {w args} {
     # Error checking.
     foreach {name value} $args {
 	if {![info exists widgetOptions($name)]}  {
-	    error "unknown option for the mactabnotebook widget: $name"
+	    return -code error "unknown option for the mactabnotebook widget: $name"
 	}
     }
     if {[llength $args] == 0} {
@@ -567,7 +575,7 @@ proc ::mactabnotebook::Configure {w args} {
     
     # Error checking.
     if {[expr {[llength $args]%2}] == 1} {
-	error "value for \"[lindex $args end]\" missing"
+	return -code error "value for \"[lindex $args end]\" missing"
     }    
 
     # Process the new configuration options.
@@ -639,16 +647,10 @@ proc ::mactabnotebook::NewPage {w name args} {
     if {$widgetGlobals(debug) > 1} {
 	puts "::mactabnotebook::NewPage w=$w, name=$name"
     }
-    foreach {key value} $args {
-	switch -- $key {
-	    -text - -image {
-		set tnInfo($name,$key) $value
-	    }
-	    default {
-		return -code error "Unknown option \"$key\" to newpage"
-	    }
-	}
+    if {[lsearch $tnInfo(tabs) $name] >= 0} {
+	return -code error "Page \"$name\"already exists"
     }
+    eval {ConfigurePage $w $name} $args
     set page [$widgets(nbframe) page $name]
     lappend tnInfo(tabs) $name
     set name2uid($name) "t[incr uid]"
@@ -658,6 +660,41 @@ proc ::mactabnotebook::NewPage {w name args} {
 	set tnInfo(pending) $id
     }
     return $page
+}
+
+
+proc ::mactabnotebook::PageConfigure {w name args} {
+
+    upvar ::mactabnotebook::${w}::tnInfo tnInfo
+
+    eval {ConfigurePage $w $name} $args
+    if {$tnInfo(pending) == ""} {
+	set id [after idle [list ::mactabnotebook::Build $w]]
+	set tnInfo(pending) $id
+    }
+}
+
+proc ::mactabnotebook::ConfigurePage {w name args} {
+
+    upvar ::mactabnotebook::${w}::tnInfo tnInfo
+    
+    foreach {key value} $args {
+	switch -- $key {
+	    -text {
+		set tnInfo($name,$key) $value
+	    }
+	    -image {
+		if {$value == ""} {
+		    catch {unset tnInfo($name,$key)}
+		} else {
+		    set tnInfo($name,$key) $value
+		}
+	    }
+	    default {
+		return -code error "Unknown option \"$key\" to newpage"
+	    }
+	}
+    }
 }
 
 proc ::mactabnotebook::Pages {w} {
@@ -725,6 +762,24 @@ proc ::mactabnotebook::DeletePage {w name} {
 	set tnInfo(pending) $id
     }
     return {}
+}
+
+
+proc ::mactabnotebook::GetUniqueName {w name} {
+    
+    upvar ::mactabnotebook::${w}::tnInfo tnInfo
+
+    if {[lsearch $tnInfo(tabs) $name] < 0} {
+	set uname $name
+    } else {
+	set i 2
+	set uname ${name}-${i}
+	while {[lsearch -exact $tnInfo(tabs) $uname] >= 0} {
+	    incr i
+	    set uname ${name}-${i}
+	}
+    }
+    return $uname
 }
 
 # mactabnotebook::Build --
@@ -1065,22 +1120,30 @@ proc ::mactabnotebook::ButtonPressTab {w name} {
 proc ::mactabnotebook::Display {w name {opt {}}} {
     
     variable widgetGlobals
-    upvar ::mactabnotebook::${w}::tnInfo tnInfo
-    upvar ::mactabnotebook::${w}::widgets widgets
-    upvar ::mactabnotebook::${w}::options options
     
     if {$widgetGlobals(debug) > 1} {
 	puts "::mactabnotebook::Display w=$w, name=$name"
     }
+
+    # We may have been deleted sionce this is an idle call.
+    if {![winfo exists $w]} {
+	return
+    }
+    upvar ::mactabnotebook::${w}::tnInfo tnInfo
+    upvar ::mactabnotebook::${w}::widgets widgets
+    upvar ::mactabnotebook::${w}::options options
+    
     if {![string equal $opt "tabsonly"]} {
 	$widgets(nbframe) displaypage $name
     }
+    set same 1
     if {![string equal $name $tnInfo(current)]} {
 	set tnInfo(previous) $tnInfo(current)
+	set same 0
     }
     set tnInfo(current) $name
     ConfigTabs $w
-    if {[llength $options(-selectcommand)] > 0} {
+    if {!$same && [llength $options(-selectcommand)] > 0} {
 	uplevel #0 $options(-selectcommand) [list $w $name]
     }
 }
@@ -1251,7 +1314,17 @@ proc ::mactabnotebook::DrawAluRect {wcan x0 y0 x1 y1 col tag} {
 #       the internal state is cleaned up, namespace deleted.
 
 proc ::mactabnotebook::DestroyHandler {w} {
-    
+
+    variable widgetGlobals
+    upvar ::mactabnotebook::${w}::tnInfo tnInfo
+
+    if {$widgetGlobals(debug) > 1} {
+	puts "::mactabnotebook::DestroyHandler w=$w, pending=$tnInfo(pending)"
+    }
+    if {$tnInfo(pending) != ""} {
+	after cancel $tnInfo(pending)
+    }
+
     # Remove the namespace with the widget.
     if {[string equal [winfo class $w] "MacTabnotebook"]} {
 	namespace delete ::mactabnotebook::${w}

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: HtmlImport.tcl,v 1.8 2004-03-13 15:21:58 matben Exp $
+# $Id: HtmlImport.tcl,v 1.9 2004-06-06 07:02:23 matben Exp $
 
 
 namespace eval ::HtmlImport:: {
@@ -242,7 +242,7 @@ proc ::HtmlImport::Import {wcan optListVar args} {
 proc ::HtmlImport::Clicked {id} {
     variable locals
     
-    ::Utils::OpenHtmlInBrowser $locals(id2file,$id)
+    ::Utils::OpenURLInBrowser $locals(id2file,$id)
 }
 
 # ::HtmlImport::Save --

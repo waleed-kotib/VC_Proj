@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.15 2004-05-29 13:20:58 matben Exp $
+# $Id: Disco.tcl,v 1.16 2004-06-06 07:02:20 matben Exp $
 
 package provide Disco 1.0
 
@@ -203,8 +203,7 @@ proc ::Jabber::Disco::ItemsCB {disconame type from subiq args} {
 		    }
 		}
 	    }
-	    ::Jabber::AddErrorLog [clock format [clock seconds] -format "%H:%M:%S"] \
-	      $from "Failed disco $from"
+	    ::Jabber::AddErrorLog $from "Failed disco $from"
 	}
 	ok - result {
 
@@ -241,8 +240,7 @@ proc ::Jabber::Disco::InfoCB {disconame type from subiq args} {
     
     ::Debug 2 "::Jabber::Disco::InfoCB type=$type, from=$from"
     if {$type != "ok"} {
-	::Jabber::AddErrorLog [clock format [clock seconds] -format "%H:%M:%S"] \
-	  $from $subiq
+	::Jabber::AddErrorLog $from $subiq
 	return
     }
     
@@ -391,8 +389,10 @@ proc ::Jabber::Disco::Build {w} {
     scrollbar $wxsc -orient horizontal -command [list $wtree xview]
     scrollbar $wysc -orient vertical -command [list $wtree yview]
     ::tree::tree $wtree -width 180 -height 100 -silent 1 -scrollwidth 400 \
-      -xscrollcommand [list $wxsc set]       \
-      -yscrollcommand [list $wysc set]       \
+      -xscrollcommand [list ::UI::ScrollSet $wxsc \
+      [list grid $wxsc -row 1 -column 0 -sticky ew]]  \
+      -yscrollcommand [list ::UI::ScrollSet $wysc \
+      [list grid $wysc -row 0 -column 1 -sticky ns]]  \
       -selectcommand [namespace current]::SelectCmd    \
       -closecommand [namespace current]::CloseTreeCmd  \
       -opencommand [namespace current]::OpenTreeCmd

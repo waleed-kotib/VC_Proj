@@ -2,7 +2,7 @@
 # 
 #       Provides a structure for code components.
 #       
-# $Id: component.tcl,v 1.2 2004-04-25 10:14:15 matben Exp $
+# $Id: component.tcl,v 1.3 2004-06-06 07:02:20 matben Exp $
 
 package provide component 1.0
 
@@ -20,12 +20,17 @@ proc component::lappend_auto_path {path} {
     lappend auto_path $path
 }
 
-proc component::register {name fileName initProc} {
+proc component::attempt {name fileName initProc} {
+    variable priv
+    
+    uplevel #0 [list source $fileName]
+    uplevel #0 $initProc
+}
+
+proc component::register {name} {
     variable priv
     
     set priv($name) 1
-    uplevel #0 [list source $fileName]
-    uplevel #0 $initProc
 }
 
 # component::load --
@@ -33,7 +38,7 @@ proc component::register {name fileName initProc} {
 #       Loads all cmpntIndex.tcl files.
 #       Each line in the cmpntIndex.tcl file defines a component to be loaded:
 #       
-#       component::register MyCool [file join $dir mycool.tcl] MyCoolInitProc
+#       component::attempt MyCool [file join $dir mycool.tcl] MyCoolInitProc
 
 proc component::load { } {
     

@@ -5,11 +5,13 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: OOB.tcl,v 1.29 2004-05-26 07:36:36 matben Exp $
+# $Id: OOB.tcl,v 1.30 2004-06-06 07:02:21 matben Exp $
 
 package provide OOB 1.0
 
 namespace eval ::Jabber::OOB:: {
+
+    ::hooks::add initHook            ::Jabber::OOB::InitHook
 
     variable locals
     set locals(initialLocalDir) [pwd]
@@ -17,6 +19,16 @@ namespace eval ::Jabber::OOB:: {
 
     # Running number for token.
     variable uid 0
+}
+
+proc ::Jabber::OOB::InitHook { } {
+    variable locals
+    
+    # Drag and Drop support...
+    set locals(haveTkDnD) 0
+    if {![catch {package require tkdnd}]} {
+	set locals(haveTkDnD) 1
+    }       
 }
 
 # Jabber::OOB::BuildSet --
@@ -82,6 +94,10 @@ proc ::Jabber::OOB::BuildSet {jid} {
     
     wm resizable $w 0 0
     bind $w <Return> ::Jabber::OOB::DoSend
+    if {$locals(haveTkDnD)} {
+	update
+	::Jabber::OOB::InitDnD $frmid.efile
+    }
     
     # Grab and focus.
     focus $w
@@ -92,6 +108,45 @@ proc ::Jabber::OOB::BuildSet {jid} {
     
     catch {grab release $w}
     catch {destroy $w}    
+}
+
+proc ::Jabber::OOB::InitDnD {win} {
+    
+    dnd bindtarget $win text/uri-list <Drop>      \
+      [list [namespace current]::DnDDrop %W %D %T]   
+    dnd bindtarget $win text/uri-list <DragEnter> \
+      [list [namespace current]::DnDEnter %W %A %D %T]   
+    dnd bindtarget $win text/uri-list <DragLeave> \
+      [list [namespace current]::DnDLeave %W %D %T]       
+}
+
+proc ::Jabber::OOB::DnDDrop {w data type} {
+    global  prefs
+    
+    variable localpath
+    ::Debug 2 "::Jabber::OOB::DnDDrop data=$data, type=$type"
+
+    # Take only first file.
+    set f [lindex $data 0]
+	
+    # Strip off any file:// prefix.
+    set f [string map {file:// ""} $f]
+    set f [uriencode::decodefile $f]
+    set localpath $f
+}
+
+proc ::Jabber::OOB::DnDEnter {w action data type} {
+    
+    ::Debug 2 "::Jabber::OOB::DnDEnter action=$action, data=$data, type=$type"
+
+    focus $w
+    set act "none"
+    return $act
+}
+
+proc ::Jabber::OOB::DnDLeave {w data type} {
+    
+    focus [winfo toplevel $w] 
 }
 
 proc ::Jabber::OOB::FileOpen { } {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.61 2004-05-27 13:59:10 matben Exp $
+# $Id: Roster.tcl,v 1.62 2004-06-06 07:02:21 matben Exp $
 
 package provide Roster 1.0
 
@@ -117,7 +117,7 @@ namespace eval ::Jabber::Roster:: {
 	mChatHistory   user      {::Jabber::Chat::BuildHistory $jid}
 	mRemoveUser    user      {::Jabber::Roster::SendRemove $jid}
 	separator      {}        {}
-	mStatus        any       @::Jabber::Roster::BuildPresenceMenu
+	mStatus        user      {::Jabber::Roster::DirectedPresenceDlg $jid}
 	mRefreshRoster any       {::Jabber::Roster::Refresh}
     }  
     
@@ -253,10 +253,12 @@ proc ::Jabber::Roster::Build {w} {
 	}
     }
 
-    eval {::tree::tree $wtree -width 180 -height 100 -silent 1  \
+    eval {::tree::tree $wtree -width 100 -height 100 -silent 1  \
       -scrollwidth 400  \
-      -xscrollcommand [list $wxsc set]       \
-      -yscrollcommand [list $wysc set]       \
+      -xscrollcommand [list ::UI::ScrollSet $wxsc \
+      [list grid $wxsc -row 1 -column 0 -sticky ew]]  \
+      -yscrollcommand [list ::UI::ScrollSet $wysc \
+      [list grid $wysc -row 0 -column 1 -sticky ns]]  \
       -selectcommand [namespace current]::SelectCmd   \
       -doubleclickcommand [namespace current]::DoubleClickCmd} $opts
     
@@ -1784,6 +1786,65 @@ proc ::Jabber::Roster::GetMyPresenceIcon { } {
     return $presenceIcon($jstate(status))
 }
 
+proc ::Jabber::Roster::DirectedPresenceDlg {jid} {
+    global  this wDlgs
+    
+    variable finishedDirPres -1
+
+    set w $wDlgs(jdirpres)
+    if {[winfo exists $w]} {
+	raise $w
+	return
+    }
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
+      -macclass {document closeBox}
+    wm title $w [::msgcat::mc {Set Directed Presence}]
+    
+    # Global frame.
+    frame $w.frall -borderwidth 1 -relief raised
+    pack  $w.frall -fill both -expand 1
+
+    label $w.frall.lmsg -wraplength 200 -justify left -text \
+      "Send directed presence to the user \"$jid\"."
+    
+    pack  $w.frall.lmsg -side top -anchor w -padx 4 -pady 1
+   
+    
+    
+    # Button part.
+    set frbot [frame $w.frall.frbot -borderwidth 0]
+    pack [button $frbot.btok -text [::msgcat::mc Set] -default active \
+      -command [list [namespace current]::SetDirectedPresence $w]]  \
+      -side right -padx 5 -pady 5
+    pack [button $frbot.btcancel -text [::msgcat::mc Cancel]  \
+      -command [list set [namespace current]::finishedDirPres 0]] \
+      -side right -padx 5 -pady 5
+    pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
+    
+    wm resizable $w 0 0
+    bind $w <Return> {}
+	
+    # Trick to resize the labels wraplength.
+    if {0} {
+	set script [format {
+	    update idletasks
+	    %s.lmsg configure -wraplength [expr [winfo reqwidth %s] - 20]
+	} $fpage $fpage]    
+	after idle $script
+    }
+    # Grab and focus.
+    set oldFocus [focus]
+    focus $w
+    catch {grab $w}
+    
+    # Wait here for a button press and window to be destroyed.
+    tkwait window $w
+    
+    catch {grab release $w}
+    catch {focus $oldFocus}
+    return [expr {($finishedDirPres <= 0) ? "cancel" : "set"}]
+}
+
 # Jabber::Roster::BuildStatusMenuButton --
 # 
 #       Status megawidget menubutton.
@@ -1794,7 +1855,6 @@ proc ::Jabber::Roster::GetMyPresenceIcon { } {
 proc ::Jabber::Roster::BuildStatusMenuButton {w} {
     
     set wmenu $w.menu
-    #label $w -bd 1 -image [::Jabber::Roster::GetMyPresenceIcon]
     button $w -bd 1 -image [::Jabber::Roster::GetMyPresenceIcon] \
       -width 16 -height 16
     $w configure -state disabled

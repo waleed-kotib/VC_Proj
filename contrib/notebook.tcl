@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: notebook.tcl,v 1.3 2004-01-13 14:50:20 matben Exp $
+# $Id: notebook.tcl,v 1.4 2004-06-06 07:02:20 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -117,7 +117,7 @@ proc ::notebook::notebook {w args} {
     }
     foreach {name value} $args {
 	if {![info exists widgetOptions($name)]} {
-	    error "unknown option \"$name\" for the notebook widget"
+	    return -code error "unknown option \"$name\" for the notebook widget"
 	}
     }
 
@@ -168,9 +168,10 @@ proc ::notebook::notebook {w args} {
     proc ::${w} {command args}   \
       "eval ::notebook::WidgetProc {$w} \$command \$args"
         
-    set nbInfo(count) 0
+    set nbInfo(uid) 0
     set nbInfo(pages) {}
     set nbInfo(current) {}
+    set nbInfo(pending) ""
     
     return $w
 }
@@ -203,7 +204,7 @@ proc ::notebook::WidgetProc {w command args} {
     switch -- $command {
 	cget {
 	    if {[llength $args] != 1} {
-		error "wrong # args: should be $w cget option"
+		return -code error "wrong # args: should be $w cget option"
 	    }
 	    set result $options($args)
 	}
@@ -215,9 +216,11 @@ proc ::notebook::WidgetProc {w command args} {
 	}
 	displaypage {
 	    if {[llength $args] != 1} {
-		error "wrong # args: should be $w displaypage pageName"
+		return -code error "wrong # args: should be $w displaypage pageName"
 	    }
-	    set result [eval {Display $w} $args 1]
+	    #set result [eval {Display $w} $args 1]
+	    #update idletasks
+	    set result [eval {Display $w} $args]
 	}
 	page {
 	    set result [eval {Page $w} $args]
@@ -226,7 +229,7 @@ proc ::notebook::WidgetProc {w command args} {
 	    set result [Pages $w]
 	}
 	default {
-	    error "unknown command \"$command\" of the notebook widget.\
+	    return -code error "unknown command \"$command\" of the notebook widget.\
 	      Must be one of $widgetCommands"
 	}
     }
@@ -257,7 +260,7 @@ proc ::notebook::Configure {w args} {
     # Error checking.
     foreach {name value} $args {
 	if {![info exists widgetOptions($name)]}  {
-	    error "unknown option for the notebook widget: $name"
+	    return -code error "unknown option for the notebook widget: $name"
 	}
     }
     if {[llength $args] == 0} {
@@ -283,7 +286,7 @@ proc ::notebook::Configure {w args} {
     
     # Error checking.
     if {[expr {[llength $args]%2}] == 1} {
-	error "value for \"[lindex $args end]\" missing"
+	return -code error "value for \"[lindex $args end]\" missing"
     }    
     
     if {[llength $args] > 0} {
@@ -311,14 +314,14 @@ proc ::notebook::Page {w name} {
     if {$widgetGlobals(debug) > 1} {
 	puts "::notebook::Page w=$w, name=$name"
     }
-    set page "$w.page[incr nbInfo(count)]"
+    set page "$w.page[incr nbInfo(uid)]"
     lappend nbInfo(pages) $page
     set nbInfo(page-$name) $page
     set nbInfo(name-$page) $name
     
     # We should probably add configuration options here.
     frame $page
-    if {$nbInfo(count) == 1} {
+    if {$nbInfo(uid) == 1} {
 	after idle [list ::notebook::Display $w $name 1]
     }
     return $page
@@ -356,10 +359,9 @@ proc ::notebook::DeletePage {w name} {
     if {[info exists nbInfo(page-$name)]} {
 	set page $nbInfo(page-$name)
     } else {
-	error "bad notebook page \"$name\""
+	return -code error "bad notebook page \"$name\""
     }
     set ind [lsearch -exact $nbInfo(pages) $page]
-    #puts "    page=$page, nbInfo(current)=$nbInfo(current), ind=$ind"
     if {$ind < 0} {
 	return -code error "Page \"$name\" is not there"
     }
@@ -371,7 +373,6 @@ proc ::notebook::DeletePage {w name} {
 	# Set next page to current.
 	set newInd [expr $ind + 1]
 	set newCurrentPage [lindex $nbInfo(pages) $newInd]
-	#puts "    newInd=$newInd"
 	if {$newInd >= [llength $nbInfo(pages)]} {
 	    
 	    # We are about to delete the last page, set current to next to last.
@@ -379,14 +380,13 @@ proc ::notebook::DeletePage {w name} {
 	}
     }
     set newCurrentName $nbInfo(name-$newCurrentPage)
-    #puts "newCurrentPage=$newCurrentPage, newCurrentName=$newCurrentName"
     unset nbInfo(page-$name)
     unset nbInfo(name-$page)
     set nbInfo(pages) [lreplace $nbInfo(pages) $ind $ind]
     
     # There can be a change in geometry if removed a large page.
-    catch {after cancel $nbInfo(displayId)}
-    set nbInfo(displayId)  \
+    catch {after cancel $nbInfo(pending)}
+    set nbInfo(pending)  \
       [after idle [list ::notebook::Display $w $newCurrentName 1]]
     after idle destroy $page
     return {}
@@ -410,7 +410,7 @@ proc ::notebook::Display {w name {force 0}} {
     upvar ::notebook::${w}::widgets widgets
 
     if {$widgetGlobals(debug) > 1} {
-	puts "::notebook::Display w=$w, name=$name"
+	puts "::notebook::Display w=$w, name=$name, force=$force"
     }
     set page {}
     if {[info exists nbInfo(page-$name)]} {
@@ -419,7 +419,10 @@ proc ::notebook::Display {w name {force 0}} {
 	set page $w.page$name
     }
     if {$page == ""} {
-	error "bad notebook page \"$name\""
+	return -code error "bad notebook page \"$name\""
+    }
+    if {$widgetGlobals(debug) > 2} {
+	puts "\t +++++ page=$page, nbInfo(current)=$nbInfo(current)"
     }
     
     # This proc can also sometimes be used to find out the correct size of
@@ -427,16 +430,18 @@ proc ::notebook::Display {w name {force 0}} {
     if {!$force && [string equal $page $nbInfo(current)]} {
 	return
     }
-     
-    # We shouldn't need to do this each time we change page.
-    if {$force} {
-	FixSize $w
-    }
     if {$nbInfo(current) != ""} {
 	pack forget $nbInfo(current)
     }
     pack $page -expand yes -fill both
     set nbInfo(current) $page
+
+    # We shouldn't need to do this each time we change page.
+    # The placement of FixSize is critical since its update can
+    # generate multiple entries to the Display proc!
+    if {$force} {
+	FixSize $w
+    }
 }
 
 # notebook::FixSize --
@@ -462,7 +467,6 @@ proc ::notebook::FixSize {win} {
     set maxw 0
     set maxh 0
     foreach page $nbInfo(pages) {
-	#puts "   page=$page"
 	set w [winfo reqwidth $page]
 	if {$w > $maxw} {
 	    set maxw $w
@@ -495,6 +499,12 @@ proc ::notebook::FixSize {win} {
 
 proc ::notebook::DestroyHandler {w} {
     
+    upvar ::notebook::${w}::nbInfo nbInfo
+
+    if {$nbInfo(pending) != ""} {
+	catch {after cancel $nbInfo(pending)}
+    }
+
     # Remove the namespace with the widget.
     if {[string equal [winfo class $w] {Notebook}]} {
 	namespace delete ::notebook::${w}

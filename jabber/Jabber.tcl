@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.86 2004-05-26 07:36:35 matben Exp $
+# $Id: Jabber.tcl,v 1.87 2004-06-06 07:02:20 matben Exp $
 
 package provide Jabber 1.0
 
@@ -767,8 +767,7 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 		  -title [::msgcat::mc {Presence Error}] \
 		  -message [FormatTextForMessageBox $msg]	
 	    }
-	    ::Jabber::AddErrorLog [clock format [clock seconds] -format "%H:%M:%S"]  \
-	      $from $msg
+	    ::Jabber::AddErrorLog $from $msg
 	}
     }
 }
@@ -876,9 +875,10 @@ proc ::Jabber::DebugCmd { } {
     }
 }
 
-proc ::Jabber::AddErrorLog {tm jid msg} {    
+proc ::Jabber::AddErrorLog {jid msg} {    
     variable jerror
     
+    set tm [clock format [clock seconds] -format "%H:%M:%S"]
     lappend jerror [list $tm $jid $msg]
 }
 
@@ -1368,12 +1368,13 @@ proc ::Jabber::SetPrivateData { } {
     global  prefs
     
     variable jstate
+    variable jserver
     variable privatexmlns
     
     # Build tag and attributes lists to 'private_set'.
     set ip [::Network::GetThisOutsideIPAddress]
     $jstate(jlib) private_set $privatexmlns(public)  \
-      [list ::Jabber::SetPrivateDataCallback private_set]   \
+      [list ::Jabber::SetPrivateDataCallback $jserver(this)]   \
       -server [list $ip [list resource $jstate(meres)  \
       port $prefs(thisServPort)]]       \
       -httpd [list $ip [list resource $jstate(meres)   \
@@ -1389,8 +1390,7 @@ proc ::Jabber::SetPrivateDataCallback {jid jlibName what theQuery} {
 
     if {[string equal $what "error"]} {
 	set jidPublic(haveit) 0
-	::Jabber::AddErrorLog [clock format [clock seconds] -format "%H:%M:%S"]  \
-	  "" "Failed setting private data: $theQuery"	    
+	::Jabber::AddErrorLog $jid "Failed setting private data: $theQuery"	    
     } else {
 	set jidPublic(haveit) 1
     }
@@ -1505,8 +1505,7 @@ proc ::Jabber::GetLastResult {from silent jlibname type subiq} {
 
     if {[string equal $type "error"]} {
 	set msg [::msgcat::mc jamesserrlastactive $from [lindex $subiq 1]]
-	::Jabber::AddErrorLog [clock format [clock seconds] -format "%H:%M:%S"]  \
-	  $from $msg	    
+	::Jabber::AddErrorLog $from $msg	    
 	if {!$silent} {
 	    tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
 	      -message [FormatTextForMessageBox $msg]
@@ -1539,8 +1538,7 @@ proc ::Jabber::GetLastResult {from silent jlibname type subiq} {
 		set msg1 [::msgcat::mc jamessuptime]
 	    }
 	    tk_messageBox -title [::msgcat::mc {Last Activity}] -icon info  \
-	      -type ok -message \
-	      [FormatTextForMessageBox "$msg1 $uptime. $msg"]
+	      -type ok -message [FormatTextForMessageBox "$msg1 $uptime. $msg"]
 	}
     }
 }
@@ -1567,8 +1565,8 @@ proc ::Jabber::GetTime {to args} {
 proc ::Jabber::GetTimeResult {from silent jlibname type subiq} {
 
     if {[string equal $type "error"]} {
-	::Jabber::AddErrorLog [clock format [clock seconds] -format "%H:%M:%S"]  \
-	  $from "We received an error when quering its time info.\
+	::Jabber::AddErrorLog $from  \
+	  "We received an error when quering its time info.\
 	  The error was: [lindex $subiq 1]"	    
 	if {!$silent} {
 	    tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
@@ -1627,8 +1625,8 @@ proc ::Jabber::GetVersionResult {from silent jlibname type subiq} {
     set fontSB [option get . fontSmallBold {}]
     
     if {[string equal $type "error"]} {
-	::Jabber::AddErrorLog [clock format [clock seconds] -format "%H:%M:%S"]  \
-	  $from [::msgcat::mc jamesserrvers $from [lindex $subiq 1]]
+	::Jabber::AddErrorLog $from  \
+	  [::msgcat::mc jamesserrvers $from [lindex $subiq 1]]
 	if {!$silent} {
 	    tk_messageBox -title [::msgcat::mc Error] -icon error -type ok \
 	      -message [FormatTextForMessageBox \

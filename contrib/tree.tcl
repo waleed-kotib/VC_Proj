@@ -25,7 +25,7 @@
 # 
 # Copyright (C) 2002-2004 Mats Bengtsson
 # 
-# $Id: tree.tcl,v 1.25 2004-05-23 13:18:08 matben Exp $
+# $Id: tree.tcl,v 1.26 2004-06-06 07:02:20 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -1490,11 +1490,15 @@ proc ::tree::Build {w} {
     $can lower tpyj ttreev
     $can lower tbg ttreev
 
-    set h [lindex [$can bbox (ttreev||tpyj)] 3]
-    if {($h == "") || ($h < $options(-height))} {
-	set h $options(-height)
+    set hbbox [lindex [$can bbox (ttreev||tpyj)] 3]
+    set wbbox [expr [lindex [$can bbox (ttreeh||x)] 2] + 10]
+    if {($hbbox == "") || ($hbbox < $options(-height))} {
+	set hbbox $options(-height)
     }
-    $can configure -scrollregion [concat 0 0 $options(-scrollwidth) $h]
+    if {($wbbox == "") || ($wbbox < $options(-width))} {
+	set wbbox $options(-width)
+    }
+    $can configure -scrollregion [concat 0 0 $wbbox $hbbox]
     DrawSelection $w
 }
 

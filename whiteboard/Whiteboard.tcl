@@ -7,9 +7,10 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.1 2004-06-06 06:41:31 matben Exp $
+# $Id: Whiteboard.tcl,v 1.2 2004-06-06 07:02:23 matben Exp $
 
 package require entrycomp
+package require moviecontroller
 package require uriencode
 package require CanvasDraw
 package require CanvasText
@@ -18,10 +19,11 @@ package require CanvasCutCopyPaste
 package require CanvasCmd
 package require CanvasFile
 package require FilePrefs
+package require GetFileIface
 package require Import
 package require ItemInspector
+package require PutFileIface
 package require WBPrefs
-package require moviecontroller
 
 
 package provide Whiteboard 1.0

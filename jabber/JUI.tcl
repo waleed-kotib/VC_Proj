@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.40 2004-05-26 07:36:35 matben Exp $
+# $Id: JUI.tcl,v 1.41 2004-06-06 07:02:20 matben Exp $
 
 package provide JUI 1.0
 
@@ -80,8 +80,6 @@ namespace eval ::Jabber::UI:: {
 	{command   mNewWhiteboard      {::Jabber::WB::NewWhiteboard}  normal   N}
 	{command   mCloseWindow        {::UI::DoCloseWindow}          normal   W}
 	{command   mPreferences...     {::Preferences::Build}         normal   {}}
-	{command   mUpdateCheck        {
-	    ::AutoUpdate::Get $prefs(urlAutoUpdate) -silent 0}        normal   {}}
 	{separator}
 	{command   mQuit               {::UserActions::DoQuit}        normal   Q}
     }
@@ -111,11 +109,17 @@ namespace eval ::Jabber::UI:: {
 	    package require SetupAss
 	    ::Jabber::SetupAss::SetupAss}                             normal {}}
 	{command     mRemoveAccount {::Jabber::Register::Remove}      disabled {}}	
-	{separator}
-	{command     mErrorLog      {::Jabber::ErrorLogDlg}           normal   {}}
-	{checkbutton mDebug         {::Jabber::DebugCmd}              normal   {} \
-	  {-variable ::Jabber::jstate(debugCmd)}}
-    }    
+    }
+    set menuDefs(rost,info) {    
+	{command   mUpdateCheck        {
+	    ::AutoUpdate::Get $prefs(urlAutoUpdate) -silent 0}        normal   {}}
+	    {command     mErrorLog      {::Jabber::ErrorLogDlg}       normal   {}}
+	    {checkbutton mDebug         {::Jabber::DebugCmd}          normal   {} \
+	      {-variable ::Jabber::jstate(debugCmd)}}
+	    {separator}
+	    {command     mCoccinellaHome {::Jabber::UI::OpenCoccinellaURL} normal {}}
+	    {command     mBugReport     {::Jabber::UI::OpenBugURL}   normal {}}
+    }
 
     # The status menu is built dynamically due to the -image options on 8.4.
     if {!$prefs(stripJabber)} {
@@ -198,6 +202,7 @@ proc ::Jabber::UI::Build {w} {
 	::UI::NewMenu $wtop ${wmenu}.edit  mEdit   $menuDefs(min,edit)   normal
     }
     ::UI::NewMenu $wtop ${wmenu}.jabber  mJabber   $menuDefs(rost,jabber) normal
+    ::UI::NewMenu $wtop ${wmenu}.info    mInfo     $menuDefs(rost,info)   normal
     $w configure -menu $wmenu
     
     # Use a frame here just to be able to set the class (JMain) which
@@ -351,7 +356,7 @@ proc ::Jabber::UI::LoginCmd { } {
 
 proc ::Jabber::UI::LogoutHook { } {
     
-    ::Jabber::UI::SetStatusMessage "Logged out"
+    ::Jabber::UI::SetStatusMessage [::msgcat::mc {Logged out}]
     ::Jabber::UI::FixUIWhen "disconnect"
     ::Jabber::UI::WhenSetStatus "unavailable"
     
@@ -365,6 +370,17 @@ proc ::Jabber::UI::GetRosterWmenu { } {
     variable jwapp
 
     return $jwapp(wmenu)
+}
+
+proc ::Jabber::UI::OpenCoccinellaURL { } {
+    
+    ::Utils::OpenURLInBrowser "http://hem.fyristorg.com/matben/"
+}
+
+proc ::Jabber::UI::OpenBugURL { } {
+    
+    ::Utils::OpenURLInBrowser  \
+      "http://sourceforge.net/tracker/?group_id=68334&atid=520863"
 }
 
 # Jabber::UI::NewPage --

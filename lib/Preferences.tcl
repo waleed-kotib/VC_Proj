@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Preferences.tcl,v 1.50 2004-05-06 13:41:11 matben Exp $
+# $Id: Preferences.tcl,v 1.51 2004-06-06 07:02:21 matben Exp $
  
 package require notebook
 package require tree
@@ -114,12 +114,15 @@ proc ::Preferences::Build { } {
       -fill y -side left -padx 4 -pady 4
     set frtree $w.frall.fr.t.frtree
     pack [frame $frtree] -fill both -expand 1 -side left
+    
+    # Set a width in the label to act as a spacer when scrollbar is unpacked.
     pack [label $frtree.la -text [::msgcat::mc {Settings Panels}]  \
-      -font $fontSB -relief raised -bd 1 -bg #bdbdbd] -side top -fill x
+      -font $fontSB -relief raised -width 24 -bd 1 -bg #bdbdbd] -side top -fill x
     set wtree $frtree.t
-    ::tree::tree $wtree -width 140 -height 300 \
-      -yscrollcommand [list $frtree.sby set]       \
-      -selectcommand ::Preferences::SelectCmd   \
+    ::tree::tree $wtree -width 100 -height 300 \
+      -yscrollcommand [list ::UI::ScrollSet $frtree.sby \
+      [list pack $frtree.sby -side right -fill y]]  \
+    -selectcommand ::Preferences::SelectCmd   \
       -doubleclickcommand {}
     scrollbar $frtree.sby -orient vertical -command [list $wtree yview]
     

@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.57 2004-05-29 13:20:58 matben Exp $
+# $Id: Coccinella.tcl,v 1.58 2004-06-06 07:02:20 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -100,8 +100,8 @@ proc resolve_cmd_realpath {infile} {
 # The application major and minor version numbers; should only be written to
 # default file, never read.
 set prefs(majorVers) 0
-set prefs(minorVers) 94
-set prefs(releaseVers) 11
+set prefs(minorVers) 95
+set prefs(releaseVers) 0
 set prefs(fullVers) $prefs(majorVers).$prefs(minorVers).$prefs(releaseVers)
 
 # We may be embedded in another application, say an ActiveX component.
@@ -276,8 +276,9 @@ if {$privariaFlag} {
     set prefs(stripJabber) 0
 }
 
-# Add our lib directory to our search path.
+# Add our lib and whiteboard directory to our search path.
 lappend auto_path [file join $this(path) lib]
+lappend auto_path [file join $this(path) whiteboard]
 
 # Add the contrib directory which has things like widgets etc. 
 lappend auto_path [file join $this(path) contrib]
@@ -371,11 +372,7 @@ set allLibSourceFiles {
   Base64Icons.tcl        \
   EditDialogs.tcl        \
   FileUtils.tcl          \
-  ItemInspector.tcl      \
-  Import.tcl             \
-  GetFileIface.tcl       \
   Network.tcl            \
-  PutFileIface.tcl       \
   TheServer.tcl          \
   UI.tcl                 \
   UserActions.tcl        \
@@ -457,13 +454,11 @@ set listOfPackages {
     fontselection
     headlabel
     hooks
-    moviecontroller
     sha1pure
     tablelist
     undo
     Dialogs
     AutoUpdate
-    FilesAndCanvas
     FileCache
     Preferences
     PreferencesUtils

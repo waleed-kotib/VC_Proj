@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  
-# $Id: buttontray.tcl,v 1.7 2004-03-31 07:55:17 matben Exp $
+# $Id: buttontray.tcl,v 1.8 2004-06-06 07:02:20 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -145,7 +145,7 @@ proc ::buttontray::buttontray {w height args} {
     }
     foreach {name value} $args {
 	if {![info exists widgetOptions($name)]} {
-	    error "unknown option \"$name\" for the buttontray widget"
+	    return -code error "unknown option \"$name\" for the buttontray widget"
 	}
     }
 
@@ -239,7 +239,7 @@ proc ::buttontray::WidgetProc {w command args} {
 	}
 	cget {
 	    if {[llength $args] != 1} {
-		error "wrong # args: should be $w cget option"
+		return -code error "wrong # args: should be $w cget option"
 	    }
 	    set result $options($args)
 	}
@@ -253,7 +253,7 @@ proc ::buttontray::WidgetProc {w command args} {
 	    set result [eval {NewButton $w} $args]
 	}
 	default {
-	    error "unknown command \"$command\" of the buttontray widget.\
+	    return -code error "unknown command \"$command\" of the buttontray widget.\
 	      Must be one of $widgetCommands"
 	}
     }
@@ -280,7 +280,7 @@ proc ::buttontray::Configure {w args} {
     # Error checking.
     foreach {name value} $args  {
 	if {![info exists widgetOptions($name)]}  {
-	    error "unknown option for the moviecontroller: $name"
+	    return -code error "unknown option for the moviecontroller: $name"
 	}
     }
     if {[llength $args] == 0}  {
@@ -305,7 +305,7 @@ proc ::buttontray::Configure {w args} {
     
     # Error checking.
     if {[expr {[llength $args]%2}] == 1}  {
-	error "value for \"[lindex $args end]\" missing"
+	return -code error "value for \"[lindex $args end]\" missing"
     }    
 	
     # Process the new configuration options.
@@ -403,8 +403,8 @@ proc ::buttontray::Enter {w name which} {
     set coords [list \
       [expr $x0-$h2] $y0 [expr $x0+$h2] $y0 \
       [expr $x1-$h2] $y0 [expr $x1+$h2] $y0 \
-    [expr $x1+$h2] $y1 [expr $x1-$h2] $y1 \
-    [expr $x0+$h2] $y1 [expr $x0-$h2] $y1]
+      [expr $x1+$h2] $y1 [expr $x1-$h2] $y1 \
+      [expr $x0+$h2] $y1 [expr $x0-$h2] $y1]
     $can itemconfigure $idtxt -fill $activeforeground
     $can create polygon $coords -fill $activebackground  \
       -tags activebg -outline "" -smooth 1 -splinesteps 10
