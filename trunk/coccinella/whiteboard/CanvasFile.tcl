@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasFile.tcl,v 1.10 2004-08-13 15:27:26 matben Exp $
+# $Id: CanvasFile.tcl,v 1.11 2004-08-30 07:46:08 matben Exp $
  
 package require can2svg
 package require svg2can
@@ -349,7 +349,7 @@ proc ::CanvasFile::FileToCanvasVer2 {w fd absPath args} {
 	    set utag [::CanvasUtils::NewUtag]
 	    set line [::CanvasUtils::ReplaceUtag $line $utag]
 	} else {
-	    set utag [::CanvasUtils::GetUtagFromCmd $line]
+	    set utag [::CanvasUtils::GetUtagFromCreateCmd $line]
 	}
 	
 	switch -- $cmd {
@@ -393,6 +393,15 @@ proc ::CanvasFile::FileToCanvasVer2 {w fd absPath args} {
 	    import {
 		set errMsg ""
 
+		# Be sure to remove any existing -above and -below since
+		# they refer to wrong utags.
+		foreach key {-above -below} {
+		    set ind [lsearch $line $key]
+		    if {$ind >= 0} {
+			set line [lreplace $line $ind [expr $ind+1]]
+		    }
+		}
+		
 		# Assume the order in the file is also stacking order.
 		if {[info exists previousUtag]} {
 		    lappend line -above $previousUtag

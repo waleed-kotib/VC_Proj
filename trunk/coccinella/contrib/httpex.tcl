@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson only for the new and rewritten parts.
 #
-# $Id: httpex.tcl,v 1.13 2004-07-30 12:55:53 matben Exp $
+# $Id: httpex.tcl,v 1.14 2004-08-30 07:46:08 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -1493,7 +1493,7 @@ proc httpex::reset {token {why reset}} {
     if {[info exists state(error)]} {
 	set errorlist $state(error)
 	unset state
-	eval error $errorlist
+	eval ::error $errorlist
     }
 }
 

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.16 2004-08-15 08:00:34 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.17 2004-08-30 07:46:08 matben Exp $
 
 package require sha1pure
 
@@ -378,19 +378,40 @@ proc ::CanvasUtils::GetUtagPrefix { } {
     return $utagpref
 }
 
-# CanvasUtils::GetUtagFromCmd --
+# CanvasUtils::GetUtagFromCreateCmd --
 #
-#       Takes a canvas command and returns the utag if any.
+#       Takes a canvas create (import) command and returns the utag if any.
 
-proc ::CanvasUtils::GetUtagFromCmd {str} {
+proc ::CanvasUtils::GetUtagFromCreateCmd {cmd} {
     
-    set ind [lsearch -exact $str "-tags"]
+    set ind [lsearch -exact $cmd "-tags"]
     if {$ind >= 0} {
-	return [lsearch -inline -regexp [lindex $str [incr ind]]  \
+	return [lsearch -inline -regexp [lindex $cmd [incr ind]]  \
 	  {^[^/: ]+/[0-9]+$}]
     } else {  
 	return ""
     }
+}
+
+# CanvasUtils::GetUtagFromCanvasCmd --
+# 
+#       Without any CANVAS: prefix.
+#       Only relevant canvas commands.
+
+proc ::CanvasUtils::GetUtagFromCanvasCmd {cmd} {
+
+    set utag ""
+    
+    switch -- [lindex $cmd 0] {
+	create {
+	    set utag [::CanvasUtils::GetUtagFromCreateCmd $cmd]
+	}
+	coords - dchars - delete - insert - itemconfigure - lower - move - \
+	  raise - scale {
+	    set utag [lindex $cmd 1]
+	}
+    }
+    return $utag
 }
 
 proc ::CanvasUtils::GetUtagFromTagList {tags} {
@@ -465,7 +486,7 @@ proc ::CanvasUtils::GetUndoCommand {wtop cmd} {
 	    set undo [list ::CanvasUtils::Command $wtop $canUndo]	
 	}
 	create {
-	    set utag [::CanvasUtils::GetUtagFromCmd $cmd]
+	    set utag [::CanvasUtils::GetUtagFromCreateCmd $cmd]
 	    if {$utag != ""} {
 		set canUndo [list delete $utag]
 		set undo [list ::CanvasUtils::Command $wtop $canUndo]	
@@ -846,7 +867,7 @@ proc ::CanvasUtils::GetImportCmdForQTMovie {cmd args} {
 	    return -code error "Unknown -uritype \"$argsArr(-uritype)\""
 	}
     }
-    set optsArr(-tags) [::CanvasUtils::GetUtagFromCmd $cmd]
+    set optsArr(-tags) [::CanvasUtils::GetUtagFromCreateCmd $cmd]
     set optsArr(-mime) [::Types::GetMimeTypeForFileName $movFile]
     
     return [concat import $coords [array get optsArr]]
@@ -875,7 +896,7 @@ proc ::CanvasUtils::GetImportCmdForSnack {cmd args} {
     array set optsArr [eval {
 	::CanvasUtils::GetImportOptsURI $argsArr(-uritype) $soundFile
     } $args]
-    set optsArr(-tags) [::CanvasUtils::GetUtagFromCmd $cmd]
+    set optsArr(-tags) [::CanvasUtils::GetUtagFromCreateCmd $cmd]
     set optsArr(-mime) [::Types::GetMimeTypeForFileName $soundFile]
     
     return [concat import $coords [array get optsArr]]
@@ -1049,7 +1070,7 @@ proc ::CanvasUtils::CreateItem {w args} {
     
     set wtop [::UI::GetToplevelNS $w]
 
-    set utag [::CanvasUtils::GetUtagFromCmd $args]
+    set utag [::CanvasUtils::GetUtagFromCreateCmd $args]
     set cmd [concat create $args]
     set undocmd [list delete $utag]
     
@@ -1891,6 +1912,8 @@ proc ::CanvasUtils::HandleCanvasDraw {wtop instr args} {
 	undo::add [::WB::GetUndoToken $wtop] $undo $redo
     }
     
+    eval {::hooks::run whiteboardPreCanvasDraw $wtop $bsinstr} $args
+    
     # The 'import' command is an exception case (for the future). 
     if {[string equal $cmd "import"]} {
 	eval {::Import::HandleImportCmd $wServCan $bsinstr -where local} $args
@@ -1951,6 +1974,8 @@ proc ::CanvasUtils::HandleCanvasDraw {wtop instr args} {
     foreach pcmd $postCmds {
 	eval $pcmd
     }
+    
+    eval {::hooks::run whiteboardPostCanvasDraw $wtop $bsinstr} $args
 }
 
 # CanvasUtils::CanvasDrawSafe --
