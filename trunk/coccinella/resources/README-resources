@@ -12,7 +12,7 @@ If the theme is set in the prefs file, the themeName.rdb
 file is read. This is first searched for inside the sources and then 
 in the alternative user directory. You find this directory
 by using the Jabber/Debug menu command, and write
-puts $this(altResourcedbPath)
+puts $this(altResourcePath)
 Typically you'll have a path .../Coccinella/resources/
 
 There are several levels of options that can be set.

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Rosticons.tcl,v 1.5 2004-11-20 08:13:52 matben Exp $
+# $Id: Rosticons.tcl,v 1.6 2004-11-23 08:55:23 matben Exp $
 
 package provide Rosticons 1.0
 
@@ -27,14 +27,14 @@ proc ::Rosticons::InitPrefsHook { } {
     variable priv
     upvar ::Jabber::jprefs jprefs
 
-    set jprefs(rost,iconSet) "default"
+    set jprefs(rost,iconSet)     "default"
     set jprefs(rost,haveWBicons) 1
     
     # Do NOT store the complete path!
     ::PreferencesUtils::Add [list  \
+      [list ::Jabber::jprefs(rost,haveWBicons) jprefs_rost_haveWBicons $jprefs(rost,haveWBicons)] \
       [list ::Jabber::jprefs(rost,iconSet) jprefs_rost_iconSet $jprefs(rost,iconSet)]]
 
-    set jprefs(rost,iconSet) "default"
 }
 
 proc ::Rosticons::Init { } {

@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.74 2004-10-21 07:43:56 matben Exp $
+# $Id: UI.tcl,v 1.75 2004-11-23 08:55:23 matben Exp $
 
 package require entrycomp
 package require alertbox
@@ -45,9 +45,11 @@ proc ::UI::Init {} {
     
     ::Debug 2 "::UI::Init"    
     
-    # Standard button icons.
+    # Standard button icons. 
+    # Special solution to be able to set image via the option database.
     ::Theme::GetImage [option get . buttonOKImage {}] -keepname 1
     ::Theme::GetImage [option get . buttonCancelImage {}] -keepname 1    
+    ::Theme::GetImage [option get . buttonTrayImage {}] -keepname 1    
 }
 
 # UI::InitMenuDefs --

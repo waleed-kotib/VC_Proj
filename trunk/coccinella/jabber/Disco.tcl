@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.39 2004-11-15 08:51:13 matben Exp $
+# $Id: Disco.tcl,v 1.40 2004-11-23 08:55:22 matben Exp $
 
 package provide Disco 1.0
 
@@ -17,7 +17,18 @@ namespace eval ::Jabber::Disco:: {
     ::hooks::register logoutHook         ::Jabber::Disco::LogoutHook
     ::hooks::register presenceHook       ::Jabber::Disco::PresenceHook
 
-    option add *Disco.waveImage            wave           widgetDefault
+    # Standard widgets and standard options.
+    option add *Disco.borderWidth           0               50
+    option add *Disco.relief                flat            50
+    option add *Disco.pad.padX              4               50
+    option add *Disco.pad.padY              4               50
+    option add *Disco*box.borderWidth       1               50
+    option add *Disco*box.relief            sunken          50
+    option add *Disco.stat.f.padX           8               50
+    option add *Disco.stat.f.padY           2               50
+
+    # Specials.
+    option add *Disco.waveImage             wave            widgetDefault
 
     # Common xml namespaces.
     variable xmlns
@@ -436,24 +447,40 @@ proc ::Jabber::Disco::Build {w} {
     
     set fontS [option get . fontSmall {}]
 
-    # The frame of class Disco.
-    frame $w -borderwidth 0 -relief flat -class Disco
-    set wbrowser $w
-        
-    set wwave $w.fs
+    # The frame of class Disco. D = -bd 0 -relief flat
+    frame $w -class Disco
+
+    # Keep empty frame for any padding.
+    frame $w.tpad
+    pack  $w.tpad -side top -fill x
+
+    # D = -padx 0 -pady 0
+    frame $w.stat
+    frame $w.stat.f
+    pack  $w.stat   -side bottom -fill x
+    pack  $w.stat.f -side bottom -fill x
+    set wwave $w.stat.f.wa
     set waveImage [::Theme::GetImage [option get $w waveImage {}]]  
-    ::wavelabel::wavelabel $wwave -relief groove -bd 2 \
-      -type image -image $waveImage
-    pack $wwave -side bottom -fill x -padx 8 -pady 2
+    ::wavelabel::wavelabel $wwave -type image -image $waveImage
+    pack $wwave -side bottom -fill x
     
-    set wbox $w.box
-    pack [frame $wbox -border 1 -relief sunken]   \
-      -side top -fill both -expand 1 -padx 4 -pady 4
-    set wtree $wbox.tree
-    set wxsc $wbox.xsc
-    set wysc $wbox.ysc
-    scrollbar $wxsc -orient horizontal -command [list $wtree xview]
-    scrollbar $wysc -orient vertical -command [list $wtree yview]
+    # Tree frame with scrollbars.
+    set wdisco  $w
+    set wpad    $w.pad
+    set wbox    $w.pad.box
+    set wxsc    $wbox.xsc
+    set wysc    $wbox.ysc
+    set wtree   $wbox.tree
+    
+    # D = -padx 4 -pady 4
+    frame $wpad
+    pack  $wpad -side top -fill both -expand 1
+
+    # D = -border 1 -relief sunken
+    frame $wbox
+    pack  $wbox -side top -fill both -expand 1
+    scrollbar $wxsc -command [list $wtree xview] -orient horizontal
+    scrollbar $wysc -command [list $wtree yview] -orient vertical
     ::tree::tree $wtree -width 180 -height 100 -silent 1 -scrollwidth 400 \
       -xscrollcommand [list ::UI::ScrollSet $wxsc \
       [list grid $wxsc -row 1 -column 0 -sticky ew]]  \
@@ -474,7 +501,7 @@ proc ::Jabber::Disco::Build {w} {
     grid $wysc  -row 0 -column 1 -sticky ns
     grid $wxsc  -row 1 -column 0 -sticky ew
     grid columnconfigure $wbox 0 -weight 1
-    grid rowconfigure $wbox 0 -weight 1
+    grid rowconfigure    $wbox 0 -weight 1
 	
     # All tree content is set from browse callback from the browse object.
     

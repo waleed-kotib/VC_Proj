@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.83 2004-11-20 08:13:51 matben Exp $
+# $Id: GroupChat.tcl,v 1.84 2004-11-23 08:55:22 matben Exp $
 
 package require History
 
@@ -95,6 +95,18 @@ namespace eval ::Jabber::GroupChat:: {
 	{histhead    -background          histHeadBackground    Background}
 	{histhead    -font                histHeadFont          Font}
     }
+    
+    # Standard wigets.
+    option add *GroupChat.frall.borderWidth          1               50
+    option add *GroupChat.frall.relief               raised          50
+    option add *GroupChat*top.padX                   4               50
+    option add *GroupChat*top.padY                   2               50
+    option add *GroupChat*divt.borderWidth           2               50
+    option add *GroupChat*divt.relief                sunken          50
+
+    option add *GroupChat*bot.padX                   10              50
+    option add *GroupChat*bot.padY                   8               50
+    
     
     # Local stuff
     variable enteruid 0
@@ -628,11 +640,12 @@ proc ::Jabber::GroupChat::Build {roomjid args} {
     }
     
     # Global frame.
-    frame $w.frall -borderwidth 1 -relief raised
-    pack  $w.frall -fill both -expand 1 -ipadx 4
+    frame $w.frall
+    pack  $w.frall -fill both -expand 1
     
     # Widget paths.
-    set wtray     $w.frall.tray
+    set wtop      $w.frall.top
+    set wtray     $wtop.tray
     set frmid     $w.frall.frmid
     set wtxt      $frmid.frtxt
     set wtext     $wtxt.0.text
@@ -657,6 +670,10 @@ proc ::Jabber::GroupChat::Build {roomjid args} {
     set iconInfoDis     [::Theme::GetImage [option get $w infoDisImage {}]]
     set iconPrint       [::Theme::GetImage [option get $w printImage {}]]
     set iconPrintDis    [::Theme::GetImage [option get $w printDisImage {}]]
+
+    # D = -padx 4 -pady 2
+    frame $wtop
+    pack  $wtop -side top -fill x
 
     ::buttontray::buttontray $wtray
     pack $wtray -side top -fill x -padx 4 -pady 2
@@ -685,8 +702,8 @@ proc ::Jabber::GroupChat::Build {roomjid args} {
     set shortBtWidth [expr [$wtray minwidth] + 8]
 
     # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack $frbot -side bottom -fill x -padx 10 -pady 8
+    set frbot [frame $w.frall.bot]
+    pack $frbot -side bottom -fill x
     pack [button $frbot.btok -text [mc Send]  \
       -default active -command [list [namespace current]::Send $token]] \
       -side right -padx 5 -pady 5
@@ -710,7 +727,8 @@ proc ::Jabber::GroupChat::Build {roomjid args} {
       -variable $token\(active)]  \
       -side left -padx 5
             
-    pack [frame $w.frall.div2 -bd 2 -relief sunken -height 2] -fill x -side top
+    # D = -bd 2 -relief sunken
+    pack [frame $w.frall.divt] -fill x -side top
     
     # Header fields.
     set   frtop [frame $w.frall.frtop -borderwidth 0]

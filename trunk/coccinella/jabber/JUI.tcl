@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.70 2004-11-20 08:13:51 matben Exp $
+# $Id: JUI.tcl,v 1.71 2004-11-23 08:55:23 matben Exp $
 
 package provide JUI 1.0
 
@@ -32,6 +32,9 @@ namespace eval ::Jabber::UI:: {
     option add *JMain.head.borderWidth            0               50 
     option add *JMain.head.relief                 flat            50
 
+    option add *JMain.statusWidgetStyle           button          50
+    option add *JMain.statusWidgetImage           ""              50
+
     # Other icons.
     option add *JMain.contactOffImage             contactOff      widgetDefault
     option add *JMain.contactOnImage              contactOn       widgetDefault
@@ -46,6 +49,8 @@ namespace eval ::Jabber::UI:: {
     option add *JMain.bot.padY                    0               50
     option add *JMain.bot.relief                  raised          50
     option add *JMain.bpad.height                 0               50
+    option add *JMain.bot.f.pad.padX              6               50
+    option add *JMain.bot.f.pad.padY              2               50
  
     option add *JMain.ButtonTray.borderWidth      1               50
     option add *JMain.ButtonTray.relief           raised          50
@@ -307,8 +312,10 @@ proc ::Jabber::UI::Build {w} {
     set iconContactOff [::Theme::GetImage [option get $wmain contactOffImage {}]]
     set iconResize     [::Theme::GetImage [option get $wmain resizeHandleImage {}]]
     set iconRoster     [::Theme::GetImage [option get $wmain roster16Image {}]]
-        
-    set fontS [option get . fontSmall {}]
+    set statusImage    [::Theme::GetImage [option get $wmain statusWidgetImage {}]]
+
+    set statusStyle  [option get $wmain statusWidgetStyle {}]
+    set fontS        [option get . fontSmall {}]
     
     set wtray $wmain.top
     # D = -borderwidth 1 -relief raised
@@ -350,7 +357,7 @@ proc ::Jabber::UI::Build {w} {
     # Jid entry with electric plug indicator.
     set wbot              $wmain.bot.f
     set jwapp(elplug)     $wbot.icon
-    set jwapp(mystatus)   $wbot.stat
+    set jwapp(mystatus)   $wbot.pad.stat
     set jwapp(myjid)      $wbot.jid
 
     frame $wmain.bot
@@ -358,13 +365,16 @@ proc ::Jabber::UI::Build {w} {
 
     frame $wbot
     pack  $wbot -side bottom -fill x
-        
-    ::Jabber::Status::Button $jwapp(mystatus) \
-      ::Jabber::jstate(status) -command ::Jabber::SetStatus 
+            
+    # D = -padx 6 -pady 2
+    frame $wbot.pad
+    pack  $wbot.pad -side left
+    ::Jabber::Status::Widget $jwapp(mystatus) $statusStyle \
+      ::Jabber::jstate(status) -command ::Jabber::SetStatus -image $statusImage
     
-    pack  $jwapp(mystatus) -side left -pady 2 -padx 6
+    pack  $jwapp(mystatus) -side left
     label $wbot.size -image $iconResize
-    pack  $wbot.size -side right -anchor s
+    pack  $wbot.size -side right
     label $jwapp(elplug) -image $iconContactOff
     pack  $jwapp(elplug) -side right -pady 0 -padx 0
     entry $jwapp(myjid) -state disabled -width 0 \
@@ -597,7 +607,7 @@ proc ::Jabber::UI::MailBoxState {mailboxstate} {
 proc ::Jabber::UI::WhenSetStatus {type} {
     variable jwapp
 	
-    ::Jabber::Status::ConfigButton $jwapp(mystatus) $type
+    ::Jabber::Status::Configure $jwapp(mystatus) $type
 }
 
 proc ::Jabber::UI::EnterRoomHook {roomJid protocol} {
