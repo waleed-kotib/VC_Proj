@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasCmd.tcl,v 1.3 2004-01-17 14:35:13 matben Exp $
+# $Id: CanvasCmd.tcl,v 1.4 2004-01-29 08:24:39 matben Exp $
 
 package provide CanvasCmd 1.0
 
@@ -342,7 +342,8 @@ proc ::CanvasCmd::FlipItem {wtop direction} {
 proc ::CanvasCmd::Undo {wtop} {
     
     # Make the text stuff in sync.
-    ::CanvasText::EvalBufferedText $wtop
+    set wCan [::UI::GetCanvasFromWtop $wtop]
+    ::CanvasText::EvalBufferedText $wCan
     
     # The actual undo command.
     undo::undo [::WB::GetUndoToken $wtop]
