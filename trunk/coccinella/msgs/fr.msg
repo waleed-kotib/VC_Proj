@@ -309,6 +309,8 @@
 ::msgcat::mcset fr mCoccinellaHome  	{Dossier de Coccinella...}
 ::msgcat::mcset fr mComponents          {Composants...}
 ::msgcat::mcset fr mBugReport           {Signaler un bug...}
+#::msgcat::mcset fr mTakeSnapShot        {Take Snapshot}
+#::msgcat::mcset fr mTimeCode            {Timecode}
 #::msgcat::mcset fr mUserInfo            {User Info...}
 
 

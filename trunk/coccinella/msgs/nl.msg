@@ -310,6 +310,8 @@
 ::msgcat::mcset nl mCoccinellaHome  	{Coccinella's homepage...}
 ::msgcat::mcset nl mComponents 	 	{Componenten...}
 ::msgcat::mcset nl mBugReport  	 	{Fout melden...}
+#::msgcat::mcset nl mTakeSnapShot        {Take Snapshot}
+#::msgcat::mcset nl mTimeCode            {Timecode}
 #::msgcat::mcset nl mUserInfo            {User Info...}
 
 

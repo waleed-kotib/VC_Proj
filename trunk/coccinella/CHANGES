@@ -11,6 +11,7 @@ Coccinella-0.95.5 (050315):
 	- status changes displayed in roster
 	- roster remembers which dir items opened/closed
 	- can hide offline/transports in roster
+	- added a keepalive mechansism to guard against aggresive routers
 
 
 Coccinella-0.95.4 (050126):
