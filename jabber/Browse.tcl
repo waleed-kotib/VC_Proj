@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.30 2004-02-11 07:12:27 matben Exp $
+# $Id: Browse.tcl,v 1.31 2004-02-13 14:05:09 matben Exp $
 
 package require chasearrows
 
@@ -470,7 +470,7 @@ proc ::Jabber::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::nsToText nsToText
     
-    ::Jabber::Debug 5 "::Jabber::Browse::AddToTree parentsJidList='$parentsJidList', jid=$jid"
+    ::Jabber::Debug 6 "::Jabber::Browse::AddToTree parentsJidList='$parentsJidList', jid=$jid"
 
     # Verify that parent tree item really exists!
     if {![$wtree isitem $parentsJidList]} {
@@ -511,7 +511,7 @@ proc ::Jabber::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
 	    set jidList [concat $parentsJidList $jid]
 	    set allChildren [wrapper::getchildren $xmllist]
 	    
-	    ::Jabber::Debug 5 "   jidList='$jidList'"
+	    ::Jabber::Debug 6 "   jidList='$jidList'"
 	    
 	    if {[info exists attrArr(type)] && [string equal $attrArr(type) "remove"]} {
 		
@@ -670,10 +670,10 @@ proc ::Jabber::Browse::SelectCmd {w v} {
 #       v           tree item path (jidList: {jabber.org jud.jabber.org} etc.)
 #       
 # Results:
-#       .
+#       none.
 
 proc ::Jabber::Browse::OpenTreeCmd {w v} {   
-    variable wsearrows
+    variable wtree    
     upvar ::Jabber::jstate jstate
     
     ::Jabber::Debug 2 "::Jabber::Browse::OpenTreeCmd v=$v"
@@ -682,11 +682,17 @@ proc ::Jabber::Browse::OpenTreeCmd {w v} {
 	set jid [lindex $v end]
 	
 	# If we have not yet browsed this jid, do it now!
+	# We should have a method to tell if children have been added to tree!!!
 	if {![$jstate(browse) isbrowsed $jid]} {
 	    ::Jabber::Browse::ControlArrows 1
 	    
 	    # Browse services available.
 	    ::Jabber::Browse::Get $jid
+	} elseif {[llength [$wtree children $v]] == 0} {
+	    set xmllist [$jstate(browse) get $jid]
+	    foreach child [wrapper::getchildren $xmllist] {
+		::Jabber::Browse::AddToTree $v {} $child
+	    }
 	}
     }    
 }
