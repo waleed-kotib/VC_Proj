@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Taskbar.tcl,v 1.2 2004-07-27 14:25:19 matben Exp $
+# $Id: Taskbar.tcl,v 1.3 2004-09-13 09:05:18 matben Exp $
 
 namespace eval ::Taskbar:: {
     
@@ -72,12 +72,12 @@ proc ::Taskbar::Load { } {
 
     winico taskbar add $icon -callback  \
       [list [namespace current]::Cmd %m %X %Y] \
-      -text "The Coccinella - $statusStr"
+      -text "$prefs(theAppName) - $statusStr"
     
     # Build popup menu.
     set m $wmenu
     menu $m -tearoff 1 -postcommand [list [namespace current]::Post $m] \
-      -tearoffcommand [namespace current]::TearOff -title "The Coccinella"
+      -tearoffcommand [namespace current]::TearOff -title $prefs(theAppName)
     
     set menuDef {
 	mAboutCoccinella     {::SplashScreen::SplashScreen}
@@ -231,13 +231,14 @@ proc ::Taskbar::Update {w} {
 }
 
 proc ::Taskbar::SetPresenceHook {type args} {
+    global  prefs
     variable icon
        
     # This can be used to update any specific icon in taskbar.
    if {$icon != ""} {
  	set status [::Jabber::GetMyStatus]
 	set statusStr [::Jabber::GetStatusText $status]
-	winico taskbar modify $icon -text "The Coccinella - $statusStr"
+	winico taskbar modify $icon -text "$prefs(theAppName) - $statusStr"
     }
 }
 

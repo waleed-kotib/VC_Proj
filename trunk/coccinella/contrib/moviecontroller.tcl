@@ -6,8 +6,9 @@
 #  Copyright (c) 2000  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
+#  This source file is distributed under the BSD licens.
 #  
-# $Id: moviecontroller.tcl,v 1.4 2004-07-24 10:55:47 matben Exp $
+# $Id: moviecontroller.tcl,v 1.5 2004-09-13 09:05:18 matben Exp $
 
 #  Code idee from Alexander Schoepe's "Progressbar", thank you!
 #

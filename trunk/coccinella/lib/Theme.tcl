@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2003  Mats Bengtsson
 #  
-# $Id: Theme.tcl,v 1.13 2004-07-09 06:26:06 matben Exp $
+# $Id: Theme.tcl,v 1.14 2004-09-13 09:05:19 matben Exp $
 
 package provide Theme 1.0
 
@@ -90,6 +90,12 @@ proc ::Theme::Init { } {
 proc ::Theme::ReadPrefsFile { } {
     global  this prefs
     
+    # Order of these two?
+    if {[file exists $this(basThemePrefsPath)]} {
+	option readfile $this(basThemePrefsPath)
+	set prefs(appName)    [option get . appName {}]
+	set prefs(theAppName) [option get . theAppName {}]
+    }
     if {[file exists $this(themePrefsPath)]} {
 	option readfile $this(themePrefsPath)
     }

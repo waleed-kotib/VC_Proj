@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.49 2004-08-28 07:00:07 matben Exp $
+# $Id: JUI.tcl,v 1.50 2004-09-13 09:05:19 matben Exp $
 
 package provide JUI 1.0
 
@@ -190,7 +190,7 @@ proc ::Jabber::UI::Build {w} {
 	bind $w <FocusOut> "+ ::UI::MacFocusFixEditMenu $w $wtop %W"
     }    
     set jwapp(wtopRost) $w
-    wm title $w "The Coccinella"
+    wm title $w $prefs(theAppName)
 
     # Build minimal menu for Jabber stuff.
     set wmenu ${wtop}menu

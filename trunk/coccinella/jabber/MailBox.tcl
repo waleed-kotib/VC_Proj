@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.50 2004-09-02 13:59:38 matben Exp $
+# $Id: MailBox.tcl,v 1.51 2004-09-13 09:05:19 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -1194,10 +1194,11 @@ proc ::Jabber::MailBox::SaveMailboxVer2 {args} {
 }
 
 proc ::Jabber::MailBox::WriteInboxHeader {fid} {
+    global  prefs
     
     # Header information.
     puts $fid "# Version: 2"
-    puts $fid "#\n#   User's Jabber Message Box for The Coccinella."
+    puts $fid "#\n#   User's Jabber Message Box for $prefs(theAppName)."
     puts $fid "#   The data written at: [clock format [clock seconds]]\n#"    
 }
 

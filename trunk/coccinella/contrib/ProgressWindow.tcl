@@ -6,10 +6,11 @@
 #       cancel operation.
 #      
 #  Copyright (c) 2000-2004  Mats Bengtsson
+#  This source file is distributed under the BSD licens.
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ProgressWindow.tcl,v 1.15 2004-05-06 13:41:10 matben Exp $
+# $Id: ProgressWindow.tcl,v 1.16 2004-09-13 09:05:18 matben Exp $
 # 
 #-------------------------------------------------------------------------------
 #

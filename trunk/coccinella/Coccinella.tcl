@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.81 2004-09-11 14:21:50 matben Exp $
+# $Id: Coccinella.tcl,v 1.82 2004-09-13 09:05:18 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -232,6 +232,7 @@ set this(resourcedbPath)    [file join $this(path) resources]
 set this(altResourcedbPath) [file join $this(prefsPath) resources]
 set this(soundsPath)        [file join $this(path) sounds]
 set this(altSoundsPath)     [file join $this(prefsPath) sounds]
+set this(basThemePrefsPath) [file join $this(resourcedbPath) theme.rdb]
 set this(themePrefsPath)    [file join $this(prefsPath) theme]
 set this(msgcatPath)        [file join $this(path) msgs]
 set this(docsPath)          [file join $this(path) docs]
@@ -336,6 +337,8 @@ if {![catch {package require Itcl 3.2}]} {
     namespace import ::itcl::*
     set prefs(haveItcl) 1
 }
+set prefs(appName)    "Coccinella"
+set prefs(theAppName) "The Coccinella"
 
 # Read our theme prefs file, if any, containing the theme name and locale.
 package require Theme

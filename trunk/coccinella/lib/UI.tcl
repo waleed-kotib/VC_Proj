@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.69 2004-08-23 12:44:36 matben Exp $
+# $Id: UI.tcl,v 1.70 2004-09-13 09:05:19 matben Exp $
 
 package require entrycomp
 package require alertbox
@@ -1430,7 +1430,7 @@ proc ::UI::MacFocusFixEditMenu {w wtopmenu wfocus} {
     if {$w != $wfocus} {
 	return
     }    
-    ::Debug 5 "MacFocusFixEditMenu: w=$w, wfocus=$wfocus"
+    ::Debug 8 "MacFocusFixEditMenu: w=$w, wfocus=$wfocus"
     
     # The <FocusIn> events are sent in order, from toplevel and down
     # to the actual window with focus.

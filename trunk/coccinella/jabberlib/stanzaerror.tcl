@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: stanzaerror.tcl,v 1.3 2004-09-11 14:21:51 matben Exp $
+# $Id: stanzaerror.tcl,v 1.4 2004-09-13 09:05:19 matben Exp $
 # 
 
 package provide stanzaerror 1.0
@@ -13,7 +13,7 @@ package provide stanzaerror 1.0
 namespace eval stanzaerror {
     
     # This maps Defined Conditions to clear text messages.
-    # draft-iietf-xmpp-core23; 9.3.3 Defined Conditions
+    # draft-ietf-xmpp-core23; 9.3.3 Defined Conditions
     
     variable msg
     array set msg {

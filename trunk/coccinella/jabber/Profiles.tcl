@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.27 2004-09-08 13:13:14 matben Exp $
+# $Id: Profiles.tcl,v 1.28 2004-09-13 09:05:19 matben Exp $
 
 package provide Profiles 1.0
 
@@ -345,7 +345,7 @@ proc ::Profiles::BuildPage {page} {
     set wmenu [eval {tk_optionMenu $wmenubt [namespace current]::profile} \
       $allNames]
     trace variable [namespace current]::profile w  \
-      [namespace current]::TraceMenuVar
+      [namespace current]::TraceProfile
 
     grid $pui.lpop -column 0 -row 0 -sticky e
     grid $wmenubt -column 1 -row 0 -sticky ew
@@ -388,8 +388,6 @@ proc ::Profiles::BuildPage {page} {
     set token [namespace current]::moreOpts
     variable $token
 
-    ::Profiles::DefaultOptionsTabNotebook $token
-
     foreach {key value} [array get tmpProfArr $profile,-*] {
 	set optname [string map [list $profile,- ""] $key]
 	
@@ -405,8 +403,11 @@ proc ::Profiles::BuildPage {page} {
 
     # Tabbed notebook for more options.
     set wtabnb $popt.nb
-    ::Profiles::OptionsTabNotebook $wtabnb $token
+    ::Profiles::NotebookOptionWidget $wtabnb $token
     pack $wtabnb -fill x
+    
+    # The actual prefs state for the current profile must be set.
+    ::Profiles::SetCurrentFromTmp $tmpSelected
 
     # This allows us to clean up some things when we go away.
     bind $lfr <Destroy> [list [namespace current]::DestroyHandler]
@@ -419,16 +420,18 @@ proc ::Profiles::BuildPage {page} {
     after idle $script
 }
 
-# Profiles::OptionsTabNotebook --
+# Profiles::NotebookOptionWidget --
 # 
 #       Megawidget tabbed notebook for all extras.
 #       Can be used elsewhere as well.
 
-proc ::Profiles::OptionsTabNotebook {w token} {
+proc ::Profiles::NotebookOptionWidget {w token} {
     global  prefs
     variable $token
     upvar 0 $token state
     variable defaultOptionsArr
+    
+    Debug 2 "::Profiles::NotebookOptionWidget"
     
     set fontS  [option get . fontSmall {}]
 
@@ -496,7 +499,7 @@ proc ::Profiles::OptionsTabNotebook {w token} {
     }
     
     # Set defaults.
-    ::Profiles::DefaultOptionsTabNotebook $token
+    ::Profiles::NotebookSetDefaults $token
 
     # Let components ad their own stuff here.
     ::hooks::run profileBuildTabNotebook $w $token
@@ -513,11 +516,27 @@ namespace eval ::Profiles:: {
     variable initedDefaultOptions 0
 }
 
+proc ::Profiles::NotebookSetDefaults {token} {
+    variable $token
+    upvar 0 $token state
+    variable defaultOptionsArr
+    variable initedDefaultOptions
+    
+    Debug 2 "::Profiles::NotebookSetDefaults"
+
+    if {!$initedDefaultOptions} {
+	::Profiles::InitDefaultOptions
+    }
+    array set state [array get defaultOptionsArr]
+}
+
 proc ::Profiles::InitDefaultOptions { } {
     global  prefs
     variable initedDefaultOptions
     variable defaultOptionsArr
     upvar ::Jabber::jprefs jprefs
+    
+    Debug 2 "::Profiles::InitDefaultOptions"
  
     array set defaultOptionsArr {
 	digest      1
@@ -539,18 +558,6 @@ proc ::Profiles::InitDefaultOptions { } {
     set initedDefaultOptions 1
 }
 
-proc ::Profiles::DefaultOptionsTabNotebook {token} {
-    variable $token
-    upvar 0 $token state
-    variable defaultOptionsArr
-    variable initedDefaultOptions
-
-    if {!$initedDefaultOptions} {
-	::Profiles::InitDefaultOptions
-    }
-    array set state [array get defaultOptionsArr]
-}
-
 # Profiles::MakeTmpProfArr --
 #
 #       Make temp array for profiles.
@@ -559,7 +566,6 @@ proc ::Profiles::MakeTmpProfArr { } {
     
     variable profiles
     variable tmpProfArr
-    variable moreOpts
     
     # New... Profiles
     unset -nocomplain tmpProfArr
@@ -577,11 +583,10 @@ proc ::Profiles::MakeTmpProfArr { } {
     }
 }
 
-proc ::Profiles::TraceMenuVar {name key op} {
+proc ::Profiles::TraceProfile {name key op} {
     variable profile
 
-    # puts "TraceMenuVar name=$name"
-    #puts "\t set name=[set $name]"
+    Debug 4 "TraceProfile name=$name; set name=[set $name]"
     ::Profiles::SetCmd [set $name]
 }
 
@@ -594,11 +599,6 @@ proc ::Profiles::SetCmd {profName} {
     variable tmpProfArr
     variable tmpSelected
     variable profile
-    variable server
-    variable username
-    variable password
-    variable resource
-    variable moreOpts
     
     # The 'profName' is here the new profile, and 'tmpSelected' the
     # previous one.
@@ -616,29 +616,47 @@ proc ::Profiles::SetCmd {profName} {
 	}
 	
 	# Save previous state in tmp before setting the new one.
-	::Profiles::SaveStateToTmpProfArr $tmpSelected
+	::Profiles::SaveCurrentToTmp $tmpSelected
     }
     
     # In case this is a new profile.
     if {[info exists tmpProfArr($profName,server)]} {
-	set server   $tmpProfArr($profName,server)
-	set username $tmpProfArr($profName,username)
-	set password $tmpProfArr($profName,password)
-	::Profiles::DefaultOptionsTabNotebook [namespace current]::moreOpts
-	
-	foreach {key value} [array get tmpProfArr $profName,-*] {
-	    set optname [string map [list $profName,- ""] $key]
-	    if {$optname == "resource"} {
-		continue
-	    }
-	    set moreOpts($optname) $value
-	}
-	set resource $tmpProfArr($profName,-resource)
-	set tmpSelected $profName  
+	::Profiles::SetCurrentFromTmp $profName
     }
 }
 
-proc ::Profiles::SaveStateToTmpProfArr {profName} {
+proc ::Profiles::SetCurrentFromTmp {profName} {
+    variable tmpProfArr
+    variable tmpSelected
+    variable profile
+    variable server
+    variable username
+    variable password
+    variable resource
+    variable moreOpts
+
+    Debug 2 "::Profiles::SetCurrentFromTmp profName=$profName"
+    
+    set server   $tmpProfArr($profName,server)
+    set username $tmpProfArr($profName,username)
+    set password $tmpProfArr($profName,password)
+    ::Profiles::NotebookSetDefaults [namespace current]::moreOpts
+    
+    foreach {key value} [array get tmpProfArr $profName,-*] {
+	set optname [string map [list $profName,- ""] $key]
+	
+	# The 'resource' is a bit special...
+	if {$optname == "resource"} {
+	    continue
+	}
+	Debug 4 "\t key=$key, value=$value, optname=$optname"
+	set moreOpts($optname) $value
+    }
+    set resource $tmpProfArr($profName,-resource)
+    set tmpSelected $profName  
+}
+
+proc ::Profiles::SaveCurrentToTmp {profName} {
     global  prefs
     
     variable tmpProfArr    
@@ -649,7 +667,7 @@ proc ::Profiles::SaveStateToTmpProfArr {profName} {
     variable moreOpts
     variable defaultOptionsArr
     
-    Debug 2 "::Profiles::SaveStateToTmpProfArr profName=$profName"
+    Debug 2 "::Profiles::SaveCurrentToTmp profName=$profName"
     
     # Store it in the temporary array. 
     # But only of the profile already exists since we may have just deleted it!
@@ -754,7 +772,6 @@ proc ::Profiles::NewCmd { } {
     Debug 2 "::Profiles::NewCmd tmpSelected=$tmpSelected, newProfile=$newProfile"
 
     set uniqueName [::Profiles::MakeUniqueProfileName $newProfile]
-    # puts "\t uniqueName=$uniqueName"
     $wmenu add radiobutton -label $uniqueName  \
       -variable [namespace current]::profile
 
@@ -764,7 +781,7 @@ proc ::Profiles::NewCmd { } {
     set username  ""
     set password  ""
     set resource  ""
-    ::Profiles::DefaultOptionsTabNotebook [namespace current]::moreOpts
+    ::Profiles::NotebookSetDefaults [namespace current]::moreOpts
     
     # Must do this for it to be automatically saved.
     set tmpProfArr($profile,name) $profile
@@ -785,7 +802,6 @@ proc ::Profiles::DeleteCmd { } {
     
     # The present state may be something that has not been stored yet.
     if {[info exists tmpProfArr($profile,server)]} {
-	# puts "\t exists tmpProfArr($profile,server)"
 	set ans [tk_messageBox -title [mc Warning]  \
 	  -type yesno -icon warning -default yes  \
 	  -parent [winfo toplevel $wpage] \
@@ -808,7 +824,7 @@ proc ::Profiles::DeleteCmd { } {
 proc  ::Profiles::DestroyHandler { } {
     
     trace vdelete [namespace current]::profile w  \
-      [namespace current]::TraceMenuVar   
+      [namespace current]::TraceProfile   
 }
 
 proc ::Profiles::UserDefaultsHook { } {
@@ -838,7 +854,7 @@ proc ::Profiles::GetTmpProfiles { } {
     Debug 2 "::Profiles::GetTmpProfiles"
     
     # Get present dialog state into tmp array first.
-    ::Profiles::SaveStateToTmpProfArr $profile
+    ::Profiles::SaveCurrentToTmp $profile
     
     set tmpProfiles {}
     foreach name [::Profiles::GetAllTmpNames] {
