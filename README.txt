@@ -2,8 +2,6 @@
 	  The Coccinella : Jabber application with Whiteboard
 	  ---------------------------------------------------
 
-		version 0.95.3, January, 2005
-
 		       by Mats Bengtsson
 
 

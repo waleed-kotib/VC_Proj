@@ -1,8 +1,14 @@
 
-Whiteboard CHANGES
-------------------
+                          Coccinella CHANGES
+                          ------------------
+
 
 Not to mention all bugfixes and rewrites.
+
+
+Coccinella-0.95.4 (050126):
+
+        - critical bug in one of the message catalogs
 
 
 Coccinella-0.95.3 (050125):

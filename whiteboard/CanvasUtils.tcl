@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.20 2004-12-02 15:22:08 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.21 2005-01-26 08:21:41 matben Exp $
 
 package require sha1pure
 
@@ -128,6 +128,8 @@ proc ::CanvasUtils::Init { } {
     set menuDefs(pop,syncplay)  \
       {checkbutton  mSyncPlayback {::Import::SyncPlay $wtop $winfr}  normal {} {} \
 	{-variable ::CanvasUtils::popupVars(-syncplay)}}
+     set menuDefs(pop,shot)  \
+	{command   mTakeSnapShot  {::Import::TakeShot $wtop $winfr}  normal {}}
     set menuDefs(pop,inspectbroken)  \
       {command   mInspectItem  {::ItemInspector::Broken $wtop $id}          normal {}}
     set menuDefs(pop,reloadimage)  \
