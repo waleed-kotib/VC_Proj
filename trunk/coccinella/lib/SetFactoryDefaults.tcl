@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.39 2004-10-09 13:21:57 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.40 2004-10-30 14:44:52 matben Exp $
 
 
 set noErr 0
@@ -283,7 +283,15 @@ switch -- $this(platform) {
 	  [file nativename [file join $this(prefsPath) canvases]]
 	set prefs(historyPath)  \
 	  [file nativename [file join $this(prefsPath) history]]
-	set prefs(webBrowser) mozilla
+	if {[info exists env(BROWSER)]} {
+	    if {[llength [auto_execok $env(BROWSER)]] > 0} {
+		set prefs(webBrowser) $env(BROWSER)
+	    } else {	    
+		set prefs(webBrowser) ""
+	    }
+	} else {
+	    set prefs(webBrowser) ""
+	}
     }
     macintosh {
 	set osprefs(mod) Command

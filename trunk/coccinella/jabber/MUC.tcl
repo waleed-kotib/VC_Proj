@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.50 2004-10-29 13:17:15 matben Exp $
+# $Id: MUC.tcl,v 1.51 2004-10-30 14:44:52 matben Exp $
 
 package require entrycomp
 package require muc
@@ -953,7 +953,7 @@ proc ::Jabber::MUC::FillTable {roomjid} {
 	}
 	$wtbl insert end [list $res $role $aff]
 	if {[string equal $res $mynick]} {
-	    set locals($roomjid,myaff) $aff
+	    set locals($roomjid,myaff)  $aff
 	    set locals($roomjid,myrole) $role
 	    $wtbl rowconfigure $irow -bg #ffa090
 	}

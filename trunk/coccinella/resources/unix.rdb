@@ -21,6 +21,7 @@
 *Menu.Font:                          Helvetica -10
 *Message.Font:                       Helvetica -10
 *Radiobutton.Font:                   Helvetica -10
+*Scale.Font:                         Helvetica -10
 *Text.Font:                          Helvetica -10
 *Scrollbar.borderWidth:              1
 *Scrollbar.width:                    12

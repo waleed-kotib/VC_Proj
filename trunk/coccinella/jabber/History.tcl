@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: History.tcl,v 1.5 2004-10-27 14:42:34 matben Exp $
+# $Id: History.tcl,v 1.6 2004-10-30 14:44:52 matben Exp $
 
 package require uriencode
 
@@ -109,7 +109,8 @@ proc ::History::BuildHistory {jid args} {
     }
     set path [file join $prefs(historyPath) [uriencode::quote $jid]] 
 
-    set clockFormat [option get $wchatframe clockFormat {}]
+    set clockFormat         [option get $wchatframe clockFormat {}]
+    set clockFormatNotToday [option get $wchatframe clockFormatNotToday {}]
     
     if {[file exists $path]} {
 	set uidstart 1000
@@ -123,23 +124,25 @@ proc ::History::BuildHistory {jid args} {
 	
 	for {set i $uidstart} {$i <= $uidstop} {incr i} {
 	    foreach {name dateISO body tag} $message($i) break
-
-	    set prefix ""
-	    set secs [clock scan $dateISO]
 	    
 	    # Insert a 'histhead' line for each new day.
+	    set secs [clock scan $dateISO]
 	    set day [clock format $secs -format "%j"]
 	    if {$day != $prevday} {
 		set dayFormat [clock format $secs -format "%A %B %e, %Y"]
 		$wtext insert end "$argsArr(-headtitle) $dayFormat\n" histhead
 	    }
 	    set prevday $day
-	    if {$clockFormat != ""} {
+	    if {[::Utils::IsToday $secs]} {
 		set theTime [clock format $secs -format $clockFormat]
 	    } else {
-		set theTime [clock format $syssecs -format "%H:%M:%S"]
+		set theTime [clock format $secs -format $clockFormatNotToday]
 	    }
-	    set prefix "\[$theTime\] "
+	    if {$theTime != ""} {
+		set prefix "\[$theTime\] "
+	    } else {
+		set prefix ""
+	    }
 	    append prefix "<$name>"
 
 	    $wtext insert end $prefix ${tag}pre

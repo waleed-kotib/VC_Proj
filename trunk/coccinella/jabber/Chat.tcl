@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.85 2004-10-27 14:42:33 matben Exp $
+# $Id: Chat.tcl,v 1.86 2004-10-30 14:44:52 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -76,6 +76,7 @@ namespace eval ::Jabber::Chat:: {
     option add *Chat*histHeadBackground   gray60                widgetDefault
     option add *Chat*histHeadFont         ""                    widgetDefault
     option add *Chat*clockFormat          "%H:%M"               widgetDefault
+    option add *Chat*clockFormatNotToday  "%b %d %H:%M"         widgetDefault
 
     # List of: {tagName optionName resourceName resourceClass}
     variable chatOptions {
@@ -333,7 +334,9 @@ proc ::Jabber::Chat::GotMsg {body args} {
     if {[info exists argsArr(-subject)]} {
 	set chatstate(subject) $argsArr(-subject)
 	set chatstate(lastsubject) $chatstate(subject)
-	InsertMessage $chattoken systext "Subject: $chatstate(subject)\n"
+	eval {
+	    InsertMessage $chattoken systext "Subject: $chatstate(subject)\n"
+	} $args
     }
     
     # See if we've got a jabber:x:event (JEP-0022).
@@ -347,12 +350,24 @@ proc ::Jabber::Chat::GotMsg {body args} {
 	}
     }
     
-    # And put message in window if nonempty, and history file.
     if {$body != ""} {
-	InsertMessage $chattoken you $body
-	set dateISO [clock format [clock seconds] -format "%Y%m%dT%H:%M:%S"]
-	PutMessageInHistoryFile $jid2 \
-	  [list $jid2 $threadID $dateISO $body]
+	
+	# Put in chat window.
+	eval {InsertMessage $chattoken you $body} $args
+
+	# Put in history file.
+	set secs ""
+	if {[info exists argsArr(-x)]} {
+	    set tm [::Jabber::GetAnyDelayElem $argsArr(-x)]
+	    if {$tm != ""} {
+		set secs [clock scan $tm -gmt 1]
+	    }
+	}
+	if {$secs == ""} {
+	    set secs [clock seconds]
+	}
+	set dateISO [clock format $secs -format "%Y%m%dT%H:%M:%S"]
+	PutMessageInHistoryFile $jid2 [list $jid2 $threadID $dateISO $body]
 	eval {TabAlert $chattoken} $args
     }
     if {$dlgstate(got1stMsg) == 0} {
@@ -383,16 +398,16 @@ proc ::Jabber::Chat::GotNormalMsg {body args} {
 # 
 #       Puts message in text chat window.
 
-proc ::Jabber::Chat::InsertMessage {chattoken whom body} {
+proc ::Jabber::Chat::InsertMessage {chattoken whom body args} {
     variable $chattoken
     upvar 0 $chattoken chatstate
+    
+    array set argsArr $args
     
     set w     $chatstate(w)
     set wtext $chatstate(wtext)
     set jid   $chatstate(jid)
-    set secs  [clock seconds]
-    set clockFormat [option get $w clockFormat {}]
-    
+        
     switch -- $whom {
 	me {
 	    jlib::splitjidex [::Jabber::GetMyJid] node host res
@@ -411,12 +426,27 @@ proc ::Jabber::Chat::InsertMessage {chattoken whom body} {
 	    }
 	}
     }
-
-    set prefix ""
+    set secs ""
+    if {[info exists argsArr(-x)]} {
+	set tm [::Jabber::GetAnyDelayElem $argsArr(-x)]
+	if {$tm != ""} {
+	    set secs [clock scan $tm -gmt 1]
+	}
+    }
+    if {$secs == ""} {
+	set secs [clock seconds]
+    }
+    if {[::Utils::IsToday $secs]} {
+	set clockFormat [option get $w clockFormat {}]
+    } else {
+	set clockFormat [option get $w clockFormatNotToday {}]
+    }
     if {$clockFormat != ""} {
 	set theTime [clock format $secs -format $clockFormat]
 	set prefix "\[$theTime\] "
-    }        
+    } else {
+	set prefix ""
+    }
     
     switch -- $whom {
 	me - you {

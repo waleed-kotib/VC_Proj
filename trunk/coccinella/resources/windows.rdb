@@ -28,6 +28,7 @@
 *Listbox.Font:                       Arial 8
 *Message.Font:                       Arial 8
 *Radiobutton.Font:                   Arial 8
+*Scale.Font:                         Arial 8
 *Text.background:                    white
 *Text.Font:                          Arial 8
 
