@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.15 2003-11-09 15:07:32 matben Exp $
+# $Id: roster.tcl,v 1.16 2003-11-14 09:57:22 matben Exp $
 # 
 # Note that every jid in the rosterArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -279,7 +279,7 @@ proc roster::removeitem {rostName jid} {
     
     # Be sure to evaluate the registered command procedure.
     if {[string length $options(cmd)]} {
-	uplevel #0 "$options(cmd) [list $rostName remove $jid]"
+	uplevel #0 $options(cmd) [list $rostName remove $jid]
     }
     return {}
 }
@@ -312,7 +312,7 @@ proc roster::ClearRoster {rostName} {
     
     # Be sure to evaluate the registered command procedure.
     if {[string length $options(cmd)]} {
-	uplevel #0 "$options(cmd) [list $rostName enterroster]"
+	uplevel #0 $options(cmd) [list $rostName enterroster]
     }
     return {}
 }
@@ -347,7 +347,7 @@ proc roster::exitroster {rostName} {
 
     # Be sure to evaluate the registered command procedure.
     if {[string length $options(cmd)]} {
-	uplevel #0 "$options(cmd) [list $rostName exitroster]"
+	uplevel #0 $options(cmd) [list $rostName exitroster]
     }
 }
 
@@ -509,15 +509,62 @@ proc roster::getrosteritem {rostName jid} {
 
 proc roster::getusers {rostName args} {
     upvar [namespace current]::${rostName}::rosterArr rosterArr
-    upvar [namespace current]::${rostName}::presArr presArr
-        
-    set answer $rosterArr(users)
+    upvar [namespace current]::${rostName}::presArr presArr    
+    
+    set jidlist $rosterArr(users)
+    
     foreach {key value} $args {
+	
 	switch -- $key {
 	    -type {
 		
 		# Loop through all jid2 in roster and see if any available
-		set answer {}
+		set jidlist {}
+		foreach jid2 $rosterArr(users) {
+		    set isavailable 0
+
+		    # Be sure to handle empty resources as well: '1234@icq.host'
+		    foreach key [array names presArr "${jid2}*,type"] {
+			if {[string equal $presArr($key) "available"]} {
+			    set isavailable 1
+			    break
+			}
+		    }
+		    
+		    switch -- $value {
+			available {
+			    if {$isavailable} {
+				lappend jidlist $jid2
+			    }
+			}
+			unavailable {
+			    if {!$isavailable} {
+				lappend jidlist $jid2
+			    }
+			}
+		    }
+		}
+	    }
+	    default {
+		# empty
+	    }
+	}
+    }
+    return $jidlist
+}
+
+proc roster::getusersBU {rostName args} {
+    upvar [namespace current]::${rostName}::rosterArr rosterArr
+    upvar [namespace current]::${rostName}::presArr presArr
+	
+    set jidlist $rosterArr(users)
+    foreach {key value} $args {
+	
+	switch -- $key {
+	    -type {
+		
+		# Loop through all jid2 in roster and see if any available
+		set jidlist {}
 		foreach jid2 $rosterArr(users) {
 		    set isavailable 0
 		    if {[info exists presArr($jid2,res)]} {
@@ -530,23 +577,27 @@ proc roster::getusers {rostName args} {
 			    }
 			}
 		    }
+		    
 		    switch -- $value {
 			available {
 			    if {$isavailable} {
-				lappend answer $jid2
+				lappend jidlist $jid2
 			    }
 			}
 			unavailable {
 			    if {!$isavailable} {
-				lappend answer $jid2
+				lappend jidlist $jid2
 			    }
 			}
 		    }
 		}
 	    }
+	    default {
+		# empty
+	    }
 	}
     }
-    return $answer
+    return $jidlist
 }
 
 # roster::getpresence --
@@ -602,11 +653,16 @@ proc roster::getpresence {rostName jid args} {
     if {$haveRes} {
 
 	# Return presence only from the specified resource.
+	# Be sure to handle empty resources as well: '1234@icq.host'
 	if {[lsearch -exact $presArr($jid,res) $resource] < 0} {
 	    return [list -resource $resource -type unavailable]
 	}
 	set result [list -resource $resource]
-	set jid3 $jid/$resource
+	if {$resource == ""} {
+	    set jid3 $jid
+	} else {
+	    set jid3 $jid/$resource
+	}
 	if {[info exists argsArr(-type)] &&  \
 	  ![string equal $argsArr(-type) $presArr($jid3,type)]} {
 	    return {}
@@ -619,9 +675,14 @@ proc roster::getpresence {rostName jid args} {
     } else {
 	
 	# Get presence for all resources.
+	# Be sure to handle empty resources as well: '1234@icq.host'
 	foreach res $presArr($jid,res) {
 	    set thisRes [list -resource $res]
-	    set jid3 $jid/$res
+	    if {$res == ""} {
+		set jid3 $jid
+	    } else {
+		set jid3 $jid/$res
+	    }
 	    if {[info exists argsArr(-type)] &&  \
 	      ![string equal $argsArr(-type) $presArr($jid3,type)]} {
 		# Empty.
@@ -762,7 +823,13 @@ proc roster::getresources {rostName jid args} {
 	    set resList {}
 	    set type $argsArr(-type)
 	    foreach res $presArr($jid,res) {
-		set jid3 $jid/$res
+
+		# Be sure to handle empty resources as well: '1234@icq.host'
+		if {$res== ""} {
+		    set jid3 $jid
+		} else {
+		    set jid3 $jid/$res
+		}
 		if {[string equal $argsArr(-type) $presArr($jid3,type)]} {
 		    lappend resList $res
 		}
@@ -799,7 +866,13 @@ proc roster::gethighestresource {rostName jid} {
 	set maxpri 0
 	set maxres [lindex $presArr($jid,res) 0]
 	foreach res $presArr($jid,res) {
-	    set jid3 $jid/$res
+
+	    # Be sure to handle empty resources as well: '1234@icq.host'
+	    if {$res== ""} {
+		set jid3 $jid
+	    } else {
+		set jid3 $jid/$res
+	    }
 	    if {[info exists presArr($jid3,priority)]} {
 		if {$presArr($jid3,priority) > $maxpri} {
 		    set maxres $res
@@ -842,17 +915,14 @@ proc roster::isavailable {rostName jid} {
 	    return 0
 	}
     } else {
-	set allKeys [array names presArr "$jid2/*,type"]
-	if {[llength $allKeys]} {
-	    foreach key $allKeys {
-		if {[string equal $presArr($key) "available"]} {
-		    return 1
-		}
+	
+	# Be sure to allow for 'user@domain' with empty resource.
+	foreach key [array names presArr "${jid2}*,type"] {
+	    if {[string equal $presArr($key) "available"]} {
+		return 1
 	    }
-	    return 0
-	} else {
-	    return 0
 	}
+	return 0
     }
 }
 
