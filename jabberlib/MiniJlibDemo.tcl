@@ -51,7 +51,7 @@ set myPassword xyz123
 
 # Open and connect
 set sock [socket $theServer 5222]
-$theJlib connect $theServer -cmd MyConnectProc -socket $sock
+$theJlib openstream $theServer -cmd MyConnectProc -socket $sock
 
 # Send authorization info for an existing account
 $theJlib send_auth $myUsername home MyIqCB -password $myPassword
@@ -63,4 +63,4 @@ $theJlib roster_get MyRosterResultProc
 $theJlib send_presence -type available
 
 # Disconnect
-$theJlib disconnect
+$theJlib closestream

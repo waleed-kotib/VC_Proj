@@ -85,7 +85,7 @@ return
 #-------------------------------------------------------------------------------
 # Open and connect
 set sock [socket $ip 5222]
-$theJlib connect $theServer -cmd MyConnectProc -socket $sock
+$theJlib openstream $theServer -cmd MyConnectProc -socket $sock
 
 # Choose from the calls below. Pick the appropriate ones:
 # Make a new account
@@ -190,7 +190,7 @@ $theJlib send_presence -type unavailable -status {Gone fishing}
 $theJlib register_remove $theServer MyClientProc
 
 # Disconnect
-$theJlib disconnect
+$theJlib closestream
 
 #--- Get stuff from our roster object ------------------------------------------
 # never set values from the client!

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Login.tcl,v 1.36 2004-06-30 08:52:39 matben Exp $
+# $Id: Login.tcl,v 1.37 2004-07-02 14:08:02 matben Exp $
 
 package provide Login 1.0
 
@@ -340,8 +340,12 @@ proc ::Jabber::Login::DoLogin {} {
     set finished 1
     ::Jabber::Login::Close $wtoplevel
     
-    ::Jabber::Login::Connect $server [namespace current]::DoLoginCB \
-      -ssl $moreOpts(ssl) -ip $moreOpts(ip)
+    set opts {}
+    if {$moreOpts(httpproxy)} {
+	lappend opts -httpproxy 1
+    }
+    eval {::Jabber::Login::Connect $server [namespace current]::DoLoginCB \
+      -ssl $moreOpts(ssl) -ip $moreOpts(ip) -port $moreOpts(port)} $opts
 }
 
 proc ::Jabber::Login::DoLoginCB {status msg} {
@@ -453,7 +457,9 @@ proc ::Jabber::Login::SetStatus {args} {
 #       server
 #       cmd         callback command when socket connected
 #       args  -ip
+#             -port
 #             -ssl 0|1
+#             -httpproxy 0|1
 #       
 # Results:
 #       Callback scheduled.
@@ -462,11 +468,13 @@ proc ::Jabber::Login::Connect {server cmd args} {
     global  prefs
 
     upvar ::Jabber::jprefs jprefs
+    upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::Jabber::Login::Connect"
+    ::Debug 2 "::Jabber::Login::Connect args=$args"
     array set argsArr {
-	-ip     ""
-	-ssl    0
+	-ip         ""
+	-ssl        0
+	-httpproxy  0
     }
     array set argsArr $args
     
@@ -481,6 +489,8 @@ proc ::Jabber::Login::Connect {server cmd args} {
     # Async socket open with callback.
     if {$argsArr(-ssl)} {
 	set port $jprefs(sslport)
+    } elseif {[info exists argsArr(-port)]} {
+	set port $argsArr(-port)
     } else {
 	set port $jprefs(port)
     }
@@ -489,8 +499,52 @@ proc ::Jabber::Login::Connect {server cmd args} {
     } else {
 	set host $argsArr(-ip)
     }
-    ::Network::Open $host $port [list [namespace current]::ConnectCB $cmd] \
-      -timeout $prefs(timeoutSecs) -tls $argsArr(-ssl)
+    
+    # Open socket unless we are using a http proxy.
+    if {!$argsArr(-httpproxy)} {
+	::Network::Open $host $port [list [namespace current]::ConnectCB $cmd] \
+	  -timeout $prefs(timeoutSecs) -tls $argsArr(-ssl)
+    } else {
+	
+	# Perhaps it gives a better structure to have this elsewhere?
+	package require jlibhttp
+	
+	# Configure our jlib http transport.
+	set opts {}
+	if {[string length $prefs(httpproxyserver)]} {
+	    lappend opts -proxyhost $prefs(httpproxyserver)
+	}
+	if {[string length $prefs(httpproxyport)]} {
+	    lappend opts -proxyport $prefs(httpproxyport)
+	}
+	if {[string length $prefs(httpproxyusername)]} {
+	    lappend opts -proxyusername $prefs(httpproxyusername)
+	}
+	if {[string length $prefs(httpproxypassword)]} {
+	    lappend opts -proxypasswd $prefs(httpproxypassword)
+	}
+	eval {jlib::http::new $jstate(jlib) $host \
+	  -command [namespace current]::HttpProxyCmd} $opts
+
+	uplevel #0 $cmd [list ok ""]
+    }
+}
+
+proc ::Jabber::Login::HttpProxyCmd {status msg} {
+    
+    ::Debug 2 "::Jabber::Login::HttpProxyCmd status=$status, msg=$msg"
+    
+    switch -- $status {
+	ok {
+	    
+	}
+	default {
+	    ::Jabber::DoCloseClientConnection
+	    tk_messageBox -title [::msgcat::mc Error] -icon error \
+	      -message "The HTTP jabber service replied with a status\
+	      $status and message: $msg"
+	}
+    }
 }
 
 # Jabber::Login::ConnectCB --
@@ -517,6 +571,8 @@ proc ::Jabber::Login::ConnectCB {cmd sock ip port status {msg {}}} {
 	}
 	default {
 	    set jstate(sock) $sock
+	    
+	    $jstate(jlib) setsockettransport $jstate(sock)
 	}
     }    
     uplevel #0 $cmd [list $status $msg]
@@ -539,11 +595,9 @@ proc ::Jabber::Login::InitStream {server cmd} {
     
     ::Jabber::UI::SetStatusMessage [::msgcat::mc jawaitxml $server]
     
-    $jstate(jlib) setsockettransport $jstate(sock)
-    
     # Initiate a new stream. We should wait for the server <stream>.
     if {[catch {
-	$jstate(jlib) connect $server  \
+	$jstate(jlib) openstream $server  \
 	  -cmd [list [namespace current]::InitStreamCB $cmd]
     } err]} {
 	::Jabber::UI::SetStatusMessage ""
@@ -645,7 +699,7 @@ proc ::Jabber::Login::AuthorizeCB {token jlibName type theQuery} {
 
 	# There is a potential problem if called from within a xml parser 
 	# callback which makes the subsequent parsing to fail. (after idle?)
-	after idle $jstate(jlib) disconnect
+	after idle $jstate(jlib) closestream
     } else {    
 	foreach {ip addr port} [fconfigure $jstate(sock) -sockname] break
 	set jstate(ipNum) $ip
