@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.7 2004-07-24 10:55:47 matben Exp $
+# $Id: Whiteboard.tcl,v 1.8 2004-07-25 15:06:43 matben Exp $
 
 package require entrycomp
 package require moviecontroller
@@ -1924,7 +1924,7 @@ proc ::WB::BuildShortcutButtonPad {wtop} {
 	set icon    [::Theme::GetImage [option get $wfrall ${name}Image {}]]
 	set iconDis [::Theme::GetImage [option get $wfrall ${name}DisImage {}]]
 	set cmd [subst -nocommands -nobackslashes $cmd]
-	set txt [string toupper [string index $name 0]][string range $name 1 end]
+	set txt [string totitle $name]
 	$wtray newbutton $name $txt $icon $iconDis $cmd
     }
 
