@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.82 2004-10-21 07:37:39 matben Exp $
+# $Id: Chat.tcl,v 1.83 2004-10-22 15:05:33 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -816,9 +816,9 @@ proc ::Jabber::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
       [list grid $wysc -column 1 -row 0 -sticky ns]]
     scrollbar $wysc -orient vertical -command [list $wtext yview]
     grid $wtext -column 0 -row 0 -sticky news
-    grid $wysc -column 1 -row 0 -sticky ns
+    grid $wysc  -column 1 -row 0 -sticky ns
     grid columnconfigure $wtxt 0 -weight 1
-    grid rowconfigure $wtxt 0 -weight 1
+    grid rowconfigure    $wtxt 0 -weight 1
     
     # The tags.
     ConfigureTextTags $w $wtext

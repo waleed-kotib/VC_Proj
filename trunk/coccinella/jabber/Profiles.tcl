@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.33 2004-10-20 13:35:59 matben Exp $
+# $Id: Profiles.tcl,v 1.34 2004-10-22 15:05:33 matben Exp $
 
 package provide Profiles 1.0
 
@@ -497,6 +497,7 @@ proc ::Profiles::NotebookOptionWidget {w token} {
 	grid $pageproxy.lpoll $pageproxy.spoll -sticky e
 	grid $pageproxy.set   -   -sticky w
     }
+    #bind [winfo toplevel $w] <Control-Key-t> [list $w nextpage]
     
     # Set defaults.
     NotebookSetDefaults $token
