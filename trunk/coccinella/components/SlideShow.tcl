@@ -4,7 +4,7 @@
 #       
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-#       $Id: SlideShow.tcl,v 1.6 2004-08-18 13:46:41 matben Exp $
+#       $Id: SlideShow.tcl,v 1.7 2004-08-23 12:44:36 matben Exp $
 
 namespace eval ::SlideShow:: {
     
@@ -143,7 +143,7 @@ proc ::SlideShow::BuildPrefsHook {wtree nbframe} {
 
     checkbutton $lfr.ss -text " Show next and previous buttons"  \
       -variable [namespace current]::tmpPrefs(slideShow,buttons)
-    checkbutton $lfr.size -text " Resize canvas utomatically to fit image"  \
+    checkbutton $lfr.size -text " Resize canvas automatically to fit image"  \
       -variable [namespace current]::tmpPrefs(slideShow,autosize)
     pack $lfr.ss $lfr.size -side top -anchor w -padx 8 -pady 2
 }

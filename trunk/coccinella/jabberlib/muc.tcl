@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: muc.tcl,v 1.15 2004-07-30 12:55:54 matben Exp $
+# $Id: muc.tcl,v 1.16 2004-08-23 12:44:36 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -23,7 +23,7 @@
 #      mucName allroomsin
 #      mucName create roomjid nick callback
 #      mucName destroy roomjid ?-command, -reason, alternativejid?
-#      mucName enter roomjid nick ?-command?
+#      mucName enter roomjid nick ?-command, -password?
 #      mucName exit roomjid
 #      mucName getaffiliation roomjid affiliation callback
 #      mucName getrole roomjid role callback
@@ -197,8 +197,9 @@ proc jlib::muc::parse_enter {mucname roomjid jlibname type args} {
 	set cache($roomjid,inside) 1
     }
     if {[info exists cache($roomjid,entercb)]} {
-	uplevel #0 $cache($roomjid,entercb) $mucname $type $args
+	set cbproc $cache($roomjid,entercb)
 	unset -nocomplain cache($roomjid,entercb)
+	uplevel #0 $cbproc $mucname $type $args
     }
 }
 
@@ -449,8 +450,9 @@ proc jlib::muc::parse_create {mucname roomjid jlibname type args} {
 	set cache($roomjid,inside) 1
     }
     if {[info exists cache($roomjid,createcb)]} {
-	uplevel #0 $cache($roomjid,createcb) $mucname $type $args
+	set cbproc $cache($roomjid,createcb)
 	unset -nocomplain cache($roomjid,createcb)
+	uplevel #0 $cbproc $mucname $type $args
     }
 }
 
