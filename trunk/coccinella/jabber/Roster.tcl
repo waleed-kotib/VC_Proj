@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.80 2004-09-28 13:50:18 matben Exp $
+# $Id: Roster.tcl,v 1.81 2004-09-30 06:16:27 matben Exp $
 
 package provide Roster 1.0
 
@@ -1675,13 +1675,18 @@ proc ::Jabber::Roster::BuildStatusMenuDef { } {
     return $statMenuDef
 }
 
+# Jabber::Roster::BrowseSetHook, DiscoInfoHook --
+# 
+#       It is first when we have obtained either browse or disco info it is
+#       possible to set icons of foreign IM users.
+
 proc ::Jabber::Roster::BrowseSetHook {from subiq} {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jserver jserver
     
     # Fix icons of foreign IM systems.
-    if {$jprefs(rost,haveIMsysIcons) && [jlib::jidequal $from $jserver(this)]} {
-	PostProcessIcons $from
+    if {$jprefs(rost,haveIMsysIcons)} {
+	PostProcessIcons browse $from
     }
 }
 
@@ -1694,7 +1699,7 @@ proc ::Jabber::Roster::DiscoInfoHook {type from subiq args} {
 	return
     }
     if {$jprefs(rost,haveIMsysIcons)} {
-	PostProcessIcons $from
+	PostProcessIcons disco $from
     }
 }
 
@@ -1704,12 +1709,30 @@ proc ::Jabber::Roster::DiscoInfoHook {type from subiq args} {
 #       Usually we get the roster before we've got browse/agents/disco 
 #       info, so we cannot know if an item is an ICQ etc. when putting it
 #       into the roster.
+#       
+#       Browse and disco return this information differently:
+#         browse:  from=login server
+#         disco:   from=each specific component
+#         
+# Arguments:
+#       method      "browse" or "disco"
+#       
+# Results:
+#       none.
 
-proc ::Jabber::Roster::PostProcessIcons {from} {
+proc ::Jabber::Roster::PostProcessIcons {method from} {
     variable wtree    
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
-
+    
+    if {[string equal $method "browse"]} {
+	if {![jlib::jidequal $from $jserver(this)]} {
+	    return
+	}
+	set matchHost 0
+    } else {
+	set matchHost 1	
+    }
     ::Debug 5 "::Jabber::Roster::PostProcessIcons $from"
     
     set server [jlib::jidmap $jserver(this)]
@@ -1728,10 +1751,14 @@ proc ::Jabber::Roster::PostProcessIcons {from} {
 		
 		# Only relevant jid's. Must have full jid here!
 		# Exclude jid's that belong to our login jabber server.
- 		if {![string equal $server $host] && [string equal $from $host]} {
-		    set icon [GetPresenceIconFromJid $jid]
-		    if {[string length $icon]} {
-			$wtree itemconfigure $v -image $icon
+ 		if {![string equal $server $host]} {
+		    
+		    # Browse always, disco only if from=host.
+		    if {!$matchHost || [string equal $from $host]} {
+			set icon [GetPresenceIconFromJid $jid]
+			if {[string length $icon]} {
+			    $wtree itemconfigure $v -image $icon
+			}
 		    }
 		}
 	    }
@@ -1899,7 +1926,7 @@ proc ::Jabber::Roster::InitPrefsHook { } {
     set jprefs(rost,dblClk)         normal
     
     # Show special icons for foreign IM systems?
-    set jprefs(rost,haveIMsysIcons) 0
+    set jprefs(rost,haveIMsysIcons) 1
 	
     ::PreferencesUtils::Add [list  \
       [list ::Jabber::jprefs(rost,clrLogout)   jprefs_rost_clrRostWhenOut $jprefs(rost,clrLogout)]  \
