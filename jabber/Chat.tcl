@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Chat.tcl,v 1.81 2004-10-16 13:32:50 matben Exp $
+# $Id: Chat.tcl,v 1.82 2004-10-21 07:37:39 matben Exp $
 
 package require entrycomp
 package require uriencode
@@ -537,20 +537,12 @@ proc ::Jabber::Chat::Build {threadID args} {
     array set argsArr $args
 
     set dlgstate(w)           $w
-    set dlgstate(active)      $cprefs(lastActiveRet)
     set dlgstate(got1stMsg)   0
-    
-    if {$jprefs(chatActiveRet)} {
-	set dlgstate(active) 1
-    }
     
     # Toplevel with class Chat.
     ::UI::Toplevel $w -class Chat -usemacmainmenu 1 -macstyle documentProc
 
     set fontSB [option get . fontSmallBold {}]
-    if {$dlgstate(active)} {
-	ActiveCmd $dlgtoken
-    }
 
     # Global frame.
     frame $w.frall -borderwidth 1 -relief raised
@@ -603,22 +595,24 @@ proc ::Jabber::Chat::Build {threadID args} {
     set shortBtWidth [$wtray minwidth]
 
     # Button part.
-    pack [frame $w.frall.pady -height 8] -side bottom
-    set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btok -text [mc Send] -default active \
-      -command [list [namespace current]::Send $dlgtoken]]  \
-      -side right -padx 5
-    pack [button $frbot.btcancel -text [mc Close]  \
-      -command [list [namespace current]::Close $dlgtoken]]  \
-      -side right -padx 5
-    set cmd [list [namespace current]::SmileyCmd $dlgtoken]
-    pack [::Emoticons::MenuButton $frbot.smile -command $cmd]  \
-      -side right -padx 5
-    pack [checkbutton $frbot.active -text " [mc {Active <Return>}]" \
-      -command [list [namespace current]::ActiveCmd $dlgtoken] \
-      -variable $dlgtoken\(active)]  \
-      -side left -padx 5
-    pack $frbot -side bottom -fill x -padx 10
+    if {0} {
+	pack [frame $w.frall.pady -height 8] -side bottom
+	set frbot [frame $w.frall.frbot -borderwidth 0]
+	pack [button $frbot.btok -text [mc Send] -default active \
+	  -command [list [namespace current]::Send $dlgtoken]]  \
+	  -side right -padx 5
+	pack [button $frbot.btcancel -text [mc Close]  \
+	  -command [list [namespace current]::Close $dlgtoken]]  \
+	  -side right -padx 5
+	set cmd [list [namespace current]::SmileyCmd $dlgtoken]
+	pack [::Emoticons::MenuButton $frbot.smile -command $cmd]  \
+	  -side right -padx 5
+	pack [checkbutton $frbot.active -text " [mc {Active <Return>}]" \
+	  -command [list [namespace current]::ActiveCmd $dlgtoken] \
+	  -variable $dlgtoken\(active)]  \
+	  -side left -padx 5
+	pack $frbot -side bottom -fill x -padx 10
+    }
     
     pack [frame $w.frall.div2 -bd 2 -relief sunken -height 2] -fill x -side top
 
@@ -705,17 +699,22 @@ proc ::Jabber::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set chatstate(fromjid)  $jid
     set chatstate(jid)      $mjid
 
-    set chatstate(dlgtoken)     $dlgtoken
-    set chatstate(threadid)     $threadID
-    set chatstate(rosterName)   $rosterName
-    set chatstate(state)        normal    
+    set chatstate(dlgtoken)         $dlgtoken
+    set chatstate(threadid)         $threadID
+    set chatstate(rosterName)       $rosterName
+    set chatstate(state)            normal    
     set chatstate(subject)          ""
     set chatstate(lastsubject)      ""
     set chatstate(notifier)         ""
+    set chatstate(active)           $cprefs(lastActiveRet)
     set chatstate(xevent,status)    ""
     set chatstate(xevent,msgidlist) ""
     if {[info exists argsArr(-subject)]} {
 	set chatstate(subject) $argsArr(-subject)
+    }
+    
+    if {$jprefs(chatActiveRet)} {
+	set chatstate(active) 1
     }
     
     # We need to kep track of current presence/status since we may get
@@ -740,8 +739,10 @@ proc ::Jabber::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set wtxtsnd     $wfrmid.frtxtsnd        
     set wtextsnd    $wtxtsnd.text
     set wyscsnd     $wtxtsnd.ysc
-    set wnotifier   $wthread.f.lnot
-    set wclose      $wthread.f.close
+    set wfrbot      $wthread.f
+    set wfrnot      $wfrbot.fn
+    set wnotifier   $wfrnot.lnot
+    set wclose      $wfrbot.close
     set wsubject    $wthread.frtop.fsub.e
     set wpresimage  $wthread.frtop.fsub.i
     
@@ -755,26 +756,53 @@ proc ::Jabber::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     label $frtop.fsub.l -text "[mc Subject]:"
     entry $frtop.fsub.e -textvariable $chattoken\(subject)
     label $frtop.fsub.i -image $icon
-    pack  $frtop.fsub -side top -anchor w -padx 6 -pady 2 -fill x
+    pack  $frtop.fsub   -side top -anchor w -padx 6 -pady 2 -fill x
     pack  $frtop.fsub.l -side left -padx 2
     pack  $frtop.fsub.i -side right -padx 6
     pack  $frtop.fsub.e -side top -padx 2 -fill x
 
     # Notifier label.
     set chatstate(wnotifier) $wnotifier
-    pack [frame $wthread.f] -side bottom -anchor w -fill x -padx 16 -pady 0
-    pack [frame $wthread.f.pad -width 1 -height  \
-      [image height $dlgstate(iconNotifier)]] -side left -pady 0
-    pack [label $wnotifier -textvariable $chattoken\(notifier)  \
-      -pady 0 -bd 0 -compound left] -side left -pady 0
-    if {$jprefs(chat,tabbedui)} {
-	pack [button $wclose -text [mc {Close Thread}] \
-	  -command [list [namespace current]::CloseThread $chattoken] \
-	  -font $fontS] \
-	  -pady 2 -padx 0 -side right
-    }
-    if {[llength $dlgstate(chattokens)] == 1} {
-	pack forget $wclose
+    frame $wfrbot
+    pack  $wfrbot -side bottom -anchor w -fill x -padx 16 -pady 0
+    frame $wfrbot.fn
+    pack  $wfrbot.fn -side top -anchor w -fill x
+    
+    if {0} {
+	pack [frame $wfrbot.pad -width 1 -height  \
+	  [image height $dlgstate(iconNotifier)]] -side left -pady 0
+	pack [label $wnotifier -textvariable $chattoken\(notifier)  \
+	  -pady 0 -bd 0 -compound left] -side left -pady 0
+	if {$jprefs(chat,tabbedui)} {
+	    pack [button $wclose -text [mc {Close Thread}] \
+	      -command [list [namespace current]::CloseThread $chattoken] \
+	      -font $fontS] \
+	      -pady 2 -padx 0 -side right
+	}
+	if {[llength $dlgstate(chattokens)] == 1} {
+	    pack forget $wclose
+	}
+    } else {
+	checkbutton $wfrbot.active -text " [mc {Active <Return>}]" \
+	  -command [list [namespace current]::ActiveCmd $chattoken] \
+	  -variable $chattoken\(active)
+	pack $wfrbot.active -side left
+	set cmd [list [namespace current]::SmileyCmd $chattoken]
+	::Emoticons::MenuButton $wfrbot.smile -command $cmd
+	pack $wfrbot.smile -side left -padx 8	
+	if {$jprefs(chat,tabbedui)} {
+	    button $wclose -text [mc {Close Thread}] -font $fontS \
+	      -command [list [namespace current]::CloseThread $chattoken]	      
+	    pack $wclose -pady 2 -padx 0 -side right
+	    if {[llength $dlgstate(chattokens)] == 1} {
+		pack forget $wclose
+	    }
+	}
+	frame $wfrnot.pad -width 1 -height [image height $dlgstate(iconNotifier)]
+	pack  $wfrnot.pad -side left -pady 0
+	label $wnotifier -textvariable $chattoken\(notifier) -pady 0 -bd 0 \
+	  -compound left
+	pack $wnotifier -side left -pady 0
     }
     
     # Text chat.
@@ -813,6 +841,9 @@ proc ::Jabber::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     if {[info exists argsArr(-message)]} {
 	$wtextsnd insert end $argsArr(-message)	
     }
+    if {$chatstate(active)} {
+	ActiveCmd $chattoken
+    }
     
     set imageHorizontal \
       [::Theme::GetImage [option get $wfrmid imageHorizontal {}]]
@@ -832,7 +863,7 @@ proc ::Jabber::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     eval {::pane::pane $wtxt $wtxtsnd} $paneopts
 
     bind $wtextsnd <Return>  \
-      [list [namespace current]::ReturnKeyPress $dlgtoken]
+      [list [namespace current]::ReturnKeyPress $chattoken]
    
     # jabber:x:event
     if {$cprefs(usexevents)} {
@@ -1065,7 +1096,7 @@ proc ::Jabber::Chat::SetState {chattoken state} {
     foreach name {send sendfile} {
 	$dlgstate(wtray) buttonconfigure $name -state $state 
     }
-    $dlgstate(wbtsend)   configure -state $state
+    #$dlgstate(wbtsend)   configure -state $state
     $chatstate(wtextsnd) configure -state $state
     $chatstate(wsubject) configure -state $state
     set chatstate(state) $state
@@ -1107,9 +1138,7 @@ proc ::Jabber::Chat::TabAlert {chattoken args} {
     }
 }
 
-proc ::Jabber::Chat::SmileyCmd {dlgtoken im key} {
-    
-    set chattoken [GetActiveChatToken $dlgtoken]
+proc ::Jabber::Chat::SmileyCmd {chattoken im key} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     
@@ -1249,22 +1278,22 @@ proc ::Jabber::Chat::SetFont {theFont} {
     }
 }
 
-proc ::Jabber::Chat::ActiveCmd {dlgtoken} {
+proc ::Jabber::Chat::ActiveCmd {chattoken} {
     variable cprefs
-    variable $dlgtoken
-    upvar 0 $dlgtoken dlgstate
+    variable $chattoken
+    upvar 0 $chattoken chatstate
     
     # Remember last setting.
-    set cprefs(lastActiveRet) $dlgstate(active)
+    set cprefs(lastActiveRet) $chatstate(active)
 }
 
-proc ::Jabber::Chat::ReturnKeyPress {dlgtoken} {
+proc ::Jabber::Chat::ReturnKeyPress {chattoken} {
     variable cprefs
-    variable $dlgtoken
-    upvar 0 $dlgtoken dlgstate
+    variable $chattoken
+    upvar 0 $chattoken chatstate
     
-    if {$dlgstate(active)} {
-	Send $dlgtoken
+    if {$chatstate(active)} {
+	Send $chatstate(dlgtoken)
 	
 	# Stop further handling in Text.
 	return -code break
