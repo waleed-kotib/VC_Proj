@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.122 2005-02-28 15:00:42 matben Exp $
+# $Id: Roster.tcl,v 1.123 2005-03-02 13:49:41 matben Exp $
 
 package provide Roster 1.0
 
@@ -85,6 +85,13 @@ namespace eval ::Roster:: {
       invisible       [mc mInvisible]     \
       unavailable     [mc mNotAvailable]]
 
+    variable mcHead
+    array set mcHead [list \
+      available     [mc Online]         \
+      unavailable   [mc Offline]        \
+      transports    [mc Transports]     \
+      pending       [mc {Subscription Pending}]]
+    
     # Template for the roster popup menu.
     variable popMenuDefs
     
@@ -1388,6 +1395,7 @@ proc ::Roster::TreeNew {w wtree wxsc wysc} {
 
 proc ::Roster::TreeInit {w} {
     variable wtree
+    variable mcHead
     upvar ::Jabber::jprefs jprefs
     
     set rootOpts [list  \
@@ -1415,14 +1423,14 @@ proc ::Roster::TreeInit {w} {
 	set isopen 0
     }
     eval {$wtree newitem [list available] -dir 1 -open $isopen \
-      -text [mc Online] -tags head -image $onlineImage} $rootOpts
+      -text $mcHead(available) -tags head -image $onlineImage} $rootOpts
     if {!$jprefs(rost,hideOffline)} {
 	set isopen 1
 	if {[lsearch $jprefs(rost,closedItems) unavailable] >= 0} {
 	    set isopen 0
 	}
 	eval {$wtree newitem [list unavailable] -dir 1 -open $isopen \
-	  -text [mc Offline] -tags head -image $offlineImage} $rootOpts
+	  -text $mcHead(unavailable) -tags head -image $offlineImage} $rootOpts
     }
 }
 
@@ -1445,6 +1453,7 @@ proc ::Roster::TreeNewItem {jid presence args} {
     variable wtree    
     variable treeuid
     variable mapShowElemToText
+    variable mcHead
     upvar ::Jabber::jstate  jstate
     upvar ::Jabber::jserver jserver
     upvar ::Jabber::jprefs  jprefs
@@ -1527,7 +1536,7 @@ proc ::Roster::TreeNewItem {jid presence args} {
 	if {![$wtree isitem [list transports]]} {
 	    set vdir [list transports]
 	    $wtree newitem $vdir -tags {head trpt} -dir 1 \
-	      -text [mc Transports]
+	      -text $mcHead(transports)
 	}
 	set tags [list trpt $jid3]
 	eval {$wtree newitem [list transports $jid3] -image $icon -tags $tags} \
@@ -1539,8 +1548,7 @@ proc ::Roster::TreeNewItem {jid presence args} {
 	# Make it if not already exists.
 	if {![$wtree isitem [list pending]]} {
 	    set vdir [list pending]
-	    $wtree newitem $vdir -tags head -dir 1 \
-	      -text [mc {Subscription Pending}]
+	    $wtree newitem $vdir -tags head -dir 1 -text $mcHead(pending)
 	}
 	set tags [list user $mjid]
 	eval {$wtree newitem [list pending $jid] -image $icon -tags $tags} \

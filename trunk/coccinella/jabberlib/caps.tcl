@@ -11,9 +11,9 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: caps.tcl,v 1.2 2005-02-17 10:30:07 matben Exp $
+# $Id: caps.tcl,v 1.3 2005-03-02 13:49:41 matben Exp $
 
-#      UNFINISHED!!!
+# UNFINISHED!!!
 #      
 # EXPERIMENTAL!!!
 
@@ -65,6 +65,10 @@ proc jlib::caps::presence_cb {jlibname jid type args} {
 	    set node [wrapper::getattribute $cElem node]
 	    set ver  [wrapper::getattribute $cElem ver]
 	    set ext  [wrapper::getattribute $cElem ext]
+	    
+	    set cache(jid,$jid,node) $node
+	    set cache(jid,$jid,ver)  $ver
+	    set cache(jid,$jid,ext)  $ext
 	    
 	    # Keep track of all jid <-> node+ver combinations.
 	    # The exts may be different for identical node+ver and must be
@@ -120,7 +124,7 @@ proc jlib::caps::unavail_cb {jlibname jid type args} {
 	    set capsjids($node,$ver) [lreplace $capsjids($node,$ver) $ind $ind]
 	}
     }
-    
+    array unset cache "jid,$jid,*"
 }
 
 proc jlib::caps::free {jlibname} {

@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.32 2005-02-21 07:59:08 matben Exp $
+# $Id: roster.tcl,v 1.33 2005-03-02 13:49:41 matben Exp $
 # 
 # Note that every jid in the rostArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -65,6 +65,7 @@
 #      rostName exitroster
 #      rostName getgroups ?jid?
 #      rostName getask jid
+#      rostName getcapsattr jid name
 #      rostName getname jid
 #      rostName getpresence jid ?-resource, -type?
 #      rostName getresources jid

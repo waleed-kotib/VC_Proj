@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: tinyhttpd.tcl,v 1.25 2005-01-31 14:06:53 matben Exp $
+# $Id: tinyhttpd.tcl,v 1.26 2005-03-02 13:49:40 matben Exp $
 
 # ########################### USAGE ############################################
 #
@@ -31,6 +31,7 @@
 #      ::tinyhttpd::unregistercgicommand path
 #      ::tinyhttpd::allcgibins
 #      ::tinyhttpd::putheader token httpcode ?-headers list?
+#      ::tinyhttpd::configure ?-option?
 #      
 # ##############################################################################
 
@@ -445,6 +446,27 @@ proc ::tinyhttpd::start {args} {
     LogMsg "Tiny Httpd started"
 
     return ""
+}
+
+proc ::tinyhttpd::configure {args} {
+    variable options
+    
+    if {$args == {}} {
+	set opts {}
+	foreach {name value} [array get options] {
+	    lappend opts $name $value
+	}
+	return $opts
+    } elseif {[llength $args] == 1} {
+	set name [lindex $args 0]
+	if {[info exists options($name)]} {
+	    return $options($name)
+	} else {
+	    return -code error "option \"$name\" does not exist"
+	}
+    } else {
+	return -code error "usage: ::tinyhttpd::configure ?-key?"
+    }
 }
 
 # tinyhttpd::NewChannel --
@@ -1435,6 +1457,27 @@ proc ::tinyhttpd::LogMsg {msg} {
 	    puts $priv(logfd) "[clock format [clock clicks]]: $msg"
 	}
     }
+}
+
+# Various test code.
+
+if {0} {
+    
+    ::tinyhttpd::registercgicommand  hello.html  Cgibin
+
+    proc Cgibin {token} {
+	variable $token
+	upvar 0 $token state
+
+	set sock $state(s)
+	::tinyhttpd::putheader $token 200 -headers {Content-Type text/html}
+	puts $sock {<HTML><BODY><H1>Hello World!</H1></BODY></HTML>}
+	close $sock
+    }
+
+    
+    
+    
 }
 
 #-------------------------------------------------------------------------------

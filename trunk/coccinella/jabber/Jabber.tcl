@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.132 2005-02-27 14:11:05 matben Exp $
+# $Id: Jabber.tcl,v 1.133 2005-03-02 13:49:40 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -1926,8 +1926,11 @@ proc ::Jabber::Passwd::ResponseProc {jlibName type theQuery} {
 proc ::Jabber::LoginLogout { } {
     
     ::Debug 2 "::Jabber::LoginLogout"
-    if {[::Jabber::IsConnected]} {
-	::Jabber::DoCloseClientConnection
+    
+    if {[IsConnected]} {
+	DoCloseClientConnection
+    } elseif {[::Login::IsPending]} {
+	::Login::Kill
     } else {
 	::Login::Dlg
     }    
