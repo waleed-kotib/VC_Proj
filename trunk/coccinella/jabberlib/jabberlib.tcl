@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.42 2004-05-23 13:18:09 matben Exp $
+# $Id: jabberlib.tcl,v 1.43 2004-05-26 07:36:38 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -2966,9 +2966,14 @@ proc jlib::joinjid {node domain resource} {
     return $jid
 }
 
+# jlib::jidequal --
+# 
+#       Checks if two jids are actually equal after mapped. Does not check
+#       for prohibited characters.
+
 proc jlib::jidequal {jid1 jid2} {
     
-    return [string equal [jidprep $jid1] [jidprep $jid2]]
+    return [string equal [jidmap $jid1] [jidmap $jid2]]
 }
 
 # jlib::jidvalidate --
@@ -3011,10 +3016,34 @@ proc jlib::jidvalidate {jid} {
 #     satisfy the requirements for bidirectional strings, return an
 #     error.  This is described in section 6.
 
+# jlib::*map --
+# 
+#       Does the mapping part.
+
+proc jlib::nodemap {node} {
+
+    return [string tolower $node]
+}
+
+proc jlib::namemap {domain} { 
+ 
+    return [string tolower $domain]
+}
+
+proc jlib::resourcemap {resource} {
+    
+    # Note that resources are case sensitive!
+    return $resource
+}
+
+# jlib::*prep --
+# 
+#       Does the complete stringprep.
+
 proc jlib::nodeprep {node} {
     variable asciiProhibit
     
-    set node [string tolower $node]
+    set node [nodemap $node]
     if {[regexp ".*\[${asciiProhibit(node)}\].*" $node]} {
 	return -code error "username contains illegal character(s)"
     }
@@ -3024,7 +3053,7 @@ proc jlib::nodeprep {node} {
 proc jlib::nameprep {domain} {   
     variable asciiProhibit
     
-    set domain [string tolower $domain]
+    set domain [namemap $domain]
     if {[regexp ".*\[${asciiProhibit(domain)}\].*" $domain]} {
 	return -code error "domain contains illegal character(s)"
     }
@@ -3034,12 +3063,32 @@ proc jlib::nameprep {domain} {
 proc jlib::resourceprep {resource} {
     variable asciiProhibit
     
-    # Note that resources are case sensitive!
+    set resource [resourcemap $resource]
+    
     # Orinary spaces are allowed!
     if {[regexp ".*\[${asciiProhibit(resource)}\].*" $resource]} {
 	return -code error "resource contains illegal character(s)"
     }
     return $resource
+}
+
+# jlib::jidmap --
+# 
+#       Does the mapping part of STRINGPREP. Does not check for prohibited
+#       characters.
+#       
+# Results:
+#       throws an error if form unrecognized, else the mapped jid.
+
+proc jlib::jidmap {jid} {
+    
+    if {$jid == ""} {
+	return ""
+    }
+    if {[catch {splitjidex $jid node domain resource} res]} {
+	return -code error $res
+    }
+    return [joinjid [nodemap $node] [namemap $domain] [resourcemap $resource]]
 }
 
 # jlib::jidprep --
@@ -3051,6 +3100,9 @@ proc jlib::resourceprep {resource} {
 
 proc jlib::jidprep {jid} {
     
+    if {$jid == ""} {
+	return ""
+    }
     if {[catch {splitjidex $jid node domain resource} res]} {
 	return -code error $res
     }
@@ -3066,7 +3118,7 @@ proc jlib::jidprep {jid} {
 
 proc jlib::MapStr {str } {
     
-
+    # TODO
 }
 
 # jlib::encodeusername, decodeusername, decodejid --

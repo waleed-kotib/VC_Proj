@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: JUI.tcl,v 1.39 2004-05-23 13:18:08 matben Exp $
+# $Id: JUI.tcl,v 1.40 2004-05-26 07:36:35 matben Exp $
 
 package provide JUI 1.0
 
@@ -332,7 +332,7 @@ proc ::Jabber::UI::SetPresenceHook {type args} {
     
     array set argsArr [list -to $jserver(this)]
     array set argsArr $args
-    if {[string equal $jserver(this) $argsArr(-to)]} {
+    if {[jlib::jidequal $jserver(this) $argsArr(-to)]} {
 	::Jabber::UI::WhenSetStatus $type
     }
 }

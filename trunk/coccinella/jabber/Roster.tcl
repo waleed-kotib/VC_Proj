@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.59 2004-05-23 13:18:08 matben Exp $
+# $Id: Roster.tcl,v 1.60 2004-05-26 07:36:37 matben Exp $
 
 package provide Roster 1.0
 
@@ -294,7 +294,7 @@ proc ::Jabber::Roster::Build {w} {
 
 proc ::Jabber::Roster::LoginCmd { } {
     
-    ::Jabber::InvokeJlibCmd roster_get ::Jabber::Roster::PushProc
+    ::Jabber::JlibCmd roster_get ::Jabber::Roster::PushProc
 
     set server [::Jabber::GetServerJid]
     set ::Jabber::Roster::servtxt $server
@@ -356,7 +356,7 @@ proc ::Jabber::Roster::CloseDlg {w} {
 proc ::Jabber::Roster::Refresh { } {
 
     # Get my roster.
-    ::Jabber::InvokeJlibCmd roster_get [namespace current]::PushProc
+    ::Jabber::JlibCmd roster_get [namespace current]::PushProc
 }
 
 # Jabber::Roster::SendRemove --
@@ -380,7 +380,7 @@ proc ::Jabber::Roster::SendRemove {jidrm} {
       [FormatTextForMessageBox [::msgcat::mc jamesswarnremove]]  \
       -icon warning -type yesno]
     if {[string equal $ans "yes"]} {
-	::Jabber::InvokeJlibCmd roster_remove $jid [namespace current]::PushProc
+	::Jabber::JlibCmd roster_remove $jid [namespace current]::PushProc
     }
 }
 
@@ -880,9 +880,9 @@ proc ::Jabber::Roster::Remove {jid} {
     # Else if 2-tier jid:  => remove jid2
     
     jlib::splitjid $jid jid2 res
-    set prepjid2 [jlib::jidprep $jid2]
+    set jid2map [jlib::jidmap $jid2]
 
-    foreach v [$wtree find withtag $prepjid2] {
+    foreach v [$wtree find withtag $jid2map] {
 	$wtree delitem $v
 	
 	# Remove dirs if empty?
@@ -897,8 +897,8 @@ proc ::Jabber::Roster::Remove {jid} {
 	
 	# We've got a 3-tier jid.
 	set jid3 $jid
-	set prepjid3 [jlib::jidprep $jid]
-	foreach v [$wtree find withtag $prepjid3] {
+	set jid3map [jlib::jidmap $jid]
+	foreach v [$wtree find withtag $jid3map] {
 	    $wtree delitem $v
 	    set vparent [lrange $v 0 end-1]
 	    if {[llength $v] == 3} {
@@ -941,8 +941,8 @@ proc ::Jabber::Roster::SetCoccinella {jid} {
 	    set icon $presenceIcon(available,wb)
 	}
     }
-    set prepjid [jlib::jidprep $jid]
-    foreach v [$wtree find withtag $prepjid] {
+    set jidmap [jlib::jidmap $jid]
+    foreach v [$wtree find withtag $jidmap] {
 	$wtree itemconfigure $v -image $icon
     }
 }
@@ -986,9 +986,10 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
     # since a user may be logged in from more than one resource.
     # Note that some (icq) transports have 3-tier items that are unavailable!
     
+    set server [jlib::jidmap $jserver(this)]
     if {[info exists argsArr(-name)] && ($argsArr(-name) != "")} {
 	set itemTxt $argsArr(-name)
-    } elseif {[regexp "^(\[^@\]+)@$jserver(this)" $jid match user]} {
+    } elseif {[regexp "^(\[^@\]+)@${server}" $jid match user]} {
 	set itemTxt $user
     } else {
 	set itemTxt $jid2
@@ -1000,7 +1001,7 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
 	    set jidx ${jid2}/$argsArr(-resource)
 	}
     }
-    set prepjid [jlib::jidprep $jidx]
+    set jidmap [jlib::jidmap $jidx]
     ::Debug 5 "\t jidx=$jidx"
     
     set treectag item[incr treeuid]    
@@ -1012,7 +1013,7 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
     if {[info exists argsArr(-ask)] &&  \
       [string equal $argsArr(-ask) "subscribe"]} {
 	eval {$wtree newitem [list {Subscription Pending} $jid]  \
-	  -image $icon -tags $prepjid} $itemOpts
+	  -image $icon -tags $jidmap} $itemOpts
     } elseif {[info exists argsArr(-groups)] && ($argsArr(-groups) != "")} {
 	set groups $argsArr(-groups)
 	
@@ -1026,13 +1027,13 @@ proc ::Jabber::Roster::PutItemInTree {jid presence args} {
 		  -tags group -image $groupImage
 	    }
 	    eval {$wtree newitem [list $gpresarr($presence) $grp $jidx] \
-	      -image $icon -tags $prepjid} $itemOpts
+	      -image $icon -tags $jidmap} $itemOpts
 	}
     } else {
 	
 	# No groups associated with this item.
 	eval {$wtree newitem [list $gpresarr($presence) $jidx] \
-	  -image $icon -tags $prepjid} $itemOpts
+	  -image $icon -tags $jidmap} $itemOpts
     }
     
     # Design the balloon help window message.
@@ -1100,8 +1101,8 @@ namespace eval ::Jabber::Roster:: {
 proc ::Jabber::Roster::GetAllTransportJids { } {
     upvar ::Jabber::jserver jserver
     
-    set allTransports [::Jabber::InvokeJlibCmd service gettransportjids *]
-    set jabbjids [::Jabber::InvokeJlibCmd service gettransportjids jabber]
+    set allTransports [::Jabber::JlibCmd service gettransportjids *]
+    set jabbjids [::Jabber::JlibCmd service gettransportjids jabber]
     
     # Exclude jabber services and login server.
     foreach jid $jabbjids {
@@ -1142,7 +1143,7 @@ proc ::Jabber::Roster::NewOrEditItem {which args} {
 		set users [$jstate(roster) getusers]
 		set jid [lsearch -inline -glob $users ${host}*]
 		set subscription [$jstate(roster) getsubscription $jid]
-		set typesubtype [::Jabber::InvokeJlibCmd service gettype $host]
+		set typesubtype [::Jabber::JlibCmd service gettype $host]
 		regexp {^[^/]+/(.+)$} $typesubtype match subtype
 	    }
 	}
@@ -1418,7 +1419,7 @@ proc ::Jabber::Roster::BuildTrptMenu {token} {
     # We must be indenpendent of method; agent, browse, disco
     set trpts {}
     foreach subtype $allTransports {
-	set jids [::Jabber::InvokeJlibCmd service gettransportjids $subtype]
+	set jids [::Jabber::JlibCmd service gettransportjids $subtype]
 	if {[llength $jids]} {
 	    lappend trpts $subtype
 	    set dlgstate(servicejid,$subtype) [lindex $jids 0]
@@ -1596,27 +1597,27 @@ proc ::Jabber::Roster::EditSet {token} {
 	lappend opts -groups [list $usersGroup]
     }
     if {[string equal $which "new"]} {
-	eval {::Jabber::InvokeJlibCmd roster_set $jid   \
+	eval {::Jabber::JlibCmd roster_set $jid   \
 	  [list [namespace current]::EditSetCommand $jid]} $opts
     } else {
-	eval {::Jabber::InvokeJlibCmd roster_set $jid   \
+	eval {::Jabber::JlibCmd roster_set $jid   \
 	  [list [namespace current]::EditSetCommand $jid]} $opts
     }
     if {[string equal $which "new"]} {
 	
 	# Send subscribe request.
 	if {$subscribe} {
-	    ::Jabber::InvokeJlibCmd send_presence -type "subscribe" -to $jid \
+	    ::Jabber::JlibCmd send_presence -type "subscribe" -to $jid \
 	      -command [namespace current]::PresError
 	}
     } else {
 	
 	# Send (un)subscribe request.
 	if {$subscribe} {
-	    ::Jabber::InvokeJlibCmd send_presence -type "subscribe" -to $jid \
+	    ::Jabber::JlibCmd send_presence -type "subscribe" -to $jid \
 	      -command [namespace current]::PresError
 	} elseif {$unsubscribe} {
-	    ::Jabber::InvokeJlibCmd send_presence -type "unsubscribe" -to $jid \
+	    ::Jabber::JlibCmd send_presence -type "unsubscribe" -to $jid \
 	      -command [namespace current]::PresError
 	}
     }
@@ -1665,7 +1666,7 @@ proc ::Jabber::Roster::PresError {jlibName type args} {
 	  The error is: $errmsg ($errcode).\
 	  Do you want to remove it from your roster?"]
 	if {$ans == "yes"} {
-	    ::Jabber::InvokeJlibCmd roster_remove $argsArr(-from) [namespace current]::PushProc
+	    ::Jabber::JlibCmd roster_remove $argsArr(-from) [namespace current]::PushProc
 	}
     }
 }
@@ -1742,7 +1743,7 @@ proc ::Jabber::Roster::GetPresenceIcon {jid presence args} {
     set haveForeignIM 0
     if {$jprefs(rost,haveIMsysIcons)} {
 	if {[regexp {^(.+@)?([^@/]+)(/.*)?} $jid match pre host]} {
-	    set typesubtype [::Jabber::InvokeJlibCmd service gettype $host]
+	    set typesubtype [::Jabber::JlibCmd service gettype $host]
 	
 	    # If empty we have likely not yet browsed etc.
 	    if {[string length $typesubtype] > 0} {
@@ -1942,10 +1943,11 @@ proc ::Jabber::Roster::PostProcessIcons { } {
 	    } 
 	    default {
 		set jid [lindex $v end]
-		set prepjid [jlib::jidprep $jid]
+		set jidmap [jlib::jidmap $jid]
+		set server [jlib::jidmap $jserver(this)]
 		
 		# Exclude jid's that belong to our login jabber server.
- 		if {![string match "*@$jserver(this)*" $prepjid]} {
+ 		if {![string match "*@${server}*" $jidmap]} {
 		    jlib::splitjid $jid jid2 res
 		    set pres [$jstate(roster) getpresence $jid2 -resource $res]
 		    array set presArr $pres

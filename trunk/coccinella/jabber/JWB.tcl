@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JWB.tcl,v 1.12 2004-05-23 13:18:08 matben Exp $
+# $Id: JWB.tcl,v 1.13 2004-05-26 07:36:35 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -168,7 +168,10 @@ proc ::Jabber::WB::NewWhiteboard {args} {
 	    -wtop {
 		continue
 	    }
-	    -jid - -send - -type {
+	    -jid {
+		set jwbstate($wtop,jid) [jlib::jidmap $value]
+	    }
+	    -send - -type {
 		set jwbstate($wtop,[string trimleft $key -]) $value
 	    }
 	    default {
@@ -214,6 +217,7 @@ proc ::Jabber::WB::NewWhiteboardTo {jid args} {
     #    jid is a user in a room: chat
     #    jid is ordinary available user: chat
     #    jid is ordinary but unavailable user: normal message
+    set jid [jlib::jidmap $jid]
     jlib::splitjid $jid jid2 res
     set isRoom 0
     if {[info exists argsArr(-type)]} {
@@ -246,7 +250,6 @@ proc ::Jabber::WB::NewWhiteboardTo {jid args} {
 		return
 	    }
 	}
-	#set roomName [$jstate(browse) getname $jid]    
 	set roomName [$jstate(jlib) service name $jid]
 	if {[llength $roomName]} {
 	    set title "Groupchat room $roomName"
@@ -781,7 +784,6 @@ proc ::Jabber::WB::CanvasCmdListToMessageXElement {wtop cmdList} {
 	set wcan [::WB::GetCanvasFromWtop $wtop]
 	foreach cmd $cmdList {
 	    set cmd [::CanvasUtils::FontHtmlToPixelSize $cmd]
-	    #puts "cmd=$cmd"
 	    set subx [concat $subx \
 	      [can2svgwb::svgasxmllist $cmd -usestyleattribute 0 -canvas $wcan]]
 	}
@@ -1076,7 +1078,7 @@ proc ::Jabber::WB::SVGHttpHandler {wtop cmd} {
     set jid3 $jwbstate($wtop,jid)
 
     if {[$jstate(roster) isavailable $jid3] || \
-      [string equal $jid3 $jstate(mejidres)]} {
+      [jlib::jidequal $jid3 $jstate(mejidres)]} {
 	set tryimport 1
     }
     #puts "::Jabber::WB::SVGHttpHandler line=$line"
@@ -1214,14 +1216,14 @@ proc ::Jabber::WB::GetIPnumber {jid {cmd {}}} {
     if {$cmd != ""} {
 	set ipCache(cmd,$getid) $cmd
     }
-    set prepjid [jlib::jidprep $jid]
+    set mjid [jlib::jidmap $jid]
     
     # What shall we do when we already have the IP number?
-    if {[info exists ipCache(ip,$prepjid)]} {
-	::Jabber::WB::GetIPCallback $jid $getid $ipCache(ip,$prepjid)
+    if {[info exists ipCache(ip,$mjid)]} {
+	::Jabber::WB::GetIPCallback $jid $getid $ipCache(ip,$mjid)
     } else {
 	::Jabber::WB::SendRawMessageList $jid [list "GET IP: $getid"]
-	set ipCache(req,$prepjid) 1
+	set ipCache(req,$mjid) 1
     }
     incr ipCache(getid)
 }
@@ -1245,12 +1247,12 @@ proc ::Jabber::WB::GetIPCallback {jid id ip} {
 
     ::Debug 2 "::Jabber::WB::GetIPCallback: jid=$jid, id=$id, ip=$ip"
 
-    set prepjid [jlib::jidprep $jid]
-    set ipCache(ip,$prepjid) $ip
+    set mjid [jlib::jidmap $jid]
+    set ipCache(ip,$mjid) $ip
     if {[info exists ipCache(cmd,$id)]} {
 	::Debug 2 "\t ipCache(cmd,$id)=$ipCache(cmd,$id)"
 	eval $ipCache(cmd,$id) $jid
-	catch {unset ipCache(cmd,$id) ipCache(req,$prepjid)}
+	catch {unset ipCache(cmd,$id) ipCache(req,$mjid)}
     }
 }
 
@@ -1271,8 +1273,8 @@ proc ::Jabber::WB::GetCoccinellaServers {jid3 {cmd {}}} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::privatexmlns privatexmlns
     
-    set prepjid3 [jlib::jidprep $jid3]
-    set ipCache(req,$prepjid3) 1
+    set mjid3 [jlib::jidmap $jid3]
+    set ipCache(req,$mjid3) 1
     $jstate(jlib) iq_get $privatexmlns(servers) -to $jid3  \
       -command [list ::Jabber::WB::GetCoccinellaServersCallback $jid3 $cmd]
 }
@@ -1290,14 +1292,14 @@ proc ::Jabber::WB::GetCoccinellaServersCallback {jid3 cmd jlibname type subiq} {
     if {$type == "error"} {
 	return
     }
-    set prepjid3 [jlib::jidprep $jid3]
+    set mjid3 [jlib::jidmap $jid3]
     set ipElements [wrapper::getchildswithtag $subiq ip]
     set ip [wrapper::getcdata [lindex $ipElements 0]]
-    set ipCache(ip,$prepjid3) $ip
+    set ipCache(ip,$mjid3) $ip
     if {$cmd != ""} {
 	eval $cmd
     }
-    catch {unset ipCache(req,$prepjid3)}
+    catch {unset ipCache(req,$mjid3)}
 }
 
 proc ::Jabber::WB::PresenceHook {jid type args} {
@@ -1308,13 +1310,13 @@ proc ::Jabber::WB::PresenceHook {jid type args} {
     if {[info exists argsArr(-resource)] && [string length $argsArr(-resource)]} {
 	set jid $jid/$argsArr(-resource)
     }
-    set prepjid [jlib::jidprep $jid]
+    set mjid [jlib::jidmap $jid]
     
     switch -- $type {
 	unavailable {
 	    
 	    # Need to remove our cached ip number for this jid.
-	    catch {unset ipCache(ip,$prepjid) ipCache(req,$prepjid)}
+	    catch {unset ipCache(ip,$mjid) ipCache(req,$mjid)}
 	}
 	available {
 	    
@@ -1335,8 +1337,8 @@ proc ::Jabber::WB::AutoBrowseHook {jid} {
     
     # Shall we query for its ip address right away?
     # Get only if not yet requested.
-    set prepjid [jlib::jidprep $jid]
-    if {$jprefs(preGetIP) && ![info exists ipCache(req,$prepjid)]} {
+    set mjid [jlib::jidmap $jid]
+    if {$jprefs(preGetIP) && ![info exists ipCache(req,$mjid)]} {
 	if {$jprefs(getIPraw)} {
 	    ::Jabber::WB::GetIPnumber $jid
 	} else {
@@ -1391,13 +1393,14 @@ proc ::Jabber::WB::PutFileOrScheduleHook {wtop fileName opts} {
     }
     
     set tojid $jwbstate($wtop,jid)
+    jlib::splitjid $tojid jid2 res
     set isRoom 0
     
-    if {[regexp {^(.+)@([^/]+)/([^/]*)} $tojid match name host res]} {
+    if {[string length $res] > 0} {
 	
 	# The 'tojid' is already complete with resource.
 	set allJid3 $tojid
-	lappend opts -from $jstate(mejidres)
+	lappend opts -from $jstate(mejidresmap)
     } else {
 	
 	# If 'tojid' is without a resource, it can be a room.
@@ -1426,11 +1429,11 @@ proc ::Jabber::WB::PutFileOrScheduleHook {wtop fileName opts} {
 	    } else {
 		set allJid3 $tojid/$res
 	    }
-	    lappend opts -from $jstate(mejidres)
+	    lappend opts -from $jstate(mejidresmap)
 	}
     }
     
-    ::Debug 2 "   allJid3=$allJid3"
+    ::Debug 2 "\t allJid3=$allJid3"
     
     # We shall put to all resources. Treat each in turn.
     foreach jid3 $allJid3 {
@@ -1441,7 +1444,7 @@ proc ::Jabber::WB::PutFileOrScheduleHook {wtop fileName opts} {
 	} else {
 	    set avail [$jstate(roster) isavailable $jid3]
 	}
-	set prepjid3 [jlib::jidprep $jid3]
+	set mjid3 [jlib::jidmap $jid3]
 	
 	# Each jid must get its own -to attribute.
 	set optjidList [concat $opts -to $jid3]
@@ -1449,7 +1452,7 @@ proc ::Jabber::WB::PutFileOrScheduleHook {wtop fileName opts} {
 	::Debug 2 "\t jid3=$jid3, avail=$avail"
 	
 	if {$avail} {
-	    if {[info exists ipCache(ip,$prepjid3)]} {
+	    if {[info exists ipCache(ip,$mjid3)]} {
 		
 		# This one had already told us its ip number, good!
 		::Jabber::WB::PutFile $wtop $fileName $mime $optjidList $jid3
@@ -1514,10 +1517,10 @@ proc ::Jabber::WB::PutFile {wtop fileName mime opts jid} {
     
     ::Debug 2 "::Jabber::WB::PutFile: fileName=$fileName, opts='$opts', jid=$jid"
 
-    set prepjid [jlib::jidprep $jid]
-    if {![info exists ipCache(ip,$prepjid)]} {
+    set mjid [jlib::jidmap $jid]
+    if {![info exists ipCache(ip,$mjid)]} {
 	puts "::Jabber::WB::PutFile: Houston, we have a problem. \
-	  ipCache(ip,$prepjid) not there"
+	  ipCache(ip,$mjid) not there"
 	return
     }
     
@@ -1535,7 +1538,7 @@ proc ::Jabber::WB::PutFile {wtop fileName mime opts jid} {
     # Translate tcl type '-key value' list to 'Key: value' option list.
     set optList [::Import::GetTransportSyntaxOptsFromTcl $opts]
 
-    ::PutFileIface::PutFile $wtop $fileName $ipCache(ip,$prepjid) $optList
+    ::PutFileIface::PutFile $wtop $fileName $ipCache(ip,$mjid) $optList
 }
 
 # Jabber::WB::HandlePutRequest --
@@ -1577,7 +1580,8 @@ proc ::Jabber::WB::MakeWhiteboardExist {opts} {
 	    }
 	}
 	groupchat {
-	    if {![regexp {(^[^@]+@[^/]+)(/.*)?} $optArr(-from) match roomjid]} {
+	    jlib::splitjid $optArr(-from) roomjid resource
+	    if {[string length $roomjid] == 0} {
 		return -code error  \
 		  "The jid we got \"$optArr(-from)\" was not well-formed!"
 	    }
@@ -1603,6 +1607,7 @@ proc ::Jabber::WB::GetWtopFromMessage {type jid {thread {}}} {
     variable jwbstate
     
     set wtop ""
+    set mjid [jlib::jidmap $jid]
     
     switch -- $type {
 	 chat {
@@ -1613,7 +1618,7 @@ proc ::Jabber::WB::GetWtopFromMessage {type jid {thread {}}} {
 	 groupchat {
 	 
 	     # The jid is typically the 'roomjid/nickorhash' but can be the room itself.
-	     jlib::splitjid $jid jid2 resource
+	     jlib::splitjid $mjid jid2 resource
 	     if {[info exists jwbstate($jid2,wtop)]} {
 		 set wtop $jwbstate($jid2,wtop)
 	     }	    

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Search.tcl,v 1.13 2004-04-25 15:35:26 matben Exp $
+# $Id: Search.tcl,v 1.14 2004-05-26 07:36:38 matben Exp $
 
 package provide Search 1.0
 
@@ -95,7 +95,7 @@ proc ::Jabber::Search::Build {args} {
     pack $woob -side bottom -fill x -padx 8 -pady 0
     
     # Get all (browsed) services that support search.
-    set searchServ [::Jabber::InvokeJlibCmd service getjidsfor "search"]
+    set searchServ [::Jabber::JlibCmd service getjidsfor "search"]
     set wcomboserver $frtop.eserv
     ::combobox::combobox $wcomboserver -width 20   \
       -textvariable [namespace current]::server -editable 0
@@ -180,7 +180,7 @@ proc ::Jabber::Search::Get { } {
     set stattxt "-- [::msgcat::mc jawaitserver] --"
     
     # Send get register.
-    ::Jabber::InvokeJlibCmd search_get $server ::Jabber::Search::GetCB    
+    ::Jabber::JlibCmd search_get $server ::Jabber::Search::GetCB    
     $wsearrows start
     
     $wtb configure -columns [list 60 [::msgcat::mc {Search results}]]
@@ -261,7 +261,7 @@ proc ::Jabber::Search::DoSearch { } {
 
     # Returns the hierarchical xml list starting with the <x> element.
     set subelements [::Jabber::Forms::GetXML $wbox]    
-    ::Jabber::InvokeJlibCmd search_set $server  \
+    ::Jabber::JlibCmd search_set $server  \
       [list [namespace current]::ResultCallback $server] -subtags $subelements
 }
 

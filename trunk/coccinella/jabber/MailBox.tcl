@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.45 2004-04-25 15:35:25 matben Exp $
+# $Id: MailBox.tcl,v 1.46 2004-05-26 07:36:36 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -868,7 +868,7 @@ proc ::Jabber::MailBox::DisplayRawMessage {jid3 uid} {
     # Only if user available shall we try to import.
     set tryimport 0
     if {[$jstate(roster) isavailable $jid3] || \
-      [string equal $jid3 $jstate(mejidres)]} {
+      [jlib::jidequal $jid3 $jstate(mejidres)]} {
 	set tryimport 1
     }
 	    
@@ -902,7 +902,7 @@ proc ::Jabber::MailBox::DisplayXElementSVG {jid3 xlist} {
     # Only if user available shall we try to import.
     set tryimport 0
     if {[$jstate(roster) isavailable $jid3] || \
-      [string equal $jid3 $jstate(mejidres)]} {
+      [jlib::jidequal $jid3 $jstate(mejidres)]} {
 	set tryimport 1
     }
 
@@ -1030,7 +1030,7 @@ proc ::Jabber::MailBox::ReplyTo { } {
     # We shall have the original, unparsed, text here.
     set allText [lindex $mailbox($id) 5]
     foreach {subject to time} [lrange $mailbox($id) 0 2] break
-    set to [::Jabber::InvokeJlibCmd getrecipientjid $to]
+    set to [::Jabber::JlibCmd getrecipientjid $to]
     if {![regexp -nocase {^ *re:} $subject]} {
 	set subject "Re: $subject"
     }

@@ -5,12 +5,14 @@
 #
 # Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.16 2003-11-14 09:57:22 matben Exp $
+# $Id: roster.tcl,v 1.17 2004-05-26 07:36:38 matben Exp $
 # 
 # Note that every jid in the rosterArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
 # the presArr($jid-2,res) which have any resource stripped off. The 'from' 
-# attribute sre (always) with /resource.
+# attribute are (always) with /resource.
+# 
+# All jid's in internal arrays are STRINGPREPed!
 # 
 # Variables used in roster:
 # 
@@ -108,6 +110,7 @@
 #       030602   added clearpresence command.
 #       030702   added -type option to getusers command.
 #       030703   removed rostName from roster::roster
+#       040514   does STRINGPREP on all jids
 
 package provide roster 1.0
 
@@ -213,21 +216,23 @@ proc roster::setrosteritem {rostName jid args} {
     
     Debug 2 "roster::setrosteritem rostName=$rostName, jid='$jid', args='$args'"
         
+    set mjid [jlib::jidmap $jid]
+    
     # Add user if not there already.
-    if {[lsearch -exact $rosterArr(users) $jid] < 0} {
-	lappend rosterArr(users) $jid
+    if {[lsearch -exact $rosterArr(users) $mjid] < 0} {
+	lappend rosterArr(users) $mjid
     }
     
     # Clear out the old state since an 'ask' element may still be lurking.
     foreach key $rostGlobals(tags) {
-	catch {unset rosterArr($jid,$key)}
+	catch {unset rosterArr($mjid,$key)}
     }
     
     # Old values will be overwritten, nonexisting options will result in
     # nonexisting array entries.
     foreach {name value} $args {
 	set par [string trimleft $name "-"]
-	set rosterArr($jid,$par) $value
+	set rosterArr($mjid,$par) $value
 	if {[string equal $par "groups"]} {
 	    foreach gr $value {
 		if {[lsearch $rosterArr(groups) $gr] < 0} {
@@ -262,7 +267,8 @@ proc roster::removeitem {rostName jid} {
     
     Debug 2 "roster::removeitem rostName=$rostName, jid='$jid'"
     
-    set ind [lsearch -exact $rosterArr(users) $jid]
+    set mjid [jlib::jidmap $jid]
+    set ind [lsearch -exact $rosterArr(users) $mjid]
     
     # Return if not there.
     if {$ind < 0} {
@@ -273,9 +279,9 @@ proc roster::removeitem {rostName jid} {
     
     # First the roster, then presence...
     foreach name $rostGlobals(tags) {
-	catch {unset rosterArr($jid,$name)}
+	catch {unset rosterArr($mjid,$name)}
     }
-    array unset presArr "$jid,*"
+    array unset presArr "$mjid,*"
     
     # Be sure to evaluate the registered command procedure.
     if {[string length $options(cmd)]} {
@@ -415,26 +421,28 @@ proc roster::setpresence {rostName jid type args} {
     Debug 2 "roster::setpresence rostName=$rostName, jid='$jid', \
       type='$type', args='$args'"
     
-    jlib::splitjid $jid jid2 resource
+    set mjid [jlib::jidmap $jid]
+    jlib::splitjid $mjid mjid2 resource
+    jlib::splitjid $jid jid2 x
     
     if {[string equal $type "unsubscribed"]} {
 	
 	# We need to remove item from all resources.
-	array unset presArr "${jid2}*"
+	array unset presArr "${mjid2}*"
 	set argList [list -type $type]
     } else {
 	
 	# Clear out the old presence state since elements may still be lurking.
-	array unset presArr "${jid},*"
+	array unset presArr "${mjid},*"
 	
 	# Should we add something more to our roster, such as subscription,
 	# if we haven't got our roster before this?
 	
 	# Add to list of resources.
-	set presArr($jid2,res) [lsort -unique [lappend presArr($jid2,res) \
+	set presArr($mjid2,res) [lsort -unique [lappend presArr($mjid2,res) \
 	  $resource]]
 	
-	set presArr($jid,type) $type
+	set presArr($mjid,type) $type
 	foreach {name value} $args {
 	    set par [string trimleft $name "-"]
 	    switch -- $par {
@@ -445,11 +453,11 @@ proc roster::setpresence {rostName jid type args} {
 			set ns [wrapper::getattribute $xelem xmlns]
 			regexp {http://jabber.org/protocol/(.*)$} $ns \
 			  match ns
-			set presArr($jid,x,$ns) $xelem
+			set presArr($mjid,x,$ns) $xelem
 		    }
 		}
 		default {
-		    set presArr($jid,$par) $value
+		    set presArr($mjid,$par) $value
 		}
 	    }
 	}
@@ -482,6 +490,7 @@ proc roster::getrosteritem {rostName jid} {
     
     Debug 2 "roster::getrosteritem rostName=$rostName, jid='$jid'"
     
+    set jid [jlib::jidmap $jid]
     if {[lsearch -exact $rosterArr(users) $jid] < 0} {
 	#error "nonexisting jid \"$jid\" in roster"
 	# Or should we be silent?
@@ -553,53 +562,6 @@ proc roster::getusers {rostName args} {
     return $jidlist
 }
 
-proc roster::getusersBU {rostName args} {
-    upvar [namespace current]::${rostName}::rosterArr rosterArr
-    upvar [namespace current]::${rostName}::presArr presArr
-	
-    set jidlist $rosterArr(users)
-    foreach {key value} $args {
-	
-	switch -- $key {
-	    -type {
-		
-		# Loop through all jid2 in roster and see if any available
-		set jidlist {}
-		foreach jid2 $rosterArr(users) {
-		    set isavailable 0
-		    if {[info exists presArr($jid2,res)]} {
-			foreach res $presArr($jid2,res) {
-			    set jid3 $jid2/$res
-			    if {[info exists presArr($jid3,type)] && \
-			      [string equal $presArr($jid3,type) "available"]} {
-				set isavailable 1
-				break
-			    }
-			}
-		    }
-		    
-		    switch -- $value {
-			available {
-			    if {$isavailable} {
-				lappend jidlist $jid2
-			    }
-			}
-			unavailable {
-			    if {!$isavailable} {
-				lappend jidlist $jid2
-			    }
-			}
-		    }
-		}
-	    }
-	    default {
-		# empty
-	    }
-	}
-    }
-    return $jidlist
-}
-
 # roster::getpresence --
 #
 #       Returns the presence state of an existing roster item.
@@ -627,6 +589,7 @@ proc roster::getpresence {rostName jid args} {
     
     Debug 2 "roster::getpresence rostName=$rostName, jid=$jid, args='$args'"
     
+    set jid [jlib::jidmap $jid]
     array set argsArr $args
     set haveRes 0
     if {[info exists argsArr(-resource)]} {
@@ -716,6 +679,7 @@ proc roster::getgroups {rostName {jid {}}} {
    
     Debug 2 "roster::getgroups rostName=$rostName, jid='$jid'"
     
+    set jid [jlib::jidmap $jid]
     if {[string length $jid]} {
 	if {[info exists rosterArr($jid,groups)]} {
 	    return $rosterArr($jid,groups)
@@ -744,6 +708,7 @@ proc roster::getname {rostName jid} {
    
     Debug 2 "roster::getname rostName=$rostName, jid='$jid'"
     
+    set jid [jlib::jidmap $jid]
     if {[info exists rosterArr($jid,name)]} {
 	return $rosterArr($jid,name)
     } else {
@@ -767,6 +732,7 @@ proc roster::getsubscription {rostName jid} {
    
     Debug 2 "roster::getsubscription rostName=$rostName, jid='$jid'"
     
+    set jid [jlib::jidmap $jid]
     if {[info exists rosterArr($jid,subscription)]} {
 	return $rosterArr($jid,subscription)
     } else {
@@ -901,6 +867,8 @@ proc roster::isavailable {rostName jid} {
    
     Debug 2 "roster::isavailable rostName=$rostName, jid='$jid'"
         
+    set jid [jlib::jidmap $jid]
+
     # If any resource in jid, we get it here.
     jlib::splitjid $jid jid2 resource
 
@@ -945,6 +913,7 @@ proc roster::getx {rostName jid xmlns} {
    
     Debug 2 "roster::getx rostName=$rostName, jid='$jid', xmlns=$xmlns"
 
+    set jid [jlib::jidmap $jid]
     if {[info exists presArr($jid,x,$xmlns)]} {
 	return $presArr($jid,x,$xmlns)
     } else {

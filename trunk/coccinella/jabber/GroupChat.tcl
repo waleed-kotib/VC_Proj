@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.60 2004-05-23 13:18:08 matben Exp $
+# $Id: GroupChat.tcl,v 1.61 2004-05-26 07:36:35 matben Exp $
 
 package require History
 
@@ -315,16 +315,16 @@ proc ::Jabber::GroupChat::EnterOrCreate {what args} {
     return $ans
 }
 
-proc ::Jabber::GroupChat::EnterHook {roomJid protocol} {
+proc ::Jabber::GroupChat::EnterHook {roomjid protocol} {
     
-    ::Debug 2 "::Jabber::GroupChat::EnterHook roomJid=$roomJid $protocol"
+    ::Debug 2 "::Jabber::GroupChat::EnterHook roomjid=$roomjid $protocol"
     
-    ::Jabber::GroupChat::SetProtocol $roomJid $protocol
+    ::Jabber::GroupChat::SetProtocol $roomjid $protocol
     
     # If we are using the 'conference' protocol we must browse
     # the room to get the participants.
     if {$protocol == "conference"} {
-	::Jabber::Browse::Get $roomJid
+	::Jabber::Browse::Get $roomjid
     }
 }
 
@@ -332,16 +332,17 @@ proc ::Jabber::GroupChat::EnterHook {roomJid protocol} {
 # 
 #       Cache groupchat protocol in use for specific room.
 
-proc ::Jabber::GroupChat::SetProtocol {roomJid inprotocol} {
+proc ::Jabber::GroupChat::SetProtocol {roomjid inprotocol} {
     
     variable protocol
 
-    ::Debug 2 "::Jabber::GroupChat::SetProtocol $roomJid $inprotocol"
+    ::Debug 2 "::Jabber::GroupChat::SetProtocol $roomjid $inprotocol"
+    set roomjid [jlib::jidmap $roomjid]
     
     # We need a separate cache for this since the room may not yet exist.
-    set protocol($roomJid) $inprotocol
+    set protocol($roomjid) $inprotocol
     
-    set token [::Jabber::GroupChat::GetTokenFrom roomjid $roomJid]
+    set token [::Jabber::GroupChat::GetTokenFrom roomjid $roomjid]
     if {$token == ""} {
 	return
     }
@@ -491,8 +492,8 @@ proc ::Jabber::GroupChat::DoEnter {token} {
 	return
     }
 
-    set roomJid [string tolower $enter(roomname)@$enter(server)]
-    ::Jabber::InvokeJlibCmd groupchat enter $roomJid $enter(nickname) \
+    set roomjid [jlib::jidmap [jlib::joinjid $enter(roomname) $enter(server) ""]]
+    ::Jabber::JlibCmd groupchat enter $roomjid $enter(nickname) \
       -command [namespace current]::EnterCallback
 
     set enter(finished) 1
@@ -538,27 +539,19 @@ proc ::Jabber::GroupChat::GotMsg {body args} {
     
     array set argsArr $args
     
-    # We must follow the roomJid...
+    # We must follow the roomjid...
     if {[info exists argsArr(-from)]} {
-	set fromJid $argsArr(-from)
+	set from $argsArr(-from)
     } else {
-	return -code error {Missing -from attribute in group message!}
+	return -code error "Missing -from attribute in group message!"
     }
-    
-    # Figure out if from the room or from user.
-    if {[regexp {(.+)@([^/]+)(/(.+))?} $fromJid match name host junk res]} {
-	set roomJid ${name}@${host}
-	if {$res == ""} {
-	    # From the room itself.
-	}
-    } else {
-	return -code error "The jid we got \"$fromJid\"was not well-formed!"
-    }
-    
+    set from [jlib::jidmap $from]
+    jlib::splitjid $from roomjid res
+        
     # If we haven't a window for this roomjid, make one!
-    set token [::Jabber::GroupChat::GetTokenFrom roomjid $roomJid]
+    set token [::Jabber::GroupChat::GetTokenFrom roomjid $roomjid]
     if {$token == ""} {
-	set token [eval {::Jabber::GroupChat::Build $roomJid} $args]
+	set token [eval {::Jabber::GroupChat::Build $roomjid} $args]
     }
     variable $token
     upvar 0 $token state
@@ -569,7 +562,7 @@ proc ::Jabber::GroupChat::GotMsg {body args} {
     if {[string length $body] > 0} {
 
 	# And put message in window.
-	eval {::Jabber::GroupChat::InsertMessage $token $fromJid $body} $args
+	eval {::Jabber::GroupChat::InsertMessage $token $from $body} $args
 	set state(got1stmsg) 1
 	
 	# Run display hooks (speech).
@@ -583,13 +576,13 @@ proc ::Jabber::GroupChat::GotMsg {body args} {
 #       and 'conference'.
 #
 # Arguments:
-#       roomJid     The roomname@server
+#       roomjid     The roomname@server
 #       args        ??
 #       
 # Results:
 #       shows window, returns token.
 
-proc ::Jabber::GroupChat::Build {roomJid args} {
+proc ::Jabber::GroupChat::Build {roomjid args} {
     global  this prefs wDlgs
     
     variable protocol
@@ -599,7 +592,7 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
-    ::Debug 2 "::Jabber::GroupChat::Build roomJid=$roomJid, args='$args'"
+    ::Debug 2 "::Jabber::GroupChat::Build roomjid=$roomjid, args='$args'"
 
     # Initialize the state variable, an array, that keeps is the storage.
     
@@ -612,7 +605,7 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     array set argsArr $args
 
     set state(w)                $w
-    set state(roomjid)          $roomJid
+    set state(roomjid)          $roomjid
     set state(subject)          ""
     set state(status)           "available"
     set state(oldStatus)        "available"
@@ -627,13 +620,13 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     ::UI::Toplevel $w -class GroupChat -usemacmainmenu 1 -macstyle documentProc
     
     # Not sure how old-style groupchat works here???
-    #set roomName [$jstate(browse) getname $roomJid]
-    set roomName [$jstate(jlib) service name $roomJid]
+    #set roomName [$jstate(browse) getname $roomjid]
+    set roomName [$jstate(jlib) service name $roomjid]
     
     if {[llength $roomName]} {
 	set tittxt $roomName
     } else {
-	set tittxt $roomJid
+	set tittxt $roomjid
     }
     wm title $w "[::msgcat::mc Groupchat]: $tittxt"
     
@@ -683,13 +676,13 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     $wtray newbutton history History $iconHistory $iconHistoryDis \
       [list [namespace current]::BuildHistory $token]
     $wtray newbutton invite  Invite  $iconInvite  $iconInviteDis  \
-      [list ::Jabber::MUC::Invite $roomJid]
+      [list ::Jabber::MUC::Invite $roomjid]
     $wtray newbutton info    Info    $iconInfo    $iconInfoDis    \
-      [list ::Jabber::MUC::BuildInfo $roomJid]
+      [list ::Jabber::MUC::BuildInfo $roomjid]
     $wtray newbutton print   Print   $iconPrint   $iconPrintDis   \
       [list [namespace current]::Print $token]
     
-    ::hooks::run buildGroupChatButtonTrayHook $wtray $roomJid
+    ::hooks::run buildGroupChatButtonTrayHook $wtray $roomjid
     
     set shortBtWidth [expr [$wtray minwidth] + 8]
 
@@ -727,14 +720,14 @@ proc ::Jabber::GroupChat::Build {roomJid args} {
     entry $frtop.etp -textvariable $token\(subject) -state disabled
     set wbtnick $frtop.bni
     button $wbtnick -text "[::msgcat::mc {Nick name}]..."  \
-      -font $fontS -command [list ::Jabber::MUC::SetNick $roomJid]
+      -font $fontS -command [list ::Jabber::MUC::SetNick $roomjid]
     
     grid $frtop.btp -column 0 -row 0 -sticky w -padx 6 -pady 1
     grid $frtop.etp -column 1 -row 0 -sticky ew -padx 4 -pady 1
     grid $frtop.bni -column 2 -row 0 -sticky ew -padx 6 -pady 1
     grid columnconfigure $frtop 1 -weight 1
     
-    if {!( [info exists protocol($roomJid)] && ($protocol($roomJid) == "muc") )} {
+    if {!( [info exists protocol($roomjid)] && ($protocol($roomjid) == "muc") )} {
 	$wbtnick configure -state disabled
 	$wtray buttonconfigure invite -state disabled
 	$wtray buttonconfigure info   -state disabled
@@ -903,11 +896,11 @@ proc ::Jabber::GroupChat::InsertMessage {token from body args} {
     array set argsArr $args
     
     # Old-style groupchat and browser compatibility layer.
-    set nick [::Jabber::InvokeJlibCmd service nick $from]
+    set nick [::Jabber::JlibCmd service nick $from]
     
     # This can be room name or nick name.
     foreach {meRoomJid mynick}  \
-      [::Jabber::InvokeJlibCmd service hashandnick $roomjid] break
+      [::Jabber::JlibCmd service hashandnick $roomjid] break
     if {[string equal $meRoomJid $from]} {
 	set whom me
     } elseif {[string equal $roomjid $from]} {
@@ -1013,7 +1006,7 @@ proc ::Jabber::GroupChat::SetTopic {token} {
     upvar ::Jabber::jstate jstate
     
     set topic   $state(subject)
-    set roomJid $state(roomjid)
+    set roomjid $state(roomjid)
     set ans [::UI::MegaDlgMsgAndEntry  \
       [::msgcat::mc {Set New Topic}]  \
       [::msgcat::mc jasettopic]  \
@@ -1022,7 +1015,7 @@ proc ::Jabber::GroupChat::SetTopic {token} {
 
     if {($ans == "ok") && ($topic != "")} {
 	if {[catch {
-	    ::Jabber::InvokeJlibCmd send_message $roomJid -type groupchat \
+	    ::Jabber::JlibCmd send_message $roomjid -type groupchat \
 	      -subject $topic
 	} err]} {
 	    tk_messageBox -type ok -icon error -title "Network Error" \
@@ -1046,7 +1039,7 @@ proc ::Jabber::GroupChat::Send {token} {
 	return
     }
     set wtextsnd $state(wtextsnd)
-    set roomJid  $state(roomjid)
+    set roomjid  $state(roomjid)
 
     # Get text to send. Strip off any ending newlines from Return.
     # There might by smiley icons in the text widget. Parse them to text.
@@ -1054,7 +1047,7 @@ proc ::Jabber::GroupChat::Send {token} {
     set allText [string trimright $allText "\n"]
     if {$allText != ""} {	
 	if {[catch {
-	    ::Jabber::InvokeJlibCmd send_message $roomJid -type groupchat \
+	    ::Jabber::JlibCmd send_message $roomjid -type groupchat \
 	      -body $allText
 	} err]} {
 	    tk_messageBox -type ok -icon error -title "Network Error" \
@@ -1153,12 +1146,12 @@ proc ::Jabber::GroupChat::PresenceHook {jid presence args} {
 	array set attrArr $args
 	
 	# Since there should not be any /resource.
-	set roomJid $jid
+	set roomjid $jid
 	set jid3 ${jid}/$attrArr(-resource)
 	if {[string equal $presence "available"]} {
-	    eval {::Jabber::GroupChat::SetUser $roomJid $jid3 $presence} $args
+	    eval {::Jabber::GroupChat::SetUser $roomjid $jid3 $presence} $args
 	} elseif {[string equal $presence "unavailable"]} {
-	    ::Jabber::GroupChat::RemoveUser $roomJid $jid3
+	    ::Jabber::GroupChat::RemoveUser $roomjid $jid3
 	}
 	
 	# When kicked etc. from a MUC room...
@@ -1221,7 +1214,7 @@ proc ::Jabber::GroupChat::BrowseUser {userXmlList} {
 #       Adds or updates a user item in the group chat dialog.
 #       
 # Arguments:
-#       roomJid     the room's jid
+#       roomjid     the room's jid
 #       jid3     $roomjid/hashornick
 #       presence    "available", "unavailable", or "unsubscribed"
 #       args        list of '-key value' pairs where '-key' can be
@@ -1230,20 +1223,22 @@ proc ::Jabber::GroupChat::BrowseUser {userXmlList} {
 # Results:
 #       updated UI.
 
-proc ::Jabber::GroupChat::SetUser {roomJid jid3 presence args} {
+proc ::Jabber::GroupChat::SetUser {roomjid jid3 presence args} {
     global  this
 
     upvar ::Jabber::jstate jstate
 
-    ::Debug 2 "::Jabber::GroupChat::SetUser roomJid=$roomJid,\
+    ::Debug 2 "::Jabber::GroupChat::SetUser roomjid=$roomjid,\
       jid3=$jid3 presence=$presence"
 
     array set attrArr $args
+    set roomjid [jlib::jidmap $roomjid]
+    set jid3    [jlib::jidmap $jid3]
 
     # If we haven't a window for this thread, make one!
-    set token [::Jabber::GroupChat::GetTokenFrom roomjid $roomJid]
+    set token [::Jabber::GroupChat::GetTokenFrom roomjid $roomjid]
     if {$token == ""} {
-	set token [eval {::Jabber::GroupChat::Build $roomJid} $args]
+	set token [eval {::Jabber::GroupChat::Build $roomjid} $args]
     }       
     variable $token
     upvar 0 $token state
@@ -1251,7 +1246,7 @@ proc ::Jabber::GroupChat::SetUser {roomJid jid3 presence args} {
     # Get the hex string to use as tag. 
     # In old-style groupchat this is the nick name which should be unique
     # within this room aswell.
-    jlib::splitjid $jid3 jid2 hexstr
+    jlib::splitjid $jid3 jid2 resource
     
     # If we got a browse push with a <user>, asume is available.
     if {[string length $presence] == 0} {
@@ -1271,12 +1266,12 @@ proc ::Jabber::GroupChat::SetUser {roomJid jid3 presence args} {
     set wusers $state(wusers)
     
     # Old-style groupchat and browser compatibility layer.
-    set nick [::Jabber::InvokeJlibCmd service nick $jid3]
+    set nick [::Jabber::JlibCmd service nick $jid3]
     set icon [eval {::Jabber::Roster::GetPresenceIcon $jid3 $presence} $args]
     $wusers configure -state normal
     set insertInd end
     set begin end
-    set range [$wusers tag ranges $hexstr]
+    set range [$wusers tag ranges $resource]
     if {[llength $range]} {
 	
 	# Remove complete line including image.
@@ -1287,22 +1282,22 @@ proc ::Jabber::GroupChat::SetUser {roomJid jid3 presence args} {
     
     # Icon that is popup sensitive.
     $wusers image create $begin -image $icon -align bottom
-    $wusers tag add $hexstr "$begin linestart" "$begin lineend"
+    $wusers tag add $resource "$begin linestart" "$begin lineend"
 
     # Use hex string, nickname (resource) as tag.
-    $wusers insert "$begin +1 char" " $nick\n" $hexstr
+    $wusers insert "$begin +1 char" " $nick\n" $resource
     $wusers configure -state disabled
     
     # For popping up menu.
     if {[string match "mac*" $this(platform)]} {
-	$wusers tag bind $hexstr <Button-1>  \
+	$wusers tag bind $resource <Button-1>  \
 	  [list [namespace current]::PopupTimer $token $jid3 %x %y]
-	$wusers tag bind $hexstr <ButtonRelease-1>   \
+	$wusers tag bind $resource <ButtonRelease-1>   \
 	  [list [namespace current]::PopupTimerCancel $token]
-	$wusers tag bind $hexstr <Control-Button-1>  \
+	$wusers tag bind $resource <Control-Button-1>  \
 	  [list [namespace current]::Popup $token $jid3 %x %y]
     } else {
-	$wusers tag bind $hexstr <Button-3>  \
+	$wusers tag bind $resource <Button-3>  \
 	  [list [namespace current]::Popup $wusers $jid3 %x %y]
     }
     
@@ -1452,9 +1447,10 @@ proc ::Jabber::GroupChat::Popup {w v x y} {
     }
 }
 
-proc ::Jabber::GroupChat::RemoveUser {roomJid jid3} {
+proc ::Jabber::GroupChat::RemoveUser {roomjid jid3} {
 
-    set token [::Jabber::GroupChat::GetTokenFrom roomjid $roomJid]
+    set roomjid [jlib::jidmap $roomjid]
+    set token [::Jabber::GroupChat::GetTokenFrom roomjid $roomjid]
     if {$token == ""} {
 	return
     }
@@ -1462,10 +1458,10 @@ proc ::Jabber::GroupChat::RemoveUser {roomJid jid3} {
     upvar 0 $token state
     
     # Get the hex string to use as tag.
-    jlib::splitjid $jid3 jid2 hexstr
+    jlib::splitjid $jid3 jid2 resource
     set wusers $state(wusers)
     $wusers configure -state normal
-    set range [$wusers tag ranges $hexstr]
+    set range [$wusers tag ranges $resource]
     if {[llength $range]} {
 	set insertInd [lindex $range 0]
 	$wusers delete "$insertInd linestart" "$insertInd lineend +1 char"
@@ -1499,7 +1495,7 @@ proc ::Jabber::GroupChat::Save {token} {
     if {[string length $ans]} {
 	set allText [::Text::TransformToPureText $wtext]
 	foreach {meRoomJid mynick}  \
-	  [::Jabber::InvokeJlibCmd service hashandnick $roomjid] break
+	  [::Jabber::JlibCmd service hashandnick $roomjid] break
 	set fd [open $ans w]
 	puts $fd "Groupchat in:\t$roomjid"
 	puts $fd "Subject:     \t$state(subject)"
@@ -1521,7 +1517,8 @@ proc ::Jabber::GroupChat::Print {token} {
 }
 
 proc ::Jabber::GroupChat::ExitRoom {roomjid} {
-    
+
+    set roomjid [jlib::jidmap $roomjid]
     set token [::Jabber::GroupChat::GetTokenFrom roomjid $roomjid]
     if {$token != ""} {
 	::Jabber::GroupChat::Exit $token
@@ -1533,7 +1530,7 @@ proc ::Jabber::GroupChat::ExitRoom {roomjid} {
 #       Ask if wants to exit room. If then calls GroupChat::Close to do it.
 #       
 # Arguments:
-#       roomJid
+#       roomjid
 #       
 # Results:
 #       yes/no if actually exited or not.
@@ -1543,7 +1540,7 @@ proc ::Jabber::GroupChat::Exit {token} {
     upvar 0 $token state
     upvar ::Jabber::jstate jstate
 
-    set roomJid $state(roomjid)
+    set roomjid $state(roomjid)
     
     if {[info exists state(w)] && [winfo exists $state(w)]} {
 	set opts [list -parent $state(w)]
@@ -1553,11 +1550,11 @@ proc ::Jabber::GroupChat::Exit {token} {
     
     if {[::Jabber::IsConnected]} {
 	set ans [eval {tk_messageBox -icon warning -type yesno  \
-	  -message [::msgcat::mc jamesswarnexitroom $roomJid]} $opts]
+	  -message [::msgcat::mc jamesswarnexitroom $roomjid]} $opts]
 	if {$ans == "yes"} {
 	    ::Jabber::GroupChat::Close $token
-	    ::Jabber::InvokeJlibCmd service exitroom $roomJid
-	    ::hooks::run groupchatExitRoomHook $roomJid
+	    ::Jabber::JlibCmd service exitroom $roomjid
+	    ::hooks::run groupchatExitRoomHook $roomjid
 	}
     } else {
 	set ans "yes"
@@ -1575,7 +1572,7 @@ proc ::Jabber::GroupChat::Close {token} {
     variable $token
     upvar 0 $token state
     
-    set roomJid $state(roomjid)
+    set roomjid $state(roomjid)
 
     if {[info exists state(w)] && [winfo exists $state(w)]} {
 	::UI::SaveWinGeom $wDlgs(jgc) $state(w)
@@ -1592,7 +1589,7 @@ proc ::Jabber::GroupChat::Close {token} {
     }
     
     # Make sure any associated whiteboard is closed as well.
-    ::hooks::run groupchatExitRoomHook $roomJid
+    ::hooks::run groupchatExitRoomHook $roomjid
 }
 
 # Jabber::GroupChat::LogoutHook --

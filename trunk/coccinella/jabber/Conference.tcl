@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Conference.tcl,v 1.24 2004-05-23 13:18:08 matben Exp $
+# $Id: Conference.tcl,v 1.25 2004-05-26 07:36:35 matben Exp $
 
 package provide Conference 1.0
 
@@ -328,7 +328,7 @@ proc ::Jabber::Conference::EnterGet {token} {
     
     # Send get enter room.
     set roomJid [string tolower $state(roomname)@$state(server)]    
-    ::Jabber::InvokeJlibCmd conference get_enter $roomJid  \
+    ::Jabber::JlibCmd conference get_enter $roomJid  \
       [list [namespace current]::EnterGetCB $token]
 }
 
@@ -379,7 +379,7 @@ proc ::Jabber::Conference::DoEnter {token} {
     	set subelements [::Jabber::Forms::GetScrollForm $state(wbox)]
     }
     set roomJid [string tolower $state(roomname)@$state(server)]
-    ::Jabber::InvokeJlibCmd conference set_enter $roomJid $subelements  \
+    ::Jabber::JlibCmd conference set_enter $roomJid $subelements  \
       [list [namespace current]::ResultCallback $roomJid]
     
     # This triggers the tkwait, and destroys the enter dialog.
@@ -660,7 +660,7 @@ proc ::Jabber::Conference::CreateMUCCB {token jlibName type args} {
     if {![info exists argsArr(-created)]} {
     
     }
-    ::Jabber::InvokeJlibCmd muc getroom $state(roomjid)  \
+    ::Jabber::JlibCmd muc getroom $state(roomjid)  \
       [list [namespace current]::CreateGetGetCB $token]
 }
 
@@ -728,10 +728,10 @@ proc ::Jabber::Conference::DoCreate {token} {
     
     # Ask jabberlib to create the room for us.
     if {$state(usemuc)} {
-	::Jabber::InvokeJlibCmd muc setroom $roomJid form -form $subelements \
+	::Jabber::JlibCmd muc setroom $roomJid form -form $subelements \
 	  -command [list [namespace current]::DoCreateCallback $state(usemuc) $roomJid]
     } else {
-	::Jabber::InvokeJlibCmd conference set_create $roomJid $subelements  \
+	::Jabber::JlibCmd conference set_create $roomJid $subelements  \
 	  [list [namespace current]::DoCreateCallback $state(usemuc) $roomJid]
     }
     

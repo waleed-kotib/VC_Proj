@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Subscribe.tcl,v 1.17 2004-05-06 13:41:10 matben Exp $
+# $Id: Subscribe.tcl,v 1.18 2004-05-26 07:36:38 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -195,9 +195,9 @@ proc ::Jabber::Subscribe::Doit {uid} {
     
     # Accept (allow) or deny subscription.
     if {$locals($uid,allow)} {
-	::Jabber::InvokeJlibCmd send_presence -to $jid -type "subscribed"
+	::Jabber::JlibCmd send_presence -to $jid -type "subscribed"
     } else {
-	::Jabber::InvokeJlibCmd send_presence -to $jid -type "unsubscribed"
+	::Jabber::JlibCmd send_presence -to $jid -type "unsubscribed"
     }
 	
     # Add user to my roster. Send subscription request.	
@@ -209,9 +209,9 @@ proc ::Jabber::Subscribe::Doit {uid} {
 	if {($locals($uid,group) != "") && ($locals($uid,group) != "None")} {
 	    lappend arglist -groups [list $locals($uid,group)]
 	}
-	eval {::Jabber::InvokeJlibCmd roster_set $jid ::Jabber::Subscribe::ResProc} \
+	eval {::Jabber::JlibCmd roster_set $jid ::Jabber::Subscribe::ResProc} \
 	  $arglist
-	::Jabber::InvokeJlibCmd send_presence -to $jid -type "subscribe"
+	::Jabber::JlibCmd send_presence -to $jid -type "subscribe"
     }
     set locals($uid,finished) 1
     destroy $locals($uid,wtop)
@@ -225,7 +225,7 @@ proc ::Jabber::Subscribe::Cancel {uid} {
     ::Debug 2 "::Jabber::Subscribe::Cancel jid=$jid"
     
     # Deny presence to this user.
-    ::Jabber::InvokeJlibCmd send_presence -to $jid -type "unsubscribed"
+    ::Jabber::JlibCmd send_presence -to $jid -type "unsubscribed"
 
     set locals($uid,finished) 0
     destroy $locals($uid,wtop)

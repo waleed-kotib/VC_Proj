@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.45 2004-05-23 13:18:08 matben Exp $
+# $Id: Browse.tcl,v 1.46 2004-05-26 07:36:35 matben Exp $
 
 package require chasearrows
 
@@ -268,7 +268,7 @@ proc ::Jabber::Browse::Callback {browseName type from subiq} {
 	set {
     
 	    # It is at this stage we are confident that a Browser page is needed.
-	    if {[string equal $from $jserver(this)]} {
+	    if {[jlib::jidequal $from $jserver(this)]} {
 		::Jabber::UI::NewPage "Browser"
 	    }
 	    
@@ -343,7 +343,7 @@ proc ::Jabber::Browse::Callback {browseName type from subiq} {
 			if {!$haveNS && [info exists cattrArr(type)] &&  \
 			  ($cattrArr(type) == "public" ||  \
 			  $cattrArr(type) == "private")} {
-			    ::Jabber::InvokeJlibCmd get_version $confjid   \
+			    ::Jabber::JlibCmd get_version $confjid   \
 			      [list ::Jabber::CacheGroupchatType $confjid]
 			}
 
@@ -359,7 +359,7 @@ proc ::Jabber::Browse::Callback {browseName type from subiq} {
 	    }
 	    
 	    # Fix icons of foreign IM systems.
-	    if {[string equal $from $jserver(this)]} {
+	    if {[jlib::jidequal $from $jserver(this)]} {
 		::Jabber::Roster::PostProcessIcons
 	    }
 	}
@@ -411,7 +411,7 @@ proc ::Jabber::Browse::ErrorProc {silent browseName type jid errlist} {
     
     # As a fallback we use the disco or agents method instead if browsing 
     # the login server fails.
-    if {[string equal $jid $jserver(this)]} {
+    if {[jlib::jidequal $jid $jserver(this)]} {
 
 	switch -- $jprefs(serviceMethod) {
 	    disco {
@@ -942,7 +942,7 @@ proc ::Jabber::Browse::AutoBrowse {jid presence args} {
     if {[string equal $presence "available"]} {   
 	
 	# Browse only potential Coccinella (all jabber) clients.
-	regexp {^(.+@)?([^@/]+)(/.*)?} $jid match pre host
+	jlib::splitjidex $jid node host x
 	set type [$jstate(browse) gettype $host]
 	::Debug 4 "\t type=$type"
 	
@@ -1335,7 +1335,7 @@ proc ::Jabber::Browse::ParseGet {jlibname from subiq args} {
 	lappend subtags [wrapper::createtag "ns" -chdata $ns]
     }
     
-    set attr [list xmlns jabber:iq:browse jid $jstate(mejidres)  \
+    set attr [list xmlns jabber:iq:browse jid $jstate(mejidresmap)  \
       type client category user]
     set xmllist [wrapper::createtag "item" -subtags $subtags -attrlist $attr]
     eval {$jstate(jlib) send_iq "result" $xmllist -to $from} $opts
