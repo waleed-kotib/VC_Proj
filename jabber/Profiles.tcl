@@ -4,7 +4,7 @@
 #      
 #  Copyright (c) 2003-2004  Mats Bengtsson
 #  
-# $Id: Profiles.tcl,v 1.3 2004-01-06 15:59:22 matben Exp $
+# $Id: Profiles.tcl,v 1.4 2004-01-07 14:57:34 matben Exp $
 
 package provide Profiles 1.0
 
@@ -286,7 +286,7 @@ proc ::Profiles::BuildPage {page} {
     pack $page.fr -side top -anchor w -ipadx 10 -ipady 6 -fill x
     
     message $labpui.msg -text [::msgcat::mc prefprof] -aspect 800
-    pack $labpui.msg -side top -fill x
+    pack $labpui.msg -side top -anchor w -fill x
 
     set pui $labpui.fr
     pack [frame $pui] -side left  
@@ -322,19 +322,19 @@ proc ::Profiles::BuildPage {page} {
     
     label $pui.lserv -text "[::msgcat::mc {Jabber Server}]:" -font $fontSB \
       -anchor e
-    entry $pui.eserv -width 28   \
+    entry $pui.eserv -width 22   \
       -textvariable [namespace current]::server -validate key  \
       -validatecommand {::Jabber::ValidateJIDChars %S}
     label $pui.luser -text "[::msgcat::mc Username]:" -font $fontSB -anchor e
-    entry $pui.euser -width 28  \
+    entry $pui.euser -width 22  \
       -textvariable [namespace current]::username -validate key  \
       -validatecommand {::Jabber::ValidateJIDChars %S}
     label $pui.lpass -text "[::msgcat::mc Password]:" -font $fontSB -anchor e
-    entry $pui.epass -width 28  \
+    entry $pui.epass -width 22  \
       -textvariable [namespace current]::password -validate key  \
       -validatecommand {::Jabber::ValidateJIDChars %S}
     label $pui.lres -text "[::msgcat::mc Resource]:" -font $fontSB -anchor e
-    entry $pui.eres -width 28   \
+    entry $pui.eres -width 22   \
       -textvariable [namespace current]::resource -validate key  \
       -validatecommand {::Jabber::ValidateJIDChars %S}
     set wuserinfofocus $wcombo
@@ -349,7 +349,7 @@ proc ::Profiles::BuildPage {page} {
     grid $pui.eres -column 1 -row 4 -sticky w
 
     set puibt [frame $labpui.frbt]
-    pack $puibt -padx 4 -pady 6 -side right -fill y -expand 1
+    pack $puibt -padx 8 -pady 6 -side left -fill y
     pack [button $puibt.new -font $fontS -text [::msgcat::mc New]  \
       -command [namespace current]::NewCmd]   \
       -side top -fill x -pady 4

@@ -8,6 +8,7 @@
 ::msgcat::mcset en Add
 ::msgcat::mcset en Address
 ::msgcat::mcset en Advanced
+::msgcat::mcset en Agents
 ::msgcat::mcset en Apply
 ::msgcat::mcset en Available
 ::msgcat::mcset en Away
@@ -20,6 +21,8 @@
 ::msgcat::mcset en Buffering
 ::msgcat::mcset en Cancel
 ::msgcat::mcset en Change
+::msgcat::mcset en Chat
+::msgcat::mcset en Choose
 ::msgcat::mcset en City
 ::msgcat::mcset en Clear
 ::msgcat::mcset en Close
@@ -46,6 +49,7 @@
 ::msgcat::mcset en Get
 ::msgcat::mcset en Group
 ::msgcat::mcset en Handling
+::msgcat::mcset en History
 ::msgcat::mcset en Home
 ::msgcat::mcset en Import
 ::msgcat::mcset en Inbox
@@ -56,6 +60,7 @@
 ::msgcat::mcset en Logout
 ::msgcat::mcset en Middle
 ::msgcat::mcset en More
+::msgcat::mcset en Never
 ::msgcat::mcset en New
 ::msgcat::mcset en Next
 ::msgcat::mcset en No
@@ -240,6 +245,8 @@
 ::msgcat::mcset en mUpdateCheck  	{Update Check}
 ::msgcat::mcset en mReloadImage  	{Reload Image}
 
+::msgcat::mcset en mTakeSnapshot        {Take Snapshot...}
+
 # Popups
 ::msgcat::mcset en mMessage     	{Message...}
 ::msgcat::mcset en mWhiteboard     	{Whiteboard...}
@@ -263,6 +270,7 @@
 ::msgcat::mcset en {About Coccinella}
 ::msgcat::mcset en {About Whiteboard}
 ::msgcat::mcset en {About QuickTimeTcl}
+::msgcat::mcset en {Active <Return>}
 ::msgcat::mcset en {Add New User}
 ::msgcat::mcset en {Add Server}
 ::msgcat::mcset en {Add Shortcut}
@@ -279,13 +287,18 @@
 ::msgcat::mcset en {Auto-reject}
 ::msgcat::mcset en {Away status}
 ::msgcat::mcset en {Basic Info}
-::msgcat::mcset en {Built in server port}
 ::msgcat::mcset en {Block JID}
+::msgcat::mcset en {Built in server port}
+::msgcat::mcset en {Cache folder}
+::msgcat::mcset en {Chat History}
 ::msgcat::mcset en {Chat With}
+::msgcat::mcset en {Clear Disk Cache Now}
 ::msgcat::mcset en {Company Name}
 ::msgcat::mcset en {Conference server}
 ::msgcat::mcset en {Create Room}
 ::msgcat::mcset en {Default group}
+::msgcat::mcset en {Default Logout Status}
+::msgcat::mcset en {Disk Cache}
 ::msgcat::mcset en {Do Not Disturb}
 ::msgcat::mcset en {Edit Fonts}
 ::msgcat::mcset en {Edit Item}
@@ -297,6 +310,7 @@
 ::msgcat::mcset en {Empty Fields}
 ::msgcat::mcset en {Enter/Create Room}
 ::msgcat::mcset en {Enter Room}
+::msgcat::mcset en {Every time}
 ::msgcat::mcset en {Extended Away status}
 ::msgcat::mcset en {Factory Settings}
 ::msgcat::mcset en {Fatal Error}
@@ -313,6 +327,7 @@
 ::msgcat::mcset en {Get File Error}
 ::msgcat::mcset en {Get vCard}
 ::msgcat::mcset en {Group chat in room}
+::msgcat::mcset en {Groupchat-1.0 (fallback)}
 ::msgcat::mcset en {Handled By}
 ::msgcat::mcset en {Host name}
 ::msgcat::mcset en {HTTP port}
@@ -351,6 +366,7 @@
 ::msgcat::mcset en {New shortcut}
 ::msgcat::mcset en {New User}
 ::msgcat::mcset en {My vCard}
+::msgcat::mcset en {NAT Address}
 ::msgcat::mcset en {Nick name}
 ::msgcat::mcset en {No Address}
 ::msgcat::mcset en {No Inbox}
@@ -358,6 +374,7 @@
 ::msgcat::mcset en {Not Available}
 ::msgcat::mcset en {Not available}
 ::msgcat::mcset en {Not Connected}
+::msgcat::mcset en {Once per session}
 ::msgcat::mcset en {One hour} 
 ::msgcat::mcset en {One day} 
 ::msgcat::mcset en {One week} 
@@ -376,6 +393,7 @@
 ::msgcat::mcset en {Plugin Control}
 ::msgcat::mcset en {Port number}
 ::msgcat::mcset en {Postal Code}
+::msgcat::mcset en {Preferred Protocol}
 ::msgcat::mcset en {Presence Error}
 ::msgcat::mcset en {Proxy Setup}
 ::msgcat::mcset en {Put File Error}
@@ -412,12 +430,14 @@
 ::msgcat::mcset en {Sounds & Speech}
 ::msgcat::mcset en {Start Chat}
 ::msgcat::mcset en {Status message}
+::msgcat::mcset en {Status when logging out}
 ::msgcat::mcset en {Subscription Pending}
 ::msgcat::mcset en {Synthetic speech}
 ::msgcat::mcset en {System fonts}
 ::msgcat::mcset en {Tel (voice)}
 ::msgcat::mcset en {Tel (fax)}
 ::msgcat::mcset en {This IP number}
+::msgcat::mcset en {Thread started}
 ::msgcat::mcset en {To/from JID}
 ::msgcat::mcset en {To Jabber id}
 ::msgcat::mcset en {To Send or Not}
@@ -780,7 +800,13 @@ Don't you want to save them?}
 ::msgcat::mcset en preffilecache {The cache is used to keep local copies of files from\
 other users which reduces time for network transport. The size of the local disk cache\
 is limited by user's settings below.}
-
+::msgcat::mcset en prefcachecmp  {Cached file compared with remote}
+::msgcat::mcset en prefnatip     {Use the following ip address as seen from the outside}
+::msgcat::mcset en prefmucconf   {Multi-User-Chat with Conference as fallback}
+::msgcat::mcset en prefrostbgim  {Use background image (gif) in roster}
+::msgcat::mcset en preftheme     {Pick theme, need relaunch}
+::msgcat::mcset en prefplugctrl  {You may unselect any of these packages if\
+you don't want them loaded. You must relaunch for this to take effect.}
 
 
 

@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.33 2004-01-06 15:59:22 matben Exp $
+# $Id: Coccinella.tcl,v 1.34 2004-01-07 14:57:34 matben Exp $
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -256,14 +256,14 @@ regsub -all " " $machineSpecPath "" machineSpecPath
 if {($this(platform) == "macintosh") &&  \
   ([info exists tclkit::topdir] ||  \
   [string match -nocase tclkit* [file tail [info nameofexecutable]]])} {
-    set prefs(binPath) [file dirname [info nameofexecutable]]
+    set this(binPath) [file dirname [info nameofexecutable]]
 } else {
-    set prefs(binPath) [file join $this(path) bin $this(platform) $machineSpecPath]
+    set this(binPath) [file join $this(path) bin $this(platform) $machineSpecPath]
 }
-if {[file exists $prefs(binPath)]} {
-    set auto_path [concat [list $prefs(binPath)] $auto_path]
+if {[file exists $this(binPath)]} {
+    set auto_path [concat [list $this(binPath)] $auto_path]
 } else {
-    set prefs(binPath) {}
+    set this(binPath) {}
 }
 
 # Path where preferences etc are stored.
@@ -306,11 +306,11 @@ package require Theme
 # The message catalog for language customization.
 package require msgcat
 set this(msgcatPath) [file join $this(path) msgs]
-if {[string equal [::msgcat::mclocale] "C"]} {
+if {[string match -nocase "c" [::msgcat::mclocale]]} {
     ::msgcat::mclocale en
 }  
 # tmp...
-::msgcat::mclocale en
+::msgcat::mclocale sv
 ::msgcat::mcload $this(msgcatPath)
 
 # Show it! Need a full update here, at least on Windows.
