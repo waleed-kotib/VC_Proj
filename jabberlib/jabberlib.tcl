@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.38 2004-04-16 13:59:29 matben Exp $
+# $Id: jabberlib.tcl,v 1.39 2004-04-19 13:58:48 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -2833,6 +2833,63 @@ proc jlib::splitjid {jid jid2Var resourceVar} {
     }
 }
 
+namespace eval jlib {
+    
+    # Characters that need to be escaped since non valid.
+    #       JEP-0106 EXPERIMENTAL!
+    variable jidesc { "#\&'/:<>@}
+}
+
+# jlib::encodeusername, decodeusername, decodejid --
+# 
+#       Jid escaping.
+#       JEP-0106 EXPERIMENTAL!
+
+proc jlib::encodeusername {username} {    
+    variable jidesc
+    
+    set str $username
+    set ndx 0
+    while {[regexp -start $ndx -indices -- "\[$jidesc\]" $str r]} {
+	set ndx [lindex $r 0]
+	scan [string index $str $ndx] %c chr
+	set rep "#[format %.2x $chr];"
+	set str [string replace $str $ndx $ndx $rep]
+	incr ndx 3
+    }
+    return $str
+}
+
+proc jlib::decodeusername {username} {
+    
+    # Be sure that only the specific characters are being decoded.
+    foreach sub {{#(20);} {#(22);} {#(23);} {#(26);} {#(27);} {#(2f);}  \
+      {#(3a);} {#(3c);} {#(3e);} {#(40);}} {
+	regsub -all $sub $username {[format %c 0x\1]} username
+    }	
+    return [subst $username]
+}
+
+proc jlib::decodejid {jid} {
+    
+    set jidlist [split $jid @]
+    if {[llength $jidlist] == 2} {
+	return "[decodeusername [lindex $jidlist 0]]@[lindex $jidlist 1]"
+    } else {
+	return $jid
+    }
+}
+
+proc jlib::getdisplayusername {jid} {
+
+    set jidlist [split $jid @]
+    if {[llength $jidlist] == 2} {
+	return [decodeusername [lindex $jidlist 0]]
+    } else {
+	return $jid
+    }
+}
+
 proc jlib::setdebug {args} {
     variable debug
     
@@ -3040,6 +3097,8 @@ proc jlib::service::parent {jlibname jid} {
 
     if {$serv(browse) && [$serv(browse,name) isbrowsed $jid]} {
 	return [$serv(browse,name) getparentjid $jid]
+    } elseif {$serv(disco) && [$serv(disco,name) isdiscoed items $jid]} {
+	return [$serv(disco,name) parent $jid]
     } else {
 	if {[info exists agent($jid,parent)]} {
 	    return $agent($jid,parent)
@@ -3056,6 +3115,8 @@ proc jlib::service::childs {jlibname jid} {
 
     if {$serv(browse) && [$serv(browse,name) isbrowsed $jid]} {
 	return [$serv(browse,name) getchilds $jid]
+    } elseif {$serv(disco) && [$serv(disco,name) isdiscoed items $jid]} {
+	return [$serv(disco,name) children $jid]
     } else {
 	if {[info exists agent($jid,childs)]} {
 	    set agent($jid,childs) [lsort -unique $agent($jid,childs)]
@@ -3116,7 +3177,20 @@ proc jlib::service::getjidsfor {jlibname what} {
 	    }
 	}
     }
-       
+    
+    # Disco
+    if {$serv(disco)} {
+	set jidsdi [$serv(disco,name) getjidsforfeature jabber:iq:${what}]
+	
+	switch -- $what {
+	    groupchat - muc {
+		set jidsdi [concat $jidsdi [$serv(disco,name) getjidsforfeature \
+		  "http://jabber.org/protocol/muc"]]
+	    }
+	}
+	set jids [concat $jids $jidsdi]
+    }       
+    
     # Agent service if any.
     if {[info exists agent($what)] && [llength $agent($what)]} {
 	set agent($what) [lsort -unique $agent($what)]
@@ -3146,7 +3220,12 @@ proc jlib::service::gettransportjids {jlibname what} {
     
     # Browse service if any.
     if {$serv(browse)} {
-	set jids [$serv(browse,name) getalljidfortypes "service/$what"]
+	set jids [concat $jids \
+	  [$serv(browse,name) getalljidfortypes "service/$what"]]
+    }
+    if {$serv(disco)} {
+	set jids [concat $jids \
+	  [$serv(disco,name) getjidsforcategory "service/$what"]]
     }
 
     # Agent service if any.
@@ -3180,6 +3259,9 @@ proc jlib::service::gettype {jlibname jid} {
     if {$serv(browse)} {
 	set type [$serv(browse,name) gettype $jid]
     }
+    if {$serv(disco) && [$serv(disco,name) isdiscoed info $jid]} {
+	set type [lindex [$serv(disco,name) types $jid] 0]
+    }
     if {[info exists agent($jid,service)]} {
 	set type "service/$agent($jid,service)"
     }
@@ -3204,6 +3286,8 @@ proc jlib::service::isroom {jlibname jid} {
 	if {[$serv(browse,name) isroom $jid]} {
 	    set isroom 1
 	}
+    } elseif {$serv(disco) && [$serv(disco,name) isdiscoed info $lib(server)]} {
+	
     } elseif {[regexp {^[^@]+@([^@ ]+)$} $jid match domain]} {
 	if {[info exists agent($domain,groupchat)]} {
 	    set isroom 1

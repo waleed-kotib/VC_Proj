@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.5 2004-04-17 14:02:02 matben Exp $
+# $Id: Disco.tcl,v 1.6 2004-04-19 13:58:47 matben Exp $
 
 package provide Disco 1.0
 
@@ -27,6 +27,8 @@ namespace eval ::Jabber::Disco:: {
     variable popMenuDefs
 
     set popMenuDefs(disco,def) {
+	mMessage       user      {::Jabber::NewMsg::Build -to $jid}
+	mChat          user      {::Jabber::Chat::StartThread $jid}
 	mEnterRoom     room      {
 	    ::Jabber::GroupChat::EnterOrCreate enter -roomjid $jid -autoget 1
 	}
@@ -38,6 +40,14 @@ namespace eval ::Jabber::Disco:: {
 	mLocalTime     jid       {::Jabber::GetTime $jid}
 	mvCard         jid       {::VCard::Fetch other $jid}
 	mVersion       jid       {::Jabber::GetVersion $jid}
+	separator      {}        {}
+	mSearch        search    {
+	    ::Jabber::Search::Build -server $jid -autoget 1
+	}
+	mRegister      register  {
+	    ::Jabber::GenRegister::BuildRegister -server $jid -autoget 1
+	}
+	mUnregister    register  {::Jabber::Register::Remove $jid}
 	separator      {}        {}
 	mRefresh       jid       {::Jabber::Disco::Refresh $jid}
     }
@@ -80,7 +90,22 @@ proc ::Jabber::Disco::LoginHook { } {
 
 proc ::Jabber::Disco::LogoutHook { } {
     
+    if {[lsearch [::Jabber::UI::Pages] "Disco"] >= 0} {
+	#::Jabber::Disco::SetUIWhen "disconnect"
+	#::Jabber::Disco::Clear
+    }
+}
+
+proc ::Jabber::Disco::HaveTree { } {    
+    upvar ::Jabber::jserver jserver
+    upvar ::Jabber::jstate jstate
     
+    if {[info exists jstate(disco)]} {
+	if {[$jstate(disco) isdiscoed items $jserver(this)]} {
+	    return 1
+	}
+    }    
+    return 0
 }
 
 # Jabber::Disco::GetInfo, GetItems --
@@ -140,15 +165,13 @@ proc ::Jabber::Disco::ItemsCB {type from subiq args} {
     
     puts "::Jabber::Disco::ItemsCB type=$type, from=$from"
     
-    #::Jabber::Disco::ControlArrows -1
-
     switch -- $type {
 	error {
 	    
 	    # As a fallback we use the browse method instead.
 	    if {[string equal $from $jserver(this)]} {
 		
-		# This is a bit ugly! 
+		# This is a bit ugly! Should have a better mechanism!!!
 		# Should have another way of invoking alternatives.
 		::Jabber::Browse::GetAll
 	    }
@@ -159,6 +182,7 @@ proc ::Jabber::Disco::ItemsCB {type from subiq args} {
 	    if {[string equal $from $jserver(this)]} {
 		::Jabber::UI::NewPage "Disco"
 	    }
+	    ::Jabber::Disco::ControlArrows -1
 	    
 	    # First add the discoed item.
 	    set parents [$jstate(disco) parents $from]
@@ -182,10 +206,14 @@ proc ::Jabber::Disco::ItemsCB {type from subiq args} {
     }
 }
 
-proc ::Jabber::Disco::InfoCB {args} {
+proc ::Jabber::Disco::InfoCB {type from subiq args} {
     
-    puts "::Jabber::Disco::InfoCB args='$args'"
+    puts "::Jabber::Disco::InfoCB type=$type, from=$from"
     
+    # The info contains the name attribute (optional) which may
+    # need to be set since we get items before name.
+    # 
+    # BUT the items element may also have a name attribute???
     
     
 }
@@ -336,18 +364,22 @@ proc ::Jabber::Disco::Popup {w v x y} {
     set categoryType [lindex $categoryList 0]
     puts "\t categoryType=$categoryType"
 
-    switch -glob -- $categoryType {
-	user/* {
-	    set typeClicked user
+    if {[regexp {^.+@[^/]+(/.*)?$} $jid match res]} {
+	set typeClicked user
+	# We should call disco directly here!!!!!!
+	if {[$jstate(jlib) service isroom $jid]} {
+	    set typeClicked room
 	}
-	conference/* {
-	    set typeClicked conference
-	}
-	default {
-	    set typeClicked jid
-	}
+    } elseif {[string match -nocase "conference/*" $categoryType]} {
+	set typeClicked conference
+    } elseif {[string match -nocase "user/*" $categoryType]} {
+	set typeClicked user
+    } elseif {$jid != ""} {
+	set typeClicked jid
     }
-    
+    if {$jid == ""} {
+	set typeClicked ""	
+    }
     set X [expr [winfo rootx $w] + $x]
     set Y [expr [winfo rooty $w] + $y]
 
@@ -411,7 +443,7 @@ proc ::Jabber::Disco::Popup {w v x y} {
 		}
 	    } 
 	    search - register {
-		if {[$jstate(browse) havenamespace $jid "jabber:iq:${type}"]} {
+		if {[$jstate(disco) havefeature "jabber:iq:${type}" $jid]} {
 		    set state normal
 		}
 	    }
@@ -523,8 +555,12 @@ proc ::Jabber::Disco::AddToTree {v} {
     if {[llength $v] == 1} {
 	set isopen 1
     }
-    $wtree newitem $v -text $name -tags $jid -style $style -dir 1 -open $isopen \
-      -canvastags $treectag
+    
+    # Do not create if exists which preserves -open.
+    if {![$wtree isitem $v]} {
+	$wtree newitem $v -text $name -tags $jid -style $style -dir 1  \
+	  -open $isopen -canvastags $treectag
+    }
     
     # Add all child elements as well.
     set childs [$jstate(disco) children $jid]
@@ -627,18 +663,31 @@ proc ::Jabber::Disco::InfoResultCB {type jid subiq args} {
 
     pack $w.frall.l $wtext -side top -anchor w -padx 10 -pady 1
     
-    $wtext tag configure head -background gray70
-    $wtext insert end "XML namespace\tDescription\n" head
+    $wtext tag configure head -background gray70 -lmargin1 6
+    $wtext tag configure feature -lmargin1 6
+    $wtext insert end "Feature\tXML namespace\n" head
+    
+    set features [$jstate(disco) features $jid]
+    
+    set tfont [$wtext cget -font]
+    set maxw 0
+    foreach ns $features {
+	if {[info exists nsToText($ns)]} {
+	    set twidth [font measure $tfont $nsToText($ns)]
+	    if {$twidth > $maxw} {
+		set maxw $twidth
+	    }
+	}
+    }
+    $wtext configure -tabs [expr $maxw + 20]
+    
     set n 1
-    
-    set features [$jstate(disco) get info $jid features]
-    
     foreach ns $features {
 	incr n
-	$wtext insert end $ns
 	if {[info exists nsToText($ns)]} {
-	    $wtext insert end "\t$nsToText($ns)"
+	    $wtext insert end "$nsToText($ns)" feature
 	}
+	$wtext insert end "\t$ns"
 	$wtext insert end \n
     }
     if {$n == 1} {

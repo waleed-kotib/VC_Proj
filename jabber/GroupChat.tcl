@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.52 2004-04-15 05:55:17 matben Exp $
+# $Id: GroupChat.tcl,v 1.53 2004-04-19 13:58:47 matben Exp $
 
 package require History
 
@@ -121,9 +121,10 @@ namespace eval ::Jabber::GroupChat:: {
 #       by obtaining version number for the conference component. UGLY!!!
 
 proc ::Jabber::GroupChat::AllConference { } {
+    upvar ::Jabber::jstate jstate
 
     set anyNonConf 0
-    foreach confjid [::Jabber::InvokeJlibCmd service getjidsfor "groupchat"] {
+    foreach confjid [$jstate(jlib) service getjidsfor "groupchat"] {
 	if {[info exists jstate(conference,$confjid)] &&  \
 	  ($jstate(conference,$confjid) == 0)} {
 	    set anyNonConf 1
@@ -142,12 +143,12 @@ proc ::Jabber::GroupChat::AllConference { } {
 #       Ad hoc method for finding out if possible to use the original
 #       jabber:iq:conference method.
 
-proc ::Jabber::GroupChat::HaveOrigConference {{roomjid {}}} {
+proc ::Jabber::GroupChat::HaveOrigConference {{roomjid ""}} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
 
     set ans 0
-    if {[string length $roomjid] == 0} {
+    if {$roomjid == ""} {
 	if {[::Jabber::Browse::HaveBrowseTree $jserver(this)] &&  \
 	  [::Jabber::GroupChat::AllConference]} {
 	    set ans 1
@@ -156,11 +157,13 @@ proc ::Jabber::GroupChat::HaveOrigConference {{roomjid {}}} {
 	
 	# Require that conference service browsed and that we have the
 	# original jabber:iq:conference
-	set conf [$jstate(browse) getparentjid $roomjid]
-	if {[$jstate(browse) isbrowsed $conf]} {
-	    if {[info exists jstate(conference,$conf)] && \
-	      $jstate(conference,$conf)} {
-		set ans 1
+	if {[info exists jstate(browse)]} {
+	    set conf [$jstate(browse) getparentjid $roomjid]
+	    if {[$jstate(browse) isbrowsed $conf]} {
+		if {[info exists jstate(conference,$conf)] && \
+		  $jstate(conference,$conf)} {
+		    set ans 1
+		}
 	    }
 	}
     }
@@ -171,27 +174,45 @@ proc ::Jabber::GroupChat::HaveOrigConference {{roomjid {}}} {
 # 
 # 
 
-proc ::Jabber::GroupChat::HaveMUC {{roomjid {}}} {
+proc ::Jabber::GroupChat::HaveMUC {{roomjid ""}} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
 
     set ans 0
-    if {[string length $roomjid] == 0} {
+    if {$roomjid == ""} {
 	
 	# Require at least one service that supports muc.
-	set jids [$jstate(browse) getservicesforns  \
-	  "http://jabber.org/protocol/muc"]
-	if {[llength $jids] > 0} {
-	    set ans 1
+	if {[info exists jstate(browse)]} {
+	    set jids [$jstate(browse) getservicesforns  \
+	      "http://jabber.org/protocol/muc"]
+	    if {[llength $jids] > 0} {
+		set ans 1
+	    }
+	}
+	if {[info exists jstate(disco)]} {
+	    set jids [$jstate(disco) getjidsforfeature  \
+	      "http://jabber.org/protocol/muc"]
+	    if {[llength $jids] > 0} {
+		set ans 1
+	    }
 	}
     } else {
-	set confserver [$jstate(browse) getparentjid $roomjid]
-	if {[$jstate(browse) isbrowsed $confserver]} {
-	    set ans [$jstate(browse) havenamespace $confserver  \
-	      "http://jabber.org/protocol/muc"]
+	if {[info exists jstate(browse)]} {
+	    set confserver [$jstate(browse) getparentjid $roomjid]
+	    if {[$jstate(browse) isbrowsed $confserver]} {
+		set ans [$jstate(browse) havenamespace $confserver  \
+		  "http://jabber.org/protocol/muc"]
+		::Jabber::Debug 4 "::Jabber::GroupChat::HaveMUC	confserver=$confserver, ans=$ans"
+	    }
 	}
-	::Jabber::Debug 4 "::Jabber::GroupChat::HaveMUC \
-	confserver=$confserver, ans=$ans"
+	if {[info exists jstate(disco)]} {
+	    set confserver [$jstate(disco) parent $roomjid]
+	    if {[$jstate(disco) isdiscoed $confserver]} {
+		set ans [$jstate(disco) havefeature   \
+		  "http://jabber.org/protocol/muc" $confserver]
+		::Jabber::Debug 4 "::Jabber::GroupChat::HaveMUC	confserver=$confserver, ans=$ans"
+	    }
+	}
     }
     return $ans
 }

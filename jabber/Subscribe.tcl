@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Subscribe.tcl,v 1.14 2004-04-09 10:32:25 matben Exp $
+# $Id: Subscribe.tcl,v 1.15 2004-04-19 13:58:48 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -113,7 +113,7 @@ proc ::Jabber::Subscribe::Subscribe {jid args} {
     set locals($uid,add) $jprefs(defSubscribe)
     set fropt $w.frall.fropt
     labelframe $fropt -text {Options}
-    pack $fropt -side top -fill both -ipadx 10 -ipady 6
+    pack $fropt -side top -fill both -padx 10 -pady 6
     checkbutton $fropt.pres -text "  [::msgcat::mc jasuballow $jid]" \
       -variable [namespace current]::locals($uid,allow)
     

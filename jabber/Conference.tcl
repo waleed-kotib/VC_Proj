@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Conference.tcl,v 1.19 2004-04-15 05:55:17 matben Exp $
+# $Id: Conference.tcl,v 1.20 2004-04-19 13:58:47 matben Exp $
 
 package provide Conference 1.0
 
@@ -62,7 +62,7 @@ proc ::Jabber::Conference::BuildEnter {args} {
 	server      ""
 	roomname    ""
     }
-    set fontS [option get . fontSmall {}]
+    set fontS  [option get . fontSmall {}]
     set fontSB [option get . fontSmallBold {}]
     
     # Global frame.
