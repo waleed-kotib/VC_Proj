@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.1.1.1 2002-12-08 11:05:16 matben Exp $
+# $Id: UI.tcl,v 1.2 2002-12-15 09:10:56 matben Exp $
 
 # LabeledFrame --
 #
@@ -1322,52 +1322,52 @@ proc ::UI::DisableWhiteboardMenus {wmenu} {
 #       keyboard bindings set
 
 proc ::UI::SetMenuAccelerators {wtop} {
-    global  this prefs wDlgs
+    global  this prefs wDlgs osprefs
     
     if {$wtop != "."} {
 	set topw [string trimright $wtop .]
     } else {
 	set topw $wtop
     }
-    # Add accelerators keys "by hand". On the Mac this works automatically
-    # via the menu accelerators.
-    if {![string match "mac*" $this(platform)]} {
+    # Add accelerators keys "by hand". On the Mac Classic this works 
+    # automatically via the menu accelerators (not MacOSX).
+    if {![string equal "macintosh" $this(platform)]} {
 	
 	# The File menu.
-	bind $topw <Control-Key-o> {
+	bind $topw <$osprefs(mod)-Key-o> {
 	    if {[string equal $prefs(protocol) "jabber"]} {
 		::Jabber::Login::Login $wDlgs(jlogin)
 	    } elseif {![string equal $prefs(protocol) "server"]} {
 		OpenConnection $wDlgs(openConn)
 	    }
 	}
-	bind $topw <Control-Key-w> ::UserActions::DoCloseWindow
-	bind $topw <Control-Key-i>  \
+	bind $topw <$osprefs(mod)-Key-w> ::UserActions::DoCloseWindow
+	bind $topw <$osprefs(mod)-Key-i>  \
 	  [list ::ImageAndMovie::ImportImageOrMovieDlg $wtop]
-	bind $topw <Control-Key-s>   \
+	bind $topw <$osprefs(mod)-Key-s>   \
 	  [list ::CanvasFile::DoSaveCanvasFile $wtop]
-	bind $topw <Control-Key-q> {
+	bind $topw <$osprefs(mod)-Key-q> {
 	    ::UserActions::DoQuit
 	}
 	
 	# The Edit menu.
-	bind $topw <Control-Key-a> [list ::UserActions::SelectAll $wtop]
-	bind $topw <Control-Key-x> {
+	bind $topw <$osprefs(mod)-Key-a> [list ::UserActions::SelectAll $wtop]
+	bind $topw <$osprefs(mod)-Key-x> {
 	    CopySelectedToClipboard [focus] cut
 	}
-	bind $topw <Control-Key-c> {
+	bind $topw <$osprefs(mod)-Key-c> {
 	    CopySelectedToClipboard [focus] copy
 	}
-	bind $topw <Control-Key-v> {
+	bind $topw <$osprefs(mod)-Key-v> {
 	    PasteFromClipboardTo [focus]
 	}
-	bind $topw <Control-Key-r>  \
+	bind $topw <$osprefs(mod)-Key-r>  \
 	  [list ::UserActions::RaiseOrLowerItems $wtop raise]
-	bind $topw <Control-Key-l>  \
+	bind $topw <$osprefs(mod)-Key-l>  \
 	  [list ::UserActions::RaiseOrLowerItems $wtop lower]
-	bind $topw <Control-Key-greater>  \
+	bind $topw <$osprefs(mod)-Key-greater>  \
 	  [list ::UserActions::ResizeItem $wtop $prefs(scaleFactor)]
-	bind $topw <Control-Key-less>  \
+	bind $topw <$osprefs(mod)-Key-less>  \
 	  [list ::UserActions::ResizeItem $wtop $prefs(invScaleFac)]]
     } else {
 	
