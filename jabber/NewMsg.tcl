@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.45 2004-10-22 06:44:14 matben Exp $
+# $Id: NewMsg.tcl,v 1.46 2004-10-24 14:12:52 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -115,7 +115,7 @@ proc ::Jabber::NewMsg::InitEach { } {
 #       shows window.
 
 proc ::Jabber::NewMsg::Build {args} {
-    global  this prefs wDlgs
+    global  this prefs wDlgs osprefs
     
     variable locals  
     upvar ::Jabber::jstate jstate
@@ -182,8 +182,8 @@ proc ::Jabber::NewMsg::Build {args} {
       [list ::Jabber::NewMsg::DoSend $w]
     $wtray newbutton quote Quote $iconQuote $iconQuoteDis  \
       [list ::Jabber::NewMsg::DoQuote $w $opts(-quotemessage) $opts(-to) $opts(-time)] \
-       -state $quotestate
-     $wtray newbutton save Save $iconSave $iconSaveDis  \
+      -state $quotestate
+    $wtray newbutton save Save $iconSave $iconSaveDis  \
       [list ::Jabber::NewMsg::SaveMsg $w]
     $wtray newbutton print Print $iconPrint $iconPrintDis  \
       [list ::Jabber::NewMsg::DoPrint $w]
@@ -208,9 +208,9 @@ proc ::Jabber::NewMsg::Build {args} {
     set wspacer [frame $frport.sp -height 1]
     grid $wspacer -sticky ew -columnspan 2 
     foreach n {1 2 3 4} {
-	::Jabber::NewMsg::NewAddrLine $w $frport $n
+	NewAddrLine $w $frport $n
     }
-    ::Jabber::NewMsg::FillAddrLine $w $frport 1
+    FillAddrLine $w $frport 1
     set id [$waddcan create window 0 0 -anchor nw -window $frport]
     
     # If -to option. This can have jid's with and without any resource.
@@ -220,7 +220,7 @@ proc ::Jabber::NewMsg::Build {args} {
 	set n 1
 	foreach jid $opts(-to) {
 	    if {$n > 1} {
-		::Jabber::NewMsg::FillAddrLine $w $frport $n
+		FillAddrLine $w $frport $n
 	    }	    
 	    set locals($w,addr$n) [::Jabber::JlibCmd getrecipientjid $jid]
 	    incr n
@@ -300,6 +300,8 @@ $opts(-forwardmessage)"
     wm minsize $w 300 260
     wm maxsize $w 1200 1000
     
+    bind $w <$osprefs(mod)-Return> \
+      [list [namespace current]::CommandReturnKeyPress $w]
     #bind $w <Destroy> [list [namespace current]::CloseDlg $w]
     wm protocol $w WM_DELETE_WINDOW [list [namespace current]::CloseDlg $w]
     
@@ -367,7 +369,7 @@ proc ::Jabber::NewMsg::ButtonInAddr {w wfr n} {
     
     if {$n > $locals($w,fillline)} {
 	set new [expr $locals($w,fillline) + 1]
-	::Jabber::NewMsg::FillAddrLine $w $wfr $new
+	FillAddrLine $w $wfr $new
 	focus $wfr.addr$new
     }
 }
@@ -381,13 +383,13 @@ proc ::Jabber::NewMsg::TabInAddr {w wfr n} {
 
     # If last line then insert new line.
     if {$n == $locals($w,addrline)} {
-	::Jabber::NewMsg::NewAddrLine $w $wfr [expr $n + 1]
+	NewAddrLine $w $wfr [expr $n + 1]
 	if {$n >= 4} {
-	    ::Jabber::NewMsg::FillAddrLine $w $wfr [expr $n + 1]
+	    FillAddrLine $w $wfr [expr $n + 1]
 	}
 	update idletasks
 	focus "$wfr.addr[expr $n + 1]"
-	::Jabber::NewMsg::SeeLine $w [expr $n + 1]
+	SeeLine $w [expr $n + 1]
     } else {
 	focus $wsubject
     }
@@ -405,14 +407,14 @@ proc ::Jabber::NewMsg::ReturnInAddr {w wfr n} {
 
 	# If last line then insert new line.
 	if {$n == $locals($w,addrline)} {
-	    ::Jabber::NewMsg::NewAddrLine $w $wfr $new
+	    NewAddrLine $w $wfr $new
 	}
-	::Jabber::NewMsg::FillAddrLine $w $wfr $new
+	FillAddrLine $w $wfr $new
 	focus $wfr.addr$new
     } elseif {$n < $locals($w,fillline)} {
 	focus $wfr.addr[expr $n + 1]
     }
-    ::Jabber::NewMsg::SeeLine $w [expr $n + 1]
+    SeeLine $w [expr $n + 1]
 }
 
 #       Remove this line if empty and shift all lines below up.
@@ -439,7 +441,7 @@ proc ::Jabber::NewMsg::BackSpaceInAddr {w wfr n} {
 	    set locals($w,poptrpt$to) $locals($w,poptrpt$from)
 	    set locals($w,addr$to) $locals($w,addr$from)
 	}	
-	::Jabber::NewMsg::EmptyAddrLine $w $wfr $last
+	EmptyAddrLine $w $wfr $last
 	if {$last > 4} {
 	    # Can't make it work :-(
 	    #after idle ::Jabber::NewMsg::DeleteLastAddrLine $w $wfr
@@ -501,7 +503,7 @@ proc ::Jabber::NewMsg::KeyUpDown {updown w wfr n} {
 	set newfocus $locals($w,fillline)
     }
     focus $wfr.addr$newfocus
-    ::Jabber::NewMsg::SeeLine $w $newfocus
+    SeeLine $w $newfocus
 }
 
 proc ::Jabber::NewMsg::PopupCmd {w n} {
@@ -604,6 +606,11 @@ proc ::Jabber::NewMsg::TrptPopupRelease {w n} {
     $wfr.f${n}.la configure -image $locals(popupbt)
 }
 
+proc ::Jabber::NewMsg::CommandReturnKeyPress {w} {
+    
+    DoSend $w
+}
+
 # Jabber::NewMsg::DoSend --
 #
 #       Send the message. Validate addresses in address list.
@@ -659,7 +666,7 @@ proc ::Jabber::NewMsg::DoSend {w} {
 	return
     }
     set wtext $locals($w,wtext)
-    set allText [::Text::TransformToPureText $wtext]
+    set allText [string trimright [::Text::TransformToPureText $wtext] "\n"]
     
     if {[string length $locals($w,subject)] > 0} {
 	set subopt [list -subject $locals($w,subject)]
@@ -735,7 +742,7 @@ proc ::Jabber::NewMsg::CloseHook {wclose} {
     variable locals
 	
     if {[string match $wDlgs(jsendmsg)* $wclose]} {
-	::Jabber::NewMsg::CloseDlg $wclose
+	CloseDlg $wclose
     }   
 }
 
