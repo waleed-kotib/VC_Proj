@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: PreferencesUtils.tcl,v 1.2 2003-01-30 17:34:03 matben Exp $
+# $Id: PreferencesUtils.tcl,v 1.3 2003-02-06 17:23:33 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -349,6 +349,7 @@ proc ::PreferencesUtils::SetWidgetDefaultOptions { } {
 	    option add *Text.HighlightThickness 2
 	}
 	"unix" {
+	    option add *Entry.Foreground Black
 	    option add *Entry.HighlightThickness 2
 	    option add *Listbox.HighlightThickness 2
 	    option add *Listbox.BorderWidth 1

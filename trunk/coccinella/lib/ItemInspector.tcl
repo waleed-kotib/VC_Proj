@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: ItemInspector.tcl,v 1.2 2003-01-11 16:16:09 matben Exp $
+# $Id: ItemInspector.tcl,v 1.3 2003-02-06 17:23:33 matben Exp $
 
 namespace eval ::ItemInspector::  {
     
@@ -98,7 +98,7 @@ proc ::ItemInspector::ItemInspector {wtop which args} {
     # We need to create an item specific instance. 
     # Use the item id for instance.
     set itemIdList [$wCan find withtag $which]
-    if {[llength $itemIdList] == 0}  {
+    if {$itemIdList == ""}  {
 	return
     }
     

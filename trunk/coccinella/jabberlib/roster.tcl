@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: roster.tcl,v 1.3 2003-01-30 17:33:51 matben Exp $
+# $Id: roster.tcl,v 1.4 2003-02-06 17:23:32 matben Exp $
 # 
 # Note that every jid in the rosterArr is usually (always) without any resource,
 # but the jid's in the presArr are identical to the 'from' attribute, except
@@ -38,11 +38,9 @@
 #
 #       presArr($from,show)           : The presence show element.
 #
-#       presArr($from,x)              : List of the presence x elements:
-#                                       jabber:x:autoupdate
-#                                       jabber:x:delay
-#                                       jabber:x:oob
-#                                       jabber:x:roster
+#       presArr($from,x,xmlns)        : Storage for x elements.
+#                                       xmlns is a namespace but where any
+#                                       http://jabber.org/protocol/ stripped off
 #                                      
 ############################# USAGE ############################################
 #
@@ -70,6 +68,7 @@
 #      rostName getrosteritem jid
 #      rostName getsubscription jid
 #      rostName getusers
+#      rostName getx jid xmlns
 #      rostName isavailable jid
 #      rostName removeitem jid
 #      rostName reset
@@ -104,6 +103,7 @@
 #       1.0a3    added reset, isavailable, getresources, and getsubscription 
 #       1.0b1    added gethighestresource command
 #                changed setpresence arguments
+#       1.0b2    changed storage of x elements, added getx command.
 
 package provide roster 1.0
 
@@ -118,11 +118,11 @@ namespace eval roster {
     
     # List of all rosterArr element sub entries. First the actual roster,
     # with 'rosterArr($jid,...)'
-    set rostGlobals(entries) {name groups ask subscription} 
+    set rostGlobals(tags) {name groups ask subscription} 
     
     # ...and the presence arrays: 'presArr($jid/$resource,...)'
     # The list of resources is treated separately (presArr($jid,res))
-    set rostGlobals(presEntries) {type status priority show x} 
+    set rostGlobals(presTags) {type status priority show x} 
 }
 
 proc roster::Debug {num str} {
@@ -228,7 +228,7 @@ proc roster::setrosteritem {rostName jid args} {
     }
     
     # Clear out the old state since an 'ask' element may still be lurking.
-    foreach key $rostGlobals(entries) {
+    foreach key $rostGlobals(tags) {
 	catch {unset rosterArr($jid,$key)}
     }
     
@@ -282,7 +282,7 @@ proc roster::removeitem {rostName jid} {
     }
     
     # First the roster, then presence...
-    foreach name $rostGlobals(entries) {
+    foreach name $rostGlobals(tags) {
 	catch {unset rosterArr($jid,$name)}
     }
     array unset presArr "$jid,*"
@@ -315,7 +315,7 @@ proc roster::ClearRoster {rostName} {
         
     # Remove the roster.
     foreach jid $rosterArr(users) {
-	foreach key $rostGlobals(entries) {
+	foreach key $rostGlobals(tags) {
 	    catch {unset rosterArr($jid,$key)}
 	}
     }
@@ -418,15 +418,8 @@ proc roster::setpresence {rostName jid type args} {
 	set argList [list -type $type]
     } else {
 	
-	# Add user if not there already.
-	if {[lsearch -exact $rosterArr(users) $jid2] < 0} {
-	    lappend rosterArr(users) $jid2
-	}
-	
 	# Clear out the old presence state since elements may still be lurking.
-	foreach key $rostGlobals(presEntries) {
-	    catch {unset presArr($jid,$key)}
-	}
+	array unset presArr "${jid},*"
 	
 	# Should we add something more to our roster, such as subscription,
 	# if we haven't got our roster before this?
@@ -441,7 +434,21 @@ proc roster::setpresence {rostName jid type args} {
 	set presArr($jid,type) $type
 	foreach {name value} $args {
 	    set par [string trimleft $name "-"]
-	    set presArr($jid,$par) $value
+	    switch -- $par {
+		x {
+		    
+		    # This is a list of <x> lists.
+		    foreach xelem $value {
+			set ns [wrapper::getattr [lindex $xelem 1] xmlns]
+			regexp {http://jabber.org/protocol/(.*)$} $ns \
+			  match ns
+			set presArr($jid,x,$ns) $xelem
+		    }
+		}
+		default {
+		    set presArr($jid,$par) $value
+		}
+	    }
 	}
 	set argList [concat [list -resource $resource -type $type] $args]
     }
@@ -479,7 +486,7 @@ proc roster::getrosteritem {rostName jid} {
 	return {}
     }
     set result {}
-    foreach key $rostGlobals(entries) {
+    foreach key $rostGlobals(tags) {
 	if {[info exists rosterArr($jid,$key)]} {
 	    lappend result -$key $rosterArr($jid,$key)
 	}
@@ -547,10 +554,10 @@ proc roster::getpresence {rostName jid {resource {}}} {
 	    return [list -resource $resource -type unavailable]
 	}
 	set result [list -resource $resource]
-	set fulljid $jid/$resource
-	foreach key $rostGlobals(presEntries) {
-	    if {[info exists presArr($fulljid,$key)]} {
-		lappend result -$key $presArr($fulljid,$key)
+	set jid3 $jid/$resource
+	foreach key $rostGlobals(presTags) {
+	    if {[info exists presArr($jid3,$key)]} {
+		lappend result -$key $presArr($jid3,$key)
 	    }
 	}
     } else {
@@ -558,10 +565,10 @@ proc roster::getpresence {rostName jid {resource {}}} {
 	# Get presence for all resources.
 	foreach res $presArr($jid,res) {
 	    set thisRes [list -resource $res]
-	    set fulljid $jid/$res
-	    foreach key $rostGlobals(presEntries) {
-		if {[info exists presArr($fulljid,$key)]} {
-		    lappend thisRes -$key $presArr($fulljid,$key)
+	    set jid3 $jid/$res
+	    foreach key $rostGlobals(presTags) {
+		if {[info exists presArr($jid3,$key)]} {
+		    lappend thisRes -$key $presArr($jid3,$key)
 		}
 	    }
 	    lappend result $thisRes
@@ -715,11 +722,11 @@ proc roster::gethighestresource {rostName jid} {
 	set maxpri 0
 	set maxres [lindex $presArr($jid,res) 0]
 	foreach res $presArr($jid,res) {
-	    set fulljid $jid/$res
-	    if {[info exists presArr($fulljid,priority)]} {
-		if {$presArr($fulljid,priority) > $maxpri} {
+	    set jid3 $jid/$res
+	    if {[info exists presArr($jid3,priority)]} {
+		if {$presArr($jid3,priority) > $maxpri} {
 		    set maxres $res
-		    set maxpri $presArr($fulljid,priority)
+		    set maxpri $presArr($jid3,priority)
 		}
 	    }
 	}
@@ -773,6 +780,32 @@ proc roster::isavailable {rostName jid} {
 	} else {
 	    return 0
 	}
+    }
+}
+
+# roster::getx --
+#
+#       Returns the xml list for this jid's x element with given xml namespace.
+#       Returns empty if no matching info.
+#
+# Arguments:
+#       rostName:   the instance of this roster.
+#       jid:        any jid
+#       xmlns:      the (mandatory) xmlns specifier. Any prefix
+#                   http://jabber.org/protocol/ must be stripped off.
+#       
+# Results:
+#       xml list or empty.
+
+proc roster::getx {rostName jid xmlns} {
+    upvar [namespace current]::${rostName}::presArr presArr
+   
+    Debug 2 "roster::getx rostName=$rostName, jid='$jid', xmlns=$xmlns"
+
+    if {[info exists presArr($jid,x,$xmlns)]} {
+	return $presArr($jid,x,$xmlns)
+    } else {
+	return ""
     }
 }
 

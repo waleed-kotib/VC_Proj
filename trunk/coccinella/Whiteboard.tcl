@@ -15,7 +15,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Whiteboard.tcl,v 1.4 2003-01-30 17:33:36 matben Exp $
+# $Id: Whiteboard.tcl,v 1.5 2003-02-06 17:23:31 matben Exp $
 
 #--Descriptions of some central variables and their usage-----------------------
 #            
@@ -661,7 +661,6 @@ if {$prefs(firstLaunch)} {
     ::CanvasFile::DoOpenCanvasFile . $prefs(welcomeFile)
 }
 set prefs(firstLaunch) 0
-raise .
 
 ### The server part ############################################################
 

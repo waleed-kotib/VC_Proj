@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: FilesAndCanvas.tcl,v 1.3 2003-01-30 17:33:57 matben Exp $
+# $Id: FilesAndCanvas.tcl,v 1.4 2003-02-06 17:23:33 matben Exp $
  
 package require can2svg
 package require undo
@@ -38,7 +38,7 @@ proc ::CanvasFile::DrawCanvasItemFromFile {wtop filePath args} {
 	tk_messageBox -icon error -type ok -parent $wCan -message  \
 	  [FormatTextForMessageBox [::msgcat::mc messfailopread $tail $fd]]	  
     }
-    eval {FileToCanvas $wCan $fd $filePath} $args
+    eval {::CanvasFile::FileToCanvas $wCan $fd $filePath} $args
     close $fd
 }
 	  
@@ -174,7 +174,7 @@ proc ::CanvasFile::FileToCanvasVer1 {w fd absPath args} {
 	    # Use the image create command on the previous line if exist.
 	    # Extract the complete file path.
 	    
-	    if {[llength $previousImageOrMovieCmd] > 0} {
+	    if {$previousImageOrMovieCmd != ""} {
 		set ind [lsearch -exact $previousImageOrMovieCmd "-file"]
 		if {$ind >= 0} {
 		    set filePath [lindex $previousImageOrMovieCmd [expr $ind + 1]]
@@ -297,6 +297,7 @@ proc ::CanvasFile::FileToCanvasVer2 {w fd absPath args} {
 	set updateUtags 0
     }
     set dirPath [file dirname $absPath]
+    set wtop [::UI::GetToplevelNS $w]
     
     # This is not completely correct!!!
     set stackCmd [list -below all]
@@ -311,7 +312,6 @@ proc ::CanvasFile::FileToCanvasVer2 {w fd absPath args} {
 	if {[regexp {(^ *#|^[ \n\t]*$)} $line]} {
 	    continue
 	}
-	set wtop [::UI::GetToplevelNS $w]
 	set cmd [lindex $line 0]
 	if {$updateUtags} {
 	    set utag [::CanvasUtils::NewUtag]
@@ -358,21 +358,22 @@ proc ::CanvasFile::FileToCanvasVer2 {w fd absPath args} {
 		if {[string equal $where "all"] || \
 		  [string equal $where "local"]} {
 		    if {$prefs(SpeechOn) && [string equal $type "text"]} {
-			::UserActions::Speak [$w itemcget $ittag -text] $prefs(voiceUs)
+			::UserActions::Speak [$w itemcget $utag -text] $prefs(voiceUs)
 		    }
 		}
 	    }
 	    import {
-		set didImport 0
+		set errMsg 0
 		if {$argsArr(-tryimport)} {
 		    
 		    # This is typically an image or movie (QT or Snack).
-		    set didImport [eval {
+		    set errMsg [eval {
 			::ImageAndMovie::HandleImportCmd $w $line \
-		      -where $where -basepath $dirPath} $stackCmd]
+			  -where $where -basepath $dirPath \
+			  -command [namespace current]::ImportCallback \
+			} $stackCmd]
 		}
-		
-		if {!$didImport && $argsArr(-showbroken)} {
+		if {($errMsg != "") && $argsArr(-showbroken)} {
 		    
 		    # Display a broken image to indicate for the user.
 		    eval {$w create image} [lrange $line 1 2] \
@@ -389,6 +390,29 @@ proc ::CanvasFile::FileToCanvasVer2 {w fd absPath args} {
 	}
     }
     return $numImports
+}
+
+# CanvasFile::ImportCallback --
+# 
+#       Callback procedure for the '::ImageAndMovie::HandleImportCmd'
+#       command. Take care of errors not reported by direct return. 
+
+proc ::CanvasFile::ImportCallback {status gettoken httptoken} {
+    upvar ::UI::icons icons
+    upvar #0 $gettoken getstate          
+
+    Debug 2 "::CanvasFile::ImportCallback "
+    
+    set wtop $getstate(wtop)
+    upvar ::${wtop}::wapp wapp
+
+    if {$status == "error"} {
+	array set optArr $getstate(optList)
+	if {[info exists optArr(coords:)]} {
+	    eval {$wapp(can) create image} $optArr(coords:) \
+	      {-image $icons(brokenImage) -anchor nw}
+	}
+    }
 }
 
 # CanvasFile::CanvasToFile --
@@ -591,7 +615,7 @@ proc ::CanvasFile::DoSaveCanvasFile {wtop} {
 	lappend opts -filetypes $typelist
     }
     if {[string match "mac*" $this(platform)]} {
-	lappend opts -message "Kilroy was here!"
+	lappend opts -message "Pick .svg suffix for XML, .can as default"
     }
     set ans [eval {tk_getSaveFile -title [::msgcat::mc {Save Canvas}] \
       -defaultextension ".can"} $opts]

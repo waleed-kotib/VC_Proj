@@ -8,7 +8,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasCutCopyPaste.tcl,v 1.1.1.1 2002-12-08 11:02:01 matben Exp $
+# $Id: CanvasCutCopyPaste.tcl,v 1.2 2003-02-06 17:23:32 matben Exp $
 
 package provide CanvasCutCopyPaste 1.0
 
@@ -23,7 +23,7 @@ namespace eval ::CanvasCCP:: {
 
     # Use a very unlikely combination for the separator of items in clipboard.
     # Perhaps it is enough to use a nonprintable character; 
-    # what happens with binary data?
+    # what happens with binary data?    BAD!!!!!!!!!
     variable clipItemSep " ANDqzU\06 "
 }
 
@@ -47,10 +47,9 @@ proc ::CanvasCCP::CopySelectedToClipboard {w doWhat} {
     variable clipToken
     
     Debug 2 "CopySelectedToClipboard:: w=$w, doWhat=$doWhat"
-    Debug 2 "  CopySelectedToClipboard:: focus=[focus], class=[winfo class [focus]]"
+    Debug 2 "   focus=[focus], class=[winfo class $w]"
 
-    set wClass [winfo class $w]
-    if {![string equal $wClass {Canvas}]} {
+    if {![string equal [winfo class $w] "Canvas"]} {
 	return
     }
     set wtop [::UI::GetToplevelNS $w]
@@ -66,7 +65,7 @@ proc ::CanvasCCP::CopySelectedToClipboard {w doWhat} {
 	if {[string equal $doWhat "cut"]} {
 	    ::CanvasText::Delete $w
 	}
-	set clipToken {string}
+	set clipToken "string"
     } else {
 	
 	# Loop over all selected items, use 'clipItemSep' as separator.
@@ -143,14 +142,14 @@ proc ::CanvasCCP::PasteFromClipboardTo {w} {
 
     switch -glob -- $wClass {
 	Canvas {
-	    PasteFromClipboardToCanvas $w
+	    ::CanvasCCP::PasteFromClipboardToCanvas $w
 	} 
 	Wish* - Whiteboard {
 	
 	    # We assume that it is the canvas that should receive this?
 	    set wtop [::UI::GetToplevelNS $w]
 	    upvar ::${wtop}::wapp wapp
-	    PasteFromClipboardToCanvas $wapp(can)
+	    ::CanvasCCP::PasteFromClipboardToCanvas $wapp(can)
 	}
 	default {
 	
@@ -187,7 +186,7 @@ proc ::CanvasCCP::PasteFromClipboardToCanvas {w} {
     Debug 2 "  PasteFromClipboardToCanvas:: clipToken=$clipToken, cmds=$cmds"
     $w delete withtag tbbox
     
-    # Try to figure out if pute text string (clipToken="string") or complete
+    # Try to figure out if put text string (clipToken="string") or complete
     # canvas create item command (clipToken="item").
     
     set tmpCmds $cmds
@@ -211,7 +210,7 @@ proc ::CanvasCCP::PasteFromClipboardToCanvas {w} {
     if {$clipToken == "string"} {
 	
 	# Find out if there is a current focus on a text item.
-	if {[llength [$w focus]] == 0} {
+	if {[$w focus] == ""} {
 	    eval ::CanvasText::CanvasFocus $w [::CanvasUtils::NewImportAnchor] 1
 	}
 	::CanvasText::TextInsert $w $cmds
@@ -367,7 +366,7 @@ proc ::CanvasCCP::CmdToken {cmdName separator} {
     upvar $cmdName theCmd
     
     # If nothing then return -1.
-    if {[llength $theCmd] == 0} {
+    if {$theCmd == ""} {
 	return -1
     }
     set indSep [lsearch -exact $theCmd $separator]
@@ -402,44 +401,41 @@ proc ::CanvasCCP::CmdToken {cmdName separator} {
 
 proc ::CanvasCCP::CanvasStripItemOptions {optList} {
     
-    array set opts $optList
-    foreach name [array names opts] {
-	
+    set opts {}
+    foreach {name val} $optList {
+
 	# First, discard if empty list. This is not true for -fill for polygons.
 	# A nonexistent -fill option for a polygon fills it with black, which
 	# is correct for Tk 8.0 but a bug in Tk 8.3.
-	if {([llength $opts($name)] == 0) &&   \
-	  ([string compare $name "-fill"] != 0)} {
-	    unset opts($name)
+	if {($val == "") && ![string equal $name "-fill"]} {
+	    continue
 	}
 	
 	# Pick options that can be discarded if zero.
-	
-	if {[string equal $name "-disabledwidth"] ||  \
-	  [string equal $name "-activewidth"] ||  \
-	  [string equal $name "-dashoffset"]} {
-	    if {$opts($name) == 0} {
-		unset opts($name)
+	switch -- $name {
+	    "-disabledwidth" - "-activewidth" - "-dashoffset" {
+		if {[string equal $val "0"]} {
+		    continue
+		}
+	    }
+	    "-offset" - "-outlineoffset" {
+		if {[string equal $val "0,0"]} {
+		    continue
+		}
+	    }
+	    "-smooth" {
+
+		# We take the opportunity to fix a bug(?) in 8.3.
+		if {[string equal $val "bezier"]} {
+		    set val 1
+		}		
 	    }
 	}
-	if {[string equal $name "-offset"] ||  \
-	  [string equal $name "-outlineoffset"]} {
-	    if {[string equal $opts($name) "0,0"]} {
-		unset opts($name)
-	    }
-	}
-	
-	# We take the opportunity to fix a bug(?) in 8.3.
-	
-	if {[string equal $name "-smooth"]} {
-	    if {[string equal $opts(-smooth) "bezier"]} {
-		set opts(-smooth) 1
-	    }
-	}
+	lappend opts $name $val
     }
     
     # And get back the modified list to return.
-    return [array get opts]
+    return $opts
 }
 
 #-------------------------------------------------------------------------------

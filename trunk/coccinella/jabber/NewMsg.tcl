@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.2 2003-01-30 17:33:46 matben Exp $
+# $Id: NewMsg.tcl,v 1.3 2003-02-06 17:23:32 matben Exp $
 
 package provide NewMsg 1.0
 
@@ -194,7 +194,7 @@ proc ::Jabber::NewMsg::Build {wbase args} {
     
     # If -to option. This can have jid's with and without any resource.
     # Generally we shouldn't care having the resource, except for groupchats.
-    if {[llength $opts(-to)] > 0} {
+    if {$opts(-to) != ""} {
 	set n 1
 	foreach jid $opts(-to) {
 	    if {$n > 1} {
