@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: History.tcl,v 1.4 2004-09-28 13:50:17 matben Exp $
+# $Id: History.tcl,v 1.5 2004-10-27 14:42:34 matben Exp $
 
 package require uriencode
 
@@ -145,7 +145,8 @@ proc ::History::BuildHistory {jid args} {
 	    $wtext insert end $prefix ${tag}pre
 	    $wtext insert end "   "   ${tag}text
 	    
-	    ::Jabber::ParseAndInsertText $wtext $body ${tag}text urltag
+	    ::Text::Parse $wtext $body ${tag}text
+	    $wtext insert end \n
 	}
     } else {
 	$wtext insert end "No registered history for $jid\n" histhead

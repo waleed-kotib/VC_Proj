@@ -10,6 +10,8 @@ Coccinella-0.95.2 (04????): 	Short summary --
 	  widget
 	- extended buddy pouncing
 	- added automatic login option
+	- improved smiley/url text parsing which is 20 times faster
+
 
 Coccinella-0.95.1 (040930): 	Short summary --
 

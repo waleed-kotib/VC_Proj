@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.18 2004-10-26 12:46:51 matben Exp $
+# $Id: Emoticons.tcl,v 1.19 2004-10-27 14:42:34 matben Exp $
 
 
 package provide Emoticons 1.0
@@ -82,150 +82,22 @@ proc ::Emoticons::Init { } {
     ::Emoticons::SetPermanentSet $jprefs(emoticonSet)
 }
 
-# OUTDATED!
-
-proc ::Emoticons::MakeDarkProjectSet { } {
-    global  this
-    
+proc ::Emoticons::Exists {word} {
     variable smiley
-    variable smileyExp
-    variable smileyLongNames
-
-    ::Debug 2 "::Emoticons::MakeDarkProjectSet"
     
-    # Smiley icons. The "short" types.
-    foreach {key name} {
-	":-)"          classic 
-	":-("          sad 
-	":-0"          shocked 
-	";-)"          wink
-	";("           cry
-	":o"           embarrassed
-	":D"           grin
-	"x)"           knocked
-	":|"           normal
-	":S"           puzzled
-	":p"           silly
-	":O"           shocked
-	":x"           speechless} {
-	    set imSmile($name) [image create photo -format gif  \
-	      -file [file join $this(imagePath) smileys "smiley-${name}.gif"]]
-	    set smiley($key) $imSmile($name)
-    }
-	
-    # Duplicates:
-    foreach {key name} {
-	":)"           classic 
-	";)"           wink} {
-	    set smiley($key) $imSmile($name)
-    }
-    
-    # Seems unused...
-    set smileyExp {(}
-    foreach key [array names smiley] {
-	append smileyExp "$key|"
-    }
-    set smileyExp [string trimright $smileyExp "|"]
-    append smileyExp {)}
-    regsub  {[)(|]} $smileyExp {\\\0} smileyExp
-    
-    # The "long" smileys are treated differently; only loaded when needed.
-    set smileyLongNames {
-	:alien:
-	:angry:
-	:bandit:
-	:beard:
-	:bored:
-	:calm:
-	:cat:
-	:cheeky:
-	:cheerful:
-	:chinese:
-	:confused:
-	:cool:
-	:cross-eye:
-	:cyclops:
-	:dead:
-	:depressed:
-	:devious:
-	:disappoin:
-	:ditsy:
-	:dog:
-	:ermm:
-	:evil:
-	:evolved:
-	:gasmask:
-	:glasses:
-	:happy:
-	:hurt:
-	:jaguar:
-	:kommie:
-	:laugh:
-	:lick:
-	:mad:
-	:nervous:
-	:ninja:
-	:ogre:
-	:old:
-	:paranoid:
-	:pirate:
-	:ponder:
-	:puzzled:
-	:rambo:
-	:robot:
-	:eek:
-	:shocked:
-	:smiley:
-	:sleeping:
-	:smoker:
-	:surprised:
-	:tired:
-	:vampire:
+    if {[info exists smiley($word)]} {
+	return 1
+    } else {
+	return 0
     }
 }
-    
-# Emoticons::Parse --
-# 
-#       Parses text into a list with every second element an image create command.
-#       
-# Arguments:
-#       str         the text string, tcl special chars already protected
-#       
-# Results:
-#       A list {str {image create ..} ?str {image create ..} ...?}
 
-proc ::Emoticons::Parse {str} {
-    global  this
-    
+proc ::Emoticons::Make {w word} {
     variable smiley
-    variable smileyLongNames
     
-    set _begin {( |^)}
-    set _end {( |$)}
-    
-    # Protect Tcl special characters, quotes included.
-    regsub -all {([][$\\{}"])} $str {\\\1} str
-        
-    # Since there are about 60 smileys we need to be economical here.    
-    # Check first if there are any short smileys.
-    
-    # Protect all  *regexp*  special characters. Regexp hell!!!
-    # Carefully embrace $smile since may contain ; etc.
-    # Reqire one space on each side, replaced with -padx 6.
-    
-    foreach smile [array names smiley] {
-	set sub "\} \{image create end -image $smiley($smile) -padx 6 -name \{$smile\}\} \{"
-	    
-	# Protect all regexp special characters!
-	regsub -all {[][$^);(\|\?\*\\]} $smile {\\\0} smileExp
-	if {[catch {
-	    regsub -all ${_begin}${smileExp}${_end} $str $sub str
-	}]} {
-	    puts "--->smile=$smile, smileExp=$smileExp"
-	}
+    if {[info exists smiley($word)]} {
+	$w image create end -image $smiley($word) -name $word
     }
-
-    return "\{$str\}"
 }
 
 proc ::Emoticons::GetAllSets { } {

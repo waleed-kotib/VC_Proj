@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Dialogs.tcl,v 1.48 2004-10-09 13:21:57 matben Exp $
+# $Id: Dialogs.tcl,v 1.49 2004-10-27 14:42:37 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -216,17 +216,13 @@ proc ::Dialogs::InfoOnPlugins { } {
     if {[::Plugins::IsHost QuickTimeTcl] &&  \
       ![::Plugins::HavePackage QuickTimeTcl]} {
 
-	::Text::ConfigureLinkTagForTextWidget $wtxt urltag activeurltag
-	set ad {Get QuickTime for free from Apple at www.apple.com/quicktime.\
-	  It adds a lot of functionality to this application.}
+	set ad "Get QuickTime for free from Apple at www.apple.com/quicktime.\
+	  It adds a lot of functionality to this application."
 	$wtxt insert end "\n" tline
 	$wtxt insert end "QuickTimeTcl\n" ttitle
 	$wtxt insert end "\n" tline
 	$wtxt insert end "\tDownload:\t" tkey
-	set textCmds [::Text::ParseHttpLinks $ad ttxt urltag]
-	foreach cmd $textCmds {
-	    eval $wtxt $cmd
-	}	
+	::Text::Parse $wtxt $ad ttxt
 	$wtxt insert end "\n\n"
     }
     
@@ -238,11 +234,11 @@ proc ::Dialogs::InfoOnPlugins { } {
 	$wtxt insert end "Microsoft Speech\n" ttitle
 	$wtxt insert end "\n" tline
 	$wtxt insert end "\tDownload:\t" tkey
-	$wtxt insert end {Get Microsoft Speech for free from Microsoft at } ttxt
+	$wtxt insert end "Get Microsoft Speech for free from Microsoft at " ttxt
 	::Text::InsertURL $wtxt "download.microsoft.com"  \
-	  {http://download.microsoft.com/download/speechSDK/SDK/5.1/WXP/EN-US/Sp5TTIntXP.exe} \
+	  "http://download.microsoft.com/download/speechSDK/SDK/5.1/WXP/EN-US/Sp5TTIntXP.exe" \
 	  ttxt
-	$wtxt insert end { It adds synthetic speech of text messages.} ttxt	
+	$wtxt insert end " It adds synthetic speech of text messages." ttxt	
 	$wtxt insert end "\n\n"
     }
         

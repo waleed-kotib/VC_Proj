@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.32 2004-10-24 14:12:52 matben Exp $
+# $Id: Utils.tcl,v 1.33 2004-10-27 14:42:37 matben Exp $
 
 namespace eval ::Utils:: {
 
@@ -676,14 +676,108 @@ proc ::Timing::FormMessage {key totalbytes} {
 
 namespace eval ::Text:: {
 
-    # Unique counter to produce http link tags.
-    variable numLink 1000
-    
     # Unique counter to produce specified link tags.
     variable idurl 1000
+        
+    variable urlRegexp {^(http://|https://|www\.|ftp://|ftp\.)([^ \t\r\n]+)}
+    variable urlColor
+    array set urlColor {fg blue activefg red}
+}
+
+# Text::Parse, ... --
+# 
+#       It takes a text widget, the text, and a default tag, and parses
+#       smileys and urls.
+
+proc ::Text::Parse {w str tag} {
     
-    # Storage for mapping idurl -> url
-    variable idToUrlArr
+    # Split string into words and whitespaces.
+    set wsp {[ \t\r\n]+}
+    set len [string length $str]
+    if {$len == 0} {
+	return
+    }
+    set start 0
+    while {[regexp -start $start -indices -- $wsp $str match]} {
+	foreach {matchStart matchEnd} $match break
+	
+	# The "space" part.
+	set space [string range $str $matchStart $matchEnd]
+	incr matchStart -1
+	incr matchEnd
+	
+	# The word preceeding the space.
+	set word [string range $str $start $matchStart]
+	set start $matchEnd
+	
+	# Process the actual word.
+	ParseWord $w $word $tag
+	
+	# Insert the whitespace after word.
+	$w insert end $space $tag
+    }
+    
+    # And the final word.
+    set word [string range $str $start end]
+    ParseWord $w $word $tag
+}
+
+proc ::Text::ParseWord {w word tag} {
+    
+    if {[::Emoticons::Exists $word]} {
+	::Emoticons::Make $w $word
+    } elseif {![ParseUrl $w $word]} {
+	$w insert end $word $tag
+    }
+}
+
+proc ::Text::ParseUrl {w word} {
+    variable urlRegexp
+    variable idurl
+    variable urlColor
+    
+    if {[regexp $urlRegexp $word]} {
+	set urltag url${idurl}
+	set urlfg       [option get $w urlForeground       Text]
+	set urlactivefg [option get $w urlActiveForeground Text]
+	if {$urlfg == ""} {
+	    set urlfg $urlColor(fg)
+	}
+	if {$urlactivefg == ""} {
+	    set activefg $urlColor(activefg)
+	}
+	$w tag configure $urltag -foreground $urlfg -underline 1
+	$w tag bind $urltag <Button-1>  \
+	  [list ::Text::UrlButton [string map {% %%} $word]]
+	$w tag bind $urltag <Any-Enter>  \
+	  [list ::Text::UrlEnter $w $urltag $activefg]
+	$w tag bind $urltag <Any-Leave>  \
+	  [list ::Text::UrlLeave $w $urltag $urlfg]
+	$w insert end $word $urltag
+	incr idurl
+	return 1
+    } else {
+	return 0
+    }
+}
+
+proc ::Text::UrlButton {url} {
+    if {![regexp {^http://.+} $url]} {
+	set url "http://$url"
+    }
+    if {[::Utils::IsWellformedUrl $url]} {
+	::Utils::OpenURLInBrowser $url
+    }
+}
+
+proc ::Text::UrlEnter {w tag fgcol} {
+    $w configure -cursor hand2
+    $w tag configure $tag -foreground $fgcol -underline 1
+}
+
+proc ::Text::UrlLeave {w tag fgcol} {
+    $w configure -cursor arrow
+    $w tag configure $tag -foreground $fgcol -underline 1
 }
 
 # Text::URLLabel --
@@ -696,98 +790,9 @@ proc ::Text::URLLabel {w url args} {
       -wrap word -highlightthickness 0]
     array set opts $args
     eval {text $w} [array get opts]
-    $w tag configure normal -foreground blue -underline 1
-    $w tag configure active -foreground red -underline 1   
-    $w tag bind normal <Enter> [list ::Text::EnterLink $w %x %y normal active]
-    $w tag bind active <ButtonPress>  \
-      [list ::Text::ButtonPressOnLink $w %x %y active]
-    $w insert end $url normal
+    ParseUrl $w $url 
+    
     return $w
-}
-
-# Text::ParseHttpLinks --
-# 
-#       Parses text translating elements that may be interpreted as an url
-#       to a clickable thing.
-#
-# Arguments:
-#       str         the text string, tcl special chars already protected
-#       tag         the normal text tag
-#       linktag     the tag for links
-#       
-# Results:
-#       A list {textcmd textcmd ...} where textcmd is typically:
-#       "insert end {Some text} $tag"
-
-proc ::Text::ParseHttpLinks {str tag linktag} {
-    
-    # Protect all  *regexp*  special characters.
-    #regsub -all {\\|&} $str {\\\0} str
-
-    # regexp hell, welcome!
-    set wsp_ "\[ \t\r\n]"
-    set path_ "\[^ \t\r\n,]"
-    set epath_ "\[^ \t\r\n,\.]"
-    set start_ "(^|\"|$wsp_)"
-    set end_ "(\$|\"|$wsp_)"
-
-    # This is extremely tricky business!
-    # Character data must not be embraced, but must be qoted in order for
-    # the protected tcl special chars to be deprotected.
-    set re "${start_}((http://|www\\.)${path_}+${epath_})"
-    set sub "\\1\" $tag\} \{insert end \{\\2\} \{$tag $linktag\}\} \{insert end \""
-    regsub -all -nocase -- $re $str $sub txtlist
-    return "\{insert end \"$txtlist\" $tag\}"
-}
-
-proc ::Text::ConfigureLinkTagForTextWidget {w tag linkactive} {
-    
-    $w tag configure $tag -foreground blue -underline 1
-    $w tag configure $linkactive -foreground red -underline 1
-    
-    $w tag bind $tag <Enter> [list ::Text::EnterLink $w %x %y $tag $linkactive]
-    $w tag bind $linkactive <ButtonPress>  \
-      [list ::Text::ButtonPressOnLink $w %x %y $linkactive]
-}
-
-proc ::Text::EnterLink {w x y linktag linkactive} {
-    
-    set range [$w tag prevrange $linktag "@$x,$y +1 char"]
-    if {[llength $range]} {
-	eval {$w tag add $linkactive} $range
-	eval {$w tag remove $linktag} $range
-	$w configure -cursor hand2
-	$w tag bind $linkactive <Leave>  \
-	  [list ::Text::LeaveLink $w $linktag $linkactive]
-    }
-}
-
-proc ::Text::LeaveLink {w linktag linkactive} {
-    
-    set range [$w tag ranges $linkactive]
-    if {[llength $range]} {
-	eval {$w tag add $linktag} $range
-	eval {$w tag remove $linkactive} $range
-    }
-    $w configure -cursor arrow
-}
-
-proc ::Text::ButtonPressOnLink {w x y linkactive} {
-    
-    ::Debug 2 "::Text::ButtonPressOnLink"
-
-    set range [$w tag prevrange $linkactive "@$x,$y"]
-    if {[llength $range]} {
-	set url [string trim [eval $w get $range]]
-	
-	# Add "http://" if not there.
-	if {![regexp {^http://.+} $url]} {
-	    set url "http://$url"
-	}
-	if {[::Utils::IsWellformedUrl $url]} {
-	    ::Utils::OpenURLInBrowser $url
-	}
-    }
 }
 
 # Text::InsertURL --
@@ -796,37 +801,26 @@ proc ::Text::ButtonPressOnLink {w x y linkactive} {
 
 proc ::Text::InsertURL {w str url tag} {    
     variable idurl
-    variable idToUrlArr
-
-    set idToUrlArr($idurl) $url
+    variable urlColor
+    
     set urltag url${idurl}
-    set linkactive ${urltag}active
+    set urlfg       [option get $w urlForeground       Text]
+    set urlactivefg [option get $w urlActiveForeground Text]
+    if {$urlfg == ""} {
+	set urlfg $urlColor(fg)
+    }
+    if {$urlactivefg == ""} {
+	set activefg $urlColor(activefg)
+    }
+    $w tag configure $urltag -foreground $urlfg -underline 1
+    $w tag bind $urltag <Button-1>  \
+      [list ::Text::UrlButton [string map {% %%} $url]]
+    $w tag bind $urltag <Any-Enter>  \
+      [list ::Text::UrlEnter $w $urltag $activefg]
+    $w tag bind $urltag <Any-Leave>  \
+      [list ::Text::UrlLeave $w $urltag $urlfg]
     $w insert end $str [list $tag $urltag]
-
-    $w tag configure $urltag -foreground blue -underline 1
-    $w tag configure $linkactive -foreground red -underline 1
-    
-    $w tag bind $urltag <Enter>  \
-      [list ::Text::EnterLink $w %x %y $urltag $linkactive]
-    $w tag bind $linkactive <ButtonPress>  \
-      [list ::Text::ButtonPressOnURL $w $idurl]
-
     incr idurl
-}
-
-proc ::Text::ButtonPressOnURL {w idurl} {    
-    variable idToUrlArr
-
-    set url $idToUrlArr($idurl)
-    ::Debug 2 "::Text::ButtonPressOnURL url=$url"
-    
-    # Add "http://" if not there.
-    if {![regexp {^http://.+} $url]} {
-	set url "http://$url"
-    }
-    if {[::Utils::IsWellformedUrl $url]} {
-	::Utils::OpenURLInBrowser $url
-    }
 }
 
 proc ::Text::TransformToPureText {w args} {    

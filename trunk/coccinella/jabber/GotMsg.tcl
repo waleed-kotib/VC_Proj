@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.34 2004-10-24 14:12:52 matben Exp $
+# $Id: GotMsg.tcl,v 1.35 2004-10-27 14:42:34 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -124,7 +124,8 @@ proc ::Jabber::GotMsg::Show {thisMsgId} {
     # Insert the actual body of the message.
     $wtext configure -state normal
     $wtext delete 1.0 end
-    ::Jabber::ParseAndInsertText $wtext $body normal urltag
+    ::Text::Parse $wtext $body normal
+    $wtext insert end \n
     $wtext configure -state disabled
     
     # If no more messages after this one...
@@ -231,7 +232,6 @@ proc ::Jabber::GotMsg::Build { } {
     text $wtext -height 6 -width 48 -wrap word  \
       -borderwidth 1 -relief sunken -yscrollcommand [list $wysc set]
     $wtext tag configure normal
-    ::Text::ConfigureLinkTagForTextWidget $wtext urltag activeurltag
     scrollbar $wysc -orient vertical -command [list $wtext yview]
     grid $wtext -column 0 -row 0 -sticky news
     grid $wysc -column 1 -row 0 -sticky ns

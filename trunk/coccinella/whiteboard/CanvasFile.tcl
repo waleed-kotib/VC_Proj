@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasFile.tcl,v 1.13 2004-10-26 12:46:52 matben Exp $
+# $Id: CanvasFile.tcl,v 1.14 2004-10-27 14:42:37 matben Exp $
  
 package require can2svg
 package require svg2can
@@ -764,6 +764,18 @@ proc ::CanvasFile::SVGImageHandler {wtop cmd} {
     set idx [lsearch -regexp $cmd {-[a-z]+}]
     array set argsArr [lrange $cmd $idx end]
     return [::WB::CreateImageForWtop $wtop "" -file $argsArr(-file)]
+}
+
+# Perhaps a mechanism for components to register new open/save formats?
+
+proc ::CanvasFile::RegisterOpenFormat {} {
+    
+    
+}
+
+proc ::CanvasFile::RegisterSaveFormat {} {
+    
+    
 }
 
 #

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2004  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.74 2004-10-24 14:12:52 matben Exp $
+# $Id: GroupChat.tcl,v 1.75 2004-10-27 14:42:34 matben Exp $
 
 package require History
 
@@ -930,7 +930,9 @@ proc ::Jabber::GroupChat::InsertMessage {token from body args} {
     
     $wtext configure -state normal
     $wtext insert end $prefix ${whom}pre
-    ::Jabber::ParseAndInsertText $wtext "  $body" ${whom}text urltag	
+    
+    ::Text::Parse $wtext "  $body" ${whom}text
+    $wtext insert end \n
     
     $wtext configure -state disabled
     $wtext see end
@@ -998,8 +1000,6 @@ proc ::Jabber::GroupChat::ConfigureTextTags {w wtext} {
     foreach tag $alltags {
 	eval {$wtext tag configure $tag} $opts($tag)
     }
-    
-    ::Text::ConfigureLinkTagForTextWidget $wtext urltag activeurltag
 }
 
 proc ::Jabber::GroupChat::SetTopic {token} {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2004  Mats Bengtsson
 #  
-# $Id: MailBox.tcl,v 1.56 2004-10-24 14:12:52 matben Exp $
+# $Id: MailBox.tcl,v 1.57 2004-10-27 14:42:36 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -336,7 +336,6 @@ proc ::Jabber::MailBox::Build {args} {
       [list grid $wyscmsg -column 1 -row 0 -sticky ns]] \
       -state disabled
     $wtextmsg tag configure normal
-    ::Text::ConfigureLinkTagForTextWidget $wtextmsg urltag activeurltag
     scrollbar $wyscmsg -orient vertical -command [list $wtextmsg yview]
     grid $wtextmsg -column 0 -row 0 -sticky news
     grid $wyscmsg -column 1 -row 0 -sticky ns
@@ -577,7 +576,8 @@ proc ::Jabber::MailBox::GetCanvasHexUID {id} {
     return $ans
 }
 
-proc ::Jabber::MailBox::MarkMsgAsRead {uid} {    
+proc ::Jabber::MailBox::MarkMsgAsRead {uid} {
+    global  wDlgs
     variable mailbox
     variable mailboxindex
     variable colindex
@@ -586,15 +586,18 @@ proc ::Jabber::MailBox::MarkMsgAsRead {uid} {
     
     if {[lindex $mailbox($uid) $mailboxindex(isread)] == 0} {
 	lset mailbox($uid) $mailboxindex(isread) 1
-	set fontS [option get . fontSmall {}]
-	set colsub $colindex(subject)
-	set wtbl $locals(wtbl)
 	
-	# Map uid to row (item) index.
-	set key $tableUid2Key($uid)
-	set item [$wtbl index k${key}]
-	$wtbl rowconfigure $item -font $fontS
-	$wtbl cellconfigure "${item},${colsub}" -image $locals(iconReadMsg)
+	if {[winfo exists $wDlgs(jinbox)]} {
+	    set fontS [option get . fontSmall {}]
+	    set colsub $colindex(subject)
+	    set wtbl $locals(wtbl)
+	    
+	    # Map uid to row (item) index.
+	    set key $tableUid2Key($uid)
+	    set item [$wtbl index k${key}]
+	    $wtbl rowconfigure $item -font $fontS
+	    $wtbl cellconfigure "${item},${colsub}" -image $locals(iconReadMsg)
+	}
 	set locals(haveEdits) 1
     }
 }
@@ -1133,7 +1136,8 @@ proc ::Jabber::MailBox::DisplayMsg {id} {
     
     $wtextmsg configure -state normal
     $wtextmsg delete 1.0 end
-    ::Jabber::ParseAndInsertText $wtextmsg $body normal urltag
+    ::Text::Parse $wtextmsg $body normal
+    $wtextmsg insert end \n
     $wtextmsg configure -state disabled
     
     set opts [list -subject $subject -from $from -time $date]
