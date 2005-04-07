@@ -2,10 +2,10 @@
 #  
 #      This file provides translation from canvas commands to XML/SVG format.
 #      
-#  Copyright (c) 2004  Mats Bengtsson
+#  Copyright (c) 2004-2005  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #
-# $Id: svg2can.tcl,v 1.21 2004-10-12 13:48:56 matben Exp $
+# $Id: svg2can.tcl,v 1.22 2005-04-07 06:22:16 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -20,6 +20,7 @@
 # ########################### CHANGES ##########################################
 #
 #   0.1      first release
+#   0.2      starting support for tkpath package
 #
 # ########################### TODO #############################################
 #
@@ -87,6 +88,12 @@ namespace eval svg2can {
 	windows - macintosh {
 	    set systemFont system
 	}
+    }
+    
+    variable priv
+    set priv(havetkpath) 0
+    if {![catch {package require tkpath}]} {
+	set priv(havetkpath) 1
     }
 }
 
@@ -459,6 +466,59 @@ proc svg2can::ParseLine {xmllist paropts transformList args} {
 }
 
 proc svg2can::ParsePath {xmllist paropts transformList args} {
+    variable priv
+    
+    if {$priv(havetkpath)} {
+	eval {ParsePathEx $xmllist $paropts $transformList} $args
+    } else {
+	eval {ParsePathPure $xmllist $paropts $transformList} $args
+    }
+}
+
+proc svg2can::ParsePathEx {xmllist paropts transformList args} {
+    variable tmptag
+    
+    set opts {}
+    set presentationAttr {}
+    set path {}
+    array set attrArr $args
+    array set attrArr [getattr $xmllist]
+    set tags {}
+    if {[llength $transformList]} {
+	lappend tags $tmptag
+    }
+    
+    foreach {key value} [array get attrArr] {
+	
+	switch -- $key {
+	    d {
+		set path $value
+	    }
+	    id {
+		set tags [concat $tags $value]
+	    }
+	    style {
+		set opts [StyleToOpts path [StyleAttrToList $value]]
+	    }
+	    default {
+		lappend presentationAttr $key $value
+	    }
+	}
+    }
+    lappend opts -tags $tags
+    set opts [MergePresentationAttr line $opts $presentationAttr]  
+    
+    regsub -all -- {([a-zA-Z])([0-9])} $path {\1 \2} path
+    regsub -all -- {([0-9])([a-zA-Z])} $path {\1 \2} path
+    set path [string map {- " -"} $path]
+    set path [string map {, " "} $path]
+        
+    set cmdList [list [concat create path [list $path] $opts]]
+
+    return [AddAnyTransformCmds $cmdList $transformList]
+}
+
+proc svg2can::ParsePathPure {xmllist paropts transformList args} {
     variable tmptag
     
     set debug 0
@@ -1246,6 +1306,36 @@ proc svg2can::parseColor {color} {
 #       list of canvas options
 
 proc svg2can::StyleToOpts {type styleList args} {
+    
+    if {$type == "path"} {
+	eval {StyleToOptsPath $styleList} $args
+    } else {
+	eval {StyleToOptsPure $type $styleList} $args
+    }
+}
+
+proc svg2can::StyleToOptsPath {styleList args} {
+    
+    array set optsArr {-fill black -stroke ""}
+    
+    foreach {key value} $styleList {
+    
+	switch -- $key {
+	    fill - stroke {
+		set optsArr(-$key) [parseColor $value]		
+	    }
+	    stroke-dasharray - strokelinecap - strokelinejoin - \
+	      strokemiterlimit - strokeopacity - strokewidth {
+		
+		set name [string map {"-" ""} $key]
+		set optsArr(-$name) $value
+	    }
+	}
+    }
+    return [array get optsArr]
+}
+
+proc svg2can::StyleToOptsPure {type styleList args} {
     
     variable textAnchorMap
     
