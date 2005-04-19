@@ -8,8 +8,9 @@ Not to mention all bugfixes and rewrites.
 Coccinella-0.95.6 (050????):
 
 	- added PLAIN sasl mechanism
-
-
+	- updated QuickTime support which fixed an instabilty problem
+          and an audio problem on Windows
+	- fixed snapshot bug
 
 Coccinella-0.95.5 (050311):
 

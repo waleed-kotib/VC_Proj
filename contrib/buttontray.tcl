@@ -6,7 +6,7 @@
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  This source file is distributed under the BSD license.
 #  
-# $Id: buttontray.tcl,v 1.21 2005-03-11 06:55:55 matben Exp $
+# $Id: buttontray.tcl,v 1.22 2005-04-19 06:51:36 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -29,7 +29,8 @@
 #      pathName configure ?option? ?value option value ...?
 #      pathName exists name
 #      pathName minwidth
-#      pathName newbutton name text image imageDis cmd args
+#      pathName newbutton name -text str -image name -disabledimage name 
+#                              -command cmd args
 #
 # ########################### CHANGES ##########################################
 #
