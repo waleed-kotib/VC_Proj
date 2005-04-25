@@ -32,7 +32,7 @@
 # liability for all claims, expenses, losses, damages and costs any user may
 # incur as a result of using, copying or modifying the Software.
 #
-# $Id: sgmlparser.tcl,v 1.4 2004-09-08 13:13:13 matben Exp $
+# $Id: sgmlparser.tcl,v 1.5 2005-04-25 07:40:03 matben Exp $
 
 package require sgml 1.8
 
@@ -307,7 +307,8 @@ proc sgml::parseEvent {sgml args} {
     # I've switched back to an older version here. 
     
     if {![info exists state(line)]} {
-	# Initialise the state variable
+	
+	# Initialise the state variable	
 	array set state {
 	    mode normal
 	    haveXMLDecl 0
@@ -884,7 +885,7 @@ proc sgml::ParseEvent:ElementOpen {tag attr opts args} {
 
     # Update state
     lappend state(stack) $tag
-
+    
     # Parse attribute list into a key-value representation
     if {[string compare $options(-parseattributelistcommand) {}]} {
 	if {[catch {uplevel #0 $options(-parseattributelistcommand) [list $attr]} attr]} {
