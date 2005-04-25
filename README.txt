@@ -194,9 +194,6 @@ Who:
     It has been developed by:
 
     Mats Bengtsson   
-    Hamngatan 21
-    SE-58226, Linkoping Sweden
-   
     matben@users.sourceforge.net
     phone: +46 13 136114
 
