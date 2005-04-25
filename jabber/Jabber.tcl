@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.133 2005-03-02 13:49:40 matben Exp $
+# $Id: Jabber.tcl,v 1.134 2005-04-25 11:55:00 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -315,7 +315,7 @@ proc ::Jabber::FactoryDefaults { } {
       [lindex $jserver(profile) 0]
     
     #
-    set jprefs(urlServersList) "http://www.jabber.org/servers.php"
+    set jprefs(urlServersList) "http://www.jabber.org/servers.xml"
         
     # Menu definitions for the Roster/services window. Collects minimal Jabber
     # stuff.

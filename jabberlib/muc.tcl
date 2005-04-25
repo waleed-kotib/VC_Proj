@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: muc.tcl,v 1.22 2005-04-25 07:40:04 matben Exp $
+# $Id: muc.tcl,v 1.23 2005-04-25 11:55:00 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -187,7 +187,7 @@ proc jlib::muc::enter {mucname roomjid nick args} {
     }
     set jid ${roomjid}/${nick}
     set xelem [wrapper::createtag "x" -subtags $xsub \
-      -attrlist [list xmlns $xmlnsmuc]]
+      -attrlist [list xmlns $xmlnsmuc()]]
     $jlibname send_presence -to $jid -xlist [list $xelem] -extras $extras \
       -command [list [namespace current]::parse_enter $mucname $roomjid]
     set cache($roomjid,mynick) $nick
