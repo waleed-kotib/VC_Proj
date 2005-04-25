@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: muc.tcl,v 1.21 2005-02-22 13:58:47 matben Exp $
+# $Id: muc.tcl,v 1.22 2005-04-25 07:40:04 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -21,7 +21,7 @@
 #	
 #   INSTANCE COMMANDS
 #      mucName allroomsin
-#      mucName create roomjid nick callback
+#      mucName create roomjid nick callback ?-extras?
 #      mucName destroy roomjid ?-command, -reason, alternativejid?
 #      mucName enter roomjid nick ?-command, -extras, -password?
 #      mucName exit roomjid
@@ -51,6 +51,14 @@ namespace eval jlib::muc {
 
     # Running number.
     variable uid 0
+    
+    variable xmlnsmuc 
+    array set xmlnsmuc {
+	""              "http://jabber.org/protocol/muc"
+	"admin"         "http://jabber.org/protocol/muc#admin"
+	"owner"         "http://jabber.org/protocol/muc#owner"
+	"user"          "http://jabber.org/protocol/muc#user"
+    }
     
     variable muc
     set muc(affiliationExp) {(owner|admin|member|outcast|none)}
@@ -152,6 +160,7 @@ proc jlib::muc::invoke_callback {mucname cmd type subiq} {
 proc jlib::muc::enter {mucname roomjid nick args} {
 
     variable muc2jlib
+    variable xmlnsmuc
     upvar ${mucname}::cache cache
     upvar ${mucname}::rooms rooms
     
@@ -178,7 +187,7 @@ proc jlib::muc::enter {mucname roomjid nick args} {
     }
     set jid ${roomjid}/${nick}
     set xelem [wrapper::createtag "x" -subtags $xsub \
-      -attrlist {xmlns "http://jabber.org/protocol/muc"}]
+      -attrlist [list xmlns $xmlnsmuc]]
     $jlibname send_presence -to $jid -xlist [list $xelem] -extras $extras \
       -command [list [namespace current]::parse_enter $mucname $roomjid]
     set cache($roomjid,mynick) $nick
@@ -266,6 +275,7 @@ proc jlib::muc::setnick {mucname roomjid nick args} {
 proc jlib::muc::invite {mucname roomjid jid args} {
     
     variable muc2jlib
+    variable xmlnsmuc
 
     set jlibname $muc2jlib($mucname)
     set opts {}
@@ -288,7 +298,7 @@ proc jlib::muc::invite {mucname roomjid jid args} {
       -attrlist [list to $jid] -subtags $children]]
     
     set xelem [wrapper::createtag "x" -subtags $invite  \
-      -attrlist {xmlns "http://jabber.org/protocol/muc#user"}]
+      -attrlist [list xmlns $xmlnsmuc(user)]]
     eval {$jlibname send_message $roomjid -xlist [list $xelem]} $opts
 }
 
@@ -300,6 +310,7 @@ proc jlib::muc::setrole {mucname roomjid nick role args} {
 
     variable muc2jlib
     variable muc
+    variable xmlnsmuc
     
     if {![regexp $muc(roleExp) $role]} {
 	return -code error "Unrecognized role \"$role\""
@@ -326,8 +337,7 @@ proc jlib::muc::setrole {mucname roomjid nick role args} {
       -attrlist [list nick $nick role $role]]]
     
     set xmllist [wrapper::createtag "query" \
-      -attrlist {xmlns "http://jabber.org/protocol/muc#admin"} \
-      -subtags $subelements]
+      -attrlist [list xmlns $xmlnsmuc(admin)] -subtags $subelements]
     eval {$jlibname send_iq "set" [list $xmllist] -to $roomjid} $opts
 }
 
@@ -339,6 +349,7 @@ proc jlib::muc::setaffiliation {mucname roomjid nick affiliation args} {
 
     variable muc2jlib
     variable muc
+    variable xmlnsmuc
     
     if {![regexp $muc(affiliationExp) $affiliation]} {
 	return -code error "Unrecognized affiliation \"$affiliation\""
@@ -363,10 +374,10 @@ proc jlib::muc::setaffiliation {mucname roomjid nick affiliation args} {
 
     switch -- $affiliation {
     	owner {
-    	    set xmlns "http://jabber.org/protocol/muc#owner"
+    	    set xmlns $xmlnsmuc(owner)
     	}
     	default {
-    	    set xmlns "http://jabber.org/protocol/muc#admin"
+    	    set xmlns $xmlnsmuc(admin)
     	}
     }
     
@@ -386,6 +397,7 @@ proc jlib::muc::getrole {mucname roomjid role callback} {
 
     variable muc2jlib
     variable muc
+    variable xmlnsmuc
     
     if {![regexp $muc(roleExp) $role]} {
 	return -code error "Unrecognized role \"$role\""
@@ -395,7 +407,7 @@ proc jlib::muc::getrole {mucname roomjid role callback} {
       -attrlist [list role $role]]]
     
     set xmllist [wrapper::createtag "query" -subtags $subelements \
-      -attrlist {xmlns "http://jabber.org/protocol/muc#admin"}]
+      -attrlist [list xmlns $xmlnsmuc(admin)]]
     $jlibname send_iq "get" [list $xmllist] -to $roomjid \
       -command [list [namespace current]::invoke_callback $mucname $callback]
 }
@@ -408,6 +420,7 @@ proc jlib::muc::getaffiliation {mucname roomjid affiliation callback} {
 
     variable muc2jlib
     variable muc
+    variable xmlnsmuc
     
     if {![regexp $muc(affiliationExp) $affiliation]} {
 	return -code error "Unrecognized role \"$affiliation\""
@@ -418,10 +431,10 @@ proc jlib::muc::getaffiliation {mucname roomjid affiliation callback} {
 
     switch -- $affiliation {
     	owner - admin {
-    	    set xmlns "http://jabber.org/protocol/muc#owner"
+    	    set xmlns $xmlnsmuc(owner)
     	}
     	default {
-    	    set xmlns "http://jabber.org/protocol/muc#admin"
+    	    set xmlns $xmlnsmuc(admin)
     	}
     }
     
@@ -434,20 +447,45 @@ proc jlib::muc::getaffiliation {mucname roomjid affiliation callback} {
 # jlib::muc::create --
 # 
 #       The first thing to do when creating a room.
+#       
+# Arguments:
+#       mucname    name of jabberlib instance.
+#       roomjiid
+#       nick        nick name
+#       callback    callbackProc
+#       args        ?-extras list of xmllist?
+#       
+# Results:
+#       none.
 
-proc jlib::muc::create {mucname roomjid nick callback} {
+proc jlib::muc::create {mucname roomjid nick callback args} {
 
     variable muc2jlib
+    variable xmlnsmuc
     upvar ${mucname}::cache cache
     upvar ${mucname}::rooms rooms
 
     set jlibname $muc2jlib($mucname)
+    set extras {}
+    foreach {name value} $args {
+	
+	switch -- $name {
+	    -extras {
+		set extras $value
+	    }
+	    default {
+		return -code error "Unrecognized option \"$name\""
+	    }
+	}
+    }
     set jid ${roomjid}/${nick}
     set cache($roomjid,createcb) $callback
-    set xelem [wrapper::createtag "x"  \
-      -attrlist {xmlns "http://jabber.org/protocol/muc"}]
-    $jlibname send_presence -to $jid -xlist [list $xelem]  \
-      -command [list [namespace current]::parse_create $mucname $roomjid]
+    set xelem [wrapper::createtag "x" -attrlist [list xmlns $xmlnsmuc()]]
+    $jlibname send_presence  \
+      -to $jid  \
+      -command [list [namespace current]::parse_create $mucname $roomjid]  \
+      -xlist [list $xelem]  \
+      -extras $extras
     set cache($roomjid,mynick) $nick
     set rooms($roomjid) 1
     $jlibname service setroomprotocol $roomjid "muc"
@@ -489,6 +527,7 @@ proc jlib::muc::parse_create {mucname roomjid jlibname type args} {
 proc jlib::muc::setroom {mucname roomjid type args} {
 
     variable muc2jlib
+    variable xmlnsmuc
 
     set jlibname $muc2jlib($mucname)
     set opts {}
@@ -512,7 +551,7 @@ proc jlib::muc::setroom {mucname roomjid type args} {
 	  -attrlist [list xmlns "jabber:x:data" type $type]]]
     }
     set xmllist [wrapper::createtag "query" -subtags $xelem \
-      -attrlist {xmlns "http://jabber.org/protocol/muc#owner"}]
+      -attrlist [list xmlns $xmlnsmuc(owner)]]
     eval {$jlibname send_iq "set" [list $xmllist] -to $roomjid} $opts
 }
 
@@ -530,6 +569,7 @@ proc jlib::muc::setroom {mucname roomjid type args} {
 proc jlib::muc::destroy {mucname roomjid args} {
 
     variable muc2jlib
+    variable xmlnsmuc
 
     set jlibname $muc2jlib($mucname)
     set opts {}
@@ -558,7 +598,7 @@ proc jlib::muc::destroy {mucname roomjid args} {
       -attrlist [list jid $roomjid]]
 
     set xmllist [wrapper::createtag "query" -subtags [list $destroyelem] \
-      -attrlist {xmlns "http://jabber.org/protocol/muc#owner"}]
+      -attrlist [list xmlns $xmlnsmuc(owner)]]
     eval {$jlibname send_iq "set" [list $xmllist] -to $roomjid} $opts
 }
 
@@ -569,10 +609,11 @@ proc jlib::muc::destroy {mucname roomjid args} {
 proc jlib::muc::getroom {mucname roomjid callback} {
 
     variable muc2jlib
+    variable xmlnsmuc
 
     set jlibname $muc2jlib($mucname)
-    set xmllist [wrapper::createtag "query"  \
-      -attrlist {xmlns "http://jabber.org/protocol/muc#owner"}]
+    set xmllist [wrapper::createtag "query" \
+      -attrlist [list xmlns $xmlnsmuc(owner)]]
     $jlibname send_iq "get" [list $xmllist] -to $roomjid  \
       -command [list [namespace current]::invoke_callback $mucname $callback]
 }

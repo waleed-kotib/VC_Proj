@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Conference.tcl,v 1.37 2005-02-14 13:48:37 matben Exp $
+# $Id: Conference.tcl,v 1.38 2005-04-25 07:40:04 matben Exp $
 
 package provide Conference 1.0
 
@@ -577,8 +577,8 @@ proc ::Conference::CreateGet {token} {
 
     # Figure out if 'conference' or 'muc' protocol.
     if {$jprefs(prefgchatproto) == "muc"} {
-	set state(usemuc) [$jstate(jlib) service hasfeature $state(server)  \
-	  $xmppxmlns(muc)]
+	set state(usemuc)  \
+	  [$jstate(jlib) service hasfeature $state(server) $xmppxmlns(muc)]
     } else {
 	set state(usemuc) 0
     }
@@ -601,8 +601,13 @@ proc ::Conference::CreateGet {token} {
     ::Debug 2 "::Conference::CreateGet usemuc=$state(usemuc)"
 
     if {$state(usemuc)} {
-	$jstate(muc) create $roomJid $state(nickname) \
-	  [list [namespace current]::CreateMUCCB $token]
+
+	# We announce that we are a Coccinella here and let others know ip etc.
+	set cocciElem [::Jabber::CreateCoccinellaPresElement]
+	set capsElem  [::Jabber::CreateCapsPresElement]
+	$jstate(muc) create $roomJid $state(nickname)  \
+	  [list [namespace current]::CreateMUCCB $token]  \
+	  -extras [list $cocciElem $capsElem]
     } else {
 	$jstate(jlib) conference get_create $roomJid  \
 	  [list [namespace current]::CreateGetGetCB $token]
