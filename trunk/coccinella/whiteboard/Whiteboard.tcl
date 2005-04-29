@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.33 2005-03-04 14:21:36 matben Exp $
+# $Id: Whiteboard.tcl,v 1.34 2005-04-29 12:07:06 matben Exp $
 
 package require entrycomp
 package require moviecontroller
@@ -96,6 +96,12 @@ namespace eval ::WB:: {
     option add *Whiteboard.bwrectImage          bwrect          widgetDefault
     option add *Whiteboard.imcolorImage         imcolor         widgetDefault
     
+    # Canvas selections.
+    option add *Whiteboard.aSelect              2               widgetDefault
+    option add *Whiteboard.fgSelectNormal       black           widgetDefault
+    option add *Whiteboard.fgSelectLocked       red             widgetDefault
+    
+    
     # Keeps various geometry info.
     variable dims
     
@@ -129,9 +135,6 @@ namespace eval ::WB:: {
     variable iconsInitted 0
     
     # Prefs:
-    # Side of selecting box .
-    set prefs(aBBox) 2
-
     # Should text inserts be batched?
     set prefs(batchText) 1
 
@@ -1363,13 +1366,11 @@ proc ::WB::SetToolButton {wtop btName} {
     $wCan config -cursor {}
     
     # Bindings directly to the canvas widget are dealt with using bindtags.
-
-    # Typical B3 bindings independent of tool selected.
+    
+    # These ones are needed to cancel selection since we compete
+    # with Button-1 binding to canvas.
     switch -- $this(platform) {
 	macintosh - macosx {
-	    
-	    # This one is needed to cancel selection since we compete
-	    # with Button-1 binding to canvas.
 	    $wCan bind std <Control-ButtonRelease-1> {
 		::CanvasDraw::CancelBox %W
 	    }
@@ -1379,8 +1380,12 @@ proc ::WB::SetToolButton {wtop btName} {
 	}
     }
 
-    $wCan bind std <<ButtonPopup>> {
+    # Typical B3 bindings independent of tool selected.
+    $wCan bind std&&!locked <<ButtonPopup>> {
 	::CanvasUtils::DoItemPopup %W %X %Y 
+    }
+    $wCan bind std&&locked <<ButtonPopup>> {
+	::CanvasUtils::DoLockedPopup %W %X %Y 
     }
     bind QTFrame <<ButtonPopup>> {
 	::CanvasUtils::DoQuickTimePopup %W %X %Y 
@@ -1388,7 +1393,7 @@ proc ::WB::SetToolButton {wtop btName} {
     bind SnackFrame <<ButtonPopup>> {
 	::CanvasUtils::DoWindowPopup %W %X %Y 
     }
-    
+
     switch -- $btName {
 	point {
 	    bindtags $wCan  \
@@ -1399,19 +1404,16 @@ proc ::WB::SetToolButton {wtop btName} {
 
 	    switch -- $this(platform) {
 		macintosh - macosx {
-		    $wCan bind std <Button-1> {
-			
-			# Global coords for popup.
-			::CanvasUtils::StartTimerToItemPopup %W %X %Y 
+		    $wCan bind std&&!locked <Button-1> {
+			::CanvasUtils::StartTimerToPopupEx %W %X %Y \
+			  ::CanvasUtils::DoItemPopup
+		    }
+		    $wCan bind std&&locked <Button-1> {
+			::CanvasUtils::StartTimerToPopupEx %W %X %Y \
+			  ::CanvasUtils::DoLockedPopup
 		    }
 		    $wCan bind std <ButtonRelease-1> {
-			::CanvasUtils::StopTimerToItemPopup
-		    }
-		    
-		    # This one is needed to cancel selection since we compete
-		    # with Button-1 binding to canvas.
-		    $wCan bind std <Control-ButtonRelease-1> {
-			::CanvasDraw::CancelBox %W
+			::CanvasUtils::StopTimerToPopupEx
 		    }
 		    bind QTFrame <Button-1> {
 			::CanvasUtils::StartTimerToPopupEx %W %X %Y \
@@ -1432,18 +1434,6 @@ proc ::WB::SetToolButton {wtop btName} {
 		    ::WB::SetStatusMessage $wtop [mc uastatpoint]		      
 		}
 	    }
-
-	    $wCan bind std <<ButtonPopup>> {
-		
-		# Global coords for popup.
-		::CanvasUtils::DoItemPopup %W %X %Y 
-	    }
-	    bind QTFrame <<ButtonPopup>> {
-		::CanvasUtils::DoQuickTimePopup %W %X %Y 
-	    }
-	    bind SnackFrame <<ButtonPopup>> {
-		::CanvasUtils::DoWindowPopup %W %X %Y 
-	    }
 	}
 	move {
 	    
@@ -1455,16 +1445,16 @@ proc ::WB::SetToolButton {wtop btName} {
 	    bindtags $wCan  \
 	      [list $wCan WhiteboardMove WhiteboardNonText $wtoplevel all]	    
 
-	    $wCan bind std <Button-1> {
+	    $wCan bind std&&!locked <Button-1> {
 		::CanvasDraw::InitMoveCurrent %W [%W canvasx %x] [%W canvasy %y]
 	    }
-	    $wCan bind std <B1-Motion> {
+	    $wCan bind std&&!locked <B1-Motion> {
 		::CanvasDraw::DragMoveCurrent %W [%W canvasx %x] [%W canvasy %y]
 	    }
-	    $wCan bind std <ButtonRelease-1> {
+	    $wCan bind std&&!locked <ButtonRelease-1> {
 		::CanvasDraw::FinalMoveCurrent %W [%W canvasx %x] [%W canvasy %y]
 	    }
-	    $wCan bind std <Shift-B1-Motion> {
+	    $wCan bind std&&!locked <Shift-B1-Motion> {
 		::CanvasDraw::DragMoveCurrent %W [%W canvasx %x] [%W canvasy %y] shift
 	    }
 	    
@@ -1559,7 +1549,7 @@ proc ::WB::SetToolButton {wtop btName} {
 	del {
 	    bindtags $wCan  \
 	      [list $wCan WhiteboardDel WhiteboardNonText $wtoplevel all]
-	    $wCan bind std <Button-1> {
+	    $wCan bind std&&!locked <Button-1> {
 		::CanvasDraw::DeleteCurrent %W
 	    }
 	    bind QTFrame <Button-1>  \
