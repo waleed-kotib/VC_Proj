@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.23 2005-01-31 14:07:00 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.24 2005-04-29 12:07:06 matben Exp $
 
 package require sha1pure
 
@@ -213,6 +213,7 @@ proc ::CanvasUtils::Init { } {
 	qt         {inspectqt exportmovie syncplay shot timecode}
 	snack      {}
 	broken     {inspectbroken reloadimage}
+	locked     {inspect}
     }
     foreach name [array names menuArr] {
 	set menuDefs(pop,$name) {}
@@ -485,6 +486,12 @@ proc ::CanvasUtils::GetUndoCommand {wtop cmd} {
     set undo {}
     
     switch -- [lindex $cmd 0] {
+	addtag {
+	    set utag [lindex $cmd 1]
+	    set tag [lindex $cmd 3]
+	    set canUndo [list dtag $utag $tag]
+	    set undo [list ::CanvasUtils::Command $wtop $canUndo]	
+	}
 	coords {
 	    set utag [lindex $cmd 1]
 	    set canUndo [concat [list coords $utag] [$w coords $utag]]
@@ -532,6 +539,12 @@ proc ::CanvasUtils::GetUndoCommand {wtop cmd} {
 		    set undo [list ::CanvasUtils::CommandList $wtop $canUndoList]	
 		}
 	    }
+	}
+	dtag {
+	    set utag [lindex $cmd 1]
+	    set tag [lindex $cmd 2]
+	    set canUndo [list addtag $tag withtag $utag]
+	    set undo [list ::CanvasUtils::Command $wtop $canUndo]	
 	}
 	insert {
 	    foreach {dum utag ind str} $cmd break
@@ -1151,8 +1164,8 @@ proc ::CanvasUtils::ItemCoords {w id coords} {
     # Be sure to get the real id (number).
     set id [$w find withtag $id]
     set utag [GetUtag $w $id]
-    set cmd "coords $utag $coords"
-    set undocmd "coords $utag [$w coords $id]"
+    set cmd [concat coords $utag $coords]
+    set undocmd [concat coords $utag [$w coords $id]]
     set redo [list ::CanvasUtils::Command $wtop $cmd]
     set undo [list ::CanvasUtils::Command $wtop $undocmd]
     eval $redo
@@ -1164,6 +1177,37 @@ proc ::CanvasUtils::ItemCoords {w id coords} {
 	$w delete id$id
 	::CanvasDraw::MarkBbox $w 1 $id
     }
+}
+
+proc ::CanvasUtils::AddTag {w id tag} {
+    
+    set wtop [::UI::GetToplevelNS $w]
+    set id [$w find withtag $id]
+    set utag [GetUtag $w $id]
+    set cmd [list addtag $tag withtag $utag]
+    set undocmd [list dtag $utag $tag]
+    set redo [list ::CanvasUtils::Command $wtop $cmd]
+    set undo [list ::CanvasUtils::Command $wtop $undocmd]
+    eval $redo
+    undo::add [::WB::GetUndoToken $wtop] $undo $redo
+}
+
+proc ::CanvasUtils::DeleteTag {w id tag} {
+    
+    set wtop [::UI::GetToplevelNS $w]
+    set id [$w find withtag $id]
+    set utag [GetUtag $w $id]
+    set cmd [list dtag $utag $tag]
+    set undocmd [list addtag $tag withtag $utag]
+    set redo [list ::CanvasUtils::Command $wtop $cmd]
+    set undo [list ::CanvasUtils::Command $wtop $undocmd]
+    eval $redo
+    undo::add [::WB::GetUndoToken $wtop] $undo $redo
+}
+
+proc ::CanvasUtils::IsLocked {w id} {
+    return [expr {[lsearch -exact [$w itemcget $id -tags] "locked"] >= 0} \
+      ? 1 : 0]
 }
 
 # CanvasUtils::StartTimerToItemPopup --
@@ -1180,7 +1224,9 @@ proc ::CanvasUtils::ItemCoords {w id coords} {
 
 proc ::CanvasUtils::StartTimerToItemPopup {w x y} {
     variable itemAfterId
-    
+        
+    Debug 2 "::CanvasUtils::StartTimerToItemPopup"
+
     if {[info exists itemAfterId]} {
 	catch {after cancel $itemAfterId}
     }
@@ -1253,11 +1299,8 @@ proc ::CanvasUtils::DoItemPopup {w x y} {
     
     Debug 2 "::CanvasUtils::DoItemPopup: w=$w"
 
+    StopTimerToItemPopup
     set wtop [::UI::GetToplevelNS $w]
-    
-    # Cancel the gray box drag rectangle. x and y must be canvas local coords.
-    set xloc [expr $x - [winfo rootx $w]]
-    set yloc [expr $y - [winfo rooty $w]]
     
     # Clear and cancel the triggering of any selections.
     ::CanvasDraw::CancelBox $w
@@ -1280,7 +1323,7 @@ proc ::CanvasUtils::DoItemPopup {w x y} {
     # Build popup menu.
     set m .popup${type}
     catch {destroy $m}
-    if {![winfo exists $m]} {	
+    if {![winfo exists $m]} {
 	::UI::NewMenu $wtop $m {} $menuDefs(pop,$type) normal -id $id -w $w
 	if {[string equal $type "text"]} {
 	    BuildCanvasPopupFontMenu $w ${m}.mfont $id $prefs(canvasFonts)
@@ -1354,14 +1397,34 @@ proc ::CanvasUtils::DoWindowPopup {w x y} {
     }
 }
 
+proc ::CanvasUtils::DoLockedPopup {w x y} {
+    variable menuDefs
+    
+    # Clear and cancel the triggering of any selections.
+    ::CanvasDraw::CancelBox $w
+    set id [$w find withtag current]
+    if {$id == ""} {
+	return
+    }
+    set type "locked"
+    set wtop [::UI::GetToplevelNS $w]
+    set m .popup${type}
+    catch {destroy $m}
+    if {![winfo exists $m]} {
+	::UI::NewMenu $wtop $m {} $menuDefs(pop,$type) normal -id $id -w $w
+	update idletasks
+    }
+    
+    # Post popup menu.
+    tk_popup $m [expr int($x) - 10] [expr int($y) - 10]
+}
+
 proc ::CanvasUtils::DoQuickTimePopup {w x y} {
     variable menuDefs
     variable popupVars
     
     set wtop [::UI::GetToplevelNS $w]
     set m .popupqt
-    set xloc [expr $x - [winfo rootx $w]]
-    set yloc [expr $y - [winfo rooty $w]]
     
     # Build popup menu.
     catch {destroy $m}
@@ -1395,8 +1458,6 @@ proc ::CanvasUtils::DoQuickTimePopup {w x y} {
 proc ::CanvasUtils::PostGeneralMenu {w x y m mDef} {
             
     set wtop [::UI::GetToplevelNS $w]    
-    set xloc [expr $x - [winfo rootx $w]]
-    set yloc [expr $y - [winfo rooty $w]]
         
     # Build popup menu.
     catch {destroy $m}
@@ -1700,8 +1761,6 @@ proc ::CanvasUtils::FindTypeFromOverlapping {c x y type} {
     # Choose the first item with tags $type.
     foreach i $ids {
 	if {[lsearch [$c gettags $i] $type] >= 0} {
-	    
-	    # Found "$type".
 	    set id $i
 	    break
 	}
@@ -1935,8 +1994,9 @@ proc ::CanvasUtils::HandleCanvasDraw {wtop instr args} {
 	# Make the actual canvas command, either straight or in the 
 	# safe interpreter.
 	if {$prefs(makeSafeServ)} {
-	    if {[catch {$canvasSafeInterp eval SafeCanvasDraw  \
-	      $wServCan $bsinstr} idnew]} {
+	    if {[catch {
+		$canvasSafeInterp eval SafeCanvasDraw $wServCan $bsinstr
+	    } idnew]} {
 		puts stderr "--->error: did not understand: $idnew"
 		return
 	    }
@@ -1953,16 +2013,17 @@ proc ::CanvasUtils::HandleCanvasDraw {wtop instr args} {
     # The item can either be selected by remote client or here.
     
     switch -- $cmd {
-	move - coords - scale - itemconfigure {
-	    set utag [lindex $instr 1]
-	    set id [$wServCan find withtag $utag]
-	    set idsMarker [$wServCan find withtag id$id]
+	move - coords - scale - itemconfigure - dtag - addtag {
+	    if {$cmd == "addtag"} {
+		set utag [lindex $instr 3]
+	    } else {
+		set utag [lindex $instr 1]
+	    }
 	    
 	    # If we have selected the item in question.
-	    if {[string length $idsMarker] > 0} {
-		$wServCan delete id$id
-		$wServCan dtag $id "selected"
-		::CanvasDraw::MarkBbox $wServCan 1 $id
+	    if {[::CanvasDraw::IsSelected $wServCan $utag]} {
+		::CanvasDraw::DeleteSelection $wServCan $utag
+		::CanvasDraw::SelectItem $wServCan $utag
 	    }
 	}
 	create - insert {

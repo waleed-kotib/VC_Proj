@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.112 2005-04-02 13:58:36 matben Exp $
+# $Id: Coccinella.tcl,v 1.113 2005-04-29 12:07:05 matben Exp $
 	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
@@ -123,7 +123,7 @@ proc resolve_cmd_realpath {infile} {
 # default file, never read.
 set prefs(majorVers)    0
 set prefs(minorVers)   95
-set prefs(releaseVers)  6
+set prefs(releaseVers)  7
 set prefs(fullVers) $prefs(majorVers).$prefs(minorVers).$prefs(releaseVers)
 set prefs(appName)    "Coccinella"
 set prefs(theAppName) "The Coccinella"

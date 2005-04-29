@@ -1,15 +1,11 @@
 #  ItemInspector.tcl ---
 #  
 #      This file is part of The Coccinella application. It lets the user 
-#      inspect and configure item options in the canvas. The options are 
-#      organized into a list as:   
-#      listOfAllOptions = {{-option oldValue entryWidget} {...} ...}
+#      inspect and configure item options in the canvas.
 #      
-#  Copyright (c) 1999-2002  Mats Bengtsson
+#  Copyright (c) 1999-2005  Mats Bengtsson
 #  
-#  See the README file for license, bugs etc.
-#  
-# $Id: ItemInspector.tcl,v 1.3 2004-07-30 12:55:56 matben Exp $
+# $Id: ItemInspector.tcl,v 1.4 2005-04-29 12:07:06 matben Exp $
 
 package provide ItemInspector 1.0
 
@@ -34,6 +30,7 @@ namespace eval ::ItemInspector::  {
 	activeoutlinestipple
 	activestipple
 	activewidth
+	dashoffset
 	disableddash
 	disabledfill
 	disabledimage
@@ -41,23 +38,18 @@ namespace eval ::ItemInspector::  {
 	disabledoutlinestipple
 	disabledstipple
 	disabledwidth
+	offset
 	outlineoffset
 	state
 	splinesteps
-    }
-
-    # On 8.3 and earlier we use '-background' for disabled entries,
-    # else use '-disabledbackground'.
-    variable disabledBackground
-    if {[info tclversion] >= 8.4} {
-	set disabledBackground -disabledbackground
-    } else {
-	set disabledBackground -background
     }
     
     # For QuickTime movies.
     variable skipMovieOpts
     set skipMovieOpts(std) {
+	highlightbackground
+	highlightcolor
+	highlightthickness
 	loadcommand
 	mccommand
 	resizable
@@ -69,6 +61,9 @@ namespace eval ::ItemInspector::  {
 	swingspeed
     }
     set skipMovieOpts(qtvr) {
+	highlightbackground
+	highlightcolor
+	highlightthickness
 	loadcommand
 	mccommand
 	resizable
@@ -101,7 +96,7 @@ proc ::ItemInspector::ItemInspector {wtop which args} {
     # We need to create an item specific instance. 
     # Use the item id for instance.
     set idlist [$wCan find withtag $which]
-    if {$idlist == ""}  {
+    if {$idlist == {}}  {
 	return
     }
     
@@ -111,9 +106,9 @@ proc ::ItemInspector::ItemInspector {wtop which args} {
     foreach id $idlist {
 	set tags [$wCan gettags $id]
 	if {[lsearch $tags broken] >= 0} {
-	    eval {::ItemInspector::Broken $wtop $id} [array get opts]
+	    eval {Broken $wtop $id} [array get opts]
 	} else {
-	    eval {::ItemInspector::Build $wtop $id} [array get opts]
+	    eval {Build $wtop $id} [array get opts]
 	}
     }
 }
@@ -121,57 +116,68 @@ proc ::ItemInspector::ItemInspector {wtop which args} {
 # ItemInspector::Build --
 # 
 #       Builds one inspector window for the specified item.
+#
+# Arguments:
+#
+#
+# Results:
+#       toplevel window path
 
-proc ::ItemInspector::Build {wtop itemId args} {
-    global  prefs fontPoints2Size this
+proc ::ItemInspector::Build {wtop itemid args} {
+    global  prefs fontPoints2Size this wDlgs
     upvar ::WB::dashShort2Full dashShort2Full
     
-    Debug 2 "::ItemInspector::Build wtop=$wtop, itemId=$itemId"
-    set w .itinsp${itemId}
-    set wCan [::WB::GetCanvasFromWtop $wtop]
+    ::Debug 2 "::ItemInspector::Build wtop=$wtop, itemid=$itemid"
+
+    set w $wDlgs(iteminsp)$itemid
     
     # If window already there, just return silently.
-    if {[winfo exists $w]}  {
+    if {[winfo exists $w]} {
+	raise $w
 	return
     }
+    set wCan [::WB::GetCanvasFromWtop $wtop]
+    
+    # Keep state array for item options etc.
+    set token [namespace current]::$itemid
+    variable $token
+    upvar 0 $token state
+
+    set state(w)      $w
+    set state(wCan)   $wCan
+    set state(itemid) $itemid
+    set state(finished) -1
 
     # The local namespace variables.
     variable boolFull2Short
     variable boolShort2Full
     variable notWantedOpts
-    variable disabledBackground
 
-    # Need to have instance specific namespace for regional variables.
-    namespace eval ::ItemInspector::$w  {
-	variable menuBtVar
-	variable finished
-    }
     array set argsArr {
 	-state    normal
     }
     array set argsArr $args
+    set canvasState $argsArr(-state)
     
-    # Refer to them by simpler variable names.
-    upvar ::ItemInspector::${w}::menuBtVar menuBtVar
-    upvar ::ItemInspector::${w}::finished finished
-
     set nl_ {\\n}
-    set finished -1
-    set itPrefNo [::CanvasUtils::GetUtag $wCan $itemId]
-    if {[llength $itPrefNo] == 0}  {
+    set utag [::CanvasUtils::GetUtag $wCan $itemid]
+    if {$utag == {}}  {
 	return
     }
+    set state(utag) $utag
     
     # Movies may not be selected this way; temporary solution?
-    if {[lsearch [$wCan gettags $itPrefNo] "frame"] >= 0}  {
+    if {[lsearch [$wCan gettags $utag] "frame"] >= 0}  {
 	#return
     }	
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
-      -macclass {document closeBox}
+      -macclass {document closeBox} \
+      -closecommand [list [namespace current]::CloseCmd $token]
     wm title $w {Item Inspector}
+    bind $wCan <Destroy> [list +[namespace current]::Cancel $token]
     
-    set fontSB [option get . fontSmallBold {}]
-    
+    set typWidth 24
+        
     # Global frame.
     frame $w.frall -borderwidth 1 -relief raised
     pack  $w.frall -fill both -expand 1
@@ -184,46 +190,57 @@ proc ::ItemInspector::Build {wtop itemId args} {
     pack $frtot -padx 10 -pady 10
     
     # List available options of the option menus.
-    array set theMenuOpts [list    \
-      arrow {none first last both}  \
-      capstyle {butt projecting round}   \
-      joinstyle {bevel miter round}  \
-      dash {none dotted dash-dotted dashed}   \
-      smooth {false true}    \
-      stipple {none gray75 gray50 gray25 gray12}  \
-      outlinestipple {none gray75 gray50 gray25 gray12}   \
-      style {pieslice chord arc}   \
-      anchor {n ne e se s sw w nw center}   \
-      {fontfamily} $prefs(canvasFonts)    \
-      {fontsize} {1 2 3 4 5 6}   \
-      {fontweight} {normal bold italic}  \
-      justify {left right center}]
-    set listOfAllOptions {}
+    array set menuOpts {
+	arrow             {none first last both}
+	capstyle          {butt projecting round}
+	joinstyle         {bevel miter round}
+	dash              {none dotted dash-dotted dashed}
+	smooth            {false true}
+	stipple           {none gray75 gray50 gray25 gray12}
+	outlinestipple    {none gray75 gray50 gray25 gray12}
+	style             {pieslice chord arc}
+	anchor            {n ne e se s sw w nw center}
+	fontsize          {1 2 3 4 5 6}
+	fontweight        {normal bold italic}
+	justify           {left right center}
+	fill              {transparent fill}
+	outline           {transparent fill}
+    }
+    set menuOpts(fontfamily) $prefs(canvasFonts)
+    set state(allopts) {}
     
     # Item type.
-    set iLine 0
-    set itemType [$wCan type $itemId]
-    label $frtot.lbl$iLine -text "item type:" -font $fontSB
-    entry $frtot.ent$iLine -width 30
-    $frtot.ent$iLine insert end $itemType
-    $frtot.ent$iLine configure -state disabled
-    grid $frtot.lbl$iLine -column 0 -row $iLine -sticky e -padx 2 -pady 1
-    grid $frtot.ent$iLine -column 1 -row $iLine -sticky w -padx 2 -pady 1
-    lappend listOfAllOptions [list type $itemType $frtot.ent$iLine]
+    set line 0
+    set itemType [$wCan type $itemid]
+    set state(type)       $itemType
+    set state(type,value) $itemType
+    set wlabel $frtot.l$line
+    set wentry $frtot.e$line
+    label $wlabel -text "Item type:"
+    entry $wentry -width $typWidth -textvariable $token\(type)
+    $wentry configure -state disabled
+    grid  $wlabel  $wentry  -padx 2 -pady 1
+    grid  $wlabel  -sticky e
+    grid  $wentry  -sticky ew
+    set state(type,w) $wentry
     
     # Coordinates.
-    incr iLine
-    label $frtot.lbl$iLine -text {coordinates:} -font $fontSB
-    entry $frtot.ent$iLine -width 30
-    set theCoords [$wCan coords $itemId]
-    $frtot.ent$iLine insert end $theCoords
-    $frtot.ent$iLine configure -state disabled
-    grid $frtot.lbl$iLine -column 0 -row $iLine -sticky e -padx 2 -pady 1
-    grid $frtot.ent$iLine -column 1 -row $iLine -sticky w -padx 2 -pady 1
-    lappend listOfAllOptions [list coords $theCoords $frtot.ent$iLine]
-    
+    set theCoords [$wCan coords $itemid]
+    set state(coords,value) $theCoords
+    lappend state(allopts) "coords"
+    incr line
+    set wlabel $frtot.l$line
+    set wentry $frtot.e$line
+    label $wlabel -text "Coordinates:"
+    entry $wentry -width $typWidth -textvariable $token\(coords)
+    $wentry configure -state disabled
+    grid  $wlabel  $wentry  -padx 2 -pady 1
+    grid  $wlabel  -sticky e
+    grid  $wentry  -sticky ew
+    set state(coords,w) $wentry
+        
     # Get all item options. Fonts need special treatment.
-    set opts [$wCan itemconfigure $itemId]
+    set opts [$wCan itemconfigure $itemid]
     set ind [lsearch $opts "-font*"]
     
     # We have got a font option.
@@ -235,24 +252,30 @@ proc ::ItemInspector::Build {wtop itemId args} {
 	  [list {-fontfamily} {} {} {} [lindex $fontOpts 0]]  \
 	  [list {-fontsize} {} {} {} $fontPoints2Size([lindex $fontOpts 1])]  \
 	  [list {-fontweight} {} {} {} [lindex $fontOpts 2]]]
+	
+	set state(-fontfamily) [lindex $fontOpts 0]
+	set state(-fontsize)   $fontPoints2Size([lindex $fontOpts 1])
+	set state(-fontweight) [lindex $fontOpts 2]
     }
     
     # Get any cached info for this id. Flat list!
-    foreach {key value} [::CanvasUtils::ItemCGet $wtop $itemId] {
+    foreach {key value} [::CanvasUtils::ItemCGet $wtop $itemid] {
 	lappend opts [list $key {} {} {} $value]
     }
     
     # Loop over all options.
     foreach opt $opts {
-	incr iLine
-	set op [lindex $opt 0]
+	incr line
+	set op  [lindex $opt 0]
 	set val [lindex $opt 4]
+	set opname [string trimleft $op "-"]
 	
 	# Skip not wanted options.
-	set noMinOp [string trimleft $op "-"]
-	if {[lsearch $notWantedOpts $noMinOp] >= 0} {
+	if {[lsearch $notWantedOpts $opname] >= 0} {
 	    continue
 	}
+	set state($op,value) $val
+	lappend state(allopts) $op
 	
 	# If multine text, encode as one line with explicit "\n".
 	if {[string equal $op "-text"]}  {
@@ -260,44 +283,53 @@ proc ::ItemInspector::Build {wtop itemId args} {
 	    regsub -all "\r" $oneliner $nl_ oneliner
 	    set val $oneliner
 	}
-	set opname [string trim $op -]
-	label $frtot.lbl$iLine -text "$opname:" -font $fontSB
+	label $frtot.l$line -text [string totitle "$opname:"]
 	
 	# Intercept options for nontext output.
 	switch -exact -- $op {
 	    -fill        -
-	    -outline     {
-		
-		frame $frtot.ent$iLine
-		if {[string length $val] == 0}  {
-		    set menuBtVar($opname) transparent
+	    -outline     {		
+		frame $frtot.e$line
+		if {$val == ""}  {
+		    set state($op) "transparent"
 		} else {
-		    set menuBtVar($opname) fill
+		    set state($op) "fill"
 		}
-		set wMenu [tk_optionMenu $frtot.menu$iLine   \
-		  ::ItemInspector::${w}::menuBtVar($opname) transparent fill]
-		$wMenu configure -font $fontSB
-		$frtot.menu$iLine configure -font $fontSB  \
-		  -highlightthickness 0 -foreground black
-		entry $frtot.entent$iLine -width 4 -state disabled
-		if {[string length $val] > 0} {
-		    $frtot.entent$iLine configure $disabledBackground $val
+		set wmb    $frtot.menu$line
+		set wentry $frtot.ente$line
+		set wMenu [eval {
+		    tk_optionMenu $wmb $token\($op)
+		} $menuOpts($opname)]
+		$wmb configure -highlightthickness 0 -foreground black
+		entry $wentry -width 4 -state disabled
+		if {$val != ""} {
+		    set rgb8 {}
+		    # winfo rgb . white -> 65535 65535 65535
+		    foreach rgb [winfo rgb . $val] {
+			lappend rgb8 [expr $rgb >> 8]
+		    }
+		    set val [eval {format "#%02x%02x%02x"} $rgb8]
+		    $wentry configure -disabledbackground $val
 		}
-		pack $frtot.menu$iLine -in $frtot.ent$iLine -side left
-		pack $frtot.entent$iLine -in $frtot.ent$iLine  \
+		pack $wmb    -in $frtot.e$line -side left
+		pack $wentry -in $frtot.e$line  \
 		  -side left -fill x -expand 1
-		if {$argsArr(-state) == "normal"} {
-		    bind $frtot.entent$iLine <Double-Button-1>   \
-		      [list [namespace current]::ChooseItemColor $frtot.entent$iLine]
+		if {$canvasState eq "normal"} {
+		    bind $wentry <Double-Button-1>   \
+		      [list [namespace current]::ChooseItemColor $wentry]
 		} else {
-			$frtot.menu$iLine configure -state disabled
+		    $wmb configure -state disabled
 		}
+		set state($op,w) $wentry
+		set state($op,value) $val
 	    } 
-	    -tags       {
-		
-		entry $frtot.ent$iLine -width 30 
-		$frtot.ent$iLine insert end $val
-		$frtot.ent$iLine configure -state disabled
+	    -tags             -
+	    -image            {
+		set wentry $frtot.e$line
+		entry $wentry -width $typWidth -textvariable $token\($op)
+		$wentry configure -state disabled
+		set state($op) $val
+		set state($op,w) $wentry
 		
 		# Pure menu options.
 	    } 
@@ -310,144 +342,172 @@ proc ::ItemInspector::Build {wtop itemId args} {
 	    -outlinestipple   -
 	    -style            -
 	    -anchor           -
-	    "-fontfamily"     -
-	    "-fontsize"       -
-	    "-fontweight"     -
+	    -fontfamily       -
+	    -fontsize         -
+	    -fontweight       -
 	    -justify          {
 		if {[string equal $op "-smooth"]}  {
 		    
 		    # Get full menu name.
-		    if {[string length $val] == 0}  {
-			set menuBtVar($opname) "false"
+		    if {$val == ""}  {
+			set state($op) "false"
 		    } else  {
-			set menuBtVar($opname) $boolShort2Full($val)
+			set state($op) $boolShort2Full($val)
 		    }
 		} elseif {[string equal $op "-dash"]}  {
-		    set menuBtVar($opname) $dashShort2Full($val)
+		    set state($op) $dashShort2Full($val)
 		} else  {
-		    if {[string length $val] == 0}  {
-			set menuBtVar($opname) "none"
+		    if {$val == ""}  {
+			set state($op) "none"
 		    } else  {
-			set menuBtVar($opname) $val
+			set state($op) $val
 		    }
 		}
-		set wMenu [eval {tk_optionMenu $frtot.ent$iLine   \
-		  ::ItemInspector::${w}::menuBtVar($opname)}  \
-		  $theMenuOpts($opname)]
-		$wMenu configure -font $fontSB 
-		if {$argsArr(-state) == "disabled"} {
-		    $frtot.ent$iLine configure -state disabled
+		set wmb $frtot.e$line
+		set wMenu [eval {
+		    tk_optionMenu $wmb $token\($op)
+		} $menuOpts($opname)]
+		if {$canvasState == "disabled"} {
+		    $wmb configure -state disabled
 		}
-		$frtot.ent$iLine configure -font $fontSB -highlightthickness 0
+		$wmb configure -highlightthickness 0
+		set state($op,w) $wmb
 	    } 
 	    default  {
 		
 		# Just an editable text entry widget.
-		entry $frtot.ent$iLine -width 30 
-		$frtot.ent$iLine insert end $val
-		if {$argsArr(-state) == "disabled"} {
-		    $frtot.ent$iLine configure -state disabled
+		set wentry $frtot.e$line
+		entry $wentry -width $typWidth -textvariable $token\($op)
+		if {$canvasState == "disabled"} {
+		    $wentry configure -state disabled
 		}
+		set state($op) $val
+		set state($op,w) $wentry
 	    }
 	}
-	grid $frtot.lbl$iLine -column 0 -row $iLine -sticky e -padx 2 -pady 0
-	if {[string equal $op "-fill"] || [string equal $op "-outline"]} {
-	    grid $frtot.ent$iLine -column 1 -row $iLine -sticky ew   \
-	      -padx 2 -pady 1
-	} else  {
-	    grid $frtot.ent$iLine -column 1 -row $iLine -sticky w   \
-	      -padx 2 -pady 1
-	}
-	if {[string equal $op "-fill"] || [string equal $op "-outline"]} {
-	    lappend listOfAllOptions [list $op $val $frtot.entent$iLine]
-	} else  {
-	    lappend listOfAllOptions [list $op $val $frtot.ent$iLine]
-	}
+	grid  $frtot.l$line  $frtot.e$line  -padx 2 -pady 0
+	grid  $frtot.l$line  -sticky e
+	grid  $frtot.e$line  -sticky ew
     }
+    
+    incr line
+    set lockCmd [list [namespace current]::LockCmd $token]
+    checkbutton $frtot.lock$line -text "Lock this item from being edited" \
+      -variable $token\(locked) -command $lockCmd
+    grid  x  $frtot.lock$line  -sticky w
+    set state(locked) 0
+    if {[::CanvasUtils::IsLocked $wCan $itemid]} {
+	set state(locked) 1
+    }
+    set state(locked,value) $state(locked)
     
     # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btsave -text [mc Save] -default active  \
-      -command [list [namespace current]::CanvasConfigureItem $w $wCan  \
-      $itemId $listOfAllOptions]]  \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [mc Cancel]  \
-      -command [list [namespace current]::Cancel $w]]  \
-      -side right -padx 5 -pady 5
-    pack $frbot -side top -fill both -expand 1 -in $w.frall  \
-      -padx 8 -pady 6
+    set frbot [frame $w.frall.frbot]
+    set saveCmd [list [namespace current]::Configure $token]
+    set cancelCmd [list [namespace current]::Cancel $token]
+    button $frbot.btsave   -text [mc Save]   -command $saveCmd -default active
+    button $frbot.btcancel -text [mc Cancel] -command $cancelCmd
+    pack $frbot.btsave   -side right -padx 5 -pady 5
+    pack $frbot.btcancel -side right -padx 5 -pady 5
+    pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
     
-    if {$argsArr(-state) == "disabled"} {
+    if {$canvasState == "disabled"} {
 	$frbot.btsave configure -state disabled
     }
+    set state(wbtsave) $frbot.btsave
     
     wm resizable $w 0 0
-    bind $w <Return> "$frbot.btsave invoke"
-}
-
-proc ::ItemInspector::Cancel {w} {
+    bind $w <Return> [list $frbot.btsave invoke]
     
-    set ::ItemInspector::${w}::finished 0
-    destroy $w
+    return $w
 }
 
-# ItemInspector::CanvasConfigureItem --
+proc ::ItemInspector::LockCmd {token} {
+    variable $token
+    upvar 0 $token state
+    
+    # We have the possibility here to disable the Save button. Good or Bad?
+    if {0} {
+	if {$state(locked)} {
+	    $state(wbtsave) configure -state disabled
+	} else {
+	    $state(wbtsave) configure -state normal
+	}
+    }
+}
+
+proc ::ItemInspector::CloseCmd {token w} {
+    Cancel $token
+}
+
+proc ::ItemInspector::Cancel {token} {
+    variable $token
+    upvar 0 $token state
+
+    if {[array exists state]} {
+	set state(finished) 0
+	Close $token
+	Free $token
+    }
+}
+
+# ItemInspector::Configure --
 #
 #       When the Save button is clicked in the item inspector dialog.
 #   
 # Arguments:
-#       w
-#       wCan        the canvas widget.
-#       itemId
-#       listOfAllOptions
+#
 #       
 # Results:
-#       dialog displayed.
+#       dialog closed, state freed
 
-proc ::ItemInspector::CanvasConfigureItem {w wCan itemId listOfAllOptions} {
+proc ::ItemInspector::Configure {token} {
     global  fontPoints2Size fontSize2Points
     
-    variable disabledBackground
+    variable $token
+    upvar 0 $token state
+
     upvar ::WB::dashFull2Short dashFull2Short
-    upvar ::ItemInspector::${w}::menuBtVar menuBtVar
-    upvar ::ItemInspector::${w}::finished finished
     
-    set itPrefNo [::CanvasUtils::GetUtag $wCan $itemId]
-    
+    set utag $state(utag)
+    set type $state(type)
+    set wCan $state(wCan)
+        
     # Loop through all options. Assemble a configure list.
     set allNewOpts {}
-    foreach opt $listOfAllOptions {
-	set op [lindex $opt 0]
-	set val [lindex $opt 1]
-	set entWid [lindex $opt 2]
-	set opname [string trim $op -]
+    foreach op $state(allopts) {
+	set wname  $state($op,w)
+	set opname [string trimleft $op "-"]
+	set oldVal $state($op,value)
+	set newVal $state($op)
+	
+	#puts "op=$op, oldVal=$oldVal, newVal=$newVal"
 
 	# Intercept options for nontext output.
 	switch -- $op {
 	    type         -
 	    coords       -
-	    -file        {
+	    -file        -
+	    -tags        {
 		
 		# Do nothing
 		continue
 	    }
 	    -fill        -
-	    -outline     {
-		
-		set newOpt $menuBtVar($opname)
-		if {[string equal $newOpt "transparent"]}  {
+	    -outline     {		
+		if {[string equal $newVal "transparent"]}  {
 		    set newVal {}
 		} else  {
 
 		    # On MacOSX this can return systemWindowBody which 
 		    # fails on other platforms.
-		    set newVal [$entWid cget $disabledBackground]
-		    set rgbx {}
+		    set newVal [$wname cget -disabledbackground]
+		    set rgb8 {}
 		    # winfo rgb . white -> 65535 65535 65535
 		    foreach rgb [winfo rgb . $newVal] {
-			lappend rgbx [expr $rgb >> 8]
+			lappend rgb8 [expr $rgb >> 8]
 		    }
-		    set newVal [eval {format "#%02x%02x%02x"} $rgbx]
+		    set newVal [eval {format "#%02x%02x%02x"} $rgb8]
 		}
 		
 		# Pure menu options.
@@ -458,50 +518,41 @@ proc ::ItemInspector::CanvasConfigureItem {w wCan itemId listOfAllOptions} {
 	    -smooth           -
 	    -style            -
 	    -anchor           -
-	    -justify          {
-	    
-		set newVal $menuBtVar($opname)
+	    -justify          {	    
+		# empty
 	    }
-	    "-fontfamily"     {
-	    
-		set newVal $menuBtVar($opname)
+	    -fontfamily       {
 		set fontFamily $newVal
 	    }
-	    "-fontsize"       {
-	    
-		set newVal $menuBtVar($opname)
+	    -fontsize         {
 		set fontSize $newVal
 	    }
-	    "-fontweight"     {
-	    
-		set newVal $menuBtVar($opname)
+	    -fontweight       {
 		set fontWeight $newVal
 	    }
 	    -dash             {
-		set newOpt $menuBtVar($opname)
-		if {[string equal $newOpt "none"]}  {
+		if {[string equal $newVal "none"]}  {
 		    set newVal {}
 		} else  {
-		    set newVal $dashFull2Short($menuBtVar($opname))
+		    set newVal $dashFull2Short($newVal)
 		}
 	    }
-	    "-stipple"    -
-	    -outlinestipple   {
-	    
-		set newOpt $menuBtVar($opname)
-		if {[string equal $newOpt "none"]}  {
+	    -stipple          -
+	    -outlinestipple   {	    
+		if {[string equal $newVal "none"]}  {
 		    set newVal {}
 		} else  {
-		    set newVal $menuBtVar($opname)
+		    set newVal $newOpt
 		}
 	    }
 	    default           {
-		set newVal [$entWid get]
+		# empty
 	    }
 	}
+	#puts "\t newVal=$newVal"
 	
 	# If new different from old, reconfigure. Reinterpret \n"
-	if {![string equal $val $newVal]}  {
+	if {![string equal $oldVal $newVal]}  {
 	    lappend allNewOpts $op $newVal
 	}
     }
@@ -509,7 +560,7 @@ proc ::ItemInspector::CanvasConfigureItem {w wCan itemId listOfAllOptions} {
     # We need to collect all three artificial font options to the real one.
     # Only for the text item type.
     
-    if {[string equal [$wCan type $itemId] "text"]}  {
+    if {$type eq "text"}  {
 	array set newOptsArr $allNewOpts
 	
 	# If any font attributes changed, need to collect them all.
@@ -522,28 +573,56 @@ proc ::ItemInspector::CanvasConfigureItem {w wCan itemId listOfAllOptions} {
 	      newOptsArr(-fontsize) \
 	      newOptsArr(-fontweight)
 	    set newOptsArr(-font) $newFontOpts
-	    #puts "newFontOpts=$newFontOpts"
 	    set allNewOpts [array get newOptsArr]
 	}
     }
-    #puts "2: allNewOpts=$allNewOpts"
+    #puts "allNewOpts=$allNewOpts"
     
     # Do the actual change.
-    if {[llength $allNewOpts] > 0}  {
-	eval ::CanvasUtils::ItemConfigure $wCan $itPrefNo $allNewOpts
+    if {$allNewOpts != {}}  {
+	eval {::CanvasUtils::ItemConfigure $wCan $utag} $allNewOpts
     }
-    set ::ItemInspector::${w}::finished 1 
-    destroy $w
+    set selected 0
+    if {[::CanvasDraw::IsSelected $wCan $utag]} {
+	set selected 1
+    }
+    if {$state(locked,value) != $state(locked)} {
+	::CanvasDraw::DeselectItem $wCan $utag
+	if {$state(locked)} {
+	    ::CanvasUtils::AddTag $wCan $utag "locked"
+	} else {
+	    ::CanvasUtils::DeleteTag $wCan $utag "locked"
+	}
+	if {$selected} {
+	    ::CanvasDraw::SelectItem $wCan $utag
+	}
+    }
+    set state(finished) 1 
+    Close $token
+    Free $token
 }
     
 proc ::ItemInspector::ChooseItemColor {wEntry} {
-    variable disabledBackground
     
-    set col [$wEntry cget $disabledBackground]
+    set col [$wEntry cget -disabledbackground]
     set col [tk_chooseColor -initialcolor $col]
     if {[string length $col] > 0}	 {
-	$wEntry configure $disabledBackground $col
+	$wEntry configure -disabledbackground $col
     }
+}
+
+proc ::ItemInspector::Close {token} {
+    variable $token
+    upvar 0 $token state
+
+    destroy $state(w)
+}
+
+proc ::ItemInspector::Free {token} {
+    variable $token
+    upvar 0 $token state
+
+    unset -nocomplain state
 }
 
 # ItemInspector::Movie --
@@ -552,46 +631,65 @@ proc ::ItemInspector::ChooseItemColor {wEntry} {
 #
 #
 
-proc ::ItemInspector::Movie {wtop winfr} {
-    global  prefs this
+proc ::ItemInspector::Movie {wtop winfr args} {
+    global  wDlgs
     
-    variable uid
     variable skipMovieOpts
     variable boolFull2Short
     variable boolShort2Full
+    variable uid
 
-    incr uid
-    set w ".itinsp${uid}"
+    set w $wDlgs(iteminsp)m[incr uid]
+    
+    # If window already there, just return silently.
+    if {[winfo exists $w]} {
+	raise $w
+	return
+    }
     set wCan [::WB::GetCanvasFromWtop $wtop]
     
-    # Need to have instance specific namespace for regional variables.
-    namespace eval ::ItemInspector::$w  {
-	variable menuBtVar
-	variable optList
-	variable finished
+    # Keep state array for item options etc.
+    set token [namespace current]::m$uid
+    variable $token
+    upvar 0 $token state
+
+    set state(w)      $w
+    set state(wCan)   $wCan
+    set state(finished) -1
+
+    array set argsArr {
+	-state    normal
+    }
+    array set argsArr $args
+    set canvasState $argsArr(-state)
+    
+    if {0} {
+	set utag [::CanvasUtils::GetUtag $wCan $itemid]
+	if {$utag == {}}  {
+	    return
+	}
+	set state(utag) $utag
     }
     
-    # Refer to them by simpler variable names.
-    upvar ::ItemInspector::${w}::menuBtVar menuBtVar
-    upvar ::ItemInspector::${w}::optList optList
-    upvar ::ItemInspector::${w}::finished finished
-        
-    # If window already there, just return.
-    if {[winfo exists $w]}  {
-	error "window name $w already exists!"
-    }
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
-      -macclass {document closeBox}
+      -macclass {document closeBox}  \
+      -closecommand [list [namespace current]::CloseCmd $token]
     wm title $w {Movie Inspector}
-    set fontSB [option get . fontSmallBold {}]
+    bind $wCan  <Destroy> [list +[namespace current]::Cancel $token]
+    bind $winfr <Destroy> [list +[namespace current]::Cancel $token]
     
-    set wmov ${winfr}.m
+    set typWidth 24
+    
+    set wmov $winfr.m
     set ispano [$wmov ispanoramic]
     set isvisual [$wmov isvisual]
     set type "std"
     if {$ispano} {
 	set type "qtvr"
     }
+    set state(wmov)  $wmov
+    set state(winfr) $winfr
+    set state(type)  $type
     
     # Global frame.
     frame $w.frall -borderwidth 1 -relief raised
@@ -606,108 +704,148 @@ proc ::ItemInspector::Movie {wtop winfr} {
     
     # Loop over all options.
     set i 0
-    set optList {}
-    foreach opts [$wmov configure] {
-	foreach {op x y def val} $opts {
-	    set opname [string trim $op -]
-	    if {[lsearch $skipMovieOpts($type) $opname] >= 0} {
-		continue
-	    }
-	    if {!$isvisual && ($op == "-height" || $op == "-width")} {
-		continue
-	    }
-	    incr i
-	    label $frtot.l$i -text "$opname:" -font $fontSB
-	    switch -- $op {
-		-controller - -custombutton - -loadintoram - -loopstate -
-		-mcedit - -palindromeloopstate {
-		    
-		    set menuBtVar($op) $boolShort2Full($val)
-		    set wMenu [eval {tk_optionMenu $frtot.e$i  \
-		      ::ItemInspector::${w}::menuBtVar($op)} true false]
-		    $wMenu configure -font $fontSB 
-		    $frtot.e$i configure -font $fontSB -highlightthickness 0
-		}
-		default {
-		    set ::ItemInspector::${w}::tvar($op) $val
-		    entry $frtot.e$i -width 26  \
-		      -textvariable ::ItemInspector::${w}::tvar($op)
-		}
-	    }
-	    lappend optList [list $op $val]
-	    grid $frtot.l$i -column 0 -row $i -sticky e -padx 2 -pady 0
-	    grid $frtot.e$i -column 1 -row $i -sticky w -padx 2 -pady 1
+    
+    foreach opt [$wmov configure] {
+	set op  [lindex $opt 0]
+	set val [lindex $opt 4]
+	set opname [string trimleft $op "-"]
+	if {[lsearch $skipMovieOpts($type) $opname] >= 0} {
+	    continue
 	}
+	if {!$isvisual && ($op == "-height" || $op == "-width")} {
+	    continue
+	}
+	set state($op,isbool) 0
+	lappend state(allopts) $op
+	incr i
+	label $frtot.l$i -text [string totitle "$opname:"]
+	
+	switch -- $op {
+	    -controller     - 
+	    -custombutton   - 
+	    -loadintoram    - 
+	    -loopstate      -
+	    -mcedit         - 
+	    -palindromeloopstate {
+		set wmb $frtot.e$i
+		set state($op) $boolShort2Full($val)
+		set wMenu [tk_optionMenu $wmb $token\($op) true false]
+		if {$canvasState == "disabled"} {
+		    $wmb configure -state disabled
+		}
+		$wmb configure -highlightthickness 0
+		set state($op,value) $state($op)
+		set state($op,w) $wmb
+		set state($op,isbool) 1
+	    }
+	    default {
+		set wentry $frtot.e$i
+		entry $wentry -width $typWidth -textvariable $token\($op)
+
+		switch -- $op {
+		    -file - -url {
+			$wentry configure -state disabled
+		    }
+		}
+		if {$canvasState == "disabled"} {
+		    $wentry configure -state disabled
+		}
+		set state($op) $val
+		set state($op,value) $val
+		set state($op,w) $wentry
+	    }
+	}
+	grid  $frtot.l$i  $frtot.e$i  -padx 2 -pady 0
+	grid  $frtot.l$i  -sticky e
+	grid  $frtot.e$i  -sticky ew
     }
     
     # Button part.
-    set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btsave -text [mc Save] -default active  \
-      -command [list [namespace current]::MovieConfigure $w $wmov]]  \
-      -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [mc Cancel]  \
-      -command [list [namespace current]::MovieCancel $w]]  \
-      -side right -padx 5 -pady 5
-    pack $frbot -side top -fill both -expand 1 -in $w.frall  \
-      -padx 8 -pady 6
+    set frbot [frame $w.frall.frbot]
+    set saveCmd [list [namespace current]::MovieConfigure $token]
+    set cancelCmd [list [namespace current]::Cancel $token]
+    button $frbot.btsave   -text [mc Save]   -command $saveCmd -default active
+    button $frbot.btcancel -text [mc Cancel] -command $cancelCmd
+    pack $frbot.btsave   -side right -padx 5 -pady 5
+    pack $frbot.btcancel -side right -padx 5 -pady 5
+    pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
     
     wm resizable $w 0 0
-    bind $w <Return> "$frbot.btsave invoke"
+    bind $w <Return> [list $frbot.btsave invoke]
 }
 
-proc ::ItemInspector::MovieConfigure {w wmov} {
+proc ::ItemInspector::MovieConfigure {token} {
     
+    variable $token
+    upvar 0 $token state
+
     variable boolFull2Short
     variable boolShort2Full
-    upvar ::ItemInspector::${w}::menuBtVar menuBtVar
-    upvar ::ItemInspector::${w}::optList optList
-    upvar ::ItemInspector::${w}::finished finished
-    upvar ::ItemInspector::${w}::tvar tvar
+    
+    set wmov $state(wmov)
     
     # Loop through all options. Assemble a configure list.
     set newOptList {}
-    foreach opt $optList {
-	set op [lindex $opt 0]
-	set val [lindex $opt 1]
-	if {[info exists tvar($op)]} {
-	    set newVal $tvar($op)
-	} elseif {[info exists menuBtVar($op)]} {
-	    set newVal $boolFull2Short($menuBtVar($op))
+    foreach op $state(allopts) {
+	set wname  $state($op,w)
+	set opname [string trimleft $op "-"]
+	set oldVal $state($op,value)
+	set newVal $state($op)
+	if {$state($op,isbool)} {
+	    set optVal $boolFull2Short($newVal)
+	} else {
+	    set optVal $newVal
 	}
-	
+		
 	# If new different from old, reconfigure.
-	if {![string equal $val $newVal]}  {
-	    lappend newOptList $op $newVal
+	if {![string equal $oldVal $newVal]}  {
+	    lappend newOptList $op $optVal
 	}
     }
-    if {[llength $newOptList]} {
+    if {$newOptList != {}} {
+	
+	# Remote???
 	eval {$wmov configure} $newOptList
     }
-    destroy $w
+    set state(finished) 1 
+    Close $token
+    Free $token
 }
 
-proc ::ItemInspector::MovieCancel {w} {
-    
-    set ::ItemInspector::${w}::finished 0
-    destroy $w
-}
-
-
-
-proc ::ItemInspector::Broken {wtop id args} {
-    global  this
+proc ::ItemInspector::Broken {wtop itemid args} {
+    global  wDlgs
         
-    set w .itin${id}
+    set w $wDlgs(iteminsp)$itemid
+    
+    # If window already there, just return silently.
     if {[winfo exists $w]} {
+	raise $w
 	return
     }
+    set wCan [::WB::GetCanvasFromWtop $wtop]
+    
+    # Keep state array for item options etc.
+    set token [namespace current]::$itemid
+    variable $token
+    upvar 0 $token state
+
+    set state(w)      $w
+    set state(wCan)   $wCan
+    set state(itemid) $itemid
+    set state(finished) -1
+
+    set utag [::CanvasUtils::GetUtag $wCan $itemid]
+    if {$utag == {}}  {
+	return
+    }
+    set state(utag) $utag
+
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
-      -macclass {document closeBox}
+      -macclass {document closeBox} \
+      -closecommand [list [namespace current]::CloseCmd $token]
     wm title $w {Item Inspector}
-    set wcan [::WB::GetCanvasFromWtop $wtop]
-    
-    set fontSB [option get . fontSmallBold {}]
-    
+    bind $wCan <Destroy> [list +[namespace current]::Cancel $token]
+            
     # Global frame.
     frame $w.frall -borderwidth 1 -relief raised
     pack  $w.frall -fill both -expand 1
@@ -720,37 +858,38 @@ proc ::ItemInspector::Broken {wtop id args} {
     pack $fr -padx 10 -pady 10
     
     # Get any cached info for this id.
-    set itemcget [::CanvasUtils::ItemCGet $wtop $id]
+    set itemcget [::CanvasUtils::ItemCGet $wtop $itemid]
     set i 0
     foreach {key value} $itemcget {
 	if {$key == "-optlist"} {
 	    foreach {optkey optvalue} $value {
 		set name [string totitle [string trimright $optkey :]]
-		label $fr.l$i -text $name -font $fontSB
+		label $fr.l$i -text $name
 		label $fr.v$i -text $optvalue
-		grid $fr.l$i -row $i -column 0 -sticky e
-		grid $fr.v$i -row $i -column 1 -sticky w
+		grid  $fr.l$i  $fr.v$i
+		grid  $fr.l$i  -sticky e
+		grid  $fr.v$i  -sticky w
 		incr i
 	    }
 	} else {
 	    set name [string totitle [string trimleft $key -]]
-	    label $fr.l$i -text $name -font $fontSB
+	    label $fr.l$i -text $name
 	    label $fr.v$i -text $value
-	    grid $fr.l$i -row $i -column 0 -sticky e
-	    grid $fr.v$i -row $i -column 1 -sticky w
+	    grid  $fr.l$i  $fr.v$i
+	    grid  $fr.l$i  -sticky e
+	    grid  $fr.v$i  -sticky w
 	    incr i
 	}
     }
     
     # Button part.
     set frbot [frame $w.frall.frbot -borderwidth 0]
-    pack [button $frbot.btok -text [mc OK]  \
-      -command "destroy $w"]  \
-      -side right -padx 5 -pady 5
+    button $frbot.btok -text [mc OK] -command [list destroy $w]
+    pack $frbot.btok -side right -padx 5 -pady 5
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
         
     wm resizable $w 0 0
-    bind $w <Return> "$frbot.btok invoke"
+    bind $w <Return> [list $frbot.btok invoke]
 }
 
 #-------------------------------------------------------------------------------

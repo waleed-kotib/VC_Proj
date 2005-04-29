@@ -3,11 +3,9 @@
 #      This file is part of The Coccinella application. It implements the
 #      drawings commands associated with the tools.
 #      
-#  Copyright (c) 2000-2003  Mats Bengtsson
+#  Copyright (c) 2000-2005  Mats Bengtsson
 #  
-#  See the README file for license, bugs etc.
-#  
-# $Id: CanvasDraw.tcl,v 1.10 2005-04-04 09:14:49 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.11 2005-04-29 12:07:06 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 #  
@@ -35,13 +33,15 @@ namespace eval ::CanvasDraw:: {}
 proc ::CanvasDraw::InitMoveSelected {w x y} {
     variable moveArr
     
-    set selected [$w find withtag selected]
+    set selected [$w find withtag selected&&!locked]
     if {[llength $selected] == 0} {
 	return
     }
-    if {[::CanvasDraw::HitMovableTBBox $w $x $y]} {
+    if {[HitMovableTBBox $w $x $y]} {
 	return
     }
+    $w dtag _move
+    $w addtag _move withtag selected&&!locked
     set moveArr(x) $x
     set moveArr(y) $y
     set moveArr(x0) $x
@@ -57,7 +57,7 @@ proc ::CanvasDraw::InitMoveSelected {w x y} {
 proc ::CanvasDraw::DragMoveSelected {w x y {modifier {}}} {
     variable moveArr
     
-    set selected [$w find withtag selected]
+    set selected [$w find withtag _move]
     if {[llength $selected] == 0} {
 	return
     }
@@ -69,8 +69,8 @@ proc ::CanvasDraw::DragMoveSelected {w x y {modifier {}}} {
     }
     set dx [expr $x - $moveArr(x)]
     set dy [expr $y - $moveArr(y)]
-    $w move selected $dx $dy
-    $w move tbbox $dx $dy
+    $w move _move $dx $dy
+    $w move tbbox&&!locked $dx $dy
     set moveArr(x) $x
     set moveArr(y) $y
 }
@@ -79,7 +79,7 @@ proc ::CanvasDraw::FinalMoveSelected {w x y} {
     variable moveArr
     
     # Protect thsi from beeing trigged when moving individual points.
-    set selected [$w find withtag selected]
+    set selected [$w find withtag _move]
     if {[llength $selected] == 0} {
 	return
     }
@@ -125,6 +125,7 @@ proc ::CanvasDraw::FinalMoveSelected {w x y} {
     eval $redo remote
     undo::add [::WB::GetUndoToken $wtop] $undo $redo    
     
+    $w dtag _move
     unset -nocomplain moveArr
 }
 
@@ -135,7 +136,7 @@ proc ::CanvasDraw::FinalMoveSelected {w x y} {
 proc ::CanvasDraw::InitMoveCurrent {w x y} {
     variable moveArr
     
-    set selected [$w find withtag selected]
+    set selected [$w find withtag selected&&!locked]
     if {[llength $selected] > 0} {
 	return
     }
@@ -153,7 +154,7 @@ proc ::CanvasDraw::InitMoveCurrent {w x y} {
 proc ::CanvasDraw::DragMoveCurrent {w x y {modifier {}}} {
     variable moveArr
     
-    set selected [$w find withtag selected]
+    set selected [$w find withtag selected&&!locked]
     if {[llength $selected] > 0} {
 	return
     }
@@ -170,7 +171,7 @@ proc ::CanvasDraw::DragMoveCurrent {w x y {modifier {}}} {
 proc ::CanvasDraw::FinalMoveCurrent {w x y} {
     variable moveArr
     
-    set selected [$w find withtag selected]
+    set selected [$w find withtag selected&&!locked]
     if {[llength $selected] > 0} {
 	return
     }
@@ -220,7 +221,7 @@ proc ::CanvasDraw::FinalMoveCurrent {w x y} {
 proc ::CanvasDraw::InitMoveRectPoint {w x y} {
     variable moveArr
     
-    if {![::CanvasDraw::HitTBBox $w $x $y]} {
+    if {![HitTBBox $w $x $y]} {
 	return
     }
 
@@ -233,7 +234,7 @@ proc ::CanvasDraw::InitMoveRectPoint {w x y} {
     if {![regexp {id:([0-9]+)} [$w gettags $id] match itemid]} {
 	return
     }
-    ::CanvasDraw::DrawHighlightBox $w $itemid $id
+    DrawHighlightBox $w $itemid $id
     set itemcoords [$w coords $itemid]
     set utag [::CanvasUtils::GetUtag $w $itemid]
 
@@ -251,7 +252,7 @@ proc ::CanvasDraw::InitMoveRectPoint {w x y} {
       [lindex $itemcoords 0] [lindex $itemcoords 3]  \
       [lindex $itemcoords 2] [lindex $itemcoords 3]]
   
-    set ind [::CanvasDraw::FindClosestCoordsIndex $x $y $longcoo]
+    set ind [FindClosestCoordsIndex $x $y $longcoo]
     set ptind [expr $ind/2]
     
     # Keep only hit corner and the diagonally opposite one.
@@ -290,6 +291,9 @@ proc ::CanvasDraw::InitMoveRectPoint {w x y} {
 proc ::CanvasDraw::DragMoveRectPoint {w x y {modifier {}}} {
     variable moveArr
     
+    if {![info exists moveArr]} {
+	return
+    }
     if {![string equal $moveArr(bindType) "tbbox:rect"]} {
 	return
     }
@@ -343,7 +347,7 @@ proc ::CanvasDraw::InitMoveArcPoint {w x y} {
     global  kGrad2Rad
     variable moveArr
     
-    if {![::CanvasDraw::HitTBBox $w $x $y]} {
+    if {![HitTBBox $w $x $y]} {
 	return
     }
 
@@ -363,7 +367,7 @@ proc ::CanvasDraw::InitMoveArcPoint {w x y} {
     if {![regexp {id:([0-9]+)} [$w gettags $id] match itemid]} {
 	return
     }
-    ::CanvasDraw::DrawHighlightBox $w $itemid $id
+    DrawHighlightBox $w $itemid $id
     set itemcoords [$w coords $itemid]
     set utag [::CanvasUtils::GetUtag $w $itemid]
     
@@ -517,7 +521,7 @@ proc ::CanvasDraw::FinalMoveArcPoint {w x y} {
 proc ::CanvasDraw::InitMovePolyLinePoint {w x y} {
     variable moveArr
     
-    if {![::CanvasDraw::HitTBBox $w $x $y]} {
+    if {![HitTBBox $w $x $y]} {
 	return
     }
 
@@ -535,9 +539,9 @@ proc ::CanvasDraw::InitMovePolyLinePoint {w x y} {
     if {![regexp {id:([0-9]+)} [$w gettags $id] match itemid]} {
 	return
     }
-    ::CanvasDraw::DrawHighlightBox $w $itemid $id
+    DrawHighlightBox $w $itemid $id
     set itemcoords [$w coords $itemid]
-    set ind [::CanvasDraw::FindClosestCoordsIndex $x $y $itemcoords]
+    set ind [FindClosestCoordsIndex $x $y $itemcoords]
 
     set moveArr(itemid) $itemid
     set moveArr(coords) $itemcoords
@@ -859,7 +863,7 @@ proc ::CanvasDraw::FinalMoveCurrentGrid {w x y grid args} {
     
     Debug 2 "::CanvasDraw::FinalMoveCurrentGrid"
 
-    set selected [$w find withtag selected]
+    set selected [$w find withtag selected&&!locked]
     if {[llength $selected] > 0} {
 	return
     }
@@ -960,14 +964,12 @@ proc ::CanvasDraw::HitTBBox {w x y} {
     
     set hit 0
     set d 2
-    set ids [$w find overlapping \
-      [expr $x-$d] [expr $y-$d] [expr $x+$d] [expr $y+$d]]
-    foreach id $ids {
-	if {[lsearch [$w gettags $id] tbbox] >= 0} {
-	    set hit 1
-	    break
-	}
+    $w addtag _tmp overlapping  \
+      [expr $x-$d] [expr $y-$d] [expr $x+$d] [expr $y+$d]
+    if {[$w find withtag tbbox&&_tmp&&!locked] != {}} {
+	set hit 1
     }
+    $w dtag _tmp
     return $hit
 }
 
@@ -2094,7 +2096,7 @@ proc ::CanvasDraw::InitRotateItem {w x y} {
     variable rotDrag
 
     # Only one single selected item is allowed to be rotated.
-    set id [$w find withtag selected]
+    set id [$w find withtag selected&&!locked]
     if {[llength $id] != 1} {
 	return
     }
@@ -2271,7 +2273,7 @@ proc ::CanvasDraw::DeleteCurrent {w} {
 
 proc ::CanvasDraw::DeleteSelected {w} {
     
-    set ids [$w find withtag selected]
+    set ids [$w find withtag selected&&!locked]
     
     ::Debug 6 "::CanvasDraw::DeleteSelected, ids=$ids"
     if {$ids == {}} {
@@ -2507,7 +2509,7 @@ proc ::CanvasDraw::PointButton {w x y {modifier {}}} {
 
 # CanvasDraw::MarkBbox --
 #
-#        Makes four tiny squares at the corners of the specified items.
+#        Administrates a selection, drawing, ui etc.
 #       
 # Arguments:
 #       w           the canvas widget.
@@ -2543,13 +2545,13 @@ proc ::CanvasDraw::MarkBbox {w shift {which current}} {
     
     # If already selected, and shift clicked, deselect.
     if {$shift == 1} {
-	if {[::CanvasDraw::IsSelected $w $id]} {
+	if {[IsSelected $w $id]} {
 	    $w delete tbbox&&id:${id}
 	    $w dtag $id selected
 	    return
 	}
     }    
-    ::CanvasDraw::SelectItem $w $which
+    SelectItem $w $which
     focus $w
     
     # Enable cut and paste etc.
@@ -2566,8 +2568,12 @@ proc ::CanvasDraw::SelectItem {w which} {
     set type [$w type $which]
     $w addtag "selected" withtag $which
     set id [$w find withtag $which]
-    set tmark [list tbbox $type id:${id}]
-    ::CanvasDraw::DrawItemSelection $w $which $tmark
+    if {[::CanvasUtils::IsLocked $w $id]} {
+	set tmark [list tbbox $type id:${id} locked]	
+    } else {
+	set tmark [list tbbox $type id:${id}]
+    }
+    DrawItemSelection $w $which $tmark
 }
 
 proc ::CanvasDraw::DeselectItem {w which} {
@@ -2578,6 +2584,13 @@ proc ::CanvasDraw::DeselectItem {w which} {
 
     # menus
     ::UI::FixMenusWhenSelection $w
+}
+
+proc ::CanvasDraw::DeleteSelection {w which} {
+    
+    set id [$w find withtag $which]
+    $w delete tbbox&&id:${id}
+    $w dtag $id selected
 }
 
 proc ::CanvasDraw::IsSelected {w which} {
@@ -2596,11 +2609,18 @@ proc ::CanvasDraw::AnySelected {w} {
 
 proc ::CanvasDraw::DrawItemSelection {w which tmark} {
     global  prefs kGrad2Rad
-    
-    set a $prefs(aBBox)
+        
     set type [$w type $which]
     set bbox [$w bbox $which]
     set id   [$w find withtag $which]
+
+    set wwb [winfo toplevel $w]
+    set a  [option get $wwb aSelect {}]
+    if {[::CanvasUtils::IsLocked $w $id]} {
+	set fg [option get $wwb fgSelectLocked {}]
+    } else {
+	set fg [option get $wwb fgSelectNormal {}]
+    }
 
     # If mark the bounding box. Also for all "regular" shapes.
     
@@ -2609,13 +2629,13 @@ proc ::CanvasDraw::DrawItemSelection {w which tmark} {
 
 	foreach {x1 y1 x2 y2} $bbox break
 	$w create rectangle [expr $x1-$a] [expr $y1-$a] [expr $x1+$a] [expr $y1+$a] \
-	  -tags $tmark -fill white
+	  -tags $tmark -fill white -outline $fg
 	$w create rectangle [expr $x1-$a] [expr $y2-$a] [expr $x1+$a] [expr $y2+$a] \
-	  -tags $tmark -fill white
+	  -tags $tmark -fill white -outline $fg
 	$w create rectangle [expr $x2-$a] [expr $y1-$a] [expr $x2+$a] [expr $y1+$a] \
-	  -tags $tmark -fill white
+	  -tags $tmark -fill white -outline $fg
 	$w create rectangle [expr $x2-$a] [expr $y2-$a] [expr $x2+$a] [expr $y2+$a] \
-	  -tags $tmark -fill white
+	  -tags $tmark -fill white -outline $fg
     } else {
 	
 	set coords [$w coords $which]
@@ -2641,16 +2661,18 @@ proc ::CanvasDraw::DrawItemSelection {w which tmark} {
 	    set xfin [expr $cx + $r * cos($kGrad2Rad * ($startAng + $extentAng))]
 	    set yfin [expr $cy - $r * sin($kGrad2Rad * ($startAng + $extentAng))]
 	    $w create rectangle [expr $xstart-$a] [expr $ystart-$a]   \
-	      [expr $xstart+$a] [expr $ystart+$a] -tags $tmark -fill white
+	      [expr $xstart+$a] [expr $ystart+$a] -tags $tmark -fill white \
+	      -outline $fg
 	    $w create rectangle [expr $xfin-$a] [expr $yfin-$a]   \
-	      [expr $xfin+$a] [expr $yfin+$a] -tags $tmark -fill white
+	      [expr $xfin+$a] [expr $yfin+$a] -tags $tmark -fill white \
+	      -outline $fg
 	    
 	} else {
 	    
 	    # Mark each coordinate. {x0 y0 x1 y1 ... }
 	    foreach {x y} $coords {
 		$w create rectangle [expr $x-$a] [expr $y-$a] [expr $x+$a] [expr $y+$a] \
-		  -tags $tmark -fill white
+		  -tags $tmark -fill white -outline $fg
 	    }
 	}
     }

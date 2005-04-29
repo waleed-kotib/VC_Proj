@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.89 2005-02-27 14:11:07 matben Exp $
+# $Id: UI.tcl,v 1.90 2005-04-29 12:07:05 matben Exp $
 
 package require entrycomp
 package require alertbox
@@ -113,6 +113,7 @@ proc ::UI::InitDlgs { } {
 	fileAssoc       .fass
 	infoClient      .infocli
 	infoServ        .infoserv
+	iteminsp        .iteminsp
 	netSetup        .netsetup
 	openConn        .opc
 	openMulti       .opqtmulti

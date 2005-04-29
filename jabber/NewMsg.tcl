@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: NewMsg.tcl,v 1.59 2005-02-18 13:58:54 matben Exp $
+# $Id: NewMsg.tcl,v 1.60 2005-04-29 12:07:05 matben Exp $
 
 package require entrycomp
 package provide NewMsg 1.0
@@ -490,12 +490,12 @@ proc ::NewMsg::NewAddrLine {w wfr n} {
 	  -command [list ::NewMsg::PopupCmd $w $n]
     }
     
-    bind $wentry <Button-1> [list ::NewMsg::ButtonInAddr $w $wfr $n]
-    bind $wentry <Tab>      [list ::NewMsg::TabInAddr $w $wfr $n]
-    bind $wentry <BackSpace> "+ ::NewMsg::BackSpaceInAddr $w $wfr $n"
-    bind $wentry <Return>   [list ::NewMsg::ReturnInAddr $w $wfr $n]
-    bind $wentry <Key-Up>   [list ::NewMsg::KeyUpDown -1 $w $wfr $n]
-    bind $wentry <Key-Down> [list ::NewMsg::KeyUpDown 1 $w $wfr $n]
+    bind $wentry <Button-1>   [list ::NewMsg::ButtonInAddr $w $wfr $n]
+    bind $wentry <Tab>        [list ::NewMsg::TabInAddr $w $wfr $n]
+    bind $wentry <BackSpace>  [list +::NewMsg::BackSpaceInAddr $w $wfr $n]
+    bind $wentry <Return>     [list ::NewMsg::ReturnInAddr $w $wfr $n]
+    bind $wentry <Key-Up>     [list ::NewMsg::KeyUpDown -1 $w $wfr $n]
+    bind $wentry <Key-Down>   [list ::NewMsg::KeyUpDown 1 $w $wfr $n]
     
     grid $wfr.f${n} -padx 1 -pady 1 -column 0 -row $n -sticky news
     grid $wentry    -padx 1 -pady 1 -column 1 -row $n -sticky news
@@ -616,12 +616,14 @@ proc ::NewMsg::EmptyAddrLine {w wfr n} {
     variable locals
     
     set bg3 [option get $wfr entry3Background {}]
+    set bgpop [option get $wfr popup2Background {}]
 
     $wfr.f${n}.trpt configure -disabledbackground $bg3
-    $wfr.f${n}.la configure -image ""
+    $wfr.f${n}.la configure -image "" -bg $bgpop
     $wfr.addr${n} configure -state disabled
-    set locals($w,poptrpt$n) {}
-    set locals($w,addr$n) {}
+    set locals($w,poptrpt$n) ""
+    set locals($w,addr$n) ""
+    set locals($w,enttrpt$n) ""
     set locals($w,fillline) [expr $n - 1]
     bind $wfr.f${n}.la <Button-1> {}
     bind $wfr.f${n}.la <ButtonRelease-1> {}    
