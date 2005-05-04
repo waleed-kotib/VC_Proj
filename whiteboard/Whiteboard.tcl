@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.34 2005-04-29 12:07:06 matben Exp $
+# $Id: Whiteboard.tcl,v 1.35 2005-05-04 13:58:37 matben Exp $
 
 package require entrycomp
 package require moviecontroller
@@ -100,7 +100,6 @@ namespace eval ::WB:: {
     option add *Whiteboard.aSelect              2               widgetDefault
     option add *Whiteboard.fgSelectNormal       black           widgetDefault
     option add *Whiteboard.fgSelectLocked       red             widgetDefault
-    
     
     # Keeps various geometry info.
     variable dims
