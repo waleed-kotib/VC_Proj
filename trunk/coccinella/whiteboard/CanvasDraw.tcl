@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2000-2005  Mats Bengtsson
 #  
-# $Id: CanvasDraw.tcl,v 1.11 2005-04-29 12:07:06 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.12 2005-05-04 13:58:37 matben Exp $
 
 #  All code in this file is placed in one common namespace.
 #  
@@ -2610,16 +2610,18 @@ proc ::CanvasDraw::AnySelected {w} {
 proc ::CanvasDraw::DrawItemSelection {w which tmark} {
     global  prefs kGrad2Rad
         
+    set wtop [::UI::GetToplevelNS $w]
+    upvar ::WB::${wtop}::wapp wapp
+
     set type [$w type $which]
     set bbox [$w bbox $which]
     set id   [$w find withtag $which]
-
-    set wwb [winfo toplevel $w]
-    set a  [option get $wwb aSelect {}]
+    
+    set a  [option get $wapp(frall) aSelect {}]
     if {[::CanvasUtils::IsLocked $w $id]} {
-	set fg [option get $wwb fgSelectLocked {}]
+	set fg [option get $wapp(frall) fgSelectLocked {}]
     } else {
-	set fg [option get $wwb fgSelectNormal {}]
+	set fg [option get $wapp(frall) fgSelectNormal {}]
     }
 
     # If mark the bounding box. Also for all "regular" shapes.
