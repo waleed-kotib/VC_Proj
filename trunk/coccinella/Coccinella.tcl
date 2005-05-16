@@ -12,11 +12,11 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.113 2005-04-29 12:07:05 matben Exp $
+# $Id: Coccinella.tcl,v 1.114 2005-05-16 13:36:21 matben Exp $
 	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
-set debugLevel 0
+set debugLevel 4
 
 # TclKit loading mechanism.
 package provide app-Coccinella 1.0
@@ -123,7 +123,7 @@ proc resolve_cmd_realpath {infile} {
 # default file, never read.
 set prefs(majorVers)    0
 set prefs(minorVers)   95
-set prefs(releaseVers)  7
+set prefs(releaseVers)  8
 set prefs(fullVers) $prefs(majorVers).$prefs(minorVers).$prefs(releaseVers)
 set prefs(appName)    "Coccinella"
 set prefs(theAppName) "The Coccinella"
