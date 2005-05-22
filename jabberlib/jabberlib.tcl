@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.93 2005-04-03 10:41:10 matben Exp $
+# $Id: jabberlib.tcl,v 1.94 2005-05-22 10:03:23 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -81,7 +81,7 @@
 #      jlibName element_deregister tag func
 #      jlibName element_register tag func ?seq?
 #      jlibName getstreamattr name
-#      jlibName havefeatures name
+#      jlibName get_features name
 #      jlibName get_last to cmd
 #      jlibName get_time to cmd
 #      jlibName get_version to cmd
@@ -850,6 +850,7 @@ proc jlib::dispatcher {jlibname xmldata} {
 	}
 	features {
 	    features_handler $jlibname $xmldata
+	    element_run_hook $jlibname $tag $xmldata
 	}
 	error {
 	    error_handler $jlibname $xmldata
@@ -1245,26 +1246,28 @@ proc jlib::features_handler {jlibname xmllist} {
     upvar ${jlibname}::locals locals
     variable xmppxmlns
     
+    Debug 4 "jlib::features_handler"
+    
     foreach child [wrapper::getchildren $xmllist] {
 	wrapper::splitxml $child tag attr chdata children
 	
 	switch -- $tag {
 	    mechanisms {
-		if {[wrapper::getattr $attr xmlns] == $xmppxmlns(sasl)} {
-		    set mechanisms {}
+		set mechanisms {}
+		if {[wrapper::getattr $attr xmlns] eq $xmppxmlns(sasl)} {
 		    foreach mechelem $children {
 			wrapper::splitxml $mechelem mtag mattr mchdata mchild
 			if {$mtag == "mechanism"} {
 			    lappend mechanisms $mchdata
 			}
 		    }
-
-		    # Variable that may trigger a trace event.
-		    set locals(features,mechanisms) $mechanisms
 		}
+
+		# Variable that may trigger a trace event.
+		set locals(features,mechanisms) $mechanisms
 	    }
 	    starttls {
-		if {[wrapper::getattr $attr xmlns] == $xmppxmlns(tls)} {
+		if {[wrapper::getattr $attr xmlns] eq $xmppxmlns(tls)} {
 		    set locals(features,starttls) 1
 		    set childs [wrapper::getchildswithtag $xmllist required]
 		    if {$childs != ""} {
@@ -1282,15 +1285,15 @@ proc jlib::features_handler {jlibname xmllist} {
     set locals(features) 1
 }
 
-# jlib::havefeatures --
+# jlib::get_features --
 # 
 #       Just to get access of the stream features.
 
-proc jlib::havefeatures {jlibname name {name2 ""}} {
+proc jlib::get_features {jlibname name {name2 ""}} {
     
     upvar ${jlibname}::locals locals
 
-    set ans 0
+    set ans ""
     if {$name2 != ""} {
 	if {[info exists locals(features,$name,$name2)]} {
 	    set ans $locals(features,$name,$name2)
