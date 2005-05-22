@@ -6,7 +6,7 @@
 #      
 #  Copyright (c) 2004-2005  Mats Bengtsson
 #  
-# $Id: jlibsasl.tcl,v 1.13 2005-04-03 10:41:10 matben Exp $
+# $Id: jlibsasl.tcl,v 1.14 2005-05-22 10:03:24 matben Exp $
 
 # We need to be flexible here since can have cyrus based sasl or our 
 # own special pure tcl saslmd5.
@@ -92,22 +92,26 @@ proc jlib::auth_sasl {jlibname username resource password cmd} {
     if {[info exists locals(features,mechanisms)]} {
 	auth_sasl_continue $jlibname
     } else {
-	
-	# Must be careful so this is not triggered by a reset or something...
-	# 
-	# Perhaps these traces should be handled by 'element_register'?
-	trace add variable ${jlibname}::locals(features,mechanisms) write \
-	  [list [namespace current]::auth_sasl_mechanisms_write $jlibname]
+	element_register $jlibname features [namespace current]::sasl_features
     }
 }
 
-proc jlib::auth_sasl_mechanisms_write {jlibname name1 name2 op} {
+proc jlib::sasl_features {jlibname tag xmllist} {
+
+    upvar ${jlibname}::locals locals
+
+    Debug 2 "jlib::sasl_features"
+
+    element_deregister $jlibname features [namespace current]::sasl_features
     
-    Debug 2 "jlib::auth_sasl_mechanisms_write"
-    
-    trace remove variable ${jlibname}::locals(features,mechanisms) write \
-      [list [namespace current]::auth_sasl_mechanisms_write $jlibname]
-    auth_sasl_continue $jlibname
+    # Verify that sasl is supported before going on.
+    set features [get_features $jlibname "mechanisms"]
+    if {$features == ""} {
+	set msg "no sasl mechanisms announced by the server"
+	sasl_final $jlibname error [list {} $msg]
+    } else {
+	auth_sasl_continue $jlibname
+    }
 }
 
 # jlib::auth_sasl_continue --
@@ -432,6 +436,7 @@ proc jlib::sasl_final {jlibname type subiq} {
     element_deregister $jlibname challenge [namespace current]::sasl_challenge
     element_deregister $jlibname failure   [namespace current]::sasl_failure
     element_deregister $jlibname success   [namespace current]::sasl_success
+    element_deregister $jlibname features  [namespace current]::sasl_features
 
     uplevel #0 $locals(sasl,cmd) [list $jlibname $type $subiq]
 }
