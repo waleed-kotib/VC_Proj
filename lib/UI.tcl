@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.90 2005-04-29 12:07:05 matben Exp $
+# $Id: UI.tcl,v 1.91 2005-05-24 12:46:35 matben Exp $
 
 package require entrycomp
 package require alertbox
@@ -70,6 +70,27 @@ proc ::UI::InitCommonBinds { } {
     bind Text <ButtonRelease-1> "+ ::UI::FixMenusWhenSelection %W"
     bind Text <<Cut>>           "+ ::UI::FixMenusWhenSelection %W"
     bind Text <<Copy>>          "+ ::UI::FixMenusWhenSelection %W"
+    
+    if {[string equal "x11" [tk windowingsystem]]} {
+	# Support for mousewheels on Linux/Unix commonly comes through mapping
+	# the wheel to the extended buttons.  If you have a mousewheel, find
+	# Linux configuration info at:
+	#	http://www.inria.fr/koala/colas/mouse-wheel-scroll/
+	bind Canvas <4> {
+	    if {!$::tk_strictMotif} {
+		%W yview scroll -5 units
+	    }
+	}
+	bind Canvas <5> {
+	    if {!$::tk_strictMotif} {
+		%W yview scroll 5 units
+	    }
+	}
+    } else {
+	bind Canvas <MouseWheel> {
+	    %W yview scroll [expr {- (%D)}] units
+	}
+    }
 
     # Linux has a strange binding by default. Handled by <<Paste>>.
     if {[string equal $this(platform) "unix"]} {
