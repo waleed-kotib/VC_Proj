@@ -5,7 +5,7 @@
 #
 #  Copyright (c) 2001-2002  Mats Bengtsson
 #  
-# $Id: SetupAss.tcl,v 1.28 2004-12-02 08:22:34 matben Exp $
+# $Id: SetupAss.tcl,v 1.29 2005-05-24 07:32:13 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -194,7 +194,7 @@ proc ::Jabber::SetupAss::DoRegister { } {
     variable password
     variable haveRegistered
 
-    ::Register::NewDlg -server $server  \
+    ::RegisterEx::New -server $server  \
       -username $username -password $password
     set haveRegistered 1
 }
@@ -211,7 +211,7 @@ proc ::Jabber::SetupAss::DoFinish {w} {
     if {!$haveRegistered} {
 	
 	# Save as a shortcut and default server only if not called 
-	# ::Register::NewDlg which already done this
+	# ::RegisterEx::New which already done this
 	::Profiles::Set {} $server $username $password home
     }
     

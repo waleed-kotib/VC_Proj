@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.35 2005-05-04 13:58:37 matben Exp $
+# $Id: Whiteboard.tcl,v 1.36 2005-05-24 07:32:13 matben Exp $
 
 package require entrycomp
 package require moviecontroller
@@ -702,29 +702,29 @@ proc ::WB::BuildWhiteboard {wtop args} {
 	set wapp(menu)      ${w}.menu
     }
     set wapp(frall)     $wall
-    set wapp(frtop)     ${wall}.frtop
+    set wapp(frtop)     $wall.frtop
     set wapp(tray)      $wapp(frtop).on.fr
-    set wapp(tool)      ${wall}.fmain.frleft.frbt
-    set wapp(buglabel)  ${wall}.fmain.frleft.pad.bug
-    set wapp(frcan)     ${wall}.fmain.fc
-    set wapp(comm)      ${wall}.fcomm
+    set wapp(tool)      $wall.fmain.frleft.frbt
+    set wapp(buglabel)  $wall.fmain.frleft.pad.bug
+    set wapp(frcan)     $wall.fmain.fc
+    set wapp(comm)      $wall.fcomm
     set wcomm           $wapp(comm)
     set wapp(statmess)  ${wcomm}.stat.lbl
     set wapp(frstat)    ${wcomm}.st
-    set wapp(topchilds) [list ${wall}.menu ${wall}.frtop ${wall}.fmain ${wall}.fcomm]
+    set wapp(topchilds) [list $wall.menu $wall.frtop $wall.fmain $wall.fcomm]
     
     # temporary...
-    set wapp(can)       ${wall}.fmain.fc.can
-    set wapp(xsc)       ${wall}.fmain.fc.xsc
-    set wapp(ysc)       ${wall}.fmain.fc.ysc
+    set wapp(can)       $wall.fmain.fc.can
+    set wapp(xsc)       $wall.fmain.fc.xsc
+    set wapp(ysc)       $wall.fmain.fc.ysc
     set wapp(can,)      $wapp(can)
     
     # Having the frame with canvas + scrollbars as a sibling makes it possible
     # to pack it in a different place.
-    set wapp(ccon)      ${wall}.fmain.cc
+    set wapp(ccon)      $wall.fmain.cc
     
     # Notebook widget path to be packed into wapp(ccon).
-    set wapp(nb)        ${wall}.fmain.nb
+    set wapp(nb)        $wall.fmain.nb
     
     set canvasImages {}
     
@@ -768,8 +768,8 @@ proc ::WB::BuildWhiteboard {wtop args} {
     }
 
     # Make the connection frame.
-    frame $wcomm
-    pack  $wcomm -side bottom -fill x
+    ttk::frame $wcomm
+    pack $wcomm -side bottom -fill x
     
     # Status message part.
     frame  $wapp(frstat) -relief raised -borderwidth 1
@@ -786,21 +786,21 @@ proc ::WB::BuildWhiteboard {wtop args} {
     ::hooks::run whiteboardBuildEntryHook $wtop $wall $wcomm
     
     # Make frame for toolbar + canvas.
-    frame ${wall}.fmain -borderwidth 0 -relief flat
-    frame ${wall}.fmain.frleft
+    frame $wall.fmain -borderwidth 0 -relief flat
+    frame $wall.fmain.frleft
     frame $wapp(tool)
-    frame ${wall}.fmain.frleft.pad -relief raised -borderwidth 1
+    frame $wall.fmain.frleft.pad -relief raised -borderwidth 1
     frame $wapp(ccon) -bd 1 -relief raised
-    pack  ${wall}.fmain -side top -fill both -expand true
-    pack  ${wall}.fmain.frleft -side left -fill y
+    pack  $wall.fmain -side top -fill both -expand true
+    pack  $wall.fmain.frleft -side left -fill y
     pack  $wapp(tool) -side top
-    pack  ${wall}.fmain.frleft.pad -fill both -expand true
+    pack  $wall.fmain.frleft.pad -fill both -expand true
     pack  $wapp(ccon) -fill both -expand true -side right
     
     # The 'Coccinella'.
-    set   wapp(bugImage) [::Theme::GetImage ladybug]
-    label $wapp(buglabel) -borderwidth 0 -image $wapp(bugImage)
-    pack  $wapp(buglabel) -side bottom
+    set wapp(bugImage) [::Theme::GetImage ladybug]
+    ttk::label $wapp(buglabel) -image $wapp(bugImage) -compound image
+    pack $wapp(buglabel) -side bottom
     
     # Make the tool buttons and invoke the one from the prefs file.
     ::WB::CreateAllButtons $wtop
