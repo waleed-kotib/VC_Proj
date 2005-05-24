@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.36 2005-05-24 07:32:13 matben Exp $
+# $Id: Whiteboard.tcl,v 1.37 2005-05-24 12:46:36 matben Exp $
 
 package require entrycomp
 package require moviecontroller
@@ -768,7 +768,7 @@ proc ::WB::BuildWhiteboard {wtop args} {
     }
 
     # Make the connection frame.
-    ttk::frame $wcomm
+    frame $wcomm
     pack $wcomm -side bottom -fill x
     
     # Status message part.
@@ -799,7 +799,7 @@ proc ::WB::BuildWhiteboard {wtop args} {
     
     # The 'Coccinella'.
     set wapp(bugImage) [::Theme::GetImage ladybug]
-    ttk::label $wapp(buglabel) -image $wapp(bugImage) -compound image
+    label $wapp(buglabel) -image $wapp(bugImage)
     pack $wapp(buglabel) -side bottom
     
     # Make the tool buttons and invoke the one from the prefs file.
@@ -1396,7 +1396,7 @@ proc ::WB::SetToolButton {wtop btName} {
     switch -- $btName {
 	point {
 	    bindtags $wCan  \
-	      [list $wCan WhiteboardPoint WhiteboardNonText $wtoplevel all]
+	      [list $wCan WhiteboardPoint WhiteboardNonText Whiteboard $wtoplevel all]
 
 	    $wCan bind std <Double-Button-1>  \
 	      [list ::ItemInspector::ItemInspector $wtop current]
@@ -1442,7 +1442,7 @@ proc ::WB::SetToolButton {wtop btName} {
 	    # items as well.
 	    # With shift constrained move.
 	    bindtags $wCan  \
-	      [list $wCan WhiteboardMove WhiteboardNonText $wtoplevel all]	    
+	      [list $wCan WhiteboardMove WhiteboardNonText Whiteboard $wtoplevel all]	    
 
 	    $wCan bind std&&!locked <Button-1> {
 		::CanvasDraw::InitMoveCurrent %W [%W canvasx %x] [%W canvasy %y]
@@ -1520,34 +1520,34 @@ proc ::WB::SetToolButton {wtop btName} {
 	}
 	line {
 	    bindtags $wCan  \
-	      [list $wCan WhiteboardLine WhiteboardNonText $wtoplevel all]
+	      [list $wCan WhiteboardLine WhiteboardNonText Whiteboard $wtoplevel all]
 	    ::WB::SetStatusMessage $wtop [mc uastatline]
 	}
 	arrow {
 	    bindtags $wCan  \
-	      [list $wCan WhiteboardArrow WhiteboardNonText $wtoplevel all]
+	      [list $wCan WhiteboardArrow WhiteboardNonText Whiteboard $wtoplevel all]
 	    ::WB::SetStatusMessage $wtop [mc uastatarrow]
 	}
 	rect {
 	    bindtags $wCan  \
-	      [list $wCan WhiteboardRect WhiteboardNonText $wtoplevel all]
+	      [list $wCan WhiteboardRect WhiteboardNonText Whiteboard $wtoplevel all]
 	    ::WB::SetStatusMessage $wtop [mc uastatrect]
 	}
 	oval {
 	    bindtags $wCan  \
-	      [list $wCan WhiteboardOval WhiteboardNonText $wtoplevel all]
+	      [list $wCan WhiteboardOval WhiteboardNonText Whiteboard $wtoplevel all]
 	    ::WB::SetStatusMessage $wtop [mc uastatoval]
 	}
 	text {
 	    bindtags $wCan  \
-	      [list $wCan WhiteboardText $wtoplevel all]
+	      [list $wCan WhiteboardText Whiteboard $wtoplevel all]
 	    ::CanvasText::EditBind $wCan
 	    $wCan config -cursor xterm
 	    ::WB::SetStatusMessage $wtop [mc uastattext]
 	}
 	del {
 	    bindtags $wCan  \
-	      [list $wCan WhiteboardDel WhiteboardNonText $wtoplevel all]
+	      [list $wCan WhiteboardDel WhiteboardNonText Whiteboard $wtoplevel all]
 	    $wCan bind std&&!locked <Button-1> {
 		::CanvasDraw::DeleteCurrent %W
 	    }
@@ -1559,33 +1559,33 @@ proc ::WB::SetToolButton {wtop btName} {
 	}
 	pen {
 	    bindtags $wCan  \
-	      [list $wCan WhiteboardPen WhiteboardNonText $wtoplevel all]
+	      [list $wCan WhiteboardPen WhiteboardNonText Whiteboard $wtoplevel all]
 	    $wCan config -cursor pencil
 	    ::WB::SetStatusMessage $wtop [mc uastatpen]
 	}
 	brush {
 	    bindtags $wCan  \
-	      [list $wCan WhiteboardBrush WhiteboardNonText $wtoplevel all]
+	      [list $wCan WhiteboardBrush WhiteboardNonText Whiteboard $wtoplevel all]
 	    ::WB::SetStatusMessage $wtop [mc uastatbrush]
 	}
 	paint {
 	    bindtags $wCan  \
-	      [list $wCan WhiteboardPaint WhiteboardNonText $wtoplevel all]
+	      [list $wCan WhiteboardPaint WhiteboardNonText Whiteboard $wtoplevel all]
 	    ::WB::SetStatusMessage $wtop [mc uastatpaint]	      
 	}
 	poly {
 	    bindtags $wCan  \
-	      [list $wCan WhiteboardPoly WhiteboardNonText $wtoplevel all]
+	      [list $wCan WhiteboardPoly WhiteboardNonText Whiteboard $wtoplevel all]
 	    ::WB::SetStatusMessage $wtop [mc uastatpoly]	      
 	}       
 	arc {
 	    bindtags $wCan  \
-	      [list $wCan WhiteboardArc WhiteboardNonText $wtoplevel all]
+	      [list $wCan WhiteboardArc WhiteboardNonText Whiteboard $wtoplevel all]
 	    ::WB::SetStatusMessage $wtop [mc uastatarc]	      
 	}
 	rot {
 	    bindtags $wCan  \
-	      [list $wCan WhiteboardRot WhiteboardNonText $wtoplevel all]
+	      [list $wCan WhiteboardRot WhiteboardNonText Whiteboard $wtoplevel all]
 	    $wCan config -cursor exchange
 	    ::WB::SetStatusMessage $wtop [mc uastatrot]	      
 	}

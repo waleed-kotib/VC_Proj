@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.24 2005-04-29 12:07:06 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.25 2005-05-24 12:46:36 matben Exp $
 
 package require sha1pure
 
@@ -2069,6 +2069,27 @@ proc ::CanvasUtils::CanvasDrawSafe {w args} {
 proc ::CanvasUtils::DefineWhiteboardBindtags { } {
     global  this
     
+    if {[string equal "x11" [tk windowingsystem]]} {
+	# Support for mousewheels on Linux/Unix commonly comes through mapping
+	# the wheel to the extended buttons.  If you have a mousewheel, find
+	# Linux configuration info at:
+	#	http://www.inria.fr/koala/colas/mouse-wheel-scroll/
+	bind Whiteboard <4> {
+	    if {!$::tk_strictMotif} {
+		%W yview scroll -5 units
+	    }
+	}
+	bind Whiteboard <5> {
+	    if {!$::tk_strictMotif} {
+		%W yview scroll 5 units
+	    }
+	}
+    } else {
+	bind Whiteboard <MouseWheel> {
+	    %W yview scroll [expr {- (%D)}] units
+	}
+    }
+
     # WhiteboardPoint
     bind WhiteboardPoint <Button-1> {
 	::CanvasDraw::PointButton %W [%W canvasx %x] [%W canvasy %y]
