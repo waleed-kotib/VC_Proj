@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.104 2005-02-27 14:11:04 matben Exp $
+# $Id: GroupChat.tcl,v 1.105 2005-05-24 07:32:13 matben Exp $
 
 package require History
 
@@ -124,6 +124,7 @@ namespace eval ::GroupChat:: {
 	mMessage       user      {::NewMsg::Build -to $jid}
 	mChat          user      {::Chat::StartThread $jid}
 	mSendFile      user      {::OOB::BuildSet $jid}
+	mvCard         user      {::VCard::Fetch other $jid}
 	mWhiteboard    wb        {::Jabber::WB::NewWhiteboardTo $jid}
     }    
     
