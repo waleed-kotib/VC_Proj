@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.94 2005-05-22 10:03:23 matben Exp $
+# $Id: jabberlib.tcl,v 1.95 2005-05-24 09:45:25 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -2579,8 +2579,7 @@ proc jlib::send_presence {jlibname args} {
     
     # Any of {available away dnd invisible unavailable}
     # Must be destined to login server (by default).
-    if {![info exists argsArr(-to)] || \
-      [string equal $argsArr(-to) $locals(server)]} {
+    if {![info exists argsArr(-to)] || ($argsArr(-to) eq $locals(server))} {
 	set locals(status) $type
 	if {[info exists argsArr(-show)]} {
 	    set locals(status) $argsArr(-show)
@@ -2607,7 +2606,7 @@ proc jlib::send {jlibname xmllist} {
 
     # We fail only if already in stream.
     # The first failure reports the network error, closes the stream,
-    # which stops multiple errors to be reported to client.
+    # which stops multiple errors to be reported to the client.
     if {$lib(isinstream) && [catch {eval $lib(transportsend) {$xml}} err]} {
 	kill $jlibname
 	uplevel #0 $lib(clientcmd) [list $jlibname networkerror]
@@ -2616,7 +2615,7 @@ proc jlib::send {jlibname xmllist} {
 
 # jlib::mystatus --
 # 
-#       Returns any of {available away dnd invisible unavailable}
+#       Returns any of {available away xa chat dnd invisible unavailable}
 #       for our status with the login server.
 
 proc jlib::mystatus {jlibname} {
@@ -3241,7 +3240,11 @@ proc jlib::auto_away_cmd {jlibname what} {
     upvar ${jlibname}::opts opts
 
     Debug 3 "jlib::auto_away_cmd what=$what"
-    
+
+    if {$locals(status) eq "invisible"} {
+	return
+    }
+
     switch -- $what {
 	away {
 	    send_presence $jlibname -show "away" -status $opts(-awaymsg)
