@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.134 2005-04-25 11:55:00 matben Exp $
+# $Id: Jabber.tcl,v 1.135 2005-05-24 14:16:55 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -822,7 +822,7 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	away - xaway {
 	    set jstate(status) $what
 	    ::hooks::run setPresenceHook $what
-	    after idle ::Jabber::AutoAway
+	    #after idle ::Jabber::AutoAway
 	}
 	streamerror {
 	    DoCloseClientConnection
@@ -1498,7 +1498,7 @@ proc ::Jabber::GetLastResult {from silent jlibname type subiq} {
 	      -type ok -message [mc jamesserrnotimeinfo $from]
 	} else {
 	    set secs [expr [clock seconds] - $attrArr(seconds)]
-	    set uptime [clock format $secs -format "%a %b %d %H:%M:%S"]
+	    set uptime [clock format $secs -format "%a %b %d %H:%M:%S %Y"]
 	    if {[wrapper::getcdata $subiq] != ""} {
 		set msg "The message: [wrapper::getcdata $subiq]"
 	    } else {
