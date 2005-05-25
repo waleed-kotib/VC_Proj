@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.58 2005-02-22 13:58:46 matben Exp $
+# $Id: MUC.tcl,v 1.59 2005-05-25 11:51:26 matben Exp $
 
 package require entrycomp
 package require muc
@@ -109,7 +109,8 @@ proc ::MUC::BuildEnter {args} {
     variable dlguid
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::xmppxmlns xmppxmlns
-    
+    upvar ::Jabber::jprefs jprefs
+
     array set argsArr {
 	-autobrowse     0
     }
@@ -153,6 +154,7 @@ proc ::MUC::BuildEnter {args} {
 	nickname    ""
 	password    ""
     }
+    set enter(nickname) $jprefs(defnick)
     
     set fontSB [option get . fontSmallBold {}]
     
