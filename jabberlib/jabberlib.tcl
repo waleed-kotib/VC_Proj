@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.96 2005-05-25 11:51:26 matben Exp $
+# $Id: jabberlib.tcl,v 1.97 2005-05-25 13:46:39 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -3286,7 +3286,7 @@ proc jlib::auto_away_cmd {jlibname what} {
 	    }
 	}
     }
-    uplevel #0 $lib(clientcmd) [list $jlibname $what]
+    uplevel #0 $lib(clientcmd) [list $jlibname $status]
 }
 
 # jlib::getrecipientjid --
