@@ -7,7 +7,7 @@
 #      
 #  Copyright (c) 2003-2005  Mats Bengtsson
 #  
-# $Id: MUC.tcl,v 1.59 2005-05-25 11:51:26 matben Exp $
+# $Id: MUC.tcl,v 1.60 2005-05-25 13:44:14 matben Exp $
 
 package require entrycomp
 package require muc
@@ -640,8 +640,6 @@ proc ::MUC::Invite {roomjid} {
 
     catch {focus $oldFocus}
     
-    set finished $invite(finished)
-    return [expr {($finished <= 0) ? "cancel" : "ok"}]
 }
 
 proc ::MUC::CancelInvite {token} {
