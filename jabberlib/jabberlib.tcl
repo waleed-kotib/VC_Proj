@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.95 2005-05-24 09:45:25 matben Exp $
+# $Id: jabberlib.tcl,v 1.96 2005-05-25 11:51:26 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -252,6 +252,20 @@ namespace eval jlib {
 	muc,admin       http://jabber.org/protocol/muc#admin
 	muc,owner       http://jabber.org/protocol/muc#owner
 	pubsub          http://jabber.org/protocol/pubsub
+    }
+    
+    # Auto away and extended away are only set when the
+    # current status has a lower priority than away or xa respectively.
+    # After an idea by Zbigniew Baniewski.
+    variable statusPriority
+    array set statusPriority {
+	chat            1
+	available       2
+	away            3
+	xa              4
+	dnd             5
+	invisible       6
+	unavailable     7
     }
 }
 
@@ -3235,13 +3249,22 @@ proc jlib::cancel_auto_away {jlibname} {
 
 proc jlib::auto_away_cmd {jlibname what} {      
 
+    variable statusPriority
     upvar ${jlibname}::locals locals
     upvar ${jlibname}::lib lib
     upvar ${jlibname}::opts opts
 
     Debug 3 "jlib::auto_away_cmd what=$what"
+    
+    if {$what eq "xaway"} {
+	set status xa
+    } else {
+	set status $what
+    }
 
-    if {$locals(status) eq "invisible"} {
+    # Auto away and extended away are only set when the
+    # current status has a lower priority than away or xa respectively.
+    if {$statusPriority($locals(status)) >= $statusPriority($status)} {
 	return
     }
 

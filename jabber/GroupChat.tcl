@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.105 2005-05-24 07:32:13 matben Exp $
+# $Id: GroupChat.tcl,v 1.106 2005-05-25 11:51:26 matben Exp $
 
 package require History
 
@@ -373,6 +373,7 @@ proc ::GroupChat::BuildEnter {args} {
     variable enteruid
     variable dlguid
     upvar ::Jabber::jstate jstate
+    upvar ::Jabber::jprefs jprefs
 
     set chatservers [$jstate(jlib) service getjidsfor "groupchat"]
     ::Debug 2 "::GroupChat::BuildEnter args='$args'"
@@ -398,6 +399,7 @@ proc ::GroupChat::BuildEnter {args} {
 	roomname    ""
 	nickname    ""
     }
+    set enter(nickname) $jprefs(defnick)
     array set argsArr $args
     
     set fontSB [option get . fontSmallBold {}]
@@ -1730,9 +1732,11 @@ proc ::GroupChat::InitPrefsHook { } {
     # Preferred groupchat protocol (gc-1.0|muc).
     # 'muc' uses 'conference' as fallback.
     set jprefs(prefgchatproto) "muc"
+    set jprefs(defnick)        ""
 	
     ::PreferencesUtils::Add [list  \
       [list ::Jabber::jprefs(prefgchatproto)   jprefs_prefgchatproto    $jprefs(prefgchatproto)]  \
+      [list ::Jabber::jprefs(defnick)          jprefs_defnick           $jprefs(defnick)]  \
       ]   
 }
 
@@ -1752,6 +1756,7 @@ proc ::GroupChat::BuildPageConf {page} {
     set ypad [option get [winfo toplevel $page] yPad {}]
     
     set tmpJPrefs(prefgchatproto) $jprefs(prefgchatproto)
+    set tmpJPrefs(defnick)        $jprefs(defnick)
     
     # Conference (groupchat) stuff.
     set labfr $page.fr
@@ -1768,6 +1773,13 @@ proc ::GroupChat::BuildPageConf {page} {
 	  -variable [namespace current]::tmpJPrefs(prefgchatproto)	      
 	grid $wrad -sticky w -pady $ypad
     }
+    
+    frame $page.nick
+    label $page.nick.l -text "Default nickname:"
+    entry $page.nick.e \
+      -textvariable [namespace current]::tmpJPrefs(defnick)
+    pack $page.nick.l $page.nick.e -side left
+    pack $page.nick -side top -anchor w -padx 8 -pady 4
 }
 
 proc ::GroupChat::SavePrefsHook { } {

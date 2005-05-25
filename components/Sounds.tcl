@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Sounds.tcl,v 1.10 2005-02-19 11:10:55 matben Exp $
+# $Id: Sounds.tcl,v 1.11 2005-05-25 11:51:25 matben Exp $
 
 namespace eval ::Sounds:: {
         
@@ -20,6 +20,7 @@ namespace eval ::Sounds:: {
 	newchatthread   {New chat thread}
 	statchange      {User's status changed}
 	connected       {Is connected}
+	groupchatpres   {Groupchat presence change}
     }
 
     # Map between sound name and file name for default sound set.
@@ -32,6 +33,7 @@ namespace eval ::Sounds:: {
 	newchatthread   newchatthread.wav
 	statchange      statchange.wav
 	connected       connected.wav
+	groupchatpres   clicked.wav
     }
 
     variable allSounds
@@ -307,9 +309,12 @@ proc ::Sounds::Event {snd args} {
 proc ::Sounds::Presence {jid presence args} {
     
     array set argsArr $args
+    jlib::splitjid $jid jid2 res
     
     # Alert sounds.
-    if {[info exists argsArr(-show)] && [string equal $argsArr(-show) "chat"]} {
+    if {[::Jabber::JlibCmd service isroom $jid2]} {
+	::Sounds::PlayWhenIdle groupchatpres
+    } elseif {[info exists argsArr(-show)] && [string equal $argsArr(-show) "chat"]} {
 	::Sounds::PlayWhenIdle statchange
     } elseif {[string equal $presence "available"]} {
 	::Sounds::PlayWhenIdle online
