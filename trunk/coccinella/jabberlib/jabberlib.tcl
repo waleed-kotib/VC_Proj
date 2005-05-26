@@ -8,7 +8,7 @@
 # The algorithm for building parse trees has been completely redesigned.
 # Only some structures and API names are kept essentially unchanged.
 #
-# $Id: jabberlib.tcl,v 1.97 2005-05-25 13:46:39 matben Exp $
+# $Id: jabberlib.tcl,v 1.98 2005-05-26 12:16:42 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -362,7 +362,15 @@ proc jlib::new {rostername clientcmd args} {
     set lib(wrap)         $wrapper
     
     set lib(isinstream) 0
-    set locals(server) ""
+    
+    init_inst $jlibname
+            
+    # Init conference and groupchat state.
+    set conf(allroomsin) {}
+    groupchat::init $jlibname
+    if {$opts(-autodiscocaps)} {
+	caps::init $jlibname
+    }
     
     # Register some standard iq handlers that are handled internally.
     iq_register $jlibname get jabber:iq:last    \
@@ -371,28 +379,20 @@ proc jlib::new {rostername clientcmd args} {
       [namespace current]::handle_get_time
     iq_register $jlibname get jabber:iq:version \
       [namespace current]::handle_get_version
-        
-    # Any of {available away dnd invisible unavailable}
-    set locals(status) "unavailable"
-    set locals(myjid)  ""
-    
-    # Init conference and groupchat state.
-    set conf(allroomsin) {}
-    groupchat::init $jlibname
-    if {$opts(-autodiscocaps)} {
-	caps::init $jlibname
-    }
     
     # Create the actual jlib instance procedure.
     proc $jlibname {cmd args}   \
       "eval jlib::cmdproc {$jlibname} \$cmd \$args"
     
     # Init the service layer for this jlib instance.
-    jlib::service::init $jlibname
+    service::init $jlibname
     
     return $jlibname
 }
 
+# jlib::init --
+# 
+#       Static initializations.
 
 proc jlib::init {} {
     variable statics
@@ -409,6 +409,21 @@ proc jlib::init {} {
 	set statics(tls) 1
     }
     set statics(inited) 1
+}
+
+# jlib::init_inst --
+# 
+#       Instance specific initializations.
+
+proc jlib::init_inst {jlibname} {
+
+    upvar ${jlibname}::locals   locals
+    
+    # Any of {available chat away xa dnd invisible unavailable}
+    set locals(status)        "unavailable"
+    set locals(myjid)         ""
+    set locals(trigAutoAway)  1
+    set locals(server)        ""
 }
 
 # jlib::havesasl --
@@ -925,7 +940,7 @@ proc jlib::iq_handler {jlibname xmldata} {
 	set afrom $from
     }
     
-    # The child must be a single <query> element (or any namespaced element).
+    # @@@ The child must be a single <query> element (or any namespaced element).
     # WRONG WRONG !!!!!!!!!!!!!!!
     set childlist [wrapper::getchildren $xmldata]
     set subiq [lindex $childlist 0]
@@ -1481,12 +1496,10 @@ proc jlib::reset {jlibname} {
     unset -nocomplain prescmd
     set prescmd(uid) $num
     
-    unset -nocomplain agent
-    
+    unset -nocomplain agent    
     unset -nocomplain locals
-    set locals(status) "unavailable"
-    set locals(server) ""
-    set locals(myjid)  ""
+    
+    init_inst $jlibname
 
     set lib(isinstream) 0
     
@@ -2613,8 +2626,9 @@ proc jlib::send {jlibname xmllist} {
     upvar ${jlibname}::locals locals
 	
     # For the auto away function.
-    schedule_auto_away $jlibname
-
+    if {$locals(trigAutoAway)} {
+	schedule_auto_away $jlibname
+    }
     set locals(last) [clock seconds]
     set xml [wrapper::createxml $xmllist]
 
@@ -3267,25 +3281,19 @@ proc jlib::auto_away_cmd {jlibname what} {
     if {$statusPriority($locals(status)) >= $statusPriority($status)} {
 	return
     }
+    
+    # Be sure not to trig ourselves.
+    set locals(trigAutoAway) 0
 
     switch -- $what {
 	away {
 	    send_presence $jlibname -show "away" -status $opts(-awaymsg)
-
-	    # Since this has itself triggered a schedule of auto away need to kill it.
-	    if {[info exists locals(afterawayid)]} {
-		after cancel $locals(afterawayid)
-		unset locals(afterawayid)
-	    }
 	}
 	xaway {
 	    send_presence $jlibname -show "xa" -status $opts(-xawaymsg)
-	    if {[info exists locals(afterxawayid)]} {
-		after cancel $locals(afterxawayid)
-		unset locals(afterxawayid)
-	    }
 	}
     }
+    set locals(trigAutoAway) 1
     uplevel #0 $lib(clientcmd) [list $jlibname $status]
 }
 

@@ -7,8 +7,9 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Whiteboard.tcl,v 1.37 2005-05-24 12:46:36 matben Exp $
+# $Id: Whiteboard.tcl,v 1.38 2005-05-26 12:16:42 matben Exp $
 
+package require anigif
 package require entrycomp
 package require moviecontroller
 package require uriencode
@@ -1002,7 +1003,6 @@ proc ::WB::DestroyMain {wtop} {
     
     upvar ::WB::${wtop}::wapp wapp
     upvar ::WB::${wtop}::opts opts
-    upvar ::WB::${wtop}::canvasImages canvasImages
     
     Debug 3 "::WB::DestroyMain wtop=$wtop"
     
@@ -1025,7 +1025,7 @@ proc ::WB::DestroyMain {wtop} {
     }
     
     # We could do some cleanup here.
-    catch {eval {image delete} $canvasImages}
+    GarbageImages $wtop
     ::CanvasUtils::ItemFree $wtop
     ::UI::FreeMenu $wtop
 }
@@ -1047,13 +1047,14 @@ proc ::WB::CreateImageForWtop {wtop name args} {
     if {[info exists argsArr(-file)]} {
 	lappend photoOpts -file $argsArr(-file)
 	if {[string tolower [file extension $argsArr(-file)]] == ".gif"} {
-	    lappend photoOpts -format gif
+	    set photo [::Utils::CreateGif $argsArr(-file) $name]
+	} else {
+	    set photo [eval {image create photo} $name]
 	}
     } else {
-	lappend photoOpts -data $argsArr(-data)
+	set photo [eval {image create photo} $name {-data $argsArr(-data)}]
     }
 
-    set photo [eval {image create photo} $name $photoOpts]
     lappend canvasImages $photo
     return $photo
 }
@@ -1063,6 +1064,21 @@ proc ::WB::AddImageToGarbageCollector {wtop name} {
     upvar ::WB::${wtop}::canvasImages canvasImages
 
     lappend canvasImages $name
+}
+
+proc ::WB::GarbageImages {wtop} {
+    
+    upvar ::WB::${wtop}::canvasImages canvasImages
+    
+    foreach name $canvasImages {
+	if {[::anigif::isanigif $name]} {
+	    ::anigif::destroy $name
+	} else {
+	    if {![catch {image inuse $name}]} {
+		catch {image delete $name}
+	    }
+	}
+    }
 }
 
 # WB::SaveWhiteboardState

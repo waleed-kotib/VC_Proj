@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Emoticons.tcl,v 1.28 2005-02-19 11:10:55 matben Exp $
+# $Id: Emoticons.tcl,v 1.29 2005-05-26 12:16:35 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -252,8 +252,9 @@ proc ::Emoticons::ParseIcon {name dir xmllist} {
     
     switch -- $mime {
 	image/gif {
-	    set im [image create photo -format gif  \
-	      -file [file join $dir $object]]
+	    #set im [image create photo -format gif  \
+	    #  -file [file join $dir $object]]
+	    set im [::Utils::CreateGif [file join $dir $object]]
 	    foreach key $keyList {
 		set tmpicons($name,$key) $im
 	    }
