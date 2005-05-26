@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: UserInfo.tcl,v 1.2 2005-05-26 12:16:42 matben Exp $
+# $Id: UserInfo.tcl,v 1.3 2005-05-26 14:39:22 matben Exp $
 
 package provide UserInfo 1.0
 
@@ -136,6 +136,8 @@ proc ::UserInfo::LastCB {token jlibname type subiq} {
     } else {
 	array set attrArr [wrapper::getattrlist $subiq]
 	if {![info exists attrArr(seconds)]} {
+	    set str [mc jamesserrnotimeinfo $jid]
+	} elseif {![string is integer -strict $attrArr(seconds)]} {
 	    set str [mc jamesserrnotimeinfo $jid]
 	} else {
 	    set secs [expr [clock seconds] - $attrArr(seconds)]
