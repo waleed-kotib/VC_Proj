@@ -6,7 +6,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Jabber.tcl,v 1.135 2005-05-24 14:16:55 matben Exp $
+# $Id: Jabber.tcl,v 1.136 2005-05-26 12:16:35 matben Exp $
 
 package require balloonhelp
 package require browse
@@ -783,7 +783,7 @@ proc ::Jabber::PresenceCallback {jlibName type args} {
 # Arguments:
 #       jlibName    Name of jabberlib instance.
 #       what        Any of "connect", "disconnect", "xmlerror", "networkerror",
-#                   "away", or "xaway"
+#                   "away", or "xa"
 #       args        Is a list of '-key value' pairs.
 #       
 # Results:
@@ -819,7 +819,7 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	    SetClosedState
 	    ::UI::MessageBox -icon error -type ok -message [mc jamessconnbroken]
 	}
-	away - xaway {
+	away - xa {
 	    set jstate(status) $what
 	    ::hooks::run setPresenceHook $what
 	    #after idle ::Jabber::AutoAway

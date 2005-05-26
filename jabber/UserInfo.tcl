@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2005  Mats Bengtsson
 #  
-# $Id: UserInfo.tcl,v 1.1 2005-02-27 14:11:07 matben Exp $
+# $Id: UserInfo.tcl,v 1.2 2005-05-26 12:16:42 matben Exp $
 
 package provide UserInfo 1.0
 
@@ -139,7 +139,7 @@ proc ::UserInfo::LastCB {token jlibname type subiq} {
 	    set str [mc jamesserrnotimeinfo $jid]
 	} else {
 	    set secs [expr [clock seconds] - $attrArr(seconds)]
-	    set uptime [clock format $secs -format "%a %b %d %H:%M:%S"]
+	    set uptime [clock format $secs -format "%a %b %d %H:%M:%S %Y"]
 	    if {[wrapper::getcdata $subiq] != ""} {
 		set msg "The message: [wrapper::getcdata $subiq]"
 	    } else {
@@ -372,7 +372,7 @@ proc ::UserInfo::CloseHook {wclose} {
     global  wDlgs
     
     if {[string match $wDlgs(juserinfo)* $wclose]} {
-	set token [::VCard::GetTokenFrom w $wclose]
+	set token [::VCard::GetNSTokenFrom w $wclose]
 	if {$token != ""} {
 	    Close $token
 	}

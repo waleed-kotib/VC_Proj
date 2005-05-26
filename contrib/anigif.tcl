@@ -6,6 +6,8 @@
 # AniGif 1.3, this license is applicable to all previous versions.
 #
 # Modified by Alexey Shchepin <alexey@sevcom.net>
+# 
+# Modified by Mats Bengtsson <matben@users.sf.net>
 #
 # ###############################  USAGE  #################################
 #
@@ -43,8 +45,15 @@
 
 namespace eval anigif {
     variable image_number 0
+    variable allNames {}
 
     proc anigif2 {img list delay {idx 0}} {
+	
+	# Mats: need a way to detect if original image was deleted.
+	if {[catch {image inuse $img}]} {
+	    destroy $img
+	    return
+	}
 	if { $idx >= [llength $list]  } {
 	    set idx 0
 	    if { [set ::anigif::${img}(repeat)] == 0} {
@@ -84,15 +93,21 @@ namespace eval anigif {
     }
 
 
-    proc anigif {fnam {idx 0}} {
+    proc anigif {fnam name {idx 0}} {
 	variable image_number
+	variable allNames
 
 	set n 0
 	set images {}
 	set delay {}
 	#set img anigifimage[incr image_number]
-	set img [image create photo]
-
+	# Mats:
+	if {$name == ""} {
+	    set img [image create photo]
+	} else {
+	    set img [image create photo $name]
+	}
+	lappend allNames $img
 	set fin [open $fnam r]
 	fconfigure $fin -translation binary
 	set data [read $fin [file size $fnam]]
@@ -193,6 +208,16 @@ namespace eval anigif {
 		}
 	    }
 	    unset ::anigif::${w}
+	}
+    }
+    
+    proc isanigif {name} {
+	variable allNames
+	
+	if {[lsearch $allNames $name] >= 0} {
+	    return 1
+	} else {
+	    return 0
 	}
     }
 }

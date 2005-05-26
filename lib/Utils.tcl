@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Utils.tcl,v 1.43 2005-02-14 13:48:45 matben Exp $
+# $Id: Utils.tcl,v 1.44 2005-05-26 12:16:42 matben Exp $
 
 
 package provide Utils 1.0
@@ -467,6 +467,29 @@ proc ::Utils::GetHttpFromFile {filePath} {
     set relPath [uriencode::quotepath $relPath]
     set ip [::Network::GetThisPublicIP]
     return "http://${ip}:$prefs(httpdPort)/$relPath"
+}
+
+proc ::Utils::IsAnimatedGif {fileName} {
+    
+    # If we can read -index 1 then this is likely an animated gif. CRUDE!
+    set code [catch {
+	image create photo -file $fileName -format {gif89 -index 1}
+    } name]
+    catch {image delete $name}
+    return [expr {$code == 0 ? 1 : 0}]
+}
+
+proc ::Utils::CreateGif {fileName {imageName ""}} {
+    
+    if {[IsAnimatedGif $fileName]} {
+	return [::anigif::anigif $fileName $imageName]
+    } else {
+	if {$imageName == ""} {
+	    return [image create photo -file $fileName -format gif]
+	} else {
+	    return [image create photo $imageName -file $fileName -format gif]
+	}
+    }
 }
 
 #--- Animation -----------------------------------------------------------------
