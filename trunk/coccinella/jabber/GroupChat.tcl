@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.106 2005-05-25 11:51:26 matben Exp $
+# $Id: GroupChat.tcl,v 1.107 2005-05-27 06:08:19 matben Exp $
 
 package require History
 
@@ -1362,9 +1362,6 @@ proc ::GroupChat::SetUser {roomjid jid3 presence args} {
 	$wusers newitem [list $role $jid3] -text $nick -image $icon  \
 	  -tags [list $jid3]
     }
-    
-    # Noise.
-    ::Sounds::PlayWhenIdle online
 }
 
 proc ::GroupChat::GetRoleFromJid {jid3} {
@@ -1555,9 +1552,6 @@ proc ::GroupChat::RemoveUser {roomjid jid3} {
     foreach item $items {
 	$wusers delitem $item
     }
-    
-    # Noise.
-    ::Sounds::PlayWhenIdle offline
 }
 
 proc ::GroupChat::BuildHistory {token} {
