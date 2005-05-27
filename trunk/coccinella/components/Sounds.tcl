@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: Sounds.tcl,v 1.11 2005-05-25 11:51:25 matben Exp $
+# $Id: Sounds.tcl,v 1.12 2005-05-27 06:07:42 matben Exp $
 
 namespace eval ::Sounds:: {
         
@@ -208,6 +208,7 @@ proc ::Sounds::Play {snd} {
     if {[info exists sprefs($snd)] && !$sprefs($snd)} {
 	return
     }
+    
     unset -nocomplain afterid($snd)
     if {$priv(QuickTimeTcl)} {
 	if {[catch {.fake.${snd} play}]} {
@@ -222,7 +223,11 @@ proc ::Sounds::Play {snd} {
 
 proc ::Sounds::PlayWhenIdle {snd} {
     variable afterid
+    variable sprefs
         
+    if {![info exists sprefs($snd)] || !$sprefs($snd)} {
+	return
+    }
     if {![info exists afterid($snd)]} {
 	set afterid($snd) 1
 	after idle [list ::Sounds::Play $snd]
@@ -310,7 +315,7 @@ proc ::Sounds::Presence {jid presence args} {
     
     array set argsArr $args
     jlib::splitjid $jid jid2 res
-    
+        
     # Alert sounds.
     if {[::Jabber::JlibCmd service isroom $jid2]} {
 	::Sounds::PlayWhenIdle groupchatpres
