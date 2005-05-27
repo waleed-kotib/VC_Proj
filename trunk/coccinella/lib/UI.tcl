@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: UI.tcl,v 1.91 2005-05-24 12:46:35 matben Exp $
+# $Id: UI.tcl,v 1.92 2005-05-27 06:41:47 matben Exp $
 
 package require entrycomp
 package require alertbox
@@ -78,17 +78,23 @@ proc ::UI::InitCommonBinds { } {
 	#	http://www.inria.fr/koala/colas/mouse-wheel-scroll/
 	bind Canvas <4> {
 	    if {!$::tk_strictMotif} {
-		%W yview scroll -5 units
+		if {![string equal [%W yview] "0 1"]} {
+		    %W yview scroll -5 units
+		}
 	    }
 	}
 	bind Canvas <5> {
 	    if {!$::tk_strictMotif} {
-		%W yview scroll 5 units
+		if {![string equal [%W yview] "0 1"]} {
+		    %W yview scroll 5 units
+		}
 	    }
 	}
     } else {
 	bind Canvas <MouseWheel> {
-	    %W yview scroll [expr {- (%D)}] units
+	    if {![string equal [%W yview] "0 1"]} {
+		%W yview scroll [expr {- (%D)}] units
+	    }
 	}
     }
 
