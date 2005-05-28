@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002  Mats Bengtsson
 #  
-# $Id: GotMsg.tcl,v 1.39 2004-12-21 15:14:42 matben Exp $
+# $Id: GotMsg.tcl,v 1.40 2005-05-28 07:04:15 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -267,7 +267,7 @@ proc ::GotMsg::UpdateDate { } {
     variable date
     variable smartdate
     
-    if {![winfo exists $w]} {
+    if {![winfo exists $w] || ![info exists date]} {
 	return
     }
     set smartdate [::Utils::SmartClockFormat [clock scan $date]]

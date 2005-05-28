@@ -3,24 +3,22 @@
 #      This file is part of The Coccinella application. 
 #      It implements alert sounds.
 #      
-#  Copyright (c) 2002-2004  Mats Bengtsson
+#  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-#  See the README file for license, bugs etc.
-#  
-# $Id: Sounds.tcl,v 1.12 2005-05-27 06:07:42 matben Exp $
+# $Id: Sounds.tcl,v 1.13 2005-05-28 07:04:14 matben Exp $
 
 namespace eval ::Sounds:: {
         
     variable nameToText 
     array set nameToText {
-	online          {User is online}
-	offline         {User is offline}
-	newmsg          {New incoming message}
-	newchatmsg      {New chat message}
-	newchatthread   {New chat thread}
-	statchange      {User's status changed}
-	connected       {Is connected}
-	groupchatpres   {Groupchat presence change}
+	online          "User is online"
+	offline         "User is offline"
+	newmsg          "New incoming message"
+	newchatmsg      "New chat message"
+	newchatthread   "New chat thread"
+	statchange      "User's status changed"
+	connected       "Is connected"
+	groupchatpres   "Groupchat presence change"
     }
 
     # Map between sound name and file name for default sound set.
@@ -75,7 +73,7 @@ proc ::Sounds::Load { } {
       or the Snack audio package."
 
     # Make sure we get called when certain events happen.
-    ::Sounds::InitEventHooks
+    InitEventHooks
 }
 
 proc ::Sounds::InitEventHooks { } {
@@ -127,10 +125,10 @@ proc ::Sounds::Init { } {
     if {$priv(canPlay)} {
 	
 	# Verify that sound set exists.
-	if {[lsearch -exact [::Sounds::GetAllSets] $sprefs(soundSet)] < 0} {
+	if {[lsearch -exact [GetAllSets] $sprefs(soundSet)] < 0} {
 	    set sprefs(soundSet) ""
 	}
-	::Sounds::LoadSoundSet $sprefs(soundSet)
+	LoadSoundSet $sprefs(soundSet)
     }
 }
 
@@ -141,7 +139,8 @@ proc ::Sounds::LoadSoundSet {soundSet} {
     variable priv
 
     ::Debug 2 "::Sounds::LoadSoundSet: soundSet=$soundSet"
-    ::Sounds::Free
+    
+    Free
         
     array set sound [array get soundIndex]
     
@@ -169,20 +168,18 @@ proc ::Sounds::LoadSoundSet {soundSet} {
 	frame .fake
     }
     foreach s $allSounds {
-	::Sounds::Create $s [file join $path $sound($s)]
+	Create $s [file join $path $sound($s)]
     }
 }
 
 proc ::Sounds::Create {name path} {
     global  this    
     variable priv
+    variable midiPath
     
     # QuickTime doesn't understand vfs; need to copy out to tmp dir.
     if {$priv(QuickTimeTcl) && [info exists ::starkit::topdir]} {
-	set tmp [::tfileutils::tempfile $this(tmpPath) sound]
-	append tmp [file extension $path]
-	file copy -force $path $tmp
-	set path $tmp
+	set path [CopyToTemp $path]
     }
     if {$priv(QuickTimeTcl)} {
 	if {[catch {
@@ -190,7 +187,15 @@ proc ::Sounds::Create {name path} {
 	}]} {
 	    # ?
 	}
+    } elseif {[file extension $path] eq ".mid"} {
+	if {[info exists ::starkit::topdir]} {
+	    set midiPath($name) [CopyToTemp $path]
+	} else {
+	    set midiPath($name) $path
+	}
     } elseif {$priv(snack)} {
+	
+	# Snack seems not to complain about midi files; just no sound.
 	if {[catch {
 	    snack::sound $name -load $path
 	}]} {
@@ -203,6 +208,7 @@ proc ::Sounds::Play {snd} {
     variable sprefs
     variable priv
     variable afterid
+    variable midiPath
 
     # Check the jabber prefs if sound should be played.
     if {[info exists sprefs($snd)] && !$sprefs($snd)} {
@@ -211,9 +217,11 @@ proc ::Sounds::Play {snd} {
     
     unset -nocomplain afterid($snd)
     if {$priv(QuickTimeTcl)} {
-	if {[catch {.fake.${snd} play}]} {
+	if {[catch {.fake.$snd play}]} {
 	    # ?
 	}
+    } elseif {[file extension $soundIndex($snd)] eq ".mid"} {
+	PlayMIDI $midiPath($snd)
     } elseif {$priv(snack)} {
 	if {[catch {$snd play}]} {
 	    # ?
@@ -240,20 +248,43 @@ proc ::Sounds::PlaySoundTmp {path} {
     
     if {$priv(QuickTimeTcl)} {
 	if {[info exists ::starkit::topdir]} {
-	    set tmp [::tfileutils::tempfile $this(tmpPath) sound]
-	    append tmp [file extension $path]
-	    file copy -force $path $tmp
-	    set path $tmp
+	    set path [CopyToTemp $path]
 	}
 	catch {destroy .fake._tmp}
 	catch {
 	    movie .fake._tmp -file $path -controller 0
 	    .fake._tmp play
 	}
+    } elseif {[file extension $path] eq ".mid"} {
+	if {[info exists ::starkit::topdir]} {
+	    set path [CopyToTemp $path]
+	}
+	PlayMIDI $path 
     } elseif {$priv(snack)} {
 	catch {_tmp destroy}
 	catch {snack::sound _tmp -load $path}
 	catch {_tmp play}
+    }
+}
+
+proc ::Sounds::CopyToTemp {path} {
+    global  this
+    
+    set tmp [::tfileutils::tempfile $this(tmpPath) sound]
+    append tmp [file extension $path]
+    file copy -force $path $tmp
+    return $tmp
+}
+
+proc ::Sounds::PlayMIDI {fileName} {
+    variable sprefs
+    
+    # This is unix only.
+    set cmd  [lindex $sprefs(midiCmd) 0]
+    set opts [lrange $sprefs(midiCmd) 1 end]
+    set mcmd [auto_execok $cmd]
+    if {$mcmd != ""} {
+	catch {exec $mcmd $opts $fileName &}
     }
 }
 
@@ -291,12 +322,12 @@ proc ::Sounds::Msg {type snd body args} {
 	}
     }
 
-    ::Sounds::PlayWhenIdle $snd
+    PlayWhenIdle $snd
 }
 
 proc ::Sounds::Event {snd args} {
     
-    ::Sounds::PlayWhenIdle $snd
+    PlayWhenIdle $snd
 }
 
 # Sounds::Presence --
@@ -318,13 +349,13 @@ proc ::Sounds::Presence {jid presence args} {
         
     # Alert sounds.
     if {[::Jabber::JlibCmd service isroom $jid2]} {
-	::Sounds::PlayWhenIdle groupchatpres
+	PlayWhenIdle groupchatpres
     } elseif {[info exists argsArr(-show)] && [string equal $argsArr(-show) "chat"]} {
-	::Sounds::PlayWhenIdle statchange
+	PlayWhenIdle statchange
     } elseif {[string equal $presence "available"]} {
-	::Sounds::PlayWhenIdle online
+	PlayWhenIdle online
     } elseif {[string equal $presence "unavailable"]} {
-	::Sounds::PlayWhenIdle offline
+	PlayWhenIdle offline
     }    
 }
 
@@ -350,9 +381,11 @@ proc  ::Sounds::InitPrefsHook { } {
     
     set sprefs(soundSet) ""
     set sprefs(volume)   100
+    set sprefs(midiCmd)  ""
     ::PreferencesUtils::Add [list  \
-      [list ::Sounds::sprefs(soundSet) sound_set    $sprefs(soundSet)] \
-      [list ::Sounds::sprefs(volume)   sound_volume $sprefs(volume)] \
+      [list ::Sounds::sprefs(soundSet) sound_set     $sprefs(soundSet)] \
+      [list ::Sounds::sprefs(volume)   sound_volume  $sprefs(volume)]   \
+      [list ::Sounds::sprefs(midiCmd)  sound_midiCmd $sprefs(midiCmd)]  \
       ]
     
     set optList {}
@@ -371,7 +404,7 @@ proc ::Sounds::BuildPrefsHook {wtree nbframe} {
 	  -text [mc {Sounds}]
 
 	set wpage [$nbframe page {Sounds}]    
-	::Sounds::BuildPrefsPage $wpage
+	BuildPrefsPage $wpage
     }
 }
 
@@ -394,6 +427,7 @@ proc ::Sounds::BuildPrefsPage {wpage} {
 	set tmpPrefs(soundSet) $sprefs(soundSet)
     }
     set tmpPrefs(volume) $sprefs(volume)
+    set tmpPrefs(midiCmd) $sprefs(midiCmd)
     
     set labpalrt $wpage.alrt
     labelframe $labpalrt -text [mc {Alert sounds}]
@@ -402,7 +436,7 @@ proc ::Sounds::BuildPrefsPage {wpage} {
     set frs $labpalrt.frs
     pack [frame $frs] -side top -anchor w -padx 8 -pady 2
     
-    set soundSets [concat [list [mc Default]] [::Sounds::GetAllSets]]
+    set soundSets [concat [list [mc Default]] [GetAllSets]]
     label $frs.lsets -text "[mc {Sound Set}]:"
     set wpopsets $frs.popsets
     set wpopupmenu [eval {tk_optionMenu $wpopsets   \
@@ -431,6 +465,26 @@ proc ::Sounds::BuildPrefsPage {wpage} {
       -from 0 -to 100 -label [mc Volume] -orient horizontal -bd 1
     grid $fr.vol -stick ew -padx 12 -pady 4
     
+    button $fr.midi -text "MIDI Player" -command ::Sounds::MidiPlayer
+    grid $fr.midi x -sticky w -padx 12 -pady 4
+}
+
+proc ::Sounds::MidiPlayer { } {
+    variable tmpPrefs
+    
+    set title "External Midi Player"
+    set msg "Set midi command to use for playing MIDI sounds.\
+      This option is only relevant if you have a sound set with MIDI files.\
+      Your system midi player command must have the \"command fileName\"\
+      syntax."
+    set label "MIDI command:"
+    set varName [namespace current]::midiCmd
+
+    set ans [::UI::MegaDlgMsgAndEntry $title $msg $label $varName \
+     [mc Cancel] [mc OK]]
+    if {$ans eq "ok"} {
+	set tmpPrefs(midiCmd) [set $varName]
+    }
 }
 
 proc ::Sounds::PlayTmpPrefSound {name} {
@@ -495,10 +549,11 @@ proc ::Sounds::SavePrefsHook { } {
 	set tmpPrefs(soundSet) ""
     }
     if {![string equal $tmpPrefs(soundSet) $sprefs(soundSet)]} {
-	::Sounds::LoadSoundSet $tmpPrefs(soundSet)
+	LoadSoundSet $tmpPrefs(soundSet)
     }
     set sprefs(soundSet) $tmpPrefs(soundSet)
     set sprefs(volume)   $tmpPrefs(volume)
+    set sprefs(midiCmd)  $tmpPrefs(midiCmd)
     foreach name $allSounds {
 	set sprefs($name) $tmpPrefs($name)
     }

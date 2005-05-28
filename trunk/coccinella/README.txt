@@ -107,6 +107,7 @@ Translations:
     Dutch:      Sander Devrieze
     French:     Guillaume Ayoub
     Spanish:    Nestor Diaz
+    Polish:     Zbigniew Baniewski
 
 Bug Reports:
 

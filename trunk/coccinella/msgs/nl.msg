@@ -555,6 +555,7 @@
 ::msgcat::mcset nl {Version Info}		{Versiegegevens}
 ::msgcat::mcset nl {Whiteboard fonts}		{Whiteboard lettertypes}
 ::msgcat::mcset nl {Writing file}		{Bezig met wegschrijven bestand}
+#::msgcat::mcset nl {Groupchat presence change}
 
 
 # Splash screen:

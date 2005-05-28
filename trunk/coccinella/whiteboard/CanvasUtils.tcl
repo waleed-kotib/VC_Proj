@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: CanvasUtils.tcl,v 1.25 2005-05-24 12:46:36 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.26 2005-05-28 07:04:27 matben Exp $
 
 package require sha1pure
 
@@ -2076,17 +2076,23 @@ proc ::CanvasUtils::DefineWhiteboardBindtags { } {
 	#	http://www.inria.fr/koala/colas/mouse-wheel-scroll/
 	bind Whiteboard <4> {
 	    if {!$::tk_strictMotif} {
-		%W yview scroll -5 units
+		if {![string equal [%W yview] "0 1"]} {
+		    %W yview scroll -5 units
+		}
 	    }
 	}
 	bind Whiteboard <5> {
 	    if {!$::tk_strictMotif} {
-		%W yview scroll 5 units
+		if {![string equal [%W yview] "0 1"]} {
+		    %W yview scroll 5 units
+		}
 	    }
 	}
     } else {
 	bind Whiteboard <MouseWheel> {
-	    %W yview scroll [expr {- (%D)}] units
+	    if {![string equal [%W yview] "0 1"]} {
+		%W yview scroll [expr {- (%D)}] units
+	    }
 	}
     }
 
