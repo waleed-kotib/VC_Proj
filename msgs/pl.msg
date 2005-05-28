@@ -552,6 +552,7 @@
 ::msgcat::mcset pl {Version Info}         {Dane wersji}
 ::msgcat::mcset pl {Whiteboard fonts}     {Czcionki Tablicy}
 ::msgcat::mcset pl {Writing file}         {Zapis pliku}
+#::msgcat::mcset pl {Groupchat presence change} 
 
 
 # Splash screen:

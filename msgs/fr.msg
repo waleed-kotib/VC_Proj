@@ -554,6 +554,7 @@
 ::msgcat::mcset fr {Version Info}		{Infos sur la version}
 ::msgcat::mcset fr {Whiteboard fonts}		{Polices du tableau}
 ::msgcat::mcset fr {Writing file}		{Écriture du fichier}
+#::msgcat::mcset fr {Groupchat presence change}
 
 
 # Écran de démarrage :

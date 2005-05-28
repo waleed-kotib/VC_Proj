@@ -554,6 +554,7 @@
 ::msgcat::mcset de {Version Info}         {Versions-Info}
 ::msgcat::mcset de {Whiteboard fonts}     {Schriften Zeichenfläche}
 ::msgcat::mcset de {Writing file}         {Schreibe Datei}
+#::msgcat::mcset en {Groupchat presence change}
 
 
 # Splash screen:

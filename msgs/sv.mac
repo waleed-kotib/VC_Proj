@@ -551,6 +551,7 @@
 ::msgcat::mcset sv {Version Info}	   {Versions info}
 ::msgcat::mcset sv {Whiteboard fonts}      {Skrivtavlans typsnitt}
 ::msgcat::mcset sv {Writing file}	   {Skriver fil}
+::msgcat::mcset sv {Groupchat presence change} {Gruppchatt närvaroförändring}
 
 
 # Splash screen:
