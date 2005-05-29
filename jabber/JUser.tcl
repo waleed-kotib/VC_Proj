@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JUser.tcl,v 1.11 2004-12-29 08:17:46 matben Exp $
+# $Id: JUser.tcl,v 1.12 2005-05-29 07:30:49 matben Exp $
 
 package provide JUser 1.0
 
@@ -372,9 +372,12 @@ proc ::Jabber::User::EditUserDlg {jid} {
     set unsubscribe 0
     set subscription "none"
     foreach {key value} [$jstate(roster) getrosteritem $jid] {
+	
+	# 'groups', 'subscription',...
 	set keym [string trimleft $key "-"]
 	set $keym $value
     }
+    set groups [lsort -unique $groups]
     set group [lindex $groups 0]
     
     set state(jid)         $jid
@@ -382,6 +385,8 @@ proc ::Jabber::User::EditUserDlg {jid} {
     set state(group)       $group
     set state(origname)    $name
     set state(origgroup)   $group
+    set state(origgroups)  $groups
+    set state(ngroups)     [llength $groups]
     set state(subscribe)   $subscribe
     set state(unsubscribe) $unsubscribe
     if {$istransport} {
@@ -410,11 +415,22 @@ proc ::Jabber::User::EditUserDlg {jid} {
 
     label $wbox.lnick -text "[mc {Nick name}]:" -anchor e
     entry $wbox.enick -width 24 -textvariable $token\(name)
-    label $wbox.lgroup -text "[mc Group]:" -anchor e
-    ::combobox::combobox $wbox.egroup -width 12  \
-      -textvariable $token\(group)
-    eval {$wbox.egroup list insert end} "None $allGroups"
-
+    grid  $wbox.lnick  $wbox.enick  -sticky e
+    grid  $wbox.enick  -sticky ew
+    
+    set igroup 0
+    foreach group $groups {
+	set wglabel $wbox.lgroup${igroup}
+	set wgcombo $wbox.egroup${igroup}
+	label $wglabel -text "[mc Group]:" -anchor e
+	::combobox::combobox $wgcombo -width 12  \
+	  -textvariable $token\(group${igroup})
+	set state(group${igroup}) $group
+	eval {$wgcombo list insert end} "None $allGroups"
+	grid  $wglabel  $wgcombo  -sticky e
+	grid  $wgcombo  -sticky ew
+	incr igroup
+    }
     if {!$istransport} {
 
 	# Give user an opportunity to subscribe/unsubscribe other jid.
@@ -434,18 +450,14 @@ proc ::Jabber::User::EditUserDlg {jid} {
 	label $wbox.lsub -text $str -anchor e
     }
     
-    grid $wbox.lnick  $wbox.enick  -sticky e
-    grid $wbox.lgroup $wbox.egroup -sticky e
     if {!$istransport} {
 	grid x            $wbox.csubs  -sticky w
 	grid x            $wbox.lsub   -sticky w
     }
-    grid $wbox.enick  $wbox.egroup -sticky ew
     
     # Cache state variables for the dialog.
     set state(wjid)   $wbox.ejid
     set state(wnick)  $wbox.enick
-    set state(wgroup) $wbox.egroup
     
     # Button part.
     set frbot [frame $wall.frbot -borderwidth 0]
@@ -505,20 +517,28 @@ proc ::Jabber::User::DoEdit {token} {
     set group       $state(group)
     set origname    $state(origname)
     set origgroup   $state(origgroup)
+    set origgroups  $state(origgroups)
     set subscribe   $state(subscribe)
     set unsubscribe $state(unsubscribe)
-    
+        
     # This is the only situation when a client "sets" a roster item.
     # The actual roster item is pushed back to us, and not set from here.
     set opts {}
     if {[string length $name]} {
 	lappend opts -name $name
     }
-    if {$group != $origgroup} {
-	if {$group == "None"} {
-	    set group ""
+    set groups {}
+    for {set igroup 0} {$igroup < $state(ngroups)} {incr igroup} { 
+	if {[info exists state(group${igroup})]} {
+	    set group $state(group${igroup})
+	    if {($group ne "None") && ($group ne "")} {
+		lappend groups $group
+	    }
 	}
-	lappend opts -groups [list $group]
+    }
+    set groups [lsort -unique $groups]
+    if {$groups != $origgroups} {
+	lappend opts -groups $groups
     }
     eval {$jstate(jlib) roster_set $jid   \
       [list [namespace current]::SetCB $jid]} $opts
