@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Init.tcl,v 1.12 2005-05-28 07:04:15 matben Exp $
+# $Id: Init.tcl,v 1.13 2005-05-29 14:33:27 matben Exp $
 
 namespace eval ::Init:: { }
 
@@ -29,21 +29,37 @@ proc ::Init::SetThis {thisScript} {
 	    set this(prefsPath) [file nativename ~/.coccinella]
 	}
 	windows {
-	    if {[info exists ::env(USERPROFILE)]} {
-		set winPrefsDir $::env(USERPROFILE)
-	    } elseif {[info exists ::env(APPDATA)]} {
-		set winPrefsDir $::env(APPDATA)
-	    } elseif {[info exists ::env(HOME)]} {
-		set winPrefsDir $::env(HOME)
-	    } elseif {[info exists ::env(HOMEDRIVE)]} {
-		set winPrefsDir $::env(HOMEDRIVE)
-	    } else {
+	    foreach key {USERPROFILE APPDATA HOME HOMEPATH \
+	      ALLUSERSPROFILE CommonProgramFiles HOMEDRIVE} {
+		if {[info exists ::env($key)] && [file writable $::env($key)]} {
+		    set winPrefsDir $::env($key)
+		    break
+		}
+	    }
+	    if {![info exists winPrefsDir]} {
 		set vols [lsort [file volumes]]
 		set vols [lsearch -all -inline -glob -not $vols A:*]
 		set vols [lsearch -all -inline -glob -not $vols B:*]
-		set winPrefsDir [lindex $vols 0]
+		
+		# If none of the above are writable this is unlikely.
+		if {[file writable [lindex $vols 0]]} {
+		    set winPrefsDir [lindex $vols 0]
+		} else {
+		    if {[info exists starkit::topdir]} {
+			set dir [file dirname [info nameofexecutable]]
+		    } else {
+			set dir [file dirname [file dirname $thisScript]]
+		    }
+		    if {[file writable $dir]} {
+			set winPrefsDir $dir
+		    }
+		}
 	    }
-	    set this(prefsPath) [file join $winPrefsDir Coccinella]
+	    if {[info exists winPrefsDir]} {
+		set this(prefsPath) [file join $winPrefsDir Coccinella]
+	    } else {
+		set this(prefsPath) ""
+	    }
 	}
     }
     
