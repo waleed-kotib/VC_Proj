@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2002-2005  Mats Bengtsson
 #  
-# $Id: Sounds.tcl,v 1.13 2005-05-28 07:04:14 matben Exp $
+# $Id: Sounds.tcl,v 1.14 2005-05-29 14:41:13 matben Exp $
 
 namespace eval ::Sounds:: {
         
@@ -209,6 +209,7 @@ proc ::Sounds::Play {snd} {
     variable priv
     variable afterid
     variable midiPath
+    variable soundIndex
 
     # Check the jabber prefs if sound should be played.
     if {[info exists sprefs($snd)] && !$sprefs($snd)} {
