@@ -6,7 +6,7 @@
 # Copyright (C) 2002-2005 Mats Bengtsson
 # This source file is distributed under the BSD license.
 # 
-# $Id: tree.tcl,v 1.46 2005-03-03 07:29:47 matben Exp $
+# $Id: tree.tcl,v 1.47 2005-05-30 14:16:43 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -34,6 +34,7 @@
 #	-highlightthickness, highlightThickness, HighlightThickness
 #	-height, height, Height
 #	-indention, indention, Indention
+#	-lsortcommand, lsortCommand, LsortCommand             (""|tclProc)
 #	-opencommand, openCommand, OpenCommand
 #       -openimage, openImage, OpenImage
 #	-pyjamascolor, pyjamasColor, PyjamasColor
@@ -47,7 +48,8 @@
 #	-selectoutline, selectOutline, SelectOutline
 #	-showrootbutton, showRootButton, ShowRootButton       (0|1)
 #	-silent, silent, Silent                               (0|1)
-#	-sortcommand, sortCommand, SortCommand                tclProc
+#	-sortcommand, sortCommand, SortCommand                (""|tclProc)
+#	-sortcommand2, sortCommand2, SortCommand2             (""|tclProc)
 #       -sortlevels, sortLevels, SortLevels
 #       -stripecolors, stripeColors, StripeColors
 #	-styleicons, styleIcons, StyleIcons                  
@@ -305,6 +307,7 @@ proc ::tree::Init { } {
 	-highlightthickness  {highlightThickness   HighlightThickness  }
 	-height              {height               Height              }
 	-indention           {indention            Indention           }
+	-lsortcommand        {lsortCommand         LsortCommand        }
 	-opencommand         {openCommand          OpenCommand         }
 	-openimage           {openImage            OpenImage           }
 	-pyjamascolor        {pyjamasColor         PyjamasColor        }
@@ -320,6 +323,7 @@ proc ::tree::Init { } {
 	-silent              {silent               Silent              }
 	-sortlevels          {sortLevels           SortLevels          }
 	-sortcommand         {sortCommand          SortCommand         }
+	-sortcommand2        {sortCommand2         SortCommand2        }
 	-stripecolors        {stripeColors         StripeColors        }
 	-styleicons          {styleIcons           StyleIcons          }
 	-treecolor           {treeColor            TreeColor           }
@@ -358,6 +362,7 @@ proc ::tree::Init { } {
     option add *Tree.height                100             widgetDefault
     option add *Tree.indention             8               widgetDefault
     option add *Tree.itemBackgoundBd       0               widgetDefault
+    option add *Tree.lsortCommand          ""              widgetDefault
     option add *Tree.openImage             ""              widgetDefault
     option add *Tree.openCommand           {}              widgetDefault
     option add *Tree.pyjamasColor          white           widgetDefault
@@ -859,7 +864,7 @@ proc ::tree::WidgetProc {w command args} {
 	}
 	default {
 	    return -code error "unknown command \"$command\" of the tree widget.\
-	      Must be one of $widgetCommands"
+	      Must be one of \"$widgetCommands\""
 	}
     }
     return $result
@@ -1155,10 +1160,10 @@ proc ::tree::ConfigureItem {w v args} {
 	    -dir {
 		if {[info exists state($uid:dir)]} {
 		    set result $state($uid:dir)
-		} elseif {[llength $state($uid:children)]} {
-		    set result 1
-		} else {
+		} elseif {$state($uid:children) == {}} {
 		    set result 0
+		} else {
+		    set result 1
 		}
 	    }
 	    -foreground {
@@ -1252,7 +1257,7 @@ proc ::tree::SetItemOptions {w v args} {
 	    -sortcommand {
 		set state($uid:scmd) $val
 		set state($uid:children)  \
-		  [eval $state($uid:scmd) [list $state($uid:children)]]
+		  [eval $state($uid:scmd) {$state($uid:children)}]
 	    }
 	    -style {
 		if {[regexp {(normal|bold|italic)} $val]} {
@@ -1336,23 +1341,6 @@ proc ::tree::NewItem {w v args} {
     } else {
 	lappend state($uidDir:children) $tail
     }
-    if {[llength $options(-sortcommand)]} {
-	set doSort 1
-	if {[llength $options(-sortlevels)]} {
-	    set sort [lindex $options(-sortlevels) [expr {[llength $v] - 1}]]
-	    if {[string equal $sort "0"]} {
-		set doSort 0
-	    }
-	}
-	if {$doSort} {
-	    set state($uidDir:children)  \
-	      [eval $options(-sortcommand) [list $state($uidDir:children)]]
-	}
-    }
-    if {[info exists state($uidDir:scmd)] && ($state($uidDir:scmd) != "")} {
-	set state($uidDir:children)  \
-	  [eval $state($uidDir:scmd) [list $state($uidDir:children)]]
-    }
     
     # Make fresh uid now that we know it's ok to create it.
     set uid [incr vuid]
@@ -1363,7 +1351,31 @@ proc ::tree::NewItem {w v args} {
     ItemInit $w $v
     
     # Set the actual item options.
-    eval {::tree::SetItemOptions $w $v} $args
+    eval {SetItemOptions $w $v} $args
+
+    set sort 1
+    if {$options(-sortlevels) != {}} {
+	set sortlev [lindex $options(-sortlevels) [expr {[llength $v] - 1}]]
+	if {[string equal $sortlev "0"]} {
+	    set sort 0
+	}
+    }
+
+    if {[info exists state($uidDir:scmd)] && ($state($uidDir:scmd) != {})} {
+	set state($uidDir:children)  \
+	  [eval $state($uidDir:scmd) {$state($uidDir:children)}]
+    } elseif {$sort} {
+	if {$options(-sortcommand) != {}} {
+	    set state($uidDir:children)  \
+	      [eval $options(-sortcommand) {$state($uidDir:children)}]
+	} elseif {$options(-sortcommand2) != {}} {
+	    set state($uidDir:children)  \
+	      [eval $options(-sortcommand2) {$dir $state($uidDir:children)}]
+	} elseif {$options(-lsortcommand) != {}} {
+	    set state($uidDir:children) [eval {lsort -command} \
+	      $options(-lsortcommand) {$state($uidDir:children)}]
+	}
+    }
 
     BuildWhenIdle $w
 }

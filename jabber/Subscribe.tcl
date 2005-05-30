@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2003  Mats Bengtsson
 #  
-# $Id: Subscribe.tcl,v 1.25 2004-12-02 08:22:34 matben Exp $
+# $Id: Subscribe.tcl,v 1.26 2005-05-30 14:17:00 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -125,7 +125,7 @@ proc ::Subscribe::NewDlg {jid args} {
 	::UI::SetWindowPosition $w $wDlgs(jsubsc)
     }
     wm resizable $w 0 0
-    bind $w <Return> [list $wall.frbot invoke]
+    bind $w <Return> [list $frbot.btok invoke]
 
     # Trick to resize the labels wraplength.
     set script [format {

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.73 2005-02-17 10:30:06 matben Exp $
+# $Id: Browse.tcl,v 1.74 2005-05-30 14:16:59 matben Exp $
 
 package provide Browse 1.0
 
@@ -1163,6 +1163,7 @@ proc ::Browse::AddServer { } {
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 6
         
     wm resizable $w 0 0
+    bind $w <Return> [list $frbot.btadd invoke]
         
     # Grab and focus.
     set oldFocus [focus]

@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: JUser.tcl,v 1.12 2005-05-29 07:30:49 matben Exp $
+# $Id: JUser.tcl,v 1.13 2005-05-30 14:16:59 matben Exp $
 
 package provide JUser 1.0
 
@@ -379,6 +379,11 @@ proc ::Jabber::User::EditUserDlg {jid} {
     }
     set groups [lsort -unique $groups]
     set group [lindex $groups 0]
+
+    # We need at least one entry here even if no groups.
+    if {$groups == {}} {
+	set groups "None"
+    }
     
     set state(jid)         $jid
     set state(name)        $name
@@ -425,7 +430,11 @@ proc ::Jabber::User::EditUserDlg {jid} {
 	label $wglabel -text "[mc Group]:" -anchor e
 	::combobox::combobox $wgcombo -width 12  \
 	  -textvariable $token\(group${igroup})
-	set state(group${igroup}) $group
+	if {$group eq "None"} {
+	    set state(group${igroup}) ""	    
+	} else {
+	    set state(group${igroup}) $group
+	}
 	eval {$wgcombo list insert end} "None $allGroups"
 	grid  $wglabel  $wgcombo  -sticky e
 	grid  $wgcombo  -sticky ew
@@ -479,6 +488,7 @@ proc ::Jabber::User::EditUserDlg {jid} {
 	::UI::SetWindowPosition $w $wDlgs(jrostedituser)
     }
     wm resizable $w 0 0
+    bind $w <Return> [list $frbot.btok invoke]
     	
     # Trick to resize the labels wraplength.
     set script [format {

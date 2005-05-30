@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2004  Mats Bengtsson
 #  
-# $Id: Disco.tcl,v 1.58 2005-03-04 08:45:07 matben Exp $
+# $Id: Disco.tcl,v 1.59 2005-05-30 14:16:59 matben Exp $
 
 package provide Disco 1.0
 
@@ -1376,6 +1376,7 @@ proc ::Disco::AddServerDlg { } {
     pack $frbot -side top -fill both -expand 1 -padx 8 -pady 2
 	
     wm resizable $w 0 0
+    bind $w <Return> [list $frbot.btabtokdd invoke]
     
     # Grab and focus.
     set oldFocus [focus]
