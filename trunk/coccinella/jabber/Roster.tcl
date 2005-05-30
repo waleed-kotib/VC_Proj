@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Roster.tcl,v 1.127 2005-03-07 07:22:35 matben Exp $
+# $Id: Roster.tcl,v 1.128 2005-05-30 14:16:59 matben Exp $
 
 package provide Roster 1.0
 
@@ -1276,14 +1276,20 @@ proc ::Roster::TreeNew {w wtree wxsc wysc} {
 	}
     }
     
+    # Various ways of sorting items.
+    #lappend opts -sortcommand {lsort -dictionary}
+    lappend opts -sortcommand2 [list ::Roster::SortDirsFirst $wtree]
+    
+    set xscCmd [list ::UI::ScrollSet $wxsc \
+      [list grid $wxsc -row 1 -column 0 -sticky ew]]
+    set yscCmd [list ::UI::ScrollSet $wysc \
+      [list grid $wysc -row 0 -column 1 -sticky ns]]
+    
     eval {
 	::tree::tree $wtree -width 100 -height 100 -silent 1  \
-	  -sortcommand {lsort -dictionary} -sortlevels {0} \
-	  -scrollwidth 400  \
-	  -xscrollcommand [list ::UI::ScrollSet $wxsc \
-	  [list grid $wxsc -row 1 -column 0 -sticky ew]]  \
-	  -yscrollcommand [list ::UI::ScrollSet $wysc \
-	  [list grid $wysc -row 0 -column 1 -sticky ns]]  \
+	  -sortlevels {0} -scrollwidth 400  \
+	  -xscrollcommand $xscCmd  \
+	  -yscrollcommand $yscCmd  \
 	  -selectcommand [namespace current]::SelectCmd   \
 	  -doubleclickcommand [namespace current]::TreeDoubleClickCmd  \
 	  -eventlist [list [list <<ButtonPopup>> [namespace current]::TreePopup]]
@@ -1291,6 +1297,24 @@ proc ::Roster::TreeNew {w wtree wxsc wysc} {
     
     if {[string match "mac*" $this(platform)]} {
 	$wtree configure -buttonpresscommand [namespace current]::TreePopup
+    }
+}
+
+proc ::Roster::SortDirsFirst {w vdir items} {
+    
+    return [lsort -command [list ::Roster::SortCmd $w $vdir] $items]
+}
+
+proc ::Roster::SortCmd {w vdir item1 item2} {
+    
+    set isdir1 [$w itemconfigure [concat $vdir [list $item1]] -dir]
+    set isdir2 [$w itemconfigure [concat $vdir [list $item2]] -dir]
+    if {$isdir1 && !$isdir2} {
+	return -1
+    } elseif {!$isdir1 && $isdir2} {
+	return +1
+    } else {
+	return [string compare $item1 $item2]
     }
 }
 
