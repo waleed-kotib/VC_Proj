@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005s  Mats Bengtsson
 #
-# $Id: Register.tcl,v 1.34 2005-05-24 07:32:13 matben Exp $
+# $Id: Register.tcl,v 1.35 2005-05-31 13:24:35 matben Exp $
 
 package provide Register 1.0
 
@@ -460,6 +460,7 @@ proc ::RegisterEx::New {args} {
     }
     set state(w)        $w
     set state(finished) -1
+    set state(server)   ""
 
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox} \
@@ -476,10 +477,7 @@ proc ::RegisterEx::New {args} {
     
     ::headlabel::headlabel $w.frall.head -text [mc {New Account}]
     pack $w.frall.head -side top -fill both -expand 1
-    label $w.frall.msg -wraplength 260 -justify left \
-      -text "Fill in the jabber servers name you want to register with.\
-      Then press the Get button to receive the desired registration info.\
-      Fill in that info and register."
+    label $w.frall.msg -wraplength 260 -justify left -text [mc jaregisterex] 
     pack $w.frall.msg -side top -fill both -expand 1 -padx 16 -pady 6
     
     # Entries etc.
@@ -509,9 +507,6 @@ proc ::RegisterEx::New {args} {
     ::Profiles::NotebookOptionWidget $wtabnb $tokenOpts
     pack $wtabnb
     
-    puts $token
-    puts $tokenOpts
-
     set state(tokenOpts) $tokenOpts
 
     # Frame to put entries in.
