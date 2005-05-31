@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.74 2005-05-30 14:16:59 matben Exp $
+# $Id: Browse.tcl,v 1.75 2005-05-31 07:42:00 matben Exp $
 
 package provide Browse 1.0
 
@@ -23,12 +23,6 @@ namespace eval ::Browse:: {
     variable wtop  ""
     variable wwave ""
     
-    # Options only for internal use. EXPERIMENTAL! See browse.tcl
-    #     -setbrowsedjid:   default=1, store the browsed jid even if cached already
-    variable options
-    array set options {
-	-setbrowsedjid 1
-    }
     variable dlguid 0
     
     # Use a unique canvas tag in the tree widget for each jid put there.
@@ -85,6 +79,17 @@ namespace eval ::Browse:: {
 proc ::Browse::NewJlibHook {jlibName} {
     upvar ::Jabber::jstate jstate
     
+    # We could add more icons for other categories here!
+    variable typeIcon
+    array set typeIcon [list                                    \
+      service/aim           [::Rosticons::Get aim/online]     \
+      service/icq           [::Rosticons::Get icq/online]     \
+      service/msn           [::Rosticons::Get msn/online]     \
+      service/yahoo         [::Rosticons::Get yahoo/online]   \
+      service/x-gadugadu    [::Rosticons::Get gadugadu/online]\
+      service/smtp          [::Rosticons::Get smtp/online]\
+      ]
+
     set jstate(browse) [browse::new $jlibName  \
       -command [namespace current]::Command]
     
@@ -727,8 +732,8 @@ proc ::Browse::Popup {w v x y} {
 
 proc ::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {    
     variable wtree
-    variable options
     variable treeuid
+    variable typeIcon
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::nsToText nsToText
     
@@ -745,24 +750,10 @@ proc ::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
 	set category $attrArr(category)
     }
     set treectag item[incr treeuid]
-
-    if {$options(-setbrowsedjid)} {}
     
     switch -exact -- $category {
 	ns {
-	    
-	    # outdated !!!!!!!!!
-	    if {0} {
-		set ns [wrapper::getcdata $xmllist]
-		set txt $ns
-		if {[info exists nsToText($ns)]} {
-		    set txt $nsToText($ns)
-		}
-		
-		# Namespaces indicate supported feature.
-		$wtree newitem [concat $parentsJidList \
-		  [wrapper::getcdata $xmllist]] -text $txt -dir 0
-	    }
+	    # empty
 	}
 	default {
     
@@ -782,7 +773,7 @@ proc ::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
 		foreach v [$wtree find withtag $jid] {
 		    $wtree delitem $v
 		}
-	    } elseif {$options(-setbrowsedjid) || !$browsedjid} {
+	    } else {
 		
 		# Set this jid in tree widget.
 		set txt $jid		
@@ -798,6 +789,7 @@ proc ::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
 		if {[llength $jidList] <= 2} {
 		    set style bold
 		}
+		set cattype [$jstate(browse) gettype $jid]
 		
 		# If three-tier jid, then dead-end.
 		# Note: it is very unclear how to determine if dead-end without
@@ -827,8 +819,12 @@ proc ::Browse::AddToTree {parentsJidList jid xmllist {browsedjid 0}} {
 			  -canvastags $treectag
 		    }
 		} elseif {[string equal $category "service"]} {
+		    set icon  ""
+		    if {[info exists typeIcon($cattype)]} {
+			set icon $typeIcon($cattype)
+		    }
 		    $wtree newitem $jidList -text $txt -tags [list $jid] \
-		      -style $style -canvastags $treectag
+		      -style $style -canvastags $treectag -image $icon
 		} else {
 		    
 		    # This is a service, transport, room, etc.
