@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: browse.tcl,v 1.30 2004-07-30 12:55:54 matben Exp $
+# $Id: browse.tcl,v 1.31 2005-05-31 07:42:00 matben Exp $
 # 
 #  locals($jid,parent):       the parent of $jid.
 #  locals($jid,parents):      list of all parent jid's,
@@ -744,8 +744,6 @@ proc browse::setsinglejid {browsename parentJid jid xmllist {browsedjid 0}} {
     
     upvar ${browsename}::locals locals
     
-    Debug 3 "browse::setsinglejid browsename=$browsename, parentJid=$parentJid, jid=$jid"
-    
     set category [wrapper::gettag $xmllist]
     array set attrArr [wrapper::getattrlist $xmllist]
 
@@ -758,6 +756,8 @@ proc browse::setsinglejid {browsename parentJid jid xmllist {browsedjid 0}} {
     if {[string length $jid] == 0} {
 	set jid $attrArr(jid)
     }
+    
+    Debug 3 "browse::setsinglejid parentJid=$parentJid, jid=$jid, category=$category"
     
     # First, is this a "set" or a "remove" type?
     if {[info exists attrArr(type)] && [string equal $attrArr(type) "remove"]} {
