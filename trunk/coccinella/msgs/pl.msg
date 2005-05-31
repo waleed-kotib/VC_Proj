@@ -888,7 +888,8 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset pl jadisrmall   {Usuń adresy wszystkich serwerów dodanych na stałe, przeglądanych automatycznie.}
 ::msgcat::mcset pl jauserinnote {Możesz o tym użytkowniku napisać coś "od siebie"}
 
-
+# translate!
+::msgcat::mcset pl jaregisterex {Fill in the jabber servers name you want to register with. Then press the Get button to receive the desired registration info. Fill in that info and register.}
 
 
 # Setup assistant:

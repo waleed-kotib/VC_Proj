@@ -891,6 +891,8 @@ Wilt u ze niet opslaan?}
 ::msgcat::mcset nl jadisrmall {Alle permanente servers uit de lijst verwijderen.}
 ::msgcat::mcset nl jauserinnote {Uw persoonlijke opmerkingen over deze gebruiker kunt u hier bewaren}
 
+# translate
+::msgcat::mcset nl jaregisterex {Fill in the jabber servers name you want to register with. Then press the Get button to receive the desired registration info. Fill in that info and register.}
 
 
 # Setup assistant:

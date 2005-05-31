@@ -897,6 +897,9 @@ namespace eval ::EditShortcuts:: {
 
 ::msgcat::mcset de jauserinnote {Ihre persönlichen Notizen über diesen Benutzer hinzufügen}
 
+# translate!
+::msgcat::mcset de jaregisterex {Fill in the jabber servers name you want to register with. Then press the Get button to receive the desired registration info. Fill in that info and register.}
+
 
 # Setup assistant:
 ::msgcat::mcset de suintro1 	{Dies ist ein Assistent, der Ihnen beim Eingeben der Daten hilft, die für ein neues oder bestehendes Konto auf einem Jabber-Server erforderlich sind.}
