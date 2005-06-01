@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: GroupChat.tcl,v 1.107 2005-05-27 06:08:19 matben Exp $
+# $Id: GroupChat.tcl,v 1.108 2005-06-01 06:52:55 matben Exp $
 
 package require History
 
@@ -1630,16 +1630,18 @@ proc ::GroupChat::Exit {token} {
 	set opts ""
     }
     
+    set ans "yes"
     if {[::Jabber::IsConnected]} {
-	set ans [eval {::UI::MessageBox -icon warning -type yesno  \
-	  -message [mc jamesswarnexitroom $roomjid]} $opts]
+	if {0} {
+	    set ans [eval {::UI::MessageBox -icon warning -type yesno  \
+	      -message [mc jamesswarnexitroom $roomjid]} $opts]
+	}
 	if {$ans == "yes"} {
 	    Close $token
 	    $jstate(jlib) service exitroom $roomjid
 	    ::hooks::run groupchatExitRoomHook $roomjid
 	}
     } else {
-	set ans "yes"
 	Close $token
     }
     return $ans
