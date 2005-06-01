@@ -5,7 +5,7 @@
 #      
 #  Copyright (c) 2001-2005  Mats Bengtsson
 #  
-# $Id: Browse.tcl,v 1.75 2005-05-31 07:42:00 matben Exp $
+# $Id: Browse.tcl,v 1.76 2005-06-01 06:26:40 matben Exp $
 
 package provide Browse 1.0
 
@@ -20,8 +20,9 @@ namespace eval ::Browse:: {
     # Use priority 30 just to override the widgetDefault values!
     option add *Browse.waveImage            wave           widgetDefault
 
-    variable wtop  ""
-    variable wwave ""
+    variable wtop  -
+    variable wwave -
+    variable wtree -
     
     variable dlguid 0
     
@@ -408,6 +409,7 @@ proc ::Browse::DispatchUsers {jid subiq} {
 proc ::Browse::ErrorProc {silent browseName type jid errlist} {
     variable tstate
     variable wwave
+    variable wtree
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
@@ -415,7 +417,9 @@ proc ::Browse::ErrorProc {silent browseName type jid errlist} {
     ::Debug 2 "::Browse::ErrorProc type=$type, jid=$jid, errlist='$errlist'"
 
     array unset tstate run,*
-    $wwave animate 0
+    if {[winfo exists $wwave]} {
+	$wwave animate 0
+    }
     
     # If we got an error browsing an actual server, then remove from list.
     set ind [lsearch -exact $jprefs(browseServers) $jid]
